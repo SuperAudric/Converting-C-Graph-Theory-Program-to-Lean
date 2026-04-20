@@ -2,6 +2,14 @@ name = "hello-world"
 version = "0.0.1"
 defaultTargets = ["hello-world"]
 
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+version = "git#master"
+
+[[lean_lib]]
+name = "GraphStructureAttempt1"
+
 [[lean_exe]]
 name = "hello-world"
 root = "HelloWorld"
