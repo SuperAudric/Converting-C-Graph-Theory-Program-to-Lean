@@ -176,9 +176,9 @@ public class GraphCannonTests(ITestOutputHelper output)
     [Theory]
     [InlineData(3)]
     [InlineData(4)]
-    //[InlineData(5)]//disabled for being too slow
-    //[InlineData(6)]
-    //[InlineData(7)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
     public void KnownGraphs_DifferentScramblings_ProduceSameCanonical(int size)
     {
         var graphs = ConvertJaggedArrayType<EdgeType>(UniqueGraphsBySize.graphsBySize[size]);

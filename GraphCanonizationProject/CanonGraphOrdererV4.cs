@@ -1,430 +1,366 @@
-using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Linq;
 
-//this is a graph canonizer prototype
-//it works off the idea that paths in a graph are unique to isomorphic graphs, and condenses this via dynamic programming to dinstinguish between the sets of paths between each vertex by length, rather than enumerating them all.
-//The paths from vertex A to Vertex B are considered a different type to C and D if they're composed of a different count or ratio of subpaths types, or the vertices are a different type.
-//Vertices are considered a different type if they're composed of a different count or ratio of subpaths types.
-//These are evaluated iteratively until a steady state is reached.
-//a perfect implementation of this will always return the same result for any two isomorphic graphs (as they will always have the same paths, which is what also determines vertex type). I haven't proven that any two non-isomorphic graphs won't produce the same result though so am transfering this to lean to work on.
-//I'm going to try to make a version that simplifies it less, instead keeping track of "number paths to Vertex B of length C of types (a,b,c,d...)" which then gets simplified down to a single number. This should ensure there's no two verticies that could falsely be named identical
-// I think it will tiebreak more or less off of which has more paths that have gone to earlier sorted types of vertices, earlier in their cycles, then more often
-//I think I need to ensure two main things for it to work. ONLY two nodes that are truely isomorphic to each other will have the same neighborsByDistance (this is why I'm moving away from count and to a direct, comparision based approach) and second, each vertex can be sorted purely by its neighborsByDistance deterministically, with sort ties detectable
-
+// Graph canonizer based on path multisets between vertices.
+// Paths from A→B are a different "type" from C→D when composed of different subpath-type
+// multisets, or when endpoint vertex types differ. Vertex types are refined iteratively
+// until a fixed point is reached.
+// Intended for translation to Lean 4; refactored toward pure/functional style accordingly.
 
 namespace Canonizer
 {
-    using VertexType = System.UInt32; //using some aliases for Vertex Types and Edge Types, as all we really care about is there's a discrete number of them, and they have a linear ordering.
-    using EdgeType = System.UInt64;//using Uint64 (aka uLong) just so mouseover typing is easier to see, interchangable with Int32 and the like
+    using VertexType = System.UInt32; // Lean: abbrev VertexType := UInt32
+    using EdgeType = System.UInt64;   // Lean: abbrev EdgeType   := UInt64
 
     public class CanonGraphOrdererV4
     {
-      
-
-        PathsByLength[] pathsOfLength;//pathsByLength[lengthOfPath].constituantPaths[startVertex].connectedSubPaths[endVertex] represents the paths of length lengthOfPath, that start at [startVertex] and end at [endVertex]
-        int maxDepth;//=pathsByLength.GetLength(0)
-        int vertexCount;//=pathsByLength.GetLength(1)
-
         public string Run(VertexType[] vertexTypes, EdgeType[,] edges)
         {
             ValidateInputs(vertexTypes, edges);
             VertexType[] vertexRankings = GetVertexTypeRankings(vertexTypes);
-            InitializePaths(vertexRankings, edges);
-            OrderVertices(ref vertexRankings);
-            EdgeType[,] CanonicalOrdering =  LabelEdgesAccordingToRankings(vertexRankings, edges);
-            return AdjMatrixToString(CanonicalOrdering);
+            PathState state = InitializePaths(vertexRankings, edges);
+            vertexRankings = OrderVertices(state, vertexRankings);
+            EdgeType[,] canonicalOrdering = LabelEdgesAccordingToRankings(vertexRankings, edges);
+            return AdjMatrixToString(canonicalOrdering);
         }
 
         private static void ValidateInputs(VertexType[] vertexTypes, EdgeType[,] edges)
         {
             if (edges.GetLength(0) != edges.GetLength(1))
-            {
                 throw new Exception("Edges must be a square matrix");
-            }
             if (vertexTypes.Length != edges.GetLength(0))
-            {
                 throw new Exception("Every vertex must be given a type. They may all be given the same type");
-            }
         }
 
-        private static VertexType[] GetVertexTypeRankings(VertexType[] vertexTypes)
-        {
-            VertexType[] vertexRankings = (VertexType[])vertexTypes.ToArray();//don't modify the original array by making a clone with .ToArray(); Trying to emulate the immutable arrays of Lean
-            vertexRankings = GetArrayRank(vertexRankings);
-            return vertexRankings;
-        }
+        private static VertexType[] GetVertexTypeRankings(VertexType[] vertexTypes) =>
+            GetArrayRank(vertexTypes.ToArray());
 
-        private static VertexType[] GetArrayRank(VertexType[] arr) //this should turn [0,10,5,5,11] into [0,3,1,1,4]. Each number keeps their relative ordering, and becomes the how many numbers were less than it. NOT DENSE RANKING
+        // Replaces each value with the count of strictly smaller values in the array.
+        // E.g. [0,10,5,5,11] → [0,3,1,1,4].  (Non-dense ranking.)
+        private static VertexType[] GetArrayRank(VertexType[] arr)
         {
             if (arr.Length < 2) return arr;
-            (VertexType value, int index)[] sortedByValue = arr.Select((value, index) => (value, index)).OrderBy(x => x.value).ToArray();
+            var sortedByValue = arr.Select((v, i) => (v, i)).OrderBy(x => x.v).ToArray();
             int counter = 0;
-            List<(VertexType newValue, int originalIndex)> output = new List<(VertexType newValue, int originalIndex)>() { ((VertexType)counter, sortedByValue[0].index) };
+            List<(VertexType rank, int original)> output = [(0, sortedByValue[0].i)];
             for (int i = 1; i < sortedByValue.Length; i++)
             {
-                if (sortedByValue[i - 1].value != sortedByValue[i].value)
-                {
+                if (sortedByValue[i - 1].v != sortedByValue[i].v)
                     counter = i;
-                }
-                output.Add(((VertexType)counter, sortedByValue[i].index));
+                output.Add(((VertexType)counter, sortedByValue[i].i));
             }
-            return output.OrderBy(x => x.originalIndex).Select(x => x.newValue).ToArray();
+            return output.OrderBy(x => x.original).Select(x => x.rank).ToArray();
         }
 
-        private void InitializePaths(VertexType[] vertices, EdgeType[,] edges)
+        // Bundles the mutable path table and its dimensions.
+        // Lean translation: replace with a pure record threaded through all functions,
+        // computing rankInLayer as return values rather than mutating in place.
+        private record PathState(PathsByLength[] PathsOfLength, int MaxDepth, int VertexCount);
+
+        private static PathState InitializePaths(VertexType[] vertices, EdgeType[,] edges)
         {
-            pathsOfLength = new PathsByLength[vertices.Length];
-            maxDepth = vertices.Length;//these variables are the same, more used here instead to help with understanding what's being used
-            vertexCount = vertices.Length;
-            for (int depth = 0; depth < maxDepth; depth++)
+            int n = vertices.Length;
+            var pathsOfLength = new PathsByLength[n];
+            for (int depth = 0; depth < n; depth++)
             {
-                pathsOfLength[depth] = new PathsByLength(vertices);
-                for (int fromVertex = 0; fromVertex < vertexCount; fromVertex++)
+                pathsOfLength[depth] = new PathsByLength(n);
+                for (int from = 0; from < n; from++)
                 {
-                    pathsOfLength[depth].pathsFromVertex[fromVertex] = new AllPossiblePathsFrom(vertices,depth,fromVertex);
-                    for (int toVertex = 0; toVertex < vertexCount; toVertex++)
+                    pathsOfLength[depth].pathsFromVertex[from] = new AllPossiblePathsFrom(vertices, depth, from);
+                    for (int to = 0; to < n; to++)
                     {
-                        pathsOfLength[depth].pathsFromVertex[fromVertex].pathsToVertex[toVertex] = new AllPossiblePathsBetween(vertices,depth, fromVertex, toVertex);
+                        pathsOfLength[depth].pathsFromVertex[from].pathsToVertex[to] =
+                            new AllPossiblePathsBetween(vertices, depth, from, to);
                         if (depth == 0)
                         {
-                            if(fromVertex == toVertex)//handles the trivial case. In terms of paths of length 0, there is only one path from yourself to yourself
-                            {
-                                pathsOfLength[depth].pathsFromVertex[fromVertex].pathsToVertex[toVertex].connectedSubPaths = new PathSegment[1] { new PathSegment(vertices, fromVertex)};
-                            }
-                            else
-                            {
-                                pathsOfLength[depth].pathsFromVertex[fromVertex].pathsToVertex[toVertex].connectedSubPaths = new PathSegment[0];
-                            }
+                            pathsOfLength[depth].pathsFromVertex[from].pathsToVertex[to].connectedSubPaths =
+                                from == to
+                                    ? [new BottomPathSegment(vertices, from)]
+                                    : [];
                             continue;
                         }
-                        else
+                        for (int mid = 0; mid < n; mid++)
                         {
-                            for (int intermediateVertex = 0; intermediateVertex < vertexCount; intermediateVertex++)
-                            {
-                                pathsOfLength[depth].pathsFromVertex[fromVertex].pathsToVertex[toVertex].connectedSubPaths[intermediateVertex] = new PathSegment(edges[intermediateVertex, toVertex],pathsOfLength[depth-1].pathsFromVertex[fromVertex].pathsToVertex[intermediateVertex]);
-                            }
+                            pathsOfLength[depth].pathsFromVertex[from].pathsToVertex[to].connectedSubPaths[mid] =
+                                new InnerPathSegment(
+                                    edges[mid, to],
+                                    pathsOfLength[depth - 1].pathsFromVertex[from].pathsToVertex[mid]);
                         }
                     }
                 }
             }
-            for(int i=0;i<vertices.Length;i++)
-            {
-                SetNewVertexLabel(ref vertices, i, vertices[i]);//only needed when provided when initialized with non-zero vertext types
-            }
+            var state = new PathState(pathsOfLength, n, n);
+            for (int i = 0; i < n; i++)
+                SetNewVertexLabel(state, vertices, i, vertices[i]);
+            return state;
         }
 
-        //outputs the Adjacency Matrix relabelled to be in the (cannonical) order provided.
-        public static EdgeType[,] LabelEdgesAccordingToRankings(VertexType[] vertexRankings, EdgeType[,] edges)//If the vertex Rankings are [1,0,2,3], then that means it should take the edges and swap colum 0 and 1 and also row 0 and 1.
+        // Relabels the adjacency matrix so vertex positions match the given rankings.
+        // If rankings have ties (only arises mid-sort for debugging), they are resolved
+        // by original position before applying the swap sequence.
+        public static EdgeType[,] LabelEdgesAccordingToRankings(VertexType[] vertexRankings, EdgeType[,] edges)
         {
-            int[] vertexRankingsWithDuplicatesIncremented = vertexRankings.Select((item, originalIndex) => (item, originalIndex))//this mess just has the simple job of converting [4,0,1,1,3] into [4,0,1,2,3], which ONLY arises when debugging mid-sort
-                                                          .OrderBy(pairedItem => pairedItem)//This whole block of code is already kind of useless, as for any normal case vertexRankings is already 0 to n in some order.
-                                                          .Select((pairedItem, sortOrder) => (sortOrder, pairedItem.originalIndex))
-                                                          .OrderBy(x => x.originalIndex)
-                                                          .Select(x => x.sortOrder)
-                                                          .ToArray();
+            int[] rankings = vertexRankings
+                .Select((v, i) => (v, i))
+                .OrderBy(p => p)
+                .Select((p, rank) => (rank, p.i))
+                .OrderBy(x => x.i)
+                .Select(x => x.rank)
+                .ToArray();
 
             EdgeType[,] orderedEdges = (EdgeType[,])edges.Clone();
-            for (int i = 0; i < vertexRankingsWithDuplicatesIncremented.Length; i++)
+            for (int i = 0; i < rankings.Length; i++)
             {
-                int positionToSwapWith = vertexRankingsWithDuplicatesIncremented.ToList().IndexOf(i);
-                orderedEdges = SwapVertexLabelling(orderedEdges, i, positionToSwapWith);
-                int temp = vertexRankingsWithDuplicatesIncremented[positionToSwapWith];
-                vertexRankingsWithDuplicatesIncremented[positionToSwapWith] = vertexRankingsWithDuplicatesIncremented[i];
-                vertexRankingsWithDuplicatesIncremented[i] = temp;
+                int j = Array.IndexOf(rankings, i);
+                orderedEdges = SwapVertexLabelling(orderedEdges, i, j);
+                (rankings[j], rankings[i]) = (rankings[i], rankings[j]);
             }
             return orderedEdges;
-            //this way works too, but may be harder to theorem prove on as it "sorts" instead of using swaps
-            //var rows = vertexRankingsWithDuplicatesIncremented.Select((vertexRankingX, indexX) => (vertexRankingX, vertexRankingsWithDuplicatesIncremented.Select((vertexRankingY, indexY) => (vertexRankingY, edges[indexX, indexY])).ToArray())).ToArray(); 
-            //int[][] sortedRows = rows.OrderBy(row => row.vertexRankingX).Select(x => x.Item2.OrderBy(y => y.vertexRankingY).Select(y => y.Item2).ToArray()).ToArray();
-            //return string.Join("\n", sortedRows.Select(row => string.Join(", ", row)));
-
         }
 
-        //swaps the rows and columns of vertex1 with vertex2, as if you'd swapped their labelling. Made to be a simple base move that mantains isomorphism
-        public static EdgeType[,] SwapVertexLabelling(EdgeType[,] edges, int vertex1, int vertex2)
+        // Swaps rows and columns of v1 and v2 — an isomorphism-preserving relabelling.
+        public static EdgeType[,] SwapVertexLabelling(EdgeType[,] edges, int v1, int v2)
         {
-            if (vertex1 == vertex2) 
+            if (v1 == v2)
                 return (EdgeType[,])edges.Clone();
-            EdgeType[,] relabelledEdges= new EdgeType[edges.GetLength(0), edges.GetLength(1)];
-            for(int xIndex=0; xIndex < relabelledEdges.GetLength(0); xIndex++)
-            {
-                for(int yIndex =0;yIndex<relabelledEdges.GetLength(1);yIndex++)
-                {
-                    relabelledEdges[xIndex, yIndex] = edges[xIndex == vertex1 ? vertex2 : xIndex == vertex2 ? vertex1 : xIndex,
-                                                            yIndex == vertex1 ? vertex2 : yIndex == vertex2 ? vertex1 : yIndex];
-                }
-            }
-            return relabelledEdges;
+            int n = edges.GetLength(0);
+            var result = new EdgeType[n, n];
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                    result[x, y] = edges[
+                        x == v1 ? v2 : x == v2 ? v1 : x,
+                        y == v1 ? v2 : y == v2 ? v1 : y];
+            return result;
         }
 
-        public static string AdjMatrixToString(EdgeType[,] edges) //Displays every entry in a 2D array.
-        {
-            return  string.Join("\n", Enumerable.Range(0, edges.GetLength(0)).Select(xIndex => 
-                    string.Join(", ", Enumerable.Range(0, edges.GetLength(1)).Select(yIndex => 
-                                 edges[xIndex, yIndex].ToString()))));
-        }
+        public static string AdjMatrixToString(EdgeType[,] edges) =>
+            string.Join("\n", Enumerable.Range(0, edges.GetLength(0)).Select(x =>
+                string.Join(", ", Enumerable.Range(0, edges.GetLength(1)).Select(y =>
+                    edges[x, y].ToString()))));
 
-        private void OrderVertices(ref VertexType[] vertexRankings)
+        private static VertexType[] OrderVertices(PathState state, VertexType[] vertexRankings)
         {
+            vertexRankings = vertexRankings.ToArray();
+            int n = state.VertexCount;
             bool needsResort = true;
-            for (int fullySortedVertexes = 0; fullySortedVertexes < vertexCount; fullySortedVertexes++)
+            for (int fullySorted = 0; fullySorted < n; fullySorted++)
             {
-                for(int sortCycleCounter = 0; needsResort && (fullySortedVertexes + sortCycleCounter < vertexCount); sortCycleCounter++ )//at least one vertex is sorted per cylce of the inner loop, and at least one per outer loop
+                for (int cycle = 0; needsResort && (fullySorted + cycle < n); cycle++)
                 {
-                    CalculatePathRankings();
-                    //Debug.Log(string.Join("\n\n", vertexRankings.Select((_,index) => LayerToString(index))));
-                    //Debug.Log(LayerToString(0));//Left these in as they were extremely helpful when debugging, layer 0, 1, and 2 each deal with different bugs.
-                    //Debug.Log(LayerToString(1));
-                    //Debug.Log(LayerToString(2));
-                    //Debug.Log(LayerToString(3));
+                    CalculatePathRankings(state);
                     needsResort = false;
-
-                    for (int startVertex = 0; startVertex < vertexCount; startVertex++)
+                    for (int v = 0; v < n; v++)
                     {
-                        if (pathsOfLength[maxDepth - 1].pathsFromVertex[startVertex].rankInLayer != vertexRankings[startVertex])//if they're tied at this layer, they must be tied at all previous layers too
+                        int newRank = state.PathsOfLength[state.MaxDepth - 1].pathsFromVertex[v].rankInLayer;
+                        if ((VertexType)newRank != vertexRankings[v])
                         {
-                            //Debug.Log("Vertex lable " + vertexRankings[startVertex] + " is becoming " + pathsOfLength[maxDepth - 1].pathsFromVertex[startVertex].rankInLayer);
                             needsResort = true;
-                            SetNewVertexLabel(ref vertexRankings, startVertex, (VertexType) pathsOfLength[maxDepth - 1].pathsFromVertex[startVertex].rankInLayer);
+                            SetNewVertexLabel(state, vertexRankings, v, (VertexType)newRank);
                         }
                     }
                 }
 
                 bool firstAppearance = true;
-                for (int i = 0; i < vertexCount; i++)
+                for (int i = 0; i < n; i++)
                 {
-                    if(vertexRankings[i] == fullySortedVertexes)
+                    if (vertexRankings[i] == fullySorted)
                     {
-                        if(firstAppearance)
-                        {
-                            firstAppearance = false;
-                            continue;
-                        }
-                        else
-                        {
-                            needsResort = true;
-                            //Debug.Log("Vertex lable " + vertexRankings[i] + " is becoming " + (fullySortedVertexes + 1) + " due to symmetry");
-                            SetNewVertexLabel(ref vertexRankings, i, (VertexType) fullySortedVertexes + 1);//this is the hardest thing to justify. If two vertices have a sorting tie after all of this, they are isomorphic to each other (i.e. the graph has a symmetry)
-                        }                                                                  //If you have two isomorphic vertices, then chosing either one to come first is equivilent.
+                        if (firstAppearance) { firstAppearance = false; continue; }
+                        // Two vertices tied after full convergence are symmetric; arbitrarily
+                        // promote the second one to break the tie.
+                        needsResort = true;
+                        SetNewVertexLabel(state, vertexRankings, i, (VertexType)fullySorted + 1);
                     }
                 }
             }
+            return vertexRankings;
         }
 
-        private void CalculatePathRankings()
+        private static void CalculatePathRankings(PathState state)
         {
-            for (int depth = 0; depth < vertexCount; depth++)
+            for (int depth = 0; depth < state.VertexCount; depth++)
             {
-                RankPathsBetween(pathsOfLength[depth].pathsFromVertex.SelectMany(x=>x.pathsToVertex).ToArray());
-                RankPathsFrom(pathsOfLength[depth].pathsFromVertex);
+                RankPathsBetween(state.PathsOfLength[depth].pathsFromVertex.SelectMany(x => x.pathsToVertex).ToArray());
+                RankPathsFrom(state.PathsOfLength[depth].pathsFromVertex);
             }
         }
 
-        private void RankPathsBetween(AllPossiblePathsBetween[] allPathsBetween)
+        private static void RankPathsBetween(AllPossiblePathsBetween[] paths)
         {
-            AllPossiblePathsBetweenComparer pathsBetweenComparer = new AllPossiblePathsBetweenComparer();
-            AllPossiblePathsBetween[] sortedPaths = allPathsBetween.ToArray();//don't modify the original's order
-            Array.Sort(sortedPaths, pathsBetweenComparer);
+            var sorted = paths.ToArray();
+            Array.Sort(sorted, ComparePathsBetween);
             int counter = 0;
-            for (int toVertex = 0; toVertex < sortedPaths.Length; toVertex++)
+            for (int i = 0; i < sorted.Length; i++)
             {
-                if (toVertex != 0 && (pathsBetweenComparer.Compare(sortedPaths[toVertex - 1], sortedPaths[toVertex]) != 0))
-                {
-                    counter = toVertex;
-                }
-                sortedPaths[toVertex].rankInLayer = counter;
-            }
-        }
-        private void RankPathsFrom(AllPossiblePathsFrom[] connectedSubPaths)
-        {
-            AllPossiblePathsFromComparer pathsFromComparer = new AllPossiblePathsFromComparer();
-            AllPossiblePathsFrom[] sortedPaths = connectedSubPaths.ToArray();//don't modify the original's order
-            Array.Sort(sortedPaths, pathsFromComparer);
-            int counter = 0;
-            for (int toVertex = 0; toVertex < sortedPaths.Length; toVertex++)
-            {
-                if (toVertex != 0 && (pathsFromComparer.Compare(sortedPaths[toVertex - 1], sortedPaths[toVertex]) != 0))
-                {
-                    counter = toVertex;
-                }
-                sortedPaths[toVertex].rankInLayer = counter;
+                if (i > 0 && ComparePathsBetween(sorted[i - 1], sorted[i]) != 0)
+                    counter = i;
+                sorted[i].rankInLayer = counter;
             }
         }
 
-        private void SetNewVertexLabel(ref VertexType[] vertexTypes, int index, VertexType value)
+        private static void RankPathsFrom(AllPossiblePathsFrom[] paths)
+        {
+            var sorted = paths.ToArray();
+            Array.Sort(sorted, ComparePathsFrom);
+            int counter = 0;
+            for (int i = 0; i < sorted.Length; i++)
+            {
+                if (i > 0 && ComparePathsFrom(sorted[i - 1], sorted[i]) != 0)
+                    counter = i;
+                sorted[i].rankInLayer = counter;
+            }
+        }
+
+        private static void SetNewVertexLabel(PathState state, VertexType[] vertexTypes, int index, VertexType value)
         {
             vertexTypes[index] = value;
-
-            //this entire function could be skipped if I converted everything to reference varaibles, but I'm being explicit
-            for (int depthToUpdateVertexType = 0; depthToUpdateVertexType < maxDepth; depthToUpdateVertexType++)
+            for (int depth = 0; depth < state.MaxDepth; depth++)
             {
-                pathsOfLength[depthToUpdateVertexType].pathsFromVertex[index].startVertexType = vertexTypes[index];
-                for (int endVertex = 0; endVertex < vertexCount; endVertex++)
-                {
-                    pathsOfLength[depthToUpdateVertexType].pathsFromVertex[index].pathsToVertex[endVertex].startVertexType = vertexTypes[index];
-                }
-                for (int startVertex = 0; startVertex < vertexCount; startVertex++)
-                {
-                    pathsOfLength[depthToUpdateVertexType].pathsFromVertex[startVertex].pathsToVertex[index].endVertexType = vertexTypes[index];
-                }
+                state.PathsOfLength[depth].pathsFromVertex[index].startVertexType = value;
+                for (int end = 0; end < state.VertexCount; end++)
+                    state.PathsOfLength[depth].pathsFromVertex[index].pathsToVertex[end].startVertexType = value;
+                for (int start = 0; start < state.VertexCount; start++)
+                    state.PathsOfLength[depth].pathsFromVertex[start].pathsToVertex[index].endVertexType = value;
             }
-            pathsOfLength[0].pathsFromVertex[index].pathsToVertex[index].connectedSubPaths[0].selfVertexType = vertexTypes[index];
-        }     
-
-
-        private string LayerToString(int depth = 0)//Just a debug function to view all of what's in a layer. I've left it in as it was quite useful
-        {
-            return string.Join("\n", pathsOfLength[depth].pathsFromVertex.Select(
-                pathStart =>
-                {
-                    return  pathStart.rankInLayer + ". " + pathStart.pathsToVertex.Length + " paths:(" +
-                        string.Join(",", pathStart.pathsToVertex.Select(
-                            pathBetween => 
-                            "<"+string.Join("    ",pathBetween?.connectedSubPaths?.Select(path =>
-                            "[" + path?.subPath?.rankInLayer.ToString() + "," + path?.edgeType.ToString() + "]"))
-                        +">")) + ")";
-                }
-                ));
+            state.PathsOfLength[0].pathsFromVertex[index].pathsToVertex[index].connectedSubPaths[0] =
+                new BottomPathSegment(value, index);
         }
 
-        public class PathSegment //represends a layer in a path. Holds the data of the final layer, and a link to the path that is itself, except missing the final layer
-        {//Needs to hold data in the form [to x of connection type y], when currently it's [from x of connection type y]. Which matters more at the bottom layer
-            public EdgeType edgeType;
-            public AllPossiblePathsBetween subPath;
-            public bool isBottomLayer = false;
-            public int selfVertexIndex;
+        // Lean translation: inductive PathSegment
+        //   | bottom (vertexIndex : Nat) (vertexType : VertexType) : PathSegment
+        //   | inner  (edgeType : EdgeType) (subPath : AllPossiblePathsBetween) : PathSegment
+        public abstract class PathSegment { }
+
+        public sealed class BottomPathSegment : PathSegment
+        {
+            public readonly int selfVertexIndex;
             public VertexType selfVertexType;
-            public PathSegment(EdgeType edgeType, AllPossiblePathsBetween subPath)
+
+            public BottomPathSegment(VertexType[] vertices, int vertexIndex)
             {
-                this.edgeType = edgeType;
-                this.subPath = subPath;
+                selfVertexIndex = vertexIndex;
+                selfVertexType = vertices[vertexIndex];
             }
-            public PathSegment(VertexType[] vertices, int vertexIndex)
+
+            public BottomPathSegment(VertexType vertexType, int vertexIndex)
             {
-                this.isBottomLayer = true;
-                this.selfVertexIndex = vertexIndex;
-                this.selfVertexType = vertices[vertexIndex];
-            }
-        }
-        private class PathSegmentComparer : IComparer<PathSegment>
-        {
-            public int Compare(PathSegment x, PathSegment y)
-            {
-                if (x.isBottomLayer != y.isBottomLayer)
-                {
-                    throw new Exception("Why are you comparing paths of different lengths?!");
-                    return x.isBottomLayer ? 1 : -1;//should never occur
-                }
-                if (x.isBottomLayer)
-                {
-                    if (x.selfVertexType != y.selfVertexType)
-                        return x.selfVertexType > y.selfVertexType ? 1 : -1;
-                    return 0;
-                }
-                else
-                {
-                    if (x.subPath.rankInLayer != y.subPath.rankInLayer)
-                    {
-                        return x.subPath.rankInLayer < y.subPath.rankInLayer ? 1 : -1;
-                    }
-                    if (x.edgeType != y.edgeType)
-                    {
-                        return x.edgeType < y.edgeType ? 1 : -1;
-                    }
-                    return 0;
-                }
+                selfVertexIndex = vertexIndex;
+                selfVertexType = vertexType;
             }
         }
 
-
-
-        public class AllPossiblePathsBetween //represents all the paths of a given length startVertex -> subPath -> connectionType -> endVertex, (startVertex is technically inside of the subPath)
+        public sealed class InnerPathSegment(EdgeType edgeType, AllPossiblePathsBetween subPath) : PathSegment
         {
-            public int depth;//only for debugging
+            public readonly EdgeType edgeType = edgeType;
+            public readonly AllPossiblePathsBetween subPath = subPath;
+        }
+
+        // Lean translation: these three become Ord instances (or explicit compare functions).
+
+        public static int ComparePathSegments(PathSegment x, PathSegment y) =>
+            (x, y) switch
+            {
+                (BottomPathSegment bx, BottomPathSegment by) =>
+                    bx.selfVertexType != by.selfVertexType
+                        ? (bx.selfVertexType > by.selfVertexType ? 1 : -1)
+                        : 0,
+                (InnerPathSegment ix, InnerPathSegment iy) =>
+                    ix.subPath.rankInLayer != iy.subPath.rankInLayer
+                        ? (ix.subPath.rankInLayer < iy.subPath.rankInLayer ? 1 : -1)
+                    : ix.edgeType != iy.edgeType
+                        ? (ix.edgeType < iy.edgeType ? 1 : -1)
+                        : 0,
+                _ => throw new Exception("Cannot compare BottomPathSegment with InnerPathSegment")
+            };
+
+        public static int ComparePathsBetween(AllPossiblePathsBetween x, AllPossiblePathsBetween y)
+        {
+            if (x.endVertexType != y.endVertexType)
+                return x.endVertexType > y.endVertexType ? 1 : -1;
+            return OrderInsensitiveListComparison(x.connectedSubPaths, y.connectedSubPaths, ComparePathSegments);
+        }
+
+        public static int ComparePathsFrom(AllPossiblePathsFrom x, AllPossiblePathsFrom y)
+        {
+            if (x.startVertexType != y.startVertexType)
+                return x.startVertexType > y.startVertexType ? 1 : -1;
+            return OrderInsensitiveListComparison(x.pathsToVertex, y.pathsToVertex, ComparePathsBetween);
+        }
+
+        // All paths of a given length between two specific vertices.
+        // startVertexType is maintained but not yet used in comparisons (reserved for Lean proofs).
+        public class AllPossiblePathsBetween
+        {
+            public readonly int depth; // debug only
             public VertexType startVertexType;
-            public int startVertexIndex;
+            public readonly int startVertexIndex;
             public VertexType endVertexType;
-            public int endVertexIndex;
-            public int rankInLayer = 0;
+            public readonly int endVertexIndex;
+            public int rankInLayer = 0; // Lean: return from RankPathsBetween rather than storing in-place
             public PathSegment[] connectedSubPaths;
+
             public AllPossiblePathsBetween(VertexType[] vertices, int depth, int startVertexIndex, int endVertexIndex)
             {
-                this.depth             = depth;
-                this.startVertexIndex  = startVertexIndex;
-                this.startVertexType   = vertices[startVertexIndex];
-                this.endVertexIndex    = endVertexIndex;
-                this.endVertexType     = vertices[endVertexIndex];
+                this.depth = depth;
+                this.startVertexIndex = startVertexIndex;
+                this.startVertexType = vertices[startVertexIndex];
+                this.endVertexIndex = endVertexIndex;
+                this.endVertexType = vertices[endVertexIndex];
                 this.connectedSubPaths = new PathSegment[vertices.Length];
             }
         }
-        private class AllPossiblePathsBetweenComparer : IComparer<AllPossiblePathsBetween> //looks at the set of all ways from A to B, and compares it to the set of all ways from C to D, and checks if you could be certain someone hadn't handed you the same pair twice
-        {
-            public int Compare(AllPossiblePathsBetween x, AllPossiblePathsBetween y)
-            {
 
-                if (x.endVertexType != y.endVertexType)
-                    return x.endVertexType > y.endVertexType ? 1 : -1;
-                PathSegmentComparer pathSegmentComparer = new PathSegmentComparer();
-                int subLayerComparison = OrderInsensitiveListComparison(x.connectedSubPaths, y.connectedSubPaths, pathSegmentComparer);//Start vertex,end vertex, edge type is the sort priority for lexicographical, but now fitting that in is a bit rough
-                if (subLayerComparison != 0)
-                    return subLayerComparison;
-                return 0;
-            }
-        }
-        public class AllPossiblePathsFrom //represents all the paths from this vertex with a length = depth
+        // All paths of a given length starting from one specific vertex.
+        public class AllPossiblePathsFrom
         {
             public VertexType startVertexType;
-            public int startVertexIndex;
-            public int depth;//only used for debugging
-            public AllPossiblePathsBetween[] pathsToVertex;//represents all the paths startVertex ->connectionType->subPath
-            public int rankInLayer = 0; //must be calculated before use, this is effectively the [startVertex]'s calculated rank, mentioned in the comparer
+            public readonly int startVertexIndex;
+            public readonly int depth; // debug only
+            public AllPossiblePathsBetween[] pathsToVertex;
+            public int rankInLayer = 0; // Lean: return from RankPathsFrom rather than storing in-place
 
             public AllPossiblePathsFrom(VertexType[] vertices, int depth, int startVertexIndex)
             {
                 this.depth = depth;
-                this.startVertexType = vertices[startVertexType];
                 this.startVertexIndex = startVertexIndex;
+                this.startVertexType = vertices[startVertexIndex];
                 this.pathsToVertex = new AllPossiblePathsBetween[vertices.Length];
             }
         }
 
-        private class AllPossiblePathsFromComparer : IComparer<AllPossiblePathsFrom>
+        private class PathsByLength(int vertexCount)
         {
-            public int Compare(AllPossiblePathsFrom x, AllPossiblePathsFrom y)
-            {
-                if (x.startVertexType != y.startVertexType)//if the vertex was given an earlier rank, deffer to that. Otherwise, check if the two vertices are distinguishable
-                {
-                    return x.startVertexType > y.startVertexType ? 1 : -1; 
-                }
-                return OrderInsensitiveListComparison(x.pathsToVertex, y.pathsToVertex, new AllPossiblePathsBetweenComparer());
-            }
+            public AllPossiblePathsFrom[] pathsFromVertex = new AllPossiblePathsFrom[vertexCount];
         }
-        private class PathsByLength //represents all paths of a given length
+
+        // Compares two arrays by their sorted contents rather than element order.
+        // E.g. [a,b,b,c] == [a,b,c,b].
+        public static int OrderInsensitiveListComparison<T>(T[] arr1, T[] arr2, Comparison<T> compare)
         {
-            public AllPossiblePathsFrom[] pathsFromVertex;
-            public PathsByLength(VertexType[] vertices)
-            {
-                pathsFromVertex = new AllPossiblePathsFrom[vertices.Length];
-            }
-        }
-        public static int OrderInsensitiveListComparison<T>(T[] arr1, T[] arr2, IComparer<T> comparer)//Compares an array based on what it contains, not it's order. For instance ababca == aaabbc
-        {
-            if (arr1.Length != arr2.Length)//this should always be unused, except length zero paths. In that case I use it for discarding paths from a to b of length zero (as that would be length 1)
+            if (arr1.Length != arr2.Length)
                 return arr1.Length < arr2.Length ? 1 : -1;
-            T[] arr1Sorted = arr1.ToArray();//don't modify the original array
-            T[] arr2Sorted = arr2.ToArray();
-            Array.Sort(arr1Sorted, comparer);
-            Array.Sort(arr2Sorted, comparer);
-            for (int i = 0; i < arr1Sorted.Length; i++)
+            T[] s1 = arr1.ToArray();
+            T[] s2 = arr2.ToArray();
+            Array.Sort(s1, compare);
+            Array.Sort(s2, compare);
+            for (int i = 0; i < s1.Length; i++)
             {
-                if (comparer.Compare(arr1Sorted[i], arr2Sorted[i]) != 0)
-                {
-                    return comparer.Compare(arr1Sorted[i], arr2Sorted[i]);
-                }
+                int cmp = compare(s1[i], s2[i]);
+                if (cmp != 0) return cmp;
             }
             return 0;
         }
+
+        // Debug helper: displays the ranked path structure at a given depth.
+        private static string LayerToString(PathState state, int depth = 0) =>
+            string.Join("\n", state.PathsOfLength[depth].pathsFromVertex.Select(pathStart =>
+                pathStart.rankInLayer + ". " + pathStart.pathsToVertex.Length + " paths:(" +
+                string.Join(",", pathStart.pathsToVertex.Select(pb =>
+                    "<" + string.Join("    ", pb.connectedSubPaths.Select(seg =>
+                        seg is InnerPathSegment s
+                            ? "[" + s.subPath.rankInLayer + "," + s.edgeType + "]"
+                            : "[bottom]")) +
+                    ">")) + ")"));
     }
 }
