@@ -1,6 +1,6 @@
-name = "hello-world"
+name = "GraphCanonizationProofs"
 version = "0.0.1"
-defaultTargets = ["hello-world"]
+defaultTargets = ["GraphCanonizationProofs"]
 
 [[require]]
 name = "mathlib"
@@ -9,7 +9,3 @@ version = "git#master"
 
 [[lean_lib]]
 name = "GraphStructureAttempt1"
-
-[[lean_exe]]
-name = "hello-world"
-root = "HelloWorld"
