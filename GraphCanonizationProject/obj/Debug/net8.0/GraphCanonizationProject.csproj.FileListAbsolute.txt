@@ -1,0 +1,15 @@
+/workspace/GraphCanonizationProject/bin/Debug/net8.0/GraphCanonizationProject
+/workspace/GraphCanonizationProject/bin/Debug/net8.0/GraphCanonizationProject.deps.json
+/workspace/GraphCanonizationProject/bin/Debug/net8.0/GraphCanonizationProject.runtimeconfig.json
+/workspace/GraphCanonizationProject/bin/Debug/net8.0/GraphCanonizationProject.dll
+/workspace/GraphCanonizationProject/bin/Debug/net8.0/GraphCanonizationProject.pdb
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.GeneratedMSBuildEditorConfig.editorconfig
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.AssemblyInfoInputs.cache
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.AssemblyInfo.cs
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.csproj.CoreCompileInputs.cache
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.sourcelink.json
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.dll
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/refint/GraphCanonizationProject.dll
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.pdb
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/GraphCanonizationProject.genruntimeconfig.cache
+/workspace/GraphCanonizationProject/obj/Debug/net8.0/ref/GraphCanonizationProject.dll
