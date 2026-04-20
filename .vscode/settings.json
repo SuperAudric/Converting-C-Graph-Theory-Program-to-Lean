@@ -1,6 +1,4 @@
 {
-  "terminal.integrated.env.linux": {
-    "PATH": "/home/node/.elan/bin:${env:PATH}"
-  },
-  "lean4.leanExecutablePath": "/home/node/.elan/bin/lean"
+  "lean4.leanExecutablePath": "/home/node/.elan/bin/lean",
+  "dotnet.defaultSolution": "workspace.sln"
 }
