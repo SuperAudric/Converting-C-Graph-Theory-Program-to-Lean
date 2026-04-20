@@ -13,8 +13,6 @@ using System.Linq;
 // I think it will tiebreak more or less off of which has more paths that have gone to earlier sorted types of vertices, earlier in their cycles, then more often
 //I think I need to ensure two main things for it to work. ONLY two nodes that are truely isomorphic to each other will have the same neighborsByDistance (this is why I'm moving away from count and to a direct, comparision based approach) and second, each vertex can be sorted purely by its neighborsByDistance deterministically, with sort ties detectable
 
-//this is version 4 roughly, which I'm trying to make as simple as possible
-//I apparently recently broke it, it's failing on the standard cases like APointedTest
 
 namespace Canonizer
 {

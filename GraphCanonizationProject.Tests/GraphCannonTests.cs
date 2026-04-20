@@ -23,19 +23,29 @@ public class GraphCannonTests(ITestOutputHelper output)
         Assert.Equal(_orderer.Run(verts, edges1), _orderer.Run(verts, edges2));
     }
 
-    [Fact(Skip = "Known algorithm bug in CanonGraphOrdererV4")]
+    [Fact]
     public void APointed_IsomorphicGraphs_ProduceSameCanonical()
     {
-        VertexType[] verts = [0, 1, 1, 3, 4, 5, 6];
-        EdgeType[,] edges1 = {
-            { 0, 0, 0, 1, 1, 0, 0 }, { 0, 0, 1, 0, 1, 0, 0 }, { 0, 1, 0, 0, 1, 0, 0 },
-            { 1, 0, 0, 0, 1, 0, 0 }, { 1, 1, 1, 1, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 1 },
-            { 0, 0, 0, 0, 0, 1, 0 }
+        VertexType[] vertices1 = { 0, 1, 1, 1, 4, 5, 6 };
+        EdgeType[,] edges1 = new EdgeType[,] {
+        {0, 0, 0, 1, 1, 0, 0},
+        {0, 0, 1, 0, 1, 0, 0},
+        {0, 1, 0, 0, 1, 0, 0},
+        {1, 0, 0, 0, 1, 0, 0},
+        {1, 1, 1, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1},
+        {0, 0, 0, 0, 0, 1, 0}
         };
-        EdgeType[,] edges2 = {
-            { 0, 0, 1, 0, 1, 0, 0 }, { 0, 0, 0, 1, 1, 0, 0 }, { 1, 0, 0, 0, 1, 0, 0 },
-            { 0, 1, 0, 0, 1, 0, 0 }, { 1, 1, 1, 1, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 1 },
-            { 0, 0, 0, 0, 0, 1, 0 }
+
+        VertexType[] vertices2 = { 0, 1, 1, 1, 4, 5, 6 };
+        EdgeType[,] edges2 = new EdgeType[,] {
+        {0, 0, 1, 0, 1, 0, 0},
+        {0, 0, 0, 1, 1, 0, 0},
+        {1, 0, 0, 0, 1, 0, 0},
+        {0, 1, 0, 0, 1, 0, 0},
+        {1, 1, 1, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1},
+        {0, 0, 0, 0, 0, 1, 0}
         };
         Assert.Equal(_orderer.Run(verts, edges1), _orderer.Run(verts, edges2));
     }
