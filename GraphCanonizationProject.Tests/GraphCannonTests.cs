@@ -15,6 +15,34 @@ public class GraphCannonTests(ITestOutputHelper output)
     // ── Isomorphism tests ────────────────────────────────────────────────────
 
     [Fact]
+    public void Inputs_NotModified()
+    {
+        VertexType[] verts     = [0, 0, 0, 0];
+        VertexType[] vertsCopy = [0, 0, 0, 0];
+        EdgeType[,] edges     = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
+        EdgeType[,] edgesCopy = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
+        _orderer.Run(verts, edges);
+        Assert.True(Enumerable.SequenceEqual(verts,vertsCopy));
+        Assert.True(Enumerable.SequenceEqual(edges.Cast<EdgeType>(),edgesCopy.Cast<EdgeType>()));
+    }
+
+    [Fact]
+    public void Run_ThrowsOnNonSquareMatrix()
+    {
+        var verts = new VertexType[2];
+        var edges = new EdgeType[2, 3];
+        Assert.Throws<Exception>(() => _orderer.Run(verts, edges));
+    }
+
+    [Fact]
+    public void Run_ThrowsOnMismatchedVertexCount()
+    {
+        var verts = new VertexType[4];
+        var edges = new EdgeType[3, 3];
+        Assert.Throws<Exception>(() => _orderer.Run(verts, edges));
+    }
+
+    [Fact]
     public void Simple_IsomorphicGraphs_ProduceSameCanonical()
     {
         VertexType[] verts = [0, 0, 0, 0];
@@ -128,6 +156,12 @@ public class GraphCannonTests(ITestOutputHelper output)
     [InlineData(2, 2)]
     [InlineData(3, 4)]
     [InlineData(4, 11)]
+    //[InlineData(5, 34)]//disabled for being too slow
+    //[InlineData(6, 156)]
+    //[InlineData(7, 1044)]
+    //[InlineData(8, 12346)]
+    //[InlineData(9, 274668)]//not even sure this could run in a year
+    
     public void AllPermutations_UniqueCanonicalCount_MatchesExpected(int size, int expected)
     {
         BigInteger total = BigInteger.Pow(2, size * (size - 1) / 2);
@@ -142,6 +176,9 @@ public class GraphCannonTests(ITestOutputHelper output)
     [Theory]
     [InlineData(3)]
     [InlineData(4)]
+    //[InlineData(5)]//disabled for being too slow
+    //[InlineData(6)]
+    //[InlineData(7)]
     public void KnownGraphs_DifferentScramblings_ProduceSameCanonical(int size)
     {
         var graphs = ConvertJaggedArrayType<EdgeType>(UniqueGraphsBySize.graphsBySize[size]);
@@ -159,6 +196,41 @@ public class GraphCannonTests(ITestOutputHelper output)
                     $"Expected:\n{canonical}\nGot:\n{result}\n{DisplayMatrix(matrix)}");
             }
         }
+    }
+
+    // ── Instance state / side-effect tests ──────────────────────────────────
+
+    [Fact]
+    public void Run_CalledTwiceOnSameInput_ReturnsSameResult()
+    {
+        VertexType[] verts = [0, 0, 0, 0];
+        EdgeType[,] edges  = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
+        Assert.Equal(_orderer.Run(verts, edges), _orderer.Run(verts, edges));
+    }
+
+    [Fact]
+    public void Run_CorrectResultAfterDifferentSizedGraphCall()
+    {
+        VertexType[] verts4  = [0, 0, 0, 0];
+        EdgeType[,] edges4a  = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
+        EdgeType[,] edges4b  = { { 0, 1, 1, 0 }, { 1, 0, 0, 0 }, { 1, 0, 0, 0 }, { 0, 0, 0, 0 } };
+        var edges3 = BuildGraph((0, 1), (1, 2), (2, 0));
+
+        string resultBefore = _orderer.Run(verts4, edges4a);
+        _orderer.Run(EmptyVerts(edges3), edges3);
+        string resultAfter = _orderer.Run(verts4, edges4b);
+
+        Assert.Equal(resultBefore, resultAfter);
+    }
+
+    [Fact]
+    public void LabelEdgesAccordingToRankings_DoesNotModifyInputEdges()
+    {
+        VertexType[] rankings = [0, 1, 2, 3];
+        EdgeType[,] edges     = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
+        EdgeType[,] edgesCopy = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
+        GraphOrderer.LabelEdgesAccordingToRankings(rankings, edges);
+        Assert.True(Enumerable.SequenceEqual(edges.Cast<EdgeType>(), edgesCopy.Cast<EdgeType>()));
     }
 
     // ── Ordering function smoke test ─────────────────────────────────────────
