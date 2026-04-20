@@ -1,0 +1,6 @@
+{
+  "terminal.integrated.env.linux": {
+    "PATH": "/home/node/.elan/bin:${env:PATH}"
+  },
+  "lean4.leanExecutablePath": "/home/node/.elan/bin/lean"
+}

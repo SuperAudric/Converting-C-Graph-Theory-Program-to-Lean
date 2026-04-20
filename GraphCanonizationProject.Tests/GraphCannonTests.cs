@@ -47,7 +47,7 @@ public class GraphCannonTests(ITestOutputHelper output)
         {0, 0, 0, 0, 0, 0, 1},
         {0, 0, 0, 0, 0, 1, 0}
         };
-        Assert.Equal(_orderer.Run(verts, edges1), _orderer.Run(verts, edges2));
+        Assert.Equal(_orderer.Run(vertices1, edges1), _orderer.Run(vertices2, edges2));
     }
 
     [Fact]

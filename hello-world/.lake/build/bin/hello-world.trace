@@ -1,0 +1,17 @@
+{"synthetic": false,
+ "schemaVersion": "2025-09-10",
+ "outputs": "4d08028302c0002f",
+ "log":
+ [{"message":
+   ".> /home/node/.elan/toolchains/leanprover--lean4---v4.29.1/bin/clang -o /workspace/hello-world/.lake/build/bin/hello-world /workspace/hello-world/.lake/build/ir/HelloWorld.c.o.export -L /home/node/.elan/toolchains/leanprover--lean4---v4.29.1/lib/lean --sysroot /home/node/.elan/toolchains/leanprover--lean4---v4.29.1 -L /home/node/.elan/toolchains/leanprover--lean4---v4.29.1/lib -L /home/node/.elan/toolchains/leanprover--lean4---v4.29.1/lib/glibc -lc -lc_nonshared -Wl,--as-needed -l:ld.so -Wl,--no-as-needed -lpthread_nonshared -Wl,--as-needed -Wl,-Bstatic -lgmp -lunwind -luv -Wl,-Bdynamic -Wl,--no-as-needed -fuse-ld=lld -Wl,--start-group -lleancpp -lLean -Wl,--end-group -lStd -Wl,--start-group -lInit -lleanrt -Wl,--end-group -Wl,-Bstatic -lc++ -lc++abi -Wl,-Bdynamic -lLake -Wl,--as-needed -lgmp -luv -lpthread -ldl -lrt -Wl,--no-as-needed -Wl,--gc-sections -lm -ldl -pthread",
+   "level": "trace"}],
+ "inputs":
+ [["linkObjs",
+   [["/workspace/hello-world/.lake/build/ir/HelloWorld.c.o.export",
+     "b84cf9114ec209b8"]]],
+  ["linkLibs", "00000000000006bb"],
+  ["Lean 4.29.1, commit f72c35b3f637c8c6571d353742168ab66cc22c00",
+   "fa77a35a41db35c0"],
+  ["traceArgs: #[]", "00000000000006bb"],
+  ["x86_64-unknown-linux-gnu", "53a0e8937c307c28"]],
+ "depHash": "a774e99d93525704"}

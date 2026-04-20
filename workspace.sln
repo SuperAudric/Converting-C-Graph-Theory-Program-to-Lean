@@ -1,29 +1,28 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.5.2.0
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hello-world", "hello-world", "{D96D28C7-CAE0-45A6-D149-0DBFE4A23BD7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphCanonizationProject", "GraphCanonizationProject\GraphCanonizationProject.csproj", "{D86A2369-0A3F-40AF-B273-1F3596FC55BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpHello", "hello-world\CSharpHello\CSharpHello.csproj", "{AFF7D6F6-CB0C-2C5A-5D08-89297DD75724}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphCanonizationProject.Tests", "GraphCanonizationProject.Tests\GraphCanonizationProject.Tests.csproj", "{6DA935E3-B6A9-49F5-8548-D44BCC043EC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AFF7D6F6-CB0C-2C5A-5D08-89297DD75724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AFF7D6F6-CB0C-2C5A-5D08-89297DD75724}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AFF7D6F6-CB0C-2C5A-5D08-89297DD75724}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AFF7D6F6-CB0C-2C5A-5D08-89297DD75724}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{AFF7D6F6-CB0C-2C5A-5D08-89297DD75724} = {D96D28C7-CAE0-45A6-D149-0DBFE4A23BD7}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4202AEE1-4F39-4DF6-8479-0A5B76FBC6D1}
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D86A2369-0A3F-40AF-B273-1F3596FC55BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D86A2369-0A3F-40AF-B273-1F3596FC55BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D86A2369-0A3F-40AF-B273-1F3596FC55BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D86A2369-0A3F-40AF-B273-1F3596FC55BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DA935E3-B6A9-49F5-8548-D44BCC043EC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DA935E3-B6A9-49F5-8548-D44BCC043EC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DA935E3-B6A9-49F5-8548-D44BCC043EC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DA935E3-B6A9-49F5-8548-D44BCC043EC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
