@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GraphCanonizationProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52208d1862cc9be59ceadf9f7fdb088fd14c1480")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7456dc6a6ce656e2cbc405739017d88f2c7061b3")]
 [assembly: System.Reflection.AssemblyProductAttribute("GraphCanonizationProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GraphCanonizationProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
