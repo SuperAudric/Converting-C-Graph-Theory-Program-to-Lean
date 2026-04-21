@@ -16,7 +16,7 @@ namespace AdjMatrix
 
 variable {vertexCount : Nat}
 
-def swapVertices (vertex1 vertex2 : Fin vertexCount) (G : AdjMatrix vertexCount) : AdjMatrix vertexCount :=
+def swapVertexLabels (vertex1 vertex2 : Fin vertexCount) (G : AdjMatrix vertexCount) : AdjMatrix vertexCount :=
   { adj := fun fromVertex toVertex =>
       let mappedFrom := if fromVertex = vertex1 then vertex2 else if fromVertex = vertex2 then vertex1 else fromVertex
       let mappedTo   := if toVertex   = vertex1 then vertex2 else if toVertex   = vertex2 then vertex1 else toVertex
@@ -24,7 +24,7 @@ def swapVertices (vertex1 vertex2 : Fin vertexCount) (G : AdjMatrix vertexCount)
 
 inductive Isomorphic : AdjMatrix vertexCount → AdjMatrix vertexCount → Prop
   | refl  (G : AdjMatrix vertexCount)                                       : Isomorphic G G
-  | swap  (G : AdjMatrix vertexCount) (vertex1 vertex2 : Fin vertexCount)   : Isomorphic G (swapVertices vertex1 vertex2 G)
+  | swap  (G : AdjMatrix vertexCount) (vertex1 vertex2 : Fin vertexCount)   : Isomorphic G (swapVertexLabels vertex1 vertex2 G)
   | trans {G₁ G₂ G₃ : AdjMatrix vertexCount}
       : Isomorphic G₁ G₂ → Isomorphic G₂ G₃ → Isomorphic G₁ G₃
 
@@ -45,6 +45,7 @@ end AdjMatrix
 
 inductive PathSegment where
   | bottom (vertexIndex : Nat)                                    : PathSegment
+  -- subDepth/subStart/subEnd index into betweenRanks; in C# this is an AllPathsBetween object reference
   | inner  (edgeType : EdgeType) (subDepth subStart subEnd : Nat) : PathSegment
 deriving Repr, BEq
 
@@ -269,7 +270,7 @@ def labelEdgesAccordingToRankings {vertexCount : Nat}
       | none          => (graph, rankMap)
       | some sourceFin =>
         let sourceIdx    := sourceFin.val
-        let swappedGraph := graph.swapVertices currentFin sourceFin
+        let swappedGraph := graph.swapVertexLabels currentFin sourceFin
         let rankAtSource := rankMap.getD sourceIdx 0
         let rankAtTarget := rankMap.getD targetPos 0
         (swappedGraph, (rankMap.set! sourceIdx rankAtTarget).set! targetPos rankAtSource))
