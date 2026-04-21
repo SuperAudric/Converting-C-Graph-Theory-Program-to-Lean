@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs cat *)",
+      "Bash(lake build *)",
+      "Read(//usr/**)",
+      "Read(//home/node/.elan/bin/**)"
+    ]
+  }
+}

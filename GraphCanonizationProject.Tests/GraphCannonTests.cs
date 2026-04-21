@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using GraphOrderer = Canonizer.CanonGraphOrdererV4;
-using VertexType = System.UInt32;
-using EdgeType = System.UInt64;
+using VertexType = int;
+using EdgeType = int;
 
 public class GraphCannonTests(ITestOutputHelper output)
 {
@@ -178,7 +178,7 @@ public class GraphCannonTests(ITestOutputHelper output)
     [InlineData(4)]
     [InlineData(5)]
     [InlineData(6)]
-    [InlineData(7)]
+    [InlineData(7)]//This test alone can confirm the algorithm is working as intended, but is quite slow
     public void KnownGraphs_DifferentScramblings_ProduceSameCanonical(int size)
     {
         var graphs = ConvertJaggedArrayType<EdgeType>(UniqueGraphsBySize.graphsBySize[size]);

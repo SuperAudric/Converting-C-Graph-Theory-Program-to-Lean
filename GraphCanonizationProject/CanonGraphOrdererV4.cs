@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
 // Graph canonizer based on path multisets between vertices.
 // Paths from A→B are a different "type" from C→D when composed of different subpath-type
@@ -10,8 +9,8 @@ using System.Linq;
 
 namespace Canonizer
 {
-    using VertexType = System.UInt32; // Lean: abbrev VertexType := UInt32
-    using EdgeType = System.UInt64;   // Lean: abbrev EdgeType   := UInt64
+    using VertexType = int; //Used semantically to help keep track of what's being referred to.
+    using EdgeType = int;
 
     public class CanonGraphOrdererV4
     {
@@ -19,7 +18,7 @@ namespace Canonizer
         {
             ValidateInputs(vertexTypes, edges);
             VertexType[] vertexRankings = GetVertexTypeRankings(vertexTypes);
-            PathState state = InitializePaths(vertexRankings, edges);
+            PathState state = InitializePaths(edges);
             vertexRankings = OrderVertices(state, vertexRankings);
             EdgeType[,] canonicalOrdering = LabelEdgesAccordingToRankings(vertexRankings, edges);
             return AdjMatrixToString(canonicalOrdering);
@@ -54,6 +53,8 @@ namespace Canonizer
         }
 
         // Lean translation: a pure record threaded through all functions.
+        // PathState holds only structural (edge-derived) information; vertex types are
+        // passed separately and never cached inside path objects.
         private record PathState(PathsByLength[] PathsOfLength, int MaxDepth, int VertexCount);
 
         // Rank lookup tables produced by CalculatePathRankings.
@@ -62,26 +63,25 @@ namespace Canonizer
         //   FromRanks[depth, fromVertex]               = rank of all depth-length paths from that vertex
         private record RankState(int[,,] BetweenRanks, int[,] FromRanks);
 
-        private static PathState InitializePaths(VertexType[] vertices, EdgeType[,] edges)
+        // PathState is built once from edges alone; vertex types are never stored inside it.
+        private static PathState InitializePaths(EdgeType[,] edges)
         {
-            int n = vertices.Length;
+            int n = edges.GetLength(0);
             var pathsOfLength = new PathsByLength[n];
             for (int depth = 0; depth < n; depth++)
             {
                 pathsOfLength[depth] = new PathsByLength(n);
                 for (int from = 0; from < n; from++)
                 {
-                    pathsOfLength[depth].pathsFromVertex[from] = new AllPossiblePathsFrom(vertices, depth, from);
+                    pathsOfLength[depth].pathsFromVertex[from] = new AllPossiblePathsFrom(depth, from, n);
                     for (int to = 0; to < n; to++)
                     {
                         pathsOfLength[depth].pathsFromVertex[from].pathsToVertex[to] =
-                            new AllPossiblePathsBetween(vertices, depth, from, to);
+                            new AllPossiblePathsBetween(depth, from, to, n);
                         if (depth == 0)
                         {
                             pathsOfLength[depth].pathsFromVertex[from].pathsToVertex[to].connectedSubPaths =
-                                from == to
-                                    ? [new BottomPathSegment(vertices, from)]
-                                    : [];
+                                from == to ? [new BottomPathSegment(from)] : [];
                             continue;
                         }
                         for (int mid = 0; mid < n; mid++)
@@ -94,10 +94,7 @@ namespace Canonizer
                     }
                 }
             }
-            var state = new PathState(pathsOfLength, n, n);
-            for (int i = 0; i < n; i++)
-                SetNewVertexLabel(state, vertices, i, vertices[i]);
-            return state;
+            return new PathState(pathsOfLength, n, n);
         }
 
         // Relabels the adjacency matrix so vertex positions match the given rankings.
@@ -152,15 +149,15 @@ namespace Canonizer
             {
                 for (int cycle = 0; needsResort && (fullySorted + cycle < n); cycle++)
                 {
-                    RankState ranks = CalculatePathRankings(state);
+                    RankState ranks = CalculatePathRankings(state, vertexRankings);
                     needsResort = false;
                     for (int v = 0; v < n; v++)
                     {
                         int newRank = ranks.FromRanks[state.MaxDepth - 1, v];
-                        if ((VertexType)newRank != vertexRankings[v])
+                        if (newRank != vertexRankings[v])
                         {
                             needsResort = true;
-                            SetNewVertexLabel(state, vertexRankings, v, (VertexType)newRank);
+                            vertexRankings[v] = newRank;
                         }
                     }
                 }
@@ -174,7 +171,7 @@ namespace Canonizer
                         // Two vertices tied after full convergence are symmetric; arbitrarily
                         // promote the second one to break the tie.
                         needsResort = true;
-                        SetNewVertexLabel(state, vertexRankings, i, (VertexType)fullySorted + 1);
+                        vertexRankings[i] = fullySorted + 1;
                     }
                 }
             }
@@ -183,7 +180,7 @@ namespace Canonizer
 
         // Computes ranks for every (depth, from, to) triple and every (depth, from) pair.
         // Does not mutate any PathState objects; produces fresh rank tables.
-        private static RankState CalculatePathRankings(PathState state)
+        private static RankState CalculatePathRankings(PathState state, VertexType[] vertexTypes)
         {
             int n = state.VertexCount;
             var betweenRanks = new int[n, n, n];
@@ -192,8 +189,8 @@ namespace Canonizer
             {
                 RankPathsBetween(
                     state.PathsOfLength[depth].pathsFromVertex.SelectMany(x => x.pathsToVertex).ToArray(),
-                    depth, betweenRanks);
-                RankPathsFrom(state.PathsOfLength[depth].pathsFromVertex, depth, betweenRanks, fromRanks);
+                    vertexTypes, depth, betweenRanks);
+                RankPathsFrom(state.PathsOfLength[depth].pathsFromVertex, vertexTypes, depth, betweenRanks, fromRanks);
             }
             return new RankState(betweenRanks, fromRanks);
         }
@@ -201,9 +198,9 @@ namespace Canonizer
         // Sorts all (from, to) path-sets at the given depth and writes their ranks into
         // betweenRanks[depth, from, to].  The sort reads betweenRanks for depth-1 paths,
         // which are already filled by the time this is called for depth > 0.
-        private static void RankPathsBetween(AllPossiblePathsBetween[] paths, int depth, int[,,] betweenRanks)
+        private static void RankPathsBetween(AllPossiblePathsBetween[] paths, VertexType[] vertexTypes, int depth, int[,,] betweenRanks)
         {
-            int compare(AllPossiblePathsBetween x, AllPossiblePathsBetween y) => ComparePathsBetween(x, y, betweenRanks);
+            int compare(AllPossiblePathsBetween x, AllPossiblePathsBetween y) => ComparePathsBetween(x, y, vertexTypes, betweenRanks);
             var sorted = paths.ToArray();
             Array.Sort(sorted, compare);
             int counter = 0;
@@ -218,9 +215,9 @@ namespace Canonizer
         // Sorts all from-vertex path-sets at the given depth and writes their ranks into
         // fromRanks[depth, from].  The sort reads betweenRanks for depth-1 paths (via
         // ComparePathsBetween), so betweenRanks for this depth need not yet be filled.
-        private static void RankPathsFrom(AllPossiblePathsFrom[] paths, int depth, int[,,] betweenRanks, int[,] fromRanks)
+        private static void RankPathsFrom(AllPossiblePathsFrom[] paths, VertexType[] vertexTypes, int depth, int[,,] betweenRanks, int[,] fromRanks)
         {
-            int compare(AllPossiblePathsFrom x, AllPossiblePathsFrom y) => ComparePathsFrom(x, y, betweenRanks);
+            int compare(AllPossiblePathsFrom x, AllPossiblePathsFrom y) => ComparePathsFrom(x, y, vertexTypes, betweenRanks);
             var sorted = paths.ToArray();
             Array.Sort(sorted, compare);
             int counter = 0;
@@ -232,42 +229,14 @@ namespace Canonizer
             }
         }
 
-        private static void SetNewVertexLabel(PathState state, VertexType[] vertexTypes, int index, VertexType value)
-        {
-            vertexTypes[index] = value;
-            for (int depth = 0; depth < state.MaxDepth; depth++)
-            {
-                state.PathsOfLength[depth].pathsFromVertex[index].startVertexType = value;
-                for (int end = 0; end < state.VertexCount; end++)
-                    state.PathsOfLength[depth].pathsFromVertex[index].pathsToVertex[end].startVertexType = value;
-                for (int start = 0; start < state.VertexCount; start++)
-                    state.PathsOfLength[depth].pathsFromVertex[start].pathsToVertex[index].endVertexType = value;
-            }
-            state.PathsOfLength[0].pathsFromVertex[index].pathsToVertex[index].connectedSubPaths[0] =
-                new BottomPathSegment(value, index);
-        }
-
         // Lean translation: inductive PathSegment
-        //   | bottom (vertexIndex : Nat) (vertexType : VertexType) : PathSegment
+        //   | bottom (vertexIndex : Nat) : PathSegment
         //   | inner  (edgeType : EdgeType) (subPath : AllPossiblePathsBetween) : PathSegment
         public abstract class PathSegment { }
 
-        public sealed class BottomPathSegment : PathSegment
+        public sealed class BottomPathSegment(int vertexIndex) : PathSegment
         {
-            public readonly int selfVertexIndex;
-            public VertexType selfVertexType;
-
-            public BottomPathSegment(VertexType[] vertices, int vertexIndex)
-            {
-                selfVertexIndex = vertexIndex;
-                selfVertexType = vertices[vertexIndex];
-            }
-
-            public BottomPathSegment(VertexType vertexType, int vertexIndex)
-            {
-                selfVertexIndex = vertexIndex;
-                selfVertexType = vertexType;
-            }
+            public readonly int selfVertexIndex = vertexIndex;
         }
 
         public sealed class InnerPathSegment(EdgeType edgeType, AllPossiblePathsBetween subPath) : PathSegment
@@ -277,14 +246,17 @@ namespace Canonizer
         }
 
         // Lean translation: these three become Ord instances (or explicit compare functions).
+        // vertexTypes supplies the current ranking for each vertex index.
 
         // betweenRanks supplies the pre-computed rank of each subPath referenced by InnerPathSegments.
-        public static int ComparePathSegments(PathSegment x, PathSegment y, int[,,] betweenRanks)
+        public static int ComparePathSegments(PathSegment x, PathSegment y, VertexType[] vertexTypes, int[,,] betweenRanks)
         {
             if (x is BottomPathSegment bx && y is BottomPathSegment by)
-                return bx.selfVertexType != by.selfVertexType
-                    ? (bx.selfVertexType > by.selfVertexType ? 1 : -1)
-                    : 0;
+            {
+                VertexType tx = vertexTypes[bx.selfVertexIndex];
+                VertexType ty = vertexTypes[by.selfVertexIndex];
+                return tx != ty ? (tx > ty ? 1 : -1) : 0;
+            }
             if (x is InnerPathSegment ix && y is InnerPathSegment iy)
             {
                 int rx = betweenRanks[ix.subPath.depth, ix.subPath.startVertexIndex, ix.subPath.endVertexIndex];
@@ -296,58 +268,53 @@ namespace Canonizer
             throw new Exception("Cannot compare BottomPathSegment with InnerPathSegment");
         }
 
-        public static int ComparePathsBetween(AllPossiblePathsBetween x, AllPossiblePathsBetween y, int[,,] betweenRanks)
+        public static int ComparePathsBetween(AllPossiblePathsBetween x, AllPossiblePathsBetween y, VertexType[] vertexTypes, int[,,] betweenRanks)
         {
-            if (x.endVertexType != y.endVertexType)
-                return x.endVertexType > y.endVertexType ? 1 : -1;
+            VertexType ex = vertexTypes[x.endVertexIndex];
+            VertexType ey = vertexTypes[y.endVertexIndex];
+            if (ex != ey) return ex > ey ? 1 : -1;
             return OrderInsensitiveListComparison(x.connectedSubPaths, y.connectedSubPaths,
-                (a, b) => ComparePathSegments(a, b, betweenRanks));
+                (a, b) => ComparePathSegments(a, b, vertexTypes, betweenRanks));
         }
 
-        public static int ComparePathsFrom(AllPossiblePathsFrom x, AllPossiblePathsFrom y, int[,,] betweenRanks)
+        public static int ComparePathsFrom(AllPossiblePathsFrom x, AllPossiblePathsFrom y, VertexType[] vertexTypes, int[,,] betweenRanks)
         {
-            if (x.startVertexType != y.startVertexType)
-                return x.startVertexType > y.startVertexType ? 1 : -1;
+            VertexType sx = vertexTypes[x.startVertexIndex];
+            VertexType sy = vertexTypes[y.startVertexIndex];
+            if (sx != sy) return sx > sy ? 1 : -1;
             return OrderInsensitiveListComparison(x.pathsToVertex, y.pathsToVertex,
-                (a, b) => ComparePathsBetween(a, b, betweenRanks));
+                (a, b) => ComparePathsBetween(a, b, vertexTypes, betweenRanks));
         }
 
         // All paths of a given length between two specific vertices.
-        // startVertexType is maintained but not yet used in comparisons (reserved for Lean proofs).
         public class AllPossiblePathsBetween
         {
-            public readonly int depth;           // index into BetweenRanks first dimension
-            public VertexType startVertexType;
+            public readonly int depth;            // index into BetweenRanks first dimension
             public readonly int startVertexIndex; // index into BetweenRanks second dimension
-            public VertexType endVertexType;
             public readonly int endVertexIndex;   // index into BetweenRanks third dimension
             public PathSegment[] connectedSubPaths;
 
-            public AllPossiblePathsBetween(VertexType[] vertices, int depth, int startVertexIndex, int endVertexIndex)
+            public AllPossiblePathsBetween(int depth, int startVertexIndex, int endVertexIndex, int n)
             {
                 this.depth = depth;
                 this.startVertexIndex = startVertexIndex;
-                this.startVertexType = vertices[startVertexIndex];
                 this.endVertexIndex = endVertexIndex;
-                this.endVertexType = vertices[endVertexIndex];
-                this.connectedSubPaths = new PathSegment[vertices.Length];
+                this.connectedSubPaths = new PathSegment[n];
             }
         }
 
         // All paths of a given length starting from one specific vertex.
         public class AllPossiblePathsFrom
         {
-            public VertexType startVertexType;
             public readonly int startVertexIndex; // index into FromRanks second dimension
             public readonly int depth;            // index into FromRanks first dimension
             public AllPossiblePathsBetween[] pathsToVertex;
 
-            public AllPossiblePathsFrom(VertexType[] vertices, int depth, int startVertexIndex)
+            public AllPossiblePathsFrom(int depth, int startVertexIndex, int n)
             {
                 this.depth = depth;
                 this.startVertexIndex = startVertexIndex;
-                this.startVertexType = vertices[startVertexIndex];
-                this.pathsToVertex = new AllPossiblePathsBetween[vertices.Length];
+                this.pathsToVertex = new AllPossiblePathsBetween[n];
             }
         }
 
@@ -375,14 +342,14 @@ namespace Canonizer
         }
 
         // Debug helper: displays the ranked path structure at a given depth.
-        private static string LayerToString(PathState state, RankState ranks, int depth = 0) =>
+        private static string LayerToString(PathState state, RankState ranks, VertexType[] vertexTypes, int depth = 0) =>
             string.Join("\n", state.PathsOfLength[depth].pathsFromVertex.Select(pathStart =>
                 ranks.FromRanks[depth, pathStart.startVertexIndex] + ". " + pathStart.pathsToVertex.Length + " paths:(" +
                 string.Join(",", pathStart.pathsToVertex.Select(pb =>
                     "<" + string.Join("    ", pb.connectedSubPaths.Select(seg =>
                         seg is InnerPathSegment s
                             ? "[" + ranks.BetweenRanks[s.subPath.depth, s.subPath.startVertexIndex, s.subPath.endVertexIndex] + "," + s.edgeType + "]"
-                            : "[bottom]")) +
+                            : "[bottom:" + vertexTypes[((BottomPathSegment)seg).selfVertexIndex] + "]")) +
                     ">")) + ")"));
     }
 }
