@@ -1,0 +1,8 @@
+# C# build outputs
+bin/
+obj/
+
+# Lean4 / Lake build outputs and downloaded packages
+# Reproducible via: lake update (uses lake-manifest.json) && lake build
+.lake/build/
+.lake/packages/

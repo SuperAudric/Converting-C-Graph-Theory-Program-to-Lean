@@ -4,7 +4,11 @@
       "Bash(xargs cat *)",
       "Bash(lake build *)",
       "Read(//usr/**)",
-      "Read(//home/node/.elan/bin/**)"
+      "Read(//home/node/.elan/bin/**)",
+      "Bash(git -C /workspace ls-files)",
+      "Bash(git -C /workspace ls-files GraphCanonizationProofs/)",
+      "Bash(git -C /workspace ls-files GraphCanonizationProofs/.lake/packages/)",
+      "Bash(xargs rm *)"
     ]
   }
 }
