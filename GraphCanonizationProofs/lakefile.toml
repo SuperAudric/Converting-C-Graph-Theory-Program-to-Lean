@@ -8,4 +8,7 @@ scope = "leanprover-community"
 version = "git#master"
 
 [[lean_lib]]
-name = "GraphStructureAttempt1"
+name = "LeanGraphCanonizerV4"
+
+[[lean_lib]]
+name = "LeanGraphCanonizerV4Tests"
