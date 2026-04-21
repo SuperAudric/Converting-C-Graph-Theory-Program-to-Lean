@@ -5,10 +5,6 @@ open Graph
 private def mkAdj (rows : List (List EdgeType)) (size : Nat) : AdjMatrix size where
   adj rowIdx colIdx := (rows.getD rowIdx.val []).getD colIdx.val 0
 
--- Apply a sequence of vertex-label swaps; each swap preserves the isomorphism class.
-private def applySwaps {n : Nat} (swaps : List (Fin n × Fin n)) (G : AdjMatrix n) : AdjMatrix n :=
-  swaps.foldl (fun g p => g.swapVertexLabels p.1 p.2) G
-
 -- Build the simple graph on n vertices encoded by a bitmask over upper-triangular edges.
 -- Edge index for pair (lo, hi) with lo < hi: lo*(2n-lo-1)/2 + (hi-lo-1)
 private def graphFromBitmask (n : Nat) (mask : Nat) : AdjMatrix n :=
@@ -29,6 +25,35 @@ private def countUniqueCanonicals (n : Nat) : Nat :=
       if seen.contains c then seen else seen ++ [c])
     ([] : List String)
   |>.length
+
+-- ── Scrambling helpers ────────────────────────────────────────────────────────
+
+-- Apply swaps indexed by Nat; indices outside [0, n) are silently ignored.
+private def applyNatSwaps {n : Nat} (swaps : List (Nat × Nat)) (G : AdjMatrix n) : AdjMatrix n :=
+  swaps.foldl (fun g (a, b) =>
+    if h1 : a < n then if h2 : b < n then g.swapVertexLabels ⟨a, h1⟩ ⟨b, h2⟩ else g
+    else g) G
+
+-- Reverse: swap pairs from outside in — [(0, n-1), (1, n-2), …]
+private def scrReverse (n : Nat) : List (Nat × Nat) :=
+  (List.range (n / 2)).map fun i => (i, n - 1 - i)
+
+-- Rotate left: chain [(0,1), (1,2), …, (n-2, n-1)] — moves vertex 0 to the last position
+private def scrRotateLeft (n : Nat) : List (Nat × Nat) :=
+  (List.range (n - 1)).map fun i => (i, i + 1)
+
+-- Cut: swap the two halves — [(0, ⌊n/2⌋), (1, ⌊n/2⌋+1), …]
+private def scrCut (n : Nat) : List (Nat × Nat) :=
+  (List.range (n / 2)).map fun i => (i, i + n / 2)
+
+private def standardScramblers (n : Nat) : List (List (Nat × Nat)) :=
+  [scrReverse n, scrRotateLeft n, scrCut n]
+
+-- True iff the graph's canonical form is unchanged under every scrambler in the list.
+private def isStableUnder {n : Nat} (vts : Array VertexType) (G : AdjMatrix n)
+    (scramblers : List (List (Nat × Nat))) : Bool :=
+  let canonical := toString (run vts G)
+  scramblers.all fun scr => toString (run vts (applyNatSwaps scr G)) == canonical
 
 
 -- ── 1. Isomorphism tests ──────────────────────────────────────────────────────
@@ -66,24 +91,16 @@ private def c6 : AdjMatrix 6 := mkAdj
 
 
 -- ── 2. Scrambling stability tests ─────────────────────────────────────────────
+-- Each graph is tested against all three standard scramblers: reverse, rotate-left, cut.
 
--- 3-dimensional hypercube Q3 (8 vertices = 3-bit strings, edges = Hamming distance 1).
--- All vertex relabelings must yield the same canonical form.
+-- 3-dimensional hypercube Q3 (8 vertices = 3-bit strings, edges = Hamming distance 1)
 private def q3 : AdjMatrix 8 := mkAdj
   [[0,1,1,0,1,0,0,0],[1,0,0,1,0,1,0,0],[1,0,0,1,0,0,1,0],[0,1,1,0,0,0,0,1],
    [1,0,0,0,0,1,1,0],[0,1,0,0,1,0,0,1],[0,0,1,0,1,0,0,1],[0,0,0,1,0,1,1,0]] 8
 
-private def ev8 : Array VertexType := #[0,0,0,0,0,0,0,0]
+#guard isStableUnder #[0,0,0,0,0,0,0,0] q3 (standardScramblers 8)
 
-#guard toString (run ev8 q3) ==
-        toString (run ev8 (q3.swapVertexLabels ⟨0,by omega⟩ ⟨7,by omega⟩))
-#guard toString (run ev8 q3) ==
-        toString (run ev8 (q3.swapVertexLabels ⟨1,by omega⟩ ⟨6,by omega⟩))
-#guard toString (run ev8 q3) ==
-        toString (run ev8 (applySwaps
-          [(⟨0,by omega⟩,⟨4,by omega⟩),(⟨1,by omega⟩,⟨5,by omega⟩)] q3))
-
--- Scrambled path graphs (line_n: 0─1─…─(n-1))
+-- Path graphs (line_n: 0─1─…─(n-1))
 private def line4 : AdjMatrix 4 :=
   mkAdj [[0,1,0,0],[1,0,1,0],[0,1,0,1],[0,0,1,0]] 4
 private def line5 : AdjMatrix 5 :=
@@ -91,37 +108,16 @@ private def line5 : AdjMatrix 5 :=
 private def line6 : AdjMatrix 6 :=
   mkAdj [[0,1,0,0,0,0],[1,0,1,0,0,0],[0,1,0,1,0,0],[0,0,1,0,1,0],[0,0,0,1,0,1],[0,0,0,0,1,0]] 6
 
-#guard toString (run #[0,0,0,0] line4) ==
-        toString (run #[0,0,0,0] (line4.swapVertexLabels ⟨0,by omega⟩ ⟨3,by omega⟩))
-#guard toString (run #[0,0,0,0] line4) ==
-        toString (run #[0,0,0,0]
-          (applySwaps [(⟨0,by omega⟩,⟨3,by omega⟩),(⟨1,by omega⟩,⟨2,by omega⟩)] line4))
+#guard isStableUnder #[0,0,0,0]     line4 (standardScramblers 4)
+#guard isStableUnder #[0,0,0,0,0]   line5 (standardScramblers 5)
+#guard isStableUnder #[0,0,0,0,0,0] line6 (standardScramblers 6)
 
-#guard toString (run #[0,0,0,0,0] line5) ==
-        toString (run #[0,0,0,0,0] (line5.swapVertexLabels ⟨0,by omega⟩ ⟨4,by omega⟩))
-#guard toString (run #[0,0,0,0,0] line5) ==
-        toString (run #[0,0,0,0,0]
-          (applySwaps [(⟨0,by omega⟩,⟨4,by omega⟩),(⟨1,by omega⟩,⟨3,by omega⟩)] line5))
-
-#guard toString (run #[0,0,0,0,0,0] line6) ==
-        toString (run #[0,0,0,0,0,0] (line6.swapVertexLabels ⟨0,by omega⟩ ⟨5,by omega⟩))
-#guard toString (run #[0,0,0,0,0,0] line6) ==
-        toString (run #[0,0,0,0,0,0]
-          (applySwaps [(⟨0,by omega⟩,⟨5,by omega⟩),(⟨1,by omega⟩,⟨4,by omega⟩),
-                      (⟨2,by omega⟩,⟨3,by omega⟩)] line6))
-
--- Scrambled spider (center 0, three arms of length 2: 0─1─2, 0─3─4, 0─5─6)
+-- Spider (center 0, three arms of length 2: 0─1─2, 0─3─4, 0─5─6)
 private def spider : AdjMatrix 7 := mkAdj
   [[0,1,0,1,0,1,0],[1,0,1,0,0,0,0],[0,1,0,0,0,0,0],[1,0,0,0,1,0,0],
    [0,0,0,1,0,0,0],[1,0,0,0,0,0,1],[0,0,0,0,0,1,0]] 7
 
--- Swap arm tips (2 and 4 are both at distance 2 from center, same structure)
-#guard toString (run #[0,0,0,0,0,0,0] spider) ==
-        toString (run #[0,0,0,0,0,0,0] (spider.swapVertexLabels ⟨2,by omega⟩ ⟨4,by omega⟩))
--- Swap two arms entirely (arm 0─1─2 ↔ arm 0─3─4)
-#guard toString (run #[0,0,0,0,0,0,0] spider) ==
-        toString (run #[0,0,0,0,0,0,0]
-          (applySwaps [(⟨1,by omega⟩,⟨3,by omega⟩),(⟨2,by omega⟩,⟨4,by omega⟩)] spider))
+#guard isStableUnder #[0,0,0,0,0,0,0] spider (standardScramblers 7)
 
 -- K3+K3 in a different vertex labeling (triangles on {1,2,3} and {0,4,5})
 private def k3k3_alt : AdjMatrix 6 := mkAdj
@@ -141,17 +137,15 @@ private def k3k3_alt : AdjMatrix 6 := mkAdj
 
 
 -- ── 4. Known-graphs scrambling tests ──────────────────────────────────────────
--- For each known unique graph, any vertex-label swap must yield the same canonical.
+-- For each known unique graph, all standard scramblers must yield the same canonical.
 -- Add larger sizes to UniqueGraphsBySize.lean as needed.
 
 private def allScrambleStable {n : Nat} (graphs : Array (AdjMatrix n))
-    (v1 v2 : Fin n) (vts : Array VertexType) : Bool :=
-  graphs.all fun g =>
-    toString (run vts g) == toString (run vts (g.swapVertexLabels v1 v2))
+    (vts : Array VertexType) : Bool :=
+  graphs.all fun g => isStableUnder vts g (standardScramblers n)
 
-#guard allScrambleStable UniqueGraphsBySize.size2 ⟨0,by omega⟩ ⟨1,by omega⟩ #[0,0]
-#guard allScrambleStable UniqueGraphsBySize.size3 ⟨0,by omega⟩ ⟨2,by omega⟩ #[0,0,0]
-
+#guard allScrambleStable UniqueGraphsBySize.size2 #[0,0]
+#guard allScrambleStable UniqueGraphsBySize.size3 #[0,0,0]
 
 
 -- ── 5. Repeatability ──────────────────────────────────────────────────────────
