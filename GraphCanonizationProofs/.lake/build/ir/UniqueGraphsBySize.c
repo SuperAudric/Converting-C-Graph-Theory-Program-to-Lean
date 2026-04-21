@@ -1,0 +1,622 @@
+// Lean compiler output
+// Module: UniqueGraphsBySize
+// Imports: public import Init public meta import Init public import LeanGraphCanonizerV4
+#include <lean/lean.h>
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wunused-label"
+#elif defined(__GNUC__) && !defined(__CLANG__)
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-label"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
+#ifdef __cplusplus
+extern "C" {
+#endif
+lean_object* lean_nat_to_int(lean_object*);
+lean_object* l_List_getD___redArg(lean_object*, lean_object*, lean_object*);
+lean_object* lean_mk_empty_array_with_capacity(lean_object*);
+lean_object* lean_array_push(lean_object*, lean_object*);
+static lean_once_cell_t lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0;
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg(lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj(lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___boxed(lean_object*, lean_object*);
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__2_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__2;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__3_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__3;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__4_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__4;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__9_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__9;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__10_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__10;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__11_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__11;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__12_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__12;
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size2;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__2_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__2;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__3_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__3;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__4_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__4;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__6_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__6;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__7_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__7;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__8_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__8;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__9_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__9;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__11_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__11;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__12_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__12;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__13_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__13;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__14_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__14;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__15_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__15;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__16_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__16;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__17_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__17;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__18_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__18;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__19_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__19;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__20_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__20;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__21_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__21;
+static lean_once_cell_t lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__22_once = LEAN_ONCE_CELL_INITIALIZER;
+static lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__22;
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_UniqueGraphsBySize_size3;
+static lean_object* _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0(void){
+_start:
+{
+lean_object* v___x_1_; lean_object* v___x_2_; 
+v___x_1_ = lean_unsigned_to_nat(0u);
+v___x_2_ = lean_nat_to_int(v___x_1_);
+return v___x_2_;
+}
+}
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0(lean_object* v_rows_3_, lean_object* v_rowIdx_4_, lean_object* v_colIdx_5_){
+_start:
+{
+lean_object* v___x_6_; lean_object* v___x_7_; lean_object* v___x_8_; lean_object* v___x_9_; 
+v___x_6_ = lean_box(0);
+v___x_7_ = l_List_getD___redArg(v_rows_3_, v_rowIdx_4_, v___x_6_);
+v___x_8_ = lean_obj_once(&lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0, &lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once, _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0);
+v___x_9_ = l_List_getD___redArg(v___x_7_, v_colIdx_5_, v___x_8_);
+lean_dec(v___x_7_);
+return v___x_9_;
+}
+}
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed(lean_object* v_rows_10_, lean_object* v_rowIdx_11_, lean_object* v_colIdx_12_){
+_start:
+{
+lean_object* v_res_13_; 
+v_res_13_ = lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0(v_rows_10_, v_rowIdx_11_, v_colIdx_12_);
+lean_dec(v_rows_10_);
+return v_res_13_;
+}
+}
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg(lean_object* v_rows_14_){
+_start:
+{
+lean_object* v___f_15_; 
+v___f_15_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_15_, 0, v_rows_14_);
+return v___f_15_;
+}
+}
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj(lean_object* v_rows_16_, lean_object* v_size_17_){
+_start:
+{
+lean_object* v___f_18_; 
+v___f_18_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_18_, 0, v_rows_16_);
+return v___f_18_;
+}
+}
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___boxed(lean_object* v_rows_19_, lean_object* v_size_20_){
+_start:
+{
+lean_object* v_res_21_; 
+v_res_21_ = lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj(v_rows_19_, v_size_20_);
+lean_dec(v_size_20_);
+return v_res_21_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0(void){
+_start:
+{
+lean_object* v___x_22_; lean_object* v___x_23_; lean_object* v___x_24_; 
+v___x_22_ = lean_box(0);
+v___x_23_ = lean_obj_once(&lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0, &lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once, _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0);
+v___x_24_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_24_, 0, v___x_23_);
+lean_ctor_set(v___x_24_, 1, v___x_22_);
+return v___x_24_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1(void){
+_start:
+{
+lean_object* v___x_25_; lean_object* v___x_26_; lean_object* v___x_27_; 
+v___x_25_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0);
+v___x_26_ = lean_obj_once(&lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0, &lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once, _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0);
+v___x_27_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_27_, 0, v___x_26_);
+lean_ctor_set(v___x_27_, 1, v___x_25_);
+return v___x_27_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__2(void){
+_start:
+{
+lean_object* v___x_28_; lean_object* v___x_29_; lean_object* v___x_30_; 
+v___x_28_ = lean_box(0);
+v___x_29_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1);
+v___x_30_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_30_, 0, v___x_29_);
+lean_ctor_set(v___x_30_, 1, v___x_28_);
+return v___x_30_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__3(void){
+_start:
+{
+lean_object* v___x_31_; lean_object* v___x_32_; lean_object* v___x_33_; 
+v___x_31_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__2, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__2_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__2);
+v___x_32_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1);
+v___x_33_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_33_, 0, v___x_32_);
+lean_ctor_set(v___x_33_, 1, v___x_31_);
+return v___x_33_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__4(void){
+_start:
+{
+lean_object* v___x_34_; lean_object* v___f_35_; 
+v___x_34_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__3, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__3_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__3);
+v___f_35_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_35_, 0, v___x_34_);
+return v___f_35_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5(void){
+_start:
+{
+lean_object* v___x_36_; lean_object* v___x_37_; 
+v___x_36_ = lean_unsigned_to_nat(1u);
+v___x_37_ = lean_nat_to_int(v___x_36_);
+return v___x_37_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6(void){
+_start:
+{
+lean_object* v___x_38_; lean_object* v___x_39_; lean_object* v___x_40_; 
+v___x_38_ = lean_box(0);
+v___x_39_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5);
+v___x_40_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_40_, 0, v___x_39_);
+lean_ctor_set(v___x_40_, 1, v___x_38_);
+return v___x_40_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7(void){
+_start:
+{
+lean_object* v___x_41_; lean_object* v___x_42_; lean_object* v___x_43_; 
+v___x_41_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6);
+v___x_42_ = lean_obj_once(&lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0, &lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once, _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0);
+v___x_43_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_43_, 0, v___x_42_);
+lean_ctor_set(v___x_43_, 1, v___x_41_);
+return v___x_43_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8(void){
+_start:
+{
+lean_object* v___x_44_; lean_object* v___x_45_; lean_object* v___x_46_; 
+v___x_44_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__0);
+v___x_45_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5);
+v___x_46_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_46_, 0, v___x_45_);
+lean_ctor_set(v___x_46_, 1, v___x_44_);
+return v___x_46_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__9(void){
+_start:
+{
+lean_object* v___x_47_; lean_object* v___x_48_; lean_object* v___x_49_; 
+v___x_47_ = lean_box(0);
+v___x_48_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8);
+v___x_49_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_49_, 0, v___x_48_);
+lean_ctor_set(v___x_49_, 1, v___x_47_);
+return v___x_49_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__10(void){
+_start:
+{
+lean_object* v___x_50_; lean_object* v___x_51_; lean_object* v___x_52_; 
+v___x_50_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__9, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__9_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__9);
+v___x_51_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7);
+v___x_52_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_52_, 0, v___x_51_);
+lean_ctor_set(v___x_52_, 1, v___x_50_);
+return v___x_52_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__11(void){
+_start:
+{
+lean_object* v___x_53_; lean_object* v___f_54_; 
+v___x_53_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__10, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__10_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__10);
+v___f_54_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_54_, 0, v___x_53_);
+return v___f_54_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__12(void){
+_start:
+{
+lean_object* v___f_55_; lean_object* v___f_56_; lean_object* v___x_57_; lean_object* v___x_58_; lean_object* v___x_59_; lean_object* v___x_60_; 
+v___f_55_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__11, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__11_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__11);
+v___f_56_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__4, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__4_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__4);
+v___x_57_ = lean_unsigned_to_nat(2u);
+v___x_58_ = lean_mk_empty_array_with_capacity(v___x_57_);
+v___x_59_ = lean_array_push(v___x_58_, v___f_56_);
+v___x_60_ = lean_array_push(v___x_59_, v___f_55_);
+return v___x_60_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2(void){
+_start:
+{
+lean_object* v___x_61_; 
+v___x_61_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__12, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__12_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__12);
+return v___x_61_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0(void){
+_start:
+{
+lean_object* v___x_62_; lean_object* v___x_63_; lean_object* v___x_64_; 
+v___x_62_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1);
+v___x_63_ = lean_obj_once(&lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0, &lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once, _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0);
+v___x_64_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_64_, 0, v___x_63_);
+lean_ctor_set(v___x_64_, 1, v___x_62_);
+return v___x_64_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1(void){
+_start:
+{
+lean_object* v___x_65_; lean_object* v___x_66_; lean_object* v___x_67_; 
+v___x_65_ = lean_box(0);
+v___x_66_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0);
+v___x_67_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_67_, 0, v___x_66_);
+lean_ctor_set(v___x_67_, 1, v___x_65_);
+return v___x_67_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__2(void){
+_start:
+{
+lean_object* v___x_68_; lean_object* v___x_69_; lean_object* v___x_70_; 
+v___x_68_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1);
+v___x_69_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0);
+v___x_70_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_70_, 0, v___x_69_);
+lean_ctor_set(v___x_70_, 1, v___x_68_);
+return v___x_70_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__3(void){
+_start:
+{
+lean_object* v___x_71_; lean_object* v___x_72_; lean_object* v___x_73_; 
+v___x_71_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__2, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__2_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__2);
+v___x_72_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__0);
+v___x_73_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_73_, 0, v___x_72_);
+lean_ctor_set(v___x_73_, 1, v___x_71_);
+return v___x_73_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__4(void){
+_start:
+{
+lean_object* v___x_74_; lean_object* v___f_75_; 
+v___x_74_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__3, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__3_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__3);
+v___f_75_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_75_, 0, v___x_74_);
+return v___f_75_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5(void){
+_start:
+{
+lean_object* v___x_76_; lean_object* v___x_77_; lean_object* v___x_78_; 
+v___x_76_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8);
+v___x_77_ = lean_obj_once(&lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0, &lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once, _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0);
+v___x_78_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_78_, 0, v___x_77_);
+lean_ctor_set(v___x_78_, 1, v___x_76_);
+return v___x_78_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__6(void){
+_start:
+{
+lean_object* v___x_79_; lean_object* v___x_80_; lean_object* v___x_81_; 
+v___x_79_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__1);
+v___x_80_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5);
+v___x_81_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_81_, 0, v___x_80_);
+lean_ctor_set(v___x_81_, 1, v___x_79_);
+return v___x_81_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__7(void){
+_start:
+{
+lean_object* v___x_82_; lean_object* v___x_83_; lean_object* v___x_84_; 
+v___x_82_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__1);
+v___x_83_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__6, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__6_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__6);
+v___x_84_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_84_, 0, v___x_83_);
+lean_ctor_set(v___x_84_, 1, v___x_82_);
+return v___x_84_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__8(void){
+_start:
+{
+lean_object* v___x_85_; lean_object* v___x_86_; lean_object* v___x_87_; 
+v___x_85_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__7, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__7_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__7);
+v___x_86_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5);
+v___x_87_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_87_, 0, v___x_86_);
+lean_ctor_set(v___x_87_, 1, v___x_85_);
+return v___x_87_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__9(void){
+_start:
+{
+lean_object* v___x_88_; lean_object* v___f_89_; 
+v___x_88_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__8, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__8_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__8);
+v___f_89_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_89_, 0, v___x_88_);
+return v___f_89_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10(void){
+_start:
+{
+lean_object* v___x_90_; lean_object* v___x_91_; lean_object* v___x_92_; 
+v___x_90_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__7);
+v___x_91_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5);
+v___x_92_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_92_, 0, v___x_91_);
+lean_ctor_set(v___x_92_, 1, v___x_90_);
+return v___x_92_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__11(void){
+_start:
+{
+lean_object* v___x_93_; lean_object* v___x_94_; lean_object* v___x_95_; 
+v___x_93_ = lean_box(0);
+v___x_94_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5);
+v___x_95_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_95_, 0, v___x_94_);
+lean_ctor_set(v___x_95_, 1, v___x_93_);
+return v___x_95_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__12(void){
+_start:
+{
+lean_object* v___x_96_; lean_object* v___x_97_; lean_object* v___x_98_; 
+v___x_96_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__11, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__11_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__11);
+v___x_97_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10);
+v___x_98_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_98_, 0, v___x_97_);
+lean_ctor_set(v___x_98_, 1, v___x_96_);
+return v___x_98_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__13(void){
+_start:
+{
+lean_object* v___x_99_; lean_object* v___x_100_; lean_object* v___x_101_; 
+v___x_99_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__12, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__12_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__12);
+v___x_100_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__5);
+v___x_101_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_101_, 0, v___x_100_);
+lean_ctor_set(v___x_101_, 1, v___x_99_);
+return v___x_101_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__14(void){
+_start:
+{
+lean_object* v___x_102_; lean_object* v___f_103_; 
+v___x_102_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__13, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__13_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__13);
+v___f_103_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_103_, 0, v___x_102_);
+return v___f_103_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__15(void){
+_start:
+{
+lean_object* v___x_104_; lean_object* v___x_105_; lean_object* v___x_106_; 
+v___x_104_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__6);
+v___x_105_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5);
+v___x_106_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_106_, 0, v___x_105_);
+lean_ctor_set(v___x_106_, 1, v___x_104_);
+return v___x_106_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__16(void){
+_start:
+{
+lean_object* v___x_107_; lean_object* v___x_108_; lean_object* v___x_109_; 
+v___x_107_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__15, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__15_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__15);
+v___x_108_ = lean_obj_once(&lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0, &lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0_once, _init_lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___closed__0);
+v___x_109_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_109_, 0, v___x_108_);
+lean_ctor_set(v___x_109_, 1, v___x_107_);
+return v___x_109_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__17(void){
+_start:
+{
+lean_object* v___x_110_; lean_object* v___x_111_; lean_object* v___x_112_; 
+v___x_110_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__8);
+v___x_111_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2___closed__5);
+v___x_112_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_112_, 0, v___x_111_);
+lean_ctor_set(v___x_112_, 1, v___x_110_);
+return v___x_112_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__18(void){
+_start:
+{
+lean_object* v___x_113_; lean_object* v___x_114_; lean_object* v___x_115_; 
+v___x_113_ = lean_box(0);
+v___x_114_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__17, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__17_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__17);
+v___x_115_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_115_, 0, v___x_114_);
+lean_ctor_set(v___x_115_, 1, v___x_113_);
+return v___x_115_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__19(void){
+_start:
+{
+lean_object* v___x_116_; lean_object* v___x_117_; lean_object* v___x_118_; 
+v___x_116_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__18, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__18_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__18);
+v___x_117_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__10);
+v___x_118_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_118_, 0, v___x_117_);
+lean_ctor_set(v___x_118_, 1, v___x_116_);
+return v___x_118_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__20(void){
+_start:
+{
+lean_object* v___x_119_; lean_object* v___x_120_; lean_object* v___x_121_; 
+v___x_119_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__19, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__19_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__19);
+v___x_120_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__16, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__16_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__16);
+v___x_121_ = lean_alloc_ctor(1, 2, 0);
+lean_ctor_set(v___x_121_, 0, v___x_120_);
+lean_ctor_set(v___x_121_, 1, v___x_119_);
+return v___x_121_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__21(void){
+_start:
+{
+lean_object* v___x_122_; lean_object* v___f_123_; 
+v___x_122_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__20, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__20_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__20);
+v___f_123_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs___private_UniqueGraphsBySize_0__UniqueGraphsBySize_mkAdj___redArg___lam__0___boxed), 3, 1);
+lean_closure_set(v___f_123_, 0, v___x_122_);
+return v___f_123_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__22(void){
+_start:
+{
+lean_object* v___f_124_; lean_object* v___f_125_; lean_object* v___f_126_; lean_object* v___f_127_; lean_object* v___x_128_; lean_object* v___x_129_; lean_object* v___x_130_; lean_object* v___x_131_; lean_object* v___x_132_; lean_object* v___x_133_; 
+v___f_124_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__21, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__21_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__21);
+v___f_125_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__14, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__14_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__14);
+v___f_126_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__9, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__9_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__9);
+v___f_127_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__4, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__4_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__4);
+v___x_128_ = lean_unsigned_to_nat(4u);
+v___x_129_ = lean_mk_empty_array_with_capacity(v___x_128_);
+v___x_130_ = lean_array_push(v___x_129_, v___f_127_);
+v___x_131_ = lean_array_push(v___x_130_, v___f_126_);
+v___x_132_ = lean_array_push(v___x_131_, v___f_125_);
+v___x_133_ = lean_array_push(v___x_132_, v___f_124_);
+return v___x_133_;
+}
+}
+static lean_object* _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3(void){
+_start:
+{
+lean_object* v___x_134_; 
+v___x_134_ = lean_obj_once(&lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__22, &lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__22_once, _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3___closed__22);
+return v___x_134_;
+}
+}
+lean_object* initialize_Init(uint8_t builtin);
+lean_object* initialize_Init(uint8_t builtin);
+lean_object* initialize_GraphCanonizationProofs_LeanGraphCanonizerV4(uint8_t builtin);
+static bool _G_initialized = false;
+LEAN_EXPORT lean_object* initialize_GraphCanonizationProofs_UniqueGraphsBySize(uint8_t builtin) {
+lean_object * res;
+if (_G_initialized) return lean_io_result_mk_ok(lean_box(0));
+_G_initialized = true;
+res = initialize_Init(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_Init(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_GraphCanonizationProofs_LeanGraphCanonizerV4(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+lp_GraphCanonizationProofs_UniqueGraphsBySize_size2 = _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size2();
+lean_mark_persistent(lp_GraphCanonizationProofs_UniqueGraphsBySize_size2);
+lp_GraphCanonizationProofs_UniqueGraphsBySize_size3 = _init_lp_GraphCanonizationProofs_UniqueGraphsBySize_size3();
+lean_mark_persistent(lp_GraphCanonizationProofs_UniqueGraphsBySize_size3);
+return lean_io_result_mk_ok(lean_box(0));
+}
+#ifdef __cplusplus
+}
+#endif

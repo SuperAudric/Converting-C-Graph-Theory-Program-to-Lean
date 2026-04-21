@@ -11,4 +11,7 @@ version = "git#master"
 name = "LeanGraphCanonizerV4"
 
 [[lean_lib]]
+name = "UniqueGraphsBySize"
+
+[[lean_lib]]
 name = "LeanGraphCanonizerV4Tests"

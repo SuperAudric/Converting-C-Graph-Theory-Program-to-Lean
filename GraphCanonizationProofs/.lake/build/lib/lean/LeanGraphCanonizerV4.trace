@@ -1,10 +1,10 @@
 {"synthetic": false,
  "schemaVersion": "2025-09-10",
  "outputs":
- {"o": ["4340547af478e87c.olean"],
+ {"o": ["7c94113098afd4f1.olean"],
   "m": false,
-  "i": "ed979e28daee6c73.ilean",
-  "c": "a7441ff26264b21c.c"},
+  "i": "376aef243685de97.ilean",
+  "c": "43607afadcdb718b.c"},
  "log":
  [{"message":
    ".> LEAN_PATH=/workspace/GraphCanonizationProofs/.lake/packages/Cli/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/batteries/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/Qq/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/aesop/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/proofwidgets/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/importGraph/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/plausible/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/mathlib/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/build/lib/lean /home/node/.elan/toolchains/leanprover--lean4---v4.30.0-rc2/bin/lean /workspace/GraphCanonizationProofs/LeanGraphCanonizerV4.lean -o /workspace/GraphCanonizationProofs/.lake/build/lib/lean/LeanGraphCanonizerV4.olean -i /workspace/GraphCanonizationProofs/.lake/build/lib/lean/LeanGraphCanonizerV4.ilean -c /workspace/GraphCanonizationProofs/.lake/build/ir/LeanGraphCanonizerV4.c --setup /workspace/GraphCanonizationProofs/.lake/build/ir/LeanGraphCanonizerV4.setup.json --json",
@@ -30,10 +30,10 @@
   ["Lean 4.30.0, commit 3dc1a088b6d2d8eafe25a7cd7ec7b58d731bd7cc",
    "2c8d2623007dfc36"],
   ["/workspace/GraphCanonizationProofs/LeanGraphCanonizerV4.lean",
-   "83b8e2de21d9a00e"],
+   "f020dfd1799b1ebd"],
   ["options", "00000000000006bb"],
   ["isModule: false", "feefd2a0d3a1847e"],
   ["Module.name: LeanGraphCanonizerV4", "21c3917a82a7f63a"],
   ["Package.id?: (some GraphCanonizationProofs)", "4e2520c1089745eb"],
   ["Module.leanArgs: #[]", "00000000000006bb"]],
- "depHash": "dc10df0d8784083d"}
+ "depHash": "d32b87d8e9d88c8a"}

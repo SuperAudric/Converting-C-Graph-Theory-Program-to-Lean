@@ -21,6 +21,7 @@ lean_object* lean_int_add(lean_object*, lean_object*);
 lean_object* lean_array_set(lean_object*, lean_object*, lean_object*);
 uint8_t lean_nat_dec_lt(lean_object*, lean_object*);
 lean_object* lean_array_fget_borrowed(lean_object*, lean_object*);
+uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 lean_object* l_Nat_reprFast(lean_object*);
 lean_object* l_Repr_addAppParen(lean_object*, lean_object*);
 uint8_t lean_nat_dec_le(lean_object*, lean_object*);
@@ -51,7 +52,6 @@ lean_object* l_List_appendTR___redArg(lean_object*, lean_object*);
 lean_object* l_mkPanicMessageWithDecl(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* lean_panic_fn_borrowed(lean_object*, lean_object*);
 lean_object* l_List_lengthTR___redArg(lean_object*);
-uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 uint8_t l_instDecidableEqOrdering(uint8_t, uint8_t);
 lean_object* l_List_zipWith___at___00List_zip_spec__0___redArg(lean_object*, lean_object*);
 lean_object* l_List_reverse___redArg(lean_object*);
@@ -66,10 +66,10 @@ lean_object* l_Lean_addMacroScope(lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Syntax_node2(lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_List_intersperseTR___redArg(lean_object*, lean_object*);
 lean_object* l_List_foldl___at___00Lake_toUpperCamelCaseString_spec__2(lean_object*, lean_object*);
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___redArg___lam__0(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___redArg(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices(lean_object*, lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___redArg___lam__0(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___redArg(lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels(lean_object*, lean_object*, lean_object*, lean_object*);
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
 static const lean_string_object lp_GraphCanonizationProofs_Graph_AdjMatrix_term___u2243___00__closed__0_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 6, .m_capacity = 6, .m_length = 5, .m_data = "Graph"};
 static const lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_term___u2243___00__closed__0 = (const lean_object*)&lp_GraphCanonizationProofs_Graph_AdjMatrix_term___u2243___00__closed__0_value;
 static const lean_string_object lp_GraphCanonizationProofs_Graph_AdjMatrix_term___u2243___00__closed__1_value = {.m_header = {.m_rc = 0, .m_cs_sz = 0, .m_other = 0, .m_tag = 249}, .m_size = 10, .m_capacity = 10, .m_length = 9, .m_data = "AdjMatrix"};
@@ -406,7 +406,7 @@ LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_labelEdgesAccordingToR
 LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_List_foldl___at___00Graph_labelEdgesAccordingToRankings_spec__0(lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_List_foldl___at___00Graph_labelEdgesAccordingToRankings_spec__0___boxed(lean_object*, lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_run(lean_object*, lean_object*, lean_object*);
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___redArg___lam__0(lean_object* v_vertex1_1_, lean_object* v_vertex2_2_, lean_object* v_G_3_, lean_object* v_fromVertex_4_, lean_object* v_toVertex_5_){
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___redArg___lam__0(lean_object* v_vertex1_1_, lean_object* v_vertex2_2_, lean_object* v_G_3_, lean_object* v_fromVertex_4_, lean_object* v_toVertex_5_){
 _start:
 {
 uint8_t v___x_6_; uint8_t v___x_7_; lean_object* v___y_9_; 
@@ -469,33 +469,33 @@ return v___x_13_;
 }
 }
 }
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___redArg(lean_object* v_vertex1_15_, lean_object* v_vertex2_16_, lean_object* v_G_17_){
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___redArg(lean_object* v_vertex1_15_, lean_object* v_vertex2_16_, lean_object* v_G_17_){
 _start:
 {
 lean_object* v___f_18_; 
-v___f_18_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___redArg___lam__0), 5, 3);
+v___f_18_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___redArg___lam__0), 5, 3);
 lean_closure_set(v___f_18_, 0, v_vertex1_15_);
 lean_closure_set(v___f_18_, 1, v_vertex2_16_);
 lean_closure_set(v___f_18_, 2, v_G_17_);
 return v___f_18_;
 }
 }
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices(lean_object* v_vertexCount_19_, lean_object* v_vertex1_20_, lean_object* v_vertex2_21_, lean_object* v_G_22_){
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels(lean_object* v_vertexCount_19_, lean_object* v_vertex1_20_, lean_object* v_vertex2_21_, lean_object* v_G_22_){
 _start:
 {
 lean_object* v___f_23_; 
-v___f_23_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___redArg___lam__0), 5, 3);
+v___f_23_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___redArg___lam__0), 5, 3);
 lean_closure_set(v___f_23_, 0, v_vertex1_20_);
 lean_closure_set(v___f_23_, 1, v_vertex2_21_);
 lean_closure_set(v___f_23_, 2, v_G_22_);
 return v___f_23_;
 }
 }
-LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___boxed(lean_object* v_vertexCount_24_, lean_object* v_vertex1_25_, lean_object* v_vertex2_26_, lean_object* v_G_27_){
+LEAN_EXPORT lean_object* lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___boxed(lean_object* v_vertexCount_24_, lean_object* v_vertex1_25_, lean_object* v_vertex2_26_, lean_object* v_G_27_){
 _start:
 {
 lean_object* v_res_28_; 
-v_res_28_ = lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices(v_vertexCount_24_, v_vertex1_25_, v_vertex2_26_, v_G_27_);
+v_res_28_ = lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels(v_vertexCount_24_, v_vertex1_25_, v_vertex2_26_, v_G_27_);
 lean_dec(v_vertexCount_24_);
 return v_res_28_;
 }
@@ -2595,7 +2595,7 @@ _start:
 lean_object* v___x_872_; lean_object* v___x_873_; lean_object* v___x_874_; lean_object* v___x_875_; lean_object* v___x_876_; lean_object* v___x_877_; 
 v___x_872_ = ((lean_object*)(lp_GraphCanonizationProofs_Graph_comparePathSegments___closed__2));
 v___x_873_ = lean_unsigned_to_nat(12u);
-v___x_874_ = lean_unsigned_to_nat(112u);
+v___x_874_ = lean_unsigned_to_nat(113u);
 v___x_875_ = ((lean_object*)(lp_GraphCanonizationProofs_Graph_comparePathSegments___closed__1));
 v___x_876_ = ((lean_object*)(lp_GraphCanonizationProofs_Graph_comparePathSegments___closed__0));
 v___x_877_ = l_mkPanicMessageWithDecl(v___x_876_, v___x_875_, v___x_874_, v___x_873_, v___x_872_);
@@ -5315,7 +5315,7 @@ v_val_1812_ = lean_ctor_get(v___x_1807_, 0);
 lean_inc_n(v_val_1812_, 2);
 lean_dec_ref(v___x_1807_);
 lean_inc(v_head_1802_);
-v_swappedGraph_1813_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertices___redArg___lam__0), 5, 3);
+v_swappedGraph_1813_ = lean_alloc_closure((void*)(lp_GraphCanonizationProofs_Graph_AdjMatrix_swapVertexLabels___redArg___lam__0), 5, 3);
 lean_closure_set(v_swappedGraph_1813_, 0, v_head_1802_);
 lean_closure_set(v_swappedGraph_1813_, 1, v_val_1812_);
 lean_closure_set(v_swappedGraph_1813_, 2, v_fst_1804_);
