@@ -182,14 +182,17 @@ public class GraphCannonTests(ITestOutputHelper output)
     public void KnownGraphs_DifferentScramblings_ProduceSameCanonical(int size)
     {
         var graphs = ConvertJaggedArrayType<EdgeType>(UniqueGraphsBySize.graphsBySize[size]);
-        for (int i = 1; i < graphs.Length; i++)
+        var seen = new HashSet<string>();
+        for (int i = 0; i < graphs.Length; i++)
         {
+            Assert.Equal(i, seen.Count);
             string? canonical = null;
             for (int j = 0; j < 5; j++)
             {
                 var matrix = (EdgeType[,])graphs[i].Clone();
                 Scramble(matrix, seed: 15326 + j);
                 string result = _orderer.Run(new VertexType[size], matrix);
+                seen.Add(result);
                 canonical ??= result;
                 Assert.True(canonical == result,
                     $"Graph {i} (size {size}): scramble {j} produced different canonical.\n" +
