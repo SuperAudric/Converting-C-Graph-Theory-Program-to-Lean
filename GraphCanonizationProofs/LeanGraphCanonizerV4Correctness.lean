@@ -181,8 +181,14 @@ theorem swapVTs_self_inverse (v1 v2 : Fin n) (vts : Array VertexType) :
 /-- An all-zeros array is invariant under any position swap (all values are already equal). -/
 theorem swapVTs_zeros (v1 v2 : Fin n) :
     swapVTs v1 v2 (Array.replicate n 0) = Array.replicate n 0 := by
-  -- All elements are 0, so both getD calls return 0, and set!-ing 0 into an all-0 array is a no-op.
-  sorry
+  simp only [swapVTs]
+  -- Both getD calls return 0: every element of replicate n 0 is 0.
+  have ha : (Array.replicate n (0 : VertexType)).getD v1.val 0 = 0 := by
+    simp [v1.isLt]
+  have hb : (Array.replicate n (0 : VertexType)).getD v2.val 0 = 0 := by
+    simp [v2.isLt]
+  -- set!-ing 0 into an all-0 array is a no-op (setIfInBounds_replicate_self).
+  simp only [ha, hb, Array.set!_eq_setIfInBounds, Array.setIfInBounds_replicate_self]
 
 /-- **Core equivariance** (Stage C + wrap-up of A–D):
     Computing `orderVertices` on the vertex-swapped graph with vertex-swapped types yields the
