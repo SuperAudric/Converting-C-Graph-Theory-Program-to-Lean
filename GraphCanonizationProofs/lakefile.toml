@@ -15,3 +15,6 @@ name = "UniqueGraphsBySize"
 
 [[lean_lib]]
 name = "LeanGraphCanonizerV4Tests"
+
+[[lean_lib]]
+name = "LeanGraphCanonizerV4Correctness"
