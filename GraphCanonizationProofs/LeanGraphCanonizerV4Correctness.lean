@@ -115,7 +115,50 @@ theorem AdjMatrix.Isomorphic.symm {n : Nat} {G H : AdjMatrix n} (h : G ≃ H) : 
 theorem labelEdgesAccordingToRankings_isomorphic {n : Nat}
     (vts : Array VertexType) (G : AdjMatrix n) :
     G ≃ labelEdgesAccordingToRankings vts G := by
-  sorry
+  -- Strengthen: for any acc with G ≃ acc.1, the fold output's first component is ≃ G.
+  -- This lets the induction go, since each step either leaves the graph alone (none branch)
+  -- or applies swapVertexLabels (some branch), both preserving the invariant.
+  suffices key : ∀ (vs : List (Fin n)) (acc : AdjMatrix n × Array Nat),
+      G ≃ acc.1 →
+      G ≃ (vs.foldl
+            (fun (accumulated : AdjMatrix n × Array Nat) currentFin =>
+              let (graph, rankMap) := accumulated
+              let targetPos := currentFin.val
+              match (List.finRange n).find? fun searchFin =>
+                  rankMap.getD searchFin.val 0 == targetPos with
+              | none => (graph, rankMap)
+              | some sourceFin =>
+                  let sourceIdx    := sourceFin.val
+                  let swappedGraph := graph.swapVertexLabels currentFin sourceFin
+                  let rankAtSource := rankMap.getD sourceIdx 0
+                  let rankAtTarget := rankMap.getD targetPos 0
+                  (swappedGraph,
+                   (rankMap.set! sourceIdx rankAtTarget).set! targetPos rankAtSource))
+            acc).1 by
+    -- Let Lean infer the list and initial accumulator via definitional unfolding of
+    -- labelEdgesAccordingToRankings (avoids naming the private computeDenseRanks).
+    exact key _ _ (.refl G)
+  intro vs
+  induction vs with
+  | nil =>
+    intro acc hG
+    simp only [List.foldl_nil]
+    exact hG
+  | cons v rest ih =>
+    intro acc hG
+    obtain ⟨graph, rankMap⟩ := acc
+    simp only [List.foldl_cons]
+    apply ih
+    -- Goal: G ≃ (step ⟨graph, rankMap⟩ v).1.
+    -- dsimp reduces the beta/iota/zeta redexes to expose the match; then split on it.
+    -- (.1 on a match is NOT def-eq to pushing .1 into branches, but after split each
+    -- branch has .1 on a concrete constructor, which does reduce definitionally.)
+    dsimp only
+    split
+    · -- none branch: accumulator unchanged, first component is still graph
+      exact hG
+    · -- some src branch: graph gets one swapVertexLabels step; let Lean infer the vertex
+      exact hG.trans (.swap graph v _)
 
 /-- The output of `run` is always isomorphic to its graph input. -/
 theorem run_isomorphic_to_input {n : Nat} (vts : Array VertexType) (G : AdjMatrix n) :
