@@ -241,7 +241,7 @@ theorem orderVertices_swap_equivariant {n : Nat} (G : AdjMatrix n) (v1 v2 : Fin 
     swapVTs v1 v2 (orderVertices (initializePaths G) vts) := by
   sorry
 
-/-- After `orderVertices` finishes, all vertices have distinct rank values.
+/-- After `orderVertices` finishes, all vertices have distinct rank values.--This flat out is incorrect. Tiebreak function does fire, however all tied vertexes share at least one symmetry, so the function collapses one symmetry.
     This is needed to ensure the index-tiebreaker in `computeDenseRanks` never fires,
     making `denseRanks'[i] = denseRanks[σi]` an exact equality.
 
