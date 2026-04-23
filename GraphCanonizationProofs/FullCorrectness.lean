@@ -2,6 +2,7 @@ import FullCorrectness.Basic
 import FullCorrectness.Permutation
 import FullCorrectness.Automorphism
 import FullCorrectness.Isomorphic
+import FullCorrectness.Equivariance
 
 /-!
 # Full correctness of the graph canonizer — umbrella + proof plan

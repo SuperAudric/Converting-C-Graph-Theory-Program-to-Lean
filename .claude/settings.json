@@ -12,7 +12,9 @@
       "Read(//home/**)",
       "Read(//root/.elan/**)",
       "Bash(export PATH=\"$HOME/.elan/bin:$PATH\")",
-      "Bash(command -v lean)"
+      "Bash(command -v lean)",
+      "Bash(sort -t'[' -k2 -nr)",
+      "Read(//tmp/**)"
     ]
   }
 }
