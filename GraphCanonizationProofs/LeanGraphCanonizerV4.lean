@@ -230,7 +230,7 @@ private def convergeLoop (state : PathState) (vertexTypes : Array VertexType) : 
     if changed then convergeLoop state updatedTypes fuel else updatedTypes
 
 --This function collapses one symmetry by choosing one (the first is arbitrarily chosen) to come before the others in the partial ordering
---Choosing any other should result in the same output, as this represents choosing one automorphis to display
+--Choosing any other should result in the same output, as this represents choosing one automorphism to display
 private def breakTie (vertexTypes : Array VertexType) (target : Int) : Array VertexType × Bool :=
   let result := (List.range vertexTypes.size).foldl
     (fun (triple : Array VertexType × Bool × Bool) vertexIdx =>
