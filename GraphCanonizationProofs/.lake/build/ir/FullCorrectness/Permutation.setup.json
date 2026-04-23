@@ -1,7 +1,7 @@
 {"plugins": [],
  "package": "GraphCanonizationProofs",
  "options": {},
- "name": "LeanGraphCanonizerV4Correctness",
+ "name": "FullCorrectness.Permutation",
  "isModule": false,
  "importArts":
  {"Qq.Typ":

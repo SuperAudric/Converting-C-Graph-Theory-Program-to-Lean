@@ -1,7 +1,7 @@
 {"plugins": [],
  "package": "GraphCanonizationProofs",
  "options": {},
- "name": "LeanGraphCanonizerV4Correctness",
+ "name": "FullCorrectness.Automorphism",
  "isModule": false,
  "importArts":
  {"Qq.Typ":
@@ -15351,6 +15351,8 @@
    "/workspace/GraphCanonizationProofs/.lake/packages/importGraph/.lake/build/lib/lean/ImportGraph/Graph/TransitiveClosure.ir",
    "/workspace/GraphCanonizationProofs/.lake/packages/importGraph/.lake/build/lib/lean/ImportGraph/Graph/TransitiveClosure.olean.server",
    "/workspace/GraphCanonizationProofs/.lake/packages/importGraph/.lake/build/lib/lean/ImportGraph/Graph/TransitiveClosure.olean.private"],
+  "FullCorrectness.Permutation":
+  ["/workspace/GraphCanonizationProofs/.lake/build/lib/lean/FullCorrectness/Permutation.olean"],
   "FullCorrectness.Basic":
   ["/workspace/GraphCanonizationProofs/.lake/build/lib/lean/FullCorrectness/Basic.olean"],
   "Batteries.Util.ProofWanted":

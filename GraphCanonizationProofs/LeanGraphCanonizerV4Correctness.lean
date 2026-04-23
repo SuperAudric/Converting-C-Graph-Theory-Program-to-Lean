@@ -1,57 +1,73 @@
 import LeanGraphCanonizerV4
+import FullCorrectness.Basic
 import Mathlib.Tactic
 
 /-!
-# Correctness of the Graph Canonizer
+# Correctness of the Graph Canonizer — **FLAWED / ABANDONED ATTEMPT**
 
-## Main theorem
+> ⚠ **Status: not a valid proof.**  Parts of this file are genuinely proved and are reused
+> elsewhere (see "What is still correct" below), but the central strategy — a full-Sym(n)
+> equivariance of the pipeline under `swapVTs` — is based on a **false premise** about how
+> `breakTie` interacts with label permutations. Several lemma statements in §5 are
+> unprovable as written, and the main theorems in §7 transitively depend on them via
+> `sorry`. The corrected proof is being developed in the `FullCorrectness/` tree, starting
+> with an Aut(G)-restricted equivariance and a separate tiebreak-choice-independence
+> argument. See `FullCorrectness/Isomorphic.lean` and its header for the replacement plan.
 
-  `run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n 0) H`
+## The flawed premise
 
-That is, `run` with all-zero vertex inputs is a canonical form for graph isomorphism:
-isomorphic graphs produce identical outputs, and non-isomorphic graphs produce distinct outputs.
+The old strategy assumed: for any vertex swap σ = (v₁ v₂),
+```
+  orderVertices (σ · G) (σ · vts) = σ · orderVertices G vts.
+```
+This would be true if `convergeLoop` alone separated every automorphism orbit (i.e. if
+`breakTie` never fired non-trivially). It is **false** in general because `breakTie`
+picks the *lowest-index* vertex from a tied class and promotes it. After applying σ to
+the graph, a *different* vertex is now the lowest-index in the tied class, so a different
+vertex is promoted, and the resulting rankings differ by more than just a swap.
 
-## Proof structure
+Equivalently: `breakTie` is equivariant under `Aut(G)` (the graph's symmetry group), but
+**not** under arbitrary elements of `Sym(Fin n)`. The old proof quantified over all of
+`Sym(Fin n)` via `swapVTs`, so it cannot close.
 
-**→ (isomorphic ⟹ equal outputs)**
+## What is still correct (reused by `FullCorrectness/`)
 
-By induction on `Isomorphic`.  The key case is a single vertex swap; `run_swap_invariant` (§6)
-handles it.  The argument: the full pipeline is *equivariant* under vertex permutations (§5) —
-running on a σ-permuted graph with σ-permuted vertex types yields the σ-permuted output.  For
-all-zero starting types, σ-permuted zeros = zeros, so the final outputs are literally equal.
+Four things in this file are genuinely proved and safe to depend on:
 
-The equivariance chain (all proved in §5, sketched in comments):
+  §2  `swapVertexLabels_self_inverse`, `swapVertexLabels_comm` — concrete swap facts.
+  §3  `Isomorphic.symm`                                        — `≃` is an equivalence relation.
+  §4  `labelEdgesAccordingToRankings_isomorphic`,
+      `run_isomorphic_to_input`                                — `G ≃ run vts G` for all vts.
+      This alone suffices for the (←) direction of the main theorem: if canonical forms
+      agree then `G ≃ run zeros G = run zeros H ≃⁻¹ H`, so `G ≃ H`. That direction,
+      `run_eq_implies_iso` in §7, is therefore genuinely proved by this file.
 
-  Stage A – `initializePaths`:  paths in `swapVL v1 v2 G` at position (d,s,e) correspond to
-  paths in G at position (d, σs, σe) with vertex indices relabeled by σ.
+## What is broken (do not depend on)
 
-  Stage B – `calculatePathRankings`:  by induction on depth, if the input path state and vertex
-  types are σ-related, the output ranks satisfy `ranks'[d][s][e] = ranks[d][σs][σe]`.
-
-  Stage C – `orderVertices`:  `convergeOnce` is equivariant (it reads fromRanks); `breakTie`
-  breaks ties by index, but after all n iterations the *dense* rank of vertex w in the swapped
-  system equals the dense rank of σw in the original (because ties are fully resolved and the
-  graph topology, not the labeling, determines the canonical ordering).
-
-  Stage D – `labelEdgesAccordingToRankings`:  with distinct dense ranks, the vertex at position
-  p in the swapped sort is σ of the vertex at position p in the original sort.  The edge between
-  positions p and q is then `G.adj(σ(σwₚ))(σ(σwₙ)) = G.adj wₚ wₙ`. ∎
-
-**← (equal outputs ⟹ isomorphic)**
-
-`run_isomorphic_to_input` (§4) shows `G ≃ run zeros G` for any G, because
-`labelEdgesAccordingToRankings` is a sequence of `swapVertexLabels` steps.  Given equal outputs:
-  G ≃ run zeros G = run zeros H ≃⁻¹ H,  so  G ≃ H. ∎
+  §5  `orderVertices_swap_equivariant`   — **STATEMENT IS FALSE**. Cannot be proved.
+  §5  `orderVertices_distinct_ranks`     — statement is true, but the surrounding
+                                            narrative about why was wrong; see inline
+                                            warning at the theorem.
+  §5  `labelEdges_swap_equivariant`      — conditionally fine but unreachable: the proof
+                                            chain to its `hdist` hypothesis goes through
+                                            the false lemma above.
+  §6  `run_swap_invariant`               — *statement* is true (consequence of the
+                                            canonical theorem), but the sketched proof
+                                            through §5 cannot be completed. `sorry`.
+  §7  `run_isomorphic_eq`, `run_canonical` — *statements* are true; their proofs here
+                                              route through `run_swap_invariant` and so
+                                              are effectively `sorry`. Do not import
+                                              these for a claim of correctness.
 
 ## Sections
 
-  §1  AdjMatrix extensionality
-  §2  swapVertexLabels is an involution
-  §3  Isomorphic is an equivalence relation (adds symmetry and provides dot notation)
-  §4  `labelEdgesAccordingToRankings` output is isomorphic to input; hence `run zeros G ≃ G`
-  §5  Equivariance lemmas for the pipeline  [sorry — see stage comments above]
-  §6  `run_swap_invariant`  [sorry — assembles §5]
-  §7  Main theorems: `run_isomorphic_eq`, `run_eq_implies_iso`, `run_canonical`
+  §1  AdjMatrix extensionality                              [shared via `FullCorrectness.Basic`]
+  §2  swapVertexLabels involution                           [proved]
+  §3  Isomorphic is an equivalence relation                 [proved]
+  §4  `run` output is isomorphic to input                   [proved]
+  §5  Equivariance lemmas for the pipeline                  [BROKEN — one statement is false]
+  §6  `run_swap_invariant`                                  [sorry; strategy cannot close]
+  §7  Main theorems                                         [sorry-reachable via §6]
 -/
 
 namespace Graph
@@ -62,10 +78,7 @@ variable {n : Nat}
 
 /-! ## §1  AdjMatrix extensionality -/
 
-@[ext]
-theorem AdjMatrix.ext {n : Nat} {G H : AdjMatrix n}
-    (h : ∀ i j : Fin n, G.adj i j = H.adj i j) : G = H := by
-  cases G; cases H; congr; funext i j; exact h i j
+-- `AdjMatrix.ext` is now shared via `FullCorrectness.Basic`.
 
 /-! ## §2  swapVertexLabels is an involution -/
 
@@ -226,38 +239,42 @@ theorem swapVTs_zeros (v1 v2 : Fin n) :
   -- set!-ing 0 into an all-0 array is a no-op (setIfInBounds_replicate_self).
   simp only [ha, hb, Array.set!_eq_setIfInBounds, Array.setIfInBounds_replicate_self]
 
-/-- **Core equivariance** (Stage C + wrap-up of A–D):
-    Computing `orderVertices` on the vertex-swapped graph with vertex-swapped types yields the
-    vertex-swapped ordered ranks.
+/-- ⚠ **THIS STATEMENT IS FALSE.** Kept as a record of the flawed old strategy; do not
+    import or depend on it.
 
-    Full proof requires Stages A–D from the module docstring:
-    - Stage A: initializePaths equivariance (path state is σ-relabeled).
-    - Stage B: calculatePathRankings equivariance (ranks satisfy ranks'[d][s][e]=ranks[d][σs][σe]).
-    - Stage C: convergeOnce/breakTie/orderVertices equivariance.
-    Stage D is handled separately by `labelEdges_swap_equivariant`. -/
+    The claim is that `orderVertices` commutes with arbitrary label swaps. It fails
+    because `breakTie` is not equivariant under `Sym(Fin n)` — it picks the lowest-index
+    element of a tied class, and a label swap changes which element is lowest-index. See
+    the file header for the full discussion.
+
+    A correct, restricted version (with σ ∈ `Aut G`, not arbitrary σ) is planned in
+    `FullCorrectness/Equivariance.lean`. -/
 theorem orderVertices_swap_equivariant {n : Nat} (G : AdjMatrix n) (v1 v2 : Fin n)
     (vts : Array VertexType) :
     orderVertices (initializePaths (swapVertexLabels v1 v2 G)) (swapVTs v1 v2 vts) =
     swapVTs v1 v2 (orderVertices (initializePaths G) vts) := by
   sorry
 
-/-- After `orderVertices` finishes, all vertices have distinct rank values.--This flat out is incorrect. Tiebreak function does fire, however all tied vertexes share at least one symmetry, so the function collapses one symmetry.
-    This is needed to ensure the index-tiebreaker in `computeDenseRanks` never fires,
-    making `denseRanks'[i] = denseRanks[σi]` an exact equality.
+/-- After `orderVertices` finishes, all vertices have distinct rank values.
 
-    Proof sketch: after n iterations of the outer loop, each value in 0..n-1 is held by at
-    most one vertex (shown by induction: iteration p ensures uniqueness of value p). -/
+    **Note on history.** An earlier version of the surrounding narrative claimed this held
+    *because* `breakTie` never fires — that claim was wrong. `breakTie` does fire on graphs
+    with non-trivial automorphisms, but the tied vertices are symmetric to each other, so
+    promoting one of them just collapses one symmetry. The **statement** of this theorem
+    (ranks distinct after n iterations) is still correct by design of the outer loop, but
+    the flawed narrative originally justified it differently.
+
+    Proof sketch (still valid): after n iterations of the outer loop, each value in 0..n-1
+    is held by at most one vertex — iteration p ensures uniqueness of value p. -/
 theorem orderVertices_distinct_ranks {n : Nat} (state : PathState) (vts : Array VertexType) :
     let ranks := orderVertices state vts
     ∀ i j : Fin n, i ≠ j → ranks.getD i.val 0 ≠ ranks.getD j.val 0 := by
   sorry
 
-/-- **Stage D**: `labelEdgesAccordingToRankings` with consistently swapped ranks and graph
-    produces the same result as the original.
-
-    With distinct dense ranks, `denseRanks'[i] = denseRanks[σi]`.  The selection sort places
-    vertex σwₚ at position p in `swapVL G`; the edge between positions p and q is then
-    `(swapVL G).adj(σwₚ)(σwₙ) = G.adj(σ²wₚ)(σ²wₙ) = G.adj wₚ wₙ`. -/
+/-- ⚠ **Unreachable in the flawed strategy.** The statement is plausibly true under its
+    `hdist` hypothesis, but every attempted proof of `run_swap_invariant` that feeds the
+    needed ranks into it goes through `orderVertices_swap_equivariant`, which is false.
+    Do not depend on this lemma; the real proof will approach Stage D differently. -/
 theorem labelEdges_swap_equivariant {n : Nat}
     (G : AdjMatrix n) (v1 v2 : Fin n) (ranks : Array VertexType)
     (hdist : ∀ i j : Fin n, i ≠ j → ranks.getD i.val 0 ≠ ranks.getD j.val 0) :
@@ -268,7 +285,13 @@ theorem labelEdges_swap_equivariant {n : Nat}
 /-! ## §6  run_swap_invariant -/
 
 /-- Swapping two vertex labels before calling `run` (with all-zero starting types) does not
-    change the output. -/
+    change the output.
+
+    ⚠ **Statement is true, but this proof cannot be completed.** It is a consequence of the
+    full canonical theorem (any label swap is an isomorphism, so canonical forms agree).
+    The sketched derivation below, via `orderVertices_swap_equivariant`, routes through a
+    **false** lemma and will therefore stay at `sorry`. The real proof in `FullCorrectness/`
+    obtains this as a corollary of Aut-equivariance + tiebreak choice-independence. -/
 theorem run_swap_invariant {n : Nat} (G : AdjMatrix n) (v1 v2 : Fin n) :
     run (Array.replicate n 0) (swapVertexLabels v1 v2 G) =
     run (Array.replicate n 0) G := by
@@ -291,7 +314,11 @@ theorem run_swap_invariant {n : Nat} (G : AdjMatrix n) (v1 v2 : Fin n) :
 
 /-! ## §7  Main theorems -/
 
-/-- Isomorphic graphs produce the same canonical form. -/
+/-- Isomorphic graphs produce the same canonical form.
+
+    ⚠ **Statement is the (→) direction of the main theorem and is true**, but this proof
+    depends on `run_swap_invariant`, which in turn depends on the false §5 lemma. Effectively
+    `sorry`. The corrected proof lives in `FullCorrectness/Main.lean` (planned). -/
 theorem run_isomorphic_eq {n : Nat} {G H : AdjMatrix n}
     (h : G ≃ H) :
     run (Array.replicate n 0) G = run (Array.replicate n 0) H := by
@@ -313,7 +340,13 @@ theorem run_eq_implies_iso {n : Nat} {G H : AdjMatrix n}
   exact hG.trans hH.symm
 
 /-- **Main theorem**: `run` with all-zero vertex inputs is a complete graph-isomorphism invariant.
-    Two graphs are isomorphic if and only if `run` maps them to identical adjacency matrices. -/
+    Two graphs are isomorphic if and only if `run` maps them to identical adjacency matrices.
+
+    ⚠ **Sorry-reachable.** The (←) direction is genuinely proved (via
+    `run_eq_implies_iso`, which only uses the valid §4 result). The (→) direction relies on
+    `run_isomorphic_eq` → `run_swap_invariant` → the false §5 lemma. Do not cite this
+    theorem as evidence of correctness. The corrected version will appear in
+    `FullCorrectness/Main.lean`. -/
 theorem run_canonical {n : Nat} (G H : AdjMatrix n) :
     G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n 0) H :=
   ⟨run_isomorphic_eq, run_eq_implies_iso⟩

@@ -17,8 +17,8 @@
       ["imports",
        [["LeanGraphCanonizerV4 transitive imports (legacy)",
          "ed33e842c51feb76"],
-        ["LeanGraphCanonizerV4:importAllArts", "ae91682b55a66956"],
-        ["UniqueGraphsBySize transitive imports (legacy)", "77705e5e252759d4"],
+        ["LeanGraphCanonizerV4:importAllArts", "4a260bf1c99e4387"],
+        ["UniqueGraphsBySize transitive imports (legacy)", "f76ebb0f59889333"],
         ["UniqueGraphsBySize:importAllArts", "993d3fc0f19789be"]]]]],
     ["libs",
      [["import dynlibs", "00000000000006bb"],
@@ -34,4 +34,4 @@
   ["Module.name: LeanGraphCanonizerV4Tests", "5d852b7dc20bdbc9"],
   ["Package.id?: (some GraphCanonizationProofs)", "4e2520c1089745eb"],
   ["Module.leanArgs: #[]", "00000000000006bb"]],
- "depHash": "156e890566b78ee6"}
+ "depHash": "05b988cff9236aa2"}

@@ -1,6 +1,6 @@
 // Lean compiler output
 // Module: LeanGraphCanonizerV4Correctness
-// Imports: public import Init public meta import Init public import LeanGraphCanonizerV4 public import Mathlib.Tactic
+// Imports: public import Init public meta import Init public import LeanGraphCanonizerV4 public import FullCorrectness.Basic public import Mathlib.Tactic
 #include <lean/lean.h>
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -173,6 +173,7 @@ return v_res_55_;
 lean_object* initialize_Init(uint8_t builtin);
 lean_object* initialize_Init(uint8_t builtin);
 lean_object* initialize_GraphCanonizationProofs_LeanGraphCanonizerV4(uint8_t builtin);
+lean_object* initialize_GraphCanonizationProofs_FullCorrectness_Basic(uint8_t builtin);
 lean_object* initialize_mathlib_Mathlib_Tactic(uint8_t builtin);
 static bool _G_initialized = false;
 LEAN_EXPORT lean_object* initialize_GraphCanonizationProofs_LeanGraphCanonizerV4Correctness(uint8_t builtin) {
@@ -186,6 +187,9 @@ res = initialize_Init(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_GraphCanonizationProofs_LeanGraphCanonizerV4(builtin);
+if (lean_io_result_is_error(res)) return res;
+lean_dec_ref(res);
+res = initialize_GraphCanonizationProofs_FullCorrectness_Basic(builtin);
 if (lean_io_result_is_error(res)) return res;
 lean_dec_ref(res);
 res = initialize_mathlib_Mathlib_Tactic(builtin);

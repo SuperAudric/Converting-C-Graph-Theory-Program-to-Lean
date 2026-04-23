@@ -1,25 +1,25 @@
 {"synthetic": false,
  "schemaVersion": "2025-09-10",
  "outputs":
- {"o": ["4c65fd939e584f80.olean"],
+ {"o": ["7b05b15e59676507.olean"],
   "m": false,
-  "i": "da2d9caabfce5ad1.ilean",
-  "c": "d7f49fa8d7633033.c"},
+  "i": "ca1f46b58d874ab7.ilean",
+  "c": "65fba6efad9a6539.c"},
  "log":
  [{"message":
    ".> LEAN_PATH=/workspace/GraphCanonizationProofs/.lake/packages/Cli/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/batteries/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/Qq/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/aesop/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/proofwidgets/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/importGraph/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/plausible/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/packages/mathlib/.lake/build/lib/lean:/workspace/GraphCanonizationProofs/.lake/build/lib/lean /home/node/.elan/toolchains/leanprover--lean4---v4.30.0-rc2/bin/lean /workspace/GraphCanonizationProofs/LeanGraphCanonizerV4Correctness.lean -o /workspace/GraphCanonizationProofs/.lake/build/lib/lean/LeanGraphCanonizerV4Correctness.olean -i /workspace/GraphCanonizationProofs/.lake/build/lib/lean/LeanGraphCanonizerV4Correctness.ilean -c /workspace/GraphCanonizationProofs/.lake/build/ir/LeanGraphCanonizerV4Correctness.c --setup /workspace/GraphCanonizationProofs/.lake/build/ir/LeanGraphCanonizerV4Correctness.setup.json --json",
    "level": "trace"},
   {"message":
-   "LeanGraphCanonizerV4Correctness.lean:238:8: declaration uses `sorry`",
+   "LeanGraphCanonizerV4Correctness.lean:252:8: declaration uses `sorry`",
    "level": "warning"},
   {"message":
-   "LeanGraphCanonizerV4Correctness.lean:250:8: declaration uses `sorry`",
+   "LeanGraphCanonizerV4Correctness.lean:269:8: declaration uses `sorry`",
    "level": "warning"},
   {"message":
-   "LeanGraphCanonizerV4Correctness.lean:261:8: declaration uses `sorry`",
+   "LeanGraphCanonizerV4Correctness.lean:278:8: declaration uses `sorry`",
    "level": "warning"},
   {"message":
-   "LeanGraphCanonizerV4Correctness.lean:272:8: declaration uses `sorry`",
+   "LeanGraphCanonizerV4Correctness.lean:295:8: declaration uses `sorry`",
    "level": "warning"}],
  "inputs":
  [["LeanGraphCanonizerV4Correctness:deps",
@@ -30,6 +30,9 @@
        [["LeanGraphCanonizerV4 transitive imports (legacy)",
          "ed33e842c51feb76"],
         ["LeanGraphCanonizerV4:importAllArts", "4a260bf1c99e4387"],
+        ["FullCorrectness.Basic transitive imports (legacy)",
+         "413f4c8f3ff2452a"],
+        ["FullCorrectness.Basic:importAllArts", "a064f2fec718bbb6"],
         ["Mathlib.Tactic transitive imports (legacy)", "19cd76385ba64639"],
         ["Mathlib.Tactic:importAllArts", "cb1b22a5f1bb1b84"]]]]],
     ["libs",
@@ -40,10 +43,10 @@
   ["Lean 4.30.0, commit 3dc1a088b6d2d8eafe25a7cd7ec7b58d731bd7cc",
    "2c8d2623007dfc36"],
   ["/workspace/GraphCanonizationProofs/LeanGraphCanonizerV4Correctness.lean",
-   "0a090f24929241a4"],
+   "d6fa999d3c510457"],
   ["options", "00000000000006bb"],
   ["isModule: false", "feefd2a0d3a1847e"],
   ["Module.name: LeanGraphCanonizerV4Correctness", "97a7042ac7819c09"],
   ["Package.id?: (some GraphCanonizationProofs)", "4e2520c1089745eb"],
   ["Module.leanArgs: #[]", "00000000000006bb"]],
- "depHash": "39ce405c701fd9ae"}
+ "depHash": "dc335f91f4736ce2"}
