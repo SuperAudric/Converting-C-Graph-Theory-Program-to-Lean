@@ -174,9 +174,45 @@ def swapVTs (v1 v2 : Fin n) (vts : Array VertexType) : Array VertexType :=
   (vts.set! v1.val b).set! v2.val a
 
 /-- Swapping the same position twice is the identity. -/
-theorem swapVTs_self_inverse (v1 v2 : Fin n) (vts : Array VertexType) :
-    swapVTs v1 v2 (swapVTs v1 v2 vts) = vts :=
-  sorry
+theorem swapVTs_self_inverse (v1 v2 : Fin n) (vts : Array VertexType) (hvts : vts.size = n) :
+    swapVTs v1 v2 (swapVTs v1 v2 vts) = vts := by
+  have hv1 : v1.val < vts.size := hvts ▸ v1.isLt
+  have hv2 : v2.val < vts.size := hvts ▸ v2.isLt
+  simp only [swapVTs, Array.set!_eq_setIfInBounds]
+  -- Helper: setting a position to its current value is identity.
+  have hself : ∀ (i : Nat) (hi : i < vts.size), vts.setIfInBounds i (vts.getD i 0) = vts := by
+    intro i hi
+    apply Array.ext_getElem?
+    intro k
+    simp only [Array.getElem?_setIfInBounds]
+    by_cases h : i = k
+    · subst h; simp [Array.getD_eq_getD_getElem?, hi]
+    · simp [h]
+  -- inner = (vts.setIfInBounds v1 (getD v2 0)).setIfInBounds v2 (getD v1 0)
+  -- inner.getD v1 0 = getD v2 0  (last write at v1 came from position v2)
+  have hD1 : ((vts.setIfInBounds v1.val (vts.getD v2.val 0)).setIfInBounds v2.val
+              (vts.getD v1.val 0)).getD v1.val 0 = vts.getD v2.val 0 := by
+    by_cases h : v2.val = v1.val
+    · simp [Array.getD_eq_getD_getElem?, h, hv1]
+    · simp [Array.getD_eq_getD_getElem?, h, hv1]
+  -- inner.getD v2 0 = getD v1 0  (last write at v2 came from position v1)
+  have hD2 : ((vts.setIfInBounds v1.val (vts.getD v2.val 0)).setIfInBounds v2.val
+              (vts.getD v1.val 0)).getD v2.val 0 = vts.getD v1.val 0 := by
+    simp [Array.getD_eq_getD_getElem?, hv2]
+  rw [hD1, hD2]
+  -- Goal: (((vts.sIB v1 Q).sIB v2 P).sIB v1 P).sIB v2 Q = vts
+  --   where P = getD v1 0, Q = getD v2 0
+  by_cases h12 : v1.val = v2.val
+  · -- v1 = v2: all four operations are at the same index, collapse repeatedly.
+    simp only [h12, Array.setIfInBounds_setIfInBounds]
+    exact hself v2.val hv2
+  · -- v1 ≠ v2: commute (sIB v2 P · sIB v1 P) to (sIB v1 P · sIB v2 P),
+    --   then collapse each pair of same-index writes.
+    have hne : v2.val ≠ v1.val := Ne.symm h12
+    rw [Array.setIfInBounds_comm (vts.getD v1.val 0) (vts.getD v1.val 0) hne]
+    simp only [Array.setIfInBounds_setIfInBounds]
+    rw [hself v1.val hv1]
+    exact hself v2.val hv2
 
 /-- An all-zeros array is invariant under any position swap (all values are already equal). -/
 theorem swapVTs_zeros (v1 v2 : Fin n) :
