@@ -11,7 +11,8 @@
       "Bash(xargs rm *)",
       "Read(//home/**)",
       "Read(//root/.elan/**)",
-      "Bash(export PATH=\"$HOME/.elan/bin:$PATH\")"
+      "Bash(export PATH=\"$HOME/.elan/bin:$PATH\")",
+      "Bash(command -v lean)"
     ]
   }
 }
