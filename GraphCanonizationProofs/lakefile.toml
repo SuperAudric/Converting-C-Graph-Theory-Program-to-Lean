@@ -18,3 +18,6 @@ name = "LeanGraphCanonizerV4Tests"
 
 [[lean_lib]]
 name = "LeanGraphCanonizerV4Correctness"
+
+[[lean_lib]]
+name = "LeanGraphCanonizerV4FullCorrectness"

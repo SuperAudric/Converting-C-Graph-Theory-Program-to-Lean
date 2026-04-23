@@ -10,7 +10,8 @@
       "Bash(git -C /workspace ls-files GraphCanonizationProofs/.lake/packages/)",
       "Bash(xargs rm *)",
       "Read(//home/**)",
-      "Read(//root/.elan/**)"
+      "Read(//root/.elan/**)",
+      "Bash(export PATH=\"$HOME/.elan/bin:$PATH\")"
     ]
   }
 }
