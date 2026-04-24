@@ -46,15 +46,14 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 5 (Equivariance: `orderInsensitiveListCmp_perm`,
-`comparePathsBetween_equivCompat`, map-to-pointwise bridge inside
-`comparePathsFrom_σ_equivariant`, `calculatePathRankings_fromRanks_inv`,
+**Sorry count.** 4 (Equivariance: `orderInsensitiveListCmp_perm`,
+`comparePathsBetween_equivCompat`, `calculatePathRankings_fromRanks_inv`,
 `calculatePathRankings_betweenRanks_inv`) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) +
-3 (Invariants — §7) + 1 (Main) = **10 open obligations**. The two Perm helpers
-(`PathsBetween_permute_connectedSubPaths_perm`, `PathsFrom_permute_pathsToVertex_perm`) are
-now proved via a generic `map_reindex_perm` helper using Mathlib's
-`Equiv.Perm.ofFn_comp_perm`. The deep Stage B content remains decomposed into well-scoped
-helper lemmas, each individually attackable.
+3 (Invariants — §7) + 1 (Main) = **9 open obligations**. The map-to-pointwise bridge
+inside `comparePathsFrom_σ_equivariant` is now closed via a pointwise variant of
+`orderInsensitiveListCmp_map` (which uses `foldl_congr_mem` + pointwise variants of
+`insertSorted_map`/`sortBy_map`). The deep Stage B content remains decomposed into
+well-scoped helper lemmas, each individually attackable.
 
 **Closed during the equivariance push:**
 - **Stage D** trivially via `σ ∈ Aut G ⟹ G.permute σ = G`.
@@ -81,9 +80,6 @@ helper lemmas, each individually attackable.
   (needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). Requires an
   auxiliary `orderInsensitiveListCmp_equivCompat_left` lemma about orderInsensitiveListCmp
   giving `.eq` implying interchangeability.
-- Map-to-pointwise bridge inside `comparePathsFrom_σ_equivariant`: `orderInsensitiveListCmp_map`
-  takes a uniform `cmp (f a) (f b) = cmp a b` hypothesis, but `comparePathsBetween_σ_equivariant`
-  requires per-element `h_len` conditions. A list-pointwise version would bridge this.
 - `calculatePathRankings_fromRanks_inv` / `..._betweenRanks_inv`: the fold-level
   σ-invariance of the rank tables. Requires foldl induction on the depth loop plus
   σ-equivariance of sortBy + assignRanks at each step.
@@ -95,6 +91,10 @@ helper lemmas, each individually attackable.
 - `sortBy_perm` + `perm_insertSorted` — sortBy preserves multiset (`Perm`).
 - `sortBy_map` + `orderInsensitiveListCmp_map` — sort/compare respect `map`-ping by a
   `cmp`-preserving function (handles the depth=0 branch directly).
+- `insertSorted_map_pointwise` + `sortBy_map_pointwise` + `orderInsensitiveListCmp_map_pointwise`
+  + `foldl_congr_mem` — pointwise (per-element) variants; used to bridge
+  `comparePathsBetween_σ_equivariant`'s per-element `h_len` hypothesis into the uniform
+  condition expected by `orderInsensitiveListCmp_map`.
 - `comparePathsBetween_σ_equivariant` — proved (modulo the Perm + orderInsensitiveListCmp_perm
   sorries).
 - `comparePathsFrom_σ_equivariant` — proved modulo the inner map-to-pointwise bridge sorry.
