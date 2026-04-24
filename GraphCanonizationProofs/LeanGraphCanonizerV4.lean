@@ -166,7 +166,7 @@ ordinal `0, 1, 2, …`. For example, sorted `[a, a, b, c]` ↦ `[(a,0), (a,0), (
 index of the class. The dense form is what `breakTie` (below) needs to maintain a clean
 prefix-of-ℕ invariant on the typing array. -/
 
-private def assignRanks {α : Type} (cmp : α → α → Ordering) (sorted : List α)
+def assignRanks {α : Type} (cmp : α → α → Ordering) (sorted : List α)
     : List (α × Nat) :=
   let (reversedList, _) := sorted.foldl
     (fun (pair : List (α × Nat) × Option (α × Nat)) item =>
@@ -179,7 +179,7 @@ private def assignRanks {α : Type} (cmp : α → α → Ordering) (sorted : Lis
     (([] : List (α × Nat)), none)
   reversedList.reverse
 
-private def setBetween (betweenTable : Array (Array (Array Nat)))
+def setBetween (betweenTable : Array (Array (Array Nat)))
     (depth startIdx endIdx : Nat) (rank : Nat) : Array (Array (Array Nat)) :=
   let depthSlice := betweenTable.getD depth #[]
   let startSlice := depthSlice.getD startIdx #[]
