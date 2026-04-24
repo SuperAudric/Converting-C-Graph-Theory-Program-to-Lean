@@ -32,7 +32,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §1   | Automorphism group, orbits, `permute` action      | `Basic`, `Permutation`, `Automorphism`     | ✅ proved       |
 | §1.7 | `Fintype G.Aut` (decidability + finiteness)       | `Automorphism`                             | ✅ proved       |
 | §2   | `Isomorphic ↔ ∃σ, H = G.permute σ` bridge         | `Isomorphic`                               | ✅ proved       |
-| §3   | Pipeline equivariance under Aut(G) (Stages A–D)   | `Equivariance`                             | A 🧱 (succ case), B/C/D ✅ via Stage A + RankState invariance |
+| §3   | Pipeline equivariance under Aut(G) (Stages A–D)   | `Equivariance`                             | A ✅, B 🧱 (RankState σ-invariance), C/D ✅ via Stage A |
 | §4   | `convergeOnce` Aut-invariance (1 step)            | `Equivariance`                             | ✅ proved via writeback + getFrom-invariance |
 | §4   | `convergeLoop` Aut-invariance (induction on fuel) | `Equivariance`                             | ✅ proved (with `vts.size = n`) |
 | §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                                 | ✅ defined       |
@@ -46,7 +46,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 2 (Equivariance: Stage A succ case + RankState σ-invariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) = **7 open obligations** in the new tree (down from 10 after the equivariance push + sparse→dense migration).
+**Sorry count.** 1 (Equivariance: RankState σ-invariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) = **6 open obligations** in the new tree (down from 7 after closing Stage A's succ case).
 
 **Closed during the equivariance push:**
 - **Stage D** trivially via `σ ∈ Aut G ⟹ G.permute σ = G`.
@@ -58,8 +58,6 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 - **`calculatePathRankings_fromRanks_size`** proved (foldl invariant on the algorithm body).
 
 **Remaining structural work in `Equivariance`:**
-- Stage A succ case: ~80 lines of nested `Array.ext`/`List.ext` plus depth = 0 vs > 0
-  case-split, all leaves close by `Equiv.symm_apply_apply` and `permNat_inv_fin`.
 - `calculatePathRankings_RankState_invariant`: the σ-invariance of the rank state under
   `σ ∈ Aut G` + σ-invariant `vts`. This is the genuine "path bijection under Aut" content
   and requires reasoning about `assignRanks`/`sortBy`/comparison-function preservation.
