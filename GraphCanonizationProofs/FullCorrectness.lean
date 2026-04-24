@@ -46,21 +46,31 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 1 (Equivariance: RankState σ-invariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) = **6 open obligations** in the new tree (down from 7 after closing Stage A's succ case).
+**Sorry count.** 1 (Equivariance: `calculatePathRankings_σInvariant` — the deep content)
++ 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) = **6 open
+obligations** in the new tree.
 
 **Closed during the equivariance push:**
 - **Stage D** trivially via `σ ∈ Aut G ⟹ G.permute σ = G`.
 - **Stage C** by Stage A + Stage-D-style substitution.
-- **Stage B** by Stage A + a focused `RankState.permute σ rs = rs` lemma (`calculatePathRankings_RankState_invariant` — still pending, the genuine deep content).
+- **Stage A** (`initializePaths_Aut_equivariant`) — `succ` case proved via two helper
+  lemmas (`PathsBetween_initializePaths_eq`, `PathsFrom_initializePaths_eq`) + nested
+  `Array.ext` descending through `pathsOfLength`.
+- **Stage B** (`calculatePathRankings_RankState_invariant`) — reduced via the structural
+  `RankState.σInvariant` predicate + extensionality (`σInvariant.permute_eq_self`). The
+  remaining content is `calculatePathRankings_σInvariant`: σ-invariance of the rank state
+  under `σ ∈ Aut G` + σ-invariant `vts`. This is the genuine "path bijection under Aut"
+  content and requires σ-equivariance of `comparePathSegments`/`comparePathsBetween`/
+  `comparePathsFrom`/`sortBy`/`assignRanks` propagated through the outer fold.
 - **`convergeOnce_Aut_invariant`** via a `convergeOnce_writeback` lemma (proved) +
   `RankState.getFrom_permute` (proved) + the `RankState` invariant.
 - **`convergeOnce_size_preserving`** proved (foldl invariant, mechanical).
 - **`calculatePathRankings_fromRanks_size`** proved (foldl invariant on the algorithm body).
 
 **Remaining structural work in `Equivariance`:**
-- `calculatePathRankings_RankState_invariant`: the σ-invariance of the rank state under
-  `σ ∈ Aut G` + σ-invariant `vts`. This is the genuine "path bijection under Aut" content
-  and requires reasoning about `assignRanks`/`sortBy`/comparison-function preservation.
+- `calculatePathRankings_σInvariant`: the σ-invariance fields of the output `RankState`
+  (sizes + pointwise σ-invariance of `betweenRanks`/`fromRanks`). Requires foldl induction
+  on the depth loop and σ-equivariance of compare/sort/assignRanks at each step.
 
 ### Algorithm refactor (this iteration)
 

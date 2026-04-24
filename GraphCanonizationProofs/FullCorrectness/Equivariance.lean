@@ -510,17 +510,107 @@ theorem calculatePathRankings_fromRanks_size {vc : Nat} (state : PathState vc)
       obtain ⟨pathFrom, rank⟩ := y
       simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds, hacc]
 
+/-! ### `RankState.σInvariant` and extensionality
+
+The structural content of `RankState.permute σ rs = rs` decomposes into (a) size constraints
+ensuring `rs`'s tables are shape `n × n × n` / `n × n` and (b) σ-invariance of the cell
+values. We package this as `RankState.σInvariant`, prove the extensionality direction
+(`σInvariant → permute σ rs = rs`), and reduce the main theorem to the σInvariance of
+`calculatePathRankings (initializePaths G) vts`. The latter is the deep content — it
+requires σ-equivariance of the entire `calculatePathRankings` pipeline (compare → sort →
+assignRanks → fold). -/
+
+/-- The structural σ-invariance of a `RankState` w.r.t. a permutation `σ`. -/
+structure RankState.σInvariant {n : Nat} (σ : Equiv.Perm (Fin n)) (rs : RankState) : Prop where
+  fromRanks_size      : rs.fromRanks.size = n
+  betweenRanks_size   : rs.betweenRanks.size = n
+  fromRanks_row_size  : ∀ d : Nat, d < n → (rs.fromRanks.getD d #[]).size = n
+  betweenRanks_row_size : ∀ d : Nat, d < n → (rs.betweenRanks.getD d #[]).size = n
+  betweenRanks_cell_size : ∀ d : Nat, d < n → ∀ s : Nat, s < n →
+    ((rs.betweenRanks.getD d #[]).getD s #[]).size = n
+  /-- σ-invariance of `fromRanks` values: σ⁻¹-shifted start positions hold the same rank. -/
+  fromRanks_inv : ∀ d : Nat, d < n → ∀ s : Fin n,
+    (rs.fromRanks.getD d #[]).getD s.val 0
+    = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0
+  /-- σ-invariance of `betweenRanks` values: σ⁻¹-shifted (start, end) hold the same rank. -/
+  betweenRanks_inv : ∀ d : Nat, d < n → ∀ s e : Fin n,
+    ((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
+    = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0
+
+/-- Extensionality: the structural σ-invariance is exactly what `RankState.permute σ rs = rs`
+requires. -/
+theorem RankState.σInvariant.permute_eq_self
+    {σ : Equiv.Perm (Fin n)} {rs : RankState} (h : RankState.σInvariant σ rs) :
+    RankState.permute σ rs = rs := by
+  -- Apply mk.injEq via show on the unfolded `permute` form.
+  show ({ betweenRanks := _, fromRanks := _ } : RankState) = rs
+  refine RankState.mk.injEq _ _ _ _ |>.mpr ⟨?_, ?_⟩
+  · -- betweenRanks equality.
+    refine Array.ext ?_ fun d hd₁ hd₂ => ?_
+    · simp [h.betweenRanks_size, h.fromRanks_size]
+    have hd : d < n := by simpa [h.fromRanks_size] using hd₁
+    rw [Array.getElem_map, Array.getElem_range]
+    -- Convert RHS `rs.betweenRanks[d]` to `rs.betweenRanks.getD d #[]` BEFORE the inner
+    -- Array.ext, so the inner bound `hs₂` doesn't carry a dependency on the unsubstituted
+    -- `[d]` term (which would block subsequent rewrites with motive type-mismatch).
+    rw [show rs.betweenRanks[d]'hd₂ = rs.betweenRanks.getD d #[] from Array.getElem_eq_getD _]
+    refine Array.ext ?_ fun s hs₁ hs₂ => ?_
+    · simp only [Array.size_map, Array.size_range]
+      exact (h.betweenRanks_row_size d hd).symm
+    have hs : s < n := by simpa using hs₁
+    rw [Array.getElem_map, Array.getElem_range]
+    rw [show (rs.betweenRanks.getD d #[])[s]'hs₂ = (rs.betweenRanks.getD d #[]).getD s #[] from
+        Array.getElem_eq_getD _]
+    refine Array.ext ?_ fun e he₁ he₂ => ?_
+    · simp only [Array.size_map, Array.size_range]
+      exact (h.betweenRanks_cell_size d hd s hs).symm
+    have he : e < n := by simpa using he₁
+    rw [Array.getElem_map, Array.getElem_range]
+    rw [show ((rs.betweenRanks.getD d #[]).getD s #[])[e]'he₂
+          = ((rs.betweenRanks.getD d #[]).getD s #[]).getD e 0 from Array.getElem_eq_getD _]
+    rw [show permNat σ⁻¹ s = (σ⁻¹ ⟨s, hs⟩).val from permNat_of_lt hs,
+        show permNat σ⁻¹ e = (σ⁻¹ ⟨e, he⟩).val from permNat_of_lt he]
+    exact (h.betweenRanks_inv d hd ⟨s, hs⟩ ⟨e, he⟩).symm
+  · -- fromRanks equality. Same pattern as above without the third level.
+    refine Array.ext ?_ fun d hd₁ hd₂ => ?_
+    · simp [h.fromRanks_size]
+    have hd : d < n := by simpa [h.fromRanks_size] using hd₁
+    rw [Array.getElem_map, Array.getElem_range]
+    rw [show rs.fromRanks[d]'hd₂ = rs.fromRanks.getD d #[] from Array.getElem_eq_getD _]
+    refine Array.ext ?_ fun s hs₁ hs₂ => ?_
+    · simp only [Array.size_map, Array.size_range]
+      exact (h.fromRanks_row_size d hd).symm
+    have hs : s < n := by simpa using hs₁
+    rw [Array.getElem_map, Array.getElem_range]
+    rw [show (rs.fromRanks.getD d #[])[s]'hs₂ = (rs.fromRanks.getD d #[]).getD s 0 from
+        Array.getElem_eq_getD _]
+    rw [show permNat σ⁻¹ s = (σ⁻¹ ⟨s, hs⟩).val from permNat_of_lt hs]
+    exact (h.fromRanks_inv d hd ⟨s, hs⟩).symm
+
+/-- The σ-invariance of `calculatePathRankings`'s output, given σ ∈ Aut G and σ-invariant
+typing. **This is the deep content of Stage B** — it requires σ-equivariance of the entire
+pipeline (`comparePathSegments`/`comparePathsBetween`/`comparePathsFrom` are σ-equivariant
+on a σ-invariant rank table; `sortBy`/`assignRanks` preserve equivalence-class membership;
+the fold preserves σ-invariance step by step). The structural sizes follow from a foldl
+invariant analogous to `calculatePathRankings_fromRanks_size`. -/
+theorem calculatePathRankings_σInvariant
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType)
+    (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
+    RankState.σInvariant σ (calculatePathRankings (initializePaths G) vts) := by
+  sorry
+
 /-- The genuine content of Stage B (the part not reducible to Stage A + σ ∈ Aut G):
 the rank state computed from `initializePaths G` with a σ-invariant typing is itself
 σ-invariant, so `RankState.permute σ` is the identity on it. Stage B follows from this
 plus Stage A by substitution. -/
 theorem calculatePathRankings_RankState_invariant
-    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
     (vts : Array VertexType)
-    (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
+    (hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
     calculatePathRankings (initializePaths G) vts
-      = RankState.permute σ (calculatePathRankings (initializePaths G) vts) := by
-  sorry
+      = RankState.permute σ (calculatePathRankings (initializePaths G) vts) :=
+  (calculatePathRankings_σInvariant G σ hσ vts hvts).permute_eq_self.symm
 
 theorem calculatePathRankings_Aut_equivariant
     (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
