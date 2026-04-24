@@ -1,5 +1,6 @@
 import FullCorrectness.Permutation
 import Mathlib.Algebra.Group.Subgroup.Basic
+import Mathlib.Data.Fintype.Perm
 
 /-!
 # §1.3–§1.6  Automorphism group and vertex orbits

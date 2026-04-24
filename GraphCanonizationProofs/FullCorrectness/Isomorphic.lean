@@ -1,4 +1,5 @@
 import FullCorrectness.Automorphism
+import Mathlib.GroupTheory.Perm.Sign
 
 /-!
 # §2  Bridge lemma: `Isomorphic ↔ ∃ σ, H = G.permute σ`

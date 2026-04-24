@@ -1,4 +1,5 @@
 import FullCorrectness.Equivariance
+import Mathlib.Tactic.IntervalCases
 
 /-!
 # §7  "Converged types are a prefix of ℕ" invariant

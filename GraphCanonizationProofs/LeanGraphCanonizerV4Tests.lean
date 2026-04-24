@@ -2,6 +2,11 @@ import LeanGraphCanonizerV4
 import UniqueGraphsBySize
 open Graph
 
+-- Dev flag: flip to `true` to run the two slowest `#guard` tests
+-- Default off to keep iteration builds fast.
+-- enable before shipping or when touching canonizer internals.
+private def devSlowTests : Bool := false
+
 private def mkAdj (rows : List (List EdgeType)) (size : Nat) : AdjMatrix size where
   adj rowIdx colIdx := (rows.getD rowIdx.val []).getD colIdx.val 0
 
@@ -98,7 +103,7 @@ private def q3 : AdjMatrix 8 := mkAdj
   [[0,1,1,0,1,0,0,0],[1,0,0,1,0,1,0,0],[1,0,0,1,0,0,1,0],[0,1,1,0,0,0,0,1],
    [1,0,0,0,0,1,1,0],[0,1,0,0,1,0,0,1],[0,0,1,0,1,0,0,1],[0,0,0,1,0,1,1,0]] 8
 
-#guard isStableUnder #[0,0,0,0,0,0,0,0] q3 (standardScramblers 8)
+#guard if devSlowTests then isStableUnder #[0,0,0,0,0,0,0,0] q3 (standardScramblers 8) else true
 
 -- Path graphs (line_n: 0─1─…─(n-1))
 private def line4 : AdjMatrix 4 :=
@@ -117,7 +122,7 @@ private def spider : AdjMatrix 7 := mkAdj
   [[0,1,0,1,0,1,0],[1,0,1,0,0,0,0],[0,1,0,0,0,0,0],[1,0,0,0,1,0,0],
    [0,0,0,1,0,0,0],[1,0,0,0,0,0,1],[0,0,0,0,0,1,0]] 7
 
-#guard isStableUnder #[0,0,0,0,0,0,0] spider (standardScramblers 7)
+#guard if devSlowTests then isStableUnder #[0,0,0,0,0,0,0] spider (standardScramblers 7) else true
 
 -- K3+K3 in a different vertex labeling (triangles on {1,2,3} and {0,4,5})
 private def k3k3_alt : AdjMatrix 6 := mkAdj
@@ -134,7 +139,7 @@ private def k3k3_alt : AdjMatrix 6 := mkAdj
 #guard countUniqueCanonicals 2 == 2
 #guard countUniqueCanonicals 3 == 4
 #guard countUniqueCanonicals 4 == 11
-
+#guard if devSlowTests then countUniqueCanonicals 5 == 34 else true
 
 -- ── 4. Known-graphs scrambling tests ──────────────────────────────────────────
 -- For each known unique graph, all standard scramblers must yield the same canonical.

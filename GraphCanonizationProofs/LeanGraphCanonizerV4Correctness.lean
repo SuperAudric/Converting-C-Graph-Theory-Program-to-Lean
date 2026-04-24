@@ -1,5 +1,6 @@
 import LeanGraphCanonizerV4
 import FullCorrectness.Basic
+import Mathlib.Tactic.SplitIfs
 
 /-!
 # Correctness of the Graph Canonizer — **FLAWED / ABANDONED ATTEMPT**

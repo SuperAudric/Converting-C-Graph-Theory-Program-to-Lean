@@ -1,5 +1,5 @@
 import LeanGraphCanonizerV4
-import Mathlib.Tactic
+import Mathlib.Tactic.Ext
 
 /-!
 # Shared basics for the full-correctness proof
