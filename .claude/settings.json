@@ -20,7 +20,8 @@
       "Bash(tee /tmp/lake-build-3.log)",
       "Bash(tee /tmp/lake-build-4.log)",
       "Bash(export PATH=\"/home/node/.elan/bin:$PATH\")",
-      "Bash(lake --version)"
+      "Bash(lake --version)",
+      "Bash(grep -rB1 -A5 \"^theorem Array.ext\\\\b\\\\|^theorem ext\\\\b\\\\|^@\\\\[ext\\\\]\\\\s*theorem\" /home/node/.elan/toolchains/leanprover--lean4---v4.30.0-rc2/src/lean/Init/Data/Array/)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",
