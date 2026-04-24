@@ -282,10 +282,9 @@ private theorem btStep_notfirst (t₀ : VertexType) (arr : Array VertexType)
   unfold btStep
   rfl
 
-/-- `t₀ + 1 ≠ t₀` for any integer `t₀`. -/
+/-- `t₀ + 1 ≠ t₀` for any natural number `t₀`. -/
 private theorem VertexType_add_one_ne (t₀ : VertexType) : t₀ + 1 ≠ t₀ :=
-  fun h => absurd (Int.add_left_cancel (show t₀ + 1 = t₀ + 0 from by
-    rw [h, Int.add_zero])) (by decide)
+  Nat.succ_ne_self t₀
 
 /-- Starting with `first = false`, any index `j` in a `Nodup` list with target value gets
 promoted to `t₀ + 1`. The `Nodup` hypothesis rules out visiting `j` twice. `List.range n`
@@ -490,7 +489,7 @@ theorem breakTie_getD_target_ge (vts : Array VertexType) (t₀ : VertexType)
     t₀ ≤ (breakTie vts t₀).1.getD w 0 := by
   rcases breakTie_getD_target vts t₀ hw_size hw with h | h
   · exact le_of_eq h.symm
-  · exact le_of_lt (h.symm ▸ Int.lt_add_one_of_le (le_refl t₀))
+  · exact le_of_lt (h.symm ▸ Nat.lt_succ_self t₀)
 
 /-- **§5.1**  `TypedAut` after `breakTie` is the `v*`-stabilizer of the original.
 
@@ -700,10 +699,10 @@ matrix. -/
 def runFrom {n : Nat} (start : Nat) (vts : Array VertexType) (G : AdjMatrix n) :
     AdjMatrix n :=
   let state := initializePaths G
-  let orderedRanks := (List.range (state.vertexCount - start)).foldl
+  let orderedRanks := (List.range (n - start)).foldl
     (fun currentTypes targetPosition =>
-      let convergedTypes := convergeLoop state currentTypes state.vertexCount
-      (breakTie convergedTypes (Int.ofNat (start + targetPosition))).1)
+      let convergedTypes := convergeLoop state currentTypes n
+      (breakTie convergedTypes (start + targetPosition)).1)
     vts
   labelEdgesAccordingToRankings orderedRanks G
 

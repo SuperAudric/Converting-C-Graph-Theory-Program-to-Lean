@@ -2,8 +2,8 @@ open Nat
 
 namespace Graph
 
-abbrev VertexType := Int
-abbrev EdgeType   := Int
+abbrev VertexType := Nat
+abbrev EdgeType   := Nat
 
 /-! ## Adjacency matrix -/
 
@@ -44,39 +44,45 @@ instance : ToString (AdjMatrix vertexCount) := ⟨adjToString⟩
 
 end AdjMatrix
 
-/-! ## Path structures -/
+/-! ## Path structures
 
-inductive PathSegment where
-  | bottom (vertexIndex : Nat)                                    : PathSegment
+The path data structures are parametrized by `vertexCount` and use `Fin vertexCount` for
+all vertex slots. This makes the equivariance proofs in `FullCorrectness/` directly
+applicable: `Equiv.Perm (Fin vertexCount)` acts on the structures by mapping indices
+through `σ` without any `Nat`-bounds bookkeeping. The `subDepth` field of `PathSegment.inner`
+is kept as `Nat` because it is a depth index (0..vertexCount-1) that the algorithm
+manipulates with `depthFin.val - 1`; constraining it to `Fin vertexCount` adds little. -/
+
+inductive PathSegment (vertexCount : Nat) where
+  | bottom (vertexIndex : Fin vertexCount)                                                                    : PathSegment vertexCount
   -- subDepth/subStart/subEnd index into betweenRanks; in C# this is an AllPathsBetween object reference
-  | inner  (edgeType : EdgeType) (subDepth subStart subEnd : Nat) : PathSegment
+  | inner  (edgeType : EdgeType) (subDepth : Nat) (subStart subEnd : Fin vertexCount)                         : PathSegment vertexCount
 deriving Repr, BEq
 
-structure PathsBetween where
+structure PathsBetween (vertexCount : Nat) where
   depth            : Nat
-  startVertexIndex : Nat
-  endVertexIndex   : Nat
-  connectedSubPaths : List PathSegment
+  startVertexIndex : Fin vertexCount
+  endVertexIndex   : Fin vertexCount
+  connectedSubPaths : List (PathSegment vertexCount)
 deriving Repr
 
-structure PathsFrom where
+structure PathsFrom (vertexCount : Nat) where
   depth            : Nat
-  startVertexIndex : Nat
-  pathsToVertex    : List PathsBetween
+  startVertexIndex : Fin vertexCount
+  pathsToVertex    : List (PathsBetween vertexCount)
 deriving Repr
 
-structure PathState where
-  vertexCount   : Nat
-  pathsOfLength : Array (Array PathsFrom)
+structure PathState (vertexCount : Nat) where
+  pathsOfLength : Array (Array (PathsFrom vertexCount))
 
 structure RankState where
-  betweenRanks : Array (Array (Array Int))
-  fromRanks    : Array (Array Int)
+  betweenRanks : Array (Array (Array Nat))
+  fromRanks    : Array (Array Nat)
 
-def RankState.getBetween (rankState : RankState) (depth startIdx endIdx : Nat) : Int :=
+def RankState.getBetween (rankState : RankState) (depth startIdx endIdx : Nat) : Nat :=
   ((rankState.betweenRanks.getD depth #[]).getD startIdx #[]).getD endIdx 0
 
-def RankState.getFrom (rankState : RankState) (depth startIdx : Nat) : Int :=
+def RankState.getFrom (rankState : RankState) (depth startIdx : Nat) : Nat :=
   (rankState.fromRanks.getD depth #[]).getD startIdx 0
 
 /-! ## Helpers -/
@@ -101,111 +107,110 @@ def orderInsensitiveListCmp {α : Type} (cmp : α → α → Ordering) (list1 li
 
 /-! ## Comparison functions -/
 
-def comparePathSegments
+def comparePathSegments {vertexCount : Nat}
     (vertexTypes  : Array VertexType)
-    (betweenRanks : Nat → Nat → Nat → Int)
-    : PathSegment → PathSegment → Ordering
+    (betweenRanks : Nat → Nat → Nat → Nat)
+    : PathSegment vertexCount → PathSegment vertexCount → Ordering
   | .bottom xVertexIdx,              .bottom yVertexIdx              =>
-      compare (vertexTypes.getD xVertexIdx 0) (vertexTypes.getD yVertexIdx 0)
+      compare (vertexTypes.getD xVertexIdx.val 0) (vertexTypes.getD yVertexIdx.val 0)
   | .inner xEdge xDepth xStart xEnd, .inner yEdge yDepth yStart yEnd =>
-      let xRank := betweenRanks xDepth xStart xEnd
-      let yRank := betweenRanks yDepth yStart yEnd
+      let xRank := betweenRanks xDepth xStart.val xEnd.val
+      let yRank := betweenRanks yDepth yStart.val yEnd.val
       if xRank != yRank then compare yRank xRank
       else if xEdge != yEdge then compare yEdge xEdge
       else .eq
   | _, _ => panic! "Cannot compare bottom and inner PathSegments"
 
-def comparePathsBetween
+def comparePathsBetween {vertexCount : Nat}
     (vertexTypes  : Array VertexType)
-    (betweenRanks : Nat → Nat → Nat → Int)
-    (pathX pathY : PathsBetween) : Ordering :=
-  let xEndType := vertexTypes.getD pathX.endVertexIndex 0
-  let yEndType := vertexTypes.getD pathY.endVertexIndex 0
+    (betweenRanks : Nat → Nat → Nat → Nat)
+    (pathX pathY : PathsBetween vertexCount) : Ordering :=
+  let xEndType := vertexTypes.getD pathX.endVertexIndex.val 0
+  let yEndType := vertexTypes.getD pathY.endVertexIndex.val 0
   if xEndType != yEndType then compare xEndType yEndType
   else orderInsensitiveListCmp (comparePathSegments vertexTypes betweenRanks)
          pathX.connectedSubPaths pathY.connectedSubPaths
 
-def comparePathsFrom
+def comparePathsFrom {vertexCount : Nat}
     (vertexTypes  : Array VertexType)
-    (betweenRanks : Nat → Nat → Nat → Int)
-    (pathX pathY : PathsFrom) : Ordering :=
-  let xStartType := vertexTypes.getD pathX.startVertexIndex 0
-  let yStartType := vertexTypes.getD pathY.startVertexIndex 0
+    (betweenRanks : Nat → Nat → Nat → Nat)
+    (pathX pathY : PathsFrom vertexCount) : Ordering :=
+  let xStartType := vertexTypes.getD pathX.startVertexIndex.val 0
+  let yStartType := vertexTypes.getD pathY.startVertexIndex.val 0
   if xStartType != yStartType then compare xStartType yStartType
   else orderInsensitiveListCmp (comparePathsBetween vertexTypes betweenRanks)
          pathX.pathsToVertex pathY.pathsToVertex
 
 /-! ## Path initialization -/
 
-def initializePaths {vertexCount : Nat} (G : AdjMatrix vertexCount) : PathState :=
+def initializePaths {vertexCount : Nat} (G : AdjMatrix vertexCount) : PathState vertexCount :=
   let vertices := List.finRange vertexCount
-  { vertexCount := vertexCount
-    pathsOfLength := vertices.toArray.map fun depthFin =>
+  { pathsOfLength := vertices.toArray.map fun depthFin =>
       vertices.toArray.map fun startFin =>
         { depth            := depthFin.val
-          startVertexIndex := startFin.val
+          startVertexIndex := startFin
           pathsToVertex    :=
             vertices.map fun endFin =>
               { depth            := depthFin.val
-                startVertexIndex := startFin.val
-                endVertexIndex   := endFin.val
+                startVertexIndex := startFin
+                endVertexIndex   := endFin
                 connectedSubPaths :=
                   if depthFin.val = 0 then
-                    if startFin = endFin then [.bottom startFin.val] else []
+                    if startFin = endFin then [.bottom startFin] else []
                   else
                     vertices.map fun midFin =>
-                      .inner (G.adj midFin endFin) (depthFin.val - 1) startFin.val midFin.val } } }
+                      .inner (G.adj midFin endFin) (depthFin.val - 1) startFin midFin } } }
 
 /-! ## Ranking -/
 
 -- Assign ranks to a sorted list: rank = index of the first element in the equivalence class.
 -- e.g. for sorted [a,a,b,c]: [(a,0),(a,0),(b,2),(c,3)]
 private def assignRanks {α : Type} (cmp : α → α → Ordering) (sorted : List α)
-    : List (α × Int) :=
+    : List (α × Nat) :=
   let (reversedList, _) := sorted.foldl
-    (fun (pair : List (α × Int) × Option (α × Int)) item =>
+    (fun (pair : List (α × Nat) × Option (α × Nat)) item =>
       let (revList, lastEntry) := pair
-      let rank : Int :=
+      let rank : Nat :=
         match lastEntry with
         | none                      => 0
-        | some (prevItem, prevRank) => if cmp prevItem item == .eq then prevRank else Int.ofNat revList.length
+        | some (prevItem, prevRank) => if cmp prevItem item == .eq then prevRank else revList.length
       ((item, rank) :: revList, some (item, rank)))
-    (([] : List (α × Int)), none)
+    (([] : List (α × Nat)), none)
   reversedList.reverse
 
-private def setBetween (betweenTable : Array (Array (Array Int)))
-    (depth startIdx endIdx : Nat) (rank : Int) : Array (Array (Array Int)) :=
+private def setBetween (betweenTable : Array (Array (Array Nat)))
+    (depth startIdx endIdx : Nat) (rank : Nat) : Array (Array (Array Nat)) :=
   let depthSlice := betweenTable.getD depth #[]
   let startSlice := depthSlice.getD startIdx #[]
   betweenTable.set! depth (depthSlice.set! startIdx (startSlice.set! endIdx rank))
 
-def calculatePathRankings (state : PathState) (vertexTypes : Array VertexType) : RankState :=
-  let numVertices := state.vertexCount
-  let emptyBetweenTable : Array (Array (Array Int)) :=
-    (Array.range numVertices).map fun _ => (Array.range numVertices).map fun _ => (Array.range numVertices).map fun _ => (0 : Int)
-  let emptyFromTable : Array (Array Int) :=
-    (Array.range numVertices).map fun _ => (Array.range numVertices).map fun _ => (0 : Int)
+def calculatePathRankings {vertexCount : Nat} (state : PathState vertexCount) (vertexTypes : Array VertexType) : RankState :=
+  let numVertices := vertexCount
+  let emptyBetweenTable : Array (Array (Array Nat)) :=
+    (Array.range numVertices).map fun _ => (Array.range numVertices).map fun _ => (Array.range numVertices).map fun _ => (0 : Nat)
+  let emptyFromTable : Array (Array Nat) :=
+    (Array.range numVertices).map fun _ => (Array.range numVertices).map fun _ => (0 : Nat)
   let (finalBetween, finalFrom) := (List.range numVertices).foldl
-    (fun (accumulated : Array (Array (Array Int)) × Array (Array Int)) depth =>
+    (fun (accumulated : Array (Array (Array Nat)) × Array (Array Nat)) depth =>
       let (currentBetween, currentFrom) := accumulated
       let pathsAtDepth  := (state.pathsOfLength.getD depth #[]).toList
       let allBetween    := pathsAtDepth.foldl (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
-      let betweenRankFn : Nat → Nat → Nat → Int := fun rankDepth rankStart rankEnd =>
+      let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
         ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
       let compareBetween  := comparePathsBetween vertexTypes betweenRankFn
       let updatedBetween  := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
-                              (fun (betweenAcc : Array (Array (Array Int))) item =>
+                              (fun (betweenAcc : Array (Array (Array Nat))) item =>
                                 let (pathBetween, rank) := item
-                                setBetween betweenAcc depth pathBetween.startVertexIndex pathBetween.endVertexIndex rank)
+                                setBetween betweenAcc depth pathBetween.startVertexIndex.val pathBetween.endVertexIndex.val rank)
                               currentBetween
-      let updatedBetweenFn : Nat → Nat → Nat → Int := fun rankDepth rankStart rankEnd =>
+      let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
         ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
       let compareFrom     := comparePathsFrom vertexTypes updatedBetweenFn
       let updatedFrom     := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
-                              (fun (fromAcc : Array (Array Int)) item =>
+                              (fun (fromAcc : Array (Array Nat)) item =>
                                 let (pathFrom, rank) := item
                                 let depthSlice := fromAcc.getD depth #[]
-                                fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex rank))
+                                fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank))
                               currentFrom
       (updatedBetween, updatedFrom))
     (emptyBetweenTable, emptyFromTable)
@@ -213,10 +218,10 @@ def calculatePathRankings (state : PathState) (vertexTypes : Array VertexType) :
 
 /-! ## Vertex ordering -/
 
-def convergeOnce (state : PathState) (vertexTypes : Array VertexType)
+def convergeOnce {vertexCount : Nat} (state : PathState vertexCount) (vertexTypes : Array VertexType)
     : Array VertexType × Bool :=
   let rankState   := calculatePathRankings state vertexTypes
-  let numVertices := state.vertexCount
+  let numVertices := vertexCount
   (List.range numVertices).foldl
     (fun (pair : Array VertexType × Bool) vertexIdx =>
       let (typeArray, changed) := pair
@@ -226,7 +231,7 @@ def convergeOnce (state : PathState) (vertexTypes : Array VertexType)
     (vertexTypes, false)
 
 --This function provides a partial ordering of vertices, ordering every vertex into types, where each type shares a symmetry between them (and implicitly automorphic)
-def convergeLoop (state : PathState) (vertexTypes : Array VertexType) : Nat → Array VertexType
+def convergeLoop {vertexCount : Nat} (state : PathState vertexCount) (vertexTypes : Array VertexType) : Nat → Array VertexType
   | 0        => vertexTypes
   | fuel + 1 =>
     let (updatedTypes, changed) := convergeOnce state vertexTypes
@@ -234,7 +239,7 @@ def convergeLoop (state : PathState) (vertexTypes : Array VertexType) : Nat → 
 
 --This function collapses one symmetry by choosing one (the first is arbitrarily chosen) to come before the others in the partial ordering
 --Choosing any other should result in the same output, as this represents choosing one automorphism to display
-def breakTie (vertexTypes : Array VertexType) (target : Int) : Array VertexType × Bool :=
+def breakTie (vertexTypes : Array VertexType) (target : VertexType) : Array VertexType × Bool :=
   let result := (List.range vertexTypes.size).foldl
     (fun (triple : Array VertexType × Bool × Bool) vertexIdx =>
       let (typeArray, firstAppearance, changed) := triple
@@ -246,11 +251,11 @@ def breakTie (vertexTypes : Array VertexType) (target : Int) : Array VertexType 
   let (typeArray, _, changed) := result
   (typeArray, changed)
 
-def orderVertices (state : PathState) (vertexTypes : Array VertexType) : Array VertexType :=
-  (List.range state.vertexCount).foldl
+def orderVertices {vertexCount : Nat} (state : PathState vertexCount) (vertexTypes : Array VertexType) : Array VertexType :=
+  (List.range vertexCount).foldl
     (fun currentTypes targetPosition =>
-      let convergedTypes := convergeLoop state currentTypes state.vertexCount
-      (breakTie convergedTypes (Int.ofNat targetPosition)).1)
+      let convergedTypes := convergeLoop state currentTypes vertexCount
+      (breakTie convergedTypes targetPosition).1)
     vertexTypes
 
 /-! ## Edge labeling -/

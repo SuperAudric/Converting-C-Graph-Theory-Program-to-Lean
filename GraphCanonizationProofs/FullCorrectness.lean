@@ -48,11 +48,43 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 
 **Sorry count.** 5 (Equivariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants) + 1 (Main) = **10 open obligations** in the new tree.
 
-**Stage A infrastructure** (this iteration): added `permNat` round-trips
-(`permNat_of_lt`, `permNat_of_ge`, `permNat_inv_perm`, `permNat_perm_inv`, `permNat_fin`)
-plus structural sanity lemmas about `initializePaths`/`PathState.permute` (vertexCount
-and pathsOfLength sizes). These are the building blocks consumed by the Stage A proof
-skeleton documented in `Equivariance.lean`. §5.1 and §5.2 are now proved with stronger hypotheses than the original plan (see the "§5 hypothesis revisions" note below). §6 (`tiebreak_choice_independent`) is now closed by reduction to a single precisely-stated pipeline-equivariance lemma (`runFrom_VtsInvariant_eq`), the chained §3 Stages B–D for the bounded `runFrom` loop. The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
+### Algorithm refactor (this iteration)
+
+The algorithm in `LeanGraphCanonizerV4.lean` was refactored to make the equivariance
+proofs structurally simpler. Three changes:
+
+  1. **`VertexType := Nat`, `EdgeType := Nat`** (was `Int`). The `Int` choice was
+     arbitrary; nothing in the algorithm needs negative values. With `Nat`, the entire
+     `Int.ofNat` / `Int.toNat` conversion machinery in `Tiebreak.lean` and
+     `Invariants.lean` collapses, and the `0 ≤ vts[v]` half of `IsPrefixTyping` becomes
+     vacuously true and is dropped from the definition.
+  2. **Path-structure indices `Nat → Fin vertexCount`.** `PathSegment`, `PathsBetween`,
+     `PathsFrom`, `PathState` are now parametrized by `vertexCount : Nat` and use
+     `Fin vertexCount` for every vertex slot. The `PathState.vertexCount` field was
+     dropped (redundant with the type-level parameter). At the algorithm level this is
+     a pure typing strengthening — the runtime behavior and tests are unchanged.
+  3. **Action definitions in `Equivariance.lean` simplified.** The per-element action on
+     `PathSegment` is now literally `σ`-applied (`.bottom v ↦ .bottom (σ v)`) rather
+     than going through a `permNat` lift on `Nat` indices. The residual `permNat`
+     helper is kept for the *positional* re-indexing of `connectedSubPaths` and
+     `pathsToVertex` lists (which are still `List`s, hence `Nat`-indexed by position),
+     but is now used only for that residual case.
+
+**Dense-rank deferred.** The fourth recommended change (dense-rank inline in
+`convergeOnce`) was deferred because it requires also fixing `breakTie`'s "promote all
+but one" logic to avoid value collisions with the next dense rank. Sparse rank +
+"promote all but one" was the original deliberate design choice for that reason. To
+flip to dense, `breakTie` would need to also bump every value `≥ target + 1` by
+(class-size − 1) on each call, which is a non-trivial change to a function whose
+proofs are already mostly complete.
+
+§5.1 and §5.2 are proved with stronger hypotheses than the original plan (see the "§5
+hypothesis revisions" note below). §6 (`tiebreak_choice_independent`) is closed by
+reduction to a single precisely-stated pipeline-equivariance lemma
+(`runFrom_VtsInvariant_eq`), the chained §3 Stages B–D for the bounded `runFrom` loop.
+The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`,
+`IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure
+(`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
 
 ### §5 disjunctive characterization (new)
 
@@ -360,9 +392,9 @@ tiebreak_choice_independent : ∀ (two τ-related states), same final canonical 
 
 ## §7  "Converged types are a prefix of ℕ" invariant
 
-`orderVertices` calls `breakTie convergedTypes (Int.ofNat targetPosition)` where
-`targetPosition` is the outer-loop counter `0, 1, …, n-1`, NOT the smallest tied value.
-For §5/§6 to apply, we need: at iteration p, the smallest tied value is exactly p.
+`orderVertices` calls `breakTie convergedTypes targetPosition` where `targetPosition`
+is the outer-loop counter `0, 1, …, n-1`, NOT the smallest tied value. For §5/§6 to
+apply, we need: at iteration p, the smallest tied value is exactly p.
 
 **Goal.**
 ```
