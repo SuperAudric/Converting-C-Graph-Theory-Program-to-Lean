@@ -102,4 +102,28 @@ theorem AdjMatrix.orbit_stable_under_Aut {G : AdjMatrix n} {σ : Equiv.Perm (Fin
 theorem AdjMatrix.exists_Aut_of_mem_orbit {G : AdjMatrix n} {v w : Fin n}
     (h : w ∈ G.orbit v) : ∃ σ ∈ G.Aut, σ v = w := h
 
+/-! ## §1.7  Finiteness of `Aut G`
+
+`Aut G` is a subgroup of the finite group `Equiv.Perm (Fin n)` (cardinality `n!`), so it is
+itself finite. The `Fintype` instance is used in §5–§6 to perform strong induction on the
+cardinality `|Aut(G, T)|` of typed-automorphism subgroups.
+
+Membership in `Aut G` is decidable: `σ ∈ G.Aut ↔ G.permute σ = G`, and `AdjMatrix` equality
+is decidable because adjacency is `Int`-valued (decidable equality) on the finite domain
+`Fin n × Fin n`. Combined with the ambient `Fintype (Equiv.Perm (Fin n))` (Mathlib), this
+gives `Fintype G.Aut` via subtype filtering. -/
+
+instance : DecidableEq (AdjMatrix n) := fun G H => by
+  by_cases h : ∀ i j : Fin n, G.adj i j = H.adj i j
+  · exact isTrue (AdjMatrix.ext h)
+  · refine isFalse fun heq => h ?_
+    intro i j; rw [heq]
+
+instance (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) : Decidable (σ ∈ G.Aut) :=
+  inferInstanceAs (Decidable (G.permute σ = G))
+
+/-- `Aut G` is finite, as a subgroup of the finite group `Equiv.Perm (Fin n)`. -/
+instance (G : AdjMatrix n) : Fintype G.Aut :=
+  Subtype.fintype _
+
 end Graph

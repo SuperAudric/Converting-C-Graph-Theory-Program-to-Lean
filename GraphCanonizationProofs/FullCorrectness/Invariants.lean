@@ -50,6 +50,31 @@ def IsPrefixTyping (vts : Array VertexType) : Prop :=
     (∀ v : Fin n, 0 ≤ vts.getD v.val 0) ∧
     (∀ k : Nat, k < m → ∃ v : Fin n, vts.getD v.val 0 = Int.ofNat k)
 
+/-- The all-zeros array is a prefix typing. (Boundary case for `run`'s entry point.)
+
+Witness `m`:
+- For `n = 0`: take `m = 0`. All conditions are vacuous (no vertices to constrain, no
+  values `k < 0` to require representatives for).
+- For `n ≥ 1`: take `m = 1`. Every entry is `0 < 1`; `0 ≤ 0`; for `k = 0` the witness is
+  `⟨0, hn⟩`. -/
+theorem IsPrefixTyping.replicate_zero :
+    @IsPrefixTyping n (Array.replicate n (0 : VertexType)) := by
+  by_cases hn : n = 0
+  · -- n = 0: no vertices; take m = 0.
+    subst hn
+    refine ⟨0, ?_, ?_, ?_⟩
+    · intro v; exact v.elim0
+    · intro v; exact v.elim0
+    · intro k hk; exact absurd hk (Nat.not_lt_zero _)
+  · -- n ≥ 1: take m = 1; the unique value 0 is held by vertex 0.
+    have hpos : 0 < n := Nat.pos_of_ne_zero hn
+    refine ⟨1, ?_, ?_, ?_⟩
+    · intro v; simp [v.isLt]
+    · intro v; simp [v.isLt]
+    · intro k hk
+      interval_cases k
+      exact ⟨⟨0, hpos⟩, by simp [hpos]⟩
+
 /-! ## §7.1  `convergeLoop` preserves prefix typings -/
 
 /-- `convergeLoop` maps prefix typings to prefix typings.

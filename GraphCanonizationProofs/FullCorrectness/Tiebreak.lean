@@ -86,6 +86,38 @@ theorem AdjMatrix.TypedAut_le_Aut (G : AdjMatrix n) (vts : Array VertexType) :
   intro σ hσ
   exact hσ.1
 
+/-! ## Decidability and finiteness of `TypedAut`
+
+For §6's strong induction on `|TypedAut G vts|`, we need a `Fintype` instance. As with
+`Aut G`, this follows from `Equiv.Perm (Fin n)` being finite (`n!`) plus decidable
+membership in `TypedAut G vts`. -/
+
+instance (vts : Array VertexType) (σ : Equiv.Perm (Fin n)) :
+    Decidable (VtsInvariant σ vts) :=
+  inferInstanceAs (Decidable (∀ v : Fin n,
+    vts.getD (σ v).val 0 = vts.getD v.val 0))
+
+instance (G : AdjMatrix n) (vts : Array VertexType) (σ : Equiv.Perm (Fin n)) :
+    Decidable (σ ∈ G.TypedAut vts) :=
+  inferInstanceAs (Decidable (G.permute σ = G ∧ VtsInvariant σ vts))
+
+instance (G : AdjMatrix n) (vts : Array VertexType) : Fintype (G.TypedAut vts) :=
+  Subtype.fintype _
+
+/-- The all-zeros array is σ-invariant for every σ. (Boundary case for the main
+theorem: `run` is invoked with `Array.replicate n 0` as the starting vertex types.) -/
+theorem VtsInvariant.replicate_zero (σ : Equiv.Perm (Fin n)) :
+    VtsInvariant σ (Array.replicate n (0 : VertexType)) := by
+  intro v
+  simp [v.isLt, (σ v).isLt]
+
+/-- For any `G`, every automorphism is in `TypedAut G (Array.replicate n 0)` — i.e. the
+typed-automorphism group with all-zeros types coincides with the full automorphism group. -/
+theorem TypedAut_replicate_zero (G : AdjMatrix n) :
+    G.TypedAut (Array.replicate n (0 : VertexType)) = G.Aut := by
+  ext σ
+  refine ⟨fun ⟨h, _⟩ => h, fun h => ⟨h, VtsInvariant.replicate_zero σ⟩⟩
+
 /-! ## §5  `breakTie` shrinks the typed-automorphism group
 
 Let `t₀` be the smallest repeated value in `vts`, `V_{t₀} := { v | vts[v] = t₀ }` its

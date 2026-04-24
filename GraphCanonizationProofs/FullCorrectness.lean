@@ -30,13 +30,20 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | Step | Subject                                           | File                                       | Status          |
 | ---- | ------------------------------------------------- | ------------------------------------------ | --------------- |
 | §1   | Automorphism group, orbits, `permute` action      | `Basic`, `Permutation`, `Automorphism`     | ✅ proved       |
+| §1.7 | `Fintype G.Aut` (decidability + finiteness)       | `Automorphism`                             | ✅ proved       |
 | §2   | `Isomorphic ↔ ∃σ, H = G.permute σ` bridge         | `Isomorphic`                               | ✅ proved       |
 | §3   | Pipeline equivariance under Aut(G) (Stages A–D)   | `Equivariance`                             | 🧱 stated, `sorry` |
-| §4   | `convergeLoop` output is Aut(G)-invariant         | `Equivariance`                             | 🧱 stated, `sorry` |
-| §5   | `breakTie` shrinks typed-automorphism group       | `Tiebreak`                                 | 🧱 stated, `sorry` |
+| §4   | `convergeOnce` Aut-invariance (1 step)            | `Equivariance`                             | 🧱 stated, `sorry` |
+| §4   | `convergeLoop` Aut-invariance (induction on fuel) | `Equivariance`                             | ✅ proved (modulo §4 1-step) |
+| §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                                 | ✅ defined       |
+| §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                                 | 🧱 stated, `sorry` |
+| §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                                 | 🧱 stated, `sorry` |
 | §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | 🧱 stated, `sorry` |
-| §7   | "Converged types are a prefix of ℕ" invariant     | `Invariants`                               | 🧱 stated, `sorry` |
-| §8   | Assemble `run_canonical`                          | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
+| §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                               | ✅ defined + boundary proved |
+| §7   | "Converged types are a prefix of ℕ" 4 invariants  | `Invariants`                               | 🧱 stated, `sorry` |
+| §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
+
+**Sorry count.** 5 (Equivariance) + 3 (Tiebreak) + 4 (Invariants) + 1 (Main) = **13 open obligations** in the new tree, all corresponding to clearly-stated theorems with detailed proof plans inline. The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
 
 --------------------------------------------------------------------------------
 
