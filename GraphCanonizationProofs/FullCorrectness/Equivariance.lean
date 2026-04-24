@@ -795,6 +795,117 @@ theorem calculatePathRankings_size_inv {vc : Nat} (state : PathState vc)
       · intro d hd; rw [setBetween_getD_size]; exact h_row d hd
       · intro d s hd hs; rw [setBetween_getD_getD_size]; exact h_cell d s hd hs
 
+/-! ### σ-equivariance of the comparison functions
+
+`calculatePathRankings_value_invariant` needs the three compare functions to be σ-equivariant
+on σ-invariant inputs. We prove `comparePathSegments` fully here; the stronger `PathsBetween`/
+`PathsFrom` versions also require `sortBy`'s `map`-respect lemma (proved below), and for
+the depth-positive `PathsBetween` case `orderInsensitiveListCmp`'s permutation-invariance
+(left for follow-up work). -/
+
+/-- `insertSorted` respects `map` when `f` preserves the comparison: inserting `f a` into
+a `f`-mapped sorted list equals `f`-mapping the result of inserting `a` into the original
+sorted list. -/
+private theorem insertSorted_map {α : Type} (f : α → α) (cmp : α → α → Ordering)
+    (h : ∀ a b : α, cmp (f a) (f b) = cmp a b) (a : α) (L : List α) :
+    insertSorted cmp (f a) (L.map f) = (insertSorted cmp a L).map f := by
+  induction L with
+  | nil => rfl
+  | cons b L ih =>
+    show insertSorted cmp (f a) (f b :: L.map f) = (insertSorted cmp a (b :: L)).map f
+    show (if cmp (f a) (f b) != .gt then f a :: f b :: L.map f
+          else f b :: insertSorted cmp (f a) (L.map f))
+       = (if cmp a b != .gt then a :: b :: L else b :: insertSorted cmp a L).map f
+    rw [h a b]
+    by_cases hc : cmp a b != .gt
+    · simp [hc]
+    · simp [hc, ih]
+
+/-- `sortBy` respects `map` when `f` preserves the comparison. The σ-equivariance form
+(below) instantiates `f := PathSegment.permute σ` and the σ-equivariance of
+`comparePathSegments`. -/
+private theorem sortBy_map {α : Type} (f : α → α) (cmp : α → α → Ordering)
+    (h : ∀ a b : α, cmp (f a) (f b) = cmp a b) (L : List α) :
+    sortBy cmp (L.map f) = (sortBy cmp L).map f := by
+  induction L with
+  | nil => rfl
+  | cons a L ih =>
+    show insertSorted cmp (f a) (sortBy cmp (L.map f))
+       = (insertSorted cmp a (sortBy cmp L)).map f
+    rw [ih, insertSorted_map f cmp h]
+
+/-- `orderInsensitiveListCmp` is invariant under `map`-ping both lists by an
+`f` that preserves the comparison. This handles the depth=0 branch of
+`PathsBetween.permute` (where `connectedSubPaths` is just `.map (PathSegment.permute σ)`). -/
+theorem orderInsensitiveListCmp_map {α : Type} (f : α → α) (cmp : α → α → Ordering)
+    (h : ∀ a b : α, cmp (f a) (f b) = cmp a b) (L₁ L₂ : List α) :
+    orderInsensitiveListCmp cmp (L₁.map f) (L₂.map f) = orderInsensitiveListCmp cmp L₁ L₂ := by
+  unfold orderInsensitiveListCmp
+  simp only [List.length_map]
+  by_cases hLen : L₁.length = L₂.length
+  · simp only [hLen]
+    rw [sortBy_map f cmp h L₁, sortBy_map f cmp h L₂]
+    -- Convert the zip-of-maps into a map-of-zip, then push the map through `foldl` and
+    -- collapse `cmp (f x) (f y)` to `cmp x y` via `h`.
+    rw [show ((sortBy cmp L₁).map f).zip ((sortBy cmp L₂).map f)
+          = ((sortBy cmp L₁).zip (sortBy cmp L₂)).map (fun (x, y) => (f x, f y)) by
+        rw [List.zip_map_right, List.zip_map_left, List.map_map]
+        congr]
+    rw [List.foldl_map]
+    -- The two foldl functions agree pointwise (by h); rewrite by function equality.
+    have hfn : (fun (x : Ordering) (y : α × α) =>
+                  if (x != Ordering.eq) = true then x
+                  else cmp ((fun (p : α × α) => (f p.1, f p.2)) y).1
+                            ((fun (p : α × α) => (f p.1, f p.2)) y).2)
+             = (fun (currentOrder : Ordering) (x : α × α) =>
+                  if (currentOrder != Ordering.eq) = true then currentOrder
+                  else cmp x.1 x.2) := by
+      funext x y
+      simp [h y.1 y.2]
+    rw [hfn]
+  · simp [hLen]
+
+/-- `comparePathSegments` is σ-equivariant when both the typing array and the
+`betweenRanks` function are σ-invariant. -/
+theorem comparePathSegments_σ_equivariant
+    {vc : Nat} (σ : Equiv.Perm (Fin vc))
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin vc, vts.getD (σ v).val 0 = vts.getD v.val 0)
+    (br : Nat → Nat → Nat → Nat)
+    (hbr : ∀ d : Nat, ∀ s e : Fin vc, br d (σ s).val (σ e).val = br d s.val e.val)
+    (p q : PathSegment vc) :
+    comparePathSegments vts br (PathSegment.permute σ p) (PathSegment.permute σ q)
+    = comparePathSegments vts br p q := by
+  cases p with
+  | bottom xVI =>
+    cases q with
+    | bottom yVI =>
+      -- LHS: compare (vts.getD (σ xVI).val 0) (vts.getD (σ yVI).val 0)
+      -- RHS: compare (vts.getD xVI.val 0) (vts.getD yVI.val 0)
+      -- σ-invariance of vts gives equality at each position.
+      show compare (vts.getD (σ xVI).val 0) (vts.getD (σ yVI).val 0)
+         = compare (vts.getD xVI.val 0) (vts.getD yVI.val 0)
+      rw [hvts xVI, hvts yVI]
+    | inner _ _ _ _ =>
+      -- Mixed bottom/inner hits the panic branch; both sides equal.
+      rfl
+  | inner xe xd xs xend =>
+    cases q with
+    | bottom _ =>
+      rfl
+    | inner ye yd ys yend =>
+      -- LHS compares inner segments with `(σ xs, σ xend)` and `(σ ys, σ yend)` endpoints.
+      -- σ-invariance of `br` gives the same `xRank`/`yRank` values as in the RHS.
+      show (let xRank := br xd (σ xs).val (σ xend).val
+            let yRank := br yd (σ ys).val (σ yend).val
+            if xRank != yRank then compare yRank xRank
+            else if xe != ye then compare ye xe else .eq)
+        = (let xRank := br xd xs.val xend.val
+           let yRank := br yd ys.val yend.val
+           if xRank != yRank then compare yRank xRank
+           else if xe != ye then compare ye xe else .eq)
+      rw [hbr xd xs xend, hbr yd ys yend]
+
 /-- The pointwise σ-invariance of `calculatePathRankings`'s output, separated from the
 size facts. **This is the deep content** — it requires σ-equivariance of the entire
 pipeline: `comparePathSegments`/`comparePathsBetween`/`comparePathsFrom` are σ-equivariant
