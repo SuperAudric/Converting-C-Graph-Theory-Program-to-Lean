@@ -87,9 +87,6 @@ def RankState.getFrom (rankState : RankState) (depth startIdx : Nat) : Nat :=
 
 /-! ## Helpers -/
 
-def getArrayRank (arr : Array VertexType) : Array VertexType :=
-  arr.map fun value => arr.foldl (fun smallerCount other => if other < value then smallerCount + 1 else smallerCount) 0
-
 def insertSorted {α : Type} (cmp : α → α → Ordering) (newItem : α) : List α → List α
   | []               => [newItem]
   | listHead :: listTail => if cmp newItem listHead != .gt then newItem :: listHead :: listTail else listHead :: insertSorted cmp newItem listTail
@@ -161,10 +158,14 @@ def initializePaths {vertexCount : Nat} (G : AdjMatrix vertexCount) : PathState 
                     vertices.map fun midFin =>
                       .inner (G.adj midFin endFin) (depthFin.val - 1) startFin midFin } } }
 
-/-! ## Ranking -/
+/-! ## Ranking
 
--- Assign ranks to a sorted list: rank = index of the first element in the equivalence class.
--- e.g. for sorted [a,a,b,c]: [(a,0),(a,0),(b,2),(c,3)]
+`assignRanks` produces **dense** ranks: each equivalence class gets a unique consecutive
+ordinal `0, 1, 2, …`. For example, sorted `[a, a, b, c]` ↦ `[(a,0), (a,0), (b,1), (c,2)]`.
+[sparse→dense] Was previously sparse (`[(a,0), (a,0), (b,2), (c,3)]`), where rank = first
+index of the class. The dense form is what `breakTie` (below) needs to maintain a clean
+prefix-of-ℕ invariant on the typing array. -/
+
 private def assignRanks {α : Type} (cmp : α → α → Ordering) (sorted : List α)
     : List (α × Nat) :=
   let (reversedList, _) := sorted.foldl
@@ -173,7 +174,7 @@ private def assignRanks {α : Type} (cmp : α → α → Ordering) (sorted : Lis
       let rank : Nat :=
         match lastEntry with
         | none                      => 0
-        | some (prevItem, prevRank) => if cmp prevItem item == .eq then prevRank else revList.length
+        | some (prevItem, prevRank) => if cmp prevItem item == .eq then prevRank else prevRank + 1
       ((item, rank) :: revList, some (item, rank)))
     (([] : List (α × Nat)), none)
   reversedList.reverse
@@ -237,9 +238,32 @@ def convergeLoop {vertexCount : Nat} (state : PathState vertexCount) (vertexType
     let (updatedTypes, changed) := convergeOnce state vertexTypes
     if changed then convergeLoop state updatedTypes fuel else updatedTypes
 
---This function collapses one symmetry by choosing one (the first is arbitrarily chosen) to come before the others in the partial ordering
---Choosing any other should result in the same output, as this represents choosing one automorphism to display
-def breakTie (vertexTypes : Array VertexType) (target : VertexType) : Array VertexType × Bool :=
+/-! ### `breakTie`
+
+`breakTie vts target` collapses one symmetry by promoting all-but-one of the vertices in
+the value-`target` class to value `target + 1`. To remain compatible with **dense** input
+typings (where `target + 1` is the next class's value), it first opens a one-slot gap by
+shifting every value `> target` up by one. After the shift, value `target + 1` is empty,
+and the promotion fills it with the (k − 1) promoted vertices.
+
+[sparse→dense] Originally `breakTie` was a single fold over the input array that promoted
+in-place. That worked only because **sparse** ranks left a gap of size `≥ k` after every
+class of size `k`, so promoting to `target + 1` could not collide with the next class. With
+dense ranks the gap is gone, hence the `shiftAbove` pre-pass.
+
+The whole operation is gated on `count ≥ 2`: when there is no tie to break, we leave `vts`
+untouched. Shifting unconditionally would create a spurious gap and break the dense-prefix
+invariant maintained by the outer loop. -/
+
+/-- Shift every value strictly greater than `target` up by 1, opening a gap at `target + 1`. -/
+def shiftAbove (target : VertexType) (vts : Array VertexType) : Array VertexType :=
+  vts.map (fun v => if v > target then v + 1 else v)
+
+/-- The promote stage of `breakTie`: keep the first vertex with value `target` at `target`
+and bump every other such vertex to `target + 1`. Assumes there is no existing `target + 1`
+class to collide with (caller's responsibility — the outer `breakTie` ensures this via
+`shiftAbove`). -/
+def breakTiePromote (vertexTypes : Array VertexType) (target : VertexType) : Array VertexType × Bool :=
   let result := (List.range vertexTypes.size).foldl
     (fun (triple : Array VertexType × Bool × Bool) vertexIdx =>
       let (typeArray, firstAppearance, changed) := triple
@@ -251,6 +275,14 @@ def breakTie (vertexTypes : Array VertexType) (target : VertexType) : Array Vert
   let (typeArray, _, changed) := result
   (typeArray, changed)
 
+/-- Top-level tiebreak: if at least two vertices share value `target`, open a gap above
+`target` (`shiftAbove`) and then promote all-but-one to `target + 1`. Otherwise return
+`vts` unchanged. The gating preserves dense typings as input/output. -/
+def breakTie (vertexTypes : Array VertexType) (target : VertexType) : Array VertexType × Bool :=
+  let count := vertexTypes.foldl (fun c v => if v == target then c + 1 else c) 0
+  if count < 2 then (vertexTypes, false)
+  else breakTiePromote (shiftAbove target vertexTypes) target
+
 def orderVertices {vertexCount : Nat} (state : PathState vertexCount) (vertexTypes : Array VertexType) : Array VertexType :=
   (List.range vertexCount).foldl
     (fun currentTypes targetPosition =>
@@ -260,6 +292,16 @@ def orderVertices {vertexCount : Nat} (state : PathState vertexCount) (vertexTyp
 
 /-! ## Edge labeling -/
 
+/-- Assign a unique position in `[0, numVertices)` to each vertex, using `vertexRankings`
+as the primary key and the vertex index as a tiebreaker. The result is a permutation:
+`output[v] = position of v in the sort by (vertexRankings[v], v)`. Used by
+`labelEdgesAccordingToRankings` to map vertices to their canonical positions when ranks
+are guaranteed all-distinct (the post-`orderVertices` invariant from §7).
+
+Note: this is **not** a "dense rank" in the rank-statistics sense — it does not assign
+equal output values to ties. It assumes ties have already been broken by §7. The name
+is preserved for backward compatibility; see `getArrayRank` below for the proper dense
+ranking that we use as the entry-point normalization. -/
 def computeDenseRanks (numVertices : Nat) (vertexRankings : Array VertexType) : Array Nat :=
   let pairs : List (VertexType × Nat) := (List.range numVertices).map fun vertexIdx => (vertexRankings.getD vertexIdx 0, vertexIdx)
   let cmp : (VertexType × Nat) → (VertexType × Nat) → Ordering :=
@@ -268,6 +310,31 @@ def computeDenseRanks (numVertices : Nat) (vertexRankings : Array VertexType) : 
   (List.range sorted.length).foldl
     (fun (positionArray : Array Nat) sortedIdx => positionArray.set! (sorted.getD sortedIdx (0, 0)).2 sortedIdx)
     ((Array.range numVertices).map fun _ => 0)
+
+/-- True dense rank of each entry: replaces each value in `arr` by the number of distinct
+values strictly less than it. Ties are preserved. For example,
+`[5, 0, 5, 3]` ↦ `[2, 0, 2, 1]` (values `0 < 3 < 5`).
+
+[sparse→dense] Was previously "count of strictly smaller values" (sparse-style — for the
+example, gave `[3, 0, 3, 1]`). Both forms preserve the partition and the order, so
+downstream comparisons are unaffected; the dense form keeps the `IsPrefixTyping` invariant
+true at the entry point of `run`. -/
+def getArrayRank (arr : Array VertexType) : Array VertexType :=
+  let pairs : List (VertexType × Nat) :=
+    (List.range arr.size).map fun i => (arr.getD i 0, i)
+  let sorted := sortBy (fun (a b : VertexType × Nat) => compare a.1 b.1) pairs
+  let (assignmentsRev, _) := sorted.foldl
+    (fun (acc : List (Nat × Nat) × Option (VertexType × Nat))
+         (item : VertexType × Nat) =>
+      let (revList, last) := acc
+      let rank : Nat := match last with
+        | none                       => 0
+        | some (lastVal, lastRank)   => if lastVal == item.1 then lastRank else lastRank + 1
+      ((item.2, rank) :: revList, some (item.1, rank)))
+    (([] : List (Nat × Nat)), none)
+  assignmentsRev.foldl
+    (fun (out : Array VertexType) (entry : Nat × Nat) => out.set! entry.1 entry.2)
+    (Array.replicate arr.size 0)
 
 def labelEdgesAccordingToRankings {vertexCount : Nat}
     (vertexRankings : Array VertexType) (G : AdjMatrix vertexCount) : AdjMatrix vertexCount :=

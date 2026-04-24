@@ -70,13 +70,10 @@ proofs structurally simpler. Three changes:
      `pathsToVertex` lists (which are still `List`s, hence `Nat`-indexed by position),
      but is now used only for that residual case.
 
-**Dense-rank deferred.** The fourth recommended change (dense-rank inline in
-`convergeOnce`) was deferred because it requires also fixing `breakTie`'s "promote all
-but one" logic to avoid value collisions with the next dense rank. Sparse rank +
-"promote all but one" was the original deliberate design choice for that reason. To
-flip to dense, `breakTie` would need to also bump every value `≥ target + 1` by
-(class-size − 1) on each call, which is a non-trivial change to a function whose
-proofs are already mostly complete.
+**Dense-rank migration in progress.** The fourth recommended algorithm change
+(dense-rank inline in `convergeOnce`) is now being applied. See "## Sparse → Dense
+Ranking Migration Notes" further down for the design, the affected proofs, and a
+checklist of follow-up items to verify after the migration lands.
 
 §5.1 and §5.2 are proved with stronger hypotheses than the original plan (see the "§5
 hypothesis revisions" note below). §6 (`tiebreak_choice_independent`) is closed by
@@ -157,6 +154,128 @@ breakTieAt_getD_keep        : (breakTieAt vts t₀ keep)[keep] = vts[keep]
 breakTieAt_getD_promoted    : w ≠ keep ∧ vts[w] = t₀ → (breakTieAt vts t₀ keep)[w] = t₀ + 1
 breakTieAt_VtsInvariant_eq  : [τ-equivariance under VtsInvariant τ vts]
 ```
+
+--------------------------------------------------------------------------------
+
+## Sparse → Dense Ranking Migration Notes
+
+**Why these notes exist.** Switching `assignRanks` from sparse (rank = first-index-of-class
+in sorted order) to dense (rank = number-of-classes-strictly-below) requires a coordinated
+change to `breakTie`, because sparse ranks deliberately leave gaps that `breakTie`'s
+"promote one tied vertex to `target + 1`" relied on for collision-freedom. With dense
+ranks there is no gap, so promotion to `target + 1` would collide with the next class.
+The fix is shift-then-promote: bump every value `> target` up by one to open a gap, then
+do the existing promote pass into the gap.
+
+This section catalogs everything that depends on the current sparse-rank semantics, so
+each item can be re-verified against the new dense-rank semantics during the migration.
+Each item is tagged `[sparse→dense]` for greppability.
+
+### Algorithm-level changes
+
+  **[sparse→dense]** **`assignRanks`** ([LeanGraphCanonizerV4.lean:163](LeanGraphCanonizerV4.lean#L163)).
+   Currently `rank := if cmp prevItem item == .eq then prevRank else revList.length`.
+   New: `rank := if cmp prevItem item == .eq then prevRank else prevRank + 1`.
+   Watch for: anywhere downstream that assumed rank = "position in sorted order" rather
+   than "ordinal of equivalence class". Comparisons still use `compare` on ranks, which
+   is invariant under any monotone bijection — so `comparePathSegments`,
+   `comparePathsBetween`, `comparePathsFrom` are all unaffected.
+
+  **[sparse→dense]** **`getArrayRank`** ([LeanGraphCanonizerV4.lean:88](LeanGraphCanonizerV4.lean#L88)).
+   Currently `arr.foldl (fun c other => if other < value then c + 1 else c) 0` per entry —
+   this is "count of strictly smaller values", not dense rank. For value `v` in `[0, 1, 1, 2]`,
+   the original gives `[0, 1, 1, 3]` (count of smaller); dense should give `[0, 1, 1, 2]`.
+   Replace by `computeDenseRanks arr.size arr` (already in the codebase, used at the end
+   of `labelEdgesAccordingToRankings`).
+
+  **[sparse→dense]** **`breakTie`** ([LeanGraphCanonizerV4.lean:248](LeanGraphCanonizerV4.lean#L248)).
+   Decompose into `shiftAbove` + `breakTiePromote` (the latter is the current `breakTie`
+   body, renamed). Top-level `breakTie` first counts target-valued entries; if `< 2` it's
+   a no-op (preserving denseness), else applies shift then promote. The gating matters:
+   shifting unconditionally would create gaps when no promotion happens, breaking the
+   prefix invariant that motivates this whole change.
+
+### Proof-level impacts
+
+  **[sparse→dense]** **`breakTie_getD_of_ne`** ([Tiebreak.lean:240](FullCorrectness/Tiebreak.lean#L240))
+   no longer holds as stated (`vts[j] > t₀` positions get bumped). Replace with two lemmas:
+   `breakTie_getD_below : vts[j] < t₀ → output[j] = vts[j]` and
+   `breakTie_getD_above : vts[j] > t₀ → output[j] = vts[j] + 1`.
+
+  **[sparse→dense]** **`breakTie_Aut_stabilizer`** ([Tiebreak.lean:528](FullCorrectness/Tiebreak.lean#L528))
+   statement unchanged, proof rewrites the "non-target unchanged" case as the below/above
+   split. The high-level argument (σ preserves post-vts ⇔ σ ∈ TypedAut vts ∧ σ v* = v*)
+   survives because shift is a bijection on value labels and `TypedAut` depends only on
+   the vertex partition, not the labels.
+
+  **[sparse→dense]** **`breakTieAt`** ([Tiebreak.lean:750](FullCorrectness/Tiebreak.lean#L750))
+   and its lemma block need the symmetric shift-then-keep treatment. Same risk profile as
+   `breakTie`.
+
+  **[sparse→dense]** **`btFold_*` infrastructure** ([Tiebreak.lean:187](FullCorrectness/Tiebreak.lean#L187)
+   onward) is *not* invalidated — it now describes `breakTiePromote` (the second stage of
+   the new `breakTie`). Add a small companion block of `shiftAbove_*` lemmas (size,
+   below/above value characterization) and one `breakTie_eq_compose` lemma stitching them.
+
+  **[sparse→dense]** **`breakTie_targetPos_is_min_tied`** ([Invariants.lean:107](FullCorrectness/Invariants.lean#L107))
+   is already proved; the proof uses `breakTie_getD_of_ne`. Replace those uses with the
+   below/above split. The "val < p" branch becomes `breakTie_getD_below`; "val = p"
+   branch is unchanged.
+
+### Downstream payoff (proofs that newly become tractable)
+
+  **[sparse→dense]** **`convergeLoop_preserves_prefix`** ([Invariants.lean:78](FullCorrectness/Invariants.lean#L78))
+   currently has the explicit "this may not hold under sparse ranks" caveat (R2 in the
+   plan, and the file header). With dense `assignRanks`, `convergeOnce` writes values from
+   `{0, 1, …, m−1}` directly, and the proof becomes induction on fuel + the new dense
+   characterization of `assignRanks` output. **The R2 risk and the file-header caveat
+   should both be removed/rewritten after the migration succeeds.**
+
+  **[sparse→dense]** **`orderVertices_prefix_invariant`** ([Invariants.lean:173](FullCorrectness/Invariants.lean#L173))
+   inductive step needs `breakTie` to preserve the prefix property when fired and be a
+   no-op otherwise — both ensured by the new `breakTie` design.
+
+  **[sparse→dense]** **`orderVertices_n_distinct_ranks`** ([Invariants.lean:187](FullCorrectness/Invariants.lean#L187))
+   becomes a corollary at p = n.
+
+### Tests to re-run / re-verify
+
+  **[sparse→dense]** **`LeanGraphCanonizerV4Tests.lean` `#guard` checks.** Final canonical
+   forms should be unchanged because `labelEdgesAccordingToRankings` already calls
+   `computeDenseRanks` at the end, so any sparse-vs-dense difference in intermediate vts
+   is squashed by that final pass. **But verify** by rebuilding the test target — most
+   `#guard` checks are equality between two canonical forms (invariant), but a few
+   compare against literal strings (e.g. the `smoke_*` block) and could regress.
+
+  **[sparse→dense]** **`countUniqueCanonicals` checks** (OEIS A000088). These compare
+   *string equality* of canonical forms across all bitmask graphs of size n. The dense
+   change shouldn't affect the equality classes (same partition either way), but if it
+   does, the count would go wrong. Run `countUniqueCanonicals 4 == 11` as a sanity check.
+
+  **[sparse→dense]** **`vtPointed = #[0, 1, 1, 1, 4, 5, 6]`** ([LeanGraphCanonizerV4Tests.lean:74](LeanGraphCanonizerV4Tests.lean#L74))
+   currently uses sparse-style starting types. After `getArrayRank` switches to dense,
+   this densifies to `#[0, 1, 1, 1, 2, 3, 4]` at the entry point. The two `g1Pointed`/
+   `g2Pointed` graphs should still produce equal canonical forms (the partition under
+   the densified vts is the same: vertex 0 alone in class 0, vertices 1/2/3 in class 1,
+   vertex 4 in class 2, etc.). Verify this `#guard` still passes after the migration.
+
+### Fallback if `breakTie_Aut_stabilizer` rewrite blows up
+
+If the proof rewrite turns out to be more than ~50 lines beyond what the current proof
+spends on `breakTie_getD_of_ne`-driven case analysis, the cleaner factoring is:
+
+  1. Keep `breakTiePromote` with the *current* `breakTie_Aut_stabilizer` proof verbatim
+     (literally the existing proof, applied to `breakTiePromote` instead of `breakTie`).
+  2. Prove a one-liner `shiftAbove_TypedAut_eq : TypedAut G (shiftAbove t vts) = TypedAut G vts`
+     using the bijective-relabeling argument (one direction is `Array.map` preservation
+     of the partition; the other direction uses that `shiftAbove t` is injective on the
+     value set actually appearing in vts).
+  3. Compose: `TypedAut G (breakTie vts t₀) = TypedAut G (breakTiePromote (shiftAbove t₀ vts) t₀)`
+     `= [stabilizer of v_star in TypedAut G (shiftAbove t₀ vts)]` (by step 1)
+     `= [stabilizer of v_star in TypedAut G vts]` (by step 2).
+
+This factoring keeps the existing proof intact and adds ~30 lines of bijection-of-labels
+plumbing instead of rewriting the case analysis.
 
 --------------------------------------------------------------------------------
 

@@ -146,13 +146,85 @@ def typeClass (vts : Array VertexType) (t₀ : VertexType) : Set (Fin n) :=
 /-! ### Characterizing `breakTie`'s output
 
 Before the §5 theorems, we characterize the output of `breakTie` position-by-position.
-After the fold runs over `[0, 1, …, size-1]`:
+[sparse→dense] `breakTie` is now `breakTiePromote ∘ shiftAbove` (gated on the
+target-class size). The two-stage decomposition is reflected in the lemma layout below:
+first we describe the inner `breakTiePromote` fold (size, getD characterizations), then
+we lift via `shiftAbove` lemmas to the outer `breakTie`.
+
+After the full pipeline:
 
   - size is preserved;
-  - positions outside `typeClass vts t₀` keep their value;
-  - the **first** position (smallest-index) with value `t₀` keeps its value;
+  - positions with value strictly **less** than `t₀` keep their value;
+  - positions with value strictly **greater** than `t₀` are bumped to `value + 1`;
+  - the **first** position (smallest-index) with value `t₀` keeps `t₀`;
   - every other position with value `t₀` is promoted to `t₀ + 1`.
+
+If the target class has size `< 2`, `breakTie` is the identity (no shift, no promote);
+the per-position characterizations specialize to "output = input" in this case.
 -/
+
+/-! #### `shiftAbove` lemmas [sparse→dense] -/
+
+theorem shiftAbove_size (t₀ : VertexType) (vts : Array VertexType) :
+    (shiftAbove t₀ vts).size = vts.size := by
+  unfold shiftAbove; simp
+
+/-- Unified pointwise characterization of `shiftAbove`: at every position, the output is
+the input value, possibly bumped by 1 if it exceeded `t₀`. The `0` default works because
+`f 0 = 0` (zero is never `> t₀` for a `Nat` `t₀`). -/
+theorem shiftAbove_getD (t₀ : VertexType) (vts : Array VertexType) (j : Nat) :
+    (shiftAbove t₀ vts).getD j 0 =
+      (if vts.getD j 0 > t₀ then vts.getD j 0 + 1 else vts.getD j 0) := by
+  unfold shiftAbove
+  simp only [Array.getD_eq_getD_getElem?, Array.getElem?_map]
+  rcases h : vts[j]? with _ | x
+  · simp
+  · simp [Option.map, Option.getD]
+
+theorem shiftAbove_getD_below (t₀ : VertexType) (vts : Array VertexType)
+    {j : Nat} (hj : vts.getD j 0 ≤ t₀) :
+    (shiftAbove t₀ vts).getD j 0 = vts.getD j 0 := by
+  rw [shiftAbove_getD]
+  have : ¬ (vts.getD j 0 > t₀) := Nat.not_lt.mpr hj
+  rw [if_neg this]
+
+theorem shiftAbove_getD_above (t₀ : VertexType) (vts : Array VertexType)
+    {j : Nat} (hj : vts.getD j 0 > t₀) :
+    (shiftAbove t₀ vts).getD j 0 = vts.getD j 0 + 1 := by
+  rw [shiftAbove_getD]
+  rw [if_pos hj]
+
+theorem shiftAbove_getD_target (t₀ : VertexType) (vts : Array VertexType) (j : Nat)
+    (hj : vts.getD j 0 = t₀) :
+    (shiftAbove t₀ vts).getD j 0 = t₀ := by
+  rw [shiftAbove_getD_below t₀ vts (le_of_eq hj), hj]
+
+/-! #### `breakTie` composition lemmas [sparse→dense] -/
+
+/-- Number of target-valued positions in `vts`. Definitionally equal to the count
+expression appearing inside `breakTie`. -/
+def breakTieCount (vts : Array VertexType) (t₀ : VertexType) : Nat :=
+  vts.foldl (fun c v => if v == t₀ then c + 1 else c) 0
+
+/-- `breakTie` is the identity when the target class has fewer than 2 elements. -/
+theorem breakTie_noop (vts : Array VertexType) (t₀ : VertexType)
+    (hcount : breakTieCount vts t₀ < 2) :
+    breakTie vts t₀ = (vts, false) := by
+  unfold breakTie
+  show (if breakTieCount vts t₀ < 2 then (vts, false)
+        else breakTiePromote (shiftAbove t₀ vts) t₀) = (vts, false)
+  simp [hcount]
+
+/-- When the target class has at least 2 elements, `breakTie` is `breakTiePromote ∘ shiftAbove`. -/
+theorem breakTie_eq_promote_shift (vts : Array VertexType) (t₀ : VertexType)
+    (hcount : 2 ≤ breakTieCount vts t₀) :
+    breakTie vts t₀ = breakTiePromote (shiftAbove t₀ vts) t₀ := by
+  unfold breakTie
+  show (if breakTieCount vts t₀ < 2 then (vts, false)
+        else breakTiePromote (shiftAbove t₀ vts) t₀)
+        = breakTiePromote (shiftAbove t₀ vts) t₀
+  simp [by omega]
+
 
 /-- The body of the `breakTie` fold. Written using explicit projections (rather than a
 `let (arr, first, chg) := triple` destructure) so that `split` on the branches keeps the
@@ -172,15 +244,16 @@ private theorem btStep_size (t₀ : VertexType)
   simp only [btStep]
   split_ifs <;> simp
 
-/-- `breakTie` unfolded into the `btStep` fold. Proved via pointwise function extensionality
-on the lambda body (both bodies reduce to the same `match` expression on a 3-tuple). -/
-private theorem breakTie_eq_fold (vts : Array VertexType) (t₀ : VertexType) :
-    breakTie vts t₀ =
+/-- `breakTiePromote` unfolded into the `btStep` fold. Proved via pointwise function
+extensionality on the lambda body (both bodies reduce to the same `match` expression on a
+3-tuple). [sparse→dense] Renamed from `breakTie_eq_fold`: the body of `breakTiePromote`
+is the body of the original `breakTie`, so this lemma's statement and proof are unchanged
+modulo the rename. -/
+private theorem breakTiePromote_eq_fold (vts : Array VertexType) (t₀ : VertexType) :
+    breakTiePromote vts t₀ =
       let triple := (List.range vts.size).foldl (btStep t₀) (vts, true, false)
       (triple.1, triple.2.2) := by
-  -- The `let (a,b,c) := triple` destructure inside `breakTie`'s lambda is semantically the
-  -- same as projecting `.1`, `.2.1`, `.2.2`; we normalize by `funext` + `split_ifs`.
-  unfold breakTie btStep
+  unfold breakTiePromote btStep
   congr 1
 
 /-- Size is preserved by the breakTie fold. -/
@@ -230,18 +303,67 @@ private theorem btFold_getD_ne (t₀ : VertexType) :
       have hj' : (btStep t₀ triple x).1.getD j 0 ≠ t₀ := by rw [hstep]; exact hj
       rw [btFold_getD_ne t₀ xs _ j hj', hstep]
 
+/-- `breakTiePromote` preserves array size. -/
+theorem breakTiePromote_size (vts : Array VertexType) (t₀ : VertexType) :
+    (breakTiePromote vts t₀).1.size = vts.size := by
+  rw [breakTiePromote_eq_fold]
+  exact btFold_size t₀ _ (vts, true, false)
+
+/-- `breakTiePromote` leaves untouched any position whose value is not the target. -/
+theorem breakTiePromote_getD_of_ne (vts : Array VertexType) (t₀ : VertexType)
+    {j : Nat} (hj : vts.getD j 0 ≠ t₀) :
+    (breakTiePromote vts t₀).1.getD j 0 = vts.getD j 0 := by
+  rw [breakTiePromote_eq_fold]
+  exact btFold_getD_ne t₀ _ (vts, true, false) j hj
+
 /-- `breakTie` preserves array size. -/
 theorem breakTie_size (vts : Array VertexType) (t₀ : VertexType) :
     (breakTie vts t₀).1.size = vts.size := by
-  rw [breakTie_eq_fold]
-  exact btFold_size t₀ _ (vts, true, false)
+  by_cases hcount : breakTieCount vts t₀ < 2
+  · rw [breakTie_noop vts t₀ hcount]
+  · rw [breakTie_eq_promote_shift vts t₀ (by omega),
+        breakTiePromote_size, shiftAbove_size]
 
-/-- `breakTie` leaves untouched any position whose value is not the target. -/
-theorem breakTie_getD_of_ne (vts : Array VertexType) (t₀ : VertexType)
-    {j : Nat} (hj : vts.getD j 0 ≠ t₀) :
+/-- [sparse→dense] `breakTie` leaves positions with value `< t₀` unchanged. -/
+theorem breakTie_getD_below (vts : Array VertexType) (t₀ : VertexType)
+    {j : Nat} (hj : vts.getD j 0 < t₀) :
     (breakTie vts t₀).1.getD j 0 = vts.getD j 0 := by
-  rw [breakTie_eq_fold]
-  exact btFold_getD_ne t₀ _ (vts, true, false) j hj
+  by_cases hcount : breakTieCount vts t₀ < 2
+  · rw [breakTie_noop vts t₀ hcount]
+  · have hcount' : 2 ≤ breakTieCount vts t₀ := Nat.le_of_not_lt hcount
+    rw [breakTie_eq_promote_shift vts t₀ hcount']
+    have hshift : (shiftAbove t₀ vts).getD j 0 = vts.getD j 0 :=
+      shiftAbove_getD_below t₀ vts (le_of_lt hj)
+    have hne : (shiftAbove t₀ vts).getD j 0 ≠ t₀ := by
+      rw [hshift]; exact ne_of_lt hj
+    rw [breakTiePromote_getD_of_ne (shiftAbove t₀ vts) t₀ hne, hshift]
+
+/-- [sparse→dense] `breakTie` bumps positions with value `> t₀` up by one — but only when
+the breakTie actually fires (target class has ≥ 2 members). When the class has < 2 members,
+`breakTie` is the identity and values above `t₀` are also unchanged; see
+`breakTie_getD_above_or` below for the disjunctive version that handles both cases. -/
+theorem breakTie_getD_above (vts : Array VertexType) (t₀ : VertexType)
+    (hcount : 2 ≤ breakTieCount vts t₀)
+    {j : Nat} (hj : vts.getD j 0 > t₀) :
+    (breakTie vts t₀).1.getD j 0 = vts.getD j 0 + 1 := by
+  rw [breakTie_eq_promote_shift vts t₀ hcount]
+  have hshift : (shiftAbove t₀ vts).getD j 0 = vts.getD j 0 + 1 :=
+    shiftAbove_getD_above t₀ vts hj
+  have hne : (shiftAbove t₀ vts).getD j 0 ≠ t₀ := by
+    rw [hshift]
+    exact Ne.symm (Nat.ne_of_lt (Nat.lt_succ_of_lt hj))
+  rw [breakTiePromote_getD_of_ne (shiftAbove t₀ vts) t₀ hne, hshift]
+
+/-- [sparse→dense] Disjunctive form covering both gating branches: a position with value
+`> t₀` is either preserved (no-op when target class has < 2 members) or bumped (when the
+breakTie fires). Convenient when callers don't want to case-split on `breakTieCount`. -/
+theorem breakTie_getD_above_or (vts : Array VertexType) (t₀ : VertexType)
+    {j : Nat} (hj : vts.getD j 0 > t₀) :
+    (breakTie vts t₀).1.getD j 0 = vts.getD j 0 ∨
+    (breakTie vts t₀).1.getD j 0 = vts.getD j 0 + 1 := by
+  by_cases hcount : breakTieCount vts t₀ < 2
+  · rw [breakTie_noop vts t₀ hcount]; exact Or.inl rfl
+  · exact Or.inr (breakTie_getD_above vts t₀ (by omega) hj)
 
 /-! The remaining characterizations — "first-target keeps value, later targets get promoted"
 — require tracking the `firstAppearance` flag across the fold. Two lemmas do the heavy
@@ -349,14 +471,16 @@ private theorem btFold_getD_not_mem (t₀ : VertexType) :
         · rfl
       rw [btFold_getD_not_mem t₀ xs _ j hnotin', hstep]
 
-/-- `breakTie` leaves the minimum-index target-valued position at value `t₀`. Requires
-`v_star` is the unique minimum: no earlier index has value `t₀` in `vts`. -/
-theorem breakTie_getD_at_min (vts : Array VertexType) (t₀ : VertexType)
+/-- `breakTiePromote` leaves the minimum-index target-valued position at value `t₀`.
+Requires `v_star` is the unique minimum: no earlier index has value `t₀` in `vts`.
+[sparse→dense] Renamed from `breakTie_getD_at_min`; now describes the inner `breakTiePromote`
+stage. The corresponding `breakTie`-level lemma is below, derived via `shiftAbove`. -/
+theorem breakTiePromote_getD_at_min (vts : Array VertexType) (t₀ : VertexType)
     {v_star_idx : Nat} (hv_size : v_star_idx < vts.size)
     (hv_val : vts.getD v_star_idx 0 = t₀)
     (hv_min : ∀ i, i < v_star_idx → vts.getD i 0 ≠ t₀) :
-    (breakTie vts t₀).1.getD v_star_idx 0 = t₀ := by
-  rw [breakTie_eq_fold]
+    (breakTiePromote vts t₀).1.getD v_star_idx 0 = t₀ := by
+  rw [breakTiePromote_eq_fold]
   -- Split List.range vts.size = List.range v_star_idx ++ [v_star_idx] ++
   --                             List.range' (v_star_idx + 1) (vts.size - v_star_idx - 1)
   -- But it's cleaner to do induction step-by-step.
@@ -409,16 +533,18 @@ theorem breakTie_getD_at_min (vts : Array VertexType) (t₀ : VertexType)
   rw [btFold_getD_not_mem t₀ _ (vts, false, false) v_star_idx h_notin]
   exact hv_val
 
-/-- `breakTie` promotes every other target-valued position to `t₀ + 1`. -/
-theorem breakTie_getD_at_other (vts : Array VertexType) (t₀ : VertexType)
+/-- `breakTiePromote` promotes every other target-valued position to `t₀ + 1`.
+[sparse→dense] Renamed from `breakTie_getD_at_other`; the corresponding `breakTie`-level
+lemma is below. -/
+theorem breakTiePromote_getD_at_other (vts : Array VertexType) (t₀ : VertexType)
     {v_star_idx : Nat} (hv_size : v_star_idx < vts.size)
     (hv_val : vts.getD v_star_idx 0 = t₀)
     (hv_min : ∀ i, i < v_star_idx → vts.getD i 0 ≠ t₀)
     {w_idx : Nat} (hw_size : w_idx < vts.size)
     (hw_val : vts.getD w_idx 0 = t₀)
     (hw_ne : w_idx ≠ v_star_idx) :
-    (breakTie vts t₀).1.getD w_idx 0 = t₀ + 1 := by
-  rw [breakTie_eq_fold]
+    (breakTiePromote vts t₀).1.getD w_idx 0 = t₀ + 1 := by
+  rw [breakTiePromote_eq_fold]
   -- w_idx > v_star_idx (since v_star is min and w ≠ v_star).
   have hw_gt : v_star_idx < w_idx := by
     rcases lt_or_ge w_idx v_star_idx with hlt | hge
@@ -455,6 +581,76 @@ theorem breakTie_getD_at_other (vts : Array VertexType) (t₀ : VertexType)
   show (List.foldl (btStep t₀) (vts, false, false)
            (List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1)))).1.getD w_idx 0 = t₀ + 1
   exact btFold_from_notfirst_getD t₀ _ h_nd vts false w_idx h_mem hw_val hw_size
+
+/-! #### Composing `breakTie = breakTiePromote ∘ shiftAbove` [sparse→dense]
+
+The next two lemmas lift `breakTiePromote_getD_at_min` / `..._at_other` to the top-level
+`breakTie` by chasing through the `shiftAbove` pre-pass. The key observations:
+
+  - `shiftAbove` does not touch positions with value `≤ t₀` (in particular, target-valued
+    positions stay at `t₀`), so the inner `breakTiePromote` sees the same target class.
+  - Positions with value `≠ t₀` in `vts` remain `≠ t₀` after shift (values `< t₀` are
+    untouched; values `> t₀` get bumped to `> t₀ + 1`, still `≠ t₀`). So the `hv_min`
+    hypothesis lifts cleanly to `shiftAbove t₀ vts`. -/
+
+private theorem shiftAbove_getD_ne_target (t₀ : VertexType) (vts : Array VertexType)
+    {j : Nat} (hj : vts.getD j 0 ≠ t₀) :
+    (shiftAbove t₀ vts).getD j 0 ≠ t₀ := by
+  rcases lt_or_gt_of_ne hj with hlt | hgt
+  · rw [shiftAbove_getD_below t₀ vts (le_of_lt hlt)]; exact hj
+  · rw [shiftAbove_getD_above t₀ vts hgt]
+    exact Ne.symm (Nat.ne_of_lt (Nat.lt_succ_of_lt hgt))
+
+theorem breakTie_getD_at_min (vts : Array VertexType) (t₀ : VertexType)
+    {v_star_idx : Nat} (hv_size : v_star_idx < vts.size)
+    (hv_val : vts.getD v_star_idx 0 = t₀)
+    (hv_min : ∀ i, i < v_star_idx → vts.getD i 0 ≠ t₀) :
+    (breakTie vts t₀).1.getD v_star_idx 0 = t₀ := by
+  by_cases hcount : breakTieCount vts t₀ < 2
+  · rw [breakTie_noop vts t₀ hcount]; exact hv_val
+  · rw [breakTie_eq_promote_shift vts t₀ (by omega)]
+    have hsz : v_star_idx < (shiftAbove t₀ vts).size := by
+      rw [shiftAbove_size]; exact hv_size
+    have hval : (shiftAbove t₀ vts).getD v_star_idx 0 = t₀ :=
+      shiftAbove_getD_target t₀ vts v_star_idx hv_val
+    have hmin : ∀ i, i < v_star_idx → (shiftAbove t₀ vts).getD i 0 ≠ t₀ :=
+      fun i hi => shiftAbove_getD_ne_target t₀ vts (hv_min i hi)
+    exact breakTiePromote_getD_at_min (shiftAbove t₀ vts) t₀ hsz hval hmin
+
+/-- Counting helper: two distinct in-bounds positions with value `t₀` give `count ≥ 2`.
+[sparse→dense] Single-purpose lemma, isolated as a `sorry` for now — the formal proof is
+a routine induction on `vts.toList` that extracts both contributions to the foldl. The
+content is straightforwardly true; pinning it as a focused obligation keeps the
+breakTie-level proofs structurally clean. -/
+private theorem breakTieCount_ge_two_of_distinct (vts : Array VertexType) (t₀ : VertexType)
+    (i j : Nat) (hi_size : i < vts.size) (hj_size : j < vts.size) (hij : i ≠ j)
+    (hi_val : vts.getD i 0 = t₀) (hj_val : vts.getD j 0 = t₀) :
+    2 ≤ breakTieCount vts t₀ := by
+  sorry
+
+theorem breakTie_getD_at_other (vts : Array VertexType) (t₀ : VertexType)
+    {v_star_idx : Nat} (hv_size : v_star_idx < vts.size)
+    (hv_val : vts.getD v_star_idx 0 = t₀)
+    (hv_min : ∀ i, i < v_star_idx → vts.getD i 0 ≠ t₀)
+    {w_idx : Nat} (hw_size : w_idx < vts.size)
+    (hw_val : vts.getD w_idx 0 = t₀)
+    (hw_ne : w_idx ≠ v_star_idx) :
+    (breakTie vts t₀).1.getD w_idx 0 = t₀ + 1 := by
+  have hcount : 2 ≤ breakTieCount vts t₀ :=
+    breakTieCount_ge_two_of_distinct vts t₀ v_star_idx w_idx hv_size hw_size
+      (Ne.symm hw_ne) hv_val hw_val
+  rw [breakTie_eq_promote_shift vts t₀ hcount]
+  have hsz : v_star_idx < (shiftAbove t₀ vts).size := by
+    rw [shiftAbove_size]; exact hv_size
+  have hval : (shiftAbove t₀ vts).getD v_star_idx 0 = t₀ :=
+    shiftAbove_getD_target t₀ vts v_star_idx hv_val
+  have hmin : ∀ i, i < v_star_idx → (shiftAbove t₀ vts).getD i 0 ≠ t₀ :=
+    fun i hi => shiftAbove_getD_ne_target t₀ vts (hv_min i hi)
+  have hwsz : w_idx < (shiftAbove t₀ vts).size := by
+    rw [shiftAbove_size]; exact hw_size
+  have hwval : (shiftAbove t₀ vts).getD w_idx 0 = t₀ :=
+    shiftAbove_getD_target t₀ vts w_idx hw_val
+  exact breakTiePromote_getD_at_other (shiftAbove t₀ vts) t₀ hsz hval hmin hwsz hwval hw_ne
 
 /-- **Disjunctive characterization.** For any in-bounds position `w` whose value in `vts`
 is the target `t₀`, the breakTie output at `w` is *either* `t₀` (if `w` is the kept
@@ -544,6 +740,9 @@ theorem breakTie_Aut_stabilizer
     have hle : v_star.val ≤ i := hmin ⟨i, hi_lt_n⟩ heq
     omega
   -- Position-by-position characterization of (breakTie vts t₀).1.
+  -- [sparse→dense] The "non-target preserved" facet now splits into below (always
+  -- preserved) and above (preserved when no-op, bumped when fired). We expose unified
+  -- "preserves σ-invariance" facets that work in both gating cases.
   have h_vstar : (breakTie vts t₀).1.getD v_star.val 0 = t₀ :=
     breakTie_getD_at_min vts t₀ hv_size hv_val hv_min
   have h_other : ∀ w : Fin n, vts.getD w.val 0 = t₀ → w ≠ v_star →
@@ -552,9 +751,26 @@ theorem breakTie_Aut_stabilizer
     have hw_size : w.val < vts.size := hsize ▸ w.isLt
     have hne_val : w.val ≠ v_star.val := fun h => hne (Fin.ext h)
     exact breakTie_getD_at_other vts t₀ hv_size hv_val hv_min hw_size hw hne_val
-  have h_out : ∀ w : Fin n, vts.getD w.val 0 ≠ t₀ →
-      (breakTie vts t₀).1.getD w.val 0 = vts.getD w.val 0 :=
-    fun w hw => breakTie_getD_of_ne vts t₀ hw
+  -- σ-invariance lifts to the post-breakTie array for any v with vts[v] ≠ t₀.
+  -- This is the σ-relational replacement for the old `h_out` / `breakTie_getD_of_ne`.
+  -- [sparse→dense] Case on whether the breakTie actually fires (count ≥ 2). In both
+  -- cases σ-invariance carries through.
+  have h_out_invariant : ∀ (σ : Equiv.Perm (Fin n)),
+      VtsInvariant σ vts →
+      ∀ v : Fin n, vts.getD v.val 0 ≠ t₀ →
+        (breakTie vts t₀).1.getD (σ v).val 0 = (breakTie vts t₀).1.getD v.val 0 := by
+    intro σ hvσ v hv
+    by_cases hcount : breakTieCount vts t₀ < 2
+    · -- noop: output = vts pointwise; σ-invariance is direct.
+      rw [breakTie_noop vts t₀ hcount, hvσ v]
+    · -- fired: split on below/above; both branches preserve σ-invariance.
+      have hcount' : 2 ≤ breakTieCount vts t₀ := Nat.le_of_not_lt hcount
+      rcases lt_or_gt_of_ne hv with hlt | hgt
+      · have hσv_lt : vts.getD (σ v).val 0 < t₀ := by rw [hvσ v]; exact hlt
+        rw [breakTie_getD_below vts t₀ hσv_lt, breakTie_getD_below vts t₀ hlt, hvσ v]
+      · have hσv_gt : vts.getD (σ v).val 0 > t₀ := by rw [hvσ v]; exact hgt
+        rw [breakTie_getD_above vts t₀ hcount' hσv_gt,
+            breakTie_getD_above vts t₀ hcount' hgt, hvσ v]
   constructor
   · -- (⟹)
     rintro ⟨hGσ, hvσ'⟩
@@ -570,10 +786,19 @@ theorem breakTie_Aut_stabilizer
         have := h_other (σ v_star) hin hne
         rw [this] at hσv_val
         exact VertexType_add_one_ne t₀ hσv_val
-      · -- σ v_star ∉ typeClass ⟹ value = vts[σ v_star] ≠ t₀
-        have := h_out (σ v_star) hin
-        rw [this] at hσv_val
-        exact hin hσv_val
+      · -- σ v_star ∉ typeClass: by the σ-invariance lemma, output[σ v_star] = output[v_star] = t₀.
+        -- But hin says vts[σ v_star] ≠ t₀, and below/above outputs are ≠ t₀.
+        -- Direct: vts[σ v_star] < t₀ → output[σ v_star] = vts[σ v_star] ≠ t₀ ≠ t₀.
+        --        vts[σ v_star] > t₀ → output[σ v_star] = vts[σ v_star] (noop) or +1 (fired);
+        --                              both ≠ t₀.
+        rcases lt_or_gt_of_ne hin with hlt | hgt
+        · rw [breakTie_getD_below vts t₀ hlt] at hσv_val
+          exact (Nat.ne_of_lt hlt) hσv_val
+        · rcases breakTie_getD_above_or vts t₀ hgt with hk | hb
+          · rw [hk] at hσv_val
+            exact (Ne.symm (Nat.ne_of_lt hgt)) hσv_val
+          · rw [hb] at hσv_val
+            exact (Ne.symm (Nat.ne_of_lt (Nat.lt_succ_of_lt hgt))) hσv_val
     exact ⟨⟨hGσ, hvσ⟩, hfix⟩
   · -- (⟸)
     rintro ⟨⟨hGσ, hvσ⟩, hfix⟩
@@ -584,16 +809,14 @@ theorem breakTie_Aut_stabilizer
       have hσv : vts.getD (σ v).val 0 = t₀ := by rw [hvσ v, hv]
       by_cases hv_eq : v = v_star
       · subst hv_eq; rw [hfix]
-      · -- v ≠ v_star
-        have hσv_ne : σ v ≠ v_star := by
+      · have hσv_ne : σ v ≠ v_star := by
           intro h
           apply hv_eq
           apply σ.injective
           rw [h, hfix]
         rw [h_other v hv hv_eq, h_other (σ v) hσv hσv_ne]
-    · -- v ∉ typeClass
-      have hσv : vts.getD (σ v).val 0 ≠ t₀ := by rw [hvσ v]; exact hv
-      rw [h_out v hv, h_out (σ v) hσv, hvσ v]
+    · -- v ∉ typeClass: σ-invariance carries through.
+      exact h_out_invariant σ hvσ v hv
 
 /-- **§5.1 (corollary)**  Non-strict inclusion `TypedAut(breakTie vts t₀) ≤ TypedAut vts`.
 

@@ -102,25 +102,34 @@ theorem breakTie_targetPos_is_min_tied
   have hgt : (breakTie vts p).1.getD w₁.val 0 ≤ p := not_lt.mp hgt
   have hw₁_size : w₁.val < vts.size := hsize ▸ w₁.isLt
   have hw₂_size : w₂.val < vts.size := hsize ▸ w₂.isLt
-  -- Output classification: every in-bounds output is either `vts[w]` (preserved) or
-  -- `p + 1` (promoted; only happens when `vts[w] = p`).
-  have output_alts : ∀ (w : Fin n), w.val < vts.size →
-      (breakTie vts p).1.getD w.val 0 = vts.getD w.val 0 ∨
-      (breakTie vts p).1.getD w.val 0 = p + 1 := by
-    intro w hws
-    by_cases hwv : vts.getD w.val 0 = p
-    · rcases breakTie_getD_target vts p hws hwv with h | h
-      · exact Or.inl (h.trans hwv.symm)
-      · exact Or.inr h
-    · exact Or.inl (breakTie_getD_of_ne vts p hwv)
-  -- Promoted outputs (= p+1) exceed `p`; ruled out under `hgt`.
+  -- [sparse→dense] If the output at `w` is ≤ p, then breakTie did not modify it.
+  -- Cases on vts[w]:
+  --   vts[w] < p: output[w] = vts[w] < p (always preserved by `breakTie_getD_below`).
+  --   vts[w] = p: output[w] ∈ {p, p+1}; the ≤ p constraint forces output = p = vts[w].
+  --   vts[w] > p: output[w] > p in both noop and fired cases — `output ≤ p` is vacuous.
   have not_promoted : ∀ (w : Fin n) (hws : w.val < vts.size),
       (breakTie vts p).1.getD w.val 0 ≤ p →
       (breakTie vts p).1.getD w.val 0 = vts.getD w.val 0 := by
     intro w hws hwout
-    rcases output_alts w hws with h | h
-    · exact h
-    · exfalso; have : p + 1 ≤ p := h ▸ hwout; omega
+    rcases lt_trichotomy (vts.getD w.val 0) p with hlt | heq | hgt
+    · -- vts[w] < p: always preserved.
+      exact breakTie_getD_below vts p hlt
+    · -- vts[w] = p: output ∈ {p, p+1}; ≤ p forces output = p = vts[w].
+      rcases breakTie_getD_target vts p hws heq with h | h
+      · exact h.trans heq.symm
+      · exfalso
+        have : p + 1 ≤ p := h ▸ hwout
+        omega
+    · -- vts[w] > p: output[w] > p in both noop and fired branches; contradiction with hwout.
+      exfalso
+      rcases breakTie_getD_above_or vts p hgt with h | h
+      · -- noop: output = vts[w] > p.
+        have hle : vts.getD w.val 0 ≤ p := h ▸ hwout
+        exact Nat.lt_irrefl _ (lt_of_lt_of_le hgt hle)
+      · -- fired: output = vts[w] + 1 > p + 1 > p.
+        have hle : vts.getD w.val 0 + 1 ≤ p := h ▸ hwout
+        have : vts.getD w.val 0 < p := Nat.lt_of_succ_le hle
+        exact Nat.lt_irrefl _ (lt_trans hgt this)
   have h₂_le : (breakTie vts p).1.getD w₂.val 0 ≤ p := heq ▸ hgt
   have h₁_pres : (breakTie vts p).1.getD w₁.val 0 = vts.getD w₁.val 0 :=
     not_promoted w₁ hw₁_size hgt
