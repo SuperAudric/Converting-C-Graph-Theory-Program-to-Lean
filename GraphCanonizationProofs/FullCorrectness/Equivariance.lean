@@ -510,6 +510,79 @@ theorem calculatePathRankings_fromRanks_size {vc : Nat} (state : PathState vc)
       obtain ⟨pathFrom, rank⟩ := y
       simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds, hacc]
 
+/-! ### Size invariants for `calculatePathRankings`'s output
+
+The `calculatePathRankings_σInvariant` (below) needs five size facts: `betweenRanks` has
+shape `vc × vc × vc` and `fromRanks` has shape `vc × vc`. We prove these via small
+size-preservation lemmas about `set!`/`setBetween` and a foldl invariant. -/
+
+/-- `set!` at the same in-bounds index reads back the inserted value (for `getD`). -/
+private theorem Array_set!_getD_self {α : Type} (xs : Array α) (i : Nat) (v d : α)
+    (h : i < xs.size) : (xs.set! i v).getD i d = v := by
+  rw [Array.set!_eq_setIfInBounds, Array.getD_eq_getD_getElem?,
+      Array.getElem?_setIfInBounds_self_of_lt h, Option.getD_some]
+
+/-- `set!` at a different index leaves the `getD` reading unchanged. -/
+private theorem Array_set!_getD_ne {α : Type} (xs : Array α) (i j : Nat) (v d : α)
+    (h : i ≠ j) : (xs.set! i v).getD j d = xs.getD j d := by
+  rw [Array.set!_eq_setIfInBounds, Array.getD_eq_getD_getElem?,
+      Array.getElem?_setIfInBounds_ne h, ← Array.getD_eq_getD_getElem?]
+
+/-- Out-of-bounds `set!` is a no-op. -/
+private theorem Array_set!_eq_self_of_size_le {α : Type} (xs : Array α) (i : Nat) (v : α)
+    (h : xs.size ≤ i) : xs.set! i v = xs := by
+  rw [Array.set!_eq_setIfInBounds, Array.setIfInBounds_eq_of_size_le h]
+
+/-- `setBetween` preserves `betweenTable`'s outer size. -/
+private theorem setBetween_size (b : Array (Array (Array Nat))) (d s e r : Nat) :
+    (setBetween b d s e r).size = b.size := by
+  unfold setBetween
+  simp [Array.set!_eq_setIfInBounds]
+
+/-- `setBetween` preserves the size of every depth-row. -/
+private theorem setBetween_getD_size (b : Array (Array (Array Nat))) (d s e r d' : Nat) :
+    ((setBetween b d s e r).getD d' #[]).size = (b.getD d' #[]).size := by
+  unfold setBetween
+  by_cases h_eq : d = d'
+  · subst h_eq
+    by_cases h_in : d < b.size
+    · rw [Array_set!_getD_self _ _ _ _ h_in]
+      simp [Array.set!_eq_setIfInBounds]
+    · rw [Array_set!_eq_self_of_size_le _ _ _ (by omega)]
+  · rw [Array_set!_getD_ne _ _ _ _ _ h_eq]
+
+/-- `setBetween` preserves the size of every (depth, start)-cell. -/
+private theorem setBetween_getD_getD_size (b : Array (Array (Array Nat)))
+    (d s e r d' s' : Nat) :
+    (((setBetween b d s e r).getD d' #[]).getD s' #[]).size
+    = ((b.getD d' #[]).getD s' #[]).size := by
+  unfold setBetween
+  by_cases h_d_eq : d = d'
+  · subst h_d_eq
+    by_cases h_d_in : d < b.size
+    · rw [Array_set!_getD_self _ _ _ _ h_d_in]
+      -- Inside: `depthSlice.set! s (startSlice.set! e r)`. Recurse on s vs s'.
+      by_cases h_s_eq : s = s'
+      · subst h_s_eq
+        by_cases h_s_in : s < (b.getD d #[]).size
+        · rw [Array_set!_getD_self _ _ _ _ h_s_in]
+          simp [Array.set!_eq_setIfInBounds]
+        · rw [Array_set!_eq_self_of_size_le _ _ _ (by omega)]
+      · rw [Array_set!_getD_ne _ _ _ _ _ h_s_eq]
+    · rw [Array_set!_eq_self_of_size_le _ _ _ (by omega)]
+  · rw [Array_set!_getD_ne _ _ _ _ _ h_d_eq]
+
+/-- The from-side update preserves the size of every depth-row. -/
+private theorem from_set_getD_size (f : Array (Array Nat)) (d s : Nat) (rank : Nat) (d' : Nat) :
+    ((f.set! d ((f.getD d #[]).set! s rank)).getD d' #[]).size = (f.getD d' #[]).size := by
+  by_cases h_eq : d = d'
+  · subst h_eq
+    by_cases h_in : d < f.size
+    · rw [Array_set!_getD_self _ _ _ _ h_in]
+      simp [Array.set!_eq_setIfInBounds]
+    · rw [Array_set!_eq_self_of_size_le _ _ _ (by omega)]
+  · rw [Array_set!_getD_ne _ _ _ _ _ h_eq]
+
 /-! ### `RankState.σInvariant` and extensionality
 
 The structural content of `RankState.permute σ rs = rs` decomposes into (a) size constraints
@@ -587,18 +660,177 @@ theorem RankState.σInvariant.permute_eq_self
     rw [show permNat σ⁻¹ s = (σ⁻¹ ⟨s, hs⟩).val from permNat_of_lt hs]
     exact (h.fromRanks_inv d hd ⟨s, hs⟩).symm
 
-/-- The σ-invariance of `calculatePathRankings`'s output, given σ ∈ Aut G and σ-invariant
-typing. **This is the deep content of Stage B** — it requires σ-equivariance of the entire
-pipeline (`comparePathSegments`/`comparePathsBetween`/`comparePathsFrom` are σ-equivariant
-on a σ-invariant rank table; `sortBy`/`assignRanks` preserve equivalence-class membership;
-the fold preserves σ-invariance step by step). The structural sizes follow from a foldl
-invariant analogous to `calculatePathRankings_fromRanks_size`. -/
-theorem calculatePathRankings_σInvariant
+/-- The five size facts about `calculatePathRankings`'s output: `betweenRanks` and
+`fromRanks` have shapes `vc × vc × vc` and `vc × vc`. Proved via a single foldl invariant
+on the algorithm body, using the `setBetween`/`set!` size-preservation lemmas above. -/
+theorem calculatePathRankings_size_inv {vc : Nat} (state : PathState vc)
+    (vts : Array VertexType) :
+    let rs := calculatePathRankings state vts
+    rs.betweenRanks.size = vc ∧
+    rs.fromRanks.size = vc ∧
+    (∀ d : Nat, d < vc → (rs.fromRanks.getD d #[]).size = vc) ∧
+    (∀ d : Nat, d < vc → (rs.betweenRanks.getD d #[]).size = vc) ∧
+    (∀ d s : Nat, d < vc → s < vc →
+      ((rs.betweenRanks.getD d #[]).getD s #[]).size = vc) := by
+  unfold calculatePathRankings
+  -- Define a combined size invariant on the foldl accumulator (b, f).
+  suffices haux : ∀ (l : List Nat)
+      (start : Array (Array (Array Nat)) × Array (Array Nat)),
+      (start.1.size = vc ∧ start.2.size = vc ∧
+       (∀ d : Nat, d < vc → (start.2.getD d #[]).size = vc) ∧
+       (∀ d : Nat, d < vc → (start.1.getD d #[]).size = vc) ∧
+       (∀ d s : Nat, d < vc → s < vc → ((start.1.getD d #[]).getD s #[]).size = vc)) →
+      let acc := l.foldl (fun accumulated depth =>
+          let (currentBetween, currentFrom) := accumulated
+          let pathsAtDepth := (state.pathsOfLength.getD depth #[]).toList
+          let allBetween := pathsAtDepth.foldl
+            (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+          let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+            ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+          let compareBetween := comparePathsBetween vts betweenRankFn
+          let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+            (fun (betweenAcc : Array (Array (Array Nat))) item =>
+              let (pathBetween, rank) := item
+              setBetween betweenAcc depth pathBetween.startVertexIndex.val
+                pathBetween.endVertexIndex.val rank) currentBetween
+          let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+            ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+          let compareFrom := comparePathsFrom vts updatedBetweenFn
+          let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+            (fun (fromAcc : Array (Array Nat)) item =>
+              let (pathFrom, rank) := item
+              let depthSlice := fromAcc.getD depth #[]
+              fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+          (updatedBetween, updatedFrom)) start
+      acc.1.size = vc ∧ acc.2.size = vc ∧
+      (∀ d : Nat, d < vc → (acc.2.getD d #[]).size = vc) ∧
+      (∀ d : Nat, d < vc → (acc.1.getD d #[]).size = vc) ∧
+      (∀ d s : Nat, d < vc → s < vc → ((acc.1.getD d #[]).getD s #[]).size = vc) by
+    -- Apply with the empty initial accumulator.
+    have h_init : (((Array.range vc).map fun _ => (Array.range vc).map fun _ =>
+                    (Array.range vc).map fun _ : Nat => (0 : Nat)).size = vc ∧
+                   ((Array.range vc).map fun _ => (Array.range vc).map fun _ : Nat => (0 : Nat)).size = vc ∧
+                   (∀ d : Nat, d < vc → (((Array.range vc).map fun _ =>
+                     (Array.range vc).map fun _ : Nat => (0 : Nat)).getD d #[]).size = vc) ∧
+                   (∀ d : Nat, d < vc → (((Array.range vc).map fun _ =>
+                     (Array.range vc).map fun _ => (Array.range vc).map fun _ : Nat => (0 : Nat)).getD d #[]).size = vc) ∧
+                   (∀ d s : Nat, d < vc → s < vc → ((((Array.range vc).map fun _ =>
+                     (Array.range vc).map fun _ => (Array.range vc).map fun _ : Nat => (0 : Nat)).getD d #[]).getD s #[]).size = vc)) := by
+      refine ⟨by simp, by simp, ?_, ?_, ?_⟩
+      · intro d hd
+        simp [hd]
+      · intro d hd
+        simp [hd]
+      · intro d s hd hs
+        simp [hd, hs]
+    exact haux _ _ h_init
+  -- Foldl invariant proof.
+  intro l
+  induction l with
+  | nil => intros _ h; exact h
+  | cons x xs ih =>
+    intros start hstart
+    rw [List.foldl_cons]
+    apply ih
+    obtain ⟨b, f⟩ := start
+    obtain ⟨h_b_size, h_f_size, h_f_row, h_b_row, h_b_cell⟩ := hstart
+    simp only [] at h_b_size h_f_size h_f_row h_b_row h_b_cell ⊢
+    -- Inner fold over assignRanks updates `b` via `setBetween` — preserves between sizes.
+    -- We state the inner-b lemma without an outer `let acc'` so that `exact`/`apply`
+    -- unifies the universal variable `l'` with the specific assignRanks-output list in
+    -- the goal.
+    suffices h_inner_b : ∀ (l' : List ((PathsBetween vc) × Nat))
+        (acc : Array (Array (Array Nat))),
+        acc.size = vc → (∀ d : Nat, d < vc → (acc.getD d #[]).size = vc) →
+        (∀ d s : Nat, d < vc → s < vc → ((acc.getD d #[]).getD s #[]).size = vc) →
+        (l'.foldl (fun (betweenAcc : Array (Array (Array Nat))) item =>
+          let (pathBetween, rank) := item
+          setBetween betweenAcc x pathBetween.startVertexIndex.val
+            pathBetween.endVertexIndex.val rank) acc).size = vc ∧
+        (∀ d : Nat, d < vc → ((l'.foldl (fun (betweenAcc : Array (Array (Array Nat))) item =>
+          let (pathBetween, rank) := item
+          setBetween betweenAcc x pathBetween.startVertexIndex.val
+            pathBetween.endVertexIndex.val rank) acc).getD d #[]).size = vc) ∧
+        (∀ d s : Nat, d < vc → s < vc →
+          (((l'.foldl (fun (betweenAcc : Array (Array (Array Nat))) item =>
+            let (pathBetween, rank) := item
+            setBetween betweenAcc x pathBetween.startVertexIndex.val
+              pathBetween.endVertexIndex.val rank) acc).getD d #[]).getD s #[]).size = vc) by
+      suffices h_inner_f : ∀ (l' : List ((PathsFrom vc) × Nat)) (acc : Array (Array Nat)),
+          acc.size = vc → (∀ d : Nat, d < vc → (acc.getD d #[]).size = vc) →
+          (l'.foldl (fun (fromAcc : Array (Array Nat)) item =>
+            let (pathFrom, rank) := item
+            let depthSlice := fromAcc.getD x #[]
+            fromAcc.set! x (depthSlice.set! pathFrom.startVertexIndex.val rank)) acc).size = vc ∧
+          (∀ d : Nat, d < vc → ((l'.foldl (fun (fromAcc : Array (Array Nat)) item =>
+            let (pathFrom, rank) := item
+            let depthSlice := fromAcc.getD x #[]
+            fromAcc.set! x (depthSlice.set! pathFrom.startVertexIndex.val rank)) acc).getD d #[]).size = vc) by
+        exact ⟨(h_inner_b _ b h_b_size h_b_row h_b_cell).1,
+               (h_inner_f _ f h_f_size h_f_row).1,
+               (h_inner_f _ f h_f_size h_f_row).2,
+               (h_inner_b _ b h_b_size h_b_row h_b_cell).2.1,
+               (h_inner_b _ b h_b_size h_b_row h_b_cell).2.2⟩
+      -- Prove h_inner_f.
+      intro l' acc h_size h_row
+      induction l' generalizing acc with
+      | nil => exact ⟨h_size, h_row⟩
+      | cons y ys ih_inner =>
+        rw [List.foldl_cons]
+        obtain ⟨pathFrom, rank⟩ := y
+        apply ih_inner
+        · simp [Array.set!_eq_setIfInBounds, h_size]
+        · intro d hd
+          rw [from_set_getD_size]
+          exact h_row d hd
+    -- Prove h_inner_b.
+    intro l' acc h_size h_row h_cell
+    induction l' generalizing acc with
+    | nil => exact ⟨h_size, h_row, h_cell⟩
+    | cons y ys ih_inner =>
+      rw [List.foldl_cons]
+      obtain ⟨pathBetween, rank⟩ := y
+      apply ih_inner
+      · rw [setBetween_size]; exact h_size
+      · intro d hd; rw [setBetween_getD_size]; exact h_row d hd
+      · intro d s hd hs; rw [setBetween_getD_getD_size]; exact h_cell d s hd hs
+
+/-- The pointwise σ-invariance of `calculatePathRankings`'s output, separated from the
+size facts. **This is the deep content** — it requires σ-equivariance of the entire
+pipeline: `comparePathSegments`/`comparePathsBetween`/`comparePathsFrom` are σ-equivariant
+on σ-invariant rank tables; `sortBy`/`assignRanks` preserve σ-related equivalence classes;
+the outer fold preserves the σ-invariance of the rank tables step by step. -/
+theorem calculatePathRankings_value_invariant
     (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
     (vts : Array VertexType)
     (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
-    RankState.σInvariant σ (calculatePathRankings (initializePaths G) vts) := by
+    let rs := calculatePathRankings (initializePaths G) vts
+    (∀ d : Nat, d < n → ∀ s : Fin n,
+      (rs.fromRanks.getD d #[]).getD s.val 0
+      = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0) ∧
+    (∀ d : Nat, d < n → ∀ s e : Fin n,
+      ((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
+      = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) := by
   sorry
+
+/-- The σ-invariance of `calculatePathRankings`'s output, given σ ∈ Aut G and σ-invariant
+typing. Sizes follow from `calculatePathRankings_size_inv` (proved); the deep value
+invariance comes from `calculatePathRankings_value_invariant` (the remaining sorry). -/
+theorem calculatePathRankings_σInvariant
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
+    RankState.σInvariant σ (calculatePathRankings (initializePaths G) vts) where
+  fromRanks_size := calculatePathRankings_fromRanks_size _ _
+  betweenRanks_size := (calculatePathRankings_size_inv (initializePaths G) vts).1
+  fromRanks_row_size := fun d hd =>
+    (calculatePathRankings_size_inv (initializePaths G) vts).2.2.1 d hd
+  betweenRanks_row_size := fun d hd =>
+    (calculatePathRankings_size_inv (initializePaths G) vts).2.2.2.1 d hd
+  betweenRanks_cell_size := fun d hd s hs =>
+    (calculatePathRankings_size_inv (initializePaths G) vts).2.2.2.2 d s hd hs
+  fromRanks_inv := (calculatePathRankings_value_invariant G σ hσ vts hvts).1
+  betweenRanks_inv := (calculatePathRankings_value_invariant G σ hσ vts hvts).2
 
 /-- The genuine content of Stage B (the part not reducible to Stage A + σ ∈ Aut G):
 the rank state computed from `initializePaths G` with a σ-invariant typing is itself

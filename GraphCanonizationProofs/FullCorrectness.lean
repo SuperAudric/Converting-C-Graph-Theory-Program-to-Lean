@@ -46,7 +46,8 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 1 (Equivariance: `calculatePathRankings_σInvariant` — the deep content)
+**Sorry count.** 1 (Equivariance: `calculatePathRankings_value_invariant` — the deep
+σ-equivariance content; the size invariants are proved by `calculatePathRankings_size_inv`)
 + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) = **6 open
 obligations** in the new tree.
 
@@ -68,9 +69,10 @@ obligations** in the new tree.
 - **`calculatePathRankings_fromRanks_size`** proved (foldl invariant on the algorithm body).
 
 **Remaining structural work in `Equivariance`:**
-- `calculatePathRankings_σInvariant`: the σ-invariance fields of the output `RankState`
-  (sizes + pointwise σ-invariance of `betweenRanks`/`fromRanks`). Requires foldl induction
-  on the depth loop and σ-equivariance of compare/sort/assignRanks at each step.
+- `calculatePathRankings_value_invariant`: the pointwise σ-invariance of `betweenRanks`
+  and `fromRanks` values (sizes are now discharged by `calculatePathRankings_size_inv`).
+  Requires foldl induction on the depth loop and σ-equivariance of compare/sort/assignRanks
+  at each step. This is the genuine deep content of Stage B.
 
 ### Algorithm refactor (this iteration)
 
