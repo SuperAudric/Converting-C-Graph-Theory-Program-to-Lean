@@ -834,6 +834,112 @@ private theorem sortBy_map {α : Type} (f : α → α) (cmp : α → α → Orde
        = (insertSorted cmp a (sortBy cmp L)).map f
     rw [ih, insertSorted_map f cmp h]
 
+/-- `insertSorted` produces a permutation of `a :: L` (regardless of `cmp`). -/
+theorem perm_insertSorted {α : Type} (cmp : α → α → Ordering) (a : α) (L : List α) :
+    (insertSorted cmp a L).Perm (a :: L) := by
+  induction L with
+  | nil => exact List.Perm.refl _
+  | cons b L ih =>
+    show (if cmp a b != .gt then a :: b :: L else b :: insertSorted cmp a L).Perm (a :: b :: L)
+    by_cases h : cmp a b != .gt
+    · simp [h]
+    · simp [h]
+      exact (List.Perm.cons b ih).trans (List.Perm.swap a b L)
+
+/-- `sortBy` produces a permutation of its input (regardless of `cmp`). -/
+theorem sortBy_perm {α : Type} (cmp : α → α → Ordering) (L : List α) :
+    (sortBy cmp L).Perm L := by
+  induction L with
+  | nil => exact List.Perm.refl _
+  | cons a L ih =>
+    show (insertSorted cmp a (sortBy cmp L)).Perm (a :: L)
+    exact (perm_insertSorted cmp a (sortBy cmp L)).trans (List.Perm.cons a ih)
+
+/-- `orderInsensitiveListCmp` is invariant under permutations of its inputs when `cmp`
+respects equivalence classes. This is the lemma needed for the depth>0 branch of
+`PathsBetween.permute`'s σ-equivariance.
+
+**Proof sketch.** Let `M = sortBy cmp L₁`, `M' = sortBy cmp L₁'`. By `sortBy_perm`, `M` and
+`M'` are both sorted and `Perm` of each other. This forces `M[i]` and `M'[i]` to be in the
+same equivalence class for every `i` (sorted lists with the same multiset have the same
+class-boundary positions). Under `h_compat`, this yields `cmp M[i] N[i] = cmp M'[i] N[i]`
+for every `i`, making the final `foldl` identical. Formalizing this requires either an
+explicit class-block decomposition or a strong induction that carries equivalence-aware
+comparison throughout the fold.
+
+Leave as sorry for now; downstream compare σ-equivariance and the main
+`calculatePathRankings_value_invariant` depend on it, but the infrastructure
+(`sortBy_perm`, `comparePathSegments_equivCompat`, `orderInsensitiveListCmp_map`) is in
+place to support the full proof. -/
+theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
+    (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c)
+    (L₁ L₁' L₂ L₂' : List α) (h₁ : L₁.Perm L₁') (h₂ : L₂.Perm L₂') :
+    orderInsensitiveListCmp cmp L₁ L₂ = orderInsensitiveListCmp cmp L₁' L₂' := by
+  sorry
+
+/-- `comparePathSegments` respects equivalence: equivalent (`= .eq`) segments compare the
+same way to every third segment. This is the key compatibility condition for
+`orderInsensitiveListCmp`'s permutation invariance (deferred). -/
+theorem comparePathSegments_equivCompat
+    {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat)
+    (p q : PathSegment vc) (h : comparePathSegments vts br p q = Ordering.eq) (r : PathSegment vc) :
+    comparePathSegments vts br p r = comparePathSegments vts br q r := by
+  cases p with
+  | bottom xVI =>
+    cases q with
+    | bottom yVI =>
+      have hvts_eq : vts.getD xVI.val 0 = vts.getD yVI.val 0 :=
+        compare_eq_iff_eq.mp h
+      cases r with
+      | bottom zVI =>
+        show compare (vts.getD xVI.val 0) (vts.getD zVI.val 0)
+           = compare (vts.getD yVI.val 0) (vts.getD zVI.val 0)
+        rw [hvts_eq]
+      | inner _ _ _ _ => rfl  -- panic case for both, equal.
+    | inner _ _ _ _ =>
+      -- panic case: cmp .bottom .inner returns `default = .lt` ≠ .eq.
+      exfalso
+      have : (default : Ordering) = .lt := rfl
+      rw [show comparePathSegments vts br (PathSegment.bottom xVI)
+              (PathSegment.inner _ _ _ _) = default from rfl, this] at h
+      exact Ordering.noConfusion h
+  | inner xe xd xs xend =>
+    cases q with
+    | bottom _ =>
+      exfalso
+      have : (default : Ordering) = .lt := rfl
+      rw [show comparePathSegments vts br (PathSegment.inner xe xd xs xend)
+              (PathSegment.bottom _) = default from rfl, this] at h
+      exact Ordering.noConfusion h
+    | inner ye yd ys yend =>
+      -- Extract: br xd xs.val xend.val = br yd ys.val yend.val and xe = ye.
+      have hRank : br xd xs.val xend.val = br yd ys.val yend.val := by
+        by_cases hxy : br xd xs.val xend.val = br yd ys.val yend.val
+        · exact hxy
+        · exfalso
+          simp only [comparePathSegments, hxy, bne_iff_ne, ne_eq, not_false_eq_true,
+            ↓reduceIte] at h
+          exact hxy (compare_eq_iff_eq.mp h).symm
+      have hEdge : xe = ye := by
+        by_cases hxy : xe = ye
+        · exact hxy
+        · exfalso
+          simp only [comparePathSegments, hRank, bne_self_eq_false, ↓reduceIte,
+            hxy, bne_iff_ne, ne_eq, not_false_eq_true] at h
+          exact hxy (compare_eq_iff_eq.mp h).symm
+      cases r with
+      | bottom _ => rfl
+      | inner ze zd zs zend =>
+        show (let xR := br xd xs.val xend.val
+              let zR := br zd zs.val zend.val
+              if xR != zR then compare zR xR
+              else if xe != ze then compare ze xe else .eq)
+           = (let yR := br yd ys.val yend.val
+              let zR := br zd zs.val zend.val
+              if yR != zR then compare zR yR
+              else if ye != ze then compare ze ye else .eq)
+        rw [hRank, hEdge]
+
 /-- `orderInsensitiveListCmp` is invariant under `map`-ping both lists by an
 `f` that preserves the comparison. This handles the depth=0 branch of
 `PathsBetween.permute` (where `connectedSubPaths` is just `.map (PathSegment.permute σ)`). -/

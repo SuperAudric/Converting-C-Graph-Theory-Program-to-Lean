@@ -46,10 +46,10 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 1 (Equivariance: `calculatePathRankings_value_invariant` — the deep
-σ-equivariance content; the size invariants are proved by `calculatePathRankings_size_inv`)
-+ 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) = **6 open
-obligations** in the new tree.
+**Sorry count.** 2 (Equivariance: `orderInsensitiveListCmp_perm` — the Perm-invariance
+of `orderInsensitiveListCmp` under EquivCompat cmp, and `calculatePathRankings_value_invariant`
+— the foldl-level σ-invariance content) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) +
+3 (Invariants — §7) + 1 (Main) = **7 open obligations** in the new tree.
 
 **Closed during the equivariance push:**
 - **Stage D** trivially via `σ ∈ Aut G ⟹ G.permute σ = G`.
@@ -69,10 +69,24 @@ obligations** in the new tree.
 - **`calculatePathRankings_fromRanks_size`** proved (foldl invariant on the algorithm body).
 
 **Remaining structural work in `Equivariance`:**
+- `orderInsensitiveListCmp_perm`: permutation-invariance of `orderInsensitiveListCmp` when
+  `cmp` respects equivalence classes. Needed for `comparePathsBetween`/`comparePathsFrom`
+  σ-equivariance in the depth>0 case (where `PathsBetween.permute` reindexes the
+  `connectedSubPaths` list). Proof sketch in the file: sorted permutations agree
+  position-wise on classes, and `cmp` on class-equal elements collapses the foldl to the
+  same result.
 - `calculatePathRankings_value_invariant`: the pointwise σ-invariance of `betweenRanks`
-  and `fromRanks` values (sizes are now discharged by `calculatePathRankings_size_inv`).
-  Requires foldl induction on the depth loop and σ-equivariance of compare/sort/assignRanks
-  at each step. This is the genuine deep content of Stage B.
+  and `fromRanks` values (sizes are discharged by `calculatePathRankings_size_inv`).
+  Requires foldl induction on the depth loop plus σ-equivariance of compare/sort/
+  assignRanks at each step. This is the main remaining content of Stage B.
+
+**Proved infrastructure in `Equivariance` (used by the above):**
+- `comparePathSegments_σ_equivariant` — base case of compare σ-equivariance.
+- `comparePathSegments_equivCompat` — `comparePathSegments` respects equivalence classes
+  (supplies the hypothesis for `orderInsensitiveListCmp_perm` at the inner level).
+- `sortBy_perm` + `perm_insertSorted` — sortBy preserves multiset (Perm).
+- `sortBy_map` + `orderInsensitiveListCmp_map` — sort/compare respect mapping by a
+  `cmp`-preserving function (handles the depth=0 branch directly).
 
 ### Algorithm refactor (this iteration)
 
