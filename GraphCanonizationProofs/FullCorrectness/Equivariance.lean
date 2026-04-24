@@ -44,6 +44,34 @@ theorem permNat_lt {σ : Equiv.Perm (Fin n)} {i : Nat} (h : i < n) :
     permNat σ i < n := by
   unfold permNat; simp [h, (σ ⟨i, h⟩).isLt]
 
+theorem permNat_of_lt {σ : Equiv.Perm (Fin n)} {i : Nat} (h : i < n) :
+    permNat σ i = (σ ⟨i, h⟩).val := by
+  unfold permNat; simp [h]
+
+theorem permNat_of_ge {σ : Equiv.Perm (Fin n)} {i : Nat} (h : n ≤ i) :
+    permNat σ i = i := by
+  unfold permNat; simp [Nat.not_lt.mpr h]
+
+/-- `Fin n` round-trip: `permNat σ⁻¹ ∘ permNat σ` is the identity below `n`. -/
+@[simp] theorem permNat_inv_perm {σ : Equiv.Perm (Fin n)} {i : Nat} (h : i < n) :
+    permNat σ⁻¹ (permNat σ i) = i := by
+  rw [permNat_of_lt h, permNat_of_lt (σ ⟨i, h⟩).isLt]
+  show (σ⁻¹ (σ ⟨i, h⟩)).val = i
+  simp
+
+/-- `Fin n` round-trip: `permNat σ ∘ permNat σ⁻¹` is the identity below `n`. -/
+@[simp] theorem permNat_perm_inv {σ : Equiv.Perm (Fin n)} {i : Nat} (h : i < n) :
+    permNat σ (permNat σ⁻¹ i) = i := by
+  rw [permNat_of_lt h, permNat_of_lt (σ⁻¹ ⟨i, h⟩).isLt]
+  show (σ (σ⁻¹ ⟨i, h⟩)).val = i
+  simp
+
+/-- For `i : Fin n`, `permNat σ i.val = (σ i).val`. The basic translation between the
+`Fin n` action and the `Nat`-lifted `permNat`. -/
+@[simp] theorem permNat_fin (σ : Equiv.Perm (Fin n)) (i : Fin n) :
+    permNat σ i.val = (σ i).val := by
+  rw [permNat_of_lt i.isLt]
+
 /-! ## Permutation action on path structures -/
 
 /-- Relabel the vertex indices inside a `PathSegment` by `σ`. -/
@@ -121,6 +149,37 @@ def RankState.permute (σ : Equiv.Perm (Fin n)) (rs : RankState) : RankState :=
         let slice := rs.fromRanks.getD d #[]
         (Array.range n).map fun s => slice.getD (permNat σ⁻¹ s) 0 }
 
+/-! ## Structural sanity lemmas
+
+Sizes and shapes of intermediate arrays inside `initializePaths` and `PathState.permute`.
+Used as building blocks for Stage A; also useful to have on hand for Stage B/C/D.
+-/
+
+@[simp] theorem initializePaths_vertexCount (G : AdjMatrix n) :
+    (initializePaths G).vertexCount = n := rfl
+
+@[simp] theorem initializePaths_pathsOfLength_size (G : AdjMatrix n) :
+    (initializePaths G).pathsOfLength.size = n := by
+  unfold initializePaths
+  simp
+
+@[simp] theorem PathState_permute_vertexCount (σ : Equiv.Perm (Fin n)) (st : PathState) :
+    (st.permute σ).vertexCount = st.vertexCount := rfl
+
+@[simp] theorem PathState_permute_pathsOfLength_size
+    (σ : Equiv.Perm (Fin n)) (st : PathState) :
+    (st.permute σ).pathsOfLength.size = st.pathsOfLength.size := by
+  unfold PathState.permute
+  simp
+
+/-- For `d < n`, the depth-`d` slice of `(initializePaths G).pathsOfLength` is a length-`n`
+array of `PathsFrom` records, indexed by start vertex. -/
+theorem initializePaths_pathsOfLength_get_size
+    (G : AdjMatrix n) {d : Nat} (hd : d < n) :
+    ((initializePaths G).pathsOfLength[d]'(by simp; exact hd)).size = n := by
+  unfold initializePaths
+  simp
+
 /-! ## §3 Stage A — `initializePaths` equivariance
 
 **Theorem.** For *any* `σ : Equiv.Perm (Fin n)` — no `Aut G` hypothesis needed — the path
@@ -150,6 +209,38 @@ correct. A mechanized proof requires ~100 lines of `Array.ext'` / `Array.getElem
 `List.map_ofFn` / `List.get?_map` plumbing, plus case-analysis on `d.val = 0` versus
 `d.val > 0`. Left as `sorry` pending that PR — this module's immediate purpose is to
 freeze the correct statement and action definitions for downstream use in Stages B–D.
+
+**Infrastructure now in place** (this file):
+- `permNat_of_lt`, `permNat_of_ge`, `permNat_inv_perm`, `permNat_perm_inv`, `permNat_fin`
+  — handle the `Nat ↔ Fin n` round-trips that drive index reordering.
+- `initializePaths_vertexCount`, `initializePaths_pathsOfLength_size`,
+  `PathState_permute_vertexCount`, `PathState_permute_pathsOfLength_size`,
+  `initializePaths_pathsOfLength_get_size` — the size and shape lemmas needed before
+  applying `Array.ext`.
+
+**Skeleton of the Lean proof (next iteration).**
+```
+-- After unfolding both sides to nested Array.maps:
+apply (PathState.mk.injEq _ _ _ _).mpr
+refine ⟨rfl, ?_⟩
+-- For pathsOfLength: rewrite RHS with `Array.map_map` to expose a single outer
+-- `(List.finRange n).toArray.map`, then `Array.ext` peels the depth dimension.
+rw [Array.map_map]
+apply Array.ext
+· simp
+intro d hd₁ hd₂
+simp only [Array.getElem_map, Function.comp_apply]
+-- Goal at depth d: inner Array.map equality (start dimension).
+apply Array.ext
+· simp
+intro s hs₁ hs₂
+simp only [Array.getElem_map, Array.getElem_range]
+-- Goal at (d, s): single PathsFrom equality. Use Array.getD reasoning to push
+-- σ⁻¹-indexed access through the map. Then descend into PathsToVertex (List).
+-- For the List, similar pattern with List.map_map, List.ext_get, and List.get?_map.
+-- At the deepest level (PathSegment list), case on (List.finRange n).toArray[d] = 0
+-- vs > 0 to handle the `if depthFin.val = 0` branches.
+```
 -/
 
 theorem initializePaths_Aut_equivariant

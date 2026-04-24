@@ -46,7 +46,13 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 5 (Equivariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants) + 1 (Main) = **10 open obligations** in the new tree. §5.1 and §5.2 are now proved with stronger hypotheses than the original plan (see the "§5 hypothesis revisions" note below). §6 (`tiebreak_choice_independent`) is now closed by reduction to a single precisely-stated pipeline-equivariance lemma (`runFrom_VtsInvariant_eq`), the chained §3 Stages B–D for the bounded `runFrom` loop. The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
+**Sorry count.** 5 (Equivariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants) + 1 (Main) = **10 open obligations** in the new tree.
+
+**Stage A infrastructure** (this iteration): added `permNat` round-trips
+(`permNat_of_lt`, `permNat_of_ge`, `permNat_inv_perm`, `permNat_perm_inv`, `permNat_fin`)
+plus structural sanity lemmas about `initializePaths`/`PathState.permute` (vertexCount
+and pathsOfLength sizes). These are the building blocks consumed by the Stage A proof
+skeleton documented in `Equivariance.lean`. §5.1 and §5.2 are now proved with stronger hypotheses than the original plan (see the "§5 hypothesis revisions" note below). §6 (`tiebreak_choice_independent`) is now closed by reduction to a single precisely-stated pipeline-equivariance lemma (`runFrom_VtsInvariant_eq`), the chained §3 Stages B–D for the bounded `runFrom` loop. The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
 
 ### §5 disjunctive characterization (new)
 
