@@ -40,12 +40,28 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
 | §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
 | §6.0 | `breakTieAt` output + τ-equivariance              | `Tiebreak`                                 | ✅ proved (3 characterization + 1 equivariance) |
-| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | 🧱 reduced to §3 equivariance — `sorry` on the pipeline-`runFrom`-equivariance step |
+| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | ✅ closed modulo `runFrom_VtsInvariant_eq` (the chained §3 Stages B–D for `runFrom`) |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                               | ✅ defined + boundary proved |
-| §7   | "Converged types are a prefix of ℕ" 4 invariants  | `Invariants`                               | 🧱 stated, `sorry` |
+| §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                               | ✅ proved (uses §5 disjunctive characterization) |
+| §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 5 (Equivariance) + 1 (Tiebreak §6) + 4 (Invariants) + 1 (Main) = **11 open obligations** in the new tree. §5.1 and §5.2 are now proved with stronger hypotheses than the original plan (see the "§5 hypothesis revisions" note below). The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
+**Sorry count.** 5 (Equivariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants) + 1 (Main) = **10 open obligations** in the new tree. §5.1 and §5.2 are now proved with stronger hypotheses than the original plan (see the "§5 hypothesis revisions" note below). §6 (`tiebreak_choice_independent`) is now closed by reduction to a single precisely-stated pipeline-equivariance lemma (`runFrom_VtsInvariant_eq`), the chained §3 Stages B–D for the bounded `runFrom` loop. The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
+
+### §5 disjunctive characterization (new)
+
+In support of §7's `breakTie_targetPos_is_min_tied`, two reusable corollaries are added in
+`Tiebreak.lean`:
+
+```
+breakTie_getD_target     : vts[w] = t₀ → output[w] = t₀ ∨ output[w] = t₀ + 1
+breakTie_getD_target_ge  : vts[w] = t₀ → t₀ ≤ output[w]
+```
+
+Both are derived by picking `v_star` as the smallest target-valued index (`Nat.find`) and
+applying `breakTie_getD_at_min` / `breakTie_getD_at_other`. They are useful whenever one
+needs to know "the breakTie output at a target-valued vertex is either kept or promoted"
+without naming the kept representative.
 
 ### §5 hypothesis revisions
 
@@ -89,7 +105,11 @@ runFrom_VtsInvariant_eq :
   τ ∈ G.Aut → (∀ w, arr₂[w] = arr₁[τ⁻¹ w]) → runFrom s arr₁ G = runFrom s arr₂ G
 ```
 
-which is §3 (Stages B–D) chained. This is the remaining `sorry` in `tiebreak_choice_independent`.
+which is §3 (Stages B–D) chained. **`tiebreak_choice_independent` now type-checks**: it
+discharges via `runFrom_VtsInvariant_eq` applied to the τ-related pair `breakTieAt vts t₀
+v₁`, `breakTieAt vts t₀ v₂` (related by the τ from `hconn`). The single open obligation
+in this whole chain is now `runFrom_VtsInvariant_eq` itself, stated in `Tiebreak.lean`
+with `sorry`. Everything else around §6 is closed.
 
 New deliverables in `Tiebreak.lean` supporting §6:
 ```
@@ -351,14 +371,27 @@ with target p leaves values 0..p-1 unchanged and promotes some value-p vertices 
 (which may then be re-dense-ranked by the next `convergeLoop` call — verify this claim is
 preserved by `convergeLoop` on a prefix typing).
 
-**Deliverable.** One invariant theorem in `FullCorrectness/Invariants.lean`:
+**Deliverables in `FullCorrectness/Invariants.lean`:**
 ```
-orderVertices_prefix_invariant : ∀ p < n, after p iterations, types ⊆ Fin (p+1)  (or similar)
+convergeLoop_preserves_prefix      : 🧱 sorry (depends on density of `assignRanks`)
+breakTie_targetPos_is_min_tied     : ✅ proved (via `breakTie_getD_target` from §5)
+orderVertices_prefix_invariant     : 🧱 sorry (induct on the outer fold)
+orderVertices_n_distinct_ranks     : 🧱 sorry (corollary at p = n)
 ```
 
-**Watch-out.** If the algorithm's rank assignment is not dense (e.g. skips values), this
-invariant fails, and the whole argument unravels. Check `assignRanks` + `computeDenseRanks`
-carefully.
+**`breakTie_targetPos_is_min_tied` is now proved.** The argument: assume by contradiction
+that two distinct vertices `w₁ ≠ w₂` share an output value `val ≤ p`. By `breakTie_getD_target`,
+target-valued positions land on `{p, p+1}`; since `p+1 > p`, an output `≤ p` rules out
+promotion, so `output[w_i] = vts[w_i]` (preserved). Two sub-cases on `val`:
+- `val < p`: by the prefix-uniqueness hypothesis at `k := val.toNat`, `w₁ = w₂`. ⊥.
+- `val = p`: both `vts[w_i] = p`, so any `w_i ≠ v_star` (= the smallest target-valued
+  index, found via `Nat.find`) would land on `p+1` by `breakTie_getD_at_other` — contradicting
+  `output[w_i] = p`. So both `w_i = v_star`, hence equal. ⊥.
+
+**Watch-out.** If the algorithm's rank assignment is not dense (e.g. skips values), the
+remaining `convergeLoop_preserves_prefix` invariant fails, and the whole argument unravels.
+Check `assignRanks` + `computeDenseRanks` carefully — or restate the invariant against the
+dense-rank composition.
 
 ## §8  Assembling `run_canonical`
 

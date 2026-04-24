@@ -457,6 +457,41 @@ theorem breakTie_getD_at_other (vts : Array VertexType) (t₀ : VertexType)
            (List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1)))).1.getD w_idx 0 = t₀ + 1
   exact btFold_from_notfirst_getD t₀ _ h_nd vts false w_idx h_mem hw_val hw_size
 
+/-- **Disjunctive characterization.** For any in-bounds position `w` whose value in `vts`
+is the target `t₀`, the breakTie output at `w` is *either* `t₀` (if `w` is the kept
+representative) *or* `t₀ + 1` (if `w` was promoted). Useful when callers don't need to
+know which alternative obtains. Derived from `breakTie_getD_at_min` /
+`breakTie_getD_at_other` by picking `v_star` as the smallest target-valued index. -/
+theorem breakTie_getD_target (vts : Array VertexType) (t₀ : VertexType)
+    {w : Nat} (hw_size : w < vts.size) (hw : vts.getD w 0 = t₀) :
+    (breakTie vts t₀).1.getD w 0 = t₀ ∨ (breakTie vts t₀).1.getD w 0 = t₀ + 1 := by
+  classical
+  -- The set of target-valued, in-bounds indices is non-empty (contains `w`).
+  have h_ex : ∃ i, i < vts.size ∧ vts.getD i 0 = t₀ := ⟨w, hw_size, hw⟩
+  set v_star := Nat.find h_ex with h_vstar_def
+  have hv_spec : v_star < vts.size ∧ vts.getD v_star 0 = t₀ := Nat.find_spec h_ex
+  have hv_min_raw : ∀ i, i < v_star → ¬ (i < vts.size ∧ vts.getD i 0 = t₀) :=
+    fun i hi => Nat.find_min h_ex hi
+  have hv_min : ∀ i, i < v_star → vts.getD i 0 ≠ t₀ := by
+    intro i hi heq
+    exact hv_min_raw i hi ⟨lt_trans hi hv_spec.1, heq⟩
+  by_cases hwv : w = v_star
+  · -- `w` is the smallest target-valued index — kept at `t₀`.
+    subst hwv
+    exact Or.inl (breakTie_getD_at_min vts t₀ hv_spec.1 hv_spec.2 hv_min)
+  · -- `w` is some other target-valued index — promoted to `t₀ + 1`.
+    exact Or.inr (breakTie_getD_at_other vts t₀ hv_spec.1 hv_spec.2 hv_min hw_size hw hwv)
+
+/-- **Lower-bound corollary.** For target-valued positions, the breakTie output is at
+least `t₀`. Convenient when only the lower bound matters (e.g., in the §7 prefix
+invariant: tied values after `breakTie p` cannot drop below `p`). -/
+theorem breakTie_getD_target_ge (vts : Array VertexType) (t₀ : VertexType)
+    {w : Nat} (hw_size : w < vts.size) (hw : vts.getD w 0 = t₀) :
+    t₀ ≤ (breakTie vts t₀).1.getD w 0 := by
+  rcases breakTie_getD_target vts t₀ hw_size hw with h | h
+  · exact le_of_eq h.symm
+  · exact le_of_lt (h.symm ▸ Int.lt_add_one_of_le (le_refl t₀))
+
 /-- **§5.1**  `TypedAut` after `breakTie` is the `v*`-stabilizer of the original.
 
 Let `t₀` be the smallest tied value, `v* := min (typeClass vts t₀)` (by `Fin` order), and
@@ -671,6 +706,42 @@ def runFrom {n : Nat} (start : Nat) (vts : Array VertexType) (G : AdjMatrix n) :
       (breakTie convergedTypes (Int.ofNat (start + targetPosition))).1)
     vts
   labelEdgesAccordingToRankings orderedRanks G
+
+/-! ### Pipeline τ-equivariance for `runFrom`
+
+The single load-bearing reduction needed by §6. It says: for any `τ ∈ Aut G` and any two
+`τ`-related input typings `arr₁, arr₂` (i.e., `arr₂[w] = arr₁[τ⁻¹ w]` for every vertex
+`w`), the canonical matrix produced by `runFrom` is the same on both inputs.
+
+**Why this is exactly §3 chained.** Inside `runFrom` the work is:
+  1. `initializePaths G` — independent of the input typing.
+  2. A `foldl` over `[0, …, n - start)` that alternates `convergeLoop` and `breakTie`.
+     Each `convergeLoop` step preserves τ-relatedness of the typing array (Stage B + the
+     `convergeLoop_Aut_invariant`-style argument generalized to the relational form: if
+     `arr₂[w] = arr₁[τ⁻¹ w]` going in, the same relation holds coming out).
+     Each `breakTie` step preserves τ-relatedness too: the smallest index in
+     `typeClass arr_i t₀` differs by τ between the two arrays in exactly the way the
+     τ-relation predicts (because the typeClass on `arr₂` is the τ-image of the typeClass
+     on `arr₁`), so the promoted/kept positions correspond under τ.
+  3. `labelEdgesAccordingToRankings` (Stage D): given τ-related rank arrays and `τ ∈ Aut G`,
+     produces equal canonical matrices because the dense-rank/swap procedure factors out τ.
+
+So this lemma is precisely the chained Stages B–D specialized to the bounded `runFrom`
+loop. The `hτ : τ ∈ G.Aut` hypothesis is exactly what the Stage B–D theorems require. The
+size hypotheses make the size of intermediate arrays computable (every `breakTie` and
+`convergeLoop` step preserves array size).
+
+**Status: stated, proof pending.** Once the four Stage A–D theorems in `Equivariance.lean`
+are discharged, this reduction is mechanical (induct on the fold; apply Stage B/D at each
+step). Listed as the single load-bearing sorry that §6 reduces to. -/
+theorem runFrom_VtsInvariant_eq
+    (G : AdjMatrix n) (s : Nat) (τ : Equiv.Perm (Fin n))
+    (_hτ : τ ∈ G.Aut)
+    (arr₁ arr₂ : Array VertexType)
+    (_h_size₁ : arr₁.size = n) (_h_size₂ : arr₂.size = n)
+    (_h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0) :
+    runFrom s arr₁ G = runFrom s arr₂ G := by
+  sorry
 
 /-- `breakTieAt vts t₀ keep`: the "what if we had kept vertex `keep` instead of
 `min (typeClass vts t₀)`" alternative to `breakTie`. Promotes every vertex with value
@@ -936,6 +1007,7 @@ theorem tiebreak_choice_independent
   obtain ⟨τ, hτ, hτv⟩ := hconn
   -- τ is in TypedAut, so preserves G AND vts.
   have hτG : G.permute τ = G := hτ.1
+  have hτAut : τ ∈ G.Aut := hτG
   have hτvts : VtsInvariant τ vts := hτ.2
   -- Rewrite v₂ as τ v₁ and apply breakTieAt τ-equivariance.
   have h_relabel : ∀ w : Fin n,
@@ -944,9 +1016,15 @@ theorem tiebreak_choice_independent
     intro w
     rw [show v₂ = τ v₁ from hτv.symm]
     exact breakTieAt_VtsInvariant_eq vts t₀ τ v₁ hsize hτvts w
-  -- At this point, runFrom on τ-related arrays should produce the same output,
-  -- because τ ∈ Aut G and §3 equivariance (Stages B–D) commutes τ through the pipeline.
-  -- The remaining gap is this pipeline equivariance, which is the contents of §3.
-  sorry
+  -- The two arrays are τ-related; both have size `n` (breakTieAt preserves size, and
+  -- vts.size = n). The pipeline equivariance lemma `runFrom_VtsInvariant_eq` (§3 Stages
+  -- B–D chained) collapses the τ-relation, giving equal final canonical matrices.
+  have h_size₁ : (breakTieAt vts t₀ v₁).size = n := by
+    rw [breakTieAt_size]; exact hsize
+  have h_size₂ : (breakTieAt vts t₀ v₂).size = n := by
+    rw [breakTieAt_size]; exact hsize
+  exact runFrom_VtsInvariant_eq G (start + 1) τ hτAut
+            (breakTieAt vts t₀ v₁) (breakTieAt vts t₀ v₂)
+            h_size₁ h_size₂ h_relabel
 
 end Graph
