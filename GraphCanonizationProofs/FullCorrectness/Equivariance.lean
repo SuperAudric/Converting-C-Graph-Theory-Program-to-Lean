@@ -188,6 +188,91 @@ theorem calculatePathRankings_Aut_equivariant
       = (calculatePathRankings (initializePaths G) vts).permute σ := by
   sorry
 
+/-! ## §4 — `convergeLoop` preserves Aut(G)-invariance
+
+If the input vertex-type array is σ-invariant for some σ ∈ Aut G, then the output of
+`convergeLoop` is σ-invariant as well. In particular, starting from the all-zeros array
+(trivially σ-invariant), the output `convergeLoop (initializePaths G) zeros fuel` is
+always σ-invariant for every σ ∈ Aut G.
+
+**Corollary used downstream.** Two vertices in the same Aut(G)-orbit carry the same
+type in the output of `convergeLoop` on an Aut(G)-invariant input.
+
+**Proof plan.** Induction on `fuel`. The inductive step follows from:
+  (a) Stage B equivariance: `calculatePathRankings ((initializePaths G).permute σ) vts
+        = (calculatePathRankings (initializePaths G) vts).permute σ`
+      when vts is σ-invariant.
+  (b) Stage A equivariance + Stage B: starting from `(initializePaths G, vts)`, running
+      one `convergeOnce` step and reading off `rankState.getFrom (n-1) v`, the value at
+      `σ v` equals the value at `v` because the rank depends only on σ-invariant data.
+  (c) `convergeLoop` either returns the current types (no change this step) or recurses
+      with σ-invariant types; the IH closes the recursive case.
+-/
+
+/-- **One-step Aut-invariance.** If `vts` is σ-invariant for σ ∈ Aut G, then so is
+`(convergeOnce (initializePaths G) vts).1`. This is the content of Stage B equivariance
+plus the fact that `rankState.getFrom (n-1) v` depends only on the `fromRanks` slice at
+`v`, which is `σ`-equivariant. -/
+theorem convergeOnce_Aut_invariant
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType)
+    (_hvts : ∀ v : Fin n, vts.getD (σ v).val 0 = vts.getD v.val 0) :
+    ∀ v : Fin n,
+      (convergeOnce (initializePaths G) vts).1.getD (σ v).val 0 =
+      (convergeOnce (initializePaths G) vts).1.getD v.val 0 := by
+  -- Depends on Stage B equivariance (`calculatePathRankings_Aut_equivariant`) +
+  -- `RankState.permute` compatibility + the outer fold that writes back into vts.
+  -- The fold writes `rankState.getFrom (n-1) v` into slot `v`. By Stage B, the written
+  -- values are σ-invariant, so the output array is σ-invariant too.
+  sorry
+
+theorem convergeLoop_Aut_invariant
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType) (fuel : Nat)
+    (hvts : ∀ v : Fin n, vts.getD (σ v).val 0 = vts.getD v.val 0) :
+    ∀ v : Fin n,
+      (convergeLoop (initializePaths G) vts fuel).getD (σ v).val 0 =
+      (convergeLoop (initializePaths G) vts fuel).getD v.val 0 := by
+  induction fuel generalizing vts with
+  | zero =>
+    -- `convergeLoop state vts 0 = vts` by definition; the goal is exactly `hvts`.
+    intro v
+    show vts.getD (σ v).val 0 = vts.getD v.val 0
+    exact hvts v
+  | succ k ih =>
+    -- `convergeLoop state vts (k+1)`  ≡
+    --   `let (updatedTypes, changed) := convergeOnce state vts
+    --    if changed then convergeLoop state updatedTypes k else updatedTypes`.
+    -- In either branch the propagated typing is σ-invariant (by convergeOnce_Aut_invariant),
+    -- so the result is σ-invariant (IH in the recursive branch, `hStep` directly in the other).
+    have hStep := convergeOnce_Aut_invariant G σ hσ vts hvts
+    intro v
+    -- Expose the `let`-destructuring + `if`-branch via `change` to the normalized form.
+    change (if (convergeOnce (initializePaths G) vts).2
+            then convergeLoop (initializePaths G) (convergeOnce (initializePaths G) vts).1 k
+            else (convergeOnce (initializePaths G) vts).1).getD (σ v).val 0 =
+           (if (convergeOnce (initializePaths G) vts).2
+            then convergeLoop (initializePaths G) (convergeOnce (initializePaths G) vts).1 k
+            else (convergeOnce (initializePaths G) vts).1).getD v.val 0
+    -- Split on the `if`: both LHS and RHS of the equality contain the same `if` expression,
+    -- so `split` produces two subgoals (one per branch) where each side reduces uniformly.
+    split
+    · -- recursive branch: by IH applied to the σ-invariant one-step typing
+      exact ih _ hStep v
+    · -- terminate branch: the one-step typing is itself the result, σ-invariant by hStep
+      exact hStep v
+
+/-- **Corollary of §4.** Starting from the all-zeros array (trivially Aut-invariant),
+`convergeLoop` produces a vertex typing that is constant on each Aut(G)-orbit. -/
+theorem convergeLoop_zeros_Aut_invariant
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G) (fuel : Nat) :
+    ∀ v : Fin n,
+      (convergeLoop (initializePaths G) (Array.replicate n 0) fuel).getD (σ v).val 0 =
+      (convergeLoop (initializePaths G) (Array.replicate n 0) fuel).getD v.val 0 := by
+  apply convergeLoop_Aut_invariant G σ hσ
+  intro v
+  simp [v.isLt, (σ v).isLt]
+
 /-! ## §3 Stage C — `orderVertices` equivariance
 
 **Theorem.** If `σ ∈ Aut G` and `vts` is σ-invariant, then:

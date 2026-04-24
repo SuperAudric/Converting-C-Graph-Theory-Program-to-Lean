@@ -14,7 +14,9 @@
       "Bash(export PATH=\"$HOME/.elan/bin:$PATH\")",
       "Bash(command -v lean)",
       "Bash(sort -t'[' -k2 -nr)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(lake env *)",
+      "Bash(tee /tmp/lake-build-2.log)"
     ]
   }
 }

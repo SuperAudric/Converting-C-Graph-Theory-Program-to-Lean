@@ -5,7 +5,7 @@
    "type": "git",
    "subDir": null,
    "scope": "leanprover-community",
-   "rev": "cc26c21489ac73ce98d415f2d02ca2bacb047fdb",
+   "rev": "8c4628756426abd24c518640a658f9ec47372752",
    "name": "mathlib",
    "manifestFile": "lake-manifest.json",
    "inputRev": "master",
@@ -91,6 +91,6 @@
    "inputRev": "v4.30.0-rc2",
    "inherited": true,
    "configFile": "lakefile.toml"}],
- "name": "«hello-world»",
+ "name": "GraphCanonizationProofs",
  "lakeDir": ".lake",
  "fixedToolchain": false}

@@ -3,6 +3,9 @@ import FullCorrectness.Permutation
 import FullCorrectness.Automorphism
 import FullCorrectness.Isomorphic
 import FullCorrectness.Equivariance
+import FullCorrectness.Tiebreak
+import FullCorrectness.Invariants
+import FullCorrectness.Main
 
 /-!
 # Full correctness of the graph canonizer — umbrella + proof plan
@@ -27,13 +30,13 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | Step | Subject                                           | File                                       | Status          |
 | ---- | ------------------------------------------------- | ------------------------------------------ | --------------- |
 | §1   | Automorphism group, orbits, `permute` action      | `Basic`, `Permutation`, `Automorphism`     | ✅ proved       |
-| §2   | `Isomorphic ↔ ∃σ, H = G.permute σ` bridge         | `Isomorphic`                               | 📋 planned      |
-| §3   | Pipeline equivariance under Aut(G) (Stages A–D)   | `Equivariance` (to create)                 | 📋 planned below|
-| §4   | `convergeLoop` output is Aut(G)-invariant         | `Equivariance` (to create)                 | 📋 planned below|
-| §5   | `breakTie` shrinks typed-automorphism group       | `Tiebreak` (to create)                     | 📋 planned below|
-| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak` (to create)                     | 📋 planned below|
-| §7   | "Converged types are a prefix of ℕ" invariant     | `Invariants` (to create)                   | 📋 planned below|
-| §8   | Assemble `run_canonical`                          | `Main` (to create)                         | 📋 planned below|
+| §2   | `Isomorphic ↔ ∃σ, H = G.permute σ` bridge         | `Isomorphic`                               | ✅ proved       |
+| §3   | Pipeline equivariance under Aut(G) (Stages A–D)   | `Equivariance`                             | 🧱 stated, `sorry` |
+| §4   | `convergeLoop` output is Aut(G)-invariant         | `Equivariance`                             | 🧱 stated, `sorry` |
+| §5   | `breakTie` shrinks typed-automorphism group       | `Tiebreak`                                 | 🧱 stated, `sorry` |
+| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | 🧱 stated, `sorry` |
+| §7   | "Converged types are a prefix of ℕ" invariant     | `Invariants`                               | 🧱 stated, `sorry` |
+| §8   | Assemble `run_canonical`                          | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
 --------------------------------------------------------------------------------
 

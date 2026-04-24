@@ -213,7 +213,7 @@ def calculatePathRankings (state : PathState) (vertexTypes : Array VertexType) :
 
 /-! ## Vertex ordering -/
 
-private def convergeOnce (state : PathState) (vertexTypes : Array VertexType)
+def convergeOnce (state : PathState) (vertexTypes : Array VertexType)
     : Array VertexType × Bool :=
   let rankState   := calculatePathRankings state vertexTypes
   let numVertices := state.vertexCount
@@ -226,7 +226,7 @@ private def convergeOnce (state : PathState) (vertexTypes : Array VertexType)
     (vertexTypes, false)
 
 --This function provides a partial ordering of vertices, ordering every vertex into types, where each type shares a symmetry between them (and implicitly automorphic)
-private def convergeLoop (state : PathState) (vertexTypes : Array VertexType) : Nat → Array VertexType
+def convergeLoop (state : PathState) (vertexTypes : Array VertexType) : Nat → Array VertexType
   | 0        => vertexTypes
   | fuel + 1 =>
     let (updatedTypes, changed) := convergeOnce state vertexTypes
@@ -234,7 +234,7 @@ private def convergeLoop (state : PathState) (vertexTypes : Array VertexType) : 
 
 --This function collapses one symmetry by choosing one (the first is arbitrarily chosen) to come before the others in the partial ordering
 --Choosing any other should result in the same output, as this represents choosing one automorphism to display
-private def breakTie (vertexTypes : Array VertexType) (target : Int) : Array VertexType × Bool :=
+def breakTie (vertexTypes : Array VertexType) (target : Int) : Array VertexType × Bool :=
   let result := (List.range vertexTypes.size).foldl
     (fun (triple : Array VertexType × Bool × Bool) vertexIdx =>
       let (typeArray, firstAppearance, changed) := triple
@@ -255,7 +255,7 @@ def orderVertices (state : PathState) (vertexTypes : Array VertexType) : Array V
 
 /-! ## Edge labeling -/
 
-private def computeDenseRanks (numVertices : Nat) (vertexRankings : Array VertexType) : Array Nat :=
+def computeDenseRanks (numVertices : Nat) (vertexRankings : Array VertexType) : Array Nat :=
   let pairs : List (VertexType × Nat) := (List.range numVertices).map fun vertexIdx => (vertexRankings.getD vertexIdx 0, vertexIdx)
   let cmp : (VertexType × Nat) → (VertexType × Nat) → Ordering :=
     fun pair1 pair2 => if pair1.1 != pair2.1 then compare pair1.1 pair2.1 else compare pair1.2 pair2.2

@@ -265,6 +265,7 @@ theorem orderVertices_swap_equivariant {n : Nat} (G : AdjMatrix n) (v1 v2 : Fin 
 
     Proof sketch (still valid): after n iterations of the outer loop, each value in 0..n-1
     is held by at most one vertex — iteration p ensures uniqueness of value p. -/
+    --possible duplicate of tiebreak->orderVertices_n_distinct_ranks
 theorem orderVertices_distinct_ranks {n : Nat} (state : PathState) (vts : Array VertexType) :
     let ranks := orderVertices state vts
     ∀ i j : Fin n, i ≠ j → ranks.getD i.val 0 ≠ ranks.getD j.val 0 := by
