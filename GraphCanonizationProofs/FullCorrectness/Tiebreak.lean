@@ -143,59 +143,475 @@ not all are fixed by `TypedAut G vts`, so the stabilizer is a proper subgroup.
 def typeClass (vts : Array VertexType) (t₀ : VertexType) : Set (Fin n) :=
   { v | vts.getD v.val 0 = t₀ }
 
+/-! ### Characterizing `breakTie`'s output
+
+Before the §5 theorems, we characterize the output of `breakTie` position-by-position.
+After the fold runs over `[0, 1, …, size-1]`:
+
+  - size is preserved;
+  - positions outside `typeClass vts t₀` keep their value;
+  - the **first** position (smallest-index) with value `t₀` keeps its value;
+  - every other position with value `t₀` is promoted to `t₀ + 1`.
+-/
+
+/-- The body of the `breakTie` fold. Written using explicit projections (rather than a
+`let (arr, first, chg) := triple` destructure) so that `split` on the branches keeps the
+goal in terms of `triple.1` / `triple.2.1` / `triple.2.2`. The definitional equality with
+the `let`-destructured form used by `breakTie` is established in `breakTie_eq_fold`. -/
+private def btStep (t₀ : VertexType)
+    (triple : Array VertexType × Bool × Bool) (i : Nat) :
+    Array VertexType × Bool × Bool :=
+  if triple.1.getD i 0 == t₀ then
+    if triple.2.1 then (triple.1, false, triple.2.2)
+    else (triple.1.set! i (t₀ + 1), false, true)
+  else triple
+
+private theorem btStep_size (t₀ : VertexType)
+    (triple : Array VertexType × Bool × Bool) (i : Nat) :
+    (btStep t₀ triple i).1.size = triple.1.size := by
+  simp only [btStep]
+  split_ifs <;> simp
+
+/-- `breakTie` unfolded into the `btStep` fold. Proved via pointwise function extensionality
+on the lambda body (both bodies reduce to the same `match` expression on a 3-tuple). -/
+private theorem breakTie_eq_fold (vts : Array VertexType) (t₀ : VertexType) :
+    breakTie vts t₀ =
+      let triple := (List.range vts.size).foldl (btStep t₀) (vts, true, false)
+      (triple.1, triple.2.2) := by
+  -- The `let (a,b,c) := triple` destructure inside `breakTie`'s lambda is semantically the
+  -- same as projecting `.1`, `.2.1`, `.2.2`; we normalize by `funext` + `split_ifs`.
+  unfold breakTie btStep
+  congr 1
+
+/-- Size is preserved by the breakTie fold. -/
+private theorem btFold_size (t₀ : VertexType) :
+    ∀ (l : List Nat) (triple : Array VertexType × Bool × Bool),
+      (l.foldl (btStep t₀) triple).1.size = triple.1.size
+  | [], _ => rfl
+  | x :: xs, triple => by
+      rw [List.foldl_cons, btFold_size t₀ xs (btStep t₀ triple x), btStep_size]
+
+/-- Positions whose value is not `t₀` are preserved by one `btStep`. -/
+private theorem btStep_getD_ne (t₀ : VertexType)
+    (triple : Array VertexType × Bool × Bool) (i j : Nat)
+    (hj : triple.1.getD j 0 ≠ t₀) :
+    (btStep t₀ triple i).1.getD j 0 = triple.1.getD j 0 := by
+  unfold btStep
+  split
+  · -- current value at position `i` equals `t₀`
+    split
+    · rfl
+    · rename_i hcmp _
+      -- If `i = j`, the hypothesis `hj` contradicts `hcmp` (which says `triple.1.getD i 0 = t₀`).
+      have hij : i ≠ j := by
+        intro hij
+        apply hj
+        rw [← hij]
+        exact beq_iff_eq.mp hcmp
+      -- `set!` at position `i ≠ j` leaves position `j` untouched.
+      simp only [Array.getD_eq_getD_getElem?]
+      rcases lt_or_ge j triple.1.size with hjs | hjs
+      · rw [Array.set!_eq_setIfInBounds,
+            Array.getElem?_setIfInBounds_ne hij]
+      · rw [Array.set!_eq_setIfInBounds]
+        simp [hjs]
+  · rfl
+
+/-- Positions whose value is not `t₀` are preserved across the whole fold. -/
+private theorem btFold_getD_ne (t₀ : VertexType) :
+    ∀ (l : List Nat) (triple : Array VertexType × Bool × Bool) (j : Nat),
+      triple.1.getD j 0 ≠ t₀ →
+      (l.foldl (btStep t₀) triple).1.getD j 0 = triple.1.getD j 0
+  | [], _, _, _ => rfl
+  | x :: xs, triple, j, hj => by
+      rw [List.foldl_cons]
+      have hstep : (btStep t₀ triple x).1.getD j 0 = triple.1.getD j 0 :=
+        btStep_getD_ne t₀ triple x j hj
+      have hj' : (btStep t₀ triple x).1.getD j 0 ≠ t₀ := by rw [hstep]; exact hj
+      rw [btFold_getD_ne t₀ xs _ j hj', hstep]
+
+/-- `breakTie` preserves array size. -/
+theorem breakTie_size (vts : Array VertexType) (t₀ : VertexType) :
+    (breakTie vts t₀).1.size = vts.size := by
+  rw [breakTie_eq_fold]
+  exact btFold_size t₀ _ (vts, true, false)
+
+/-- `breakTie` leaves untouched any position whose value is not the target. -/
+theorem breakTie_getD_of_ne (vts : Array VertexType) (t₀ : VertexType)
+    {j : Nat} (hj : vts.getD j 0 ≠ t₀) :
+    (breakTie vts t₀).1.getD j 0 = vts.getD j 0 := by
+  rw [breakTie_eq_fold]
+  exact btFold_getD_ne t₀ _ (vts, true, false) j hj
+
+/-! The remaining characterizations — "first-target keeps value, later targets get promoted"
+— require tracking the `firstAppearance` flag across the fold. Two lemmas do the heavy
+lifting:
+
+  - `btFold_no_target`:  if every index in the list has `vts.getD _ 0 ≠ t₀`, the fold is
+    a no-op on `(vts, first, chg)`.
+  - `btFold_from_notfirst`: starting from `(arr, false, chg)` (so `first = false`), any
+    subsequent index `j` in the list with `arr.getD j 0 = t₀` gets promoted to `t₀ + 1`. -/
+
+/-- If no index in the list has target value, the fold is a no-op. -/
+private theorem btFold_no_target (t₀ : VertexType) :
+    ∀ (l : List Nat) (arr : Array VertexType) (first chg : Bool),
+      (∀ i ∈ l, arr.getD i 0 ≠ t₀) →
+      l.foldl (btStep t₀) (arr, first, chg) = (arr, first, chg)
+  | [], _, _, _, _ => rfl
+  | x :: xs, arr, first, chg, hne => by
+      rw [List.foldl_cons]
+      have hxne : arr.getD x 0 ≠ t₀ := hne x (List.mem_cons_self)
+      -- One step is a no-op: btStep t₀ (arr, first, chg) x = (arr, first, chg).
+      have hstep : btStep t₀ (arr, first, chg) x = (arr, first, chg) := by
+        simp only [btStep]
+        have : ¬ (arr.getD x 0 == t₀) = true := by
+          intro h; exact hxne (beq_iff_eq.mp h)
+        rw [if_neg this]
+      rw [hstep]
+      apply btFold_no_target t₀ xs arr first chg
+      intro i hi
+      exact hne i (List.mem_cons_of_mem x hi)
+
+/-- Explicit form of `btStep` when the accumulator already has `first = false`:
+    no `first`-flip case; either promote at `i` or leave untouched. -/
+private theorem btStep_notfirst (t₀ : VertexType) (arr : Array VertexType)
+    (chg : Bool) (i : Nat) :
+    btStep t₀ (arr, false, chg) i =
+      if arr.getD i 0 == t₀ then (arr.set! i (t₀ + 1), false, true)
+      else (arr, false, chg) := by
+  unfold btStep
+  rfl
+
+/-- `t₀ + 1 ≠ t₀` for any integer `t₀`. -/
+private theorem VertexType_add_one_ne (t₀ : VertexType) : t₀ + 1 ≠ t₀ :=
+  fun h => absurd (Int.add_left_cancel (show t₀ + 1 = t₀ + 0 from by
+    rw [h, Int.add_zero])) (by decide)
+
+/-- Starting with `first = false`, any index `j` in a `Nodup` list with target value gets
+promoted to `t₀ + 1`. The `Nodup` hypothesis rules out visiting `j` twice. `List.range n`
+is `Nodup`, which is the only case we need. -/
+private theorem btFold_from_notfirst_getD (t₀ : VertexType) :
+    ∀ (l : List Nat) (_hnd : l.Nodup) (arr : Array VertexType) (chg : Bool) (j : Nat),
+      j ∈ l →
+      arr.getD j 0 = t₀ →
+      j < arr.size →
+      (l.foldl (btStep t₀) (arr, false, chg)).1.getD j 0 = t₀ + 1
+  | [], _, _, _, _, hj, _, _ => absurd hj List.not_mem_nil
+  | x :: xs, hnd, arr, chg, j, hj, hjt, hjs => by
+      rw [List.foldl_cons, btStep_notfirst]
+      have hxnotin : x ∉ xs := (List.nodup_cons.mp hnd).1
+      have hnd' : xs.Nodup := (List.nodup_cons.mp hnd).2
+      rcases List.mem_cons.mp hj with hjeq | hjtail
+      · -- j = x: this step promotes position j; later steps preserve it (j ∉ xs).
+        subst hjeq
+        have hcmp : (arr.getD j 0 == t₀) = true := by
+          rw [hjt]; exact beq_self_eq_true _
+        rw [if_pos hcmp]
+        have hjt' : (arr.set! j (t₀ + 1)).getD j 0 = t₀ + 1 := by
+          simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+                     Array.getElem?_setIfInBounds_self_of_lt hjs]
+          rfl
+        have hne' : (arr.set! j (t₀ + 1)).getD j 0 ≠ t₀ := by
+          rw [hjt']; exact VertexType_add_one_ne t₀
+        rw [btFold_getD_ne t₀ xs (arr.set! j (t₀ + 1), false, true) j hne']
+        exact hjt'
+      · -- j ∈ xs: step at x leaves j alone since x ≠ j (nodup).
+        have hneq : x ≠ j := fun hxj => hxnotin (hxj ▸ hjtail)
+        by_cases hcmp : (arr.getD x 0 == t₀) = true
+        · rw [if_pos hcmp]
+          have hjt' : (arr.set! x (t₀ + 1)).getD j 0 = t₀ := by
+            simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+                       Array.getElem?_setIfInBounds_ne hneq]
+            rw [← Array.getD_eq_getD_getElem?]; exact hjt
+          have hjs' : j < (arr.set! x (t₀ + 1)).size := by
+            rw [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]; exact hjs
+          exact btFold_from_notfirst_getD t₀ xs hnd' _ _ j hjtail hjt' hjs'
+        · rw [if_neg hcmp]
+          exact btFold_from_notfirst_getD t₀ xs hnd' _ _ j hjtail hjt hjs
+
+/-- A position `j` not in the fold's list has its value preserved across the fold.
+(No step ever writes at positions outside the list.) -/
+private theorem btFold_getD_not_mem (t₀ : VertexType) :
+    ∀ (l : List Nat) (triple : Array VertexType × Bool × Bool) (j : Nat),
+      j ∉ l →
+      (l.foldl (btStep t₀) triple).1.getD j 0 = triple.1.getD j 0
+  | [], _, _, _ => rfl
+  | x :: xs, triple, j, hnotin => by
+      rw [List.foldl_cons]
+      have hneq : x ≠ j := fun h => hnotin (h ▸ List.mem_cons_self)
+      have hnotin' : j ∉ xs := fun h => hnotin (List.mem_cons_of_mem x h)
+      have hstep : (btStep t₀ triple x).1.getD j 0 = triple.1.getD j 0 := by
+        unfold btStep
+        split_ifs
+        · rfl
+        · -- promoting branch: set! at x, x ≠ j preserves
+          simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+                     Array.getElem?_setIfInBounds_ne hneq]
+        · rfl
+      rw [btFold_getD_not_mem t₀ xs _ j hnotin', hstep]
+
+/-- `breakTie` leaves the minimum-index target-valued position at value `t₀`. Requires
+`v_star` is the unique minimum: no earlier index has value `t₀` in `vts`. -/
+theorem breakTie_getD_at_min (vts : Array VertexType) (t₀ : VertexType)
+    {v_star_idx : Nat} (hv_size : v_star_idx < vts.size)
+    (hv_val : vts.getD v_star_idx 0 = t₀)
+    (hv_min : ∀ i, i < v_star_idx → vts.getD i 0 ≠ t₀) :
+    (breakTie vts t₀).1.getD v_star_idx 0 = t₀ := by
+  rw [breakTie_eq_fold]
+  -- Split List.range vts.size = List.range v_star_idx ++ [v_star_idx] ++
+  --                             List.range' (v_star_idx + 1) (vts.size - v_star_idx - 1)
+  -- But it's cleaner to do induction step-by-step.
+  --
+  -- Strategy: use btFold_no_target on List.range v_star_idx (no targets), then one step at
+  -- v_star_idx (flips first, array unchanged), then btFold_getD_not_mem on the rest (since
+  -- v_star_idx is not in the remaining list after it's been visited).
+  --
+  -- We prove this by showing `List.range vts.size = List.range (v_star_idx + 1) ++ tail` and
+  -- that the fold over the prefix leaves position `v_star_idx` at value `t₀`.
+  --
+  -- Direct approach: induction on List.range vts.size with generalized invariant.
+  have h_split : List.range vts.size =
+      (List.range (v_star_idx + 1)) ++ List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1)) := by
+    have h_sum : vts.size = (v_star_idx + 1) + (vts.size - (v_star_idx + 1)) := by omega
+    conv_lhs => rw [List.range_eq_range', h_sum, ← List.range'_append_1]
+    simp [List.range_eq_range']
+  rw [h_split, List.foldl_append]
+  -- After processing List.range (v_star_idx + 1): position v_star_idx has value t₀,
+  -- first = false (because at index v_star_idx, arr[v_star_idx] = t₀ triggered the flip).
+  -- Key claim: fold over List.range (v_star_idx + 1) starting from (vts, true, false) gives
+  --            (vts, false, false).
+  have h_prefix : (List.range (v_star_idx + 1)).foldl (btStep t₀) (vts, true, false) =
+                    (vts, false, false) := by
+    -- List.range (v_star_idx + 1) = List.range v_star_idx ++ [v_star_idx]
+    rw [List.range_succ, List.foldl_append]
+    -- First: fold over List.range v_star_idx (no targets) is a no-op.
+    have h_pre : (List.range v_star_idx).foldl (btStep t₀) (vts, true, false) = (vts, true, false) := by
+      apply btFold_no_target
+      intro i hi
+      exact hv_min i (List.mem_range.mp hi)
+    rw [h_pre]
+    -- Now step at v_star_idx with (vts, true, false)
+    simp only [List.foldl_cons, List.foldl_nil]
+    -- btStep t₀ (vts, true, false) v_star_idx = ?
+    have hcmp : (vts.getD v_star_idx 0 == t₀) = true := by
+      rw [hv_val]; exact beq_self_eq_true _
+    show btStep t₀ (vts, true, false) v_star_idx = (vts, false, false)
+    unfold btStep
+    rw [if_pos hcmp]
+    rfl
+  rw [h_prefix]
+  -- Now the goal is: fold over List.range' (v_star_idx + 1) ... starting from (vts, false, false)
+  -- evaluates at position v_star_idx to t₀. Since v_star_idx is not in the suffix list, the
+  -- position's value is preserved.
+  have h_notin : v_star_idx ∉ List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1)) := by
+    intro h
+    rcases List.mem_range'.mp h with ⟨hge, _⟩
+    omega
+  rw [btFold_getD_not_mem t₀ _ (vts, false, false) v_star_idx h_notin]
+  exact hv_val
+
+/-- `breakTie` promotes every other target-valued position to `t₀ + 1`. -/
+theorem breakTie_getD_at_other (vts : Array VertexType) (t₀ : VertexType)
+    {v_star_idx : Nat} (hv_size : v_star_idx < vts.size)
+    (hv_val : vts.getD v_star_idx 0 = t₀)
+    (hv_min : ∀ i, i < v_star_idx → vts.getD i 0 ≠ t₀)
+    {w_idx : Nat} (hw_size : w_idx < vts.size)
+    (hw_val : vts.getD w_idx 0 = t₀)
+    (hw_ne : w_idx ≠ v_star_idx) :
+    (breakTie vts t₀).1.getD w_idx 0 = t₀ + 1 := by
+  rw [breakTie_eq_fold]
+  -- w_idx > v_star_idx (since v_star is min and w ≠ v_star).
+  have hw_gt : v_star_idx < w_idx := by
+    rcases lt_or_ge w_idx v_star_idx with hlt | hge
+    · exact absurd hw_val (hv_min w_idx hlt)
+    · exact lt_of_le_of_ne hge (Ne.symm hw_ne)
+  -- Same split as before.
+  have h_split : List.range vts.size =
+      (List.range (v_star_idx + 1)) ++ List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1)) := by
+    have h_sum : vts.size = (v_star_idx + 1) + (vts.size - (v_star_idx + 1)) := by omega
+    conv_lhs => rw [List.range_eq_range', h_sum, ← List.range'_append_1]
+    simp [List.range_eq_range']
+  rw [h_split, List.foldl_append]
+  have h_prefix : (List.range (v_star_idx + 1)).foldl (btStep t₀) (vts, true, false) =
+                    (vts, false, false) := by
+    rw [List.range_succ, List.foldl_append]
+    have h_pre : (List.range v_star_idx).foldl (btStep t₀) (vts, true, false) = (vts, true, false) := by
+      apply btFold_no_target
+      intro i hi
+      exact hv_min i (List.mem_range.mp hi)
+    rw [h_pre]
+    simp only [List.foldl_cons, List.foldl_nil]
+    have hcmp : (vts.getD v_star_idx 0 == t₀) = true := by
+      rw [hv_val]; exact beq_self_eq_true _
+    show btStep t₀ (vts, true, false) v_star_idx = (vts, false, false)
+    unfold btStep
+    rw [if_pos hcmp]
+    rfl
+  rw [h_prefix]
+  -- Suffix fold starting from (vts, false, false); w_idx ∈ suffix, value = t₀ at w_idx.
+  have h_mem : w_idx ∈ List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1)) :=
+    List.mem_range'_1.mpr ⟨by omega, by omega⟩
+  have h_nd : (List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1))).Nodup :=
+    List.nodup_range' (step := 1) (by decide)
+  show (List.foldl (btStep t₀) (vts, false, false)
+           (List.range' (v_star_idx + 1) (vts.size - (v_star_idx + 1)))).1.getD w_idx 0 = t₀ + 1
+  exact btFold_from_notfirst_getD t₀ _ h_nd vts false w_idx h_mem hw_val hw_size
+
 /-- **§5.1**  `TypedAut` after `breakTie` is the `v*`-stabilizer of the original.
 
 Let `t₀` be the smallest tied value, `v* := min (typeClass vts t₀)` (by `Fin` order), and
 `vts' := (breakTie vts t₀).1`. Then a permutation σ belongs to `TypedAut G vts'` iff it
 belongs to `TypedAut G vts` and additionally fixes `v*`.
 
-**Proof sketch.** By definition of `breakTie`, the unique vertex with `vts'[w] = t₀` is
-`v*`, and `vts'[w] = vts[w]` for every `w ∉ typeClass vts t₀` and `vts'[w] = t₀ + 1` for
-`w ∈ typeClass vts t₀ \ {v*}`.
+**Required hypotheses beyond the plan sketch.**
 
-  - (⟹) Let σ ∈ TypedAut G vts'. Then σ preserves vts' pointwise; in particular it
-        fixes the unique value-`t₀` vertex of vts', which is `v*`. It also preserves
-        `vts` because the partition into value-classes is the same (modulo the split of
-        `typeClass t₀` into `{v*}` vs. the rest).
+  - `hsize : vts.size = n` — in the algorithm, `vts` always has size exactly `n`. This is
+    needed to connect `Fin n` indexing to `Array.getD`.
+  - `hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts` — `vts` is `Aut(G)`-invariant. This extra
+    assumption (compared to the original plan) is genuinely necessary. Without it, the
+    (⟹) direction fails: if `vts` contains a value `t₀ + 1` at some position outside
+    `typeClass vts t₀`, a label-swap between that position and a non-`v*` member of
+    `typeClass t₀` preserves `vts'` (both acquire value `t₀ + 1`) but not `vts` (they had
+    different values in `vts`). `Aut(G)`-invariance rules this out: if such a swap is an
+    automorphism of `G`, then Aut-invariance forces the two positions to already have the
+    same value in `vts`, contradicting the setup. In the algorithm's usage (see §7's
+    prefix invariant), `vts` is always Aut-invariant at each `breakTie` call, so the
+    hypothesis is satisfied.
 
-  - (⟸) Let σ ∈ TypedAut G vts with σ v* = v*. Case-analyse `vts' w`:
-          * `w = v*`:              `σ v* = v*` forces `vts'[σ v*] = vts'[v*]`.
-          * `w ∈ V_{t₀} \ {v*}`:   vts[σ w] = vts[w] = t₀, and σ w ≠ v* because σ is a
-                                    bijection fixing v*. Hence `vts'[σ w] = t₀+1 = vts'[w]`.
-          * otherwise:             `vts'[w] = vts[w]`, similarly for `σ w` (outside
-                                    `typeClass t₀`), and σ preserves vts.
+**Proof.** By the characterizations `breakTie_getD_at_min`, `breakTie_getD_at_other`, and
+`breakTie_getD_of_ne`, the output of `breakTie vts t₀` has value `t₀` exactly at `v*`,
+value `t₀ + 1` at every `w ∈ typeClass vts t₀ \ {v*}`, and preserves `vts` elsewhere.
 
-**Deliverable.**
+  - (⟹) `σ ∈ TypedAut G vts'` means `σ ∈ Aut G` and `σ` preserves `vts'`. By Aut-invariance
+        of `vts`, `σ ∈ Aut G` already implies `σ` preserves `vts`; so `σ ∈ TypedAut G vts`.
+        For `σ v* = v*`: the unique `vts'`-value-`t₀` vertex is `v*`, and σ must send it
+        to itself (since σ preserves vts').
+
+  - (⟸) Case analysis on `vts[v]`: same/same, in-class/in-class-not-star (σ permutes
+        `typeClass t₀ \ {v*}` because it preserves vts and fixes v_star), or outside/outside.
 -/
 theorem breakTie_Aut_stabilizer
     (G : AdjMatrix n) (vts : Array VertexType) (t₀ : VertexType) (v_star : Fin n)
-    (_hmin : ∀ w ∈ @typeClass n vts t₀, v_star.val ≤ w.val)
-    (_hmem : v_star ∈ @typeClass n vts t₀) :
+    (hsize : vts.size = n)
+    (hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts)
+    (hmin : ∀ w ∈ @typeClass n vts t₀, v_star.val ≤ w.val)
+    (hmem : v_star ∈ @typeClass n vts t₀) :
     ∀ σ : Equiv.Perm (Fin n),
       σ ∈ G.TypedAut (breakTie vts t₀).1 ↔
       (σ ∈ G.TypedAut vts ∧ σ v_star = v_star) := by
-  sorry
+  intro σ
+  have hv_size : v_star.val < vts.size := hsize ▸ v_star.isLt
+  have hv_val : vts.getD v_star.val 0 = t₀ := hmem
+  -- Convert hmin to the form required by the characterization lemmas.
+  have hv_min : ∀ i, i < v_star.val → vts.getD i 0 ≠ t₀ := by
+    intro i hi heq
+    have hi_lt_n : i < n := lt_of_lt_of_le hi (by
+      have := v_star.isLt; omega)
+    have hle : v_star.val ≤ i := hmin ⟨i, hi_lt_n⟩ heq
+    omega
+  -- Position-by-position characterization of (breakTie vts t₀).1.
+  have h_vstar : (breakTie vts t₀).1.getD v_star.val 0 = t₀ :=
+    breakTie_getD_at_min vts t₀ hv_size hv_val hv_min
+  have h_other : ∀ w : Fin n, vts.getD w.val 0 = t₀ → w ≠ v_star →
+      (breakTie vts t₀).1.getD w.val 0 = t₀ + 1 := by
+    intro w hw hne
+    have hw_size : w.val < vts.size := hsize ▸ w.isLt
+    have hne_val : w.val ≠ v_star.val := fun h => hne (Fin.ext h)
+    exact breakTie_getD_at_other vts t₀ hv_size hv_val hv_min hw_size hw hne_val
+  have h_out : ∀ w : Fin n, vts.getD w.val 0 ≠ t₀ →
+      (breakTie vts t₀).1.getD w.val 0 = vts.getD w.val 0 :=
+    fun w hw => breakTie_getD_of_ne vts t₀ hw
+  constructor
+  · -- (⟹)
+    rintro ⟨hGσ, hvσ'⟩
+    have hσAut : σ ∈ G.Aut := hGσ
+    have hvσ : VtsInvariant σ vts := hAutInv σ hσAut
+    -- Show σ v_star = v_star: only v_star has vts' value t₀.
+    have hfix : σ v_star = v_star := by
+      by_contra hne
+      have hσv_val : (breakTie vts t₀).1.getD (σ v_star).val 0 = t₀ := by
+        rw [hvσ' v_star, h_vstar]
+      by_cases hin : vts.getD (σ v_star).val 0 = t₀
+      · -- σ v_star ∈ typeClass, σ v_star ≠ v_star ⟹ value t₀ + 1, not t₀
+        have := h_other (σ v_star) hin hne
+        rw [this] at hσv_val
+        exact VertexType_add_one_ne t₀ hσv_val
+      · -- σ v_star ∉ typeClass ⟹ value = vts[σ v_star] ≠ t₀
+        have := h_out (σ v_star) hin
+        rw [this] at hσv_val
+        exact hin hσv_val
+    exact ⟨⟨hGσ, hvσ⟩, hfix⟩
+  · -- (⟸)
+    rintro ⟨⟨hGσ, hvσ⟩, hfix⟩
+    refine ⟨hGσ, ?_⟩
+    intro v
+    by_cases hv : vts.getD v.val 0 = t₀
+    · -- v ∈ typeClass
+      have hσv : vts.getD (σ v).val 0 = t₀ := by rw [hvσ v, hv]
+      by_cases hv_eq : v = v_star
+      · subst hv_eq; rw [hfix]
+      · -- v ≠ v_star
+        have hσv_ne : σ v ≠ v_star := by
+          intro h
+          apply hv_eq
+          apply σ.injective
+          rw [h, hfix]
+        rw [h_other v hv hv_eq, h_other (σ v) hσv hσv_ne]
+    · -- v ∉ typeClass
+      have hσv : vts.getD (σ v).val 0 ≠ t₀ := by rw [hvσ v]; exact hv
+      rw [h_out v hv, h_out (σ v) hσv, hvσ v]
+
+/-- **§5.1 (corollary)**  Non-strict inclusion `TypedAut(breakTie vts t₀) ≤ TypedAut vts`.
+
+The ≤ direction of §5.2. Given the §5.1 biconditional, `TypedAut vts' = {σ ∈ TypedAut vts |
+σ v_star = v_star}`, which is trivially ≤ `TypedAut vts`. Unlike the strict version, this
+does not require any orbit-connectivity hypothesis. -/
+theorem breakTie_TypedAut_le
+    (G : AdjMatrix n) (vts : Array VertexType) (t₀ : VertexType)
+    (hsize : vts.size = n)
+    (hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts)
+    (v_star : Fin n)
+    (hmin : ∀ w ∈ @typeClass n vts t₀, v_star.val ≤ w.val)
+    (hmem : v_star ∈ @typeClass n vts t₀) :
+    G.TypedAut (breakTie vts t₀).1 ≤ G.TypedAut vts := by
+  intro σ hσ
+  exact (breakTie_Aut_stabilizer G vts t₀ v_star hsize hAutInv hmin hmem σ |>.mp hσ).1
 
 /-- **§5.2**  Strict shrinking of `TypedAut` under `breakTie`.
 
-If `vts` is Aut(G)-invariant (every σ ∈ Aut G preserves `vts`) and the type-class of the
-smallest repeated value has size ≥ 2, then `TypedAut G (breakTie vts t₀).1` is a *proper*
-subgroup of `TypedAut G vts`.
+**Requires `hmove`.** The original plan stated this with only `hAutInv` and `htwo`
+(existence of two distinct vertices with value `t₀`). That is insufficient — strictness
+requires that *some automorphism actually moves `v*`*. This is the `hmove` hypothesis.
 
-**Proof sketch.** By §4's corollary (convergeLoop_Aut_invariant), all vertices in a
-given type class lie in a single Aut(G)-orbit. If the class has ≥ 2 elements, picking any
-`w ≠ v*` in the class gives some σ ∈ TypedAut G vts with σ v* = w ≠ v*, so σ is not
-in the `v*`-stabilizer. By §5.1 this σ is in `TypedAut G vts` but not in
-`TypedAut G (breakTie vts t₀).1`. Combined with §5.1's ⊆ direction, the inclusion is
-strict.
+In the algorithm's context, `hmove` follows from the fact that same-type vertices
+(under an Aut-invariant typing) are in the same Aut-orbit, i.e., the "completeness"
+of `convergeLoop`. That completeness is essentially the algorithm's correctness and is
+not derivable from `Aut`-invariance alone. The plan implicitly assumed it; we make it
+explicit here via `hmove`.
+
+**Proof.**
+  - (≤) by `breakTie_TypedAut_le` (uses §5.1).
+  - (≠) by §5.1: `hmove` supplies some σ ∈ TypedAut G vts with σ v* ≠ v*, and §5.1 says
+        such σ ∉ TypedAut G (breakTie vts t₀).1.
 -/
 theorem breakTie_strict_shrink
     (G : AdjMatrix n) (vts : Array VertexType) (t₀ : VertexType)
-    (_hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts)
-    (_htwo : ∃ v₁ v₂ : Fin n, v₁ ≠ v₂ ∧
-                (vts.getD v₁.val 0 = t₀) ∧ (vts.getD v₂.val 0 = t₀)) :
+    (hsize : vts.size = n)
+    (hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts)
+    (v_star : Fin n)
+    (hmin : ∀ w ∈ @typeClass n vts t₀, v_star.val ≤ w.val)
+    (hmem : v_star ∈ @typeClass n vts t₀)
+    (hmove : ∃ σ ∈ G.TypedAut vts, σ v_star ≠ v_star) :
     G.TypedAut (breakTie vts t₀).1 < G.TypedAut vts := by
-  sorry
+  rw [lt_iff_le_and_ne]
+  refine ⟨breakTie_TypedAut_le G vts t₀ hsize hAutInv v_star hmin hmem, ?_⟩
+  intro heq
+  obtain ⟨σ, hσ, hσmv⟩ := hmove
+  -- σ is in TypedAut vts. If the subgroups were equal, σ would be in TypedAut vts'.
+  -- By §5.1, that forces σ v_star = v_star, contradicting hσmv.
+  have : σ ∈ G.TypedAut (breakTie vts t₀).1 := heq ▸ hσ
+  have := (breakTie_Aut_stabilizer G vts t₀ v_star hsize hAutInv hmin hmem σ |>.mp this).2
+  exact hσmv this
 
 /-! ## §6  Tiebreak choice-independence (conceptual crux)
 

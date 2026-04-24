@@ -36,14 +36,39 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §4   | `convergeOnce` Aut-invariance (1 step)            | `Equivariance`                             | 🧱 stated, `sorry` |
 | §4   | `convergeLoop` Aut-invariance (induction on fuel) | `Equivariance`                             | ✅ proved (modulo §4 1-step) |
 | §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                                 | ✅ defined       |
-| §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                                 | 🧱 stated, `sorry` |
-| §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                                 | 🧱 stated, `sorry` |
+| §5.0 | `breakTie` output position-by-position            | `Tiebreak`                                 | ✅ proved (4 characterization lemmas) |
+| §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
+| §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
 | §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | 🧱 stated, `sorry` |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                               | ✅ defined + boundary proved |
 | §7   | "Converged types are a prefix of ℕ" 4 invariants  | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 5 (Equivariance) + 3 (Tiebreak) + 4 (Invariants) + 1 (Main) = **13 open obligations** in the new tree, all corresponding to clearly-stated theorems with detailed proof plans inline. The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
+**Sorry count.** 5 (Equivariance) + 1 (Tiebreak §6) + 4 (Invariants) + 1 (Main) = **11 open obligations** in the new tree. §5.1 and §5.2 are now proved with stronger hypotheses than the original plan (see the "§5 hypothesis revisions" note below). The boundary lemmas (`VtsInvariant.replicate_zero`, `TypedAut_replicate_zero`, `IsPrefixTyping.replicate_zero`, `convergeLoop_zeros_Aut_invariant`) and infrastructure (`Fintype` instances on `Aut`/`TypedAut`, `DecidableEq` on `AdjMatrix`) are all proved.
+
+### §5 hypothesis revisions
+
+During formalization of §5.1 and §5.2, two hypotheses were added beyond what the original
+plan stated:
+
+  1. **§5.1 adds `hsize : vts.size = n` and `hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts`.**
+     The `hsize` hypothesis is trivially satisfied by the algorithm (all type arrays have
+     size `n`); it's needed to connect `Fin n` indexing to `Array.getD`. The Aut-invariance
+     hypothesis is genuinely necessary: without it, a label swap between a non-`v*` member
+     of `typeClass t₀` and some position carrying value `t₀ + 1` can preserve `vts'`
+     (both get value `t₀+1`) without preserving `vts`. Aut-invariance rules out this
+     counterexample because such a swap would have to be an automorphism forcing the two
+     positions to already agree in `vts`. In the algorithm, `vts` at each `breakTie` call
+     is Aut-invariant by §4's corollary, so the hypothesis is satisfied.
+
+  2. **§5.2 adds `hmove : ∃ σ ∈ G.TypedAut vts, σ v_star ≠ v_star`.**
+     The plan's sketch claimed strict shrinking followed from "same-type vertices lie in
+     a single Aut-orbit" (§4's corollary), but §4 only gives the forward direction
+     (same-orbit → same-type), not the reverse. The reverse is essentially the algorithm's
+     completeness — same-type vertices must be permutable — and requires a separate
+     argument. We capture the minimal needed input in `hmove`: there's *some* typed
+     automorphism moving `v_star`. With `hmove`, strictness is immediate from §5.1 (the
+     moving automorphism is in `TypedAut vts` but not in the `v_star`-stabilizer).
 
 --------------------------------------------------------------------------------
 
@@ -219,11 +244,29 @@ are in the same Aut(G, T)-orbit by §4's corollary, and there are ≥ 2 of them)
 stabilizer is a proper subgroup. After each tiebreak, the typed-automorphism group strictly
 shrinks; after at most n tiebreaks it is trivial (all types distinct).
 
-**Deliverable.** Two theorems in `FullCorrectness/Tiebreak.lean`:
+**Deliverable.** Both theorems are now proved in `FullCorrectness/Tiebreak.lean`:
 ```
-breakTie_Aut_stabilizer   : Aut(G, breakTie T t₀) = stab_{Aut(G,T)}(min V_{t₀})
-breakTie_strict_shrink    : |V_{t₀}| ≥ 2 → Aut(G, breakTie T t₀) ⊊ Aut(G, T)
+breakTie_Aut_stabilizer  : [with hsize + hAutInv]
+    σ ∈ TypedAut G (breakTie vts t₀).1  ↔  (σ ∈ TypedAut G vts ∧ σ v* = v*)
+breakTie_TypedAut_le     : TypedAut G (breakTie vts t₀).1 ≤ TypedAut G vts
+breakTie_strict_shrink   : [with hmove] TypedAut G (breakTie vts t₀).1 < TypedAut G vts
 ```
+
+Four position-by-position characterization lemmas underpin the proofs:
+```
+breakTie_size             : (breakTie vts t₀).1.size = vts.size
+breakTie_getD_of_ne       : vts[j] ≠ t₀ → (breakTie vts t₀).1[j] = vts[j]
+breakTie_getD_at_min      : v_star is min of typeClass → (breakTie vts t₀).1[v_star] = t₀
+breakTie_getD_at_other    : w ≠ v_star in typeClass → (breakTie vts t₀).1[w] = t₀ + 1
+```
+These follow from an induction-on-the-fold argument with three helper lemmas
+(`btFold_no_target`, `btFold_from_notfirst_getD`, `btFold_getD_not_mem`) tracking how
+the `firstAppearance` flag flips at the first target encounter.
+
+See the "§5 hypothesis revisions" note at the top of this file for why the proved
+forms differ slightly from the original sketch (`breakTie_Aut_stabilizer` requires `vts`
+to be Aut-invariant; `breakTie_strict_shrink` requires an explicit `hmove` hypothesis
+rather than deriving strictness from `|V_{t₀}| ≥ 2`).
 
 ## §6  Tiebreak choice-independence (the conceptual crux)
 

@@ -19,7 +19,8 @@
       "Bash(tee /tmp/lake-build-2.log)",
       "Bash(tee /tmp/lake-build-3.log)",
       "Bash(tee /tmp/lake-build-4.log)",
-      "Bash(export PATH=\"/home/node/.elan/bin:$PATH\")"
+      "Bash(export PATH=\"/home/node/.elan/bin:$PATH\")",
+      "Bash(lake --version)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",
