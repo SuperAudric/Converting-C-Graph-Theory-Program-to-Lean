@@ -617,16 +617,105 @@ theorem breakTie_getD_at_min (vts : Array VertexType) (t₀ : VertexType)
       fun i hi => shiftAbove_getD_ne_target t₀ vts (hv_min i hi)
     exact breakTiePromote_getD_at_min (shiftAbove t₀ vts) t₀ hsz hval hmin
 
+/-- Auxiliary: the foldl form of `breakTieCount` agrees with `countP` on the same
+predicate. -/
+private theorem breakTieCount_eq_countP (vts : Array VertexType) (t₀ : VertexType) :
+    breakTieCount vts t₀ = vts.toList.countP (fun v => v == t₀) := by
+  unfold breakTieCount
+  rw [← Array.foldl_toList]
+  -- Generalize the accumulator to handle the foldl induction cleanly.
+  have aux : ∀ (l : List Nat) (acc : Nat),
+      l.foldl (fun c v => if (v == t₀) = true then c + 1 else c) acc =
+      acc + l.countP (fun v => v == t₀) := by
+    intro l
+    induction l with
+    | nil => intro acc; simp
+    | cons x xs ih =>
+      intro acc
+      rw [List.foldl_cons, List.countP_cons, ih]
+      split_ifs <;> omega
+  have h := aux vts.toList 0
+  omega
+
 /-- Counting helper: two distinct in-bounds positions with value `t₀` give `count ≥ 2`.
-[sparse→dense] Single-purpose lemma, isolated as a `sorry` for now — the formal proof is
-a routine induction on `vts.toList` that extracts both contributions to the foldl. The
-content is straightforwardly true; pinning it as a focused obligation keeps the
-breakTie-level proofs structurally clean. -/
+[sparse→dense] Proves the obvious "two witnesses → countP ≥ 2" by extracting both list
+positions and showing the filtered list has length ≥ 2. -/
 private theorem breakTieCount_ge_two_of_distinct (vts : Array VertexType) (t₀ : VertexType)
     (i j : Nat) (hi_size : i < vts.size) (hj_size : j < vts.size) (hij : i ≠ j)
     (hi_val : vts.getD i 0 = t₀) (hj_val : vts.getD j 0 = t₀) :
     2 ≤ breakTieCount vts t₀ := by
-  sorry
+  rw [breakTieCount_eq_countP, List.countP_eq_length_filter]
+  -- Goal: 2 ≤ (vts.toList.filter (fun v => v == t₀)).length
+  -- Convert vts.getD facts to list element facts.
+  have hi_list : vts.toList[i]'(by simpa using hi_size) = t₀ := by
+    rw [Array.getElem_toList, Array.getElem_eq_getD (h := hi_size) 0]; exact hi_val
+  have hj_list : vts.toList[j]'(by simpa using hj_size) = t₀ := by
+    rw [Array.getElem_toList, Array.getElem_eq_getD (h := hj_size) 0]; exact hj_val
+  -- WLOG assume i < j; the symmetric case follows by swapping.
+  rcases Nat.lt_or_lt_of_ne hij with hlt | hgt
+  · -- i < j: split vts.toList = (take j) ++ (drop j); both contain witnesses.
+    -- Use a sublist construction: `[vts.toList[i], vts.toList[j]]` ⊆ vts.toList.filter
+    -- Actually, easier: both vts.toList[i] and vts.toList[j] are in the filter (membership).
+    -- Two distinct positions ⟹ filter contains them at distinct positions ⟹ length ≥ 2.
+    -- Direct via countP_take + countP_drop.
+    have h_i_lt_size : i < vts.toList.length := by simpa using hi_size
+    have h_j_lt_size : j < vts.toList.length := by simpa using hj_size
+    -- Split vts.toList at j: first part has at least one t₀ (at position i < j), second part
+    -- starts with vts.toList[j] = t₀.
+    have hsplit : vts.toList = vts.toList.take j ++ vts.toList.drop j := by
+      rw [List.take_append_drop]
+    -- countP on append: countP (l₁ ++ l₂) = countP l₁ + countP l₂
+    rw [hsplit, List.filter_append, List.length_append]
+    -- Show each side ≥ 1.
+    have h_left : 1 ≤ (vts.toList.take j |>.filter (fun v => v == t₀)).length := by
+      rw [← List.countP_eq_length_filter]
+      -- vts.toList.take j contains vts.toList[i] at position i (since i < j)
+      apply List.countP_pos_iff.mpr
+      refine ⟨t₀, ?_, by simp⟩
+      have h_i_in_take : vts.toList[i]'h_i_lt_size ∈ vts.toList.take j := by
+        rw [List.mem_take_iff_getElem]
+        refine ⟨i, ?_, ?_⟩
+        · simp; exact ⟨hlt, hi_size⟩
+        · simp
+      rw [hi_list] at h_i_in_take
+      exact h_i_in_take
+    have h_right : 1 ≤ (vts.toList.drop j |>.filter (fun v => v == t₀)).length := by
+      rw [← List.countP_eq_length_filter]
+      apply List.countP_pos_iff.mpr
+      refine ⟨t₀, ?_, by simp⟩
+      have h_j_in_drop : vts.toList[j]'h_j_lt_size ∈ vts.toList.drop j := by
+        rw [List.mem_drop_iff_getElem]
+        exact ⟨0, by simpa using h_j_lt_size, by simp⟩
+      rw [hj_list] at h_j_in_drop
+      exact h_j_in_drop
+    omega
+  · -- j < i: symmetric — extract via the same decomposition with (i, j) swapped.
+    have h_i_lt_size : i < vts.toList.length := by simpa using hi_size
+    have h_j_lt_size : j < vts.toList.length := by simpa using hj_size
+    have hsplit : vts.toList = vts.toList.take i ++ vts.toList.drop i := by
+      rw [List.take_append_drop]
+    rw [hsplit, List.filter_append, List.length_append]
+    have h_left : 1 ≤ (vts.toList.take i |>.filter (fun v => v == t₀)).length := by
+      rw [← List.countP_eq_length_filter]
+      apply List.countP_pos_iff.mpr
+      refine ⟨t₀, ?_, by simp⟩
+      have h_j_in_take : vts.toList[j]'h_j_lt_size ∈ vts.toList.take i := by
+        rw [List.mem_take_iff_getElem]
+        refine ⟨j, ?_, ?_⟩
+        · simp; exact ⟨hgt, hj_size⟩
+        · simp
+      rw [hj_list] at h_j_in_take
+      exact h_j_in_take
+    have h_right : 1 ≤ (vts.toList.drop i |>.filter (fun v => v == t₀)).length := by
+      rw [← List.countP_eq_length_filter]
+      apply List.countP_pos_iff.mpr
+      refine ⟨t₀, ?_, by simp⟩
+      have h_i_in_drop : vts.toList[i]'h_i_lt_size ∈ vts.toList.drop i := by
+        rw [List.mem_drop_iff_getElem]
+        exact ⟨0, by simpa using h_i_lt_size, by simp⟩
+      rw [hi_list] at h_i_in_drop
+      exact h_i_in_drop
+    omega
 
 theorem breakTie_getD_at_other (vts : Array VertexType) (t₀ : VertexType)
     {v_star_idx : Nat} (hv_size : v_star_idx < vts.size)

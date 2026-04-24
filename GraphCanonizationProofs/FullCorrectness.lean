@@ -48,6 +48,12 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 
 **Sorry count.** 5 (Equivariance) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants) + 1 (Main) = **10 open obligations** in the new tree.
 
+After the [sparse → dense ranking migration] (see the section below): the count is unchanged at 10, but the three Invariants sorries (`convergeLoop_preserves_prefix`,
+`orderVertices_prefix_invariant`, `orderVertices_n_distinct_ranks`) are now *reachable*
+— their R2 caveat is resolved, and proofs become a direct consequence of the new dense
+`assignRanks` semantics. The migration also closed `breakTieCount_ge_two_of_distinct`
+(an internal helper introduced in the process) so the net is no new debt.
+
 ### Algorithm refactor (this iteration)
 
 The algorithm in `LeanGraphCanonizerV4.lean` was refactored to make the equivariance
@@ -588,8 +594,12 @@ theorem run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.rep
 with `Fintype`, but we need to actually put a `Fintype` instance on `Aut(G, T)` (it is a
 subgroup of `Sym(Fin n)` which is finite).
 
-**R2.** §7's prefix-of-ℕ invariant assumes dense ranking throughout. Verify in
-`assignRanks` and `computeDenseRanks` that values are always exactly 0..m-1.
+**R2.** ~~§7's prefix-of-ℕ invariant assumes dense ranking throughout. Verify in
+`assignRanks` and `computeDenseRanks` that values are always exactly 0..m-1.~~
+**Resolved by the sparse → dense ranking migration:** `assignRanks` now produces dense
+ranks; `getArrayRank` densifies at the entry point; `breakTie` uses shift-then-promote
+to preserve density across iterations. The `convergeLoop_preserves_prefix` and downstream
+§7 sorries are now reachable (proofs pending).
 
 **R3.** `convergeLoop` is given fuel equal to `state.vertexCount`. Correctness does not
 require it to actually reach a fixed point — §4 says the output is always Aut-invariant,
