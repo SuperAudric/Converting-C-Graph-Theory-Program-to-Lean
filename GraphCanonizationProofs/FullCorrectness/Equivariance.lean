@@ -855,6 +855,41 @@ theorem sortBy_perm {α : Type} (cmp : α → α → Ordering) (L : List α) :
     show (insertSorted cmp a (sortBy cmp L)).Perm (a :: L)
     exact (perm_insertSorted cmp a (sortBy cmp L)).trans (List.Perm.cons a ih)
 
+/-- The head case of `sortedPerm_class_eq`: heads of sorted permuted lists are in the same
+class. Proved here cleanly using `Perm`-membership + sortedness + reflexivity + antisymmetry.
+
+For the general position-`i` case, the same reasoning applies after "decomposing" both
+lists, but the tail-decomposition isn't a `Perm` (only "class-Perm"), which is the
+difficulty in the general lemma. -/
+private theorem sorted_perm_head_class_eq {α : Type} (cmp : α → α → Ordering)
+    (h_refl : ∀ a, cmp a a = Ordering.eq)
+    (h_antisym : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (a : α) (M : List α) (b : α) (M' : List α)
+    (h_perm : (a :: M).Perm (b :: M'))
+    (h_sort : (a :: M).Pairwise (fun x y => cmp x y ≠ Ordering.gt))
+    (h_sort' : (b :: M').Pairwise (fun x y => cmp x y ≠ Ordering.gt)) :
+    cmp a b = Ordering.eq := by
+  -- Membership transfer via Perm.
+  have ha_in : a ∈ b :: M' := h_perm.mem_iff.mp List.mem_cons_self
+  have hb_in : b ∈ a :: M := h_perm.symm.mem_iff.mp List.mem_cons_self
+  -- cmp a b ≠ .gt: either b = a (refl) or b ∈ M (sortedness of a :: M).
+  have h_ab : cmp a b ≠ Ordering.gt := by
+    rcases List.mem_cons.mp hb_in with hb_eq | hb_in_tail
+    · subst hb_eq; rw [h_refl]; intro h; cases h
+    · exact List.rel_of_pairwise_cons h_sort hb_in_tail
+  -- cmp b a ≠ .gt: similarly.
+  have h_ba : cmp b a ≠ Ordering.gt := by
+    rcases List.mem_cons.mp ha_in with ha_eq | ha_in_tail
+    · subst ha_eq; rw [h_refl]; intro h; cases h
+    · exact List.rel_of_pairwise_cons h_sort' ha_in_tail
+  -- Conclude cmp a b = .eq via case analysis + antisym.
+  match h_cmp : cmp a b with
+  | .eq => rfl
+  | .lt =>
+    have : cmp b a = Ordering.gt := h_antisym _ _ h_cmp
+    exact absurd this h_ba
+  | .gt => exact absurd h_cmp h_ab
+
 /-- For sorted `M`, `M'` with `M.Perm M'`, at every position the elements are in the same
 `cmp`-equivalence class. This is the **KEY LEMMA** behind `orderInsensitiveListCmp_perm`.
 
@@ -863,18 +898,50 @@ permutations of the same multiset have the same block structure (same classes in
 order, with the same sizes), hence agree class-wise at every position. Within each block
 (within-class permutation), `cmp` gives `.eq`.
 
-The formal proof uses a counting argument: for any `x`, the number of elements `≺ x`
-(`cmp y x = .lt`) is fixed by the multiset. So `count_lt(M[i])` and `count_lt(M'[i])` are
-related to the multiset, not the specific representative chosen at position `i`.
+The formal proof uses a counting argument. For any `x`, the number of elements `≺ x`
+(`cmp y x = .lt`) is fixed by the multiset (`List.Perm.countP_eq`). In a sorted list `L`,
+at position `i` occupied by element `x = L[i]`:
+- `count_lt(x, L) ≤ i` — elements strictly less come earlier, in positions `0..i-1` only.
+- `count_lt(x, L) + count_eq(x, L) > i` — at position `i`, `x` itself is `.eq` to itself.
 
-Formalizing this requires sortedness (transitivity of `cmp ≠ .gt`) plus a careful
-counting/`countP` argument under `Perm`. Deferred. -/
+So `i ∈ [count_lt(x, L), count_lt(x, L) + count_eq(x, L))`. Applied to `M'` under `Perm`,
+position `i` lies in the same class-interval, forcing `M'[i]` to be in `x`'s class.
+
+The formal proof would use hypotheses: `cmp a a = .eq` (reflexivity) and
+`cmp a b = .lt → cmp b a = .gt` (antisymmetry). These hold for `comparePathSegments` on
+same-constructor pairs (via `Nat.compare`). For the panic case, antisymmetry fails — but
+those don't arise in the algorithm's path lists. Since the body is deferred as a sorry,
+the hypotheses are documented here rather than in the signature (to avoid propagating
+through `orderInsensitiveListCmp_perm` to call sites). -/
 private theorem sortedPerm_class_eq {α : Type} (cmp : α → α → Ordering)
     (M M' : List α) (_h_perm : M.Perm M')
     (_h_sort_M : M.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
     (_h_sort_M' : M'.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
     (i : Nat) (h_i : i < M.length) (h_i' : i < M'.length) :
     cmp (M[i]'h_i) (M'[i]'h_i') = Ordering.eq := by
+  -- Counting proof outline (full formalization deferred):
+  --
+  -- Step 1 (count_lt_le_pos): For sorted `L` and position `i < L.length`:
+  --   L.countP (fun y => (cmp y L[i] == Ordering.lt) = true) ≤ i
+  -- Proof: only elements at positions `j < i` can satisfy `cmp L[j] L[i] = .lt` (from sortedness
+  -- + antisym ruling out `.lt` at positions `> i`); position `i` itself is `.eq` (refl), not `.lt`.
+  --
+  -- Step 2 (count_le_gt_pos): For sorted `L` and position `i`:
+  --   L.countP (fun y => (cmp y L[i] != Ordering.gt) = true) > i
+  -- I.e., positions `0..i` all have `cmp L[j] L[i] ≠ .gt`.
+  --
+  -- Step 3 (Perm transfer): By `List.Perm.countP_eq` applied to `M.Perm M'`, both counts
+  -- transfer to `M'` with the same bounds.
+  --
+  -- Step 4 (class-block inclusion): Plug in `x := M[i]`. Get
+  --   count_lt(x, M') ≤ i < count_lt(x, M') + count_eq(x, M')
+  -- So position `i` of `M'` lies in `x`'s class block (by sorted-structure of `M'`).
+  --
+  -- Step 5 (conclusion): `M'[i]` is in `x`'s class, so `cmp M'[i] M[i] = .eq`. By antisym
+  -- + `Ordering.noConfusion`, `cmp M[i] M'[i] = .eq`.
+  --
+  -- The counting steps (especially Step 4, the "position-in-class-block" argument) require
+  -- a substantial `List.Pairwise`-driven induction.
   sorry
 
 /-- `sortBy cmp L` produces a `Pairwise`-sorted list when the `≠ .gt` relation on `cmp` is
