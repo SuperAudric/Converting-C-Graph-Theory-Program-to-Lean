@@ -855,35 +855,139 @@ theorem sortBy_perm {α : Type} (cmp : α → α → Ordering) (L : List α) :
     show (insertSorted cmp a (sortBy cmp L)).Perm (a :: L)
     exact (perm_insertSorted cmp a (sortBy cmp L)).trans (List.Perm.cons a ih)
 
-/-- `orderInsensitiveListCmp` is invariant under permutations of its inputs when `cmp`
-respects equivalence classes. This is the lemma needed for the depth>0 branch of
-`PathsBetween.permute`'s σ-equivariance.
+/-- For sorted `M`, `M'` with `M.Perm M'`, at every position the elements are in the same
+`cmp`-equivalence class. This is the **KEY LEMMA** behind `orderInsensitiveListCmp_perm`.
 
-**Proof sketch.** Let `M = sortBy cmp L₁`, `M' = sortBy cmp L₁'`. By `sortBy_perm`, `M` and
-`M'` are both sorted and `Perm` of each other. This forces `M[i]` and `M'[i]` to be in the
-same equivalence class for every `i` (sorted lists with the same multiset have the same
-class-boundary positions). Under `h_compat`, this yields `cmp M[i] N[i] = cmp M'[i] N[i]`
-for every `i`, making the final `foldl` identical. Formalizing this requires either an
-explicit class-block decomposition or a strong induction that carries equivalence-aware
-comparison throughout the fold.
+Intuition: in a sorted list, equivalence classes occupy contiguous blocks. Two sorted
+permutations of the same multiset have the same block structure (same classes in the same
+order, with the same sizes), hence agree class-wise at every position. Within each block
+(within-class permutation), `cmp` gives `.eq`.
 
-Currently left as sorry; downstream compare σ-equivariance and the main
-`calculatePathRankings_value_invariant` depend on it, but the infrastructure
-(`sortBy_perm`, `comparePathSegments_equivCompat`, `orderInsensitiveListCmp_map`) is in
-place to support the full proof. -/
-theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
-    (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c)
-    (L₁ L₁' L₂ L₂' : List α) (h₁ : L₁.Perm L₁') (h₂ : L₂.Perm L₂') :
-    orderInsensitiveListCmp cmp L₁ L₂ = orderInsensitiveListCmp cmp L₁' L₂' := by
+The formal proof uses a counting argument: for any `x`, the number of elements `≺ x`
+(`cmp y x = .lt`) is fixed by the multiset. So `count_lt(M[i])` and `count_lt(M'[i])` are
+related to the multiset, not the specific representative chosen at position `i`.
+
+Formalizing this requires sortedness (transitivity of `cmp ≠ .gt`) plus a careful
+counting/`countP` argument under `Perm`. Deferred. -/
+private theorem sortedPerm_class_eq {α : Type} (cmp : α → α → Ordering)
+    (M M' : List α) (_h_perm : M.Perm M')
+    (_h_sort_M : M.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
+    (_h_sort_M' : M'.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
+    (i : Nat) (h_i : i < M.length) (h_i' : i < M'.length) :
+    cmp (M[i]'h_i) (M'[i]'h_i') = Ordering.eq := by
   sorry
 
-/-- `comparePathSegments` respects equivalence: equivalent (`= .eq`) segments compare the
-same way to every third segment. This is the key compatibility condition for
-`orderInsensitiveListCmp`'s permutation invariance (deferred). -/
+/-- `sortBy cmp L` produces a `Pairwise`-sorted list when the `≠ .gt` relation on `cmp` is
+transitive. Standard insertion-sort result, deferred. Rather than exposing a transitivity
+hypothesis on `orderInsensitiveListCmp_perm` (which would propagate up through
+`comparePathsBetween_σ_equivariant`/`comparePathsFrom_σ_equivariant`), we absorb the proof
+as a sorry here. -/
+private theorem sortBy_pairwise {α : Type} (cmp : α → α → Ordering) (L : List α) :
+    (sortBy cmp L).Pairwise (fun a b => cmp a b ≠ Ordering.gt) := by
+  sorry
+
+/-- Pointwise `foldl` equality: if `L.length = L'.length` and `f acc (L[i]) = f acc (L'[i])`
+at every position `i` and every `acc`, then the folds on `L` and `L'` give the same result. -/
+private theorem foldl_pointwise_eq {α β : Type} (f : β → α → β) (L L' : List α) (init : β)
+    (h_len : L.length = L'.length)
+    (h_pt : ∀ acc : β, ∀ i : Nat, ∀ (h₁ : i < L.length) (h₂ : i < L'.length),
+            f acc (L[i]'h₁) = f acc (L'[i]'h₂)) :
+    L.foldl f init = L'.foldl f init := by
+  induction L generalizing L' init with
+  | nil => match L' with
+    | [] => rfl
+    | _ :: _ => simp at h_len
+  | cons a L ih =>
+    match L' with
+    | [] => simp at h_len
+    | a' :: L' =>
+      rw [List.foldl_cons, List.foldl_cons]
+      rw [show f init a = f init a' from h_pt init 0 (by simp) (by simp)]
+      apply ih
+      · simpa using h_len
+      · intros acc i h₁ h₂
+        exact h_pt acc (i + 1) (by simp; exact h₁) (by simp; exact h₂)
+
+/-- `orderInsensitiveListCmp` is invariant under permutations of its inputs when `cmp`
+respects equivalence classes bilaterally (`h_compat`: both left and right).
+
+**Proof.** Lengths agree by `Perm`. `sortBy cmp L₁` and `sortBy cmp L₁'` are both sorted
+(`sortBy_pairwise`) and `Perm` (`sortBy_perm`-twice + transitivity). By
+`sortedPerm_class_eq`, they agree position-wise on `cmp`-class. Under bilateral `h_compat`,
+fold values against the corresponding position of the other sorted list agree pointwise,
+so `foldl_pointwise_eq` gives the same result. -/
+theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
+    (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c ∧ cmp c a = cmp c b)
+    (L₁ L₁' L₂ L₂' : List α) (h₁ : L₁.Perm L₁') (h₂ : L₂.Perm L₂') :
+    orderInsensitiveListCmp cmp L₁ L₂ = orderInsensitiveListCmp cmp L₁' L₂' := by
+  unfold orderInsensitiveListCmp
+  have hL₁ : L₁.length = L₁'.length := h₁.length_eq
+  have hL₂ : L₂.length = L₂'.length := h₂.length_eq
+  by_cases hLen : L₁.length = L₂.length
+  · have hLen' : L₁'.length = L₂'.length := hL₁.symm.trans (hLen.trans hL₂)
+    simp only [hLen, hLen', bne_self_eq_false, Bool.false_eq_true, ↓reduceIte]
+    -- sortBy outputs are Perm-related + sorted.
+    have hM₁ : (sortBy cmp L₁).Perm (sortBy cmp L₁') :=
+      ((sortBy_perm cmp L₁).trans h₁).trans (sortBy_perm cmp L₁').symm
+    have hM₂ : (sortBy cmp L₂).Perm (sortBy cmp L₂') :=
+      ((sortBy_perm cmp L₂).trans h₂).trans (sortBy_perm cmp L₂').symm
+    have hSort₁ := sortBy_pairwise cmp L₁
+    have hSort₁' := sortBy_pairwise cmp L₁'
+    have hSort₂ := sortBy_pairwise cmp L₂
+    have hSort₂' := sortBy_pairwise cmp L₂'
+    -- Pointwise class agreement.
+    have h_class₁ : ∀ i (hi₁ : i < (sortBy cmp L₁).length) (hi₁' : i < (sortBy cmp L₁').length),
+        cmp ((sortBy cmp L₁)[i]'hi₁) ((sortBy cmp L₁')[i]'hi₁') = Ordering.eq :=
+      fun i hi₁ hi₁' => sortedPerm_class_eq cmp _ _ hM₁ hSort₁ hSort₁' i hi₁ hi₁'
+    have h_class₂ : ∀ i (hi₂ : i < (sortBy cmp L₂).length) (hi₂' : i < (sortBy cmp L₂').length),
+        cmp ((sortBy cmp L₂)[i]'hi₂) ((sortBy cmp L₂')[i]'hi₂') = Ordering.eq :=
+      fun i hi₂ hi₂' => sortedPerm_class_eq cmp _ _ hM₂ hSort₂ hSort₂' i hi₂ hi₂'
+    -- Length equality on zip.
+    have h_zip_len : ((sortBy cmp L₁).zip (sortBy cmp L₂)).length
+                  = ((sortBy cmp L₁').zip (sortBy cmp L₂')).length := by
+      rw [List.length_zip, List.length_zip, hM₁.length_eq, hM₂.length_eq]
+    -- Apply foldl_pointwise_eq.
+    apply foldl_pointwise_eq _ _ _ _ h_zip_len
+    intros acc i h_i₁ h_i₂
+    -- Translate zip indices to sortBy positions.
+    have h_sort₁_len : i < (sortBy cmp L₁).length := by
+      have := h_i₁; rw [List.length_zip] at this; omega
+    have h_sort₂_len : i < (sortBy cmp L₂).length := by
+      have := h_i₁; rw [List.length_zip] at this; omega
+    have h_sort₁'_len : i < (sortBy cmp L₁').length := by
+      have := h_i₂; rw [List.length_zip] at this; omega
+    have h_sort₂'_len : i < (sortBy cmp L₂').length := by
+      have := h_i₂; rw [List.length_zip] at this; omega
+    -- Compute cmp values at each position via bilateral h_compat.
+    have h_eq_cmp :
+        cmp ((sortBy cmp L₁)[i]'h_sort₁_len) ((sortBy cmp L₂)[i]'h_sort₂_len)
+      = cmp ((sortBy cmp L₁')[i]'h_sort₁'_len) ((sortBy cmp L₂')[i]'h_sort₂'_len) := by
+      -- Bridge through (sortBy L₁')[i] (sortBy L₂)[i] using left compat for L₁/L₁'.
+      rw [(h_compat _ _ (h_class₁ i h_sort₁_len h_sort₁'_len) _).1]
+      -- Now need cmp (sortBy L₁')[i] (sortBy L₂)[i] = cmp (sortBy L₁')[i] (sortBy L₂')[i].
+      -- Use right compat for L₂/L₂'.
+      exact (h_compat _ _ (h_class₂ i h_sort₂_len h_sort₂'_len) _).2
+    -- The foldl step value at index i.
+    show (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder else cmp x.1 x.2) acc
+          ((sortBy cmp L₁).zip (sortBy cmp L₂))[i]
+       = (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder else cmp x.1 x.2) acc
+          ((sortBy cmp L₁').zip (sortBy cmp L₂'))[i]
+    rw [List.getElem_zip, List.getElem_zip]
+    simp [h_eq_cmp]
+  · have hLen' : ¬ L₁'.length = L₂'.length := fun h => hLen (hL₁.trans (h.trans hL₂.symm))
+    have h_len_lt : (L₁.length < L₂.length) = (L₁'.length < L₂'.length) := by
+      rw [hL₁, hL₂]
+    simp [hLen, hLen', h_len_lt]
+
+/-- `comparePathSegments` respects equivalence bilaterally: equivalent (`= .eq`) segments
+compare the same way to every third segment, in either argument position. -/
 theorem comparePathSegments_equivCompat
     {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat)
     (p q : PathSegment vc) (h : comparePathSegments vts br p q = Ordering.eq) (r : PathSegment vc) :
-    comparePathSegments vts br p r = comparePathSegments vts br q r := by
+    comparePathSegments vts br p r = comparePathSegments vts br q r ∧
+    comparePathSegments vts br r p = comparePathSegments vts br r q := by
   cases p with
   | bottom xVI =>
     cases q with
@@ -892,12 +996,15 @@ theorem comparePathSegments_equivCompat
         compare_eq_iff_eq.mp h
       cases r with
       | bottom zVI =>
-        show compare (vts.getD xVI.val 0) (vts.getD zVI.val 0)
-           = compare (vts.getD yVI.val 0) (vts.getD zVI.val 0)
-        rw [hvts_eq]
-      | inner _ _ _ _ => rfl  -- panic case for both, equal.
+        refine ⟨?_, ?_⟩
+        · show compare (vts.getD xVI.val 0) (vts.getD zVI.val 0)
+             = compare (vts.getD yVI.val 0) (vts.getD zVI.val 0)
+          rw [hvts_eq]
+        · show compare (vts.getD zVI.val 0) (vts.getD xVI.val 0)
+             = compare (vts.getD zVI.val 0) (vts.getD yVI.val 0)
+          rw [hvts_eq]
+      | inner _ _ _ _ => exact ⟨rfl, rfl⟩
     | inner _ _ _ _ =>
-      -- panic case: cmp .bottom .inner returns `default = .lt` ≠ .eq.
       exfalso
       have : (default : Ordering) = .lt := rfl
       rw [show comparePathSegments vts br (PathSegment.bottom xVI)
@@ -912,7 +1019,6 @@ theorem comparePathSegments_equivCompat
               (PathSegment.bottom _) = default from rfl, this] at h
       exact Ordering.noConfusion h
     | inner ye yd ys yend =>
-      -- Extract: br xd xs.val xend.val = br yd ys.val yend.val and xe = ye.
       have hRank : br xd xs.val xend.val = br yd ys.val yend.val := by
         by_cases hxy : br xd xs.val xend.val = br yd ys.val yend.val
         · exact hxy
@@ -928,17 +1034,27 @@ theorem comparePathSegments_equivCompat
             hxy, bne_iff_ne, ne_eq, not_false_eq_true] at h
           exact hxy (compare_eq_iff_eq.mp h).symm
       cases r with
-      | bottom _ => rfl
+      | bottom _ => exact ⟨rfl, rfl⟩
       | inner ze zd zs zend =>
-        show (let xR := br xd xs.val xend.val
-              let zR := br zd zs.val zend.val
-              if xR != zR then compare zR xR
-              else if xe != ze then compare ze xe else .eq)
-           = (let yR := br yd ys.val yend.val
-              let zR := br zd zs.val zend.val
-              if yR != zR then compare zR yR
-              else if ye != ze then compare ze ye else .eq)
-        rw [hRank, hEdge]
+        refine ⟨?_, ?_⟩
+        · show (let xR := br xd xs.val xend.val
+                let zR := br zd zs.val zend.val
+                if xR != zR then compare zR xR
+                else if xe != ze then compare ze xe else .eq)
+             = (let yR := br yd ys.val yend.val
+                let zR := br zd zs.val zend.val
+                if yR != zR then compare zR yR
+                else if ye != ze then compare ze ye else .eq)
+          rw [hRank, hEdge]
+        · show (let zR := br zd zs.val zend.val
+                let xR := br xd xs.val xend.val
+                if zR != xR then compare xR zR
+                else if ze != xe then compare xe ze else .eq)
+             = (let zR := br zd zs.val zend.val
+                let yR := br yd ys.val yend.val
+                if zR != yR then compare yR zR
+                else if ze != ye then compare ye ze else .eq)
+          rw [hRank, hEdge]
 
 /-- `orderInsensitiveListCmp` is invariant under `map`-ping both lists by an
 `f` that preserves the comparison. This handles the depth=0 branch of
@@ -1259,14 +1375,15 @@ theorem comparePathsBetween_σ_equivariant
             (fun a b => comparePathSegments_σ_equivariant σ vts hvts br hbr a b)
             p₁.connectedSubPaths p₂.connectedSubPaths
 
-/-- `comparePathsBetween` respects equivalence (the EquivCompat condition needed for
-`orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). -/
+/-- `comparePathsBetween` respects equivalence bilaterally (the EquivCompat condition
+needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). -/
 theorem comparePathsBetween_equivCompat
     {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat)
     (p₁ p₂ : PathsBetween vc)
     (h : comparePathsBetween vts br p₁ p₂ = Ordering.eq)
     (r : PathsBetween vc) :
-    comparePathsBetween vts br p₁ r = comparePathsBetween vts br p₂ r := by
+    comparePathsBetween vts br p₁ r = comparePathsBetween vts br p₂ r ∧
+    comparePathsBetween vts br r p₁ = comparePathsBetween vts br r p₂ := by
   sorry
 
 /-- `comparePathsFrom` is σ-equivariant under σ-invariant `vts`/`br` and `pathsToVertex`-
