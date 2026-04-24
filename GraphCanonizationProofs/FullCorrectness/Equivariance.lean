@@ -867,7 +867,7 @@ for every `i`, making the final `foldl` identical. Formalizing this requires eit
 explicit class-block decomposition or a strong induction that carries equivalence-aware
 comparison throughout the fold.
 
-Leave as sorry for now; downstream compare σ-equivariance and the main
+Currently left as sorry; downstream compare σ-equivariance and the main
 `calculatePathRankings_value_invariant` depend on it, but the infrastructure
 (`sortBy_perm`, `comparePathSegments_equivCompat`, `orderInsensitiveListCmp_map`) is in
 place to support the full proof. -/
@@ -1012,27 +1012,256 @@ theorem comparePathSegments_σ_equivariant
            else if xe != ye then compare ye xe else .eq)
       rw [hbr xd xs xend, hbr yd ys yend]
 
-/-- The pointwise σ-invariance of `calculatePathRankings`'s output, separated from the
-size facts. **This is the deep content** — it requires σ-equivariance of the entire
-pipeline: `comparePathSegments`/`comparePathsBetween`/`comparePathsFrom` are σ-equivariant
-on σ-invariant rank tables; `sortBy`/`assignRanks` preserve σ-related equivalence classes;
-the outer fold preserves the σ-invariance of the rank tables step by step. -/
-theorem calculatePathRankings_value_invariant
+/-! ### `PathsBetween` / `PathsFrom` permute → multiset Perm
+
+When `PathsBetween.permute σ` (depth>0 branch) reindexes `connectedSubPaths` via `σ⁻¹`
+on positions, the result is a `Perm` of `connectedSubPaths.map (PathSegment.permute σ)`
+by `Equiv.Perm.ofFn_comp_perm`. Same for `PathsFrom.permute σ`'s `pathsToVertex`. -/
+
+/-- General reindex-perm lemma: if `L : List α` has length `n` and `σ : Equiv.Perm (Fin n)`,
+then the list obtained by σ-reindexing `L.map act` is a `Perm` of `L.map act`. This captures
+the depth>0 branch of `PathsBetween.permute`/`PathsFrom.permute` in a σ-agnostic way. -/
+private theorem map_reindex_perm {α : Type} {n : Nat}
+    (σ : Equiv.Perm (Fin n)) (L : List α) (h_len : L.length = n)
+    (act : α → α) (def_val : α) :
+    ((List.finRange n).map fun i : Fin n => act (L.getD (σ i).val def_val)).Perm
+      (L.map act) := by
+  -- Rewrite getD to getElem using h_len and (σ i).isLt.
+  have h_eq : (List.finRange n).map (fun i : Fin n => act (L.getD (σ i).val def_val))
+            = (List.finRange n).map (fun i : Fin n =>
+                act (L[(σ i).val]'(h_len ▸ (σ i).isLt))) := by
+    apply List.map_congr_left
+    intro i _
+    congr 1
+    rw [List.getD_eq_getElem?_getD, List.getElem?_eq_getElem (h_len ▸ (σ i).isLt),
+        Option.getD_some]
+  rw [h_eq]
+  -- Convert to List.ofFn and apply Equiv.Perm.ofFn_comp_perm.
+  rw [← List.ofFn_eq_map]
+  -- Now: List.ofFn (fun i => act L[(σ i).val]'_) ~ L.map act.
+  -- View as List.ofFn (f ∘ σ) where f i := act L[i.val]'_.
+  rw [show (fun i : Fin n => act (L[(σ i).val]'(h_len ▸ (σ i).isLt)))
+        = (fun i : Fin n => act (L[i.val]'(h_len ▸ i.isLt))) ∘ σ from by
+      funext i; rfl]
+  refine (Equiv.Perm.ofFn_comp_perm σ _).trans ?_
+  -- Goal: List.ofFn (fun i => act L[i.val]'_) ~ L.map act.
+  rw [List.ofFn_eq_map]
+  -- Now: (finRange n).map (fun i : Fin n => act L[i.val]'_) ~ L.map act.
+  -- Prove element-wise equality.
+  apply List.Perm.of_eq
+  apply List.ext_getElem
+  · simp [h_len]
+  intros j h₁ h₂
+  simp [List.getElem_map, List.getElem_finRange]
+
+/-- For `n = k + 1` and `p.connectedSubPaths` of length `k+1` (or depth = 0), the
+permuted `connectedSubPaths` is a `Perm` of the σ-mapped original. -/
+theorem PathsBetween_permute_connectedSubPaths_perm
+    {vc : Nat} (σ : Equiv.Perm (Fin vc)) (p : PathsBetween vc)
+    (h_len : p.depth > 0 → p.connectedSubPaths.length = vc) :
+    (p.permute σ).connectedSubPaths.Perm (p.connectedSubPaths.map (PathSegment.permute σ)) := by
+  match vc, σ, p, h_len with
+  | 0, _, p, _ =>
+    -- PathSegment 0 is uninhabited, so p.connectedSubPaths must be [].
+    show p.connectedSubPaths.Perm (p.connectedSubPaths.map _)
+    cases h_cs : p.connectedSubPaths with
+    | nil => simp
+    | cons a _ =>
+      cases a with
+      | bottom v => exact v.elim0
+      | inner _ _ s _ => exact s.elim0
+  | k + 1, σ, p, h_len =>
+    by_cases hd : p.depth = 0
+    · -- d = 0 case: directly equal (no reindexing).
+      have h_eq : (PathsBetween.permute σ p).connectedSubPaths
+                = p.connectedSubPaths.map (PathSegment.permute σ) := by
+        show (if p.depth = 0 then p.connectedSubPaths.map (PathSegment.permute σ) else _) = _
+        rw [if_pos hd]
+      rw [h_eq]
+    · -- d > 0: reindexed. Use map_reindex_perm with σ := σ⁻¹.
+      have h_len' : p.connectedSubPaths.length = k + 1 := h_len (Nat.pos_of_ne_zero hd)
+      have h_eq : (PathsBetween.permute σ p).connectedSubPaths
+                = (List.finRange (k+1)).map fun i : Fin (k+1) =>
+                    PathSegment.permute σ
+                      (p.connectedSubPaths.getD (permNat σ⁻¹ i.val) (PathSegment.bottom 0)) := by
+        show (if p.depth = 0 then _ else _) = _
+        rw [if_neg hd]
+      rw [h_eq]
+      -- Replace `permNat σ⁻¹ i.val` with `(σ⁻¹ i).val` to match `map_reindex_perm`.
+      have h_rw : (fun i : Fin (k+1) =>
+          PathSegment.permute σ (p.connectedSubPaths.getD (permNat σ⁻¹ i.val) (PathSegment.bottom 0)))
+        = (fun i : Fin (k+1) =>
+          PathSegment.permute σ (p.connectedSubPaths.getD (σ⁻¹ i).val (PathSegment.bottom 0))) := by
+        funext i
+        rw [permNat_of_lt i.isLt]
+      rw [h_rw]
+      exact map_reindex_perm σ⁻¹ p.connectedSubPaths h_len'
+        (PathSegment.permute σ) (PathSegment.bottom 0)
+
+/-- Analogous Perm helper for `PathsFrom.permute`'s `pathsToVertex`. -/
+theorem PathsFrom_permute_pathsToVertex_perm
+    {vc : Nat} (σ : Equiv.Perm (Fin vc)) (p : PathsFrom vc)
+    (h_len : p.pathsToVertex.length = vc) :
+    (p.permute σ).pathsToVertex.Perm (p.pathsToVertex.map (PathsBetween.permute σ)) := by
+  match vc, σ, p, h_len with
+  | 0, _, p, h_len =>
+    -- For n=0, PathsFrom.permute is identity. We need p.pathsToVertex = [].
+    -- Actually, since pathsToVertex : List (PathsBetween 0) and PathsBetween has fields
+    -- startVertexIndex endVertexIndex : Fin 0 (uninhabited), pathsToVertex can only be [].
+    show p.pathsToVertex.Perm (p.pathsToVertex.map _)
+    cases h_pv : p.pathsToVertex with
+    | nil => simp
+    | cons a _ => exact a.startVertexIndex.elim0
+  | k + 1, σ, p, h_len =>
+    -- PathsFrom.permute's pathsToVertex is always reindexed (no depth branching).
+    have h_eq : (PathsFrom.permute σ p).pathsToVertex
+              = (List.finRange (k+1)).map fun i : Fin (k+1) =>
+                  PathsBetween.permute σ
+                    (p.pathsToVertex.getD (permNat σ⁻¹ i.val)
+                      { depth := 0, startVertexIndex := 0, endVertexIndex := 0,
+                        connectedSubPaths := [] }) := rfl
+    rw [h_eq]
+    have h_rw : (fun i : Fin (k+1) =>
+        PathsBetween.permute σ
+          (p.pathsToVertex.getD (permNat σ⁻¹ i.val)
+            ({ depth := 0, startVertexIndex := 0, endVertexIndex := 0,
+               connectedSubPaths := [] } : PathsBetween (k+1))))
+      = (fun i : Fin (k+1) =>
+        PathsBetween.permute σ
+          (p.pathsToVertex.getD (σ⁻¹ i).val
+            ({ depth := 0, startVertexIndex := 0, endVertexIndex := 0,
+               connectedSubPaths := [] } : PathsBetween (k+1)))) := by
+      funext i
+      rw [permNat_of_lt i.isLt]
+    rw [h_rw]
+    exact map_reindex_perm σ⁻¹ p.pathsToVertex h_len
+      (PathsBetween.permute σ)
+      { depth := 0, startVertexIndex := 0, endVertexIndex := 0, connectedSubPaths := [] }
+
+/-- `comparePathsBetween` is σ-equivariant under σ-invariant `vts`/`br` and `connectedSubPaths`-
+length normalization (which holds in `initializePaths G` for `depth>0`). -/
+theorem comparePathsBetween_σ_equivariant
+    {vc : Nat} (σ : Equiv.Perm (Fin vc))
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin vc, vts.getD (σ v).val 0 = vts.getD v.val 0)
+    (br : Nat → Nat → Nat → Nat)
+    (hbr : ∀ d : Nat, ∀ s e : Fin vc, br d (σ s).val (σ e).val = br d s.val e.val)
+    (p₁ p₂ : PathsBetween vc)
+    (h_len₁ : p₁.depth > 0 → p₁.connectedSubPaths.length = vc)
+    (h_len₂ : p₂.depth > 0 → p₂.connectedSubPaths.length = vc) :
+    comparePathsBetween vts br (p₁.permute σ) (p₂.permute σ)
+    = comparePathsBetween vts br p₁ p₂ := by
+  match vc, σ, p₁, p₂, h_len₁, h_len₂ with
+  | 0, _, _, _, _, _ =>
+    -- For n = 0, `PathsBetween.permute` is the identity definitionally.
+    rfl
+  | k + 1, σ, p₁, p₂, h_len₁, h_len₂ =>
+    -- Unfold comparePathsBetween + PathsBetween.permute (succ branch).
+    show (if vts.getD (σ p₁.endVertexIndex).val 0 != vts.getD (σ p₂.endVertexIndex).val 0 then
+            compare (vts.getD (σ p₁.endVertexIndex).val 0) (vts.getD (σ p₂.endVertexIndex).val 0)
+          else orderInsensitiveListCmp (comparePathSegments vts br)
+                 (PathsBetween.permute σ p₁).connectedSubPaths
+                 (PathsBetween.permute σ p₂).connectedSubPaths)
+       = (if vts.getD p₁.endVertexIndex.val 0 != vts.getD p₂.endVertexIndex.val 0 then
+            compare (vts.getD p₁.endVertexIndex.val 0) (vts.getD p₂.endVertexIndex.val 0)
+          else orderInsensitiveListCmp (comparePathSegments vts br)
+                 p₁.connectedSubPaths p₂.connectedSubPaths)
+    rw [hvts p₁.endVertexIndex, hvts p₂.endVertexIndex]
+    split
+    · rfl
+    · -- else branch: orderInsensitiveListCmp on connectedSubPaths.
+      have h_perm₁ := PathsBetween_permute_connectedSubPaths_perm σ p₁ h_len₁
+      have h_perm₂ := PathsBetween_permute_connectedSubPaths_perm σ p₂ h_len₂
+      rw [orderInsensitiveListCmp_perm (comparePathSegments vts br)
+            (comparePathSegments_equivCompat vts br) _ _ _ _ h_perm₁ h_perm₂]
+      exact orderInsensitiveListCmp_map (PathSegment.permute σ) (comparePathSegments vts br)
+            (fun a b => comparePathSegments_σ_equivariant σ vts hvts br hbr a b)
+            p₁.connectedSubPaths p₂.connectedSubPaths
+
+/-- `comparePathsBetween` respects equivalence (the EquivCompat condition needed for
+`orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). -/
+theorem comparePathsBetween_equivCompat
+    {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat)
+    (p₁ p₂ : PathsBetween vc)
+    (h : comparePathsBetween vts br p₁ p₂ = Ordering.eq)
+    (r : PathsBetween vc) :
+    comparePathsBetween vts br p₁ r = comparePathsBetween vts br p₂ r := by
+  sorry
+
+/-- `comparePathsFrom` is σ-equivariant under σ-invariant `vts`/`br` and `pathsToVertex`-
+length normalization (which holds in `initializePaths G`). -/
+theorem comparePathsFrom_σ_equivariant
+    {vc : Nat} (σ : Equiv.Perm (Fin vc))
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin vc, vts.getD (σ v).val 0 = vts.getD v.val 0)
+    (br : Nat → Nat → Nat → Nat)
+    (hbr : ∀ d : Nat, ∀ s e : Fin vc, br d (σ s).val (σ e).val = br d s.val e.val)
+    (p₁ p₂ : PathsFrom vc)
+    (h_len₁ : p₁.pathsToVertex.length = vc)
+    (h_len₂ : p₂.pathsToVertex.length = vc)
+    (h_inner_len₁ : ∀ q ∈ p₁.pathsToVertex, q.depth > 0 → q.connectedSubPaths.length = vc)
+    (h_inner_len₂ : ∀ q ∈ p₂.pathsToVertex, q.depth > 0 → q.connectedSubPaths.length = vc) :
+    comparePathsFrom vts br (p₁.permute σ) (p₂.permute σ)
+    = comparePathsFrom vts br p₁ p₂ := by
+  match vc, σ, p₁, p₂, h_len₁, h_len₂, h_inner_len₁, h_inner_len₂ with
+  | 0, _, _, _, _, _, _, _ =>
+    rfl
+  | k + 1, σ, p₁, p₂, h_len₁, h_len₂, _h_inner_len₁, _h_inner_len₂ =>
+    show (if vts.getD (σ p₁.startVertexIndex).val 0 != vts.getD (σ p₂.startVertexIndex).val 0 then
+            compare (vts.getD (σ p₁.startVertexIndex).val 0) (vts.getD (σ p₂.startVertexIndex).val 0)
+          else orderInsensitiveListCmp (comparePathsBetween vts br)
+                 (PathsFrom.permute σ p₁).pathsToVertex
+                 (PathsFrom.permute σ p₂).pathsToVertex)
+       = (if vts.getD p₁.startVertexIndex.val 0 != vts.getD p₂.startVertexIndex.val 0 then
+            compare (vts.getD p₁.startVertexIndex.val 0) (vts.getD p₂.startVertexIndex.val 0)
+          else orderInsensitiveListCmp (comparePathsBetween vts br)
+                 p₁.pathsToVertex p₂.pathsToVertex)
+    rw [hvts p₁.startVertexIndex, hvts p₂.startVertexIndex]
+    split
+    · rfl
+    · have h_perm₁ := PathsFrom_permute_pathsToVertex_perm σ p₁ h_len₁
+      have h_perm₂ := PathsFrom_permute_pathsToVertex_perm σ p₂ h_len₂
+      rw [orderInsensitiveListCmp_perm (comparePathsBetween vts br)
+            (comparePathsBetween_equivCompat vts br) _ _ _ _ h_perm₁ h_perm₂]
+      -- Now: orderInsensitiveListCmp cmp (p₁.pathsToVertex.map σ-act) (p₂.pathsToVertex.map σ-act)
+      --    = orderInsensitiveListCmp cmp p₁.pathsToVertex p₂.pathsToVertex.
+      -- Need orderInsensitiveListCmp_map with PathsBetween.permute σ as the f. The condition is
+      -- comparePathsBetween_σ_equivariant on each pair, but that needs h_inner_len conditions on
+      -- the `connectedSubPaths` of each PathsBetween in the pathsToVertex lists. The general
+      -- map lemma only handles uniform conditions; for per-element conditions we'd need a
+      -- list-pointwise version. Sorry the bridge for now.
+      sorry
+
+/-- The σ-invariance of `fromRanks` values in `calculatePathRankings`'s output.
+Part of the deep Stage B content; requires foldl induction on the depth loop combined with
+σ-equivariance of the compare/sort/rank assignment at each step. -/
+theorem calculatePathRankings_fromRanks_inv
     (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
     (vts : Array VertexType)
-    (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
+    (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0)
+    (d : Nat) (_hd : d < n) (s : Fin n) :
     let rs := calculatePathRankings (initializePaths G) vts
-    (∀ d : Nat, d < n → ∀ s : Fin n,
-      (rs.fromRanks.getD d #[]).getD s.val 0
-      = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0) ∧
-    (∀ d : Nat, d < n → ∀ s e : Fin n,
-      ((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
-      = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) := by
+    (rs.fromRanks.getD d #[]).getD s.val 0
+    = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0 := by
+  sorry
+
+/-- The σ-invariance of `betweenRanks` values in `calculatePathRankings`'s output.
+Companion to `calculatePathRankings_fromRanks_inv`; the two are proved by a shared foldl
+induction (sharing the same σ-invariance bookkeeping across the `betweenRanks`/`fromRanks`
+pair, since each step updates both in tandem). -/
+theorem calculatePathRankings_betweenRanks_inv
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType)
+    (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0)
+    (d : Nat) (_hd : d < n) (s e : Fin n) :
+    let rs := calculatePathRankings (initializePaths G) vts
+    ((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
+    = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0 := by
   sorry
 
 /-- The σ-invariance of `calculatePathRankings`'s output, given σ ∈ Aut G and σ-invariant
-typing. Sizes follow from `calculatePathRankings_size_inv` (proved); the deep value
-invariance comes from `calculatePathRankings_value_invariant` (the remaining sorry). -/
+typing. Sizes are discharged by `calculatePathRankings_size_inv` (proved); the value
+invariance comes from the two `_inv` theorems above. -/
 theorem calculatePathRankings_σInvariant
     (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
     (vts : Array VertexType)
@@ -1046,8 +1275,8 @@ theorem calculatePathRankings_σInvariant
     (calculatePathRankings_size_inv (initializePaths G) vts).2.2.2.1 d hd
   betweenRanks_cell_size := fun d hd s hs =>
     (calculatePathRankings_size_inv (initializePaths G) vts).2.2.2.2 d s hd hs
-  fromRanks_inv := (calculatePathRankings_value_invariant G σ hσ vts hvts).1
-  betweenRanks_inv := (calculatePathRankings_value_invariant G σ hσ vts hvts).2
+  fromRanks_inv := calculatePathRankings_fromRanks_inv G σ hσ vts hvts
+  betweenRanks_inv := calculatePathRankings_betweenRanks_inv G σ hσ vts hvts
 
 /-- The genuine content of Stage B (the part not reducible to Stage A + σ ∈ Aut G):
 the rank state computed from `initializePaths G` with a σ-invariant typing is itself

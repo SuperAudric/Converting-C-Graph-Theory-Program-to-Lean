@@ -46,10 +46,15 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 2 (Equivariance: `orderInsensitiveListCmp_perm` — the Perm-invariance
-of `orderInsensitiveListCmp` under EquivCompat cmp, and `calculatePathRankings_value_invariant`
-— the foldl-level σ-invariance content) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) +
-3 (Invariants — §7) + 1 (Main) = **7 open obligations** in the new tree.
+**Sorry count.** 5 (Equivariance: `orderInsensitiveListCmp_perm`,
+`comparePathsBetween_equivCompat`, map-to-pointwise bridge inside
+`comparePathsFrom_σ_equivariant`, `calculatePathRankings_fromRanks_inv`,
+`calculatePathRankings_betweenRanks_inv`) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) +
+3 (Invariants — §7) + 1 (Main) = **10 open obligations**. The two Perm helpers
+(`PathsBetween_permute_connectedSubPaths_perm`, `PathsFrom_permute_pathsToVertex_perm`) are
+now proved via a generic `map_reindex_perm` helper using Mathlib's
+`Equiv.Perm.ofFn_comp_perm`. The deep Stage B content remains decomposed into well-scoped
+helper lemmas, each individually attackable.
 
 **Closed during the equivariance push:**
 - **Stage D** trivially via `σ ∈ Aut G ⟹ G.permute σ = G`.
@@ -68,25 +73,39 @@ of `orderInsensitiveListCmp` under EquivCompat cmp, and `calculatePathRankings_v
 - **`convergeOnce_size_preserving`** proved (foldl invariant, mechanical).
 - **`calculatePathRankings_fromRanks_size`** proved (foldl invariant on the algorithm body).
 
-**Remaining structural work in `Equivariance`:**
+**Remaining structural work in `Equivariance`** (all sorried, each well-scoped):
 - `orderInsensitiveListCmp_perm`: permutation-invariance of `orderInsensitiveListCmp` when
-  `cmp` respects equivalence classes. Needed for `comparePathsBetween`/`comparePathsFrom`
-  σ-equivariance in the depth>0 case (where `PathsBetween.permute` reindexes the
-  `connectedSubPaths` list). Proof sketch in the file: sorted permutations agree
-  position-wise on classes, and `cmp` on class-equal elements collapses the foldl to the
-  same result.
-- `calculatePathRankings_value_invariant`: the pointwise σ-invariance of `betweenRanks`
-  and `fromRanks` values (sizes are discharged by `calculatePathRankings_size_inv`).
-  Requires foldl induction on the depth loop plus σ-equivariance of compare/sort/
-  assignRanks at each step. This is the main remaining content of Stage B.
+  `cmp` respects equivalence classes. Sorted permutations agree position-wise on classes;
+  under EquivCompat the foldl collapses to the same result.
+- `comparePathsBetween_equivCompat`: `comparePathsBetween` respects equivalence classes
+  (needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). Requires an
+  auxiliary `orderInsensitiveListCmp_equivCompat_left` lemma about orderInsensitiveListCmp
+  giving `.eq` implying interchangeability.
+- Map-to-pointwise bridge inside `comparePathsFrom_σ_equivariant`: `orderInsensitiveListCmp_map`
+  takes a uniform `cmp (f a) (f b) = cmp a b` hypothesis, but `comparePathsBetween_σ_equivariant`
+  requires per-element `h_len` conditions. A list-pointwise version would bridge this.
+- `calculatePathRankings_fromRanks_inv` / `..._betweenRanks_inv`: the fold-level
+  σ-invariance of the rank tables. Requires foldl induction on the depth loop plus
+  σ-equivariance of sortBy + assignRanks at each step.
 
-**Proved infrastructure in `Equivariance` (used by the above):**
+**Proved infrastructure in `Equivariance`**:
 - `comparePathSegments_σ_equivariant` — base case of compare σ-equivariance.
 - `comparePathSegments_equivCompat` — `comparePathSegments` respects equivalence classes
   (supplies the hypothesis for `orderInsensitiveListCmp_perm` at the inner level).
-- `sortBy_perm` + `perm_insertSorted` — sortBy preserves multiset (Perm).
-- `sortBy_map` + `orderInsensitiveListCmp_map` — sort/compare respect mapping by a
+- `sortBy_perm` + `perm_insertSorted` — sortBy preserves multiset (`Perm`).
+- `sortBy_map` + `orderInsensitiveListCmp_map` — sort/compare respect `map`-ping by a
   `cmp`-preserving function (handles the depth=0 branch directly).
+- `comparePathsBetween_σ_equivariant` — proved (modulo the Perm + orderInsensitiveListCmp_perm
+  sorries).
+- `comparePathsFrom_σ_equivariant` — proved modulo the inner map-to-pointwise bridge sorry.
+- `map_reindex_perm` — generic list reindex-`Perm` helper using Mathlib's
+  `Equiv.Perm.ofFn_comp_perm`; bridges list reindexing under a bijection to `List.Perm`.
+- `PathsBetween_permute_connectedSubPaths_perm` — proved via `map_reindex_perm`.
+- `PathsFrom_permute_pathsToVertex_perm` — proved via `map_reindex_perm`.
+- `PathState.permute` / `PathsFrom.permute` / `PathsBetween.permute` — action definitions.
+- `calculatePathRankings_size_inv` — all 5 shape facts for the output via combined foldl
+  invariant + `setBetween`/`set!` size-preservation helpers.
+- `RankState.σInvariant.permute_eq_self` — structural extensionality.
 
 ### Algorithm refactor (this iteration)
 
