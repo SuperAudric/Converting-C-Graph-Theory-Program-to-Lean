@@ -39,7 +39,8 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §5.0 | `breakTie` output position-by-position            | `Tiebreak`                                 | ✅ proved (4 characterization lemmas) |
 | §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
 | §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
-| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | 🧱 stated, `sorry` |
+| §6.0 | `breakTieAt` output + τ-equivariance              | `Tiebreak`                                 | ✅ proved (3 characterization + 1 equivariance) |
+| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | 🧱 reduced to §3 equivariance — `sorry` on the pipeline-`runFrom`-equivariance step |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                               | ✅ defined + boundary proved |
 | §7   | "Converged types are a prefix of ℕ" 4 invariants  | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
@@ -69,6 +70,35 @@ plan stated:
      argument. We capture the minimal needed input in `hmove`: there's *some* typed
      automorphism moving `v_star`. With `hmove`, strictness is immediate from §5.1 (the
      moving automorphism is in `TypedAut vts` but not in the `v_star`-stabilizer).
+
+### §6 restructuring
+
+`tiebreak_choice_independent` has been revised to have two additional hypotheses beyond
+the plan:
+
+  - `hsize : vts.size = n` — as in §5.
+  - `hconn : ∃ τ ∈ G.TypedAut vts, τ v₁ = v₂` — orbit connectivity between `v₁` and `v₂`.
+    This is the same "same-type ⟹ same-orbit" requirement that §5.2 needed. The plan
+    implicitly invoked this from §4's corollary, but §4 only gives the forward direction;
+    we make the required backward connection explicit.
+
+With those hypotheses, §6 reduces to the *pipeline equivariance* statement:
+
+```
+runFrom_VtsInvariant_eq :
+  τ ∈ G.Aut → (∀ w, arr₂[w] = arr₁[τ⁻¹ w]) → runFrom s arr₁ G = runFrom s arr₂ G
+```
+
+which is §3 (Stages B–D) chained. This is the remaining `sorry` in `tiebreak_choice_independent`.
+
+New deliverables in `Tiebreak.lean` supporting §6:
+```
+breakTieAt_size             : (breakTieAt vts t₀ keep).size = vts.size
+breakTieAt_getD_of_ne       : vts[j] ≠ t₀ → (breakTieAt vts t₀ keep)[j] = vts[j]
+breakTieAt_getD_keep        : (breakTieAt vts t₀ keep)[keep] = vts[keep]
+breakTieAt_getD_promoted    : w ≠ keep ∧ vts[w] = t₀ → (breakTieAt vts t₀ keep)[w] = t₀ + 1
+breakTieAt_VtsInvariant_eq  : [τ-equivariance under VtsInvariant τ vts]
+```
 
 --------------------------------------------------------------------------------
 

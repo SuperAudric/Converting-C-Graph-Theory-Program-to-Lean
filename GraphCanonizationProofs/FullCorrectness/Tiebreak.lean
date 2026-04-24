@@ -683,27 +683,270 @@ def breakTieAt {n : Nat} (vts : Array VertexType) (t₀ : VertexType) (keep : Fi
       if acc.getD v.val 0 = t₀ ∧ v ≠ keep then acc.set! v.val (t₀ + 1) else acc)
     vts
 
+/-! ### Characterizing `breakTieAt`
+
+Each `Fin n` position in `List.finRange n` is visited exactly once (the list is `Nodup`),
+and the only write at step `v` is at position `v.val`. So the value at position `w.val`
+in the output is determined by the step at `w` alone:
+  - `vts[w] ≠ t₀`: no promotion, value = `vts[w]`.
+  - `vts[w] = t₀` and `w = keep`: no promotion (keep-exception), value = `t₀`.
+  - `vts[w] = t₀` and `w ≠ keep`: promoted, value = `t₀ + 1`.
+
+The structure of the proof mirrors the `breakTie` characterization but is simpler: no
+`firstAppearance` flag to track. We factor out the step function and prove the invariants
+as fold properties. -/
+
+/-- The step function of `breakTieAt`, extracted. -/
+private def bTAStep {n : Nat} (t₀ : VertexType) (keep : Fin n)
+    (acc : Array VertexType) (v : Fin n) : Array VertexType :=
+  if acc.getD v.val 0 = t₀ ∧ v ≠ keep then acc.set! v.val (t₀ + 1) else acc
+
+private theorem breakTieAt_eq_fold (vts : Array VertexType) (t₀ : VertexType) (keep : Fin n) :
+    breakTieAt vts t₀ keep = (List.finRange n).foldl (bTAStep t₀ keep) vts := rfl
+
+private theorem bTAStep_size (t₀ : VertexType) (keep : Fin n)
+    (acc : Array VertexType) (v : Fin n) :
+    (bTAStep t₀ keep acc v).size = acc.size := by
+  unfold bTAStep
+  split_ifs <;> simp
+
+private theorem bTAFold_size (t₀ : VertexType) (keep : Fin n) :
+    ∀ (l : List (Fin n)) (acc : Array VertexType),
+      (l.foldl (bTAStep t₀ keep) acc).size = acc.size
+  | [], _ => rfl
+  | x :: xs, acc => by
+      rw [List.foldl_cons, bTAFold_size t₀ keep xs _, bTAStep_size]
+
+/-- `breakTieAt` preserves array size. -/
+theorem breakTieAt_size (vts : Array VertexType) (t₀ : VertexType) (keep : Fin n) :
+    (breakTieAt vts t₀ keep).size = vts.size := by
+  rw [breakTieAt_eq_fold]
+  exact bTAFold_size t₀ keep _ vts
+
+/-- After `bTAStep` at `v`, value at position `j ≠ v.val` is unchanged. -/
+private theorem bTAStep_getD_ne (t₀ : VertexType) (keep : Fin n)
+    (acc : Array VertexType) (v : Fin n) {j : Nat} (hj : v.val ≠ j) :
+    (bTAStep t₀ keep acc v).getD j 0 = acc.getD j 0 := by
+  unfold bTAStep
+  split_ifs
+  · simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+               Array.getElem?_setIfInBounds_ne hj]
+  · rfl
+
+/-- Across the fold over a list of distinct `Fin n`, positions not in the list are unchanged.
+The `Nodup`ness of `List.finRange n` plus the observation that each step at `v` only writes
+at position `v.val` gives us value preservation at any `j` we've visited exactly once. -/
+private theorem bTAFold_getD_of_notin (t₀ : VertexType) (keep : Fin n) :
+    ∀ (l : List (Fin n)) (acc : Array VertexType) (j : Nat),
+      (∀ v ∈ l, v.val ≠ j) →
+      (l.foldl (bTAStep t₀ keep) acc).getD j 0 = acc.getD j 0
+  | [], _, _, _ => rfl
+  | x :: xs, acc, j, hne => by
+      rw [List.foldl_cons]
+      have hx : x.val ≠ j := hne x List.mem_cons_self
+      have hxs : ∀ v ∈ xs, v.val ≠ j := fun v hv => hne v (List.mem_cons_of_mem x hv)
+      rw [bTAFold_getD_of_notin t₀ keep xs _ j hxs, bTAStep_getD_ne t₀ keep acc x hx]
+
+/-- If after the step at `v` the value at `v.val` is no longer `t₀`, subsequent steps
+don't re-promote (they check `== t₀` in the accumulator). Simpler but specialized form:
+for positions outside `t₀`, the fold preserves the value. Follows from a "position-wise"
+invariant: once position `v` carries a value not equal to `t₀`, it stays that way. -/
+private theorem bTAFold_getD_of_ne (t₀ : VertexType) (keep : Fin n) :
+    ∀ (l : List (Fin n)) (acc : Array VertexType) (j : Nat),
+      acc.getD j 0 ≠ t₀ →
+      (l.foldl (bTAStep t₀ keep) acc).getD j 0 = acc.getD j 0
+  | [], _, _, _ => rfl
+  | x :: xs, acc, j, hj => by
+      rw [List.foldl_cons]
+      have hstep : (bTAStep t₀ keep acc x).getD j 0 = acc.getD j 0 := by
+        unfold bTAStep
+        split_ifs with hif
+        · by_cases hxj : x.val = j
+          · -- x.val = j: but then acc.getD x.val 0 = acc.getD j 0 ≠ t₀,
+            -- contradicting hif.1 which says acc.getD x.val 0 = t₀
+            rw [hxj] at hif
+            exact absurd hif.1 hj
+          · simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+                       Array.getElem?_setIfInBounds_ne hxj]
+        · rfl
+      have hj' : (bTAStep t₀ keep acc x).getD j 0 ≠ t₀ := by rw [hstep]; exact hj
+      rw [bTAFold_getD_of_ne t₀ keep xs _ j hj', hstep]
+
+/-- `breakTieAt` preserves values at non-target positions. -/
+theorem breakTieAt_getD_of_ne (vts : Array VertexType) (t₀ : VertexType) (keep : Fin n)
+    {j : Nat} (hj : vts.getD j 0 ≠ t₀) :
+    (breakTieAt vts t₀ keep).getD j 0 = vts.getD j 0 := by
+  rw [breakTieAt_eq_fold]
+  exact bTAFold_getD_of_ne t₀ keep _ vts j hj
+
+/-- One step of `bTAStep` preserves the value at position `keep.val`. The step at
+`keep` itself is a no-op because the `v ≠ keep` check fails; any other step writes at
+`v.val ≠ keep.val`. -/
+private theorem bTAStep_preserves_keep (t₀ : VertexType) (keep : Fin n)
+    (acc : Array VertexType) (v : Fin n) :
+    (bTAStep t₀ keep acc v).getD keep.val 0 = acc.getD keep.val 0 := by
+  unfold bTAStep
+  split_ifs with hif
+  · have hne : v.val ≠ keep.val := fun h => hif.2 (Fin.ext h)
+    simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+               Array.getElem?_setIfInBounds_ne hne]
+  · rfl
+
+private theorem bTAFold_preserves_keep (t₀ : VertexType) (keep : Fin n) :
+    ∀ (l : List (Fin n)) (acc : Array VertexType),
+      (l.foldl (bTAStep t₀ keep) acc).getD keep.val 0 = acc.getD keep.val 0
+  | [], _ => rfl
+  | x :: xs, acc => by
+      rw [List.foldl_cons, bTAFold_preserves_keep t₀ keep xs _, bTAStep_preserves_keep]
+
+/-- `breakTieAt` preserves the value at the kept vertex. -/
+theorem breakTieAt_getD_keep (vts : Array VertexType) (t₀ : VertexType) (keep : Fin n) :
+    (breakTieAt vts t₀ keep).getD keep.val 0 = vts.getD keep.val 0 := by
+  rw [breakTieAt_eq_fold]
+  exact bTAFold_preserves_keep t₀ keep _ vts
+
+/-- The key promotion lemma: for `w ≠ keep` in a `Nodup` list with `acc[w.val] = t₀`,
+the fold's output has `t₀ + 1` at position `w.val`. -/
+private theorem bTAFold_getD_promoted (t₀ : VertexType) (keep : Fin n) :
+    ∀ (l : List (Fin n)) (_hnd : l.Nodup) (acc : Array VertexType) (w : Fin n),
+      w ∈ l → acc.getD w.val 0 = t₀ → w ≠ keep → w.val < acc.size →
+      (l.foldl (bTAStep t₀ keep) acc).getD w.val 0 = t₀ + 1
+  | [], _, _, _, hw, _, _, _ => absurd hw List.not_mem_nil
+  | x :: xs, hnd, acc, w, hw, hwt, hw_ne, hw_size => by
+      rw [List.foldl_cons]
+      have hxnotin : x ∉ xs := (List.nodup_cons.mp hnd).1
+      have hnd' : xs.Nodup := (List.nodup_cons.mp hnd).2
+      rcases List.mem_cons.mp hw with hwx | hwxs
+      · -- w = x: step at x promotes; rest is preserved at w.val.
+        subst hwx
+        have hstep_eq : bTAStep t₀ keep acc w = acc.set! w.val (t₀ + 1) := by
+          unfold bTAStep
+          rw [if_pos ⟨hwt, hw_ne⟩]
+        rw [hstep_eq]
+        have hjt' : (acc.set! w.val (t₀ + 1)).getD w.val 0 = t₀ + 1 := by
+          simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+                     Array.getElem?_setIfInBounds_self_of_lt hw_size]
+          rfl
+        have hne' : (acc.set! w.val (t₀ + 1)).getD w.val 0 ≠ t₀ := by
+          rw [hjt']; exact VertexType_add_one_ne t₀
+        rw [bTAFold_getD_of_ne t₀ keep xs _ w.val hne']
+        exact hjt'
+      · -- w ∈ xs: step at x doesn't affect position w.val (x ≠ w by nodup).
+        have hxneq : x ≠ w := fun h => hxnotin (h ▸ hwxs)
+        have hxval : x.val ≠ w.val := fun h => hxneq (Fin.ext h)
+        have hstep_at_w : (bTAStep t₀ keep acc x).getD w.val 0 = acc.getD w.val 0 :=
+          bTAStep_getD_ne t₀ keep acc x hxval
+        have hwt' : (bTAStep t₀ keep acc x).getD w.val 0 = t₀ := by rw [hstep_at_w]; exact hwt
+        have hw_size' : w.val < (bTAStep t₀ keep acc x).size := by
+          rw [bTAStep_size]; exact hw_size
+        exact bTAFold_getD_promoted t₀ keep xs hnd' _ w hwxs hwt' hw_ne hw_size'
+
+/-- `breakTieAt` promotes every non-keep target vertex to `t₀ + 1`. -/
+theorem breakTieAt_getD_promoted (vts : Array VertexType) (t₀ : VertexType) (keep : Fin n)
+    (hsize : vts.size = n) {w : Fin n}
+    (hw_val : vts.getD w.val 0 = t₀) (hw_ne : w ≠ keep) :
+    (breakTieAt vts t₀ keep).getD w.val 0 = t₀ + 1 := by
+  rw [breakTieAt_eq_fold]
+  have hw_size : w.val < vts.size := hsize ▸ w.isLt
+  exact bTAFold_getD_promoted t₀ keep _ (List.nodup_finRange n) vts w
+    (List.mem_finRange w) hw_val hw_ne hw_size
+
+/-- **Equivariance of `breakTieAt` under a typed automorphism.**
+
+If `τ : Equiv.Perm (Fin n)` preserves `vts` pointwise (i.e., `τ ∈ TypedAut G vts` for
+graph-preserving τ — only `VtsInvariant` is used here), then the output of
+`breakTieAt vts t₀ (τ keep)` is the `τ`-re-indexing of the output of `breakTieAt vts t₀
+keep`: for any `w`, the value at position `w.val` in the `(τ keep)`-breakTie equals the
+value at position `(τ⁻¹ w).val` in the `keep`-breakTie.
+
+This is the first piece §6 needs: it says choosing `τ keep` instead of `keep` to preserve
+amounts to a relabeling by `τ`. The second piece — that the *remainder of the pipeline*
+commutes with this relabeling — is §3 equivariance and remains a `sorry`. -/
+theorem breakTieAt_VtsInvariant_eq (vts : Array VertexType) (t₀ : VertexType)
+    (τ : Equiv.Perm (Fin n)) (keep : Fin n)
+    (hsize : vts.size = n) (hτvts : VtsInvariant τ vts) (w : Fin n) :
+    (breakTieAt vts t₀ (τ keep)).getD w.val 0 =
+      (breakTieAt vts t₀ keep).getD (τ⁻¹ w).val 0 := by
+  -- `VtsInvariant τ⁻¹` gives `vts[(τ⁻¹ w)] = vts[w]`.
+  have hτ_inv_vts : VtsInvariant τ⁻¹ vts := hτvts.inv
+  have hvts_eq : vts.getD (τ⁻¹ w).val 0 = vts.getD w.val 0 := hτ_inv_vts w
+  by_cases hw : vts.getD w.val 0 = t₀
+  · -- w ∈ typeClass t₀
+    have hτw : vts.getD (τ⁻¹ w).val 0 = t₀ := hvts_eq.trans hw
+    by_cases h_eq : w = τ keep
+    · -- w = τ keep → τ⁻¹ w = keep
+      subst h_eq
+      have h_inv_keep : τ⁻¹ (τ keep) = keep := by simp
+      rw [breakTieAt_getD_keep, h_inv_keep, breakTieAt_getD_keep]
+      exact hτvts keep
+    · -- w ≠ τ keep, so τ⁻¹ w ≠ keep
+      have h_neq : τ⁻¹ w ≠ keep := by
+        intro h
+        apply h_eq
+        have : τ (τ⁻¹ w) = τ keep := by rw [h]
+        simpa using this
+      rw [breakTieAt_getD_promoted vts t₀ (τ keep) hsize hw h_eq,
+          breakTieAt_getD_promoted vts t₀ keep hsize hτw h_neq]
+  · -- w ∉ typeClass t₀
+    have hτw : vts.getD (τ⁻¹ w).val 0 ≠ t₀ := hvts_eq.symm ▸ hw
+    rw [breakTieAt_getD_of_ne vts t₀ (τ keep) hw,
+        breakTieAt_getD_of_ne vts t₀ keep hτw]
+    exact hvts_eq.symm
+
 /-- **§6** Tiebreak choice-independence.
 
 For any Aut(G)-invariant typing `vts`, any smallest-tied value `t₀`, and any two vertices
 `v₁`, `v₂ ∈ typeClass vts t₀`, running the rest of the pipeline from
 `breakTieAt vts t₀ v₁` vs. `breakTieAt vts t₀ v₂` produces the same canonical matrix.
 
-In the algorithm, the fixed choice `v* := min (typeClass vts t₀)` is used; this theorem
-says the canonical output would be *identical* if any other representative were chosen
-(which is why the algorithm's canonical output is a graph invariant).
+**Required hypotheses beyond the plan sketch.**
 
-**Proof plan.** Strong induction on `|TypedAut G vts|`, closed by §3 (Stages B–D
-equivariance), §4 (convergeLoop Aut-invariance), and §5 (breakTie theorems).
-See the section header above for the full sketch.
+  - `hsize : vts.size = n` — always satisfied by the algorithm.
+  - `hconn : ∃ τ ∈ G.TypedAut vts, τ v₁ = v₂` — *orbit connectivity*. The plan's sketch
+    took "same-type vertices lie in a single Aut-orbit" from §4, but §4 only proves the
+    forward direction (same-orbit → same-type), not the reverse. The reverse is essentially
+    the canonizer's completeness and must be provided as a separate input. In the
+    algorithm, orbit connectivity is maintained throughout `orderVertices` — but proving
+    that is the core correctness argument and is outside this lemma's scope. We surface
+    the requirement as an explicit hypothesis.
+
+**Proof (modulo §3).**
+
+  1. By `hconn`, pick `τ ∈ TypedAut G vts` with `τ v₁ = v₂`.
+  2. By `breakTieAt_VtsInvariant_eq`, `breakTieAt vts t₀ v₂` (= `breakTieAt vts t₀ (τ v₁)`)
+     is the `τ`-relabeling of `breakTieAt vts t₀ v₁`.
+  3. Apply pipeline-equivariance under `τ` (§3 Stages B–D + §4) to conclude the two
+     `runFrom` values are equal. Step 3 is `sorry` pending §3.
+
+**Remaining gap (sorry).** The reduction to §3 equivariance of `runFrom` under τ-related
+inputs. In Lean terms, we need a lemma `runFrom_VtsInvariant_eq` stating:
+`∀ τ ∈ G.Aut, ∀ arr₁ arr₂, (∀ w, arr₂[w] = arr₁[τ⁻¹ w]) → runFrom s arr₁ G = runFrom s arr₂ G`.
+Given this, closing §6 is immediate from step 2. The lemma itself is §3 Stages B–D
+chained together for the fuel-bounded loop.
 -/
 theorem tiebreak_choice_independent
     (G : AdjMatrix n) (start : Nat) (vts : Array VertexType) (t₀ : VertexType)
     (v₁ v₂ : Fin n)
+    (hsize : vts.size = n)
     (_hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts)
-    (_hv₁ : v₁ ∈ @typeClass n vts t₀) (_hv₂ : v₂ ∈ @typeClass n vts t₀) :
+    (_hv₁ : v₁ ∈ @typeClass n vts t₀) (_hv₂ : v₂ ∈ @typeClass n vts t₀)
+    (hconn : ∃ τ ∈ G.TypedAut vts, τ v₁ = v₂) :
     runFrom (start + 1) (breakTieAt vts t₀ v₁) G =
     runFrom (start + 1) (breakTieAt vts t₀ v₂) G := by
+  obtain ⟨τ, hτ, hτv⟩ := hconn
+  -- τ is in TypedAut, so preserves G AND vts.
+  have hτG : G.permute τ = G := hτ.1
+  have hτvts : VtsInvariant τ vts := hτ.2
+  -- Rewrite v₂ as τ v₁ and apply breakTieAt τ-equivariance.
+  have h_relabel : ∀ w : Fin n,
+      (breakTieAt vts t₀ v₂).getD w.val 0 =
+        (breakTieAt vts t₀ v₁).getD (τ⁻¹ w).val 0 := by
+    intro w
+    rw [show v₂ = τ v₁ from hτv.symm]
+    exact breakTieAt_VtsInvariant_eq vts t₀ τ v₁ hsize hτvts w
+  -- At this point, runFrom on τ-related arrays should produce the same output,
+  -- because τ ∈ Aut G and §3 equivariance (Stages B–D) commutes τ through the pipeline.
+  -- The remaining gap is this pipeline equivariance, which is the contents of §3.
   sorry
 
 end Graph
