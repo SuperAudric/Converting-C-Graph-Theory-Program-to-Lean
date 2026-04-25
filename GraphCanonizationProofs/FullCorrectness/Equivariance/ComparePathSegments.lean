@@ -751,6 +751,156 @@ private theorem orderInsensitiveListCmp_trans {α : Type} (cmp : α → α → O
           rw [if_pos h_bne₁₃, if_neg hLt₁₃]
           intro h; exact Ordering.noConfusion h
 
+/-- Foldl-zip-`.eq` extracts pointwise `cmp = .eq` at every position. The reverse
+direction is also true (and would follow by induction) but isn't needed here. -/
+private theorem foldl_zip_eq_implies_pairwise_eq {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List (α × α)),
+      L.foldl (fun (currentOrder : Ordering) (x : α × α) =>
+          if (currentOrder != Ordering.eq) = true then currentOrder
+          else cmp x.1 x.2) Ordering.eq = Ordering.eq →
+      ∀ i (h : i < L.length), cmp ((L[i]'h).1) ((L[i]'h).2) = Ordering.eq := by
+  intro L
+  induction L with
+  | nil => intros _ i h_lt; exact absurd h_lt (Nat.not_lt_zero _)
+  | cons y L ih =>
+    intro h i h_lt
+    rw [List.foldl_cons] at h
+    simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte] at h
+    match h_y : cmp y.1 y.2 with
+    | .eq =>
+      rw [h_y] at h
+      cases i with
+      | zero => exact h_y
+      | succ i' =>
+        have h_lt' : i' < L.length := Nat.lt_of_succ_lt_succ h_lt
+        show cmp ((L[i']'h_lt').1) ((L[i']'h_lt').2) = Ordering.eq
+        exact ih h i' h_lt'
+    | .lt =>
+      rw [h_y] at h
+      have h_pres := orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.lt
+                        (by intro hh; cases hh) L
+      rw [h_pres] at h; exact Ordering.noConfusion h
+    | .gt =>
+      rw [h_y] at h
+      have h_pres := orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.gt
+                        (by intro hh; cases hh) L
+      rw [h_pres] at h; exact Ordering.noConfusion h
+
+/-- Bilateral compat lift for `orderInsensitiveListCmp`: if two lists are class-equal
+under the order-insensitive cmp, they compare the same against any third list, in either
+argument position. The proof extracts pointwise class equality from the foldl-`.eq`
+hypothesis and pushes it through `foldl_pointwise_eq` via `h_compat`. -/
+theorem orderInsensitiveListCmp_equivCompat {α : Type} (cmp : α → α → Ordering)
+    (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c ∧ cmp c a = cmp c b)
+    (L₁ L₂ : List α) (h : orderInsensitiveListCmp cmp L₁ L₂ = Ordering.eq) (L₃ : List α) :
+    orderInsensitiveListCmp cmp L₁ L₃ = orderInsensitiveListCmp cmp L₂ L₃ ∧
+    orderInsensitiveListCmp cmp L₃ L₁ = orderInsensitiveListCmp cmp L₃ L₂ := by
+  -- Extract length equality from h.
+  have hLen : L₁.length = L₂.length := by
+    unfold orderInsensitiveListCmp at h
+    by_contra hne
+    have h_bne : (L₁.length != L₂.length) = true := bne_iff_ne.mpr hne
+    rw [if_pos h_bne] at h
+    by_cases h_lt : L₁.length < L₂.length
+    · rw [if_pos h_lt] at h; exact Ordering.noConfusion h
+    · rw [if_neg h_lt] at h; exact Ordering.noConfusion h
+  -- Extract foldl-`.eq` from h.
+  have hFoldl : ((sortBy cmp L₁).zip (sortBy cmp L₂)).foldl
+      (fun (currentOrder : Ordering) (x : α × α) =>
+        if (currentOrder != Ordering.eq) = true then currentOrder
+        else cmp x.1 x.2) Ordering.eq = Ordering.eq := by
+    unfold orderInsensitiveListCmp at h
+    have h_bne : (L₁.length != L₂.length) = false := by
+      rw [hLen]; exact bne_self_eq_false (a := L₂.length)
+    simp only [h_bne, Bool.false_eq_true, ↓reduceIte] at h
+    exact h
+  -- Pointwise class equality on sorted lists.
+  have h_class : ∀ i (h₁ : i < (sortBy cmp L₁).length) (h₂ : i < (sortBy cmp L₂).length),
+      cmp ((sortBy cmp L₁)[i]'h₁) ((sortBy cmp L₂)[i]'h₂) = Ordering.eq := by
+    intros i h₁ h₂
+    have h_zip_lt : i < ((sortBy cmp L₁).zip (sortBy cmp L₂)).length := by
+      rw [List.length_zip]; omega
+    have hp := foldl_zip_eq_implies_pairwise_eq cmp _ hFoldl i h_zip_lt
+    rw [List.getElem_zip] at hp
+    exact hp
+  refine ⟨?_, ?_⟩
+  · -- orderInsensitiveListCmp L₁ L₃ = orderInsensitiveListCmp L₂ L₃
+    unfold orderInsensitiveListCmp
+    by_cases hLen₁₃ : L₁.length = L₃.length
+    · have hLen₂₃ : L₂.length = L₃.length := hLen.symm.trans hLen₁₃
+      have h_bne₁₃ : (L₁.length != L₃.length) = false := by
+        rw [hLen₁₃]; exact bne_self_eq_false (a := L₃.length)
+      have h_bne₂₃ : (L₂.length != L₃.length) = false := by
+        rw [hLen₂₃]; exact bne_self_eq_false (a := L₃.length)
+      simp only [h_bne₁₃, h_bne₂₃, Bool.false_eq_true, ↓reduceIte]
+      have h_zip_lengths : ((sortBy cmp L₁).zip (sortBy cmp L₃)).length
+                         = ((sortBy cmp L₂).zip (sortBy cmp L₃)).length := by
+        rw [List.length_zip, List.length_zip,
+            (sortBy_perm cmp L₁).length_eq, (sortBy_perm cmp L₂).length_eq, hLen]
+      apply foldl_pointwise_eq _ _ _ _ h_zip_lengths
+      intros acc i h_i₁ h_i₂
+      have h_sort₁_lt : i < (sortBy cmp L₁).length := by
+        rw [List.length_zip] at h_i₁; omega
+      have h_sort₂_lt : i < (sortBy cmp L₂).length := by
+        rw [List.length_zip] at h_i₂; omega
+      have h_sort₃_lt : i < (sortBy cmp L₃).length := by
+        rw [List.length_zip] at h_i₁; omega
+      have h_class_at_i := h_class i h_sort₁_lt h_sort₂_lt
+      have h_eq_cmp := (h_compat _ _ h_class_at_i ((sortBy cmp L₃)[i]'h_sort₃_lt)).1
+      show (fun (currentOrder : Ordering) (x : α × α) =>
+              if (currentOrder != Ordering.eq) = true then currentOrder
+              else cmp x.1 x.2) acc
+            ((sortBy cmp L₁).zip (sortBy cmp L₃))[i]
+         = (fun (currentOrder : Ordering) (x : α × α) =>
+              if (currentOrder != Ordering.eq) = true then currentOrder
+              else cmp x.1 x.2) acc
+            ((sortBy cmp L₂).zip (sortBy cmp L₃))[i]
+      rw [List.getElem_zip, List.getElem_zip]
+      simp [h_eq_cmp]
+    · have hLen₂₃ : L₂.length ≠ L₃.length := fun h => hLen₁₃ (hLen.trans h)
+      have h_bne₁₃ : (L₁.length != L₃.length) = true := bne_iff_ne.mpr hLen₁₃
+      have h_bne₂₃ : (L₂.length != L₃.length) = true := bne_iff_ne.mpr hLen₂₃
+      simp only [h_bne₁₃, h_bne₂₃, ↓reduceIte]
+      rw [hLen]
+  · -- orderInsensitiveListCmp L₃ L₁ = orderInsensitiveListCmp L₃ L₂
+    unfold orderInsensitiveListCmp
+    by_cases hLen₃₁ : L₃.length = L₁.length
+    · have hLen₃₂ : L₃.length = L₂.length := hLen₃₁.trans hLen
+      have h_bne₃₁ : (L₃.length != L₁.length) = false := by
+        rw [hLen₃₁]; exact bne_self_eq_false (a := L₁.length)
+      have h_bne₃₂ : (L₃.length != L₂.length) = false := by
+        rw [hLen₃₂]; exact bne_self_eq_false (a := L₂.length)
+      simp only [h_bne₃₁, h_bne₃₂, Bool.false_eq_true, ↓reduceIte]
+      have h_zip_lengths : ((sortBy cmp L₃).zip (sortBy cmp L₁)).length
+                         = ((sortBy cmp L₃).zip (sortBy cmp L₂)).length := by
+        rw [List.length_zip, List.length_zip,
+            (sortBy_perm cmp L₁).length_eq, (sortBy_perm cmp L₂).length_eq, hLen]
+      apply foldl_pointwise_eq _ _ _ _ h_zip_lengths
+      intros acc i h_i₁ h_i₂
+      have h_sort₁_lt : i < (sortBy cmp L₁).length := by
+        rw [List.length_zip] at h_i₁; omega
+      have h_sort₂_lt : i < (sortBy cmp L₂).length := by
+        rw [List.length_zip] at h_i₂; omega
+      have h_sort₃_lt : i < (sortBy cmp L₃).length := by
+        rw [List.length_zip] at h_i₁; omega
+      have h_class_at_i := h_class i h_sort₁_lt h_sort₂_lt
+      have h_eq_cmp := (h_compat _ _ h_class_at_i ((sortBy cmp L₃)[i]'h_sort₃_lt)).2
+      show (fun (currentOrder : Ordering) (x : α × α) =>
+              if (currentOrder != Ordering.eq) = true then currentOrder
+              else cmp x.1 x.2) acc
+            ((sortBy cmp L₃).zip (sortBy cmp L₁))[i]
+         = (fun (currentOrder : Ordering) (x : α × α) =>
+              if (currentOrder != Ordering.eq) = true then currentOrder
+              else cmp x.1 x.2) acc
+            ((sortBy cmp L₃).zip (sortBy cmp L₂))[i]
+      rw [List.getElem_zip, List.getElem_zip]
+      simp [h_eq_cmp]
+    · have hLen₃₂ : L₃.length ≠ L₂.length := fun h => hLen₃₁ (h.trans hLen.symm)
+      have h_bne₃₁ : (L₃.length != L₁.length) = true := bne_iff_ne.mpr hLen₃₁
+      have h_bne₃₂ : (L₃.length != L₂.length) = true := bne_iff_ne.mpr hLen₃₂
+      simp only [h_bne₃₁, h_bne₃₂, ↓reduceIte]
+      rw [hLen]
+
 theorem comparePathsBetween_total_preorder {vc : Nat}
     (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
     (∀ a : PathsBetween vc, comparePathsBetween vts br a a = Ordering.eq) ∧

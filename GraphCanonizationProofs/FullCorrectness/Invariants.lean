@@ -18,7 +18,8 @@ canonicalized" part plus one more tied value for the next iteration to break.
 - §7 `convergeLoop_preserves_prefix`: stated; proof pending.
 - §7 `breakTie_targetPos_is_min_tied`: ✅ proved.
 - §7 `orderVertices_prefix_invariant`: stated; proof pending.
-- §7 `orderVertices_n_distinct_ranks`: stated; proof pending (corollary at p = n).
+- §7 `orderVertices_n_distinct_ranks`: ✅ proved (pigeonhole corollary of the prefix invariant
+  at `p = n`).
 
 ## Risk
 
@@ -192,13 +193,67 @@ theorem orderVertices_prefix_invariant
   sorry
 
 /-- After all `n` iterations of `orderVertices`'s outer loop, every vertex has a
-distinct rank. This is the form of §7 used in §8 and Stage D. -/
+distinct rank. This is the form of §7 used in §8 and Stage D.
+
+**Proof.** By `orderVertices_prefix_invariant` at `p = n`, for each `k : Fin n` there is
+a unique witness `v` with `rank v = k.val`. The witness map `φ : Fin n → Fin n` is
+injective (distinct `k` ⟹ distinct witnesses by uniqueness), hence bijective on the
+finite set `Fin n` (`Finite.injective_iff_bijective`). Surjectivity gives every vertex
+a `k`, hence `rank v < n`. Then `rank i = rank j` forces `k_i = k_j` (Fin extensionality
+on the same Nat), and the unique witness condition forces `i = j`. -/
 theorem orderVertices_n_distinct_ranks
     (state : PathState n) (vts : Array VertexType)
-    (_hv : @IsPrefixTyping n vts) :
+    (hv : @IsPrefixTyping n vts) :
     ∀ i j : Fin n,
       i ≠ j →
       (orderVertices state vts).getD i.val 0 ≠ (orderVertices state vts).getD j.val 0 := by
-  sorry
+  intro i j hij h_eq
+  -- Unfold orderVertices to the foldl form used by orderVertices_prefix_invariant.
+  have h_unfold : orderVertices state vts
+      = (List.range n).foldl
+          (fun currentTypes targetPosition =>
+            let convergedTypes := convergeLoop state currentTypes n
+            (breakTie convergedTypes targetPosition).1)
+          vts := rfl
+  rw [h_unfold] at h_eq
+  have h_inv := orderVertices_prefix_invariant state vts n (le_refl n) hv
+  classical
+  -- Witness map: each rank k in Fin n has a unique vertex.
+  let φ : Fin n → Fin n := fun k => (h_inv k).exists.choose
+  have h_φ : ∀ k : Fin n,
+      ((List.range n).foldl
+          (fun currentTypes targetPosition =>
+            let convergedTypes := convergeLoop state currentTypes n
+            (breakTie convergedTypes targetPosition).1)
+          vts).getD (φ k).val 0 = k.val := fun k =>
+    (h_inv k).exists.choose_spec
+  -- φ is injective.
+  have h_inj : Function.Injective φ := by
+    intro k₁ k₂ h_eq_φ
+    have h_v1 := h_φ k₁
+    have h_v2 := h_φ k₂
+    rw [h_eq_φ] at h_v1
+    exact Fin.ext (h_v1.symm.trans h_v2)
+  -- Hence bijective on Fin n (a Finite type).
+  have h_bij : Function.Bijective φ := Finite.injective_iff_bijective.mp h_inj
+  -- Pull back i and j to ranks via surjectivity.
+  obtain ⟨k_i, h_k_i⟩ := h_bij.surjective i
+  obtain ⟨k_j, h_k_j⟩ := h_bij.surjective j
+  -- rank i = k_i.val, rank j = k_j.val.
+  have hri : ((List.range n).foldl
+      (fun currentTypes targetPosition =>
+        let convergedTypes := convergeLoop state currentTypes n
+        (breakTie convergedTypes targetPosition).1)
+      vts).getD i.val 0 = k_i.val := h_k_i ▸ h_φ k_i
+  have hrj : ((List.range n).foldl
+      (fun currentTypes targetPosition =>
+        let convergedTypes := convergeLoop state currentTypes n
+        (breakTie convergedTypes targetPosition).1)
+      vts).getD j.val 0 = k_j.val := h_k_j ▸ h_φ k_j
+  -- From h_eq: k_i.val = k_j.val.
+  have hk_eq_val : k_i.val = k_j.val := by rw [← hri, h_eq, hrj]
+  have hk_eq : k_i = k_j := Fin.ext hk_eq_val
+  -- φ k_i = i, φ k_j = j. With k_i = k_j: i = j.
+  exact hij (h_k_i.symm.trans (hk_eq ▸ h_k_j))
 
 end Graph

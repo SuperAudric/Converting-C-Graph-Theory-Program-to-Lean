@@ -43,7 +43,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §3B  | `calculatePathRankings` size + `σInvariant`       | `Equivariance.RankStateInvariants`       | ✅ proved       |
 | §3B  | Generic sort/`orderInsensitiveListCmp` lemmas     | `Equivariance.ComparisonSort`            | ✅ proved       |
 | §3B  | `comparePathSegments_total_preorder` (Stage B)    | `Equivariance.ComparePathSegments`       | ✅ proved; `comparePathsBetween_total_preorder` ✅ proved |
-| §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | 🧱 2 sorry (`comparePathsBetween_equivCompat`, `calculatePathRankings_*_inv`) |
+| §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | 🧱 2 sorry (`calculatePathRankings_fromRanks_inv`, `calculatePathRankings_betweenRanks_inv`) |
 | §4   | `convergeOnce`/`convergeLoop` Aut-invariance; C/D | `Equivariance.ConvergeLoop`              | ✅ proved       |
 | §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                               | ✅ defined      |
 | §5.0 | `breakTie` output position-by-position            | `Tiebreak`                               | ✅ proved (4 characterization lemmas) |
@@ -53,20 +53,18 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (the chained §3 Stages B–D for `runFrom`) |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                             | ✅ defined + boundary proved |
 | §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                             | ✅ proved (uses §5 disjunctive characterization) |
-| §7   | Other prefix invariants (3)                       | `Invariants`                             | 🧱 stated, `sorry` |
+| §7   | Other prefix invariants                           | `Invariants`                             | 🧱 2 sorry (`convergeLoop_preserves_prefix`, `orderVertices_prefix_invariant`); `n_distinct_ranks` ✅ as corollary |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (8 total)
+## Open obligations (6 total)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `comparePathsBetween_equivCompat`     | `Equivariance.PathEquivariance`    | Auxiliary `orderInsensitiveListCmp_equivCompat` lemma; same architectural shape as the now-closed `comparePathsBetween_total_preorder`. |
 | `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. |
 | `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |
 | `convergeLoop_preserves_prefix`       | `Invariants`                       | Induction on fuel + dense-rank characterization of `assignRanks` output. Reachable now that the dense-rank migration has landed. |
-| `orderVertices_prefix_invariant`      | `Invariants`                       | Induct on the outer fold using `convergeLoop_preserves_prefix` + `breakTie_targetPos_is_min_tied`. |
-| `orderVertices_n_distinct_ranks`      | `Invariants`                       | Corollary of the above at `p = n`. |
+| `orderVertices_prefix_invariant`      | `Invariants`                       | Induct on the outer fold using `convergeLoop_preserves_prefix` + `breakTie_targetPos_is_min_tied`. (`orderVertices_n_distinct_ranks` is closed as a pigeonhole corollary.) |
 | `run_isomorphic_eq` (⟹)               | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2. |
 
 --------------------------------------------------------------------------------

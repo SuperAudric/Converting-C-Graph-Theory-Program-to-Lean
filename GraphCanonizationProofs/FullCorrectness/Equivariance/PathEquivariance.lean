@@ -14,8 +14,6 @@ Assembles Stage B: `calculatePathRankings_Aut_equivariant` follows from
 below) composed with Stage A + `σ ∈ Aut G`.
 
 ## Sorry status
-- `comparePathsBetween_equivCompat` : `sorry` — needs `orderInsensitiveListCmp_equivCompat`,
-  same architecture as `comparePathsBetween_total_preorder`.
 - `calculatePathRankings_fromRanks_inv` : `sorry` — deep fold-level σ-invariance; requires
   foldl induction on the depth loop plus σ-equivariance of sortBy + assignRanks.
 - `calculatePathRankings_betweenRanks_inv` : `sorry` — companion to the above; proved by
@@ -353,7 +351,10 @@ theorem comparePathsBetween_σ_equivariant
             p₁.connectedSubPaths p₂.connectedSubPaths
 
 /-- `comparePathsBetween` respects equivalence bilaterally (the EquivCompat condition
-needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). -/
+needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level).
+The proof mirrors `comparePathsBetween_total_preorder`: case on whether the
+end-vertex-types match, then use `orderInsensitiveListCmp_equivCompat` for the
+equal-prefix branch (with `comparePathSegments_equivCompat` as the inner `h_compat`). -/
 theorem comparePathsBetween_equivCompat
     {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat)
     (p₁ p₂ : PathsBetween vc)
@@ -361,7 +362,46 @@ theorem comparePathsBetween_equivCompat
     (r : PathsBetween vc) :
     comparePathsBetween vts br p₁ r = comparePathsBetween vts br p₂ r ∧
     comparePathsBetween vts br r p₁ = comparePathsBetween vts br r p₂ := by
-  sorry
+  have h_seg_compat := comparePathSegments_equivCompat (vc := vc) vts br
+  have h' : (let xEndType := vts.getD p₁.endVertexIndex.val 0
+             let yEndType := vts.getD p₂.endVertexIndex.val 0
+             if xEndType != yEndType then compare xEndType yEndType
+             else orderInsensitiveListCmp (comparePathSegments vts br)
+                    p₁.connectedSubPaths p₂.connectedSubPaths) = Ordering.eq := h
+  by_cases h_endTy_eq : vts.getD p₁.endVertexIndex.val 0 = vts.getD p₂.endVertexIndex.val 0
+  · have h_bne_eq : (vts.getD p₁.endVertexIndex.val 0 != vts.getD p₂.endVertexIndex.val 0) = false := by
+      rw [h_endTy_eq]; exact bne_self_eq_false (a := vts.getD p₂.endVertexIndex.val 0)
+    simp only [h_bne_eq, Bool.false_eq_true, ↓reduceIte] at h'
+    obtain ⟨h_inner_left, h_inner_right⟩ := orderInsensitiveListCmp_equivCompat
+      (comparePathSegments vts br) h_seg_compat
+      p₁.connectedSubPaths p₂.connectedSubPaths h' r.connectedSubPaths
+    refine ⟨?_, ?_⟩
+    · show (let xEndType := vts.getD p₁.endVertexIndex.val 0
+            let rEndType := vts.getD r.endVertexIndex.val 0
+            if xEndType != rEndType then compare xEndType rEndType
+            else orderInsensitiveListCmp (comparePathSegments vts br)
+                   p₁.connectedSubPaths r.connectedSubPaths)
+         = (let yEndType := vts.getD p₂.endVertexIndex.val 0
+            let rEndType := vts.getD r.endVertexIndex.val 0
+            if yEndType != rEndType then compare yEndType rEndType
+            else orderInsensitiveListCmp (comparePathSegments vts br)
+                   p₂.connectedSubPaths r.connectedSubPaths)
+      rw [h_endTy_eq, h_inner_left]
+    · show (let rEndType := vts.getD r.endVertexIndex.val 0
+            let xEndType := vts.getD p₁.endVertexIndex.val 0
+            if rEndType != xEndType then compare rEndType xEndType
+            else orderInsensitiveListCmp (comparePathSegments vts br)
+                   r.connectedSubPaths p₁.connectedSubPaths)
+         = (let rEndType := vts.getD r.endVertexIndex.val 0
+            let yEndType := vts.getD p₂.endVertexIndex.val 0
+            if rEndType != yEndType then compare rEndType yEndType
+            else orderInsensitiveListCmp (comparePathSegments vts br)
+                   r.connectedSubPaths p₂.connectedSubPaths)
+      rw [h_endTy_eq, h_inner_right]
+  · have h_bne_ne : (vts.getD p₁.endVertexIndex.val 0 != vts.getD p₂.endVertexIndex.val 0) = true :=
+      bne_iff_ne.mpr h_endTy_eq
+    simp only [h_bne_ne, ↓reduceIte] at h'
+    exact absurd (compare_eq_iff_eq.mp h') h_endTy_eq
 
 /-- `comparePathsFrom` is σ-equivariant under σ-invariant `vts`/`br` and `pathsToVertex`-
 length normalization (which holds in `initializePaths G`). -/

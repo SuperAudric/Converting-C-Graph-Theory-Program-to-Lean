@@ -392,7 +392,7 @@ private theorem sortBy_pairwise {α : Type} (cmp : α → α → Ordering)
 
 /-- Pointwise `foldl` equality: if `L.length = L'.length` and `f acc (L[i]) = f acc (L'[i])`
 at every position `i` and every `acc`, then the folds on `L` and `L'` give the same result. -/
-private theorem foldl_pointwise_eq {α β : Type} (f : β → α → β) (L L' : List α) (init : β)
+theorem foldl_pointwise_eq {α β : Type} (f : β → α → β) (L L' : List α) (init : β)
     (h_len : L.length = L'.length)
     (h_pt : ∀ acc : β, ∀ i : Nat, ∀ (h₁ : i < L.length) (h₂ : i < L'.length),
             f acc (L[i]'h₁) = f acc (L'[i]'h₂)) :
