@@ -23,6 +23,10 @@ any path data types directly.
 - `assignRanks_rank_lt_length` — every rank is `< L.length`. Combined with the above,
   bounds the values produced by `convergeOnce` (each vertex gets a `getFrom` value, which
   is a rank from `assignRanks` on a length-`n` input list).
+- `assignRanks_image_dense` — the rank set is downward-closed: any `k ≤ entry.2` for an
+  entry in the output also has a witness in the output. Combined with `_rank_lt_length`,
+  the rank set is `{0, 1, ..., max_rank}` — exactly the density needed for the prefix
+  typing invariant.
 -/
 
 namespace Graph
@@ -683,6 +687,139 @@ private theorem assignRanks_aux_rank_le {α : Type} (cmp : α → α → Orderin
     have := ih newRev newLast (k + 1) h_step.1 h_step.2 entry h_in
     show entry.2 ≤ k + (L.length + 1)
     omega
+
+/-! ### Image density: ranks form a downward-closed set
+
+For any entry in `assignRanks cmp L`, every smaller rank also appears. Hence the rank
+set is `{0, 1, ..., max_rank}`. This is the missing density property needed by
+`getFrom_image_isPrefix_for_initializePaths` (which feeds `convergeLoop_preserves_prefix`). -/
+
+/-- A single `assignRanksStep` preserves the joint invariant:
+- (P') the revList is downward-closed: every entry's rank has all predecessors
+  represented in the revList;
+- (P2) the lastEntry's pair is in the revList. -/
+private theorem assignRanksStep_density_invariant {α : Type} (cmp : α → α → Ordering)
+    (revList : List (α × Nat)) (lastEntry : Option (α × Nat)) (item : α)
+    (h_P' : ∀ entry ∈ revList, ∀ k ≤ entry.2, ∃ entry' ∈ revList, entry'.2 = k)
+    (h_P2 : ∀ x, lastEntry = some x → x ∈ revList) :
+    let new := assignRanksStep cmp (revList, lastEntry) item
+    (∀ entry ∈ new.1, ∀ k ≤ entry.2, ∃ entry' ∈ new.1, entry'.2 = k) ∧
+    (∀ x, new.2 = some x → x ∈ new.1) := by
+  refine ⟨?_, ?_⟩
+  · -- Preserve P'.
+    intro entry h_in k hk
+    unfold assignRanksStep at h_in
+    cases lastEntry with
+    | none =>
+      simp only [List.mem_cons] at h_in
+      rcases h_in with rfl | h_old
+      · -- entry = (item, 0). k ≤ 0 → k = 0. Witness: (item, 0).
+        have hk0 : k = 0 := by simp at hk; exact hk
+        refine ⟨(item, 0), ?_, hk0.symm⟩
+        unfold assignRanksStep; simp [List.mem_cons]
+      · -- entry was in old revList. Apply h_P'.
+        obtain ⟨e', he'_in, he'_eq⟩ := h_P' entry h_old k hk
+        refine ⟨e', ?_, he'_eq⟩
+        unfold assignRanksStep; simp [List.mem_cons]; right; exact he'_in
+    | some prev =>
+      rcases prev with ⟨p1, p2⟩
+      have hp_in : (p1, p2) ∈ revList := h_P2 (p1, p2) rfl
+      simp only [List.mem_cons] at h_in
+      obtain h_eq | h_old := h_in
+      · -- entry = (item, new_rank). new_rank = p2 (cmp eq) or p2 + 1.
+        rw [h_eq] at hk
+        by_cases h_cmp : (cmp p1 item == Ordering.eq) = true
+        · -- new_rank = p2.
+          simp [h_cmp] at hk  -- hk : k ≤ p2
+          obtain ⟨e', he'_in, he'_eq⟩ := h_P' (p1, p2) hp_in k hk
+          refine ⟨e', ?_, he'_eq⟩
+          unfold assignRanksStep; simp [h_cmp, List.mem_cons]; right; exact he'_in
+        · -- new_rank = p2 + 1.
+          simp [h_cmp] at hk  -- hk : k ≤ p2 + 1
+          by_cases h_k_le_p2 : k ≤ p2
+          · obtain ⟨e', he'_in, he'_eq⟩ := h_P' (p1, p2) hp_in k h_k_le_p2
+            refine ⟨e', ?_, he'_eq⟩
+            unfold assignRanksStep; simp [h_cmp, List.mem_cons]; right; exact he'_in
+          · -- ¬ (k ≤ p2), so k > p2, combined with k ≤ p2 + 1: k = p2 + 1.
+            have h_k_eq : k = p2 + 1 := by omega
+            refine ⟨(item, p2 + 1), ?_, h_k_eq.symm⟩
+            unfold assignRanksStep; simp [h_cmp, List.mem_cons]
+      · -- entry was in old revList. Apply h_P'.
+        obtain ⟨e', he'_in, he'_eq⟩ := h_P' entry h_old k hk
+        refine ⟨e', ?_, he'_eq⟩
+        unfold assignRanksStep
+        by_cases h_cmp_dec : (cmp p1 item == Ordering.eq) = true
+        · simp [h_cmp_dec, List.mem_cons]; right; exact he'_in
+        · simp [h_cmp_dec, List.mem_cons]; right; exact he'_in
+  · -- Preserve P2.
+    intro x hx
+    unfold assignRanksStep at hx ⊢
+    cases lastEntry with
+    | none =>
+      simp only [Option.some.injEq] at hx
+      subst hx
+      simp [List.mem_cons]
+    | some prev =>
+      simp only [Option.some.injEq] at hx
+      subst hx
+      simp [List.mem_cons]
+
+/-- Foldl-level density invariant: maintained through the whole `assignRanks` foldl. -/
+private theorem assignRanks_aux_density {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α) (revList₀ : List (α × Nat)) (lastEntry₀ : Option (α × Nat)),
+      (∀ entry ∈ revList₀, ∀ k ≤ entry.2, ∃ entry' ∈ revList₀, entry'.2 = k) →
+      (∀ x, lastEntry₀ = some x → x ∈ revList₀) →
+      (∀ entry ∈ (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1,
+        ∀ k ≤ entry.2,
+          ∃ entry' ∈ (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1, entry'.2 = k) ∧
+      (∀ x, (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).2 = some x →
+        x ∈ (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1) := by
+  intro L
+  induction L with
+  | nil => intros; exact ⟨‹_›, ‹_›⟩
+  | cons a L ih =>
+    intros revList₀ lastEntry₀ h_P' h_P2
+    rw [List.foldl_cons]
+    -- After one step: state = assignRanksStep cmp (revList₀, lastEntry₀) a.
+    -- Apply step lemma to get new (P', P2), then apply IH.
+    have h_step := assignRanksStep_density_invariant cmp revList₀ lastEntry₀ a h_P' h_P2
+    -- Reify the step result for IH application.
+    set newState := assignRanksStep cmp (revList₀, lastEntry₀) a with h_newState
+    rcases h_pair : newState with ⟨newRev, newLast⟩
+    have h_new_P' : ∀ entry ∈ newRev, ∀ k ≤ entry.2, ∃ entry' ∈ newRev, entry'.2 = k := by
+      intro entry h_in k hk
+      have h_in' : entry ∈ newState.1 := by rw [h_pair]; exact h_in
+      rw [h_newState] at h_in'
+      obtain ⟨e', he'_in, he'_eq⟩ := h_step.1 entry h_in' k hk
+      have he'_in' : e' ∈ newState.1 := by rw [h_newState]; exact he'_in
+      rw [h_pair] at he'_in'
+      exact ⟨e', he'_in', he'_eq⟩
+    have h_new_P2 : ∀ x, newLast = some x → x ∈ newRev := by
+      intro x hx
+      have hx' : newState.2 = some x := by rw [h_pair]; exact hx
+      rw [h_newState] at hx'
+      have := h_step.2 x hx'
+      have h_in_state : x ∈ newState.1 := by rw [h_newState]; exact this
+      rw [h_pair] at h_in_state
+      exact h_in_state
+    exact ih newRev newLast h_new_P' h_new_P2
+
+/-- The image of `assignRanks cmp L` is downward-closed: for any entry, all smaller ranks
+appear. Combined with `assignRanks_rank_lt_length`, the rank set is `{0, ..., max_rank}`. -/
+theorem assignRanks_image_dense {α : Type} (cmp : α → α → Ordering) (L : List α)
+    (entry : α × Nat) (h_in : entry ∈ assignRanks cmp L) :
+    ∀ k ≤ entry.2, ∃ entry' ∈ assignRanks cmp L, entry'.2 = k := by
+  intros k hk
+  have h_initP' : ∀ e ∈ ([] : List (α × Nat)), ∀ k' ≤ e.2,
+      ∃ e' ∈ ([] : List (α × Nat)), e'.2 = k' := fun _ he _ _ => by simp at he
+  have h_initP2 : ∀ x, (none : Option (α × Nat)) = some x → x ∈ ([] : List (α × Nat)) :=
+    fun _ h => by cases h
+  have h_aux := assignRanks_aux_density cmp L [] none h_initP' h_initP2
+  rw [assignRanks_eq_foldl, List.mem_reverse] at h_in
+  obtain ⟨entry', he'_in, he'_eq⟩ := h_aux.1 entry h_in k hk
+  refine ⟨entry', ?_, he'_eq⟩
+  rw [assignRanks_eq_foldl, List.mem_reverse]
+  exact he'_in
 
 /-- Every rank in `assignRanks cmp L` is `< L.length`. (Vacuous for empty `L`.) -/
 theorem assignRanks_rank_lt_length {α : Type} (cmp : α → α → Ordering) (L : List α) :

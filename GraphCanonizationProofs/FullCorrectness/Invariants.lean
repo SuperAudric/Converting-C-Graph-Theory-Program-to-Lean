@@ -114,16 +114,117 @@ theorem convergeLoop_size_preserving
     · rw [ih (convergeOnce state vts).1]; exact h_step
     · exact h_step
 
-/-- The image of `getFrom (n-1) ·` over `Fin n` forms a prefix `{0, ..., m-1}` when the
-state is `initializePaths G`. **Deep sub-lemma**: requires reasoning about `assignRanks`'s
-dense rank output combined with the structural fact that `pathsAtDepth_{n-1}` from
-`initializePaths G` has each start vertex appearing exactly once, so each slot in the
-result table is written exactly once with its corresponding rank.
+/-! ### Inner-fold characterization
 
-The witness `m` is the number of distinct equivalence classes under `compareFrom` —
-between `1` and `n` inclusive (for `n ≥ 1`), or `0` for `n = 0`.
+The inner fold inside `calculatePathRankings` updates `fromAcc[depth]` slot-by-slot via
+nested `set!`s. The following helpers extract the slice's evolution:
+- `inner_fold_slice_at_depth` — the slice after the inner fold equals a chain of
+  `set!`s applied directly to the initial slice. Strips out the outer `fromAcc.set! depth`
+  layer.
+- (TODO) `array_set_chain_at_target` — for a chain of `set!`s with distinct indices,
+  the value at any target index is the corresponding write.
+-/
 
-**Status:** `n = 0` case closed (vacuous); `n ≥ 1` requires inner-fold characterization. -/
+/-- Strip the outer `fromAcc.set! depth` wrapper from the inner fold: the slice at
+position `depth` after the fold equals folding `slice.set! ... ...` directly on the
+initial slice. -/
+private theorem inner_fold_slice_at_depth {n : Nat}
+    (l : List (PathsFrom n × Nat)) (fromAcc₀ : Array (Array Nat)) (depth : Nat)
+    (h_depth_in : depth < fromAcc₀.size) :
+    (l.foldl (fun (fromAcc : Array (Array Nat)) item =>
+      let (pathFrom, rank) := item
+      let depthSlice := fromAcc.getD depth #[]
+      fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) fromAcc₀).getD depth #[]
+    = l.foldl (fun slice item =>
+        slice.set! item.1.startVertexIndex.val item.2) (fromAcc₀.getD depth #[]) := by
+  induction l generalizing fromAcc₀ with
+  | nil => rfl
+  | cons item l' ih =>
+    rw [List.foldl_cons, List.foldl_cons]
+    -- After one outer step: fromAcc' = fromAcc₀.set! depth (slice.set! ...).
+    -- Inner step: slice' = slice.set! item.1.startVertexIndex.val item.2.
+    -- Need: (l'.foldl ... fromAcc').getD depth #[] = l'.foldl ... slice'.
+    -- IH applies once we know depth < fromAcc'.size (preserved by set!).
+    set fromAcc' := fromAcc₀.set! depth ((fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2) with hfromAcc'
+    have h_depth_in' : depth < fromAcc'.size := by
+      rw [hfromAcc']
+      simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]
+      exact h_depth_in
+    -- The slice at depth in fromAcc' equals slice.set! ...
+    have h_slice_eq : fromAcc'.getD depth #[]
+                    = (fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2 := by
+      rw [hfromAcc']
+      rw [show fromAcc₀.set! depth ((fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2)
+            = fromAcc₀.setIfInBounds depth ((fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2) from rfl]
+      simp only [Array.getD_eq_getD_getElem?,
+                 Array.getElem?_setIfInBounds_self_of_lt h_depth_in,
+                 Option.getD_some]
+    -- Apply IH on fromAcc'.
+    rw [ih fromAcc' h_depth_in', h_slice_eq]
+
+/-- Foldl `set!`-chain leaves untouched positions unchanged: if no entry in `l` has
+its first component equal to `i`, the position-`i` value of the result equals the input. -/
+private theorem array_set_chain_outside_unchanged
+    {α : Type} (arr₀ : Array α) (l : List (Nat × α)) (i : Nat) (defaultV : α)
+    (h : ∀ item ∈ l, item.1 ≠ i) :
+    (l.foldl (fun a item => a.set! item.1 item.2) arr₀).getD i defaultV
+      = arr₀.getD i defaultV := by
+  induction l generalizing arr₀ with
+  | nil => rfl
+  | cons head l' ih =>
+    rw [List.foldl_cons]
+    have h_head_ne : head.1 ≠ i := h head List.mem_cons_self
+    have h_tail : ∀ item ∈ l', item.1 ≠ i := fun item h_in => h item (List.mem_cons_of_mem _ h_in)
+    rw [ih (arr₀.set! head.1 head.2) h_tail]
+    -- arr₀.set! head.1 head.2 leaves position i unchanged (head.1 ≠ i).
+    simp only [Array.getD_eq_getD_getElem?,
+               Array.set!_eq_setIfInBounds,
+               Array.getElem?_setIfInBounds_ne h_head_ne]
+
+/-- Foldl `set!`-chain at the target index gives the target value, when the chain
+indices are `Nodup` (the target's index appears only at the target's position). -/
+private theorem array_set_chain_at_target_nodup
+    {α : Type} (arr₀ : Array α) (l : List (Nat × α)) (target : Nat × α) (defaultV : α)
+    (h_target_in : target ∈ l)
+    (h_nodup : (l.map (·.1)).Nodup)
+    (h_target_bound : target.1 < arr₀.size) :
+    (l.foldl (fun a item => a.set! item.1 item.2) arr₀).getD target.1 defaultV
+      = target.2 := by
+  induction l generalizing arr₀ with
+  | nil => exact absurd h_target_in (by simp)
+  | cons head l' ih =>
+    rw [List.foldl_cons]
+    rcases List.mem_cons.mp h_target_in with h_eq | h_in_tail
+    · -- target = head. First step writes target.2 at target.1; later writes don't touch.
+      have h_others_ne : ∀ item ∈ l', item.1 ≠ target.1 := by
+        intro item h_in_item
+        have h_nd' := h_nodup
+        simp only [List.map_cons] at h_nd'
+        have h_head_not_in : head.1 ∉ l'.map (·.1) := (List.nodup_cons.mp h_nd').1
+        rw [← h_eq] at h_head_not_in
+        intro h_eq_idx
+        exact h_head_not_in (h_eq_idx ▸ List.mem_map.mpr ⟨item, h_in_item, rfl⟩)
+      have h_step_eq : arr₀.set! head.1 head.2 = arr₀.set! target.1 target.2 := by
+        rw [h_eq]
+      rw [h_step_eq]
+      rw [array_set_chain_outside_unchanged (arr₀.set! target.1 target.2) l' target.1 defaultV h_others_ne]
+      simp only [Array.getD_eq_getD_getElem?,
+                 Array.set!_eq_setIfInBounds,
+                 Array.getElem?_setIfInBounds_self_of_lt h_target_bound,
+                 Option.getD_some]
+    · -- target ∈ l'. By Nodup, head.1 ≠ target.1, so first step doesn't touch target.1.
+      have h_head_ne : head.1 ≠ target.1 := by
+        have h_nd' := h_nodup
+        simp only [List.map_cons] at h_nd'
+        have h_head_not_in : head.1 ∉ l'.map (·.1) := (List.nodup_cons.mp h_nd').1
+        intro h_eq_idx
+        exact h_head_not_in (h_eq_idx ▸ List.mem_map.mpr ⟨target, h_in_tail, rfl⟩)
+      have h_nodup' : (l'.map (·.1)).Nodup := by
+        simp only [List.map_cons] at h_nodup
+        exact (List.nodup_cons.mp h_nodup).2
+      have h_bound' : target.1 < (arr₀.set! head.1 head.2).size := by
+        simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]; exact h_target_bound
+      exact ih (arr₀.set! head.1 head.2) h_in_tail h_nodup' h_bound'
 theorem getFrom_image_isPrefix_for_initializePaths
     (G : AdjMatrix n) (vts : Array VertexType) :
     ∃ m : Nat,
