@@ -2,7 +2,13 @@ import FullCorrectness.Basic
 import FullCorrectness.Permutation
 import FullCorrectness.Automorphism
 import FullCorrectness.Isomorphic
-import FullCorrectness.Equivariance
+import FullCorrectness.Equivariance.Actions
+import FullCorrectness.Equivariance.StageA
+import FullCorrectness.Equivariance.RankStateInvariants
+import FullCorrectness.Equivariance.ComparisonSort
+import FullCorrectness.Equivariance.ComparePathSegments
+import FullCorrectness.Equivariance.PathEquivariance
+import FullCorrectness.Equivariance.ConvergeLoop
 import FullCorrectness.Tiebreak
 import FullCorrectness.Invariants
 import FullCorrectness.Main
@@ -27,24 +33,28 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 
 ## Status at a glance
 
-| Step | Subject                                           | File                                       | Status          |
-| ---- | ------------------------------------------------- | ------------------------------------------ | --------------- |
-| §1   | Automorphism group, orbits, `permute` action      | `Basic`, `Permutation`, `Automorphism`     | ✅ proved       |
-| §1.7 | `Fintype G.Aut` (decidability + finiteness)       | `Automorphism`                             | ✅ proved       |
-| §2   | `Isomorphic ↔ ∃σ, H = G.permute σ` bridge         | `Isomorphic`                               | ✅ proved       |
-| §3   | Pipeline equivariance under Aut(G) (Stages A–D)   | `Equivariance`                             | A ✅, B 🧱 (RankState σ-invariance), C/D ✅ via Stage A |
-| §4   | `convergeOnce` Aut-invariance (1 step)            | `Equivariance`                             | ✅ proved via writeback + getFrom-invariance |
-| §4   | `convergeLoop` Aut-invariance (induction on fuel) | `Equivariance`                             | ✅ proved (with `vts.size = n`) |
-| §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                                 | ✅ defined       |
-| §5.0 | `breakTie` output position-by-position            | `Tiebreak`                                 | ✅ proved (4 characterization lemmas) |
-| §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
-| §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                                 | ✅ proved (hypothesis revised — see note below) |
-| §6.0 | `breakTieAt` output + τ-equivariance              | `Tiebreak`                                 | ✅ proved (3 characterization + 1 equivariance) |
-| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                                 | ✅ closed modulo `runFrom_VtsInvariant_eq` (the chained §3 Stages B–D for `runFrom`) |
-| §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                               | ✅ defined + boundary proved |
-| §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                               | ✅ proved (uses §5 disjunctive characterization) |
-| §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
-| §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
+| Step | Subject                                           | File                                     | Status          |
+| ---- | ------------------------------------------------- | ---------------------------------------- | --------------- |
+| §1   | Automorphism group, orbits, `permute` action      | `Basic`, `Permutation`, `Automorphism`   | ✅ proved       |
+| §1.7 | `Fintype G.Aut` (decidability + finiteness)       | `Automorphism`                           | ✅ proved       |
+| §2   | `Isomorphic ↔ ∃σ, H = G.permute σ` bridge         | `Isomorphic`                             | ✅ proved       |
+| §3   | `permNat` + `PathSegment/PathsBetween/...permute` | `Equivariance.Actions`                   | ✅ defined      |
+| §3A  | `initializePaths_Aut_equivariant` (Stage A)       | `Equivariance.StageA`                    | ✅ proved       |
+| §3B  | `calculatePathRankings` size + `σInvariant`       | `Equivariance.RankStateInvariants`       | ✅ proved       |
+| §3B  | Generic sort/`orderInsensitiveListCmp` lemmas     | `Equivariance.ComparisonSort`            | ✅ proved       |
+| §3B  | `comparePathSegments_total_preorder` (Stage B)    | `Equivariance.ComparePathSegments`       | ✅ proved; `comparePathsBetween_total_preorder` 🧱 sorry |
+| §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | 🧱 2 sorry (`comparePathsBetween_equivCompat`, `calculatePathRankings_*_inv`) |
+| §4   | `convergeOnce`/`convergeLoop` Aut-invariance; C/D | `Equivariance.ConvergeLoop`              | ✅ proved       |
+| §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                               | ✅ defined      |
+| §5.0 | `breakTie` output position-by-position            | `Tiebreak`                               | ✅ proved (4 characterization lemmas) |
+| §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                               | ✅ proved (hypothesis revised — see note below) |
+| §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                               | ✅ proved (hypothesis revised — see note below) |
+| §6.0 | `breakTieAt` output + τ-equivariance              | `Tiebreak`                               | ✅ proved (3 characterization + 1 equivariance) |
+| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (the chained §3 Stages B–D for `runFrom`) |
+| §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                             | ✅ defined + boundary proved |
+| §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                             | ✅ proved (uses §5 disjunctive characterization) |
+| §7   | Other prefix invariants (3)                       | `Invariants`                             | 🧱 stated, `sorry` |
+| §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
 **Sorry count.** 4 (Equivariance: `comparePathsBetween_total_preorder`,
 `comparePathsBetween_equivCompat`, `calculatePathRankings_fromRanks_inv`,

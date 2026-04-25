@@ -23,7 +23,9 @@
       "Bash(lake --version)",
       "Bash(grep -rB1 -A5 \"^theorem Array.ext\\\\b\\\\|^theorem ext\\\\b\\\\|^@\\\\[ext\\\\]\\\\s*theorem\" /home/node/.elan/toolchains/leanprover--lean4---v4.30.0-rc2/src/lean/Init/Data/Array/)",
       "Bash(awk -F: '$1 == 1523 || $1 == 1928 || $1 == 1993 || $1 == 2007 {print}')",
-      "Bash(sed -n '1520p;1525p;1925p;1930p;1990p;1995p;2005p;2010p' /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance.lean)"
+      "Bash(sed -n '1520p;1525p;1925p;1930p;1990p;1995p;2005p;2010p' /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance.lean)",
+      "Bash(sed -i 's/^import FullCorrectness\\\\.Equivariance$/import FullCorrectness.Equivariance.Actions/' /workspace/GraphCanonizationProofs/FullCorrectness/Tiebreak.lean)",
+      "Bash(sed -i 's/^import FullCorrectness\\\\.Equivariance$/import FullCorrectness.Equivariance.ConvergeLoop/' /workspace/GraphCanonizationProofs/FullCorrectness/Invariants.lean)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

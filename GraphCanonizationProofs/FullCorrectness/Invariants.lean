@@ -1,4 +1,4 @@
-import FullCorrectness.Equivariance
+import FullCorrectness.Equivariance.ConvergeLoop
 import FullCorrectness.Tiebreak
 import Mathlib.Tactic.IntervalCases
 

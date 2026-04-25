@@ -1,4 +1,4 @@
-import FullCorrectness.Equivariance
+import FullCorrectness.Equivariance.Actions
 
 /-!
 # §5–§6  `breakTie` analysis
