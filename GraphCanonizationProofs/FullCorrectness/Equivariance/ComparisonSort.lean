@@ -841,4 +841,198 @@ theorem assignRanks_rank_lt_length {α : Type} (cmp : α → α → Ordering) (L
     show entry.2 < L'.length + 1
     omega
 
+/-! ### Per-position rank bounds (`assignRanks` ranks at position `k` ≤ `k`)
+
+Used by `Invariants.lean`'s Phase 3 to bound the new typing values for unique-typed
+vertices. The key fact: in the dense ranking, position `k` of the sorted list gets a
+rank ≤ k (strictly less only when consecutive items collapse into the same class). -/
+
+/-- **P3.B aux** lastEntry's rank tracks step count: after processing `L`, the lastEntry
+(if any) has rank `≤ prev_rank + L.length` (where `prev_rank` is the input lastEntry's
+rank, or `L.length - 1` if input lastEntry is `none`). -/
+private theorem assignRanksFoldl_lastEntry_rank_le {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α) (initRev : List (α × Nat)) (initLast : Option (α × Nat)),
+      ∀ e, (L.foldl (assignRanksStep cmp) (initRev, initLast)).2 = some e →
+        e.2 ≤ initLast.elim (L.length - 1) (fun prev => prev.2 + L.length) := by
+  intro L
+  induction L with
+  | nil =>
+    intros initRev initLast e he
+    rw [List.foldl_nil] at he
+    cases hlast : initLast with
+    | none =>
+      rw [hlast] at he
+      exact absurd he (by simp)
+    | some prev =>
+      rw [hlast] at he
+      simp only [Option.some.injEq] at he
+      simp only [Option.elim_some, List.length_nil, Nat.add_zero]
+      rw [← he]
+  | cons a L' ih =>
+    intros initRev initLast e he
+    rw [List.foldl_cons] at he
+    -- After step a: state' = (newRev, newLast) with newLast = some (a, r_a) where
+    -- r_a depends on initLast.
+    set state' := assignRanksStep cmp (initRev, initLast) a with hstate'
+    -- Identify state'.2.
+    have h_state'_2 : ∃ r, state'.2 = some (a, r) ∧
+        r ≤ initLast.elim 0 (fun prev => prev.2 + 1) := by
+      cases hlast : initLast with
+      | none =>
+        refine ⟨0, ?_, by simp⟩
+        rw [hstate', hlast]
+        unfold assignRanksStep
+        rfl
+      | some prev =>
+        refine ⟨if cmp prev.1 a == .eq then prev.2 else prev.2 + 1, ?_, ?_⟩
+        · rw [hstate', hlast]
+          unfold assignRanksStep
+          rfl
+        · simp only [Option.elim_some]
+          split_ifs <;> omega
+    obtain ⟨r, h_state'_2_eq, h_r⟩ := h_state'_2
+    -- Apply ih on L' from state'.
+    have h_ih := ih state'.1 state'.2 e he
+    rw [h_state'_2_eq] at h_ih
+    simp only [Option.elim_some] at h_ih
+    -- h_ih : e.2 ≤ r + L'.length.
+    cases hlast : initLast with
+    | none =>
+      have h_r_eq : r = 0 := by
+        have := h_r
+        simp [hlast] at this
+        omega
+      simp only [Option.elim_none]
+      rw [h_r_eq] at h_ih
+      simp only [Nat.zero_add] at h_ih
+      -- h_ih : e.2 ≤ L'.length.
+      show e.2 ≤ (List.length L' + 1) - 1
+      omega
+    | some prev =>
+      have h_r' : r ≤ prev.2 + 1 := by
+        have := h_r
+        simp [hlast] at this
+        exact this
+      simp only [Option.elim_some]
+      show e.2 ≤ prev.2 + (List.length L' + 1)
+      omega
+
+/-- **P3.B aux** Decomposition for `assignRanks` on `snoc`: the result is the result on
+the prefix appended with one entry whose rank is bounded by the prefix length. -/
+private theorem assignRanks_snoc_decompose {α : Type} (cmp : α → α → Ordering)
+    (L : List α) (a : α) :
+    ∃ r_a : Nat, assignRanks cmp (L ++ [a]) = assignRanks cmp L ++ [(a, r_a)] ∧
+      r_a ≤ L.length := by
+  rw [assignRanks_eq_foldl, assignRanks_eq_foldl, List.foldl_append,
+      List.foldl_cons, List.foldl_nil]
+  -- Destructure the state explicitly.
+  rcases h_pair : L.foldl (assignRanksStep cmp) ([], none) with ⟨rev, lastE⟩
+  -- assignRanksStep cmp (rev, lastE) a now reduces concretely.
+  cases hlast : lastE with
+  | none =>
+    refine ⟨0, ?_, by omega⟩
+    show ((a, 0) :: rev).reverse = rev.reverse ++ [(a, 0)]
+    rw [List.reverse_cons]
+  | some prev =>
+    rcases prev with ⟨p1, p2⟩
+    refine ⟨if cmp p1 a == .eq then p2 else p2 + 1, ?_, ?_⟩
+    · show ((a, if cmp p1 a == .eq then p2 else p2 + 1) :: rev).reverse
+          = rev.reverse ++ [(a, if cmp p1 a == .eq then p2 else p2 + 1)]
+      rw [List.reverse_cons]
+    · -- Bound via aux lemma.
+      have h_aux := assignRanksFoldl_lastEntry_rank_le cmp L [] none (p1, p2)
+      have h_st_eq : (L.foldl (assignRanksStep cmp) ([], none)).2 = some (p1, p2) := by
+        rw [h_pair]; exact hlast
+      have h_p2 := h_aux h_st_eq
+      simp at h_p2
+      -- h_p2 : p2 ≤ L.length - 1.
+      have h_L_pos : 0 < L.length := by
+        by_contra h_zero
+        have : L = [] := by
+          cases L with
+          | nil => rfl
+          | cons _ _ => simp at h_zero
+        rw [this] at h_pair
+        simp at h_pair
+        rw [← h_pair.2] at hlast
+        exact absurd hlast (by simp)
+      split_ifs <;> omega
+
+/-- **P3.C aux** Sharper snoc decomposition: gives the exact formula for the new rank
+in terms of the lastEntry of the partial fold. -/
+private theorem assignRanks_snoc_decompose_strict {α : Type} (cmp : α → α → Ordering)
+    (L : List α) (a : α) (rev : List (α × Nat)) (lastL : Option (α × Nat))
+    (h_pair : L.foldl (assignRanksStep cmp) ([], none) = (rev, lastL)) :
+    assignRanks cmp (L ++ [a]) =
+      assignRanks cmp L ++
+      [(a, lastL.elim 0 (fun prev => if cmp prev.1 a == .eq then prev.2 else prev.2 + 1))] := by
+  rw [assignRanks_eq_foldl, assignRanks_eq_foldl, List.foldl_append,
+      List.foldl_cons, List.foldl_nil, h_pair]
+  cases hlast : lastL with
+  | none =>
+    show ((a, 0) :: rev).reverse = rev.reverse ++ [(a, 0)]
+    rw [List.reverse_cons]
+  | some prev =>
+    rcases prev with ⟨p1, p2⟩
+    show ((a, if cmp p1 a == .eq then p2 else p2 + 1) :: rev).reverse
+         = rev.reverse ++ [(a, if cmp p1 a == .eq then p2 else p2 + 1)]
+    rw [List.reverse_cons]
+
+/-- For non-empty `L`, the foldl's `lastEntry` has first component `L.getLast`. -/
+private theorem assignRanks_foldl_lastEntry_fst {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α) (h : L ≠ []),
+      ∃ r, (L.foldl (assignRanksStep cmp) ([], none)).2 = some (L.getLast h, r) := by
+  intro L
+  induction L using List.reverseRecOn with
+  | nil => intro h; exact absurd rfl h
+  | append_singleton L' a _ =>
+    intro _
+    rw [List.foldl_append, List.foldl_cons, List.foldl_nil]
+    rcases h_pair : L'.foldl (assignRanksStep cmp) ([], none) with ⟨rev, lastE⟩
+    cases hlast : lastE with
+    | none =>
+      refine ⟨0, ?_⟩
+      show (assignRanksStep cmp (rev, none) a).2 = some ((L' ++ [a]).getLast _, 0)
+      rw [show (L' ++ [a]).getLast (by simp) = a from List.getLast_append_singleton L']
+      rfl
+    | some prev =>
+      rcases prev with ⟨p1, p2⟩
+      refine ⟨if cmp p1 a == .eq then p2 else p2 + 1, ?_⟩
+      show (assignRanksStep cmp (rev, some (p1, p2)) a).2 = some ((L' ++ [a]).getLast _, _)
+      rw [show (L' ++ [a]).getLast (by simp) = a from List.getLast_append_singleton L']
+      rfl
+
+/-- **P3.B** Rank at position `k` in `assignRanks cmp L` is `≤ k`. -/
+theorem assignRanks_rank_le_pos {α : Type} (cmp : α → α → Ordering) (L : List α)
+    (k : Nat) (hk : k < L.length) :
+    ((assignRanks cmp L)[k]'(by rw [assignRanks_length]; exact hk)).2 ≤ k := by
+  induction L using List.reverseRecOn generalizing k with
+  | nil => simp at hk
+  | append_singleton L' a ih =>
+    obtain ⟨r_a, h_decomp, h_r_a⟩ := assignRanks_snoc_decompose cmp L' a
+    have h_len_lhs : (assignRanks cmp L').length = L'.length := assignRanks_length cmp L'
+    have h_k_lt : k < L'.length + 1 := by
+      have := hk; simp [List.length_append] at this; omega
+    have h_k_lt_full : k < (assignRanks cmp (L' ++ [a])).length := by
+      rw [assignRanks_length]; exact hk
+    rcases Nat.lt_or_ge k L'.length with h_k_lt_L' | h_k_ge_L'
+    · -- k < L'.length: position k is in `assignRanks cmp L'`.
+      have h_assign_get : (assignRanks cmp (L' ++ [a]))[k]'h_k_lt_full =
+          (assignRanks cmp L' ++ [(a, r_a)])[k]'(by simp [h_len_lhs]; omega) := by
+        congr 1
+      rw [h_assign_get]
+      have h_lt_lhs : k < (assignRanks cmp L').length := by rw [h_len_lhs]; exact h_k_lt_L'
+      rw [List.getElem_append_left h_lt_lhs]
+      exact ih k h_k_lt_L'
+    · -- k = L'.length: position k is the appended entry.
+      have h_k_eq : k = L'.length := by omega
+      have h_assign_get : (assignRanks cmp (L' ++ [a]))[k]'h_k_lt_full =
+          (assignRanks cmp L' ++ [(a, r_a)])[k]'(by simp [h_len_lhs]; omega) := by
+        congr 1
+      rw [h_assign_get]
+      have h_k_eq_len : k = (assignRanks cmp L').length := by rw [h_len_lhs]; exact h_k_eq
+      rw [List.getElem_append_right (by rw [← h_k_eq_len])]
+      simp [h_k_eq_len]
+      omega
+
 end Graph

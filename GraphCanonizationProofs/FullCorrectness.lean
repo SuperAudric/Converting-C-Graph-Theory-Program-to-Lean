@@ -359,13 +359,27 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
   `breakTie_getD_above_or`, plus a converse to `breakTieCount_ge_two_of_distinct`
   (`exists_two_distinct_q_in_T`, derived from `List.Duplicate` + `List.Sublist`).
 
-- **Phase 3 — convergeLoop preservation** (🧱 single sorry, P3.1 done): For `T` prefix
-  with `0..q-1` uniquely held by `v_0..v_{q-1}` (with `T[v_k] = k`), `convergeLoop _ T fuel`
-  has the same property with the SAME witnesses. The proof requires reasoning about
-  `comparePathsFrom`'s behavior on differing start types (P3.1 ✅), the position of unique-
-  typed paths in `sortBy comparePathsFrom T pathsAtTop` (P3.2 — sorts to position `k` for
-  unique type `k`), and the rank assigned by `assignRanks` (P3.3 — rank `k` for position
-  `k` when consecutive start types differ).
+- **Phase 3 — convergeLoop preservation** (🧱 single sorry, with sub-sub-lemmas being
+  built): For `T` prefix with `0..q-1` uniquely held by `v_0..v_{q-1}` (with `T[v_k] = k`),
+  `convergeLoop _ T fuel` has the same property. The proof uses three weaker facts about
+  `T' = convergeOnce T`: (a) `T'[v_k] < q` for unique-typed `v_k`, (b) `T'[w] ≥ q` for
+  non-unique-typed `w`, (c) `k ↦ T'[v_k]` is injective. Then `{T'[v_k] | k < q} = {0..q-1}`
+  and the public `∃!` follows.
+
+  Sub-sub-lemmas:
+  - **P3.1** ✅ `comparePathsFrom_eq_compare_of_start_types_ne` (different start types ⟹
+    `comparePathsFrom` returns the comparison directly).
+  - **P3.B** ✅ `assignRanks_rank_le_pos` (rank at position `k` is `≤ k`). Foundational.
+    Uses aux lemmas `assignRanksFoldl_lastEntry_rank_le` (lastEntry rank tracks step count)
+    and `assignRanks_snoc_decompose` (snoc-decomposition with rank bound).
+  - **P3.C** 🧱 `assignRanks_rank_eq_pos_when_distinct` (rank `=` position when
+    consecutive cmps differ). Aux lemma `assignRanks_snoc_decompose_strict` (sharper
+    snoc-decomposition with exact rank formula) and `assignRanks_foldl_lastEntry_fst`
+    (lastEntry's first component) are in place.
+  - **P3.D** 🧱 `sortBy_first_q_positions_have_start_types_lt_q`: heaviest piece, requires
+    sortBy positional reasoning.
+  - **P3.E** 🧱 combine P3.1/B/C/D for `convergeOnce`.
+  - **P3.5** 🧱 induct on fuel using P3.E.
 
 Closing `getFrom_image_isPrefix_for_initializePaths` (n ≥ 1) used these helpers, all in
 `Invariants.lean`:
