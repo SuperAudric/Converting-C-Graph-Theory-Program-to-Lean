@@ -898,19 +898,33 @@ private def UniquelyHeldBelow (vts : Array VertexType) (q : Nat) : Prop :=
 
 /-! ### Phase 3: convergeLoop preserves lower-uniqueness
 
-The deep sub-lemma. Strategy:
-- **P3.1** `comparePathsFrom_eq_compare_of_start_types_ne` — mechanical from the
-  definition: when two start types differ, the comparator returns the comparison of
-  the types directly.
-- **P3.2** `sortBy_positions_of_uniquely_held` — for `pathsAtTop` with start vertices
-  forming `List.range n`, uniquely-typed start vertices `v_0, ..., v_{q-1}` (with types
-  `0, ..., q-1`) sort to positions `0, ..., q-1` (in this order) under the comparator.
-- **P3.3** `assignRanks_at_position_of_singleton_chain` — for the first `q` positions
-  where each is in its own equivalence class (different cmp from previous), the rank at
-  position `i` equals `i`.
-- **P3.4** `convergeOnce_preserves_uniqueness` — combine P3.1/P3.2/P3.3: applying
-  `convergeOnce` to `T` gives `T'` where `T'[v_k.val] = k` for each unique-typed `v_k`.
-- **P3.5** `convergeLoop_preserves_lower_uniqueness` — induct on fuel using P3.4. -/
+The deep sub-lemma. Refined strategy (avoids requiring `T'[v_k] = k` pointwise):
+
+For `T'` = `convergeOnce (initializePaths G) T`, prove three facts:
+- **(a)** For each unique-typed `v_k` (`T[v_k] = k`, `k < q`): `T'[v_k] < q`.
+- **(b)** For each non-unique-typed `w` (`T[w] ≥ q`): `T'[w] ≥ q`.
+- **(c)** `k ↦ T'[v_k]` is injective on `Fin q` (different start types ⟹ different
+  output values).
+
+Then `{T'[v_k] | k < q} ⊆ {0..q-1}` (by (a)+(c)), with `q` distinct values, so it
+equals `{0..q-1}`. For each `m < q`, the unique witness for `T'[v] = m` is the
+unique-typed vertex with that new value (others are excluded by (b)).
+
+Sub-sub-lemmas:
+- **P3.1** `comparePathsFrom_eq_compare_of_start_types_ne` ✅ — when two start types
+  differ, the comparator returns the comparison of the types directly.
+- **P3.B** `assignRanks_rank_le_pos` 🧱 — rank at position `k` in `assignRanks cmp L` is
+  `≤ k`. (Generic lemma about `assignRanks`.)
+- **P3.C** `assignRanks_rank_eq_pos_when_consecutive_distinct` 🧱 — if cmp at every
+  consecutive pair `(L[i], L[i+1])` for `i < q-1` is `≠ .eq`, then rank at position
+  `k` (for `k < q`) is exactly `k`.
+- **P3.D** `sortBy_first_q_positions_have_start_types_lt_q` 🧱 — for `pathsAtTop` with
+  start vertices forming `List.range n` and `T` uniquely-typed at `0..q-1`, the first
+  `q` positions of `sortBy comparePathsFrom T pathsAtTop` have start types `< q`,
+  arranged in ascending order.
+- **P3.E** `convergeOnce_preserves_lower_uniqueness` 🧱 — combines P3.1/B/C/D to derive
+  (a), (b), (c) and hence the uniqueness of `T'`.
+- **P3.5** `convergeLoop_preserves_lower_uniqueness` 🧱 — induction on fuel using P3.E. -/
 
 /-- **P3.1** `comparePathsFrom` returns the comparison of start types when they differ. -/
 private theorem comparePathsFrom_eq_compare_of_start_types_ne
