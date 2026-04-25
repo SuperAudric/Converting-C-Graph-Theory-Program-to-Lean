@@ -53,18 +53,20 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (the chained §3 Stages B–D for `runFrom`) |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                             | ✅ defined + boundary proved |
 | §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                             | ✅ proved (uses §5 disjunctive characterization) |
-| §7   | Other prefix invariants                           | `Invariants`                             | ✅ `getFrom_image_isPrefix_for_initializePaths` proved; ✅ `convergeLoop_preserves_prefix` proved; ✅ `n_distinct_ranks` proved; 🟡 `orderVertices_prefix_invariant` reduced to a single deep sub-lemma `convergeLoop_preserves_lower_uniqueness` (P3) — outer skeleton + Phase 2 breakTie step ✅ proved |
+| §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, Phase 2 breakTie step, Phase 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (5 total)
+## Open obligations (4 total)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
 | `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. |
 | `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |
-| `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` | `Invariants`       | Chain-equation extraction wrapper: `fromRanks.getD (n-1) #[]` equals the assignList foldl (with comparator parameterized by some `br`). Mirrors `getFrom_image_isPrefix_for_initializePaths`'s outer-fold/inner-fold unwinding but exposes the chain expression directly rather than its dense image. Mechanical refactor of the existing proof. **`convergeOnce_preserves_lower_uniqueness` (P3.E) is fully assembled on top of this — closing this aux closes P3.E and `orderVertices_prefix_invariant`.** |
 | `run_isomorphic_eq` (⟹)               | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2. |
+
+**`Invariants.lean` is fully closed.** `orderVertices_prefix_invariant` and
+`orderVertices_n_distinct_ranks` both proved unconditionally.
 
 --------------------------------------------------------------------------------
 
@@ -396,11 +398,11 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
     - Made public: `orderInsensitiveListCmp_refl`, `orderInsensitiveListCmp_swap_lt`,
       `orderInsensitiveListCmp_swap_gt`, `orderInsensitiveListCmp_trans` in
       `ComparePathSegments.lean`; `sortBy_pairwise` in `ComparisonSort.lean`.
-  - **P3.E** ✅ `convergeOnce_preserves_lower_uniqueness`: closed (modulo `aux`).
+  - **P3.E** ✅ `convergeOnce_preserves_lower_uniqueness` fully closed.
     Prefix + size conjuncts via `convergeOnce_writeback` +
     `getFrom_image_isPrefix_for_initializePaths`. Uniqueness conjunct via the (a)/(b)/(c)
     pattern: per-vertex chain identification + P3.D + P3.C-prefix + monotonicity +
-    boundary-distinctness extension. Helpers added this session:
+    boundary-distinctness extension. Helpers added:
     - `assignRanks_rank_eq_of_prefix` (rank at k in `assignRanks (A ++ B)` equals rank
       at k in `assignRanks A` for k < A.length).
     - `assignRanks_rank_eq_pos_when_distinct_prefix` (P3.C-prefix: rank = position for
@@ -410,9 +412,10 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
       `revList head = lastEntry, head ≥ tail`).
     - `chain_value_at_vertex_for_assignRanks_sortBy` (per-vertex chain-rank lookup
       via `array_set_chain_at_target_nodup`).
-    - **Aux** `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` 🧱 sorry —
-      outer/inner-fold unwinding wrapper (mechanical; mirrors
-      `getFrom_image_isPrefix_for_initializePaths`).
+    - **Aux** `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` ✅ proved.
+      Mirrors `getFrom_image_isPrefix_for_initializePaths`'s outer/inner-fold unwinding;
+      witness `br` is the iteration's let-bound `updatedBetweenFn`, and after unwinding
+      both sides become the same chain syntactically (closed by `rfl`).
   - **P3.5** ✅ `convergeLoop_preserves_lower_uniqueness`: closed via fuel induction
     using P3.E.
 

@@ -1433,19 +1433,163 @@ private theorem fromRanks_at_n_minus_1_eq_chain_for_initializePaths
                 ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)).foldl
               (fun (slice : Array Nat) item => slice.set! item.1.startVertexIndex.val item.2)
               ((Array.range n).map (fun _ : Nat => (0 : Nat)))).getD v.val 0 := by
-  -- The witness: the final betweenRanks (at iteration n-1, which is the last iteration,
-  -- so the final betweenRanks state IS the updatedBetween used at depth n-1).
+  have h_n_pred_lt : n - 1 < n := Nat.sub_lt hn_pos (by omega)
+  have h_n_pred_not_in : (n - 1) ∉ List.range (n - 1) := by simp [List.mem_range]
+  have h_range_split : List.range n = List.range (n - 1) ++ [n - 1] := by
+    conv_lhs => rw [show n = (n - 1) + 1 from (Nat.succ_pred_eq_of_pos hn_pos).symm]
+    rw [List.range_succ]
+  -- Strengthen to array-level equality.
+  suffices h_array : ∃ br : Nat → Nat → Nat → Nat,
+      (calculatePathRankings (initializePaths G) T).fromRanks.getD (n - 1) #[]
+        = (assignRanks (comparePathsFrom T br) (sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)).foldl
+            (fun (slice : Array Nat) item => slice.set! item.1.startVertexIndex.val item.2)
+            ((Array.range n).map (fun _ : Nat => (0 : Nat))) by
+    obtain ⟨br, h_eq⟩ := h_array
+    refine ⟨br, ?_⟩
+    intro v
+    rw [h_eq]
+  -- Now prove the array-level equality. Mirror getFrom_image_isPrefix_for_initializePaths.
+  unfold calculatePathRankings
+  suffices haux : ∀ (start : Array (Array (Array Nat)) × Array (Array Nat))
+      (h_size : start.2.size = n)
+      (h_top_eq : start.2.getD (n - 1) #[] = (Array.range n).map (fun _ : Nat => (0 : Nat))),
+      ∃ br : Nat → Nat → Nat → Nat,
+        (((List.range n).foldl (fun accumulated depth =>
+          let (currentBetween, currentFrom) := accumulated
+          let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+          let allBetween := pathsAtDepth.foldl
+            (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+          let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+            ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+          let compareBetween := comparePathsBetween T betweenRankFn
+          let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+            (fun (betweenAcc : Array (Array (Array Nat))) item =>
+              let (pathBetween, rank) := item
+              setBetween betweenAcc depth pathBetween.startVertexIndex.val
+                pathBetween.endVertexIndex.val rank) currentBetween
+          let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+            ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+          let compareFrom := comparePathsFrom T updatedBetweenFn
+          let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+            (fun (fromAcc : Array (Array Nat)) item =>
+              let (pathFrom, rank) := item
+              let depthSlice := fromAcc.getD depth #[]
+              fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+          (updatedBetween, updatedFrom)) start).2).getD (n - 1) #[]
+        = (assignRanks (comparePathsFrom T br) (sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)).foldl
+            (fun (slice : Array Nat) item => slice.set! item.1.startVertexIndex.val item.2)
+            ((Array.range n).map (fun _ : Nat => (0 : Nat))) by
+    apply haux
+    · simp
+    · simp [h_n_pred_lt]
+  intros start h_size h_top_eq
+  rw [h_range_split, List.foldl_append, List.foldl_cons, List.foldl_nil]
+  have h_outer := outer_fold_fromAcc_other_target_unchanged
+    (initializePaths G) T (n - 1) (List.range (n - 1)) start h_n_pred_not_in
+  set acc_pre := (List.range (n - 1)).foldl (fun accumulated depth =>
+    let (currentBetween, currentFrom) := accumulated
+    let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+    let allBetween := pathsAtDepth.foldl
+      (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+    let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+      ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+    let compareBetween := comparePathsBetween T betweenRankFn
+    let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+      (fun (betweenAcc : Array (Array (Array Nat))) item =>
+        let (pathBetween, rank) := item
+        setBetween betweenAcc depth pathBetween.startVertexIndex.val
+          pathBetween.endVertexIndex.val rank) currentBetween
+    let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+      ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+    let compareFrom := comparePathsFrom T updatedBetweenFn
+    let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+      (fun (fromAcc : Array (Array Nat)) item =>
+        let (pathFrom, rank) := item
+        let depthSlice := fromAcc.getD depth #[]
+        fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+    (updatedBetween, updatedFrom)) start with h_acc_pre_def
+  have h_acc_pre_top_eq : acc_pre.2.getD (n - 1) #[] =
+      (Array.range n).map (fun _ : Nat => (0 : Nat)) := by
+    rw [show acc_pre.2.getD (n - 1) #[] = start.2.getD (n - 1) #[] from h_outer]
+    exact h_top_eq
+  -- Need acc_pre.2.size = n for inner_fold_slice_at_depth.
+  have h_acc_pre_size : acc_pre.2.size = n := by
+    have h_size_pres : ∀ (l : List Nat) (s : Array (Array (Array Nat)) × Array (Array Nat)),
+        s.2.size = n → ((l.foldl (fun accumulated depth =>
+          let (currentBetween, currentFrom) := accumulated
+          let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+          let allBetween := pathsAtDepth.foldl
+            (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+          let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+            ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+          let compareBetween := comparePathsBetween T betweenRankFn
+          let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+            (fun (betweenAcc : Array (Array (Array Nat))) item =>
+              let (pathBetween, rank) := item
+              setBetween betweenAcc depth pathBetween.startVertexIndex.val
+                pathBetween.endVertexIndex.val rank) currentBetween
+          let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+            ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+          let compareFrom := comparePathsFrom T updatedBetweenFn
+          let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+            (fun (fromAcc : Array (Array Nat)) item =>
+              let (pathFrom, rank) := item
+              let depthSlice := fromAcc.getD depth #[]
+              fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+          (updatedBetween, updatedFrom)) s).2).size = n := by
+      intro l
+      induction l with
+      | nil => intros _ h; exact h
+      | cons x xs ih =>
+        intros s hs
+        rw [List.foldl_cons]
+        apply ih
+        obtain ⟨b, f⟩ := s
+        simp only [] at hs ⊢
+        suffices h_inner : ∀ (l' : List ((PathsFrom n) × Nat)) (acc : Array (Array Nat)),
+            acc.size = n →
+            (l'.foldl (fun (fromAcc : Array (Array Nat)) item =>
+              let (pathFrom, rank) := item
+              let depthSlice := fromAcc.getD x #[]
+              fromAcc.set! x (depthSlice.set! pathFrom.startVertexIndex.val rank)) acc).size = n by
+          apply h_inner _ _ hs
+        intro l' acc hacc
+        induction l' generalizing acc with
+        | nil => exact hacc
+        | cons y ys ih_inner =>
+          rw [List.foldl_cons]
+          apply ih_inner
+          obtain ⟨pathFrom, rank⟩ := y
+          simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds, hacc]
+    exact h_size_pres _ start h_size
+  have h_n_pred_lt_acc_pre : n - 1 < acc_pre.2.size := h_acc_pre_size ▸ h_n_pred_lt
+  obtain ⟨b_pre, f_pre⟩ := acc_pre
+  simp only [] at h_acc_pre_top_eq h_acc_pre_size h_n_pred_lt_acc_pre ⊢
+  rw [inner_fold_slice_at_depth _ f_pre (n - 1) h_n_pred_lt_acc_pre]
+  rw [h_acc_pre_top_eq]
+  -- Now expose the let-bound updatedBetweenFn as the witness br.
+  -- After all the lets, the goal looks like:
+  --   chain(<updatedBetweenFn from let>) = chain(?br)
+  -- We pick ?br := the explicit form of updatedBetweenFn at iteration (n-1) with
+  -- currentBetween = b_pre.
   refine ⟨fun rankDepth rankStart rankEnd =>
-    (((calculatePathRankings (initializePaths G) T).betweenRanks.getD rankDepth #[]).getD
-      rankStart #[]).getD rankEnd 0, ?_⟩
-  intro v
-  -- The remaining work: unwind `calculatePathRankings` to expose its inner-fold's chain
-  -- at depth n-1, then recognize that chain as the RHS. Mirror the unwinding in
-  -- `getFrom_image_isPrefix_for_initializePaths` (lines 662-826) — outer fold split via
-  -- `outer_fold_fromAcc_other_target_unchanged`, inner fold via `inner_fold_slice_at_depth`,
-  -- then `rfl` since both sides are syntactically the same chain (the cmp on both sides
-  -- is `comparePathsFrom T <updatedBetweenFn at iter n-1>`, which equals our chosen `br`).
-  sorry
+    ((((assignRanks
+            (comparePathsBetween T (fun rd rs re =>
+              ((b_pre.getD rd #[]).getD rs #[]).getD re 0))
+            (sortBy
+              (comparePathsBetween T (fun rd rs re =>
+                ((b_pre.getD rd #[]).getD rs #[]).getD re 0))
+              (((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList.foldl
+                (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex)
+                []))).foldl
+            (fun (betweenAcc : Array (Array (Array Nat))) item =>
+              let (pathBetween, rank) := item
+              setBetween betweenAcc (n - 1) pathBetween.startVertexIndex.val
+                pathBetween.endVertexIndex.val rank) b_pre).getD rankDepth #[]).getD
+        rankStart #[]).getD rankEnd 0, ?_⟩
+  rfl
 
 /-- **P3.E** `convergeOnce (initializePaths G) T` preserves the prefix property, the size,
 and the lower-uniqueness `0..q-1`. The uniqueness conjunct combines:
