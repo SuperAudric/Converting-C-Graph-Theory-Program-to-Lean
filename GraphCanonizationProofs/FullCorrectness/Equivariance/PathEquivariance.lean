@@ -456,6 +456,163 @@ theorem comparePathsFrom_σ_equivariant
         | Or.inr hq_in => h_inner_len₂ q hq_in hq_d
       exact comparePathsBetween_σ_equivariant σ vts hvts br hbr p q hp_len hq_len
 
+/-! ### Plan for `calculatePathRankings_fromRanks_inv` and `_betweenRanks_inv`
+
+**Strategy**: Foldl invariant on the depth loop (mirroring `calculatePathRankings_size_inv`).
+Track σ-invariance of cell values across both `betweenRanks` and `fromRanks` simultaneously
+(the body updates both in tandem).
+
+**Proof tree**:
+```
+calculatePathRankings_σInvariant_combined  (deep helper, foldl invariant)
+  ├── init_σ_invariant         (trivial: all zeros)
+  └── body_preserves_σ_inv     (the deep step; uses Aut G + σ-inv vts)
+        │
+        ├── betweenRankFn σ-invariant from cell-σ-inv of currentBetween
+        ├── compareBetween σ-equivariant  (via comparePathsBetween_σ_equivariant ✅)
+        ├── pathsAtDepth σ-permuted by σ  (via Stage A: initializePaths_Aut_equivariant ✅)
+        ├── allBetween σ-permuted  (concat over PathsFrom_permute_pathsToVertex_perm ✅)
+        ├── assignList σ-equivariantly permuted with rank-preservation
+        │     ├── sortBy with σ-equivariant cmp  (sortBy_map_pointwise ✅)
+        │     └── assignRanks rank-preservation across σ-Perm-related sorted lists
+        ├── setBetween chain over σ-Perm assignList preserves σ-inv of currentBetween
+        ├── updatedBetweenFn σ-invariant (analogous to step 1)
+        ├── compareFrom σ-equivariant  (via comparePathsFrom_σ_equivariant ✅)
+        └── set! chain (for fromRanks) over σ-Perm assignList preserves σ-inv
+```
+
+**Sub-lemmas needed** (some new, some existing):
+- `betweenRankFn_σ_inv_from_cells` — small: cell-σ-inv → function-σ-inv.
+- `pathsAtDepth_initializePaths_σInv` — small: corollary of Stage A.
+- `assignRanks_σ_equivariant_perm` — generic; rank preservation across σ-related sorted lists.
+- `setBetween_chain_σInvariant`, `set!_chain_σInvariant` — chain preserves σ-inv.
+- `body_preserves_σ_inv` — wraps the substeps above.
+- `calculatePathRankings_σInvariant_combined` — foldl invariant.
+
+Both target theorems then follow by extracting the corresponding cell-level fact. -/
+
+/-- **Helper 1 (small)**: cell-level σ-invariance of a 3D table lifts to a σ-invariant
+function (the natural betweenRankFn projection). -/
+theorem betweenRankFn_σ_inv_from_cells
+    (σ : Equiv.Perm (Fin n)) (b : Array (Array (Array Nat)))
+    (h_cell : ∀ d : Nat, d < n → ∀ s e : Fin n,
+      ((b.getD d #[]).getD s.val #[]).getD e.val 0
+      = ((b.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) :
+    ∀ d : Nat, d < n → ∀ s e : Fin n,
+      (fun rankDepth rankStart rankEnd =>
+          ((b.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0)
+        d (σ s).val (σ e).val
+      = (fun rankDepth rankStart rankEnd =>
+          ((b.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0)
+        d s.val e.val := by
+  intro d hd s e
+  -- Apply h_cell at (d, σ s, σ e); the σ⁻¹ (σ x) terms simplify to x.
+  have h := h_cell d hd (σ s) (σ e)
+  have h_inv_s : σ⁻¹ (σ s) = s := by simp
+  have h_inv_e : σ⁻¹ (σ e) = e := by simp
+  rw [h_inv_s, h_inv_e] at h
+  show ((b.getD d #[]).getD (σ s).val #[]).getD (σ e).val 0
+     = ((b.getD d #[]).getD s.val #[]).getD e.val 0
+  exact h
+
+/-- **Helper 2 (small)**: for σ ∈ Aut G, `initializePaths G` is fixed by `PathState.permute σ`.
+Direct corollary of `initializePaths_Aut_equivariant`. -/
+theorem initializePaths_σInv_via_Aut
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G) :
+    initializePaths G = PathState.permute σ (initializePaths G) := by
+  have hG : G.permute σ = G := hσ
+  have h_stageA := initializePaths_Aut_equivariant G σ
+  rw [hG] at h_stageA
+  exact h_stageA
+
+/-! ### Chain σ-invariance lemmas
+
+The body of `calculatePathRankings` updates `currentBetween` and `currentFrom` via
+chains of `setBetween` / `set!` operations driven by the assignList from `assignRanks`.
+For σ-invariance preservation, we need:
+
+- The chain preserves σ-invariance of cells **outside** the touched depth.
+- For the touched depth, the new cells are σ-invariant when:
+  - The currentBetween/currentFrom is already σ-invariant.
+  - The assignList is σ-rank-closed (each entry's σ-conjugate is also in the assignList
+    with the same rank).
+  - The assignList has the right uniqueness structure (unique start vertices for `set!`,
+    unique (start, end) pairs for `setBetween`).
+
+The σ-rank-closure of the assignList comes from `assignRanks_map_of_cmp_respect`
+(already proved): when `cmp` respects `f := PathsFrom.permute σ`, applying `f` to the
+first components of the assignList preserves its multiset structure (proof TBD via the
+`Perm`-related-sorted lemma). -/
+
+/-- **Sub-lemma `set!_chain_σInvariant`** (TODO): the `set!` chain on `fromRanks`
+preserves σ-invariance, given the σ-rank-closure of the assignList.
+
+**Status**: stated; proof sketched; deep details TBD via chain-inversion infrastructure. -/
+private theorem set_chain_σInvariant
+    (σ : Equiv.Perm (Fin n)) (currentFrom : Array (Array Nat))
+    (h_size : currentFrom.size = n)
+    (h_row_size : ∀ d : Nat, d < n → (currentFrom.getD d #[]).size = n)
+    (h_curr_inv : ∀ d : Nat, d < n → ∀ s : Fin n,
+      (currentFrom.getD d #[]).getD s.val 0
+      = (currentFrom.getD d #[]).getD (σ⁻¹ s).val 0)
+    (depth : Nat) (h_depth : depth < n)
+    (assignList : List (PathsFrom n × Nat))
+    (h_unique_starts : ∀ s : Fin n, ∃! item ∈ assignList, item.1.startVertexIndex.val = s.val)
+    (h_σ_closure : ∀ item ∈ assignList,
+      ∃ item' ∈ assignList,
+        item'.1.startVertexIndex.val = (σ item.1.startVertexIndex).val
+        ∧ item'.2 = item.2) :
+    let result := assignList.foldl
+      (fun (fromAcc : Array (Array Nat)) item =>
+        let (pathFrom, rank) := item
+        let depthSlice := fromAcc.getD depth #[]
+        fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+    -- Sizes preserved.
+    result.size = n ∧
+    (∀ d : Nat, d < n → (result.getD d #[]).size = n) ∧
+    -- σ-invariance preserved.
+    (∀ d : Nat, d < n → ∀ s : Fin n,
+      (result.getD d #[]).getD s.val 0
+      = (result.getD d #[]).getD (σ⁻¹ s).val 0) := by
+  sorry
+
+/-- **Sub-lemma `setBetween_chain_σInvariant`** (TODO): the `setBetween` chain on
+`betweenRanks` preserves σ-invariance, given the σ-rank-closure of the assignList.
+
+**Status**: stated; proof sketched; deep details TBD. -/
+private theorem setBetween_chain_σInvariant
+    (σ : Equiv.Perm (Fin n)) (currentBetween : Array (Array (Array Nat)))
+    (h_size : currentBetween.size = n)
+    (h_row_size : ∀ d : Nat, d < n → (currentBetween.getD d #[]).size = n)
+    (h_cell_size : ∀ d : Nat, d < n → ∀ s : Nat, s < n →
+      ((currentBetween.getD d #[]).getD s #[]).size = n)
+    (h_curr_inv : ∀ d : Nat, d < n → ∀ s e : Fin n,
+      ((currentBetween.getD d #[]).getD s.val #[]).getD e.val 0
+      = ((currentBetween.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0)
+    (depth : Nat) (h_depth : depth < n)
+    (assignList : List (PathsBetween n × Nat))
+    (h_unique_pairs : ∀ s e : Fin n, ∃! item ∈ assignList,
+      item.1.startVertexIndex.val = s.val ∧ item.1.endVertexIndex.val = e.val)
+    (h_σ_closure : ∀ item ∈ assignList,
+      ∃ item' ∈ assignList,
+        item'.1.startVertexIndex.val = (σ item.1.startVertexIndex).val
+        ∧ item'.1.endVertexIndex.val = (σ item.1.endVertexIndex).val
+        ∧ item'.2 = item.2) :
+    let result := assignList.foldl
+      (fun (betweenAcc : Array (Array (Array Nat))) item =>
+        let (pathBetween, rank) := item
+        setBetween betweenAcc depth pathBetween.startVertexIndex.val
+          pathBetween.endVertexIndex.val rank) currentBetween
+    -- Sizes preserved.
+    result.size = n ∧
+    (∀ d : Nat, d < n → (result.getD d #[]).size = n) ∧
+    (∀ d : Nat, d < n → ∀ s : Nat, s < n → ((result.getD d #[]).getD s #[]).size = n) ∧
+    -- σ-invariance preserved.
+    (∀ d : Nat, d < n → ∀ s e : Fin n,
+      ((result.getD d #[]).getD s.val #[]).getD e.val 0
+      = ((result.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) := by
+  sorry
+
 /-- The σ-invariance of `fromRanks` values in `calculatePathRankings`'s output.
 Part of the deep Stage B content; requires foldl induction on the depth loop combined with
 σ-equivariance of the compare/sort/rank assignment at each step. -/

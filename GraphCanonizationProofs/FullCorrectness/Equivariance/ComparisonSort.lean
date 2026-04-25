@@ -615,6 +615,65 @@ theorem assignRanks_getElem_fst {α : Type} (cmp : α → α → Ordering) (L : 
   rw [List.getElem_map] at h_via_map
   exact h_via_map
 
+/-! ### `assignRanks` commutes with `map f` when `f` respects `cmp`
+
+For `f : α → α` such that `cmp (f a) (f b) = cmp a b`:
+- `assignRanksStep` commutes with the f-mapping of state.
+- Lifted through `foldl`, this gives that `assignRanks cmp (L.map f)` equals the f-image
+  of `assignRanks cmp L` (componentwise on first coordinates, ranks unchanged).
+
+Foundational for the σ-equivariance pipeline of `calculatePathRankings`. -/
+
+/-- Single-step commutation: applying `f` to all first components of the state and to the
+new item commutes with `assignRanksStep`, given `cmp` respects `f`. -/
+private theorem assignRanksStep_commutes_with_f_map {α : Type} (cmp : α → α → Ordering)
+    (f : α → α) (h_respect : ∀ a b : α, cmp (f a) (f b) = cmp a b)
+    (rev : List (α × Nat)) (lastE : Option (α × Nat)) (a : α) :
+    assignRanksStep cmp (rev.map (fun e => (f e.1, e.2)),
+                         lastE.map (fun e => (f e.1, e.2))) (f a)
+    = ((assignRanksStep cmp (rev, lastE) a).1.map (fun e => (f e.1, e.2)),
+       (assignRanksStep cmp (rev, lastE) a).2.map (fun e => (f e.1, e.2))) := by
+  unfold assignRanksStep
+  cases lastE with
+  | none => simp
+  | some prev =>
+    rcases prev with ⟨p1, p2⟩
+    simp only [Option.map_some]
+    -- New rank: cmp (f p1) (f a) → cmp p1 a by h_respect.
+    rw [h_respect p1 a]
+    simp [List.map_cons]
+
+/-- Lifted foldl commutation: foldl on the f-mapped list with the f-mapped initial state
+gives the f-mapped foldl on the original list. -/
+private theorem assignRanks_foldl_map_f {α : Type} (cmp : α → α → Ordering) (f : α → α)
+    (h_respect : ∀ a b : α, cmp (f a) (f b) = cmp a b) :
+    ∀ (L : List α) (rev : List (α × Nat)) (lastE : Option (α × Nat)),
+      (L.map f).foldl (assignRanksStep cmp)
+        (rev.map (fun e => (f e.1, e.2)), lastE.map (fun e => (f e.1, e.2)))
+      = ((L.foldl (assignRanksStep cmp) (rev, lastE)).1.map (fun e => (f e.1, e.2)),
+         (L.foldl (assignRanksStep cmp) (rev, lastE)).2.map (fun e => (f e.1, e.2))) := by
+  intro L
+  induction L with
+  | nil => intros; simp
+  | cons a L ih =>
+    intros rev lastE
+    rw [List.map_cons, List.foldl_cons, List.foldl_cons]
+    rw [assignRanksStep_commutes_with_f_map cmp f h_respect rev lastE a]
+    apply ih
+
+/-- **Main commutation**: `assignRanks cmp` distributes over `List.map f` when `f` respects
+`cmp`. The first components of the result are f-mapped; ranks are unchanged. -/
+theorem assignRanks_map_of_cmp_respect {α : Type} (cmp : α → α → Ordering) (f : α → α)
+    (h_respect : ∀ a b : α, cmp (f a) (f b) = cmp a b) (L : List α) :
+    assignRanks cmp (L.map f) = (assignRanks cmp L).map (fun e => (f e.1, e.2)) := by
+  rw [assignRanks_eq_foldl, assignRanks_eq_foldl]
+  have h := assignRanks_foldl_map_f cmp f h_respect L [] none
+  simp only [List.map_nil, Option.map_none] at h
+  have h_fst : ((L.map f).foldl (assignRanksStep cmp) ([], none)).1
+             = ((L.foldl (assignRanksStep cmp) ([], none)).1).map (fun e => (f e.1, e.2)) :=
+    congrArg Prod.fst h
+  rw [h_fst, List.map_reverse]
+
 /-! ### Rank bound: every rank is `< L.length`
 
 Useful for `convergeLoop_preserves_prefix`: ranks from `assignRanks` end up as values
