@@ -419,17 +419,20 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
   - **P3.5** ✅ `convergeLoop_preserves_lower_uniqueness`: closed via fuel induction
     using P3.E.
 
-Closing `getFrom_image_isPrefix_for_initializePaths` (n ≥ 1) used these helpers, all in
-`Invariants.lean`:
-- `inner_fold_slice_at_depth` — strips the outer `fromAcc.set! depth` wrapper of the inner
-  fold, reducing to a chain of `set!`s on the depth slice.
-- `outer_fold_fromAcc_other_target_unchanged` — characterizes the outer depth loop: the
-  `fromRanks` slot at any `target` is preserved as long as `target` is not in the list of
-  remaining depths to process.
-- `array_set_chain_outside_unchanged` / `array_set_chain_at_target_nodup` — read out a
-  `set!` chain at any target index when the chain's indices are `Nodup`.
-- `initializePaths_pathsAtDepth_startVertices_eq_range` — for `state := initializePaths G`,
-  the depth-`d` slice's `pathsFrom.startVertexIndex.val` list equals exactly `List.range n`.
+Closing `getFrom_image_isPrefix_for_initializePaths` (n ≥ 1) used these helpers:
+- `inner_fold_slice_at_depth` (in `Equivariance.RankStateInvariants`) — strips the outer
+  `fromAcc.set! depth` wrapper of the inner fold, reducing to a chain of `set!`s on the
+  depth slice.
+- `outer_fold_fromAcc_other_target_unchanged` (in `Invariants.lean`) — characterizes the
+  outer depth loop: the `fromRanks` slot at any `target` is preserved as long as `target`
+  is not in the list of remaining depths to process.
+- `array_set_chain_outside_unchanged` / `array_set_chain_at_target_nodup` (in
+  `Equivariance.RankStateInvariants`) — read out a `set!` chain at any target index when
+  the chain's indices are `Nodup`. (Moved from `Invariants.lean` to share with
+  `PathEquivariance.lean`'s σ-invariance proofs.)
+- `initializePaths_pathsAtDepth_startVertices_eq_range` (in `Invariants.lean`) — for
+  `state := initializePaths G`, the depth-`d` slice's `pathsFrom.startVertexIndex.val` list
+  equals exactly `List.range n`.
 - `chain_image_dense_of_perm_and_density` — generic image-density lemma: if the chain's
   indices are a permutation of `0..n-1` and the rank set is downward-closed, the image
   over `Fin n` is exactly `{0, …, m-1}` for some `m`.
