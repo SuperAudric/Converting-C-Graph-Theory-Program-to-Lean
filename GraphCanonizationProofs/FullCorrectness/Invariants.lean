@@ -96,15 +96,87 @@ theorem IsPrefixTyping.replicate_zero :
 
 /-! ## §7.1  `convergeLoop` preserves prefix typings -/
 
+/-- `convergeLoop` preserves array size (each iteration calls `convergeOnce` which is
+size-preserving via `set!` in-bounds, then either recurses on the size-preserved array
+or returns it directly). -/
+theorem convergeLoop_size_preserving
+    {vc : Nat} (state : PathState vc) (vts : Array VertexType) (fuel : Nat) :
+    (convergeLoop state vts fuel).size = vts.size := by
+  induction fuel generalizing vts with
+  | zero => rfl
+  | succ k ih =>
+    have h_step : (convergeOnce state vts).1.size = vts.size :=
+      convergeOnce_size_preserving state vts
+    change (if (convergeOnce state vts).2
+            then convergeLoop state (convergeOnce state vts).1 k
+            else (convergeOnce state vts).1).size = vts.size
+    split
+    · rw [ih (convergeOnce state vts).1]; exact h_step
+    · exact h_step
+
+/-- The image of `getFrom (n-1) ·` over `Fin n` forms a prefix `{0, ..., m-1}` when the
+state is `initializePaths G`. **Deep sub-lemma**: requires reasoning about `assignRanks`'s
+dense rank output combined with the structural fact that `pathsAtDepth_{n-1}` from
+`initializePaths G` has each start vertex appearing exactly once, so each slot in the
+result table is written exactly once with its corresponding rank.
+
+The witness `m` is the number of distinct equivalence classes under `compareFrom` —
+between `1` and `n` inclusive (for `n ≥ 1`), or `0` for `n = 0`.
+
+**Status:** `n = 0` case closed (vacuous); `n ≥ 1` requires inner-fold characterization. -/
+theorem getFrom_image_isPrefix_for_initializePaths
+    (G : AdjMatrix n) (vts : Array VertexType) :
+    ∃ m : Nat,
+      (∀ i : Fin n, (calculatePathRankings (initializePaths G) vts).getFrom (n - 1) i.val < m) ∧
+      (∀ k : Nat, k < m →
+        ∃ i : Fin n, (calculatePathRankings (initializePaths G) vts).getFrom (n - 1) i.val = k) := by
+  by_cases hn : n = 0
+  · -- n = 0: take m = 0; both conditions vacuous over Fin 0 / Nat.lt 0.
+    subst hn
+    refine ⟨0, ?_, ?_⟩
+    · intro v; exact v.elim0
+    · intro k hk; exact absurd hk (Nat.not_lt_zero _)
+  · -- n ≥ 1: deep argument via inner-fold characterization (TODO).
+    sorry
+
 /-- `convergeLoop` (on `initializePaths G`) maps prefix typings to prefix typings.
 
 Specialized to `state := initializePaths G`; see file header for why the general form
-over arbitrary `PathState n` is false. -/
+over arbitrary `PathState n` is false. The `h_size` hypothesis (`vts.size = n`) is
+required because `convergeOnce` writes via `set!`, and out-of-bounds positions retain
+their default-`0` value — for small `vts`, this can introduce skipped values into the
+image (e.g., `vts.size=1, n=3, getFrom = 2` gives image `{0, 2}`, not a prefix). -/
 theorem convergeLoop_preserves_prefix
     (G : AdjMatrix n) (vts : Array VertexType) (fuel : Nat)
+    (h_size : vts.size = n)
     (_hv : @IsPrefixTyping n vts) :
     @IsPrefixTyping n (convergeLoop (initializePaths G) vts fuel) := by
-  sorry
+  induction fuel generalizing vts with
+  | zero => exact _hv
+  | succ k ih =>
+    -- The convergeOnce output is always a prefix typing (when vts.size = n) regardless
+    -- of input vts: every position holds `getFrom (n-1) i`, whose image is dense.
+    have h_step_size : (convergeOnce (initializePaths G) vts).1.size = n := by
+      rw [convergeOnce_size_preserving]; exact h_size
+    have h_step_isPrefix : @IsPrefixTyping n (convergeOnce (initializePaths G) vts).1 := by
+      obtain ⟨m, h_bound, h_witness⟩ := getFrom_image_isPrefix_for_initializePaths G vts
+      refine ⟨m, ?_, ?_⟩
+      · intro v
+        rw [convergeOnce_writeback (initializePaths G) vts v.val (h_size.symm ▸ v.isLt) v.isLt]
+        exact h_bound v
+      · intro k hk
+        obtain ⟨i, hi⟩ := h_witness k hk
+        refine ⟨i, ?_⟩
+        rw [convergeOnce_writeback (initializePaths G) vts i.val (h_size.symm ▸ i.isLt) i.isLt]
+        exact hi
+    show @IsPrefixTyping n (convergeLoop (initializePaths G) vts (k + 1))
+    change @IsPrefixTyping n (
+      if (convergeOnce (initializePaths G) vts).2
+      then convergeLoop (initializePaths G) (convergeOnce (initializePaths G) vts).1 k
+      else (convergeOnce (initializePaths G) vts).1)
+    split
+    · exact ih _ h_step_size h_step_isPrefix
+    · exact h_step_isPrefix
 
 /-! ## §7.2  `breakTie`'s target `p` equals the smallest tied value -/
 
