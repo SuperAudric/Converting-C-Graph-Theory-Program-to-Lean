@@ -123,7 +123,7 @@ private theorem setBetween_getD_size (b : Array (Array (Array Nat))) (d s e r d'
   · rw [Array_set!_getD_ne _ _ _ _ _ h_eq]
 
 /-- `setBetween` preserves the size of every (depth, start)-cell. -/
-private theorem setBetween_getD_getD_size (b : Array (Array (Array Nat)))
+theorem setBetween_getD_getD_size (b : Array (Array (Array Nat)))
     (d s e r d' s' : Nat) :
     (((setBetween b d s e r).getD d' #[]).getD s' #[]).size
     = ((b.getD d' #[]).getD s' #[]).size := by
@@ -153,6 +153,183 @@ private theorem from_set_getD_size (f : Array (Array Nat)) (d s : Nat) (rank : N
       simp [Array.set!_eq_setIfInBounds]
     · rw [Array_set!_eq_self_of_size_le _ _ _ (by omega)]
   · rw [Array_set!_getD_ne _ _ _ _ _ h_eq]
+
+/-! ### Chain helpers: `set!`-chain inversion
+
+These chain helpers express how a foldl over `set!`-style updates evolves: the value at a
+target position is determined by the (unique, by `Nodup`) entry whose first component
+equals that position; positions outside the chain are unchanged. They are shared between
+`Invariants.lean` (used by tiebreak content) and `PathEquivariance.lean` (used by σ-inv). -/
+
+/-- Foldl `set!`-chain leaves untouched positions unchanged: if no entry in `l` has its
+first component equal to `i`, the position-`i` value of the result equals the input. -/
+theorem array_set_chain_outside_unchanged
+    {α : Type} (arr₀ : Array α) (l : List (Nat × α)) (i : Nat) (defaultV : α)
+    (h : ∀ item ∈ l, item.1 ≠ i) :
+    (l.foldl (fun a item => a.set! item.1 item.2) arr₀).getD i defaultV
+      = arr₀.getD i defaultV := by
+  induction l generalizing arr₀ with
+  | nil => rfl
+  | cons head l' ih =>
+    rw [List.foldl_cons]
+    have h_head_ne : head.1 ≠ i := h head List.mem_cons_self
+    have h_tail : ∀ item ∈ l', item.1 ≠ i := fun item h_in => h item (List.mem_cons_of_mem _ h_in)
+    rw [ih (arr₀.set! head.1 head.2) h_tail]
+    simp only [Array.getD_eq_getD_getElem?,
+               Array.set!_eq_setIfInBounds,
+               Array.getElem?_setIfInBounds_ne h_head_ne]
+
+/-- Foldl `set!`-chain at the target index gives the target value, when the chain
+indices are `Nodup` (the target's index appears only at the target's position). -/
+theorem array_set_chain_at_target_nodup
+    {α : Type} (arr₀ : Array α) (l : List (Nat × α)) (target : Nat × α) (defaultV : α)
+    (h_target_in : target ∈ l)
+    (h_nodup : (l.map (·.1)).Nodup)
+    (h_target_bound : target.1 < arr₀.size) :
+    (l.foldl (fun a item => a.set! item.1 item.2) arr₀).getD target.1 defaultV
+      = target.2 := by
+  induction l generalizing arr₀ with
+  | nil => exact absurd h_target_in (by simp)
+  | cons head l' ih =>
+    rw [List.foldl_cons]
+    rcases List.mem_cons.mp h_target_in with h_eq | h_in_tail
+    · have h_others_ne : ∀ item ∈ l', item.1 ≠ target.1 := by
+        intro item h_in_item
+        have h_nd' := h_nodup
+        simp only [List.map_cons] at h_nd'
+        have h_head_not_in : head.1 ∉ l'.map (·.1) := (List.nodup_cons.mp h_nd').1
+        rw [← h_eq] at h_head_not_in
+        intro h_eq_idx
+        exact h_head_not_in (h_eq_idx ▸ List.mem_map.mpr ⟨item, h_in_item, rfl⟩)
+      have h_step_eq : arr₀.set! head.1 head.2 = arr₀.set! target.1 target.2 := by
+        rw [h_eq]
+      rw [h_step_eq]
+      rw [array_set_chain_outside_unchanged (arr₀.set! target.1 target.2) l' target.1 defaultV h_others_ne]
+      simp only [Array.getD_eq_getD_getElem?,
+                 Array.set!_eq_setIfInBounds,
+                 Array.getElem?_setIfInBounds_self_of_lt h_target_bound,
+                 Option.getD_some]
+    · have h_head_ne : head.1 ≠ target.1 := by
+        have h_nd' := h_nodup
+        simp only [List.map_cons] at h_nd'
+        have h_head_not_in : head.1 ∉ l'.map (·.1) := (List.nodup_cons.mp h_nd').1
+        intro h_eq_idx
+        exact h_head_not_in (h_eq_idx ▸ List.mem_map.mpr ⟨target, h_in_tail, rfl⟩)
+      have h_nodup' : (l'.map (·.1)).Nodup := by
+        simp only [List.map_cons] at h_nodup
+        exact (List.nodup_cons.mp h_nodup).2
+      have h_bound' : target.1 < (arr₀.set! head.1 head.2).size := by
+        simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]; exact h_target_bound
+      exact ih (arr₀.set! head.1 head.2) h_in_tail h_nodup' h_bound'
+
+/-- Strip the outer `fromAcc.set! depth` wrapper from the inner fold: the slice at
+position `depth` after the fold equals folding `slice.set! ... ...` directly on the
+initial slice. -/
+theorem inner_fold_slice_at_depth {n : Nat}
+    (l : List (PathsFrom n × Nat)) (fromAcc₀ : Array (Array Nat)) (depth : Nat)
+    (h_depth_in : depth < fromAcc₀.size) :
+    (l.foldl (fun (fromAcc : Array (Array Nat)) item =>
+      let (pathFrom, rank) := item
+      let depthSlice := fromAcc.getD depth #[]
+      fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) fromAcc₀).getD depth #[]
+    = l.foldl (fun slice item =>
+        slice.set! item.1.startVertexIndex.val item.2) (fromAcc₀.getD depth #[]) := by
+  induction l generalizing fromAcc₀ with
+  | nil => rfl
+  | cons item l' ih =>
+    rw [List.foldl_cons, List.foldl_cons]
+    set fromAcc' := fromAcc₀.set! depth ((fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2) with hfromAcc'
+    have h_depth_in' : depth < fromAcc'.size := by
+      rw [hfromAcc']
+      simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]
+      exact h_depth_in
+    have h_slice_eq : fromAcc'.getD depth #[]
+                    = (fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2 := by
+      rw [hfromAcc']
+      rw [show fromAcc₀.set! depth ((fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2)
+            = fromAcc₀.setIfInBounds depth ((fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2) from rfl]
+      simp only [Array.getD_eq_getD_getElem?,
+                 Array.getElem?_setIfInBounds_self_of_lt h_depth_in,
+                 Option.getD_some]
+    rw [ih fromAcc' h_depth_in', h_slice_eq]
+
+/-- Inner fold (within `calculatePathRankings`) only writes to slot `depth`, so positions
+`target ≠ depth` are preserved. -/
+theorem inner_fold_other_depth_unchanged
+    (l : List (PathsFrom n × Nat)) (fromAcc₀ : Array (Array Nat))
+    (depth target : Nat) (h_ne : depth ≠ target) :
+    (l.foldl (fun (fromAcc : Array (Array Nat)) item =>
+      let (pathFrom, rank) := item
+      let depthSlice := fromAcc.getD depth #[]
+      fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) fromAcc₀).getD target #[]
+    = fromAcc₀.getD target #[] := by
+  induction l generalizing fromAcc₀ with
+  | nil => rfl
+  | cons item l' ih =>
+    rw [List.foldl_cons]
+    rw [ih]
+    show (fromAcc₀.set! depth
+            ((fromAcc₀.getD depth #[]).set! item.1.startVertexIndex.val item.2)).getD target #[]
+       = fromAcc₀.getD target #[]
+    simp only [Array.getD_eq_getD_getElem?, Array.set!_eq_setIfInBounds,
+               Array.getElem?_setIfInBounds_ne h_ne]
+
+/-- Strip the outer `setBetween` wrapper from the setBetween-chain fold: the depth-slice
+of the result equals folding `slice.set! start (inner.set! end r)` directly on the initial
+depth-slice. The 3D analog of `inner_fold_slice_at_depth`. -/
+theorem setBetween_fold_slice_at_depth {n : Nat}
+    (l : List (PathsBetween n × Nat)) (betweenAcc₀ : Array (Array (Array Nat)))
+    (depth : Nat) (h_depth_in : depth < betweenAcc₀.size) :
+    (l.foldl (fun (betweenAcc : Array (Array (Array Nat))) item =>
+      let (pathBetween, rank) := item
+      setBetween betweenAcc depth pathBetween.startVertexIndex.val
+        pathBetween.endVertexIndex.val rank) betweenAcc₀).getD depth #[]
+    = l.foldl (fun (ds : Array (Array Nat)) item =>
+        let s := item.1.startVertexIndex.val
+        let e := item.1.endVertexIndex.val
+        ds.set! s ((ds.getD s #[]).set! e item.2)) (betweenAcc₀.getD depth #[]) := by
+  induction l generalizing betweenAcc₀ with
+  | nil => rfl
+  | cons item l' ih =>
+    rw [List.foldl_cons, List.foldl_cons]
+    set betweenAcc' := setBetween betweenAcc₀ depth item.1.startVertexIndex.val
+        item.1.endVertexIndex.val item.2 with hbetweenAcc'
+    have h_depth_in' : depth < betweenAcc'.size := by
+      rw [hbetweenAcc']
+      unfold setBetween
+      simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]
+      exact h_depth_in
+    have h_slice_eq : betweenAcc'.getD depth #[]
+        = (betweenAcc₀.getD depth #[]).set! item.1.startVertexIndex.val
+            (((betweenAcc₀.getD depth #[]).getD item.1.startVertexIndex.val #[]).set!
+                item.1.endVertexIndex.val item.2) := by
+      rw [hbetweenAcc']
+      unfold setBetween
+      simp only [Array.set!_eq_setIfInBounds, Array.getD_eq_getD_getElem?,
+                 Array.getElem?_setIfInBounds_self_of_lt h_depth_in, Option.getD_some]
+    rw [ih betweenAcc' h_depth_in', h_slice_eq]
+
+/-- The setBetween chain only writes to outer index `depth`, so other depths are
+preserved. The 3D analog of `inner_fold_other_depth_unchanged`. -/
+theorem setBetween_fold_other_depth_unchanged {n : Nat}
+    (l : List (PathsBetween n × Nat)) (betweenAcc₀ : Array (Array (Array Nat)))
+    (depth target : Nat) (h_ne : depth ≠ target) :
+    (l.foldl (fun (betweenAcc : Array (Array (Array Nat))) item =>
+      let (pathBetween, rank) := item
+      setBetween betweenAcc depth pathBetween.startVertexIndex.val
+        pathBetween.endVertexIndex.val rank) betweenAcc₀).getD target #[]
+    = betweenAcc₀.getD target #[] := by
+  induction l generalizing betweenAcc₀ with
+  | nil => rfl
+  | cons item l' ih =>
+    rw [List.foldl_cons]
+    rw [ih]
+    show (setBetween betweenAcc₀ depth item.1.startVertexIndex.val
+            item.1.endVertexIndex.val item.2).getD target #[]
+       = betweenAcc₀.getD target #[]
+    unfold setBetween
+    simp only [Array.set!_eq_setIfInBounds, Array.getD_eq_getD_getElem?,
+               Array.getElem?_setIfInBounds_ne h_ne]
 
 /-! ### `RankState.σInvariant` and extensionality
 
