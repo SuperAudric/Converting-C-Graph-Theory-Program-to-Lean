@@ -941,6 +941,192 @@ private theorem comparePathsFrom_eq_compare_of_start_types_ne
   -- != true case.
   exact bne_iff_ne.mpr h_ne
 
+/-! ### Phase 3: comparePathsFrom total preorder (lifted from comparePathsBetween) -/
+
+/-- comparePathsFrom satisfies the total-preorder properties. Lifted by hand from
+`comparePathsBetween_total_preorder` and the now-public `orderInsensitiveListCmp_*`
+helpers. -/
+theorem comparePathsFrom_total_preorder
+    {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
+    (∀ a : PathsFrom vc, comparePathsFrom vts br a a = Ordering.eq) ∧
+    (∀ a b : PathsFrom vc, comparePathsFrom vts br a b = Ordering.lt →
+                            comparePathsFrom vts br b a = Ordering.gt) ∧
+    (∀ a b : PathsFrom vc, comparePathsFrom vts br a b = Ordering.gt →
+                            comparePathsFrom vts br b a = Ordering.lt) ∧
+    (∀ a b c : PathsFrom vc, comparePathsFrom vts br a b ≠ Ordering.gt →
+                              comparePathsFrom vts br b c ≠ Ordering.gt →
+                              comparePathsFrom vts br a c ≠ Ordering.gt) := by
+  obtain ⟨h_pb_refl, h_pb_anti₁, h_pb_anti₂, h_pb_trans⟩ :=
+    comparePathsBetween_total_preorder (vc := vc) vts br
+  have h_pb_compat := comparePathsBetween_equivCompat (vc := vc) vts br
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · -- Refl.
+    intro a
+    show (let xStartType := vts.getD a.startVertexIndex.val 0
+          let yStartType := vts.getD a.startVertexIndex.val 0
+          if xStartType != yStartType then compare xStartType yStartType
+          else orderInsensitiveListCmp (comparePathsBetween vts br)
+                 a.pathsToVertex a.pathsToVertex) = Ordering.eq
+    simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte]
+    exact orderInsensitiveListCmp_refl _ _ (fun s _ => h_pb_refl s)
+  · -- Antisym₁: .lt → .gt.
+    intros a b h_lt
+    show (let yStartType := vts.getD b.startVertexIndex.val 0
+          let xStartType := vts.getD a.startVertexIndex.val 0
+          if yStartType != xStartType then compare yStartType xStartType
+          else orderInsensitiveListCmp (comparePathsBetween vts br)
+                 b.pathsToVertex a.pathsToVertex) = Ordering.gt
+    have h_lt' : (let xStartType := vts.getD a.startVertexIndex.val 0
+                  let yStartType := vts.getD b.startVertexIndex.val 0
+                  if xStartType != yStartType then compare xStartType yStartType
+                  else orderInsensitiveListCmp (comparePathsBetween vts br)
+                         a.pathsToVertex b.pathsToVertex) = Ordering.lt := h_lt
+    by_cases h_eq : vts.getD a.startVertexIndex.val 0 = vts.getD b.startVertexIndex.val 0
+    · have h_bne_xy : (vts.getD a.startVertexIndex.val 0 != vts.getD b.startVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.startVertexIndex.val 0)
+      have h_bne_yx : (vts.getD b.startVertexIndex.val 0 != vts.getD a.startVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.startVertexIndex.val 0)
+      simp only [h_bne_xy, Bool.false_eq_true, ↓reduceIte] at h_lt'
+      simp only [h_bne_yx, Bool.false_eq_true, ↓reduceIte]
+      exact orderInsensitiveListCmp_swap_lt _ h_pb_anti₁ h_pb_anti₂ _ _ h_lt'
+    · have h_bne_xy : (vts.getD a.startVertexIndex.val 0 != vts.getD b.startVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_eq
+      simp only [h_bne_xy, ↓reduceIte] at h_lt'
+      have h_xy_lt : (vts.getD a.startVertexIndex.val 0 : Nat) < vts.getD b.startVertexIndex.val 0 :=
+        Nat.compare_eq_lt.mp h_lt'
+      have h_yx_ne : vts.getD b.startVertexIndex.val 0 ≠ vts.getD a.startVertexIndex.val 0 := Ne.symm h_eq
+      have h_bne_yx : (vts.getD b.startVertexIndex.val 0 != vts.getD a.startVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_yx_ne
+      simp only [h_bne_yx, ↓reduceIte]
+      exact Nat.compare_eq_gt.mpr h_xy_lt
+  · -- Antisym₂: .gt → .lt.
+    intros a b h_gt
+    show (let yStartType := vts.getD b.startVertexIndex.val 0
+          let xStartType := vts.getD a.startVertexIndex.val 0
+          if yStartType != xStartType then compare yStartType xStartType
+          else orderInsensitiveListCmp (comparePathsBetween vts br)
+                 b.pathsToVertex a.pathsToVertex) = Ordering.lt
+    have h_gt' : (let xStartType := vts.getD a.startVertexIndex.val 0
+                  let yStartType := vts.getD b.startVertexIndex.val 0
+                  if xStartType != yStartType then compare xStartType yStartType
+                  else orderInsensitiveListCmp (comparePathsBetween vts br)
+                         a.pathsToVertex b.pathsToVertex) = Ordering.gt := h_gt
+    by_cases h_eq : vts.getD a.startVertexIndex.val 0 = vts.getD b.startVertexIndex.val 0
+    · have h_bne_xy : (vts.getD a.startVertexIndex.val 0 != vts.getD b.startVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.startVertexIndex.val 0)
+      have h_bne_yx : (vts.getD b.startVertexIndex.val 0 != vts.getD a.startVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.startVertexIndex.val 0)
+      simp only [h_bne_xy, Bool.false_eq_true, ↓reduceIte] at h_gt'
+      simp only [h_bne_yx, Bool.false_eq_true, ↓reduceIte]
+      exact orderInsensitiveListCmp_swap_gt _ h_pb_anti₁ h_pb_anti₂ _ _ h_gt'
+    · have h_bne_xy : (vts.getD a.startVertexIndex.val 0 != vts.getD b.startVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_eq
+      simp only [h_bne_xy, ↓reduceIte] at h_gt'
+      have h_xy_gt : (vts.getD a.startVertexIndex.val 0 : Nat) > vts.getD b.startVertexIndex.val 0 :=
+        Nat.compare_eq_gt.mp h_gt'
+      have h_yx_ne : vts.getD b.startVertexIndex.val 0 ≠ vts.getD a.startVertexIndex.val 0 := Ne.symm h_eq
+      have h_bne_yx : (vts.getD b.startVertexIndex.val 0 != vts.getD a.startVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_yx_ne
+      simp only [h_bne_yx, ↓reduceIte]
+      exact Nat.compare_eq_lt.mpr h_xy_gt
+  · -- Transitivity.
+    intros a b c h_ab h_bc
+    show (let xStartType := vts.getD a.startVertexIndex.val 0
+          let zStartType := vts.getD c.startVertexIndex.val 0
+          if xStartType != zStartType then compare xStartType zStartType
+          else orderInsensitiveListCmp (comparePathsBetween vts br)
+                 a.pathsToVertex c.pathsToVertex) ≠ Ordering.gt
+    -- Restate hypotheses with explicit bindings.
+    have h_ab' : (let xStartType := vts.getD a.startVertexIndex.val 0
+                  let yStartType := vts.getD b.startVertexIndex.val 0
+                  if xStartType != yStartType then compare xStartType yStartType
+                  else orderInsensitiveListCmp (comparePathsBetween vts br)
+                         a.pathsToVertex b.pathsToVertex) ≠ Ordering.gt := h_ab
+    have h_bc' : (let yStartType := vts.getD b.startVertexIndex.val 0
+                  let zStartType := vts.getD c.startVertexIndex.val 0
+                  if yStartType != zStartType then compare yStartType zStartType
+                  else orderInsensitiveListCmp (comparePathsBetween vts br)
+                         b.pathsToVertex c.pathsToVertex) ≠ Ordering.gt := h_bc
+    -- Case analysis on start types.
+    by_cases h_ab_eq : vts.getD a.startVertexIndex.val 0 = vts.getD b.startVertexIndex.val 0
+    · by_cases h_bc_eq : vts.getD b.startVertexIndex.val 0 = vts.getD c.startVertexIndex.val 0
+      · -- a, b, c all have same start type. Use orderInsensitiveListCmp_trans.
+        have h_ac_eq : vts.getD a.startVertexIndex.val 0 = vts.getD c.startVertexIndex.val 0 :=
+          h_ab_eq.trans h_bc_eq
+        have h_bne_ab : (vts.getD a.startVertexIndex.val 0 != vts.getD b.startVertexIndex.val 0) = false := by
+          rw [h_ab_eq]; exact bne_self_eq_false _
+        have h_bne_bc : (vts.getD b.startVertexIndex.val 0 != vts.getD c.startVertexIndex.val 0) = false := by
+          rw [h_bc_eq]; exact bne_self_eq_false _
+        have h_bne_ac : (vts.getD a.startVertexIndex.val 0 != vts.getD c.startVertexIndex.val 0) = false := by
+          rw [h_ac_eq]; exact bne_self_eq_false _
+        simp only [h_bne_ab, Bool.false_eq_true, ↓reduceIte] at h_ab'
+        simp only [h_bne_bc, Bool.false_eq_true, ↓reduceIte] at h_bc'
+        simp only [h_bne_ac, Bool.false_eq_true, ↓reduceIte]
+        exact orderInsensitiveListCmp_trans _ h_pb_anti₁ h_pb_trans h_pb_compat _ _ _ h_ab' h_bc'
+      · -- a's type = b's type ≠ c's type. cmp(b, c) ≠ .gt and ≠ .eq, so .lt. Hence b's type < c's type.
+        -- a's type = b's type < c's type. So compare(a's, c's) = .lt ≠ .gt.
+        have h_bne_bc : (vts.getD b.startVertexIndex.val 0 != vts.getD c.startVertexIndex.val 0) = true :=
+          bne_iff_ne.mpr h_bc_eq
+        simp only [h_bne_bc, ↓reduceIte] at h_bc'
+        -- h_bc' : compare ... ≠ .gt, so .lt or .eq. .eq is impossible (different types). So .lt.
+        have h_bc_lt : compare (vts.getD b.startVertexIndex.val 0) (vts.getD c.startVertexIndex.val 0) = Ordering.lt := by
+          rcases Nat.lt_trichotomy (vts.getD b.startVertexIndex.val 0) (vts.getD c.startVertexIndex.val 0) with h_lt | h_eq' | h_gt
+          · exact Nat.compare_eq_lt.mpr h_lt
+          · exact absurd h_eq' h_bc_eq
+          · exact absurd (Nat.compare_eq_gt.mpr h_gt) h_bc'
+        have h_ac_ne : vts.getD a.startVertexIndex.val 0 ≠ vts.getD c.startVertexIndex.val 0 := by
+          rw [h_ab_eq]; exact h_bc_eq
+        have h_bne_ac : (vts.getD a.startVertexIndex.val 0 != vts.getD c.startVertexIndex.val 0) = true :=
+          bne_iff_ne.mpr h_ac_ne
+        simp only [h_bne_ac, ↓reduceIte]
+        rw [h_ab_eq]
+        rw [h_bc_lt]
+        intro h; cases h
+    · by_cases h_bc_eq : vts.getD b.startVertexIndex.val 0 = vts.getD c.startVertexIndex.val 0
+      · -- a's type ≠ b's type, b's type = c's type. cmp(a, b) ≠ .gt + ≠ .eq ⟹ .lt.
+        have h_bne_ab : (vts.getD a.startVertexIndex.val 0 != vts.getD b.startVertexIndex.val 0) = true :=
+          bne_iff_ne.mpr h_ab_eq
+        simp only [h_bne_ab, ↓reduceIte] at h_ab'
+        have h_ab_lt : compare (vts.getD a.startVertexIndex.val 0) (vts.getD b.startVertexIndex.val 0) = Ordering.lt := by
+          rcases Nat.lt_trichotomy (vts.getD a.startVertexIndex.val 0) (vts.getD b.startVertexIndex.val 0) with h_lt | h_eq' | h_gt
+          · exact Nat.compare_eq_lt.mpr h_lt
+          · exact absurd h_eq' h_ab_eq
+          · exact absurd (Nat.compare_eq_gt.mpr h_gt) h_ab'
+        have h_ac_ne : vts.getD a.startVertexIndex.val 0 ≠ vts.getD c.startVertexIndex.val 0 := by
+          rw [← h_bc_eq]; exact h_ab_eq
+        have h_bne_ac : (vts.getD a.startVertexIndex.val 0 != vts.getD c.startVertexIndex.val 0) = true :=
+          bne_iff_ne.mpr h_ac_ne
+        simp only [h_bne_ac, ↓reduceIte]
+        rw [← h_bc_eq]
+        rw [h_ab_lt]
+        intro h; cases h
+      · -- All three start types differ pairwise (or just a/b and b/c differ).
+        have h_bne_ab : (vts.getD a.startVertexIndex.val 0 != vts.getD b.startVertexIndex.val 0) = true :=
+          bne_iff_ne.mpr h_ab_eq
+        have h_bne_bc : (vts.getD b.startVertexIndex.val 0 != vts.getD c.startVertexIndex.val 0) = true :=
+          bne_iff_ne.mpr h_bc_eq
+        simp only [h_bne_ab, ↓reduceIte] at h_ab'
+        simp only [h_bne_bc, ↓reduceIte] at h_bc'
+        have h_ab_lt : (vts.getD a.startVertexIndex.val 0 : Nat) < vts.getD b.startVertexIndex.val 0 := by
+          rcases Nat.lt_trichotomy (vts.getD a.startVertexIndex.val 0) (vts.getD b.startVertexIndex.val 0) with h_lt | h_eq' | h_gt
+          · exact h_lt
+          · exact absurd h_eq' h_ab_eq
+          · exact absurd (Nat.compare_eq_gt.mpr h_gt) h_ab'
+        have h_bc_lt : (vts.getD b.startVertexIndex.val 0 : Nat) < vts.getD c.startVertexIndex.val 0 := by
+          rcases Nat.lt_trichotomy (vts.getD b.startVertexIndex.val 0) (vts.getD c.startVertexIndex.val 0) with h_lt | h_eq' | h_gt
+          · exact h_lt
+          · exact absurd h_eq' h_bc_eq
+          · exact absurd (Nat.compare_eq_gt.mpr h_gt) h_bc'
+        have h_ac_lt_nat : (vts.getD a.startVertexIndex.val 0 : Nat) < vts.getD c.startVertexIndex.val 0 :=
+          lt_trans h_ab_lt h_bc_lt
+        have h_ac_ne : vts.getD a.startVertexIndex.val 0 ≠ vts.getD c.startVertexIndex.val 0 :=
+          Nat.ne_of_lt h_ac_lt_nat
+        have h_bne_ac : (vts.getD a.startVertexIndex.val 0 != vts.getD c.startVertexIndex.val 0) = true :=
+          bne_iff_ne.mpr h_ac_ne
+        simp only [h_bne_ac, ↓reduceIte]
+        rw [Nat.compare_eq_lt.mpr h_ac_lt_nat]
+        intro h; cases h
+
 /-! ### Phase 3: P3.D and helpers for sortBy positional reasoning
 
 Key facts needed:
@@ -1006,6 +1192,19 @@ private theorem sortBy_first_q_positions_have_start_types
         (((initializePaths G).pathsOfLength.getD (n-1) #[]).toList)).length,
         T.getD (((sortBy (comparePathsFrom T betweenRanks)
           (((initializePaths G).pathsOfLength.getD (n-1) #[]).toList))[k]'h_lt_len).startVertexIndex.val) 0 = k := by
+  -- Set up: total preorder, Pairwise from sortBy_pairwise, perm from sortBy_perm.
+  obtain ⟨_, h_anti₁, h_anti₂, h_trans⟩ :=
+    comparePathsFrom_total_preorder (vc := n) T betweenRanks
+  set pathsAtTop := ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList
+  set cmp := comparePathsFrom T betweenRanks
+  have h_pairwise : (sortBy cmp pathsAtTop).Pairwise (fun a b => cmp a b ≠ Ordering.gt) :=
+    sortBy_pairwise cmp h_anti₂ h_trans pathsAtTop
+  have h_perm : (sortBy cmp pathsAtTop).Perm pathsAtTop := sortBy_perm cmp pathsAtTop
+  -- The actual counting argument from Pairwise + Perm + h_unique. The key reasoning:
+  -- For unique-typed v_k (k < q), pathFrom v_k has unique start type k. By Pairwise +
+  -- antisymmetry, paths with smaller start types must be earlier in sortedList, paths
+  -- with larger must be later. Counting yields exactly k smaller paths, so v_k is at
+  -- position k. The formalization is substantial counting work.
   sorry
 
 /-- **P3.E (TODO)** `convergeOnce (initializePaths G) T` preserves the prefix property,

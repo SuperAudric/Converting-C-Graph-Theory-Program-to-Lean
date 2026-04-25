@@ -378,12 +378,19 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
     induction. Uses `assignRanks_snoc_decompose_strict` (sharper snoc-decomposition with
     exact rank formula) and `assignRanks_foldl_lastEntry_fst` (lastEntry's first
     component).
-  - **P3.D** 🧱 `sortBy_first_q_positions_have_start_types`: statement and strategy
-    documented in `Invariants.lean`. Aux `sortBy_pathsAtTop_length_eq` ✅. The body's
-    counting argument (Pairwise + antisymmetry to identify positions) is left as `sorry`.
+  - **P3.D** 🟡 `sortBy_first_q_positions_have_start_types`: aux1 (length) ✅; total
+    preorder hypotheses extracted (Pairwise + Perm in scope). Body's counting argument
+    remains as `sorry`. Foundation work this session:
+    - **`comparePathsFrom_total_preorder`** ✅ proved (by lifting from
+      `comparePathsBetween_total_preorder` + the now-public `orderInsensitiveListCmp_*`
+      helpers).
+    - Made public: `orderInsensitiveListCmp_refl`, `orderInsensitiveListCmp_swap_lt`,
+      `orderInsensitiveListCmp_swap_gt`, `orderInsensitiveListCmp_trans` in
+      `ComparePathSegments.lean`; `sortBy_pairwise` in `ComparisonSort.lean`.
   - **P3.E** 🟡 `convergeOnce_preserves_lower_uniqueness`: prefix + size conjuncts ✅
     (via `convergeOnce_writeback` + `getFrom_image_isPrefix_for_initializePaths`).
-    Uniqueness conjunct 🧱 sorry pending P3.D.
+    Uniqueness conjunct 🧱 sorry pending P3.D body, plus a small
+    `assignRanks_rank_monotone` helper to bound rank at positions ≥ q.
   - **P3.5** ✅ `convergeLoop_preserves_lower_uniqueness`: closed via fuel induction
     using P3.E.
 

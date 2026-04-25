@@ -282,7 +282,7 @@ These helpers lift the four total-preorder properties from the inner `cmp` to
 the equal-length case. -/
 
 /-- `orderInsensitiveListCmp cmp L L = .eq` when `cmp` is reflexive on (the elements of) `L`. -/
-private theorem orderInsensitiveListCmp_refl {α : Type} (cmp : α → α → Ordering)
+theorem orderInsensitiveListCmp_refl {α : Type} (cmp : α → α → Ordering)
     (L : List α) (h_refl : ∀ a ∈ L, cmp a a = Ordering.eq) :
     orderInsensitiveListCmp cmp L L = Ordering.eq := by
   unfold orderInsensitiveListCmp
@@ -415,7 +415,7 @@ private theorem orderInsensitiveListCmp_foldl_init_preserved {α : Type} (cmp : 
 locate the first position whose cmp is `.lt`; antisym₁ swaps it to `.gt` for the swapped
 zip; preceding `.eq` positions stay `.eq` under symmetry of `.eq`. The length-mismatch
 branch flips by direct case analysis. -/
-private theorem orderInsensitiveListCmp_swap_lt {α : Type} (cmp : α → α → Ordering)
+theorem orderInsensitiveListCmp_swap_lt {α : Type} (cmp : α → α → Ordering)
     (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
     (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
     (L₁ L₂ : List α) :
@@ -490,7 +490,7 @@ private theorem orderInsensitiveListCmp_swap_lt {α : Type} (cmp : α → α →
 
 /-- Antisymmetry-`.gt → .lt` lift for `orderInsensitiveListCmp`. Mirror of `_swap_lt`:
 the first non-`.eq` cmp becomes `.gt` (from antisym₂), preceding `.eq`s stay `.eq`. -/
-private theorem orderInsensitiveListCmp_swap_gt {α : Type} (cmp : α → α → Ordering)
+theorem orderInsensitiveListCmp_swap_gt {α : Type} (cmp : α → α → Ordering)
     (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
     (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
     (L₁ L₂ : List α) :
@@ -679,7 +679,7 @@ private theorem foldl_zip_trans {α : Type} (cmp : α → α → Ordering)
 /-- Transitivity lift for `orderInsensitiveListCmp`. Length-mismatch cases reduce to
 length comparisons; the fully-equal-length case delegates to `foldl_zip_trans` after
 sorting all three lists. -/
-private theorem orderInsensitiveListCmp_trans {α : Type} (cmp : α → α → Ordering)
+theorem orderInsensitiveListCmp_trans {α : Type} (cmp : α → α → Ordering)
     (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
     (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
     (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c ∧ cmp c a = cmp c b)

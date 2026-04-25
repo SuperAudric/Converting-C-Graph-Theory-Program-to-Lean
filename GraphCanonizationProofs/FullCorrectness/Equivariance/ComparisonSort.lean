@@ -387,7 +387,7 @@ private theorem insertSorted_pairwise {α : Type} (cmp : α → α → Ordering)
 
 /-- `sortBy cmp L` produces a `Pairwise`-sorted list. Insertion sort, by induction on `L`
 applying `insertSorted_pairwise` at each step. -/
-private theorem sortBy_pairwise {α : Type} (cmp : α → α → Ordering)
+theorem sortBy_pairwise {α : Type} (cmp : α → α → Ordering)
     (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
     (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
     (L : List α) :
