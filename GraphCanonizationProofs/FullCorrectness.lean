@@ -53,7 +53,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (the chained §3 Stages B–D for `runFrom`) |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                             | ✅ defined + boundary proved |
 | §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                             | ✅ proved (uses §5 disjunctive characterization) |
-| §7   | Other prefix invariants                           | `Invariants`                             | ✅ `getFrom_image_isPrefix_for_initializePaths` proved; ✅ `convergeLoop_preserves_prefix` proved; ✅ `n_distinct_ranks` proved; 🧱 `orderVertices_prefix_invariant` (outer-fold induction) |
+| §7   | Other prefix invariants                           | `Invariants`                             | ✅ `getFrom_image_isPrefix_for_initializePaths` proved; ✅ `convergeLoop_preserves_prefix` proved; ✅ `n_distinct_ranks` proved; 🟡 `orderVertices_prefix_invariant` reduced to a single deep sub-lemma `convergeLoop_preserves_lower_uniqueness` (P3) — outer skeleton + Phase 2 breakTie step ✅ proved |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
 ## Open obligations (5 total)
@@ -63,7 +63,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. |
 | `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |
-| `orderVertices_prefix_invariant`      | `Invariants`                       | Specialized to `state := initializePaths G`. Induct on the outer fold using `convergeLoop_preserves_prefix` + `breakTie_targetPos_is_min_tied`. (`orderVertices_n_distinct_ranks` is closed as a pigeonhole corollary.) Requires a "convergeLoop preserves uniquely-held ranks 0..p-1" companion lemma. |
+| `convergeLoop_preserves_lower_uniqueness` | `Invariants`                   | The deep sub-lemma blocking `orderVertices_prefix_invariant`. For `T` prefix with `0..q-1` uniquely held by witnesses `v_0, ..., v_{q-1}` (with `T[v_k] = k`), `convergeLoop _ T fuel` has the same property with the SAME witnesses (`T'[v_k] = k`). Strategy: induct on fuel, then for each `convergeOnce` step, show that `getFrom (n-1) v_k = k`. This requires P3.2 (sortBy sorts by start type, so `pathFrom v_k` lands at position `k`) and P3.3 (assignRanks gives rank `k` to position `k` for distinct consecutive start types). P3.1 (`comparePathsFrom_eq_compare_of_start_types_ne`) ✅ proved. |
 | `run_isomorphic_eq` (⟹)               | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2. |
 
 --------------------------------------------------------------------------------
@@ -335,10 +335,37 @@ convergeLoop_preserves_prefix              : ✅ proved (specialized to `state :
 getFrom_image_isPrefix_for_initializePaths : ✅ proved (deep core: `n = 0` boundary + `n ≥ 1` via
                                               outer/inner fold helpers + dense-rank density)
 breakTie_targetPos_is_min_tied             : ✅ proved
-orderVertices_prefix_invariant             : 🧱 sorry (induct on the outer fold)
+orderVertices_prefix_invariant             : 🟡 closed conditional on Phase 3 sub-lemma
+                                              `convergeLoop_preserves_lower_uniqueness`. Outer
+                                              induction skeleton (`_strong` form) and Phase 2
+                                              (breakTie step) ✅ proved.
 orderVertices_n_distinct_ranks             : ✅ proved (corollary of `_prefix_invariant` at `p = n`
-                                              via pigeonhole + `Finite.injective_iff_bijective`)
+                                              via pigeonhole + `Finite.injective_iff_bijective`,
+                                              now requires a `vts.size = n` hypothesis to thread
+                                              through the strengthened invariant)
 ```
+
+The `orderVertices_prefix_invariant` proof factors into three phases:
+
+- **Phase 1 — inductive skeleton** (✅): Strengthened invariant (`_strong` form) tracks
+  both the prefix-typing property and the uniqueness `0..q-1`. Induction on `q` from `0`
+  to `p`. The base case is vacuous. The step uses Phase 3 (convergeLoop preservation)
+  followed by Phase 2 (breakTie step).
+
+- **Phase 2 — breakTie step** (✅ as `breakTie_step_preserves_uniqueness`): For `T`
+  prefix with `0..q-1` uniquely held and `q < n`, `(breakTie T q).1` is prefix and has
+  `0..q` uniquely held. Cases on `breakTieCount T q < 2` (noop) or `≥ 2` (fires).
+  Uses `breakTie_getD_below`, `breakTie_getD_at_min`, `breakTie_getD_at_other`,
+  `breakTie_getD_above_or`, plus a converse to `breakTieCount_ge_two_of_distinct`
+  (`exists_two_distinct_q_in_T`, derived from `List.Duplicate` + `List.Sublist`).
+
+- **Phase 3 — convergeLoop preservation** (🧱 single sorry, P3.1 done): For `T` prefix
+  with `0..q-1` uniquely held by `v_0..v_{q-1}` (with `T[v_k] = k`), `convergeLoop _ T fuel`
+  has the same property with the SAME witnesses. The proof requires reasoning about
+  `comparePathsFrom`'s behavior on differing start types (P3.1 ✅), the position of unique-
+  typed paths in `sortBy comparePathsFrom T pathsAtTop` (P3.2 — sorts to position `k` for
+  unique type `k`), and the rank assigned by `assignRanks` (P3.3 — rank `k` for position
+  `k` when consecutive start types differ).
 
 Closing `getFrom_image_isPrefix_for_initializePaths` (n ≥ 1) used these helpers, all in
 `Invariants.lean`:

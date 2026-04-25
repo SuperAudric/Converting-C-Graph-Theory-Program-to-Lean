@@ -619,7 +619,7 @@ theorem breakTie_getD_at_min (vts : Array VertexType) (t₀ : VertexType)
 
 /-- Auxiliary: the foldl form of `breakTieCount` agrees with `countP` on the same
 predicate. -/
-private theorem breakTieCount_eq_countP (vts : Array VertexType) (t₀ : VertexType) :
+theorem breakTieCount_eq_countP (vts : Array VertexType) (t₀ : VertexType) :
     breakTieCount vts t₀ = vts.toList.countP (fun v => v == t₀) := by
   unfold breakTieCount
   rw [← Array.foldl_toList]
@@ -640,7 +640,7 @@ private theorem breakTieCount_eq_countP (vts : Array VertexType) (t₀ : VertexT
 /-- Counting helper: two distinct in-bounds positions with value `t₀` give `count ≥ 2`.
 [sparse→dense] Proves the obvious "two witnesses → countP ≥ 2" by extracting both list
 positions and showing the filtered list has length ≥ 2. -/
-private theorem breakTieCount_ge_two_of_distinct (vts : Array VertexType) (t₀ : VertexType)
+theorem breakTieCount_ge_two_of_distinct (vts : Array VertexType) (t₀ : VertexType)
     (i j : Nat) (hi_size : i < vts.size) (hj_size : j < vts.size) (hij : i ≠ j)
     (hi_val : vts.getD i 0 = t₀) (hj_val : vts.getD j 0 = t₀) :
     2 ≤ breakTieCount vts t₀ := by

@@ -1,6 +1,8 @@
 import FullCorrectness.Equivariance.ConvergeLoop
 import FullCorrectness.Tiebreak
 import Mathlib.Tactic.IntervalCases
+import Mathlib.Data.List.Duplicate
+import Mathlib.Data.List.NodupEquivFin
 
 /-!
 # §7  "Converged types are a prefix of ℕ" invariant
@@ -875,14 +877,397 @@ theorem breakTie_targetPos_is_min_tied
     have hw₂_eq : w₂.val = Nat.find h_ex := eq_vstar w₂ hw₂_size hvts₂ h₂_out
     exact hne (Fin.ext (hw₁_eq.trans hw₂_eq.symm))
 
-/-! ## §7.3  Prefix invariant across `orderVertices` -/
+/-! ## §7.3  Prefix invariant across `orderVertices`
 
-/-- After `p` iterations of `orderVertices`'s outer loop on `initializePaths G`, values
-`0..p-1` are each held by a single vertex and the remaining typing is a prefix typing
-over values `≥ p`. -/
+Strengthened invariant: after `q` outer iterations on `initializePaths G`, the typing is
+a prefix typing AND values `0..q-1` are each held by exactly one vertex. Inductive
+proof needs:
+- Phase 2 — `breakTie_step_preserves_uniqueness`: breakTie at target `q` extends the
+  uniqueness from `0..q-1` to `0..q`, given the input is prefix with `0..q-1` unique.
+- Phase 3 — `convergeLoop_preserves_lower_uniqueness`: convergeLoop preserves both
+  the prefix property and the `0..q-1` uniqueness. Same witnesses.
+
+Phase 3 is the deep sub-lemma. It rests on the algorithm's refinement property:
+`comparePathsFrom T` distinguishes paths whose start vertices have different types
+in `T`, so unique-typed vertices remain unique under `convergeOnce`.
+-/
+
+/-- The "uniqueness up to q" property: each value in `Fin q` has exactly one witness. -/
+private def UniquelyHeldBelow (vts : Array VertexType) (q : Nat) : Prop :=
+  ∀ k : Fin q, ∃! v : Fin n, vts.getD v.val 0 = k.val
+
+/-! ### Phase 3: convergeLoop preserves lower-uniqueness
+
+The deep sub-lemma. Strategy:
+- **P3.1** `comparePathsFrom_eq_compare_of_start_types_ne` — mechanical from the
+  definition: when two start types differ, the comparator returns the comparison of
+  the types directly.
+- **P3.2** `sortBy_positions_of_uniquely_held` — for `pathsAtTop` with start vertices
+  forming `List.range n`, uniquely-typed start vertices `v_0, ..., v_{q-1}` (with types
+  `0, ..., q-1`) sort to positions `0, ..., q-1` (in this order) under the comparator.
+- **P3.3** `assignRanks_at_position_of_singleton_chain` — for the first `q` positions
+  where each is in its own equivalence class (different cmp from previous), the rank at
+  position `i` equals `i`.
+- **P3.4** `convergeOnce_preserves_uniqueness` — combine P3.1/P3.2/P3.3: applying
+  `convergeOnce` to `T` gives `T'` where `T'[v_k.val] = k` for each unique-typed `v_k`.
+- **P3.5** `convergeLoop_preserves_lower_uniqueness` — induct on fuel using P3.4. -/
+
+/-- **P3.1** `comparePathsFrom` returns the comparison of start types when they differ. -/
+private theorem comparePathsFrom_eq_compare_of_start_types_ne
+    (vts : Array VertexType) (betweenRanks : Nat → Nat → Nat → Nat)
+    (pf_u pf_v : PathsFrom n)
+    (h_ne : vts.getD pf_u.startVertexIndex.val 0 ≠ vts.getD pf_v.startVertexIndex.val 0) :
+    comparePathsFrom vts betweenRanks pf_u pf_v
+      = compare (vts.getD pf_u.startVertexIndex.val 0) (vts.getD pf_v.startVertexIndex.val 0) := by
+  unfold comparePathsFrom
+  show (if vts.getD pf_u.startVertexIndex.val 0 != vts.getD pf_v.startVertexIndex.val 0 then
+          compare (vts.getD pf_u.startVertexIndex.val 0) (vts.getD pf_v.startVertexIndex.val 0)
+        else _) = _
+  rw [if_pos]
+  -- != true case.
+  exact bne_iff_ne.mpr h_ne
+
+/-- **Phase 3 (TODO P3.2 + P3.3 + P3.4).** convergeLoop preserves prefix typing AND
+lower-uniqueness. The proof requires:
+- (P3.2) For uniquely-typed `v_k` with `T[v_k] = k` (`k < q`), pathFrom `v_k` sorts to
+  position `k` in `sortBy comparePathsFrom T pathsAtTop`.
+- (P3.3) `assignRanks` assigns rank `k` to position `k` for the first `q` positions
+  (since consecutive distinct start types give cmp ≠ .eq, so rank increments by 1).
+- (P3.4) Hence `convergeOnce T` produces `T'` with `T'[v_k.val] = k`.
+- Induction on fuel for `convergeLoop`.
+-/
+private theorem convergeLoop_preserves_lower_uniqueness
+    (G : AdjMatrix n) (T : Array VertexType) (q : Nat) (fuel : Nat)
+    (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
+    (h_unique : @UniquelyHeldBelow n T q) :
+    @IsPrefixTyping n (convergeLoop (initializePaths G) T fuel) ∧
+    @UniquelyHeldBelow n (convergeLoop (initializePaths G) T fuel) q := by
+  sorry
+
+/-! ### Phase 2 helpers and main breakTie step lemma -/
+
+/-- For `T` prefix with `0..q-1` uniquely held and `q < n`, value `q` must be held
+by ≥ 1 vertex. (Proof: `0..q-1` exhaust `q` vertices; the remaining `n - q ≥ 1` vertices
+have values in `0..M-1` (prefix), but can't reuse `0..q-1` (uniquely held), so they have
+values `≥ q`. Prefix forces all values up to `M-1` to be held, so in particular `q`.) -/
+private theorem prefix_unique_below_implies_value_held
+    (T : Array VertexType) (q : Nat) (hq : q < n)
+    (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
+    (h_unique : @UniquelyHeldBelow n T q) :
+    ∃ v : Fin n, T.getD v.val 0 = q := by
+  classical
+  obtain ⟨M, h_bound, h_witness⟩ := h_prefix
+  by_contra h_no_q_raw
+  -- h_no_q_raw : ¬ ∃ v : Fin n, T.getD v.val 0 = q.
+  have h_no_q : ∀ v : Fin n, T.getD v.val 0 ≠ q := by
+    intro v hv
+    exact h_no_q_raw ⟨v, hv⟩
+  -- Step: M ≤ q (else value q would be present by h_witness, contradiction with h_no_q).
+  have h_M_le_q : M ≤ q := by
+    by_contra h_M_gt_raw
+    have h_M_gt : q < M := Nat.lt_of_not_ge h_M_gt_raw
+    obtain ⟨v, hv⟩ := h_witness q h_M_gt
+    exact h_no_q v hv
+  -- All values are in `Fin q`. The map v ↦ T-value-of-v is injective (by uniqueness of
+  -- 0..q-1). Hence n ≤ q. Contradicts hq.
+  have h_im_in_fin_q : ∀ v : Fin n, T.getD v.val 0 < q :=
+    fun v => lt_of_lt_of_le (h_bound v) h_M_le_q
+  let φ : Fin n → Fin q := fun v => ⟨T.getD v.val 0, h_im_in_fin_q v⟩
+  have h_φ_inj : Function.Injective φ := by
+    intro v₁ v₂ h_φ
+    have h_val_eq : T.getD v₁.val 0 = T.getD v₂.val 0 := congrArg Fin.val h_φ
+    obtain ⟨_, _, h_uniq⟩ := h_unique ⟨T.getD v₁.val 0, h_im_in_fin_q v₁⟩
+    exact (h_uniq v₁ rfl).trans (h_uniq v₂ h_val_eq.symm).symm
+  have h_card : Fintype.card (Fin n) ≤ Fintype.card (Fin q) :=
+    Fintype.card_le_of_injective φ h_φ_inj
+  simp at h_card
+  omega
+
+/-- Converse of `breakTieCount_ge_two_of_distinct`: from `count ≥ 2`, find a vertex
+distinct from a given one (e.g., `v_star`) with value `q`. -/
+private theorem exists_two_distinct_q_in_T
+    (T : Array VertexType) (q : VertexType) (h_size : T.size = n)
+    (v_star_idx : Nat) (_hv_star_lt : v_star_idx < n)
+    (_hv_star_val : T.getD v_star_idx 0 = q)
+    (hcnt : 2 ≤ breakTieCount T q) :
+    ∃ w : Fin n, w.val ≠ v_star_idx ∧ T.getD w.val 0 = q := by
+  -- breakTieCount T q = T.toList.countP (· == q) = T.toList.count q.
+  rw [breakTieCount_eq_countP] at hcnt
+  -- T.toList.countP (· == q) = T.toList.count q (definitionally).
+  have h_count : 2 ≤ T.toList.count q := hcnt
+  -- count ≥ 2 ⟹ q ∈+ T.toList (Duplicate).
+  have h_dup : List.Duplicate q T.toList := List.duplicate_iff_two_le_count.mpr h_count
+  -- Duplicate ⟹ [q, q] is a sublist.
+  have h_subl : List.Sublist [q, q] T.toList := List.duplicate_iff_sublist.mp h_dup
+  -- Extract two distinct positions from the sublist.
+  obtain ⟨f, hf⟩ := List.sublist_iff_exists_fin_orderEmbedding_get_eq.mp h_subl
+  -- f : Fin 2 ↪o Fin T.toList.length.
+  have h_size_eq : T.toList.length = T.size := Array.length_toList
+  -- Build Fin indices for accessing [q, q] at positions 0 and 1.
+  have h_len_qq : ([q, q] : List VertexType).length = 2 := rfl
+  have h_0_lt : 0 < ([q, q] : List VertexType).length := by rw [h_len_qq]; omega
+  have h_1_lt : 1 < ([q, q] : List VertexType).length := by rw [h_len_qq]; omega
+  let i0 : Fin ([q, q] : List VertexType).length := ⟨0, h_0_lt⟩
+  let i1 : Fin ([q, q] : List VertexType).length := ⟨1, h_1_lt⟩
+  have h_f0_lt : (f i0).val < T.toList.length := (f i0).isLt
+  have h_f1_lt : (f i1).val < T.toList.length := (f i1).isLt
+  have h_toList_len_n : T.toList.length = n := h_size_eq.trans h_size
+  have h_f0_lt_n : (f i0).val < n := h_toList_len_n ▸ h_f0_lt
+  have h_f1_lt_n : (f i1).val < n := h_toList_len_n ▸ h_f1_lt
+  -- Order embedding: 0 < 1 ⟹ f 0 < f 1.
+  have h_f01_lt : (f i0).val < (f i1).val := by
+    have h01 : i0 < i1 := by
+      show (i0.val : Nat) < i1.val
+      simp [i0, i1]
+    exact f.lt_iff_lt.mpr h01
+  -- T.toList.get (f i0) = q, T.toList.get (f i1) = q.
+  have h_get_q0 : T.toList.get (f i0) = q := by
+    have h_eq := hf i0
+    have h_i0 : ([q, q] : List VertexType).get i0 = q := by simp [i0]
+    rw [← h_i0]; exact h_eq.symm
+  have h_get_q1 : T.toList.get (f i1) = q := by
+    have h_eq := hf i1
+    have h_i1 : ([q, q] : List VertexType).get i1 = q := by simp [i1]
+    rw [← h_i1]; exact h_eq.symm
+  have h_t0 : T.getD (f i0).val 0 = q := by
+    have h_lt : (f i0).val < T.size := by rw [← h_size_eq]; exact (f i0).isLt
+    have h_g : T.toList[(f i0).val]'h_f0_lt = q := h_get_q0
+    rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_getElem h_lt, Option.getD_some]
+    have : T.toList[(f i0).val]'h_f0_lt = T[(f i0).val]'h_lt := Array.getElem_toList _
+    rw [← this]; exact h_g
+  have h_t1 : T.getD (f i1).val 0 = q := by
+    have h_lt : (f i1).val < T.size := by rw [← h_size_eq]; exact (f i1).isLt
+    have h_g : T.toList[(f i1).val]'h_f1_lt = q := h_get_q1
+    rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_getElem h_lt, Option.getD_some]
+    have : T.toList[(f i1).val]'h_f1_lt = T[(f i1).val]'h_lt := Array.getElem_toList _
+    rw [← this]; exact h_g
+  -- One of (f i0).val, (f i1).val differs from v_star_idx.
+  by_cases h_f0_eq : (f i0).val = v_star_idx
+  · refine ⟨⟨(f i1).val, h_f1_lt_n⟩, ?_, h_t1⟩
+    intro h_eq
+    rw [h_eq] at h_f01_lt
+    rw [← h_f0_eq] at h_f01_lt
+    exact absurd h_f01_lt (Nat.lt_irrefl _)
+  · exact ⟨⟨(f i0).val, h_f0_lt_n⟩, h_f0_eq, h_t0⟩
+
+/-- **Phase 2.** breakTie at `q` extends uniqueness from `0..q-1` to `0..q`, preserving
+the prefix-typing property. Requires `q < n` (so value `q` is necessarily present in any
+prefix typing with `0..q-1` unique). -/
+private theorem breakTie_step_preserves_uniqueness
+    (T : Array VertexType) (q : Nat) (hq : q < n)
+    (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
+    (h_unique : @UniquelyHeldBelow n T q) :
+    @IsPrefixTyping n (breakTie T q).1 ∧
+    @UniquelyHeldBelow n (breakTie T q).1 (q + 1) := by
+  classical
+  -- Set up.
+  obtain ⟨M, h_bound, h_witness⟩ := h_prefix
+  obtain ⟨v_q, hv_q⟩ := prefix_unique_below_implies_value_held T q hq h_size
+                          ⟨M, h_bound, h_witness⟩ h_unique
+  have hv_q_size : v_q.val < T.size := h_size ▸ v_q.isLt
+  have h_ex : ∃ i, i < T.size ∧ T.getD i 0 = q := ⟨v_q.val, hv_q_size, hv_q⟩
+  set v_star_idx := Nat.find h_ex with hv_star_def
+  have hv_star_spec : v_star_idx < T.size ∧ T.getD v_star_idx 0 = q := Nat.find_spec h_ex
+  have hv_star_size : v_star_idx < T.size := hv_star_spec.1
+  have hv_star_val : T.getD v_star_idx 0 = q := hv_star_spec.2
+  have hv_star_min : ∀ i, i < v_star_idx → T.getD i 0 ≠ q := fun i hi h_eq =>
+    Nat.find_min h_ex hi ⟨lt_trans hi hv_star_size, h_eq⟩
+  have hv_star_lt_n : v_star_idx < n := h_size ▸ hv_star_size
+  let v_star : Fin n := ⟨v_star_idx, hv_star_lt_n⟩
+  -- Bound: q < M (since value q is in T).
+  have hqM : q < M := by
+    have := h_bound v_q
+    rw [hv_q] at this
+    exact this
+  -- Helper: bridge output values to T values via case analysis on T[w] vs q.
+  -- Returns: if output[w] ≤ q, then either T[w] = output[w] < q (preserved), or
+  -- T[w] = q ∧ w = v_star (kept as q). Else output[w] > q.
+  have h_output_below_or_eq_q : ∀ w : Fin n,
+      (breakTie T q).1.getD w.val 0 < q → T.getD w.val 0 = (breakTie T q).1.getD w.val 0 := by
+    intro w h_out_lt
+    rcases lt_trichotomy (T.getD w.val 0) q with h_lt | h_eq | h_gt
+    · rw [breakTie_getD_below T q h_lt]
+    · exfalso
+      have hw_size : w.val < T.size := h_size ▸ w.isLt
+      have h_ge := breakTie_getD_target_ge T q hw_size h_eq
+      exact absurd (lt_of_le_of_lt h_ge h_out_lt) (Nat.lt_irrefl q)
+    · exfalso
+      have h_out_ge_T : T.getD w.val 0 ≤ (breakTie T q).1.getD w.val 0 := by
+        rcases breakTie_getD_above_or T q h_gt with h | h
+        · rw [h]
+        · rw [h]; exact Nat.le_succ _
+      have h_q_lt_out : q < (breakTie T q).1.getD w.val 0 := lt_of_lt_of_le h_gt h_out_ge_T
+      exact absurd (lt_trans h_q_lt_out h_out_lt) (Nat.lt_irrefl q)
+  -- Output[w] = q iff T[w] = q AND w.val = v_star_idx.
+  have h_output_eq_q_iff_vstar : ∀ w : Fin n,
+      (breakTie T q).1.getD w.val 0 = q → w.val = v_star_idx := by
+    intro w h_out_eq
+    by_contra hw_ne
+    have hw_size : w.val < T.size := h_size ▸ w.isLt
+    rcases lt_trichotomy (T.getD w.val 0) q with h_lt | h_eq | h_gt
+    · -- T[w] < q ⟹ output = T[w] < q ≠ q.
+      rw [breakTie_getD_below T q h_lt] at h_out_eq
+      exact absurd h_out_eq (Nat.ne_of_lt h_lt)
+    · -- T[w] = q ∧ w ≠ v_star ⟹ output = q + 1 ≠ q.
+      have h_at_other := breakTie_getD_at_other T q hv_star_size hv_star_val hv_star_min
+                          hw_size h_eq hw_ne
+      rw [h_at_other] at h_out_eq
+      exact absurd h_out_eq (Nat.succ_ne_self q)
+    · -- T[w] > q ⟹ output ≥ q + 1 > q.
+      rcases breakTie_getD_above_or T q h_gt with h | h
+      · rw [h] at h_out_eq; exact absurd h_out_eq (Nat.ne_of_gt h_gt)
+      · rw [h] at h_out_eq
+        exact absurd h_out_eq (Nat.ne_of_gt (Nat.lt_succ_of_lt h_gt))
+  -- Uniqueness 0..q in output.
+  have h_unique_qp1 : @UniquelyHeldBelow n (breakTie T q).1 (q + 1) := by
+    intro k
+    have hk_lt_qp1 : k.val < q + 1 := k.isLt
+    rcases Nat.lt_or_ge k.val q with hk_lt | hk_ge
+    · -- k.val < q: preserved from h_unique.
+      obtain ⟨w, hw_val, hw_uniq⟩ := h_unique ⟨k.val, hk_lt⟩
+      have hw_val' : T.getD w.val 0 = k.val := hw_val
+      refine ⟨w, ?_, ?_⟩
+      · show (breakTie T q).1.getD w.val 0 = k.val
+        rw [breakTie_getD_below T q (hw_val' ▸ hk_lt)]
+        exact hw_val'
+      · intro w' hw'_val
+        show w' = w
+        have hw'_val' : (breakTie T q).1.getD w'.val 0 = k.val := hw'_val
+        have h_out_lt : (breakTie T q).1.getD w'.val 0 < q := hw'_val' ▸ hk_lt
+        have h_orig := h_output_below_or_eq_q w' h_out_lt
+        have h_T_eq : T.getD w'.val 0 = k.val := h_orig.trans hw'_val'
+        exact hw_uniq w' h_T_eq
+    · -- k.val = q.
+      have hk_eq : k.val = q := Nat.le_antisymm (Nat.lt_succ_iff.mp hk_lt_qp1) hk_ge
+      refine ⟨v_star, ?_, ?_⟩
+      · show (breakTie T q).1.getD v_star.val 0 = k.val
+        rw [hk_eq]
+        exact breakTie_getD_at_min T q hv_star_size hv_star_val hv_star_min
+      · intro w hw_val
+        show w = v_star
+        have hw_val' : (breakTie T q).1.getD w.val 0 = k.val := hw_val
+        rw [hk_eq] at hw_val'
+        exact Fin.ext (h_output_eq_q_iff_vstar w hw_val')
+  -- Prefix property.
+  have h_prefix_out : @IsPrefixTyping n (breakTie T q).1 := by
+    by_cases hcnt : breakTieCount T q < 2
+    · have h_noop : (breakTie T q).1 = T := by rw [breakTie_noop T q hcnt]
+      rw [h_noop]; exact ⟨M, h_bound, h_witness⟩
+    · have hcnt' : 2 ≤ breakTieCount T q := Nat.le_of_not_lt hcnt
+      refine ⟨M + 1, ?_, ?_⟩
+      · intro v
+        have hv_size : v.val < T.size := h_size ▸ v.isLt
+        have h_bound_v : T.getD v.val 0 < M := h_bound v
+        rcases lt_trichotomy (T.getD v.val 0) q with h_lt | h_eq | h_gt
+        · rw [breakTie_getD_below T q h_lt]
+          exact Nat.lt_succ_of_lt h_bound_v
+        · rcases breakTie_getD_target T q hv_size h_eq with h | h
+          · rw [h]; exact Nat.lt_succ_of_lt hqM
+          · rw [h]; exact Nat.succ_lt_succ hqM
+        · rw [breakTie_getD_above T q hcnt' h_gt]
+          exact Nat.succ_lt_succ h_bound_v
+      · intro k hk
+        rcases lt_trichotomy k q with h_lt | h_eq | h_gt
+        · obtain ⟨v, hv_val, _⟩ := h_unique ⟨k, h_lt⟩
+          have hv_val' : T.getD v.val 0 = k := hv_val
+          refine ⟨v, ?_⟩
+          show (breakTie T q).1.getD v.val 0 = k
+          rw [breakTie_getD_below T q (hv_val' ▸ h_lt)]
+          exact hv_val'
+        · -- h_eq : k = q.
+          refine ⟨v_star, ?_⟩
+          rw [h_eq]
+          exact breakTie_getD_at_min T q hv_star_size hv_star_val hv_star_min
+        · rcases Nat.lt_or_ge k (q + 1 + 1) with h_le | h_ge
+          · have hk_eq : k = q + 1 := by
+              have h_le' : k ≤ q + 1 := Nat.lt_succ_iff.mp h_le
+              exact Nat.le_antisymm h_le' h_gt
+            have h_other_exists : ∃ w : Fin n, w.val ≠ v_star_idx ∧ T.getD w.val 0 = q :=
+              exists_two_distinct_q_in_T T q h_size v_star_idx hv_star_lt_n hv_star_val hcnt'
+            obtain ⟨w, hw_ne, hw_val⟩ := h_other_exists
+            refine ⟨w, ?_⟩
+            have hw_size : w.val < T.size := h_size ▸ w.isLt
+            rw [breakTie_getD_at_other T q hv_star_size hv_star_val hv_star_min
+                  hw_size hw_val hw_ne, hk_eq]
+          · -- q + 1 + 1 ≤ k, so k ≥ 2.
+            have h_ge' : q + 1 + 1 ≤ k := h_ge
+            have h_one_le_qpp : (1 : Nat) ≤ q + 1 + 1 := Nat.succ_le_succ (Nat.zero_le _)
+            have hk1 : 1 ≤ k := le_trans h_one_le_qpp h_ge'
+            have h_kpr : k - 1 + 1 = k := Nat.sub_add_cancel hk1
+            -- Subtract 1 from both sides of h_ge to get q + 1 ≤ k - 1.
+            have h_q1_le_kpr : q + 1 ≤ k - 1 := by
+              have := h_ge'
+              rw [← h_kpr] at this
+              exact Nat.le_of_succ_le_succ this
+            have hk_pred_lt_M : k - 1 < M := by
+              have h_k_le_M : k ≤ M := Nat.lt_succ_iff.mp hk
+              -- k - 1 < k ≤ M.
+              calc k - 1 < k - 1 + 1 := Nat.lt_succ_self _
+                _ = k := h_kpr
+                _ ≤ M := h_k_le_M
+            obtain ⟨v, hv⟩ := h_witness (k - 1) hk_pred_lt_M
+            have hv_gt : T.getD v.val 0 > q := by
+              rw [hv]
+              exact Nat.lt_of_succ_le h_q1_le_kpr
+            refine ⟨v, ?_⟩
+            rw [breakTie_getD_above T q hcnt' hv_gt, hv]
+            exact h_kpr
+  exact ⟨h_prefix_out, h_unique_qp1⟩
+
+/-- After `p` iterations of `orderVertices`'s outer loop on `initializePaths G`, the typing
+is a prefix typing AND values `0..p-1` are each held by a single vertex.
+
+This is the strengthened invariant; the original theorem statement is the second
+conjunct (modulo the explicit foldl form). -/
+private theorem orderVertices_prefix_invariant_strong
+    (G : AdjMatrix n) (vts : Array VertexType)
+    (h_size : vts.size = n) (hv : @IsPrefixTyping n vts) :
+    ∀ q, q ≤ n →
+      let T_q := (List.range q).foldl
+        (fun currentTypes targetPosition =>
+          let convergedTypes := convergeLoop (initializePaths G) currentTypes n
+          (breakTie convergedTypes targetPosition).1) vts
+      T_q.size = n ∧
+      @IsPrefixTyping n T_q ∧
+      @UniquelyHeldBelow n T_q q := by
+  intro q
+  induction q with
+  | zero =>
+    intro _
+    refine ⟨h_size, hv, ?_⟩
+    intro k; exact k.elim0
+  | succ q' ih =>
+    intro hq
+    have hq' : q' ≤ n := Nat.le_of_succ_le hq
+    have hq_lt : q' < n := hq
+    obtain ⟨h_size_q', h_prefix_q', h_unique_q'⟩ := ih hq'
+    -- Set name for T_{q'} (the foldl over List.range q').
+    set T_q' := (List.range q').foldl
+      (fun currentTypes targetPosition =>
+        let convergedTypes := convergeLoop (initializePaths G) currentTypes n
+        (breakTie convergedTypes targetPosition).1) vts with hT_q'
+    -- T_{q'+1} = body T_{q'} q' = (breakTie (convergeLoop _ T_q' n) q').1.
+    show let T_qp1 := (List.range (q' + 1)).foldl _ vts
+         T_qp1.size = n ∧ _ ∧ _
+    rw [show List.range (q' + 1) = List.range q' ++ [q'] from List.range_succ,
+        List.foldl_append, List.foldl_cons, List.foldl_nil]
+    -- Apply Phase 3: convergeLoop preserves prefix + lower-uniqueness.
+    have ⟨h_prefix_conv, h_unique_conv⟩ :=
+      convergeLoop_preserves_lower_uniqueness G T_q' q' n h_size_q' h_prefix_q' h_unique_q'
+    have h_size_conv : (convergeLoop (initializePaths G) T_q' n).size = n := by
+      rw [convergeLoop_size_preserving]; exact h_size_q'
+    -- Apply Phase 2: breakTie step preserves prefix + extends uniqueness.
+    have ⟨h_prefix_bt, h_unique_bt⟩ :=
+      breakTie_step_preserves_uniqueness (convergeLoop (initializePaths G) T_q' n) q' hq_lt
+        h_size_conv h_prefix_conv h_unique_conv
+    have h_size_bt : (breakTie (convergeLoop (initializePaths G) T_q' n) q').1.size = n := by
+      rw [breakTie_size]; exact h_size_conv
+    exact ⟨h_size_bt, h_prefix_bt, h_unique_bt⟩
+
 theorem orderVertices_prefix_invariant
-    (G : AdjMatrix n) (vts : Array VertexType) (p : Nat) (_hp : p ≤ n)
-    (_hv : @IsPrefixTyping n vts) :
+    (G : AdjMatrix n) (vts : Array VertexType) (p : Nat) (hp : p ≤ n)
+    (h_size : vts.size = n)
+    (hv : @IsPrefixTyping n vts) :
     ∀ k : Fin p,
       ∃! v : Fin n,
         ((List.range p).foldl
@@ -890,7 +1275,7 @@ theorem orderVertices_prefix_invariant
             let convergedTypes := convergeLoop (initializePaths G) currentTypes n
             (breakTie convergedTypes targetPosition).1)
           vts).getD v.val 0 = k.val := by
-  sorry
+  exact (orderVertices_prefix_invariant_strong G vts h_size hv p hp).2.2
 
 /-- After all `n` iterations of `orderVertices`'s outer loop, every vertex has a
 distinct rank. This is the form of §7 used in §8 and Stage D.
@@ -903,6 +1288,7 @@ a `k`, hence `rank v < n`. Then `rank i = rank j` forces `k_i = k_j` (Fin extens
 on the same Nat), and the unique witness condition forces `i = j`. -/
 theorem orderVertices_n_distinct_ranks
     (G : AdjMatrix n) (vts : Array VertexType)
+    (h_size : vts.size = n)
     (hv : @IsPrefixTyping n vts) :
     ∀ i j : Fin n,
       i ≠ j →
@@ -917,7 +1303,7 @@ theorem orderVertices_n_distinct_ranks
             (breakTie convergedTypes targetPosition).1)
           vts := rfl
   rw [h_unfold] at h_eq
-  have h_inv := orderVertices_prefix_invariant G vts n (le_refl n) hv
+  have h_inv := orderVertices_prefix_invariant G vts n (le_refl n) h_size hv
   classical
   -- Witness map: each rank k in Fin n has a unique vertex.
   let φ : Fin n → Fin n := fun k => (h_inv k).exists.choose
