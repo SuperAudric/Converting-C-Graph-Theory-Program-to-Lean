@@ -898,51 +898,200 @@ permutations of the same multiset have the same block structure (same classes in
 order, with the same sizes), hence agree class-wise at every position. Within each block
 (within-class permutation), `cmp` gives `.eq`.
 
-The formal proof uses a counting argument. For any `x`, the number of elements `≺ x`
-(`cmp y x = .lt`) is fixed by the multiset (`List.Perm.countP_eq`). In a sorted list `L`,
-at position `i` occupied by element `x = L[i]`:
-- `count_lt(x, L) ≤ i` — elements strictly less come earlier, in positions `0..i-1` only.
-- `count_lt(x, L) + count_eq(x, L) > i` — at position `i`, `x` itself is `.eq` to itself.
+The proof is a counting argument. Set `x := M[i]`. Two facts about a sorted `L`:
+- `count(cmp · x = .lt, L) ≤ i`: by sortedness, only the first `i` positions can hold
+  elements strictly less than `x`.
+- `count(cmp · x ≠ .gt, L) ≥ i + 1`: positions `0..i` all hold elements `≤ x`.
+Both counts transfer to `M'` via `List.Perm.countP_eq`. In sorted `M'`, "lt-positions"
+form a left prefix and "≠-gt-positions" form a left prefix. The bounds force position
+`i` of `M'` to be sandwiched: not in the lt prefix (since `i ≥ lt_count`) but in the
+≠-gt prefix (since `i < ngt_count`). Hence `cmp M'[i] x` is neither `.lt` nor `.gt`,
+so it is `.eq`. Symmetry gives `cmp M[i] M'[i] = .eq`.
 
-So `i ∈ [count_lt(x, L), count_lt(x, L) + count_eq(x, L))`. Applied to `M'` under `Perm`,
-position `i` lies in the same class-interval, forcing `M'[i]` to be in `x`'s class.
-
-The formal proof would use hypotheses: `cmp a a = .eq` (reflexivity) and
-`cmp a b = .lt → cmp b a = .gt` (antisymmetry). These hold for `comparePathSegments` on
-same-constructor pairs (via `Nat.compare`). For the panic case, antisymmetry fails — but
-those don't arise in the algorithm's path lists. Since the body is deferred as a sorry,
-the hypotheses are documented here rather than in the signature (to avoid propagating
-through `orderInsensitiveListCmp_perm` to call sites). -/
+The proof uses four hypotheses on `cmp`: reflexivity, both directions of antisymmetry,
+and `≤`-transitivity. These are the ingredients of a total preorder, which is what
+`comparePathSegments`/etc. behave like on the algorithm's actual lists. -/
 private theorem sortedPerm_class_eq {α : Type} (cmp : α → α → Ordering)
-    (M M' : List α) (_h_perm : M.Perm M')
-    (_h_sort_M : M.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
-    (_h_sort_M' : M'.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
+    (h_refl : ∀ a, cmp a a = Ordering.eq)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
+    (M M' : List α) (h_perm : M.Perm M')
+    (h_sort_M : M.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
+    (h_sort_M' : M'.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
     (i : Nat) (h_i : i < M.length) (h_i' : i < M'.length) :
     cmp (M[i]'h_i) (M'[i]'h_i') = Ordering.eq := by
-  -- Counting proof outline (full formalization deferred):
-  --
-  -- Step 1 (count_lt_le_pos): For sorted `L` and position `i < L.length`:
-  --   L.countP (fun y => (cmp y L[i] == Ordering.lt) = true) ≤ i
-  -- Proof: only elements at positions `j < i` can satisfy `cmp L[j] L[i] = .lt` (from sortedness
-  -- + antisym ruling out `.lt` at positions `> i`); position `i` itself is `.eq` (refl), not `.lt`.
-  --
-  -- Step 2 (count_le_gt_pos): For sorted `L` and position `i`:
-  --   L.countP (fun y => (cmp y L[i] != Ordering.gt) = true) > i
-  -- I.e., positions `0..i` all have `cmp L[j] L[i] ≠ .gt`.
-  --
-  -- Step 3 (Perm transfer): By `List.Perm.countP_eq` applied to `M.Perm M'`, both counts
-  -- transfer to `M'` with the same bounds.
-  --
-  -- Step 4 (class-block inclusion): Plug in `x := M[i]`. Get
-  --   count_lt(x, M') ≤ i < count_lt(x, M') + count_eq(x, M')
-  -- So position `i` of `M'` lies in `x`'s class block (by sorted-structure of `M'`).
-  --
-  -- Step 5 (conclusion): `M'[i]` is in `x`'s class, so `cmp M'[i] M[i] = .eq`. By antisym
-  -- + `Ordering.noConfusion`, `cmp M[i] M'[i] = .eq`.
-  --
-  -- The counting steps (especially Step 4, the "position-in-class-block" argument) require
-  -- a substantial `List.Pairwise`-driven induction.
-  sorry
+  -- Helper 0: symmetry of `.eq` (derived from antisym₁ + antisym₂).
+  have h_eq_symm : ∀ a b, cmp a b = Ordering.eq → cmp b a = Ordering.eq := by
+    intros a b hab
+    match h_ba : cmp b a with
+    | .eq => rfl
+    | .lt =>
+      have h1 := h_antisym₁ b a h_ba
+      rw [hab] at h1
+      exact Ordering.noConfusion h1
+    | .gt =>
+      have h1 := h_antisym₂ b a h_ba
+      rw [hab] at h1
+      exact Ordering.noConfusion h1
+  -- Helper 1: `≤`-then-`<` gives `<`.
+  have h_le_lt : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c = Ordering.lt → cmp a c = Ordering.lt := by
+    intros a b c hab hbc
+    have hbc' : cmp b c ≠ Ordering.gt := by rw [hbc]; intro h; cases h
+    have h_ac_le : cmp a c ≠ Ordering.gt := h_trans a b c hab hbc'
+    match h_ac : cmp a c with
+    | .lt => rfl
+    | .gt => exact (h_ac_le h_ac).elim
+    | .eq =>
+      exfalso
+      have h_ca : cmp c a = Ordering.eq := h_eq_symm _ _ h_ac
+      have h_ca' : cmp c a ≠ Ordering.gt := by rw [h_ca]; intro h; cases h
+      exact (h_trans c a b h_ca' hab) (h_antisym₁ b c hbc)
+  -- Helper 2: `<`-then-`≤` gives `<`.
+  have h_lt_le : ∀ a b c, cmp a b = Ordering.lt → cmp b c ≠ Ordering.gt → cmp a c = Ordering.lt := by
+    intros a b c hab hbc
+    have hab' : cmp a b ≠ Ordering.gt := by rw [hab]; intro h; cases h
+    have h_ac_le : cmp a c ≠ Ordering.gt := h_trans a b c hab' hbc
+    match h_ac : cmp a c with
+    | .lt => rfl
+    | .gt => exact (h_ac_le h_ac).elim
+    | .eq =>
+      exfalso
+      have h_ca : cmp c a = Ordering.eq := h_eq_symm _ _ h_ac
+      have h_ca' : cmp c a ≠ Ordering.gt := by rw [h_ca]; intro h; cases h
+      exact (h_trans b c a hbc h_ca') (h_antisym₁ a b hab)
+  -- 1. Reference element `x := M[i]`.
+  set x := M[i]'h_i with hx_def
+  -- 2. `lt_count M x ≤ i`. Split `M = take i ++ drop i`; the drop part contributes 0.
+  have h_lt_count_M : M.countP (fun y => decide (cmp y x = Ordering.lt)) ≤ i := by
+    rw [show M = M.take i ++ M.drop i from (List.take_append_drop i M).symm,
+        List.countP_append]
+    have h_drop_zero : (M.drop i).countP (fun y => decide (cmp y x = Ordering.lt)) = 0 := by
+      rw [List.countP_eq_zero]
+      intros y hy
+      obtain ⟨k, hk_lt, hk_eq⟩ := List.getElem_of_mem hy
+      have hk_lt' : k < M.length - i := by simpa using hk_lt
+      have hi_k : i + k < M.length := by omega
+      simp only [decide_eq_true_eq]
+      have h_index : (M.drop i)[k]'hk_lt = M[i + k]'hi_k :=
+        (List.getElem_drop' (by omega)).symm
+      rw [show y = M[i + k]'hi_k by rw [← hk_eq]; exact h_index]
+      intro h_eq_lt
+      by_cases h_k : k = 0
+      · subst h_k
+        -- h_eq_lt : cmp M[i + 0] x = Ordering.lt; reduce via def-eq.
+        have h_eq_lt' : cmp (M[i]'h_i) (M[i]'h_i) = Ordering.lt := h_eq_lt
+        rw [h_refl] at h_eq_lt'
+        exact Ordering.noConfusion h_eq_lt'
+      · have hi_lt_ik : i < i + k := Nat.lt_add_of_pos_right (Nat.pos_of_ne_zero h_k)
+        have h_sort : cmp (M[i]'h_i) (M[i + k]'hi_k) ≠ Ordering.gt :=
+          (List.pairwise_iff_getElem.mp h_sort_M) i (i + k) h_i hi_k hi_lt_ik
+        exact h_sort (h_antisym₁ _ _ h_eq_lt)
+    rw [h_drop_zero, Nat.add_zero]
+    refine Nat.le_trans List.countP_le_length ?_
+    rw [List.length_take]; exact Nat.min_le_left _ _
+  -- 3. `not_gt_count M x ≥ i + 1`. The take (i+1) part hits `i+1` because every element satisfies.
+  have h_ngt_count_M : i + 1 ≤ M.countP (fun y => decide (cmp y x ≠ Ordering.gt)) := by
+    rw [show M = M.take (i+1) ++ M.drop (i+1) from (List.take_append_drop (i+1) M).symm,
+        List.countP_append]
+    have h_take_eq : (M.take (i+1)).countP (fun y => decide (cmp y x ≠ Ordering.gt))
+                  = (M.take (i+1)).length := by
+      rw [List.countP_eq_length]
+      intros y hy
+      obtain ⟨k, hk_lt, hk_eq⟩ := List.getElem_of_mem hy
+      simp only [decide_eq_true_eq]
+      rw [List.getElem_take] at hk_eq
+      rw [List.length_take] at hk_lt
+      have hk_lt_succ : k < i + 1 := (lt_min_iff.mp hk_lt).1
+      have hk_le_i : k ≤ i := Nat.le_of_lt_succ hk_lt_succ
+      have hk_M : k < M.length := (lt_min_iff.mp hk_lt).2
+      rw [← hk_eq]
+      by_cases h_k : k = i
+      · subst h_k
+        rw [hx_def, h_refl]
+        intro hh; cases hh
+      · have hk_lt_i : k < i := lt_of_le_of_ne hk_le_i h_k
+        exact (List.pairwise_iff_getElem.mp h_sort_M) k i hk_M h_i hk_lt_i
+    have h_take_len : (M.take (i+1)).length = i + 1 := by
+      rw [List.length_take]; omega
+    rw [h_take_eq, h_take_len]
+    omega
+  -- 4. Perm transfer: counts on `M'` inherit the same bounds.
+  have h_lt_count_M' : M'.countP (fun y => decide (cmp y x = Ordering.lt)) ≤ i := by
+    rw [← h_perm.countP_eq]; exact h_lt_count_M
+  have h_ngt_count_M' : i + 1 ≤ M'.countP (fun y => decide (cmp y x ≠ Ordering.gt)) := by
+    rw [← h_perm.countP_eq]; exact h_ngt_count_M
+  -- 5. `cmp M'[i] x ≠ .lt`. Otherwise, by `h_le_lt`, all positions ≤ `i` have `cmp · x = .lt`,
+  -- forcing `lt_count M' x ≥ i + 1` — contradicting (4).
+  have h_not_lt : cmp (M'[i]'h_i') x ≠ Ordering.lt := by
+    intro h_lt_val
+    have h_count_take_M' : (M'.take (i+1)).countP (fun y => decide (cmp y x = Ordering.lt))
+                         = (M'.take (i+1)).length := by
+      rw [List.countP_eq_length]
+      intros y hy
+      obtain ⟨k, hk_lt, hk_eq⟩ := List.getElem_of_mem hy
+      simp only [decide_eq_true_eq]
+      rw [List.getElem_take] at hk_eq
+      rw [List.length_take] at hk_lt
+      have hk_lt_succ : k < i + 1 := (lt_min_iff.mp hk_lt).1
+      have hk_le_i : k ≤ i := Nat.le_of_lt_succ hk_lt_succ
+      have hk_M' : k < M'.length := (lt_min_iff.mp hk_lt).2
+      rw [← hk_eq]
+      by_cases h_k : k = i
+      · subst h_k; exact h_lt_val
+      · have hk_lt_i : k < i := lt_of_le_of_ne hk_le_i h_k
+        have h_sort : cmp (M'[k]'hk_M') (M'[i]'h_i') ≠ Ordering.gt :=
+          (List.pairwise_iff_getElem.mp h_sort_M') k i hk_M' h_i' hk_lt_i
+        exact h_le_lt _ _ _ h_sort h_lt_val
+    have h_take_len_M' : (M'.take (i+1)).length = i + 1 := by
+      rw [List.length_take]; omega
+    have h_count_full :
+        i + 1 ≤ M'.countP (fun y => decide (cmp y x = Ordering.lt)) := by
+      rw [show M' = M'.take (i+1) ++ M'.drop (i+1) from (List.take_append_drop (i+1) M').symm,
+          List.countP_append, h_count_take_M', h_take_len_M']
+      omega
+    omega
+  -- 6. `cmp M'[i] x ≠ .gt`. Otherwise, by `h_lt_le` (after antisym), all positions ≥ `i`
+  -- have `cmp · x = .gt`, forcing `ngt_count M' x ≤ i` — contradicting (4).
+  have h_not_gt : cmp (M'[i]'h_i') x ≠ Ordering.gt := by
+    intro h_gt_val
+    have h_drop_zero : (M'.drop i).countP (fun y => decide (cmp y x ≠ Ordering.gt)) = 0 := by
+      rw [List.countP_eq_zero]
+      intros y hy
+      obtain ⟨k, hk_lt, hk_eq⟩ := List.getElem_of_mem hy
+      have hk_lt' : k < M'.length - i := by simpa using hk_lt
+      have hi_k : i + k < M'.length := by omega
+      simp only [decide_eq_true_eq, ne_eq, Decidable.not_not]
+      have h_index : (M'.drop i)[k]'hk_lt = M'[i + k]'hi_k :=
+        (List.getElem_drop' (by omega)).symm
+      rw [show y = M'[i + k]'hi_k by rw [← hk_eq]; exact h_index]
+      by_cases h_k : k = 0
+      · subst h_k
+        show cmp (M'[i]'h_i') x = Ordering.gt
+        exact h_gt_val
+      · have hi_lt_ik : i < i + k := Nat.lt_add_of_pos_right (Nat.pos_of_ne_zero h_k)
+        have h_sort : cmp (M'[i]'h_i') (M'[i + k]'hi_k) ≠ Ordering.gt :=
+          (List.pairwise_iff_getElem.mp h_sort_M') i (i + k) h_i' hi_k hi_lt_ik
+        have h_x_M'i : cmp x (M'[i]'h_i') = Ordering.lt := h_antisym₂ _ _ h_gt_val
+        have h_x_M'ik : cmp x (M'[i + k]'hi_k) = Ordering.lt := h_lt_le _ _ _ h_x_M'i h_sort
+        exact h_antisym₁ _ _ h_x_M'ik
+    have h_take_le_i : (M'.take i).length ≤ i := by
+      rw [List.length_take]; exact Nat.min_le_left _ _
+    have h_count_take_le : (M'.take i).countP (fun y => decide (cmp y x ≠ Ordering.gt))
+                         ≤ i :=
+      List.countP_le_length.trans h_take_le_i
+    have h_total : M'.countP (fun y => decide (cmp y x ≠ Ordering.gt)) ≤ i := by
+      rw [show M' = M'.take i ++ M'.drop i from (List.take_append_drop i M').symm,
+          List.countP_append, h_drop_zero, Nat.add_zero]
+      exact h_count_take_le
+    omega
+  -- 7. Conclude `cmp M'[i] x = .eq` (the only remaining case), then symmetrize.
+  have h_M'i_eq_x : cmp (M'[i]'h_i') x = Ordering.eq := by
+    match h : cmp (M'[i]'h_i') x with
+    | .eq => rfl
+    | .lt => exact (h_not_lt h).elim
+    | .gt => exact (h_not_gt h).elim
+  exact h_eq_symm _ _ h_M'i_eq_x
 
 /-- `sortBy cmp L` produces a `Pairwise`-sorted list when the `≠ .gt` relation on `cmp` is
 transitive. Standard insertion-sort result, deferred. Rather than exposing a transitivity
@@ -984,6 +1133,10 @@ respects equivalence classes bilaterally (`h_compat`: both left and right).
 fold values against the corresponding position of the other sorted list agree pointwise,
 so `foldl_pointwise_eq` gives the same result. -/
 theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
+    (h_refl : ∀ a, cmp a a = Ordering.eq)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
     (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c ∧ cmp c a = cmp c b)
     (L₁ L₁' L₂ L₂' : List α) (h₁ : L₁.Perm L₁') (h₂ : L₂.Perm L₂') :
     orderInsensitiveListCmp cmp L₁ L₂ = orderInsensitiveListCmp cmp L₁' L₂' := by
@@ -1005,10 +1158,14 @@ theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
     -- Pointwise class agreement.
     have h_class₁ : ∀ i (hi₁ : i < (sortBy cmp L₁).length) (hi₁' : i < (sortBy cmp L₁').length),
         cmp ((sortBy cmp L₁)[i]'hi₁) ((sortBy cmp L₁')[i]'hi₁') = Ordering.eq :=
-      fun i hi₁ hi₁' => sortedPerm_class_eq cmp _ _ hM₁ hSort₁ hSort₁' i hi₁ hi₁'
+      fun i hi₁ hi₁' =>
+        sortedPerm_class_eq cmp h_refl h_antisym₁ h_antisym₂ h_trans
+          _ _ hM₁ hSort₁ hSort₁' i hi₁ hi₁'
     have h_class₂ : ∀ i (hi₂ : i < (sortBy cmp L₂).length) (hi₂' : i < (sortBy cmp L₂').length),
         cmp ((sortBy cmp L₂)[i]'hi₂) ((sortBy cmp L₂')[i]'hi₂') = Ordering.eq :=
-      fun i hi₂ hi₂' => sortedPerm_class_eq cmp _ _ hM₂ hSort₂ hSort₂' i hi₂ hi₂'
+      fun i hi₂ hi₂' =>
+        sortedPerm_class_eq cmp h_refl h_antisym₁ h_antisym₂ h_trans
+          _ _ hM₂ hSort₂ hSort₂' i hi₂ hi₂'
     -- Length equality on zip.
     have h_zip_len : ((sortBy cmp L₁).zip (sortBy cmp L₂)).length
                   = ((sortBy cmp L₁').zip (sortBy cmp L₂')).length := by
@@ -1047,6 +1204,42 @@ theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
     have h_len_lt : (L₁.length < L₂.length) = (L₁'.length < L₂'.length) := by
       rw [hL₁, hL₂]
     simp [hLen, hLen', h_len_lt]
+
+/-- `comparePathSegments` is a total preorder on the algorithm's actual path lists
+(reflexive, both directions of antisymmetry, ≤-transitive). The four conjuncts are exactly
+the hypotheses needed by `orderInsensitiveListCmp_perm` (via `sortedPerm_class_eq`).
+
+The properties hold globally except for the `panic!` mixed bottom/inner case (where
+`cmp` returns `.lt` for both directions, breaking the `.lt → .gt` antisymmetry and
+≤-transitivity). In the actual algorithm `connectedSubPaths` is uniform per call
+(all `bottom` for depth=0, all `inner` for depth>0), so the panic case never fires;
+proving this property given the algorithm's structure is left as future work. -/
+private theorem comparePathSegments_total_preorder {vc : Nat}
+    (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
+    (∀ a : PathSegment vc, comparePathSegments vts br a a = Ordering.eq) ∧
+    (∀ a b : PathSegment vc, comparePathSegments vts br a b = Ordering.lt →
+                              comparePathSegments vts br b a = Ordering.gt) ∧
+    (∀ a b : PathSegment vc, comparePathSegments vts br a b = Ordering.gt →
+                              comparePathSegments vts br b a = Ordering.lt) ∧
+    (∀ a b c : PathSegment vc, comparePathSegments vts br a b ≠ Ordering.gt →
+                                comparePathSegments vts br b c ≠ Ordering.gt →
+                                comparePathSegments vts br a c ≠ Ordering.gt) := by
+  sorry
+
+/-- `comparePathsBetween` is a total preorder on the algorithm's actual `pathsToVertex`
+lists. Same caveat as `comparePathSegments_total_preorder`: the panic case in the inner
+`comparePathSegments` propagates up but never fires on the algorithm's lists. -/
+private theorem comparePathsBetween_total_preorder {vc : Nat}
+    (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
+    (∀ a : PathsBetween vc, comparePathsBetween vts br a a = Ordering.eq) ∧
+    (∀ a b : PathsBetween vc, comparePathsBetween vts br a b = Ordering.lt →
+                               comparePathsBetween vts br b a = Ordering.gt) ∧
+    (∀ a b : PathsBetween vc, comparePathsBetween vts br a b = Ordering.gt →
+                               comparePathsBetween vts br b a = Ordering.lt) ∧
+    (∀ a b c : PathsBetween vc, comparePathsBetween vts br a b ≠ Ordering.gt →
+                                 comparePathsBetween vts br b c ≠ Ordering.gt →
+                                 comparePathsBetween vts br a c ≠ Ordering.gt) := by
+  sorry
 
 /-- `comparePathSegments` respects equivalence bilaterally: equivalent (`= .eq`) segments
 compare the same way to every third segment, in either argument position. -/
@@ -1436,7 +1629,10 @@ theorem comparePathsBetween_σ_equivariant
     · -- else branch: orderInsensitiveListCmp on connectedSubPaths.
       have h_perm₁ := PathsBetween_permute_connectedSubPaths_perm σ p₁ h_len₁
       have h_perm₂ := PathsBetween_permute_connectedSubPaths_perm σ p₂ h_len₂
+      obtain ⟨h_refl, h_antisym₁, h_antisym₂, h_trans⟩ :=
+        comparePathSegments_total_preorder (vc := k+1) vts br
       rw [orderInsensitiveListCmp_perm (comparePathSegments vts br)
+            h_refl h_antisym₁ h_antisym₂ h_trans
             (comparePathSegments_equivCompat vts br) _ _ _ _ h_perm₁ h_perm₂]
       exact orderInsensitiveListCmp_map (PathSegment.permute σ) (comparePathSegments vts br)
             (fun a b => comparePathSegments_σ_equivariant σ vts hvts br hbr a b)
@@ -1486,7 +1682,10 @@ theorem comparePathsFrom_σ_equivariant
     · rfl
     · have h_perm₁ := PathsFrom_permute_pathsToVertex_perm σ p₁ h_len₁
       have h_perm₂ := PathsFrom_permute_pathsToVertex_perm σ p₂ h_len₂
+      obtain ⟨h_refl, h_antisym₁, h_antisym₂, h_trans⟩ :=
+        comparePathsBetween_total_preorder (vc := k+1) vts br
       rw [orderInsensitiveListCmp_perm (comparePathsBetween vts br)
+            h_refl h_antisym₁ h_antisym₂ h_trans
             (comparePathsBetween_equivCompat vts br) _ _ _ _ h_perm₁ h_perm₂]
       -- Apply pointwise map lemma: comparePathsBetween_σ_equivariant for each pair in the
       -- combined list, using per-element h_inner_len conditions.

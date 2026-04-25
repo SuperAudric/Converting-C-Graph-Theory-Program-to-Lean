@@ -46,14 +46,20 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 5 (Equivariance: `sortedPerm_class_eq`, `sortBy_pairwise`,
-`comparePathsBetween_equivCompat`, `calculatePathRankings_fromRanks_inv`,
-`calculatePathRankings_betweenRanks_inv`) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) +
-3 (Invariants — §7) + 1 (Main) = **10 open obligations**. `orderInsensitiveListCmp_perm`
-is now **proved modulo the two sub-lemmas** `sortedPerm_class_eq` and `sortBy_pairwise`;
-the structural foldl-equality argument (via `foldl_pointwise_eq` and bilateral `h_compat`)
-is fully in place. The net +1 sorry comes from decomposing the previously deep single
-sorry into two narrower, individually attackable counting/insertion-sort lemmas.
+**Sorry count.** 6 (Equivariance: `sortBy_pairwise`, `comparePathSegments_total_preorder`,
+`comparePathsBetween_total_preorder`, `comparePathsBetween_equivCompat`,
+`calculatePathRankings_fromRanks_inv`, `calculatePathRankings_betweenRanks_inv`) +
+1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) =
+**11 open obligations**. `sortedPerm_class_eq` is **closed** via a counting argument
+(positions in sorted lists are bounded by `lt_count` from below and `not_gt_count` from
+above; both are `Perm`-invariant via `List.Perm.countP_eq`). The closure required adding
+four hypotheses on `cmp` (refl, both directions of antisymmetry, `≤`-transitivity) to
+the signature; these propagate to `orderInsensitiveListCmp_perm` and to its two callers
+(`comparePathsBetween_σ_equivariant`, `comparePathsFrom_σ_equivariant`) via two new
+helper lemmas `comparePathSegments_total_preorder` / `comparePathsBetween_total_preorder`
+(both currently `sorry` — they fail globally on the `panic!` mixed bottom/inner case but
+hold on the algorithm's actual uniform lists; closing them requires a list-uniformity
+hypothesis or a panic-case-aware reformulation of `comparePathSegments`).
 
 **Closed during the equivariance push:**
 - **Stage D** trivially via `σ ∈ Aut G ⟹ G.permute σ = G`.
@@ -73,11 +79,16 @@ sorry into two narrower, individually attackable counting/insertion-sort lemmas.
 - **`calculatePathRankings_fromRanks_size`** proved (foldl invariant on the algorithm body).
 
 **Remaining structural work in `Equivariance`** (all sorried, each well-scoped):
-- `sortedPerm_class_eq`: for two sorted lists `M`, `M'` with `M.Perm M'`, at every
-  position `i`, `cmp M[i] M'[i] = .eq`. Counting argument on sorted positions under
-  `Perm` multiset invariance.
 - `sortBy_pairwise`: `sortBy cmp L` is `Pairwise`-sorted by `cmp ≠ .gt`. Standard
   insertion-sort result; requires `cmp`-transitivity (to be supplied).
+- `comparePathSegments_total_preorder` / `comparePathsBetween_total_preorder`: provide
+  the four total-preorder properties (refl + both antisym directions + `≤`-trans) for
+  the path-comparison functions. These hold globally except for the `panic!` mixed
+  bottom/inner case in `comparePathSegments`; in the algorithm `connectedSubPaths` is
+  uniform per call (all `bottom` for depth=0, all `inner` for depth>0), so the panic
+  case never fires. Closing requires either a list-uniformity hypothesis or a refactor
+  to make the panic case total-preorder-compatible (e.g., return `.eq` instead of
+  `panic!`, or have `comparePathSegments` declare a stable order on bottom-vs-inner).
 - `comparePathsBetween_equivCompat`: `comparePathsBetween` respects equivalence classes
   (needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). Requires an
   auxiliary `orderInsensitiveListCmp_equivCompat_left` lemma about orderInsensitiveListCmp
@@ -100,8 +111,14 @@ sorry into two narrower, individually attackable counting/insertion-sort lemmas.
 - `comparePathsBetween_σ_equivariant` — proved (modulo the Perm + orderInsensitiveListCmp_perm
   sorries).
 - `comparePathsFrom_σ_equivariant` — proved (bridge closed via `orderInsensitiveListCmp_map_pointwise`).
-- `orderInsensitiveListCmp_perm` — **proved modulo `sortedPerm_class_eq` + `sortBy_pairwise`**.
-  Structural argument uses `foldl_pointwise_eq` + bilateral `h_compat`.
+- `sortedPerm_class_eq` — **proved** via the counting argument: `lt_count L L[i] ≤ i` and
+  `not_gt_count L L[i] ≥ i + 1` in any sorted `L`, both `Perm`-transferred to `L'`, then
+  ruled out `cmp L'[i] x = .lt` and `= .gt` separately by extending the counts via the
+  helpers `h_le_lt` / `h_lt_le` (which combine refl, both antisymmetries, and ≤-trans).
+  Takes four cmp hypotheses (refl, antisym₁, antisym₂, ≤-trans) in its signature.
+- `orderInsensitiveListCmp_perm` — **proved modulo `sortBy_pairwise`** (and the new cmp
+  total-preorder hypotheses passed through to `sortedPerm_class_eq`). Structural argument
+  uses `foldl_pointwise_eq` + bilateral `h_compat`.
 - `foldl_pointwise_eq` — generic pointwise foldl equality helper.
 - `map_reindex_perm` — generic list reindex-`Perm` helper using Mathlib's
   `Equiv.Perm.ofFn_comp_perm`; bridges list reindexing under a bijection to `List.Perm`.
