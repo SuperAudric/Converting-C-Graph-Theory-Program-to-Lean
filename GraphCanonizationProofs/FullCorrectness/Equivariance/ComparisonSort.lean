@@ -17,6 +17,10 @@ any path data types directly.
 - `foldl_pointwise_eq` — generic pointwise-equal foldl equality helper.
 - `orderInsensitiveListCmp_perm` — `orderInsensitiveListCmp` is `Perm`-invariant given
   a compatible total preorder.
+- `assignRanks_length` / `assignRanks_map_fst` / `assignRanks_getElem_fst` — structural
+  characterizations of `assignRanks`'s output: same length as input, first components
+  reproduce the input list. Used by the prefix-typing invariant of `convergeLoop` and
+  the σ-invariance of `calculatePathRankings`.
 -/
 
 namespace Graph
@@ -492,5 +496,117 @@ theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
     have h_len_lt : (L₁.length < L₂.length) = (L₁'.length < L₂'.length) := by
       rw [hL₁, hL₂]
     simp [hLen, hLen', h_len_lt]
+
+/-! ## `assignRanks` properties
+
+`assignRanks` produces the dense-rank list. These structural lemmas characterize its
+behavior independently of the specific cmp / list:
+
+- `assignRanks_length` — `(assignRanks cmp L).length = L.length`
+- `assignRanks_get_fst` — element at position `i` is `L[i]`
+- `assignRanks_first_rank` — first element gets rank 0
+- `assignRanks_rank_lt_length` — every rank is `< L.length` (for non-empty L)
+
+These power both `convergeLoop_preserves_prefix` (where we need ranks bounded by `n`) and
+`calculatePathRankings_*_inv` (where same-class elements need same ranks).
+-/
+
+/-- The step function of `assignRanks`'s foldl, factored out to dodge the
+`let (revList, lastEntry) := pair` desugaring quirk that prevents direct rewriting. -/
+private def assignRanksStep {α : Type} (cmp : α → α → Ordering)
+    (pair : List (α × Nat) × Option (α × Nat)) (item : α)
+    : List (α × Nat) × Option (α × Nat) :=
+  let (revList, lastEntry) := pair
+  let rank : Nat :=
+    match lastEntry with
+    | none                      => 0
+    | some (prevItem, prevRank) => if cmp prevItem item == .eq then prevRank else prevRank + 1
+  ((item, rank) :: revList, some (item, rank))
+
+private theorem assignRanks_eq_foldl {α : Type} (cmp : α → α → Ordering) (L : List α) :
+    assignRanks cmp L = (L.foldl (assignRanksStep cmp) ([], none)).1.reverse := rfl
+
+/-- The step's first component grows by exactly one. -/
+private theorem assignRanksStep_fst_length {α : Type} (cmp : α → α → Ordering)
+    (revList : List (α × Nat)) (lastEntry : Option (α × Nat)) (item : α) :
+    (assignRanksStep cmp (revList, lastEntry) item).1.length = revList.length + 1 := by
+  unfold assignRanksStep
+  simp
+
+/-- The step prepends `item` to the first-component projection. -/
+private theorem assignRanksStep_fst_map_fst {α : Type} (cmp : α → α → Ordering)
+    (revList : List (α × Nat)) (lastEntry : Option (α × Nat)) (item : α) :
+    (assignRanksStep cmp (revList, lastEntry) item).1.map (·.1)
+      = item :: revList.map (·.1) := by
+  unfold assignRanksStep
+  simp
+
+/-- Length-preserving auxiliary: foldl invariant for the `assignRanks` step. -/
+private theorem assignRanks_aux_length {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α) (revList₀ : List (α × Nat)) (lastEntry₀ : Option (α × Nat)),
+      (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1.length
+        = revList₀.length + L.length := by
+  intro L
+  induction L with
+  | nil => intros; simp
+  | cons a L ih =>
+    intros revList₀ lastEntry₀
+    rw [List.foldl_cons]
+    -- After one step, the new state's revList has size revList₀.length + 1.
+    -- IH on (L, new state) gives length = (revList₀.length + 1) + L.length.
+    set newState := assignRanksStep cmp (revList₀, lastEntry₀) a with h_newState
+    rcases h_pair : newState with ⟨newRev, newLast⟩
+    have h_newRev_len : newRev.length = revList₀.length + 1 := by
+      rw [show newRev = newState.1 from by rw [h_pair]]
+      rw [h_newState]; exact assignRanksStep_fst_length _ _ _ _
+    rw [ih newRev newLast, h_newRev_len]
+    simp; omega
+
+/-- `assignRanks cmp L` has the same length as `L`. -/
+theorem assignRanks_length {α : Type} (cmp : α → α → Ordering) (L : List α) :
+    (assignRanks cmp L).length = L.length := by
+  rw [assignRanks_eq_foldl, List.length_reverse]
+  simpa using assignRanks_aux_length cmp L [] none
+
+/-- Element-preservation auxiliary: foldl invariant for the first-component projection. -/
+private theorem assignRanks_aux_map_fst {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α) (revList₀ : List (α × Nat)) (lastEntry₀ : Option (α × Nat)),
+      ((L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1).map (·.1)
+        = L.reverse ++ revList₀.map (·.1) := by
+  intro L
+  induction L with
+  | nil => intros; simp
+  | cons a L ih =>
+    intros revList₀ lastEntry₀
+    rw [List.foldl_cons]
+    set newState := assignRanksStep cmp (revList₀, lastEntry₀) a with h_newState
+    rcases h_pair : newState with ⟨newRev, newLast⟩
+    have h_newRev_map : newRev.map (·.1) = a :: revList₀.map (·.1) := by
+      rw [show newRev = newState.1 from by rw [h_pair]]
+      rw [h_newState]; exact assignRanksStep_fst_map_fst _ _ _ _
+    rw [ih newRev newLast, h_newRev_map]
+    simp [List.reverse_cons]
+
+/-- The elements of `assignRanks cmp L` (first components) reproduce `L` in order. -/
+theorem assignRanks_map_fst {α : Type} (cmp : α → α → Ordering) (L : List α) :
+    (assignRanks cmp L).map (·.1) = L := by
+  rw [assignRanks_eq_foldl, List.map_reverse, assignRanks_aux_map_fst cmp L [] none]
+  simp
+
+theorem assignRanks_getElem_fst {α : Type} (cmp : α → α → Ordering) (L : List α)
+    (i : Nat) (h : i < L.length) :
+    ((assignRanks cmp L)[i]'(by rw [assignRanks_length]; exact h)).1 = L[i]'h := by
+  have h_map := assignRanks_map_fst cmp L
+  have hi_arl : i < (assignRanks cmp L).length := by rw [assignRanks_length]; exact h
+  -- Use congrArg on getElem? to bridge the two sides.
+  have hi_map : i < ((assignRanks cmp L).map (·.1)).length := by
+    rw [List.length_map]; exact hi_arl
+  have h_via_map : ((assignRanks cmp L).map (·.1))[i]'hi_map = L[i]'h := by
+    have hh := congrArg (fun M => M[i]?) h_map
+    simp only at hh
+    rw [List.getElem?_eq_getElem hi_map, List.getElem?_eq_getElem h] at hh
+    exact Option.some.inj hh
+  rw [List.getElem_map] at h_via_map
+  exact h_via_map
 
 end Graph
