@@ -1,4 +1,5 @@
 import FullCorrectness.Equivariance.ComparisonSort
+import Mathlib.Data.List.Zip
 
 /-!
 # `comparePathSegments` total preorder and `comparePathsBetween` lifting
@@ -8,15 +9,14 @@ Proves that `comparePathSegments` is a total preorder (reflexive, both antisymme
 `≤`-transitive) after the algorithm refactor that replaced the `panic!` bottom/inner
 mixed case with a fixed `bottom < inner` ordering.
 
-Also provides the `orderInsensitiveListCmp` lifting helpers (reflexivity closed;
-swap/trans sorry'd pending careful foldl-reduction handling) and states
-`comparePathsBetween_total_preorder` (sorry'd: requires lifting through
-`orderInsensitiveListCmp`).
+Also provides the `orderInsensitiveListCmp` lifting helpers (reflexivity and
+antisym₁-`.lt → .gt` closed; antisym₂-`.gt → .lt` and `_trans` pending) and states
+`comparePathsBetween_total_preorder` (sorry'd: requires the remaining lifters).
 
 ## Sorry status
-- `comparePathsBetween_total_preorder` : `sorry` — lifting `_swap` and `_trans` through
-  `orderInsensitiveListCmp` requires foldl-induction with careful beta-reduced form
-  matching (see the docstring for guidance).
+- `comparePathsBetween_total_preorder` : `sorry` — needs the `_swap_gt` and `_trans`
+  lifters, then assemble the four conjuncts on top of `comparePathSegments_total_preorder`
+  + the existing length-prefix check on `xEndType vs yEndType`.
 -/
 
 namespace Graph
@@ -279,8 +279,8 @@ theorem comparePathSegments_total_preorder {vc : Nat}
 /-! #### `orderInsensitiveListCmp` total-preorder lifting helpers (partial)
 
 These helpers lift total-preorder properties from the inner `cmp` to
-`orderInsensitiveListCmp`. Currently `_refl` is closed; `_swap` and `_trans` are sorry'd
-pending careful foldl-reduction handling. -/
+`orderInsensitiveListCmp`. Currently `_refl` and `_swap_lt` (antisym₁ direction) are
+closed; `_swap_gt` (antisym₂) and `_trans` are pending. -/
 
 /-- `orderInsensitiveListCmp cmp L L = .eq` when `cmp` is reflexive on (the elements of) `L`. -/
 private theorem orderInsensitiveListCmp_refl {α : Type} (cmp : α → α → Ordering)
@@ -317,15 +317,107 @@ private theorem orderInsensitiveListCmp_refl {α : Type} (cmp : α → α → Or
     rw [h_a]
     exact ih (fun b hb => h b (List.mem_cons_of_mem _ hb))
 
-/-- `comparePathsBetween` is a total preorder on `PathsBetween`. The four conjuncts
-match `orderInsensitiveListCmp_perm`'s requirements via `sortedPerm_class_eq`.
+/-! #### Foldl init preservation and antisymmetry-`.lt → .gt` lifter -/
 
-Closing this requires lifting the four total-preorder properties from
-`comparePathSegments` (closed via `comparePathSegments_total_preorder`) through
-`orderInsensitiveListCmp` (a foldl-based comparator). `_refl` lifts cleanly via
-`orderInsensitiveListCmp_refl` above; `_swap` (for antisym) and `_trans` are tractable
-by induction on the zipped `sortBy` outputs but require careful handling of the foldl
-reduction. Left as future work. -/
+/-- Once the accumulator of the `orderInsensitiveListCmp` foldl is non-`.eq` the foldl
+preserves it: every subsequent step short-circuits via `if currentOrder != .eq then ...`.
+Used by the `_swap_lt`/`_swap_gt` lifters to discharge the "first non-`.eq`" case. -/
+private theorem orderInsensitiveListCmp_foldl_init_preserved {α : Type} (cmp : α → α → Ordering)
+    (init : Ordering) (h : init ≠ Ordering.eq) (L : List (α × α)) :
+    L.foldl (fun (currentOrder : Ordering) (x : α × α) =>
+        if (currentOrder != Ordering.eq) = true then currentOrder
+        else cmp x.1 x.2) init = init := by
+  cases init with
+  | eq => exact (h rfl).elim
+  | lt =>
+    induction L with
+    | nil => rfl
+    | cons x L ih =>
+      show ((x :: L).foldl _ Ordering.lt) = Ordering.lt
+      rw [List.foldl_cons]; exact ih
+  | gt =>
+    induction L with
+    | nil => rfl
+    | cons x L ih =>
+      show ((x :: L).foldl _ Ordering.gt) = Ordering.gt
+      rw [List.foldl_cons]; exact ih
+
+/-- Antisymmetry-`.lt → .gt` lift for `orderInsensitiveListCmp`. In the lengths-equal case,
+locate the first position whose cmp is `.lt`; antisym₁ swaps it to `.gt` for the swapped
+zip; preceding `.eq` positions stay `.eq` under symmetry of `.eq`. The length-mismatch
+branch flips by direct case analysis. -/
+private theorem orderInsensitiveListCmp_swap_lt {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (L₁ L₂ : List α) :
+    orderInsensitiveListCmp cmp L₁ L₂ = Ordering.lt →
+    orderInsensitiveListCmp cmp L₂ L₁ = Ordering.gt := by
+  have h_eq_symm : ∀ a b, cmp a b = Ordering.eq → cmp b a = Ordering.eq := by
+    intros a b hab
+    match h_ba : cmp b a with
+    | .eq => rfl
+    | .lt =>
+      have := h_antisym₁ b a h_ba; rw [hab] at this; exact Ordering.noConfusion this
+    | .gt =>
+      have := h_antisym₂ b a h_ba; rw [hab] at this; exact Ordering.noConfusion this
+  unfold orderInsensitiveListCmp
+  by_cases hLen : L₁.length = L₂.length
+  · -- Equal lengths.
+    have hLenSwap : L₂.length = L₁.length := hLen.symm
+    have h_bne₁ : (L₁.length != L₂.length) = false := by
+      rw [hLen]; exact bne_self_eq_false (a := L₂.length)
+    have h_bne₂ : (L₂.length != L₁.length) = false := by
+      rw [hLenSwap]; exact bne_self_eq_false (a := L₁.length)
+    simp only [h_bne₁, h_bne₂, Bool.false_eq_true, ↓reduceIte]
+    rw [show (sortBy cmp L₂).zip (sortBy cmp L₁)
+          = ((sortBy cmp L₁).zip (sortBy cmp L₂)).map Prod.swap from
+        (List.zip_swap (sortBy cmp L₁) (sortBy cmp L₂)).symm]
+    intro h_lt
+    suffices h_aux : ∀ (L : List (α × α)),
+        L.foldl (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder
+            else cmp x.1 x.2) Ordering.eq = Ordering.lt →
+        (L.map Prod.swap).foldl (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder
+            else cmp x.1 x.2) Ordering.eq = Ordering.gt from
+      h_aux _ h_lt
+    intro L
+    induction L with
+    | nil => intro h; exact Ordering.noConfusion h
+    | cons x L ih =>
+      intro h
+      -- Reduce the head step on both sides: LHS init becomes `cmp x.1 x.2`,
+      -- RHS init becomes `cmp x.2 x.1` (via Prod.swap).
+      rw [List.foldl_cons] at h
+      simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte] at h
+      show ((Prod.swap x) :: L.map Prod.swap).foldl _ Ordering.eq = Ordering.gt
+      rw [List.foldl_cons]
+      simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte,
+                 Prod.fst_swap, Prod.snd_swap]
+      match h_xy : cmp x.1 x.2 with
+      | .eq =>
+        rw [h_xy] at h
+        rw [h_eq_symm _ _ h_xy]
+        exact ih h
+      | .lt =>
+        rw [h_antisym₁ _ _ h_xy]
+        exact orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.gt
+                (by intro hh; cases hh) (L.map Prod.swap)
+      | .gt =>
+        rw [h_xy] at h
+        have h_pres := orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.gt
+                          (by intro hh; cases hh) L
+        rw [h_pres] at h
+        exact Ordering.noConfusion h
+  · -- Unequal lengths: outer if takes the inner branch on both sides.
+    have hLenSwap : ¬ L₂.length = L₁.length := fun h => hLen h.symm
+    have h_bne₁ : (L₁.length != L₂.length) = true := bne_iff_ne.mpr hLen
+    have h_bne₂ : (L₂.length != L₁.length) = true := bne_iff_ne.mpr hLenSwap
+    rw [if_pos h_bne₁, if_pos h_bne₂]
+    intro h
+    by_cases h₁₂ : L₁.length < L₂.length
+    · rw [if_pos h₁₂] at h; exact Ordering.noConfusion h
+    · rw [if_pos (show L₂.length < L₁.length by omega)]
 theorem comparePathsBetween_total_preorder {vc : Nat}
     (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
     (∀ a : PathsBetween vc, comparePathsBetween vts br a a = Ordering.eq) ∧
