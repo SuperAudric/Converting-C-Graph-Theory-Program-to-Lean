@@ -19,8 +19,10 @@ any path data types directly.
   a compatible total preorder.
 - `assignRanks_length` / `assignRanks_map_fst` / `assignRanks_getElem_fst` — structural
   characterizations of `assignRanks`'s output: same length as input, first components
-  reproduce the input list. Used by the prefix-typing invariant of `convergeLoop` and
-  the σ-invariance of `calculatePathRankings`.
+  reproduce the input list.
+- `assignRanks_rank_lt_length` — every rank is `< L.length`. Combined with the above,
+  bounds the values produced by `convergeOnce` (each vertex gets a `getFrom` value, which
+  is a rank from `assignRanks` on a length-`n` input list).
 -/
 
 namespace Graph
@@ -608,5 +610,98 @@ theorem assignRanks_getElem_fst {α : Type} (cmp : α → α → Ordering) (L : 
     exact Option.some.inj hh
   rw [List.getElem_map] at h_via_map
   exact h_via_map
+
+/-! ### Rank bound: every rank is `< L.length`
+
+Useful for `convergeLoop_preserves_prefix`: ranks from `assignRanks` end up as values
+in the typing array, so bounding them by the input length bounds the prefix-typing
+witness `m`. -/
+
+/-- A single `assignRanksStep` from a state bounded by `k` produces a state bounded by
+`k + 1`, both for the new revList and the new lastEntry. -/
+private theorem assignRanksStep_rank_le {α : Type} (cmp : α → α → Ordering)
+    (revList : List (α × Nat)) (lastEntry : Option (α × Nat)) (item : α) (k : Nat)
+    (h_rev : ∀ e ∈ revList, e.2 ≤ k)
+    (h_last : ∀ e, lastEntry = some e → e.2 ≤ k) :
+    (∀ e ∈ (assignRanksStep cmp (revList, lastEntry) item).1, e.2 ≤ k + 1) ∧
+    (∀ e, (assignRanksStep cmp (revList, lastEntry) item).2 = some e → e.2 ≤ k + 1) := by
+  unfold assignRanksStep
+  refine ⟨?_, ?_⟩
+  · -- New revList = (item, rank) :: revList₀.
+    intro e he
+    cases lastEntry with
+    | none =>
+      simp only [List.mem_cons] at he
+      rcases he with rfl | he
+      · show (0 : Nat) ≤ k + 1; omega
+      · exact (h_rev e he).trans (Nat.le_succ k)
+    | some prev =>
+      rcases prev with ⟨p1, p2⟩
+      simp only [List.mem_cons] at he
+      have hp2 : p2 ≤ k := h_last (p1, p2) rfl
+      rcases he with rfl | he
+      · -- e = (item, rank) where rank = p2 or p2 + 1.
+        show (if cmp p1 item == Ordering.eq then p2 else p2 + 1) ≤ k + 1
+        split_ifs <;> omega
+      · exact (h_rev e he).trans (Nat.le_succ k)
+  · -- New lastEntry = some (item, rank).
+    intro e he
+    cases lastEntry with
+    | none =>
+      simp only [Option.some.injEq] at he
+      rw [← he]
+      show (0 : Nat) ≤ k + 1; omega
+    | some prev =>
+      rcases prev with ⟨p1, p2⟩
+      have hp2 : p2 ≤ k := h_last (p1, p2) rfl
+      simp only [Option.some.injEq] at he
+      rw [← he]
+      show (if cmp p1 item == Ordering.eq then p2 else p2 + 1) ≤ k + 1
+      split_ifs <;> omega
+
+/-- Auxiliary: foldl preserves the rank bound, growing it by `L.length` each call. -/
+private theorem assignRanks_aux_rank_le {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α) (revList₀ : List (α × Nat)) (lastEntry₀ : Option (α × Nat)) (k : Nat),
+      (∀ entry ∈ revList₀, entry.2 ≤ k) →
+      (∀ entry, lastEntry₀ = some entry → entry.2 ≤ k) →
+      ∀ entry ∈ (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1,
+        entry.2 ≤ k + L.length := by
+  intro L
+  induction L with
+  | nil =>
+    intros revList₀ _ k h_rev _ entry h_in
+    simpa using h_rev entry h_in
+  | cons a L ih =>
+    intros revList₀ lastEntry₀ k h_rev h_last
+    rw [List.foldl_cons]
+    -- After one step, bound is k + 1.
+    have h_step := assignRanksStep_rank_le cmp revList₀ lastEntry₀ a k h_rev h_last
+    -- Reify the step result as (newRev, newLast).
+    set newRev := (assignRanksStep cmp (revList₀, lastEntry₀) a).1
+    set newLast := (assignRanksStep cmp (revList₀, lastEntry₀) a).2
+    intro entry h_in
+    have := ih newRev newLast (k + 1) h_step.1 h_step.2 entry h_in
+    show entry.2 ≤ k + (L.length + 1)
+    omega
+
+/-- Every rank in `assignRanks cmp L` is `< L.length`. (Vacuous for empty `L`.) -/
+theorem assignRanks_rank_lt_length {α : Type} (cmp : α → α → Ordering) (L : List α) :
+    ∀ entry ∈ assignRanks cmp L, entry.2 < L.length := by
+  intro entry h_entry
+  rcases L with _ | ⟨a, L'⟩
+  · simp [assignRanks_eq_foldl] at h_entry
+  · -- Non-empty L: handle the first step manually so we get bound 0 instead of 1.
+    rw [assignRanks_eq_foldl, List.mem_reverse, List.foldl_cons] at h_entry
+    -- After processing `a`: state = ([(a, 0)], some (a, 0)). Then aux on L' with k = 0.
+    have h_first : assignRanksStep cmp ([], none) a = ([(a, 0)], some (a, 0)) := by
+      unfold assignRanksStep; rfl
+    rw [h_first] at h_entry
+    have h_rev : ∀ e ∈ [(a, 0)], e.2 ≤ 0 := by
+      intros e he; simp only [List.mem_singleton] at he; rw [he]
+    have h_last : ∀ e, some (a, 0) = some e → e.2 ≤ 0 := by
+      intros e he; simp only [Option.some.injEq] at he; rw [← he]
+    have := assignRanks_aux_rank_le cmp L' [(a, 0)] (some (a, 0)) 0 h_rev h_last entry h_entry
+    show entry.2 < L'.length + 1
+    omega
 
 end Graph
