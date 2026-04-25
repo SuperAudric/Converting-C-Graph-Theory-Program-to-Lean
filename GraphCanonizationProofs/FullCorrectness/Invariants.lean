@@ -534,6 +534,86 @@ private theorem chain_image_dense_for_assignRanks_sortBy
     intro entry h_entry k hk
     exact assignRanks_image_dense cmp _ entry h_entry k hk
 
+/-- Per-vertex value lookup: for each vertex `v`, the chain at `v.val` equals the rank
+of the assignList entry at the (unique) position whose start vertex is `v.val`. Used
+by P3.E to relate `output[v.val]` to a specific assignList rank. -/
+private theorem chain_value_at_vertex_for_assignRanks_sortBy
+    (cmp : PathsFrom n → PathsFrom n → Ordering)
+    (pathsAtTop : List (PathsFrom n))
+    (h_indices : pathsAtTop.map (·.startVertexIndex.val) = List.range n)
+    (v : Fin n) :
+    ∃ pos : Nat, ∃ hpos : pos < (sortBy cmp pathsAtTop).length,
+      ((sortBy cmp pathsAtTop)[pos]'hpos).startVertexIndex.val = v.val ∧
+      ((assignRanks cmp (sortBy cmp pathsAtTop)).foldl
+          (fun (slice : Array Nat) item => slice.set! item.1.startVertexIndex.val item.2)
+          ((Array.range n).map (fun _ : Nat => (0 : Nat)))).getD v.val 0
+        = ((assignRanks cmp (sortBy cmp pathsAtTop))[pos]'(by
+            rw [assignRanks_length]; exact hpos)).2 := by
+  set sortedList := sortBy cmp pathsAtTop with h_sortedList_def
+  set assignList := assignRanks cmp sortedList with h_assignList_def
+  have h_assignList_len : assignList.length = sortedList.length := assignRanks_length cmp sortedList
+  -- Starts in sortedList form a perm of List.range n.
+  have h_perm : sortedList.Perm pathsAtTop := sortBy_perm cmp pathsAtTop
+  have h_perm_starts : (sortedList.map (·.startVertexIndex.val)).Perm (List.range n) := by
+    rw [← h_indices]; exact h_perm.map _
+  have h_v_in_starts : v.val ∈ sortedList.map (·.startVertexIndex.val) := by
+    rw [h_perm_starts.mem_iff]; exact List.mem_range.mpr v.isLt
+  obtain ⟨p_v, h_p_v_in, h_p_v_start⟩ := List.mem_map.mp h_v_in_starts
+  obtain ⟨pos, h_pos_lt, h_pos_eq⟩ := List.mem_iff_getElem.mp h_p_v_in
+  refine ⟨pos, h_pos_lt, ?_, ?_⟩
+  · rw [h_pos_eq]; exact h_p_v_start
+  · -- Chain reasoning via array_set_chain_at_target_nodup on L_pairs.
+    set L_pairs : List (Nat × Nat) := assignList.map
+      (fun e => (e.1.startVertexIndex.val, e.2)) with h_L_pairs_def
+    have h_chain_eq : assignList.foldl (fun (slice : Array Nat) item =>
+          slice.set! item.1.startVertexIndex.val item.2)
+          ((Array.range n).map (fun _ : Nat => (0 : Nat)))
+        = L_pairs.foldl (fun (slice : Array Nat) item => slice.set! item.1 item.2)
+            ((Array.range n).map (fun _ : Nat => (0 : Nat))) := by
+      rw [h_L_pairs_def, List.foldl_map]
+    rw [h_chain_eq]
+    -- L_pairs first-coords nodup.
+    have h_starts_nodup : (sortedList.map (·.startVertexIndex.val)).Nodup :=
+      h_perm_starts.nodup_iff.mpr List.nodup_range
+    have h_assign_starts_eq : assignList.map (·.1.startVertexIndex.val)
+                            = sortedList.map (·.startVertexIndex.val) := by
+      rw [show assignList.map (·.1.startVertexIndex.val)
+            = (assignList.map (·.1)).map (·.startVertexIndex.val) from by
+              rw [List.map_map]; rfl]
+      rw [assignRanks_map_fst]
+    have h_L_pairs_fst_eq : L_pairs.map (·.1) = assignList.map (·.1.startVertexIndex.val) := by
+      rw [h_L_pairs_def, List.map_map]; rfl
+    have h_L_pairs_nodup : (L_pairs.map (·.1)).Nodup := by
+      rw [h_L_pairs_fst_eq, h_assign_starts_eq]; exact h_starts_nodup
+    -- Locate the entry corresponding to v.val.
+    have h_pos_lt_assign : pos < assignList.length := by rw [h_assignList_len]; exact h_pos_lt
+    have h_assign_at_pos_fst : (assignList[pos]'h_pos_lt_assign).1 = sortedList[pos]'h_pos_lt :=
+      assignRanks_getElem_fst cmp sortedList pos h_pos_lt
+    have h_assign_pos_start : (assignList[pos]'h_pos_lt_assign).1.startVertexIndex.val = v.val := by
+      rw [h_assign_at_pos_fst, h_pos_eq]; exact h_p_v_start
+    set entry : Nat × Nat := (v.val, (assignList[pos]'h_pos_lt_assign).2) with h_entry_def
+    have h_entry_in : entry ∈ L_pairs := by
+      rw [h_L_pairs_def]
+      apply List.mem_map.mpr
+      refine ⟨assignList[pos]'h_pos_lt_assign, List.getElem_mem _, ?_⟩
+      simp [h_entry_def, h_assign_pos_start]
+    have h_init_size : ((Array.range n).map (fun _ : Nat => (0 : Nat))).size = n := by simp
+    have h_target_bound : entry.1 < ((Array.range n).map (fun _ : Nat => (0 : Nat))).size := by
+      rw [h_init_size]
+      show v.val < n
+      exact v.isLt
+    have h_chain_val := array_set_chain_at_target_nodup
+      ((Array.range n).map (fun _ : Nat => (0 : Nat)))
+      L_pairs entry 0 h_entry_in h_L_pairs_nodup h_target_bound
+    -- entry.1 = v.val, entry.2 = (assignList[pos]).2.
+    show (L_pairs.foldl (fun (slice : Array Nat) item => slice.set! item.1 item.2)
+          ((Array.range n).map (fun _ : Nat => (0 : Nat)))).getD v.val 0
+      = (assignList[pos]'h_pos_lt_assign).2
+    have h_entry_1 : entry.1 = v.val := rfl
+    have h_entry_2 : entry.2 = (assignList[pos]'h_pos_lt_assign).2 := rfl
+    rw [← h_entry_1, ← h_entry_2]
+    exact h_chain_val
+
 theorem getFrom_image_isPrefix_for_initializePaths
     (G : AdjMatrix n) (vts : Array VertexType) :
     ∃ m : Nat,
@@ -1324,8 +1404,43 @@ private theorem sortBy_first_q_positions_have_start_types
   -- Specialize at k' = q, i = k.
   exact h_main q (le_refl _) k hk
 
-/-- **P3.E (TODO)** `convergeOnce (initializePaths G) T` preserves the prefix property,
-the size, and the lower-uniqueness `0..q-1`. -/
+/-- **P3.E.aux** Outer-fold/inner-fold unwinding for `calculatePathRankings`'s
+depth-(n-1) slice: there exists a `br` (the betweenRanks function from prior outer-fold
+iterations) such that `fromRanks.getD (n-1) #[]` equals a chain over the assignList
+indexed by `comparePathsFrom T br`.
+
+This mirrors the unwinding in `getFrom_image_isPrefix_for_initializePaths` but exposes
+the chain expression syntactically rather than just deriving its dense image. Used by
+`convergeOnce_preserves_lower_uniqueness` to relate `output[v.val]` to a specific
+assignList rank via `chain_value_at_vertex_for_assignRanks_sortBy`.
+
+**Proof status (TODO)**: the unwinding mirrors `getFrom_image_isPrefix_for_initializePaths`
+verbatim up through `inner_fold_slice_at_depth`, then gives the chain expression directly
+rather than applying `chain_image_dense_for_assignRanks_sortBy`. Refactoring opportunity:
+extract the shared unwinding skeleton so both the density theorem and this per-vertex
+theorem can apply at the chain step. -/
+private theorem fromRanks_at_n_minus_1_eq_chain_for_initializePaths
+    (G : AdjMatrix n) (T : Array VertexType) (hn_pos : 0 < n) :
+    ∃ br : Nat → Nat → Nat → Nat,
+      ∀ v : Fin n,
+        ((calculatePathRankings (initializePaths G) T).fromRanks.getD (n - 1) #[]).getD v.val 0
+          = ((assignRanks (comparePathsFrom T br)
+              (sortBy (comparePathsFrom T br)
+                ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)).foldl
+              (fun (slice : Array Nat) item => slice.set! item.1.startVertexIndex.val item.2)
+              ((Array.range n).map (fun _ : Nat => (0 : Nat)))).getD v.val 0 := by
+  sorry
+
+/-- **P3.E** `convergeOnce (initializePaths G) T` preserves the prefix property, the size,
+and the lower-uniqueness `0..q-1`. The uniqueness conjunct combines:
+- `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` (chain equation),
+- `chain_value_at_vertex_for_assignRanks_sortBy` (per-vertex rank lookup),
+- `sortBy_first_q_positions_have_start_types` (P3.D: positions 0..q-1 have unique-typed
+  start vertices),
+- `assignRanks_rank_eq_pos_when_distinct_prefix` (P3.C-prefix: rank at position k = k for
+  k < q when the prefix has distinct cmps),
+- `assignRanks_rank_monotone` (rank non-decreasing) + the cmp-distinctness at the q-1/q
+  boundary (rank at position q is q ⟹ rank at pos ≥ q is ≥ q for pos ≥ q). -/
 private theorem convergeOnce_preserves_lower_uniqueness
     (G : AdjMatrix n) (T : Array VertexType) (q : Nat) (hq : q ≤ n)
     (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
@@ -1348,9 +1463,24 @@ private theorem convergeOnce_preserves_lower_uniqueness
       refine ⟨i, ?_⟩
       rw [convergeOnce_writeback (initializePaths G) T i.val (h_size.symm ▸ i.isLt) i.isLt]
       exact hi
-  -- Output's uniqueness: requires P3.D + P3.B/C + (a)/(b)/(c) reasoning.
+  -- Output's uniqueness. Strategy (TODO):
+  -- 1. Apply `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` to obtain a `br`.
+  -- 2. Apply `chain_value_at_vertex_for_assignRanks_sortBy` to get per-vertex chain value.
+  -- 3. Apply `convergeOnce_writeback` so output[v.val] = chain at v.val = rank of unique
+  --    assignList entry whose start vertex is v.val.
+  -- 4. By P3.D (`sortBy_first_q_positions_have_start_types`), positions 0..q-1 in
+  --    sortedList have start types 0..q-1. By P3.1, adjacent paths in this prefix have
+  --    distinct cmps.
+  -- 5. By `assignRanks_rank_eq_pos_when_distinct_prefix` (added this iteration), rank at
+  --    position k = k for k < q.
+  -- 6. By extending distinctness to position q (using P3.D + uniqueness of starts) and
+  --    `assignRanks_rank_monotone` (added this iteration), rank at position pos ≥ q is ≥ q.
+  -- 7. Existence: for v_k = unique witness for T-value k, output[v_k.val] = k via
+  --    P3.D pinning sortedList[k].start = v_k.val + step (5).
+  -- 8. Uniqueness: any w with output[w] = k corresponds to a position pos_w; by step (6),
+  --    pos_w < q; by step (5), pos_w = k; hence w.val = sortedList[k].start.val = v_k.val.
   have h_unique_out : @UniquelyHeldBelow n (convergeOnce (initializePaths G) T).1 q := by
-    sorry  -- Combine P3.D with assignRanks rank facts.
+    sorry
   exact ⟨h_size_out, h_prefix_out, h_unique_out⟩
 
 /-- **Phase 3 main lemma (P3.5)** `convergeLoop` preserves prefix typing AND lower-

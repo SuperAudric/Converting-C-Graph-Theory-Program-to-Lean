@@ -1035,6 +1035,104 @@ theorem assignRanks_rank_le_pos {α : Type} (cmp : α → α → Ordering) (L : 
       simp [h_k_eq_len]
       omega
 
+/-! ### Rank monotonicity
+
+`assignRanks` produces ranks that are non-decreasing along the output list. This is
+because each `assignRanksStep` either keeps the rank (when `cmp prev item == .eq`) or
+increments it by exactly one. The proof tracks the joint invariant:
+- the foldl's `revList` is pairwise non-increasing (head has the largest rank);
+- the `lastEntry` equals the head of `revList` (so it tracks the most recent rank).
+
+After reversing, the output `assignRanks cmp L` is pairwise non-decreasing in rank. -/
+
+/-- One step of `assignRanksStep` preserves: revList head matches lastEntry, AND revList
+is pairwise non-increasing in rank from head to tail. -/
+private theorem assignRanksStep_preserves_invariant {α : Type} (cmp : α → α → Ordering)
+    (revList : List (α × Nat)) (lastEntry : Option (α × Nat)) (item : α)
+    (h_pw : revList.Pairwise (fun a b => b.2 ≤ a.2))
+    (h_head : revList.head? = lastEntry) :
+    (assignRanksStep cmp (revList, lastEntry) item).1.Pairwise (fun a b => b.2 ≤ a.2) ∧
+    (assignRanksStep cmp (revList, lastEntry) item).1.head?
+      = (assignRanksStep cmp (revList, lastEntry) item).2 := by
+  unfold assignRanksStep
+  cases lastEntry with
+  | none =>
+    -- lastEntry = none ⟹ revList = [] (since head? = none).
+    have h_rev_empty : revList = [] := by
+      cases revList with
+      | nil => rfl
+      | cons => simp at h_head
+    subst h_rev_empty
+    refine ⟨?_, ?_⟩
+    · exact List.pairwise_singleton _ _
+    · simp
+  | some prev =>
+    -- revList = head :: tail. h_head says head = prev.
+    rcases revList with _ | ⟨head, tail⟩
+    · simp at h_head
+    · simp only [List.head?_cons, Option.some.injEq] at h_head
+      -- h_head : head = prev
+      rcases prev with ⟨p1, p2⟩
+      have h_head_eq : head = (p1, p2) := h_head
+      subst h_head_eq
+      refine ⟨?_, ?_⟩
+      · -- ((item, new_rank) :: (p1, p2) :: tail).Pairwise.
+        apply List.Pairwise.cons _ h_pw
+        intro b hb
+        rcases List.mem_cons.mp hb with h_eq | h_in
+        · subst h_eq
+          show (p1, p2).2 ≤ (if cmp p1 item == Ordering.eq then p2 else p2 + 1)
+          split_ifs <;> omega
+        · -- b ∈ tail; b.2 ≤ p2 by IH.
+          have h_tail_le : ∀ x ∈ tail, x.2 ≤ p2 :=
+            (List.pairwise_cons.mp h_pw).1
+          have hb_le : b.2 ≤ p2 := h_tail_le b h_in
+          show b.2 ≤ (if cmp p1 item == Ordering.eq then p2 else p2 + 1)
+          split_ifs <;> omega
+      · simp
+
+/-- The joint invariant lifted through `foldl`. -/
+private theorem assignRanks_foldl_invariant {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α) (revList₀ : List (α × Nat)) (lastEntry₀ : Option (α × Nat)),
+      revList₀.Pairwise (fun a b => b.2 ≤ a.2) →
+      revList₀.head? = lastEntry₀ →
+      (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1.Pairwise
+        (fun a b => b.2 ≤ a.2) ∧
+      (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).1.head?
+        = (L.foldl (assignRanksStep cmp) (revList₀, lastEntry₀)).2 := by
+  intro L
+  induction L with
+  | nil => intros; exact ⟨‹_›, ‹_›⟩
+  | cons a L ih =>
+    intros revList₀ lastEntry₀ h_pw h_head
+    rw [List.foldl_cons]
+    obtain ⟨h_pw', h_head'⟩ :=
+      assignRanksStep_preserves_invariant cmp revList₀ lastEntry₀ a h_pw h_head
+    set newState := assignRanksStep cmp (revList₀, lastEntry₀) a
+    exact ih newState.1 newState.2 h_pw' h_head'
+
+/-- **Pairwise rank ordering**: `assignRanks cmp L` has ranks non-decreasing along the list. -/
+theorem assignRanks_pairwise_rank_le {α : Type} (cmp : α → α → Ordering) (L : List α) :
+    (assignRanks cmp L).Pairwise (fun a b => a.2 ≤ b.2) := by
+  rw [assignRanks_eq_foldl]
+  have h_inv :=
+    (assignRanks_foldl_invariant cmp L [] none List.Pairwise.nil rfl).1
+  exact List.pairwise_reverse.mpr h_inv
+
+/-- **Rank monotonicity**: rank at position `i` is `≤` rank at position `j` for `i ≤ j`. -/
+theorem assignRanks_rank_monotone {α : Type} (cmp : α → α → Ordering) (L : List α)
+    (i j : Nat) (hi : i ≤ j) (hj : j < L.length) :
+    ((assignRanks cmp L)[i]'(by rw [assignRanks_length]; omega)).2
+      ≤ ((assignRanks cmp L)[j]'(by rw [assignRanks_length]; exact hj)).2 := by
+  have h_pw := assignRanks_pairwise_rank_le cmp L
+  have hi' : i < (assignRanks cmp L).length := by rw [assignRanks_length]; omega
+  have hj' : j < (assignRanks cmp L).length := by rw [assignRanks_length]; exact hj
+  rcases Nat.lt_or_eq_of_le hi with h_lt | h_eq
+  · exact List.pairwise_iff_getElem.mp h_pw i j hi' hj' h_lt
+  · -- i = j; ranks equal.
+    subst h_eq
+    exact Nat.le_refl _
+
 /-- **P3.C aux** (combined with lastEntry tracking): Strong invariant via reverseRecOn
 induction. For lists where consecutive cmps differ for `i + 1 < L.length`, the rank at
 every position equals the position, AND the foldl's lastEntry has rank `L.length - 1`
@@ -1253,5 +1351,79 @@ theorem assignRanks_rank_eq_pos_when_distinct {α : Type} (cmp : α → α → O
     (k : Nat) (hk : k < L.length) :
     ((assignRanks cmp L)[k]'(by rw [assignRanks_length]; exact hk)).2 = k :=
   (assignRanks_strong_invariant cmp L h_distinct).1 k hk
+
+/-- **Append-preservation**: rank at position `k` in `assignRanks cmp (A ++ B)` equals
+the rank at position `k` in `assignRanks cmp A` (for `k < A.length`). Proved via
+right-snoc induction on `B` using `assignRanks_snoc_decompose`. -/
+theorem assignRanks_rank_eq_of_prefix {α : Type} (cmp : α → α → Ordering)
+    (A B : List α) (k : Nat) (hk : k < A.length) :
+    ((assignRanks cmp (A ++ B))[k]'(by
+        rw [assignRanks_length, List.length_append]; omega)).2
+      = ((assignRanks cmp A)[k]'(by rw [assignRanks_length]; exact hk)).2 := by
+  induction B using List.reverseRecOn with
+  | nil =>
+    -- A ++ [] reduces to A. Show that the two getElem's agree by congruence.
+    simp
+  | append_singleton B' b ih =>
+    -- A ++ (B' ++ [b]) = (A ++ B') ++ [b]. By snoc_decompose, the rank at k < A.length
+    -- in assignRanks ((A ++ B') ++ [b]) = (assignRanks (A ++ B') ++ [(b, _)])[k]
+    -- = (assignRanks (A ++ B'))[k].2 (by getElem_append_left, since k < A++B'.length).
+    obtain ⟨r_b, h_decomp, _⟩ := assignRanks_snoc_decompose cmp (A ++ B') b
+    have h_assign_AB'_len : (assignRanks cmp (A ++ B')).length = (A ++ B').length :=
+      assignRanks_length _ _
+    have h_k_lt_AB' : k < (A ++ B').length := by
+      simp [List.length_append]; omega
+    have h_k_lt_assign_AB' : k < (assignRanks cmp (A ++ B')).length := by
+      rw [h_assign_AB'_len]; exact h_k_lt_AB'
+    have h_k_lt_full : k < (assignRanks cmp (A ++ B' ++ [b])).length := by
+      rw [assignRanks_length]; simp [List.length_append]; omega
+    have h_assoc : A ++ (B' ++ [b]) = (A ++ B') ++ [b] := by simp
+    have h_get_eq : (assignRanks cmp (A ++ (B' ++ [b])))[k]'(by
+            rw [assignRanks_length, List.length_append, List.length_append]; omega)
+        = (assignRanks cmp ((A ++ B') ++ [b]))[k]'h_k_lt_full := by
+      congr 1
+      rw [h_assoc]
+    rw [h_get_eq]
+    have h_get_eq2 : (assignRanks cmp ((A ++ B') ++ [b]))[k]'h_k_lt_full
+        = (assignRanks cmp (A ++ B') ++ [(b, r_b)])[k]'(by
+            rw [List.length_append, h_assign_AB'_len, List.length_singleton]; omega) := by
+      congr 1
+    rw [h_get_eq2, List.getElem_append_left h_k_lt_assign_AB']
+    exact ih
+
+/-- **P3.C-prefix**: rank at position `k` (for `k < q`) in `assignRanks cmp L` equals `k`,
+provided consecutive cmps differ throughout the prefix `L.take q` (with `q ≤ L.length`).
+Combines `assignRanks_rank_eq_of_prefix` with `assignRanks_rank_eq_pos_when_distinct`
+applied to the prefix. -/
+theorem assignRanks_rank_eq_pos_when_distinct_prefix {α : Type} (cmp : α → α → Ordering)
+    (L : List α) (q : Nat) (hq : q ≤ L.length)
+    (h_distinct : ∀ i (h : i + 1 < q),
+      cmp (L[i]'(Nat.lt_of_lt_of_le (Nat.lt_of_succ_lt h) hq))
+          (L[i+1]'(Nat.lt_of_lt_of_le h hq)) ≠ .eq)
+    (k : Nat) (hk : k < q) :
+    ((assignRanks cmp L)[k]'(by
+        rw [assignRanks_length]; exact Nat.lt_of_lt_of_le hk hq)).2 = k := by
+  have h_take_len : (L.take q).length = q := by
+    rw [List.length_take]; omega
+  have hk_take : k < (L.take q).length := by rw [h_take_len]; exact hk
+  -- Distinctness on L.take q follows from distinctness of L's prefix.
+  have h_distinct_take : ∀ i (h : i + 1 < (L.take q).length),
+      cmp ((L.take q)[i]'(Nat.lt_of_succ_lt h)) ((L.take q)[i+1]'h) ≠ .eq := by
+    intro i h
+    have h_i_lt_q : i + 1 < q := by rw [h_take_len] at h; exact h
+    have h_i_eq : (L.take q)[i]'(Nat.lt_of_succ_lt h)
+                = L[i]'(Nat.lt_of_lt_of_le (Nat.lt_of_succ_lt h_i_lt_q) hq) := by
+      rw [List.getElem_take]
+    have h_i1_eq : (L.take q)[i+1]'h
+                 = L[i+1]'(Nat.lt_of_lt_of_le h_i_lt_q hq) := by
+      rw [List.getElem_take]
+    rw [h_i_eq, h_i1_eq]
+    exact h_distinct i h_i_lt_q
+  -- Step: use `assignRanks_rank_eq_of_prefix` with A = L.take q, B = L.drop q, then
+  -- rewrite via `take_append_drop` to bridge.
+  have h_pref := assignRanks_rank_eq_of_prefix cmp (L.take q) (L.drop q) k hk_take
+  simp only [List.take_append_drop] at h_pref
+  rw [h_pref]
+  exact assignRanks_rank_eq_pos_when_distinct cmp (L.take q) h_distinct_take k hk_take
 
 end Graph
