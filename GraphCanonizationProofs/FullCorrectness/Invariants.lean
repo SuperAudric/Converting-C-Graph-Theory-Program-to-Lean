@@ -1195,17 +1195,134 @@ private theorem sortBy_first_q_positions_have_start_types
   -- Set up: total preorder, Pairwise from sortBy_pairwise, perm from sortBy_perm.
   obtain ⟨_, h_anti₁, h_anti₂, h_trans⟩ :=
     comparePathsFrom_total_preorder (vc := n) T betweenRanks
-  set pathsAtTop := ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList
-  set cmp := comparePathsFrom T betweenRanks
-  have h_pairwise : (sortBy cmp pathsAtTop).Pairwise (fun a b => cmp a b ≠ Ordering.gt) :=
+  set pathsAtTop := ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList with h_pathsAtTop_def
+  set cmp := comparePathsFrom T betweenRanks with h_cmp_def
+  set sortedList := sortBy cmp pathsAtTop with h_sortedList_def
+  have h_pairwise : sortedList.Pairwise (fun a b => cmp a b ≠ Ordering.gt) :=
     sortBy_pairwise cmp h_anti₂ h_trans pathsAtTop
-  have h_perm : (sortBy cmp pathsAtTop).Perm pathsAtTop := sortBy_perm cmp pathsAtTop
-  -- The actual counting argument from Pairwise + Perm + h_unique. The key reasoning:
-  -- For unique-typed v_k (k < q), pathFrom v_k has unique start type k. By Pairwise +
-  -- antisymmetry, paths with smaller start types must be earlier in sortedList, paths
-  -- with larger must be later. Counting yields exactly k smaller paths, so v_k is at
-  -- position k. The formalization is substantial counting work.
-  sorry
+  have h_perm : sortedList.Perm pathsAtTop := sortBy_perm cmp pathsAtTop
+  intro k hk
+  -- q > 0 (from k < q), n > 0 (from q ≤ n).
+  have hq_pos : 0 < q := Nat.lt_of_le_of_lt (Nat.zero_le _) hk
+  have hn_pos : 0 < n := Nat.lt_of_lt_of_le hq_pos hq
+  have h_n_pred_lt : n - 1 < n := Nat.sub_lt hn_pos (by omega)
+  -- pathsAtTop has length n; sortedList has length n.
+  have h_indices : pathsAtTop.map (·.startVertexIndex.val) = List.range n :=
+    initializePaths_pathsAtDepth_startVertices_eq_range G h_n_pred_lt
+  have h_pathsAtTop_len : pathsAtTop.length = n := by
+    have h := congrArg List.length h_indices
+    rwa [List.length_map, List.length_range] at h
+  have h_sortedLen : sortedList.length = n := by
+    rw [h_perm.length_eq]; exact h_pathsAtTop_len
+  -- Starts in sortedList are nodup.
+  have h_starts_nodup : (sortedList.map (·.startVertexIndex.val)).Nodup := by
+    have h_perm_map : (sortedList.map (·.startVertexIndex.val)).Perm
+        (pathsAtTop.map (·.startVertexIndex.val)) := h_perm.map _
+    have h_perm_range : (sortedList.map (·.startVertexIndex.val)).Perm (List.range n) :=
+      h_indices ▸ h_perm_map
+    exact h_perm_range.nodup_iff.mpr List.nodup_range
+  -- Pairwise gives the relation at any pair of positions.
+  have h_pairwise_at : ∀ (a b : Nat) (ha : a < sortedList.length) (hb : b < sortedList.length),
+      a < b → cmp (sortedList[a]'ha) (sortedList[b]'hb) ≠ Ordering.gt :=
+    fun a b ha hb h_lt => List.pairwise_iff_getElem.mp h_pairwise a b ha hb h_lt
+  -- Distinct positions have distinct start vertex values.
+  have h_starts_nodup_at : ∀ (a b : Nat) (ha : a < sortedList.length) (hb : b < sortedList.length),
+      (sortedList[a]'ha).startVertexIndex.val = (sortedList[b]'hb).startVertexIndex.val → a = b := by
+    intro a b ha hb h_start_eq
+    have ha' : a < (sortedList.map (·.startVertexIndex.val)).length := by rw [List.length_map]; exact ha
+    have hb' : b < (sortedList.map (·.startVertexIndex.val)).length := by rw [List.length_map]; exact hb
+    have h_map_eq : (sortedList.map (·.startVertexIndex.val))[a]'ha'
+                 = (sortedList.map (·.startVertexIndex.val))[b]'hb' := by
+      rw [List.getElem_map, List.getElem_map]
+      exact h_start_eq
+    exact h_starts_nodup.getElem_inj_iff.mp h_map_eq
+  -- Main claim by strong induction: for each k' ≤ q, all positions i < k' have value i.
+  have h_main : ∀ k' : Nat, k' ≤ q →
+      ∀ i, i < k' →
+        ∃ h_lt : i < sortedList.length,
+          T.getD ((sortedList[i]'h_lt).startVertexIndex.val) 0 = i := by
+    intro k'
+    induction k' with
+    | zero => intros _ i hi; exact absurd hi (Nat.not_lt_zero _)
+    | succ k'' ih =>
+      intro hk'_le i hi
+      have hk''_le : k'' ≤ q := Nat.le_of_succ_le hk'_le
+      rcases Nat.lt_or_eq_of_le (Nat.lt_succ_iff.mp hi) with hi_lt | hi_eq
+      · exact ih hk''_le i hi_lt
+      · -- i = k''. Need V_i = i.
+        have hi_lt_q : i < q := hi_eq ▸ Nat.lt_of_succ_le hk'_le
+        have hi_lt_n : i < n := Nat.lt_of_lt_of_le hi_lt_q hq
+        have hi_lt_len : i < sortedList.length := h_sortedLen.symm ▸ hi_lt_n
+        refine ⟨hi_lt_len, ?_⟩
+        -- Prior values: V_j = j for j < i.
+        have h_prior : ∀ j, j < i →
+            ∃ h_lt : j < sortedList.length,
+              T.getD ((sortedList[j]'h_lt).startVertexIndex.val) 0 = j := fun j hj =>
+          ih hk''_le j (hi_eq ▸ hj)
+        -- Step A: V_i ≥ i.
+        have h_V_i_ne : ∀ j, j < i → T.getD ((sortedList[i]'hi_lt_len).startVertexIndex.val) 0 ≠ j := by
+          intro j hj h_eq
+          have h_jlt_q : j < q := lt_trans hj hi_lt_q
+          obtain ⟨h_j_lt_len, h_V_j⟩ := h_prior j hj
+          obtain ⟨_, _, h_uniq⟩ := h_unique ⟨j, h_jlt_q⟩
+          have h_si_lt_n : (sortedList[i]'hi_lt_len).startVertexIndex.val < n :=
+            (sortedList[i]'hi_lt_len).startVertexIndex.isLt
+          have h_sj_lt_n : (sortedList[j]'h_j_lt_len).startVertexIndex.val < n :=
+            (sortedList[j]'h_j_lt_len).startVertexIndex.isLt
+          have h_eq_i := h_uniq ⟨(sortedList[i]'hi_lt_len).startVertexIndex.val, h_si_lt_n⟩ h_eq
+          have h_eq_j := h_uniq ⟨(sortedList[j]'h_j_lt_len).startVertexIndex.val, h_sj_lt_n⟩ h_V_j
+          have h_start_eq : (sortedList[i]'hi_lt_len).startVertexIndex.val
+                          = (sortedList[j]'h_j_lt_len).startVertexIndex.val := by
+            have h := h_eq_i.trans h_eq_j.symm
+            exact congrArg Fin.val h
+          have h_idx_eq := h_starts_nodup_at i j hi_lt_len h_j_lt_len h_start_eq
+          exact Nat.lt_irrefl j (h_idx_eq ▸ hj)
+        have h_V_i_ge : i ≤ T.getD ((sortedList[i]'hi_lt_len).startVertexIndex.val) 0 := by
+          by_contra h_lt
+          have h_lt' : T.getD ((sortedList[i]'hi_lt_len).startVertexIndex.val) 0 < i :=
+            Nat.lt_of_not_ge h_lt
+          exact h_V_i_ne _ h_lt' rfl
+        -- Step B: V_i ≤ i. Find the unique witness for value i and show its position pins V_i.
+        obtain ⟨w_i_fin, h_w_i_val, _⟩ := h_unique ⟨i, hi_lt_q⟩
+        have h_w_i_in_starts : w_i_fin.val ∈ pathsAtTop.map (·.startVertexIndex.val) := by
+          rw [h_indices]; exact List.mem_range.mpr w_i_fin.isLt
+        obtain ⟨p_w, h_p_w_in_pAT, h_p_w_start⟩ := List.mem_map.mp h_w_i_in_starts
+        have h_p_w_in_sl : p_w ∈ sortedList := h_perm.symm.mem_iff.mp h_p_w_in_pAT
+        obtain ⟨pos, h_pos_lt, h_pos_eq⟩ := List.mem_iff_getElem.mp h_p_w_in_sl
+        have h_V_pos : T.getD ((sortedList[pos]'h_pos_lt).startVertexIndex.val) 0 = i := by
+          rw [h_pos_eq, h_p_w_start, h_w_i_val]
+        have h_V_i_le : T.getD ((sortedList[i]'hi_lt_len).startVertexIndex.val) 0 ≤ i := by
+          by_contra h_gt
+          have h_gt' : i < T.getD ((sortedList[i]'hi_lt_len).startVertexIndex.val) 0 :=
+            Nat.lt_of_not_ge h_gt
+          rcases Nat.lt_trichotomy pos i with h_pos_lt_i | h_pos_eq_i | h_pos_gt_i
+          · -- pos < i: by IH, V_pos = pos, but V_pos = i; so pos = i, contradiction.
+            obtain ⟨_, h_V_pos_prior⟩ := h_prior pos h_pos_lt_i
+            have h_eq : pos = i := h_V_pos_prior.symm.trans h_V_pos
+            exact Nat.lt_irrefl i (h_eq ▸ h_pos_lt_i)
+          · -- pos = i: V_i = V_pos = i, contradicting V_i > i.
+            exfalso
+            have h_lookup : (sortedList[i]'hi_lt_len) = (sortedList[pos]'h_pos_lt) := by
+              cases h_pos_eq_i; rfl
+            rw [h_lookup] at h_gt'
+            rw [h_V_pos] at h_gt'
+            exact Nat.lt_irrefl i h_gt'
+          · -- pos > i: by Pairwise, cmp sortedList[i] sortedList[pos] ≠ .gt; but P3.1 gives = .gt.
+            have h_cmp_ne_gt := h_pairwise_at i pos hi_lt_len h_pos_lt h_pos_gt_i
+            have h_V_ne : T.getD ((sortedList[i]'hi_lt_len).startVertexIndex.val) 0
+                         ≠ T.getD ((sortedList[pos]'h_pos_lt).startVertexIndex.val) 0 := by
+              rw [h_V_pos]; exact Nat.ne_of_gt h_gt'
+            have h_cmp_eq : cmp (sortedList[i]'hi_lt_len) (sortedList[pos]'h_pos_lt)
+                = compare (T.getD ((sortedList[i]'hi_lt_len).startVertexIndex.val) 0)
+                          (T.getD ((sortedList[pos]'h_pos_lt).startVertexIndex.val) 0) :=
+              comparePathsFrom_eq_compare_of_start_types_ne T betweenRanks _ _ h_V_ne
+            have h_cmp_gt : cmp (sortedList[i]'hi_lt_len) (sortedList[pos]'h_pos_lt) = Ordering.gt := by
+              rw [h_cmp_eq, h_V_pos]
+              exact Nat.compare_eq_gt.mpr h_gt'
+            exact h_cmp_ne_gt h_cmp_gt
+        exact Nat.le_antisymm h_V_i_le h_V_i_ge
+  -- Specialize at k' = q, i = k.
+  exact h_main q (le_refl _) k hk
 
 /-- **P3.E (TODO)** `convergeOnce (initializePaths G) T` preserves the prefix property,
 the size, and the lower-uniqueness `0..q-1`. -/

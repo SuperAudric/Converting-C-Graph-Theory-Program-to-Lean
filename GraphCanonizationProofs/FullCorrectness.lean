@@ -63,7 +63,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. |
 | `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |
-| `convergeLoop_preserves_lower_uniqueness` | `Invariants`                   | The deep sub-lemma blocking `orderVertices_prefix_invariant`. For `T` prefix with `0..q-1` uniquely held by witnesses `v_0, ..., v_{q-1}` (with `T[v_k] = k`), `convergeLoop _ T fuel` has the same property with the SAME witnesses (`T'[v_k] = k`). Strategy: induct on fuel, then for each `convergeOnce` step, show that `getFrom (n-1) v_k = k`. This requires P3.2 (sortBy sorts by start type, so `pathFrom v_k` lands at position `k`) and P3.3 (assignRanks gives rank `k` to position `k` for distinct consecutive start types). P3.1 (`comparePathsFrom_eq_compare_of_start_types_ne`) ✅ proved. |
+| `convergeOnce_preserves_lower_uniqueness` (uniqueness conjunct) | `Invariants`         | Single-step uniqueness of `convergeOnce`. P3.5 (fuel induction) ✅ proved on top. P3.1, P3.B, P3.C, P3.D ✅ proved. Remaining: combine P3.D (sortedList[k] has start type k for k < q) with P3.C (rank at position k = k for k < q) via the chain inversion in `array_set_chain_at_target_nodup` to get `output[v_k.val] = k`; then a small monotonicity argument (rank at positions ≥ q is ≥ q) for uniqueness. |
 | `run_isomorphic_eq` (⟹)               | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2. |
 
 --------------------------------------------------------------------------------
@@ -378,9 +378,18 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
     induction. Uses `assignRanks_snoc_decompose_strict` (sharper snoc-decomposition with
     exact rank formula) and `assignRanks_foldl_lastEntry_fst` (lastEntry's first
     component).
-  - **P3.D** 🟡 `sortBy_first_q_positions_have_start_types`: aux1 (length) ✅; total
-    preorder hypotheses extracted (Pairwise + Perm in scope). Body's counting argument
-    remains as `sorry`. Foundation work this session:
+  - **P3.D** ✅ `sortBy_first_q_positions_have_start_types`: closed this session.
+    For `T` uniquely-typed at `0..q-1`, the first `q` positions of
+    `sortBy comparePathsFrom T pathsAtTop` have start types `0, 1, …, q-1` in order.
+    Strategy: strong induction on position `k`, with two sub-arguments:
+    (A) `V_k ≥ k` — uses uniqueness + nodup of starts in sortedList: any value `j < k`
+    that V_k could take would force its start to coincide with the unique witness at
+    position `j` (where `V_j = j` by IH), contradicting nodup.
+    (B) `V_k ≤ k` — find the unique witness `w_k` for value `k`; locate its position
+    `pos` in sortedList; trichotomy on `pos` vs `k` gives a contradiction in each case
+    (`pos < k` contradicts IH, `pos = k` gives `V_k = k`, `pos > k` violates Pairwise
+    via P3.1 since `V_k > k = V_pos` would force `cmp = .gt`).
+    Foundation work this session:
     - **`comparePathsFrom_total_preorder`** ✅ proved (by lifting from
       `comparePathsBetween_total_preorder` + the now-public `orderInsensitiveListCmp_*`
       helpers).
@@ -389,8 +398,9 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
       `ComparePathSegments.lean`; `sortBy_pairwise` in `ComparisonSort.lean`.
   - **P3.E** 🟡 `convergeOnce_preserves_lower_uniqueness`: prefix + size conjuncts ✅
     (via `convergeOnce_writeback` + `getFrom_image_isPrefix_for_initializePaths`).
-    Uniqueness conjunct 🧱 sorry pending P3.D body, plus a small
-    `assignRanks_rank_monotone` helper to bound rank at positions ≥ q.
+    Uniqueness conjunct 🧱 sorry. P3.D now closed — remaining work: combine P3.D with
+    P3.B/C and a small `assignRanks_rank_monotone` helper to bound rank at positions
+    `≥ q`, then conclude `output[v_k.val] = k` and uniqueness.
   - **P3.5** ✅ `convergeLoop_preserves_lower_uniqueness`: closed via fuel induction
     using P3.E.
 
