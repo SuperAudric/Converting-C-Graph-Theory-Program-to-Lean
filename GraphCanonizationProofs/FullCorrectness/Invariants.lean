@@ -1416,9 +1416,13 @@ assignList rank via `chain_value_at_vertex_for_assignRanks_sortBy`.
 
 **Proof status (TODO)**: the unwinding mirrors `getFrom_image_isPrefix_for_initializePaths`
 verbatim up through `inner_fold_slice_at_depth`, then gives the chain expression directly
-rather than applying `chain_image_dense_for_assignRanks_sortBy`. Refactoring opportunity:
-extract the shared unwinding skeleton so both the density theorem and this per-vertex
-theorem can apply at the chain step. -/
+rather than applying `chain_image_dense_for_assignRanks_sortBy`. The witness `br` is the
+final betweenRanks function (specifically, the projection of `(calculatePathRankings ...
+).betweenRanks` since iteration `n-1` is the last one — its `updatedBetween` IS the final
+state's betweenRanks).
+
+Refactoring opportunity: extract the shared unwinding skeleton so both the density theorem
+and this per-vertex theorem can apply at the chain step. -/
 private theorem fromRanks_at_n_minus_1_eq_chain_for_initializePaths
     (G : AdjMatrix n) (T : Array VertexType) (hn_pos : 0 < n) :
     ∃ br : Nat → Nat → Nat → Nat,
@@ -1429,6 +1433,18 @@ private theorem fromRanks_at_n_minus_1_eq_chain_for_initializePaths
                 ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)).foldl
               (fun (slice : Array Nat) item => slice.set! item.1.startVertexIndex.val item.2)
               ((Array.range n).map (fun _ : Nat => (0 : Nat)))).getD v.val 0 := by
+  -- The witness: the final betweenRanks (at iteration n-1, which is the last iteration,
+  -- so the final betweenRanks state IS the updatedBetween used at depth n-1).
+  refine ⟨fun rankDepth rankStart rankEnd =>
+    (((calculatePathRankings (initializePaths G) T).betweenRanks.getD rankDepth #[]).getD
+      rankStart #[]).getD rankEnd 0, ?_⟩
+  intro v
+  -- The remaining work: unwind `calculatePathRankings` to expose its inner-fold's chain
+  -- at depth n-1, then recognize that chain as the RHS. Mirror the unwinding in
+  -- `getFrom_image_isPrefix_for_initializePaths` (lines 662-826) — outer fold split via
+  -- `outer_fold_fromAcc_other_target_unchanged`, inner fold via `inner_fold_slice_at_depth`,
+  -- then `rfl` since both sides are syntactically the same chain (the cmp on both sides
+  -- is `comparePathsFrom T <updatedBetweenFn at iter n-1>`, which equals our chosen `br`).
   sorry
 
 /-- **P3.E** `convergeOnce (initializePaths G) T` preserves the prefix property, the size,
@@ -1463,24 +1479,296 @@ private theorem convergeOnce_preserves_lower_uniqueness
       refine ⟨i, ?_⟩
       rw [convergeOnce_writeback (initializePaths G) T i.val (h_size.symm ▸ i.isLt) i.isLt]
       exact hi
-  -- Output's uniqueness. Strategy (TODO):
-  -- 1. Apply `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` to obtain a `br`.
-  -- 2. Apply `chain_value_at_vertex_for_assignRanks_sortBy` to get per-vertex chain value.
-  -- 3. Apply `convergeOnce_writeback` so output[v.val] = chain at v.val = rank of unique
-  --    assignList entry whose start vertex is v.val.
-  -- 4. By P3.D (`sortBy_first_q_positions_have_start_types`), positions 0..q-1 in
-  --    sortedList have start types 0..q-1. By P3.1, adjacent paths in this prefix have
-  --    distinct cmps.
-  -- 5. By `assignRanks_rank_eq_pos_when_distinct_prefix` (added this iteration), rank at
-  --    position k = k for k < q.
-  -- 6. By extending distinctness to position q (using P3.D + uniqueness of starts) and
-  --    `assignRanks_rank_monotone` (added this iteration), rank at position pos ≥ q is ≥ q.
-  -- 7. Existence: for v_k = unique witness for T-value k, output[v_k.val] = k via
-  --    P3.D pinning sortedList[k].start = v_k.val + step (5).
-  -- 8. Uniqueness: any w with output[w] = k corresponds to a position pos_w; by step (6),
-  --    pos_w < q; by step (5), pos_w = k; hence w.val = sortedList[k].start.val = v_k.val.
+  -- Output's uniqueness.
   have h_unique_out : @UniquelyHeldBelow n (convergeOnce (initializePaths G) T).1 q := by
-    sorry
+    intro k_fin
+    obtain ⟨k_val, hk_lt_q⟩ := k_fin
+    have hn_pos : 0 < n := Nat.lt_of_lt_of_le (Nat.lt_of_le_of_lt (Nat.zero_le _) hk_lt_q) hq
+    have h_n_pred_lt : n - 1 < n := Nat.sub_lt hn_pos (by omega)
+    -- Unique witness for T-value k_val.
+    obtain ⟨v_k, hv_k_T, hv_k_uniq⟩ := h_unique ⟨k_val, hk_lt_q⟩
+    -- Apply unwinding helper.
+    obtain ⟨br, h_chain_eq⟩ := fromRanks_at_n_minus_1_eq_chain_for_initializePaths G T hn_pos
+    -- Indices fact.
+    have h_indices : ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList.map
+        (·.startVertexIndex.val) = List.range n :=
+      initializePaths_pathsAtDepth_startVertices_eq_range G h_n_pred_lt
+    -- Lengths.
+    have h_pathsAtTop_len : ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList.length = n := by
+      have h := congrArg List.length h_indices
+      rwa [List.length_map, List.length_range] at h
+    have h_sortedLen : (sortBy (comparePathsFrom T br)
+        ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList).length = n := by
+      rw [(sortBy_perm _ _).length_eq]; exact h_pathsAtTop_len
+    -- Nodup of starts in sortedList.
+    have h_starts_nodup : ((sortBy (comparePathsFrom T br)
+        ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList).map
+        (·.startVertexIndex.val)).Nodup := by
+      have h_perm_starts := (sortBy_perm (comparePathsFrom T br)
+        ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList).map
+        (·.startVertexIndex.val)
+      rw [h_indices] at h_perm_starts
+      exact h_perm_starts.nodup_iff.mpr List.nodup_range
+    have h_starts_nodup_at : ∀ (a b : Nat) (ha : a < (sortBy (comparePathsFrom T br)
+        ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList).length)
+        (hb : b < (sortBy (comparePathsFrom T br)
+        ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList).length),
+        ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+          (n - 1) #[]).toList)[a]'ha).startVertexIndex.val
+          = ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+          (n - 1) #[]).toList)[b]'hb).startVertexIndex.val → a = b := by
+      intro a b ha hb h_eq
+      have ha' : a < ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+        (n - 1) #[]).toList).map (·.startVertexIndex.val)).length := by
+        rw [List.length_map]; exact ha
+      have hb' : b < ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+        (n - 1) #[]).toList).map (·.startVertexIndex.val)).length := by
+        rw [List.length_map]; exact hb
+      have h_map_eq :
+          ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList).map (·.startVertexIndex.val))[a]'ha'
+          = ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList).map (·.startVertexIndex.val))[b]'hb' := by
+        rw [List.getElem_map, List.getElem_map]; exact h_eq
+      exact h_starts_nodup.getElem_inj_iff.mp h_map_eq
+    -- P3.D.
+    have h_p3d := sortBy_first_q_positions_have_start_types G T q hq h_size h_unique br
+    -- Distinctness of consecutive cmps in the prefix.
+    have h_distinct_for_prefix : ∀ (i : Nat) (h_q : i + 1 < q),
+        comparePathsFrom T br
+          ((sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i]'(by
+              rw [h_sortedLen]; exact Nat.lt_of_lt_of_le (Nat.lt_of_succ_lt h_q) hq))
+          ((sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i+1]'(by
+              rw [h_sortedLen]; exact Nat.lt_of_lt_of_le h_q hq)) ≠ Ordering.eq := by
+      intro i h_q
+      have hi_q' : i < q := Nat.lt_of_succ_lt h_q
+      obtain ⟨h_i_lt, h_T_i⟩ := h_p3d i hi_q'
+      obtain ⟨h_i1_lt, h_T_i1⟩ := h_p3d (i+1) h_q
+      have h_T_ne :
+          T.getD (((sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i]'h_i_lt).startVertexIndex.val) 0
+          ≠ T.getD (((sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i+1]'h_i1_lt).startVertexIndex.val) 0 := by
+        intro h_eq
+        have h : (i : Nat) = i + 1 := h_T_i.symm.trans (h_eq.trans h_T_i1)
+        omega
+      have h_cmp_eq := comparePathsFrom_eq_compare_of_start_types_ne T br _ _ h_T_ne
+      have h_lt :
+          T.getD (((sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i]'h_i_lt).startVertexIndex.val) 0
+          < T.getD (((sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i+1]'h_i1_lt).startVertexIndex.val) 0 :=
+        h_T_i.symm ▸ h_T_i1.symm ▸ Nat.lt_succ_self i
+      have h_compare_lt :
+          compare (T.getD (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList)[i]'h_i_lt).startVertexIndex.val) 0)
+                  (T.getD (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList)[i+1]'h_i1_lt).startVertexIndex.val) 0)
+            = Ordering.lt := Nat.compare_eq_lt.mpr h_lt
+      intro h_eq
+      rw [h_cmp_eq, h_compare_lt] at h_eq
+      cases h_eq
+    -- P3.C-prefix: rank at k = k for k < q.
+    have h_rank_eq_pos : ∀ (k : Nat) (hk : k < q),
+        ((assignRanks (comparePathsFrom T br) (sortBy (comparePathsFrom T br)
+          ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList))[k]'(by
+            rw [assignRanks_length, h_sortedLen]; exact Nat.lt_of_lt_of_le hk hq)).2 = k := by
+      intro k hk
+      apply assignRanks_rank_eq_pos_when_distinct_prefix (comparePathsFrom T br)
+        (sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList) q
+        (by rw [h_sortedLen]; exact hq) _ k hk
+      intro i h_lt_q
+      exact h_distinct_for_prefix i h_lt_q
+    -- For positions ≥ q: rank ≥ q. Strategy: extend distinctness to i+1 < q+1 (boundary
+    -- via P3.D + uniqueness + nodup), apply P3.C-prefix with q+1 to get rank at q = q,
+    -- then apply `assignRanks_rank_monotone`.
+    have h_rank_ge_q : ∀ (pos : Nat) (h_lt : pos < n) (h_ge : q ≤ pos),
+        q ≤ ((assignRanks (comparePathsFrom T br) (sortBy (comparePathsFrom T br)
+          ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList))[pos]'(by
+            rw [assignRanks_length, h_sortedLen]; exact h_lt)).2 := by
+      intro pos h_lt h_ge
+      have hq_pos : 0 < q := Nat.lt_of_le_of_lt (Nat.zero_le _) hk_lt_q
+      have hq_lt_n : q < n := Nat.lt_of_le_of_lt h_ge h_lt
+      have hq_pred_lt_q : q - 1 < q := Nat.sub_lt hq_pos (by omega)
+      have h_q_lt_len : q < (sortBy (comparePathsFrom T br)
+          ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList).length := by
+        rw [h_sortedLen]; exact hq_lt_n
+      -- Boundary distinctness: cmp(sortedList[q-1], sortedList[q]) ≠ .eq.
+      obtain ⟨h_qpred_lt, h_T_qpred⟩ := h_p3d (q - 1) hq_pred_lt_q
+      have h_boundary_distinct :
+          comparePathsFrom T br
+            ((sortBy (comparePathsFrom T br)
+              ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[q-1]'h_qpred_lt)
+            ((sortBy (comparePathsFrom T br)
+              ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[q]'h_q_lt_len)
+          ≠ Ordering.eq := by
+        intro h_eq
+        -- cmp = .eq → T-values match (else compare gives .lt or .gt).
+        have h_T_match :
+            T.getD (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[q-1]'h_qpred_lt).startVertexIndex.val) 0
+            = T.getD (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[q]'h_q_lt_len).startVertexIndex.val) 0 := by
+          by_contra h_T_ne
+          have h_cmp_compare := comparePathsFrom_eq_compare_of_start_types_ne T br _ _ h_T_ne
+          rw [h_cmp_compare] at h_eq
+          rcases Nat.lt_trichotomy
+              (T.getD (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+                (n - 1) #[]).toList)[q-1]'h_qpred_lt).startVertexIndex.val) 0)
+              (T.getD (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+                (n - 1) #[]).toList)[q]'h_q_lt_len).startVertexIndex.val) 0) with h_lt' | h_eq' | h_gt'
+          · rw [Nat.compare_eq_lt.mpr h_lt'] at h_eq; cases h_eq
+          · exact h_T_ne h_eq'
+          · rw [Nat.compare_eq_gt.mpr h_gt'] at h_eq; cases h_eq
+        -- T at q = q-1.
+        have h_T_q : T.getD (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList)[q]'h_q_lt_len).startVertexIndex.val) 0 = q - 1 := by
+          rw [← h_T_match]; exact h_T_qpred
+        -- Both starts equal the unique witness for q-1 → starts equal → nodup contradiction.
+        obtain ⟨_, _, hv_qpred_uniq⟩ := h_unique ⟨q - 1, hq_pred_lt_q⟩
+        have h_si_qpred_lt_n :
+            (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[q-1]'h_qpred_lt).startVertexIndex.val) < n :=
+          (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList)[q-1]'h_qpred_lt).startVertexIndex.isLt)
+        have h_si_q_lt_n :
+            (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[q]'h_q_lt_len).startVertexIndex.val) < n :=
+          (((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList)[q]'h_q_lt_len).startVertexIndex.isLt)
+        have h_qpred_w := hv_qpred_uniq
+          ⟨((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList)[q-1]'h_qpred_lt).startVertexIndex.val, h_si_qpred_lt_n⟩ h_T_qpred
+        have h_q_w := hv_qpred_uniq
+          ⟨((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+            (n - 1) #[]).toList)[q]'h_q_lt_len).startVertexIndex.val, h_si_q_lt_n⟩ h_T_q
+        have h_starts_eq :
+            ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[q-1]'h_qpred_lt).startVertexIndex.val
+            = ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[q]'h_q_lt_len).startVertexIndex.val := by
+          have h := h_qpred_w.trans h_q_w.symm
+          exact congrArg Fin.val h
+        have h_idx_eq := h_starts_nodup_at (q-1) q h_qpred_lt h_q_lt_len h_starts_eq
+        omega
+      -- Extended distinctness: i+1 < q+1.
+      have h_distinct_extended : ∀ (i : Nat) (h_q : i + 1 < q + 1),
+          comparePathsFrom T br
+            ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[i]'(by
+                rw [h_sortedLen]
+                have : i < q + 1 := Nat.lt_of_succ_lt h_q
+                omega))
+            ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+              (n - 1) #[]).toList)[i+1]'(by
+                rw [h_sortedLen]
+                have : i + 1 < q + 1 := h_q
+                omega)) ≠ Ordering.eq := by
+        intro i h_q
+        rcases Nat.lt_or_eq_of_le (Nat.le_of_lt_succ h_q) with h_lt_q | h_eq_q
+        · -- i + 1 < q, use h_distinct_for_prefix.
+          exact h_distinct_for_prefix i h_lt_q
+        · -- i + 1 = q, so i = q - 1. Use h_boundary_distinct via convert.
+          have hi_eq : i = q - 1 := by omega
+          have hi1_eq : i + 1 = q := h_eq_q
+          intro h_cmp_eq
+          apply h_boundary_distinct
+          have h_get_i_eq : (sortBy (comparePathsFrom T br)
+              ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i]'(by
+                rw [h_sortedLen]; omega)
+              = (sortBy (comparePathsFrom T br)
+                ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[q-1]'h_qpred_lt := by
+            cases hi_eq; rfl
+          have h_get_i1_eq : (sortBy (comparePathsFrom T br)
+              ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[i+1]'(by
+                rw [h_sortedLen]; omega)
+              = (sortBy (comparePathsFrom T br)
+                ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)[q]'h_q_lt_len := by
+            cases hi1_eq; rfl
+          rw [← h_get_i_eq, ← h_get_i1_eq]
+          exact h_cmp_eq
+      -- Apply P3.C-prefix with q+1 to get rank at q = q.
+      have h_rank_at_q :
+          ((assignRanks (comparePathsFrom T br) (sortBy (comparePathsFrom T br)
+            ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList))[q]'(by
+              rw [assignRanks_length, h_sortedLen]; exact hq_lt_n)).2 = q := by
+        apply assignRanks_rank_eq_pos_when_distinct_prefix (comparePathsFrom T br)
+          (sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)
+          (q + 1) (by rw [h_sortedLen]; omega) _ q (Nat.lt_succ_self q)
+        intro i h_lt
+        exact h_distinct_extended i h_lt
+      -- Apply rank monotonicity.
+      have h_pos_lt_sorted : pos < (sortBy (comparePathsFrom T br)
+          ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList).length := by
+        rw [h_sortedLen]; exact h_lt
+      have h_mono := assignRanks_rank_monotone (comparePathsFrom T br)
+        (sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList)
+        q pos h_ge h_pos_lt_sorted
+      rw [h_rank_at_q] at h_mono
+      exact h_mono
+    -- The unique position in sortedList with start = v_k.val is k_val (by P3.D).
+    obtain ⟨h_k_lt_len, h_T_k⟩ := h_p3d k_val hk_lt_q
+    have h_sorted_k_eq_v_k :
+        ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+          (n - 1) #[]).toList)[k_val]'h_k_lt_len).startVertexIndex.val = v_k.val := by
+      have h_si_lt_n : ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+          (n - 1) #[]).toList)[k_val]'h_k_lt_len).startVertexIndex.val < n :=
+        ((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+          (n - 1) #[]).toList)[k_val]'h_k_lt_len).startVertexIndex.isLt
+      have h_eq_i := hv_k_uniq
+        ⟨((sortBy (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD
+          (n - 1) #[]).toList)[k_val]'h_k_lt_len).startVertexIndex.val, h_si_lt_n⟩ h_T_k
+      exact congrArg Fin.val h_eq_i
+    -- Existence + uniqueness.
+    refine ⟨v_k, ?_, ?_⟩
+    · -- Existence: output[v_k.val] = k_val.
+      obtain ⟨pos, hpos, h_pos_start, h_chain_at_v⟩ := chain_value_at_vertex_for_assignRanks_sortBy
+        (comparePathsFrom T br) ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList
+        h_indices v_k
+      -- Combine convergeOnce_writeback + h_chain_eq to relate output to chain.
+      rw [convergeOnce_writeback (initializePaths G) T v_k.val (h_size.symm ▸ v_k.isLt) v_k.isLt]
+      show ((calculatePathRankings (initializePaths G) T).fromRanks.getD (n - 1) #[]).getD v_k.val 0
+        = k_val
+      rw [h_chain_eq v_k]
+      rw [h_chain_at_v]
+      -- pos = k_val by nodup.
+      have h_pos_eq_k : pos = k_val := by
+        apply h_starts_nodup_at pos k_val hpos h_k_lt_len
+        rw [h_pos_start, h_sorted_k_eq_v_k]
+      subst h_pos_eq_k
+      exact h_rank_eq_pos pos hk_lt_q
+    · -- Uniqueness.
+      intro w hw
+      obtain ⟨pos_w, hpos_w_lt, h_pos_w_start, h_chain_at_w⟩ :=
+        chain_value_at_vertex_for_assignRanks_sortBy (comparePathsFrom T br)
+          ((initializePaths G).pathsOfLength.getD (n - 1) #[]).toList h_indices w
+      -- Bridge output[w.val] to chain at w.val.
+      rw [convergeOnce_writeback (initializePaths G) T w.val (h_size.symm ▸ w.isLt) w.isLt] at hw
+      change ((calculatePathRankings (initializePaths G) T).fromRanks.getD (n - 1) #[]).getD w.val 0
+        = k_val at hw
+      rw [h_chain_eq w] at hw
+      rw [h_chain_at_w] at hw
+      -- hw : (assignList[pos_w]).2 = k_val
+      -- Show pos_w < q (else rank ≥ q).
+      have h_pos_w_lt_q : pos_w < q := by
+        by_contra h_pos_w_ge_q_neg
+        have h_pos_w_ge_q : q ≤ pos_w := Nat.le_of_not_lt h_pos_w_ge_q_neg
+        have h_pos_w_lt_n : pos_w < n := h_sortedLen ▸ hpos_w_lt
+        have h_rank_ge := h_rank_ge_q pos_w h_pos_w_lt_n h_pos_w_ge_q
+        rw [hw] at h_rank_ge
+        exact absurd h_rank_ge (Nat.not_le.mpr hk_lt_q)
+      -- By P3.C-prefix: rank at pos_w = pos_w, so pos_w = k_val.
+      have h_pos_w_eq_k : pos_w = k_val := by
+        have h_rk := h_rank_eq_pos pos_w h_pos_w_lt_q
+        rw [h_rk] at hw
+        exact hw
+      -- Now sortedList[k_val].start.val = w.val = v_k.val.
+      subst h_pos_w_eq_k
+      have h_w_val_eq : w.val = v_k.val := by
+        rw [← h_pos_w_start]; exact h_sorted_k_eq_v_k
+      exact Fin.ext h_w_val_eq
   exact ⟨h_size_out, h_prefix_out, h_unique_out⟩
 
 /-- **Phase 3 main lemma (P3.5)** `convergeLoop` preserves prefix typing AND lower-
