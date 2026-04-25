@@ -372,10 +372,12 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
   - **P3.B** ✅ `assignRanks_rank_le_pos` (rank at position `k` is `≤ k`). Foundational.
     Uses aux lemmas `assignRanksFoldl_lastEntry_rank_le` (lastEntry rank tracks step count)
     and `assignRanks_snoc_decompose` (snoc-decomposition with rank bound).
-  - **P3.C** 🧱 `assignRanks_rank_eq_pos_when_distinct` (rank `=` position when
-    consecutive cmps differ). Aux lemma `assignRanks_snoc_decompose_strict` (sharper
-    snoc-decomposition with exact rank formula) and `assignRanks_foldl_lastEntry_fst`
-    (lastEntry's first component) are in place.
+  - **P3.C** ✅ `assignRanks_rank_eq_pos_when_distinct` (rank `=` position when
+    consecutive cmps differ). Built on `assignRanks_strong_invariant` which simultaneously
+    tracks (i) rank-at-every-position and (ii) lastEntry-rank, via `reverseRecOn`
+    induction. Uses `assignRanks_snoc_decompose_strict` (sharper snoc-decomposition with
+    exact rank formula) and `assignRanks_foldl_lastEntry_fst` (lastEntry's first
+    component).
   - **P3.D** 🧱 `sortBy_first_q_positions_have_start_types_lt_q`: heaviest piece, requires
     sortBy positional reasoning.
   - **P3.E** 🧱 combine P3.1/B/C/D for `convergeOnce`.

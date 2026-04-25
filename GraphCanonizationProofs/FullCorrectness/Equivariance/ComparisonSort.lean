@@ -1035,4 +1035,223 @@ theorem assignRanks_rank_le_pos {α : Type} (cmp : α → α → Ordering) (L : 
       simp [h_k_eq_len]
       omega
 
+/-- **P3.C aux** (combined with lastEntry tracking): Strong invariant via reverseRecOn
+induction. For lists where consecutive cmps differ for `i + 1 < L.length`, the rank at
+every position equals the position, AND the foldl's lastEntry has rank `L.length - 1`
+(for non-empty L). -/
+private theorem assignRanks_strong_invariant {α : Type} (cmp : α → α → Ordering) :
+    ∀ (L : List α),
+      (∀ i (h : i + 1 < L.length),
+        cmp (L[i]'(Nat.lt_of_succ_lt h)) (L[i+1]'h) ≠ .eq) →
+      (∀ k (hk : k < L.length),
+        ((assignRanks cmp L)[k]'(by rw [assignRanks_length]; exact hk)).2 = k) ∧
+      (∀ (h_ne : L ≠ []), ∃ a,
+        (L.foldl (assignRanksStep cmp) ([], none)).2 = some (a, L.length - 1)) := by
+  intro L
+  induction L using List.reverseRecOn with
+  | nil =>
+    intro _
+    refine ⟨?_, ?_⟩
+    · intros _ hk; simp at hk
+    · intros h; exact absurd rfl h
+  | append_singleton L' a ih =>
+    intro h_distinct
+    -- Restrict h_distinct to L'.
+    have h_distinct_L' : ∀ i (h : i + 1 < L'.length),
+        cmp (L'[i]'(Nat.lt_of_succ_lt h)) (L'[i+1]'h) ≠ .eq := by
+      intro i hi
+      have h_in_L : i + 1 < (L' ++ [a]).length := by simp; omega
+      have h_orig := h_distinct i h_in_L
+      have h_get_i : (L' ++ [a])[i]'(Nat.lt_of_succ_lt h_in_L) = L'[i]'(Nat.lt_of_succ_lt hi) := by
+        rw [List.getElem_append_left (Nat.lt_of_succ_lt hi)]
+      have h_get_i1 : (L' ++ [a])[i+1]'h_in_L = L'[i+1]'hi := by
+        rw [List.getElem_append_left hi]
+      rw [h_get_i, h_get_i1] at h_orig
+      exact h_orig
+    obtain ⟨ih_rank, ih_lastEntry⟩ := ih h_distinct_L'
+    -- Key info: the snoc decomposition.
+    rcases h_pair : L'.foldl (assignRanksStep cmp) ([], none) with ⟨rev, lastE⟩
+    have h_decomp_strict := assignRanks_snoc_decompose_strict cmp L' a rev lastE h_pair
+    have h_len_lhs : (assignRanks cmp L').length = L'.length := assignRanks_length cmp L'
+    refine ⟨?_, ?_⟩
+    · -- Rank at every position k of assignRanks (L' ++ [a]) = k.
+      intros k hk
+      have h_k_lt_full : k < (assignRanks cmp (L' ++ [a])).length := by
+        rw [assignRanks_length]; exact hk
+      have h_assign_get : (assignRanks cmp (L' ++ [a]))[k]'h_k_lt_full =
+          (assignRanks cmp L' ++ [(a, lastE.elim 0 (fun prev =>
+            if cmp prev.1 a == .eq then prev.2 else prev.2 + 1))])[k]'(by
+              simp [h_len_lhs]
+              have := hk; simp [List.length_append] at this; omega) := by
+        congr 1
+      rw [h_assign_get]
+      rcases Nat.lt_or_ge k L'.length with h_k_lt_L' | h_k_ge_L'
+      · -- k < L'.length: use ih_rank.
+        have h_lt_lhs : k < (assignRanks cmp L').length := by rw [h_len_lhs]; exact h_k_lt_L'
+        rw [List.getElem_append_left h_lt_lhs]
+        exact ih_rank k h_k_lt_L'
+      · -- k = L'.length: appended entry, rank = lastE.elim 0 (...).
+        have h_k_eq : k = L'.length := by
+          have := hk; simp [List.length_append] at this; omega
+        have h_k_eq_len : k = (assignRanks cmp L').length := by rw [h_len_lhs]; exact h_k_eq
+        rw [List.getElem_append_right (by rw [← h_k_eq_len])]
+        simp [h_k_eq_len]
+        -- Goal: lastE.elim 0 (...) = L'.length.
+        cases hlast : lastE with
+        | none =>
+          -- lastE = none ⟹ L' = [].
+          have h_L'_empty : L' = [] := by
+            by_contra h_L'_ne
+            obtain ⟨a', h_some⟩ := ih_lastEntry h_L'_ne
+            rw [h_pair] at h_some
+            simp at h_some
+            rw [hlast] at h_some
+            exact absurd h_some (by simp)
+          subst h_L'_empty
+          rfl
+        | some prev =>
+          -- L' ≠ []. Use ih_lastEntry to get prev's rank = L'.length - 1.
+          rcases prev with ⟨p1, p2⟩
+          have h_L'_ne : L' ≠ [] := by
+            intro h_L'_eq
+            rw [h_L'_eq] at h_pair
+            simp at h_pair
+            rw [← h_pair.2] at hlast
+            exact absurd hlast (by simp)
+          obtain ⟨a', h_some⟩ := ih_lastEntry h_L'_ne
+          rw [h_pair] at h_some
+          simp at h_some
+          rw [hlast] at h_some
+          -- h_some : some (a', L'.length - 1) = some (p1, p2)
+          simp only [Option.some.injEq, Prod.mk.injEq] at h_some
+          obtain ⟨h_a'_eq_p1, h_p2_eq⟩ := h_some
+          -- p1 = L'.getLast h_L'_ne (from assignRanks_foldl_lastEntry_fst).
+          obtain ⟨_, h_fst⟩ := assignRanks_foldl_lastEntry_fst cmp L' h_L'_ne
+          rw [h_pair] at h_fst
+          simp at h_fst
+          rw [hlast] at h_fst
+          simp only [Option.some.injEq, Prod.mk.injEq] at h_fst
+          have h_p1_eq : p1 = L'.getLast h_L'_ne := h_fst.1
+          -- cmp p1 a ≠ .eq follows from h_distinct.
+          have h_cmp_ne : cmp p1 a ≠ .eq := by
+            have h_lt : L'.length - 1 + 1 < (L' ++ [a]).length := by
+              simp; have := List.length_pos_iff.mpr h_L'_ne; omega
+            have h_h_distinct := h_distinct (L'.length - 1) h_lt
+            -- (L' ++ [a])[L'.length - 1] = L'[L'.length - 1] = L'.getLast = p1.
+            have h_get_pre : (L' ++ [a])[L'.length - 1]'(by simp; omega) =
+                L'[L'.length - 1]'(by have := List.length_pos_iff.mpr h_L'_ne; omega) := by
+              rw [List.getElem_append_left]
+            have h_get_post : (L' ++ [a])[L'.length - 1 + 1]'h_lt = a := by
+              have h_pos := List.length_pos_iff.mpr h_L'_ne
+              have h_at_len : (L' ++ [a])[L'.length]'(by simp) = a := by
+                rw [List.getElem_append_right (Nat.le_refl _)]
+                simp
+              have h_idx_cast : (L' ++ [a])[L'.length - 1 + 1]'h_lt
+                              = (L' ++ [a])[L'.length]'(by simp) := by
+                congr 1; omega
+              rw [h_idx_cast]; exact h_at_len
+            rw [h_get_pre, h_get_post] at h_h_distinct
+            -- L'[L'.length - 1] = L'.getLast = p1.
+            have h_getLast_eq : L'[L'.length - 1]'(by
+                have := List.length_pos_iff.mpr h_L'_ne; omega) = L'.getLast h_L'_ne := by
+              rw [List.getLast_eq_getElem]
+            rw [h_getLast_eq, ← h_p1_eq] at h_h_distinct
+            exact h_h_distinct
+          -- Now compute the rank.
+          simp only [Option.elim_some]
+          split_ifs with h_eq
+          · exact absurd h_eq h_cmp_ne
+          · rw [h_p2_eq]
+            have := List.length_pos_iff.mpr h_L'_ne
+            simp [h_len_lhs]
+            omega
+    · -- lastEntry of foldl (L' ++ [a]) has rank L'.length = (L' ++ [a]).length - 1.
+      intros _
+      rw [List.foldl_append, List.foldl_cons, List.foldl_nil, h_pair]
+      cases hlast : lastE with
+      | none =>
+        refine ⟨a, ?_⟩
+        show (assignRanksStep cmp (rev, none) a).2 = some (a, (L' ++ [a]).length - 1)
+        unfold assignRanksStep
+        simp
+        -- Need: 0 = (L' ++ [a]).length - 1.
+        -- From hlast (lastE = none) and h_pair: L' = [].
+        have h_L'_empty : L' = [] := by
+          by_contra h_L'_ne
+          obtain ⟨a', h_some⟩ := ih_lastEntry h_L'_ne
+          rw [h_pair] at h_some
+          simp at h_some
+          rw [hlast] at h_some
+          exact absurd h_some (by simp)
+        simp [h_L'_empty]
+      | some prev =>
+        rcases prev with ⟨p1, p2⟩
+        refine ⟨a, ?_⟩
+        show (assignRanksStep cmp (rev, some (p1, p2)) a).2 = some (a, (L' ++ [a]).length - 1)
+        -- L' must be non-empty (else lastE = none).
+        have h_L'_ne : L' ≠ [] := by
+          intro h_L'_eq
+          rw [h_L'_eq] at h_pair
+          simp at h_pair
+          rw [← h_pair.2] at hlast
+          exact absurd hlast (by simp)
+        have h_pos := List.length_pos_iff.mpr h_L'_ne
+        -- p2 = L'.length - 1 (from ih_lastEntry).
+        obtain ⟨a', h_some⟩ := ih_lastEntry h_L'_ne
+        rw [h_pair] at h_some
+        simp at h_some
+        rw [hlast] at h_some
+        simp only [Option.some.injEq, Prod.mk.injEq] at h_some
+        have h_p2_eq : p2 = L'.length - 1 := h_some.2
+        -- p1 = L'.getLast h_L'_ne (from assignRanks_foldl_lastEntry_fst).
+        obtain ⟨_, h_fst⟩ := assignRanks_foldl_lastEntry_fst cmp L' h_L'_ne
+        rw [h_pair] at h_fst
+        simp at h_fst
+        rw [hlast] at h_fst
+        simp only [Option.some.injEq, Prod.mk.injEq] at h_fst
+        have h_p1_eq : p1 = L'.getLast h_L'_ne := h_fst.1
+        -- cmp p1 a ≠ .eq (from h_distinct, similar to the rank conjunct).
+        have h_cmp_ne : cmp p1 a ≠ .eq := by
+          have h_lt : L'.length - 1 + 1 < (L' ++ [a]).length := by
+            simp; omega
+          have h_h_distinct := h_distinct (L'.length - 1) h_lt
+          have h_get_pre : (L' ++ [a])[L'.length - 1]'(by simp; omega) =
+              L'[L'.length - 1]'(by omega) := by
+            rw [List.getElem_append_left]
+          have h_get_post : (L' ++ [a])[L'.length - 1 + 1]'h_lt = a := by
+            have h_at_len : (L' ++ [a])[L'.length]'(by simp) = a := by
+              rw [List.getElem_append_right (Nat.le_refl _)]
+              simp
+            have h_idx_cast : (L' ++ [a])[L'.length - 1 + 1]'h_lt
+                            = (L' ++ [a])[L'.length]'(by simp) := by
+              congr 1; omega
+            rw [h_idx_cast]; exact h_at_len
+          rw [h_get_pre, h_get_post] at h_h_distinct
+          have h_getLast_eq : L'[L'.length - 1]'(by omega) = L'.getLast h_L'_ne := by
+            rw [List.getLast_eq_getElem]
+          rw [h_getLast_eq, ← h_p1_eq] at h_h_distinct
+          exact h_h_distinct
+        -- Now compute the lastEntry's rank.
+        unfold assignRanksStep
+        simp only []
+        -- Goal: ((a, if cmp p1 a == .eq then p2 else p2 + 1) :: rev, some (a, ...)).2 = some (a, ...).
+        congr 1
+        simp only [Prod.mk.injEq, true_and]
+        split_ifs with h_eq
+        · simp at h_eq; exact absurd h_eq h_cmp_ne
+        · -- Goal: p2 + 1 = (L' ++ [a]).length - 1.
+          rw [h_p2_eq]
+          simp
+          omega
+
+/-- **P3.C** Rank at position `k` in `assignRanks cmp L` equals `k`, when consecutive
+cmps differ throughout `L`. -/
+theorem assignRanks_rank_eq_pos_when_distinct {α : Type} (cmp : α → α → Ordering)
+    (L : List α)
+    (h_distinct : ∀ i (h : i + 1 < L.length),
+      cmp (L[i]'(Nat.lt_of_succ_lt h)) (L[i+1]'h) ≠ .eq)
+    (k : Nat) (hk : k < L.length) :
+    ((assignRanks cmp L)[k]'(by rw [assignRanks_length]; exact hk)).2 = k :=
+  (assignRanks_strong_invariant cmp L h_distinct).1 k hk
+
 end Graph
