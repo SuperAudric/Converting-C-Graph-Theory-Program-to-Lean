@@ -42,7 +42,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §3A  | `initializePaths_Aut_equivariant` (Stage A)       | `Equivariance.StageA`                    | ✅ proved       |
 | §3B  | `calculatePathRankings` size + `σInvariant`       | `Equivariance.RankStateInvariants`       | ✅ proved       |
 | §3B  | Generic sort/`orderInsensitiveListCmp` lemmas     | `Equivariance.ComparisonSort`            | ✅ proved       |
-| §3B  | `comparePathSegments_total_preorder` (Stage B)    | `Equivariance.ComparePathSegments`       | ✅ proved; `comparePathsBetween_total_preorder` 🧱 sorry |
+| §3B  | `comparePathSegments_total_preorder` (Stage B)    | `Equivariance.ComparePathSegments`       | ✅ proved; `comparePathsBetween_total_preorder` ✅ proved |
 | §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | 🧱 2 sorry (`comparePathsBetween_equivCompat`, `calculatePathRankings_*_inv`) |
 | §4   | `convergeOnce`/`convergeLoop` Aut-invariance; C/D | `Equivariance.ConvergeLoop`              | ✅ proved       |
 | §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                               | ✅ defined      |
@@ -56,12 +56,11 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                             | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (9 total)
+## Open obligations (8 total)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `comparePathsBetween_total_preorder`  | `Equivariance.ComparePathSegments` | Lift `_swap` and `_trans` through `orderInsensitiveListCmp` (`_refl` already lifted). Foldl-induction in beta-reduced form, mirroring `orderInsensitiveListCmp_refl`. |
-| `comparePathsBetween_equivCompat`     | `Equivariance.PathEquivariance`    | Auxiliary `orderInsensitiveListCmp_equivCompat` lemma; same architectural shape as the total-preorder lifting. |
+| `comparePathsBetween_equivCompat`     | `Equivariance.PathEquivariance`    | Auxiliary `orderInsensitiveListCmp_equivCompat` lemma; same architectural shape as the now-closed `comparePathsBetween_total_preorder`. |
 | `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. |
 | `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |

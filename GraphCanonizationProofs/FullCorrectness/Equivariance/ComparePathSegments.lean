@@ -9,14 +9,12 @@ Proves that `comparePathSegments` is a total preorder (reflexive, both antisymme
 `≤`-transitive) after the algorithm refactor that replaced the `panic!` bottom/inner
 mixed case with a fixed `bottom < inner` ordering.
 
-Also provides the `orderInsensitiveListCmp` lifting helpers (reflexivity and
-antisym₁-`.lt → .gt` closed; antisym₂-`.gt → .lt` and `_trans` pending) and states
-`comparePathsBetween_total_preorder` (sorry'd: requires the remaining lifters).
+Provides the four `orderInsensitiveListCmp` lifting helpers (`_refl`, `_swap_lt`,
+`_swap_gt`, `_trans`) and assembles `comparePathsBetween_total_preorder` on top of
+them + `comparePathSegments_total_preorder` + `comparePathSegments_equivCompat`.
 
 ## Sorry status
-- `comparePathsBetween_total_preorder` : `sorry` — needs the `_swap_gt` and `_trans`
-  lifters, then assemble the four conjuncts on top of `comparePathSegments_total_preorder`
-  + the existing length-prefix check on `xEndType vs yEndType`.
+- None — all four total-preorder lifters and `comparePathsBetween_total_preorder` are closed.
 -/
 
 namespace Graph
@@ -276,11 +274,12 @@ theorem comparePathSegments_total_preorder {vc : Nat}
               · rw [cmpInner_eq_lt _ _ _ _ h_xz] at h_gt
                 exact Ordering.noConfusion h_gt
 
-/-! #### `orderInsensitiveListCmp` total-preorder lifting helpers (partial)
+/-! #### `orderInsensitiveListCmp` total-preorder lifting helpers
 
-These helpers lift total-preorder properties from the inner `cmp` to
-`orderInsensitiveListCmp`. Currently `_refl` and `_swap_lt` (antisym₁ direction) are
-closed; `_swap_gt` (antisym₂) and `_trans` are pending. -/
+These helpers lift the four total-preorder properties from the inner `cmp` to
+`orderInsensitiveListCmp`: `_refl`, `_swap_lt` (antisym₁), `_swap_gt` (antisym₂), and
+`_trans` (≤-trans). All closed. The `_trans` proof factors through `foldl_zip_trans` for
+the equal-length case. -/
 
 /-- `orderInsensitiveListCmp cmp L L = .eq` when `cmp` is reflexive on (the elements of) `L`. -/
 private theorem orderInsensitiveListCmp_refl {α : Type} (cmp : α → α → Ordering)
@@ -316,6 +315,76 @@ private theorem orderInsensitiveListCmp_refl {α : Type} (cmp : α → α → Or
             else cmp x.1 x.2) (cmp a a) = Ordering.eq
     rw [h_a]
     exact ih (fun b hb => h b (List.mem_cons_of_mem _ hb))
+
+/-- `comparePathSegments` respects equivalence bilaterally: equivalent (`= .eq`) segments
+compare the same way to every third segment, in either argument position. This is the
+`h_compat` hypothesis required by the `_trans` lifter (and by `_perm`). -/
+theorem comparePathSegments_equivCompat
+    {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat)
+    (p q : PathSegment vc) (h : comparePathSegments vts br p q = Ordering.eq) (r : PathSegment vc) :
+    comparePathSegments vts br p r = comparePathSegments vts br q r ∧
+    comparePathSegments vts br r p = comparePathSegments vts br r q := by
+  cases p with
+  | bottom xVI =>
+    cases q with
+    | bottom yVI =>
+      have hvts_eq : vts.getD xVI.val 0 = vts.getD yVI.val 0 :=
+        compare_eq_iff_eq.mp h
+      cases r with
+      | bottom zVI =>
+        refine ⟨?_, ?_⟩
+        · show compare (vts.getD xVI.val 0) (vts.getD zVI.val 0)
+             = compare (vts.getD yVI.val 0) (vts.getD zVI.val 0)
+          rw [hvts_eq]
+        · show compare (vts.getD zVI.val 0) (vts.getD xVI.val 0)
+             = compare (vts.getD zVI.val 0) (vts.getD yVI.val 0)
+          rw [hvts_eq]
+      | inner _ _ _ _ => exact ⟨rfl, rfl⟩
+    | inner _ _ _ _ =>
+      -- comparePathSegments .bottom .inner = .lt (by the new definition); contradicts h.
+      exact Ordering.noConfusion h
+  | inner xe xd xs xend =>
+    cases q with
+    | bottom _ =>
+      -- comparePathSegments .inner .bottom = .gt; contradicts h.
+      exact Ordering.noConfusion h
+    | inner ye yd ys yend =>
+      have hRank : br xd xs.val xend.val = br yd ys.val yend.val := by
+        by_cases hxy : br xd xs.val xend.val = br yd ys.val yend.val
+        · exact hxy
+        · exfalso
+          simp only [comparePathSegments, hxy, bne_iff_ne, ne_eq, not_false_eq_true,
+            ↓reduceIte] at h
+          exact hxy (compare_eq_iff_eq.mp h).symm
+      have hEdge : xe = ye := by
+        by_cases hxy : xe = ye
+        · exact hxy
+        · exfalso
+          simp only [comparePathSegments, hRank, bne_self_eq_false, ↓reduceIte,
+            hxy, bne_iff_ne, ne_eq, not_false_eq_true] at h
+          exact hxy (compare_eq_iff_eq.mp h).symm
+      cases r with
+      | bottom _ => exact ⟨rfl, rfl⟩
+      | inner ze zd zs zend =>
+        refine ⟨?_, ?_⟩
+        · show (let xR := br xd xs.val xend.val
+                let zR := br zd zs.val zend.val
+                if xR != zR then compare zR xR
+                else if xe != ze then compare ze xe else .eq)
+             = (let yR := br yd ys.val yend.val
+                let zR := br zd zs.val zend.val
+                if yR != zR then compare zR yR
+                else if ye != ze then compare ze ye else .eq)
+          rw [hRank, hEdge]
+        · show (let zR := br zd zs.val zend.val
+                let xR := br xd xs.val xend.val
+                if zR != xR then compare xR zR
+                else if ze != xe then compare xe ze else .eq)
+             = (let zR := br zd zs.val zend.val
+                let yR := br yd ys.val yend.val
+                if zR != yR then compare yR zR
+                else if ze != ye then compare ye ze else .eq)
+          rw [hRank, hEdge]
 
 /-! #### Foldl init preservation and antisymmetry-`.lt → .gt` lifter -/
 
@@ -418,6 +487,270 @@ private theorem orderInsensitiveListCmp_swap_lt {α : Type} (cmp : α → α →
     by_cases h₁₂ : L₁.length < L₂.length
     · rw [if_pos h₁₂] at h; exact Ordering.noConfusion h
     · rw [if_pos (show L₂.length < L₁.length by omega)]
+
+/-- Antisymmetry-`.gt → .lt` lift for `orderInsensitiveListCmp`. Mirror of `_swap_lt`:
+the first non-`.eq` cmp becomes `.gt` (from antisym₂), preceding `.eq`s stay `.eq`. -/
+private theorem orderInsensitiveListCmp_swap_gt {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (L₁ L₂ : List α) :
+    orderInsensitiveListCmp cmp L₁ L₂ = Ordering.gt →
+    orderInsensitiveListCmp cmp L₂ L₁ = Ordering.lt := by
+  have h_eq_symm : ∀ a b, cmp a b = Ordering.eq → cmp b a = Ordering.eq := by
+    intros a b hab
+    match h_ba : cmp b a with
+    | .eq => rfl
+    | .lt =>
+      have := h_antisym₁ b a h_ba; rw [hab] at this; exact Ordering.noConfusion this
+    | .gt =>
+      have := h_antisym₂ b a h_ba; rw [hab] at this; exact Ordering.noConfusion this
+  unfold orderInsensitiveListCmp
+  by_cases hLen : L₁.length = L₂.length
+  · have hLenSwap : L₂.length = L₁.length := hLen.symm
+    have h_bne₁ : (L₁.length != L₂.length) = false := by
+      rw [hLen]; exact bne_self_eq_false (a := L₂.length)
+    have h_bne₂ : (L₂.length != L₁.length) = false := by
+      rw [hLenSwap]; exact bne_self_eq_false (a := L₁.length)
+    simp only [h_bne₁, h_bne₂, Bool.false_eq_true, ↓reduceIte]
+    rw [show (sortBy cmp L₂).zip (sortBy cmp L₁)
+          = ((sortBy cmp L₁).zip (sortBy cmp L₂)).map Prod.swap from
+        (List.zip_swap (sortBy cmp L₁) (sortBy cmp L₂)).symm]
+    intro h_gt
+    suffices h_aux : ∀ (L : List (α × α)),
+        L.foldl (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder
+            else cmp x.1 x.2) Ordering.eq = Ordering.gt →
+        (L.map Prod.swap).foldl (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder
+            else cmp x.1 x.2) Ordering.eq = Ordering.lt from
+      h_aux _ h_gt
+    intro L
+    induction L with
+    | nil => intro h; exact Ordering.noConfusion h
+    | cons x L ih =>
+      intro h
+      rw [List.foldl_cons] at h
+      simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte] at h
+      show ((Prod.swap x) :: L.map Prod.swap).foldl _ Ordering.eq = Ordering.lt
+      rw [List.foldl_cons]
+      simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte,
+                 Prod.fst_swap, Prod.snd_swap]
+      match h_xy : cmp x.1 x.2 with
+      | .eq =>
+        rw [h_xy] at h
+        rw [h_eq_symm _ _ h_xy]
+        exact ih h
+      | .gt =>
+        rw [h_antisym₂ _ _ h_xy]
+        exact orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.lt
+                (by intro hh; cases hh) (L.map Prod.swap)
+      | .lt =>
+        rw [h_xy] at h
+        have h_pres := orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.lt
+                          (by intro hh; cases hh) L
+        rw [h_pres] at h
+        exact Ordering.noConfusion h
+  · have hLenSwap : ¬ L₂.length = L₁.length := fun h => hLen h.symm
+    have h_bne₁ : (L₁.length != L₂.length) = true := bne_iff_ne.mpr hLen
+    have h_bne₂ : (L₂.length != L₁.length) = true := bne_iff_ne.mpr hLenSwap
+    rw [if_pos h_bne₁, if_pos h_bne₂]
+    intro h
+    by_cases h₁₂ : L₁.length < L₂.length
+    · -- result .gt holds for hyp; for swap, ¬ L₂.length < L₁.length, so result is .lt.
+      rw [if_neg (by omega : ¬ L₂.length < L₁.length)]
+    · rw [if_neg h₁₂] at h; exact Ordering.noConfusion h
+
+/-- Three-list foldl-trans helper: for sorted lists `A`, `B`, `C` of equal length, if both
+`(zip A B).foldl ≠ .gt` and `(zip B C).foldl ≠ .gt`, then `(zip A C).foldl ≠ .gt`. The
+case analysis is on the head pair `(cmp a b, cmp b c)`; bilateral compatibility on `.eq`
+collapses the `.eq` cases, antisym₁ collapses `(.lt, .lt)` to `cmp a c = .lt`, and the
+`.gt` cases discharge the relevant hypothesis via init preservation. -/
+private theorem foldl_zip_trans {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
+    (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c ∧ cmp c a = cmp c b) :
+    ∀ (A B C : List α),
+      A.length = B.length → B.length = C.length →
+      (A.zip B).foldl (fun (currentOrder : Ordering) (x : α × α) =>
+          if (currentOrder != Ordering.eq) = true then currentOrder
+          else cmp x.1 x.2) Ordering.eq ≠ Ordering.gt →
+      (B.zip C).foldl (fun (currentOrder : Ordering) (x : α × α) =>
+          if (currentOrder != Ordering.eq) = true then currentOrder
+          else cmp x.1 x.2) Ordering.eq ≠ Ordering.gt →
+      (A.zip C).foldl (fun (currentOrder : Ordering) (x : α × α) =>
+          if (currentOrder != Ordering.eq) = true then currentOrder
+          else cmp x.1 x.2) Ordering.eq ≠ Ordering.gt := by
+  intro A
+  induction A with
+  | nil =>
+    intros B C _ _ _ _ h
+    exact Ordering.noConfusion h
+  | cons a A' ih =>
+    intros B C h_AB h_BC h₁ h₂
+    cases B with
+    | nil => simp at h_AB
+    | cons b B' =>
+      cases C with
+      | nil => simp at h_BC
+      | cons c C' =>
+        have h_AB' : A'.length = B'.length := by
+          have : A'.length + 1 = B'.length + 1 := by simpa using h_AB
+          omega
+        have h_BC' : B'.length = C'.length := by
+          have : B'.length + 1 = C'.length + 1 := by simpa using h_BC
+          omega
+        -- Step the head off all three foldls. The new init becomes the head cmp.
+        rw [show ((a :: A').zip (b :: B')) = (a, b) :: (A'.zip B') from rfl] at h₁
+        rw [List.foldl_cons] at h₁
+        simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte] at h₁
+        rw [show ((b :: B').zip (c :: C')) = (b, c) :: (B'.zip C') from rfl] at h₂
+        rw [List.foldl_cons] at h₂
+        simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte] at h₂
+        show ((a :: A').zip (c :: C')).foldl _ Ordering.eq ≠ Ordering.gt
+        rw [show ((a :: A').zip (c :: C')) = (a, c) :: (A'.zip C') from rfl]
+        rw [List.foldl_cons]
+        simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte]
+        match h_ab : cmp a b, h_bc : cmp b c with
+        | .eq, .eq =>
+          rw [h_ab] at h₁; rw [h_bc] at h₂
+          have h_ac : cmp a c = Ordering.eq := by
+            rw [(h_compat a b h_ab c).1, h_bc]
+          rw [h_ac]
+          exact ih B' C' h_AB' h_BC' h₁ h₂
+        | .eq, .lt =>
+          have h_ac : cmp a c = Ordering.lt := by
+            rw [(h_compat a b h_ab c).1, h_bc]
+          rw [h_ac]
+          intro h_gt
+          rw [orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.lt
+                (by intro hh; cases hh) (A'.zip C')] at h_gt
+          exact Ordering.noConfusion h_gt
+        | .eq, .gt =>
+          rw [h_bc] at h₂
+          have h_pres := orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.gt
+                            (by intro hh; cases hh) (B'.zip C')
+          rw [h_pres] at h₂
+          exact (h₂ rfl).elim
+        | .lt, .eq =>
+          have h_ac : cmp a c = Ordering.lt := by
+            -- h_compat (b, c, .eq, a).2 : cmp a b = cmp a c
+            rw [← (h_compat b c h_bc a).2]; exact h_ab
+          rw [h_ac]
+          intro h_gt
+          rw [orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.lt
+                (by intro hh; cases hh) (A'.zip C')] at h_gt
+          exact Ordering.noConfusion h_gt
+        | .lt, .lt =>
+          have h_ac_le : cmp a c ≠ Ordering.gt :=
+            h_trans a b c (by rw [h_ab]; intro h; cases h)
+                          (by rw [h_bc]; intro h; cases h)
+          have h_ac_ne_eq : cmp a c ≠ Ordering.eq := by
+            intro h_eq
+            -- cmp a c = .eq → (h_compat a c .eq b).1: cmp a b = cmp c b → cmp c b = .lt
+            -- → cmp b c = .gt (antisym₁) → contradicts h_bc = .lt.
+            have h := (h_compat a c h_eq b).1
+            rw [h_ab] at h
+            have h_bc_gt : cmp b c = Ordering.gt := h_antisym₁ c b h.symm
+            rw [h_bc] at h_bc_gt
+            exact Ordering.noConfusion h_bc_gt
+          have h_ac : cmp a c = Ordering.lt := by
+            match h_ac_val : cmp a c with
+            | .lt => rfl
+            | .eq => exact (h_ac_ne_eq h_ac_val).elim
+            | .gt => exact (h_ac_le h_ac_val).elim
+          rw [h_ac]
+          intro h_gt
+          rw [orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.lt
+                (by intro hh; cases hh) (A'.zip C')] at h_gt
+          exact Ordering.noConfusion h_gt
+        | .lt, .gt =>
+          rw [h_bc] at h₂
+          have h_pres := orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.gt
+                            (by intro hh; cases hh) (B'.zip C')
+          rw [h_pres] at h₂
+          exact (h₂ rfl).elim
+        | .gt, _ =>
+          rw [h_ab] at h₁
+          have h_pres := orderInsensitiveListCmp_foldl_init_preserved cmp Ordering.gt
+                            (by intro hh; cases hh) (A'.zip B')
+          rw [h_pres] at h₁
+          exact (h₁ rfl).elim
+
+/-- Transitivity lift for `orderInsensitiveListCmp`. Length-mismatch cases reduce to
+length comparisons; the fully-equal-length case delegates to `foldl_zip_trans` after
+sorting all three lists. -/
+private theorem orderInsensitiveListCmp_trans {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
+    (h_compat : ∀ a b, cmp a b = Ordering.eq → ∀ c, cmp a c = cmp b c ∧ cmp c a = cmp c b)
+    (L₁ L₂ L₃ : List α) :
+    orderInsensitiveListCmp cmp L₁ L₂ ≠ Ordering.gt →
+    orderInsensitiveListCmp cmp L₂ L₃ ≠ Ordering.gt →
+    orderInsensitiveListCmp cmp L₁ L₃ ≠ Ordering.gt := by
+  unfold orderInsensitiveListCmp
+  -- Helper: `(L_a.length != L_b.length) = false ↔ L_a.length = L_b.length`,
+  -- and `... = true ↔ L_a.length ≠ L_b.length`. We thread the bne form through.
+  intros h₁ h₂
+  -- We need to case-analyze the lengths of L₁, L₂, L₃ and the foldls' results.
+  by_cases hL₁₂ : L₁.length = L₂.length
+  · by_cases hL₂₃ : L₂.length = L₃.length
+    · -- All equal lengths: reduce to foldl_zip_trans.
+      have hL₁₃ : L₁.length = L₃.length := hL₁₂.trans hL₂₃
+      have h_bne₁₂ : (L₁.length != L₂.length) = false := by
+        rw [hL₁₂]; exact bne_self_eq_false (a := L₂.length)
+      have h_bne₂₃ : (L₂.length != L₃.length) = false := by
+        rw [hL₂₃]; exact bne_self_eq_false (a := L₃.length)
+      have h_bne₁₃ : (L₁.length != L₃.length) = false := by
+        rw [hL₁₃]; exact bne_self_eq_false (a := L₃.length)
+      simp only [h_bne₁₂, Bool.false_eq_true, ↓reduceIte] at h₁
+      simp only [h_bne₂₃, Bool.false_eq_true, ↓reduceIte] at h₂
+      simp only [h_bne₁₃, Bool.false_eq_true, ↓reduceIte]
+      have hSort₁₂ : (sortBy cmp L₁).length = (sortBy cmp L₂).length := by
+        rw [(sortBy_perm cmp L₁).length_eq, (sortBy_perm cmp L₂).length_eq, hL₁₂]
+      have hSort₂₃ : (sortBy cmp L₂).length = (sortBy cmp L₃).length := by
+        rw [(sortBy_perm cmp L₂).length_eq, (sortBy_perm cmp L₃).length_eq, hL₂₃]
+      exact foldl_zip_trans cmp h_antisym₁ h_trans h_compat
+        (sortBy cmp L₁) (sortBy cmp L₂) (sortBy cmp L₃) hSort₁₂ hSort₂₃ h₁ h₂
+    · -- L₁.length = L₂.length but L₂.length ≠ L₃.length.
+      -- Either L₂ < L₃ (Hyp2 false) or L₂ > L₃ (conclusion length-based .lt).
+      have h_bne₂₃ : (L₂.length != L₃.length) = true := bne_iff_ne.mpr hL₂₃
+      rw [if_pos h_bne₂₃] at h₂
+      by_cases hLt₂₃ : L₂.length < L₃.length
+      · rw [if_pos hLt₂₃] at h₂; exact (h₂ rfl).elim
+      · -- L₂ > L₃. So L₁ = L₂ > L₃, hence L₁ ≠ L₃, L₁ > L₃.
+        have hGt : L₂.length > L₃.length := by omega
+        have hL₁₃_ne : L₁.length ≠ L₃.length := by omega
+        have hLt₁₃ : ¬ L₁.length < L₃.length := by omega
+        have h_bne₁₃ : (L₁.length != L₃.length) = true := bne_iff_ne.mpr hL₁₃_ne
+        rw [if_pos h_bne₁₃, if_neg hLt₁₃]
+        intro h; exact Ordering.noConfusion h
+  · -- L₁.length ≠ L₂.length: similar.
+    have h_bne₁₂ : (L₁.length != L₂.length) = true := bne_iff_ne.mpr hL₁₂
+    rw [if_pos h_bne₁₂] at h₁
+    by_cases hLt₁₂ : L₁.length < L₂.length
+    · rw [if_pos hLt₁₂] at h₁; exact (h₁ rfl).elim
+    · -- L₁ > L₂.
+      have hGt : L₁.length > L₂.length := lt_of_le_of_ne (Nat.le_of_not_lt hLt₁₂) (Ne.symm hL₁₂)
+      by_cases hL₂₃ : L₂.length = L₃.length
+      · -- L₁ > L₂ = L₃, so L₁ > L₃.
+        have hL₁₃_ne : L₁.length ≠ L₃.length := by omega
+        have hLt₁₃ : ¬ L₁.length < L₃.length := by omega
+        have h_bne₁₃ : (L₁.length != L₃.length) = true := bne_iff_ne.mpr hL₁₃_ne
+        rw [if_pos h_bne₁₃, if_neg hLt₁₃]
+        intro h; exact Ordering.noConfusion h
+      · -- Both length-mismatches. L₂ vs L₃ trichotomy.
+        have h_bne₂₃ : (L₂.length != L₃.length) = true := bne_iff_ne.mpr hL₂₃
+        rw [if_pos h_bne₂₃] at h₂
+        by_cases hLt₂₃ : L₂.length < L₃.length
+        · rw [if_pos hLt₂₃] at h₂; exact (h₂ rfl).elim
+        · -- L₁ > L₂ > L₃, so L₁ > L₃.
+          have hGt' : L₂.length > L₃.length := by omega
+          have hL₁₃_ne : L₁.length ≠ L₃.length := by omega
+          have hLt₁₃ : ¬ L₁.length < L₃.length := by omega
+          have h_bne₁₃ : (L₁.length != L₃.length) = true := bne_iff_ne.mpr hL₁₃_ne
+          rw [if_pos h_bne₁₃, if_neg hLt₁₃]
+          intro h; exact Ordering.noConfusion h
+
 theorem comparePathsBetween_total_preorder {vc : Nat}
     (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
     (∀ a : PathsBetween vc, comparePathsBetween vts br a a = Ordering.eq) ∧
@@ -428,7 +761,141 @@ theorem comparePathsBetween_total_preorder {vc : Nat}
     (∀ a b c : PathsBetween vc, comparePathsBetween vts br a b ≠ Ordering.gt →
                                  comparePathsBetween vts br b c ≠ Ordering.gt →
                                  comparePathsBetween vts br a c ≠ Ordering.gt) := by
-  sorry
+  -- Pull out the four properties of the inner cmp = comparePathSegments.
+  obtain ⟨h_seg_refl, h_seg_anti₁, h_seg_anti₂, h_seg_trans⟩ :=
+    comparePathSegments_total_preorder (vc := vc) vts br
+  -- And the bilateral compat lemma.
+  have h_seg_compat := comparePathSegments_equivCompat (vc := vc) vts br
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · -- Refl: comparePathsBetween a a = .eq.
+    intro a
+    show (let xEndType := vts.getD a.endVertexIndex.val 0
+          let yEndType := vts.getD a.endVertexIndex.val 0
+          if xEndType != yEndType then compare xEndType yEndType
+          else orderInsensitiveListCmp (comparePathSegments vts br)
+                 a.connectedSubPaths a.connectedSubPaths) = Ordering.eq
+    simp only [bne_self_eq_false, Bool.false_eq_true, ↓reduceIte]
+    exact orderInsensitiveListCmp_refl _ _ (fun s _ => h_seg_refl s)
+  · -- Antisym₁: .lt → .gt.
+    intros a b h_lt
+    -- Unfold both sides.
+    show (let yEndType := vts.getD b.endVertexIndex.val 0
+          let xEndType := vts.getD a.endVertexIndex.val 0
+          if yEndType != xEndType then compare yEndType xEndType
+          else orderInsensitiveListCmp (comparePathSegments vts br)
+                 b.connectedSubPaths a.connectedSubPaths) = Ordering.gt
+    have h_lt' : (let xEndType := vts.getD a.endVertexIndex.val 0
+                  let yEndType := vts.getD b.endVertexIndex.val 0
+                  if xEndType != yEndType then compare xEndType yEndType
+                  else orderInsensitiveListCmp (comparePathSegments vts br)
+                         a.connectedSubPaths b.connectedSubPaths) = Ordering.lt := h_lt
+    by_cases h_eq : vts.getD a.endVertexIndex.val 0 = vts.getD b.endVertexIndex.val 0
+    · have h_bne_xy : (vts.getD a.endVertexIndex.val 0 != vts.getD b.endVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.endVertexIndex.val 0)
+      have h_bne_yx : (vts.getD b.endVertexIndex.val 0 != vts.getD a.endVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.endVertexIndex.val 0)
+      simp only [h_bne_xy, Bool.false_eq_true, ↓reduceIte] at h_lt'
+      simp only [h_bne_yx, Bool.false_eq_true, ↓reduceIte]
+      exact orderInsensitiveListCmp_swap_lt _ h_seg_anti₁ h_seg_anti₂ _ _ h_lt'
+    · have h_bne_xy : (vts.getD a.endVertexIndex.val 0 != vts.getD b.endVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_eq
+      simp only [h_bne_xy, ↓reduceIte] at h_lt'
+      have h_xy_lt : (vts.getD a.endVertexIndex.val 0 : Nat) < vts.getD b.endVertexIndex.val 0 :=
+        Nat.compare_eq_lt.mp h_lt'
+      have h_yx_ne : vts.getD b.endVertexIndex.val 0 ≠ vts.getD a.endVertexIndex.val 0 := Ne.symm h_eq
+      have h_bne_yx : (vts.getD b.endVertexIndex.val 0 != vts.getD a.endVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_yx_ne
+      simp only [h_bne_yx, ↓reduceIte]
+      exact Nat.compare_eq_gt.mpr h_xy_lt
+  · -- Antisym₂: .gt → .lt. Mirror of above.
+    intros a b h_gt
+    show (let yEndType := vts.getD b.endVertexIndex.val 0
+          let xEndType := vts.getD a.endVertexIndex.val 0
+          if yEndType != xEndType then compare yEndType xEndType
+          else orderInsensitiveListCmp (comparePathSegments vts br)
+                 b.connectedSubPaths a.connectedSubPaths) = Ordering.lt
+    have h_gt' : (let xEndType := vts.getD a.endVertexIndex.val 0
+                  let yEndType := vts.getD b.endVertexIndex.val 0
+                  if xEndType != yEndType then compare xEndType yEndType
+                  else orderInsensitiveListCmp (comparePathSegments vts br)
+                         a.connectedSubPaths b.connectedSubPaths) = Ordering.gt := h_gt
+    by_cases h_eq : vts.getD a.endVertexIndex.val 0 = vts.getD b.endVertexIndex.val 0
+    · have h_bne_xy : (vts.getD a.endVertexIndex.val 0 != vts.getD b.endVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.endVertexIndex.val 0)
+      have h_bne_yx : (vts.getD b.endVertexIndex.val 0 != vts.getD a.endVertexIndex.val 0) = false := by
+        rw [h_eq]; exact bne_self_eq_false (a := vts.getD b.endVertexIndex.val 0)
+      simp only [h_bne_xy, Bool.false_eq_true, ↓reduceIte] at h_gt'
+      simp only [h_bne_yx, Bool.false_eq_true, ↓reduceIte]
+      exact orderInsensitiveListCmp_swap_gt _ h_seg_anti₁ h_seg_anti₂ _ _ h_gt'
+    · have h_bne_xy : (vts.getD a.endVertexIndex.val 0 != vts.getD b.endVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_eq
+      simp only [h_bne_xy, ↓reduceIte] at h_gt'
+      have h_xy_gt : (vts.getD a.endVertexIndex.val 0 : Nat) > vts.getD b.endVertexIndex.val 0 :=
+        Nat.compare_eq_gt.mp h_gt'
+      have h_yx_ne : vts.getD b.endVertexIndex.val 0 ≠ vts.getD a.endVertexIndex.val 0 := Ne.symm h_eq
+      have h_bne_yx : (vts.getD b.endVertexIndex.val 0 != vts.getD a.endVertexIndex.val 0) = true :=
+        bne_iff_ne.mpr h_yx_ne
+      simp only [h_bne_yx, ↓reduceIte]
+      exact Nat.compare_eq_lt.mpr h_xy_gt
+  · -- ≤-trans.
+    intros a b c hab hbc
+    -- Unfold all three.
+    show (let xEndType := vts.getD a.endVertexIndex.val 0
+          let zEndType := vts.getD c.endVertexIndex.val 0
+          if xEndType != zEndType then compare xEndType zEndType
+          else orderInsensitiveListCmp (comparePathSegments vts br)
+                 a.connectedSubPaths c.connectedSubPaths) ≠ Ordering.gt
+    have hab' : (let xEndType := vts.getD a.endVertexIndex.val 0
+                 let yEndType := vts.getD b.endVertexIndex.val 0
+                 if xEndType != yEndType then compare xEndType yEndType
+                 else orderInsensitiveListCmp (comparePathSegments vts br)
+                        a.connectedSubPaths b.connectedSubPaths) ≠ Ordering.gt := hab
+    have hbc' : (let yEndType := vts.getD b.endVertexIndex.val 0
+                 let zEndType := vts.getD c.endVertexIndex.val 0
+                 if yEndType != zEndType then compare yEndType zEndType
+                 else orderInsensitiveListCmp (comparePathSegments vts br)
+                        b.connectedSubPaths c.connectedSubPaths) ≠ Ordering.gt := hbc
+    set xT := vts.getD a.endVertexIndex.val 0 with hxT
+    set yT := vts.getD b.endVertexIndex.val 0 with hyT
+    set zT := vts.getD c.endVertexIndex.val 0 with hzT
+    -- From hab', xT ≤ yT (via Nat.compare_eq_gt + Nat order).
+    have h_xy_le : (xT : Nat) ≤ yT := by
+      by_contra h_gt
+      have hgt : yT < xT := Nat.lt_of_not_le h_gt
+      have h_ne : xT ≠ yT := fun h => Nat.lt_irrefl _ (h ▸ hgt)
+      have h_bne : (xT != yT) = true := bne_iff_ne.mpr h_ne
+      simp only [h_bne, ↓reduceIte] at hab'
+      exact hab' (Nat.compare_eq_gt.mpr hgt)
+    have h_yz_le : (yT : Nat) ≤ zT := by
+      by_contra h_gt
+      have hgt : zT < yT := Nat.lt_of_not_le h_gt
+      have h_ne : yT ≠ zT := fun h => Nat.lt_irrefl _ (h ▸ hgt)
+      have h_bne : (yT != zT) = true := bne_iff_ne.mpr h_ne
+      simp only [h_bne, ↓reduceIte] at hbc'
+      exact hbc' (Nat.compare_eq_gt.mpr hgt)
+    -- xT ≤ zT.
+    have h_xz_le : (xT : Nat) ≤ zT := Nat.le_trans h_xy_le h_yz_le
+    by_cases h_xz_eq : xT = zT
+    · -- xT = zT, so all three equal (sandwich). Use trans on the orderInsensitiveListCmp.
+      have h_yx_le : (yT : Nat) ≤ xT := by rw [h_xz_eq]; exact h_yz_le
+      have h_xy_eq : xT = yT := Nat.le_antisymm h_xy_le h_yx_le
+      have h_yz_eq : yT = zT := h_xy_eq ▸ h_xz_eq
+      have h_bne_xz : (xT != zT) = false := by
+        rw [h_xz_eq]; exact bne_self_eq_false (a := zT)
+      have h_bne_xy : (xT != yT) = false := by
+        rw [h_xy_eq]; exact bne_self_eq_false (a := yT)
+      have h_bne_yz : (yT != zT) = false := by
+        rw [h_yz_eq]; exact bne_self_eq_false (a := zT)
+      simp only [h_bne_xy, Bool.false_eq_true, ↓reduceIte] at hab'
+      simp only [h_bne_yz, Bool.false_eq_true, ↓reduceIte] at hbc'
+      simp only [h_bne_xz, Bool.false_eq_true, ↓reduceIte]
+      exact orderInsensitiveListCmp_trans _ h_seg_anti₁ h_seg_trans h_seg_compat _ _ _ hab' hbc'
+    · -- xT < zT, conclusion is .lt ≠ .gt.
+      have h_xz_lt : (xT : Nat) < zT := lt_of_le_of_ne h_xz_le h_xz_eq
+      have h_bne_xz : (xT != zT) = true := bne_iff_ne.mpr h_xz_eq
+      simp only [h_bne_xz, ↓reduceIte]
+      rw [Nat.compare_eq_lt.mpr h_xz_lt]
+      intro h; exact Ordering.noConfusion h
 
 
 end Graph

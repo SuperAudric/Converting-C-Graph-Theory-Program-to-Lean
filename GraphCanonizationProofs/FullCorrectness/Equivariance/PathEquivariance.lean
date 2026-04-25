@@ -26,74 +26,9 @@ namespace Graph
 
 variable {n : Nat}
 
-/-- `comparePathSegments` respects equivalence bilaterally: equivalent (`= .eq`) segments
-compare the same way to every third segment, in either argument position. -/
-theorem comparePathSegments_equivCompat
-    {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat)
-    (p q : PathSegment vc) (h : comparePathSegments vts br p q = Ordering.eq) (r : PathSegment vc) :
-    comparePathSegments vts br p r = comparePathSegments vts br q r ∧
-    comparePathSegments vts br r p = comparePathSegments vts br r q := by
-  cases p with
-  | bottom xVI =>
-    cases q with
-    | bottom yVI =>
-      have hvts_eq : vts.getD xVI.val 0 = vts.getD yVI.val 0 :=
-        compare_eq_iff_eq.mp h
-      cases r with
-      | bottom zVI =>
-        refine ⟨?_, ?_⟩
-        · show compare (vts.getD xVI.val 0) (vts.getD zVI.val 0)
-             = compare (vts.getD yVI.val 0) (vts.getD zVI.val 0)
-          rw [hvts_eq]
-        · show compare (vts.getD zVI.val 0) (vts.getD xVI.val 0)
-             = compare (vts.getD zVI.val 0) (vts.getD yVI.val 0)
-          rw [hvts_eq]
-      | inner _ _ _ _ => exact ⟨rfl, rfl⟩
-    | inner _ _ _ _ =>
-      -- comparePathSegments .bottom .inner = .lt (by the new definition); contradicts h.
-      exact Ordering.noConfusion h
-  | inner xe xd xs xend =>
-    cases q with
-    | bottom _ =>
-      -- comparePathSegments .inner .bottom = .gt; contradicts h.
-      exact Ordering.noConfusion h
-    | inner ye yd ys yend =>
-      have hRank : br xd xs.val xend.val = br yd ys.val yend.val := by
-        by_cases hxy : br xd xs.val xend.val = br yd ys.val yend.val
-        · exact hxy
-        · exfalso
-          simp only [comparePathSegments, hxy, bne_iff_ne, ne_eq, not_false_eq_true,
-            ↓reduceIte] at h
-          exact hxy (compare_eq_iff_eq.mp h).symm
-      have hEdge : xe = ye := by
-        by_cases hxy : xe = ye
-        · exact hxy
-        · exfalso
-          simp only [comparePathSegments, hRank, bne_self_eq_false, ↓reduceIte,
-            hxy, bne_iff_ne, ne_eq, not_false_eq_true] at h
-          exact hxy (compare_eq_iff_eq.mp h).symm
-      cases r with
-      | bottom _ => exact ⟨rfl, rfl⟩
-      | inner ze zd zs zend =>
-        refine ⟨?_, ?_⟩
-        · show (let xR := br xd xs.val xend.val
-                let zR := br zd zs.val zend.val
-                if xR != zR then compare zR xR
-                else if xe != ze then compare ze xe else .eq)
-             = (let yR := br yd ys.val yend.val
-                let zR := br zd zs.val zend.val
-                if yR != zR then compare zR yR
-                else if ye != ze then compare ze ye else .eq)
-          rw [hRank, hEdge]
-        · show (let zR := br zd zs.val zend.val
-                let xR := br xd xs.val xend.val
-                if zR != xR then compare xR zR
-                else if ze != xe then compare xe ze else .eq)
-             = (let zR := br zd zs.val zend.val
-                let yR := br yd ys.val yend.val
-                if zR != yR then compare yR zR
-                else if ze != ye then compare ye ze else .eq)
-          rw [hRank, hEdge]
+-- `comparePathSegments_equivCompat` was moved to `Equivariance.ComparePathSegments`
+-- so it can be used by `comparePathsBetween_total_preorder` (the .eq-bilateral compat
+-- lemma is needed by the `_trans` lifter on `orderInsensitiveListCmp`).
 
 /-- `orderInsensitiveListCmp` is invariant under `map`-ping both lists by an
 `f` that preserves the comparison. This handles the depth=0 branch of
