@@ -1517,9 +1517,56 @@ private theorem comparePathSegments_total_preorder {vc : Nat}
               · rw [cmpInner_eq_lt _ _ _ _ h_xz] at h_gt
                 exact Ordering.noConfusion h_gt
 
-/-- `comparePathsBetween` is a total preorder on the algorithm's actual `pathsToVertex`
-lists. Same caveat as `comparePathSegments_total_preorder`: the panic case in the inner
-`comparePathSegments` propagates up but never fires on the algorithm's lists. -/
+/-! #### `orderInsensitiveListCmp` total-preorder lifting helpers (partial)
+
+These helpers lift total-preorder properties from the inner `cmp` to
+`orderInsensitiveListCmp`. Currently `_refl` is closed; `_swap` and `_trans` are sorry'd
+pending careful foldl-reduction handling. -/
+
+/-- `orderInsensitiveListCmp cmp L L = .eq` when `cmp` is reflexive on (the elements of) `L`. -/
+private theorem orderInsensitiveListCmp_refl {α : Type} (cmp : α → α → Ordering)
+    (L : List α) (h_refl : ∀ a ∈ L, cmp a a = Ordering.eq) :
+    orderInsensitiveListCmp cmp L L = Ordering.eq := by
+  unfold orderInsensitiveListCmp
+  rw [if_neg (by simp)]
+  -- sortBy preserves elements (Perm), so reflexivity carries.
+  have h_sort_refl : ∀ a ∈ sortBy cmp L, cmp a a = Ordering.eq := fun a ha =>
+    h_refl a ((sortBy_perm cmp L).mem_iff.mp ha)
+  -- Inner induction over (sortBy cmp L).
+  suffices h_aux : ∀ (M : List α), (∀ a ∈ M, cmp a a = Ordering.eq) →
+      (M.zip M).foldl
+        (fun (currentOrder : Ordering) (x : α × α) =>
+          if (currentOrder != Ordering.eq) = true then currentOrder
+          else cmp x.1 x.2) Ordering.eq = Ordering.eq from
+    h_aux _ h_sort_refl
+  intro M
+  induction M with
+  | nil => intros; rfl
+  | cons a M' ih =>
+    intros h
+    have h_a : cmp a a = Ordering.eq := h a List.mem_cons_self
+    -- Compute the foldl one step: new init = cmp a a = .eq. Then recurse via ih.
+    show ((a, a) :: M'.zip M').foldl
+          (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder
+            else cmp x.1 x.2) Ordering.eq = Ordering.eq
+    rw [List.foldl_cons]
+    show (M'.zip M').foldl
+          (fun (currentOrder : Ordering) (x : α × α) =>
+            if (currentOrder != Ordering.eq) = true then currentOrder
+            else cmp x.1 x.2) (cmp a a) = Ordering.eq
+    rw [h_a]
+    exact ih (fun b hb => h b (List.mem_cons_of_mem _ hb))
+
+/-- `comparePathsBetween` is a total preorder on `PathsBetween`. The four conjuncts
+match `orderInsensitiveListCmp_perm`'s requirements via `sortedPerm_class_eq`.
+
+Closing this requires lifting the four total-preorder properties from
+`comparePathSegments` (closed via `comparePathSegments_total_preorder`) through
+`orderInsensitiveListCmp` (a foldl-based comparator). `_refl` lifts cleanly via
+`orderInsensitiveListCmp_refl` above; `_swap` (for antisym) and `_trans` are tractable
+by induction on the zipped `sortBy` outputs but require careful handling of the foldl
+reduction. Left as future work. -/
 private theorem comparePathsBetween_total_preorder {vc : Nat}
     (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
     (∀ a : PathsBetween vc, comparePathsBetween vts br a a = Ordering.eq) ∧

@@ -100,7 +100,13 @@ Remaining in `Equivariance`:
 - `comparePathsBetween_total_preorder`: provides the four total-preorder properties for
   `comparePathsBetween`. The inner cmp `comparePathSegments` is now a total preorder
   (closed via the algorithm refactor), so this reduces to lifting total-preorder
-  properties through `orderInsensitiveListCmp` (a foldl-based comparator).
+  properties through `orderInsensitiveListCmp` (a foldl-based comparator). The `_refl`
+  lifting helper (`orderInsensitiveListCmp_refl`) is now proved; the `_swap` and `_trans`
+  lifting helpers are tractable by induction on the zipped `sortBy` outputs but require
+  careful handling of the foldl reduction, where after `List.foldl_cons` the
+  function-application form is beta-reduced and abstract step lemmas don't match via
+  `rw`. The fix is to write the per-step equalities in their reduced form using `show`,
+  similar to how `orderInsensitiveListCmp_refl` is structured.
 - `comparePathsBetween_equivCompat`: `comparePathsBetween` respects equivalence classes
   (needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). Requires
   an auxiliary `orderInsensitiveListCmp_equivCompat` lemma — same architectural shape

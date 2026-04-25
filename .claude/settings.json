@@ -28,7 +28,8 @@
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",
       "/workspace/GraphCanonizationProofs/.lake/build/lib/lean/FullCorrectness",
-      "/workspace/GraphCanonizationProofs/.lake/build/lib/lean"
+      "/workspace/GraphCanonizationProofs/.lake/build/lib/lean",
+      "/tmp"
     ]
   }
 }
