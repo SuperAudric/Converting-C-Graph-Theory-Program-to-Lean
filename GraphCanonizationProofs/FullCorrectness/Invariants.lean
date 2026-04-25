@@ -28,6 +28,29 @@ the prefix invariant fails. The watch-out in the plan highlights this; the proof
 `convergeLoop_preserves_prefix` must verify each of those helpers preserves the prefix
 property. Since the algorithm uses `orderInsensitiveListCmp`-sorted order + dense rank,
 this should hold, but it must be checked line-by-line.
+
+## Specialization to `initializePaths G`
+
+`convergeLoop_preserves_prefix` and `orderVertices_prefix_invariant` are stated for
+`state := initializePaths G` rather than an arbitrary `PathState n`. **The general form
+is literally false**: a malformed state with multiple paths from the same start vertex
+can cause `assignRanks` writes to overwrite each other, leaving non-prefix outputs.
+Concrete counter-example with `n = 1`: state with two cmp-distinct paths from start 0
+forces `convergeOnce`'s output to be `[1]` (no witness for value 0).
+
+`initializePaths G` always has each `pathsOfLength[d]` with exactly `n` entries, one per
+start vertex — every position in the rank-table is written exactly once with a dense
+rank from `assignRanks`. The actual algorithm only invokes `convergeLoop` with this
+state (via `runFrom`, `orderVertices`, `run`), so specializing matches reality.
+
+### Backup plan if specialization proves intractable
+
+**Option B (algorithm modification):** Insert `computeDenseRanks` after each
+`convergeOnce` inside `convergeLoop`. The lemma becomes trivial (output is by
+definition a prefix). Risks: re-verify `LeanGraphCanonizerV4Tests.lean` `#guard`s
+(especially `countUniqueCanonicals 4 == 11`); inspect equivariance proofs for
+sensitivity to `convergeOnce`'s exact value behavior; minor performance cost. Likely
+all repairable since canonization is invariant under any rank-preserving relabeling.
 -/
 
 namespace Graph
@@ -73,13 +96,14 @@ theorem IsPrefixTyping.replicate_zero :
 
 /-! ## §7.1  `convergeLoop` preserves prefix typings -/
 
-/-- `convergeLoop` maps prefix typings to prefix typings.
+/-- `convergeLoop` (on `initializePaths G`) maps prefix typings to prefix typings.
 
-See the file header for the dense-vs-sparse caveat (R2 in the plan). -/
+Specialized to `state := initializePaths G`; see file header for why the general form
+over arbitrary `PathState n` is false. -/
 theorem convergeLoop_preserves_prefix
-    (state : PathState n) (vts : Array VertexType) (fuel : Nat)
+    (G : AdjMatrix n) (vts : Array VertexType) (fuel : Nat)
     (_hv : @IsPrefixTyping n vts) :
-    @IsPrefixTyping n (convergeLoop state vts fuel) := by
+    @IsPrefixTyping n (convergeLoop (initializePaths G) vts fuel) := by
   sorry
 
 /-! ## §7.2  `breakTie`'s target `p` equals the smallest tied value -/
@@ -177,17 +201,17 @@ theorem breakTie_targetPos_is_min_tied
 
 /-! ## §7.3  Prefix invariant across `orderVertices` -/
 
-/-- After `p` iterations of `orderVertices`'s outer loop, values `0..p-1` are each held by
-a single vertex and the remaining typing is a prefix typing over values `≥ p`.
--/
+/-- After `p` iterations of `orderVertices`'s outer loop on `initializePaths G`, values
+`0..p-1` are each held by a single vertex and the remaining typing is a prefix typing
+over values `≥ p`. -/
 theorem orderVertices_prefix_invariant
-    (state : PathState n) (vts : Array VertexType) (p : Nat) (_hp : p ≤ n)
+    (G : AdjMatrix n) (vts : Array VertexType) (p : Nat) (_hp : p ≤ n)
     (_hv : @IsPrefixTyping n vts) :
     ∀ k : Fin p,
       ∃! v : Fin n,
         ((List.range p).foldl
           (fun currentTypes targetPosition =>
-            let convergedTypes := convergeLoop state currentTypes n
+            let convergedTypes := convergeLoop (initializePaths G) currentTypes n
             (breakTie convergedTypes targetPosition).1)
           vts).getD v.val 0 = k.val := by
   sorry
@@ -202,28 +226,29 @@ finite set `Fin n` (`Finite.injective_iff_bijective`). Surjectivity gives every 
 a `k`, hence `rank v < n`. Then `rank i = rank j` forces `k_i = k_j` (Fin extensionality
 on the same Nat), and the unique witness condition forces `i = j`. -/
 theorem orderVertices_n_distinct_ranks
-    (state : PathState n) (vts : Array VertexType)
+    (G : AdjMatrix n) (vts : Array VertexType)
     (hv : @IsPrefixTyping n vts) :
     ∀ i j : Fin n,
       i ≠ j →
-      (orderVertices state vts).getD i.val 0 ≠ (orderVertices state vts).getD j.val 0 := by
+      (orderVertices (initializePaths G) vts).getD i.val 0
+        ≠ (orderVertices (initializePaths G) vts).getD j.val 0 := by
   intro i j hij h_eq
   -- Unfold orderVertices to the foldl form used by orderVertices_prefix_invariant.
-  have h_unfold : orderVertices state vts
+  have h_unfold : orderVertices (initializePaths G) vts
       = (List.range n).foldl
           (fun currentTypes targetPosition =>
-            let convergedTypes := convergeLoop state currentTypes n
+            let convergedTypes := convergeLoop (initializePaths G) currentTypes n
             (breakTie convergedTypes targetPosition).1)
           vts := rfl
   rw [h_unfold] at h_eq
-  have h_inv := orderVertices_prefix_invariant state vts n (le_refl n) hv
+  have h_inv := orderVertices_prefix_invariant G vts n (le_refl n) hv
   classical
   -- Witness map: each rank k in Fin n has a unique vertex.
   let φ : Fin n → Fin n := fun k => (h_inv k).exists.choose
   have h_φ : ∀ k : Fin n,
       ((List.range n).foldl
           (fun currentTypes targetPosition =>
-            let convergedTypes := convergeLoop state currentTypes n
+            let convergedTypes := convergeLoop (initializePaths G) currentTypes n
             (breakTie convergedTypes targetPosition).1)
           vts).getD (φ k).val 0 = k.val := fun k =>
     (h_inv k).exists.choose_spec
@@ -242,12 +267,12 @@ theorem orderVertices_n_distinct_ranks
   -- rank i = k_i.val, rank j = k_j.val.
   have hri : ((List.range n).foldl
       (fun currentTypes targetPosition =>
-        let convergedTypes := convergeLoop state currentTypes n
+        let convergedTypes := convergeLoop (initializePaths G) currentTypes n
         (breakTie convergedTypes targetPosition).1)
       vts).getD i.val 0 = k_i.val := h_k_i ▸ h_φ k_i
   have hrj : ((List.range n).foldl
       (fun currentTypes targetPosition =>
-        let convergedTypes := convergeLoop state currentTypes n
+        let convergedTypes := convergeLoop (initializePaths G) currentTypes n
         (breakTie convergedTypes targetPosition).1)
       vts).getD j.val 0 = k_j.val := h_k_j ▸ h_φ k_j
   -- From h_eq: k_i.val = k_j.val.

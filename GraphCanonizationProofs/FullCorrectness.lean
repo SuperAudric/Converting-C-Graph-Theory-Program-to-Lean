@@ -63,8 +63,8 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. |
 | `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |
-| `convergeLoop_preserves_prefix`       | `Invariants`                       | Induction on fuel + dense-rank characterization of `assignRanks` output. Reachable now that the dense-rank migration has landed. |
-| `orderVertices_prefix_invariant`      | `Invariants`                       | Induct on the outer fold using `convergeLoop_preserves_prefix` + `breakTie_targetPos_is_min_tied`. (`orderVertices_n_distinct_ranks` is closed as a pigeonhole corollary.) |
+| `convergeLoop_preserves_prefix`       | `Invariants`                       | Specialized to `state := initializePaths G` (the general form is false — see file header). Induction on fuel + dense-rank characterization of `assignRanks` output. The `assignRanks_*` infrastructure in `Equivariance.ComparisonSort` is already in place. |
+| `orderVertices_prefix_invariant`      | `Invariants`                       | Specialized to `state := initializePaths G`. Induct on the outer fold using `convergeLoop_preserves_prefix` + `breakTie_targetPos_is_min_tied`. (`orderVertices_n_distinct_ranks` is closed as a pigeonhole corollary.) |
 | `run_isomorphic_eq` (⟹)               | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2. |
 
 --------------------------------------------------------------------------------
