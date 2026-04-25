@@ -1093,14 +1093,74 @@ private theorem sortedPerm_class_eq {α : Type} (cmp : α → α → Ordering)
     | .gt => exact (h_not_gt h).elim
   exact h_eq_symm _ _ h_M'i_eq_x
 
-/-- `sortBy cmp L` produces a `Pairwise`-sorted list when the `≠ .gt` relation on `cmp` is
-transitive. Standard insertion-sort result, deferred. Rather than exposing a transitivity
-hypothesis on `orderInsensitiveListCmp_perm` (which would propagate up through
-`comparePathsBetween_σ_equivariant`/`comparePathsFrom_σ_equivariant`), we absorb the proof
-as a sorry here. -/
-private theorem sortBy_pairwise {α : Type} (cmp : α → α → Ordering) (L : List α) :
+/-- `insertSorted` preserves `Pairwise`-sortedness when `cmp` admits the swap-on-`.gt`
+direction of antisymmetry and `≤`-transitivity. Inserts `a` into a sorted `L` in the
+unique left-most position where `cmp a · ≠ .gt` holds; positions before are unchanged
+(IH), at position `a` we use sortedness + transitivity to extend to the tail, and at
+positions after we use that the tail is sorted (IH) and `cmp ·_head a ≠ .gt` follows
+from `cmp a head = .gt → cmp head a = .lt`. -/
+private theorem insertSorted_pairwise {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt) :
+    ∀ (L : List α) (a : α), L.Pairwise (fun x y => cmp x y ≠ Ordering.gt) →
+      (insertSorted cmp a L).Pairwise (fun x y => cmp x y ≠ Ordering.gt) := by
+  intro L
+  induction L with
+  | nil =>
+    intros a _
+    show ([a] : List α).Pairwise _
+    exact List.Pairwise.cons (by intros _ hy; cases hy) List.Pairwise.nil
+  | cons b L ih =>
+    intros a hL
+    show (if cmp a b != Ordering.gt then a :: b :: L else b :: insertSorted cmp a L).Pairwise _
+    by_cases hab : cmp a b != Ordering.gt
+    · -- insert at front: a :: b :: L is sorted because cmp a b ≠ .gt + transitivity to L.
+      simp only [hab]
+      have hab' : cmp a b ≠ Ordering.gt := by
+        intro h; rw [h] at hab; simp at hab
+      apply List.Pairwise.cons
+      · intros y hy
+        rcases List.mem_cons.mp hy with rfl | hy_in
+        · exact hab'
+        · have hby : cmp b y ≠ Ordering.gt := List.rel_of_pairwise_cons hL hy_in
+          exact h_trans _ _ _ hab' hby
+      · exact hL
+    · -- insert later: b :: insertSorted cmp a L. b ≤ everything in (a :: L) by sortedness
+      -- (for L) + antisym₂ (for a, since cmp a b = .gt → cmp b a = .lt ≠ .gt).
+      simp only [hab]
+      have hab_gt : cmp a b = Ordering.gt := by
+        match h_eq : cmp a b with
+        | .lt => exfalso; rw [h_eq] at hab; simp at hab
+        | .eq => exfalso; rw [h_eq] at hab; simp at hab
+        | .gt => rfl
+      have hL_tail : L.Pairwise (fun x y => cmp x y ≠ Ordering.gt) :=
+        (List.pairwise_cons.mp hL).2
+      have hL_head : ∀ y ∈ L, cmp b y ≠ Ordering.gt :=
+        (List.pairwise_cons.mp hL).1
+      apply List.Pairwise.cons
+      · intros y hy
+        have hy_perm : y ∈ a :: L := (perm_insertSorted cmp a L).mem_iff.mp hy
+        rcases List.mem_cons.mp hy_perm with hy_eq | hy_in
+        · rw [hy_eq]
+          have h_ba : cmp b a = Ordering.lt := h_antisym₂ _ _ hab_gt
+          rw [h_ba]; intro h; cases h
+        · exact hL_head y hy_in
+      · exact ih a hL_tail
+
+/-- `sortBy cmp L` produces a `Pairwise`-sorted list. Insertion sort, by induction on `L`
+applying `insertSorted_pairwise` at each step. -/
+private theorem sortBy_pairwise {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
+    (L : List α) :
     (sortBy cmp L).Pairwise (fun a b => cmp a b ≠ Ordering.gt) := by
-  sorry
+  induction L with
+  | nil =>
+    show (([] : List α)).Pairwise _
+    exact List.Pairwise.nil
+  | cons a L ih =>
+    show (insertSorted cmp a (sortBy cmp L)).Pairwise _
+    exact insertSorted_pairwise cmp h_antisym₂ h_trans (sortBy cmp L) a ih
 
 /-- Pointwise `foldl` equality: if `L.length = L'.length` and `f acc (L[i]) = f acc (L'[i])`
 at every position `i` and every `acc`, then the folds on `L` and `L'` give the same result. -/
@@ -1151,10 +1211,10 @@ theorem orderInsensitiveListCmp_perm {α : Type} (cmp : α → α → Ordering)
       ((sortBy_perm cmp L₁).trans h₁).trans (sortBy_perm cmp L₁').symm
     have hM₂ : (sortBy cmp L₂).Perm (sortBy cmp L₂') :=
       ((sortBy_perm cmp L₂).trans h₂).trans (sortBy_perm cmp L₂').symm
-    have hSort₁ := sortBy_pairwise cmp L₁
-    have hSort₁' := sortBy_pairwise cmp L₁'
-    have hSort₂ := sortBy_pairwise cmp L₂
-    have hSort₂' := sortBy_pairwise cmp L₂'
+    have hSort₁ := sortBy_pairwise cmp h_antisym₂ h_trans L₁
+    have hSort₁' := sortBy_pairwise cmp h_antisym₂ h_trans L₁'
+    have hSort₂ := sortBy_pairwise cmp h_antisym₂ h_trans L₂
+    have hSort₂' := sortBy_pairwise cmp h_antisym₂ h_trans L₂'
     -- Pointwise class agreement.
     have h_class₁ : ∀ i (hi₁ : i < (sortBy cmp L₁).length) (hi₁' : i < (sortBy cmp L₁').length),
         cmp ((sortBy cmp L₁)[i]'hi₁) ((sortBy cmp L₁')[i]'hi₁') = Ordering.eq :=
