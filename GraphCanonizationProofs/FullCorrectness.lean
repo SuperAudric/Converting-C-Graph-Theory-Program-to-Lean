@@ -378,10 +378,14 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
     induction. Uses `assignRanks_snoc_decompose_strict` (sharper snoc-decomposition with
     exact rank formula) and `assignRanks_foldl_lastEntry_fst` (lastEntry's first
     component).
-  - **P3.D** 🧱 `sortBy_first_q_positions_have_start_types_lt_q`: heaviest piece, requires
-    sortBy positional reasoning.
-  - **P3.E** 🧱 combine P3.1/B/C/D for `convergeOnce`.
-  - **P3.5** 🧱 induct on fuel using P3.E.
+  - **P3.D** 🧱 `sortBy_first_q_positions_have_start_types`: statement and strategy
+    documented in `Invariants.lean`. Aux `sortBy_pathsAtTop_length_eq` ✅. The body's
+    counting argument (Pairwise + antisymmetry to identify positions) is left as `sorry`.
+  - **P3.E** 🟡 `convergeOnce_preserves_lower_uniqueness`: prefix + size conjuncts ✅
+    (via `convergeOnce_writeback` + `getFrom_image_isPrefix_for_initializePaths`).
+    Uniqueness conjunct 🧱 sorry pending P3.D.
+  - **P3.5** ✅ `convergeLoop_preserves_lower_uniqueness`: closed via fuel induction
+    using P3.E.
 
 Closing `getFrom_image_isPrefix_for_initializePaths` (n ≥ 1) used these helpers, all in
 `Invariants.lean`:

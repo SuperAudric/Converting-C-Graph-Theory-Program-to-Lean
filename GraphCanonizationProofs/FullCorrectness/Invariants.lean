@@ -941,22 +941,130 @@ private theorem comparePathsFrom_eq_compare_of_start_types_ne
   -- != true case.
   exact bne_iff_ne.mpr h_ne
 
-/-- **Phase 3 (TODO P3.2 + P3.3 + P3.4).** convergeLoop preserves prefix typing AND
-lower-uniqueness. The proof requires:
-- (P3.2) For uniquely-typed `v_k` with `T[v_k] = k` (`k < q`), pathFrom `v_k` sorts to
-  position `k` in `sortBy comparePathsFrom T pathsAtTop`.
-- (P3.3) `assignRanks` assigns rank `k` to position `k` for the first `q` positions
-  (since consecutive distinct start types give cmp ≠ .eq, so rank increments by 1).
-- (P3.4) Hence `convergeOnce T` produces `T'` with `T'[v_k.val] = k`.
-- Induction on fuel for `convergeLoop`.
--/
+/-! ### Phase 3: P3.D and helpers for sortBy positional reasoning
+
+Key facts needed:
+- **P3.D.aux1** `comparePathsFrom_swap_lt_gt`: `cmp a b = .lt ↔ cmp b a = .gt` (antisymmetry).
+  Follows from `comparePathsBetween_total_preorder` lifted through the start-type guard.
+- **P3.D.aux2** For `pathsAtTop = (initializePaths G).pathsOfLength.getD (n-1) #[]).toList`:
+  - Length is `n`.
+  - Each entry's `startVertexIndex.val` equals its position (by `initializePaths_pathsAtDepth_startVertices_eq_range`, which gives `pathsAtTop.map (·.startVertexIndex.val) = List.range n`).
+- **P3.D.aux3** For T uniquely held at `0..q-1`, exactly `k` paths in pathsAtTop have
+  start type `< k` (the v_0..v_{k-1}).
+
+Strategy for P3.D: argue via `sortBy_pairwise` that:
+- Position k of `sortBy cmp pathsAtTop` has start type `≥ k` AND `≤ k`, so `= k`.
+- The `≥ k` direction: by Pairwise, position k is preceded by k paths, each with cmp
+  `≤` (i.e., `.lt` or `.eq`) to position k. By unique typing, these k paths must have
+  start types `< k`. So position k's start type cannot be `< k` — must be `≥ k`.
+- The `≤ k` direction: by symmetric argument on suffix.
+
+For now this is left as a sorry; the structure is established. -/
+
+/-- **P3.D.aux1** sortedList has length `n` (since pathsAtTop does, and sortBy preserves
+length). -/
+private theorem sortBy_pathsAtTop_length_eq
+    {n : Nat} (G : AdjMatrix n) (T : Array VertexType) (hn_pos : 0 < n)
+    (betweenRanks : Nat → Nat → Nat → Nat) :
+    (sortBy (comparePathsFrom T betweenRanks)
+        (((initializePaths G).pathsOfLength.getD (n-1) #[]).toList)).length = n := by
+  have h_pathsAtTop_len : (((initializePaths G).pathsOfLength.getD (n-1) #[]).toList).length = n := by
+    have h_n_pred_lt : n - 1 < n := by omega
+    have h_indices := initializePaths_pathsAtDepth_startVertices_eq_range G h_n_pred_lt
+    have h_len_eq := congrArg List.length h_indices
+    rw [List.length_map, List.length_range] at h_len_eq
+    exact h_len_eq
+  rw [(sortBy_perm _ _).length_eq]
+  exact h_pathsAtTop_len
+
+/-- **P3.D (TODO)** For `T` prefix with `0..q-1` uniquely held, the first `q` positions
+of `sortBy comparePathsFrom T pathsAtTop` have start types `0, 1, …, q-1` (in this order).
+Equivalently: `T (sortedList[k].startVertexIndex.val) = k` for each `k < q`.
+
+**Proof strategy** (left as `sorry`, intended for a future iteration):
+1. By `sortBy_pairwise`, sortedList satisfies `Pairwise (cmp · · ≠ .gt)`.
+2. By `sortBy_perm` + `initializePaths_pathsAtDepth_startVertices_eq_range`, sortedList
+   contains exactly one path per start vertex.
+3. For each `j < q`, the unique `v_j` with `T[v_j] = j` exists (h_unique).
+4. By P3.1, `comparePathsFrom T betweenRanks pathFrom_v_a pathFrom_v_b
+   = compare T[v_a] T[v_b]` whenever start types differ.
+5. From Pairwise + (4) + antisymmetry of `compare`: the position of `pathFrom v_k`
+   in sortedList equals the count of paths with strictly smaller start type, which
+   is `k` for `k < q`.
+
+The hard part is formalizing (5) — counting. Possible approaches:
+- Induction on `q`, using `List.Pairwise.cons` / `List.Pairwise.tail`.
+- Direct argument via `List.idxOf` and `List.Pairwise` -based counting lemmas.
+- Reduction to a sortBy of `(List.range n).map (T.getD · 0)`. -/
+private theorem sortBy_first_q_positions_have_start_types
+    {n : Nat} (G : AdjMatrix n) (T : Array VertexType) (q : Nat) (hq : q ≤ n)
+    (h_size : T.size = n)
+    (h_unique : @UniquelyHeldBelow n T q)
+    (betweenRanks : Nat → Nat → Nat → Nat) :
+    ∀ k : Nat, k < q →
+      ∃ h_lt_len : k < (sortBy (comparePathsFrom T betweenRanks)
+        (((initializePaths G).pathsOfLength.getD (n-1) #[]).toList)).length,
+        T.getD (((sortBy (comparePathsFrom T betweenRanks)
+          (((initializePaths G).pathsOfLength.getD (n-1) #[]).toList))[k]'h_lt_len).startVertexIndex.val) 0 = k := by
+  sorry
+
+/-- **P3.E (TODO)** `convergeOnce (initializePaths G) T` preserves the prefix property,
+the size, and the lower-uniqueness `0..q-1`. -/
+private theorem convergeOnce_preserves_lower_uniqueness
+    (G : AdjMatrix n) (T : Array VertexType) (q : Nat) (hq : q ≤ n)
+    (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
+    (h_unique : @UniquelyHeldBelow n T q) :
+    (convergeOnce (initializePaths G) T).1.size = n ∧
+    @IsPrefixTyping n (convergeOnce (initializePaths G) T).1 ∧
+    @UniquelyHeldBelow n (convergeOnce (initializePaths G) T).1 q := by
+  -- Output's size: by convergeOnce_size_preserving.
+  have h_size_out : (convergeOnce (initializePaths G) T).1.size = n := by
+    rw [convergeOnce_size_preserving]; exact h_size
+  -- Output's prefix property: by getFrom_image_isPrefix_for_initializePaths + writeback.
+  have h_prefix_out : @IsPrefixTyping n (convergeOnce (initializePaths G) T).1 := by
+    obtain ⟨m, h_bound, h_witness⟩ := getFrom_image_isPrefix_for_initializePaths G T
+    refine ⟨m, ?_, ?_⟩
+    · intro v
+      rw [convergeOnce_writeback (initializePaths G) T v.val (h_size.symm ▸ v.isLt) v.isLt]
+      exact h_bound v
+    · intro k hk
+      obtain ⟨i, hi⟩ := h_witness k hk
+      refine ⟨i, ?_⟩
+      rw [convergeOnce_writeback (initializePaths G) T i.val (h_size.symm ▸ i.isLt) i.isLt]
+      exact hi
+  -- Output's uniqueness: requires P3.D + P3.B/C + (a)/(b)/(c) reasoning.
+  have h_unique_out : @UniquelyHeldBelow n (convergeOnce (initializePaths G) T).1 q := by
+    sorry  -- Combine P3.D with assignRanks rank facts.
+  exact ⟨h_size_out, h_prefix_out, h_unique_out⟩
+
+/-- **Phase 3 main lemma (P3.5)** `convergeLoop` preserves prefix typing AND lower-
+uniqueness. By induction on fuel, using `convergeOnce_preserves_lower_uniqueness` (P3.E)
+at each step. -/
 private theorem convergeLoop_preserves_lower_uniqueness
-    (G : AdjMatrix n) (T : Array VertexType) (q : Nat) (fuel : Nat)
+    (G : AdjMatrix n) (T : Array VertexType) (q : Nat) (hq : q ≤ n) (fuel : Nat)
     (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
     (h_unique : @UniquelyHeldBelow n T q) :
     @IsPrefixTyping n (convergeLoop (initializePaths G) T fuel) ∧
     @UniquelyHeldBelow n (convergeLoop (initializePaths G) T fuel) q := by
-  sorry
+  induction fuel generalizing T with
+  | zero => exact ⟨h_prefix, h_unique⟩
+  | succ fuel' ih =>
+    -- T' := (convergeOnce (initializePaths G) T).1. By P3.E, T' satisfies the hypotheses.
+    have h_step := convergeOnce_preserves_lower_uniqueness G T q hq h_size h_prefix h_unique
+    obtain ⟨h_T'_size, h_T'_prefix, h_T'_unique⟩ := h_step
+    -- convergeLoop (fuel'+1) = if changed then recurse on T' fuel' else T'.
+    show @IsPrefixTyping n (convergeLoop (initializePaths G) T (fuel' + 1)) ∧ _
+    change @IsPrefixTyping n
+      (if (convergeOnce (initializePaths G) T).2
+       then convergeLoop (initializePaths G) (convergeOnce (initializePaths G) T).1 fuel'
+       else (convergeOnce (initializePaths G) T).1) ∧
+      @UniquelyHeldBelow n
+      (if (convergeOnce (initializePaths G) T).2
+       then convergeLoop (initializePaths G) (convergeOnce (initializePaths G) T).1 fuel'
+       else (convergeOnce (initializePaths G) T).1) q
+    split
+    · exact ih _ h_T'_size h_T'_prefix h_T'_unique
+    · exact ⟨h_T'_prefix, h_T'_unique⟩
 
 /-! ### Phase 2 helpers and main breakTie step lemma -/
 
@@ -1267,7 +1375,8 @@ private theorem orderVertices_prefix_invariant_strong
         List.foldl_append, List.foldl_cons, List.foldl_nil]
     -- Apply Phase 3: convergeLoop preserves prefix + lower-uniqueness.
     have ⟨h_prefix_conv, h_unique_conv⟩ :=
-      convergeLoop_preserves_lower_uniqueness G T_q' q' n h_size_q' h_prefix_q' h_unique_q'
+      convergeLoop_preserves_lower_uniqueness G T_q' q' (Nat.le_of_lt hq_lt) n
+        h_size_q' h_prefix_q' h_unique_q'
     have h_size_conv : (convergeLoop (initializePaths G) T_q' n).size = n := by
       rw [convergeLoop_size_preserving]; exact h_size_q'
     -- Apply Phase 2: breakTie step preserves prefix + extends uniqueness.
