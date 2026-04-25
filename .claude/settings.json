@@ -21,7 +21,9 @@
       "Bash(tee /tmp/lake-build-4.log)",
       "Bash(export PATH=\"/home/node/.elan/bin:$PATH\")",
       "Bash(lake --version)",
-      "Bash(grep -rB1 -A5 \"^theorem Array.ext\\\\b\\\\|^theorem ext\\\\b\\\\|^@\\\\[ext\\\\]\\\\s*theorem\" /home/node/.elan/toolchains/leanprover--lean4---v4.30.0-rc2/src/lean/Init/Data/Array/)"
+      "Bash(grep -rB1 -A5 \"^theorem Array.ext\\\\b\\\\|^theorem ext\\\\b\\\\|^@\\\\[ext\\\\]\\\\s*theorem\" /home/node/.elan/toolchains/leanprover--lean4---v4.30.0-rc2/src/lean/Init/Data/Array/)",
+      "Bash(awk -F: '$1 == 1523 || $1 == 1928 || $1 == 1993 || $1 == 2007 {print}')",
+      "Bash(sed -n '1520p;1525p;1925p;1930p;1990p;1995p;2005p;2010p' /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance.lean)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

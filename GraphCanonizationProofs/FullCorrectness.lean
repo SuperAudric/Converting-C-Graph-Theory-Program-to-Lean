@@ -46,20 +46,38 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants (3)                       | `Invariants`                               | 🧱 stated, `sorry` |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                     | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-**Sorry count.** 6 (Equivariance: `sortBy_pairwise`, `comparePathSegments_total_preorder`,
-`comparePathsBetween_total_preorder`, `comparePathsBetween_equivCompat`,
-`calculatePathRankings_fromRanks_inv`, `calculatePathRankings_betweenRanks_inv`) +
-1 (Tiebreak — `runFrom_VtsInvariant_eq`) + 3 (Invariants — §7) + 1 (Main) =
-**11 open obligations**. `sortedPerm_class_eq` is **closed** via a counting argument
-(positions in sorted lists are bounded by `lt_count` from below and `not_gt_count` from
-above; both are `Perm`-invariant via `List.Perm.countP_eq`). The closure required adding
-four hypotheses on `cmp` (refl, both directions of antisymmetry, `≤`-transitivity) to
-the signature; these propagate to `orderInsensitiveListCmp_perm` and to its two callers
-(`comparePathsBetween_σ_equivariant`, `comparePathsFrom_σ_equivariant`) via two new
-helper lemmas `comparePathSegments_total_preorder` / `comparePathsBetween_total_preorder`
-(both currently `sorry` — they fail globally on the `panic!` mixed bottom/inner case but
-hold on the algorithm's actual uniform lists; closing them requires a list-uniformity
-hypothesis or a panic-case-aware reformulation of `comparePathSegments`).
+**Sorry count.** 4 (Equivariance: `comparePathsBetween_total_preorder`,
+`comparePathsBetween_equivCompat`, `calculatePathRankings_fromRanks_inv`,
+`calculatePathRankings_betweenRanks_inv`) + 1 (Tiebreak — `runFrom_VtsInvariant_eq`) +
+3 (Invariants — §7) + 1 (Main) = **9 open obligations** (down from 10). Closures this
+iteration:
+
+- **`sortedPerm_class_eq`** ✅ — counting argument (positions in sorted lists bounded
+  by `lt_count` from below and `not_gt_count` from above; both `Perm`-invariant via
+  `List.Perm.countP_eq`). Required four hypotheses on `cmp` in the signature (refl,
+  both directions of antisymmetry, `≤`-trans), propagated to `orderInsensitiveListCmp_perm`
+  and its two callers via the helper lemmas `comparePathSegments_total_preorder` /
+  `comparePathsBetween_total_preorder`.
+- **`sortBy_pairwise`** ✅ — standard insertion-sort sortedness, via a new
+  `insertSorted_pairwise` helper using `h_antisym₂` and `h_trans`.
+- **`comparePathSegments_total_preorder`** ✅ — proved after a small refactor of
+  `comparePathSegments` ([LeanGraphCanonizerV4.lean:107](LeanGraphCanonizerV4.lean#L107))
+  that replaced the original `panic!` mixed-bottom/inner case with a fixed ordering
+  (`bottom < inner`). The previous `panic!` returned `default = .lt` in both directions,
+  breaking antisymmetry. The fixed ordering preserves the algorithm's behavior on the
+  actual lists (which are always uniform, never mixed) and verifies that
+  `LeanGraphCanonizerV4Tests` still passes. Three small `cmpInner_*` helpers reduce the
+  inner-inner branch to Nat trichotomy + `omega`.
+
+Remaining in `Equivariance`:
+- `comparePathsBetween_total_preorder`: needs `orderInsensitiveListCmp` analogues of
+  refl/antisym/trans. The `cmp` here is `comparePathSegments` (now a total preorder), so
+  the structural argument is in scope but requires foldl-based analysis of
+  `orderInsensitiveListCmp` on `(L, L)`, swapped lists, and chained lists.
+- `comparePathsBetween_equivCompat`: same architectural shape — needs
+  `orderInsensitiveListCmp` to respect `.eq` substitution under bilateral cmp-compat.
+- `calculatePathRankings_fromRanks_inv` / `..._betweenRanks_inv`: the deep fold-level
+  σ-invariance of the rank tables. Foldl induction on the depth loop.
 
 **Closed during the equivariance push:**
 - **Stage D** trivially via `σ ∈ Aut G ⟹ G.permute σ = G`.
@@ -79,20 +97,15 @@ hypothesis or a panic-case-aware reformulation of `comparePathSegments`).
 - **`calculatePathRankings_fromRanks_size`** proved (foldl invariant on the algorithm body).
 
 **Remaining structural work in `Equivariance`** (all sorried, each well-scoped):
-- `sortBy_pairwise`: `sortBy cmp L` is `Pairwise`-sorted by `cmp ≠ .gt`. Standard
-  insertion-sort result; requires `cmp`-transitivity (to be supplied).
-- `comparePathSegments_total_preorder` / `comparePathsBetween_total_preorder`: provide
-  the four total-preorder properties (refl + both antisym directions + `≤`-trans) for
-  the path-comparison functions. These hold globally except for the `panic!` mixed
-  bottom/inner case in `comparePathSegments`; in the algorithm `connectedSubPaths` is
-  uniform per call (all `bottom` for depth=0, all `inner` for depth>0), so the panic
-  case never fires. Closing requires either a list-uniformity hypothesis or a refactor
-  to make the panic case total-preorder-compatible (e.g., return `.eq` instead of
-  `panic!`, or have `comparePathSegments` declare a stable order on bottom-vs-inner).
+- `comparePathsBetween_total_preorder`: provides the four total-preorder properties for
+  `comparePathsBetween`. The inner cmp `comparePathSegments` is now a total preorder
+  (closed via the algorithm refactor), so this reduces to lifting total-preorder
+  properties through `orderInsensitiveListCmp` (a foldl-based comparator).
 - `comparePathsBetween_equivCompat`: `comparePathsBetween` respects equivalence classes
-  (needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). Requires an
-  auxiliary `orderInsensitiveListCmp_equivCompat_left` lemma about orderInsensitiveListCmp
-  giving `.eq` implying interchangeability.
+  (needed for `orderInsensitiveListCmp_perm` at the `comparePathsFrom` level). Requires
+  an auxiliary `orderInsensitiveListCmp_equivCompat` lemma — same architectural shape
+  as `comparePathsBetween_total_preorder`, both depend on `orderInsensitiveListCmp`
+  property-lifting helpers.
 - `calculatePathRankings_fromRanks_inv` / `..._betweenRanks_inv`: the fold-level
   σ-invariance of the rank tables. Requires foldl induction on the depth loop plus
   σ-equivariance of sortBy + assignRanks at each step.
@@ -116,8 +129,15 @@ hypothesis or a panic-case-aware reformulation of `comparePathSegments`).
   ruled out `cmp L'[i] x = .lt` and `= .gt` separately by extending the counts via the
   helpers `h_le_lt` / `h_lt_le` (which combine refl, both antisymmetries, and ≤-trans).
   Takes four cmp hypotheses (refl, antisym₁, antisym₂, ≤-trans) in its signature.
-- `orderInsensitiveListCmp_perm` — **proved modulo `sortBy_pairwise`** (and the new cmp
-  total-preorder hypotheses passed through to `sortedPerm_class_eq`). Structural argument
+- `sortBy_pairwise` — **proved** via a new `insertSorted_pairwise` helper. Insertion at
+  the leftmost `≠ .gt` position; the head case uses `h_antisym₂` to flip `.gt → .lt`,
+  the recursive case uses `h_trans`. Takes `h_antisym₂` and `h_trans` hypotheses.
+- `comparePathSegments_total_preorder` — **proved**. Refl, both antisymmetries, and
+  `≤`-transitivity of `comparePathSegments` after the algorithm refactor (panic →
+  fixed `bottom < inner` ordering). Three internal `cmpInner_*` helpers reduce the
+  inner-inner branch to Nat trichotomy + `omega`.
+- `orderInsensitiveListCmp_perm` — **proved modulo the new cmp total-preorder hypotheses**
+  passed through to `sortedPerm_class_eq` and `sortBy_pairwise`. Structural argument
   uses `foldl_pointwise_eq` + bilateral `h_compat`.
 - `foldl_pointwise_eq` — generic pointwise foldl equality helper.
 - `map_reindex_perm` — generic list reindex-`Perm` helper using Mathlib's

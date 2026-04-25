@@ -116,7 +116,13 @@ def comparePathSegments {vertexCount : Nat}
       if xRank != yRank then compare yRank xRank
       else if xEdge != yEdge then compare yEdge xEdge
       else .eq
-  | _, _ => panic! "Cannot compare bottom and inner PathSegments"
+  -- Mixed bottom/inner does not arise in practice (the algorithm's `connectedSubPaths` is
+  -- uniform per call: all `bottom` for depth=0, all `inner` for depth>0). We pick a
+  -- definite ordering here so `comparePathSegments` is a proper total preorder, which
+  -- the equivariance proofs depend on. The previous `panic!` returned `default = .lt`
+  -- in both directions, breaking antisymmetry.
+  | .bottom _, .inner _ _ _ _ => .lt
+  | .inner _ _ _ _, .bottom _ => .gt
 
 def comparePathsBetween {vertexCount : Nat}
     (vertexTypes  : Array VertexType)
