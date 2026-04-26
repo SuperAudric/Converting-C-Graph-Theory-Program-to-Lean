@@ -1,12 +1,6 @@
 /-!
 # Full correctness of the graph canonizer — proof plan (docs only)
 
-This file is documentation. It used to `import` every submodule, but loading the
-whole transitive Mathlib closure made it a 60s+ rebuild on every edit. The
-`FullCorrectness/*` submodules are now built directly by the `FullCorrectness`
-lean_lib via the `globs = ["FullCorrectness.+"]` entry in `lakefile.toml`, so no
-umbrella is needed. Internal modules import the specific step(s) they depend on.
-
 The flat-flawed proof in `LeanGraphCanonizerV4Correctness.lean` is retired — its header
 explains why its central equivariance claim is literally false. This tree replaces it.
 
