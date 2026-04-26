@@ -2122,51 +2122,84 @@ private theorem between_assignList_σ_rank_closure
   · -- (assignList[k']).2 = item.2.
     rw [h_item2_eq]; exact h_rank_eq.symm
 
-/-- The σ-invariance of `fromRanks` values in `calculatePathRankings`'s output.
-Part of the deep Stage B content; requires foldl induction on the depth loop combined with
-σ-equivariance of the compare/sort/rank assignment at each step. -/
-theorem calculatePathRankings_fromRanks_inv
-    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
+/-! ### `calculatePathRankings` σ-invariance — combined proof
+
+The two `_inv` theorems below are projections of the combined `σInvariant_combined`,
+which carries the entire `RankState.σInvariant σ rs` content (sizes + cell-level
+σ-invariance). Sizes are discharged by `calculatePathRankings_size_inv`; the cell-level
+σ-invariance comes from `calculatePathRankings_σ_cell_inv_facts`, which is the deep
+foldl-induction lemma. -/
+
+/-- **Cell-level σ-invariance facts** for `calculatePathRankings`'s output. The deep
+content. Proved via depth-foldl induction over `List.range n`; the inductive step uses
+`set_chain_σInvariant` / `setBetween_chain_σInvariant` (with the σ-rank-closure lemmas
+`from_assignList_σ_rank_closure` / `between_assignList_σ_rank_closure`) plus the
+structural facts about `pathsAtDepth` and `allBetween` from `initializePaths G`. -/
+private theorem calculatePathRankings_σ_cell_inv_facts
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
     (vts : Array VertexType)
-    (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0)
-    (d : Nat) (_hd : d < n) (s : Fin n) :
+    (hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
+    let rs := calculatePathRankings (initializePaths G) vts
+    (∀ d : Nat, d < n → ∀ s : Fin n,
+        (rs.fromRanks.getD d #[]).getD s.val 0
+        = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0) ∧
+    (∀ d : Nat, d < n → ∀ s e : Fin n,
+        ((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
+        = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) := by
+  sorry
+
+/-- **Combined σ-invariance** of `calculatePathRankings`'s output: the full
+`RankState.σInvariant σ rs` for `rs := calculatePathRankings (initializePaths G) vts`.
+Sizes from `calculatePathRankings_size_inv`; cell σ-inv from
+`calculatePathRankings_σ_cell_inv_facts`. -/
+theorem calculatePathRankings_σInvariant_combined
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
+    RankState.σInvariant σ (calculatePathRankings (initializePaths G) vts) := by
+  have h_size := calculatePathRankings_size_inv (initializePaths G) vts
+  obtain ⟨h_from_inv, h_between_inv⟩ :=
+    calculatePathRankings_σ_cell_inv_facts G σ hσ vts hvts
+  exact {
+    fromRanks_size := calculatePathRankings_fromRanks_size _ _,
+    betweenRanks_size := h_size.1,
+    fromRanks_row_size := fun d hd => h_size.2.2.1 d hd,
+    betweenRanks_row_size := fun d hd => h_size.2.2.2.1 d hd,
+    betweenRanks_cell_size := fun d hd s hs => h_size.2.2.2.2 d s hd hs,
+    fromRanks_inv := h_from_inv,
+    betweenRanks_inv := h_between_inv,
+  }
+
+/-- The σ-invariance of `fromRanks` values: projection of `σInvariant_combined`. -/
+theorem calculatePathRankings_fromRanks_inv
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0)
+    (d : Nat) (hd : d < n) (s : Fin n) :
     let rs := calculatePathRankings (initializePaths G) vts
     (rs.fromRanks.getD d #[]).getD s.val 0
-    = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0 := by
-  sorry
+    = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0 :=
+  (calculatePathRankings_σInvariant_combined G σ hσ vts hvts).fromRanks_inv d hd s
 
-/-- The σ-invariance of `betweenRanks` values in `calculatePathRankings`'s output.
-Companion to `calculatePathRankings_fromRanks_inv`; the two are proved by a shared foldl
-induction (sharing the same σ-invariance bookkeeping across the `betweenRanks`/`fromRanks`
-pair, since each step updates both in tandem). -/
+/-- The σ-invariance of `betweenRanks` values: projection of `σInvariant_combined`. -/
 theorem calculatePathRankings_betweenRanks_inv
-    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (_hσ : σ ∈ AdjMatrix.Aut G)
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
     (vts : Array VertexType)
-    (_hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0)
-    (d : Nat) (_hd : d < n) (s e : Fin n) :
+    (hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0)
+    (d : Nat) (hd : d < n) (s e : Fin n) :
     let rs := calculatePathRankings (initializePaths G) vts
     ((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
-    = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0 := by
-  sorry
+    = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0 :=
+  (calculatePathRankings_σInvariant_combined G σ hσ vts hvts).betweenRanks_inv d hd s e
 
-/-- The σ-invariance of `calculatePathRankings`'s output, given σ ∈ Aut G and σ-invariant
-typing. Sizes are discharged by `calculatePathRankings_size_inv` (proved); the value
-invariance comes from the two `_inv` theorems above. -/
+/-- The σ-invariance of `calculatePathRankings`'s output: a direct alias for
+`calculatePathRankings_σInvariant_combined`. -/
 theorem calculatePathRankings_σInvariant
     (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
     (vts : Array VertexType)
     (hvts : ∀ v : Fin n, vts.getD (σ v) 0 = vts.getD v 0) :
-    RankState.σInvariant σ (calculatePathRankings (initializePaths G) vts) where
-  fromRanks_size := calculatePathRankings_fromRanks_size _ _
-  betweenRanks_size := (calculatePathRankings_size_inv (initializePaths G) vts).1
-  fromRanks_row_size := fun d hd =>
-    (calculatePathRankings_size_inv (initializePaths G) vts).2.2.1 d hd
-  betweenRanks_row_size := fun d hd =>
-    (calculatePathRankings_size_inv (initializePaths G) vts).2.2.2.1 d hd
-  betweenRanks_cell_size := fun d hd s hs =>
-    (calculatePathRankings_size_inv (initializePaths G) vts).2.2.2.2 d s hd hs
-  fromRanks_inv := calculatePathRankings_fromRanks_inv G σ hσ vts hvts
-  betweenRanks_inv := calculatePathRankings_betweenRanks_inv G σ hσ vts hvts
+    RankState.σInvariant σ (calculatePathRankings (initializePaths G) vts) :=
+  calculatePathRankings_σInvariant_combined G σ hσ vts hvts
 
 /-- The genuine content of Stage B (the part not reducible to Stage A + σ ∈ Aut G):
 the rank state computed from `initializePaths G` with a σ-invariant typing is itself
