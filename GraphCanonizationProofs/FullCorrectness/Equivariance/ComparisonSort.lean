@@ -1485,4 +1485,122 @@ theorem assignRanks_rank_eq_pos_when_distinct_prefix {α : Type} (cmp : α → �
   rw [h_pref]
   exact assignRanks_rank_eq_pos_when_distinct cmp (L.take q) h_distinct_take k hk_take
 
+/-! ### Rank equality across `.eq` transitions (TODO)
+
+The dual of `assignRanks_rank_eq_pos_when_distinct`: when `cmp L[i] L[i+1] = .eq`, the
+ranks at positions `i` and `i+1` are equal.
+
+**Proof strategy**: use `assignRanks_rank_eq_of_prefix` to reduce to `L.take (i+2)`, then
+use `assignRanks_snoc_decompose_strict` on `L.take (i+2) = L.take (i+1) ++ [L[i+1]]`. The
+foldl's `lastEntry` after processing `L.take (i+1)` carries the rank at position `i` of
+the assignList, with first component `L[i]`. The snoc-decompose's new rank for `L[i+1]`
+becomes `if cmp L[i] L[i+1] = .eq then rank_at_i else rank_at_i + 1`, which is `rank_at_i`
+by `h_eq`. -/
+
+/-- **Rank equality across `.eq` transition**: if `cmp L[i] L[i+1] = .eq` and
+`i+1 < L.length`, then ranks at positions `i` and `i+1` in `assignRanks cmp L` are equal. -/
+theorem assignRanks_rank_eq_at_succ_when_cmp_eq {α : Type} (cmp : α → α → Ordering)
+    (L : List α) (i : Nat) (hi : i + 1 < L.length)
+    (h_eq : cmp (L[i]'(Nat.lt_of_succ_lt hi)) (L[i+1]'hi) = .eq) :
+    ((assignRanks cmp L)[i]'(by rw [assignRanks_length]; omega)).2
+      = ((assignRanks cmp L)[i+1]'(by rw [assignRanks_length]; exact hi)).2 := by
+  -- Step 1: reduce to assignRanks (L.take (i+2)) using prefix lemma.
+  have hi_take_len : (L.take (i+2)).length = i + 2 := by
+    rw [List.length_take]; omega
+  have hi_lt_take : i < (L.take (i+2)).length := by rw [hi_take_len]; omega
+  have hi1_lt_take : i + 1 < (L.take (i+2)).length := by rw [hi_take_len]; omega
+  have h_pref_i := assignRanks_rank_eq_of_prefix cmp (L.take (i+2)) (L.drop (i+2)) i hi_lt_take
+  have h_pref_i1 :=
+    assignRanks_rank_eq_of_prefix cmp (L.take (i+2)) (L.drop (i+2)) (i+1) hi1_lt_take
+  simp only [List.take_append_drop] at h_pref_i h_pref_i1
+  rw [h_pref_i, h_pref_i1]
+  -- Step 2: rewrite L.take (i+2) = L.take (i+1) ++ [L[i+1]].
+  have h_take_eq : L.take (i+2) = L.take (i+1) ++ [L[i+1]'hi] :=
+    (List.take_concat_get' L (i+1) hi).symm
+  -- Step 3: extract foldl pair for L.take (i+1).
+  have hA_len : (L.take (i+1)).length = i + 1 := by
+    rw [List.length_take]; omega
+  rcases h_pair : (L.take (i+1)).foldl (assignRanksStep cmp) ([], none) with ⟨rev, lastE⟩
+  -- Identify lastE = some (L[i], r_last).
+  have h_A_ne : L.take (i+1) ≠ [] := by
+    intro h_nil; rw [h_nil] at hA_len; simp at hA_len
+  obtain ⟨r_last, h_lastE_some⟩ := assignRanks_foldl_lastEntry_fst cmp (L.take (i+1)) h_A_ne
+  rw [h_pair] at h_lastE_some
+  simp only at h_lastE_some
+  -- (L.take (i+1)).getLast = L[i].
+  have hi_lt_A : i < (L.take (i+1)).length := by rw [hA_len]; omega
+  have h_getLast_eq : (L.take (i+1)).getLast h_A_ne = L[i]'(Nat.lt_of_succ_lt hi) := by
+    rw [List.getLast_eq_getElem]
+    have h_eq_idx : (L.take (i+1))[(L.take (i+1)).length - 1]'(by
+        have h_pos : 0 < (L.take (i+1)).length := List.length_pos_iff.mpr h_A_ne
+        omega) = (L.take (i+1))[i]'hi_lt_A := by
+      congr 1; rw [hA_len]; omega
+    rw [h_eq_idx, List.getElem_take]
+  rw [h_getLast_eq] at h_lastE_some
+  -- Step 4: characterize (assignRanks cmp (L.take (i+1)))[i].2 = r_last via foldl invariant.
+  have h_assign_A_eq_rev : assignRanks cmp (L.take (i+1)) = rev.reverse := by
+    rw [assignRanks_eq_foldl, h_pair]
+  have h_assign_A_len : (assignRanks cmp (L.take (i+1))).length = i + 1 := by
+    rw [assignRanks_length]; exact hA_len
+  have h_rev_len : rev.length = i + 1 := by
+    rw [← List.length_reverse, ← h_assign_A_eq_rev, h_assign_A_len]
+  have h_rev_ne : rev ≠ [] := by
+    intro h_rev_eq; rw [h_rev_eq] at h_rev_len; simp at h_rev_len
+  have h_inv := assignRanks_foldl_invariant cmp (L.take (i+1)) [] none List.Pairwise.nil rfl
+  rw [h_pair] at h_inv
+  simp only at h_inv
+  have h_rev_head_eq_lastE : rev.head? = lastE := h_inv.2
+  -- rev.head h_rev_ne = (L[i], r_last) via head? equation.
+  have h_head?_eq : rev.head? = some (L[i]'(Nat.lt_of_succ_lt hi), r_last) := by
+    rw [h_rev_head_eq_lastE, h_lastE_some]
+  have h_head_some : rev.head? = some (rev.head h_rev_ne) := List.head?_eq_some_head h_rev_ne
+  rw [h_head_some] at h_head?_eq
+  have h_rev_head_eq : rev.head h_rev_ne = (L[i]'(Nat.lt_of_succ_lt hi), r_last) :=
+    Option.some.inj h_head?_eq
+  -- Step 5: snoc decomposition gives the list-level equation.
+  have h_decomp :=
+    assignRanks_snoc_decompose_strict cmp (L.take (i+1)) (L[i+1]'hi) rev lastE h_pair
+  have h_r' : lastE.elim 0 (fun prev =>
+        if cmp prev.1 (L[i+1]'hi) == .eq then prev.2 else prev.2 + 1) = r_last := by
+    rw [h_lastE_some]
+    simp only [Option.elim_some]
+    rw [h_eq]
+    rfl
+  -- The combined list-level equation, expressed in terms of rev.reverse to avoid
+  -- a later dependent rewrite of `assignRanks cmp (L.take (i+1))`.
+  have h_assignL2_eq : assignRanks cmp (L.take (i+2))
+      = rev.reverse ++ [(L[i+1]'hi, r_last)] := by
+    rw [h_take_eq, h_decomp, h_r', h_assign_A_eq_rev]
+  -- Step 6: factor through a helper to bypass dependent-rewriting issues.
+  -- The helper takes a list `M` equal to the concrete (rev.reverse-based) form.
+  suffices h_compute : ∀ (M : List (α × Nat))
+      (_h_M_eq : M = rev.reverse ++ [(L[i+1]'hi, r_last)])
+      (h_b1 : i < M.length) (h_b2 : i + 1 < M.length),
+      (M[i]'h_b1).2 = r_last ∧ (M[i+1]'h_b2).2 = r_last by
+    obtain ⟨hl, hr⟩ := h_compute (assignRanks cmp (L.take (i+2))) h_assignL2_eq _ _
+    rw [hl, hr]
+  intros M h_M_eq h_b1 h_b2
+  subst h_M_eq
+  -- M = rev.reverse ++ [(L[i+1], r_last)]
+  have h_rev_rev_len : rev.reverse.length = i + 1 := by
+    rw [List.length_reverse]; exact h_rev_len
+  have h_i_lt_rev_rev : i < rev.reverse.length := by rw [h_rev_rev_len]; omega
+  have h_rev_rev_le : rev.reverse.length ≤ i + 1 := by rw [h_rev_rev_len]
+  -- Convert h_rev_head_eq to use rev[0] form.
+  rw [List.head_eq_getElem_zero h_rev_ne] at h_rev_head_eq
+  -- h_rev_head_eq : rev[0]'_ = (L[i], r_last)
+  refine ⟨?_, ?_⟩
+  · -- (rev.reverse ++ [(L[i+1], r_last)])[i].2 = r_last
+    rw [List.getElem_append_left h_i_lt_rev_rev, List.getElem_reverse]
+    -- Goal: (rev[rev.length - 1 - i]).2 = r_last, where rev.length - 1 - i = 0.
+    have h_idx_zero : rev.length - 1 - i = 0 := by rw [h_rev_len]; omega
+    have h_rev0_lt : 0 < rev.length := by rw [h_rev_len]; omega
+    have h_idx_lt : rev.length - 1 - i < rev.length := by rw [h_idx_zero]; exact h_rev0_lt
+    have h_idx_get : rev[rev.length - 1 - i]'h_idx_lt = rev[0]'h_rev0_lt := by
+      congr 1
+    rw [h_idx_get, h_rev_head_eq]
+  · -- (rev.reverse ++ [(L[i+1], r_last)])[i+1].2 = r_last
+    rw [List.getElem_append_right h_rev_rev_le]
+    simp [h_rev_rev_len]
+
 end Graph

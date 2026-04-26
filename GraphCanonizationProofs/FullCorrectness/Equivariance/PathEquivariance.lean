@@ -1368,6 +1368,84 @@ theorem comparePathsFrom_σ_self_eq
     · intro x hx
       exact comparePathsBetween_σ_self_eq σ vts hvts br hbr x (h_inner_len x hx)
 
+/-! ### σ-rank-closure of the assignList
+
+Goal: when `pathsAtDepth` is permutation-closed under `f := PathsFrom.permute σ` (which
+holds when `state` is σ-fixed), and `cmp` is σ-equivariant + identifies σ-related entries
+(`comparePathsFrom_σ_self_eq`), then for each `(p, r)` in the assignList, the σ-permuted
+pair `(f p, r)` is also in the list.
+
+Proof strategy:
+- `f p ∈ pathsAtDepth` (witnessed by σ-fixedness: `f p` is the entry at slot `σ p.start`).
+- By `assignRanks_map_of_cmp_respect`: `assignRanks cmp (sortBy cmp (Y.map f))
+  = (assignRanks cmp (sortBy cmp Y)).map (fun (x, r) => (f x, r))`.
+- By `sortBy_map_pointwise`: LHS = `assignRanks cmp ((sortBy cmp Y).map f)`.
+- For `Y.Perm (Y.map f)` (which σ-fixedness gives) AND assignRanks-Perm-preservation, the
+  multisets of `assignList` and `assignList.map (lift f)` coincide.
+- Hence `(f p, r) ∈ assignList`.
+
+The key missing piece is **assignRanks-Perm-preservation**: `Y.Perm Y' →
+assignRanks cmp (sortBy cmp Y).Perm assignRanks cmp (sortBy cmp Y')`. This holds because
+sortBy outputs differ only in tie-breaking (Pairwise + Perm-equivalent), and assignRanks
+gives same rank to .eq-class members.
+
+The structural sub-lemma needed is `assignRanks_rank_eq_within_eq_class`: in a sorted list
+(Pairwise non-gt), two elements with `cmp a b = .eq` get the same rank. -/
+
+/-- **σ-rank-closure of the from-side assignList** (TODO): for σ-fixed `state` and
+σ-invariant `vts`/`br`, the assignList from `assignRanks cmp (sortBy cmp pathsAtDepth)` is
+σ-rank-closed: each `(p, r)` has matching `(f p, r)` in the list. -/
+private theorem from_assignList_σ_rank_closure
+    {n : Nat} (σ : Equiv.Perm (Fin n))
+    (state : PathState n)
+    (h_state_σ_fixed : PathState.permute σ state = state)
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin n, vts.getD (σ v).val 0 = vts.getD v.val 0)
+    (br : Nat → Nat → Nat → Nat)
+    (hbr : ∀ d : Nat, ∀ s e : Fin n, br d (σ s).val (σ e).val = br d s.val e.val)
+    (depth : Nat) (h_depth : depth < n)
+    (h_outer_len : (state.pathsOfLength.getD depth #[]).toList.length = n)
+    (h_pathsToVertex_len : ∀ p ∈ (state.pathsOfLength.getD depth #[]).toList,
+        p.pathsToVertex.length = n)
+    (h_inner_len : ∀ p ∈ (state.pathsOfLength.getD depth #[]).toList,
+        ∀ q ∈ p.pathsToVertex, q.depth > 0 → q.connectedSubPaths.length = n) :
+    let pathsAtDepth := (state.pathsOfLength.getD depth #[]).toList
+    let cmp := comparePathsFrom vts br
+    let assignList := assignRanks cmp (sortBy cmp pathsAtDepth)
+    ∀ item ∈ assignList,
+      ∃ item' ∈ assignList,
+        item'.1.startVertexIndex.val = (σ item.1.startVertexIndex).val
+        ∧ item'.2 = item.2 := by
+  sorry
+
+/-- **σ-rank-closure of the between-side assignList** (TODO): analog of the from-side
+σ-rank-closure for the `allBetween` list (the concat of all `pathsToVertex`). -/
+private theorem between_assignList_σ_rank_closure
+    {n : Nat} (σ : Equiv.Perm (Fin n))
+    (state : PathState n)
+    (h_state_σ_fixed : PathState.permute σ state = state)
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin n, vts.getD (σ v).val 0 = vts.getD v.val 0)
+    (br : Nat → Nat → Nat → Nat)
+    (hbr : ∀ d : Nat, ∀ s e : Fin n, br d (σ s).val (σ e).val = br d s.val e.val)
+    (depth : Nat) (h_depth : depth < n)
+    (h_outer_len : (state.pathsOfLength.getD depth #[]).toList.length = n)
+    (h_pathsToVertex_len : ∀ p ∈ (state.pathsOfLength.getD depth #[]).toList,
+        p.pathsToVertex.length = n)
+    (h_inner_len : ∀ p ∈ (state.pathsOfLength.getD depth #[]).toList,
+        ∀ q ∈ p.pathsToVertex, q.depth > 0 → q.connectedSubPaths.length = n) :
+    let pathsAtDepth := (state.pathsOfLength.getD depth #[]).toList
+    let allBetween := pathsAtDepth.foldl
+      (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+    let cmp := comparePathsBetween vts br
+    let assignList := assignRanks cmp (sortBy cmp allBetween)
+    ∀ item ∈ assignList,
+      ∃ item' ∈ assignList,
+        item'.1.startVertexIndex.val = (σ item.1.startVertexIndex).val
+        ∧ item'.1.endVertexIndex.val = (σ item.1.endVertexIndex).val
+        ∧ item'.2 = item.2 := by
+  sorry
+
 /-- The σ-invariance of `fromRanks` values in `calculatePathRankings`'s output.
 Part of the deep Stage B content; requires foldl induction on the depth loop combined with
 σ-equivariance of the compare/sort/rank assignment at each step. -/

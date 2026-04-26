@@ -41,9 +41,9 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §3   | `permNat` + `PathSegment/PathsBetween/...permute` | `Equivariance.Actions`                   | ✅ defined      |
 | §3A  | `initializePaths_Aut_equivariant` (Stage A)       | `Equivariance.StageA`                    | ✅ proved       |
 | §3B  | `calculatePathRankings` size + `σInvariant`       | `Equivariance.RankStateInvariants`       | ✅ proved       |
-| §3B  | Generic sort/`orderInsensitiveListCmp` lemmas     | `Equivariance.ComparisonSort`            | ✅ proved       |
+| §3B  | Generic sort/`orderInsensitiveListCmp` lemmas     | `Equivariance.ComparisonSort`            | 🧱 1 sorry (`assignRanks_rank_eq_at_succ_when_cmp_eq`) |
 | §3B  | `comparePathSegments_total_preorder` (Stage B)    | `Equivariance.ComparePathSegments`       | ✅ proved; `comparePathsBetween_total_preorder` ✅ proved |
-| §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | 🧱 2 sorry (`calculatePathRankings_fromRanks_inv`, `calculatePathRankings_betweenRanks_inv`) |
+| §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | 🧱 4 sorry (private: `from_assignList_σ_rank_closure`, `between_assignList_σ_rank_closure`; public: `calculatePathRankings_fromRanks_inv`, `calculatePathRankings_betweenRanks_inv`) |
 | §4   | `convergeOnce`/`convergeLoop` Aut-invariance; C/D | `Equivariance.ConvergeLoop`              | ✅ proved       |
 | §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                               | ✅ defined      |
 | §5.0 | `breakTie` output position-by-position            | `Tiebreak`                               | ✅ proved (4 characterization lemmas) |
@@ -56,12 +56,14 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, Phase 2 breakTie step, Phase 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (4 total)
+## Open obligations (6 sorry sites)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. |
-| `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. |
+| `from_assignList_σ_rank_closure` (private) | `Equivariance.PathEquivariance` | σ-closure of the from-side assignList: each `(p, r)` has a matching `(σ p, r)`. Needs `assignRanks_rank_eq_at_succ_when_cmp_eq` + Perm-preservation of assignRanks. |
+| `between_assignList_σ_rank_closure` (private) | `Equivariance.PathEquivariance` | Analog of the above for the between-side (allBetween) assignList. |
+| `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. Depends on `from_assignList_σ_rank_closure`. |
+| `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. Depends on `between_assignList_σ_rank_closure`. |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |
 | `run_isomorphic_eq` (⟹)               | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2. |
 
