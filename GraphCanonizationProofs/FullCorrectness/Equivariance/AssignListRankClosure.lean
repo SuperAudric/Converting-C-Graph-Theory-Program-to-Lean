@@ -646,7 +646,7 @@ private theorem mem_foldl_append_init_nil {α β : Type} (f : β → List α) (q
       · exact Or.inr ⟨x, h_in, h_q⟩
 
 /-- Specialization for the algorithm's `allBetween` foldl. -/
-private theorem mem_allBetween_iff {n : Nat} (q : PathsBetween n)
+theorem mem_allBetween_iff {n : Nat} (q : PathsBetween n)
     (pathsAtDepth : List (PathsFrom n)) :
     q ∈ pathsAtDepth.foldl
         (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) [] ↔

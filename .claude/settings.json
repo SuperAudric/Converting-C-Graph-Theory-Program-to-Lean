@@ -35,7 +35,11 @@
       "Bash(grep -nA 15 \"^def comparePathsFrom\\\\|^def comparePathsBetween\" /workspace/GraphCanonizationProofs/LeanGraphCanonizerV4.lean)",
       "Bash(grep -nA 5 \"assignRanks_map_of_cmp_respect\\\\|assignRanks_map_fst\\\\|assignRanks_getElem_fst\\\\|assignRanks_length\\\\|assignRanks_rank_eq_within_eq_class\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)",
       "Bash(grep -nB 2 -A 20 \"assignRanks_foldl_map_f\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)",
-      "Bash(grep -nB 2 -A 30 \"assignRanksStep_commutes_with_f_map\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)"
+      "Bash(grep -nB 2 -A 30 \"assignRanksStep_commutes_with_f_map\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)",
+      "Bash(grep -nA 5 \"Equiv.Perm.ofFn_comp_perm\\\\|ofFn.*Perm\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/CompareEquivariant.lean)",
+      "Bash(grep -nA 4 \"assignRanks_rank_eq_pos_when_distinct\\\\b\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)",
+      "Bash(grep -nB 2 -A 6 \"ranks at positions \\\\`i\\\\` and \\\\`i+1\\\\` are equal\\\\|when \\\\`cmp L\\\\[i\\\\] L\\\\[i+1\\\\] = \\\\.eq\\\\|when \\\\`cmp.*\\\\.lt\\\\`\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)",
+      "Bash(grep -nA 15 \"^theorem assignRanks_rank_monotone\\\\b\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

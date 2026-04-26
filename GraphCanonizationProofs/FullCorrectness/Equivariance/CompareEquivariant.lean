@@ -184,7 +184,7 @@ by `Equiv.Perm.ofFn_comp_perm`. Same for `PathsFrom.permute σ`'s `pathsToVertex
 /-- General reindex-perm lemma: if `L : List α` has length `n` and `σ : Equiv.Perm (Fin n)`,
 then the list obtained by σ-reindexing `L.map act` is a `Perm` of `L.map act`. This captures
 the depth>0 branch of `PathsBetween.permute`/`PathsFrom.permute` in a σ-agnostic way. -/
-private theorem map_reindex_perm {α : Type} {n : Nat}
+theorem map_reindex_perm {α : Type} {n : Nat}
     (σ : Equiv.Perm (Fin n)) (L : List α) (h_len : L.length = n)
     (act : α → α) (def_val : α) :
     ((List.finRange n).map fun i : Fin n => act (L.getD (σ i).val def_val)).Perm

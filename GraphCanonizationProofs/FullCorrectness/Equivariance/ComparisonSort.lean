@@ -149,7 +149,7 @@ so it is `.eq`. Symmetry gives `cmp M[i] M'[i] = .eq`.
 The proof uses four hypotheses on `cmp`: reflexivity, both directions of antisymmetry,
 and `≤`-transitivity. These are the ingredients of a total preorder, which is what
 `comparePathSegments`/etc. behave like on the algorithm's actual lists. -/
-private theorem sortedPerm_class_eq {α : Type} (cmp : α → α → Ordering)
+theorem sortedPerm_class_eq {α : Type} (cmp : α → α → Ordering)
     (h_refl : ∀ a, cmp a a = Ordering.eq)
     (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
     (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
@@ -1837,5 +1837,216 @@ theorem assignRanks_rank_eq_within_eq_class {α : Type} (cmp : α → α → Ord
   intros k h_k_eq h_b
   subst h_k_eq
   rfl
+
+/-! ### Rank step at consecutive positions: `.ne` case
+
+Dual of `assignRanks_rank_eq_at_succ_when_cmp_eq`: when `cmp L[i] L[i+1] ≠ .eq`, the
+rank at `i+1` is one more than the rank at `i`. The proof structure mirrors the `.eq`
+case (snoc-decompose-strict + foldl invariant), differing only in the if-then-else
+branch of `assignRanksStep` that determines the new rank. -/
+
+/-- Dual of `assignRanks_rank_eq_at_succ_when_cmp_eq`. -/
+theorem assignRanks_rank_succ_when_cmp_neq_eq {α : Type} (cmp : α → α → Ordering)
+    (L : List α) (i : Nat) (hi : i + 1 < L.length)
+    (h_neq : cmp (L[i]'(Nat.lt_of_succ_lt hi)) (L[i+1]'hi) ≠ .eq) :
+    ((assignRanks cmp L)[i+1]'(by rw [assignRanks_length]; exact hi)).2
+      = ((assignRanks cmp L)[i]'(by rw [assignRanks_length]; omega)).2 + 1 := by
+  -- Step 1: reduce to assignRanks (L.take (i+2)) using prefix lemma.
+  have hi_take_len : (L.take (i+2)).length = i + 2 := by
+    rw [List.length_take]; omega
+  have hi_lt_take : i < (L.take (i+2)).length := by rw [hi_take_len]; omega
+  have hi1_lt_take : i + 1 < (L.take (i+2)).length := by rw [hi_take_len]; omega
+  have h_pref_i := assignRanks_rank_eq_of_prefix cmp (L.take (i+2)) (L.drop (i+2)) i hi_lt_take
+  have h_pref_i1 :=
+    assignRanks_rank_eq_of_prefix cmp (L.take (i+2)) (L.drop (i+2)) (i+1) hi1_lt_take
+  simp only [List.take_append_drop] at h_pref_i h_pref_i1
+  rw [h_pref_i, h_pref_i1]
+  -- Step 2: rewrite L.take (i+2) = L.take (i+1) ++ [L[i+1]].
+  have h_take_eq : L.take (i+2) = L.take (i+1) ++ [L[i+1]'hi] :=
+    (List.take_concat_get' L (i+1) hi).symm
+  -- Step 3: extract foldl pair for L.take (i+1).
+  have hA_len : (L.take (i+1)).length = i + 1 := by
+    rw [List.length_take]; omega
+  rcases h_pair : (L.take (i+1)).foldl (assignRanksStep cmp) ([], none) with ⟨rev, lastE⟩
+  have h_A_ne : L.take (i+1) ≠ [] := by
+    intro h_nil; rw [h_nil] at hA_len; simp at hA_len
+  obtain ⟨r_last, h_lastE_some⟩ := assignRanks_foldl_lastEntry_fst cmp (L.take (i+1)) h_A_ne
+  rw [h_pair] at h_lastE_some
+  simp only at h_lastE_some
+  -- (L.take (i+1)).getLast = L[i].
+  have hi_lt_A : i < (L.take (i+1)).length := by rw [hA_len]; omega
+  have h_getLast_eq : (L.take (i+1)).getLast h_A_ne = L[i]'(Nat.lt_of_succ_lt hi) := by
+    rw [List.getLast_eq_getElem]
+    have h_eq_idx : (L.take (i+1))[(L.take (i+1)).length - 1]'(by
+        have h_pos : 0 < (L.take (i+1)).length := List.length_pos_iff.mpr h_A_ne
+        omega) = (L.take (i+1))[i]'hi_lt_A := by
+      congr 1; rw [hA_len]; omega
+    rw [h_eq_idx, List.getElem_take]
+  rw [h_getLast_eq] at h_lastE_some
+  -- Step 4: characterize (assignRanks cmp (L.take (i+1)))[i].2 = r_last.
+  have h_assign_A_eq_rev : assignRanks cmp (L.take (i+1)) = rev.reverse := by
+    rw [assignRanks_eq_foldl, h_pair]
+  have h_assign_A_len : (assignRanks cmp (L.take (i+1))).length = i + 1 := by
+    rw [assignRanks_length]; exact hA_len
+  have h_rev_len : rev.length = i + 1 := by
+    rw [← List.length_reverse, ← h_assign_A_eq_rev, h_assign_A_len]
+  have h_rev_ne : rev ≠ [] := by
+    intro h_rev_eq; rw [h_rev_eq] at h_rev_len; simp at h_rev_len
+  have h_inv := assignRanks_foldl_invariant cmp (L.take (i+1)) [] none List.Pairwise.nil rfl
+  rw [h_pair] at h_inv
+  simp only at h_inv
+  have h_rev_head_eq_lastE : rev.head? = lastE := h_inv.2
+  have h_head?_eq : rev.head? = some (L[i]'(Nat.lt_of_succ_lt hi), r_last) := by
+    rw [h_rev_head_eq_lastE, h_lastE_some]
+  have h_head_some : rev.head? = some (rev.head h_rev_ne) := List.head?_eq_some_head h_rev_ne
+  rw [h_head_some] at h_head?_eq
+  have h_rev_head_eq : rev.head h_rev_ne = (L[i]'(Nat.lt_of_succ_lt hi), r_last) :=
+    Option.some.inj h_head?_eq
+  -- Step 5: snoc decomposition gives the list-level equation.
+  have h_decomp :=
+    assignRanks_snoc_decompose_strict cmp (L.take (i+1)) (L[i+1]'hi) rev lastE h_pair
+  have h_r' : lastE.elim 0 (fun prev =>
+        if cmp prev.1 (L[i+1]'hi) == .eq then prev.2 else prev.2 + 1) = r_last + 1 := by
+    rw [h_lastE_some]
+    simp only [Option.elim_some]
+    -- Branch the if-then-else on the value of cmp.
+    match h_cmp : cmp (L[i]'(Nat.lt_of_succ_lt hi)) (L[i+1]'hi) with
+    | Ordering.eq => exact absurd h_cmp h_neq
+    | Ordering.lt =>
+      rw [show (Ordering.lt == Ordering.eq) = false from rfl]
+      rfl
+    | Ordering.gt =>
+      rw [show (Ordering.gt == Ordering.eq) = false from rfl]
+      rfl
+  have h_assignL2_eq : assignRanks cmp (L.take (i+2))
+      = rev.reverse ++ [(L[i+1]'hi, r_last + 1)] := by
+    rw [h_take_eq, h_decomp, h_r', h_assign_A_eq_rev]
+  -- Step 6: factor through a helper.
+  suffices h_compute : ∀ (M : List (α × Nat))
+      (_h_M_eq : M = rev.reverse ++ [(L[i+1]'hi, r_last + 1)])
+      (h_b1 : i < M.length) (h_b2 : i + 1 < M.length),
+      (M[i]'h_b1).2 = r_last ∧ (M[i+1]'h_b2).2 = r_last + 1 by
+    obtain ⟨hl, hr⟩ := h_compute (assignRanks cmp (L.take (i+2))) h_assignL2_eq _ _
+    rw [hl, hr]
+  intros M h_M_eq h_b1 h_b2
+  subst h_M_eq
+  have h_rev_rev_len : rev.reverse.length = i + 1 := by
+    rw [List.length_reverse]; exact h_rev_len
+  have h_i_lt_rev_rev : i < rev.reverse.length := by rw [h_rev_rev_len]; omega
+  have h_rev_rev_le : rev.reverse.length ≤ i + 1 := by rw [h_rev_rev_len]
+  rw [List.head_eq_getElem_zero h_rev_ne] at h_rev_head_eq
+  refine ⟨?_, ?_⟩
+  · rw [List.getElem_append_left h_i_lt_rev_rev, List.getElem_reverse]
+    have h_idx_zero : rev.length - 1 - i = 0 := by rw [h_rev_len]; omega
+    have h_rev0_lt : 0 < rev.length := by rw [h_rev_len]; omega
+    have h_idx_lt : rev.length - 1 - i < rev.length := by rw [h_idx_zero]; exact h_rev0_lt
+    have h_idx_get : rev[rev.length - 1 - i]'h_idx_lt = rev[0]'h_rev0_lt := by
+      congr 1
+    rw [h_idx_get, h_rev_head_eq]
+  · rw [List.getElem_append_right h_rev_rev_le]
+    simp [h_rev_rev_len]
+
+/-! ### Position-by-position rank equality for sorted Perm-equivalent inputs
+
+For sorted Perm-equivalent inputs `X.Perm Y` (both `Pairwise (cmp · · ≠ .gt)`), the rank
+at each position is the same in `assignRanks cmp X` and `assignRanks cmp Y`. The proof is
+by induction on the position, using:
+- `sortedPerm_class_eq` to relate consecutive `cmp` values via the `.eq`-class structure.
+- `assignRanks_rank_eq_at_succ_when_cmp_eq` and `assignRanks_rank_succ_when_cmp_neq_eq`
+  for the rank-step at each induction step. -/
+
+/-- For sorted `X.Perm Y` (under a total preorder `cmp`), the assigned rank at every
+position agrees. Note: the (element, rank) PAIRS may differ at the same position (within
+an `.eq`-class), but the ranks themselves match. -/
+theorem assignRanks_rank_eq_of_sorted_perm {α : Type} (cmp : α → α → Ordering)
+    (h_refl : ∀ a, cmp a a = Ordering.eq)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
+    {X Y : List α} (hXY : X.Perm Y)
+    (h_sort_X : X.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
+    (h_sort_Y : Y.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
+    (i : Nat) (h_X : i < X.length) (h_Y : i < Y.length) :
+    ((assignRanks cmp X)[i]'(by rw [assignRanks_length]; exact h_X)).2
+      = ((assignRanks cmp Y)[i]'(by rw [assignRanks_length]; exact h_Y)).2 := by
+  -- Helper: `.eq` is symmetric.
+  have h_eq_symm : ∀ a b, cmp a b = Ordering.eq → cmp b a = Ordering.eq := by
+    intros a b hab
+    match h_ba : cmp b a with
+    | .eq => rfl
+    | .lt =>
+      have := h_antisym₁ b a h_ba
+      rw [hab] at this; cases this
+    | .gt =>
+      have := h_antisym₂ b a h_ba
+      rw [hab] at this; cases this
+  -- Helper: `.eq` chains.
+  have h_eq_trans : ∀ a b c, cmp a b = Ordering.eq → cmp b c = Ordering.eq →
+      cmp a c = Ordering.eq := by
+    intros a b c hab hbc
+    have h_ab_le : cmp a b ≠ Ordering.gt := by rw [hab]; intro h; cases h
+    have h_bc_le : cmp b c ≠ Ordering.gt := by rw [hbc]; intro h; cases h
+    have h_ac_le : cmp a c ≠ Ordering.gt := h_trans a b c h_ab_le h_bc_le
+    have h_ba := h_eq_symm a b hab
+    have h_cb := h_eq_symm b c hbc
+    have h_ba_le : cmp b a ≠ Ordering.gt := by rw [h_ba]; intro h; cases h
+    have h_cb_le : cmp c b ≠ Ordering.gt := by rw [h_cb]; intro h; cases h
+    have h_ca_le : cmp c a ≠ Ordering.gt := h_trans c b a h_cb_le h_ba_le
+    match h_ac : cmp a c with
+    | .eq => rfl
+    | .lt =>
+      have h_ca_gt : cmp c a = Ordering.gt := h_antisym₁ a c h_ac
+      exact (h_ca_le h_ca_gt).elim
+    | .gt => exact (h_ac_le h_ac).elim
+  induction i with
+  | zero =>
+    -- Base case: rank at position 0 is 0 in both (rank ≤ 0).
+    have h_X_le := assignRanks_rank_le_pos cmp X 0 h_X
+    have h_Y_le := assignRanks_rank_le_pos cmp Y 0 h_Y
+    omega
+  | succ k ih =>
+    -- Inductive step.
+    have h_X_k : k < X.length := Nat.lt_of_succ_lt h_X
+    have h_Y_k : k < Y.length := Nat.lt_of_succ_lt h_Y
+    have h_ih := ih h_X_k h_Y_k
+    -- Class equality at positions k and k+1 in X iff Y.
+    have h_class_k_X : cmp (X[k]'h_X_k) (Y[k]'h_Y_k) = Ordering.eq :=
+      sortedPerm_class_eq cmp h_refl h_antisym₁ h_antisym₂ h_trans
+        X Y hXY h_sort_X h_sort_Y k h_X_k h_Y_k
+    have h_class_k1_X : cmp (X[k+1]'h_X) (Y[k+1]'h_Y) = Ordering.eq :=
+      sortedPerm_class_eq cmp h_refl h_antisym₁ h_antisym₂ h_trans
+        X Y hXY h_sort_X h_sort_Y (k+1) h_X h_Y
+    -- Now: cmp X[k] X[k+1] = .eq iff cmp Y[k] Y[k+1] = .eq.
+    have h_iff : cmp (X[k]'h_X_k) (X[k+1]'h_X) = Ordering.eq
+              ↔ cmp (Y[k]'h_Y_k) (Y[k+1]'h_Y) = Ordering.eq := by
+      constructor
+      · intro h_X_eq
+        -- cmp Y[k] X[k] = .eq (symm); cmp X[k] X[k+1] = .eq; cmp X[k+1] Y[k+1] = .eq.
+        -- So cmp Y[k] Y[k+1] = .eq by transitivity.
+        have h_Yk_Xk : cmp (Y[k]'h_Y_k) (X[k]'h_X_k) = Ordering.eq := h_eq_symm _ _ h_class_k_X
+        have h_Yk_Xk1 : cmp (Y[k]'h_Y_k) (X[k+1]'h_X) = Ordering.eq :=
+          h_eq_trans _ _ _ h_Yk_Xk h_X_eq
+        exact h_eq_trans _ _ _ h_Yk_Xk1 h_class_k1_X
+      · intro h_Y_eq
+        have h_Xk_Yk : cmp (X[k]'h_X_k) (Y[k]'h_Y_k) = Ordering.eq := h_class_k_X
+        have h_Xk_Yk1 : cmp (X[k]'h_X_k) (Y[k+1]'h_Y) = Ordering.eq :=
+          h_eq_trans _ _ _ h_Xk_Yk h_Y_eq
+        have h_Yk1_Xk1 : cmp (Y[k+1]'h_Y) (X[k+1]'h_X) = Ordering.eq :=
+          h_eq_symm _ _ h_class_k1_X
+        exact h_eq_trans _ _ _ h_Xk_Yk1 h_Yk1_Xk1
+    -- Case on whether cmp X[k] X[k+1] = .eq.
+    by_cases h_X_eq : cmp (X[k]'h_X_k) (X[k+1]'h_X) = Ordering.eq
+    · have h_Y_eq := h_iff.mp h_X_eq
+      have h_X_step :=
+        (assignRanks_rank_eq_at_succ_when_cmp_eq cmp X k h_X h_X_eq).symm
+      have h_Y_step :=
+        (assignRanks_rank_eq_at_succ_when_cmp_eq cmp Y k h_Y h_Y_eq).symm
+      rw [h_X_step, h_Y_step]
+      exact h_ih
+    · have h_Y_neq : cmp (Y[k]'h_Y_k) (Y[k+1]'h_Y) ≠ Ordering.eq := by
+        intro h_Y_eq; exact h_X_eq (h_iff.mpr h_Y_eq)
+      have h_X_step := assignRanks_rank_succ_when_cmp_neq_eq cmp X k h_X h_X_eq
+      have h_Y_step := assignRanks_rank_succ_when_cmp_neq_eq cmp Y k h_Y h_Y_neq
+      rw [h_X_step, h_Y_step, h_ih]
 
 end Graph
