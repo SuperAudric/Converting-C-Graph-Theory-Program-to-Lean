@@ -846,8 +846,12 @@ Phase 3 is the deep sub-lemma. It rests on the algorithm's refinement property:
 in `T`, so unique-typed vertices remain unique under `convergeOnce`.
 -/
 
-/-- The "uniqueness up to q" property: each value in `Fin q` has exactly one witness. -/
-private def UniquelyHeldBelow (vts : Array VertexType) (q : Nat) : Prop :=
+/-- The "uniqueness up to q" property: each value in `Fin q` has exactly one witness.
+Made public for use in `Equivariance.RunFromRelational`'s strengthened
+`runFrom_VtsInvariant_eq` (Phase 5) — this is the algorithmic hypothesis that the
+input typing has values 0..q-1 already uniquely held, so the remaining foldl
+iterations can finish breaking all ties. -/
+def UniquelyHeldBelow (vts : Array VertexType) (q : Nat) : Prop :=
   ∀ k : Fin q, ∃! v : Fin n, vts.getD v.val 0 = k.val
 
 /-! ### Phase 3: convergeLoop preserves lower-uniqueness
@@ -1796,7 +1800,7 @@ private theorem convergeOnce_preserves_lower_uniqueness
 /-- **Phase 3 main lemma (P3.5)** `convergeLoop` preserves prefix typing AND lower-
 uniqueness. By induction on fuel, using `convergeOnce_preserves_lower_uniqueness` (P3.E)
 at each step. -/
-private theorem convergeLoop_preserves_lower_uniqueness
+theorem convergeLoop_preserves_lower_uniqueness
     (G : AdjMatrix n) (T : Array VertexType) (q : Nat) (hq : q ≤ n) (fuel : Nat)
     (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
     (h_unique : @UniquelyHeldBelow n T q) :
@@ -1931,7 +1935,7 @@ private theorem exists_two_distinct_q_in_T
 /-- **Phase 2.** breakTie at `q` extends uniqueness from `0..q-1` to `0..q`, preserving
 the prefix-typing property. Requires `q < n` (so value `q` is necessarily present in any
 prefix typing with `0..q-1` unique). -/
-private theorem breakTie_step_preserves_uniqueness
+theorem breakTie_step_preserves_uniqueness
     (T : Array VertexType) (q : Nat) (hq : q < n)
     (h_size : T.size = n) (h_prefix : @IsPrefixTyping n T)
     (h_unique : @UniquelyHeldBelow n T q) :
