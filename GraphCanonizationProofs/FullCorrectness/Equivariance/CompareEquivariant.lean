@@ -72,7 +72,7 @@ private theorem insertSorted_map_pointwise {α : Type} (f : α → α) (cmp : α
 
 /-- Pointwise variant of `sortBy_map`: only requires `cmp (f a) (f b) = cmp a b` for
 `a, b ∈ L`. -/
-private theorem sortBy_map_pointwise {α : Type} (f : α → α) (cmp : α → α → Ordering)
+theorem sortBy_map_pointwise {α : Type} (f : α → α) (cmp : α → α → Ordering)
     (L : List α) (h : ∀ a ∈ L, ∀ b ∈ L, cmp (f a) (f b) = cmp a b) :
     sortBy cmp (L.map f) = (sortBy cmp L).map f := by
   induction L with
