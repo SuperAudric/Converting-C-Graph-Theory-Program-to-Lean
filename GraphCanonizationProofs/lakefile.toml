@@ -21,3 +21,4 @@ name = "LeanGraphCanonizerV4Correctness"
 
 [[lean_lib]]
 name = "FullCorrectness"
+globs = ["FullCorrectness.+"]

@@ -44,13 +44,16 @@
       "Bash(grep -nA 5 \"^def computeDenseRanks\\\\|^def shiftAbove\\\\|^def breakTiePromote\\\\|^def labelEdgesAccordingToRankings\\\\|^def getArrayRank\" /workspace/GraphCanonizationProofs/LeanGraphCanonizerV4.lean)",
       "Bash(lean --version)",
       "Bash(wait)",
-      "Bash(2>/dev/null)"
+      "Bash(2>/dev/null)",
+      "Bash(grep -E \"\\\\.\\(olean|trace\\)$\")",
+      "Bash(grep -rln \"^import FullCorrectness$\" --include=\"*.lean\" .)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",
       "/workspace/GraphCanonizationProofs/.lake/build/lib/lean/FullCorrectness",
       "/workspace/GraphCanonizationProofs/.lake/build/lib/lean",
-      "/tmp"
+      "/tmp",
+      "/workspace/GraphCanonizationProofs/.lake/build/lib/lean/FullCorrectness/Equivariance"
     ]
   }
 }

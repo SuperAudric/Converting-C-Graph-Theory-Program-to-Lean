@@ -1,35 +1,11 @@
-import FullCorrectness.Basic
-import FullCorrectness.Permutation
-import FullCorrectness.Automorphism
-import FullCorrectness.Isomorphic
-import FullCorrectness.Equivariance.Actions
-import FullCorrectness.Equivariance.StageA
-import FullCorrectness.Equivariance.RankStateInvariants
-import FullCorrectness.Equivariance.ComparisonSort
-import FullCorrectness.Equivariance.ComparePathSegments
-import FullCorrectness.Equivariance.CompareEquivariant
-import FullCorrectness.Equivariance.PathsAtDepthStructure
-import FullCorrectness.Equivariance.ChainSetInvariant
-import FullCorrectness.Equivariance.AssignListRankClosure
-import FullCorrectness.Equivariance.LabelEdgesCharacterization
-import FullCorrectness.Equivariance.PathEquivariance
-import FullCorrectness.Equivariance.PathEquivarianceRelational
-import FullCorrectness.Equivariance.ConvergeLoop
-import FullCorrectness.Equivariance.ConvergeLoopRelational
-import FullCorrectness.Tiebreak
-import FullCorrectness.Equivariance.BreakTieRelational
-import FullCorrectness.Equivariance.StageDRelational
-import FullCorrectness.Equivariance.RunFromRelational
-import FullCorrectness.Equivariance.MainRelationalNotes
-import FullCorrectness.Invariants
-import FullCorrectness.Main
-
 /-!
-# Full correctness of the graph canonizer — umbrella + proof plan
+# Full correctness of the graph canonizer — proof plan (docs only)
 
-Re-exports all submodules under `FullCorrectness/`. External consumers can
-`import FullCorrectness` to pull in the whole proof; internal modules import
-the specific step(s) they depend on.
+This file is documentation. It used to `import` every submodule, but loading the
+whole transitive Mathlib closure made it a 60s+ rebuild on every edit. The
+`FullCorrectness/*` submodules are now built directly by the `FullCorrectness`
+lean_lib via the `globs = ["FullCorrectness.+"]` entry in `lakefile.toml`, so no
+umbrella is needed. Internal modules import the specific step(s) they depend on.
 
 The flat-flawed proof in `LeanGraphCanonizerV4Correctness.lean` is retired — its header
 explains why its central equivariance claim is literally false. This tree replaces it.
