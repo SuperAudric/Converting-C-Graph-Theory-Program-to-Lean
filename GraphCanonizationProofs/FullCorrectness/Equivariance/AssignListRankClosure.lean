@@ -189,7 +189,7 @@ The structural sub-lemma needed is `assignRanks_rank_eq_within_eq_class`: in a s
 
 /-- For a σ-fixed `state`, slot `(σ s).val` of the depth-`depth` array equals the
 σ-permuted image of slot `s.val`. This is the array-level reading of σ-fixedness. -/
-private theorem state_σ_fixed_pathsOfLength_at_σ_slot
+theorem state_σ_fixed_pathsOfLength_at_σ_slot
     {n : Nat} (σ : Equiv.Perm (Fin n))
     (state : PathState n)
     (h_state_σ_fixed : PathState.permute σ state = state)

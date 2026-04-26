@@ -117,6 +117,45 @@ that factors through the inverse of `denseRanks`.
 The plan was to attempt path 2 first (cheaper if it works), falling back to
 path 1 when no alternative proof shape presented itself.
 
+### Refactor of Stage B (σ-INV form) — landed
+
+Before lifting Stage B to relational form, the 2609-line `Equivariance/PathEquivariance.lean`
+has been split into 5 modular files (1–2 logical concerns each). All sub-lemmas the
+σ-INV proof depends on are now in dedicated modules:
+
+| File | Lines | Content |
+| ---- | ----- | ------- |
+| `Equivariance/CompareEquivariant.lean`           | 523 | σ-equivariance of `comparePathSegments`/`...PathsBetween`/`...PathsFrom`; `PathsBetween_permute_connectedSubPaths_perm`, `PathsFrom_permute_pathsToVertex_perm`; bridge helpers (`betweenRankFn_σ_inv_from_cells`, `initializePaths_σInv_via_Aut`). |
+| `Equivariance/PathsAtDepthStructure.lean`        | 231 | `initializePaths_pathsAtDepth_structure`, `initializePaths_pathsAtDepth_inner_structure`, `initializePaths_allBetween_pairs_facts`. |
+| `Equivariance/ChainSetInvariant.lean`            | 693 | 1D and 2D chain σ-invariance preservation: `set_chain_σInvariant`, `setBetween_chain_σInvariant` and their size-preservation helpers. |
+| `Equivariance/AssignListRankClosure.lean`        | 835 | σ-self-equality of compare functions; σ-rank-closure of `assignList` (`from_assignList_σ_rank_closure`, `between_assignList_σ_rank_closure`). |
+| `Equivariance/PathEquivariance.lean`             | 401 | Stage B assembly only: `CalcRankingsInv`, body step, foldl induction, `calculatePathRankings_Aut_equivariant`. |
+
+### Stage B-rel (relational form) — partial
+
+A new module `Equivariance/PathEquivarianceRelational.lean` (~880 lines) contains the
+relational analogues of the foundational lemmas. **Status: structure complete; two
+auxiliary `sorry`s remain.**
+
+| Component | Status |
+| --------- | ------ |
+| `comparePathSegments_σ_relational`                        | ✅ proved |
+| `comparePathsBetween_σ_relational`                        | ✅ proved |
+| `comparePathsFrom_σ_relational`                           | ✅ proved |
+| `sortBy_map_pointwise_relational`                         | ✅ proved |
+| `orderInsensitiveListCmp_map_pointwise_relational`        | ✅ proved |
+| `set_chain_σRelated`                                      | ✅ proved |
+| `setBetween_chain_σRelated`                               | ✅ proved |
+| `assignRanks_map_relational` (in `ComparisonSort.lean`)   | ✅ proved (relational lift of `assignRanks_map_of_cmp_respect`) |
+| `pathsAtDepth_map_f_perm` (auxiliary)                     | 🧱 `sorry` (pathsAtDepth.Perm pathsAtDepth.map f under σ-fixed state) |
+| `from_assignList_σ_rank_rel` / `between_assignList_σ_rank_rel` | 🧱 `sorry` at the rank-equality step (depends on Perm-invariance of `assignRanks ∘ sortBy`) |
+| Body step + foldl induction + `Stage B-rel` assembly      | 🟦 not yet started |
+
+The remaining `sorry`s collapse to one technical gap: showing that for `X.Perm Y`
+both sorted by `cmp`, `(assignRanks cmp X).Perm (assignRanks cmp Y)` (intra-class tie-breaking
+doesn't affect the (element, rank) multiset). Proving this generic Perm-invariance closes
+both the relational σ-rank-closure lemmas without further work in Stage B-rel.
+
 --------------------------------------------------------------------------------
 
 ## §1  Automorphism group, vertex orbits, and permutation action

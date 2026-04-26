@@ -674,6 +674,103 @@ theorem assignRanks_map_of_cmp_respect {α : Type} (cmp : α → α → Ordering
     congrArg Prod.fst h
   rw [h_fst, List.map_reverse]
 
+/-! ### Relational `assignRanks_map`
+
+`assignRanks_map_of_cmp_respect` (above) requires a *single* `cmp` with
+`cmp (f a) (f b) = cmp a b`. The relational form replaces this with the relational
+hypothesis `cmp₂ (f a) (f b) = cmp₁ a b` connecting *two different* comparison functions.
+This is the form needed by Stage B-rel (in `PathEquivarianceRelational.lean`), where
+`cmp₁` uses `vts₁`/`br₁` and `cmp₂` uses the σ-permuted `vts₂`/`br₂`. The fixed-point
+form is recovered as the diagonal `cmp₁ = cmp₂`.
+
+Implementation note: the proof structure mirrors the fixed-point version through three
+lemmas (single-step commutation → foldl-lifted commutation → top-level), but the foldl
+lemma carries a *pointwise* hypothesis on the elements of the (already-processed) prefix
+because the `lastEntry` first component is one of those elements. -/
+
+/-- Single-step commutation in the relational form. The membership condition on `b`
+captures the invariant that `lastE`'s first component is always a previously-processed
+element. -/
+private theorem assignRanksStep_commutes_relational {α : Type}
+    (cmp₁ cmp₂ : α → α → Ordering) (f : α → α)
+    (rev : List (α × Nat)) (lastE : Option (α × Nat)) (a : α)
+    (h_resp_a : ∀ b : α, (∃ p, lastE = some p ∧ p.1 = b) → cmp₂ (f b) (f a) = cmp₁ b a) :
+    assignRanksStep cmp₂ (rev.map (fun e => (f e.1, e.2)),
+                          lastE.map (fun e => (f e.1, e.2))) (f a)
+    = ((assignRanksStep cmp₁ (rev, lastE) a).1.map (fun e => (f e.1, e.2)),
+       (assignRanksStep cmp₁ (rev, lastE) a).2.map (fun e => (f e.1, e.2))) := by
+  unfold assignRanksStep
+  cases lastE with
+  | none => simp
+  | some prev =>
+    rcases prev with ⟨p1, p2⟩
+    simp only [Option.map_some]
+    rw [h_resp_a p1 ⟨(p1, p2), rfl, rfl⟩]
+    simp [List.map_cons]
+
+/-- Foldl-lifted relational commutation. The hypothesis quantifies over `b` that's either
+in `lastE`'s first-component slot or in the remaining list `L`. -/
+private theorem assignRanks_foldl_map_f_relational {α : Type}
+    (cmp₁ cmp₂ : α → α → Ordering) (f : α → α) :
+    ∀ (L : List α) (rev : List (α × Nat)) (lastE : Option (α × Nat)),
+      (∀ a ∈ L, ∀ b : α, (∃ p, lastE = some p ∧ p.1 = b) ∨ b ∈ L →
+        cmp₂ (f b) (f a) = cmp₁ b a) →
+      (L.map f).foldl (assignRanksStep cmp₂)
+        (rev.map (fun e => (f e.1, e.2)), lastE.map (fun e => (f e.1, e.2)))
+      = ((L.foldl (assignRanksStep cmp₁) (rev, lastE)).1.map (fun e => (f e.1, e.2)),
+         (L.foldl (assignRanksStep cmp₁) (rev, lastE)).2.map (fun e => (f e.1, e.2))) := by
+  intro L
+  induction L with
+  | nil => intros; simp
+  | cons a L ih =>
+    intros rev lastE h
+    rw [List.map_cons, List.foldl_cons, List.foldl_cons]
+    rw [assignRanksStep_commutes_relational cmp₁ cmp₂ f rev lastE a
+      (fun b hb => h a List.mem_cons_self b (Or.inl hb))]
+    apply ih
+    intros a' h_a'_in b h_b
+    cases h_b with
+    | inl h_b_lastE =>
+      obtain ⟨p, hp_eq, hp_b⟩ := h_b_lastE
+      have h_step_lastE_p1 : p.1 = a := by
+        unfold assignRanksStep at hp_eq
+        cases lastE with
+        | none =>
+          simp at hp_eq
+          rw [← hp_eq]
+        | some prev =>
+          rcases prev with ⟨pp1, pp2⟩
+          simp only [Option.some.injEq] at hp_eq
+          rw [← hp_eq]
+      have h_b_eq_a : b = a := h_step_lastE_p1 ▸ hp_b.symm
+      apply h a' (List.mem_cons_of_mem _ h_a'_in) b
+      exact Or.inr (h_b_eq_a ▸ List.mem_cons_self)
+    | inr h_b_in =>
+      apply h a' (List.mem_cons_of_mem _ h_a'_in) b
+      exact Or.inr (List.mem_cons_of_mem _ h_b_in)
+
+/-- **Main relational commutation**: `assignRanks cmp₂ ∘ map f = (assignRanks cmp₁) ∘ ·.map (lift f)`
+when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ L`. The fixed-point form
+`assignRanks_map_of_cmp_respect` is the diagonal special case `cmp₁ = cmp₂`. -/
+theorem assignRanks_map_relational {α : Type}
+    (cmp₁ cmp₂ : α → α → Ordering) (f : α → α) (L : List α)
+    (h_resp : ∀ a ∈ L, ∀ b ∈ L, cmp₂ (f a) (f b) = cmp₁ a b) :
+    assignRanks cmp₂ (L.map f) = (assignRanks cmp₁ L).map (fun e => (f e.1, e.2)) := by
+  rw [assignRanks_eq_foldl, assignRanks_eq_foldl]
+  have h := assignRanks_foldl_map_f_relational cmp₁ cmp₂ f L [] none ?_
+  · simp only [List.map_nil, Option.map_none] at h
+    have h_fst : ((L.map f).foldl (assignRanksStep cmp₂) ([], none)).1
+               = ((L.foldl (assignRanksStep cmp₁) ([], none)).1).map (fun e => (f e.1, e.2)) :=
+      congrArg Prod.fst h
+    rw [h_fst, List.map_reverse]
+  · intros a' h_a'_in b h_b
+    cases h_b with
+    | inl h_b_lastE =>
+      obtain ⟨_, h_eq, _⟩ := h_b_lastE
+      cases h_eq
+    | inr h_b_in =>
+      exact h_resp b h_b_in a' h_a'_in
+
 /-! ### Rank bound: every rank is `< L.length`
 
 Useful for `convergeLoop_preserves_prefix`: ranks from `assignRanks` end up as values

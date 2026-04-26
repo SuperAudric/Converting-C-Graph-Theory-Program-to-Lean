@@ -33,7 +33,7 @@ namespace Graph
 variable {n : Nat}
 
 /-- The chain of `set!`s on `fromAcc` preserves the outer array size. -/
-private theorem set_chain_size_preserving
+theorem set_chain_size_preserving
     (currentFrom : Array (Array Nat)) (depth : Nat)
     (assignList : List (PathsFrom n × Nat)) :
     (assignList.foldl
@@ -50,7 +50,7 @@ private theorem set_chain_size_preserving
     simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]
 
 /-- The chain of `set!`s on `fromAcc` preserves each row's size. -/
-private theorem set_chain_row_size_preserving
+theorem set_chain_row_size_preserving
     (currentFrom : Array (Array Nat)) (depth : Nat)
     (assignList : List (PathsFrom n × Nat))
     (d : Nat) (h_orig : (currentFrom.getD d #[]).size = n) :
@@ -311,7 +311,7 @@ private theorem nested_set_chain_outside_pair_unchanged
 
 /-- 2D chain "at target" lemma: with `Nodup` `(s, e)` keys and `target ∈ l`, the cell at
 `(target.1, target.2.1)` equals `target.2.2`. -/
-private theorem nested_set_chain_at_target_pair_nodup
+theorem nested_set_chain_at_target_pair_nodup
     {α : Type} (ds₀ : Array (Array α)) (l : List (Nat × Nat × α))
     (target : Nat × Nat × α) (defaultV : α)
     (h_target_in : target ∈ l)
@@ -394,7 +394,7 @@ private theorem nested_set_chain_at_target_pair_nodup
       exact ih ds₀' h_in_tail h_nodup' h_outer_bound' h_inner_bound'
 
 /-- The setBetween chain preserves the outer array size. -/
-private theorem setBetween_chain_size_preserving
+theorem setBetween_chain_size_preserving
     (currentBetween : Array (Array (Array Nat))) (depth : Nat)
     (assignList : List (PathsBetween n × Nat)) :
     (assignList.foldl
@@ -411,7 +411,7 @@ private theorem setBetween_chain_size_preserving
     simp [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]
 
 /-- The setBetween chain preserves each row's size. -/
-private theorem setBetween_chain_row_size_preserving
+theorem setBetween_chain_row_size_preserving
     (currentBetween : Array (Array (Array Nat))) (depth : Nat)
     (assignList : List (PathsBetween n × Nat))
     (d : Nat) (h_orig : (currentBetween.getD d #[]).size = n) :
@@ -463,7 +463,7 @@ private theorem setBetween_chain_row_size_preserving
       exact h_orig
 
 /-- The setBetween chain preserves each (depth, start) cell's size. -/
-private theorem setBetween_chain_cell_size_preserving
+theorem setBetween_chain_cell_size_preserving
     (currentBetween : Array (Array (Array Nat))) (depth : Nat)
     (assignList : List (PathsBetween n × Nat))
     (d : Nat) (s : Nat) (h_orig : ((currentBetween.getD d #[]).getD s #[]).size = n) :
