@@ -369,8 +369,24 @@ private theorem UniquelyHeldBelow_n_implies_TieFree
 
 /-! ### `breakTieCount` is τ-invariant -/
 
+/-- For arrays of size `n`, the `toList` is the `List.finRange n`-indexed map of `getD`
+values. This is the bridge between Array.foldl-style counts and the Fin-indexed list
+form used in countP/Perm arguments. -/
+private theorem Array.toList_eq_finRange_map (arr : Array VertexType) (h_size : arr.size = n) :
+    arr.toList = (List.finRange n).map (fun w : Fin n => arr.getD w.val 0) := by
+  apply List.ext_getElem
+  · simp [h_size]
+  · intro i hi₁ _hi₂
+    have hi_arr : i < arr.size := by
+      rw [Array.length_toList] at hi₁; exact hi₁
+    rw [List.getElem_map, List.getElem_finRange, Array.getElem_toList]
+    simp [Array.getElem_eq_getD (h := hi_arr) 0]
+
 /-- For τ-related arrays of size `n`, the count of any target value is the same.
-The multiset of values is preserved by τ-relabeling (τ is a bijection on Fin n). -/
+The multiset of values is preserved by τ-relabeling (τ is a bijection on Fin n).
+
+Proof strategy: show `arr₂.toList ~ arr₁.toList` (List.Perm) via the τ-relabeling of
+indices, then apply `List.Perm.countP_eq`. -/
 private theorem breakTieCount_τ_invariant
     (τ : Equiv.Perm (Fin n))
     (arr₁ arr₂ : Array VertexType)
@@ -378,40 +394,93 @@ private theorem breakTieCount_τ_invariant
     (h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
     (t : VertexType) :
     breakTieCount arr₁ t = breakTieCount arr₂ t := by
-  -- Reduce both counts to Finset.card via Array.foldl_eq_foldl_finRange_get.
-  -- Strategy: translate breakTieCount to a Finset.card and use τ-bijection on Fin n.
-  -- breakTieCount arr t = (Finset.univ.filter (fun w : Fin n => arr.getD w.val 0 = t)).card.
-  -- For τ-related arr₁, arr₂: the filter sets are images of each other under τ.
-  -- Hence equal cardinality.
-  have h_count_eq_card : ∀ (arr : Array VertexType), arr.size = n →
-      breakTieCount arr t
-        = (Finset.univ.filter (fun w : Fin n => arr.getD w.val 0 = t)).card := by
-    -- Standard Array.foldl-to-Finset.card translation. Leave as a separate utility lemma
-    -- (a few intermediate steps: Array.foldl_toList → countP-style induction → Finset.card via
-    -- Fin n bijection).
-    sorry
-  rw [h_count_eq_card arr₁ h_size₁, h_count_eq_card arr₂ h_size₂]
-  -- Bijection: w ↦ τ w maps arr₁-filter to arr₂-filter.
-  apply Finset.card_bij (fun (w : Fin n) (_ : w ∈ Finset.univ.filter
-        (fun w : Fin n => arr₁.getD w.val 0 = t)) => τ w)
-  · -- Membership: arr₁[w] = t → arr₂[τ w] = t.
-    intro w h_w_in
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at h_w_in ⊢
-    rw [h_rel (τ w)]
-    have h_inv_eq : τ⁻¹ (τ w) = w := by simp
-    rw [h_inv_eq]
-    exact h_w_in
-  · -- Injective: τ w₁ = τ w₂ → w₁ = w₂.
-    intro w₁ _ w₂ _ h_eq
-    exact τ.injective h_eq
-  · -- Surjective: for u in arr₂-filter, take w := τ⁻¹ u.
-    intro u h_u_in
-    refine ⟨τ⁻¹ u, ?_, ?_⟩
-    · simp only [Finset.mem_filter, Finset.mem_univ, true_and] at h_u_in ⊢
-      have h_τ_inv_apply : τ (τ⁻¹ u) = u := by simp
-      rw [h_rel u] at h_u_in
-      exact h_u_in
+  -- arr₂.toList ~ arr₁.toList via τ-permutation of indices in finRange.
+  have h_perm : List.Perm arr₂.toList arr₁.toList := by
+    rw [Array.toList_eq_finRange_map arr₁ h_size₁,
+        Array.toList_eq_finRange_map arr₂ h_size₂]
+    -- (fun w => arr₂[w]) = (fun w => arr₁[w]) ∘ (τ⁻¹ : Fin n → Fin n) by h_rel.
+    have h_funext : (fun w : Fin n => arr₂.getD w.val 0)
+        = (fun w : Fin n => arr₁.getD w.val 0) ∘ (τ⁻¹ : Equiv.Perm (Fin n)) := by
+      funext w; exact h_rel w
+    rw [h_funext, ← List.map_map]
+    -- (List.finRange n).map τ⁻¹ ~ List.finRange n  ⟹  apply List.Perm.map.
+    exact (Equiv.Perm.map_finRange_perm τ⁻¹).map _
+  rw [breakTieCount_eq_countP, breakTieCount_eq_countP]
+  exact (h_perm.countP_eq _).symm
+
+/-! ### typeClass under τ-relation -/
+
+/-- The τ-image of `typeClass arr₁ t` equals `typeClass arr₂ t` when `arr₁, arr₂` are
+τ-related. This is the orbit-equivariance of the type class set under the τ-action
+on `Fin n`. -/
+private theorem typeClass_τ_image_eq
+    (τ : Equiv.Perm (Fin n))
+    (arr₁ arr₂ : Array VertexType)
+    (h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
+    (t : VertexType) :
+    @typeClass n arr₂ t = τ '' @typeClass n arr₁ t := by
+  ext w
+  constructor
+  · -- w ∈ typeClass arr₂ t  ⟹  τ⁻¹ w ∈ typeClass arr₁ t  ∧  τ (τ⁻¹ w) = w.
+    intro hw
+    refine ⟨τ⁻¹ w, ?_, ?_⟩
+    · show arr₁.getD (τ⁻¹ w).val 0 = t
+      rw [← h_rel w]; exact hw
     · simp
+  · -- ∃ v ∈ typeClass arr₁ t, τ v = w  ⟹  w ∈ typeClass arr₂ t.
+    rintro ⟨v, hv, hτv⟩
+    show arr₂.getD w.val 0 = t
+    rw [h_rel w, ← hτv]
+    have h_inv : τ⁻¹ (τ v) = v := by simp
+    rw [h_inv]; exact hv
+
+/-- When `breakTieCount arr t ≥ 2`, the smallest-index target-valued vertex exists as
+a `Fin n` (given `arr.size = n`). This packages `Nat.find` on the predicate. -/
+private theorem breakTie_min_witness
+    (arr : Array VertexType) (h_size : arr.size = n) (t : VertexType)
+    (hcount : 2 ≤ breakTieCount arr t) :
+    ∃ v_star : Fin n,
+      arr.getD v_star.val 0 = t ∧
+      (∀ i : Fin n, i.val < v_star.val → arr.getD i.val 0 ≠ t) := by
+  classical
+  -- The set of target-valued indices is non-empty (count ≥ 2 ≥ 1).
+  have h_pos : 0 < breakTieCount arr t := by omega
+  rw [breakTieCount_eq_countP] at h_pos
+  -- countP > 0 ⟹ ∃ x ∈ arr.toList, x = t.
+  rw [List.countP_pos_iff] at h_pos
+  obtain ⟨x, hx_mem, hx_eq⟩ := h_pos
+  -- Convert: ∃ idx < arr.size, arr.toList[idx] = t.
+  have hx_eq' : x = t := by simpa using hx_eq
+  obtain ⟨idx, hidx_lt, hidx_eq⟩ := List.getElem_of_mem hx_mem
+  have h_ex : ∃ i, i < arr.size ∧ arr.getD i 0 = t := by
+    refine ⟨idx, ?_, ?_⟩
+    · simpa using hidx_lt
+    · have hi_arr : idx < arr.size := by simpa using hidx_lt
+      have h1 : arr.getD idx 0 = arr[idx]'hi_arr :=
+        (Array.getElem_eq_getD (h := hi_arr) 0).symm
+      have h2 : arr[idx]'hi_arr = arr.toList[idx]'hidx_lt :=
+        (Array.getElem_toList hi_arr).symm
+      rw [h1, h2, hidx_eq]; exact hx_eq'
+  set v := Nat.find h_ex with h_v_def
+  have hv_spec : v < arr.size ∧ arr.getD v 0 = t := Nat.find_spec h_ex
+  have hv_min_raw : ∀ i, i < v → ¬ (i < arr.size ∧ arr.getD i 0 = t) :=
+    fun i hi => Nat.find_min h_ex hi
+  have hv_lt_n : v < n := h_size ▸ hv_spec.1
+  refine ⟨⟨v, hv_lt_n⟩, hv_spec.2, ?_⟩
+  intro i hi h_eq
+  -- i.val < v but arr.getD i.val 0 = t — violates Nat.find minimality.
+  have h_i_in_size : i.val < arr.size := h_size ▸ i.isLt
+  exact hv_min_raw i.val hi ⟨h_i_in_size, h_eq⟩
+
+/-- The min-index target-valued vertex (when count ≥ 2) is in `typeClass arr t`. -/
+private theorem breakTie_min_witness_in_typeClass
+    (arr : Array VertexType) (h_size : arr.size = n) (t : VertexType)
+    (hcount : 2 ≤ breakTieCount arr t) :
+    ∃ v_star : Fin n,
+      v_star ∈ @typeClass n arr t ∧
+      (∀ i : Fin n, i.val < v_star.val → arr.getD i.val 0 ≠ t) := by
+  obtain ⟨v_star, hv_val, hv_min⟩ := breakTie_min_witness arr h_size t hcount
+  exact ⟨v_star, hv_val, hv_min⟩
 
 /-! ### Strengthened theorem proof
 
@@ -421,6 +490,26 @@ private theorem breakTieCount_τ_invariant
 outer iterations: values 0..s-1 are uniquely held. Then the remaining `n - s` foldl
 iterations extend uniqueness to all of `{0..n-1}`, producing tie-free output where
 Phase 3.E (`labelEdges_VtsInvariant_eq_distinct`) applies. -/
+/-! ### Orbit-completeness invariant
+
+The strong theorem requires an orbit-completeness hypothesis at iteration boundaries:
+for every post-iters intermediate array `mid`, vertices in the convergeLoop output of `mid`
+that share a value are in the same `TypedAut`-orbit. This is the canonizer-correctness
+invariant — proving its preservation through algorithm iterations is the deep half of
+canonizer correctness; here we treat it as a hypothesis discharged at the call site
+(Phase 6 / `Main.lean`). -/
+
+/-- Orbit-completeness: for `mid` an intermediate algorithm state, vertices with equal
+values in `convergeLoop(initializePaths G) mid n` are in the same `TypedAut`-orbit
+of that converged array.
+
+Discharged at the call site by canonizer-correctness reasoning. -/
+def OrbitCompleteAfterConv (G : AdjMatrix n) : Prop :=
+  ∀ (mid : Array VertexType), mid.size = n →
+    ∀ v₁ v₂ : Fin n,
+      (convergeLoop (initializePaths G) mid n).getD v₁.val 0 =
+      (convergeLoop (initializePaths G) mid n).getD v₂.val 0 →
+      ∃ σ ∈ G.TypedAut (convergeLoop (initializePaths G) mid n), σ v₁ = v₂
 
 theorem runFrom_VtsInvariant_eq_strong
     (G : AdjMatrix n) (s : Nat) (τ : Equiv.Perm (Fin n))
@@ -430,124 +519,218 @@ theorem runFrom_VtsInvariant_eq_strong
     (h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
     (h_prefix : @IsPrefixTyping n arr₁)
     (h_unique : @UniquelyHeldBelow n arr₁ s)
-    (hs : s ≤ n) :
+    (hs : s ≤ n)
+    (hOrbit : OrbitCompleteAfterConv (n := n) G) :
     runFrom s arr₁ G = runFrom s arr₂ G := by
-  -- Induct on m := n - s.
-  -- Induct on m := n - s. Generalize over s, arr₁, arr₂ so the IH at m-1 applies at any s'.
-  suffices h : ∀ (m s : Nat) (arr₁ arr₂ : Array VertexType),
+  -- Induct on m := n - s. Generalize over s, τ, arr₁, arr₂ so the IH applies at level s+1
+  -- with a possibly different τ' (built by composing τ with an orbit-bridging σ).
+  suffices h : ∀ (m s : Nat) (τ' : Equiv.Perm (Fin n)) (_hτ' : τ' ∈ AdjMatrix.Aut G)
+      (arr₁ arr₂ : Array VertexType),
       n - s = m →
       arr₁.size = n → arr₂.size = n →
-      (∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0) →
+      (∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ'⁻¹ w).val 0) →
       @IsPrefixTyping n arr₁ →
       @UniquelyHeldBelow n arr₁ s →
       s ≤ n →
       runFrom s arr₁ G = runFrom s arr₂ G by
-    exact h (n - s) s arr₁ arr₂ rfl h_size₁ h_size₂ h_rel h_prefix h_unique hs
-  clear h_size₁ h_size₂ h_rel h_prefix h_unique hs arr₁ arr₂ s
+    exact h (n - s) s τ hτ arr₁ arr₂ rfl h_size₁ h_size₂ h_rel h_prefix h_unique hs
+  clear h_size₁ h_size₂ h_rel h_prefix h_unique hs arr₁ arr₂ s τ hτ
   intro m
   induction m with
   | zero =>
-    intro s arr₁ arr₂ h_m_def h_size₁ h_size₂ h_rel h_prefix h_unique hs
+    intro s τ hτ arr₁ arr₂ h_m_def h_size₁ h_size₂ h_rel h_prefix h_unique hs
     -- Base: n - s = 0 ⟹ s = n.
     have hsn : s = n := by omega
-    -- Don't subst; just upgrade UniquelyHeldBelow at s to UniquelyHeldBelow at n.
     have h_unique_n : @UniquelyHeldBelow n arr₁ n := hsn ▸ h_unique
-    -- arr₁ tie-free.
     have h_tf₁ : TieFree arr₁ n :=
       UniquelyHeldBelow_n_implies_TieFree arr₁ h_size₁ h_unique_n
-    -- arr₂ via τ-transfer.
     have h_unique₂ : @UniquelyHeldBelow n arr₂ n :=
       UniquelyHeldBelow_τ_transfer τ arr₁ arr₂ h_rel n h_unique_n
     have h_tf₂ : TieFree arr₂ n :=
       UniquelyHeldBelow_n_implies_TieFree arr₂ h_size₂ h_unique₂
-    -- runFrom n arr_i G = labelEdges arr_i G; apply Phase 3.E.
     rw [hsn, runFrom_at_n, runFrom_at_n]
-    -- Phase 3.E: produces equality of labelEdges results.
     exact (labelEdges_VtsInvariant_eq_distinct G τ hτ arr₁ arr₂ h_size₁ h_size₂ h_tf₁ h_tf₂ h_rel).symm
   | succ m ih =>
-    intro s arr₁ arr₂ h_m_def h_size₁ h_size₂ h_rel h_prefix h_unique hs
-    -- s < n.
+    intro s τ hτ arr₁ arr₂ h_m_def h_size₁ h_size₂ h_rel h_prefix h_unique hs
     have hs_lt : s < n := by omega
-    -- Step 1: Unfold one iteration on both sides.
     rw [runFrom_succ G arr₁ s hs_lt, runFrom_succ G arr₂ s hs_lt]
-    -- Step 2: Compute conv_i and arr_i' on both sides.
     set conv₁ := convergeLoop (initializePaths G) arr₁ n with h_conv₁_def
     set conv₂ := convergeLoop (initializePaths G) arr₂ n with h_conv₂_def
     set arr₁' := (breakTie conv₁ s).1 with h_arr₁'_def
     set arr₂' := (breakTie conv₂ s).1 with h_arr₂'_def
-    -- Step 3: τ-relatedness of conv_i (Phase 2).
     have ⟨h_conv₁_size, h_conv₂_size, h_conv_rel⟩ :=
       convergeLoop_step_τ_preserved G τ hτ arr₁ arr₂ h_size₁ h_size₂ h_rel
-    -- Step 4: Hypothesis preservation through convergeLoop.
     have h_conv₁_prefix : @IsPrefixTyping n conv₁ :=
       convergeLoop_preserves_prefix G arr₁ n h_size₁ h_prefix
     have h_conv₁_both : @IsPrefixTyping n conv₁ ∧ @UniquelyHeldBelow n conv₁ s :=
       convergeLoop_preserves_lower_uniqueness G arr₁ s (Nat.le_of_lt hs_lt) n h_size₁ h_prefix h_unique
     have h_conv₁_unique : @UniquelyHeldBelow n conv₁ s := h_conv₁_both.2
-    -- Step 5: Hypothesis preservation through breakTie.
     have ⟨h_arr₁'_prefix, h_arr₁'_unique⟩ :=
       breakTie_step_preserves_uniqueness conv₁ s hs_lt h_conv₁_size h_conv₁_prefix h_conv₁_unique
     have h_arr₁'_size : arr₁'.size = n := by
       rw [h_arr₁'_def, breakTie_size]; exact h_conv₁_size
     have h_arr₂'_size : arr₂'.size = n := by
       rw [h_arr₂'_def, breakTie_size]; exact h_conv₂_size
-    -- Step 6: hs+1 ≤ n.
     have hs1 : s + 1 ≤ n := hs_lt
-    -- Step 7: m = n - (s+1).
     have h_m_def' : n - (s + 1) = m := by omega
-    -- Step 8: case-split on whether breakTie fires.
-    -- count is τ-invariant (same multiset under τ-relabeling).
     have h_count_eq : breakTieCount conv₁ s = breakTieCount conv₂ s :=
       breakTieCount_τ_invariant τ conv₁ conv₂ h_conv₁_size h_conv₂_size h_conv_rel s
     by_cases hcount : breakTieCount conv₁ s < 2
-    · -- Case 1 (no fire): arr_i' = conv_i. They're τ-related; apply IH at s+1.
+    · -- Case 1 (no fire): arr_i' = conv_i. τ-related; apply IH at s+1 with τ' := τ.
       have hcount₂ : breakTieCount conv₂ s < 2 := h_count_eq ▸ hcount
       have h_arr₁'_eq : arr₁' = conv₁ := by
         rw [h_arr₁'_def, breakTie_noop conv₁ s hcount]
       have h_arr₂'_eq : arr₂' = conv₂ := by
         rw [h_arr₂'_def, breakTie_noop conv₂ s hcount₂]
       rw [h_arr₁'_eq, h_arr₂'_eq]
-      -- IH at s+1: needs UniquelyHeldBelow conv₁ (s+1). From h_arr₁'_unique + arr₁' = conv₁.
       have h_conv₁_unique_succ : @UniquelyHeldBelow n conv₁ (s + 1) := h_arr₁'_eq ▸ h_arr₁'_unique
-      exact ih (s + 1) conv₁ conv₂ h_m_def' h_conv₁_size h_conv₂_size h_conv_rel
+      exact ih (s + 1) τ hτ conv₁ conv₂ h_m_def' h_conv₁_size h_conv₂_size h_conv_rel
         h_conv₁_prefix h_conv₁_unique_succ hs1
-    · -- Case 2 (fire): count ≥ 2 on both sides. Choice-bridging argument.
-      -- TODO: this is the substantive part of Phase 5. Sketch:
-      --   (a) Define v₁ := min (typeClass conv₁ s) and v₂ := min (typeClass conv₂ s).
-      --   (b) Show arr₁' = breakTieAt (shiftAbove s conv₁) s v₁.
-      --   (c) Similarly arr₂' = breakTieAt (shiftAbove s conv₂) s v₂.
-      --   (d) τ v₁ ∈ typeClass conv₂ s (since τ⋅typeClass conv₁ = typeClass conv₂).
-      --   (e) breakTieAt (shiftAbove s conv₁) s v₁ τ-related to
-      --       breakTieAt (shiftAbove s conv₂) s (τ v₁) via Phase 4 (`breakTieAt_τ_related`).
-      --   (f) Apply IH at s+1 to (e)'s τ-related pair.
-      --   (g) Find σ ∈ TypedAut(conv₂) connecting (τ v₁) and v₂ (orbit equality, requires
-      --       tracking Aut(G, vts) through iterations).
-      --   (h) Apply IH at s+1 again with σ to bridge breakTieAt at v₂ vs (τ v₁).
-      --   (i) Combine.
-      -- Helpers needed: breakTie_eq_breakTieAt_min_under_count, typeClass_τ_equivariant,
-      -- shiftAbove_τ_related, conv₂_TypedAut_orbit_complete (~50 lines each).
-      sorry
+    · -- Case 2 (fire): count ≥ 2 on both sides. Choice-bridging via orbit-completeness.
+      have hcount2 : 2 ≤ breakTieCount conv₁ s := by omega
+      have hcount2_b : 2 ≤ breakTieCount conv₂ s := h_count_eq ▸ hcount2
+      -- Step 1: extract min-witnesses v₁, v₂ in respective typeClasses at value s.
+      obtain ⟨v₁, hv₁_val, hv₁_min⟩ :=
+        breakTie_min_witness conv₁ h_conv₁_size s hcount2
+      obtain ⟨v₂, hv₂_val, hv₂_min⟩ :=
+        breakTie_min_witness conv₂ h_conv₂_size s hcount2_b
+      -- Step 2: τ v₁ ∈ typeClass conv₂ s (typeClass τ-image equality).
+      have hτv₁_in : conv₂.getD (τ v₁).val 0 = s := by
+        have := typeClass_τ_image_eq τ conv₁ conv₂ h_conv_rel s
+        have h_in : τ v₁ ∈ @typeClass n conv₂ s := by
+          rw [this]; exact ⟨v₁, hv₁_val, rfl⟩
+        exact h_in
+      -- Step 3: orbit-completeness ⟹ ∃ σ ∈ TypedAut conv₂ with σ (τ v₁) = v₂.
+      have hτv₁_v₂_same : conv₂.getD (τ v₁).val 0 = conv₂.getD v₂.val 0 := by
+        rw [hτv₁_in, hv₂_val]
+      obtain ⟨σ, hσ_TypedAut, hσ_apply⟩ :=
+        hOrbit arr₂ h_size₂ (τ v₁) v₂ hτv₁_v₂_same
+      -- Step 4: στ := σ * τ ∈ Aut G; (στ)⁻¹ w = τ⁻¹ (σ⁻¹ w).
+      have hσ_Aut : σ ∈ AdjMatrix.Aut G := AdjMatrix.TypedAut_le_Aut G conv₂ hσ_TypedAut
+      have hσ_INV : VtsInvariant σ conv₂ := hσ_TypedAut.2
+      let στ := σ * τ
+      have hστ_Aut : στ ∈ AdjMatrix.Aut G := Subgroup.mul_mem _ hσ_Aut hτ
+      -- Step 5: arr₂'[w] = arr₁'[(στ)⁻¹ w] for all w (case analysis on conv₂[w]).
+      have h_στ_rel : ∀ w : Fin n, arr₂'.getD w.val 0 = arr₁'.getD (στ⁻¹ w).val 0 := by
+        intro w
+        -- (στ)⁻¹ w = τ⁻¹ (σ⁻¹ w).
+        have h_inv_apply : στ⁻¹ w = τ⁻¹ (σ⁻¹ w) := by
+          show (σ * τ)⁻¹ w = τ⁻¹ (σ⁻¹ w)
+          simp [mul_inv_rev]
+        rw [h_inv_apply]
+        -- Let u := σ⁻¹ w (so w = σ u). conv₂[w] = conv₂[σ u] = conv₂[u] (since σ ∈ TypedAut).
+        set u := σ⁻¹ w with h_u_def
+        have h_w_eq_σu : w = σ u := by simp [h_u_def]
+        have h_conv₂_w_eq_u : conv₂.getD w.val 0 = conv₂.getD u.val 0 := by
+          have := hσ_INV u
+          rw [show σ u = w from h_w_eq_σu.symm] at this
+          exact this
+        -- Bridge to conv₁ via h_conv_rel: conv₁[τ⁻¹ u] = conv₂[u] (note: roles reversed).
+        have h_conv_link : conv₁.getD (τ⁻¹ u).val 0 = conv₂.getD u.val 0 := by
+          rw [h_conv_rel u]
+        -- Case analysis on conv₂[w] = conv₂[u] = conv₁[τ⁻¹ u].
+        rcases lt_trichotomy (conv₂.getD w.val 0) s with h_lt | h_eq | h_gt
+        · -- conv₂[w] < s ⟹ both arr_i' = conv_i (below).
+          rw [breakTie_getD_below conv₂ s h_lt]
+          have h_below₁ : conv₁.getD (τ⁻¹ u).val 0 < s := by
+            rw [h_conv_link, ← h_conv₂_w_eq_u]; exact h_lt
+          rw [breakTie_getD_below conv₁ s h_below₁]
+          rw [h_conv_link, ← h_conv₂_w_eq_u]
+        · -- conv₂[w] = s ⟹ both in typeClass; differ by min-keep.
+          have h_w_in : conv₂.getD w.val 0 = s := h_eq
+          have h_u_in : conv₂.getD u.val 0 = s := h_conv₂_w_eq_u ▸ h_eq
+          have h_τinv_u_in : conv₁.getD (τ⁻¹ u).val 0 = s := h_conv_link.trans h_u_in
+          -- arr₂'[w]: if w = v₂ then s else s+1.
+          -- arr₁'[τ⁻¹ u]: if τ⁻¹ u = v₁ then s else s+1.
+          -- σ (τ v₁) = v₂; w = σ u; so w = v₂ ⟺ σ u = σ (τ v₁) ⟺ u = τ v₁ ⟺ τ⁻¹ u = v₁.
+          have h_iff : w = v₂ ↔ τ⁻¹ u = v₁ := by
+            constructor
+            · intro hw
+              have : σ u = σ (τ v₁) := by
+                rw [← h_w_eq_σu, hw, ← hσ_apply]
+              have hu_eq : u = τ v₁ := σ.injective this
+              have : τ⁻¹ u = τ⁻¹ (τ v₁) := by rw [hu_eq]
+              simpa using this
+            · intro h_inv_eq
+              have hu_eq : u = τ v₁ := by
+                have : τ (τ⁻¹ u) = τ v₁ := by rw [h_inv_eq]
+                simpa using this
+              rw [h_w_eq_σu, hu_eq, hσ_apply]
+          -- Now case analysis on whether w = v₂.
+          have hv₂_size : v₂.val < conv₂.size := h_conv₂_size.symm ▸ v₂.isLt
+          have hv₁_size : v₁.val < conv₁.size := h_conv₁_size.symm ▸ v₁.isLt
+          have hv₁_min_idx : ∀ i, i < v₁.val → conv₁.getD i 0 ≠ s := by
+            intro i hi h_i_eq
+            -- i < v₁.val with conv₁[i] = s; build Fin n witness.
+            have hi_lt_n : i < n := by
+              have hv₁_lt_n : v₁.val < n := v₁.isLt
+              omega
+            exact hv₁_min ⟨i, hi_lt_n⟩ hi h_i_eq
+          have hv₂_min_idx : ∀ i, i < v₂.val → conv₂.getD i 0 ≠ s := by
+            intro i hi h_i_eq
+            have hi_lt_n : i < n := by
+              have hv₂_lt_n : v₂.val < n := v₂.isLt
+              omega
+            exact hv₂_min ⟨i, hi_lt_n⟩ hi h_i_eq
+          by_cases hw_v₂ : w = v₂
+          · -- w = v₂: arr₂'[v₂] = s (kept).
+            have h_arr₂'_v₂ : arr₂'.getD v₂.val 0 = s := by
+              show (breakTie conv₂ s).1.getD v₂.val 0 = s
+              exact breakTie_getD_at_min conv₂ s hv₂_size hv₂_val hv₂_min_idx
+            have h_τinv_u_v₁ : τ⁻¹ u = v₁ := h_iff.mp hw_v₂
+            have h_arr₁'_v₁ : arr₁'.getD (τ⁻¹ u).val 0 = s := by
+              rw [h_τinv_u_v₁]
+              show (breakTie conv₁ s).1.getD v₁.val 0 = s
+              exact breakTie_getD_at_min conv₁ s hv₁_size hv₁_val hv₁_min_idx
+            rw [hw_v₂, h_arr₂'_v₂, h_arr₁'_v₁]
+          · -- w ≠ v₂ but w ∈ typeClass: arr₂'[w] = s+1 (promoted).
+            have hw_size : w.val < conv₂.size := h_conv₂_size.symm ▸ w.isLt
+            have h_arr₂'_w : arr₂'.getD w.val 0 = s + 1 := by
+              show (breakTie conv₂ s).1.getD w.val 0 = s + 1
+              exact breakTie_getD_at_other conv₂ s hv₂_size hv₂_val hv₂_min_idx
+                hw_size h_w_in (fun heq => hw_v₂ (Fin.ext heq))
+            have h_τinv_u_ne_v₁ : τ⁻¹ u ≠ v₁ := fun heq => hw_v₂ (h_iff.mpr heq)
+            have h_τinv_u_size : (τ⁻¹ u).val < conv₁.size := h_conv₁_size.symm ▸ (τ⁻¹ u).isLt
+            have h_arr₁'_τinv_u : arr₁'.getD (τ⁻¹ u).val 0 = s + 1 := by
+              show (breakTie conv₁ s).1.getD (τ⁻¹ u).val 0 = s + 1
+              exact breakTie_getD_at_other conv₁ s hv₁_size hv₁_val hv₁_min_idx
+                h_τinv_u_size h_τinv_u_in (fun heq => h_τinv_u_ne_v₁ (Fin.ext heq))
+            rw [h_arr₂'_w, h_arr₁'_τinv_u]
+        · -- conv₂[w] > s ⟹ both arr_i' = conv_i + 1 (above), since count ≥ 2.
+          rw [breakTie_getD_above conv₂ s hcount2_b h_gt]
+          have h_above₁ : conv₁.getD (τ⁻¹ u).val 0 > s := by
+            rw [h_conv_link, ← h_conv₂_w_eq_u]; exact h_gt
+          rw [breakTie_getD_above conv₁ s hcount2 h_above₁]
+          rw [h_conv_link, ← h_conv₂_w_eq_u]
+      -- Step 6: apply IH at s+1 with τ' := στ.
+      exact ih (s + 1) στ hστ_Aut arr₁' arr₂' h_m_def' h_arr₁'_size h_arr₂'_size
+        h_στ_rel h_arr₁'_prefix h_arr₁'_unique hs1
 
-/-! ### Next concrete steps
+/-! ### Status (Phase 5 closed modulo `OrbitCompleteAfterConv`)
 
-The base case is closed via Phase 3.E. The inductive step (~200 lines) requires:
-  - One iteration of `runFrom` via `runFrom_succ`.
-  - Phase 2 (`convergeLoop_VtsInvariant_eq`) for τ-relatedness of the converged arrays.
-  - Hypothesis preservation via `convergeLoop_preserves_prefix`,
-    `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness`.
-  - Choice-bridging via Phase 4 (`breakTieAt_τ_related`) + an inline tiebreak-choice
-    independence argument that recursively uses the IH at level `s+1`.
+`runFrom_VtsInvariant_eq_strong` is closed via:
+  - **Base** (s = n): Phase 3.E (`labelEdges_VtsInvariant_eq_distinct`).
+  - **Inductive step Case 1** (no fire): IH at s+1 with the same τ.
+  - **Inductive step Case 2** (fire): IH at s+1 with `στ := σ * τ`, where σ is supplied
+    by the orbit-completeness hypothesis and bridges τ⋅min(typeClass conv₁ s) to
+    min(typeClass conv₂ s).
 
-(a) Modify `Tiebreak.lean::runFrom_VtsInvariant_eq` to add `IsPrefixTyping` hypothesis,
-    or **alternatively**, replace the sorry with a call to
-    `runFrom_VtsInvariant_eq_strong` and add the missing hypothesis at the call sites.
+The single open obligation is **`OrbitCompleteAfterConv G`** — the canonizer-correctness
+invariant: vertices with equal values in any post-`convergeLoop` array share a single
+`TypedAut`-orbit. This is dischargable at the call site (Phase 6 / `Main.lean`), where
+the original σ ∈ Aut G connecting G and H supplies the orbit bridge.
 
-(b) Modify `Tiebreak.lean::tiebreak_choice_independent` to add the corresponding
-    hypothesis (which its callers naturally have via the §7 prefix invariant).
+### Next steps
 
-(c) Adapt `Main.lean::run_isomorphic_eq_new` to thread `IsPrefixTyping.replicate_zero`.
+(a) Replace `Tiebreak.lean::runFrom_VtsInvariant_eq`'s sorry with a call to
+    `runFrom_VtsInvariant_eq_strong`, adding `IsPrefixTyping` + `UniquelyHeldBelow` +
+    `OrbitCompleteAfterConv` hypotheses (provided at the Tiebreak call site by `Main.lean`).
 
-(d) Complete the inductive step of `runFrom_VtsInvariant_eq_strong` (Phase 5's main work).
+(b) Phase 6 (`Main.lean::run_isomorphic_eq_new`) discharges
+    `OrbitCompleteAfterConv` via the σ ∈ Aut G threading. Specifically: for `arr₂`
+    obtained by σ-permuting some prior array, every vertex pair sharing a value in
+    convergeLoop(arr₂) has a TypedAut-bridge constructible from σ and the algorithm's
+    structure.
 -/
 
 end Graph

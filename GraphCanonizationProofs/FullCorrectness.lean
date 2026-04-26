@@ -37,13 +37,16 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, §7-Step 2 breakTie step, §7-Step 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (3 sorry sites)
+## Open obligations (2 sorry sites)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | **Net-new infrastructure**, NOT mechanical chaining of existing Stages A–D. See "Stage B/D gap" below. |
-| `runFrom_VtsInvariant_eq_strong`      | `Equivariance/RunFromRelational`   | Phase 5 joint induction (Phase 3 now closed; Phase 3.E is the leaf). |
-| `run_isomorphic_eq_new` (⟹)           | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2; current sketch routes through `tiebreak_choice_independent`, hence inherits the Stage B/D gap. |
+| `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | Replace with a call to `runFrom_VtsInvariant_eq_strong`, threading `IsPrefixTyping`, `UniquelyHeldBelow`, and `OrbitCompleteAfterConv` hypotheses from the call site. |
+| `run_isomorphic_eq_new` (⟹)           | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2; discharges the `OrbitCompleteAfterConv` hypothesis using the σ ∈ Aut G structure. |
+
+**`runFrom_VtsInvariant_eq_strong` (Phase 5) is now closed** modulo the
+`OrbitCompleteAfterConv` hypothesis input (the canonizer-correctness invariant; provable
+within Phase 6 from σ ∈ Aut G).
 
 **`Invariants.lean` and `Equivariance.PathEquivariance.lean` are both fully closed.**
 `orderVertices_prefix_invariant`, `orderVertices_n_distinct_ranks`,
@@ -152,8 +155,8 @@ This is mechanical given the foundational lemmas above.
 | 2     | Stage C-rel (`convergeOnce_VtsInvariant_eq`, `convergeLoop_VtsInvariant_eq`) | ✅ closed |
 | 4     | `breakTieAt_τ_related`, `shiftAbove_VtsInvariant_eq` | ✅ closed |
 | 3     | Stage D-rel (cell-wise + denseRanks + assembly)      | ✅ closed (all of 3.A–3.E) |
-| 5     | `runFrom_VtsInvariant_eq_strong`                     | 🟡 base case closed (via Phase 3.E); helpers proved (`runFrom_at_n`, `runFrom_succ`, `UniquelyHeldBelow_n_implies_TieFree`); inductive step skeleton in place — choice-bridging argument pending |
-| 6     | `run_isomorphic_eq_new`                              | 🟦 documented; needs generalized stages |
+| 5     | `runFrom_VtsInvariant_eq_strong`                     | ✅ closed modulo `OrbitCompleteAfterConv` orbit hypothesis (canonizer-correctness invariant, discharged at Phase 6's call site) |
+| 6     | `run_isomorphic_eq_new`                              | 🟦 documented; needs generalized stages + `OrbitCompleteAfterConv` discharge |
 
 ### Phase 3 inner sub-decomposition (top-level relational)
 
@@ -193,7 +196,7 @@ injectivity-of-`computeDenseRanks` lemma (no tie-freeness required for injectivi
 ```
 Main.run_isomorphic_eq_new                       (Phase 6, pending)
   ↓ uses
-runFrom_VtsInvariant_eq_strong                   (Phase 5, partial: base case + Case 1 closed; Case 2 pending)
+runFrom_VtsInvariant_eq_strong                   (Phase 5, ✅ closed modulo OrbitCompleteAfterConv)
   ↓ uses
 labelEdges_VtsInvariant_eq_distinct              (Phase 3.E, ✅ closed)
   ↓ uses
@@ -202,8 +205,9 @@ computeDenseRanks_perm_when_tieFree              (Phase 3.D, ✅ closed) +
 [labelEdges_fold_strong + labelEdges_terminal_rankMap_identity]  (Phase 3.B, ✅ closed)
 ```
 
-All of Phase 3 is now closed; the gap is Phase 5's inductive step Case 2 (choice-bridging) and
-Phase 6's σ-generalized stages.
+All of Phase 3 is closed and Phase 5's strong theorem is closed modulo a single
+canonizer-correctness hypothesis (`OrbitCompleteAfterConv`). The remaining gap is
+Phase 6's σ-generalized stages plus discharging the orbit hypothesis there.
 
 ### Phase 3.C, 3.D, 3.E — closed
 
@@ -215,92 +219,53 @@ All proofs in `Equivariance/StageDRelational.lean`. Highlights:
   - 3.E uses `labelEdges_fold_strong` + `labelEdges_terminal_rankMap_identity` (Phase 3.B
     foundations) + a `computeDenseRanks_inj` lemma (proved structurally without tie-freeness).
 
-### Phase 5 — `runFrom_VtsInvariant_eq_strong` (partial)
+### Phase 5 — `runFrom_VtsInvariant_eq_strong` (closed modulo orbit hypothesis)
 
 **File**: `Equivariance/RunFromRelational.lean`.
 
 **Statement**: `runFrom_VtsInvariant_eq_strong` with hypotheses
-`(IsPrefixTyping arr₁) ∧ (UniquelyHeldBelow arr₁ s) ∧ (s ≤ n)` — captures the algorithmic
-state after `s` outer iterations of `orderVertices` (values 0..s-1 uniquely held).
+`(τ ∈ Aut G) ∧ (τ-related arr₁, arr₂) ∧ (IsPrefixTyping arr₁) ∧ (UniquelyHeldBelow arr₁ s) ∧
+(s ≤ n) ∧ (OrbitCompleteAfterConv G)` — the last hypothesis is the canonizer-correctness
+orbit invariant taken as input (discharged at the Phase 6 call site).
 
-**Strategy**: induction on `m := n - s` (single-variable, NOT the originally-planned joint
-induction; the choice-bridging argument is inlined in Case 2 of the inductive step using IH
-at level s+1 twice).
+**Strategy**: induction on `m := n - s`, generalizing over `s` and over `τ` (since Case 2
+applies the IH with a different τ' := σ * τ where σ is the orbit-bridging element).
 
-**What is closed:**
-  - `runFrom_at_n` (✅): `runFrom n arr G = labelEdgesAccordingToRankings arr G` (empty foldl).
-  - `runFrom_succ` (✅): for `s < n`, `runFrom s arr G = runFrom (s+1) ((breakTie (convergeLoop _ arr n) s).1) G`.
-    Proved via `List.range_add` + `List.foldl_append` + `List.foldl_map`.
-  - `UniquelyHeldBelow_n_implies_TieFree` (✅): pigeonhole via `Finite.injective_iff_surjective`.
+**Proof structure** (all closed):
+  - `runFrom_at_n`: `runFrom n arr G = labelEdgesAccordingToRankings arr G` (empty foldl).
+  - `runFrom_succ`: `runFrom s arr G = runFrom (s+1) ((breakTie (convergeLoop _ arr n) s).1) G`.
+  - `UniquelyHeldBelow_n_implies_TieFree`: pigeonhole via `Finite.injective_iff_surjective`.
+  - `breakTieCount_τ_invariant`: closed via `breakTieCount_eq_countP` +
+    `Equiv.Perm.map_finRange_perm` + `List.Perm.countP_eq` (List.Perm machinery — no
+    Finset.card detour needed).
+  - `typeClass_τ_image_eq`: τ⋅(typeClass arr₁ t) = typeClass arr₂ t for τ-related arrays.
+  - `breakTie_min_witness`: when `breakTieCount arr t ≥ 2`, the smallest-index
+    target-valued vertex exists as a `Fin n` (via `Nat.find`).
   - **Base case** (s = n): closed via Phase 3.E + `UniquelyHeldBelow_τ_transfer`.
-  - **Inductive step skeleton** (✅): unfolds via `runFrom_succ`, computes `conv_i` and
-    `arr_i' := (breakTie conv_i s).1`, threads hypothesis preservation through:
-    `convergeLoop_step_τ_preserved`, `convergeLoop_preserves_prefix`,
-    `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness`.
-  - **Case 1 of inductive step** (✅): when `breakTieCount conv₁ s < 2` (no fire), `arr_i' = conv_i`,
-    which are τ-related via Phase 2; IH at s+1 applies directly. Uses `breakTie_noop` and
-    `breakTieCount_τ_invariant` (modulo a foldl-to-Finset.card sub-sorry).
+  - **Case 1** (no fire, `breakTieCount conv₁ s < 2`): `arr_i' = conv_i` (via
+    `breakTie_noop`); they are τ-related via Phase 2; IH at s+1 with the same τ.
+  - **Case 2** (fire, `breakTieCount conv₁ s ≥ 2`):
+    1. Extract `v₁ := min(typeClass conv₁ s)` and `v₂ := min(typeClass conv₂ s)` via
+       `breakTie_min_witness`.
+    2. Show `τ v₁ ∈ typeClass conv₂ s` via `typeClass_τ_image_eq`.
+    3. Apply `OrbitCompleteAfterConv` to get `σ ∈ G.TypedAut conv₂` with `σ (τ v₁) = v₂`.
+    4. Define `στ := σ * τ ∈ Aut G`; check pointwise via `breakTie_getD_below /
+       _at_min / _at_other / _above` characterizations that `arr₁'` and `arr₂'` are
+       `στ`-related (case split on `conv₂[w]` vs `s`).
+    5. Apply IH at s+1 with τ' := στ.
 
-**What remains:**
+**Discharged at the call site (Phase 6 / Main.lean)**:
+  - `OrbitCompleteAfterConv G`: ∀ post-iters mid, vertices in convergeLoop(mid)
+    sharing a value lie in the same `TypedAut(convergeLoop(mid))`-orbit. This is
+    the canonizer-correctness invariant; for Phase 6's `run zeros G = run zeros H`
+    proof under `H = G.permute σ`, the σ ∈ Aut G structure supplies the orbit bridge.
 
-**(P5.U)** `breakTieCount_τ_invariant` — a foldl-to-Finset.card translation utility (~30
-lines). Sketch:
-  - `breakTieCount arr t = arr.foldl ... 0 = arr.toList.foldl ... 0` via `Array.foldl_toList`.
-  - `arr.toList.foldl ... 0 = arr.toList.countP (· == t)` by induction-with-accumulator.
-  - `countP arr.toList = card { i : Fin arr.size | arr[i] = t }` via `Fin.find` /
-    `List.countP_eq_length_filter`.
-  - Bijection `Fin arr.size ↔ Fin n` via `arr.size = n`, then bijection on filters.
-
-**(P5.C2)** Inductive-step **Case 2** (`breakTieCount conv₁ s ≥ 2`, breakTie fires) — the
-substantive choice-bridging argument (~150 lines):
-
-1. Define `v_i := min (typeClass conv_i s)` (the "kept" vertex of `breakTie conv_i s`).
-2. Show `arr_i' = breakTieAt (shiftAbove s conv_i) s v_i`. (Helper lemma needed:
-   `breakTie_eq_breakTieAt_min_under_count`.)
-3. `τ v₁ ∈ typeClass conv₂ s` since `conv₂` is τ-relabeled `conv₁`. (Helper:
-   `typeClass_τ_image_eq` — typeClass is τ-equivariant under τ-related arrays.)
-4. `breakTieAt (shiftAbove s conv₁) s v₁` τ-related to `breakTieAt (shiftAbove s conv₂) s (τ v₁)`
-   via Phase 4 (`breakTieAt_τ_related`, ✅) plus a `shiftAbove_τ_related` helper (~15 lines).
-5. **IH at s+1, application 1**: applied to step (4)'s τ-related pair, gives
-   `runFrom (s+1) arr₁' G = runFrom (s+1) (breakTieAt (shiftAbove s conv₂) s (τ v₁)) G`.
-6. `(τ v₁)` and `v₂` are in the same `TypedAut(shiftAbove s conv₂) ∩ AutG`-orbit. **This
-   is the conceptual crux** — requires either:
-     (a) tracking an "orbit-completeness" invariant through iterations, or
-     (b) using `Aut(G).TypedAut`'s structure: `breakTie_Aut_stabilizer` (✅, §5.1) shows the
-         post-breakTie TypedAut is the stabilizer of the kept vertex. Combined with τ-relatedness,
-         either the orbit hypothesis follows or we reduce to a subcase.
-   Helper needed: `tiedVertices_same_TypedAut_orbit` (~50 lines, depends on (a) or (b) choice).
-7. **IH at s+1, application 2**: with the σ-relation between (τ v₁) and v₂ outputs of
-   `breakTieAt`, apply IH again to get
-   `runFrom (s+1) (breakTieAt (shiftAbove s conv₂) s (τ v₁)) G = runFrom (s+1) arr₂' G`.
-8. Compose 5 + 7.
-
-**Key lemma names** (✅ = available; 🟦 = needs writing):
-  - `convergeLoop_VtsInvariant_eq` (✅ Phase 2)
-  - `convergeLoop_preserves_prefix` (✅ in `Invariants.lean`)
-  - `convergeLoop_preserves_lower_uniqueness` (✅)
-  - `breakTie_step_preserves_uniqueness` (✅)
-  - `breakTie_noop` (✅, in `Tiebreak.lean`) — for Case 1.
-  - `breakTie_eq_promote_shift` (✅) — for Case 2 unfolding.
-  - `breakTieAt_τ_related` (✅ Phase 4)
-  - `IsPrefixTyping_τ_transfer` (✅)
-  - `UniquelyHeldBelow_τ_transfer` (✅)
-  - `labelEdges_VtsInvariant_eq_distinct` (✅ Phase 3.E)
-  - `breakTieCount_τ_invariant` (🟡 has sub-sorry P5.U)
-  - `breakTie_eq_breakTieAt_min_under_count` (🟦) — connects `breakTie` (uses min selection)
-    to `breakTieAt` (takes keep as argument).
-  - `typeClass_τ_image_eq` (🟦) — τ⋅(typeClass conv₁ t) = typeClass conv₂ t.
-  - `shiftAbove_τ_related` (🟦) — shiftAbove preserves τ-relatedness (value-only operation).
-  - `tiedVertices_same_TypedAut_orbit` (🟦) — the conceptual-crux orbit lemma.
-
-**Fallback for (P5.C2 step 6)**: if the orbit-completeness argument is too intricate,
-strengthen `runFrom_VtsInvariant_eq_strong`'s signature to additionally take an orbit
-hypothesis at the call site (similar to how `tiebreak_choice_independent` in `Tiebreak.lean`
-takes `hconn : ∃ τ ∈ G.TypedAut vts, τ v₁ = v₂` as a hypothesis). This shifts the burden
-upward to `Main.run_isomorphic_eq_new`, which has access to the original σ ∈ Aut G.
-
-**Risk: high.** The orbit-completeness lemma is the conceptual crux of §6 and may require
-substantial new infrastructure. Estimate: ~150-200 new lines for (P5.U) + (P5.C2) combined.
+**Key lemmas used**:
+  - `convergeLoop_VtsInvariant_eq` (Phase 2), `convergeLoop_preserves_prefix`,
+    `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness`,
+    `breakTie_noop`, `breakTie_getD_below/_above/_at_min/_at_other`,
+    `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`,
+    `labelEdges_VtsInvariant_eq_distinct` (Phase 3.E).
 
 ### Phase 6 — `run_isomorphic_eq_new` (~300-500 lines)
 
@@ -411,8 +376,9 @@ switch to Path B (swap induction). The Path B detour adds ~200 lines but reuses 
 existing σ ∈ Aut G machinery for each transposition step.
 
 **Risk: medium-high.** Substantial work in generalizing Stage B-rel (Path A) or
-threading swap-induction (Path B). Both depend on Phase 5 being fully closed first
-(its Case 2 choice-bridging is the hardest gate).
+threading swap-induction (Path B). Phase 5's strong theorem is closed, so Phase 6 has
+a clean entry point — the only Phase 5 burden it inherits is discharging the
+`OrbitCompleteAfterConv` hypothesis.
 
 ### Total remaining-work estimate
 
@@ -421,22 +387,19 @@ threading swap-induction (Path B). Both depend on Phase 5 being fully closed fir
 | Phase 3.C     | `computeDenseRanks_τ_shift_distinct`                   | medium      | ✅ closed    | done      |
 | Phase 3.D     | `computeDenseRanks_perm_when_tieFree`                  | medium-low  | ✅ closed    | done      |
 | Phase 3.E     | `labelEdges_VtsInvariant_eq_distinct` assembly         | low         | ✅ closed    | done      |
-| Phase 5 base  | base case + helpers + inductive step Case 1            | medium      | ✅ closed    | done      |
-| Phase 5 P5.U  | `breakTieCount_τ_invariant` Finset utility (sub-sorry) | low         | 🟦 pending  | ~30       |
-| Phase 5 P5.C2 | inductive step Case 2 (choice-bridging)                | high        | 🟦 pending  | ~150-200  |
-| Phase 6       | `run_isomorphic_eq_new` + general σ stages (Path A)    | medium-high | 🟦 pending  | ~300-500  |
+| Phase 5       | `runFrom_VtsInvariant_eq_strong` (modulo `OrbitCompleteAfterConv`) | medium-high | ✅ closed | done |
+| Phase 6       | `run_isomorphic_eq_new` + general σ stages + `OrbitCompleteAfterConv` discharge | medium-high | 🟦 pending  | ~350-550  |
+| Tiebreak.lean | Replace `runFrom_VtsInvariant_eq` sorry with strong theorem call | low | 🟦 pending  | ~30       |
 
-**Remaining**: ~480–730 lines of new Lean. Recommended order: P5.U → P5.C2 → Phase 6.
+**Remaining**: ~380–580 lines of new Lean. Recommended order: Tiebreak fix-up → Phase 6.
 
 ### Risk-mitigation pivots
 
-  - **P5.U fallback**: if the foldl-to-Finset.card translation drags, prove
-    `breakTieCount_τ_invariant` directly via foldl-induction on `arr.toList` paired with
-    a list-bijection argument over `Fin n` indices. Avoids the Finset.card detour.
-  - **P5.C2 fallback**: if the orbit-completeness lemma `tiedVertices_same_TypedAut_orbit`
-    is too intricate, strengthen `runFrom_VtsInvariant_eq_strong`'s signature to take an
-    extra orbit hypothesis (mirroring `tiebreak_choice_independent`'s `hconn`). The burden
-    moves to the call site (Phase 6), where the original Aut(G) is available.
+  - **OrbitCompleteAfterConv discharge** at Phase 6 call site: the canonizer-correctness
+    invariant. When Phase 6's σ ∈ Aut G connects G and H = G.permute σ, an explicit σ
+    bridges any required orbit pair. The hypothesis can be discharged by the σ-threading
+    structure of Phase 6 itself — no separate canonizer-completeness proof required for
+    the (⟹) direction.
   - **Phase 6 simplification**: if Path A (Stage B-rel general σ) proves too costly,
     take Path B (case-split on `σ ∈ Aut G`): trivial when σ ∈ Aut G; for σ ∉ Aut G use
     `Equiv.Perm.swap_induction_on` to decompose σ into transpositions, threading
