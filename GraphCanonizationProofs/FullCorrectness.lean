@@ -14,6 +14,7 @@ import FullCorrectness.Equivariance.AssignListRankClosure
 import FullCorrectness.Equivariance.PathEquivariance
 import FullCorrectness.Equivariance.PathEquivarianceRelational
 import FullCorrectness.Equivariance.ConvergeLoop
+import FullCorrectness.Equivariance.ConvergeLoopRelational
 import FullCorrectness.Tiebreak
 import FullCorrectness.Invariants
 import FullCorrectness.Main
