@@ -1486,4 +1486,390 @@ theorem between_assignList_σ_rank_rel
       show (σ p.endVertexIndex).val = (σ item₁.1.endVertexIndex).val
       rw [hp_def]
 
+/-! ### Stage B-rel assembly: body step + foldl induction + final theorem
+
+This section assembles the Stage B relational equivariance theorem from the foundational
+lemmas above. It mirrors `PathEquivariance.lean`'s assembly of the σ-INV form, but tracks
+the relation between two parallel computations on `vts₁` and `vts₂` rather than σ-invariance
+of one. -/
+
+/-- Bridge helper: cell-level σ-relatedness on a 3D table lifts to a functional
+σ-relatedness in the form needed by `comparePathsBetween_σ_relational` /
+`comparePathsFrom_σ_relational`. Relational analogue of `betweenRankFn_σ_inv_from_cells`. -/
+private theorem betweenRankFn_σ_rel_from_cells
+    (σ : Equiv.Perm (Fin n)) (b₁ b₂ : Array (Array (Array Nat)))
+    (h_cell_rel : ∀ d : Nat, d < n → ∀ s e : Fin n,
+      ((b₂.getD d #[]).getD s.val #[]).getD e.val 0
+      = ((b₁.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) :
+    ∀ d : Nat, d < n → ∀ s e : Fin n,
+      ((b₂.getD d #[]).getD (σ s).val #[]).getD (σ e).val 0
+      = ((b₁.getD d #[]).getD s.val #[]).getD e.val 0 := by
+  intro d hd s e
+  have h := h_cell_rel d hd (σ s) (σ e)
+  have h_inv_s : σ⁻¹ (σ s) = s := by simp
+  have h_inv_e : σ⁻¹ (σ e) = e := by simp
+  rw [h_inv_s, h_inv_e] at h
+  exact h
+
+/-- The combined relational invariant on a pair of `(currentBetween, currentFrom)`
+accumulators, one per parallel computation: this is the loop invariant of the depth-foldl
+in `calculatePathRankings` running in two parallel copies. -/
+private def CalcRankingsRel {n : Nat} (σ : Equiv.Perm (Fin n))
+    (acc₁ acc₂ : Array (Array (Array Nat)) × Array (Array Nat)) : Prop :=
+  -- Sizes for acc₁
+  acc₁.1.size = n ∧
+  acc₁.2.size = n ∧
+  (∀ d : Nat, d < n → (acc₁.1.getD d #[]).size = n) ∧
+  (∀ d : Nat, d < n → (acc₁.2.getD d #[]).size = n) ∧
+  (∀ d : Nat, d < n → ∀ s : Nat, s < n → ((acc₁.1.getD d #[]).getD s #[]).size = n) ∧
+  -- Sizes for acc₂
+  acc₂.1.size = n ∧
+  acc₂.2.size = n ∧
+  (∀ d : Nat, d < n → (acc₂.1.getD d #[]).size = n) ∧
+  (∀ d : Nat, d < n → (acc₂.2.getD d #[]).size = n) ∧
+  (∀ d : Nat, d < n → ∀ s : Nat, s < n → ((acc₂.1.getD d #[]).getD s #[]).size = n) ∧
+  -- σ-relatedness of `between` cells
+  (∀ d : Nat, d < n → ∀ s e : Fin n,
+    ((acc₂.1.getD d #[]).getD s.val #[]).getD e.val 0
+    = ((acc₁.1.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) ∧
+  -- σ-relatedness of `from` cells
+  (∀ d : Nat, d < n → ∀ s : Fin n,
+    (acc₂.2.getD d #[]).getD s.val 0
+    = (acc₁.2.getD d #[]).getD (σ⁻¹ s).val 0)
+
+/-- The body of the depth-foldl in `calculatePathRankings`, run in parallel on two
+accumulators with σ-related typing arrays, preserves `CalcRankingsRel σ`. Relational
+analogue of `calculatePathRankings_body_preserves_inv`. -/
+private theorem calculatePathRankings_body_preserves_rel
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts₁ vts₂ : Array VertexType)
+    (hvts_rel : ∀ v : Fin n, vts₂.getD (σ v).val 0 = vts₁.getD v.val 0)
+    (acc₁ acc₂ : Array (Array (Array Nat)) × Array (Array Nat))
+    (h_rel : CalcRankingsRel σ acc₁ acc₂)
+    (depth : Nat) (h_depth : depth < n) :
+    let body := fun (vts : Array VertexType)
+        (accumulated : Array (Array (Array Nat)) × Array (Array Nat)) =>
+      let (currentBetween, currentFrom) := accumulated
+      let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+      let allBetween := pathsAtDepth.foldl
+        (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+      let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+        ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+      let compareBetween := comparePathsBetween vts betweenRankFn
+      let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+        (fun (betweenAcc : Array (Array (Array Nat))) item =>
+          let (pathBetween, rank) := item
+          setBetween betweenAcc depth pathBetween.startVertexIndex.val
+            pathBetween.endVertexIndex.val rank) currentBetween
+      let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+        ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+      let compareFrom := comparePathsFrom vts updatedBetweenFn
+      let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+        (fun (fromAcc : Array (Array Nat)) item =>
+          let (pathFrom, rank) := item
+          let depthSlice := fromAcc.getD depth #[]
+          fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+      (updatedBetween, updatedFrom)
+    CalcRankingsRel σ (body vts₁ acc₁) (body vts₂ acc₂) := by
+  obtain ⟨cb₁, cf₁⟩ := acc₁
+  obtain ⟨cb₂, cf₂⟩ := acc₂
+  obtain ⟨h_cb₁_size, h_cf₁_size, h_cb₁_row, h_cf₁_row, h_cb₁_cell,
+          h_cb₂_size, h_cf₂_size, h_cb₂_row, h_cf₂_row, h_cb₂_cell,
+          h_cb_rel, h_cf_rel⟩ := h_rel
+  -- State σ-fixed via Aut.
+  have h_state_σ_fixed : PathState.permute σ (initializePaths G) = initializePaths G :=
+    (initializePaths_σInv_via_Aut G σ hσ).symm
+  -- Length facts about pathsAtDepth.
+  obtain ⟨h_outer_len, h_starts_eq, h_pathsToVertex_len, h_inner_conn_len⟩ :=
+    initializePaths_pathsAtDepth_structure G h_depth
+  obtain ⟨h_pairs_nodup, h_pairs_complete⟩ :=
+    initializePaths_allBetween_pairs_facts G h_depth
+  -- σ-related betweenRankFn for current state (extended to all d via the out-of-bounds case).
+  have h_br_rel : ∀ d : Nat, ∀ s e : Fin n,
+      ((cb₂.getD d #[]).getD (σ s).val #[]).getD (σ e).val 0
+      = ((cb₁.getD d #[]).getD s.val #[]).getD e.val 0 := by
+    intros d s e
+    by_cases hd : d < n
+    · exact betweenRankFn_σ_rel_from_cells σ cb₁ cb₂ h_cb_rel d hd s e
+    · push_neg at hd
+      have h_lhs_empty : cb₂.getD d #[] = #[] := by
+        rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_cb₂_size]; exact hd),
+            Option.getD_none]
+      have h_rhs_empty : cb₁.getD d #[] = #[] := by
+        rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_cb₁_size]; exact hd),
+            Option.getD_none]
+      rw [h_lhs_empty, h_rhs_empty]; simp
+  -- Apply between_assignList_σ_rank_rel.
+  have h_b_σ_rel := between_assignList_σ_rank_rel σ (initializePaths G) h_state_σ_fixed
+    vts₁ vts₂ hvts_rel
+    (fun rd rs re => ((cb₁.getD rd #[]).getD rs #[]).getD re 0)
+    (fun rd rs re => ((cb₂.getD rd #[]).getD rs #[]).getD re 0)
+    h_br_rel depth h_depth h_outer_len h_pathsToVertex_len h_inner_conn_len
+  -- Compute pairs nodup + complete for both assignList₁ and assignList₂.
+  set compareBetween₁ := comparePathsBetween vts₁
+    (fun rd rs re => ((cb₁.getD rd #[]).getD rs #[]).getD re 0) with h_compareBetween₁_def
+  set compareBetween₂ := comparePathsBetween vts₂
+    (fun rd rs re => ((cb₂.getD rd #[]).getD rs #[]).getD re 0) with h_compareBetween₂_def
+  set allBetween := ((initializePaths G).pathsOfLength.getD depth #[]).toList.foldl
+    (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) [] with h_allBetween_def
+  set assignList_b₁ := assignRanks compareBetween₁ (sortBy compareBetween₁ allBetween)
+    with h_assignList_b₁_def
+  set assignList_b₂ := assignRanks compareBetween₂ (sortBy compareBetween₂ allBetween)
+    with h_assignList_b₂_def
+  -- Generic helper: any sortBy-derived assignList preserves nodup of (s,e) and completeness.
+  have h_b_nodup_complete : ∀ (cmp : PathsBetween n → PathsBetween n → Ordering),
+      ((assignRanks cmp (sortBy cmp allBetween)).map (fun item =>
+          (item.1.startVertexIndex.val, item.1.endVertexIndex.val))).Nodup ∧
+      (∀ s e : Fin n, ∃ item ∈ assignRanks cmp (sortBy cmp allBetween),
+          item.1.startVertexIndex.val = s.val ∧ item.1.endVertexIndex.val = e.val) := by
+    intro cmp
+    set assignList := assignRanks cmp (sortBy cmp allBetween) with h_def
+    refine ⟨?_, ?_⟩
+    · have h_fst : assignList.map (·.1) = sortBy cmp allBetween := by
+        rw [h_def]; exact assignRanks_map_fst _ _
+      have h_eq : assignList.map (fun item =>
+          (item.1.startVertexIndex.val, item.1.endVertexIndex.val))
+                = (sortBy cmp allBetween).map (fun pb : PathsBetween n =>
+                    (pb.startVertexIndex.val, pb.endVertexIndex.val)) := by
+        rw [← h_fst, List.map_map]; rfl
+      rw [h_eq]
+      have h_perm : ((sortBy cmp allBetween).map (fun pb : PathsBetween n =>
+          (pb.startVertexIndex.val, pb.endVertexIndex.val))).Perm
+          (allBetween.map (fun pb : PathsBetween n =>
+            (pb.startVertexIndex.val, pb.endVertexIndex.val))) :=
+        (sortBy_perm cmp allBetween).map _
+      exact h_perm.nodup_iff.mpr h_pairs_nodup
+    · intros s e
+      obtain ⟨q, h_q_in, h_q_start, h_q_end⟩ := h_pairs_complete s e
+      have h_q_in_sort : q ∈ sortBy cmp allBetween :=
+        (sortBy_perm cmp allBetween).mem_iff.mpr h_q_in
+      have h_q_in_map : q ∈ assignList.map (·.1) := by
+        rw [h_def, assignRanks_map_fst]; exact h_q_in_sort
+      obtain ⟨item, h_item_in, h_item_eq⟩ := List.mem_map.mp h_q_in_map
+      refine ⟨item, h_item_in, ?_, ?_⟩
+      · rw [h_item_eq]; exact h_q_start
+      · rw [h_item_eq]; exact h_q_end
+  obtain ⟨h_b₁_nodup, h_b₁_complete⟩ := h_b_nodup_complete compareBetween₁
+  obtain ⟨h_b₂_nodup, h_b₂_complete⟩ := h_b_nodup_complete compareBetween₂
+  -- Apply setBetween_chain_σRelated.
+  have h_chain_b := setBetween_chain_σRelated σ cb₁ cb₂
+    h_cb₁_size h_cb₂_size h_cb₁_row h_cb₂_row h_cb₁_cell h_cb₂_cell h_cb_rel
+    depth h_depth assignList_b₁ assignList_b₂
+    h_b₁_nodup h_b₂_nodup h_b₁_complete h_b₂_complete h_b_σ_rel
+  obtain ⟨h_ub₁_size, h_ub₂_size, h_ub₁_row, h_ub₂_row, h_ub₁_cell, h_ub₂_cell, h_ub_rel⟩ :=
+    h_chain_b
+  -- Updated between σ-rel.
+  set updatedBetween₁ := assignList_b₁.foldl
+    (fun (betweenAcc : Array (Array (Array Nat))) item =>
+      let (pathBetween, rank) := item
+      setBetween betweenAcc depth pathBetween.startVertexIndex.val
+        pathBetween.endVertexIndex.val rank) cb₁ with h_updatedBetween₁_def
+  set updatedBetween₂ := assignList_b₂.foldl
+    (fun (betweenAcc : Array (Array (Array Nat))) item =>
+      let (pathBetween, rank) := item
+      setBetween betweenAcc depth pathBetween.startVertexIndex.val
+        pathBetween.endVertexIndex.val rank) cb₂ with h_updatedBetween₂_def
+  -- σ-related updatedBetweenFn (for the from-side step).
+  have h_updatedBr_rel : ∀ d : Nat, ∀ s e : Fin n,
+      ((updatedBetween₂.getD d #[]).getD (σ s).val #[]).getD (σ e).val 0
+      = ((updatedBetween₁.getD d #[]).getD s.val #[]).getD e.val 0 := by
+    intros d s e
+    by_cases hd : d < n
+    · exact betweenRankFn_σ_rel_from_cells σ updatedBetween₁ updatedBetween₂ h_ub_rel d hd s e
+    · push_neg at hd
+      have h_lhs_empty : updatedBetween₂.getD d #[] = #[] := by
+        rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_ub₂_size]; exact hd),
+            Option.getD_none]
+      have h_rhs_empty : updatedBetween₁.getD d #[] = #[] := by
+        rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_ub₁_size]; exact hd),
+            Option.getD_none]
+      rw [h_lhs_empty, h_rhs_empty]; simp
+  -- Apply from_assignList_σ_rank_rel.
+  set compareFrom₁ := comparePathsFrom vts₁
+    (fun rd rs re => ((updatedBetween₁.getD rd #[]).getD rs #[]).getD re 0) with h_compareFrom₁_def
+  set compareFrom₂ := comparePathsFrom vts₂
+    (fun rd rs re => ((updatedBetween₂.getD rd #[]).getD rs #[]).getD re 0) with h_compareFrom₂_def
+  have h_f_σ_rel := from_assignList_σ_rank_rel σ (initializePaths G) h_state_σ_fixed
+    vts₁ vts₂ hvts_rel
+    (fun rd rs re => ((updatedBetween₁.getD rd #[]).getD rs #[]).getD re 0)
+    (fun rd rs re => ((updatedBetween₂.getD rd #[]).getD rs #[]).getD re 0)
+    h_updatedBr_rel depth h_depth h_outer_len h_pathsToVertex_len h_inner_conn_len
+  -- Generic helper: any sortBy on pathsAtDepth gives starts permuted equal to range n.
+  have h_f_starts_perm : ∀ (cmp : PathsFrom n → PathsFrom n → Ordering),
+      ((assignRanks cmp (sortBy cmp ((initializePaths G).pathsOfLength.getD depth #[]).toList)).map
+          (·.1.startVertexIndex.val)).Perm (List.range n) := by
+    intro cmp
+    set assignList := assignRanks cmp
+      (sortBy cmp ((initializePaths G).pathsOfLength.getD depth #[]).toList) with h_def
+    have h_fst : assignList.map (·.1) = sortBy cmp
+        ((initializePaths G).pathsOfLength.getD depth #[]).toList := by
+      rw [h_def]; exact assignRanks_map_fst _ _
+    have h_eq : assignList.map (·.1.startVertexIndex.val)
+              = (sortBy cmp ((initializePaths G).pathsOfLength.getD depth #[]).toList).map
+                  (·.startVertexIndex.val) := by
+      rw [← h_fst, List.map_map]; rfl
+    rw [h_eq]
+    have h_perm : ((sortBy cmp
+        ((initializePaths G).pathsOfLength.getD depth #[]).toList).map (·.startVertexIndex.val)).Perm
+        (((initializePaths G).pathsOfLength.getD depth #[]).toList.map (·.startVertexIndex.val)) :=
+      (sortBy_perm cmp _).map _
+    rw [h_starts_eq] at h_perm
+    exact h_perm
+  set assignList_f₁ := assignRanks compareFrom₁
+    (sortBy compareFrom₁ ((initializePaths G).pathsOfLength.getD depth #[]).toList)
+    with h_assignList_f₁_def
+  set assignList_f₂ := assignRanks compareFrom₂
+    (sortBy compareFrom₂ ((initializePaths G).pathsOfLength.getD depth #[]).toList)
+    with h_assignList_f₂_def
+  have h_f₁_starts_perm := h_f_starts_perm compareFrom₁
+  have h_f₂_starts_perm := h_f_starts_perm compareFrom₂
+  -- Apply set_chain_σRelated.
+  have h_chain_f := set_chain_σRelated σ cf₁ cf₂
+    h_cf₁_size h_cf₂_size h_cf₁_row h_cf₂_row h_cf_rel depth h_depth
+    assignList_f₁ assignList_f₂ h_f₁_starts_perm h_f₂_starts_perm h_f_σ_rel
+  obtain ⟨h_uf₁_size, h_uf₂_size, h_uf₁_row, h_uf₂_row, h_uf_rel⟩ := h_chain_f
+  -- Combine into CalcRankingsRel.
+  exact ⟨h_ub₁_size, h_uf₁_size, h_ub₁_row, h_uf₁_row, h_ub₁_cell,
+         h_ub₂_size, h_uf₂_size, h_ub₂_row, h_uf₂_row, h_ub₂_cell,
+         h_ub_rel, h_uf_rel⟩
+
+/-- **Cell-level σ-relatedness facts** for `calculatePathRankings`'s output run on
+σ-related typing arrays. Relational analogue of `calculatePathRankings_σ_cell_inv_facts`. -/
+private theorem calculatePathRankings_σ_cell_rel_facts
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts₁ vts₂ : Array VertexType)
+    (hvts_rel : ∀ v : Fin n, vts₂.getD (σ v) 0 = vts₁.getD v 0) :
+    let rs₁ := calculatePathRankings (initializePaths G) vts₁
+    let rs₂ := calculatePathRankings (initializePaths G) vts₂
+    (∀ d : Nat, d < n → ∀ s : Fin n,
+        (rs₂.fromRanks.getD d #[]).getD s.val 0
+        = (rs₁.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0) ∧
+    (∀ d : Nat, d < n → ∀ s e : Fin n,
+        ((rs₂.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
+        = ((rs₁.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) := by
+  -- Coerce hvts_rel to the .val form expected by helpers.
+  have hvts_rel' : ∀ v : Fin n, vts₂.getD (σ v).val 0 = vts₁.getD v.val 0 := hvts_rel
+  -- Unfold calculatePathRankings.
+  unfold calculatePathRankings
+  -- Initial accumulator (zero tables).
+  set acc₀ := (((Array.range n).map fun _ =>
+                  (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat)),
+               ((Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat)))
+    with h_acc₀_def
+  -- Initial CalcRankingsRel on (acc₀, acc₀).
+  have h_init : CalcRankingsRel σ acc₀ acc₀ := by
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · simp [h_acc₀_def]
+    · simp [h_acc₀_def]
+    · intro d hd; simp [h_acc₀_def, hd]
+    · intro d hd; simp [h_acc₀_def, hd]
+    · intro d hd s hs; simp [h_acc₀_def, hd, hs]
+    · simp [h_acc₀_def]
+    · simp [h_acc₀_def]
+    · intro d hd; simp [h_acc₀_def, hd]
+    · intro d hd; simp [h_acc₀_def, hd]
+    · intro d hd s hs; simp [h_acc₀_def, hd, hs]
+    · intro d hd s e
+      have h_lhs : (((acc₀.1).getD d #[]).getD s.val #[]).getD e.val 0 = 0 := by
+        simp [h_acc₀_def, hd]
+      have h_rhs : (((acc₀.1).getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0 = 0 := by
+        simp [h_acc₀_def, hd]
+      rw [h_lhs, h_rhs]
+    · intro d hd s
+      have h_lhs : ((acc₀.2).getD d #[]).getD s.val 0 = 0 := by
+        simp [h_acc₀_def, hd]
+      have h_rhs : ((acc₀.2).getD d #[]).getD (σ⁻¹ s).val 0 = 0 := by
+        simp [h_acc₀_def, hd]
+      rw [h_lhs, h_rhs]
+  -- Foldl induction on List.range n with parallel accumulators.
+  suffices h_step : ∀ (l : List Nat) (a₁ a₂ : Array (Array (Array Nat)) × Array (Array Nat)),
+      (∀ d ∈ l, d < n) → CalcRankingsRel σ a₁ a₂ →
+      CalcRankingsRel σ
+        (l.foldl (fun acc d =>
+          (fun depth => fun (vts : Array VertexType)
+              (accumulated : Array (Array (Array Nat)) × Array (Array Nat)) =>
+            let (currentBetween, currentFrom) := accumulated
+            let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+            let allBetween := pathsAtDepth.foldl
+              (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+            let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+              ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+            let compareBetween := comparePathsBetween vts betweenRankFn
+            let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+              (fun (betweenAcc : Array (Array (Array Nat))) item =>
+                let (pathBetween, rank) := item
+                setBetween betweenAcc depth pathBetween.startVertexIndex.val
+                  pathBetween.endVertexIndex.val rank) currentBetween
+            let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+              ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+            let compareFrom := comparePathsFrom vts updatedBetweenFn
+            let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+              (fun (fromAcc : Array (Array Nat)) item =>
+                let (pathFrom, rank) := item
+                let depthSlice := fromAcc.getD depth #[]
+                fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+            (updatedBetween, updatedFrom)) d vts₁ acc) a₁)
+        (l.foldl (fun acc d =>
+          (fun depth => fun (vts : Array VertexType)
+              (accumulated : Array (Array (Array Nat)) × Array (Array Nat)) =>
+            let (currentBetween, currentFrom) := accumulated
+            let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+            let allBetween := pathsAtDepth.foldl
+              (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+            let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+              ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+            let compareBetween := comparePathsBetween vts betweenRankFn
+            let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+              (fun (betweenAcc : Array (Array (Array Nat))) item =>
+                let (pathBetween, rank) := item
+                setBetween betweenAcc depth pathBetween.startVertexIndex.val
+                  pathBetween.endVertexIndex.val rank) currentBetween
+            let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+              ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+            let compareFrom := comparePathsFrom vts updatedBetweenFn
+            let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+              (fun (fromAcc : Array (Array Nat)) item =>
+                let (pathFrom, rank) := item
+                let depthSlice := fromAcc.getD depth #[]
+                fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+            (updatedBetween, updatedFrom)) d vts₂ acc) a₂) by
+    have h_l_lt : ∀ d ∈ List.range n, d < n := fun d hd => List.mem_range.mp hd
+    have h_final := h_step (List.range n) acc₀ acc₀ h_l_lt h_init
+    obtain ⟨_, _, _, _, _, _, _, _, _, _, h_b_rel, h_f_rel⟩ := h_final
+    exact ⟨h_f_rel, h_b_rel⟩
+  intro l
+  induction l with
+  | nil => intros _ _ _ h_rel; exact h_rel
+  | cons x xs ih =>
+    intros a₁ a₂ h_l_lt h_rel
+    rw [List.foldl_cons, List.foldl_cons]
+    apply ih
+    · intros d h_d_in
+      exact h_l_lt d (List.mem_cons_of_mem _ h_d_in)
+    · -- Apply body_preserves_rel with depth = x.
+      have h_x_lt : x < n := h_l_lt x List.mem_cons_self
+      exact calculatePathRankings_body_preserves_rel G σ hσ vts₁ vts₂ hvts_rel'
+        a₁ a₂ h_rel x h_x_lt
+
+/-- **Stage B-rel: relational σ-equivariance of `calculatePathRankings`**.
+
+For σ ∈ Aut G and any two σ-related typing arrays `vts₁`, `vts₂`, the cells of
+`calculatePathRankings (initializePaths G) vts₂` are σ-related to the cells of
+`calculatePathRankings (initializePaths G) vts₁` (i.e., shifted by σ⁻¹).
+
+Recovers `calculatePathRankings_σInvariant` as the diagonal special case `vts₁ = vts₂`. -/
+theorem calculatePathRankings_σ_equivariant_relational
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts₁ vts₂ : Array VertexType)
+    (hvts_rel : ∀ v : Fin n, vts₂.getD (σ v) 0 = vts₁.getD v 0) :
+    let rs₁ := calculatePathRankings (initializePaths G) vts₁
+    let rs₂ := calculatePathRankings (initializePaths G) vts₂
+    (∀ d : Nat, d < n → ∀ s : Fin n,
+        (rs₂.fromRanks.getD d #[]).getD s.val 0
+        = (rs₁.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0) ∧
+    (∀ d : Nat, d < n → ∀ s e : Fin n,
+        ((rs₂.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
+        = ((rs₁.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) :=
+  calculatePathRankings_σ_cell_rel_facts G σ hσ vts₁ vts₂ hvts_rel
+
 end Graph

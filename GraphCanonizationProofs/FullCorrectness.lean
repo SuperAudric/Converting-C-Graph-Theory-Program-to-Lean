@@ -154,7 +154,7 @@ and final Stage B-rel assembly remain.**
 | `allBetween_map_f_perm`                                                | ✅ proved (via `flatMap_eq_foldl` + `Perm.flatMap_left` + `pathsAtDepth_map_f_perm`) |
 | `from_assignList_σ_rank_rel`                                           | ✅ proved |
 | `between_assignList_σ_rank_rel`                                        | ✅ proved |
-| Body step + foldl induction + `Stage B-rel` assembly                   | 🟦 not yet started |
+| Body step + foldl induction + `Stage B-rel` assembly                   | ✅ proved (Phase 1 landed: `calculatePathRankings_σ_equivariant_relational`) |
 
 With both relational σ-rank-closure lemmas closed, the remaining work is to assemble:
 1. A relational body step (parallel to `calculatePathRankings_body_preserves_inv` in
