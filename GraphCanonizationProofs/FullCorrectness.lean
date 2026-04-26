@@ -41,7 +41,17 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `run_isomorphic_eq_new` (⟹)           | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2; discharges the `OrbitCompleteAfterConv` hypothesis using the σ ∈ Aut G structure. |
+| `run_swap_invariant_fwd` (σ ∉ Aut G branch) | `Main` | Pipeline σ-equivariance for general σ — specifically `orderVertices ((init G).permute σ) zeros = σ-shift of orderVertices (init G) zeros`. Reduces to Stage B-rel general σ + Stage C-rel general σ + breakTie σ-tracking through outer iterations. **Stage D-rel general σ is now closed** (`labelEdges_two_graphs_σ_related` in `StageDRelational.lean`), so once orderVertices σ-equivariance is closed, the swap case follows immediately. |
+
+The top-level theorem `run_isomorphic_eq_new` is now structured via induction on
+`Isomorphic`'s constructors: `refl` and `trans` cases close trivially, the `swap` case
+delegates to `run_swap_invariant_fwd`. The σ ∈ Aut G branch is fully closed; the σ ∉ Aut G
+branch is reduced to a single technical claim (orderVertices σ-equivariance under general σ).
+
+**New in this round:** `labelEdges_two_graphs_σ_related` in `StageDRelational.lean` — Stage
+D-rel for **two different graphs** related by σ (not requiring σ ∈ Aut G). Mirrors
+Phase 3.E (`labelEdges_VtsInvariant_eq_distinct`) but starts the labelEdges fold on
+`G.permute σ` (rather than `G`) for the second side.
 
 **Closed in this round:**
   - `runFrom_VtsInvariant_eq_strong` (Phase 5, in `Equivariance/RunFromRelational.lean`):

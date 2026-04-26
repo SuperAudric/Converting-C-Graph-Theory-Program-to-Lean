@@ -652,4 +652,72 @@ theorem labelEdges_VtsInvariant_eq_distinct
   -- Conclude: output_1.1 = G.permute σ_1 = G.permute σ_2 = output_2.1.
   rw [h_out2_graph, h_out1_graph, h_σ_eq]
 
+/-! ### Stage D-rel general σ (no Aut hypothesis)
+
+Generalization of `labelEdges_VtsInvariant_eq_distinct` (Phase 3.E) that drops the
+`τ ∈ Aut G` hypothesis. Compares `labelEdgesAccordingToRankings` on **two different
+graphs** `G` and `G.permute σ`, with `σ`-related rks. The proof is structurally
+identical to Phase 3.E, except we don't need to collapse `G.permute σ = G`.
+
+Used by Phase 6 (`Main.lean::run_swap_invariant_fwd`) for the σ ∉ Aut G branch. -/
+theorem labelEdges_two_graphs_σ_related
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n))
+    (rks₁ rks₂ : Array VertexType)
+    (h_size₁ : rks₁.size = n) (h_size₂ : rks₂.size = n)
+    (h_distinct₁ : TieFree rks₁ n) (h_distinct₂ : TieFree rks₂ n)
+    (h_rel : ∀ w : Fin n, rks₂.getD w.val 0 = rks₁.getD (σ⁻¹ w).val 0) :
+    labelEdgesAccordingToRankings rks₂ (G.permute σ) = labelEdgesAccordingToRankings rks₁ G := by
+  show ((List.finRange n).foldl (labelEdgesStep n (List.finRange n))
+          (G.permute σ, computeDenseRanks n rks₂)).1
+       = ((List.finRange n).foldl (labelEdgesStep n (List.finRange n))
+          (G, computeDenseRanks n rks₁)).1
+  have h_dr1_size : (computeDenseRanks n rks₁).size = n := computeDenseRanks_size n rks₁
+  have h_dr2_size : (computeDenseRanks n rks₂).size = n := computeDenseRanks_size n rks₂
+  have h_dr1_perm : ∀ k : Fin n, ∃ w : Fin n, (computeDenseRanks n rks₁).getD w.val 0 = k.val :=
+    computeDenseRanks_perm_when_tieFree rks₁ h_size₁ h_distinct₁
+  have h_dr2_perm : ∀ k : Fin n, ∃ w : Fin n, (computeDenseRanks n rks₂).getD w.val 0 = k.val :=
+    computeDenseRanks_perm_when_tieFree rks₂ h_size₂ h_distinct₂
+  have h_dr_shift : ∀ w : Fin n,
+      (computeDenseRanks n rks₂).getD w.val 0 = (computeDenseRanks n rks₁).getD (σ⁻¹ w).val 0 :=
+    computeDenseRanks_τ_shift_distinct σ rks₁ rks₂ h_size₁ h_size₂ h_distinct₁ h_distinct₂ h_rel
+  -- Side 1: starting graph G = G.permute 1.
+  obtain ⟨σ_1, h_out1_graph, h_out1_size, h_out1_rankMap⟩ :=
+    labelEdges_fold_strong G (computeDenseRanks n rks₁) h_dr1_size (List.finRange n)
+      (G, computeDenseRanks n rks₁) (1 : Equiv.Perm (Fin n))
+      (by show G = G.permute 1; rw [AdjMatrix.permute_one])
+      h_dr1_size
+      (fun v => by show _ = _; rfl)
+  -- Side 2: starting graph G.permute σ — this is exactly acc.1 directly, no Aut needed.
+  obtain ⟨σ_2, h_out2_graph, h_out2_size, h_out2_rankMap⟩ :=
+    labelEdges_fold_strong G (computeDenseRanks n rks₁) h_dr1_size (List.finRange n)
+      (G.permute σ, computeDenseRanks n rks₂) σ
+      (by show G.permute σ = G.permute σ; rfl)
+      h_dr2_size
+      h_dr_shift
+  -- Both terminal rankMaps are identity.
+  have h_term1 : ∀ v : Fin n,
+      ((List.finRange n).foldl (labelEdgesStep n (List.finRange n))
+        (G, computeDenseRanks n rks₁)).2.getD v.val 0 = v.val :=
+    labelEdges_terminal_rankMap_identity G (computeDenseRanks n rks₁) h_dr1_size h_dr1_perm
+  have h_term2 : ∀ v : Fin n,
+      ((List.finRange n).foldl (labelEdgesStep n (List.finRange n))
+        (G.permute σ, computeDenseRanks n rks₂)).2.getD v.val 0 = v.val :=
+    labelEdges_terminal_rankMap_identity (G.permute σ) (computeDenseRanks n rks₂) h_dr2_size h_dr2_perm
+  -- denseRanks rks₁ ∘ σ_1⁻¹ = denseRanks rks₁ ∘ σ_2⁻¹ pointwise.
+  have h_combined : ∀ v : Fin n,
+      (computeDenseRanks n rks₁).getD (σ_1⁻¹ v).val 0
+        = (computeDenseRanks n rks₁).getD (σ_2⁻¹ v).val 0 := by
+    intro v
+    rw [← h_out1_rankMap v, h_term1 v, ← h_term2 v, h_out2_rankMap v]
+  -- By injectivity of denseRanks rks₁, σ_1⁻¹ v = σ_2⁻¹ v.
+  have h_inv_eq : ∀ v : Fin n, σ_1⁻¹ v = σ_2⁻¹ v := fun v =>
+    computeDenseRanks_inj rks₁ (σ_1⁻¹ v) (σ_2⁻¹ v) (h_combined v)
+  have h_σ_eq : σ_1 = σ_2 := by
+    have h_inv_eq' : σ_1⁻¹ = σ_2⁻¹ := Equiv.ext h_inv_eq
+    have := congrArg (·⁻¹) h_inv_eq'
+    simp at this
+    exact this
+  -- Conclude: output_2.1 = G.permute σ_2 = G.permute σ_1 = output_1.1.
+  rw [h_out2_graph, h_out1_graph, h_σ_eq]
+
 end Graph

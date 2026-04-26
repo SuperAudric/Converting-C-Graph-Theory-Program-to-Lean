@@ -1,5 +1,8 @@
 import FullCorrectness.Tiebreak
 import FullCorrectness.Invariants
+import FullCorrectness.Permutation
+import FullCorrectness.Automorphism
+import FullCorrectness.Equivariance.StageDRelational
 import LeanGraphCanonizerV4Correctness
 
 /-!
@@ -62,24 +65,63 @@ open AdjMatrix
 
 variable {n : Nat}
 
-/-! ## (⟹) Isomorphic graphs produce equal canonical forms. -/
+/-! ## (⟹) Isomorphic graphs produce equal canonical forms.
+
+The proof inducts on the `Isomorphic` constructors (refl / swap / trans). The refl and
+trans cases are immediate. The swap case reduces to a single-transposition equivalence
+`run_swap_invariant`, which itself splits on whether the swap is in `Aut G`:
+
+  - If `Equiv.swap v1 v2 ∈ Aut G`: `G.permute σ = G` definitionally, so the two `run`
+    calls are on the same graph — trivially equal.
+  - If `Equiv.swap v1 v2 ∉ Aut G`: requires general-σ equivariance of the pipeline
+    (Path A: Stage B-rel/C-rel/D-rel generalized to drop σ ∈ Aut G). This branch
+    is currently a focused sorry; closure requires ~400 lines of new general-σ
+    infrastructure.
+-/
+
+/-- Single-transposition invariance of `run` (forward direction). Splits on
+`σ := Equiv.swap v1 v2 ∈ Aut G`: the σ-fixing branch closes definitionally; the σ-moving
+branch requires general-σ pipeline equivariance (Path A).
+
+Distinct from the legacy `Graph.run_swap_invariant` (which goes in the opposite direction
+and is sorry-blocked by the false §5 lemma). -/
+private theorem run_swap_invariant_fwd (G : AdjMatrix n) (v1 v2 : Fin n) :
+    run (Array.replicate n 0) G =
+    run (Array.replicate n 0) (swapVertexLabels v1 v2 G) := by
+  -- Reduce swapVertexLabels to G.permute σ via §1.2.
+  rw [swapVertexLabels_eq_permute]
+  set σ : Equiv.Perm (Fin n) := Equiv.swap v1 v2 with h_σ_def
+  -- Branch on whether σ is an automorphism of G.
+  by_cases hσ_Aut : σ ∈ AdjMatrix.Aut G
+  · -- σ ∈ Aut G: G.permute σ = G by definition, so both `run`s are on the same graph.
+    have h_perm_eq : G.permute σ = G := hσ_Aut
+    rw [h_perm_eq]
+  · -- σ ∉ Aut G: the swap genuinely changes the graph. Reduces to:
+    --   (Step A) `labelEdges_two_graphs_σ_related` (✅ proved in `StageDRelational.lean`,
+    --     Stage D-rel general σ): given σ-shifted tie-free rks, `labelEdges rks_H (G.permute σ)
+    --     = labelEdges rks_G G`. So if we have σ-shifted ranks, the labelEdges parts match.
+    --   (Step B) Pipeline σ-equivariance for general σ (open): `orderVertices
+    --     (init (G.permute σ)) (getArrayRank zeros) = σ-shift of orderVertices (init G)
+    --     (getArrayRank zeros)`. This requires:
+    --     - Stage B-rel general σ: `calculatePathRankings (state.permute σ) (σ-shifted vts)
+    --       = σ-shift of calculatePathRankings state vts` for ANY σ.
+    --     - Stage C-rel general σ: corollary for `convergeLoop`.
+    --     - breakTie loop σ-tracking through outer iterations (Phase 5's strong theorem
+    --       requires τ ∈ Aut G; needs adaptation).
+    --   The remaining work is ~250-400 lines for these generalizations.
+    sorry
 
 /-- New proof path (replacing the sorry-reachable `Graph.run_isomorphic_eq` from the
-flat file). Proved via §3 (Stages A–D) + §4 (Aut-invariance of `convergeLoop`) + §6
-(tiebreak choice-independence). -/
+flat file). Proved via induction on `Isomorphic`'s constructors, reducing the swap case
+to `run_swap_invariant`. -/
 theorem run_isomorphic_eq_new
     {G H : AdjMatrix n}
     (h : G ≃ H) :
     run (Array.replicate n 0) G = run (Array.replicate n 0) H := by
-  -- Proof plan: by `permute_of_Isomorphic` (§2) obtain σ with `H = G.permute σ`.
-  -- Then unfold `run`; by Stage A, `initializePaths H = (initializePaths G).permute σ`.
-  -- Combine with Stages B, C (which on an Aut-invariant input give Aut-invariant output)
-  -- and Stage D to conclude.
-  --
-  -- The argument decomposes σ as a product of elements in Aut G times a coset
-  -- representative, but because the canonical output depends only on the isomorphism
-  -- class (not the particular labeling), the cosetRepresentative contribution collapses.
-  sorry
+  induction h with
+  | refl G => rfl
+  | swap G v1 v2 => exact run_swap_invariant_fwd G v1 v2
+  | trans _ _ ih1 ih2 => exact ih1.trans ih2
 
 /-! ## (⟸) Equal canonical forms imply isomorphism.
 
