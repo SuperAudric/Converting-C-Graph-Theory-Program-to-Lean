@@ -281,118 +281,261 @@ applies the IH with a different τ' := σ * τ where σ is the orbit-bridging el
     `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`,
     `labelEdges_VtsInvariant_eq_distinct` (Phase 3.E).
 
-### Phase 6 — `run_isomorphic_eq_new` (~300-500 lines)
+### Phase 6 — `run_isomorphic_eq_new` (~300-450 lines remaining)
 
-**File**: `Main.lean`. Preliminaries in `Equivariance/MainRelationalNotes.lean`
-(already documents the plan).
+**File**: `Main.lean`. Preliminaries in `Equivariance/MainRelationalNotes.lean`.
 
-**Statement** (in file): `G ≃ H → run zeros G = run zeros H`, where
-`zeros := Array.replicate n 0`.
+**Statement**: `G ≃ H → run zeros G = run zeros H`, where `zeros := Array.replicate n 0`.
 
-**Strategy**: by §2 obtain σ : `Equiv.Perm (Fin n)` with `H = G.permute σ`. The σ may
-NOT be in `Aut G` in general — that's exactly what makes graphs isomorphic vs equal. So
-we must thread σ through the entire pre-labelEdges pipeline as an EXTERNAL relabeling
-(graph changes; vts undergoes σ-relabel in lockstep).
+**Top-level structure (✅ closed):** Induct on `Isomorphic`'s constructors:
+  - `refl G`: `rfl`.
+  - `trans h₁ h₂ ih₁ ih₂`: `ih₁.trans ih₂`.
+  - `swap G v₁ v₂`: delegate to `run_swap_invariant_fwd G v₁ v₂`.
 
-#### Strategy split: symmetric vs general σ
+**`run_swap_invariant_fwd` structure (partial):**
+```
+run zeros G = run zeros (swapVertexLabels v₁ v₂ G)
+  ⟹ rw swapVertexLabels_eq_permute   (G.permute (Equiv.swap v₁ v₂))
+  σ := Equiv.swap v₁ v₂
+  by_cases hσ_Aut : σ ∈ Aut G
+  · -- ✅ closed: G.permute σ = G by Aut definition
+  · -- 🟦 sorry: σ ∉ Aut G case
+```
 
-Two viable paths:
+#### Closed components
 
-**Path A (clean) — generalize the σ-relational stages from "σ ∈ Aut G" to "general σ".**
+  - **`labelEdges_two_graphs_σ_related`** (`StageDRelational.lean`, ✅) — Stage D-rel
+    general σ: for σ-shifted tie-free `rks₁, rks₂`,
+    `labelEdges rks₂ (G.permute σ) = labelEdges rks₁ G`. Mirrors Phase 3.E's structure
+    via `labelEdges_fold_strong` (which already supports `acc.1 = G.permute σ` with no
+    Aut hypothesis) + `labelEdges_terminal_rankMap_identity` + `computeDenseRanks_inj`
+    + Phase 3.C (`computeDenseRanks_τ_shift_distinct`). No new infrastructure required.
 
-  - **Stage A general**: `initializePaths_general_σ`: `initializePaths (G.permute σ) = (initializePaths G).permute σ`.
-    Likely already available — `initializePaths_Aut_equivariant` (in `Equivariance.StageA`)
-    doesn't actually use σ ∈ Aut G; just rename/re-export.
-  - **Stage B-rel general**: `calculatePathRankings_σ_equivariant_general`:
+  - **`initializePaths_Aut_equivariant`** (`StageA.lean`, ✅ already general) — despite
+    the name, takes any `σ : Equiv.Perm (Fin n)` (no Aut hypothesis). Use directly:
+    `initializePaths (G.permute σ) = PathState.permute σ (initializePaths G)`.
+
+  - **Relational compare lemmas** (`PathEquivarianceRelational.lean`, ✅ all general):
+    - `comparePathSegments_σ_relational`
+    - `comparePathsBetween_σ_relational`
+    - `comparePathsFrom_σ_relational`
+    - `sortBy_map_pointwise_relational`
+    - `orderInsensitiveListCmp_map_pointwise_relational`
+
+    All take any `σ : Equiv.Perm (Fin vc)`, no Aut hypothesis.
+
+#### Plan to close `run_swap_invariant_fwd` σ ∉ Aut G branch
+
+The branch proves `run zeros G = run zeros (G.permute σ)` for `σ := Equiv.swap v₁ v₂ ∉ Aut G`.
+
+**Top-level reduction** (using `labelEdges_two_graphs_σ_related`):
+
+```lean
+  -- After unfolding `run`:
+  -- LHS: labelEdges (orderVertices (init G) (getArrayRank zeros)) G
+  -- RHS: labelEdges (orderVertices (init (G.permute σ)) (getArrayRank zeros)) (G.permute σ)
+  set ranks_G := orderVertices (initializePaths G) (getArrayRank zeros)
+  set ranks_H := orderVertices (initializePaths (G.permute σ)) (getArrayRank zeros)
+  -- (P6.1) ranks_H[w] = ranks_G[σ⁻¹ w]   (orderVertices σ-equivariance, OPEN)
+  -- (P6.2) TieFree ranks_G n  (from orderVertices_n_distinct_ranks, ✅)
+  -- (P6.3) TieFree ranks_H n  (from orderVertices_n_distinct_ranks, ✅)
+  -- Apply labelEdges_two_graphs_σ_related to conclude.
+```
+
+**Sub-tasks:**
+
+##### P6.U — Utility helpers (~50 lines, low risk)
+
+  - `getArrayRank_zeros_eq_zeros` 🟦
     ```
-    calculatePathRankings (initializePaths (G.permute σ)) (σ · vts)
-      = RankState.permute σ (calculatePathRankings (initializePaths G) vts)
+    getArrayRank (Array.replicate n 0) = Array.replicate n 0
     ```
-    Phase 1's `calculatePathRankings_σ_equivariant_relational` relies on
-    `PathState.permute σ (initializePaths G) = initializePaths G` (which uses σ ∈ Aut G).
-    Generalizing requires a fresh body-step proof tracking σ on BOTH state and vts. The
-    `comparePathsFrom`/`comparePathsBetween`/`comparePathSegments` σ-equivariance lemmas
-    (in `CompareEquivariant.lean`) already hold without σ ∈ Aut G — they're purely
-    algebraic. The σ-cell-INV `comparePathsFrom_σ_self_eq` is the obstacle (uses σ-INV
-    vts). Workaround: the relational forms `comparePathSegments_σ_relational` etc.
-    (already proved) generalize directly. Estimate: **~150-200 lines** following
-    `PathEquivarianceRelational.lean`'s pattern with a different invariant.
-  - **Stage C-rel general**: direct corollary of generalized Stage B-rel + Phase 2's
-    `convergeOnce_VtsInvariant_eq` structure. Estimate: ~30-50 lines.
-  - **Stage D extended** (external σ): a variant of `labelEdges_VtsInvariant_eq_distinct`
-    (Phase 3.E) with G vs G.permute σ as the graph and τ-related rks. Same cell-wise
-    machinery (`labelEdges_fold_strong` + `labelEdges_terminal_rankMap_identity` + Phase
-    3.D) applies. Estimate: ~50-80 lines.
+    Pairs are `(0, i)` for each `i`; sortBy preserves order under `compare a.1 b.1 = .eq`;
+    foldl assigns rank 0 throughout. Direct array extensionality. (~20 lines)
 
-**Path B (case-split fallback) — handle σ ∈ Aut G and σ ∉ Aut G separately.**
+  - `orderVertices_size_eq` 🟦
+    ```
+    (orderVertices state vts).size = vts.size
+    ```
+    foldl induction; each step preserves size via `convergeLoop_size_preserving` and
+    `breakTie_size`. (~10 lines)
 
-  - σ ∈ Aut G case: G = G.permute σ = H, so reduces to G = H (literally), trivial.
-  - σ ∉ Aut G case: decompose σ into transpositions via `Equiv.Perm.swap_induction_on`
-    and apply `swapVertexLabels_eq_permute` step-by-step. Each step is one `swap` /
-    `swapVertexLabels`. Cost: ~200 extra lines for the swap induction; avoids the deep
-    Stage B-rel generalization.
+  - `getArrayRank_size` 🟦
+    ```
+    (getArrayRank arr).size = arr.size
+    ```
+    Mechanical from `Array.size_replicate` and `set!` size preservation. (~5 lines)
 
-#### Phase 6 proper — assembly (assumes Path A's generalizations)
+  - `getArrayRank_IsPrefixTyping` 🟦
+    ```
+    arr.size = n → IsPrefixTyping (getArrayRank arr)
+    ```
+    `getArrayRank` always produces dense ranks (values in `{0..m-1}` for some `m ≤ n`).
+    (~30 lines, or derive via existing prefix-typing infrastructure)
 
-Given `G ≃ H`, get `σ : Equiv.Perm (Fin n)` with `H = G.permute σ` via
-`permute_of_Isomorphic` (✅, §2). With `zeros := Array.replicate n 0`:
+##### P6.A — Stage B-rel general σ (~150-200 lines, medium-high risk)
 
-1. **getArrayRank invariance**: `getArrayRank zeros = zeros` (all values 0 → dense ranks
-   all 0). Helper: `getArrayRank_zeros_eq_zeros` (🟦, ~15 lines, mechanical).
+Target lemma (in new file `Equivariance/PathEquivarianceGeneral.lean`):
 
-2. **σ-invariance of zeros**: `zeros_σ_invariant` (✅, in `MainRelationalNotes.lean`):
-   trivially `zeros[σ v] = 0 = zeros[v]`. So `zeros` is σ-INV.
+  - `calculatePathRankings_σ_equivariant_general` 🟦
+    ```
+    ∀ σ : Equiv.Perm (Fin n),  -- no Aut hypothesis
+    ∀ vts₁ vts₂ : Array VertexType,
+    (∀ v : Fin n, vts₂.getD (σ v).val 0 = vts₁.getD v.val 0) →
+    let rs₁ := calculatePathRankings (initializePaths G) vts₁
+    let rs₂ := calculatePathRankings (initializePaths (G.permute σ)) vts₂
+    -- rs₂'s cells are σ-shifts of rs₁'s cells
+    (∀ d s, ... fromRanks σ-shift relation) ∧
+    (∀ d s e, ... betweenRanks σ-shift relation)
+    ```
 
-3. **Stage A applied**: `initializePaths H = (initializePaths G).permute σ`
-   (`initializePaths_general_σ`, ~5 lines).
+**Key infrastructure to build** (parallel to `PathEquivarianceRelational.lean`):
 
-4. **convergeLoop on H = σ-shift of convergeLoop on G**:
-   ```
-   convergeLoop (initializePaths H) zeros n
-     = some-σ-shift-of (convergeLoop (initializePaths G) zeros n)
-   ```
-   Apply `convergeLoop_σ_equivariant_general` (Path A; 🟦) using zeros σ-INV (step 2).
+  - `pathsAtDepth_two_states_perm` 🟦 (~30 lines)
+    Under Stage A general (`initializePaths_Aut_equivariant`):
+    ```
+    state₂ := PathState.permute σ state₁  ⟹
+    (state₂.pathsOfLength.getD d #[]).toList ~ (state₁.pathsOfLength.getD d #[]).toList.map (PathsFrom.permute σ)
+    ```
+    (Or equivalent; the σ-permuted state's pathsAtDepth is a permutation of the
+    σ-image of the original.)
 
-5. **The breakTie loop** in `runFrom 0 ... H` produces orderedRanks_H. By Phase 5's
-   `runFrom_VtsInvariant_eq_strong` (currently partial), the tiebreak choices are
-   absorbed: `runFrom 0 zeros' H = runFrom 0 (σ-shift zeros') G` for the σ-shifted
-   typing, where the τ in `runFrom_VtsInvariant_eq_strong` is set to σ on the
-   permuted graph. This requires σ ∈ Aut(G.permute σ) = Aut H, which is automatic
-   via `Aut_isomorphism_transfer` (✅ likely available, or quick derivation).
+  - `allBetween_two_states_perm` 🟦 (~30 lines)
+    Corollary: `allBetween state₂ ~ (allBetween state₁).map (PathsBetween.permute σ)`.
 
-6. **labelEdges on H = labelEdges on G** (Stage D extended; 🟦): with tie-free
-   orderedRanks (from `orderVertices_n_distinct_ranks`, ✅, §7) and the σ-shift
-   relating H to G, Phase 3.E's pattern + `labelEdges_external_σ_eq` (🟦)
-   gives `labelEdges orderedRanks_H H = labelEdges orderedRanks_G G`.
+  - `mem_allBetween_two_states_under_f` 🟦 (~30 lines)
+    Replaces existing `mem_allBetween_under_f` (which required σ-INV state).
 
-7. Hence `run zeros H = run zeros G`. ∎
+  - `between_assignList_σ_rank_general` 🟦 (~80 lines)
+    Generalizes `between_assignList_σ_rank_rel` (Phase 1) to drop the
+    `PathState.permute σ state = state` hypothesis. Uses the `_two_states_perm` helpers
+    + the existing relational compare lemmas.
 
-**Key lemma names**:
-  - `permute_of_Isomorphic` (✅, §2)
-  - `Isomorphic_iff_exists_permute` (✅, §2)
-  - `initializePaths_Aut_equivariant` / `initializePaths_general_σ` (✅ likely, just
-    re-export — verify the proof in `StageA.lean` doesn't unnecessarily require σ ∈ Aut G).
-  - `zeros_σ_invariant` (✅, in `MainRelationalNotes.lean`)
-  - `orderVertices_n_distinct_ranks` (✅, §7, in `Invariants.lean`)
-  - `orderVertices_prefix_invariant` (✅, §7) — provides `IsPrefixTyping (orderVertices …)`.
-  - `IsPrefixTyping.replicate_zero` / `zeros_IsPrefixTyping` (✅, in `Invariants.lean`,
-    boundary instance for `zeros`).
-  - `runFrom_VtsInvariant_eq_strong` (Phase 5, currently partial) — this is where the
-    Phase 5 work plugs in.
-  - `Aut_isomorphism_transfer` (🟦, may need writing — `σ ∈ Aut(G.permute σ)` automatic).
-  - `getArrayRank_zeros_eq_zeros` (🟦, ~15 lines, quick).
-  - `calculatePathRankings_σ_equivariant_general` (🟦, ~150-200 lines if Path A).
-  - `convergeLoop_σ_equivariant_general` (🟦, ~30-50 lines, corollary of above).
-  - `labelEdges_external_σ_eq` (🟦, ~50-80 lines, variant of Phase 3.E).
+  - `from_assignList_σ_rank_general` 🟦 (~80 lines)
+    Parallel for the from-side.
 
-**Path A → Path B fallback**: if Path A's Stage B-rel generalization is too costly,
-switch to Path B (swap induction). The Path B detour adds ~200 lines but reuses the
-existing σ ∈ Aut G machinery for each transposition step.
+  - `calculatePathRankings_body_preserves_general` 🟦 (~80 lines)
+    Body-step lemma generalizing `calculatePathRankings_body_preserves_rel`. Takes two
+    accumulators and two STATES; threads σ on the state through the depth-foldl body.
 
-**Risk: medium-high.** Substantial work in generalizing Stage B-rel (Path A) or
-threading swap-induction (Path B). Phase 5's strong theorem is closed, so Phase 6 has
-a clean entry point — the only Phase 5 burden it inherits is discharging the
-`OrbitCompleteAfterConv` hypothesis.
+  - `calculatePathRankings_σ_cell_general_facts` 🟦 (~30 lines)
+    Foldl induction over `List.range n` using the body lemma.
+
+  - `calculatePathRankings_σ_equivariant_general` 🟦 (~10 lines)
+    Final assembly via the cell facts.
+
+##### P6.B — Stage C-rel general σ (~30-50 lines, low risk)
+
+Target lemma:
+
+  - `convergeLoop_σ_equivariant_general` 🟦
+    ```
+    ∀ σ, ∀ vts₁ vts₂ σ-related,
+    convergeLoop (initializePaths (G.permute σ)) vts₂ fuel [w]
+      = convergeLoop (initializePaths G) vts₁ fuel [σ⁻¹ w]
+    ```
+
+  Direct corollary of `calculatePathRankings_σ_equivariant_general` (P6.A) + the existing
+  `convergeOnce_writeback` structure. Mirrors the proof of `convergeLoop_VtsInvariant_eq`
+  in `ConvergeLoopRelational.lean` but with the two-graph variant.
+
+  Helper (~20 lines):
+  - `convergeOnce_σ_equivariant_general` 🟦 — single-step version, derived from
+    `calculatePathRankings_getFrom_σ_equivariant_general` (the get-from projection of P6.A).
+
+##### P6.C — orderVertices σ-equivariance for general σ (~80-150 lines, high risk)
+
+Target lemma (in `Equivariance/RunFromRelational.lean` or new file):
+
+  - `orderVertices_σ_equivariant_general` 🟦
+    ```
+    ∀ σ : Equiv.Perm (Fin n),
+    ∀ vts₁ vts₂ σ-related,
+    (orderVertices (initializePaths (G.permute σ)) vts₂)[w]
+      = (orderVertices (initializePaths G) vts₁)[σ⁻¹ w]
+    ```
+
+The orderVertices outer foldl has the same shape as Phase 5's `runFrom` (sans the
+final `labelEdges`). The proof mirrors `runFrom_VtsInvariant_eq_strong` but with σ ∉ Aut G:
+
+  - **Helpers reused from Phase 5:** `runFrom_at_n`, `runFrom_succ` (they don't use Aut),
+    `breakTie_min_witness`, `breakTie_min_witness_in_typeClass`, `typeClass_τ_image_eq`
+    (already general — verify), `breakTieCount_τ_invariant` (already general — verify).
+
+  - **Outer induction**: induct on `m := n - s`. Generalize over `σ`, like the strong
+    theorem does, since the bridging σ at each step composes with the original.
+
+  - **Base case** (s = n): `orderVertices_at_n` 🟦 — the empty foldl gives back vts.
+    Direct; vts σ-relation already given.
+
+  - **Inductive step Case 1** (no fire): IH at s+1 directly with σ via
+    `convergeLoop_σ_equivariant_general` (P6.B) + `breakTie_noop`.
+
+  - **Inductive step Case 2** (fire): the orbit-bridging argument. Requires:
+    - `OrbitCompleteAfterConv_general` 🟦 — adapted form for `convergeLoop` on
+      `G.permute σ` (i.e., a TypedAut-orbit hypothesis on conv₂ where conv₂ comes from
+      a different graph than conv₁). This is the Phase 5 hypothesis adapted.
+      The Phase 5 form
+      `OrbitCompleteAfterConv : ∀ mid, (post-conv mid is orbit-complete)`
+      generalizes by indexing also over the "underlying graph" (G or G.permute σ).
+    - For Phase 6's specific σ (= `Equiv.swap v₁ v₂`), the orbit hypothesis can be
+      discharged inline by exhibiting σ itself as the bridging permutation: σ is a
+      transposition, so it's an Aut element of `G.permute σ` iff... hmm, not always.
+    - Worst case: this inherits the same orbit-completeness obligation as Phase 5,
+      pushed further upward.
+
+  Estimate: ~80-150 lines if leveraging Phase 5's helpers; possibly less if the orbit
+  hypothesis can be discharged for the swap-induction context specifically.
+
+##### P6.D — Final assembly in `Main.lean` (~30 lines, low risk)
+
+Replace the σ ∉ Aut G sorry with:
+
+```lean
+  -- After unfolding run and reducing via getArrayRank_zeros_eq_zeros (P6.U):
+  set zeros := Array.replicate n 0
+  rw [show getArrayRank zeros = zeros from getArrayRank_zeros_eq_zeros n]
+  set ranks_G := orderVertices (initializePaths G) zeros
+  set ranks_H := orderVertices (initializePaths (G.permute σ)) zeros
+  have h_size_G := orderVertices_size_eq G zeros (Array.size_replicate n 0)
+  have h_size_H := orderVertices_size_eq (G.permute σ) zeros (Array.size_replicate n 0)
+  have h_zeros_prefix := IsPrefixTyping.replicate_zero (n := n)
+  have h_tf_G : TieFree ranks_G n := by ... (orderVertices_n_distinct_ranks)
+  have h_tf_H : TieFree ranks_H n := by ... (orderVertices_n_distinct_ranks)
+  have h_σ_shift : ∀ w, ranks_H[w] = ranks_G[σ⁻¹ w] := by
+    -- vts₁ = vts₂ = zeros; zeros is σ-INV trivially.
+    have h_zeros_σ : ∀ v : Fin n, zeros.getD (σ v).val 0 = zeros.getD v.val 0 := by simp
+    exact orderVertices_σ_equivariant_general σ zeros zeros h_zeros_σ
+  exact (labelEdges_two_graphs_σ_related G σ ranks_G ranks_H
+          h_size_G h_size_H h_tf_G h_tf_H h_σ_shift).symm
+```
+
+#### Total remaining-work estimate
+
+| Sub-task     | Description                                            | Risk        | Lines     |
+|--------------|--------------------------------------------------------|-------------|-----------|
+| P6.U         | Utility helpers (`getArrayRank_zeros`, `orderVertices_size_eq`, etc.) | low | ~50 |
+| P6.A         | Stage B-rel general σ (calculatePathRankings)          | medium-high | ~150-200 |
+| P6.B         | Stage C-rel general σ (convergeLoop)                   | low-medium  | ~30-50 |
+| P6.C         | orderVertices σ-equivariance general σ                 | high        | ~80-150 |
+| P6.D         | Final assembly                                         | low         | ~30 |
+
+**Total**: ~340-480 new lines. Recommended order: P6.U → P6.A → P6.B → P6.C → P6.D.
+
+#### Path B fallback (swap induction; ~250 lines)
+
+If P6.A's general-σ Stage B-rel proves too costly, an alternative path:
+
+  - In `run_swap_invariant_fwd`, the σ ∉ Aut G branch can be approached via direct
+    swap-by-swap induction on σ.
+  - Use `Equiv.Perm.swap_induction_on` to decompose σ into transpositions.
+  - For each transposition, use the existing σ ∈ Aut G machinery if the transposition
+    happens to be in Aut G; otherwise, recurse on a smaller swap-product.
+  - Cost: ~250 extra lines, but avoids the deep Stage B-rel generalization.
+
+  This path has its own complications (the intermediate graph after each swap is
+  generally NOT `G` or `G.permute σ`, so we'd need to track an intermediate graph
+  state through the induction).
 
 ### Total remaining-work estimate
 
@@ -402,23 +545,29 @@ a clean entry point — the only Phase 5 burden it inherits is discharging the
 | Phase 3.D     | `computeDenseRanks_perm_when_tieFree`                  | medium-low  | ✅ closed    | done      |
 | Phase 3.E     | `labelEdges_VtsInvariant_eq_distinct` assembly         | low         | ✅ closed    | done      |
 | Phase 5       | `runFrom_VtsInvariant_eq_strong` (modulo `OrbitCompleteAfterConv`) | medium-high | ✅ closed | done |
-| Phase 6       | `run_isomorphic_eq_new` + general σ stages + `OrbitCompleteAfterConv` discharge | medium-high | 🟦 pending  | ~350-550  |
-| Tiebreak.lean | Replace `runFrom_VtsInvariant_eq` sorry with strong theorem call | low | 🟦 pending  | ~30       |
+| Tiebreak.lean | Replace `runFrom_VtsInvariant_eq` sorry with strong theorem call | low | ✅ closed | done |
+| Phase 6 — `labelEdges_two_graphs_σ_related` (Stage D-rel general σ) | low | ✅ closed | done |
+| Phase 6 — top-level induction + `run_swap_invariant_fwd` (σ ∈ Aut G branch) | low | ✅ closed | done |
+| Phase 6 — P6.U utility helpers (`getArrayRank_zeros_eq_zeros` etc.) | low | 🟦 pending | ~50 |
+| Phase 6 — P6.A Stage B-rel general σ                   | medium-high | 🟦 pending | ~150-200 |
+| Phase 6 — P6.B Stage C-rel general σ (corollary of P6.A) | low-medium | 🟦 pending | ~30-50 |
+| Phase 6 — P6.C orderVertices σ-equivariance general σ  | high        | 🟦 pending | ~80-150 |
+| Phase 6 — P6.D Final assembly in `Main.lean`           | low         | 🟦 pending | ~30 |
 
-**Remaining**: ~380–580 lines of new Lean. Recommended order: Tiebreak fix-up → Phase 6.
+**Remaining**: ~340–480 lines of new Lean. Recommended order: P6.U → P6.A → P6.B → P6.C → P6.D.
 
 ### Risk-mitigation pivots
 
   - **OrbitCompleteAfterConv discharge** at Phase 6 call site: the canonizer-correctness
-    invariant. When Phase 6's σ ∈ Aut G connects G and H = G.permute σ, an explicit σ
-    bridges any required orbit pair. The hypothesis can be discharged by the σ-threading
-    structure of Phase 6 itself — no separate canonizer-completeness proof required for
-    the (⟹) direction.
-  - **Phase 6 simplification**: if Path A (Stage B-rel general σ) proves too costly,
-    take Path B (case-split on `σ ∈ Aut G`): trivial when σ ∈ Aut G; for σ ∉ Aut G use
-    `Equiv.Perm.swap_induction_on` to decompose σ into transpositions, threading
-    `swapVertexLabels_eq_permute` repeatedly. Cost: ~200 extra lines but avoids
-    the deep σ-relational generalization.
+    invariant required by Phase 5's strong theorem. For the σ ∈ Aut G branch (already
+    closed) the discharge is trivial. For σ ∉ Aut G, P6.C inherits the same orbit-bridging
+    obligation; the hypothesis must be discharged using the σ from Phase 6 itself or
+    a generalized variant (`OrbitCompleteAfterConv_general` for `convergeLoop` on
+    `G.permute σ`).
+  - **P6.A fallback (Path B — swap induction)**: if Stage B-rel general σ proves too
+    costly, decompose σ into transpositions via `Equiv.Perm.swap_induction_on`, threading
+    intermediate graph state through. Cost: ~250 extra lines but avoids the deep
+    σ-relational generalization.
 
 --------------------------------------------------------------------------------
 
