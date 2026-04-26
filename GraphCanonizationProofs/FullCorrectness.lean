@@ -167,6 +167,173 @@ This is mechanical given the foundational lemmas above.
 
 --------------------------------------------------------------------------------
 
+## Plan of attack: closing the two open sorries
+
+**Goal**: close `runFrom_VtsInvariant_eq` (Tiebreak.lean) and `run_isomorphic_eq_new` (Main.lean).
+
+**Dependency graph**:
+
+```
+Main.run_isomorphic_eq_new (⟹ direction of run_canonical)
+  ↓ uses
+Tiebreak.runFrom_VtsInvariant_eq
+  ↓ uses
+[Stage B-rel] + [Stage C-rel] + [Stage D-rel] + [breakTie/tiebreak handling]
+```
+
+Six phases, ordered by risk and dependency. Phase 1 is purely mechanical assembly;
+phases 2 and 4 are direct applications; phases 3, 5, 6 each have one technical wrinkle.
+
+### Phase 1 — Stage B-rel assembly (~300 lines)
+
+**File**: `Equivariance/PathEquivarianceRelational.lean` (extend).
+
+Mirror what `PathEquivariance.lean` does for the σ-INV form, with our new relational
+foundational lemmas:
+
+```
+private def CalcRankingsRel σ acc₁ acc₂ : Prop  -- relational invariant: sizes + cell σ-related
+private theorem calculatePathRankings_body_preserves_rel  -- body step (uses set_chain_σRelated, setBetween_chain_σRelated, from/between_assignList_σ_rank_rel)
+private theorem calculatePathRankings_σ_cell_rel_facts    -- foldl induction over List.range n
+theorem calculatePathRankings_σ_equivariant_relational    -- Stage B-rel (final)
+```
+
+All foundational lemmas (`set_chain_σRelated`, `setBetween_chain_σRelated`,
+`from_assignList_σ_rank_rel`, `between_assignList_σ_rank_rel`) are in place.
+**Risk: low.** Mechanical assembly.
+
+### Phase 2 — Stage C-rel: `convergeLoop` τ-equivariance (~150 lines)
+
+**File**: New `Equivariance/ConvergeLoopRelational.lean`, or extend `ConvergeLoop.lean`.
+
+```
+convergeOnce_VtsInvariant_eq:
+  τ ∈ G.Aut → arr-sizes-n → τ-related arr₁, arr₂ →
+  ∀ w, (convergeOnce state arr₂).1.getD w 0 = (convergeOnce state arr₁).1.getD (τ⁻¹ w) 0
+
+convergeLoop_VtsInvariant_eq:
+  ... ∀ fuel, ∀ w, ...
+```
+
+Direct application of Stage B-rel via `convergeOnce_writeback`: convergeOnce writes
+`getFrom (n-1) w` from `calculatePathRankings`. Stage B-rel gives the τ-relation on
+`getFrom`. **Risk: low.** Short, parallel to existing `convergeOnce_Aut_invariant`.
+
+### Phase 3 — Stage D-rel under tie-freeness (~250 lines)
+
+**File**: New `Equivariance/StageDRelational.lean`.
+
+```
+labelEdges_VtsInvariant_eq_distinct:
+  τ ∈ G.Aut →
+  rks₁, rks₂ τ-related, both with all-distinct ranks →
+  labelEdgesAccordingToRankings rks₂ G = labelEdgesAccordingToRankings rks₁ G
+```
+
+The technical wrinkle: `computeDenseRanks` uses `(rank, vertex-index)` lex order. Under
+τ-relabeling, the secondary `vertex-index` key gets τ-permuted. Tie-freeness of `rks`
+collapses the secondary key (no ties to break), so dense ranks are determined by
+primary rank alone, hence τ-related. Combined with `τ ∈ Aut G`, the resulting
+adjacency matrices match position-by-position.
+
+Sub-lemmas:
+- `computeDenseRanks_VtsInvariant_eq_distinct`: dense ranks τ-related.
+- `sortBy_lex_VtsInvariant_distinct`: sort permutation in arr₂ is τ-conjugate of arr₁'s.
+- Final adjacency-matrix equality via Aut.
+
+**Risk: medium.** The dense-ranks-under-τ argument is intricate but well-defined.
+
+### Phase 4 — breakTie / shiftAbove τ-related preservation helpers (~150 lines)
+
+**Critical observation**: `breakTie` is **not** in general τ-equivariant — its "smallest
+index" choice depends on `Fin` ordering, which τ does not respect. So we collect helpers
+for the parts that *do* preserve τ-relatedness:
+
+```
+shiftAbove_VtsInvariant_eq:
+  τ-related arr₁, arr₂ → (shiftAbove t arr₂)[w] = (shiftAbove t arr₁)[τ⁻¹ w]
+
+breakTieAt_τ_related:  -- generalize the existing breakTieAt_VtsInvariant_eq
+  (already exists for σ ∈ TypedAut on a single vts; lift to τ ∈ Aut G + τ-related arrs)
+```
+
+**Risk: low.** Direct, parallel to existing helpers in `Tiebreak.lean`.
+
+### Phase 5 — `runFrom_VtsInvariant_eq` main proof (~300 lines)
+
+**Strategy**: Joint induction on `(n - start)` with `tiebreak_choice_independent`.
+
+**Why joint induction?** breakTie's choice can DIVERGE between τ-related inputs
+(min-index doesn't commute with τ). The standard chained-Stages proof breaks here.
+Resolution: state and prove `runFrom_VtsInvariant_eq` and `tiebreak_choice_independent`
+*together* by induction on `(n - start)`, sharing a single IH that absorbs both:
+1. τ-related arrays produce equal final matrices.
+2. Different tiebreak choices in the same orbit produce equal final matrices.
+
+**Base case** (`n - start = 0`): foldl is empty; orderedRanks_i = arr_i. After the full
+`runFrom 0 arr G` loop, ranks are distinct (`orderVertices_n_distinct_ranks`) — so
+Stage D-rel applies. For the inductive descent into `runFrom (start+1) ...`, the
+arr_i may not yet be distinct, but successive convergeLoop+breakTie iterations make
+them so by the time the loop exits.
+
+**Inductive step**: ct₁ := convergeLoop arr₁; ct₂ := convergeLoop arr₂. By Stage C-rel,
+ct₁, ct₂ τ-related. The two breakTie choices keep₁, keep₂ may differ:
+- If keep₂ = τ keep₁: arr₁', arr₂' τ-related (via `breakTieAt_τ_related`); apply IH.
+- Else: introduce alternative arr₂_alt := breakTieAt ct₂ start (τ keep₁). By IH-on-
+  `tiebreak_choice_independent`, runFrom on arr₂' equals runFrom on arr₂_alt. Then
+  arr₁' and arr₂_alt are τ-related; apply IH-on-`runFrom_VtsInvariant_eq`.
+
+**Risk: high.** The joint induction is intricate; getting the IH form right takes care.
+
+### Phase 6 — `Main.run_isomorphic_eq_new` (~150 lines)
+
+Given `G ≃ H`. By §2 obtain σ with `H = G.permute σ`. Goal: `run 0 G = run 0 H`.
+
+**Decomposition**:
+- `run vts G = labelEdges (orderVertices (initializePaths G) (getArrayRank vts)) G`.
+- For `vts = zeros`, `getArrayRank zeros = zeros`.
+- By Stage A: `initializePaths H = (initializePaths G).permute σ`.
+- For σ ∈ Aut G: trivial reduction to identity.
+- For σ ∉ Aut G: harder — H differs from G structurally.
+
+**Resolution path**: do *not* case-split on σ ∈ Aut G. Use a stronger generic
+σ-equivariance for the pre-labelEdges pipeline (Stages A, B-rel, C-rel are all
+generic for any σ : `Equiv.Perm (Fin n)` consistently applied to `(state, vts)`).
+The argument:
+1. `orderVertices (initializePaths H) zeros` is the σ-image of
+   `orderVertices (initializePaths G) zeros` (modulo tiebreak choices, absorbed via Phase 5).
+2. By Stage D-rel applied to σ acting from G to H: `labelEdges ... H = labelEdges ... G`.
+
+The Stage D-rel here is slightly more general than Phase 3 (σ may not be ∈ Aut G), but
+since `H = G.permute σ`, applying it to `(G, σ)` and then transporting through
+`G = (G.permute σ).permute σ⁻¹` gives the equality.
+
+**Risk: medium-high.** The exact σ-equivariance form needed at the labelEdges step
+may require generalization beyond Phase 3.
+
+### Risks and ordering
+
+| Phase | Description | Risk | Lines |
+|---|---|---|---|
+| 1 | Stage B-rel assembly                            | low         | ~300  |
+| 2 | Stage C-rel                                     | low         | ~150  |
+| 4 | breakTie / shiftAbove helpers                   | low         | ~150  |
+| 3 | Stage D-rel under tie-freeness                  | medium      | ~250  |
+| 5 | `runFrom_VtsInvariant_eq` (joint induction)     | high        | ~300  |
+| 6 | `Main.run_isomorphic_eq_new`                    | medium-high | ~150  |
+
+**Total: ~1300–1500 new lines.** Recommended order: 1 → 2 → 4 → 3 → 5 → 6. Phases 1, 2,
+4 are independent enough to swap if useful. Phase 3 should land before Phase 5 since
+Phase 5's base case appeals to Stage D-rel.
+
+Possible risk-mitigation pivots:
+- If Phase 5's joint induction proves too complex, fall back to: split on whether
+  ranks are already distinct (skip breakTie) vs. not (recurse).
+- If Phase 6 needs a stronger σ-equivariance than Phase 3 provides, prove the
+  generalized form first, then specialize back to Phase 3 as a corollary.
+
+--------------------------------------------------------------------------------
+
 ## §1  Automorphism group, vertex orbits, and permutation action
 
 **Status: proved.** Definitions and theorems live in `Basic`, `Permutation`, `Automorphism`.
