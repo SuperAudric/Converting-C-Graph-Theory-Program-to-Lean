@@ -31,22 +31,26 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                               | ✅ proved (with `hAutInv`/`hsize`) |
 | §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                               | ✅ proved (with `hmove`) |
 | §6.0 | `breakTieAt` output + τ-equivariance              | `Tiebreak`                               | ✅ proved (3 characterization + 1 equivariance) |
-| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (see "Stage B/D gap" below) |
+| §6   | Tiebreak choice-independence (conceptual crux)    | `Equivariance.RunFromRelational`         | ✅ closed (modulo `OrbitCompleteAfterConv` hypothesis discharged by Phase 6) |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                             | ✅ defined + boundary proved |
 | §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                             | ✅ proved (uses §5 disjunctive characterization) |
 | §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, §7-Step 2 breakTie step, §7-Step 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (2 sorry sites)
+## Open obligations (1 sorry site)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | Replace with a call to `runFrom_VtsInvariant_eq_strong`, threading `IsPrefixTyping`, `UniquelyHeldBelow`, and `OrbitCompleteAfterConv` hypotheses from the call site. |
 | `run_isomorphic_eq_new` (⟹)           | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2; discharges the `OrbitCompleteAfterConv` hypothesis using the σ ∈ Aut G structure. |
 
-**`runFrom_VtsInvariant_eq_strong` (Phase 5) is now closed** modulo the
-`OrbitCompleteAfterConv` hypothesis input (the canonizer-correctness invariant; provable
-within Phase 6 from σ ∈ Aut G).
+**Closed in this round:**
+  - `runFrom_VtsInvariant_eq_strong` (Phase 5, in `Equivariance/RunFromRelational.lean`):
+    closed modulo the `OrbitCompleteAfterConv` hypothesis input.
+  - `runFrom_VtsInvariant_eq` (formerly `Tiebreak.lean` sorry): now a wrapper around the
+    strong theorem, in `Equivariance/RunFromRelational.lean`.
+  - `tiebreak_choice_independent` (formerly modulo §3 sorry in `Tiebreak.lean`): now
+    proved as a wrapper around `runFrom_VtsInvariant_eq` + `breakTieAt_VtsInvariant_eq`,
+    in `Equivariance/RunFromRelational.lean`.
 
 **`Invariants.lean` and `Equivariance.PathEquivariance.lean` are both fully closed.**
 `orderVertices_prefix_invariant`, `orderVertices_n_distinct_ranks`,

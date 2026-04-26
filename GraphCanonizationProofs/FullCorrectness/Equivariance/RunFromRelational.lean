@@ -706,6 +706,74 @@ theorem runFrom_VtsInvariant_eq_strong
       exact ih (s + 1) στ hστ_Aut arr₁' arr₂' h_m_def' h_arr₁'_size h_arr₂'_size
         h_στ_rel h_arr₁'_prefix h_arr₁'_unique hs1
 
+/-! ### Lemmas previously sketched in `Tiebreak.lean`
+
+The original `runFrom_VtsInvariant_eq` and `tiebreak_choice_independent` in `Tiebreak.lean`
+were stated as `sorry` pending §3 closure. With the strong theorem available, they're now
+provable here as direct wrappers — the strong theorem supplies the τ-relational equivariance,
+and the §6 choice-independence lemma reduces to a single `breakTieAt_VtsInvariant_eq` step
+to construct the τ-relation from the orbit hypothesis. Both lemmas inherit
+`OrbitCompleteAfterConv G` as the canonizer-correctness hypothesis.
+
+These replace the corresponding declarations in `Tiebreak.lean`. -/
+
+/-- Pipeline τ-equivariance for `runFrom`. The original `Tiebreak.lean` stated a too-broad
+form (no prefix/uniqueness/orbit hypotheses); the corrected form is supplied here by
+direct application of `runFrom_VtsInvariant_eq_strong`.
+
+Replaces the `Tiebreak.lean` sorry. -/
+theorem runFrom_VtsInvariant_eq
+    (G : AdjMatrix n) (s : Nat) (τ : Equiv.Perm (Fin n))
+    (hτ : τ ∈ AdjMatrix.Aut G)
+    (arr₁ arr₂ : Array VertexType)
+    (h_size₁ : arr₁.size = n) (h_size₂ : arr₂.size = n)
+    (h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
+    (h_prefix : @IsPrefixTyping n arr₁)
+    (h_unique : @UniquelyHeldBelow n arr₁ s)
+    (hs : s ≤ n)
+    (hOrbit : OrbitCompleteAfterConv (n := n) G) :
+    runFrom s arr₁ G = runFrom s arr₂ G :=
+  runFrom_VtsInvariant_eq_strong G s τ hτ arr₁ arr₂ h_size₁ h_size₂ h_rel
+    h_prefix h_unique hs hOrbit
+
+/-- §6 Tiebreak choice-independence. For `vts` an Aut(G)-invariant typing and `v₁, v₂`
+in the same `TypedAut(G, vts)`-orbit (`hconn`), running the rest of the pipeline from
+`breakTieAt vts t₀ v_i` yields the same canonical matrix.
+
+The proof reduces to `runFrom_VtsInvariant_eq` (above) by constructing the τ-relation
+between `breakTieAt vts t₀ v₁` and `breakTieAt vts t₀ v₂` via `breakTieAt_VtsInvariant_eq`
+applied to the τ provided by `hconn`. -/
+theorem tiebreak_choice_independent
+    (G : AdjMatrix n) (start : Nat) (vts : Array VertexType) (t₀ : VertexType)
+    (v₁ v₂ : Fin n)
+    (hsize : vts.size = n)
+    (_hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts)
+    (_hv₁ : v₁ ∈ @typeClass n vts t₀) (_hv₂ : v₂ ∈ @typeClass n vts t₀)
+    (hconn : ∃ τ ∈ G.TypedAut vts, τ v₁ = v₂)
+    (h_prefix : @IsPrefixTyping n (breakTieAt vts t₀ v₁))
+    (h_unique : @UniquelyHeldBelow n (breakTieAt vts t₀ v₁) (start + 1))
+    (hs : start + 1 ≤ n)
+    (hOrbit : OrbitCompleteAfterConv (n := n) G) :
+    runFrom (start + 1) (breakTieAt vts t₀ v₁) G =
+    runFrom (start + 1) (breakTieAt vts t₀ v₂) G := by
+  obtain ⟨τ, hτ, hτv⟩ := hconn
+  have hτG : G.permute τ = G := hτ.1
+  have hτAut : τ ∈ G.Aut := hτG
+  have hτvts : VtsInvariant τ vts := hτ.2
+  have h_relabel : ∀ w : Fin n,
+      (breakTieAt vts t₀ v₂).getD w.val 0 =
+        (breakTieAt vts t₀ v₁).getD (τ⁻¹ w).val 0 := by
+    intro w
+    rw [show v₂ = τ v₁ from hτv.symm]
+    exact breakTieAt_VtsInvariant_eq vts t₀ τ v₁ hsize hτvts w
+  have h_size₁ : (breakTieAt vts t₀ v₁).size = n := by
+    rw [breakTieAt_size]; exact hsize
+  have h_size₂ : (breakTieAt vts t₀ v₂).size = n := by
+    rw [breakTieAt_size]; exact hsize
+  exact runFrom_VtsInvariant_eq G (start + 1) τ hτAut
+            (breakTieAt vts t₀ v₁) (breakTieAt vts t₀ v₂)
+            h_size₁ h_size₂ h_relabel h_prefix h_unique hs hOrbit
+
 /-! ### Status (Phase 5 closed modulo `OrbitCompleteAfterConv`)
 
 `runFrom_VtsInvariant_eq_strong` is closed via:

@@ -1020,39 +1020,11 @@ def runFrom {n : Nat} (start : Nat) (vts : Array VertexType) (G : AdjMatrix n) :
 
 /-! ### Pipeline τ-equivariance for `runFrom`
 
-The single load-bearing reduction needed by §6. It says: for any `τ ∈ Aut G` and any two
-`τ`-related input typings `arr₁, arr₂` (i.e., `arr₂[w] = arr₁[τ⁻¹ w]` for every vertex
-`w`), the canonical matrix produced by `runFrom` is the same on both inputs.
-
-**Why this is exactly §3 chained.** Inside `runFrom` the work is:
-  1. `initializePaths G` — independent of the input typing.
-  2. A `foldl` over `[0, …, n - start)` that alternates `convergeLoop` and `breakTie`.
-     Each `convergeLoop` step preserves τ-relatedness of the typing array (Stage B + the
-     `convergeLoop_Aut_invariant`-style argument generalized to the relational form: if
-     `arr₂[w] = arr₁[τ⁻¹ w]` going in, the same relation holds coming out).
-     Each `breakTie` step preserves τ-relatedness too: the smallest index in
-     `typeClass arr_i t₀` differs by τ between the two arrays in exactly the way the
-     τ-relation predicts (because the typeClass on `arr₂` is the τ-image of the typeClass
-     on `arr₁`), so the promoted/kept positions correspond under τ.
-  3. `labelEdgesAccordingToRankings` (Stage D): given τ-related rank arrays and `τ ∈ Aut G`,
-     produces equal canonical matrices because the dense-rank/swap procedure factors out τ.
-
-So this lemma is precisely the chained Stages B–D specialized to the bounded `runFrom`
-loop. The `hτ : τ ∈ G.Aut` hypothesis is exactly what the Stage B–D theorems require. The
-size hypotheses make the size of intermediate arrays computable (every `breakTie` and
-`convergeLoop` step preserves array size).
-
-**Status: stated, proof pending.** Once the four Stage A–D theorems in `Equivariance.lean`
-are discharged, this reduction is mechanical (induct on the fold; apply Stage B/D at each
-step). Listed as the single load-bearing sorry that §6 reduces to. -/
-theorem runFrom_VtsInvariant_eq
-    (G : AdjMatrix n) (s : Nat) (τ : Equiv.Perm (Fin n))
-    (_hτ : τ ∈ G.Aut)
-    (arr₁ arr₂ : Array VertexType)
-    (_h_size₁ : arr₁.size = n) (_h_size₂ : arr₂.size = n)
-    (_h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0) :
-    runFrom s arr₁ G = runFrom s arr₂ G := by
-  sorry
+The single load-bearing reduction needed by §6. The original sorry-form here was too-broad
+(no prefix/uniqueness/orbit hypotheses), and is now superseded by `runFrom_VtsInvariant_eq`
+in `Equivariance/RunFromRelational.lean`, which threads `IsPrefixTyping`,
+`UniquelyHeldBelow`, and `OrbitCompleteAfterConv` and reduces to
+`runFrom_VtsInvariant_eq_strong` (Phase 5). -/
 
 /-- `breakTieAt vts t₀ keep`: the "what if we had kept vertex `keep` instead of
 `min (typeClass vts t₀)`" alternative to `breakTie`. Promotes every vertex with value
@@ -1275,67 +1247,13 @@ theorem breakTieAt_VtsInvariant_eq (vts : Array VertexType) (t₀ : VertexType)
         breakTieAt_getD_of_ne vts t₀ keep hτw]
     exact hvts_eq.symm
 
-/-- **§6** Tiebreak choice-independence.
+/-! **§6** Tiebreak choice-independence.
 
-For any Aut(G)-invariant typing `vts`, any smallest-tied value `t₀`, and any two vertices
-`v₁`, `v₂ ∈ typeClass vts t₀`, running the rest of the pipeline from
-`breakTieAt vts t₀ v₁` vs. `breakTieAt vts t₀ v₂` produces the same canonical matrix.
-
-**Required hypotheses beyond the plan sketch.**
-
-  - `hsize : vts.size = n` — always satisfied by the algorithm.
-  - `hconn : ∃ τ ∈ G.TypedAut vts, τ v₁ = v₂` — *orbit connectivity*. The plan's sketch
-    took "same-type vertices lie in a single Aut-orbit" from §4, but §4 only proves the
-    forward direction (same-orbit → same-type), not the reverse. The reverse is essentially
-    the canonizer's completeness and must be provided as a separate input. In the
-    algorithm, orbit connectivity is maintained throughout `orderVertices` — but proving
-    that is the core correctness argument and is outside this lemma's scope. We surface
-    the requirement as an explicit hypothesis.
-
-**Proof (modulo §3).**
-
-  1. By `hconn`, pick `τ ∈ TypedAut G vts` with `τ v₁ = v₂`.
-  2. By `breakTieAt_VtsInvariant_eq`, `breakTieAt vts t₀ v₂` (= `breakTieAt vts t₀ (τ v₁)`)
-     is the `τ`-relabeling of `breakTieAt vts t₀ v₁`.
-  3. Apply pipeline-equivariance under `τ` (§3 Stages B–D + §4) to conclude the two
-     `runFrom` values are equal. Step 3 is `sorry` pending §3.
-
-**Remaining gap (sorry).** The reduction to §3 equivariance of `runFrom` under τ-related
-inputs. In Lean terms, we need a lemma `runFrom_VtsInvariant_eq` stating:
-`∀ τ ∈ G.Aut, ∀ arr₁ arr₂, (∀ w, arr₂[w] = arr₁[τ⁻¹ w]) → runFrom s arr₁ G = runFrom s arr₂ G`.
-Given this, closing §6 is immediate from step 2. The lemma itself is §3 Stages B–D
-chained together for the fuel-bounded loop.
+The §6 lemma `tiebreak_choice_independent` is now stated and proved in
+`Equivariance/RunFromRelational.lean` (where `runFrom_VtsInvariant_eq_strong` is in
+scope). It takes the same hypotheses as the original sketch (Aut-invariance + typeClass
+membership + orbit connectivity) plus the additional algorithmic hypotheses required by
+the strong theorem (`IsPrefixTyping`, `UniquelyHeldBelow`, `OrbitCompleteAfterConv`).
 -/
-theorem tiebreak_choice_independent
-    (G : AdjMatrix n) (start : Nat) (vts : Array VertexType) (t₀ : VertexType)
-    (v₁ v₂ : Fin n)
-    (hsize : vts.size = n)
-    (_hAutInv : ∀ σ ∈ G.Aut, VtsInvariant σ vts)
-    (_hv₁ : v₁ ∈ @typeClass n vts t₀) (_hv₂ : v₂ ∈ @typeClass n vts t₀)
-    (hconn : ∃ τ ∈ G.TypedAut vts, τ v₁ = v₂) :
-    runFrom (start + 1) (breakTieAt vts t₀ v₁) G =
-    runFrom (start + 1) (breakTieAt vts t₀ v₂) G := by
-  obtain ⟨τ, hτ, hτv⟩ := hconn
-  -- τ is in TypedAut, so preserves G AND vts.
-  have hτG : G.permute τ = G := hτ.1
-  have hτAut : τ ∈ G.Aut := hτG
-  have hτvts : VtsInvariant τ vts := hτ.2
-  -- Rewrite v₂ as τ v₁ and apply breakTieAt τ-equivariance.
-  have h_relabel : ∀ w : Fin n,
-      (breakTieAt vts t₀ v₂).getD w.val 0 =
-        (breakTieAt vts t₀ v₁).getD (τ⁻¹ w).val 0 := by
-    intro w
-    rw [show v₂ = τ v₁ from hτv.symm]
-    exact breakTieAt_VtsInvariant_eq vts t₀ τ v₁ hsize hτvts w
-  -- The two arrays are τ-related; both have size `n` (breakTieAt preserves size, and
-  -- vts.size = n). The pipeline equivariance lemma `runFrom_VtsInvariant_eq` (§3 Stages
-  -- B–D chained) collapses the τ-relation, giving equal final canonical matrices.
-  have h_size₁ : (breakTieAt vts t₀ v₁).size = n := by
-    rw [breakTieAt_size]; exact hsize
-  have h_size₂ : (breakTieAt vts t₀ v₂).size = n := by
-    rw [breakTieAt_size]; exact hsize
-  exact runFrom_VtsInvariant_eq G (start + 1) τ hτAut
-            (breakTieAt vts t₀ v₁) (breakTieAt vts t₀ v₂)
-            h_size₁ h_size₂ h_relabel
 
 end Graph
