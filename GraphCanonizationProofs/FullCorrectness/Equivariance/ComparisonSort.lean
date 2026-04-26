@@ -1603,4 +1603,142 @@ theorem assignRanks_rank_eq_at_succ_when_cmp_eq {α : Type} (cmp : α → α →
     rw [List.getElem_append_right h_rev_rev_le]
     simp [h_rev_rev_len]
 
+/-! ### Rank equality within an `.eq`-class
+
+Given a total preorder `cmp` and a sorted list (Pairwise `≠ .gt`), if two positions
+`i ≤ j` satisfy `cmp L[i] L[j] = .eq`, then by sortedness + transitivity each
+consecutive `cmp L[k] L[k+1]` for `k ∈ [i, j-1]` must also be `.eq`. Chain
+`assignRanks_rank_eq_at_succ_when_cmp_eq` to conclude equal ranks. -/
+
+/-- **Rank equality within an `.eq`-class**: for a sorted list `L` under a total
+preorder `cmp`, if `cmp L[i] L[j] = .eq` and `i ≤ j`, the assigned ranks agree. -/
+theorem assignRanks_rank_eq_within_eq_class {α : Type} (cmp : α → α → Ordering)
+    (h_refl : ∀ a, cmp a a = Ordering.eq)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
+    (L : List α)
+    (h_sorted : L.Pairwise (fun a b => cmp a b ≠ Ordering.gt))
+    (i j : Nat) (hij : i ≤ j) (hj : j < L.length)
+    (h_eq : cmp (L[i]'(Nat.lt_of_le_of_lt hij hj)) (L[j]'hj) = Ordering.eq) :
+    ((assignRanks cmp L)[i]'(by rw [assignRanks_length]; omega)).2
+      = ((assignRanks cmp L)[j]'(by rw [assignRanks_length]; exact hj)).2 := by
+  -- Helper: `.eq` is symmetric.
+  have h_eq_symm : ∀ a b, cmp a b = Ordering.eq → cmp b a = Ordering.eq := by
+    intros a b hab
+    match h_ba : cmp b a with
+    | .eq => rfl
+    | .lt =>
+      have := h_antisym₁ b a h_ba
+      rw [hab] at this; cases this
+    | .gt =>
+      have := h_antisym₂ b a h_ba
+      rw [hab] at this; cases this
+  -- Helper: `cmp a b ≠ .gt → cmp b c = .lt → cmp a c = .lt`.
+  have h_le_lt : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c = Ordering.lt →
+      cmp a c = Ordering.lt := by
+    intros a b c hab hbc
+    have hbc' : cmp b c ≠ Ordering.gt := by rw [hbc]; intro h; cases h
+    have h_ac_le : cmp a c ≠ Ordering.gt := h_trans a b c hab hbc'
+    match h_ac : cmp a c with
+    | .lt => rfl
+    | .gt => exact (h_ac_le h_ac).elim
+    | .eq =>
+      exfalso
+      have h_ca : cmp c a = Ordering.eq := h_eq_symm _ _ h_ac
+      have h_ca_le : cmp c a ≠ Ordering.gt := by rw [h_ca]; intro h; cases h
+      have h_cb_le : cmp c b ≠ Ordering.gt := h_trans c a b h_ca_le hab
+      have h_cb_gt : cmp c b = Ordering.gt := h_antisym₁ b c hbc
+      exact h_cb_le h_cb_gt
+  -- Helper: `cmp a b = .lt → cmp b c ≠ .gt → cmp a c = .lt`.
+  have h_lt_le : ∀ a b c, cmp a b = Ordering.lt → cmp b c ≠ Ordering.gt →
+      cmp a c = Ordering.lt := by
+    intros a b c hab hbc
+    have hab' : cmp a b ≠ Ordering.gt := by rw [hab]; intro h; cases h
+    have h_ac_le : cmp a c ≠ Ordering.gt := h_trans a b c hab' hbc
+    match h_ac : cmp a c with
+    | .lt => rfl
+    | .gt => exact (h_ac_le h_ac).elim
+    | .eq =>
+      exfalso
+      have h_ca : cmp c a = Ordering.eq := h_eq_symm _ _ h_ac
+      have h_ca_le : cmp c a ≠ Ordering.gt := by rw [h_ca]; intro h; cases h
+      have h_ba_gt : cmp b a = Ordering.gt := h_antisym₁ a b hab
+      have h_ba_le : cmp b a ≠ Ordering.gt := h_trans b c a hbc h_ca_le
+      exact h_ba_le h_ba_gt
+  -- Pairwise-iff-getElem: any two indexed elements with `i' < j'` satisfy `cmp ≠ .gt`.
+  have h_pw := List.pairwise_iff_getElem.mp h_sorted
+  -- Sortedness gives `cmp L[i'] L[j'] ≠ .gt` for all `i' ≤ j'`.
+  have h_sorted_le : ∀ (i' j' : Nat) (hi' : i' < L.length) (hj' : j' < L.length),
+      i' ≤ j' → cmp (L[i']'hi') (L[j']'hj') ≠ Ordering.gt := by
+    intros i' j' hi' hj' hij'
+    rcases Nat.lt_or_eq_of_le hij' with h_lt | h_eq_idx
+    · exact h_pw i' j' hi' hj' h_lt
+    · subst h_eq_idx
+      rw [h_refl]; intro h; cases h
+  -- Show all consecutive cmps in [i, j-1] are `.eq`.
+  have h_chain : ∀ (k : Nat) (hk : i ≤ k) (hk_succ : k + 1 ≤ j),
+      cmp (L[k]'(by have := hj; omega)) (L[k+1]'(by have := hj; omega)) = Ordering.eq := by
+    intros k hk hk_succ
+    have hk_lt : k < L.length := by omega
+    have hk1_lt : k + 1 < L.length := by omega
+    have hi_lt : i < L.length := Nat.lt_of_le_of_lt hij hj
+    have h_kk1_le : cmp (L[k]'hk_lt) (L[k+1]'hk1_lt) ≠ Ordering.gt :=
+      h_pw k (k+1) hk_lt hk1_lt (Nat.lt_succ_self k)
+    match h_cmp : cmp (L[k]'hk_lt) (L[k+1]'hk1_lt) with
+    | .eq => rfl
+    | .gt => exact (h_kk1_le h_cmp).elim
+    | .lt =>
+      exfalso
+      -- cmp L[i] L[k] ≤ + cmp L[k] L[k+1] = lt → cmp L[i] L[k+1] = lt.
+      have h_ik_le := h_sorted_le i k hi_lt hk_lt hk
+      have h_ik1_lt : cmp (L[i]'hi_lt) (L[k+1]'hk1_lt) = Ordering.lt :=
+        h_le_lt _ _ _ h_ik_le h_cmp
+      -- cmp L[i] L[k+1] = lt + cmp L[k+1] L[j] ≤ → cmp L[i] L[j] = lt.
+      have h_k1j_le := h_sorted_le (k+1) j hk1_lt hj hk_succ
+      have h_ij_lt : cmp (L[i]'hi_lt) (L[j]'hj) = Ordering.lt :=
+        h_lt_le _ _ _ h_ik1_lt h_k1j_le
+      rw [h_ij_lt] at h_eq; cases h_eq
+  -- Chain `assignRanks_rank_eq_at_succ_when_cmp_eq` via a generic statement that
+  -- pre-computes the bound proof from the `i + m ≤ j` hypothesis.
+  have h_step : ∀ (m : Nat) (hm : i + m ≤ j),
+      ∀ (h_b : i + m < (assignRanks cmp L).length),
+      ((assignRanks cmp L)[i]'(by rw [assignRanks_length]; omega)).2
+        = ((assignRanks cmp L)[i+m]'h_b).2 := by
+    intro m
+    induction m with
+    | zero => intros _ _; rfl
+    | succ m ih =>
+      intro h_m_le h_b_succ
+      have h_m_le' : i + m ≤ j := Nat.le_of_succ_le h_m_le
+      have h_im1_lt : i + m + 1 < L.length := by
+        rw [assignRanks_length] at h_b_succ; exact h_b_succ
+      have h_im_lt : i + m < L.length := Nat.lt_of_succ_lt h_im1_lt
+      have h_b_m : i + m < (assignRanks cmp L).length := by
+        rw [assignRanks_length]; exact h_im_lt
+      have h_im_le_k : i ≤ i + m := Nat.le_add_right i m
+      have h_cmp_eq :
+          cmp (L[i+m]'h_im_lt) (L[(i+m)+1]'h_im1_lt) = Ordering.eq :=
+        h_chain (i+m) h_im_le_k h_m_le
+      have h_succ_step :
+          ((assignRanks cmp L)[i+m]'h_b_m).2
+            = ((assignRanks cmp L)[i+m+1]'(by
+                rw [assignRanks_length]; exact h_im1_lt)).2 :=
+        assignRanks_rank_eq_at_succ_when_cmp_eq cmp L (i+m) h_im1_lt h_cmp_eq
+      rw [ih h_m_le' h_b_m, h_succ_step]
+      rfl
+  -- Extract the result at `m = j - i`, then convert `i + (j - i) = j`.
+  have h_b_at_jmi : i + (j - i) < (assignRanks cmp L).length := by
+    rw [assignRanks_length]; omega
+  have h_at_j_minus_i := h_step (j - i) (by omega) h_b_at_jmi
+  -- Convert via proof-irrelevant index equation.
+  suffices h_get_eq : ∀ (k : Nat) (_h_k_eq : k = j) (h_b : k < (assignRanks cmp L).length),
+      ((assignRanks cmp L)[k]'h_b).2
+        = ((assignRanks cmp L)[j]'(by rw [assignRanks_length]; exact hj)).2 by
+    rw [h_at_j_minus_i]
+    exact h_get_eq (i + (j - i)) (by omega) _
+  intros k h_k_eq h_b
+  subst h_k_eq
+  rfl
+
 end Graph

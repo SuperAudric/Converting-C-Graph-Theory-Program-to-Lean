@@ -895,12 +895,16 @@ private theorem comparePathsFrom_eq_compare_of_start_types_ne
   -- != true case.
   exact bne_iff_ne.mpr h_ne
 
-/-! ### Phase 3: comparePathsFrom total preorder (lifted from comparePathsBetween) -/
+/-! ### Phase 3: `comparePathsFrom_total_preorder` is now in `PathEquivariance.lean`.
 
-/-- comparePathsFrom satisfies the total-preorder properties. Lifted by hand from
-`comparePathsBetween_total_preorder` and the now-public `orderInsensitiveListCmp_*`
-helpers. -/
-theorem comparePathsFrom_total_preorder
+(`from_assignList_σ_rank_closure` needs the total-preorder properties; rather than
+duplicate the proof, the theorem was relocated. This file inherits it transitively via
+`ConvergeLoop → PathEquivariance`.)
+
+The legacy proof body is still kept below behind a private wrapper so we don't need to
+re-edit Mathlib-style imports while the shared file is in flux. -/
+
+private theorem _comparePathsFrom_total_preorder_legacy_unused
     {vc : Nat} (vts : Array VertexType) (br : Nat → Nat → Nat → Nat) :
     (∀ a : PathsFrom vc, comparePathsFrom vts br a a = Ordering.eq) ∧
     (∀ a b : PathsFrom vc, comparePathsFrom vts br a b = Ordering.lt →
