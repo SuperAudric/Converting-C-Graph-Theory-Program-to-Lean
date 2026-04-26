@@ -25,7 +25,12 @@
       "Bash(awk -F: '$1 == 1523 || $1 == 1928 || $1 == 1993 || $1 == 2007 {print}')",
       "Bash(sed -n '1520p;1525p;1925p;1930p;1990p;1995p;2005p;2010p' /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance.lean)",
       "Bash(sed -i 's/^import FullCorrectness\\\\.Equivariance$/import FullCorrectness.Equivariance.Actions/' /workspace/GraphCanonizationProofs/FullCorrectness/Tiebreak.lean)",
-      "Bash(sed -i 's/^import FullCorrectness\\\\.Equivariance$/import FullCorrectness.Equivariance.ConvergeLoop/' /workspace/GraphCanonizationProofs/FullCorrectness/Invariants.lean)"
+      "Bash(sed -i 's/^import FullCorrectness\\\\.Equivariance$/import FullCorrectness.Equivariance.ConvergeLoop/' /workspace/GraphCanonizationProofs/FullCorrectness/Invariants.lean)",
+      "Bash(awk 'NR>=1559 && NR<=2226' GraphCanonizationProofs/FullCorrectness/Equivariance/PathEquivariance.lean)",
+      "Bash(awk 'NR>=1415 && NR<1559' GraphCanonizationProofs/FullCorrectness/Equivariance/PathEquivariance.lean)",
+      "Bash(awk 'NR>=1559 && NR<2227' GraphCanonizationProofs/FullCorrectness/Equivariance/PathEquivariance.lean)",
+      "Bash(awk 'NR>=2227 && NR<=2609' GraphCanonizationProofs/FullCorrectness/Equivariance/PathEquivariance.lean)",
+      "Bash(awk 'NR==1{print \"first line:\", $0}; NR==184{print \"L184:\", $0}; NR==185{print \"L185:\", $0}; NR==458{print \"L458:\", $0}; NR==459{print \"L459:\", $0}; NR==528{print \"L528:\", $0}; NR==529{print \"L529:\", $0}; NR==738{print \"L738:\", $0}; NR==739{print \"L739:\", $0}; NR==1414{print \"L1414:\", $0}; NR==1415{print \"L1415:\", $0}; NR==2226{print \"L2226:\", $0}; NR==2227{print \"L2227:\", $0}; NR==2609{print \"L2609:\", $0}' GraphCanonizationProofs/FullCorrectness/Equivariance/PathEquivariance.lean)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

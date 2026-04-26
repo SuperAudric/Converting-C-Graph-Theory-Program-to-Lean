@@ -41,34 +41,76 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §3   | `permNat` + `PathSegment/PathsBetween/...permute` | `Equivariance.Actions`                   | ✅ defined      |
 | §3A  | `initializePaths_Aut_equivariant` (Stage A)       | `Equivariance.StageA`                    | ✅ proved       |
 | §3B  | `calculatePathRankings` size + `σInvariant`       | `Equivariance.RankStateInvariants`       | ✅ proved       |
-| §3B  | Generic sort/`orderInsensitiveListCmp` lemmas     | `Equivariance.ComparisonSort`            | 🧱 1 sorry (`assignRanks_rank_eq_at_succ_when_cmp_eq`) |
+| §3B  | Generic sort/`orderInsensitiveListCmp` lemmas     | `Equivariance.ComparisonSort`            | ✅ proved (`assignRanks_rank_eq_within_eq_class` + `_at_succ_when_cmp_eq` closed) |
 | §3B  | `comparePathSegments_total_preorder` (Stage B)    | `Equivariance.ComparePathSegments`       | ✅ proved; `comparePathsBetween_total_preorder` ✅ proved |
-| §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | 🧱 4 sorry (private: `from_assignList_σ_rank_closure`, `between_assignList_σ_rank_closure`; public: `calculatePathRankings_fromRanks_inv`, `calculatePathRankings_betweenRanks_inv`) |
+| §3B  | σ-equivariance of compare/sort; Stage B assembly  | `Equivariance.PathEquivariance`          | ✅ proved (`from_assignList_σ_rank_closure`, `between_assignList_σ_rank_closure`, `calculatePathRankings_fromRanks_inv`, `calculatePathRankings_betweenRanks_inv` all closed via `calculatePathRankings_σ_cell_inv_facts` + foldl body lemma) |
 | §4   | `convergeOnce`/`convergeLoop` Aut-invariance; C/D | `Equivariance.ConvergeLoop`              | ✅ proved       |
 | §5   | `TypedAut G vts` (subgroup + Fintype)             | `Tiebreak`                               | ✅ defined      |
 | §5.0 | `breakTie` output position-by-position            | `Tiebreak`                               | ✅ proved (4 characterization lemmas) |
 | §5.1 | `breakTie` is the v*-stabilizer of `TypedAut`     | `Tiebreak`                               | ✅ proved (with `hAutInv`/`hsize`) |
 | §5.2 | `breakTie` strictly shrinks `TypedAut`            | `Tiebreak`                               | ✅ proved (with `hmove`) |
 | §6.0 | `breakTieAt` output + τ-equivariance              | `Tiebreak`                               | ✅ proved (3 characterization + 1 equivariance) |
-| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (the chained §3 Stages B–D for `runFrom`) |
+| §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (see "Stage B/D gap" below) |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                             | ✅ defined + boundary proved |
 | §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                             | ✅ proved (uses §5 disjunctive characterization) |
 | §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, Phase 2 breakTie step, Phase 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (6 sorry sites)
+## Open obligations (2 sorry sites)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `from_assignList_σ_rank_closure` (private) | `Equivariance.PathEquivariance` | σ-closure of the from-side assignList: each `(p, r)` has a matching `(σ p, r)`. Needs `assignRanks_rank_eq_at_succ_when_cmp_eq` + Perm-preservation of assignRanks. |
-| `between_assignList_σ_rank_closure` (private) | `Equivariance.PathEquivariance` | Analog of the above for the between-side (allBetween) assignList. |
-| `calculatePathRankings_fromRanks_inv` | `Equivariance.PathEquivariance`    | Foldl induction on the depth loop + σ-equivariance of sortBy + assignRanks at each step. Depends on `from_assignList_σ_rank_closure`. |
-| `calculatePathRankings_betweenRanks_inv` | `Equivariance.PathEquivariance` | Companion to the above; same induction. Depends on `between_assignList_σ_rank_closure`. |
-| `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | §3 Stages B–D chained for the bounded `runFrom` loop. Mechanical once Stage B–D are discharged. |
-| `run_isomorphic_eq` (⟹)               | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2. |
+| `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | **Net-new infrastructure**, NOT mechanical chaining of existing Stages A–D. See "Stage B/D gap" below. |
+| `run_isomorphic_eq_new` (⟹)           | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2; current sketch routes through `tiebreak_choice_independent`, hence inherits the Stage B/D gap. |
 
-**`Invariants.lean` is fully closed.** `orderVertices_prefix_invariant` and
-`orderVertices_n_distinct_ranks` both proved unconditionally.
+**`Invariants.lean` and `Equivariance.PathEquivariance.lean` are both fully closed.**
+`orderVertices_prefix_invariant`, `orderVertices_n_distinct_ranks`,
+`calculatePathRankings_fromRanks_inv`, and `calculatePathRankings_betweenRanks_inv` are all
+proved unconditionally.
+
+## The Stage B/D gap blocking `runFrom_VtsInvariant_eq`
+
+The original plan billed `runFrom_VtsInvariant_eq` as "mechanical given Stages A–D." On
+inspection that is **not accurate**: the existing Stages A–D are stated in *fixed-point*
+form (single σ-INVARIANT array applied to the same/permuted graph), but
+`runFrom_VtsInvariant_eq` needs *relational* equivariance — TWO τ-related arrays
+`arr₁, arr₂` (with `arr₂[w] = arr₁[τ⁻¹ w]`) feeding the same `G`, where neither array
+is τ-fixed.
+
+What the proven Stages give vs. what the runFrom proof needs:
+
+| Stage | Proven form                                                                                                       | Needed (relational) form                                                                                          |
+| ----- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| A     | General σ: `initializePaths (G.permute σ) = PathState.permute σ (initializePaths G)`                              | (already general — reusable as-is)                                                                                |
+| B     | σ ∈ Aut G **AND** σ-INV vts ⟹ `RankState.permute σ rs = rs` (σ-fixed point)                                       | σ ∈ Aut G, ANY vts: `calculatePathRankings (init G) (σ·vts) = RankState.permute σ (calculatePathRankings (init G) vts)` |
+| C     | σ-INV form: `convergeLoop` preserves σ-INVARIANCE of a single array                                               | σ-related form: τ-related arrays produce τ-related convergeLoop outputs                                            |
+| D     | `labelEdges vts (G.permute σ) = labelEdges vts G` for σ ∈ Aut G (same vts on permuted graph)                      | `labelEdges (σ·rks) G = labelEdges rks G` for σ ∈ Aut G AND tie-free rks (different rks on same graph)             |
+
+The σ-cell-INV proof in `Equivariance.PathEquivariance` rests crucially on
+`comparePathsFrom_σ_self_eq` which requires σ-INV vts (so that `cmp p (σ·p) = .eq`).
+Lifting Stage B to the relational form requires redoing the foldl-induction body in a
+relational form (~few hundred lines, comparable to the σ-cell-INV proof itself).
+
+Stage D-rel is even less direct: the `denseRanks` step uses `(rank, vertex-index)`
+lexicographic order. Under τ-relabeling, the secondary key `vertex-index` gets
+τ-permuted, so the dense-ranks-as-permutation argument requires either tie-freeness
+of `rks` at this step, or a structural theorem about `labelEdgesAccordingToRankings`
+that factors through the inverse of `denseRanks`.
+
+### Three reasonable resolutions
+
+1. **Build the relational stages.** Mirror the σ-cell-INV machinery in relational form
+   (Stage B-rel, C-rel) plus a structure theorem for `labelEdges` (Stage D-rel). Estimate:
+   500–1000 lines, comparable to the work that closed `calculatePathRankings_*_inv`.
+2. **Find a different proof of `run_isomorphic_eq_new`** that bypasses
+   `tiebreak_choice_independent` entirely. If successful, both sorries close together
+   without going through the gap. Risky — current sketch uses §6 essentially.
+3. **Acknowledge `runFrom_VtsInvariant_eq` as the entry point** for canonicalization
+   correctness and accept it as a "deep" lemma requiring net-new work; do not pretend it
+   is downstream of the existing Stages.
+
+The plan was to attempt path 2 first (cheaper if it works), falling back to
+path 1 when no alternative proof shape presented itself.
 
 --------------------------------------------------------------------------------
 
