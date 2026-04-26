@@ -548,6 +548,92 @@ theorem initializePaths_σInv_via_Aut
   rw [hG] at h_stageA
   exact h_stageA
 
+/-! ### Structural facts about `pathsAtDepth` from `initializePaths G`
+
+These mirror `initializePaths_pathsAtDepth_startVertices_eq_range` from `Invariants.lean`,
+but are needed earlier (in `PathEquivariance.lean`) for the σ-invariance proofs. -/
+
+/-- The depth-`d` slice of `(initializePaths G).pathsOfLength` has the explicit
+constructor form. Used to extract structural facts (lengths, start vertices, etc.). -/
+private theorem initializePaths_pathsOfLength_get_eq
+    (G : AdjMatrix n) {d : Nat} (hd : d < n)
+    (h_in : d < (initializePaths G).pathsOfLength.size) :
+    (initializePaths G).pathsOfLength[d]'h_in
+      = (List.finRange n).toArray.map fun startFin : Fin n =>
+          ({ depth := d, startVertexIndex := startFin,
+             pathsToVertex := (List.finRange n).map fun endFin : Fin n =>
+               { depth := d, startVertexIndex := startFin, endVertexIndex := endFin,
+                 connectedSubPaths :=
+                   if d = 0 then
+                     (if startFin = endFin then [PathSegment.bottom startFin] else []
+                      : List (PathSegment n))
+                   else
+                     (List.finRange n).map fun midFin : Fin n =>
+                       PathSegment.inner (G.adj midFin endFin) (d - 1) startFin midFin } }
+              : PathsFrom n) := by
+  show ((List.finRange n).toArray.map _)[d]'_ = _
+  rw [Array.getElem_map]
+  simp [List.getElem_finRange]
+
+/-- The structural facts about `pathsAtDepth` from `initializePaths G`: outer length,
+start-vertex enumeration, and inner length conditions. -/
+private theorem initializePaths_pathsAtDepth_structure
+    (G : AdjMatrix n) {d : Nat} (hd : d < n) :
+    let pathsAtDepth := ((initializePaths G).pathsOfLength.getD d #[]).toList
+    pathsAtDepth.length = n ∧
+    pathsAtDepth.map (·.startVertexIndex.val) = List.range n ∧
+    (∀ p ∈ pathsAtDepth, p.pathsToVertex.length = n) ∧
+    (∀ p ∈ pathsAtDepth, ∀ q ∈ p.pathsToVertex,
+        q.depth > 0 → q.connectedSubPaths.length = n) := by
+  intro pathsAtDepth
+  have h_in : d < (initializePaths G).pathsOfLength.size := by
+    rw [initializePaths_pathsOfLength_size]; exact hd
+  have h_pathsAtDepth_eq : pathsAtDepth = ((initializePaths G).pathsOfLength[d]'h_in).toList := by
+    show ((initializePaths G).pathsOfLength.getD d #[]).toList = _
+    rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_getElem h_in, Option.getD_some]
+  have h_slice := initializePaths_pathsOfLength_get_eq G hd h_in
+  -- Compute pathsAtDepth in the explicit form.
+  have h_pathsAtDepth :
+      pathsAtDepth = (List.finRange n).map fun startFin : Fin n =>
+          ({ depth := d, startVertexIndex := startFin,
+             pathsToVertex := (List.finRange n).map fun endFin : Fin n =>
+               { depth := d, startVertexIndex := startFin, endVertexIndex := endFin,
+                 connectedSubPaths :=
+                   if d = 0 then
+                     (if startFin = endFin then [PathSegment.bottom startFin] else []
+                      : List (PathSegment n))
+                   else
+                     (List.finRange n).map fun midFin : Fin n =>
+                       PathSegment.inner (G.adj midFin endFin) (d - 1) startFin midFin } }
+              : PathsFrom n) := by
+    rw [h_pathsAtDepth_eq, h_slice, Array.toList_map, List.toList_toArray]
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · -- pathsAtDepth.length = n
+    rw [h_pathsAtDepth, List.length_map, List.length_finRange]
+  · -- pathsAtDepth.map (·.startVertexIndex.val) = List.range n
+    rw [h_pathsAtDepth, List.map_map]
+    show (List.finRange n).map (fun startFin : Fin n => startFin.val) = List.range n
+    exact List.map_coe_finRange_eq_range
+  · -- ∀ p ∈ pathsAtDepth, p.pathsToVertex.length = n
+    intros p h_p_in
+    rw [h_pathsAtDepth] at h_p_in
+    obtain ⟨startFin, _, h_p_eq⟩ := List.mem_map.mp h_p_in
+    subst h_p_eq
+    show ((List.finRange n).map _).length = n
+    rw [List.length_map, List.length_finRange]
+  · -- ∀ p ∈ pathsAtDepth, ∀ q ∈ p.pathsToVertex, q.depth > 0 → q.connectedSubPaths.length = n
+    intros p h_p_in q h_q_in h_q_depth
+    rw [h_pathsAtDepth] at h_p_in
+    obtain ⟨startFin, _, h_p_eq⟩ := List.mem_map.mp h_p_in
+    subst h_p_eq
+    -- q ∈ (List.finRange n).map (...).
+    obtain ⟨endFin, _, h_q_eq⟩ := List.mem_map.mp h_q_in
+    subst h_q_eq
+    -- q.depth = d. By h_q_depth, d > 0 so d ≠ 0.
+    have h_d_ne : d ≠ 0 := by
+      intro h_d; rw [h_d] at h_q_depth; exact absurd h_q_depth (Nat.lt_irrefl 0)
+    simp only [if_neg h_d_ne, List.length_map, List.length_finRange]
+
 /-! ### Chain σ-invariance lemmas
 
 The body of `calculatePathRankings` updates `currentBetween` and `currentFrom` via
@@ -1824,8 +1910,44 @@ private theorem from_assignList_σ_rank_closure
   · -- (assignList[k']).2 = item.2.
     rw [h_item2_eq]; exact h_rank_eq.symm
 
-/-- **σ-rank-closure of the between-side assignList** (TODO): analog of the from-side
-σ-rank-closure for the `allBetween` list (the concat of all `pathsToVertex`). -/
+/-- For a list `L`, `L.foldl (acc, x => acc ++ f x) []` flattens to a `flatMap`-style
+collection: `q ∈ result ↔ ∃ x ∈ L, q ∈ f x`. -/
+private theorem mem_foldl_append_init_nil {α β : Type} (f : β → List α) (q : α) :
+    ∀ (L : List β) (init : List α),
+      q ∈ L.foldl (fun acc x => acc ++ f x) init ↔
+        q ∈ init ∨ ∃ x ∈ L, q ∈ f x := by
+  intro L
+  induction L with
+  | nil =>
+    intro init
+    simp [List.foldl]
+  | cons hd tl ih =>
+    intro init
+    rw [List.foldl_cons]
+    rw [ih (init ++ f hd)]
+    simp only [List.mem_append, List.mem_cons]
+    constructor
+    · rintro ((h_init | h_hd) | ⟨x, h_in, h_q⟩)
+      · exact Or.inl h_init
+      · exact Or.inr ⟨hd, Or.inl rfl, h_hd⟩
+      · exact Or.inr ⟨x, Or.inr h_in, h_q⟩
+    · rintro (h_init | ⟨x, (h_eq | h_in), h_q⟩)
+      · exact Or.inl (Or.inl h_init)
+      · subst h_eq; exact Or.inl (Or.inr h_q)
+      · exact Or.inr ⟨x, h_in, h_q⟩
+
+/-- Specialization for the algorithm's `allBetween` foldl. -/
+private theorem mem_allBetween_iff {n : Nat} (q : PathsBetween n)
+    (pathsAtDepth : List (PathsFrom n)) :
+    q ∈ pathsAtDepth.foldl
+        (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) [] ↔
+      ∃ pf ∈ pathsAtDepth, q ∈ pf.pathsToVertex := by
+  rw [mem_foldl_append_init_nil (fun pf : PathsFrom n => pf.pathsToVertex) q pathsAtDepth []]
+  simp
+
+/-- **σ-rank-closure of the between-side assignList**: for σ-fixed `state` and
+σ-invariant `vts`/`br`, the assignList from `assignRanks cmp (sortBy cmp allBetween)` is
+σ-rank-closed: each `(q, r)` has a matching `(f q, r)` in the list. -/
 private theorem between_assignList_σ_rank_closure
     {n : Nat} (σ : Equiv.Perm (Fin n))
     (state : PathState n)
@@ -1850,7 +1972,155 @@ private theorem between_assignList_σ_rank_closure
         item'.1.startVertexIndex.val = (σ item.1.startVertexIndex).val
         ∧ item'.1.endVertexIndex.val = (σ item.1.endVertexIndex).val
         ∧ item'.2 = item.2 := by
-  sorry
+  intro pathsAtDepth allBetween cmp assignList item h_item_mem
+  set f : PathsBetween n → PathsBetween n := PathsBetween.permute σ with hf_def
+  -- Inner-array size = n via toList.length.
+  have h_inner_size : (state.pathsOfLength.getD depth #[]).size = n := by
+    rw [← Array.length_toList]; exact h_outer_len
+  have h_depth_arr : depth < state.pathsOfLength.size := by
+    by_contra h_not
+    push_neg at h_not
+    have : state.pathsOfLength.getD depth #[] = #[] := by
+      rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none h_not, Option.getD_none]
+    rw [this] at h_outer_len
+    simp at h_outer_len
+    omega
+  -- Decompose item ∈ assignList: at some position k.
+  obtain ⟨k, h_k_lt, h_assign_k⟩ := List.mem_iff_getElem.mp h_item_mem
+  have h_assign_len : assignList.length = (sortBy cmp allBetween).length :=
+    assignRanks_length cmp _
+  have h_k_lt_sort : k < (sortBy cmp allBetween).length := by
+    rw [← h_assign_len]; exact h_k_lt
+  have h_item1_eq : item.1 = (sortBy cmp allBetween)[k]'h_k_lt_sort := by
+    have h_fst_eq : (assignList[k]'h_k_lt).1
+                  = (sortBy cmp allBetween)[k]'h_k_lt_sort :=
+      assignRanks_getElem_fst cmp (sortBy cmp allBetween) k h_k_lt_sort
+    rw [← h_assign_k]; exact h_fst_eq
+  have h_item2_eq : item.2 = (assignList[k]'h_k_lt).2 := by rw [← h_assign_k]
+  set q := item.1 with hq_def
+  -- q ∈ allBetween via sortBy_perm.
+  have h_q_in_sort : q ∈ sortBy cmp allBetween := by
+    rw [h_item1_eq]; exact List.getElem_mem _
+  have h_q_in : q ∈ allBetween :=
+    (sortBy_perm cmp allBetween).mem_iff.mp h_q_in_sort
+  -- q ∈ allBetween ⟹ ∃ pf ∈ pathsAtDepth, q ∈ pf.pathsToVertex.
+  obtain ⟨pf, h_pf_in, h_q_in_pf⟩ := (mem_allBetween_iff q pathsAtDepth).mp h_q_in
+  -- pf is at some slot s_pf : Fin n in pathsAtDepth.
+  obtain ⟨s_pf, hs_pf_lt, hs_pf_eq⟩ := List.mem_iff_getElem.mp h_pf_in
+  have hs_pf_lt_n : s_pf < n := by rw [← h_outer_len]; exact hs_pf_lt
+  set s_fin : Fin n := ⟨s_pf, hs_pf_lt_n⟩
+  have h_s_pf_lt_arr : s_pf < (state.pathsOfLength.getD depth #[]).size := by
+    rw [h_inner_size]; exact hs_pf_lt_n
+  have h_σs_lt_arr : (σ s_fin).val < (state.pathsOfLength.getD depth #[]).size := by
+    rw [h_inner_size]; exact (σ s_fin).isLt
+  -- σ-fixedness: pathsAtDepth[σ s_fin] = PathsFrom.permute σ pf.
+  have h_pf_at_σs_eq :
+      (state.pathsOfLength.getD depth #[])[(σ s_fin).val]'h_σs_lt_arr
+        = PathsFrom.permute σ pf := by
+    have h_eq := state_σ_fixed_pathsOfLength_at_σ_slot σ state h_state_σ_fixed depth
+                  h_depth_arr h_inner_size s_fin h_σs_lt_arr h_s_pf_lt_arr
+    rw [h_eq]
+    have h_arr_eq_p : (state.pathsOfLength.getD depth #[])[s_fin.val]'h_s_pf_lt_arr = pf := by
+      show (state.pathsOfLength.getD depth #[])[s_pf]'h_s_pf_lt_arr = pf
+      rw [show (state.pathsOfLength.getD depth #[])[s_pf]'h_s_pf_lt_arr
+            = (state.pathsOfLength.getD depth #[]).toList[s_pf]'(by
+                rw [Array.length_toList]; exact h_s_pf_lt_arr)
+          from (Array.getElem_toList (h := h_s_pf_lt_arr)).symm]
+      exact hs_pf_eq
+    rw [h_arr_eq_p]
+  -- pf' := PathsFrom.permute σ pf, located at slot σ s_fin in pathsAtDepth.
+  set pf' : PathsFrom n := PathsFrom.permute σ pf with hpf'_def
+  have h_pf'_in : pf' ∈ pathsAtDepth := by
+    show pf' ∈ (state.pathsOfLength.getD depth #[]).toList
+    rw [← h_pf_at_σs_eq]
+    exact Array.getElem_mem_toList _
+  -- q ∈ pf.pathsToVertex ⟹ f q ∈ pf.pathsToVertex.map f.
+  have h_fq_in_map : f q ∈ pf.pathsToVertex.map f := List.mem_map.mpr ⟨q, h_q_in_pf, rfl⟩
+  -- pf'.pathsToVertex.Perm (pf.pathsToVertex.map f) via PathsFrom_permute_pathsToVertex_perm.
+  have h_pf_pathsToVertex_len : pf.pathsToVertex.length = n := h_pathsToVertex_len pf h_pf_in
+  have h_perm : pf'.pathsToVertex.Perm (pf.pathsToVertex.map f) :=
+    PathsFrom_permute_pathsToVertex_perm σ pf h_pf_pathsToVertex_len
+  -- f q ∈ pf'.pathsToVertex.
+  have h_fq_in_pf' : f q ∈ pf'.pathsToVertex := h_perm.symm.mem_iff.mp h_fq_in_map
+  -- f q ∈ allBetween (via the foldl-flatten lemma).
+  have h_fq_in_all : f q ∈ allBetween := by
+    show f q ∈ pathsAtDepth.foldl _ []
+    exact (mem_allBetween_iff (f q) pathsAtDepth).mpr ⟨pf', h_pf'_in, h_fq_in_pf'⟩
+  -- f q ∈ sortBy cmp allBetween, at some position k'.
+  have h_fq_in_sort : f q ∈ sortBy cmp allBetween :=
+    (sortBy_perm cmp allBetween).mem_iff.mpr h_fq_in_all
+  obtain ⟨k', h_k'_lt_sort, hk'_eq⟩ := List.mem_iff_getElem.mp h_fq_in_sort
+  have h_k'_lt : k' < assignList.length := by rw [h_assign_len]; exact h_k'_lt_sort
+  -- cmp q (f q) = .eq via comparePathsBetween_σ_self_eq.
+  have h_q_inner_len : q.depth > 0 → q.connectedSubPaths.length = n :=
+    h_inner_len pf h_pf_in q h_q_in_pf
+  have h_cmp_qfq : cmp q (f q) = Ordering.eq := by
+    rw [hf_def]
+    exact comparePathsBetween_σ_self_eq σ vts hvts br hbr q h_q_inner_len
+  -- Get total preorder of cmp.
+  obtain ⟨h_refl, h_antisym₁, h_antisym₂, h_trans⟩ :=
+    comparePathsBetween_total_preorder (vc := n) vts br
+  have h_sorted : (sortBy cmp allBetween).Pairwise (fun a b => cmp a b ≠ Ordering.gt) :=
+    sortBy_pairwise cmp h_antisym₂ h_trans allBetween
+  have h_sortk_eq_q : (sortBy cmp allBetween)[k]'h_k_lt_sort = q := h_item1_eq.symm
+  have h_sortk'_eq_fq : (sortBy cmp allBetween)[k']'h_k'_lt_sort = f q := hk'_eq
+  have h_cmp_at : cmp ((sortBy cmp allBetween)[k]'h_k_lt_sort)
+                      ((sortBy cmp allBetween)[k']'h_k'_lt_sort) = Ordering.eq := by
+    rw [h_sortk_eq_q, h_sortk'_eq_fq]; exact h_cmp_qfq
+  have h_eq_symm : ∀ a b : PathsBetween n, cmp a b = .eq → cmp b a = .eq := by
+    intros a b hab
+    match h_ba : cmp b a with
+    | .eq => rfl
+    | .lt =>
+      exfalso
+      have h_gt : comparePathsBetween vts br a b = .gt := h_antisym₁ b a h_ba
+      have h_eq : comparePathsBetween vts br a b = .eq := hab
+      rw [h_gt] at h_eq; cases h_eq
+    | .gt =>
+      exfalso
+      have h_lt : comparePathsBetween vts br a b = .lt := h_antisym₂ b a h_ba
+      have h_eq : comparePathsBetween vts br a b = .eq := hab
+      rw [h_lt] at h_eq; cases h_eq
+  have h_b_k : k < (assignRanks cmp (sortBy cmp allBetween)).length := by
+    rw [assignRanks_length]; exact h_k_lt_sort
+  have h_b_k' : k' < (assignRanks cmp (sortBy cmp allBetween)).length := by
+    rw [assignRanks_length]; exact h_k'_lt_sort
+  have h_rank_eq :
+      ((assignRanks cmp (sortBy cmp allBetween))[k]'h_b_k).2
+        = ((assignRanks cmp (sortBy cmp allBetween))[k']'h_b_k').2 := by
+    rcases Nat.lt_or_ge k' k with h_lt | h_ge
+    · have h_le_swap : k' ≤ k := Nat.le_of_lt h_lt
+      have h_cmp_swap : cmp ((sortBy cmp allBetween)[k']'h_k'_lt_sort)
+                            ((sortBy cmp allBetween)[k]'h_k_lt_sort) = Ordering.eq :=
+        h_eq_symm _ _ h_cmp_at
+      exact (assignRanks_rank_eq_within_eq_class cmp h_refl h_antisym₁ h_antisym₂ h_trans
+        (sortBy cmp allBetween) h_sorted k' k h_le_swap h_k_lt_sort h_cmp_swap).symm
+    · exact assignRanks_rank_eq_within_eq_class cmp h_refl h_antisym₁ h_antisym₂ h_trans
+        (sortBy cmp allBetween) h_sorted k k' h_ge h_k'_lt_sort h_cmp_at
+  -- Construct item' = assignList[k']: first component is f q.
+  refine ⟨assignList[k']'h_k'_lt, List.getElem_mem _, ?_, ?_, ?_⟩
+  · -- (assignList[k']).1.startVertexIndex.val = (σ q.startVertexIndex).val.
+    have h_assign_k'_fst : (assignList[k']'h_k'_lt).1
+                         = (sortBy cmp allBetween)[k']'h_k'_lt_sort :=
+      assignRanks_getElem_fst cmp (sortBy cmp allBetween) k' h_k'_lt_sort
+    rw [h_assign_k'_fst, h_sortk'_eq_fq, hf_def]
+    by_cases hn : n = 0
+    · subst hn; exact q.startVertexIndex.elim0
+    · obtain ⟨k_pos, rfl⟩ : ∃ k, n = k + 1 := ⟨n - 1, by omega⟩
+      show (σ q.startVertexIndex).val = (σ q.startVertexIndex).val
+      rfl
+  · -- (assignList[k']).1.endVertexIndex.val = (σ q.endVertexIndex).val.
+    have h_assign_k'_fst : (assignList[k']'h_k'_lt).1
+                         = (sortBy cmp allBetween)[k']'h_k'_lt_sort :=
+      assignRanks_getElem_fst cmp (sortBy cmp allBetween) k' h_k'_lt_sort
+    rw [h_assign_k'_fst, h_sortk'_eq_fq, hf_def]
+    by_cases hn : n = 0
+    · subst hn; exact q.endVertexIndex.elim0
+    · obtain ⟨k_pos, rfl⟩ : ∃ k, n = k + 1 := ⟨n - 1, by omega⟩
+      show (σ q.endVertexIndex).val = (σ q.endVertexIndex).val
+      rfl
+  · -- (assignList[k']).2 = item.2.
+    rw [h_item2_eq]; exact h_rank_eq.symm
 
 /-- The σ-invariance of `fromRanks` values in `calculatePathRankings`'s output.
 Part of the deep Stage B content; requires foldl induction on the depth loop combined with
