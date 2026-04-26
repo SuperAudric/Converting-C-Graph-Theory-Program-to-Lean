@@ -10,37 +10,15 @@ Proves that `comparePathSegments`, `comparePathsBetween`, `comparePathsFrom` are
 permute actions produce `List.Perm`-related outputs.
 
 Assembles Stage B: `calculatePathRankings_Aut_equivariant` follows from
-`calculatePathRankings_RankState_invariant` (which needs the two `_inv` sorry'd lemmas
-below) composed with Stage A + `σ ∈ Aut G`.
+`calculatePathRankings_RankState_invariant` composed with Stage A + `σ ∈ Aut G`.
 
-## Sorry status
-- `calculatePathRankings_fromRanks_inv` : `sorry` — deep fold-level σ-invariance; requires
-  foldl induction on the depth loop plus σ-equivariance of sortBy + assignRanks.
-- `calculatePathRankings_betweenRanks_inv` : `sorry` — companion to the above; proved by
-  shared foldl induction.
-
-## Progress status (2026-04-25)
-Foundational sub-lemmas for the deep proof are in place:
-- ✅ `betweenRankFn_σ_inv_from_cells` — cell-σ-inv → fn-σ-inv.
-- ✅ `initializePaths_σInv_via_Aut` — Stage A applied for σ ∈ Aut G.
-- ✅ `assignRanks_map_of_cmp_respect` (in `ComparisonSort`) — assignRanks commutes with `map f`
-  when cmp respects f.
-- ✅ `set_chain_σInvariant` — set! chain on fromRanks preserves σ-cell-invariance, given
-  σ-rank-closure + permutation of starts.
-- ✅ `setBetween_chain_σInvariant` — setBetween chain on betweenRanks preserves σ-cell-
-  invariance, given σ-rank-closure + Nodup of (start, end) pairs.
-- ✅ `comparePathSegments_σ_self_eq` — `cmp p (PS.permute σ p) = .eq` under σ-inv vts/br.
-- ✅ `comparePathsBetween_σ_self_eq` — `cmp p (PB.permute σ p) = .eq` under σ-inv vts/br.
-- ✅ `comparePathsFrom_σ_self_eq` — `cmp p (PF.permute σ p) = .eq` under σ-inv vts/br.
-
-Remaining for `calculatePathRankings_fromRanks_inv` / `_betweenRanks_inv`:
-- σ-rank-closure of assignList: derive from `_σ_self_eq` (cmp p (f p) = .eq) — σ-related
-  elements get the same rank in `assignRanks`. The σ-self-eq lemmas above provide the key
-  ingredient: cmp identifies p with its σ-permuted self, so they're in the same cmp-class.
-- Body preservation: combines chain σ-inv + σ-rank-closure + σ-equivariance of compare/sort
-  for one depth iteration.
-- Foldl invariant on the depth loop (carrying σ-cell-invariance of currentBetween/currentFrom).
-- Cell-level extraction from the foldl invariant.
+The σ-cell-invariance of `calculatePathRankings`'s output is `calculatePathRankings_σ_cell_inv_facts`,
+proved by depth-foldl induction (`calculatePathRankings_body_preserves_inv` is the body step)
+using:
+- `set_chain_σInvariant` / `setBetween_chain_σInvariant` (chain σ-inv preservation),
+- `from_assignList_σ_rank_closure` / `between_assignList_σ_rank_closure` (σ-rank-closure),
+- `initializePaths_pathsAtDepth_structure` / `initializePaths_allBetween_pairs_facts`
+  (structural facts on `pathsAtDepth` and `allBetween`).
 -/
 
 namespace Graph
@@ -633,6 +611,130 @@ private theorem initializePaths_pathsAtDepth_structure
     have h_d_ne : d ≠ 0 := by
       intro h_d; rw [h_d] at h_q_depth; exact absurd h_q_depth (Nat.lt_irrefl 0)
     simp only [if_neg h_d_ne, List.length_map, List.length_finRange]
+
+/-- Inner structural facts about `pathsAtDepth` from `initializePaths G`: every entry of
+`pf.pathsToVertex` has its `startVertexIndex` equal to `pf.startVertexIndex`, and the
+`endVertexIndex.val`s of `pf.pathsToVertex` enumerate `List.range n`. -/
+private theorem initializePaths_pathsAtDepth_inner_structure
+    (G : AdjMatrix n) {d : Nat} (hd : d < n) :
+    let pathsAtDepth := ((initializePaths G).pathsOfLength.getD d #[]).toList
+    (∀ pf ∈ pathsAtDepth, ∀ q ∈ pf.pathsToVertex,
+        q.startVertexIndex = pf.startVertexIndex) ∧
+    (∀ pf ∈ pathsAtDepth,
+        pf.pathsToVertex.map (·.endVertexIndex.val) = List.range n) := by
+  intro pathsAtDepth
+  have h_in : d < (initializePaths G).pathsOfLength.size := by
+    rw [initializePaths_pathsOfLength_size]; exact hd
+  have h_pathsAtDepth_eq : pathsAtDepth = ((initializePaths G).pathsOfLength[d]'h_in).toList := by
+    show ((initializePaths G).pathsOfLength.getD d #[]).toList = _
+    rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_getElem h_in, Option.getD_some]
+  have h_slice := initializePaths_pathsOfLength_get_eq G hd h_in
+  have h_pathsAtDepth :
+      pathsAtDepth = (List.finRange n).map fun startFin : Fin n =>
+          ({ depth := d, startVertexIndex := startFin,
+             pathsToVertex := (List.finRange n).map fun endFin : Fin n =>
+               { depth := d, startVertexIndex := startFin, endVertexIndex := endFin,
+                 connectedSubPaths :=
+                   if d = 0 then
+                     (if startFin = endFin then [PathSegment.bottom startFin] else []
+                      : List (PathSegment n))
+                   else
+                     (List.finRange n).map fun midFin : Fin n =>
+                       PathSegment.inner (G.adj midFin endFin) (d - 1) startFin midFin } }
+              : PathsFrom n) := by
+    rw [h_pathsAtDepth_eq, h_slice, Array.toList_map, List.toList_toArray]
+  refine ⟨?_, ?_⟩
+  · -- ∀ pf ∈ pathsAtDepth, ∀ q ∈ pf.pathsToVertex, q.startVertexIndex = pf.startVertexIndex
+    intros pf h_pf_in q h_q_in
+    rw [h_pathsAtDepth] at h_pf_in
+    obtain ⟨startFin, _, h_pf_eq⟩ := List.mem_map.mp h_pf_in
+    subst h_pf_eq
+    obtain ⟨endFin, _, h_q_eq⟩ := List.mem_map.mp h_q_in
+    subst h_q_eq
+    rfl
+  · -- ∀ pf ∈ pathsAtDepth, pf.pathsToVertex.map (·.endVertexIndex.val) = List.range n
+    intros pf h_pf_in
+    rw [h_pathsAtDepth] at h_pf_in
+    obtain ⟨startFin, _, h_pf_eq⟩ := List.mem_map.mp h_pf_in
+    subst h_pf_eq
+    show ((List.finRange n).map _).map _ = _
+    rw [List.map_map]
+    show (List.finRange n).map (fun endFin : Fin n => endFin.val) = List.range n
+    exact List.map_coe_finRange_eq_range
+
+/-- The (start, end) pairs of `allBetween` are unique (Nodup) and complete (every
+`(s, e) : Fin n × Fin n` appears as some entry's pair). -/
+private theorem initializePaths_allBetween_pairs_facts
+    (G : AdjMatrix n) {d : Nat} (hd : d < n) :
+    let pathsAtDepth := ((initializePaths G).pathsOfLength.getD d #[]).toList
+    let allBetween := pathsAtDepth.foldl
+      (fun acc pf => acc ++ pf.pathsToVertex) []
+    (allBetween.map (fun q => (q.startVertexIndex.val, q.endVertexIndex.val))).Nodup ∧
+    (∀ s e : Fin n, ∃ q ∈ allBetween,
+        q.startVertexIndex.val = s.val ∧ q.endVertexIndex.val = e.val) := by
+  intro pathsAtDepth allBetween
+  have h_allBetween_eq : allBetween = pathsAtDepth.flatMap (·.pathsToVertex) := by
+    show pathsAtDepth.foldl (fun acc pf => acc ++ pf.pathsToVertex) [] = _
+    rw [List.flatMap_eq_foldl]
+  obtain ⟨_, h_starts_eq, _, _⟩ :=
+    initializePaths_pathsAtDepth_structure G hd
+  obtain ⟨h_inner_start_eq, h_inner_ends_eq⟩ :=
+    initializePaths_pathsAtDepth_inner_structure G hd
+  refine ⟨?_, ?_⟩
+  · -- Nodup of (start, end) pairs.
+    rw [h_allBetween_eq, List.map_flatMap]
+    rw [List.nodup_flatMap]
+    refine ⟨?_, ?_⟩
+    · -- Each pf.pathsToVertex.map (s,e) is Nodup.
+      intros pf h_pf_in
+      -- Use Nodup of ends → Nodup of pairs via Pairwise.imp.
+      have h_ends_nodup : (pf.pathsToVertex.map (·.endVertexIndex.val)).Nodup := by
+        rw [h_inner_ends_eq pf h_pf_in]; exact List.nodup_range
+      show (pf.pathsToVertex.map (fun q => (q.startVertexIndex.val, q.endVertexIndex.val))).Nodup
+      rw [List.Nodup, List.pairwise_map]
+      rw [List.Nodup, List.pairwise_map] at h_ends_nodup
+      apply h_ends_nodup.imp
+      intros q q' h_ends_ne h_pairs_eq
+      apply h_ends_ne
+      exact ((Prod.mk.injEq _ _ _ _).mp h_pairs_eq).2
+    · -- Pairwise (Disjoint on f) pathsAtDepth where f = ·.pathsToVertex.map ...
+      have h_starts_nodup : (pathsAtDepth.map (·.startVertexIndex.val)).Nodup := by
+        rw [h_starts_eq]; exact List.nodup_range
+      rw [List.Nodup, List.pairwise_map] at h_starts_nodup
+      apply h_starts_nodup.imp_of_mem
+      intros pf₁ pf₂ h_pf₁_in h_pf₂_in h_starts_ne
+      show List.Disjoint (pf₁.pathsToVertex.map _) (pf₂.pathsToVertex.map _)
+      intros pair h_pair_in₁ h_pair_in₂
+      obtain ⟨q₁, h_q₁_in, h_q₁_eq⟩ := List.mem_map.mp h_pair_in₁
+      obtain ⟨q₂, h_q₂_in, h_q₂_eq⟩ := List.mem_map.mp h_pair_in₂
+      apply h_starts_ne
+      have h_q₁_start : q₁.startVertexIndex = pf₁.startVertexIndex :=
+        h_inner_start_eq pf₁ h_pf₁_in q₁ h_q₁_in
+      have h_q₂_start : q₂.startVertexIndex = pf₂.startVertexIndex :=
+        h_inner_start_eq pf₂ h_pf₂_in q₂ h_q₂_in
+      have h_pair_eq : (q₁.startVertexIndex.val, q₁.endVertexIndex.val)
+                     = (q₂.startVertexIndex.val, q₂.endVertexIndex.val) :=
+        h_q₁_eq.trans h_q₂_eq.symm
+      have h_starts_eq_q : q₁.startVertexIndex.val = q₂.startVertexIndex.val :=
+        ((Prod.mk.injEq _ _ _ _).mp h_pair_eq).1
+      rw [h_q₁_start, h_q₂_start] at h_starts_eq_q
+      exact h_starts_eq_q
+  · -- Completeness.
+    intros s e
+    -- Find a pf with start = s.
+    have h_s_in_starts : s.val ∈ pathsAtDepth.map (·.startVertexIndex.val) := by
+      rw [h_starts_eq]; exact List.mem_range.mpr s.isLt
+    obtain ⟨pf, h_pf_in, h_pf_start⟩ := List.mem_map.mp h_s_in_starts
+    -- Find a q with end = e in pf.pathsToVertex.
+    have h_e_in_ends : e.val ∈ pf.pathsToVertex.map (·.endVertexIndex.val) := by
+      rw [h_inner_ends_eq pf h_pf_in]; exact List.mem_range.mpr e.isLt
+    obtain ⟨q, h_q_in, h_q_end⟩ := List.mem_map.mp h_e_in_ends
+    have h_q_start : q.startVertexIndex = pf.startVertexIndex :=
+      h_inner_start_eq pf h_pf_in q h_q_in
+    refine ⟨q, ?_, ?_, h_q_end⟩
+    · rw [h_allBetween_eq]
+      exact List.mem_flatMap.mpr ⟨pf, h_pf_in, h_q_in⟩
+    · rw [h_q_start]; exact h_pf_start
 
 /-! ### Chain σ-invariance lemmas
 
@@ -2130,6 +2232,171 @@ which carries the entire `RankState.σInvariant σ rs` content (sizes + cell-lev
 σ-invariance comes from `calculatePathRankings_σ_cell_inv_facts`, which is the deep
 foldl-induction lemma. -/
 
+/-- The combined σ-cell-invariance + size invariant on a `(currentBetween, currentFrom)`
+pair: this is the loop invariant of the depth foldl in `calculatePathRankings`. -/
+private def CalcRankingsInv {n : Nat} (σ : Equiv.Perm (Fin n))
+    (acc : Array (Array (Array Nat)) × Array (Array Nat)) : Prop :=
+  acc.1.size = n ∧
+  acc.2.size = n ∧
+  (∀ d : Nat, d < n → (acc.1.getD d #[]).size = n) ∧
+  (∀ d : Nat, d < n → (acc.2.getD d #[]).size = n) ∧
+  (∀ d : Nat, d < n → ∀ s : Nat, s < n → ((acc.1.getD d #[]).getD s #[]).size = n) ∧
+  (∀ d : Nat, d < n → ∀ s e : Fin n,
+      ((acc.1.getD d #[]).getD s.val #[]).getD e.val 0
+      = ((acc.1.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) ∧
+  (∀ d : Nat, d < n → ∀ s : Fin n,
+      (acc.2.getD d #[]).getD s.val 0
+      = (acc.2.getD d #[]).getD (σ⁻¹ s).val 0)
+
+/-- The body of the depth-foldl in `calculatePathRankings` preserves the combined invariant
+`CalcRankingsInv σ`. -/
+private theorem calculatePathRankings_body_preserves_inv
+    (G : AdjMatrix n) (σ : Equiv.Perm (Fin n)) (hσ : σ ∈ AdjMatrix.Aut G)
+    (vts : Array VertexType)
+    (hvts : ∀ v : Fin n, vts.getD (σ v).val 0 = vts.getD v.val 0)
+    (acc : Array (Array (Array Nat)) × Array (Array Nat))
+    (h_inv : CalcRankingsInv σ acc)
+    (depth : Nat) (h_depth : depth < n) :
+    CalcRankingsInv σ
+      (let (currentBetween, currentFrom) := acc
+       let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+       let allBetween := pathsAtDepth.foldl
+         (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+       let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+         ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+       let compareBetween := comparePathsBetween vts betweenRankFn
+       let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+         (fun (betweenAcc : Array (Array (Array Nat))) item =>
+           let (pathBetween, rank) := item
+           setBetween betweenAcc depth pathBetween.startVertexIndex.val
+             pathBetween.endVertexIndex.val rank) currentBetween
+       let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+         ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+       let compareFrom := comparePathsFrom vts updatedBetweenFn
+       let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+         (fun (fromAcc : Array (Array Nat)) item =>
+           let (pathFrom, rank) := item
+           let depthSlice := fromAcc.getD depth #[]
+           fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+       (updatedBetween, updatedFrom)) := by
+  obtain ⟨cb, cf⟩ := acc
+  obtain ⟨h_cb_size, h_cf_size, h_cb_row, h_cf_row, h_cb_cell, h_cb_inv, h_cf_inv⟩ := h_inv
+  -- State σ-fixed via Aut.
+  have h_state_σ_fixed : PathState.permute σ (initializePaths G) = initializePaths G :=
+    (initializePaths_σInv_via_Aut G σ hσ).symm
+  -- Length facts about pathsAtDepth.
+  obtain ⟨h_outer_len, h_starts_eq, h_pathsToVertex_len, h_inner_conn_len⟩ :=
+    initializePaths_pathsAtDepth_structure G h_depth
+  obtain ⟨h_pairs_nodup, h_pairs_complete⟩ :=
+    initializePaths_allBetween_pairs_facts G h_depth
+  -- σ-inv of betweenRankFn (current state) for all d (extended from d < n via the
+  -- out-of-bounds case where cb.getD d #[] = #[]).
+  have h_br_inv : ∀ d : Nat, ∀ s e : Fin n,
+      ((cb.getD d #[]).getD (σ s).val #[]).getD (σ e).val 0
+      = ((cb.getD d #[]).getD s.val #[]).getD e.val 0 := by
+    intros d s e
+    by_cases hd : d < n
+    · exact betweenRankFn_σ_inv_from_cells σ cb h_cb_inv d hd s e
+    · push_neg at hd
+      have h : cb.getD d #[] = #[] := by
+        rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_cb_size]; exact hd),
+            Option.getD_none]
+      rw [h]
+      simp
+  -- between assignList: σ-rank-closure.
+  have h_b_σ_closure :=
+    between_assignList_σ_rank_closure σ (initializePaths G) h_state_σ_fixed
+      vts hvts (fun rd rs re => ((cb.getD rd #[]).getD rs #[]).getD re 0)
+      h_br_inv depth h_depth h_outer_len h_pathsToVertex_len h_inner_conn_len
+  -- between assignList: Nodup of (s, e) pairs.
+  set compareBetween := comparePathsBetween vts
+    (fun rd rs re => ((cb.getD rd #[]).getD rs #[]).getD re 0) with h_compareBetween_def
+  set allBetween := ((initializePaths G).pathsOfLength.getD depth #[]).toList.foldl
+    (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) [] with h_allBetween_def
+  set assignList_b := assignRanks compareBetween (sortBy compareBetween allBetween) with h_assignList_b_def
+  have h_b_nodup : (assignList_b.map (fun item =>
+      (item.1.startVertexIndex.val, item.1.endVertexIndex.val))).Nodup := by
+    have h_fst : assignList_b.map (·.1) = sortBy compareBetween allBetween := by
+      rw [h_assignList_b_def]; exact assignRanks_map_fst _ _
+    have h_eq : assignList_b.map (fun item => (item.1.startVertexIndex.val, item.1.endVertexIndex.val))
+              = (sortBy compareBetween allBetween).map (fun pb : PathsBetween n =>
+                  (pb.startVertexIndex.val, pb.endVertexIndex.val)) := by
+      rw [← h_fst, List.map_map]; rfl
+    rw [h_eq]
+    have h_perm : ((sortBy compareBetween allBetween).map (fun pb : PathsBetween n =>
+        (pb.startVertexIndex.val, pb.endVertexIndex.val))).Perm
+        (allBetween.map (fun pb : PathsBetween n =>
+          (pb.startVertexIndex.val, pb.endVertexIndex.val))) :=
+      (sortBy_perm compareBetween allBetween).map _
+    exact h_perm.nodup_iff.mpr h_pairs_nodup
+  -- between assignList: Completeness of (s, e) pairs.
+  have h_b_complete : ∀ s e : Fin n, ∃ item ∈ assignList_b,
+      item.1.startVertexIndex.val = s.val ∧ item.1.endVertexIndex.val = e.val := by
+    intros s e
+    obtain ⟨q, h_q_in, h_q_start, h_q_end⟩ := h_pairs_complete s e
+    have h_q_in_sort : q ∈ sortBy compareBetween allBetween :=
+      (sortBy_perm compareBetween allBetween).mem_iff.mpr h_q_in
+    have h_q_in_map : q ∈ assignList_b.map (·.1) := by
+      rw [h_assignList_b_def, assignRanks_map_fst]; exact h_q_in_sort
+    obtain ⟨item, h_item_in, h_item_eq⟩ := List.mem_map.mp h_q_in_map
+    refine ⟨item, h_item_in, ?_, ?_⟩
+    · rw [h_item_eq]; exact h_q_start
+    · rw [h_item_eq]; exact h_q_end
+  -- Apply setBetween_chain_σInvariant.
+  have h_chain_b := setBetween_chain_σInvariant σ cb h_cb_size h_cb_row h_cb_cell h_cb_inv
+    depth h_depth assignList_b h_b_nodup h_b_complete h_b_σ_closure
+  -- Updated between σ-inv.
+  obtain ⟨h_ub_size, h_ub_row, h_ub_cell, h_ub_inv⟩ := h_chain_b
+  -- σ-inv of updatedBetweenFn.
+  set updatedBetween := assignList_b.foldl
+    (fun (betweenAcc : Array (Array (Array Nat))) item =>
+      let (pathBetween, rank) := item
+      setBetween betweenAcc depth pathBetween.startVertexIndex.val
+        pathBetween.endVertexIndex.val rank) cb with h_updatedBetween_def
+  have h_updatedBr_inv : ∀ d : Nat, ∀ s e : Fin n,
+      ((updatedBetween.getD d #[]).getD (σ s).val #[]).getD (σ e).val 0
+      = ((updatedBetween.getD d #[]).getD s.val #[]).getD e.val 0 := by
+    intros d s e
+    by_cases hd : d < n
+    · exact betweenRankFn_σ_inv_from_cells σ updatedBetween h_ub_inv d hd s e
+    · push_neg at hd
+      have h : updatedBetween.getD d #[] = #[] := by
+        rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_ub_size]; exact hd),
+            Option.getD_none]
+      rw [h]; simp
+  -- from-side σ-rank-closure.
+  set compareFrom := comparePathsFrom vts
+    (fun rd rs re => ((updatedBetween.getD rd #[]).getD rs #[]).getD re 0) with h_compareFrom_def
+  have h_f_σ_closure :=
+    from_assignList_σ_rank_closure σ (initializePaths G) h_state_σ_fixed
+      vts hvts (fun rd rs re => ((updatedBetween.getD rd #[]).getD rs #[]).getD re 0)
+      h_updatedBr_inv depth h_depth h_outer_len h_pathsToVertex_len h_inner_conn_len
+  -- starts perm for from-side assignList.
+  set assignList_f := assignRanks compareFrom
+    (sortBy compareFrom ((initializePaths G).pathsOfLength.getD depth #[]).toList)
+    with h_assignList_f_def
+  have h_f_starts_perm : (assignList_f.map (·.1.startVertexIndex.val)).Perm (List.range n) := by
+    have h_fst : assignList_f.map (·.1) = sortBy compareFrom
+        ((initializePaths G).pathsOfLength.getD depth #[]).toList := by
+      rw [h_assignList_f_def]; exact assignRanks_map_fst _ _
+    have h_eq : assignList_f.map (·.1.startVertexIndex.val)
+              = (sortBy compareFrom ((initializePaths G).pathsOfLength.getD depth #[]).toList).map
+                  (·.startVertexIndex.val) := by
+      rw [← h_fst, List.map_map]; rfl
+    rw [h_eq]
+    have h_perm : ((sortBy compareFrom
+        ((initializePaths G).pathsOfLength.getD depth #[]).toList).map (·.startVertexIndex.val)).Perm
+        (((initializePaths G).pathsOfLength.getD depth #[]).toList.map (·.startVertexIndex.val)) :=
+      (sortBy_perm compareFrom _).map _
+    rw [h_starts_eq] at h_perm
+    exact h_perm
+  -- Apply set_chain_σInvariant.
+  have h_chain_f := set_chain_σInvariant σ cf h_cf_size h_cf_row h_cf_inv
+    depth h_depth assignList_f h_f_starts_perm h_f_σ_closure
+  obtain ⟨h_uf_size, h_uf_row, h_uf_inv⟩ := h_chain_f
+  -- Combine into CalcRankingsInv.
+  exact ⟨h_ub_size, h_uf_size, h_ub_row, h_uf_row, h_ub_cell, h_ub_inv, h_uf_inv⟩
+
 /-- **Cell-level σ-invariance facts** for `calculatePathRankings`'s output. The deep
 content. Proved via depth-foldl induction over `List.range n`; the inductive step uses
 `set_chain_σInvariant` / `setBetween_chain_σInvariant` (with the σ-rank-closure lemmas
@@ -2146,7 +2413,116 @@ private theorem calculatePathRankings_σ_cell_inv_facts
     (∀ d : Nat, d < n → ∀ s e : Fin n,
         ((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0
         = ((rs.betweenRanks.getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0) := by
-  sorry
+  -- Coerce hvts to the .val form expected by helpers.
+  have hvts' : ∀ v : Fin n, vts.getD (σ v).val 0 = vts.getD v.val 0 := hvts
+  -- Unfold calculatePathRankings.
+  unfold calculatePathRankings
+  -- Reduce to a foldl-invariant statement.
+  suffices h_inv :
+      CalcRankingsInv σ
+        ((List.range n).foldl
+          (fun accumulated depth =>
+            let (currentBetween, currentFrom) := accumulated
+            let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+            let allBetween := pathsAtDepth.foldl
+              (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+            let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+              ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+            let compareBetween := comparePathsBetween vts betweenRankFn
+            let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+              (fun (betweenAcc : Array (Array (Array Nat))) item =>
+                let (pathBetween, rank) := item
+                setBetween betweenAcc depth pathBetween.startVertexIndex.val
+                  pathBetween.endVertexIndex.val rank) currentBetween
+            let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+              ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+            let compareFrom := comparePathsFrom vts updatedBetweenFn
+            let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+              (fun (fromAcc : Array (Array Nat)) item =>
+                let (pathFrom, rank) := item
+                let depthSlice := fromAcc.getD depth #[]
+                fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+            (updatedBetween, updatedFrom))
+          ((Array.range n).map fun _ => (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat),
+           (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat))) by
+    obtain ⟨_, _, _, _, _, h_b_inv, h_f_inv⟩ := h_inv
+    exact ⟨h_f_inv, h_b_inv⟩
+  -- Foldl induction with body_preserves_inv.
+  -- Initial CalcRankingsInv on (empty, empty).
+  have h_init : CalcRankingsInv σ
+      ((Array.range n).map fun _ => (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat),
+       (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat)) := by
+    refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · simp
+    · simp
+    · intro d hd; simp [hd]
+    · intro d hd; simp [hd]
+    · intro d hd s hs; simp [hd, hs]
+    · intro d hd s e
+      -- All cells are 0 in the empty table.
+      have h_get_d : ((((Array.range n).map fun _ =>
+            (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat))).getD d #[]).size = n := by
+        simp [hd]
+      -- Both sides are getD ... 0 = 0.
+      have h_lhs : (((((Array.range n).map fun _ =>
+              (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat))).getD d #[]).getD s.val #[]).getD e.val 0 = 0 := by
+        simp [hd]
+      have h_rhs : (((((Array.range n).map fun _ =>
+              (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat))).getD d #[]).getD (σ⁻¹ s).val #[]).getD (σ⁻¹ e).val 0 = 0 := by
+        simp [hd]
+      rw [h_lhs, h_rhs]
+    · intro d hd s
+      have h_lhs : ((((Array.range n).map fun _ =>
+            (Array.range n).map fun _ : Nat => (0 : Nat))).getD d #[]).getD s.val 0 = 0 := by
+        simp [hd]
+      have h_rhs : ((((Array.range n).map fun _ =>
+            (Array.range n).map fun _ : Nat => (0 : Nat))).getD d #[]).getD (σ⁻¹ s).val 0 = 0 := by
+        simp [hd]
+      rw [h_lhs, h_rhs]
+  -- Foldl induction.
+  generalize h_acc_eq :
+    ((Array.range n).map fun _ => (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat),
+     (Array.range n).map fun _ => (Array.range n).map fun _ : Nat => (0 : Nat)) = acc₀
+  rw [h_acc_eq] at h_init
+  -- Generalize over the list (List.range n) and the initial accumulator.
+  suffices h_step : ∀ (l : List Nat) (acc₀ : Array (Array (Array Nat)) × Array (Array Nat)),
+      (∀ d ∈ l, d < n) → CalcRankingsInv σ acc₀ →
+      CalcRankingsInv σ (l.foldl (fun accumulated depth =>
+        let (currentBetween, currentFrom) := accumulated
+        let pathsAtDepth := ((initializePaths G).pathsOfLength.getD depth #[]).toList
+        let allBetween := pathsAtDepth.foldl
+          (fun collectedPaths pathsFrom => collectedPaths ++ pathsFrom.pathsToVertex) []
+        let betweenRankFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+          ((currentBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+        let compareBetween := comparePathsBetween vts betweenRankFn
+        let updatedBetween := (assignRanks compareBetween (sortBy compareBetween allBetween)).foldl
+          (fun (betweenAcc : Array (Array (Array Nat))) item =>
+            let (pathBetween, rank) := item
+            setBetween betweenAcc depth pathBetween.startVertexIndex.val
+              pathBetween.endVertexIndex.val rank) currentBetween
+        let updatedBetweenFn : Nat → Nat → Nat → Nat := fun rankDepth rankStart rankEnd =>
+          ((updatedBetween.getD rankDepth #[]).getD rankStart #[]).getD rankEnd 0
+        let compareFrom := comparePathsFrom vts updatedBetweenFn
+        let updatedFrom := (assignRanks compareFrom (sortBy compareFrom pathsAtDepth)).foldl
+          (fun (fromAcc : Array (Array Nat)) item =>
+            let (pathFrom, rank) := item
+            let depthSlice := fromAcc.getD depth #[]
+            fromAcc.set! depth (depthSlice.set! pathFrom.startVertexIndex.val rank)) currentFrom
+        (updatedBetween, updatedFrom)) acc₀) by
+    have h_l_lt : ∀ d ∈ List.range n, d < n := fun d hd => List.mem_range.mp hd
+    exact h_step (List.range n) acc₀ h_l_lt h_init
+  intro l
+  induction l with
+  | nil => intros _ _ h_inv; exact h_inv
+  | cons x xs ih =>
+    intros acc₀ h_l_lt h_inv
+    rw [List.foldl_cons]
+    apply ih
+    · intros d h_d_in
+      exact h_l_lt d (List.mem_cons_of_mem _ h_d_in)
+    · -- Apply body_preserves_inv with depth = x.
+      have h_x_lt : x < n := h_l_lt x List.mem_cons_self
+      exact calculatePathRankings_body_preserves_inv G σ hσ vts hvts' acc₀ h_inv x h_x_lt
 
 /-- **Combined σ-invariance** of `calculatePathRankings`'s output: the full
 `RankState.σInvariant σ rs` for `rs := calculatePathRankings (initializePaths G) vts`.
