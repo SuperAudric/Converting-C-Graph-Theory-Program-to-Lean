@@ -367,6 +367,52 @@ private theorem UniquelyHeldBelow_n_implies_TieFree
   have h_j_eq_v : j = v_k := hv_k_unique j h_j_witness
   exact h_ne (h_i_eq_v.trans h_j_eq_v.symm)
 
+/-! ### `breakTieCount` is τ-invariant -/
+
+/-- For τ-related arrays of size `n`, the count of any target value is the same.
+The multiset of values is preserved by τ-relabeling (τ is a bijection on Fin n). -/
+private theorem breakTieCount_τ_invariant
+    (τ : Equiv.Perm (Fin n))
+    (arr₁ arr₂ : Array VertexType)
+    (h_size₁ : arr₁.size = n) (h_size₂ : arr₂.size = n)
+    (h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
+    (t : VertexType) :
+    breakTieCount arr₁ t = breakTieCount arr₂ t := by
+  -- Reduce both counts to Finset.card via Array.foldl_eq_foldl_finRange_get.
+  -- Strategy: translate breakTieCount to a Finset.card and use τ-bijection on Fin n.
+  -- breakTieCount arr t = (Finset.univ.filter (fun w : Fin n => arr.getD w.val 0 = t)).card.
+  -- For τ-related arr₁, arr₂: the filter sets are images of each other under τ.
+  -- Hence equal cardinality.
+  have h_count_eq_card : ∀ (arr : Array VertexType), arr.size = n →
+      breakTieCount arr t
+        = (Finset.univ.filter (fun w : Fin n => arr.getD w.val 0 = t)).card := by
+    -- Standard Array.foldl-to-Finset.card translation. Leave as a separate utility lemma
+    -- (a few intermediate steps: Array.foldl_toList → countP-style induction → Finset.card via
+    -- Fin n bijection).
+    sorry
+  rw [h_count_eq_card arr₁ h_size₁, h_count_eq_card arr₂ h_size₂]
+  -- Bijection: w ↦ τ w maps arr₁-filter to arr₂-filter.
+  apply Finset.card_bij (fun (w : Fin n) (_ : w ∈ Finset.univ.filter
+        (fun w : Fin n => arr₁.getD w.val 0 = t)) => τ w)
+  · -- Membership: arr₁[w] = t → arr₂[τ w] = t.
+    intro w h_w_in
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at h_w_in ⊢
+    rw [h_rel (τ w)]
+    have h_inv_eq : τ⁻¹ (τ w) = w := by simp
+    rw [h_inv_eq]
+    exact h_w_in
+  · -- Injective: τ w₁ = τ w₂ → w₁ = w₂.
+    intro w₁ _ w₂ _ h_eq
+    exact τ.injective h_eq
+  · -- Surjective: for u in arr₂-filter, take w := τ⁻¹ u.
+    intro u h_u_in
+    refine ⟨τ⁻¹ u, ?_, ?_⟩
+    · simp only [Finset.mem_filter, Finset.mem_univ, true_and] at h_u_in ⊢
+      have h_τ_inv_apply : τ (τ⁻¹ u) = u := by simp
+      rw [h_rel u] at h_u_in
+      exact h_u_in
+    · simp
+
 /-! ### Strengthened theorem proof
 
 **Strengthened** `runFrom_VtsInvariant_eq`: τ-related typings with prefix typing
@@ -449,25 +495,38 @@ theorem runFrom_VtsInvariant_eq_strong
     have hs1 : s + 1 ≤ n := hs_lt
     -- Step 7: m = n - (s+1).
     have h_m_def' : n - (s + 1) = m := by omega
-    -- Step 8: arr₁' and arr₂' may not be τ-related (different "keep" choices in breakTie).
-    -- Bridge: there exists σ ∈ Aut G with σ ∈ TypedAut conv_2 and σ v_2 = τ v_1, where
-    -- v_i := the kept vertex in breakTie conv_i s. Use this to transition arr₂' to a τ-related
-    -- variant arr₂'' := breakTieAt conv₂ s (τ v_1), then apply IH twice.
-    --
-    -- This is the substantive part of Phase 5. Sketch:
-    --   (a) Define v₁ := min (typeClass conv₁ s) and v₂ := min (typeClass conv₂ s).
-    --   (b) Show arr₁' = breakTieAt (shiftAbove s conv₁) s v₁ (when breakTie fires; else arr₁' = conv₁).
-    --   (c) Similarly arr₂' = breakTieAt (shiftAbove s conv₂) s v₂.
-    --   (d) τ v₁ ∈ typeClass conv₂ s (since τ⋅typeClass conv₁ = typeClass conv₂).
-    --   (e) breakTieAt (shiftAbove s conv₁) s v₁ τ-related to breakTieAt (shiftAbove s conv₂) s (τ v₁)
-    --       via Phase 4.
-    --   (f) Apply IH at s+1 to runFrom (s+1) on (e)'s τ-related pair.
-    --   (g) Find σ ∈ TypedAut(conv₂) connecting (τ v₁) and v₂ (orbit equality).
-    --   (h) Apply IH at s+1 again with σ to bridge breakTieAt at v₂ vs (τ v₁).
-    --   (i) Combine.
-    -- Many helpers needed: breakTie_eq_breakTieAt_min, typeClass_τ_equivariant,
-    -- conv₂_TypedAut_orbit, etc. All of these require dedicated lemmas (~50 lines each).
-    sorry
+    -- Step 8: case-split on whether breakTie fires.
+    -- count is τ-invariant (same multiset under τ-relabeling).
+    have h_count_eq : breakTieCount conv₁ s = breakTieCount conv₂ s :=
+      breakTieCount_τ_invariant τ conv₁ conv₂ h_conv₁_size h_conv₂_size h_conv_rel s
+    by_cases hcount : breakTieCount conv₁ s < 2
+    · -- Case 1 (no fire): arr_i' = conv_i. They're τ-related; apply IH at s+1.
+      have hcount₂ : breakTieCount conv₂ s < 2 := h_count_eq ▸ hcount
+      have h_arr₁'_eq : arr₁' = conv₁ := by
+        rw [h_arr₁'_def, breakTie_noop conv₁ s hcount]
+      have h_arr₂'_eq : arr₂' = conv₂ := by
+        rw [h_arr₂'_def, breakTie_noop conv₂ s hcount₂]
+      rw [h_arr₁'_eq, h_arr₂'_eq]
+      -- IH at s+1: needs UniquelyHeldBelow conv₁ (s+1). From h_arr₁'_unique + arr₁' = conv₁.
+      have h_conv₁_unique_succ : @UniquelyHeldBelow n conv₁ (s + 1) := h_arr₁'_eq ▸ h_arr₁'_unique
+      exact ih (s + 1) conv₁ conv₂ h_m_def' h_conv₁_size h_conv₂_size h_conv_rel
+        h_conv₁_prefix h_conv₁_unique_succ hs1
+    · -- Case 2 (fire): count ≥ 2 on both sides. Choice-bridging argument.
+      -- TODO: this is the substantive part of Phase 5. Sketch:
+      --   (a) Define v₁ := min (typeClass conv₁ s) and v₂ := min (typeClass conv₂ s).
+      --   (b) Show arr₁' = breakTieAt (shiftAbove s conv₁) s v₁.
+      --   (c) Similarly arr₂' = breakTieAt (shiftAbove s conv₂) s v₂.
+      --   (d) τ v₁ ∈ typeClass conv₂ s (since τ⋅typeClass conv₁ = typeClass conv₂).
+      --   (e) breakTieAt (shiftAbove s conv₁) s v₁ τ-related to
+      --       breakTieAt (shiftAbove s conv₂) s (τ v₁) via Phase 4 (`breakTieAt_τ_related`).
+      --   (f) Apply IH at s+1 to (e)'s τ-related pair.
+      --   (g) Find σ ∈ TypedAut(conv₂) connecting (τ v₁) and v₂ (orbit equality, requires
+      --       tracking Aut(G, vts) through iterations).
+      --   (h) Apply IH at s+1 again with σ to bridge breakTieAt at v₂ vs (τ v₁).
+      --   (i) Combine.
+      -- Helpers needed: breakTie_eq_breakTieAt_min_under_count, typeClass_τ_equivariant,
+      -- shiftAbove_τ_related, conv₂_TypedAut_orbit_complete (~50 lines each).
+      sorry
 
 /-! ### Next concrete steps
 
