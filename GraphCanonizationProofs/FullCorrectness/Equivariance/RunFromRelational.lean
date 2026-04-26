@@ -261,7 +261,7 @@ theorem UniquelyHeldBelow_τ_transfer
 
 /-- `runFrom n arr G = labelEdgesAccordingToRankings arr G`. The empty foldl reduces
 to the identity on the typing array, then labelEdges runs on it. -/
-private theorem runFrom_at_n (G : AdjMatrix n) (arr : Array VertexType) :
+theorem runFrom_at_n (G : AdjMatrix n) (arr : Array VertexType) :
     runFrom n arr G = labelEdgesAccordingToRankings arr G := by
   unfold runFrom
   simp [List.range_zero]
@@ -270,7 +270,7 @@ private theorem runFrom_at_n (G : AdjMatrix n) (arr : Array VertexType) :
 `convergeLoop`-then-`breakTie` at target `s`. The outer foldl in `runFrom s` decomposes
 into the first iteration (target `s + 0 = s`) followed by the remaining iterations
 (targets `s+1, …, n-1`), which is exactly `runFrom (s+1)`. -/
-private theorem runFrom_succ (G : AdjMatrix n) (arr : Array VertexType) (s : Nat) (hs : s < n) :
+theorem runFrom_succ (G : AdjMatrix n) (arr : Array VertexType) (s : Nat) (hs : s < n) :
     runFrom s arr G
       = runFrom (s + 1) ((breakTie (convergeLoop (initializePaths G) arr n) s).1) G := by
   -- Define the body at each base target.
@@ -311,7 +311,7 @@ private theorem runFrom_succ (G : AdjMatrix n) (arr : Array VertexType) (s : Nat
 /-- `UniquelyHeldBelow arr n` (with `arr.size = n`) implies `TieFree arr n`. By the
 uniqueness of each value in {0..n-1}, equal values force equal vertices. The
 `IsPrefixTyping` hypothesis isn't strictly needed for this implication. -/
-private theorem UniquelyHeldBelow_n_implies_TieFree
+theorem UniquelyHeldBelow_n_implies_TieFree
     (arr : Array VertexType) (_h_size : arr.size = n)
     (h_unique : @UniquelyHeldBelow n arr n) :
     TieFree arr n := by
@@ -387,7 +387,7 @@ The multiset of values is preserved by τ-relabeling (τ is a bijection on Fin n
 
 Proof strategy: show `arr₂.toList ~ arr₁.toList` (List.Perm) via the τ-relabeling of
 indices, then apply `List.Perm.countP_eq`. -/
-private theorem breakTieCount_τ_invariant
+theorem breakTieCount_τ_invariant
     (τ : Equiv.Perm (Fin n))
     (arr₁ arr₂ : Array VertexType)
     (h_size₁ : arr₁.size = n) (h_size₂ : arr₂.size = n)
@@ -413,7 +413,7 @@ private theorem breakTieCount_τ_invariant
 /-- The τ-image of `typeClass arr₁ t` equals `typeClass arr₂ t` when `arr₁, arr₂` are
 τ-related. This is the orbit-equivariance of the type class set under the τ-action
 on `Fin n`. -/
-private theorem typeClass_τ_image_eq
+theorem typeClass_τ_image_eq
     (τ : Equiv.Perm (Fin n))
     (arr₁ arr₂ : Array VertexType)
     (h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
@@ -436,7 +436,7 @@ private theorem typeClass_τ_image_eq
 
 /-- When `breakTieCount arr t ≥ 2`, the smallest-index target-valued vertex exists as
 a `Fin n` (given `arr.size = n`). This packages `Nat.find` on the predicate. -/
-private theorem breakTie_min_witness
+theorem breakTie_min_witness
     (arr : Array VertexType) (h_size : arr.size = n) (t : VertexType)
     (hcount : 2 ≤ breakTieCount arr t) :
     ∃ v_star : Fin n,
@@ -473,7 +473,7 @@ private theorem breakTie_min_witness
   exact hv_min_raw i.val hi ⟨h_i_in_size, h_eq⟩
 
 /-- The min-index target-valued vertex (when count ≥ 2) is in `typeClass arr t`. -/
-private theorem breakTie_min_witness_in_typeClass
+theorem breakTie_min_witness_in_typeClass
     (arr : Array VertexType) (h_size : arr.size = n) (t : VertexType)
     (hcount : 2 ≤ breakTieCount arr t) :
     ∃ v_star : Fin n,

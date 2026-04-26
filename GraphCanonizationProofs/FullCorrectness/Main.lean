@@ -97,51 +97,52 @@ private theorem run_swap_invariant_fwd (G : AdjMatrix n) (v1 v2 : Fin n) :
   · -- σ ∈ Aut G: G.permute σ = G by definition, so both `run`s are on the same graph.
     have h_perm_eq : G.permute σ = G := hσ_Aut
     rw [h_perm_eq]
-  · -- σ ∉ Aut G: the swap genuinely changes the graph. Assembly via:
-    --   (P6.U) `getArrayRank_zeros_eq_zeros` reduces `getArrayRank zeros = zeros`.
-    --   (P6.U) `orderVertices_size_eq` provides `(orderVertices ...).size = n`.
-    --   (Existing) `orderVertices_n_distinct_ranks` provides tie-freeness for both sides.
-    --   (P6.A-C) `orderVertices_σ_equivariant_general` (OPEN): σ-shift relation between
-    --     `orderVertices (init G) zeros` and `orderVertices (init (G.permute σ)) zeros`.
-    --   (Phase 6) `labelEdges_two_graphs_σ_related` (✅ in `StageDRelational.lean`):
-    --     given σ-shifted tie-free ranks, the labelEdges outputs match.
-    -- Unfold `run`:
-    show labelEdgesAccordingToRankings
-            (orderVertices (initializePaths G) (getArrayRank (Array.replicate n 0))) G
-        = labelEdgesAccordingToRankings
-            (orderVertices (initializePaths (G.permute σ))
-              (getArrayRank (Array.replicate n 0))) (G.permute σ)
-    -- (P6.U) Reduce `getArrayRank zeros = zeros` on both sides.
-    rw [getArrayRank_zeros_eq_zeros n]
-    set zeros : Array VertexType := Array.replicate n 0 with h_zeros_def
-    set ranks_G := orderVertices (initializePaths G) zeros with h_ranks_G_def
-    set ranks_H := orderVertices (initializePaths (G.permute σ)) zeros with h_ranks_H_def
-    have h_size_zeros : zeros.size = n := Array.size_replicate
-    have h_size_G : ranks_G.size = n := orderVertices_size_eq G zeros h_size_zeros
-    have h_size_H : ranks_H.size = n := orderVertices_size_eq (G.permute σ) zeros h_size_zeros
-    have h_zeros_prefix : @IsPrefixTyping n zeros := IsPrefixTyping.replicate_zero
-    -- (Existing) ties broken: post-orderVertices ranks are pairwise distinct.
-    have h_distinct_G := orderVertices_n_distinct_ranks G zeros h_size_zeros h_zeros_prefix
-    have h_distinct_H :=
-      orderVertices_n_distinct_ranks (G.permute σ) zeros h_size_zeros h_zeros_prefix
-    have h_tf_G : TieFree ranks_G n := by
-      intro i j h_eq
-      by_contra hij; exact h_distinct_G i j hij h_eq
-    have h_tf_H : TieFree ranks_H n := by
-      intro i j h_eq
-      by_contra hij; exact h_distinct_H i j hij h_eq
-    -- (P6.A–C, OPEN) `orderVertices` σ-equivariance for general σ on the all-zeros input.
-    -- The remaining substantive content is concentrated in
-    -- `orderVertices_σ_equivariant_general_zeros` (`OrderVerticesGeneral.lean`), which
-    -- in turn depends on `convergeLoop_σ_equivariant_general` (P6.B) and
-    -- `calculatePathRankings_σ_equivariant_general` (P6.A). Estimated ~340–480 lines
-    -- across the three sub-files.
-    have h_σ_shift : ∀ w : Fin n,
-        ranks_H.getD w.val 0 = ranks_G.getD (σ⁻¹ w).val 0 :=
-      orderVertices_σ_equivariant_general_zeros G σ
-    -- (Phase 6 ✅) Stage D-rel general σ closes the equality.
-    exact (labelEdges_two_graphs_σ_related G σ ranks_G ranks_H
-            h_size_G h_size_H h_tf_G h_tf_H h_σ_shift).symm
+  · -- σ ∉ Aut G: the swap genuinely changes the graph. Apply the strong P6.C theorem
+    -- (`runFrom_VtsInvariant_eq_strong_general`) directly.
+    --
+    -- `run zeros G = runFrom 0 (getArrayRank zeros) G = runFrom 0 zeros G`
+    -- (the second eq via `getArrayRank_zeros_eq_zeros`). The strong theorem closes
+    -- `runFrom 0 zeros G = runFrom 0 zeros (G.permute σ)` modulo the orbit hypothesis
+    -- `OrbitCompleteAfterConv_general G σ`, which is the canonizer-correctness
+    -- invariant — discharged here as a focused sorry.
+    have h_orbit : OrbitCompleteAfterConv_general (n := n) G σ := by
+      -- Discharge of the canonizer-correctness orbit invariant. This is the deep
+      -- half of canonizer correctness; orthogonal to Phase 6's σ-equivariance work.
+      sorry
+    -- Bridge `run zeros = runFrom 0 zeros` (modulo getArrayRank).
+    have h_run_eq_runFrom :
+        ∀ (G' : AdjMatrix n),
+          run (Array.replicate n 0) G' = runFrom 0 (Array.replicate n 0) G' := by
+      intro G'
+      show labelEdgesAccordingToRankings
+              (orderVertices (initializePaths G') (getArrayRank (Array.replicate n 0))) G'
+          = labelEdgesAccordingToRankings
+              ((List.range (n - 0)).foldl
+                (fun currentTypes targetPosition =>
+                  let convergedTypes := convergeLoop (initializePaths G') currentTypes n
+                  (breakTie convergedTypes (0 + targetPosition)).1)
+                (Array.replicate n 0)) G'
+      rw [getArrayRank_zeros_eq_zeros n]
+      -- Both sides have `n - 0 = n` iterations and body `(breakTie (convergeLoop ...) targetPosition).1`.
+      show labelEdgesAccordingToRankings
+              ((List.range n).foldl _ (Array.replicate n 0)) G'
+          = labelEdgesAccordingToRankings
+              ((List.range (n - 0)).foldl _ (Array.replicate n 0)) G'
+      simp only [Nat.sub_zero, Nat.zero_add]
+    rw [h_run_eq_runFrom G, h_run_eq_runFrom (G.permute σ)]
+    -- Apply the strong theorem at s = 0, σ_chain = σ (with τ = 1 ∈ Aut G).
+    apply runFrom_VtsInvariant_eq_strong_general G σ 0 σ
+    · exact ⟨1, Subgroup.one_mem _, by simp⟩
+    · exact Array.size_replicate
+    · exact Array.size_replicate
+    · -- σ-shift relation: zeros[w] = zeros[σ⁻¹ w] = 0.
+      intro w
+      simp [w.isLt]
+    · exact IsPrefixTyping.replicate_zero
+    · -- UniquelyHeldBelow zeros 0: vacuous (no k : Fin 0).
+      intro k; exact k.elim0
+    · exact Nat.zero_le n
+    · exact h_orbit
 
 /-- New proof path (replacing the sorry-reachable `Graph.run_isomorphic_eq` from the
 flat file). Proved via induction on `Isomorphic`'s constructors, reducing the swap case

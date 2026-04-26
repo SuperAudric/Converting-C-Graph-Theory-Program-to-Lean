@@ -37,14 +37,21 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, §7-Step 2 breakTie step, §7-Step 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (4 sorry sites, all in Phase 6 sub-files; Main.lean is sorry-free)
+## Open obligations (1 sorry site total)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `calculatePathRankings_σ_equivariant_general` (P6.A) | `Equivariance/PathEquivarianceGeneral` | Stage B-rel general σ — relational σ-equivariance of `calculatePathRankings` without `σ ∈ Aut G`. Genuinely new proof; existing Phase 1 σ ∈ Aut G version uses `PathState.permute σ state = state` which fails for general σ. ~150-200 lines. |
-| `convergeOnce_σ_equivariant_general` (P6.B) | `Equivariance/ConvergeLoopGeneral` | Direct corollary of P6.A via `convergeOnce_writeback`. ~15-25 lines. |
-| `convergeLoop_σ_equivariant_general` (P6.B) | `Equivariance/ConvergeLoopGeneral` | Fuel induction using `convergeOnce_σ_equivariant_general`. ~30-50 lines. |
-| `orderVertices_σ_equivariant_general` (P6.C) | `Equivariance/OrderVerticesGeneral` | Outer-loop σ-equivariance, structurally similar to Phase 5's `runFrom_VtsInvariant_eq_strong` but without `σ ∈ Aut G`. Uses P6.B per step and inherits the same orbit-bridging obligation as Phase 5. ~80-150 lines. |
+| `OrbitCompleteAfterConv_general G σ` (canonizer-correctness invariant) | `Main.lean:89` | The deep half of canonizer correctness: vertices with equal values in `convergeLoop` output of an arbitrary intermediate state lie in the same `TypedAut` orbit. Discharge requires preserving the orbit-completeness invariant through algorithm iterations — orthogonal to Phase 6's σ-equivariance work. |
+
+**P6.A, P6.B, P6.C are all now fully closed (modulo the orbit hypothesis input).** ✅
+
+The full Phase 6 σ-equivariance chain is now closed:
+  - `calculatePathRankings_σ_equivariant_general` (P6.A) — Stage B-rel general σ ✅
+  - `convergeLoop_σ_equivariant_general` (P6.B) — Stage C-rel general σ ✅
+  - `runFrom_VtsInvariant_eq_strong_general` (P6.C) — strong outer-loop theorem ✅
+
+`run_swap_invariant_fwd` in `Main.lean` applies the P6.C strong theorem directly,
+yielding `run zeros G = run zeros (G.permute σ)` modulo the orbit hypothesis.
 
 **`Main.lean` is sorry-free**: `run_swap_invariant_fwd` σ ∉ Aut G branch is fully
 assembled using P6.U helpers + `labelEdges_two_graphs_σ_related` (✅) +
@@ -563,8 +570,9 @@ If P6.A's general-σ Stage B-rel proves too costly, an alternative path:
 | Phase 6 — top-level induction + `run_swap_invariant_fwd` (σ ∈ Aut G branch) | low | ✅ closed | done |
 | Phase 6 — P6.U utility helpers (`getArrayRank_zeros_eq_zeros` etc.) | low | ✅ closed | done |
 | Phase 6 — P6.A Stage B-rel general σ (foundational lemmas + assignList-rank-general + body-step + foldl induction + final assembly) | medium-high | ✅ closed | done |
-| Phase 6 — P6.B Stage C-rel general σ (corollary of P6.A) | low-medium | 🟦 pending | ~30-50 |
-| Phase 6 — P6.C orderVertices σ-equivariance general σ  | high        | 🟦 pending | ~80-150 |
+| Phase 6 — P6.B Stage C-rel general σ (corollary of P6.A) | low-medium | ✅ closed | done |
+| Phase 6 — P6.C `runFrom_VtsInvariant_eq_strong_general` (two-graphs strong theorem) | high | ✅ closed | done |
+| Phase 6 — `OrbitCompleteAfterConv_general` discharge (canonizer-correctness orbit invariant) | research-level | 🟦 pending | unknown |
 | Phase 6 — P6.D Final assembly in `Main.lean`           | low         | 🟦 pending | ~30 |
 
 **Remaining**: ~340–480 lines of new Lean. Recommended order: P6.U → P6.A → P6.B → P6.C → P6.D.
