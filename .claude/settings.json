@@ -46,7 +46,8 @@
       "Bash(wait)",
       "Bash(2>/dev/null)",
       "Bash(grep -E \"\\\\.\\(olean|trace\\)$\")",
-      "Bash(grep -rln \"^import FullCorrectness$\" --include=\"*.lean\" .)"
+      "Bash(grep -rln \"^import FullCorrectness$\" --include=\"*.lean\" .)",
+      "Bash(grep -E \"uses \\\\`sorry\\\\`\" /tmp/lake_output.log)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

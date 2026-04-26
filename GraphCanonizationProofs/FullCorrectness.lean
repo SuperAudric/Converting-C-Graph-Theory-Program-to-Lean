@@ -158,7 +158,7 @@ This is mechanical given the foundational lemmas above.
 | 2     | Stage C-rel (`convergeOnce_VtsInvariant_eq`, `convergeLoop_VtsInvariant_eq`) | ✅ closed |
 | 4     | `breakTieAt_τ_related`, `shiftAbove_VtsInvariant_eq` | ✅ closed |
 | 3     | Stage D-rel (cell-wise + denseRanks + assembly)      | ✅ closed (all of 3.A–3.E) |
-| 5     | `runFrom_VtsInvariant_eq_strong`                     | 🟦 stated with right hypotheses + transfer helpers closed; main proof pending joint induction |
+| 5     | `runFrom_VtsInvariant_eq_strong`                     | 🟡 base case closed (via Phase 3.E); helpers proved (`runFrom_at_n`, `runFrom_succ`, `UniquelyHeldBelow_n_implies_TieFree`); inductive step skeleton in place — choice-bridging argument pending |
 | 6     | `run_isomorphic_eq_new`                              | 🟦 documented; needs generalized stages |
 
 ### Phase 3 inner sub-decomposition (top-level relational)

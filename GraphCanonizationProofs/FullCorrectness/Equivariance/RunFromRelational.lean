@@ -257,40 +257,227 @@ theorem UniquelyHeldBelow_τ_transfer
     have : τ (τ⁻¹ w) = τ v := by rw [h_τinv_w_eq]
     simpa using this
 
-/-- **Strengthened** `runFrom_VtsInvariant_eq`: τ-related typings with prefix typing
-+ lower-uniqueness produce equal canonical matrices.
+/-! ### Helpers: runFrom unfolding and tie-freeness from invariants -/
 
-The `IsPrefixTyping arr₁` + `UniquelyHeldBelow arr₁ s` hypotheses precisely capture
-the algorithmic state after `s` outer iterations: values 0..s-1 are uniquely held, and
-all values are in some prefix `{0..m-1}`. Then the remaining `n - s` foldl iterations
-(at targets s, s+1, ..., n-1) extend uniqueness to all of `{0..n-1}`, producing
-tie-free output where Phase 3's `labelEdges_VtsInvariant_eq_distinct` applies.
+/-- `runFrom n arr G = labelEdgesAccordingToRankings arr G`. The empty foldl reduces
+to the identity on the typing array, then labelEdges runs on it. -/
+private theorem runFrom_at_n (G : AdjMatrix n) (arr : Array VertexType) :
+    runFrom n arr G = labelEdgesAccordingToRankings arr G := by
+  unfold runFrom
+  simp [List.range_zero]
 
-**Proof status: stated only; full closure pending Phase 3 + joint induction.**
+/-- `runFrom s arr G = runFrom (s+1) (after-one-step arr) G`, where one step is
+`convergeLoop`-then-`breakTie` at target `s`. The outer foldl in `runFrom s` decomposes
+into the first iteration (target `s + 0 = s`) followed by the remaining iterations
+(targets `s+1, …, n-1`), which is exactly `runFrom (s+1)`. -/
+private theorem runFrom_succ (G : AdjMatrix n) (arr : Array VertexType) (s : Nat) (hs : s < n) :
+    runFrom s arr G
+      = runFrom (s + 1) ((breakTie (convergeLoop (initializePaths G) arr n) s).1) G := by
+  -- Define the body at each base target.
+  let body (t : Nat) := fun (currentTypes : Array VertexType) (targetPosition : Nat) =>
+    (breakTie (convergeLoop (initializePaths G) currentTypes n) (t + targetPosition)).1
+  -- The orderedRanks computed by runFrom s arr G is (List.range (n-s)).foldl (body s) arr.
+  show labelEdgesAccordingToRankings ((List.range (n - s)).foldl (body s) arr) G
+       = labelEdgesAccordingToRankings
+            ((List.range (n - (s + 1))).foldl (body (s + 1))
+              ((breakTie (convergeLoop (initializePaths G) arr n) s).1)) G
+  -- Reduce to: orderedRanks are equal.
+  congr 1
+  -- Peel the first iteration of LHS via List.range_add.
+  have h_diff : n - s = 1 + (n - (s + 1)) := by omega
+  rw [h_diff, List.range_add]
+  rw [List.foldl_append]
+  -- Inner foldl (List.range 1 = [0]) reduces to one step.
+  have h_step : (List.range 1).foldl (body s) arr
+        = (breakTie (convergeLoop (initializePaths G) arr n) s).1 := by
+    show ((List.range 1).foldl (body s) arr) = _
+    rw [show List.range 1 = [0] from by decide]
+    show body s arr 0 = _
+    show (breakTie (convergeLoop (initializePaths G) arr n) (s + 0)).1 = _
+    rw [Nat.add_zero]
+  rw [h_step]
+  -- LHS now: ((List.range (n-(s+1))).map (1 + ·)).foldl (body s) (arr_step).
+  -- RHS:    (List.range (n-(s+1))).foldl (body (s+1)) (arr_step).
+  -- The map shifts targets by +1.
+  rw [List.foldl_map]
+  -- Bodies match: body s curr (1 + tp) = body (s+1) curr tp (since s + (1+tp) = (s+1) + tp).
+  congr 1
+  funext currentTypes targetPosition
+  show body s currentTypes (1 + targetPosition) = body (s + 1) currentTypes targetPosition
+  show (breakTie (convergeLoop (initializePaths G) currentTypes n) (s + (1 + targetPosition))).1
+       = (breakTie (convergeLoop (initializePaths G) currentTypes n) (s + 1 + targetPosition)).1
+  rw [show s + (1 + targetPosition) = s + 1 + targetPosition from by omega]
 
-The plan (recorded in this file's header):
-  - Joint induction on `m = n - s` together with `tiebreak_choice_independent_strong`.
-  - Base case (m = 0): `UniquelyHeldBelow arr s` with `s = n` is exactly tie-freeness;
-    apply Phase 3 directly.
-  - Step (m > 0): unfold one foldl iteration; use Phase 2 (Stage C-rel) + Phase 4 + IH.
-    The hypothesis updates via `convergeLoop_preserves_lower_uniqueness` +
-    `breakTie_step_preserves_uniqueness`. -/
+/-- `UniquelyHeldBelow arr n` (with `arr.size = n`) implies `TieFree arr n`. By the
+uniqueness of each value in {0..n-1}, equal values force equal vertices. The
+`IsPrefixTyping` hypothesis isn't strictly needed for this implication. -/
+private theorem UniquelyHeldBelow_n_implies_TieFree
+    (arr : Array VertexType) (_h_size : arr.size = n)
+    (h_unique : @UniquelyHeldBelow n arr n) :
+    TieFree arr n := by
+  intro i j h_eq
+  -- arr[i.val] = arr[j.val] = k, with k < n (we'll get this from h_unique).
+  -- For i, j ∈ Fin n, take k_i := ⟨arr[i.val], _⟩. By h_unique, the witness for k_i is unique.
+  -- Both i and j are witnesses (their arr values equal); so i = j.
+  -- We need arr[i.val] < n. This is provided by the uniqueness hypothesis: for any k ∈ Fin n,
+  -- the unique witness has arr[witness] = k.val. Conversely, every value held by some
+  -- v ∈ Fin n must be in {0..n-1} via the bijective correspondence.
+  -- Direct argument: n values in {0..n-1} are uniquely held, and arr.size = n, so ALL values
+  -- in arr are in {0..n-1}. (Pigeonhole: n distinct values within {0..n-1}, n vertices.)
+  -- For brevity, we show TieFree directly using uniqueness on Fin n indexed values.
+  by_contra h_ne
+  -- i ≠ j with arr[i.val] = arr[j.val] = some value k.
+  -- Strategy: derive contradiction by finding a value k < n where two distinct vertices both witness it.
+  -- We use h_unique on k = ⟨_, h_lt⟩ where h_lt is established by exhaustion via finite Fintype.
+  -- A cleaner route: extract the bijection directly.
+  -- Use Finite.injective_iff_surjective on f : Fin n → Fin n (defined when arr values < n).
+  -- For now, derive via uniqueness + value bounds.
+  have h_arr_val_lt_n : ∀ v : Fin n, arr.getD v.val 0 < n := by
+    -- For each v, the value k := arr[v.val]. We claim k < n.
+    -- If k ≥ n: by h_unique on k' = arr[v.val] ... but h_unique only applies for k' : Fin n.
+    -- We need a separate argument using the bijection. Since n values 0..n-1 are uniquely held,
+    -- and there are exactly n vertices, the n witnesses for k ∈ Fin n cover Fin n. So every
+    -- vertex IS a witness for some k < n, hence its value is < n.
+    intro v
+    -- The map (k : Fin n) ↦ (h_unique k).choose : Fin n → Fin n is injective (different ks give
+    -- different vs by uniqueness clause). For finite sets, injective ⟹ surjective. So v is in
+    -- the image, i.e., ∃ k, (h_unique k).choose = v. Then arr[v.val] = k.val < n.
+    let f : Fin n → Fin n := fun k => (h_unique k).choose
+    have h_f_inj : Function.Injective f := by
+      intro k₁ k₂ h_f_eq
+      have h₁ : arr.getD (f k₁).val 0 = k₁.val := (h_unique k₁).choose_spec.1
+      have h₂ : arr.getD (f k₂).val 0 = k₂.val := (h_unique k₂).choose_spec.1
+      rw [h_f_eq] at h₁
+      apply Fin.ext
+      rw [← h₁, h₂]
+    have h_f_surj : Function.Surjective f := Finite.injective_iff_surjective.mp h_f_inj
+    obtain ⟨k, h_k_eq⟩ := h_f_surj v
+    have h_arr_eq_k : arr.getD v.val 0 = k.val := h_k_eq ▸ (h_unique k).choose_spec.1
+    rw [h_arr_eq_k]
+    exact k.isLt
+  -- arr[i.val] < n. So arr[i.val] = k.val for some k : Fin n.
+  set k_val := arr.getD i.val 0 with h_k_def
+  have h_k_lt : k_val < n := h_arr_val_lt_n i
+  let k_fin : Fin n := ⟨k_val, h_k_lt⟩
+  -- Both i and j are witnesses for k_fin in h_unique.
+  obtain ⟨v_k, hv_k_eq, hv_k_unique⟩ := h_unique k_fin
+  have h_i_witness : arr.getD i.val 0 = k_fin.val := rfl
+  have h_j_witness : arr.getD j.val 0 = k_fin.val := h_eq.symm ▸ h_i_witness
+  have h_i_eq_v : i = v_k := hv_k_unique i h_i_witness
+  have h_j_eq_v : j = v_k := hv_k_unique j h_j_witness
+  exact h_ne (h_i_eq_v.trans h_j_eq_v.symm)
+
+/-! ### Strengthened theorem proof
+
+**Strengthened** `runFrom_VtsInvariant_eq`: τ-related typings with prefix typing
++ lower-uniqueness produce equal canonical matrices. The `IsPrefixTyping arr₁` +
+`UniquelyHeldBelow arr₁ s` hypotheses precisely capture the algorithmic state after `s`
+outer iterations: values 0..s-1 are uniquely held. Then the remaining `n - s` foldl
+iterations extend uniqueness to all of `{0..n-1}`, producing tie-free output where
+Phase 3.E (`labelEdges_VtsInvariant_eq_distinct`) applies. -/
+
 theorem runFrom_VtsInvariant_eq_strong
     (G : AdjMatrix n) (s : Nat) (τ : Equiv.Perm (Fin n))
-    (_hτ : τ ∈ AdjMatrix.Aut G)
+    (hτ : τ ∈ AdjMatrix.Aut G)
     (arr₁ arr₂ : Array VertexType)
-    (_h_size₁ : arr₁.size = n) (_h_size₂ : arr₂.size = n)
-    (_h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
-    (_h_prefix : @IsPrefixTyping n arr₁)
-    (_h_unique : @UniquelyHeldBelow n arr₁ s)
-    (_hs : s ≤ n) :
+    (h_size₁ : arr₁.size = n) (h_size₂ : arr₂.size = n)
+    (h_rel : ∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0)
+    (h_prefix : @IsPrefixTyping n arr₁)
+    (h_unique : @UniquelyHeldBelow n arr₁ s)
+    (hs : s ≤ n) :
     runFrom s arr₁ G = runFrom s arr₂ G := by
-  -- TODO Phase 5: implement the joint induction outlined in the file docstring.
-  -- The hypothesis transfer to arr₂ is via IsPrefixTyping_τ_transfer +
-  -- UniquelyHeldBelow_τ_transfer (proved above).
-  sorry
+  -- Induct on m := n - s.
+  -- Induct on m := n - s. Generalize over s, arr₁, arr₂ so the IH at m-1 applies at any s'.
+  suffices h : ∀ (m s : Nat) (arr₁ arr₂ : Array VertexType),
+      n - s = m →
+      arr₁.size = n → arr₂.size = n →
+      (∀ w : Fin n, arr₂.getD w.val 0 = arr₁.getD (τ⁻¹ w).val 0) →
+      @IsPrefixTyping n arr₁ →
+      @UniquelyHeldBelow n arr₁ s →
+      s ≤ n →
+      runFrom s arr₁ G = runFrom s arr₂ G by
+    exact h (n - s) s arr₁ arr₂ rfl h_size₁ h_size₂ h_rel h_prefix h_unique hs
+  clear h_size₁ h_size₂ h_rel h_prefix h_unique hs arr₁ arr₂ s
+  intro m
+  induction m with
+  | zero =>
+    intro s arr₁ arr₂ h_m_def h_size₁ h_size₂ h_rel h_prefix h_unique hs
+    -- Base: n - s = 0 ⟹ s = n.
+    have hsn : s = n := by omega
+    -- Don't subst; just upgrade UniquelyHeldBelow at s to UniquelyHeldBelow at n.
+    have h_unique_n : @UniquelyHeldBelow n arr₁ n := hsn ▸ h_unique
+    -- arr₁ tie-free.
+    have h_tf₁ : TieFree arr₁ n :=
+      UniquelyHeldBelow_n_implies_TieFree arr₁ h_size₁ h_unique_n
+    -- arr₂ via τ-transfer.
+    have h_unique₂ : @UniquelyHeldBelow n arr₂ n :=
+      UniquelyHeldBelow_τ_transfer τ arr₁ arr₂ h_rel n h_unique_n
+    have h_tf₂ : TieFree arr₂ n :=
+      UniquelyHeldBelow_n_implies_TieFree arr₂ h_size₂ h_unique₂
+    -- runFrom n arr_i G = labelEdges arr_i G; apply Phase 3.E.
+    rw [hsn, runFrom_at_n, runFrom_at_n]
+    -- Phase 3.E: produces equality of labelEdges results.
+    exact (labelEdges_VtsInvariant_eq_distinct G τ hτ arr₁ arr₂ h_size₁ h_size₂ h_tf₁ h_tf₂ h_rel).symm
+  | succ m ih =>
+    intro s arr₁ arr₂ h_m_def h_size₁ h_size₂ h_rel h_prefix h_unique hs
+    -- s < n.
+    have hs_lt : s < n := by omega
+    -- Step 1: Unfold one iteration on both sides.
+    rw [runFrom_succ G arr₁ s hs_lt, runFrom_succ G arr₂ s hs_lt]
+    -- Step 2: Compute conv_i and arr_i' on both sides.
+    set conv₁ := convergeLoop (initializePaths G) arr₁ n with h_conv₁_def
+    set conv₂ := convergeLoop (initializePaths G) arr₂ n with h_conv₂_def
+    set arr₁' := (breakTie conv₁ s).1 with h_arr₁'_def
+    set arr₂' := (breakTie conv₂ s).1 with h_arr₂'_def
+    -- Step 3: τ-relatedness of conv_i (Phase 2).
+    have ⟨h_conv₁_size, h_conv₂_size, h_conv_rel⟩ :=
+      convergeLoop_step_τ_preserved G τ hτ arr₁ arr₂ h_size₁ h_size₂ h_rel
+    -- Step 4: Hypothesis preservation through convergeLoop.
+    have h_conv₁_prefix : @IsPrefixTyping n conv₁ :=
+      convergeLoop_preserves_prefix G arr₁ n h_size₁ h_prefix
+    have h_conv₁_both : @IsPrefixTyping n conv₁ ∧ @UniquelyHeldBelow n conv₁ s :=
+      convergeLoop_preserves_lower_uniqueness G arr₁ s (Nat.le_of_lt hs_lt) n h_size₁ h_prefix h_unique
+    have h_conv₁_unique : @UniquelyHeldBelow n conv₁ s := h_conv₁_both.2
+    -- Step 5: Hypothesis preservation through breakTie.
+    have ⟨h_arr₁'_prefix, h_arr₁'_unique⟩ :=
+      breakTie_step_preserves_uniqueness conv₁ s hs_lt h_conv₁_size h_conv₁_prefix h_conv₁_unique
+    have h_arr₁'_size : arr₁'.size = n := by
+      rw [h_arr₁'_def, breakTie_size]; exact h_conv₁_size
+    have h_arr₂'_size : arr₂'.size = n := by
+      rw [h_arr₂'_def, breakTie_size]; exact h_conv₂_size
+    -- Step 6: hs+1 ≤ n.
+    have hs1 : s + 1 ≤ n := hs_lt
+    -- Step 7: m = n - (s+1).
+    have h_m_def' : n - (s + 1) = m := by omega
+    -- Step 8: arr₁' and arr₂' may not be τ-related (different "keep" choices in breakTie).
+    -- Bridge: there exists σ ∈ Aut G with σ ∈ TypedAut conv_2 and σ v_2 = τ v_1, where
+    -- v_i := the kept vertex in breakTie conv_i s. Use this to transition arr₂' to a τ-related
+    -- variant arr₂'' := breakTieAt conv₂ s (τ v_1), then apply IH twice.
+    --
+    -- This is the substantive part of Phase 5. Sketch:
+    --   (a) Define v₁ := min (typeClass conv₁ s) and v₂ := min (typeClass conv₂ s).
+    --   (b) Show arr₁' = breakTieAt (shiftAbove s conv₁) s v₁ (when breakTie fires; else arr₁' = conv₁).
+    --   (c) Similarly arr₂' = breakTieAt (shiftAbove s conv₂) s v₂.
+    --   (d) τ v₁ ∈ typeClass conv₂ s (since τ⋅typeClass conv₁ = typeClass conv₂).
+    --   (e) breakTieAt (shiftAbove s conv₁) s v₁ τ-related to breakTieAt (shiftAbove s conv₂) s (τ v₁)
+    --       via Phase 4.
+    --   (f) Apply IH at s+1 to runFrom (s+1) on (e)'s τ-related pair.
+    --   (g) Find σ ∈ TypedAut(conv₂) connecting (τ v₁) and v₂ (orbit equality).
+    --   (h) Apply IH at s+1 again with σ to bridge breakTieAt at v₂ vs (τ v₁).
+    --   (i) Combine.
+    -- Many helpers needed: breakTie_eq_breakTieAt_min, typeClass_τ_equivariant,
+    -- conv₂_TypedAut_orbit, etc. All of these require dedicated lemmas (~50 lines each).
+    sorry
 
 /-! ### Next concrete steps
+
+The base case is closed via Phase 3.E. The inductive step (~200 lines) requires:
+  - One iteration of `runFrom` via `runFrom_succ`.
+  - Phase 2 (`convergeLoop_VtsInvariant_eq`) for τ-relatedness of the converged arrays.
+  - Hypothesis preservation via `convergeLoop_preserves_prefix`,
+    `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness`.
+  - Choice-bridging via Phase 4 (`breakTieAt_τ_related`) + an inline tiebreak-choice
+    independence argument that recursively uses the IH at level `s+1`.
 
 (a) Modify `Tiebreak.lean::runFrom_VtsInvariant_eq` to add `IsPrefixTyping` hypothesis,
     or **alternatively**, replace the sorry with a call to
@@ -301,9 +488,7 @@ theorem runFrom_VtsInvariant_eq_strong
 
 (c) Adapt `Main.lean::run_isomorphic_eq_new` to thread `IsPrefixTyping.replicate_zero`.
 
-(d) Prove `runFrom_VtsInvariant_eq_strong` via joint induction (Phase 5's main work).
-
-(e) Close Phase 3 (separate work).
+(d) Complete the inductive step of `runFrom_VtsInvariant_eq_strong` (Phase 5's main work).
 -/
 
 end Graph
