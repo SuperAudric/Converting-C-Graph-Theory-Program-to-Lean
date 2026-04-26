@@ -41,7 +41,10 @@
       "Bash(grep -nB 2 -A 6 \"ranks at positions \\\\`i\\\\` and \\\\`i+1\\\\` are equal\\\\|when \\\\`cmp L\\\\[i\\\\] L\\\\[i+1\\\\] = \\\\.eq\\\\|when \\\\`cmp.*\\\\.lt\\\\`\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)",
       "Bash(grep -nA 15 \"^theorem assignRanks_rank_monotone\\\\b\" /workspace/GraphCanonizationProofs/FullCorrectness/Equivariance/ComparisonSort.lean)",
       "Bash(grep -nA 5 \"^def run\\\\|^def orderVertices\\\\|^def labelEdgesAccordingToRankings\\\\|^def breakTie\\\\|^def convergeLoop\\\\|^def convergeOnce\" /workspace/GraphCanonizationProofs/LeanGraphCanonizerV4.lean)",
-      "Bash(grep -nA 5 \"^def computeDenseRanks\\\\|^def shiftAbove\\\\|^def breakTiePromote\\\\|^def labelEdgesAccordingToRankings\\\\|^def getArrayRank\" /workspace/GraphCanonizationProofs/LeanGraphCanonizerV4.lean)"
+      "Bash(grep -nA 5 \"^def computeDenseRanks\\\\|^def shiftAbove\\\\|^def breakTiePromote\\\\|^def labelEdgesAccordingToRankings\\\\|^def getArrayRank\" /workspace/GraphCanonizationProofs/LeanGraphCanonizerV4.lean)",
+      "Bash(lean --version)",
+      "Bash(wait)",
+      "Bash(2>/dev/null)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

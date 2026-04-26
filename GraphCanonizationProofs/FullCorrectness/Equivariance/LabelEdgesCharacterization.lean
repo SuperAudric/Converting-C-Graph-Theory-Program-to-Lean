@@ -79,8 +79,9 @@ Generalizes `labelEdgesAccordingToRankings_isomorphic` (which only tracks `G ≃
 by carrying an explicit permutation `σ` such that `acc.1 = G.permute σ`. This is the
 strengthened invariant required for the cell-wise characterization. -/
 
-/-- The labelEdges fold step extracted as a function. -/
-private def labelEdgesStep (n : Nat) (vertices : List (Fin n))
+/-- The labelEdges fold step extracted as a function. Public so downstream files
+(Phase 3.E in `StageDRelational.lean`) can rewrite via `labelEdges_fold_strong`. -/
+def labelEdgesStep (n : Nat) (vertices : List (Fin n))
     (accumulated : AdjMatrix n × Array Nat) (currentFin : Fin n) :
     AdjMatrix n × Array Nat :=
   let (graph, rankMap) := accumulated

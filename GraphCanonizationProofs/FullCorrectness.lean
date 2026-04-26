@@ -67,11 +67,12 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, §7-Step 2 breakTie step, §7-Step 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (2 sorry sites)
+## Open obligations (3 sorry sites)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
 | `runFrom_VtsInvariant_eq`             | `Tiebreak`                         | **Net-new infrastructure**, NOT mechanical chaining of existing Stages A–D. See "Stage B/D gap" below. |
+| `runFrom_VtsInvariant_eq_strong`      | `Equivariance/RunFromRelational`   | Phase 5 joint induction (Phase 3 now closed; Phase 3.E is the leaf). |
 | `run_isomorphic_eq_new` (⟹)           | `Main`                             | Assemble §3 + §4 + §6 against the σ from §2; current sketch routes through `tiebreak_choice_independent`, hence inherits the Stage B/D gap. |
 
 **`Invariants.lean` and `Equivariance.PathEquivariance.lean` are both fully closed.**
@@ -180,8 +181,8 @@ This is mechanical given the foundational lemmas above.
 | 1     | Stage B-rel assembly (`calculatePathRankings_σ_equivariant_relational`) | ✅ closed |
 | 2     | Stage C-rel (`convergeOnce_VtsInvariant_eq`, `convergeLoop_VtsInvariant_eq`) | ✅ closed |
 | 4     | `breakTieAt_τ_related`, `shiftAbove_VtsInvariant_eq` | ✅ closed |
-| 3     | Cell-wise characterization of `labelEdgesAccordingToRankings` | 🟡 deep lemmas closed; 3 structural sub-sorries remain |
-| 5     | `runFrom_VtsInvariant_eq_strong`                     | 🟦 stated with right hypotheses + transfer helpers closed; main proof pending Phase 3 + joint induction |
+| 3     | Stage D-rel (cell-wise + denseRanks + assembly)      | ✅ closed (all of 3.A–3.E) |
+| 5     | `runFrom_VtsInvariant_eq_strong`                     | 🟦 stated with right hypotheses + transfer helpers closed; main proof pending joint induction |
 | 6     | `run_isomorphic_eq_new`                              | 🟦 documented; needs generalized stages |
 
 ### Phase 3 inner sub-decomposition (top-level relational)
@@ -199,13 +200,15 @@ abbreviation).
 |           |  – `labelEdges_fold_strong` (σ + `rankMap = rankMap_0 ∘ σ⁻¹`) |                             | ✅ proved |
 |           |  – `rankMap_swap_step_eq` (helper)                    |                                     | ✅ proved |
 |           |  – `labelEdges_terminal_rankMap_identity`             |                                     | ✅ proved |
-| Phase 3.C | `computeDenseRanks_τ_shift_distinct`                  | `StageDRelational.lean`             | 🟦 sorry — structural |
-| Phase 3.D | `computeDenseRanks_perm_when_tieFree`                 | `StageDRelational.lean`             | 🟦 sorry — structural |
-| Phase 3.E | `labelEdges_VtsInvariant_eq_distinct` (assembly)      | `StageDRelational.lean`             | 🟦 sorry — assembly |
+| Phase 3.C | `computeDenseRanks_τ_shift_distinct`                  | `StageDRelational.lean`             | ✅ proved |
+| Phase 3.D | `computeDenseRanks_perm_when_tieFree`                 | `StageDRelational.lean`             | ✅ proved |
+| Phase 3.E | `labelEdges_VtsInvariant_eq_distinct` (assembly)      | `StageDRelational.lean`             | ✅ proved |
 
-The two **deepest** parts (Phase 3.B's strong fold invariant + the selection-sort
-terminal-rankMap-identity) are now closed. What remains is **structural arithmetic on
-`computeDenseRanks`** (Phase 3.C, Phase 3.D) plus a clean **algebraic assembly** (Phase 3.E).
+**All of Phase 3 is now closed.** The structural denseRanks lemmas (3.C, 3.D) use the
+relational `sortBy` machinery and a `pairCmp` strict-lex characterization, plus a new
+`sortBy_eq_of_perm_strict` helper added to `ComparisonSort.lean`. Phase 3.E assembles
+via `labelEdges_fold_strong` + `labelEdges_terminal_rankMap_identity` and an
+injectivity-of-`computeDenseRanks` lemma (no tie-freeness required for injectivity).
 
 --------------------------------------------------------------------------------
 

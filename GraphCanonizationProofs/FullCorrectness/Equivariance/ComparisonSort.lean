@@ -2049,4 +2049,94 @@ theorem assignRanks_rank_eq_of_sorted_perm {α : Type} (cmp : α → α → Orde
       have h_Y_step := assignRanks_rank_succ_when_cmp_neq_eq cmp Y k h_Y h_Y_neq
       rw [h_X_step, h_Y_step, h_ih]
 
+/-! ### Sorted-uniqueness under strict comparison
+
+When `cmp` is "strict" on a list `X` (no two distinct list elements are `cmp`-equal), and
+`X` is sorted (`Pairwise (cmp _ _ ≠ .gt)`) and `X.Perm Y` with `Y` also sorted, then
+`X = Y`. Used by Phase 3.C to identify two `sortBy`-outputs as equal lists. -/
+
+private theorem sorted_eq_of_perm_strict_aux {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt) :
+    ∀ {X Y : List α}, X.Perm Y →
+      X.Pairwise (fun a b => cmp a b ≠ Ordering.gt) →
+      Y.Pairwise (fun a b => cmp a b ≠ Ordering.gt) →
+      (∀ a ∈ X, ∀ b ∈ X, a ≠ b → cmp a b ≠ Ordering.eq) →
+      X = Y := by
+  intro X
+  induction X with
+  | nil =>
+    intro Y h_perm _ _ _
+    exact (List.nil_perm.mp h_perm).symm
+  | cons a X' ih =>
+    intro Y h_perm h_sortX h_sortY h_strict
+    -- a ∈ Y. Decompose Y = b :: Y'.
+    have h_Y_ne : Y ≠ [] := by
+      intro h_eq; rw [h_eq] at h_perm
+      exact List.cons_ne_nil _ _ (List.perm_nil.mp h_perm)
+    obtain ⟨b, Y', rfl⟩ := List.exists_cons_of_ne_nil h_Y_ne
+    -- Show a = b.
+    have h_a_in_bY : a ∈ b :: Y' := h_perm.mem_iff.mp List.mem_cons_self
+    have h_b_in_aX : b ∈ a :: X' := h_perm.symm.mem_iff.mp List.mem_cons_self
+    have h_a_eq_b : a = b := by
+      by_contra h_a_ne_b
+      -- a ≠ b. Then a ∈ Y' (from h_a_in_bY) and b ∈ X' (from h_b_in_aX).
+      have h_a_in_Y' : a ∈ Y' := by
+        rcases List.mem_cons.mp h_a_in_bY with h_eq | h_in
+        · exact (h_a_ne_b h_eq).elim
+        · exact h_in
+      have h_b_in_X' : b ∈ X' := by
+        rcases List.mem_cons.mp h_b_in_aX with h_eq | h_in
+        · exact (h_a_ne_b h_eq.symm).elim
+        · exact h_in
+      -- cmp a b ≠ .gt (X sorted: a is head, b in tail).
+      have h_ab_le : cmp a b ≠ Ordering.gt := List.rel_of_pairwise_cons h_sortX h_b_in_X'
+      -- cmp b a ≠ .gt (Y sorted: b is head, a in tail).
+      have h_ba_le : cmp b a ≠ Ordering.gt := List.rel_of_pairwise_cons h_sortY h_a_in_Y'
+      -- So cmp a b = .eq (or .lt, but .lt → cmp b a = .gt contradicts).
+      have h_ab_eq : cmp a b = Ordering.eq := by
+        match h_ab : cmp a b with
+        | .eq => rfl
+        | .lt => exact (h_ba_le (h_antisym₁ a b h_ab)).elim
+        | .gt => exact (h_ab_le h_ab).elim
+      -- But strictness says cmp a b ≠ .eq.
+      exact h_strict a List.mem_cons_self b (List.mem_cons_of_mem _ h_b_in_X') h_a_ne_b h_ab_eq
+    subst h_a_eq_b
+    -- Now Y = a :: Y'. Recurse.
+    have h_perm_tail : X'.Perm Y' := (List.perm_cons a).mp h_perm
+    have h_sortX' : X'.Pairwise (fun a b => cmp a b ≠ Ordering.gt) := h_sortX.tail
+    have h_sortY' : Y'.Pairwise (fun a b => cmp a b ≠ Ordering.gt) := h_sortY.tail
+    have h_strict' : ∀ a' ∈ X', ∀ b' ∈ X', a' ≠ b' → cmp a' b' ≠ Ordering.eq := fun a' ha' b' hb' =>
+      h_strict a' (List.mem_cons_of_mem _ ha') b' (List.mem_cons_of_mem _ hb')
+    rw [ih h_perm_tail h_sortX' h_sortY' h_strict']
+
+/-- **Sorted Perm uniqueness under strict cmp.** If `X.Perm Y` and both are sorted by
+`cmp` and the elements of `X` are pairwise `cmp`-distinct, then `sortBy cmp X = sortBy cmp Y`.
+Equivalently, `X` and `Y` are themselves equal. Used by Phase 3.C to derive
+`sortBy cmp pairs₂ = (sortBy cmp pairs₁).map f`. -/
+theorem sortBy_eq_of_perm_strict {α : Type} (cmp : α → α → Ordering)
+    (h_antisym₁ : ∀ a b, cmp a b = Ordering.lt → cmp b a = Ordering.gt)
+    (h_antisym₂ : ∀ a b, cmp a b = Ordering.gt → cmp b a = Ordering.lt)
+    (h_trans : ∀ a b c, cmp a b ≠ Ordering.gt → cmp b c ≠ Ordering.gt → cmp a c ≠ Ordering.gt)
+    {X Y : List α} (h_perm : X.Perm Y)
+    (h_strict : ∀ a ∈ X, ∀ b ∈ X, a ≠ b → cmp a b ≠ Ordering.eq) :
+    sortBy cmp X = sortBy cmp Y := by
+  -- Both `sortBy` outputs are Perms of each other (transitively via X, Y).
+  have h_sX_perm : (sortBy cmp X).Perm X := sortBy_perm cmp X
+  have h_sY_perm : (sortBy cmp Y).Perm Y := sortBy_perm cmp Y
+  have h_sortedX_perm_sortedY : (sortBy cmp X).Perm (sortBy cmp Y) :=
+    h_sX_perm.trans (h_perm.trans h_sY_perm.symm)
+  -- Both are sorted.
+  have h_sortedX : (sortBy cmp X).Pairwise (fun a b => cmp a b ≠ Ordering.gt) :=
+    sortBy_pairwise cmp h_antisym₂ h_trans X
+  have h_sortedY : (sortBy cmp Y).Pairwise (fun a b => cmp a b ≠ Ordering.gt) :=
+    sortBy_pairwise cmp h_antisym₂ h_trans Y
+  -- Strictness transfers to sortBy cmp X (which has the same elements as X).
+  have h_strict_sortedX : ∀ a ∈ sortBy cmp X, ∀ b ∈ sortBy cmp X, a ≠ b → cmp a b ≠ Ordering.eq := by
+    intro a h_a b h_b h_ab
+    have h_a' : a ∈ X := h_sX_perm.mem_iff.mp h_a
+    have h_b' : b ∈ X := h_sX_perm.mem_iff.mp h_b
+    exact h_strict a h_a' b h_b' h_ab
+  exact sorted_eq_of_perm_strict_aux cmp h_antisym₁ h_sortedX_perm_sortedY
+    h_sortedX h_sortedY h_strict_sortedX
+
 end Graph
