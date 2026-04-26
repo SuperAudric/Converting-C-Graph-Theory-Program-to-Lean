@@ -2226,4 +2226,211 @@ theorem orderVertices_n_distinct_ranks
   -- φ k_i = i, φ k_j = j. With k_i = k_j: i = j.
   exact hij (h_k_i.symm.trans (hk_eq ▸ h_k_j))
 
+/-! ## §7-P6.U  Phase 6 utility helpers
+
+These small helpers are used by the Phase 6 closure (`run_swap_invariant_fwd` σ ∉ Aut G
+branch) in `Main.lean`. They reduce the entry-point pipeline to its post-`getArrayRank`
+form on the all-zeros input, and provide size/prefix-typing facts at that boundary. -/
+
+/-- `getArrayRank` preserves array size: the output starts with `Array.replicate arr.size 0`,
+and the trailing assignment foldl uses `set!` which is size-preserving. -/
+theorem getArrayRank_size (arr : Array VertexType) :
+    (getArrayRank arr).size = arr.size := by
+  unfold getArrayRank
+  -- The result is `assignmentsRev.foldl (set!) (replicate arr.size 0)`.
+  -- Generalize over the assignment list and the starting array.
+  set pairs : List (VertexType × Nat) :=
+    (List.range arr.size).map (fun i => (arr.getD i 0, i)) with hpairs
+  set sorted := sortBy (fun (a b : VertexType × Nat) => compare a.1 b.1) pairs with hsorted
+  set assignmentsRev := (sorted.foldl
+    (fun (acc : List (Nat × Nat) × Option (VertexType × Nat))
+         (item : VertexType × Nat) =>
+      let (revList, last) := acc
+      let rank : Nat := match last with
+        | none                       => 0
+        | some (lastVal, lastRank)   => if lastVal == item.1 then lastRank else lastRank + 1
+      ((item.2, rank) :: revList, some (item.1, rank)))
+    (([] : List (Nat × Nat)), none)).1 with hAR
+  -- Show foldl preserves size starting from any array of size arr.size.
+  have h_step : ∀ (L : List (Nat × Nat)) (a : Array VertexType),
+      a.size = arr.size →
+      (L.foldl (fun out entry => out.set! entry.1 entry.2) a).size = arr.size := by
+    intro L
+    induction L with
+    | nil => intro a ha; simpa
+    | cons hd tl ih =>
+      intro a ha
+      simp only [List.foldl_cons]
+      apply ih
+      simp only [Array.set!_eq_setIfInBounds, Array.size_setIfInBounds]
+      exact ha
+  have h_init : (Array.replicate arr.size (0 : VertexType)).size = arr.size :=
+    Array.size_replicate
+  exact h_step assignmentsRev (Array.replicate arr.size 0) h_init
+
+/-- For the all-zeros input, every "rank" produced by the foldl that builds
+`assignmentsRev` is `0`, so the trailing `set!`-foldl writes only `0`s into a `0`-array
+and `getArrayRank zeros = zeros`.
+
+Used by `run_swap_invariant_fwd` (σ ∉ Aut G branch) to reduce
+`getArrayRank (Array.replicate n 0)` to the σ-trivially-invariant `zeros` array. -/
+theorem getArrayRank_zeros_eq_zeros (n : Nat) :
+    getArrayRank (Array.replicate n (0 : VertexType)) = Array.replicate n 0 := by
+  -- Strategy: show the entire trailing foldl writes `0`s into a `0`-array; the
+  -- writes are no-ops, so the result equals the starting array.
+  unfold getArrayRank
+  -- Set names matching the definition.
+  set zeros : Array VertexType := Array.replicate n 0 with hzeros
+  have h_zeros_size : zeros.size = n := Array.size_replicate
+  -- The pairs list has every first component equal to 0.
+  set pairs : List (VertexType × Nat) :=
+    (List.range zeros.size).map (fun i => (zeros.getD i 0, i)) with hpairs
+  have h_pairs_first : ∀ p ∈ pairs, p.1 = 0 := by
+    intro p hp
+    rw [hpairs] at hp
+    rcases List.mem_map.mp hp with ⟨i, _, h_eq⟩
+    rw [← h_eq]
+    -- Show `zeros.getD i 0 = 0` for any `i`.
+    show zeros.getD i 0 = 0
+    rw [Array.getD_eq_getD_getElem?, hzeros, Array.getElem?_replicate]
+    split <;> rfl
+  -- After sortBy, the first components are still all 0 (Perm).
+  set sorted := sortBy (fun (a b : VertexType × Nat) => compare a.1 b.1) pairs with hsorted
+  have h_sorted_perm : sorted.Perm pairs := by rw [hsorted]; exact sortBy_perm _ _
+  have h_sorted_first : ∀ p ∈ sorted, p.1 = 0 := fun p hp =>
+    h_pairs_first p (h_sorted_perm.mem_iff.mp hp)
+  -- The foldl that builds (assignmentsRev, last) starting from ([], none): every rank is 0,
+  -- so assignmentsRev is `sorted.reverse.map (fun p => (p.2, 0))`.
+  -- We extract a strong invariant for the foldl.
+  have h_foldl_inv : ∀ (L : List (VertexType × Nat)),
+      (∀ p ∈ L, p.1 = 0) →
+      (L.foldl
+        (fun (acc : List (Nat × Nat) × Option (VertexType × Nat))
+             (item : VertexType × Nat) =>
+          let (revList, last) := acc
+          let rank : Nat := match last with
+            | none                       => 0
+            | some (lastVal, lastRank)   => if lastVal == item.1 then lastRank else lastRank + 1
+          ((item.2, rank) :: revList, some (item.1, rank)))
+        (([] : List (Nat × Nat)), none)).1 = L.reverse.map (fun p => (p.2, 0)) := by
+    intro L hL
+    -- Generalize over a starting accumulator with `last` either `none` or `some (0, 0)`.
+    suffices h : ∀ (L : List (VertexType × Nat)) (acc : List (Nat × Nat))
+                   (last : Option (VertexType × Nat))
+                   (h_first : ∀ p ∈ L, p.1 = 0)
+                   (h_last : last = none ∨ last = some (0, 0)),
+        (L.foldl
+          (fun (acc : List (Nat × Nat) × Option (VertexType × Nat))
+               (item : VertexType × Nat) =>
+            let (revList, last) := acc
+            let rank : Nat := match last with
+              | none                       => 0
+              | some (lastVal, lastRank)   => if lastVal == item.1 then lastRank else lastRank + 1
+            ((item.2, rank) :: revList, some (item.1, rank)))
+          (acc, last)).1
+          = L.reverse.map (fun p => (p.2, 0)) ++ acc by
+      have := h L [] none hL (Or.inl rfl)
+      simpa using this
+    -- Induction on L.
+    intro L
+    induction L with
+    | nil =>
+      intro acc last _ _
+      simp
+    | cons hd tl ih =>
+      intro acc last h_first h_last
+      simp only [List.foldl_cons, List.reverse_cons, List.map_append, List.map_cons,
+                 List.map_nil, List.append_assoc, List.cons_append, List.nil_append]
+      have h_hd_first : hd.1 = 0 := h_first hd (List.mem_cons_self)
+      have h_tl_first : ∀ p ∈ tl, p.1 = 0 := fun p hp => h_first p (List.mem_cons_of_mem _ hp)
+      -- Compute the rank for the head.
+      have h_rank_eq : (match last with
+                        | none                       => 0
+                        | some (lastVal, lastRank)   =>
+                          if lastVal == hd.1 then lastRank else lastRank + 1) = 0 := by
+        rcases h_last with hL | hL
+        · rw [hL]
+        · rw [hL, h_hd_first]; simp
+      -- Apply IH with the new accumulator and `last`.
+      have h_ih := ih ((hd.2, 0) :: acc) (some (hd.1, 0)) h_tl_first
+        (Or.inr (by simp [h_hd_first]))
+      -- Massage the goal.
+      show
+        (tl.foldl _ ((hd.2, _) :: acc, some (hd.1, _))).1
+          = tl.reverse.map (fun p => (p.2, 0)) ++ ((hd.2, 0) :: acc)
+      rw [h_rank_eq] at *
+      exact h_ih
+  -- Apply h_foldl_inv to sorted.
+  set assignmentsRev := (sorted.foldl
+    (fun (acc : List (Nat × Nat) × Option (VertexType × Nat))
+         (item : VertexType × Nat) =>
+      let (revList, last) := acc
+      let rank : Nat := match last with
+        | none                       => 0
+        | some (lastVal, lastRank)   => if lastVal == item.1 then lastRank else lastRank + 1
+      ((item.2, rank) :: revList, some (item.1, rank)))
+    (([] : List (Nat × Nat)), none)).1 with hAR
+  have h_AR_eq : assignmentsRev = sorted.reverse.map (fun p => (p.2, 0)) := by
+    rw [hAR]; exact h_foldl_inv sorted h_sorted_first
+  -- Now the trailing foldl writes (entry.2 = 0) at every position; starting from
+  -- `replicate zeros.size 0`, it stays as `replicate zeros.size 0`.
+  -- Show: ∀ L : List (Nat × Nat), (∀ e ∈ L, e.2 = 0) →
+  --        L.foldl (fun out e => out.set! e.1 e.2) (replicate n 0) = replicate n 0
+  have h_writes_zero : ∀ (L : List (Nat × Nat)) (a : Array VertexType),
+      a = Array.replicate n 0 → (∀ e ∈ L, e.2 = 0) →
+      L.foldl (fun out e => out.set! e.1 e.2) a = Array.replicate n 0 := by
+    intro L
+    induction L with
+    | nil => intro a ha _; rw [List.foldl_nil]; exact ha
+    | cons hd tl ih =>
+      intro a ha hL
+      simp only [List.foldl_cons]
+      apply ih
+      · -- (a.set! hd.1 hd.2) = replicate n 0 because hd.2 = 0 and a = replicate n 0.
+        have h_hd : hd.2 = 0 := hL hd (List.mem_cons_self)
+        rw [ha, h_hd]
+        -- (Array.replicate n 0).set! hd.1 0 = Array.replicate n 0.
+        apply Array.ext
+        · simp
+        · intro i hi₁ hi₂
+          simp [Array.set!_eq_setIfInBounds]
+      · intro e he
+        exact hL e (List.mem_cons_of_mem _ he)
+  -- All entries in assignmentsRev have second component 0.
+  have h_AR_zero : ∀ e ∈ assignmentsRev, e.2 = 0 := by
+    rw [h_AR_eq]
+    intro e he
+    rcases List.mem_map.mp he with ⟨p, _, hp_eq⟩
+    rw [← hp_eq]
+  -- Conclude.
+  show assignmentsRev.foldl (fun out e => out.set! e.1 e.2)
+        (Array.replicate zeros.size 0) = Array.replicate n 0
+  rw [h_zeros_size]
+  exact h_writes_zero assignmentsRev (Array.replicate n 0) rfl h_AR_zero
+
+/-- `orderVertices` preserves array size: the outer `(List.range n).foldl` body composes
+`convergeLoop` (size-preserving via `convergeLoop_size_preserving`) with `(breakTie · ·).1`
+(size-preserving via `breakTie_size`). -/
+theorem orderVertices_size_eq (G : AdjMatrix n) (vts : Array VertexType)
+    (h_size : vts.size = n) :
+    (orderVertices (initializePaths G) vts).size = n := by
+  unfold orderVertices
+  -- Generalize: ∀ L vts0, vts0.size = n → (L.foldl body vts0).size = n.
+  suffices h : ∀ (L : List Nat) (vts0 : Array VertexType),
+      vts0.size = n →
+      ((L.foldl
+          (fun currentTypes targetPosition =>
+            let convergedTypes := convergeLoop (initializePaths G) currentTypes n
+            (breakTie convergedTypes targetPosition).1) vts0).size = n) by
+    exact h (List.range n) vts h_size
+  intro L
+  induction L with
+  | nil => intro vts0 hv; simpa
+  | cons hd tl ih =>
+    intro vts0 hv
+    simp only [List.foldl_cons]
+    apply ih
+    rw [breakTie_size, convergeLoop_size_preserving]
+    exact hv
+
 end Graph

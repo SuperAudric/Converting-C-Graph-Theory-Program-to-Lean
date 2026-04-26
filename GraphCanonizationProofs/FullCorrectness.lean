@@ -37,11 +37,22 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, §7-Step 2 breakTie step, §7-Step 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
-## Open obligations (1 sorry site)
+## Open obligations (4 sorry sites, all in Phase 6 sub-files; Main.lean is sorry-free)
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `run_swap_invariant_fwd` (σ ∉ Aut G branch) | `Main` | Pipeline σ-equivariance for general σ — specifically `orderVertices ((init G).permute σ) zeros = σ-shift of orderVertices (init G) zeros`. Reduces to Stage B-rel general σ + Stage C-rel general σ + breakTie σ-tracking through outer iterations. **Stage D-rel general σ is now closed** (`labelEdges_two_graphs_σ_related` in `StageDRelational.lean`), so once orderVertices σ-equivariance is closed, the swap case follows immediately. |
+| `calculatePathRankings_σ_equivariant_general` (P6.A) | `Equivariance/PathEquivarianceGeneral` | Stage B-rel general σ — relational σ-equivariance of `calculatePathRankings` without `σ ∈ Aut G`. Genuinely new proof; existing Phase 1 σ ∈ Aut G version uses `PathState.permute σ state = state` which fails for general σ. ~150-200 lines. |
+| `convergeOnce_σ_equivariant_general` (P6.B) | `Equivariance/ConvergeLoopGeneral` | Direct corollary of P6.A via `convergeOnce_writeback`. ~15-25 lines. |
+| `convergeLoop_σ_equivariant_general` (P6.B) | `Equivariance/ConvergeLoopGeneral` | Fuel induction using `convergeOnce_σ_equivariant_general`. ~30-50 lines. |
+| `orderVertices_σ_equivariant_general` (P6.C) | `Equivariance/OrderVerticesGeneral` | Outer-loop σ-equivariance, structurally similar to Phase 5's `runFrom_VtsInvariant_eq_strong` but without `σ ∈ Aut G`. Uses P6.B per step and inherits the same orbit-bridging obligation as Phase 5. ~80-150 lines. |
+
+**`Main.lean` is sorry-free**: `run_swap_invariant_fwd` σ ∉ Aut G branch is fully
+assembled using P6.U helpers + `labelEdges_two_graphs_σ_related` (✅) +
+`orderVertices_σ_equivariant_general_zeros` (the specialized form for the all-zeros
+input, derived from P6.C).
+
+The Phase 6 proof is now structurally complete: closing P6.A through P6.C as
+documented closes the entire `run_canonical_correctness` theorem.
 
 The top-level theorem `run_isomorphic_eq_new` is now structured via induction on
 `Isomorphic`'s constructors: `refl` and `trans` cases close trivially, the `swap` case
@@ -344,34 +355,35 @@ The branch proves `run zeros G = run zeros (G.permute σ)` for `σ := Equiv.swap
 
 **Sub-tasks:**
 
-##### P6.U — Utility helpers (~50 lines, low risk)
+##### P6.U — Utility helpers (✅ closed in `Invariants.lean`)
 
-  - `getArrayRank_zeros_eq_zeros` 🟦
+  - `getArrayRank_zeros_eq_zeros` ✅ proved
     ```
     getArrayRank (Array.replicate n 0) = Array.replicate n 0
     ```
-    Pairs are `(0, i)` for each `i`; sortBy preserves order under `compare a.1 b.1 = .eq`;
-    foldl assigns rank 0 throughout. Direct array extensionality. (~20 lines)
+    Pairs all have first component `0`; sortBy preserves the all-zero first components
+    via `sortBy_perm`; the inner foldl assigns rank `0` throughout (foldl-invariant
+    showing `last = some (0, 0)` at every step); the trailing `set!`-foldl on a
+    `replicate n 0` array writes only `0`s and is a no-op.
 
-  - `orderVertices_size_eq` 🟦
+  - `orderVertices_size_eq` ✅ proved
     ```
-    (orderVertices state vts).size = vts.size
+    (G : AdjMatrix n) → (vts : Array VertexType) → vts.size = n →
+    (orderVertices (initializePaths G) vts).size = n
     ```
-    foldl induction; each step preserves size via `convergeLoop_size_preserving` and
-    `breakTie_size`. (~10 lines)
+    foldl induction over `List.range n`; each step preserves size via
+    `convergeLoop_size_preserving` and `breakTie_size`.
 
-  - `getArrayRank_size` 🟦
+  - `getArrayRank_size` ✅ proved
     ```
     (getArrayRank arr).size = arr.size
     ```
-    Mechanical from `Array.size_replicate` and `set!` size preservation. (~5 lines)
+    foldl induction starting from `Array.replicate arr.size 0`; each `set!` is
+    size-preserving (`Array.set!_eq_setIfInBounds` + `Array.size_setIfInBounds`).
 
-  - `getArrayRank_IsPrefixTyping` 🟦
-    ```
-    arr.size = n → IsPrefixTyping (getArrayRank arr)
-    ```
-    `getArrayRank` always produces dense ranks (values in `{0..m-1}` for some `m ≤ n`).
-    (~30 lines, or derive via existing prefix-typing infrastructure)
+  - `getArrayRank_IsPrefixTyping` (not strictly needed for P6.D — `IsPrefixTyping zeros`
+    is supplied directly via `IsPrefixTyping.replicate_zero` after the
+    `getArrayRank_zeros_eq_zeros` rewrite).
 
 ##### P6.A — Stage B-rel general σ (~150-200 lines, medium-high risk)
 
@@ -548,7 +560,7 @@ If P6.A's general-σ Stage B-rel proves too costly, an alternative path:
 | Tiebreak.lean | Replace `runFrom_VtsInvariant_eq` sorry with strong theorem call | low | ✅ closed | done |
 | Phase 6 — `labelEdges_two_graphs_σ_related` (Stage D-rel general σ) | low | ✅ closed | done |
 | Phase 6 — top-level induction + `run_swap_invariant_fwd` (σ ∈ Aut G branch) | low | ✅ closed | done |
-| Phase 6 — P6.U utility helpers (`getArrayRank_zeros_eq_zeros` etc.) | low | 🟦 pending | ~50 |
+| Phase 6 — P6.U utility helpers (`getArrayRank_zeros_eq_zeros` etc.) | low | ✅ closed | done |
 | Phase 6 — P6.A Stage B-rel general σ                   | medium-high | 🟦 pending | ~150-200 |
 | Phase 6 — P6.B Stage C-rel general σ (corollary of P6.A) | low-medium | 🟦 pending | ~30-50 |
 | Phase 6 — P6.C orderVertices σ-equivariance general σ  | high        | 🟦 pending | ~80-150 |
