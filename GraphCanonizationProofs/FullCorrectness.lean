@@ -64,7 +64,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 | §6   | Tiebreak choice-independence (conceptual crux)    | `Tiebreak`                               | ✅ closed modulo `runFrom_VtsInvariant_eq` (see "Stage B/D gap" below) |
 | §7   | `IsPrefixTyping` definition + zeros instance      | `Invariants`                             | ✅ defined + boundary proved |
 | §7   | `breakTie_targetPos_is_min_tied`                  | `Invariants`                             | ✅ proved (uses §5 disjunctive characterization) |
-| §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, Phase 2 breakTie step, Phase 3 convergeLoop_preserves_lower_uniqueness) |
+| §7   | Other prefix invariants                           | `Invariants`                             | ✅ all proved (`getFrom_image_isPrefix_for_initializePaths`, `convergeLoop_preserves_prefix`, `n_distinct_ranks`, `orderVertices_prefix_invariant`, §7-Step 2 breakTie step, §7-Step 3 convergeLoop_preserves_lower_uniqueness) |
 | §8   | Assemble `run_canonical_correctness`              | `Main`                                   | 🧱 assembled, (⟹) `sorry`; (⟸) proved |
 
 ## Open obligations (2 sorry sites)
@@ -173,170 +173,334 @@ This is mechanical given the foundational lemmas above.
 
 --------------------------------------------------------------------------------
 
-## Plan of attack: closing the two open sorries
+## Phase status snapshot (updated)
 
-**Goal**: close `runFrom_VtsInvariant_eq` (Tiebreak.lean) and `run_isomorphic_eq_new` (Main.lean).
+| Phase | Subject                                              | Status |
+| ----- | ---------------------------------------------------- | ------ |
+| 1     | Stage B-rel assembly (`calculatePathRankings_σ_equivariant_relational`) | ✅ closed |
+| 2     | Stage C-rel (`convergeOnce_VtsInvariant_eq`, `convergeLoop_VtsInvariant_eq`) | ✅ closed |
+| 4     | `breakTieAt_τ_related`, `shiftAbove_VtsInvariant_eq` | ✅ closed |
+| 3     | Cell-wise characterization of `labelEdgesAccordingToRankings` | 🟡 deep lemmas closed; 3 structural sub-sorries remain |
+| 5     | `runFrom_VtsInvariant_eq_strong`                     | 🟦 stated with right hypotheses + transfer helpers closed; main proof pending Phase 3 + joint induction |
+| 6     | `run_isomorphic_eq_new`                              | 🟦 documented; needs generalized stages |
+
+### Phase 3 inner sub-decomposition (top-level relational)
+
+**Naming convention** (avoids collision with §7-Step terminology above): the relational
+Phase 3 (Stage D-rel) is sub-decomposed as Phase 3.A through Phase 3.E. Each sub-phase
+has a unique single-letter suffix, and the "Phase 3.X" prefix is always used (no
+abbreviation).
+
+| Sub-phase | Lemma                                                 | File                                | Status |
+| --------- | ----------------------------------------------------- | ----------------------------------- | ------ |
+| Phase 3.A | `computeDenseRanks_size`                              | `LabelEdgesCharacterization.lean`   | ✅ proved |
+| Phase 3.B | Cell-wise characterization (the three lemmas below)   | `LabelEdgesCharacterization.lean`   | ✅ proved |
+|           |  – `labelEdges_fold_permutes` (existence of σ)        |                                     | ✅ proved |
+|           |  – `labelEdges_fold_strong` (σ + `rankMap = rankMap_0 ∘ σ⁻¹`) |                             | ✅ proved |
+|           |  – `rankMap_swap_step_eq` (helper)                    |                                     | ✅ proved |
+|           |  – `labelEdges_terminal_rankMap_identity`             |                                     | ✅ proved |
+| Phase 3.C | `computeDenseRanks_τ_shift_distinct`                  | `StageDRelational.lean`             | 🟦 sorry — structural |
+| Phase 3.D | `computeDenseRanks_perm_when_tieFree`                 | `StageDRelational.lean`             | 🟦 sorry — structural |
+| Phase 3.E | `labelEdges_VtsInvariant_eq_distinct` (assembly)      | `StageDRelational.lean`             | 🟦 sorry — assembly |
+
+The two **deepest** parts (Phase 3.B's strong fold invariant + the selection-sort
+terminal-rankMap-identity) are now closed. What remains is **structural arithmetic on
+`computeDenseRanks`** (Phase 3.C, Phase 3.D) plus a clean **algebraic assembly** (Phase 3.E).
+
+--------------------------------------------------------------------------------
+
+## Plan of attack for the remaining theorems
+
+**Top-level goal**: close `runFrom_VtsInvariant_eq` (Tiebreak.lean) and
+`run_isomorphic_eq_new` (Main.lean), and the structurally-connected sub-sorries
+(Phase 3.C, 3.D, 3.E; Phase 5; Phase 6).
 
 **Dependency graph**:
 
 ```
-Main.run_isomorphic_eq_new (⟹ direction of run_canonical)
+Main.run_isomorphic_eq_new                       (Phase 6)
   ↓ uses
-Tiebreak.runFrom_VtsInvariant_eq
+runFrom_VtsInvariant_eq_strong                   (Phase 5)
   ↓ uses
-[Stage B-rel] + [Stage C-rel] + [Stage D-rel] + [breakTie/tiebreak handling]
+labelEdges_VtsInvariant_eq_distinct              (Phase 3.E)
+  ↓ uses
+computeDenseRanks_τ_shift_distinct               (Phase 3.C) +
+computeDenseRanks_perm_when_tieFree              (Phase 3.D) +
+[labelEdges_fold_strong + labelEdges_terminal_rankMap_identity]  (Phase 3.B, ✅ closed)
 ```
 
-Six phases, ordered by risk and dependency. Phase 1 is purely mechanical assembly;
-phases 2 and 4 are direct applications; phases 3, 5, 6 each have one technical wrinkle.
+### Phase 3.C — `computeDenseRanks_τ_shift_distinct` (~120-150 lines)
 
-### Phase 1 — Stage B-rel assembly (~300 lines)
+**File**: `Equivariance/StageDRelational.lean`.
 
-**File**: `Equivariance/PathEquivarianceRelational.lean` (extend).
-
-Mirror what `PathEquivariance.lean` does for the σ-INV form, with our new relational
-foundational lemmas:
-
+**Statement**:
 ```
-private def CalcRankingsRel σ acc₁ acc₂ : Prop  -- relational invariant: sizes + cell σ-related
-private theorem calculatePathRankings_body_preserves_rel  -- body step (uses set_chain_σRelated, setBetween_chain_σRelated, from/between_assignList_σ_rank_rel)
-private theorem calculatePathRankings_σ_cell_rel_facts    -- foldl induction over List.range n
-theorem calculatePathRankings_σ_equivariant_relational    -- Stage B-rel (final)
+∀ w : Fin n,
+  (computeDenseRanks n rks₂).getD w.val 0
+  = (computeDenseRanks n rks₁).getD (τ⁻¹ w).val 0
+```
+under hypotheses tie-freeness of both AND τ-relation `rks₂[w] = rks₁[τ⁻¹ w]`.
+
+**Approach (preferred — direct via the fold characterization)**:
+
+This is the substantial structural lemma. Two viable routes:
+
+  **Route A** — characterize denseRanks as `#{u | (rks[u], u) lex < (rks[v], v)}` and
+  show this counting transforms cleanly under τ. Under tie-freeness, the `(·, u)`
+  secondary key is irrelevant, so denseRanks reduces to `#{u | rks[u] < rks[v]}`,
+  which transforms by change of variables `u ↦ τ⁻¹ u`. Cleanest math; needs careful
+  formalization with `List.countP` or `Finset.filter`.
+
+  **Route B** — compare the two `pairs` lists step-by-step. The pairs for `rks₂` are
+  the τ-image of pairs for `rks₁` (under the second component). Sort both; under
+  tie-freeness, the sorts are determined by primary key alone, so the sorts are equal
+  up to a τ-relabeling of second components. Then the foldl outputs differ by a τ-shift.
+
+**Key lemmas / tools**:
+  - Existing relational sortBy machinery in `PathEquivarianceRelational.lean`:
+    `sortBy_map_pointwise_relational`, `assignRanks_map_relational`. These are the
+    pattern; lift them to `(VertexType × Nat)` lex sort under tie-freeness.
+  - `Equiv.Perm.bijective` for the change-of-variables in Route A.
+  - `List.countP_filter` and `Finset.card_image_of_injective` if going via Finset.
+
+**Risk: medium.** Route A is cleanest mathematically; Route B parallels existing
+machinery (cheaper to set up, more verbose).
+
+### Phase 3.D — `computeDenseRanks_perm_when_tieFree` (~70-100 lines)
+
+**File**: `Equivariance/StageDRelational.lean`.
+
+**Statement**:
+```
+∀ k : Fin n, ∃ w : Fin n, (computeDenseRanks n rks).getD w.val 0 = k.val
+```
+under hypotheses `rks.size = n` and `TieFree rks n`.
+
+**Approach**:
+1. Unfold `computeDenseRanks`: `pairs = (List.range n).map (fun i => (rks[i], i))`,
+   `sorted = sortBy lex_cmp pairs`, then foldl writes `sortedIdx → position pairs[sortedIdx].2`.
+2. Show `pairs.length = n`, hence `sorted.length = n` (via `sortBy_perm` / `Perm.length_eq`).
+3. For target value `k.val`, witness vertex `w := (sorted.getD k.val (0,0)).2`. Show:
+   - `w < n` because `pairs` second components ⊆ `[0, n)` and `sorted ~ pairs` (Perm).
+   - The fold's set! at position `w` writes value `k.val` (the matching `sortedIdx`).
+   - No subsequent set! overwrites position `w` — by Nodup of `sorted.map (·.2)` (which
+     follows from Nodup of `pairs.map (·.2)` = `List.range n` + sort is a Perm).
+
+**Key lemmas to use**:
+  - `sortBy_perm` (in `ComparisonSort.lean`): the sort is a permutation of input.
+  - `List.Perm.length_eq`, `List.Perm.nodup_iff`.
+  - `array_set_chain_at_target_nodup` (in `RankStateInvariants.lean`): when you write to
+    a list of distinct targets, reading at any specific target gives the written value.
+    **This is the workhorse** — same pattern as in `set_chain_σInvariant`'s proof.
+
+**Risk: medium-low.** Familiar pattern (set!-chain with Nodup keys); main work is the
+unfold of `computeDenseRanks` and tracking the fold structure.
+
+### Phase 3.E — `labelEdges_VtsInvariant_eq_distinct` assembly (~80-120 lines)
+
+**File**: `Equivariance/StageDRelational.lean`.
+
+**Statement** (already in file):
+```
+τ ∈ Aut G → tie-free rks₁, rks₂ → τ-related →
+labelEdges rks₂ G = labelEdges rks₁ G
 ```
 
-All foundational lemmas (`set_chain_σRelated`, `setBetween_chain_σRelated`,
-`from_assignList_σ_rank_rel`, `between_assignList_σ_rank_rel`) are in place.
-**Risk: low.** Mechanical assembly.
+**Proof plan** (with all closed/pending lemmas named):
 
-### Phase 2 — Stage C-rel: `convergeLoop` τ-equivariance (~150 lines)
+1. Unfold both labelEdges to `(List.finRange n).foldl (labelEdgesStep n (List.finRange n)) (G, computeDenseRanks n rks_i)`.
 
-**File**: New `Equivariance/ConvergeLoopRelational.lean`, or extend `ConvergeLoop.lean`.
+2. Apply `labelEdges_fold_strong` (✅) on side 1 with σ := id and rankMap_0 := computeDenseRanks rks₁:
+   - get σ_1 with `output_1.1 = G.permute σ_1` and `output_1.2.getD v.val 0 = (computeDenseRanks rks₁).getD (σ_1⁻¹ v).val 0`.
 
+3. Apply `labelEdges_fold_strong` (✅) on side 2 with σ := τ⁻¹ (using `_hτ : τ ∈ Aut G ⟹ G = G.permute τ⁻¹` via `permute_permute_symm`) and rankMap_0 := computeDenseRanks rks₁:
+   - The required hypothesis `acc.2 = rankMap_0 ∘ σ⁻¹` here is
+     `(computeDenseRanks rks₂).getD v.val 0 = (computeDenseRanks rks₁).getD (τ v).val 0`, which is **Phase 3.C** (with σ = τ⁻¹).
+   - get σ_2 with `output_2.1 = G.permute σ_2` and `output_2.2.getD v.val 0 = (computeDenseRanks rks₁).getD (σ_2⁻¹ v).val 0`.
+
+4. Apply `labelEdges_terminal_rankMap_identity` (✅) on both sides — the multiset hypothesis is **Phase 3.D** for each rks_i. Get:
+   - `output_1.2.getD v.val 0 = v.val`.
+   - `output_2.2.getD v.val 0 = v.val`.
+
+5. Combine 2/3 with 4: `(computeDenseRanks rks₁).getD (σ_1⁻¹ v).val 0 = v.val = (computeDenseRanks rks₁).getD (σ_2⁻¹ v).val 0`.
+
+6. By tie-freeness of rks₁ + Phase 3.D (denseRanks is a permutation), `computeDenseRanks rks₁` is injective on `Fin n`. Hence σ_1⁻¹ v = σ_2⁻¹ v, so σ_1 = σ_2.
+
+7. Conclude `output_1.1 = G.permute σ_1 = G.permute σ_2 = output_2.1`.
+
+**Risk: low.** Algebraic; the heavy lifting is in Phase 3.D and Phase 3.C.
+
+### Phase 5 — `runFrom_VtsInvariant_eq_strong` joint induction (~250-300 lines)
+
+**File**: `Equivariance/RunFromRelational.lean` (extend).
+
+**Statement** (already in file): see `runFrom_VtsInvariant_eq_strong` with hypotheses
+`(IsPrefixTyping arr₁) ∧ (UniquelyHeldBelow arr₁ s) ∧ (s ≤ n)`.
+
+**Strategy**: joint induction on `m := n - s` together with a strengthened
+`tiebreak_choice_independent_strong` (also taking the prefix hypothesis).
+
+**Joint statement** (informal):
 ```
-convergeOnce_VtsInvariant_eq:
-  τ ∈ G.Aut → arr-sizes-n → τ-related arr₁, arr₂ →
-  ∀ w, (convergeOnce state arr₂).1.getD w 0 = (convergeOnce state arr₁).1.getD (τ⁻¹ w) 0
-
-convergeLoop_VtsInvariant_eq:
-  ... ∀ fuel, ∀ w, ...
-```
-
-Direct application of Stage B-rel via `convergeOnce_writeback`: convergeOnce writes
-`getFrom (n-1) w` from `calculatePathRankings`. Stage B-rel gives the τ-relation on
-`getFrom`. **Risk: low.** Short, parallel to existing `convergeOnce_Aut_invariant`.
-
-### Phase 3 — Stage D-rel under tie-freeness (~250 lines)
-
-**File**: New `Equivariance/StageDRelational.lean`.
-
-```
-labelEdges_VtsInvariant_eq_distinct:
-  τ ∈ G.Aut →
-  rks₁, rks₂ τ-related, both with all-distinct ranks →
-  labelEdgesAccordingToRankings rks₂ G = labelEdgesAccordingToRankings rks₁ G
-```
-
-The technical wrinkle: `computeDenseRanks` uses `(rank, vertex-index)` lex order. Under
-τ-relabeling, the secondary `vertex-index` key gets τ-permuted. Tie-freeness of `rks`
-collapses the secondary key (no ties to break), so dense ranks are determined by
-primary rank alone, hence τ-related. Combined with `τ ∈ Aut G`, the resulting
-adjacency matrices match position-by-position.
-
-Sub-lemmas:
-- `computeDenseRanks_VtsInvariant_eq_distinct`: dense ranks τ-related.
-- `sortBy_lex_VtsInvariant_distinct`: sort permutation in arr₂ is τ-conjugate of arr₁'s.
-- Final adjacency-matrix equality via Aut.
-
-**Risk: medium.** The dense-ranks-under-τ argument is intricate but well-defined.
-
-### Phase 4 — breakTie / shiftAbove τ-related preservation helpers (~150 lines)
-
-**Critical observation**: `breakTie` is **not** in general τ-equivariant — its "smallest
-index" choice depends on `Fin` ordering, which τ does not respect. So we collect helpers
-for the parts that *do* preserve τ-relatedness:
-
-```
-shiftAbove_VtsInvariant_eq:
-  τ-related arr₁, arr₂ → (shiftAbove t arr₂)[w] = (shiftAbove t arr₁)[τ⁻¹ w]
-
-breakTieAt_τ_related:  -- generalize the existing breakTieAt_VtsInvariant_eq
-  (already exists for σ ∈ TypedAut on a single vts; lift to τ ∈ Aut G + τ-related arrs)
+P(m) := ∀ s, n - s = m →
+        (P₁) runFrom_VtsInvariant_eq_strong at this s holds, AND
+        (P₂) tiebreak_choice_independent_strong at this s+1 (sub-call form) holds.
 ```
 
-**Risk: low.** Direct, parallel to existing helpers in `Tiebreak.lean`.
+**Base case** (m = 0, s = n):
+- foldl in `runFrom n arr G` is empty; orderedRanks = arr.
+- `UniquelyHeldBelow arr n` (from hypothesis with q = n) means values 0..n-1 each
+  uniquely held — i.e., `TieFree arr n`. Same for arr₂ via `UniquelyHeldBelow_τ_transfer` (✅).
+- Apply `labelEdges_VtsInvariant_eq_distinct` (Phase 3.E). Done.
 
-### Phase 5 — `runFrom_VtsInvariant_eq` main proof (~300 lines)
+**Inductive step** (m = k+1):
+1. **Convergence step.** ct_i := `convergeLoop (initializePaths G) arr_i n`. By Phase 2
+   (`convergeLoop_VtsInvariant_eq`, ✅), ct₁, ct₂ are τ-related.
+   Hypothesis preservation:
+   - `IsPrefixTyping ct_i`: by `convergeLoop_preserves_prefix` (✅, in `Invariants.lean`,
+     now public via the recent surgery).
+   - `UniquelyHeldBelow ct_i s`: by `convergeLoop_preserves_lower_uniqueness` (✅, made
+     public this session).
+   - `ct_i.size = n`: by `convergeLoop_size_preserving` (✅).
 
-**Strategy**: Joint induction on `(n - start)` with `tiebreak_choice_independent`.
+2. **breakTie step.** `(arr_i', changed_i) := breakTie ct_i s`.
+   Hypothesis preservation:
+   - `IsPrefixTyping arr_i'` AND `UniquelyHeldBelow arr_i' (s+1)`: by
+     `breakTie_step_preserves_uniqueness` (✅, made public this session).
+   - `arr_i'.size = n`: via `breakTie_size`.
 
-**Why joint induction?** breakTie's choice can DIVERGE between τ-related inputs
-(min-index doesn't commute with τ). The standard chained-Stages proof breaks here.
-Resolution: state and prove `runFrom_VtsInvariant_eq` and `tiebreak_choice_independent`
-*together* by induction on `(n - start)`, sharing a single IH that absorbs both:
-1. τ-related arrays produce equal final matrices.
-2. Different tiebreak choices in the same orbit produce equal final matrices.
+3. **Tiebreak choice handling.** Two sub-cases on the pair `(keep₁, keep₂)`:
+   - **Case A** (keep₂ = τ keep₁): arr₁' and arr₂' are directly τ-related via
+     `breakTieAt_τ_related` (✅, Phase 4) applied with the converged ct_i. Apply
+     **IH-P₁** at level k to (arr₁', arr₂') — giving `runFrom (s+1) arr₁' G = runFrom (s+1) arr₂' G`.
+   - **Case B** (keep₂ ≠ τ keep₁): both keep_i ∈ typeClass ct_i s (the targeted class),
+     and they're in the same `TypedAut`-orbit (since τ ct₁'s typeClass equals ct₂'s
+     typeClass). Use **IH-P₂** at level k to get
+     `runFrom (s+1) (breakTieAt ct₂ s keep₂) G = runFrom (s+1) (breakTieAt ct₂ s (τ keep₁)) G`.
+     Then `breakTieAt ct₂ s (τ keep₁)` is τ-related to `breakTieAt ct₁ s keep₁` by
+     `breakTieAt_τ_related` (✅), and we apply **IH-P₁** to get equality with
+     `runFrom (s+1) arr₁' G`.
 
-**Base case** (`n - start = 0`): foldl is empty; orderedRanks_i = arr_i. After the full
-`runFrom 0 arr G` loop, ranks are distinct (`orderVertices_n_distinct_ranks`) — so
-Stage D-rel applies. For the inductive descent into `runFrom (start+1) ...`, the
-arr_i may not yet be distinct, but successive convergeLoop+breakTie iterations make
-them so by the time the loop exits.
+4. Combining 3.A or 3.B chains the runFroms, giving `runFrom s arr₁ G = runFrom s arr₂ G`. ∎
 
-**Inductive step**: ct₁ := convergeLoop arr₁; ct₂ := convergeLoop arr₂. By Stage C-rel,
-ct₁, ct₂ τ-related. The two breakTie choices keep₁, keep₂ may differ:
-- If keep₂ = τ keep₁: arr₁', arr₂' τ-related (via `breakTieAt_τ_related`); apply IH.
-- Else: introduce alternative arr₂_alt := breakTieAt ct₂ start (τ keep₁). By IH-on-
-  `tiebreak_choice_independent`, runFrom on arr₂' equals runFrom on arr₂_alt. Then
-  arr₁' and arr₂_alt are τ-related; apply IH-on-`runFrom_VtsInvariant_eq`.
+**Key lemma names**:
+  - `convergeLoop_VtsInvariant_eq` (✅ Phase 2)
+  - `convergeLoop_preserves_prefix` (✅ in Invariants)
+  - `convergeLoop_preserves_lower_uniqueness` (✅ now public)
+  - `breakTie_step_preserves_uniqueness` (✅ now public)
+  - `breakTieAt_τ_related` (✅ Phase 4)
+  - `IsPrefixTyping_τ_transfer` (✅ this session)
+  - `UniquelyHeldBelow_τ_transfer` (✅ this session)
+  - `labelEdges_VtsInvariant_eq_distinct` (Phase 3.E pending)
 
-**Risk: high.** The joint induction is intricate; getting the IH form right takes care.
+**`tiebreak_choice_independent_strong`**: a strengthened version of the existing
+`tiebreak_choice_independent` (in `Tiebreak.lean`), with the added prefix/uniqueness
+hypotheses. Its proof reduces to `runFrom_VtsInvariant_eq_strong` at level k+1,
+hence the joint induction.
 
-### Phase 6 — `Main.run_isomorphic_eq_new` (~150 lines)
+**Risk: high.** Intricate joint induction; care needed in stating the IH and the
+case analysis. Mitigation: state the joint statement with explicit `s` and prove
+P₁ ↔ P₂ once at fixed level, then induct.
 
-Given `G ≃ H`. By §2 obtain σ with `H = G.permute σ`. Goal: `run 0 G = run 0 H`.
+### Phase 6 — `run_isomorphic_eq_new` (~250-400 lines, including the generalized stages)
 
-**Decomposition**:
-- `run vts G = labelEdges (orderVertices (initializePaths G) (getArrayRank vts)) G`.
-- For `vts = zeros`, `getArrayRank zeros = zeros`.
-- By Stage A: `initializePaths H = (initializePaths G).permute σ`.
-- For σ ∈ Aut G: trivial reduction to identity.
-- For σ ∉ Aut G: harder — H differs from G structurally.
+**File**: `Main.lean`. Preliminaries in `Equivariance/MainRelationalNotes.lean`
+(already documents the plan).
 
-**Resolution path**: do *not* case-split on σ ∈ Aut G. Use a stronger generic
-σ-equivariance for the pre-labelEdges pipeline (Stages A, B-rel, C-rel are all
-generic for any σ : `Equiv.Perm (Fin n)` consistently applied to `(state, vts)`).
-The argument:
-1. `orderVertices (initializePaths H) zeros` is the σ-image of
-   `orderVertices (initializePaths G) zeros` (modulo tiebreak choices, absorbed via Phase 5).
-2. By Stage D-rel applied to σ acting from G to H: `labelEdges ... H = labelEdges ... G`.
+**Statement** (in file): `G ≃ H → run zeros G = run zeros H`.
 
-The Stage D-rel here is slightly more general than Phase 3 (σ may not be ∈ Aut G), but
-since `H = G.permute σ`, applying it to `(G, σ)` and then transporting through
-`G = (G.permute σ).permute σ⁻¹` gives the equality.
+**Strategy**: by §2 obtain σ : Equiv.Perm (Fin n) with H = G.permute σ. The σ may not
+be in Aut G (in general). Need to thread σ through the entire pre-labelEdges pipeline,
+using that σ acts consistently on (state, vts) and on the graph G ↦ G.permute σ.
 
-**Risk: medium-high.** The exact σ-equivariance form needed at the labelEdges step
-may require generalization beyond Phase 3.
+#### Required generalizations beyond Phases 1-5:
 
-### Risks and ordering
+  - **Stage A (general σ)**: `initializePaths_Aut_equivariant` already holds for any σ
+    (the proof in `Equivariance.StageA` doesn't use σ ∈ Aut G — only the algebraic
+    structure of `Equiv.Perm`). Re-export or rename: ✅ effectively available, just
+    need to confirm it's not unnecessarily restricted.
 
-| Phase | Description | Risk | Lines |
-|---|---|---|---|
-| 1 | Stage B-rel assembly                            | low         | ~300  |
-| 2 | Stage C-rel                                     | low         | ~150  |
-| 4 | breakTie / shiftAbove helpers                   | low         | ~150  |
-| 3 | Stage D-rel under tie-freeness                  | medium      | ~250  |
-| 5 | `runFrom_VtsInvariant_eq` (joint induction)     | high        | ~300  |
-| 6 | `Main.run_isomorphic_eq_new`                    | medium-high | ~150  |
+  - **Stage B-rel (general σ)**: Phase 1's `calculatePathRankings_σ_equivariant_relational`
+    relies on `PathState.permute σ (initializePaths G) = initializePaths G` (true only
+    for σ ∈ Aut G). For general σ, the LHS is `initializePaths (G.permute σ)` (by
+    Stage A). New form needed:
+    ```
+    calculatePathRankings (initializePaths (G.permute σ)) (σ · vts)
+      = RankState.permute σ (calculatePathRankings (initializePaths G) vts)
+    ```
+    The body-step proof needs to NOT assume σ-fixedness of state. Instead, track σ
+    on both state and vts simultaneously. Estimate: ~150-200 lines following the
+    existing Stage B-rel structure but with a different invariant.
 
-**Total: ~1300–1500 new lines.** Recommended order: 1 → 2 → 4 → 3 → 5 → 6. Phases 1, 2,
-4 are independent enough to swap if useful. Phase 3 should land before Phase 5 since
-Phase 5's base case appeals to Stage D-rel.
+  - **Stage C-rel (general σ)**: direct corollary of generalized Stage B-rel.
+    Estimate: ~30-50 lines.
 
-Possible risk-mitigation pivots:
-- If Phase 5's joint induction proves too complex, fall back to: split on whether
-  ranks are already distinct (skip breakTie) vs. not (recurse).
-- If Phase 6 needs a stronger σ-equivariance than Phase 3 provides, prove the
-  generalized form first, then specialize back to Phase 3 as a corollary.
+  - **Stage D under "external σ" (i.e., G vs G.permute σ)**: use
+    `labelEdges_VtsInvariant_eq_distinct` extended to `(rks_τ, G.permute σ)` →
+    `(rks, G)`. Same cell-wise characterization (Phase 3 terminal rankMap identity
+    + fold strong) applies — just specialize differently. Estimate: ~50 lines.
+
+#### Phase 6 proper — assembly:
+
+Given G ≃ H, σ with H = G.permute σ, zeros : Array VertexType:
+
+1. `getArrayRank zeros = zeros` (since all values are 0; values stay 0; getArrayRank
+   maps to dense ranks all zero too).
+
+2. `initializePaths H = (initializePaths G).permute σ` (Stage A general).
+
+3. `convergeLoop (initializePaths H) zeros n
+      = (convergeLoop (initializePaths G) zeros n) shifted by σ`
+   (Stage C general; uses zeros being trivially σ-invariant).
+
+4. After the full breakTie loop in `runFrom 0 ... H`, the orderedRanks for H is the
+   σ-shift of orderedRanks for G — modulo tiebreak choices, absorbed via Phase 5
+   (the tiebreak-choice-independence built up in `runFrom_VtsInvariant_eq_strong`).
+
+5. `labelEdges (orderedRanks_H) H = labelEdges (orderedRanks_G shifted by σ) (G.permute σ)
+      = labelEdges orderedRanks_G G` (Stage D extended, with the tie-freeness from
+   `orderVertices_n_distinct_ranks`).
+
+6. Hence `run zeros H = run zeros G`. ∎
+
+**Key lemma names beyond Phase 5**:
+  - Generalized `calculatePathRankings_σ_equivariant_relational_general`: pending.
+  - `convergeLoop_σ_equivariant_general`: corollary, pending.
+  - `labelEdges_external_σ_eq`: extension of Phase 3.E for σ ∉ Aut G case. Pending.
+  - `zeros_σ_invariant` (in `MainRelationalNotes.lean`, ✅).
+  - `getArrayRank_zeros_eq_zeros`: needed; quick.
+
+**Risk: medium-high.** Substantial work in generalizing Stage B-rel; the rest is
+assembly given the generalizations.
+
+### Total remaining-work estimate
+
+| Sub-phase     | Description                                            | Risk        | New lines |
+|---------------|--------------------------------------------------------|-------------|-----------|
+| Phase 3.C     | `computeDenseRanks_τ_shift_distinct`                   | medium      | ~120-150  |
+| Phase 3.D     | `computeDenseRanks_perm_when_tieFree`                  | medium-low  | ~70-100   |
+| Phase 3.E     | `labelEdges_VtsInvariant_eq_distinct` assembly         | low         | ~80-120   |
+| Phase 5       | `runFrom_VtsInvariant_eq_strong` joint induction       | high        | ~250-300  |
+| Phase 6       | `run_isomorphic_eq_new` + generalized Stage B/C        | medium-high | ~350-500  |
+
+**Total**: ~870–1170 lines of new Lean. Recommended order: Phase 3.D → Phase 3.C
+→ Phase 3.E → Phase 5 → Phase 6. (Phase 3.D and Phase 3.C are independent; doing
+Phase 3.D first is safer because it's the simpler structural fact about `computeDenseRanks`.)
+
+### Risk-mitigation pivots
+
+  - **3.C alternative (Route A vs B)**: if Route A's `Finset`-counting becomes hard,
+    fall back to Route B's parallel-fold approach (more verbose but safer).
+  - **5 fallback**: if the joint induction proves too intricate, separately strengthen
+    `tiebreak_choice_independent` to take the prefix invariant, then prove
+    `runFrom_VtsInvariant_eq_strong` using IT and Phase 3.E directly without the
+    joint structure. Cost: ~50 extra lines of preconditions.
+  - **6 simplification**: if generalizing Stage B-rel proves too costly, take a
+    case-split on `σ ∈ Aut G`. The σ ∈ Aut G case reduces to existing Phase 1-5;
+    the σ ∉ Aut G case can be handled via `Isomorphic.swap_induction_on`
+    (in `Isomorphic.lean`) decomposing σ into transpositions, threading
+    `swapVertexLabels_eq_permute` repeatedly. Cost: ~200 extra lines but avoids
+    the deep generalization.
 
 --------------------------------------------------------------------------------
 
@@ -607,9 +771,9 @@ convergeLoop_preserves_prefix              : ✅ proved (specialized to `state :
 getFrom_image_isPrefix_for_initializePaths : ✅ proved (deep core: `n = 0` boundary + `n ≥ 1` via
                                               outer/inner fold helpers + dense-rank density)
 breakTie_targetPos_is_min_tied             : ✅ proved
-orderVertices_prefix_invariant             : 🟡 closed conditional on Phase 3 sub-lemma
+orderVertices_prefix_invariant             : 🟡 closed conditional on §7-Step 3 sub-lemma
                                               `convergeLoop_preserves_lower_uniqueness`. Outer
-                                              induction skeleton (`_strong` form) and Phase 2
+                                              induction skeleton (`_strong` form) and §7-Step 2
                                               (breakTie step) ✅ proved.
 orderVertices_n_distinct_ranks             : ✅ proved (corollary of `_prefix_invariant` at `p = n`
                                               via pigeonhole + `Finite.injective_iff_bijective`,
@@ -617,40 +781,41 @@ orderVertices_n_distinct_ranks             : ✅ proved (corollary of `_prefix_i
                                               through the strengthened invariant)
 ```
 
-The `orderVertices_prefix_invariant` proof factors into three phases:
+The `orderVertices_prefix_invariant` proof factors into three §7-internal steps
+(named "§7-Step X" to avoid collision with the top-level relational "Phase X"):
 
-- **Phase 1 — inductive skeleton** (✅): Strengthened invariant (`_strong` form) tracks
+- **§7-Step 1 — inductive skeleton** (✅): Strengthened invariant (`_strong` form) tracks
   both the prefix-typing property and the uniqueness `0..q-1`. Induction on `q` from `0`
-  to `p`. The base case is vacuous. The step uses Phase 3 (convergeLoop preservation)
-  followed by Phase 2 (breakTie step).
+  to `p`. The base case is vacuous. The step uses §7-Step 3 (convergeLoop preservation)
+  followed by §7-Step 2 (breakTie step).
 
-- **Phase 2 — breakTie step** (✅ as `breakTie_step_preserves_uniqueness`): For `T`
+- **§7-Step 2 — breakTie step** (✅ as `breakTie_step_preserves_uniqueness`): For `T`
   prefix with `0..q-1` uniquely held and `q < n`, `(breakTie T q).1` is prefix and has
   `0..q` uniquely held. Cases on `breakTieCount T q < 2` (noop) or `≥ 2` (fires).
   Uses `breakTie_getD_below`, `breakTie_getD_at_min`, `breakTie_getD_at_other`,
   `breakTie_getD_above_or`, plus a converse to `breakTieCount_ge_two_of_distinct`
   (`exists_two_distinct_q_in_T`, derived from `List.Duplicate` + `List.Sublist`).
 
-- **Phase 3 — convergeLoop preservation** (🧱 single sorry, with sub-sub-lemmas being
-  built): For `T` prefix with `0..q-1` uniquely held by `v_0..v_{q-1}` (with `T[v_k] = k`),
+- **§7-Step 3 — convergeLoop preservation** (✅, closed via the sub-sub-lemmas below):
+  For `T` prefix with `0..q-1` uniquely held by `v_0..v_{q-1}` (with `T[v_k] = k`),
   `convergeLoop _ T fuel` has the same property. The proof uses three weaker facts about
   `T' = convergeOnce T`: (a) `T'[v_k] < q` for unique-typed `v_k`, (b) `T'[w] ≥ q` for
   non-unique-typed `w`, (c) `k ↦ T'[v_k]` is injective. Then `{T'[v_k] | k < q} = {0..q-1}`
   and the public `∃!` follows.
 
-  Sub-sub-lemmas:
-  - **P3.1** ✅ `comparePathsFrom_eq_compare_of_start_types_ne` (different start types ⟹
+  Sub-sub-lemmas (named `Step3.X` — local to §7-Step 3):
+  - **Step3.1** ✅ `comparePathsFrom_eq_compare_of_start_types_ne` (different start types ⟹
     `comparePathsFrom` returns the comparison directly).
-  - **P3.B** ✅ `assignRanks_rank_le_pos` (rank at position `k` is `≤ k`). Foundational.
+  - **Step3.B** ✅ `assignRanks_rank_le_pos` (rank at position `k` is `≤ k`). Foundational.
     Uses aux lemmas `assignRanksFoldl_lastEntry_rank_le` (lastEntry rank tracks step count)
     and `assignRanks_snoc_decompose` (snoc-decomposition with rank bound).
-  - **P3.C** ✅ `assignRanks_rank_eq_pos_when_distinct` (rank `=` position when
+  - **Step3.C** ✅ `assignRanks_rank_eq_pos_when_distinct` (rank `=` position when
     consecutive cmps differ). Built on `assignRanks_strong_invariant` which simultaneously
     tracks (i) rank-at-every-position and (ii) lastEntry-rank, via `reverseRecOn`
     induction. Uses `assignRanks_snoc_decompose_strict` (sharper snoc-decomposition with
     exact rank formula) and `assignRanks_foldl_lastEntry_fst` (lastEntry's first
     component).
-  - **P3.D** ✅ `sortBy_first_q_positions_have_start_types`: closed this session.
+  - **Step3.D** ✅ `sortBy_first_q_positions_have_start_types`.
     For `T` uniquely-typed at `0..q-1`, the first `q` positions of
     `sortBy comparePathsFrom T pathsAtTop` have start types `0, 1, …, q-1` in order.
     Strategy: strong induction on position `k`, with two sub-arguments:
@@ -660,22 +825,22 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
     (B) `V_k ≤ k` — find the unique witness `w_k` for value `k`; locate its position
     `pos` in sortedList; trichotomy on `pos` vs `k` gives a contradiction in each case
     (`pos < k` contradicts IH, `pos = k` gives `V_k = k`, `pos > k` violates Pairwise
-    via P3.1 since `V_k > k = V_pos` would force `cmp = .gt`).
-    Foundation work this session:
+    via Step3.1 since `V_k > k = V_pos` would force `cmp = .gt`).
+    Foundation work:
     - **`comparePathsFrom_total_preorder`** ✅ proved (by lifting from
       `comparePathsBetween_total_preorder` + the now-public `orderInsensitiveListCmp_*`
       helpers).
     - Made public: `orderInsensitiveListCmp_refl`, `orderInsensitiveListCmp_swap_lt`,
       `orderInsensitiveListCmp_swap_gt`, `orderInsensitiveListCmp_trans` in
       `ComparePathSegments.lean`; `sortBy_pairwise` in `ComparisonSort.lean`.
-  - **P3.E** ✅ `convergeOnce_preserves_lower_uniqueness` fully closed.
+  - **Step3.E** ✅ `convergeOnce_preserves_lower_uniqueness` fully closed.
     Prefix + size conjuncts via `convergeOnce_writeback` +
     `getFrom_image_isPrefix_for_initializePaths`. Uniqueness conjunct via the (a)/(b)/(c)
-    pattern: per-vertex chain identification + P3.D + P3.C-prefix + monotonicity +
+    pattern: per-vertex chain identification + Step3.D + Step3.C-prefix + monotonicity +
     boundary-distinctness extension. Helpers added:
     - `assignRanks_rank_eq_of_prefix` (rank at k in `assignRanks (A ++ B)` equals rank
       at k in `assignRanks A` for k < A.length).
-    - `assignRanks_rank_eq_pos_when_distinct_prefix` (P3.C-prefix: rank = position for
+    - `assignRanks_rank_eq_pos_when_distinct_prefix` (Step3.C-prefix: rank = position for
       positions < q when only the prefix has distinct cmps).
     - `assignRanks_pairwise_rank_le` + `assignRanks_rank_monotone` (rank values
       non-decreasing along assignList; via the foldl invariant
@@ -686,8 +851,8 @@ The `orderVertices_prefix_invariant` proof factors into three phases:
       Mirrors `getFrom_image_isPrefix_for_initializePaths`'s outer/inner-fold unwinding;
       witness `br` is the iteration's let-bound `updatedBetweenFn`, and after unwinding
       both sides become the same chain syntactically (closed by `rfl`).
-  - **P3.5** ✅ `convergeLoop_preserves_lower_uniqueness`: closed via fuel induction
-    using P3.E.
+  - **Step3.5** ✅ `convergeLoop_preserves_lower_uniqueness`: closed via fuel induction
+    using Step3.E.
 
 Closing `getFrom_image_isPrefix_for_initializePaths` (n ≥ 1) used these helpers:
 - `inner_fold_slice_at_depth` (in `Equivariance.RankStateInvariants`) — strips the outer
