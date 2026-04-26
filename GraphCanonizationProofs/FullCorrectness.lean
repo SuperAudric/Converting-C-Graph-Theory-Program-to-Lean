@@ -16,6 +16,10 @@ import FullCorrectness.Equivariance.PathEquivarianceRelational
 import FullCorrectness.Equivariance.ConvergeLoop
 import FullCorrectness.Equivariance.ConvergeLoopRelational
 import FullCorrectness.Tiebreak
+import FullCorrectness.Equivariance.BreakTieRelational
+import FullCorrectness.Equivariance.StageDRelational
+import FullCorrectness.Equivariance.RunFromRelational
+import FullCorrectness.Equivariance.MainRelationalNotes
 import FullCorrectness.Invariants
 import FullCorrectness.Main
 
