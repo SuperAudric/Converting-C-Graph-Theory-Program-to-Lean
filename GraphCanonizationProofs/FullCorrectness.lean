@@ -385,55 +385,56 @@ The branch proves `run zeros G = run zeros (G.permute σ)` for `σ := Equiv.swap
     is supplied directly via `IsPrefixTyping.replicate_zero` after the
     `getArrayRank_zeros_eq_zeros` rewrite).
 
-##### P6.A — Stage B-rel general σ (~150-200 lines, medium-high risk)
+##### P6.A — Stage B-rel general σ (~150-200 lines, partially closed)
 
 Target lemma (in new file `Equivariance/PathEquivarianceGeneral.lean`):
 
-  - `calculatePathRankings_σ_equivariant_general` 🟦
-    ```
-    ∀ σ : Equiv.Perm (Fin n),  -- no Aut hypothesis
-    ∀ vts₁ vts₂ : Array VertexType,
-    (∀ v : Fin n, vts₂.getD (σ v).val 0 = vts₁.getD v.val 0) →
-    let rs₁ := calculatePathRankings (initializePaths G) vts₁
-    let rs₂ := calculatePathRankings (initializePaths (G.permute σ)) vts₂
-    -- rs₂'s cells are σ-shifts of rs₁'s cells
-    (∀ d s, ... fromRanks σ-shift relation) ∧
-    (∀ d s e, ... betweenRanks σ-shift relation)
-    ```
+  - `calculatePathRankings_σ_equivariant_general` 🟦 — top-level statement landed,
+    proof pending the body-step + foldl assembly.
 
-**Key infrastructure to build** (parallel to `PathEquivarianceRelational.lean`):
+**Key infrastructure** (parallel to `PathEquivarianceRelational.lean`):
 
-  - `pathsAtDepth_two_states_perm` 🟦 (~30 lines)
-    Under Stage A general (`initializePaths_Aut_equivariant`):
-    ```
-    state₂ := PathState.permute σ state₁  ⟹
-    (state₂.pathsOfLength.getD d #[]).toList ~ (state₁.pathsOfLength.getD d #[]).toList.map (PathsFrom.permute σ)
-    ```
-    (Or equivalent; the σ-permuted state's pathsAtDepth is a permutation of the
-    σ-image of the original.)
+  - `pathsOfLength_two_states_at_σ_slot` ✅ proved
+    Two-state generalization of `state_σ_fixed_pathsOfLength_at_σ_slot`. Direct from
+    the definition of `PathState.permute` (the map identity is `rfl` on the `pathsOfLength`
+    projection of the σ-permuted state).
 
-  - `allBetween_two_states_perm` 🟦 (~30 lines)
-    Corollary: `allBetween state₂ ~ (allBetween state₁).map (PathsBetween.permute σ)`.
+  - `pathsAtDepth_two_states_perm` ✅ proved
+    `pathsAtDepth state₂ ~Perm (pathsAtDepth state₁).map (PathsFrom.permute σ)`. Uses
+    `pathsOfLength_two_states_at_σ_slot` + `map_reindex_perm` (mirrors
+    `pathsAtDepth_map_f_perm`).
 
-  - `mem_allBetween_two_states_under_f` 🟦 (~30 lines)
-    Replaces existing `mem_allBetween_under_f` (which required σ-INV state).
+  - `mem_pathsAtDepth_two_states_under_f` ✅ proved
+    Membership corollary of `pathsAtDepth_two_states_perm` via `Perm.mem_iff` + `mem_map`.
 
-  - `between_assignList_σ_rank_general` 🟦 (~80 lines)
-    Generalizes `between_assignList_σ_rank_rel` (Phase 1) to drop the
-    `PathState.permute σ state = state` hypothesis. Uses the `_two_states_perm` helpers
-    + the existing relational compare lemmas.
+  - `allBetween_two_states_perm` ✅ proved
+    `allBetween state₂ ~Perm (allBetween state₁).map (PathsBetween.permute σ)`. Uses
+    `flatMap` decomposition + `Perm.flatMap_left/right` + `pathsAtDepth_two_states_perm`
+    (mirrors `allBetween_map_f_perm`).
 
-  - `from_assignList_σ_rank_general` 🟦 (~80 lines)
-    Parallel for the from-side.
+  - `mem_allBetween_two_states_under_f` ✅ proved
+    Membership corollary of `allBetween_two_states_perm`.
 
-  - `calculatePathRankings_body_preserves_general` 🟦 (~80 lines)
+  - `from_assignList_σ_rank_general` 🟦 (~150 lines remaining)
+    Generalizes `from_assignList_σ_rank_rel` to drop `PathState.permute σ state = state`.
+    Uses `mem_pathsAtDepth_two_states_under_f` and `pathsAtDepth_two_states_perm` in
+    place of the σ-INV chain. Structure: copy of the σ-INV proof with single
+    `pathsAtDepth` replaced by per-side `pathsAtDepth_i`.
+
+  - `between_assignList_σ_rank_general` 🟦 (~150 lines remaining)
+    Same as above for the between-side, using `mem_allBetween_two_states_under_f` and
+    `allBetween_two_states_perm`.
+
+  - `calculatePathRankings_body_preserves_general` 🟦 (~80 lines remaining)
     Body-step lemma generalizing `calculatePathRankings_body_preserves_rel`. Takes two
     accumulators and two STATES; threads σ on the state through the depth-foldl body.
+    Uses `set_chain_σRelated` and `setBetween_chain_σRelated` (which are already
+    σ-general — no Aut hypothesis required) plus the σ-rank-general lemmas above.
 
-  - `calculatePathRankings_σ_cell_general_facts` 🟦 (~30 lines)
+  - `calculatePathRankings_σ_cell_general_facts` 🟦 (~30 lines remaining)
     Foldl induction over `List.range n` using the body lemma.
 
-  - `calculatePathRankings_σ_equivariant_general` 🟦 (~10 lines)
+  - `calculatePathRankings_σ_equivariant_general` 🟦 (~10 lines remaining)
     Final assembly via the cell facts.
 
 ##### P6.B — Stage C-rel general σ (~30-50 lines, low risk)
@@ -561,7 +562,9 @@ If P6.A's general-σ Stage B-rel proves too costly, an alternative path:
 | Phase 6 — `labelEdges_two_graphs_σ_related` (Stage D-rel general σ) | low | ✅ closed | done |
 | Phase 6 — top-level induction + `run_swap_invariant_fwd` (σ ∈ Aut G branch) | low | ✅ closed | done |
 | Phase 6 — P6.U utility helpers (`getArrayRank_zeros_eq_zeros` etc.) | low | ✅ closed | done |
-| Phase 6 — P6.A Stage B-rel general σ                   | medium-high | 🟦 pending | ~150-200 |
+| Phase 6 — P6.A foundational lemmas (5 closed: pathsOfLength_two_states_at_σ_slot, pathsAtDepth_two_states_perm, mem_pathsAtDepth_two_states_under_f, allBetween_two_states_perm, mem_allBetween_two_states_under_f) | medium | ✅ closed | done |
+| Phase 6 — P6.A from/between_assignList_σ_rank_general (~300 lines combined) | medium-high | 🟦 pending | ~300 |
+| Phase 6 — P6.A body-step + foldl induction + final assembly | medium | 🟦 pending | ~120 |
 | Phase 6 — P6.B Stage C-rel general σ (corollary of P6.A) | low-medium | 🟦 pending | ~30-50 |
 | Phase 6 — P6.C orderVertices σ-equivariance general σ  | high        | 🟦 pending | ~80-150 |
 | Phase 6 — P6.D Final assembly in `Main.lean`           | low         | 🟦 pending | ~30 |
