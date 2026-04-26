@@ -1496,7 +1496,7 @@ of one. -/
 /-- Bridge helper: cell-level σ-relatedness on a 3D table lifts to a functional
 σ-relatedness in the form needed by `comparePathsBetween_σ_relational` /
 `comparePathsFrom_σ_relational`. Relational analogue of `betweenRankFn_σ_inv_from_cells`. -/
-private theorem betweenRankFn_σ_rel_from_cells
+theorem betweenRankFn_σ_rel_from_cells
     (σ : Equiv.Perm (Fin n)) (b₁ b₂ : Array (Array (Array Nat)))
     (h_cell_rel : ∀ d : Nat, d < n → ∀ s e : Fin n,
       ((b₂.getD d #[]).getD s.val #[]).getD e.val 0
@@ -1514,7 +1514,7 @@ private theorem betweenRankFn_σ_rel_from_cells
 /-- The combined relational invariant on a pair of `(currentBetween, currentFrom)`
 accumulators, one per parallel computation: this is the loop invariant of the depth-foldl
 in `calculatePathRankings` running in two parallel copies. -/
-private def CalcRankingsRel {n : Nat} (σ : Equiv.Perm (Fin n))
+def CalcRankingsRel {n : Nat} (σ : Equiv.Perm (Fin n))
     (acc₁ acc₂ : Array (Array (Array Nat)) × Array (Array Nat)) : Prop :=
   -- Sizes for acc₁
   acc₁.1.size = n ∧

@@ -562,9 +562,7 @@ If P6.A's general-σ Stage B-rel proves too costly, an alternative path:
 | Phase 6 — `labelEdges_two_graphs_σ_related` (Stage D-rel general σ) | low | ✅ closed | done |
 | Phase 6 — top-level induction + `run_swap_invariant_fwd` (σ ∈ Aut G branch) | low | ✅ closed | done |
 | Phase 6 — P6.U utility helpers (`getArrayRank_zeros_eq_zeros` etc.) | low | ✅ closed | done |
-| Phase 6 — P6.A foundational lemmas (5 closed: pathsOfLength_two_states_at_σ_slot, pathsAtDepth_two_states_perm, mem_pathsAtDepth_two_states_under_f, allBetween_two_states_perm, mem_allBetween_two_states_under_f) | medium | ✅ closed | done |
-| Phase 6 — P6.A from/between_assignList_σ_rank_general (~300 lines combined) | medium-high | 🟦 pending | ~300 |
-| Phase 6 — P6.A body-step + foldl induction + final assembly | medium | 🟦 pending | ~120 |
+| Phase 6 — P6.A Stage B-rel general σ (foundational lemmas + assignList-rank-general + body-step + foldl induction + final assembly) | medium-high | ✅ closed | done |
 | Phase 6 — P6.B Stage C-rel general σ (corollary of P6.A) | low-medium | 🟦 pending | ~30-50 |
 | Phase 6 — P6.C orderVertices σ-equivariance general σ  | high        | 🟦 pending | ~80-150 |
 | Phase 6 — P6.D Final assembly in `Main.lean`           | low         | 🟦 pending | ~30 |
