@@ -1,4 +1,5 @@
 import FullCorrectness.Equivariance.ConvergeLoopRelational
+import FullCorrectness.Equivariance.LabelEdgesCharacterization
 
 /-!
 # Phase 3 — Stage D-rel: `labelEdgesAccordingToRankings` τ-equivariance under tie-freeness

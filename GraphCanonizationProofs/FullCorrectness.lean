@@ -11,6 +11,7 @@ import FullCorrectness.Equivariance.CompareEquivariant
 import FullCorrectness.Equivariance.PathsAtDepthStructure
 import FullCorrectness.Equivariance.ChainSetInvariant
 import FullCorrectness.Equivariance.AssignListRankClosure
+import FullCorrectness.Equivariance.LabelEdgesCharacterization
 import FullCorrectness.Equivariance.PathEquivariance
 import FullCorrectness.Equivariance.PathEquivarianceRelational
 import FullCorrectness.Equivariance.ConvergeLoop
