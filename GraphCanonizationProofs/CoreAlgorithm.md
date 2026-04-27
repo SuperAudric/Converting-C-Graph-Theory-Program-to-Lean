@@ -112,9 +112,9 @@ preserve the fixed-point character of `convergeLoop`.
 ## Side note
 It would not surpise me if there were faster implementations of this algorithm.
 Perhaps dropping one of the vertex array indices, or providing an arbitrary backup comparer
-for vertices that was never tied. It could that replaces the need for tiebreak,
-as long as it never takes precedent over orbit comparisons. 
-This may paralelize the tiebreaking within converge cycles so only one loop needed.
+for vertices that was never tied to replace the need for tiebreak.
+As long as it never takes precedent over orbit comparisons, 
+this may paralelize the tiebreaking within converge cycles so only one loop needed.
 
 ## Quick map for the proof effort
 
