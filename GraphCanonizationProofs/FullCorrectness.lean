@@ -41,7 +41,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `OrbitCompleteAfterConv_general G σ` (canonizer-correctness invariant) | `Main.lean:89` | The deep half of canonizer correctness: vertices with equal values in `convergeLoop` output of an arbitrary intermediate state lie in the same `TypedAut` orbit. Discharge requires preserving the orbit-completeness invariant through algorithm iterations — orthogonal to Phase 6's σ-equivariance work. |
+| `OrbitCompleteAfterConv_general G σ` (canonizer-correctness invariant) | `Main.lean:89` | The deep half of canonizer correctness: vertices with equal values in `convergeLoop` output of an arbitrary intermediate state lie in the same `TypedAut` orbit. Equivalent to the assertion that the algorithm's path-multiset color refinement is **complete** — i.e., separates every pair of non-orbit-equivalent vertices. Empirically validated outside Lean (exhaustive on n ≤ 7, random on n = 30); a Lean-side discharge plan is recorded separately in [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md). |
 
 **P6.A, P6.B, P6.C are all now fully closed (modulo the orbit hypothesis input).** ✅
 
