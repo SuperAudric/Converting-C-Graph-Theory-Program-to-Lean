@@ -59,7 +59,7 @@ namespace Canonizer
                     _adj[x, y].ToString()))));
     }
 
-    public class CanonGraphOrdererV4
+    public class CanonGraphOrdererV4 : ICanonGraphOrderer
     {
         // Lean: run. Pure pipeline returning the canonicalized AdjMatrix.
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)

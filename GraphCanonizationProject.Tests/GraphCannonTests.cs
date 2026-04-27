@@ -10,7 +10,11 @@ using EdgeType = int;
 
 public class GraphCannonTests(ITestOutputHelper output)
 {
-    private readonly GraphOrderer _orderer = new();
+    // Default = perf-focused canonizer. Swap to `new CanonGraphOrdererV4()` to run
+    // the same instance-level tests against the Lean-aligned reference. Tests that
+    // call static helpers on the reference (LabelEdgesAccordingToRankings) stay
+    // tied to GraphOrderer regardless.
+    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererV4Fast();
 
     // ── Isomorphism tests ────────────────────────────────────────────────────
 
@@ -275,8 +279,8 @@ public class GraphCannonTests(ITestOutputHelper output)
     [InlineData("Cycle3")]
     [InlineData("Cycle4")]
     [InlineData("K4")]
-    //[InlineData("K33")]      // 60 vertices — slow under the canonizer, enable when wanted
-    //[InlineData("Petersen")] // 100 vertices — slower still
+    //[InlineData("K33")]      // 60 vertices — too slow for the non fast version, ~30s for fast 
+    //[InlineData("Petersen")] // 100 vertices — WAY too slow except for the fast version ~370s for fast
     public void CfiPair_ProducesDifferentCanonical(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);

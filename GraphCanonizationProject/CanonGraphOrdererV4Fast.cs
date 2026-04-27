@@ -31,7 +31,7 @@ namespace Canonizer
     using VertexType = int;
     using EdgeType = int;
 
-    public sealed class CanonGraphOrdererV4Fast
+    public sealed class CanonGraphOrdererV4Fast : ICanonGraphOrderer
     {
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
