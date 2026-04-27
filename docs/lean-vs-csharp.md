@@ -6,8 +6,9 @@ Both `GraphCanonizationProject/CanonGraphOrdererV4.cs` and `GraphCanonizationPro
 
 | Lean | C# |
 |------|-----|
-| `AdjMatrix vertexCount` | `EdgeType[,]` (size implicit) |
-| `AdjMatrix.swapVertexLabels` | `SwapVertexLabelling` |
+| `AdjMatrix vertexCount` | `AdjMatrix` (vertex count carried at runtime) |
+| `AdjMatrix.swapVertexLabels` | `AdjMatrix.SwapVertexLabels` |
+| `AdjMatrix.adjToString` | `AdjMatrix.ToString` |
 | `AdjMatrix.Isomorphic` | no equivalent (proof-only) |
 | `PathsBetween` | `AllPathsBetween` |
 | `PathsFrom` | `AllPathsFrom` |
@@ -33,7 +34,10 @@ Both `GraphCanonizationProject/CanonGraphOrdererV4.cs` and `GraphCanonizationPro
 | `orderVertices` | `OrderVertices` |
 | `computeDenseRanks` | `ComputeDenseRanks` |
 | `labelEdgesAccordingToRankings` | `LabelEdgesAccordingToRankings` |
-| `run` | `Run` |
+| `shiftAbove` | `ShiftAbove` |
+| `breakTiePromote` | `BreakTiePromote` |
+| `getArrayRank` (dense) | `GetArrayRank` (dense) |
+| `run` | `Run` (returns `AdjMatrix`); `Run_ToString` is a thin wrapper that takes `EdgeType[,]` and calls `.ToString()` |
 
 ---
 
@@ -100,9 +104,16 @@ Lean's `sortBy` is insertion sort, present because it is straightforward to reas
 
 ### 4. Graph representation
 
-**C# — plain 2D array:**
+**C# — wrapper class around a 2D array:**
 ```csharp
-EdgeType[,] edges  // size carried implicitly
+public sealed class AdjMatrix
+{
+    public readonly int VertexCount;
+    private readonly EdgeType[,] _adj;
+    public EdgeType this[int from, int to] => _adj[from, to];
+    public AdjMatrix SwapVertexLabels(int v1, int v2) { ... }
+    public override string ToString() { ... }
+}
 ```
 
 **Lean — dependent type:**
@@ -111,7 +122,7 @@ structure AdjMatrix (vertexCount : Nat) where
   adj : Fin vertexCount → Fin vertexCount → EdgeType
 ```
 
-Lean's `AdjMatrix` carries its vertex count in the type, which means size mismatches are a compile-time error rather than a runtime check. `Fin vertexCount` is an index type that is bounded by definition, so out-of-bounds access is impossible.
+Both sides expose an `AdjMatrix` type with the same operations (`SwapVertexLabels`, `ToString`). Lean carries `vertexCount` in the type, making size mismatches a compile-time error and out-of-bounds access impossible (`Fin vertexCount` is bounded by construction). C# carries it at runtime as a public field; size mismatches between `vertexTypes` and `G` are caught by a runtime check at the start of `Run`.
 
 ### 5. Isomorphism relation (Lean only)
 
@@ -153,35 +164,54 @@ Both use a "fuel" counter to ensure the function provably terminates. Lean requi
 
 ### 7. `getArrayRank` implementation
 
+Both sides now produce **dense** ranks: each distinct value maps to a consecutive
+ordinal `0, 1, 2, …` with ties preserved. E.g. `[5, 0, 5, 3]` ↦ `[2, 0, 2, 1]`.
+
 **C# — sort-based:**
 ```csharp
 private static VertexType[] GetArrayRank(VertexType[] arr)
 {
     var sortedByValue = arr.Select((v, i) => (v, i)).OrderBy(x => x.v).ToArray();
-    // walk sorted order, assigning ranks
+    int counter = 0;
+    // walk sorted order; bump counter on each value transition (dense)
 }
 ```
 
-**Lean — count-smaller-values approach:**
+**Lean — sort-based, same algorithm:**
 ```lean
 def getArrayRank (arr : Array VertexType) : Array VertexType :=
-  arr.map fun value =>
-    arr.foldl (fun smallerCount other =>
-      if other < value then smallerCount + 1 else smallerCount) 0
+  let sorted := sortBy (fun a b => compare a.1 b.1) (...pair-with-index...)
+  -- fold through sorted, bumping rank on each value transition (dense)
 ```
 
-The Lean version counts, for each element, how many other elements are strictly smaller. This is O(n²) but is simpler to reason about formally. Both produce the same result.
+[sparse→dense] Both implementations were previously sparse — C# returned "count of strictly smaller values" (`[5,0,5,3] → [3,0,3,1]`), and Lean had the same shape via a fold-count. Both were switched to dense to keep the `IsPrefixTyping` invariant true at the entry point of `run` (see `BreakTie` shift-above logic in §8).
+
+### 8. `breakTie` and dense-rank gap maintenance
+
+`breakTie target` collapses one symmetry by promoting all-but-one of the value-`target` vertices to `target + 1`. With **dense** ranks, value `target + 1` is already occupied by the next class, so a one-slot gap must be opened first.
+
+**Lean and C# now both:**
+
+1. Count occurrences of `target`. If `< 2`, return unchanged.
+2. `shiftAbove target`: bump every value `> target` up by one, opening a gap at `target + 1`.
+3. `breakTiePromote`: walk the array and promote all-but-the-first `target` to `target + 1`.
+
+Previously C# performed step 3 only — which worked because **sparse** ranks left a gap of size `≥ k` after every class of size `k`, so promoting could not collide with the next class. The dense form removes that gap, making the explicit `shiftAbove` necessary.
 
 ---
 
 ## What the Lean file does not include
 
-- Input validation (`ValidateInputs`) — Lean's type system makes out-of-range inputs impossible
-- `AdjMatrixToString` output formatting — the Lean `ToString` instance is equivalent
+- Input validation (vertex-count vs matrix-size mismatch) — Lean's type system makes it impossible
 - Debug helpers (`LayerToString`) — present in C# for development, omitted in Lean
+
+## What the C# file adds
+
+- `Run_ToString` — a wrapper that accepts a raw `EdgeType[,]` and returns the canonical form as a string (used by tests). Lean's `run` corresponds directly to C#'s `Run`.
+- A backward-compat overload `LabelEdgesAccordingToRankings(VertexType[], EdgeType[,])` that mirrors the `AdjMatrix`-typed primary version for tests still using `EdgeType[,]` directly.
 
 ## What the Lean file adds
 
 - The `Isomorphic` inductive proposition and the `≃` notation
-- The `AdjMatrix` dependent type with size in the type
+- The `AdjMatrix` dependent type with size in the type (C# carries it at runtime)
 - `RankState.getBetween` / `getFrom` accessor functions (in C# these are direct array accesses)

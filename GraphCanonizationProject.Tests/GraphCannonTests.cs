@@ -21,7 +21,7 @@ public class GraphCannonTests(ITestOutputHelper output)
         VertexType[] vertsCopy = [0, 0, 0, 0];
         EdgeType[,] edges     = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
         EdgeType[,] edgesCopy = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
-        _orderer.Run(verts, edges);
+        _orderer.Run_ToString(verts, edges);
         Assert.True(Enumerable.SequenceEqual(verts,vertsCopy));
         Assert.True(Enumerable.SequenceEqual(edges.Cast<EdgeType>(),edgesCopy.Cast<EdgeType>()));
     }
@@ -31,7 +31,7 @@ public class GraphCannonTests(ITestOutputHelper output)
     {
         var verts = new VertexType[2];
         var edges = new EdgeType[2, 3];
-        Assert.Throws<Exception>(() => _orderer.Run(verts, edges));
+        Assert.Throws<Exception>(() => _orderer.Run_ToString(verts, edges));
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class GraphCannonTests(ITestOutputHelper output)
     {
         var verts = new VertexType[4];
         var edges = new EdgeType[3, 3];
-        Assert.Throws<Exception>(() => _orderer.Run(verts, edges));
+        Assert.Throws<Exception>(() => _orderer.Run_ToString(verts, edges));
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class GraphCannonTests(ITestOutputHelper output)
         VertexType[] verts = [0, 0, 0, 0];
         EdgeType[,] edges1 = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
         EdgeType[,] edges2 = { { 0, 1, 1, 0 }, { 1, 0, 0, 0 }, { 1, 0, 0, 0 }, { 0, 0, 0, 0 } };
-        Assert.Equal(_orderer.Run(verts, edges1), _orderer.Run(verts, edges2));
+        Assert.Equal(_orderer.Run_ToString(verts, edges1), _orderer.Run_ToString(verts, edges2));
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class GraphCannonTests(ITestOutputHelper output)
         {0, 0, 0, 0, 0, 0, 1},
         {0, 0, 0, 0, 0, 1, 0}
         };
-        Assert.Equal(_orderer.Run(vertices1, edges1), _orderer.Run(vertices2, edges2));
+        Assert.Equal(_orderer.Run_ToString(vertices1, edges1), _orderer.Run_ToString(vertices2, edges2));
     }
 
     [Fact]
@@ -83,8 +83,8 @@ public class GraphCannonTests(ITestOutputHelper output)
     {
         var pair   = BuildGraph((0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3));
         var cycle6 = BuildGraph((0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 0));
-        Assert.NotEqual(_orderer.Run(EmptyVerts(pair), pair),
-                        _orderer.Run(EmptyVerts(cycle6), cycle6));
+        Assert.NotEqual(_orderer.Run_ToString(EmptyVerts(pair), pair),
+                        _orderer.Run_ToString(EmptyVerts(cycle6), cycle6));
     }
 
     // ── Scrambling stability tests ───────────────────────────────────────────
@@ -99,7 +99,7 @@ public class GraphCannonTests(ITestOutputHelper output)
             {
                 var matrix = GenerateRandomAdjacencyMatrix(8, 0.75f, seed: 10593 + i);
                 Scramble(matrix, seed: 15326 + j);
-                string result = _orderer.Run(new VertexType[8], matrix);
+                string result = _orderer.Run_ToString(new VertexType[8], matrix);
                 canonical ??= result;
                 Assert.Equal(canonical, result);
             }
@@ -119,7 +119,7 @@ public class GraphCannonTests(ITestOutputHelper output)
             for (int j = 0; j < lineSize - 1; j++)
                 edges = AddEdge(edges, j, j + 1);
             Scramble(edges, seed: 103925 + i);
-            string result = _orderer.Run(EmptyVerts(edges), edges);
+            string result = _orderer.Run_ToString(EmptyVerts(edges), edges);
             canonical ??= result;
             Assert.Equal(canonical, result);
         }
@@ -133,7 +133,7 @@ public class GraphCannonTests(ITestOutputHelper output)
         {
             var edges = BuildGraph((0, 1), (1, 2), (0, 3), (3, 4), (0, 5), (5, 6));
             Scramble(edges, seed: 103925 + i);
-            string result = _orderer.Run(EmptyVerts(edges), edges);
+            string result = _orderer.Run_ToString(EmptyVerts(edges), edges);
             canonical ??= result;
             Assert.Equal(canonical, result);
         }
@@ -144,8 +144,8 @@ public class GraphCannonTests(ITestOutputHelper output)
     {
         var form1 = BuildGraph((1, 2), (2, 3), (3, 1), (0, 4), (4, 5), (5, 0));
         var form2 = BuildGraph((0, 1), (1, 2), (2, 0), (3, 4), (4, 5), (5, 3));
-        Assert.Equal(_orderer.Run(EmptyVerts(form1), form1),
-                     _orderer.Run(EmptyVerts(form2), form2));
+        Assert.Equal(_orderer.Run_ToString(EmptyVerts(form1), form1),
+                     _orderer.Run_ToString(EmptyVerts(form2), form2));
     }
 
     // ── Canonical count / exhaustive tests ──────────────────────────────────
@@ -167,7 +167,7 @@ public class GraphCannonTests(ITestOutputHelper output)
         BigInteger total = BigInteger.Pow(2, size * (size - 1) / 2);
         var seen = new HashSet<string>();
         for (BigInteger p = 0; p < total; p++)
-            seen.Add(_orderer.Run(new VertexType[size], GeneratePermutedAdjacencyMatrix(size, p)));
+            seen.Add(_orderer.Run_ToString(new VertexType[size], GeneratePermutedAdjacencyMatrix(size, p)));
 
         output.WriteLine($"size {size}: {seen.Count} unique graphs");
         Assert.Equal(expected, seen.Count);
@@ -191,7 +191,7 @@ public class GraphCannonTests(ITestOutputHelper output)
             {
                 var matrix = (EdgeType[,])graphs[i].Clone();
                 Scramble(matrix, seed: 15326 + j);
-                string result = _orderer.Run(new VertexType[size], matrix);
+                string result = _orderer.Run_ToString(new VertexType[size], matrix);
                 seen.Add(result);
                 canonical ??= result;
                 Assert.True(canonical == result,
@@ -208,7 +208,7 @@ public class GraphCannonTests(ITestOutputHelper output)
     {
         VertexType[] verts = [0, 0, 0, 0];
         EdgeType[,] edges  = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
-        Assert.Equal(_orderer.Run(verts, edges), _orderer.Run(verts, edges));
+        Assert.Equal(_orderer.Run_ToString(verts, edges), _orderer.Run_ToString(verts, edges));
     }
 
     [Fact]
@@ -219,9 +219,9 @@ public class GraphCannonTests(ITestOutputHelper output)
         EdgeType[,] edges4b  = { { 0, 1, 1, 0 }, { 1, 0, 0, 0 }, { 1, 0, 0, 0 }, { 0, 0, 0, 0 } };
         var edges3 = BuildGraph((0, 1), (1, 2), (2, 0));
 
-        string resultBefore = _orderer.Run(verts4, edges4a);
-        _orderer.Run(EmptyVerts(edges3), edges3);
-        string resultAfter = _orderer.Run(verts4, edges4b);
+        string resultBefore = _orderer.Run_ToString(verts4, edges4a);
+        _orderer.Run_ToString(EmptyVerts(edges3), edges3);
+        string resultAfter = _orderer.Run_ToString(verts4, edges4b);
 
         Assert.Equal(resultBefore, resultAfter);
     }

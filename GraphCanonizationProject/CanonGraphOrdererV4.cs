@@ -12,45 +12,70 @@ namespace Canonizer
     using VertexType = int; //Used semantically to help keep track of what's being referred to.
     using EdgeType = int;
 
+    // Lean translation: structure AdjMatrix (vertexCount : Nat) where adj : Fin vc → Fin vc → EdgeType.
+    // The C# version wraps a square EdgeType[,] and exposes a read-only indexer plus the
+    // immutable swapVertexLabels and ToString operations. Construction clones the input so
+    // callers' arrays are never aliased into the matrix.
+    public sealed class AdjMatrix
+    {
+        public readonly int VertexCount;
+        private readonly EdgeType[,] _adj;
+
+        public AdjMatrix(EdgeType[,] adj)
+        {
+            if (adj.GetLength(0) != adj.GetLength(1))
+                throw new Exception("Edges must be a square matrix");
+            VertexCount = adj.GetLength(0);
+            _adj = (EdgeType[,])adj.Clone();
+        }
+
+        private AdjMatrix(EdgeType[,] adj, bool takeOwnership)
+        {
+            VertexCount = adj.GetLength(0);
+            _adj = takeOwnership ? adj : (EdgeType[,])adj.Clone();
+        }
+
+        public EdgeType this[int fromVertex, int toVertex] => _adj[fromVertex, toVertex];
+
+        // Lean: AdjMatrix.swapVertexLabels. Swaps rows and columns of vertex1 and vertex2.
+        public AdjMatrix SwapVertexLabels(int vertex1, int vertex2)
+        {
+            if (vertex1 == vertex2) return this;
+            var result = new EdgeType[VertexCount, VertexCount];
+            for (int x = 0; x < VertexCount; x++)
+                for (int y = 0; y < VertexCount; y++)
+                    result[x, y] = _adj[
+                        x == vertex1 ? vertex2 : x == vertex2 ? vertex1 : x,
+                        y == vertex1 ? vertex2 : y == vertex2 ? vertex1 : y];
+            return new AdjMatrix(result, takeOwnership: true);
+        }
+
+        public EdgeType[,] ToArray() => (EdgeType[,])_adj.Clone();
+
+        // Lean: adjToString. Rows separated by '\n', cells in a row separated by a single space.
+        public override string ToString() =>
+            string.Join("\n", Enumerable.Range(0, VertexCount).Select(x =>
+                string.Join(" ", Enumerable.Range(0, VertexCount).Select(y =>
+                    _adj[x, y].ToString()))));
+    }
+
     public class CanonGraphOrdererV4
     {
-        public string Run(VertexType[] vertexTypes, EdgeType[,] edges)
+        // Lean: run. Pure pipeline returning the canonicalized AdjMatrix.
+        public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
-            ValidateInputs(vertexTypes, edges);
-            VertexType[] vertexRankings = GetVertexTypeRankings(vertexTypes);
-            PathState state = InitializePaths(edges);
-            vertexRankings = OrderVertices(state, vertexRankings);
-            EdgeType[,] canonicalOrdering = LabelEdgesAccordingToRankings(vertexRankings, edges);
-            return AdjMatrixToString(canonicalOrdering);
-        }
-
-        private static void ValidateInputs(VertexType[] vertexTypes, EdgeType[,] edges)
-        {
-            if (edges.GetLength(0) != edges.GetLength(1))
-                throw new Exception("Edges must be a square matrix");
-            if (vertexTypes.Length != edges.GetLength(0))
+            if (vertexTypes.Length != G.VertexCount)
                 throw new Exception("Every vertex must be given a type. They may all be given the same type");
+            VertexType[] vertexRankings = GetArrayRank(vertexTypes.ToArray());
+            PathState state = InitializePaths(G);
+            vertexRankings = OrderVertices(state, vertexRankings);
+            return LabelEdgesAccordingToRankings(vertexRankings, G);
         }
 
-        private static VertexType[] GetVertexTypeRankings(VertexType[] vertexTypes) =>
-            GetArrayRank(vertexTypes.ToArray());
-
-        // Replaces each value with the count of strictly smaller values in the array.
-        // E.g. [0,10,5,5,11] → [0,3,1,1,4].  (Non-dense ranking.)
-        private static VertexType[] GetArrayRank(VertexType[] arr)
-        {
-            if (arr.Length < 2) return arr;
-            var sortedByValue = arr.Select((v, i) => (v, i)).OrderBy(x => x.v).ToArray();
-            int counter = 0;
-            List<(VertexType rank, int original)> output = [(0, sortedByValue[0].i)];
-            for (int i = 1; i < sortedByValue.Length; i++)
-            {
-                if (sortedByValue[i - 1].v != sortedByValue[i].v)
-                    counter = i;
-                output.Add(((VertexType)counter, sortedByValue[i].i));
-            }
-            return output.OrderBy(x => x.original).Select(x => x.rank).ToArray();
-        }
+        // Convenience wrapper that takes a raw EdgeType[,] and returns the formatted string.
+        // Most existing tests call this form. New code should prefer Run + ToString.
+        public string Run_ToString(VertexType[] vertexTypes, EdgeType[,] edges) =>
+            Run(vertexTypes, new AdjMatrix(edges)).ToString();
 
         // Lean translation: a pure record threaded through all functions.
         // PathState holds only structural (edge-derived) information; vertex types are
@@ -63,10 +88,10 @@ namespace Canonizer
         //   FromRanks[depth, fromVertex]               = rank of all depth-length paths from that vertex
         private record RankState(int[,,] BetweenRanks, int[,] FromRanks);
 
-        // PathState is built once from edges alone; vertex types are never stored inside it.
-        private static PathState InitializePaths(EdgeType[,] edges)
+        // PathState is built once from the AdjMatrix alone; vertex types are never stored inside it.
+        private static PathState InitializePaths(AdjMatrix G)
         {
-            int n = edges.GetLength(0);
+            int n = G.VertexCount;
             var pathsOfLength = new PathsByLength[n];
             for (int depth = 0; depth < n; depth++)
             {
@@ -88,7 +113,7 @@ namespace Canonizer
                         {
                             pathsOfLength[depth].pathsFromVertex[from].pathsToVertex[to].connectedSubPaths[mid] =
                                 new InnerPathSegment(
-                                    edges[mid, to],
+                                    G[mid, to],
                                     pathsOfLength[depth - 1].pathsFromVertex[from].pathsToVertex[mid]);
                         }
                     }
@@ -97,8 +122,10 @@ namespace Canonizer
             return new PathState(pathsOfLength, n);
         }
 
-        // Dense ranking: ties in vertexRankings are broken by original index.
-        // Lean: computeDenseRanks
+        // Position permutation: ties in vertexRankings are broken by original index.
+        // output[v] = position of v in the sort by (vertexRankings[v], v).
+        // Lean: computeDenseRanks (name kept for symmetry; this is a permutation, not a
+        // dense rank in the rank-statistics sense — see GetArrayRank for the proper dense rank).
         private static int[] ComputeDenseRanks(VertexType[] vertexRankings) =>
             vertexRankings
                 .Select((v, i) => (v, i))
@@ -109,38 +136,22 @@ namespace Canonizer
                 .ToArray();
 
         // Relabels the adjacency matrix so vertex positions match the given rankings.
-        public static EdgeType[,] LabelEdgesAccordingToRankings(VertexType[] vertexRankings, EdgeType[,] edges)
+        public static AdjMatrix LabelEdgesAccordingToRankings(VertexType[] vertexRankings, AdjMatrix G)
         {
             int[] rankings = ComputeDenseRanks(vertexRankings);
-            EdgeType[,] orderedEdges = (EdgeType[,])edges.Clone();
+            AdjMatrix orderedGraph = G;
             for (int i = 0; i < rankings.Length; i++)
             {
                 int j = Array.IndexOf(rankings, i);
-                orderedEdges = SwapVertexLabelling(orderedEdges, i, j);
+                orderedGraph = orderedGraph.SwapVertexLabels(i, j);
                 (rankings[j], rankings[i]) = (rankings[i], rankings[j]);
             }
-            return orderedEdges;
+            return orderedGraph;
         }
 
-        // Swaps rows and columns of v1 and v2 — an isomorphism-preserving relabelling.
-        public static EdgeType[,] SwapVertexLabelling(EdgeType[,] edges, int v1, int v2)
-        {
-            if (v1 == v2)
-                return (EdgeType[,])edges.Clone();
-            int n = edges.GetLength(0);
-            var result = new EdgeType[n, n];
-            for (int x = 0; x < n; x++)
-                for (int y = 0; y < n; y++)
-                    result[x, y] = edges[
-                        x == v1 ? v2 : x == v2 ? v1 : x,
-                        y == v1 ? v2 : y == v2 ? v1 : y];
-            return result;
-        }
-
-        public static string AdjMatrixToString(EdgeType[,] edges) =>
-            string.Join("\n", Enumerable.Range(0, edges.GetLength(0)).Select(x =>
-                string.Join(", ", Enumerable.Range(0, edges.GetLength(1)).Select(y =>
-                    edges[x, y].ToString()))));
+        // Backward-compat overload retained for existing tests that pass raw EdgeType[,].
+        public static EdgeType[,] LabelEdgesAccordingToRankings(VertexType[] vertexRankings, EdgeType[,] edges) =>
+            LabelEdgesAccordingToRankings(vertexRankings, new AdjMatrix(edges)).ToArray();
 
         // One pass of ranking propagation. Lean: convergeOnce
         private static (VertexType[] rankings, bool changed) ConvergeOnce(PathState state, VertexType[] vertexRankings)
@@ -169,10 +180,21 @@ namespace Canonizer
             return vertexRankings;
         }
 
-        // Promotes the second occurrence of `target` to `target+1`.
-        // Two vertices tied after full convergence are symmetric; this arbitrarily distinguishes them.
-        // Lean: breakTie
-        private static (VertexType[] rankings, bool changed) BreakTie(VertexType[] vertexRankings, int target)
+        // Lean: shiftAbove. Bumps every value strictly greater than `target` up by one,
+        // opening a one-slot gap at `target + 1`. Required because dense ranks leave no
+        // gap between consecutive equivalence classes.
+        private static VertexType[] ShiftAbove(VertexType[] vertexRankings, int target)
+        {
+            var result = new VertexType[vertexRankings.Length];
+            for (int i = 0; i < vertexRankings.Length; i++)
+                result[i] = vertexRankings[i] > target ? vertexRankings[i] + 1 : vertexRankings[i];
+            return result;
+        }
+
+        // Promotes all-but-the-first occurrence of `target` to `target + 1`. Caller must
+        // ensure no existing `target + 1` class collides (BreakTie handles this via ShiftAbove).
+        // Lean: breakTiePromote
+        private static (VertexType[] rankings, bool changed) BreakTiePromote(VertexType[] vertexRankings, int target)
         {
             bool firstAppearance = true;
             bool changed = false;
@@ -185,6 +207,19 @@ namespace Canonizer
                 changed = true;
             }
             return (updated, changed);
+        }
+
+        // Top-level tiebreak: if at least two vertices share value `target`, open a gap
+        // above `target` (ShiftAbove) and promote all-but-one to `target + 1`. Otherwise
+        // return the input unchanged. The gating preserves dense typings as input/output.
+        // Lean: breakTie
+        private static (VertexType[] rankings, bool changed) BreakTie(VertexType[] vertexRankings, int target)
+        {
+            int count = 0;
+            for (int i = 0; i < vertexRankings.Length; i++)
+                if (vertexRankings[i] == target) count++;
+            if (count < 2) return (vertexRankings.ToArray(), false);
+            return BreakTiePromote(ShiftAbove(vertexRankings, target), target);
         }
 
         // Lean: orderVertices
@@ -216,8 +251,10 @@ namespace Canonizer
             return new RankState(betweenRanks, fromRanks);
         }
 
-        // Rank = index of first element in each equivalence class.
-        // E.g. sorted [a,a,b,c] → [(a,0),(a,0),(b,2),(c,3)]. Lean: assignRanks
+        // Dense ranks: each equivalence class gets a unique consecutive ordinal 0, 1, 2, …
+        // E.g. sorted [a,a,b,c] → [(a,0),(a,0),(b,1),(c,2)]. Lean: assignRanks.
+        // [sparse→dense] Was previously sparse (counter = i on transition). Dense form is
+        // what BreakTie's gap-opening logic now relies on.
         private static (T item, int rank)[] AssignRanks<T>(T[] sorted, Comparison<T> compare)
         {
             var result = new (T, int)[sorted.Length];
@@ -225,7 +262,7 @@ namespace Canonizer
             for (int i = 0; i < sorted.Length; i++)
             {
                 if (i > 0 && compare(sorted[i - 1], sorted[i]) != 0)
-                    counter = i;
+                    counter++;
                 result[i] = (sorted[i], counter);
             }
             return result;
@@ -289,7 +326,11 @@ namespace Canonizer
                 if (ix.edgeType != iy.edgeType) return ix.edgeType < iy.edgeType ? 1 : -1;
                 return 0;
             }
-            throw new Exception("Cannot compare BottomPathSegment with InnerPathSegment");
+            // Mixed bottom/inner does not arise in practice (connectedSubPaths is uniform per
+            // call). Lean picks a definite ordering here so the comparator is a total preorder;
+            // in C# we mirror that with `bottom < inner`.
+            if (x is BottomPathSegment) return -1;
+            return 1;
         }
 
         public static int ComparePathsBetween(AllPathsBetween x, AllPathsBetween y, VertexType[] vertexTypes, int[,,] betweenRanks)
@@ -363,6 +404,28 @@ namespace Canonizer
                 if (cmp != 0) return cmp;
             }
             return 0;
+        }
+
+        // Dense rank: replaces each value with the number of *distinct* values strictly
+        // less than it (ties preserved). E.g. [5, 0, 5, 3] → [2, 0, 2, 1].
+        // Lean: getArrayRank.
+        // [sparse→dense] Was previously "count of strictly smaller values" (sparse, e.g.
+        // [5,0,5,3]→[3,0,3,1]). Dense form keeps the IsPrefixTyping invariant true at
+        // entry; both forms preserve the partition and downstream comparison behavior.
+        private static VertexType[] GetArrayRank(VertexType[] arr)
+        {
+            if (arr.Length < 2) return arr;
+            var sortedByValue = arr.Select((v, i) => (v, i)).OrderBy(x => x.v).ToArray();
+            int counter = 0;
+            var output = new (VertexType rank, int original)[sortedByValue.Length];
+            output[0] = (0, sortedByValue[0].i);
+            for (int i = 1; i < sortedByValue.Length; i++)
+            {
+                if (sortedByValue[i - 1].v != sortedByValue[i].v)
+                    counter++;
+                output[i] = ((VertexType)counter, sortedByValue[i].i);
+            }
+            return output.OrderBy(x => x.original).Select(x => x.rank).ToArray();
         }
 
         // Debug helper: displays the ranked path structure at a given depth.
