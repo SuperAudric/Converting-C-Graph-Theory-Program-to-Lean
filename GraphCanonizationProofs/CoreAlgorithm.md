@@ -110,7 +110,11 @@ not what the open obligation is about. They're only relevant insofar as they
 preserve the fixed-point character of `convergeLoop`.
 
 ## Side note
-it would not surpise me if there were faster implementations of this algorithm, perhaps dropping one of the vertex array indices, or providing an arbitrary but never tied backup comparer for vertices that replaces the need for tiebreak, but never takes precedent over orbit comparisons (this may paralelize the tiebreakingwithin converge cycles so only one loop needed).
+It would not surpise me if there were faster implementations of this algorithm.
+Perhaps dropping one of the vertex array indices, or providing an arbitrary backup comparer
+for vertices that was never tied. It could that replaces the need for tiebreak,
+as long as it never takes precedent over orbit comparisons. 
+This may paralelize the tiebreaking within converge cycles so only one loop needed.
 
 ## Quick map for the proof effort
 
