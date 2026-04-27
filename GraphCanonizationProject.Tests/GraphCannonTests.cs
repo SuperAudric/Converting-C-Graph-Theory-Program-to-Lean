@@ -250,6 +250,47 @@ public class GraphCannonTests(ITestOutputHelper output)
         GraphOrderer.LabelEdgesAccordingToRankings(verts, edges);
     }
 
+    // ── CFI tests ────────────────────────────────────────────────────────────
+    // CFI pairs are non-isomorphic graphs that color-refinement-style algorithms can
+    // collapse. See GraphCanonizationProofs/OrbitCompleteAfterConv.md for context. The
+    // theory call distinguishes generator correctness from canonizer correctness:
+    // CfiPair_WellFormed should always pass; CfiPair_ProducesDifferentCanonical can
+    // legitimately fail and is the falsifying-counterexample harness.
+
+    [Theory]
+    [InlineData("Cycle3")]
+    [InlineData("Cycle4")]
+    [InlineData("K4")]
+    [InlineData("K33")]
+    [InlineData("Petersen")]
+    public void CfiPair_WellFormed(string baseName)
+    {
+        var pair = CfiGraphGenerator.Generate(baseName);
+        CfiGraphGenerator.AssertWellFormedPair(pair);
+        Assert.True(CfiGraphGenerator.VerifyNonIsomorphic(pair),
+            $"CFI generator produced an isomorphic pair on base {baseName}.");
+    }
+
+    [Theory]
+    [InlineData("Cycle3")]
+    [InlineData("Cycle4")]
+    [InlineData("K4")]
+    //[InlineData("K33")]      // 60 vertices — slow under the canonizer, enable when wanted
+    //[InlineData("Petersen")] // 100 vertices — slower still
+    public void CfiPair_ProducesDifferentCanonical(string baseName)
+    {
+        var pair = CfiGraphGenerator.Generate(baseName);
+        CfiGraphGenerator.AssertWellFormedPair(pair);
+
+        var verts     = new VertexType[pair.Even.VertexCount];
+        string evenCanon = _orderer.Run(verts, pair.Even).ToString();
+        string oddCanon  = _orderer.Run(verts, pair.Odd).ToString();
+
+        Assert.True(evenCanon != oddCanon,
+            $"CFI pair on base {baseName} produced equal canonicals — possible counterexample to OrbitCompleteAfterConv_general.\n" +
+            CfiGraphGenerator.DescribePair(pair));
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private static EdgeType[,] NewGraph() => new EdgeType[1, 1];

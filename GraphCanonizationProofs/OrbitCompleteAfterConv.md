@@ -94,15 +94,24 @@ Build a series of CFI pairs in the C# precursor and run them through `CanonGraph
 If a CFI pair collapses to the same canonical, the obligation is false (outcome 3),
 and the proof attempt is moot.
 
-  - Generator stub:
+  - Generator:
     [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
-    — methods, base-graph factories, and verification helpers laid out, bodies pending.
-  - Test wiring: a `CfiPair_ProducesDifferentCanonical` `[Theory]` in
-    `GraphCannonTests.cs` (sketch included at the bottom of the generator file).
-  - Coverage targets: K_4 base (12 vertices, classical 1-WL counterexample),
-    K_{3,3} / Rook 3×3 / Petersen bases (defeat 2-WL), and at least one
-    higher-treewidth base (defeat k-WL for larger k). Each pair must be verified
-    non-isomorphic before drawing conclusions about the canonizer.
+    — implements `Generate(baseName)` producing a `CfiPair(Even, Odd, BaseGraphName,
+    BaseTreewidth, VertexRoles)`, plus `AssertWellFormedPair`, `VerifyNonIsomorphic`,
+    and `DescribePair`. Available bases: `Cycle{n}` (treewidth 2), `K4` (3),
+    `K33` (3), `Rook3x3` (4), `Petersen` (4).
+  - Test wiring: `CfiPair_WellFormed` (verifies the generator) and
+    `CfiPair_ProducesDifferentCanonical` (the canonizer check) in
+    `GraphCannonTests.cs`. The latter currently runs `Cycle3` (18 vertices),
+    `Cycle4` (24), and `K4` (40); `K33` (60) and `Petersen` (100) are commented
+    out for runtime and can be enabled when wanted.
+  - Coverage targets: cycle bases (defeat 1-WL, smallest; cheapest to test),
+    K_4 and K_{3,3} (defeat 1-WL via treewidth 3), Rook 3×3 / Petersen
+    (defeat 2-WL via treewidth 4), and at least one higher-treewidth base
+    (defeat k-WL for larger k — not yet wired). Each pair is verified
+    non-isomorphic via `AssertWellFormedPair` (well-formedness) and
+    `VerifyNonIsomorphic` (brute-force for n ≤ 9, otherwise relies on the
+    construction's published proof).
 
 The empirical claim from the existing test sweeps is that the algorithm is *not*
 analogous to any constant-k WL — Step 1 is what tests that claim. No correctness
