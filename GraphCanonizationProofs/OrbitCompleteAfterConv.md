@@ -32,11 +32,12 @@ This file is about the **reverse direction** — the deep half.
 
 ## Single sorry site
 
-`FullCorrectness/Main.lean:89` — `run_swap_invariant_fwd` σ ∉ Aut G branch.
+[FullCorrectness/Main.lean:89](FullCorrectness/Main.lean#L89) — `run_swap_invariant_fwd`,
+σ ∉ Aut G branch.
 
 The hypothesis is consumed by `runFrom_VtsInvariant_eq_strong_general`
-(`FullCorrectness/Equivariance/OrderVerticesGeneral.lean`) as input to its outer
-induction's Case 2 (orbit-bridging step).
+([FullCorrectness/Equivariance/OrderVerticesGeneral.lean](FullCorrectness/Equivariance/OrderVerticesGeneral.lean))
+as input to its outer induction's Case 2 (orbit-bridging step).
 
 ---
 
@@ -50,115 +51,114 @@ The algorithm has been validated outside Lean:
   - **Random on n = 30:** randomized testing on size-30 graphs (in the C# precursor).
     No counterexamples observed.
 
-The Lean port of this project exists *to formally verify* what the empirical sweeps
-suggest. So the question is not "is the algorithm correct in practice" but
-"can we **prove** correctness in Lean, and if not, why not."
+Neither sweep targets the *structural* cases known to be hard for refinement-based
+algorithms. Those cases are sparse, regular, and have heavy local symmetry; random
+Erdős–Rényi sampling effectively never produces them, and exhaustive enumeration
+caps below their minimum size.
 
 ---
 
 ## Why the obligation is research-level
 
-`OrbitCompleteAfterConv_general` asserts that the algorithm's color refinement
-is a *complete* orbit detector. Color-refinement-style algorithms are known to be
-**incomplete in general**:
+`OrbitCompleteAfterConv_general` asserts that the algorithm's refinement is a
+*complete* orbit detector. The Cai–Furer–Immerman (CFI) construction produces, for
+every k, a non-isomorphic pair of graphs that the k-dimensional Weisfeiler–Leman
+algorithm cannot distinguish. Practical canonizers (nauty, bliss, traces, saucy)
+sidestep this via individualization-and-refinement: when refinement plateaus, they
+fork on a vertex of the smallest non-singleton color class and recurse. The
+refinement *alone* is not the source of correctness.
 
-  - **1-WL** (Weisfeiler–Leman, neighbor-color-multiset refinement) cannot
-    distinguish the Cai–Furer–Immerman family of pairs.
-  - **k-WL** for any constant *k* is also incomplete; the W-L hierarchy strictly
-    increases in expressive power but never reaches all graphs.
-  - Practical canonizers (nauty, bliss, traces, saucy) achieve completeness via
-    **individualization-and-refinement**: when refinement plateaus, they fork on
-    a vertex of the smallest non-singleton color class and recurse. The refinement
-    *alone* is not the source of correctness.
-
-The pipeline here uses **path-multiset refinement** (multiset of all paths from a
-vertex up to depth n−1), which is a richer invariant than 1-WL. Whether this is
-*complete* — i.e. strictly stronger than the entire W-L hierarchy in expressive
-power — is the open question. The empirical sweeps say "yes for n ≤ 7" and "yes
-for random n = 30," but a counterexample at any *n* would falsify the obligation
-unconditionally.
+This pipeline uses **path-multiset refinement** indexed on `(depth, start, end)`
+triples — see [CoreAlgorithm.md](CoreAlgorithm.md) for the data-structure detail.
+Whether this refinement is complete, and where it sits relative to the WL hierarchy,
+is the open question. The empirical sweeps say "yes" within their scope, but a
+counterexample at any *n* would falsify the obligation unconditionally.
 
 This means **the obligation may or may not be true**. Three outcomes are possible:
 
-  1. **It is true** and provable in Lean: requires building the full color-refinement
-     completeness proof for path-multiset refinement.
-  2. **It is true** but a Lean proof is intractable: the obligation remains an axiom
-     of canonizer-correctness, accepted on empirical grounds.
-  3. **It is false**: there exists a graph (probably large) where path-multiset
-     refinement merges two non-orbit-equivalent vertices. Discovering such a graph
-     is itself a contribution.
+  1. **It is true** and provable in Lean: requires building the full
+     bisimulation-lift proof (Approach A below).
+  2. **It is true** but a Lean proof is intractable: the obligation remains an
+     external hypothesis of canonizer-correctness.
+  3. **It is false**: there exists a graph where path-multiset refinement merges
+     two non-orbit-equivalent vertices. Discovering such a graph is itself a result.
 
 ---
 
-## Roadmap to a Lean proof (assuming outcome 1)
+## Plan of attack — two steps, in order
 
-Sketch of what a direct discharge would require, ordered by depth.
+### Step 1 (in progress) — CFI counterexample test
 
-### Step 1 — characterize `convergeLoop` as a fixed point of a refinement operator (~200 lines)
+Before investing in a proof, **falsify or de-risk the obligation by direct test**.
+Build a series of CFI pairs in the C# precursor and run them through `CanonGraphOrdererV4`.
+If a CFI pair collapses to the same canonical, the obligation is false (outcome 3),
+and the proof attempt is moot.
 
-Define a typing-refinement operator
-```
-refine : (Fin n → α) → (Fin n → α′)
-```
-where the codomain `α′` is `(typing of v) × (multiset of typings of paths from v)`
-or a hashed version thereof. Show:
+  - Generator stub:
+    [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
+    — methods, base-graph factories, and verification helpers laid out, bodies pending.
+  - Test wiring: a `CfiPair_ProducesDifferentCanonical` `[Theory]` in
+    `GraphCannonTests.cs` (sketch included at the bottom of the generator file).
+  - Coverage targets: K_4 base (12 vertices, classical 1-WL counterexample),
+    K_{3,3} / Rook 3×3 / Petersen bases (defeat 2-WL), and at least one
+    higher-treewidth base (defeat k-WL for larger k). Each pair must be verified
+    non-isomorphic before drawing conclusions about the canonizer.
 
-  - `refine` is monotone: if two vertices receive distinct types under `refine·t`,
-    they had distinct types under `t` already ⇒ refining never collapses classes.
-  - `convergeLoop` reaches a fixed point of `refine` (modulo dense-rank renaming).
-  - At the fixed point, two vertices have equal type iff their refinement signatures
-    are equal at all depths.
+The empirical claim from the existing test sweeps is that the algorithm is *not*
+analogous to any constant-k WL — Step 1 is what tests that claim. No correctness
+property of the algorithm is asserted here on the basis of WL classification; that
+classification is what's being checked.
 
-Helper file: `FullCorrectness/Refinement.lean` (new, ~200 lines).
+**Possible outcomes of Step 1:**
 
-### Step 2 — characterize the fixed-point typing as a complete orbit invariant (~research)
+  - All CFI pairs are correctly distinguished ⇒ raises confidence that the
+    algorithm is genuinely beyond the WL hierarchy. Proceed to Step 2.
+  - Some CFI pair collapses ⇒ the obligation as stated is false. Pivot to
+    pivot-and-refinement: introduce a backtracking fork for non-singleton classes,
+    re-state and re-prove the modified theorem.
 
-Show that two vertices with equal fixed-point type are `Aut(G)`-orbit-equivalent.
-Equivalent statements that any of would suffice:
+### Step 2 (later) — Approach A: bisimulation lift
 
-  - **Path-multiset completeness.** `path_multiset G v₁ = path_multiset G v₂ ⇒
-    ∃ σ ∈ Aut G, σ v₁ = v₂`. This is the central open question for this algorithm.
-  - **Inductive bisimulation construction.** Given vertices with equal fixed-point
-    types, *constructively* build the bridging σ by greedily extending a partial
-    automorphism using the type-matching at each depth. Standard for "stable
-    coloring" algorithms; needs Mathlib `Equiv` machinery.
+The path the rest of this document is organized around. Conceptually:
 
-This step is where the depth lives. If path-multiset refinement is not complete,
-no proof here will succeed.
+  1. **Refinement-operator framing.** Define a typing-refinement operator
+     `refine : (Fin n → α) → (Fin n → α′)` whose codomain encodes
+     `(typing of v) × (multiset of typings of paths from v)`. Show
+       - `refine` is monotone (no class is collapsed),
+       - `convergeLoop` is its fixed-point iterator,
+       - at the fixed point, the equivalence `v ~ w ⇔ c[v] = c[w]` is an
+         **equitable partition** (local refinement-stability condition).
+     New file: `FullCorrectness/Refinement.lean` (~200 lines).
 
-Possible structure: try the constructive approach (sub-step b above). At each
-recursion level, pick the lowest-numbered unmatched vertex; show that its type
-class (under the current refinement) is a singleton or that its members are all
-isomorphism-equivalent within `Aut G`. If they aren't, you've found a
-counterexample (outcome 3).
+  2. **Bisimulation construction.** From the equitable-partition condition,
+     build the bridging automorphism τ depth-by-depth. At each step:
+       - Choose a not-yet-matched vertex `x` reachable from already-matched
+         territory.
+       - Use the path-multiset equality to find a partner `y` for `x` such that
+         the partial map extends without contradiction.
+       - Iterate until every vertex is mapped.
+     The crux is consistency: showing the local choices can be made coherently.
+     This is exactly where CFI graphs break analogous attempts for 1-WL — Step 1
+     is what tells us whether they break this construction too.
+     New file: `FullCorrectness/CompletenessOfPathRefinement.lean`. Length and
+     feasibility depend on Step 1's verdict.
 
-Helper file: `FullCorrectness/CompletenessOfPathRefinement.lean` (new, hundreds of
-lines if successful; possibly impossible).
+  3. **TypedAut refinement.** Once a witness σ ∈ Aut G with `σ v₁ = v₂` exists,
+     show σ ∈ TypedAut(conv mid). Direct from `convergeLoop_Aut_invariant`.
+     ~50 lines.
 
-### Step 3 — refine `Aut(G)` to `TypedAut(conv mid)` (~50 lines)
+  4. **Assembly.** Plug 1–3 into the definition of `OrbitCompleteAfterConv_general`,
+     discharge in `Main.lean:89`. ~30 lines.
 
-Once we have σ ∈ Aut(G) with σ v₁ = v₂ and v₁, v₂ have the same conv value, show
-σ ∈ TypedAut(conv mid). Direct from `convergeLoop_Aut_invariant`: σ ∈ Aut G ⇒ σ
-preserves conv values pointwise.
-
-### Step 4 — assemble (~30 lines)
-
-Plug Steps 1–3 into the definition of `OrbitCompleteAfterConv_general`. Discharge
-in `Main.lean:89`.
-
-**Total:** ~300 lines of Lean **plus** a research-level mathematical proof at Step 2
-(unknown size; may not exist).
+**Total for Step 2:** ~300+ lines of Lean *plus* the bisimulation lift, which is
+a research-level mathematical proof of unknown size.
 
 ---
 
-## Roadmap if Step 2 stalls (outcome 2)
+## Fallback (Approach D) — Hoist as hypothesis
 
-If a Lean proof of completeness proves intractable, fall back to one of:
-
-### B1 — Hoist the assumption into the theorem statement
-
-Make `OrbitCompleteAfterConv_general` an explicit hypothesis of
-`run_canonical_correctness`:
+If Steps 1–2 do not produce a closed proof, hoist `OrbitCompleteAfterConv_general`
+as an explicit named premise on `run_canonical_correctness`:
 
 ```lean
 theorem run_canonical_correctness (G H : AdjMatrix n)
@@ -166,59 +166,9 @@ theorem run_canonical_correctness (G H : AdjMatrix n)
     G ≃ H ↔ run zeros G = run zeros H
 ```
 
-Honest framing: the σ-equivariance work is fully proved; the completeness piece
-is a stated assumption. No `sorry` at all.
-
-### B2 — Bounded variant for small n
-
-State and prove a bounded version:
-
-```lean
-theorem run_canonical_correctness_le_n (G H : AdjMatrix n) (hn : n ≤ 7) :
-    G ≃ H ↔ run zeros G = run zeros H
-```
-
-Discharge `OrbitCompleteAfterConv_general` for `n ≤ 7` by exhaustive case analysis
-(decidable by finiteness of `Aut G`). Combine with the unconditional Phase 6
-machinery. Yields a verified canonizer for `n ≤ 7`, which matches the empirical
-testing scope already done.
-
-Estimated effort: ~100–200 lines per *n* (bounded by the size of `Aut G` for that *n*).
-
-### B3 — Counterexample search
-
-If Step 2 reveals a structural reason the algorithm might fail, write a search
-procedure to look for a counterexample at larger *n*. Lean is poorly suited to
-this; offload to the C# precursor with extended graph generators.
-
----
-
-## Recommended posture
-
-The current `Main.lean:89` sorry is an honest record of the situation:
-
-> Phase 6 proves that the canonizer is *equivariant* (its output transforms
-> consistently under graph relabelings). What's missing is that the canonizer is
-> *complete* (its output distinguishes all non-isomorphic graphs).
->
-> Equivariance is the Lean-tractable half. Completeness is research-level for
-> arbitrary *n* but empirically validated for n ≤ 7 (exhaustive) and n = 30 (random)
-> via the C# precursor.
-
-Concrete next actions, in priority order:
-
-  1. **Discharge for bounded n** (Path B2). Yields a clean, fully-Lean-proved
-     canonizer for graphs of size ≤ 7. Matches the existing empirical scope.
-     Self-contained, no research prerequisites. Estimated: 1–2 weeks.
-
-  2. **Attempt Step 2 constructively** (Path A.2 sub-step b). If it works for
-     small examples, the proof structure may scale. If it fails on a specific
-     graph, that's a counterexample (outcome 3). Estimated: open-ended; abandon
-     after ~2 weeks if no progress.
-
-  3. **Hoist the assumption** (Path B1) as a fallback if both above are
-     unfruitful. Two-line edit; produces an unconditional Lean theorem with a
-     named external hypothesis.
+Honest framing: the σ-equivariance work is fully proved; the completeness piece is
+a stated assumption. No `sorry` at all, but the assumption's truth depends on the
+empirical/CFI results.
 
 ---
 
@@ -236,3 +186,6 @@ Concrete next actions, in priority order:
   - The path-multiset machinery (`calculatePathRankings`, `comparePathsFrom`,
     `comparePathsBetween`) lives across `Equivariance/CompareEquivariant.lean`,
     `Equivariance/PathEquivariance.lean`, and `Equivariance/PathEquivarianceRelational.lean`.
+  - Algorithm-side context: [CoreAlgorithm.md](CoreAlgorithm.md).
+  - CFI generator stub:
+    [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs).
