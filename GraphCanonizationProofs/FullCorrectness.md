@@ -1,4 +1,3 @@
-/-!
 # Full correctness of the graph canonizer — proof plan (docs only)
 
 The flat-flawed proof in `LeanGraphCanonizerV4Correctness.lean` is retired — its header
@@ -1032,4 +1031,3 @@ work (Mathlib-facing infrastructure: §1 done; §2 done) can proceed in parallel
 algorithm-facing work (§3–§5 are about the specific data structures of this canonizer).
 
 §6 is the single hardest step and should be the budgeting focus once §3–§5 are in place.
--/

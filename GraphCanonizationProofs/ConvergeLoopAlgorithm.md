@@ -1,4 +1,4 @@
-# Core Algorithm — notes for `OrbitCompleteAfterConv`
+# Converge Loop Algorithm — notes for `OrbitCompleteAfterConv`
 
 This file captures what the `convergeLoop` in `LeanGraphCanonizerV4` actually
 does, in a form aimed specifically at supporting the discharge of
