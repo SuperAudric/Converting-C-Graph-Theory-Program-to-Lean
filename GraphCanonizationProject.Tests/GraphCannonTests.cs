@@ -282,7 +282,7 @@ public class GraphCannonTests(ITestOutputHelper output)
     [InlineData("K4")]
     //[InlineData("K33")]      // 60 vertices — too slow for the non fast version, ~30s for fast
     //[InlineData("Petersen")] // 100 vertices — WAY too slow except for the fast version ~370s for fast
-    //[InlineData("K6")]       // 156 vertices, treewidth 5 (3-WL); not yet timed, extrapolated ≳ 1 hour on fast
+    //[InlineData("K6")]       // 156 vertices, treewidth 5 (3-WL); ~3000s on fast — passed once manually
     public void CfiPair_ProducesDifferentCanonical(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);

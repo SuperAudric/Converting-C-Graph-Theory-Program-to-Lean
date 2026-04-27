@@ -87,12 +87,11 @@ beyond the WL hierarchy and the bisimulation-lift proof attempt is justified.
 The CFI generator lives at
 [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
 and is wired into `GraphCannonTests.cs`. As of 2026-04-27, every wired CFI
-pair (`Cycle3`, `Cycle4`, `K4`, `K33`, `Petersen` — coverage through
-treewidth-4 bases, i.e. 2-WL counterexamples under the doc's convention) is
-correctly distinguished by the algorithm. `K6` (treewidth 5, 3-WL extension)
-is generator-validated; canonizer-distinguishes pending a longer-running
-run. See [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) for the
-empirical state and outcome interpretation.
+pair (`Cycle3`, `Cycle4`, `K4`, `K33`, `Petersen`, and a single manual run
+of `K6`) is correctly distinguished by the algorithm — coverage now extends
+through the treewidth-5 base (the 3-WL counterexample under the doc's
+convention). See [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) for
+empirical runtimes and outcome interpretation.
 
 ## What's known to matter for the proof
 

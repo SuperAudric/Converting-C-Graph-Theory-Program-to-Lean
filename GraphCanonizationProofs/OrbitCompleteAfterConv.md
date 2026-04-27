@@ -50,13 +50,11 @@ The algorithm has been validated outside Lean:
     the C# precursor extended the exhaustive sweep to n = 7 against OEIS A000088.
   - **Random on n = 30:** randomized testing on size-30 graphs (in the C# precursor).
     No counterexamples observed.
-  - **CFI sweep, treewidth 2–4 bases:** every active and manually-verified CFI
-    pair is correctly distinguished — `Cycle3`, `Cycle4`, `K4`, `K33`, `Petersen`.
-    These are precisely the *structural* hard cases that the previous two
-    bullets miss. See "Step 1" below for the test wiring; coverage extends
-    through 2-WL counterexample bases (treewidth 4). The 3-WL extension
-    (`K6`, treewidth 5) is generator-validated; canonizer-distinguishes
-    pending a longer-running run.
+  - **CFI sweep, treewidth 2–5 bases:** every active and manually-verified CFI
+    pair is correctly distinguished — `Cycle3`, `Cycle4`, `K4`, `K33`, `Petersen`,
+    and (single-run) `K6`. These are precisely the *structural* hard cases that
+    the previous two bullets miss. See "Step 1" below for the test wiring;
+    coverage now extends through the 3-WL counterexample base (treewidth 5).
 
 The first two sweeps do not target the *structural* cases known to be hard for
 refinement-based algorithms — those cases are sparse, regular, and have heavy
@@ -120,8 +118,9 @@ and the proof attempt is moot.
     `K6` (156 vertices) — well-formedness is cheap regardless of vertex count.
     `CfiPair_ProducesDifferentCanonical` runs `Cycle3`, `Cycle4`, `K4` by
     default; `K33` (60v, ~30s under fast), `Petersen` (100v, ~370s under fast),
-    and `K6` (156v, extrapolated ≳ 1h on fast) are commented out for routine-run
-    reasons and toggle on by uncommenting their `[InlineData]` lines.
+    and `K6` (156v, ~3000s under fast — passed once manually) are commented
+    out for routine-run reasons and toggle on by uncommenting their
+    `[InlineData]` lines.
   - Coverage targets (under this doc's convention "treewidth-(k+2) base ⇒
     defeats k-WL"): cycle bases (1-WL, smallest; cheapest to test), `K4` and
     `K33` (1-WL via treewidth 3), `Rook3x3` and `Petersen` (2-WL via
@@ -139,18 +138,18 @@ classification is what's being checked.
 **Empirical state as of 2026-04-27:** every wired CFI pair the canonizer has
 been run on is correctly distinguished. `Cycle3`, `Cycle4`, `K4` pass under
 the default test profile (< 5s each). `K33` (60v) and `Petersen` (100v) have
-been verified manually under the fast canonizer (~30s and ~370s) and likewise
-produce distinct canonicals. `K6` (3-WL extension) is generator-validated via
-`CfiPair_WellFormed`; the canonizer-distinguishes case is not yet timed.
-**No counterexample to `OrbitCompleteAfterConv_general` has been observed**,
-raising confidence in outcome 1 below.
+been verified manually under the fast canonizer (~30s and ~370s respectively)
+and produce distinct canonicals. `K6` (156v, treewidth 5, the 3-WL
+counterexample under this doc's convention) was run individually via VSCode
+testing once and passed in ~3000s under the fast canonizer.
+**No counterexample to `OrbitCompleteAfterConv_general` has been observed
+through the 3-WL counterexample base**, raising confidence in outcome 1 below.
 
 **Possible outcomes of Step 1:**
 
   - All CFI pairs are correctly distinguished ⇒ raises confidence that the
     algorithm is genuinely beyond the WL hierarchy. Proceed to Step 2.
-    *(Currently consistent with all observations; confirmed through 2-WL
-    counterexample bases. Pending verification: `K6` (3-WL).)*
+    *(Currently consistent with all observations through `K6` (3-WL).)*
   - Some CFI pair collapses ⇒ the obligation as stated is false. Pivot to
     pivot-and-refinement: introduce a backtracking fork for non-singleton classes,
     re-state and re-prove the modified theorem.
