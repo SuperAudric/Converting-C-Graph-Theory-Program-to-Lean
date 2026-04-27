@@ -267,6 +267,7 @@ public class GraphCannonTests(ITestOutputHelper output)
     [InlineData("K4")]
     [InlineData("K33")]
     [InlineData("Petersen")]
+    [InlineData("K6")]   // 156 vertices, treewidth 5 — 3-WL extension; well-formedness only
     public void CfiPair_WellFormed(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);
@@ -279,8 +280,9 @@ public class GraphCannonTests(ITestOutputHelper output)
     [InlineData("Cycle3")]
     [InlineData("Cycle4")]
     [InlineData("K4")]
-    //[InlineData("K33")]      // 60 vertices — too slow for the non fast version, ~30s for fast 
+    //[InlineData("K33")]      // 60 vertices — too slow for the non fast version, ~30s for fast
     //[InlineData("Petersen")] // 100 vertices — WAY too slow except for the fast version ~370s for fast
+    //[InlineData("K6")]       // 156 vertices, treewidth 5 (3-WL); not yet timed, extrapolated ≳ 1 hour on fast
     public void CfiPair_ProducesDifferentCanonical(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);

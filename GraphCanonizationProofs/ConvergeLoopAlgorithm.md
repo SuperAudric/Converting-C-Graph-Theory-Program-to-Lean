@@ -84,8 +84,15 @@ refinement collapses a CFI pair, the obligation is false and the algorithm
 needs to be augmented (e.g. with individualization-and-refinement). If it
 distinguishes every CFI pair we throw at it, the algorithm is empirically
 beyond the WL hierarchy and the bisimulation-lift proof attempt is justified.
-The CFI generator stub lives at
-[GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs).
+The CFI generator lives at
+[GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
+and is wired into `GraphCannonTests.cs`. As of 2026-04-27, every wired CFI
+pair (`Cycle3`, `Cycle4`, `K4`, `K33`, `Petersen` — coverage through
+treewidth-4 bases, i.e. 2-WL counterexamples under the doc's convention) is
+correctly distinguished by the algorithm. `K6` (treewidth 5, 3-WL extension)
+is generator-validated; canonizer-distinguishes pending a longer-running
+run. See [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) for the
+empirical state and outcome interpretation.
 
 ## What's known to matter for the proof
 
@@ -115,6 +122,19 @@ Perhaps dropping one of the vertex array indices, or providing an arbitrary back
 for vertices that was never tied to replace the need for tiebreak.
 As long as it never takes precedent over orbit comparisons, 
 this may paralelize the tiebreaking within converge cycles so only one loop needed.
+
+A perf-focused C# reimplementation
+([`CanonGraphOrdererV4Fast`](../GraphCanonizationProject/CanonGraphOrdererV4Fast.cs))
+exists alongside the Lean-aligned reference: same algorithm and same
+equivalence-class behaviour, but the object-graph `PathState` is replaced
+with flat int/long buffers, hot-path allocations are hoisted into a
+preallocated workspace, and the per-comparison double-sort in
+`OrderInsensitiveListComparison` is replaced by one-shot signature ranking.
+On the CFI subset this yielded ~195× speedup (9 m 46 s → 3 s on `K4`-class
+runs), which is what made the `K33` and `Petersen` runs above feasible in
+test-time. The reimplementation does not claim — and is not required — to
+be byte-identical with the reference; tests verify canonicality (iso → same
+canon, non-iso → different canon).
 
 ## Quick map for the proof effort
 

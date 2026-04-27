@@ -66,6 +66,7 @@ using System.Text;
 //   - K_{3,3} (deg 3):           6 × (4 + 6)  = 60
 //   - Rook 3×3 (deg 4):          9 × (8 + 8)  = 144
 //   - Petersen (deg 3):         10 × (4 + 6)  = 100
+//   - K_6 (deg 5):               6 × (16 + 10) = 156
 //
 // Verification: G_even and G_odd should produce *different* canonicals under
 // `CanonGraphOrdererV4.Run`. If they produce the same canonical, the obligation fails
@@ -108,9 +109,11 @@ namespace Canonizer
         /// canonical "hard pair at WL-level k" generator.
         /// </summary>
         /// <param name="baseGraph">
-        /// One of: "K4" (defeats 1-WL, smallest of the named bases), "K33" (defeats 2-WL),
-        /// "Rook3x3" (defeats 2-WL), "Petersen" (defeats 2-WL), or
+        /// One of: "K4" (treewidth 3), "K33" (treewidth 3), "Rook3x3" (treewidth 4),
+        /// "Petersen" (treewidth 4), "K6" (treewidth 5; 3-WL extension point), or
         /// "Cycle{n}" for parameterized cycle bases (e.g. "Cycle3", "Cycle4").
+        /// Per the convention used in `OrbitCompleteAfterConv.md`, a base of
+        /// treewidth t produces a CFI pair that defeats (t-2)-WL.
         /// </param>
         public static CfiPair Generate(string baseGraph)
         {
@@ -125,6 +128,7 @@ namespace Canonizer
                 "K33"     => BuildCfiPair(BuildBaseK33(),     "K33",     baseTreewidth: 3),
                 "Rook3x3" => BuildCfiPair(BuildBaseRook3x3(), "Rook3x3", baseTreewidth: 4),
                 "Petersen"=> BuildCfiPair(BuildBasePetersen(),"Petersen",baseTreewidth: 4),
+                "K6"      => BuildCfiPair(BuildBaseK6(),      "K6",      baseTreewidth: 5),
                 _ => throw new ArgumentException($"Unknown base graph '{baseGraph}'."),
             };
         }
@@ -261,6 +265,10 @@ namespace Canonizer
         /// <summary>K_4: complete graph on 4 vertices. Treewidth 3.
         /// CFI pair has 40 vertices.</summary>
         public static AdjMatrix BuildBaseK4() => BuildComplete(4);
+
+        /// <summary>K_6: complete graph on 6 vertices. Treewidth 5.
+        /// Lowest-vertex named base reaching 3-WL coverage. CFI pair has 156 vertices.</summary>
+        public static AdjMatrix BuildBaseK6() => BuildComplete(6);
 
         /// <summary>K_{3,3}: complete bipartite on 3+3. Treewidth 3.
         /// CFI pair has 60 vertices.</summary>
