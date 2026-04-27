@@ -109,6 +109,9 @@ load-bearing for the algorithm's correctness on a specific platform but are
 not what the open obligation is about. They're only relevant insofar as they
 preserve the fixed-point character of `convergeLoop`.
 
+## Side note
+it would not surpise me if there were faster implementations of this algorithm, perhaps dropping one of the vertex array indices, or providing an arbitrary but never tied backup comparer for vertices that replaces the need for tiebreak, but never takes precedent over orbit comparisons (this may paralelize the tiebreakingwithin converge cycles so only one loop needed).
+
 ## Quick map for the proof effort
 
 If you're working on `OrbitCompleteAfterConv_general`:
