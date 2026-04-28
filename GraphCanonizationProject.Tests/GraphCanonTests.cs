@@ -8,7 +8,7 @@ using GraphOrderer = Canonizer.CanonGraphOrdererV4;
 using VertexType = int;
 using EdgeType = int;
 
-public class GraphCannonTests(ITestOutputHelper output)
+public partial class GraphCanonTests(ITestOutputHelper output)
 {
     // Default = perf-focused canonizer. Swap to `new CanonGraphOrdererV4()` to run
     // the same instance-level tests against the Lean-aligned reference. Tests that

@@ -86,7 +86,7 @@ distinguishes every CFI pair we throw at it, the algorithm is empirically
 beyond the WL hierarchy and the bisimulation-lift proof attempt is justified.
 The CFI generator lives at
 [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
-and is wired into `GraphCannonTests.cs`. As of 2026-04-27, every wired CFI
+and is wired into `GraphCanonTests.cs`. As of 2026-04-27, every wired CFI
 pair (`Cycle3`, `Cycle4`, `K4`, `K33`, `Petersen`, and a single manual run
 of `K6`) is correctly distinguished by the algorithm — coverage now extends
 through the treewidth-5 base (the 3-WL counterexample under the doc's

@@ -23,7 +23,7 @@ using System.Text;
 // (which would be a result in its own right).
 //
 // This generator therefore exists to feed the existing test harness
-// (`GraphCanonizationProject.Tests/GraphCannonTests.cs`, alongside `UniqueGraphsBySize`)
+// (`GraphCanonizationProject.Tests/GraphCanonTests.cs`, alongside `UniqueGraphsBySize`)
 // the "hard" cases that random and exhaustive-small testing miss.
 //
 // Why existing tests miss this

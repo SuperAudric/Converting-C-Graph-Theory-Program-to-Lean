@@ -110,11 +110,11 @@ and the proof attempt is moot.
     [`CanonGraphOrdererV4Fast`](../GraphCanonizationProject/CanonGraphOrdererV4Fast.cs)
     (a flat-buffer reimplementation of the Lean-aligned reference; same algorithm,
     same equivalence-class behaviour). The test class field
-    `_orderer : ICanonGraphOrderer` in `GraphCannonTests.cs` is a one-line swap
+    `_orderer : ICanonGraphOrderer` in `GraphCanonTests.cs` is a one-line swap
     back to the reference if needed.
   - Test wiring: `CfiPair_WellFormed` (verifies the generator) and
     `CfiPair_ProducesDifferentCanonical` (the canonizer check) in
-    `GraphCannonTests.cs`. `CfiPair_WellFormed` runs every named base including
+    `GraphCanonTests.cs`. `CfiPair_WellFormed` runs every named base including
     `K6` (156 vertices) — well-formedness is cheap regardless of vertex count.
     `CfiPair_ProducesDifferentCanonical` runs `Cycle3`, `Cycle4`, `K4` by
     default; `K33` (60v, ~30s under fast), `Petersen` (100v, ~370s under fast),
