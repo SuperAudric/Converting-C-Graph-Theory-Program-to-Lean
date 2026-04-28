@@ -75,7 +75,7 @@ fork on a vertex of the smallest non-singleton color class and recurse. The
 refinement *alone* is not the source of correctness.
 
 This pipeline uses **path-multiset refinement** indexed on `(depth, start, end)`
-triples — see [CoreAlgorithm.md](CoreAlgorithm.md) for the data-structure detail.
+triples — see [ConvergeLoopAlgorithm.md](ConvergeLoopAlgorithm.md) for the data-structure detail.
 Whether this refinement is complete, and where it sits relative to the WL hierarchy,
 is the open question. The empirical sweeps say "yes" within their scope, but a
 counterexample at any *n* would falsify the obligation unconditionally.
