@@ -4,18 +4,17 @@ using System.Numerics;
 using VertexType = int;
 using EdgeType = int;
 
-// Long-running test cases — discoverable in VSCode test explorer but excluded
-// from the default `dotnet test` run via --filter "Category!=LongRunning".
-// Use scripts/run-long-tests.sh (or the VSCode "Run Long Tests" task) to run
-// these in the background with persistent TRX + log output.
-[Trait("Category", "LongRunning")]
+// Long-running test cases — discoverable in VSCode test explorer but not run by
+// default (they carry [Trait("Category","LongRunning")] so they must be selected
+// explicitly). Use scripts/run-long-tests.sh or the VSCode "Run Long Tests" task.
 public partial class GraphCanonTests
 {
     // ── CFI long cases ───────────────────────────────────────────────────────
     // Same logic as CfiPair_ProducesDifferentCanonical; split out so the trait
-    // can be applied without affecting the fast InlineData cases above.
+    // can be applied at method level without touching the fast InlineData cases.
 
     [Theory]
+    [Trait("Category", "LongRunning")]
     [InlineData("K33")]      // ~30 s
     [InlineData("Petersen")] // ~370 s
     [InlineData("K6")]       // ~3000 s  (passed once manually)
@@ -25,9 +24,9 @@ public partial class GraphCanonTests
         var pair = CfiGraphGenerator.Generate(baseName);
         CfiGraphGenerator.AssertWellFormedPair(pair);
 
-        var verts    = new VertexType[pair.Even.VertexCount];
-        string even  = _orderer.Run(verts, pair.Even).ToString();
-        string odd   = _orderer.Run(verts, pair.Odd).ToString();
+        var verts   = new VertexType[pair.Even.VertexCount];
+        string even = _orderer.Run(verts, pair.Even).ToString();
+        string odd  = _orderer.Run(verts, pair.Odd).ToString();
 
         Assert.True(even != odd,
             $"CFI pair on base {baseName} produced equal canonicals — " +
@@ -38,6 +37,7 @@ public partial class GraphCanonTests
     // ── Exhaustive permutation long cases ────────────────────────────────────
 
     [Theory]
+    [Trait("Category", "LongRunning")]
     [InlineData(5, 34)]
     [InlineData(6, 156)]
     [InlineData(7, 1044)]

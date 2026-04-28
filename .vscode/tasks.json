@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Long Tests (Background)",
+            "detail": "Builds, then runs Category=LongRunning tests via nohup. Output goes to TestResults/.",
+            "type": "shell",
+            "command": "bash scripts/run-long-tests.sh",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true,
+                "close": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Long Tests — K7 only",
+            "detail": "Runs only the K7 CFI pair (~21 h projected).",
+            "type": "shell",
+            "command": "bash scripts/run-long-tests.sh \"DisplayName~K7&Category=LongRunning\"",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true,
+                "close": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Tail Latest Test Log",
+            "detail": "Streams the most recent long-test log file.",
+            "type": "shell",
+            "command": "tail -f \"$(ls -t GraphCanonizationProject.Tests/TestResults/*.log 2>/dev/null | head -1)\"",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Check Long Test Status",
+            "detail": "Shows PID/alive status and last 20 lines of each active run.",
+            "type": "shell",
+            "command": "for p in GraphCanonizationProject.Tests/TestResults/*.pid; do pid=$(cat \"$p\"); log=\"${p%.pid}.log\"; echo \"--- $(basename $p .pid) (PID $pid) ---\"; kill -0 \"$pid\" 2>/dev/null && echo 'RUNNING' || echo 'FINISHED'; tail -20 \"$log\"; echo; done",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

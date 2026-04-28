@@ -6,8 +6,9 @@
 #
 # FILTER defaults to all LongRunning tests. Examples:
 #   ./scripts/run-long-tests.sh "Category=LongRunning"
-#   ./scripts/run-long-tests.sh "FullyQualifiedName~K7"
-#   ./scripts/run-long-tests.sh "FullyQualifiedName~AllPermutations_UniqueCanonicalCount_MatchesExpected_Extended(8"
+#   ./scripts/run-long-tests.sh "DisplayName~K7&Category=LongRunning"
+#   ./scripts/run-long-tests.sh "DisplayName~Petersen&Category=LongRunning"
+#   ./scripts/run-long-tests.sh "FullyQualifiedName~AllPermutations_UniqueCanonicalCount_MatchesExpected_Extended"
 
 set -euo pipefail
 

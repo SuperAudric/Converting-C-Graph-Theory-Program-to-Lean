@@ -1,0 +1,28 @@
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.33
+
+=== Long test run ===
+    Started:  20260428-044644
+    Filter:   FullyQualifiedName~AllPermutations_UniqueCanonicalCount_MatchesExpected_Extended(size: 5
+    Log:      /workspace/GraphCanonizationProject.Tests/TestResults/long-tests-20260428-044644.log
+    Results:  /workspace/GraphCanonizationProject.Tests/TestResults/long-tests-20260428-044644.trx
+
+Test run for /workspace/GraphCanonizationProject.Tests/bin/Debug/net8.0/GraphCanonizationProject.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+/workspace/GraphCanonizationProject.Tests/bin/Debug/net8.0/GraphCanonizationProject.Tests.dll
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.26)
+[xUnit.net 00:00:00.08]   Discovering: GraphCanonizationProject.Tests
+[xUnit.net 00:00:00.15]   Discovered:  GraphCanonizationProject.Tests
+[xUnit.net 00:00:00.15] GraphCanonizationProject.Tests: Exception filtering tests: Incorrect format for TestCaseFilter Error: Missing ')'. Specify the correct format and try again. Note that the incorrect format can lead to no test getting executed.
+[xUnit.net 00:00:00.16]   Starting:    GraphCanonizationProject.Tests
+[xUnit.net 00:00:00.18]   Finished:    GraphCanonizationProject.Tests
+No test matches the given testcase filter `FullyQualifiedName~AllPermutations_UniqueCanonicalCount_MatchesExpected_Extended(size: 5` in /workspace/GraphCanonizationProject.Tests/bin/Debug/net8.0/GraphCanonizationProject.Tests.dll
+
+Results File: /workspace/GraphCanonizationProject.Tests/TestResults/long-tests-20260428-044644.trx
