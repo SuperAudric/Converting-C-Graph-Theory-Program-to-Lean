@@ -37,3 +37,11 @@ Aha, I found a useful to understand, but issueful issue.
 The base algorithm this was based on is the count of paths from A to B of size n, without distinguishing the component path type, running through the counterexample here shows clearly why. For a cycle with odd length, after an even number of steps, you cannot reach vertexes on odd parity unless you complete a loop (visa versa for odd number of steps), making a n/2 cycle look like an n-cycle.
 This basically means that if you throw away the info of which vertexes you could reach after odd step count when you make your even, then it will treat them like you've never visited before.
 This sounds easily remedied by keeping track of historical path count (generalized for the current algorithm to "compare the sets of constituant paths of length 0 to depth"), but that does likely make it slower.
+
+One potential improvement would be a sub array of promotions used for tiebreaking.
+The failure case graphs pair would be solvable/distinguishable if you were able to sort them internally first, it's just that currently promoting one's internals, also promotes it externally
+If it could be marked that this was a result of an arbitrary promotin (perhaps comparison to its rank saved from before the breaktie step), then later once the graph has every vertex distinguished, it could compare back against other vertexes to see if it was substantively different than any that it was previously "arbitrarily" chosen to be different than. If so, then resort.
+
+You could also equivilently identify the symmetry type, and promote one from each of the failure pair symmetry type, but I have no idea how to tell them apart in the general case, even if here it's fairly clear that it's two separate (similar) graphs rather than symmetric branches off of them.
+
+If either of those were managed to be implemented, it sh
