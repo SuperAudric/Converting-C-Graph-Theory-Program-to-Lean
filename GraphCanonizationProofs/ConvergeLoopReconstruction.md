@@ -33,3 +33,7 @@ Which means that although a single path alone does not contain the informtation 
 
 As long as loops are recognized between a vertex and the final destination of the (sub)path, that should get identified, and vertexes without identical looping paths would be distinguished.
 
+Aha, I found a useful to understand, but issueful issue.
+The base algorithm this was based on is the count of paths from A to B of size n, without distinguishing the component path type, running through the counterexample here shows clearly why. For a cycle with odd length, after an even number of steps, you cannot reach vertexes on odd parity unless you complete a loop (visa versa for odd number of steps), making a n/2 cycle look like an n-cycle.
+This basically means that if you throw away the info of which vertexes you could reach after odd step count when you make your even, then it will treat them like you've never visited before.
+This sounds easily remedied by keeping track of historical path count (generalized for the current algorithm to "compare the sets of constituant paths of length 0 to depth"), but that does likely make it slower.
