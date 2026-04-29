@@ -1,15 +1,26 @@
 using System;
 using System.Collections.Generic;
 
-// Performance-focused reimplementation of CanonGraphOrdererV4. Same path-multiset
-// refinement, same BreakTie/ShiftAbove discipline, same observable behaviour at
-// the equivalence-class level (isomorphic input ↔ equal canonical output, with
-// CFI pairs distinguished where the reference distinguishes them).
+// Performance-focused reimplementation of CanonGraphOrdererV4 with the
+// history-tracking extension from
+// `GraphCanonizationProofs/ConvergeLoopHistoryExtension.md` (Variant B).
 //
+// Refinement difference from the unaugmented algorithm: cell signatures at
+// depth d consult `BetweenHistoryRanks[d-1, v, mid]` instead of
+// `BetweenRanks[d-1, v, mid]`. The history rank is the dense rank of the
+// pair `(BHR[d-1, v, u], BR[d, v, u])`, which inductively encodes the full
+// trajectory (BR[0, v, u], BR[1, v, u], …, BR[d, v, u]). This separates
+// cells that have the same most-recent BR rank but disagreed at any earlier
+// depth — needed to distinguish e.g. the (v, v) cell of `2·C_n` from the
+// antipode cell of `C_{2n}` in disjoint-union CFI inputs (Cycle3/5/7 in the
+// 1b probe). See the spec doc for the full motivation.
+//
+// Equivalence-class behaviour:
+//   * Iso → same canonical: preserved (refinement still automorphism-equivariant).
+//   * Non-iso → different canonical: strictly improved on the cycle CFI class.
 // The canonical bit pattern is NOT guaranteed to match CanonGraphOrdererV4 byte
-// for byte: ordering conventions inside path-segment compare were naturalized for
-// packed-long sorting. Tests on this class must verify canonicality (iso → same
-// canon, non-iso → different canon), not bit-parity with the reference.
+// for byte. Tests on this class must verify canonicality (iso → same canon,
+// non-iso → different canon), not bit-parity with the reference.
 //
 // Internal differences from the reference, all purely representational:
 //   * PathState/AllPathsFrom/AllPathsBetween/PathSegment object graph replaced
@@ -19,7 +30,8 @@ using System.Collections.Generic;
 //   * Per-comparison double-sort in OrderInsensitiveListComparison replaced by
 //     a one-shot signature compute: each cell's segments are sorted once into
 //     its signature slot, then cells are ranked by lex compare on those slots.
-//   * Path segments encoded as packed longs ((subRank << 32) | edgeType).
+//   * Path segments encoded as packed longs ((subRank << 32) | edgeType),
+//     with subRank coming from BetweenHistoryRanks rather than BetweenRanks.
 //   * LabelEdgesAccordingToRankings's n × SwapVertexLabels (O(n³)) replaced by
 //     a single permutation pass (O(n²)).
 //   * BreakTie + ShiftAbove + BreakTiePromote fused into one in-place pass.
@@ -94,28 +106,38 @@ namespace Canonizer
         private sealed class Workspace
         {
             public readonly int N;
-            public readonly int[] BetweenRanks;       // [d * n * n + from * n + to]
-            public readonly int[] FromRanks;          // [d * n + from]
-            public readonly long[] SigBuf;            // [(from*n + to) * SigStride + i], i ∈ [0..SigLen[cell])
+            public readonly int[] BetweenRanks;          // [d * n * n + from * n + to]
+            public readonly int[] BetweenHistoryRanks;   // dense rank of (BHR[d-1, v, u], BR[d, v, u])
+            public readonly int[] FromRanks;             // [d * n + from]
+            public readonly long[] SigBuf;               // [(from*n + to) * SigStride + i], i ∈ [0..SigLen[cell])
             public readonly int SigStride;
             public readonly int[] SigLen;
             public readonly int[] CellIdx;
-            public readonly long[] FromSigBuf;        // [from * FromSigStride + i], i ∈ [0..n]
+            public readonly int[] HistoryIdx;            // permutation buffer used while ranking BHR
+            public readonly long[] FromSigBuf;           // [from * FromSigStride + i], i ∈ [0..n]
             public readonly int FromSigStride;
             public readonly int[] FromIdx;
             public readonly long[] RankPairs;
             public readonly Comparer<int> CellComparer;
             public readonly Comparer<int> FromComparer;
+            public readonly Comparer<int> HistoryComparer;
+
+            // Mutable bases the HistoryComparer reads at sort time. Set by
+            // ComputeBetweenHistoryRanks before each Array.Sort call.
+            public int HistoryDBase;
+            public int HistoryPrevDBase;
 
             public Workspace(int n)
             {
                 N = n;
                 BetweenRanks = new int[n * n * n];
+                BetweenHistoryRanks = new int[n * n * n];
                 FromRanks = new int[n * n];
                 SigStride = n + 1;
                 SigBuf = new long[n * n * SigStride];
                 SigLen = new int[n * n];
                 CellIdx = new int[n * n];
+                HistoryIdx = new int[n * n];
                 FromSigStride = n + 1;
                 FromSigBuf = new long[n * FromSigStride];
                 FromIdx = new int[n];
@@ -155,6 +177,20 @@ namespace Canonizer
                     }
                     return 0;
                 });
+
+                var bhr = BetweenHistoryRanks;
+                var br = BetweenRanks;
+                HistoryComparer = Comparer<int>.Create((a, b) =>
+                {
+                    int prevBase = HistoryPrevDBase;
+                    int dBase = HistoryDBase;
+                    int prevA = bhr[prevBase + a];
+                    int prevB = bhr[prevBase + b];
+                    if (prevA != prevB) return prevA < prevB ? -1 : 1;
+                    int brA = br[dBase + a];
+                    int brB = br[dBase + b];
+                    return brA == brB ? 0 : (brA < brB ? -1 : 1);
+                });
             }
         }
 
@@ -193,6 +229,7 @@ namespace Canonizer
             {
                 BuildBetweenSignatures(n, d, adj, ranks, ws);
                 AssignBetweenRanks(n, d, ws);
+                ComputeBetweenHistoryRanks(n, d, ws);
                 BuildFromSignatures(n, d, ranks, ws);
                 AssignFromRanks(n, d, ws);
             }
@@ -250,7 +287,7 @@ namespace Canonizer
                     sigBuf[baseIdx] = ranks[to];
                     for (int mid = 0; mid < n; mid++)
                     {
-                        int subRank = ws.BetweenRanks[prevFromBase + mid];
+                        int subRank = ws.BetweenHistoryRanks[prevFromBase + mid];
                         int edge = adj[mid * n + to];
                         sigBuf[baseIdx + 1 + mid] = ((long)subRank << 32) | (uint)edge;
                     }
@@ -278,9 +315,57 @@ namespace Canonizer
             }
         }
 
+        // History-rank: dense rank of (BHR[d-1, v, u], BR[d, v, u]) over all
+        // cells. By induction this encodes the full sequence
+        // (BR[0, v, u], BR[1, v, u], …, BR[d, v, u]); two cells share a BHR
+        // iff their entire refinement trajectory agrees through depth d.
+        // At d=0 there is no prior depth, so BHR[0] := BR[0].
+        private static void ComputeBetweenHistoryRanks(int n, int d, Workspace ws)
+        {
+            int total = n * n;
+            int dBase = d * n * n;
+            int[] br = ws.BetweenRanks;
+            int[] bhr = ws.BetweenHistoryRanks;
+
+            if (d == 0)
+            {
+                for (int i = 0; i < total; i++) bhr[dBase + i] = br[dBase + i];
+                return;
+            }
+
+            int prevDBase = (d - 1) * n * n;
+            ws.HistoryDBase = dBase;
+            ws.HistoryPrevDBase = prevDBase;
+
+            int[] idx = ws.HistoryIdx;
+            for (int i = 0; i < total; i++) idx[i] = i;
+            Array.Sort(idx, 0, total, ws.HistoryComparer);
+
+            int rank = 0;
+            int prevPB = bhr[prevDBase + idx[0]];
+            int prevBR = br[dBase + idx[0]];
+            bhr[dBase + idx[0]] = 0;
+            for (int i = 1; i < total; i++)
+            {
+                int curPB = bhr[prevDBase + idx[i]];
+                int curBR = br[dBase + idx[i]];
+                if (curPB != prevPB || curBR != prevBR)
+                {
+                    rank++;
+                    prevPB = curPB;
+                    prevBR = curBR;
+                }
+                bhr[dBase + idx[i]] = rank;
+            }
+        }
+
         // From-vertex signature at depth d:
         //   slot 0 = ranks[from]
-        //   slots 1..n: sorted (ascending) betweenRanks[d, from, to] for each to.
+        //   slots 1..n: sorted (ascending) betweenHistoryRanks[d, from, to] for each to.
+        // Reading from BHR (not BR) is what makes the FromRanks pickup history-
+        // distinguished cells that share a BR rank but disagreed at some earlier
+        // depth — e.g. the (v, v) cell of a small cycle vs the antipode cell of
+        // its double-length cousin in the disjoint-union CFI input class.
         private static void BuildFromSignatures(int n, int d, int[] ranks, Workspace ws)
         {
             long[] sig = ws.FromSigBuf;
@@ -292,7 +377,7 @@ namespace Canonizer
                 sig[baseIdx] = ranks[from];
                 int rowBase = dBase + from * n;
                 for (int to = 0; to < n; to++)
-                    sig[baseIdx + 1 + to] = ws.BetweenRanks[rowBase + to];
+                    sig[baseIdx + 1 + to] = ws.BetweenHistoryRanks[rowBase + to];
                 Array.Sort(sig, baseIdx + 1, n);
             }
         }
