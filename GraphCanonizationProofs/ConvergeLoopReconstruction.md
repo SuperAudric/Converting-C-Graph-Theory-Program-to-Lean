@@ -41,6 +41,7 @@ This sounds easily remedied by keeping track of historical path count (generaliz
 One potential improvement would be a sub array of promotions used for tiebreaking.
 The failure case graphs pair would be solvable/distinguishable if you were able to sort them internally first, it's just that currently promoting one's internals, also promotes it externally
 If it could be marked that this was a result of an arbitrary promotin (perhaps comparison to its rank saved from before the breaktie step), then later once the graph has every vertex distinguished, it could compare back against other vertexes to see if it was substantively different than any that it was previously "arbitrarily" chosen to be different than. If so, then resort.
+Arg, I feel like I'm close to knowing how to figure out "substantively different" too, like if another vertex's rank was impacted by this one, they're dependant rather than 'currently tied for equivilency until more data', however that's not quite enough as... actually maybe it is, but what to do about truely symetric ones (simple example is a star graph)? Promote one arbitrarily anyways I guess.
 
 You could also equivilently identify the symmetry type, and promote one from each of the failure pair symmetry type, but I have no idea how to tell them apart in the general case, even if here it's fairly clear that it's two separate (similar) graphs rather than symmetric branches off of them.
 
