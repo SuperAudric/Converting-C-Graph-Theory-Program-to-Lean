@@ -60,6 +60,35 @@ namespace Canonizer
         public string Run_ToString(VertexType[] vertexTypes, EdgeType[,] edges) =>
             Run(vertexTypes, new AdjMatrix(edges)).ToString();
 
+        /// <summary>
+        /// Test-only entry point: run a single `ConvergeLoop` pass (no `BreakTie`,
+        /// no `OrderVertices` outer loop) and return the converged dense ranks.
+        ///
+        /// Used by `CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint` to probe the
+        /// `OrbitCompleteAfterConv_general` obligation directly: feeding G = Even ⊕ Odd
+        /// here, the obligation predicts the rank values at Even-indices and at
+        /// Odd-indices form disjoint sets. Any shared value is a counterexample.
+        ///
+        /// Not part of the canonical pipeline; do not use from production callers.
+        /// </summary>
+        public static int[] RunConvergeLoopForTesting(VertexType[] vertexTypes, AdjMatrix G)
+        {
+            if (vertexTypes.Length != G.VertexCount)
+                throw new Exception("Every vertex must be given a type.");
+
+            int n = G.VertexCount;
+            var adj = new int[n * n];
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    adj[i * n + j] = G[i, j];
+
+            var ws = new Workspace(n);
+            var ranks = new int[n];
+            DenseRankInto(vertexTypes, ranks, ws);
+            ConvergeLoop(n, adj, ranks, ws);
+            return ranks;
+        }
+
         // ── Workspace ───────────────────────────────────────────────────────────
         // Every buffer the convergence pipeline needs, allocated once per Run.
         private sealed class Workspace

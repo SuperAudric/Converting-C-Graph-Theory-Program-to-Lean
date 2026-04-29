@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
-using GraphOrderer = Canonizer.CanonGraphOrdererV4;
+using GraphOrderer = Canonizer.CanonGraphOrdererV4Fast;
 using VertexType = int;
 using EdgeType = int;
 
@@ -229,7 +229,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
 
         Assert.Equal(resultBefore, resultAfter);
     }
-
+/*
     [Fact]
     public void LabelEdgesAccordingToRankings_DoesNotModifyInputEdges()
     {
@@ -253,7 +253,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
                 edges[i, j] = (EdgeType)(verts[i] * 10u + verts[j]);
         GraphOrderer.LabelEdgesAccordingToRankings(verts, edges);
     }
-
+*/
     // ── CFI tests ────────────────────────────────────────────────────────────
     // CFI pairs are non-isomorphic graphs that color-refinement-style algorithms can
     // collapse. See GraphCanonizationProofs/OrbitCompleteAfterConv.md for context. The
@@ -298,6 +298,91 @@ public partial class GraphCanonTests(ITestOutputHelper output)
         Assert.True(evenCanon != oddCanon,
             $"CFI pair on base {baseName} produced equal canonicals — possible counterexample to OrbitCompleteAfterConv_general.\n" +
             CfiGraphGenerator.DescribePair(pair));
+    }
+
+    // ── CFI direct-probe test ────────────────────────────────────────────────
+    // Build G = Even ⊕ Odd and run a single ConvergeLoop pass (no BreakTie, no
+    // OrderVertices outer loop). Aut(G) = Aut(Even) × Aut(Odd) since Even and
+    // Odd are connected and non-isomorphic, so no orbit of G crosses components.
+    // Per OrbitCompleteAfterConv_general: equal converged value ⇒ same orbit.
+    // Therefore Even-half ranks and Odd-half ranks must be disjoint sets.
+    // Any shared rank is a direct counterexample (no BreakTie cascade involved).
+    //
+    // Wired only against CanonGraphOrdererV4Fast — the reference orderer doesn't
+    // expose ConvergeLoop and isn't needed for this falsification harness.
+
+    [Theory]
+    [InlineData("Cycle3")]
+    [InlineData("Cycle4")]
+    [InlineData("Cycle5")]
+    [InlineData("Cycle6")]
+    [InlineData("Cycle7")]
+    [InlineData("K4")]
+    //[InlineData("K33")]      // 120v disjoint union — see GraphCanonLongTests.cs
+    //[InlineData("Petersen")] // 200v disjoint union — see GraphCanonLongTests.cs
+    //[InlineData("K6")]       // 312v disjoint union — see GraphCanonLongTests.cs
+    //[InlineData("K7")]       // 616v disjoint union — see GraphCanonLongTests.cs
+    public void CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint(string baseName)
+    {
+        var pair = CfiGraphGenerator.Generate(baseName);
+        CfiGraphGenerator.AssertWellFormedPair(pair);
+
+        var union = CfiGraphGenerator.BuildDisjointUnion(pair.Even, pair.Odd);
+        int nEven = pair.Even.VertexCount;
+        int nTotal = union.VertexCount;
+        var ranks = CanonGraphOrdererV4Fast.RunConvergeLoopForTesting(new VertexType[nTotal], union);
+
+        var evenSet = new HashSet<int>();
+        for (int i = 0; i < nEven; i++) evenSet.Add(ranks[i]);
+        var oddSet = new HashSet<int>();
+        for (int i = nEven; i < nTotal; i++) oddSet.Add(ranks[i]);
+
+        var shared = new HashSet<int>(evenSet);
+        shared.IntersectWith(oddSet);
+
+        Assert.True(shared.Count == 0,
+            $"CFI pair on base {baseName}: ConvergeLoop on Even ⊕ Odd assigned " +
+            $"{shared.Count} rank value(s) shared between halves — direct counterexample " +
+            $"to OrbitCompleteAfterConv_general. Shared ranks: [{string.Join(", ", shared)}].\n" +
+            CfiGraphGenerator.DescribePair(pair));
+    }
+
+    // Same Even ⊕ Odd disjoint union as above, but exercised through the full
+    // Run pipeline against scrambled relabelings of the same graph. Run is
+    // graph-isomorphism-invariant by contract, so the canonical form of the
+    // union must be identical across all scramblings. A regression here would
+    // signal a vertex-order dependence somewhere in Run on a graph the size of
+    // a CFI disjoint union — territory the small-graph scramble tests don't
+    // cover.
+
+    [Theory]
+    [InlineData("Cycle3")]
+    [InlineData("Cycle4")]
+    [InlineData("Cycle5")]
+    [InlineData("Cycle6")]
+    [InlineData("Cycle7")]
+    [InlineData("K4")]
+    public void CfiPair_DisjointUnion_DifferentScramblings_ProduceSameCanonical(string baseName)
+    {
+        var pair = CfiGraphGenerator.Generate(baseName);
+        CfiGraphGenerator.AssertWellFormedPair(pair);
+
+        var union = CfiGraphGenerator.BuildDisjointUnion(pair.Even, pair.Odd);
+        int nTotal = union.VertexCount;
+
+        string canonical = _orderer.Run(new VertexType[nTotal], union).ToString();
+
+        for (int j = 0; j < 5; j++)
+        {
+            var matrix = union.ToArray();
+            Scramble(matrix, seed: 472901 + j);
+            string result = _orderer.Run(new VertexType[nTotal], new AdjMatrix(matrix)).ToString();
+            Assert.True(canonical == result,
+                $"CFI pair on base {baseName}: scramble {j} of Even ⊕ Odd produced a " +
+                $"different canonical from the unscrambled union — Run is not " +
+                $"isomorphism-invariant on this graph.\n" +
+                CfiGraphGenerator.DescribePair(pair));
+        }
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────

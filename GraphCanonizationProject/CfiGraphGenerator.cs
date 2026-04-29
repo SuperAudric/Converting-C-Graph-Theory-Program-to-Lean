@@ -344,6 +344,34 @@ namespace Canonizer
             return new AdjMatrix(m);
         }
 
+        // ── Disjoint-union helper ───────────────────────────────────────────────
+
+        /// <summary>
+        /// Build the disjoint union G = a ⊕ b: a square adjacency matrix of size
+        /// (a.VertexCount + b.VertexCount), with a's edges in the top-left block,
+        /// b's edges in the bottom-right block, and zero everywhere else.
+        ///
+        /// Used by `CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint`. When `a` and
+        /// `b` are connected and non-isomorphic, `Aut(a ⊕ b) = Aut(a) × Aut(b)` —
+        /// no automorphism crosses components — so any rank value shared between
+        /// the two halves under one `convergeLoop` pass is a direct counterexample
+        /// to `OrbitCompleteAfterConv_general`.
+        /// </summary>
+        public static AdjMatrix BuildDisjointUnion(AdjMatrix a, AdjMatrix b)
+        {
+            int na = a.VertexCount;
+            int nb = b.VertexCount;
+            int n = na + nb;
+            var m = new EdgeType[n, n];
+            for (int i = 0; i < na; i++)
+                for (int j = 0; j < na; j++)
+                    m[i, j] = a[i, j];
+            for (int i = 0; i < nb; i++)
+                for (int j = 0; j < nb; j++)
+                    m[na + i, na + j] = b[i, j];
+            return new AdjMatrix(m);
+        }
+
         // ── Verification / diagnostic helpers ──────────────────────────────────
 
         /// <summary>
@@ -413,11 +441,21 @@ namespace Canonizer
             for (int i = 0; i < n; i++)
                 sb.AppendLine($"  [{i,3}] {pair.VertexRoles[i]}");
             sb.AppendLine();
-            sb.AppendLine("Adjacency diff (· = same, • = differs between Even and Odd):");
+            sb.AppendLine("Adjacency: ' '=neither, ◤=Even only, ◢=Odd only, █=both");
             for (int i = 0; i < n; i++)
             {
                 for (int j = 0; j < n; j++)
-                    sb.Append(pair.Even[i, j] != pair.Odd[i, j] ? '•' : '·');
+                {
+                    int e = pair.Even[i, j] != 0 ? 1 : 0;
+                    int o = pair.Odd[i, j]  != 0 ? 1 : 0;
+                    sb.Append((e, o) switch
+                    {
+                        (0, 0) => ' ',
+                        (1, 0) => '◤',
+                        (0, 1) => '◢',
+                        _      => '█',
+                    });
+                }
                 sb.AppendLine();
             }
             return sb.ToString();

@@ -40,7 +40,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 
 | Sorry | Location | What's needed |
 | ----- | -------- | ------------- |
-| `OrbitCompleteAfterConv_general G σ` (canonizer-correctness invariant) | `Main.lean:89` | The deep half of canonizer correctness: vertices with equal values in `convergeLoop` output of an arbitrary intermediate state lie in the same `TypedAut` orbit. Equivalent to the assertion that the algorithm's path-multiset color refinement is **complete** — i.e., separates every pair of non-orbit-equivalent vertices. Empirically validated outside Lean (exhaustive on n ≤ 7, random on n = 30); a Lean-side discharge plan is recorded separately in [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md). |
+| `OrbitCompleteAfterConv_general G σ` (canonizer-correctness invariant) | `Main.lean:89` | The deep half of canonizer correctness: vertices with equal values in `convergeLoop` output of an arbitrary intermediate state lie in the same `TypedAut` orbit. Equivalent to the assertion that the algorithm's path-multiset color refinement is **complete** — i.e., separates every pair of non-orbit-equivalent vertices. **As of 2026-04-28 this obligation is empirically falsified** — `convergeLoop` on the disjoint union of `Cycle3`'s CFI pair (and several other CFI bases) assigns equal values to vertices in different `TypedAut` orbits. The Lean discharge plan for the obligation as currently stated is moot until it is restated; investigation of root cause and remediation is recorded in [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md). |
 
 **P6.A, P6.B, P6.C are all now fully closed (modulo the orbit hypothesis input).** ✅
 

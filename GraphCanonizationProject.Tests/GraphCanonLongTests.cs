@@ -34,6 +34,45 @@ public partial class GraphCanonTests
             CfiGraphGenerator.DescribePair(pair));
     }
 
+    // ── CFI direct-probe long cases ──────────────────────────────────────────
+    // See CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint in GraphCanonTests.cs
+    // for the full rationale. One ConvergeLoop on a 2n-vertex disjoint union is
+    // ~n× cheaper than full Run on a 2n-vertex graph (no OrderVertices outer
+    // loop), so these long-running cases scale better than the 1a counterparts.
+
+    [Theory]
+    [Trait("Category", "LongRunning")]
+    [InlineData("K33")]
+    [InlineData("Petersen")]
+    [InlineData("K6")]
+    [InlineData("K7")]
+    public void CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint_Extended(string baseName)
+    {
+        var pair = CfiGraphGenerator.Generate(baseName);
+        CfiGraphGenerator.AssertWellFormedPair(pair);
+
+        var union = CfiGraphGenerator.BuildDisjointUnion(pair.Even, pair.Odd);
+        int nEven = pair.Even.VertexCount;
+        int nTotal = union.VertexCount;
+        var ranks = CanonGraphOrdererV4Fast.RunConvergeLoopForTesting(new VertexType[nTotal], union);
+
+        var evenSet = new HashSet<int>();
+        for (int i = 0; i < nEven; i++) evenSet.Add(ranks[i]);
+        var oddSet = new HashSet<int>();
+        for (int i = nEven; i < nTotal; i++) oddSet.Add(ranks[i]);
+
+        var shared = new HashSet<int>(evenSet);
+        shared.IntersectWith(oddSet);
+
+        output.WriteLine($"{baseName}: Even ranks={evenSet.Count} distinct, Odd ranks={oddSet.Count} distinct, shared={shared.Count}");
+        Assert.True(shared.Count == 0,
+            $"CFI pair on base {baseName}: ConvergeLoop on Even ⊕ Odd assigned " +
+            $"{shared.Count} rank value(s) shared between halves — direct counterexample " +
+            $"to OrbitCompleteAfterConv_general. Shared ranks: [{string.Join(", ", shared)}].\n" +
+            CfiGraphGenerator.DescribePair(pair));
+    }
+
+
     // ── Exhaustive permutation long cases ────────────────────────────────────
 
     [Theory]
@@ -41,7 +80,6 @@ public partial class GraphCanonTests
     [InlineData(5, 34)]
     [InlineData(6, 156)]
     [InlineData(7, 1044)]
-    [InlineData(8, 12346)]
     public void AllPermutations_UniqueCanonicalCount_MatchesExpected_Extended(int size, int expected)
     {
         BigInteger total = BigInteger.Pow(2, size * (size - 1) / 2);

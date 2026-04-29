@@ -518,7 +518,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `typeClass_τ_image_eq` | — | — | `typeClass vts₂ t₀ = τ '' (typeClass vts₁ t₀)` when `vts₂` is τ-related to `vts₁`. | — |
 | `breakTie_min_witness` | `breakTieCount_τ_invariant`, `typeClass_τ_image_eq` | — | The minimum vertex in `typeClass vts₂ t₀` is `τ` applied to the minimum in `typeClass vts₁ t₀`. | — |
 | `breakTie_min_witness_in_typeClass` | `breakTie_min_witness` | — | The minimum witness vertex lies in `typeClass`. | — |
-| `OrbitCompleteAfterConv` | — | — | Orbit-completeness invariant: vertices with equal converged types lie in the same `TypedAut`-orbit. | — |
+| `OrbitCompleteAfterConv` | — | — | Orbit-completeness invariant: vertices with equal converged types lie in the same `TypedAut`-orbit. | ⚠ empirically falsified 2026-04-28 — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
 | `runFrom_VtsInvariant_eq_strong` | `convergeLoop_step_τ_preserved`, `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`, `breakTie_min_witness`, `OrbitCompleteAfterConv`, `UniquelyHeldBelow_n_implies_TieFree`, `labelEdges_VtsInvariant_eq_distinct` | — | Strong relational theorem: `runFrom s vts₂ G = runFrom s vts₁ G` (not just τ-related, equal) given `OrbitCompleteAfterConv` and `UniquelyHeldBelow s`. | — |
 | `runFrom_VtsInvariant_eq` | `runFrom_VtsInvariant_eq_strong` | — | Corollary of the strong form: `runFrom 0 zeros G = runFrom 0 (τ-shifted zeros) G`. | — |
 | `tiebreak_choice_independent` | `runFrom_VtsInvariant_eq` | — | The canonical `orderVertices` output is independent of which tied vertex is chosen for tiebreaking; proved from `runFrom_VtsInvariant_eq`. | — |
@@ -527,7 +527,7 @@ The file requirements have recently changed, a few early tables don't follow the
 
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
-| `OrbitCompleteAfterConv_general` | — | — | Two-graphs variant of `OrbitCompleteAfterConv`: orbit-completeness for `convergeLoop (initializePaths (G.permute σ)) mid n`. | — |
+| `OrbitCompleteAfterConv_general` | — | — | Two-graphs variant of `OrbitCompleteAfterConv`: orbit-completeness for `convergeLoop (initializePaths (G.permute σ)) mid n`. | ⚠ empirically falsified 2026-04-28 (Cycle3 disjoint union, K4, odd-cycle bases) — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
 | `convergeLoop_step_σ_chain_preserved_general` | `convergeLoop_VtsInvariant_eq`, `convergeLoop_σ_equivariant_general` | — | Two-graphs convergeLoop step preservation: chains through an intermediate τ-shifted typing to decompose `σ_chain = σ * τ` (τ ∈ Aut G). | private |
 | `runFrom_VtsInvariant_eq_strong_general` | `convergeLoop_step_σ_chain_preserved_general`, `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`, `OrbitCompleteAfterConv_general`, `UniquelyHeldBelow_n_implies_TieFree`, `labelEdges_two_graphs_σ_related` | — | **P6.C**: `runFrom s vts₁ G = runFrom s vts₂ (G.permute σ)` given `OrbitCompleteAfterConv_general` and σ-relatedness of the arrays. | — |
 

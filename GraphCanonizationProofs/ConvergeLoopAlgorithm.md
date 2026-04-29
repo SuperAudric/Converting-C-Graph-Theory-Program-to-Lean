@@ -81,17 +81,21 @@ The first concrete step in the discharge plan is therefore not a proof: it's
 a **direct CFI test** of the algorithm. Cai–Furer–Immerman pairs are the
 standard hard cases for refinement-based algorithms; if path-multiset
 refinement collapses a CFI pair, the obligation is false and the algorithm
-needs to be augmented (e.g. with individualization-and-refinement). If it
-distinguishes every CFI pair we throw at it, the algorithm is empirically
-beyond the WL hierarchy and the bisimulation-lift proof attempt is justified.
-The CFI generator lives at
+needs to be augmented (e.g. with individualization-and-refinement). The CFI
+generator lives at
 [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
-and is wired into `GraphCanonTests.cs`. As of 2026-04-27, every wired CFI
-pair (`Cycle3`, `Cycle4`, `K4`, `K33`, `Petersen`, and a single manual run
-of `K6`) is correctly distinguished by the algorithm — coverage now extends
-through the treewidth-5 base (the 3-WL counterexample under the doc's
-convention). See [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) for
-empirical runtimes and outcome interpretation.
+and is wired into `GraphCanonTests.cs`. **As of 2026-04-28 the obligation is
+empirically falsified.** The disjoint-union direct probe
+(`CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint`) fails on `Cycle3`
+(smallest CFI base, 18 vertices per half), and a separate full-pipeline
+σ-invariance probe
+(`CfiPair_DisjointUnion_DifferentScramblings_ProduceSameCanonical`) fails
+on every odd-cycle CFI base tested (`Cycle3`/`Cycle5`/`Cycle7`) — meaning
+not only is the stated obligation false, the canonizer's full-pipeline
+output isn't isomorphism-invariant on those inputs. See
+[OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) for the per-base
+results table and the next-step (algorithm vs. implementation) root-cause
+investigation plan.
 
 ## What's known to matter for the proof
 
