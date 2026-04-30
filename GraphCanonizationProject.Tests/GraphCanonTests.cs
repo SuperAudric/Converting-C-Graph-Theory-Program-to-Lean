@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
-using GraphOrderer = Canonizer.CanonGraphOrdererV4Fast;
+using GraphOrderer = Canonizer.CanonGraphOrdererTwoWL;
 using VertexType = int;
 using EdgeType = int;
 
@@ -14,7 +14,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     // the same instance-level tests against the Lean-aligned reference. Tests that
     // call static helpers on the reference (LabelEdgesAccordingToRankings) stay
     // tied to GraphOrderer regardless.
-    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererV4Fast();
+    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererTwoWL();
 
     // ── Isomorphism tests ────────────────────────────────────────────────────
 
@@ -328,7 +328,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
         var union = CfiGraphGenerator.BuildDisjointUnion(pair.Even, pair.Odd);
         int nEven = pair.Even.VertexCount;
         int nTotal = union.VertexCount;
-        var ranks = CanonGraphOrdererV4Fast.RunConvergeLoopForTesting(new VertexType[nTotal], union);
+        var ranks = GraphOrderer.RunConvergeLoopForTesting(new VertexType[nTotal], union);
 
         var evenSet = new HashSet<int>();
         for (int i = 0; i < nEven; i++) evenSet.Add(ranks[i]);
