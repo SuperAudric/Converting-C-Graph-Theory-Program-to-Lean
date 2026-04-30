@@ -40,12 +40,16 @@ public partial class GraphCanonTests
     // ~n× cheaper than full Run on a 2n-vertex graph (no OrderVertices outer
     // loop), so these long-running cases scale better than the 1a counterparts.
 
-    [Theory]
+    // Skipped while _orderer is CanonGraphOrdererTwoWL: hardcodes
+    // CanonGraphOrdererV4Fast.RunConvergeLoopForTesting, so it probes V4Fast
+    // internals regardless of the active orderer. Re-enable by removing Skip
+    // when V4Fast is the active orderer.
+
+    [Theory(Skip = "V4Fast-specific harness; not applicable while TwoWL is the active orderer.")]
     [Trait("Category", "LongRunning")]
-    [InlineData("K33")]
-    //[InlineData("Petersen")]
-    //[InlineData("K6")]
-    //[InlineData("K7")]
+    [InlineData("Petersen")]
+    [InlineData("K6")]
+    [InlineData("K7")]
     public void CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint_Extended(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);

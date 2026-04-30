@@ -59,24 +59,6 @@ namespace Canonizer
             return PermuteByDenseRanks(G, ranks);
         }
 
-        public static int[] RunConvergeLoopForTesting(VertexType[] vertexTypes, AdjMatrix G)
-        {
-            if (vertexTypes.Length != G.VertexCount)
-                throw new Exception("Every vertex must be given a type. They may all be given the same type");
-
-            int n = G.VertexCount;
-            var adj = new int[n * n];
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
-                    adj[i * n + j] = G[i, j];
-
-            var ws = new Workspace(n);
-            var ranks = new int[n];
-            DenseRankInto(vertexTypes, ranks, ws);
-            Discriminate(n, adj, ranks, ws);
-            return ranks;
-        }
-
         public string Run_ToString(VertexType[] vertexTypes, EdgeType[,] edges) =>
             Run(vertexTypes, new AdjMatrix(edges)).ToString();
 
