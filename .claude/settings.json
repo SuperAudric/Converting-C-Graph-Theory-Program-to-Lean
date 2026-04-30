@@ -48,7 +48,8 @@
       "Bash(grep -E \"\\\\.\\(olean|trace\\)$\")",
       "Bash(grep -rln \"^import FullCorrectness$\" --include=\"*.lean\" .)",
       "Bash(grep -E \"uses \\\\`sorry\\\\`\" /tmp/lake_output.log)",
-      "Bash(dotnet run *)"
+      "Bash(dotnet run *)",
+      "Bash(ps -o pid,etime,pcpu,pmem,stat,cmd -p 79263 79347)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

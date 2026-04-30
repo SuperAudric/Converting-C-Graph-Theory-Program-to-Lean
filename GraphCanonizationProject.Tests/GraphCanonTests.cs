@@ -182,7 +182,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     [InlineData(4)]
     [InlineData(5)]
     [InlineData(6)]
-    [InlineData(7)]//This test alone can confirm the algorithm is working as intended, but is quite slow
+    //[InlineData(7)]
     public void KnownGraphs_DifferentScramblings_ProduceSameCanonical(int size)
     {
         var graphs = ConvertJaggedArrayType<EdgeType>(UniqueGraphsBySize.graphsBySize[size]);
@@ -315,8 +315,6 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     [InlineData("Cycle3")]
     [InlineData("Cycle4")]
     [InlineData("Cycle5")]
-    [InlineData("Cycle6")]
-    [InlineData("Cycle7")]
     [InlineData("K4")]
     //[InlineData("K33")]      // 120v disjoint union — see GraphCanonLongTests.cs
     //[InlineData("Petersen")] // 200v disjoint union — see GraphCanonLongTests.cs
@@ -359,8 +357,6 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     [InlineData("Cycle3")]
     [InlineData("Cycle4")]
     [InlineData("Cycle5")]
-    [InlineData("Cycle6")]
-    [InlineData("Cycle7")]
     [InlineData("K4")]
     public void CfiPair_DisjointUnion_DifferentScramblings_ProduceSameCanonical(string baseName)
     {

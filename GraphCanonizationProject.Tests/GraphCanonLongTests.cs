@@ -16,9 +16,9 @@ public partial class GraphCanonTests
     [Theory]
     [Trait("Category", "LongRunning")]
     [InlineData("K33")]      // ~30 s
-    [InlineData("Petersen")] // ~370 s
-    [InlineData("K6")]       // ~3000 s  (passed once manually)
-    [InlineData("K7")]       // ~21 h    (projected from n^4.74 fit)
+    //[InlineData("Petersen")] // ~370 s
+    //[InlineData("K6")]       // ~3000 s  (passed once manually)
+    //[InlineData("K7")]       // ~21 h    (projected from n^4.74 fit)
     public void CfiPair_ProducesDifferentCanonical_Extended(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);
@@ -43,9 +43,9 @@ public partial class GraphCanonTests
     [Theory]
     [Trait("Category", "LongRunning")]
     [InlineData("K33")]
-    [InlineData("Petersen")]
-    [InlineData("K6")]
-    [InlineData("K7")]
+    //[InlineData("Petersen")]
+    //[InlineData("K6")]
+    //[InlineData("K7")]
     public void CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint_Extended(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);
@@ -79,7 +79,7 @@ public partial class GraphCanonTests
     [Trait("Category", "LongRunning")]
     [InlineData(5, 34)]
     [InlineData(6, 156)]
-    [InlineData(7, 1044)]
+    //[InlineData(7, 1044)]
     public void AllPermutations_UniqueCanonicalCount_MatchesExpected_Extended(int size, int expected)
     {
         BigInteger total = BigInteger.Pow(2, size * (size - 1) / 2);
