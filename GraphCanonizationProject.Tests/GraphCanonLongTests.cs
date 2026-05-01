@@ -40,12 +40,12 @@ public partial class GraphCanonTests
     // ~n× cheaper than full Run on a 2n-vertex graph (no OrderVertices outer
     // loop), so these long-running cases scale better than the 1a counterparts.
 
-    // Skipped while _orderer is CanonGraphOrdererTwoWL: hardcodes
+    // Skipped while _orderer is not CanonGraphOrdererV4Fast: hardcodes
     // CanonGraphOrdererV4Fast.RunConvergeLoopForTesting, so it probes V4Fast
     // internals regardless of the active orderer. Re-enable by removing Skip
     // when V4Fast is the active orderer.
 
-    [Theory(Skip = "V4Fast-specific harness; not applicable while TwoWL is the active orderer.")]
+    [Theory(Skip = "V4Fast-specific harness; not applicable while a non-V4Fast orderer is active.")]
     [Trait("Category", "LongRunning")]
     [InlineData("Petersen")]
     [InlineData("K6")]

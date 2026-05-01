@@ -14,7 +14,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     // the same instance-level tests against the Lean-aligned reference. Tests that
     // call static helpers on the reference (LabelEdgesAccordingToRankings) stay
     // tied to GraphOrderer regardless.
-    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererTwoWL();
+    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererOneWL();
 
     // ── Isomorphism tests ────────────────────────────────────────────────────
 
@@ -311,12 +311,12 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     // Wired only against CanonGraphOrdererV4Fast — the reference orderer doesn't
     // expose ConvergeLoop and isn't needed for this falsification harness.
     //
-    // Skipped while _orderer is CanonGraphOrdererTwoWL: this test calls
+    // Skipped while _orderer is not CanonGraphOrdererV4Fast: this test calls
     // GraphOrderer.RunConvergeLoopForTesting (alias for CanonGraphOrdererV4Fast)
     // directly, so it probes V4Fast internals regardless of the active orderer.
     // Re-enable by removing Skip when V4Fast is the active orderer.
 
-    [Theory(Skip = "V4Fast-specific harness; not applicable while TwoWL is the active orderer.")]
+    [Theory(Skip = "V4Fast-specific harness; not applicable while a non-V4Fast orderer is active.")]
     [InlineData("Cycle3")]
     [InlineData("Cycle4")]
     [InlineData("Cycle5")]
