@@ -17,11 +17,13 @@ using System.Collections.Generic;
 // instead of single integer ranks. Layer 0 holds r₀ (1-WL fixed-point);
 // layers 1..L hold one Role value per vertex per event.
 //
-// This file is a structural stub. Public API compiles and Run() walks
-// the phase order; the non-trivial bodies (Discriminate over tuples,
-// PickPair, atom classification, multi-pass supplant, forced completion)
-// throw NotImplementedException. Filling them in is tracked by
-// docs/supplant-strategy.md §6 and the implementation plan.
+// Status: first-pass implementation. EventLoop, Discriminate, PickPair,
+// ClassifyAtom, ComputeSignature, and the connected-component helper are
+// fleshed out. ForcedCompletion is a no-op (§6.1 not yet wired). Supplant
+// is a baseline dense-rank of the final full tuple — multi-pass sort and
+// flip-canonicalization (§6.3) are not yet implemented; the baseline is
+// canonical for §7-style inputs only when the natural event sequence
+// already matches across scrambles.
 
 namespace Canonizer
 {
@@ -117,7 +119,7 @@ namespace Canonizer
             public int A;
             public int B;
             public AtomType Type;
-            public long[] Signature = Array.Empty<long>();   // sorted multiset, encoded
+            public long[] Signature = [];                   // sorted multiset, encoded
             public bool IsRedundant;
         }
 
@@ -126,10 +128,11 @@ namespace Canonizer
         private sealed class State
         {
             public int N;
-            public int[] Adj = Array.Empty<int>();           // n*n flattened, row-major
-            public int[] R0  = Array.Empty<int>();           // 1-WL fixed-point rank per vertex
-            public List<Role[]> Layers = new();              // Layers[k][v] = role at layer (k+1) for vertex v
-            public List<EventRecord> Events = new();
+            public int[] Adj = [];                           // n*n flattened, row-major
+            public int[] R0  = [];                           // 1-WL fixed-point rank per vertex
+            public int[] Components = [];                    // BFS connected-component id per vertex
+            public List<Role[]> Layers = [];                 // Layers[k][v] = role at layer (k+1) for vertex v
+            public List<EventRecord> Events = [];
             public Workspace WS = new(0);
 
             public int L => Layers.Count;                    // number of completed events
@@ -138,20 +141,43 @@ namespace Canonizer
         private sealed class Workspace
         {
             public readonly int N;
-            public readonly long[] RankPairs;    // dense-rank scratch
-            // Additional buffers for Discriminate (signature buffer, comparer) added
-            // when Discriminate is fleshed out.
+            public readonly long[] RankPairs;
+            public readonly int[] VertexIdx;
+            public readonly long[] SigBuf;
+            public readonly int SigStride;
+            public readonly Comparer<int> SigComparer;
+            public readonly int[] NewKeys;
 
             public Workspace(int n)
             {
                 N = n;
-                RankPairs = new long[n];
+                RankPairs = n > 0 ? new long[n] : [];
+                VertexIdx = n > 0 ? new int[n] : [];
+                SigStride = n + 1;
+                SigBuf = n > 0 ? new long[n * SigStride] : [];
+                NewKeys = n > 0 ? new int[n] : [];
+
+                long[] sigBuf = SigBuf;
+                int sigStride = SigStride;
+                int sigCmpLen = sigStride;
+                SigComparer = Comparer<int>.Create((a, b) =>
+                {
+                    int ba = a * sigStride;
+                    int bb = b * sigStride;
+                    for (int i = 0; i < sigCmpLen; i++)
+                    {
+                        long va = sigBuf[ba + i];
+                        long vb = sigBuf[bb + i];
+                        if (va != vb) return va < vb ? -1 : 1;
+                    }
+                    return 0;
+                });
             }
         }
 
         // ── Phase 1: Setup ─────────────────────────────────────────────────────
 
-        private State Setup(VertexType[] vertexTypes, AdjMatrix G)
+        private static State Setup(VertexType[] vertexTypes, AdjMatrix G)
         {
             int n = G.VertexCount;
             var adj = new int[n * n];
@@ -163,160 +189,406 @@ namespace Canonizer
             var r0 = new int[n];
             DenseRankInto(vertexTypes, r0, ws);
 
-            // Run 1-WL refinement on bare integer ranks until fixed point to
-            // obtain r₀. (Identical to the inner loop of CanonGraphOrdererOneWL,
-            // before any tiebreaking.)
+            // 1-WL refinement on bare integer ranks → r₀ (frozen for the run).
             OneWlFixedPoint(n, adj, r0, ws);
+
+            var components = ComputeConnectedComponents(n, adj);
 
             return new State
             {
-                N      = n,
-                Adj    = adj,
-                R0     = r0,
-                Layers = new List<Role[]>(),
-                Events = new List<EventRecord>(),
-                WS     = ws,
+                N          = n,
+                Adj        = adj,
+                R0         = r0,
+                Components = components,
+                Layers     = [],
+                Events     = [],
+                WS         = ws,
             };
         }
 
         // ── Phase 2: Event loop ────────────────────────────────────────────────
 
-        private void EventLoop(State s)
+        private static void EventLoop(State s)
         {
             while (true)
             {
                 var pair = PickPair(s);
                 if (pair is null) break;
-
-                int a = pair.Value.A;
-                int b = pair.Value.B;
-
-                // Append a fresh layer initialized to Untouched, then tag (A, B).
-                var layer = new Role[s.N];          // all Untouched by default
-                layer[a] = Role.Low;
-                layer[b] = Role.High;
-                s.Layers.Add(layer);
-                int layerIndex = s.L - 1;           // 0-based among Layers
-
-                Discriminate(s);                    // refines layer `layerIndex`
-
-                s.Events.Add(new EventRecord
-                {
-                    LayerIndex   = layerIndex,
-                    A            = a,
-                    B            = b,
-                    Type         = ClassifyAtom(s, layerIndex),
-                    Signature    = ComputeSignature(s, layerIndex),
-                    IsRedundant  = false,
-                });
+                AppendEvent(s, pair.Value.A, pair.Value.B, isRedundant: false);
             }
+        }
+
+        private static void AppendEvent(State s, int a, int b, bool isRedundant)
+        {
+            // Append a fresh layer initialized to Untouched, then tag (A, B).
+            var layer = new Role[s.N];          // default = Role(Untouched)
+            layer[a] = Role.Low;
+            layer[b] = Role.High;
+            s.Layers.Add(layer);
+            int layerIndex = s.L - 1;
+
+            Discriminate(s);                    // refines layer at layerIndex
+
+            s.Events.Add(new EventRecord
+            {
+                LayerIndex  = layerIndex,
+                A           = a,
+                B           = b,
+                Type        = isRedundant ? AtomType.Redundant : ClassifyAtom(s, layerIndex),
+                Signature   = ComputeSignature(s, layerIndex),
+                IsRedundant = isRedundant,
+            });
         }
 
         // ── Phase 3: Forced completion ─────────────────────────────────────────
 
-        private void ForcedCompletion(State s)
+        private static void ForcedCompletion(State s)
         {
-            // For each tuple-tied class encountered (or its split descendants),
-            // run an event for every structurally-distinct candidate pair-type
-            // not already explored. Mark IsRedundant when Discriminate produces
-            // no new split.
+            // First-prototype simplification: no-op. The baseline EventLoop
+            // already collects events that suffice when the "natural" event
+            // sequence matches across scrambles; forced completion is needed
+            // only to canonicalize event-count differences across scrambles.
             //
-            // First-prototype simplification: classify candidate pair types by
-            // adjacency within the source class (1-WL pair feature). For richer
-            // pair-rank classification, swap Discriminate to 2-WL.
-            //
-            // Bound: O(p · 2-WL-cost) where p ≤ O(n²) is the count of distinct
-            // pair-types across all visited classes.
-            throw new NotImplementedException("ForcedCompletion: see supplant-strategy.md §6.1");
+            // TODO (docs/supplant-strategy.md §6.1): walk each tuple-tied
+            // class encountered during EventLoop, run an event for every
+            // pair-rank class not already explored, and tag IsRedundant when
+            // Discriminate adds no new split.
+            _ = s;
         }
 
         // ── Phase 4: Supplant ──────────────────────────────────────────────────
 
-        private int[] Supplant(State s)
+        private static int[] Supplant(State s)
         {
-            // Multi-pass canonicalization. See supplant-strategy.md §6.3.
-            //
-            //   pass A: CrossComponent           — flip-canonicalized per layer
-            //   pass B: CrossClassSameComponent  — disambiguated by pass-A coords
-            //   pass C: WithinClass              — disambiguated by passes A, B
-            //
-            // After each pass, the events of that type get canonical layer
-            // indices in the global permutation π. Per-layer flip-lex-min is
-            // applied before signature comparison and recorded so that the
-            // chosen layer columns are realized post-π.
-            //
-            // Final step: dense-rank vertices by their canonicalized full
-            // (r₀, role_{π(1)}, …, role_{π(L)}) tuple.
-            throw new NotImplementedException("Supplant: see supplant-strategy.md §6.3");
+            // Baseline: dense-rank vertices by their final full tuple
+            // (r₀, role_1, …, role_L) under Role's IComparable. Skips the
+            // multi-pass sort and flip-canonicalization (§6.3) — those make
+            // the algorithm canonical on §8-class inputs and are TODO.
+            return ComputeTupleDenseRank(s, s.L);
         }
 
         // ── Discriminate (1-WL refinement over rank tuples) ────────────────────
 
-        private void Discriminate(State s)
+        private static void Discriminate(State s)
         {
-            // 1-WL refinement at layer L (the most recently appended layer).
-            // Inputs:  s.R0, s.Layers[0..L-2] frozen; s.Layers[L-1] partially
-            //          initialized (A=Low, B=High, others=Untouched).
-            // Output:  s.Layers[L-1] updated. For non-tagged vertices whose
-            //          1-WL refinement key changes from the all-Untouched
-            //          baseline, write Cascaded(d) where d is dense-ranked
-            //          across the moved set. Vertices whose key remains the
-            //          baseline stay Untouched. Tagged vertices keep Low/High.
-            //
-            // Per-vertex key is the dense-rank of the full tuple
-            // (r₀, role₁, …, role_L) under Role's IComparable. The 1-WL
-            // signature is (key, sorted neighborhood multiset of (key, edge)),
-            // matching the existing OneWL Discriminate.
-            //
-            // Iterate to fixed point: at most n iterations.
-            throw new NotImplementedException("Discriminate over tuples: implement next");
+            int n = s.N;
+            int L = s.L;
+            if (L == 0) return;
+
+            // Pre-event partition: tuple keys excluding the just-added layer.
+            int[] preEventKeys = ComputeTupleDenseRank(s, layerCount: L - 1);
+
+            // Initial post-event partition: tuple keys including the new
+            // layer (whose Roles are A=Low, B=High, others=Untouched).
+            int[] currentKeys = ComputeTupleDenseRank(s, layerCount: L);
+
+            // 1-WL fixed point on the integer keys.
+            for (int iter = 0; iter < n; iter++)
+            {
+                BuildVertexSignatures(n, s.Adj, currentKeys, s.WS);
+                AssignVertexRanks(n, s.WS);
+                if (!RanksDiffer(n, currentKeys, s.WS.NewKeys)) break;
+                Array.Copy(s.WS.NewKeys, currentKeys, n);
+            }
+
+            // Decode the converged partition back to layer-L Role values.
+            DecodeLayerRoles(s, L - 1, preEventKeys, currentKeys);
+        }
+
+        // Compute integer dense-ranks of vertices keyed on their tuple
+        // (r₀, role_1, …, role_{layerCount-1}). When layerCount == 0 this
+        // dense-ranks r₀ alone.
+        private static int[] ComputeTupleDenseRank(State s, int layerCount)
+        {
+            int n = s.N;
+            int[] order = new int[n];
+            for (int i = 0; i < n; i++) order[i] = i;
+
+            int Compare(int a, int b)
+            {
+                int c = s.R0[a].CompareTo(s.R0[b]);
+                if (c != 0) return c;
+                for (int k = 0; k < layerCount; k++)
+                {
+                    c = s.Layers[k][a].CompareTo(s.Layers[k][b]);
+                    if (c != 0) return c;
+                }
+                return 0;
+            }
+
+            Array.Sort(order, Compare);
+
+            int[] keys = new int[n];
+            if (n == 0) return keys;
+            keys[order[0]] = 0;
+            int rank = 0;
+            for (int i = 1; i < n; i++)
+            {
+                if (Compare(order[i - 1], order[i]) != 0) rank++;
+                keys[order[i]] = rank;
+            }
+            return keys;
+        }
+
+        // ── Decode 1-WL output to layer-L roles ────────────────────────────────
+        //
+        // For each pre-event class C:
+        //   - {A} and {B} singleton sub-classes keep their explicit Low / High.
+        //   - Among the remaining sub-classes:
+        //       · if there is exactly one and it equals C \ {A, B}, the
+        //         cascade did not split the non-tagged members — they stay
+        //         Untouched.
+        //       · otherwise the non-tagged members were split; assign each
+        //         sub-class a Cascaded(d) value, with d = dense-rank of the
+        //         sub-class's post-event key within C.
+
+        private static void DecodeLayerRoles(State s, int layerIdx, int[] preEventKeys, int[] currentKeys)
+        {
+            int n = s.N;
+            Role[] layer = s.Layers[layerIdx];
+
+            int aIdx = -1, bIdx = -1;
+            for (int i = 0; i < n; i++)
+            {
+                if (layer[i].Kind == RoleKind.Low)  aIdx = i;
+                else if (layer[i].Kind == RoleKind.High) bIdx = i;
+            }
+
+            // Group vertices by pre-event class.
+            var preMembers = new Dictionary<int, List<int>>();
+            for (int i = 0; i < n; i++)
+            {
+                if (!preMembers.TryGetValue(preEventKeys[i], out var lst))
+                    preMembers[preEventKeys[i]] = lst = [];
+                lst.Add(i);
+            }
+
+            foreach (var kvp in preMembers)
+            {
+                var members = kvp.Value;
+
+                // Within this pre-event class, group non-tagged members by post-event key.
+                var subClasses = new Dictionary<int, List<int>>();
+                int aInClass = 0, bInClass = 0;
+                for (int idx = 0; idx < members.Count; idx++)
+                {
+                    int v = members[idx];
+                    if (v == aIdx) { aInClass = 1; continue; }
+                    if (v == bIdx) { bInClass = 1; continue; }
+                    int postKey = currentKeys[v];
+                    if (!subClasses.TryGetValue(postKey, out var lst))
+                        subClasses[postKey] = lst = [];
+                    lst.Add(v);
+                }
+
+                int adjustedPreSize = members.Count - aInClass - bInClass;
+                if (adjustedPreSize == 0) continue;
+
+                if (subClasses.Count == 1)
+                {
+                    // Pre-event class minus tagged singletons did not split:
+                    // those vertices stay Untouched (already the layer default).
+                    continue;
+                }
+
+                // Multiple sub-classes: assign Cascaded(d) by ascending post-event key.
+                var sortedKeys = new List<int>(subClasses.Keys);
+                sortedKeys.Sort();
+                for (int d = 0; d < sortedKeys.Count; d++)
+                {
+                    var sub = subClasses[sortedKeys[d]];
+                    for (int j = 0; j < sub.Count; j++)
+                        layer[sub[j]] = Role.Cascaded(d);
+                }
+            }
         }
 
         // ── Pair selection ─────────────────────────────────────────────────────
 
-        private (int A, int B)? PickPair(State s)
+        private static (int A, int B)? PickPair(State s)
         {
-            // Find the lowest tuple-tied class with size ≥ 2 (under the dense-rank
-            // ordering of full tuples). Return its two smallest original indices.
-            // Return null if every class is a singleton.
-            throw new NotImplementedException("PickPair: lowest-class smallest-indices rule");
+            int n = s.N;
+            if (n < 2) return null;
+
+            int[] keys = ComputeTupleDenseRank(s, s.L);
+
+            // Group vertex indices by current full-tuple key.
+            var groups = new Dictionary<int, List<int>>();
+            for (int i = 0; i < n; i++)
+            {
+                if (!groups.TryGetValue(keys[i], out var lst))
+                    groups[keys[i]] = lst = [];
+                lst.Add(i);
+            }
+
+            // Lowest key with size ≥ 2.
+            int lowestKey = int.MaxValue;
+            bool found = false;
+            foreach (var kvp in groups)
+            {
+                if (kvp.Value.Count < 2) continue;
+                if (!found || kvp.Key < lowestKey) { lowestKey = kvp.Key; found = true; }
+            }
+            if (!found) return null;
+
+            var members = groups[lowestKey];
+            members.Sort();
+            return (members[0], members[1]);
         }
 
-        // ── Atom classification & signatures ───────────────────────────────────
+        // ── Atom classification ────────────────────────────────────────────────
 
-        private AtomType ClassifyAtom(State s, int layerIndex)
+        private static AtomType ClassifyAtom(State s, int layerIndex)
         {
-            // Inspect the cascade footprint at `layerIndex`:
-            //   - vertices touched (Low, High, Cascaded)
-            //   - the prior-tuple class they came from
-            //   - whether the source class's siblings (same connected
-            //     component or not) were also touched
-            //
-            // Decide one of:
-            //   WithinClass             — cascade stayed in the source class
-            //   CrossClassSameComponent — touched a sibling class via edges
-            //   CrossComponent          — touched a class in a disjoint component
-            //
-            // The connected-component partition can be precomputed in Setup.
-            throw new NotImplementedException("ClassifyAtom: cascade footprint analysis");
+            int n = s.N;
+            Role[] layer = s.Layers[layerIndex];
+
+            // Pre-event keys = tuple keys excluding this layer.
+            int[] preEventKeys = ComputeTupleDenseRank(s, layerIndex);
+
+            int aIdx = -1;
+            for (int i = 0; i < n; i++)
+            {
+                if (layer[i].Kind == RoleKind.Low) { aIdx = i; break; }
+            }
+            if (aIdx < 0) return AtomType.WithinClass;     // degenerate
+
+            int sourceClass     = preEventKeys[aIdx];
+            int sourceComponent = s.Components[aIdx];
+
+            bool reachedOtherClass     = false;
+            bool reachedOtherComponent = false;
+
+            for (int i = 0; i < n; i++)
+            {
+                if (layer[i].Kind != RoleKind.Cascaded) continue;
+                if (preEventKeys[i] != sourceClass)     reachedOtherClass = true;
+                if (s.Components[i] != sourceComponent) reachedOtherComponent = true;
+            }
+
+            if (reachedOtherComponent) return AtomType.CrossComponent;
+            if (reachedOtherClass)     return AtomType.CrossClassSameComponent;
+            return AtomType.WithinClass;
         }
 
-        private long[] ComputeSignature(State s, int layerIndex)
+        // ── Signature ──────────────────────────────────────────────────────────
+        //
+        // Sorted multiset over affected vertices, each entry packed as
+        //   [pre-event class id (32 bits)] [role kind (8 bits)] [cascaded rank (24 bits)]
+        // High 32 bits put pre-event class first in lex order; within a
+        // class, role kind and cascaded rank determine sub-class identity.
+
+        private static long[] ComputeSignature(State s, int layerIndex)
         {
-            // Sorted multiset of (priorClassId, RoleKind, CascadedRank) entries
-            // written by this event, packed as longs. This is the cmpKey input
-            // for Supplant (after flip-canonicalization).
-            throw new NotImplementedException("ComputeSignature: pack per-class role multisets");
+            int n = s.N;
+            Role[] layer = s.Layers[layerIndex];
+            int[] preEventKeys = ComputeTupleDenseRank(s, layerIndex);
+
+            int count = 0;
+            for (int i = 0; i < n; i++)
+                if (layer[i].Kind != RoleKind.Untouched) count++;
+
+            var entries = new long[count];
+            int idx = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (layer[i].Kind == RoleKind.Untouched) continue;
+                long packed =
+                    ((long)preEventKeys[i] << 32) |
+                    ((long)(byte)layer[i].Kind << 24) |
+                    (uint)(layer[i].CascadedRank & 0xFFFFFF);
+                entries[idx++] = packed;
+            }
+            Array.Sort(entries);
+            return entries;
         }
 
-        // ── 1-WL fixed point on bare ranks (used in Setup for r₀) ─────────────
+        // ── 1-WL primitives (lifted from CanonGraphOrdererOneWL) ───────────────
 
         private static void OneWlFixedPoint(int n, int[] adj, int[] ranks, Workspace ws)
         {
-            // Same shape as CanonGraphOrdererOneWL.Discriminate but here
-            // ranks are integer-only (no rank tuples yet). Iterate to fixed
-            // point.
-            throw new NotImplementedException("OneWlFixedPoint: lift from CanonGraphOrdererOneWL");
+            for (int iter = 0; iter < n; iter++)
+            {
+                BuildVertexSignatures(n, adj, ranks, ws);
+                AssignVertexRanks(n, ws);
+                if (!RanksDiffer(n, ranks, ws.NewKeys)) return;
+                Array.Copy(ws.NewKeys, ranks, n);
+            }
+        }
+
+        // sig[v]: slot 0 = ranks[v]; slots 1..n = sorted longs encoding
+        // ((ranks[u] * 2 + (u == v ? 1 : 0)) << 32) | adj[v, u] for each u.
+        private static void BuildVertexSignatures(int n, int[] adj, int[] ranks, Workspace ws)
+        {
+            long[] sigBuf = ws.SigBuf;
+            int stride = ws.SigStride;
+            for (int v = 0; v < n; v++)
+            {
+                int baseIdx = v * stride;
+                sigBuf[baseIdx] = ranks[v];
+                int vRowBase = v * n;
+                for (int u = 0; u < n; u++)
+                {
+                    long ru = (long)ranks[u] * 2 + (u == v ? 1 : 0);
+                    sigBuf[baseIdx + 1 + u] = (ru << 32) | (uint)adj[vRowBase + u];
+                }
+                Array.Sort(sigBuf, baseIdx + 1, n);
+            }
+        }
+
+        private static void AssignVertexRanks(int n, Workspace ws)
+        {
+            int[] idx = ws.VertexIdx;
+            for (int i = 0; i < n; i++) idx[i] = i;
+            Array.Sort(idx, 0, n, ws.SigComparer);
+
+            int[] target = ws.NewKeys;
+            int rank = 0;
+            target[idx[0]] = 0;
+            for (int i = 1; i < n; i++)
+            {
+                if (ws.SigComparer.Compare(idx[i - 1], idx[i]) != 0) rank++;
+                target[idx[i]] = rank;
+            }
+        }
+
+        private static bool RanksDiffer(int n, int[] cur, int[] nu)
+        {
+            for (int i = 0; i < n; i++)
+                if (cur[i] != nu[i]) return true;
+            return false;
+        }
+
+        // ── Connected components (BFS) ─────────────────────────────────────────
+
+        private static int[] ComputeConnectedComponents(int n, int[] adj)
+        {
+            var components = new int[n];
+            for (int i = 0; i < n; i++) components[i] = -1;
+
+            var queue = new Queue<int>();
+            int next = 0;
+            for (int start = 0; start < n; start++)
+            {
+                if (components[start] != -1) continue;
+                components[start] = next;
+                queue.Enqueue(start);
+                while (queue.Count > 0)
+                {
+                    int v = queue.Dequeue();
+                    int rowBase = v * n;
+                    for (int u = 0; u < n; u++)
+                    {
+                        if (adj[rowBase + u] != 0 && components[u] == -1)
+                        {
+                            components[u] = next;
+                            queue.Enqueue(u);
+                        }
+                    }
+                }
+                next++;
+            }
+            return components;
         }
 
         // ── Permute by dense ranks ─────────────────────────────────────────────
