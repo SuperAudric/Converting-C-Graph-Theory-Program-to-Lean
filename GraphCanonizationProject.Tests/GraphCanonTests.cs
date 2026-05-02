@@ -14,7 +14,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     // the same instance-level tests against the Lean-aligned reference. Tests that
     // call static helpers on the reference (LabelEdgesAccordingToRankings) stay
     // tied to GraphOrderer regardless.
-    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererOneWL();
+    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererPairOrder();
 
     // ── Isomorphism tests ────────────────────────────────────────────────────
 

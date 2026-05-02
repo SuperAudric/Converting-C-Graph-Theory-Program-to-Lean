@@ -1,50 +1,37 @@
 using System;
 using System.Collections.Generic;
 
-// Layered Tiebreak with Supplant — distilled v2.
+// Partial pair-ordering canonizer (1-WL discriminator, no supplant).
 //
-// Driving principle (reset to first principles): a tiebreak event is a
-// guess A<B encoded as Low/High at a fresh layer. After all events run,
-// each layer is classified into one of two outcomes:
+// The minimal distillation of the pair-event idea from
+// docs/supplant-strategy.md: each tiebreak event individualizes a pair
+// (A, B) at a fresh layer with roles low/high; 1-WL refines using the full
+// rank tuple as the per-vertex key; the loop runs until every class is a
+// singleton; final output is the dense-rank of the full tuple.
 //
-//   (S) Supplanted. Removing the layer entirely (zero out every role)
-//       still leaves every vertex's full tuple distinct from every other
-//       vertex's. The layer's information is now implied by other layers
-//       + r₀ — it was a guess that later refinement made redundant.
+// No supplant machinery (no atom classification, no signatures, no
+// forced completion, no multi-pass sort). The whole algorithm fits in
+// one file and is meant to be the smallest reproducer for partial-
+// pair-ordering bugs separate from supplant bugs.
 //
-//   (F) Flip. Removing the layer collapses some pair into a tie. The
-//       layer is essential; only the per-layer Z/2 freedom (Low ↔ High at
-//       A, B) remains. Flip-canonicalize at the end by lex-min.
+// Pair-selection rule: lex-min by (cross-component, non-adjacent,
+// smallest A index, smallest B index) within the lowest tuple-tied
+// class. Cross-component pairs come first, then within-component
+// non-adjacent, then adjacent. This is iso-invariant on inputs whose
+// component partition and adjacency relation are themselves iso-
+// invariant (which is everything 1-WL sees).
 //
-// (S) is decided post-hoc, greedily late-to-early. The check "during the
-// loop" of the previous draft was unsound: a freshly added layer is the
-// only refinement past r₀ at that moment, so removing it always reties
-// A and B; (S) can only fire once subsequent layers' cascades exist.
-//
-// (X) — load-bearing pair-choice freedom that 1-WL cannot resolve — is
-// out of scope. StructuralPick is iso-invariant up to ties between
-// structurally-equivalent pairs; for inputs whose tied class admits
-// multiple iso-equivalent pair choices (e.g., the two diagonals of a
-// 4-cycle), the resulting layer-creation order is not iso-invariant and
-// the canonical bytes diverge across scramblings. Layer-permutation
-// canonicalization (the multi-pass sort the prior design proposed) is
-// future work.
-//
-// What was removed vs the prior file:
-//   * Atom classification (within-class / cross-class / cross-component).
-//   * Per-event Signature multisets.
-//   * ForcedCompletion (no padding events).
-//   * Multi-pass structural sort over layer indices.
-//
-// Layer order is content-determined: a layer exists exactly when the input
-// genuinely needed a structural decision at that point.
+// Where this differs from CanonGraphOrdererSupplant: the latter has the
+// supplant scaffolding (which is not yet doing real work) and uses
+// "smallest two indices" as PickPair. Comparing the two on the same
+// inputs isolates which failures are pair-selection vs supplant issues.
 
 namespace Canonizer
 {
     using VertexType = int;
     using EdgeType = int;
 
-    public sealed class CanonGraphOrdererSupplant : ICanonGraphOrderer
+    public sealed class CanonGraphOrdererPairOrder : ICanonGraphOrderer
     {
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
@@ -53,8 +40,6 @@ namespace Canonizer
 
             var s = Setup(vertexTypes, G);
             EventLoop(s);
-            PostProcessSupplant(s);
-            FlipCanonicalize(s);
             int[] canonicalRanks = ComputeTupleDenseRank(s, s.L);
             return PermuteByDenseRanks(G, canonicalRanks);
         }
@@ -63,9 +48,8 @@ namespace Canonizer
             Run(vertexTypes, new AdjMatrix(edges)).ToString();
 
         // ── Roles ──────────────────────────────────────────────────────────────
+        //
         // Lex order: Untouched < Cascaded(0) < Cascaded(1) < … < Low < High.
-        // Low and High are adjacent so the per-layer flip is a Z/2 involution
-        // that touches only the (A, B) cells of a Flip layer.
 
         private enum RoleKind : byte { Untouched = 0, Cascaded = 1, Low = 2, High = 3 }
 
@@ -93,22 +77,17 @@ namespace Canonizer
             public override int GetHashCode() => ((byte)Kind, CascadedRank).GetHashCode();
         }
 
-        private enum LayerKind : byte
-        {
-            Flip       = 0,
-            Supplanted = 1,
-        }
-
-        // ── State ──────────────────────────────────────────────────────────────
+        // ── State + workspace ──────────────────────────────────────────────────
 
         private sealed class State
         {
             public int N;
             public int[] Adj = [];
-            public int[] R0  = [];
-            public List<Role[]>   Layers     = [];
-            public List<LayerKind> LayerKinds = [];
+            public int[] R0 = [];
+            public int[] Components = [];
+            public List<Role[]> Layers = [];
             public Workspace WS = new(0);
+
             public int L => Layers.Count;
         }
 
@@ -116,11 +95,11 @@ namespace Canonizer
         {
             public readonly int N;
             public readonly long[] RankPairs;
-            public readonly int[]  VertexIdx;
+            public readonly int[] VertexIdx;
             public readonly long[] SigBuf;
-            public readonly int    SigStride;
+            public readonly int SigStride;
             public readonly Comparer<int> SigComparer;
-            public readonly int[]  NewKeys;
+            public readonly int[] NewKeys;
 
             public Workspace(int n)
             {
@@ -169,8 +148,8 @@ namespace Canonizer
                 N          = n,
                 Adj        = adj,
                 R0         = r0,
+                Components = ComputeConnectedComponents(n, adj),
                 Layers     = [],
-                LayerKinds = [],
                 WS         = ws,
             };
         }
@@ -181,91 +160,41 @@ namespace Canonizer
         {
             while (true)
             {
-                var pair = StructuralPick(s);
+                var pair = PickPair(s);
                 if (pair is null) break;
 
-                int aIdx = pair.Value.A;
-                int bIdx = pair.Value.B;
-
-                // Append a fresh layer with the explicit guess A=Low, B=High.
-                var layer = new Role[s.N];   // default Untouched
-                layer[aIdx] = Role.Low;
-                layer[bIdx] = Role.High;
+                var layer = new Role[s.N];
+                layer[pair.Value.A] = Role.Low;
+                layer[pair.Value.B] = Role.High;
                 s.Layers.Add(layer);
-                s.LayerKinds.Add(LayerKind.Flip);
 
-                // 1-WL Discriminate over full tuples; decode others into
-                // Cascaded(d) / Untouched while preserving A=Low, B=High.
-                Discriminate(s, aIdx, bIdx);
+                Discriminate(s);
             }
         }
 
-        // ── Post-process supplant ──────────────────────────────────────────────
+        // ── Pair selection ─────────────────────────────────────────────────────
         //
-        // Greedy late-to-early: for each layer k still marked Flip, try setting
-        // every role at that layer to Untouched. If every pair of vertices
-        // remains in distinct full tuples after the removal, layer k was
-        // redundant — its information is implied by other layers + r₀. Mark
-        // Supplanted (the layer stays at all-Untouched). Otherwise restore the
-        // layer's roles.
+        // Within the lowest tuple-tied class, prefer pairs in this order:
+        //   1. cross-component                    (most informative cascade)
+        //   2. within-component, non-adjacent
+        //   3. within-component, adjacent
+        // Tiebreak on (smallest A index, smallest B index).
         //
-        // The greedy direction matters: removing a later layer can only make
-        // earlier layers more essential, never less. Walking backwards lets
-        // each decision stand without re-checking.
+        // Rationale: across all input scramblings of the same graph, the
+        // pair structurally selected at this rule is automorphism-equivalent
+        // (because component partition and adjacency are 1-WL invariants).
+        // Smallest indices is iso-invariant *within* the chosen structural
+        // class, since members of an automorphism orbit yield equivalent
+        // cascades regardless of which specific vertex pair is picked.
 
-        private static void PostProcessSupplant(State s)
-        {
-            int n = s.N;
-            int L = s.L;
-            for (int k = L - 1; k >= 0; k--)
-            {
-                if (s.LayerKinds[k] != LayerKind.Flip) continue;
-
-                Role[] layer = s.Layers[k];
-                Role[] saved = (Role[])layer.Clone();
-                for (int i = 0; i < n; i++) layer[i] = Role.Untouched;
-
-                int[] keys = ComputeTupleDenseRank(s, L);
-                bool allDistinct = true;
-                if (n > 1)
-                {
-                    var seen = new HashSet<int>();
-                    for (int i = 0; i < n; i++)
-                    {
-                        if (!seen.Add(keys[i])) { allDistinct = false; break; }
-                    }
-                }
-
-                if (allDistinct)
-                    s.LayerKinds[k] = LayerKind.Supplanted;
-                else
-                    Array.Copy(saved, layer, n);
-            }
-        }
-
-        // ── Structural pair pick (iso-invariant) ──────────────────────────────
-        //
-        // Within the lowest tuple-tied class C, pick the pair (A, B) whose joint
-        // adjacency multiset over u — the sorted list of
-        //     (currentKey[u], min(adj[A,u], adj[B,u]), max(adj[A,u], adj[B,u]))
-        // — is lex-smallest. The pair signature is symmetric in A, B, so it is
-        // unchanged under the (A ↔ B) relabel; that means orbit-equivalent pairs
-        // produce the same signature regardless of which physical vertices the
-        // input scramble names them by, so the lex-min is iso-invariant.
-        //
-        // Within the picked pair, A is assigned Low and B High by index order.
-        // That intra-pair choice is NOT iso-invariant under input scrambling,
-        // but flip-canonicalization at the end of the run resolves it: a Flip
-        // layer is exactly the case where A and B are interchangeable up to
-        // Z/2, so the lex-min flip is canonical regardless of intra-pair pick.
-
-        private static (int A, int B)? StructuralPick(State s)
+        private static (int A, int B)? PickPair(State s)
         {
             int n = s.N;
             if (n < 2) return null;
 
             int[] keys = ComputeTupleDenseRank(s, s.L);
 
+            // Group vertex indices by current full-tuple key.
             var groups = new Dictionary<int, List<int>>();
             for (int i = 0; i < n; i++)
             {
@@ -274,6 +203,7 @@ namespace Canonizer
                 lst.Add(i);
             }
 
+            // Find the lowest key whose class has size ≥ 2.
             int lowestKey = int.MaxValue;
             bool found = false;
             foreach (var kvp in groups)
@@ -286,40 +216,39 @@ namespace Canonizer
             var members = groups[lowestKey];
             members.Sort();
 
-            long[]? bestSig = null;
-            int bestA = -1, bestB = -1;
-            var sig = new long[n];
+            // Search for the best pair under the structural ordering above.
+            // We score each pair (A, B) with A < B as a tuple
+            //   (sameComponent ? 1 : 0,  adjacent ? 1 : 0,  A,  B)
+            // and pick lex-min.
+            int bestSameComp = 2, bestAdj = 2, bestA = -1, bestB = -1;
             for (int i = 0; i < members.Count; i++)
             {
-                int A = members[i];
-                int rowA = A * n;
+                int a = members[i];
                 for (int j = i + 1; j < members.Count; j++)
                 {
-                    int B = members[j];
-                    int rowB = B * n;
-                    for (int u = 0; u < n; u++)
+                    int b = members[j];
+                    int sameComp = s.Components[a] == s.Components[b] ? 1 : 0;
+                    int adj      = s.Adj[a * n + b] != 0 ? 1 : 0;
+
+                    if (sameComp <  bestSameComp ||
+                       (sameComp == bestSameComp && adj <  bestAdj) ||
+                       (sameComp == bestSameComp && adj == bestAdj && a < bestA) ||
+                       (sameComp == bestSameComp && adj == bestAdj && a == bestA && b < bestB))
                     {
-                        int aAdj = s.Adj[rowA + u];
-                        int bAdj = s.Adj[rowB + u];
-                        int mn = aAdj < bAdj ? aAdj : bAdj;
-                        int mx = aAdj < bAdj ? bAdj : aAdj;
-                        sig[u] = ((long)keys[u] << 32) | ((long)(uint)mn << 16) | (uint)(mx & 0xFFFF);
-                    }
-                    Array.Sort(sig);
-                    if (bestSig is null || CompareLongArrays(sig, bestSig) < 0)
-                    {
-                        bestSig = (long[])sig.Clone();
-                        bestA = A;
-                        bestB = B;
+                        bestSameComp = sameComp;
+                        bestAdj      = adj;
+                        bestA        = a;
+                        bestB        = b;
                     }
                 }
             }
+
             return (bestA, bestB);
         }
 
         // ── Discriminate (1-WL refinement over rank tuples) ────────────────────
 
-        private static void Discriminate(State s, int aIdx, int bIdx)
+        private static void Discriminate(State s)
         {
             int n = s.N;
             int L = s.L;
@@ -336,11 +265,8 @@ namespace Canonizer
                 Array.Copy(s.WS.NewKeys, currentKeys, n);
             }
 
-            DecodeLayerRolesPair(s.Layers[L - 1], preEventKeys, currentKeys, n, aIdx, bIdx);
+            DecodeLayerRoles(s, L - 1, preEventKeys, currentKeys);
         }
-
-
-        // ── Tuple key / role decoding ──────────────────────────────────────────
 
         private static int[] ComputeTupleDenseRank(State s, int layerCount)
         {
@@ -374,13 +300,24 @@ namespace Canonizer
             return keys;
         }
 
-        // Pair-aware decode: keep A=Low, B=High. Other vertices in A and B's
-        // pre-event class are split into sub-classes by their post-event keys
-        // and assigned Cascaded(d) by ascending sub-class key. Vertices in
-        // pre-event classes that did not split stay Untouched.
-        private static void DecodeLayerRolesPair(
-            Role[] layer, int[] preEventKeys, int[] currentKeys, int n, int aIdx, int bIdx)
+        // For each pre-event class C:
+        //   - {A} and {B} singleton sub-classes keep their explicit Low / High.
+        //   - If non-tagged members all stay in one sub-class equal to C \ {A, B},
+        //     they remain Untouched (cascade did not split them).
+        //   - Otherwise non-tagged members are assigned Cascaded(d), with d the
+        //     dense-rank of the post-event key within C.
+        private static void DecodeLayerRoles(State s, int layerIdx, int[] preEventKeys, int[] currentKeys)
         {
+            int n = s.N;
+            Role[] layer = s.Layers[layerIdx];
+
+            int aIdx = -1, bIdx = -1;
+            for (int i = 0; i < n; i++)
+            {
+                if (layer[i].Kind == RoleKind.Low)  aIdx = i;
+                else if (layer[i].Kind == RoleKind.High) bIdx = i;
+            }
+
             var preMembers = new Dictionary<int, List<int>>();
             for (int i = 0; i < n; i++)
             {
@@ -394,8 +331,9 @@ namespace Canonizer
                 var members = kvp.Value;
                 var subClasses = new Dictionary<int, List<int>>();
                 int aInClass = 0, bInClass = 0;
-                foreach (int v in members)
+                for (int idx = 0; idx < members.Count; idx++)
                 {
+                    int v = members[idx];
                     if (v == aIdx) { aInClass = 1; continue; }
                     if (v == bIdx) { bInClass = 1; continue; }
                     int postKey = currentKeys[v];
@@ -403,47 +341,20 @@ namespace Canonizer
                         subClasses[postKey] = lst = [];
                     lst.Add(v);
                 }
+
                 int adjustedPreSize = members.Count - aInClass - bInClass;
                 if (adjustedPreSize == 0) continue;
-                if (subClasses.Count == 1) continue;
+                if (subClasses.Count == 1) continue;       // no split → stay Untouched
 
                 var sortedKeys = new List<int>(subClasses.Keys);
                 sortedKeys.Sort();
                 for (int d = 0; d < sortedKeys.Count; d++)
                 {
                     var sub = subClasses[sortedKeys[d]];
-                    foreach (int v in sub) layer[v] = Role.Cascaded(d);
+                    for (int j = 0; j < sub.Count; j++)
+                        layer[sub[j]] = Role.Cascaded(d);
                 }
             }
-        }
-
-        // ── Flip canonicalization (NOT IMPLEMENTED in v1) ──────────────────────
-        //
-        // The intended end-of-run pass: for each Flip layer, lex-min over the
-        // (Low ↔ High) swap at A and B. The simple version — swap labels in
-        // place and compare canonical bytes — is *unsound*. Cascaded(d) values
-        // on third parties were assigned under one direction of the guess; a
-        // raw label swap leaves them inconsistent with the alternative cascade.
-        //
-        // A correct implementation has to re-run Discriminate per flip choice
-        // (and propagate to subsequent layers, since their pair picks depend
-        // on this layer's Cascaded(d) labels). That is brute-force territory.
-        //
-        // Consequence for v1: within-orbit pairs whose canonicalization needs
-        // the Z/2 swap are not resolved. Same scope as the layer-permutation
-        // gap noted in the file header.
-
-        private static void FlipCanonicalize(State s) { _ = s; }
-
-        private static int CompareLongArrays(long[] a, long[] b)
-        {
-            int len = a.Length < b.Length ? a.Length : b.Length;
-            for (int i = 0; i < len; i++)
-            {
-                if (a[i] < b[i]) return -1;
-                if (a[i] > b[i]) return 1;
-            }
-            return a.Length.CompareTo(b.Length);
         }
 
         // ── 1-WL primitives ────────────────────────────────────────────────────
@@ -498,6 +409,38 @@ namespace Canonizer
             for (int i = 0; i < n; i++)
                 if (cur[i] != nu[i]) return true;
             return false;
+        }
+
+        // ── Connected components ───────────────────────────────────────────────
+
+        private static int[] ComputeConnectedComponents(int n, int[] adj)
+        {
+            var components = new int[n];
+            for (int i = 0; i < n; i++) components[i] = -1;
+
+            var queue = new Queue<int>();
+            int next = 0;
+            for (int start = 0; start < n; start++)
+            {
+                if (components[start] != -1) continue;
+                components[start] = next;
+                queue.Enqueue(start);
+                while (queue.Count > 0)
+                {
+                    int v = queue.Dequeue();
+                    int rowBase = v * n;
+                    for (int u = 0; u < n; u++)
+                    {
+                        if (adj[rowBase + u] != 0 && components[u] == -1)
+                        {
+                            components[u] = next;
+                            queue.Enqueue(u);
+                        }
+                    }
+                }
+                next++;
+            }
+            return components;
         }
 
         // ── Permutation / dense-rank utilities ─────────────────────────────────

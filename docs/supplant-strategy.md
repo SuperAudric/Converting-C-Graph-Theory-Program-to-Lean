@@ -1,512 +1,603 @@
-# Layered Tiebreak with Supplant
+# Layered Tiebreak with Supplant — v2
 
-A graph canonization algorithm that aims for polynomial time on inputs where
-2-WL refinement, augmented with pair-individualization, is orbit-complete on
-every class it ties. Each tiebreak event individualizes a *pair* (A, B) with
-roles low/high — a binary, invertible commitment. Reconciliation between
-different scramblings happens after all events run, via a multi-pass
-canonicalization ("supplant") that resolves the flip dimension by Z/2 inverse
-on role labels, the atom-multiset dimension by forced completion, and the
-layer-position dimension by structural sort.
+A graph canonization algorithm built around a single principle:
 
-This design supersedes earlier drafts that individualized a single vertex per
-event. The single-vertex scheme had a known failure (§8 of those drafts: two
-independent symmetry choices bundled into one marker, supplant unable to
-decouple them). The pair-event scheme splits each commitment into two
-separable axes — *which pair* (resolved by atom canonicalization under the
-structured assumption) and *which flip direction* (resolved by Z/2 inverse on
-the role labels), eliminating that failure on inputs that satisfy the
-structured assumption (§8 below). The earlier `tiebreak-tuples-strategy.md`
-captured a related set of data structures from a different angle.
+> **Guess A<B → 1-WL refine → supplant the guess if the refinement made
+> it redundant.**
+
+Each tiebreak event records a binary, invertible commitment ("A is Low,
+B is High") in its own layer of a per-vertex rank tuple. After all events
+run, a single post-hoc pass walks the layers from latest to earliest and
+removes any whose information turned out to be derivable from the others.
+What survives is the minimum set of structural decisions the input
+required at this discriminator strength.
+
+This document supersedes [`supplant-strategy-v1.md`](./supplant-strategy-v1.md).
+The header of that file lists the v1 → v2 differences.
+
+The C# implementation lives in
+[`CanonGraphOrdererSupplant.cs`](../GraphCanonizationProject/CanonGraphOrdererSupplant.cs).
 
 ---
 
 ## 1. Problem
 
-**Canonical labeling.** Given an undirected graph G, produce a byte string
-canon(G) such that:
+**Canonical labeling.** Given an undirected graph G with vertex types,
+produce a byte string `canon(G)` such that
+
   - Iso: G ≅ H ⇒ canon(G) = canon(H)
-  - Non-iso: G ≇ H ⇒ canon(G) ≠ canon(H)
+  - Non-iso: G ≇ H ⇒ canon(G) ≠ canon(H).
 
-A canonical labeling is harder than just deciding isomorphism — you have to
-produce the same labeled graph for every input scrambling.
+**The obstacle.** Color refinement (1-WL) reaches a fixed point in which
+non-equivalent vertices may share a color. Producing a unique canonical
+labeling requires breaking those ties, and the choice of *how* to break
+each tie is in general not invariant under input relabeling. The standard
+families of solutions:
 
-**Why it's hard.** Refinement-based discriminators (color refinement, k-WL)
-reach a fixed point in which non-equivalent vertices may share the same color.
-Any further progress needs to *break* a tie, and that choice is not in general
-invariant under input relabeling. Three families of solutions:
+  - **Greedy commit.** Promote one tied vertex to a singleton by index;
+    update the structural rank in place. Fast, but not σ-invariant —
+    different scramblings break ties at different physical vertices.
+  - **Branch and prune (nauty / bliss / traces).** Recursively try every
+    choice, individualize, refine, compare leaf labelings, lex-min. σ-
+    invariant by construction, exponential worst case.
+  - **Layered tiebreak with supplant (this design).** Record each choice
+    in its own rank layer. Don't backtrack. After the loop, drop any
+    layer the rest of the rank tuple makes redundant; canonicalize the
+    leftover freedoms (Z/2 label swap, layer permutation between iso-
+    equivalent pair picks).
 
-1. **Greedy commit.** Pick "first array index"; update the rank in place. Fast,
-   not canonical: scramblings produce different bytes when the tied class
-   isn't a true automorphism orbit.
-2. **Branch and prune (nauty/bliss/traces).** Try every choice; for each,
-   individualize, refine, compare leaf labelings; lex-min over leaves.
-   Provably canonical, exponential worst case.
-3. **Layered tiebreak with supplant (this design).** Record each choice in a
-   *separate rank dimension*; restrict choices to pair-promotions whose two
-   axes are separately invertible. Reconcile different choice sequences by
-   sorting the dimensions at the end. Polynomial on the structured class;
-   reduces to (2) in worst case otherwise.
-
-The 2-WL discriminator at the core (sort-based pair-rank refinement, see
-`CanonGraphOrdererTwoWL.cs`) is unchanged. Everything in this document is the
-machinery around it.
+The discriminator at the core (1-WL pair-rank refinement, see
+[`CanonGraphOrdererOneWL.cs`](../GraphCanonizationProject/CanonGraphOrdererOneWL.cs))
+is unchanged. Everything in this doc is the machinery around it.
 
 ---
 
-## 2. Pair-tagged rank tuples
+## 2. Per-vertex state: rank tuples
 
 Every vertex carries a tuple
 
 ```
-rankTuple(v) = (r₀, role₁, role₂, …, role_L)
+rankTuple(v) = (r₀,  role₁(v),  role₂(v),  …,  role_L(v))
 ```
 
-  - **r₀** is the structural 2-WL rank computed before any tiebreaking.
+  - **r₀** is 1-WL fixed-point rank computed before any tiebreaking.
     Frozen for the life of the run.
-  - **role_k** is one of `{untouched, cascaded(d), low, high}`, where
-    `cascaded(d)` is the dense-rank role within v's prior-tuple class
-    determined by event k's cascade. Frozen once event k completes.
-  - **L** is the number of completed events. Each event consumes exactly one
-    layer; there is no separate notion of "round" in this version.
+  - **role_k(v)** is one of `{Untouched, Cascaded(d), Low, High}`.
+    Frozen once event k completes.
+  - **L** is the number of completed events.
 
-**Lex order on role values:** `untouched < cascaded(0) < cascaded(1) < … < low < high`.
-The three ideas this encodes:
-  - *Untouched dominates* — a vertex outside the cascade's reach sorts before
-    vertices the cascade reordered. Same as in the single-vertex scheme.
-  - *Cascaded sorts before tagged* — vertices the cascade pulled into a
-    finer rank class sort before the explicitly tagged pair members.
-  - *low and high are adjacent* — the flip swap is a Z/2 involution that
-    moves only A and B's role values, never any cascaded vertex's value.
-    This is the key property that makes flip-canonicalization local to the
-    tagged pair (§6.3).
+**Lex order on roles:**
+`Untouched < Cascaded(0) < Cascaded(1) < … < Low < High`.
 
-This is the only state the algorithm carries — no automorphism group, no
-search tree, no history vectors.
+The three semantic ideas this encodes:
 
----
+  - *Untouched dominates*: a vertex outside event k's cascade reach sorts
+    before any vertex the cascade rewrote.
+  - *Cascaded sorts before tagged*: vertices the cascade refined sit
+    between Untouched and the explicitly tagged pair.
+  - *Low and High are adjacent in the lex order*: the per-layer flip
+    swaps Low ↔ High and touches no Cascaded(d) value, so flip is a Z/2
+    involution local to the (A, B) cells of the layer.
 
-## 3. Discriminate (2-WL over tuples)
+Each layer also carries a `LayerKind ∈ {Flip, Supplanted}` set during
+post-processing.
 
-Sort-based 2-WL pair-rank refinement, identical in structure to the existing
-implementation, with two adaptations:
-
-  - The initial pair signature for cell (u, v) leads with the *full* rank
-    tuples of u and v (instead of single integers).
-  - The vertex-rank update writes only to position L (the latest layer);
-    positions 0..L-1 are frozen.
-
-The strict-refinement invariant — previous rank as the lead component of every
-signature — extends to tuples: if `rankTuple(x) < rankTuple(y)` at any step,
-the relation persists across subsequent Discriminate calls. The integer
-dense-rank consumed by 2-WL internally is invariant under the role-value
-semantics (the dense-rank treats `(untouched, cascaded(d), low, high)` as
-opaque distinct symbols).
-
-When called with L = 0 (the very first Discriminate), it writes to position 0
-and produces r₀.
+This is the only state the algorithm carries. There is no automorphism
+group, no search tree, no per-event signature multiset.
 
 ---
 
-## 4. Tiebreak event
+## 3. Algorithm
 
 ```
-Event:
-    pick pair (A, B) from the current lowest tuple-tied class
-    rankTuple(A)[L] ← low
-    rankTuple(B)[L] ← high
-    Discriminate
-    for every v whose role_L moved off untouched as a result:
-        v's role_L is one of low, high, cascaded(d)
-        record reachedByLayer_L(v) = true
+canon(G, vertexTypes):
+    s ← Setup(vertexTypes, G)
+    EventLoop(s)
+    PostProcessSupplant(s)
+    FlipCanonicalize(s)                  -- no-op in v1; see §7
+    canonicalRanks ← DenseRank(fullTuple(v) for v ∈ V)
+    return PermuteByDenseRanks(G, canonicalRanks)
 ```
 
-Pair selection within the class follows a deterministic rule (e.g., the two
-smallest original indices). The flip-canonicalization in §6 neutralizes the
-"who is low, who is high" choice under input scrambling; the
-atom-canonicalization in §6 neutralizes the "which pair within the orbit"
-choice when the class is a single orbit.
+### 3.1 Setup
 
-L increments by 1 after each event.
+  - Compute r₀ via 1-WL fixed point on `(vertexTypes, adj)`. Frozen.
+  - Initialize empty layer list, empty kind list.
 
----
-
-## 5. Target selection
-
-The pick rule "lowest tuple-tied class, two smallest indices" is structurally
-arbitrary if and only if the chosen pair belongs to a single
-automorphism orbit-pair. Three regimes:
-
-  - **Within-orbit pair.** Both A and B in the same automorphism orbit.
-    Different scramblings produce automorphism-equivalent cascades that
-    differ only in flip direction. §6.3 reconciles via Z/2 inverse on the
-    pair's role labels.
-
-  - **Cross-orbit pair, structured neighborhood.** A and B are in different
-    orbits, but the tied class is "structured" — every internal vertex is
-    eventually distinguishable by 2-WL plus enough pair-individualizations.
-    Different scramblings collect the same multiset of cascade footprints
-    ("atoms"), possibly in different orders and via different specific pair
-    picks; §6 canonicalizes the multiset.
-
-  - **Non-structured tied class.** 2-WL plus pair-individualization stalls
-    inside some sub-orbit even after exhausting forced completion. The atom
-    multiset itself differs across scramblings. §10 detect-and-fall-back is
-    required.
-
-The structured assumption — every reachable tied class either is a true orbit
-or is structured in the second sense — is the load-bearing premise. §9
-formalizes it as a recursive property.
-
----
-
-## 6. Supplant: layered canonicalization with forced completion
-
-The earlier draft's supplant was a single sort by event signature, sufficient
-for §7 (disjoint-component case) but defeated by §8 (bipartite-interconnected
-case). Pair-tag events admit a richer canonicalization with three components:
-forced completion (6.1), atom classification (6.2), and a multi-pass sort
-with flip-canonicalization (6.3).
-
-### 6.1 Forced completion
-
-Different scramblings can complete the algorithm with different layer counts,
-because some atoms are *optional* — their information is derivable from a
-finer-grained subset that already ran in the same sequence. For
-canonicalization to compare scramblings byte-for-byte, every run must
-terminate with the same atom multiset.
-
-The forced-completion pass: do not exit when Discriminate first reaches all
-singletons. Instead, keep running events until every structurally distinct
-candidate pair (A, B) — defined as every distinct 2-WL pair-rank class within
-the *original* lowest tuple-tied class at its time of selection — has been
-spent as an event. Events whose atom is derivable from prior atoms (their
-cascade adds no new information) are still run; they are simply tagged
-"redundant" in their atom classification and contribute trivially to the
-canonical bytes.
-
-The result: a fixed-cardinality canonical atom multiset across scramblings,
-provided the structured assumption holds. The cost upper bound is
-O(p · 2-WL-cost) where p is the total count of structurally distinct pairs
-visited across all events; on §8-class inputs p is O(n²) in the worst case
-(see §11.5).
-
-A simpler post-hoc rebuild — drop redundant events from the log after the
-fact instead of running them — gives the same canonical output but is harder
-to reason about under the recursive argument in §9, so this design favors
-forced completion as primary.
-
-### 6.2 Atom classification
-
-Each completed event is classified by the structural footprint of its
-cascade:
+### 3.2 Event loop
 
 ```
-atomType(event_k) = (
-    structural-class of (A, B)'s pre-event tuple-tied class,
-    set of other tuple-tied classes the cascade visibly altered,
-    within-pair 2-WL pair-rank of (A, B)
-)
+EventLoop(s):
+    while True:
+        (A, B) ← StructuralPick(s)
+        if no pair:  break
+        layer ← new Role[N], all Untouched
+        layer[A] ← Low
+        layer[B] ← High
+        s.Layers.append(layer)
+        s.LayerKinds.append(Flip)
+        Discriminate(s, A, B)            -- 1-WL on full tuples;
+                                           writes Cascaded(d) to others
 ```
 
-For §8, atoms fall into three types:
-  - **within-class** — cascade refines the source class internally, leaves
-    other classes' vertex-by-vertex roles at untouched.
-  - **cross-class-same-component** — cascade reorders two classes that share
-    edges within a connected component.
-  - **cross-component** — cascade orders two classes that lie in disjoint
-    components.
+`StructuralPick` returns `null` when every tuple is in a singleton class.
 
-Each event's atom signature is the type plus a sorted multiset of the
-`(low, high, cascaded(d))` role values it wrote, projected per affected
-class. Atom signatures are richer than the single-event signatures of the
-prior draft, and admit a nested canonical comparison.
+### 3.3 StructuralPick — iso-invariant pair selection
 
-### 6.3 Multi-pass sort with flip-canonicalization
-
-Atoms canonicalize from outer (most globally structural) to inner (most
-locally structural), with each pass consuming the previous pass's output to
-break its own ties:
+Within the lowest tuple-tied class C (ties broken by smallest tuple key
+when multiple classes have size ≥ 2), pick the pair whose **joint
+adjacency multiset** is lex-smallest:
 
 ```
-Supplant:
-    classify every event by atomType(event_k)
-    π ← identity                                           // canonical layer permutation
-
-    for pass in [cross-component, cross-class-same-component, within-class]:
-        events_in_pass ← {k : atomType(k) belongs to pass}
-        for each event k in events_in_pass:
-            cmpKey(k) ← lex-min over { sig(k), sig(k) under flip(low ↔ high) }
-        sort events_in_pass by (cmpKey, prior-pass coordinates of (A, B))
-        extend π with these events' canonical positions
-
-    apply π to every tuple's positions 1..L (r₀ stays in position 0)
-    for each event whose flip-canonicalization chose the flipped column:
-        swap low ↔ high in that layer's column across every vertex
+for each unordered pair {A, B} ⊂ C:
+    sig(A, B) ← sorted multiset over u ∈ V of
+                ( currentTupleKey[u],
+                  min(adj[A,u], adj[B,u]),
+                  max(adj[A,u], adj[B,u]) )
+pick the pair with lex-min sig
 ```
 
-The "prior-pass coordinates" of a pair (A, B): once an outer pass has
-committed canonical layer indices for atoms of its type, every vertex
-inherits a canonical class-coordinate (e.g., "copy 1" or "copy 2" for §8
-after the cross-component pass canonicalizes). Inner passes use these
-coordinates to disambiguate ties between events whose own signatures
+The pair signature is symmetric in A and B (we use min/max, not the
+ordered pair), so it doesn't depend on which physical vertex is named
+"A". Combined with `currentTupleKey[u]` being iso-invariant (dense rank
+of an iso-invariant partition), `sig(A, B)` is iso-invariant under input
+scrambling.
+
+Within the picked pair, A is assigned Low and B High by ascending vertex
+index. That intra-pair choice is **not** iso-invariant — it's the Z/2
+freedom that `FlipCanonicalize` is supposed to resolve at the end (see
+§7).
+
+### 3.4 Discriminate
+
+```
+Discriminate(s, A, B):
+    L ← s.L
+    preEventKeys ← DenseRank of fullTuple restricted to layers 0..L-2
+    currentKeys  ← DenseRank of fullTuple restricted to layers 0..L-1
+                                                -- includes the new layer
+    repeat:
+        sigs[v] ← (currentKeys[v],
+                   sorted multiset over u of
+                       (2·currentKeys[u] + (u==v?1:0),  adj[v,u]))
+        currentKeys ← DenseRank by sigs
+    until currentKeys is stable
+
+    DecodeLayerRolesPair(s.Layers[L-1], preEventKeys, currentKeys, A, B)
+```
+
+This is plain 1-WL on the integer keys derived from the full tuple. The
+"+ (u==v?1:0)" term distinguishes "v has a self-loop" from "v has a
+same-rank neighbor".
+
+### 3.5 DecodeLayerRolesPair
+
+For the just-added layer, translate the converged 1-WL partition into
+role values:
+
+  - A keeps `Low`, B keeps `High` (set explicitly when the layer was
+    appended).
+  - For every pre-event class C (vertices with the same `preEventKeys`):
+    - Drop A and B.
+    - Group the remaining vertices by `currentKeys`.
+    - If all remaining vertices share one post-event key, the class did
+      not split — they stay `Untouched`.
+    - Otherwise, sort sub-classes by ascending post-event key and assign
+      `Cascaded(0), Cascaded(1), …` to each in order.
+
+The dense-rank of sub-classes is iso-invariant given iso-invariant input
+keys, so the `Cascaded(d)` assignment is iso-invariant up to mirror sub-
+class swaps under the per-layer Low ↔ High flip (see §6.2).
+
+### 3.6 PostProcessSupplant
+
+```
+PostProcessSupplant(s):
+    for k = L-1 down to 0:
+        if s.LayerKinds[k] != Flip:  continue
+        saved ← copy of s.Layers[k]
+        zero out s.Layers[k]              -- everyone Untouched at layer k
+        keys ← DenseRank of fullTuple over remaining layers
+        if every key is distinct:
+            s.LayerKinds[k] ← Supplanted   -- layer stays at all-Untouched
+        else:
+            s.Layers[k] ← saved            -- restore
+```
+
+The greedy direction matters: removing a later layer can only make
+earlier layers more, not less, essential. Walking backwards lets each
+decision stand without re-checking.
+
+A layer marked `Supplanted` is effectively a no-op column in the rank
+tuple — every vertex has `Untouched` there, so it contributes nothing to
+sort order or 1-WL signatures.
+
+### 3.7 Output
+
+Dense-rank vertices by the full tuple (after `Supplanted` layers are
+zeroed and `FlipCanonicalize` runs); permute the adjacency matrix to
 match.
 
-**Flip-canonicalization is layer-local.** Swapping low ↔ high within layer
-k's column changes A's and B's ranks but does not change the partition
-2-WL sees at any subsequent layer (the same vertices remain in the same
-equivalence classes; only the integer rank labels shift). Therefore each
-layer's flip choice is independent of every other layer's, and the
-per-layer lex-min is a global lex-min. This is the property single-vertex
-individualization lacked.
+---
 
-Cost: O(L · log L · n) per pass; passes are bounded by the depth of the
-structural decomposition (three for §8). Total supplant cost
-O(passes · L · log L · n).
+## 4. Why this avoids backtracking
 
-### 6.4 Why this works
+The principle the v1 design lost is that *every layer survives the loop
+in some form*. There is no "undo" in EventLoop. Three possible fates per
+layer, decided post-hoc:
 
-  - **Flip dimension.** Flip is a Z/2 involution on role labels, partition-
-    preserving by construction. Per-layer lex-min over flips is therefore
-    optimal globally and computable in O(n) per layer.
-  - **Atom-multiset dimension.** Forced completion guarantees the multiset
-    of atoms is invariant across scramblings under the structured assumption.
-    Different scramblings choose different specific pairs to instantiate
-    each atom, but the multiset of (atomType, signature) values matches.
-  - **Layer-order dimension.** The multi-pass sort canonicalizes layer
-    positions deterministically from outer to inner, with ties at each pass
-    broken by coordinates from the prior pass. Under the structured
-    assumption, each pass either fully orders its events or ties only on
-    iso-equivalent events (which canonicalize identically downstream).
-  - **Cascade-dependence at intermediate states.** Different scramble orders
-    produce different intermediate partitions. The supplant operates on the
-    *final* augmented vertex labels, not on intermediate states; under the
-    structured assumption, the final labels match across scramblings up to
-    the layer permutation π and the per-layer flip, both of which supplant
-    canonicalizes. So intermediate cascade-dependence does not affect
-    correctness — only the run-time cost.
+  - **Flip** (the layer carries a true Z/2 freedom): kept; flip-
+    canonicalized at the end.
+  - **Supplanted** (the layer's information is implied by other layers
+    + r₀): zeroed out. The structural fact A<B is now visible from the
+    rank tuple without the explicit Low/High at this layer.
+  - **(X) load-bearing pair-choice freedom** that 1-WL cannot resolve:
+    not detected in v2; produces wrong canonical bytes silently. (See
+    §8.)
+
+Because the loop never reverts a guess, "current work done" is preserved
+across the entire run. Compare to nauty's branch-and-prune, where each
+choice is one root of a tree and only one path is consumed. This design
+puts each choice in its own rank coordinate and lets them coexist.
 
 ---
 
-## 7. Worked example: disjoint CFI even ⊔ odd
+## 5. Soundness lemmas
 
-Consider G = CFI(K4)_even ⊔ CFI(K4)_odd: two CFI graphs on the K4 base, of
-opposite parity, joined by a disjoint union (no edges between them).
-2-WL cannot distinguish CFI_even from CFI_odd internally; r₀ ties every
-vertex.
+### 5.1 1-WL set partition is invariant under per-layer flip
 
-**Atom inventory** (structured assumption: 2-WL plus within-CFI(K4)
-pair-individualization reaches singletons inside each side):
-  - 1 within-class atom per CFI side (assuming a single pair-individualization
-    suffices to refine the side to singletons; in practice it may take more,
-    each contributing one within-class atom).
-  - 1 cross-component atom (orders even before odd or vice versa).
+> *Claim.* Given an input partition P that differs only in the labels
+> assigned to two designated vertices A, B (with A=Low, B=High in P, and
+> A=High, B=Low in P'), 1-WL fixed-point applied to P and to P' produces
+> the same set partition (only the dense-rank labels differ).
 
-**Scrambling A and scrambling B** pick events in different orders. Forced
-completion ensures each run accumulates the same atom multiset.
+*Proof sketch.* 1-WL signatures are functions of multisets of (rank,
+edge) pairs over neighbours. The two starting partitions are related by
+the Low ↔ High label swap on A and B. By symmetry of the multiset
+operation under this swap, every iteration's partition matches up to the
+same swap.
 
-**Supplant:**
-  1. Cross-component pass — one atom; flip-canonicalize → canonical bipartite
-     order (CFI_even before CFI_odd if their canonical bytes lex-order that
-     way, else reversed).
-  2. Cross-class-same-component pass — empty in this construction.
-  3. Within-class pass — two atoms with distinguishable signatures (one over
-     CFI_even, one over CFI_odd because the two graphs are non-iso).
-     Sort by signature; bipartite coordinate from pass 1 disambiguates if
-     they ever tie.
+**Consequence.** A "flip" of layer k's Low/High labels is a relabeling
+of cells of an iso-invariant partition. The flip is observable in the
+full tuple's dense rank, but not in the underlying partition.
 
-Output identical across scramblings. Algorithm runs in
-O((events) · 2-WL-cost) = O(n · n⁴) = O(n⁵).
+### 5.2 StructuralPick is iso-invariant up to ties
 
----
+> *Claim.* If `sig(A, B)` is uniquely minimised over candidate pairs of
+> the lowest tied class, the chosen pair is the same orbit-pair across
+> any input scrambling. If multiple pairs share the lex-min `sig`, the
+> shared-min pairs are an iso-equivalent set, and any deterministic
+> tiebreak that depends only on iso-invariant data preserves
+> σ-invariance.
 
-## 8. The bipartite-interconnected double cover, under the new design
+The current code breaks ties by physical vertex index, which is **not**
+iso-invariant. This is the source of the v2's main known failure mode
+(see §8.1).
 
-Construct G as in earlier drafts:
-  - H = CFI(K4)_even ⋈ CFI(K4)_odd, where ⋈ is the complete bipartite
-    connection between every CFI_even vertex and every CFI_odd vertex.
-  - G = H ⊔ H.
+### 5.3 Post-hoc supplant is sound
 
-G has four hidden orbits in its universal r₀-tied class:
-{O1 = copy1-even, O2 = copy1-odd, O3 = copy2-even, O4 = copy2-odd}. The
-single-vertex scheme failed here because one marker on (copy?, side?)
-bundled two independent symmetry choices.
+> *Claim.* If zeroing layer k leaves every full tuple distinct, the
+> dense-rank of the full tuples over layers `{0..L-1}\{k}` produces the
+> same canonical permutation as the dense-rank over all layers — i.e.,
+> layer k contributed no distinguishing information beyond what the
+> other layers provide.
 
-**Why pair-tag events behave better under ⋈.** A within-orbit pair
-(A, B) ⊂ O1 has the property that every O2-vertex X is adjacent to *both*
-A and B (⋈ is uniform). X's neighborhood multiset acquires exactly one
-(low, edge) entry and exactly one (high, edge) entry under the new tags,
-identical for every X ∈ O2. The cascade therefore does not split O2
-internally, only bumps O2's class-rank as a unit. Same argument for O3, O4
-relative to a within-O1 pair (no edges to copy 2 — they're untouched).
-The pair-tag's effect is localized to "split O1 internally; bump O2's
-class-rank as a unit; leave the disjoint copy alone."
+*Proof.* Dense-rank is determined by the equivalence classes of the
+full tuple under equality. If removing layer k leaves all tuples
+distinct, the equivalence classes are still all singletons. Sorting
+singletons by tuple yields the same permutation up to lex order on the
+remaining coordinates, which agrees with the original lex order
+restricted to those coordinates.
 
-**Atom inventory under forced completion:**
-  - 4 within-class atoms (one per CFI(K4) instance):
-      - 2 within-CFI_even (signatures equal — copy1-even and copy2-even are
-        graph-isomorphic).
-      - 2 within-CFI_odd (signatures equal).
-  - 2 cross-class-same-component atoms (one per copy: orders the copy's
-    even half against its odd half). Forced completion runs both even when
-    they are derivable from the within-class atoms; redundant ones carry the
-    "redundant" flag and contribute predictably to the canonical bytes.
-  - 1 cross-component atom (orders copy 1 against copy 2).
-
-**Multi-pass supplant:**
-  1. Cross-component pass — one atom; flip-canonicalize → canonical copy
-     order. Every vertex now has a canonical *copy* coordinate.
-  2. Cross-class-same-component pass — two atoms with equal raw signatures
-     (since copy 1 and copy 2 are iso). Disambiguate by copy coordinate
-     from pass 1. Flip-canonicalize each. Every vertex now has a canonical
-     (copy, side) coordinate.
-  3. Within-class pass — four atoms in two tied-signature pairs. The two
-     CFI_even atoms are tied in raw signature but disambiguated by their
-     (copy, side) coordinate from passes 1–2. Same for CFI_odd. Flip-
-     canonicalize each.
-
-Output matches across scramblings. The previous failure case is closed,
-*conditional on* the structured assumption (each CFI(K4) instance reaches
-singletons under pair-individualization).
-
-If the structured assumption fails — e.g., 2-WL plus pair-individualization
-stalls inside a single CFI(K4) — then within-class atoms don't fully refine,
-the (O1 vs O3) and (O2 vs O4) tied subclasses recur at a deeper level, and
-§9's recursive argument either bottoms out (algorithm succeeds at greater
-depth) or fails (§10 fall-back triggers).
+The greedy late→early order is sound by induction: removing layer k
+cannot make a later layer's removal change correctness (later layers
+were already classified before we touched k).
 
 ---
 
-## 9. Recursive singletons argument
+## 6. Worked examples
 
-The structured assumption can be cast recursively:
+### 6.1 Path 0–1–2–3 (size 4)
 
-> *Claim.* If 2-WL plus pair-individualization can resolve any subgraph G[C]
-> (the induced subgraph on tuple-tied class C, plus its boundary structure
-> to the rest of G) into canonical singletons, then it can resolve the
-> ordering of any pair (A, B) drawn from C against the rest of G.
->
-> *Base case.* A 2-vertex subgraph trivially resolves: there are two
-> labelings, related by the Z/2 flip, and supplant's flip-canonicalization
-> selects the lex-min.
->
-> *Inductive step.* Any larger structured subgraph admits a pair-event that
-> splits some hidden sub-orbit, reducing the problem to canonicalizing two
-> strictly smaller subgraphs (the split halves). Each half falls under the
-> induction hypothesis.
+r₀ partition: `{0, 3}` (degree 1), `{1, 2}` (degree 2).
 
-The induction is conditional: at each level both halves must themselves be
-structured for the next level to inherit it. The CFI ladder (CFI applied to
-bases of growing treewidth) is the canonical falsifier — each rung needs
-strictly more discriminator strength than the last, so the recursion does
-not bottom out at any fixed k-WL.
+Lowest tied class: `{0, 3}`. StructuralPick picks (0, 3) (only candidate
+pair). Layer 1 created with `layer[0] = Low, layer[3] = High`.
 
-For inputs whose recursion bottoms out at finite depth (which §8's input
-does, conditional on 2-WL handling individualized CFI(K4)), the algorithm
-is polynomial. The depth of the recursion times the per-level cost gives a
-total polynomial bound.
+Discriminate: vertex 1 is adjacent to 0=Low only; vertex 2 is adjacent
+to 3=High only. They split. Sub-class with the smaller post-event key
+gets `Cascaded(0)`; the other gets `Cascaded(1)`. Result:
 
-This argument is a sketch, not a proof. Formalization would require:
-  - A precise definition of "structured" that is checkable per-level.
-  - A bound on recursion depth in terms of graph parameters.
-  - An invariance proof that the canonical bytes produced at each level are
-    iso-invariant.
+```
+Layer 1:  [ Low,  Cascaded(0),  Cascaded(1),  High ]
+```
 
-§11 lists these as open.
+Full tuples: `(0, Low), (1, Cascaded(0)), (1, Cascaded(1)), (0, High)`.
+All distinct → loop ends.
 
----
+PostProcessSupplant: zero layer 1. Tuples become `(0, U), (1, U),
+(1, U), (0, U)` — vertices 0 ≡ 3, vertices 1 ≡ 2. Not all distinct.
+Restore. Layer 1 stays Flip.
 
-## 10. Mitigation: detect-and-fall-back
+Output: dense-rank assigns 0, 2, 3, 1 (sort order: vertex 0 < vertex 3 <
+vertex 1 < vertex 2). Canonical permuted matrix is the standard "path"
+layout.
 
-The algorithm should not silently produce wrong bytes. Two detection
-strategies, refined for the multi-pass supplant:
+### 6.2 Square (4-cycle) — exposes the layer-permutation gap
 
-1. **Pass-internal tie + downstream tie.** If a supplant pass produces a
-   tied atom-signature group whose intra-group disambiguation depends on a
-   later pass that *also* ties on its own input, the tie is structural, not
-   just signature-incidental. Either the tied atoms are truly automorphic
-   (no problem) or the input is non-structured at this level (problem). To
-   distinguish, compute both orderings of the offending tie group, run each
-   through downstream passes, and check whether the resulting tuple
-   multisets coincide. If they don't, fall back to enumerating both
-   orderings.
+r₀: every vertex has degree 2 with the same neighbourhood multiset; r₀
+ties all four vertices.
 
-2. **Forced-completion non-singleton residual.** If forced completion
-   exhausts every structurally distinct candidate pair in the lowest
-   tuple-tied class and Discriminate still does not reach singletons within
-   that class, the structured assumption fails. Fall back is required. The
-   fall-back enumerates the offending tied class as a search tree (nauty-
-   style) over the residual ambiguity, then resumes the polynomial path.
+Lowest tied class: `{0, 1, 2, 3}`. StructuralPick over six candidate
+pairs computes:
 
-Either path reintroduces L! cost on the offending tie groups but keeps the
-fast path fast on inputs that don't need it. The per-pass detection check
-is itself polynomial.
+  - Adjacent pair (e.g. (0, 1)): sig multiset = four copies of
+    `(0, 0, 1)`.
+  - Diagonal pair (e.g. (0, 2)): sig multiset =
+    `[(0,0,0), (0,0,0), (0,1,1), (0,1,1)]`.
 
----
+`(0, 0, 0) < (0, 0, 1)` lex, so diagonal sigs are lex-smaller. Both
+diagonals `(0, 2)` and `(1, 3)` have the **same** sig — they're iso-
+equivalent.
 
-## 11. Open questions
+The current code breaks the tie by iteration order (smallest A first,
+then smallest B), so it picks `(0, 2)`. Across scramblings, this picks
+**different physical pairs that map to different orig-graph diagonals**.
+The two layers that result (after the second iteration picks the
+remaining diagonal `(1, 3)`) are in **different creation orders** for
+different scramblings.
 
-  1. **Cascade-independence checkability.** Is there a polynomial local test
-     that confirms two events' cascades commute, short of re-running both
-     orderings? The flip dimension is now provably independent (§6.3); this
-     question reduces to the atom-set and layer-order dimensions.
+Final tuples for two scramblings of the square diverge in dense-rank,
+producing different canonical bytes. The layer-permutation freedom is
+unresolved.
 
-  2. **Touched-flag semantics under bipartite cascades.** The reached flag
-     still conflates "structurally touched" with "rank-rewritten." Pair-tag
-     events reduce but don't eliminate this — A and B's neighbors may
-     rank-rewrite even when not in the cascade's structural reach.
+### 6.3 What supplant looks like
 
-  3. **Within-component orbit-completeness for CFI.** §7 and §8 both assume
-     2-WL plus pair-individualization is orbit-complete on a single
-     CFI(K4) instance. Empirical probe lives in `CfiPair_DisjointUnion_*`
-     tests; results from the previous (path-multiset) algorithm don't carry
-     over and the tests must be re-run on the pair-event implementation.
+Supplant fires when later layers' cascades make an earlier layer's
+distinctions redundant. Concretely: a graph where individualizing a
+later pair `(C, D)` causes 1-WL to discover that A and B were already in
+different orbits (visible in the cascaded values around `(C, D)`) — at
+which point the explicit Low/High at the earlier layer carries no extra
+information.
 
-  4. **Atom classification iso-invariance.** §6.2 defines atom types
-     operationally (by cascade footprint). A more rigorous definition would
-     tie atoms to the orbit structure of G, but the orbit structure is the
-     GI question. The operational definition's iso-invariance under the
-     structured assumption needs proof, not just empirical confirmation.
-
-  5. **Forced-completion polynomial bound.** §6.1 claims the cost is
-     O(p · 2-WL-cost) where p counts structurally distinct candidate pairs.
-     A concrete polynomial bound on p in terms of n, for the structured
-     class, is pending.
-
-  6. **Recursive singletons formalization.** §9's recursion is a sketch.
-     Formal definitions of "structured," "depth," and per-level invariance
-     are needed to convert it to a proof.
-
-  7. **Strict-refinement invariant under role-value lex order.** The
-     `untouched < cascaded(d) < low < high` order needs to be the lead
-     component of every Discriminate signature for the strict-refinement
-     invariant to hold across passes. Worth verifying explicitly before
-     relying on it.
+For the path and the square, no such cascade-feedback exists; supplant
+does not fire. For more structured graphs (the §8 CFI examples in v1's
+draft), supplant can fire, but the v2 implementation hasn't been
+empirically tested on those.
 
 ---
 
-## 12. Where this design sits
+## 7. Implementation status
 
-  - **Strictly more powerful than the single-vertex layered scheme.** The
-    bundling failure that defeated the prior draft is closed by pair-event
-    Z/2 invertibility plus forced-completion atom canonicalization.
+  - [x] Setup, r₀ via 1-WL fixed point.
+  - [x] EventLoop with StructuralPick + Discriminate + DecodeLayerRoles.
+  - [x] PostProcessSupplant (greedy late→early, full-layer-zero check).
+  - [ ] FlipCanonicalize. The simple per-layer Low↔High swap is unsound
+    because Cascaded(d) labels on third parties are derived under one
+    direction of the guess — a raw label swap leaves them inconsistent
+    with the alternative cascade. A correct implementation re-runs
+    Discriminate per flip choice and propagates to subsequent layers
+    (their pair picks depend on this layer's Cascaded labels). That is
+    brute-force territory and is left as future work; the current code
+    has `FlipCanonicalize` as an explicit no-op.
+  - [ ] Layer-permutation canonicalization. When StructuralPick ties
+    (§6.2), the choice of which pair becomes layer 1 vs layer 2 is not
+    iso-invariant. v2 has no mechanism for this.
+  - [ ] (X) detection.
 
-  - **Strictly more powerful than greedy 2-WL+individualization** when
-    cascades are independent: σ-invariance holds in the §7 and §8 regimes
-    above; greedy commit fails σ-invariance on the same inputs because its
-    in-place rank update can't represent "the choice was arbitrary."
+### 7.1 Test status (last measured)
 
-  - **Equivalent to nauty in worst case** under the §10 fallback:
-    enumeration over offending tie groups re-introduces the branching
-    nauty does natively.
+| Orderer | Passed | Failed | Skipped |
+|---|---:|---:|---:|
+| `CanonGraphOrdererPairOrder` (baseline) | 35 | 7 | 2 |
+| `CanonGraphOrdererSupplant` (v2)        | 31 | 11 | 2 |
 
-  - **Not a polynomial-time canonizer for arbitrary graphs.** The
-    structured assumption fails on graph families that need unbounded
-    k-WL — those are the GI-hard core. The algorithm is polynomial *on the
-    structured class*, with the recognition problem for that class itself
-    a form of GI.
+The 7 PairOrder failures are also Supplant failures (CFI disjoint-union
+scrambling-invariance, large exhaustive-permutation count). The 4
+additional Supplant failures (`KnownGraphs` size 4 / 5,
+`AllPermutations` size 4, `AllPermutations_Extended` size 5) are size-4
+and size-5 cases where PairOrder's index-based pair pick happens to
+produce an iso-invariant choice and v2's structural pick ties on iso-
+equivalent pair candidates and breaks them by index non-iso-invariantly.
 
-The bet: pair-event canonicalization plus multi-pass supplant captures
-enough structure that real-world inputs in the intended domain fall in the
-structured class, and §10's detect-and-fall-back keeps the design correct
-on the rest at a cost that scales with how adversarial the input is.
+This is the layer-permutation gap of §8.1 surfacing on small inputs.
+
+### 7.2 What's not yet plumbed
+
+  - `FlipCanonicalize` is a stub.
+  - There is no telemetry / diagnostic for "supplant fired on layer k"
+    — would be useful to confirm supplant ever actually fires on real
+    inputs.
+  - No (X) detection: when the input is GI-hard at 1-WL strength, the
+    algorithm produces wrong bytes silently.
+
+---
+
+## 8. Known failure modes
+
+### 8.1 Layer-permutation freedom
+
+When StructuralPick's lex-min tie has multiple iso-equivalent pair
+candidates, the choice of which pair becomes "first" is the choice of
+which layer index they occupy. Across scramblings of the same input,
+different physical vertices win the index-based tiebreak, and the
+layer-creation order diverges. Final dense-rank canonicals differ.
+
+The 4-cycle example in §6.2 is the minimal failure case. The CFI
+disjoint-union failures on K4 / K3,3 / Cycle3..5 are larger-scale
+manifestations of the same issue.
+
+**Fix direction.** Two options:
+
+  1. **Brute-force** at the canonicalization step: enumerate all
+     orderings of layers within a sig-equivalent group, take lex-min.
+     Cost is `Π(group_size!)`; for inputs where the structural pick
+     produces few ties, this is small.
+  2. **Multi-pass structural sort** (the v1 design): classify each
+     layer by structural type (within-class / cross-class / cross-
+     component; or some other invariant), sort by class first, then
+     break inner ties by sub-class coordinates from earlier passes.
+     Polynomial when the classification is rich enough; reduces to
+     option 1 on inputs where the classification ties.
+
+### 8.2 Within-orbit Z/2 freedom
+
+When the picked pair (A, B) is within a true automorphism orbit, the
+Low/High assignment is a Z/2 freedom that should be resolved by lex-min
+over the swap. v2's `FlipCanonicalize` is a no-op, so this freedom is
+not resolved: scramblings that pick (A, B) vs (B, A) by physical-index
+tiebreak produce different canonicals.
+
+**Fix direction.** Brute-force `2^L` flip combinations, re-running
+Discriminate per combination (because subsequent layers' Cascaded(d)
+assignments depend on prior layers' flips). With smart sharing of work
+across the DFS, the cost is closer to `O(2^L · L · 1-WL-cost)`;
+without sharing, `O(2^L · L · n³)`.
+
+### 8.3 (X): cross-orbit ties not 1-WL-resolvable
+
+If the lowest tuple-tied class is a non-orbit tie (vertices that 1-WL
+groups but that are not actually in the same automorphism orbit), the
+guess A<B introduces information that no later refinement can recover
+from. Both directions of the guess produce structurally distinct
+cascades. Neither flip nor supplant can reconcile them.
+
+This is the GI-hard case at 1-WL strength. v2 doesn't detect it. nauty
+handles it natively (the search tree branches, both options are
+explored, lex-min over leaves). v1's §10 sketched a "detect-and-fall-
+back" mechanism; v2 has not implemented it.
+
+---
+
+## 9. Why the algorithm is forced into exponential worst case
+
+Three compounding sources:
+
+1. **Number of layers L.** L can grow to `n - (number of r₀ classes)`.
+   For inputs with high symmetry (every vertex same degree, regular
+   structure, CFI constructions), L is `Θ(n)`.
+
+2. **Layer-permutation freedom.** When StructuralPick ties on `m` iso-
+   equivalent pair candidates, the resulting layer ordering has up to
+   `m!` valid permutations to canonicalize. For an input with several
+   tied classes each admitting iso-equivalent picks, the per-layer
+   freedom multiplies.
+
+3. **Per-layer Z/2 freedom.** Each layer (after supplant) has up to two
+   valid Low/High assignments, requiring `2^L` enumeration.
+
+**Combined worst-case canonicalization cost:** `O(2^L · m! · 1-WL-cost)`
+where `m` is the maximal ties-equivalent group size. For CFI graphs at
+1-WL strength, this collapses to nauty's exponential branching — same
+complexity class, different shape.
+
+### 9.1 The deeper reason
+
+The algorithm uses **1-WL** as its discriminator. 1-WL cannot tell
+whether a tied class is
+
+  - a true automorphism orbit (where Z/2-and-friends freedoms are real
+    symmetries: enumeration is *correct* but produces `n!`-many bytes
+    that all agree, so we just take any one — the only question is
+    *picking* the canonical labels), or
+  - a non-orbit tie at 1-WL strength (where the freedoms are structural
+    decisions: enumeration *might* produce different canonicals across
+    inputs, and we have to lex-min).
+
+Without that distinction, the algorithm cannot avoid enumerating every
+freedom: it has no way to recognise which freedoms are "free" and which
+are load-bearing.
+
+A stronger discriminator (k-WL for higher k) resolves more tied classes
+structurally, reducing L. But by Cai-Fürer-Immerman, for any fixed k,
+CFI graphs at treewidth `k+1` defeat k-WL. So no fixed-strength
+discriminator escapes the exponential worst case on the GI-hard core.
+
+The way out — input-adaptive discriminator strength climbing the WL
+hierarchy as needed — is Babai's territory and not what this design
+implements.
+
+### 9.2 Why "supplant" doesn't rescue this
+
+The principle was that supplant would absorb most freedoms into
+structural information, leaving only a polynomial cleanup. In practice:
+
+  - Supplant fires only when **later** layers' cascades make an
+    **earlier** layer's distinctions redundant. This requires multi-
+    layer feedback through 1-WL — which 1-WL can produce only if the
+    perturbation reveals structural asymmetry that 1-WL on r₀ alone
+    missed. For most inputs, this doesn't happen often.
+  - Layer-permutation and Z/2 freedoms are *not* candidates for
+    supplant in the v2 sense. They're freedoms within the picked pair,
+    not redundant guesses about it.
+
+So supplant reduces L (and per-layer enumeration) only when the input
+has multi-layer cascade feedback. On inputs without such feedback (much
+of the GI-hard core), supplant is a no-op and the full enumeration
+applies.
+
+---
+
+## 10. Forward path
+
+### 10.1 Closing the v1 gaps
+
+The two "documented v1 limitation" fixes that would close most of the
+test-suite failures:
+
+  - **Brute-force flip canonicalization**, gated by L. For L ≤ ~12 (the
+    practical regime for CFI tests), `2^L · 1-WL-cost` is tractable.
+  - **Brute-force layer-permutation canonicalization** within sig-
+    equivalent groups. Cost `Π(group_size!)`; usually small in
+    practice.
+
+Combined, these turn the algorithm into a "pair-event with bounded
+brute-force canonicalization". Strictly more power than greedy 1-WL +
+individualization; strictly less efficient than nauty on the cases
+where nauty's pruning shines, but with much simpler bookkeeping.
+
+### 10.2 Beyond brute force
+
+To re-claim the original "polynomial on structured inputs" promise, the
+algorithm needs a structural sort over layers — the v1 multi-pass scheme
+or some equivalent. The challenge is defining the sort key in a way
+that is *iso-invariant* and *informative* (distinguishes layers that
+need distinguishing). v1's atom classification was a first attempt and
+had known gaps (§11.1 in v1).
+
+A different angle: detect the (X) case (non-orbit tie at 1-WL) by some
+local check after the cascade and escalate that single layer to 2-WL
+discriminator strength. This is the "input-adaptive WL climb" approach,
+applied per-layer rather than globally.
+
+### 10.3 Empirical work needed
+
+  - Verify that supplant ever fires on real inputs. The v2 code path is
+    in place but no test confirms it activates. Add a counter and a
+    test that constructs an input where a later layer should supplant
+    an earlier one.
+  - Re-run the v1 §7 / §8 worked examples (CFI disjoint unions and
+    bipartite-interconnected double covers) on v2 once
+    FlipCanonicalize is implemented, to see whether the structured-
+    class promise holds for v2.
+  - Localize each known failure to one of the three known modes
+    (§8.1 / §8.2 / §8.3) so the fix priorities match the failure
+    distribution.
+
+---
+
+## 11. Glossary
+
+| Term | Meaning |
+|---|---|
+| r₀ | 1-WL fixed-point rank on `(vertexTypes, adj)`. |
+| Layer | One column of the per-vertex rank tuple, added by one event. |
+| Event | Pick a pair (A, B), tag layer with Low/High, run 1-WL refine. |
+| Role | Per-vertex per-layer value: `Untouched` / `Cascaded(d)` / `Low` / `High`. |
+| Cascade | The 1-WL refinement triggered by an event's Low/High tags. |
+| Tied class | Set of vertices sharing a full tuple key. |
+| Flip | Per-layer Z/2 freedom: swap A=Low, B=High ↔ A=High, B=Low. |
+| Supplant | Decide a layer is redundant and zero it. Post-hoc. |
+| Iso-invariant | Unchanged under input vertex relabeling. |
+| σ-invariance | Same as iso-invariance (different shorthand). |
+| (X) regime | Cross-orbit tie at 1-WL strength — GI-hard, undetected in v2. |
