@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
-using GraphOrderer = Canonizer.CanonGraphOrdererV4Fast;
+using GraphOrderer = Canonizer.CanonGraphOrdererOneWLPartialOrder;
 using VertexType = int;
 using EdgeType = int;
 
@@ -333,7 +333,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
         var union = CfiGraphGenerator.BuildDisjointUnion(pair.Even, pair.Odd);
         int nEven = pair.Even.VertexCount;
         int nTotal = union.VertexCount;
-        var ranks = GraphOrderer.RunConvergeLoopForTesting(new VertexType[nTotal], union);
+        var ranks = CanonGraphOrdererV4Fast.RunConvergeLoopForTesting(new VertexType[nTotal], union);
 
         var evenSet = new HashSet<int>();
         for (int i = 0; i < nEven; i++) evenSet.Add(ranks[i]);
