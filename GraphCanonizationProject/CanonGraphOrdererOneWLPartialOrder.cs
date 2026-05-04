@@ -44,7 +44,7 @@ namespace Canonizer
             {
                 RefineToFixedPoint(po, adj);
                 if (po.IsTotal()) break;
-                BreakLexSmallestTie(po);
+                BreakLowestTiedClass(po);
                 po.TransitiveClose();
             }
 
@@ -301,21 +301,60 @@ namespace Canonizer
 
         // ── Tiebreak ───────────────────────────────────────────────────────────
         //
-        // When refinement reaches a fixed point but Unknowns remain, force
-        // the lex-smallest Unknown pair to Less. This matches the spirit of
-        // CanonGraphOrdererOneWL.BreakTieInPlace, which keeps the
-        // lowest-index member of a tied class at its current rank and shifts
-        // the rest up — both rules are iso-variant by index, but consistent
-        // with the original orderer's behaviour.
+        // Mirrors CanonGraphOrdererOneWL.BreakTieInPlace, which keeps the
+        // lowest-index member of the lowest-rank tied class at its current
+        // rank and shifts EVERY OTHER member of the class up by one. Setting
+        // a single pair's relation here was a real bug: it left the rest of
+        // the tied class with their original (Below, Above) levels, so the
+        // un-touched members ended up at lower levels than the "chosen"
+        // vertex (whose AboveCount went up by one) and refinement resolved
+        // them BELOW chosen — the opposite of what BreakTieInPlace does.
         //
-        // No cycle is possible: if there were a chain b → … → a in Less,
-        // the prior TransitiveClose would have set M[a, b] = Greater, and
-        // LexSmallestUnknownPair would not have returned (a, b).
-        private static void BreakLexSmallestTie(PartialOrder po)
+        // At a fixed point of refinement, sig(a) = sig(b) ⇔ M[a,b] = Unknown,
+        // so "every vertex Unknown relative to chosen" is exactly chosen's
+        // tied class. Promoting the whole set above chosen in one pass is
+        // the partial-order analogue of OneWL's whole-class shift.
+        //
+        // No cycle is possible: the prior TransitiveClose has already pushed
+        // any implied inequalities into M, so any (chosen, u) still Unknown
+        // is genuinely comparable in the integer-rank world.
+        private static void BreakLowestTiedClass(PartialOrder po)
         {
-            var pair = po.LexSmallestUnknownPair()
-                ?? throw new InvalidOperationException("BreakLexSmallestTie called on a total order");
-            po.Set(pair.A, pair.B, Ordering.Less);
+            int n = po.N;
+
+            // Find the lowest-leveled vertex that still has any Unknown
+            // relation. Lowest-leveled, not lowest-INDEX, mirrors OneWL's
+            // outer loop (target = 0, 1, 2, …): the lowest-rank tied class
+            // always breaks first. At fixed point, classes are uniquely
+            // identified by (BelowCount, AboveCount) — different sigs give
+            // a known relation, so two classes never share a level — so
+            // "lowest-leveled" picks an iso-invariant class.
+            int chosen = -1;
+            long chosenLevel = 0;
+            for (int v = 0; v < n; v++)
+            {
+                if (!HasUnknownNeighbor(po, v)) continue;
+                long level = ((long)po.BelowCount(v) << 32) | (uint)po.AboveCount(v);
+                if (chosen < 0 || level < chosenLevel || (level == chosenLevel && v < chosen))
+                {
+                    chosen = v;
+                    chosenLevel = level;
+                }
+            }
+            if (chosen < 0)
+                throw new InvalidOperationException("BreakLowestTiedClass called on a total order");
+
+            for (int u = 0; u < n; u++)
+                if (u != chosen && po.Compare(chosen, u) == Ordering.Unknown)
+                    po.Set(chosen, u, Ordering.Less);
+        }
+
+        private static bool HasUnknownNeighbor(PartialOrder po, int v)
+        {
+            int n = po.N;
+            for (int u = 0; u < n; u++)
+                if (u != v && po.Compare(v, u) == Ordering.Unknown) return true;
+            return false;
         }
 
         // ── Output ─────────────────────────────────────────────────────────────
