@@ -167,23 +167,85 @@ namespace Canonizer
             }
         }
 
+        // ── Signatures ─────────────────────────────────────────────────────────
+        //
+        // A vertex v's signature is its own colour Lead followed by the sorted
+        // multiset of NeighborEntry tuples — one per u ∈ V. Each entry records
+        //
+        //   * Color    — u's own (BelowCount, AboveCount) packed into an int.
+        //                Two vertices with the same (Below, Above) are treated
+        //                as the same colour. This is coarser than 1-WL would
+        //                be and will need refining once the partial order is
+        //                allowed to have a < b, b ≈ c, a ≁ c, but it is sound
+        //                today: a transitive partial order with all "ties"
+        //                being mutually unknown means same-(Below, Above) is
+        //                still an equivalence.
+        //
+        //   * IsSelf   — whether u == v. Without this bit, a self-loop edge
+        //                of type t at v collides with a same-colour neighbour
+        //                connected by a t-edge.
+        //
+        //   * Relation — M[v, u]. *This is the key fix versus a vanilla 1-WL
+        //                signature.* Without it, a vertex with two edges, both
+        //                to colour-X neighbours that lie *above* it, looks
+        //                identical to a vertex with two edges, both to
+        //                colour-X neighbours that lie *below* it.
+        //
+        //   * Edge     — adj[v, u].
+        //
+        // Lead = colour(v) is preserved as an early-out tiebreak (a < b in M
+        // ⇒ Lead(a) < Lead(b)) and ensures that whenever M already orders the
+        // pair, refinement can never contradict it.
+        //
+        // Comparison order within a NeighborEntry: Color → IsSelf → Relation →
+        // Edge. Comparison across two VertexSigs: Lead → Tail element-by-
+        // element on the sorted multiset.
+
+        private readonly struct NeighborEntry(int color, bool isSelf, Ordering relation, int edge)
+            : IComparable<NeighborEntry>
+        {
+            public readonly int Color = color;
+            public readonly bool IsSelf = isSelf;
+            public readonly Ordering Relation = relation;
+            public readonly int Edge = edge;
+
+            public int CompareTo(NeighborEntry o)
+            {
+                int c = Color.CompareTo(o.Color);
+                if (c != 0) return c;
+                c = IsSelf.CompareTo(o.IsSelf);
+                if (c != 0) return c;
+                c = ((sbyte)Relation).CompareTo((sbyte)o.Relation);
+                if (c != 0) return c;
+                return Edge.CompareTo(o.Edge);
+            }
+        }
+
+        private readonly struct VertexSig(int lead, NeighborEntry[] tail)
+            : IComparable<VertexSig>
+        {
+            public readonly int Lead = lead;
+            public readonly NeighborEntry[] Tail = tail;
+
+            public int CompareTo(VertexSig o)
+            {
+                int c = Lead.CompareTo(o.Lead);
+                if (c != 0) return c;
+                for (int i = 0; i < Tail.Length; i++)
+                {
+                    c = Tail[i].CompareTo(o.Tail[i]);
+                    if (c != 0) return c;
+                }
+                return 0;
+            }
+        }
+
         // ── Refinement ─────────────────────────────────────────────────────────
         //
-        // Until a step makes no change, build per-vertex 1-WL signatures over
-        // the current partial order and resolve every Unknown pair (a, b)
-        // whose signatures differ.
-        //
-        // Each vertex's level is the pair (BelowCount(v), AboveCount(v)),
-        // packed into a single sortable int. This is a total preorder
-        // consistent with M: a < b in M ⇒ BelowCount(a) < BelowCount(b), so
-        // the lead component of the signature already orders vertices that
-        // M orders. The signature's tail is the sorted multiset of
-        // (level(u)·2 + selfBit, edge[v, u]) pairs over u ∈ V — exactly the
-        // shape used by CanonGraphOrdererOneWL, with the level swapped in
-        // for the integer rank.
-        //
-        // Because lex order on signatures is itself transitive, refinement
-        // never produces an entry that contradicts the existing matrix.
+        // Until a step makes no change, build VertexSigs over the current
+        // partial order and resolve every Unknown pair (a, b) whose signatures
+        // differ. Lex order on signatures is transitive, so refinement never
+        // produces an entry that contradicts the existing matrix.
 
         private static void RefineToFixedPoint(PartialOrder po, int[] adj)
         {
@@ -195,7 +257,7 @@ namespace Canonizer
         private static bool RefineOneStep(PartialOrder po, int[] adj)
         {
             int n = po.N;
-            long[][] sigs = BuildSignatures(po, adj);
+            VertexSig[] sigs = BuildSignatures(po, adj);
 
             bool anyChange = false;
             for (int a = 0; a < n; a++)
@@ -203,7 +265,7 @@ namespace Canonizer
                 for (int b = a + 1; b < n; b++)
                 {
                     if (po.Compare(a, b) != Ordering.Unknown) continue;
-                    int cmp = LexCompare(sigs[a], sigs[b]);
+                    int cmp = sigs[a].CompareTo(sigs[b]);
                     if (cmp == 0) continue;
                     po.Set(a, b, cmp < 0 ? Ordering.Less : Ordering.Greater);
                     anyChange = true;
@@ -212,37 +274,29 @@ namespace Canonizer
             return anyChange;
         }
 
-        private static long[][] BuildSignatures(PartialOrder po, int[] adj)
+        private static VertexSig[] BuildSignatures(PartialOrder po, int[] adj)
         {
             int n = po.N;
 
-            int[] levelKey = new int[n];
+            int[] color = new int[n];
             for (int v = 0; v < n; v++)
-                levelKey[v] = (po.BelowCount(v) << 16) | (po.AboveCount(v) & 0xFFFF);
+                color[v] = (po.BelowCount(v) << 16) | (po.AboveCount(v) & 0xFFFF);
 
-            var sigs = new long[n][];
+            var sigs = new VertexSig[n];
             for (int v = 0; v < n; v++)
             {
-                var sig = new long[n + 1];
-                sig[0] = levelKey[v];
+                var tail = new NeighborEntry[n];
                 int rowBase = v * n;
                 for (int u = 0; u < n; u++)
-                {
-                    long ru = (long)levelKey[u] * 2 + (u == v ? 1 : 0);
-                    sig[1 + u] = (ru << 32) | (uint)adj[rowBase + u];
-                }
-                Array.Sort(sig, 1, n);
-                sigs[v] = sig;
+                    tail[u] = new NeighborEntry(
+                        color: color[u],
+                        isSelf: u == v,
+                        relation: po.Compare(v, u),
+                        edge: adj[rowBase + u]);
+                Array.Sort(tail);
+                sigs[v] = new VertexSig(color[v], tail);
             }
             return sigs;
-        }
-
-        private static int LexCompare(long[] a, long[] b)
-        {
-            int len = a.Length;
-            for (int i = 0; i < len; i++)
-                if (a[i] != b[i]) return a[i] < b[i] ? -1 : 1;
-            return 0;
         }
 
         // ── Tiebreak ───────────────────────────────────────────────────────────
