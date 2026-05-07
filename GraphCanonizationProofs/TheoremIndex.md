@@ -24,8 +24,8 @@ The file requirements have recently changed, a few early tables don't follow the
 |------|---------|-------------|-------|
 | `AdjMatrix.permute` | `AdjMatrix.Aut`, `AdjMatrix.permute_adj`, `AdjMatrix.permute_mul`, `AdjMatrix.permute_one`, `Isomorphic_permute`, `mem_Aut_iff_adj`, `permute_of_Isomorphic`, `swapVertexLabels_eq_permute` | Relabel vertices of G by permutation σ. Uses σ.symm for left-action semantics. | — |
 | `AdjMatrix.permute_adj` | `PathsBetween_initializePaths_eq`, `comparePathSegments_σ_equivariant`, `initializePaths_Aut_equivariant` | Simplification rule: `(G.permute σ).adj i j = G.adj (σ.symm i) (σ.symm j)`. | `@[simp]` |
-| `AdjMatrix.permute_one` | `AdjMatrix.Aut`, `AdjMatrix.permute_permute_symm`, `AdjMatrix.permute_symm_permute`, `Isomorphic_permute`, `permute_of_Isomorphic` | Permuting by the identity does nothing: `G.permute 1 = G`. | `@[simp]` |
-| `AdjMatrix.permute_mul` | `AdjMatrix.Aut`, `AdjMatrix.permute_permute_symm`, `AdjMatrix.permute_symm_permute`, `Isomorphic_permute`, `labelEdges_fold_permutes`, `labelEdges_fold_strong`, `permute_of_Isomorphic`, `runFrom_VtsInvariant_eq_strong_general` | Permutation action composes as left action: `G.permute (σ * τ) = (G.permute τ).permute σ`. | — |
+| `AdjMatrix.permute_one` | `AdjMatrix.Aut`, `AdjMatrix.permute_permute_symm`, `AdjMatrix.permute_symm_permute`, `Isomorphic_permute`, `permute_of_Isomorphic` | Permuting by the identity does nothing: `G.permute 1 = G`. | `@[simp]`; Widely reused — identity is the unit of permutation action |
+| `AdjMatrix.permute_mul` | `AdjMatrix.Aut`, `AdjMatrix.permute_permute_symm`, `AdjMatrix.permute_symm_permute`, `Isomorphic_permute`, `labelEdges_fold_permutes`, `labelEdges_fold_strong`, `permute_of_Isomorphic`, `runFrom_VtsInvariant_eq_strong_general` | Permutation action composes as left action: `G.permute (σ * τ) = (G.permute τ).permute σ`. | Widely reused — composition of permutation actions |
 | `AdjMatrix.permute_permute_symm` | `AdjMatrix.Aut` | Permuting by inverse undoes original: `(G.permute σ).permute σ⁻¹ = G`. | `@[simp]` |
 | `AdjMatrix.permute_symm_permute` | — | Inverse permute then permute: `(G.permute σ⁻¹).permute σ = G`. | `@[simp]` |
 | `swapVertexLabels_eq_permute` | `Isomorphic_permute`, `labelEdges_fold_permutes`, `labelEdges_fold_strong`, `permute_of_Isomorphic` | Bridge between concrete `swapVertexLabels` and abstract `permute` action. | — |
@@ -35,10 +35,10 @@ The file requirements have recently changed, a few early tables don't follow the
 | Name | Used By | Description | Notes |
 |------|---------|-------------|-------|
 | `AdjMatrix.Aut` | `AdjMatrix.orbit`, `Decidable (σ ∈ G.Aut)`, `mem_Aut_iff` | The automorphism group of G: permutations σ with `G.permute σ = G`. Instances: `DecidableEq`, `Fintype`. | — |
-| `mem_Aut_iff` | — | Characterization of `Aut` via permute: `σ ∈ G.Aut ↔ G.permute σ = G`. | — |
-| `mem_Aut_iff_adj` | — | Characterization via adjacency: `σ ∈ G.Aut ↔ ∀ i j, G.adj (σ.symm i) (σ.symm j) = G.adj i j`. | — |
+| `mem_Aut_iff` | — | Characterization of `Aut` via permute: `σ ∈ G.Aut ↔ G.permute σ = G`. | API characterization; useful when needing the bicondition explicitly |
+| `mem_Aut_iff_adj` | — | Characterization via adjacency: `σ ∈ G.Aut ↔ ∀ i j, G.adj (σ.symm i) (σ.symm j) = G.adj i j`. | API characterization in adjacency form |
 | `AdjMatrix.orbit` | `AdjMatrix.exists_Aut_of_mem_orbit`, `AdjMatrix.mem_orbit_self`, `AdjMatrix.mem_orbit_symm`, `AdjMatrix.mem_orbit_trans`, `AdjMatrix.orbit_stable_under_Aut`, `mem_orbit_iff` | The `Aut(G)`-orbit of vertex v: all vertices reachable from v by an automorphism. | — |
-| `mem_orbit_iff` | — | Characterization: `w ∈ G.orbit v ↔ ∃ σ ∈ G.Aut, σ v = w`. | — |
+| `mem_orbit_iff` | — | Characterization: `w ∈ G.orbit v ↔ ∃ σ ∈ G.Aut, σ v = w`. | API characterization of orbit membership |
 | `AdjMatrix.mem_orbit_self` | `AdjMatrix.orbitSetoid` | Reflexivity: `v ∈ G.orbit v`. | — |
 | `AdjMatrix.mem_orbit_symm` | `AdjMatrix.orbitSetoid` | Symmetry: `w ∈ G.orbit v → v ∈ G.orbit w`. | — |
 | `AdjMatrix.mem_orbit_trans` | `AdjMatrix.orbitSetoid` | Transitivity: `v ∈ G.orbit u → w ∈ G.orbit v → w ∈ G.orbit u`. | — |
@@ -65,7 +65,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `permNat` | `PathState.permute`, `PathsBetween.permute`, `PathsFrom.permute`, `RankState.permute`, `permNat_lt`, `permNat_of_ge`, `permNat_of_lt`, `permNat_one` | Re-index natural numbers by permutation (identity outside `[0, n)`). | — |
 | `permNat_one` | — | Permuting by identity is the identity on naturals. | `@[simp]` |
 | `permNat_lt` | — | Permuting a number `< n` stays `< n`. | — |
-| `permNat_of_lt` | `PathsBetween_initializePaths_eq`, `PathsBetween_permute_connectedSubPaths_perm`, `PathsFrom_initializePaths_eq`, `PathsFrom_permute_pathsToVertex_perm`, `RankState.σInvariant.permute_eq_self`, `calculatePathRankings_getFrom_invariant`, `initializePaths_Aut_equivariant`, `pathsOfLength_two_states_at_σ_slot`, `permNat_fin`, `permNat_inv_fin`, `permNat_inv_perm`, `permNat_perm_inv`, `state_σ_fixed_pathsOfLength_at_σ_slot` | Explicit formula for `permNat σ i` when `i < n`. | — |
+| `permNat_of_lt` | `PathsBetween_initializePaths_eq`, `PathsBetween_permute_connectedSubPaths_perm`, `PathsFrom_initializePaths_eq`, `PathsFrom_permute_pathsToVertex_perm`, `RankState.σInvariant.permute_eq_self`, `calculatePathRankings_getFrom_invariant`, `initializePaths_Aut_equivariant`, `pathsOfLength_two_states_at_σ_slot`, `permNat_fin`, `permNat_inv_fin`, `permNat_inv_perm`, `permNat_perm_inv`, `state_σ_fixed_pathsOfLength_at_σ_slot` | Explicit formula for `permNat σ i` when `i < n`. | Widely reused — primary `permNat` rewrite tool |
 | `permNat_of_ge` | — | Permuting a number `≥ n` is unchanged. | — |
 | `permNat_inv_perm` | — | Applying σ then σ⁻¹ is identity on in-range naturals. | `@[simp]` |
 | `permNat_perm_inv` | — | Applying σ⁻¹ then σ is identity on in-range naturals. | `@[simp]` |
@@ -114,9 +114,9 @@ The file requirements have recently changed, a few early tables don't follow the
 
 | Name | Used By | Description | Notes |
 |------|---------|-------------|-------|
-| `sortBy_map` | `orderInsensitiveListCmp_map` | `sortBy cmp (L.map f) = (sortBy cmp L).map f` when `f` preserves `cmp`; instantiated with `PathSegment.permute σ` for σ-equivariance. | — |
+| `sortBy_map` | `orderInsensitiveListCmp_map` | `sortBy cmp (L.map f) = (sortBy cmp L).map f` when `f` preserves `cmp`; instantiated with `PathSegment.permute σ` for σ-equivariance. | Global form; pointwise variant `sortBy_map_pointwise` is strictly stronger |
 | `perm_insertSorted` | `insertSorted_pairwise`, `sortBy_perm` | `insertSorted cmp a L` is a `List.Perm` of `a :: L`. | — |
-| `sortBy_perm` | `between_assignList_σ_rank_closure`, `calculatePathRankings_body_preserves_inv`, `chain_image_dense_for_assignRanks_sortBy`, `chain_value_at_vertex_for_assignRanks_sortBy`, `convergeOnce_preserves_lower_uniqueness`, `from_assignList_σ_rank_closure`, `getArrayRank_zeros_eq_zeros`, `orderInsensitiveListCmp_equivCompat`, `orderInsensitiveListCmp_map`, `orderInsensitiveListCmp_map_pointwise`, `orderInsensitiveListCmp_map_pointwise_relational`, `orderInsensitiveListCmp_perm`, `orderInsensitiveListCmp_refl`, `orderInsensitiveListCmp_self_under_f_eq`, `orderInsensitiveListCmp_trans`, `sortBy_eq_of_perm_strict`, `sortBy_first_q_positions_have_start_types`, `sortBy_map_pointwise`, `sortBy_pathsAtTop_length_eq`, `sortedPairs_seconds_perm` | `sortBy cmp L` is a `List.Perm` of `L`. | — |
+| `sortBy_perm` | `between_assignList_σ_rank_closure`, `calculatePathRankings_body_preserves_inv`, `chain_image_dense_for_assignRanks_sortBy`, `chain_value_at_vertex_for_assignRanks_sortBy`, `convergeOnce_preserves_lower_uniqueness`, `from_assignList_σ_rank_closure`, `getArrayRank_zeros_eq_zeros`, `orderInsensitiveListCmp_equivCompat`, `orderInsensitiveListCmp_map`, `orderInsensitiveListCmp_map_pointwise`, `orderInsensitiveListCmp_map_pointwise_relational`, `orderInsensitiveListCmp_perm`, `orderInsensitiveListCmp_refl`, `orderInsensitiveListCmp_self_under_f_eq`, `orderInsensitiveListCmp_trans`, `sortBy_eq_of_perm_strict`, `sortBy_first_q_positions_have_start_types`, `sortBy_map_pointwise`, `sortBy_pathsAtTop_length_eq`, `sortedPairs_seconds_perm` | `sortBy cmp L` is a `List.Perm` of `L`. | Widely reused — sorted output is a permutation of input |
 | `sortedPerm_class_eq` | `assignRanks_rank_eq_of_sorted_perm`, `orderInsensitiveListCmp_perm` | KEY LEMMA: for sorted lists `M`, `M'` with `M.Perm M'`, the elements at position `i` of `M` and `M'` lie in the same `cmp`-equivalence class. Proved by a counting argument on sorted prefix/suffix structure. | — |
 | `sortBy_pairwise` | `orderInsensitiveListCmp_perm`, `sortBy_eq_of_perm_strict` | `sortBy cmp L` is `Pairwise (cmp · · ≠ .gt)`, i.e. the output list is sorted under `cmp`. | — |
 | `foldl_pointwise_eq` | `orderInsensitiveListCmp_equivCompat`, `orderInsensitiveListCmp_perm` | If two equal-length lists agree element-wise under `f` at every accumulator value, their `List.foldl f` results are equal. | — |
@@ -124,8 +124,8 @@ The file requirements have recently changed, a few early tables don't follow the
 | `assignRanks_length` | `assignRanks_getElem_fst`, `assignRanks_rank_eq_at_succ_when_cmp_eq`, `assignRanks_rank_eq_of_prefix`, `assignRanks_rank_le_pos`, `assignRanks_rank_monotone`, `assignRanks_rank_succ_when_cmp_neq_eq`, `assignRanks_strong_invariant`, `chain_value_at_vertex_for_assignRanks_sortBy` | `(assignRanks cmp L).length = L.length`. | — |
 | `assignRanks_map_fst` | `assignRanks_getElem_fst`, `between_assignList_σ_rank_closure`, `calculatePathRankings_body_preserves_inv`, `chain_image_dense_for_assignRanks_sortBy`, `from_assignList_σ_rank_closure` | `(assignRanks cmp L).map (·.1) = L`: first components reproduce the input list in order. | — |
 | `assignRanks_getElem_fst` | `chain_value_at_vertex_for_assignRanks_sortBy` | Element-wise: `((assignRanks cmp L)[i]).1 = L[i]`. | — |
-| `assignRanks_map_of_cmp_respect` | — | `assignRanks cmp (L.map f) = (assignRanks cmp L).map (fun e => (f e.1, e.2))` when `f` preserves `cmp`; foundational for the σ-equivariance pipeline. | — |
-| `assignRanks_map_relational` | `between_assignList_σ_rank_general`, `between_assignList_σ_rank_rel`, `from_assignList_σ_rank_general`, `from_assignList_σ_rank_rel` | Relational form: `assignRanks cmp₂ (L.map f) = (assignRanks cmp₁ L).map (fun e => (f e.1, e.2))` when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ L`. Used by Stage B-rel. | — |
+| `assignRanks_map_of_cmp_respect` | — | `assignRanks cmp (L.map f) = (assignRanks cmp L).map (fun e => (f e.1, e.2))` when `f` preserves `cmp`; foundational for the σ-equivariance pipeline. | Diagonal special case of `assignRanks_map_relational`; new code should prefer the relational form |
+| `assignRanks_map_relational` | `between_assignList_σ_rank_general`, `between_assignList_σ_rank_rel`, `from_assignList_σ_rank_general`, `from_assignList_σ_rank_rel` | Relational form: `assignRanks cmp₂ (L.map f) = (assignRanks cmp₁ L).map (fun e => (f e.1, e.2))` when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ L`. Used by Stage B-rel. | Relational generalization of `assignRanks_map_of_cmp_respect` |
 | `assignRanks_image_dense` | `chain_image_dense_for_assignRanks_sortBy` | Rank set is downward-closed: for any entry in `assignRanks cmp L`, every `k ≤ entry.2` has a witness in the output. | — |
 | `assignRanks_rank_lt_length` | `getFrom_image_isPrefix_for_initializePaths` | Every rank in `assignRanks cmp L` is `< L.length`; bounds vertex type values produced by `convergeOnce`. | — |
 | `assignRanks_rank_le_pos` | `assignRanks_rank_eq_of_sorted_perm` | Rank at position `k` in `assignRanks cmp L` is `≤ k`. | — |
@@ -139,7 +139,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `assignRanks_rank_succ_when_cmp_neq_eq` | `assignRanks_rank_eq_of_sorted_perm` | Rank at `i+1` equals rank at `i` plus 1 when `cmp L[i] L[i+1] ≠ .eq`. | — |
 | `assignRanks_rank_eq_of_sorted_perm` | `between_assignList_σ_rank_general`, `between_assignList_σ_rank_rel`, `from_assignList_σ_rank_general`, `from_assignList_σ_rank_rel` | For sorted `X.Perm Y` (under a total preorder), ranks at each position `i` agree between `assignRanks cmp X` and `assignRanks cmp Y`. | — |
 | `sortBy_eq_of_perm_strict` | `computeDenseRanks_τ_shift_distinct` | If `X.Perm Y` and `cmp` is strict on `X` (no two distinct elements are `cmp`-equal), then `sortBy cmp X = sortBy cmp Y`. | — |
-| `insertSorted_map` | `sortBy_map` | `insertSorted cmp (f a) (L.map f) = (insertSorted cmp a L).map f` when `f` globally preserves `cmp`. | private |
+| `insertSorted_map` | `sortBy_map` | `insertSorted cmp (f a) (L.map f) = (insertSorted cmp a L).map f` when `f` globally preserves `cmp`. | private; Global form; pointwise variant `insertSorted_map_pointwise` is strictly stronger |
 | `sorted_perm_head_class_eq` | `sortedPerm_class_eq` | Head-element lemma used in `sortedPerm_class_eq`: the head of a sorted list and the head of any Perm share the same `cmp`-class. | private |
 | `insertSorted_pairwise` | `sortBy_pairwise` | `insertSorted cmp a L` is `Pairwise (cmp · · ≠ .gt)` when `L` is, i.e. insertion preserves sortedness. | private |
 | `assignRanksStep` | `assignRanksStep_commutes_relational`, `assignRanksStep_commutes_with_f_map`, `assignRanksStep_density_invariant`, `assignRanksStep_fst_length`, `assignRanksStep_fst_map_fst`, `assignRanksStep_preserves_invariant`, `assignRanksStep_rank_le`, `assignRanks_eq_foldl` | Single foldl step for `assignRanks`: appends `(elem, rank)` to accumulator. | private |
@@ -188,7 +188,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `VtsInvariant.mul` | `AdjMatrix.TypedAut` | Composition: if σ and τ both satisfy `VtsInvariant`, so does `σ * τ`. | — |
 | `VtsInvariant.inv` | `AdjMatrix.TypedAut` | Inversion: if σ satisfies `VtsInvariant`, so does `σ⁻¹`. | — |
 | `AdjMatrix.TypedAut` | `AdjMatrix.TypedAut_le_Aut`, `Decidable (σ ∈ G.TypedAut vts)`, `Fintype (G.TypedAut vts)`, `TypedAut_replicate_zero`, `mem_TypedAut_iff` | Subgroup of `Aut G` whose elements also satisfy `VtsInvariant vts`. | — |
-| `mem_TypedAut_iff` | — | `σ ∈ G.TypedAut vts ↔ σ ∈ G.Aut ∧ VtsInvariant σ vts`. | — |
+| `mem_TypedAut_iff` | — | `σ ∈ G.TypedAut vts ↔ σ ∈ G.Aut ∧ VtsInvariant σ vts`. | API characterization; useful when needing the bicondition explicitly |
 | `AdjMatrix.TypedAut_le_Aut` | `runFrom_VtsInvariant_eq_strong`, `runFrom_VtsInvariant_eq_strong_general` | `G.TypedAut vts` is a subgroup of `G.Aut`. | — |
 | `Decidable (VtsInvariant σ vts)` | — | Instance: `VtsInvariant σ vts` is decidable. | Instance |
 | `Decidable (σ ∈ G.TypedAut vts)` | — | Instance: membership in `TypedAut` is decidable. | Instance |
@@ -203,7 +203,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `shiftAbove_getD_target` | `breakTie_getD_at_min`, `breakTie_getD_at_other` | Positions with type `= t₀` also have value shifted after `shiftAbove`. | — |
 | `breakTieCount` | `breakTie_eq_promote_shift`, `breakTie_noop`, `breakTie_step_preserves_uniqueness` | Number of vertices in `vts` with type `t₀`. | — |
 | `breakTie_noop` | `breakTie_getD_above_or`, `breakTie_getD_at_min`, `breakTie_getD_below`, `breakTie_size`, `runFrom_VtsInvariant_eq_strong`, `runFrom_VtsInvariant_eq_strong_general` | If `t₀` does not appear in `vts`, `breakTie t₀ vts = vts`. | — |
-| `breakTie_eq_promote_shift` | `breakTie_getD_above`, `breakTie_getD_at_min`, `breakTie_getD_at_other`, `breakTie_getD_below`, `breakTie_size` | `breakTie t₀ vts = shiftAbove t₀ (breakTiePromote t₀ vts)`. | — |
+| `breakTie_eq_promote_shift` | `breakTie_getD_above`, `breakTie_getD_at_min`, `breakTie_getD_at_other`, `breakTie_getD_below`, `breakTie_size` | `breakTie t₀ vts = shiftAbove t₀ (breakTiePromote t₀ vts)`. | Algebraic decomposition; useful when reasoning about `breakTie` via its components |
 | `btStep` | `breakTiePromote_eq_fold`, `btFold_getD_not_mem`, `btFold_no_target`, `btStep_getD_ne`, `btStep_notfirst`, `btStep_size` | Single fold step for `breakTiePromote`: promotes the minimum tied vertex. | private |
 | `btStep_size` | `btFold_size` | `btStep` preserves array size. | private |
 | `breakTiePromote_eq_fold` | `breakTiePromote_getD_at_min`, `breakTiePromote_getD_at_other`, `breakTiePromote_getD_of_ne`, `breakTiePromote_size` | `breakTiePromote t₀ vts` is expressed as a `List.foldl` of `btStep`. | private |
@@ -233,7 +233,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `breakTie_Aut_stabilizer` | `breakTie_TypedAut_le`, `breakTie_strict_shrink` | §5.1: characterizes `TypedAut G (breakTie vts t₀)` as the `v_star`-stabilizer subgroup of `TypedAut G vts`, where `v_star := min (typeClass vts t₀)`. Requires `vts` to be `Aut(G)`-invariant. | — |
 | `breakTie_TypedAut_le` | `breakTie_strict_shrink` | `G.TypedAut (breakTie t₀ vts) ≤ G.TypedAut vts`: breaking a tie can only shrink the typed automorphism group. | — |
 | `breakTie_strict_shrink` | — | §5.2: Strict inclusion `G.TypedAut (breakTie vts t₀) < G.TypedAut vts`, given an `hmove` witness — some σ ∈ TypedAut(G,vts) with σ v_star ≠ v_star. | — |
-| `runFrom` | — | "Remainder of the pipeline" referenced in §6: feed an intermediate typing in, run the remaining `orderVertices` outer iterations and the final `labelEdgesAccordingToRankings`, and produce the canonical matrix. | — |
+| `runFrom` | — | "Remainder of the pipeline" referenced in §6: feed an intermediate typing in, run the remaining `orderVertices` outer iterations and the final `labelEdgesAccordingToRankings`, and produce the canonical matrix. | Pipeline entry point — all `runFrom_*` theorems concern this definition |
 | `breakTieAt` | `breakTieAt_eq_fold` | The "what if we had kept vertex `keep` instead of `min (typeClass vts t₀)`" alternative to `breakTie`. Promotes every vertex with value `t₀` except `keep` to `t₀ + 1`. | — |
 | `bTAStep` | `bTAFold_getD_of_ne`, `bTAStep_getD_ne`, `bTAStep_preserves_keep`, `bTAStep_size`, `breakTieAt_eq_fold` | Single fold step for `breakTieAt`. | private |
 | `breakTieAt_eq_fold` | `breakTieAt_getD_keep`, `breakTieAt_getD_of_ne`, `breakTieAt_size` | `breakTieAt vts t₀ keep` is expressed as a `List.foldl` of `bTAStep`. | private |
@@ -249,7 +249,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `breakTieAt_getD_keep` | `breakTieAt_VtsInvariant_eq`, `breakTieAt_τ_related` | `breakTieAt` preserves the value at `keep`. | — |
 | `bTAFold_getD_promoted` | `breakTieAt_getD_promoted` | Value at positions promoted by `bTAFold`. | private |
 | `breakTieAt_getD_promoted` | `breakTieAt_VtsInvariant_eq`, `breakTieAt_τ_related` | Value at positions promoted by `breakTieAt`. | — |
-| `breakTieAt_VtsInvariant_eq` | `tiebreak_choice_independent` | `breakTieAt` preserves `VtsInvariant τ` when `τ keep = keep`. | — |
+| `breakTieAt_VtsInvariant_eq` | `tiebreak_choice_independent` | `breakTieAt` preserves `VtsInvariant τ` when `τ keep = keep`. | Single-vts form; relational two-vts version: `breakTieAt_τ_related` |
 
 ## ComparePathSegments Module
 
@@ -260,33 +260,33 @@ The file requirements have recently changed, a few early tables don't follow the
 | `cmpInner_eq_eq` | `comparePathSegments_total_preorder` | Evaluates the inner-inner `comparePathSegments` expression to `.eq` when `xR = yR` and `xe = ye`. | private |
 | `cmpInner_trichotomy` | `comparePathSegments_total_preorder` | Exhaustive case split: for any `(xR, xe)` and `(yR, ye)`, exactly one of the `.gt`, `.eq`, or `.lt` conditions for the inner-inner comparator holds. | private |
 | `comparePathSegments_total_preorder` | `comparePathsBetween_total_preorder` | Proves `comparePathSegments` satisfies all four total-preorder properties: reflexivity, both antisymmetries (`.lt → .gt` and `.gt → .lt`), and ≤-transitivity (`≠ .gt`). Mixed `bottom`/`inner` cases use the fixed `bottom < inner` ordering; inner-inner cases reduce to Nat-tuple lexicographic order. | — |
-| `orderInsensitiveListCmp_refl` | `_comparePathsFrom_total_preorder_legacy_unused`, `comparePathsBetween_total_preorder`, `comparePathsFrom_total_preorder` | `orderInsensitiveListCmp cmp L L = .eq` when `cmp` is reflexive on elements of `L`. Uses `sortBy_perm` to transfer reflexivity from `L` to its sorted form. | — |
+| `orderInsensitiveListCmp_refl` | `comparePathsBetween_total_preorder`, `comparePathsFrom_total_preorder` | `orderInsensitiveListCmp cmp L L = .eq` when `cmp` is reflexive on elements of `L`. Uses `sortBy_perm` to transfer reflexivity from `L` to its sorted form. | — |
 | `comparePathSegments_equivCompat` | `comparePathsBetween_equivCompat`, `comparePathsBetween_total_preorder` | If `comparePathSegments vts br p q = .eq`, then `p` and `q` compare identically against any third segment `r` in either argument position. The `h_compat` hypothesis required by `orderInsensitiveListCmp_trans` and `_equivCompat`. | — |
 | `orderInsensitiveListCmp_foldl_init_preserved` | `foldl_zip_eq_implies_pairwise_eq`, `foldl_zip_trans`, `orderInsensitiveListCmp_swap_gt`, `orderInsensitiveListCmp_swap_lt` | Once the `orderInsensitiveListCmp` foldl accumulator is non-`.eq`, all subsequent steps short-circuit and the value is preserved unchanged. Used by `_swap_lt`, `_swap_gt`, `foldl_zip_trans`, and `foldl_zip_eq_implies_pairwise_eq` to discharge "init already set" cases. | private |
-| `orderInsensitiveListCmp_swap_lt` | `_comparePathsFrom_total_preorder_legacy_unused`, `comparePathsBetween_total_preorder`, `comparePathsFrom_total_preorder` | Antisymmetry-`.lt → .gt` lift: `orderInsensitiveListCmp cmp L₁ L₂ = .lt → orderInsensitiveListCmp cmp L₂ L₁ = .gt`. Handles equal-length and length-mismatch cases separately. | — |
+| `orderInsensitiveListCmp_swap_lt` | `comparePathsBetween_total_preorder`, `comparePathsFrom_total_preorder` | Antisymmetry-`.lt → .gt` lift: `orderInsensitiveListCmp cmp L₁ L₂ = .lt → orderInsensitiveListCmp cmp L₂ L₁ = .gt`. Handles equal-length and length-mismatch cases separately. | — |
 | `orderInsensitiveListCmp_swap_gt` | `comparePathsBetween_total_preorder`, `comparePathsFrom_total_preorder` | Antisymmetry-`.gt → .lt` lift: `orderInsensitiveListCmp cmp L₁ L₂ = .gt → orderInsensitiveListCmp cmp L₂ L₁ = .lt`. Mirror of `_swap_lt`. | — |
 | `foldl_zip_trans` | `orderInsensitiveListCmp_trans` | For equal-length lists `A`, `B`, `C`: if `(zip A B).foldl ≠ .gt` and `(zip B C).foldl ≠ .gt`, then `(zip A C).foldl ≠ .gt`. Proved by induction on the head pair `(cmp a b, cmp b c)` using antisym₁ and bilateral compat. Core of `orderInsensitiveListCmp_trans`. | private |
 | `orderInsensitiveListCmp_trans` | `comparePathsBetween_total_preorder`, `comparePathsFrom_total_preorder` | Transitivity lift: `orderInsensitiveListCmp cmp L₁ L₂ ≠ .gt → ... L₂ L₃ ≠ .gt → ... L₁ L₃ ≠ .gt`. Equal-length case delegates to `foldl_zip_trans`; length-mismatch cases reduce to length arithmetic. | — |
 | `foldl_zip_eq_implies_pairwise_eq` | `orderInsensitiveListCmp_equivCompat` | If the `orderInsensitiveListCmp` foldl over a zipped list returns `.eq`, then every element pair in that list has `cmp = .eq` pointwise. | private |
 | `orderInsensitiveListCmp_equivCompat` | `comparePathsBetween_equivCompat` | Bilateral compat lift: if `orderInsensitiveListCmp cmp L₁ L₂ = .eq`, then `L₁` and `L₂` compare identically against any third list in either argument position. Extracts pointwise class equality via `foldl_zip_eq_implies_pairwise_eq`, then applies `foldl_pointwise_eq`. | — |
-| `comparePathsBetween_total_preorder` | `_comparePathsFrom_total_preorder_legacy_unused`, `comparePathsFrom_total_preorder` | `comparePathsBetween` is a total preorder, assembled by lifting all four properties of `comparePathSegments_total_preorder` through the `orderInsensitiveListCmp` helpers. Compares first by `endVertexIndex` type, then by the order-insensitive list of `connectedSubPaths`. | — |
+| `comparePathsBetween_total_preorder` | `comparePathsFrom_total_preorder` | `comparePathsBetween` is a total preorder, assembled by lifting all four properties of `comparePathSegments_total_preorder` through the `orderInsensitiveListCmp` helpers. Compares first by `endVertexIndex` type, then by the order-insensitive list of `connectedSubPaths`. | — |
 
 ## CompareEquivariant Module
 
 | Name | Used By | Description | Notes |
 |------|---------|-------------|-------|
-| `orderInsensitiveListCmp_map` | `comparePathsBetween_σ_equivariant` | `orderInsensitiveListCmp` is invariant under applying `f` to both lists when `f` globally preserves `cmp`. | — |
-| `insertSorted_map_pointwise` | `sortBy_map_pointwise` | Pointwise variant of `insertSorted_map`: requires `cmp (f a) (f b) = cmp a b` only for `b ∈ L`. | private |
-| `sortBy_map_pointwise` | `orderInsensitiveListCmp_map_pointwise`, `orderInsensitiveListCmp_self_under_f_eq` | Pointwise variant of `sortBy_map`: requires `cmp (f a) (f b) = cmp a b` only for `a, b ∈ L`. | — |
+| `orderInsensitiveListCmp_map` | `comparePathsBetween_σ_equivariant` | `orderInsensitiveListCmp` is invariant under applying `f` to both lists when `f` globally preserves `cmp`. | Global form; pointwise variant `orderInsensitiveListCmp_map_pointwise` is strictly stronger |
+| `insertSorted_map_pointwise` | `sortBy_map_pointwise` | Pointwise variant of `insertSorted_map`: requires `cmp (f a) (f b) = cmp a b` only for `b ∈ L`. | private; Pointwise form of `insertSorted_map` |
+| `sortBy_map_pointwise` | `orderInsensitiveListCmp_map_pointwise`, `orderInsensitiveListCmp_self_under_f_eq` | Pointwise variant of `sortBy_map`: requires `cmp (f a) (f b) = cmp a b` only for `a, b ∈ L`. | Pointwise form of `sortBy_map`; relational variant: `sortBy_map_pointwise_relational` |
 | `foldl_congr_mem` | `orderInsensitiveListCmp_map_pointwise` | Pointwise foldl congruence: `f` and `g` agreeing on all `(acc, a)` pairs with `a ∈ L` implies equal foldl results. | private |
-| `orderInsensitiveListCmp_map_pointwise` | `comparePathsFrom_σ_equivariant` | Pointwise variant of `orderInsensitiveListCmp_map`: requires `cmp` respects only for pairs from `L₁ ++ L₂`. | — |
-| `comparePathSegments_σ_equivariant` | `comparePathSegments_σ_relational`, `comparePathsBetween_σ_equivariant`, `comparePathsBetween_σ_self_eq` | `comparePathSegments vts br (PathSegment.permute σ p) (PathSegment.permute σ q) = comparePathSegments vts br p q` under σ-invariant `vts` and `br`. | — |
+| `orderInsensitiveListCmp_map_pointwise` | `comparePathsFrom_σ_equivariant` | Pointwise variant of `orderInsensitiveListCmp_map`: requires `cmp` respects only for pairs from `L₁ ++ L₂`. | Pointwise form of `orderInsensitiveListCmp_map`; relational variant: `orderInsensitiveListCmp_map_pointwise_relational` |
+| `comparePathSegments_σ_equivariant` | `comparePathSegments_σ_relational`, `comparePathsBetween_σ_equivariant`, `comparePathsBetween_σ_self_eq` | `comparePathSegments vts br (PathSegment.permute σ p) (PathSegment.permute σ q) = comparePathSegments vts br p q` under σ-invariant `vts` and `br`. | Single-σ form; relational generalization: `comparePathSegments_σ_relational` |
 | `map_reindex_perm` | `PathsBetween_permute_connectedSubPaths_perm`, `PathsFrom_permute_pathsToVertex_perm` | Reindex-perm lemma: σ-reindexing `L.map act` gives a `List.Perm` of `L.map act`. | — |
 | `PathsBetween_permute_connectedSubPaths_perm` | `comparePathsBetween_σ_equivariant`, `comparePathsBetween_σ_relational` | `(p.permute σ).connectedSubPaths.Perm (p.connectedSubPaths.map (PathSegment.permute σ))` for depth>0 paths of length `vc`. | — |
 | `PathsFrom_permute_pathsToVertex_perm` | `comparePathsFrom_σ_equivariant`, `comparePathsFrom_σ_relational` | `(p.permute σ).pathsToVertex.Perm (p.pathsToVertex.map (PathsBetween.permute σ))` for length-`vc` `pathsToVertex`. | — |
-| `comparePathsBetween_σ_equivariant` | `between_assignList_σ_rank_closure`, `comparePathsBetween_σ_relational`, `comparePathsFrom_σ_equivariant`, `comparePathsFrom_σ_self_eq` | `comparePathsBetween vts br (p₁.permute σ) (p₂.permute σ) = comparePathsBetween vts br p₁ p₂` under σ-invariant `vts`/`br` and length conditions. | — |
-| `comparePathsBetween_equivCompat` | `_comparePathsFrom_total_preorder_legacy_unused`, `comparePathsFrom_total_preorder` | Bilateral compat for `comparePathsBetween`: if it returns `.eq`, both arguments compare identically against any third. | — |
-| `comparePathsFrom_σ_equivariant` | `comparePathsFrom_σ_relational`, `from_assignList_σ_rank_closure` | `comparePathsFrom vts br (p₁.permute σ) (p₂.permute σ) = comparePathsFrom vts br p₁ p₂` under σ-invariant `vts`/`br` and length conditions. | — |
+| `comparePathsBetween_σ_equivariant` | `between_assignList_σ_rank_closure`, `comparePathsBetween_σ_relational`, `comparePathsFrom_σ_equivariant`, `comparePathsFrom_σ_self_eq` | `comparePathsBetween vts br (p₁.permute σ) (p₂.permute σ) = comparePathsBetween vts br p₁ p₂` under σ-invariant `vts`/`br` and length conditions. | Single-σ form; relational generalization: `comparePathsBetween_σ_relational` |
+| `comparePathsBetween_equivCompat` | `comparePathsFrom_total_preorder` | Bilateral compat for `comparePathsBetween`: if it returns `.eq`, both arguments compare identically against any third. | — |
+| `comparePathsFrom_σ_equivariant` | `comparePathsFrom_σ_relational`, `from_assignList_σ_rank_closure` | `comparePathsFrom vts br (p₁.permute σ) (p₂.permute σ) = comparePathsFrom vts br p₁ p₂` under σ-invariant `vts`/`br` and length conditions. | Single-σ form; relational generalization: `comparePathsFrom_σ_relational` |
 | `betweenRankFn_σ_inv_from_cells` | `calculatePathRankings_body_preserves_inv` | Cell-level σ-invariance of a 3D table lifts to a σ-invariant function (the `betweenRankFn` projection). | — |
 | `initializePaths_σInv_via_Aut` | `calculatePathRankings_body_preserves_inv` | For σ ∈ Aut G, `initializePaths G = PathState.permute σ (initializePaths G)`. Direct corollary of Stage A. | — |
 
@@ -323,10 +323,10 @@ The file requirements have recently changed, a few early tables don't follow the
 | `comparePathsFrom_σ_self_eq` | `from_assignList_σ_rank_closure` | `comparePathsFrom vts br p (p.permute σ) = .eq` under σ-invariant `vts`/`br` and length conditions. | — |
 | `state_σ_fixed_pathsOfLength_at_σ_slot` | `from_assignList_σ_rank_closure` | For a σ-fixed `PathState`, reading slot `s` of the depth-`d` array equals reading slot `σ s` in the original. | — |
 | `comparePathsFrom_total_preorder` | `sortBy_first_q_positions_have_start_types` | `comparePathsFrom` satisfies all four total-preorder properties, lifted from `comparePathsBetween_total_preorder` through `orderInsensitiveListCmp`. | — |
-| `from_assignList_σ_rank_closure` | `calculatePathRankings_body_preserves_inv` | The `fromRanks` assignList is σ-rank-closed: for each `(p, r)` in the list, `(PathsFrom.permute σ p, r)` is also in the list. | — |
+| `from_assignList_σ_rank_closure` | `calculatePathRankings_body_preserves_inv` | The `fromRanks` assignList is σ-rank-closed: for each `(p, r)` in the list, `(PathsFrom.permute σ p, r)` is also in the list. | σ ∈ Aut G form; rel: `from_assignList_σ_rank_rel`, general: `from_assignList_σ_rank_general` |
 | `mem_foldl_append_init_nil` | `mem_allBetween_iff` | Membership characterization for `List.foldl (fun acc x => acc ++ f x) []`: `q ∈ result ↔ ∃ x, q ∈ f x`. | private |
 | `mem_allBetween_iff` | `between_assignList_σ_rank_closure` | `q ∈ allBetween ↔ ∃ pf ∈ pathsAtDepth, q ∈ pf.pathsToVertex`. | — |
-| `between_assignList_σ_rank_closure` | `calculatePathRankings_body_preserves_inv` | The `betweenRanks` assignList is σ-rank-closed: for each `(q, r)` in the list, `(PathsBetween.permute σ q, r)` is also in the list. | — |
+| `between_assignList_σ_rank_closure` | `calculatePathRankings_body_preserves_inv` | The `betweenRanks` assignList is σ-rank-closed: for each `(q, r)` in the list, `(PathsBetween.permute σ q, r)` is also in the list. | σ ∈ Aut G form; rel: `between_assignList_σ_rank_rel`, general: `between_assignList_σ_rank_general` |
 
 ## PathEquivariance Module
 
@@ -336,10 +336,10 @@ The file requirements have recently changed, a few early tables don't follow the
 | `calculatePathRankings_body_preserves_inv` | `calculatePathRankings_σ_cell_inv_facts` | One depth-step of the `calculatePathRankings` foldl preserves `CalcRankingsInv σ`; the inductive body lemma. | private |
 | `calculatePathRankings_σ_cell_inv_facts` | `calculatePathRankings_σInvariant_combined` | Cell-level σ-invariance of `calculatePathRankings` output: both `fromRanks` and `betweenRanks` are σ-invariant at every depth. Proved by foldl induction via `calculatePathRankings_body_preserves_inv`. | private |
 | `calculatePathRankings_σInvariant_combined` | `calculatePathRankings_betweenRanks_inv`, `calculatePathRankings_fromRanks_inv`, `calculatePathRankings_σInvariant` | Combined `RankState.σInvariant σ` for `calculatePathRankings (initializePaths G) vts`: assembles size invariants and cell σ-invariance into the full `σInvariant` structure. | — |
-| `calculatePathRankings_fromRanks_inv` | — | σ-invariance of `fromRanks` values: `(rs.fromRanks.getD d #[]).getD s.val 0 = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0`. Projection of `σInvariant_combined`. | — |
-| `calculatePathRankings_betweenRanks_inv` | — | σ-invariance of `betweenRanks` values: `((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0 = ... (σ⁻¹ s) ... (σ⁻¹ e) ...`. Projection of `σInvariant_combined`. | — |
-| `calculatePathRankings_σInvariant` | `calculatePathRankings_RankState_invariant` | Direct alias for `calculatePathRankings_σInvariant_combined`; the canonical public name for the full σ-invariance result. | — |
-| `calculatePathRankings_RankState_invariant` | `calculatePathRankings_Aut_equivariant`, `calculatePathRankings_getFrom_invariant` | `RankState.permute σ` is the identity on `calculatePathRankings (initializePaths G) vts` when σ ∈ Aut G and vts is σ-invariant. | — |
+| `calculatePathRankings_fromRanks_inv` | — | σ-invariance of `fromRanks` values: `(rs.fromRanks.getD d #[]).getD s.val 0 = (rs.fromRanks.getD d #[]).getD (σ⁻¹ s).val 0`. Projection of `σInvariant_combined`. | Projection of `calculatePathRankings_σInvariant_combined` |
+| `calculatePathRankings_betweenRanks_inv` | — | σ-invariance of `betweenRanks` values: `((rs.betweenRanks.getD d #[]).getD s.val #[]).getD e.val 0 = ... (σ⁻¹ s) ... (σ⁻¹ e) ...`. Projection of `σInvariant_combined`. | Projection of `calculatePathRankings_σInvariant_combined` |
+| `calculatePathRankings_σInvariant` | `calculatePathRankings_RankState_invariant` | Direct alias for `calculatePathRankings_σInvariant_combined`; the canonical public name for the full σ-invariance result. | Public alias for `calculatePathRankings_σInvariant_combined` |
+| `calculatePathRankings_RankState_invariant` | `calculatePathRankings_Aut_equivariant`, `calculatePathRankings_getFrom_invariant` | `RankState.permute σ` is the identity on `calculatePathRankings (initializePaths G) vts` when σ ∈ Aut G and vts is σ-invariant. | σ ∈ Aut G form; relational: `calculatePathRankings_σ_equivariant_relational`, general: `calculatePathRankings_σ_equivariant_general` |
 | `calculatePathRankings_Aut_equivariant` | — | **Stage B**: `calculatePathRankings (PathState.permute σ (initializePaths G)) vts = RankState.permute σ (calculatePathRankings (initializePaths G) vts)`. Assembled from Stage A plus σ-invariance. | **Stage B** — requires σ ∈ Aut G |
 
 
@@ -347,27 +347,27 @@ The file requirements have recently changed, a few early tables don't follow the
 
 | Name | Used By | Description | Notes |
 |------|---------|-------------|-------|
-| `comparePathSegments_σ_relational` | — | Relational form: `comparePathSegments vts₂ br₂ p₁ p₂ = comparePathSegments vts₁ br₁ (f p₁) (f p₂)` when `f = PathSegment.permute σ` and the two `vts`/`br` pairs are σ-related. | — |
+| `comparePathSegments_σ_relational` | — | Relational form: `comparePathSegments vts₂ br₂ p₁ p₂ = comparePathSegments vts₁ br₁ (f p₁) (f p₂)` when `f = PathSegment.permute σ` and the two `vts`/`br` pairs are σ-related. | Relational form of `comparePathSegments_σ_equivariant` |
 | `insertSorted_map_pointwise_relational` | `sortBy_map_pointwise_relational` | Relational pointwise variant of `insertSorted_map`: `cmp₂ (f a) (f b) = cmp₁ a b` for `b` in the input list. | private |
-| `sortBy_map_pointwise_relational` | `between_assignList_σ_rank_general`, `between_assignList_σ_rank_rel`, `from_assignList_σ_rank_general`, `from_assignList_σ_rank_rel`, `orderInsensitiveListCmp_map_pointwise_relational` | Relational pointwise variant of `sortBy_map`: `sortBy cmp₂ (L.map f) = (sortBy cmp₁ L).map f` when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ L`. | — |
-| `orderInsensitiveListCmp_map_pointwise_relational` | `comparePathsBetween_σ_relational`, `comparePathsFrom_σ_relational` | Relational pointwise variant of `orderInsensitiveListCmp_map`: `orderInsensitiveListCmp cmp₂ (L₁.map f) (L₂.map f) = orderInsensitiveListCmp cmp₁ L₁ L₂` with per-element `cmp₂ (f a) (f b) = cmp₁ a b`. | — |
-| `comparePathsBetween_σ_relational` | `between_assignList_σ_rank_general`, `between_assignList_σ_rank_rel` | Relational form of `comparePathsBetween_σ_equivariant` for two different `vts`/`br` pairs. | — |
-| `comparePathsFrom_σ_relational` | `from_assignList_σ_rank_general`, `from_assignList_σ_rank_rel` | Relational form of `comparePathsFrom_σ_equivariant` for two different `vts`/`br` pairs. | — |
+| `sortBy_map_pointwise_relational` | `between_assignList_σ_rank_general`, `between_assignList_σ_rank_rel`, `from_assignList_σ_rank_general`, `from_assignList_σ_rank_rel`, `orderInsensitiveListCmp_map_pointwise_relational` | Relational pointwise variant of `sortBy_map`: `sortBy cmp₂ (L.map f) = (sortBy cmp₁ L).map f` when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ L`. | Relational form of `sortBy_map_pointwise` |
+| `orderInsensitiveListCmp_map_pointwise_relational` | `comparePathsBetween_σ_relational`, `comparePathsFrom_σ_relational` | Relational pointwise variant of `orderInsensitiveListCmp_map`: `orderInsensitiveListCmp cmp₂ (L₁.map f) (L₂.map f) = orderInsensitiveListCmp cmp₁ L₁ L₂` with per-element `cmp₂ (f a) (f b) = cmp₁ a b`. | Relational form of `orderInsensitiveListCmp_map_pointwise` |
+| `comparePathsBetween_σ_relational` | `between_assignList_σ_rank_general`, `between_assignList_σ_rank_rel` | Relational form of `comparePathsBetween_σ_equivariant` for two different `vts`/`br` pairs. | Relational form of `comparePathsBetween_σ_equivariant` |
+| `comparePathsFrom_σ_relational` | `from_assignList_σ_rank_general`, `from_assignList_σ_rank_rel` | Relational form of `comparePathsFrom_σ_equivariant` for two different `vts`/`br` pairs. | Relational form of `comparePathsFrom_σ_equivariant` |
 | `nodup_keys_unique_value` | `set_chain_σRelated` | If a `List (Nat × Nat)` has Nodup first components, the value at each key is uniquely determined. | private |
 | `nodup_pair_keys_unique_value` | `setBetween_chain_σRelated` | If a `List ((Nat × Nat) × Nat)` has Nodup key pairs, the value at each key pair is unique. | private |
 | `set_chain_σRelated` | `calculatePathRankings_body_preserves_general`, `calculatePathRankings_body_preserves_rel` | The `fromRanks` `set!`-chain produces τ-related outputs when the two assignLists are τ-related (each entry in one maps to a τ-shifted entry of equal rank in the other). | — |
 | `setBetween_chain_σRelated` | `calculatePathRankings_body_preserves_general`, `calculatePathRankings_body_preserves_rel` | The `betweenRanks` `setBetween`-chain produces τ-related outputs when the two assignLists are τ-related. | — |
 | `mem_pathsAtDepth_under_f` | `pathsAtDepth_map_f_perm` | Membership in the `f`-mapped `pathsAtDepth` list. | private |
 | `pathsAtDepth_map_f_perm` | `from_assignList_σ_rank_rel` | The `f`-mapped `pathsAtDepth` list is a `Perm` of the original when `f` reindexes start vertices bijectively. | private |
-| `from_assignList_σ_rank_rel` | `calculatePathRankings_body_preserves_rel` | Relational σ-rank-closure for the `fromRanks` assignList: entries on the two sides are τ-related with equal ranks. | — |
+| `from_assignList_σ_rank_rel` | `calculatePathRankings_body_preserves_rel` | Relational σ-rank-closure for the `fromRanks` assignList: entries on the two sides are τ-related with equal ranks. | Relational form of `from_assignList_σ_rank_closure` (still requires σ ∈ Aut G) |
 | `mem_allBetween_under_f` | `allBetween_map_f_perm` | Membership in the `f`-mapped `allBetween` list. | private |
 | `allBetween_map_f_perm` | `between_assignList_σ_rank_rel` | The `f`-mapped `allBetween` list is a `Perm` of the original when `f` reindexes `(start, end)` pairs bijectively. | private |
-| `between_assignList_σ_rank_rel` | `calculatePathRankings_body_preserves_rel` | Relational σ-rank-closure for the `betweenRanks` assignList. | — |
+| `between_assignList_σ_rank_rel` | `calculatePathRankings_body_preserves_rel` | Relational σ-rank-closure for the `betweenRanks` assignList. | Relational form of `between_assignList_σ_rank_closure` (still requires σ ∈ Aut G) |
 | `betweenRankFn_σ_rel_from_cells` | `calculatePathRankings_body_preserves_general`, `calculatePathRankings_body_preserves_rel` | Cell-level τ-relatedness of a 3D table lifts to a τ-related `betweenRankFn`. | — |
 | `CalcRankingsRel` | `calculatePathRankings_body_preserves_rel`, `calculatePathRankings_σ_cell_rel_facts` | Loop invariant for the relational depth foldl: the two accumulators `(currentBetween₁, currentFrom₁)` and `(currentBetween₂, currentFrom₂)` are τ-related at every cell. | — |
 | `calculatePathRankings_body_preserves_rel` | `calculatePathRankings_σ_cell_rel_facts` | One depth-step of the relational `calculatePathRankings` foldl preserves `CalcRankingsRel`. | private |
 | `calculatePathRankings_σ_cell_rel_facts` | `calculatePathRankings_σ_equivariant_relational` | Cell-level τ-relatedness of `calculatePathRankings` outputs on two τ-related inputs; proved by foldl induction. | private |
-| `calculatePathRankings_σ_equivariant_relational` | `calculatePathRankings_getFrom_VtsInvariant_eq` | **Stage B-rel**: `calculatePathRankings` outputs on τ-related inputs are τ-related at every cell. Requires σ ∈ Aut G. | — |
+| `calculatePathRankings_σ_equivariant_relational` | `calculatePathRankings_getFrom_VtsInvariant_eq` | **Stage B-rel**: `calculatePathRankings` outputs on τ-related inputs are τ-related at every cell. Requires σ ∈ Aut G. | Relational form of `calculatePathRankings_RankState_invariant` (still requires σ ∈ Aut G) |
 
 ## PathEquivarianceGeneral Module
 
@@ -378,11 +378,11 @@ The file requirements have recently changed, a few early tables don't follow the
 | `mem_pathsAtDepth_two_states_under_f` | — | Membership characterization for the `f`-mapped `pathsAtDepth` across two Stage-A-related states. | private |
 | `allBetween_two_states_perm` | `between_assignList_σ_rank_general`, `mem_allBetween_two_states_under_f` | The `allBetween` list of state₂ is a `Perm` of the σ-mapped `allBetween` of state₁. | private |
 | `mem_allBetween_two_states_under_f` | — | Membership characterization for the `f`-mapped `allBetween` across two Stage-A-related states. | private |
-| `from_assignList_σ_rank_general` | `calculatePathRankings_body_preserves_general` | General σ-rank-closure for the `fromRanks` assignList across two Stage-A-related states (no Aut G hypothesis). | — |
-| `between_assignList_σ_rank_general` | `calculatePathRankings_body_preserves_general` | General σ-rank-closure for the `betweenRanks` assignList across two Stage-A-related states (no Aut G hypothesis). | — |
+| `from_assignList_σ_rank_general` | `calculatePathRankings_body_preserves_general` | General σ-rank-closure for the `fromRanks` assignList across two Stage-A-related states (no Aut G hypothesis). | General form of `from_assignList_σ_rank_closure` — drops σ ∈ Aut G hypothesis |
+| `between_assignList_σ_rank_general` | `calculatePathRankings_body_preserves_general` | General σ-rank-closure for the `betweenRanks` assignList across two Stage-A-related states (no Aut G hypothesis). | General form of `between_assignList_σ_rank_closure` — drops σ ∈ Aut G hypothesis |
 | `calculatePathRankings_body_preserves_general` | `calculatePathRankings_σ_cell_general_facts` | One depth-step of the general foldl preserves the relational invariant across two Stage-A-related states. | private |
 | `calculatePathRankings_σ_cell_general_facts` | `calculatePathRankings_σ_equivariant_general` | Cell-level τ-relatedness of `calculatePathRankings` across two Stage-A-related states; proved by foldl induction. | private |
-| `calculatePathRankings_σ_equivariant_general` | `calculatePathRankings_getFrom_σ_equivariant_general` | **Stage B-rel-general**: `calculatePathRankings` on `initializePaths (G.permute σ)` is σ-related to `calculatePathRankings` on `initializePaths G`, for any σ (no Aut G hypothesis). | — |
+| `calculatePathRankings_σ_equivariant_general` | `calculatePathRankings_getFrom_σ_equivariant_general` | **Stage B-rel-general**: `calculatePathRankings` on `initializePaths (G.permute σ)` is σ-related to `calculatePathRankings` on `initializePaths G`, for any σ (no Aut G hypothesis). | **Stage B-rel-general** — fully general form (no Aut G) |
 
 ## ConvergeLoop Module
 
@@ -393,9 +393,9 @@ The file requirements have recently changed, a few early tables don't follow the
 | `convergeOnce_writeback` | `convergeLoop_preserves_prefix`, `convergeOnce_Aut_invariant`, `convergeOnce_VtsInvariant_eq`, `convergeOnce_preserves_lower_uniqueness`, `convergeOnce_σ_equivariant_general` | After `convergeOnce`, every in-bounds position `i` holds `calculatePathRankings.getFrom (n-1) i`. | — |
 | `RankState.getFrom_permute` | `calculatePathRankings_getFrom_invariant` | `getFrom` on `RankState.permute σ rs` reads from the `σ⁻¹`-shifted position in the original `rs`. | — |
 | `calculatePathRankings_getFrom_invariant` | `convergeOnce_Aut_invariant` | σ-invariance of `getFrom (n-1)`: positions `v` and `σ v` return the same value when σ ∈ Aut(G) and `vts` is σ-invariant. | — |
-| `convergeOnce_Aut_invariant` | `convergeLoop_Aut_invariant` | One `convergeOnce` step preserves Aut(G)-invariance: `output[σ v] = output[v]` for σ ∈ Aut(G). | — |
+| `convergeOnce_Aut_invariant` | `convergeLoop_Aut_invariant` | One `convergeOnce` step preserves Aut(G)-invariance: `output[σ v] = output[v]` for σ ∈ Aut(G). | σ ∈ Aut G form; relational: `convergeOnce_VtsInvariant_eq`, general: `convergeOnce_σ_equivariant_general` |
 | `convergeOnce_size_preserving` | `convergeLoop_Aut_invariant`, `convergeLoop_VtsInvariant_eq`, `convergeLoop_preserves_lower_uniqueness`, `convergeLoop_preserves_prefix`, `convergeLoop_size_preserving`, `convergeLoop_σ_equivariant_general`, `convergeOnce_preserves_lower_uniqueness` | `convergeOnce` preserves the vertex type array size. | — |
-| `convergeLoop_Aut_invariant` | `convergeLoop_zeros_Aut_invariant` | The full convergence loop preserves Aut(G)-invariance for any fuel; proved by induction on fuel. | — |
+| `convergeLoop_Aut_invariant` | `convergeLoop_zeros_Aut_invariant` | The full convergence loop preserves Aut(G)-invariance for any fuel; proved by induction on fuel. | σ ∈ Aut G form; relational: `convergeLoop_VtsInvariant_eq`, general: `convergeLoop_σ_equivariant_general` |
 | `convergeLoop_zeros_Aut_invariant` | `run_swap_invariant_fwd` | Corollary: starting from the all-zeros array, the convergence loop preserves Aut(G)-invariance. | — |
 | `orderVertices_Aut_equivariant` | — | Stage C: `orderVertices (PathState.permute σ (initializePaths G)) vts = orderVertices (initializePaths G) vts` for σ ∈ Aut(G). | **Stage C** |
 | `labelEdges_Aut_equivariant` | `run_swap_invariant_fwd` | Stage D: `labelEdgesAccordingToRankings vts (G.permute σ) = labelEdgesAccordingToRankings vts G` for σ ∈ Aut(G); follows immediately from `G.permute σ = G`. | **Stage D** |
@@ -410,16 +410,16 @@ The file requirements have recently changed, a few early tables don't follow the
 | `convergeLoop_unchanged_fixedpoint` | `convergeLoop_succ_eq_loop_of_once` | If `convergeOnce`'s flag is `false`, then `convergeLoop` is the identity at every fuel level. | — |
 | `convergeLoop_succ_eq_loop_of_once` | `convergeLoop_VtsInvariant_eq`, `convergeLoop_σ_equivariant_general` | `convergeLoop state vts (k+1) = convergeLoop state (convergeOnce state vts).1 k` regardless of the flag. | — |
 | `calculatePathRankings_getFrom_VtsInvariant_eq` | `convergeOnce_VtsInvariant_eq` | Relational `getFrom (n-1)` analogue: for τ-related `vts₁`/`vts₂`, the `getFrom` values are τ-shifted. | — |
-| `convergeOnce_VtsInvariant_eq` | `convergeLoop_VtsInvariant_eq` | One `convergeOnce` step on τ-related arrays produces τ-related outputs. Relational analogue of `convergeOnce_Aut_invariant`. | — |
-| `convergeLoop_VtsInvariant_eq` | `convergeLoop_step_σ_chain_preserved_general`, `convergeLoop_step_τ_preserved` | The full `convergeLoop` preserves τ-relatedness for any fuel. Relational analogue of `convergeLoop_Aut_invariant`. | — |
+| `convergeOnce_VtsInvariant_eq` | `convergeLoop_VtsInvariant_eq` | One `convergeOnce` step on τ-related arrays produces τ-related outputs. Relational analogue of `convergeOnce_Aut_invariant`. | Relational form of `convergeOnce_Aut_invariant` (still requires σ ∈ Aut G) |
+| `convergeLoop_VtsInvariant_eq` | `convergeLoop_step_σ_chain_preserved_general`, `convergeLoop_step_τ_preserved` | The full `convergeLoop` preserves τ-relatedness for any fuel. Relational analogue of `convergeLoop_Aut_invariant`. | Relational form of `convergeLoop_Aut_invariant` (still requires σ ∈ Aut G) |
 
 ## ConvergeLoopGeneral Module
 
 | Name | Used By | Description | Notes |
 |------|---------|-------------|-------|
 | `calculatePathRankings_getFrom_σ_equivariant_general` | `convergeOnce_σ_equivariant_general` | Relational `getFrom (n-1)` for general σ: the two computations run on `initializePaths G` vs `initializePaths (G.permute σ)`. | private |
-| `convergeOnce_σ_equivariant_general` | `convergeLoop_σ_equivariant_general` | **P6.B**: `convergeOnce` on `(initializePaths (G.permute σ), vts₂)` is σ-related to `convergeOnce` on `(initializePaths G, vts₁)` for any σ. | — |
-| `convergeLoop_σ_equivariant_general` | `convergeLoop_step_σ_chain_preserved_general` | **P6.B loop**: The full `convergeLoop` is σ-equivariant across the two general states for any fuel. | — |
+| `convergeOnce_σ_equivariant_general` | `convergeLoop_σ_equivariant_general` | **P6.B**: `convergeOnce` on `(initializePaths (G.permute σ), vts₂)` is σ-related to `convergeOnce` on `(initializePaths G, vts₁)` for any σ. | **P6.B** — general form of `convergeOnce_Aut_invariant` |
+| `convergeLoop_σ_equivariant_general` | `convergeLoop_step_σ_chain_preserved_general` | **P6.B loop**: The full `convergeLoop` is σ-equivariant across the two general states for any fuel. | **P6.B loop** — general form of `convergeLoop_Aut_invariant` |
 
 ## StageDRelational Module
 
@@ -454,8 +454,8 @@ The file requirements have recently changed, a few early tables don't follow the
 | `pairsOf_τ_perm` | `computeDenseRanks_τ_shift_distinct` | `pairsOf n (τ-shifted rks)` is a Perm of `pairLift τ` applied to `pairsOf n rks`. | private |
 | `pairCmp_resp_lift_under_tieFree` | `computeDenseRanks_τ_shift_distinct` | `pairCmp` respects `pairLift τ` on tie-free pairs: `pairCmp (pairLift τ a) (pairLift τ b) = pairCmp a b` when `rks` is tie-free. | private |
 | `computeDenseRanks_τ_shift_distinct` | `labelEdges_two_graphs_σ_related` | Under `TieFree` and τ-related ranks, `computeDenseRanks` on `rks₂` is the τ-shifted `computeDenseRanks` on `rks₁`. | — |
-| `labelEdges_VtsInvariant_eq_distinct` | `runFrom_VtsInvariant_eq_strong` | When `rks` is tie-free, `labelEdgesAccordingToRankings rks G` is invariant under `VtsInvariant` (Aut G acts trivially). | — |
-| `labelEdges_two_graphs_σ_related` | `runFrom_VtsInvariant_eq_strong_general` | Under τ-related tie-free ranks, `labelEdgesAccordingToRankings rks₂ G₂ = labelEdgesAccordingToRankings rks₁ G₁`. Stage D-rel. | — |
+| `labelEdges_VtsInvariant_eq_distinct` | `runFrom_VtsInvariant_eq_strong` | When `rks` is tie-free, `labelEdgesAccordingToRankings rks G` is invariant under `VtsInvariant` (Aut G acts trivially). | Single-graph form (Phase 3.E); two-graphs version: `labelEdges_two_graphs_σ_related` |
+| `labelEdges_two_graphs_σ_related` | `runFrom_VtsInvariant_eq_strong_general` | Under τ-related tie-free ranks, `labelEdgesAccordingToRankings rks₂ G₂ = labelEdgesAccordingToRankings rks₁ G₁`. Stage D-rel. | **Stage D-rel** — fully general form (no Aut G) |
 
 ## BreakTieRelational Module
 
@@ -463,7 +463,7 @@ The file requirements have recently changed, a few early tables don't follow the
 |------|---------|-------------|-------|
 | `shiftAbove_VtsInvariant_eq` | — | `shiftAbove t₀ vts₂` at slot `w` equals `shiftAbove t₀ vts₁` at slot `τ⁻¹ w` when `vts₁`/`vts₂` are τ-related. | — |
 | `shiftAbove_VtsInvariant_size_eq` | — | τ-related `vts₁`/`vts₂` have the same size after `shiftAbove`. | — |
-| `breakTieAt_τ_related` | — | `breakTieAt vts₂ t₀ (τ keep)` at slot `w` equals `breakTieAt vts₁ t₀ keep` at slot `τ⁻¹ w` when inputs are τ-related. | — |
+| `breakTieAt_τ_related` | — | `breakTieAt vts₂ t₀ (τ keep)` at slot `w` equals `breakTieAt vts₁ t₀ keep` at slot `τ⁻¹ w` when inputs are τ-related. | Relational form of `breakTieAt_VtsInvariant_eq` |
 | `breakTieAt_size_eq` | — | τ-related `vts₁`/`vts₂` have the same size after `breakTieAt`. | — |
 
 ## Invariants Module
@@ -485,7 +485,6 @@ The file requirements have recently changed, a few early tables don't follow the
 | `breakTie_targetPos_is_min_tied` | — | The tiebreak target position `breakTieAt`'s `keep` argument is the minimum vertex in the tied type class. | — |
 | `UniquelyHeldBelow` | `breakTie_step_preserves_uniqueness`, `convergeLoop_preserves_lower_uniqueness`, `convergeOnce_preserves_lower_uniqueness`, `orderVertices_prefix_invariant`, `orderVertices_prefix_invariant_strong`, `prefix_unique_below_implies_value_held`, `sortBy_first_q_positions_have_start_types` | Predicate: every value `< q` in `vts` is held by exactly one vertex. The algorithmic hypothesis (Phase 5) that values `0..q-1` are already uniquely held, so remaining foldl iterations can finish breaking ties. | — |
 | `comparePathsFrom_eq_compare_of_start_types_ne` | `convergeOnce_preserves_lower_uniqueness` | When two start types differ, `comparePathsFrom` reduces to comparing start types only. | private |
-| `_comparePathsFrom_total_preorder_legacy_unused` | — | Legacy total-preorder proof for `comparePathsFrom`; superseded by `comparePathsFrom_total_preorder`. | private |
 | `sortBy_pathsAtTop_length_eq` | — | `sortBy comparePathsFrom (pathsAtDepth)` preserves length `n`. | private |
 | `sortBy_first_q_positions_have_start_types` | `convergeOnce_preserves_lower_uniqueness` | The first `q` positions of the sorted `pathsAtDepth` list have start types `0, 1, ..., q-1`. | private |
 | `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` | `convergeOnce_preserves_lower_uniqueness` | The `fromRanks` at depth `n-1` in `calculatePathRankings (initializePaths G) vts` equals the rank of vertex `v` in the sorted list. | private |
@@ -496,7 +495,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `breakTie_step_preserves_uniqueness` | `orderVertices_prefix_invariant_strong`, `runFrom_VtsInvariant_eq_strong`, `runFrom_VtsInvariant_eq_strong_general` | One `breakTie` step preserves `UniquelyHeldBelow` for the next level. | — |
 | `orderVertices_prefix_invariant_strong` | `orderVertices_prefix_invariant` | Strong inductive: after `runFrom s vts G`, `UniquelyHeldBelow s` holds. | private |
 | `orderVertices_prefix_invariant` | `orderVertices_n_distinct_ranks` | `orderVertices (initializePaths G) zeros` satisfies `IsPrefixTyping`. | — |
-| `orderVertices_n_distinct_ranks` | — | `orderVertices` produces exactly `n` distinct values `0, 1, ..., n-1`. | — |
+| `orderVertices_n_distinct_ranks` | — | `orderVertices` produces exactly `n` distinct values `0, 1, ..., n-1`. | Final §7 invariant — leaf result |
 | `getArrayRank_size` | — | `getArrayRank arr` preserves array size. | — |
 | `getArrayRank_zeros_eq_zeros` | — | `getArrayRank (Array.replicate n 0) = Array.replicate n 0`. | — |
 | `orderVertices_size_eq` | — | `orderVertices (initializePaths G) vts` preserves array size. | — |
@@ -515,11 +514,11 @@ The file requirements have recently changed, a few early tables don't follow the
 | `breakTieCount_τ_invariant` | `breakTie_min_witness`, `runFrom_VtsInvariant_eq_strong`, `runFrom_VtsInvariant_eq_strong_general` | `breakTieCount t₀ vts₂ = breakTieCount t₀ vts₁` when `vts₁`/`vts₂` are τ-related. | — |
 | `typeClass_τ_image_eq` | `breakTie_min_witness`, `runFrom_VtsInvariant_eq_strong`, `runFrom_VtsInvariant_eq_strong_general` | `typeClass vts₂ t₀ = τ '' (typeClass vts₁ t₀)` when `vts₂` is τ-related to `vts₁`. | — |
 | `breakTie_min_witness` | `breakTie_min_witness_in_typeClass`, `runFrom_VtsInvariant_eq_strong`, `runFrom_VtsInvariant_eq_strong_general` | The minimum vertex in `typeClass vts₂ t₀` is `τ` applied to the minimum in `typeClass vts₁ t₀`. | — |
-| `breakTie_min_witness_in_typeClass` | — | The minimum witness vertex lies in `typeClass`. | — |
+| `breakTie_min_witness_in_typeClass` | — | The minimum witness vertex lies in `typeClass`. | Convenience corollary of `breakTie_min_witness` |
 | `OrbitCompleteAfterConv` | `runFrom_VtsInvariant_eq_strong` | Orbit-completeness: for `mid` an intermediate algorithm state, vertices with equal values in `convergeLoop(initializePaths G) mid n` lie in the same `TypedAut`-orbit of that converged array. | ⚠ empirically falsified 2026-04-28 — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
-| `runFrom_VtsInvariant_eq_strong` | `runFrom_VtsInvariant_eq` | Strong relational theorem: `runFrom s vts₂ G = runFrom s vts₁ G` (not just τ-related, equal) given `OrbitCompleteAfterConv` and `UniquelyHeldBelow s`. | — |
-| `runFrom_VtsInvariant_eq` | `tiebreak_choice_independent` | Corollary of the strong form: `runFrom 0 zeros G = runFrom 0 (τ-shifted zeros) G`. | — |
-| `tiebreak_choice_independent` | — | The canonical `orderVertices` output is independent of which tied vertex is chosen for tiebreaking; proved from `runFrom_VtsInvariant_eq`. | — |
+| `runFrom_VtsInvariant_eq_strong` | `runFrom_VtsInvariant_eq` | Strong relational theorem: `runFrom s vts₂ G = runFrom s vts₁ G` (not just τ-related, equal) given `OrbitCompleteAfterConv` and `UniquelyHeldBelow s`. | Single-graph strong form; two-graphs version: `runFrom_VtsInvariant_eq_strong_general` |
+| `runFrom_VtsInvariant_eq` | `tiebreak_choice_independent` | Corollary of the strong form: `runFrom 0 zeros G = runFrom 0 (τ-shifted zeros) G`. | Convenience corollary of `runFrom_VtsInvariant_eq_strong` (specializes to zeros, start=0) |
+| `tiebreak_choice_independent` | — | The canonical `orderVertices` output is independent of which tied vertex is chosen for tiebreaking; proved from `runFrom_VtsInvariant_eq`. | Phase 5 / §6 final result — leaf |
 
 ## OrderVerticesGeneral Module
 
@@ -527,7 +526,7 @@ The file requirements have recently changed, a few early tables don't follow the
 |------|---------|-------------|-------|
 | `OrbitCompleteAfterConv_general` | `runFrom_VtsInvariant_eq_strong_general`, `run_isomorphic_eq_new` | Two-graphs variant of `OrbitCompleteAfterConv`: orbit-completeness for `convergeLoop (initializePaths (G.permute σ)) mid n`. | ⚠ empirically falsified 2026-04-28 (Cycle3 disjoint union, K4, odd-cycle bases) — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
 | `convergeLoop_step_σ_chain_preserved_general` | `runFrom_VtsInvariant_eq_strong_general` | Two-graphs convergeLoop step preservation: chains through an intermediate τ-shifted typing to decompose `σ_chain = σ * τ` (τ ∈ Aut G). | private |
-| `runFrom_VtsInvariant_eq_strong_general` | `run_isomorphic_eq_new` | **P6.C**: `runFrom s vts₁ G = runFrom s vts₂ (G.permute σ)` given `OrbitCompleteAfterConv_general` and σ-relatedness of the arrays. | — |
+| `runFrom_VtsInvariant_eq_strong_general` | `run_isomorphic_eq_new` | **P6.C**: `runFrom s vts₁ G = runFrom s vts₂ (G.permute σ)` given `OrbitCompleteAfterConv_general` and σ-relatedness of the arrays. | **P6.C** — two-graphs form of `runFrom_VtsInvariant_eq_strong` |
 
 ## MainRelationalNotes Module
 
@@ -541,7 +540,7 @@ The file requirements have recently changed, a few early tables don't follow the
 |------|---------|-------------|-------|
 | `run_swap_invariant_fwd` | — | Forward direction kernel: for σ ∈ Aut G, `run zeros G = run zeros (G.permute σ)`. Used to bootstrap the (⟹) direction. | private |
 | `run_isomorphic_eq_new` | `run_canonical_correctness` | **(⟹) direction**: `G ≃ H → run zeros G = run zeros H`. Assembled from Stage A + Stage B-rel-general + P6.B/C + Stage D-rel. | — |
-| `run_canonical_correctness` | — | **Main theorem**: `G ≃ H ↔ run zeros G = run zeros H`. Combines both directions. | — |
+| `run_canonical_correctness` | — | **Main theorem**: `G ≃ H ↔ run zeros G = run zeros H`. Combines both directions. | **Main theorem** — public API of the project |
 
 ---
 
