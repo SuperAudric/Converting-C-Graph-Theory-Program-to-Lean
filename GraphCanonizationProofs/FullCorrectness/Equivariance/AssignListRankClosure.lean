@@ -172,8 +172,9 @@ pair `(f p, r)` is also in the list.
 
 Proof strategy:
 - `f p ∈ pathsAtDepth` (witnessed by σ-fixedness: `f p` is the entry at slot `σ p.start`).
-- By `assignRanks_map_of_cmp_respect`: `assignRanks cmp (sortBy cmp (Y.map f))
-  = (assignRanks cmp (sortBy cmp Y)).map (fun (x, r) => (f x, r))`.
+- By `assignRanks_map_relational`: `assignRanks cmp₂ (sortBy cmp₂ (Y.map f))
+  = (assignRanks cmp₁ (sortBy cmp₁ Y)).map (fun (x, r) => (f x, r))` when
+  `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ Y`.
 - By `sortBy_map_pointwise`: LHS = `assignRanks cmp ((sortBy cmp Y).map f)`.
 - For `Y.Perm (Y.map f)` (which σ-fixedness gives) AND assignRanks-Perm-preservation, the
   multisets of `assignList` and `assignList.map (lift f)` coincide.

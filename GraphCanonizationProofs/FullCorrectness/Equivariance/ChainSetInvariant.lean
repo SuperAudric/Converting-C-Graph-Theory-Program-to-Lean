@@ -15,10 +15,9 @@ For σ-invariance preservation, we need:
   - The assignList has the right uniqueness structure (unique start vertices for `set!`,
     unique (start, end) pairs for `setBetween`).
 
-The σ-rank-closure of the assignList comes from `assignRanks_map_of_cmp_respect`
-(already proved): when `cmp` respects `f := PathsFrom.permute σ`, applying `f` to the
-first components of the assignList preserves its multiset structure (proof TBD via the
-`Perm`-related-sorted lemma).
+The σ-rank-closure of the assignList comes from `assignRanks_map_relational`: when
+`cmp₂ (f a) (f b) = cmp₁ a b` for `f := PathsFrom.permute σ`, applying `f` to the
+first components of the assignList preserves its multiset structure.
 
 This module exposes:
 - `set_chain_σInvariant` (private) — 1D chain σ-invariance preservation for `fromRanks`

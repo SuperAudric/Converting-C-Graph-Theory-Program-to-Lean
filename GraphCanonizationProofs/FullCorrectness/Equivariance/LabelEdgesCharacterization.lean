@@ -95,61 +95,12 @@ def labelEdgesStep (n : Nat) (vertices : List (Fin n))
     let rankAtTarget := rankMap.getD targetPos 0
     (swappedGraph, (rankMap.set! sourceIdx rankAtTarget).set! targetPos rankAtSource)
 
-/-- **Strengthened fold invariant.** For any list `vs` and accumulator with
-`acc.1 = G.permute σ` for some `σ`, the foldl preserves the existence of such a
-permutation. This generalizes `labelEdgesAccordingToRankings_isomorphic` from `G ≃ acc.1`
-to "acc.1 is a specific permute of G".
-
-The proof structure mirrors `labelEdgesAccordingToRankings_isomorphic`: induction on
-`vs` with case-split on the `find?` branch. The `none` branch leaves σ unchanged; the
-`some` branch composes one swap into σ.
-
-**Use case:** specialized at `vs = List.finRange n` and `acc = (G, denseRanks rks)`,
-the resulting σ is the cumulative composition of all swaps. Identifying this σ as
-`denseRanksPerm rks` (the dense-rank perm) is the second half of the cell-wise
-characterization.
-
-**Status:** stated; not yet proved. The proof is direct but tedious — each swap
-contributes one `Equiv.swap` factor to σ. -/
-theorem labelEdges_fold_permutes
-    (G : AdjMatrix n) (vs : List (Fin n)) (acc : AdjMatrix n × Array Nat)
-    (σ : Equiv.Perm (Fin n)) (h_acc : acc.1 = G.permute σ) :
-    ∃ σ' : Equiv.Perm (Fin n),
-      (vs.foldl (labelEdgesStep n (List.finRange n)) acc).1 = G.permute σ' := by
-  induction vs generalizing acc σ with
-  | nil =>
-    -- Base case: the foldl is acc itself.
-    refine ⟨σ, ?_⟩
-    rw [List.foldl_nil]
-    exact h_acc
-  | cons v rest ih =>
-    rw [List.foldl_cons]
-    -- One step: case-split on the find? branch.
-    obtain ⟨graph, rankMap⟩ := acc
-    show ∃ σ', (rest.foldl (labelEdgesStep n (List.finRange n))
-                  (labelEdgesStep n (List.finRange n) (graph, rankMap) v)).1 = G.permute σ'
-    unfold labelEdgesStep
-    simp only []
-    split
-    · -- none branch: accumulator unchanged.
-      apply ih
-      exact h_acc
-    · -- some sourceFin branch: graph gets one swap.
-      rename_i sourceFin _
-      apply ih (acc := (graph.swapVertexLabels v sourceFin, _))
-      -- New graph = graph.swapVertexLabels v sourceFin
-      --           = (G.permute σ).swapVertexLabels v sourceFin
-      --           = (G.permute σ).permute (Equiv.swap v sourceFin)
-      --           = G.permute (Equiv.swap v sourceFin * σ).
-      have h_graph_eq : graph = G.permute σ := h_acc
-      show graph.swapVertexLabels v sourceFin = G.permute (Equiv.swap v sourceFin * σ)
-      rw [swapVertexLabels_eq_permute, h_graph_eq, ← AdjMatrix.permute_mul]
-
 /-! ### Strong fold invariant — tracks the rankMap as well
 
-This is the deeper variant of `labelEdges_fold_permutes`. It additionally tracks
-`acc.2 = rankMap_0 ∘ σ⁻¹` (in `getD`-pointwise form). Combined with the algorithm's
-selection-sort structure, this lets us identify the σ at the end of the fold.
+For any list `vs` and accumulator with `acc.1 = G.permute σ` and the rankMap-σ
+relationship `acc.2 = rankMap_0 ∘ σ⁻¹` (in `getD`-pointwise form), the foldl preserves
+both invariants. Combined with the algorithm's selection-sort structure, this lets us
+identify the σ at the end of the fold.
 
 The key insight: the labelEdges fold updates rankMap by swapping two entries (at
 `currentFin.val` and `sourceFin.val`). This corresponds to composing one `Equiv.swap`

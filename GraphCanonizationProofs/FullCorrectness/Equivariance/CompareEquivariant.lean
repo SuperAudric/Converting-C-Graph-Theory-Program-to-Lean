@@ -88,52 +88,6 @@ theorem sortBy_map_pointwise {α : Type} (f : α → α) (cmp : α → α → Or
         (List.mem_cons_of_mem _ ((sortBy_perm cmp L).mem_iff.mp hb))
     exact insertSorted_map_pointwise f cmp a (sortBy cmp L) h_a
 
-/-- Pointwise `foldl` congruence: if `f` and `g` agree on all `(acc, a)` pairs where
-`a ∈ L`, then their folds agree. -/
-private theorem foldl_congr_mem {α β : Type} {f g : β → α → β} {L : List α} {init : β}
-    (h : ∀ acc : β, ∀ a ∈ L, f acc a = g acc a) :
-    L.foldl f init = L.foldl g init := by
-  induction L generalizing init with
-  | nil => rfl
-  | cons a L ih =>
-    rw [List.foldl_cons, List.foldl_cons, h init a List.mem_cons_self]
-    apply ih
-    intros acc b hb
-    exact h acc b (List.mem_cons_of_mem _ hb)
-
-/-- Pointwise variant of `orderInsensitiveListCmp_map`: only requires `cmp (f a) (f b) = cmp a b`
-for `a, b ∈ L₁ ++ L₂`. This is what's needed for `comparePathsFrom_σ_equivariant` where
-the inner `comparePathsBetween_σ_equivariant` only applies to elements satisfying per-element
-length conditions. -/
-theorem orderInsensitiveListCmp_map_pointwise {α : Type} (f : α → α) (cmp : α → α → Ordering)
-    (L₁ L₂ : List α)
-    (h : ∀ a ∈ L₁ ++ L₂, ∀ b ∈ L₁ ++ L₂, cmp (f a) (f b) = cmp a b) :
-    orderInsensitiveListCmp cmp (L₁.map f) (L₂.map f) = orderInsensitiveListCmp cmp L₁ L₂ := by
-  -- Decompose h into per-list and cross-list conditions.
-  have h₁ : ∀ a ∈ L₁, ∀ b ∈ L₁, cmp (f a) (f b) = cmp a b := fun a ha b hb =>
-    h a (List.mem_append_left _ ha) b (List.mem_append_left _ hb)
-  have h₂ : ∀ a ∈ L₂, ∀ b ∈ L₂, cmp (f a) (f b) = cmp a b := fun a ha b hb =>
-    h a (List.mem_append_right _ ha) b (List.mem_append_right _ hb)
-  unfold orderInsensitiveListCmp
-  simp only [List.length_map]
-  by_cases hLen : L₁.length = L₂.length
-  · simp only [hLen, bne_self_eq_false, Bool.false_eq_true, ↓reduceIte]
-    rw [sortBy_map_pointwise f cmp L₁ h₁, sortBy_map_pointwise f cmp L₂ h₂]
-    rw [show ((sortBy cmp L₁).map f).zip ((sortBy cmp L₂).map f)
-          = ((sortBy cmp L₁).zip (sortBy cmp L₂)).map (fun (x, y) => (f x, f y)) by
-        rw [List.zip_map_right, List.zip_map_left, List.map_map]
-        congr]
-    rw [List.foldl_map]
-    -- Apply pointwise foldl_congr: only need cmp respect for pairs in the zip.
-    apply foldl_congr_mem
-    intros acc p hp
-    have hp_left' : p.1 ∈ L₁ := (sortBy_perm cmp L₁).mem_iff.mp (List.of_mem_zip hp).1
-    have hp_right' : p.2 ∈ L₂ := (sortBy_perm cmp L₂).mem_iff.mp (List.of_mem_zip hp).2
-    have h_p : cmp (f p.1) (f p.2) = cmp p.1 p.2 :=
-      h p.1 (List.mem_append_left _ hp_left') p.2 (List.mem_append_right _ hp_right')
-    simp [h_p]
-  · simp [hLen]
-
 /-- `comparePathSegments` is σ-equivariant when both the typing array and the
 `betweenRanks` function are σ-invariant. -/
 theorem comparePathSegments_σ_equivariant
@@ -397,59 +351,6 @@ theorem comparePathsBetween_equivCompat
     simp only [h_bne_ne, ↓reduceIte] at h'
     exact absurd (compare_eq_iff_eq.mp h') h_endTy_eq
 
-/-- `comparePathsFrom` is σ-equivariant under σ-invariant `vts`/`br` and `pathsToVertex`-
-length normalization (which holds in `initializePaths G`). -/
-theorem comparePathsFrom_σ_equivariant
-    {vc : Nat} (σ : Equiv.Perm (Fin vc))
-    (vts : Array VertexType)
-    (hvts : ∀ v : Fin vc, vts.getD (σ v).val 0 = vts.getD v.val 0)
-    (br : Nat → Nat → Nat → Nat)
-    (hbr : ∀ d : Nat, ∀ s e : Fin vc, br d (σ s).val (σ e).val = br d s.val e.val)
-    (p₁ p₂ : PathsFrom vc)
-    (h_len₁ : p₁.pathsToVertex.length = vc)
-    (h_len₂ : p₂.pathsToVertex.length = vc)
-    (h_inner_len₁ : ∀ q ∈ p₁.pathsToVertex, q.depth > 0 → q.connectedSubPaths.length = vc)
-    (h_inner_len₂ : ∀ q ∈ p₂.pathsToVertex, q.depth > 0 → q.connectedSubPaths.length = vc) :
-    comparePathsFrom vts br (p₁.permute σ) (p₂.permute σ)
-    = comparePathsFrom vts br p₁ p₂ := by
-  match vc, σ, p₁, p₂, h_len₁, h_len₂, h_inner_len₁, h_inner_len₂ with
-  | 0, _, _, _, _, _, _, _ =>
-    rfl
-  | k + 1, σ, p₁, p₂, h_len₁, h_len₂, h_inner_len₁, h_inner_len₂ =>
-    show (if vts.getD (σ p₁.startVertexIndex).val 0 != vts.getD (σ p₂.startVertexIndex).val 0 then
-            compare (vts.getD (σ p₁.startVertexIndex).val 0) (vts.getD (σ p₂.startVertexIndex).val 0)
-          else orderInsensitiveListCmp (comparePathsBetween vts br)
-                 (PathsFrom.permute σ p₁).pathsToVertex
-                 (PathsFrom.permute σ p₂).pathsToVertex)
-       = (if vts.getD p₁.startVertexIndex.val 0 != vts.getD p₂.startVertexIndex.val 0 then
-            compare (vts.getD p₁.startVertexIndex.val 0) (vts.getD p₂.startVertexIndex.val 0)
-          else orderInsensitiveListCmp (comparePathsBetween vts br)
-                 p₁.pathsToVertex p₂.pathsToVertex)
-    rw [hvts p₁.startVertexIndex, hvts p₂.startVertexIndex]
-    split
-    · rfl
-    · have h_perm₁ := PathsFrom_permute_pathsToVertex_perm σ p₁ h_len₁
-      have h_perm₂ := PathsFrom_permute_pathsToVertex_perm σ p₂ h_len₂
-      obtain ⟨h_refl, h_antisym₁, h_antisym₂, h_trans⟩ :=
-        comparePathsBetween_total_preorder (vc := k+1) vts br
-      rw [orderInsensitiveListCmp_perm (comparePathsBetween vts br)
-            h_refl h_antisym₁ h_antisym₂ h_trans
-            (comparePathsBetween_equivCompat vts br) _ _ _ _ h_perm₁ h_perm₂]
-      -- Apply pointwise map lemma: comparePathsBetween_σ_equivariant for each pair in the
-      -- combined list, using per-element h_inner_len conditions.
-      apply orderInsensitiveListCmp_map_pointwise (PathsBetween.permute σ)
-        (comparePathsBetween vts br) p₁.pathsToVertex p₂.pathsToVertex
-      intro p hp q hq
-      have hp_len : p.depth > 0 → p.connectedSubPaths.length = k + 1 := fun hp_d =>
-        match List.mem_append.mp hp with
-        | Or.inl hp_in => h_inner_len₁ p hp_in hp_d
-        | Or.inr hp_in => h_inner_len₂ p hp_in hp_d
-      have hq_len : q.depth > 0 → q.connectedSubPaths.length = k + 1 := fun hq_d =>
-        match List.mem_append.mp hq with
-        | Or.inl hq_in => h_inner_len₁ q hq_in hq_d
-        | Or.inr hq_in => h_inner_len₂ q hq_in hq_d
-      exact comparePathsBetween_σ_equivariant σ vts hvts br hbr p q hp_len hq_len
-
 /-! ### Plan for `calculatePathRankings_fromRanks_inv` and `_betweenRanks_inv`
 
 **Strategy**: Foldl invariant on the depth loop (mirroring `calculatePathRankings_size_inv`).
@@ -471,7 +372,7 @@ calculatePathRankings_σInvariant_combined  (deep helper, foldl invariant)
         │     └── assignRanks rank-preservation across σ-Perm-related sorted lists
         ├── setBetween chain over σ-Perm assignList preserves σ-inv of currentBetween
         ├── updatedBetweenFn σ-invariant (analogous to step 1)
-        ├── compareFrom σ-equivariant  (via comparePathsFrom_σ_equivariant ✅)
+        ├── compareFrom σ-equivariant  (via comparePathsFrom_σ_relational ✅)
         └── set! chain (for fromRanks) over σ-Perm assignList preserves σ-inv
 ```
 

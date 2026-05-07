@@ -59,10 +59,10 @@ variable {n : Nat}
 
 /-! ### Relational compare equivariance
 
-These are the relational analogues of `comparePathSegments_σ_equivariant`,
-`comparePathsBetween_σ_equivariant`, and `comparePathsFrom_σ_equivariant`. The
-fixed-point lemmas are recovered as the diagonal special case `vts₁ = vts₂` and
-`br₁ = br₂` (under which the relational hypotheses collapse to σ-INV). -/
+These are the relational analogues of `comparePathSegments_σ_equivariant` and
+`comparePathsBetween_σ_equivariant`. The fixed-point lemmas are recovered as the
+diagonal special case `vts₁ = vts₂` and `br₁ = br₂` (under which the relational
+hypotheses collapse to σ-INV). -/
 
 /-- `comparePathSegments` is σ-equivariant under σ-related typing/rank functions.
 This is a strict generalization of `comparePathSegments_σ_equivariant`: when
@@ -104,10 +104,9 @@ theorem comparePathSegments_σ_relational
 
 /-! ### Relational `sortBy` / `orderInsensitiveListCmp` machinery
 
-The fixed-point form's `sortBy_map_pointwise` / `orderInsensitiveListCmp_map_pointwise`
-use a single `cmp`. The relational form switches `cmp` when going through the σ-image:
-sorting `L.map f` by `cmp₂` equals (sorting `L` by `cmp₁`) mapped by `f`, when
-`cmp₂ (f a) (f b) = cmp₁ a b` pointwise. -/
+The fixed-point form's `sortBy_map_pointwise` uses a single `cmp`. The relational form
+switches `cmp` when going through the σ-image: sorting `L.map f` by `cmp₂` equals
+(sorting `L` by `cmp₁`) mapped by `f`, when `cmp₂ (f a) (f b) = cmp₁ a b` pointwise. -/
 
 /-- Pointwise relational `insertSorted_map`: only requires the relational
 `cmp₂ (f a) (f b) = cmp₁ a b` hypothesis pointwise on `b ∈ L`. -/
@@ -252,8 +251,7 @@ theorem comparePathsBetween_σ_relational
       intros a _ b _
       exact comparePathSegments_σ_relational σ vts₁ vts₂ hvts_rel br₁ br₂ hbr_rel a b
 
-/-- `comparePathsFrom` is σ-equivariant under σ-related typing/rank functions.
-This is a strict generalization of `comparePathsFrom_σ_equivariant`. -/
+/-- `comparePathsFrom` is σ-equivariant under σ-related typing/rank functions. -/
 theorem comparePathsFrom_σ_relational
     {vc : Nat} (σ : Equiv.Perm (Fin vc))
     (vts₁ vts₂ : Array VertexType)
