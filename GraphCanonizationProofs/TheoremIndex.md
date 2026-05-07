@@ -94,76 +94,76 @@ The file requirements have recently changed, a few early tables don't follow the
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
 | `calculatePathRankings_fromRanks_size` | — | — | The `fromRanks` table of `calculatePathRankings` output has size `vc`. | — |
-| `setBetween_getD_getD_size` | — | — | `setBetween` preserves the size of every (depth, start)-cell. | — |
+| `setBetween_getD_getD_size` | `Array_set!_getD_self`, `Array_set!_getD_ne`, `Array_set!_eq_self_of_size_le` | — | `setBetween` preserves the size of every (depth, start)-cell. | — |
 | `array_set_chain_outside_unchanged` | — | — | Foldl `set!`-chain leaves untouched positions unchanged. | — |
 | `array_set_chain_at_target_nodup` | `array_set_chain_outside_unchanged` | — | Foldl `set!`-chain gives target value at target index when indices are `Nodup`. | — |
 | `inner_fold_slice_at_depth` | — | — | Strip the outer `set! depth` wrapper: the result's `depth`-slice equals folding on the initial slice directly. | — |
 | `inner_fold_other_depth_unchanged` | — | — | Inner fold only writes to depth-slot, other depths are preserved. | — |
-| `setBetween_fold_slice_at_depth` | — | — | `setBetween` fold depth-slice equals folding the depth-slice directly. | — |
+| `setBetween_fold_slice_at_depth` | `setBetween_size` | — | `setBetween` fold depth-slice equals folding the depth-slice directly. | — |
 | `setBetween_fold_other_depth_unchanged` | — | — | `setBetween` fold only writes to outer depth, other depths preserved. | — |
 | `RankState.σInvariant` | — | — | Predicate on `rs : RankState`: size-shape and value σ-invariance conditions sufficient to conclude `RankState.permute σ rs = rs`. | **Key structure** — packages σ-invariance for extensionality |
 | `RankState.σInvariant.permute_eq_self` | `RankState.σInvariant`, `RankState.permute`, `permNat_of_lt` | — | Extensionality: σ-invariance implies `RankState.permute σ rs = rs`. | **Extensionality** — σ-invariance ⟹ permute equals identity |
-| `calculatePathRankings_size_inv` | `setBetween_getD_getD_size` | — | Size facts on `calculatePathRankings` output: `betweenRanks` is `vc×vc×vc`, `fromRanks` is `vc×vc`. | — |
+| `calculatePathRankings_size_inv` | `setBetween_size`, `setBetween_getD_size`, `setBetween_getD_getD_size`, `from_set_getD_size` | — | Size facts on `calculatePathRankings` output: `betweenRanks` is `vc×vc×vc`, `fromRanks` is `vc×vc`. | — |
 | `Array_set!_getD_self` | — | — | `(xs.set! i v).getD i d = v` when `i < xs.size`. | private |
 | `Array_set!_getD_ne` | — | — | `(xs.set! i v).getD j d = xs.getD j d` when `i ≠ j`. | private |
 | `Array_set!_eq_self_of_size_le` | — | — | `xs.set! i v = xs` when `xs.size ≤ i` (out-of-bounds write is identity). | private |
 | `setBetween_size` | — | — | `setBetween` preserves the outer-array size. | private |
-| `setBetween_getD_size` | — | — | `setBetween` preserves the size of every depth-row. | private |
-| `from_set_getD_size` | — | — | Folding `set!` on `fromAcc` preserves the size of every depth-row. | private |
+| `setBetween_getD_size` | `Array_set!_getD_self`, `Array_set!_getD_ne`, `Array_set!_eq_self_of_size_le` | — | `setBetween` preserves the size of every depth-row. | private |
+| `from_set_getD_size` | `Array_set!_getD_self`, `Array_set!_getD_ne`, `Array_set!_eq_self_of_size_le` | — | Folding `set!` on `fromAcc` preserves the size of every depth-row. | private |
 
 ## ComparisonSort Module
 
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
-| `sortBy_map` | — | — | `sortBy cmp (L.map f) = (sortBy cmp L).map f` when `f` preserves `cmp`; instantiated with `PathSegment.permute σ` for σ-equivariance. | — |
+| `sortBy_map` | `insertSorted_map` | — | `sortBy cmp (L.map f) = (sortBy cmp L).map f` when `f` preserves `cmp`; instantiated with `PathSegment.permute σ` for σ-equivariance. | — |
 | `perm_insertSorted` | — | — | `insertSorted cmp a L` is a `List.Perm` of `a :: L`. | — |
 | `sortBy_perm` | `perm_insertSorted` | — | `sortBy cmp L` is a `List.Perm` of `L`. | — |
-| `sortedPerm_class_eq` | — | — | KEY LEMMA: for sorted lists `M`, `M'` with `M.Perm M'`, the elements at position `i` of `M` and `M'` lie in the same `cmp`-equivalence class. Proved by a counting argument on sorted prefix/suffix structure. | — |
-| `sortBy_pairwise` | — | — | `sortBy cmp L` is `Pairwise (cmp · · ≠ .gt)`, i.e. the output list is sorted under `cmp`. | — |
+| `sortedPerm_class_eq` | `sorted_perm_head_class_eq` | — | KEY LEMMA: for sorted lists `M`, `M'` with `M.Perm M'`, the elements at position `i` of `M` and `M'` lie in the same `cmp`-equivalence class. Proved by a counting argument on sorted prefix/suffix structure. | — |
+| `sortBy_pairwise` | `insertSorted_pairwise` | — | `sortBy cmp L` is `Pairwise (cmp · · ≠ .gt)`, i.e. the output list is sorted under `cmp`. | — |
 | `foldl_pointwise_eq` | — | — | If two equal-length lists agree element-wise under `f` at every accumulator value, their `List.foldl f` results are equal. | — |
 | `orderInsensitiveListCmp_perm` | `sortBy_perm`, `sortBy_pairwise`, `sortedPerm_class_eq`, `foldl_pointwise_eq` | — | `orderInsensitiveListCmp cmp L₁ L₂` is invariant under permutations of `L₁` and `L₂`, given a compatible total preorder. | — |
-| `assignRanks_length` | — | — | `(assignRanks cmp L).length = L.length`. | — |
-| `assignRanks_map_fst` | — | — | `(assignRanks cmp L).map (·.1) = L`: first components reproduce the input list in order. | — |
+| `assignRanks_length` | `assignRanks_eq_foldl`, `assignRanks_aux_length` | — | `(assignRanks cmp L).length = L.length`. | — |
+| `assignRanks_map_fst` | `assignRanks_eq_foldl`, `assignRanks_aux_map_fst` | — | `(assignRanks cmp L).map (·.1) = L`: first components reproduce the input list in order. | — |
 | `assignRanks_getElem_fst` | `assignRanks_map_fst`, `assignRanks_length` | — | Element-wise: `((assignRanks cmp L)[i]).1 = L[i]`. | — |
-| `assignRanks_map_of_cmp_respect` | — | — | `assignRanks cmp (L.map f) = (assignRanks cmp L).map (fun e => (f e.1, e.2))` when `f` preserves `cmp`; foundational for the σ-equivariance pipeline. | — |
-| `assignRanks_map_relational` | — | — | Relational form: `assignRanks cmp₂ (L.map f) = (assignRanks cmp₁ L).map (fun e => (f e.1, e.2))` when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ L`. Used by Stage B-rel. | — |
-| `assignRanks_image_dense` | — | — | Rank set is downward-closed: for any entry in `assignRanks cmp L`, every `k ≤ entry.2` has a witness in the output. | — |
-| `assignRanks_rank_lt_length` | — | — | Every rank in `assignRanks cmp L` is `< L.length`; bounds vertex type values produced by `convergeOnce`. | — |
+| `assignRanks_map_of_cmp_respect` | `assignRanks_eq_foldl`, `assignRanks_foldl_map_f` | — | `assignRanks cmp (L.map f) = (assignRanks cmp L).map (fun e => (f e.1, e.2))` when `f` preserves `cmp`; foundational for the σ-equivariance pipeline. | — |
+| `assignRanks_map_relational` | `assignRanks_eq_foldl`, `assignRanks_foldl_map_f_relational` | — | Relational form: `assignRanks cmp₂ (L.map f) = (assignRanks cmp₁ L).map (fun e => (f e.1, e.2))` when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b ∈ L`. Used by Stage B-rel. | — |
+| `assignRanks_image_dense` | `assignRanks_aux_density`, `assignRanks_eq_foldl` | — | Rank set is downward-closed: for any entry in `assignRanks cmp L`, every `k ≤ entry.2` has a witness in the output. | — |
+| `assignRanks_rank_lt_length` | `assignRanks_eq_foldl`, `assignRanks_aux_rank_le` | — | Every rank in `assignRanks cmp L` is `< L.length`; bounds vertex type values produced by `convergeOnce`. | — |
 | `assignRanks_rank_le_pos` | `assignRanks_length` | — | Rank at position `k` in `assignRanks cmp L` is `≤ k`. | — |
-| `assignRanks_pairwise_rank_le` | — | — | Ranks in `assignRanks cmp L` are pairwise non-decreasing along the list. | — |
+| `assignRanks_pairwise_rank_le` | `assignRanks_eq_foldl`, `assignRanks_foldl_invariant` | — | Ranks in `assignRanks cmp L` are pairwise non-decreasing along the list. | — |
 | `assignRanks_rank_monotone` | `assignRanks_pairwise_rank_le`, `assignRanks_length` | — | Rank at position `i` is `≤` rank at position `j` for `i ≤ j < L.length`. | — |
-| `assignRanks_rank_eq_pos_when_distinct` | — | — | Rank at position `k` equals `k` when all consecutive pairs in `L` have `cmp ≠ .eq`. | — |
-| `assignRanks_rank_eq_of_prefix` | `assignRanks_length` | — | Rank at position `k < A.length` in `assignRanks cmp (A ++ B)` equals rank at `k` in `assignRanks cmp A`. | — |
+| `assignRanks_rank_eq_pos_when_distinct` | `assignRanks_strong_invariant` | — | Rank at position `k` equals `k` when all consecutive pairs in `L` have `cmp ≠ .eq`. | — |
+| `assignRanks_rank_eq_of_prefix` | `assignRanks_length`, `assignRanks_snoc_decompose` | — | Rank at position `k < A.length` in `assignRanks cmp (A ++ B)` equals rank at `k` in `assignRanks cmp A`. | — |
 | `assignRanks_rank_eq_pos_when_distinct_prefix` | `assignRanks_rank_eq_of_prefix`, `assignRanks_rank_eq_pos_when_distinct` | — | Rank equals position for all `k < q` when consecutive elements in the first `q` entries have `cmp ≠ .eq`. | — |
-| `assignRanks_rank_eq_at_succ_when_cmp_eq` | `assignRanks_rank_eq_of_prefix` | — | Ranks at positions `i` and `i+1` are equal when `cmp L[i] L[i+1] = .eq`. | — |
+| `assignRanks_rank_eq_at_succ_when_cmp_eq` | `assignRanks_rank_eq_of_prefix`, `assignRanks_eq_foldl`, `assignRanks_length`, `assignRanks_foldl_invariant`, `assignRanks_foldl_lastEntry_fst`, `assignRanks_snoc_decompose_strict` | — | Ranks at positions `i` and `i+1` are equal when `cmp L[i] L[i+1] = .eq`. | — |
 | `assignRanks_rank_eq_within_eq_class` | `assignRanks_rank_eq_at_succ_when_cmp_eq` | — | For a sorted list under a total preorder, if `cmp L[i] L[j] = .eq` and `i ≤ j`, the assigned ranks at `i` and `j` agree. | — |
-| `assignRanks_rank_succ_when_cmp_neq_eq` | `assignRanks_rank_eq_of_prefix` | — | Rank at `i+1` equals rank at `i` plus 1 when `cmp L[i] L[i+1] ≠ .eq`. | — |
+| `assignRanks_rank_succ_when_cmp_neq_eq` | `assignRanks_rank_eq_of_prefix`, `assignRanks_eq_foldl`, `assignRanks_length`, `assignRanks_foldl_invariant`, `assignRanks_foldl_lastEntry_fst`, `assignRanks_snoc_decompose_strict` | — | Rank at `i+1` equals rank at `i` plus 1 when `cmp L[i] L[i+1] ≠ .eq`. | — |
 | `assignRanks_rank_eq_of_sorted_perm` | `assignRanks_rank_le_pos`, `sortedPerm_class_eq`, `assignRanks_rank_eq_at_succ_when_cmp_eq`, `assignRanks_rank_succ_when_cmp_neq_eq` | — | For sorted `X.Perm Y` (under a total preorder), ranks at each position `i` agree between `assignRanks cmp X` and `assignRanks cmp Y`. | — |
-| `sortBy_eq_of_perm_strict` | `sortBy_perm`, `sortBy_pairwise` | — | If `X.Perm Y` and `cmp` is strict on `X` (no two distinct elements are `cmp`-equal), then `sortBy cmp X = sortBy cmp Y`. | — |
+| `sortBy_eq_of_perm_strict` | `sortBy_perm`, `sortBy_pairwise`, `sorted_eq_of_perm_strict_aux` | — | If `X.Perm Y` and `cmp` is strict on `X` (no two distinct elements are `cmp`-equal), then `sortBy cmp X = sortBy cmp Y`. | — |
 | `insertSorted_map` | — | — | `insertSorted cmp (f a) (L.map f) = (insertSorted cmp a L).map f` when `f` globally preserves `cmp`. | private |
 | `sorted_perm_head_class_eq` | — | — | Head-element lemma used in `sortedPerm_class_eq`: the head of a sorted list and the head of any Perm share the same `cmp`-class. | private |
-| `insertSorted_pairwise` | — | — | `insertSorted cmp a L` is `Pairwise (cmp · · ≠ .gt)` when `L` is, i.e. insertion preserves sortedness. | private |
+| `insertSorted_pairwise` | `perm_insertSorted` | — | `insertSorted cmp a L` is `Pairwise (cmp · · ≠ .gt)` when `L` is, i.e. insertion preserves sortedness. | private |
 | `assignRanksStep` | — | — | Single foldl step for `assignRanks`: appends `(elem, rank)` to accumulator. | private |
-| `assignRanks_eq_foldl` | — | — | `assignRanks cmp L` equals a `List.foldl` of `assignRanksStep` starting from `([], 0)`. | private |
-| `assignRanksStep_fst_length` | — | — | `assignRanksStep` preserves the length of the accumulated first-component list. | private |
-| `assignRanksStep_fst_map_fst` | — | — | First components after `assignRanksStep` are the original list elements in order. | private |
-| `assignRanks_aux_length` | — | — | Length of the `assignRanks` foldl accumulator at each step. | private |
-| `assignRanks_aux_map_fst` | — | — | First-component map of the `assignRanks` foldl accumulator reproduces the prefix. | private |
-| `assignRanksStep_commutes_with_f_map` | — | — | `assignRanksStep` commutes with global `f`-mapping when `f` preserves `cmp`. | private |
-| `assignRanks_foldl_map_f` | — | — | Foldl of `assignRanksStep` on `L.map f` equals foldl on `L` with `f` applied to first components; global hypothesis. | private |
-| `assignRanksStep_commutes_relational` | — | — | Relational commutation: `assignRanksStep` with `cmp₂` on `f`-mapped input equals `assignRanksStep` with `cmp₁` on original when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b` in processed prefix. | private |
-| `assignRanks_foldl_map_f_relational` | — | — | Foldl of `assignRanksStep` commutes with `f`-mapping in the relational form (pointwise hypothesis on already-seen prefix). | private |
-| `assignRanksStep_rank_le` | — | — | The rank produced by `assignRanksStep` is `≤` the position index. | private |
-| `assignRanks_aux_rank_le` | — | — | All ranks in the foldl accumulator are `≤` their position. | private |
-| `assignRanksStep_density_invariant` | — | — | `assignRanksStep` preserves the density invariant: every rank below the current max has a witness. | private |
-| `assignRanks_aux_density` | — | — | Density invariant holds for the full foldl accumulator. | private |
+| `assignRanks_eq_foldl` | `assignRanksStep` | — | `assignRanks cmp L` equals a `List.foldl` of `assignRanksStep` starting from `([], 0)`. | private |
+| `assignRanksStep_fst_length` | `assignRanksStep` | — | `assignRanksStep` preserves the length of the accumulated first-component list. | private |
+| `assignRanksStep_fst_map_fst` | `assignRanksStep` | — | First components after `assignRanksStep` are the original list elements in order. | private |
+| `assignRanks_aux_length` | `assignRanksStep_fst_length` | — | Length of the `assignRanks` foldl accumulator at each step. | private |
+| `assignRanks_aux_map_fst` | `assignRanksStep_fst_map_fst` | — | First-component map of the `assignRanks` foldl accumulator reproduces the prefix. | private |
+| `assignRanksStep_commutes_with_f_map` | `assignRanksStep` | — | `assignRanksStep` commutes with global `f`-mapping when `f` preserves `cmp`. | private |
+| `assignRanks_foldl_map_f` | `assignRanksStep_commutes_with_f_map` | — | Foldl of `assignRanksStep` on `L.map f` equals foldl on `L` with `f` applied to first components; global hypothesis. | private |
+| `assignRanksStep_commutes_relational` | `assignRanksStep` | — | Relational commutation: `assignRanksStep` with `cmp₂` on `f`-mapped input equals `assignRanksStep` with `cmp₁` on original when `cmp₂ (f a) (f b) = cmp₁ a b` for `a, b` in processed prefix. | private |
+| `assignRanks_foldl_map_f_relational` | `assignRanksStep_commutes_relational` | — | Foldl of `assignRanksStep` commutes with `f`-mapping in the relational form (pointwise hypothesis on already-seen prefix). | private |
+| `assignRanksStep_rank_le` | `assignRanksStep` | — | The rank produced by `assignRanksStep` is `≤` the position index. | private |
+| `assignRanks_aux_rank_le` | `assignRanksStep_rank_le` | — | All ranks in the foldl accumulator are `≤` their position. | private |
+| `assignRanksStep_density_invariant` | `assignRanksStep` | — | `assignRanksStep` preserves the density invariant: every rank below the current max has a witness. | private |
+| `assignRanks_aux_density` | `assignRanksStep_density_invariant` | — | Density invariant holds for the full foldl accumulator. | private |
 | `assignRanksFoldl_lastEntry_rank_le` | — | — | The last entry's rank in the foldl accumulator is `≤` its list-end index. | private |
-| `assignRanks_snoc_decompose` | — | — | Decompose `assignRanks cmp (L ++ [a])` into `assignRanks cmp L` plus one final entry. | private |
-| `assignRanks_snoc_decompose_strict` | — | — | Strict variant: final rank is `assignRanks cmp L`.length when `cmp (last L) a ≠ .eq`. | private |
+| `assignRanks_snoc_decompose` | `assignRanks_eq_foldl`, `assignRanksFoldl_lastEntry_rank_le` | — | Decompose `assignRanks cmp (L ++ [a])` into `assignRanks cmp L` plus one final entry. | private |
+| `assignRanks_snoc_decompose_strict` | `assignRanks_eq_foldl` | — | Strict variant: final rank is `assignRanks cmp L`.length when `cmp (last L) a ≠ .eq`. | private |
 | `assignRanks_foldl_lastEntry_fst` | — | — | The first component of the foldl's last entry is the last element of the input list. | private |
-| `assignRanksStep_preserves_invariant` | — | — | `assignRanksStep` preserves the combined (length, map_fst, rank_le) invariant used by `assignRanks_foldl_invariant`. | private |
-| `assignRanks_foldl_invariant` | — | — | The combined invariant holds for the full foldl. | private |
-| `assignRanks_strong_invariant` | — | — | Strong combined invariant for `assignRanks` used to prove `rank_eq_pos_when_distinct_prefix` and `rank_eq_within_eq_class`. | private |
+| `assignRanksStep_preserves_invariant` | `assignRanksStep` | — | `assignRanksStep` preserves the combined (length, map_fst, rank_le) invariant used by `assignRanks_foldl_invariant`. | private |
+| `assignRanks_foldl_invariant` | `assignRanksStep_preserves_invariant` | — | The combined invariant holds for the full foldl. | private |
+| `assignRanks_strong_invariant` | `assignRanks_foldl_lastEntry_fst`, `assignRanks_snoc_decompose_strict`, `assignRanks_length` | — | Strong combined invariant for `assignRanks` used to prove `rank_eq_pos_when_distinct_prefix` and `rank_eq_within_eq_class`. | private |
 | `sorted_eq_of_perm_strict_aux` | — | — | Auxiliary for `sortBy_eq_of_perm_strict`: equal sorted lists under strict `cmp`. | private |
 
 ## LabelEdgesCharacterization Module
@@ -174,7 +174,7 @@ The file requirements have recently changed, a few early tables don't follow the
 | `labelEdgesStep` | — | — | The `labelEdgesAccordingToRankings` fold body extracted as a standalone function (swap-and-update). | — |
 | `set!_getD_self_aux` | — | — | `(xs.set! i v).getD i d = v` when `i < xs.size`; local helper. | private |
 | `set!_getD_ne_aux` | — | — | `(xs.set! i v).getD j d = xs.getD j d` when `i ≠ j`; local helper. | private |
-| `rankMap_swap_step_eq` | — | — | The rankMap double-`set!` swap step is equivalent to composing one `Equiv.swap` into the indexing permutation. | private |
+| `rankMap_swap_step_eq` | `set!_getD_self_aux`, `set!_getD_ne_aux` | — | The rankMap double-`set!` swap step is equivalent to composing one `Equiv.swap` into the indexing permutation. | private |
 | `labelEdges_fold_permutes` | `swapVertexLabels_eq_permute`, `AdjMatrix.permute_mul` | — | The `labelEdgesAccordingToRankings` foldl maintains `∃ σ', acc.1 = G.permute σ'`; weak invariant. | — |
 | `labelEdges_fold_strong` | `swapVertexLabels_eq_permute`, `AdjMatrix.permute_mul`, `rankMap_swap_step_eq` | — | Strong fold invariant: tracks both the cumulative permutation σ and `acc.2.getD v 0 = rankMap₀.getD (σ⁻¹ v) 0` pointwise. | — |
 | `labelEdges_fold_terminal_aux` | `rankMap_swap_step_eq` | — | Auxiliary: after processing a Nodup sublist of `finRange n`, the terminal rankMap satisfies `rankMap[v] = v`. | private |
@@ -185,72 +185,72 @@ The file requirements have recently changed, a few early tables don't follow the
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
 | `VtsInvariant` | — | — | Predicate: `σ` maps `vts` to itself (`vts.getD (σ v).val 0 = vts.getD v.val 0` for all `v`). | — |
-| `VtsInvariant.one` | — | — | The identity permutation always satisfies `VtsInvariant`. | — |
-| `VtsInvariant.mul` | — | — | Composition: if σ and τ both satisfy `VtsInvariant`, so does `σ * τ`. | — |
-| `VtsInvariant.inv` | — | — | Inversion: if σ satisfies `VtsInvariant`, so does `σ⁻¹`. | — |
-| `AdjMatrix.TypedAut` | — | — | Subgroup of `Aut G` whose elements also satisfy `VtsInvariant vts`. | — |
-| `mem_TypedAut_iff` | — | — | `σ ∈ G.TypedAut vts ↔ σ ∈ G.Aut ∧ VtsInvariant σ vts`. | — |
-| `AdjMatrix.TypedAut_le_Aut` | — | — | `G.TypedAut vts` is a subgroup of `G.Aut`. | — |
-| `Decidable (VtsInvariant σ vts)` | — | — | Instance: `VtsInvariant σ vts` is decidable. | Instance |
-| `Decidable (σ ∈ G.TypedAut vts)` | — | — | Instance: membership in `TypedAut` is decidable. | Instance |
-| `Fintype (G.TypedAut vts)` | — | — | Instance: `G.TypedAut vts` is finite. | Instance |
-| `VtsInvariant.replicate_zero` | — | — | The all-zeros array satisfies `VtsInvariant σ` for any σ. | — |
-| `TypedAut_replicate_zero` | — | — | `G.TypedAut (Array.replicate n 0) = G.Aut` (zeros do not constrain automorphisms beyond Aut). | — |
+| `VtsInvariant.one` | `VtsInvariant` | — | The identity permutation always satisfies `VtsInvariant`. | — |
+| `VtsInvariant.mul` | `VtsInvariant` | — | Composition: if σ and τ both satisfy `VtsInvariant`, so does `σ * τ`. | — |
+| `VtsInvariant.inv` | `VtsInvariant` | — | Inversion: if σ satisfies `VtsInvariant`, so does `σ⁻¹`. | — |
+| `AdjMatrix.TypedAut` | `VtsInvariant`, `VtsInvariant.one`, `VtsInvariant.mul`, `VtsInvariant.inv` | — | Subgroup of `Aut G` whose elements also satisfy `VtsInvariant vts`. | — |
+| `mem_TypedAut_iff` | `AdjMatrix.TypedAut` | — | `σ ∈ G.TypedAut vts ↔ σ ∈ G.Aut ∧ VtsInvariant σ vts`. | — |
+| `AdjMatrix.TypedAut_le_Aut` | `AdjMatrix.TypedAut` | — | `G.TypedAut vts` is a subgroup of `G.Aut`. | — |
+| `Decidable (VtsInvariant σ vts)` | `VtsInvariant` | — | Instance: `VtsInvariant σ vts` is decidable. | Instance |
+| `Decidable (σ ∈ G.TypedAut vts)` | `AdjMatrix.TypedAut` | — | Instance: membership in `TypedAut` is decidable. | Instance |
+| `Fintype (G.TypedAut vts)` | `AdjMatrix.TypedAut` | — | Instance: `G.TypedAut vts` is finite. | Instance |
+| `VtsInvariant.replicate_zero` | `VtsInvariant` | — | The all-zeros array satisfies `VtsInvariant σ` for any σ. | — |
+| `TypedAut_replicate_zero` | `AdjMatrix.TypedAut`, `VtsInvariant.replicate_zero` | — | For any `G`, every automorphism is in `TypedAut G (Array.replicate n 0)` — the typed-automorphism group with all-zeros types coincides with the full automorphism group. | — |
 | `typeClass` | — | — | The set of `Fin n` vertices with vertex type exactly `t₀` in `vts`. | — |
 | `shiftAbove_size` | — | — | `shiftAbove t₀ vts` preserves array size. | — |
 | `shiftAbove_getD` | — | — | Value of `shiftAbove t₀ vts` at position `j`. | — |
-| `shiftAbove_getD_below` | — | — | Positions with type `< t₀` are unchanged by `shiftAbove`. | — |
-| `shiftAbove_getD_above` | — | — | Positions with type `> t₀` have their value incremented by 1 after `shiftAbove`. | — |
-| `shiftAbove_getD_target` | — | — | Positions with type `= t₀` also have value shifted after `shiftAbove`. | — |
+| `shiftAbove_getD_below` | `shiftAbove_getD` | — | Positions with type `< t₀` are unchanged by `shiftAbove`. | — |
+| `shiftAbove_getD_above` | `shiftAbove_getD` | — | Positions with type `> t₀` have their value incremented by 1 after `shiftAbove`. | — |
+| `shiftAbove_getD_target` | `shiftAbove_getD` | — | Positions with type `= t₀` also have value shifted after `shiftAbove`. | — |
 | `breakTieCount` | — | — | Number of vertices in `vts` with type `t₀`. | — |
-| `breakTie_noop` | — | — | If `t₀` does not appear in `vts`, `breakTie t₀ vts = vts`. | — |
-| `breakTie_eq_promote_shift` | — | — | `breakTie t₀ vts = shiftAbove t₀ (breakTiePromote t₀ vts)`. | — |
+| `breakTie_noop` | `breakTieCount` | — | If `t₀` does not appear in `vts`, `breakTie t₀ vts = vts`. | — |
+| `breakTie_eq_promote_shift` | `breakTieCount` | — | `breakTie t₀ vts = shiftAbove t₀ (breakTiePromote t₀ vts)`. | — |
 | `btStep` | — | — | Single fold step for `breakTiePromote`: promotes the minimum tied vertex. | private |
-| `btStep_size` | — | — | `btStep` preserves array size. | private |
-| `breakTiePromote_eq_fold` | — | — | `breakTiePromote t₀ vts` is expressed as a `List.foldl` of `btStep`. | private |
-| `btFold_size` | — | — | The `btStep` foldl preserves array size. | private |
-| `btStep_getD_ne` | — | — | `btStep` leaves positions with type `≠ t₀` unchanged. | private |
-| `btFold_getD_ne` | — | — | The `btStep` foldl leaves positions with type `≠ t₀` unchanged. | private |
-| `breakTiePromote_size` | — | — | `breakTiePromote t₀ vts` preserves array size. | — |
-| `breakTiePromote_getD_of_ne` | — | — | `breakTiePromote` leaves positions whose type is not `t₀` unchanged. | — |
-| `breakTie_size` | — | — | `breakTie t₀ vts` preserves array size. | — |
-| `breakTie_getD_below` | — | — | Positions with type `< t₀` are unchanged by `breakTie`. | — |
-| `breakTie_getD_above` | — | — | Positions with type `> t₀` have their value shifted up by 1 after `breakTie`. | — |
-| `breakTie_getD_above_or` | — | — | Combined case: value at position `≥ t₀` after `breakTie`. | — |
-| `btFold_no_target` | — | — | If no position in the fold list has type `t₀`, the foldl is the identity. | private |
-| `btStep_notfirst` | — | — | `btStep` is the identity when the current position is not the first promoted position. | private |
+| `btStep_size` | `btStep` | — | `btStep` preserves array size. | private |
+| `breakTiePromote_eq_fold` | `btStep` | — | `breakTiePromote t₀ vts` is expressed as a `List.foldl` of `btStep`. | private |
+| `btFold_size` | `btStep_size` | — | The `btStep` foldl preserves array size. | private |
+| `btStep_getD_ne` | `btStep` | — | `btStep` leaves positions with type `≠ t₀` unchanged. | private |
+| `btFold_getD_ne` | `btStep_getD_ne` | — | The `btStep` foldl leaves positions with type `≠ t₀` unchanged. | private |
+| `breakTiePromote_size` | `breakTiePromote_eq_fold`, `btFold_size` | — | `breakTiePromote t₀ vts` preserves array size. | — |
+| `breakTiePromote_getD_of_ne` | `breakTiePromote_eq_fold`, `btFold_getD_ne` | — | `breakTiePromote` leaves positions whose type is not `t₀` unchanged. | — |
+| `breakTie_size` | `breakTie_noop`, `breakTie_eq_promote_shift`, `breakTiePromote_size`, `shiftAbove_size` | — | `breakTie t₀ vts` preserves array size. | — |
+| `breakTie_getD_below` | `breakTie_noop`, `breakTie_eq_promote_shift`, `breakTiePromote_getD_of_ne`, `shiftAbove_getD_below` | — | Positions with type `< t₀` are unchanged by `breakTie`. | — |
+| `breakTie_getD_above` | `breakTie_eq_promote_shift`, `breakTiePromote_getD_of_ne`, `shiftAbove_getD_above` | — | Positions with type `> t₀` have their value shifted up by 1 after `breakTie`. | — |
+| `breakTie_getD_above_or` | `breakTie_noop`, `breakTie_getD_above` | — | Combined case: value at position `≥ t₀` after `breakTie`. | — |
+| `btFold_no_target` | `btStep` | — | If no position in the fold list has type `t₀`, the foldl is the identity. | private |
+| `btStep_notfirst` | `btStep` | — | `btStep` is the identity when the current position is not the first promoted position. | private |
 | `VertexType_add_one_ne` | — | — | `t₀ + 1 ≠ t₀` for any vertex type `t₀`. | private |
-| `btFold_from_notfirst_getD` | — | — | Value formula for `btFold` starting from a position past the first promoted vertex. | private |
-| `btFold_getD_not_mem` | — | — | The `btStep` foldl leaves positions outside its list unchanged. | private |
-| `breakTiePromote_getD_at_min` | — | — | Value at the minimum vertex with type `t₀` after `breakTiePromote`. | — |
-| `breakTiePromote_getD_at_other` | — | — | Value at non-minimum vertices with type `t₀` after `breakTiePromote`. | — |
-| `shiftAbove_getD_ne_target` | — | — | `shiftAbove` at a position whose type differs from `t₀`. | private |
-| `breakTie_getD_at_min` | — | — | The minimum vertex with type `t₀` receives a unique promoted value after `breakTie`. | — |
+| `btFold_from_notfirst_getD` | `btStep_notfirst`, `btFold_getD_ne`, `VertexType_add_one_ne` | — | Value formula for `btFold` starting from a position past the first promoted vertex. | private |
+| `btFold_getD_not_mem` | `btStep` | — | The `btStep` foldl leaves positions outside its list unchanged. | private |
+| `breakTiePromote_getD_at_min` | `breakTiePromote_eq_fold`, `btFold_no_target`, `btFold_getD_not_mem` | — | Value at the minimum vertex with type `t₀` after `breakTiePromote`. | — |
+| `breakTiePromote_getD_at_other` | `breakTiePromote_eq_fold`, `btFold_no_target`, `btFold_from_notfirst_getD` | — | Value at non-minimum vertices with type `t₀` after `breakTiePromote`. | — |
+| `shiftAbove_getD_ne_target` | `shiftAbove_getD_below`, `shiftAbove_getD_above` | — | `shiftAbove` at a position whose type differs from `t₀`. | private |
+| `breakTie_getD_at_min` | `breakTie_noop`, `breakTie_eq_promote_shift`, `breakTiePromote_getD_at_min`, `shiftAbove_getD_target`, `shiftAbove_getD_ne_target` | — | The minimum vertex with type `t₀` receives a unique promoted value after `breakTie`. | — |
 | `breakTieCount_eq_countP` | — | — | `breakTieCount t₀ vts = vts.toList.countP (· == t₀)`. | — |
-| `breakTieCount_ge_two_of_distinct` | — | — | If two distinct vertices have type `t₀`, then `breakTieCount t₀ vts ≥ 2`. | — |
-| `breakTie_getD_at_other` | — | — | Non-minimum vertices with type `t₀` receive the shifted-up value after `breakTie`. | — |
-| `breakTie_getD_target` | — | — | Value at arbitrary positions after `breakTie`, by type case. | — |
-| `breakTie_getD_target_ge` | — | — | Every position's value after `breakTie` is `≥` its original value. | — |
-| `breakTie_Aut_stabilizer` | — | — | The `breakTie` output is invariant under `G.TypedAut (breakTie t₀ vts)`. | — |
-| `breakTie_TypedAut_le` | — | — | `G.TypedAut (breakTie t₀ vts) ≤ G.TypedAut vts`: breaking a tie can only shrink the typed automorphism group. | — |
-| `breakTie_strict_shrink` | — | — | If `breakTieCount t₀ vts ≥ 2`, then `G.TypedAut (breakTie t₀ vts) < G.TypedAut vts` (strictly smaller). | — |
-| `runFrom` | — | — | Sequential tiebreak from vertex `start` up to `n`: iterates `convergeLoop ∘ breakTie` for each tied type. | — |
-| `breakTieAt` | — | — | Tiebreak that resolves only the tie at vertex `keep`, bumping all same-type vertices above it. | — |
+| `breakTieCount_ge_two_of_distinct` | `breakTieCount_eq_countP` | — | If two distinct vertices have type `t₀`, then `breakTieCount t₀ vts ≥ 2`. | — |
+| `breakTie_getD_at_other` | `breakTie_eq_promote_shift`, `breakTiePromote_getD_at_other`, `breakTieCount_ge_two_of_distinct`, `shiftAbove_getD_target`, `shiftAbove_getD_ne_target` | — | Non-minimum vertices with type `t₀` receive the shifted-up value after `breakTie`. | — |
+| `breakTie_getD_target` | `breakTie_getD_at_min`, `breakTie_getD_at_other` | — | Value at arbitrary positions after `breakTie`, by type case. | — |
+| `breakTie_getD_target_ge` | `breakTie_getD_target` | — | Every position's value after `breakTie` is `≥` its original value. | — |
+| `breakTie_Aut_stabilizer` | `breakTie_getD_at_min`, `breakTie_getD_at_other`, `breakTie_getD_below`, `breakTie_getD_above`, `breakTie_getD_above_or`, `VertexType_add_one_ne` | — | §5.1: characterizes `TypedAut G (breakTie vts t₀)` as the `v_star`-stabilizer subgroup of `TypedAut G vts`, where `v_star := min (typeClass vts t₀)`. Requires `vts` to be `Aut(G)`-invariant. | — |
+| `breakTie_TypedAut_le` | `breakTie_Aut_stabilizer` | — | `G.TypedAut (breakTie t₀ vts) ≤ G.TypedAut vts`: breaking a tie can only shrink the typed automorphism group. | — |
+| `breakTie_strict_shrink` | `breakTie_TypedAut_le`, `breakTie_Aut_stabilizer` | — | §5.2: Strict inclusion `G.TypedAut (breakTie vts t₀) < G.TypedAut vts`, given an `hmove` witness — some σ ∈ TypedAut(G,vts) with σ v_star ≠ v_star. | — |
+| `runFrom` | `breakTie`, `convergeLoop`, `labelEdgesAccordingToRankings` | — | "Remainder of the pipeline" referenced in §6: feed an intermediate typing in, run the remaining `orderVertices` outer iterations and the final `labelEdgesAccordingToRankings`, and produce the canonical matrix. | — |
+| `breakTieAt` | — | — | The "what if we had kept vertex `keep` instead of `min (typeClass vts t₀)`" alternative to `breakTie`. Promotes every vertex with value `t₀` except `keep` to `t₀ + 1`. | — |
 | `bTAStep` | — | — | Single fold step for `breakTieAt`. | private |
-| `breakTieAt_eq_fold` | — | — | `breakTieAt vts t₀ keep` is expressed as a `List.foldl` of `bTAStep`. | private |
-| `bTAStep_size` | — | — | `bTAStep` preserves array size. | private |
-| `bTAFold_size` | — | — | The `bTAStep` foldl preserves array size. | private |
-| `breakTieAt_size` | — | — | `breakTieAt vts t₀ keep` preserves array size. | — |
-| `bTAStep_getD_ne` | — | — | `bTAStep` leaves all positions other than `keep` unchanged. | private |
-| `bTAFold_getD_of_notin` | — | — | `bTAFold` leaves positions not in its list unchanged. | private |
-| `bTAFold_getD_of_ne` | — | — | `bTAFold` leaves positions `≠ keep` unchanged. | private |
-| `breakTieAt_getD_of_ne` | — | — | `breakTieAt` leaves positions `≠ keep` unchanged. | — |
-| `bTAStep_preserves_keep` | — | — | `bTAStep` preserves the value at `keep`. | private |
-| `bTAFold_preserves_keep` | — | — | The `bTAStep` foldl preserves the value at `keep`. | private |
-| `breakTieAt_getD_keep` | — | — | `breakTieAt` preserves the value at `keep`. | — |
-| `bTAFold_getD_promoted` | — | — | Value at positions promoted by `bTAFold`. | private |
-| `breakTieAt_getD_promoted` | — | — | Value at positions promoted by `breakTieAt`. | — |
-| `breakTieAt_VtsInvariant_eq` | — | — | `breakTieAt` preserves `VtsInvariant τ` when `τ keep = keep`. | — |
+| `breakTieAt_eq_fold` | `breakTieAt`, `bTAStep` | — | `breakTieAt vts t₀ keep` is expressed as a `List.foldl` of `bTAStep`. | private |
+| `bTAStep_size` | `bTAStep` | — | `bTAStep` preserves array size. | private |
+| `bTAFold_size` | `bTAStep_size` | — | The `bTAStep` foldl preserves array size. | private |
+| `breakTieAt_size` | `breakTieAt_eq_fold`, `bTAFold_size` | — | `breakTieAt vts t₀ keep` preserves array size. | — |
+| `bTAStep_getD_ne` | `bTAStep` | — | `bTAStep` leaves all positions other than `keep` unchanged. | private |
+| `bTAFold_getD_of_notin` | `bTAStep_getD_ne` | — | `bTAFold` leaves positions not in its list unchanged. | private |
+| `bTAFold_getD_of_ne` | `bTAStep` | — | `bTAFold` leaves positions `≠ keep` unchanged. | private |
+| `breakTieAt_getD_of_ne` | `breakTieAt_eq_fold`, `bTAFold_getD_of_ne` | — | `breakTieAt` leaves positions `≠ keep` unchanged. | — |
+| `bTAStep_preserves_keep` | `bTAStep` | — | `bTAStep` preserves the value at `keep`. | private |
+| `bTAFold_preserves_keep` | `bTAStep_preserves_keep` | — | The `bTAStep` foldl preserves the value at `keep`. | private |
+| `breakTieAt_getD_keep` | `breakTieAt_eq_fold`, `bTAFold_preserves_keep` | — | `breakTieAt` preserves the value at `keep`. | — |
+| `bTAFold_getD_promoted` | `bTAStep_getD_ne`, `bTAFold_getD_of_ne`, `VertexType_add_one_ne` | — | Value at positions promoted by `bTAFold`. | private |
+| `breakTieAt_getD_promoted` | `bTAFold_getD_promoted` | — | Value at positions promoted by `breakTieAt`. | — |
+| `breakTieAt_VtsInvariant_eq` | `breakTieAt_getD_keep`, `breakTieAt_getD_promoted`, `breakTieAt_getD_of_ne`, `VtsInvariant` | — | `breakTieAt` preserves `VtsInvariant τ` when `τ keep = keep`. | — |
 
 ## ComparePathSegments Module
 
@@ -432,28 +432,28 @@ The file requirements have recently changed, a few early tables don't follow the
 | `pairCmp_refl` | — | — | `pairCmp a a = .eq`. | private |
 | `pairCmp_eval_ne_fst` | — | — | `pairCmp a b` when `a.1 ≠ b.1` (reduces to `Nat.compare a.1 b.1`). | private |
 | `pairCmp_eval_eq_fst` | — | — | `pairCmp a b` when `a.1 = b.1` (reduces to `Nat.compare a.2 b.2`). | private |
-| `pairCmp_le_iff` | — | — | `pairCmp a b ≠ .gt ↔ a.1 < b.1 ∨ (a.1 = b.1 ∧ a.2 ≤ b.2)`. | private |
-| `pairCmp_gt_iff` | — | — | `pairCmp a b = .gt ↔ b.1 < a.1 ∨ (a.1 = b.1 ∧ b.2 < a.2)`. | private |
-| `pairCmp_antisym₁` | — | — | Antisymmetry `.lt → .gt` for `pairCmp`. | private |
-| `pairCmp_antisym₂` | — | — | Antisymmetry `.gt → .lt` for `pairCmp`. | private |
-| `pairCmp_trans` | — | — | Transitivity `≠ .gt` for `pairCmp`. | private |
-| `pairCmp_strict` | — | — | `pairCmp a b ≠ .eq` when `a ≠ b`. | private |
+| `pairCmp_le_iff` | `pairCmp_eval_eq_fst`, `pairCmp_eval_ne_fst` | — | `pairCmp a b ≠ .gt ↔ a.1 < b.1 ∨ (a.1 = b.1 ∧ a.2 ≤ b.2)`. | private |
+| `pairCmp_gt_iff` | `pairCmp_eval_eq_fst`, `pairCmp_eval_ne_fst` | — | `pairCmp a b = .gt ↔ b.1 < a.1 ∨ (a.1 = b.1 ∧ b.2 < a.2)`. | private |
+| `pairCmp_antisym₁` | `pairCmp_gt_iff`, `pairCmp_eval_eq_fst`, `pairCmp_eval_ne_fst` | — | Antisymmetry `.lt → .gt` for `pairCmp`. | private |
+| `pairCmp_antisym₂` | `pairCmp_gt_iff`, `pairCmp_eval_eq_fst`, `pairCmp_eval_ne_fst` | — | Antisymmetry `.gt → .lt` for `pairCmp`. | private |
+| `pairCmp_trans` | `pairCmp_le_iff` | — | Transitivity `≠ .gt` for `pairCmp`. | private |
+| `pairCmp_strict` | `pairCmp_eval_eq_fst`, `pairCmp_eval_ne_fst` | — | `pairCmp a b ≠ .eq` when `a ≠ b`. | private |
 | `pairsOf` | — | — | Convert `(rks : Array VertexType)` to a list of `(rks[i], i)` pairs. | private |
-| `pairsOf_length` | — | — | `(pairsOf n rks).length = n`. | private |
-| `pairsOf_seconds` | — | — | The second components of `pairsOf n rks` are `[0, 1, ..., n-1]`. | private |
-| `sortedPairs_length` | — | — | The `pairCmp`-sorted pairs list has length `n`. | private |
+| `pairsOf_length` | `pairsOf` | — | `(pairsOf n rks).length = n`. | private |
+| `pairsOf_seconds` | `pairsOf` | — | The second components of `pairsOf n rks` are `[0, 1, ..., n-1]`. | private |
+| `sortedPairs_length` | `pairsOf_length` | — | The `pairCmp`-sorted pairs list has length `n`. | private |
 | `sortedPairs_seconds_perm` | `pairsOf_seconds`, `sortBy_perm` | — | Second components of the sorted pairs are a Perm of `[0, 1, ..., n-1]`. | private |
 | `sortedPairs_seconds_nodup` | `sortedPairs_seconds_perm` | — | Second components of the sorted pairs are Nodup. | private |
-| `L_pairs_nodup_aux` | — | — | Nodup of the `(type, index)` pairs list when indices are distinct. | private |
+| `L_pairs_nodup_aux` | `sortedPairs_seconds_nodup` | — | Nodup of the `(type, index)` pairs list when indices are distinct. | private |
 | `computeDenseRanks_eq_zipIdx_setChain` | `pairsOf_seconds`, `sortedPairs_seconds_nodup`, `array_set_chain_at_target_nodup` | — | `computeDenseRanks` output equals the result of a `set!`-chain indexed by the sorted `(type, index)` pairs. | private |
 | `computeDenseRanks_getD_at_pos` | `computeDenseRanks_eq_zipIdx_setChain` | — | `(computeDenseRanks n rks).getD v 0` equals the dense rank of vertex `v`. | private |
 | `computeDenseRanks_inj` | `computeDenseRanks_getD_at_pos` | — | `computeDenseRanks` is injective on vertex indices when tie-free. | private |
 | `computeDenseRanks_perm_when_tieFree` | `computeDenseRanks_getD_at_pos`, `computeDenseRanks_inj` | — | Under `TieFree rks n`, `computeDenseRanks` output is a permutation of `[0, 1, ..., n-1]`. | — |
 | `liftToNat` | — | — | Lift `τ : Equiv.Perm (Fin n)` to a total `Nat → Nat` function (identity outside `[0, n)`). | private |
-| `pairLift` | — | — | Lift `τ` to act on `(VertexType × Nat)` by shifting the index component. | private |
-| `liftToNat_in_range` | — | — | `liftToNat τ j = (τ ⟨j, _⟩).val` when `j < n`. | private |
-| `pairsOf_τ_perm` | `liftToNat_in_range` | — | `pairsOf n (τ-shifted rks)` is a Perm of `pairLift τ` applied to `pairsOf n rks`. | private |
-| `pairCmp_resp_lift_under_tieFree` | `pairCmp_eval_ne_fst`, `pairCmp_eval_eq_fst` | — | `pairCmp` respects `pairLift τ` on tie-free pairs: `pairCmp (pairLift τ a) (pairLift τ b) = pairCmp a b` when `rks` is tie-free. | private |
+| `pairLift` | `liftToNat` | — | Lift `τ` to act on `(VertexType × Nat)` by shifting the index component. | private |
+| `liftToNat_in_range` | `liftToNat` | — | `liftToNat τ j = (τ ⟨j, _⟩).val` when `j < n`. | private |
+| `pairsOf_τ_perm` | `liftToNat_in_range`, `pairLift`, `pairsOf` | — | `pairsOf n (τ-shifted rks)` is a Perm of `pairLift τ` applied to `pairsOf n rks`. | private |
+| `pairCmp_resp_lift_under_tieFree` | `pairCmp_eval_ne_fst`, `pairCmp_eval_eq_fst`, `pairCmp_refl`, `pairLift` | — | `pairCmp` respects `pairLift τ` on tie-free pairs: `pairCmp (pairLift τ a) (pairLift τ b) = pairCmp a b` when `rks` is tie-free. | private |
 | `computeDenseRanks_τ_shift_distinct` | `pairsOf_τ_perm`, `pairCmp_resp_lift_under_tieFree`, `sortBy_eq_of_perm_strict`, `computeDenseRanks_getD_at_pos`, `computeDenseRanks_inj` | — | Under `TieFree` and τ-related ranks, `computeDenseRanks` on `rks₂` is the τ-shifted `computeDenseRanks` on `rks₁`. | — |
 | `labelEdges_VtsInvariant_eq_distinct` | `computeDenseRanks_perm_when_tieFree`, `labelEdges_fold_strong`, `labelEdges_terminal_rankMap_identity` | — | When `rks` is tie-free, `labelEdgesAccordingToRankings rks G` is invariant under `VtsInvariant` (Aut G acts trivially). | — |
 | `labelEdges_two_graphs_σ_related` | `computeDenseRanks_τ_shift_distinct`, `labelEdges_fold_strong`, `labelEdges_terminal_rankMap_identity` | — | Under τ-related tie-free ranks, `labelEdgesAccordingToRankings rks₂ G₂ = labelEdgesAccordingToRankings rks₁ G₁`. Stage D-rel. | — |
@@ -462,74 +462,73 @@ The file requirements have recently changed, a few early tables don't follow the
 
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
-| `shiftAbove_VtsInvariant_eq` | — | — | `shiftAbove t₀ vts₂` at slot `w` equals `shiftAbove t₀ vts₁` at slot `τ⁻¹ w` when `vts₁`/`vts₂` are τ-related. | — |
-| `shiftAbove_VtsInvariant_size_eq` | — | — | τ-related `vts₁`/`vts₂` have the same size after `shiftAbove`. | — |
-| `breakTieAt_τ_related` | `shiftAbove_VtsInvariant_eq`, `shiftAbove_VtsInvariant_size_eq` | — | `breakTieAt vts₂ t₀ (τ keep)` at slot `w` equals `breakTieAt vts₁ t₀ keep` at slot `τ⁻¹ w` when inputs are τ-related. | — |
-| `breakTieAt_size_eq` | — | — | τ-related `vts₁`/`vts₂` have the same size after `breakTieAt`. | — |
+| `shiftAbove_VtsInvariant_eq` | `shiftAbove_getD_below`, `shiftAbove_getD_above` | — | `shiftAbove t₀ vts₂` at slot `w` equals `shiftAbove t₀ vts₁` at slot `τ⁻¹ w` when `vts₁`/`vts₂` are τ-related. | — |
+| `shiftAbove_VtsInvariant_size_eq` | `shiftAbove_size` | — | τ-related `vts₁`/`vts₂` have the same size after `shiftAbove`. | — |
+| `breakTieAt_τ_related` | `breakTieAt_getD_keep`, `breakTieAt_getD_promoted`, `breakTieAt_getD_of_ne` | — | `breakTieAt vts₂ t₀ (τ keep)` at slot `w` equals `breakTieAt vts₁ t₀ keep` at slot `τ⁻¹ w` when inputs are τ-related. | — |
+| `breakTieAt_size_eq` | `breakTieAt_size` | — | τ-related `vts₁`/`vts₂` have the same size after `breakTieAt`. | — |
 
 ## Invariants Module
 
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
-| `IsPrefixTyping` | — | — | Predicate: `vts` values form a contiguous prefix `{0, 1, ..., k}` for some `k`; i.e. every value `< vts.max` appears. | — |
+| `IsPrefixTyping` | — | — | A typing `vts` is a prefix of ℕ: its value set equals `{0, 1, …, m-1}` for some `m`. | — |
 | `IsPrefixTyping.replicate_zero` | — | — | The all-zeros array satisfies `IsPrefixTyping`. | — |
 | `convergeLoop_size_preserving` | `convergeOnce_size_preserving` | — | `convergeLoop` preserves the vertex type array size. | — |
-| `initializePaths_pathsAtDepth_startVertices_eq_range` | — | — | Start vertices of depth-`d` slice of `initializePaths G` are exactly `List.range n`. | private |
+| `initializePaths_pathsAtDepth_startVertices_eq_range` | `initializePaths_pathsOfLength_size` | — | Start vertices of depth-`d` slice of `initializePaths G` are exactly `List.range n`. | private |
 | `initializePaths_pathsAtDepth_startVertices_nodup` | `initializePaths_pathsAtDepth_startVertices_eq_range` | — | Start vertices of depth-`d` slice are Nodup. | private |
-| `outer_fold_fromAcc_other_target_unchanged` | — | — | The outer `fromAcc` foldl leaves depth-slots other than the target depth unchanged. | private |
+| `outer_fold_fromAcc_other_target_unchanged` | `inner_fold_other_depth_unchanged` | — | The outer `fromAcc` foldl leaves depth-slots other than the target depth unchanged. | private |
 | `list_pair_max_exists` | — | — | A non-empty list of `(α × Nat)` contains an element with maximum second component. | private |
-| `chain_image_dense_of_perm_and_density` | — | — | If the rank image is dense and the assignList is a Perm-related variant, the image remains dense. | private |
-| `chain_image_dense_for_assignRanks_sortBy` | `assignRanks_image_dense`, `sortBy_perm` | — | The rank image of `assignRanks cmp (sortBy cmp L)` is dense (downward closed). | private |
-| `chain_value_at_vertex_for_assignRanks_sortBy` | `chain_image_dense_for_assignRanks_sortBy` | — | For each vertex `v`, some entry in the `assignRanks (sortBy …)` output has first component `v`. | private |
-| `getFrom_image_isPrefix_for_initializePaths` | `chain_image_dense_for_assignRanks_sortBy`, `assignRanks_rank_lt_length` | — | The image of `getFrom (n-1)` on `calculatePathRankings (initializePaths G) vts` is a prefix `{0, ..., k}`. | — |
-| `convergeLoop_preserves_prefix` | `getFrom_image_isPrefix_for_initializePaths`, `convergeOnce_writeback` | — | `convergeLoop` preserves `IsPrefixTyping` from fuel 0 onward. | — |
-| `breakTie_targetPos_is_min_tied` | — | — | The tiebreak target position `breakTieAt`'s `keep` argument is the minimum vertex in the tied type class. | — |
-| `UniquelyHeldBelow` | — | — | Predicate: every value `< q` in `vts` is held by exactly one vertex. | — |
+| `chain_image_dense_of_perm_and_density` | `array_set_chain_at_target_nodup`, `list_pair_max_exists` | — | If the rank image is dense and the assignList is a Perm-related variant, the image remains dense. | private |
+| `chain_image_dense_for_assignRanks_sortBy` | `chain_image_dense_of_perm_and_density`, `assignRanks_map_fst`, `assignRanks_image_dense`, `sortBy_perm` | — | The rank image of `assignRanks cmp (sortBy cmp L)` is dense (downward closed). | private |
+| `chain_value_at_vertex_for_assignRanks_sortBy` | `array_set_chain_at_target_nodup`, `assignRanks_length`, `assignRanks_getElem_fst`, `sortBy_perm` | — | For each vertex `v`, some entry in the `assignRanks (sortBy …)` output has first component `v`. | private |
+| `getFrom_image_isPrefix_for_initializePaths` | `outer_fold_fromAcc_other_target_unchanged`, `chain_image_dense_for_assignRanks_sortBy`, `initializePaths_pathsAtDepth_startVertices_eq_range`, `initializePaths_pathsAtDepth_startVertices_nodup`, `inner_fold_slice_at_depth`, `assignRanks_rank_lt_length` | — | The image of `getFrom (n-1)` on `calculatePathRankings (initializePaths G) vts` is a prefix `{0, ..., k}`. | — |
+| `convergeLoop_preserves_prefix` | `getFrom_image_isPrefix_for_initializePaths`, `convergeOnce_size_preserving`, `convergeOnce_writeback`, `IsPrefixTyping` | — | `convergeLoop` preserves `IsPrefixTyping` from fuel 0 onward. | — |
+| `breakTie_targetPos_is_min_tied` | `breakTie_getD_below`, `breakTie_getD_target`, `breakTie_getD_above_or`, `breakTie_getD_at_other`, `IsPrefixTyping` | — | The tiebreak target position `breakTieAt`'s `keep` argument is the minimum vertex in the tied type class. | — |
+| `UniquelyHeldBelow` | — | — | Predicate: every value `< q` in `vts` is held by exactly one vertex. The algorithmic hypothesis (Phase 5) that values `0..q-1` are already uniquely held, so remaining foldl iterations can finish breaking ties. | — |
 | `comparePathsFrom_eq_compare_of_start_types_ne` | — | — | When two start types differ, `comparePathsFrom` reduces to comparing start types only. | private |
-| `_comparePathsFrom_total_preorder_legacy_unused` | — | — | Legacy total-preorder proof for `comparePathsFrom`; superseded by `comparePathsFrom_total_preorder`. | private |
-| `sortBy_pathsAtTop_length_eq` | — | — | `sortBy comparePathsFrom (pathsAtDepth)` preserves length `n`. | private |
-| `sortBy_first_q_positions_have_start_types` | — | — | The first `q` positions of the sorted `pathsAtDepth` list have start types `0, 1, ..., q-1`. | private |
-| `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` | `chain_value_at_vertex_for_assignRanks_sortBy` | — | The `fromRanks` at depth `n-1` in `calculatePathRankings (initializePaths G) vts` equals the rank of vertex `v` in the sorted list. | private |
-| `convergeOnce_preserves_lower_uniqueness` | `convergeOnce_writeback`, `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` | — | One `convergeOnce` step preserves `UniquelyHeldBelow q` when the current values below `q` are already distinct. | private |
-| `convergeLoop_preserves_lower_uniqueness` | `convergeOnce_preserves_lower_uniqueness`, `convergeOnce_size_preserving` | — | `convergeLoop` preserves `UniquelyHeldBelow q` for any fuel. | — |
-| `prefix_unique_below_implies_value_held` | — | — | If `IsPrefixTyping vts` and `UniquelyHeldBelow q vts`, every value `< q` is held by exactly one vertex. | private |
-| `exists_two_distinct_q_in_T` | — | — | If `breakTieCount t₀ vts ≥ 2`, there exist two distinct vertices with type `t₀`. | private |
-| `breakTie_step_preserves_uniqueness` | `breakTie_getD_at_min`, `breakTie_getD_at_other`, `breakTie_getD_target` | — | One `breakTie` step preserves `UniquelyHeldBelow` for the next level. | — |
-| `orderVertices_prefix_invariant_strong` | `convergeLoop_preserves_prefix`, `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness` | — | Strong inductive: after `runFrom s vts G`, `UniquelyHeldBelow s` holds. | private |
-| `orderVertices_prefix_invariant` | `orderVertices_prefix_invariant_strong` | — | `orderVertices (initializePaths G) zeros` satisfies `IsPrefixTyping`. | — |
+| `_comparePathsFrom_total_preorder_legacy_unused` | `comparePathsBetween_total_preorder`, `comparePathsBetween_equivCompat`, `orderInsensitiveListCmp_refl`, `orderInsensitiveListCmp_swap_lt` | — | Legacy total-preorder proof for `comparePathsFrom`; superseded by `comparePathsFrom_total_preorder`. | private |
+| `sortBy_pathsAtTop_length_eq` | `initializePaths_pathsAtDepth_startVertices_eq_range`, `sortBy_perm` | — | `sortBy comparePathsFrom (pathsAtDepth)` preserves length `n`. | private |
+| `sortBy_first_q_positions_have_start_types` | `comparePathsFrom_total_preorder`, `initializePaths_pathsAtDepth_startVertices_eq_range`, `sortBy_perm`, `UniquelyHeldBelow` | — | The first `q` positions of the sorted `pathsAtDepth` list have start types `0, 1, ..., q-1`. | private |
+| `fromRanks_at_n_minus_1_eq_chain_for_initializePaths` | `outer_fold_fromAcc_other_target_unchanged`, `inner_fold_slice_at_depth`, `chain_value_at_vertex_for_assignRanks_sortBy` | — | The `fromRanks` at depth `n-1` in `calculatePathRankings (initializePaths G) vts` equals the rank of vertex `v` in the sorted list. | private |
+| `convergeOnce_preserves_lower_uniqueness` | `getFrom_image_isPrefix_for_initializePaths`, `convergeOnce_size_preserving`, `convergeOnce_writeback`, `fromRanks_at_n_minus_1_eq_chain_for_initializePaths`, `chain_value_at_vertex_for_assignRanks_sortBy`, `sortBy_first_q_positions_have_start_types`, `initializePaths_pathsAtDepth_startVertices_eq_range`, `sortBy_perm`, `comparePathsFrom_eq_compare_of_start_types_ne`, `assignRanks_rank_eq_pos_when_distinct_prefix`, `assignRanks_rank_monotone`, `UniquelyHeldBelow`, `IsPrefixTyping` | — | One `convergeOnce` step preserves `UniquelyHeldBelow q` when the current values below `q` are already distinct. | private |
+| `convergeLoop_preserves_lower_uniqueness` | `convergeOnce_preserves_lower_uniqueness`, `convergeOnce_size_preserving`, `UniquelyHeldBelow`, `IsPrefixTyping` | — | `convergeLoop` preserves `UniquelyHeldBelow q` for any fuel. | — |
+| `prefix_unique_below_implies_value_held` | `IsPrefixTyping`, `UniquelyHeldBelow` | — | If `IsPrefixTyping vts` and `UniquelyHeldBelow q vts`, every value `< q` is held by exactly one vertex. | private |
+| `exists_two_distinct_q_in_T` | `breakTieCount_eq_countP` | — | If `breakTieCount t₀ vts ≥ 2`, there exist two distinct vertices with type `t₀`. | private |
+| `breakTie_step_preserves_uniqueness` | `prefix_unique_below_implies_value_held`, `breakTie_getD_below`, `breakTie_getD_target_ge`, `breakTie_getD_above_or`, `breakTie_getD_at_other`, `exists_two_distinct_q_in_T`, `breakTie_getD_above`, `breakTieCount`, `breakTie_size`, `UniquelyHeldBelow`, `IsPrefixTyping` | — | One `breakTie` step preserves `UniquelyHeldBelow` for the next level. | — |
+| `orderVertices_prefix_invariant_strong` | `convergeLoop_preserves_prefix`, `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness`, `UniquelyHeldBelow`, `IsPrefixTyping` | — | Strong inductive: after `runFrom s vts G`, `UniquelyHeldBelow s` holds. | private |
+| `orderVertices_prefix_invariant` | `orderVertices_prefix_invariant_strong`, `UniquelyHeldBelow` | — | `orderVertices (initializePaths G) zeros` satisfies `IsPrefixTyping`. | — |
 | `orderVertices_n_distinct_ranks` | `orderVertices_prefix_invariant`, `convergeLoop_preserves_lower_uniqueness` | — | `orderVertices` produces exactly `n` distinct values `0, 1, ..., n-1`. | — |
 | `getArrayRank_size` | — | — | `getArrayRank arr` preserves array size. | — |
-| `getArrayRank_zeros_eq_zeros` | — | — | `getArrayRank (Array.replicate n 0) = Array.replicate n 0`. | — |
-| `orderVertices_size_eq` | — | — | `orderVertices (initializePaths G) vts` preserves array size. | — |
+| `getArrayRank_zeros_eq_zeros` | `sortBy_perm` | — | `getArrayRank (Array.replicate n 0) = Array.replicate n 0`. | — |
+| `orderVertices_size_eq` | `convergeLoop_size_preserving`, `breakTie_size` | — | `orderVertices (initializePaths G) vts` preserves array size. | — |
 
 ## RunFromRelational Module
 
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
-| `runFrom_VtsInvariant_eq` | `convergeLoop_VtsInvariant_eq`, `breakTieAt_τ_related`, `breakTieAt_size_eq` | — | Early form: for τ-related `vts₁`/`vts₂`, `runFrom s vts₂ G` is τ-related to `runFrom s vts₁ G`. | — |
-| `convergeLoop_step_τ_preserved` | `convergeLoop_VtsInvariant_eq` | — | One `convergeLoop ∘ breakTieAt` step preserves τ-relatedness of the arrays. | — |
+| `convergeLoop_step_τ_preserved` | `convergeLoop_size_preserving`, `convergeLoop_VtsInvariant_eq` | — | One `convergeLoop ∘ breakTieAt` step preserves τ-relatedness of the arrays. | — |
 | `IsPrefixTyping_τ_transfer` | — | — | τ-relatedness transfers `IsPrefixTyping`: if `vts₁` is a prefix typing and `vts₂` is τ-related, so is `vts₂`. | — |
 | `UniquelyHeldBelow_τ_transfer` | — | — | τ-relatedness transfers `UniquelyHeldBelow q`: if `vts₁` holds it and `vts₂` is τ-related, so does `vts₂`. | — |
 | `runFrom_at_n` | — | — | `runFrom n vts G = vts` (base case: no vertices left to process). | — |
 | `runFrom_succ` | — | — | Unfolding: `runFrom s vts G = runFrom (s+1) (convergeLoop ∘ breakTieAt s vts) G`. | — |
 | `UniquelyHeldBelow_n_implies_TieFree` | — | — | `UniquelyHeldBelow n vts` implies `TieFree vts n`. | — |
 | `Array.toList_eq_finRange_map` | — | — | `arr.toList = (List.finRange n).map (fun i => arr[i.val])` when `arr.size = n`. | private |
-| `breakTieCount_τ_invariant` | — | — | `breakTieCount t₀ vts₂ = breakTieCount t₀ vts₁` when `vts₁`/`vts₂` are τ-related. | — |
+| `breakTieCount_τ_invariant` | `breakTieCount_eq_countP` | — | `breakTieCount t₀ vts₂ = breakTieCount t₀ vts₁` when `vts₁`/`vts₂` are τ-related. | — |
 | `typeClass_τ_image_eq` | — | — | `typeClass vts₂ t₀ = τ '' (typeClass vts₁ t₀)` when `vts₂` is τ-related to `vts₁`. | — |
-| `breakTie_min_witness` | `breakTieCount_τ_invariant`, `typeClass_τ_image_eq` | — | The minimum vertex in `typeClass vts₂ t₀` is `τ` applied to the minimum in `typeClass vts₁ t₀`. | — |
+| `breakTie_min_witness` | `breakTieCount_τ_invariant`, `typeClass_τ_image_eq`, `breakTieCount_eq_countP` | — | The minimum vertex in `typeClass vts₂ t₀` is `τ` applied to the minimum in `typeClass vts₁ t₀`. | — |
 | `breakTie_min_witness_in_typeClass` | `breakTie_min_witness` | — | The minimum witness vertex lies in `typeClass`. | — |
-| `OrbitCompleteAfterConv` | — | — | Orbit-completeness invariant: vertices with equal converged types lie in the same `TypedAut`-orbit. | ⚠ empirically falsified 2026-04-28 — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
-| `runFrom_VtsInvariant_eq_strong` | `convergeLoop_step_τ_preserved`, `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`, `breakTie_min_witness`, `OrbitCompleteAfterConv`, `UniquelyHeldBelow_n_implies_TieFree`, `labelEdges_VtsInvariant_eq_distinct` | — | Strong relational theorem: `runFrom s vts₂ G = runFrom s vts₁ G` (not just τ-related, equal) given `OrbitCompleteAfterConv` and `UniquelyHeldBelow s`. | — |
+| `OrbitCompleteAfterConv` | — | — | Orbit-completeness: for `mid` an intermediate algorithm state, vertices with equal values in `convergeLoop(initializePaths G) mid n` lie in the same `TypedAut`-orbit of that converged array. | ⚠ empirically falsified 2026-04-28 — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
+| `runFrom_VtsInvariant_eq_strong` | `convergeLoop_step_τ_preserved`, `convergeLoop_preserves_prefix`, `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness`, `breakTie_size`, `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`, `breakTie_min_witness`, `OrbitCompleteAfterConv`, `UniquelyHeldBelow_n_implies_TieFree`, `runFrom_succ`, `labelEdges_VtsInvariant_eq_distinct`, `breakTieCount_τ_invariant`, `typeClass_τ_image_eq`, `AdjMatrix.TypedAut_le_Aut`, `breakTie_noop`, `breakTie_getD_below`, `breakTie_getD_at_min`, `breakTie_getD_at_other`, `breakTie_getD_above` | — | Strong relational theorem: `runFrom s vts₂ G = runFrom s vts₁ G` (not just τ-related, equal) given `OrbitCompleteAfterConv` and `UniquelyHeldBelow s`. | — |
 | `runFrom_VtsInvariant_eq` | `runFrom_VtsInvariant_eq_strong` | — | Corollary of the strong form: `runFrom 0 zeros G = runFrom 0 (τ-shifted zeros) G`. | — |
-| `tiebreak_choice_independent` | `runFrom_VtsInvariant_eq` | — | The canonical `orderVertices` output is independent of which tied vertex is chosen for tiebreaking; proved from `runFrom_VtsInvariant_eq`. | — |
+| `tiebreak_choice_independent` | `breakTieAt_VtsInvariant_eq`, `breakTieAt_size`, `runFrom_VtsInvariant_eq` | — | The canonical `orderVertices` output is independent of which tied vertex is chosen for tiebreaking; proved from `runFrom_VtsInvariant_eq`. | — |
 
 ## OrderVerticesGeneral Module
 
 | Name | Uses | Used By | Description | Notes |
 |------|------|---------|-------------|-------|
 | `OrbitCompleteAfterConv_general` | — | — | Two-graphs variant of `OrbitCompleteAfterConv`: orbit-completeness for `convergeLoop (initializePaths (G.permute σ)) mid n`. | ⚠ empirically falsified 2026-04-28 (Cycle3 disjoint union, K4, odd-cycle bases) — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
-| `convergeLoop_step_σ_chain_preserved_general` | `convergeLoop_VtsInvariant_eq`, `convergeLoop_σ_equivariant_general` | — | Two-graphs convergeLoop step preservation: chains through an intermediate τ-shifted typing to decompose `σ_chain = σ * τ` (τ ∈ Aut G). | private |
-| `runFrom_VtsInvariant_eq_strong_general` | `convergeLoop_step_σ_chain_preserved_general`, `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`, `OrbitCompleteAfterConv_general`, `UniquelyHeldBelow_n_implies_TieFree`, `labelEdges_two_graphs_σ_related` | — | **P6.C**: `runFrom s vts₁ G = runFrom s vts₂ (G.permute σ)` given `OrbitCompleteAfterConv_general` and σ-relatedness of the arrays. | — |
+| `convergeLoop_step_σ_chain_preserved_general` | `convergeLoop_size_preserving`, `convergeLoop_VtsInvariant_eq`, `convergeLoop_σ_equivariant_general` | — | Two-graphs convergeLoop step preservation: chains through an intermediate τ-shifted typing to decompose `σ_chain = σ * τ` (τ ∈ Aut G). | private |
+| `runFrom_VtsInvariant_eq_strong_general` | `convergeLoop_step_σ_chain_preserved_general`, `convergeLoop_preserves_prefix`, `convergeLoop_preserves_lower_uniqueness`, `breakTie_step_preserves_uniqueness`, `breakTie_size`, `IsPrefixTyping_τ_transfer`, `UniquelyHeldBelow_τ_transfer`, `OrbitCompleteAfterConv_general`, `UniquelyHeldBelow_n_implies_TieFree`, `runFrom_at_n`, `runFrom_succ`, `labelEdges_two_graphs_σ_related`, `breakTieCount_τ_invariant`, `breakTie_noop`, `breakTie_min_witness`, `typeClass_τ_image_eq`, `AdjMatrix.TypedAut_le_Aut`, `AdjMatrix.permute_mul`, `breakTie_getD_below`, `breakTie_getD_at_min`, `breakTie_getD_at_other` | — | **P6.C**: `runFrom s vts₁ G = runFrom s vts₂ (G.permute σ)` given `OrbitCompleteAfterConv_general` and σ-relatedness of the arrays. | — |
 
 ## MainRelationalNotes Module
 
