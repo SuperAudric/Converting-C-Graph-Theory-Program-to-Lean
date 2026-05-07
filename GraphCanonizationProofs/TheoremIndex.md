@@ -2,7 +2,7 @@
 
 Comprehensive index of all public and private Lean theorems, lemmas, and definitions in the GraphCanonizationProofs project.
 
-The file requirements have recently changed, a few early tables don't follow the description guideline correctly.
+check_used_by.py will help mantain the "Used By" column
 
 
 ## Legend
