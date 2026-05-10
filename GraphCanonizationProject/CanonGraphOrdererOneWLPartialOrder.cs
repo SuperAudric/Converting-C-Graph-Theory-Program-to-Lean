@@ -167,78 +167,6 @@ namespace Canonizer
             }
         }
 
-        // ── Signatures ─────────────────────────────────────────────────────────
-        //
-        // A vertex v's signature is its own colour Lead followed by the sorted
-        // multiset of NeighborEntry tuples — one per u ∈ V. Each entry records
-        //
-        //   * Color    — u's own (BelowCount, AboveCount) packed into an int.
-        //                Two vertices with the same (Below, Above) are treated
-        //                as the same colour. This is coarser than 1-WL would
-        //                be and will need refining once the partial order is
-        //                allowed to have a < b, b ≈ c, a ≁ c, but it is sound
-        //                today: a transitive partial order with all "ties"
-        //                being mutually unknown means same-(Below, Above) is
-        //                still an equivalence.
-        //
-        //   * IsSelf   — whether u == v. Without this bit, a self-loop edge
-        //                of type t at v collides with a same-colour neighbour
-        //                connected by a t-edge.
-        //
-        //   * Relation — M[v, u]. *This is the key fix versus a vanilla 1-WL
-        //                signature.* Without it, a vertex with two edges, both
-        //                to colour-X neighbours that lie *above* it, looks
-        //                identical to a vertex with two edges, both to
-        //                colour-X neighbours that lie *below* it.
-        //
-        //   * Edge     — adj[v, u].
-        //
-        // Lead = colour(v) is preserved as an early-out tiebreak (a < b in M
-        // ⇒ Lead(a) < Lead(b)) and ensures that whenever M already orders the
-        // pair, refinement can never contradict it.
-        //
-        // Comparison order within a NeighborEntry: Color → IsSelf → Relation →
-        // Edge. Comparison across two VertexSigs: Lead → Tail element-by-
-        // element on the sorted multiset.
-
-        private readonly struct NeighborEntry(int color, bool isSelf, Ordering relation, int edge)
-            : IComparable<NeighborEntry>
-        {
-            public readonly int Color = color;
-            public readonly bool IsSelf = isSelf;
-            public readonly Ordering Relation = relation;
-            public readonly int Edge = edge;
-
-            public int CompareTo(NeighborEntry o)
-            {
-                int c = Color.CompareTo(o.Color);
-                if (c != 0) return c;
-                c = IsSelf.CompareTo(o.IsSelf);
-                if (c != 0) return c;
-                c = ((sbyte)Relation).CompareTo((sbyte)o.Relation);
-                if (c != 0) return c;
-                return Edge.CompareTo(o.Edge);
-            }
-        }
-
-        private readonly struct VertexSig(int lead, NeighborEntry[] tail)
-            : IComparable<VertexSig>
-        {
-            public readonly int Lead = lead;
-            public readonly NeighborEntry[] Tail = tail;
-
-            public int CompareTo(VertexSig o)
-            {
-                int c = Lead.CompareTo(o.Lead);
-                if (c != 0) return c;
-                for (int i = 0; i < Tail.Length; i++)
-                {
-                    c = Tail[i].CompareTo(o.Tail[i]);
-                    if (c != 0) return c;
-                }
-                return 0;
-            }
-        }
 
         // ── Refinement ─────────────────────────────────────────────────────────
         //
@@ -257,7 +185,6 @@ namespace Canonizer
         private static bool RefineOneStep(PartialOrder po, int[] adj)
         {
             int n = po.N;
-            VertexSig[] sigs = BuildSignatures(po, adj);
 
             bool anyChange = false;
             for (int a = 0; a < n; a++)
@@ -265,7 +192,7 @@ namespace Canonizer
                 for (int b = a + 1; b < n; b++)
                 {
                     if (po.Compare(a, b) != Ordering.Unknown) continue;
-                    int cmp = sigs[a].CompareTo(sigs[b]);
+                    int cmp = CompareVertices(a, b, po, adj);
                     if (cmp == 0) continue;
                     po.Set(a, b, cmp < 0 ? Ordering.Less : Ordering.Greater);
                     anyChange = true;
@@ -274,29 +201,32 @@ namespace Canonizer
             return anyChange;
         }
 
-        private static VertexSig[] BuildSignatures(PartialOrder po, int[] adj)
+        private static int CompareVertices(int a, int b, PartialOrder po, int[] adj)
         {
             int n = po.N;
-
-            int[] color = new int[n];
-            for (int v = 0; v < n; v++)
-                color[v] = (po.BelowCount(v) << 16) | (po.AboveCount(v) & 0xFFFF);
-
-            var sigs = new VertexSig[n];
-            for (int v = 0; v < n; v++)
+            List<(EdgeType edgeType, Ordering order)> connectionsA = new List<(EdgeType edgeType, Ordering order)>();
+            List<(EdgeType edgeType, Ordering order)> connectionsB = new List<(EdgeType edgeType, Ordering order)>();
+            for(int i=0;i<n;i++)
             {
-                var tail = new NeighborEntry[n];
-                int rowBase = v * n;
-                for (int u = 0; u < n; u++)
-                    tail[u] = new NeighborEntry(
-                        color: color[u],
-                        isSelf: u == v,
-                        relation: po.Compare(v, u),
-                        edge: adj[rowBase + u]);
-                Array.Sort(tail);
-                sigs[v] = new VertexSig(color[v], tail);
+                connectionsA.Add((adj[n*a+i], po.Compare(a,i)));
+                connectionsB.Add((adj[n*b+i], po.Compare(b,i)));
             }
-            return sigs;
+            
+            connectionsA = connectionsA.OrderBy(x=>x.edgeType).ThenBy(x=>x.order).ToList();
+            connectionsB = connectionsB.OrderBy(x=>x.edgeType).ThenBy(x=>x.order).ToList();
+            for(int i=0;i<n;i++)
+            {
+                if(connectionsA[i].edgeType != connectionsB[i].edgeType)
+                    return (connectionsA[i].edgeType < connectionsB[i].edgeType)?-1:1;
+            }
+            for(int i=0;i<n;i++)
+            {
+                if(po.Compare(a,i) != Ordering.Unknown && po.Compare(b,i) != Ordering.Unknown)
+                if(connectionsA[i].order != connectionsB[i].order)
+                    return (connectionsA[i].order < connectionsB[i].order)?-1:1;
+            }
+            return 0;
+
         }
 
         // ── Tiebreak ───────────────────────────────────────────────────────────
