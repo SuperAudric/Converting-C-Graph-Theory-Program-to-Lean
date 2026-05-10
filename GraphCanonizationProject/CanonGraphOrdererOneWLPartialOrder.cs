@@ -203,6 +203,8 @@ namespace Canonizer
 
         private static int CompareVertices(int a, int b, PartialOrder po, int[] adj)
         {
+            if(po.Compare(a,b) != Ordering.Unknown) 
+                return po.Compare(a,b) == Ordering.Greater ? -1 : 1;
             int n = po.N;
             List<(EdgeType edgeType, Ordering order)> connectionsA = new List<(EdgeType edgeType, Ordering order)>();
             List<(EdgeType edgeType, Ordering order)> connectionsB = new List<(EdgeType edgeType, Ordering order)>();
@@ -211,7 +213,7 @@ namespace Canonizer
                 connectionsA.Add((adj[n*a+i], po.Compare(a,i)));
                 connectionsB.Add((adj[n*b+i], po.Compare(b,i)));
             }
-            
+
             connectionsA = connectionsA.OrderBy(x=>x.edgeType).ThenBy(x=>x.order).ToList();
             connectionsB = connectionsB.OrderBy(x=>x.edgeType).ThenBy(x=>x.order).ToList();
             for(int i=0;i<n;i++)
