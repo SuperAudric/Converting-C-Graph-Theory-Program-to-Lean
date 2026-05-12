@@ -182,11 +182,21 @@ namespace Canonizer
                 if (!RefineOneStep(po, adj)) return;
         }
 
+        // One refinement step. Read po, compute all pairwise conclusions, THEN apply
+        // them — analogous to OneWL's BuildVertexSignatures → AssignVertexRanks
+        // lockstep. Mutating po mid-iteration was a real bug: later comparisons
+        // observed asymmetric mid-step state and concluded relations from labeling
+        // artifacts (e.g. "v0 already has Greater entries from earlier in this pass"
+        // — its structurally-equivalent twin processed later does not yet have those
+        // entries and compares differently). The batch is internally consistent
+        // because lex-compare of sorted (edgeType, ordering) multisets is a total
+        // order, so transitive-cycle conclusions (a<b, b<c, c<a) cannot arise from
+        // one snapshot.
         private static bool RefineOneStep(PartialOrder po, int[] adj)
         {
             int n = po.N;
+            var pending = new List<(int a, int b, Ordering ord)>();
 
-            bool anyChange = false;
             for (int a = 0; a < n; a++)
             {
                 for (int b = a + 1; b < n; b++)
@@ -194,11 +204,16 @@ namespace Canonizer
                     if (po.Compare(a, b) != Ordering.Unknown) continue;
                     int cmp = CompareVertices(a, b, po, adj);
                     if (cmp == 0) continue;
-                    po.Set(a, b, cmp < 0 ? Ordering.Less : Ordering.Greater);
-                    anyChange = true;
+                    pending.Add((a, b, cmp < 0 ? Ordering.Less : Ordering.Greater));
                 }
             }
-            return anyChange;
+
+            if (pending.Count == 0) return false;
+
+            foreach (var (a, b, ord) in pending)
+                po.Set(a, b, ord);
+            po.TransitiveClose();
+            return true;
         }
 
         private static int CompareVertices(int a, int b, PartialOrder po, int[] adj)
