@@ -317,6 +317,9 @@ restricted to them, P restricted to them) which all transport unchanged.
 **Status.** The single most fragile claim and the load-bearing one for the
 polynomial bound. The diagnostic in §9 detects a violation directly.
 
+An alternative would be detecting if it would need to be flipped,
+dependant on the shallower guess, without recalcualting in full.
+
 ### 6.4 Closure as guess (correctness + polynomial)
 
 Without explicit tracking, transitive closure can produce a chain of
@@ -495,19 +498,19 @@ ground-up review; items marked **(new)** were added in that pass.
    contradict on closure, neither branch produces a canonical form. The
    algorithm needs a defined error mode and, ideally, a structural
    argument that this can never happen on connected graphs.
-5. **(new) Between-cell guess selection rule.** "Lex-min P-incomparable
+5. **Between-cell guess selection rule.** "Lex-min P-incomparable
    cell pair, then lex-min representatives" must be iso-invariant in the
    presence of multiple equally-canonical pairs. The pair (X, Y) is
    chosen by canonical cell id (which is iso-invariant), but the
    representative `(x, y)` within them is chosen by index — which is
    iso-invariant only across orbit-equivalent vertices within each cell.
    Verify this is the case when X and Y are non-singleton.
-6. **(new) Cell snapshot completeness.** The cell snapshot stored per
+6. **Cell snapshot completeness.** The cell snapshot stored per
    guess must contain enough to re-run the local orbit test after deeper
    flips. The minimal sufficient information is given in §3.5 but the
    exact requirement should be re-derived from the local-orbit-test
    pseudocode once implemented.
-7. **(new) Local-orbit-test sub-tree pairing well-definedness.** §3.6
+7. **Local-orbit-test sub-tree pairing well-definedness.** §3.6
    builds the pairing "by walking the cell tree below `g`." When the
    sub-trees of `A` and `B` have the same shape but the canonical leaf
    ordering inside each differs (because deeper guesses fell
@@ -516,14 +519,14 @@ ground-up review; items marked **(new)** were added in that pass.
    before implementation; the natural rule is "match leaves by
    guess-record position in their sub-trees," but that needs verifying
    against the cases where one sub-tree has more guesses than the other.
-8. **(new) Is the between-cell guess actually needed?** On the test
+8. **Is the between-cell guess actually needed?** On the test
    graphs traced so far (2K2, K3, C4) within-cell guesses alone reach
    `P` total via closure once 1-WL has split enough. The between-cell
    case is needed in principle for disjoint unions of asymmetric
    components; verify with an empirical sweep whether the
    within-cell-only forward pass ever fails to make `P` total on the
    size-4/5/6 corpus before committing to the more general spec.
-9. **(new) Iso-invariance of "lex-min by index" within a cell.** Two
+9. **Iso-invariance of "lex-min by index" within a cell.** Two
    1-WL-equivalent vertices are in the same cell, which means there is
    an automorphism of `(A, P)` mapping one to the other; under any
    scrambling, the lex-min-by-index pair maps to an orbit-equivalent
