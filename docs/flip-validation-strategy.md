@@ -136,6 +136,11 @@ When `P` is not total but every cell is internally resolved (no within-cell
 by canonical cell id). Write `P[x,y] = LESS` for **one** representative
 pair `x ∈ X, y ∈ Y` (lex-min indices). Push a `PRIMARY` with `x, y, LESS`.
 
+The "lex-min by index" representative rule is provisional — see §11.5.
+For the first implementation it is fine; any iso-invariance violation it
+introduces will be caught by the scramble-stability check on the test
+corpus.
+
 Closure (§3.4) will not promote this to "all of X below all of Y" — that is
 the block guess of `PartialOrderIR` and would discard interleavings. Here
 the relation is between a single pair; if every `(x', y')` with `x' ∈ X,
@@ -198,6 +203,17 @@ the bare transposition `(a b)` is an automorphism of `(A, P_at_g)`. If so,
 lock `g` immediately without building the pairing. This is a polynomial
 fast path that handles the common case where the guess split a true two-
 element orbit.
+
+**Practical note: the transposition pre-check is the whole test for this
+algorithm.** Both within-cell and between-cell primary guesses write a
+single `P` entry involving the chosen pair, and refinement uses that
+unique entry to individualise both vertices into their own sub-cells. So
+`A` and `B` are always singletons `{a}` and `{b}`, the sub-tree pairing
+collapses to `(a, b)`, and the σ of the general test is exactly the
+transposition `(a b)`. The general sub-tree-pairing description is kept
+above so the algorithm extends cleanly to future variants that produce
+non-singleton sub-cells (e.g. block guesses for performance), but the
+first implementation only needs the transposition test.
 
 ---
 
@@ -317,8 +333,15 @@ restricted to them, P restricted to them) which all transport unchanged.
 **Status.** The single most fragile claim and the load-bearing one for the
 polynomial bound. The diagnostic in §9 detects a violation directly.
 
-An alternative would be detecting if it would need to be flipped,
-dependant on the shallower guess, without recalcualting in full.
+**Alternative if 6.3 fails.** Per shallow flip, detect *which* deeper
+locks the flip actually affects rather than re-running every deeper local
+orbit test in full. The cell snapshot (§3.5) records which entries of `P`
+each deeper test consumed; if the shallow flip touches none of them, that
+deeper lock is preserved. Re-test only the affected locks. Cost: `O(n)`
+deeper locks × `O(n²)` per re-test = `O(n³)` extra per shallow flip,
+`O(n⁴)` total — the polynomial bound survives a 6.3 failure as long as
+the affected-set detection is itself polynomial, which it is (a snapshot-
+versus-flip comparison is `O(n²)` per snapshot).
 
 ### 6.4 Closure as guess (correctness + polynomial)
 
@@ -479,8 +502,10 @@ should be added with the diagnostic counters exposed.
 ## 11. Open questions and gaps
 
 These need either a definitive specification or empirical resolution
-before the polynomial claim can be staked. The list has grown since the
-ground-up review; items marked **(new)** were added in that pass.
+before the polynomial claim can be staked. None of them currently block
+an initial implementation — they are either resolved by a placeholder
+rule and an empirical check (5, 8, 9), or only matter on falsification
+paths the algorithm need not handle in its first version (3, 4, 6, 7).
 
 1. **Prove 6.2 across closure.** Empirically holds; needs a written
    proof for the Lean formalisation.
@@ -510,22 +535,22 @@ ground-up review; items marked **(new)** were added in that pass.
    flips. The minimal sufficient information is given in §3.5 but the
    exact requirement should be re-derived from the local-orbit-test
    pseudocode once implemented.
-7. **Local-orbit-test sub-tree pairing well-definedness.** §3.6
-   builds the pairing "by walking the cell tree below `g`." When the
-   sub-trees of `A` and `B` have the same shape but the canonical leaf
-   ordering inside each differs (because deeper guesses fell
-   asymmetrically), the pairing rule must be specified so that "same
-   relative position in the sub-tree" is unambiguous. Pin this down
-   before implementation; the natural rule is "match leaves by
-   guess-record position in their sub-trees," but that needs verifying
-   against the cases where one sub-tree has more guesses than the other.
-8. **Is the between-cell guess actually needed?** On the test
-   graphs traced so far (2K2, K3, C4) within-cell guesses alone reach
-   `P` total via closure once 1-WL has split enough. The between-cell
-   case is needed in principle for disjoint unions of asymmetric
-   components; verify with an empirical sweep whether the
-   within-cell-only forward pass ever fails to make `P` total on the
-   size-4/5/6 corpus before committing to the more general spec.
+7. **Local-orbit-test sub-tree pairing well-definedness (deferred).**
+   Dissolves for the algorithm as specified: every primary guess
+   individualises its endpoints into singleton sub-cells, so the local
+   orbit test is exactly the transposition test (§3.6, practical note).
+   The sub-tree-pairing concern only resurfaces if a future variant
+   introduces block guesses or some other mechanism that produces
+   non-singleton `A` or `B`; pin the rule down then.
+8. **The between-cell guess is needed.** Originally listed as "verify
+   whether within-cell alone suffices," but the 2K2 trace settles it:
+   after `0<1` within `{0,1,2,3}`, refinement gives cells
+   `{0},{1},{2,3}`, and a second within-cell guess on `{2,3}` leaves
+   `{0,1}` vs `{2,3}` P-incomparable. So between-cell guesses really
+   are required in the forward pass for any graph with multiple
+   automorphism-equivalent components. Specified in §3.3; the open
+   sub-question is the iso-invariance of the representative-pick rule
+   (item 5).
 9. **Iso-invariance of "lex-min by index" within a cell.** Two
    1-WL-equivalent vertices are in the same cell, which means there is
    an automorphism of `(A, P)` mapping one to the other; under any
