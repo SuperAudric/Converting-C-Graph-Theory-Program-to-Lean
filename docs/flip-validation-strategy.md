@@ -366,13 +366,39 @@ The *partition coarseness* is direction-independent; only labels and the
 roles of `a, b` swap. This is what allows a backward flip to reuse the
 deeper cell structure verbatim instead of re-discovering it.
 
-**Why it holds for 1-WL.** The equivalence relation 1-WL computes is the
-coarsest equitable refinement of the initial colouring. Swapping a single
-`Less` for a single `Greater` is a relabelling of signature *symbols*, not
-a change in their structural information content. Empirically verified on
-`C4` with `(0 1)` non-Aut, on the 6-vertex asymmetric graph
-`{0-1, 0-2, 0-3, 1-4, 2-5}` with `(1 2)` non-Aut, and on `K3`. No
-counterexample is known.
+**This is specifically a claim about the warm refinement actually used
+by the implementation** — see the "warm vs fresh" note below. Fresh 1-WL
+on the post-guess matrix can produce different partitions under the two
+directions; warm refinement (started from the pre-guess steady-state
+colouring) cannot.
+
+**Why warm refinement preserves it.** Warm refinement is split-only: it
+can only further partition the cells of its starting colouring, never
+merge them. Combined with cell-coherence of the starting colouring (all
+members of a cell have identical out-relations to every other cell),
+the splits induced by a single guess + TC are uniform within each cell
+— every member of a cell gains the same new `Less` / `Greater` entries
+to the same target cells, regardless of which direction was chosen. So
+cells either stay intact or split identically under both directions.
+
+**Why it would fail for fresh 1-WL on between-cell guesses.** Fresh
+1-WL re-runs colour refinement from a trivial initial colouring on the
+post-guess matrix, which can produce a *coarser* partition than warm
+refinement when asymmetric TC chains in one direction add entries that
+distinguish vertices that the other direction's lack-of-entries leaves
+indistinguishable.
+
+Minimal counterexample (fresh 1-WL only): 3 vertices `{0, 1, 2}`, no
+edges, `P_pre(2, 0) = <`. Steady state: `{0}, {1}, {2}` (all singletons).
+Apply between-cell guess `(0, 1, <)`: TC chains `2 → 0 → 1`, adding
+`P(2, 1) = <`, giving total order. Fresh 1-WL: `{0}, {1}, {2}`. Apply
+`(0, 1, >)`: no TC chain. Fresh 1-WL of the resulting P sees `1` and
+`2` with identical signatures and merges them into `{1, 2}`. Partitions
+differ.
+
+Warm refinement starting from `{0}, {1}, {2}` cannot merge `1` and `2`
+in either direction, so the discrepancy disappears: both runs end at
+`{0}, {1}, {2}`.
 
 **Why it holds across closure.** Within a cell, all vertices have identical
 Prel profiles, so closure derives *the same* new relations for every cell-
@@ -381,8 +407,34 @@ The within-cell symmetry is preserved by closure when it was preserved
 before. Closure-derived asymmetries only affect vertices that were
 *already* distinguished, and partition coarseness survives.
 
-**Status.** Empirical on small cases; not formally proven. CFI is the
-sharpest test (§8).
+**Strong version (vertex-by-vertex label coincidence) does not follow.**
+Even under warm refinement, the actual colour *values* `χ^<(v)` and
+`χ^>(v)` differ — the signatures include the direction-dependent
+`Less`/`Greater` label of the `(a, b)` entry. A "label coincidence"
+version, `χ^<(v) = χ^>(σ_ab(v))` for some explicit `σ_ab`, would
+require `σ_ab` to be a true automorphism of `(A, P_pre)` — i.e., `(a, b)`
+to be a transposition-orbit pair, which is exactly the §3.6
+transposition-test case. The weak (partition) version is the most that
+holds for arbitrary `(a, b)`, and is sufficient for §6.3's deeper-lock
+survival argument.
+
+**Status.** Partial Lean proof in
+[`FlipValidation.lean`](../GraphCanonizationProofs/FlipValidation.lean)
+(`theorem warm_6_2`). Definitions and structural lemmas are elaborated
+(`applyGuess_swap`, `refineStep_refines`, `samePartition` equivalence,
+etc.); the load-bearing pieces are `sorry`'d with prose proof sketches:
+- `warmRefine_refines` — `Nat.iterate` induction, ~10 lines.
+- `transitiveClose_swap` — induction on iteration count, ~30 lines.
+- `cell_split_uniform` — the core within-cell coherence argument, the
+  substantive work (~100+ lines).
+- `warm_6_2` — composition of the three, ~40 lines.
+
+Empirically verified on `C4` with `(0 1)` non-Aut, on the 6-vertex
+asymmetric graph `{0-1, 0-2, 0-3, 1-4, 2-5}` with `(1 2)` non-Aut, and
+on `K3`. The fresh-1-WL counterexample above does not arise under the
+warm-refinement implementation. CFI is still the sharpest empirical
+test (§8) but is currently impractical at the §6.5 implementation's
+`O(n⁸)` per-sweep bound; see §11.10.
 
 ### 6.3 Deeper-guess locks survive shallow flips (polynomial)
 
