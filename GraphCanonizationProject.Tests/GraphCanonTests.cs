@@ -357,6 +357,37 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     // a CFI disjoint union — territory the small-graph scramble tests don't
     // cover.
 
+    // Smaller-scale CFI scramble test: a single CFI graph (Even half only),
+    // not the disjoint union. Tests isomorphism-invariance against scrambling
+    // on a graph that 1-WL alone cannot canonize — but at n=18 for Cycle3
+    // instead of the n=36 disjoint-union variant below. This is the cheaper
+    // "does §6.5 handle 1-WL-resistant pair-orbit ambiguity at all" check;
+    // CfiPair_ProducesDifferentCanonical above covers Even≠Odd separately.
+    [Theory]
+    [InlineData("Cycle3")]
+    //[InlineData("Cycle4")] // 24 vertices, too slow on v1
+    //[InlineData("K4")]     // 40 vertices, too slow on v1
+    public void CfiSingle_DifferentScramblings_ProduceSameCanonical(string baseName)
+    {
+        var pair = CfiGraphGenerator.Generate(baseName);
+        CfiGraphGenerator.AssertWellFormedPair(pair);
+
+        int n = pair.Even.VertexCount;
+        string canonical = _orderer.Run(new VertexType[n], pair.Even).ToString();
+
+        for (int j = 0; j < 5; j++)
+        {
+            var matrix = pair.Even.ToArray();
+            Scramble(matrix, seed: 318901 + j);
+            string result = _orderer.Run(new VertexType[n], new AdjMatrix(matrix)).ToString();
+            Assert.True(canonical == result,
+                $"CFI Even on base {baseName}: scramble {j} produced a different " +
+                $"canonical from the unscrambled graph — Run is not isomorphism-" +
+                $"invariant on a single CFI graph.\n" +
+                CfiGraphGenerator.DescribePair(pair));
+        }
+    }
+
     [Theory]
     [InlineData("Cycle3")]
     [InlineData("Cycle4")]

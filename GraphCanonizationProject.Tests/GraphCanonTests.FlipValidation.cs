@@ -74,6 +74,25 @@ public partial class GraphCanonTests
         Assert.Equal(graphs.Length, seen.Count); // all distinct ⇒ complete invariant
     }
 
+    // Two disjoint C4's: 8 vertices, each C4 cell hosts adjacent vs diagonal
+    // pair-orbits (one of the §6.5 rotation targets), plus the cross-copy
+    // same/different cell distinction. Smallest fast test that exercises
+    // multi-orbit handling on a structurally non-trivial graph.
+    [Fact]
+    public void FV_TwoDisjointC4_ScramblingsProduceSameCanonical()
+    {
+        var edges = BuildGraph(
+            (0, 1), (1, 2), (2, 3), (3, 0),
+            (4, 5), (5, 6), (6, 7), (7, 4));
+        string canonical = _fv.Run_ToString(EmptyVerts(edges), edges);
+        for (int i = 0; i < 5; i++)
+        {
+            var scrambled = (EdgeType[,])edges.Clone();
+            Scramble(scrambled, seed: 911823 + i);
+            Assert.Equal(canonical, _fv.Run_ToString(new VertexType[8], scrambled));
+        }
+    }
+
     [Theory]
     [InlineData(4)]
     [InlineData(5)]
