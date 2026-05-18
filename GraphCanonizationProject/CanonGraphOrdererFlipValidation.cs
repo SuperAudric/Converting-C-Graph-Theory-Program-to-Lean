@@ -68,9 +68,12 @@ namespace Canonizer
             LastPairRotationsAttempted = 0;
             LastLockedThenInvalidated = 0;
 
-            // Forward pass.
+            // Forward pass. Partition is warm-refined at every state-mutation
+            // point (see ContinueForward / PickAndApplyGuess) so each refine
+            // call starts from a partition that's at most one ApplyOne stale.
             sbyte[] p = SeedFromTypes(n, vertexTypes);
-            List<Primary> record = ContinueForward(n, adj, p);
+            var partition = new WarmPartition(n);
+            List<Primary> record = ContinueForward(n, adj, p, partition);
 
             // Backward pass to fixpoint. A single deepest-first sweep optimizes
             // each primary against its forward-pass snapshot, but adopting a
@@ -122,14 +125,14 @@ namespace Canonizer
 
         // ── Forward pass ─────────────────────────────────────────────────────
 
-        // Walk P toward total via single-pair guesses; mutate p, return the
-        // primaries pushed (in order).
-        private List<Primary> ContinueForward(int n, int[] adj, sbyte[] p)
+        // Walk P toward total via single-pair guesses; mutate p (and partition),
+        // return the primaries pushed (in order).
+        private List<Primary> ContinueForward(int n, int[] adj, sbyte[] p, WarmPartition partition)
         {
             var record = new List<Primary>();
             while (!IsTotal(n, p))
             {
-                if (!PickAndApplyGuess(n, adj, p, record))
+                if (!PickAndApplyGuess(n, adj, p, partition, record))
                     throw new InvalidOperationException(
                         "FlipValidation: P not total but no guess candidate found");
             }
@@ -137,12 +140,19 @@ namespace Canonizer
         }
 
         // Pick the next primary guess (within-cell first, else between-cell),
-        // apply it to p, and push it onto record. Returns false only if there
-        // really is no candidate, which is a bug given P is not total.
-        private bool PickAndApplyGuess(int n, int[] adj, sbyte[] p, List<Primary> record)
+        // apply it to p (mutating partition to match), and push onto record.
+        // Returns false only if there really is no candidate, which is a bug
+        // given P is not total.
+        private bool PickAndApplyGuess(int n, int[] adj, sbyte[] p, WarmPartition partition,
+                                       List<Primary> record)
         {
-            int[] cellOf = Refine(n, adj, p);
-            int numCells = cellOf.Max() + 1;
+            // Warm-refine the partition to current P state. Partition is
+            // expected to be at most one-ApplyOne stale; warm-refine converges
+            // in a few rounds typically.
+            partition.Refine(adj, p);
+            int[] cellOf = partition.CellOf;
+            int numCells = partition.NumCells;
+
             var cells = new List<List<int>>(numCells);
             for (int c = 0; c < numCells; c++) cells.Add(new List<int>());
             for (int v = 0; v < n; v++) cells[cellOf[v]].Add(v);
@@ -270,11 +280,24 @@ namespace Canonizer
             // prefix part of `current` (positions 0..i-1) is ever read by an
             // iteration at position i, and adopting at i never touches
             // positions <i — so an iteration that doesn't adopt leaves the
-            // canonical unchanged. Recomputing per outer iter was an O(n^5)
-            // redundant cost per sweep.
+            // canonical unchanged.
             sbyte[]? pCur = ReplayRecord(n, vertexTypes, current, current.Count);
             if (pCur == null) return current;
             int[] matBest = BuildPermutedMatrix(adj, ReadPermutation(n, pCur), n);
+
+            // Precompute the prefix stack once per sweep. pPrefix[i] is the
+            // P state after applying current[0..i-1]; partPrefix[i] is the
+            // matching warm-refined partition. Built bottom-up by incremental
+            // ApplyOne + warm Refine (so O(n²) per primary, O(n⁴) total). Each
+            // branch evaluation copies (pPrefix[i], partPrefix[i]) instead of
+            // re-applying 0..i-1 primaries from scratch.
+            //
+            // Validity across the sweep: adoptions at outer-iter i overwrite
+            // current[i..end] only; positions <i (and therefore both
+            // pPrefix[0..i] and partPrefix[0..i]) remain valid for subsequent
+            // iterations i-1, i-2, ...
+            var (pPrefix, partPrefix) = BuildPrefixStack(n, vertexTypes, adj, current);
+            if (pPrefix == null) return current; // baseline broken (shouldn't happen)
 
             for (int i = current.Count - 1; i >= 0; i--)
             {
@@ -282,7 +305,12 @@ namespace Canonizer
                 List<Primary> bestRecord = current;
                 bool adopted = false;
 
-                // Enumerate rotation branches. Note: (primI.A, primI.B,
+                // Deeper region is constant for this outer iter; hoist out of
+                // the inner branch loops.
+                var deeper = new List<Primary>(current.Count - i - 1);
+                for (int j = i + 1; j < current.Count; j++) deeper.Add(current[j]);
+
+                // Enumerate rotation branches. (primI.A, primI.B,
                 // primI.Direction) is the no-change branch — skip it (the
                 // baseline already represents it).
                 foreach (int aPrime in primI.CellSnapshotA)
@@ -304,20 +332,14 @@ namespace Canonizer
                                 CellSnapshotB = primI.CellSnapshotB,
                             };
 
-                            var prefix = new List<Primary>(i + 1);
-                            for (int j = 0; j < i; j++) prefix.Add(current[j]);
-                            prefix.Add(branchPrim);
-
-                            var deeper = new List<Primary>(current.Count - i - 1);
-                            for (int j = i + 1; j < current.Count; j++) deeper.Add(current[j]);
-
                             LastPairRotationsAttempted++;
 
-                            var branchFull = TryReplayWithDeeper(n, adj, vertexTypes,
-                                                                 prefix, deeper,
-                                                                 out bool deeperBroken,
-                                                                 out sbyte[]? pBranch);
-                            if (branchFull == null || pBranch == null) continue;
+                            var suffix = TryReplayFromState(n, adj,
+                                                            pPrefix[i], partPrefix[i],
+                                                            branchPrim, deeper,
+                                                            out bool deeperBroken,
+                                                            out sbyte[]? pBranch);
+                            if (suffix == null || pBranch == null) continue;
                             if (deeperBroken) LastLockedThenInvalidated++;
 
                             int[] permBranch = ReadPermutation(n, pBranch);
@@ -326,7 +348,12 @@ namespace Canonizer
                             if (LexLess(matBranch, matBest))
                             {
                                 matBest = matBranch;
-                                bestRecord = branchFull;
+                                // Assemble: prefix (current[0..i-1]) + suffix
+                                // (branchPrim + replayed deeper + continued).
+                                var newRecord = new List<Primary>(i + suffix.Count);
+                                for (int j = 0; j < i; j++) newRecord.Add(current[j]);
+                                newRecord.AddRange(suffix);
+                                bestRecord = newRecord;
                                 adopted = true;
                             }
                         }
@@ -343,25 +370,56 @@ namespace Canonizer
             return current;
         }
 
-        // Apply prefix; then try to apply deeper guesses one by one. If a
-        // deeper guess can't be applied (its pair is no longer Unknown in the
-        // current P), bump the broken flag and re-run ContinueForward to fill
-        // out the remainder. Returns the final P alongside the record so the
-        // caller doesn't have to replay everything from scratch again.
-        private List<Primary>? TryReplayWithDeeper(int n, int[] adj, VertexType[] vertexTypes,
-                                                   List<Primary> prefix, List<Primary> deeper,
-                                                   out bool anyBroken, out sbyte[]? finalP)
+        // Build paired stacks: pStack[k] = P after applying record[0..k-1],
+        // partStack[k] = matching warm-refined partition. Returns (null, _)
+        // if any primary produces a contradiction (shouldn't happen for a
+        // valid record). Cost: O(n²) primaries × (O(n²) ApplyOne + O(n²)
+        // typical warm Refine) = O(n⁴) typical.
+        private static (sbyte[][]?, WarmPartition[]) BuildPrefixStack(
+            int n, VertexType[] vertexTypes, int[] adj, List<Primary> record)
+        {
+            var pStack = new sbyte[record.Count + 1][];
+            var partStack = new WarmPartition[record.Count + 1];
+
+            sbyte[] running = SeedFromTypes(n, vertexTypes);
+            var runningPart = new WarmPartition(n);
+            runningPart.Refine(adj, running);  // initial cold refine for the seed state
+
+            pStack[0] = (sbyte[])running.Clone();
+            partStack[0] = runningPart.Clone();
+
+            for (int k = 0; k < record.Count; k++)
+            {
+                if (!ApplyOne(running, n, record[k])) return (null, partStack);
+                runningPart.Refine(adj, running);  // warm-refine to keep partition in sync
+                pStack[k + 1] = (sbyte[])running.Clone();
+                partStack[k + 1] = runningPart.Clone();
+            }
+            return (pStack, partStack);
+        }
+
+        // Replay from a cached (prefix-P, prefix-partition) state instead of
+        // re-applying primaries 0..i-1 from scratch: clone initialP and
+        // initialPart, apply the branch primary (refining partition), then
+        // apply each deeper primary (refining after each, to keep partition
+        // staleness bounded for the warm refines in ContinueForward).
+        // Returns the suffix record (branchPrim + applied-deeper + continued)
+        // and the final P.
+        private List<Primary>? TryReplayFromState(int n, int[] adj,
+                                                  sbyte[] initialP, WarmPartition initialPart,
+                                                  Primary branchPrim,
+                                                  List<Primary> deeper,
+                                                  out bool anyBroken, out sbyte[]? finalP)
         {
             anyBroken = false;
             finalP = null;
-            sbyte[] p = SeedFromTypes(n, vertexTypes);
-            var result = new List<Primary>(prefix.Count + deeper.Count);
+            sbyte[] p = (sbyte[])initialP.Clone();
+            WarmPartition partition = initialPart.Clone();
+            var result = new List<Primary>(deeper.Count + 1);
 
-            foreach (var prim in prefix)
-            {
-                if (!ApplyOne(p, n, prim)) return null;
-                result.Add(prim);
-            }
+            if (!ApplyOne(p, n, branchPrim)) return null;
+            partition.Refine(adj, p);
+            result.Add(branchPrim);
 
             foreach (var prim in deeper)
             {
@@ -370,12 +428,13 @@ namespace Canonizer
                     anyBroken = true;
                     break;
                 }
+                partition.Refine(adj, p);
                 result.Add(prim);
             }
 
             while (!IsTotal(n, p))
             {
-                if (!PickAndApplyGuess(n, adj, p, result))
+                if (!PickAndApplyGuess(n, adj, p, partition, result))
                     return null;
             }
 
@@ -391,12 +450,64 @@ namespace Canonizer
         // implied it).
         private static bool ApplyOne(sbyte[] p, int n, Primary prim)
         {
-            sbyte cur = p[prim.A * n + prim.B];
-            if (cur == prim.Direction) return true;
+            int a = prim.A, b = prim.B;
+            sbyte dir = prim.Direction;
+            sbyte cur = p[a * n + b];
+            if (cur == dir) return true;
             if (cur != UNKNOWN) return false;
-            p[prim.A * n + prim.B] = prim.Direction;
-            p[prim.B * n + prim.A] = (sbyte)(-prim.Direction);
-            return TransitiveClose(p, n);
+
+            // Normalise the new edge into a LESS edge x → y, so closure reads
+            // "what new transitive LESS chains pass through x → y".
+            int x, y;
+            if (dir == LESS) { x = a; y = b; }
+            else            { x = b; y = a; }
+            p[x * n + y] = LESS;
+            p[y * n + x] = GREATER;
+            return CloseAfterInsert(p, n, x, y);
+        }
+
+        // Incremental closure for a single new LESS edge x → y. Assumes p was
+        // transitively closed before the edge was inserted. New chains are
+        // exactly {(i, j) : i ∈ ancestors(x) ∪ {x}, j ∈ descendants(y) ∪ {y}}
+        // because any new chain must factor as i → ... → x → y → ... → j.
+        // Cost: O(|anc| · |desc|), worst case O(n²) — beats Floyd-Warshall's
+        // O(n³) by an O(n) factor per ApplyOne call.
+        private static bool CloseAfterInsert(sbyte[] p, int n, int x, int y)
+        {
+            // ancestors(x) ∪ {x}: i with P[i, x] = LESS, plus x itself.
+            Span<int> anc = stackalloc int[n];
+            int ancCount = 0;
+            anc[ancCount++] = x;
+            for (int i = 0; i < n; i++)
+                if (i != x && p[i * n + x] == LESS) anc[ancCount++] = i;
+
+            // descendants(y) ∪ {y}: j with P[y, j] = LESS, plus y itself.
+            Span<int> desc = stackalloc int[n];
+            int descCount = 0;
+            desc[descCount++] = y;
+            for (int j = 0; j < n; j++)
+                if (j != y && p[y * n + j] == LESS) desc[descCount++] = j;
+
+            // Cross product. Any (i, j) where i is also a descendant (i.e.
+            // i appears in both anc and desc, or i == j here) marks a cycle.
+            for (int ia = 0; ia < ancCount; ia++)
+            {
+                int i = anc[ia];
+                int iRow = i * n;
+                for (int jd = 0; jd < descCount; jd++)
+                {
+                    int j = desc[jd];
+                    if (i == j) return false;  // cycle: i is both ancestor of x and descendant of y
+                    sbyte cur = p[iRow + j];
+                    if (cur == GREATER) return false;
+                    if (cur == UNKNOWN)
+                    {
+                        p[iRow + j] = LESS;
+                        p[j * n + i] = GREATER;
+                    }
+                }
+            }
+            return true;
         }
 
         // Replay the first `count` primaries from a record into a fresh P.
@@ -431,10 +542,12 @@ namespace Canonizer
             return new AdjMatrix(result);
         }
 
-        // ── Mirrored from CanonGraphOrdererPartialOrderSinglePair ────────────
+        // ── Self-contained helpers ───────────────────────────────────────────
         //
-        // Refine / TransitiveClose / SeedFromTypes / IsTotal / ReadPermutation
-        // / LexLess kept locally so this class is self-contained.
+        // Refinement lives in IncrementalPartition.cs (WarmPartition).
+        // SeedFromTypes uses full Floyd-Warshall TransitiveClose for the
+        // one-time bootstrap; CloseAfterInsert handles all subsequent
+        // single-edge insertions.
 
         private static int[] ExtractAdj(AdjMatrix G)
         {
@@ -471,107 +584,6 @@ namespace Canonizer
                         if (cur == UNKNOWN) { p[i * n + j] = LESS; p[j * n + i] = GREATER; }
                     }
                 }
-            return true;
-        }
-
-        private static int[] Refine(int n, int[] adj, sbyte[] p)
-        {
-            int[] color = new int[n];
-            while (true)
-            {
-                int[] next = RefineRound(n, adj, p, color);
-                bool same = SamePartition(n, color, next);
-                color = next;
-                if (same) break;
-            }
-            return color;
-        }
-
-        // Each vertex's signature is its own color followed by the sorted
-        // multiset of neighbour (color, edge-label, Prel)-tuples, packed into
-        // longs. Two vertices share a signature iff they have equal own-color
-        // and equal multisets — equivalent to the previous string-based check,
-        // just without per-round string allocation.
-        private static int[] RefineRound(int n, int[] adj, sbyte[] p, int[] color)
-        {
-            var sigs = new long[n][];
-            for (int v = 0; v < n; v++)
-            {
-                var tuples = new long[n]; // [0] = own color; [1..n-1] = sorted neighbours
-                tuples[0] = color[v];
-                int k = 1;
-                for (int u = 0; u < n; u++)
-                {
-                    if (u == v) continue;
-                    tuples[k++] = ((long)color[u] << 24)
-                                  | ((long)(uint)adj[v * n + u] << 8)
-                                  | ((long)(p[v * n + u] + 1) & 0xFF);
-                }
-                Array.Sort(tuples, 1, n - 1);
-                sigs[v] = tuples;
-            }
-
-            // Canonical rank: sort distinct signatures lex, assign sequential
-            // ids. The lex sort preserves iso-invariance of the cell ids
-            // (relied on by between-cell guess selection).
-            var distinct = new SortedSet<long[]>(LongArrayLex.Instance);
-            for (int v = 0; v < n; v++) distinct.Add(sigs[v]);
-            var rank = new Dictionary<long[], int>(distinct.Count, LongArrayEq.Instance);
-            int r = 0;
-            foreach (var sig in distinct) rank[sig] = r++;
-
-            var nextColor = new int[n];
-            for (int v = 0; v < n; v++) nextColor[v] = rank[sigs[v]];
-            return nextColor;
-        }
-
-        private sealed class LongArrayEq : IEqualityComparer<long[]>
-        {
-            public static readonly LongArrayEq Instance = new();
-            public bool Equals(long[]? a, long[]? b)
-            {
-                if (ReferenceEquals(a, b)) return true;
-                if (a is null || b is null || a.Length != b.Length) return false;
-                for (int i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
-                return true;
-            }
-            public int GetHashCode(long[] a)
-            {
-                unchecked
-                {
-                    ulong h = 14695981039346656037UL;
-                    for (int i = 0; i < a.Length; i++)
-                    {
-                        h ^= (ulong)a[i];
-                        h *= 1099511628211UL;
-                    }
-                    return (int)h;
-                }
-            }
-        }
-
-        private sealed class LongArrayLex : IComparer<long[]>
-        {
-            public static readonly LongArrayLex Instance = new();
-            public int Compare(long[]? a, long[]? b)
-            {
-                if (ReferenceEquals(a, b)) return 0;
-                if (a is null) return -1;
-                if (b is null) return 1;
-                int min = a.Length < b.Length ? a.Length : b.Length;
-                for (int i = 0; i < min; i++)
-                {
-                    if (a[i] != b[i]) return a[i] < b[i] ? -1 : 1;
-                }
-                return a.Length.CompareTo(b.Length);
-            }
-        }
-
-        private static bool SamePartition(int n, int[] a, int[] b)
-        {
-            for (int i = 0; i < n; i++)
-                for (int j = i + 1; j < n; j++)
-                    if ((a[i] == a[j]) != (b[i] == b[j])) return false;
             return true;
         }
 
