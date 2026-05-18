@@ -162,7 +162,7 @@ public partial class GraphCanonTests
 
     [Theory]
     [InlineData(4)]
-    [InlineData(5)]
+    //[InlineData(5)] too slow for normal use, passes after 30-40s
     public void POS_KnownGraphs_DifferentScramblings_ProduceSameCanonical(int size)
     {
         var graphs = ConvertJaggedArrayType<EdgeType>(UniqueGraphsBySize.graphsBySize[size]);

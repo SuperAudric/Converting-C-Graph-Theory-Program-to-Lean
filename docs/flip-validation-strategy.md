@@ -17,19 +17,31 @@ plus a single backward sweep.
 
 ## Algorithm at a glance
 
-1. **Forward pass.** Greedy: at each step pick one canonical guess
-   (within-cell or between-cell), write it into `P`, propagate, record what
-   was done. Repeat until `P` is total.
+1. **Forward pass.** Greedy: at each step pick one guess (within-cell or
+   between-cell, by a deliberately simple lex-min-by-index rule that may
+   not currently be iso-invariant on cells hosting multiple pair-orbits — see §3.2
+   and §6.5), write it into `P`, propagate, record what was done. Repeat
+   until `P` is total. The architectural commitment is that the *forward
+   pass need not make iso-invariant pair choices*; correcting wrong
+   choices is the backward pass's job.
 2. **Backward pass.** Walk the guess stack from deepest to shallowest. For
    each primary guess, decide via a polynomial-time local test whether its
    two endpoints are automorphic given everything decided below it. If yes,
    the guess was an arbitrary tie-break — lock it. If no, flip it,
    re-propagate downward, lex-min, lock the resolved direction.
+3. **Pair-orbit recovery (PLANNED, §6.5).** When the wrong-direction flip
+   of step 2 doesn't recover the canonical form because the *pair-orbit
+   choice itself* was non-canonical (and not just its direction), an
+   additional backward-pass mechanism — not yet specified — switches the
+   representative within the cell. Without this, the algorithm is **not
+   a correct canonizer on graphs with multi-orbit cells**, which
+   includes the disjoint-CFI test family.
 
 Each primary guess is touched once per pass. The forward pass is
 `O(n³)`-per-step × `O(n)` steps; the backward pass is `O(n²)`-per-test ×
 `O(n)` tests, plus a polynomial re-propagation cost on each flip. The total
-is polynomial **iff** the invariants in §6 hold.
+is polynomial **iff** the invariants in §6 hold and §6.5's mechanism
+ships polynomial.
 
 The final bar of correctness is a Lean proof in the
 [`GraphCanonizationProofs`](../GraphCanonizationProofs) project, after the
@@ -125,28 +137,41 @@ improving worst case on the families that defeat 1-WL).
 ### 3.2 Within-cell primary guess
 
 When some cell `C` has `|C| ≥ 2` and contains an internal `Unknown` pair,
-pick the lex-min `a, b ∈ C` (lex-min by index — they are 1-WL-equivalent at
-this point, so index-based selection picks an automorphism-equivalent
-representative). Write `P[a,b] = LESS`. Push a `PRIMARY` with `a, b, LESS`.
+pick the lex-min `a, b ∈ C` (lex-min by vertex index). Write
+`P[a,b] = LESS`. Push a `PRIMARY` with `a, b, LESS`.
+
+The lex-min-by-index rule is **deliberately simple and not iso-invariant
+on cells that contain multiple pair-orbits** (e.g. C4's vertex-orbit
+contains the adjacent and diagonal pair-orbits separately, and the
+adjacent-vs-diagonal choice depends on input labelling). This is *not*
+patched at the pair-selection step — patching it would push the burden
+onto whatever discriminator builds the "canonical pair" rule, and the
+whole architectural premise of this design (§6) is that the discriminator
+need not be strong enough to identify structure. The intended fix lives
+in the backward pass and is described in §6.5 — "every canonical form is
+reachable from any pair selection." That mechanism is **planned but not
+yet implemented**, so the current code will fail iso-invariance on graphs
+whose cells host multiple pair-orbits. The failure is visible in the size
+6 corpus and on the disjoint-CFI tests; see §9 / §11.
 
 ### 3.3 Between-cell primary guess (sibling-ordering)
 
 When `P` is not total but every cell is internally resolved (no within-cell
 `Unknown` left), pick the lex-min P-incomparable cell pair `(X, Y)` (lex-min
 by canonical cell id). Write `P[x,y] = LESS` for **one** representative
-pair `x ∈ X, y ∈ Y` (lex-min indices). Push a `PRIMARY` with `x, y, LESS`.
+pair `x ∈ X, y ∈ Y` (lex-min by vertex index). Push a `PRIMARY` with
+`x, y, LESS`.
 
-The "lex-min by index" representative rule is provisional — see §11.5.
-For the first implementation it is fine; any iso-invariance violation it
-introduces will be caught by the scramble-stability check on the test
-corpus.
+Same caveat as §3.2: representative selection by vertex index isn't iso-
+invariant when `X` and `Y` host non-singleton cross-orbit structure. The
+§6.5 mechanism is the intended fix.
 
 Closure (§3.4) will not promote this to "all of X below all of Y" — that is
 the block guess of `PartialOrderIR` and would discard interleavings. Here
 the relation is between a single pair; if every `(x', y')` with `x' ∈ X,
 y' ∈ Y` should eventually be `LESS`, that is the forward pass's job, one
 guess at a time. This is what gives the algorithm freedom to reach
-interleaved canonical orders (§7).
+interleaved canonical orders (§7) and is a precondition for §6.5.
 
 ### 3.4 Derived guess (transitive closure)
 
@@ -282,17 +307,39 @@ deeper primary's `VALID` lock is invalidated, so the work is bounded.
 
 ## 6. Invariants
 
-The algorithm is **correct** iff (6.1) and (6.4) hold. It is
-**polynomial** iff (6.2) and (6.3) additionally hold.
+The algorithm is **correct** iff (6.1) plus (6.4) plus the planned (6.5)
+all hold. It is **polynomial** iff (6.2) and (6.3) additionally hold.
 
-### 6.1 Iso-invariance of every choice (correctness)
+The architectural commitment driving this whole section is that **the
+discriminator (1-WL) does not need to identify structure completely.**
+That would itself require a canonizer. Instead, when 1-WL is insufficient
+to single out an iso-invariant choice, the algorithm makes a non-iso-
+invariant guess and *the backward pass + flipping* is what restores iso-
+invariance of the final output. The "one guess collapses one symmetry
+(true or apparent)" framing in §2 is the tiered-groups expression of
+this: each guess is a single symmetry-collapse step; the backward sweep
+sorts out which collapses were structural vs. arbitrary.
 
-The canonical cell ids (from canonical 1-WL signature order) and the lex-min
-in-cell pair are functions of `(A, P)` only. So at every node the candidate
-guess set is iso-invariant, and the recursion's reached leaves form an
-iso-invariant set of permuted matrices, each isomorphic to the input. Lex-
-min over them is a complete canonical form. Same argument as `PartialOrderIR`
-and `SinglePair`.
+### 6.1 Iso-invariance of cell ids (correctness building block)
+
+Canonical cell ids (from canonical 1-WL signature order) are functions of
+`(A, P)` only, so the *set of candidate cells* and the *set of candidate
+cell pairs* at any node are iso-invariant. That is what `PartialOrderIR`
+and `SinglePair` rely on for their iso-invariance argument.
+
+**What this does *not* give us, and what the prior version of this doc
+silently assumed.** Picking the lex-min representative *within* a cell by
+vertex index is iso-invariant **only when the cell is a single pair-
+orbit**. A 1-WL cell can host multiple pair-orbits (C4: adjacent vs.
+diagonal pairs; C6: distance-1 / 2 / 3 pairs; CFI on Cycle4/K4: many more
+subtle orbit splits that 1-WL on pairs cannot separate). When that
+happens, lex-min by index can land in different pair-orbits across input
+scramblings, and the resulting canonical form differs across scramblings
+unless (6.5) compensates.
+
+So 6.1 alone is **not sufficient for correctness** on graphs with multi-
+orbit cells. The correctness chain needs (6.4) for closure consistency
+and (6.5) for the pair-orbit recovery.
 
 ### 6.2 Weakened symmetry of propagation (polynomial)
 
@@ -366,6 +413,37 @@ them on opposite sides of a split derives the *opposite* forced direction,
 not an inconsistency. Closure asymmetries are confined to pairs whose
 ordering descends from a primary guess; flipping the primary flips the
 chain.
+
+### 6.5 Every canonical form reachable from any pair selection (PLANNED, correctness)
+
+> For any input scrambling and any starting pair the forward pass might
+> commit to, the algorithm's exploration reaches every canonical form
+> that any other starting pair could reach.
+
+This is the load-bearing correctness invariant under the architectural
+commitment in the header of §6 — it is what makes 1-WL's *failure to
+identify pair orbits* survivable. If two scramblings commit to pairs
+from different pair-orbits, both runs must end up considering the same
+set of candidate canonical forms; the lex-min then resolves them to a
+common output.
+
+**This is planned but not implemented.** The direction-flip mechanism
+already in the backward pass (§5) is the right shape for it but is
+restricted to flipping a single guess's *direction*, not its *pair-
+orbit choice*. The next planning iteration (separate document) will
+specify the actual mechanism — candidates we have discussed include
+branching over pair-orbits with work-sharing between branches, a richer
+backward-pass "swap representative" step, and explicit propagation
+discipline that makes the < and > branches share enough state to make
+the search polynomial.
+
+**Until 6.5 is in, the implementation is not a correct canonizer on
+graphs that contain multi-orbit cells.** The size 4–6 corpus contains
+such graphs (C4 + K2 at size 6 #56 is the smallest example); the
+disjoint-CFI tests on Cycle4 and K4 are the larger and more important
+ones. The failure is intentional in the current code — it is the
+diagnostic that 6.5 needs to fix, not a bug to be patched at the pair-
+selection step.
 
 ---
 
@@ -523,13 +601,12 @@ paths the algorithm need not handle in its first version (3, 4, 6, 7).
    contradict on closure, neither branch produces a canonical form. The
    algorithm needs a defined error mode and, ideally, a structural
    argument that this can never happen on connected graphs.
-5. **Between-cell guess selection rule.** "Lex-min P-incomparable
-   cell pair, then lex-min representatives" must be iso-invariant in the
-   presence of multiple equally-canonical pairs. The pair (X, Y) is
-   chosen by canonical cell id (which is iso-invariant), but the
-   representative `(x, y)` within them is chosen by index — which is
-   iso-invariant only across orbit-equivalent vertices within each cell.
-   Verify this is the case when X and Y are non-singleton.
+5. **Between-cell and within-cell representative selection.** "Lex-min
+   by vertex index" is not iso-invariant when the cell hosts multiple
+   pair-orbits. Patching it at the selection step (e.g. by adding a
+   pair signature) would deepen reliance on 1-WL's identifying power,
+   which is precisely what the architecture rejects. The real fix lives
+   in §6.5 and is planned, not implemented.
 6. **Cell snapshot completeness.** The cell snapshot stored per
    guess must contain enough to re-run the local orbit test after deeper
    flips. The minimal sufficient information is given in §3.5 but the
@@ -551,12 +628,9 @@ paths the algorithm need not handle in its first version (3, 4, 6, 7).
    automorphism-equivalent components. Specified in §3.3; the open
    sub-question is the iso-invariance of the representative-pick rule
    (item 5).
-9. **Iso-invariance of "lex-min by index" within a cell.** Two
-   1-WL-equivalent vertices are in the same cell, which means there is
-   an automorphism of `(A, P)` mapping one to the other; under any
-   scrambling, the lex-min-by-index pair maps to an orbit-equivalent
-   pair, so the leaf set is iso-invariant. This is the standard IR
-   argument and should hold; the open part is whether the *backward
-   pass's lex-min recompute* preserves this when multiple guesses get
-   flipped (sequence of flips may not commute with the relabelling).
-   Worth a dedicated correctness lemma.
+9. **Lex-min-by-index iso-invariance argument was wrong as stated.**
+   The earlier note here said "two 1-WL-equivalent vertices are in the
+   same cell, so lex-min by index picks an automorphism-equivalent
+   representative." That step is only valid for the *vertex* orbit,
+   not the *pair* orbit. A 1-WL cell is one vertex-orbit but can be
+   several pair-orbits. Subsumed by item 5 and §6.5.

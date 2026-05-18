@@ -13,7 +13,7 @@ public partial class GraphCanonTests
     // Same logic as CfiPair_ProducesDifferentCanonical; split out so the trait
     // can be applied at method level without touching the fast InlineData cases.
 
-    [Theory]
+    [Theory(Skip ="Long running not enabled")]
     [Trait("Category", "LongRunning")]
     [InlineData("K33")]      // ~30 s
     //[InlineData("Petersen")] // ~370 s

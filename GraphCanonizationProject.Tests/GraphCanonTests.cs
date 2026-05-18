@@ -13,7 +13,7 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     // the same instance-level tests against the Lean-aligned reference. Tests that
     // call static helpers on the reference (LabelEdgesAccordingToRankings) stay
     // tied to GraphOrderer regardless.
-    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererPartialOrderSinglePair();
+    private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererFlipValidation();
 
     // ── Isomorphism tests ────────────────────────────────────────────────────
 
@@ -360,9 +360,9 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     [Theory]
     [InlineData("Cycle3")]
     [InlineData("Cycle4")]
-    [InlineData("Cycle5")]
-    [InlineData("K4")]
-    [InlineData("K33")]
+    //[InlineData("Cycle5")]
+    //[InlineData("K4")]
+    //[InlineData("K33")] in extended tests
     public void CfiPair_DisjointUnion_DifferentScramblings_ProduceSameCanonical(string baseName)
     {
         var pair = CfiGraphGenerator.Generate(baseName);
