@@ -11,38 +11,37 @@ namespace Canonizer
     // case time. See docs/flip-validation-strategy.md for the full design.
     //
     // ── Algorithm at a glance ────────────────────────────────────────────────
-    //   Forward pass: greedily walk the search tree. At each step pick one
-    //     iso-invariant single-pair guess (within-cell if any cell has an
-    //     internal Unknown pair, else between-cell on a P-incomparable cell
-    //     pair), write it into P, run transitive closure, push a Primary
-    //     record. Repeat until P is total.
-    //   Backward pass: walk the primary stack deepest-to-shallowest. Each
-    //     primary is validated by the transposition automorphism test; if it
-    //     passes, the guess was an arbitrary tie-break of a true symmetry —
-    //     lock. If it fails, flip the direction, attempt to keep the deeper
-    //     primaries (a deeper primary may now have its pair pre-resolved or
-    //     contradicted, in which case the deeper lock counts as broken and
-    //     the forward pass is rerun from the breakage), lex-min the
-    //     resulting canonical matrices, and adopt the winner.
+    //   Forward pass (greedy): at each step pick one single-pair guess
+    //     (within-cell if any cell has an internal Unknown pair, else
+    //     between-cell on a P-incomparable cell pair) by a lex-min-by-index
+    //     rule, write it into P, transitively close, push a Primary record
+    //     with the at-guess-time cell snapshot. Repeat until P is total.
+    //   Backward pass (§6.5 eager rotation): walk the primary stack deepest
+    //     to shallowest. For each primary i, enumerate branches over
+    //     {direction × a' ∈ CellSnapshotA × b' ∈ CellSnapshotB}, replay
+    //     each branch through prefix + deeper + ContinueForward, lex-min
+    //     over the resulting canonicals, adopt the winner.
+    //   Fixpoint iteration: adopting at a shallow primary replaces deeper
+    //     primaries with fresh ones (from ContinueForward) that haven't
+    //     been backward-processed. The backward pass is iterated until a
+    //     sweep adopts zero branches; termination follows from canonical-
+    //     lex monotonicity.
     //
     // ── v1 simplifications (see §10/§11 of the strategy doc) ────────────────
     //   - DERIVED closure records are not tracked; transitive closure is
     //     re-run from scratch on each replay. Constant-factor cost increase,
     //     polynomial preserved.
-    //   - The local orbit test is exactly the transposition test (§3.6
-    //     practical note: single-pair guesses always individualise both
-    //     endpoints into singleton sub-cells, so the sub-tree pairing
-    //     collapses to (a, b)).
-    //   - When a shallow flip invalidates a deeper guess's pair, the
-    //     algorithm re-runs ContinueForward from the breakage. The more
-    //     surgical "detect-and-redo only affected locks" fallback from
-    //     §6.3 is deferred to a later version.
+    //   - When a shallow change invalidates a deeper guess's pair,
+    //     TryReplayWithDeeper bails out and re-runs ContinueForward from the
+    //     breakage. The surgical "detect-and-redo only affected locks"
+    //     fallback from §6.3 is deferred to a later version.
+    //   - The §3.6 transposition test as a fast path is omitted; eager
+    //     enumeration covers its case as one branch among many.
     //
     // ── Diagnostic counters ─────────────────────────────────────────────────
     //   Public properties below are updated by Run() and reflect the LAST
-    //   run, cumulative across forward pass plus backward-pass re-runs.
-    //   The locked-then-invalidated counter is the single most diagnostic
-    //   per §9 of the strategy doc.
+    //   run, cumulative across forward pass plus backward-pass sweeps.
+    //   LastLockedThenInvalidated is the §9 most-diagnostic counter.
     public sealed class CanonGraphOrdererFlipValidation : ICanonGraphOrderer
     {
         private const sbyte LESS = -1, UNKNOWN = 0, GREATER = 1;
@@ -52,6 +51,7 @@ namespace Canonizer
         public int LastWithinCellGuesses { get; private set; }
         public int LastBetweenCellGuesses { get; private set; }
         public int LastBackwardFlips { get; private set; }
+        public int LastPairRotationsAttempted { get; private set; }
         public int LastLockedThenInvalidated { get; private set; }
 
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
@@ -65,14 +65,28 @@ namespace Canonizer
             LastWithinCellGuesses = 0;
             LastBetweenCellGuesses = 0;
             LastBackwardFlips = 0;
+            LastPairRotationsAttempted = 0;
             LastLockedThenInvalidated = 0;
 
             // Forward pass.
             sbyte[] p = SeedFromTypes(n, vertexTypes);
             List<Primary> record = ContinueForward(n, adj, p);
 
-            // Backward pass.
-            record = BackwardPass(n, adj, vertexTypes, record);
+            // Backward pass to fixpoint. A single deepest-first sweep optimizes
+            // each primary against its forward-pass snapshot, but adopting a
+            // branch at a shallow primary replaces deeper primaries with fresh
+            // ones from ContinueForward (in TryReplayWithDeeper) that haven't
+            // been backward-processed. Iterating until no branch is adopted
+            // gives every deeper primary a chance. Termination: each adoption
+            // strictly decreases the canonical lex-value, and canonicals form a
+            // finite set. The dependency calculator (§11.10) replaces this
+            // with a one-shot diagram read.
+            int prevFlips;
+            do
+            {
+                prevFlips = LastBackwardFlips;
+                record = BackwardPass(n, adj, vertexTypes, record);
+            } while (LastBackwardFlips > prevFlips);
             LastPrimaryCount = record.Count;
 
             // Replay the (possibly updated) record and read off the canonical
@@ -96,6 +110,14 @@ namespace Canonizer
             public int A, B;
             public sbyte Direction;   // LESS (A<B) or GREATER (A>B)
             public bool BetweenCell;  // false = within-cell, true = between-cell
+
+            // Cell-tree fragment captured at guess time (§3.5). CellSnapshotA
+            // is the membership of A's cell *before* this guess was applied;
+            // CellSnapshotB is B's. For within-cell guesses the two arrays
+            // point to the same instance. §6.5's backward-pass rotation
+            // enumerates (a' ∈ CellSnapshotA) × (b' ∈ CellSnapshotB).
+            public int[] CellSnapshotA;
+            public int[] CellSnapshotB;
         }
 
         // ── Forward pass ─────────────────────────────────────────────────────
@@ -127,7 +149,12 @@ namespace Canonizer
 
             if (TryFindWithinCellGuess(n, p, cells, numCells, out int a, out int b))
             {
-                var prim = new Primary { A = a, B = b, Direction = LESS, BetweenCell = false };
+                var snap = cells[cellOf[a]].ToArray();
+                var prim = new Primary
+                {
+                    A = a, B = b, Direction = LESS, BetweenCell = false,
+                    CellSnapshotA = snap, CellSnapshotB = snap,
+                };
                 if (!ApplyOne(p, n, prim))
                     throw new InvalidOperationException(
                         "FlipValidation: within-cell guess produced a contradiction");
@@ -138,7 +165,13 @@ namespace Canonizer
 
             if (TryFindBetweenCellGuess(n, p, cellOf, cells, numCells, out a, out b))
             {
-                var prim = new Primary { A = a, B = b, Direction = LESS, BetweenCell = true };
+                var snapA = cells[cellOf[a]].ToArray();
+                var snapB = cells[cellOf[b]].ToArray();
+                var prim = new Primary
+                {
+                    A = a, B = b, Direction = LESS, BetweenCell = true,
+                    CellSnapshotA = snapA, CellSnapshotB = snapB,
+                };
                 if (!ApplyOne(p, n, prim))
                     return false; // contradiction on between-cell closure; caller decides
                 record.Add(prim);
@@ -220,57 +253,89 @@ namespace Canonizer
 
         // ── Backward pass ────────────────────────────────────────────────────
 
-        // For each primary in reverse: validate via the transposition test; on
-        // failure, try the flipped direction, take lex-min of the two resulting
-        // canonical matrices. Deeper guesses are preserved when their pairs
-        // remain applicable; broken deeper guesses bump the diagnostic counter
-        // and the forward pass is re-run from the break point.
+        // §6.5 eager rotation: for each primary, enumerate branches over
+        // {direction × a' ∈ CellSnapshotA × b' ∈ CellSnapshotB}, replay each
+        // via the prefix + deeper machinery, lex-min over the resulting
+        // canonical matrices, and adopt the winner. The transposition test is
+        // no longer a fast path — it would only let us skip 2 of the 2·|C_a|·
+        // |C_b| branches in the "true symmetry pair" case, which is a
+        // marginal optimization that the dependency calculator (§11.10) will
+        // make redundant. Keeping the loop uniform makes correctness clearer.
         private List<Primary> BackwardPass(int n, int[] adj, VertexType[] vertexTypes,
                                            List<Primary> record)
         {
             var current = new List<Primary>(record);
 
+            // Baseline canonical: cached across outer iterations. Only the
+            // prefix part of `current` (positions 0..i-1) is ever read by an
+            // iteration at position i, and adopting at i never touches
+            // positions <i — so an iteration that doesn't adopt leaves the
+            // canonical unchanged. Recomputing per outer iter was an O(n^5)
+            // redundant cost per sweep.
+            sbyte[]? pCur = ReplayRecord(n, vertexTypes, current, current.Count);
+            if (pCur == null) return current;
+            int[] matBest = BuildPermutedMatrix(adj, ReadPermutation(n, pCur), n);
+
             for (int i = current.Count - 1; i >= 0; i--)
             {
                 var primI = current[i];
+                List<Primary> bestRecord = current;
+                bool adopted = false;
 
-                // P just after primary i was applied.
-                sbyte[]? pAtI = ReplayRecord(n, vertexTypes, current, i + 1);
-                if (pAtI == null) continue;
-
-                // Transposition test on the current state. If σ = (a b) is an
-                // automorphism of (adj, P_at_i), the guess was an arbitrary
-                // tie-break of a true two-element orbit — lock it.
-                if (TranspositionTest(primI.A, primI.B, pAtI, adj, n))
-                    continue;
-
-                // Otherwise, try the flipped direction.
-                var flippedPrim = primI;
-                flippedPrim.Direction = (sbyte)(-primI.Direction);
-
-                var prefix = current.Take(i).ToList();
-                prefix.Add(flippedPrim);
-
-                var deeper = current.Skip(i + 1).ToList();
-                var flippedFull = TryReplayWithDeeper(n, adj, vertexTypes, prefix, deeper,
-                                                     out bool deeperBroken);
-                if (flippedFull == null) continue; // flipped branch dead
-
-                if (deeperBroken) LastLockedThenInvalidated++;
-
-                // Compare canonical matrices and adopt the lex-smaller.
-                sbyte[]? pCur = ReplayRecord(n, vertexTypes, current, current.Count);
-                sbyte[]? pFlip = ReplayRecord(n, vertexTypes, flippedFull, flippedFull.Count);
-                if (pCur == null || pFlip == null) continue;
-
-                int[] permCur = ReadPermutation(n, pCur);
-                int[] permFlip = ReadPermutation(n, pFlip);
-                int[] matCur = BuildPermutedMatrix(adj, permCur, n);
-                int[] matFlip = BuildPermutedMatrix(adj, permFlip, n);
-
-                if (LexLess(matFlip, matCur))
+                // Enumerate rotation branches. Note: (primI.A, primI.B,
+                // primI.Direction) is the no-change branch — skip it (the
+                // baseline already represents it).
+                foreach (int aPrime in primI.CellSnapshotA)
                 {
-                    current = flippedFull;
+                    foreach (int bPrime in primI.CellSnapshotB)
+                    {
+                        if (aPrime == bPrime) continue;
+
+                        foreach (sbyte dir in new sbyte[] { LESS, GREATER })
+                        {
+                            if (aPrime == primI.A && bPrime == primI.B && dir == primI.Direction)
+                                continue;
+
+                            var branchPrim = new Primary
+                            {
+                                A = aPrime, B = bPrime, Direction = dir,
+                                BetweenCell = primI.BetweenCell,
+                                CellSnapshotA = primI.CellSnapshotA,
+                                CellSnapshotB = primI.CellSnapshotB,
+                            };
+
+                            var prefix = new List<Primary>(i + 1);
+                            for (int j = 0; j < i; j++) prefix.Add(current[j]);
+                            prefix.Add(branchPrim);
+
+                            var deeper = new List<Primary>(current.Count - i - 1);
+                            for (int j = i + 1; j < current.Count; j++) deeper.Add(current[j]);
+
+                            LastPairRotationsAttempted++;
+
+                            var branchFull = TryReplayWithDeeper(n, adj, vertexTypes,
+                                                                 prefix, deeper,
+                                                                 out bool deeperBroken,
+                                                                 out sbyte[]? pBranch);
+                            if (branchFull == null || pBranch == null) continue;
+                            if (deeperBroken) LastLockedThenInvalidated++;
+
+                            int[] permBranch = ReadPermutation(n, pBranch);
+                            int[] matBranch = BuildPermutedMatrix(adj, permBranch, n);
+
+                            if (LexLess(matBranch, matBest))
+                            {
+                                matBest = matBranch;
+                                bestRecord = branchFull;
+                                adopted = true;
+                            }
+                        }
+                    }
+                }
+
+                if (adopted)
+                {
+                    current = bestRecord;
                     LastBackwardFlips++;
                 }
             }
@@ -281,13 +346,14 @@ namespace Canonizer
         // Apply prefix; then try to apply deeper guesses one by one. If a
         // deeper guess can't be applied (its pair is no longer Unknown in the
         // current P), bump the broken flag and re-run ContinueForward to fill
-        // out the remainder. The strategy doc allows this — the polynomial
-        // bound costs more constant factor than the surgical §6.3 alt.
+        // out the remainder. Returns the final P alongside the record so the
+        // caller doesn't have to replay everything from scratch again.
         private List<Primary>? TryReplayWithDeeper(int n, int[] adj, VertexType[] vertexTypes,
                                                    List<Primary> prefix, List<Primary> deeper,
-                                                   out bool anyBroken)
+                                                   out bool anyBroken, out sbyte[]? finalP)
         {
             anyBroken = false;
+            finalP = null;
             sbyte[] p = SeedFromTypes(n, vertexTypes);
             var result = new List<Primary>(prefix.Count + deeper.Count);
 
@@ -313,29 +379,11 @@ namespace Canonizer
                     return null;
             }
 
+            finalP = p;
             return result;
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
-
-        // σ = (a b) — does swapping rows/columns a and b leave both the
-        // adjacency matrix and the partial-order matrix unchanged? O(n²).
-        // Sound but incomplete as an orbit test; incompleteness only triggers
-        // a lex-min recompute that yields the same canonical form either way.
-        private static bool TranspositionTest(int a, int b, sbyte[] p, int[] adj, int n)
-        {
-            for (int u = 0; u < n; u++)
-            {
-                int su = (u == a) ? b : (u == b ? a : u);
-                for (int v = 0; v < n; v++)
-                {
-                    int sv = (v == a) ? b : (v == b ? a : v);
-                    if (adj[u * n + v] != adj[su * n + sv]) return false;
-                    if (p[u * n + v] != p[su * n + sv]) return false;
-                }
-            }
-            return true;
-        }
 
         // Apply one primary to p, transitively closing. Returns false on
         // contradiction (cycle or direction conflict). A "match in the same
@@ -439,29 +487,84 @@ namespace Canonizer
             return color;
         }
 
+        // Each vertex's signature is its own color followed by the sorted
+        // multiset of neighbour (color, edge-label, Prel)-tuples, packed into
+        // longs. Two vertices share a signature iff they have equal own-color
+        // and equal multisets — equivalent to the previous string-based check,
+        // just without per-round string allocation.
         private static int[] RefineRound(int n, int[] adj, sbyte[] p, int[] color)
         {
-            var sigs = new string[n];
+            var sigs = new long[n][];
             for (int v = 0; v < n; v++)
             {
-                var parts = new List<string>(n);
+                var tuples = new long[n]; // [0] = own color; [1..n-1] = sorted neighbours
+                tuples[0] = color[v];
+                int k = 1;
                 for (int u = 0; u < n; u++)
                 {
                     if (u == v) continue;
-                    parts.Add(color[u] + "." + adj[v * n + u] + "." + ((int)p[v * n + u]));
+                    tuples[k++] = ((long)color[u] << 24)
+                                  | ((long)(uint)adj[v * n + u] << 8)
+                                  | ((long)(p[v * n + u] + 1) & 0xFF);
                 }
-                parts.Sort(StringComparer.Ordinal);
-                sigs[v] = color[v] + "/" + string.Join(",", parts);
+                Array.Sort(tuples, 1, n - 1);
+                sigs[v] = tuples;
             }
 
-            var distinct = new List<string>(new HashSet<string>(sigs));
-            distinct.Sort(StringComparer.Ordinal);
-            var rank = new Dictionary<string, int>(distinct.Count);
-            for (int i = 0; i < distinct.Count; i++) rank[distinct[i]] = i;
+            // Canonical rank: sort distinct signatures lex, assign sequential
+            // ids. The lex sort preserves iso-invariance of the cell ids
+            // (relied on by between-cell guess selection).
+            var distinct = new SortedSet<long[]>(LongArrayLex.Instance);
+            for (int v = 0; v < n; v++) distinct.Add(sigs[v]);
+            var rank = new Dictionary<long[], int>(distinct.Count, LongArrayEq.Instance);
+            int r = 0;
+            foreach (var sig in distinct) rank[sig] = r++;
 
             var nextColor = new int[n];
             for (int v = 0; v < n; v++) nextColor[v] = rank[sigs[v]];
             return nextColor;
+        }
+
+        private sealed class LongArrayEq : IEqualityComparer<long[]>
+        {
+            public static readonly LongArrayEq Instance = new();
+            public bool Equals(long[]? a, long[]? b)
+            {
+                if (ReferenceEquals(a, b)) return true;
+                if (a is null || b is null || a.Length != b.Length) return false;
+                for (int i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
+                return true;
+            }
+            public int GetHashCode(long[] a)
+            {
+                unchecked
+                {
+                    ulong h = 14695981039346656037UL;
+                    for (int i = 0; i < a.Length; i++)
+                    {
+                        h ^= (ulong)a[i];
+                        h *= 1099511628211UL;
+                    }
+                    return (int)h;
+                }
+            }
+        }
+
+        private sealed class LongArrayLex : IComparer<long[]>
+        {
+            public static readonly LongArrayLex Instance = new();
+            public int Compare(long[]? a, long[]? b)
+            {
+                if (ReferenceEquals(a, b)) return 0;
+                if (a is null) return -1;
+                if (b is null) return 1;
+                int min = a.Length < b.Length ? a.Length : b.Length;
+                for (int i = 0; i < min; i++)
+                {
+                    if (a[i] != b[i]) return a[i] < b[i] ? -1 : 1;
+                }
+                return a.Length.CompareTo(b.Length);
+            }
         }
 
         private static bool SamePartition(int n, int[] a, int[] b)

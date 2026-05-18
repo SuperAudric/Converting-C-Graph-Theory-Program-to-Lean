@@ -18,30 +18,32 @@ plus a single backward sweep.
 ## Algorithm at a glance
 
 1. **Forward pass.** Greedy: at each step pick one guess (within-cell or
-   between-cell, by a deliberately simple lex-min-by-index rule that may
-   not currently be iso-invariant on cells hosting multiple pair-orbits — see §3.2
+   between-cell, by a deliberately simple lex-min-by-index rule that is
+   not iso-invariant on cells hosting multiple pair-orbits — see §3.2
    and §6.5), write it into `P`, propagate, record what was done. Repeat
    until `P` is total. The architectural commitment is that the *forward
    pass need not make iso-invariant pair choices*; correcting wrong
    choices is the backward pass's job.
-2. **Backward pass.** Walk the guess stack from deepest to shallowest. For
-   each primary guess, decide via a polynomial-time local test whether its
-   two endpoints are automorphic given everything decided below it. If yes,
-   the guess was an arbitrary tie-break — lock it. If no, flip it,
-   re-propagate downward, lex-min, lock the resolved direction.
-3. **Pair-orbit recovery (PLANNED, §6.5).** When the wrong-direction flip
-   of step 2 doesn't recover the canonical form because the *pair-orbit
-   choice itself* was non-canonical (and not just its direction), an
-   additional backward-pass mechanism — not yet specified — switches the
-   representative within the cell. Without this, the algorithm is **not
-   a correct canonizer on graphs with multi-orbit cells**, which
-   includes the disjoint-CFI test family.
+2. **Backward pass — direction and pair rotation.** Walk the guess stack
+   from deepest to shallowest. For each primary, enumerate branches over
+   `{direction × first-vertex-rotation × second-vertex-rotation}` from
+   the cell snapshot taken at guess time (§3.5), replay each branch,
+   lex-min over the resulting canonicals, adopt the winner. Direction
+   rotation handles "wrong-way guess on a true symmetry"; vertex
+   rotation handles "guessed pair was in a different pair-orbit than the
+   canonical one." See §6.5 for the mechanism in detail.
+3. **Pair-orbit recovery (§6.5).** When the wrong-direction flip alone
+   doesn't recover the canonical because the *pair-orbit choice itself*
+   was non-canonical (not just its direction), the backward pass also
+   enumerates alternative within-cell representatives `(a', b')`,
+   lex-mins across the resulting canonicals, and adopts the winner.
+   This is what makes 1-WL's failure to separate pair-orbits survivable.
 
-Each primary guess is touched once per pass. The forward pass is
-`O(n³)`-per-step × `O(n)` steps; the backward pass is `O(n²)`-per-test ×
-`O(n)` tests, plus a polynomial re-propagation cost on each flip. The total
-is polynomial **iff** the invariants in §6 hold and §6.5's mechanism
-ships polynomial.
+Each primary guess is touched once per pass (modulo §6.5's rotation
+factor). The forward pass is `O(n³)`-per-step × `O(n)` steps; the
+backward pass is `O(n²)`-per-test × `O(n)` tests, plus §6.5's pair
+rotation. The naive first-cut total is `O(n⁸)`; the planned dependency
+calculator (§11.10) brings it down by sharing state across branches.
 
 The final bar of correctness is a Lean proof in the
 [`GraphCanonizationProofs`](../GraphCanonizationProofs) project, after the
@@ -142,17 +144,14 @@ pick the lex-min `a, b ∈ C` (lex-min by vertex index). Write
 
 The lex-min-by-index rule is **deliberately simple and not iso-invariant
 on cells that contain multiple pair-orbits** (e.g. C4's vertex-orbit
-contains the adjacent and diagonal pair-orbits separately, and the
-adjacent-vs-diagonal choice depends on input labelling). This is *not*
-patched at the pair-selection step — patching it would push the burden
-onto whatever discriminator builds the "canonical pair" rule, and the
-whole architectural premise of this design (§6) is that the discriminator
-need not be strong enough to identify structure. The intended fix lives
-in the backward pass and is described in §6.5 — "every canonical form is
-reachable from any pair selection." That mechanism is **planned but not
-yet implemented**, so the current code will fail iso-invariance on graphs
-whose cells host multiple pair-orbits. The failure is visible in the size
-6 corpus and on the disjoint-CFI tests; see §9 / §11.
+contains the adjacent and diagonal pair-orbits separately). Patching it
+at the pair-selection step would push the burden onto a stronger
+discriminator, which the architectural premise of this design (§6)
+rejects. The fix lives in the backward pass — see §6.5 — which enumerates
+alternative representatives within the cell snapshot and lex-mins across
+the resulting canonicals. The forward pass therefore commits to the
+lex-min-by-index pair as an arbitrary starting choice that §6.5
+rotates away.
 
 ### 3.3 Between-cell primary guess (sibling-ordering)
 
@@ -163,8 +162,9 @@ pair `x ∈ X, y ∈ Y` (lex-min by vertex index). Push a `PRIMARY` with
 `x, y, LESS`.
 
 Same caveat as §3.2: representative selection by vertex index isn't iso-
-invariant when `X` and `Y` host non-singleton cross-orbit structure. The
-§6.5 mechanism is the intended fix.
+invariant when `X` and `Y` host non-singleton cross-orbit structure.
+§6.5's pair rotation enumerates `(x', y')` alternatives within
+`(X-at-guess-time, Y-at-guess-time)` and lex-mins.
 
 Closure (§3.4) will not promote this to "all of X below all of Y" — that is
 the block guess of `PartialOrderIR` and would discard interleavings. Here
@@ -189,15 +189,21 @@ its driving primary flips (§5). At most `n(n−1)` exist at any time.
 
 ### 3.5 Cell snapshot
 
-Captured per primary at guess time, sufficient to re-run the local orbit
-test (§3.6) without recomputing the world. Minimally:
+Captured per primary at guess time, sufficient both to re-run the local
+orbit test (§3.6) and to drive §6.5's pair rotation without recomputing
+the world. A **cell-tree fragment** containing:
 
-- The cell `C` being split (just its member list).
-- For each `c ∈ C`, the cell id `c` was in at the parent tier.
-- The mapping of `C`'s sub-cells (after this guess and its closure) to
-  members.
+- `C_a`: the cell containing `a` at guess time (full member list).
+- `C_b`: the cell containing `b` at guess time (member list;
+  `C_a = C_b` for within-cell guesses, distinct for between-cell).
+- For each `c ∈ C_a ∪ C_b`, the cell id `c` had at the parent tier.
+- The mapping of `C_a`'s and `C_b`'s sub-cells (after this guess and its
+  closure) to members.
 
-Storage is `O(n)` per guess, `O(n²)` total.
+Storage is `O(n)` per guess, `O(n²)` total. The richer scope (beyond the
+"members only" form needed for §3.6's transposition test) is what §6.5
+rotates over and what the §6.3 snapshot-diff alternative compares
+against.
 
 ### 3.6 Local orbit test
 
@@ -281,34 +287,38 @@ for i = len(guesses) − 1 down to 0:
     g := guesses[i]
     if g.kind == DERIVED: continue              # rides with its driver
 
-    if transposition_test(g.a, g.b, P_at(i)):   # fast path
-        g.locked := VALID
-        continue
-    if local_orbit_test(g):
-        g.locked := VALID
-        continue
-
-    # Wrong-direction candidate. Re-propagate from position i with the
-    # other direction, take lex-min of the two resulting canonical forms.
-    re-propagate from i with direction reversed
-    if lex(M_reverse) < lex(M_current):
-        rewrite g and its DERIVED descendants
-        adopt M_reverse
+    # Enumerate branches over {direction × a' ∈ C_a × b' ∈ C_b}
+    # using the cell-tree fragment captured at guess time (§3.5).
+    best := current canonical
+    for (dir, a', b') in branches(g):
+        if a' == b': continue
+        if (a', b', dir) == (g.a, g.b, g.direction): continue   # baseline
+        re-propagate from i with primary i replaced by (a', b', dir)
+        if lex(M_branch) < lex(best):
+            best := M_branch
+            winner := (dir, a', b')
+    if winner exists:
+        rewrite g (and its DERIVED descendants); adopt best
     g.locked := RESOLVED
 ```
 
-The re-propagation rewrites everything from position `i` onward: the
-deeper primaries themselves stay in place (their `(a, b)` pairs are still
-in the same cells by invariant 6.2), but their `DERIVED` descendants are
-recomputed from scratch under the flipped direction. By invariant 6.3 no
-deeper primary's `VALID` lock is invalidated, so the work is bounded.
+Direction rotation handles "guess made the wrong way on a true symmetry"
+(the transposition test's case from §3.6, which could be re-introduced
+as a fast path to skip both direction branches when σ = (a b) is an
+automorphism — omitted in v1 for code uniformity); vertex rotation
+handles "guessed pair was in a different pair-orbit than the canonical
+one" (§6.5). By invariant 6.2 the deeper cells survive a branch swap;
+by 6.3 (or its snapshot-diff alternative) deeper `VALID` locks are
+preserved or selectively re-tested.
 
 ---
 
 ## 6. Invariants
 
-The algorithm is **correct** iff (6.1) plus (6.4) plus the planned (6.5)
-all hold. It is **polynomial** iff (6.2) and (6.3) additionally hold.
+The algorithm is **correct** iff (6.1), (6.4), and (6.5) all hold. It
+is **polynomial** iff (6.2) and (6.3) additionally hold; the first-cut
+implementation of (6.5) is `O(n⁸)` (still polynomial), and §11.10's
+planned dependency calculator brings it down further.
 
 The architectural commitment driving this whole section is that **the
 discriminator (1-WL) does not need to identify structure completely.**
@@ -380,15 +390,18 @@ restricted to them, P restricted to them) which all transport unchanged.
 **Status.** The single most fragile claim and the load-bearing one for the
 polynomial bound. The diagnostic in §9 detects a violation directly.
 
-**Alternative if 6.3 fails.** Per shallow flip, detect *which* deeper
-locks the flip actually affects rather than re-running every deeper local
-orbit test in full. The cell snapshot (§3.5) records which entries of `P`
-each deeper test consumed; if the shallow flip touches none of them, that
-deeper lock is preserved. Re-test only the affected locks. Cost: `O(n)`
-deeper locks × `O(n²)` per re-test = `O(n³)` extra per shallow flip,
-`O(n⁴)` total — the polynomial bound survives a 6.3 failure as long as
-the affected-set detection is itself polynomial, which it is (a snapshot-
-versus-flip comparison is `O(n²)` per snapshot).
+**Alternative if 6.3 fails.** Per shallow flip *or §6.5 rotation*,
+detect *which* deeper locks the change actually affects rather than
+re-running every deeper local orbit test in full. The cell snapshot
+(§3.5) records which entries of `P` each deeper test consumed; if the
+shallow change touches none of them, that deeper lock is preserved.
+Re-test only the affected locks. Cost: `O(n)` deeper locks × `O(n²)`
+per re-test = `O(n³)` extra per shallow change, `O(n⁴)` total — the
+polynomial bound survives a 6.3 failure as long as the affected-set
+detection is itself polynomial, which it is (a snapshot-versus-change
+comparison is `O(n²)` per snapshot). The same machinery underwrites
+§6.5's rotation branches: most rotations touch a small subset of `P`,
+so deeper-lock invalidation is the exception, not the rule.
 
 ### 6.4 Closure as guess (correctness + polynomial)
 
@@ -414,7 +427,7 @@ not an inconsistency. Closure asymmetries are confined to pairs whose
 ordering descends from a primary guess; flipping the primary flips the
 chain.
 
-### 6.5 Every canonical form reachable from any pair selection (PLANNED, correctness)
+### 6.5 Every canonical form reachable from any pair selection (correctness)
 
 > For any input scrambling and any starting pair the forward pass might
 > commit to, the algorithm's exploration reaches every canonical form
@@ -423,27 +436,70 @@ chain.
 This is the load-bearing correctness invariant under the architectural
 commitment in the header of §6 — it is what makes 1-WL's *failure to
 identify pair orbits* survivable. If two scramblings commit to pairs
-from different pair-orbits, both runs must end up considering the same
-set of candidate canonical forms; the lex-min then resolves them to a
-common output.
+from different pair-orbits, both runs must consider the same set of
+candidate canonical forms; the lex-min then resolves them to a common
+output.
 
-**This is planned but not implemented.** The direction-flip mechanism
-already in the backward pass (§5) is the right shape for it but is
-restricted to flipping a single guess's *direction*, not its *pair-
-orbit choice*. The next planning iteration (separate document) will
-specify the actual mechanism — candidates we have discussed include
-branching over pair-orbits with work-sharing between branches, a richer
-backward-pass "swap representative" step, and explicit propagation
-discipline that makes the < and > branches share enough state to make
-the search polynomial.
+**Mechanism.** Extend each primary's backward-pass evaluation from
+`{direction-flip}` to `{direction-flip × first-vertex-rotation ×
+second-vertex-rotation}`. For primary `i = (a, b, dir, kind)` with cell
+snapshot `(C_a, C_b)` (captured at guess time, see §3.5):
 
-**Until 6.5 is in, the implementation is not a correct canonizer on
-graphs that contain multi-orbit cells.** The size 4–6 corpus contains
-such graphs (C4 + K2 at size 6 #56 is the smallest example); the
-disjoint-CFI tests on Cycle4 and K4 are the larger and more important
-ones. The failure is intentional in the current code — it is the
-diagnostic that 6.5 needs to fix, not a bug to be patched at the pair-
-selection step.
+- **Direction axis:** `dir ∈ {LESS, GREATER}`.
+- **First-vertex axis:** `a' ∈ C_a` (a's cell at guess time, including
+  `a` itself).
+- **Second-vertex axis:** `b' ∈ C_b`, with `a' ≠ b'`.
+
+For each `(dir, a', b')`, replay primaries `0..i-1`, apply
+`(a', b', dir)` as a substitute for primary `i`, continue the forward
+pass via the normal guess loop, and lex-min the resulting canonical
+against the running best. Adopt the winner; rewrite primaries `i..`
+accordingly.
+
+**Why this addresses pair-orbit ambiguity.** If `(a, b)` and
+`(a', b')` are in the same pair-orbit, both branches produce equivalent
+canonicals and lex-min picks one idempotently. If they're in different
+pair-orbits, both candidates surface and lex-min picks the smaller,
+iso-invariant by construction. The σ-orientation question (which
+direction of a swap σ on `(a, b)` to commit to when σ has two valid
+mappings) dissolves: enumerating `(a, b')` and `(a', b)` covers both
+swap orientations of any such σ.
+
+**Fixpoint iteration.** A single deepest-first sweep of the backward
+pass is not sufficient: adopting a branch at a shallow primary `i`
+replaces primaries `i+1..end` with fresh primaries from
+`ContinueForward` (the prefix+deeper machinery in §10), and those have
+not been backward-processed. The implementation iterates the backward
+pass until a full sweep adopts zero branches. Termination is guaranteed
+because every adoption strictly decreases the canonical's lex value
+and canonicals form a finite set. The dependency calculator (§11.10)
+replaces this iteration with a one-shot diagram read.
+
+**Complexity (first-cut, naive replay).** Branches per primary:
+`|C_a| × |C_b| × 2 ≤ 2n²`. Primaries: `O(n²)` from the P-entry bound
+(see §11.4 / paragraph below on false-count). Total branch evaluations
+per sweep: `O(n⁴)`. Each evaluation is `O(n⁴)` replay → `O(n⁸)` per
+sweep. The number of sweeps until fixpoint is bounded only by
+canonical-lex monotonicity (worst case exponential in `n²`, but
+empirically small — converges in 2–3 sweeps on the size 4–6 corpus).
+§11.10's planned dependency calculator collapses both the per-sweep
+cost and the iteration count by sharing state across branches that
+differ only in a small subtree of `P`.
+
+**False-count bound (why guess count stays polynomial).** Every guess
+writes at least one `P` entry to enter the record; `P` has `O(n²)`
+entries, so primary count — including false-symmetry guesses caught by
+the backward pass — is bounded by `O(n²)`. Most rotation branches will
+prove iso-equivalence rather than discover alternatives; a cheap
+iso-equivalence pre-filter (deferred to the calculator) would skip the
+bulk.
+
+**Eager vs lazy.** The implementation enumerates the rotation branches
+eagerly (every primary, every iteration), rather than only when the
+direction-flip fails to improve the canonical. Lazy would be faster in
+the true-symmetry-heavy common case but introduces a control-flow
+split that could hide bugs where the direction flip happens to look
+fine but the rotation would have been correct.
 
 ---
 
@@ -601,36 +657,38 @@ paths the algorithm need not handle in its first version (3, 4, 6, 7).
    contradict on closure, neither branch produces a canonical form. The
    algorithm needs a defined error mode and, ideally, a structural
    argument that this can never happen on connected graphs.
-5. **Between-cell and within-cell representative selection.** "Lex-min
-   by vertex index" is not iso-invariant when the cell hosts multiple
-   pair-orbits. Patching it at the selection step (e.g. by adding a
-   pair signature) would deepen reliance on 1-WL's identifying power,
-   which is precisely what the architecture rejects. The real fix lives
-   in §6.5 and is planned, not implemented.
-6. **Cell snapshot completeness.** The cell snapshot stored per
-   guess must contain enough to re-run the local orbit test after deeper
-   flips. The minimal sufficient information is given in §3.5 but the
-   exact requirement should be re-derived from the local-orbit-test
-   pseudocode once implemented.
-7. **Local-orbit-test sub-tree pairing well-definedness (deferred).**
-   Dissolves for the algorithm as specified: every primary guess
+5. **Representative selection in forward pass.** Closed by §6.5: the
+   forward pass's lex-min-by-index is an arbitrary starting choice;
+   the backward pass rotates representatives within the cell snapshot
+   and lex-mins the resulting canonicals. Patching at the selection
+   step (e.g. via a pair signature) was deliberately rejected — it
+   would deepen reliance on 1-WL's identifying power, which the
+   architecture rejects.
+6. **Cell snapshot scope.** §3.5 now specifies a cell-tree fragment
+   sufficient for both the §3.6 transposition test and §6.5's rotation
+   enumeration. The minimal scope can be tightened later once the
+   §6.3 snapshot-diff alternative is implemented.
+7. **Local-orbit-test sub-tree pairing.** *Resolved.* Every primary
    individualises its endpoints into singleton sub-cells, so the local
-   orbit test is exactly the transposition test (§3.6, practical note).
+   orbit test is exactly the transposition test (§3.6 practical note).
    The sub-tree-pairing concern only resurfaces if a future variant
-   introduces block guesses or some other mechanism that produces
-   non-singleton `A` or `B`; pin the rule down then.
-8. **The between-cell guess is needed.** Originally listed as "verify
-   whether within-cell alone suffices," but the 2K2 trace settles it:
-   after `0<1` within `{0,1,2,3}`, refinement gives cells
+   introduces block guesses.
+8. **Between-cell guess necessity.** *Resolved.* The 2K2 trace settles
+   it: after `0<1` within `{0,1,2,3}`, refinement gives cells
    `{0},{1},{2,3}`, and a second within-cell guess on `{2,3}` leaves
-   `{0,1}` vs `{2,3}` P-incomparable. So between-cell guesses really
-   are required in the forward pass for any graph with multiple
-   automorphism-equivalent components. Specified in §3.3; the open
-   sub-question is the iso-invariance of the representative-pick rule
-   (item 5).
+   `{0,1}` vs `{2,3}` P-incomparable. Between-cell guesses are
+   required for any graph with multiple automorphism-equivalent
+   components. Specified in §3.3.
 9. **Lex-min-by-index iso-invariance argument was wrong as stated.**
-   The earlier note here said "two 1-WL-equivalent vertices are in the
-   same cell, so lex-min by index picks an automorphism-equivalent
-   representative." That step is only valid for the *vertex* orbit,
-   not the *pair* orbit. A 1-WL cell is one vertex-orbit but can be
-   several pair-orbits. Subsumed by item 5 and §6.5.
+   *Resolved.* A 1-WL cell is one vertex-orbit but can be several
+   pair-orbits; the earlier note conflated them. Subsumed by §6.5's
+   rotation mechanism.
+10. **Dependency-relation calculator (planned optimization on §6.5).**
+    The first-cut §6.5 mechanism replays a full forward pass per
+    branch, giving `O(n⁸)`. A future iteration will build an `O(n²)`
+    boolean-style dependency state diagram that encodes, for each
+    guessed relation, which cells move under `<` vs `>` and how those
+    moves interact with other guesses. Lex-min then reads the canonical
+    off the diagram without re-replaying. Until built, naive replay
+    suffices to validate §6.5 empirically; failure cases discovered
+    during validation feed the calculator's design.
