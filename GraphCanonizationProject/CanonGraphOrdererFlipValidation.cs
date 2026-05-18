@@ -276,15 +276,6 @@ namespace Canonizer
         {
             var current = new List<Primary>(record);
 
-            // Baseline canonical: cached across outer iterations. Only the
-            // prefix part of `current` (positions 0..i-1) is ever read by an
-            // iteration at position i, and adopting at i never touches
-            // positions <i — so an iteration that doesn't adopt leaves the
-            // canonical unchanged.
-            sbyte[]? pCur = ReplayRecord(n, vertexTypes, current, current.Count);
-            if (pCur == null) return current;
-            int[] matBest = BuildPermutedMatrix(adj, ReadPermutation(n, pCur), n);
-
             // Precompute the prefix stack once per sweep. pPrefix[i] is the
             // P state after applying current[0..i-1]; partPrefix[i] is the
             // matching warm-refined partition. Built bottom-up by incremental
@@ -299,6 +290,13 @@ namespace Canonizer
             var (pPrefix, partPrefix) = BuildPrefixStack(n, vertexTypes, adj, current);
             if (pPrefix == null) return current; // baseline broken (shouldn't happen)
 
+            // Baseline canonical: pPrefix[current.Count] is the full state
+            // after applying every primary in `current`. Reusing it here
+            // avoids a redundant ReplayRecord call (saves one O(n⁴) replay
+            // per sweep). Cached across outer iterations since `current`
+            // only changes on adoption.
+            int[] matBest = BuildPermutedMatrix(adj, ReadPermutation(n, pPrefix[current.Count]), n);
+
             for (int i = current.Count - 1; i >= 0; i--)
             {
                 var primI = current[i];
@@ -311,17 +309,32 @@ namespace Canonizer
                 for (int j = i + 1; j < current.Count; j++) deeper.Add(current[j]);
 
                 // Enumerate rotation branches. (primI.A, primI.B,
-                // primI.Direction) is the no-change branch — skip it (the
-                // baseline already represents it).
+                // primI.Direction) is the no-change branch — skip it.
+                //
+                // Within-cell dedup: (a', b', LESS) and (b', a', GREATER)
+                // write the same P entry, so enumerating both is wasted
+                // work. Restrict a' < b' for within-cell and cover both
+                // directions per ordered pair; the baseline check is
+                // normalised against the same ordering.
+                bool isWithinCell = !primI.BetweenCell;
+                int wA = primI.A, wB = primI.B;
+                sbyte wDir = primI.Direction;
+                if (isWithinCell && wA > wB)
+                {
+                    (wA, wB) = (wB, wA);
+                    wDir = (sbyte)(-wDir);
+                }
+
                 foreach (int aPrime in primI.CellSnapshotA)
                 {
                     foreach (int bPrime in primI.CellSnapshotB)
                     {
                         if (aPrime == bPrime) continue;
+                        if (isWithinCell && aPrime > bPrime) continue;
 
                         foreach (sbyte dir in new sbyte[] { LESS, GREATER })
                         {
-                            if (aPrime == primI.A && bPrime == primI.B && dir == primI.Direction)
+                            if (aPrime == wA && bPrime == wB && dir == wDir)
                                 continue;
 
                             var branchPrim = new Primary

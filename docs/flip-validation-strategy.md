@@ -175,7 +175,7 @@ interleaved canonical orders (§7) and is a precondition for §6.5.
 
 ### 3.4 Derived guess (transitive closure)
 
-After every write to `P`, run a Floyd-Warshall closure. For each `(i, k, j)`
+After every write to `P`, transitively close. For each `(i, k, j)`
 with `P[i,k] = LESS`, `P[k,j] = LESS`, and `P[i,j] = UNKNOWN`: set
 `P[i,j] = LESS` and push a `DERIVED` record with `driver` = the most-recent
 `PRIMARY` whose write completed the chain (formally: the unique `PRIMARY`
@@ -183,6 +183,12 @@ whose insertion of an edge took the `(i, j)`-reachability count from zero
 to positive in this round; ties broken by primary index — see §11.3 for the
 specification corner). Contradiction (a cycle or `P[v,v] = LESS`) marks the
 current branch dead.
+
+The closure algorithm itself doesn't matter to the spec — only the final
+closed `P`. The v1 implementation uses incremental closure: after a single
+new LESS edge `x → y`, only the cross-product `ancestors(x) × descendants(y)`
+needs to be processed (`O(n²)` per insertion), vs Floyd-Warshall's
+`O(n³)`. Both produce the same closed relation.
 
 DERIVED records exist only so the backward pass can unwind a chain when
 its driving primary flips (§5). At most `n(n−1)` exist at any time.
@@ -556,15 +562,20 @@ The intended path:
    alongside `LeanGraphCanonizerV4` and prove (a) correctness (6.1 + 6.4)
    and (b) the polynomial bound (6.2 + 6.3). The proof is the final bar.
 
-The complexity arithmetic, if 6.1–6.4 all hold:
+The complexity arithmetic, with 6.1–6.5 all holding and the v1
+implementation (warm-refined partition, incremental TC, precomputed
+prefix-P stack — see §10):
 
-- Forward pass: `O(n)` primaries × `O(n³)` per propagation = `O(n⁴)`.
-- Backward pass: `O(n)` primaries × `O(n²)` per local orbit test +
-  `O(n⁴)` worst-case re-propagation per flip = `O(n⁵)`.
-- DERIVED records: `O(n²)` rewrite cost amortised over the backward
-  pass.
+- Forward pass: `O(n²)` primaries × `O(n²)` per refine + apply = `O(n⁴)`.
+- Backward pass per sweep: `O(n²)` primaries × `O(n²)` rotation branches
+  per primary × `O(n⁴)` per branch evaluation (clone prefix state, apply
+  branch, apply deeper, continue forward) = `O(n⁸)`.
+- Fixpoint iterations: bounded by canonical-lex monotonicity; empirically
+  2–3 on the size 4–6 corpus, no proven polynomial bound without §11.10.
 
-Total `O(n⁵)`.
+Total per fixpoint pass: `O(n⁸)`. The planned dependency calculator
+(§11.10) collapses this by sharing state across branches and removing the
+need for fixpoint iteration; target is `O(n⁵)`–`O(n⁶)`.
 
 ---
 
@@ -601,31 +612,58 @@ changed the deeper structure — i.e. the deeper-lock-survival invariant
 
 ## 10. Implementation notes
 
-Build on `CanonGraphOrdererPartialOrderSinglePair`:
+The v1 implementation lives in
+[`CanonGraphOrdererFlipValidation.cs`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs)
+plus [`IncrementalPartition.cs`](../GraphCanonizationProject/IncrementalPartition.cs).
+Lineage: built on top of `CanonGraphOrdererPartialOrderSinglePair`,
+replacing its exhaustive recursive `Search` with a greedy `ContinueForward`
+plus a `BackwardPass` that iterates to fixpoint.
 
-- **Reuse:** `Refine`, `TransitiveClose`, `SeedFromTypes`, `IsTotal`,
-  `ReadPermutation`, and the basic guess plumbing.
-- **Replace:** `Search` (exhaustive recursion) with `ForwardPass` (greedy
-  stack build) followed by `BackwardPass` (single sweep).
-- **Add:**
-  - `GuessRecord` with `PRIMARY` / `DERIVED` distinction and `driver`
-    pointer.
-  - `cell_snapshot` capture inside the guess step.
-  - Between-cell primary guess branch in the forward pass (the only place
-    where the algorithm needs cross-cell guesses; SinglePair handles this
-    implicitly via recursion).
-  - `TranspositionTest(a, b, P)` — fast pre-check.
-  - `LocalOrbitTest(g)` — pairing-via-sub-tree + permutation check.
-  - Diagnostic counters from §9 exposed for tests.
+Key components:
 
-**Useful intermediate milestone.** Implement only the forward pass + final
-read-off, no backward pass. This is already a complete canonizer if 6.1
-plus 6.2 are enough — i.e. the "trust the first direction" version. Run it
-against the size-4/5/6/7 known-graphs corpus and compare to
-`PartialOrderIR`. If outputs are stable across scramblings and distinct
-across non-isomorphic graphs, the backward pass is purely about correcting
-wrong choices and the polynomial-time claim narrows to "are wrong choices
-rare enough that the backward pass stays linear."
+- **`Primary` record** (within `CanonGraphOrdererFlipValidation`): `(A, B,
+  Direction, BetweenCell, CellSnapshotA, CellSnapshotB)`. The snapshots
+  are vertex-membership lists of the two cells at guess time, captured
+  inside `PickAndApplyGuess`. They're what §6.5 rotates over.
+- **`WarmPartition`** (in `IncrementalPartition.cs`): the partition data
+  structure. Carries `CellOf` and `NumCells` as state; `Refine(adj, p)`
+  runs 1-WL refinement to fixpoint, **warm-starting** from the existing
+  `CellOf` rather than from an all-zero coloring. When `CellOf` was
+  already converged for a similar `P` state, refinement converges in 1–2
+  rounds instead of `O(n)`.
+- **`ApplyOne` + `CloseAfterInsert`**: incremental transitive closure.
+  Each `ApplyOne` writes one P entry and closes via the
+  `ancestors × descendants` cross product (`O(n²)` per insertion).
+- **`BuildPrefixStack`**: precomputes `(pPrefix[i], partPrefix[i])` for
+  every position `i` in the current record at sweep start. Each branch
+  evaluation in the backward pass clones the cached pair instead of
+  re-applying primaries `0..i-1` from scratch.
+- **`TryReplayFromState`**: per-branch evaluator. Clones the cached
+  prefix state, applies the branch primary, applies deeper primaries
+  (refining the partition after each to keep warm-refine cheap), then
+  `ContinueForward` to a total `P`. Returns the suffix record + final
+  `P` so the caller doesn't have to replay again.
+- **`BackwardPass`**: deepest-first walk; per primary, enumerates `(dir ×
+  a' ∈ CellSnapshotA × b' ∈ CellSnapshotB)` branches (with within-cell
+  dedup for `a' < b'`), evaluates each via `TryReplayFromState`, lex-mins
+  over the resulting canonicals, adopts the winner.
+- **Fixpoint loop in `Run`**: backward pass is invoked repeatedly until a
+  sweep adopts zero branches. Termination by canonical-lex monotonicity.
+- **Diagnostic counters**: `LastPrimaryCount`, `LastWithinCellGuesses`,
+  `LastBetweenCellGuesses`, `LastBackwardFlips`, `LastPairRotationsAttempted`,
+  `LastLockedThenInvalidated`. The last is the §9 most-diagnostic.
+
+**Deferred to later versions** (named for grep-ability):
+
+- **`DERIVED` records with driver pointers** (§6.4). v1 re-runs closure
+  from scratch on each replay rather than tracking which primary forced
+  each closure-derived edge. Polynomial-bound argument needs this in.
+- **§3.6 transposition fast path / general local orbit test.** v1's eager
+  rotation enumeration subsumes the transposition test's case as one
+  branch among many. Reintroducing it as a fast path would let us skip
+  both direction branches when `(a b)` is a true automorphism.
+- **§6.3 snapshot-diff alternative** for deeper-lock re-validation.
+- **Dependency calculator** (§11.10).
 
 Test scaffolding analogous to
 [`GraphCanonTests.PartialOrderIR.cs`](../GraphCanonizationProject.Tests/GraphCanonTests.PartialOrderIR.cs)
