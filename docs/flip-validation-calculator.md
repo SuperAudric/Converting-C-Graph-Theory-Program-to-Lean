@@ -495,13 +495,33 @@ This is **DNF (OR-of-ANDs)**, not AND-of-XOR. The current
 implementation re-runs TC from scratch (no canonical driver per
 derived entry), so TC-derived entries' formulas are literally DNF.
 
-**Fix candidate:** assign a canonical "driver" chain per derived
-entry (the §11.3 spec corner). Then the formula collapses to AND of
-literals — a degenerate AND-of-XOR. This works **only when the
-driver chain is stable across direction flips**. If the driver chain
-becomes broken (some link flips to GREATER), a different chain takes
-over, and the formula re-acquires OR structure. Driver stability
-holds for graphs where chains don't overlap, fails in general.
+**Fix candidates:**
+
+- **Canonical driver tracking** (the §11.3 spec corner): assign a
+  canonical chain per derived entry. Formula collapses to AND of
+  literals — a degenerate AND-of-XOR. Works only when the driver
+  chain is stable across direction flips. If the driver chain becomes
+  broken, a different chain takes over and the formula re-acquires
+  OR structure. Driver stability holds for graphs where chains don't
+  overlap, fails in general.
+
+- **TC relegation** (proposed reformulation): *every* P entry
+  becomes a direct primary with its own direction variable. No TC
+  derivation, no chains, no OR over chains. The TC consistency
+  requirement (no cycles in P) is re-encoded as constraints the
+  LexMin engine respects: `(P[u, x] = LESS) ∧ (P[x, v] = LESS) →
+  (P[u, v] = LESS)`. Each such implication is a Horn clause
+  (one positive literal). The full constraint system is **Horn-CNF**
+  with `O(n³)` clauses over `O(n²)` variables. **Horn-SAT is in P**;
+  the calculator's per-entry satisfiability check would be unit
+  propagation in linear time. **This eliminates Reason 1 entirely**
+  — no OR-of-ANDs anywhere — and lands the class in Horn-CNF, which
+  is strictly richer than AND-of-XOR but still polynomial-satisfiable.
+
+The TC relegation reformulation is the more structurally promising
+of the two: it doesn't require driver-stability assumptions, and it
+moves the calculator's class target to Horn-CNF (Horn structurally
+matches the implications TC generates).
 
 ### Reason 2: canonical-from-rank is structurally non-linear in P entries
 
@@ -527,15 +547,20 @@ linearly through the rank-count integer-dispatch.
 
 The "AND-of-XOR over linear variables" form was the calculator's
 load-bearing class assumption. **Both reasons above falsify it
-structurally, not just empirically.** Even if we fixed Reason 1 with
-perfect driver tracking, Reason 2 would still produce non-linear
-formulas at the canonical-entry level.
+structurally, not just empirically.** Reason 1 has a clean fix
+(TC relegation; see above) that lands the class in Horn-CNF.
+Reason 2 is independent and persists even after Reason 1 is
+addressed — rank-based canonical reading is non-linear in P entries
+regardless of how P is constructed.
 
 This means the calculator's polynomial bound — *as originally
-conceived* — cannot be reached via XOR-SAT / Gaussian elimination.
-The class needs to either be richer (still polynomial-satisfiable),
-or the canonical definition needs to change to something compatible
-with linear classes.
+conceived as AND-of-XOR* — cannot be reached via XOR-SAT / Gaussian
+elimination. But Horn-CNF (post-TC-relegation) is structurally close
+and is polynomial-satisfiable. The remaining obstacle is Reason 2:
+either the canonical definition needs to change to something
+compatible with the chosen tractable class, or the rank-counting
+mechanism needs explicit auxiliary-variable encoding that stays
+polynomial-sized in the chosen class.
 
 ---
 
@@ -546,26 +571,35 @@ admit polynomial-satisfiability under suitable restrictions. Each
 has open questions about whether the algorithm's formulas actually
 land in it.
 
-### Horn (monotone-implication CNF)
+### Horn (monotone-implication CNF) — current most-promising target
 
 Each clause has ≤ 1 positive literal. Polynomial-satisfiability via
 unit propagation, linear-time.
 
-**Why it might fit:** TC chains naturally produce Horn clauses:
-"`P[u, v]_LESS ← AND of chain links_LESS`" is a Horn clause. Op 1
-(direct write) is degenerate Horn.
+**Why it fits naturally — given TC relegation.** With every P entry
+as a direct primary (the TC-relegation reformulation, see "Reason 1
+fix candidates"), the TC consistency requirement becomes Horn-CNF
+directly: `(P[u, x] = LESS) ∧ (P[x, v] = LESS) → (P[u, v] = LESS)`
+is exactly a Horn clause. `O(n³)` such clauses, `O(n²)` variables.
+This is the cleanest structural match for the algorithm's natural
+constraint shape.
 
-**What breaks:** Rank-counting (Reason 2 above). Integer-dispatch
-from boolean P entries to canonical positions requires encoding
-"rank(v) = i" as auxiliary boolean indicators with counting clauses.
-Counting in Horn is awkward; n binary indicators per vertex × n
-vertices = n² auxiliary variables, with Horn clauses encoding count
-semantics. Plausible but expensive. Polynomial-bound still in
-principle achievable.
+**What's not yet handled:** Rank-counting (Reason 2). Integer-
+dispatch from boolean P entries to canonical positions requires
+encoding "rank(v) = i" as auxiliary boolean indicators. "At-most-one"
+is Horn-pairwise (mutex clauses); "at-least-one" is `X_1 ∨ X_2 ∨ ...
+∨ X_k`, which is **not Horn** (all-positive clause). Encoding
+rank-counting in pure Horn requires either:
+- Auxiliary variables and clauses that simulate counting indirectly
+  (e.g., comparator chains), polynomial-sized but bulky.
+- Accepting a slightly broader class (e.g., dual-Horn or Krom-Horn
+  hybrid) that's still polynomial-satisfiable.
+- Or restructuring the canonical reading to avoid rank-counting
+  altogether (see "Restructuring options").
 
-**Empirical status:** untested. Phase 2 v2 tested only linear-over-
-Z₂; a Horn-fit test would need different machinery (unit-propagation
-verifier rather than Gaussian elimination).
+**Empirical status:** untested. Phase 2 measured XOR fit; a Horn-fit
+test would need separate instrumentation (unit-propagation verifier
+rather than Gaussian elimination). Phase 3 in the natural sequence.
 
 ### Monotone boolean (positive AND/OR only)
 
@@ -627,7 +661,33 @@ hasn't identified.
 
 If no alternative class fits the *current* algorithm's formulas
 cleanly, the algorithm itself can be restructured to produce
-formulas in a tractable class. Two paths worth noting:
+formulas in a tractable class. Three paths worth noting:
+
+### TC relegation (every entry becomes a direct guess)
+
+The forward pass currently runs TC after every primary, deriving
+new entries from chains. The reformulation: never run TC during
+forward; every P entry becomes a direct primary with its own
+direction variable. The TC consistency requirement (no cycles in
+P) is enforced by the LexMin engine as Horn-CNF constraints (see
+"Reason 1 fix candidates" and the Horn class entry above).
+
+**Cost:** the forward pass produces `O(n²)` primaries instead of
+`O(n)`. Each primary contributes one direct write; no derived
+entries. Forward pass is simpler but generates a larger record.
+
+**Benefit:** the OR-of-ANDs structure from TC chains is eliminated
+entirely. The calculator's class target shifts from AND-of-XOR
+(refuted) to Horn-CNF (polynomial-satisfiable, structurally
+matches the resulting constraints).
+
+**Constraint count:** `O(n³)` Horn clauses (one per `(u, x, v)`
+triple) on `O(n²)` variables. Manageable; unit propagation linear
+in clause count.
+
+This restructuring closes Reason 1. Reason 2 (rank-counting
+non-linearity in the canonical reading) is independent and would
+need either of the other two restructurings below to address.
 
 ### Stable primary sequence (fixed-order enumeration)
 
@@ -672,13 +732,15 @@ In priority order:
 1. **T-C's class characterisation (load-bearing, now sharper).** Phase 2
    v1 and v2 together rule out linear-over-Z₂ (AND-of-XOR) as the class
    the algorithm's formulas land in — structurally falsified by the
-   two arguments in "Structural impossibility" above. Remaining
-   candidates: Horn, monotone boolean, algebraic circuits with some
-   structural restriction. **Resolving T-C now means picking a class
-   from this set (or a new one) and either empirically validating fit
-   or formally proving the class is sufficient.** Phase 2 instrumentation
-   would need to be adapted per candidate class (Horn-fit checker,
-   monotone-fit checker, etc.).
+   two arguments in "Structural impossibility" above. **Most promising
+   remaining target: Horn-CNF**, which arises naturally under TC
+   relegation (every P entry as a direct guess; TC consistency
+   re-encoded as Horn clauses). Horn-SAT is in P. Other candidates:
+   monotone boolean, algebraic circuits with some structural
+   restriction. **Resolving T-C now means: (a) decide whether to
+   relegate TC, (b) characterise the resulting formula class
+   empirically (Horn-fit instrumentation), (c) handle Reason 2
+   (rank-counting non-linearity) separately.**
 2. **Variable basis confirmation (resolved).** Phase 2 v2 with direction-
    only variables still gave 0% fit on CFI, so the failure is *not* a
    variable-basis artefact. The variable model is acceptable; the class
@@ -803,31 +865,39 @@ The empirical journey reached a turning point:
 
 The natural next steps are along three axes:
 
-**Axis A: alternative class characterisation.**
-- Implement Horn-fit probing (adapt `ProbeXorCouplings` to test
-  Horn-CNF satisfiability instead of XOR-CNF). If Horn-fit succeeds,
-  the calculator design can be redirected to Horn.
-- Same for monotone-fit, 2-SAT fit, etc.
-- This is the smallest delta from current Plateau A infrastructure.
+**Axis A: TC relegation + Horn-fit empirical test.**
+- Modify the forward pass to emit a direct primary for every P
+  entry that gets resolved (whether currently a direct write or a
+  TC-derived entry). No TC in forward pass; instead, the engine
+  treats TC consistency as Horn-CNF constraints.
+- Adapt `ProbeXorCouplings` to test Horn-CNF satisfiability
+  (unit propagation) instead of XOR-CNF (Gaussian elimination).
+  Re-run on small graphs + CFI(Cycle3).
+- If Horn-fit succeeds on graphs where XOR did not, that's
+  empirical evidence for Horn as the calculator's class.
+- This is the most structurally promising next step. It directly
+  addresses Reason 1 of the structural impossibility argument.
+- Reason 2 (rank-counting) remains; will need separate handling
+  before the polynomial bound is fully recovered.
 
-**Axis B: algorithm restructuring.**
-- Try a stable-primary-sequence variant (lex-min over UNKNOWN P
-  entries, ignoring cell structure). Variables become stable;
-  cell-pruning is lost.
-- Or change the canonical-form reading (drop rank-based; use
-  direction-invariant canonical). This changes what "canonical"
-  means; would need separate proof of equivalence with standard
-  canonization.
+**Axis B: algorithm restructuring to address Reason 2.**
+- Try a canonical-form change: drop rank-based reading, use a
+  direction-invariant canonical that avoids `σ` non-linearity.
+  Equivalence with standard canonization needs separate argument.
+- Or stable-primary-sequence variant. Less directly aimed at
+  Reason 2 but adjacent restructuring.
 
 **Axis C: accept quasi-polynomial.**
 - Run Phase 2-style probing on disjoint CFI copies; characterise
   the growth rate. If it matches Babai's 2^O(log³ n), document as
   a known quasi-polynomial bound and move on.
 
-Axis A is the cheapest to test next (no algorithm change, just
-adapt the fit-test machinery). It will either give a positive result
-(some other class fits, calculator design redirects) or further
-narrow the search by ruling out more classes.
+**Recommended order:** Axis A first (TC relegation + Horn-fit). It's
+the smallest structural change with the largest potential payoff: if
+Horn fits, the calculator's class target is settled, Reason 1 is
+truly closed, and only Reason 2 remains. If Horn-fit also fails, the
+class is even more restrictive than expected and Axis B or C
+becomes necessary.
 
 ### Reading order for context recovery
 
