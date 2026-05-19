@@ -20,16 +20,16 @@ intended to be a complete picture of the project's state.
 ## What the calculator is, and what it isn't
 
 The calculator is not a general-purpose canonization algorithm. Its scope is
-narrower: given the *structured output of the forward pass* (primaries,
-their cell snapshots, the precomputed prefix state stack), decide which of
-§6.5's branches produces the lex-smaller canonical, without re-running the
-forward pass per branch.
+narrower: given the *structured output of the forward pass* (the list of
+primary guesses and the precomputed prefix state stack), decide which
+direction assignment to the primaries produces the lex-smaller canonical,
+without re-running the forward pass per direction combination.
 
 This narrowing matters for the polynomial-bound argument. The calculator
 operates on inputs that are already structured by 1-WL refinement and the
 forward pass's deterministic guess selection. It does not face "arbitrary
 graph, find canonical" — it faces "given this prefix state plus these
-rotation candidates, which wins LexMin?" The forward pass has already done
+direction options, which wins LexMin?" The forward pass has already done
 the easy parts.
 
 The honest framing: the calculator's polynomial bound is equivalent in
@@ -40,6 +40,13 @@ where free-form canonization does not — that is the project's bet.
 ---
 
 ## Architectural form: priority-tier swap-condition rules per P entry
+
+> **Status (post-Phase 2 v2):** the AND-of-XOR class assumption underlying
+> the description below has been empirically refuted on every tested graph,
+> including 1-WL-handleable cases. The architectural form is still useful
+> as a design target, but the specific class restriction (linear over Z₂)
+> needs replacing. See "Structural impossibility" and "Alternative classes"
+> sections below.
 
 The calculator represents the canonical symbolically. For each P entry
 `P[u, v]`, its direction in the final canonical is the forward pass's
@@ -184,11 +191,18 @@ operation. Their current status:
 | 6.2 (weakened symmetry of propagation) | Partial Lean proof; `cell_split_uniform` and `transitiveClose_swap` are `sorry`'d | T-A's basis |
 | 6.3 (deeper-lock survival) | Empirical; no structural proof | Backward-pass correctness; snapshot-diff alternative gives polynomial fallback |
 | 6.4 (closure-as-guess) | Operational; DERIVED records not yet implemented | Direction-flip subproblem; tier-rule construction for closure-derived entries |
-| 6.5 (every canonical reachable from any pair selection) | Established constructively by rotation mechanism | The calculator IS the polynomial replacement for naive rotation |
+| 6.5 (every canonical reachable from any pair selection) | **Rotation mechanism stripped (2026-05-xx)** — empirically broke AND-of-XOR closure; backward pass reverted to direction-only flip per primary | Tests on multi-orbit cells (C4+K2 #56) now fail until calculator replaces what rotation was doing |
 
 ---
 
 ## How the theorems shape the design
+
+> **Status note (post-Phase 2 v2):** The design decisions below are still
+> structurally correct (tiered evaluation, support tracking, etc. all
+> apply regardless of class). What's changed is the target class itself —
+> "linear over Z₂" is empirically + structurally refuted. The decisions
+> are reframed below under "if Horn / monotone / etc. is the class
+> instead." See "Alternative classes" and the status snapshot.
 
 The design decisions of the calculator are forced by the theorems' shape;
 none are stylistic choices.
@@ -247,20 +261,27 @@ Instrumentation that surfaces the load-bearing measurements before any
 algorithmic change. Implemented as two methods on
 [`CanonGraphOrdererFlipValidation`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs):
 
-- **`ProbeRotationsSingleFlip` (Phase 1).** Runs the forward pass to get a
-  baseline P, then enumerates every rotation alternative at every primary
-  (the same loop the backward pass uses) and records, per alternative,
-  which P entries differ from baseline. Reports false-symmetry vs true-
-  symmetry probe counts, per-entry coupling-candidate counts, and per-
-  layer breakdowns.
-- **`ProbeXorCouplings` (Phase 2 v1).** For each coupling-candidate entry
-  (one affected by ≥ 2 single-flip probes), picks one representative
-  alternative per involved primary, computes XOR fit coefficients from
-  baseline + single-substitutions, and verifies on all pair-substitutions.
-  Reports fit rate per graph and per-k-variables breakdown.
+- **`ProbeRotationsSingleFlip` (Phase 1).** Runs the forward pass to get
+  a baseline P, then probes one direction flip per primary (the
+  current backward-pass alternative space, post-§6.5-strip). Records
+  per-probe affected-entry sets, per-entry coupling-candidate counts,
+  and aggregate stats.
+- **`ProbeXorCouplings` (Phase 2).** For each coupling-candidate entry
+  (one affected by ≥ 2 primary-direction-flips), computes XOR fit
+  coefficients from baseline + single-flip substitutions, verifies on
+  pair-substitutions. Reports fit rate per graph.
 
-The plateau-A test scaffold lives in
+The Plateau-A test scaffold lives in
 [`GraphCanonTests.CalculatorViability.cs`](../GraphCanonizationProject.Tests/GraphCanonTests.CalculatorViability.cs).
+
+Phase 2 was run in two versions:
+- **v1** (pre-§6.5-strip): probed over rotation alternatives, naive
+  representative-per-primary basis.
+- **v2** (post-§6.5-strip): probed over direction flips only, clean
+  variable basis.
+
+Both versions empirically refuted the AND-of-XOR class assumption.
+See "Empirical findings" and "Structural impossibility" sections.
 
 What it delivers:
 
@@ -399,29 +420,248 @@ What the result tells us:
    the same primary), or alternatives need to be grouped into
    equivalence classes based on their effect-fingerprints.
 
-### Phase 2 v2 paths
+### Phase 2 v2: §6.5 strip + direction-only basis
 
-Three concrete experiments to actually settle T-C empirically:
+After diagnosing that Phase 2 v1's naive variable basis mixed rotation
+alternatives with semantically-different effects, we took the cleanest
+fix: **strip §6.5 pair rotation entirely** and rerun with direction-only
+variables. The expectation (matching the project's original mental
+model) was that direction-only branching should suffice over the
+partial order, and rotation was a workaround for greedy direction-flip
+getting stuck on multi-orbit cells.
 
-- **(v2a) Equivalence-class binning.** Per primary, run every alternative
-  through a single-substitution forward pass. Classify alternatives by
-  their effect on the baseline P. Variables = distinct classes per
-  primary. Test XOR fit over this classification. Cost: K × (avg
-  alternatives per primary) forward passes = O(K · n²) ≈ O(n⁴). Cheap.
-- **(v2b) CFI-specific gadget-bit identification.** Hand-pick the
-  rotation alternatives that correspond to gadget-bit flips in CFI
-  (using CFI's structural definition). Variables = one binary per
-  gadget bit. Test fit. Bypasses calculator's variable picking and
-  tests T-C in principle on the simplest CFI case.
-- **(v2c) Variable model rework.** Treat each alternative as its own
-  binary variable; encode mutual-exclusion within a primary as XOR
-  constraints. Larger variable count but each variable's semantics is
-  clean.
+**Implementation changes:**
 
-(v2b) is the smallest experiment: it directly settles whether T-C's
-"linear-over-Z₂" class assumption is reachable in principle on CFI.
-(v2a) is the natural calculator-level next step if (v2b) confirms. (v2c)
-is structural rethinking, more expensive but more general.
+- `Primary` struct stripped of `CellSnapshotA`/`CellSnapshotB`.
+- `PickAndApplyGuess` no longer captures cell snapshots.
+- `BackwardPass` simplified to a single deepest-first sweep with
+  direction-only flip per primary (no rotation enumeration, no fixpoint
+  iteration).
+- `Run` no longer iterates the backward pass to fixpoint (rotation was
+  the reason fresh deeper primaries appeared mid-sweep).
+- `ProbeRotationsSingleFlip` simplified: one probe per primary, the
+  direction flip.
+- `ProbeXorCouplings` updated: representative = the direction flip; one
+  variable per involved primary.
+
+**Test consequences:** 10/11 FV tests still pass. Only
+`FV_KnownGraphs_DifferentScramblings_ProduceSameCanonical(size: 6)`
+fails — specifically graph #56 (C4 + K2), the known multi-orbit-cell
+case. This is the expected diagnostic that "calculator not yet built";
+all 1-WL-handleable cases stay correct.
+
+**Phase 2 v2 results (direction-only basis):**
+
+| Graph | n | Primaries | Coupling Cands | FitRate | Pair-match avg (non-fit) |
+|---|---|---|---|---|---|
+| 2K2 | 4 | 5 | 4 | **0%** | 17% |
+| K4 | 4 | 5 | 4 | **0%** | 17% |
+| C4 | 4 | 6 | 6 | **33%** | 17% |
+| C4 + K2 | 6 | 13 | 16 | 12.5% | 12% |
+| CFI(Cycle3) even | 18 | 149 | 264 | **0%** | 0.4% |
+
+The fit rate stayed essentially 0%. Some small-graph entries fit
+(notably C4's k=2 entries at 33%), but CFI dropped to 0% with
+near-zero pair-match rates.
+
+**This rules out** the most plausible reading of Phase 2 v1's failure
+— "wrong variable basis." With the cleanest possible variable basis
+(direction-only, one per primary), the XOR fit still doesn't hold.
+
+The structural impossibility section below explains why.
+
+---
+
+## Structural impossibility: why AND-of-XOR cannot fit (with rank-based canonical)
+
+Walking the construction operations carefully reveals two independent
+reasons the AND-of-XOR class is unreachable, independent of variable
+basis choice. Both fall out of structural facts about the algorithm,
+not measurement artefacts.
+
+### Reason 1: TC closure without driver tracking is OR-of-ANDs
+
+A direct-write primary `P[a, b] = d_i` contributes a single literal,
+which is trivially in AND-of-XOR.
+
+A TC-derived entry `P[u, v] = LESS` holds iff *there exists a chain*
+`u → x₁ → ... → x_k → v` of LESS edges. Boolean form:
+
+```
+P[u, v]_LESS = ∨_{chains c} (∧_{link l ∈ c} l_LESS)
+```
+
+This is **DNF (OR-of-ANDs)**, not AND-of-XOR. The current
+implementation re-runs TC from scratch (no canonical driver per
+derived entry), so TC-derived entries' formulas are literally DNF.
+
+**Fix candidate:** assign a canonical "driver" chain per derived
+entry (the §11.3 spec corner). Then the formula collapses to AND of
+literals — a degenerate AND-of-XOR. This works **only when the
+driver chain is stable across direction flips**. If the driver chain
+becomes broken (some link flips to GREATER), a different chain takes
+over, and the formula re-acquires OR structure. Driver stability
+holds for graphs where chains don't overlap, fails in general.
+
+### Reason 2: canonical-from-rank is structurally non-linear in P entries
+
+The canonical matrix at position (i, j) is
+`adj[σ⁻¹(i), σ⁻¹(j)]`, where `σ` is determined by rank counts:
+`rank(v) = #{u : P[u, v] = LESS}`.
+
+Rank is an **integer count**, not a boolean. `σ⁻¹(i)` is "the vertex
+whose rank is `i`" — an integer-dispatch from boolean P variables.
+
+For canonical entries to be linear over Z₂ in P variables, the
+position-to-value mapping would need to be XOR. But integer dispatch
+from boolean variables is not linear: `σ⁻¹` cycles through
+permutations, and the canonical entry at (i, j) depends on which
+specific vertex landed at rank `i` and rank `j`, not on a XOR
+combination of their P-entry directions.
+
+This holds **regardless of variable basis**. Direction variables,
+P-entry variables, rotation variables — they all enter `σ` non-
+linearly through the rank-count integer-dispatch.
+
+### Implication
+
+The "AND-of-XOR over linear variables" form was the calculator's
+load-bearing class assumption. **Both reasons above falsify it
+structurally, not just empirically.** Even if we fixed Reason 1 with
+perfect driver tracking, Reason 2 would still produce non-linear
+formulas at the canonical-entry level.
+
+This means the calculator's polynomial bound — *as originally
+conceived* — cannot be reached via XOR-SAT / Gaussian elimination.
+The class needs to either be richer (still polynomial-satisfiable),
+or the canonical definition needs to change to something compatible
+with linear classes.
+
+---
+
+## Alternative classes considered
+
+Three classes that are strictly broader than AND-of-XOR but still
+admit polynomial-satisfiability under suitable restrictions. Each
+has open questions about whether the algorithm's formulas actually
+land in it.
+
+### Horn (monotone-implication CNF)
+
+Each clause has ≤ 1 positive literal. Polynomial-satisfiability via
+unit propagation, linear-time.
+
+**Why it might fit:** TC chains naturally produce Horn clauses:
+"`P[u, v]_LESS ← AND of chain links_LESS`" is a Horn clause. Op 1
+(direct write) is degenerate Horn.
+
+**What breaks:** Rank-counting (Reason 2 above). Integer-dispatch
+from boolean P entries to canonical positions requires encoding
+"rank(v) = i" as auxiliary boolean indicators with counting clauses.
+Counting in Horn is awkward; n binary indicators per vertex × n
+vertices = n² auxiliary variables, with Horn clauses encoding count
+semantics. Plausible but expensive. Polynomial-bound still in
+principle achievable.
+
+**Empirical status:** untested. Phase 2 v2 tested only linear-over-
+Z₂; a Horn-fit test would need different machinery (unit-propagation
+verifier rather than Gaussian elimination).
+
+### Monotone boolean (positive AND/OR only)
+
+No negation, so monotone-SAT is trivial (set all variables true).
+Monotone-OPTIMIZATION (find lex-min satisfying assignment) is in P
+for some cases (P-complete in general, but bounded-arity is easier).
+
+**Why it might fit:** "P[u, v]_LESS" and "P[u, v]_GREATER" become
+separate positive variables. TC chains compose positively. Direction
+flip becomes "swap which variable is true."
+
+**What breaks:** Rank-counting again. And antisymmetry (`P[u,v]_LESS`
+and `P[u,v]_GREATER` can't both be true) requires negation or
+mutual-exclusion. Encoding this in pure monotone form needs
+auxiliary structure.
+
+**Empirical status:** untested.
+
+### Fixed-point logic with counting (FPC)
+
+The natural logic for 1-WL. Polynomial model-checking. Captures the
+strength of 1-WL refinement.
+
+**Why it might fit:** 1-WL refinement IS the algorithm's
+discriminator. The forward pass's deterministic guess selection from
+canonical cell IDs is FPC-expressible.
+
+**What breaks:** **CFI is FPC's textbook counterexample.** FPC fails
+to distinguish CFI(K_m) for all m. So if the calculator's formulas
+reduce to FPC, CFI canonization is impossible at that level. The
+polynomial bound on FPC graphs is fine; CFI would need something
+strictly stronger.
+
+**Empirical status:** known-incomplete on CFI by Cai-Fürer-Immerman
+1992. Not a viable target for the polynomial-on-all-graphs claim.
+
+### Algebraic circuits over Z₂ (with structural restriction)
+
+Closed under AND, OR, XOR, negation. Polynomial-size representation
+via DAG with sharing. Construction operations all preserve this
+class.
+
+**Why it might fit:** structurally, any polynomial-time-computable
+function has a polynomial-size circuit. So the canonical's
+representation in this class IS polynomial-size if GI ∈ P.
+
+**What breaks:** satisfiability of arbitrary polynomial-size
+algebraic circuits is NP-hard. Without additional structural
+restrictions (bounded depth, monotone gates, specific algebraic
+patterns), no polynomial evaluation.
+
+**Empirical status:** the structural restriction that would land
+this in P is exactly the missing insight the calculator design
+hasn't identified.
+
+---
+
+## Restructuring options for the algorithm itself
+
+If no alternative class fits the *current* algorithm's formulas
+cleanly, the algorithm itself can be restructured to produce
+formulas in a tractable class. Two paths worth noting:
+
+### Stable primary sequence (fixed-order enumeration)
+
+Currently the forward pass picks the next primary based on current
+cell structure, which depends on prior direction choices. So the
+"variable set" (primary positions) is dynamic.
+
+**Restructured:** pre-determine the primary order by a deterministic
+rule that doesn't depend on cell structure (e.g., iterate over
+unordered pairs in lex order). Forward pass becomes "for each (a, b)
+in lex order, guess direction if P[a, b] = UNKNOWN."
+
+**Cost:** loses cell-based pruning. Forward pass becomes more like
+nauty's "individualize and refine each leaf" with a fixed enumeration.
+Search space grows; polynomial bound depends on different invariants.
+
+**Benefit:** variable set is stable. Direction-flip is pure
+substitution. AND-of-XOR closure preserved (modulo the rank issue).
+
+### Canonical-form change (drop rank-based reading)
+
+The rank-based canonical is non-linear in P entries. If we change
+the canonical definition to something direction-invariant (e.g., a
+multiset-style encoding, or a representation where directions
+factor out cleanly), we sidestep Reason 2.
+
+**Cost:** the canonical wouldn't be the lex-smallest n×n adjacency
+matrix. Equivalence with the standard canonical would need separate
+proof.
+
+**Benefit:** canonical entries are linear in P variables.
+
+Neither restructuring has been tried. Both are open research
+directions.
 
 ---
 
@@ -429,38 +669,58 @@ is structural rethinking, more expensive but more general.
 
 In priority order:
 
-1. **Variable basis identification (new, blocking T-C).** Phase 2 v1's
-   single-representative-per-primary basis empirically fails on every
-   tested graph including CFI. The calculator's variable model needs
-   refinement before T-C can be tested. See "Phase 2 v2 paths" above for
-   three candidate approaches. This question must be resolved before
-   T-C's class characterisation can be meaningfully attempted.
-2. **T-C's formula class (still open).** With a workable variable basis
-   (open question 1), what's the structural class of boolean functions
-   the tier evaluation produces? Candidates: 2-SAT, Horn, monotone,
-   linear over Z₂, FPC. A characterisation that lands in any of these
-   closes the polynomial bound. Currently *uncharacterised* — the
-   Phase 2 v1 result is a measurement artefact, not evidence one way
-   or the other.
-3. **T-A's formal proof.** Show that support sets are bounded by cell-
-   tier depth × cell size, with warm-refinement uniformity carried
-   through closure. Concrete Lean work, building on §6.2's partial proof.
-   Empirically supported by Phase 1's coupling-candidate counts.
-4. **Cyclic dependency polynomial termination.** Empirical; structural
-   proof would tie T-B's count bound directly to the iteration count.
-5. **Multi-vertex rearrangements in tier form.** Verify on test inputs
-   with explicit k≥3 orbit structure (triangle, K_4 vertex orbits, etc.)
-   that the tiered decomposition into pairwise primaries doesn't lose
-   information needed for canonical reconstruction.
-6. **XOR-style coupling case (CFI).** Verify experimentally on CFI(K_m)
-   that tier evaluation runs in polynomial time as the parity-formula
-   characterisation predicts. Blocked on questions 1–2; the empirical
-   evidence will come from Phase 2 v2.
-7. **Relation to Babai's quasi-polynomial bound.** If T-C lands in a
-   class strictly between FPC and arbitrary boolean — i.e., quasi-
-   polynomial but not polynomial — the calculator's bound matches
-   Babai's. This would not resolve GI ∈ P but would be a
-   non-trivial standalone result.
+1. **T-C's class characterisation (load-bearing, now sharper).** Phase 2
+   v1 and v2 together rule out linear-over-Z₂ (AND-of-XOR) as the class
+   the algorithm's formulas land in — structurally falsified by the
+   two arguments in "Structural impossibility" above. Remaining
+   candidates: Horn, monotone boolean, algebraic circuits with some
+   structural restriction. **Resolving T-C now means picking a class
+   from this set (or a new one) and either empirically validating fit
+   or formally proving the class is sufficient.** Phase 2 instrumentation
+   would need to be adapted per candidate class (Horn-fit checker,
+   monotone-fit checker, etc.).
+2. **Variable basis confirmation (resolved).** Phase 2 v2 with direction-
+   only variables still gave 0% fit on CFI, so the failure is *not* a
+   variable-basis artefact. The variable model is acceptable; the class
+   is what's wrong.
+3. **Choose between class change vs algorithm restructuring.** Two
+   options:
+   - Keep the algorithm; find a class strictly broader than AND-of-XOR
+     that fits the algorithm's natural formulas and is polynomial-
+     satisfiable. (Per "Alternative classes considered" — Horn looks
+     most promising structurally.)
+   - Restructure the algorithm to produce formulas in a known
+     tractable class. (Per "Restructuring options" — stable primary
+     sequence + canonical-form change.)
+   Both have unresolved feasibility questions.
+4. **DERIVED tracking (still pending, now structurally required).** The
+   "TC produces OR-of-ANDs" finding makes driver tracking a prerequisite
+   for any class-fit attempt, not just an optimization. Implementing it
+   is concrete; correctness depends on §11.3's tie-breaking rule.
+5. **T-A's formal proof.** Support sets bounded by cell-tier depth × cell
+   size. Empirically supported by Phase 1 data; Lean proof concrete and
+   achievable, building on §6.2's partial proof.
+6. **C4+K2 #56 test correctness.** Currently red after §6.5 strip.
+   Resolution path: calculator handles direction branching globally
+   (current backward pass is greedy, which is incomplete on multi-orbit
+   cells). Until the calculator works, this is the visible diagnostic
+   for "calculator not yet built." Alternative interim: enable exhaustive
+   2^k direction enumeration in backward pass — exponential but correct.
+7. **Relation to Babai's quasi-polynomial bound.** If the algorithm's
+   formulas land in a class strictly between FPC and arbitrary boolean
+   — i.e., quasi-polynomial but not polynomial-satisfiable — the
+   calculator's bound matches Babai's 2^O(log³ n). Non-trivial standalone
+   result if achieved.
+
+### Resolved / superseded since the prior doc revision
+
+- *"Variable basis identification"* — Phase 2 v2 (direction-only) ruled
+  out variable basis as the cause of the 0% fit rate. Superseded by the
+  structural impossibility argument.
+- *"Phase 2 v2 paths v2a/v2b/v2c"* — v2 turned out to be the §6.5 strip
+  + direction-only basis, not the proposed alternatives. Results are
+  what informed the structural impossibility section. The original v2a
+  / v2b / v2c proposals are no longer the path forward.
 
 ---
 
@@ -480,26 +740,107 @@ The project's terminal state for this component is:
 
 Anything short of this is a research checkpoint, not the terminal state.
 
-## Current position (status snapshot)
+## Current position (status snapshot, 2026-05-19)
 
-**Implementation.** Plateau A is delivered: Phase 1 (single-flip
-probing) and Phase 2 v1 (naive XOR-fit) are implemented in
-[`CanonGraphOrdererFlipValidation`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs)
-and exercised by
-[`GraphCanonTests.CalculatorViability.cs`](../GraphCanonizationProject.Tests/GraphCanonTests.CalculatorViability.cs).
-Plateau B (DERIVED tracking, per-primary split tables) has not started.
+### Implementation state
 
-**Theory.** T-A and T-B are empirically supported but not formally
-proven. T-C is the load-bearing claim and is *currently uncharacterised*
-— Phase 2 v1's 0% fit rate is a measurement artefact (wrong variable
-basis), not evidence on T-C either way. The blocking question is now
-"identify a variable basis under which Phase 2 can meaningfully test
-T-C," and three candidate approaches (v2a / v2b / v2c) are sketched
-above.
+The current `CanonGraphOrdererFlipValidation` implementation:
+- **Forward pass:** unchanged — greedy single-pair guess + warm-refine + TC.
+- **Backward pass:** direction-only flip per primary, single deepest-first
+  sweep, no rotation, no fixpoint iteration. (§6.5 pair rotation stripped.)
+- **Run:** single forward + single backward, no fixpoint loop.
+- **Plateau A instrumentation:** `ProbeRotationsSingleFlip` (Phase 1) and
+  `ProbeXorCouplings` (Phase 2) both adapted to direction-only basis.
 
-**Next concrete step.** Phase 2 v2b (CFI-specific gadget-bit hand-
-picking) is the smallest experiment that would settle whether T-C's
-linear-over-Z₂ class is reachable in principle on the simplest CFI
-case. If v2b confirms, v2a (equivalence-class binning) is the natural
-calculator-level next step. If v2b refutes, the calculator's class
-assumption needs reformulation entirely.
+**Plateau B (DERIVED tracking, per-primary split tables) has not started.**
+The §11.3 driver-pointer specification corner is open, and DERIVED
+tracking is now structurally required (not just an optimization) per
+the "Structural impossibility" finding.
+
+### Test state
+
+- 10/11 FV tests pass.
+- `FV_KnownGraphs_DifferentScramblings_ProduceSameCanonical(size: 6)`
+  fails on graph #56 (C4 + K2). Known multi-orbit-cell case;
+  expected diagnostic for "greedy direction-flip backward pass is
+  incomplete without the calculator."
+- All Phase 1/2 calculator-viability tests pass (they're measurements,
+  not regressions).
+- PartialOrderIR tests pass (unaffected).
+
+### Theory state
+
+- **T-A** (bounded support set per entry): empirically consistent with
+  Phase 1 data; no formal proof yet.
+- **T-B** (bounded false-symmetry count): empirically holds (primary
+  count ≤ n(n−1)/2 by construction); no formal proof yet.
+- **T-C** (polynomial-satisfiability of the formula class):
+  - The linear-over-Z₂ / AND-of-XOR specialisation is **empirically
+    refuted on every tested graph** (Phase 2 v1 + v2).
+  - Structurally refuted by two independent arguments (see "Structural
+    impossibility"): TC closure without driver tracking is OR-of-ANDs,
+    and rank-based canonical is non-linear in P entries regardless of
+    variable basis.
+  - Whether the algorithm's formulas land in any *other* polynomial-
+    satisfiability class (Horn, monotone, restricted algebraic
+    circuits) is **untested** and is the new T-C target.
+
+### Where the development iteration left off
+
+The empirical journey reached a turning point:
+
+1. §6.5 pair rotation was added as a pragmatic fix for the C4+K2
+   failure with greedy direction-flip.
+2. Phase 1+2 instrumentation surfaced that rotation variables made the
+   variable basis incoherent → 0% XOR fit.
+3. §6.5 was stripped, restoring the original "direction-only branching"
+   model.
+4. Phase 2 v2 with the clean direction-only basis **also** gave 0% fit,
+   ruling out the variable-basis hypothesis.
+5. Structural impossibility argument: AND-of-XOR is unreachable
+   regardless of variable basis, due to TC's OR structure and rank-
+   counting non-linearity.
+
+The natural next steps are along three axes:
+
+**Axis A: alternative class characterisation.**
+- Implement Horn-fit probing (adapt `ProbeXorCouplings` to test
+  Horn-CNF satisfiability instead of XOR-CNF). If Horn-fit succeeds,
+  the calculator design can be redirected to Horn.
+- Same for monotone-fit, 2-SAT fit, etc.
+- This is the smallest delta from current Plateau A infrastructure.
+
+**Axis B: algorithm restructuring.**
+- Try a stable-primary-sequence variant (lex-min over UNKNOWN P
+  entries, ignoring cell structure). Variables become stable;
+  cell-pruning is lost.
+- Or change the canonical-form reading (drop rank-based; use
+  direction-invariant canonical). This changes what "canonical"
+  means; would need separate proof of equivalence with standard
+  canonization.
+
+**Axis C: accept quasi-polynomial.**
+- Run Phase 2-style probing on disjoint CFI copies; characterise
+  the growth rate. If it matches Babai's 2^O(log³ n), document as
+  a known quasi-polynomial bound and move on.
+
+Axis A is the cheapest to test next (no algorithm change, just
+adapt the fit-test machinery). It will either give a positive result
+(some other class fits, calculator design redirects) or further
+narrow the search by ruling out more classes.
+
+### Reading order for context recovery
+
+For a new development iteration picking this up:
+1. Read [`flip-validation-strategy.md`](./flip-validation-strategy.md)
+   for the algorithm's basic shape.
+2. Read this doc through the "Structural impossibility" section for
+   the central finding.
+3. Read "Alternative classes" and "Restructuring options" for the
+   path-forward options.
+4. Check this status snapshot for the latest concrete state.
+
+The current code in
+[`CanonGraphOrdererFlipValidation.cs`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs)
+matches the description in this snapshot; the FV and CV test files
+exercise it.
