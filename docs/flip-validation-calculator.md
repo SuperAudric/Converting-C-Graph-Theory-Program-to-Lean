@@ -241,25 +241,39 @@ The calculator is large and the implementation is staged. Each plateau is
 independently valuable as a research checkpoint, with measurable
 deliverables.
 
-### Plateau A — Caching and measurement
+### Plateau A — Single-flip probing and XOR-fit instrumentation
 
-A strict superset of the current replay-based implementation, adding a
-`(prefix-state-hash, branch) → (outcome-hash, canonical)` cache to the
-backward pass. No algorithmic change.
+Instrumentation that surfaces the load-bearing measurements before any
+algorithmic change. Implemented as two methods on
+[`CanonGraphOrdererFlipValidation`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs):
 
-What it delivers:
-
-- Cache hit rate per primary, per graph class. High rate on CFI(K_m) for
-  growing `m` is empirical evidence that route 1's state count stays
-  polynomial.
-- Distinct outcome counts per primary, the cleanest empirical measure of
-  "how many pair-orbits does this cell host?" Diagnostic for T-B.
-- Per-entry support-set size (which primaries' directions, when flipped,
-  change this entry). Diagnostic for T-A.
-- Wall-clock unblocking for larger graphs (CFI(K3), CFI(K4)).
+- **`ProbeRotationsSingleFlip` (Phase 1).** Runs the forward pass to get a
+  baseline P, then enumerates every rotation alternative at every primary
+  (the same loop the backward pass uses) and records, per alternative,
+  which P entries differ from baseline. Reports false-symmetry vs true-
+  symmetry probe counts, per-entry coupling-candidate counts, and per-
+  layer breakdowns.
+- **`ProbeXorCouplings` (Phase 2 v1).** For each coupling-candidate entry
+  (one affected by ≥ 2 single-flip probes), picks one representative
+  alternative per involved primary, computes XOR fit coefficients from
+  baseline + single-substitutions, and verifies on all pair-substitutions.
+  Reports fit rate per graph and per-k-variables breakdown.
 
 The plateau-A test scaffold lives in
 [`GraphCanonTests.CalculatorViability.cs`](../GraphCanonizationProject.Tests/GraphCanonTests.CalculatorViability.cs).
+
+What it delivers:
+
+- Empirical diagnostic for T-A's "support set per entry" claim
+  (Phase 1's coupling-candidate counts and per-entry probe affect-counts).
+- Empirical diagnostic for T-B's "false-symmetry count" claim (Phase 1's
+  false vs true symmetry probe counts).
+- Empirical test of T-C's "AND-of-XOR class" claim under a chosen
+  variable basis (Phase 2's fit rates).
+- Wall-clock unblocking — CFI(Cycle3) now runs in ~10 s, vs minutes for
+  the current backward-pass-with-fixpoint code.
+
+Findings are recorded in the "Empirical findings" section below.
 
 ### Plateau B — DERIVED tracking and per-primary split tables
 
@@ -300,27 +314,149 @@ requires the open theoretical work, not just engineering.
 
 ---
 
+## Empirical findings (Phase 1 + Phase 2 v1)
+
+### Phase 1: single-flip probing — what changed
+
+Single-flip rotation probing was run on small graphs and on CFI(Cycle3).
+Headline numbers:
+
+| Graph | n | Primaries | TotalProbes | FalseSym | TrueSym | MaxAffected | CouplingCands | AvgAff(FS) |
+|---|---|---|---|---|---|---|---|---|
+| 2K2 | 4 | 5 | 15 | 10 | 5 | 8 | 12 | 4.40 |
+| K4 | 4 | 5 | 15 | 10 | 5 | 8 | 12 | 4.40 |
+| C4 | 4 | 6 | 16 | 11 | 5 | 8 | 12 | 4.36 |
+| C4 + K2 | 6 | 13 | 23 | 18 | 5 | 8 | 18 | 4.44 |
+| CFI(Cycle3) even | 18 | 149 | 453 | 301 | 152 | 230 | 306 | 52.25 |
+| CFI(Cycle3) odd | 18 | 152 | 456 | 304 | 152 | 230 | 306 | 54.35 |
+
+Observations:
+
+- **PrimaryCount on CFI is near-maximal.** 152 primaries for n = 18
+  (cap n(n−1)/2 = 153). Almost every P entry is a direct write; TC
+  closure contributes very little. Polynomial in n² as T-B predicts,
+  but the upper bound is tight.
+- **CFI's per-probe impact is large** (avg 52 entries affected per
+  false-symmetry probe; max 230 out of n² = 324). Each rotation cascades
+  through many entries — the parity coupling.
+- **Coupling-candidate density is high on CFI.** 306 of 324 P entries
+  are touched by ≥ 2 probes. Most entries depend on multiple primary
+  decisions.
+
+These results are consistent with the calculator design's structural
+expectations: false-symmetry count is polynomial-bounded, coupling
+density is high.
+
+### Phase 2 v1: XOR-fit under naive single-representative basis
+
+For each coupling-candidate entry, Phase 2 v1 picks the first probe per
+involved primary as a representative, computes XOR coefficients from
+baseline + single substitutions, and verifies on all pair substitutions.
+
+| Graph | Coupling Candidates | Fit Rate | Pair-match avg (non-fit) |
+|---|---|---|---|
+| 2K2 | 8 | 25% | 11% |
+| K4 | 8 | 25% | 11% |
+| C4 | 10 | **0%** | 13% |
+| C4 + K2 | 16 | 12.5% | 9% |
+| CFI(Cycle3) even | 296 | **0%** | 0.3% |
+| CFI(Cycle3) odd | 302 | **0%** | 0.4% |
+
+**XOR fit rate is essentially 0% across all tested graphs, including CFI
+itself where parity (XOR) is the construction's defining algebraic
+structure.** Pair-match rates on non-fitting entries average ~0.3% for
+CFI — systematic mis-alignment, not random noise.
+
+### Interpretation
+
+The 0% fit rate doesn't directly falsify T-C. It falsifies the *naive
+empirical test* of T-C — specifically, that single-representative-per-
+primary is a workable variable basis.
+
+The structural reason it fails: each primary in the algorithm has
+*multiple* alternative rotations, and different alternatives within one
+primary can have semantically different effects on entries. Picking one
+arbitrary alternative as "the variable" mixes:
+- Alternatives that flip a gadget bit cleanly;
+- Alternatives that flip a different gadget bit;
+- Alternatives that flip multiple bits;
+- Alternatives in true-symmetry orbits that don't flip anything.
+
+Testing XOR fit over this mish-mash basis gives essentially random pair
+predictions, hence the systematic 0% match rate.
+
+What the result tells us:
+
+1. **The naive variable basis does not work.** Phase 2 must use a
+   structurally-aware variable basis, not first-affecting-alternative.
+2. **T-C remains untested.** Whether the underlying algebraic structure
+   is XOR (or some other linear-poly-time-checkable class) is still
+   open. The Phase 2 v1 result is a measurement bug, not a structural
+   refutation.
+3. **The calculator's variable model needs refinement.** Single-primary-
+   level variables are too coarse. Either each alternative is its own
+   variable (with mutual-exclusion constraints across alternatives at
+   the same primary), or alternatives need to be grouped into
+   equivalence classes based on their effect-fingerprints.
+
+### Phase 2 v2 paths
+
+Three concrete experiments to actually settle T-C empirically:
+
+- **(v2a) Equivalence-class binning.** Per primary, run every alternative
+  through a single-substitution forward pass. Classify alternatives by
+  their effect on the baseline P. Variables = distinct classes per
+  primary. Test XOR fit over this classification. Cost: K × (avg
+  alternatives per primary) forward passes = O(K · n²) ≈ O(n⁴). Cheap.
+- **(v2b) CFI-specific gadget-bit identification.** Hand-pick the
+  rotation alternatives that correspond to gadget-bit flips in CFI
+  (using CFI's structural definition). Variables = one binary per
+  gadget bit. Test fit. Bypasses calculator's variable picking and
+  tests T-C in principle on the simplest CFI case.
+- **(v2c) Variable model rework.** Treat each alternative as its own
+  binary variable; encode mutual-exclusion within a primary as XOR
+  constraints. Larger variable count but each variable's semantics is
+  clean.
+
+(v2b) is the smallest experiment: it directly settles whether T-C's
+"linear-over-Z₂" class assumption is reachable in principle on CFI.
+(v2a) is the natural calculator-level next step if (v2b) confirms. (v2c)
+is structural rethinking, more expensive but more general.
+
+---
+
 ## Open questions
 
 In priority order:
 
-1. **T-C's formula class.** What's the structural class of boolean
-   formulas the tier evaluation produces? Candidates to test: 2-SAT,
-   Horn, monotone, linear over Z₂, FPC. A characterisation that lands in
-   any of these closes the polynomial bound.
-2. **T-A's formal proof.** Show that support sets are bounded by cell-
+1. **Variable basis identification (new, blocking T-C).** Phase 2 v1's
+   single-representative-per-primary basis empirically fails on every
+   tested graph including CFI. The calculator's variable model needs
+   refinement before T-C can be tested. See "Phase 2 v2 paths" above for
+   three candidate approaches. This question must be resolved before
+   T-C's class characterisation can be meaningfully attempted.
+2. **T-C's formula class (still open).** With a workable variable basis
+   (open question 1), what's the structural class of boolean functions
+   the tier evaluation produces? Candidates: 2-SAT, Horn, monotone,
+   linear over Z₂, FPC. A characterisation that lands in any of these
+   closes the polynomial bound. Currently *uncharacterised* — the
+   Phase 2 v1 result is a measurement artefact, not evidence one way
+   or the other.
+3. **T-A's formal proof.** Show that support sets are bounded by cell-
    tier depth × cell size, with warm-refinement uniformity carried
    through closure. Concrete Lean work, building on §6.2's partial proof.
-3. **Cyclic dependency polynomial termination.** Empirical; structural
+   Empirically supported by Phase 1's coupling-candidate counts.
+4. **Cyclic dependency polynomial termination.** Empirical; structural
    proof would tie T-B's count bound directly to the iteration count.
-4. **Multi-vertex rearrangements in tier form.** Verify on test inputs
+5. **Multi-vertex rearrangements in tier form.** Verify on test inputs
    with explicit k≥3 orbit structure (triangle, K_4 vertex orbits, etc.)
    that the tiered decomposition into pairwise primaries doesn't lose
    information needed for canonical reconstruction.
-5. **XOR-style coupling case (CFI).** Verify experimentally on CFI(K_m)
+6. **XOR-style coupling case (CFI).** Verify experimentally on CFI(K_m)
    that tier evaluation runs in polynomial time as the parity-formula
-   characterisation predicts. Instrumented via plateau A.
-6. **Relation to Babai's quasi-polynomial bound.** If T-C lands in a
+   characterisation predicts. Blocked on questions 1–2; the empirical
+   evidence will come from Phase 2 v2.
+7. **Relation to Babai's quasi-polynomial bound.** If T-C lands in a
    class strictly between FPC and arbitrary boolean — i.e., quasi-
    polynomial but not polynomial — the calculator's bound matches
    Babai's. This would not resolve GI ∈ P but would be a
@@ -343,6 +479,27 @@ The project's terminal state for this component is:
   contained for an external reader to verify the polynomial claim.
 
 Anything short of this is a research checkpoint, not the terminal state.
-The honest position: the project is currently between plateaus A and B
-on the implementation side and well before the T-C resolution on the
-theoretical side.
+
+## Current position (status snapshot)
+
+**Implementation.** Plateau A is delivered: Phase 1 (single-flip
+probing) and Phase 2 v1 (naive XOR-fit) are implemented in
+[`CanonGraphOrdererFlipValidation`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs)
+and exercised by
+[`GraphCanonTests.CalculatorViability.cs`](../GraphCanonizationProject.Tests/GraphCanonTests.CalculatorViability.cs).
+Plateau B (DERIVED tracking, per-primary split tables) has not started.
+
+**Theory.** T-A and T-B are empirically supported but not formally
+proven. T-C is the load-bearing claim and is *currently uncharacterised*
+— Phase 2 v1's 0% fit rate is a measurement artefact (wrong variable
+basis), not evidence on T-C either way. The blocking question is now
+"identify a variable basis under which Phase 2 can meaningfully test
+T-C," and three candidate approaches (v2a / v2b / v2c) are sketched
+above.
+
+**Next concrete step.** Phase 2 v2b (CFI-specific gadget-bit hand-
+picking) is the smallest experiment that would settle whether T-C's
+linear-over-Z₂ class is reachable in principle on the simplest CFI
+case. If v2b confirms, v2a (equivalence-class binning) is the natural
+calculator-level next step. If v2b refutes, the calculator's class
+assumption needs reformulation entirely.

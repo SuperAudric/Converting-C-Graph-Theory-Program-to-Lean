@@ -7,6 +7,84 @@ namespace Canonizer
     using VertexType = int;
     using EdgeType = int;
 
+    // ── Phase 1 instrumentation records ─────────────────────────────────────
+    //
+    // Returned by CanonGraphOrdererFlipValidation.ProbeRotationsSingleFlip.
+    // Used by the calculator-viability tests to measure how many backward-pass
+    // rotation alternatives actually change the canonical's P state ("false
+    // symmetries") vs. leave it untouched ("true symmetries"), and how often
+    // a single P entry is moved by multiple different rotation alternatives
+    // (coupling candidates for Phase 2's XOR-fit step).
+    //
+    // See docs/flip-validation-calculator.md, the rotation-coupling section.
+
+    public record RotationProbeData(
+        int LayerId,
+        int OriginalA, int OriginalB, sbyte OriginalDirection,
+        bool BetweenCell,
+        int AlternativeA, int AlternativeB, sbyte AlternativeDirection,
+        int[] AffectedEntries);   // flat indices i*n + j into P where the
+                                  // alternative-applied branch differs from
+                                  // the forward-pass baseline.
+
+    public sealed class RotationProbingReport
+    {
+        public int N { get; init; }
+        public int PrimaryCount { get; init; }
+        public IReadOnlyList<RotationProbeData> Probes { get; init; } = [];
+        public int CouplingCandidateEntries { get; init; }
+
+        // Aggregates over Probes.
+        public int TotalProbes => Probes.Count;
+        public int FalseSymmetryProbes =>
+            Probes.Count(p => p.AffectedEntries.Length > 0);
+        public int TrueSymmetryProbes => TotalProbes - FalseSymmetryProbes;
+        public int MaxAffectedEntries =>
+            Probes.Count == 0 ? 0 : Probes.Max(p => p.AffectedEntries.Length);
+        public double AvgAffectedEntriesOverFalseSymProbes =>
+            FalseSymmetryProbes == 0
+                ? 0.0
+                : Probes.Where(p => p.AffectedEntries.Length > 0)
+                        .Average(p => p.AffectedEntries.Length);
+    }
+
+    // Phase 2 instrumentation: XOR-fit data per coupling-candidate entry.
+    // For an entry whose direction is affected by multiple rotation
+    // alternatives, this reports whether the value-as-a-function of those
+    // alternatives is linear over Z₂ (XOR of the involved variables, plus a
+    // constant). Linearity is the load-bearing class assumption for the
+    // route-2 calculator: if formulas stay AND-of-XOR through construction,
+    // every coupling must fit XOR. Failure here directly refutes that
+    // assumption on the failing graph.
+
+    public record XorCouplingFit(
+        int EntryFlatIndex,
+        int[] InvolvedPrimaries,        // primary indices contributing to E
+        bool FitsXor,                   // every pair-verification matched
+        bool[] XorCoefficients,         // c_i ∈ {0, 1} aligned with InvolvedPrimaries
+        bool ConstantTerm,              // c_0 (baseline value of E)
+        int PairsChecked,
+        int PairsMatched);
+
+    public sealed class CouplingFitReport
+    {
+        public int N { get; init; }
+        public int PrimaryCount { get; init; }
+        public int CouplingCandidatesTested { get; init; }
+        public int ForwardPassesRun { get; init; }
+        public IReadOnlyList<XorCouplingFit> Fits { get; init; } = [];
+
+        public int FitCount => Fits.Count(f => f.FitsXor);
+        public int NonFitCount => Fits.Count(f => !f.FitsXor);
+        public double FitRate =>
+            CouplingCandidatesTested == 0 ? 1.0
+            : (double)FitCount / CouplingCandidatesTested;
+        public int MaxVariablesPerEntry =>
+            Fits.Count == 0 ? 0 : Fits.Max(f => f.InvolvedPrimaries.Length);
+        public double AvgVariablesPerEntry =>
+            Fits.Count == 0 ? 0.0 : Fits.Average(f => f.InvolvedPrimaries.Length);
+    }
+
     // Flip-validation canonizer: a two-pass design aimed at polynomial worst-
     // case time. See docs/flip-validation-strategy.md for the full design.
     //
@@ -75,21 +153,16 @@ namespace Canonizer
             var partition = new WarmPartition(n);
             List<Primary> record = ContinueForward(n, adj, p, partition);
 
-            // Backward pass to fixpoint. A single deepest-first sweep optimizes
-            // each primary against its forward-pass snapshot, but adopting a
-            // branch at a shallow primary replaces deeper primaries with fresh
-            // ones from ContinueForward (in TryReplayWithDeeper) that haven't
-            // been backward-processed. Iterating until no branch is adopted
-            // gives every deeper primary a chance. Termination: each adoption
-            // strictly decreases the canonical lex-value, and canonicals form a
-            // finite set. The dependency calculator (§11.10) replaces this
-            // with a one-shot diagram read.
-            int prevFlips;
-            do
-            {
-                prevFlips = LastBackwardFlips;
-                record = BackwardPass(n, adj, vertexTypes, record);
-            } while (LastBackwardFlips > prevFlips);
+            // Backward pass: direction-only flip per primary, single sweep
+            // deepest-to-shallowest. No fixpoint iteration needed — without
+            // pair rotation, deeper primaries are not replaced by new ones,
+            // so a single sweep suffices.
+            //
+            // Greedy direction-flip is incomplete on graphs with multi-orbit
+            // cells (e.g., C4+K2 #56) — those will fail until the calculator
+            // (route 2, AND-of-XOR symbolic representation over direction
+            // variables) is built.
+            record = BackwardPass(n, adj, vertexTypes, record);
             LastPrimaryCount = record.Count;
 
             // Replay the (possibly updated) record and read off the canonical
@@ -113,14 +186,6 @@ namespace Canonizer
             public int A, B;
             public sbyte Direction;   // LESS (A<B) or GREATER (A>B)
             public bool BetweenCell;  // false = within-cell, true = between-cell
-
-            // Cell-tree fragment captured at guess time (§3.5). CellSnapshotA
-            // is the membership of A's cell *before* this guess was applied;
-            // CellSnapshotB is B's. For within-cell guesses the two arrays
-            // point to the same instance. §6.5's backward-pass rotation
-            // enumerates (a' ∈ CellSnapshotA) × (b' ∈ CellSnapshotB).
-            public int[] CellSnapshotA;
-            public int[] CellSnapshotB;
         }
 
         // ── Forward pass ─────────────────────────────────────────────────────
@@ -159,11 +224,9 @@ namespace Canonizer
 
             if (TryFindWithinCellGuess(n, p, cells, numCells, out int a, out int b))
             {
-                var snap = cells[cellOf[a]].ToArray();
                 var prim = new Primary
                 {
                     A = a, B = b, Direction = LESS, BetweenCell = false,
-                    CellSnapshotA = snap, CellSnapshotB = snap,
                 };
                 if (!ApplyOne(p, n, prim))
                     throw new InvalidOperationException(
@@ -175,12 +238,9 @@ namespace Canonizer
 
             if (TryFindBetweenCellGuess(n, p, cellOf, cells, numCells, out a, out b))
             {
-                var snapA = cells[cellOf[a]].ToArray();
-                var snapB = cells[cellOf[b]].ToArray();
                 var prim = new Primary
                 {
                     A = a, B = b, Direction = LESS, BetweenCell = true,
-                    CellSnapshotA = snapA, CellSnapshotB = snapB,
                 };
                 if (!ApplyOne(p, n, prim))
                     return false; // contradiction on between-cell closure; caller decides
@@ -300,82 +360,37 @@ namespace Canonizer
             for (int i = current.Count - 1; i >= 0; i--)
             {
                 var primI = current[i];
-                List<Primary> bestRecord = current;
-                bool adopted = false;
 
-                // Deeper region is constant for this outer iter; hoist out of
-                // the inner branch loops.
+                // Direction-only flip: try (primI.A, primI.B, -primI.Direction).
+                // If the resulting canonical is lex-smaller, adopt.
+                var flipped = new Primary
+                {
+                    A = primI.A, B = primI.B,
+                    Direction = (sbyte)(-primI.Direction),
+                    BetweenCell = primI.BetweenCell,
+                };
+
                 var deeper = new List<Primary>(current.Count - i - 1);
                 for (int j = i + 1; j < current.Count; j++) deeper.Add(current[j]);
 
-                // Enumerate rotation branches. (primI.A, primI.B,
-                // primI.Direction) is the no-change branch — skip it.
-                //
-                // Within-cell dedup: (a', b', LESS) and (b', a', GREATER)
-                // write the same P entry, so enumerating both is wasted
-                // work. Restrict a' < b' for within-cell and cover both
-                // directions per ordered pair; the baseline check is
-                // normalised against the same ordering.
-                bool isWithinCell = !primI.BetweenCell;
-                int wA = primI.A, wB = primI.B;
-                sbyte wDir = primI.Direction;
-                if (isWithinCell && wA > wB)
+                var suffix = TryReplayFromState(n, adj,
+                                                pPrefix[i], partPrefix[i],
+                                                flipped, deeper,
+                                                out bool deeperBroken,
+                                                out sbyte[]? pBranch);
+                if (suffix == null || pBranch == null) continue;
+                if (deeperBroken) LastLockedThenInvalidated++;
+
+                int[] permBranch = ReadPermutation(n, pBranch);
+                int[] matBranch = BuildPermutedMatrix(adj, permBranch, n);
+
+                if (LexLess(matBranch, matBest))
                 {
-                    (wA, wB) = (wB, wA);
-                    wDir = (sbyte)(-wDir);
-                }
-
-                foreach (int aPrime in primI.CellSnapshotA)
-                {
-                    foreach (int bPrime in primI.CellSnapshotB)
-                    {
-                        if (aPrime == bPrime) continue;
-                        if (isWithinCell && aPrime > bPrime) continue;
-
-                        foreach (sbyte dir in new sbyte[] { LESS, GREATER })
-                        {
-                            if (aPrime == wA && bPrime == wB && dir == wDir)
-                                continue;
-
-                            var branchPrim = new Primary
-                            {
-                                A = aPrime, B = bPrime, Direction = dir,
-                                BetweenCell = primI.BetweenCell,
-                                CellSnapshotA = primI.CellSnapshotA,
-                                CellSnapshotB = primI.CellSnapshotB,
-                            };
-
-                            LastPairRotationsAttempted++;
-
-                            var suffix = TryReplayFromState(n, adj,
-                                                            pPrefix[i], partPrefix[i],
-                                                            branchPrim, deeper,
-                                                            out bool deeperBroken,
-                                                            out sbyte[]? pBranch);
-                            if (suffix == null || pBranch == null) continue;
-                            if (deeperBroken) LastLockedThenInvalidated++;
-
-                            int[] permBranch = ReadPermutation(n, pBranch);
-                            int[] matBranch = BuildPermutedMatrix(adj, permBranch, n);
-
-                            if (LexLess(matBranch, matBest))
-                            {
-                                matBest = matBranch;
-                                // Assemble: prefix (current[0..i-1]) + suffix
-                                // (branchPrim + replayed deeper + continued).
-                                var newRecord = new List<Primary>(i + suffix.Count);
-                                for (int j = 0; j < i; j++) newRecord.Add(current[j]);
-                                newRecord.AddRange(suffix);
-                                bestRecord = newRecord;
-                                adopted = true;
-                            }
-                        }
-                    }
-                }
-
-                if (adopted)
-                {
-                    current = bestRecord;
+                    matBest = matBranch;
+                    var newRecord = new List<Primary>(i + suffix.Count);
+                    for (int j = 0; j < i; j++) newRecord.Add(current[j]);
+                    newRecord.AddRange(suffix);
+                    current = newRecord;
                     LastBackwardFlips++;
                 }
             }
@@ -626,6 +641,331 @@ namespace Canonizer
             for (int i = 0; i < a.Length; i++)
                 if (a[i] != b[i]) return a[i] < b[i];
             return false;
+        }
+
+        // ── Phase 1 instrumentation: single-flip rotation probing ────────────
+        //
+        // Runs the forward pass to get a baseline P, then enumerates every
+        // rotation alternative at every primary (the same loop the backward
+        // pass uses) and records, per alternative, which P entries differ
+        // from baseline. Reports false-symmetry counts and per-entry
+        // coupling-candidate counts.
+        //
+        // Cost: O(n²) primaries × O(n²) alternatives per primary × O(n⁴)
+        // per replay = O(n⁸) total — same as one backward sweep, just
+        // recording diffs instead of doing lex-min. The polynomial-bound
+        // calculator (route 2) would replace this measurement with a
+        // closed-form symbolic representation; this method exists to
+        // empirically validate the load-bearing assumption that affected-
+        // entry sets fit XOR structure on the test corpus.
+        public RotationProbingReport ProbeRotationsSingleFlip(VertexType[] vertexTypes, AdjMatrix G)
+        {
+            if (vertexTypes.Length != G.VertexCount)
+                throw new Exception("Every vertex must be given a type. They may all be given the same type");
+
+            int n = G.VertexCount;
+            int[] adj = ExtractAdj(G);
+
+            // Forward pass: baseline record + warm-refined partition.
+            sbyte[] p = SeedFromTypes(n, vertexTypes);
+            var partition = new WarmPartition(n);
+            List<Primary> record = ContinueForward(n, adj, p, partition);
+
+            // Cached prefix state for efficient per-branch replay.
+            var (pPrefix, partPrefix) = BuildPrefixStack(n, vertexTypes, adj, record);
+            if (pPrefix == null)
+                throw new InvalidOperationException("Baseline prefix stack failed");
+
+            sbyte[] baselineP = pPrefix[record.Count];
+
+            var probes = new List<RotationProbeData>();
+            var entryAffectCount = new Dictionary<int, int>();
+
+            for (int i = 0; i < record.Count; i++)
+            {
+                var primI = record[i];
+
+                var deeper = new List<Primary>(record.Count - i - 1);
+                for (int j = i + 1; j < record.Count; j++) deeper.Add(record[j]);
+
+                // Direction-only probe: flip primary i's direction, keep
+                // pair (a, b). One probe per primary.
+                var flipped = new Primary
+                {
+                    A = primI.A, B = primI.B,
+                    Direction = (sbyte)(-primI.Direction),
+                    BetweenCell = primI.BetweenCell,
+                };
+
+                var suffix = TryReplayFromState(n, adj,
+                                                pPrefix[i], partPrefix[i],
+                                                flipped, deeper,
+                                                out _, out sbyte[]? branchP);
+                if (suffix == null || branchP == null) continue;
+
+                // Diff vs baseline.
+                var affected = new List<int>();
+                for (int idx = 0; idx < n * n; idx++)
+                {
+                    if (baselineP[idx] != branchP[idx])
+                    {
+                        affected.Add(idx);
+                        entryAffectCount[idx] =
+                            entryAffectCount.GetValueOrDefault(idx, 0) + 1;
+                    }
+                }
+
+                probes.Add(new RotationProbeData(
+                    LayerId: i,
+                    OriginalA: primI.A, OriginalB: primI.B,
+                    OriginalDirection: primI.Direction,
+                    BetweenCell: primI.BetweenCell,
+                    AlternativeA: primI.A, AlternativeB: primI.B,
+                    AlternativeDirection: flipped.Direction,
+                    AffectedEntries: affected.ToArray()));
+            }
+
+            int couplingCandidates = 0;
+            foreach (var kv in entryAffectCount)
+                if (kv.Value >= 2) couplingCandidates++;
+
+            return new RotationProbingReport
+            {
+                N = n,
+                PrimaryCount = record.Count,
+                Probes = probes,
+                CouplingCandidateEntries = couplingCandidates,
+            };
+        }
+
+        // Replay the baselineRecord from scratch, substituting `subs[i]` for
+        // baselineRecord[i] wherever a substitution is specified. After every
+        // primary is applied (substituted or not), refine the partition and
+        // continue forward to total. Used by ProbeXorCouplings to compute the
+        // P state resulting from any combination of primary substitutions.
+        private List<Primary>? ReplayWithSubstitutions(
+            int n, int[] adj, VertexType[] vertexTypes,
+            List<Primary> baselineRecord,
+            Dictionary<int, Primary> subs,
+            out sbyte[]? finalP)
+        {
+            sbyte[] p = SeedFromTypes(n, vertexTypes);
+            var partition = new WarmPartition(n);
+            partition.Refine(adj, p);
+
+            var result = new List<Primary>(baselineRecord.Count);
+
+            for (int i = 0; i < baselineRecord.Count; i++)
+            {
+                var prim = subs.TryGetValue(i, out var sub) ? sub : baselineRecord[i];
+                if (!ApplyOne(p, n, prim))
+                {
+                    finalP = null;
+                    return null;
+                }
+                partition.Refine(adj, p);
+                result.Add(prim);
+            }
+
+            while (!IsTotal(n, p))
+            {
+                if (!PickAndApplyGuess(n, adj, p, partition, result))
+                {
+                    finalP = null;
+                    return null;
+                }
+            }
+
+            finalP = p;
+            return result;
+        }
+
+        // Phase 2 instrumentation: for each coupling-candidate entry from
+        // Phase 1 (one affected by ≥ 2 single-flip probes), test whether the
+        // entry's direction as a function of involved-primary substitutions
+        // fits a linear-over-Z₂ (XOR) model.
+        //
+        // Procedure:
+        //   1. Run Phase 1 to learn which primaries' alternatives affect which
+        //      entries.
+        //   2. Pick one representative alternative per "involved" primary
+        //      (any primary whose alternatives affect some entry). The
+        //      representative is the first probe (in Phase 1's enumeration
+        //      order) that has non-empty AffectedEntries at this primary.
+        //   3. Precompute K single-substitution P arrays and K(K-1)/2 pair-
+        //      substitution P arrays, where K = involved primary count.
+        //   4. For each coupling-candidate entry E:
+        //        a. Identify primaries involved for E (subset of the K).
+        //        b. Compute fit coefficients: c_0 = baselineP[E];
+        //           c_i = singleP_i[E] XOR c_0.
+        //        c. Verify on every pair (i, j):
+        //           pairP_{i,j}[E] should equal c_0 XOR c_i XOR c_j.
+        //        d. If all pair verifications match, FitsXor = true.
+        //
+        // Cost: O(K² · n⁴) for the precomputed forward passes + O(entries · k²)
+        // for lookups, where K ≤ PrimaryCount and k is per-entry variable
+        // count. Polynomial; tractable up to CFI(Cycle4) within this design.
+        public CouplingFitReport ProbeXorCouplings(VertexType[] vertexTypes, AdjMatrix G)
+        {
+            if (vertexTypes.Length != G.VertexCount)
+                throw new Exception("Every vertex must be given a type. They may all be given the same type");
+
+            int n = G.VertexCount;
+            int[] adj = ExtractAdj(G);
+
+            // Forward pass: baseline record + baseline P.
+            sbyte[] p = SeedFromTypes(n, vertexTypes);
+            var partition = new WarmPartition(n);
+            List<Primary> baseline = ContinueForward(n, adj, p, partition);
+
+            var (pPrefix, _) = BuildPrefixStack(n, vertexTypes, adj, baseline);
+            if (pPrefix == null)
+                throw new InvalidOperationException("Baseline prefix stack failed");
+            sbyte[] baselineP = pPrefix[baseline.Count];
+
+            // Phase 1: get single-flip probes + affected-entries map.
+            var phase1 = ProbeRotationsSingleFlip(vertexTypes, G);
+
+            // Choose one representative alternative per involved primary.
+            // The first probe (in phase1.Probes order) with non-empty
+            // AffectedEntries at that primary wins.
+            // Each "involved" primary has exactly one alternative — its
+            // direction flip. Map: primary index → flipped Primary record.
+            var primaryReps = new Dictionary<int, Primary>();
+            foreach (var probe in phase1.Probes)
+            {
+                if (probe.AffectedEntries.Length == 0) continue;
+                if (!primaryReps.ContainsKey(probe.LayerId))
+                {
+                    primaryReps[probe.LayerId] = new Primary
+                    {
+                        A = probe.AlternativeA,
+                        B = probe.AlternativeB,
+                        Direction = probe.AlternativeDirection,
+                        BetweenCell = probe.BetweenCell,
+                    };
+                }
+            }
+
+            int[] involvedPrimaries = primaryReps.Keys.OrderBy(k => k).ToArray();
+            int K = involvedPrimaries.Length;
+            int forwardPassesRun = 0;
+
+            // Precompute single-substitution P arrays.
+            var singleP = new sbyte[K][];
+            for (int idx = 0; idx < K; idx++)
+            {
+                var sub = new Dictionary<int, Primary>
+                {
+                    [involvedPrimaries[idx]] = primaryReps[involvedPrimaries[idx]]
+                };
+                ReplayWithSubstitutions(n, adj, vertexTypes, baseline, sub, out sbyte[]? sp);
+                singleP[idx] = sp ?? baselineP;
+                forwardPassesRun++;
+            }
+
+            // Precompute pair-substitution P arrays (lower triangular keyed
+            // by (i, j) with i < j).
+            var pairP = new Dictionary<(int, int), sbyte[]>();
+            for (int i = 0; i < K; i++)
+            {
+                for (int j = i + 1; j < K; j++)
+                {
+                    var sub = new Dictionary<int, Primary>
+                    {
+                        [involvedPrimaries[i]] = primaryReps[involvedPrimaries[i]],
+                        [involvedPrimaries[j]] = primaryReps[involvedPrimaries[j]],
+                    };
+                    ReplayWithSubstitutions(n, adj, vertexTypes, baseline, sub, out sbyte[]? pp);
+                    if (pp != null) pairP[(i, j)] = pp;
+                    forwardPassesRun++;
+                }
+            }
+
+            // For each coupling-candidate entry, fit XOR coefficients and
+            // verify against precomputed pair P arrays.
+            var entryToProbes = new Dictionary<int, List<RotationProbeData>>();
+            foreach (var probe in phase1.Probes)
+            {
+                if (probe.AffectedEntries.Length == 0) continue;
+                foreach (var entry in probe.AffectedEntries)
+                {
+                    if (!entryToProbes.TryGetValue(entry, out var list))
+                    {
+                        list = new List<RotationProbeData>();
+                        entryToProbes[entry] = list;
+                    }
+                    list.Add(probe);
+                }
+            }
+
+            var primaryToIdx = new Dictionary<int, int>();
+            for (int i = 0; i < K; i++) primaryToIdx[involvedPrimaries[i]] = i;
+
+            var fits = new List<XorCouplingFit>();
+            int couplingCandidatesTested = 0;
+
+            foreach (var (entryIdx, probesForEntry) in entryToProbes)
+            {
+                // Coupling candidate: at least 2 distinct involved primaries.
+                var primaries = probesForEntry.Select(p => p.LayerId).Distinct().OrderBy(p => p).ToArray();
+                if (primaries.Length < 2) continue;
+                couplingCandidatesTested++;
+
+                // Compute fit coefficients from baseline + singles.
+                bool c0 = (baselineP[entryIdx] == LESS);
+                bool[] coefs = new bool[primaries.Length];
+                bool fitFailed = false;
+                for (int i = 0; i < primaries.Length; i++)
+                {
+                    int pidx = primaryToIdx[primaries[i]];
+                    bool singleVal = (singleP[pidx][entryIdx] == LESS);
+                    coefs[i] = singleVal ^ c0;
+                }
+
+                // Verify on every pair.
+                int pairsChecked = 0, pairsMatched = 0;
+                for (int i = 0; i < primaries.Length; i++)
+                {
+                    for (int j = i + 1; j < primaries.Length; j++)
+                    {
+                        int pi = primaryToIdx[primaries[i]];
+                        int pj = primaryToIdx[primaries[j]];
+                        int pmin = Math.Min(pi, pj), pmax = Math.Max(pi, pj);
+                        if (!pairP.TryGetValue((pmin, pmax), out var pp))
+                        {
+                            // Pair substitution failed at replay time; can't
+                            // verify; conservatively mark fit as failed.
+                            fitFailed = true;
+                            pairsChecked++;
+                            continue;
+                        }
+                        pairsChecked++;
+                        bool pairVal = (pp[entryIdx] == LESS);
+                        bool predicted = c0 ^ coefs[i] ^ coefs[j];
+                        if (pairVal == predicted) pairsMatched++;
+                        else fitFailed = true;
+                    }
+                }
+
+                fits.Add(new XorCouplingFit(
+                    EntryFlatIndex: entryIdx,
+                    InvolvedPrimaries: primaries,
+                    FitsXor: !fitFailed,
+                    XorCoefficients: coefs,
+                    ConstantTerm: c0,
+                    PairsChecked: pairsChecked,
+                    PairsMatched: pairsMatched));
+            }
+
+            return new CouplingFitReport
+            {
+                N = n,
+                PrimaryCount = baseline.Count,
+                CouplingCandidatesTested = couplingCandidatesTested,
+                ForwardPassesRun = forwardPassesRun,
+                Fits = fits,
+            };
         }
     }
 }
