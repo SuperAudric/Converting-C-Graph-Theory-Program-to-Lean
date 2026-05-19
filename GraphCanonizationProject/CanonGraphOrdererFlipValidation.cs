@@ -54,6 +54,50 @@ namespace Canonizer
         public int LastPairRotationsAttempted { get; private set; }
         public int LastLockedThenInvalidated { get; private set; }
 
+        // Per-primary branch-distinctness instrumentation for §11.10 calculator
+        // viability study. When CollectBranchStats is true, the backward pass
+        // records (CellSizeA, CellSizeB, BranchCount, DistinctCanonicalCount)
+        // for every primary visited in every sweep. DistinctCanonicalCount is
+        // the number of distinct permuted-adjacency-matrix outcomes among the
+        // branches enumerated at that primary (including the baseline). If
+        // distinct-count stays small relative to branch-count across input
+        // families, route 1 (equivalence-detection sharing) is structurally
+        // viable.
+        public bool CollectBranchStats { get; set; }
+        public List<BranchStats>? LastBranchStats { get; private set; }
+
+        // L4.3 (single-pass equivalence) test harness. When true, Run() stops
+        // after one backward-pass sweep regardless of whether adoption occurred,
+        // skipping the fixpoint iteration that the current implementation
+        // requires. If the resulting canonical matches the fixpoint canonical
+        // across all inputs, deeper primaries are determined by shallower
+        // primaries + branch (the local-cascade-dependence conjecture), and
+        // the calculator can be designed as a single-pass evaluator.
+        public bool SkipFixpoint { get; set; }
+        public int LastSweepCount { get; private set; }
+
+        // L4.3-memo-polynomial instrumentation. When true, hash every distinct
+        // intermediate P-state encountered across all backward-pass branch
+        // evaluations (including the continuations spawned by ContinueForward).
+        // LastDistinctStateCount is the size of the resulting set — a direct
+        // empirical estimate of the DP memo size if the calculator were
+        // implemented as bottom-up dynamic programming over P-states.
+        public bool CollectStateCount { get; set; }
+        public int LastDistinctStateCount { get; private set; }
+        private HashSet<ulong>? _stateHashes;
+
+        public readonly struct BranchStats(
+            int sweep, int primary, int cellA, int cellB,
+            int branches, int distinct)
+        {
+            public int SweepIndex { get; } = sweep;
+            public int PrimaryIndex { get; } = primary;
+            public int CellSizeA { get; } = cellA;
+            public int CellSizeB { get; } = cellB;
+            public int BranchCount { get; } = branches;
+            public int DistinctCanonicalCount { get; } = distinct;
+        }
+
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
             if (vertexTypes.Length != G.VertexCount)
@@ -67,6 +111,9 @@ namespace Canonizer
             LastBackwardFlips = 0;
             LastPairRotationsAttempted = 0;
             LastLockedThenInvalidated = 0;
+            LastBranchStats = CollectBranchStats ? [] : null;
+            _stateHashes = CollectStateCount ? [] : null;
+            LastDistinctStateCount = 0;
 
             // Forward pass. Partition is warm-refined at every state-mutation
             // point (see ContinueForward / PickAndApplyGuess) so each refine
@@ -85,11 +132,16 @@ namespace Canonizer
             // finite set. The dependency calculator (§11.10) replaces this
             // with a one-shot diagram read.
             int prevFlips;
+            int sweepIndex = 0;
             do
             {
                 prevFlips = LastBackwardFlips;
-                record = BackwardPass(n, adj, vertexTypes, record);
+                record = BackwardPass(n, adj, vertexTypes, record, sweepIndex);
+                sweepIndex++;
+                if (SkipFixpoint) break;
             } while (LastBackwardFlips > prevFlips);
+            LastSweepCount = sweepIndex;
+            LastDistinctStateCount = _stateHashes?.Count ?? 0;
             LastPrimaryCount = record.Count;
 
             // Replay the (possibly updated) record and read off the canonical
@@ -272,7 +324,7 @@ namespace Canonizer
         // marginal optimization that the dependency calculator (§11.10) will
         // make redundant. Keeping the loop uniform makes correctness clearer.
         private List<Primary> BackwardPass(int n, int[] adj, VertexType[] vertexTypes,
-                                           List<Primary> record)
+                                           List<Primary> record, int sweepIndex)
         {
             var current = new List<Primary>(record);
 
@@ -307,6 +359,14 @@ namespace Canonizer
                 // the inner branch loops.
                 var deeper = new List<Primary>(current.Count - i - 1);
                 for (int j = i + 1; j < current.Count; j++) deeper.Add(current[j]);
+
+                // Per-primary branch-distinct-canonical tracking (§11.10
+                // viability study). Hash every branch outcome we evaluate
+                // plus the baseline; the size of the resulting set is the
+                // number of distinct canonicals at this primary.
+                HashSet<ulong>? distinctHashes = CollectBranchStats ? [] : null;
+                int branchesAtThisPrimary = 0;
+                distinctHashes?.Add(HashMatrix(matBest));
 
                 // Enumerate rotation branches. (primI.A, primI.B,
                 // primI.Direction) is the no-change branch — skip it.
@@ -346,6 +406,7 @@ namespace Canonizer
                             };
 
                             LastPairRotationsAttempted++;
+                            branchesAtThisPrimary++;
 
                             var suffix = TryReplayFromState(n, adj,
                                                             pPrefix[i], partPrefix[i],
@@ -357,6 +418,7 @@ namespace Canonizer
 
                             int[] permBranch = ReadPermutation(n, pBranch);
                             int[] matBranch = BuildPermutedMatrix(adj, permBranch, n);
+                            distinctHashes?.Add(HashMatrix(matBranch));
 
                             if (LexLess(matBranch, matBest))
                             {
@@ -373,6 +435,17 @@ namespace Canonizer
                     }
                 }
 
+                if (distinctHashes != null && LastBranchStats != null)
+                {
+                    LastBranchStats.Add(new BranchStats(
+                        sweep: sweepIndex,
+                        primary: i,
+                        cellA: primI.CellSnapshotA.Length,
+                        cellB: primI.CellSnapshotB.Length,
+                        branches: branchesAtThisPrimary,
+                        distinct: distinctHashes.Count));
+                }
+
                 if (adopted)
                 {
                     current = bestRecord;
@@ -381,6 +454,21 @@ namespace Canonizer
             }
 
             return current;
+        }
+
+        // Fast FNV-1a hash of a canonical adjacency matrix for use in distinct-
+        // outcome counting. Collisions are tolerable for measurement (false
+        // sharing only underestimates distinct counts, which is the conservative
+        // direction for the route-1-feasibility check).
+        private static ulong HashMatrix(int[] mat)
+        {
+            ulong h = 14695981039346656037UL;
+            for (int i = 0; i < mat.Length; i++)
+            {
+                h ^= (uint)mat[i];
+                h *= 1099511628211UL;
+            }
+            return h;
         }
 
         // Build paired stacks: pStack[k] = P after applying record[0..k-1],
@@ -433,6 +521,7 @@ namespace Canonizer
             if (!ApplyOne(p, n, branchPrim)) return null;
             partition.Refine(adj, p);
             result.Add(branchPrim);
+            RecordStateHash(p);
 
             foreach (var prim in deeper)
             {
@@ -443,16 +532,33 @@ namespace Canonizer
                 }
                 partition.Refine(adj, p);
                 result.Add(prim);
+                RecordStateHash(p);
             }
 
             while (!IsTotal(n, p))
             {
                 if (!PickAndApplyGuess(n, adj, p, partition, result))
                     return null;
+                RecordStateHash(p);
             }
 
             finalP = p;
             return result;
+        }
+
+        // Hash the current P state and record it. Cheap no-op when state
+        // collection is off. The hash is FNV-1a over the (n×n)-byte P matrix;
+        // collisions are tolerable for memo-size estimation.
+        private void RecordStateHash(sbyte[] p)
+        {
+            if (_stateHashes == null) return;
+            ulong h = 14695981039346656037UL;
+            for (int i = 0; i < p.Length; i++)
+            {
+                h ^= (byte)p[i];
+                h *= 1099511628211UL;
+            }
+            _stateHashes.Add(h);
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
