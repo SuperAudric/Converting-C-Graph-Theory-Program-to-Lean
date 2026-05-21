@@ -451,21 +451,35 @@ transposition-test case. The weak (partition) version is the most that
 holds for arbitrary `(a, b)`, and is sufficient for §6.3's deeper-lock
 survival argument.
 
-**Status.** Lean development in
-[`ChainDescent.lean`](../GraphCanonizationProofs/ChainDescent.lean)
-(`theorem warm_6_2`), updated 2026-05-21:
-- `warmRefine_refines` (warm refinement is split-only) — **proved**.
-- `transitiveClose_swap` (σ-relabel commutes with TC) — **disproved**;
-  the unconditional statement is false. Machine-checked refutations
-  `closeStep_swap_false` / `transitiveClose_swap_false`, witness
-  `conflictMatrix`. A consistency-restricted version is future work.
+**Status — `warm_6_2` is proved (2026-05-21).** Lean development in
+[`ChainDescent.lean`](../GraphCanonizationProofs/ChainDescent.lean).
+
+The proof uses the model settled in design discussion:
+
+- **Transitive closure relegated.** A guess writes a single `P` entry; an
+  inconsistent partial order is handled as a *lex-min ranking* criterion,
+  not a propagation step (equivalent in practice — a non-lex-min branch is
+  never chosen, so being-ranked-worse ≡ being-pruned). So no `transitiveClose`
+  sits in the refinement loop, and `P⁻`/`P⁺` differ at only the `(a,b)`/`(b,a)`
+  entries. *This makes 6.2 provable:* off `{a,b}` no refinement signature can
+  even see the guess.
+- **Individualisation = fresh colour.** The guessed pair starts as singletons
+  — the "`A`, `B` are always singletons" property §3 already relies on, now
+  true by construction.
+
+Lean results:
+- `warm_6_2` (the §6.2 partition claim) — **proved**. `P⁻` and `P⁺` differ
+  only inside `{a,b}`; off-pair vertices refine identically across the two
+  directions; `a, b` stay singletons throughout, so they never satisfy a
+  partition-equality test. Induction on the refinement round.
+- `warmRefine_refines` (warm refinement is split-only) — **proved**;
+  supplies the singleton-preservation lemma.
+- `transitiveClose_swap` (σ-relabel commutes with TC) — **disproved**
+  (`transitiveClose_swap_false`, witness `conflictMatrix`). Moot under TC
+  relegation; kept as a record — the σ-relabel route to 6.2 was not taken.
 - `cell_split_uniform` (cell-mates keep equal post-guess signatures) —
-  **disproved**; machine-checked refutation `cell_split_uniform_false`,
-  witness `witnessP0`. A version restricted to singleton `(a, b)` cells
-  is future work.
-- `warm_6_2` (the §6.2 partition claim itself) — still `sorry`. Believed
-  true, but its original proof route (via `cell_split_uniform`) is dead;
-  it needs a direct *direction-symmetric split* lemma.
+  **disproved** (`cell_split_uniform_false`, witness `witnessP0`); the
+  abandoned *no-split* route.
 
 Empirically verified on `C4` with `(0 1)` non-Aut, on the 6-vertex
 asymmetric graph `{0-1, 0-2, 0-3, 1-4, 2-5}` with `(1 2)` non-Aut, and

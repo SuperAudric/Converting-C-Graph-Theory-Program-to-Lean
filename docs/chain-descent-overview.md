@@ -323,13 +323,15 @@ there is not a coincidence.
   — which guess forced which derived relation — so the coupled component can be
   delineated and the candidate twist built. This is the
   `DERIVED`-record-with-driver structure of strategy-doc §6.4.
-- **Invariant 6.2**, including across transitive closure, so §7.2's
-  partition-sharing is rigorous. Its load-bearing core is a *direction-symmetric
-  split* lemma — a guess splits a cell into the **same sub-cells** under either
-  direction. Note this is **not** the lemma originally named `cell_split_uniform`
-  in `ChainDescent.lean`: that lemma (cell-mates keep *equal* signatures — i.e.
-  no split at all) is machine-checked **false** there. 6.2 needs the genuine,
-  weaker split-symmetry statement, still unproven (`warm_6_2` is `sorry`).
+- **Invariant 6.2** — so §7.2's partition-sharing is rigorous. Its load-bearing
+  core is a *direction-symmetric split* lemma: a guess splits a cell into the
+  **same sub-cells** under either direction. This is `warm_6_2` in
+  `ChainDescent.lean`, **proved** — under the relegated-TC model (a guess writes
+  one `P` entry, no transitive closure in the refinement loop) with
+  fresh-colour individualisation. Note 6.2 is *not* the lemma originally named
+  `cell_split_uniform` (cell-mates keep *equal* signatures — no split at all),
+  which is machine-checked **false**; the genuine, weaker split-symmetry
+  statement is what `warm_6_2` proves.
 - **Cheap candidate construction** (step 2) — turning a propagation pattern into
   a vertex permutation — is the one genuinely unspecified piece and the main
   implementation risk.

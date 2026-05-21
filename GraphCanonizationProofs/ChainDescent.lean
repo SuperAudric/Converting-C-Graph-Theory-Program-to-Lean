@@ -14,40 +14,43 @@ the file has been renamed accordingly.)
 
 ## Informal claim
 
-Let `P₀` be a partial-order matrix and `χ₀` a 1-WL-stable colouring of
-`(adj, P₀)`. For any "guess" pair `(a, b)` with `P₀ a b = unknown`,
-running warm refinement after applying `(a, b, less)` + TC produces the
-same partition as warm refinement after applying `(a, b, greater)` + TC,
-starting from `χ₀`.
+For a guessed pair `(a, b)` and a starting colouring `χι` in which `a` and
+`b` are singletons, warm refinement after the guess `a < b` and after the
+guess `b < a` induce the **same partition** — the two runs differ only in
+the order labels on the splits. This is `warm_6_2`, proved below.
 
-## Key insight (and where the original sketch broke)
+## Model (settled in design discussion)
 
-Warm refinement is **split-only**: it can only further partition the cells
-of its starting colouring, never merge them (`warmRefine_refines`). That
-much holds.
+- **Transitive closure is relegated.** A guess writes a single `P` entry;
+  consistency is a lex-min ranking criterion, not a propagation step. So the
+  post-guess matrix is `applyGuess P₀ a b dir` — `transitiveClose` does not
+  sit in the refinement loop, and `P⁻`/`P⁺` differ only at `(a,b)`/`(b,a)`.
+- **Individualisation assigns a fresh colour**, making the guessed vertices
+  singletons by construction — the property the oracle (strategy §3) relies
+  on, rather than left to a refinement hand-wave.
 
-The original sketch went further: it claimed the guess + TC leaves
-cell-mates with *equal signatures*, so a cell does not split at all. That
-is **false** — a guess applied to an individual vertex genuinely splits a
-cell (`cell_split_uniform_false`). The honest, weaker claim is that a cell
-*does* split, but **into the same sub-cells under either guess direction**;
-only the order labels differ. Proving that direction-symmetric-split
-statement is the genuine open content of §6.2.
+The earlier route (`cell_split_uniform`: cell-mates keep *equal signatures*,
+no split) is false — `cell_split_uniform_false` refutes it. The route that
+works: a guess *does* split a cell, but **into the same sub-cells under
+either direction**, because off `{a,b}` the refinement signature cannot even
+see the guess.
 
 ## Proof status
 
 - Definitions are concrete (one `axiom`, `refineStep`/`refineStep_iff`, to
   abstract over the colour-encoding question).
 - `warmRefine_refines` — **proved** (`Nat.iterate` induction).
+- `warm_6_2` — **proved**. The four supporting lemmas
+  (`refineStep_preserves_singleton`, `iterate_refineStep_preserves_singleton`,
+  `signature_applyGuess_off`, `signature_eq_of_samePartition`) are proved;
+  `warm_6_2` itself is an induction on the refinement round.
 - `transitiveClose_swap` — the unconditionally-stated lemma is **FALSE**;
-  `closeStep`'s `less`-first tie-break is not σ-symmetric. Replaced by the
-  machine-checked refutations `closeStep_swap_false` / `transitiveClose_swap_false`
-  (witness: `conflictMatrix`). A consistency-restricted version is future work.
+  `closeStep`'s `less`-first tie-break is not σ-symmetric. Machine-checked
+  refutations `closeStep_swap_false` / `transitiveClose_swap_false` (witness:
+  `conflictMatrix`). Moot under TC relegation — kept as a record, since the
+  σ-relabel route to 6.2 is not the one taken.
 - `cell_split_uniform` — the lemma as stated is **FALSE**; refuted by the
-  machine-checked `cell_split_uniform_false` (witness: `witnessP0`). A
-  singleton-`(a,b)`-restricted version is future work.
-- `warm_6_2` — still `sorry`. Believed true, but its original proof route
-  (via `cell_split_uniform`) is invalid; see the note on the theorem.
+  machine-checked `cell_split_uniform_false` (witness: `witnessP0`).
 -/
 
 namespace ChainDescent
@@ -506,46 +509,172 @@ theorem cell_split_uniform_false :
   rw [witnessTC_eq] at hconj
   exact absurd hconj.1 (by decide)
 
-/-! ## Main theorem -/
+/-! ## §6.2 — direction invariance of warm refinement
+
+The model here is the one settled in design discussion:
+
+* **Transitive closure is relegated.** A guess writes a single `P` entry and
+  nothing else (consistency becomes a lex-min ranking criterion, not a
+  propagation step). So the post-guess matrix is `applyGuess P₀ a b dir`,
+  which differs from `P₀` at *only* the `(a,b)` / `(b,a)` entries — and
+  `closeStep` / `transitiveClose` are absent from the refinement loop.
+* **Individualisation assigns a fresh colour.** Warm refinement starts from a
+  colouring `χι` in which the guessed vertices `a` and `b` are *singletons*
+  (their own cells). This is the "`A`, `B` are always singletons" property
+  the strategy doc's oracle (§3) relies on; modelling it directly makes it
+  true by construction rather than by a refinement hand-wave.
+
+Under this model 6.2 is provable: `P⁻` and `P⁺` differ only inside `{a,b}`,
+so the only vertices whose refinement signature can depend on the guess
+direction are `a` and `b` — and those are quarantined as singletons.
+-/
+
+/-- One refinement round preserves a singleton: if no vertex shares `a`'s
+colour, none shares it after `refineStep` either — refinement only splits. -/
+theorem refineStep_preserves_singleton {n : Nat} (adj : AdjMatrix n)
+    (P : PMatrix n) (χ : Colouring n) (a : Fin n)
+    (hsing : ∀ u, u ≠ a → χ u ≠ χ a) :
+    ∀ u, u ≠ a → refineStep adj P χ u ≠ refineStep adj P χ a := by
+  intro u hu h
+  exact hsing u hu (refineStep_refines adj P χ h)
+
+/-- Iterating refinement preserves a singleton, for any number of rounds. -/
+theorem iterate_refineStep_preserves_singleton {n : Nat} (adj : AdjMatrix n)
+    (P : PMatrix n) (a : Fin n) :
+    ∀ (k : Nat) (χ : Colouring n), (∀ u, u ≠ a → χ u ≠ χ a) →
+      ∀ u, u ≠ a →
+        ((refineStep adj P)^[k]) χ u ≠ ((refineStep adj P)^[k]) χ a := by
+  intro k
+  induction k with
+  | zero => intro χ hsing u hu; exact hsing u hu
+  | succ k ih =>
+    intro χ hsing u hu
+    simp only [Function.iterate_succ, Function.comp_apply]
+    exact ih (refineStep adj P χ)
+      (refineStep_preserves_singleton adj P χ a hsing) u hu
+
+/-- Off the guessed pair, the guess is invisible: for `x ∉ {a,b}` the
+signature under `applyGuess P₀ a b dir` equals the signature under `P₀` —
+`applyGuess` only touches the `(a,b)` / `(b,a)` entries, none of which sits
+in `x`'s row. -/
+theorem signature_applyGuess_off {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (a b : Fin n) (d : POE) (χ : Colouring n) (x : Fin n)
+    (hxa : x ≠ a) (hxb : x ≠ b) :
+    signature adj (applyGuess P₀ a b d) χ x = signature adj P₀ χ x := by
+  unfold signature
+  apply Multiset.map_congr rfl
+  intro u _
+  have hP : applyGuess P₀ a b d x u = P₀ x u := by
+    unfold applyGuess
+    rw [if_neg (fun h => hxa h.1), if_neg (fun h => hxb h.1)]
+  rw [hP]
+
+/-- **Signature equality is a partition invariant of the colouring.** If `χ`
+and `χ'` induce the same partition, two vertices have equal signatures under
+`χ` iff they do under `χ'`: the colour *values* differ, but only by a
+relabelling `g`, and `Multiset.map` carries that relabelling through. -/
+theorem signature_eq_of_samePartition {n : Nat} (adj : AdjMatrix n)
+    (P : PMatrix n) {χ χ' : Colouring n} (h : samePartition χ χ') (i j : Fin n) :
+    (signature adj P χ i = signature adj P χ j)
+      ↔ (signature adj P χ' i = signature adj P χ' j) := by
+  have key : ∀ (μ ν : Colouring n), samePartition μ ν →
+      signature adj P μ i = signature adj P μ j →
+      signature adj P ν i = signature adj P ν j := by
+    intro μ ν hμν hsig
+    classical
+    obtain ⟨g, hg⟩ : ∃ g : Nat → Nat, ∀ v, ν v = g (μ v) := by
+      refine ⟨fun c => if hc : ∃ v, μ v = c then ν hc.choose else c, fun v => ?_⟩
+      have hex : ∃ v', μ v' = μ v := ⟨v, rfl⟩
+      simp only [dif_pos hex]
+      exact ((hμν hex.choose v).mp hex.choose_spec).symm
+    have hmap : ∀ v, signature adj P ν v
+        = (signature adj P μ v).map (fun t => (g t.1, t.2.1, t.2.2)) := by
+      intro v
+      unfold signature
+      rw [Multiset.map_map]
+      apply Multiset.map_congr rfl
+      intro u _
+      simp only [Function.comp_apply, hg]
+    rw [hmap i, hmap j, hsig]
+  exact ⟨key χ χ' h, key χ' χ h.symm⟩
 
 /--
-**Direction invariance of warm refinement (algorithm §6.2).** — OPEN (`sorry`).
+**Direction invariance of warm refinement (chain descent §6.2).**
 
-For any pre-guess matrix `P₀` with stable colouring `χ₀`, and any
-guessable pair `(a, b)`, warm refinement under
-`TC (applyGuess P₀ a b less)` and `TC (applyGuess P₀ a b greater)`,
-starting from `χ₀`, induce the same *partition*.
+For any pre-guess matrix `P₀`, guessed pair `(a, b)`, and starting colouring
+`χι` in which `a` and `b` are singletons (the fresh-colour individualisation),
+warm refinement after the guess `a < b` and after the guess `b < a` induce
+the **same partition**. The two runs differ only in the order labels on the
+splits — the partition itself is direction-independent.
 
-**The theorem is still believed true** — it is the partition-level
-("weak") form of invariant 6.2, empirically checked on `C4`, `K3`, and
-the 6-vertex asymmetric graph (see `docs/chain-descent-strategy.md` §6.2).
-What changed is the **proof route**.
+This is the partition-level ("weak") form of invariant 6.2
+(`docs/chain-descent-strategy.md` §6.2, `docs/chain-descent-overview.md` §7.2),
+empirically checked on `C4`, `K3`, and the 6-vertex asymmetric graph.
 
-The original sketch reduced it to `cell_split_uniform`: cell-mates `v, w`
-(neither `a` nor `b`) keep *equal signatures* after the guess, so cells
-do not split at all. `cell_split_uniform_false` above shows that is wrong
-— a guess on an individual vertex *does* split a cell. The honest picture
-is weaker and is what must now be proved:
-
-> after the guess, a `χ₀`-cell may split, **but it splits into the same
-> sub-cells regardless of guess direction** — only the order labels on
-> the split differ.
-
-So the surviving ingredient is `warmRefine_refines` (warm refinement only
-splits `χ₀`, never merges it — handles the `χ₀ v ≠ χ₀ w` case), and the
-missing ingredient is a *direction-symmetric split* lemma replacing the
-(false) *no-split* lemma `cell_split_uniform`. That lemma is the real
-content of §6.2 and the genuine open obligation; note the σ-relabel route
-is also unavailable, since `transitiveClose_swap` is false (see above) and
-in any case swapping the guess direction swaps the whole pre-guess matrix.
+Proof. `applyGuess P₀ a b less` and `applyGuess P₀ a b greater` differ at only
+the `(a,b)`/`(b,a)` entries, so for any vertex `x ∉ {a,b}` the refinement
+signature is identical under the two directions (`signature_applyGuess_off`).
+By induction on the refinement round, the two colourings stay partition-equal:
+vertices in `{a,b}` are singletons throughout
+(`iterate_refineStep_preserves_singleton`), so they never satisfy a
+`samePartition` equality test with a distinct vertex; every other pair is
+governed by `refineStep_iff`, the off-pair signature equality, and
+`signature_eq_of_samePartition` against the inductive hypothesis.
 -/
-theorem warm_6_2 {n : Nat} (adj : AdjMatrix n)
-    (P₀ : PMatrix n) (χ₀ : Colouring n)
-    (h_stable : samePartition χ₀ (refineStep adj P₀ χ₀))
-    (a b : Fin n) (hab : a ≠ b) (h_unknown : P₀ a b = .unknown) :
+theorem warm_6_2 {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (a b : Fin n) (χι : Colouring n)
+    (ha : ∀ u, u ≠ a → χι u ≠ χι a)
+    (hb : ∀ u, u ≠ b → χι u ≠ χι b) :
     samePartition
-      (warmRefine adj (transitiveClose (applyGuess P₀ a b .less))    χ₀)
-      (warmRefine adj (transitiveClose (applyGuess P₀ a b .greater)) χ₀) := by
-  sorry
+      (warmRefine adj (applyGuess P₀ a b .less)    χι)
+      (warmRefine adj (applyGuess P₀ a b .greater) χι) := by
+  suffices key : ∀ k, samePartition
+      (((refineStep adj (applyGuess P₀ a b .less)))^[k] χι)
+      (((refineStep adj (applyGuess P₀ a b .greater)))^[k] χι) from key n
+  intro k
+  induction k with
+  | zero => exact samePartition.refl χι
+  | succ k ih =>
+    intro i j
+    simp only [Function.iterate_succ', Function.comp_apply]
+    rw [refineStep_iff, refineStep_iff]
+    set Xl := (refineStep adj (applyGuess P₀ a b .less))^[k] χι
+    set Xg := (refineStep adj (applyGuess P₀ a b .greater))^[k] χι
+    have saL : ∀ u, u ≠ a → Xl u ≠ Xl a :=
+      iterate_refineStep_preserves_singleton adj (applyGuess P₀ a b .less) a k χι ha
+    have sbL : ∀ u, u ≠ b → Xl u ≠ Xl b :=
+      iterate_refineStep_preserves_singleton adj (applyGuess P₀ a b .less) b k χι hb
+    have saG : ∀ u, u ≠ a → Xg u ≠ Xg a :=
+      iterate_refineStep_preserves_singleton adj (applyGuess P₀ a b .greater) a k χι ha
+    have sbG : ∀ u, u ≠ b → Xg u ≠ Xg b :=
+      iterate_refineStep_preserves_singleton adj (applyGuess P₀ a b .greater) b k χι hb
+    by_cases hij : i = j
+    · subst hij; simp
+    · -- a vertex of {a,b} meeting a distinct vertex: colours differ both ways
+      have split : ∀ x y : Fin n, x ≠ y → (x = a ∨ x = b) →
+          Xl x ≠ Xl y ∧ Xg x ≠ Xg y := by
+        intro x y hxy hx
+        rcases hx with hx | hx <;> subst hx
+        · exact ⟨fun e => saL y (Ne.symm hxy) e.symm,
+                 fun e => saG y (Ne.symm hxy) e.symm⟩
+        · exact ⟨fun e => sbL y (Ne.symm hxy) e.symm,
+                 fun e => sbG y (Ne.symm hxy) e.symm⟩
+      by_cases hi : i = a ∨ i = b
+      · obtain ⟨hm, hp⟩ := split i j hij hi
+        exact ⟨fun e => absurd e.1 hm, fun e => absurd e.1 hp⟩
+      · by_cases hj : j = a ∨ j = b
+        · obtain ⟨hm, hp⟩ := split j i (Ne.symm hij) hj
+          exact ⟨fun e => absurd e.1 (Ne.symm hm),
+                 fun e => absurd e.1 (Ne.symm hp)⟩
+        · -- i, j ∉ {a,b}: the guess is invisible to both rows
+          have hia : i ≠ a := fun e => hi (Or.inl e)
+          have hib : i ≠ b := fun e => hi (Or.inr e)
+          have hja : j ≠ a := fun e => hj (Or.inl e)
+          have hjb : j ≠ b := fun e => hj (Or.inr e)
+          rw [signature_applyGuess_off adj P₀ a b .less Xl i hia hib,
+              signature_applyGuess_off adj P₀ a b .less Xl j hja hjb,
+              signature_applyGuess_off adj P₀ a b .greater Xg i hia hib,
+              signature_applyGuess_off adj P₀ a b .greater Xg j hja hjb,
+              ih i j, signature_eq_of_samePartition adj P₀ ih i j]
 
 end ChainDescent
