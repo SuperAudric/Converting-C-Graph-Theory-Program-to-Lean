@@ -23,6 +23,25 @@ namespace Canonizer
     // below. Behaviour matches the previous IR search, now bounded by the
     // budget and structured around the oracle seam the deferred linear oracle
     // (§7) will plug into.
+    //
+    // ── Proof contract (docs/chain-descent-overview.md §8–§9) ──────────────
+    //
+    // Correctness (oracle-agnostic). For ANY oracle whose representatives
+    // cover every orbit of the target cell, Canonize returns an isomorphism-
+    // invariant, complete canonical form — or a flag, never a wrong answer.
+    // Rests on: cell ids are iso-invariant; the target cell is chosen by cell
+    // id; the representatives cover every orbit; a leaf matrix determines the
+    // isomorphism class.
+    //
+    // Complexity (conditional). With a polynomial-time oracle the run is
+    // polynomial-or-flag: the node count is ≤ budget by construction and
+    // per-node work is polynomial. Unconditional given the budget.
+    //
+    // Tier-1 target (open — §9 gap 3). On cascade (Tier-1) graphs the descent
+    // is conjectured to fit within B(n), so the run canonizes rather than
+    // flags. Proving it — characterising the cascade class — is the open
+    // Tier-1 theorem; the NodesByDepth instrumentation exposes the cost shape
+    // that proof reasons about.
     internal sealed class ChainDescent
     {
         private const sbyte LESS = -1, GREATER = 1;
@@ -42,6 +61,9 @@ namespace Canonizer
         private bool _flagged;
         private string? _flagReason;
         private int[]? _bestMatrix;
+
+        // Descent-tree node count per depth — the per-level cost profile.
+        private readonly List<int> _nodesByDepth = new();
 
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
@@ -66,14 +88,15 @@ namespace Canonizer
         {
             Search(p, partition);
 
+            var stats = new DescentStats(
+                _nodeCount, _maxDepth, _leafCount, _prunedBranches,
+                _budget, _nodesByDepth.ToArray());
+
             if (_flagged)
-                return CanonResult.Flag(_flagReason ?? "flagged", Automorphisms,
-                                        _nodeCount, _maxDepth, _leafCount, _prunedBranches);
+                return CanonResult.Flag(_flagReason ?? "flagged", Automorphisms, stats);
             if (_bestMatrix == null)
-                return CanonResult.Flag("descent produced no leaf", Automorphisms,
-                                        _nodeCount, _maxDepth, _leafCount, _prunedBranches);
-            return CanonResult.Canonical(_bestMatrix, Automorphisms,
-                                         _nodeCount, _maxDepth, _leafCount, _prunedBranches);
+                return CanonResult.Flag("descent produced no leaf", Automorphisms, stats);
+            return CanonResult.Canonical(_bestMatrix, Automorphisms, stats);
         }
 
         // One descent node: refine, emit a leaf if discrete, else branch on the
@@ -87,7 +110,10 @@ namespace Canonizer
                 _flagReason = $"node budget {_budget} exceeded";
                 return;
             }
-            if (_path.Count > _maxDepth) _maxDepth = _path.Count;
+            int depth = _path.Count;
+            if (depth > _maxDepth) _maxDepth = depth;
+            while (_nodesByDepth.Count <= depth) _nodesByDepth.Add(0);
+            _nodesByDepth[depth]++;
 
             partition.Refine(_adj, p);
             int numCells = partition.NumCells;

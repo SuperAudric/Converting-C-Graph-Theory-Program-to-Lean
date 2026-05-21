@@ -28,11 +28,19 @@ namespace Canonizer
         public long LastNodeCount { get; private set; }
         public int LastMaxDepth { get; private set; }
 
+        // The node budget the last run carried (interpret LastNodeCount
+        // against it), and the descent-tree node count per depth — the cost
+        // shape (a flat all-ones profile is a single descent path).
+        public long LastBudget { get; private set; }
+        public IReadOnlyList<int> LastNodesByDepth { get; private set; } = [];
+
         // Order of the automorphism group harvested during the descent.
         public BigInteger LastAutomorphismGroupOrder { get; private set; }
 
-        // The flag reason, or null when the run produced a canonical form.
+        // The flag reason (null when the run produced a canonical form) and
+        // its classification (docs/chain-descent-overview.md §9 gap 9).
         public string? LastFlagReason { get; private set; }
+        public FlagKind LastFlagKind { get; private set; }
 
         // Optional override for the descent's polynomial node budget; null
         // uses ChainDescent.DefaultBudget(n).
@@ -70,12 +78,17 @@ namespace Canonizer
             var descent = new ChainDescent(n, adj, new CascadeOracle(), budget);
             CanonResult result = descent.Canonize(p, partition);
 
-            LastNodeCount = result.NodeCount;
-            LastMaxDepth = result.MaxDepth;
-            LastPrunedBranches = result.PrunedBranches;
-            LastLeafCount = result.LeafCount;
+            LastNodeCount = result.Stats.NodeCount;
+            LastMaxDepth = result.Stats.MaxDepth;
+            LastPrunedBranches = result.Stats.PrunedBranches;
+            LastLeafCount = result.Stats.LeafCount;
+            LastBudget = result.Stats.Budget;
+            LastNodesByDepth = result.Stats.NodesByDepth;
             LastAutomorphismGroupOrder = result.ResidualGroup.Order;
             LastFlagReason = result.Flagged ? result.FlagReason : null;
+            LastFlagKind = result.Flagged
+                ? (result.ResidualGroup.IsTrivial ? FlagKind.IrBlindSpot : FlagKind.Tier2Like)
+                : FlagKind.None;
 
             if (result.Flagged)
                 throw new CanonizationFlaggedException(
