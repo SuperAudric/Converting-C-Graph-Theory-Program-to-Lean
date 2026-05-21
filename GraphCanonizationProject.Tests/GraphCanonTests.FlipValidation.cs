@@ -172,4 +172,15 @@ public partial class GraphCanonTests
         string odd = _fv.Run_ToString(new VertexType[pair.Odd.VertexCount], pair.Odd.ToArray());
         Assert.NotEqual(even, odd);
     }
+
+    // The odd graph is an 18-cycle with automorphism group D18; orbit pruning
+    // should collapse the 18-way root branch to a handful of representatives.
+    [Fact]
+    public void FV_CfiCycle3_Odd_OrbitPruningIsActive()
+    {
+        var pair = CfiGraphGenerator.Generate("Cycle3");
+        _fv.Run_ToString(new VertexType[pair.Odd.VertexCount], pair.Odd.ToArray());
+        Assert.True(_fv.LastPrunedBranches > 0,
+            $"orbit pruning should have skipped branches; got {_fv.LastPrunedBranches}");
+    }
 }

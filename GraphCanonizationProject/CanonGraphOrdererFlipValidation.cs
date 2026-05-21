@@ -137,6 +137,10 @@ namespace Canonizer
         // on the last connected-component canonization.
         public BigInteger LastAutomorphismGroupOrder { get; private set; }
 
+        // Branches the calculator's orbit-pruning skipped on the last
+        // connected-component canonization.
+        public int LastPrunedBranches { get; private set; }
+
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
             if (vertexTypes.Length != G.VertexCount)
@@ -187,6 +191,7 @@ namespace Canonizer
 
             LastPrimaryCount = calc.LeafCount;
             LastAutomorphismGroupOrder = calc.Automorphisms.Order;
+            LastPrunedBranches = calc.PrunedBranches;
 
             int[] best = calc.BestMatrix;
             var result = new EdgeType[n, n];
@@ -202,31 +207,34 @@ namespace Canonizer
         // (nauty-shaped). At each node: warm-refine the partition; if it is
         // discrete the cell ids are the canonical labelling and the node is a
         // leaf; otherwise pick the lowest-id non-singleton cell as the target
-        // and branch by individualising each of its vertices in turn, then
-        // recurse. The lex-smallest leaf matrix is the canonical.
+        // and branch by individualising each of its vertices, then recurse.
+        // The lex-smallest leaf matrix is the canonical.
         //
         // Correctness: cell ids are iso-invariant (IncrementalPartition assigns
         // them by canonical lex-sort of refinement signatures), the target
-        // cell is chosen by cell id, and branching is exhaustive over the
-        // target cell's vertices — so the search tree, and hence the set of
-        // leaf matrices, is iso-invariant: every scrambling yields the same
-        // lex-min. A leaf matrix determines its isomorphism class, so the
-        // invariant is also complete.
+        // cell is chosen by cell id, and branching covers every orbit of the
+        // target cell — so the set of leaf matrices is iso-invariant: every
+        // scrambling yields the same lex-min. A leaf matrix determines its
+        // isomorphism class, so the invariant is also complete.
         //
-        // Tying leaves (equal permuted matrix) differ by an automorphism; those
-        // are harvested into a PermutationGroup — the residual-symmetry object
-        // of the calculator doc's model. Orbit-pruning that consumes it (so
-        // symmetric branches are explored once) is the next increment; the
-        // current search is unpruned, but with refinement cascading between
-        // branches the tree stays small on the graphs in scope.
+        // Orbit pruning: leaves with an equal permuted matrix differ by an
+        // automorphism; these are harvested (verified, then added to a
+        // PermutationGroup — the residual-symmetry object of the calculator
+        // doc's model). At a branch node, a target-cell vertex reachable from
+        // an already-explored one via automorphisms that fix the individualised
+        // path is skipped — its subtree is isomorphic to an explored one's and
+        // yields no new canonical. This makes the search a sum over the target
+        // cell's orbits rather than a product over all its vertices.
         private sealed class GroupCalculator
         {
             private readonly int _n;
             private readonly int[] _adj;
+            private readonly List<int> _path = new();
+            private readonly Dictionary<int[], int[]> _seen;
 
             public int[]? BestMatrix { get; private set; }
-            public int[]? BestPerm { get; private set; }
             public int LeafCount { get; private set; }
+            public int PrunedBranches { get; private set; }
             public PermutationGroup Automorphisms { get; }
 
             public GroupCalculator(int n, int[] adj)
@@ -234,6 +242,7 @@ namespace Canonizer
                 _n = n;
                 _adj = adj;
                 Automorphisms = new PermutationGroup(n);
+                _seen = new Dictionary<int[], int[]>(IntArrayEq.Instance);
             }
 
             // Refine; emit a leaf if discrete, else branch on the target cell.
@@ -246,8 +255,8 @@ namespace Canonizer
 
                 if (numCells == _n)
                 {
-                    // Discrete: each vertex is alone in a cell, so cellOf is a
-                    // bijection onto {0..n-1} — the canonical labelling.
+                    // Discrete: cellOf is a bijection onto {0..n-1} — the
+                    // canonical labelling.
                     HandleLeaf(cellOf);
                     return;
                 }
@@ -256,14 +265,25 @@ namespace Canonizer
                 for (int c = 0; c < numCells; c++) cellMembers.Add(new List<int>());
                 for (int v = 0; v < _n; v++) cellMembers[cellOf[v]].Add(v);
 
-                // Target cell: the lowest-id non-singleton cell. One exists
-                // because numCells < n. Cell id is iso-invariant, so the
-                // choice — and the branching below it — is iso-invariant.
+                // Target cell: the lowest-id non-singleton cell (one exists,
+                // numCells < n). Cell id is iso-invariant.
                 int target = 0;
                 while (cellMembers[target].Count < 2) target++;
+                var members = cellMembers[target];
 
-                foreach (int v in cellMembers[target])
-                    Branch(p, partition, cellMembers[target], v);
+                // Branch over one vertex per orbit of the target cell under
+                // path-fixing automorphisms discovered so far.
+                var explored = new List<int>();
+                foreach (int v in members)
+                {
+                    if (explored.Count > 0 && ReachableByPathFixingAut(v, explored))
+                    {
+                        PrunedBranches++;
+                        continue;
+                    }
+                    explored.Add(v);
+                    Branch(p, partition, members, v);
+                }
             }
 
             // Individualise vertex v within its cell — order it below every
@@ -279,7 +299,41 @@ namespace Canonizer
                     // ApplyOne never fails here; guard defensively.
                     if (!ApplyOne(pChild, _n, prim)) return;
                 }
+                _path.Add(v);
                 Search(pChild, partition.Clone());
+                _path.RemoveAt(_path.Count - 1);
+            }
+
+            // True if v is reachable from an already-explored target-cell
+            // vertex via discovered automorphisms that fix every path vertex.
+            // Such an automorphism carries an explored vertex's subtree onto
+            // v's, so v's subtree yields no canonical the explored one omits.
+            private bool ReachableByPathFixingAut(int v, List<int> explored)
+            {
+                var gens = new List<int[]>();
+                foreach (var g in Automorphisms.Generators)
+                {
+                    bool fixesPath = true;
+                    foreach (int pt in _path)
+                        if (g[pt] != pt) { fixesPath = false; break; }
+                    if (fixesPath) gens.Add(g);
+                }
+                if (gens.Count == 0) return false;
+
+                var inOrbit = new bool[_n];
+                var queue = new Queue<int>();
+                foreach (int r in explored)
+                    if (!inOrbit[r]) { inOrbit[r] = true; queue.Enqueue(r); }
+                while (queue.Count > 0)
+                {
+                    int u = queue.Dequeue();
+                    foreach (var g in gens)
+                    {
+                        int w = g[u];
+                        if (!inOrbit[w]) { inOrbit[w] = true; queue.Enqueue(w); }
+                    }
+                }
+                return inOrbit[v];
             }
 
             private void HandleLeaf(int[] cellOf)
@@ -289,23 +343,50 @@ namespace Canonizer
                 int[] matrix = BuildPermutedMatrix(_adj, perm, _n);
 
                 if (BestMatrix == null || LexLess(matrix, BestMatrix))
-                {
                     BestMatrix = matrix;
-                    BestPerm = perm;
-                }
-                else if (MatrixEquals(matrix, BestMatrix))
+
+                if (_seen.TryGetValue(matrix, out int[]? firstPerm))
                 {
-                    // perm and BestPerm both produce BestMatrix; the relabelling
+                    // perm and firstPerm both produce `matrix`; the relabelling
                     // between them is an automorphism of the graph.
-                    Automorphisms.AddGenerator(Perm.Compose(Perm.Inverse(perm), BestPerm!));
+                    int[] auto = Perm.Compose(Perm.Inverse(perm), firstPerm);
+                    if (IsAutomorphism(auto))
+                        Automorphisms.AddGenerator(auto);
+                }
+                else
+                {
+                    _seen[matrix] = perm;
                 }
             }
 
-            private static bool MatrixEquals(int[] x, int[] y)
+            private bool IsAutomorphism(int[] g)
             {
-                for (int i = 0; i < x.Length; i++)
-                    if (x[i] != y[i]) return false;
+                for (int i = 0; i < _n; i++)
+                    for (int j = 0; j < _n; j++)
+                        if (_adj[g[i] * _n + g[j]] != _adj[i * _n + j])
+                            return false;
                 return true;
+            }
+
+            private sealed class IntArrayEq : IEqualityComparer<int[]>
+            {
+                public static readonly IntArrayEq Instance = new();
+
+                public bool Equals(int[]? a, int[]? b)
+                {
+                    if (ReferenceEquals(a, b)) return true;
+                    if (a is null || b is null || a.Length != b.Length) return false;
+                    for (int i = 0; i < a.Length; i++)
+                        if (a[i] != b[i]) return false;
+                    return true;
+                }
+
+                public int GetHashCode(int[] a)
+                {
+                    var h = new HashCode();
+                    foreach (int x in a) h.Add(x);
+                    return h.ToHashCode();
+                }
             }
         }
 
