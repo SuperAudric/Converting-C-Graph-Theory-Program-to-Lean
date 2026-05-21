@@ -324,8 +324,12 @@ there is not a coincidence.
   delineated and the candidate twist built. This is the
   `DERIVED`-record-with-driver structure of strategy-doc §6.4.
 - **Invariant 6.2**, including across transitive closure, so §7.2's
-  partition-sharing is rigorous. Its core lemma (`cell_split_uniform`) is the
-  load-bearing dependency.
+  partition-sharing is rigorous. Its load-bearing core is a *direction-symmetric
+  split* lemma — a guess splits a cell into the **same sub-cells** under either
+  direction. Note this is **not** the lemma originally named `cell_split_uniform`
+  in `ChainDescent.lean`: that lemma (cell-mates keep *equal* signatures — i.e.
+  no split at all) is machine-checked **false** there. 6.2 needs the genuine,
+  weaker split-symmetry statement, still unproven (`warm_6_2` is `sorry`).
 - **Cheap candidate construction** (step 2) — turning a propagation pattern into
   a vertex permutation — is the one genuinely unspecified piece and the main
   implementation risk.

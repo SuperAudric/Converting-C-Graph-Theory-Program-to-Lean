@@ -391,12 +391,22 @@ colouring) cannot.
 
 **Why warm refinement preserves it.** Warm refinement is split-only: it
 can only further partition the cells of its starting colouring, never
-merge them. Combined with cell-coherence of the starting colouring (all
-members of a cell have identical out-relations to every other cell),
-the splits induced by a single guess + TC are uniform within each cell
-— every member of a cell gains the same new `Less` / `Greater` entries
-to the same target cells, regardless of which direction was chosen. So
-cells either stay intact or split identically under both directions.
+merge them. That much is proven (`warmRefine_refines` in
+`ChainDescent.lean`).
+
+> ⚠️ **Correction (2026-05-21).** The argument originally continued: "the
+> splits induced by a single guess + TC are uniform within each cell —
+> every member of a cell gains the *same* new `Less`/`Greater` entries,
+> so cells stay intact or split identically". The first half is **false**.
+> Cell-coherence is a *multiset* property — cell-mates relate identically
+> to every *cell* — but a guess `(a, b)` acts on individual *vertices*,
+> and TC chains run through individual vertices. Two cell-mates can relate
+> symmetrically to `a`'s cell yet asymmetrically to `a` itself, so the
+> `a → b` edge reaches one and not the other: **a cell genuinely splits**.
+> This is machine-checked by `cell_split_uniform_false` in
+> `ChainDescent.lean`. The honest claim is only the *second* half — a cell
+> splits **into the same sub-cells under either direction**, order labels
+> aside — and proving *that* is the open content of 6.2 (see Status).
 
 **Why it would fail for fresh 1-WL on between-cell guesses.** Fresh
 1-WL re-runs colour refinement from a trivial initial colouring on the
@@ -418,11 +428,17 @@ in either direction, so the discrepancy disappears: both runs end at
 `{0}, {1}, {2}`.
 
 **Why it holds across closure.** Within a cell, all vertices have identical
-Prel profiles, so closure derives *the same* new relations for every cell-
-mate (everyone in the cell gains a `Less` to some target, or no one does).
-The within-cell symmetry is preserved by closure when it was preserved
-before. Closure-derived asymmetries only affect vertices that were
-*already* distinguished, and partition coarseness survives.
+Prel profiles *as multisets over cells* — but, per the correction above,
+**not** identical relations to the individual guessed vertices `a, b`. So
+closure does **not** derive the same new relations for every cell-mate; a
+cell-mate with a chain into `a` is pulled out of its cell. The surviving
+statement is the direction-symmetric one: whatever split closure induces,
+it induces the *same* split (sub-cells, not labels) under `a<b` and `b<a`.
+The unconditional σ-relabel shortcut for this — `transitiveClose` commutes
+with the `less ↔ greater` swap — is itself **false** (`closeStep`'s
+`less`-first tie-break is not σ-symmetric; machine-checked by
+`transitiveClose_swap_false`), so the closure case needs the direct
+argument, not a relabel.
 
 **Strong version (vertex-by-vertex label coincidence) does not follow.**
 Even under warm refinement, the actual colour *values* `χ^<(v)` and
@@ -435,16 +451,21 @@ transposition-test case. The weak (partition) version is the most that
 holds for arbitrary `(a, b)`, and is sufficient for §6.3's deeper-lock
 survival argument.
 
-**Status.** Partial Lean proof in
-[`FlipValidation.lean`](../GraphCanonizationProofs/FlipValidation.lean)
-(`theorem warm_6_2`). Definitions and structural lemmas are elaborated
-(`applyGuess_swap`, `refineStep_refines`, `samePartition` equivalence,
-etc.); the load-bearing pieces are `sorry`'d with prose proof sketches:
-- `warmRefine_refines` — `Nat.iterate` induction, ~10 lines.
-- `transitiveClose_swap` — induction on iteration count, ~30 lines.
-- `cell_split_uniform` — the core within-cell coherence argument, the
-  substantive work (~100+ lines).
-- `warm_6_2` — composition of the three, ~40 lines.
+**Status.** Lean development in
+[`ChainDescent.lean`](../GraphCanonizationProofs/ChainDescent.lean)
+(`theorem warm_6_2`), updated 2026-05-21:
+- `warmRefine_refines` (warm refinement is split-only) — **proved**.
+- `transitiveClose_swap` (σ-relabel commutes with TC) — **disproved**;
+  the unconditional statement is false. Machine-checked refutations
+  `closeStep_swap_false` / `transitiveClose_swap_false`, witness
+  `conflictMatrix`. A consistency-restricted version is future work.
+- `cell_split_uniform` (cell-mates keep equal post-guess signatures) —
+  **disproved**; machine-checked refutation `cell_split_uniform_false`,
+  witness `witnessP0`. A version restricted to singleton `(a, b)` cells
+  is future work.
+- `warm_6_2` (the §6.2 partition claim itself) — still `sorry`. Believed
+  true, but its original proof route (via `cell_split_uniform`) is dead;
+  it needs a direct *direction-symmetric split* lemma.
 
 Empirically verified on `C4` with `(0 1)` non-Aut, on the 6-vertex
 asymmetric graph `{0-1, 0-2, 0-3, 1-4, 2-5}` with `(1 2)` non-Aut, and

@@ -24,4 +24,4 @@ name = "FullCorrectness"
 globs = ["FullCorrectness.+"]
 
 [[lean_lib]]
-name = "FlipValidation"
+name = "ChainDescent"

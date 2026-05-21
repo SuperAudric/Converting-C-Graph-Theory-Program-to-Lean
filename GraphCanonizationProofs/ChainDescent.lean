@@ -4,11 +4,13 @@ import Mathlib.Data.List.FinRange
 import Mathlib.Logic.Function.Iterate
 
 /-!
-# Direction invariance of warm 1-WL refinement (algorithm §6.2)
+# Direction invariance of warm 1-WL refinement (chain descent §6.2)
 
-This file states and partially proves the load-bearing direction-symmetry
-invariant for the flip-validation canonizer
-(see `docs/flip-validation-strategy.md` §6.2).
+This file states, and partially proves, the load-bearing direction-symmetry
+invariant ("invariant 6.2") for the **chain-descent** canonizer — see
+`docs/chain-descent-strategy.md` §6.2 and `docs/chain-descent-overview.md`
+§7.2. ("Flip validation" was the earlier name of the chain-descent design;
+the file has been renamed accordingly.)
 
 ## Informal claim
 
@@ -18,32 +20,37 @@ running warm refinement after applying `(a, b, less)` + TC produces the
 same partition as warm refinement after applying `(a, b, greater)` + TC,
 starting from `χ₀`.
 
-## Key insight
+## Key insight (and where the original sketch broke)
 
 Warm refinement is **split-only**: it can only further partition the cells
-of its starting colouring, never merge them. Combined with cell-coherence
-of `χ₀` (all members of a cell have identical out-relations to every
-other cell), the splits induced by the new guess + TC are uniform within
-each cell of `χ₀` — every member of a cell sees the same structural
-change regardless of guess direction.
+of its starting colouring, never merge them (`warmRefine_refines`). That
+much holds.
 
-This sidesteps the freshly-1-WL counterexample in which between-cell
-guesses can produce different partitions under `<` vs `>` via asymmetric
-TC chains: warm refinement starting from the pre-guess partition cannot
-merge cells, so the post-guess freshly-1-WL coarsening simply doesn't
-materialise.
+The original sketch went further: it claimed the guess + TC leaves
+cell-mates with *equal signatures*, so a cell does not split at all. That
+is **false** — a guess applied to an individual vertex genuinely splits a
+cell (`cell_split_uniform_false`). The honest, weaker claim is that a cell
+*does* split, but **into the same sub-cells under either guess direction**;
+only the order labels differ. Proving that direction-symmetric-split
+statement is the genuine open content of §6.2.
 
 ## Proof status
 
-- Definitions are concrete (one `axiom` to abstract over the colour-
-  encoding question; see `refineStep_iff`).
-- Trivial structural lemmas are proven.
-- `transitiveClose_swap`, `warmRefine_refines`, `cell_split_uniform`,
-  and `warm_6_2` are `sorry` with prose sketches above each. These are
-  the next-iteration work items.
+- Definitions are concrete (one `axiom`, `refineStep`/`refineStep_iff`, to
+  abstract over the colour-encoding question).
+- `warmRefine_refines` — **proved** (`Nat.iterate` induction).
+- `transitiveClose_swap` — the unconditionally-stated lemma is **FALSE**;
+  `closeStep`'s `less`-first tie-break is not σ-symmetric. Replaced by the
+  machine-checked refutations `closeStep_swap_false` / `transitiveClose_swap_false`
+  (witness: `conflictMatrix`). A consistency-restricted version is future work.
+- `cell_split_uniform` — the lemma as stated is **FALSE**; refuted by the
+  machine-checked `cell_split_uniform_false` (witness: `witnessP0`). A
+  singleton-`(a,b)`-restricted version is future work.
+- `warm_6_2` — still `sorry`. Believed true, but its original proof route
+  (via `cell_split_uniform`) is invalid; see the note on the theorem.
 -/
 
-namespace FlipValidation
+namespace ChainDescent
 
 /-! ## Partial-order entries -/
 
@@ -163,24 +170,112 @@ to reach fixpoint. -/
 def transitiveClose {n : Nat} (P : PMatrix n) : PMatrix n :=
   (closeStep^[n * n]) P
 
-/--
-**Lemma (transitive closure commutes with σ-swap).**
+/-!
+### The σ-swap commutation lemma is FALSE as originally stated
+
+The original file asserted, unconditionally,
 
 ```
 transitiveClose (swap P) = swap (transitiveClose P)
 ```
 
-Proof sketch: induction on iteration count. The base case (zero iterations)
-is `swap (swap P) = P`. The inductive step needs `closeStep ∘ swap =
-swap ∘ closeStep`, which follows from the symmetry of the chain rule
-under `less ↔ greater`: the rule "`P i k = less ∧ P k j = less ⇒ P i j =
-less`" swaps with "`P i k = greater ∧ P k j = greater ⇒ P i j = greater`"
-under the σ-relabel, and `List.any` over the universal index set respects
-this swap.
+with a proof sketch appealing to "symmetry of the chain rule under
+`less ↔ greater`". That sketch is wrong. `closeStep` resolves a pair that
+has *both* a `less`-chain and a `greater`-chain running through it by the
+**first `if`** — it unconditionally picks `less`. That tie-break is not
+σ-symmetric: on the σ-swapped matrix the (now-swapped) chains hit the same
+first `if` and `less` is picked *again*, where σ-symmetry would demand
+`greater`. So the two sides disagree on any matrix with a conflicted pair.
+
+`conflictMatrix` below is a concrete 4-vertex witness; `closeStep_swap_false`
+and `transitiveClose_swap_false` are machine-checked refutations.
+
+A *correct* version needs a consistency hypothesis — no pair may carry
+both a `less`-chain and a `greater`-chain (automatic for any `P` that
+extends to a genuine partial order). Stating and proving that conditional
+lemma is left as follow-up; it is **not** on the critical path for
+`warm_6_2`, whose proof route is a direct within-cell argument, not the
+σ-relabel argument (which swapping the guess direction would break anyway,
+since it swaps the whole pre-guess matrix).
 -/
-theorem transitiveClose_swap {n : Nat} (P : PMatrix n) :
-    transitiveClose (PMatrix.swap P) = PMatrix.swap (transitiveClose P) := by
-  sorry
+
+/-- A concrete 4-vertex `PMatrix` with a conflicted pair: entry `(0,1)` is
+`unknown`, yet it carries a `less`-chain `0 → 2 → 1` and a `greater`-chain
+`0 → 3 → 1` simultaneously. -/
+def conflictMatrix : PMatrix 4 := fun i j =>
+  match i.val, j.val with
+  | 0, 2 => .less
+  | 2, 0 => .greater
+  | 2, 1 => .less
+  | 1, 2 => .greater
+  | 0, 3 => .greater
+  | 3, 0 => .less
+  | 3, 1 => .greater
+  | 1, 3 => .less
+  | _, _ => .unknown
+
+/-- `closeStep` never demotes a decided `less` entry. -/
+theorem closeStep_keeps_less {n : Nat} (Q : PMatrix n) {i j : Fin n}
+    (h : Q i j = .less) : closeStep Q i j = .less := by
+  simp only [closeStep, h]
+
+/-- Iterating `closeStep` preserves a `less` entry — once decided, frozen. -/
+theorem iterate_closeStep_keeps_less {n : Nat} (i j : Fin n) :
+    ∀ (k : Nat) (Q : PMatrix n), Q i j = .less →
+      ((closeStep^[k]) Q) i j = .less := by
+  intro k
+  induction k with
+  | zero => intro Q h; exact h
+  | succ k ih =>
+    intro Q h
+    rw [Function.iterate_succ, Function.comp_apply]
+    exact ih (closeStep Q) (closeStep_keeps_less Q h)
+
+/-- Single-step σ-swap commutation already fails on `conflictMatrix`:
+`closeStep` decides `(0,1)` as `less` for both the matrix and its σ-swap,
+where σ-symmetry would force the swapped run to pick `greater`. -/
+theorem closeStep_swap_false :
+    ¬ ∀ (m : Nat) (P : PMatrix m),
+        closeStep (PMatrix.swap P) = PMatrix.swap (closeStep P) := by
+  intro h
+  have hbad := congrFun (congrFun (h 4 conflictMatrix) 0) 1
+  revert hbad
+  decide
+
+/-- `transitiveClose conflictMatrix` decides the conflicted pair `(0,1)`
+as `less` (the `less`-chain wins the first `if`). -/
+theorem transitiveClose_conflict_less :
+    transitiveClose conflictMatrix 0 1 = .less := by
+  have h1 : closeStep conflictMatrix 0 1 = POE.less := by decide
+  show (closeStep^[4 * 4]) conflictMatrix 0 1 = .less
+  rw [show 4 * 4 = 15 + 1 from rfl, Function.iterate_succ, Function.comp_apply]
+  exact iterate_closeStep_keeps_less 0 1 15 (closeStep conflictMatrix) h1
+
+/-- `transitiveClose (swap conflictMatrix)` *also* decides `(0,1)` as
+`less` — the σ-swap did not flip the tie-break. -/
+theorem transitiveClose_swap_conflict_less :
+    transitiveClose (PMatrix.swap conflictMatrix) 0 1 = .less := by
+  have h1 : closeStep (PMatrix.swap conflictMatrix) 0 1 = POE.less := by decide
+  show (closeStep^[4 * 4]) (PMatrix.swap conflictMatrix) 0 1 = .less
+  rw [show 4 * 4 = 15 + 1 from rfl, Function.iterate_succ, Function.comp_apply]
+  exact iterate_closeStep_keeps_less 0 1 15
+    (closeStep (PMatrix.swap conflictMatrix)) h1
+
+/--
+**Refutation: `transitiveClose` does NOT commute with σ-swap.**
+
+`transitiveClose (swap conflictMatrix) (0,1) = less`, whereas
+`swap (transitiveClose conflictMatrix) (0,1) = swap less = greater`. The
+unconditional commutation lemma is therefore false.
+-/
+theorem transitiveClose_swap_false :
+    ¬ ∀ (m : Nat) (P : PMatrix m),
+        transitiveClose (PMatrix.swap P) = PMatrix.swap (transitiveClose P) := by
+  intro h
+  have hbad := congrFun (congrFun (h 4 conflictMatrix) 0) 1
+  rw [transitiveClose_swap_conflict_less] at hbad
+  simp only [PMatrix.swap, transitiveClose_conflict_less, POE.swap_less] at hbad
+  exact absurd hbad (by decide)
 
 /-! ## Colourings, signatures, and 1-WL refinement -/
 
@@ -270,76 +365,179 @@ theorem warmRefine_refines {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (initial : Colouring n) {v w : Fin n}
     (h : warmRefine adj P initial v = warmRefine adj P initial w) :
     initial v = initial w := by
-  sorry
+  -- Generalised over the iteration count and the starting colouring so the
+  -- induction hypothesis can peel a round off the *front*.
+  have key : ∀ k (χ : Colouring n),
+      ((refineStep adj P)^[k]) χ v = ((refineStep adj P)^[k]) χ w → χ v = χ w := by
+    intro k
+    induction k with
+    | zero => intro χ hk; exact hk
+    | succ k ih =>
+      intro χ hk
+      rw [Function.iterate_succ, Function.comp_apply] at hk
+      exact refineStep_refines adj P χ (ih (refineStep adj P χ) hk)
+  exact key n initial h
+
+/-!
+### The cell-uniform signature lemma is FALSE as originally stated
+
+The original `cell_split_uniform` claimed: if `v` and `w` lie in the same
+`χ₀`-cell and neither is `a` nor `b`, their post-guess + TC signatures
+*coincide*. Its proof sketch argued that cell-coherence forces "the set of
+TC chains from `v`" to match "the set from `w` cell-by-cell".
+
+That argument has a real gap. Cell-coherence is a **multiset** property:
+cell-mates relate identically to every *cell*. But a guess `(a, b)` is
+applied to two *individual vertices*, and TC chains run through individual
+vertices. Two cell-mates `v, w` can relate symmetrically to the *cell*
+containing `a` while relating asymmetrically to `a` *itself* — so the
+`a → b` edge propagates to one of them and not the other.
+
+`witnessP0` below is a concrete 5-vertex witness. Cells are `{0,1}`,
+`{2,3}`, `{4}`; `χ₀` is 1-WL-stable; `0 < 2` and `1 < 3` hold. Guessing
+`(a, b) = (2, 4)` gives `0 < 2 < 4` so TC adds `0 < 4`, but `1` has no
+chain to `4` — so `0` gains a `less` to `4` that `1` does not, and the
+signatures of the cell-mates `0` and `1` *differ*. `cell_split_uniform_false`
+is the machine-checked refutation.
+
+A *correct* version needs `a` and `b` to be **singleton `χ₀`-cells** (so
+"relates to `a`'s cell" coincides with "relates to `a`"). That holds for
+the individualised vertex in chain descent, but not for the unindividualised
+partner in a `k ≥ 2` target cell — which is exactly the regime §7's linear
+oracle must handle. Stating and proving the singleton-restricted lemma is
+left as follow-up.
+-/
+
+/-- Iterating `closeStep` from one of its fixpoints stays at that fixpoint. -/
+theorem iterate_closeStep_fix {n : Nat} (M : PMatrix n)
+    (hM : closeStep M = M) : ∀ k, (closeStep^[k]) M = M := by
+  intro k
+  induction k with
+  | zero => rfl
+  | succ k ih => rw [Function.iterate_succ', Function.comp_apply, ih]; exact hM
+
+/-- Witness adjacency: the empty graph on 5 vertices (adjacency plays no
+role in the refutation; the discrepancy is entirely in `P`). -/
+private def witnessAdj : AdjMatrix 5 := ⟨fun _ _ => 0⟩
+
+/-- Witness pre-guess matrix: `0 < 2` and `1 < 3`. With cells `{0,1}`,
+`{2,3}`, `{4}` the cell-mates `0, 1` relate symmetrically to the *cell*
+`{2,3}` but asymmetrically to the *vertices* `2` and `3`. -/
+private def witnessP0 : PMatrix 5 := fun i j =>
+  match i.val, j.val with
+  | 0, 2 => .less
+  | 2, 0 => .greater
+  | 1, 3 => .less
+  | 3, 1 => .greater
+  | _, _ => .unknown
+
+/-- Witness colouring: cells `{0,1}`, `{2,3}`, `{4}`. -/
+private def witnessChi : Colouring 5 := fun i =>
+  match i.val with
+  | 0 => 0
+  | 1 => 0
+  | 2 => 1
+  | 3 => 1
+  | _ => 2
+
+/-- The explicit `closeStep`-fixpoint of `applyGuess witnessP0 2 4 less`:
+`witnessP0` plus the guess `2 < 4` plus the one closure entry `0 < 4`. -/
+private def witnessTC : PMatrix 5 := fun i j =>
+  match i.val, j.val with
+  | 0, 2 => .less
+  | 2, 0 => .greater
+  | 1, 3 => .less
+  | 3, 1 => .greater
+  | 2, 4 => .less
+  | 4, 2 => .greater
+  | 0, 4 => .less
+  | 4, 0 => .greater
+  | _, _ => .unknown
+
+/-- `transitiveClose (applyGuess witnessP0 2 4 less) = witnessTC`, proved
+without unfolding the 25-fold iterate: one `closeStep` already reaches the
+fixpoint `witnessTC`, and `iterate_closeStep_fix` carries it the rest. -/
+private theorem witnessTC_eq :
+    transitiveClose (applyGuess witnessP0 2 4 .less) = witnessTC := by
+  have hstep : closeStep (applyGuess witnessP0 2 4 .less) = witnessTC := by
+    funext i j; revert i j; decide
+  have hfix : closeStep witnessTC = witnessTC := by
+    funext i j; revert i j; decide
+  show (closeStep^[5 * 5]) (applyGuess witnessP0 2 4 .less) = witnessTC
+  rw [show 5 * 5 = 24 + 1 from rfl, Function.iterate_succ, Function.comp_apply,
+    hstep]
+  exact iterate_closeStep_fix witnessTC hfix 24
+
+/-- `witnessChi` is 1-WL-stable for `(witnessAdj, witnessP0)`: cell-mates
+have equal signatures, which via `refineStep_iff` is exactly stability. -/
+private theorem witnessChi_stable :
+    samePartition witnessChi (refineStep witnessAdj witnessP0 witnessChi) := by
+  have hsig : ∀ i j : Fin 5, witnessChi i = witnessChi j →
+      signature witnessAdj witnessP0 witnessChi i
+        = signature witnessAdj witnessP0 witnessChi j := by decide
+  intro i j
+  rw [refineStep_iff]
+  exact ⟨fun hij => ⟨hij, hsig i j hij⟩, fun h => h.1⟩
 
 /--
-**Lemma (cell-uniform signature change under guess + TC).**
+**Refutation: cell-mates do NOT keep equal signatures after a guess + TC.**
 
-If `v` and `w` are in the same cell of `χ₀` (a 1-WL-stable colouring of
-`(adj, P₀)`) and neither `v` nor `w` is the guessed pair `(a, b)`, then
-their post-guess signatures coincide regardless of guess direction.
-
-Proof sketch:
-1. By stability of `χ₀` and `refineStep_iff`, members of a cell of
-   `χ₀` have equal signatures under `(adj, P₀, χ₀)`. So `signature adj
-   P₀ χ₀ v = signature adj P₀ χ₀ w`.
-2. The transitive closure under `applyGuess P₀ a b dir` adds entries
-   only along chains involving the new `(a, b)` edge. For `v` and `w`
-   in the same `χ₀`-cell, cell-coherence gives that their out-relations
-   to every other `χ₀`-cell are identical. Hence the set of TC chains
-   from `v` matches the set from `w` cell-by-cell, and the new entries
-   added to `v`'s row equal (as a multiset of `(cell, A, P)` triples)
-   the new entries added to `w`'s row.
-3. The post-TC signatures of `v` and `w` therefore remain equal, for
-   each of the two directions independently.
-
-The key observation is that this argument is symmetric in `less` vs
-`greater` — the cell-coherence and chain-matching are direction-agnostic,
-so both conjuncts of the conclusion hold by the same reasoning.
+For the witness above, `0` and `1` are `χ₀`-cell-mates, `(2, 4)` is a
+guessable pair, and `0, 1 ∉ {2, 4}` — every hypothesis of the original
+`cell_split_uniform` holds — yet under `transitiveClose (applyGuess
+witnessP0 2 4 less)` vertex `0` carries a `less` to `4` that vertex `1`
+lacks, so the two signatures differ. The `less` conjunct of the claimed
+conclusion is false, hence the lemma is false.
 -/
-theorem cell_split_uniform {n : Nat} (adj : AdjMatrix n)
-    (P₀ : PMatrix n) (χ₀ : Colouring n)
-    (h_stable : samePartition χ₀ (refineStep adj P₀ χ₀))
-    (a b : Fin n) (hab : a ≠ b) (h_unknown : P₀ a b = .unknown)
-    (v w : Fin n) (h_same_cell : χ₀ v = χ₀ w)
-    (h_neither : v ≠ a ∧ v ≠ b ∧ w ≠ a ∧ w ≠ b) :
-    signature adj (transitiveClose (applyGuess P₀ a b .less))    χ₀ v
-      = signature adj (transitiveClose (applyGuess P₀ a b .less))    χ₀ w
-    ∧
-    signature adj (transitiveClose (applyGuess P₀ a b .greater)) χ₀ v
-      = signature adj (transitiveClose (applyGuess P₀ a b .greater)) χ₀ w := by
-  sorry
+theorem cell_split_uniform_false :
+    ¬ ∀ {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n) (χ₀ : Colouring n),
+        samePartition χ₀ (refineStep adj P₀ χ₀) →
+        ∀ (a b : Fin n), a ≠ b → P₀ a b = .unknown →
+        ∀ (v w : Fin n), χ₀ v = χ₀ w →
+          (v ≠ a ∧ v ≠ b ∧ w ≠ a ∧ w ≠ b) →
+            signature adj (transitiveClose (applyGuess P₀ a b .less)) χ₀ v
+              = signature adj (transitiveClose (applyGuess P₀ a b .less)) χ₀ w
+            ∧
+            signature adj (transitiveClose (applyGuess P₀ a b .greater)) χ₀ v
+              = signature adj (transitiveClose (applyGuess P₀ a b .greater)) χ₀ w := by
+  intro h
+  have hconj := h witnessAdj witnessP0 witnessChi witnessChi_stable
+    2 4 (by decide) (by decide) 0 1 (by decide) (by decide)
+  rw [witnessTC_eq] at hconj
+  exact absurd hconj.1 (by decide)
 
 /-! ## Main theorem -/
 
 /--
-**Direction invariance of warm refinement (algorithm §6.2).**
+**Direction invariance of warm refinement (algorithm §6.2).** — OPEN (`sorry`).
 
 For any pre-guess matrix `P₀` with stable colouring `χ₀`, and any
 guessable pair `(a, b)`, warm refinement under
 `TC (applyGuess P₀ a b less)` and `TC (applyGuess P₀ a b greater)`,
-starting from `χ₀`, induce the same partition.
+starting from `χ₀`, induce the same *partition*.
 
-Proof sketch (combines the lemmas above):
+**The theorem is still believed true** — it is the partition-level
+("weak") form of invariant 6.2, empirically checked on `C4`, `K3`, and
+the 6-vertex asymmetric graph (see `docs/chain-descent-strategy.md` §6.2).
+What changed is the **proof route**.
 
-For any `v, w : Fin n` we show the two-sided implication
-`warmRefine ... .less v = warmRefine ... .less w ↔
- warmRefine ... .greater v = warmRefine ... .greater w`.
+The original sketch reduced it to `cell_split_uniform`: cell-mates `v, w`
+(neither `a` nor `b`) keep *equal signatures* after the guess, so cells
+do not split at all. `cell_split_uniform_false` above shows that is wrong
+— a guess on an individual vertex *does* split a cell. The honest picture
+is weaker and is what must now be proved:
 
-- If `v, w` are not in the same `χ₀`-cell (i.e., `χ₀ v ≠ χ₀ w`), then
-  by `warmRefine_refines` they cannot be in the same cell of either
-  warm-refined colouring. Both sides of the iff are False.
-- If `v, w` are in the same `χ₀`-cell and neither is `a` nor `b`,
-  `cell_split_uniform` gives equal signatures under both directions.
-  Iterating `refineStep_iff`, the warm-refined colours of `v` and `w`
-  remain equal in both directions; both sides of the iff are True.
-- If one of `v, w` is `a` (or `b`), individualisation in the first
-  round splits that vertex into its own singleton sub-cell in both
-  directions — the splits are direction-symmetric because the only
-  thing that differs between the two `refineStep` runs at that vertex
-  is the `(b, less)` vs `(b, greater)` entry in its signature, which
-  doesn't affect equality with any non-`a, b` vertex (their signatures
-  don't contain such an entry on their side).
+> after the guess, a `χ₀`-cell may split, **but it splits into the same
+> sub-cells regardless of guess direction** — only the order labels on
+> the split differ.
+
+So the surviving ingredient is `warmRefine_refines` (warm refinement only
+splits `χ₀`, never merges it — handles the `χ₀ v ≠ χ₀ w` case), and the
+missing ingredient is a *direction-symmetric split* lemma replacing the
+(false) *no-split* lemma `cell_split_uniform`. That lemma is the real
+content of §6.2 and the genuine open obligation; note the σ-relabel route
+is also unavailable, since `transitiveClose_swap` is false (see above) and
+in any case swapping the guess direction swaps the whole pre-guess matrix.
 -/
 theorem warm_6_2 {n : Nat} (adj : AdjMatrix n)
     (P₀ : PMatrix n) (χ₀ : Colouring n)
@@ -350,4 +548,4 @@ theorem warm_6_2 {n : Nat} (adj : AdjMatrix n)
       (warmRefine adj (transitiveClose (applyGuess P₀ a b .greater)) χ₀) := by
   sorry
 
-end FlipValidation
+end ChainDescent
