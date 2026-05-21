@@ -187,37 +187,79 @@ A counterexample would be the first clean hidden-Johnson graph.
 
 ---
 
-## Theorems the polynomial bound requires (reframed in group terms)
+## Theorems the polynomial bound requires
 
-The boolean-era theorems T-A, T-B, T-C survive the reframe — and two of three
-become *free*.
+Three structural theorems — **T-A, T-B, T-C** — are what the calculator's
+polynomial bound rests on. They predate the group reframe (they were first
+phrased for the boolean calculator); the reframe keeps all three but changes
+which are hard.
 
-### T-A (polynomial-size representation) — now free
+**Why three, and how they compose.** The calculator does lex-leader descent
+down the stabilizer chain. Its cost is, schematically:
 
-> The residual symmetry has a polynomial-size representation.
+```
+   total  =  (number of chain levels)
+           × (transversal size at each level)
+           × (work to discover that level's transversal and lex-select it)
+```
 
-A theorem of computational group theory (Sims): every subgroup of `S_n` has a
-base of `≤ n` points and a strong generating set of `O(n²)` elements,
-regardless of the group's order (even `n!`). You never store group *elements*;
-you store *generators*. `S_s` on `s` points is 2 generators, not `s!` objects.
-**T-A is no longer something to prove — it is given.**
+For the total to be polynomial, **each of the three factors must be
+polynomial** — and each theorem pins exactly one factor:
 
-### T-B (bounded chain length) — now free
+- **T-A** bounds the *representation* — each level's transversal, and the
+  chain as a whole, are polynomial-size.
+- **T-B** bounds the *number of levels*.
+- **T-C** bounds the *work per level*.
 
-> The number of genuine decision levels is polynomial.
+Drop any one and the bound collapses: without T-A the representation is
+exponential to even write down; without T-B the descent has
+super-polynomially many levels; without T-C each level costs
+super-polynomially to walk. All three are required. The reframe's payoff is
+that **T-A and T-B become free**, isolating the entire difficulty in T-C.
 
-A base has `≤ n` points; the stabilizer chain has `≤ n` levels. **Free.**
+### T-A — polynomial-size representation (free)
 
-### T-C (the load-bearing one) — = the single hurdle
+> Each chain level's transversal, and the stabilizer chain as a whole, are
+> polynomial-size.
 
-> Each level's transversal can be discovered and lex-leader-selected in
+A theorem of computational group theory (Sims): every subgroup of `S_n` —
+**whatever its order, up to `n!`** — has a base of `≤ n` points and a strong
+generating set of `O(n²)` elements. You never store group *elements*; you
+store *generators*. `S_s` acting on `s` points is 2 generators, not `s!`
+stored objects. In the boolean era T-A was an open conjecture ("bounded
+support per `P` entry"); the group reframe turns it into a citation.
+
+### T-B — polynomially many levels (free)
+
+> The stabilizer chain has polynomially many levels.
+
+A base of a subgroup of `S_n` has `≤ n` points, so the chain has `≤ n`
+levels; the genuine decisions (false symmetries) are a subset of those. Also
+a citation, not a conjecture.
+
+### T-C — polynomial work per level (the single hurdle)
+
+> Each level's transversal can be *discovered* and *lex-leader-selected* in
 > polynomial time.
 
-This is the single hurdle, restated as a theorem requirement. Polynomial on
-the easy side (cascade / abelian / bounded-width); the wall otherwise.
-**Schreier–Sims proves the chain construction is polynomial *given a
-generating set*** — so the skeleton is not the problem. The missing input —
-the per-level transversal / the generators — is the whole of T-C.
+This is the load-bearing claim, and it is exactly the single hurdle from
+"The hardness map." It is polynomial on the easy side (cascade / abelian /
+bounded-width) and the open problem otherwise. The asymmetry that pins the
+difficulty: **Schreier–Sims builds the whole chain in polynomial time *given
+a generating set*** — so the chain *machinery* is not the problem. T-C is
+entirely the *missing input*: discovering each level's transversal — the new
+coset representatives — when refinement does not expose it for free.
+
+### Note: T-A/T-B/T-C vs. the strategy doc's §6 invariants
+
+T-A/T-B/T-C are calculator-specific and defined only in this doc. They are
+distinct from [`flip-validation-strategy.md`](./flip-validation-strategy.md)'s
+§6.1–6.5 invariants, which concern the algorithm's *correctness* and its
+forward/backward passes. Of those, §6.1 (iso-invariant cell ids — the chain's
+reference frame) and the §6.5 *invariant* (every canonical form reachable —
+i.e. the per-level transversal must cover the orbit) remain load-bearing for
+the calculator's correctness; §6.2/§6.3 were tied to the now-superseded
+boolean backward pass.
 
 ---
 

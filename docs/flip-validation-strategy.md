@@ -5,6 +5,20 @@ feature is that information **flows between two passes** through a recorded
 guess stack, so the backward pass can correct wrong choices made greedily by
 the forward pass instead of branching on them.
 
+> **Status note (2026-05-21) — read before the rest of this doc.** The
+> algorithm's *forward pass and overall two-pass shape* remain current: §1–§4,
+> §7, and invariants 6.1 and 6.4. The *backward pass* has been reframed — it is
+> no longer the boolean "replay each branch and lex-min" mechanism of §5, but a
+> group-theoretic **stabilizer-chain lex-leader descent**. See
+> [`flip-validation-calculator.md`](./flip-validation-calculator.md) for the
+> current model. Superseded in this doc: §5 (backward pass); §6.5's *rotation
+> mechanism* (the *invariant* 6.5 — every canonical form reachable — still
+> holds; the mechanism is re-housed as the calculator's per-level transversal);
+> §6.2 / §6.3 (properties of the boolean backward pass); §10 (implementation
+> notes — the code is mid-migration); §11.10 (the "dependency calculator",
+> replaced by the stabilizer-chain calculator); and the §8 complexity
+> arithmetic (`O(n⁸)` etc.). Read those through the calculator doc's reframe.
+
 Built on top of
 [`CanonGraphOrdererPartialOrderSinglePair`](../GraphCanonizationProject/CanonGraphOrdererPartialOrderSinglePair.cs)
 (which provides the single-pair guess + 1-WL propagation core) and in the
