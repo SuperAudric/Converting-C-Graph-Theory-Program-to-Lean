@@ -17,6 +17,15 @@ rests on.
 > *partially superseded* — its §6.5 "pair rotation" and the backward-pass
 > description should be read through the group reframe below.
 
+> **Implementation session (same day).** Phase 1 is now substantially built —
+> the `PermutationGroup` stabilizer-chain library, Tier-0 component
+> decomposition, the recursive group calculator, and automorphism orbit
+> pruning. The calculator is **correct** (scramble-invariant + complete) on
+> Tier 0/1/CFI but **not yet proven polynomially bounded**. The "Implementation
+> plan and status" section is annotated with what shipped; "Implemented
+> calculator vs. targeted design" records why the shipped shape differs from
+> the design language; the "Status snapshot" at the end is current.
+
 ---
 
 ## What the calculator is, and what it isn't
@@ -263,39 +272,32 @@ boolean backward pass.
 
 ---
 
-## Implementation plan
+## Implementation plan and status
 
-The current code (see "Status snapshot") is the boolean-era implementation
-with §6.5 stripped. The plan replaces the backward pass with the
-group calculator.
+Phase 1 is built except the detector. The group calculator has replaced the
+backward pass; the boolean-era forward pass is retained only to back the Probe
+instrumentation. The *how* and *why each item deviated from this plan* are in
+"Implemented calculator vs. targeted design" below.
 
-### Phase 1 — nailed down; implement now (Tier 0 / Tier 1 / CFI)
+### Phase 1 — Tier 0 / Tier 1 / CFI
 
-This is everything "up to the poly/Johnson split." All of it is polynomial
-and structurally settled.
-
-1. **Direction-agnostic record.** The forward-pass record entry becomes
-   "individualised pair {a,b} in cell-context C," not a committed direction.
-   `P` itself still carries concrete directions (refinement reads it); only
-   the *record* the calculator consumes is direction-agnostic.
-2. **Restore the §3.5 cell snapshot** — re-housed as the per-level orbit /
-   transversal source. (Stripped alongside §6.5; comes back as chain data.)
-3. **Tier 0: component decomposition.** Split into connected components,
-   canonize each, combine by sorting component canonicals. Disjoint unions
-   must cost linear-in-components, never superpolynomial.
-4. **The calculator = bottom-up stabilizer-chain construction**
+1. **Direction-agnostic record** — *subsumed.* A recursive calculator keeps
+   per-level state (P, partition, path) on the call stack; there is no
+   persistent record to make direction-agnostic.
+2. **§3.5 cell snapshot** — *subsumed* with it. The per-level orbit source is
+   simply the target cell at the current recursion node.
+3. **Tier 0: component decomposition** — ✓ built. `Run` splits into connected
+   components, canonizes each, combines block-diagonally in an iso-invariant
+   sorted order.
+4. **The calculator** — ✓ built, but as a *top-down recursive IR search*, not
+   a bottom-up chain construction (Deviation 1).
+   Originally bottom-up stabilizer-chain construction
    (Schreier–Sims-shaped) **+ lex-leader descent.** §6.5 pair rotation is the
    per-level transversal.
-5. **Tier 1: refinement-cascade-driven transversal discovery.** After each
-   individualization, refinement splits cells; when it reaches single-orbit
-   cells the level's transversal is visible and lex-leader is a free choice
-   (true symmetry). Interleaving refinement with each individualization is
-   **load-bearing, not an optimization** — it is what shrinks the transversals
-   and turns guesses into true symmetries.
-6. **The poly/Johnson split detector.** After an individualization, check
-   whether refinement cascaded. *No cascade* + *the cell still carries a large
-   non-abelian group* → Tier 2 signal. This is the "Split-or-Johnson" trigger;
-   for Phase 1 it just needs to *detect and flag*, not handle.
+5. **Tier 1: transversal discovery** — ✓ built, as target-cell branching +
+   automorphism orbit pruning (Deviations 3–4). Interleaving refinement with
+   each individualization is load-bearing, as planned.
+6. **Johnson / poly-split detector** — pending; the one remaining item.
 
 ### Phase 2 — deferred (the poly/Johnson split and beyond)
 
@@ -306,9 +308,10 @@ and structurally settled.
 
 ### Test targets
 
-- `FV_KnownGraphs_DifferentScramblings_ProduceSameCanonical(size: 6)` — fails
-  today on graph **#56 (C4 + K2)**, the minimal Tier-1 case. The calculator
-  must fix it. All other FV tests pass.
+- `FV_KnownGraphs_DifferentScramblings_ProduceSameCanonical(size: 6)` — **now
+  passes.** The calculator fixed graph #56 (C4 + K2, via Tier-0 decomposition)
+  and graph #135 (a connected cubic graph — the genuine multi-orbit-cell
+  case). The whole FV suite is 11/11; `FV_CfiCycle3_*` tests were added.
 - CFI(Cycle3) — Tier 1. Established this session: the **odd** graph is a
   single 18-cycle `C18`; the **even** graph is two disjoint 9-cycles
   `C9 ⊔ C9`. `Aut(C18) = D18` (order 36); `Aut(C9 ⊔ C9) = D9 ≀ Z2` (order
@@ -320,6 +323,89 @@ and structurally settled.
   is the artefact Tier-0 decomposition removes.)
 - The `CV_*` calculator-viability tests and `GraphCanonTests.CalculatorViability.cs`
   remain as a measurement record; they are no longer load-bearing.
+
+---
+
+## Implemented calculator vs. targeted design
+
+The design language above (stabilizer chain, bottom-up construction,
+direction-agnostic record, per-level transversal) is the *target*. The shipped
+code reaches the same goal in a different shape. This section maps the two and
+records **why each deviation was forced** — the load-bearing differences for
+an implementation-vs-design review.
+
+### What shipped
+
+- **`PermutationGroup.cs`** — `Perm` (permutation algebra) + `PermutationGroup`
+  (generators → base + transversals via recursive Schreier–Sims; `Order`,
+  `Contains`, `Orbit`). The calculator-doc "stabilizer chain" as a concrete
+  object. 17 unit tests; group orders verified on S₃–S₇, D₄, and — tying to
+  the corpus — D18 = Aut(C18) and D9≀Z2 = Aut(C9⊔C9).
+- **Tier-0 decomposition** in `Run`.
+- **`GroupCalculator`** (nested in `CanonGraphOrdererFlipValidation`) — the
+  calculator: a recursive lex-min IR search with automorphism orbit pruning.
+  Replaces the backward pass.
+
+### Deviation 1 — recursive IR search, not bottom-up chain construction
+
+*Targeted:* bottom-up stabilizer-chain construction + lex-leader descent.
+*Shipped:* a top-down recursive IR search.
+*Why forced:* a literal bottom-up chain construction has the gap identified
+this session — its inductive step (extend `G_{i+1}` to `G_i`) needs the
+level's *transversal discovered*, and a subgroup does not determine its
+supergroup, so the deeper solution cannot supply it. Transversal discovery
+*is* the hurdle. What is buildable is a top-down search that discovers
+transversals by exploring. Schreier–Sims — genuinely bottom-up, but only
+*given* generators — is therefore housed inside `PermutationGroup`, organizing
+the automorphisms the search finds, rather than being the canonizer's spine.
+"Bottom-up chain" stays the right analysis lens; it is not the control flow.
+
+### Deviation 2 — no persistent record / cell snapshot
+
+The record and §3.5 snapshot were artifacts of the forward/backward split. A
+recursive search keeps per-level state on the call stack, so there is nothing
+to record; the per-level orbit source is the target cell at the current node.
+Items 1–2 are subsumed, not deferred.
+
+### Deviation 3 (load-bearing) — target-cell branching, forced by iso-invariance
+
+The first attempt branched binary on a single within-cell *pair* (by vertex
+index), declared a leaf at "no within-cell UNKNOWN pair," and completed by a
+cell-id linear extension. **It failed four scramble-invariance tests.** Root
+cause: the search-tree *shape* depended on the input labelling — whether the
+lex-min-index pair is an edge or a non-edge changes whether refinement
+cascades fully after that one guess (C4: edge-first discretizes in one step →
+2 leaves; diagonal-first leaves a 2-cell → 4 leaves), so different scramblings
+explored different trees with different leaf sets.
+
+The forced fix is the standard correct IR shape: branch over a **target
+cell's vertices**, not a pair. The target cell is the lowest-id non-singleton
+cell — cell id is iso-invariant (`IncrementalPartition` numbers cells by
+canonical lex-sort of refinement signatures); branching is exhaustive over
+that cell; a leaf is a **discrete** partition whose cell ids *are* the
+canonical labelling. The tree shape is then iso-invariant by construction, so
+the leaf-matrix set and its lex-min are invariant. This is nauty's core shape,
+and the iso-invariance requirement forces it.
+
+### Deviation 4 — §6.5 "per-level transversal" → the target-cell branch
+
+In the recursive design the per-level transversal *is* the set of target-cell
+vertices branched at a node; "one representative per orbit" is the orbit
+pruning. §6.5's concept survives, realized as target-cell branching + orbit
+pruning rather than a separate rotation mechanism.
+
+### What is not yet true
+
+- **Not proven polynomial.** The calculator is nauty-shaped and nauty is
+  exponential worst-case. Correctness (scramble-invariance + completeness) is
+  argued in the code comments; the polynomial bound — T-C — is not. Proving
+  T-C will likely need algorithm refinement, not only a write-up.
+- **No no-cascade-abelian path.** The tier map routes CFI on rich bases ("no
+  cascade + abelian") to polynomial *via linear algebra*. The shipped
+  calculator has no Gaussian path; it relies on orbit pruning. CFI(Cycle3)
+  passes only because it *cascades* (it is cycles). Genuine non-cascading CFI
+  is in Phase-1 scope but unaddressed.
+- **Johnson / poly-split detector** — not built.
 
 ---
 
@@ -415,7 +501,6 @@ In priority order:
 Anything short of this is a research checkpoint.
 
 ---
-
 ## Status snapshot (2026-05-21)
 
 ### Model state
@@ -442,30 +527,84 @@ The current `CanonGraphOrdererFlipValidation`:
   `ProbeXorCouplings`): present, now a measurement record only.
 - The group calculator is **designed (this doc) but not implemented.**
 
+## Status snapshot (2026-05-21, implementation session)
+
+### Model state
+
+- **Settled:** the calculator is a recursive lex-min individualization-
+  refinement search with automorphism orbit pruning (nauty-shaped). The
+  design's "stabilizer chain" is realized as the `PermutationGroup` that
+  harvests and prunes with discovered automorphisms; see "Implemented
+  calculator vs. targeted design" for why control flow is top-down recursion
+  rather than bottom-up chain construction.
+- **Settled:** the tier classification (0 / 1 / 2) and the cascade ×
+  composition-factor hardness map.
+- **Open:** T-C (the polynomial bound); whether Tier 2 arises from the forward
+  pass at all (the construction question).
+
+### Implementation state
+
+- **`PermutationGroup.cs`** — built. `Perm` permutation algebra +
+  `PermutationGroup` (recursive Schreier–Sims, un-sifted — correct for any
+  group; the sifting optimisation for large groups is deferred). 17 unit tests.
+- **`CanonGraphOrdererFlipValidation`** — `Run` does Tier-0 component
+  decomposition; `RunConnected` runs the nested `GroupCalculator` (recursive
+  lex-min IR search + orbit pruning). The boolean-era forward pass
+  (`ContinueForward`, `BackwardPass`, `PickAndApplyGuess`, …) is **retained but
+  no longer used by `Run`** — it still backs the `ProbeRotationsSingleFlip` /
+  `ProbeXorCouplings` instrumentation. New diagnostics:
+  `LastAutomorphismGroupOrder`, `LastPrunedBranches`.
+- The calculator is **correct** (scramble-invariant + complete) and
+  **non-redundant** (orbit pruning active); it is **not proven polynomially
+  bounded**.
+
 ### Test state
 
-- 10/11 FV tests pass; `FV_KnownGraphs_DifferentScramblings_ProduceSameCanonical(size: 6)`
-  fails on graph #56 (C4 + K2) — the Tier-1 target for the calculator.
-- All `CV_*` calculator-viability tests pass (measurements, not regressions).
+- FV suite **11/11**. The connected multi-orbit failure (graph #135) and the
+  disconnected one (#56) are both fixed.
+- New `FV_CfiCycle3_*` tests pass — scramble-invariance of C18 and C9⊔C9,
+  even ≠ odd, orbit pruning active.
+- `PermutationGroupTests` 17/17.
+- Broader suite (ex-CV/Long): 83 passed, 0 failed, 3 pre-existing skips. No
+  regressions.
+
+### Theory state
+
+- **T-A, T-B** — free (computational group theory); `PermutationGroup`
+  realizes the polynomial-size chain.
+- **T-C** — open. The implemented calculator is *correct* but not *bounded*;
+  its polynomial bound is exactly the T-C conjecture. Because the calculator
+  is nauty-shaped (and nauty is exponential worst-case), proving T-C for the
+  non-Tier-2 class will likely require algorithm refinement — notably a
+  no-cascade-abelian (Gaussian) path — not only a proof.
 
 ### Next functional step
 
-Implement Phase 1 (Tier 0 / Tier 1 / CFI + the poly/Johnson split detector).
-Expect implementation-vs-theory reconciliation work. Tier 2 is deferred.
+The **Johnson / poly-split detector** — the last Phase-1 item. Cleanest form:
+once a proven Tier-1 polynomial bound `B(n)` exists, instrument the search and
+flag any run exceeding `B(n)` as not-Tier-1 (hence Tier-2 — sound, with only
+benign false negatives). Until `B(n)` is proven, the interim detector is
+structural: an individualization that produced no refinement cascade *and* a
+residual cell carrying a large non-abelian group. A fired detector is itself a
+logged discovery — a concrete hidden-Johnson graph, a type for which no
+construction is currently known.
+
+A *polynomial* Johnson handler would close GI ∈ P on its own via Babai's
+framework (whose only super-polynomial component is the Johnson/Split-or-
+Johnson case), independent of this project; the project's achievable
+deliverable is the non-Tier-2 canonizer (polynomial if T-C holds) plus that
+detector.
 
 ### Reading order for context recovery
 
 1. [`flip-validation-strategy.md`](./flip-validation-strategy.md) — the
-   algorithm's shape (read its §6.5 / backward-pass parts through the group
-   reframe; they are partially superseded).
-2. This doc, top to bottom: the stabilizer-chain model, the hardness map and
-   the single hurdle, the construction question, then the implementation plan.
-3. The "History" section — only if you need to know why the boolean approach
-   was abandoned.
-4. [`CanonGraphOrdererFlipValidation.cs`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs)
-   and [`GraphCanonTests.CalculatorViability.cs`](../GraphCanonizationProject.Tests/GraphCanonTests.CalculatorViability.cs)
-   — the current (boolean-era) code and the measurement scaffold.
-
-The [`FlipValidation.lean`](../GraphCanonizationProofs/FlipValidation.lean)
-partial proof targeted §6.2 (T-A's old basis); with T-A now free from group
-theory it is no longer central.
+   algorithm's original shape (its §6.5 / backward-pass parts are superseded).
+2. This doc: the stabilizer-chain model, the hardness map and the single
+   hurdle, then "Implementation plan and status" and "Implemented calculator
+   vs. targeted design."
+3. [`PermutationGroup.cs`](../GraphCanonizationProject/PermutationGroup.cs) and
+   the `GroupCalculator` class in
+   [`CanonGraphOrdererFlipValidation.cs`](../GraphCanonizationProject/CanonGraphOrdererFlipValidation.cs)
+   — the shipped calculator. `PermutationGroupTests.cs` and the `FV_CfiCycle3_*`
+   tests exercise it.
+4. The "History" section — only for why the boolean approach was abandoned.

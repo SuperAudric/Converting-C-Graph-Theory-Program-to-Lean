@@ -18,6 +18,11 @@ the forward pass instead of branching on them.
 > notes — the code is mid-migration); §11.10 (the "dependency calculator",
 > replaced by the stabilizer-chain calculator); and the §8 complexity
 > arithmetic (`O(n⁸)` etc.). Read those through the calculator doc's reframe.
+>
+> **Implementation update (same day):** the group calculator is now built —
+> `PermutationGroup` plus the recursive `GroupCalculator` — so §10's
+> "mid-migration" is resolved. See the calculator doc's "Implementation plan
+> and status" and "Implemented calculator vs. targeted design".
 
 Built on top of
 [`CanonGraphOrdererPartialOrderSinglePair`](../GraphCanonizationProject/CanonGraphOrdererPartialOrderSinglePair.cs)
