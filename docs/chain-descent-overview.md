@@ -4,10 +4,12 @@ A plain-language description of the rewritten calculator (the "chain-descent"
 design from the implementation plan). It is the spec the rewrite implements and
 the structure that correctness/complexity proofs will be written against.
 
-Companion to [`chain-descent-strategy.md`](./chain-descent-strategy.md) and
-[`chain-descent-calculator.md`](./chain-descent-calculator.md); it is
-intended to become the basis of the calculator doc's rewrite. Where it conflicts
-with those, this doc wins.
+This is the current, authoritative design doc.
+[`chain-descent-strategy.md`](./chain-descent-strategy.md) and
+[`chain-descent-calculator.md`](./chain-descent-calculator.md) are earlier-
+generation companions — superseded, retained for lineage and for detail this
+doc summarizes (notably invariant 6.2, which §7 depends on). Where they
+conflict with this doc, this doc wins.
 
 ---
 

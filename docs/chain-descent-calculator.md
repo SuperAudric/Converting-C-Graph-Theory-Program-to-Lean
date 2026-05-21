@@ -1,4 +1,4 @@
-# Flip-validation calculator (route 2: stabilizer-chain evaluation)
+# Flip-validation calculator — superseded (design detail behind chain-descent-overview.md)
 
 A supplement to [`chain-descent-strategy.md`](./chain-descent-strategy.md)
 covering the polynomial-bound piece of the algorithm — the "calculator" that
@@ -6,25 +6,20 @@ decides the lex-min canonical without exponential re-evaluation. The
 calculator is the unproven-polynomial component the whole algorithm's bound
 rests on.
 
-> **Major rewrite, 2026-05-21.** This doc was reframed after a session that
-> moved the calculator from a *boolean-formula* object to a *group-theoretic*
-> one. The boolean-class era (AND-of-XOR, Horn, LP) is preserved, condensed,
-> in "History" near the end — it is superseded but explains why the current
-> model is what it is. If you are picking this up cold, read top to bottom;
-> the "Reading order" section at the very end points at the companion files.
+> **Superseded (chain-descent rewrite).** The current authoritative design is
+> [`chain-descent-overview.md`](./chain-descent-overview.md); the implemented
+> code is the chain-descent harness (`ChainDescent.cs`, `CascadeOracle.cs`,
+> `CanonGraphOrdererChainDescent.cs`, …). This doc is retained for the detailed
+> analysis the overview only summarizes — the T-A/T-B/T-C decomposition, the
+> stabilizer-chain model, and the tier classification — which all carry over.
 >
-> Note: [`chain-descent-strategy.md`](./chain-descent-strategy.md) is now
-> *partially superseded* — its §6.5 "pair rotation" and the backward-pass
-> description should be read through the group reframe below.
-
-> **Implementation session (same day).** Phase 1 is now substantially built —
-> the `PermutationGroup` stabilizer-chain library, Tier-0 component
-> decomposition, the recursive group calculator, and automorphism orbit
-> pruning. The calculator is **correct** (scramble-invariant + complete) on
-> Tier 0/1/CFI but **not yet proven polynomially bounded**. The "Implementation
-> plan and status" section is annotated with what shipped; "Implemented
-> calculator vs. targeted design" records why the shipped shape differs from
-> the design language; the "Status snapshot" at the end is current.
+> **What does not carry over:** every "Implementation plan and status",
+> "Implemented calculator vs. targeted design", and "Status snapshot" section
+> below describes the *pre-rewrite* `GroupCalculator` — a nauty-shaped IR
+> search, since deleted. The actual implementation is the budget-bounded
+> chain-descent harness; read those sections as historical, and the overview
+> for what was built. The boolean-class era (AND-of-XOR, Horn, LP) remains
+> condensed in "History" near the end.
 
 ---
 
