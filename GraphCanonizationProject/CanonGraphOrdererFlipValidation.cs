@@ -137,6 +137,27 @@ namespace Canonizer
             if (vertexTypes.Length != G.VertexCount)
                 throw new Exception("Every vertex must be given a type. They may all be given the same type");
 
+            // Tier 0 — component decomposition. A disjoint union's automorphism
+            // group factors as a (wreath) product over connected components;
+            // canonizing each component independently and combining keeps
+            // disjoint unions linear in the number of components. The old
+            // whole-graph forward pass instead ran over the union as one cell
+            // and manufactured cross-component coupling, going superpolynomial
+            // on disjoint CFI. See docs/flip-validation-calculator.md "Tier 0".
+            var components = ConnectedComponents(G);
+            if (components.Count <= 1)
+                return RunConnected(vertexTypes, G);
+            return CombineComponents(vertexTypes, G, components);
+        }
+
+        public string Run_ToString(VertexType[] vertexTypes, EdgeType[,] edges) =>
+            Run(vertexTypes, new AdjMatrix(edges)).ToString();
+
+        // The single-component canonizer: forward greedy pass + backward pass,
+        // then read off the canonical. Run() dispatches here for connected
+        // graphs and for each component of a disconnected one.
+        private AdjMatrix RunConnected(VertexType[] vertexTypes, AdjMatrix G)
+        {
             int n = G.VertexCount;
             int[] adj = ExtractAdj(G);
 
@@ -154,14 +175,9 @@ namespace Canonizer
             List<Primary> record = ContinueForward(n, adj, p, partition);
 
             // Backward pass: direction-only flip per primary, single sweep
-            // deepest-to-shallowest. No fixpoint iteration needed — without
-            // pair rotation, deeper primaries are not replaced by new ones,
-            // so a single sweep suffices.
-            //
-            // Greedy direction-flip is incomplete on graphs with multi-orbit
-            // cells (e.g., C4+K2 #56) — those will fail until the calculator
-            // (route 2, AND-of-XOR symbolic representation over direction
-            // variables) is built.
+            // deepest-to-shallowest. Greedy direction-flip is incomplete on
+            // graphs with a multi-orbit cell (e.g. C4) — those stay wrong
+            // until the group calculator replaces this pass.
             record = BackwardPass(n, adj, vertexTypes, record);
             LastPrimaryCount = record.Count;
 
@@ -176,8 +192,97 @@ namespace Canonizer
             return PermuteByPartialOrder(G, pFinal, n);
         }
 
-        public string Run_ToString(VertexType[] vertexTypes, EdgeType[,] edges) =>
-            Run(vertexTypes, new AdjMatrix(edges)).ToString();
+        // ── Tier 0: component decomposition ──────────────────────────────────
+
+        // Connected components of G, treated as undirected (u ~ v if G has an
+        // edge either way). Each component is a sorted vertex-index array.
+        private static List<int[]> ConnectedComponents(AdjMatrix G)
+        {
+            int n = G.VertexCount;
+            var compOf = new int[n];
+            for (int i = 0; i < n; i++) compOf[i] = -1;
+            var components = new List<int[]>();
+            var queue = new Queue<int>();
+            for (int s = 0; s < n; s++)
+            {
+                if (compOf[s] >= 0) continue;
+                int id = components.Count;
+                var members = new List<int> { s };
+                compOf[s] = id;
+                queue.Clear();
+                queue.Enqueue(s);
+                while (queue.Count > 0)
+                {
+                    int u = queue.Dequeue();
+                    for (int v = 0; v < n; v++)
+                    {
+                        if (compOf[v] >= 0) continue;
+                        if (G[u, v] != 0 || G[v, u] != 0)
+                        {
+                            compOf[v] = id;
+                            members.Add(v);
+                            queue.Enqueue(v);
+                        }
+                    }
+                }
+                members.Sort();
+                components.Add(members.ToArray());
+            }
+            return components;
+        }
+
+        // Canonize each connected component independently, then lay the
+        // component canonicals out block-diagonally in an iso-invariant order.
+        // The order key is (vertex count, sorted type multiset, canonical
+        // adjacency) — a complete invariant for uniform-type graphs (the
+        // project's test corpus) and a sound partial one otherwise.
+        private AdjMatrix CombineComponents(VertexType[] vertexTypes, AdjMatrix G,
+                                            List<int[]> components)
+        {
+            int n = G.VertexCount;
+            var canon = new List<(int Size, int[] TypeMultiset, AdjMatrix Canon)>(components.Count);
+
+            foreach (var members in components)
+            {
+                int k = members.Length;
+                var subEdges = new EdgeType[k, k];
+                for (int i = 0; i < k; i++)
+                    for (int j = 0; j < k; j++)
+                        subEdges[i, j] = G[members[i], members[j]];
+
+                var subTypes = new VertexType[k];
+                for (int i = 0; i < k; i++) subTypes[i] = vertexTypes[members[i]];
+                var typeMultiset = (int[])subTypes.Clone();
+                Array.Sort(typeMultiset);
+
+                AdjMatrix subCanon = RunConnected(subTypes, new AdjMatrix(subEdges));
+                canon.Add((k, typeMultiset, subCanon));
+            }
+
+            canon.Sort(CompareComponent);
+
+            var result = new EdgeType[n, n];
+            int offset = 0;
+            foreach (var (size, _, sub) in canon)
+            {
+                for (int i = 0; i < size; i++)
+                    for (int j = 0; j < size; j++)
+                        result[offset + i, offset + j] = sub[i, j];
+                offset += size;
+            }
+            return new AdjMatrix(result);
+        }
+
+        private static int CompareComponent(
+            (int Size, int[] TypeMultiset, AdjMatrix Canon) a,
+            (int Size, int[] TypeMultiset, AdjMatrix Canon) b)
+        {
+            if (a.Size != b.Size) return a.Size.CompareTo(b.Size);
+            for (int i = 0; i < a.Size; i++)
+                if (a.TypeMultiset[i] != b.TypeMultiset[i])
+                    return a.TypeMultiset[i].CompareTo(b.TypeMultiset[i]);
+            return string.CompareOrdinal(a.Canon.ToString(), b.Canon.ToString());
+        }
 
         // ── Internal record ──────────────────────────────────────────────────
 
