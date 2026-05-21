@@ -136,4 +136,40 @@ public partial class GraphCanonTests
 
         Assert.Equal(resultBefore, resultAfter);
     }
+
+    // ── CFI(Cycle3): the calculator doc's Tier-1 lab ────────────────────────
+    //
+    // The odd graph is a single 18-cycle; the even graph is two disjoint
+    // 9-cycles. Both are 1-WL-blind but cascade after one individualization —
+    // the group calculator must canonize both scramble-invariantly, and
+    // distinguish them (they are non-isomorphic).
+
+    [Fact]
+    public void FV_CfiCycle3_ScramblingsProduceSameCanonical()
+    {
+        var pair = CfiGraphGenerator.Generate("Cycle3");
+        foreach (var g in new[] { pair.Even, pair.Odd })
+        {
+            int n = g.VertexCount;
+            var baseEdges = g.ToArray();
+            string? canonical = null;
+            for (int i = 0; i < 5; i++)
+            {
+                var scrambled = (EdgeType[,])baseEdges.Clone();
+                Scramble(scrambled, seed: 51509 + i);
+                string result = _fv.Run_ToString(new VertexType[n], scrambled);
+                canonical ??= result;
+                Assert.Equal(canonical, result);
+            }
+        }
+    }
+
+    [Fact]
+    public void FV_CfiCycle3_EvenAndOddProduceDifferentCanonical()
+    {
+        var pair = CfiGraphGenerator.Generate("Cycle3");
+        string even = _fv.Run_ToString(new VertexType[pair.Even.VertexCount], pair.Even.ToArray());
+        string odd = _fv.Run_ToString(new VertexType[pair.Odd.VertexCount], pair.Odd.ToArray());
+        Assert.NotEqual(even, odd);
+    }
 }

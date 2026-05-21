@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Canonizer
 {
@@ -132,6 +133,10 @@ namespace Canonizer
         public int LastPairRotationsAttempted { get; private set; }
         public int LastLockedThenInvalidated { get; private set; }
 
+        // Order of the automorphism group harvested by the route-2 calculator
+        // on the last connected-component canonization.
+        public BigInteger LastAutomorphismGroupOrder { get; private set; }
+
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
             if (vertexTypes.Length != G.VertexCount)
@@ -153,8 +158,7 @@ namespace Canonizer
         public string Run_ToString(VertexType[] vertexTypes, EdgeType[,] edges) =>
             Run(vertexTypes, new AdjMatrix(edges)).ToString();
 
-        // The single-component canonizer: forward greedy pass + backward pass,
-        // then read off the canonical. Run() dispatches here for connected
+        // The single-component canonizer. Run() dispatches here for connected
         // graphs and for each component of a disconnected one.
         private AdjMatrix RunConnected(VertexType[] vertexTypes, AdjMatrix G)
         {
@@ -167,29 +171,142 @@ namespace Canonizer
             LastPairRotationsAttempted = 0;
             LastLockedThenInvalidated = 0;
 
-            // Forward pass. Partition is warm-refined at every state-mutation
-            // point (see ContinueForward / PickAndApplyGuess) so each refine
-            // call starts from a partition that's at most one ApplyOne stale.
+            // Route-2 group calculator: recursive lex-min over the
+            // individualization-refinement tree. Replaces the forward-greedy +
+            // direction-only backward pass, which was incomplete on connected
+            // graphs with a multi-orbit cell (e.g. graph #135 of the size-6
+            // corpus). See docs/flip-validation-calculator.md.
             sbyte[] p = SeedFromTypes(n, vertexTypes);
             var partition = new WarmPartition(n);
-            List<Primary> record = ContinueForward(n, adj, p, partition);
 
-            // Backward pass: direction-only flip per primary, single sweep
-            // deepest-to-shallowest. Greedy direction-flip is incomplete on
-            // graphs with a multi-orbit cell (e.g. C4) — those stay wrong
-            // until the group calculator replaces this pass.
-            record = BackwardPass(n, adj, vertexTypes, record);
-            LastPrimaryCount = record.Count;
+            var calc = new GroupCalculator(n, adj);
+            calc.Search(p, partition);
+            if (calc.BestMatrix == null)
+                throw new InvalidOperationException(
+                    "FlipValidation: calculator produced no leaf");
 
-            // Replay the (possibly updated) record and read off the canonical
-            // form.
-            sbyte[] pFinal = ReplayRecord(n, vertexTypes, record, record.Count)
-                ?? throw new InvalidOperationException(
-                    "FlipValidation: final replay produced a contradiction");
-            if (!IsTotal(n, pFinal))
-                throw new InvalidOperationException("FlipValidation: final P not total");
+            LastPrimaryCount = calc.LeafCount;
+            LastAutomorphismGroupOrder = calc.Automorphisms.Order;
 
-            return PermuteByPartialOrder(G, pFinal, n);
+            int[] best = calc.BestMatrix;
+            var result = new EdgeType[n, n];
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    result[i, j] = best[i * n + j];
+            return new AdjMatrix(result);
+        }
+
+        // ── Route-2 group calculator ─────────────────────────────────────────
+        //
+        // Recursive lex-min over the individualization-refinement tree
+        // (nauty-shaped). At each node: warm-refine the partition; if it is
+        // discrete the cell ids are the canonical labelling and the node is a
+        // leaf; otherwise pick the lowest-id non-singleton cell as the target
+        // and branch by individualising each of its vertices in turn, then
+        // recurse. The lex-smallest leaf matrix is the canonical.
+        //
+        // Correctness: cell ids are iso-invariant (IncrementalPartition assigns
+        // them by canonical lex-sort of refinement signatures), the target
+        // cell is chosen by cell id, and branching is exhaustive over the
+        // target cell's vertices — so the search tree, and hence the set of
+        // leaf matrices, is iso-invariant: every scrambling yields the same
+        // lex-min. A leaf matrix determines its isomorphism class, so the
+        // invariant is also complete.
+        //
+        // Tying leaves (equal permuted matrix) differ by an automorphism; those
+        // are harvested into a PermutationGroup — the residual-symmetry object
+        // of the calculator doc's model. Orbit-pruning that consumes it (so
+        // symmetric branches are explored once) is the next increment; the
+        // current search is unpruned, but with refinement cascading between
+        // branches the tree stays small on the graphs in scope.
+        private sealed class GroupCalculator
+        {
+            private readonly int _n;
+            private readonly int[] _adj;
+
+            public int[]? BestMatrix { get; private set; }
+            public int[]? BestPerm { get; private set; }
+            public int LeafCount { get; private set; }
+            public PermutationGroup Automorphisms { get; }
+
+            public GroupCalculator(int n, int[] adj)
+            {
+                _n = n;
+                _adj = adj;
+                Automorphisms = new PermutationGroup(n);
+            }
+
+            // Refine; emit a leaf if discrete, else branch on the target cell.
+            public void Search(sbyte[] p, WarmPartition partition)
+            {
+                partition.Refine(_adj, p);
+
+                int numCells = partition.NumCells;
+                int[] cellOf = partition.CellOf;
+
+                if (numCells == _n)
+                {
+                    // Discrete: each vertex is alone in a cell, so cellOf is a
+                    // bijection onto {0..n-1} — the canonical labelling.
+                    HandleLeaf(cellOf);
+                    return;
+                }
+
+                var cellMembers = new List<List<int>>(numCells);
+                for (int c = 0; c < numCells; c++) cellMembers.Add(new List<int>());
+                for (int v = 0; v < _n; v++) cellMembers[cellOf[v]].Add(v);
+
+                // Target cell: the lowest-id non-singleton cell. One exists
+                // because numCells < n. Cell id is iso-invariant, so the
+                // choice — and the branching below it — is iso-invariant.
+                int target = 0;
+                while (cellMembers[target].Count < 2) target++;
+
+                foreach (int v in cellMembers[target])
+                    Branch(p, partition, cellMembers[target], v);
+            }
+
+            // Individualise vertex v within its cell — order it below every
+            // other member of the cell — then recurse.
+            private void Branch(sbyte[] p, WarmPartition partition, List<int> cell, int v)
+            {
+                var pChild = (sbyte[])p.Clone();
+                foreach (int w in cell)
+                {
+                    if (w == v) continue;
+                    var prim = new Primary { A = v, B = w, Direction = LESS, BetweenCell = false };
+                    // v and w share a cell, hence are P-incomparable, so
+                    // ApplyOne never fails here; guard defensively.
+                    if (!ApplyOne(pChild, _n, prim)) return;
+                }
+                Search(pChild, partition.Clone());
+            }
+
+            private void HandleLeaf(int[] cellOf)
+            {
+                LeafCount++;
+                int[] perm = (int[])cellOf.Clone();
+                int[] matrix = BuildPermutedMatrix(_adj, perm, _n);
+
+                if (BestMatrix == null || LexLess(matrix, BestMatrix))
+                {
+                    BestMatrix = matrix;
+                    BestPerm = perm;
+                }
+                else if (MatrixEquals(matrix, BestMatrix))
+                {
+                    // perm and BestPerm both produce BestMatrix; the relabelling
+                    // between them is an automorphism of the graph.
+                    Automorphisms.AddGenerator(Perm.Compose(Perm.Inverse(perm), BestPerm!));
+                }
+            }
+
+            private static bool MatrixEquals(int[] x, int[] y)
+            {
+                for (int i = 0; i < x.Length; i++)
+                    if (x[i] != y[i]) return false;
+                return true;
+            }
         }
 
         // ── Tier 0: component decomposition ──────────────────────────────────
