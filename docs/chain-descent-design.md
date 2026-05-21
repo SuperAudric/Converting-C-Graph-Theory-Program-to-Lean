@@ -407,3 +407,17 @@ Where the theory is incomplete, or load-bearing but unproven:
    components, each canonized, then reassembled in a sorted order. The sort key
    being a *complete* invariant across all vertex-type regimes is assumed, not
    proven — a small pre-existing gap inherited from the current code.
+
+9. **The flagged region exceeds Tier 2.** Tier 2 (no cascade + a non-abelian
+   `A_k` automorphism factor) is the genuine hard core, aligned with Babai's
+   split-or-Johnson obstruction — flagging it is honest hardness. But the
+   flagged region also contains **IR blind spots**: rigid, refinement-resistant
+   graphs (the Neuen–Schweitzer multipede family) with *no* symmetry at all.
+   These are hard for the individualization-refinement *method* — chain descent
+   included — yet almost certainly polynomial for graph isomorphism by other
+   means (bounded degree ⇒ Luks). The algorithm flags them not because they are
+   hard but because IR is incomplete on them, and no oracle of this design can
+   fix it — there is no symmetry to consume. So the honest claim is "flagged
+   region ⊇ Tier 2 ∪ IR-blind-spots", not "= Tier 2". The two are
+   distinguishable at flag time by the residual group order: non-trivial ⇒
+   Tier-2-like, trivial ⇒ IR blind spot.

@@ -141,6 +141,18 @@ namespace Canonizer
         // connected-component canonization.
         public int LastPrunedBranches { get; private set; }
 
+        // ── Chain-descent diagnostics (docs/chain-descent-design.md) ─────────
+        // Descent-tree node count and max depth from the last connected-
+        // component run, and the flag reason (null when the run produced a
+        // canonical form rather than flagging).
+        public long LastNodeCount { get; private set; }
+        public int LastMaxDepth { get; private set; }
+        public string? LastFlagReason { get; private set; }
+
+        // Optional override for the descent's polynomial node budget; null
+        // uses ChainDescent.DefaultBudget(n).
+        public long? BudgetOverride { get; set; }
+
         public AdjMatrix Run(VertexType[] vertexTypes, AdjMatrix G)
         {
             if (vertexTypes.Length != G.VertexCount)
@@ -169,36 +181,37 @@ namespace Canonizer
             int n = G.VertexCount;
             int[] adj = ExtractAdj(G);
 
-            LastWithinCellGuesses = 0;
-            LastBetweenCellGuesses = 0;
-            LastBackwardFlips = 0;
-            LastPairRotationsAttempted = 0;
-            LastLockedThenInvalidated = 0;
-
-            // Route-2 group calculator: recursive lex-min over the
-            // individualization-refinement tree. Replaces the forward-greedy +
-            // direction-only backward pass, which was incomplete on connected
-            // graphs with a multi-orbit cell (e.g. graph #135 of the size-6
-            // corpus). See docs/flip-validation-calculator.md.
+            // Chain-descent canonizer (docs/chain-descent-design.md): a
+            // budget-bounded recursive lex-min over the individualization-
+            // refinement tree. A run that exceeds the polynomial node budget
+            // flags (CanonizationFlaggedException) rather than continuing — an
+            // honest "not handled", never a wrong answer. Replaces the
+            // unbounded route-2 IR search (the nested GroupCalculator, now
+            // unreferenced and deleted in a follow-up step).
             sbyte[] p = SeedFromTypes(n, vertexTypes);
             var partition = new WarmPartition(n);
 
-            var calc = new GroupCalculator(n, adj);
-            calc.Search(p, partition);
-            if (calc.BestMatrix == null)
-                throw new InvalidOperationException(
-                    "FlipValidation: calculator produced no leaf");
+            long budget = BudgetOverride ?? ChainDescent.DefaultBudget(n);
+            var descent = new ChainDescent(n, adj, new CascadeOracle(), budget);
+            CanonResult result = descent.Canonize(p, partition);
 
-            LastPrimaryCount = calc.LeafCount;
-            LastAutomorphismGroupOrder = calc.Automorphisms.Order;
-            LastPrunedBranches = calc.PrunedBranches;
+            LastNodeCount = result.NodeCount;
+            LastMaxDepth = result.MaxDepth;
+            LastPrunedBranches = result.PrunedBranches;
+            LastPrimaryCount = result.LeafCount;
+            LastAutomorphismGroupOrder = result.ResidualGroup.Order;
+            LastFlagReason = result.Flagged ? result.FlagReason : null;
 
-            int[] best = calc.BestMatrix;
-            var result = new EdgeType[n, n];
+            if (result.Flagged)
+                throw new CanonizationFlaggedException(
+                    result.FlagReason ?? "flagged", result.ResidualGroup.Order);
+
+            int[] best = result.Matrix!;
+            var canonical = new EdgeType[n, n];
             for (int i = 0; i < n; i++)
                 for (int j = 0; j < n; j++)
-                    result[i, j] = best[i * n + j];
-            return new AdjMatrix(result);
+                    canonical[i, j] = best[i * n + j];
+            return new AdjMatrix(canonical);
         }
 
         // ── Route-2 group calculator ─────────────────────────────────────────
