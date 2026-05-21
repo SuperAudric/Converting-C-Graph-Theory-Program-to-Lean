@@ -10,7 +10,7 @@ the forward pass instead of branching on them.
 > §7, and invariants 6.1 and 6.4. The *backward pass* has been reframed — it is
 > no longer the boolean "replay each branch and lex-min" mechanism of §5, but a
 > group-theoretic **stabilizer-chain lex-leader descent**. See
-> [`flip-validation-calculator.md`](./flip-validation-calculator.md) for the
+> [`chain-descent-calculator.md`](./chain-descent-calculator.md) for the
 > current model. Superseded in this doc: §5 (backward pass); §6.5's *rotation
 > mechanism* (the *invariant* 6.5 — every canonical form reachable — still
 > holds; the mechanism is re-housed as the calculator's per-level transversal);

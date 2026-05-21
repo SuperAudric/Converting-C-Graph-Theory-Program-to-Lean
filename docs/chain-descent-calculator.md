@@ -1,6 +1,6 @@
 # Flip-validation calculator (route 2: stabilizer-chain evaluation)
 
-A supplement to [`flip-validation-strategy.md`](./flip-validation-strategy.md)
+A supplement to [`chain-descent-strategy.md`](./chain-descent-strategy.md)
 covering the polynomial-bound piece of the algorithm — the "calculator" that
 decides the lex-min canonical without exponential re-evaluation. The
 calculator is the unproven-polynomial component the whole algorithm's bound
@@ -13,7 +13,7 @@ rests on.
 > model is what it is. If you are picking this up cold, read top to bottom;
 > the "Reading order" section at the very end points at the companion files.
 >
-> Note: [`flip-validation-strategy.md`](./flip-validation-strategy.md) is now
+> Note: [`chain-descent-strategy.md`](./chain-descent-strategy.md) is now
 > *partially superseded* — its §6.5 "pair rotation" and the backward-pass
 > description should be read through the group reframe below.
 
@@ -262,7 +262,7 @@ coset representatives — when refinement does not expose it for free.
 ### Note: T-A/T-B/T-C vs. the strategy doc's §6 invariants
 
 T-A/T-B/T-C are calculator-specific and defined only in this doc. They are
-distinct from [`flip-validation-strategy.md`](./flip-validation-strategy.md)'s
+distinct from [`chain-descent-strategy.md`](./chain-descent-strategy.md)'s
 §6.1–6.5 invariants, which concern the algorithm's *correctness* and its
 forward/backward passes. Of those, §6.1 (iso-invariant cell ids — the chain's
 reference frame) and the §6.5 *invariant* (every canonical form reachable —
@@ -597,7 +597,7 @@ detector.
 
 ### Reading order for context recovery
 
-1. [`flip-validation-strategy.md`](./flip-validation-strategy.md) — the
+1. [`chain-descent-strategy.md`](./chain-descent-strategy.md) — the
    algorithm's original shape (its §6.5 / backward-pass parts are superseded).
 2. This doc: the stabilizer-chain model, the hardness map and the single
    hurdle, then "Implementation plan and status" and "Implemented calculator

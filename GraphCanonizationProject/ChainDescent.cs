@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Canonizer
 {
-    // The chain-descent harness — docs/chain-descent-design.md §4.
+    // The chain-descent harness — docs/chain-descent-overview.md §4.
     //
     // A recursive descent of the individualization-refinement tree. At each
     // node: warm-refine the partition; if it is discrete the cell ids are a
@@ -80,7 +80,7 @@ namespace Canonizer
 
         // A generous polynomial default node budget. Configurable so the
         // scaling probe can tune it; the exact value is pinned later by the
-        // Tier-1 proof (docs/chain-descent-design.md §9 gap 3).
+        // Tier-1 proof (docs/chain-descent-overview.md §9 gap 3).
         public static long DefaultBudget(int n) =>
             Math.Max(200_000L, 16L * n * n * n * n);
 

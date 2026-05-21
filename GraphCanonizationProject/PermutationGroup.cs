@@ -75,7 +75,7 @@ namespace Canonizer
     // ── Permutation group via a stabilizer chain ────────────────────────────
     //
     // The group-theoretic foundation of the route-2 calculator. Per
-    // docs/flip-validation-calculator.md ("The current model: the calculator
+    // docs/chain-descent-calculator.md ("The current model: the calculator
     // is a stabilizer chain"), the calculator's object *is* a stabilizer
     // chain; this type provides it.
     //

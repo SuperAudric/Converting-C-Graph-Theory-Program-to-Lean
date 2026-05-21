@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Canonizer
 {
-    // Phase-1 transversal oracle (docs/chain-descent-design.md §6, §9 gap 6).
+    // Phase-1 transversal oracle (docs/chain-descent-overview.md §6, §9 gap 6).
     //
     // It certifies nothing a priori: Classify returns every vertex of the
     // target cell, in ascending order. The actual orbit pruning is the

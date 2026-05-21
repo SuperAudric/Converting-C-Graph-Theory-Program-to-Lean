@@ -4,8 +4,8 @@ A plain-language description of the rewritten calculator (the "chain-descent"
 design from the implementation plan). It is the spec the rewrite implements and
 the structure that correctness/complexity proofs will be written against.
 
-Companion to [`flip-validation-strategy.md`](./flip-validation-strategy.md) and
-[`flip-validation-calculator.md`](./flip-validation-calculator.md); it is
+Companion to [`chain-descent-strategy.md`](./chain-descent-strategy.md) and
+[`chain-descent-calculator.md`](./chain-descent-calculator.md); it is
 intended to become the basis of the calculator doc's rewrite. Where it conflicts
 with those, this doc wins.
 
@@ -236,7 +236,7 @@ two branches are the two *directions* of one ordering decision.
 ### 7.2 Reverse-symmetric propagation
 
 Warm refinement has a key property — **invariant 6.2** of
-[`flip-validation-strategy.md`](./flip-validation-strategy.md): propagating
+[`chain-descent-strategy.md`](./chain-descent-strategy.md): propagating
 `e < f` and propagating `f < e` produce *the same partition of the vertices*
 (the same cells split into the same sub-cells) and differ only in the *order
 labels* on those splits.
