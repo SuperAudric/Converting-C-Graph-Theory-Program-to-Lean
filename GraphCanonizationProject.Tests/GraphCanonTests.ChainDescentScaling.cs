@@ -2,7 +2,7 @@ using Xunit;
 using Canonizer;
 using VertexType = int;
 
-// Scaling probe for the chain-descent canonizer (docs/chain-descent-overview.md
+// Scaling probe for the chain-descent canonizer (docs/chain-descent-simplified-overview.md
 // §6, §9). Not a correctness test: it runs CFI graphs of growing size under a
 // small node budget and records the descent cost (node count, depth, the flag
 // verdict and kind). It confirms the canonizer is *bounded* — every run either

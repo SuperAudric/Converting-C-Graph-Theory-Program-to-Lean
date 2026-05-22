@@ -7,7 +7,7 @@ hardness map, and the open work. This file is meant to contain the information
 from the `docs/` files, however if you do need them they are available at
 `docs/chain-descent-calculator.md`
 `docs/chain-descent-strategy.md`
-`docs/chain-descent-overview.md`
+`docs/chain-descent-simplified-overview.md`
 
 ---
 

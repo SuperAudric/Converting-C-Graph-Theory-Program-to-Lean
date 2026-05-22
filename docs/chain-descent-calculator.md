@@ -1,4 +1,4 @@
-# Flip-validation calculator — superseded (design detail behind chain-descent-overview.md)
+# Flip-validation calculator — superseded (design detail behind chain-descent-simplified-overview.md)
 
 A supplement to [`chain-descent-strategy.md`](./chain-descent-strategy.md)
 covering the polynomial-bound piece of the algorithm — the "calculator" that
@@ -7,7 +7,7 @@ calculator is the unproven-polynomial component the whole algorithm's bound
 rests on.
 
 > **Superseded as the design of record (chain-descent rewrite).** The current
-> authoritative design is [`chain-descent-overview.md`](./chain-descent-overview.md);
+> authoritative design is [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md);
 > the implementation is the chain-descent harness (`ChainDescent.cs`,
 > `CascadeOracle.cs`, `CanonGraphOrdererChainDescent.cs`, …). This doc is
 > retained as the **design detail** the overview summarizes — the T-A/T-B/T-C
@@ -265,7 +265,7 @@ boolean backward pass.
 
 The calculator is implemented as the **chain-descent harness**. The
 authoritative end-to-end description is
-[`chain-descent-overview.md`](./chain-descent-overview.md) §4–§7; this doc is
+[`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md) §4–§7; this doc is
 the design detail behind it. The code:
 
 - **`ChainDescent.cs`** — the harness: a recursive descent of the
@@ -478,7 +478,7 @@ Anything short of this is a research checkpoint.
 
 For someone picking this up cold:
 
-1. [`chain-descent-overview.md`](./chain-descent-overview.md) — the current,
+1. [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md) — the current,
    authoritative design: how the canonizer works, end to end.
 2. This doc — the design detail the overview summarizes: the stabilizer-chain
    model, the hardness map and the single hurdle, T-A/T-B/T-C, and the

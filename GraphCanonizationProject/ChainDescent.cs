@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Canonizer
 {
-    // The chain-descent harness — docs/chain-descent-overview.md §4.
+    // The chain-descent harness — docs/chain-descent-simplified-overview.md §4.
     //
     // A recursive descent of the individualization-refinement tree. At each
     // node: warm-refine the partition; if it is discrete the cell ids are a
@@ -24,7 +24,7 @@ namespace Canonizer
     // budget and structured around the oracle seam the deferred linear oracle
     // (§7) will plug into.
     //
-    // ── Proof contract (docs/chain-descent-overview.md §8–§9) ──────────────
+    // ── Proof contract (docs/chain-descent-simplified-overview.md §8–§9) ──────────────
     //
     // Correctness (oracle-agnostic). For ANY oracle whose representatives
     // cover every orbit of the target cell, Canonize returns an isomorphism-
@@ -80,7 +80,7 @@ namespace Canonizer
 
         // A generous polynomial default node budget. Configurable so the
         // scaling probe can tune it; the exact value is pinned later by the
-        // Tier-1 proof (docs/chain-descent-overview.md §9 gap 3).
+        // Tier-1 proof (docs/chain-descent-simplified-overview.md §9 gap 3).
         public static long DefaultBudget(int n) =>
             Math.Max(200_000L, 16L * n * n * n * n);
 

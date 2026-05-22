@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Canonizer
 {
     // The transversal oracle — the chain-descent design's T-C seam
-    // (docs/chain-descent-overview.md §4.1). At a branch node the harness must
+    // (docs/chain-descent-simplified-overview.md §4.1). At a branch node the harness must
     // decide which target-cell vertices to descend into; the oracle returns
     // that representative list.
     //

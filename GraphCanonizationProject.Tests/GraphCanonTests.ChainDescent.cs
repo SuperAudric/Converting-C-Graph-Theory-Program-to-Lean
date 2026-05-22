@@ -5,7 +5,7 @@ using VertexType = int;
 using EdgeType = int;
 
 // Tests for CanonGraphOrdererChainDescent — the chain-descent canonizer
-// (docs/chain-descent-overview.md). Reuses the helpers (Scramble, BuildGraph,
+// (docs/chain-descent-simplified-overview.md). Reuses the helpers (Scramble, BuildGraph,
 // ConvertJaggedArrayType, …) declared on the partial class.
 public partial class GraphCanonTests
 {
@@ -135,7 +135,7 @@ public partial class GraphCanonTests
         Assert.Equal(resultBefore, resultAfter);
     }
 
-    // ── CFI(Cycle3): a Tier-1 lab (docs/chain-descent-overview.md) ────────────
+    // ── CFI(Cycle3): a Tier-1 lab (docs/chain-descent-simplified-overview.md) ────────────
     //
     // The odd graph is a single 18-cycle; the even graph is two disjoint
     // 9-cycles. Both are 1-WL-blind but cascade after one individualization —

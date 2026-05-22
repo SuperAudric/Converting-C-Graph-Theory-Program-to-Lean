@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace Canonizer
 {
-    // How a chain-descent flag is classified (docs/chain-descent-overview.md
+    // How a chain-descent flag is classified (docs/chain-descent-simplified-overview.md
     // §9 gap 9). The flagged region is larger than Tier 2; the order of the
     // automorphism group harvested before the budget ran out tells the two
     // flag causes apart.

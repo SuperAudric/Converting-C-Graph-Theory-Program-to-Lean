@@ -9,7 +9,7 @@ the forward pass instead of branching on them.
 > This is the *earlier generation* of the design: the two-pass "flip-validation"
 > strategy (a greedy forward record plus a backward correction sweep). The
 > current design is a single recursion — **chain descent**. The authoritative
-> spec is [`chain-descent-overview.md`](./chain-descent-overview.md); the
+> spec is [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md); the
 > implemented code is the chain-descent harness (`ChainDescent.cs`,
 > `CanonGraphOrdererChainDescent.cs`, …). The two-pass machinery below — the
 > forward/backward passes (§4–§5), the §6.5 rotation mechanism, the §8
@@ -19,7 +19,7 @@ the forward pass instead of branching on them.
 > This doc is retained for two things the overview relies on but does not
 > re-derive: **invariant 6.2** (warm refinement is direction-symmetric on the
 > partition) — the load-bearing dependency of the linear oracle,
-> [`chain-descent-overview.md`](./chain-descent-overview.md) §7 — and the
+> [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md) §7 — and the
 > lineage and rationale of the single-pair, 1-WL-only design choices.
 
 Built on top of
