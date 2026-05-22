@@ -6,11 +6,14 @@ import Mathlib.Logic.Function.Iterate
 /-!
 # Direction invariance of warm 1-WL refinement (chain descent §6.2)
 
-This file states, and partially proves, the load-bearing direction-symmetry
-invariant ("invariant 6.2") for the **chain-descent** canonizer — see
-`docs/chain-descent-strategy.md` §6.2 and `docs/chain-descent-overview.md`
-§7.2. ("Flip validation" was the earlier name of the chain-descent design;
-the file has been renamed accordingly.)
+This file states and proves the load-bearing direction-symmetry invariant
+("invariant 6.2") for the **chain-descent** canonizer.
+
+**Companion: [`ChainDescent.md`](./ChainDescent.md)** — the self-contained
+proving guide: the C# implementation modelled, the Lean ↔ C# correspondence,
+the TC-relegation equivalence, the modelling axiom, the proof state, the
+hardness map, the gaps and the future work. Read that plus this file; the
+`docs/` design files are not needed.
 
 ## Informal claim
 
@@ -26,8 +29,8 @@ the order labels on the splits. This is `warm_6_2`, proved below.
   post-guess matrix is `applyGuess P₀ a b dir` — `transitiveClose` does not
   sit in the refinement loop, and `P⁻`/`P⁺` differ only at `(a,b)`/`(b,a)`.
 - **Individualisation assigns a fresh colour**, making the guessed vertices
-  singletons by construction — the property the oracle (strategy §3) relies
-  on, rather than left to a refinement hand-wave.
+  singletons by construction — the property the canonizer's oracle relies
+  on, rather than left to a refinement hand-wave (see `ChainDescent.md` §5).
 
 The earlier route (`cell_split_uniform`: cell-mates keep *equal signatures*,
 no split) is false — `cell_split_uniform_false` refutes it. The route that
@@ -406,9 +409,9 @@ is the machine-checked refutation.
 A *correct* version needs `a` and `b` to be **singleton `χ₀`-cells** (so
 "relates to `a`'s cell" coincides with "relates to `a`"). That holds for
 the individualised vertex in chain descent, but not for the unindividualised
-partner in a `k ≥ 2` target cell — which is exactly the regime §7's linear
-oracle must handle. Stating and proving the singleton-restricted lemma is
-left as follow-up.
+partner in a `k ≥ 2` target cell — which is exactly the regime the linear
+oracle must handle (`ChainDescent.md` §10). Stating and proving the
+singleton-restricted lemma is left as follow-up.
 -/
 
 /-- Iterating `closeStep` from one of its fixpoints stays at that fixpoint. -/
@@ -521,8 +524,8 @@ The model here is the one settled in design discussion:
 * **Individualisation assigns a fresh colour.** Warm refinement starts from a
   colouring `χι` in which the guessed vertices `a` and `b` are *singletons*
   (their own cells). This is the "`A`, `B` are always singletons" property
-  the strategy doc's oracle (§3) relies on; modelling it directly makes it
-  true by construction rather than by a refinement hand-wave.
+  the canonizer's oracle relies on (`ChainDescent.md` §5); modelling it
+  directly makes it true by construction rather than by a refinement hand-wave.
 
 Under this model 6.2 is provable: `P⁻` and `P⁺` differ only inside `{a,b}`,
 so the only vertices whose refinement signature can depend on the guess
@@ -607,9 +610,9 @@ warm refinement after the guess `a < b` and after the guess `b < a` induce
 the **same partition**. The two runs differ only in the order labels on the
 splits — the partition itself is direction-independent.
 
-This is the partition-level ("weak") form of invariant 6.2
-(`docs/chain-descent-strategy.md` §6.2, `docs/chain-descent-overview.md` §7.2),
-empirically checked on `C4`, `K3`, and the 6-vertex asymmetric graph.
+This is the partition-level ("weak") form of invariant 6.2 (see
+[`ChainDescent.md`](./ChainDescent.md)), empirically checked on `C4`, `K3`,
+and the 6-vertex asymmetric graph.
 
 Proof. `applyGuess P₀ a b less` and `applyGuess P₀ a b greater` differ at only
 the `(a,b)`/`(b,a)` entries, so for any vertex `x ∉ {a,b}` the refinement
@@ -812,8 +815,8 @@ hypothesis holds. Consequences:
   entirely: the *order labels* — which `D`-singleton is "less". The descent is
   thereby reduced from "explore `2^d` partitions" to "one fixed partition,
   optimise the labelling over `Z₂^d`". Closing *that* `Z₂^d` optimisation
-  cheaply is exactly the linear oracle (overview §7); this theorem is the
-  reduction that hands it a well-posed problem.
+  cheaply is exactly the linear oracle (`ChainDescent.md` §10); this theorem
+  is the reduction that hands it a well-posed problem.
 -/
 theorem warmRefine_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
     (χι : Colouring n) (D : Finset (Fin n))
