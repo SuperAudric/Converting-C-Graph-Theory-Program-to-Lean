@@ -677,4 +677,174 @@ theorem warm_6_2 {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
               signature_applyGuess_off adj P₀ a b .greater Xg j hja hjb,
               ih i j, signature_eq_of_samePartition adj P₀ ih i j]
 
+/-! ## §6.2 corollaries — direction-blindness (Q1) and guess commutativity (Q2) -/
+
+/-- σ-swapping `P` relabels each signature's `POE` component by the involution
+`POE.swap`; the colour and adjacency components are untouched. -/
+theorem signature_swap {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (v : Fin n) :
+    signature adj (PMatrix.swap P) χ v
+      = (signature adj P χ v).map (fun t : Nat × Nat × POE => (t.1, t.2.1, POE.swap t.2.2)) := by
+  unfold signature
+  rw [Multiset.map_map]
+  apply Multiset.map_congr rfl
+  intro u _
+  simp [PMatrix.swap, Function.comp]
+
+/--
+**Direction-blindness (Q1).** Warm refinement on `P` and on its σ-swap induce
+the *same partition*: the `< ↔ >` mirror of a refinement world is
+partition-identical to the original.
+
+`transitiveClose_swap` failed to give this — but only because `closeStep`'s
+`less`-first tie-break broke σ-symmetry. With TC relegated there is no
+`closeStep` in the loop; `signature` under `PMatrix.swap P` is just a
+*bijective* relabelling of `signature` under `P` (`signature_swap`), so the
+partition is preserved.
+
+Caveat — this is a symmetry that **co-swaps the base matrix**. Applied to a
+guess (`warmRefine_applyGuess_swap`) it relates `(P₀, less)` to
+`(swap P₀, greater)`, not `(P₀, less)` to `(P₀, greater)`. The two coincide
+only when `swap P₀ = P₀` — an all-`unknown` `P₀`, i.e. the descent root —
+where it re-proves `warm_6_2`. Deeper, `P₀` carries structure and the
+symmetry genuinely co-swaps it; so there is **no** `<`/`>` antisymmetry for a
+fixed `P₀` beyond `warm_6_2` itself.
+-/
+theorem warmRefine_swap {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) :
+    samePartition (warmRefine adj P χ) (warmRefine adj (PMatrix.swap P) χ) := by
+  have hpoe : Function.Injective POE.swap :=
+    Function.Involutive.injective POE.swap_swap
+  have hGinj : Function.Injective
+      (fun t : Nat × Nat × POE => (t.1, t.2.1, POE.swap t.2.2)) := by
+    rintro ⟨c1, e1, p1⟩ ⟨c2, e2, p2⟩ h
+    simp only [Prod.mk.injEq] at h ⊢
+    exact ⟨h.1, h.2.1, hpoe h.2.2⟩
+  suffices key : ∀ k, samePartition ((refineStep adj P)^[k] χ)
+      ((refineStep adj (PMatrix.swap P))^[k] χ) from key n
+  intro k
+  induction k with
+  | zero => exact samePartition.refl χ
+  | succ k ih =>
+    intro i j
+    simp only [Function.iterate_succ', Function.comp_apply]
+    rw [refineStep_iff, refineStep_iff]
+    set X := (refineStep adj P)^[k] χ
+    set Y := (refineStep adj (PMatrix.swap P))^[k] χ
+    rw [ih i j, signature_swap adj P Y i, signature_swap adj P Y j,
+        (Multiset.map_injective hGinj).eq_iff,
+        ← signature_eq_of_samePartition adj P ih i j]
+
+/-- The guess and its `< ↔ >` mirror made explicit: warm refinement after
+`a < b` on `P₀` and after `b < a` on the σ-swapped `P₀` induce the same
+partition (`applyGuess_swap` + `warmRefine_swap`). -/
+theorem warmRefine_applyGuess_swap {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (a b : Fin n) (hab : a ≠ b) (χ : Colouring n) :
+    samePartition
+      (warmRefine adj (applyGuess P₀ a b .less) χ)
+      (warmRefine adj (applyGuess (PMatrix.swap P₀) a b .greater) χ) := by
+  have h := warmRefine_swap adj (applyGuess P₀ a b .less) χ
+  rw [applyGuess_swap P₀ a b hab .less, POE.swap_less] at h
+  exact h
+
+/--
+**Guesses commute (Q2).** Guessing on `{a, b}` and on `{b, c}` — distinct
+pairs sharing the vertex `b` — touches four distinct matrix entries, so the
+two `applyGuess` writes commute. Hence the descent state reached by a *fixed*
+pair of guesses does not depend on the order they were issued: making `{a,b}`
+then `{b,c}` yields exactly the same `(adj, P)` — and therefore the same
+refinement, partition, and boundary — as `{b,c}` then `{a,b}`.
+
+(TC relegation is what makes this clean: a guess is now a single entry write,
+and writes to disjoint entries commute. With TC in the loop one would also
+need closure confluence.)
+-/
+theorem applyGuess_comm {n : Nat} (P : PMatrix n) (a b c : Fin n)
+    (hab : a ≠ b) (hbc : b ≠ c) (hac : a ≠ c) (d₁ d₂ : POE) :
+    applyGuess (applyGuess P a b d₁) b c d₂
+      = applyGuess (applyGuess P b c d₂) a b d₁ := by
+  funext i j
+  unfold applyGuess
+  split_ifs <;> simp_all
+
+/-! ## §6.2 generalised — the partition is shared across all guess directions
+
+`warm_6_2` flips *one* decision. The generalisation below flips *any set* of
+them at once, and is the precise cross-branch-sharing statement: see
+`warmRefine_agree_off`. -/
+
+/-- If `P` and `Q` agree on every entry with an endpoint outside `D`, then off
+`D` they give the same signature — a signature row of `x ∉ D` only reads
+`x`'s entries, all of which agree. -/
+theorem signature_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
+    (χ : Colouring n) {D : Finset (Fin n)}
+    (hPQ : ∀ x y : Fin n, (x ∉ D ∨ y ∉ D) → P x y = Q x y)
+    (x : Fin n) (hx : x ∉ D) :
+    signature adj P χ x = signature adj Q χ x := by
+  unfold signature
+  apply Multiset.map_congr rfl
+  intro u _
+  rw [hPQ x u (Or.inl hx)]
+
+/--
+**The cell partition depends only on the matrix off the decision set.**
+
+Let `D` be a set of vertices, each a singleton of the starting colouring `χι`
+(the fresh-colour individualisation), and let `P`, `Q` be any two matrices
+that **agree on every entry with an endpoint outside `D`**. Then warm
+refinement from `χι` induces the *same partition* under `P` and under `Q`.
+
+This is `warm_6_2` generalised from one decision to a whole set, and it is the
+precise **cross-branch work-sharing** statement. Take `D` to be the decision
+vertices of a node and `P`, `Q` two descendant states reached by *any*
+guesses on `D`-pairs in *any* directions and *any* order: every guess writes
+only `D×D` entries, so `P` and `Q` agree off `D` automatically, and the
+hypothesis holds. Consequences:
+
+* The `2^d` leaves of a `d`-genuine-decision subtree **all carry one and the
+  same cell partition**. The partition is computed once, not `2^d` times.
+* The branch that guessed `A < B` and the branch that guessed `A < C` (with
+  `A, B, C` all individualised, so `D ⊇ {A,B,C}`) reach states agreeing off
+  `D` — hence the *same* partition. That is the "share the first guess of
+  `A<C` with the `A<B` branch" you were after: the shared object is the
+  partition, and it transports verbatim.
+* What is **not** shared, and what the residual exponential now lives in
+  entirely: the *order labels* — which `D`-singleton is "less". The descent is
+  thereby reduced from "explore `2^d` partitions" to "one fixed partition,
+  optimise the labelling over `Z₂^d`". Closing *that* `Z₂^d` optimisation
+  cheaply is exactly the linear oracle (overview §7); this theorem is the
+  reduction that hands it a well-posed problem.
+-/
+theorem warmRefine_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
+    (χι : Colouring n) (D : Finset (Fin n))
+    (hPQ : ∀ x y : Fin n, (x ∉ D ∨ y ∉ D) → P x y = Q x y)
+    (hsing : ∀ x ∈ D, ∀ u, u ≠ x → χι u ≠ χι x) :
+    samePartition (warmRefine adj P χι) (warmRefine adj Q χι) := by
+  suffices key : ∀ k, samePartition ((refineStep adj P)^[k] χι)
+      ((refineStep adj Q)^[k] χι) from key n
+  intro k
+  induction k with
+  | zero => exact samePartition.refl χι
+  | succ k ih =>
+    intro i j
+    simp only [Function.iterate_succ', Function.comp_apply]
+    rw [refineStep_iff, refineStep_iff]
+    set Xp := (refineStep adj P)^[k] χι
+    set Xq := (refineStep adj Q)^[k] χι
+    by_cases hij : i = j
+    · subst hij; simp
+    · by_cases hi : i ∈ D
+      · have hsp := iterate_refineStep_preserves_singleton adj P i k χι (hsing i hi)
+        have hsq := iterate_refineStep_preserves_singleton adj Q i k χι (hsing i hi)
+        exact ⟨fun h => absurd h.1 (fun e => hsp j (Ne.symm hij) e.symm),
+               fun h => absurd h.1 (fun e => hsq j (Ne.symm hij) e.symm)⟩
+      · by_cases hj : j ∈ D
+        · have hsp := iterate_refineStep_preserves_singleton adj P j k χι (hsing j hj)
+          have hsq := iterate_refineStep_preserves_singleton adj Q j k χι (hsing j hj)
+          exact ⟨fun h => absurd h.1 (hsp i hij), fun h => absurd h.1 (hsq i hij)⟩
+        · rw [ih i j,
+              signature_agree_off adj P Q Xp hPQ i hi,
+              signature_agree_off adj P Q Xp hPQ j hj,
+              signature_eq_of_samePartition adj Q ih i j]
+
 end ChainDescent
