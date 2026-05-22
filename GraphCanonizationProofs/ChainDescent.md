@@ -169,6 +169,15 @@ All results below are **proved with no `sorry`** and depend only on
   `warm_6_2` from one decision to a set: all `2^d` guess-states over a
   `d`-decision set carry *one* partition. The residual exponential then lives
   entirely in the order-labels (a `Z₂^d` optimisation).
+- `warmRefine_agree_off'` — **the composable form.** As above but the two
+  starting colourings need only be `samePartition`-equal, not literally equal.
+  This is the version that *chains across descent levels* (`warmRefine_agree_off`
+  is the `χ = χ'` special case) and is the inductive engine of the spine (§11).
+- `PartitionInvariant`, `target_direction_blind`, `target_agree_off` — the
+  target-cell layer. A selector is *partition-invariant* if it reads only the
+  partition; `target_direction_blind` (one decision) and `target_agree_off`
+  (a decision set, composable) then say the *next branch target* is shared —
+  the per-level step of the spine argument (§11).
 - Supporting lemmas: `refineStep_preserves_singleton`,
   `iterate_refineStep_preserves_singleton`, `signature_applyGuess_off`,
   `signature_eq_of_samePartition`, `signature_swap`, `signature_agree_off`.
@@ -237,18 +246,104 @@ theorems:
 
 ## 10. Future work (in proving terms)
 
-1. **The linear oracle** — the bound-reduction lever for the abelian/CFI case.
+1. **Formalise the descent recursion → the spine theorem (§11).** The per-level
+   lemmas are all proved (`warmRefine_agree_off'`, `target_direction_blind`,
+   `target_agree_off`); what is not yet in Lean is the recursion that strings
+   them together — a `descend` function and a model of *individualisation*
+   (fresh-colouring a target cell). The open modelling choice is how to model
+   individualisation: axiomatise an `individualize` that yields `D`-singletons
+   and preserves `samePartition`, or commit to a concrete `Nat`-offset
+   fresh-colour scheme. The payoff is one headline result: *chain descent
+   computes `O(n)` distinct refinements, not `O(2^n)`.*
+2. **The linear oracle** — the bound-reduction lever for the abelian/CFI case.
    Needs a model layer: order labels + the `Z₂`-affine structure of forced
    relations. `warmRefine_agree_off` is the reduction that makes this well-posed
    (it hands the oracle one fixed partition and a clean `Z₂^d` to optimise over).
-2. **Tier-2 exclusion** — the near-theorem: if `Aut(G)` *is* a Johnson group then
+3. **Tier-2 exclusion** — the near-theorem: if `Aut(G)` *is* a Johnson group then
    `G`'s edges are `S_k`-invariant ⇒ `G` is an association-scheme graph ⇒
    refinement computes the scheme ⇒ individualization cascades. I.e. *you cannot
    hide a Johnson group as the full `Aut(G)`*. Pure graph theory (association
    schemes); rules the wall *out* rather than solving it. Caveat: the general
    "all automorphisms are revealed in the first pass" is **circular** (= GI ∈ P) —
    only the full-`Aut` version is a real theorem.
-3. **Automorphism-equivariance of `warmRefine`** — refinement commutes with a
+4. **Automorphism-equivariance of `warmRefine`** — refinement commutes with a
    graph automorphism. The rigorous justification for "branch one per orbit".
-4. **The Tier-1 polynomial proof** — T-C for the cascade class; would pin the
+5. **The Tier-1 polynomial proof** — T-C for the cascade class; would pin the
    node budget `B(n)`.
+
+---
+
+## 11. The descent spine — cross-branch sharing
+
+`warm_6_2` / `warmRefine_agree_off` share the *partition* across guess
+directions. Pushing that through the descent recursion gives the central
+IR-resistant work-sharing result.
+
+**Setup.** Chain descent is a binary tree: each node warm-refines, picks a
+target cell, branches on its two orderings, recurses. Write `D_k` for the set
+of vertices individualized down to level `k`, and `π_k` / `T_k` for the
+partition and target cell at level `k`.
+
+**Spine theorem (informal — Lean status below).** *If target-cell selection is
+partition-invariant, then `D_k`, `π_k`, `T_k` are identical for every branch at
+level `k`.* The tree of **partitions** is therefore not a tree but a **path** —
+the *spine* — of length `m ≤ n`; the `2^m`-way branching is entirely in the
+order labels overlaid on it.
+
+*Proof.* Induction on `k`. Level 0: one root, shared trivially. Level `k→k+1`:
+by IH all branches share `π_k`, hence (partition-invariant selection)
+`T_k = `target`(π_k)`, hence `D_{k+1} = D_k ∪ T_k`. Any two branch matrices
+agree off `D_{k+1}` — every guess writes only inside the decision set — and the
+two level-`k+1` start colourings are `samePartition`-equal (IH, plus
+individualizing the same cell `T_k`). `warmRefine_agree_off'` then gives
+`π_{k+1}` shared. ∎
+
+Every *step* of this induction is a proved Lean lemma: `warmRefine_agree_off'`
+(the partition composes across levels — note it accepts `samePartition` start
+colourings, which is what the IH supplies) and `target_direction_blind` /
+`target_agree_off` (the target composes). What is **not** yet formalized is the
+recursion itself — a `descend` function and a model of individualisation; see
+§10 item 1.
+
+**Consequences.**
+
+- *The spine is the all-`less` descent.* Any direction choice yields the same
+  `π_k` (`warmRefine_agree_off`), so running the descent with every guess set to
+  `less` — one **non-branching**, polynomial pass — computes the whole spine
+  `D_0 ⊂ … ⊂ D_m`, `π_0,…,π_m`, `T_0,…,T_m`.
+- *Refinement work is `O(n)` refinements, not `O(2^n)`.* All `2^m` branches
+  reuse the one spine; refinement is never redone per node.
+- *Cascade is direction-blind.* "Refinement resolves cell `C`" is a partition
+  property, so a sub-decision forced (cascaded) in the `a<b` branch is forced
+  identically in `b<a`. The set of genuine (non-forced) decisions is a function
+  of `D` alone — a decision is never free in one branch and forced in its
+  mirror.
+- *Algorithm restructuring.* The descent splits into **Phase 1** — compute the
+  spine (poly, no branching) — and **Phase 2** — optimise the order labels over
+  the fixed spine. Phase 2 is the `2^m` residual and the linear oracle's domain.
+
+**What the spine does *not* do.** It shares the internal/refinement work, not
+the **leaves**. Each leaf is a distinct linear order on `D_m`; for a rigid
+graph (multipede) all `2^m` leaves give distinct matrices and must still be
+evaluated. The spine converts "exponentially many refinements" into
+"polynomially many refinements + exponentially many leaf evaluations", and
+hands the leaf/label optimisation a *single fixed partition backdrop*. Breaking
+that residual is the linear oracle (Tier-1 abelian) or the open wall (Tier-2) —
+the spine isolates the exponential, it does not remove it.
+
+**Implementation findings (for the C#).**
+
+1. *Target selection must be partition-invariant.* Across the `a<b` / `b<a`
+   branches the refined colour **values** diverge — already at round 1, a
+   non-`D` vertex's signature is lex-ranked among *all* vertices, including the
+   `D`-vertices whose colours differ by direction. A "lowest raw colour id"
+   target rule can therefore pick *different cells* in the two branches even
+   though the partition is identical, silently breaking the sharing. Selection
+   must read partition structure (cell sizes, signature multisets, …), not raw
+   ids. This is *not* a correctness bug in the current non-sharing descent — it
+   is a precondition for adding the sharing optimisation.
+2. *Memoise by the decision set `D`, not by the colouring.* The partition is a
+   function of `D` (`warmRefine_agree_off`); colourings diverge. The reuse key
+   for cross-branch sharing is the *set of individualized vertices*. Better
+   still — by the first consequence above — skip memoisation and compute the
+   spine directly as the all-`less` pass.

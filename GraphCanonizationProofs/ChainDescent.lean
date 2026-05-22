@@ -790,6 +790,55 @@ theorem signature_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
   rw [hPQ x u (Or.inl hx)]
 
 /--
+**Composable cross-branch sharing.** The cross-level strengthening of
+`warmRefine_agree_off`: the two starting colourings need only induce the
+*same partition*, not be literally equal.
+
+This is what lets the cross-branch-sharing argument **chain across descent
+levels**. At descent level `k` the `a<b` and `b<a` sub-branches carry
+colourings that are `samePartition`-equal (by the level-`k` instance of this
+lemma) but have *diverged in raw colour value*; feeding them into level `k+1`
+still yields equal partitions. With a literal-equality hypothesis the argument
+would stall after the first level. `warmRefine_agree_off` is the special case
+`χ = χ'`.
+-/
+theorem warmRefine_agree_off' {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
+    (χ χ' : Colouring n) (D : Finset (Fin n))
+    (hχ : samePartition χ χ')
+    (hPQ : ∀ x y : Fin n, (x ∉ D ∨ y ∉ D) → P x y = Q x y)
+    (hsing : ∀ x ∈ D, ∀ u, u ≠ x → χ u ≠ χ x) :
+    samePartition (warmRefine adj P χ) (warmRefine adj Q χ') := by
+  -- The singleton hypothesis transports across the partition to `χ'`.
+  have hsing' : ∀ x ∈ D, ∀ u, u ≠ x → χ' u ≠ χ' x := by
+    intro x hx u hu e; exact hsing x hx u hu ((hχ u x).mpr e)
+  suffices key : ∀ k, samePartition ((refineStep adj P)^[k] χ)
+      ((refineStep adj Q)^[k] χ') from key n
+  intro k
+  induction k with
+  | zero => exact hχ
+  | succ k ih =>
+    intro i j
+    simp only [Function.iterate_succ', Function.comp_apply]
+    rw [refineStep_iff, refineStep_iff]
+    set Xp := (refineStep adj P)^[k] χ
+    set Xq := (refineStep adj Q)^[k] χ'
+    by_cases hij : i = j
+    · subst hij; simp
+    · by_cases hi : i ∈ D
+      · have hsp := iterate_refineStep_preserves_singleton adj P i k χ (hsing i hi)
+        have hsq := iterate_refineStep_preserves_singleton adj Q i k χ' (hsing' i hi)
+        exact ⟨fun h => absurd h.1 (fun e => hsp j (Ne.symm hij) e.symm),
+               fun h => absurd h.1 (fun e => hsq j (Ne.symm hij) e.symm)⟩
+      · by_cases hj : j ∈ D
+        · have hsp := iterate_refineStep_preserves_singleton adj P j k χ (hsing j hj)
+          have hsq := iterate_refineStep_preserves_singleton adj Q j k χ' (hsing' j hj)
+          exact ⟨fun h => absurd h.1 (hsp i hij), fun h => absurd h.1 (hsq i hij)⟩
+        · rw [ih i j,
+              signature_agree_off adj P Q Xp hPQ i hi,
+              signature_agree_off adj P Q Xp hPQ j hj,
+              signature_eq_of_samePartition adj Q ih i j]
+
+/--
 **The cell partition depends only on the matrix off the decision set.**
 
 Let `D` be a set of vertices, each a singleton of the starting colouring `χι`
@@ -822,32 +871,54 @@ theorem warmRefine_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
     (χι : Colouring n) (D : Finset (Fin n))
     (hPQ : ∀ x y : Fin n, (x ∉ D ∨ y ∉ D) → P x y = Q x y)
     (hsing : ∀ x ∈ D, ∀ u, u ≠ x → χι u ≠ χι x) :
-    samePartition (warmRefine adj P χι) (warmRefine adj Q χι) := by
-  suffices key : ∀ k, samePartition ((refineStep adj P)^[k] χι)
-      ((refineStep adj Q)^[k] χι) from key n
-  intro k
-  induction k with
-  | zero => exact samePartition.refl χι
-  | succ k ih =>
-    intro i j
-    simp only [Function.iterate_succ', Function.comp_apply]
-    rw [refineStep_iff, refineStep_iff]
-    set Xp := (refineStep adj P)^[k] χι
-    set Xq := (refineStep adj Q)^[k] χι
-    by_cases hij : i = j
-    · subst hij; simp
-    · by_cases hi : i ∈ D
-      · have hsp := iterate_refineStep_preserves_singleton adj P i k χι (hsing i hi)
-        have hsq := iterate_refineStep_preserves_singleton adj Q i k χι (hsing i hi)
-        exact ⟨fun h => absurd h.1 (fun e => hsp j (Ne.symm hij) e.symm),
-               fun h => absurd h.1 (fun e => hsq j (Ne.symm hij) e.symm)⟩
-      · by_cases hj : j ∈ D
-        · have hsp := iterate_refineStep_preserves_singleton adj P j k χι (hsing j hj)
-          have hsq := iterate_refineStep_preserves_singleton adj Q j k χι (hsing j hj)
-          exact ⟨fun h => absurd h.1 (hsp i hij), fun h => absurd h.1 (hsq i hij)⟩
-        · rw [ih i j,
-              signature_agree_off adj P Q Xp hPQ i hi,
-              signature_agree_off adj P Q Xp hPQ j hj,
-              signature_eq_of_samePartition adj Q ih i j]
+    samePartition (warmRefine adj P χι) (warmRefine adj Q χι) :=
+  warmRefine_agree_off' adj P Q χι χι D (samePartition.refl χι) hPQ hsing
+
+/-! ## §6.2 spine — the descent's target-cell sequence is branch-independent
+
+`warm_6_2` and `warmRefine_agree_off` share the *partition* across guess
+directions. The canonizer's next move is *target-cell selection* — from the
+refined partition it picks the cell to branch on next. If that selection reads
+only the partition (not raw refined colour ids) it is direction-blind too, and
+the descent's whole sequence of target cells is a fixed **spine** shared by
+every branch. See `ChainDescent.md` §11 for the full argument and consequences.
+
+The selection **must** be partition-invariant: across the `a<b` and `b<a`
+branches the refined colour *values* genuinely diverge (a non-`D` vertex's
+signature is lex-ranked among all vertices, including the `D`-vertices whose
+colours differ by direction), so a "lowest raw colour id" rule can pick
+different cells in the two branches even when the partition is identical. -/
+
+/-- A target-cell selector is **partition-invariant** when it depends only on
+the partition a colouring induces, not on raw colour values. Cross-branch
+sharing of the descent spine is sound exactly for such selectors. -/
+def PartitionInvariant {n : Nat} (sel : Colouring n → Finset (Fin n)) : Prop :=
+  ∀ χ χ' : Colouring n, samePartition χ χ' → sel χ = sel χ'
+
+/-- **The next branch target is direction-blind.** For a partition-invariant
+selector, the target cell chosen after the guess `a < b` is the *same* cell as
+after `b < a`. The base case of the descent-spine induction. -/
+theorem target_direction_blind {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (a b : Fin n) (χι : Colouring n)
+    (ha : ∀ u, u ≠ a → χι u ≠ χι a) (hb : ∀ u, u ≠ b → χι u ≠ χι b)
+    {sel : Colouring n → Finset (Fin n)} (hsel : PartitionInvariant sel) :
+    sel (warmRefine adj (applyGuess P₀ a b .less) χι)
+      = sel (warmRefine adj (applyGuess P₀ a b .greater) χι) :=
+  hsel _ _ (warm_6_2 adj P₀ a b χι ha hb)
+
+/-- **The next branch target composes across descent levels.** For a
+partition-invariant selector and matrices `P`, `Q` agreeing off an
+all-singleton decision set `D`, the target cell is the same — even when the
+two starting colourings only agree up to partition. This is the inductive step
+of the descent-spine argument (`ChainDescent.md` §11): it composes because
+`warmRefine_agree_off'` accepts `samePartition` starting colourings. -/
+theorem target_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
+    (χ χ' : Colouring n) (D : Finset (Fin n))
+    (hχ : samePartition χ χ')
+    (hPQ : ∀ x y : Fin n, (x ∉ D ∨ y ∉ D) → P x y = Q x y)
+    (hsing : ∀ x ∈ D, ∀ u, u ≠ x → χ u ≠ χ x)
+    {sel : Colouring n → Finset (Fin n)} (hsel : PartitionInvariant sel) :
+    sel (warmRefine adj P χ) = sel (warmRefine adj Q χ') :=
+  hsel _ _ (warmRefine_agree_off' adj P Q χ χ' D hχ hPQ hsing)
 
 end ChainDescent
