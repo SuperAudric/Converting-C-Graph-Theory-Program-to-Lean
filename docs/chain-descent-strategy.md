@@ -194,6 +194,15 @@ canonical 1-WL signature order) are a function of graph structure only. So the
 *set of candidate cells* and the choice of target cell at any node are
 iso-invariant. This is the reference frame everything else stands on.
 
+A subtlety this frame does *not* by itself remove: a 1-WL cell is a single
+candidate *vertex*-orbit, but it can host several distinct *pair*-orbits (C4:
+adjacent vs. diagonal pairs; C6: distance-1/2/3 pairs; CFI bases: subtler splits
+1-WL on pairs cannot separate). Picking a representative *pair* by vertex index
+is therefore *not* iso-invariant. Chain descent sidesteps the trap by branching
+over the whole iso-invariant target cell and delegating the orbit split to the
+oracle — never to an index rule. (The earlier flip-validation design instead
+made a non-iso-invariant pair guess and repaired it afterwards; §13.)
+
 **Output iso-invariance.** Cells and their canonical numbering are
 iso-invariant; the target cell is chosen by canonical id (6.1); and the oracle
 is *required* to be iso-invariant (§5). So two labellings of the same graph
@@ -270,7 +279,17 @@ types. The cell partition is re-derived from `(A, P)` at every step — never
 stored. A flat matrix, but it *induces* a hierarchical **cell tree**: the root
 is all vertices; a cell's children are the sub-cells 1-WL produces once a guess
 touches it; leaves are singletons. The tree is the navigable mental model; the
-matrix is the storage.
+matrix is the storage. The cells are **P-coherent**: any two members of a cell
+have the same multiset of `(cell, A-edge, P-relation)` triples over all vertices
+— so the induced tree is exactly the 1-WL partition lattice of `(A, P)`, and
+order propagates through it cell-respectingly (a cell's order relative to
+another cell is inherited uniformly by all its members).
+
+**The state is the output; the path to it is not.** A leaf's canonical matrix is
+a function of `(A, P_final)` alone. The order in which guesses built `P`, and
+the provenance record (§10), are a *transcript* of how that state was reached —
+never an input to the matrix. This "only the final state matters, not the path
+to it" property is load-bearing for the proofs.
 
 **Refine** — free; reads `P`, never writes it. 1-WL colour refinement on the
 coloured graph `(A, edge_label = (adj[u,v], P[u,v]))`: each vertex's colour is
@@ -296,13 +315,28 @@ cell (or in two P-incomparable cells), write `P[a,b] = Less`, refine. This
 single-pair shape is deliberate — see §11. The guessed vertex is individualized
 as a fresh colour, so `a` and `b` start as singletons after the guess.
 
+A guess pairs two vertices of the *same* cell (a **within-cell** guess) or two
+vertices of *distinct, P-incomparable* cells (a **between-cell** guess).
+Between-cell guesses are **necessary**, not a convenience: a graph with several
+automorphism-equivalent components — `2K2` is the minimal case — reaches a state
+where every cell is internally resolved yet `P` is not total, because the
+components' cells are mutually P-incomparable. Only a between-cell guess can
+order them.
+
 ## 10. Closure as a guess
 
 After a write to `P`, the partial order can be **transitively closed**: for each
 `(i, k, j)` with `P[i,k] = Less`, `P[k,j] = Less`, `P[i,j] = Unknown`, set
 `P[i,j] = Less`. A closure-derived relation is recorded as a **`DERIVED`
 record** carrying a `driver` pointer — the index of the primary guess whose
-write completed the chain. A contradiction (a cycle) marks the branch dead.
+write completed the chain. A contradiction — a cycle, or `P[v,v] = Less` — marks
+the branch dead.
+
+Only the **final closed `P`** is part of the spec: the closure *algorithm*, and
+the *order* in which derived relations are written, do not affect it
+(incremental closure over `ancestors(x) × descendants(y)`, `O(n²)` per
+insertion, and Floyd–Warshall both yield the same closed relation). This is the
+§9 "state is the output, path is not" property applied to closure.
 
 **Why the provenance matters — invariant 6.4.** Without driver tracking, closure
 can produce an `O(n)`-long chain of relations all tracing to one guess; the
@@ -311,6 +345,17 @@ forced which derived relation* — to delineate a genuine decision's **coupled
 component** and to read the candidate twist off it. The provenance record is the
 linear oracle's required state. At most `n(n−1)` `DERIVED` records exist at any
 time, so the bookkeeping is polynomial.
+
+**Closure asymmetry on non-automorphic pairs is sound.** A genuine decision
+makes closure run differently in its two branches — a chain reaches one vertex
+in one branch and not in the other. This is not an inconsistency to be repaired.
+A non-automorphic pair `(u, v)` is, by definition, in *different* cells; once it
+is, every order relation between them is *forced by structure*, not chosen.
+Closure asymmetries are therefore confined to pairs whose ordering descends from
+a guess — and there the asymmetry *is* the genuine decision the oracle exists to
+resolve, not a fault. The `driver` pointer attributes each derived relation to
+the guess that forced it, so the two branches of a decision carry cleanly
+separated derived chains and a flag is never a stranded contradiction.
 
 **Two models, one substrate.** The implementation runs closure with `DERIVED`
 records as above. The *proof* of invariant 6.2 (§10 of this list — see next
@@ -457,6 +502,29 @@ design.
   dependency, since proved as `warm_6_2`;
 - **invariant 6.1**, iso-invariance of cell ids (§7);
 - the **single-pair-does-not-prune-interleavings** rationale, the old `§7` (§11).
+
+### The invariant ledger
+
+The earlier generation organised its correctness and complexity claims as a
+numbered family `§6.1`–`§6.5`. The names `6.1`, `6.2`, `6.4` are still used in
+this doc and in the Lean development; so that nothing is silently dropped, here
+is where each landed.
+
+| Old | Statement | Where it is now |
+|---|---|---|
+| 6.1 | Iso-invariance of cell ids | **Live** — §7, a correctness building block. |
+| 6.2 | Reverse-symmetric propagation of warm refinement | **Live** — §12; proved as `warm_6_2`; the linear oracle's correctness dependency. |
+| 6.3 | Deeper-guess locks survive shallow flips | **Retired** — a property of the flip-validation backward pass; chain descent has no backward sweep and no "deeper locks" to survive. |
+| 6.4 | Closure as a guess (`DERIVED` records + `driver`) | **Live** — §10; the linear oracle's provenance state. |
+| 6.5 | Every canonical form reachable from any pair selection | **Live, re-housed** — the invariant *the branch representatives cover every orbit of the target cell* is the §7 **completeness** requirement; the enumerate-and-lex-min operation is lex-leader descent over a per-level transversal ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §2). The flip-validation backward-pass implementation (replay, fixpoint iteration) is retired. |
+
+The old `§6` header decomposed the claims as *correct iff 6.1 + 6.4 + 6.5;
+polynomial iff 6.2 + 6.3*. In current terms: **correctness** rests on
+iso-invariant cell ids (6.1, §7), oracle soundness (§5), and completeness (the
+6.5 content, §7); the **polynomial bound** rests on the budget (§6) and a
+polynomial-per-node oracle (T-C, calculator §4/§8). Note that **6.2 moved out of
+the complexity column** — it is no longer a backward-pass speed argument but a
+*correctness* dependency of the linear oracle.
 
 ## 14. Validation strategy
 
