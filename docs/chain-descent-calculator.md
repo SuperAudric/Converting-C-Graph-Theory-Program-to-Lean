@@ -345,6 +345,11 @@ is not a coincidence.
   — under the relegated-TC model (a guess writes one `P` entry, no transitive
   closure in the refinement loop) with fresh-colour individualisation. See the
   strategy doc's invariant-6.2 section for the full statement and Lean status.
+  Generalised by the **descent spine** (`warmRefine_agree_off`, proved): all
+  `2^d` leaves of a `d`-decision subtree share *one* partition, so the linear
+  oracle is handed a single fixed partition with a clean `Z₂^d`
+  label-optimisation rather than `2^d` distinct refinement worlds — see
+  [`chain-descent-strategy.md`](./chain-descent-strategy.md) §12.
 - **Cheap candidate construction** (step 2) — turning a propagation pattern into
   a vertex permutation — is the one genuinely unspecified piece and the main
   implementation risk (§9).

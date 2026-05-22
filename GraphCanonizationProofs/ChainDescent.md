@@ -265,7 +265,11 @@ theorems:
    hide a Johnson group as the full `Aut(G)`*. Pure graph theory (association
    schemes); rules the wall *out* rather than solving it. Caveat: the general
    "all automorphisms are revealed in the first pass" is **circular** (= GI ∈ P) —
-   only the full-`Aut` version is a real theorem.
+   only the full-`Aut` version is a real theorem. Written up rigorously in
+   `docs/chain-descent-hidden-johnson.md`: Pieces A and B (a visible Johnson's
+   edges are forced to be an overlap-scheme) **proved**, Piece C (that scheme
+   then cascades) **scoped** — and that doc delimits what it does *not* cover:
+   only the *visible* Johnson is ruled out, not the encoded one.
 4. **Automorphism-equivariance of `warmRefine`** — refinement commutes with a
    graph automorphism. The rigorous justification for "branch one per orbit".
 5. **The Tier-1 polynomial proof** — T-C for the cascade class; would pin the

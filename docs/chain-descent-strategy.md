@@ -453,6 +453,42 @@ singletons). Lean results:
 Empirically verified on `C4` with `(0 1)` non-Aut, on the 6-vertex asymmetric
 graph `{0-1, 0-2, 0-3, 1-4, 2-5}` with `(1 2)` non-Aut, and on `K3`.
 
+**6.2 generalised — the descent spine.** `warm_6_2` flips *one* decision;
+`warmRefine_agree_off'` (proved, `ChainDescent.lean`) flips *any set* at once: if
+two `P`-matrices agree on every entry with an endpoint outside a decision set
+`D`, and `D`'s vertices are `χι`-singletons, warm refinement gives the *same
+partition* under both — even when the two starting colourings agree only up to
+partition, which is what lets the argument chain across descent levels.
+
+Its consequence is the **descent spine**. With a target-cell selector that reads
+only the partition (not raw refined colour ids), induction down the descent
+shows every branch at level `k` shares the same partition, target cell, and
+decision set: the tree of *partitions* is a **path** of length ≤ `n`, and the
+`2^d`-way branching lives entirely in the order labels overlaid on it. Hence:
+
+- *Refinement is `O(n)` passes for the whole tree, not `O(2^d)`* — the spine is
+  computed once, by a single non-branching pass with every guess set `less` (any
+  direction gives the same partition). This sharpens the §8 cost accounting.
+- *Cascade is direction-blind* — a sub-decision forced in one branch is forced
+  identically in its mirror; the genuine-decision set depends only on `D`.
+- *Implementation requirement* — for cross-branch sharing to be sound the
+  target-cell selector **must be partition-invariant**: across a decision's two
+  directions the refined colour *values* diverge, so a "lowest raw cell id" rule
+  can pick different cells in the two branches though the partition is identical.
+  The reuse key is the *decision set*, not the colouring.
+
+The spine shares the *refinement* work, not the *leaves* — each leaf is still a
+distinct order on `D` (for a rigid graph all `2^d` are distinct; §15 gap 5). It
+reduces the descent to "polynomially many refinements + a residual `Z₂^d` label
+optimisation", handing the linear oracle
+([`chain-descent-calculator.md`](./chain-descent-calculator.md) §6) one fixed
+partition to optimise over. Proved: `warmRefine_agree_off` and its composable
+form `warmRefine_agree_off'`, `target_direction_blind`, `target_agree_off`
+(`ChainDescent.lean`); the recursion stringing them into the full spine theorem
+is not yet formalised, and the spine is not yet implemented in the C# (the
+descent re-refines per node). Full account:
+[`ChainDescent.md`](../GraphCanonizationProofs/ChainDescent.md) §11.
+
 ---
 
 # Part IV — Status
@@ -592,7 +628,12 @@ predicate, the unbuilt linear oracle) are in
 
 5. **The flagged region exceeds Tier 2.** Tier 2 (no cascade + a non-abelian
    `A_k` factor) is the genuine hard core, aligned with Babai's
-   split-or-Johnson obstruction — flagging it is honest hardness. But the
+   split-or-Johnson obstruction — flagging it is honest hardness. Whether a
+   Tier-2 obstruction can arise from the descent at all is the *construction
+   question*; the near-theorem — you cannot hide a Johnson as a graph's
+   *visible* symmetry — is written up in
+   [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md)
+   (Pieces A and B proved, Piece C scoped). But the
    flagged region also contains **IR blind spots**: rigid,
    refinement-resistant graphs (the Neuen–Schweitzer multipede family) with *no*
    symmetry at all. These are hard for the individualization-refinement
