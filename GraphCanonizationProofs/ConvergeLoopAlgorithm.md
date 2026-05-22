@@ -3,7 +3,7 @@
 This file captures what the `convergeLoop` in `LeanGraphCanonizerV4` actually
 does, in a form aimed specifically at supporting the discharge of
 [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md). For a more general
-description of the pipeline see [`docs/algorithm.md`](../docs/algorithm.md);
+description of the pipeline see [`docs/v4-canonizer.md`](../docs/v4-canonizer.md);
 for the algorithm itself see
 [LeanGraphCanonizerV4.lean](LeanGraphCanonizerV4.lean).
 
