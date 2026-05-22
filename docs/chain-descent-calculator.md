@@ -367,7 +367,11 @@ Progress so far:
   `S_k`-invariant, hence a union of Johnson-association-scheme classes, hence `G`
   is a scheme graph — and refinement computes the scheme, so individualization
   cascades. **You cannot hide a Johnson group as the full automorphism group of
-  a graph.**
+  a graph.** Rigorous treatment in
+  [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md): the
+  edges-are-a-scheme half (Pieces A, B) is proved, the cascade half (Piece C) is
+  scoped, and the doc delimits what this does *not* cover — only the *visible*
+  Johnson is ruled out, not the encoded (CFI-style) one.
 - **CFI is a `Z₂`-hiding gadget.** No `Aₖ`-hiding gadget is known. Hiding a
   non-abelian simple group requires *fusing* refinement-resistance with
   non-abelianness in one non-decomposable obstruction; layered products
