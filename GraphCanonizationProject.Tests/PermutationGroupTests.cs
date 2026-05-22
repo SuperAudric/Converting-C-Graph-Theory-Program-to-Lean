@@ -2,8 +2,8 @@ using Canonizer;
 using System.Linq;
 
 // Unit tests for the route-2 calculator's group-theoretic foundation
-// (PermutationGroup / Schreier–Sims). See docs/chain-descent-calculator.md,
-// "The current model: the calculator is a stabilizer chain".
+// (PermutationGroup / Schreier–Sims). See docs/chain-descent-calculator.md §2,
+// "The model: the calculator is a stabilizer chain".
 //
 // Group order is the decisive test: if the chain computes |G| correctly on a
 // spread of known groups, the base, transversals and sifting are sound.

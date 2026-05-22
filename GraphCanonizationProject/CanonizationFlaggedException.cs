@@ -3,8 +3,8 @@ using System.Numerics;
 
 namespace Canonizer
 {
-    // How a chain-descent flag is classified (docs/chain-descent-simplified-overview.md
-    // §9 gap 9). The flagged region is larger than Tier 2; the order of the
+    // How a chain-descent flag is classified (docs/chain-descent-strategy.md
+    // §15). The flagged region is larger than Tier 2; the order of the
     // automorphism group harvested before the budget ran out tells the two
     // flag causes apart.
     public enum FlagKind
@@ -13,9 +13,9 @@ namespace Canonizer
         None,
 
         // Flagged with a non-trivial harvested automorphism group: a genuine
-        // symmetry the cascade oracle could not consume. Covers the abelian
-        // CFI case (which the deferred linear oracle, §7, will absorb) as well
-        // as the genuine non-abelian Tier-2 wall.
+        // symmetry the cascade oracle could not consume. Covers the abelian CFI
+        // case (which the deferred linear oracle, docs/chain-descent-calculator.md
+        // §6, will absorb) as well as the genuine non-abelian Tier-2 wall.
         Tier2Like,
 
         // Flagged with a trivial harvested group: an IR blind spot — a rigid,
@@ -35,8 +35,9 @@ namespace Canonizer
         // Order of the automorphism group harvested before the budget ran out.
         public BigInteger ResidualGroupOrder { get; }
 
-        // The flag classification (§9 gap 9) — heuristic, read off
-        // ResidualGroupOrder. Never None (an exception is always a flag).
+        // The flag classification (docs/chain-descent-strategy.md §15) —
+        // heuristic, read off ResidualGroupOrder. Never None (an exception is
+        // always a flag).
         public FlagKind Kind =>
             ResidualGroupOrder.IsOne ? FlagKind.IrBlindSpot : FlagKind.Tier2Like;
 

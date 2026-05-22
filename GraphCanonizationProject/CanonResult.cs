@@ -1,7 +1,7 @@
 namespace Canonizer
 {
     // Instrumentation gathered over a chain-descent run — the cost quantities
-    // the polynomial argument reasons about (docs/chain-descent-simplified-overview.md §6).
+    // the polynomial argument reasons about (docs/chain-descent-strategy.md §8).
     internal sealed record DescentStats(
         long NodeCount,        // descent-tree nodes visited
         int MaxDepth,          // deepest individualisation path
@@ -13,7 +13,7 @@ namespace Canonizer
                                // (the Tier-1 ideal), a growing profile a
                                // fanning tree.
 
-    // The outcome of a chain-descent run (docs/chain-descent-simplified-overview.md §4):
+    // The outcome of a chain-descent run (docs/chain-descent-strategy.md §4, §6):
     // either a canonical form, or a flag. A flag is produced when the run
     // exhausts the polynomial node budget — an honest "not handled", never a
     // wrong answer.
@@ -27,7 +27,7 @@ namespace Canonizer
         // The residual automorphism group harvested during the descent. On a
         // flag its order tells the two flag causes apart: non-trivial ⇒ a
         // genuine Tier-2-like symmetry wall, trivial ⇒ an IR blind spot
-        // (docs/chain-descent-simplified-overview.md §9 gap 9).
+        // (docs/chain-descent-strategy.md §15).
         public PermutationGroup ResidualGroup { get; private init; } = null!;
 
         public string? FlagReason { get; private init; }

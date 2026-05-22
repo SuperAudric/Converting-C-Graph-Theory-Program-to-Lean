@@ -7,7 +7,7 @@ namespace Canonizer
     using VertexType = int;
     using EdgeType = int;
 
-    // Chain-descent graph canonizer — see docs/chain-descent-simplified-overview.md.
+    // Chain-descent graph canonizer — see docs/chain-descent-strategy.md.
     //
     // Run() decomposes the graph into connected components (Tier 0), canonizes
     // each with the chain-descent harness, and lays the component canonicals
@@ -38,7 +38,7 @@ namespace Canonizer
         public BigInteger LastAutomorphismGroupOrder { get; private set; }
 
         // The flag reason (null when the run produced a canonical form) and
-        // its classification (docs/chain-descent-simplified-overview.md §9 gap 9).
+        // its classification (docs/chain-descent-strategy.md §15).
         public string? LastFlagReason { get; private set; }
         public FlagKind LastFlagKind { get; private set; }
 
@@ -54,7 +54,7 @@ namespace Canonizer
             // Tier 0 — component decomposition. A disjoint union's automorphism
             // group factors over its connected components; canonizing each
             // independently and combining keeps disjoint unions linear in the
-            // component count. See docs/chain-descent-simplified-overview.md §9 gap 8.
+            // component count. See docs/chain-descent-strategy.md §15.
             var components = ConnectedComponents(G);
             if (components.Count <= 1)
                 return RunConnected(vertexTypes, G);

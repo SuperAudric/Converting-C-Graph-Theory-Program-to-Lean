@@ -361,8 +361,9 @@ public partial class GraphCanonTests(ITestOutputHelper output)
     // not the disjoint union. Tests isomorphism-invariance against scrambling
     // on a graph that 1-WL alone cannot canonize — but at n=18 for Cycle3
     // instead of the n=36 disjoint-union variant below. This is the cheaper
-    // "does §6.5 handle 1-WL-resistant pair-orbit ambiguity at all" check;
-    // CfiPair_ProducesDifferentCanonical above covers Even≠Odd separately.
+    // "does the canonizer handle 1-WL-resistant pair-orbit ambiguity at all"
+    // check (docs/chain-descent-strategy.md §7); CfiPair_ProducesDifferentCanonical
+    // above covers Even≠Odd separately.
     [Theory]
     [InlineData("Cycle3")]
     //[InlineData("Cycle4")] // 24 vertices, too slow on v1

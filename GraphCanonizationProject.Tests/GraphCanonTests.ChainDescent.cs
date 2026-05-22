@@ -135,7 +135,7 @@ public partial class GraphCanonTests
         Assert.Equal(resultBefore, resultAfter);
     }
 
-    // ── CFI(Cycle3): a Tier-1 lab (docs/chain-descent-simplified-overview.md) ────────────
+    // ── CFI(Cycle3): a Tier-1 lab (docs/chain-descent-calculator.md §3) ─────────
     //
     // The odd graph is a single 18-cycle; the even graph is two disjoint
     // 9-cycles. Both are 1-WL-blind but cascade after one individualization —

@@ -522,7 +522,7 @@ The old `§6` header decomposed the claims as *correct iff 6.1 + 6.4 + 6.5;
 polynomial iff 6.2 + 6.3*. In current terms: **correctness** rests on
 iso-invariant cell ids (6.1, §7), oracle soundness (§5), and completeness (the
 6.5 content, §7); the **polynomial bound** rests on the budget (§6) and a
-polynomial-per-node oracle (T-C, calculator §4/§8). Note that **6.2 moved out of
+polynomial-per-node oracle (T-C, calculator §4). Note that **6.2 moved out of
 the complexity column** — it is no longer a backward-pass speed argument but a
 *correctness* dependency of the linear oracle.
 

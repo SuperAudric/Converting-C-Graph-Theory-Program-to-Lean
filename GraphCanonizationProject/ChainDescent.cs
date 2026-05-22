@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Canonizer
 {
-    // The chain-descent harness — docs/chain-descent-simplified-overview.md §4.
+    // The chain-descent harness — docs/chain-descent-strategy.md §4.
     //
     // A recursive descent of the individualization-refinement tree. At each
     // node: warm-refine the partition; if it is discrete the cell ids are a
@@ -12,19 +12,20 @@ namespace Canonizer
     // posteriori once a harvested automorphism shows it redundant. The
     // lex-smallest leaf matrix is the canonical form.
     //
-    // The descent carries a polynomial node budget (§4.2). Exhausting it makes
-    // the run flag — an honest "not handled", never a wrong answer.
-    // Automorphisms are harvested from coinciding leaf matrices into a
-    // PermutationGroup, the residual-symmetry object (§4.3); both the oracle
-    // and the a-posteriori pruning consume it.
+    // The descent carries a polynomial node budget (docs/chain-descent-strategy.md
+    // §6). Exhausting it makes the run flag — an honest "not handled", never a
+    // wrong answer. Automorphisms are harvested from coinciding leaf matrices
+    // into a PermutationGroup — the residual-symmetry object, the stabilizer
+    // chain of docs/chain-descent-strategy.md §6. Both the oracle and the
+    // a-posteriori pruning consume it.
     //
     // Phase-1 conversion: the oracle is CascadeOracle, which certifies nothing
     // a priori, so all pruning is the a-posteriori path-fixing-orbit skip
     // below. Behaviour matches the previous IR search, now bounded by the
     // budget and structured around the oracle seam the deferred linear oracle
-    // (§7) will plug into.
+    // (docs/chain-descent-calculator.md §6) will plug into.
     //
-    // ── Proof contract (docs/chain-descent-simplified-overview.md §8–§9) ──────────────
+    // ── Proof contract (docs/chain-descent-strategy.md §7–§8, §15) ───────────────
     //
     // Correctness (oracle-agnostic). For ANY oracle whose representatives
     // cover every orbit of the target cell, Canonize returns an isomorphism-
@@ -37,11 +38,11 @@ namespace Canonizer
     // polynomial-or-flag: the node count is ≤ budget by construction and
     // per-node work is polynomial. Unconditional given the budget.
     //
-    // Tier-1 target (open — §9 gap 3). On cascade (Tier-1) graphs the descent
-    // is conjectured to fit within B(n), so the run canonizes rather than
-    // flags. Proving it — characterising the cascade class — is the open
-    // Tier-1 theorem; the NodesByDepth instrumentation exposes the cost shape
-    // that proof reasons about.
+    // Tier-1 target (open — docs/chain-descent-calculator.md §9). On cascade
+    // (Tier-1) graphs the descent is conjectured to fit within B(n), so the run
+    // canonizes rather than flags. Proving it — characterising the cascade
+    // class — is the open Tier-1 theorem; the NodesByDepth instrumentation
+    // exposes the cost shape that proof reasons about.
     internal sealed class ChainDescent
     {
         private const sbyte LESS = -1, GREATER = 1;
@@ -80,7 +81,7 @@ namespace Canonizer
 
         // A generous polynomial default node budget. Configurable so the
         // scaling probe can tune it; the exact value is pinned later by the
-        // Tier-1 proof (docs/chain-descent-simplified-overview.md §9 gap 3).
+        // Tier-1 proof (docs/chain-descent-calculator.md §9).
         public static long DefaultBudget(int n) =>
             Math.Max(200_000L, 16L * n * n * n * n);
 

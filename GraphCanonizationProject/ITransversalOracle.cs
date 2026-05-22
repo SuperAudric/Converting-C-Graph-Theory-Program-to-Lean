@@ -2,8 +2,9 @@ using System.Collections.Generic;
 
 namespace Canonizer
 {
-    // The transversal oracle — the chain-descent design's T-C seam
-    // (docs/chain-descent-simplified-overview.md §4.1). At a branch node the harness must
+    // The transversal oracle — the chain-descent design's T-C seam. The oracle
+    // interface contract is docs/chain-descent-strategy.md §5; the T-C framing
+    // is docs/chain-descent-calculator.md §4. At a branch node the harness must
     // decide which target-cell vertices to descend into; the oracle returns
     // that representative list.
     //
@@ -14,8 +15,9 @@ namespace Canonizer
     //
     // Phase 1 ships only CascadeOracle, which certifies nothing a priori and
     // returns the whole cell; the harness then prunes a posteriori from the
-    // automorphisms it harvests. The deferred LinearOracle (§7) will be a
-    // second implementation that returns a certified, much shorter list.
+    // automorphisms it harvests. The deferred LinearOracle
+    // (docs/chain-descent-calculator.md §6) will be a second implementation
+    // that returns a certified, much shorter list.
     internal interface ITransversalOracle
     {
         TransversalDecision Classify(

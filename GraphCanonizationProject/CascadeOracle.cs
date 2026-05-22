@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Canonizer
 {
-    // Phase-1 transversal oracle (docs/chain-descent-simplified-overview.md §6, §9 gap 6).
+    // Phase-1 transversal oracle (docs/chain-descent-calculator.md §5, §9).
     //
     // It certifies nothing a priori: Classify returns every vertex of the
     // target cell, in ascending order. The actual orbit pruning is the
@@ -13,7 +13,7 @@ namespace Canonizer
     // the node budget exactly on graphs that cascade, and flag otherwise.
     //
     // The non-trivial a-priori oracle — discovering twists from propagation
-    // patterns — is the deferred LinearOracle (§7).
+    // patterns — is the deferred LinearOracle (docs/chain-descent-calculator.md §6).
     internal sealed class CascadeOracle : ITransversalOracle
     {
         public TransversalDecision Classify(

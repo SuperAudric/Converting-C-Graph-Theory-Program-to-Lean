@@ -75,9 +75,9 @@ namespace Canonizer
     // ── Permutation group via a stabilizer chain ────────────────────────────
     //
     // The group-theoretic foundation of the route-2 calculator. Per
-    // docs/chain-descent-calculator.md ("The current model: the calculator
-    // is a stabilizer chain"), the calculator's object *is* a stabilizer
-    // chain; this type provides it.
+    // docs/chain-descent-calculator.md §2 ("The model: the calculator is a
+    // stabilizer chain"), the calculator's object *is* a stabilizer chain;
+    // this type provides it.
     //
     // A group on {0..N-1} is given by generators; a base and the basic
     // transversals (the stabilizer chain) are computed lazily by Schreier–Sims.
