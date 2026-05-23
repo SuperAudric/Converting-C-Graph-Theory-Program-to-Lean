@@ -256,14 +256,43 @@ separated by that partition. They do *not* give exchange.
 
 **What is missing for the matroid framework:**
 
-| axiom | status |
+| axiom | status (revised 2026-05-23) |
 |---|---|
-| M0 monotone | follows from `warmRefine_refines` (split-only); short Lean proof |
-| M1 extensive | by definition; trivial |
-| M2 idempotent | warm refinement runs to fixpoint; short Lean proof |
-| M3 exchange | open — see §7 |
+| M0 monotone | **unhypothesised version is FALSE** — counterexample below. Fresh-colour fix `cl_monotone_T_individualised` is **proved** (via the stronger `warmRefine_samePartition_T_individualised` — under T-individualised χι, `cl S = cl T` for any `S ⊆ T`, not merely `⊆`). The trivial all-discrete version `cl_monotone_discrete` is also proved but vacuous. |
+| M1 extensive | proved under fresh-colour hypothesis: `cl_extensive` |
+| M2 idempotent | sorry (Lean), proof sketch in `ChainDescent.lean` §13 |
+| M3 exchange | sorry (Lean), the genuinely open claim |
 
-M0–M2 are essentially free. M3 is the load-bearing claim.
+**M0 counterexample.** `n = 4`, `adj ≡ 0`, `χι ≡ 0`, `S = {(0,1)}`,
+`T = {(0,1), (2,3)}`. Under `Pof S`'s asymmetric single commit, vertex 0's
+round-1 signature has a `.less` entry, vertex 2's is all `.unknown` — they
+split. Under `Pof T`'s symmetric pair of commits the involution
+`(0 2)(1 3)` is an automorphism of `(adj, Pof T)`, so vertices 0 and 2 are
+kept co-classed by refineStep. So `(0, 2) ∈ cl S \ cl T` — *adding* the
+`(2,3)` commit to `S` un-forces the `(0,2)` separation by introducing a new
+swap symmetry. So `cl S ⊄ cl T`.
+
+**Why this matters.** The matroid framing on pair-guesses with χι fixed and
+*unindividualised* is structurally wrong: the closure operator can shrink
+when the input grows, because added commits can *restore* symmetries that
+fewer commits broke. This is the opposite of the "more info → finer
+partition" intuition.
+
+**The fresh-colour fix.** Individualising the endpoints of `T` to distinct
+`χι`-singletons mechanically blocks the swap-symmetry mechanism: the
+involution `(0 2)(1 3)` is no longer a colour-preserving automorphism
+because `χι 0 ≠ χι 2` and `χι 1 ≠ χι 3` by construction.
+`iterate_refineStep_preserves_singleton` then keeps `0,1,2,3` apart
+throughout. The candidate fixed statement is `cl_monotone_T_individualised`
+in `ChainDescent.lean` §13 — under the hypothesis that every endpoint of
+every pair in `T` (the larger set) is already a `χι`-singleton, `cl S ⊆ cl T`.
+Not yet proved; this is the natural M0 target post-counterexample.
+
+**Implication for the whole framework.** This may not be a fatal blow — M0
+might still hold under fresh-colour individualisation, and that *is* the
+matroid-friendly model already used by `warm_6_2` and `warmRefine_agree_off'`.
+But it does mean every matroid axiom needs the fresh-colour hypothesis
+attached explicitly. The "M0 is free" claim above was wrong.
 
 ---
 
@@ -386,6 +415,20 @@ What this session contributed:
   indicators) as the Tier-2 detection scheme.
 - Set the no-known-hidden-Johnson observation as a conjecture of the
   framework rather than a separate piece of evidence.
+- **Lean scaffold landed** (later same day): §13 in `ChainDescent.lean`.
+  `cl_extensive` proved. `cl_idempotent`, `cl_exchange` stated as sorries
+  with proof-obligation docstrings.
+- **M0 unhypothesised version REFUTED** (later same day): 4-vertex
+  counterexample (above, §6). The "M0 free" claim was wrong. The trivial
+  fully-discrete version `cl_monotone_discrete` is proved but vacuous.
+- **M0 under T-individualised PROVED** (later same day): via the *stronger*
+  `warmRefine_samePartition_T_individualised` — under T-individualised χι
+  the warm-refined partitions under `Pof P₀ S` and `Pof P₀ T` literally
+  coincide (`samePartition`), so `cl S = cl T` for every `S ⊆ T`, not just
+  `⊆`. Proof: induction on refinement round; non-T vertices use
+  `signature_eq_of_samePartition` + row-agreement of `Pof S` and `Pof T`
+  off `T`-vertices; T-vertices stay singletons via
+  `iterate_refineStep_preserves_singleton` and contribute vacuously.
 
 What this session did NOT settle:
 - Whether exchange (M3) actually holds.
@@ -395,4 +438,6 @@ What this session did NOT settle:
 - Whether `c < k - 1` (World B) ever genuinely occurs at the *closure
   circuit* level (vs. the direct-rule level, where it clearly does).
 
-The natural next action is §9 item 2 — attack M3 in Lean.
+The natural next action is M2 (cl_idempotent) or M3 (cl_exchange) — M0 and
+M1 are now solid under T-individualised χι. M2 has a per-cell-symmetry
+proof sketch; M3 is the genuinely open one.

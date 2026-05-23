@@ -1008,23 +1008,40 @@ theorem cl_extensive {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
   intro heq
   exact hkeep p.2 hne.symm heq.symm
 
-/-! ### M0 — monotonicity
+/-! ### M0 — monotonicity (the unhypothesised form is FALSE)
 
-Extending the set of committed pairs only refines the partition. The helper
-`warmRefine_mono` (P-extension monotonicity) is the load-bearing lemma; we
-state it here but leave the proof as a future obligation — the argument is a
-chain induction on the refinement round showing that under richer P, every
-signature multiset is at least as discriminating.
+The naive M0 — `S ⊆ T → cl S ⊆ cl T`, for arbitrary `χι` — does **not** hold.
+
+**Counterexample.** `n = 4`, `adj ≡ 0`, `χι ≡ 0`, `S = {(0,1)}`,
+`T = {(0,1), (2,3)}`. Under `S`'s `P`-matrix the signatures at round 1 split
+`0` from `2` (vertex 0 has a `.less` entry, vertex 2 has all `.unknown`).
+Under `T`'s `P`-matrix the involution `(0 2)(1 3)` is an automorphism of
+`(adj, P)`, so refineStep keeps `{0,2}` and `{1,3}` co-classed. So
+`(0,2) ∈ cl S \ cl T` — adding `(2,3)` to `S` *destroys* the separation of `0`
+and `2` by introducing a new symmetry.
+
+**Diagnosis.** The closure operator on pair-guesses is not monotone in `S`
+because more commits can introduce new automorphisms of `(adj, Pof S)`. A
+single asymmetric commit (only `(0,1)`) breaks more symmetry than two
+symmetric commits (`(0,1)` *and* `(2,3)`, jointly invariant under swap).
+
+**Fresh-colour fix.** Individualising the endpoints of `T` to distinct
+`χι`-singletons breaks the swap symmetry mechanically: vertices `0,1,2,3`
+have distinct `χι` colours and stay singletons under iteration
+(`iterate_refineStep_preserves_singleton`), so they cannot be merged by
+refinement regardless of `Pof`. With that hypothesis, M0 is the natural
+target.
+
+We do not state a refuted `cl_monotone_unknown` in Lean (the unhypothesised
+version is false, recorded here and in `docs/chain-descent-matroid.md`).
 -/
 
-/-- **Pof is entry-wise monotone in `S` when `P₀` decides nothing.** For a
-starting `P₀` that is everywhere `.unknown`, `S ⊆ T` (with `T` canonical) gives
-`Pof P₀ S i j = .unknown ∨ Pof P₀ S i j = Pof P₀ T i j` at every entry.
-
-This is the entry-level monotonicity that the matroid framework wants. For
-non-trivial `P₀` (pre-existing partial order in the descent context), the
-analogue is more subtle — `P₀` might pre-decide an entry that `T` overrides —
-and the matroid analysis is run on top of the unknown matrix in this scaffold. -/
+/-- **Pof is entry-wise monotone in `S` when `P₀` decides nothing.** For the
+all-unknown starting `P₀`, `S ⊆ T` (with `T` canonical) gives
+`Pof P₀ S i j = .unknown ∨ Pof P₀ S i j = Pof P₀ T i j` at every entry. Pure
+fact about `Pof` — does *not* extend to a `cl` monotonicity result, since the
+warm refinement step is not monotone in `P` without the fresh-colour
+hypothesis above. -/
 theorem Pof_mono_entry_of_unknown {n : Nat}
     {S T : Set (Fin n × Fin n)} (hST : S ⊆ T) (hTcanon : T ⊆ Egnd n)
     (i j : Fin n) :
@@ -1045,36 +1062,153 @@ theorem Pof_mono_entry_of_unknown {n : Nat}
     · left
       simp [Pof, h1, h2]
 
-/-- **Monotonicity helper (sorry).** P-extension monotonicity of warm
-refinement: if every entry decided by `P` is also decided the same way by `Q`,
-then `warmRefine adj Q` is at least as fine as `warmRefine adj P`.
+/-! ### M0 (hypothesised) — attempt 1: every vertex individualised
 
-Proof obligation: induction on the iterate count. At each round, two vertices
-with equal new `Q`-colour have equal new `P`-colour — because their signature
-multisets under `Q` agree (premise) which forces their multisets under `P` to
-agree (`P` decides a subset of entries, and the `Q`-agreement on those entries
-plus equal `χ`-history gives the `P`-agreement). -/
-theorem warmRefine_mono {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
-    (χ : Colouring n)
-    (hPQ : ∀ i j, P i j = .unknown ∨ P i j = Q i j) :
-    ∀ {i j : Fin n},
-      warmRefine adj Q χ i = warmRefine adj Q χ j →
-      warmRefine adj P χ i = warmRefine adj P χ j := by
-  sorry  -- TODO: chain induction on refinement round; see docstring
+The strongest reasonable hypothesis: `χι` makes *every* vertex of `Fin n` a
+singleton (fully discrete starting partition). Under this, the warm-refined
+partition is also fully discrete (singletons stay singletons), so `cl S` is
+*all* canonical pairs for every `S`. Monotonicity is then vacuous: every `cl`
+equals every other. The theorem holds but conveys no information about the
+matroid structure.
+-/
 
-/-- **M0 — monotonicity of `cl` (over the all-unknown starting matrix).**
-Extending the committed set extends the closure. The all-unknown `P₀` is the
-matroid framework's natural starting state; lifting to arbitrary `P₀` needs
-the corresponding stronger `Pof_mono_entry` and is a follow-up. -/
-theorem cl_monotone_unknown {n : Nat} (adj : AdjMatrix n) (χι : Colouring n)
-    {S T : Set (Fin n × Fin n)} (hST : S ⊆ T) (hTcanon : T ⊆ Egnd n) :
-    cl adj (fun _ _ => POE.unknown) χι S ⊆
-      cl adj (fun _ _ => POE.unknown) χι T := by
+/-- A colouring is fully discrete: every vertex is a `χι`-singleton. -/
+def FullyDiscrete {n : Nat} (χι : Colouring n) : Prop :=
+  ∀ v u, u ≠ v → χι u ≠ χι v
+
+/-- **M0 under the discrete hypothesis (trivial).** When `χι` is fully discrete,
+every canonical pair lies in every `cl S` — so `cl S = Egnd n` for every `S` and
+monotonicity is vacuous. Recorded for the record; provides no structural info. -/
+theorem cl_monotone_discrete {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι : Colouring n) (hχι : FullyDiscrete χι)
+    {S T : Set (Fin n × Fin n)} (_hST : S ⊆ T) :
+    cl adj P₀ χι S ⊆ cl adj P₀ χι T := by
+  intro p hp
+  refine ⟨hp.1, ?_⟩
+  -- Under FullyDiscrete, p.1 and p.2 are χι-singletons; warm refinement
+  -- preserves singletons, so their warm-refined colours stay distinct
+  -- regardless of which P-matrix is used.
+  have hne : p.1 ≠ p.2 := Egnd_ne hp.1
+  have hsing : ∀ u, u ≠ p.1 → χι u ≠ χι p.1 := fun u hu => hχι p.1 u hu
+  have hkeep :=
+    iterate_refineStep_preserves_singleton adj (Pof P₀ T) p.1 n χι hsing
+  intro heq
+  exact hkeep p.2 hne.symm heq.symm
+
+/-! ### M0 (hypothesised) — attempt 2: T-individualised
+
+The real target: `χι` makes the vertices of `T` (the larger set) singletons,
+but leaves vertices not in any `T`-pair unconstrained. Under this hypothesis
+the M0 counterexample is killed (the swap symmetry across `T`'s pairs is broken
+by distinct `χι`-colours on the `T`-vertices), but the closure is not vacuous —
+non-`T` vertices can still merge into multi-vertex cells.
+
+This is *not yet proved*; see the matroid doc for the proof obligation.
+-/
+
+/-- `χι`-singletons for every endpoint of every pair in `T`. -/
+def TVerticesSingletons {n : Nat} (χι : Colouring n) (T : Set (Fin n × Fin n)) :
+    Prop := ∀ p ∈ T, SingletonAt χι p
+
+/-- **Strong form of M0 under T-individualised.** The partitions induced by
+`Pof P₀ S` and `Pof P₀ T` warm-refinements *coincide* (`samePartition`) when
+`S ⊆ T` and `χι` makes every endpoint of every `T`-pair a singleton.
+
+Mechanism in three pieces:
+1. `T`-endpoints are `χι`-singletons (hypothesis) and stay singletons under
+   either refinement (`iterate_refineStep_preserves_singleton`), so any pair
+   `(i, j)` with `i` or `j` a `T`-endpoint is vacuously `samePartition`-equal
+   on both sides (both False ↔ both False).
+2. For `(i, j)` with neither endpoint in any `T`-pair, `Pof P₀ S` and
+   `Pof P₀ T` agree on rows `i` and `j` (no commit in `S ⊆ T` touches a
+   non-`T`-endpoint), so the signatures at `i` and `j` are literally equal
+   when computed against the same colouring.
+3. `signature_eq_of_samePartition` plus the inductive hypothesis transports
+   the signature-equality between `χ_S^k` and `χ_T^k`.
+
+Stronger than monotonicity: `cl S = cl T` under this hypothesis. -/
+theorem warmRefine_samePartition_T_individualised {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι : Colouring n)
+    {S T : Set (Fin n × Fin n)} (hST : S ⊆ T)
+    (hsing : TVerticesSingletons χι T) :
+    samePartition (warmRefine adj (Pof P₀ S) χι)
+                  (warmRefine adj (Pof P₀ T) χι) := by
+  suffices key : ∀ k, samePartition
+      ((refineStep adj (Pof P₀ S))^[k] χι)
+      ((refineStep adj (Pof P₀ T))^[k] χι) from key n
+  intro k
+  induction k with
+  | zero => exact samePartition.refl χι
+  | succ k ih =>
+    intro i j
+    simp only [Function.iterate_succ', Function.comp_apply]
+    rw [refineStep_iff, refineStep_iff]
+    set χ_S := (refineStep adj (Pof P₀ S))^[k] χι
+    set χ_T := (refineStep adj (Pof P₀ T))^[k] χι
+    by_cases hij : i = j
+    · subst hij; simp
+    · -- Helper: vertex v in some T-pair is a χι-singleton; iterate preserves.
+      have h_singleton : ∀ v : Fin n, (∃ p ∈ T, p.1 = v ∨ p.2 = v) →
+          (∀ u, u ≠ v → χ_S u ≠ χ_S v) ∧ (∀ u, u ≠ v → χ_T u ≠ χ_T v) := by
+        rintro v ⟨p, hpT, hv⟩
+        have hv_χι : ∀ u, u ≠ v → χι u ≠ χι v := by
+          rcases hv with rfl | rfl
+          · exact (hsing p hpT).1
+          · exact (hsing p hpT).2
+        exact ⟨iterate_refineStep_preserves_singleton adj (Pof P₀ S) v k χι hv_χι,
+               iterate_refineStep_preserves_singleton adj (Pof P₀ T) v k χι hv_χι⟩
+      -- Helper: for v not in any T-pair, Pof S and Pof T agree on v's row.
+      have h_Pof_eq : ∀ v : Fin n, (¬ ∃ p ∈ T, p.1 = v ∨ p.2 = v) →
+          ∀ u, Pof P₀ S v u = Pof P₀ T v u := by
+        intro v hv u
+        classical
+        simp only [Pof]
+        have h1T : (v, u) ∉ T := fun h => hv ⟨(v, u), h, Or.inl rfl⟩
+        have h2T : (u, v) ∉ T := fun h => hv ⟨(u, v), h, Or.inr rfl⟩
+        have h1S : (v, u) ∉ S := fun h => h1T (hST h)
+        have h2S : (u, v) ∉ S := fun h => h2T (hST h)
+        simp [h1S, h1T, h2S, h2T]
+      -- Case analysis: i in T-pair / j in T-pair / neither.
+      by_cases hi_T : ∃ p ∈ T, p.1 = i ∨ p.2 = i
+      · obtain ⟨hSi, hTi⟩ := h_singleton i hi_T
+        refine ⟨fun h => ?_, fun h => ?_⟩
+        · exact absurd h.1 (fun e => hSi j (Ne.symm hij) e.symm)
+        · exact absurd h.1 (fun e => hTi j (Ne.symm hij) e.symm)
+      · by_cases hj_T : ∃ p ∈ T, p.1 = j ∨ p.2 = j
+        · obtain ⟨hSj, hTj⟩ := h_singleton j hj_T
+          refine ⟨fun h => ?_, fun h => ?_⟩
+          · exact absurd h.1 (fun e => hSj i hij e)
+          · exact absurd h.1 (fun e => hTj i hij e)
+        · -- Main case: i, j not in any T-pair.
+          have hPi := h_Pof_eq i hi_T
+          have hPj := h_Pof_eq j hj_T
+          have hSigi : signature adj (Pof P₀ S) χ_T i
+              = signature adj (Pof P₀ T) χ_T i := by
+            unfold signature
+            apply Multiset.map_congr rfl
+            intro u _
+            rw [hPi u]
+          have hSigj : signature adj (Pof P₀ S) χ_T j
+              = signature adj (Pof P₀ T) χ_T j := by
+            unfold signature
+            apply Multiset.map_congr rfl
+            intro u _
+            rw [hPj u]
+          rw [ih i j, signature_eq_of_samePartition adj (Pof P₀ S) ih i j,
+              hSigi, hSigj]
+
+/-- **M0 under the T-individualised hypothesis.** The genuine M0 target,
+provable. Follows immediately from the stronger `samePartition` result. -/
+theorem cl_monotone_T_individualised {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι : Colouring n)
+    {S T : Set (Fin n × Fin n)} (hST : S ⊆ T)
+    (hsing : TVerticesSingletons χι T) :
+    cl adj P₀ χι S ⊆ cl adj P₀ χι T := by
   intro p hp
   refine ⟨hp.1, ?_⟩
   intro heq
-  exact hp.2 (warmRefine_mono adj _ _ χι
-    (Pof_mono_entry_of_unknown hST hTcanon) heq)
+  exact hp.2 ((warmRefine_samePartition_T_individualised adj P₀ χι hST hsing
+    p.1 p.2).mpr heq)
 
 /-! ### M2 — idempotence
 
