@@ -921,4 +921,211 @@ theorem target_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
     sel (warmRefine adj P χ) = sel (warmRefine adj Q χ') :=
   hsel _ _ (warmRefine_agree_off' adj P Q χ χ' D hχ hPQ hsing)
 
+/-! ## §13 — propagation closure as a candidate matroid
+
+Working development per [`docs/chain-descent-matroid.md`](../docs/chain-descent-matroid.md).
+The goal is to model the propagation behaviour of warm refinement as a *matroid*
+(or a slightly-weaker threshold structure) on the set of pair-guesses, then use
+binary/non-binary classification as a polynomial Tier-2 detection scheme.
+
+**The ground set `Egnd n`.** Canonical ordered pairs `(i, j)` with `i < j` —
+equivalent to unordered pairs of distinct vertices, but with a fixed
+orientation that makes the P-write antisymmetric. A "pair-guess" is an element
+of `Egnd n`.
+
+**The closure `cl S`.** Pairs whose endpoints are separated by warm refinement
+after committing `S`'s pair-orderings.
+
+**The four matroid axioms:**
+
+* **M0 monotone** — `S ⊆ T → cl S ⊆ cl T` (more commits → finer partition)
+* **M1 extensive** — `S ⊆ cl S` (a committed pair separates its endpoints)
+* **M2 idempotent** — `cl (cl S) = cl S` (cross-cell commits don't refine further)
+* **M3 exchange** — `y ∈ cl (S ∪ {x}) ∖ cl S → x ∈ cl (S ∪ {y}) ∖ cl S`
+
+M0, M1, M2 are expected to be reachable from existing theorems plus moderate
+helper lemmas; M3 is the load-bearing open claim. This section sets up the
+definitions and statements; proofs in progress.
+-/
+
+/-- The canonical ground set: ordered pairs `(i, j)` with `i < j`. -/
+def Egnd (n : Nat) : Set (Fin n × Fin n) := { p | p.1 < p.2 }
+
+theorem mem_Egnd {n : Nat} {p : Fin n × Fin n} : p ∈ Egnd n ↔ p.1 < p.2 :=
+  Iff.rfl
+
+theorem Egnd_ne {n : Nat} {p : Fin n × Fin n} (hp : p ∈ Egnd n) : p.1 ≠ p.2 :=
+  Fin.ne_of_lt hp
+
+/-- Commit a set `S ⊆ Egnd n` of pair-guesses to a P-matrix: for each
+`(u, v) ∈ S` write `P u v := less` and `P v u := greater`; leave other entries
+unchanged.
+
+If `S` is *not* canonical and contains both `(i, j)` and `(j, i)`, the
+`less`-branch wins for `(i, j)` and is *also* picked for `(j, i)` — breaking
+antisymmetry. Stick to `S ⊆ Egnd n` to avoid this. -/
+noncomputable def Pof {n : Nat} (P₀ : PMatrix n) (S : Set (Fin n × Fin n)) :
+    PMatrix n := fun i j =>
+  haveI : Decidable ((i, j) ∈ S) := Classical.propDecidable _
+  haveI : Decidable ((j, i) ∈ S) := Classical.propDecidable _
+  if (i, j) ∈ S then .less
+  else if (j, i) ∈ S then .greater
+  else P₀ i j
+
+/-- The propagation closure: pairs in the canonical ground set whose endpoints
+are separated by warm refinement after committing `S`. -/
+noncomputable def cl {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι : Colouring n) (S : Set (Fin n × Fin n)) : Set (Fin n × Fin n) :=
+  { p | p ∈ Egnd n ∧
+    warmRefine adj (Pof P₀ S) χι p.1 ≠ warmRefine adj (Pof P₀ S) χι p.2 }
+
+/-! ### M1 — extensiveness
+
+A pair-guess committed under fresh-colour individualisation has its endpoints
+in distinct singleton cells, which warm refinement preserves. So the pair is
+in `cl`. The fresh-colour hypothesis is the matroid-friendly individualisation
+model already used by `warm_6_2` and `warmRefine_agree_off'`.
+-/
+
+/-- The fresh-colour hypothesis at a pair: both endpoints are `χι`-singletons. -/
+def SingletonAt {n : Nat} (χι : Colouring n) (p : Fin n × Fin n) : Prop :=
+  (∀ u, u ≠ p.1 → χι u ≠ χι p.1) ∧ (∀ u, u ≠ p.2 → χι u ≠ χι p.2)
+
+/-- **M1 — extensiveness of `cl`.** For canonical `S` whose vertices are all
+`χι`-singletons, every pair in `S` lies in `cl S`. -/
+theorem cl_extensive {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι : Colouring n) (S : Set (Fin n × Fin n))
+    (hScanon : S ⊆ Egnd n)
+    (hsing : ∀ p ∈ S, SingletonAt χι p) :
+    S ⊆ cl adj P₀ χι S := by
+  intro p hp
+  refine ⟨hScanon hp, ?_⟩
+  have hne : p.1 ≠ p.2 := Egnd_ne (hScanon hp)
+  -- p.1 is a χι-singleton, so it stays a singleton under warm refinement.
+  have h1 := (hsing p hp).1
+  have hkeep := iterate_refineStep_preserves_singleton adj (Pof P₀ S) p.1 n χι h1
+  -- warmRefine = iterate^[n]; hkeep p.2 (hne.symm) gives the inequality.
+  intro heq
+  exact hkeep p.2 hne.symm heq.symm
+
+/-! ### M0 — monotonicity
+
+Extending the set of committed pairs only refines the partition. The helper
+`warmRefine_mono` (P-extension monotonicity) is the load-bearing lemma; we
+state it here but leave the proof as a future obligation — the argument is a
+chain induction on the refinement round showing that under richer P, every
+signature multiset is at least as discriminating.
+-/
+
+/-- **Pof is entry-wise monotone in `S` when `P₀` decides nothing.** For a
+starting `P₀` that is everywhere `.unknown`, `S ⊆ T` (with `T` canonical) gives
+`Pof P₀ S i j = .unknown ∨ Pof P₀ S i j = Pof P₀ T i j` at every entry.
+
+This is the entry-level monotonicity that the matroid framework wants. For
+non-trivial `P₀` (pre-existing partial order in the descent context), the
+analogue is more subtle — `P₀` might pre-decide an entry that `T` overrides —
+and the matroid analysis is run on top of the unknown matrix in this scaffold. -/
+theorem Pof_mono_entry_of_unknown {n : Nat}
+    {S T : Set (Fin n × Fin n)} (hST : S ⊆ T) (hTcanon : T ⊆ Egnd n)
+    (i j : Fin n) :
+    Pof (fun _ _ => POE.unknown) S i j = .unknown ∨
+      Pof (fun _ _ => POE.unknown) S i j =
+        Pof (fun _ _ => POE.unknown) T i j := by
+  classical
+  by_cases h1 : (i, j) ∈ S
+  · right
+    have h1T : (i, j) ∈ T := hST h1
+    simp [Pof, h1, h1T]
+  · by_cases h2 : (j, i) ∈ S
+    · right
+      have h2T : (j, i) ∈ T := hST h2
+      have hji : j < i := hTcanon h2T
+      have hijT : (i, j) ∉ T := fun h => absurd (hTcanon h) (lt_asymm hji)
+      simp [Pof, h1, h2, hijT, h2T]
+    · left
+      simp [Pof, h1, h2]
+
+/-- **Monotonicity helper (sorry).** P-extension monotonicity of warm
+refinement: if every entry decided by `P` is also decided the same way by `Q`,
+then `warmRefine adj Q` is at least as fine as `warmRefine adj P`.
+
+Proof obligation: induction on the iterate count. At each round, two vertices
+with equal new `Q`-colour have equal new `P`-colour — because their signature
+multisets under `Q` agree (premise) which forces their multisets under `P` to
+agree (`P` decides a subset of entries, and the `Q`-agreement on those entries
+plus equal `χ`-history gives the `P`-agreement). -/
+theorem warmRefine_mono {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
+    (χ : Colouring n)
+    (hPQ : ∀ i j, P i j = .unknown ∨ P i j = Q i j) :
+    ∀ {i j : Fin n},
+      warmRefine adj Q χ i = warmRefine adj Q χ j →
+      warmRefine adj P χ i = warmRefine adj P χ j := by
+  sorry  -- TODO: chain induction on refinement round; see docstring
+
+/-- **M0 — monotonicity of `cl` (over the all-unknown starting matrix).**
+Extending the committed set extends the closure. The all-unknown `P₀` is the
+matroid framework's natural starting state; lifting to arbitrary `P₀` needs
+the corresponding stronger `Pof_mono_entry` and is a follow-up. -/
+theorem cl_monotone_unknown {n : Nat} (adj : AdjMatrix n) (χι : Colouring n)
+    {S T : Set (Fin n × Fin n)} (hST : S ⊆ T) (hTcanon : T ⊆ Egnd n) :
+    cl adj (fun _ _ => POE.unknown) χι S ⊆
+      cl adj (fun _ _ => POE.unknown) χι T := by
+  intro p hp
+  refine ⟨hp.1, ?_⟩
+  intro heq
+  exact hp.2 (warmRefine_mono adj _ _ χι
+    (Pof_mono_entry_of_unknown hST hTcanon) heq)
+
+/-! ### M2 — idempotence
+
+`cl (cl S) = cl S`. The non-trivial direction is `cl (cl S) ⊆ cl S` — i.e.
+committing the *derived* cross-cell pairs does not refine the partition
+further.
+
+Sketch of the argument: within any single cell `C` of the `cl S`-partition,
+cell-mates `u, v ∈ C` have matching multisets of (neighbour-colour,
+adjacency, P-entry) by 1-WL stability. The extras committed in `cl (cl S)
+∖ cl S` are pairs *across* cells; for each other cell `C'`, both `u` and `v`
+gain the same uniform `.less` or `.greater` entries to every member of `C'`.
+The per-cell multiset count is preserved, so `u`'s and `v`'s signature
+multisets stay equal — they remain co-classed.
+-/
+
+/-- **M2 — idempotence of `cl` (sorry).** -/
+theorem cl_idempotent {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι : Colouring n) (S : Set (Fin n × Fin n))
+    (hScanon : S ⊆ Egnd n) :
+    cl adj P₀ χι (cl adj P₀ χι S) = cl adj P₀ χι S := by
+  sorry  -- TODO: per-cell symmetry of cross-cell P-entries; see docstring
+
+/-! ### M3 — exchange (load-bearing, open)
+
+The matroid exchange axiom: if `y` is forced by `S ∪ {x}` but not by `S` alone,
+then `x` is forced by `S ∪ {y}` but not by `S` alone. This is the "if `x`
+determines `y` then `y` determines `x`" symmetry — operating against an
+arbitrary background `S`.
+
+Per [`docs/chain-descent-matroid.md`](../docs/chain-descent-matroid.md) §6, the
+intended proof is a chain-reversal induction on the propagation chain that
+takes `cl(S ∪ {x}) ∋ y`. Each refinement-round signature-discrepancy
+(`refineStep_iff`) is a *local* count-vector flip that is symmetric in its
+two endpoints; chain-reversing flip-by-flip should yield a chain in the other
+direction.
+
+If exchange holds, the propagation closure is a matroid, and the binary /
+non-binary classification (§7 of the matroid doc) gives a polynomial Tier-2
+detection scheme. If it fails, the witness is a structural object worth
+studying — it pins exactly where the matroid framing breaks.
+-/
+
+/-- **M3 — exchange axiom (open).** -/
+theorem cl_exchange {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι : Colouring n) (S : Set (Fin n × Fin n))
+    (x y : Fin n × Fin n)
+    (hScanon : S ⊆ Egnd n) (hxcanon : x ∈ Egnd n) (hycanon : y ∈ Egnd n)
+    (hy_in : y ∈ cl adj P₀ χι (S ∪ {x}))
+    (hy_out : y ∉ cl adj P₀ χι S) :
+    x ∈ cl adj P₀ χι (S ∪ {y}) ∧ x ∉ cl adj P₀ χι S := by
+  sorry  -- TODO: chain-reversal induction; the load-bearing open claim
+
 end ChainDescent
