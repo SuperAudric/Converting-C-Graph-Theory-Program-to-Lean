@@ -1212,25 +1212,43 @@ theorem cl_monotone_T_individualised {n : Nat} (adj : AdjMatrix n)
 
 /-! ### M2 — idempotence
 
-`cl (cl S) = cl S`. The non-trivial direction is `cl (cl S) ⊆ cl S` — i.e.
-committing the *derived* cross-cell pairs does not refine the partition
-further.
+`cl (cl S) = cl S`, under fresh-colour individualisation of *both* `S`'s
+pairs and `cl S`'s pairs.
 
-Sketch of the argument: within any single cell `C` of the `cl S`-partition,
-cell-mates `u, v ∈ C` have matching multisets of (neighbour-colour,
-adjacency, P-entry) by 1-WL stability. The extras committed in `cl (cl S)
-∖ cl S` are pairs *across* cells; for each other cell `C'`, both `u` and `v`
-gain the same uniform `.less` or `.greater` entries to every member of `C'`.
-The per-cell multiset count is preserved, so `u`'s and `v`'s signature
-multisets stay equal — they remain co-classed.
+The proof reduces to the M0 strong form: applying
+`warmRefine_samePartition_T_individualised` with `T = cl S` (the larger set)
+gives `samePartition (warmRefine_S) (warmRefine_{cl S})`, hence the sets of
+separated pairs literally coincide. The two-direction set equality is then
+just unfolding the `samePartition`.
+
+The hypothesis `∀ p ∈ S ∪ cl S, SingletonAt χι p` packages both the M1
+hypothesis (for `S`) and the M0-strong hypothesis (for `cl S`).
+
+**Note on the original M2 attempt.** An earlier formulation conjectured that
+`cl_idempotent` holds without any individualisation hypothesis, via a per-
+cell-symmetry argument (within-cell multisets stay equal after committing
+cross-cell pairs). That argument is correct *under fresh colours* (which break
+the would-be symmetries that wreck M0) but cannot be true unhypothesised —
+the M0 counterexample (§13 above) is itself a witness that committing
+cross-cell pairs *can* coarsen the partition when those cells contain
+non-individualised vertices that can pair-swap.
 -/
 
-/-- **M2 — idempotence of `cl` (sorry).** -/
+/-- **M2 — idempotence of `cl` under fresh-colour individualisation.** -/
 theorem cl_idempotent {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
     (χι : Colouring n) (S : Set (Fin n × Fin n))
-    (hScanon : S ⊆ Egnd n) :
+    (hScanon : S ⊆ Egnd n)
+    (hsing : ∀ p ∈ S ∪ cl adj P₀ χι S, SingletonAt χι p) :
     cl adj P₀ χι (cl adj P₀ χι S) = cl adj P₀ χι S := by
-  sorry  -- TODO: per-cell symmetry of cross-cell P-entries; see docstring
+  have hsing_S : ∀ p ∈ S, SingletonAt χι p := fun p hp => hsing p (Or.inl hp)
+  have hsing_cl : TVerticesSingletons χι (cl adj P₀ χι S) :=
+    fun p hp => hsing p (Or.inr hp)
+  have hSsubcl : S ⊆ cl adj P₀ χι S := cl_extensive adj P₀ χι S hScanon hsing_S
+  have hsame := warmRefine_samePartition_T_individualised adj P₀ χι hSsubcl hsing_cl
+  apply Set.ext
+  intro p
+  refine ⟨fun hp => ⟨hp.1, fun heq => hp.2 ((hsame p.1 p.2).mp heq)⟩,
+          fun hp => ⟨hp.1, fun heq => hp.2 ((hsame p.1 p.2).mpr heq)⟩⟩
 
 /-! ### M3 — exchange (load-bearing, open)
 

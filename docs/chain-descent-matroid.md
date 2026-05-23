@@ -260,7 +260,7 @@ separated by that partition. They do *not* give exchange.
 |---|---|
 | M0 monotone | **unhypothesised version is FALSE** — counterexample below. Fresh-colour fix `cl_monotone_T_individualised` is **proved** (via the stronger `warmRefine_samePartition_T_individualised` — under T-individualised χι, `cl S = cl T` for any `S ⊆ T`, not merely `⊆`). The trivial all-discrete version `cl_monotone_discrete` is also proved but vacuous. |
 | M1 extensive | proved under fresh-colour hypothesis: `cl_extensive` |
-| M2 idempotent | sorry (Lean), proof sketch in `ChainDescent.lean` §13 |
+| M2 idempotent | **proved** under fresh-colour for both `S` and `cl S`: `cl_idempotent`. Falls out of M0 strong form with `T = cl S` — the partitions literally coincide, so `cl S = cl(cl S)` as sets. |
 | M3 exchange | sorry (Lean), the genuinely open claim |
 
 **M0 counterexample.** `n = 4`, `adj ≡ 0`, `χι ≡ 0`, `S = {(0,1)}`,
@@ -429,6 +429,10 @@ What this session contributed:
   `signature_eq_of_samePartition` + row-agreement of `Pof S` and `Pof T`
   off `T`-vertices; T-vertices stay singletons via
   `iterate_refineStep_preserves_singleton` and contribute vacuously.
+- **M2 under fresh-colour PROVED** (later same day): falls out of M0 strong
+  form with `T = cl S`. Under `∀ p ∈ S ∪ cl S, SingletonAt χι p`, M0 strong
+  gives `samePartition (warmRefine_S) (warmRefine_{cl S})`, so the sets of
+  separated pairs literally coincide. Three lines of Lean.
 
 What this session did NOT settle:
 - Whether exchange (M3) actually holds.
@@ -438,6 +442,6 @@ What this session did NOT settle:
 - Whether `c < k - 1` (World B) ever genuinely occurs at the *closure
   circuit* level (vs. the direct-rule level, where it clearly does).
 
-The natural next action is M2 (cl_idempotent) or M3 (cl_exchange) — M0 and
-M1 are now solid under T-individualised χι. M2 has a per-cell-symmetry
-proof sketch; M3 is the genuinely open one.
+The natural next action is M3 (cl_exchange) — M0, M1, M2 are now solid
+under fresh-colour individualisation. M3 is the genuinely open one; the
+chain-reversal-induction sketch from §6 is the planned approach.
