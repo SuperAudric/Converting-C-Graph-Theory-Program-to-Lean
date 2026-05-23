@@ -377,6 +377,16 @@ Progress so far:
   edges-are-a-scheme half (Pieces A, B) is proved, the cascade half (Piece C) is
   scoped, and the doc delimits what this does *not* cover — only the *visible*
   Johnson is ruled out, not the encoded (CFI-style) one.
+- **Matroid framing of the propagation closure** — open working route in
+  [`chain-descent-matroid.md`](./chain-descent-matroid.md). Models the
+  forced-relation structure of warm refinement as a (candidate) matroid on
+  the pair-guesses, where Tier-1 = binary matroid (CFI-shaped, linear-oracle
+  territory) and Tier-2 = a non-binary minor present. The conjecture this
+  framework targets is "propagation closure is always binary," which would
+  rule out hidden Johnson by structural detection rather than by ruling out
+  a construction. Load-bearing open step: the matroid exchange axiom for
+  warm-refinement closure. Not paper-ready; see that doc for the working
+  notes.
 - **CFI is a `Z₂`-hiding gadget.** No `Aₖ`-hiding gadget is known. Hiding a
   non-abelian simple group requires *fusing* refinement-resistance with
   non-abelianness in one non-decomposable obstruction; layered products
