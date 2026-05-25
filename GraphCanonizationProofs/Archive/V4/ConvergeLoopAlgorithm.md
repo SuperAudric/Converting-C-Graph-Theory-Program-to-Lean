@@ -3,7 +3,7 @@
 This file captures what the `convergeLoop` in `LeanGraphCanonizerV4` actually
 does, in a form aimed specifically at supporting the discharge of
 [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md). For a more general
-description of the pipeline see [`docs/v4-canonizer.md`](../docs/v4-canonizer.md);
+description of the pipeline see [`docs/Archive/V4/v4-canonizer.md`](../../../docs/Archive/V4/v4-canonizer.md);
 for the algorithm itself see
 [LeanGraphCanonizerV4.lean](LeanGraphCanonizerV4.lean).
 
@@ -83,7 +83,7 @@ standard hard cases for refinement-based algorithms; if path-multiset
 refinement collapses a CFI pair, the obligation is false and the algorithm
 needs to be augmented (e.g. with individualization-and-refinement). The CFI
 generator lives at
-[GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
+[GraphCanonizationProject/CfiGraphGenerator.cs](../../../GraphCanonizationProject/CfiGraphGenerator.cs)
 and is wired into `GraphCanonTests.cs`. **As of 2026-04-28 the obligation is
 empirically falsified.** The disjoint-union direct probe
 (`CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint`) fails on `Cycle3`
@@ -127,7 +127,7 @@ As long as it never takes precedent over orbit comparisons,
 this may paralelize the tiebreaking within converge cycles so only one loop needed.
 
 A perf-focused C# reimplementation
-([`CanonGraphOrdererV4Fast`](../GraphCanonizationProject/CanonGraphOrdererV4Fast.cs))
+([`CanonGraphOrdererV4Fast`](../../../GraphCanonizationProject/Archive/V4/CanonGraphOrdererV4Fast.cs))
 exists alongside the Lean-aligned reference: same algorithm and same
 equivalence-class behaviour, but the object-graph `PathState` is replaced
 with flat int/long buffers, hot-path allocations are hoisted into a

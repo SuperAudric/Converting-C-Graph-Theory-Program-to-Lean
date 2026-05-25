@@ -165,14 +165,14 @@ just the obligation's stated form.
 #### Common machinery
 
   - Generator:
-    [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs)
+    [GraphCanonizationProject/CfiGraphGenerator.cs](../../../GraphCanonizationProject/CfiGraphGenerator.cs)
     — `Generate(baseName)` produces a `CfiPair(Even, Odd, BaseGraphName,
     BaseTreewidth, VertexRoles)`, plus `AssertWellFormedPair`, `VerifyNonIsomorphic`,
     `DescribePair`, and `BuildDisjointUnion` (used by 1b). Available bases:
     `Cycle{n}` (treewidth 2), `K4` (3), `K33` (3), `Rook3x3` (4),
     `Petersen` (4), `K6` (5), `K7` (6).
   - Canonizer under test: 1a runs against `ICanonGraphOrderer` (defaulting to
-    [`CanonGraphOrdererV4Fast`](../GraphCanonizationProject/CanonGraphOrdererV4Fast.cs)).
+    [`CanonGraphOrdererV4Fast`](../../../GraphCanonizationProject/Archive/V4/CanonGraphOrdererV4Fast.cs)).
     1b is wired only against `CanonGraphOrdererV4Fast` — it calls
     `RunConvergeLoopForTesting` to obtain the converged ranks directly,
     bypassing the `OrderVertices` tiebreak loop. The reference orderer is
@@ -382,11 +382,11 @@ empirical/CFI results.
   - The path-multiset machinery (`calculatePathRankings`, `comparePathsFrom`,
     `comparePathsBetween`) lives across `Equivariance/CompareEquivariant.lean`,
     `Equivariance/PathEquivariance.lean`, and `Equivariance/PathEquivarianceRelational.lean`.
-  - Algorithm-side context: [CoreAlgorithm.md](CoreAlgorithm.md).
+  - Algorithm-side context: [ConvergeLoopAlgorithm.md](ConvergeLoopAlgorithm.md).
   - CFI generator (implemented):
-    [GraphCanonizationProject/CfiGraphGenerator.cs](../GraphCanonizationProject/CfiGraphGenerator.cs).
+    [GraphCanonizationProject/CfiGraphGenerator.cs](../../../GraphCanonizationProject/CfiGraphGenerator.cs).
   - Canonizer implementations:
-    [`CanonGraphOrdererV4`](../GraphCanonizationProject/CanonGraphOrdererV4.cs)
+    [`CanonGraphOrdererV4`](../../../GraphCanonizationProject/Archive/V4/CanonGraphOrdererV4.cs)
     (Lean-aligned reference) and
-    [`CanonGraphOrdererV4Fast`](../GraphCanonizationProject/CanonGraphOrdererV4Fast.cs)
+    [`CanonGraphOrdererV4Fast`](../../../GraphCanonizationProject/Archive/V4/CanonGraphOrdererV4Fast.cs)
     (flat-buffer reimplementation; same equivalence-class behaviour, default in tests).

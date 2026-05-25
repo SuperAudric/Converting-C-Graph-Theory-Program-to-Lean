@@ -7,8 +7,9 @@ import Mathlib.Tactic.Ext
 Small reusable lemmas that would otherwise be duplicated across the correctness files.
 
 Currently holds just `AdjMatrix.ext`. Each step of the `FullCorrectness/` proof imports
-this module (transitively or directly); the old `LeanGraphCanonizerV4Correctness.lean`
-file also imports it, so the lemma is defined in exactly one place.
+this module (transitively or directly); the distilled `FullCorrectness/V4Reused.lean`
+(the surviving fragments of the retired `LeanGraphCanonizerV4Correctness.lean`)
+also imports it, so the lemma is defined in exactly one place.
 -/
 
 namespace Graph

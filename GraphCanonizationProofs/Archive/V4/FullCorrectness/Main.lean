@@ -4,7 +4,7 @@ import FullCorrectness.Permutation
 import FullCorrectness.Automorphism
 import FullCorrectness.Equivariance.StageDRelational
 import FullCorrectness.Equivariance.OrderVerticesGeneral
-import LeanGraphCanonizerV4Correctness
+import FullCorrectness.V4Reused
 
 /-!
 # §8  Main theorem: `run_canonical`
@@ -18,7 +18,7 @@ run_canonical : G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n
 That is, `run` with all-zero starting types is a complete graph-isomorphism invariant.
 
 ## Status
-- (⟸) direction `run_eq_implies_iso`:  reused from `LeanGraphCanonizerV4Correctness` (genuinely proved via `run_isomorphic_to_input` + transitivity).
+- (⟸) direction `run_eq_implies_iso`:  reused from the distilled `FullCorrectness.V4Reused` (genuinely proved via `run_isomorphic_to_input` + transitivity; was originally in the now-deleted `LeanGraphCanonizerV4Correctness.lean`).
 - (⟹) direction `run_isomorphic_eq`:   new proof via §3 + §4 + §6; proof pending.
 - `run_canonical`:                      assembled from the two directions.
 
@@ -158,9 +158,9 @@ theorem run_isomorphic_eq_new
 
 /-! ## (⟸) Equal canonical forms imply isomorphism.
 
-Reused verbatim from the old flat proof: `Graph.run_eq_implies_iso` (already in
-scope via the `LeanGraphCanonizerV4Correctness` import) uses only
-`run_isomorphic_to_input` (§4 of the flat file, still correct) plus transitivity of `≃`. -/
+Reused verbatim from the distilled file: `Graph.run_eq_implies_iso` (in scope
+via the `FullCorrectness.V4Reused` import) uses only `run_isomorphic_to_input`
+(§4 of the original flat proof, still correct) plus transitivity of `≃`. -/
 
 /-! ## Main theorem -/
 
@@ -172,13 +172,14 @@ G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n 0) H
 ```
 
 - The `(⟹)` direction is `run_isomorphic_eq`, proved via §3 + §4 + §6 (the new path).
-- The `(⟸)` direction is `Graph.run_eq_implies_iso`, reused from the flat file (§4).
+- The `(⟸)` direction is `Graph.run_eq_implies_iso`, reused from the distilled
+  `FullCorrectness.V4Reused` (§4 of the original flat proof).
 
-This theorem replaces the (sorry-reachable) `Graph.run_canonical` stated in
-`LeanGraphCanonizerV4Correctness.lean`. External consumers should use
-`FullCorrectness.run_canonical` via the `FullCorrectness` umbrella, which is
-a stronger statement than the flat-file version (the (⟹) direction here does
-not route through the false §5 lemma). -/
+This theorem replaces the (sorry-reachable) `Graph.run_canonical` formerly
+stated in `LeanGraphCanonizerV4Correctness.lean` (now deleted). External
+consumers should use `FullCorrectness.run_canonical` via the `FullCorrectness`
+umbrella, which is a stronger statement than the flat-file version (the (⟹)
+direction here does not route through the false §5 lemma). -/
 theorem run_canonical_correctness (G H : AdjMatrix n) :
     G ≃ H ↔ run (Array.replicate n 0) G = run (Array.replicate n 0) H :=
   ⟨run_isomorphic_eq_new, _root_.Graph.run_eq_implies_iso⟩

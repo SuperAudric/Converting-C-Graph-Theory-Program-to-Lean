@@ -514,7 +514,7 @@ an iso-invariant choice, the forward pass guessed and the backward sweep
 restored iso-invariance. The first-cut cost was `O(n⁸)` per sweep, with a
 planned "dependency calculator" to bring it down. Implemented in the
 since-deleted `CanonGraphOrdererFlipValidation.cs`, built on
-[`CanonGraphOrdererPartialOrderSinglePair`](../GraphCanonizationProject/CanonGraphOrdererPartialOrderSinglePair.cs).
+[`CanonGraphOrdererPartialOrderSinglePair`](../GraphCanonizationProject/Archive/Exploration/CanonGraphOrdererPartialOrderSinglePair.cs).
 
 **Why it was superseded.** The two-pass correction sweep was replaced by chain
 descent's single budgeted recursion. The backward pass's job — reconciling

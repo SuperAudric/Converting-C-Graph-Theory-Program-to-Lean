@@ -47,7 +47,7 @@ The canonizer is `GraphCanonizationProject/ChainDescent.cs` together with
   `CascadeOracle` certifies nothing a priori, so the harness behaves as a
   budget-bounded IR search; a future linear oracle is what would supply a-priori
   transversals.
-- **`WarmPartition`** (`IncrementalPartition.cs`) — 1-WL colour refinement,
+- **`WarmPartition`** (`WarmPartition.cs`) — 1-WL colour refinement,
   warm-started from the carried `CellOf`. Each vertex's new colour is the
   lex-rank of its signature `[own-colour, sorted multiset of
   (neighbour-colour, adjacency-value, P-relation)]`.

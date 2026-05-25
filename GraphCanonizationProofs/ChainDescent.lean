@@ -115,7 +115,7 @@ end PMatrix
 /-! ## Adjacency
 
 A minimal locally-defined adjacency matrix to keep this file self-
-contained (independent of `Graph.AdjMatrix` from `LeanGraphCanonizerV4`). -/
+contained (independent of `Graph.AdjMatrix` from the archived `LeanGraphCanonizerV4` lean module). -/
 
 structure AdjMatrix (n : Nat) where
   adj : Fin n → Fin n → Nat

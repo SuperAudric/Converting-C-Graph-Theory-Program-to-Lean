@@ -16,7 +16,7 @@ This document supersedes [`supplant-strategy-v1.md`](./supplant-strategy-v1.md).
 The header of that file lists the v1 → v2 differences.
 
 The C# implementation lives in
-[`CanonGraphOrdererSupplant.cs`](../GraphCanonizationProject/CanonGraphOrdererSupplant.cs).
+[`CanonGraphOrdererSupplant.cs`](../../../GraphCanonizationProject/Archive/Exploration/CanonGraphOrdererSupplant.cs).
 
 ---
 
@@ -47,7 +47,7 @@ families of solutions:
     equivalent pair picks).
 
 The discriminator at the core (1-WL pair-rank refinement, see
-[`CanonGraphOrdererOneWL.cs`](../GraphCanonizationProject/CanonGraphOrdererOneWL.cs))
+[`CanonGraphOrdererOneWL.cs`](../../../GraphCanonizationProject/Archive/Exploration/CanonGraphOrdererOneWL.cs))
 is unchanged. Everything in this doc is the machinery around it.
 
 ---
