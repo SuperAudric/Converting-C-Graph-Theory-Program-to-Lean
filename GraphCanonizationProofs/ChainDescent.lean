@@ -2920,3 +2920,129 @@ theorem isAut_of_labelledAdj_eq {n : Nat} {adj : AdjMatrix n}
   simp only [labelledAdj, Equiv.symm_apply_apply] at this
   exact this.symm
 
+/-! ### §15.4 — Rank bijection on a Discrete colouring (Phase D' part 1)
+
+For a `Discrete` colouring (every cell singleton), define a canonical
+bijection `Fin n → Fin n` that maps each vertex to its rank by colour
+value. This is the bridge from "abstract leaf partition" to "concrete
+labelling" needed to define the leaf canonical adjacency matrix. -/
+
+namespace Colouring
+
+variable {n : Nat}
+
+/-- Strict rank of vertex `v`: number of vertices `u` with `χ u < χ v`. -/
+def vertexRankNat (χ : Colouring n) (v : Fin n) : Nat :=
+  (Finset.univ.filter (fun u => χ u < χ v)).card
+
+theorem vertexRankNat_lt_n (χ : Colouring n) (v : Fin n) :
+    vertexRankNat χ v < n := by
+  show (Finset.univ.filter (fun u => χ u < χ v)).card < n
+  have hlt : (Finset.univ.filter (fun u => χ u < χ v)).card
+      < (Finset.univ : Finset (Fin n)).card := by
+    apply Finset.card_lt_card
+    refine ⟨Finset.filter_subset _ _, ?_⟩
+    intro hsub
+    have hv : v ∈ Finset.univ.filter (fun u => χ u < χ v) :=
+      hsub (Finset.mem_univ v)
+    rw [Finset.mem_filter] at hv
+    exact lt_irrefl _ hv.2
+  have hcard : (Finset.univ : Finset (Fin n)).card = n := by
+    rw [Finset.card_univ, Fintype.card_fin]
+  omega
+
+/-- Vertex rank as `Fin n`. -/
+def vertexRank (χ : Colouring n) (v : Fin n) : Fin n :=
+  ⟨vertexRankNat χ v, vertexRankNat_lt_n χ v⟩
+
+/-- Vertex rank is strictly monotonic in the colour value: `χ v < χ w`
+implies `vertexRank χ v < vertexRank χ w`. -/
+theorem vertexRank_strict_mono (χ : Colouring n) {v w : Fin n}
+    (hvw : χ v < χ w) : vertexRank χ v < vertexRank χ w := by
+  show vertexRankNat χ v < vertexRankNat χ w
+  unfold vertexRankNat
+  apply Finset.card_lt_card
+  refine ⟨?_, ?_⟩
+  · intro u hu
+    rw [Finset.mem_filter] at hu ⊢
+    exact ⟨hu.1, lt_trans hu.2 hvw⟩
+  · intro hsub
+    have hvf : v ∈ Finset.univ.filter (fun u => χ u < χ w) := by
+      rw [Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, hvw⟩
+    have hnotv : v ∉ Finset.univ.filter (fun u => χ u < χ v) := by
+      rw [Finset.mem_filter]
+      intro hh
+      exact lt_irrefl _ hh.2
+    exact hnotv (hsub hvf)
+
+/-- On a `Discrete` colouring, `vertexRank` is injective. Equal ranks
+force equal colour values (via strict monotonicity in both directions),
+which forces equal vertices (by `Discrete`). -/
+theorem vertexRank_injective (χ : Colouring n) (h : Discrete χ) :
+    Function.Injective (vertexRank χ) := by
+  intro v w hvw
+  by_contra hne
+  have hχne : χ v ≠ χ w := fun e => hne (h v w e)
+  rcases lt_or_gt_of_ne hχne with hlt | hgt
+  · exact absurd hvw (ne_of_lt (vertexRank_strict_mono χ hlt))
+  · exact absurd hvw (ne_of_gt (vertexRank_strict_mono χ hgt))
+
+/-- Injective ⇒ bijective on `Fin n → Fin n` (pigeonhole). -/
+theorem vertexRank_bijective (χ : Colouring n) (h : Discrete χ) :
+    Function.Bijective (vertexRank χ) :=
+  Finite.injective_iff_bijective.mp (vertexRank_injective χ h)
+
+/-- **The rank permutation.** Bijection `Fin n ≃ Fin n` mapping each
+vertex to its colour-rank. -/
+noncomputable def rankPerm (χ : Colouring n) (h : Discrete χ) :
+    Equiv.Perm (Fin n) :=
+  Equiv.ofBijective (vertexRank χ) (vertexRank_bijective χ h)
+
+@[simp] theorem rankPerm_apply (χ : Colouring n) (h : Discrete χ) (v : Fin n) :
+    rankPerm χ h v = vertexRank χ v := rfl
+
+end Colouring
+
+/-! ### §15.5 — Leaf canonical adjacency (Phase D' part 2)
+
+Bringing together the rank bijection (§15.4) with the spine theorem and
+labelled adjacency (§15.3): every chain reaching a leaf, together with
+a `DirAssignment`, produces a canonical labelled adjacency matrix.
+
+The leaf's discrete partition is well-defined from `samePartition_chain`
++ `IsLeaf` (any `DirAssignment` refined against the chain's `χι` lands
+on a `samePartition`-equal partition, which is `Discrete` iff the chain
+is a leaf). The rank bijection on that discrete partition then
+canonically labels each vertex by its position in the sorted-by-colour
+order; relabelling `adj` by this permutation gives the leaf's
+canonical adjacency. -/
+
+/-- **Leaf canonical adjacency.** Given a `SpineChain` reaching a leaf
+and a `DirAssignment σ` over the chain's `D`, produce the canonical
+labelled adjacency matrix at this leaf.
+
+The procedure:
+1. Compute the warm-refined partition `π = warmRefine adj σ.σ chain.χι`.
+2. Discharge `Discrete π` via `samePartition_chain` (its partition
+   equals the chain's, which is Discrete by `isLeaf`).
+3. The rank permutation `rankPerm π _` labels each vertex by its
+   colour-rank.
+4. `labelledAdj` gives the relabelled adjacency.
+
+Different `DirAssignment`s give different canonical adjacency matrices
+in general (the order labels on `D` affect the rank assignment); the
+lex-min over `DirAssignment`s is the *canonical form* (Phase D'4,
+deferred). -/
+noncomputable def SpineChain.canonAdj {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) :
+    Fin n → Fin n → Nat :=
+  let π := warmRefine adj σ.σ chain.χι
+  let hDisc : Discrete π :=
+    Discrete.of_samePartition
+      (samePartition.symm (DirAssignment.samePartition_chain chain σ)) isLeaf
+  labelledAdj (Colouring.rankPerm π hDisc) adj
+

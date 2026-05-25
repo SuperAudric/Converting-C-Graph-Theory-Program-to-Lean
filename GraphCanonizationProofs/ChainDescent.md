@@ -427,18 +427,46 @@ These are axiom-cleaner than the spine work — only depend on
 `Quot.sound` (no `refineStep` axioms), since the theory lives entirely
 at the labelled-permutation level, not on warm refinement.
 
-**Still out of scope (deferred to a future Phase D'):**
+**Rank bijection + leaf canonical adjacency (added 2026-05-25, §15.4
+and §15.5).** Phase D' parts 1 and 2:
 
-* **`colourRank`** — rank-by-colour bijection on a `Discrete` colouring,
-  needed to canonically extract a labelling from a leaf. Needs
-  `Finset.sort` machinery.
-* **`SpineChain.canonAdj`** — the leaf canonical labelled matrix
-  function. Needs `colourRank` + `IsLeaf`.
-* **`canonForm`** — lex-min over `DirAssignment`s. Needs lex order on
-  matrices.
-* **Linear-oracle interface** — `LinearOracle` predicate/structure with
-  twist-discovery spec. Needs `Aut` (now available as `IsAut`) plus a
-  notion of "candidate twist from one branch's propagation pattern."
+§15.4 — Rank bijection:
+* `Colouring.vertexRankNat χ v` — count of `u` with `χ u < χ v`
+  (no `Discrete` required for the definition).
+* `Colouring.vertexRankNat_lt_n` — `v` itself is excluded, so the count
+  is `< n`.
+* `Colouring.vertexRank χ v : Fin n` — the wrapped rank.
+* `Colouring.vertexRank_strict_mono` — `χ v < χ w → vertexRank v < vertexRank w`.
+* `Colouring.vertexRank_injective` — on `Discrete χ`, injective via
+  strict-mono in both directions.
+* `Colouring.vertexRank_bijective` — pigeonhole on `Fin n → Fin n`.
+* **`Colouring.rankPerm χ h : Equiv.Perm (Fin n)`** — the rank
+  bijection (vertex ↦ its colour-rank). Via `Equiv.ofBijective`.
+
+§15.5 — Leaf canonical adjacency:
+* **`SpineChain.canonAdj chain isLeaf σ`** — given a chain reaching a
+  leaf and a `DirAssignment σ` over `chain.D`, the canonical labelled
+  adjacency at this leaf: `labelledAdj (rankPerm (warmRefine adj σ.σ
+  chain.χι) _) adj`. The `Discrete` proof is discharged via
+  `samePartition_chain` + `isLeaf`.
+
+Different `DirAssignment`s give different `canonAdj` matrices in
+general — the lex-min over `DirAssignment`s (Phase D'4, deferred) is
+the canonical form.
+
+**Still out of scope (Phase D'3–D'5 for a future round):**
+
+* **`MatrixLex`** — lex order on `Fin n → Fin n → Nat` matrices.
+  Likely via `Pi.Lex (· < ·) (fun _ => Pi.Lex (· < ·) (· < ·))`;
+  needs the standard order infrastructure.
+* **`canonForm`** — lex-min `canonAdj` over `DirAssignment`s. Needs
+  `Fintype (DirAssignment P₀ D)` instance (decidable constraints on
+  the constrained `PMatrix`) plus the argmin.
+* **Linear-oracle interface** — `LinearOracleSpec` function type with
+  `IsValidOracle` predicate. The spec is conceptually small; the
+  hard part is articulating what "candidate twist from one branch's
+  propagation pattern" means precisely enough to be useful in a
+  correctness proof of the descent.
 
 **Consequences.**
 
