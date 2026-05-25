@@ -399,14 +399,23 @@ direction entries of `S`, `.greater` at the reverses, and `.unknown` elsewhere.
 |-------|--------|------|
 | CL0 `cl_prov ∅ = ∅` | **proved** | `cl_prov_empty` |
 | CL1 extensive | **proved** for canonical S | `cl_prov_extensive` |
-| CL2 idempotent | conjectured ✓, Lean `sorry` | standard TC theory; the proof needs a matrix-equality bridge between `commitsToP (cl_prov S)` and `transitiveClose (commitsToP S)` |
-| CL3 monotone | conjectured ✓, Lean `sorry` | standard TC theory; needs a `closeStep_decided_mono` helper |
+| CL2 idempotent | **proved** (2026-05-25) | `cl_prov_idempotent` |
+| CL3 monotone | **proved** (2026-05-25) | `cl_prov_monotone` |
 | **M3 exchange** | **REFUTED** | machine-checked via `decide` (`cl_prov_M3_false`) |
 
-So `cl_prov` is (conjecturally, modulo two formalisable sorries) a
-**topological closure** (Moore family / Kuratowski axioms) — *but it is not
-a matroid*. The intended Tier-2 detection scheme of §7 (binary
-representability of the matroid) cannot be applied.
+So `cl_prov` is rigorously a **topological closure** (Moore family /
+Kuratowski axioms) — *but it is not a matroid*. The intended Tier-2
+detection scheme of §7 (binary representability of the matroid) cannot be
+applied. The CL2/CL3 proofs use a `LessMono` (single-direction entry
+mono) predicate carried through `transitiveClose` under joint
+canonical-consistency; the key lemma `canConsistent_no_conflict` rules
+out the bad case where `closeStep`'s `.less`-first tie-break would shift
+direction (a pair carrying both a `.less`-chain and a `.greater`-chain).
+TC idempotence (`transitiveClose_idempotent`) comes from a `numUnknown`
+potential argument: each non-fixed-point round strictly decreases the
+unknown count, bounded by `n*n`. All axiom-checked: only
+`propext, Classical.choice, Quot.sound` (no `refineStep` axioms; the
+CL2/CL3 chain is pure TC theory, independent of warm refinement).
 
 ### 8.2 The M3 refutation
 
@@ -575,9 +584,10 @@ What this session contributed:
 - **`cl_prov` (TC-based provenance) tested and FAILS too**: ChainDescent.lean
   §14 defines `cl_prov` via transitive closure, proves CL0 and CL1, refutes
   M3 via decide on `n=5, S={(1,2),(3,4)}, x=(2,3), y=(1,4)`. CL2 and CL3
-  stated with sorries (standard TC theory, formality not conjectural status).
-  `cl_prov` is a **topological closure** but **not a matroid** — the
-  matroid axioms still don't hold.
+  proved (2026-05-25) via `LessMono` + `CanConsistent` infrastructure plus
+  `numUnknown`-potential TC idempotence — axiom-clean, no `refineStep`
+  dependency. `cl_prov` is rigorously a **topological closure** but
+  **not a matroid** — the matroid axioms still don't hold.
 - **Matroid framework on commit-set closures is now definitively CLOSED**:
   both candidate closures (partition-based `cl`, TC-based `cl_prov`) have
   been tested and neither is a matroid. The remaining option (linear-

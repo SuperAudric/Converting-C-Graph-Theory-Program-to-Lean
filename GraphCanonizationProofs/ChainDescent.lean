@@ -1423,43 +1423,539 @@ theorem cl_prov_M3_false :
     x ∉ cl_prov (S ∪ {y}) := by
   decide
 
-/-! ### CL3 and CL2 — stated, sorries
+/-! ### Direction-monotonicity infrastructure for CL3 / CL2
 
-CL3 (monotonicity) and CL2 (idempotence) are the two remaining axioms.
-Both hold for TC closure (it's a standard topological closure operator),
-but the Lean proofs require a `closeStep_decided_mono` helper lemma
-(showing TC's "decided-stays-decided" monotonicity) that is moderate
-case-analysis on `closeStep`'s definition. Left as sorries with proof
-obligations; not blocking the matroid-vs-not-matroid conclusion since M3
-is the decisive axiom.
--/
+Both CL3 and CL2 reduce to a "less-direction entry-mono" argument lifted
+through `transitiveClose`. The naive "decidedness-only" mono fails because
+`closeStep`'s `.less`-first tie-break can shift direction between two
+related matrices. The fix is to carry **canonical-consistency** as a joint
+invariant — under it, no pair can host both a `.less`-chain and a
+`.greater`-chain, killing the bad case.
 
-/-- **CL3 — monotonicity (sorry).** For canonical `S ⊆ T`,
-`cl_prov S ⊆ cl_prov T`.
+Both CL3 and CL2 filter to canonical pairs `i.val < j.val`, so we only
+need the `.less` direction of mono throughout. -/
 
-Proof obligation: prove `closeStep_decided_mono` — if `P i j = .less →
-Q i j = .less` and `P i j = .greater → Q i j = .greater` (at every entry),
-then `closeStep P i j ≠ .unknown → closeStep Q i j ≠ .unknown`. Case
-analysis on `Q i j` (must be `.unknown`) and on chain existence. Then
-iterate via standard induction. -/
+/-- A `.less`-chain in `P` from `i` to `j`: some intermediate `k` with
+both edges `.less`. -/
+def hasLessChain {n : Nat} (P : PMatrix n) (i j : Fin n) : Prop :=
+  ∃ k : Fin n, P i k = .less ∧ P k j = .less
+
+/-- A `.greater`-chain in `P` from `i` to `j`. -/
+def hasGreaterChain {n : Nat} (P : PMatrix n) (i j : Fin n) : Prop :=
+  ∃ k : Fin n, P i k = .greater ∧ P k j = .greater
+
+/-- A `PMatrix` is **canonical-consistent** if every `.less` entry sits at
+`i.val < j.val` and every `.greater` entry at `i.val > j.val`. -/
+def CanConsistent {n : Nat} (P : PMatrix n) : Prop :=
+  (∀ i j : Fin n, P i j = .less → i.val < j.val) ∧
+  (∀ i j : Fin n, P i j = .greater → i.val > j.val)
+
+/-- One-sided (`.less`) entry-wise mono. Sufficient for CL3 and CL2 since
+both filter to canonical pairs. -/
+def LessMono {n : Nat} (P Q : PMatrix n) : Prop :=
+  ∀ i j : Fin n, P i j = .less → Q i j = .less
+
+/-- Under canonical-consistency, no pair has both a `.less`-chain and a
+`.greater`-chain (the chain endpoints' canonical ordering constraints
+conflict). -/
+theorem canConsistent_no_conflict {n : Nat} {P : PMatrix n}
+    (hP : CanConsistent P) (i j : Fin n)
+    (hL : hasLessChain P i j) (hG : hasGreaterChain P i j) : False := by
+  obtain ⟨k, hik, hkj⟩ := hL
+  obtain ⟨m, him, hmj⟩ := hG
+  have h1 : i.val < j.val := Nat.lt_trans (hP.1 i k hik) (hP.1 k j hkj)
+  have h2 : j.val < i.val := Nat.lt_trans (hP.2 m j hmj) (hP.2 i m him)
+  exact Nat.lt_irrefl _ (Nat.lt_trans h1 h2)
+
+/-- **Classification of `commitsToP S i j`** based on `S`-membership.
+Three mutually exclusive cases under canonical `S`. -/
+theorem commitsToP_classify {n : Nat} (S : Finset (Fin n × Fin n))
+    (i j : Fin n) :
+    (commitsToP S i j = .less ∧ (i, j) ∈ S) ∨
+    (commitsToP S i j = .greater ∧ (i, j) ∉ S ∧ (j, i) ∈ S) ∨
+    (commitsToP S i j = .unknown ∧ (i, j) ∉ S ∧ (j, i) ∉ S) := by
+  by_cases h1 : (i, j) ∈ S
+  · left
+    refine ⟨?_, h1⟩
+    simp [commitsToP, Pof_fs, h1]
+  · by_cases h2 : (j, i) ∈ S
+    · right; left
+      refine ⟨?_, h1, h2⟩
+      simp [commitsToP, Pof_fs, h1, h2]
+    · right; right
+      refine ⟨?_, h1, h2⟩
+      simp [commitsToP, Pof_fs, h1, h2]
+
+/-- `commitsToP` of a canonical `S` is canonical-consistent. -/
+theorem commitsToP_canConsistent {n : Nat} (S : Finset (Fin n × Fin n))
+    (hScanon : ∀ p ∈ S, p.1.val < p.2.val) :
+    CanConsistent (commitsToP S) := by
+  refine ⟨?_, ?_⟩
+  · intro i j h
+    rcases commitsToP_classify S i j with ⟨_, hmem⟩ | ⟨heq, _⟩ | ⟨heq, _⟩
+    · exact hScanon (i, j) hmem
+    · rw [heq] at h; cases h
+    · rw [heq] at h; cases h
+  · intro i j h
+    rcases commitsToP_classify S i j with ⟨heq, _⟩ | ⟨_, _, hmem⟩ | ⟨heq, _⟩
+    · rw [heq] at h; cases h
+    · exact hScanon (j, i) hmem
+    · rw [heq] at h; cases h
+
+/-! ### closeStep helpers -/
+
+/-- `closeStep` never demotes a decided `.greater` entry. -/
+theorem closeStep_keeps_greater {n : Nat} (Q : PMatrix n) {i j : Fin n}
+    (h : Q i j = .greater) : closeStep Q i j = .greater := by
+  simp only [closeStep, h]
+
+/-- Iterating `closeStep` preserves a `.greater` entry — once decided, frozen. -/
+theorem iterate_closeStep_keeps_greater {n : Nat} (i j : Fin n) :
+    ∀ (k : Nat) (Q : PMatrix n), Q i j = .greater →
+      ((closeStep^[k]) Q) i j = .greater := by
+  intro k
+  induction k with
+  | zero => intro Q h; exact h
+  | succ k ih =>
+    intro Q h
+    rw [Function.iterate_succ, Function.comp_apply]
+    exact ih (closeStep Q) (closeStep_keeps_greater Q h)
+
+/-- `closeStep` preserves any decided entry. -/
+theorem closeStep_decided {n : Nat} (P : PMatrix n) (i j : Fin n)
+    (hP : P i j ≠ .unknown) : closeStep P i j = P i j := by
+  cases hPij : P i j with
+  | less    => exact closeStep_keeps_less P hPij
+  | greater => exact closeStep_keeps_greater P hPij
+  | unknown => exact absurd hPij hP
+
+/-- `closeStep` at an `.unknown` entry, expanded. -/
+theorem closeStep_unknown_eq {n : Nat} (P : PMatrix n) (i j : Fin n)
+    (hP : P i j = .unknown) :
+    closeStep P i j =
+      (if (List.finRange n).any
+            (fun k => decide (P i k = .less) && decide (P k j = .less))
+        then .less
+        else if (List.finRange n).any
+              (fun k => decide (P i k = .greater) && decide (P k j = .greater))
+          then .greater
+          else .unknown) := by
+  unfold closeStep
+  rw [hP]
+
+/-- **Classification of `closeStep P i j`'s output for `.less` case.** -/
+theorem closeStep_eq_less_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
+    closeStep P i j = .less ↔
+      P i j = .less ∨ (P i j = .unknown ∧ hasLessChain P i j) := by
+  constructor
+  · intro h
+    cases hPij : P i j with
+    | less => left; rfl
+    | greater =>
+      rw [closeStep_keeps_greater P hPij] at h; cases h
+    | unknown =>
+      right
+      refine ⟨rfl, ?_⟩
+      rw [closeStep_unknown_eq P i j hPij] at h
+      by_cases h1 : (List.finRange n).any
+            (fun k => decide (P i k = .less) && decide (P k j = .less))
+      · rw [List.any_eq_true] at h1
+        obtain ⟨k, _, hk⟩ := h1
+        rw [Bool.and_eq_true, decide_eq_true_eq, decide_eq_true_eq] at hk
+        exact ⟨k, hk.1, hk.2⟩
+      · -- No .less-chain: closeStep outputs .greater or .unknown, not .less
+        rw [if_neg h1] at h
+        by_cases h2 : (List.finRange n).any
+              (fun k => decide (P i k = .greater) && decide (P k j = .greater))
+        · rw [if_pos h2] at h; cases h
+        · rw [if_neg h2] at h; cases h
+  · rintro (hP | ⟨hP, k, hik, hkj⟩)
+    · exact closeStep_keeps_less P hP
+    · rw [closeStep_unknown_eq P i j hP]
+      have : (List.finRange n).any
+            (fun k' => decide (P i k' = .less) && decide (P k' j = .less)) = true := by
+        rw [List.any_eq_true]
+        refine ⟨k, List.mem_finRange _, ?_⟩
+        simp [hik, hkj]
+      rw [if_pos this]
+
+/-- A direction for `closeStep` outputs: if it's `.less` (or `.greater`),
+the `.less`-chain (or `.greater`-chain) plus underlying `.less`/`.greater`
+entries determine it. The `.greater` case below mirrors. -/
+theorem closeStep_eq_greater_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
+    closeStep P i j = .greater ↔
+      P i j = .greater ∨
+        (P i j = .unknown ∧ ¬ hasLessChain P i j ∧ hasGreaterChain P i j) := by
+  constructor
+  · intro h
+    cases hPij : P i j with
+    | less => rw [closeStep_keeps_less P hPij] at h; cases h
+    | greater => left; rfl
+    | unknown =>
+      right
+      refine ⟨rfl, ?_, ?_⟩
+      · -- No .less-chain
+        intro ⟨k, hik, hkj⟩
+        rw [closeStep_unknown_eq P i j hPij] at h
+        have : (List.finRange n).any
+              (fun k' => decide (P i k' = .less) && decide (P k' j = .less)) = true := by
+          rw [List.any_eq_true]
+          refine ⟨k, List.mem_finRange _, ?_⟩
+          simp [hik, hkj]
+        rw [if_pos this] at h; cases h
+      · -- .greater-chain
+        rw [closeStep_unknown_eq P i j hPij] at h
+        by_cases h1 : (List.finRange n).any
+              (fun k => decide (P i k = .less) && decide (P k j = .less))
+        · rw [if_pos h1] at h; cases h
+        · rw [if_neg h1] at h
+          by_cases h2 : (List.finRange n).any
+                (fun k => decide (P i k = .greater) && decide (P k j = .greater))
+          · rw [List.any_eq_true] at h2
+            obtain ⟨k, _, hk⟩ := h2
+            rw [Bool.and_eq_true, decide_eq_true_eq, decide_eq_true_eq] at hk
+            exact ⟨k, hk.1, hk.2⟩
+          · rw [if_neg h2] at h; cases h
+  · rintro (hP | ⟨hP, hNoLess, k, hik, hkj⟩)
+    · exact closeStep_keeps_greater P hP
+    · rw [closeStep_unknown_eq P i j hP]
+      have h_no_less : (List.finRange n).any
+          (fun k' => decide (P i k' = .less) && decide (P k' j = .less)) = false := by
+        rw [List.any_eq_false]
+        intro k' _ hbad
+        rw [Bool.and_eq_true, decide_eq_true_eq, decide_eq_true_eq] at hbad
+        exact hNoLess ⟨k', hbad.1, hbad.2⟩
+      rw [if_neg (by rw [h_no_less]; decide)]
+      have h_greater : (List.finRange n).any
+          (fun k' => decide (P i k' = .greater) && decide (P k' j = .greater)) = true := by
+        rw [List.any_eq_true]
+        refine ⟨k, List.mem_finRange _, ?_⟩
+        simp [hik, hkj]
+      rw [if_pos h_greater]
+
+/-- `closeStep` preserves canonical-consistency. -/
+theorem closeStep_canConsistent {n : Nat} {P : PMatrix n}
+    (hP : CanConsistent P) : CanConsistent (closeStep P) := by
+  refine ⟨?_, ?_⟩
+  · intro i j hij
+    rcases (closeStep_eq_less_iff P i j).mp hij with hLess | ⟨_, k, hik, hkj⟩
+    · exact hP.1 i j hLess
+    · exact Nat.lt_trans (hP.1 i k hik) (hP.1 k j hkj)
+  · intro i j hij
+    rcases (closeStep_eq_greater_iff P i j).mp hij with hGreat | ⟨_, _, k, hik, hkj⟩
+    · exact hP.2 i j hGreat
+    · exact Nat.lt_trans (hP.2 k j hkj) (hP.2 i k hik)
+
+/-- Iterating `closeStep` preserves canonical-consistency. -/
+theorem iterate_closeStep_canConsistent {n : Nat} (P : PMatrix n)
+    (hP : CanConsistent P) : ∀ k, CanConsistent ((closeStep^[k]) P) := by
+  intro k
+  induction k with
+  | zero => exact hP
+  | succ k ih =>
+    rw [Function.iterate_succ', Function.comp_apply]
+    exact closeStep_canConsistent ih
+
+/-- `transitiveClose` preserves canonical-consistency. -/
+theorem transitiveClose_canConsistent {n : Nat} (P : PMatrix n)
+    (hP : CanConsistent P) : CanConsistent (transitiveClose P) :=
+  iterate_closeStep_canConsistent P hP (n * n)
+
+/-- **Joint inductive step for `LessMono`.** Under canonical-consistency of
+both matrices and `.less`-mono between them, `closeStep` preserves
+`.less`-mono.
+
+Threats to the `.less`-chain case: `Q i j = .greater` (ruled out by chain
++ canonical-consistency of `Q`) or a `Q .greater`-chain pre-empting the
+tie-break (irrelevant — the if-chain prioritizes `.less`). -/
+theorem closeStep_lessMono {n : Nat} {P Q : PMatrix n}
+    (hQ : CanConsistent Q) (hPQ : LessMono P Q) :
+    LessMono (closeStep P) (closeStep Q) := by
+  intro i j hLess
+  rcases (closeStep_eq_less_iff P i j).mp hLess with hP | ⟨_, k, hik, hkj⟩
+  · -- P i j = .less; transport to Q
+    exact closeStep_keeps_less Q (hPQ i j hP)
+  · -- P i j = .unknown with .less-chain through k
+    have hQik : Q i k = .less := hPQ i k hik
+    have hQkj : Q k j = .less := hPQ k j hkj
+    -- Show closeStep Q i j = .less
+    cases hQij : Q i j with
+    | less    => exact closeStep_keeps_less Q hQij
+    | greater =>
+      exfalso
+      have h_lt : i.val < j.val := Nat.lt_trans (hQ.1 i k hQik) (hQ.1 k j hQkj)
+      have h_gt : j.val < i.val := hQ.2 i j hQij
+      exact Nat.lt_irrefl _ (Nat.lt_trans h_lt h_gt)
+    | unknown =>
+      exact (closeStep_eq_less_iff Q i j).mpr (Or.inr ⟨hQij, k, hQik, hQkj⟩)
+
+/-- Iterating `closeStep` preserves `.less`-mono. -/
+theorem iterate_closeStep_lessMono {n : Nat} {P Q : PMatrix n}
+    (_ : CanConsistent P) (hQ : CanConsistent Q) (hPQ : LessMono P Q) :
+    ∀ k, LessMono ((closeStep^[k]) P) ((closeStep^[k]) Q) := by
+  intro k
+  induction k with
+  | zero => exact hPQ
+  | succ k ih =>
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact closeStep_lessMono (iterate_closeStep_canConsistent Q hQ k) ih
+
+/-- `transitiveClose` preserves `.less`-mono. -/
+theorem transitiveClose_lessMono {n : Nat} {P Q : PMatrix n}
+    (hP : CanConsistent P) (hQ : CanConsistent Q) (hPQ : LessMono P Q) :
+    LessMono (transitiveClose P) (transitiveClose Q) :=
+  iterate_closeStep_lessMono hP hQ hPQ (n * n)
+
+/-- Base case for CL3: under `S ⊆ T` both canonical,
+`commitsToP S → commitsToP T` is `.less`-mono. -/
+theorem commitsToP_lessMono {n : Nat} {S T : Finset (Fin n × Fin n)}
+    (hST : S ⊆ T) :
+    LessMono (commitsToP S) (commitsToP T) := by
+  intro i j h
+  rcases commitsToP_classify S i j with ⟨_, hmem⟩ | ⟨heq, _⟩ | ⟨heq, _⟩
+  · -- (i,j) ∈ S ⊆ T, so commitsToP T i j = .less
+    rcases commitsToP_classify T i j with ⟨heqT, _⟩ | ⟨_, hnot, _⟩ | ⟨_, hnot, _⟩
+    · exact heqT
+    · exact absurd (hST hmem) hnot
+    · exact absurd (hST hmem) hnot
+  · rw [heq] at h; cases h
+  · rw [heq] at h; cases h
+
+/-! ### CL3 — monotonicity (proved) -/
+
+/-- **CL3 — monotonicity.** For canonical `S ⊆ T`, `cl_prov S ⊆ cl_prov T`. -/
 theorem cl_prov_monotone {n : Nat} {S T : Finset (Fin n × Fin n)}
     (hST : S ⊆ T) (hScanon : ∀ p ∈ S, p.1.val < p.2.val)
     (hTcanon : ∀ p ∈ T, p.1.val < p.2.val) :
     cl_prov S ⊆ cl_prov T := by
-  sorry  -- TODO: closeStep_decided_mono + iterate
+  intro p hp
+  simp only [cl_prov, Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+  obtain ⟨hlt, hdec⟩ := hp
+  refine ⟨hlt, ?_⟩
+  have hCanS : CanConsistent (commitsToP S) := commitsToP_canConsistent S hScanon
+  have hCanT : CanConsistent (commitsToP T) := commitsToP_canConsistent T hTcanon
+  have hCanTCS : CanConsistent (transitiveClose (commitsToP S)) :=
+    transitiveClose_canConsistent _ hCanS
+  -- Under canonical-consistency, TC decided + p.1 < p.2 ⟹ TC value = .less
+  have hLess : transitiveClose (commitsToP S) p.1 p.2 = .less := by
+    cases h : transitiveClose (commitsToP S) p.1 p.2 with
+    | less    => rfl
+    | unknown => exact absurd h hdec
+    | greater => exact absurd hlt (Nat.not_lt_of_lt (hCanTCS.2 p.1 p.2 h))
+  -- Lift through LessMono
+  have hLifted : LessMono (transitiveClose (commitsToP S))
+                          (transitiveClose (commitsToP T)) :=
+    transitiveClose_lessMono hCanS hCanT (commitsToP_lessMono hST)
+  have hLessT : transitiveClose (commitsToP T) p.1 p.2 = .less :=
+    hLifted p.1 p.2 hLess
+  rw [hLessT]; decide
 
-/-- **CL2 — idempotence (sorry).** `cl_prov (cl_prov S) = cl_prov S`.
+/-! ### TC idempotence (for CL2)
 
-Proof obligation: show `commitsToP (cl_prov S) = transitiveClose (commitsToP S)`
-as matrices (every entry agrees). Then TC idempotence
-(`transitiveClose (transitiveClose M) = transitiveClose M` — also needs
-proof) gives the result. Both pieces are standard TC theory but need
-careful Lean formalisation around `Pof_fs` and `cl_prov`'s Finset/Set
-boundary. -/
+`closeStep` is monotone on decidedness: each entry transitions
+`.unknown → .less/.greater` at most once. So after `n*n` rounds the iterate
+has saturated. Argument via the strictly-decreasing potential
+`numUnknown`. -/
+
+/-- Number of `.unknown` entries in a `PMatrix`. -/
+def numUnknown {n : Nat} (P : PMatrix n) : Nat :=
+  ((Finset.univ : Finset (Fin n × Fin n)).filter
+    (fun p => P p.1 p.2 = .unknown)).card
+
+/-- `numUnknown ≤ n * n`. -/
+theorem numUnknown_le {n : Nat} (P : PMatrix n) : numUnknown P ≤ n * n := by
+  unfold numUnknown
+  calc _ ≤ (Finset.univ : Finset (Fin n × Fin n)).card :=
+            Finset.card_filter_le _ _
+    _ = n * n := by rw [Finset.card_univ, Fintype.card_prod, Fintype.card_fin]
+
+/-- The unknown set of `closeStep P` is contained in the unknown set of `P`. -/
+theorem closeStep_unknown_subset {n : Nat} (P : PMatrix n) :
+    ((Finset.univ : Finset (Fin n × Fin n)).filter
+        (fun p => closeStep P p.1 p.2 = .unknown)) ⊆
+    ((Finset.univ : Finset (Fin n × Fin n)).filter
+        (fun p => P p.1 p.2 = .unknown)) := by
+  intro p hp
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+  by_contra hPp
+  exact hPp (by rw [← closeStep_decided P p.1 p.2 hPp]; exact hp)
+
+/-- If `closeStep P ≠ P`, then `numUnknown` strictly drops. -/
+theorem closeStep_numUnknown_lt {n : Nat} {P : PMatrix n}
+    (hne : closeStep P ≠ P) : numUnknown (closeStep P) < numUnknown P := by
+  -- Some pair where closeStep P differs from P
+  have hExists : ∃ (p : Fin n × Fin n), closeStep P p.1 p.2 ≠ P p.1 p.2 := by
+    by_contra hAll
+    apply hne
+    funext i j
+    by_contra hne'
+    exact hAll ⟨(i, j), hne'⟩
+  obtain ⟨p, hpne⟩ := hExists
+  have hPunk : P p.1 p.2 = .unknown := by
+    by_contra hdec
+    exact hpne (closeStep_decided P p.1 p.2 hdec)
+  have hCSdec : closeStep P p.1 p.2 ≠ .unknown := by
+    intro hUnk; apply hpne; rw [hUnk, hPunk]
+  unfold numUnknown
+  refine Finset.card_lt_card ?_
+  refine ⟨closeStep_unknown_subset P, ?_⟩
+  intro hSub
+  have hp_in : p ∈ ((Finset.univ : Finset (Fin n × Fin n)).filter
+      (fun p => P p.1 p.2 = .unknown)) := by
+    simp [hPunk]
+  have := hSub hp_in
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at this
+  exact hCSdec this
+
+/-- After `k` iterations of `closeStep`, either a fixed point has been
+reached at some step `≤ k`, or `numUnknown` has dropped by at least `k`. -/
+theorem iterate_closeStep_progress {n : Nat} (P : PMatrix n) :
+    ∀ k, (∃ j ≤ k, (closeStep^[j+1]) P = (closeStep^[j]) P) ∨
+         numUnknown ((closeStep^[k]) P) + k ≤ numUnknown P := by
+  intro k
+  induction k with
+  | zero => right; simp
+  | succ k ih =>
+    rcases ih with ⟨j, hj_le, hFix⟩ | hDrop
+    · -- Already at fixed point at step j ≤ k → still at fixed point
+      left; exact ⟨j, Nat.le_succ_of_le hj_le, hFix⟩
+    · -- numUnknown drop ≥ k at step k. Either step k+1 reaches fixed point or strict drop.
+      by_cases hFixAtK : (closeStep^[k+1]) P = (closeStep^[k]) P
+      · left; exact ⟨k, Nat.le_succ k, hFixAtK⟩
+      · right
+        -- closeStep^[k+1] P = closeStep (closeStep^[k] P); the step from k to k+1 differs
+        have hkStep : (closeStep^[k+1]) P = closeStep ((closeStep^[k]) P) := by
+          rw [Function.iterate_succ' closeStep k, Function.comp_apply]
+        have hStepNe : closeStep ((closeStep^[k]) P) ≠ (closeStep^[k]) P := by
+          intro hAbs
+          apply hFixAtK
+          rw [hkStep, hAbs]
+        have hLt : numUnknown (closeStep ((closeStep^[k]) P)) <
+                    numUnknown ((closeStep^[k]) P) :=
+          closeStep_numUnknown_lt hStepNe
+        rw [hkStep]
+        omega
+
+/-- After `n*n` iterations, `closeStep` has reached a fixed point. -/
+theorem transitiveClose_is_fixpoint {n : Nat} (P : PMatrix n) :
+    closeStep (transitiveClose P) = transitiveClose P := by
+  unfold transitiveClose
+  rcases iterate_closeStep_progress P (n * n) with ⟨j, hj_le, hFix⟩ | hDrop
+  · -- fixed point at step j ≤ n*n; iterate it forward
+    have hExt : ∀ m, (closeStep^[j+m]) P = (closeStep^[j]) P := by
+      intro m
+      induction m with
+      | zero => rfl
+      | succ m ih =>
+        rw [show j + (m + 1) = (j + m) + 1 from by omega,
+            Function.iterate_succ' closeStep (j+m), Function.comp_apply, ih]
+        -- now goal: closeStep ((closeStep^[j]) P) = (closeStep^[j]) P
+        rw [← Function.comp_apply (f := closeStep), ← Function.iterate_succ' closeStep,
+            hFix]
+    have h1 : (closeStep^[n*n + 1]) P = (closeStep^[j]) P := by
+      have := hExt (n * n + 1 - j)
+      rw [show j + (n * n + 1 - j) = n * n + 1 from by omega] at this
+      exact this
+    have h2 : (closeStep^[n*n]) P = (closeStep^[j]) P := by
+      have := hExt (n * n - j)
+      rw [show j + (n * n - j) = n * n from by omega] at this
+      exact this
+    rw [show closeStep ((closeStep^[n*n]) P) = (closeStep^[n*n + 1]) P from by
+        rw [Function.iterate_succ' closeStep (n*n), Function.comp_apply]]
+    rw [h1, h2]
+  · -- numUnknown ((closeStep^[n*n]) P) + n*n ≤ numUnknown P ≤ n*n
+    --  ⟹ numUnknown ((closeStep^[n*n]) P) ≤ 0; but then... actually this branch
+    -- still needs argument. The drop tells us many transitions happened; we
+    -- still need that the NEXT step is a fixed point.
+    -- Alternative: numUnknown P ≤ n*n, hDrop: numUnknown ((closeStep^[n*n]) P) + n*n ≤ numUnknown P
+    -- So numUnknown ((closeStep^[n*n]) P) = 0 and numUnknown P = n*n.
+    -- If numUnknown ((closeStep^[n*n]) P) = 0, no entry is .unknown, so closeStep is identity
+    -- (closeStep on all-decided is identity).
+    have hUnkZero : numUnknown ((closeStep^[n*n]) P) = 0 := by
+      have hPle := numUnknown_le P
+      omega
+    -- closeStep on a matrix with no .unknown entries is identity
+    apply funext; intro i
+    apply funext; intro j
+    by_cases hP : (closeStep^[n*n]) P i j = .unknown
+    · -- Contradiction: numUnknown should include (i,j) but is 0
+      exfalso
+      have : (i, j) ∈ ((Finset.univ : Finset (Fin n × Fin n)).filter
+          (fun p => (closeStep^[n*n]) P p.1 p.2 = .unknown)) := by simp [hP]
+      have hCard : ((Finset.univ : Finset (Fin n × Fin n)).filter
+          (fun p => (closeStep^[n*n]) P p.1 p.2 = .unknown)).card ≠ 0 :=
+        Finset.card_ne_zero.mpr ⟨(i, j), this⟩
+      exact hCard hUnkZero
+    · exact closeStep_decided _ i j hP
+
+/-- **TC idempotence.** -/
+theorem transitiveClose_idempotent {n : Nat} (M : PMatrix n) :
+    transitiveClose (transitiveClose M) = transitiveClose M := by
+  have hFix : closeStep (transitiveClose M) = transitiveClose M :=
+    transitiveClose_is_fixpoint M
+  unfold transitiveClose at hFix ⊢
+  exact iterate_closeStep_fix ((closeStep^[n*n]) M) hFix (n * n)
+
+/-! ### CL2 — idempotence (proved) -/
+
+/-- `cl_prov S` is canonical. -/
+theorem cl_prov_canonical {n : Nat} (S : Finset (Fin n × Fin n)) :
+    ∀ p ∈ cl_prov S, p.1.val < p.2.val := by
+  intro p hp
+  simp only [cl_prov, Finset.mem_filter, Finset.mem_univ, true_and] at hp
+  exact hp.1
+
+/-- `commitsToP (cl_prov S)` is `.less`-bounded by `transitiveClose
+(commitsToP S)`. -/
+theorem commitsToP_cl_prov_lessMono {n : Nat} (S : Finset (Fin n × Fin n))
+    (hScanon : ∀ p ∈ S, p.1.val < p.2.val) :
+    LessMono (commitsToP (cl_prov S)) (transitiveClose (commitsToP S)) := by
+  have hCanS : CanConsistent (commitsToP S) := commitsToP_canConsistent S hScanon
+  have hCanTCS : CanConsistent (transitiveClose (commitsToP S)) :=
+    transitiveClose_canConsistent _ hCanS
+  intro i j h
+  rcases commitsToP_classify (cl_prov S) i j with ⟨_, hmem⟩ | ⟨heq, _⟩ | ⟨heq, _⟩
+  · -- (i,j) ∈ cl_prov S: extract hlt and hdec
+    simp only [cl_prov, Finset.mem_filter, Finset.mem_univ, true_and] at hmem
+    obtain ⟨hlt, hdec⟩ := hmem
+    cases hTC : transitiveClose (commitsToP S) i j with
+    | less    => rfl
+    | unknown => exact absurd hTC hdec
+    | greater => exact absurd hlt (Nat.not_lt_of_lt (hCanTCS.2 i j hTC))
+  · rw [heq] at h; cases h
+  · rw [heq] at h; cases h
+
+/-- **CL2 — idempotence.** `cl_prov (cl_prov S) = cl_prov S`. -/
 theorem cl_prov_idempotent {n : Nat} (S : Finset (Fin n × Fin n))
     (hScanon : ∀ p ∈ S, p.1.val < p.2.val) :
     cl_prov (cl_prov S) = cl_prov S := by
-  sorry  -- TODO: matrix-equality bridge + TC idempotence
+  apply Finset.Subset.antisymm
+  · intro p hp
+    simp only [cl_prov, Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+    obtain ⟨hlt, hdec⟩ := hp
+    refine ⟨hlt, ?_⟩
+    have hCanCl : CanConsistent (commitsToP (cl_prov S)) :=
+      commitsToP_canConsistent (cl_prov S) (cl_prov_canonical S)
+    have hCanS : CanConsistent (commitsToP S) := commitsToP_canConsistent S hScanon
+    have hCanTCS : CanConsistent (transitiveClose (commitsToP S)) :=
+      transitiveClose_canConsistent _ hCanS
+    have hLess : LessMono (commitsToP (cl_prov S)) (transitiveClose (commitsToP S)) :=
+      commitsToP_cl_prov_lessMono S hScanon
+    have hLifted : LessMono (transitiveClose (commitsToP (cl_prov S)))
+                            (transitiveClose (transitiveClose (commitsToP S))) :=
+      transitiveClose_lessMono hCanCl hCanTCS hLess
+    rw [transitiveClose_idempotent] at hLifted
+    have hCanTCcl : CanConsistent (transitiveClose (commitsToP (cl_prov S))) :=
+      transitiveClose_canConsistent _ hCanCl
+    have hLessCl : transitiveClose (commitsToP (cl_prov S)) p.1 p.2 = .less := by
+      cases h : transitiveClose (commitsToP (cl_prov S)) p.1 p.2 with
+      | less    => rfl
+      | unknown => exact absurd h hdec
+      | greater => exact absurd hlt (Nat.not_lt_of_lt (hCanTCcl.2 p.1 p.2 h))
+    have : transitiveClose (commitsToP S) p.1 p.2 = .less :=
+      hLifted p.1 p.2 hLessCl
+    rw [this]; decide
+  · exact cl_prov_extensive (cl_prov S) (cl_prov_canonical S)
 
 /-! ### Status summary
 
@@ -1469,14 +1965,21 @@ theorem cl_prov_idempotent {n : Nat} (S : Finset (Fin n × Fin n))
 |-------|--------|
 | CL0 `cl_prov ∅ = ∅` | **proved** (`cl_prov_empty`) |
 | CL1 extensive `S ⊆ cl_prov S` | **proved** for canonical S (`cl_prov_extensive`) |
-| CL2 idempotent | sorry (standard TC theory; proof obligation in docstring) |
-| CL3 monotone | sorry (standard TC theory; proof obligation in docstring) |
+| CL2 idempotent `cl_prov (cl_prov S) = cl_prov S` | **proved** (`cl_prov_idempotent`) |
+| CL3 monotone `S ⊆ T → cl_prov S ⊆ cl_prov T` | **proved** (`cl_prov_monotone`) |
 | **M3 exchange** | **REFUTED** by decide (`cl_prov_M3_false`) on `n=5`, `S={(1,2),(3,4)}`, `x=(2,3)`, `y=(1,4)` |
 
-CL2 and CL3 are conjectured to hold (standard TC topological-closure theory)
-— their sorries are formality, not conjectural status. M3's failure is the
-decisive structural finding: **`cl_prov` is a topological closure but not a
-matroid**, so it doesn't support binary-matroid representability and the
-intended Tier-2 detection scheme. See `docs/chain-descent-matroid.md` §8 for
-the proposed pivot to richer (F_2-tracking) provenance.
+CL2/CL3 proved via direction-monotonicity (`LessMono`) lifted through
+`transitiveClose` under joint canonical-consistency (`CanConsistent`).
+The `closeStep` `.less`-first tie-break would shift direction in general,
+but `canConsistent_no_conflict` rules out the bad case (a pair carrying
+both a `.less`-chain and a `.greater`-chain) under canonical-consistency.
+TC idempotence (`transitiveClose_idempotent`) is via a `numUnknown`
+potential argument: each round strictly decreases the unknown count if not
+at a fixed point, bounded by `n*n`.
+
+M3's failure remains the decisive structural finding: **`cl_prov` is a
+topological closure but not a matroid**, so it doesn't support binary-
+matroid representability and the intended Tier-2 detection scheme. See
+`docs/chain-descent-matroid.md` §8 for the closed-framework verdict.
 -/
