@@ -8,7 +8,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 - **Description**: A short description of what the theorem proves.
 - **Notes**: `@[simp]` / `@[ext]` attributes, `private`, instances, or other special properties.
 
-## FullCorrectness/Equivariance/StageA.lean
+## Archive/V4/FullCorrectness/Equivariance/StageA.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -16,7 +16,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `PathsBetween_initializePaths_eq` | 54 | For each depth-`d` slot `(s, e)`, the permuted-state's `PathsBetween` equals the σ-relabeled `PathsBetween` from the original state. | private |
 | `PathsFrom_initializePaths_eq` | 136 | For each depth-`d` slot `s`, the permuted-state's `PathsFrom` equals the σ-relabeled `PathsFrom` from the original state. | private |
 
-## FullCorrectness/Equivariance/RankStateInvariants.lean
+## Archive/V4/FullCorrectness/Equivariance/RankStateInvariants.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -27,7 +27,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `setBetween_getD_size` | 114 | `setBetween` preserves the size of every depth-row. | private |
 | `from_set_getD_size` | 147 | Folding `set!` on `fromAcc` preserves the size of every depth-row. | private |
 
-## FullCorrectness/Equivariance/ComparisonSort.lean
+## Archive/V4/FullCorrectness/Equivariance/ComparisonSort.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -55,7 +55,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `assignRanks_strong_invariant` | 1233 | Strong combined invariant for `assignRanks` used to prove `rank_eq_pos_when_distinct_prefix` and `rank_eq_within_eq_class`. | private |
 | `sorted_eq_of_perm_strict_aux` | 1995 | Auxiliary for `sortBy_eq_of_perm_strict`: equal sorted lists under strict `cmp`. | private |
 
-## FullCorrectness/Equivariance/LabelEdgesCharacterization.lean
+## Archive/V4/FullCorrectness/Equivariance/LabelEdgesCharacterization.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -64,7 +64,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `rankMap_swap_step_eq` | 126 | The rankMap double-`set!` swap step is equivalent to composing one `Equiv.swap` into the indexing permutation. | private |
 | `labelEdges_fold_terminal_aux` | 262 | Auxiliary: after processing a Nodup sublist of `finRange n`, the terminal rankMap satisfies `rankMap[v] = v`. | private |
 
-## FullCorrectness/Tiebreak.lean
+## Archive/V4/FullCorrectness/Tiebreak.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -91,7 +91,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `bTAFold_preserves_keep` | 1149 | The `bTAStep` foldl preserves the value at `keep`. | private |
 | `bTAFold_getD_promoted` | 1164 | Value at positions promoted by `bTAFold`. | private |
 
-## FullCorrectness/Equivariance/ComparePathSegments.lean
+## Archive/V4/FullCorrectness/Equivariance/ComparePathSegments.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -103,33 +103,33 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `foldl_zip_trans` | 568 | For equal-length lists `A`, `B`, `C`: if `(zip A B).foldl ≠ .gt` and `(zip B C).foldl ≠ .gt`, then `(zip A C).foldl ≠ .gt`. Proved by induction on the head pair `(cmp a b, cmp b c)` using antisym₁ and bilateral compat. Core of `orderInsensitiveListCmp_trans`. | private |
 | `foldl_zip_eq_implies_pairwise_eq` | 756 | If the `orderInsensitiveListCmp` foldl over a zipped list returns `.eq`, then every element pair in that list has `cmp = .eq` pointwise. | private |
 
-## FullCorrectness/Equivariance/CompareEquivariant.lean
+## Archive/V4/FullCorrectness/Equivariance/CompareEquivariant.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `insertSorted_map_pointwise` | 58 | Pointwise variant of `insertSorted_map`: requires `cmp (f a) (f b) = cmp a b` only for `b ∈ L`. | private; Pointwise form of `insertSorted_map` |
 
-## FullCorrectness/Equivariance/PathsAtDepthStructure.lean
+## Archive/V4/FullCorrectness/Equivariance/PathsAtDepthStructure.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `initializePaths_pathsOfLength_get_eq` | 27 | Explicit constructor form of the depth-`d` slice of `initializePaths G`. | private |
 | `initializePaths_pathsAtDepth_inner_structure` | 109 | Inner structural facts: `startVertexIndex` is constant within a `PathsFrom`, and `endVertexIndex.val`s enumerate `List.range n`. | private |
 
-## FullCorrectness/Equivariance/ChainSetInvariant.lean
+## Archive/V4/FullCorrectness/Equivariance/ChainSetInvariant.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `nested_set_chain_outside_pair_unchanged` | 266 | A nested `set!`-chain (indexed by `(start, end)` pairs) leaves positions outside the target depth unchanged. | private |
 
-## FullCorrectness/Equivariance/AssignListRankClosure.lean
+## Archive/V4/FullCorrectness/Equivariance/AssignListRankClosure.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `orderInsensitiveListCmp_self_under_f_eq` | 31 | If `cmp x (f x) = .eq` for all `x ∈ L` and `cmp` respects `f` pointwise, then `orderInsensitiveListCmp cmp L (L.map f) = .eq`. | private |
 | `mem_foldl_append_init_nil` | 625 | Membership characterization for `List.foldl (fun acc x => acc ++ f x) []`: `q ∈ result ↔ ∃ x, q ∈ f x`. | private |
 
-## FullCorrectness/Equivariance/PathEquivariance.lean
+## Archive/V4/FullCorrectness/Equivariance/PathEquivariance.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -137,7 +137,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `calculatePathRankings_body_preserves_inv` | 45 | One depth-step of the `calculatePathRankings` foldl preserves `CalcRankingsInv σ`; the inductive body lemma. | private |
 | `calculatePathRankings_σ_cell_inv_facts` | 197 | Cell-level σ-invariance of `calculatePathRankings` output: both `fromRanks` and `betweenRanks` are σ-invariant at every depth. Proved by foldl induction via `calculatePathRankings_body_preserves_inv`. | private |
 
-## FullCorrectness/Equivariance/PathEquivarianceRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/PathEquivarianceRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -151,7 +151,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `calculatePathRankings_body_preserves_rel` | 1541 | One depth-step of the relational `calculatePathRankings` foldl preserves `CalcRankingsRel`. | private |
 | `calculatePathRankings_σ_cell_rel_facts` | 1736 | Cell-level τ-relatedness of `calculatePathRankings` outputs on two τ-related inputs; proved by foldl induction. | private |
 
-## FullCorrectness/Equivariance/PathEquivarianceGeneral.lean
+## Archive/V4/FullCorrectness/Equivariance/PathEquivarianceGeneral.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -163,26 +163,26 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `calculatePathRankings_body_preserves_general` | 895 | One depth-step of the general foldl preserves the relational invariant across two Stage-A-related states. | private |
 | `calculatePathRankings_σ_cell_general_facts` | 1166 | Cell-level τ-relatedness of `calculatePathRankings` across two Stage-A-related states; proved by foldl induction. | private |
 
-## FullCorrectness/Equivariance/ConvergeLoop.lean
+## Archive/V4/FullCorrectness/Equivariance/ConvergeLoop.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `convergeOnce_fold_outside_unchanged` | 31 | The `convergeOnce` fold body leaves positions `j ∉ l` unchanged through the full `l.foldl`. | private |
 | `convergeOnce_fold_writeback` | 55 | After the fold processes position `j`, slot `j` holds `rs.getFrom (vc-1) j`. | private |
 
-## FullCorrectness/Equivariance/ConvergeLoopRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/ConvergeLoopRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `convergeOnce_fold_unchanged_when_not_flag` | 31 | If `convergeOnce`'s fold body starts with `flag = false` and reaches a `false` flag, the array is unchanged throughout. | private |
 
-## FullCorrectness/Equivariance/ConvergeLoopGeneral.lean
+## Archive/V4/FullCorrectness/Equivariance/ConvergeLoopGeneral.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `calculatePathRankings_getFrom_σ_equivariant_general` | 28 | Relational `getFrom (n-1)` for general σ: the two computations run on `initializePaths G` vs `initializePaths (G.permute σ)`. | private |
 
-## FullCorrectness/Equivariance/StageDRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/StageDRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -213,7 +213,7 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `pairsOf_τ_perm` | 397 | `pairsOf n (τ-shifted rks)` is a Perm of `pairLift τ` applied to `pairsOf n rks`. | private |
 | `pairCmp_resp_lift_under_tieFree` | 472 | `pairCmp` respects `pairLift τ` on tie-free pairs: `pairCmp (pairLift τ a) (pairLift τ b) = pairCmp a b` when `rks` is tie-free. | private |
 
-## FullCorrectness/Invariants.lean
+## Archive/V4/FullCorrectness/Invariants.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -233,20 +233,74 @@ Index of private Lean theorems, lemmas, and definitions in the GraphCanonization
 | `exists_two_distinct_q_in_T` | 1686 | If `breakTieCount t₀ vts ≥ 2`, there exist two distinct vertices with type `t₀`. | private |
 | `orderVertices_prefix_invariant_strong` | 1920 | Strong inductive: after `runFrom s vts G`, `UniquelyHeldBelow s` holds. | private |
 
-## FullCorrectness/Equivariance/RunFromRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/RunFromRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `Array.toList_eq_finRange_map` | 375 | `arr.toList = (List.finRange n).map (fun i => arr[i.val])` when `arr.size = n`. | private |
 
-## FullCorrectness/Equivariance/OrderVerticesGeneral.lean
+## Archive/V4/FullCorrectness/Equivariance/OrderVerticesGeneral.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `convergeLoop_step_σ_chain_preserved_general` | 57 | Two-graphs convergeLoop step preservation: chains through an intermediate τ-shifted typing to decompose `σ_chain = σ * τ` (τ ∈ Aut G). | private |
 
-## FullCorrectness/Main.lean
+## Archive/V4/FullCorrectness/Main.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `run_swap_invariant_fwd` | 89 | Forward direction kernel: for σ ∈ Aut G, `run zeros G = run zeros (G.permute σ)`. Used to bootstrap the (⟹) direction. | private |
+
+## Archive/V4/FullCorrectness/V4Reused.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `swapFin_invol` | 39 | — | — |
+
+## Archive/V4/LeanGraphCanonizerV4Tests.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `devSlowTests` | 8 | — | — |
+| `graphFromBitmask` | 15 | — | — |
+| `countUniqueCanonicals` | 25 | — | — |
+| `applyNatSwaps` | 37 | — | — |
+| `scrReverse` | 43 | — | — |
+| `scrRotateLeft` | 47 | — | — |
+| `scrCut` | 51 | — | — |
+| `standardScramblers` | 54 | — | — |
+| `isStableUnder` | 58 | — | — |
+| `isoVerts4` | 67 | — | — |
+| `isoG1` | 68 | — | — |
+| `isoG2` | 69 | — | — |
+| `vtPointed` | 74 | — | — |
+| `g1Pointed` | 76 | — | — |
+| `g2Pointed` | 81 | — | — |
+| `k3k3` | 89 | — | — |
+| `c6` | 92 | — | — |
+| `q3` | 102 | — | — |
+| `line4` | 109 | — | — |
+| `line5` | 111 | — | — |
+| `line6` | 113 | — | — |
+| `spider` | 121 | — | — |
+| `k3k3_alt` | 128 | — | — |
+| `allScrambleStable` | 148 | — | — |
+| `smoke_verts` | 166 | — | — |
+| `smoke_edges` | 167 | — | — |
+
+## Archive/V4/UniqueGraphsBySize.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `mkAdj` | 6 | — | — |
+
+## ChainDescent.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `witnessAdj` | 428 | — | — |
+| `witnessP0` | 433 | — | — |
+| `witnessChi` | 442 | — | — |
+| `witnessTC` | 452 | — | — |
+| `witnessTC_eq` | 467 | — | — |
+| `witnessChi_stable` | 480 | — | — |

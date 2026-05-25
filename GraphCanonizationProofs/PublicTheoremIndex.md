@@ -8,13 +8,14 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 - **Description**: A short description of what the theorem proves.
 - **Notes**: `@[simp]` / `@[ext]` attributes, `private`, instances, or other special properties.
 
-## FullCorrectness/Basic.lean
+## Archive/V4/FullCorrectness/Basic.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
+| `ext` | 20 | — | — |
 | `AdjMatrix.ext` | — | Two adjacency matrices are equal iff their adjacency functions agree pointwise. | `@[ext]` |
 
-## FullCorrectness/Permutation.lean
+## Archive/V4/FullCorrectness/Permutation.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -26,7 +27,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `AdjMatrix.permute_symm_permute` | 56 | Inverse permute then permute: `(G.permute σ⁻¹).permute σ = G`. | `@[simp]` |
 | `swapVertexLabels_eq_permute` | 67 | Bridge between concrete `swapVertexLabels` and abstract `permute` action. | — |
 
-## FullCorrectness/Automorphism.lean
+## Archive/V4/FullCorrectness/Automorphism.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -45,7 +46,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `Decidable (σ ∈ G.Aut)` | — | Instance: membership in automorphism group is decidable. | Instance |
 | `Fintype G.Aut` | — | Instance: `Aut G` is finite as a subgroup of `Equiv.Perm (Fin n)`. | Instance |
 
-## FullCorrectness/Isomorphic.lean
+## Archive/V4/FullCorrectness/Isomorphic.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -54,7 +55,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `Isomorphic_of_permute` | 58 | If `H = G.permute σ`, then `G ≃ H`. | — |
 | `Isomorphic_iff_exists_permute` | 66 | Bridge: inductive `Isomorphic ↔ ∃ σ, H = G.permute σ`. | — |
 
-## FullCorrectness/Equivariance/Actions.lean
+## Archive/V4/FullCorrectness/Equivariance/Actions.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -75,13 +76,13 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `PathState_permute_pathsOfLength_size` | 141 | Permuting a `PathState` preserves the `pathsOfLength.size`. | `@[simp]` |
 | `initializePaths_pathsOfLength_get_size` | 150 | Depth-`d` slice of `initializePaths G` is a length-`n` array. | — |
 
-## FullCorrectness/Equivariance/StageA.lean
+## Archive/V4/FullCorrectness/Equivariance/StageA.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `initializePaths_Aut_equivariant` | 204 | Main Stage A theorem: `initializePaths (G.permute σ) = PathState.permute σ (initializePaths G)` for any σ. | **Stage A** — holds for all σ, no Aut(G) hypothesis |
 
-## FullCorrectness/Equivariance/RankStateInvariants.lean
+## Archive/V4/FullCorrectness/Equivariance/RankStateInvariants.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -97,7 +98,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `RankState.σInvariant.permute_eq_self` | 363 | Extensionality: σ-invariance implies `RankState.permute σ rs = rs`. | **Extensionality** — σ-invariance ⟹ permute equals identity |
 | `calculatePathRankings_size_inv` | 414 | Size facts on `calculatePathRankings` output: `betweenRanks` is `vc×vc×vc`, `fromRanks` is `vc×vc`. | — |
 
-## FullCorrectness/Equivariance/ComparisonSort.lean
+## Archive/V4/FullCorrectness/Equivariance/ComparisonSort.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -126,7 +127,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `assignRanks_rank_eq_of_sorted_perm` | 1898 | For sorted `X.Perm Y` (under a total preorder), ranks at each position `i` agree between `assignRanks cmp X` and `assignRanks cmp Y`. | — |
 | `sortBy_eq_of_perm_strict` | 2053 | If `X.Perm Y` and `cmp` is strict on `X` (no two distinct elements are `cmp`-equal), then `sortBy cmp X = sortBy cmp Y`. | — |
 
-## FullCorrectness/Equivariance/LabelEdgesCharacterization.lean
+## Archive/V4/FullCorrectness/Equivariance/LabelEdgesCharacterization.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -135,7 +136,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `labelEdges_fold_strong` | 175 | Strong fold invariant: tracks both the cumulative permutation σ and `acc.2.getD v 0 = rankMap₀.getD (σ⁻¹ v) 0` pointwise. | — |
 | `labelEdges_terminal_rankMap_identity` | 385 | After the full foldl over `List.finRange n`, the terminal rankMap is the identity: `rankMap.getD v.val 0 = v.val`. | — |
 
-## FullCorrectness/Tiebreak.lean
+## Archive/V4/FullCorrectness/Tiebreak.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -185,7 +186,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `Decidable (σ ∈ G.TypedAut vts)` | — | Instance: membership in `TypedAut` is decidable. | Instance |
 | `Fintype (G.TypedAut vts)` | — | Instance: `G.TypedAut vts` is finite. | Instance |
 
-## FullCorrectness/Equivariance/ComparePathSegments.lean
+## Archive/V4/FullCorrectness/Equivariance/ComparePathSegments.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -198,7 +199,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `orderInsensitiveListCmp_equivCompat` | 793 | Bilateral compat lift: if `orderInsensitiveListCmp cmp L₁ L₂ = .eq`, then `L₁` and `L₂` compare identically against any third list in either argument position. Extracts pointwise class equality via `foldl_zip_eq_implies_pairwise_eq`, then applies `foldl_pointwise_eq`. | — |
 | `comparePathsBetween_total_preorder` | 904 | `comparePathsBetween` is a total preorder, assembled by lifting all four properties of `comparePathSegments_total_preorder` through the `orderInsensitiveListCmp` helpers. Compares first by `endVertexIndex` type, then by the order-insensitive list of `connectedSubPaths`. | — |
 
-## FullCorrectness/Equivariance/CompareEquivariant.lean
+## Archive/V4/FullCorrectness/Equivariance/CompareEquivariant.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -213,14 +214,14 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `betweenRankFn_σ_inv_from_cells` | 391 | Cell-level σ-invariance of a 3D table lifts to a σ-invariant function (the `betweenRankFn` projection). | — |
 | `initializePaths_σInv_via_Aut` | 415 | For σ ∈ Aut G, `initializePaths G = PathState.permute σ (initializePaths G)`. Direct corollary of Stage A. | — |
 
-## FullCorrectness/Equivariance/PathsAtDepthStructure.lean
+## Archive/V4/FullCorrectness/Equivariance/PathsAtDepthStructure.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `initializePaths_pathsAtDepth_structure` | 49 | Outer length `= n`, start-vertex enumeration `= List.range n`, inner-length conditions for a depth-`d` slice of `initializePaths G`. | — |
 | `initializePaths_allBetween_pairs_facts` | 158 | The `(start, end)` pairs of `allBetween` are Nodup and cover every `(s, e) ∈ Fin n × Fin n`. | — |
 
-## FullCorrectness/Equivariance/ChainSetInvariant.lean
+## Archive/V4/FullCorrectness/Equivariance/ChainSetInvariant.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -233,7 +234,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `setBetween_chain_cell_size_preserving` | 465 | The `setBetween` chain preserves each `(depth, start)` cell's size. | — |
 | `setBetween_chain_σInvariant` | 498 | The `betweenRanks` `setBetween`-chain preserves σ-invariance given σ-rank-closure of the assignList and `(start, end)`-pair Nodup coverage. | — |
 
-## FullCorrectness/Equivariance/AssignListRankClosure.lean
+## Archive/V4/FullCorrectness/Equivariance/AssignListRankClosure.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -246,7 +247,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `mem_allBetween_iff` | 650 | `q ∈ allBetween ↔ ∃ pf ∈ pathsAtDepth, q ∈ pf.pathsToVertex`. | — |
 | `between_assignList_σ_rank_closure` | 661 | The `betweenRanks` assignList is σ-rank-closed: for each `(q, r)` in the list, `(PathsBetween.permute σ q, r)` is also in the list. | σ ∈ Aut G form; rel: `between_assignList_σ_rank_rel`, general: `between_assignList_σ_rank_general` |
 
-## FullCorrectness/Equivariance/PathEquivariance.lean
+## Archive/V4/FullCorrectness/Equivariance/PathEquivariance.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -257,7 +258,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `calculatePathRankings_RankState_invariant` | 376 | `RankState.permute σ` is the identity on `calculatePathRankings (initializePaths G) vts` when σ ∈ Aut G and vts is σ-invariant. | σ ∈ Aut G form; relational: `calculatePathRankings_σ_equivariant_relational`, general: `calculatePathRankings_σ_equivariant_general` |
 | `calculatePathRankings_Aut_equivariant` | 384 | **Stage B**: `calculatePathRankings (PathState.permute σ (initializePaths G)) vts = RankState.permute σ (calculatePathRankings (initializePaths G) vts)`. Assembled from Stage A plus σ-invariance. | **Stage B** — requires σ ∈ Aut G |
 
-## FullCorrectness/Equivariance/PathEquivarianceRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/PathEquivarianceRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -274,7 +275,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `CalcRankingsRel` | 1515 | Loop invariant for the relational depth foldl: the two accumulators `(currentBetween₁, currentFrom₁)` and `(currentBetween₂, currentFrom₂)` are τ-related at every cell. | — |
 | `calculatePathRankings_σ_equivariant_relational` | 1859 | **Stage B-rel**: `calculatePathRankings` outputs on τ-related inputs are τ-related at every cell. Requires σ ∈ Aut G. | Relational form of `calculatePathRankings_RankState_invariant` (still requires σ ∈ Aut G) |
 
-## FullCorrectness/Equivariance/PathEquivarianceGeneral.lean
+## Archive/V4/FullCorrectness/Equivariance/PathEquivarianceGeneral.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -282,7 +283,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `between_assignList_σ_rank_general` | 642 | General σ-rank-closure for the `betweenRanks` assignList across two Stage-A-related states (no Aut G hypothesis). | General form of `between_assignList_σ_rank_closure` — drops σ ∈ Aut G hypothesis |
 | `calculatePathRankings_σ_equivariant_general` | 1286 | **Stage B-rel-general**: `calculatePathRankings` on `initializePaths (G.permute σ)` is σ-related to `calculatePathRankings` on `initializePaths G`, for any σ (no Aut G hypothesis). | **Stage B-rel-general** — fully general form (no Aut G) |
 
-## FullCorrectness/Equivariance/ConvergeLoop.lean
+## Archive/V4/FullCorrectness/Equivariance/ConvergeLoop.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -296,7 +297,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `orderVertices_Aut_equivariant` | 264 | Stage C: `orderVertices (PathState.permute σ (initializePaths G)) vts = orderVertices (initializePaths G) vts` for σ ∈ Aut(G). | **Stage C** |
 | `labelEdges_Aut_equivariant` | 279 | Stage D: `labelEdgesAccordingToRankings vts (G.permute σ) = labelEdgesAccordingToRankings vts G` for σ ∈ Aut(G); follows immediately from `G.permute σ = G`. | **Stage D** |
 
-## FullCorrectness/Equivariance/ConvergeLoopRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/ConvergeLoopRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -307,14 +308,14 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `convergeOnce_VtsInvariant_eq` | 132 | One `convergeOnce` step on τ-related arrays produces τ-related outputs. Relational analogue of `convergeOnce_Aut_invariant`. | Relational form of `convergeOnce_Aut_invariant` (still requires σ ∈ Aut G) |
 | `convergeLoop_VtsInvariant_eq` | 157 | The full `convergeLoop` preserves τ-relatedness for any fuel. Relational analogue of `convergeLoop_Aut_invariant`. | Relational form of `convergeLoop_Aut_invariant` (still requires σ ∈ Aut G) |
 
-## FullCorrectness/Equivariance/ConvergeLoopGeneral.lean
+## Archive/V4/FullCorrectness/Equivariance/ConvergeLoopGeneral.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `convergeOnce_σ_equivariant_general` | 49 | **P6.B**: `convergeOnce` on `(initializePaths (G.permute σ), vts₂)` is σ-related to `convergeOnce` on `(initializePaths G, vts₁)` for any σ. | **P6.B** — general form of `convergeOnce_Aut_invariant` |
 | `convergeLoop_σ_equivariant_general` | 78 | **P6.B loop**: The full `convergeLoop` is σ-equivariant across the two general states for any fuel. | **P6.B loop** — general form of `convergeLoop_Aut_invariant` |
 
-## FullCorrectness/Equivariance/StageDRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/StageDRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -324,7 +325,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `labelEdges_VtsInvariant_eq_distinct` | 587 | When `rks` is tie-free, `labelEdgesAccordingToRankings rks G` is invariant under `VtsInvariant` (Aut G acts trivially). | Single-graph form (Phase 3.E); two-graphs version: `labelEdges_two_graphs_σ_related` |
 | `labelEdges_two_graphs_σ_related` | 663 | Under τ-related tie-free ranks, `labelEdgesAccordingToRankings rks₂ G₂ = labelEdgesAccordingToRankings rks₁ G₁`. Stage D-rel. | **Stage D-rel** — fully general form (no Aut G) |
 
-## FullCorrectness/Equivariance/BreakTieRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/BreakTieRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -333,7 +334,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `breakTieAt_τ_related` | 75 | `breakTieAt vts₂ t₀ (τ keep)` at slot `w` equals `breakTieAt vts₁ t₀ keep` at slot `τ⁻¹ w` when inputs are τ-related. | Relational form of `breakTieAt_VtsInvariant_eq` |
 | `breakTieAt_size_eq` | 109 | τ-related `vts₁`/`vts₂` have the same size after `breakTieAt`. | — |
 
-## FullCorrectness/Invariants.lean
+## Archive/V4/FullCorrectness/Invariants.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -352,7 +353,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `getArrayRank_zeros_eq_zeros` | 2093 | `getArrayRank (Array.replicate n 0) = Array.replicate n 0`. | — |
 | `orderVertices_size_eq` | 2230 | `orderVertices (initializePaths G) vts` preserves array size. | — |
 
-## FullCorrectness/Equivariance/RunFromRelational.lean
+## Archive/V4/FullCorrectness/Equivariance/RunFromRelational.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
@@ -371,22 +372,155 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `runFrom_VtsInvariant_eq` | 725 | Corollary of the strong form: `runFrom 0 zeros G = runFrom 0 (τ-shifted zeros) G`. | Convenience corollary of `runFrom_VtsInvariant_eq_strong` (specializes to zeros, start=0) |
 | `tiebreak_choice_independent` | 746 | The canonical `orderVertices` output is independent of which tied vertex is chosen for tiebreaking; proved from `runFrom_VtsInvariant_eq`. | Phase 5 / §6 final result — leaf |
 
-## FullCorrectness/Equivariance/OrderVerticesGeneral.lean
+## Archive/V4/FullCorrectness/Equivariance/OrderVerticesGeneral.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `OrbitCompleteAfterConv_general` | 38 | Two-graphs variant of `OrbitCompleteAfterConv`: orbit-completeness for `convergeLoop (initializePaths (G.permute σ)) mid n`. | ⚠ empirically falsified 2026-04-28 (Cycle3 disjoint union, K4, odd-cycle bases) — see [OrbitCompleteAfterConv.md](OrbitCompleteAfterConv.md) |
 | `runFrom_VtsInvariant_eq_strong_general` | 134 | **P6.C**: `runFrom s vts₁ G = runFrom s vts₂ (G.permute σ)` given `OrbitCompleteAfterConv_general` and σ-relatedness of the arrays. | **P6.C** — two-graphs form of `runFrom_VtsInvariant_eq_strong` |
 
-## FullCorrectness/Equivariance/MainRelationalNotes.lean
+## Archive/V4/FullCorrectness/Equivariance/MainRelationalNotes.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `zeros_σ_invariant` | 93 | The all-zeros array is σ-invariant for any σ: `(Array.replicate n 0).getD (σ v) 0 = (Array.replicate n 0).getD v 0 = 0`. | — |
 
-## FullCorrectness/Main.lean
+## Archive/V4/FullCorrectness/Main.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `run_isomorphic_eq_new` | 150 | **(⟹) direction**: `G ≃ H → run zeros G = run zeros H`. Assembled from Stage A + Stage B-rel-general + P6.B/C + Stage D-rel. | — |
-| `run_canonical_correctness` | 182 | **Main theorem**: `G ≃ H ↔ run zeros G = run zeros H`. Combines both directions. | **Main theorem** — public API of the project |
+| `run_canonical_correctness` | 183 | **Main theorem**: `G ≃ H ↔ run zeros G = run zeros H`. Combines both directions. | **Main theorem** — public API of the project |
+
+## Archive/V4/FullCorrectness/V4Reused.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `swapVertexLabels_self_inverse` | 47 | — | — |
+| `swapVertexLabels_comm` | 51 | — | — |
+| `AdjMatrix.Isomorphic.symm` | 60 | — | — |
+| `labelEdgesAccordingToRankings_isomorphic` | 80 | — | — |
+| `run_isomorphic_to_input` | 129 | — | — |
+| `run_eq_implies_iso` | 137 | — | — |
+
+## Archive/V4/LeanGraphCanonizerV4.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `VertexType` | 5 | — | — |
+| `EdgeType` | 6 | — | — |
+| `swapVertexLabels` | 17 | — | — |
+| `Isomorphic` | 28 | — | — |
+| `adjToString` | 36 | — | — |
+| `PathSegment` | 56 | — | — |
+| `PathsBetween` | 62 | — | — |
+| `PathsFrom` | 69 | — | — |
+| `PathState` | 75 | — | — |
+| `RankState` | 78 | — | — |
+| `RankState.getBetween` | 82 | — | — |
+| `RankState.getFrom` | 85 | — | — |
+| `insertSorted` | 90 | — | — |
+| `sortBy` | 94 | — | — |
+| `orderInsensitiveListCmp` | 98 | — | — |
+| `comparePathSegments` | 107 | — | — |
+| `comparePathsBetween` | 127 | — | — |
+| `comparePathsFrom` | 137 | — | — |
+| `initializePaths` | 149 | — | — |
+| `assignRanks` | 175 | — | — |
+| `setBetween` | 188 | — | — |
+| `calculatePathRankings` | 194 | — | — |
+| `convergeOnce` | 228 | — | — |
+| `convergeLoop` | 241 | — | — |
+| `shiftAbove` | 265 | — | — |
+| `breakTiePromote` | 272 | — | — |
+| `breakTie` | 287 | — | — |
+| `orderVertices` | 292 | — | — |
+| `computeDenseRanks` | 311 | — | — |
+| `getArrayRank` | 328 | — | — |
+| `labelEdgesAccordingToRankings` | 345 | — | — |
+| `run` | 365 | — | — |
+
+## ChainDescent.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `POE` | 64 | — | — |
+| `neg` | 73 | — | — |
+| `neg_neg` | 78 | — | — |
+| `swap_less` | 88 | — | — |
+| `swap_greater` | 89 | — | — |
+| `swap_unknown` | 90 | — | — |
+| `PMatrix` | 97 | — | — |
+| `swap` | 104 | — | — |
+| `swap_swap` | 106 | — | — |
+| `Antisymmetric` | 110 | — | — |
+| `AdjMatrix` | 120 | — | — |
+| `applyGuess` | 128 | — | — |
+| `applyGuess_swap` | 138 | — | — |
+| `closeStep` | 161 | — | — |
+| `transitiveClose` | 177 | — | — |
+| `conflictMatrix` | 212 | — | — |
+| `closeStep_keeps_less` | 225 | — | — |
+| `iterate_closeStep_keeps_less` | 230 | — | — |
+| `closeStep_swap_false` | 244 | — | — |
+| `transitiveClose_conflict_less` | 254 | — | — |
+| `transitiveClose_swap_conflict_less` | 263 | — | — |
+| `transitiveClose_swap_false` | 278 | — | — |
+| `Colouring` | 290 | — | — |
+| `signature` | 295 | — | — |
+| `warmRefine` | 325 | — | — |
+| `samePartition` | 333 | — | — |
+| `refl` | 340 | — | — |
+| `symm` | 342 | — | — |
+| `trans` | 345 | — | — |
+| `refineStep_refines` | 355 | — | — |
+| `warmRefine_refines` | 371 | — | — |
+| `iterate_closeStep_fix` | 419 | — | — |
+| `cell_split_uniform_false` | 499 | — | — |
+| `refineStep_preserves_singleton` | 538 | — | — |
+| `iterate_refineStep_preserves_singleton` | 546 | — | — |
+| `signature_applyGuess_off` | 564 | — | — |
+| `signature_eq_of_samePartition` | 580 | — | — |
+| `warm_6_2` | 628 | — | — |
+| `signature_swap` | 688 | — | — |
+| `warmRefine_swap` | 717 | — | — |
+| `warmRefine_applyGuess_swap` | 745 | — | — |
+| `applyGuess_comm` | 766 | — | — |
+| `signature_agree_off` | 783 | — | — |
+| `warmRefine_agree_off'` | 806 | — | — |
+| `warmRefine_agree_off` | 871 | — | — |
+| `PartitionInvariant` | 896 | — | — |
+| `target_direction_blind` | 902 | — | — |
+| `target_agree_off` | 916 | — | — |
+| `Egnd` | 953 | — | — |
+| `mem_Egnd` | 955 | — | — |
+| `Egnd_ne` | 958 | — | — |
+| `Pof` | 968 | — | — |
+| `cl` | 978 | — | — |
+| `SingletonAt` | 992 | — | — |
+| `cl_extensive` | 997 | — | — |
+| `Pof_mono_entry_of_unknown` | 1046 | — | — |
+| `FullyDiscrete` | 1077 | — | — |
+| `cl_monotone_discrete` | 1083 | — | — |
+| `TVerticesSingletons` | 1111 | — | — |
+| `warmRefine_samePartition_T_individualised` | 1131 | — | — |
+| `cl_monotone_T_individualised` | 1203 | — | — |
+| `cl_idempotent` | 1239 | — | — |
+| `Pof_fs` | 1325 | — | — |
+| `commitsToP` | 1332 | — | — |
+| `cl_prov` | 1337 | — | — |
+| `closeStep_unknown` | 1345 | — | — |
+| `closeStep_unknown_fixpoint` | 1351 | — | — |
+| `transitiveClose_unknown` | 1356 | — | — |
+| `cl_prov_empty` | 1372 | — | — |
+| `cl_prov_extensive` | 1384 | — | — |
+| `cl_prov_M3_false` | 1417 | — | — |
+| `cl_prov_monotone` | 1445 | — | — |
+| `cl_prov_idempotent` | 1459 | — | — |
+
+## Archive/V4/UniqueGraphsBySize.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `size2` | 9 | — | — |
+| `size3` | 14 | — | — |
