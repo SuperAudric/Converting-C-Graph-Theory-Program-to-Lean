@@ -499,17 +499,46 @@ the canonical form.
   `LeafTwistSpec` statement (parallels `labelledAdj` but operates on
   bare `Fin n → Fin n → Nat` rather than `AdjMatrix`).
 
-**Remaining genuine work (Phase D''):**
-* Complete the `LinearOrder` instance on `Fin n → Fin n → Nat` (matrixLT
-  transitivity + totality + decidability), then replace the `canonForm`
-  placeholder with the actual lex-min via `Finset.min'`.
-* Prove specific `LinearOracleSpec` instances satisfy `LeafTwistSpec`
-  (this requires modelling specific linear-oracle implementations —
+**Real `canonForm` via Pi.Lex (added 2026-05-25, §15.7 + §15.8 update).**
+Phase D'' part 1:
+
+* `MatrixLex n := Lex (Fin n → Lex (Fin n → Nat))` — Lex-wrapped matrix
+  type; gets `LinearOrder` automatically from `Pi.Lex.linearOrder`
+  applied twice (no manual proof of `matrixLT` transitivity/totality
+  needed).
+* `toMatrixLex` / `ofMatrixLex` — identity coercions (Lex is a type
+  synonym).
+* `canonFormImages chain isLeaf` — extracted helper Finset of Lex'd
+  `canonAdj` values; used by both the def and the spec proofs to avoid
+  `let`-in-body unfolding issues.
+* `canonFormImages_nonempty` — nonempty under `[Nonempty
+  (DirAssignment P₀ chain.D)]`.
+* **`canonForm`** (real) — `ofMatrixLex` of `(canonFormImages
+  ...).min'`. Replaces the earlier placeholder. The `Nonempty` instance
+  is satisfied by `DirAssignment.default` when `P₀` is antisymmetric.
+* **`canonForm_mem_image`** — `canonForm = canonAdj σ` for some `σ`.
+* **`canonForm_le_canonAdj`** — `toMatrixLex (canonForm) ≤ toMatrixLex
+  (canonAdj σ)` for every `σ` (the lex-min spec, stated via the
+  `MatrixLex` order).
+
+Imports added: `Mathlib.Order.PiLex` (for `Pi.Lex.linearOrder`) and
+`Mathlib.Data.Finset.Max` (for `Finset.min'` / `min'_mem` /
+`min'_le`).
+
+**Remaining genuine work (Phase D''' and beyond):**
+* Prove specific `LinearOracleSpec` instances satisfy `LeafTwistSpec`.
+  This requires modelling specific linear-oracle implementations —
   out of scope until at least the cascade oracle's Lean model is in
-  place).
+  place. The spec is precise enough to use as a *correctness
+  contract* for any concrete oracle.
 * Tie everything back: prove that a descent guided by a valid
   `LinearOracleSpec` produces the same `canonForm` as a brute-force
-  search over all `DirAssignment`s.
+  search over all `DirAssignment`s. This is the descent's
+  high-level correctness theorem.
+* Connect `flipPair` (§15.2.1) to the descent's branch-pruning: each
+  flip generates a binary decision, and the `Z₂^d` orbit of
+  `canonForm` under the flip group describes the residual
+  exponential the linear oracle defuses.
 
 **Consequences.**
 

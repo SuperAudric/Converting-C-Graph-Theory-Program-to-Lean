@@ -1,8 +1,10 @@
+import Mathlib.Data.Finset.Max
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Pi
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Multiset.Basic
 import Mathlib.Data.List.FinRange
+import Mathlib.Order.PiLex
 import Mathlib.Logic.Function.Iterate
 
 /-!
@@ -3131,24 +3133,109 @@ def relabelMatrix {n : Nat} (π : Equiv.Perm (Fin n))
     (M : Fin n → Fin n → Nat) : Fin n → Fin n → Nat :=
   fun i j => M (π.symm i) (π.symm j)
 
-/-- **`canonForm` (placeholder)**: a canonical leaf adjacency matrix.
-The *intended* definition is the **lex-min `canonAdj` over all
-`DirAssignment`s**, computed via `Finset.min'` on the image; that
-needs a `LinearOrder` instance on `Fin n → Fin n → Nat`, which is
-genuinely substantial Mathlib glue (`Pi.Lex` two-deep). This
-placeholder picks any single `DirAssignment` via `Classical.choice` to
-give a *valid* (but not yet provably lex-minimal) canonical adjacency.
+/-- **Lex-ordered matrix type.** `Lex (Fin n → Lex (Fin n → Nat))` is
+`Fin n → Fin n → Nat` viewed under the row-major lex order. The
+`LinearOrder` instance comes automatically from `Pi.Lex.linearOrder`
+applied twice (inner: rows are sequences of `Nat`s; outer: matrix is
+a sequence of rows). -/
+abbrev MatrixLex (n : Nat) := Lex (Fin n → Lex (Fin n → Nat))
 
-Replacing this with the actual lex-min `canonAdj` (via a `LinearOrder`
-on matrices built from `matrixLT`) is the load-bearing remaining piece
-of Phase D'4. -/
-noncomputable def canonForm {n : Nat} {adj : AdjMatrix n}
+/-- Wrap a matrix into its Lex'd form. Identity at runtime (Lex is a
+type synonym). -/
+def toMatrixLex {n : Nat} (M : Fin n → Fin n → Nat) : MatrixLex n :=
+  toLex (fun i => toLex (M i))
+
+/-- Unwrap a Lex'd matrix back to a plain `Fin n → Fin n → Nat`. -/
+def ofMatrixLex {n : Nat} (M : MatrixLex n) : Fin n → Fin n → Nat :=
+  fun i j => ofLex ((ofLex M) i) j
+
+@[simp] theorem ofMatrixLex_toMatrixLex {n : Nat} (M : Fin n → Fin n → Nat) :
+    ofMatrixLex (toMatrixLex M) = M := rfl
+
+@[simp] theorem toMatrixLex_ofMatrixLex {n : Nat} (M : MatrixLex n) :
+    toMatrixLex (ofMatrixLex M) = M := rfl
+
+theorem toMatrixLex_injective {n : Nat} :
+    Function.Injective (@toMatrixLex n) := by
+  intro M₁ M₂ h
+  have := congrArg ofMatrixLex h
+  simpa using this
+
+/-- The Finset of Lex-wrapped `canonAdj` images over all
+`DirAssignment`s. Extracted as a separate def so the spec proofs can
+manipulate it cleanly (avoiding `let`-in-body unfolding pain). -/
+noncomputable def canonFormImages {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf) :
+    Finset (MatrixLex n) :=
+  (Finset.univ : Finset (DirAssignment P₀ chain.D)).image (fun σ =>
+    toMatrixLex (chain.canonAdj isLeaf σ))
+
+theorem canonFormImages_nonempty {n : Nat} {adj : AdjMatrix n}
     {P₀ : PMatrix n} {χι₀ : Colouring n}
     {sel : Colouring n → Finset (Fin n)} {k : Nat}
     (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
     [hNE : Nonempty (DirAssignment P₀ chain.D)] :
+    (canonFormImages chain isLeaf).Nonempty :=
+  Finset.image_nonempty.mpr ⟨Classical.choice hNE, Finset.mem_univ _⟩
+
+/-- **`canonForm`**: the canonical leaf adjacency matrix.
+
+This is the **lex-min `canonAdj`** over all `DirAssignment`s. The lex
+order is row-major (rows compared first, then columns within a row),
+realised via `MatrixLex` and `Finset.min'`. Replaces the earlier
+placeholder.
+
+Requires `Nonempty (DirAssignment P₀ chain.D)` so the image is
+non-empty. The default instance — `P₀` itself when `P₀` is
+antisymmetric — gives this via `DirAssignment.default`.
+
+Spec: `canonForm_mem_image` shows it's `canonAdj σ` for some `σ`;
+`canonForm_le_canonAdj` shows it's `≤` every other `canonAdj`. -/
+noncomputable def canonForm {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    [Nonempty (DirAssignment P₀ chain.D)] :
     Fin n → Fin n → Nat :=
-  chain.canonAdj isLeaf (Classical.choice hNE)
+  ofMatrixLex ((canonFormImages chain isLeaf).min'
+    (canonFormImages_nonempty chain isLeaf))
+
+/-- **`canonForm` comes from some `DirAssignment`.** The lex-min picks
+an element of the image, so it equals `canonAdj` of some `σ`. -/
+theorem canonForm_mem_image {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    [Nonempty (DirAssignment P₀ chain.D)] :
+    ∃ σ : DirAssignment P₀ chain.D,
+      canonForm chain isLeaf = chain.canonAdj isLeaf σ := by
+  have h_ne := canonFormImages_nonempty chain isLeaf
+  have h_mem := (canonFormImages chain isLeaf).min'_mem h_ne
+  obtain ⟨σ, _, hσ⟩ := Finset.mem_image.mp h_mem
+  refine ⟨σ, ?_⟩
+  unfold canonForm
+  rw [← hσ]
+  rfl
+
+/-- **`canonForm` is the lex-minimum.** For any `DirAssignment σ`, the
+canonical form (in Lex form) is `≤` `canonAdj σ` (in Lex form). The
+statement uses `MatrixLex`'s order (= row-major lex). -/
+theorem canonForm_le_canonAdj {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    [Nonempty (DirAssignment P₀ chain.D)]
+    (σ : DirAssignment P₀ chain.D) :
+    toMatrixLex (canonForm chain isLeaf) ≤ toMatrixLex (chain.canonAdj isLeaf σ) := by
+  have h_σ_mem : toMatrixLex (chain.canonAdj isLeaf σ)
+      ∈ canonFormImages chain isLeaf :=
+    Finset.mem_image.mpr ⟨σ, Finset.mem_univ _, rfl⟩
+  have h_min_le := (canonFormImages chain isLeaf).min'_le _ h_σ_mem
+  unfold canonForm
+  rw [toMatrixLex_ofMatrixLex]
+  exact h_min_le
 
 /-! ### §15.8 — Linear oracle interface (Phase D' part 5) -/
 
