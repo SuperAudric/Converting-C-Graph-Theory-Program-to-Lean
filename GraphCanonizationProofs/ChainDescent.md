@@ -454,19 +454,62 @@ Different `DirAssignment`s give different `canonAdj` matrices in
 general — the lex-min over `DirAssignment`s (Phase D'4, deferred) is
 the canonical form.
 
-**Still out of scope (Phase D'3–D'5 for a future round):**
+**Matrix lex order + Fintype + canonForm + linear-oracle interface
+(added 2026-05-25, §15.6–§15.8).** Phase D' parts 3, 4, 5:
 
-* **`MatrixLex`** — lex order on `Fin n → Fin n → Nat` matrices.
-  Likely via `Pi.Lex (· < ·) (fun _ => Pi.Lex (· < ·) (· < ·))`;
-  needs the standard order infrastructure.
-* **`canonForm`** — lex-min `canonAdj` over `DirAssignment`s. Needs
-  `Fintype (DirAssignment P₀ D)` instance (decidable constraints on
-  the constrained `PMatrix`) plus the argmin.
-* **Linear-oracle interface** — `LinearOracleSpec` function type with
-  `IsValidOracle` predicate. The spec is conceptually small; the
-  hard part is articulating what "candidate twist from one branch's
-  propagation pattern" means precisely enough to be useful in a
-  correctness proof of the descent.
+§15.6 — Lex order on matrices:
+* `matrixLT M₁ M₂` — row-major lex strict less-than: a first cell
+  `(i, j)` where the matrices disagree, with `M₁ i j < M₂ i j`.
+* **`matrixLT_irrefl`** — no matrix is `<` itself.
+* **`matrixLT_asymm`** — `M₁ < M₂ → ¬ M₂ < M₁` (asymmetry). The full
+  strict order — transitivity, decidable totality — and the
+  derived `LinearOrder` instance needed to invoke `Finset.min'` is the
+  remaining piece (see "canonForm placeholder" note below).
+
+§15.7 — Fintype + `canonForm`:
+* `instance PMatrix.fintype` — `Fin n → Fin n → POE` is finite (added
+  `Fintype POE` instance + `Mathlib.Data.Fintype.Pi` import).
+* `instance DirAssignment.fintype` — `Fintype (DirAssignment P₀ D)` via
+  `Fintype.ofInjective` on the σ-field (`noncomputable` since
+  `Fintype.ofInjective` is).
+* **`canonForm chain isLeaf`** (placeholder) — currently picks *any*
+  `DirAssignment` via `Classical.choice` (requires a `Nonempty`
+  hypothesis). The intended lex-min via `Finset.min'` requires a
+  `LinearOrder` instance on `Fin n → Fin n → Nat`, which is the
+  remaining work — `matrixLT` is defined and the asymmetry is proved,
+  but transitivity + totality + decidability for the `LinearOrder`
+  instance is left for a follow-on.
+
+§15.8 — Linear oracle interface:
+* **`LinearOracleSpec adj P₀ χι₀ sel`** — function type from
+  `(chain : SpineChain ...)` + `chain.IsLeaf` + `DirAssignment` to
+  `Option { π : Equiv.Perm (Fin n) // IsAut π adj }`. The output bundles
+  the verified automorphism with its `IsAut` proof.
+* **`some_isAut`** — when the oracle returns `some result`, the
+  permutation is an automorphism. Automatic from the bundled subtype;
+  recorded for clarity.
+* **`LeafTwistSpec oracle`** — the meaningful validity predicate: when
+  the oracle returns `some result`, the returned `π` *relates* the
+  branch `σ`'s canonical adjacency to *some other* `DirAssignment σ'`'s
+  via `relabelMatrix`. This is what justifies pruning the σ' branch.
+  Existence of σ' is existential; the oracle's actual implementation
+  (the twist-discovery algorithm) lives in the C# side per
+  `docs/chain-descent-calculator.md` §6.
+* `relabelMatrix` — generic matrix relabelling helper for the
+  `LeafTwistSpec` statement (parallels `labelledAdj` but operates on
+  bare `Fin n → Fin n → Nat` rather than `AdjMatrix`).
+
+**Remaining genuine work (Phase D''):**
+* Complete the `LinearOrder` instance on `Fin n → Fin n → Nat` (matrixLT
+  transitivity + totality + decidability), then replace the `canonForm`
+  placeholder with the actual lex-min via `Finset.min'`.
+* Prove specific `LinearOracleSpec` instances satisfy `LeafTwistSpec`
+  (this requires modelling specific linear-oracle implementations —
+  out of scope until at least the cascade oracle's Lean model is in
+  place).
+* Tie everything back: prove that a descent guided by a valid
+  `LinearOracleSpec` produces the same `canonForm` as a brute-force
+  search over all `DirAssignment`s.
 
 **Consequences.**
 

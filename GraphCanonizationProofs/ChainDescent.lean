@@ -1,4 +1,5 @@
 import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.Fintype.Pi
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Multiset.Basic
 import Mathlib.Data.List.FinRange
@@ -66,6 +67,15 @@ inductive POE
   | unknown
   | greater
 deriving DecidableEq, Repr
+
+namespace POE
+
+/-- Manual `Fintype` instance for `POE` (only three values). Needed
+downstream for `Fintype (PMatrix n)` → `Fintype (DirAssignment P₀ D)`. -/
+instance : Fintype POE :=
+  ⟨{POE.less, POE.unknown, POE.greater}, fun x => by cases x <;> decide⟩
+
+end POE
 
 namespace POE
 
@@ -3032,8 +3042,8 @@ The procedure:
 
 Different `DirAssignment`s give different canonical adjacency matrices
 in general (the order labels on `D` affect the rank assignment); the
-lex-min over `DirAssignment`s is the *canonical form* (Phase D'4,
-deferred). -/
+lex-min over `DirAssignment`s is the *canonical form* (`canonForm`,
+§15.7 — currently a placeholder). -/
 noncomputable def SpineChain.canonAdj {n : Nat} {adj : AdjMatrix n}
     {P₀ : PMatrix n} {χι₀ : Colouring n}
     {sel : Colouring n → Finset (Fin n)} {k : Nat}
@@ -3045,4 +3055,158 @@ noncomputable def SpineChain.canonAdj {n : Nat} {adj : AdjMatrix n}
     Discrete.of_samePartition
       (samePartition.symm (DirAssignment.samePartition_chain chain σ)) isLeaf
   labelledAdj (Colouring.rankPerm π hDisc) adj
+
+/-! ### §15.6 — Lex order on matrices (Phase D' part 3) -/
+
+/-- **Row-major lex strict less-than on `n × n` matrices.** `M₁ < M₂`
+means: there is a first cell `(i, j)` (lex-ordered by row then column)
+where the matrices disagree, and at that cell `M₁ i j < M₂ i j`. -/
+def matrixLT {n : Nat} (M₁ M₂ : Fin n → Fin n → Nat) : Prop :=
+  ∃ i : Fin n, ∃ j : Fin n,
+    (∀ i' : Fin n, i' < i → ∀ j' : Fin n, M₁ i' j' = M₂ i' j') ∧
+    (∀ j' : Fin n, j' < j → M₁ i j' = M₂ i j') ∧
+    M₁ i j < M₂ i j
+
+/-- `matrixLT` is irreflexive: no matrix is `<` itself. -/
+theorem matrixLT_irrefl {n : Nat} (M : Fin n → Fin n → Nat) : ¬ matrixLT M M := by
+  rintro ⟨_, _, _, _, hlt⟩
+  exact lt_irrefl _ hlt
+
+/-- `matrixLT` is asymmetric: `M₁ < M₂ → ¬ M₂ < M₁`. (Strict order.) -/
+theorem matrixLT_asymm {n : Nat} {M₁ M₂ : Fin n → Fin n → Nat}
+    (h₁ : matrixLT M₁ M₂) : ¬ matrixLT M₂ M₁ := by
+  rintro h₂
+  obtain ⟨i₁, j₁, hpre_i₁, hpre_j₁, hlt₁⟩ := h₁
+  obtain ⟨i₂, j₂, hpre_i₂, hpre_j₂, hlt₂⟩ := h₂
+  -- Two cases: i₁ < i₂, i₁ = i₂, i₁ > i₂.
+  rcases lt_trichotomy i₁ i₂ with hi | hi | hi
+  · -- i₁ < i₂: at (i₁, j₁), M₂ should equal M₁ (by hpre_i₂), contradicting hlt₁.
+    have := hpre_i₂ i₁ hi j₁
+    omega
+  · -- i₁ = i₂: case on j₁ vs j₂.
+    subst hi
+    rcases lt_trichotomy j₁ j₂ with hj | hj | hj
+    · have := hpre_j₂ j₁ hj
+      omega
+    · subst hj; omega
+    · have := hpre_j₁ j₂ hj
+      omega
+  · -- i₁ > i₂: at (i₂, j₂), M₁ should equal M₂ (by hpre_i₁), contradicting hlt₂.
+    have := hpre_i₁ i₂ hi j₂
+    omega
+
+/-! ### §15.7 — Fintype on DirAssignment + canonForm (Phase D' part 4) -/
+
+/-- `PMatrix n = Fin n → Fin n → POE` is `Fintype` because both `Fin n`
+and `POE` are. Stated explicitly because `PMatrix` is a `def` (not
+`abbrev`), so the instance doesn't transparently inherit from `Pi`. -/
+instance PMatrix.fintype {n : Nat} : Fintype (PMatrix n) := by
+  unfold PMatrix
+  infer_instance
+
+namespace DirAssignment
+
+variable {n : Nat} {P₀ : PMatrix n} {D : Finset (Fin n)}
+
+/-- **`Fintype` instance on `DirAssignment P₀ D`.** The underlying
+`PMatrix n = Fin n → Fin n → POE` is `Fintype` (since `POE` is); the
+σ-field injection then makes `DirAssignment` itself `Fintype`. The
+predicate fields (`antisym`, `agrees_off`) are Props and so add no
+inhabitants on top of distinct σ. -/
+noncomputable instance fintype : Fintype (DirAssignment P₀ D) :=
+  Fintype.ofInjective (fun σ : DirAssignment P₀ D => σ.σ) (by
+    intro x y hxy
+    apply DirAssignment.eq_of_σ_eq
+    intro i j
+    exact congrFun (congrFun hxy i) j)
+
+end DirAssignment
+
+/-- **Relabel a matrix** by a permutation: same shape as `labelledAdj`
+but works on bare `Fin n → Fin n → Nat` matrices (e.g. the output of
+`SpineChain.canonAdj`). Used in `LinearOracleSpec.LeafTwistSpec` to
+state the leaf-relabelling property without re-wrapping as an
+`AdjMatrix`. -/
+def relabelMatrix {n : Nat} (π : Equiv.Perm (Fin n))
+    (M : Fin n → Fin n → Nat) : Fin n → Fin n → Nat :=
+  fun i j => M (π.symm i) (π.symm j)
+
+/-- **`canonForm` (placeholder)**: a canonical leaf adjacency matrix.
+The *intended* definition is the **lex-min `canonAdj` over all
+`DirAssignment`s**, computed via `Finset.min'` on the image; that
+needs a `LinearOrder` instance on `Fin n → Fin n → Nat`, which is
+genuinely substantial Mathlib glue (`Pi.Lex` two-deep). This
+placeholder picks any single `DirAssignment` via `Classical.choice` to
+give a *valid* (but not yet provably lex-minimal) canonical adjacency.
+
+Replacing this with the actual lex-min `canonAdj` (via a `LinearOrder`
+on matrices built from `matrixLT`) is the load-bearing remaining piece
+of Phase D'4. -/
+noncomputable def canonForm {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    [hNE : Nonempty (DirAssignment P₀ chain.D)] :
+    Fin n → Fin n → Nat :=
+  chain.canonAdj isLeaf (Classical.choice hNE)
+
+/-! ### §15.8 — Linear oracle interface (Phase D' part 5) -/
+
+/-- **Linear oracle interface type.** Given a chain reaching a leaf and
+a `DirAssignment` (the current branch), the linear oracle returns
+either `None` (no twist discovered) or `Some` verified automorphism
+`π` of `adj`.
+
+The actual implementation — twist discovery from a single branch's
+propagation pattern — lives in the C# side (see
+`docs/chain-descent-calculator.md` §6). The Lean side just supplies the
+interface and the spec.
+
+This type is `Type` rather than `Sort` so the option's `Some` payload
+can carry the proof component of the bundled subtype. -/
+def LinearOracleSpec {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) : Type :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k), chain.IsLeaf →
+    DirAssignment P₀ chain.D →
+    Option { π : Equiv.Perm (Fin n) // IsAut π adj }
+
+namespace LinearOracleSpec
+
+variable {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+  {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+
+/-- **Soundness (subtype-level).** When the oracle returns `some
+result`, the returned permutation is an automorphism. This is
+*automatic* from the bundled subtype — recorded as a theorem for
+clarity. The stronger validity (that the returned `π` actually relates
+the branch's leaf to another leaf, justifying pruning) is captured
+by `LeafTwistSpec` below. -/
+theorem some_isAut (oracle : LinearOracleSpec adj P₀ χι₀ sel)
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D)
+    {result : { π : Equiv.Perm (Fin n) // IsAut π adj }}
+    (_ : oracle chain isLeaf σ = some result) :
+    IsAut result.val adj :=
+  result.property
+
+/-- **Leaf-twist validity.** When the oracle returns `some result`, the
+returned `π` relates the input branch `σ`'s canonical adjacency to
+*some other* `DirAssignment σ'`'s canonical adjacency via the
+labelled-relabelling action. Concretely: `labelledAdj π (canonAdj σ) =
+canonAdj σ'`. This is the property that justifies *pruning*: the two
+branches give the same canonical form modulo a known automorphism.
+
+The existence of `σ'` is the existential content; the oracle's actual
+implementation should produce it constructively, but the Lean spec
+quantifies existentially because the discovery algorithm is out of
+scope. -/
+def LeafTwistSpec (oracle : LinearOracleSpec adj P₀ χι₀ sel) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D)
+    (result : { π : Equiv.Perm (Fin n) // IsAut π adj }),
+    oracle chain isLeaf σ = some result →
+    ∃ σ' : DirAssignment P₀ chain.D,
+      relabelMatrix result.val (chain.canonAdj isLeaf σ) = chain.canonAdj isLeaf σ'
+
+end LinearOracleSpec
 
