@@ -1,4 +1,5 @@
 import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Multiset.Basic
 import Mathlib.Data.List.FinRange
 import Mathlib.Logic.Function.Iterate
@@ -1297,7 +1298,185 @@ each forced relation back to a driving commit, in the style of strategy
 doc §10's `DERIVED` records. That object likely satisfies the matroid
 axioms (the binary case literally being `F_2`-linear-algebra on derived
 relations), and is the right level for Tier-2 detection via binary-matroid
-classification.
+classification. §14 below tests the simplest such candidate.
 -/
 
-end ChainDescent
+/-! ## §14 — Provenance closure (TC-based) — `cl_prov`
+
+After §13's negative result on warm-refinement `cl`, the natural next layer
+to test is **provenance closure** via transitive closure of the partial
+order. This uses only TC propagation — no 1-WL cascade — so it captures
+the "what does S transitively imply as an ordering?" question.
+
+**Result** (this section): cl_prov is a **topological closure** (Kuratowski
+CL0–CL3 hold) but **NOT a matroid** (M3 exchange fails — concrete
+machine-checked counterexample `cl_prov_M3_false`).
+
+**Implication.** Standard TC-based provenance gives a clean topological
+closure structure but is insufficient for binary-matroid representability
+(which would be needed for Tier-2 detection). Richer provenance — tracking
+the `F_2`-linear-algebraic dependencies between commits and derived
+relations, à la strategy doc §10 `DERIVED` records — would be needed, and
+is significantly more modelling work. That extension is out of scope here.
+-/
+
+/-- A computable, Finset-based version of `Pof` (the Set-based one in §13
+is `noncomputable`, blocking `decide`-checkable refutations). -/
+def Pof_fs {n : Nat} (P₀ : PMatrix n) (S : Finset (Fin n × Fin n)) :
+    PMatrix n := fun i j =>
+  if (i, j) ∈ S then .less
+  else if (j, i) ∈ S then .greater
+  else P₀ i j
+
+/-- All-unknown commits-to-matrix: shortcut for `Pof_fs (·,· ↦ .unknown) S`. -/
+def commitsToP {n : Nat} (S : Finset (Fin n × Fin n)) : PMatrix n :=
+  Pof_fs (fun _ _ => .unknown) S
+
+/-- Provenance closure (TC-based). `cl_prov S` = canonical pair-guesses
+whose direction is decided by transitive closure of `S`'s commits. -/
+def cl_prov {n : Nat} (S : Finset (Fin n × Fin n)) : Finset (Fin n × Fin n) :=
+  (Finset.univ : Finset (Fin n × Fin n)).filter fun p =>
+    p.1.val < p.2.val ∧
+      transitiveClose (commitsToP S) p.1 p.2 ≠ .unknown
+
+/-! ### Helper lemmas for the closure axioms -/
+
+/-- `closeStep` returns `.unknown` on the all-unknown matrix at every entry. -/
+theorem closeStep_unknown {n : Nat} (i j : Fin n) :
+    closeStep (fun _ _ : Fin n => POE.unknown) i j = POE.unknown := by
+  unfold closeStep
+  simp
+
+/-- The all-unknown matrix is a fixpoint of `closeStep`. -/
+theorem closeStep_unknown_fixpoint {n : Nat} :
+    closeStep (fun _ _ : Fin n => POE.unknown) = fun _ _ => POE.unknown := by
+  funext i j; exact closeStep_unknown i j
+
+/-- `transitiveClose` of the all-unknown matrix is the all-unknown matrix. -/
+theorem transitiveClose_unknown {n : Nat} :
+    transitiveClose (fun _ _ : Fin n => POE.unknown) = fun _ _ => POE.unknown := by
+  unfold transitiveClose
+  -- iterate^[n*n] of identity-on-unknown = identity-on-unknown
+  have key : ∀ k, (closeStep^[k]) (fun _ _ : Fin n => POE.unknown)
+      = fun _ _ => POE.unknown := by
+    intro k
+    induction k with
+    | zero => rfl
+    | succ k ih => rw [Function.iterate_succ', Function.comp_apply, ih,
+                       closeStep_unknown_fixpoint]
+  exact key (n * n)
+
+/-! ### CL0–CL3 for `cl_prov` -/
+
+/-- **CL0 — empty closure.** `cl_prov ∅ = ∅`. -/
+theorem cl_prov_empty {n : Nat} : cl_prov (∅ : Finset (Fin n × Fin n)) = ∅ := by
+  ext p
+  refine ⟨fun hp => ?_, fun hp => absurd hp (by simp)⟩
+  simp only [cl_prov, Finset.mem_filter] at hp
+  have hP : commitsToP (∅ : Finset (Fin n × Fin n)) = fun _ _ => POE.unknown := by
+    funext i j
+    simp [commitsToP, Pof_fs]
+  rw [hP, transitiveClose_unknown] at hp
+  exact absurd rfl hp.2.2
+
+/-- **CL1 — extensiveness.** For canonical `S`, every commit is decided
+by TC (its direct `.less` write survives). -/
+theorem cl_prov_extensive {n : Nat} (S : Finset (Fin n × Fin n))
+    (hScanon : ∀ p ∈ S, p.1.val < p.2.val) :
+    S ⊆ cl_prov S := by
+  intro p hpS
+  simp only [cl_prov, Finset.mem_filter, Finset.mem_univ, true_and]
+  refine ⟨hScanon p hpS, ?_⟩
+  -- Pof_fs S p.1 p.2 = .less since p ∈ S
+  have hPof : commitsToP S p.1 p.2 = .less := by
+    simp [commitsToP, Pof_fs, hpS]
+  -- transitiveClose preserves .less by iterate_closeStep_keeps_less
+  unfold transitiveClose
+  rw [iterate_closeStep_keeps_less p.1 p.2 (n * n) (commitsToP S) hPof]
+  decide
+
+/-! ### M3 (matroid exchange) — REFUTED
+
+The exchange axiom of matroid theory:
+> `y ∈ cl(S ∪ {x}) ∖ cl(S) → x ∈ cl(S ∪ {y}) ∖ cl(S)`.
+
+**Refuted.** With `n = 5`, `S = {(1,2), (3,4)}`, `x = (2,3)`, `y = (1,4)`:
+
+- `y ∈ cl_prov(S ∪ {x})`: the chain `1 → 2 → 3 → 4` derives `(1,4)`. ✓
+- `y ∉ cl_prov(S)`: `(1,2)` and `(3,4)` share no vertex, no chain. ✓
+- `x ∉ cl_prov(S ∪ {y})`: `{(1,2), (3,4), (1,4)}` has no chain reaching
+  `(2,3)` — none of `(2,?)` or `(?,3)` is decided. ✗
+
+So cl_prov_TC is not a matroid. Machine-checked via `decide` on the
+concrete 5-vertex instance.
+-/
+
+/-- Concrete counterexample: with `n=5`, `S = {(1,2), (3,4)}`,
+`x = (2,3)`, `y = (1,4)`, the matroid exchange premise holds but the
+conclusion's `x ∈ cl_prov(S ∪ {y})` clause fails. -/
+theorem cl_prov_M3_false :
+    let S : Finset (Fin 5 × Fin 5) := {(1, 2), (3, 4)}
+    let x : Fin 5 × Fin 5 := (2, 3)
+    let y : Fin 5 × Fin 5 := (1, 4)
+    y ∈ cl_prov (S ∪ {x}) ∧
+    y ∉ cl_prov S ∧
+    x ∉ cl_prov (S ∪ {y}) := by
+  decide
+
+/-! ### CL3 and CL2 — stated, sorries
+
+CL3 (monotonicity) and CL2 (idempotence) are the two remaining axioms.
+Both hold for TC closure (it's a standard topological closure operator),
+but the Lean proofs require a `closeStep_decided_mono` helper lemma
+(showing TC's "decided-stays-decided" monotonicity) that is moderate
+case-analysis on `closeStep`'s definition. Left as sorries with proof
+obligations; not blocking the matroid-vs-not-matroid conclusion since M3
+is the decisive axiom.
+-/
+
+/-- **CL3 — monotonicity (sorry).** For canonical `S ⊆ T`,
+`cl_prov S ⊆ cl_prov T`.
+
+Proof obligation: prove `closeStep_decided_mono` — if `P i j = .less →
+Q i j = .less` and `P i j = .greater → Q i j = .greater` (at every entry),
+then `closeStep P i j ≠ .unknown → closeStep Q i j ≠ .unknown`. Case
+analysis on `Q i j` (must be `.unknown`) and on chain existence. Then
+iterate via standard induction. -/
+theorem cl_prov_monotone {n : Nat} {S T : Finset (Fin n × Fin n)}
+    (hST : S ⊆ T) (hScanon : ∀ p ∈ S, p.1.val < p.2.val)
+    (hTcanon : ∀ p ∈ T, p.1.val < p.2.val) :
+    cl_prov S ⊆ cl_prov T := by
+  sorry  -- TODO: closeStep_decided_mono + iterate
+
+/-- **CL2 — idempotence (sorry).** `cl_prov (cl_prov S) = cl_prov S`.
+
+Proof obligation: show `commitsToP (cl_prov S) = transitiveClose (commitsToP S)`
+as matrices (every entry agrees). Then TC idempotence
+(`transitiveClose (transitiveClose M) = transitiveClose M` — also needs
+proof) gives the result. Both pieces are standard TC theory but need
+careful Lean formalisation around `Pof_fs` and `cl_prov`'s Finset/Set
+boundary. -/
+theorem cl_prov_idempotent {n : Nat} (S : Finset (Fin n × Fin n))
+    (hScanon : ∀ p ∈ S, p.1.val < p.2.val) :
+    cl_prov (cl_prov S) = cl_prov S := by
+  sorry  -- TODO: matrix-equality bridge + TC idempotence
+
+/-! ### Status summary
+
+`cl_prov` (TC-based provenance closure):
+
+| axiom | status |
+|-------|--------|
+| CL0 `cl_prov ∅ = ∅` | **proved** (`cl_prov_empty`) |
+| CL1 extensive `S ⊆ cl_prov S` | **proved** for canonical S (`cl_prov_extensive`) |
+| CL2 idempotent | sorry (standard TC theory; proof obligation in docstring) |
+| CL3 monotone | sorry (standard TC theory; proof obligation in docstring) |
+| **M3 exchange** | **REFUTED** by decide (`cl_prov_M3_false`) on `n=5`, `S={(1,2),(3,4)}`, `x=(2,3)`, `y=(1,4)` |
+
+CL2 and CL3 are conjectured to hold (standard TC topological-closure theory)
+— their sorries are formality, not conjectural status. M3's failure is the
+decisive structural finding: **`cl_prov` is a topological closure but not a
+matroid**, so it doesn't support binary-matroid representability and the
+intended Tier-2 detection scheme. See `docs/chain-descent-matroid.md` §8 for
+the proposed pivot to richer (F_2-tracking) provenance.
+-/

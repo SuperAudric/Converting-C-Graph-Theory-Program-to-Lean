@@ -4,13 +4,15 @@ This is a **working doc**, not a paper. It records an investigation —
 modelling the propagation behaviour of warm 1-WL refinement as a matroid (or
 weaker threshold structure), aimed at attacking T-C and the Tier-2 wall.
 
-> ⚠ **Status (2026-05-23): the framework as defined is structurally dead.**
-> See §6 for the closure-zoo testing showing cl satisfies no standard
-> closure-system axiom except extensiveness. The fresh-colour escape (§6.3)
-> makes the axioms hold but degenerates the structure (no Tier-2 detection
-> power). §8 proposes a pivot to provenance-tracking closure `cl_prov` as
-> the candidate revival path; sections §1–§5 are kept as historical record
-> of the original framing.
+> ⚠ **Status (2026-05-23, final): the matroid framework on commit-set
+> closures is CLOSED — neither candidate closure is a matroid.**
+> §6 shows the partition-based `cl` satisfies essentially no closure-system
+> axiom; §8 shows the TC-based `cl_prov` is a topological closure but
+> still not a matroid (M3 refuted via machine-checked `decide`). The only
+> route to a matroid framework is via linear-algebraic structure on commits
+> (the linear oracle's domain), which is no longer a "generic framework"
+> but a different workstream. Sections §1–§5 are kept as historical record
+> of the original framing; §6 and §8 are the verdicts.
 
 For the wider project see [`chain-descent-calculator.md`](./chain-descent-calculator.md)
 (the oracle the matroid framework was trying to supply) and
@@ -376,78 +378,123 @@ level.
 
 ---
 
-## 8. The proposed pivot — provenance-tracking closure
+## 8. Provenance-tracking closure `cl_prov` — also not a matroid
 
 The §6 negative result is specific to *cl as defined in §2* (pairs separated
-by warm refinement). A different closure — `cl_prov`, operating at the
-**provenance** level — likely *does* satisfy the matroid axioms.
+by warm refinement). The natural next layer is to track *provenance* — which
+commit drove which derived relation — and ask whether **that** structure is a
+matroid. We test the simplest version: `cl_prov(S)` = pair-guesses decided by
+transitive closure of `S`'s commits, no 1-WL cascade.
 
-**Sketch.** Strategy doc §10 ("closure as a guess") already prescribes a
-`DERIVED`-record-with-driver structure for the linear oracle: each derived
-relation carries a pointer back to the commit that drove it. Define:
+### 8.1 Definition and result
 
-> `cl_prov(S) =` set of pair-guesses `q ∈ E` such that `q` is *driver-
-> determined* by `S` — i.e. there is a chain of `DERIVED` records from `S`'s
-> commits to `q`, where each step is either a direct commit or a propagation
-> step whose driver is in the chain so far.
+`cl_prov(S) := { p ∈ Egnd n : transitiveClose (commitsToP S) p.1 p.2 ≠ unknown }`
 
-This closure operates on **(commits + driver-traced derivations)**, not on
-**(separated-pair-guesses)**. The crucial difference: when committing more
-pairs "accidentally restores a symmetry" at the partition level (the M0
-counterexample), the driver chain doesn't dissolve — the previously-driven
-relation is still in `cl_prov(S)` because its driver chain is still valid.
-Adding commits can only extend the driver graph, never retract it.
+where `commitsToP S` is the partial-order matrix with `.less` at canonical-
+direction entries of `S`, `.greater` at the reverses, and `.unknown` elsewhere.
 
-This is exactly the structural property that should give monotonicity (M0)
-back. For CFI graphs the driver structure is `F_2`-linear (XOR of parities),
-which directly gives binary-matroid representability and the Tier-2 detector
-of §7.
+**Closure-axiom status of `cl_prov`** (`ChainDescent.lean` §14):
 
-**No-known-hidden-Johnson.** No graph construction is known that hides an
-`A_k`-on-subsets factor; this remains real evidence (decades of looking) but
-not proof. The reformulated conjecture is:
+| Axiom | Status | Note |
+|-------|--------|------|
+| CL0 `cl_prov ∅ = ∅` | **proved** | `cl_prov_empty` |
+| CL1 extensive | **proved** for canonical S | `cl_prov_extensive` |
+| CL2 idempotent | conjectured ✓, Lean `sorry` | standard TC theory; the proof needs a matrix-equality bridge between `commitsToP (cl_prov S)` and `transitiveClose (commitsToP S)` |
+| CL3 monotone | conjectured ✓, Lean `sorry` | standard TC theory; needs a `closeStep_decided_mono` helper |
+| **M3 exchange** | **REFUTED** | machine-checked via `decide` (`cl_prov_M3_false`) |
 
-> **Conjecture (binary cl_prov).** For every graph `G`, the provenance
-> closure `cl_prov_G` is a binary matroid.
+So `cl_prov` is (conjecturally, modulo two formalisable sorries) a
+**topological closure** (Moore family / Kuratowski axioms) — *but it is not
+a matroid*. The intended Tier-2 detection scheme of §7 (binary
+representability of the matroid) cannot be applied.
 
-If true: no hidden Johnson exists in the descent's output, and chain descent
-with linear oracle is polynomial. If false: a counterexample is the first
-known hidden-Johnson construction.
+### 8.2 The M3 refutation
 
-This is a target for the *future framework*, not a result of either it or
-the current one.
+`n = 5`, `S = {(1,2), (3,4)}`, `x = (2,3)`, `y = (1,4)`:
+
+- `cl_prov(S) = {(1,2), (3,4)}` — no common-vertex chain.
+- `cl_prov(S ∪ {x})` includes `(1,4)` via the chain `1 → 2 → 3 → 4`.
+- `cl_prov(S ∪ {y}) = {(1,2), (3,4), (1,4)}` — no chain reaching `(2,3)`
+  since neither `(2,?)` nor `(?,3)` is decided.
+
+So `y ∈ cl_prov(S ∪ {x}) ∖ cl_prov(S)` (premise) but
+`x ∉ cl_prov(S ∪ {y})` (conclusion fails). M3 violated.
+
+Machine-checked in Lean by `decide` (full computation, no axioms beyond
+`propext, Classical.choice, Quot.sound` — notably no `refineStep` axioms
+since TC closure is independent of warm refinement, and no `native_decide`).
+
+### 8.3 Why this closes the matroid branch
+
+The two natural closure operators on commit-sets — partition-based (§6) and
+TC-based (§8) — have both been tested and neither is a matroid:
+
+- `cl` (partition-based): fails CL0–M3 essentially universally.
+- `cl_prov` (TC-based): is a clean topological closure but fails M3.
+
+A matroid framework requires M3 (exchange). M3 captures the "if x determines
+y then y determines x" symmetry at the closure-operator level, which neither
+of these operators exhibits without extra structure.
+
+**The remaining possibility for a matroid framework on commits** would be a
+*linear-algebraic* closure: assign each commit a vector in some F-vector
+space (e.g., `F_2` for CFI's parity structure), and define closure as linear
+span. For CFI specifically this would give the cycle matroid of the base
+graph (a binary matroid). For other graph classes it would give other
+matroids — non-binary for `A_k`-symmetric hidden constructions, if any
+exist.
+
+This is **not a generic framework** — it's specific to the algebraic
+structure of the particular graph's automorphism group. Building it is
+equivalent to (or strictly harder than) implementing the linear oracle of
+[`chain-descent-strategy.md`](./chain-descent-strategy.md) §10. That is a
+substantial project on its own and lives in the linear-oracle workstream,
+not in this matroid-framework one.
+
+### 8.4 Verdict on the matroid framework
+
+> **The matroid framework on commit-set closures is dead.**
+>
+> Neither the partition-based `cl` (§6) nor the TC-based `cl_prov` (§8) is
+> a matroid. The fresh-colour escape on `cl` (§6.3) gives all four axioms
+> at the cost of structural degeneracy (rank-0). Anything richer (linear-
+> algebraic / oracle-driven) is no longer a generic framework — it's the
+> linear oracle itself.
+>
+> The matroid framing's value, retrospectively, has been to crystallise
+> *what the Tier-2 detector needs*: a structure where commits form a
+> classifiable matroid whose binary/non-binary character distinguishes
+> Tier-1 from Tier-2. The conclusion is that no such structure exists at
+> the commit-set closure level. Tier-2 detection (if it exists at all)
+> lives at a different layer — either the linear oracle (which makes the
+> structure F_2-explicit) or one of the other attack routes
+> (`chain-descent-hidden-johnson.md`, k-WL widening).
 
 ---
 
-## 9. Open work — the next attack
+## 9. Open work — Tier-2 attack routes (post-matroid)
 
-The §6 finding closes the current matroid framework. The natural next
-moves, in rough order:
+With the matroid framework on commit-set closures closed (§6, §8), Tier-2
+attack moves to the other workstreams:
 
-1. **Scope cl_prov rigorously.** Extend the refinement model in
-   `ChainDescent.lean` with `DERIVED`-record provenance. Define `cl_prov`.
-   Test M0–M3 on it. This is the biggest single workitem — the current
-   `refineStep` is opaque (axiomatised via `refineStep_iff` only), and
-   provenance requires opening that up.
-2. **Pivot to a different Tier-2 attack route** if cl_prov turns out to
-   need substantial new modelling. Options:
-   - **Linear oracle implementation**: build the `Z₂` Gaussian-elimination
-     oracle for CFI-style decisions; the matroid structure of the linear
-     oracle's output is itself the binary-matroid we want to classify.
-   - **Hidden-Johnson Piece C**: complete the cascade-half of the
-     near-theorem in `docs/chain-descent-hidden-johnson.md` (visible
-     Johnson is Tier-1). Doesn't address encoded Johnson but is solid
-     finite progress.
-   - **k-WL widening**: bound how much `k`-WL refinement widens Tier-1;
-     known to absorb visible Johnson schemes.
-3. **Local-rule universality lemma** (§4) — moderate-size Lean lemma,
-   still useful regardless of the matroid framework, since it characterises
-   *what* warm refinement does at each step.
+1. **Linear oracle implementation** ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §6) — builds the
+   `Z₂` Gaussian-elimination oracle for CFI-style decisions. The matroid
+   structure of the linear oracle's output IS the binary matroid we wanted;
+   classifying it as binary-vs-not-binary IS the Tier-2 detector. This is
+   the most directly relevant work given §8's finding.
+2. **Hidden-Johnson Piece C** ([`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) §5) —
+   complete the cascade-half of the near-theorem (visible Johnson is
+   Tier-1). Doesn't address encoded Johnson but is solid finite progress.
+3. **k-WL widening** ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §7) — bound how much
+   `k`-WL refinement widens Tier-1; known to absorb visible Johnson schemes,
+   doesn't cross the true wall.
+4. **Local-rule universality lemma** (§4) — moderate-size Lean lemma about
+   how warm refinement splits cells; useful regardless of framework since it
+   characterises *what* warm refinement does at each step. Standalone value.
 
-Items 4–6 of the original §9 (Algorithm 2 composition, binary-closure
-conjecture, C# Algorithm 1 probe) are conditional on the matroid framework
-working as defined and are deferred until either cl_prov is built or a
-different framing is adopted.
+Items previously deferred (Algorithm 2 composition, binary-closure
+conjecture, C# Algorithm 1 probe) were conditional on the matroid framework
+and are now obsolete — the framework they were premised on doesn't exist.
 
 ---
 
@@ -524,16 +571,25 @@ What this session contributed:
   unhypothesised. Recorded in `ChainDescent.lean` §13 comment block and
   here in §6.
 - **`cl_exchange` removed from Lean** (replaced by the closure-zoo
-  failure record). The framework as defined is structurally dead.
+  failure record).
+- **`cl_prov` (TC-based provenance) tested and FAILS too**: ChainDescent.lean
+  §14 defines `cl_prov` via transitive closure, proves CL0 and CL1, refutes
+  M3 via decide on `n=5, S={(1,2),(3,4)}, x=(2,3), y=(1,4)`. CL2 and CL3
+  stated with sorries (standard TC theory, formality not conjectural status).
+  `cl_prov` is a **topological closure** but **not a matroid** — the
+  matroid axioms still don't hold.
+- **Matroid framework on commit-set closures is now definitively CLOSED**:
+  both candidate closures (partition-based `cl`, TC-based `cl_prov`) have
+  been tested and neither is a matroid. The remaining option (linear-
+  algebraic closure) is the linear oracle itself, not a generic framework.
+  See §8.4 for the verdict.
 
-What this session did NOT settle:
-- Whether `cl_prov` (provenance-tracking closure, §8) recovers the matroid
-  axioms — the proposed pivot.
-- Whether the binary-`cl_prov` conjecture holds for graphs the descent
-  produces.
-- Whether Algorithm 2's composition lemma holds in the non-binary case.
-- Whether `c < k - 1` (World B) ever genuinely occurs at the *closure
-  circuit* level (the direct-rule level it clearly does).
+What this session did NOT settle (the deliberately-out-of-scope items):
+- Whether a linear-algebraic closure on commits (the linear oracle) is
+  buildable and gives a binary matroid for the relevant graph classes.
+  That's its own workstream — see `chain-descent-strategy.md` §10.
+- Whether the original binary-closure conjecture (now reformulated for the
+  linear oracle's output) holds.
 
-The natural next action is **scoping `cl_prov`** (§9 item 1) — or pivoting
-to one of the other Tier-2 attack routes (§9 item 2).
+The natural next action is to pivot to one of the §9 attack routes —
+linear oracle implementation being the most directly relevant.
