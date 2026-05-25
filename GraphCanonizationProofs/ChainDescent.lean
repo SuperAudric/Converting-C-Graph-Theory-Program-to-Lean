@@ -2721,5 +2721,202 @@ theorem samePartition_chain {n : Nat} {adj : AdjMatrix n}
   intro x y h
   exact (σ.agrees_off x y h).trans (chain.trace.P_agrees x y h).symm
 
+/-! #### §15.2.1 — Single-pair `Z₂` flip action -/
+
+/-- **Single-pair direction flip.** Flip the `(a, b)` and `(b, a)` entries
+of a `DirAssignment` via `POE.neg`. Antisymmetry is preserved (negating
+both sides of the antisymmetry equation consistently); `agrees_off` is
+preserved (we only touch `D × D` entries, which the `agrees_off`
+condition is vacuous on).
+
+This is the **generator of the `Z₂` group** acting on direction
+choices: one flip per unordered pair in `D`. -/
+def flipPair {n : Nat} {P₀ : PMatrix n} {D : Finset (Fin n)}
+    (σ : DirAssignment P₀ D) (a b : Fin n) (ha : a ∈ D) (hb : b ∈ D) :
+    DirAssignment P₀ D where
+  σ := fun i j =>
+    if (i = a ∧ j = b) ∨ (i = b ∧ j = a) then POE.neg (σ.σ i j) else σ.σ i j
+  antisym := by
+    intro i j
+    by_cases h : (i = a ∧ j = b) ∨ (i = b ∧ j = a)
+    · -- (i,j) is the flipped pair. Then (j,i) is too (swap branches).
+      have h' : (j = a ∧ i = b) ∨ (j = b ∧ i = a) := by
+        rcases h with ⟨hia, hjb⟩ | ⟨hib, hja⟩
+        · exact Or.inr ⟨hjb, hia⟩
+        · exact Or.inl ⟨hja, hib⟩
+      simp only [if_pos h, if_pos h']
+      -- Goal: POE.neg (σ.σ i j) = POE.neg (POE.neg (σ.σ j i)).
+      -- Rewriting σ.antisym i j on the LHS gives both sides equal.
+      rw [σ.antisym i j]
+    · -- (i,j) not flipped. Then (j,i) isn't either.
+      have h' : ¬ ((j = a ∧ i = b) ∨ (j = b ∧ i = a)) := by
+        rintro (⟨hja, hib⟩ | ⟨hjb, hia⟩)
+        · exact h (Or.inr ⟨hib, hja⟩)
+        · exact h (Or.inl ⟨hia, hjb⟩)
+      simp only [if_neg h, if_neg h']
+      exact σ.antisym i j
+  agrees_off := by
+    intro x y h
+    -- If `(x,y) = (a,b)` or `(b,a)`, both endpoints are in D — contradicting `h`.
+    have h' : ¬ ((x = a ∧ y = b) ∨ (x = b ∧ y = a)) := by
+      rintro (⟨hxa, hyb⟩ | ⟨hxb, hya⟩)
+      · rcases h with hx | hy
+        · exact hx (hxa ▸ ha)
+        · exact hy (hyb ▸ hb)
+      · rcases h with hx | hy
+        · exact hx (hxb ▸ hb)
+        · exact hy (hya ▸ ha)
+    simp only [if_neg h']
+    exact σ.agrees_off x y h
+
+/-- DirAssignment equality is determined by the matrix field — `antisym`
+and `agrees_off` are propositional and so subsumed by proof
+irrelevance. Stated in per-entry form so `ext i j` chains into the
+function-level equality directly. -/
+@[ext]
+theorem eq_of_σ_eq {σ₁ σ₂ : DirAssignment P₀ D}
+    (h : ∀ i j, σ₁.σ i j = σ₂.σ i j) : σ₁ = σ₂ := by
+  cases σ₁; cases σ₂
+  congr 1
+  funext i j
+  exact h i j
+
+/-- **Flip is an involution.** Two applications of `flipPair` to the same
+pair return the original `DirAssignment`. The Z₂ generator squares to
+the identity. -/
+theorem flipPair_idempotent {n : Nat} {P₀ : PMatrix n} {D : Finset (Fin n)}
+    (σ : DirAssignment P₀ D) (a b : Fin n) (ha : a ∈ D) (hb : b ∈ D) :
+    (σ.flipPair a b ha hb).flipPair a b ha hb = σ := by
+  ext i j
+  by_cases h : (i = a ∧ j = b) ∨ (i = b ∧ j = a)
+  · simp only [flipPair, if_pos h, POE.neg_neg]
+  · simp only [flipPair, if_neg h]
+
+/-- **Flipping preserves the partition.** A direct corollary of
+`samePartition_pair`: both `σ` and `σ.flipPair a b _ _` are
+`DirAssignment`s over the same `(P₀, D)`, so they share the spine
+partition. The order labels move; the partition doesn't. -/
+theorem flipPair_partition_invariant {n : Nat} (adj : AdjMatrix n)
+    {P₀ : PMatrix n} {D : Finset (Fin n)} {χι : Colouring n}
+    (hsing : ∀ v ∈ D, ∀ u, u ≠ v → χι u ≠ χι v)
+    (σ : DirAssignment P₀ D) (a b : Fin n) (ha : a ∈ D) (hb : b ∈ D) :
+    samePartition (warmRefine adj (σ.flipPair a b ha hb).σ χι)
+                  (warmRefine adj σ.σ χι) :=
+  samePartition_pair adj hsing (σ.flipPair a b ha hb) σ
+
+/-- **Flips on different pairs commute.** When `{a, b} ∩ {c, d} = ∅`, the
+two flip operations commute. This is the abelian-ness of the Z₂^d
+action: distinct decisions don't interfere. -/
+theorem flipPair_comm {n : Nat} {P₀ : PMatrix n} {D : Finset (Fin n)}
+    (σ : DirAssignment P₀ D) (a b c d : Fin n)
+    (ha : a ∈ D) (hb : b ∈ D) (hc : c ∈ D) (hd : d ∈ D)
+    (hac : a ≠ c) (had : a ≠ d) (hbc : b ≠ c) (hbd : b ≠ d) :
+    (σ.flipPair a b ha hb).flipPair c d hc hd
+      = (σ.flipPair c d hc hd).flipPair a b ha hb := by
+  ext i j
+  -- Each pair (a,b), (c,d) is independent — the if-then-else conditions
+  -- never both fire on the same (i,j), so the two flips commute.
+  by_cases hab : (i = a ∧ j = b) ∨ (i = b ∧ j = a)
+  · -- Hits the (a,b) pair: c,d branch doesn't fire because {a,b} ∩ {c,d} = ∅.
+    have hcd : ¬ ((i = c ∧ j = d) ∨ (i = d ∧ j = c)) := by
+      rintro (⟨hic, hjd⟩ | ⟨hid, hjc⟩) <;>
+        rcases hab with ⟨hia, hjb⟩ | ⟨hib, hja⟩
+      · exact hac (hia ▸ hic)
+      · exact hbc (hib ▸ hic)
+      · exact had (hia ▸ hid)
+      · exact hbd (hib ▸ hid)
+    simp only [flipPair, if_pos hab, if_neg hcd]
+  · by_cases hcd : (i = c ∧ j = d) ∨ (i = d ∧ j = c)
+    · simp only [flipPair, if_pos hcd, if_neg hab]
+    · simp only [flipPair, if_neg hab, if_neg hcd]
+
 end DirAssignment
+
+/-! ### §15.3 — Graph automorphisms and labelled adjacency (Phase D foundations)
+
+Toward the leaf canonical form and the linear oracle's interface, this
+sub-section defines:
+* `IsAut π adj` — predicate that a `Fin n`-permutation preserves
+  adjacency edge-by-edge.
+* `IsAut.id` / `IsAut.comp` / `IsAut.symm` — the group structure
+  (identity, composition, inverse).
+* `labelledAdj π adj` — the adjacency matrix relabelled by `π`
+  (entry `[i][j] = adj.adj (π⁻¹ i) (π⁻¹ j)`).
+* `labelledAdj_eq_of_isAut` — automorphisms preserve the labelled
+  adjacency (i.e. `labelledAdj π adj = adj.adj`).
+
+**Out of scope this round (deferred to a future Phase D'):**
+* `colourRank` (the rank-by-colour bijection on a `Discrete` colouring)
+  — needs Finset.sort machinery.
+* `SpineChain.canonAdj` (the leaf canonical labelled matrix) — needs
+  `colourRank` plus the IsLeaf machinery.
+* `canonForm` (lex-min over `DirAssignment`s).
+* `LinearOracle` interface (twist discovery from a single branch's
+  propagation pattern).
+
+These foundations are what those future pieces will build on. -/
+
+/-- A *graph automorphism* of `adj`: a `Fin n` permutation `π` preserving
+adjacency on every edge. -/
+def IsAut {n : Nat} (π : Equiv.Perm (Fin n)) (adj : AdjMatrix n) : Prop :=
+  ∀ v w, adj.adj (π v) (π w) = adj.adj v w
+
+namespace IsAut
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- The identity permutation is always an automorphism. -/
+theorem refl : IsAut (Equiv.refl (Fin n)) adj := fun _ _ => rfl
+
+/-- Composition of automorphisms is an automorphism. -/
+theorem trans {π σ : Equiv.Perm (Fin n)}
+    (hπ : IsAut π adj) (hσ : IsAut σ adj) : IsAut (π.trans σ) adj := by
+  intro v w
+  show adj.adj (σ (π v)) (σ (π w)) = adj.adj v w
+  rw [hσ, hπ]
+
+/-- The inverse of an automorphism is an automorphism. -/
+theorem symm {π : Equiv.Perm (Fin n)}
+    (hπ : IsAut π adj) : IsAut π.symm adj := by
+  intro v w
+  have h := hπ (π.symm v) (π.symm w)
+  simp only [Equiv.apply_symm_apply] at h
+  exact h.symm
+
+end IsAut
+
+/-- **Labelled adjacency**: relabel the adjacency matrix `adj` by a
+permutation `π`. The new `(i, j)` entry is the original adjacency
+between `π⁻¹ i` and `π⁻¹ j` — i.e. "vertex at canonical label `i`"
+becomes whatever vertex `π⁻¹` maps `i` to. -/
+def labelledAdj {n : Nat} (π : Equiv.Perm (Fin n)) (adj : AdjMatrix n) :
+    Fin n → Fin n → Nat :=
+  fun i j => adj.adj (π.symm i) (π.symm j)
+
+/-- **Automorphisms fix the labelled adjacency.** When `π` is an
+automorphism of `adj`, relabelling by `π` produces the same adjacency
+matrix back. Equivalently: an automorphism is invisible at the labelled
+level. The contrapositive — `labelledAdj π adj ≠ adj.adj → ¬ IsAut π
+adj` — is how the descent's verifier rejects non-automorphism candidate
+twists. -/
+theorem labelledAdj_eq_of_isAut {n : Nat} {adj : AdjMatrix n}
+    {π : Equiv.Perm (Fin n)} (h : IsAut π adj) :
+    labelledAdj π adj = adj.adj := by
+  funext i j
+  show adj.adj (π.symm i) (π.symm j) = adj.adj i j
+  have key := h (π.symm i) (π.symm j)
+  simp only [Equiv.apply_symm_apply] at key
+  exact key.symm
+
+/-- **Converse: labelledAdj-equality implies IsAut.** A π that preserves
+the labelled adjacency is an automorphism. The two characterisations
+match. -/
+theorem isAut_of_labelledAdj_eq {n : Nat} {adj : AdjMatrix n}
+    {π : Equiv.Perm (Fin n)} (h : labelledAdj π adj = adj.adj) :
+    IsAut π adj := by
+  intro v w
+  have := congrFun (congrFun h (π v)) (π w)
+  show adj.adj (π v) (π w) = adj.adj v w
+  simp only [labelledAdj, Equiv.symm_apply_apply] at this
+  exact this.symm
 

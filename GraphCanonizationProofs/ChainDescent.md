@@ -392,10 +392,53 @@ and §15.2).** Phases A and B of the deferred follow-on:
   the chain's partition. *The order-label residual is exactly the
   choice of DirAssignment; the partition is fixed.*
 
-**Still out of scope (Phases C, D for a future round):** the `Z₂` flip
-action on DirAssignments and the `Z₂^d` residual quotient (Phase C);
-the labelled-adjacency function + lex-min canonical form + linear-oracle
-interface (Phase D).
+**Z₂ flip action (added 2026-05-25, §15.2.1).** Phase C of the
+deferred follow-on:
+
+* `DirAssignment.flipPair σ a b` — flip a single pair's direction;
+  antisymmetry and `agrees_off` preserved. The **Z₂ generator** acting
+  on direction choices.
+* **`flipPair_idempotent`** — flip twice = identity.
+* **`flipPair_partition_invariant`** — flipping preserves the spine
+  partition (corollary of `samePartition_pair`).
+* **`flipPair_comm`** — flips on disjoint pairs commute (the action is
+  abelian on disjoint generators).
+
+The full `Z₂^d` quotient — the orbit structure of `DirAssignment` under
+the full flip group — is *not* formalised; it would need
+`Finset`-indexed flip-products and quotient construction. The four
+results above are the load-bearing pieces (single flip + group axioms
+for generators).
+
+**Graph automorphisms / labelled adjacency (added 2026-05-25, §15.3).**
+Phase D foundations:
+
+* `IsAut π adj` — predicate: `Fin n`-permutation `π` preserves adjacency
+  edge-by-edge.
+* `IsAut.refl` / `IsAut.trans` / `IsAut.symm` — the group structure.
+* `labelledAdj π adj` — adjacency relabelled by `π`
+  (`[i][j] = adj.adj (π⁻¹ i) (π⁻¹ j)`).
+* **`labelledAdj_eq_of_isAut`** and **`isAut_of_labelledAdj_eq`** —
+  `IsAut π adj ↔ labelledAdj π adj = adj.adj`. The two characterisations
+  match; this is what the descent's verifier uses to reject
+  non-automorphism candidate twists.
+
+These are axiom-cleaner than the spine work — only depend on
+`Quot.sound` (no `refineStep` axioms), since the theory lives entirely
+at the labelled-permutation level, not on warm refinement.
+
+**Still out of scope (deferred to a future Phase D'):**
+
+* **`colourRank`** — rank-by-colour bijection on a `Discrete` colouring,
+  needed to canonically extract a labelling from a leaf. Needs
+  `Finset.sort` machinery.
+* **`SpineChain.canonAdj`** — the leaf canonical labelled matrix
+  function. Needs `colourRank` + `IsLeaf`.
+* **`canonForm`** — lex-min over `DirAssignment`s. Needs lex order on
+  matrices.
+* **Linear-oracle interface** — `LinearOracle` predicate/structure with
+  twist-discovery spec. Needs `Aut` (now available as `IsAut`) plus a
+  notion of "candidate twist from one branch's propagation pattern."
 
 **Consequences.**
 
