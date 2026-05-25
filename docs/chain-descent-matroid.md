@@ -1,15 +1,21 @@
 # Chain descent — propagation closure as a (candidate) matroid
 
-This is a **working doc**, not a paper. It records a current investigation —
-modelling the propagation behaviour of warm 1-WL refinement as a matroid (or a
-slightly-weaker threshold structure), with the goal of attacking T-C and the
-Tier-2 wall. Sections are organised so the next reader can pick up where the
-last session stopped; conjectures and gaps are flagged.
+This is a **working doc**, not a paper. It records an investigation —
+modelling the propagation behaviour of warm 1-WL refinement as a matroid (or
+weaker threshold structure), aimed at attacking T-C and the Tier-2 wall.
+
+> ⚠ **Status (2026-05-23): the framework as defined is structurally dead.**
+> See §6 for the closure-zoo testing showing cl satisfies no standard
+> closure-system axiom except extensiveness. The fresh-colour escape (§6.3)
+> makes the axioms hold but degenerates the structure (no Tier-2 detection
+> power). §8 proposes a pivot to provenance-tracking closure `cl_prov` as
+> the candidate revival path; sections §1–§5 are kept as historical record
+> of the original framing.
 
 For the wider project see [`chain-descent-calculator.md`](./chain-descent-calculator.md)
-(the oracle the matroid framework is trying to supply) and
+(the oracle the matroid framework was trying to supply) and
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) (the
-companion attack on Tier-2 from the symmetry side).
+companion Tier-2 attack from the symmetry side).
 
 ---
 
@@ -226,152 +232,222 @@ Tier-1-only poly-time *certifier*, and Algorithm 1 + an `F_2`-rank check
 
 ---
 
-## 6. Symmetry, and what existing proofs do / don't give
+## 6. Closure-system status of `cl` — negative result (2026-05-23)
 
-**Forcing symmetry.** "`x` determines `y` ⟹ `y` determines `x`" is taken as
-the bedrock symmetry. It is *not* a direct corollary of `warm_6_2` or
-`warmRefine_agree_off` (those are about a single guess's direction-symmetry).
-The intuitive argument:
+After investigating M0–M3 and additional standard closure-system axioms via
+explicit small-case construction, the finding is that **`cl` as defined in §2
+satisfies essentially no standard closure-system axiom unhypothesised** —
+only extensiveness (CL1) survives. Every other tested property has a
+machine-verifiable witness against it (all on 4–5-vertex empty graphs with
+`χι ≡ 0`).
 
-- `x` determines `y` means there is a chain of signature-changes from
-  committing `x` to splitting `y`'s endpoints.
-- Each signature change is a count-vector flip (§4) that is locally
-  symmetric in its two endpoints.
-- Chain-reverse each flip and you get a chain from `y` to `x`.
+| Axiom | Holds? | Witness against |
+|-------|--------|------------------|
+| **CL0** `cl(∅) = ∅` | ✓ (under all-same χι) | — |
+| **CL1** extensive `S ⊆ cl S` | ✓ (conjectured, canonical `S`) | — |
+| **CL2** idempotent `cl(cl S) = cl S` | ✗ | `S = {(0,1),(2,3)}` (4-vertex) |
+| **CL3** monotone `S ⊆ T → cl S ⊆ cl T` | ✗ | M0 counterexample (below) |
+| **M3** matroid exchange | ✗ | `S={(0,1)}, x=(0,2), y=(2,3)` (below) |
+| **A3** anti-exchange (convex geometry) | ✗ | `S=∅, x=(0,1), y=(0,2)` |
+| **Sub** additivity `cl(S∪T) = cl S ∪ cl T` | ✗ | follows from monotone failure |
+| **Subsub** subadditivity `cl(S∪T) ⊆ cl S ∪ cl T` | ✗ | `S={(0,2),(1,3)}, T={(0,2),(1,4)}` (below) |
 
-This is the proof shape for exchange too (§7). It is plausible but unproved.
+The cl operator is therefore in **no** standard closure-system family
+(topological closure, matroid, convex geometry, polymatroid, Moore family,
+greedoid, etc.).
 
-**What we already have in Lean** (`ChainDescent.lean`):
+### 6.1 The three load-bearing counterexamples
 
-- `warm_6_2` — single-guess direction-symmetry at partition level.
-- `warmRefine_agree_off` / `warmRefine_agree_off'` — multi-guess
-  partition-sharing when `P`-matrices agree off a singleton-`D` set. The
-  **spine** result: all `2^d` branches share one partition.
-- `target_direction_blind`, `target_agree_off` — partition-invariant target
-  selection composes.
+**M0 / CL3 failure** (`cl S ⊄ cl T` despite `S ⊆ T`). With `n=4`, empty
+adjacency, `χι ≡ 0`:
 
-These give us: every guess set `S` induces a well-defined partition (the
-*spine partition* at `S`); hence `cl(S)` is well-defined as the set of pairs
-separated by that partition. They do *not* give exchange.
+- `S = {(0,1)}`: partition `{{0},{1},{2,3}}`. So `(0,2) ∈ cl S`.
+- `T = {(0,1), (2,3)}`: the involution `(0 2)(1 3)` is now an automorphism
+  of `(adj, Pof T)`, partition becomes `{{0,2},{1,3}}`. So `(0,2) ∉ cl T`.
 
-**What is missing for the matroid framework:**
+Adding the `(2,3)` commit *restored* the swap symmetry that `(0,1)` alone
+broke, coarsening the partition.
 
-| axiom | status (revised 2026-05-23) |
+**M3 exchange failure.** With same setup, `S = {(0,1)}, x = (0,2), y = (2,3)`:
+
+- Premise: `y = (2,3) ∈ cl(S ∪ {x}) ∖ cl S`. ✓ (`(2,3)` is forced by
+  `{(0,1),(0,2)}` but not by `{(0,1)}` alone.)
+- Conclusion needs `x ∉ cl S` — but `x = (0,2) ∈ cl({(0,1)})`. Fails.
+
+**Subadditivity failure** (`cl(S∪T) ⊄ cl S ∪ cl T`). 5-vertex empty graph,
+`χι ≡ 0`:
+
+- `S = {(0,2), (1,3)}`: partition `{{0,1},{2,3},{4}}`. `(0,1) ∉ cl S`.
+- `T = {(0,2), (1,4)}`: partition `{{0,1},{2,4},{3}}`. `(0,1) ∉ cl T`.
+- `S ∪ T = {(0,2), (1,3), (1,4)}`: vertex 0 commits to one target (`u=2`,
+  appearing in both S and T — coalesces); vertex 1 commits to two targets
+  (`u=3` from S and `u=4` from T — accumulate). Round-1 multisets diverge
+  by `.less` count (1 vs 2). `(0,1) ∈ cl(S ∪ T)`.
+
+The mechanism: per-vertex *overlap structure* between S and T is
+asymmetric, so individual sigs (which see overlap as a single `.less`
+entry) can match while joint sigs (which see overlap as one entry but
+non-overlap as two) diverge.
+
+### 6.2 Why this kills the framework as currently defined
+
+The matroid framing was built on the intuition that "if `x` determines `y`,
+then `y` determines `x`" — a local symmetry of warm refinement. That local
+symmetry is real (single-round count-vector flips are symmetric in their
+endpoints), but it does **not** lift to a closure-operator-level structural
+property. The reason, made concrete by the counterexamples: warm-refinement's
+sensitivity to *graph automorphisms of `(adj, Pof S)`* means committing more
+pairs can either create or break automorphisms in non-monotone ways. There's
+no closure operator that respects this — closure systems are by definition
+monotone.
+
+### 6.3 The fresh-colour escape, and why it's degenerate
+
+The natural fix candidate was: assume `χι` makes every "relevant" pair-guess
+endpoint a singleton, breaking the swap symmetries that cause the failure.
+This works **structurally**:
+
+| Axiom | Status under fresh-colour |
 |---|---|
-| M0 monotone | **unhypothesised version is FALSE** — counterexample below. Fresh-colour fix `cl_monotone_T_individualised` is **proved** (via the stronger `warmRefine_samePartition_T_individualised` — under T-individualised χι, `cl S = cl T` for any `S ⊆ T`, not merely `⊆`). The trivial all-discrete version `cl_monotone_discrete` is also proved but vacuous. |
-| M1 extensive | proved under fresh-colour hypothesis: `cl_extensive` |
-| M2 idempotent | **proved** under fresh-colour for both `S` and `cl S`: `cl_idempotent`. Falls out of M0 strong form with `T = cl S` — the partitions literally coincide, so `cl S = cl(cl S)` as sets. |
-| M3 exchange | sorry (Lean), the genuinely open claim |
+| M0 | ✓ (`cl_monotone_T_individualised`, actually `cl S = cl T` strictly) |
+| M1 | ✓ (`cl_extensive`) |
+| M2 | ✓ (`cl_idempotent`) |
+| M3 | vacuously ✓ (premise can't be satisfied: `cl(S∪{x}) = cl S` by M0 strong) |
 
-**M0 counterexample.** `n = 4`, `adj ≡ 0`, `χι ≡ 0`, `S = {(0,1)}`,
-`T = {(0,1), (2,3)}`. Under `Pof S`'s asymmetric single commit, vertex 0's
-round-1 signature has a `.less` entry, vertex 2's is all `.unknown` — they
-split. Under `Pof T`'s symmetric pair of commits the involution
-`(0 2)(1 3)` is an automorphism of `(adj, Pof T)`, so vertices 0 and 2 are
-kept co-classed by refineStep. So `(0, 2) ∈ cl S \ cl T` — *adding* the
-`(2,3)` commit to `S` un-forces the `(0,2)` separation by introducing a new
-swap symmetry. So `cl S ⊄ cl T`.
+But the resulting structure is **degenerate**: under full fresh-colour `χι`
+makes every canonical pair an endpoint-pair of singletons, so `cl(∅)`
+already equals the whole ground set. The matroid is rank-0 (every element a
+loop), trivially binary, indistinguishable from any other rank-0 matroid.
+**Tier-2 detection power: zero** — every graph including a hypothetical
+hidden Johnson is classified as binary (Tier-1).
 
-**Why this matters.** The matroid framing on pair-guesses with χι fixed and
-*unindividualised* is structurally wrong: the closure operator can shrink
-when the input grows, because added commits can *restore* symmetries that
-fewer commits broke. This is the opposite of the "more info → finer
-partition" intuition.
+Under *partial* fresh-colour (some endpoints individualised, others not),
+the M0 counterexample re-emerges in the unindividualised vertices. The
+fresh-colour fix only works at strengths that make it useless.
 
-**The fresh-colour fix.** Individualising the endpoints of `T` to distinct
-`χι`-singletons mechanically blocks the swap-symmetry mechanism: the
-involution `(0 2)(1 3)` is no longer a colour-preserving automorphism
-because `χι 0 ≠ χι 2` and `χι 1 ≠ χι 3` by construction.
-`iterate_refineStep_preserves_singleton` then keeps `0,1,2,3` apart
-throughout. The candidate fixed statement is `cl_monotone_T_individualised`
-in `ChainDescent.lean` §13 — under the hypothesis that every endpoint of
-every pair in `T` (the larger set) is already a `χι`-singleton, `cl S ⊆ cl T`.
-Not yet proved; this is the natural M0 target post-counterexample.
+### 6.4 What survives in Lean
 
-**Implication for the whole framework.** This may not be a fatal blow — M0
-might still hold under fresh-colour individualisation, and that *is* the
-matroid-friendly model already used by `warm_6_2` and `warmRefine_agree_off'`.
-But it does mean every matroid axiom needs the fresh-colour hypothesis
-attached explicitly. The "M0 is free" claim above was wrong.
+All of the following are **proved** in `ChainDescent.lean` §13, axiom-
+checked against the modelling axioms only (no `sorry`, no `native_decide`):
+
+- `cl_extensive` — committed pairs are forced (under fresh-colour on `S`).
+- `cl_monotone_T_individualised` — `cl S ⊆ cl T` for `S ⊆ T` (in fact
+  `cl S = cl T`) under fresh-colour on `T`.
+- `cl_monotone_discrete` — degenerate all-singletons case.
+- `cl_idempotent` — `cl(cl S) = cl S` under fresh-colour on `S ∪ cl S`.
+- `warmRefine_samePartition_T_individualised` — the strong-form M0.
+- `Pof_mono_entry_of_unknown` — entry-wise monotonicity of `Pof` itself
+  (a fact about `Pof` independent of refinement).
+
+These are kept as proved-positive content even though the framework
+overall is structurally dead — they document the *fresh-colour subset* of
+the theory cleanly, and any future revival of matroid-like-structure work
+will likely reuse them.
+
+The would-be `cl_exchange` lemma was removed (refutable as above), with a
+detailed closure-zoo failure record left in its place as a comment block.
 
 ---
 
-## 7. The Tier-2 detection scheme
+## 7. The intended Tier-2 detection scheme (would have required a matroid)
 
-Granting World A (matroid):
+This section is **conditional on the matroid framework working** — which,
+per §6, it does not at the cl-on-pair-guesses level. Kept as a record of the
+intended structure, in case a future re-defined closure (e.g. cl_prov, §8)
+recovers the matroid axioms.
 
-- The matroid is **binary** iff representable over `F_2` iff (Whitney) it has
+Were the propagation closure a matroid:
+
+- It would be **binary** iff representable over `F_2` iff (Whitney) it has
   no `U_{2,4}`, `F_7`, `F_7*`, `M(K_5)*`, or `M(K_{3,3})*` minor.
 - **Binary ⟺ CFI-shaped ⟺ linear oracle handles it.** Tier 1.
 - **Non-binary ⟺ a forbidden minor present ⟺ hidden-Johnson signature.**
   Tier 2.
 
-**The poly-time test.** Algorithm 1 outputs circuits with `(c, k)` and pool
-contents. Form the indicator vectors of those circuits over `F_2` and compute
-the rank. The matroid is binary iff the rank equals `|E| − (number of
-matroid components)`. A strict inequality is the certifying witness of a
-non-binary minor — equivalently, of Tier 2.
+**The poly-time test** (conditional). Algorithm 1 outputs circuits with
+`(c, k)` and pool contents. Form the indicator vectors of those circuits
+over `F_2` and compute the rank. A binary matroid has rank equal to
+`|E| − (number of matroid components)`. Strict inequality would be the
+certifying witness of a non-binary minor.
 
-This is **independent** of whether one can construct a hidden-Johnson graph
-explicitly (calculator §7's open construction question); it gives the
-canonizer a direct test on the input.
-
-**Caveat.** Binary representability detection from a matroid given by an
-oracle is polynomial (Truemper's algorithm); from a generating set of
-circuits it is Gaussian elimination, also polynomial. The bottleneck is
-having Algorithm 1's output, not the test.
+This idea remains the right shape for a Tier-2 detector — it just needs a
+matroid to test. The §8 pivot is about constructing one at a different
+level.
 
 ---
 
-## 8. No-known-hidden-Johnson — what to do with it
+## 8. The proposed pivot — provenance-tracking closure
 
-No graph construction is known that hides an `A_k`-on-subsets factor; this is
-real evidence (decades of looking) but not proof. The matroid framework gives
-this a precise formulation:
+The §6 negative result is specific to *cl as defined in §2* (pairs separated
+by warm refinement). A different closure — `cl_prov`, operating at the
+**provenance** level — likely *does* satisfy the matroid axioms.
 
-> **Conjecture (binary closure).** For every graph `G`, the propagation
-> closure `cl_G` is a binary matroid.
+**Sketch.** Strategy doc §10 ("closure as a guess") already prescribes a
+`DERIVED`-record-with-driver structure for the linear oracle: each derived
+relation carries a pointer back to the commit that drove it. Define:
 
-If true: no hidden Johnson exists, the descent's Tier 2 is empty, and chain
-descent with linear oracle is polynomial. If false: a counterexample is the
-first known hidden-Johnson construction.
+> `cl_prov(S) =` set of pair-guesses `q ∈ E` such that `q` is *driver-
+> determined* by `S` — i.e. there is a chain of `DERIVED` records from `S`'s
+> commits to `q`, where each step is either a direct commit or a propagation
+> step whose driver is in the chain so far.
 
-This conjecture is a *target* for the framework, not a result of it.
+This closure operates on **(commits + driver-traced derivations)**, not on
+**(separated-pair-guesses)**. The crucial difference: when committing more
+pairs "accidentally restores a symmetry" at the partition level (the M0
+counterexample), the driver chain doesn't dissolve — the previously-driven
+relation is still in `cl_prov(S)` because its driver chain is still valid.
+Adding commits can only extend the driver graph, never retract it.
+
+This is exactly the structural property that should give monotonicity (M0)
+back. For CFI graphs the driver structure is `F_2`-linear (XOR of parities),
+which directly gives binary-matroid representability and the Tier-2 detector
+of §7.
+
+**No-known-hidden-Johnson.** No graph construction is known that hides an
+`A_k`-on-subsets factor; this remains real evidence (decades of looking) but
+not proof. The reformulated conjecture is:
+
+> **Conjecture (binary cl_prov).** For every graph `G`, the provenance
+> closure `cl_prov_G` is a binary matroid.
+
+If true: no hidden Johnson exists in the descent's output, and chain descent
+with linear oracle is polynomial. If false: a counterexample is the first
+known hidden-Johnson construction.
+
+This is a target for the *future framework*, not a result of either it or
+the current one.
 
 ---
 
 ## 9. Open work — the next attack
 
-In order:
+The §6 finding closes the current matroid framework. The natural next
+moves, in rough order:
 
-1. **Lean: prove M0–M2** — short, mechanical, gives the matroid scaffolding.
-2. **Lean: attempt M3 (exchange)** via the chain-reversal induction sketched
-   in §6. Three possible outcomes:
-   - **Proved.** Propagation closure is a matroid. Record as theorem; move
-     on to §7's detection scheme.
-   - **Proved with extra hypothesis** (e.g. strengthened fresh-colour;
-     no-cancellation; quotient by parallel classes). The exact hypothesis IS
-     the structural insight; record it.
-   - **Refuted with witness.** The counterexample is a structural object
-     worth studying — it's where the matroid framing fails and a different
-     framework is needed.
-3. **Lean: the local-rule universality lemma** (§4 last paragraph) — a
-   moderate-size multiset-cardinality reformulation of `refineStep_iff`. Used
-   downstream by Algorithm 2's decoding lemma.
-4. **Paper / sketch: Algorithm 2's composition lemma** (§5.2 step 2) — does
-   composition of `c-of-k` thresholds preserve `c-of-k` shape? Test on small
-   binary and non-binary cases; if binary-only, the algorithm is Tier-1
-   certifier.
-5. **Paper / sketch: the binary-closure conjecture** (§8) — try to prove for
-   *graphs producible by the descent's output*, even if not for all graphs.
-   Connects to the construction question (calculator §7).
-6. **C# implementation probe** — implement Algorithm 1 (with the provenance
-   fix) and run on CFI(C₃), CFI(K₄), bowtie-CFI, J(5,2), and disjoint
-   mixtures. Empirically verify the matroids predicted by §4 / §7. This is
-   the cheapest sanity check on the whole framework.
+1. **Scope cl_prov rigorously.** Extend the refinement model in
+   `ChainDescent.lean` with `DERIVED`-record provenance. Define `cl_prov`.
+   Test M0–M3 on it. This is the biggest single workitem — the current
+   `refineStep` is opaque (axiomatised via `refineStep_iff` only), and
+   provenance requires opening that up.
+2. **Pivot to a different Tier-2 attack route** if cl_prov turns out to
+   need substantial new modelling. Options:
+   - **Linear oracle implementation**: build the `Z₂` Gaussian-elimination
+     oracle for CFI-style decisions; the matroid structure of the linear
+     oracle's output is itself the binary-matroid we want to classify.
+   - **Hidden-Johnson Piece C**: complete the cascade-half of the
+     near-theorem in `docs/chain-descent-hidden-johnson.md` (visible
+     Johnson is Tier-1). Doesn't address encoded Johnson but is solid
+     finite progress.
+   - **k-WL widening**: bound how much `k`-WL refinement widens Tier-1;
+     known to absorb visible Johnson schemes.
+3. **Local-rule universality lemma** (§4) — moderate-size Lean lemma,
+   still useful regardless of the matroid framework, since it characterises
+   *what* warm refinement does at each step.
 
-The exchange axiom (item 2) is the single thing that decides whether this
-framework is the right tool at all. Everything downstream depends on it.
+Items 4–6 of the original §9 (Algorithm 2 composition, binary-closure
+conjecture, C# Algorithm 1 probe) are conditional on the matroid framework
+working as defined and are deferred until either cl_prov is built or a
+different framing is adopted.
 
 ---
 
@@ -433,15 +509,31 @@ What this session contributed:
   form with `T = cl S`. Under `∀ p ∈ S ∪ cl S, SingletonAt χι p`, M0 strong
   gives `samePartition (warmRefine_S) (warmRefine_{cl S})`, so the sets of
   separated pairs literally coincide. Three lines of Lean.
+- **M3 unhypothesised REFUTED** (later same day): with `S = {(0,1)},
+  x = (0,2), y = (2,3)` on the 4-vertex empty graph, the premise holds but
+  the conclusion's `x ∉ cl S` clause fails. Under fresh-colour, M3 is
+  vacuously true (premise can't be satisfied by M0 strong-form constancy).
+- **Subadditivity also REFUTED** (same day): `cl(S ∪ T) ⊄ cl S ∪ cl T` in
+  general; witness `S = {(0,2),(1,3)}, T = {(0,2),(1,4)}` on 5-vertex empty
+  graph. Mechanism: per-vertex overlap structure between S and T is
+  asymmetric, so joint sigs accumulate `.less` entries non-symmetrically
+  even when individual sigs match.
+- **Closure-zoo survey** (same day): tested cl against topological closure,
+  matroid, convex geometry / antimatroid, polymatroid, Moore family,
+  greedoid. **cl is in none of them.** Only CL1 (extensiveness) survives
+  unhypothesised. Recorded in `ChainDescent.lean` §13 comment block and
+  here in §6.
+- **`cl_exchange` removed from Lean** (replaced by the closure-zoo
+  failure record). The framework as defined is structurally dead.
 
 What this session did NOT settle:
-- Whether exchange (M3) actually holds.
-- Whether Algorithm 2's composition lemma holds in the non-binary case.
-- Whether the binary-closure conjecture holds for graphs the descent
+- Whether `cl_prov` (provenance-tracking closure, §8) recovers the matroid
+  axioms — the proposed pivot.
+- Whether the binary-`cl_prov` conjecture holds for graphs the descent
   produces.
+- Whether Algorithm 2's composition lemma holds in the non-binary case.
 - Whether `c < k - 1` (World B) ever genuinely occurs at the *closure
-  circuit* level (vs. the direct-rule level, where it clearly does).
+  circuit* level (the direct-rule level it clearly does).
 
-The natural next action is M3 (cl_exchange) — M0, M1, M2 are now solid
-under fresh-colour individualisation. M3 is the genuinely open one; the
-chain-reversal-induction sketch from §6 is the planned approach.
+The natural next action is **scoping `cl_prov`** (§9 item 1) — or pivoting
+to one of the other Tier-2 attack routes (§9 item 2).

@@ -1250,34 +1250,54 @@ theorem cl_idempotent {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
   refine ⟨fun hp => ⟨hp.1, fun heq => hp.2 ((hsame p.1 p.2).mp heq)⟩,
           fun hp => ⟨hp.1, fun heq => hp.2 ((hsame p.1 p.2).mpr heq)⟩⟩
 
-/-! ### M3 — exchange (load-bearing, open)
+/-! ### Closure-system status of `cl` (negative result, 2026-05-23)
 
-The matroid exchange axiom: if `y` is forced by `S ∪ {x}` but not by `S` alone,
-then `x` is forced by `S ∪ {y}` but not by `S` alone. This is the "if `x`
-determines `y` then `y` determines `x`" symmetry — operating against an
-arbitrary background `S`.
+After investigating M0, M1, M2, M3 and additional standard closure axioms, the
+finding is that **`cl` as defined here satisfies essentially no standard
+closure-system axiom unhypothesised** — only extensiveness survives. Each
+failure has an explicit witness (see
+[`docs/chain-descent-matroid.md`](../docs/chain-descent-matroid.md) §6).
 
-Per [`docs/chain-descent-matroid.md`](../docs/chain-descent-matroid.md) §6, the
-intended proof is a chain-reversal induction on the propagation chain that
-takes `cl(S ∪ {x}) ∋ y`. Each refinement-round signature-discrepancy
-(`refineStep_iff`) is a *local* count-vector flip that is symmetric in its
-two endpoints; chain-reversing flip-by-flip should yield a chain in the other
-direction.
+| Axiom | Unhypothesised | Witness against |
+|-------|----------------|------------------|
+| CL0 `cl(∅) = ∅` | ✓ under all-same χι | — |
+| CL1 extensive `S ⊆ cl S` | ✓ for canonical `S` (conjectured, used as M1) | — |
+| CL2 idempotent | ✗ | `S = {(0,1),(2,3)}` (4-vertex empty graph) |
+| CL3 monotone | ✗ | `S = {(0,1)}, T = {(0,1),(2,3)}` |
+| Matroid M3 exchange | ✗ | `S = {(0,1)}, x = (0,2), y = (2,3)` |
+| Anti-exchange | ✗ | `S = ∅, x = (0,1), y = (0,2)` |
+| Additivity `cl(S∪T) = cl S ∪ cl T` | ✗ | follows from monotone failure |
+| **Subadditivity** `cl(S∪T) ⊆ cl S ∪ cl T` | ✗ | `S = {(0,2),(1,3)}, T = {(0,2),(1,4)}` |
 
-If exchange holds, the propagation closure is a matroid, and the binary /
-non-binary classification (§7 of the matroid doc) gives a polynomial Tier-2
-detection scheme. If it fails, the witness is a structural object worth
-studying — it pins exactly where the matroid framing breaks.
+So `cl` is in **no** standard closure-system family (topological closure,
+matroid, convex geometry, polymatroid, Moore family, …). The matroid framing
+is dead in its current form — see `docs/chain-descent-matroid.md` for the
+full story and the proposed pivot to provenance-tracking closure.
+
+**What survives, under fresh-colour:** when `χι` makes every endpoint of every
+pair in the relevant set a singleton, M0–M2 hold (M0 and M2 actually hold as
+*equalities*, not just `⊆`). M3 is vacuously true because the closure becomes
+constant under that hypothesis. This is captured by `cl_extensive`,
+`cl_monotone_T_individualised`, `cl_idempotent` (above). The closure is then
+structurally degenerate — a rank-0 matroid where every element is a loop —
+which is *trivially binary*, so it can't distinguish Tier-1 from Tier-2.
+Documented for completeness; no Tier-2-detection power.
+
+**M3 unhypothesised — concrete counterexample (kept as record).** With
+`n = 4`, `adj ≡ 0`, `χι ≡ 0`, `S = {(0,1)}`, `x = (0,2)`, `y = (2,3)`: the
+M3 premise holds (`y ∈ cl(S ∪ {x}) ∖ cl S`) but the conclusion's `x ∉ cl S`
+clause fails — `(0,2) ∈ cl({(0,1)})`. Not encoded as a Lean refutation
+because `warmRefine` is noncomputable (the refutation would need invariance-
+based equality arguments for the surviving direction). Manual verification
+in `docs/chain-descent-matroid.md` §6.
+
+**If matroid-like-structure work is revived in the future**, the natural
+next object to study is `cl_prov` — closure tracking the *provenance* of
+each forced relation back to a driving commit, in the style of strategy
+doc §10's `DERIVED` records. That object likely satisfies the matroid
+axioms (the binary case literally being `F_2`-linear-algebra on derived
+relations), and is the right level for Tier-2 detection via binary-matroid
+classification.
 -/
-
-/-- **M3 — exchange axiom (open).** -/
-theorem cl_exchange {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
-    (χι : Colouring n) (S : Set (Fin n × Fin n))
-    (x y : Fin n × Fin n)
-    (hScanon : S ⊆ Egnd n) (hxcanon : x ∈ Egnd n) (hycanon : y ∈ Egnd n)
-    (hy_in : y ∈ cl adj P₀ χι (S ∪ {x}))
-    (hy_out : y ∉ cl adj P₀ χι S) :
-    x ∈ cl adj P₀ χι (S ∪ {y}) ∧ x ∉ cl adj P₀ χι S := by
-  sorry  -- TODO: chain-reversal induction; the load-bearing open claim
 
 end ChainDescent
