@@ -1983,3 +1983,349 @@ topological closure but not a matroid**, so it doesn't support binary-
 matroid representability and the intended Tier-2 detection scheme. See
 `docs/chain-descent-matroid.md` §8 for the closed-framework verdict.
 -/
+
+/-! ## §15 — the descent spine
+
+Formalisation of `ChainDescent.md` §11. The headline (spine) theorem is
+
+> *With a partition-invariant target selector, the descent's per-level
+> state `(D_k, π_k, T_k)` — individualised vertex set, refined partition,
+> target cell — is identical for every branch. The tree of partitions is
+> therefore a path of length ≤ n; the `2^d` order branchings overlay a
+> single fixed partition.*
+
+This is the **reduction** the linear oracle needs: it hands the oracle
+one fixed partition and a clean `Z₂^d` residual label-optimisation
+problem instead of `2^d` distinct refinement worlds.
+
+**Per-level lemmas, all proved (§§9–11):**
+* `warmRefine_agree_off'` — partition composes across descent levels
+  (accepts `samePartition` start colourings; this is the workhorse).
+* `target_direction_blind` / `target_agree_off` — partition-invariant
+  target selection composes across the level.
+* `iterate_refineStep_preserves_singleton` — `D`-singletons stay
+  singletons under refinement.
+
+**What this section adds.** The recursion stringing the per-level lemmas
+across the whole descent. Specifically:
+
+1. `IndivStep χ D T` — *existential* witness of an individualisation step
+   (the descent's "fresh-colour the target cell"); not a function — see
+   the modelling discussion below.
+2. `DescentTrace adj P₀ χι₀ sel k D P χι` — inductive predicate "this
+   `(D, P, χι)` state is reachable by `k` descent steps."
+3. `SpineChain ... k` — a record bundling a trace with its derived data.
+4. `spine_partition_branch_independent` — the spine theorem proper: any
+   two `SpineChain`s at level `k` share both `D` and partition.
+
+**Modelling — existential individualisation.** The descent has to
+"fresh-colour" a target cell to individualise it; modelling that as a
+function (`individualise : Colouring → Finset → Colouring`) forces a
+concrete encoding fight (offsets, collision-freeness). The existential
+route bundles the witness into the inductive trace instead — at every
+descent step, a `IndivStep` is *provided* (rather than computed) as part
+of the step's data. The spine theorem then says: *however* the witnesses
+were chosen, the resulting partition is the same.
+
+Producing concrete witnesses (proving they exist) is a separate concern
+— polynomial, but not part of the spine reduction. A concrete
+`individualise` instance can be added as a follow-on if the C# side ever
+needs it.
+
+**Scope.** Spine theorem only (the headline branch-independence statement).
+Out of scope for this section:
+* the "all-`less` descent computes the whole spine" corollary;
+* leaf / order-label theory;
+* the linear oracle's `Z₂^d` reduction (the spine sets up its precondition,
+  but the reduction itself lives in a future section).
+
+See `ChainDescent.md` §11 for the full informal argument and §10 item 1
+for context. -/
+
+/-- A *witness* of one descent-step's individualisation: from a starting
+colouring `χ` and a target cell `T`, produce a new colouring `χ'` that
+singletons every vertex in `T` and refines `χ` outside `T`.
+
+We model this **existentially** (per modelling decision recorded in §15
+docstring): `IndivStep` is data, not a function. The descent's trace
+carries one such witness at each step, and the spine theorem then says
+the resulting partition is the same *however* the witnesses were chosen.
+
+**Axioms.**
+* `singletons_T` — every `v ∈ T` is a `χ'`-singleton (against every other
+  vertex, in or out of `T`). This covers all the "`x ∈ T` or `y ∈ T`"
+  inequality cases the spine induction needs.
+* `refines_off_T` — for `x, y ∉ T`, `χ'` collapses `x ≡ y` iff `χ` does.
+  Equivalently, `χ'` restricted to `Tᶜ` is partition-equal to `χ`
+  restricted to `Tᶜ`.
+
+A concrete witness function (e.g. `fun v => if v ∈ T then 2·χ v + v.val +
+offset else 2·χ v`) satisfies both axioms; we do not commit to one,
+because the spine theorem is conditional on whichever witness the trace
+carries. -/
+structure IndivStep {n : Nat} (χ : Colouring n) (T : Finset (Fin n)) where
+  χ' : Colouring n
+  singletons_T : ∀ v ∈ T, ∀ u, u ≠ v → χ' u ≠ χ' v
+  refines_off_T : ∀ x y, x ∉ T → y ∉ T → (χ' x = χ' y ↔ χ x = χ y)
+
+namespace IndivStep
+
+/-- **D-singletons are preserved.** If `χ` already singletons every vertex
+in `D`, then `χ'` singletons every vertex in `D ∪ T`. (D-vertices already
+χ-singletons stay singletons via `refines_off_T`; T-vertices are
+χ'-singletons by `singletons_T`.) Used in the trace's successor step. -/
+theorem singletons_union {n : Nat} {χ : Colouring n} {D T : Finset (Fin n)}
+    (step : IndivStep χ T)
+    (hD : ∀ v ∈ D, ∀ u, u ≠ v → χ u ≠ χ v) :
+    ∀ v ∈ D ∪ T, ∀ u, u ≠ v → step.χ' u ≠ step.χ' v := by
+  intro v hv u huv
+  rcases Finset.mem_union.mp hv with hvD | hvT
+  · -- v ∈ D.  Split on whether v ∈ T (use singletons_T) or not (use refines_off_T + hD).
+    by_cases hvT : v ∈ T
+    · exact step.singletons_T v hvT u huv
+    · by_cases huT : u ∈ T
+      · -- u ∈ T, v ∉ T.  singletons_T at u (∈ T) with v ≠ u gives χ' v ≠ χ' u.
+        exact fun e => step.singletons_T u huT v (Ne.symm huv) e.symm
+      · -- both u, v ∉ T.  refines_off_T plus hD.
+        intro e
+        have hχ : χ u = χ v := (step.refines_off_T u v huT hvT).mp e
+        exact hD v hvD u huv hχ
+  · -- v ∈ T: directly singletons_T.
+    exact step.singletons_T v hvT u huv
+
+/-- **The χι-samePartition step.** Two `IndivStep`s applied to
+`samePartition`-equal starting colourings, with the *same target* `T`,
+produce `samePartition`-equal results.
+
+This is the inductive engine for level `k → k+1` of the spine theorem:
+given the IH `samePartition π_k¹ π_k²` and two individualisation
+witnesses at level `k+1`, the level-`k+1` colourings still induce the
+same partition, so `warmRefine_agree_off'` (which only needs
+`samePartition` start colourings) chains. -/
+theorem samePartition_of_samePartition {n : Nat}
+    {χ₁ χ₂ : Colouring n} {T : Finset (Fin n)}
+    (hpart : samePartition χ₁ χ₂)
+    (step₁ : IndivStep χ₁ T) (step₂ : IndivStep χ₂ T) :
+    samePartition step₁.χ' step₂.χ' := by
+  intro x y
+  by_cases hxy : x = y
+  · subst hxy; simp
+  · by_cases hxT : x ∈ T
+    · -- x ∈ T: both sides False (χ' singletons x).
+      refine ⟨fun e => ?_, fun e => ?_⟩
+      · exact absurd e.symm (step₁.singletons_T x hxT y (Ne.symm hxy))
+      · exact absurd e.symm (step₂.singletons_T x hxT y (Ne.symm hxy))
+    · by_cases hyT : y ∈ T
+      · -- y ∈ T: both sides False.
+        refine ⟨fun e => ?_, fun e => ?_⟩
+        · exact absurd e (step₁.singletons_T y hyT x hxy)
+        · exact absurd e (step₂.singletons_T y hyT x hxy)
+      · -- both off T: chain refines_off_T through samePartition.
+        rw [step₁.refines_off_T x y hxT hyT,
+            hpart x y,
+            (step₂.refines_off_T x y hxT hyT).symm]
+
+end IndivStep
+
+/-- A `DescentTrace adj P₀ χι₀ sel k D P χι` records "the state `(D, P, χι)`
+is reachable by `k` descent steps from root `(P₀, χι₀)` using selector
+`sel`."
+
+* **zero**: at level 0 the state is the root — `D = ∅`, `P = P₀`,
+  `χι = χι₀`.
+* **succ**: at level `k+1` you have a sub-trace at level `k`, an
+  `IndivStep` witness individualising the target cell `sel (warmRefine
+  adj P χι)`, and a new matrix `P'` that agrees with `P₀` off the
+  enlarged decision set. The new state is `(D ∪ sel(…), P', step.χ')`.
+
+`P'` is any matrix obtained by writing arbitrary `POE` entries inside
+the new `D ∪ T` — i.e. any choice of guess directions. The trace is
+*existential* in the guess directions: it doesn't track which `POE`s
+were written, only that `P'` lives in the agree-off-`D ∪ T` equivalence
+class. This is exactly the hypothesis `warmRefine_agree_off'` needs. -/
+inductive DescentTrace {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) :
+    Nat → Finset (Fin n) → PMatrix n → Colouring n → Type where
+  | zero : DescentTrace adj P₀ χι₀ sel 0 ∅ P₀ χι₀
+  | succ {k : Nat} {D : Finset (Fin n)} {P : PMatrix n} {χι : Colouring n}
+      (prev : DescentTrace adj P₀ χι₀ sel k D P χι)
+      -- Individualisation operates on the **refined** partition `warmRefine
+      -- adj P χι = π_k`, not on the raw `χι`. The target cell `sel π_k` is
+      -- a function of the refined partition; individualising fresh-colours
+      -- those vertices on top of `π_k`. This matches the descent's
+      -- operational order (refine → pick target → individualise) and is
+      -- what makes the spine's `samePartition` chain (the IH gives shared
+      -- *refined* partition, which is exactly the IndivStep input).
+      (step : IndivStep (warmRefine adj P χι) (sel (warmRefine adj P χι)))
+      (P' : PMatrix n)
+      (hP' : ∀ x y,
+              (x ∉ D ∪ sel (warmRefine adj P χι) ∨
+               y ∉ D ∪ sel (warmRefine adj P χι))
+              → P' x y = P₀ x y) :
+      DescentTrace adj P₀ χι₀ sel (k+1)
+        (D ∪ sel (warmRefine adj P χι))
+        P'
+        step.χ'
+
+namespace DescentTrace
+
+/-- **The trace's colouring singletons `D`.** Inductive invariant: zero
+gives `D = ∅` (vacuous); succ enlarges `D ↦ D ∪ T` and `χι ↦ step.χ'`
+which singletons `D ∪ T` by `IndivStep.singletons_union` applied to the
+inductive hypothesis. -/
+theorem singletons {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {k : Nat} {D : Finset (Fin n)} {P : PMatrix n} {χι : Colouring n}
+    (trace : DescentTrace adj P₀ χι₀ sel k D P χι) :
+    ∀ v ∈ D, ∀ u, u ≠ v → χι u ≠ χι v := by
+  induction trace with
+  | zero => intro v hv; exact absurd hv (by simp)
+  | succ _ step _ _ ih =>
+    -- step's input is the *refined* partition `warmRefine adj P χι`. To
+    -- apply `step.singletons_union`, we lift the IH's `χ` singleton
+    -- property to `warmRefine` via singleton preservation.
+    refine step.singletons_union ?_
+    intro v hv u hu
+    exact iterate_refineStep_preserves_singleton _ _ v _ _ (ih v hv) u hu
+
+/-- **The trace's matrix agrees with `P₀` off `D`.** Inductive invariant:
+zero gives `P = P₀` (so the agreement is trivial); succ records the
+agreement explicitly in the `hP'` field. -/
+theorem P_agrees {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {k : Nat} {D : Finset (Fin n)} {P : PMatrix n} {χι : Colouring n}
+    (trace : DescentTrace adj P₀ χι₀ sel k D P χι) :
+    ∀ x y, (x ∉ D ∨ y ∉ D) → P x y = P₀ x y := by
+  induction trace with
+  | zero => intro _ _ _; rfl
+  | succ _ _ _ hP' _ => exact hP'
+
+end DescentTrace
+
+/-- A `SpineChain ... k` bundles a `DescentTrace` together with its derived
+state `(D, P, χι)`. The spine theorem is stated as branch-independence
+of two such chains. -/
+structure SpineChain {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) (k : Nat) where
+  D : Finset (Fin n)
+  P : PMatrix n
+  χι : Colouring n
+  trace : DescentTrace adj P₀ χι₀ sel k D P χι
+
+namespace SpineChain
+
+variable {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+  {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)} {k : Nat}
+
+/-- The chain's level-`k` partition: warm refinement applied to the
+chain's accumulated `(P, χι)`. -/
+noncomputable def partition (chain : SpineChain adj P₀ χι₀ sel k) :
+    Colouring n :=
+  warmRefine adj chain.P chain.χι
+
+end SpineChain
+
+/-! ### The spine theorem -/
+
+/-- Heterogeneous variant of `IndivStep.samePartition_of_samePartition` that
+accepts the targets `T₁`, `T₂` as separate parameters with an equality
+hypothesis. Used by the inductive step of the spine theorem, where the
+two targets are `sel (warmRefine adj P_prev₁ χι_prev₁)` and
+`sel (warmRefine adj P_prev₂ χι_prev₂)` — equal by partition-invariance
+of `sel` against the inductive hypothesis, but not literally equal.
+The `subst` discharges the dependency. -/
+theorem IndivStep.samePartition_het {n : Nat}
+    {χ₁ χ₂ : Colouring n} {T₁ T₂ : Finset (Fin n)}
+    (hpart : samePartition χ₁ χ₂) (hT : T₁ = T₂)
+    (step₁ : IndivStep χ₁ T₁) (step₂ : IndivStep χ₂ T₂) :
+    samePartition step₁.χ' step₂.χ' := by
+  subst hT
+  exact step₁.samePartition_of_samePartition hpart step₂
+
+/-- **The descent spine theorem (branch independence).**
+
+Any two `DescentTrace`s through `k` levels — with potentially different
+guess-direction choices and individualisation witnesses — agree on:
+
+* the accumulated decision set `D` (literal equality), and
+* the level-`k` partition (`samePartition` equality).
+
+Proof: induction on `k`. Base case `k = 0` is `samePartition.refl` after
+forced agreement of `D = ∅`, `P = P₀`, `χι = χι₀`. Inductive step `k+1`
+destructures both traces; the IH at level `k` gives partition agreement,
+which `hsel`-partition-invariance lifts to target-cell agreement; that in
+turn gives `D_{k+1}` agreement and `IndivStep.samePartition_het` lifts
+the colouring to level `k+1`; the two level-`k+1` matrices both agree
+with `P₀` off the new `D`, so they agree with each other; finally
+`warmRefine_agree_off'` discharges the inductive step.
+
+The `D = ∅`-singletoning hypothesis is the trace's first invariant
+(`DescentTrace.singletons`); the matrix agreement is the second
+(`DescentTrace.P_agrees`); both are used at level `k+1`. -/
+theorem spine_branch_independent {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} (hsel : PartitionInvariant sel) :
+    ∀ {k : Nat} {D₁ D₂ : Finset (Fin n)} {P₁ P₂ : PMatrix n}
+      {χι₁ χι₂ : Colouring n},
+      DescentTrace adj P₀ χι₀ sel k D₁ P₁ χι₁ →
+      DescentTrace adj P₀ χι₀ sel k D₂ P₂ χι₂ →
+      D₁ = D₂ ∧ samePartition (warmRefine adj P₁ χι₁) (warmRefine adj P₂ χι₂) := by
+  intro k
+  induction k with
+  | zero =>
+    intro D₁ D₂ P₁ P₂ χι₁ χι₂ t₁ t₂
+    cases t₁
+    cases t₂
+    exact ⟨rfl, samePartition.refl _⟩
+  | succ k ih =>
+    intro D₁ D₂ P₁ P₂ χι₁ χι₂ t₁ t₂
+    cases t₁ with
+    | succ prev₁ step₁ _ hP₁' =>
+      rename_i Dp₁ Pp₁ χιp₁
+      cases t₂ with
+      | succ prev₂ step₂ _ hP₂' =>
+        rename_i Dp₂ Pp₂ χιp₂
+        obtain ⟨hD_prev, hπ_prev⟩ := ih prev₁ prev₂
+        -- Targets agree by partition-invariance of `sel`.
+        have hT : sel (warmRefine adj Pp₁ χιp₁) = sel (warmRefine adj Pp₂ χιp₂) :=
+          hsel _ _ hπ_prev
+        -- New D's are equal (congruence: D_prev's agree, targets agree).
+        refine ⟨by rw [hD_prev, hT], ?_⟩
+        -- step.χ's induce equal partitions.
+        have hχ_sing : samePartition step₁.χ' step₂.χ' :=
+          IndivStep.samePartition_het hπ_prev hT step₁ step₂
+        -- Name the new decision set for clarity.
+        set Dnew := Dp₁ ∪ sel (warmRefine adj Pp₁ χιp₁) with hDnew
+        -- The two level-(k+1) matrices both agree with P₀ off Dnew, hence
+        -- with each other.
+        have hPQ : ∀ x y, (x ∉ Dnew ∨ y ∉ Dnew) → P₁ x y = P₂ x y := by
+          intro x y h
+          have h₂ : x ∉ Dp₂ ∪ sel (warmRefine adj Pp₂ χιp₂) ∨
+                    y ∉ Dp₂ ∪ sel (warmRefine adj Pp₂ χιp₂) := by
+            rcases h with hx | hy
+            · exact Or.inl (by rw [hDnew, hD_prev, hT] at hx; exact hx)
+            · exact Or.inr (by rw [hDnew, hD_prev, hT] at hy; exact hy)
+          calc P₁ x y = P₀ x y := hP₁' x y h
+            _ = P₂ x y := (hP₂' x y h₂).symm
+        -- Dnew vertices are step₁.χ'-singletons. `singletons_union` needs the
+        -- prev D singletoned in step's *input*, which is `warmRefine` of prev's
+        -- (P, χι) — lifted from `prev₁.singletons` via singleton preservation.
+        have hsing : ∀ v ∈ Dnew, ∀ u, u ≠ v → step₁.χ' u ≠ step₁.χ' v := by
+          refine step₁.singletons_union ?_
+          intro v hv u hu
+          exact iterate_refineStep_preserves_singleton _ _ v _ _
+            (prev₁.singletons v hv) u hu
+        exact warmRefine_agree_off' adj P₁ P₂ step₁.χ' step₂.χ' Dnew
+          hχ_sing hPQ hsing
+
+/-- **The spine theorem, `SpineChain` wrapper.** Convenience form of
+`spine_branch_independent` against the chain bundle: any two
+`SpineChain`s at level `k` agree on `D` and on their level-`k`
+partition. -/
+theorem SpineChain.branch_independent {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} (hsel : PartitionInvariant sel)
+    {k : Nat} (chain₁ chain₂ : SpineChain adj P₀ χι₀ sel k) :
+    chain₁.D = chain₂.D ∧ samePartition chain₁.partition chain₂.partition :=
+  spine_branch_independent hsel chain₁.trace chain₂.trace
+

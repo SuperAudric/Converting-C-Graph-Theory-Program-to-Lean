@@ -246,15 +246,12 @@ theorems:
 
 ## 10. Future work (in proving terms)
 
-1. **Formalise the descent recursion → the spine theorem (§11).** The per-level
-   lemmas are all proved (`warmRefine_agree_off'`, `target_direction_blind`,
-   `target_agree_off`); what is not yet in Lean is the recursion that strings
-   them together — a `descend` function and a model of *individualisation*
-   (fresh-colouring a target cell). The open modelling choice is how to model
-   individualisation: axiomatise an `individualize` that yields `D`-singletons
-   and preserves `samePartition`, or commit to a concrete `Nat`-offset
-   fresh-colour scheme. The payoff is one headline result: *chain descent
-   computes `O(n)` distinct refinements, not `O(2^n)`.*
+1. **Spine theorem — PROVED (§15).** `spine_branch_independent` /
+   `SpineChain.branch_independent`. Existential individualisation
+   (`IndivStep`) was the modelling choice taken; concrete-witness
+   construction is a separate follow-on (polynomial, not blocking). The
+   all-`less` corollary and the leaf/`Z₂^d` reduction are out of scope
+   for the first cut; see the §15 Lean docstring for what's deferred.
 2. **The linear oracle** — the bound-reduction lever for the abelian/CFI case.
    Needs a model layer: order labels + the `Z₂`-affine structure of forced
    relations. `warmRefine_agree_off` is the reduction that makes this well-posed
@@ -315,9 +312,38 @@ individualizing the same cell `T_k`). `warmRefine_agree_off'` then gives
 Every *step* of this induction is a proved Lean lemma: `warmRefine_agree_off'`
 (the partition composes across levels — note it accepts `samePartition` start
 colourings, which is what the IH supplies) and `target_direction_blind` /
-`target_agree_off` (the target composes). What is **not** yet formalized is the
-recursion itself — a `descend` function and a model of individualisation; see
-§10 item 1.
+`target_agree_off` (the target composes).
+
+**Status — `spine_branch_independent` is proved (§15 of `ChainDescent.lean`).**
+The recursion stringing the per-level lemmas through the descent is now in Lean.
+Modelling pieces:
+
+* `IndivStep χ T` — an *existential* witness of one descent-step's
+  individualisation: a colouring `χ'` that singletons `T` and refines `χ`
+  outside `T`. Two axioms (`singletons_T`, `refines_off_T`); not committed
+  to a concrete encoding.
+* `DescentTrace adj P₀ χι₀ sel k D P χι` — an inductive predicate (Type)
+  recording "the level-`k` state `(D, P, χι)` is reachable from
+  `(P₀, χι₀)` by `k` descent steps." `succ` carries an `IndivStep` on the
+  *refined* partition `warmRefine adj P χι` (matching the descent's
+  operational order: refine → pick target → individualise) and a fresh
+  matrix `P'` agreeing with `P₀` off the enlarged `D ∪ sel π_k`.
+* `SpineChain ... k` — a bundle of trace + derived `(D, P, χι)` fields,
+  plus a `.partition` accessor (= `warmRefine adj P χι`).
+
+Headline result: `spine_branch_independent` (trace form) /
+`SpineChain.branch_independent` (chain form). Statement: two traces /
+chains at the same level `k` agree on `D` (literal equality) and on
+their level-`k` partition (`samePartition`). The proof is induction on
+`k` chaining `warmRefine_agree_off'`, `IndivStep.samePartition_het`, and
+trace's `singletons` / `P_agrees` invariants. Axiom-clean against the
+file's existing axiom basis (`refineStep` + `refineStep_iff` + the four
+standard).
+
+**Scope kept tight on first cut:** no all-`less` corollary, no leaf/order
+theory, no `Z₂^d` reduction. Concrete witnesses of `IndivStep` are
+existence-only — producing one is polynomial but is a separate concern
+(can be added as a follow-on `instance` if the C# side needs it).
 
 **Consequences.**
 

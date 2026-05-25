@@ -483,10 +483,12 @@ reduces the descent to "polynomially many refinements + a residual `Z₂^d` labe
 optimisation", handing the linear oracle
 ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §6) one fixed
 partition to optimise over. Proved: `warmRefine_agree_off` and its composable
-form `warmRefine_agree_off'`, `target_direction_blind`, `target_agree_off`
-(`ChainDescent.lean`); the recursion stringing them into the full spine theorem
-is not yet formalised, and the spine is not yet implemented in the C# (the
-descent re-refines per node). Full account:
+form `warmRefine_agree_off'`, `target_direction_blind`, `target_agree_off`,
+and — the recursion stringing them across the descent — `spine_branch_independent`
+(trace form) / `SpineChain.branch_independent` (chain form) in
+`ChainDescent.lean` §15, under existential `IndivStep` individualisation.
+The spine is **not yet implemented in the C#** (the descent re-refines per
+node). Full account:
 [`ChainDescent.md`](../GraphCanonizationProofs/ChainDescent.md) §11.
 
 ---
