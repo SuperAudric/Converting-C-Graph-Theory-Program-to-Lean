@@ -2125,7 +2125,65 @@ theorem samePartition_of_samePartition {n : Nat}
             hpart x y,
             (step₂.refines_off_T x y hxT hyT).symm]
 
+/-- **Concrete `IndivStep` witness.** A constructive realisation of one
+individualisation step, used to prove that traces exist at every level
+(otherwise `DescentTrace` could be vacuous and the spine theorem
+trivially true).
+
+**Encoding.** `χ' v := if v ∈ T then 2 * (χ v * n + v.val) + 1 else 2 * χ v`.
+
+The parity bit marks T-membership (T-vertices get odd values, non-T
+vertices get even ones); the `χ v * n + v.val` factor is a base-`n`
+encoding of `(χ v, v.val)` and is injective because `v.val < n`. Both
+`IndivStep` axioms follow from these properties and `omega`. -/
+def default {n : Nat} (χ : Colouring n) (T : Finset (Fin n)) :
+    IndivStep χ T where
+  χ' := fun v => if v ∈ T then 2 * (χ v * n + v.val) + 1 else 2 * χ v
+  singletons_T := by
+    intro v hv u hu
+    show (if u ∈ T then 2 * (χ u * n + u.val) + 1 else 2 * χ u)
+       ≠ (if v ∈ T then 2 * (χ v * n + v.val) + 1 else 2 * χ v)
+    rw [if_pos hv]
+    by_cases huT : u ∈ T
+    · rw [if_pos huT]
+      intro heq
+      have huv : u.val < n := u.isLt
+      have hvv : v.val < n := v.isLt
+      have hn : 0 < n := lt_of_le_of_lt (Nat.zero_le _) huv
+      -- Extract base-`n` equality from the encoding.
+      have hadd : χ u * n + u.val = χ v * n + v.val := by omega
+      -- Base-`n` injectivity: high digits give χ values; low digits
+      -- give `.val`s.  Use Nat division.
+      have huval : (χ u * n + u.val) / n = χ u := by
+        rw [Nat.add_comm, Nat.add_mul_div_right _ _ hn,
+            Nat.div_eq_of_lt huv, Nat.zero_add]
+      have hvval : (χ v * n + v.val) / n = χ v := by
+        rw [Nat.add_comm, Nat.add_mul_div_right _ _ hn,
+            Nat.div_eq_of_lt hvv, Nat.zero_add]
+      have hχ_eq : χ u = χ v := by rw [← huval, hadd, hvval]
+      rw [hχ_eq] at hadd
+      have hval_eq : u.val = v.val := by omega
+      exact hu (Fin.ext hval_eq)
+    · rw [if_neg huT]
+      -- Parity mismatch: `2 * χ u` is even; `2 * (…) + 1` is odd.
+      intro h
+      omega
+  refines_off_T := by
+    intro x y hx hy
+    show ((if x ∈ T then 2 * (χ x * n + x.val) + 1 else 2 * χ x)
+        = (if y ∈ T then 2 * (χ y * n + y.val) + 1 else 2 * χ y))
+        ↔ χ x = χ y
+    rw [if_neg hx, if_neg hy]
+    constructor
+    · intro h; omega
+    · intro h; rw [h]
+
 end IndivStep
+
+/-- Convenience: every `(χ, T)` admits an `IndivStep` (the `default` one).
+Ensures `DescentTrace` is non-vacuous at every level. -/
+instance {n : Nat} (χ : Colouring n) (T : Finset (Fin n)) :
+    Nonempty (IndivStep χ T) := ⟨IndivStep.default χ T⟩
 
 /-- A `DescentTrace adj P₀ χι₀ sel k D P χι` records "the state `(D, P, χι)`
 is reachable by `k` descent steps from root `(P₀, χι₀)` using selector
@@ -2328,4 +2386,84 @@ theorem SpineChain.branch_independent {n : Nat} {adj : AdjMatrix n}
     {k : Nat} (chain₁ chain₂ : SpineChain adj P₀ χι₀ sel k) :
     chain₁.D = chain₂.D ∧ samePartition chain₁.partition chain₂.partition :=
   spine_branch_independent hsel chain₁.trace chain₂.trace
+
+/-! ### Constructive existence — a concrete reference chain
+
+The spine theorem above is conditional on the existence of `IndivStep`
+witnesses (bundled in `DescentTrace`). To prove the theorem isn't vacuous
+— and to give the C# side a *reference* level-`k` partition every chain
+must match — we construct a concrete `defaultSpineChain` using
+`IndivStep.default` at every level and `P = P₀` throughout (which
+trivially agrees with `P₀` off any `D`, satisfying the trace's `hP'`
+clause).
+
+This is the "all-`less` corollary" in its honest form: with the
+existential `IndivStep` model and arbitrary `P'`-agrees-off-`D`, the
+cleanest reference is "no guesses written, default individualisation."
+By `spine_branch_independent`, any other chain at level `k` shares this
+reference's partition.
+
+Producing an actually-all-`.less` matrix `P` would just be a different
+choice inside the same equivalence class — same partition by spine. -/
+
+/-- The level-`k` colouring of the default chain: iterate "refine then
+individualise via `IndivStep.default`," starting from `χι₀`. The
+matrix is held fixed at `P₀` throughout. -/
+noncomputable def defaultColouring {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) : Nat → Colouring n
+  | 0 => χι₀
+  | k+1 =>
+    let χι := defaultColouring adj P₀ χι₀ sel k
+    let π := warmRefine adj P₀ χι
+    (IndivStep.default π (sel π)).χ'
+
+/-- The level-`k` decision set of the default chain: accumulate
+`sel (warmRefine adj P₀ (defaultColouring k))` across all levels. -/
+noncomputable def defaultD {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) : Nat → Finset (Fin n)
+  | 0 => ∅
+  | k+1 =>
+    let χι := defaultColouring adj P₀ χι₀ sel k
+    let π := warmRefine adj P₀ χι
+    defaultD adj P₀ χι₀ sel k ∪ sel π
+
+/-- The concrete `DescentTrace` for the default construction. -/
+noncomputable def defaultTrace {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) :
+    (k : Nat) → DescentTrace adj P₀ χι₀ sel k
+                  (defaultD adj P₀ χι₀ sel k)
+                  P₀
+                  (defaultColouring adj P₀ χι₀ sel k)
+  | 0 => DescentTrace.zero
+  | k+1 =>
+    let prev := defaultTrace adj P₀ χι₀ sel k
+    let π := warmRefine adj P₀ (defaultColouring adj P₀ χι₀ sel k)
+    DescentTrace.succ prev (IndivStep.default π (sel π)) P₀
+      (fun _ _ _ => rfl)
+
+/-- The concrete reference `SpineChain` at every level. -/
+noncomputable def defaultSpineChain {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) (k : Nat) :
+    SpineChain adj P₀ χι₀ sel k where
+  D := defaultD adj P₀ χι₀ sel k
+  P := P₀
+  χι := defaultColouring adj P₀ χι₀ sel k
+  trace := defaultTrace adj P₀ χι₀ sel k
+
+/-- **Reference corollary (formerly "all-`less` corollary").** Every
+`SpineChain` at level `k` has the same `D` and the same partition as
+`defaultSpineChain`. This is the load-bearing existence statement:
+*there is a canonical level-`k` partition, computable by one
+deterministic descent.* -/
+theorem SpineChain.eq_default {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} (hsel : PartitionInvariant sel)
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) :
+    chain.D = defaultD adj P₀ χι₀ sel k ∧
+    samePartition chain.partition (defaultSpineChain adj P₀ χι₀ sel k).partition :=
+  SpineChain.branch_independent hsel chain (defaultSpineChain adj P₀ χι₀ sel k)
 

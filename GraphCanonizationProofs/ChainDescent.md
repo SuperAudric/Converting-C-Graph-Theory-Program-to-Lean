@@ -340,10 +340,31 @@ trace's `singletons` / `P_agrees` invariants. Axiom-clean against the
 file's existing axiom basis (`refineStep` + `refineStep_iff` + the four
 standard).
 
-**Scope kept tight on first cut:** no all-`less` corollary, no leaf/order
-theory, no `Z₂^d` reduction. Concrete witnesses of `IndivStep` are
-existence-only — producing one is polynomial but is a separate concern
-(can be added as a follow-on `instance` if the C# side needs it).
+**Constructive existence (added 2026-05-25).** The first wave of
+follow-ons is now in:
+
+* `IndivStep.default` — concrete witness with base-`n` encoding (parity
+  bit for T-membership; `χ v * n + v.val` for the within-T tag). Both
+  axioms discharged by `omega` + Nat.div one-liners. Used to give the
+  `instance : Nonempty (IndivStep χ T)`.
+* `defaultColouring` / `defaultD` / `defaultTrace` — recursive concrete
+  construction of a level-`k` trace using `IndivStep.default` and
+  `P = P₀` throughout (the simplest matrix that agrees with `P₀` off
+  every `D`). Proves `DescentTrace` is non-vacuous at every level.
+* `defaultSpineChain` — the bundled chain.
+* **`SpineChain.eq_default`** — the reference corollary: every chain at
+  level `k` has the same `D` and the same partition as
+  `defaultSpineChain`. There is a *canonical* level-`k` partition,
+  computable by one deterministic descent.
+
+The "all-`less` corollary" mentioned in earlier notes is subsumed: with
+the existential `IndivStep` model and arbitrary `P'` agreeing off `D`,
+the natural reference is "no guesses written, default
+individualisation." An all-`less` matrix is just a different choice
+inside the same equivalence class — same partition by spine.
+
+**Still out of scope for now:** leaf/order-label theory (what a leaf is,
+the `Z₂^d` action on order labels) and the linear oracle's reduction.
 
 **Consequences.**
 
