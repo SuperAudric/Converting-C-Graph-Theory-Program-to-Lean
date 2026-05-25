@@ -1,27 +1,17 @@
 name = "GraphCanonizationProofs"
 version = "0.0.1"
-defaultTargets = ["GraphCanonizationProofs"]
+defaultTargets = ["ChainDescent"]
+
+# Active library: chain-descent canonizer correctness work.
+# The retired V4 lean stack (LeanGraphCanonizerV4, UniqueGraphsBySize,
+# LeanGraphCanonizerV4Tests, LeanGraphCanonizerV4Correctness, FullCorrectness/)
+# lives under `Archive/V4/`. It builds with sorries and is no longer in the
+# default build; see `Archive/V4/README.md` to reactivate any of it.
 
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
 version = "git#master"
-
-[[lean_lib]]
-name = "LeanGraphCanonizerV4"
-
-[[lean_lib]]
-name = "UniqueGraphsBySize"
-
-[[lean_lib]]
-name = "LeanGraphCanonizerV4Tests"
-
-[[lean_lib]]
-name = "LeanGraphCanonizerV4Correctness"
-
-[[lean_lib]]
-name = "FullCorrectness"
-globs = ["FullCorrectness.+"]
 
 [[lean_lib]]
 name = "ChainDescent"

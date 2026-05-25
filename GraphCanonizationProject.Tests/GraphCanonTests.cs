@@ -9,10 +9,8 @@ using EdgeType = int;
 
 public partial class GraphCanonTests(ITestOutputHelper output)
 {
-    // Default = perf-focused canonizer. Swap to `new CanonGraphOrdererV4()` to run
-    // the same instance-level tests against the Lean-aligned reference. Tests that
-    // call static helpers on the reference (LabelEdgesAccordingToRankings) stay
-    // tied to GraphOrderer regardless.
+    // Active canonizer. Other implementations sit under
+    // `GraphCanonizationProject/Archive/` and are excluded from the build.
     private readonly ICanonGraphOrderer _orderer = new CanonGraphOrdererChainDescent();
 
     // ── Isomorphism tests ────────────────────────────────────────────────────
@@ -228,37 +226,15 @@ public partial class GraphCanonTests(ITestOutputHelper output)
 
         Assert.Equal(resultBefore, resultAfter);
     }
-/*
-    [Fact]
-    public void LabelEdgesAccordingToRankings_DoesNotModifyInputEdges()
-    {
-        VertexType[] rankings = [0, 1, 2, 3];
-        EdgeType[,] edges     = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
-        EdgeType[,] edgesCopy = { { 0, 0, 0, 0 }, { 0, 0, 0, 1 }, { 0, 0, 0, 1 }, { 0, 1, 1, 0 } };
-        GraphOrderer.LabelEdgesAccordingToRankings(rankings, edges);
-        Assert.True(Enumerable.SequenceEqual(edges.Cast<EdgeType>(), edgesCopy.Cast<EdgeType>()));
-    }
 
-    // ── Ordering function smoke test ─────────────────────────────────────────
-
-    [Fact]
-    public void OrderingFunction_CompletesWithoutException()
-    {
-        var rng     = new Random(102931);
-        var verts   = Enumerable.Range(0, 10).Select(_ => (VertexType)rng.Next(0, 9)).ToArray();
-        var edges   = new EdgeType[10, 10];
-        for (int i = 0; i < 10; i++)
-            for (int j = 0; j < 10; j++)
-                edges[i, j] = (EdgeType)(verts[i] * 10u + verts[j]);
-        GraphOrderer.LabelEdgesAccordingToRankings(verts, edges);
-    }
-*/
     // ── CFI tests ────────────────────────────────────────────────────────────
     // CFI pairs are non-isomorphic graphs that color-refinement-style algorithms can
-    // collapse. See GraphCanonizationProofs/OrbitCompleteAfterConv.md for context. The
-    // theory call distinguishes generator correctness from canonizer correctness:
-    // CfiPair_WellFormed should always pass; CfiPair_ProducesDifferentCanonical can
-    // legitimately fail and is the falsifying-counterexample harness.
+    // collapse. See GraphCanonizationProofs/Archive/V4/OrbitCompleteAfterConv.md for
+    // V4-era context (the orbit-completeness obligation that the V4 stack failed to
+    // discharge on these CFI bases). The theory call distinguishes generator
+    // correctness from canonizer correctness: CfiPair_WellFormed should always pass;
+    // CfiPair_ProducesDifferentCanonical can legitimately fail and is the
+    // falsifying-counterexample harness.
 
     [Theory]
     [InlineData("Cycle3")]
@@ -299,55 +275,9 @@ public partial class GraphCanonTests(ITestOutputHelper output)
             CfiGraphGenerator.DescribePair(pair));
     }
 
-    // ── CFI direct-probe test ────────────────────────────────────────────────
-    // Build G = Even ⊕ Odd and run a single ConvergeLoop pass (no BreakTie, no
-    // OrderVertices outer loop). Aut(G) = Aut(Even) × Aut(Odd) since Even and
-    // Odd are connected and non-isomorphic, so no orbit of G crosses components.
-    // Per OrbitCompleteAfterConv_general: equal converged value ⇒ same orbit.
-    // Therefore Even-half ranks and Odd-half ranks must be disjoint sets.
-    // Any shared rank is a direct counterexample (no BreakTie cascade involved).
-    //
-    // Wired only against CanonGraphOrdererV4Fast — the reference orderer doesn't
-    // expose ConvergeLoop and isn't needed for this falsification harness.
-    //
-    // Skipped while _orderer is not CanonGraphOrdererV4Fast: this test calls
-    // GraphOrderer.RunConvergeLoopForTesting (alias for CanonGraphOrdererV4Fast)
-    // directly, so it probes V4Fast internals regardless of the active orderer.
-    // Re-enable by removing Skip when V4Fast is the active orderer.
-
-    [Theory(Skip = "V4Fast-specific harness; not applicable while a non-V4Fast orderer is active.")]
-    [InlineData("Cycle3")]
-    [InlineData("Cycle4")]
-    [InlineData("Cycle5")]
-    [InlineData("K4")]
-    [InlineData("K33")]
-    //[InlineData("Petersen")] // 200v disjoint union — see GraphCanonLongTests.cs
-    //[InlineData("K6")]       // 312v disjoint union — see GraphCanonLongTests.cs
-    //[InlineData("K7")]       // 616v disjoint union — see GraphCanonLongTests.cs
-    public void CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint(string baseName)
-    {
-        var pair = CfiGraphGenerator.Generate(baseName);
-        CfiGraphGenerator.AssertWellFormedPair(pair);
-
-        var union = CfiGraphGenerator.BuildDisjointUnion(pair.Even, pair.Odd);
-        int nEven = pair.Even.VertexCount;
-        int nTotal = union.VertexCount;
-        var ranks = CanonGraphOrdererV4Fast.RunConvergeLoopForTesting(new VertexType[nTotal], union);
-
-        var evenSet = new HashSet<int>();
-        for (int i = 0; i < nEven; i++) evenSet.Add(ranks[i]);
-        var oddSet = new HashSet<int>();
-        for (int i = nEven; i < nTotal; i++) oddSet.Add(ranks[i]);
-
-        var shared = new HashSet<int>(evenSet);
-        shared.IntersectWith(oddSet);
-
-        Assert.True(shared.Count == 0,
-            $"CFI pair on base {baseName}: ConvergeLoop on Even ⊕ Odd assigned " +
-            $"{shared.Count} rank value(s) shared between halves — direct counterexample " +
-            $"to OrbitCompleteAfterConv_general. Shared ranks: [{string.Join(", ", shared)}].\n" +
-            CfiGraphGenerator.DescribePair(pair));
-    }
+    // CFI direct-probe test (CfiPair_DisjointUnion_ConvergeLoop_RanksDisjoint)
+    // archived to Archive/V4/GraphCanonTests.V4FastFalsification.cs — it probes
+    // CanonGraphOrdererV4Fast internals, which is now archived.
 
     // Same Even ⊕ Odd disjoint union as above, but exercised through the full
     // Run pipeline against scrambled relabelings of the same graph. Run is

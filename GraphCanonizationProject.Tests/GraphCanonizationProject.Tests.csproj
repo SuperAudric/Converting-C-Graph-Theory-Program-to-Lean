@@ -24,4 +24,9 @@
     <ProjectReference Include="../GraphCanonizationProject/GraphCanonizationProject.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Archive/**" />
+    <None Include="Archive/**" />
+  </ItemGroup>
+
 </Project>
