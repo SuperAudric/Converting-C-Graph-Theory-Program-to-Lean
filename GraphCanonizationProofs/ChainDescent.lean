@@ -2467,3 +2467,259 @@ theorem SpineChain.eq_default {n : Nat} {adj : AdjMatrix n}
     samePartition chain.partition (defaultSpineChain adj P₀ χι₀ sel k).partition :=
   SpineChain.branch_independent hsel chain (defaultSpineChain adj P₀ χι₀ sel k)
 
+/-! ### §15.1 — Leaf characterisation
+
+The descent terminates at a **leaf** — a state where the partition is
+*discrete*, i.e. every cell is a singleton.  At that point the labelling
+is fully determined modulo *order labels*: which `D`-singleton sorts
+before which.  The order-label layer is the linear oracle's domain
+(§15.2 — `DirAssignment` theory).
+
+This sub-section:
+1. Defines `Discrete` and `SpineChain.IsLeaf`.
+2. Proves `IsLeaf` is `samePartition`-invariant and therefore
+   spine-invariant (a corollary of `spine_branch_independent`).
+3. Proves `defaultSpineChain_reaches_leaf` — termination within `n`
+   levels, under two hypotheses on `sel`:
+   * `TargetsNonsingletonCell` — `sel χ` only picks vertices in
+     non-singleton cells of `χ` (otherwise nothing to break).
+   * `NonemptyOnNonDiscrete` — `sel χ` is non-empty whenever `χ` is not
+     already discrete (otherwise descent stalls).
+
+Together these say *the selector keeps making progress until forced to
+stop*. Reasonable assumptions on any concrete `sel`. -/
+
+/-- A colouring is **discrete** when every cell is a singleton — equivalently,
+the function `χ : Fin n → Nat` is injective. -/
+def Discrete {n : Nat} (χ : Colouring n) : Prop :=
+  ∀ i j : Fin n, χ i = χ j → i = j
+
+namespace Discrete
+
+/-- `Discrete` is `samePartition`-invariant. -/
+theorem of_samePartition {n : Nat} {χ₁ χ₂ : Colouring n}
+    (h : samePartition χ₁ χ₂) (hd : Discrete χ₁) : Discrete χ₂ := by
+  intro i j hij
+  exact hd i j ((h i j).mpr hij)
+
+/-- Warm refinement preserves discreteness: if `χ` is injective, so is
+`warmRefine adj P χ`. Lifted from per-vertex singleton preservation
+(`iterate_refineStep_preserves_singleton`). -/
+theorem warmRefine_preserves {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    {χ : Colouring n} (hd : Discrete χ) :
+    Discrete (warmRefine adj P χ) := by
+  intro i j hij
+  by_contra hne
+  exact iterate_refineStep_preserves_singleton adj P j n χ
+    (fun u hu hχ => hu (hd u j hχ)) i hne hij
+
+end Discrete
+
+/-- A `SpineChain` reaches a *leaf* when its level-`k` partition is
+discrete. At a leaf every vertex is a singleton, so the warm-refined
+colouring uniquely identifies each vertex. -/
+def SpineChain.IsLeaf {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) : Prop :=
+  Discrete chain.partition
+
+/-- `IsLeaf` is *spine-invariant*: a chain is a leaf iff the canonical
+`defaultSpineChain` at the same level is. Direct corollary of
+`spine_branch_independent` via `Discrete.of_samePartition`. -/
+theorem SpineChain.isLeaf_iff_default {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} (hsel : PartitionInvariant sel)
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) :
+    chain.IsLeaf ↔ (defaultSpineChain adj P₀ χι₀ sel k).IsLeaf := by
+  obtain ⟨_, hπ⟩ := SpineChain.eq_default hsel chain
+  exact ⟨Discrete.of_samePartition hπ, Discrete.of_samePartition hπ.symm⟩
+
+/-! #### Termination hypotheses on `sel` -/
+
+/-- The selector only picks vertices from **non-singleton** cells of the
+colouring it inspects: every returned vertex has a same-colour partner.
+Without this, the selector could pick a vertex already-individualised
+and the descent would stall. -/
+def TargetsNonsingletonCell {n : Nat}
+    (sel : Colouring n → Finset (Fin n)) : Prop :=
+  ∀ χ : Colouring n, ∀ v ∈ sel χ, ∃ u : Fin n, u ≠ v ∧ χ u = χ v
+
+/-- The selector is non-empty when the colouring is not yet discrete.
+Without this, the selector could return ∅ early and the descent would
+freeze before reaching a leaf. -/
+def NonemptyOnNonDiscrete {n : Nat}
+    (sel : Colouring n → Finset (Fin n)) : Prop :=
+  ∀ χ : Colouring n, ¬ Discrete χ → sel χ ≠ ∅
+
+/-- **`D` covers all vertices ⇒ leaf.** When the descent's accumulated
+decision set is the full vertex set, every vertex is a singleton of the
+trace's colouring (by `DescentTrace.singletons`), the colouring is
+therefore injective (`Discrete`), and warm refinement preserves
+discreteness — so the spine partition is discrete. -/
+theorem defaultD_univ_isLeaf {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (hD : defaultD adj P₀ χι₀ sel k = Finset.univ) :
+    (defaultSpineChain adj P₀ χι₀ sel k).IsLeaf := by
+  have hsing := (defaultTrace adj P₀ χι₀ sel k).singletons
+  have hdisc : Discrete (defaultColouring adj P₀ χι₀ sel k) := by
+    intro i j hij
+    by_contra hne
+    exact hsing j (by rw [hD]; exact Finset.mem_univ _) i hne hij
+  exact Discrete.warmRefine_preserves adj P₀ hdisc
+
+/-- **`D` strictly grows on every non-leaf step.** If the chain at level
+`k` is not yet a leaf, then `sel π_k` is non-empty (by
+`NonemptyOnNonDiscrete`), and its elements are *not* in
+`defaultD k` (because `defaultD k` vertices are `π_k`-singletons while
+`sel π_k` vertices are in non-singleton cells of `π_k` by
+`TargetsNonsingletonCell`). So `defaultD (k+1) ⊋ defaultD k`. -/
+theorem defaultD_grows_if_not_leaf {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι₀ : Colouring n)
+    {sel : Colouring n → Finset (Fin n)}
+    (hcell : TargetsNonsingletonCell sel)
+    (hne : NonemptyOnNonDiscrete sel)
+    {k : Nat}
+    (hnotleaf : ¬ (defaultSpineChain adj P₀ χι₀ sel k).IsLeaf) :
+    (defaultD adj P₀ χι₀ sel k).card < (defaultD adj P₀ χι₀ sel (k+1)).card := by
+  set π := warmRefine adj P₀ (defaultColouring adj P₀ χι₀ sel k) with hπ_def
+  -- `sel π` is non-empty (chain not yet a leaf).
+  have h_sel_ne : sel π ≠ ∅ := hne π hnotleaf
+  obtain ⟨v, hv⟩ := Finset.nonempty_iff_ne_empty.mpr h_sel_ne
+  -- `v` has a same-`π` partner — so `v` is not a `π`-singleton.
+  obtain ⟨u, hu_ne, hu_eq⟩ := hcell π v hv
+  -- `v ∉ defaultD k`: any `defaultD k` vertex is a `π`-singleton (warm
+  -- refinement preserves singletons), contradicting the partner above.
+  have hv_notin : v ∉ defaultD adj P₀ χι₀ sel k := by
+    intro hv_in
+    have hsing_χι : ∀ w, w ≠ v →
+        defaultColouring adj P₀ χι₀ sel k w
+        ≠ defaultColouring adj P₀ χι₀ sel k v :=
+      (defaultTrace adj P₀ χι₀ sel k).singletons v hv_in
+    have hsing_π : ∀ w, w ≠ v → π w ≠ π v := by
+      intro w hw
+      exact iterate_refineStep_preserves_singleton adj P₀ v n
+        (defaultColouring adj P₀ χι₀ sel k) hsing_χι w hw
+    exact hsing_π u hu_ne hu_eq
+  -- `defaultD (k+1) = defaultD k ∪ sel π` strictly contains `defaultD k`.
+  have h_subset : defaultD adj P₀ χι₀ sel k ⊆ defaultD adj P₀ χι₀ sel (k+1) :=
+    fun w hw => Finset.mem_union_left _ hw
+  have hv_in_next : v ∈ defaultD adj P₀ χι₀ sel (k+1) :=
+    Finset.mem_union_right _ hv
+  apply Finset.card_lt_card
+  exact ⟨h_subset, fun h_rev => hv_notin (h_rev hv_in_next)⟩
+
+/-- **Leaf existence.** Under the two `sel` hypotheses, the default
+descent reaches a leaf within `n` levels.
+
+Proof: by contradiction. If no leaf is reached in `[0, n]`, then by
+`defaultD_grows_if_not_leaf` and induction `|defaultD i| ≥ i` for every
+`i ≤ n`. At `i = n` we get `|defaultD n| ≥ n = |Finset.univ|`, hence
+`defaultD n = Finset.univ`, hence — by `defaultD_univ_isLeaf` — the
+level-`n` chain *is* a leaf. Contradicting our assumption that no leaf
+exists in `[0, n]`. -/
+theorem defaultSpineChain_reaches_leaf {n : Nat} (adj : AdjMatrix n)
+    (P₀ : PMatrix n) (χι₀ : Colouring n)
+    {sel : Colouring n → Finset (Fin n)}
+    (hcell : TargetsNonsingletonCell sel)
+    (hne : NonemptyOnNonDiscrete sel) :
+    ∃ k ≤ n, (defaultSpineChain adj P₀ χι₀ sel k).IsLeaf := by
+  by_contra h
+  push Not at h
+  -- `h : ∀ k ≤ n, ¬ IsLeaf`. Establish growth.
+  have growth : ∀ i, i ≤ n → i ≤ (defaultD adj P₀ χι₀ sel i).card := by
+    intro i hi
+    induction i with
+    | zero => exact Nat.zero_le _
+    | succ i ih =>
+      have hi' : i ≤ n := Nat.le_of_succ_le hi
+      have ih' := ih hi'
+      have h_notleaf : ¬ (defaultSpineChain adj P₀ χι₀ sel i).IsLeaf := h i hi'
+      have h_grow := defaultD_grows_if_not_leaf adj P₀ χι₀ hcell hne h_notleaf
+      omega
+  -- At `i = n`, `|defaultD n| ≥ n`; combined with `defaultD n ⊆ univ` of
+  -- cardinality `n`, we get `defaultD n = univ`, hence a leaf at `n`.
+  have hn_card : n ≤ (defaultD adj P₀ χι₀ sel n).card := growth n (le_refl n)
+  have h_univ_card : (Finset.univ : Finset (Fin n)).card = n := by
+    rw [Finset.card_univ, Fintype.card_fin]
+  have h_le_univ : (defaultD adj P₀ χι₀ sel n).card
+      ≤ (Finset.univ : Finset (Fin n)).card :=
+    Finset.card_le_card (Finset.subset_univ _)
+  have hD_univ : defaultD adj P₀ χι₀ sel n = Finset.univ :=
+    Finset.eq_univ_of_card _ (by
+      rw [Fintype.card_fin]; omega)
+  exact h n (le_refl n) (defaultD_univ_isLeaf hD_univ)
+
+/-! ### §15.2 — Order-label space (`DirAssignment`)
+
+The spine theorem says the level-`k` *partition* is direction-independent.
+What lives in the residual exponential are the **order labels** —
+which `D`-singleton is "less than" which. This sub-section formalises
+that residual layer.
+
+A `DirAssignment P₀ D` is any `PMatrix` that:
+* is antisymmetric (an honest partial-order matrix), and
+* agrees with `P₀` on every entry with at least one endpoint outside `D`
+  (only `D × D` entries are "free" — the rest are inherited from `P₀`).
+
+These are exactly the matrices a descent through `D` could produce by
+any combination of guesses. By the spine theorem, every `DirAssignment`
+refined against a `D`-singletoning colouring induces the *same*
+partition.
+
+This is the linear oracle's input shape: a `DirAssignment` is a *point*
+in the order-label space; the linear oracle's job (Phase C/D, future)
+is to optimise over it. -/
+
+/-- An **order assignment** relative to a base matrix `P₀` and a
+decision set `D`: an antisymmetric matrix agreeing with `P₀` outside
+`D × D`. -/
+structure DirAssignment {n : Nat} (P₀ : PMatrix n) (D : Finset (Fin n)) where
+  σ : PMatrix n
+  antisym : PMatrix.Antisymmetric σ
+  agrees_off : ∀ x y : Fin n, (x ∉ D ∨ y ∉ D) → σ x y = P₀ x y
+
+namespace DirAssignment
+
+variable {n : Nat} {P₀ : PMatrix n} {D : Finset (Fin n)}
+
+/-- **Trivial DirAssignment.** When `P₀` is antisymmetric, `P₀` itself is
+a valid order assignment for *any* `D` (no guesses made — every entry
+agrees with `P₀` vacuously). Witnesses non-emptiness of
+`DirAssignment P₀ D`. -/
+def default (hP₀ : PMatrix.Antisymmetric P₀) : DirAssignment P₀ D where
+  σ := P₀
+  antisym := hP₀
+  agrees_off := fun _ _ _ => rfl
+
+/-- Any two `DirAssignment`s over the same `(P₀, D)`, refined against a
+`D`-singletoning colouring `χι`, induce the *same* partition. Direct
+application of `warmRefine_agree_off'`: both matrices agree with `P₀`
+off `D`, hence with each other. -/
+theorem samePartition_pair {n : Nat} (adj : AdjMatrix n)
+    {P₀ : PMatrix n} {D : Finset (Fin n)} {χι : Colouring n}
+    (hsing : ∀ v ∈ D, ∀ u, u ≠ v → χι u ≠ χι v)
+    (σ₁ σ₂ : DirAssignment P₀ D) :
+    samePartition (warmRefine adj σ₁.σ χι) (warmRefine adj σ₂.σ χι) := by
+  refine warmRefine_agree_off' adj σ₁.σ σ₂.σ χι χι D
+    (samePartition.refl χι) ?_ hsing
+  intro x y h
+  rw [σ₁.agrees_off x y h, σ₂.agrees_off x y h]
+
+/-- **Spine equivalence.** A `DirAssignment` over a chain's decision set,
+refined against the chain's colouring, induces the chain's partition.
+The order-label residual is therefore *exactly* the choice of
+`DirAssignment` — the partition is fixed; only the order labels vary. -/
+theorem samePartition_chain {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)} {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k)
+    (σ : DirAssignment P₀ chain.D) :
+    samePartition (warmRefine adj σ.σ chain.χι) chain.partition := by
+  refine warmRefine_agree_off' adj σ.σ chain.P chain.χι chain.χι chain.D
+    (samePartition.refl _) ?_ chain.trace.singletons
+  intro x y h
+  exact (σ.agrees_off x y h).trans (chain.trace.P_agrees x y h).symm
+
+end DirAssignment
+

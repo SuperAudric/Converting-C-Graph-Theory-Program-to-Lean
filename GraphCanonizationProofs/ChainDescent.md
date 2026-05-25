@@ -363,8 +363,39 @@ the natural reference is "no guesses written, default
 individualisation." An all-`less` matrix is just a different choice
 inside the same equivalence class — same partition by spine.
 
-**Still out of scope for now:** leaf/order-label theory (what a leaf is,
-the `Z₂^d` action on order labels) and the linear oracle's reduction.
+**Leaf characterisation + order-label space (added 2026-05-25, §15.1
+and §15.2).** Phases A and B of the deferred follow-on:
+
+§15.1 — leaf characterisation:
+* `Discrete χ` — colouring is injective (every cell singleton);
+  `samePartition`-invariant; warm refinement preserves it.
+* `SpineChain.IsLeaf chain` — chain's partition is discrete;
+  spine-invariant via `SpineChain.isLeaf_iff_default`.
+* `TargetsNonsingletonCell sel` and `NonemptyOnNonDiscrete sel` —
+  reasonable termination hypotheses on the selector.
+* **`defaultSpineChain_reaches_leaf`** — under these hypotheses, the
+  default descent reaches a leaf within `n` levels. Proof: by
+  contradiction, with `|defaultD i|` strictly growing on every non-leaf
+  step (`defaultD_grows_if_not_leaf`); at `i = n` the set must be
+  `Finset.univ`, hence the chain is a leaf (`defaultD_univ_isLeaf`).
+
+§15.2 — order-label space:
+* `DirAssignment P₀ D` — an antisymmetric `PMatrix` agreeing with `P₀`
+  outside `D × D`. The *space of guess-direction choices*.
+* `DirAssignment.default` — when `P₀` is antisymmetric, `P₀` itself is
+  a trivial DirAssignment; ensures non-emptiness.
+* **`DirAssignment.samePartition_pair`** — any two DirAssignments over
+  the same `(P₀, D)`, refined against a `D`-singletoning colouring,
+  induce the same partition.
+* **`DirAssignment.samePartition_chain`** — any DirAssignment over a
+  chain's decision set, refined against the chain's colouring, induces
+  the chain's partition. *The order-label residual is exactly the
+  choice of DirAssignment; the partition is fixed.*
+
+**Still out of scope (Phases C, D for a future round):** the `Z₂` flip
+action on DirAssignments and the `Z₂^d` residual quotient (Phase C);
+the labelled-adjacency function + lex-min canonical form + linear-oracle
+interface (Phase D).
 
 **Consequences.**
 
