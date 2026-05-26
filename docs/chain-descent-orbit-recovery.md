@@ -715,10 +715,90 @@ Proof structure (validates Phase 1 + Phase 2 strategy):
 
 All Phase 2 lemmas axiom-clean.
 
-*Stage 4 / Phase 2.2-2.D + M3.E + M4 (PENDING, deferred multi-week):*
-- Phase 2.2: b=0 endpoint inter-gadget split — uses subset structure,
-  not bridges (b=0 bridge partners aren't distinguished early).
-- Phase 2.3: subset vertex distinction (by gadget, then by S).
+*Stage 4 / M3.D Phase 2.3 — subset by gadget at round 2 — DONE
+2026-05-26.* `ChainDescent/CFI.lean` §13.14-§13.17. The first cascade
+step distinguishing **subset vertices** (parallel to Phase 2.1, which
+handled endpoint-by-partner). Four sub-sections:
+
+§13.14 / Phase 2.3 prereqs (subset vertex infra):
+- `CFIBase.subset hS` — abstract subset vertex constructor for
+  arbitrary even subsets (generalises `aEmpty v` from §13.1, which is
+  the S=∅ case).
+- `IsCFI'.subsetVertex hS` — Fin-n level extractor; `seedVertex v` is
+  the empty-subset case.
+- `subsetVertex_ne_endpointVertex` — distinctness (Sum-tag mismatch).
+- `adj_subsetVertex_endpoint_same_gadget_true_of_not_mem` — Phase 2.3
+  witness adjacency: subset_v has e^1_{v→w} as adj=1 neighbour when
+  w ∈ N(v) \ S.
+- `adj_subsetVertex_endpoint_diff_gadget` — cross-gadget non-adjacency.
+- `adj_subsetVertex_eq_one_iff` — characterisation lemma (parallel to
+  `adj_seedVertex_eq_one_iff` from §13.12; the S=∅ specialisation):
+  `adj u (subsetVertex_{v'} hS') = 1` iff `u = endpointVertex hw' b'`
+  at gadget v' with `(w' ∈ S') ⊕ b' = true`.
+
+§13.15 / Phase 2.3 prereqs (M3.B+ general parity distinction):
+- `signature_endpoint_b0_ne_b1_general_allSeeds` /
+  `refineStep_endpoint_b0_ne_b1_general_allSeeds` — generalisation of
+  M3.B from "same gadget" to "b=0 endpoint at any gadget v' vs b=1
+  endpoint at gadget v are distinguished at round 1." Same witness
+  tuple as M3.B+M3.C `(c_v, 1, P et seed_v)`; the absence argument
+  case-splits v = v' (own-gadget) vs v ≠ v' (cross-gadget), both
+  cases yielding `adj endpoint_b0 seed_v = 0`.
+
+§13.16 / Phase 2.3 step lemma (factored Approach-3 primitive):
+- `signature_subset_step` / `refineStep_subset_step` — generic step
+  lemma for subset distinction. Parallel to `refineStep_bridge_step`
+  (§13.11) for bridges. Takes arbitrary χ + preconditions:
+  - `hwS`: w ∉ S (witness endpoint e^1_{v→w} is adj=1 to subset_v).
+  - `hno_match`: χ-colour of e^1_{v→w} doesn't appear at any adj=1
+    neighbour of subset_{v'}.
+- Conclusion: refineStep χ distinguishes subset_v from subset_{v'}.
+- This is the **Approach 3 primitive** for subset propagation —
+  generic over χ, ready to apply at any cascade round once `hno_match`
+  is verifiable. The 3+5 factoring promised in the original plan.
+
+§13.16.5 / supporting helper:
+- `IsCFI'.adj_symm` — `adj.adj i j = adj.adj j i` for CFI graphs, via
+  `h.matching` + `cfiAdj_symm`. Reconciles the signature convention
+  (subject-on-left) with the iff convention (candidate-on-left).
+
+§13.17 / Phase 2.3 headline:
+- `signature_subset_inter_gadget_round2` /
+  `refineStep_subset_inter_gadget_round2` — under χ_1 = refineStep
+  χ_{allSeeds}, one more refineStep distinguishes subset vertices at
+  different gadgets (v ≠ v'), assuming the LHS subset has a witness
+  w ∈ N(v) \ S.
+
+Proof structure (Phase 1 + Phase 2 architecture, subset variant):
+- Apply `refineStep_subset_step` with χ = χ_1.
+- (P2 / hno_match): for any u adj=1 to subset_{v'} hS',
+  `χ_1 u ≠ χ_1 (e^1_{v→w})`.
+  - Swap convention via `adj_symm`, apply `adj_subsetVertex_eq_one_iff`
+    to characterise u as `endpointVertex hw'' b''` at gadget v'.
+  - Case b'' = false: M3.B+ (§13.15) gives the distinction.
+  - Case b'' = true: M3.C (§13.10) gives the b=1 inter-gadget
+    distinction (with hvv.symm to flip direction).
+
+**Hypothesis qualifier.** The `w ∈ N(v) \ S` precondition (equivalently
+S ≠ N(v)) is essential — for deg-even bases (e.g., Rook3x3), the
+degenerate case S = N(v) has no b=1 adjacent endpoint, hence no witness
+of this form. That degenerate subset is deferred to a later cascade
+round once Phase 2.2 makes b=0 endpoints distinguishable by gadget
+(unlocking a parallel "subset step lemma" using b=0 endpoint witnesses).
+
+All Phase 2.3 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
+standard basis only; no CFI-specific axioms used).
+
+*Stage 4 / Phase 2.2 + 2.X + 2.4 + M3.E + M4 (PENDING, deferred multi-week):*
+- Phase 2.2: b=0 endpoint inter-gadget split at round 3 — now
+  unblocked by Phase 2.3 (subset structure provides distinguishing
+  witnesses for b=0 endpoints' subset neighbours).
+- Phase 2.X (new): b=0 within-gadget partner distinction at round 4 —
+  analogous to Phase 2.1 (b=1 within-gadget partner) but via
+  bridge-step + Phase 2.2's b=0 inter-gadget distinction.
+- Phase 2.4: subset vertex distinction by S — once endpoints are fully
+  distinguished, subset signatures differ by their endpoint-adjacency
+  patterns.
 - M3.E: cross-type distinctions (subset vs endpoint, etc.) as
   needed by remaining cascade cases.
 - M4: assemble all cases into `Discrete (warmRefine ...)`,

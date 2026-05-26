@@ -384,6 +384,53 @@ round 1. §13.12 / §13.13.
 Validates the Phase 1 + Phase 2 architecture: arbitrary cascade
 cases can be discharged via the step lemma + (P2) verification.
 
+*Stage 4 / Phase 2.3 (2026-05-26):* subset-vertex inter-gadget
+distinction at round 2 — the **first cascade step for subset
+vertices**. §13.14-§13.17 of `CFI.lean`.
+
+§13.14: subset vertex infrastructure.
+- `CFIBase.subset hS` — general subset constructor (generalises
+  `aEmpty v`, which is the S=∅ case).
+- `IsCFI'.subsetVertex hS` — Fin-n extractor; `seedVertex v` is the
+  empty-subset specialisation.
+- `adj_subsetVertex_endpoint_*` — Fin-n adjacency facts (same-gadget
+  parity-mismatch = adj=1; diff-gadget always adj=0).
+- `adj_subsetVertex_eq_one_iff` — characterisation parallel to
+  `adj_seedVertex_eq_one_iff` (which is its S'=∅ specialisation).
+
+§13.15: M3.B+ generalised parity distinction.
+- `signature_endpoint_b0_ne_b1_general_allSeeds` /
+  `refineStep_endpoint_b0_ne_b1_general_allSeeds` — strengthens
+  M3.B from "same gadget" to "b=0 endpoint at any gadget v' vs b=1
+  endpoint at gadget v are distinguished at round 1." Same witness
+  tuple as M3.B+M3.C; the absence argument case-splits v = v' vs
+  v ≠ v'.
+
+§13.16: factored Approach-3 subset step lemma.
+- `signature_subset_step` / `refineStep_subset_step` — generic over
+  χ. Parallel to `refineStep_bridge_step` for bridges. Preconditions
+  `hwS` (w ∉ S, witness endpoint exists) + `hno_match` (witness
+  colour absent at adj=1 neighbours of the other subset). Conclusion:
+  the two subset vertices get distinct refineStep colours.
+
+§13.16.5: `IsCFI'.adj_symm` — `adj.adj i j = adj.adj j i` via
+`h.matching` + `cfiAdj_symm`. Bridges signature/iff conventions.
+
+§13.17: Phase 2.3 headline.
+- `refineStep_subset_inter_gadget_round2` — at round 2 under
+  χ_{allSeeds}, subset vertices at gadgets v ≠ v' get distinct
+  colours, provided the LHS has w ∈ N(v) \ S as witness. Proof
+  applies §13.16's step lemma with χ = χ_1; verifies hno_match by
+  cases on b'' (b''=false → M3.B+; b''=true → M3.C).
+
+**Hypothesis qualifier**: The `w ∉ S` precondition is essential —
+deg-even bases (Rook3x3) admit the degenerate `S = N(v)` case which
+has no b=1 adjacent endpoint witness. That case is deferred to a
+later cascade round (post-Phase 2.2).
+
+All Phase 2.3 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
+standard basis).
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating
