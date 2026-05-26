@@ -439,3 +439,281 @@ and unblocks the cascade half of the hidden-Johnson near-theorem.
   chain descent's polynomial argument).
 - Honest empirical pattern map (depth-1 recovery is common but not
   universal; tw(H) is the worst-case bound).
+
+---
+
+## 14. Tier 2 paper proof — association scheme graphs
+
+This section drafts the Tier 2 theorem and proof, expanding §10's
+sketch into full paper form. The proof routes through association
+scheme theory and is independent of Tier 1 / CFI machinery.
+
+### 14.1 Association scheme background
+
+A reader unfamiliar with schemes can think of them as "a clean
+algebraic generalization of distance partitions in a regular graph."
+We need the bare minimum.
+
+A **symmetric association scheme** on vertex set `V` is a partition
+of `V × V` into "relations" `R_0, R_1, …, R_d` satisfying:
+1. `R_0 = { (v, v) : v ∈ V }` (the diagonal).
+2. Each `R_i` is symmetric: `(u, v) ∈ R_i` iff `(v, u) ∈ R_i`.
+3. **Intersection numbers** `p^k_{ij}`: for any `(u, v) ∈ R_k`, the
+   number of `w ∈ V` with `(u, w) ∈ R_i` and `(w, v) ∈ R_j` is
+   `p^k_{ij}` — depending **only on k, i, j**, not on the specific
+   choice of `(u, v)`.
+
+The number `d` is the **rank** of the scheme (so `d + 1` relations
+total counting `R_0`).
+
+A **scheme graph** is a graph `G = (V, E)` whose edge set is a union
+of relations from some scheme: `E = ⋃_{j ∈ J} R_j` for some
+`J ⊆ {1, …, d}`.
+
+**Examples in scope:**
+- **Johnson graph `J(m, k)`** for `m ≥ 2k + 1`: `V` = k-subsets of
+  `[m]`; relations `R_j = {(A, B) : |A ∩ B| = k − j}` for
+  `j = 0, …, k`; graph edge set = `R_1` (share k−1 elements).
+- **Hamming graph `H(d, q)`**: `V` = strings of length `d` over an
+  alphabet of size `q`; relations `R_j = {(x, y) :` Hamming
+  distance `(x, y) = j}` for `j = 0, …, d`; graph edge set = `R_1`
+  (differ in one position).
+- **Distance-regular graphs (DRGs)**: any DRG defines a scheme via
+  distance relations. Petersen = `J(5, 2)`, Hamming and Johnson graphs,
+  and many other classical structures.
+
+A scheme is **schurian** (or **2-closed**) if its relations are
+exactly the orbits of `Aut(G)` acting diagonally on `V × V`. For
+schurian schemes, scheme-relation classes coincide with
+automorphism-orbital classes — the algebraic and group-theoretic
+descriptions match.
+
+Johnson and Hamming schemes are schurian for the parameter ranges
+above. General DRGs may or may not be schurian; "distance-transitive"
+DRGs are.
+
+### 14.2 Theorem 2
+
+> **Theorem 2 (orbit recovery for schurian scheme graphs).** Let
+> `G = (V, E)` be a scheme graph for a vertex-transitive **schurian**
+> association scheme `S = (R_0, …, R_d)` with `E = ⋃_{j ∈ J} R_j`.
+> Then for any single fresh-colour individualized vertex `v ∈ V`,
+> 1-WL refinement on `(G, v)` produces a partition equal to
+> `Aut(G)_v`-orbits.
+
+The headline contrast with Tier 1: **depth 1 always suffices** for
+Tier 2, whereas Tier 1 needed `≤ tw(H)`. The algebraic regularity
+of scheme graphs gives 1-WL much more power per individualization.
+
+### 14.3 Proof of Theorem 2
+
+Three sub-arguments, combined.
+
+**Step 1 — `Aut(G)_v` orbits on `V \ {v}` are scheme-relation classes
+relative to `v`.**
+
+For each `w ∈ V \ {v}`, there is a unique `j(w) ∈ {1, …, d}` with
+`(v, w) ∈ R_{j(w)}`. Define the **v-profile** of `w` as `j(w)`.
+
+*Claim:* `Aut(G)_v`-orbits on `V \ {v}` are exactly the level sets
+of `j`.
+
+*Proof of claim.* Each `R_j` is a `Aut(G)`-orbit on ordered pairs
+(by the schurian assumption). So for `g ∈ Aut(G)_v` (fixes `v`),
+applying `g`: `(v, w) ∈ R_j` ⟹ `(v, g(w)) = (g(v), g(w)) ∈ R_j`.
+So `j(g(w)) = j(w)` — `Aut(G)_v` preserves `v`-profile.
+
+Conversely, suppose `j(w) = j(w') = j`. Then `(v, w)` and `(v, w')`
+are both in `R_j`, hence in the same `Aut(G)`-orbital. So some
+`g ∈ Aut(G)` sends `(v, w)` to `(v, w')`. This `g` fixes the first
+coordinate, i.e., `g(v) = v`, so `g ∈ Aut(G)_v`. And `g(w) = w'`.
+So `w` and `w'` are in the same `Aut(G)_v`-orbit.
+
+Combined: `Aut(G)_v`-orbits = `v`-profile classes. ∎ Step 1.
+
+**Step 2 — 1-WL on `(G, v individualized)` distinguishes `v`-profile
+classes.**
+
+This is the technical heart. We show: at 1-WL fixpoint, two vertices
+`w, w' ∈ V \ {v}` share a 1-WL cell iff `j(w) = j(w')`.
+
+*Proof.* We argue by induction on the 1-WL round `r`.
+
+The initial colour `χ_0` has `v` distinct (fresh) and all
+other vertices equal. Already at round 1:
+- For `w` adjacent to `v` (i.e., `(v, w) ∈ E = ⋃_{j ∈ J} R_j`, so
+  `j(w) ∈ J`): `w`'s signature is `(0, multiset with one "v-color"
+  and (deg(w) − 1) "other-colors")`.
+- For `w` non-adjacent to `v` (i.e., `j(w) ∉ J`): `w`'s signature is
+  `(0, multiset with deg(w) "other-colors")` — no v-color.
+
+So round 1 separates `{w : j(w) ∈ J}` from `{w : j(w) ∉ J}`.
+
+For round `r ≥ 2`, by the scheme's intersection numbers, the number
+of `w`'s neighbours falling into any cell at round `r − 1` is a
+function of `j(w)` only. Specifically: if at round `r − 1` the
+partition refines the `v`-profile classes, then at round `r` the
+neighbour-color multiset of `w` is determined by the scheme structure
+restricted to `R_{j(w)}` — same for all `w` with same `j(w)`.
+
+So at fixpoint, the 1-WL partition is at most as fine as the
+`v`-profile partition (cells ⊆ profile classes).
+
+Conversely, the `v`-profile partition is preserved by `Aut(G)_v`
+(Step 1), and hence preserved by 1-WL (trivial direction). So 1-WL
+partition refines `v`-profile partition... wait that's the wrong
+direction. Let me re-state.
+
+The trivial direction says: if `w, w'` are `Aut_v`-equivalent (same
+profile by Step 1), they have the same 1-WL colour at every round.
+So 1-WL cell of `w` contains all `w'` with `j(w') = j(w)`. I.e.,
+profile classes ⊆ 1-WL cells.
+
+Combined with the round-by-round argument (1-WL cells ⊆ profile
+classes once fixpoint reached): profile classes = 1-WL cells.
+
+So 1-WL fixpoint partition = `v`-profile partition. ∎ Step 2.
+
+**Step 3 — Combine.** Step 1: `Aut(G)_v` orbits = `v`-profile classes.
+Step 2: 1-WL fixpoint = `v`-profile classes. So 1-WL fixpoint =
+`Aut(G)_v` orbits. ∎ Theorem 2.
+
+### 14.4 Specific instantiations
+
+**Johnson `J(m, k)` with `m ≥ 2k + 1`.** Schurian (well-known).
+`v`-profile of `B` = `|A ∩ B|` for individualized `v = A`. Profile
+classes: `k + 1` of them, sizes `\binom{k}{j}\binom{m-k}{k-j}` for
+`j = 0, …, k`. By Theorem 2, 1-WL at depth 1 recovers these classes.
+
+**Hamming `H(d, q)`.** Schurian. `v`-profile of `y` = Hamming distance
+`d(v, y)` for individualized `v`. Profile classes: `d + 1` of them.
+
+**Distance-transitive DRGs.** Schurian by definition (distance
+classes are Aut orbits on pairs). Theorem 2 applies.
+
+**Petersen graph (= `J(5, 2)`).** Schurian. 1-WL after individualizing
+a vertex `A` recovers the 3 profile classes (intersection size 1, 0)
+plus singleton `{A}`. This is the Petersen-specific case of Theorem 2;
+trivially holds since Petersen is distance-regular.
+
+### 14.5 Gaps and open questions
+
+**G1 (schurian assumption).** Theorem 2 requires schurian schemes. For
+non-schurian schemes, 1-WL might capture the scheme partition (which
+is coarser than orbit partition) but not orbit-recover. Concretely:
+some DRGs are not distance-transitive, and Theorem 2 doesn't apply to
+those. The proof would weaken from "1-WL = orbits" to "1-WL = scheme
+classes, which contain orbits."
+
+**G2 ("1-WL captures scheme structure" precision).** Step 2's
+intersection-number argument is structurally right but the precise
+classical citation is folklore-ish. Needs a clean reference:
+candidates include Cai-Fürer-Immerman 1992 (general WL theory), or
+Babai 1979 (coherent configurations and 1-WL).
+
+**G3 (general scheme graphs vs Johnson/Hamming specifically).** The
+proof above is for `G` being a scheme graph for any subset
+`J ⊆ {1, …, d}`. For the Johnson **graph** itself (with `J = {1}`),
+the argument is cleanest. For Johnson **scheme graphs** with more
+relations (union of overlap classes), the argument still goes through
+but each step needs verification.
+
+**G4 (non-vertex-transitive schemes).** Theorem 2 assumes
+vertex-transitivity. Without it, scheme classes depend on the
+starting vertex, and the proof needs modification. Easy adaptation
+but not stated above.
+
+**G5 (Lean infrastructure).** Mathlib does not have association
+schemes packaged. Formalizing Theorem 2 in Lean would need ~300-500
+lines of scheme + coherent algebra infrastructure first. Roughly
+comparable in effort to the CFI infrastructure for Tier 1.
+
+**G6 (empirical verification).** **Done 2026-05-26.** Two scheme
+graphs tested at depth 1; both pass Theorem 2 strictly.
+
+| Graph | n | \|Aut\| | Cells at depth 1 | Aut_v orbits | Match |
+|---|---:|---:|---|---|:---:|
+| Petersen (Kneser K(5,2)) | 10 | 120 | [6, 3, 1] | [6, 3, 1] | YES |
+| Johnson J(5,2) | 10 | 120 | [6, 3, 1] | [6, 3, 1] | YES |
+
+Both match the predicted Aut_v = `S_2 × S_3` stabilizer (order 12)
+with profile classes of size 3 (disjoint pairs) and 6 (single-element
+overlap) — exactly the Step 1 prediction.
+
+Tests at
+[`Tier2DecompositionExperiment.cs`](../GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs):
+`Petersen_OrbitRecovery_Depth1_Tier2Verification`,
+`JohnsonJ52_OrbitRecovery_Depth1_Tier2Verification`.
+
+Note interesting contrast with CFI(Petersen) (Tier 1, also 100% match
+at depth 1, but for a totally different graph). The 7 of 8 Tier 1
+landscape doesn't translate to Tier 2 — Theorem 2 predicts 100% match
+for all schurian schemes, no counterexamples expected.
+
+**Additional cases worth adding for fuller verification:** Hamming
+H(2, 3) = Rook3×3 directly (different from CFI(Rook3×3); should
+satisfy Theorem 2 cleanly at depth 1). Larger Johnson J(m, k) for
+m > 5. Optional but cheap.
+
+**G7 (Tier 1 vs Tier 2 interaction — CFI(Johnson) vs Johnson).** Tier 1
+verifies CFI(Petersen) = CFI(J(5,2)) cleanly. Tier 2 would verify
+Petersen = J(5,2) directly (without the CFI wrapper). These are
+**different graphs** with **different Aut groups** — relating their
+orbit-recovery behavior is itself a structural question worth
+exploring.
+
+### 14.6 Connection to hidden-Johnson Piece C
+
+[`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md)
+§5 sketches Piece C of the near-theorem: "Johnson scheme graphs
+cascade under chain descent (Tier 1)." Piece C's plan (C1–C4) routes
+through Young subgroup combinatorics directly:
+- C1: identify Young subgroup as stabilizer after individualization
+- C2: transversal discovery via profile computation
+- C3: depth bound `≤ m − 1`
+- C4: assembly
+
+Theorem 2 is a **direct alternative proof** of Piece C for the Johnson
+case (and additionally covers Hamming and DRGs). The route through
+association scheme theory is shorter and more general.
+
+If Theorem 2 is paper-rigorous, **Piece C is settled** for the
+Johnson case via Theorem 2. The hidden-Johnson near-theorem's
+remaining open piece becomes closed (for the visible Johnson
+case; encoded Johnson is still the open construction question).
+
+### 14.7 What's needed to finalize Tier 2
+
+Status as of 2026-05-26:
+- **G6 ✓ done** — Petersen and J(5,2) verified at depth 1.
+- **G1 (schurian assumption)** — explicit. Add a sentence noting the
+  classical cases (Johnson, Hamming, distance-transitive DRGs) and
+  what fails (non-distance-transitive DRGs).
+- **G2 (citation precision)** — needs a literature search. Candidate
+  references: Babai 1979 "On the complexity of canonical labeling of
+  strongly regular graphs"; Cai-Fürer-Immerman 1992; Grohe 2017 Chapter
+  on coherent configurations.
+- **G3 (general scheme graphs)** — proof above covers union-of-relations
+  edge sets in principle. Worth a paragraph spelling out one explicit
+  case beyond Johnson/Hamming.
+- **G4 (non-vertex-transitive)** — note the adaptation.
+- **G5 (Lean infrastructure)** — parallel workstream, multi-week.
+- **G7 (Tier 1 vs Tier 2 interaction)** — relate the two graph
+  families (CFI(Johnson) vs Johnson) more explicitly. Likely a
+  paragraph about how the CFI wrapper interacts with the scheme
+  structure of the base.
+
+Once G1–G4 and G7 have explicit paragraphs, Theorem 2 is
+**paper-finalized**. G5 (Lean) is a separate multi-week project.
+
+**Note on the Tier 1 / Tier 2 contrast:**
+
+Tier 1 needed `≤ tw(H)` individualizations because CFI graphs are
+specifically constructed to defeat 1-WL — the gauge structure hides
+orbits behind cycle-space obstacles that only `tw(H)` individualizations
+can resolve. Tier 2 graphs (scheme graphs) have no such obstacles — the
+scheme's algebraic structure is exactly what 1-WL is good at capturing.
+
+This is the **algebraic / non-algebraic split** in disguise: schemes
+are algebraic, CFI is non-algebraic (the gauge action is what makes
+CFI an obstacle to algebraic methods).

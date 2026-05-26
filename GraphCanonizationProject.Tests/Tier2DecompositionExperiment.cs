@@ -214,6 +214,106 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
         RunOrbitRecoveryUpToDepth(pair, 73728, baseGraphName: "Rook3x3", maxDepth: 4);
     }
 
+    // ── Tier 2 verification (orbit-recovery doc §14.7 step G6) ────────────────
+
+    // Theorem 2 of the orbit-recovery doc: for any scheme graph with a
+    // vertex-transitive schurian scheme, 1-WL at depth 1 recovers Aut_v orbits.
+    // Petersen graph = Kneser K(5,2) = scheme graph of Johnson scheme J(5,2)
+    // with edge set = R_2 (disjoint subsets). Schurian via Aut(Petersen) = S_5.
+    [Fact]
+    public void Petersen_OrbitRecovery_Depth1_Tier2Verification()
+    {
+        var adj = BuildPetersen();
+        VerifySchemeGraphOrbitRecovery(adj, expectedAutOrder: 120, label: "Petersen (Kneser K(5,2))");
+    }
+
+    // Johnson J(5,2) = triangular graph T(5) — adjacent iff share 1 element.
+    // Also schurian via Aut(J(5,2)) = S_5 (same group as Petersen, different graph).
+    [Fact]
+    public void JohnsonJ52_OrbitRecovery_Depth1_Tier2Verification()
+    {
+        var adj = BuildJohnsonJ52();
+        VerifySchemeGraphOrbitRecovery(adj, expectedAutOrder: 120, label: "Johnson J(5,2)");
+    }
+
+    private void VerifySchemeGraphOrbitRecovery(int[,] adjMatrix, BigInteger expectedAutOrder, string label)
+    {
+        int n = adjMatrix.GetLength(0);
+        var canonizer = new CanonGraphOrdererChainDescent();
+        canonizer.Run(new int[n], new AdjMatrix(adjMatrix));
+        Assert.NotNull(canonizer.LastAutomorphisms);
+        var aut = canonizer.LastAutomorphisms!;
+        output.WriteLine($"\n── {label} ── |Aut| = {aut.Order} (n = {n}), {aut.Generators.Count} generators");
+        Assert.Equal(expectedAutOrder, aut.Order);
+
+        var flatAdj = new int[n * n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++) flatAdj[i * n + j] = adjMatrix[i, j];
+
+        // Individualize vertex 0 (canonical choice for these uniformly-structured graphs).
+        int v = 0;
+        var color = new int[n];
+        OneWLRefine(flatAdj, n, color);
+        color[v] = color.Max() + 1;
+        OneWLRefine(flatAdj, n, color);
+
+        var cells = ExtractCells(color);
+        var orbits = ComputeStabilizerOrbits(v, n, aut.Generators);
+        output.WriteLine($"  cells: {cells.Count} sizes [{string.Join(",", cells.Select(c => c.Count).OrderByDescending(x => x))}]");
+        output.WriteLine($"  Aut_v orbits: {orbits.Count} sizes [{string.Join(",", orbits.Select(o => o.Count).OrderByDescending(x => x))}]");
+
+        bool match = CellsEqualOrbits(cells, orbits);
+        output.WriteLine($"  → cells = Aut_v orbits? {(match ? "YES" : "NO")}");
+        Assert.True(match, $"Theorem 2 expected: 1-WL = Aut_v orbits at depth 1 for {label}");
+    }
+
+    private static int[,] BuildPetersen()
+    {
+        // Vertices = 2-subsets of {0,1,2,3,4}; edges iff disjoint (Kneser K(5,2)).
+        var subsets = new List<(int, int)>();
+        for (int i = 0; i < 5; i++)
+            for (int j = i + 1; j < 5; j++)
+                subsets.Add((i, j));
+        int n = subsets.Count;
+        var adj = new int[n, n];
+        for (int x = 0; x < n; x++)
+            for (int y = x + 1; y < n; y++)
+            {
+                var (a1, a2) = subsets[x];
+                var (b1, b2) = subsets[y];
+                if (a1 != b1 && a1 != b2 && a2 != b1 && a2 != b2)
+                {
+                    adj[x, y] = 1; adj[y, x] = 1;
+                }
+            }
+        return adj;
+    }
+
+    private static int[,] BuildJohnsonJ52()
+    {
+        // Same vertices as Petersen, edges iff share exactly 1 element.
+        var subsets = new List<(int, int)>();
+        for (int i = 0; i < 5; i++)
+            for (int j = i + 1; j < 5; j++)
+                subsets.Add((i, j));
+        int n = subsets.Count;
+        var adj = new int[n, n];
+        for (int x = 0; x < n; x++)
+            for (int y = x + 1; y < n; y++)
+            {
+                var (a1, a2) = subsets[x];
+                var (b1, b2) = subsets[y];
+                int shared = 0;
+                if (a1 == b1 || a1 == b2) shared++;
+                if (a2 == b1 || a2 == b2) shared++;
+                if (shared == 1)
+                {
+                    adj[x, y] = 1; adj[y, x] = 1;
+                }
+            }
+        return adj;
+    }
+
     // Run the orbit-recovery check at depth 1 on both Aut-orbits (subset-start
     // and endpoint-start). For each, report whether 1-WL refinement after
     // fresh-colour individualization produces a partition equal to Aut_v orbits.
