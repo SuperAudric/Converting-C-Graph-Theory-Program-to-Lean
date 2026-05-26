@@ -275,6 +275,14 @@ axiom-free `theorem_1_HOR_at_n`'s `≤ n`. Corollaries
 the simpler bound forms. The CFI placeholder axioms now carry
 content over `cascadesAt_univ`.
 
+*Stage 4 / M1 — depth-bound concretized (2026-05-26):*
+`cfi_depth_bound` is now `def cfi_depth_bound h := h.baseSize` (was
+axiom); `cfi_depth_bound_le := Nat.le_refl _` (was axiom). Tier-1
+axiom budget **3 → 1** — only `cfi_cascades_polynomially` (the actual
+cascade lemma) remains. M2 (gadget-level lemmas), M3 (bridge
+propagation), M4 (cascade assembly) are pending multi-week tracks
+that together discharge the cascade axiom.
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

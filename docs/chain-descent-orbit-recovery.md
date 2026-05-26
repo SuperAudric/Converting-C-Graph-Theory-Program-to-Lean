@@ -539,6 +539,33 @@ collectively imply something stronger than `cascadesAt_univ` gives
 for free. The Tier 2 analogue refactor is still pending its concrete
 scheme predicate.
 
+*Stage 4 / M1 — Depth-bound concretization — DONE 2026-05-26.* With
+the depth-bound API tightened to take `IsCFI'` witnesses, the
+`cfi_depth_bound` and `cfi_depth_bound_le` axioms are dischargeable
+by direct definition. Done:
+
+- `def cfi_depth_bound h := h.baseSize` (was axiom).
+- `theorem cfi_depth_bound_le := Nat.le_refl _` (was axiom).
+
+Net effect: Tier-1 axiom budget **3 → 1**. The sole remaining
+Tier-1 axiom is `cfi_cascades_polynomially` (the actual cascade
+lemma).
+
+Concrete commit value `h.baseSize` is the "one-individualization-
+per-gadget" depth; classical bound `tw H ≤ baseSize` is a sharper
+realisation deferred to M5. The polynomial-runtime corollary needs
+only some polynomial bound; `baseSize ≤ n / 6` satisfies that.
+
+*Stage 4 / M2-M4 (PENDING, multi-week):* discharging
+`cfi_cascades_polynomially`. Plan in three milestones:
+- M2: gadget-level distinguishability — `a_∅^v` individualized
+  separates v's endpoints by parity in one round.
+- M3: bridge propagation — `e^b_{v→w}` ↔ `e^b_{w→v}` carries colour
+  across gadgets in O(diam H) rounds.
+- M4: assemble — construct S = {one `a_∅^v` per gadget}, prove
+  `warmRefine adj P χ_S` Discrete. Discharges
+  `cfi_cascades_polynomially`.
+
 *Combinatorial identity — DONE 2026-05-26.* The classical identity
 "the number of even-cardinality subsets of a nonempty `d`-element
 set is `2^(d-1)`" is proved as

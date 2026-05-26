@@ -474,44 +474,49 @@ example : Fintype.card triangleBase.CFIVertex = triangleBase.cfiVertexCount := b
 noncomputable example : IsCFI' triangleBase.cfiAdjMatrix :=
   cfiAdjMatrix_is_cfi triangleBase
 
-/-! ## §10 — Tier-1 CFI form of Theorem 1 (relocated from `ChainDescent.lean §17.4`)
+/-! ## §10 — Tier-1 CFI form of Theorem 1
 
-Two placeholder axioms (`cfi_depth_bound`, `cfi_cascades_polynomially`)
-+ derived theorem (`theorem_1_HOR_cfi`), formerly in
-[`ChainDescent.lean §17.4`](../ChainDescent.lean) using the abstract
-`axiom IsCFI`. Relocated here to use the concrete `IsCFI'` predicate
-built on `CFIBase` / `CFIVertex` / `cfiAdj`.
+The Tier-1 CFI specialisation of `theorem_1_HOR_at_depth`. Formerly in
+[`ChainDescent.lean §17.4`](../ChainDescent.lean) using an abstract
+`axiom IsCFI`; now uses the concrete `IsCFI'` `structure : Type` from
+§9, with the base graph addressable as data via projections (load-
+bearing for the depth-bound API).
 
-The axioms remain — the cascade lemma proper (Stage 4) discharges
-`cfi_cascades_polynomially` — but `IsCFI'` is now concrete, so a
-witness can be constructed (e.g., `cfiAdjMatrix_is_cfi` shows every
-`cfiAdjMatrix H` satisfies it).
+**Axiom status (Stage 4 progress):**
+- `cfi_depth_bound` — was an axiom; **discharged in M1** as
+  `def cfi_depth_bound h := h.baseSize`.
+- `cfi_depth_bound_le` — was an axiom; **discharged in M1** as
+  `Nat.le_refl _`.
+- `cfi_cascades_polynomially` — the cascade lemma proper. **The sole
+  remaining Tier-1 axiom.** Discharging it is M2-M4 (multi-week):
+  gadget-level distinguishability + bridge propagation + assembly.
 
 The Tier 2 analogue (`IsSchurianSchemeGraph`,
 `schurian_scheme_profile_exists`) still lives in `ChainDescent.lean
 §18` and uses an abstract Prop; it'll be relocated similarly once
 its concrete-scheme-based predicate is built. -/
 
-/-- **Abstract cascade-depth function for CFI graphs.** Takes a CFI
-witness `h : IsCFI' adj` and returns its cascade depth bound. Depends
-on the witness (i.e. on the base graph `h.H`), not just on `n` — that
-shape is what allows `cfi_depth_bound_le` below to claim a bound
-stronger than the trivial `≤ n`.
+/-- **Cascade-depth function for CFI graphs.** Concretely defined as
+`h.baseSize` — the cascade depth is bounded by the number of base
+graph vertices.
 
-Concrete realisation (`cfi_depth_bound h = tw h.H` or similar)
-requires Stage 4 of the CFI program. -/
-axiom cfi_depth_bound {n : Nat} {adj : AdjMatrix n} : IsCFI' adj → Nat
+This is the M1 milestone of Stage 4: committing to a concrete depth
+value, removing the `cfi_depth_bound` axiom. The bound is the
+"one-individualization-per-gadget" depth; the classical
+Cai-Fürer-Immerman bound `tw H` (≤ `baseSize`) is a sharper bound
+that requires the canonical picker and is deferred to M5.
 
-/-- **The CFI depth bound is `≤ baseSize`.** The depth bound is at most
-the number of vertices in the **base** graph, not in the CFI graph.
+For the chain-descent polynomial-runtime corollary, any polynomial
+bound suffices — `h.baseSize ≤ n / 6` (via `IsCFI'.six_baseSize_le`,
+§12) is polynomial in `n`. -/
+def cfi_depth_bound {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj) : Nat :=
+  h.baseSize
 
-Classical content: `tw H ≤ n_H = h.m = h.baseSize`. The improvement
-over `cascadesAt_univ`'s trivial `≤ n` bound: by
-`IsCFI'.six_baseSize_le` (§12), `h.baseSize ≤ n / 6`, so the depth
-bound is strictly smaller than the `n`-bound `cascadesAt_univ` already
-gives axiom-free. -/
-axiom cfi_depth_bound_le {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj) :
-    cfi_depth_bound h ≤ h.baseSize
+/-- **The CFI depth bound is `≤ baseSize`.** Trivial after M1's
+concretization (`cfi_depth_bound := h.baseSize`); previously an
+axiom. -/
+theorem cfi_depth_bound_le {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj) :
+    cfi_depth_bound h ≤ h.baseSize := Nat.le_refl _
 
 /-- **Fact A (polynomial-depth form).** A CFI graph cascades at depth
 `cfi_depth_bound h`. Stated using the concrete `IsCFI'` structure;
