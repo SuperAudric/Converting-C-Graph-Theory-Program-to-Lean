@@ -488,3 +488,130 @@ Next move in priority order:
 
 (1) is the actionable next step. (2) and (3) are slower analytical work.
 
+---
+
+## 10. Phase B step 2 — CFI(Petersen) probe results
+
+**Date:** 2026-05-26. Same test file, new test
+`CfiPetersen_DepthEscalation_CellSizesAndGadgetOverlap`. Runs in ~90 ms.
+
+### 10.1 Measured signatures
+
+CFI(Petersen): n = 100, 10 gadgets of 10 vertices each. Aut = Z₂⁶ ⋊ S₅
+where S₅ acts as the Johnson group on the 2-subsets of {1,…,5}.
+
+**Subset-start** (`v0:subset:{}`):
+
+| Depth | Cells | Cell sizes (desc, abbreviated) | Cascaded? |
+|---:|---:|---|:---:|
+| 0 | 1   | [100]                                  |  |
+| 1 | 12  | [24, 24, 12, 12, 6, 6, 3, 3, 3, 3, 3, 1] |  |
+| 2 | 56  | [4×4, 2×32, 1×20]                      |  |
+| 3 | 60  | [4×2, 2×34, 1×24]                      |  |
+| 4 | 68  | [2×32, 1×36]                           |  |
+| 5 | 100 | [1×100]                                | ✓ |
+
+**Endpoint-start** (`v0:end[w1]^0`):
+
+| Depth | Cells | Cell sizes (desc, abbreviated) |
+|---:|---:|---|
+| 0 | 1   | [100]                                       |
+| 1 | 20  | [16, 8×7, 4×4, 2×4, 1×4]                    |
+| 2 | 48  | [4×6, 2×34, 1×8]                            |
+| 3 | 60  | [4×2, 2×34, 1×24]                           |
+| 4 | 76  | [2×24, 1×52]                                |
+| 5 | 100 | [1×100]                                     |
+
+### 10.2 Findings
+
+**F5 — Iso-invariance (P2) CONFIRMED on CFI(Petersen).** Cell-size signatures
+match across identity and seeded permutation for both starting orbits.
+Strongest empirical evidence so far for P2.
+
+**F6 — Cascade at depth 5, not 4.** F2's "cascade ≈ tw(H)" was correct for
+K₄ (cascade = tw = 3) but underestimates Petersen (cascade = tw+1 = 5).
+Sharpest current statement: **cascade depth ≈ tw(H), occasionally tw(H)+1**.
+Both bounds are within a constant additive of each other, so the polynomial
+bound `B(n) = n^c` is unaffected. Open question: is the cascade-depth
+function of (H, picker choice) exactly characterizable?
+
+**F7 — The depth-1 subset-start signature reveals the residual group's
+orbit structure.** `[24, 24, 12, 12, 6, 6, 3, 3, 3, 3, 3, 1]` is consistent
+with Aut(CFI(Petersen)) acting on remaining 99 vertices via the S₅
+stabilizer of a 2-subset (which is S₂ × S₃, order 12) crossed with the
+residual gauge group. The orbit sizes 24, 12, 6, 3 correspond to
+(Petersen orbit size after fixing one J(5,2)-point) × (gauge dimension
+remaining at that orbit). This is **direct empirical evidence that the
+Johnson factor S₅ surfaces into the 1-WL refinement after one
+individualization** — the residual partition matches the residual group's
+orbits.
+
+**F8 — CFI(Petersen) is Tier-1, not Tier-2.** Cascade is reached at depth
+5, with cells of size ≤ 4 at depth 4 fully splitting on the next
+individualization. The encoded Johnson here is *decomposable* in exactly
+the way calculator.md §7 predicts: "CFI applied to a Johnson base produces
+(Z₂ᵐ, refinement-resistant) ⋊ (S_n, cascading) — a decomposable semidirect
+product." This experiment empirically confirms that claim.
+
+### 10.3 Implication: the experiment isn't probing genuine Tier-2
+
+The original framing was that CFI(Petersen) tests the "encoded hidden
+Johnson" hypothesis. The result shows the encoded Johnson **isn't actually
+hidden in this construction** — refinement plus individualization surfaces
+it within tw(H) + O(1) steps. Tier-1 behavior.
+
+Per hidden-johnson.md §6 and calculator.md §7, the *real* Tier-2 candidate
+would need to fuse refinement-resistance with non-abelian symmetry in a
+**non-decomposable** way, and no such construction is currently known.
+CFI-applied-to-anything is decomposable by design.
+
+So the experiment as originally scoped has reached its natural conclusion
+with a sharp finding: **the CFI ladder (C₃, K₄, Petersen) all cascade**;
+none are genuine Tier-2 instances. The decomposition recursion the
+experiment was scoped to test isn't needed for them — the existing chain
+descent + cascade oracle already handles them at depth ≤ tw(H) + 1
+individualizations.
+
+### 10.4 What's settled and what's next
+
+**Settled (this experiment delivered):**
+- P2 (iso-invariance of cell-size signatures) — confirmed on all three
+  instances. Strong candidate for Lean formalization.
+- F6 (cascade depth ≈ tw(H)) — measured, two data points (K₄: tw, Petersen:
+  tw+1), holds within a constant additive.
+- F7 (refinement reveals residual-group orbit structure) — concrete
+  empirical evidence that the S₅ Johnson factor is *visible* in CFI(Johnson)
+  refinement after one individualization.
+- F8 (CFI ladder is Tier-1, not Tier-2) — calculator.md §7's claim
+  empirically reproduced.
+
+**Open / next moves:**
+
+1. **Pivot the Tier-2 effort** — since CFI variants are all Tier-1, the
+   experiment as scoped doesn't probe the actual question. Three options:
+   - (a) **Look for a genuine Tier-2 construction.** Open problem in the
+     hidden-Johnson direction; no candidates known.
+   - (b) **Implement the linear oracle** (calculator.md §6) — since the
+     CFI ladder cascades, the linear oracle's role becomes clearer: it's
+     for resolving the residual Z₂ᵐ gauge after the S_n piece cascades.
+     Direct value, immediately useful.
+   - (c) **Lift F7 to a theorem.** State and prove (paper-then-Lean) that
+     1-WL refinement after fresh-colour individualization recovers the
+     residual stabilizer's orbit partition on CFI(Johnson base). This is
+     a Tier-1 cascade theorem — a strong building block for proving T-C
+     on the cascade class.
+2. **Generalize P3'** with the structure of F7. The depth-1 signature
+   `[24,24,12,12,6,6,3×5,1]` decomposes as (Petersen-orbit-sizes
+   {1, 6, 3}) × (gauge-dim per orbit). Formalizing this gives a precise
+   conjecture for the residual partition under CFI(any base).
+3. **Stop deferring picker comparison.** F6's "tw or tw+1" might be
+   picker-dependent. The smallest-cell picker on Petersen might cascade
+   at exactly tw=4. Worth measuring before drawing conclusions.
+
+**Recommended next:** option (1c) — promote F7 to a paper-then-Lean theorem.
+It's the most directly useful output of the experiment so far, and it lands
+in the existing Lean infrastructure (warm refinement, fresh-colour, descent
+spine). The decomposition recursion (the experiment's original goal) is
+shelved as not-needed-for-CFI; option (1b) [linear oracle] is the
+algorithmically valuable follow-on.
+

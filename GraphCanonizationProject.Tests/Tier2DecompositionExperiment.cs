@@ -73,6 +73,63 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
             $"Expected cascade ≤ depth 5 from endpoint start; got {cascadeEndpt}");
     }
 
+    // The actual Tier-2 probe: CFI(Petersen) = CFI(J(5,2)). 100 vertices.
+    // Aut = Z_2^6 ⋊ S_5 where S_5 acts as the Johnson group on 2-subsets.
+    //
+    // Hard assertion: iso-invariance of cell-size signature across scramblings.
+    // Soft observation: cascade depth (reported, not asserted). If Petersen
+    // cascades at depth ≈ tw(H) = 4, the Johnson factor is surfacing into
+    // refinement (cascade-class behavior). If it doesn't cascade within
+    // maxDepth, we've localized the encoded-Johnson resistance — Tier-2.
+    [Fact]
+    public void CfiPetersen_DepthEscalation_CellSizesAndGadgetOverlap()
+    {
+        var pair = CfiGraphGenerator.Generate("Petersen");
+        int n = pair.Even.VertexCount;
+        Assert.Equal(100, n);
+
+        var adj = FlattenAdj(pair.Even);
+        var roles = pair.VertexRoles;
+        var gadget = ParseGadgets(roles);
+        int numGadgets = gadget.Max() + 1;
+        Assert.Equal(10, numGadgets);
+
+        string startSubset   = "v0:subset:{}";
+        string startEndpoint = PickFirstEndpointRole(roles, "v0");
+        output.WriteLine($"Endpoint start role: {startEndpoint}");
+
+        const int maxDepth = 8;     // tw(Petersen)=4, give headroom for surprise.
+
+        var probeSubset = RunProbe(adj, n, roles, gadget, startSubset,   maxDepth);
+        var probeEndpt  = RunProbe(adj, n, roles, gadget, startEndpoint, maxDepth);
+        DumpProbeCondensed("identity / start=subset",   probeSubset);
+        DumpProbeCondensed("identity / start=endpoint", probeEndpt);
+
+        var sigma      = MakePermutation(n, seed: 4711);
+        var adjPerm    = PermuteAdjacency(adj, n, sigma);
+        var rolesPerm  = PermuteRoles(roles, sigma);
+        var gadgetPerm = ParseGadgets(rolesPerm);
+
+        var probeSubsetPerm = RunProbe(adjPerm, n, rolesPerm, gadgetPerm, startSubset,   maxDepth);
+        var probeEndptPerm  = RunProbe(adjPerm, n, rolesPerm, gadgetPerm, startEndpoint, maxDepth);
+
+        // P2 — hard assertion.
+        AssertSignaturesMatch("subset",   probeSubset, probeSubsetPerm);
+        AssertSignaturesMatch("endpoint", probeEndpt,  probeEndptPerm);
+
+        // Cascade depth — observation only, no assertion. The whole point of
+        // the Petersen probe is to discover this empirically.
+        int cascadeSubset = probeSubset.FindIndex(r => r.NumCells == n);
+        int cascadeEndpt  = probeEndpt .FindIndex(r => r.NumCells == n);
+        output.WriteLine($"\nCascade depth — subset-start: {DepthLabel(cascadeSubset)}");
+        output.WriteLine(  $"Cascade depth — endpoint-start: {DepthLabel(cascadeEndpt)}");
+        output.WriteLine(  $"(tw(Petersen) = 4; F2 from CFI(K4) predicts cascade at depth ≈ tw)");
+
+        // Final cell count at maxDepth — for the non-cascade case.
+        output.WriteLine($"Final cell count — subset-start: {probeSubset[^1].NumCells} (depth {probeSubset[^1].Depth})");
+        output.WriteLine($"Final cell count — endpoint-start: {probeEndpt[^1].NumCells} (depth {probeEndpt[^1].Depth})");
+    }
+
     // Sanity-check the refiner against the hand-computed CFI(C3) result from
     // docs/chain-descent-tier2-decomposition-experiment.md §8.2.
     [Fact]
@@ -326,6 +383,46 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
                 output.WriteLine($"      cell {c,2}: gadget-overlap [{string.Join(", ", row)}]  total {row.Sum()}");
             }
         }
+    }
+
+    // Condensed dump for large graphs: cell-size signature + cell-by-gadget
+    // class summary, skipping per-cell overlap listings. Groups cells by their
+    // gadget-overlap pattern and reports counts.
+    private void DumpProbeCondensed(string label, List<ProbeResult> probe)
+    {
+        output.WriteLine($"\n── {label} ──");
+        foreach (var r in probe)
+        {
+            output.WriteLine($"  depth {r.Depth} — individualized: {r.IndividualizedRole}");
+            output.WriteLine($"    cell-sizes (desc): [{string.Join(", ", r.CellSizes)}]  ({r.NumCells} cells)");
+
+            // Group cells by their normalized gadget-overlap pattern (sorted desc).
+            int numGadgets = r.CellByGadget.GetLength(1);
+            var patternCounts = new Dictionary<string, int>();
+            for (int c = 0; c < r.NumCells; c++)
+            {
+                var row = new int[numGadgets];
+                for (int g = 0; g < numGadgets; g++) row[g] = r.CellByGadget[c, g];
+                if (row.Sum() == 0) continue;
+                Array.Sort(row);
+                Array.Reverse(row);
+                string key = "[" + string.Join(",", row) + "]";
+                patternCounts[key] = patternCounts.GetValueOrDefault(key, 0) + 1;
+            }
+            foreach (var kvp in patternCounts.OrderByDescending(kv => kv.Value))
+                output.WriteLine($"      overlap pattern {kvp.Key}: {kvp.Value} cell(s)");
+        }
+    }
+
+    private static string PickFirstEndpointRole(string[] roles, string gadgetPrefix)
+    {
+        var prefix = gadgetPrefix + ":end[";
+        var match = roles.Where(r => r.StartsWith(prefix) && r.EndsWith("]^0"))
+                         .OrderBy(r => r, StringComparer.Ordinal)
+                         .FirstOrDefault();
+        if (match == null)
+            throw new InvalidOperationException($"No endpoint role found with prefix '{prefix}'");
+        return match;
     }
 
     private static void AssertSignaturesMatch(string label, List<ProbeResult> a, List<ProbeResult> b)
