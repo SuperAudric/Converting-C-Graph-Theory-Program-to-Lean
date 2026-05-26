@@ -552,29 +552,50 @@ against the project's chain-descent canonizer, which harvests
 [Tier2DecompositionExperiment.cs](../GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs)
 `CfiK4_OrbitRecovery_...` and `CfiPetersen_OrbitRecovery_...`.
 
-### 9.5 Empirical verification — F7 strict form CONFIRMED
+### 9.5 Empirical landscape — F7 strict form holds in MOST but NOT ALL cases
 
 The orbit-recovery comparison runs the canonizer to get `Aut(CFI(H))`
 generators, computes `Aut_v` orbits via the pair-orbit method, and
-compares against 1-WL cells at depth 1. Result table (test passes 4/4):
+compares against 1-WL cells at depth 1. Extended result table (test:
+`Tier2DecompositionExperiment.cs::Cfi*_OrbitRecovery_*`, 4 connected
+bases × 2 start orbits each):
 
-| Instance | Start orbit | Aut order | Aut_v orbit count | Cells at depth 1 | Match? |
+| Instance | Start | Aut order | Aut_v orbit count | Cells at depth 1 | Match? |
 |---|---|---:|---:|---:|:---:|
-| CFI(K₄) | subset (`v0:subset:{}`) | 192 = 2³·24 | 9 | 9 | **YES** |
-| CFI(K₄) | endpoint (`v0:end[w1]^0`) | 192 = 2³·24 | 14 | 14 | **YES** |
-| CFI(Petersen) | subset | 7680 = 2⁶·120 | 12 | 12 | **YES** |
-| CFI(Petersen) | endpoint | 7680 = 2⁶·120 | 20 | 20 | **YES** |
+| CFI(K₄) | subset | 192 = 2³·24 | 9 | 9 | YES |
+| CFI(K₄) | endpoint | 192 = 2³·24 | 14 | 14 | YES |
+| CFI(K₃,₃) | subset | 1152 = 2⁴·72 | 11 | 11 | YES |
+| CFI(K₃,₃) | endpoint | 1152 = 2⁴·72 | 16 | 16 | YES |
+| CFI(Petersen) | subset | 7680 = 2⁶·120 | 12 | 12 | YES |
+| CFI(Petersen) | endpoint | 7680 = 2⁶·120 | 20 | 20 | YES |
+| CFI(Rook3×3) | subset | 73728 = 2¹⁰·72 | **15** | **14** | **NO** |
+| CFI(Rook3×3) | endpoint | 73728 = 2¹⁰·72 | 31 | 31 | YES |
 
-Aut orders match the theoretical `2^{β_H} · |Aut(H)|`, so the canonizer's
-harvested Aut is complete (not partial). The comparison is rigorous, not
-heuristic.
+**Score: 7 of 8 pass.** The single counterexample is **CFI(Rook3×3)
+subset start**: 1-WL produces 14 cells while Aut_v has 15 orbits.
+Specifically, 1-WL merges two distinct Aut_v-orbits (sizes 4 and 2)
+into a single cell of size 6. 1-WL is strictly coarser than Aut_v at
+depth 1 for this case.
 
-**Conclusion: F7 holds in its strict form at depth 1** —
-`P(CFI(H), {v}) = O(CFI(H), {v})` — on both Aut-orbits of CFI(K₄) and
-CFI(Petersen). The earlier "discrepancy" flag (now removed) was a flaw
-in my hand analysis of within-gadget gauge action, not a real gap. The
-empirical reality is cleaner than the rough theoretical sketch
-suggested.
+**Side observation on Cycle bases.** CFI(C_k) for odd k is *disconnected*
+— it splits into two disjoint cycles of length 3k. The canonizer
+processes each component separately and its `LastAutomorphisms` returns
+the Aut of just one component, not the full graph. Multi-component CFI
+graphs are out of scope for the single-stabilizer F7 framing. The
+disconnect for odd cycles is a CFI construction quirk; for our purposes
+(connected CFI), we restrict to bases producing connected CFI graphs.
+
+**Implications for F7 strict form.** F7 as originally stated ("cells =
+Aut_v orbits at depth 1, for any CFI(H)") is **EMPIRICALLY FALSE**. It
+holds for K₄, K₃,₃, Petersen, and Rook3×3 endpoint start — but fails
+for Rook3×3 subset start. The hypothesis needs a structural restriction
+that excludes the failure case; characterising that restriction is open.
+
+**What's *not* falsified.** The cascade property (1-WL reaches discrete
+partition = orbit partition when Aut_S trivial after enough
+individualizations) holds for all tested CFI(H). The weaker F7 ("cells
+= orbits at some depth ≤ cascade_depth(H)") is consistent with all data.
+Just the depth-1 part is too aggressive.
 
 ### 9.6 What's next — L4 unblocked
 
@@ -631,9 +652,25 @@ the partition predicted by `Aut_v` is exactly what refinement produces.
 
 ## 10. L4 paper proof — 1-WL recovers Aut_v orbits
 
-The technical heart. Three sub-lemmas, proved by structural induction
-on `dist_H(u₀, u)` (distance in the base graph from `v`'s gadget to the
-gadget under analysis).
+**Important update 2026-05-26.** L4 in its originally-conjectured strict
+form ("at depth 1, cells = Aut_v orbits for any CFI(H)") is
+**falsified** by CFI(Rook3×3) subset start (§9.5). The proof program
+below was structured around the strict form; it remains useful as
+scaffolding for two refined directions:
+
+- **L4-restricted**: identify the structural property of (H, vertex type)
+  for which F7 holds at depth 1, and prove L4 conditionally.
+- **L4-graded**: state and prove F7 at some depth `k(H, type) ≤ tw(H) +
+  O(1)` (graded by individualization depth, not strict at depth 1).
+
+The proof outline (L4a, L4b, L4c) below was written under the strict
+hypothesis and inherits the falsification. **The L4a "gauge stabilizer
+of v acts trivially on X(u₀)" claim is wrong** for some cases — the
+within-gadget gauge structure on Rook3×3 subset is what breaks depth-1
+F7. The structural mistake is described in §10.9.
+
+Reading guide: §§10.1–10.6 capture the strict-form attempt as historical
+scaffold. §§10.7–10.9 capture what went wrong and the refined plan.
 
 ### 10.1 Precise statement and what we use
 
@@ -872,20 +909,66 @@ This is the rigorous form. Filling in the constant `c` (probably
 `O(diam H)`) and the precise step argument is the remaining technical
 work.
 
-### 10.8 Status and next step
+### 10.8 Status after the Rook3×3 counterexample
 
-- **L4 outline written.** L4a, L4b, L4c stated and structured.
-- **Rigorous skeleton in place** (induction on `d(u)`, with base case
-  and step lemmas identified).
-- **Two technical gaps explicit**: (i) the within-gadget /
-  cross-gadget circularity in L4a–L4b; (ii) the precise step lemma
-  in L4b proving the propagation matches orbits exactly.
-- **Recommended next**: pick (i) or (ii) and write the explicit
-  case analysis. (i) is likely cleaner — restructure as L4' (joint
-  induction on `r`).
+- **L4 strict form FALSIFIED.** CFI(Rook3×3) subset start: 1-WL gives 14
+  cells, Aut_v has 15 orbits. 1-WL merges a size-4 and a size-2 Aut_v
+  orbit into a single size-6 cell. The proof outline above is therefore
+  incomplete; at least one of its sub-claims (most likely L4a's
+  within-gadget claim) is wrong.
+- **F7 holds in 7 of 8 tested cases** (K₄, K₃,₃, Petersen on both starts;
+  Rook3×3 endpoint only). So F7 strict at depth 1 isn't universally true
+  but is the common case.
+- **No structural characterisation** of (H, vertex type) where F7
+  strict holds. Open.
 
-**Empirical safety net.** F7 is verified at depth 1 on 4 CFI
-instances, so the partition we're trying to derive analytically *is*
-the right one. Any analytical argument that produces something
-different is wrong; this is a sharp cross-check the proof has against
-itself.
+### 10.9 What went wrong in the L4 outline
+
+The §10.3 L4a claim "gauge stabilizer of `v` acts trivially on
+`X(u₀)`" was based on a hand-derived index-2 analysis that turns out
+to be CFI-base-dependent. For K₄ / K₃,₃ / Petersen subset starts, it
+happens to give the right within-gadget orbit structure (matching
+1-WL). For Rook3×3 subset start, the gauge stabilizer structure is
+richer and produces an extra orbit refinement that 1-WL doesn't see.
+
+The mismatch is on the *gauge action within `v`'s own gadget*: the
+"gauge group acts trivially on X(u₀)" simplification holds for some
+base graphs and not others. The structural distinguisher between
+"works" and "fails" cases isn't yet identified.
+
+### 10.10 Refined work plan
+
+Two directions, in priority order:
+
+**(A) Investigate Rook3×3 subset failure.** Concrete questions:
+- Does F7 recover at depth 2 for Rook3×3 subset? (Likely yes — pattern
+  consistent with "1-WL needs one extra individualization for some
+  bases".)
+- What structural property of (H, vertex type) predicts depth-1 vs
+  depth-2 recovery? Candidates: WL-dimension of the local structure,
+  algebraic structure of base-vertex stabilizer in Aut(H).
+- Test depth-2 recovery via a code extension (compute Aut_{v,v'} orbits
+  for various v' choices). Tractable.
+
+If A gives a clean predictor: **L4-graded** (F7 at depth k(H, type) with
+k bounded) becomes the right theorem statement. Provable.
+
+If A doesn't give a clean predictor: F7 strict is fundamentally
+heuristic, and Tier 1 in its sharp form may not be achievable.
+
+**(B) Pivot to Tier 2 (association schemes).** Association schemes
+have well-understood orbit structure and 1-WL behavior. For schemes:
+1-WL after one individualization recovers Aut_v orbits cleanly (this
+is essentially Piece C of hidden-johnson.md). So **Tier 2 is the
+sharper target** — likely provable in its strict depth-1 form because
+schemes are algebraically more constrained than arbitrary CFI(H).
+
+The Tier-2 approach may simply skip Tier 1's depth-1 question and
+deliver the orbit-recovery theorem for the algebraically-clean cases
+(Johnson, Hamming, distance-regular). This is still a real result and
+subsumes most cases that motivated the program.
+
+**Recommendation:** if (A) is bounded effort (~1–2 days of code +
+analysis), do it — the data is intrinsically valuable. If (A) doesn't
+quickly reveal the structural predictor, pivot to (B). The two are
+parallel and complementary.
