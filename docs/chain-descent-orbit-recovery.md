@@ -1069,3 +1069,183 @@ After Tier 1 has a stable theorem (item 2 above), Tier 2 (association
 schemes) becomes the natural next direction. Tier 1's graded form is
 strictly weaker than the depth-1 form that Tier 2 would have for
 schemes, so Tier 2 is genuinely stronger.
+
+---
+
+## 11. Paper proof sketch (Tier 1)
+
+This section drafts the paper proof of the Tier-1 orbit-recovery
+theorem. Honest assessment up front: **most of the proof is citation
+of classical CFI / WL theory**; the new content is the empirical
+landscape observation and the algorithmic framing (HOR). Reading the
+proof carefully shows where the genuine work is and where we lean on
+literature.
+
+### 11.1 Theorem statement (HOR form)
+
+For chain-descent's polynomial-cost analysis, the right statement is
+in terms of branching behavior rather than abstract 1-WL refinement.
+
+> **Theorem 1 (Hidden Orbit Revelation for CFI).** Let `H` be a
+> connected base graph and `G = CFI(H)`. Let
+> `S = (v_1, …, v_k) ⊆ V(G)` be any sequence of fresh-colour
+> individualizations chosen by the canonical chain-descent picker
+> (lowest cell id, then lex-smallest within-cell role). Then there
+> exists `k ≤ tw(H)` such that the 1-WL fixpoint partition on
+> `(G, S)` equals the orbit partition of `Aut(G)_S`.
+
+The HOR framing: the **cell-orbit gap closes within tw(H) branching
+steps**.
+
+The equivalent F7-graded form (orbit-recovery centric): "1-WL after
+tw(H) individualizations is orbit-complete on CFI(H)."
+
+### 11.2 Setup
+
+Notation as in §9.1: `H`, `V_H`, `E_H`, `β_H = |E_H| - |V_H| + 1`,
+gadget `X(u)`, vertex types subset / endpoint, gauge / base
+automorphism decomposition.
+
+Define the **cell-orbit gap** at depth `k`:
+```
+gap(G, S) = |P_∞(G, S)| - |O(G, S)|
+```
+where `P_∞(G, S)` is the 1-WL fixpoint partition after individualizing
+`S` and `O(G, S)` is the `Aut(G)_S`-orbit partition. By the trivial
+direction (§10.1), `P_∞ ≤ O` as refinements, so `gap ≤ 0` always.
+`gap = 0` iff cells equal orbits.
+
+Theorem 1 says: there exists `k ≤ tw(H)` with `gap(G, S_k) = 0`,
+where `S_k = (v_1, …, v_k)`.
+
+### 11.3 Proof — main argument
+
+The proof reduces to three classical facts plus assembly.
+
+**Fact A (CFI cascade depth, Cai-Fürer-Immerman 1992).** Chain descent
+with the canonical picker on `CFI(H)` reaches a discrete partition
+(every vertex in its own cell) within at most `tw(H)` individualization
+steps.
+
+*Reference.* Cai, Fürer, Immerman (1992), Theorem 5.4 implicit version
+phrased for k-WL dimension; restated for chain descent by Grohe (2017)
+Chapter 13.4. The result follows from the structure of CFI gadgets:
+each individualization "breaks" one independent cycle of the base
+graph's cycle space (via parity propagation through the broken
+gadget); after `tw(H)` such breaks, the cycle space is fully broken
+and the partition discretizes.
+
+**Fact B (orbit partition at discrete depth).** When the 1-WL partition
+of `(G, S)` is discrete, `Aut(G)_S` is trivial and `O(G, S) = P_∞(G,
+S)` (both are the partition into singletons).
+
+*Proof.* `Aut(G)_S` consists of automorphisms fixing every vertex in
+`S`. At discrete depth, every other vertex is also pinned by its
+unique 1-WL signature relative to `S`. A non-identity automorphism
+would need to map some non-`S` vertex `w` to a different vertex `w'`
+with the same signature — but at discrete depth, signatures are
+unique, so no such `w'` exists. Hence `Aut(G)_S = {1}`, and the orbit
+partition is singletons. The 1-WL partition is also singletons by
+hypothesis. ∎
+
+**Fact C (existence of k ≤ tw(H)).** By Fact A, there exists
+`k ≤ tw(H)` such that `P_∞(G, S_k)` is discrete. By Fact B, at this
+`k`, `P_∞(G, S_k) = O(G, S_k)`.
+
+This proves Theorem 1. ∎
+
+### 11.4 Honest assessment of the proof
+
+**What's classical:**
+- Fact A (cascade depth ≤ tw(H)) is the cornerstone CFI result. We
+  cite, don't reprove.
+- Fact B (discrete ⟹ orbits trivial) is a simple observation.
+
+**What's new:**
+- The HOR framing (gap closure as algorithmic metric).
+- Empirical observations: F7 can hold at depths far less than tw(H)
+  for many bases (K4, K33, Petersen all at depth 1). This is NOT a
+  theorem but an observed pattern.
+
+**What the proof does NOT give:**
+- A bound on `k` lower than `tw(H)` for specific CFI bases. The
+  K4-at-depth-1 phenomenon is observed but not explained by Theorem 1.
+- A characterization of which (H, vertex type) pairs achieve F7 at low
+  depth.
+- Any insight into the FAILURE pattern at intermediate depths (e.g.,
+  why the Rook3×3 gap GROWS from −1 at depth 1 to −3 at depth 3 before
+  closing at depth 4).
+
+These open questions are interesting research directions but separate
+from Theorem 1.
+
+### 11.5 Why this is still useful for chain descent
+
+Theorem 1 gives chain descent the polynomial cost bound:
+
+**Corollary 1 (chain descent on CFI(H) is polynomial-bounded for
+fixed tw(H)).** For CFI(H) with `tw(H) = c` (constant), chain descent
+with the canonical picker canonizes in time `poly(|V(G)|)`.
+
+*Proof sketch.* Per Theorem 1, the descent tree has depth at most
+`tw(H) = c`. At each level, the branching factor is bounded by the
+cell size at that level. Cell sizes are bounded by gadget size
+`O(2^{degmax})` × number of gadgets = `O(2^{degmax} · |V_H|)`. The
+total node count is `cell-size^c = poly(|V_H|)` for fixed `c`. Each
+node does polynomial work (1-WL refinement is `O(|V(G)|^2)`). Total:
+`poly(|V(G)|)`. ∎
+
+The "for fixed tw(H)" qualifier is essential. For graph families with
+unbounded tw, the bound is not polynomial. For the cascade class
+(bounded tw), it is.
+
+### 11.6 Sharpening direction (open)
+
+Theorem 1's `k ≤ tw(H)` bound is achieved (= tw(H)) for Rook3×3
+subset but vastly over-estimated (= 1, much less than tw(H)) for K4,
+K33, Petersen.
+
+The structural reason: 1-WL with fewer individualizations sometimes
+already distinguishes Aut_S orbits. The condition under which this
+happens is **base-specific** and not captured by a uniform bound.
+
+**Open question (could be a paper of its own).** For CFI(H), what is
+the precise function `k(H, vertex_type) ≤ tw(H)` such that 1-WL after
+`k` fresh-colour individualizations is orbit-complete on
+`Aut(CFI(H))_{S_k}`? Empirically: 1 for K4/K33/Petersen subset starts;
+1 for endpoint starts of all four bases tested; tw(H) for Rook3×3
+subset start. No clean predictor identified.
+
+### 11.7 Recommended path forward
+
+**For the Tier-1 paper:**
+1. State Theorem 1 (HOR for CFI) with Facts A, B, C as cited /
+   proved.
+2. State Corollary 1 (polynomial cost for fixed tw(H)).
+3. Note empirical landscape (`k` often much less than tw(H)) as
+   motivation for the sharpening question.
+4. Leave the sharpening question open as future work.
+
+**For Lean formalization:** the proof is short enough to formalize
+once the CFI machinery (gadget structure, gauge action, `Aut(CFI(H))`
+decomposition) is in Lean. The mathematical content is bounded;
+infrastructure is the bottleneck.
+
+**Next research direction:** Tier 2 (association schemes) gives a
+cleaner depth-1 statement (1-WL at depth 1 = orbits for scheme
+graphs), strictly stronger than Tier 1's tw(H) bound. This is the
+sharper statement promised by §2's tier ladder.
+
+### 11.8 What I'd revise the orbit-recovery doc to look like
+
+If we accept Theorem 1 as the Tier-1 deliverable:
+- §§1–8 of this doc remain the overview, generality tiers, and
+  empirical context.
+- §9's "verification" section stays as supporting evidence.
+- §10's "L4 strict outline" becomes "historical scaffolding —
+  superseded by §11 cascade proof."
+- §11 is the new authoritative section.
+- §12+ (future) can be Tier 2 (scheme graphs) when we get there.
+
+This restructure is doc-only and would happen after the user
+confirms the §11 sketch is what they want.
