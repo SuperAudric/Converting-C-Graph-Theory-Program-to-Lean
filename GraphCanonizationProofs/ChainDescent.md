@@ -535,8 +535,36 @@ M4 and Tier 2's planned Step 2 induction).
   `trivialSchurianScheme : SchurianScheme 1`.
 
 All T2.1 declarations axiom-clean (`propext` + `Classical.choice`
-+ `Quot.sound`; no `refineStep`). Next: T2.2 (`vProfile` + Step 1
-algebraic core).
++ `Quot.sound`; no `refineStep`).
+
+**Tier 2 Lean — Stages T2.2 + T2.3 infrastructure DONE 2026-05-26.**
+Same `Scheme.lean` module extended (~700 lines total now).
+
+- §4 — **T2.2 v-profile + Step 1 (algebraic, scheme-Aut form):**
+  `vProfile S v` (noncomputable Colouring n) with helpers
+  `vProfile_self`, `vProfile_eq_iff`, `vProfile_eq_zero_iff`,
+  `vProfile_ne_self_of_ne` (= `SchemeProfile.v_singleton`).
+  `SchemeOrbitPartition` (v-stabilized scheme-Aut orbits) with
+  refl/symm/trans. Step 1: `vProfile_aut_invariant`,
+  `SchurianScheme.vProfile_eq_imp_schemeOrbit`,
+  `SchurianScheme.vProfile_iff_schemeOrbit`.
+- §5 — **SchemeGraph structure:** `scheme + J + zero_notMem_J`
+  bundle, derived `adj : AdjMatrix n` (noncomputable), plus
+  `adj_eq_one_iff`/`_zero_iff`/`_self`/`_symm`/`_zero_or_one`.
+- §6 — **SchurianSchemeGraph:** extends SchemeGraph with two
+  schurian fields w.r.t. graph-Aut (`schurian_transitive` and
+  `isAut_imp_isSchemeAut`); provides graph-Aut `relOfPair_aut_eq`
+  and `vProfile_aut_invariant`.
+- §7 — **Step 1 in graph-Aut terms:** `GraphOrbitFixing adj v w u`
+  (refl/symm/trans). Headlines `vProfile_eq_imp_graphOrbit`,
+  `graphOrbit_imp_vProfile_eq`, `vProfile_iff_graphOrbit`. This is
+  the `SchemeProfile.profile_iff_orbit`-shaped statement (modulo
+  P-preservation bridge for arbitrary P).
+
+All T2.2 + T2.3 prerequisites axiom-clean. **Remaining:** Step 2
+proper (round-1 lemma + intersection-number induction + warmRefine
+lift; ~300 lines) and T2.M4 (SchemeProfile constructor +
+P-preservation bridge + discharge `schurian_scheme_profile_exists`).
 
 **Refuted (machine-checked, kept as record of dead routes):**
 

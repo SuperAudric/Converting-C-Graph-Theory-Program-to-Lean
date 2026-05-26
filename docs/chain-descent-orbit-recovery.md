@@ -1303,7 +1303,41 @@ and `trivialSchurianScheme : SchurianScheme 1` (single-vertex scheme,
 identity-only Aut). Confirms structures are inhabited.
 
 All T2.1 declarations axiom-clean (only `propext`, `Classical.choice`,
-`Quot.sound`). Next: T2.2 (`vProfile` + Step 1 algebraic core).
+`Quot.sound`).
+
+*Stage T2.2 — DONE 2026-05-26.* §4 of `Scheme.lean`. Defines
+`vProfile (S : AssociationScheme n) (v : Fin n) : Colouring n`
+(noncomputable) with helpers `vProfile_self`, `vProfile_eq_iff`,
+`vProfile_eq_zero_iff`, `vProfile_ne_self_of_ne` (matches
+`SchemeProfile.v_singleton`). `SchemeOrbitPartition` (v-stabilized
+scheme-Aut orbit) with refl/symm/trans. Step 1's algebraic core:
+`vProfile_aut_invariant` (forward via `IsSchemeAut.relOfPair_eq`),
+`SchurianScheme.vProfile_eq_imp_schemeOrbit` (reverse via the
+`schurian` field), and the combined `vProfile_iff_schemeOrbit`.
+
+*Stage T2.3 infrastructure — DONE 2026-05-26.* §5-§7 of `Scheme.lean`.
+- **§5 — `SchemeGraph`**: `scheme + J + zero_notMem_J` structure,
+  derived `adj : AdjMatrix n` (noncomputable), plus `adj_eq_one_iff`,
+  `adj_eq_zero_iff`, `adj_self`, `adj_symm`, `adj_eq_zero_or_one`.
+- **§6 — `SchurianSchemeGraph`**: extends `SchemeGraph` with two
+  schurian fields w.r.t. graph-Aut (`schurian_transitive` and
+  `isAut_imp_isSchemeAut`). Provides `relOfPair_aut_eq` and
+  `vProfile_aut_invariant` in graph-Aut terms.
+- **§7 — Step 1 in graph-Aut terms**: `GraphOrbitFixing adj v w u`
+  predicate (refl/symm/trans). Headlines
+  `vProfile_eq_imp_graphOrbit` (forward, uses `schurian_transitive`),
+  `graphOrbit_imp_vProfile_eq` (reverse, uses
+  `isAut_imp_isSchemeAut`), and the combined
+  `vProfile_iff_graphOrbit`. This is the
+  `SchemeProfile.profile_iff_orbit`-shaped statement, modulo the
+  P-preservation bridge (which collapses when `P` is
+  permutation-invariant).
+
+All T2.2 + T2.3 prerequisites axiom-clean. **Next:** Step 2 itself
+(round-1 lemma → inductive step via intersection numbers →
+convergence bound; ~300 lines, 2-3 days estimated). Then T2.M4
+(SchemeProfile constructor + P-preservation bridge + discharge
+`schurian_scheme_profile_exists`).
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

@@ -330,45 +330,84 @@ Landed in
 `ChainDescent.lean §16.4`. Both tiers now use them without a CFI
 import; both remain axiom-clean.
 
-### Stage T2.2 — v-profile + Step 1 (algebraic)
+### Stage T2.2 — v-profile + Step 1 (algebraic) — DONE 2026-05-26
 
-- **T2.2.a** — `vProfile S v : Colouring n`. Helpers:
-  `vProfile_self`, `vProfile_eq_iff` (chararacterizes equality via
-  relation indices), `vProfile_singleton_v`.
-- **T2.2.b (S1.a)** — `vProfile_aut_invariant`: `g ∈ Aut_v` ⟹
-  `vProfile (g w) = vProfile w`. Proof: g preserves relations
-  pointwise.
-- **T2.2.c (S1.b)** — `vProfile_eq_imp_orbit`: profile equality
-  implies same Aut_v orbit (uses schurian).
-- **T2.2.d** — `vProfile_iff_orbit`: combine T2.2.b + T2.2.c into the
-  bidirectional form. This is the **`profile_iff_orbit` field** of
-  `SchemeProfile`.
+Landed as §4 of `Scheme.lean` (~150 lines, axiom-clean).
 
-**Estimated:** ~150-200 lines. Group-theory bridging is the trickiest
-part.
+- **T2.2.a — DONE** — `vProfile (S : AssociationScheme n) (v : Fin n)
+  : Colouring n` (noncomputable; depends on `relOfPair`). Helpers:
+  `vProfile_self` (= 0 at v), `vProfile_eq_iff` (equality ↔
+  `relOfPair` equality), `vProfile_eq_zero_iff` (= 0 ↔ = v),
+  `vProfile_ne_self_of_ne` (the `SchemeProfile.v_singleton` field).
+- **T2.2.b (S1.a) — DONE** — `vProfile_aut_invariant`: v-stabilizing
+  scheme-Aut preserves `vProfile`. Proof: `IsSchemeAut.relOfPair_eq`
+  plus `π v = v`.
+- **T2.2.c (S1.b) — DONE** — `SchurianScheme.vProfile_eq_imp_schemeOrbit`:
+  profile equality ⟹ v-stabilized scheme-Aut orbit equivalence. Uses
+  the `schurian` field directly.
+- **T2.2.d — DONE** — `SchurianScheme.vProfile_iff_schemeOrbit`:
+  combined Step 1 bidirectional form in scheme-Aut terms.
 
-### Stage T2.3 — Step 2 (combinatorial)
+Also added: `SchemeOrbitPartition` predicate
+(v-stabilized scheme-Aut orbits), with `refl`/`symm`/`trans` and
+`vProfile_eq_of_schemeOrbit` (the trivial direction packaged
+separately).
 
-- **T2.3.a** — round-1 partition: signatures under `χ_{v}` are
-  determined by `(rel j v w : Bool)` for each `j ∈ J` (whether
-  `(v, w) ∈ R_j`). Lemma: `signature χ_v w` depends only on the set
-  `{j ∈ J : (v, w) ∈ R_j}`, which is determined by `vProfile w`.
+### Stage T2.3 — Step 2 (combinatorial) — INFRASTRUCTURE LANDED 2026-05-26
 
-- **T2.3.b** — round-`r` step lemma: given a partition refining
-  vProfile-coarsening at round `r`, intersection-number
-  well-definedness gives strict refinement at round `r + 1`.
-  Mirrors Phase 2.X's "generic step lemma" pattern from Tier 1.
+§5-§7 of `Scheme.lean` (~200 lines, axiom-clean) build the
+prerequisites for Step 2 and discharge **Step 1 in graph-Aut terms**
+(the form that bridges to `OrbitPartition`).
 
-- **T2.3.c** — convergence bound: depth `d + 1` suffices for
-  warmRefine to refine the profile partition. Apply iteration
-  helpers from §5.2.
+**§5 — `SchemeGraph` structure (DONE).** Bundles `scheme :
+AssociationScheme n`, `J : Finset (Fin (scheme.rank + 1))` of edge
+relations, and `zero_notMem_J` (looplessness). Provides:
+- `adj : AdjMatrix n` (noncomputable, derived from `relOfPair ∈ J`).
+- `adj_eq_one_iff`, `adj_eq_zero_iff`, `adj_self`, `adj_symm`,
+  `adj_eq_zero_or_one`.
 
-- **T2.3.d** — `warm_refines_profile_of_scheme`: the
-  **`warm_refines_profile` field** of `SchemeProfile`, obtained by
-  composing T2.3.a + T2.3.b + T2.3.c.
+**§6 — `SchurianSchemeGraph` (DONE).** Extends `SchemeGraph` with
+*two* schurian fields (necessary; one alone doesn't imply the other):
+- `schurian_transitive`: any two `R_i`-pairs are connected by some
+  graph-Aut.
+- `isAut_imp_isSchemeAut`: every graph-Aut preserves every relation
+  (i.e., is a scheme-Aut).
 
-**Estimated:** ~300-400 lines. Step 2 is the hardest because the
-intersection-number induction needs careful framing.
+Helpers: `relOfPair_aut_eq` and `vProfile_aut_invariant` lifted to
+graph-Aut.
+
+**§7 — Step 1 in graph-Aut terms (DONE).** Defines
+`GraphOrbitFixing adj v w u := ∃ π, IsAut π adj ∧ π v = v ∧ π w = u`
+(with refl/symm/trans), and proves:
+- `vProfile_eq_imp_graphOrbit` (forward, uses `schurian_transitive`).
+- `graphOrbit_imp_vProfile_eq` (reverse, uses
+  `isAut_imp_isSchemeAut`).
+- `vProfile_iff_graphOrbit` (combined).
+
+This is the **graph-Aut shape of `SchemeProfile.profile_iff_orbit`**
+modulo the P-preservation bridge (when `P` is permutation-invariant,
+`GraphOrbitFixing` and `OrbitPartition adj P {v}` coincide).
+
+**REMAINING (deferred to next session): Step 2 proper.**
+
+- **T2.3.a** — round-1 partition lemma: under `χ_v =
+  individualizedColouring n {v}`, `refineStep` separates vertices
+  by `adj v ·` value. (One round distinguishes "edge to v" from
+  "non-edge to v".)
+- **T2.3.b** — round-`r` step lemma: given a partition refining a
+  `r`-coarsening of `vProfile`, intersection-number well-definedness
+  gives strict refinement at round `r + 1`.
+- **T2.3.c** — convergence bound: depth `≤ rank + 1` suffices for
+  `warmRefine` to refine the full `vProfile` partition. Lift to
+  `warmRefine` via `warmRefine_eq_iter_eq` (in §16.4 of
+  `ChainDescent.lean`).
+- **T2.3.d** — `warm_refines_vProfile_of_schurianSchemeGraph`: the
+  `SchemeProfile.warm_refines_profile` field, composed from the
+  above.
+
+**Estimated remaining:** ~300 lines, 2-3 days. The exact phrasing of
+the per-round invariant is the technical heart; the SchemeGraph
+infrastructure now in place gives the right hooks.
 
 ### Stage T2.M4 — assembly + discharge
 
