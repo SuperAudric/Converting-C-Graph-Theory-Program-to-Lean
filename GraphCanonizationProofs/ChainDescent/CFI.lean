@@ -2,6 +2,9 @@ import ChainDescent
 import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Data.Finset.Powerset
+import Mathlib.Data.Fintype.Powerset
+import Mathlib.Data.Fintype.Sigma
+import Mathlib.Data.Fintype.Sum
 
 /-!
 # CFI infrastructure (Stage 1: foundational definitions)
@@ -183,5 +186,177 @@ theorem triangleBase_degree : ∀ v : Fin 3, triangleBase.degree v = 2 := by
 /-- `triangleBase`'s CFI has 18 vertices: `3 × (2^1 + 2*2)`. -/
 theorem triangleBase_cfiVertexCount : triangleBase.cfiVertexCount = 18 := by
   decide
+
+/-! ## §6 — CFI vertex type (Stage 2.1)
+
+The vertex set of `CFI(H)` decomposes into two kinds:
+- **Subset vertices** `a_S^v`: indexed by `(v, S)` with `v ∈ V_H` and
+  `S ⊆ N(v)` of even cardinality.
+- **Endpoint vertices** `e^b_{v→w}`: indexed by `(v, w, b)` with
+  `v ∈ V_H`, `w ∈ N(v)`, `b ∈ {0, 1}`.
+
+We encode each kind as a `Σ` type bundling base-vertex with the
+constructor-specific data (a subtype of even subsets, or a
+neighbour × Bool pair). `CFIVertex H` is their sum. The `Fintype`
+and `DecidableEq` instances derive automatically from the sub-pieces.
+
+This is the type-level skeleton; the adjacency function on
+`CFIVertex H` and the flattening bijection to
+`Fin (cfiVertexCount H)` are Stage 2.2 and 2.3 respectively. -/
+
+namespace CFIBase
+
+variable {m : Nat} (H : CFIBase m)
+
+/-- Subset vertex of `CFI(H)`: `(v, S)` with `S ∈ evenSubsetsOfNeighbors v`. -/
+abbrev SubsetVertex : Type :=
+  Σ v : Fin m, { S : Finset (Fin m) // S ∈ H.evenSubsetsOfNeighbors v }
+
+/-- Endpoint vertex of `CFI(H)`: `(v, w, b)` with `w ∈ N(v)` and
+`b : Bool`. -/
+abbrev EndpointVertex : Type :=
+  Σ v : Fin m, { w : Fin m // w ∈ H.neighbors v } × Bool
+
+/-- Vertex of `CFI(H)`: subset + endpoint vertices, as a sum. -/
+abbrev CFIVertex : Type :=
+  H.SubsetVertex ⊕ H.EndpointVertex
+
+-- The Fintype/DecidableEq instances for Sigma over Subtype-of-Finset
+-- do not derive automatically via `inferInstance` (Lean's typeclass
+-- search doesn't unify Subtype/Finset.mem in this context). We
+-- provide them explicitly via `Subtype.fintype` and Sigma/Sum
+-- composition.
+
+instance (H : CFIBase m) (v : Fin m) :
+    Fintype { S : Finset (Fin m) // S ∈ H.evenSubsetsOfNeighbors v } :=
+  Subtype.fintype _
+
+instance (H : CFIBase m) (v : Fin m) :
+    Fintype { w : Fin m // w ∈ H.neighbors v } :=
+  Subtype.fintype _
+
+instance (H : CFIBase m) : Fintype H.SubsetVertex :=
+  inferInstanceAs (Fintype (Σ v : Fin m, { S : Finset (Fin m) // S ∈ H.evenSubsetsOfNeighbors v }))
+
+instance (H : CFIBase m) : Fintype H.EndpointVertex :=
+  inferInstanceAs (Fintype (Σ v : Fin m, { w : Fin m // w ∈ H.neighbors v } × Bool))
+
+instance (H : CFIBase m) : Fintype H.CFIVertex :=
+  inferInstanceAs (Fintype (H.SubsetVertex ⊕ H.EndpointVertex))
+
+instance (H : CFIBase m) : DecidableEq H.SubsetVertex :=
+  inferInstanceAs (DecidableEq (Σ v : Fin m, { S : Finset (Fin m) // S ∈ H.evenSubsetsOfNeighbors v }))
+
+instance (H : CFIBase m) : DecidableEq H.EndpointVertex :=
+  inferInstanceAs (DecidableEq (Σ v : Fin m, { w : Fin m // w ∈ H.neighbors v } × Bool))
+
+instance (H : CFIBase m) : DecidableEq H.CFIVertex :=
+  inferInstanceAs (DecidableEq (H.SubsetVertex ⊕ H.EndpointVertex))
+
+end CFIBase
+
+/-! ## §7 — Stage 2.1 smoke test on `triangleBase`
+
+Verify the vertex type cardinalities match the formula
+`cfiVertexCount = 18` for `triangleBase`:
+- `SubsetVertex`: 3 base vertices × 2 even subsets each (sizes 0 and 2)
+  = 6.
+- `EndpointVertex`: 3 base vertices × 2 neighbours × 2 parities = 12.
+- Total: 18. -/
+
+/-- Triangle's subset vertices: 6 total (3 base vertices × 2 even subsets).
+
+`native_decide` is required: kernel `decide` chokes on the Fintype
+instance's `Finset.attach`-based enumeration. The native-compiled
+form reduces in milliseconds. -/
+example : Fintype.card triangleBase.SubsetVertex = 6 := by native_decide
+
+/-- Triangle's endpoint vertices: 12 total (3 × 2 × 2). -/
+example : Fintype.card triangleBase.EndpointVertex = 12 := by native_decide
+
+/-- Triangle's full CFI vertex type: 18 elements, matching `cfiVertexCount`. -/
+theorem triangleBase_cfiVertex_card :
+    Fintype.card triangleBase.CFIVertex = 18 := by native_decide
+
+/-! ## §8 — CFI adjacency function (Stage 2.2)
+
+The adjacency relation on `CFIVertex H`, encoding the construction of
+[`CfiGraphGenerator.cs`](../../GraphCanonizationProject/CfiGraphGenerator.cs):
+
+- **Intra-gadget**: a subset vertex `a_S^v` and an endpoint vertex
+  `e^b_{v→w}` are adjacent iff they are in the same gadget (`v_a =
+  v_e`) and `(w ∈ S) ⊕ (b = true)`. Concretely:
+  - `a_S^v ∼ e^0_{v→w}` iff `w ∈ S`.
+  - `a_S^v ∼ e^1_{v→w}` iff `w ∉ S`.
+- **Inter-gadget bridge** (untwisted): endpoint `e^b_{v→w}` adjacent
+  to endpoint `e^b_{w→v}` (same parity, mirror direction).
+- All other pairs (subset-subset, subset-endpoint across gadgets,
+  endpoint-endpoint within same gadget): not adjacent.
+
+We model this as `H.CFIVertex → H.CFIVertex → Nat` returning 0 or 1,
+matching `AdjMatrix`'s convention. The Stage 2.3 task will lift this
+through the flattening bijection to produce an `AdjMatrix
+H.cfiVertexCount`. -/
+
+namespace CFIBase
+
+variable {m : Nat} (H : CFIBase m)
+
+/-- CFI adjacency function on `CFIVertex H`. Returns 1 (adjacent) or
+0 (not adjacent). -/
+def cfiAdj : H.CFIVertex → H.CFIVertex → Nat
+  -- Subset-subset: never adjacent.
+  | .inl _, .inl _ => 0
+  -- Subset-endpoint: adjacent iff same gadget AND `w ∈ S` XOR `b`.
+  | .inl ⟨v_a, S_pair⟩, .inr ⟨v_e, w_pair, b⟩ =>
+      if v_a = v_e ∧ decide (w_pair.val ∈ S_pair.val) ≠ b then 1 else 0
+  -- Endpoint-subset: symmetric formula.
+  | .inr ⟨v_e, w_pair, b⟩, .inl ⟨v_a, S_pair⟩ =>
+      if v_a = v_e ∧ decide (w_pair.val ∈ S_pair.val) ≠ b then 1 else 0
+  -- Endpoint-endpoint: untwisted bridge iff `v₁ = w₂ ∧ w₁ = v₂ ∧ b₁ = b₂`.
+  | .inr ⟨v₁, w_pair₁, b₁⟩, .inr ⟨v₂, w_pair₂, b₂⟩ =>
+      if v₁ = w_pair₂.val ∧ w_pair₁.val = v₂ ∧ b₁ = b₂ then 1 else 0
+
+/-- **Symmetry**: `cfiAdj x y = cfiAdj y x`. The subset-endpoint and
+endpoint-subset clauses use identical formulae; subset-subset is
+trivially 0; endpoint-endpoint requires `Eq.comm` on each conjunct. -/
+theorem cfiAdj_symm (x y : H.CFIVertex) : H.cfiAdj x y = H.cfiAdj y x := by
+  match x, y with
+  | .inl _, .inl _ => rfl
+  | .inl _, .inr _ => rfl
+  | .inr _, .inl _ => rfl
+  | .inr ⟨v₁, w_pair₁, b₁⟩, .inr ⟨v₂, w_pair₂, b₂⟩ =>
+    show (if v₁ = w_pair₂.val ∧ w_pair₁.val = v₂ ∧ b₁ = b₂ then 1 else 0) =
+         (if v₂ = w_pair₁.val ∧ w_pair₂.val = v₁ ∧ b₂ = b₁ then 1 else 0)
+    by_cases h : v₁ = w_pair₂.val ∧ w_pair₁.val = v₂ ∧ b₁ = b₂
+    · obtain ⟨h1, h2, h3⟩ := h
+      have h' : v₂ = w_pair₁.val ∧ w_pair₂.val = v₁ ∧ b₂ = b₁ :=
+        ⟨h2.symm, h1.symm, h3.symm⟩
+      rw [if_pos ⟨h1, h2, h3⟩, if_pos h']
+    · have h' : ¬ (v₂ = w_pair₁.val ∧ w_pair₂.val = v₁ ∧ b₂ = b₁) := by
+        rintro ⟨h1, h2, h3⟩
+        exact h ⟨h2.symm, h1.symm, h3.symm⟩
+      rw [if_neg h, if_neg h']
+
+/-- **Looplessness**: `cfiAdj x x = 0`. Subset-subset is trivial;
+endpoint-endpoint requires that `w ≠ v` (the neighbour can't equal
+the base vertex by `not_self_mem_neighbors`), which falsifies the
+`v = w` conjunct. -/
+theorem cfiAdj_loopless (x : H.CFIVertex) : H.cfiAdj x x = 0 := by
+  match x with
+  | .inl _ => rfl
+  | .inr ⟨v, w_pair, b⟩ =>
+    show (if v = w_pair.val ∧ w_pair.val = v ∧ b = b then 1 else 0) = 0
+    have hw : w_pair.val ∈ H.neighbors v := w_pair.property
+    have hne : v ≠ w_pair.val := by
+      intro heq
+      apply H.not_self_mem_neighbors v
+      exact Eq.subst (motive := fun x => x ∈ H.neighbors v) heq.symm hw
+    have hcond : ¬ (v = w_pair.val ∧ w_pair.val = v ∧ b = b) := by
+      rintro ⟨h1, _, _⟩
+      exact hne h1
+    rw [if_neg hcond]
+
+end CFIBase
 
 end ChainDescent

@@ -228,14 +228,27 @@ The Tier 1 / Tier 2 parallel is now strict — each tier has:
 The structural assembly is identical between tiers.
 
 **CFI infrastructure — split into `ChainDescent/CFI.lean` (2026-05-26).**
-The Stage-1 foundations for the CFI construction (`CFIBase` structure,
-neighbours/degree, gadget vertex count, `evenSubsetsOfNeighbors` for
-Stage 2) live in [`ChainDescent/CFI.lean`](./ChainDescent/CFI.lean), a
-sub-module of the same `ChainDescent` library (built via
-`defaultTargets = ["ChainDescent", "ChainDescent.CFI"]` in
-`lakefile.toml`). Split to keep `ChainDescent.lean` under ~4000 lines
-as CFI work scales. Stages 2-4 (CFI vertex type + adjacency, Aut
-structure, cascade lemma) will continue in `CFI.lean`.
+The CFI construction lives in
+[`ChainDescent/CFI.lean`](./ChainDescent/CFI.lean), a sub-module of
+the same `ChainDescent` library (built via `defaultTargets =
+["ChainDescent", "ChainDescent.CFI"]` in `lakefile.toml`). Split to
+keep `ChainDescent.lean` under ~4000 lines as CFI work scales.
+
+*Stage 1 (foundations):* `CFIBase`, neighbours/degree, gadget vertex
+count, `evenSubsetsOfNeighbors`, `triangleBase` smoke test.
+
+*Stage 2.1 (vertex type):* `SubsetVertex`, `EndpointVertex`,
+`CFIVertex` as `Σ + Subtype + ⊕`. Explicit `Fintype` + `DecidableEq`
+instances via `inferInstanceAs` (auto-synthesis fails on the nested
+Sigma-of-Subtype-of-Finset-mem). `triangleBase_cfiVertex_card = 18`
+verified via `native_decide`.
+
+*Stage 2.2 (adjacency):* `cfiAdj : CFIVertex H → CFIVertex H → Nat`
+encoding intra-gadget `(w ∈ S) ⊕ b` and inter-gadget untwisted bridge
+rules; `cfiAdj_symm` and `cfiAdj_loopless` proved.
+
+*Pending:* Stage 2.3 (flattening to `AdjMatrix (cfiVertexCount H)` +
+concrete `IsCFI`), Stage 3 (Aut structure), Stage 4 (cascade lemma).
 
 **Refuted (machine-checked, kept as record of dead routes):**
 

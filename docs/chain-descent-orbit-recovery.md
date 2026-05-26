@@ -451,26 +451,48 @@ relation is exposed as the (axiomatic, placeholder)
 `cfi_depth_bound_le : cfi_depth_bound n ≤ n`, ready to be tightened
 to concrete `tw H` once CFI infrastructure lands.
 
-**CFI infrastructure — Stage 1 STARTED 2026-05-26.** New module
+**CFI infrastructure — Stages 1 + 2.1 + 2.2 STARTED 2026-05-26.** New
+module
 [`GraphCanonizationProofs/ChainDescent/CFI.lean`](../GraphCanonizationProofs/ChainDescent/CFI.lean)
-hosts the Lean CFI construction. Stage 1 (foundations) currently
-contains:
+hosts the Lean CFI construction.
+
+*Stage 1 (foundations):*
 - `CFIBase m` structure (symmetric, loopless adjacency, deg ≥ 2).
 - `neighbors`, `degree`, `mem_neighbors_symm`,
   `not_self_mem_neighbors`, `edgeCountOrdered`.
 - `gadgetSize`, `cfiVertexCount`, `gadgetSize_ge_six`,
   `cfiVertexCount_pos`.
-- `evenSubsetsOfNeighbors` (Stage 2 prerequisite — indexes the
-  `a_S^v` subset vertices).
+- `evenSubsetsOfNeighbors` (indexes the `a_S^v` subset vertices).
 - `triangleBase : CFIBase 3` concrete witness; smoke tests
   `triangleBase_degree`, `triangleBase_cfiVertexCount = 18`.
 
-Stages 2-4 (CFI vertex type + adjacency, Aut structure, cascade
-lemma) are pending and multi-week. The CFI module is built as a
-sub-target of the same library (`defaultTargets = ["ChainDescent",
-"ChainDescent.CFI"]` in `lakefile.toml`). Split from `ChainDescent.lean`
-to keep the main proofs file under ~4000 lines as CFI infrastructure
-grows.
+*Stage 2.1 (CFI vertex type):*
+- `SubsetVertex H = Σ v, { S // S ∈ evenSubsetsOfNeighbors v }`.
+- `EndpointVertex H = Σ v, { w // w ∈ neighbors v } × Bool`.
+- `CFIVertex H = SubsetVertex H ⊕ EndpointVertex H`.
+- `Fintype` + `DecidableEq` instances (explicit via `inferInstanceAs`
+  through `Mathlib.Data.Fintype.Powerset/Sigma/Sum`).
+- Smoke test `triangleBase_cfiVertex_card = 18` via `native_decide`.
+
+*Stage 2.2 (CFI adjacency function):*
+- `cfiAdj : CFIVertex H → CFIVertex H → Nat` — full CFI adjacency
+  encoding the intra-gadget (`a_S^v ∼ e^b_{v→w}` iff `(w ∈ S) ⊕ b`)
+  and inter-gadget untwisted bridge (`e^b_{v→w} ∼ e^b_{w→v}`) rules.
+- `cfiAdj_symm` — proved.
+- `cfiAdj_loopless` — proved, uses `not_self_mem_neighbors`.
+
+*Pending (Stage 2.3, multi-session):*
+- Flattening bijection `CFIVertex H ≃ Fin (cfiVertexCount H)`.
+- Lift `cfiAdj` to `AdjMatrix (cfiVertexCount H)`.
+- Concrete `def IsCFI` predicate to eventually replace the abstract
+  Prop axiom.
+
+*Pending (Stages 3-4, multi-week):* Aut structure lemma; cascade lemma
+discharging `cfi_cascades_polynomially`.
+
+The CFI module is built as a sub-target (`defaultTargets =
+["ChainDescent", "ChainDescent.CFI"]` in `lakefile.toml`), split from
+`ChainDescent.lean` to keep the main proofs file under ~4000 lines.
 
 **Effort estimate.** Each Phase-2 track is multi-week. The Phase-1
 assemblies in place mean the structure is set — once the Fact-A-shape
