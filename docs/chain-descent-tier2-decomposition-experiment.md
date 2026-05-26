@@ -418,7 +418,8 @@ invariant up to ties); the canonical chain-descent design uses lowest-id.
 | Depth | Individualized                  | Cell count | Cell sizes (desc) |
 |---:|---|---:|---|
 | 0 | (none)                           | 1  | [40] |
-| 1 | `v0:subset:{}` (subset start)     | 14 | [8, 4, 4, 4, 4, 4, 2, 2, 2, 2, 1, 1, 1, 1] |
+| 1 | `v0:subset:{}` (subset start)     | 9  | [12, 6, 6, 3, 3, 3, 3, 3, 1] |
+| 1 | `v0:end[w1]^0` (endpoint start)   | 14 | [8, 4, 4, 4, 4, 4, 2, 2, 2, 2, 1, 1, 1, 1] |
 | 2 | `v0:end[w1]^0`                   | 24 | [2 × 16, 1 × 8] |
 | 3 | `v2:subset:{w0,w3}`              | 40 | [1 × 40] — **discrete** |
 

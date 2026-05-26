@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using Xunit.Abstractions;
 using Canonizer;
@@ -128,6 +129,141 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
         // Final cell count at maxDepth — for the non-cascade case.
         output.WriteLine($"Final cell count — subset-start: {probeSubset[^1].NumCells} (depth {probeSubset[^1].Depth})");
         output.WriteLine($"Final cell count — endpoint-start: {probeEndpt[^1].NumCells} (depth {probeEndpt[^1].Depth})");
+    }
+
+    // The orbit-recovery verification probe (docs/chain-descent-orbit-recovery.md §9.6).
+    // Hypothesis F7 / Tier 1: 1-WL refinement after fresh-colour individualization
+    // produces a partition equal to Aut(G)_v orbits. We get Aut(G) from the project's
+    // canonizer (which harvests it during chain-descent), then compute Aut_v orbits
+    // via the pair-orbit method, then compare to the 1-WL cells from our local probe.
+    //
+    // The result is *observation*, not assertion: we report match/mismatch and the
+    // exact comparison data. A mismatch at depth 1 means F7 needs to weaken (likely
+    // "matches at higher depth" rather than "matches at depth 1").
+    [Fact]
+    public void CfiK4_OrbitRecovery_CompareAutStabilizerOrbitsToCells()
+    {
+        var pair = CfiGraphGenerator.Generate("K4");
+        AssertOrbitRecoveryAtDepth1(pair, expectedAutOrder: 192, baseGraphName: "K4");
+    }
+
+    [Fact]
+    public void CfiPetersen_OrbitRecovery_CompareAutStabilizerOrbitsToCells()
+    {
+        var pair = CfiGraphGenerator.Generate("Petersen");
+        // |Aut(CFI(Petersen))| = ? Computed by canonizer; we report rather than assert.
+        AssertOrbitRecoveryAtDepth1(pair, expectedAutOrder: null, baseGraphName: "Petersen");
+    }
+
+    // Run the orbit-recovery check at depth 1 on both Aut-orbits (subset-start
+    // and endpoint-start). For each, verify that 1-WL refinement after fresh-
+    // colour individualization produces a partition equal to Aut_v orbits.
+    private void AssertOrbitRecoveryAtDepth1(
+        CfiGraphGenerator.CfiPair pair,
+        BigInteger? expectedAutOrder,
+        string baseGraphName)
+    {
+        int n = pair.Even.VertexCount;
+        var canonizer = new CanonGraphOrdererChainDescent();
+        canonizer.Run(new int[n], pair.Even);
+        Assert.NotNull(canonizer.LastAutomorphisms);
+        var aut = canonizer.LastAutomorphisms!;
+        output.WriteLine($"|Aut(CFI({baseGraphName}))| = {aut.Order} ({aut.Generators.Count} generators)");
+        if (expectedAutOrder.HasValue) Assert.Equal(expectedAutOrder.Value, aut.Order);
+
+        var roles = pair.VertexRoles;
+        var adj = FlattenAdj(pair.Even);
+
+        string startSubset = "v0:subset:{}";
+        string startEndpoint = PickFirstEndpointRole(roles, "v0");
+
+        foreach (var startRole in new[] { startSubset, startEndpoint })
+        {
+            int v = Array.IndexOf(roles, startRole);
+            Assert.True(v >= 0);
+            output.WriteLine($"\n── individualization: {startRole} (vertex {v}) ──");
+
+            var autVOrbits = ComputeStabilizerOrbits(v, n, aut.Generators);
+            output.WriteLine($"  Aut_v orbits: {autVOrbits.Count} total, sizes [{string.Join(", ", autVOrbits.Select(o => o.Count).OrderByDescending(x => x))}]");
+
+            var color = new int[n];
+            OneWLRefine(adj, n, color);
+            int fresh = color.Max() + 1;
+            color[v] = fresh;
+            OneWLRefine(adj, n, color);
+            var cellsAtDepth1 = ExtractCells(color);
+            output.WriteLine($"  1-WL cells at depth 1: {cellsAtDepth1.Count} total, sizes [{string.Join(", ", cellsAtDepth1.Select(c => c.Count).OrderByDescending(x => x))}]");
+
+            bool exactMatch = CellsEqualOrbits(cellsAtDepth1, autVOrbits);
+            output.WriteLine($"  → Depth-1 cells = Aut_v orbits? {(exactMatch ? "YES" : "NO")}");
+
+            // **The assertion**: F7 at depth 1, in its strict form. If this fails on
+            // some instance, the strict form needs to weaken (e.g. higher depth) and
+            // the diagnostic output above shows where the gap is.
+            Assert.True(exactMatch,
+                $"F7 expected exact match: cells = Aut_v orbits at depth 1 for {baseGraphName}/{startRole}");
+        }
+    }
+
+    private static List<HashSet<int>> ExtractCells(int[] color)
+    {
+        var byColor = new Dictionary<int, HashSet<int>>();
+        for (int i = 0; i < color.Length; i++)
+        {
+            if (!byColor.TryGetValue(color[i], out var cell))
+                byColor[color[i]] = cell = new HashSet<int>();
+            cell.Add(i);
+        }
+        return byColor.Values.ToList();
+    }
+
+    // Compute the orbits of Aut(G)_v on V(G) via the pair-orbit method:
+    // the orbit of w under Aut_v is {w' : (v, w') is in the diagonal Aut-orbit of (v, w)}.
+    private static List<HashSet<int>> ComputeStabilizerOrbits(int v, int n, IReadOnlyList<int[]> autGenerators)
+    {
+        var remaining = new HashSet<int>(Enumerable.Range(0, n).Where(i => i != v));
+        var stabOrbits = new List<HashSet<int>> { new HashSet<int> { v } };
+        while (remaining.Count > 0)
+        {
+            int w = remaining.Min();
+            var orbit = PairOrbitFilteredOnFirst(v, w, autGenerators);
+            stabOrbits.Add(orbit);
+            remaining.ExceptWith(orbit);
+        }
+        return stabOrbits;
+    }
+
+    private static HashSet<int> PairOrbitFilteredOnFirst(int v, int w, IReadOnlyList<int[]> autGenerators)
+    {
+        var pairOrbit = new HashSet<(int, int)> { (v, w) };
+        var queue = new Queue<(int, int)>();
+        queue.Enqueue((v, w));
+        while (queue.Count > 0)
+        {
+            var (a, b) = queue.Dequeue();
+            foreach (var g in autGenerators)
+            {
+                var img = (g[a], g[b]);
+                if (pairOrbit.Add(img)) queue.Enqueue(img);
+            }
+        }
+        var result = new HashSet<int>();
+        foreach (var (a, b) in pairOrbit)
+            if (a == v) result.Add(b);
+        return result;
+    }
+
+    // Are two set-partitions equal as sets of sets?
+    private static bool CellsEqualOrbits(List<HashSet<int>> cells, List<HashSet<int>> orbits)
+    {
+        if (cells.Count != orbits.Count) return false;
+        var orbitsAsSorted = orbits.Select(o => string.Join(",", o.OrderBy(x => x))).ToHashSet();
+        foreach (var c in cells)
+        {
+            var key = string.Join(",", c.OrderBy(x => x));
+            if (!orbitsAsSorted.Contains(key)) return false;
+        }
+        return true;
     }
 
     // Sanity-check the refiner against the hand-computed CFI(C3) result from

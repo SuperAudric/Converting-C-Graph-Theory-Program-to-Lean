@@ -37,6 +37,11 @@ namespace Canonizer
         // Order of the automorphism group harvested during the descent.
         public BigInteger LastAutomorphismGroupOrder { get; private set; }
 
+        // The automorphism group itself, harvested during the descent. Same
+        // group whose .Order is exposed above. Useful for analyses needing
+        // explicit generators or orbit computations.
+        public PermutationGroup? LastAutomorphisms { get; private set; }
+
         // The flag reason (null when the run produced a canonical form) and
         // its classification (docs/chain-descent-strategy.md §15).
         public string? LastFlagReason { get; private set; }
@@ -85,6 +90,7 @@ namespace Canonizer
             LastBudget = result.Stats.Budget;
             LastNodesByDepth = result.Stats.NodesByDepth;
             LastAutomorphismGroupOrder = result.ResidualGroup.Order;
+            LastAutomorphisms = result.ResidualGroup;
             LastFlagReason = result.Flagged ? result.FlagReason : null;
             LastFlagKind = result.Flagged
                 ? (result.ResidualGroup.IsTrivial ? FlagKind.IrBlindSpot : FlagKind.Tier2Like)
