@@ -2608,4 +2608,597 @@ theorem refineStep_endpoint_false_inter_gadget_round3 (h : IsCFI' adj)
 
 end IsCFI'
 
+/-! ### §13.21 — OddDegree: restricted CFI class for clean cascade
+
+Phase 2.X (b=0 within-gadget partner), Phase 2.4 (subset by S), and M4
+have a degenerate sub-case for **saturated** subsets `S = N(v)`. This
+case requires extra cascade rounds and threading extra hypotheses
+through the proofs.
+
+A clean alternative: restrict to CFI bases where every vertex has
+**odd degree**. Then `|S|` even and `|S| ≤ deg(v) − 1 < deg(v)` forces
+`S ⊊ N(v)`, killing the saturated case.
+
+CFI bases in this class include K₄, K₃,₃, Petersen — covering the
+dominant interesting cases. Excluded: Rook3×3 (deg 4 even). The
+general-degree case is deferred to a future-work follow-on with extra
+cascade rounds.
+
+This section adds `IsCFI'.OddDegree` and a witness-existence helper.
+Downstream phases (Phase 2.X, 2.4, M4) take `h.OddDegree` as a
+hypothesis. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **Odd-degree CFI base.** Every base vertex has odd degree, ensuring
+no even subset `S ⊆ N(v)` is saturated (`S = N(v)`). -/
+def OddDegree (h : IsCFI' adj) : Prop :=
+  ∀ v : Fin h.m, h.H.degree v % 2 = 1
+
+/-- Under `OddDegree`, every even subset of `N(v)` has a strict
+non-element `y ∈ N(v) \ S` — the Phase-2.3-style witness. Used by
+Phase 2.X / 2.4 / M4 to construct subset distinction witnesses
+automatically. -/
+theorem exists_witness_of_oddDegree (h : IsCFI' adj) (h_odd : h.OddDegree)
+    (v : Fin h.m) {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v) :
+    ∃ y, y ∈ h.H.neighbors v ∧ y ∉ S := by
+  rw [h.H.mem_evenSubsetsOfNeighbors] at hS
+  obtain ⟨hSsub, hSeven⟩ := hS
+  -- |S| even, deg(v) odd ⟹ S ≠ N(v).
+  have hSne : S ≠ h.H.neighbors v := by
+    intro h_eq
+    rw [h_eq] at hSeven
+    have h_v_deg : (h.H.neighbors v).card % 2 = 1 := h_odd v
+    omega
+  have h_ssub : S ⊂ h.H.neighbors v := by
+    refine ⟨hSsub, ?_⟩
+    intro hsupset
+    exact hSne (Finset.Subset.antisymm hSsub hsupset)
+  obtain ⟨y, hy_in, hy_notin⟩ := Finset.exists_of_ssubset h_ssub
+  exact ⟨y, hy_in, hy_notin⟩
+
+/-- **Phase 2.2 witness construction under OddDegree.** Given any
+`v ∈ N(w)`, construct an even subset `S ⊆ N(w)` with `v ∈ S` and a
+witness `x ∈ N(w) \ S`. Used by Phase 2.X to invoke Phase 2.2 at the
+bridge-partner gadget `w`. Builds `S = {v, x_other}` with
+`x_other ∈ N(w) \ {v}` (exists because `deg(w) ≥ 3` under OddDegree). -/
+theorem exists_phase22_witness (h : IsCFI' adj) (h_odd : h.OddDegree)
+    {w v : Fin h.m} (hv_in_Nw : v ∈ h.H.neighbors w) :
+    ∃ (S : Finset (Fin h.m)),
+      ∃ (_hS : S ∈ h.H.evenSubsetsOfNeighbors w),
+      v ∈ S ∧ ∃ (x : Fin h.m), x ∈ h.H.neighbors w ∧ x ∉ S := by
+  -- Step 1: deg(w) ≥ 3 from deg_ge_two + odd.
+  have hcard_3 : 3 ≤ (h.H.neighbors w).card := by
+    have h_odd_w : (h.H.neighbors w).card % 2 = 1 := h_odd w
+    have h_ge_two : 2 ≤ (h.H.neighbors w).card := h.H.degree_ge_two w
+    omega
+  -- Step 2: pick x_other ∈ N(w) with x_other ≠ v.
+  obtain ⟨x_other, hxother_in_Nw, hxother_ne_v⟩ :
+      ∃ x ∈ h.H.neighbors w, x ≠ v := by
+    by_contra h_no
+    push_neg at h_no
+    have hsub : h.H.neighbors w ⊆ {v} := fun x hx =>
+      Finset.mem_singleton.mpr (h_no x hx)
+    have hle := Finset.card_le_card hsub
+    rw [Finset.card_singleton] at hle
+    omega
+  -- Step 3: construct S = {v, x_other}.
+  have hSsub : ({v, x_other} : Finset (Fin h.m)) ⊆ h.H.neighbors w := by
+    intro y hy
+    rcases Finset.mem_insert.mp hy with h1 | h2
+    · rw [h1]; exact hv_in_Nw
+    · rw [Finset.mem_singleton] at h2
+      rw [h2]; exact hxother_in_Nw
+  have hScard : ({v, x_other} : Finset (Fin h.m)).card = 2 :=
+    Finset.card_pair (fun h => hxother_ne_v h.symm)
+  have hS : ({v, x_other} : Finset (Fin h.m)) ∈
+      h.H.evenSubsetsOfNeighbors w := by
+    rw [h.H.mem_evenSubsetsOfNeighbors]
+    exact ⟨hSsub, by rw [hScard]⟩
+  have hvS : v ∈ ({v, x_other} : Finset (Fin h.m)) :=
+    Finset.mem_insert_self v _
+  -- Step 4: pick witness x ∈ N(w) \ S via S ⊊ N(w).
+  have h_ssub : ({v, x_other} : Finset (Fin h.m)) ⊂ h.H.neighbors w := by
+    refine ⟨hSsub, ?_⟩
+    intro h_supset
+    have h_eq : ({v, x_other} : Finset (Fin h.m)) = h.H.neighbors w :=
+      Finset.Subset.antisymm hSsub h_supset
+    rw [h_eq] at hScard
+    omega
+  obtain ⟨x, hx_in_Nw, hx_notin_S⟩ := Finset.exists_of_ssubset h_ssub
+  exact ⟨({v, x_other} : Finset (Fin h.m)), hS, hvS, x, hx_in_Nw, hx_notin_S⟩
+
+end IsCFI'
+
+/-! ### §13.22 — Phase 2.X: b=0 within-gadget partner at round 4
+
+The b=0 analogue of Phase 2.1 (b=1 within-gadget partner at round 2),
+but adapted for b=0 — uses Phase 2.2 (round 3) as (P1) rather than M3.C
+(round 1).
+
+Apply `refineStep_bridge_step` at χ_3 with b = false:
+- (P1): bridge partners e^0_{w→v}, e^0_{w'→v} (b=0 endpoints at gadgets
+  w ≠ w', both pointing to v) distinguished by χ_3 via Phase 2.2.
+- (P2): for u adj=1 to e^0_{v→w'}, χ_3 u ≠ χ_3 (e^0_{w→v}).
+  - u = subset at v: cross-type round-2 lifted to χ_3 (via OddDegree witness).
+  - u = bridge partner = e^0_{w'→v}: Phase 2.2 (with witness at w via OddDegree).
+
+Conclusion: refineStep χ_3 distinguishes e^0_{v→w} from e^0_{v→w'},
+i.e., χ_4 distinguishes them. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **Phase 2.X / refineStep** — b=0 within-gadget partner distinction
+at round 4 (OddDegree form).
+
+Under four nested `refineStep` rounds on `χ_{allSeeds}`, b=0 endpoints
+at gadget v toward different partners w ≠ w' get distinct colours.
+
+Hypothesis `h.OddDegree` ensures all needed witness subsets exist
+automatically (S = {v, x_other} for various v/w/x_other). -/
+theorem refineStep_endpoint_false_intra_gadget_partner_round4
+    (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n)
+    {v w w' : Fin h.m} (hww : w ≠ w')
+    (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v) :
+    refineStep adj P (refineStep adj P (refineStep adj P (refineStep adj P
+      (individualizedColouring n h.allSeeds))))
+        (h.endpointVertex hw false) ≠
+    refineStep adj P (refineStep adj P (refineStep adj P (refineStep adj P
+      (individualizedColouring n h.allSeeds))))
+        (h.endpointVertex hw' false) := by
+  -- Construct Phase 2.2 witness at gadget w (for distinguishing bridge partners).
+  obtain ⟨S_w, hS_w, hvS_w, x_w, hx_w_inN, hx_wS⟩ :=
+    h.exists_phase22_witness h_odd (h.H.mem_neighbors_symm.mp hw)
+  set χ_0 := individualizedColouring n h.allSeeds with hχ_0
+  set χ_1 := refineStep adj P χ_0 with hχ_1
+  set χ_2 := refineStep adj P χ_1 with hχ_2
+  set χ_3 := refineStep adj P χ_2 with hχ_3
+  -- Apply bridge step at χ = χ_3, b = false.
+  apply h.refineStep_bridge_step P χ_3 hw hw' false
+  · -- (P1): bridge partners e^0_{w→v}, e^0_{w'→v} distinguished by χ_3.
+    -- Phase 2.2 at gadgets (w, w') with witness at w.
+    have hv_in_Nw : v ∈ h.H.neighbors w := h.H.mem_neighbors_symm.mp hw
+    have hv_in_Nw' : v ∈ h.H.neighbors w' := h.H.mem_neighbors_symm.mp hw'
+    exact h.refineStep_endpoint_false_inter_gadget_round3
+      P hww hv_in_Nw hv_in_Nw' hS_w hvS_w hx_w_inN hx_wS
+  · -- (P2): for u adj=1 to e^0_{v→w'}, χ_3 u ≠ χ_3 (e^0_{w→v}).
+    intro u hu_adj_ev'
+    rw [h.matching, e_endpointVertex] at hu_adj_ev'
+    cases h_eu : h.e u with
+    | inl sub =>
+      -- u is a subset at gadget v containing w'.
+      obtain ⟨v_s, ⟨S_u, hSu⟩⟩ := sub
+      rw [h_eu] at hu_adj_ev'
+      have hc : v_s = v ∧ decide (w' ∈ S_u) ≠ false := by
+        by_contra hc
+        have hzero :
+            h.H.cfiAdj (h.H.endpoint hw' false)
+              (Sum.inl ⟨v_s, ⟨S_u, hSu⟩⟩ : h.H.CFIVertex) = 0 := by
+          show (if v_s = v ∧ decide (w' ∈ S_u) ≠ false then 1 else 0) = 0
+          rw [if_neg hc]
+        rw [hzero] at hu_adj_ev'
+        exact absurd hu_adj_ev' (by decide)
+      obtain ⟨hvs_eq, _⟩ := hc
+      subst hvs_eq
+      have hu_subset : u = h.subsetVertex hSu := by
+        apply h.e.injective
+        rw [e_subsetVertex, h_eu]
+        rfl
+      rw [hu_subset]
+      -- Construct cross-type witness via OddDegree.
+      obtain ⟨y, hy_in_N, hy_notin⟩ := h.exists_witness_of_oddDegree h_odd v_s hSu
+      have hv_in_Nw : v_s ∈ h.H.neighbors w := h.H.mem_neighbors_symm.mp hw
+      -- Apply cross-type round-2 at χ_2, lift to χ_3 via refineStep_iff.
+      have hχ2_ne :
+          refineStep adj P χ_1 (h.subsetVertex hSu) ≠
+          refineStep adj P χ_1 (h.endpointVertex hv_in_Nw false) :=
+        h.refineStep_subsetVertex_ne_endpoint_false_round2
+          P hSu hy_in_N hy_notin hv_in_Nw
+      intro hχ3_eq
+      apply hχ2_ne
+      exact ((refineStep_iff adj P χ_2 _ _).mp hχ3_eq).1
+    | inr endp =>
+      -- u = bridge partner of e^0_{v→w'} = e^0_{w'→v} (b=0 at gadget w').
+      obtain ⟨v_e, ⟨x_e, hxe⟩, b_e⟩ := endp
+      rw [h_eu] at hu_adj_ev'
+      have hc : v = x_e ∧ w' = v_e ∧ false = b_e := by
+        by_contra hc
+        have hzero :
+            h.H.cfiAdj (h.H.endpoint hw' false)
+              (Sum.inr ⟨v_e, ⟨x_e, hxe⟩, b_e⟩ : h.H.CFIVertex) = 0 := by
+          show (if v = x_e ∧ w' = v_e ∧ false = b_e then 1 else 0) = 0
+          rw [if_neg hc]
+        rw [hzero] at hu_adj_ev'
+        exact absurd hu_adj_ev' (by decide)
+      obtain ⟨hxe_eq_v, hwprime_eq_ve, hb_eq⟩ := hc
+      have hb_e_false : b_e = false := hb_eq.symm
+      subst hb_e_false
+      have hu_endp : u = h.endpointVertex hxe false := by
+        apply h.e.injective
+        rw [e_endpointVertex, h_eu]
+        rfl
+      rw [hu_endp]
+      -- Goal: χ_3 (endpointVertex hxe false) ≠ χ_3 (endpointVertex hv_in_Nw false).
+      -- u at gadget v_e (= w') with partner x_e (= v). Need Phase 2.2 with v_phase22 = v_e.
+      have hv_in_Nve : v ∈ h.H.neighbors v_e := by
+        rw [hxe_eq_v]; exact hxe
+      obtain ⟨S_ve, hS_ve, hvS_ve, x_ve, hx_ve_inN, hx_veS⟩ :=
+        h.exists_phase22_witness h_odd hv_in_Nve
+      -- Need: v_e ≠ w (use hwprime_eq_ve : w' = v_e + hww : w ≠ w').
+      have hve_ne_w : v_e ≠ w := by
+        intro h_eq
+        rw [← hwprime_eq_ve] at h_eq
+        exact hww h_eq.symm
+      have hv_in_Nw : v ∈ h.H.neighbors w := h.H.mem_neighbors_symm.mp hw
+      -- hxe : x_e ∈ N(v_e); with hxe_eq_v : v = x_e, we have hxe : ⟨v⟩ ∈ N(v_e).
+      -- Construct witness's containment in S_ve (have hvS_ve : v ∈ S_ve, x_e = v).
+      have hxeS_ve : x_e ∈ S_ve := by rw [← hxe_eq_v]; exact hvS_ve
+      exact h.refineStep_endpoint_false_inter_gadget_round3
+        P hve_ne_w hxe hv_in_Nw hS_ve hxeS_ve hx_ve_inN hx_veS
+
+end IsCFI'
+
+/-! ### §13.23 — Phase 2.4: subset by S at same gadget at round 5
+
+Two subset vertices `a_S^v` and `a_{S'}^v` at the same gadget v differ
+in their adjacency patterns when `S ≠ S'`: some `y` exists with
+`y ∈ S \ S'` (or vice versa), giving `a_S^v` an adj=1 link to
+`e^0_{v→y}` that `a_{S'}^v` lacks.
+
+Direct signature-tuple argument at χ_4. Witness:
+`(χ_4 (e^0_{v→y}), 1, P (a_S^v) (e^0_{v→y}))`.
+- (a) In `a_S^v`'s χ_4-signature: via u' = `e^0_{v→y}` (adj=1 since y ∈ S).
+- (b) Not in `a_{S'}^v`'s χ_4-signature: case on u' adj=1 to `a_{S'}^v`.
+  Use `adj_subsetVertex_eq_one_iff` (with `adj_symm`) to characterise
+  u' as an endpoint at gadget v with parity-matching.
+  - b'' = false: u' = `e^0_{v→x}` for x ∈ S'. Since y ∉ S', x ≠ y.
+    Phase 2.X (round 4) distinguishes b=0 same-gadget different-partner.
+  - b'' = true: u' = `e^1_{v→x}` for x ∉ S'. M3.B+ (round 1) lifted
+    to χ_4 via 3-step `refineStep_iff` chain. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **Phase 2.4 / refineStep** — subset by S at same gadget, round 5.
+
+Under five nested `refineStep` rounds on `χ_{allSeeds}`, two subset
+vertices at gadget v with `S ≠ S'` (witnessed by `y ∈ S, y ∉ S'`)
+get distinct colours. -/
+theorem refineStep_subset_intra_gadget_S_round5
+    (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n)
+    {v : Fin h.m} {S S' : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
+    (hS' : S' ∈ h.H.evenSubsetsOfNeighbors v)
+    {y : Fin h.m} (hy_in_Nv : y ∈ h.H.neighbors v)
+    (hyS : y ∈ S) (hyS' : y ∉ S') :
+    refineStep adj P (refineStep adj P (refineStep adj P (refineStep adj P
+      (refineStep adj P (individualizedColouring n h.allSeeds)))))
+        (h.subsetVertex hS) ≠
+    refineStep adj P (refineStep adj P (refineStep adj P (refineStep adj P
+      (refineStep adj P (individualizedColouring n h.allSeeds)))))
+        (h.subsetVertex hS') := by
+  intro hrefine
+  set χ_0 := individualizedColouring n h.allSeeds with hχ_0
+  set χ_1 := refineStep adj P χ_0 with hχ_1
+  set χ_2 := refineStep adj P χ_1 with hχ_2
+  set χ_3 := refineStep adj P χ_2 with hχ_3
+  set χ_4 := refineStep adj P χ_3 with hχ_4
+  have hboth := (refineStep_iff adj P χ_4 _ _).mp hrefine
+  set av := h.subsetVertex hS with hav_def
+  set av' := h.subsetVertex hS' with hav'_def
+  set ef := h.endpointVertex hy_in_Nv false with hef_def
+  let t : Nat × Nat × POE := (χ_4 ef, 1, P av ef)
+  -- (a) t ∈ signature χ_4 av — via u' = ef.
+  have ht_in_av : t ∈ signature adj P χ_4 av := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨ef, ?_, ?_⟩
+    · rw [Finset.mem_val, Finset.mem_filter]
+      refine ⟨Finset.mem_univ _, ?_⟩
+      intro heq
+      exact h.subsetVertex_ne_endpointVertex hS hy_in_Nv false heq.symm
+    · show (χ_4 ef, adj.adj av ef, P av ef) = t
+      rw [h.adj_subsetVertex_endpoint_same_gadget_false_of_mem hS hy_in_Nv hyS]
+  -- (b) t ∉ signature χ_4 av' — case on u' adj=1 to av'.
+  have ht_notin_av' : t ∉ signature adj P χ_4 av' := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, _, hu_eq⟩
+    have hχu : χ_4 u = χ_4 ef := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj av' u, P av' u) = ((1, P av ef) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj av' u = 1 := congrArg Prod.fst hrest
+    rw [h.adj_symm] at hadj
+    obtain ⟨x, hx_in_Nv, b, hparity, hu_eq⟩ :=
+      (h.adj_subsetVertex_eq_one_iff hS' u).mp hadj
+    rw [hu_eq] at hχu
+    cases b with
+    | false =>
+      -- hparity : decide (x ∈ S') ≠ false → x ∈ S'.
+      have hxS' : x ∈ S' := by
+        by_contra hxS'_neg
+        apply hparity
+        simp [hxS'_neg]
+      have hxy : x ≠ y := by
+        intro h_eq
+        rw [h_eq] at hxS'
+        exact hyS' hxS'
+      -- hχu : χ_4 (e^0_x) = χ_4 (e^0_y). Phase 2.X gives ≠.
+      exact h.refineStep_endpoint_false_intra_gadget_partner_round4
+        h_odd P hxy hx_in_Nv hy_in_Nv hχu
+    | true =>
+      -- M3.B+ at round 1: χ_1 (e^0_y) ≠ χ_1 (e^1_x). Lift hχu down 3 rounds.
+      have hχ1_ne :
+          refineStep adj P χ_0 (h.endpointVertex hy_in_Nv false) ≠
+          refineStep adj P χ_0 (h.endpointVertex hx_in_Nv true) :=
+        h.refineStep_endpoint_b0_ne_b1_general_allSeeds P hx_in_Nv hy_in_Nv
+      apply hχ1_ne
+      have h3 : χ_3 (h.endpointVertex hx_in_Nv true) =
+                χ_3 (h.endpointVertex hy_in_Nv false) :=
+        ((refineStep_iff adj P χ_3 _ _).mp hχu).1
+      have h2 : χ_2 (h.endpointVertex hx_in_Nv true) =
+                χ_2 (h.endpointVertex hy_in_Nv false) :=
+        ((refineStep_iff adj P χ_2 _ _).mp h3).1
+      have h1 : χ_1 (h.endpointVertex hx_in_Nv true) =
+                χ_1 (h.endpointVertex hy_in_Nv false) :=
+        ((refineStep_iff adj P χ_1 _ _).mp h2).1
+      exact h1.symm
+  rw [hboth.2] at ht_in_av
+  exact ht_notin_av' ht_in_av
+
+end IsCFI'
+
+/-! ### §13.24 — refineStep iteration helpers + M4 assembly
+
+Two tier-agnostic helpers for lifting per-round distinctions to
+warmRefine:
+- `refineStep_iter_le_eq`: equal at iterate `k + d` implies equal at
+  iterate `k` (refinement is split-only at any round).
+- `warmRefine_eq_iter_eq`: warmRefine equality implies iterate-r
+  equality for r ≤ n.
+
+These are pure properties of `refineStep_iff`; could live in
+`ChainDescent.lean` §16 for Tier 2 to reuse. Placed in CFI.lean for
+now to minimise file churn.
+
+Then **M4**: assembly of all phase lemmas + helpers into a Discrete
+proof for `warmRefine` under `OddDegree`. Discharges
+`cfi_cascades_polynomially` for the OddDegree CFI class. -/
+
+/-- **Refinement is split-only across iterations.** Equal at iterate
+`k + d` implies equal at iterate `k`. -/
+theorem refineStep_iter_le_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (k d : Nat) {v w : Fin n}
+    (h : ((refineStep adj P)^[k + d]) χ v =
+         ((refineStep adj P)^[k + d]) χ w) :
+    ((refineStep adj P)^[k]) χ v = ((refineStep adj P)^[k]) χ w := by
+  induction d with
+  | zero => exact h
+  | succ d' ih =>
+    apply ih
+    have h' : ((refineStep adj P)^[k + d' + 1]) χ v =
+              ((refineStep adj P)^[k + d' + 1]) χ w := by
+      rw [show k + d' + 1 = k + (d' + 1) from by omega]; exact h
+    rw [Function.iterate_succ_apply'] at h'
+    exact ((refineStep_iff adj P _ _ _).mp h').1
+
+/-- `warmRefine` equality implies iterate-r equality for r ≤ n. -/
+theorem warmRefine_eq_iter_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (r : Nat) (hr : r ≤ n) {v w : Fin n}
+    (h : warmRefine adj P χ v = warmRefine adj P χ w) :
+    ((refineStep adj P)^[r]) χ v = ((refineStep adj P)^[r]) χ w := by
+  unfold warmRefine at h
+  have h' : ((refineStep adj P)^[r + (n - r)]) χ v =
+            ((refineStep adj P)^[r + (n - r)]) χ w := by
+    have hcount : r + (n - r) = n := by omega
+    rw [hcount]
+    exact h
+  exact refineStep_iter_le_eq adj P χ r (n - r) h'
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **M4 — `cfi_cascades_polynomially` discharged under `OddDegree`.**
+
+For OddDegree CFI graphs (every base vertex has odd degree, ≥ 3),
+`warmRefine adj P (individualizedColouring n h.allSeeds)` is `Discrete`.
+Hence `CascadesAt adj P (cfi_depth_bound h)` holds with the canonical
+seed set witness.
+
+The OddDegree class covers the dominant interesting CFI bases (K₄,
+K₃,₃, Petersen). Even-degree bases (Rook3×3) are deferred to future
+work — they need additional cascade rounds for saturated subsets.
+
+**Proof structure**: case-split on vertex types via `h.e`. Each case
+applies a Phase lemma at round ≤ 5 and lifts to `warmRefine` via
+`warmRefine_eq_iter_eq`. The `hn_ge_5 : 5 ≤ n` hypothesis ensures the
+lift is valid; for OddDegree H this always holds (n ≥ 6 × baseSize
+≥ 24), but proving that requires more combinatorics — left as a
+follow-on. -/
+theorem cfi_cascades_polynomially_oddDeg
+    (h : IsCFI' adj) (h_odd : h.OddDegree)
+    (P : PMatrix n) (hn_ge_5 : 5 ≤ n) :
+    CascadesAt adj P (cfi_depth_bound h) := by
+  refine ⟨h.allSeeds, le_of_eq h.allSeeds_card, ?_⟩
+  intro i j hwarm
+  by_contra hne
+  have he_ne : h.e i ≠ h.e j := fun h_eq => hne (h.e.injective h_eq)
+  set χ_0 := individualizedColouring n h.allSeeds with hχ_0_def
+  -- Convert hwarm to iterate-r form for various r ≤ 5.
+  have lift1 : ((refineStep adj P)^[1]) χ_0 i = ((refineStep adj P)^[1]) χ_0 j :=
+    warmRefine_eq_iter_eq adj P χ_0 1 (by omega) hwarm
+  have lift2 : ((refineStep adj P)^[2]) χ_0 i = ((refineStep adj P)^[2]) χ_0 j :=
+    warmRefine_eq_iter_eq adj P χ_0 2 (by omega) hwarm
+  have lift3 : ((refineStep adj P)^[3]) χ_0 i = ((refineStep adj P)^[3]) χ_0 j :=
+    warmRefine_eq_iter_eq adj P χ_0 3 (by omega) hwarm
+  have lift4 : ((refineStep adj P)^[4]) χ_0 i = ((refineStep adj P)^[4]) χ_0 j :=
+    warmRefine_eq_iter_eq adj P χ_0 4 (by omega) hwarm
+  have lift5 : ((refineStep adj P)^[5]) χ_0 i = ((refineStep adj P)^[5]) χ_0 j :=
+    warmRefine_eq_iter_eq adj P χ_0 5 (by omega) hwarm
+  -- Unfold iterates to nested refineStep form for matching phase lemma outputs.
+  simp only [Function.iterate_succ_apply',
+    Function.iterate_zero_apply] at lift1 lift2 lift3 lift4 lift5
+  -- Case-split on h.e i, h.e j.
+  cases h_eu_i : h.e i with
+  | inl sub_i =>
+    obtain ⟨v_i, ⟨S_i, hSi⟩⟩ := sub_i
+    have hi_eq : i = h.subsetVertex hSi := by
+      apply h.e.injective; rw [e_subsetVertex, h_eu_i]; rfl
+    cases h_eu_j : h.e j with
+    | inl sub_j =>
+      -- subset/subset
+      obtain ⟨v_j, ⟨S_j, hSj⟩⟩ := sub_j
+      have hj_eq : j = h.subsetVertex hSj := by
+        apply h.e.injective; rw [e_subsetVertex, h_eu_j]; rfl
+      by_cases hvij : v_i = v_j
+      · -- Same gadget. Phase 2.4.
+        subst hvij
+        have hSij : S_i ≠ S_j := by
+          intro hSij_eq
+          apply he_ne
+          rw [h_eu_i, h_eu_j]
+          subst hSij_eq
+          rfl
+        have h_or : (∃ y ∈ S_i, y ∉ S_j) ∨ (∃ y ∈ S_j, y ∉ S_i) := by
+          by_contra h_no
+          push_neg at h_no
+          exact hSij (Finset.Subset.antisymm h_no.1 h_no.2)
+        rcases h_or with ⟨y, hy_in_Si, hy_notin_Sj⟩ |
+                          ⟨y, hy_in_Sj, hy_notin_Si⟩
+        · have hy_in_Nv : y ∈ h.H.neighbors v_i :=
+            (h.H.mem_evenSubsetsOfNeighbors.mp hSi).1 hy_in_Si
+          apply h.refineStep_subset_intra_gadget_S_round5
+            h_odd P hSi hSj hy_in_Nv hy_in_Si hy_notin_Sj
+          rw [← hi_eq, ← hj_eq]; exact lift5
+        · have hy_in_Nv : y ∈ h.H.neighbors v_i :=
+            (h.H.mem_evenSubsetsOfNeighbors.mp hSj).1 hy_in_Sj
+          apply h.refineStep_subset_intra_gadget_S_round5
+            h_odd P hSj hSi hy_in_Nv hy_in_Sj hy_notin_Si
+          rw [← hi_eq, ← hj_eq]; exact lift5.symm
+      · -- Different gadget. Phase 2.3.
+        obtain ⟨x, hx_in_Nv, hx_notin_Si⟩ :=
+          h.exists_witness_of_oddDegree h_odd v_i hSi
+        apply h.refineStep_subset_inter_gadget_round2
+          P hvij hSi hSj hx_in_Nv hx_notin_Si
+        rw [← hi_eq, ← hj_eq]; exact lift2
+    | inr endp_j =>
+      -- subset/endpoint cross-type
+      obtain ⟨v_j, ⟨w_j, hwj⟩, b_j⟩ := endp_j
+      have hj_eq : j = h.endpointVertex hwj b_j := by
+        apply h.e.injective; rw [e_endpointVertex, h_eu_j]; rfl
+      cases b_j with
+      | true =>
+        -- M3.B++ at round 1.
+        apply h.refineStep_subsetVertex_ne_endpoint_true_allSeeds P hwj hSi
+        rw [← hi_eq, ← hj_eq]; exact lift1
+      | false =>
+        -- Cross-type round 2.
+        obtain ⟨y, hy_in_Nv, hy_notin_Si⟩ :=
+          h.exists_witness_of_oddDegree h_odd v_i hSi
+        apply h.refineStep_subsetVertex_ne_endpoint_false_round2
+          P hSi hy_in_Nv hy_notin_Si hwj
+        rw [← hi_eq, ← hj_eq]; exact lift2
+  | inr endp_i =>
+    obtain ⟨v_i, ⟨w_i, hwi⟩, b_i⟩ := endp_i
+    have hi_eq : i = h.endpointVertex hwi b_i := by
+      apply h.e.injective; rw [e_endpointVertex, h_eu_i]; rfl
+    cases h_eu_j : h.e j with
+    | inl sub_j =>
+      -- endpoint/subset (symmetric to subset/endpoint via .symm)
+      obtain ⟨v_j, ⟨S_j, hSj⟩⟩ := sub_j
+      have hj_eq : j = h.subsetVertex hSj := by
+        apply h.e.injective; rw [e_subsetVertex, h_eu_j]; rfl
+      cases b_i with
+      | true =>
+        apply (h.refineStep_subsetVertex_ne_endpoint_true_allSeeds P hwi hSj).symm
+        rw [← hi_eq, ← hj_eq]; exact lift1
+      | false =>
+        obtain ⟨y, hy_in_Nv, hy_notin_Sj⟩ :=
+          h.exists_witness_of_oddDegree h_odd v_j hSj
+        apply (h.refineStep_subsetVertex_ne_endpoint_false_round2
+          P hSj hy_in_Nv hy_notin_Sj hwi).symm
+        rw [← hi_eq, ← hj_eq]; exact lift2
+    | inr endp_j =>
+      -- endpoint/endpoint
+      obtain ⟨v_j, ⟨w_j, hwj⟩, b_j⟩ := endp_j
+      have hj_eq : j = h.endpointVertex hwj b_j := by
+        apply h.e.injective; rw [e_endpointVertex, h_eu_j]; rfl
+      cases b_i with
+      | false => cases b_j with
+        | false =>
+          -- Both b=false.
+          by_cases hvij : v_i = v_j
+          · -- Same gadget. Phase 2.X (round 4).
+            subst hvij
+            have hwij : w_i ≠ w_j := by
+              intro hwij_eq
+              apply he_ne
+              rw [h_eu_i, h_eu_j]
+              subst hwij_eq
+              rfl
+            apply h.refineStep_endpoint_false_intra_gadget_partner_round4
+              h_odd P hwij hwi hwj
+            rw [← hi_eq, ← hj_eq]; exact lift4
+          · -- Different gadget. Phase 2.2 (round 3) with witness via OddDegree.
+            obtain ⟨S_w, _hS_w, hw_in_Sw, x_w, hx_w_in, hx_w_not⟩ :=
+              h.exists_phase22_witness h_odd hwi
+            apply h.refineStep_endpoint_false_inter_gadget_round3
+              P hvij hwi hwj _hS_w hw_in_Sw hx_w_in hx_w_not
+            rw [← hi_eq, ← hj_eq]; exact lift3
+        | true =>
+          -- b_i=false, b_j=true. M3.B+ (round 1).
+          apply (h.refineStep_endpoint_b0_ne_b1_general_allSeeds P hwj hwi)
+          rw [← hi_eq, ← hj_eq]; exact lift1
+      | true => cases b_j with
+        | false =>
+          -- b_i=true, b_j=false. M3.B+ (round 1) with .symm.
+          apply (h.refineStep_endpoint_b0_ne_b1_general_allSeeds P hwi hwj).symm
+          rw [← hi_eq, ← hj_eq]; exact lift1
+        | true =>
+          -- Both b=true.
+          by_cases hvij : v_i = v_j
+          · -- Same gadget. Phase 2.1 (round 2).
+            subst hvij
+            have hwij : w_i ≠ w_j := by
+              intro hwij_eq
+              apply he_ne
+              rw [h_eu_i, h_eu_j]
+              subst hwij_eq
+              rfl
+            apply h.refineStep_endpoint_true_intra_gadget_partner
+              P hwij hwi hwj
+            rw [← hi_eq, ← hj_eq]; exact lift2
+          · -- Different gadget. M3.C (round 1).
+            apply h.refineStep_endpoint_true_inter_gadget P hvij hwi hwj
+            rw [← hi_eq, ← hj_eq]; exact lift1
+
+/-- **Theorem 1 (CFI form, OddDegree, axiom-free).** Orbit recovery
+for OddDegree CFI graphs at depth ≤ `h.baseSize`. Unlike
+`theorem_1_HOR_cfi`, this is **conditional on neither**
+`cfi_cascades_polynomially` (discharged by M4) nor any other CFI axiom
+— only the `OddDegree` and `5 ≤ n` hypotheses.
+
+The `hn_ge_5` hypothesis is automatic for OddDegree H (n ≥ 6 ×
+baseSize ≥ 24), but proving that in Lean requires further
+combinatorics; left as a follow-on. -/
+theorem theorem_1_HOR_cfi_oddDeg {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) (h_odd : h.OddDegree) (hn_ge_5 : 5 ≤ n) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      S.card ≤ cfi_depth_bound h ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w :=
+  theorem_1_HOR_at_depth (h.cfi_cascades_polynomially_oddDeg h_odd P hn_ge_5)
+
+end IsCFI'
+
 end ChainDescent

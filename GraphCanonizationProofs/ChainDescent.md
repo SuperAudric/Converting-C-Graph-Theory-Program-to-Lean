@@ -431,6 +431,38 @@ later cascade round (post-Phase 2.2).
 All Phase 2.3 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
 standard basis).
 
+*Stage 4 / M4 (cascade discharge for OddDegree CFI) — DONE 2026-05-26.*
+§13.21-§13.24 of `CFI.lean`. **Tier-1 cascade axiom discharged**
+for OddDegree H (every base vertex has odd degree, ≥ 3 — covers
+K₄, K₃,₃, Petersen).
+
+§13.21: `IsCFI'.OddDegree` predicate + `exists_witness_of_oddDegree`
+(even subsets always have a non-element) + `exists_phase22_witness`
+(construct a `{v, x_other}` even subset for Phase 2.2 invocations).
+
+§13.22: Phase 2.X — b=0 within-gadget partner at round 4 via bridge
+step + Phase 2.2 + cross-type lift (OddDegree provides all witnesses
+automatically).
+
+§13.23: Phase 2.4 — subset by S at same gadget at round 5 via
+direct signature argument using b=0 endpoint witness + Phase 2.X +
+M3.B+ lifted χ_1 → χ_4.
+
+§13.24: iteration helpers (`refineStep_iter_le_eq`,
+`warmRefine_eq_iter_eq`) + **`cfi_cascades_polynomially_oddDeg`**:
+case-analysis on `(h.e i, h.e j)` with 10 sub-cases. Each invokes a
+phase lemma at the appropriate round (1-5) and lifts to warmRefine.
+Discharges `cfi_cascades_polynomially` for OddDegree + n ≥ 5.
+
+**`theorem_1_HOR_cfi_oddDeg`** — Theorem 1 (CFI form) **axiom-free**
+for OddDegree H. Depends only on `refineStep` + `refineStep_iff` +
+standard basis. No CFI-specific axioms in dependency closure.
+
+**Caveats**: (a) requires `5 ≤ n` hypothesis (automatic for OddDegree H
+via n ≥ 6 × baseSize ≥ 24, but discharge left as follow-on);
+(b) general-degree case (Rook3×3) still uses the original axiom —
+saturated subsets need more cascade rounds.
+
 *Stage 4 / Phase 2.2 (2026-05-26):* b=0 endpoint inter-gadget at
 round 3 — first b=0 cascade step. §13.18-§13.20 of `CFI.lean`.
 

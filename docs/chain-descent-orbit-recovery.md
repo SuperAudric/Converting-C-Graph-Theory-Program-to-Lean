@@ -837,18 +837,84 @@ cascade rounds via subset propagation through neighbouring gadgets).
 All Phase 2.2 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
 standard basis only; no CFI-specific axioms used).
 
-*Stage 4 / Phase 2.X + 2.4 + M3.E + M4 (PENDING, deferred multi-week):*
-- Phase 2.X (new): b=0 within-gadget partner distinction at round 4 —
-  analogous to Phase 2.1 but via bridge-step + Phase 2.2's b=0
-  inter-gadget distinction. Likely needs Phase 2.2 witnesses at
-  gadgets `w` and `w'` (the bridge-partner gadgets).
-- Phase 2.4: subset vertex distinction by S — once endpoints are fully
-  distinguished, subset signatures differ by their endpoint-adjacency
-  patterns.
-- M3.E: cross-type distinctions (subset vs endpoint, etc.) as
-  needed by remaining cascade cases.
-- M4: assemble all cases into `Discrete (warmRefine ...)`,
-  discharge `cfi_cascades_polynomially`.
+*Stage 4 / Phase 2.X + Phase 2.4 + M4 — DONE 2026-05-26 (OddDegree
+class).* `ChainDescent/CFI.lean` §13.21-§13.24 plus a new corollary.
+The full cascade discharged for CFI graphs over odd-degree base graphs.
+
+§13.21 — OddDegree predicate + witness helpers:
+- `IsCFI'.OddDegree h := ∀ v, h.H.degree v % 2 = 1`.
+- `exists_witness_of_oddDegree` — under OddDegree, every even subset
+  `S ⊆ N(v)` has a non-element `y ∈ N(v) \ S` (since `|S|` even and
+  `deg(v)` odd implies `S ⊊ N(v)`).
+- `exists_phase22_witness` — under OddDegree, for any `v ∈ N(w)`,
+  build an even subset `{v, x_other} ⊆ N(w)` with `v` inside and a
+  third element `x ∈ N(w) \ {v, x_other}` (uses `deg(w) ≥ 3` which
+  follows from odd + `deg_ge_two`).
+
+§13.22 — Phase 2.X: b=0 within-gadget partner at round 4:
+- `refineStep_endpoint_false_intra_gadget_partner_round4` —
+  analogous to Phase 2.1 but uses `refineStep_bridge_step` at χ_3.
+  - (P1): bridge partners (b=0 at gadgets w ≠ w') distinguished by
+    χ_3 via Phase 2.2 (witness at gadget w via OddDegree).
+  - (P2): for `u` adj=1 to e^0_{v→w'}, case-split:
+    - u = subset at v: cross-type round-2 lifted to χ_3 (via
+      OddDegree witness for the subset).
+    - u = bridge partner = e^0_{w'→v}: Phase 2.2 with the gadgets
+      swapped (witness at gadget v_e = w' via OddDegree).
+
+§13.23 — Phase 2.4: subset by S at same gadget at round 5:
+- `refineStep_subset_intra_gadget_S_round5` — direct signature-tuple
+  argument at χ_4. Hypothesis: `y ∈ S, y ∉ S'` (a symmetric
+  difference witness). Witness tuple `(χ_4 (e^0_{v→y}), 1, ?)`.
+  - (b) case-split on u adj=1 to subset_v hS' via
+    `adj_subsetVertex_eq_one_iff`:
+    - b=false: u = e^0_{v→x} for x ∈ S' \ {y}, distinguished from
+      e^0_{v→y} via Phase 2.X.
+    - b=true: u = e^1_{v→x}, distinguished from e^0_{v→y} via M3.B+
+      lifted χ_1 → χ_4 by a 3-step `refineStep_iff` chain.
+
+§13.24 — Iteration helpers + **M4** (cascade discharge):
+- `refineStep_iter_le_eq` — equal at iter[k+d] implies equal at
+  iter[k] (refinement split-only across iterations).
+- `warmRefine_eq_iter_eq` — `warmRefine` equality (iter[n]) gives
+  iter[r] equality for r ≤ n.
+- **`cfi_cascades_polynomially_oddDeg`** — discharges the Tier-1
+  cascade axiom under (`OddDegree`, `5 ≤ n`). Witness S = allSeeds;
+  `Discrete (warmRefine ...)` proved via case analysis on h.e i, h.e j
+  with 10 sub-cases:
+  - subset/subset (same gadget): Phase 2.4 (round 5).
+  - subset/subset (diff gadget): Phase 2.3 (round 2).
+  - subset/endpoint (b=true): M3.B++ (round 1).
+  - subset/endpoint (b=false): cross-type round-2 (round 2).
+  - endpoint/endpoint, parity mismatch: M3.B+ (round 1).
+  - endpoint/endpoint, b=true, same gadget: Phase 2.1 (round 2).
+  - endpoint/endpoint, b=true, diff gadget: M3.C (round 1).
+  - endpoint/endpoint, b=false, same gadget: Phase 2.X (round 4).
+  - endpoint/endpoint, b=false, diff gadget: Phase 2.2 (round 3).
+- **`theorem_1_HOR_cfi_oddDeg`** — the **axiom-free** CFI form of
+  Theorem 1 for OddDegree H. No CFI placeholder axioms in its
+  dependency closure (only `refineStep`, `refineStep_iff`, and
+  standard basis).
+
+**Axiom budget for Tier 1 (OddDegree subclass): 0 placeholders.**
+`theorem_1_HOR_cfi_oddDeg` discharges `cfi_cascades_polynomially`
+directly via constructive proof. The original axiom remains for the
+general (non-OddDegree) case; future-work to fully discharge.
+
+**Hypothesis qualifier: `5 ≤ n`.** Required by `warmRefine_eq_iter_eq`
+when applying Phase 2.4 (round 5). For OddDegree H this is automatic
+(n ≥ 6 × baseSize ≥ 24), but proving the implication requires
+combinatorial reasoning about OddDegree → baseSize ≥ 4 → n ≥ 24 →
+n ≥ 5; left as a follow-on.
+
+*Stage 4 / general-degree case + saturated subsets (PENDING, future
+work):*
+- Drop OddDegree hypothesis. Saturated subsets `S = N(v)` arise for
+  even-degree base vertices. These need additional cascade rounds
+  via subset propagation through neighbouring gadgets.
+- Discharge `5 ≤ n` from OddDegree automatically.
+- M3.E: cross-type distinctions for the remaining cases (currently
+  inlined in M4's case analysis; may benefit from factoring).
 
 *Stage 4 / M3.C-M3.E + M4 (PENDING, multi-week):* the remaining M3
 content + cascade assembly. **Note:** initial planning assumed the
