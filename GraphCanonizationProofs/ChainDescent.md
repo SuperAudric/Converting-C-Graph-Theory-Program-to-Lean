@@ -254,10 +254,22 @@ rules; `cfiAdj_symm` and `cfiAdj_loopless` proved.
 concrete predicate; `cfiAdjMatrix_is_cfi` self-witness. Smoke test on
 `triangleBase` confirms `IsCFI' triangleBase.cfiAdjMatrix` holds.
 
-*Pending:* (combinatorial) `Fintype.card CFIVertex = cfiVertexCount`
-identity. (Refactor) connect `IsCFI'` back to `axiom IsCFI` in
-`ChainDescent.lean §17.4`. Stage 3 (Aut structure). Stage 4 (cascade
-lemma).
+*Tier-1 CFI form relocated (§10 of `CFI.lean`):*
+`cfi_depth_bound`, `cfi_depth_bound_le`, `cfi_cascades_polynomially`,
+and `theorem_1_HOR_cfi` now live in `CFI.lean` and use the concrete
+`IsCFI'` predicate. The abstract `axiom IsCFI` is retired (was in
+`ChainDescent.lean §17.4`). Tier-1 axiom budget: 2 placeholders
+(down from 3). Tier 2 still uses its abstract Prop (pending its
+concrete predicate).
+
+*Combinatorial identity (§11 of `CFI.lean`):*
+`Finset.card_powerset_filter_even` (private) proves "even subsets of
+a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating
+sum lemma. Lifted through `Fintype.card_sigma` / `card_sum` /
+`card_coe` to give `card_CFIVertex : Fintype.card H.CFIVertex =
+H.cfiVertexCount`. All axiom-clean (standard basis only).
+
+*Pending:* Stage 3 (Aut structure). Stage 4 (cascade lemma).
 
 **Refuted (machine-checked, kept as record of dead routes):**
 

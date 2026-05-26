@@ -492,15 +492,29 @@ hosts the Lean CFI construction.
   `cfiAdjMatrix` satisfies `IsCFI'`.
 - Smoke test: `IsCFI' triangleBase.cfiAdjMatrix` holds.
 
-*Pending (combinatorial follow-on):* prove `Fintype.card H.CFIVertex =
-H.cfiVertexCount` so `cfiAdjMatrix` casts to `AdjMatrix
-H.cfiVertexCount`. Reduces to the classical identity "the number of
-even-cardinality subsets of a `d`-element set is `2^(d-1)`."
+*IsCFI axiom retirement — DONE 2026-05-26.* The Tier-1 CFI form of
+Theorem 1 (`theorem_1_HOR_cfi`) and its placeholder axioms
+(`cfi_depth_bound`, `cfi_depth_bound_le`,
+`cfi_cascades_polynomially`) have been relocated from
+`ChainDescent.lean §17.4` to `ChainDescent/CFI.lean §10`, now using
+the concrete `IsCFI'` predicate instead of the abstract `axiom
+IsCFI`. The `IsCFI` axiom is **gone**; Tier-1 axiom budget is down
+from 3 placeholders to 2 (`cfi_depth_bound`,
+`cfi_cascades_polynomially`).
 
-*Pending (refactor):* connect `IsCFI'` back to `axiom IsCFI` in
-`ChainDescent.lean §17.4`. Requires either retiring the abstract
-axiom (changing `theorem_1_HOR_cfi` to take `IsCFI'` as
-hypothesis) or providing an axiomatic bridge.
+The Tier 2 analogue (`IsSchurianSchemeGraph`,
+`schurian_scheme_profile_exists`) still uses an abstract Prop axiom
+in `ChainDescent.lean §18`; it'll be relocated similarly once
+Tier 2's concrete-scheme-based predicate is built.
+
+*Combinatorial identity — DONE 2026-05-26.* The classical identity
+"the number of even-cardinality subsets of a nonempty `d`-element
+set is `2^(d-1)`" is proved as
+`Finset.card_powerset_filter_even` (using Mathlib's
+`sum_powerset_neg_one_pow_card_of_nonempty` alternating-sum
+lemma). Combined with `Fintype.card_sigma` / `_sum` / `_coe`, the
+full identity `Fintype.card H.CFIVertex = H.cfiVertexCount` is
+proved as `CFIBase.card_CFIVertex` in `CFI.lean §11`.
 
 *Pending (Stages 3-4, multi-week):* Aut structure lemma; cascade
 lemma discharging `cfi_cascades_polynomially`.

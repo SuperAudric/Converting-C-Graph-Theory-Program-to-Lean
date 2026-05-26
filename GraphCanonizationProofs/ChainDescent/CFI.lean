@@ -5,6 +5,8 @@ import Mathlib.Data.Finset.Powerset
 import Mathlib.Data.Fintype.Powerset
 import Mathlib.Data.Fintype.Sigma
 import Mathlib.Data.Fintype.Sum
+import Mathlib.Data.Fintype.BigOperators
+import Mathlib.Data.Nat.Choose.Sum
 
 /-!
 # CFI infrastructure (Stage 1: foundational definitions)
@@ -441,12 +443,191 @@ noncomputable example : AdjMatrix (Fintype.card triangleBase.CFIVertex) :=
   triangleBase.cfiAdjMatrix
 
 /-- The cardinality identity for `triangleBase` is `18`, matching
-both `cfiVertexCount` and `Fintype.card`. -/
+both `cfiVertexCount` and `Fintype.card`. (Subsumed by the general
+`card_CFIVertex` proven in §11; kept here as a direct smoke test
+that doesn't forward-reference.) -/
 example : Fintype.card triangleBase.CFIVertex = triangleBase.cfiVertexCount := by
   rw [triangleBase_cfiVertex_card, triangleBase_cfiVertexCount]
 
 /-- **Concrete witness**: `triangleBase.cfiAdjMatrix` satisfies `IsCFI'`. -/
 example : IsCFI' triangleBase.cfiAdjMatrix :=
   cfiAdjMatrix_is_cfi triangleBase
+
+/-! ## §10 — Tier-1 CFI form of Theorem 1 (relocated from `ChainDescent.lean §17.4`)
+
+Two placeholder axioms (`cfi_depth_bound`, `cfi_cascades_polynomially`)
++ derived theorem (`theorem_1_HOR_cfi`), formerly in
+[`ChainDescent.lean §17.4`](../ChainDescent.lean) using the abstract
+`axiom IsCFI`. Relocated here to use the concrete `IsCFI'` predicate
+built on `CFIBase` / `CFIVertex` / `cfiAdj`.
+
+The axioms remain — the cascade lemma proper (Stage 4) discharges
+`cfi_cascades_polynomially` — but `IsCFI'` is now concrete, so a
+witness can be constructed (e.g., `cfiAdjMatrix_is_cfi` shows every
+`cfiAdjMatrix H` satisfies it).
+
+The Tier 2 analogue (`IsSchurianSchemeGraph`,
+`schurian_scheme_profile_exists`) still lives in `ChainDescent.lean
+§18` and uses an abstract Prop; it'll be relocated similarly once
+its concrete-scheme-based predicate is built. -/
+
+/-- **Abstract polynomial cascade-depth function for CFI graphs.** A
+function `Nat → Nat` representing the classical bound `tw(H) ≤ n_H ≤ n`
+for `adj = CFI(H)`. Concrete realisation (`tw H`) requires Stage 4 of
+the CFI program. -/
+axiom cfi_depth_bound : Nat → Nat
+
+/-- **The CFI depth bound is `≤ n`** — the placeholder polynomial
+relation. Classical content `tw H ≤ n_H ≤ n` gives this trivially. -/
+axiom cfi_depth_bound_le : ∀ n, cfi_depth_bound n ≤ n
+
+/-- **Fact A (polynomial-depth form).** A CFI graph cascades at depth
+`cfi_depth_bound n`. Stated using the concrete `IsCFI'` predicate.
+Becomes a theorem once the Cai-Fürer-Immerman cascade argument is
+formalised in Lean (Stage 4 of the CFI program). -/
+axiom cfi_cascades_polynomially {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) (P : PMatrix n) :
+    CascadesAt adj P (cfi_depth_bound n)
+
+/-- **Theorem 1 (CFI form, polynomial-depth).** A CFI graph admits
+orbit recovery at depth `cfi_depth_bound n ≤ n`. Conditional on the
+Tier-1 placeholder axioms (`cfi_depth_bound`,
+`cfi_cascades_polynomially`); `IsCFI'` is now a concrete predicate.
+
+Successor of the old `ChainDescent.theorem_1_HOR_cfi`, which used the
+abstract `axiom IsCFI`. -/
+theorem theorem_1_HOR_cfi {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      S.card ≤ cfi_depth_bound n ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w :=
+  theorem_1_HOR_at_depth (cfi_cascades_polynomially h P)
+
+/-! ## §11 — Combinatorial: `Fintype.card CFIVertex = cfiVertexCount`
+
+The vertex count formula `H.cfiVertexCount = Σ v, (2^(deg v - 1) + 2 *
+deg v)` matches `Fintype.card H.CFIVertex` exactly. The proof
+decomposes into:
+- `Fintype.card H.CFIVertex = card H.SubsetVertex + card H.EndpointVertex`
+  (since `CFIVertex = ⊕`).
+- `card H.SubsetVertex = Σ v, (evenSubsetsOfNeighbors v).card`
+  (Sigma + Subtype-of-Finset.mem).
+- `card H.EndpointVertex = Σ v, deg v * 2` (Sigma + Subtype-of-Finset
+  + Bool).
+- **Key combinatorial step**: `(evenSubsetsOfNeighbors v).card =
+  2^(deg v - 1)` (for `deg v ≥ 1`) — the classical identity "the
+  number of even-cardinality subsets of a `d`-element set is
+  `2^(d-1)`."
+
+The classical step uses Mathlib's `Finset.sum_powerset_neg_one_pow_card_of_nonempty`
+(alternating sum = 0 for nonempty sets) to conclude even-count =
+odd-count, combined with even + odd = `2^d`. -/
+
+/-- **Even-cardinality subsets of a nonempty finset count `2^(card-1)`.**
+
+Standard combinatorial identity. Proof: alternating sum of `(-1)^|T|`
+over the powerset equals zero (for nonempty s), so even-cardinality
+subsets count equals odd-cardinality subsets count; combined with
+total powerset count `2^|s|`, each half is `2^(|s|-1)`. -/
+private theorem Finset.card_powerset_filter_even {α : Type*} [DecidableEq α]
+    {s : Finset α} (hs : s.Nonempty) :
+    (s.powerset.filter (fun T => T.card % 2 = 0)).card = 2 ^ (s.card - 1) := by
+  have hpos : 1 ≤ s.card := Finset.card_pos.mpr hs
+  -- A = even count, B = odd count.
+  set A := (s.powerset.filter (fun T => T.card % 2 = 0)).card with hAdef
+  set B := (s.powerset.filter (fun T => ¬ T.card % 2 = 0)).card with hBdef
+  -- A + B = 2^s.card.
+  have hAB : A + B = 2 ^ s.card := by
+    rw [hAdef, hBdef, Finset.card_filter_add_card_filter_not, Finset.card_powerset]
+  -- A = B via alternating sum.
+  have hAeqB : A = B := by
+    -- Lift to Int: A - B = ∑ T, (-1)^T.card = 0.
+    have hsum : ∑ T ∈ s.powerset, ((-1 : ℤ))^T.card = 0 :=
+      Finset.sum_powerset_neg_one_pow_card_of_nonempty hs
+    have hsplit : ∑ T ∈ s.powerset, ((-1 : ℤ))^T.card =
+        (∑ T ∈ s.powerset.filter (fun T => T.card % 2 = 0), ((-1 : ℤ))^T.card) +
+        (∑ T ∈ s.powerset.filter (fun T => ¬ T.card % 2 = 0), ((-1 : ℤ))^T.card) :=
+      (Finset.sum_filter_add_sum_filter_not _ _ _).symm
+    -- Evaluate each piece: even part = A, odd part = -B.
+    have h_even_eval :
+        (∑ T ∈ s.powerset.filter (fun T => T.card % 2 = 0), ((-1 : ℤ))^T.card) = A := by
+      rw [Finset.sum_congr rfl (g := fun _ => 1)]
+      · simp [hAdef]
+      · intro T hT
+        rw [Finset.mem_filter] at hT
+        exact (Nat.even_iff.mpr hT.2).neg_one_pow
+    have h_odd_eval :
+        (∑ T ∈ s.powerset.filter (fun T => ¬ T.card % 2 = 0), ((-1 : ℤ))^T.card) = -B := by
+      rw [Finset.sum_congr rfl (g := fun _ => -1)]
+      · simp [hBdef]
+      · intro T hT
+        rw [Finset.mem_filter] at hT
+        have hmod : T.card % 2 = 1 := by
+          have := Nat.mod_two_eq_zero_or_one T.card
+          omega
+        exact (Nat.odd_iff.mpr hmod).neg_one_pow
+    -- Combine: A - B = 0 in Int.
+    rw [h_even_eval, h_odd_eval] at hsplit
+    have : (A : ℤ) - B = 0 := by linarith [hsplit, hsum]
+    omega
+  -- A + B = 2^n and A = B ⇒ 2A = 2^n ⇒ A = 2^(n-1) (since n ≥ 1).
+  have h2A : 2 * A = 2 ^ s.card := by omega
+  have hpow : (2 : ℕ) ^ s.card = 2 * 2 ^ (s.card - 1) := by
+    conv_lhs => rw [show s.card = (s.card - 1) + 1 from by omega]
+    ring
+  omega
+
+/-! ### Stepping the identity through `CFIVertex`'s structure -/
+
+namespace CFIBase
+
+variable {m : Nat} (H : CFIBase m)
+
+/-- The number of even-cardinality subsets of `H.neighbors v` is
+`2^(H.degree v - 1)`. Applies `Finset.card_powerset_filter_even` to
+the neighbour set, which is nonempty since `H.degree v ≥ 2`. -/
+theorem card_evenSubsetsOfNeighbors (v : Fin m) :
+    (H.evenSubsetsOfNeighbors v).card = 2 ^ (H.degree v - 1) := by
+  have hnonempty : (H.neighbors v).Nonempty := by
+    rw [← Finset.card_pos]
+    change 0 < H.degree v
+    have := H.degree_ge_two v
+    omega
+  exact Finset.card_powerset_filter_even hnonempty
+
+/-- `Fintype.card SubsetVertex = ∑ v, 2^(degree v - 1)`. -/
+theorem card_SubsetVertex :
+    Fintype.card H.SubsetVertex = ∑ v, 2 ^ (H.degree v - 1) := by
+  rw [Fintype.card_sigma]
+  apply Finset.sum_congr rfl
+  intro v _
+  rw [Fintype.card_coe]
+  exact H.card_evenSubsetsOfNeighbors v
+
+/-- `Fintype.card EndpointVertex = ∑ v, 2 * degree v`. -/
+theorem card_EndpointVertex :
+    Fintype.card H.EndpointVertex = ∑ v, 2 * H.degree v := by
+  rw [Fintype.card_sigma]
+  apply Finset.sum_congr rfl
+  intro v _
+  rw [Fintype.card_prod, Fintype.card_coe, Fintype.card_bool]
+  show (H.neighbors v).card * 2 = 2 * H.degree v
+  change H.degree v * 2 = 2 * H.degree v
+  ring
+
+/-- **The cardinality identity**: `Fintype.card CFIVertex = cfiVertexCount`.
+Combines `card_SubsetVertex` and `card_EndpointVertex` via the
+`CFIVertex = SubsetVertex ⊕ EndpointVertex` structure, matching the
+gadget-size sum `∑ v, (2^(degree v - 1) + 2 * degree v)`. -/
+theorem card_CFIVertex : Fintype.card H.CFIVertex = H.cfiVertexCount := by
+  rw [Fintype.card_sum, card_SubsetVertex, card_EndpointVertex,
+    ← Finset.sum_add_distrib]
+  rfl
+
+end CFIBase
 
 end ChainDescent

@@ -3703,22 +3703,25 @@ theorem theorem_1_HOR_at_depth {n : Nat} {adj : AdjMatrix n}
     rw [hvw]
     exact OrbitPartition.refl w
 
-/-! ### §17.4 — Specialisations and the CFI placeholder axioms
+/-! ### §17.4 — Specialisations of `theorem_1_HOR_at_depth`
 
-The Tier-1 theorem in three forms:
+The Tier-1 theorem in three structural forms, all axiom-free:
 - **Trivial-bound form** (`theorem_1_HOR_at_n`): every graph admits
-  orbit recovery at depth `n`. Axiom-free; not informative on its
-  own but useful as a smoke-test.
+  orbit recovery at depth `n`. Useful as a smoke-test.
 - **Legacy form** (`theorem_1_HOR`): existential, no depth bound.
-  Axiom-free corollary of `theorem_1_HOR_at_n`.
-- **CFI polynomial-depth form** (`theorem_1_HOR_cfi`): conditional
-  on the CFI placeholder axioms. The actual deliverable for
-  Corollary 1 of the orbit-recovery doc.
+  Corollary of `theorem_1_HOR_at_n`.
+- **Pointwise form** (`theorem_1_HOR_pointwise`): Aut_S is trivial
+  at the cascade depth.
 
-The CFI axioms mirror the Tier 2 (§18) structure: an abstract Prop
-predicate `IsCFI` (placeholder until CFI infrastructure lands) plus a
-single Fact-A-shaped existence axiom relating `IsCFI` to a polynomial
-cascade depth. -/
+The CFI-specific polynomial-depth form (`theorem_1_HOR_cfi`) and its
+placeholder axioms (`IsCFI`, `cfi_depth_bound`,
+`cfi_cascades_polynomially`) live in
+[`ChainDescent/CFI.lean`](./ChainDescent/CFI.lean), where the
+concrete `IsCFI'` predicate (built on `CFIBase` / `CFIVertex` /
+`cfiAdj`) is used directly instead of an abstract Prop axiom.
+Mirroring this for Tier 2 (`IsSchurianSchemeGraph` →
+concrete-scheme-based predicate) is a follow-on once Tier 2's
+analogue of `CFI.lean` lands. -/
 
 /-- **Theorem 1, trivial-bound corollary.** Every graph admits orbit
 recovery at depth `n`. Axiom-free; specialises
@@ -3759,63 +3762,6 @@ theorem theorem_1_HOR_pointwise {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
   refine ⟨S, hd, ?_⟩
   intro π hπ hP hπS
   exact aut_trivial_of_discrete_warmRefine hd hπ hP hπS
-
-/-! #### CFI placeholder axioms — polynomial-depth Fact A
-
-Three axioms, mirroring §18's Tier 2 structure:
-
-- `IsCFI adj` — abstract Prop placeholder for "the graph is a CFI
-  graph." No introduction rule until CFI infrastructure lands.
-- `cfi_depth_bound : Nat → Nat` + `cfi_depth_bound_le` — abstract
-  polynomial cascade-depth function for CFI, asserting `cfi_depth_bound
-  n ≤ n` as the (placeholder) polynomial relation. Classical content:
-  `cfi_depth_bound n = tw(H)` for `adj = CFI(H)`, often much smaller
-  than `n`.
-- `cfi_cascades_polynomially` — the Tier-1 Fact A. Asserts a CFI
-  graph cascades at depth `cfi_depth_bound n`. Becomes a theorem once
-  CFI infrastructure lands.
-
-Concrete (non-placeholder) realisations would tighten
-`cfi_depth_bound n ≤ n` to a meaningful polynomial relation (e.g.,
-`cfi_depth_bound n = tw H` where `n = |V(CFI(H))|` and the polynomial
-relation comes from `tw H ≤ n_H ≤ n`). -/
-
-/-- **Abstract Prop: the graph `adj` is a CFI graph.** Placeholder
-until CFI construction lands in Lean (~200-400 lines; G5 of
-orbit-recovery doc). Mirrors `IsSchurianSchemeGraph` in §18. -/
-axiom IsCFI {n : Nat} (adj : AdjMatrix n) : Prop
-
-/-- **Abstract polynomial cascade-depth function for CFI graphs.** A
-function `Nat → Nat` representing the classical bound `tw(H) ≤ n_H ≤ n`
-for `adj = CFI(H)`. Concrete realisation requires CFI infrastructure. -/
-axiom cfi_depth_bound : Nat → Nat
-
-/-- **The CFI depth bound is `≤ n`** — the placeholder polynomial
-relation. The classical content `tw H ≤ n` (where `H` is the CFI base
-graph) gives this trivially. -/
-axiom cfi_depth_bound_le : ∀ n, cfi_depth_bound n ≤ n
-
-/-- **Fact A (polynomial-depth form, placeholder).** A CFI graph
-cascades at depth `cfi_depth_bound n`. Becomes a theorem once
-`cfi_depth_bound` is given a concrete realisation (`tw H`) and CFI
-infrastructure makes the cascade lemma provable. -/
-axiom cfi_cascades_polynomially {n : Nat} {adj : AdjMatrix n}
-    (h : IsCFI adj) (P : PMatrix n) :
-    CascadesAt adj P (cfi_depth_bound n)
-
-/-- **Theorem 1 (CFI form, polynomial-depth).** A CFI graph admits
-orbit recovery at depth `cfi_depth_bound n ≤ n`. Conditional on the
-Tier-1 placeholder axioms (`IsCFI`, `cfi_cascades_polynomially`). -/
-theorem theorem_1_HOR_cfi {n : Nat} {adj : AdjMatrix n}
-    (h : IsCFI adj) (P : PMatrix n) :
-    ∃ S : Finset (Fin n),
-      S.card ≤ cfi_depth_bound n ∧
-      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
-      ∀ v w,
-        OrbitPartition adj P S v w ↔
-        warmRefine adj P (individualizedColouring n S) v =
-          warmRefine adj P (individualizedColouring n S) w :=
-  theorem_1_HOR_at_depth (cfi_cascades_polynomially h P)
 
 /-! ## §18 — Tier 2: orbit recovery for schurian scheme graphs
 
