@@ -246,3 +246,145 @@ This experiment deliberately does not address:
   closure is a binary matroid." Q1 is testing whether `cl_prov` supports
   cluster by gadget — a structural version of the binary-closure claim,
   without the matroid axioms.
+
+---
+
+## 8. Phase A — paper findings on CFI(C₃)
+
+**Date:** 2026-05-26.
+
+### 8.1 Construction summary
+
+Numbering vertices 0–17 across three gadgets G₀, G₁, G₂ of 6 vertices each
+(matches `CfiGraphGenerator.BuildCfiPair` conventions for a C₃ base).
+Each gadget has 2 subset-vertices (`a_∅`, `a_full`) and 4 edge-endpoints
+(`e^b_{vw}` for two adjacent base vertices and two parities). Every vertex
+has degree 2; total 18 edges (12 intra-gadget + 6 inter-gadget bridges).
+
+Crucial structural fact: each gadget's intra-graph is **two disjoint 3-paths**
+(`a_∅` connecting to its two `e^1` endpoints; `a_full` connecting to its two
+`e^0` endpoints). The two parities are intra-gadget-disconnected — they meet
+only through inter-gadget bridges.
+
+### 8.2 Refinement results
+
+- **Pre-individualization 1-WL:** one cell. Completely blind.
+- **After individualizing v0 = a_∅(G₀):** fixpoint partition has cell-size
+  signature `(1, 2, 2, 2, 2, 9)`. Five non-singleton cells:
+  - `B = {v3, v5}` (v0's neighbors)
+  - `D = {v9, v15}` (B's inter-gadget neighbors)
+  - `E = {v6, v12}` (a_∅ vertices in G₁ and G₂)
+  - `G = {v11, v17}` (e^1_{12} endpoints in G₁ and G₂)
+  - `H` (size 9): each gadget's "opposite parity" trio
+    `{a_full, e^0_{e1}, e^0_{e2}}`.
+- **After individualizing v0 and a second vertex (e.g., v3 ∈ B):** cascade
+  fully discretizes. So **CFI(C₃) is Tier 1: 2 individualizations suffice.**
+
+### 8.3 Q1 assessment
+
+The refinement partition is **skew to the gadget partition** — non-singleton
+cells contain ≤ 1 vertex per gadget (cells B, D, E, G) or exactly 3 per gadget
+(cell H). Gadget membership is recoverable but indirectly: the H-trio per
+gadget plus the unique pairing data from B/D/E/G fixes the gadget assignment
+up to the global gadget-permutation symmetry.
+
+So Q1's strict form ("refinement cells *are* gadgets") **fails**, but its
+operational form ("gadget assignment is recoverable in poly time from
+refinement data") **passes** via post-processing.
+
+`cl_prov` turns out **not** to be the right detector here, contra the
+experiment doc's initial framing. `cl_prov` is purely the transitive closure
+of the commit matrix — it sees the partial order built by guesses, not the
+refinement structure those guesses *induce*. The detection signal lives in
+1-WL signatures post-individualization, not in `cl_prov` directly.
+
+### 8.4 Tier-1 caveat
+
+**CFI(C₃) is Tier 1, not Tier 2.** It cascades. The Aut group is Z₂ ⋊ S₃,
+where S₃ is the standard symmetric action on 3 elements, *not* a Johnson
+action on subsets. So CFI(C₃) probes the calibration question ("is gadget
+structure visible at all?"), not the hypothesis question ("does the encoded
+Johnson factor surface?").
+
+This is consistent with calculator.md §3's hardness map: cascade-class graphs
+are Tier 1 regardless of group. The Q1+Q2+Q3 experiment as currently
+specified can confirm gadget recovery works on CFI(C₃), and that's a
+necessary condition, but the actual Tier-2 question is only probed by
+CFI(Petersen).
+
+### 8.5 Patterns to track for Lean
+
+Behaviors observed on CFI(C₃) that may generalize, with notes on conditions
+that would generalize or fail:
+
+**P1 — Pre-individualization blindness.** 1-WL is constant on CFI(H) for any
+base H with all base-vertices of equal degree. Every CFI vertex has degree 2
+(for degree-2 base vertices) or other constant degree, and the 1-WL signature
+at round 1 is symmetric. **Generalizes when:** base graph is regular. **Fails
+when:** base graph has mixed degrees — then gadget-vertex degrees differ and
+1-WL distinguishes vertex types immediately (and may distinguish gadgets via
+neighborhood degrees). This is a CFI-construction property, not a deep one.
+
+**P2 — Post-individualization cell-size signature.** The cell-size partition
+`(1, 2, 2, 2, 2, 9)` for CFI(C₃) is iso-invariant (the cells themselves
+aren't, but their sizes are). Generalizing: for CFI(H), the post-
+individualization cell-size signature is a function of (H, individualized
+gadget). **Conjecture:** the signature, together with the cell-adjacency
+graph at fixpoint, uniquely identifies the base H up to isomorphism.
+**Lean target:** state and try to prove "cell-size signature of
+warm-refined CFI(H) with one fresh-colour individualization in gadget X(v)
+equals a function f(H, v)". The descent-spine theorem
+(`warmRefine_agree_off'`) already provides the direction-blindness
+sub-component.
+
+**P3 — Parity asymmetry from individualization.** Individualizing one vertex
+in a gadget breaks the internal Z₂-parity symmetry of that gadget, and the
+break propagates through bridges into the rest. The "opposite parity" union
+across gadgets stays large (cell H has 9 vertices, with 3 per gadget). The
+size-3 within H is exactly `|gadget intra-component on opposite parity| = 3`
+(one a_full + two e^0 endpoints). **Lean target:** show that the post-
+individualization partition's largest cell, intersected with each gadget,
+has size `|gadget| / 2`. Direct calculation; one lemma per CFI vertex type.
+
+**P4 — Cascade after 2 individualizations for tree-base CFI.** CFI(C₃) and
+CFI(C_k) for small k cascade quickly because individualizing one parity-pair
+across one gadget propagates uniquely. **Generalizes when:** the base has
+small treewidth (the CFI cascade threshold is `tw(H) + 1` individualizations,
+classic result). **Fails when:** base has high treewidth. For CFI(K_4)
+(tw=3) we'd expect 4 individualizations; for CFI(K_{3,3}) (tw=3) also 4;
+for CFI(Petersen) (tw=4) probably 5. **Implication for the experiment:**
+CFI(Petersen) won't fully cascade in 1–2 individualizations, so its
+post-individualization refinement will leave non-singleton cells —
+*and those residual cells are the encoded Johnson's footprint*.
+
+**P5 — Refinement-vs-gadget skewness.** The refinement partition cuts across
+gadgets rather than respecting them. This is a CFI-design feature: the
+construction's whole point is that local gadget structure looks uniform
+from outside, so refinement can't separate vertices by gadget. **Generalizes
+when:** the encoding is gadget-uniform (CFI-class). **Fails when:** the
+encoding has gadget-distinguishing features. In Q1's strict form
+("refinement cells = gadgets") this is a failure pattern; in the operational
+form ("gadgets recoverable from refinement") it's not.
+
+### 8.6 Decision point — what to do next
+
+Phase A on CFI(C₃) confirms gadget structure is recoverable from refinement
+data, but reveals the detection isn't via `cl_prov`. Three next steps in
+descending order of value:
+
+1. **Apply P2's cell-size signature analysis to CFI(K₄) (40 vertices) by
+   code.** K₄ doesn't fully cascade in 2 individualizations (treewidth 3
+   needs 4), so the residual cell structure begins to probe what
+   CFI(Petersen) will look like. Tractable to code-test; can verify
+   conjectures P2, P3 numerically.
+2. **Re-spec Q1.** The current Q1 names `cl_prov` as the candidate detector;
+   replace with "1-WL signature post-individualization" or "cell-size
+   signature at refinement fixpoint." Q2 and Q3 are unchanged.
+3. **Proceed directly to CFI(Petersen) post-individualization signature.**
+   The cell-size signature there will tell us whether the residual
+   (after cascade hits its limit) reveals the Johnson structure or not.
+
+Recommended order: (1) → (3), with (2) folded in as a doc cleanup once we
+know which detector wins. Step (1) keeps the calibration ladder honest;
+jumping straight to (3) risks misreading a complex partition.
+
