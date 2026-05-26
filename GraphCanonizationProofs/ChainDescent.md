@@ -247,8 +247,17 @@ verified via `native_decide`.
 encoding intra-gadget `(w ∈ S) ⊕ b` and inter-gadget untwisted bridge
 rules; `cfiAdj_symm` and `cfiAdj_loopless` proved.
 
-*Pending:* Stage 2.3 (flattening to `AdjMatrix (cfiVertexCount H)` +
-concrete `IsCFI`), Stage 3 (Aut structure), Stage 4 (cascade lemma).
+*Stage 2.3 (lift to AdjMatrix + concrete IsCFI):*
+`cfiAdjMatrix : CFIBase m → AdjMatrix (Fintype.card H.CFIVertex)`
+(noncomputable, via `Fintype.equivFin`); `cfiAdjMatrix_symm` /
+`cfiAdjMatrix_loopless` proved; `IsCFI' : AdjMatrix n → Prop`
+concrete predicate; `cfiAdjMatrix_is_cfi` self-witness. Smoke test on
+`triangleBase` confirms `IsCFI' triangleBase.cfiAdjMatrix` holds.
+
+*Pending:* (combinatorial) `Fintype.card CFIVertex = cfiVertexCount`
+identity. (Refactor) connect `IsCFI'` back to `axiom IsCFI` in
+`ChainDescent.lean §17.4`. Stage 3 (Aut structure). Stage 4 (cascade
+lemma).
 
 **Refuted (machine-checked, kept as record of dead routes):**
 

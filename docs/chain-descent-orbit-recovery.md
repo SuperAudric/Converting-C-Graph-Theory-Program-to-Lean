@@ -481,14 +481,29 @@ hosts the Lean CFI construction.
 - `cfiAdj_symm` — proved.
 - `cfiAdj_loopless` — proved, uses `not_self_mem_neighbors`.
 
-*Pending (Stage 2.3, multi-session):*
-- Flattening bijection `CFIVertex H ≃ Fin (cfiVertexCount H)`.
-- Lift `cfiAdj` to `AdjMatrix (cfiVertexCount H)`.
-- Concrete `def IsCFI` predicate to eventually replace the abstract
-  Prop axiom.
+*Stage 2.3 (lift to AdjMatrix + concrete IsCFI):*
+- `cfiAdjMatrix : CFIBase m → AdjMatrix (Fintype.card H.CFIVertex)` —
+  `cfiAdj` lifted through `Fintype.equivFin` (noncomputable; the
+  classical bijection from a fintype to its Fin-indexed image).
+- `cfiAdjMatrix_symm` / `cfiAdjMatrix_loopless` — proved.
+- `IsCFI'` — concrete `Prop` predicate: `∃ m H (e : Fin n ≃
+  H.CFIVertex), ∀ i j, adj.adj i j = H.cfiAdj (e i) (e j)`.
+- `cfiAdjMatrix_is_cfi` — self-witness: every `H : CFIBase m`'s
+  `cfiAdjMatrix` satisfies `IsCFI'`.
+- Smoke test: `IsCFI' triangleBase.cfiAdjMatrix` holds.
 
-*Pending (Stages 3-4, multi-week):* Aut structure lemma; cascade lemma
-discharging `cfi_cascades_polynomially`.
+*Pending (combinatorial follow-on):* prove `Fintype.card H.CFIVertex =
+H.cfiVertexCount` so `cfiAdjMatrix` casts to `AdjMatrix
+H.cfiVertexCount`. Reduces to the classical identity "the number of
+even-cardinality subsets of a `d`-element set is `2^(d-1)`."
+
+*Pending (refactor):* connect `IsCFI'` back to `axiom IsCFI` in
+`ChainDescent.lean §17.4`. Requires either retiring the abstract
+axiom (changing `theorem_1_HOR_cfi` to take `IsCFI'` as
+hypothesis) or providing an axiomatic bridge.
+
+*Pending (Stages 3-4, multi-week):* Aut structure lemma; cascade
+lemma discharging `cfi_cascades_polynomially`.
 
 The CFI module is built as a sub-target (`defaultTargets =
 ["ChainDescent", "ChainDescent.CFI"]` in `lakefile.toml`), split from

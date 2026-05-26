@@ -359,4 +359,94 @@ theorem cfiAdj_loopless (x : H.CFIVertex) : H.cfiAdj x x = 0 := by
 
 end CFIBase
 
+/-! ## §9 — Stage 2.3: lift to `AdjMatrix` + concrete `IsCFI`
+
+Three deliverables:
+
+1. **`cfiAdjMatrix`** — `cfiAdj` lifted through the canonical
+   `CFIVertex H ≃ Fin (Fintype.card H.CFIVertex)` bijection
+   (`Fintype.equivFin`) to a concrete `AdjMatrix (Fintype.card
+   H.CFIVertex)`. Noncomputable since `Fintype.equivFin` is.
+2. **`cfiAdjMatrix_symm` / `cfiAdjMatrix_loopless`** — basic
+   properties lifted from `cfiAdj_symm`/`cfiAdj_loopless`.
+3. **`IsCFI'`** — concrete `Prop` predicate "`adj` is the adjacency
+   matrix of `CFI(H)` for some base `H`." Coexists with the abstract
+   `axiom IsCFI` declared in `ChainDescent.lean §17.4`; retiring the
+   axiom is a follow-on refactor that requires touching the Tier-1
+   theorems' `IsCFI` hypotheses.
+
+A separate combinatorial follow-on (out of scope here) would prove
+`Fintype.card H.CFIVertex = H.cfiVertexCount` so that `cfiAdjMatrix`
+can be cast to `AdjMatrix H.cfiVertexCount` — the identity reduces to
+"the number of even subsets of a `d`-element set is `2^(d-1)`". -/
+
+namespace CFIBase
+
+variable {m : Nat} (H : CFIBase m)
+
+/-- **The CFI adjacency matrix**, indexed by `Fin (Fintype.card
+H.CFIVertex)`. Lifts `cfiAdj` through `Fintype.equivFin`.
+
+Noncomputable because `Fintype.equivFin` is. The classical witness
+that the CFI construction produces a well-defined adjacency matrix
+on `Fin N` for some `N`; downstream consumers (e.g., `IsCFI'`) treat
+it existentially. -/
+noncomputable def cfiAdjMatrix : AdjMatrix (Fintype.card H.CFIVertex) :=
+  let e : Fin (Fintype.card H.CFIVertex) ≃ H.CFIVertex :=
+    (Fintype.equivFin H.CFIVertex).symm
+  ⟨fun i j => H.cfiAdj (e i) (e j)⟩
+
+/-- The CFI adjacency matrix is symmetric. -/
+theorem cfiAdjMatrix_symm (i j : Fin (Fintype.card H.CFIVertex)) :
+    H.cfiAdjMatrix.adj i j = H.cfiAdjMatrix.adj j i := by
+  show H.cfiAdj _ _ = H.cfiAdj _ _
+  exact H.cfiAdj_symm _ _
+
+/-- The CFI adjacency matrix is loopless. -/
+theorem cfiAdjMatrix_loopless (i : Fin (Fintype.card H.CFIVertex)) :
+    H.cfiAdjMatrix.adj i i = 0 := by
+  show H.cfiAdj _ _ = 0
+  exact H.cfiAdj_loopless _
+
+end CFIBase
+
+/-- **Concrete `IsCFI` predicate.** A graph `adj : AdjMatrix n` is a
+CFI graph iff there exist a base graph `H : CFIBase m` and a
+bijection `Fin n ≃ H.CFIVertex` through which `adj` matches `cfiAdj
+H`.
+
+This is the concrete counterpart of the abstract `axiom IsCFI`
+declared in `ChainDescent.lean §17.4`. Retiring that axiom in favour
+of this predicate requires refactoring the Tier-1 theorems
+(`theorem_1_HOR_cfi`) to take `IsCFI'` as a hypothesis — a follow-on
+task that touches the main file.
+
+The bijection requirement implicitly forces `n = Fintype.card
+H.CFIVertex`; the existence of an `Equiv` between two finite types
+implies their cardinalities match. -/
+def IsCFI' {n : Nat} (adj : AdjMatrix n) : Prop :=
+  ∃ (m : Nat) (H : CFIBase m) (e : Fin n ≃ H.CFIVertex),
+    ∀ i j, adj.adj i j = H.cfiAdj (e i) (e j)
+
+/-- **Self-witness**: every CFI base graph's `cfiAdjMatrix` satisfies
+`IsCFI'`. The witness is the same bijection used to define
+`cfiAdjMatrix`, so adjacency matching is `rfl`. -/
+theorem cfiAdjMatrix_is_cfi (H : CFIBase m) : IsCFI' H.cfiAdjMatrix :=
+  ⟨m, H, (Fintype.equivFin H.CFIVertex).symm, fun _ _ => rfl⟩
+
+/-- **Smoke test**: `triangleBase`'s `cfiAdjMatrix` has the
+expected `AdjMatrix 18` type (via the cardinality identity for the
+triangle). -/
+noncomputable example : AdjMatrix (Fintype.card triangleBase.CFIVertex) :=
+  triangleBase.cfiAdjMatrix
+
+/-- The cardinality identity for `triangleBase` is `18`, matching
+both `cfiVertexCount` and `Fintype.card`. -/
+example : Fintype.card triangleBase.CFIVertex = triangleBase.cfiVertexCount := by
+  rw [triangleBase_cfiVertex_card, triangleBase_cfiVertexCount]
+
+/-- **Concrete witness**: `triangleBase.cfiAdjMatrix` satisfies `IsCFI'`. -/
+example : IsCFI' triangleBase.cfiAdjMatrix :=
+  cfiAdjMatrix_is_cfi triangleBase
+
 end ChainDescent
