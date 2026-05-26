@@ -2954,52 +2954,17 @@ theorem refineStep_subset_intra_gadget_S_round5
 
 end IsCFI'
 
-/-! ### §13.24 — refineStep iteration helpers + M4 assembly
+/-! ### §13.24 — M4 assembly
 
-Two tier-agnostic helpers for lifting per-round distinctions to
-warmRefine:
-- `refineStep_iter_le_eq`: equal at iterate `k + d` implies equal at
-  iterate `k` (refinement is split-only at any round).
-- `warmRefine_eq_iter_eq`: warmRefine equality implies iterate-r
-  equality for r ≤ n.
+Assembles all phase lemmas (M2-M3 + Phase 2.0-2.4) into a single
+`Discrete (warmRefine adj P χ_{allSeeds})` proof under `OddDegree`.
+Discharges the Tier-1 cascade axiom `cfi_cascades_polynomially` for
+the OddDegree CFI class.
 
-These are pure properties of `refineStep_iff`; could live in
-`ChainDescent.lean` §16 for Tier 2 to reuse. Placed in CFI.lean for
-now to minimise file churn.
-
-Then **M4**: assembly of all phase lemmas + helpers into a Discrete
-proof for `warmRefine` under `OddDegree`. Discharges
-`cfi_cascades_polynomially` for the OddDegree CFI class. -/
-
-/-- **Refinement is split-only across iterations.** Equal at iterate
-`k + d` implies equal at iterate `k`. -/
-theorem refineStep_iter_le_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
-    (χ : Colouring n) (k d : Nat) {v w : Fin n}
-    (h : ((refineStep adj P)^[k + d]) χ v =
-         ((refineStep adj P)^[k + d]) χ w) :
-    ((refineStep adj P)^[k]) χ v = ((refineStep adj P)^[k]) χ w := by
-  induction d with
-  | zero => exact h
-  | succ d' ih =>
-    apply ih
-    have h' : ((refineStep adj P)^[k + d' + 1]) χ v =
-              ((refineStep adj P)^[k + d' + 1]) χ w := by
-      rw [show k + d' + 1 = k + (d' + 1) from by omega]; exact h
-    rw [Function.iterate_succ_apply'] at h'
-    exact ((refineStep_iff adj P _ _ _).mp h').1
-
-/-- `warmRefine` equality implies iterate-r equality for r ≤ n. -/
-theorem warmRefine_eq_iter_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
-    (χ : Colouring n) (r : Nat) (hr : r ≤ n) {v w : Fin n}
-    (h : warmRefine adj P χ v = warmRefine adj P χ w) :
-    ((refineStep adj P)^[r]) χ v = ((refineStep adj P)^[r]) χ w := by
-  unfold warmRefine at h
-  have h' : ((refineStep adj P)^[r + (n - r)]) χ v =
-            ((refineStep adj P)^[r + (n - r)]) χ w := by
-    have hcount : r + (n - r) = n := by omega
-    rw [hcount]
-    exact h
-  exact refineStep_iter_le_eq adj P χ r (n - r) h'
+The two iteration helpers (`refineStep_iter_le_eq` and
+`warmRefine_eq_iter_eq`) used to bridge per-round distinctions to
+`warmRefine` are now tier-agnostic and live in `ChainDescent.lean`
+§16.4; both Tier 1 (here) and Tier 2 (planned Step 2) use them. -/
 
 namespace IsCFI'
 

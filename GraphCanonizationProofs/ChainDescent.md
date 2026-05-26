@@ -512,6 +512,32 @@ H.cfiVertexCount`. All axiom-clean (standard basis only).
 
 *Pending:* Stage 3 (Aut structure). Stage 4 (cascade lemma).
 
+**Tier 2 Lean — Stage T2.1 DONE 2026-05-26.** New module
+[`ChainDescent/Scheme.lean`](./ChainDescent/Scheme.lean) (default
+build target alongside `ChainDescent` and `ChainDescent.CFI`).
+Iteration helpers `refineStep_iter_le_eq` /
+`warmRefine_eq_iter_eq` relocated from `CFI.lean §13.24` to
+`ChainDescent.lean §16.4` (tier-agnostic, used by both Tier 1's
+M4 and Tier 2's planned Step 2 induction).
+
+`Scheme.lean` contents:
+- §1 `AssociationScheme n` structure: `rank`, `rel`,
+  `rel_zero_iff_eq`, `rel_symm`, `rel_partition` (`∃!`),
+  `intersectionNumber`, `intersectionNumber_well_defined`.
+  Helpers: `relOfPair` + `rel_relOfPair`, `relOfPair_unique`,
+  `rel_iff_relOfPair`, `relOfPair_symm`, `relOfPair_self`,
+  `relOfPair_eq_zero_iff`.
+- §2 `IsSchemeAut S π` predicate, with `refl`/`trans`/`symm`
+  group structure and `relOfPair_eq` (scheme-Aut preserves
+  `relOfPair`). `SchurianScheme n` extends `AssociationScheme`
+  with the `schurian` field.
+- §3 Smoke test: `trivialScheme : AssociationScheme 1` and
+  `trivialSchurianScheme : SchurianScheme 1`.
+
+All T2.1 declarations axiom-clean (`propext` + `Classical.choice`
++ `Quot.sound`; no `refineStep`). Next: T2.2 (`vProfile` + Step 1
+algebraic core).
+
 **Refuted (machine-checked, kept as record of dead routes):**
 
 - `transitiveClose_swap` — false; `closeStep`'s `less`-first tie-break breaks

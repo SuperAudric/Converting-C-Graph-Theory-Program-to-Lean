@@ -296,21 +296,39 @@ SchemeProfile⟩`.
 
 Following Tier 1's naming convention (Stages + M-numbers):
 
-### Stage T2.1 — association scheme infrastructure
+### Stage T2.1 — association scheme infrastructure — DONE 2026-05-26
 
-- **T2.1.a** — `AssociationScheme n` structure (§6.1). Basic facts:
-  `rel_zero_iff_eq`, `rel_symm`, `partition`, `intersection_number`
-  axiom-fields. Plus `Fintype` / `DecidableEq` instances.
-- **T2.1.b** — `SchurianScheme n` extending `AssociationScheme` with
-  the schurian field. Aut-action interface (bridge to
-  `Automorphism (AdjMatrix.scheme_edge_set this)` from
-  `OrbitPartition`).
-- **T2.1.c** — concrete example: `JohnsonScheme m k : SchurianScheme
-  (Nat.choose m k)`. Smoke test, parallel to `triangleBase` for
-  Tier 1.
+Landed in
+[`ChainDescent/Scheme.lean`](../GraphCanonizationProofs/ChainDescent/Scheme.lean)
+(~165 lines, all axiom-clean: `propext` + `Classical.choice` +
+`Quot.sound`, no `refineStep`).
 
-**Estimated:** ~300 lines. The intersection-number axiom-fields are
-the load-bearing definitional content; the rest is bookkeeping.
+- **T2.1.a — DONE** — `AssociationScheme n` structure with
+  `rank`, `rel`, `rel_zero_iff_eq`, `rel_symm`, `rel_partition`
+  (`∃!`), `intersectionNumber`, `intersectionNumber_well_defined`.
+  Helpers: `relOfPair` (noncomputable, from `Classical.choose`),
+  `rel_relOfPair`, `relOfPair_unique`, `rel_iff_relOfPair`,
+  `relOfPair_symm`, `relOfPair_self`, `relOfPair_eq_zero_iff`.
+- **T2.1.b — DONE** — `IsSchemeAut S π` predicate (preserves every
+  relation index), with `IsSchemeAut.refl`/`trans`/`symm`/`relOfPair_eq`.
+  `SchurianScheme n` extends `AssociationScheme n` with the
+  `schurian` field. **Aut-action bridge deferred** to T2.M4 —
+  T2.2/T2.3 work with `IsSchemeAut`-based orbits, and the
+  scheme-Aut → graph-Aut inclusion gets discharged once a
+  `SchemeGraph` structure is built.
+- **T2.1.c — DONE** — `trivialScheme : AssociationScheme 1` and
+  `trivialSchurianScheme : SchurianScheme 1` (single-vertex,
+  identity-only Aut). Confirms inhabitedness. Heavier examples
+  (`JohnsonScheme m k`) deferred until T2.M4 when concrete instances
+  matter.
+
+**Build target:** `ChainDescent.Scheme` added to `lakefile.toml`
+`defaultTargets`.
+
+**Iteration helpers relocated:** `refineStep_iter_le_eq` and
+`warmRefine_eq_iter_eq` moved from `CFI.lean §13.24` to
+`ChainDescent.lean §16.4`. Both tiers now use them without a CFI
+import; both remain axiom-clean.
 
 ### Stage T2.2 — v-profile + Step 1 (algebraic)
 

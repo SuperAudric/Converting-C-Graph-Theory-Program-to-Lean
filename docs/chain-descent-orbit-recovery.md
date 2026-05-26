@@ -1278,6 +1278,33 @@ OddDegree discharge (notably the iteration helpers
 step-lemma pattern), what's fully new (association schemes don't
 exist in Mathlib), and gives a ~9-12 day effort estimate.
 
+**Tier 2 Lean execution — T2.1 STARTED 2026-05-26.** New module
+[`ChainDescent/Scheme.lean`](../GraphCanonizationProofs/ChainDescent/Scheme.lean)
+(default build target). Iteration helpers relocated to
+`ChainDescent.lean §16.4` (axiom-clean, tier-agnostic).
+
+*Stage T2.1.a (AssociationScheme structure):* `AssociationScheme n`
+structure with fields `rank`, `rel : Fin (rank+1) → Fin n → Fin n →
+Bool`, `rel_zero_iff_eq` (diagonal), `rel_symm`, `rel_partition`
+(`∃!` per pair), `intersectionNumber`, and `intersectionNumber_well_defined`
+(the load-bearing axiom). Plus `relOfPair`, `rel_relOfPair`,
+`relOfPair_unique`, `rel_iff_relOfPair`, `relOfPair_symm`,
+`relOfPair_self`, `relOfPair_eq_zero_iff` helpers.
+
+*Stage T2.1.b (scheme automorphisms + SchurianScheme):* `IsSchemeAut
+S π` predicate (π preserves every relation), with `refl`/`trans`/`symm`
+group structure and `relOfPair_eq` (scheme-Aut preserves relOfPair).
+`SchurianScheme n` extends `AssociationScheme` with the `schurian`
+field — any two pairs in the same relation are connected by some
+scheme-Aut.
+
+*Stage T2.1.c (smoke test):* `trivialScheme : AssociationScheme 1`
+and `trivialSchurianScheme : SchurianScheme 1` (single-vertex scheme,
+identity-only Aut). Confirms structures are inhabited.
+
+All T2.1 declarations axiom-clean (only `propext`, `Classical.choice`,
+`Quot.sound`). Next: T2.2 (`vProfile` + Step 1 algebraic core).
+
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.
 

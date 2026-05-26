@@ -3538,6 +3538,51 @@ theorem subset_warmRefine {v w : Fin n} (h : OrbitPartition adj P S v w) :
 
 end OrbitPartition
 
+/-! ### §16.4 — Iteration helpers (tier-agnostic)
+
+Two helpers for lifting per-round refineStep distinctions to
+`warmRefine`. Pure properties of `refineStep_iff`; no CFI-specific
+content. Used by both Tier 1's M4 cascade (`ChainDescent/CFI.lean`
+§13.24) and the planned Tier 2 Step 2 induction. Originally introduced
+inside `CFI.lean` for the OddDegree discharge; relocated here so both
+tiers can use them without an explicit CFI import. -/
+
+/-- **Refinement is split-only across iterations.** Equal at iterate
+`k + d` implies equal at iterate `k`. Inductive engine: each
+`refineStep` round can only split cells, never merge — so if two
+vertices agree at a later iterate, they agreed at every earlier
+iterate. -/
+theorem refineStep_iter_le_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (k d : Nat) {v w : Fin n}
+    (h : ((refineStep adj P)^[k + d]) χ v =
+         ((refineStep adj P)^[k + d]) χ w) :
+    ((refineStep adj P)^[k]) χ v = ((refineStep adj P)^[k]) χ w := by
+  induction d with
+  | zero => exact h
+  | succ d' ih =>
+    apply ih
+    have h' : ((refineStep adj P)^[k + d' + 1]) χ v =
+              ((refineStep adj P)^[k + d' + 1]) χ w := by
+      rw [show k + d' + 1 = k + (d' + 1) from by omega]; exact h
+    rw [Function.iterate_succ_apply'] at h'
+    exact ((refineStep_iff adj P _ _ _).mp h').1
+
+/-- `warmRefine` equality implies iterate-r equality for any `r ≤ n`.
+Combines the definition `warmRefine = iter[n]` with
+`refineStep_iter_le_eq`; the bridge from "fixpoint partition" to
+"any earlier-round partition." -/
+theorem warmRefine_eq_iter_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (r : Nat) (hr : r ≤ n) {v w : Fin n}
+    (h : warmRefine adj P χ v = warmRefine adj P χ w) :
+    ((refineStep adj P)^[r]) χ v = ((refineStep adj P)^[r]) χ w := by
+  unfold warmRefine at h
+  have h' : ((refineStep adj P)^[r + (n - r)]) χ v =
+            ((refineStep adj P)^[r + (n - r)]) χ w := by
+    have hcount : r + (n - r) = n := by omega
+    rw [hcount]
+    exact h
+  exact refineStep_iter_le_eq adj P χ r (n - r) h'
+
 /-! ## §17 — Tier 1: orbit recovery for CFI graphs
 
 Formalisation of Theorem 1 of [`docs/chain-descent-orbit-recovery.md`](../docs/chain-descent-orbit-recovery.md):
