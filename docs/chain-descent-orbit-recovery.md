@@ -451,6 +451,27 @@ relation is exposed as the (axiomatic, placeholder)
 `cfi_depth_bound_le : cfi_depth_bound n ≤ n`, ready to be tightened
 to concrete `tw H` once CFI infrastructure lands.
 
+**CFI infrastructure — Stage 1 STARTED 2026-05-26.** New module
+[`GraphCanonizationProofs/ChainDescent/CFI.lean`](../GraphCanonizationProofs/ChainDescent/CFI.lean)
+hosts the Lean CFI construction. Stage 1 (foundations) currently
+contains:
+- `CFIBase m` structure (symmetric, loopless adjacency, deg ≥ 2).
+- `neighbors`, `degree`, `mem_neighbors_symm`,
+  `not_self_mem_neighbors`, `edgeCountOrdered`.
+- `gadgetSize`, `cfiVertexCount`, `gadgetSize_ge_six`,
+  `cfiVertexCount_pos`.
+- `evenSubsetsOfNeighbors` (Stage 2 prerequisite — indexes the
+  `a_S^v` subset vertices).
+- `triangleBase : CFIBase 3` concrete witness; smoke tests
+  `triangleBase_degree`, `triangleBase_cfiVertexCount = 18`.
+
+Stages 2-4 (CFI vertex type + adjacency, Aut structure, cascade
+lemma) are pending and multi-week. The CFI module is built as a
+sub-target of the same library (`defaultTargets = ["ChainDescent",
+"ChainDescent.CFI"]` in `lakefile.toml`). Split from `ChainDescent.lean`
+to keep the main proofs file under ~4000 lines as CFI infrastructure
+grows.
+
 **Effort estimate.** Each Phase-2 track is multi-week. The Phase-1
 assemblies in place mean the structure is set — once the Fact-A-shape
 axioms are discharged, both theorems tighten automatically.

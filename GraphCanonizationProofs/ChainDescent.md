@@ -227,6 +227,16 @@ The Tier 1 / Tier 2 parallel is now strict — each tier has:
 
 The structural assembly is identical between tiers.
 
+**CFI infrastructure — split into `ChainDescent/CFI.lean` (2026-05-26).**
+The Stage-1 foundations for the CFI construction (`CFIBase` structure,
+neighbours/degree, gadget vertex count, `evenSubsetsOfNeighbors` for
+Stage 2) live in [`ChainDescent/CFI.lean`](./ChainDescent/CFI.lean), a
+sub-module of the same `ChainDescent` library (built via
+`defaultTargets = ["ChainDescent", "ChainDescent.CFI"]` in
+`lakefile.toml`). Split to keep `ChainDescent.lean` under ~4000 lines
+as CFI work scales. Stages 2-4 (CFI vertex type + adjacency, Aut
+structure, cascade lemma) will continue in `CFI.lean`.
+
 **Refuted (machine-checked, kept as record of dead routes):**
 
 - `transitiveClose_swap` — false; `closeStep`'s `less`-first tie-break breaks
