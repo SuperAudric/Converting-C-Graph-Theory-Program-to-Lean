@@ -431,6 +431,40 @@ later cascade round (post-Phase 2.2).
 All Phase 2.3 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
 standard basis).
 
+*Stage 4 / Phase 2.2 (2026-05-26):* b=0 endpoint inter-gadget at
+round 3 — first b=0 cascade step. §13.18-§13.20 of `CFI.lean`.
+
+§13.18: M3.B++ prereq.
+- `adj_subsetVertex_seedVertex` — subset-subset adj=0 helper.
+- `signature_subsetVertex_ne_endpoint_true_allSeeds` /
+  `refineStep_subsetVertex_ne_endpoint_true_allSeeds` — subset
+  (any) vs b=1 endpoint at v distinguished at round 1. Cleaner
+  than M3.B+: multi-seed forces u=seed_v but subsets have no
+  subset adjacencies (including to seeds), instant contradiction.
+
+§13.19: cross-type round-2 prereq.
+- `signature_subsetVertex_ne_endpoint_false_round2` /
+  `refineStep_subsetVertex_ne_endpoint_false_round2` — at χ_2,
+  subset with witness (x ∈ N(v) \ S) vs b=0 endpoint (any gadget)
+  distinguished. Witness `(χ_1 (e^1_{v→x}), 1, ?)`. Case analysis
+  on u adj=1 to the b=0 endpoint: subset case → M3.B++; endpoint
+  (bridge partner) case → M3.B+.
+
+§13.20: Phase 2.2 headline.
+- `refineStep_endpoint_false_inter_gadget_round3` — at round 3, b=0
+  endpoints at v ≠ v' distinguished, given witness subset (S, x) at
+  gadget v with w ∈ S and x ∈ N(v) \ S. Direct signature argument:
+  witness `(χ_2 (a_S^v), 1, ?)`. Case on u adj=1 to RHS b=0 endpoint:
+  subset → Phase 2.3 with LHS witness; bridge partner → cross-type.
+
+**Hypothesis qualifier**: Witness (S, x) requires `deg(v) ≥ 3`
+(so a 2-element even subset with witness exists). For deg(v) = 2,
+no witness — that degenerate case needs more cascade rounds (subset
+propagation through neighbouring gadgets).
+
+All Phase 2.2 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
+standard basis).
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

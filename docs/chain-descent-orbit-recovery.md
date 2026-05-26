@@ -789,13 +789,59 @@ round once Phase 2.2 makes b=0 endpoints distinguishable by gadget
 All Phase 2.3 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
 standard basis only; no CFI-specific axioms used).
 
-*Stage 4 / Phase 2.2 + 2.X + 2.4 + M3.E + M4 (PENDING, deferred multi-week):*
-- Phase 2.2: b=0 endpoint inter-gadget split at round 3 — now
-  unblocked by Phase 2.3 (subset structure provides distinguishing
-  witnesses for b=0 endpoints' subset neighbours).
+*Stage 4 / M3.D Phase 2.2 — b=0 endpoint inter-gadget at round 3 —
+DONE 2026-05-26.* `ChainDescent/CFI.lean` §13.18-§13.20. Distinguishes
+b=0 endpoints at different gadgets through a direct signature-tuple
+argument at χ_2, using subset structure (not bridge step, since b=0
+bridge partners aren't distinguished early). Three sub-sections:
+
+§13.18 / Phase 2.2 prereq (M3.B++):
+- `adj_subsetVertex_seedVertex` — subset-subset adj=0 helper.
+- `signature_subsetVertex_ne_endpoint_true_allSeeds` /
+  `refineStep_subsetVertex_ne_endpoint_true_allSeeds` — generalises
+  M3.B from "same gadget" to "subset vertex (any gadget, any T) vs
+  b=1 endpoint at gadget v" at round 1. Even cleaner than M3.B+:
+  multi-seed forces u = seed_v, but subsets aren't adjacent to any
+  subset (including seeds), contradiction.
+
+§13.19 / Phase 2.2 prereq (cross-type at χ_2):
+- `signature_subsetVertex_ne_endpoint_false_round2` /
+  `refineStep_subsetVertex_ne_endpoint_false_round2` — at χ_2,
+  subset with witness `x ∈ N(v) \ S` vs b=0 endpoint (any gadget)
+  have distinct colours. Witness tuple `(χ_1 (e^1_{v→x}), 1, ?)`.
+  Case analysis on u adj=1 to b=0 endpoint:
+  - u = subset at gadget v_f containing w_f: M3.B++ rules out.
+  - u = bridge partner: M3.B+ rules out.
+
+§13.20 / Phase 2.2 headline:
+- `signature_endpoint_false_inter_gadget_round3` /
+  `refineStep_endpoint_false_inter_gadget_round3` — at round 3 under
+  χ_{allSeeds}, b=0 endpoints at v ≠ v' get distinct colours, given
+  a witness subset `a_S^v` with w ∈ S and x ∈ N(v) \ S.
+
+Proof structure (signature-tuple at χ_2):
+- Witness `(χ_2 (a_S^v), 1, P (e^0_{v→w}) (a_S^v))`.
+- (a) In e^0_{v→w}'s χ_2-signature: via u' = a_S^v (w ∈ S adjacency).
+- (b) Not in e^0_{v'→w'}'s χ_2-signature: case on u adj=1 to e^0_{v'→w'}.
+  - u = subset at v' containing w': Phase 2.3 (§13.17) with our LHS
+    subset's witness x rules out.
+  - u = bridge partner (b=0 at gadget w'): cross-type (§13.19) rules
+    out.
+
+**Hypothesis qualifier**: The witness (S, x) with w ∈ S and x ∈ N(v) \ S
+requires `deg(v) ≥ 3` (so a 2-element even subset {w, y} with y ≠ x
+exists). For `deg(v) = 2`, no such witness — Phase 2.2 as stated
+doesn't apply. That degenerate case needs a separate argument (more
+cascade rounds via subset propagation through neighbouring gadgets).
+
+All Phase 2.2 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
+standard basis only; no CFI-specific axioms used).
+
+*Stage 4 / Phase 2.X + 2.4 + M3.E + M4 (PENDING, deferred multi-week):*
 - Phase 2.X (new): b=0 within-gadget partner distinction at round 4 —
-  analogous to Phase 2.1 (b=1 within-gadget partner) but via
-  bridge-step + Phase 2.2's b=0 inter-gadget distinction.
+  analogous to Phase 2.1 but via bridge-step + Phase 2.2's b=0
+  inter-gadget distinction. Likely needs Phase 2.2 witnesses at
+  gadgets `w` and `w'` (the bridge-partner gadgets).
 - Phase 2.4: subset vertex distinction by S — once endpoints are fully
   distinguished, subset signatures differ by their endpoint-adjacency
   patterns.

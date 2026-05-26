@@ -1749,6 +1749,18 @@ theorem cfiAdj_subset_endpoint_same_gadget_true_of_not_mem {v w : Fin m}
   refine ⟨rfl, ?_⟩
   simp [hwS]
 
+/-- `cfiAdj (a_S^v) (e^0_{v→w}) = 1` when `w ∈ S`. The Phase 2.2 witness
+adjacency: a subset containing `w` is adjacent to the b=0 endpoint
+pointing at `w`. -/
+theorem cfiAdj_subset_endpoint_same_gadget_false_of_mem {v w : Fin m}
+    {S : Finset (Fin m)} (hS : S ∈ H.evenSubsetsOfNeighbors v)
+    (hw : w ∈ H.neighbors v) (hwS : w ∈ S) :
+    H.cfiAdj (H.subset hS) (H.endpoint hw false) = 1 := by
+  show (if v = v ∧ decide (w ∈ S) ≠ false then 1 else 0) = 1
+  rw [if_pos]
+  refine ⟨rfl, ?_⟩
+  simp [hwS]
+
 /-- **Cross-gadget non-adjacency for subsets.** `subset hS` at gadget `v`
 is not adjacent to `endpoint hw b` at gadget `v' ≠ v`. Generalises
 `cfiAdj_aEmpty_endpoint_diff_gadget` from §13.2. -/
@@ -1816,6 +1828,16 @@ theorem adj_subsetVertex_endpoint_same_gadget_true_of_not_mem (h : IsCFI' adj)
     adj.adj (h.subsetVertex hS) (h.endpointVertex hw true) = 1 := by
   rw [h.matching, e_subsetVertex, e_endpointVertex]
   exact h.H.cfiAdj_subset_endpoint_same_gadget_true_of_not_mem hS hw hwS
+
+/-- `adj (subsetVertex_v hS) (endpointVertex_v hw false) = 1` when `w ∈ S`
+(Fin-n level). The Phase 2.2 witness adjacency. -/
+theorem adj_subsetVertex_endpoint_same_gadget_false_of_mem (h : IsCFI' adj)
+    {v w : Fin h.m} {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v) (hw : w ∈ h.H.neighbors v)
+    (hwS : w ∈ S) :
+    adj.adj (h.subsetVertex hS) (h.endpointVertex hw false) = 1 := by
+  rw [h.matching, e_subsetVertex, e_endpointVertex]
+  exact h.H.cfiAdj_subset_endpoint_same_gadget_false_of_mem hS hw hwS
 
 /-- Cross-gadget Fin-n non-adjacency:
 `adj (subsetVertex_v hS) (endpointVertex_v' hw b) = 0` when v ≠ v'. -/
@@ -2174,6 +2196,415 @@ theorem refineStep_subset_inter_gadget_round2 (h : IsCFI' adj) (P : PMatrix n)
   intro hrefine
   have hboth := (refineStep_iff adj P _ _ _).mp hrefine
   exact h.signature_subset_inter_gadget_round2 P hvv hS hS' hw hwS hboth.2
+
+end IsCFI'
+
+/-! ### §13.18 — Phase 2.2 prereq: M3.B++ (subset vs b=1 endpoint at round 1)
+
+The third "round-1 parity-discriminator" in the M3.B family:
+- M3.B (§13.9): b=0 endpoint at v vs b=1 endpoint at v (same gadget).
+- M3.B+ (§13.15): b=0 endpoint at any v' vs b=1 endpoint at v.
+- **M3.B++ (this section)**: subset vertex at any (v', T) vs b=1
+  endpoint at v.
+
+Used by §13.19's cross-type round-2 distinction (subset vs b=0
+endpoint at χ_2) when the b=0 endpoint's adj=1 neighbour is a subset.
+
+Same witness tuple as M3.B+ — `(c_v, 1, P et seed_v)`. Absence argument
+is **cleaner**: subsets have NO seed adjacencies at all (subset-subset
+adj is 0 in CFI), so the multi-seed-forced u = seed_v contradicts the
+adj=1 assumption directly. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **Subset-subset non-adjacency (Fin-n).** Subset and seed vertices
+(which are subsets) are never CFI-adjacent. Special case of the general
+"subset-subset adj = 0" fact, instantiated for the seed on the right —
+the form needed in M3.B++. -/
+theorem adj_subsetVertex_seedVertex (h : IsCFI' adj)
+    {v : Fin h.m} {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v) (w : Fin h.m) :
+    adj.adj (h.subsetVertex hS) (h.seedVertex w) = 0 := by
+  rw [seedVertex_eq_subsetVertex_empty, h.matching, e_subsetVertex,
+      e_subsetVertex]
+  rfl
+
+/-- **M3.B++ / signature** — subset vertex (any gadget, any T) vs b=1
+endpoint at gadget v are distinguished at round 1 under `χ_{allSeeds}`.
+
+Same witness tuple as M3.B+; the absence argument is even cleaner —
+multi-seed uniqueness forces `u = seed_v`, but `adj subsetVertex seed_v
+= 0` (subset-subset) directly contradicts `adj subsetVertex u = 1`. -/
+theorem signature_subsetVertex_ne_endpoint_true_allSeeds (h : IsCFI' adj)
+    (P : PMatrix n) {v : Fin h.m}
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
+    {v' : Fin h.m} {T : Finset (Fin h.m)}
+    (hT : T ∈ h.H.evenSubsetsOfNeighbors v') :
+    signature adj P (individualizedColouring n h.allSeeds)
+        (h.subsetVertex hT) ≠
+    signature adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw true) := by
+  intro hsig
+  set seed_v := h.seedVertex v
+  set av := h.subsetVertex hT
+  set et := h.endpointVertex hw true
+  set χ := individualizedColouring n h.allSeeds
+  have hseed_mem : seed_v ∈ h.allSeeds := h.seedVertex_mem_allSeeds v
+  let t : Nat × Nat × POE := (χ seed_v, 1, P et seed_v)
+  -- (a) t ∈ signature et — via u = seed_v.
+  have ht_in_et : t ∈ signature adj P χ et := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨seed_v, ?_, ?_⟩
+    · rw [Finset.mem_val, Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, h.seedVertex_ne_endpointVertex hw true⟩
+    · show (χ seed_v, adj.adj et seed_v, P et seed_v) = t
+      rw [h.adj_endpoint_seed_true hw]
+  -- (b) t ∉ signature av — subsets have no seed adjacencies.
+  have ht_notin_av : t ∉ signature adj P χ av := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, _, hu_eq⟩
+    have hχu : χ u = χ seed_v := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj av u, P av u) = ((1, P et seed_v) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj av u = 1 := congrArg Prod.fst hrest
+    have hu_seed : u = seed_v :=
+      (individualizedColouring_eq_iff_of_mem h.allSeeds hseed_mem).mp hχu
+    rw [hu_seed] at hadj
+    rw [h.adj_subsetVertex_seedVertex hT v] at hadj
+    exact absurd hadj (by decide)
+  rw [hsig] at ht_notin_av
+  exact ht_notin_av ht_in_et
+
+/-- **M3.B++ / refineStep** — subset vertex (any) vs b=1 endpoint at v
+distinguished after one `refineStep` round on `χ_{allSeeds}`. -/
+theorem refineStep_subsetVertex_ne_endpoint_true_allSeeds (h : IsCFI' adj)
+    (P : PMatrix n) {v : Fin h.m}
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
+    {v' : Fin h.m} {T : Finset (Fin h.m)}
+    (hT : T ∈ h.H.evenSubsetsOfNeighbors v') :
+    refineStep adj P (individualizedColouring n h.allSeeds)
+        (h.subsetVertex hT) ≠
+    refineStep adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw true) := by
+  intro hrefine
+  have hboth := (refineStep_iff adj P _ _ _).mp hrefine
+  exact h.signature_subsetVertex_ne_endpoint_true_allSeeds P hw hT hboth.2
+
+end IsCFI'
+
+/-! ### §13.19 — Phase 2.2 prereq: cross-type round-2 distinction
+(subset with witness vs b=0 endpoint at χ_2)
+
+The cross-type chunk needed by Phase 2.2's hno_match: when the offending
+adj=1 neighbour of the second b=0 endpoint is its **bridge partner**
+(itself a b=0 endpoint), we need to show its χ_2 colour differs from
+the subset witness's χ_2 colour.
+
+**Proof structure.** Witness at χ_1: `(χ_1 (e^1_{v→x}), 1, P av (e^1_{v→x}))`
+where `x ∈ N(v) \ S` (the subset's own Phase-2.3-style witness).
+- (a) Present in `av = subsetVertex hS`'s χ_1-signature via u' = e^1_{v→x}.
+- (b) Absent from `ef = e^0_{v_f→w_f}`'s χ_1-signature: case analysis on
+  h.e u' for any adj=1 candidate.
+  - u' is subset at gadget v_f containing w_f: M3.B++ rules out χ_1 match.
+  - u' is endpoint = bridge partner e^0_{w_f→v_f}: M3.B+ rules out χ_1 match.
+
+Conclude χ_2 (refineStep χ_1) outputs differ via `refineStep_iff`. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **Cross-type signature distinction at χ_1.** Subset with witness vs
+b=0 endpoint (any gadget): their χ_1-signatures differ.
+
+Hypotheses:
+- `(S, hS, x, hx, hxS)`: even subset at v with witness x ∈ N(v) \ S
+  (so `subsetVertex hS` has `endpointVertex hx true` as an adj=1
+  neighbour with M3.C-distinguished χ_1 colour).
+- `(v_f, w_f, hwf)`: any b=0 endpoint location.
+
+Conclusion: round-1 signatures of `subsetVertex hS` and
+`endpointVertex hwf false` (under χ_1 = refineStep χ_{allSeeds}) differ.
+Combined with `refineStep_iff`, χ_2 colours differ. -/
+theorem signature_subsetVertex_ne_endpoint_false_round2 (h : IsCFI' adj)
+    (P : PMatrix n)
+    {v : Fin h.m} {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
+    {x : Fin h.m} (hx : x ∈ h.H.neighbors v) (hxS : x ∉ S)
+    {v_f w_f : Fin h.m} (hwf : w_f ∈ h.H.neighbors v_f) :
+    signature adj P (refineStep adj P (individualizedColouring n h.allSeeds))
+        (h.subsetVertex hS) ≠
+    signature adj P (refineStep adj P (individualizedColouring n h.allSeeds))
+        (h.endpointVertex hwf false) := by
+  intro hsig
+  set χ_0 := individualizedColouring n h.allSeeds with hχ_0
+  set χ_1 := refineStep adj P χ_0 with hχ_1
+  set av := h.subsetVertex hS with hav_def
+  set ef := h.endpointVertex hwf false with hef_def
+  set et := h.endpointVertex hx true with het_def
+  -- Witness tuple at χ_1: (χ_1 et, 1, P av et).
+  let t : Nat × Nat × POE := (χ_1 et, 1, P av et)
+  -- (a) t ∈ signature χ_1 av — via u' = et.
+  have ht_in_av : t ∈ signature adj P χ_1 av := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨et, ?_, ?_⟩
+    · rw [Finset.mem_val, Finset.mem_filter]
+      refine ⟨Finset.mem_univ _, ?_⟩
+      intro heq
+      exact h.subsetVertex_ne_endpointVertex hS hx true heq.symm
+    · show (χ_1 et, adj.adj av et, P av et) = t
+      rw [h.adj_subsetVertex_endpoint_same_gadget_true_of_not_mem hS hx hxS]
+  -- (b) t ∉ signature χ_1 ef — case analysis on u.
+  have ht_notin_ef : t ∉ signature adj P χ_1 ef := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, _, hu_eq⟩
+    have hχu : χ_1 u = χ_1 et := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj ef u, P ef u) = ((1, P av et) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj ef u = 1 := congrArg Prod.fst hrest
+    -- Convert adj.adj ef u = 1 into cfiAdj form for case analysis.
+    rw [h.matching, e_endpointVertex] at hadj
+    -- hadj : cfiAdj (endpoint hwf false) (h.e u) = 1
+    -- Case on h.e u to determine u's structure.
+    cases h_eu : h.e u with
+    | inl sub =>
+      -- u is a subset.
+      obtain ⟨v_s, ⟨S_u, hSu⟩⟩ := sub
+      rw [h_eu] at hadj
+      -- hadj reduces by cfiAdj's endpoint-subset clause to:
+      -- (if v_s = v_f ∧ decide (w_f ∈ S_u) ≠ false then 1 else 0) = 1
+      have hc : v_s = v_f ∧ decide (w_f ∈ S_u) ≠ false := by
+        by_contra hc
+        have hzero :
+            h.H.cfiAdj (h.H.endpoint hwf false)
+              (Sum.inl ⟨v_s, ⟨S_u, hSu⟩⟩ : h.H.CFIVertex) = 0 := by
+          show (if v_s = v_f ∧ decide (w_f ∈ S_u) ≠ false then 1 else 0) = 0
+          rw [if_neg hc]
+        rw [hzero] at hadj
+        exact absurd hadj (by decide)
+      obtain ⟨hvs_eq, _⟩ := hc
+      subst hvs_eq
+      -- u = h.subsetVertex hSu (via h_eu).
+      have hu_subset : u = h.subsetVertex hSu := by
+        apply h.e.injective
+        rw [e_subsetVertex, h_eu]
+        rfl
+      rw [hu_subset] at hχu
+      -- Apply M3.B++ : χ_1 (subsetVertex hSu) ≠ χ_1 et.
+      exact h.refineStep_subsetVertex_ne_endpoint_true_allSeeds P hx hSu hχu
+    | inr endp =>
+      -- u is an endpoint = bridge partner of ef.
+      obtain ⟨v_e, ⟨x_e, hxe⟩, b_e⟩ := endp
+      rw [h_eu] at hadj
+      -- hadj reduces by cfiAdj's endpoint-endpoint clause to:
+      -- (if v_f = x_e ∧ w_f = v_e ∧ false = b_e then 1 else 0) = 1
+      have hc : v_f = x_e ∧ w_f = v_e ∧ false = b_e := by
+        by_contra hc
+        have hzero :
+            h.H.cfiAdj (h.H.endpoint hwf false)
+              (Sum.inr ⟨v_e, ⟨x_e, hxe⟩, b_e⟩ : h.H.CFIVertex) = 0 := by
+          show (if v_f = x_e ∧ w_f = v_e ∧ false = b_e then 1 else 0) = 0
+          rw [if_neg hc]
+        rw [hzero] at hadj
+        exact absurd hadj (by decide)
+      obtain ⟨_, _, hb_eq⟩ := hc
+      have hb_e_false : b_e = false := hb_eq.symm
+      subst hb_e_false
+      -- u = h.endpointVertex hxe false (via h_eu, with b_e now false).
+      have hu_endp : u = h.endpointVertex hxe false := by
+        apply h.e.injective
+        rw [e_endpointVertex, h_eu]
+        rfl
+      rw [hu_endp] at hχu
+      -- Apply M3.B+: χ_1 (e^0_{v_e→x_e}) ≠ χ_1 (e^1_{v→x}).
+      exact h.refineStep_endpoint_b0_ne_b1_general_allSeeds P hx hxe hχu
+  rw [hsig] at ht_in_av
+  exact ht_notin_ef ht_in_av
+
+/-- **Cross-type refineStep distinction at χ_2.** Subset with witness vs
+b=0 endpoint (any gadget): their χ_2 colours differ.
+
+Lift of `signature_subsetVertex_ne_endpoint_false_round2` through
+`refineStep_iff`. -/
+theorem refineStep_subsetVertex_ne_endpoint_false_round2 (h : IsCFI' adj)
+    (P : PMatrix n)
+    {v : Fin h.m} {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
+    {x : Fin h.m} (hx : x ∈ h.H.neighbors v) (hxS : x ∉ S)
+    {v_f w_f : Fin h.m} (hwf : w_f ∈ h.H.neighbors v_f) :
+    refineStep adj P (refineStep adj P (individualizedColouring n h.allSeeds))
+        (h.subsetVertex hS) ≠
+    refineStep adj P (refineStep adj P (individualizedColouring n h.allSeeds))
+        (h.endpointVertex hwf false) := by
+  intro hrefine
+  have hboth := (refineStep_iff adj P _ _ _).mp hrefine
+  exact h.signature_subsetVertex_ne_endpoint_false_round2 P hS hx hxS hwf hboth.2
+
+end IsCFI'
+
+/-! ### §13.20 — Phase 2.2 headline: b=0 endpoint inter-gadget at round 3
+
+Under `χ_2 = refineStep (refineStep χ_{allSeeds})`, applying one more
+refineStep distinguishes b=0 endpoints at different gadgets, given a
+witness subset at the LHS gadget.
+
+**Mechanism.** Direct signature-tuple argument at χ_2 (NOT bridge-step,
+since b=0 bridge partners aren't distinguished early). Witness tuple:
+`(χ_2 (a_S^v), 1, P (e^0_{v→w}) (a_S^v))` with `w ∈ S` (adjacency) and
+`x ∈ N(v) \ S` (subset's Phase 2.3 witness).
+
+For the no-match argument on the RHS b=0 endpoint, case analysis on u:
+- u is subset at v' containing w': Phase 2.3 (§13.17) gives the
+  distinction (with our LHS subset's witness x).
+- u is bridge partner (b=0 at gadget w'): §13.19's cross-type round-2
+  lemma gives the distinction.
+
+**Hypothesis qualifier.** The witness (S, x) with `w ∈ S` and
+`x ∈ N(v) \ S` requires `deg(v) ≥ 3` (so a 2-element even subset {w, y}
+with y ≠ x exists). For `deg(v) = 2` cases, Phase 2.2 as stated doesn't
+apply — those need a separate argument (likely more cascade rounds via
+subset propagation through neighbouring gadgets). -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **Phase 2.2 / signature** — b=0 endpoint inter-gadget signature
+distinction at χ_2.
+
+Under `χ_2 = refineStep χ_1 = refineStep (refineStep χ_{allSeeds})`,
+the signature multisets of two b=0 endpoints at different gadgets
+differ, given a witness subset `a_S^v` with `w ∈ S` and `x ∈ N(v) \ S`. -/
+theorem signature_endpoint_false_inter_gadget_round3 (h : IsCFI' adj)
+    (P : PMatrix n)
+    {v v' : Fin h.m} (hvv : v ≠ v')
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
+    {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v')
+    {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
+    (hwS : w ∈ S)
+    {x : Fin h.m} (hx : x ∈ h.H.neighbors v) (hxS : x ∉ S) :
+    signature adj P (refineStep adj P (refineStep adj P
+      (individualizedColouring n h.allSeeds)))
+        (h.endpointVertex hw false) ≠
+    signature adj P (refineStep adj P (refineStep adj P
+      (individualizedColouring n h.allSeeds)))
+        (h.endpointVertex hw' false) := by
+  intro hsig
+  set χ_0 := individualizedColouring n h.allSeeds with hχ_0
+  set χ_1 := refineStep adj P χ_0 with hχ_1
+  set χ_2 := refineStep adj P χ_1 with hχ_2
+  set av := h.subsetVertex hS with hav_def
+  set ef := h.endpointVertex hw false with hef_def
+  set ef' := h.endpointVertex hw' false with hef'_def
+  -- Witness tuple at χ_2.
+  let t : Nat × Nat × POE := (χ_2 av, 1, P ef av)
+  -- (a) t ∈ signature χ_2 ef — via u' = av (adj=1 since w ∈ S).
+  have ht_in_ef : t ∈ signature adj P χ_2 ef := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨av, ?_, ?_⟩
+    · rw [Finset.mem_val, Finset.mem_filter]
+      refine ⟨Finset.mem_univ _, ?_⟩
+      intro heq
+      exact h.subsetVertex_ne_endpointVertex hS hw false heq
+    · show (χ_2 av, adj.adj ef av, P ef av) = t
+      -- adj ef av = adj av ef via symmetry; then subset-endpoint with w ∈ S.
+      rw [h.adj_symm, h.adj_subsetVertex_endpoint_same_gadget_false_of_mem hS hw hwS]
+  -- (b) t ∉ signature χ_2 ef' — case analysis on u.
+  have ht_notin_ef' : t ∉ signature adj P χ_2 ef' := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, _, hu_eq⟩
+    have hχu : χ_2 u = χ_2 av := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj ef' u, P ef' u) = ((1, P ef av) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj ef' u = 1 := congrArg Prod.fst hrest
+    rw [h.matching, e_endpointVertex] at hadj
+    cases h_eu : h.e u with
+    | inl sub =>
+      -- u is a subset; characterise as subsetVertex hSu at gadget v' with w' ∈ S_u.
+      obtain ⟨v_s, ⟨S_u, hSu⟩⟩ := sub
+      rw [h_eu] at hadj
+      have hc : v_s = v' ∧ decide (w' ∈ S_u) ≠ false := by
+        by_contra hc
+        have hzero :
+            h.H.cfiAdj (h.H.endpoint hw' false)
+              (Sum.inl ⟨v_s, ⟨S_u, hSu⟩⟩ : h.H.CFIVertex) = 0 := by
+          show (if v_s = v' ∧ decide (w' ∈ S_u) ≠ false then 1 else 0) = 0
+          rw [if_neg hc]
+        rw [hzero] at hadj
+        exact absurd hadj (by decide)
+      obtain ⟨hvs_eq, _⟩ := hc
+      subst hvs_eq
+      have hu_subset : u = h.subsetVertex hSu := by
+        apply h.e.injective
+        rw [e_subsetVertex, h_eu]
+        rfl
+      rw [hu_subset] at hχu
+      -- Phase 2.3: χ_2 (subsetVertex hS) ≠ χ_2 (subsetVertex hSu).
+      -- hχu (after symm): χ_2 (subsetVertex hS) = χ_2 (subsetVertex hSu).
+      exact h.refineStep_subset_inter_gadget_round2 P hvv hS hSu hx hxS hχu.symm
+    | inr endp =>
+      -- u is an endpoint = bridge partner e^0_{w'→v'}.
+      obtain ⟨v_e, ⟨x_e, hxe⟩, b_e⟩ := endp
+      rw [h_eu] at hadj
+      have hc : v' = x_e ∧ w' = v_e ∧ false = b_e := by
+        by_contra hc
+        have hzero :
+            h.H.cfiAdj (h.H.endpoint hw' false)
+              (Sum.inr ⟨v_e, ⟨x_e, hxe⟩, b_e⟩ : h.H.CFIVertex) = 0 := by
+          show (if v' = x_e ∧ w' = v_e ∧ false = b_e then 1 else 0) = 0
+          rw [if_neg hc]
+        rw [hzero] at hadj
+        exact absurd hadj (by decide)
+      obtain ⟨_, _, hb_eq⟩ := hc
+      have hb_e_false : b_e = false := hb_eq.symm
+      subst hb_e_false
+      have hu_endp : u = h.endpointVertex hxe false := by
+        apply h.e.injective
+        rw [e_endpointVertex, h_eu]
+        rfl
+      rw [hu_endp] at hχu
+      -- Cross-type round-2 (§13.19): χ_2 (subsetVertex hS) ≠ χ_2 (e^0_{v_e→x_e}).
+      -- hχu (after symm): χ_2 (subsetVertex hS) = χ_2 (e^0_{v_e→x_e}).
+      exact h.refineStep_subsetVertex_ne_endpoint_false_round2 P hS hx hxS hxe hχu.symm
+  rw [hsig] at ht_in_ef
+  exact ht_notin_ef' ht_in_ef
+
+/-- **Phase 2.2 / refineStep (M3.D Phase 2.2 headline)** — b=0 endpoint
+inter-gadget distinction at round 3.
+
+Under three nested `refineStep` rounds applied to `χ_{allSeeds}`, b=0
+endpoints at different gadgets get distinct colours, given a witness
+subset `a_S^v` with `w ∈ S` and `x ∈ N(v) \ S` (which exists when
+`deg(v) ≥ 3`).
+
+This unlocks Phase 2.X (b=0 within-gadget partner distinction) via the
+bridge step lemma at round 4. -/
+theorem refineStep_endpoint_false_inter_gadget_round3 (h : IsCFI' adj)
+    (P : PMatrix n)
+    {v v' : Fin h.m} (hvv : v ≠ v')
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
+    {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v')
+    {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
+    (hwS : w ∈ S)
+    {x : Fin h.m} (hx : x ∈ h.H.neighbors v) (hxS : x ∉ S) :
+    refineStep adj P (refineStep adj P (refineStep adj P
+      (individualizedColouring n h.allSeeds)))
+        (h.endpointVertex hw false) ≠
+    refineStep adj P (refineStep adj P (refineStep adj P
+      (individualizedColouring n h.allSeeds)))
+        (h.endpointVertex hw' false) := by
+  intro hrefine
+  have hboth := (refineStep_iff adj P _ _ _).mp hrefine
+  exact h.signature_endpoint_false_inter_gadget_round3
+    P hvv hw hw' hS hwS hx hxS hboth.2
 
 end IsCFI'
 
