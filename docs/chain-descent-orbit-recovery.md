@@ -653,6 +653,44 @@ Remaining at round 1: b=0 endpoints across gadgets, within-gadget
 endpoints toward different partners, and subset vertices a_S^v for
 S ≠ ∅. These all require multi-round bridge propagation.
 
+*Stage 4 / M3.D Phase 1 — local bridge propagation step lemma —
+DONE 2026-05-26.* `ChainDescent/CFI.lean` §13.2/§13.4 (bridge
+prereqs) + §13.11 (step lemma). The inductive engine for the cascade:
+
+- §13.2 / `CFIBase.cfiAdj_bridge` — `cfiAdj (endpoint hw b)
+  (endpoint (sym hw) b) = 1` (bridge edge between gadgets v and w
+  is in CFI(H)'s edge set).
+- §13.4 / `IsCFI'.adj_bridge` — Fin n level via h.matching.
+- §13.4 / `IsCFI'.endpointVertex_ne_bridge` — endpoint and its bridge
+  partner are distinct Fin n vertices (proof: v ≠ w via loopless,
+  then Sigma fst projection).
+- §13.11 / `IsCFI'.signature_bridge_step` and
+  `IsCFI'.refineStep_bridge_step` — given arbitrary colouring χ:
+  - **Precondition (P1)** `hbridge`: bridge partners distinguished by
+    χ.
+  - **Precondition (P2)** `hno_match`: the bridge partner's colour
+    doesn't accidentally appear at any adj=1 neighbour of the second
+    endpoint.
+  - **Conclusion**: refineStep χ distinguishes the original endpoint
+    pair.
+
+Witness tuple `(χ bp, 1, P ev bp)` — in `ev`'s signature via the
+bridge partner u = bp (adj=1, χ matches); absent from `ev'`'s
+signature by (P2). Proof structure identical to M2/M3.B/M3.C.
+
+All M3.D Phase 1 lemmas axiom-clean (`refineStep` + `refineStep_iff`
++ standard basis).
+
+*Stage 4 / M3.D Phase 2 (multi-round cascade via base-distance —
+PENDING, multi-week):* the inductive driver that applies the step
+lemma round-by-round to grow the set of distinguished pairs.
+Maintains (P2) by tracking which colours have appeared where, using
+base-graph distance for accounting. Requires connectedness of `H`
+as a hypothesis on `IsCFI'`.
+
+*Stage 4 / M3.E + M4 (PENDING, deferred):* subset vertex distinction
++ final cascade assembly via `warmRefine` discreteness.
+
 *Stage 4 / M3.C-M3.E + M4 (PENDING, multi-week):* the remaining M3
 content + cascade assembly. **Note:** initial planning assumed the
 inter-gadget endpoint distinction would hold at round 1 — this is

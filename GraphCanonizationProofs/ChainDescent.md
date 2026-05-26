@@ -347,6 +347,25 @@ adjacent to its own seed, so signatures coincide at round 1.
 b=0 inter-gadget distinction requires multi-round bridge propagation
 (deferred). All M3.C lemmas axiom-clean.
 
+*Stage 4 / M3.D Phase 1 — local bridge propagation step lemma
+(2026-05-26):* §13.11 of `ChainDescent/CFI.lean`. The inductive
+engine for cascade: given arbitrary χ with bridge partners
+distinguished (P1) and the bridge-partner colour not appearing at any
+adj=1 neighbour of the second endpoint (P2), one `refineStep`
+distinguishes the original endpoint pair.
+
+Prereqs: `CFIBase.cfiAdj_bridge` (cfiAdj=1 for bridge edges, §13.2),
+`IsCFI'.adj_bridge` (Fin n lift, §13.4), `IsCFI'.endpointVertex_ne_bridge`
+(distinctness via loopless ⟹ v ≠ w ⟹ Sigma.fst, §13.4).
+
+Headline: `IsCFI'.refineStep_bridge_step` — refineStep distinguishes
+endpoints given P1, P2. Witness tuple `(χ bp, 1, P ev bp)` from
+bridge partner. All axiom-clean.
+
+**Phase 2 (deferred multi-week):** the multi-round driver that
+iterates the step lemma, maintaining (P2) round-by-round via base-
+graph distance accounting. Requires connectedness of H.
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

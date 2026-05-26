@@ -829,6 +829,24 @@ theorem cfiAdj_aEmpty_endpoint_diff_gadget {v v' w : Fin m}
   rintro ⟨h_eq, _⟩
   exact hvv h_eq
 
+/-- **The bridge edge.** The CFI graph's inter-gadget connections are
+"bridges" between `e^b_{v→w}` and `e^b_{w→v}` — endpoint vertices at
+gadgets `v` and `w` (with `w ∈ N(v)`) pointing toward each other,
+both with the same parity bit. This lemma evaluates `cfiAdj` on a
+bridge pair, giving `1`.
+
+The companion `cfiAdj` clauses for endpoint-endpoint pairs:
+- Within the same gadget: never adjacent (handled by `cfiAdj_loopless`-
+  style reasoning — the bridge condition requires `v₁ = w_pair₂.val`,
+  but within-gadget means `v₁ = v₂`, and `v₂` is a base vertex while
+  `w_pair₂.val` is a *neighbour*, forcing `v₁ = w_pair₂.val` to
+  conflict with `v₁ ∉ N(v₁)`).
+- Different gadgets, non-bridge: adj=0 (bridge condition fails). -/
+theorem cfiAdj_bridge {v w : Fin m} (hw : w ∈ H.neighbors v) (b : Bool) :
+    H.cfiAdj (H.endpoint hw b) (H.endpoint (H.mem_neighbors_symm.mp hw) b) = 1 := by
+  show (if v = v ∧ w = w ∧ b = b then 1 else 0) = 1
+  simp
+
 end CFIBase
 
 /-! ### §13.3 — Fin-n level extractors via the `IsCFI'` bijection
@@ -944,6 +962,40 @@ theorem adj_endpoint_seed_diff_gadget (h : IsCFI' adj)
     adj.adj (h.endpointVertex hw b) (h.seedVertex v) = 0 := by
   rw [h.matching, e_seedVertex, e_endpointVertex, h.H.cfiAdj_symm]
   exact h.H.cfiAdj_aEmpty_endpoint_diff_gadget hw b hvv
+
+/-- **Bridge adjacency (Fin n)**: the endpoint `e^b_{v→w}` is adjacent
+to its bridge partner `e^b_{w→v}`. Lifts `CFIBase.cfiAdj_bridge`
+through `h.matching`. -/
+theorem adj_bridge (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    adj.adj (h.endpointVertex hw b)
+            (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b) = 1 := by
+  rw [h.matching, e_endpointVertex, e_endpointVertex]
+  exact h.H.cfiAdj_bridge hw b
+
+/-- **Endpoint distinct from its bridge partner.** The endpoint at
+gadget `v` and the endpoint at gadget `w` (its bridge partner) are
+distinct `Fin n` vertices, because `v ≠ w` follows from `w ∈ N(v)` +
+looplessness. -/
+theorem endpointVertex_ne_bridge (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    h.endpointVertex hw b ≠
+    h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b := by
+  intro heq
+  -- (1) v ≠ w via loopless (w ∈ N(v) ⟹ w ≠ v).
+  have hvw : v ≠ w := by
+    intro hvw_eq
+    rw [hvw_eq] at hw
+    exact h.H.not_self_mem_neighbors w hw
+  -- (2) Lift equality up to the abstract CFIVertex level via h.e.
+  have habs : h.H.endpoint hw b =
+              h.H.endpoint (h.H.mem_neighbors_symm.mp hw) b := by
+    have := congrArg h.e heq
+    rwa [e_endpointVertex, e_endpointVertex] at this
+  -- (3) Extract v = w from the Sigma first component — contradiction.
+  unfold CFIBase.endpoint at habs
+  injection habs with hSig
+  exact hvw (congrArg Sigma.fst hSig)
 
 end IsCFI'
 
@@ -1337,6 +1389,109 @@ theorem refineStep_endpoint_true_inter_gadget (h : IsCFI' adj)
   intro hrefine
   have hboth := (refineStep_iff adj P _ _ _).mp hrefine
   exact h.signature_endpoint_true_inter_gadget P hvv hw hw' hboth.2
+
+end IsCFI'
+
+/-! ### §13.11 — M3.D Phase 1: local bridge propagation step lemma
+
+The **inductive engine** for the cascade: given an arbitrary colouring
+`χ`, if the bridge partners of two endpoints have distinct colours
+under `χ` AND that distinction colour doesn't accidentally appear at
+another adj=1 neighbour, then one `refineStep` distinguishes the
+endpoints themselves.
+
+This is the local step. Iterating it (Phase 2, deferred) propagates
+distinction along bridges to cover the b=0 inter-gadget case and the
+within-gadget by-partner case. Phase 2 must establish the
+"no-match" precondition at each round, typically by maintaining a
+uniqueness invariant on the iterated colouring.
+
+The proof shape is identical to M2/M3.B/M3.C — signature-distinction
+via a witness tuple — with the witness coming from the bridge partner
+rather than an own-gadget seed. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **M3.D / signature — bridge propagation at the signature level.**
+Generalises the M2/M3.B/M3.C signature-distinction pattern to an
+arbitrary colouring `χ` and uses a bridge partner as the witness.
+
+Preconditions:
+- `hbridge`: bridge partners distinguished by χ.
+- `hno_match`: the bridge partner's colour does not appear at any
+  `adj=1` neighbour of `ev'` (the second endpoint).
+
+Conclusion: the signature multisets of the two endpoints under χ
+differ. -/
+theorem signature_bridge_step (h : IsCFI' adj) (P : PMatrix n)
+    (χ : Colouring n) {v w v' w' : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v') (b : Bool)
+    (hbridge : χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b) ≠
+               χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw') b))
+    (hno_match : ∀ u, adj.adj (h.endpointVertex hw' b) u = 1 →
+                   χ u ≠ χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b)) :
+    signature adj P χ (h.endpointVertex hw b) ≠
+    signature adj P χ (h.endpointVertex hw' b) := by
+  -- Note `hbridge` is consumed by the disequality conclusion, not directly used in
+  -- the signature argument. It's present to document the intent: the lemma is
+  -- vacuous otherwise (if partners share a colour, `hno_match` can fail).
+  let _ := hbridge
+  intro hsig
+  set bp  := h.endpointVertex (h.H.mem_neighbors_symm.mp hw)  b with hbp
+  set bp' := h.endpointVertex (h.H.mem_neighbors_symm.mp hw') b with hbp'
+  set ev  := h.endpointVertex hw  b with hev
+  set ev' := h.endpointVertex hw' b with hev'
+  -- Witness tuple: (χ bp, 1, P ev bp).
+  let t : Nat × Nat × POE := (χ bp, 1, P ev bp)
+  -- (a) t ∈ signature ev — contributed by u = bp (adj ev bp = 1 from bridge).
+  have ht_in_ev : t ∈ signature adj P χ ev := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨bp, ?_, ?_⟩
+    · rw [Finset.mem_val, Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, (h.endpointVertex_ne_bridge hw b).symm⟩
+    · show (χ bp, adj.adj ev bp, P ev bp) = t
+      rw [h.adj_bridge hw b]
+  -- (b) t ∉ signature ev' — by hno_match.
+  have ht_notin_ev' : t ∉ signature adj P χ ev' := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, _, hu_eq⟩
+    have hχu : χ u = χ bp := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj ev' u, P ev' u) = ((1, P ev bp) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj ev' u = 1 := congrArg Prod.fst hrest
+    exact (hno_match u hadj) hχu
+  rw [hsig] at ht_in_ev
+  exact ht_notin_ev' ht_in_ev
+
+/-- **M3.D / refineStep — Phase 1 headline.** Given a colouring χ
+where bridge partners are distinguished and the bridge-partner colour
+is "unique within adj=1 reach" of the second endpoint, `refineStep`
+distinguishes the original endpoint pair.
+
+This is the local step lemma that, iterated through the cascade
+(Phase 2, deferred), propagates distinction along bridges.
+
+**Symmetry note**: The hypotheses are asymmetric — they only require
+uniqueness at `ev'`, not `ev`. This is intentional: the proof finds a
+witness tuple in `ev`'s signature and absent from `ev'`'s. The
+symmetric version (uniqueness at `ev` instead) follows by swapping
+arguments. -/
+theorem refineStep_bridge_step (h : IsCFI' adj) (P : PMatrix n)
+    (χ : Colouring n) {v w v' w' : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v') (b : Bool)
+    (hbridge : χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b) ≠
+               χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw') b))
+    (hno_match : ∀ u, adj.adj (h.endpointVertex hw' b) u = 1 →
+                   χ u ≠ χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b)) :
+    refineStep adj P χ (h.endpointVertex hw b) ≠
+    refineStep adj P χ (h.endpointVertex hw' b) := by
+  intro hrefine
+  have hboth := (refineStep_iff adj P _ _ _).mp hrefine
+  exact h.signature_bridge_step P χ hw hw' b hbridge hno_match hboth.2
 
 end IsCFI'
 
