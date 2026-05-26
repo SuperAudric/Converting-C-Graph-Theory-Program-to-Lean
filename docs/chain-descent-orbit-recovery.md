@@ -626,3 +626,266 @@ the partition predicted by `Aut_v` is exactly what refinement produces.
 - L5 — assembly (trivial).
 - After paper Tier 1 is done: Tier 2 (association schemes) and the
   Piece-C connection.
+
+---
+
+## 10. L4 paper proof — 1-WL recovers Aut_v orbits
+
+The technical heart. Three sub-lemmas, proved by structural induction
+on `dist_H(u₀, u)` (distance in the base graph from `v`'s gadget to the
+gadget under analysis).
+
+### 10.1 Precise statement and what we use
+
+**Notation recap.** Throughout, fix `H`, `G = CFI(H)`, `v ∈ X(u₀)` (the
+fresh-colour individualized vertex), `Aut_v = Aut(CFI(H))_v`. Write
+`P_r` for the 1-WL partition of `V(G)` after round `r`, starting from
+`P_0 = {{v}, V(G) \ {v}}` (the fresh-colour initial colouring).
+Write `P_∞ = lim_r P_r` for the 1-WL fixpoint partition.
+
+> **L4 (orbit recovery).** `P_∞ = O(G, {v}) = Aut_v` orbit partition.
+
+**The trivial direction (⊇).** For any `g ∈ Aut(G)` with `g(v) = v`,
+`g` preserves `P_r` for every `r` (1-WL is a function of the graph
+structure; any automorphism preserves it). So `Aut_v`-equivalent
+vertices share a cell in every `P_r`, hence in `P_∞`. So **`P_∞`
+refines `O(G, {v})` (cells ⊆ orbits)**, equivalently
+`P_∞ ≥ O` in the refinement order, equivalently `O ⊆ P_∞` as set
+partitions (each orbit is contained in a single cell).
+
+Wait — direction check. "Cells ⊆ orbits" means each cell is a subset of
+some orbit. "Orbits ⊆ cells" means each orbit is a subset of some cell.
+1-WL only ever splits cells (never merges), so the partition gets
+finer. Aut preserves cells in the *coarser* direction: if `u, w` are in
+the same orbit, they're in the same cell. So orbits sit inside cells.
+Trivial direction: **orbits ⊆ cells, i.e., `P_∞` refines `O`**.
+
+So `P_∞` may be finer than (or equal to) `O`. The non-trivial claim
+of L4 is **equality** — `P_∞` is not strictly finer.
+
+**What we need to show: any cell is contained within a single orbit.**
+Equivalently: 1-WL doesn't "over-distinguish" vertices that `Aut_v`
+actually identifies.
+
+### 10.2 The induction setup
+
+For each `u ∈ V_H`, let `d(u) = dist_H(u₀, u)`. Denote
+`P_∞ ↾ X(u)` for the 1-WL fixpoint partition restricted to `X(u)`, and
+`O ↾ X(u)` for the `Aut_v`-orbit partition restricted to `X(u)`.
+
+> **L4 reformulated.** For all `u ∈ V_H`: `P_∞ ↾ X(u) = O ↾ X(u)`.
+> Plus: no cross-gadget cell exists (each cell of `P_∞` lies within a
+> single gadget) — this is L4d below.
+
+Wait, the orbits aren't within single gadgets in general. The size-12
+Petersen orbit spanned 9 gadgets. So the "each cell within one gadget"
+formulation is wrong.
+
+Let me restructure. The correct restriction-pattern:
+
+> **L4 (restated).** Let `[u]_{H_v}` be the `Aut(H)_v^{base}`-orbit of
+> `u` in `V_H`, where `Aut(H)_v^{base}` denotes the base part of
+> `Aut_v` (acting via lifted base permutations). Then for each
+> `[u]_{H_v}`, `P_∞ ↾ X([u]_{H_v}) = O ↾ X([u]_{H_v})`, where
+> `X([u]_{H_v}) = ⋃_{u' ∈ [u]_{H_v}} X(u')`.
+
+This is the right grouping: orbits decompose by base-vertex orbit
+under the relevant stabilizer.
+
+### 10.3 L4a — within-`X(u₀)` refinement
+
+> **L4a.** `P_∞ ↾ X(u₀) = O ↾ X(u₀)`.
+
+The orbits of `Aut_v` on `X(u₀)`:
+- The base part `Aut(H)_{u₀}` acts on `X(u₀)` by permuting `N(u₀)`.
+- The gauge part stabilizing `v` acts **trivially** on `X(u₀)` —
+  because it consists of gauges `τ_c` for cycles `c` *not passing
+  through `u₀`* (§9.2 computation), which fix the parity of `X(u₀)`
+  pointwise.
+
+So `O ↾ X(u₀)` = `Aut(H)_{u₀}` orbits on `X(u₀)`, induced by the
+permutation action on `N(u₀)`.
+
+These are:
+1. `{v}` itself — singleton.
+2. For each `Aut(H)_{u₀}`-orbit `O ⊆ {S ⊆ N(u₀) : |S| even, S ≠ ∅}`:
+   the cell `{a_S^{u₀} : S ∈ O}`.
+3. For each `b ∈ {0,1}` and each `Aut(H)_{u₀}`-orbit `O ⊆ N(u₀)`: the
+   cell `{e^b_{u₀→w} : w ∈ O}`.
+
+*Proof.* We show 1-WL distinguishes all *different* orbits of (2) and
+(3), and doesn't over-distinguish within them.
+
+**Within-orbit indistinguishability** (the trivial direction): for any
+`σ ∈ Aut(H)_{u₀}`, `Φ(σ)` is an automorphism of `G_even` fixing `v`,
+hence preserves `P_r` for every `r`. So vertices in the same orbit
+share a cell.
+
+**Across-orbit distinction.** Two key sub-claims:
+
+*L4a.1.* The two subset orbits and two endpoint orbits in `X(u₀)` are
+distinguished by 1-WL after `O(diam_H(u₀))` rounds. Sketch:
+
+- **Endpoints with different `b`** (e.g., `e^0_{u₀→w}` vs
+  `e^1_{u₀→w}`) are distinguished after **one** round by adjacency to
+  `v`: `e^1_{u₀→w}` is a neighbour of `v` (since `v = a_∅`,
+  `∅ ⊕ b=1 = ⊤`), `e^0_{u₀→w}` is not.
+- **Subset vertices with different `|S|`**: each `a_S^{u₀}` has `|S|`
+  many neighbours of "type `e^0`" and `deg(u₀) - |S|` of "type `e^1`"
+  intra-gadget. After 1 round, the `e^1` type and `e^0` type are
+  distinguished (above), so subset vertices with different `|S|` see
+  different multisets of `e^0`/`e^1` neighbours.
+- **Subset vertices with same `|S|` but different `Aut(H)_{u₀}`-orbit**
+  of `S`: distinguished via the "1-WL on `H` rooted at `u₀`"
+  refinement, which 1-WL on `G` simulates via the gadget-edge
+  structure. (See L4b for the mechanism that propagates this
+  distinction through bridges.)
+- **Endpoints `e^b_{u₀→w}` with different `Aut(H)_{u₀}`-orbits of `w`**:
+  similarly distinguished via the bridge to `X(w)` and the structure
+  reachable from `w` in `H`.
+
+The "same `|S|` but different base orbit" and "different base orbit of
+`w`" cases use the propagation of L4b/L4c — they're not purely
+within-gadget claims. **L4a is well-posed only as part of the
+induction**; the within-gadget partition stabilizes when the
+propagation completes.
+
+*L4a.2.* No over-distinction: 1-WL signatures are invariant under
+`Aut_v`-action, so vertices in one `Aut_v`-orbit share signatures at
+every round, hence stay in the same cell. (Trivial direction of L4.)
+
+Combining L4a.1 and L4a.2: `P_∞ ↾ X(u₀) = O ↾ X(u₀)`. ∎
+
+### 10.4 L4b — propagation across one base edge
+
+> **L4b.** Let `u, u' ∈ V_H` with `(u, u') ∈ E_H`. If
+> `P_∞ ↾ X(u) = O ↾ X(u)`, then 1-WL transmits enough information across
+> the bridge `(u, u')` for `P_∞ ↾ X(u')` to equal `O ↾ X(u')`.
+
+The mechanism: bridges `e^b_{u→u'} ∼ e^b_{u'→u}` let endpoint cells in
+`X(u)` propagate to endpoint cells in `X(u')`.
+
+*Proof outline.*
+
+Suppose by induction `P_∞ ↾ X(u)` equals `O ↾ X(u)`. The endpoint
+vertices `e^b_{u→u'}` for `b ∈ {0,1}` sit in specific cells of `P_∞`
+determined by their `Aut_v`-orbit.
+
+Via the bridge, `e^b_{u'→u}` sees `e^b_{u→u'}` as its inter-gadget
+neighbour. So `P_∞`-cell of `e^b_{u'→u}` is partly determined by which
+`P_∞`-cell of `X(u)` its bridge partner sits in.
+
+By induction, that cell is exactly `Aut_v`'s orbit cell of `e^b_{u→u'}`.
+So the bridge transmits an `Aut_v`-invariant signal: any two
+`e^b_{u'→u}` endpoints with `Aut_v`-equivalent bridge partners get
+matched signals at 1-WL; those with inequivalent partners get
+distinguished.
+
+Combined with the within-`X(u')` propagation rule (analogous to L4a):
+1-WL on `X(u')` distinguishes vertices via (i) their `b` value (one
+round after the partition reaches `X(u')`), (ii) their bridge partner's
+`Aut_v`-orbit cell (transmitted across the bridge), and (iii) their
+within-gadget interactions with neighbouring endpoints.
+
+The combined effect: `P_∞ ↾ X(u')` matches `O ↾ X(u')`.
+
+**Missing piece.** The argument here is structural / hand-wavy. A
+rigorous version needs:
+- Explicit identification of `P_∞`-cells on `X(u)` in terms of which
+  subset orbits / endpoint orbits.
+- Explicit derivation of the propagated cells on `X(u')` matching
+  `Aut_v`-orbits there.
+- A "no over-distinction" verification: the propagation doesn't split
+  an `Aut_v`-orbit on `X(u')` into multiple cells.
+
+The latter (over-distinction) follows from the trivial direction (any
+`Aut_v` automorphism preserves cells). The former two require a more
+explicit cell-by-cell case analysis.
+
+### 10.5 L4c — induction on distance
+
+> **L4c.** For all `u ∈ V_H`, `P_∞ ↾ X(u) = O ↾ X(u)`.
+
+*Proof.* Induction on `d(u) = dist_H(u₀, u)`.
+
+**Base case `d = 0`** (`u = u₀`): L4a.
+
+**Inductive step `d → d+1`:** Suppose `P_∞ ↾ X(u'') = O ↾ X(u'')` for
+all `u''` with `d(u'') ≤ d`. Let `u'` have `d(u') = d + 1`. Then `u'`
+has a neighbour `u` with `d(u) = d`. By inductive hypothesis,
+`P_∞ ↾ X(u) = O ↾ X(u)`. By L4b applied to the bridge `(u, u')`,
+`P_∞ ↾ X(u') = O ↾ X(u')`. ∎
+
+Since `H` is connected, every `u` has finite `d(u)`, so the induction
+covers all of `V_H`. ∎
+
+### 10.6 L4 final statement
+
+Assemble L4c across all `u`:
+
+> **L4 (proved modulo L4b technical gaps).** `P_∞ = O(G, {v})` as set
+> partitions of `V(G)`.
+
+### 10.7 What's rigorous, what needs sharpening
+
+**Rigorous (modulo standard CFI / 1-WL theory):**
+- The trivial direction `O ⊆ P_∞` (any cells contain whole orbits).
+- The induction skeleton L4c.
+- The "different `b` distinguished by adjacency to `v`" sub-claim of
+  L4a.1 (one-round computation).
+- The "different `|S|` distinguished after `b` is distinguished"
+  sub-claim of L4a.1 (one-round computation given the previous).
+
+**Hand-wavy / needs explicit case analysis:**
+- L4a.1's "different `Aut(H)_{u₀}`-orbit of `S`" and "different
+  `Aut(H)_{u₀}`-orbit of `w`" — requires the bridge propagation
+  (L4b) to feed back into within-gadget distinction. Implicit
+  circularity: L4a uses propagation, propagation uses L4a.
+- L4b's "the propagation matches `Aut_v`-orbits on `X(u')`" — case
+  analysis on endpoint and subset vertices in `X(u')` and which
+  cells they end up in.
+
+The circularity in the L4a/L4b interdependence isn't a logical
+problem (it's just that 1-WL signatures stabilize after multiple
+rounds, and the "rounds" implicitly include both within-gadget and
+cross-gadget propagation). But the proof writeup would need to be
+restructured to capture this — e.g., as joint induction on
+"refinement round `r`" rather than as separate within-gadget /
+cross-gadget steps.
+
+**Tightening strategy (for a real paper):**
+
+Restructure L4 as a single induction on refinement round `r`:
+
+> **L4'** (joint induction). For all `r ≥ 0`: `P_r` refines a partition
+> `P^*_r` defined as follows. `P^*_r` is the partition where two
+> vertices `u, w ∈ V(G) \ {v}` are equivalent iff
+> `dist_H(u₀, gadget(u)) ≤ r/(constant)` implies they're in the same
+> `Aut_v`-orbit. Equivalently: `P^*_r` matches `Aut_v`-orbits up to
+> distance `r/c` from `u₀`, leaves vertices farther out lumped.
+>
+> At `r → ∞`, `P^*_r → O(G, {v})`, and `P_r → P_∞`. By the joint
+> induction, `P_∞ ⊆ O` (cells lie in orbits). Combined with the
+> trivial direction, `P_∞ = O`.
+
+This is the rigorous form. Filling in the constant `c` (probably
+`O(diam H)`) and the precise step argument is the remaining technical
+work.
+
+### 10.8 Status and next step
+
+- **L4 outline written.** L4a, L4b, L4c stated and structured.
+- **Rigorous skeleton in place** (induction on `d(u)`, with base case
+  and step lemmas identified).
+- **Two technical gaps explicit**: (i) the within-gadget /
+  cross-gadget circularity in L4a–L4b; (ii) the precise step lemma
+  in L4b proving the propagation matches orbits exactly.
+- **Recommended next**: pick (i) or (ii) and write the explicit
+  case analysis. (i) is likely cleaner — restructure as L4' (joint
+  induction on `r`).
+
+**Empirical safety net.** F7 is verified at depth 1 on 4 CFI
+instances, so the partition we're trying to derive analytically *is*
+the right one. Any analytical argument that produces something
+different is wrong; this is a sharp cross-check the proof has against
+itself.
