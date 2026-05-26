@@ -313,45 +313,82 @@ would be the next paper-write target.
 
 ## 9. Lean formalization status
 
-**Phase 1 (Fact B + assembly) — COMPLETE 2026-05-26.** §16 of
-[ChainDescent.lean](../GraphCanonizationProofs/ChainDescent.lean)
-contains:
+**Phase 1 (Tier 1 + Tier 2 assemblies, shared OrbitPartition framework) —
+COMPLETE 2026-05-26.** [ChainDescent.lean](../GraphCanonizationProofs/ChainDescent.lean)
+is organised as three sections, mirroring the paper structure:
 
-- `individualizedColouring`, `FixesPointwise` definitions
-- `FixesPointwise.complement` — pointwise stabilizer fixes the
-  complement setwise
-- `individualizedColouring_invariant` — automorphism fixing S
-  preserves χ_S
-- `signature_invariant_of_isAut` — automorphism preserving (adj, P, χ)
-  preserves the signature multiset (via reindexing along π)
-- `refineStep_invariant_of_isAut`, `iterate_refineStep_invariant_of_isAut`,
-  `warmRefine_invariant_of_isAut` — invariance lifts through refinement
+**§16 — Orbit recovery: shared infrastructure** (tier-agnostic):
+- `individualizedColouring`, `FixesPointwise` definitions.
+- `FixesPointwise.complement`, `individualizedColouring_invariant`.
+- `signature_invariant_of_isAut`, `refineStep_invariant_of_isAut`,
+  `iterate_refineStep_invariant_of_isAut`,
+  `warmRefine_invariant_of_isAut` — automorphism invariance lifts
+  through refinement.
+- **`OrbitPartition adj P S v w`** — the Aut_S orbit equivalence
+  relation. `OrbitPartition.refl/symm/trans` give the equivalence
+  structure.
+- **`OrbitPartition.subset_warmRefine`** — **the trivial direction,
+  proved.** Orbits refine 1-WL cells. Load-bearing for both tiers'
+  squeeze. Axiom-clean: depends only on the standard `refineStep`
+  basis.
+
+**§17 — Tier 1 (CFI graphs):**
 - `id_of_discrete_invariant` — automorphism preserving a discrete
-  colouring is the identity
+  colouring is the identity.
 - **`aut_trivial_of_discrete_warmRefine`** — **Fact B, proved**:
-  if warmRefine on χ_S is discrete, then every automorphism fixing S
-  pointwise and preserving P is the identity
+  discrete warmRefine ⟹ Aut_S is trivial.
+- `orbit_iff_eq_of_discrete_warmRefine` — **Fact B (partition form),
+  proved**: at discrete depth, OrbitPartition collapses to equality.
+  Mirror of the Tier-2 squeeze structure.
 - `cfi_cascade_exists` — **Fact A placeholder axiom** for the CFI
-  cascade-depth result (the only non-standard axiom Theorem 1 adds)
-- **`theorem_1_HOR`** — **Theorem 1 assembly, proved** conditional
-  on Fact A
+  cascade-depth result.
+- **`theorem_1_HOR`** — **Theorem 1 assembly, proved** (partition
+  form): at the cascade depth, OrbitPartition equals the warmRefine
+  partition. Conditional on `cfi_cascade_exists`.
+- `theorem_1_HOR_pointwise` — original (Aut_S trivial) form, kept as
+  a corollary.
+
+**§18 — Tier 2 (schurian scheme graphs):**
+- **`SchemeProfile`** — bundled structure carrying:
+  - `profile : Colouring n` representing the v-profile partition.
+  - `v_singleton` — v is alone in its profile class.
+  - **`profile_iff_orbit`** — Step 1 field (schurian ⟹ profile = orbits).
+  - **`warm_refines_profile`** — Step 2 field (1-WL refines profile).
+- **`SchemeProfile.warm_iff_profile`** — **derived squeeze, proved**:
+  warmRefine partition equals profile partition. The reverse half
+  (profile ⊆ warmRefine) comes from §16.3's trivial direction
+  composed with `profile_iff_orbit`.
+- `IsSchurianSchemeGraph` — **abstract Prop axiom** placeholder for
+  "the graph admits a vertex-transitive schurian association scheme."
+- `schurian_scheme_profile_exists` — **Tier 2 Fact A analogue
+  axiom**: a SchemeProfile exists at every vertex of a schurian
+  scheme graph.
+- **`theorem_2_HOR_of_profile`** — **Theorem 2 assembly given
+  witness, proved**: given a SchemeProfile at v, OrbitPartition =
+  warmRefine partition at depth 1.
+- **`theorem_2_HOR`** — **Theorem 2 unconditional form, proved**
+  conditional on `schurian_scheme_profile_exists`.
 
 **Axiom dependencies** (from `#print axioms`):
-- `theorem_1_HOR` depends on: `propext`, `Classical.choice`,
-  `Quot.sound`, `refineStep`, `refineStep_iff`, and
-  `cfi_cascade_exists`.
-- `aut_trivial_of_discrete_warmRefine` (Fact B) depends on the same
-  set **minus** `cfi_cascade_exists` — Fact B is fully closed under
-  standard axioms + the project's `refineStep` modelling axioms.
-- `signature_invariant_of_isAut` and `individualizedColouring_invariant`
-  depend only on standard Lean axioms (no `refineStep` axioms needed).
+- `OrbitPartition.subset_warmRefine` (the trivial direction): depends
+  on the standard `refineStep` basis. **No tier-specific axioms.**
+- `OrbitPartition.refl/symm/trans`: only `propext` and `Quot.sound`.
+- `theorem_1_HOR` (Tier 1 partition form): adds `cfi_cascade_exists`
+  to the standard basis.
+- `theorem_2_HOR_of_profile` (Tier 2 assembly given witness): no new
+  axioms beyond the standard basis.
+- `theorem_2_HOR` (Tier 2 unconditional): adds `IsSchurianSchemeGraph`
+  and `schurian_scheme_profile_exists` to the standard basis.
 
-This is the intended dependency structure. The proof program for the
-remaining work is to formalize `cfi_cascade_exists` from underlying
-CFI infrastructure — see "Phase 2" below.
+The Tier 1 / Tier 2 parallel is reflected in the axiom budget: each
+tier adds **exactly one Fact-A-shaped axiom** (`cfi_cascade_exists`
+or `schurian_scheme_profile_exists`), and Tier 2 adds one abstract
+predicate (`IsSchurianSchemeGraph`) as a hypothesis-only constant.
 
-**Phase 2 (Fact A) — REMAINING WORK.** Discharging
-`cfi_cascade_exists` requires:
+**Phase 2 (discharging Fact A / Tier 2 Fact A analogue) — REMAINING
+WORK.** Two parallel multi-week tracks:
+
+*Tier 1 (`cfi_cascade_exists`)*:
 - **CFI construction in Lean.** ~200-400 lines mirroring
   [`CfiGraphGenerator.cs`](../GraphCanonizationProject/CfiGraphGenerator.cs)'s
   gadget structure as Lean definitions.
@@ -360,13 +397,29 @@ CFI infrastructure — see "Phase 2" below.
   with this project's `AdjMatrix` / `Colouring`.
 - **CFI Aut structure lemma** (`Aut(CFI(H)) = Z₂^{β_H} ⋊ Aut(H)`).
 - **Cascade lemma proper** — the Cai-Fürer-Immerman WL-dim result.
-  Most involved single lemma; needs either reproof or careful
-  citation handling.
 
-**Effort estimate.** Phase 2 is a multi-week project on top of the
-infrastructure build. The Phase-1 work above means the assembly is
-in place — once `cfi_cascade_exists` is replaced with a real proof,
-Theorem 1 immediately tightens automatically.
+*Tier 2 (`schurian_scheme_profile_exists`)*:
+- **Association scheme infrastructure in Lean.** ~300-500 lines:
+  relations `R_0,…,R_d`, intersection numbers, scheme axioms, schurian
+  property, vertex-transitivity. Mathlib does not have this.
+- **Step 1 lemma**: schurian ⟹ scheme-relation classes = Aut-orbital
+  classes. Mostly group action theory.
+- **Step 2 lemma**: 1-WL refines profile partition (the
+  intersection-number induction-on-rounds argument).
+- **SchemeProfile constructor** from a scheme + vertex.
+
+**Depth bound parameterisation (potential follow-on).** The current
+`cfi_cascade_exists` axiom asserts existence of `S` without bounding
+`|S|`. Since the orbit-recovery program's Corollary 1 requires only
+that `|S|` is polynomial in `n` (any polynomial preserves polynomial
+runtime), the axiom can be tightened to
+`∃ S, |S| ≤ p(n) ∧ Discrete (...)` for any polynomial `p` —
+parameterising on `p` rather than committing to `tw(H)` keeps the
+statement abstract while making the polynomial-runtime claim explicit.
+
+**Effort estimate.** Each Phase-2 track is multi-week. The Phase-1
+assemblies in place mean the structure is set — once the Fact-A-shape
+axioms are discharged, both theorems tighten automatically.
 
 ---
 
@@ -460,9 +513,16 @@ and unblocks the cascade half of the hidden-Johnson near-theorem.
 - Multi-component CFI (odd cycle bases) is out of scope.
 
 **Next (in user's stated plan order):**
-1. Sketch Tier 2 paper proofs (§10).
-2. Begin Lean proofs for Tier 1 (§9) — much code groundwork needed.
-3. Continue with Tier 2 once Tier 1 is Lean-proved, OR sketch Tier 3.
+1. ✓ Sketch Tier 2 paper proofs (§10, §14).
+2. ✓ Lean Phase 1 — shared OrbitPartition + Tier 1 + Tier 2
+   assemblies (§9, §16-§18 of ChainDescent.lean). Both theorems
+   conditional on Fact-A-shaped axioms; structure is set.
+3. Discharge the Fact-A axioms — multi-week infrastructure builds:
+   CFI construction for Tier 1, association schemes for Tier 2.
+4. Tighten `cfi_cascade_exists` to expose a polynomial depth bound
+   (any polynomial `p(n)` preserves polynomial runtime).
+5. From there: sketch Tier 3 or continue with the infrastructure
+   work above.
 
 **Stable building blocks delivered:**
 - Test harness for orbit-recovery checks (extensible to other graph
@@ -659,6 +719,16 @@ but not stated above.
 schemes packaged. Formalizing Theorem 2 in Lean would need ~300-500
 lines of scheme + coherent algebra infrastructure first. Roughly
 comparable in effort to the CFI infrastructure for Tier 1.
+
+**Tier 2 Lean assembly is in place (2026-05-26):** §18 of
+[ChainDescent.lean](../GraphCanonizationProofs/ChainDescent.lean)
+contains the `SchemeProfile` structure (bundling Step 1's
+`profile_iff_orbit` and Step 2's `warm_refines_profile`) and
+`theorem_2_HOR` conditional on the placeholder existence axiom
+`schurian_scheme_profile_exists`. The Tier 1 / Tier 2 parallel is
+reflected in the axiom budget — each tier adds exactly one
+Fact-A-shaped existence axiom. Discharging
+`schurian_scheme_profile_exists` is the G5 work proper.
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

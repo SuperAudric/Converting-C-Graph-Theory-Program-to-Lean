@@ -182,6 +182,31 @@ All results below are **proved with no `sorry`** and depend only on
   `iterate_refineStep_preserves_singleton`, `signature_applyGuess_off`,
   `signature_eq_of_samePartition`, `signature_swap`, `signature_agree_off`.
 
+**Orbit recovery — §16/§17/§18 (added 2026-05-26):**
+
+- §16 — **Shared infrastructure:** `individualizedColouring`,
+  `FixesPointwise`, `signature_invariant_of_isAut`,
+  `warmRefine_invariant_of_isAut`, and the **partition-level
+  predicate `OrbitPartition adj P S`** with its equivalence-relation
+  lemmas (`refl`/`symm`/`trans`).
+- `OrbitPartition.subset_warmRefine` — **the trivial direction**:
+  orbits refine 1-WL cells. Axiom-clean, the load-bearing half of
+  both tiers' squeeze.
+- §17 — **Tier 1 (CFI):** `aut_trivial_of_discrete_warmRefine`
+  (Fact B), `orbit_iff_eq_of_discrete_warmRefine`, and
+  **`theorem_1_HOR`** (partition form) conditional on
+  `cfi_cascade_exists`. `theorem_1_HOR_pointwise` corollary kept for
+  direct downstream use.
+- §18 — **Tier 2 (schurian schemes):** `SchemeProfile` bundled
+  structure (with Step 1 / Step 2 fields), `SchemeProfile.warm_iff_profile`
+  (derived squeeze), and **`theorem_2_HOR`** conditional on the
+  Tier-2 Fact A analogue `schurian_scheme_profile_exists` +
+  abstract predicate `IsSchurianSchemeGraph`.
+
+The Tier 1 / Tier 2 parallel is reflected in the axiom budget — each
+tier adds exactly one Fact-A-shaped existence axiom on top of the
+standard basis; the partition-level assembly is identical.
+
 **Refuted (machine-checked, kept as record of dead routes):**
 
 - `transitiveClose_swap` — false; `closeStep`'s `less`-first tie-break breaks

@@ -3297,28 +3297,36 @@ def LeafTwistSpec (oracle : LinearOracleSpec adj P₀ χι₀ sel) : Prop :=
 
 end LinearOracleSpec
 
-/-! ## §16 — Tier-1 orbit recovery for CFI
+/-! ## §16 — Orbit recovery: shared infrastructure
 
-Formalisation of Theorem 1 of [`docs/chain-descent-orbit-recovery.md`](../docs/chain-descent-orbit-recovery.md):
-for connected `CFI(H)`, 1-WL refinement after `≤ tw(H)` fresh-colour
-individualizations recovers the `Aut(CFI(H))_S`-orbit partition.
+The orbit-recovery program ([`docs/chain-descent-orbit-recovery.md`](../docs/chain-descent-orbit-recovery.md))
+states that for "nice enough" graphs, 1-WL refinement after sufficient
+fresh-colour individualization recovers `Aut_S`-orbits. This section
+develops the **tier-agnostic** machinery the program rests on:
 
-**Proof structure** (orbit-recovery doc §5):
-- **Fact A** — CFI cascade depth ≤ tw(H). Classical Cai-Fürer-Immerman
-  1992. Requires CFI construction in Lean (a multi-week infrastructure
-  project); stated here as `axiom`/`sorry` placeholder so the assembly
-  can proceed.
-- **Fact B** — discrete partition ⟹ `Aut_S` is trivial ⟹ cells equal
-  orbits trivially. Provable now from existing primitives (`IsAut`,
-  `Discrete`, `Equiv.Perm`).
-- **Assembly** — at the cascade depth, partition is discrete (Fact A),
-  so cells = orbits (Fact B).
+- Fresh-colour individualization and the pointwise stabilizer predicate
+  (§16.1).
+- Automorphisms preserve refinement (§16.2). The key lifting lemma.
+- The orbit partition predicate `OrbitPartition` and the **trivial
+  direction** `orbits ⊆ 1-WL cells` (§16.3). Always true; the
+  load-bearing half of the squeeze used by both tiers.
 
-Sub-sections:
-- §16.1 — fresh-colour individualization + `FixesPointwise`
-- §16.2 — automorphisms preserve refinement
-- §16.3 — Fact B (discrete ⟹ trivial Aut_S; cells = orbits)
-- §16.4 — Fact A placeholder + Theorem 1 assembly
+Tier-specific assemblies live downstream:
+- §17 — Tier 1 (CFI graphs): squeeze via "warmRefine is discrete at the
+  cascade depth" + Fact B (`aut_trivial_of_discrete_warmRefine`).
+- §18 — Tier 2 (schurian scheme graphs): squeeze via "warmRefine equals
+  the scheme profile partition at depth 1" + "profile partition equals
+  Aut_v orbits".
+
+The squeeze framing common to both tiers:
+```
+OrbitPartition ⊆ samePartition (warmRefine adj P χ_S) ⊆ TargetPartition
+```
+- §16.3 gives the left inclusion (always true).
+- The right inclusion is tier-specific: discrete (Tier 1), or scheme
+  profile partition (Tier 2). Combined with `OrbitPartition ⊇
+  TargetPartition` (Fact B / Step 1 in the paper proofs), the squeeze
+  yields equality.
 -/
 
 /-! ### §16.1 — Fresh-colour individualization and pointwise stabilizer -/
@@ -3446,7 +3454,112 @@ theorem warmRefine_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
   unfold warmRefine
   exact iterate_refineStep_invariant_of_isAut hπ hP n hχ v
 
-/-! ### §16.3 — Fact B: discrete partition ⟹ trivial Aut_S -/
+/-! ### §16.3 — Orbit partition and the trivial direction
+
+`OrbitPartition adj P S` is the equivalence relation on `Fin n` defined
+by "some automorphism of `adj` preserving `P` and fixing `S` pointwise
+maps `v` to `w`." It is the partition-level expression of "1-WL cells
+contain Aut_S orbits."
+
+The **trivial direction** (`OrbitPartition.subset_warmRefine`) says
+this relation refines the 1-WL fixpoint partition: every Aut_S-orbit
+lies inside a single 1-WL cell. This is always true and follows
+directly from `warmRefine_invariant_of_isAut`. It is the load-bearing
+half of the squeeze that both Tier 1 and Tier 2 use to conclude
+"cells = orbits." -/
+
+/-- **Aut_S orbit relation.** `v ~ w` iff some automorphism of `adj`
+preserving `P` and fixing `S` pointwise maps `v` to `w`. -/
+def OrbitPartition {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (S : Finset (Fin n)) (v w : Fin n) : Prop :=
+  ∃ π : Equiv.Perm (Fin n),
+    IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u) ∧
+    FixesPointwise π S ∧ π v = w
+
+namespace OrbitPartition
+
+variable {n : Nat} {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+
+/-- Reflexivity: every vertex is in its own orbit (via the identity
+permutation). -/
+theorem refl (v : Fin n) : OrbitPartition adj P S v v :=
+  ⟨Equiv.refl _, IsAut.refl, fun _ _ => rfl, fun _ _ => rfl, rfl⟩
+
+/-- Symmetry: orbit equivalence is symmetric (via permutation inverse). -/
+theorem symm {v w : Fin n} (h : OrbitPartition adj P S v w) :
+    OrbitPartition adj P S w v := by
+  obtain ⟨π, hπ, hP, hπS, hvw⟩ := h
+  refine ⟨π.symm, hπ.symm, ?_, ?_, ?_⟩
+  · intro x u
+    have h := hP (π.symm x) (π.symm u)
+    simp only [Equiv.apply_symm_apply] at h
+    exact h.symm
+  · intro v' hv'
+    have hfix := hπS v' hv'
+    -- π v' = v', so π.symm v' = v'.
+    have := congrArg π.symm hfix
+    simpa using this.symm
+  · have := congrArg π.symm hvw
+    simpa using this.symm
+
+/-- Transitivity: orbit equivalence composes (via permutation composition). -/
+theorem trans {v w u : Fin n}
+    (h₁ : OrbitPartition adj P S v w) (h₂ : OrbitPartition adj P S w u) :
+    OrbitPartition adj P S v u := by
+  obtain ⟨π₁, hπ₁, hP₁, hπS₁, hvw⟩ := h₁
+  obtain ⟨π₂, hπ₂, hP₂, hπS₂, hwu⟩ := h₂
+  refine ⟨π₁.trans π₂, hπ₁.trans hπ₂, ?_, ?_, ?_⟩
+  · intro x u'
+    -- (π₁.trans π₂) x = π₂ (π₁ x)
+    show P (π₂ (π₁ x)) (π₂ (π₁ u')) = P x u'
+    rw [hP₂, hP₁]
+  · intro v' hv'
+    show π₂ (π₁ v') = v'
+    rw [hπS₁ v' hv', hπS₂ v' hv']
+  · show π₂ (π₁ v) = u
+    rw [hvw]; exact hwu
+
+/-- **The trivial direction: orbits refine 1-WL cells.** If `v` and `w` are
+in the same Aut_S orbit, they share a cell in `warmRefine adj P χ_S`.
+
+This is the always-true half of the squeeze. Both Tier 1 (CFI) and
+Tier 2 (scheme graphs) combine this with a tier-specific bound on the
+1-WL cells to conclude `OrbitPartition = warmRefine partition`. -/
+theorem subset_warmRefine {v w : Fin n} (h : OrbitPartition adj P S v w) :
+    warmRefine adj P (individualizedColouring n S) v =
+      warmRefine adj P (individualizedColouring n S) w := by
+  obtain ⟨π, hπ, hP, hπS, hvw⟩ := h
+  have hχ : ∀ x, individualizedColouring n S (π x) = individualizedColouring n S x :=
+    individualizedColouring_invariant hπS
+  have hwarm := warmRefine_invariant_of_isAut hπ hP hχ v
+  -- warmRefine ... (π v) = warmRefine ... v, and π v = w.
+  rw [hvw] at hwarm
+  exact hwarm.symm
+
+end OrbitPartition
+
+/-! ## §17 — Tier 1: orbit recovery for CFI graphs
+
+Formalisation of Theorem 1 of [`docs/chain-descent-orbit-recovery.md`](../docs/chain-descent-orbit-recovery.md):
+for connected `CFI(H)`, 1-WL refinement after `≤ tw(H)` fresh-colour
+individualizations recovers the `Aut(CFI(H))_S`-orbit partition.
+
+**Proof structure** (orbit-recovery doc §5):
+- **Fact A** — CFI cascade depth ≤ tw(H). Classical Cai-Fürer-Immerman
+  1992. Requires CFI construction in Lean (a multi-week infrastructure
+  project); stated here as an `axiom` placeholder so the assembly can
+  proceed.
+- **Fact B** — discrete partition ⟹ `Aut_S` is trivial ⟹ cells = orbits.
+  Provable from §16's shared infrastructure.
+- **Assembly** — at the cascade depth, partition is discrete (Fact A),
+  so cells = orbits (Fact B + §16.3 trivial direction).
+
+Sub-sections:
+- §17.1 — Fact B (discrete ⟹ trivial Aut_S; cells = orbits)
+- §17.2 — Fact A placeholder + Theorem 1 assembly
+-/
+
+/-! ### §17.1 — Fact B: discrete partition ⟹ trivial Aut_S -/
 
 /-- **Fact B (pointwise version).** If a `π`-invariant colouring `χ` is
 discrete (every cell singleton), then `π` is the identity. -/
@@ -3477,7 +3590,27 @@ theorem aut_trivial_of_discrete_warmRefine {n : Nat} {adj : AdjMatrix n}
     warmRefine_invariant_of_isAut hπ hP hχ
   exact id_of_discrete_invariant hd hwarm
 
-/-! ### §16.4 — Fact A placeholder + Theorem 1 assembly
+/-- **Fact B (partition version).** At discrete depth, the orbit partition
+collapses to equality of vertices — the reverse direction of the squeeze.
+
+If `warmRefine adj P χ_S` is discrete, then `OrbitPartition v w ↔ v = w`.
+Combined with §16.3's trivial direction, this gives `OrbitPartition v w ↔
+warmRefine ... v = warmRefine ... w` for the Tier 1 cascade-discrete case. -/
+theorem orbit_iff_eq_of_discrete_warmRefine {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {S : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S)))
+    (v w : Fin n) :
+    OrbitPartition adj P S v w ↔ v = w := by
+  constructor
+  · intro h
+    obtain ⟨π, hπ, hP, hπS, hvw⟩ := h
+    have hπ_id := aut_trivial_of_discrete_warmRefine hd hπ hP hπS
+    rw [← hvw, hπ_id]
+    rfl
+  · rintro rfl
+    exact OrbitPartition.refl v
+
+/-! ### §17.2 — Fact A placeholder + Theorem 1 assembly
 
 **Fact A** (CFI cascade depth ≤ tw(H)) is classical Cai-Fürer-Immerman
 theory but requires CFI construction in Lean, which is a multi-week
@@ -3485,25 +3618,57 @@ infrastructure project. We state it here as an axiom — pinning the
 shape of what's needed — and assemble Theorem 1 conditionally.
 
 The Fact A statement involves CFI(H), tw(H), and the canonical picker.
-For now we state the shape minimally: "there exists a `k` such that
-warmRefine after `k` fresh-colour individualizations is discrete."
-The CFI infrastructure will fill in the precise statement with the
-treewidth bound. -/
+For now we state the shape minimally: "there exists an `S` such that
+warmRefine is discrete after individualizing `S`."
+
+The depth bound `|S| ≤ tw(H)` is the classical CFI content; the
+orbit-recovery doc notes that **any polynomial bound on `|S|`
+preserves polynomial runtime** for chain descent (Corollary 1). The
+axiom can later be tightened to `∃ S, |S| ≤ p(n) ∧ Discrete (...)` for
+any polynomial `p`; the current minimal form keeps the assembly
+unconditional on the bound's shape. -/
 
 /-- **Fact A placeholder.** For a CFI graph (left abstract for now;
 `adj` here stands in for `CFI(H)` and `P` for its initial state), there
 exists a sequence of fresh-colour individualizations whose warm-refined
-partition is discrete. The treewidth bound `k ≤ tw(H)` is the classical
-content; here we just assert existence. -/
+partition is discrete. The treewidth bound `|S| ≤ tw(H)` is the
+classical content; here we just assert existence. -/
 axiom cfi_cascade_exists {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
     ∃ S : Finset (Fin n),
       Discrete (warmRefine adj P (individualizedColouring n S))
 
-/-- **Theorem 1 (HOR for CFI), Lean form.** Given Fact A (cfi_cascade_exists),
-at the cascade depth every automorphism preserving the graph and fixing the
-individualized set pointwise is the identity. So the orbit partition equals
-the (singleton) refinement partition. -/
+/-- **Theorem 1 (HOR for CFI), Lean form, partition version.**
+
+Given Fact A (`cfi_cascade_exists`), at the cascade depth the 1-WL
+fixpoint partition equals the `Aut_S`-orbit partition. In the discrete
+case both partitions reduce to the singleton partition, so this is
+trivially expressible as `v ~_orbit w ↔ v = w ↔ same warmRefine
+colour`. The bidirectional partition statement is what generalises
+cleanly to Tier 2, where the right-hand side is non-trivial. -/
 theorem theorem_1_HOR {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w := by
+  obtain ⟨S, hd⟩ := cfi_cascade_exists adj P
+  refine ⟨S, hd, ?_⟩
+  intro v w
+  constructor
+  · -- Trivial direction (§16.3): orbits ⊆ cells.
+    exact OrbitPartition.subset_warmRefine
+  · -- Reverse direction (§17.1): when partition is discrete, cells = vertices,
+    -- and v = w gives OrbitPartition via identity.
+    intro hχ
+    have hvw : v = w := hd v w hχ
+    rw [hvw]
+    exact OrbitPartition.refl w
+
+/-- **Theorem 1, pointwise corollary.** The original (Aut_S trivial)
+form, kept for direct downstream use. Derivable from the partition
+form via `aut_trivial_of_discrete_warmRefine`. -/
+theorem theorem_1_HOR_pointwise {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
     ∃ S : Finset (Fin n),
       Discrete (warmRefine adj P (individualizedColouring n S)) ∧
       ∀ (π : Equiv.Perm (Fin n)),
@@ -3513,4 +3678,163 @@ theorem theorem_1_HOR {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
   refine ⟨S, hd, ?_⟩
   intro π hπ hP hπS
   exact aut_trivial_of_discrete_warmRefine hd hπ hP hπS
+
+/-! ## §18 — Tier 2: orbit recovery for schurian scheme graphs
+
+Formalisation of Theorem 2 of [`docs/chain-descent-orbit-recovery.md`](../docs/chain-descent-orbit-recovery.md):
+for a graph admitting a vertex-transitive schurian association scheme,
+1-WL refinement after a **single** fresh-colour individualization
+recovers the `Aut_v`-orbit partition.
+
+The paper proof (orbit-recovery doc §14.3) routes through:
+- **Step 1** — schurian assumption ⟹ `Aut(G)_v` orbits = v-profile
+  classes (scheme-relation classes relative to `v`).
+- **Step 2** — 1-WL on `(G, v)` distinguishes v-profile classes (the
+  intersection-number argument).
+- **Step 3** — combine.
+
+Lean structure mirrors Tier 1 (§17):
+- §18.1 — `SchemeProfile` structure bundling Steps 1 and 2 as fields.
+- §18.2 — Scheme profile existence axiom + Theorem 2 assembly.
+
+The full association-scheme machinery (relations `R_0,…,R_d`,
+intersection numbers, schurian property) is not yet in Mathlib —
+multi-week infrastructure work tracked as G5 in the orbit-recovery
+doc §14.5. Here we axiomatise the existence of a `SchemeProfile` so
+the assembly can proceed, exactly as Tier 1 axiomatises
+`cfi_cascade_exists`.
+
+Once the scheme infrastructure lands, `schurian_scheme_profile_exists`
+becomes a theorem — the SchemeProfile fields are constructible from
+the scheme's intersection numbers and the schurian orbit identity.
+-/
+
+/-! ### §18.1 — `SchemeProfile`: the v-profile partition
+
+A `SchemeProfile adj P v` is a colouring `profile : Colouring n`
+that represents the **v-profile** (which scheme relation each w ≠ v
+shares with v, relative to a fixed association scheme on `adj`),
+together with two structural facts:
+
+- **Step 1 field (`profile_iff_orbit`)**: profile classes coincide
+  with Aut_v orbits. This is the schurian assumption's content —
+  scheme-relation classes are exactly Aut-orbital classes.
+- **Step 2 field (`warm_refines_profile`)**: 1-WL refinement on
+  `(adj, P, χ_{v})` is at least as fine as the profile partition
+  (i.e., cells ⊆ profile classes). This is the intersection-number
+  argument.
+
+The reverse inclusion (`profile classes ⊆ 1-WL cells`) follows
+from §16.3's trivial direction plus the Step 1 field, so the
+structure does not need to bundle it explicitly. Derived in
+`SchemeProfile.warm_iff_profile`. -/
+structure SchemeProfile {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (v : Fin n) where
+  /-- The v-profile colouring: encodes which scheme relation each w
+  shares with v. -/
+  profile : Colouring n
+  /-- `v` is a singleton in the profile partition. -/
+  v_singleton : ∀ w, w ≠ v → profile w ≠ profile v
+  /-- **Step 1 (schurian).** Profile classes equal Aut_v orbits. -/
+  profile_iff_orbit :
+    ∀ w u, profile w = profile u ↔ OrbitPartition adj P {v} w u
+  /-- **Step 2 (intersection numbers).** 1-WL on (adj, P, χ_{v}) refines
+  the profile partition. -/
+  warm_refines_profile :
+    ∀ w u,
+      warmRefine adj P (individualizedColouring n {v}) w =
+        warmRefine adj P (individualizedColouring n {v}) u →
+      profile w = profile u
+
+namespace SchemeProfile
+
+variable {n : Nat} {adj : AdjMatrix n} {P : PMatrix n} {v : Fin n}
+
+/-- **Squeeze: 1-WL fixpoint partition equals profile partition.**
+
+The "←" direction comes from §16.3's trivial direction (orbits refine
+1-WL cells) composed with Step 1 (orbits = profile classes). The "→"
+direction is the Step 2 field directly. -/
+theorem warm_iff_profile (sp : SchemeProfile adj P v) (w u : Fin n) :
+    warmRefine adj P (individualizedColouring n {v}) w =
+      warmRefine adj P (individualizedColouring n {v}) u ↔
+    sp.profile w = sp.profile u := by
+  constructor
+  · exact sp.warm_refines_profile w u
+  · intro h
+    have horb := (sp.profile_iff_orbit w u).mp h
+    exact OrbitPartition.subset_warmRefine horb
+
+end SchemeProfile
+
+/-! ### §18.2 — Existence axiom + Theorem 2 assembly
+
+The existence of a `SchemeProfile` is the load-bearing axiom for
+Tier 2 — the analogue of Tier 1's `cfi_cascade_exists`. It
+encapsulates "this graph is a vertex-transitive schurian scheme
+graph" without committing to a particular formalisation of
+association schemes.
+
+`IsSchurianSchemeGraph` is left as an `axiom`-declared Prop: a
+constant predicate with no introduction rule. Concrete graphs
+(Johnson `J(m,k)`, Hamming `H(d,q)`, distance-transitive DRGs) will
+satisfy it once the scheme infrastructure provides a real
+definition; for now no graph satisfies it, so the existence axiom
+is dormant — it constrains nothing until a real
+`IsSchurianSchemeGraph` proof appears. -/
+
+/-- **Abstract predicate.** Placeholder for "the graph `adj` admits a
+vertex-transitive schurian association scheme that contains its edge
+relation." Declared as an axiom-Prop until the scheme machinery
+lands; full formalization is G5 of the orbit-recovery doc. -/
+axiom IsSchurianSchemeGraph {n : Nat} (adj : AdjMatrix n) : Prop
+
+/-- **Scheme profile existence (Tier 2 Fact A analogue).** For any
+graph satisfying `IsSchurianSchemeGraph` and any vertex `v`, a
+`SchemeProfile adj P v` exists. The witness encodes:
+- the v-profile colouring (which scheme relation each w ≠ v shares
+  with v);
+- the schurian identity (profile classes = Aut_v orbits);
+- the intersection-number lemma (1-WL refines profile).
+
+Becomes a theorem once association-scheme infrastructure lands. -/
+axiom schurian_scheme_profile_exists {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph adj) (P : PMatrix n) (v : Fin n) :
+    Nonempty (SchemeProfile adj P v)
+
+/-- **Theorem 2 (HOR for schurian scheme graphs), assembly form.**
+
+Given a SchemeProfile witness at vertex `v`, the 1-WL fixpoint
+partition (at depth 1) equals the Aut_v orbit partition.
+
+This is the assembly version — the actual content is the existence
+of a SchemeProfile (`schurian_scheme_profile_exists`). Once we have a
+witness, the equality follows from chaining the two iff-fields. -/
+theorem theorem_2_HOR_of_profile {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {v : Fin n} (sp : SchemeProfile adj P v)
+    (w u : Fin n) :
+    OrbitPartition adj P {v} w u ↔
+      warmRefine adj P (individualizedColouring n {v}) w =
+        warmRefine adj P (individualizedColouring n {v}) u :=
+  -- OrbitPartition ↔ profile (Step 1 backwards), then profile ↔ warmRefine
+  -- (sp.warm_iff_profile backwards).
+  (sp.profile_iff_orbit w u).symm.trans (sp.warm_iff_profile w u).symm
+
+/-- **Theorem 2 (HOR for schurian scheme graphs), unconditional form.**
+
+For any graph satisfying `IsSchurianSchemeGraph`, the 1-WL fixpoint
+partition at depth 1 equals the Aut_v orbit partition.
+
+Conditional on `schurian_scheme_profile_exists` (the Tier-2 Fact A
+analogue). The Lean theorem becomes unconditional once the scheme
+infrastructure provides a constructive witness. -/
+theorem theorem_2_HOR {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph adj) (P : PMatrix n) (v : Fin n) :
+    ∀ w u,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u := by
+  obtain ⟨sp⟩ := schurian_scheme_profile_exists h P v
+  intro w u
+  exact theorem_2_HOR_of_profile sp w u
 
