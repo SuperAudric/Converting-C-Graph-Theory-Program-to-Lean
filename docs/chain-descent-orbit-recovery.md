@@ -681,15 +681,48 @@ signature by (P2). Proof structure identical to M2/M3.B/M3.C.
 All M3.D Phase 1 lemmas axiom-clean (`refineStep` + `refineStep_iff`
 + standard basis).
 
-*Stage 4 / M3.D Phase 2 (multi-round cascade via base-distance —
-PENDING, multi-week):* the inductive driver that applies the step
-lemma round-by-round to grow the set of distinguished pairs.
-Maintains (P2) by tracking which colours have appeared where, using
-base-graph distance for accounting. Requires connectedness of `H`
-as a hypothesis on `IsCFI'`.
+*Stage 4 / M3.D Phase 2.0 + 2.1 — first cascade step beyond round 1 —
+DONE 2026-05-26.* `ChainDescent/CFI.lean` §13.12 (structural helpers)
++ §13.13 (first concrete application).
 
-*Stage 4 / M3.E + M4 (PENDING, deferred):* subset vertex distinction
-+ final cascade assembly via `warmRefine` discreteness.
+§13.12 / Phase 2.0:
+- `IsCFI'.adj_endpointVertex_eq_one_iff` — endpoint-endpoint
+  adjacency iff `v_a = w_b ∧ w_a = v_b ∧ b_a = b_b` (the bridge
+  condition).
+- `IsCFI'.adj_seedVertex_eq_one_iff` — `adj u (seedVertex w) = 1
+  iff u = endpointVertex hx true` for some `x ∈ N(w)`. Characterises
+  exactly which vertices are adjacent to a seed (b=1 endpoints in
+  the seed's gadget, no others).
+
+§13.13 / Phase 2.1:
+- `IsCFI'.refineStep_endpoint_true_intra_gadget_partner` — under
+  `χ_1 = refineStep χ_{allSeeds}`, applying one more `refineStep`
+  distinguishes b=true endpoints at the same gadget toward different
+  partners.
+
+Proof structure (validates Phase 1 + Phase 2 strategy):
+- Apply `refineStep_bridge_step` with `χ = χ_1`.
+- (P1) from M3.C: bridge partners `e^1_{w→v}, e^1_{w'→v}` at gadgets
+  `w ≠ w'` are distinguished by `χ_1`.
+- (P2) by signature-tuple argument:
+  - Witness tuple `(χ_0 seed_w, 1, P bp seed_w)` in `bp`'s signature
+    (via the bridge to own-gadget seed).
+  - For any `u` adj=1 to `e^1_{v→w'}`: assume tuple in `u`'s
+    signature, derive `adj u seed_w = 1`, use
+    `adj_seedVertex_eq_one_iff` to force `u = endpointVertex hx
+    true` at gadget `w`, use `adj_endpointVertex_eq_one_iff` on
+    `adj e^1_{v→w'} u = 1` to force `w' = w` — contradicts `w ≠ w'`.
+
+All Phase 2 lemmas axiom-clean.
+
+*Stage 4 / Phase 2.2-2.D + M3.E + M4 (PENDING, deferred multi-week):*
+- Phase 2.2: b=0 endpoint inter-gadget split — uses subset structure,
+  not bridges (b=0 bridge partners aren't distinguished early).
+- Phase 2.3: subset vertex distinction (by gadget, then by S).
+- M3.E: cross-type distinctions (subset vs endpoint, etc.) as
+  needed by remaining cascade cases.
+- M4: assemble all cases into `Discrete (warmRefine ...)`,
+  discharge `cfi_cascades_polynomially`.
 
 *Stage 4 / M3.C-M3.E + M4 (PENDING, multi-week):* the remaining M3
 content + cascade assembly. **Note:** initial planning assumed the

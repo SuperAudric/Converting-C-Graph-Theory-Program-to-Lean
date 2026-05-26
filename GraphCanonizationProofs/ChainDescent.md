@@ -366,6 +366,24 @@ bridge partner. All axiom-clean.
 iterates the step lemma, maintaining (P2) round-by-round via base-
 graph distance accounting. Requires connectedness of H.
 
+*Stage 4 / Phase 2.0 + 2.1 (2026-05-26):* first cascade step beyond
+round 1. §13.12 / §13.13.
+
+§13.12: structural helpers.
+- `adj_endpointVertex_eq_one_iff` — bridge condition formula.
+- `adj_seedVertex_eq_one_iff` — adj=1 to seed iff b=1 endpoint at
+  the seed's gadget (case analysis on `h.e u`).
+
+§13.13: first concrete cascade step.
+- `refineStep_endpoint_true_intra_gadget_partner` — at round 2,
+  b=true endpoints at the same gadget toward different partners
+  get distinct colours. Proof applies `refineStep_bridge_step`
+  with χ = round-1 colouring, (P1) from M3.C, (P2) via signature
+  tuple presence (the seed_w-marked tuple distinguishes).
+
+Validates the Phase 1 + Phase 2 architecture: arbitrary cascade
+cases can be discharged via the step lemma + (P2) verification.
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

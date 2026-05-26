@@ -1495,4 +1495,214 @@ theorem refineStep_bridge_step (h : IsCFI' adj) (P : PMatrix n)
 
 end IsCFI'
 
+/-! ### §13.12 — M3.D Phase 2.0: structural adjacency characterisations
+
+Helper lemmas characterising when two specific CFI vertex types are
+adjacent in `adj`. These are the "structural CFI facts" that drive
+Phase 2's verification of the bridge-step lemma's (P2) precondition. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **Endpoint-endpoint adjacency formula.** Two endpoints in `adj` are
+adjacent iff they form a bridge pair: `v_a = w_b ∧ w_a = v_b ∧ b_a = b_b`.
+
+This is `cfiAdj`'s endpoint-endpoint clause, lifted to Fin n via
+`h.matching`. The within-gadget case (`v_a = v_b`) fails because
+`w_a ∈ N(v_a)` and `v_a ∉ N(v_a)` (loopless), so `v_a = w_b ∧ w_a = v_b`
+would force a self-loop. -/
+theorem adj_endpointVertex_eq_one_iff (h : IsCFI' adj)
+    {v_a w_a v_b w_b : Fin h.m}
+    (hwa : w_a ∈ h.H.neighbors v_a) (hwb : w_b ∈ h.H.neighbors v_b)
+    (b_a b_b : Bool) :
+    adj.adj (h.endpointVertex hwa b_a) (h.endpointVertex hwb b_b) = 1 ↔
+    v_a = w_b ∧ w_a = v_b ∧ b_a = b_b := by
+  rw [h.matching, e_endpointVertex, e_endpointVertex]
+  show (if v_a = w_b ∧ w_a = v_b ∧ b_a = b_b then 1 else 0) = 1 ↔
+       v_a = w_b ∧ w_a = v_b ∧ b_a = b_b
+  constructor
+  · intro h_eq
+    by_contra hc
+    rw [if_neg hc] at h_eq
+    exact absurd h_eq (by decide)
+  · intro hc
+    rw [if_pos hc]
+
+/-- **Seed-adjacency characterisation.** A vertex `u` is adjacent to
+the seed `seedVertex w` iff `u` is a b=true endpoint at gadget `w`.
+
+The (only-if) direction: case analysis on `h.e u`. If `u` is a subset
+vertex, subset-subset adj=0. If `u` is an endpoint at gadget `v_e`
+with partner `x` and parity `b`, then `adj endpoint aEmpty_w` requires
+`v_e = w ∧ b = true` (from the `cfiAdj` endpoint-subset clause with
+S = ∅).
+
+This is the key structural fact for Phase 2's (P2) verifications:
+the only CFI vertices that "see" a specific seed's fresh colour with
+adj=1 are the b=true endpoints in that seed's gadget. -/
+theorem adj_seedVertex_eq_one_iff (h : IsCFI' adj) (w : Fin h.m) (u : Fin n) :
+    adj.adj u (h.seedVertex w) = 1 ↔
+    ∃ (x : Fin h.m) (hx : x ∈ h.H.neighbors w), u = h.endpointVertex hx true := by
+  constructor
+  · -- Forward: case analysis on h.e u.
+    intro h_adj
+    rw [h.matching, e_seedVertex] at h_adj
+    -- h_adj : h.H.cfiAdj (h.e u) (h.H.aEmpty w) = 1
+    cases h_eu : h.e u with
+    | inl sub =>
+      -- u is a subset vertex; subset-subset = 0 contradicts adj=1.
+      exfalso
+      rw [h_eu] at h_adj
+      -- h_adj : h.H.cfiAdj (Sum.inl sub) (h.H.aEmpty w) = 1
+      -- aEmpty w = Sum.inl _; so this is the Sum.inl/Sum.inl case = 0.
+      have : h.H.cfiAdj (Sum.inl sub) (h.H.aEmpty w) = 0 := by
+        unfold CFIBase.aEmpty
+        rfl
+      rw [this] at h_adj
+      exact absurd h_adj (by decide)
+    | inr endp =>
+      -- u is an endpoint; destructure to (v_e, x, hx, b).
+      obtain ⟨v_e, ⟨x, hx⟩, b⟩ := endp
+      rw [h_eu] at h_adj
+      -- h_adj : h.H.cfiAdj (Sum.inr ⟨v_e, ⟨x, hx⟩, b⟩) (h.H.aEmpty w) = 1
+      -- = if w = v_e ∧ decide(x ∈ ∅) ≠ b then 1 else 0
+      -- = if w = v_e ∧ b = true then 1 else 0.
+      have h_form : h.H.cfiAdj (Sum.inr ⟨v_e, ⟨x, hx⟩, b⟩) (h.H.aEmpty w) =
+          if w = v_e ∧ b = true then 1 else 0 := by
+        show (if w = v_e ∧ decide (x ∈ (∅ : Finset (Fin h.m))) ≠ b then 1 else 0) =
+             (if w = v_e ∧ b = true then 1 else 0)
+        have hne : decide (x ∈ (∅ : Finset (Fin h.m))) = false := by simp
+        rw [hne]
+        by_cases hb : b
+        · simp [hb]
+        · simp [hb]
+      rw [h_form] at h_adj
+      -- h_adj : (if w = v_e ∧ b = true then 1 else 0) = 1
+      have hc : w = v_e ∧ b = true := by
+        by_contra hc
+        rw [if_neg hc] at h_adj
+        exact absurd h_adj (by decide)
+      obtain ⟨hw_eq, hb_true⟩ := hc
+      -- Now: v_e = w (from hw_eq.symm), b = true.
+      -- So h.e u = Sum.inr ⟨w, ⟨x, hx⟩, true⟩ where hx : x ∈ N(v_e) = N(w).
+      -- That is, u = endpointVertex (with the right hx after rewriting v_e to w) true.
+      refine ⟨x, ?_, ?_⟩
+      · -- hx : x ∈ N(v_e); want x ∈ N(w). Use hw_eq : w = v_e.
+        rw [hw_eq]; exact hx
+      · -- u = h.endpointVertex (hx after rewrite) true.
+        -- h.e u = Sum.inr ⟨v_e, ⟨x, hx⟩, b⟩ = Sum.inr ⟨w, ⟨x, hx after rewrite⟩, true⟩.
+        -- So u = h.e.symm (Sum.inr _) = h.endpointVertex (rewrite of hx) true.
+        apply h.e.injective
+        rw [e_endpointVertex, h_eu, hb_true]
+        -- Need: Sum.inr ⟨v_e, ⟨x, hx⟩, true⟩ = h.H.endpoint (hw_eq ▸ hx) true.
+        unfold CFIBase.endpoint
+        congr 1
+        -- Sigma equality: ⟨v_e, ⟨x, hx⟩, true⟩ = ⟨w, ⟨x, hw_eq ▸ hx⟩, true⟩.
+        -- v_e = w by hw_eq.symm.
+        subst hw_eq
+        rfl
+  · -- Backward: u = endpointVertex hx true ⟹ adj u seed_w = 1.
+    rintro ⟨x, hx, rfl⟩
+    exact h.adj_endpoint_seed_true hx
+
+end IsCFI'
+
+/-! ### §13.13 — M3.D Phase 2.1: within-gadget b=true endpoint split at round 2
+
+The first cascade step that **uses** the Phase 1 bridge step lemma.
+
+Under `χ_1 = refineStep χ_{allSeeds}`, the b=true endpoints at the
+same gadget `v` toward different partners `w, w' ∈ N(v)` (with
+`w ≠ w'`) get distinct colours after one more `refineStep` round.
+
+Sketch:
+- **(P1)** Bridge partners are `e^1_{w→v}` and `e^1_{w'→v}` — b=true
+  endpoints at different gadgets `w ≠ w'`. M3.C
+  (`refineStep_endpoint_true_inter_gadget`) gives them distinct
+  `χ_1` colours.
+- **(P2)** For any `u` adj=1 to `e^1_{v→w'}` (the second endpoint):
+  show `χ_1 u ≠ χ_1 (e^1_{w→v})`. By a signature-tuple argument:
+  the tuple `(χ_0 seed_w, 1, P · seed_w)` is in `e^1_{w→v}`'s
+  signature (own-gadget seed adjacency) but not in `u`'s (since `u`
+  is not adj=1 to seed_w — proved by combining
+  `adj_seedVertex_eq_one_iff` with `adj_endpointVertex_eq_one_iff`
+  to force `w = w'`, contradicting our hypothesis).
+
+This validates the Phase 1 + Phase 2 strategy: an arbitrary cascade
+case can be discharged by applying the local step lemma + verifying
+(P2) via tuple-presence + structural CFI facts. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **M3.D Phase 2.1 — within-gadget b=true endpoint split at round 2.**
+
+Under `χ_1 = refineStep χ_{allSeeds}`, applying one more refineStep
+distinguishes b=true endpoints at the same gadget toward different
+partners. -/
+theorem refineStep_endpoint_true_intra_gadget_partner (h : IsCFI' adj)
+    (P : PMatrix n) {v w w' : Fin h.m} (hww : w ≠ w')
+    (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v) :
+    refineStep adj P (refineStep adj P (individualizedColouring n h.allSeeds))
+        (h.endpointVertex hw true) ≠
+    refineStep adj P (refineStep adj P (individualizedColouring n h.allSeeds))
+        (h.endpointVertex hw' true) := by
+  set χ_0 := individualizedColouring n h.allSeeds with hχ_0
+  set χ_1 := refineStep adj P χ_0 with hχ_1
+  -- Apply the Phase 1 step lemma with χ = χ_1.
+  apply h.refineStep_bridge_step P χ_1 hw hw' true
+  · -- (P1): bridge partners e^1_{w→v}, e^1_{w'→v} distinguished by χ_1
+    --       via M3.C (refineStep_endpoint_true_inter_gadget at gadgets w ≠ w').
+    exact h.refineStep_endpoint_true_inter_gadget P hww
+      (h.H.mem_neighbors_symm.mp hw) (h.H.mem_neighbors_symm.mp hw')
+  · -- (P2): for any u adj=1 to e^1_{v→w'}, show χ_1 u ≠ χ_1 (e^1_{w→v}).
+    intro u hu_adj_ev'
+    -- Names for the relevant Fin n vertices.
+    set seed_w := h.seedVertex w
+    set bp := h.endpointVertex (h.H.mem_neighbors_symm.mp hw) true
+    have hseed_mem : seed_w ∈ h.allSeeds := h.seedVertex_mem_allSeeds w
+    -- Suppose χ_1 u = χ_1 bp; derive a contradiction.
+    intro hχ_eq
+    -- refineStep_iff splits this into χ_0 equality + signature equality.
+    have hboth := (refineStep_iff adj P χ_0 _ _).mp hχ_eq
+    -- Witness tuple in bp's signature: (χ_0 seed_w, 1, P bp seed_w).
+    let t : Nat × Nat × POE := (χ_0 seed_w, 1, P bp seed_w)
+    -- (a) t ∈ signature χ_0 bp via u' = seed_w (adj bp seed_w = 1).
+    have ht_in_bp : t ∈ signature adj P χ_0 bp := by
+      unfold signature
+      rw [Multiset.mem_map]
+      refine ⟨seed_w, ?_, ?_⟩
+      · rw [Finset.mem_val, Finset.mem_filter]
+        exact ⟨Finset.mem_univ _,
+          h.seedVertex_ne_endpointVertex (h.H.mem_neighbors_symm.mp hw) true⟩
+      · show (χ_0 seed_w, adj.adj bp seed_w, P bp seed_w) = t
+        rw [h.adj_endpoint_seed_true (h.H.mem_neighbors_symm.mp hw)]
+    -- (b) Transport via signature equality: t ∈ signature χ_0 u.
+    rw [← hboth.2] at ht_in_bp
+    -- Unpack: ∃ u' ≠ u, χ_0 u' = χ_0 seed_w, adj u u' = 1, P u u' = P bp seed_w.
+    unfold signature at ht_in_bp
+    rw [Multiset.mem_map] at ht_in_bp
+    obtain ⟨u', _, hu'_eq⟩ := ht_in_bp
+    have hχu' : χ_0 u' = χ_0 seed_w := congrArg Prod.fst hu'_eq
+    have hrest : (adj.adj u u', P u u') = ((1, P bp seed_w) : Nat × POE) :=
+      congrArg Prod.snd hu'_eq
+    have hadj_u_u' : adj.adj u u' = 1 := congrArg Prod.fst hrest
+    -- (c) Multi-seed uniqueness: χ_0 u' = χ_0 seed_w forces u' = seed_w.
+    have hu'_seed : u' = seed_w :=
+      (individualizedColouring_eq_iff_of_mem h.allSeeds hseed_mem).mp hχu'
+    rw [hu'_seed] at hadj_u_u'
+    -- hadj_u_u' : adj.adj u seed_w = 1
+    -- (d) By adj_seedVertex_eq_one_iff: u = endpointVertex hx true for some x ∈ N(w).
+    obtain ⟨x, hx, hu_eq⟩ := (h.adj_seedVertex_eq_one_iff w u).mp hadj_u_u'
+    -- (e) Combined with hu_adj_ev', apply adj_endpointVertex_eq_one_iff to force w' = w.
+    rw [hu_eq] at hu_adj_ev'
+    rw [h.adj_endpointVertex_eq_one_iff hw' hx true true] at hu_adj_ev'
+    -- hu_adj_ev' : v = x ∧ w' = w ∧ true = true. Extract w' = w.
+    obtain ⟨_, hw'_eq_w, _⟩ := hu_adj_ev'
+    exact hww hw'_eq_w.symm
+
+end IsCFI'
+
 end ChainDescent
