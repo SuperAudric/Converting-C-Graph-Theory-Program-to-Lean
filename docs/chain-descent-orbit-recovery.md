@@ -589,14 +589,48 @@ All M2 lemmas axiom-clean (`refineStep_endpoint_false_ne_true`
 depends only on `refineStep`, `refineStep_iff` and the standard
 basis — no CFI-specific axioms used).
 
-*Stage 4 / M3-M4 (PENDING, multi-week):*
-- M3: bridge propagation. The endpoint-endpoint bridge
-  `e^b_{v→w} ↔ e^b_{w→v}` carries gadget colour information across
-  bases; after O(diam H) refineStep rounds, every endpoint is
-  uniquely coloured by (gadget, partner, parity).
-- M4: assemble. Construct `S = h.e.symm '' { Sum.inl ⟨v, ⟨∅, _⟩⟩ }`
-  (size = `h.baseSize`), prove `warmRefine adj P χ_S` is `Discrete`,
-  discharge `cfi_cascades_polynomially`.
+*Stage 4 / M3.A + M3.B — multi-seed cascade setup + lifted M2 —
+DONE 2026-05-26.* `ChainDescent/CFI.lean` §13.8-§13.9:
+
+- §13.8 / M3.A — Multi-seed setup:
+  - `IsCFI'.allSeeds := Finset.univ.image h.seedVertex` — the cascade
+    individualization set (one seed per base graph vertex).
+  - `IsCFI'.seedVertex_injective` — different bases give different
+    Fin n indices.
+  - `IsCFI'.allSeeds_card : |allSeeds| = h.baseSize`.
+  - `individualizedColouring_eq_iff_of_mem` — generic multi-seed
+    uniqueness: for `v ∈ S`, `χ_S u = χ_S v ↔ u = v`. The engine for
+    lifting M2 to the multi-seed colouring.
+- §13.9 / M3.B — M2 lifted to multi-seed:
+  - `IsCFI'.signature_endpoint_false_ne_true_allSeeds` and
+  - `IsCFI'.refineStep_endpoint_false_ne_true_allSeeds` — the M2
+    endpoint split, proved under `χ_{allSeeds}` instead of the
+    single-seed colouring. Same witness tuple
+    `(χ seed_v, 1, P endpoint_true seed_v)`; the multi-seed uniqueness
+    lemma replaces the singleton uniqueness in the proof.
+
+All M3.A + M3.B lemmas axiom-clean. The cascade individualization
+witness for M4 is now constructible (`allSeeds`) and its size is bounded
+(`= h.baseSize`).
+
+*Stage 4 / M3.C-M3.E + M4 (PENDING, multi-week):* the remaining M3
+content + cascade assembly. **Note:** initial planning assumed the
+inter-gadget endpoint distinction would hold at round 1 — this is
+**not generally true** (a b=0 endpoint at gadget v has the same
+signature as a b=0 endpoint at gadget v' for many base graphs, if P
+is trivial). The cascade requires multi-round bridge propagation,
+which requires careful invariant design. Realistic decomposition:
+- M3.C — Per-CFI-vertex-type signature classification under
+  `χ_{allSeeds}`: catalogue what the signature multiset looks like
+  for each (seed, non-seed subset, b=0 endpoint, b=1 endpoint).
+- M3.D — Bridge propagation step lemma: distinction at bridge
+  partner pair at round `r` ⟹ distinction at original pair at
+  round `r+1`. The inductive engine.
+- M3.E — Subset vertex distinction: `a_S^v` vs `a_{S'}^v` split by
+  S, via endpoint-adjacency pattern differences.
+- M4 — Assemble all of M3 with multi-round induction on
+  `refineStep` to prove `warmRefine adj P χ_{allSeeds}` is
+  `Discrete`. Discharges `cfi_cascades_polynomially`.
 
 *Combinatorial identity — DONE 2026-05-26.* The classical identity
 "the number of even-cardinality subsets of a nonempty `d`-element

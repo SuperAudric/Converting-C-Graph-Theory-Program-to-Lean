@@ -307,6 +307,29 @@ endpoints. Build-up:
 All M2 lemmas axiom-clean (depends only on `refineStep`,
 `refineStep_iff`, and standard basis).
 
+*Stage 4 / M3.A + M3.B — multi-seed cascade setup (2026-05-26):*
+§13.8-§13.9 of `ChainDescent/CFI.lean`.
+
+§13.8 / M3.A:
+- `IsCFI'.allSeeds := Finset.univ.image h.seedVertex` — the cascade
+  individualization (one seed per base vertex).
+- `IsCFI'.seedVertex_injective` (via `aEmpty` injectivity through
+  Sigma.fst + h.e Equiv).
+- `IsCFI'.allSeeds_card : |allSeeds| = h.baseSize`.
+- `individualizedColouring_eq_iff_of_mem` — generic: for `v ∈ S`,
+  `χ_S u = χ_S v ↔ u = v`.
+
+§13.9 / M3.B:
+- `IsCFI'.signature_endpoint_false_ne_true_allSeeds` and
+  `IsCFI'.refineStep_endpoint_false_ne_true_allSeeds` — M2's endpoint
+  split under the multi-seed colouring `χ_{allSeeds}`. Witness tuple
+  unchanged; multi-seed uniqueness replaces singleton uniqueness.
+
+All axiom-clean. The cascade individualization witness is now
+constructible and size-bounded; M3.C-M3.E (bridge propagation step
+lemma, subset distinction, per-type signature classification) and M4
+(cascade assembly via multi-round refinement induction) remain.
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

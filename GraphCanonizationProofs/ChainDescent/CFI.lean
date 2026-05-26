@@ -1045,4 +1045,171 @@ theorem refineStep_endpoint_false_ne_true (h : IsCFI' adj) (P : PMatrix n)
 
 end IsCFI'
 
+/-! ### §13.8 — M3.A: multi-seed cascade setup
+
+The cascade individualization is `allSeeds = {h.seedVertex v : v ∈ Fin h.m}`
+— one seed per base graph vertex. This section defines `allSeeds` and
+proves the foundational structural facts:
+
+- `seedVertex` is injective (different bases give different Fin n indices).
+- `|allSeeds| = h.baseSize` (= h.m). Combined with `h.six_baseSize_le`,
+  the cascade individualization has size ≤ n / 6.
+- Multi-seed individualizedColouring uniqueness: for `v ∈ S`,
+  `χ_S u = χ_S v ↔ u = v`. The generalisation of §13.5's singleton
+  uniqueness; the engine for the M2 → multi-seed lift in §13.9. -/
+
+/-- **Multi-seed uniqueness**: under `individualizedColouring n S`, if
+`v ∈ S` and `u` has the same colour as `v`, then `u = v`. (Members of
+`S` get distinct fresh colours `u.val + 1`; non-members get `0`.)
+
+Generalises §13.5's `individualizedColouring_singleton_eq_seed_iff`
+from `S = {v}` to arbitrary `S` containing `v`. -/
+theorem individualizedColouring_eq_iff_of_mem {n : Nat} (S : Finset (Fin n))
+    {v u : Fin n} (hv : v ∈ S) :
+    individualizedColouring n S u = individualizedColouring n S v ↔ u = v := by
+  constructor
+  · intro hχ
+    by_cases hu : u ∈ S
+    · simp only [individualizedColouring, if_pos hu, if_pos hv] at hχ
+      exact Fin.eq_of_val_eq (by omega)
+    · simp only [individualizedColouring, if_neg hu, if_pos hv] at hχ
+      exact absurd hχ (by omega)
+  · rintro rfl; rfl
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- The cascade individualization set: `{h.seedVertex v : v ∈ Fin h.m}`,
+i.e. one seed per base graph vertex.
+
+Used as the witness in `cfi_cascades_polynomially`: this is `S` in
+"there exists `S` of size ≤ `cfi_depth_bound h` such that
+`warmRefine adj P χ_S` is `Discrete`." -/
+noncomputable def allSeeds (h : IsCFI' adj) : Finset (Fin n) :=
+  Finset.univ.image h.seedVertex
+
+/-- `seedVertex` is injective: different base vertices map to different
+`Fin n` indices.
+
+Proof: `aEmpty v` has its base index `v` recoverable from the `Sigma`
+first component, so `aEmpty` is injective on `v`. Combined with
+`h.e.symm` (an `Equiv`) being injective, `seedVertex v := h.e.symm (aEmpty v)`
+is injective in `v`. -/
+theorem seedVertex_injective (h : IsCFI' adj) :
+    Function.Injective h.seedVertex := by
+  intro v v' hvv
+  -- Apply h.e to both sides; the bijection round-trip exposes h.H.aEmpty equality.
+  have habs : h.H.aEmpty v = h.H.aEmpty v' := by
+    have := congrArg h.e hvv
+    rwa [e_seedVertex, e_seedVertex] at this
+  unfold CFIBase.aEmpty at habs
+  -- Sum.inl ⟨v, _⟩ = Sum.inl ⟨v', _⟩ → Sigma equality.
+  injection habs with hSig
+  -- Sigma first component projection.
+  exact congrArg Sigma.fst hSig
+
+/-- `seedVertex v ∈ h.allSeeds` for every base vertex `v`. -/
+theorem seedVertex_mem_allSeeds (h : IsCFI' adj) (v : Fin h.m) :
+    h.seedVertex v ∈ h.allSeeds :=
+  Finset.mem_image.mpr ⟨v, Finset.mem_univ _, rfl⟩
+
+/-- `|allSeeds| = h.baseSize`. Combined with `h.six_baseSize_le`,
+the cascade individualization has at most `n / 6` vertices. -/
+@[simp] theorem allSeeds_card (h : IsCFI' adj) :
+    h.allSeeds.card = h.baseSize := by
+  unfold allSeeds
+  rw [Finset.card_image_of_injective Finset.univ h.seedVertex_injective,
+    Finset.card_univ, Fintype.card_fin]
+
+/-- `|allSeeds| ≤ h.baseSize`. Convenience form for downstream use. -/
+theorem allSeeds_card_le_baseSize (h : IsCFI' adj) :
+    h.allSeeds.card ≤ h.baseSize :=
+  le_of_eq h.allSeeds_card
+
+end IsCFI'
+
+/-! ### §13.9 — M3.B: M2 endpoint split, lifted to multi-seed `χ_{allSeeds}`
+
+The cascade construction in M4 individualizes ALL seeds simultaneously,
+not just one. The M2 endpoint split (`signature_endpoint_false_ne_true`
+/ `refineStep_endpoint_false_ne_true`) generalizes verbatim: the same
+signature-distinction argument works under `χ_{allSeeds}`, with the
+multi-seed uniqueness lemma (`individualizedColouring_eq_iff_of_mem`)
+replacing the singleton form.
+
+These are the M2 lemmas as they will actually be used by M4. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **M3.B / signature** — multi-seed analogue of M2.4. Under
+`χ_{allSeeds}`, the b=0 and b=1 endpoints at gadget `v` toward
+`w ∈ N(v)` have different signature multisets.
+
+Witness tuple: `(χ seed_v, 1, P endpoint_true seed_v)`. Same argument
+as M2.4, with `individualizedColouring_eq_iff_of_mem` providing
+uniqueness from `seed_v ∈ allSeeds`. -/
+theorem signature_endpoint_false_ne_true_allSeeds (h : IsCFI' adj)
+    (P : PMatrix n) {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
+    signature adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw false) ≠
+    signature adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw true) := by
+  intro hsig
+  set seed := h.seedVertex v
+  set ef := h.endpointVertex hw false
+  set et := h.endpointVertex hw true
+  set χ := individualizedColouring n h.allSeeds
+  have hseed_mem : seed ∈ h.allSeeds := h.seedVertex_mem_allSeeds v
+  -- Witness tuple in the b=1 endpoint's signature.
+  let t : Nat × Nat × POE := (χ seed, 1, P et seed)
+  -- (a) t ∈ signature et — contributed by u = seed.
+  have ht_in_et : t ∈ signature adj P χ et := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨seed, ?_, ?_⟩
+    · rw [Finset.mem_val, Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, h.seedVertex_ne_endpointVertex hw true⟩
+    · show (χ seed, adj.adj et seed, P et seed) = t
+      rw [h.adj_endpoint_seed_true hw]
+  -- (b) t ∉ signature ef — no u satisfies both colour and adjacency.
+  have ht_notin_ef : t ∉ signature adj P χ ef := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, _, hu_eq⟩
+    -- Decompose hu_eq via Prod.fst/Prod.snd.
+    have hχu : χ u = χ seed := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj ef u, P ef u) = ((1, P et seed) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj ef u = 1 := congrArg Prod.fst hrest
+    -- Multi-seed uniqueness: χ u = χ seed → u = seed.
+    have hu_seed : u = seed :=
+      (individualizedColouring_eq_iff_of_mem h.allSeeds hseed_mem).mp hχu
+    -- But adj.adj ef seed = 0, not 1.
+    rw [hu_seed, h.adj_endpoint_seed_false hw] at hadj
+    exact absurd hadj (by decide)
+  -- Contradiction: t ∈ signature et = signature ef but t ∉ signature ef.
+  rw [hsig] at ht_notin_ef
+  exact ht_notin_ef ht_in_et
+
+/-- **M3.B / refineStep (M3 first headline)** — multi-seed analogue of
+M2.5. Under `χ_{allSeeds}`, one `refineStep` round gives the b=0 and
+b=1 endpoints at gadget `v` (toward `w ∈ N(v)`) distinct colours.
+
+The natural cascade-context generalisation of M2: the same parity-split
+holds under the actual M4 individualization (all seeds). -/
+theorem refineStep_endpoint_false_ne_true_allSeeds (h : IsCFI' adj)
+    (P : PMatrix n) {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
+    refineStep adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw false) ≠
+    refineStep adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw true) := by
+  intro hrefine
+  have hboth := (refineStep_iff adj P _ _ _).mp hrefine
+  exact h.signature_endpoint_false_ne_true_allSeeds P hw hboth.2
+
+end IsCFI'
+
 end ChainDescent
