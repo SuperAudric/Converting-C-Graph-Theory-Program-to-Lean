@@ -262,6 +262,19 @@ and `theorem_1_HOR_cfi` now live in `CFI.lean` and use the concrete
 (down from 3). Tier 2 still uses its abstract Prop (pending its
 concrete predicate).
 
+*Depth-bound API tightened (2026-05-26):* `IsCFI'` is now a
+`structure` in `Type` with projections `m`, `H`, `e`, `matching`
+(was `∃` in `Prop`). The depth function takes the witness:
+`cfi_depth_bound : IsCFI' adj → Nat`, with the bound axiom
+`cfi_depth_bound h ≤ h.baseSize` (= `h.m`). New connector
+`IsCFI'.six_baseSize_le : 6 * h.baseSize ≤ n` (axiom-clean) chains
+through the cardinality identity `card CFIVertex = ∑ gadgetSize ≥ 6m`.
+Combined: `cfi_depth_bound h ≤ n / 6`, strictly tighter than the
+axiom-free `theorem_1_HOR_at_n`'s `≤ n`. Corollaries
+`theorem_1_HOR_cfi_baseSize` and `theorem_1_HOR_cfi_n_bound` expose
+the simpler bound forms. The CFI placeholder axioms now carry
+content over `cascadesAt_univ`.
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

@@ -413,28 +413,49 @@ theorem cfiAdjMatrix_loopless (i : Fin (Fintype.card H.CFIVertex)) :
 end CFIBase
 
 /-- **Concrete `IsCFI` predicate.** A graph `adj : AdjMatrix n` is a
-CFI graph iff there exist a base graph `H : CFIBase m` and a
-bijection `Fin n ≃ H.CFIVertex` through which `adj` matches `cfiAdj
-H`.
+CFI graph when it admits a base graph `H : CFIBase m` and a bijection
+`Fin n ≃ H.CFIVertex` through which `adj` matches `cfiAdj H`.
 
-This is the concrete counterpart of the abstract `axiom IsCFI`
-declared in `ChainDescent.lean §17.4`. Retiring that axiom in favour
-of this predicate requires refactoring the Tier-1 theorems
-(`theorem_1_HOR_cfi`) to take `IsCFI'` as a hypothesis — a follow-on
-task that touches the main file.
+Modelled as a `structure` rather than `∃` so the base graph is
+addressable as data (`h.H`, `h.m`, etc.) — load-bearing for the
+`cfi_depth_bound` API, which needs to expose the base size to claim a
+bound stronger than the trivial `≤ n`.
 
 The bijection requirement implicitly forces `n = Fintype.card
 H.CFIVertex`; the existence of an `Equiv` between two finite types
 implies their cardinalities match. -/
-def IsCFI' {n : Nat} (adj : AdjMatrix n) : Prop :=
-  ∃ (m : Nat) (H : CFIBase m) (e : Fin n ≃ H.CFIVertex),
-    ∀ i j, adj.adj i j = H.cfiAdj (e i) (e j)
+structure IsCFI' {n : Nat} (adj : AdjMatrix n) : Type where
+  /-- Number of vertices in the base graph `H`. Aliased by `IsCFI'.baseSize`. -/
+  m : Nat
+  /-- The base graph. -/
+  H : CFIBase m
+  /-- Bijection from `adj`'s vertex set to the abstract `CFIVertex` type. -/
+  e : Fin n ≃ H.CFIVertex
+  /-- Adjacency in `adj` matches the CFI construction through `e`. -/
+  matching : ∀ i j, adj.adj i j = H.cfiAdj (e i) (e j)
+
+/-- **Base size** of a CFI witness — the number of base graph vertices.
+Strictly smaller than `n` (in fact `6 * baseSize ≤ n` via
+`IsCFI'.six_baseSize_le`); the depth bound API in §10 ties
+`cfi_depth_bound h` to `h.baseSize`, giving a bound strictly tighter
+than the trivial `n`-bound. -/
+abbrev IsCFI'.baseSize {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj) : Nat := h.m
 
 /-- **Self-witness**: every CFI base graph's `cfiAdjMatrix` satisfies
 `IsCFI'`. The witness is the same bijection used to define
-`cfiAdjMatrix`, so adjacency matching is `rfl`. -/
-theorem cfiAdjMatrix_is_cfi (H : CFIBase m) : IsCFI' H.cfiAdjMatrix :=
-  ⟨m, H, (Fintype.equivFin H.CFIVertex).symm, fun _ _ => rfl⟩
+`cfiAdjMatrix`, so adjacency matching is `rfl`.
+
+Now `noncomputable def` (was `theorem`) since `IsCFI'` is in `Type`
+and the `Fintype.equivFin` field is noncomputable. -/
+noncomputable def cfiAdjMatrix_is_cfi (H : CFIBase m) : IsCFI' H.cfiAdjMatrix where
+  m := m
+  H := H
+  e := (Fintype.equivFin H.CFIVertex).symm
+  matching := fun _ _ => rfl
+
+-- The connector `IsCFI'.six_baseSize_le : 6 * h.baseSize ≤ n` requires
+-- `CFIBase.card_CFIVertex` from §11 below; it lives in §12 to avoid a
+-- forward reference.
 
 /-- **Smoke test**: `triangleBase`'s `cfiAdjMatrix` has the
 expected `AdjMatrix 18` type (via the cardinality identity for the
@@ -450,7 +471,7 @@ example : Fintype.card triangleBase.CFIVertex = triangleBase.cfiVertexCount := b
   rw [triangleBase_cfiVertex_card, triangleBase_cfiVertexCount]
 
 /-- **Concrete witness**: `triangleBase.cfiAdjMatrix` satisfies `IsCFI'`. -/
-example : IsCFI' triangleBase.cfiAdjMatrix :=
+noncomputable example : IsCFI' triangleBase.cfiAdjMatrix :=
   cfiAdjMatrix_is_cfi triangleBase
 
 /-! ## §10 — Tier-1 CFI form of Theorem 1 (relocated from `ChainDescent.lean §17.4`)
@@ -471,41 +492,72 @@ The Tier 2 analogue (`IsSchurianSchemeGraph`,
 §18` and uses an abstract Prop; it'll be relocated similarly once
 its concrete-scheme-based predicate is built. -/
 
-/-- **Abstract polynomial cascade-depth function for CFI graphs.** A
-function `Nat → Nat` representing the classical bound `tw(H) ≤ n_H ≤ n`
-for `adj = CFI(H)`. Concrete realisation (`tw H`) requires Stage 4 of
-the CFI program. -/
-axiom cfi_depth_bound : Nat → Nat
+/-- **Abstract cascade-depth function for CFI graphs.** Takes a CFI
+witness `h : IsCFI' adj` and returns its cascade depth bound. Depends
+on the witness (i.e. on the base graph `h.H`), not just on `n` — that
+shape is what allows `cfi_depth_bound_le` below to claim a bound
+stronger than the trivial `≤ n`.
 
-/-- **The CFI depth bound is `≤ n`** — the placeholder polynomial
-relation. Classical content `tw H ≤ n_H ≤ n` gives this trivially. -/
-axiom cfi_depth_bound_le : ∀ n, cfi_depth_bound n ≤ n
+Concrete realisation (`cfi_depth_bound h = tw h.H` or similar)
+requires Stage 4 of the CFI program. -/
+axiom cfi_depth_bound {n : Nat} {adj : AdjMatrix n} : IsCFI' adj → Nat
+
+/-- **The CFI depth bound is `≤ baseSize`.** The depth bound is at most
+the number of vertices in the **base** graph, not in the CFI graph.
+
+Classical content: `tw H ≤ n_H = h.m = h.baseSize`. The improvement
+over `cascadesAt_univ`'s trivial `≤ n` bound: by
+`IsCFI'.six_baseSize_le` (§12), `h.baseSize ≤ n / 6`, so the depth
+bound is strictly smaller than the `n`-bound `cascadesAt_univ` already
+gives axiom-free. -/
+axiom cfi_depth_bound_le {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj) :
+    cfi_depth_bound h ≤ h.baseSize
 
 /-- **Fact A (polynomial-depth form).** A CFI graph cascades at depth
-`cfi_depth_bound n`. Stated using the concrete `IsCFI'` predicate.
+`cfi_depth_bound h`. Stated using the concrete `IsCFI'` structure;
+combined with `cfi_depth_bound_le`, gives orbit recovery at depth
+`≤ h.baseSize`.
+
 Becomes a theorem once the Cai-Fürer-Immerman cascade argument is
 formalised in Lean (Stage 4 of the CFI program). -/
 axiom cfi_cascades_polynomially {n : Nat} {adj : AdjMatrix n}
     (h : IsCFI' adj) (P : PMatrix n) :
-    CascadesAt adj P (cfi_depth_bound n)
+    CascadesAt adj P (cfi_depth_bound h)
 
 /-- **Theorem 1 (CFI form, polynomial-depth).** A CFI graph admits
-orbit recovery at depth `cfi_depth_bound n ≤ n`. Conditional on the
-Tier-1 placeholder axioms (`cfi_depth_bound`,
-`cfi_cascades_polynomially`); `IsCFI'` is now a concrete predicate.
-
-Successor of the old `ChainDescent.theorem_1_HOR_cfi`, which used the
-abstract `axiom IsCFI`. -/
+orbit recovery at depth `cfi_depth_bound h ≤ h.baseSize`. Conditional
+on the Tier-1 placeholder axioms (`cfi_depth_bound`,
+`cfi_depth_bound_le`, `cfi_cascades_polynomially`). The depth bound
+references the witness `h` (not just `n`), so the result is strictly
+tighter than the axiom-free `theorem_1_HOR_at_n`. -/
 theorem theorem_1_HOR_cfi {n : Nat} {adj : AdjMatrix n}
     (h : IsCFI' adj) (P : PMatrix n) :
     ∃ S : Finset (Fin n),
-      S.card ≤ cfi_depth_bound n ∧
+      S.card ≤ cfi_depth_bound h ∧
       Discrete (warmRefine adj P (individualizedColouring n S)) ∧
       ∀ v w,
         OrbitPartition adj P S v w ↔
         warmRefine adj P (individualizedColouring n S) v =
           warmRefine adj P (individualizedColouring n S) w :=
   theorem_1_HOR_at_depth (cfi_cascades_polynomially h P)
+
+/-- **Corollary (baseSize bound).** Combining `theorem_1_HOR_cfi` with
+`cfi_depth_bound_le` exposes the simpler `S.card ≤ h.baseSize` claim.
+
+The headline CFI-specific result for downstream consumers that only
+need a `Nat`-shaped bound; see also `theorem_1_HOR_cfi_n_bound` below
+for the further-weakened `≤ n / 6` form via §12's connector. -/
+theorem theorem_1_HOR_cfi_baseSize {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      S.card ≤ h.baseSize ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w := by
+  obtain ⟨S, hS, hd, hpart⟩ := theorem_1_HOR_cfi h P
+  exact ⟨S, le_trans hS (cfi_depth_bound_le h), hd, hpart⟩
 
 /-! ## §11 — Combinatorial: `Fintype.card CFIVertex = cfiVertexCount`
 
@@ -629,5 +681,73 @@ theorem card_CFIVertex : Fintype.card H.CFIVertex = H.cfiVertexCount := by
   rfl
 
 end CFIBase
+
+/-! ## §12 — Connector: `6 * baseSize ≤ n`
+
+The combinatorial size relation between a CFI graph's vertex count `n`
+and its base graph's vertex count `h.baseSize = h.m`. Since each
+gadget has at least 6 vertices (`gadgetSize_ge_six`) and there are `m`
+gadgets, the CFI graph has at least `6 m` vertices.
+
+Combined with the depth-bound axiom `cfi_depth_bound h ≤ h.baseSize`
+(§10), this gives `cfi_depth_bound h ≤ n / 6`. So
+`theorem_1_HOR_cfi_n_bound` (below) yields a strictly tighter
+specialisation than `theorem_1_HOR_at_n`: orbit recovery on a CFI
+graph happens at depth `≤ n / 6`, not just `≤ n`. The CFI-specific
+axioms now carry meaningful content. -/
+
+/-- **Connector**: a CFI graph has at least `6 * baseSize` vertices.
+
+Proof: `n = Fintype.card H.CFIVertex = H.cfiVertexCount =
+∑ v, gadgetSize v ≥ ∑ v, 6 = 6 * m`. The first equality uses the
+bijection `h.e`; the second is `card_CFIVertex` (§11); the
+inequality is `gadgetSize_ge_six` summed. -/
+theorem IsCFI'.six_baseSize_le {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) : 6 * h.baseSize ≤ n := by
+  -- Get h.H.cfiVertexCount = n via the bijection + card_CFIVertex.
+  have h_card : h.H.cfiVertexCount = n := by
+    have hc : Fintype.card (Fin n) = Fintype.card h.H.CFIVertex :=
+      Fintype.card_congr h.e
+    rw [Fintype.card_fin, h.H.card_CFIVertex] at hc
+    exact hc.symm
+  -- Show 6 * h.m ≤ h.H.cfiVertexCount, then chain through h_card.
+  have hsum : 6 * h.m ≤ h.H.cfiVertexCount := by
+    unfold CFIBase.cfiVertexCount
+    -- Sum of constants: ∑ _v : Fin m, 6 = 6 * m, via Finset.sum_const_nat.
+    have hconst : (∑ _v ∈ (Finset.univ : Finset (Fin h.m)), (6 : Nat)) = 6 * h.m := by
+      have hsc : (∑ _v ∈ (Finset.univ : Finset (Fin h.m)), (6 : Nat))
+          = (Finset.univ : Finset (Fin h.m)).card * 6 :=
+        Finset.sum_const_nat (fun _ _ => rfl)
+      rw [hsc, Finset.card_univ, Fintype.card_fin, Nat.mul_comm]
+    calc 6 * h.m
+        = ∑ _v ∈ (Finset.univ : Finset (Fin h.m)), (6 : Nat) := hconst.symm
+      _ ≤ ∑ v ∈ (Finset.univ : Finset (Fin h.m)), h.H.gadgetSize v :=
+          Finset.sum_le_sum (fun v _ => h.H.gadgetSize_ge_six v)
+  -- Chain: 6 * h.baseSize = 6 * h.m ≤ h.H.cfiVertexCount = n.
+  exact hsum.trans h_card.le
+
+/-- **Corollary (n-shaped bound).** Orbit recovery on a CFI graph holds
+at depth `≤ n / 6` — strictly tighter than the trivial `≤ n` bound
+provided axiom-free by `theorem_1_HOR_at_n`.
+
+This is the CFI-specific content: even before discharging Stage 4
+(the cascade lemma), the two CFI-specific axioms already buy us a
+factor-of-6 improvement on the depth bound, just from gadget size
+geometry. Once Stage 4 lands and `cfi_depth_bound h` is realised as
+`tw h.H`, the bound tightens further (treewidth is typically much
+smaller than `m / 6 = n / 36`). -/
+theorem theorem_1_HOR_cfi_n_bound {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      6 * S.card ≤ n ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w := by
+  obtain ⟨S, hS, hd, hpart⟩ := theorem_1_HOR_cfi_baseSize h P
+  refine ⟨S, ?_, hd, hpart⟩
+  calc 6 * S.card ≤ 6 * h.baseSize := by exact Nat.mul_le_mul_left 6 hS
+    _ ≤ n := h.six_baseSize_le
 
 end ChainDescent

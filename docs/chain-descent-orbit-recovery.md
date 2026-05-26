@@ -507,6 +507,38 @@ The Tier 2 analogue (`IsSchurianSchemeGraph`,
 in `ChainDescent.lean §18`; it'll be relocated similarly once
 Tier 2's concrete-scheme-based predicate is built.
 
+*Depth-bound API tightening — DONE 2026-05-26.* The original
+`theorem_1_HOR_cfi` claim `S.card ≤ cfi_depth_bound n` was structurally
+**vacuous** — it matched `theorem_1_HOR_at_n`'s axiom-free `S.card ≤ n`
+modulo the relation `cfi_depth_bound n ≤ n`, since `cfi_depth_bound`
+took only `n` and could not encode a CFI-specific bound. Refactor:
+
+- `IsCFI'` is now a **`structure` in `Type`** (was `Prop` `∃`), with
+  named projections `m`, `H`, `e`, `matching`. The base graph `h.H` is
+  addressable as data.
+- New abbreviation `h.baseSize := h.m` exposes the base graph's vertex
+  count.
+- `cfi_depth_bound` axiom refactored to take the `IsCFI'` witness:
+  `∀ {n} {adj : AdjMatrix n}, IsCFI' adj → Nat`. The depth function
+  now depends on the specific CFI graph (specifically its base).
+- `cfi_depth_bound_le` axiom strengthened to `cfi_depth_bound h ≤
+  h.baseSize`. Classical content `tw H ≤ n_H = h.baseSize`.
+- New connector `IsCFI'.six_baseSize_le : 6 * h.baseSize ≤ n`
+  (axiom-clean) — combinatorial fact `n = card CFIVertex ≥ 6 m` via
+  `gadgetSize_ge_six`. So `cfi_depth_bound h ≤ h.baseSize ≤ n / 6`,
+  which is strictly tighter than the trivial `≤ n` recovered
+  axiom-free.
+- New corollaries `theorem_1_HOR_cfi_baseSize` (bound: `≤ h.baseSize`)
+  and `theorem_1_HOR_cfi_n_bound` (bound: `6 * S.card ≤ n`). The
+  CFI-specific theorem now carries genuine content over the
+  axiom-free trivial-bound theorem.
+
+Tier-1 axiom budget unchanged at 3 placeholders (`cfi_depth_bound`,
+`cfi_depth_bound_le`, `cfi_cascades_polynomially`), but now they
+collectively imply something stronger than `cascadesAt_univ` gives
+for free. The Tier 2 analogue refactor is still pending its concrete
+scheme predicate.
+
 *Combinatorial identity — DONE 2026-05-26.* The classical identity
 "the number of even-cardinality subsets of a nonempty `d`-element
 set is `2^(d-1)`" is proved as
