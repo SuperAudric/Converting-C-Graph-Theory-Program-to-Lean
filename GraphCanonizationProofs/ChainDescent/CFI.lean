@@ -755,4 +755,294 @@ theorem theorem_1_HOR_cfi_n_bound {n : Nat} {adj : AdjMatrix n}
   calc 6 * S.card ≤ 6 * h.baseSize := by exact Nat.mul_le_mul_left 6 hS
     _ ≤ n := h.six_baseSize_le
 
+/-! ## §13 — M2: gadget-level distinguishability lemmas
+
+First set of cascade lemmas — how a single individualized subset
+vertex `a_∅^v` propagates to distinguish endpoints in its gadget.
+
+§13.1 — Named CFI vertex constructors (`aEmpty`, `endpoint`).
+§13.2 — Direct adjacency computations involving these.
+§13.3 — General signature lemma about colour-singleton vertices.
+§13.4 — **M2.1**: the headline cascade lemma — `a_∅^v` singleton
+        implies endpoints at any `(v,w)` split after one refineStep. -/
+
+namespace CFIBase
+
+variable {m : Nat} (H : CFIBase m)
+
+/-! ### §13.1 — Named CFI vertex constructors -/
+
+/-- The CFI vertex `a_∅^v`: the subset vertex at gadget `v` with empty
+subset. Always inhabits `evenSubsetsOfNeighbors v` since `|∅| = 0` is
+even. The "canonical seed" vertex used in the M2-M4 cascade
+construction. -/
+def aEmpty (v : Fin m) : H.CFIVertex :=
+  Sum.inl ⟨v, ⟨∅, H.empty_mem_evenSubsetsOfNeighbors v⟩⟩
+
+/-- The CFI vertex `e^b_{v→w}`: the endpoint at gadget `v` pointing
+toward neighbour `w ∈ N(v)` with parity bit `b ∈ {false, true}`. -/
+def endpoint {v w : Fin m} (hw : w ∈ H.neighbors v) (b : Bool) : H.CFIVertex :=
+  Sum.inr ⟨v, ⟨w, hw⟩, b⟩
+
+/-! ### §13.2 — Adjacency facts for named vertices
+
+`a_∅^v` connects to an endpoint `e^b_{v→w}` iff `(w ∈ ∅) ⊕ b = b`,
+i.e. iff `b = true`. So `cfiAdj a_∅^v e^false = 0` and
+`cfiAdj a_∅^v e^true = 1` — the parity bit `b` is exactly the
+adjacency. -/
+
+/-- `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=0 endpoint is NOT
+adjacent to the empty-subset seed. -/
+theorem cfiAdj_aEmpty_endpoint_false {v w : Fin m} (hw : w ∈ H.neighbors v) :
+    H.cfiAdj (H.aEmpty v) (H.endpoint hw false) = 0 := by
+  show (if v = v ∧ decide (w ∈ (∅ : Finset (Fin m))) ≠ false then 1 else 0) = 0
+  simp [Finset.notMem_empty]
+
+/-- `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=1 endpoint IS adjacent
+to the empty-subset seed. -/
+theorem cfiAdj_aEmpty_endpoint_true {v w : Fin m} (hw : w ∈ H.neighbors v) :
+    H.cfiAdj (H.aEmpty v) (H.endpoint hw true) = 1 := by
+  show (if v = v ∧ decide (w ∈ (∅ : Finset (Fin m))) ≠ true then 1 else 0) = 1
+  simp [Finset.notMem_empty]
+
+/-- `aEmpty v` and `endpoint hw b` are distinct CFI vertices (one is
+`Sum.inl`, the other `Sum.inr`). -/
+theorem aEmpty_ne_endpoint {v w : Fin m} (hw : w ∈ H.neighbors v) (b : Bool) :
+    H.aEmpty v ≠ H.endpoint hw b := by
+  intro heq
+  unfold aEmpty endpoint at heq
+  -- heq : Sum.inl _ = Sum.inr _ ; injection closes via case mismatch.
+  injection heq
+
+end CFIBase
+
+/-! ### §13.3 — Fin-n level extractors via the `IsCFI'` bijection
+
+Lift the abstract `H.CFIVertex` constructors `aEmpty` / `endpoint` to
+the `Fin n` index space using the `h.e : Fin n ≃ H.CFIVertex`
+bijection (and its inverse `h.e.symm`).
+
+These extractors are the "named" `Fin n` vertices the M2-M4 cascade
+construction individualizes (the seed) or probes (the endpoints). -/
+
+/-- The `Fin n` vertex corresponding to `a_∅^v` (the canonical seed at
+base vertex `v`) in `h : IsCFI' adj`. -/
+def IsCFI'.seedVertex {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj)
+    (v : Fin h.m) : Fin n :=
+  h.e.symm (h.H.aEmpty v)
+
+/-- The `Fin n` vertex corresponding to `e^b_{v→w}` (the parity-`b`
+endpoint at gadget `v` pointing toward `w ∈ N(v)`) in `h : IsCFI' adj`. -/
+def IsCFI'.endpointVertex {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj)
+    {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) (b : Bool) : Fin n :=
+  h.e.symm (h.H.endpoint hw b)
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- `h.e (h.seedVertex v) = h.H.aEmpty v`. The bijection round-trip. -/
+@[simp] theorem e_seedVertex (h : IsCFI' adj) (v : Fin h.m) :
+    h.e (h.seedVertex v) = h.H.aEmpty v := by
+  unfold seedVertex
+  exact Equiv.apply_symm_apply _ _
+
+/-- `h.e (h.endpointVertex hw b) = h.H.endpoint hw b`. -/
+@[simp] theorem e_endpointVertex (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    h.e (h.endpointVertex hw b) = h.H.endpoint hw b := by
+  unfold endpointVertex
+  exact Equiv.apply_symm_apply _ _
+
+/-- Seed vertices and endpoint vertices are distinct in `Fin n` (since
+their abstract counterparts have different `Sum` tags). -/
+theorem seedVertex_ne_endpointVertex (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    h.seedVertex v ≠ h.endpointVertex hw b := by
+  intro heq
+  apply h.H.aEmpty_ne_endpoint hw b
+  -- Apply h.e to both sides, simplify via the bijection round-trip.
+  have hcong := congrArg h.e heq
+  rw [e_seedVertex, e_endpointVertex] at hcong
+  exact hcong
+
+end IsCFI'
+
+/-! ### §13.4 — Adjacency facts at the `Fin n` level via `h.matching`
+
+The CFI graph's adjacency matrix `adj`, evaluated on the named
+extractors `seedVertex` / `endpointVertex`, reduces to the abstract
+`cfiAdj` evaluation lemmas of §13.2 through the bijection `h.e` and
+the matching identity `adj.adj i j = cfiAdj (h.e i) (h.e j)`. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- `adj (seedVertex v) (endpointVertex v w false) = 0` — the b=0
+endpoint is NOT adjacent to the seed. -/
+theorem adj_seed_endpoint_false (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) :
+    adj.adj (h.seedVertex v) (h.endpointVertex hw false) = 0 := by
+  rw [h.matching, e_seedVertex, e_endpointVertex]
+  exact h.H.cfiAdj_aEmpty_endpoint_false hw
+
+/-- `adj (seedVertex v) (endpointVertex v w true) = 1` — the b=1
+endpoint IS adjacent to the seed. -/
+theorem adj_seed_endpoint_true (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) :
+    adj.adj (h.seedVertex v) (h.endpointVertex hw true) = 1 := by
+  rw [h.matching, e_seedVertex, e_endpointVertex]
+  exact h.H.cfiAdj_aEmpty_endpoint_true hw
+
+/-- Symmetric form: `adj (endpointVertex v w false) (seedVertex v) = 0`. -/
+theorem adj_endpoint_seed_false (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) :
+    adj.adj (h.endpointVertex hw false) (h.seedVertex v) = 0 := by
+  rw [h.matching, e_seedVertex, e_endpointVertex]
+  rw [h.H.cfiAdj_symm]
+  exact h.H.cfiAdj_aEmpty_endpoint_false hw
+
+/-- Symmetric form: `adj (endpointVertex v w true) (seedVertex v) = 1`. -/
+theorem adj_endpoint_seed_true (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) :
+    adj.adj (h.endpointVertex hw true) (h.seedVertex v) = 1 := by
+  rw [h.matching, e_seedVertex, e_endpointVertex]
+  rw [h.H.cfiAdj_symm]
+  exact h.H.cfiAdj_aEmpty_endpoint_true hw
+
+end IsCFI'
+
+/-! ### §13.5 — Singleton individualization lemmas
+
+General facts about `individualizedColouring n {seed}` — the
+colouring produced by individualizing a single vertex. The seed gets
+a positive fresh colour `seed.val + 1`; every other vertex gets `0`.
+
+These are graph-agnostic facts; placed here because M2's signature
+distinction is the first proof that needs them. -/
+
+/-- `individualizedColouring n {seed} seed = seed.val + 1`. -/
+@[simp] theorem individualizedColouring_singleton_self {n : Nat} (seed : Fin n) :
+    individualizedColouring n {seed} seed = seed.val + 1 := by
+  simp [individualizedColouring]
+
+/-- For `u ≠ seed`, `individualizedColouring n {seed} u = 0`. -/
+@[simp] theorem individualizedColouring_singleton_other {n : Nat}
+    {seed u : Fin n} (h : u ≠ seed) :
+    individualizedColouring n {seed} u = 0 := by
+  simp [individualizedColouring, h]
+
+/-- The seed's colour is positive (i.e. nonzero). -/
+theorem individualizedColouring_singleton_self_pos {n : Nat} (seed : Fin n) :
+    individualizedColouring n {seed} seed ≠ 0 := by
+  rw [individualizedColouring_singleton_self]
+  exact Nat.succ_ne_zero _
+
+/-- **Uniqueness**: `individualizedColouring n {seed} u = individualizedColouring n {seed} seed`
+iff `u = seed`. The forward direction is the key fact powering M2's
+signature distinction — only the seed has the fresh colour. -/
+theorem individualizedColouring_singleton_eq_seed_iff {n : Nat}
+    {seed u : Fin n} :
+    individualizedColouring n {seed} u =
+      individualizedColouring n {seed} seed ↔ u = seed := by
+  constructor
+  · intro hχ
+    by_contra hne
+    rw [individualizedColouring_singleton_self,
+      individualizedColouring_singleton_other hne] at hχ
+    exact Nat.succ_ne_zero _ hχ.symm
+  · rintro rfl; rfl
+
+/-! ### §13.6 — M2.4: signature distinction
+
+The key cascade lemma: under the individualized colouring of the seed
+`{h.seedVertex v}`, the multiset signatures of the b=0 and b=1
+endpoints at gadget `v` toward neighbour `w` differ.
+
+Witness tuple `t = (χ seed, 1, P endpoint_true seed)`:
+- t ∈ signature endpoint_true: contributed by u = seed (since seed is
+  the unique fresh-coloured vertex, adjacent to endpoint_true).
+- t ∉ signature endpoint_false: any u with χ u = χ seed must be seed,
+  but seed is NOT adjacent to endpoint_false, so the adjacency
+  component fails. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **M2.4 — Signature distinction.** The signatures of the b=0 and
+b=1 endpoints at gadget `v` (toward `w ∈ N(v)`) differ under the
+individualized colouring of the seed vertex `h.seedVertex v`. -/
+theorem signature_endpoint_false_ne_true (h : IsCFI' adj) (P : PMatrix n)
+    {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
+    signature adj P (individualizedColouring n {h.seedVertex v})
+        (h.endpointVertex hw false) ≠
+    signature adj P (individualizedColouring n {h.seedVertex v})
+        (h.endpointVertex hw true) := by
+  intro hsig
+  set seed := h.seedVertex v
+  set ef := h.endpointVertex hw false
+  set et := h.endpointVertex hw true
+  set χ := individualizedColouring n {seed}
+  -- Witness tuple in the b=1 endpoint's signature.
+  let t : Nat × Nat × POE := (χ seed, 1, P et seed)
+  -- (a) t ∈ signature et — contributed by u = seed.
+  have ht_in_et : t ∈ signature adj P χ et := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨seed, ?_, ?_⟩
+    · -- seed ∈ (univ.filter (· ≠ et)).val
+      rw [Finset.mem_val, Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, h.seedVertex_ne_endpointVertex hw true⟩
+    · -- (χ seed, adj.adj et seed, P et seed) = (χ seed, 1, P et seed)
+      show (χ seed, adj.adj et seed, P et seed) = t
+      rw [h.adj_endpoint_seed_true hw]
+  -- (b) t ∉ signature ef — no vertex u satisfies both colour and adjacency.
+  have ht_notin_ef : t ∉ signature adj P χ ef := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, hu_mem, hu_eq⟩
+    -- hu_eq : (χ u, adj.adj ef u, P ef u) = (χ seed, 1, P et seed)
+    -- Split into components via `congrArg Prod.fst / Prod.snd`.
+    have hχu : χ u = χ seed := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj ef u, P ef u) = ((1, P et seed) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj ef u = 1 := congrArg Prod.fst hrest
+    -- From χ u = χ seed: u = seed (only seed has the fresh colour).
+    have hu_seed : u = seed := individualizedColouring_singleton_eq_seed_iff.mp hχu
+    -- Substituting u = seed: adj.adj ef seed should be 1, but it's 0.
+    rw [hu_seed] at hadj
+    rw [h.adj_endpoint_seed_false hw] at hadj
+    exact absurd hadj (by decide)
+  -- The same multiset can't both contain and not contain t.
+  rw [hsig] at ht_notin_ef
+  exact ht_notin_ef ht_in_et
+
+/-! ### §13.7 — M2.5: refineStep distinguishes endpoints (M2 headline)
+
+Lift the signature distinction (M2.4) to a refineStep distinction via
+`refineStep_iff`: equal `refineStep` outputs would require equal
+signatures, which M2.4 rules out. -/
+
+/-- **M2.5 — Endpoint split (M2 headline).** After **one** round of
+`refineStep` on the colouring `individualizedColouring n {seedVertex v}`,
+the b=0 and b=1 endpoints at gadget `v` toward `w ∈ N(v)` have distinct
+colours.
+
+This is the foundational M2 cascade lemma: individualizing one seed
+per gadget makes 1-WL distinguish v's endpoints by parity in a single
+round. -/
+theorem refineStep_endpoint_false_ne_true (h : IsCFI' adj) (P : PMatrix n)
+    {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
+    refineStep adj P (individualizedColouring n {h.seedVertex v})
+        (h.endpointVertex hw false) ≠
+    refineStep adj P (individualizedColouring n {h.seedVertex v})
+        (h.endpointVertex hw true) := by
+  intro hrefine
+  have hboth := (refineStep_iff adj P _ _ _).mp hrefine
+  exact h.signature_endpoint_false_ne_true P hw hboth.2
+
+end IsCFI'
+
 end ChainDescent

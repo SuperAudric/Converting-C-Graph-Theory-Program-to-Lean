@@ -283,6 +283,30 @@ cascade lemma) remains. M2 (gadget-level lemmas), M3 (bridge
 propagation), M4 (cascade assembly) are pending multi-week tracks
 that together discharge the cascade axiom.
 
+*Stage 4 / M2 — gadget-level distinguishability (2026-05-26):* §13 of
+`ChainDescent/CFI.lean`. The first cascade lemma:
+`IsCFI'.refineStep_endpoint_false_ne_true` — with `a_∅^v` individualized,
+one refineStep round distinguishes v's b=0 endpoints from v's b=1
+endpoints. Build-up:
+
+- §13.1-2: `CFIBase.aEmpty v`, `CFIBase.endpoint hw b`, plus
+  `cfiAdj_aEmpty_endpoint_false/true` evaluation lemmas (a_∅^v
+  adjacent to e^b iff b = true).
+- §13.3-4: Fin-n extractors `IsCFI'.seedVertex` / `endpointVertex`
+  via `h.e.symm`; adjacency facts `IsCFI'.adj_seed_endpoint_false/true`
+  transported through `h.matching`.
+- §13.5: generic singleton-individualization lemmas
+  (`individualizedColouring_singleton_eq_seed_iff` is the key
+  uniqueness fact).
+- §13.6: `IsCFI'.signature_endpoint_false_ne_true` — signature
+  multisets differ. Witness tuple `(χ seed, 1, P endpoint_true seed)`
+  in et's signature but not ef's.
+- §13.7: M2 headline `IsCFI'.refineStep_endpoint_false_ne_true` via
+  `refineStep_iff`.
+
+All M2 lemmas axiom-clean (depends only on `refineStep`,
+`refineStep_iff`, and standard basis).
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

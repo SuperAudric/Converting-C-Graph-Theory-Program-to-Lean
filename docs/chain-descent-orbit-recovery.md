@@ -556,15 +556,47 @@ per-gadget" depth; classical bound `tw H ≤ baseSize` is a sharper
 realisation deferred to M5. The polynomial-runtime corollary needs
 only some polynomial bound; `baseSize ≤ n / 6` satisfies that.
 
-*Stage 4 / M2-M4 (PENDING, multi-week):* discharging
-`cfi_cascades_polynomially`. Plan in three milestones:
-- M2: gadget-level distinguishability — `a_∅^v` individualized
-  separates v's endpoints by parity in one round.
-- M3: bridge propagation — `e^b_{v→w}` ↔ `e^b_{w→v}` carries colour
-  across gadgets in O(diam H) rounds.
-- M4: assemble — construct S = {one `a_∅^v` per gadget}, prove
-  `warmRefine adj P χ_S` Discrete. Discharges
-  `cfi_cascades_polynomially`.
+*Stage 4 / M2 — gadget-level distinguishability — DONE 2026-05-26.*
+The first cascade lemma: with `a_∅^v` (the canonical seed) individualized,
+**one round of `refineStep`** distinguishes v's b=0 endpoints from v's
+b=1 endpoints. Lean development (`ChainDescent/CFI.lean` §13):
+
+- §13.1 — `CFIBase.aEmpty v` / `CFIBase.endpoint hw b` constructors.
+- §13.2 — `cfiAdj` evaluation: `aEmpty v ↮ endpoint hw false`,
+  `aEmpty v ↔ endpoint hw true`. Distinctness `aEmpty_ne_endpoint`.
+- §13.3 — Fin-n extractors via the IsCFI' bijection:
+  `IsCFI'.seedVertex v := h.e.symm (aEmpty v)`,
+  `IsCFI'.endpointVertex hw b := h.e.symm (endpoint hw b)`. Distinct
+  via `seedVertex_ne_endpointVertex`.
+- §13.4 — `adj` adjacency facts at Fin-n level (`adj_seed_endpoint_false`
+  / `_true` and symmetric forms), transported via `h.matching`.
+- §13.5 — Generic singleton-individualization lemmas:
+  `individualizedColouring_singleton_self`,
+  `individualizedColouring_singleton_other`,
+  `individualizedColouring_singleton_eq_seed_iff` (the uniqueness
+  fact powering the signature argument).
+- §13.6 — **`IsCFI'.signature_endpoint_false_ne_true`** (M2.4):
+  signature multisets differ under χ_{seed}. Witness tuple
+  `(χ seed, 1, P endpoint_true seed)` — present in endpoint_true's
+  signature (via u = seed, since seed is adjacent to endpoint_true)
+  but absent from endpoint_false's (no u satisfies both χ u = χ seed
+  and adj endpoint_false u = 1).
+- §13.7 — **`IsCFI'.refineStep_endpoint_false_ne_true`** (M2.5,
+  headline): lift via `refineStep_iff`. The b=0 and b=1 endpoints
+  have distinct refined colours after one round.
+
+All M2 lemmas axiom-clean (`refineStep_endpoint_false_ne_true`
+depends only on `refineStep`, `refineStep_iff` and the standard
+basis — no CFI-specific axioms used).
+
+*Stage 4 / M3-M4 (PENDING, multi-week):*
+- M3: bridge propagation. The endpoint-endpoint bridge
+  `e^b_{v→w} ↔ e^b_{w→v}` carries gadget colour information across
+  bases; after O(diam H) refineStep rounds, every endpoint is
+  uniquely coloured by (gadget, partner, parity).
+- M4: assemble. Construct `S = h.e.symm '' { Sum.inl ⟨v, ⟨∅, _⟩⟩ }`
+  (size = `h.baseSize`), prove `warmRefine adj P χ_S` is `Discrete`,
+  discharge `cfi_cascades_polynomially`.
 
 *Combinatorial identity — DONE 2026-05-26.* The classical identity
 "the number of even-cardinality subsets of a nonempty `d`-element
