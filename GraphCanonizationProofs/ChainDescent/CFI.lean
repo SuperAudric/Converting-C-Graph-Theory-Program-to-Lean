@@ -814,6 +814,21 @@ theorem aEmpty_ne_endpoint {v w : Fin m} (hw : w ∈ H.neighbors v) (b : Bool) :
   -- heq : Sum.inl _ = Sum.inr _ ; injection closes via case mismatch.
   injection heq
 
+/-- **Cross-gadget non-adjacency.** `aEmpty v` is not adjacent to
+`endpoint hw b` when v ≠ v' (different gadgets): subset-endpoint pairs
+in CFI graphs are adjacent only within the same gadget.
+
+The within-gadget case is covered by `cfiAdj_aEmpty_endpoint_false`
+(adj=0 for b=false) and `cfiAdj_aEmpty_endpoint_true` (adj=1 for
+b=true). This lemma handles the cross-gadget case (adj=0 always). -/
+theorem cfiAdj_aEmpty_endpoint_diff_gadget {v v' w : Fin m}
+    (hw : w ∈ H.neighbors v') (b : Bool) (hvv : v ≠ v') :
+    H.cfiAdj (H.aEmpty v) (H.endpoint hw b) = 0 := by
+  show (if v = v' ∧ decide (w ∈ (∅ : Finset (Fin m))) ≠ b then 1 else 0) = 0
+  rw [if_neg]
+  rintro ⟨h_eq, _⟩
+  exact hvv h_eq
+
 end CFIBase
 
 /-! ### §13.3 — Fin-n level extractors via the `IsCFI'` bijection
@@ -910,6 +925,25 @@ theorem adj_endpoint_seed_true (h : IsCFI' adj) {v w : Fin h.m}
   rw [h.matching, e_seedVertex, e_endpointVertex]
   rw [h.H.cfiAdj_symm]
   exact h.H.cfiAdj_aEmpty_endpoint_true hw
+
+/-- **Cross-gadget**: `adj (seedVertex v) (endpointVertex v' w b) = 0`
+when v ≠ v'. Seeds and endpoints in different gadgets are never
+adjacent. -/
+theorem adj_seed_endpoint_diff_gadget (h : IsCFI' adj)
+    {v v' : Fin h.m} (hvv : v ≠ v')
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v') (b : Bool) :
+    adj.adj (h.seedVertex v) (h.endpointVertex hw b) = 0 := by
+  rw [h.matching, e_seedVertex, e_endpointVertex]
+  exact h.H.cfiAdj_aEmpty_endpoint_diff_gadget hw b hvv
+
+/-- Symmetric: `adj (endpointVertex v' w b) (seedVertex v) = 0` when
+v ≠ v'. -/
+theorem adj_endpoint_seed_diff_gadget (h : IsCFI' adj)
+    {v v' : Fin h.m} (hvv : v ≠ v')
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v') (b : Bool) :
+    adj.adj (h.endpointVertex hw b) (h.seedVertex v) = 0 := by
+  rw [h.matching, e_seedVertex, e_endpointVertex, h.H.cfiAdj_symm]
+  exact h.H.cfiAdj_aEmpty_endpoint_diff_gadget hw b hvv
 
 end IsCFI'
 
@@ -1209,6 +1243,100 @@ theorem refineStep_endpoint_false_ne_true_allSeeds (h : IsCFI' adj)
   intro hrefine
   have hboth := (refineStep_iff adj P _ _ _).mp hrefine
   exact h.signature_endpoint_false_ne_true_allSeeds P hw hboth.2
+
+end IsCFI'
+
+/-! ### §13.10 — M3.C: b=true endpoint inter-gadget distinction
+
+The first **inter-gadget** cascade lemma. Under `χ_{allSeeds}`, one
+`refineStep` round distinguishes b=true endpoints at different
+gadgets:
+
+  `refineStep χ (e^1_{v→w}) ≠ refineStep χ (e^1_{v'→w'})` for v ≠ v'.
+
+Witness argument (analogous to M3.B): the tuple `(c_v, 1, ?)` (where
+c_v is seed_v's fresh colour) is in `e^1_{v→w}`'s signature (via
+adjacency to seed_v in the same gadget) but not in `e^1_{v'→w'}`'s
+signature (seed_v is in a different gadget, hence not adjacent to
+`e^1_{v'→w'}`; and multi-seed uniqueness forces c_v's witness u to be
+seed_v).
+
+**Note**: The corresponding b=false case (`e^0_{v→w}` vs `e^0_{v'→w'}`
+across gadgets) is **NOT** distinguishable at round 1 — neither
+endpoint is adjacent to seed_v, so the (c_v, _, _) tuples coincide.
+b=false inter-gadget distinction requires multi-round bridge
+propagation (deferred to M3.D-multi-round + M4). -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **M3.C / signature** — inter-gadget signature distinction for b=true
+endpoints. Same witness tuple `(c_v, 1, ?)` as M3.B; the only difference
+is that the "absence" argument uses cross-gadget non-adjacency
+(`adj_endpoint_seed_diff_gadget`) rather than within-gadget
+parity-mismatch (`adj_endpoint_seed_false`). -/
+theorem signature_endpoint_true_inter_gadget (h : IsCFI' adj) (P : PMatrix n)
+    {v v' : Fin h.m} (hvv : v ≠ v')
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
+    {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v') :
+    signature adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw true) ≠
+    signature adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw' true) := by
+  intro hsig
+  set seed_v := h.seedVertex v
+  set ev := h.endpointVertex hw true
+  set ev' := h.endpointVertex hw' true
+  set χ := individualizedColouring n h.allSeeds
+  have hseed_mem : seed_v ∈ h.allSeeds := h.seedVertex_mem_allSeeds v
+  let t : Nat × Nat × POE := (χ seed_v, 1, P ev seed_v)
+  -- (a) t ∈ signature ev — contributed by u = seed_v in v's own gadget.
+  have ht_in_ev : t ∈ signature adj P χ ev := by
+    unfold signature
+    rw [Multiset.mem_map]
+    refine ⟨seed_v, ?_, ?_⟩
+    · rw [Finset.mem_val, Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, h.seedVertex_ne_endpointVertex hw true⟩
+    · show (χ seed_v, adj.adj ev seed_v, P ev seed_v) = t
+      rw [h.adj_endpoint_seed_true hw]
+  -- (b) t ∉ signature ev' — at gadget v' ≠ v, the seed_v is in a different gadget.
+  have ht_notin_ev' : t ∉ signature adj P χ ev' := by
+    unfold signature
+    rw [Multiset.mem_map]
+    rintro ⟨u, _, hu_eq⟩
+    have hχu : χ u = χ seed_v := congrArg Prod.fst hu_eq
+    have hrest : (adj.adj ev' u, P ev' u) = ((1, P ev seed_v) : Nat × POE) :=
+      congrArg Prod.snd hu_eq
+    have hadj : adj.adj ev' u = 1 := congrArg Prod.fst hrest
+    have hu_seed : u = seed_v :=
+      (individualizedColouring_eq_iff_of_mem h.allSeeds hseed_mem).mp hχu
+    -- ev' is at gadget v', seed_v at gadget v ≠ v' — not adjacent.
+    rw [hu_seed, h.adj_endpoint_seed_diff_gadget hvv hw' true] at hadj
+    exact absurd hadj (by decide)
+  -- ht_notin_ev' : t ∉ signature ev'; ht_in_ev : t ∈ signature ev = signature ev' (via hsig).
+  rw [← hsig] at ht_notin_ev'
+  exact ht_notin_ev' ht_in_ev
+
+/-- **M3.C / refineStep (M3 second headline)** — under `χ_{allSeeds}`,
+one `refineStep` round gives b=true endpoints at different gadgets
+distinct colours.
+
+Combined with M3.B (same-gadget parity split), we have: at round 1,
+b=true endpoints split by `v` (gadget); b=0 vs b=1 split within each
+gadget. Remaining cases (b=0 inter-gadget, within-gadget by `w`,
+subset vertex distinction) require multi-round bridge propagation. -/
+theorem refineStep_endpoint_true_inter_gadget (h : IsCFI' adj)
+    (P : PMatrix n) {v v' : Fin h.m} (hvv : v ≠ v')
+    {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
+    {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v') :
+    refineStep adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw true) ≠
+    refineStep adj P (individualizedColouring n h.allSeeds)
+        (h.endpointVertex hw' true) := by
+  intro hrefine
+  have hboth := (refineStep_iff adj P _ _ _).mp hrefine
+  exact h.signature_endpoint_true_inter_gadget P hvv hw hw' hboth.2
 
 end IsCFI'
 

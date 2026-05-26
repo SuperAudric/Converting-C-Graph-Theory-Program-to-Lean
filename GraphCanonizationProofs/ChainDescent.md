@@ -330,6 +330,23 @@ constructible and size-bounded; M3.C-M3.E (bridge propagation step
 lemma, subset distinction, per-type signature classification) and M4
 (cascade assembly via multi-round refinement induction) remain.
 
+*Stage 4 / M3.C — b=true endpoint inter-gadget distinction
+(2026-05-26):* §13.10 of `ChainDescent/CFI.lean`. First inter-gadget
+cascade lemma: under `χ_{allSeeds}`, one `refineStep` round
+distinguishes `e^1_{v→w}` from `e^1_{v'→w'}` for v ≠ v'.
+
+Argument parallels M3.B but uses cross-gadget non-adjacency
+(`CFIBase.cfiAdj_aEmpty_endpoint_diff_gadget`, lifted to
+`IsCFI'.adj_endpoint_seed_diff_gadget`) in place of within-gadget
+parity-mismatch. Witness `(c_v, 1, P · seed_v)` is present in
+`e^1_{v→w}`'s signature (seed_v in same gadget, adj=1) but not in
+`e^1_{v'→w'}`'s (cross-gadget, adj=0).
+
+The b=0 inter-gadget case is NOT covered: neither b=0 endpoint is
+adjacent to its own seed, so signatures coincide at round 1.
+b=0 inter-gadget distinction requires multi-round bridge propagation
+(deferred). All M3.C lemmas axiom-clean.
+
 *Combinatorial identity (§11 of `CFI.lean`):*
 `Finset.card_powerset_filter_even` (private) proves "even subsets of
 a nonempty `d`-element set = `2^(d-1)`", via Mathlib's alternating

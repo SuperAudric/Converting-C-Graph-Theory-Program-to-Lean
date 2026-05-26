@@ -613,6 +613,46 @@ All M3.A + M3.B lemmas axiom-clean. The cascade individualization
 witness for M4 is now constructible (`allSeeds`) and its size is bounded
 (`= h.baseSize`).
 
+*Stage 4 / M3.C — b=true endpoint inter-gadget distinction — DONE
+2026-05-26.* `ChainDescent/CFI.lean` §13.2 / §13.4 (foundation) +
+§13.10 (headline). The first genuinely **inter-gadget** cascade
+lemma: under `χ_{allSeeds}`, one `refineStep` round gives b=true
+endpoints at different gadgets distinct colours.
+
+- §13.2 foundation: `CFIBase.cfiAdj_aEmpty_endpoint_diff_gadget` —
+  `aEmpty v` is not adjacent to `endpoint hw b` when v ≠ v'.
+- §13.4 foundation: `IsCFI'.adj_seed_endpoint_diff_gadget` and
+  `adj_endpoint_seed_diff_gadget` at the Fin n level.
+- §13.10 headline:
+  - `IsCFI'.signature_endpoint_true_inter_gadget` — signatures of
+    `e^1_{v→w}` and `e^1_{v'→w'}` differ when v ≠ v'.
+  - `IsCFI'.refineStep_endpoint_true_inter_gadget` — refineStep
+    propagates the signature difference.
+
+Witness tuple (analogous to M3.B): `(c_v, 1, P endpoint_v seed_v)`.
+Present in `e^1_{v→w}`'s signature (via adjacency to seed_v in the
+same gadget); absent from `e^1_{v'→w'}`'s signature (seed_v is in a
+different gadget; multi-seed uniqueness forces any witness u to be
+seed_v, but `adj_endpoint_seed_diff_gadget` shows it's not adjacent).
+
+**The corresponding b=0 case does NOT hold at round 1.** Neither
+b=0 endpoint is adjacent to its own seed, so both signatures contain
+`(c_v, 0, ?)` symmetrically and the round-1 multisets coincide
+(for regular H with trivial P). b=0 inter-gadget distinction
+requires multi-round bridge propagation (deferred).
+
+All M3.C lemmas axiom-clean.
+
+Combining M3.B + M3.C: at round 1 under `χ_{allSeeds}`, the partition
+distinguishes
+- each seed (singleton, from individualization);
+- b=0 vs b=1 endpoints at the same gadget (M3.B);
+- b=1 endpoints across different gadgets (M3.C).
+
+Remaining at round 1: b=0 endpoints across gadgets, within-gadget
+endpoints toward different partners, and subset vertices a_S^v for
+S ≠ ∅. These all require multi-round bridge propagation.
+
 *Stage 4 / M3.C-M3.E + M4 (PENDING, multi-week):* the remaining M3
 content + cascade assembly. **Note:** initial planning assumed the
 inter-gadget endpoint distinction would hold at round 1 — this is
