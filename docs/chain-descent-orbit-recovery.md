@@ -333,20 +333,36 @@ is organised as three sections, mirroring the paper structure:
   basis.
 
 **§17 — Tier 1 (CFI graphs):**
-- `id_of_discrete_invariant` — automorphism preserving a discrete
-  colouring is the identity.
-- **`aut_trivial_of_discrete_warmRefine`** — **Fact B, proved**:
-  discrete warmRefine ⟹ Aut_S is trivial.
-- `orbit_iff_eq_of_discrete_warmRefine` — **Fact B (partition form),
-  proved**: at discrete depth, OrbitPartition collapses to equality.
-  Mirror of the Tier-2 squeeze structure.
-- `cfi_cascade_exists` — **Fact A placeholder axiom** for the CFI
-  cascade-depth result.
-- **`theorem_1_HOR`** — **Theorem 1 assembly, proved** (partition
-  form): at the cascade depth, OrbitPartition equals the warmRefine
-  partition. Conditional on `cfi_cascade_exists`.
-- `theorem_1_HOR_pointwise` — original (Aut_S trivial) form, kept as
-  a corollary.
+- `id_of_discrete_invariant`, **`aut_trivial_of_discrete_warmRefine`**
+  (Fact B, proved), `orbit_iff_eq_of_discrete_warmRefine` (partition
+  form, proved).
+- **`CascadesAt adj P k`** — depth-parametrised cascade predicate.
+- **`cascadesAt_univ`** — **proved**: every graph cascades at depth
+  `n` trivially (`S = univ`). The "no content" baseline that makes
+  Theorem 1's existential form axiom-free.
+- `CascadesAt.mono` — monotonicity in `k`.
+- **`theorem_1_HOR_at_depth`** — **the load-bearing depth-parametrised
+  theorem, proved unconditionally** (no axioms beyond standard basis).
+  Given `CascadesAt adj P k`, OrbitPartition = warmRefine partition at
+  some `S` with `|S| ≤ k`.
+- **`theorem_1_HOR_at_n`** — **proved**, trivial-bound specialisation
+  using `cascadesAt_univ`.
+- **`theorem_1_HOR`** — **proved** (existential, legacy form);
+  axiom-free corollary of `theorem_1_HOR_at_n`.
+- **`theorem_1_HOR_pointwise`** — **proved** (Aut_S trivial form);
+  axiom-free corollary.
+
+*Tier-1 CFI placeholder axioms (parallel to Tier 2's
+`IsSchurianSchemeGraph`):*
+- `IsCFI` — abstract Prop placeholder for "the graph is a CFI graph."
+- `cfi_depth_bound : Nat → Nat` + `cfi_depth_bound_le` — abstract
+  polynomial cascade-depth function with the placeholder polynomial
+  relation `cfi_depth_bound n ≤ n`. Classical content: `cfi_depth_bound
+  n = tw(H)` for `adj = CFI(H)`.
+- `cfi_cascades_polynomially` — Tier-1 Fact A: a CFI graph cascades at
+  depth `cfi_depth_bound n`.
+- **`theorem_1_HOR_cfi`** — **proved** (conditional on the three
+  placeholders): CFI orbit recovery at polynomial depth.
 
 **§18 — Tier 2 (schurian scheme graphs):**
 - **`SchemeProfile`** — bundled structure carrying:
@@ -370,20 +386,36 @@ is organised as three sections, mirroring the paper structure:
   conditional on `schurian_scheme_profile_exists`.
 
 **Axiom dependencies** (from `#print axioms`):
-- `OrbitPartition.subset_warmRefine` (the trivial direction): depends
-  on the standard `refineStep` basis. **No tier-specific axioms.**
-- `OrbitPartition.refl/symm/trans`: only `propext` and `Quot.sound`.
-- `theorem_1_HOR` (Tier 1 partition form): adds `cfi_cascade_exists`
-  to the standard basis.
-- `theorem_2_HOR_of_profile` (Tier 2 assembly given witness): no new
-  axioms beyond the standard basis.
-- `theorem_2_HOR` (Tier 2 unconditional): adds `IsSchurianSchemeGraph`
-  and `schurian_scheme_profile_exists` to the standard basis.
 
-The Tier 1 / Tier 2 parallel is reflected in the axiom budget: each
-tier adds **exactly one Fact-A-shaped axiom** (`cfi_cascade_exists`
-or `schurian_scheme_profile_exists`), and Tier 2 adds one abstract
-predicate (`IsSchurianSchemeGraph`) as a hypothesis-only constant.
+*Axiom-free* (standard `refineStep` basis only):
+- `OrbitPartition.subset_warmRefine` (the trivial direction).
+- `OrbitPartition.refl/symm/trans`: only `propext` and `Quot.sound`.
+- `CascadesAt`, `cascadesAt_univ`.
+- `theorem_1_HOR_at_depth` (the depth-parametrised core).
+- `theorem_1_HOR_at_n`, `theorem_1_HOR` (legacy existential),
+  `theorem_1_HOR_pointwise`.
+- `theorem_2_HOR_of_profile` (Tier 2 assembly given witness).
+
+*Tier-1 CFI placeholders* (added only by `theorem_1_HOR_cfi`):
+- `IsCFI`, `cfi_depth_bound`, `cfi_cascades_polynomially`.
+
+*Tier-2 scheme placeholders* (added only by `theorem_2_HOR`):
+- `IsSchurianSchemeGraph`, `schurian_scheme_profile_exists`.
+
+The Tier 1 / Tier 2 parallel is now load-bearing: each tier adds an
+abstract Prop placeholder and a single Fact-A-shaped existence axiom.
+The structural orbit-recovery theorems are axiom-free (load-bearing
+content is the `CascadesAt`-parametrised core); the tier-specific
+forms layer the abstract axioms on top.
+
+**Polynomial-depth bound (2026-05-26).** The Tier-1 specific axiom
+`cfi_cascades_polynomially` asserts `CascadesAt adj P (cfi_depth_bound n)`
+where `cfi_depth_bound n ≤ n` (placeholder polynomial relation).
+Concrete realisation tightens this to `cfi_depth_bound n = tw H` with
+the relation `tw H ≤ n_H ≤ n` from the CFI base graph. The
+chain-descent polynomial-runtime corollary (Corollary 1) only needs
+the depth bound to be polynomial in `n` — any concrete polynomial
+realisation suffices.
 
 **Phase 2 (discharging Fact A / Tier 2 Fact A analogue) — REMAINING
 WORK.** Two parallel multi-week tracks:
@@ -408,14 +440,16 @@ WORK.** Two parallel multi-week tracks:
   intersection-number induction-on-rounds argument).
 - **SchemeProfile constructor** from a scheme + vertex.
 
-**Depth bound parameterisation (potential follow-on).** The current
-`cfi_cascade_exists` axiom asserts existence of `S` without bounding
-`|S|`. Since the orbit-recovery program's Corollary 1 requires only
-that `|S|` is polynomial in `n` (any polynomial preserves polynomial
-runtime), the axiom can be tightened to
-`∃ S, |S| ≤ p(n) ∧ Discrete (...)` for any polynomial `p` —
-parameterising on `p` rather than committing to `tw(H)` keeps the
-statement abstract while making the polynomial-runtime claim explicit.
+**Depth bound parameterisation — DONE 2026-05-26.** The original
+`cfi_cascade_exists` axiom (no depth bound) has been replaced with the
+depth-parametrised `CascadesAt adj P k` predicate plus three CFI
+placeholder axioms (`IsCFI`, `cfi_depth_bound`,
+`cfi_cascades_polynomially`). The structural Theorem 1 is now
+axiom-free; the CFI-specific polynomial-depth form
+(`theorem_1_HOR_cfi`) layers the placeholders on top. The polynomial
+relation is exposed as the (axiomatic, placeholder)
+`cfi_depth_bound_le : cfi_depth_bound n ≤ n`, ready to be tightened
+to concrete `tw H` once CFI infrastructure lands.
 
 **Effort estimate.** Each Phase-2 track is multi-week. The Phase-1
 assemblies in place mean the structure is set — once the Fact-A-shape

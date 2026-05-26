@@ -3610,41 +3610,132 @@ theorem orbit_iff_eq_of_discrete_warmRefine {n : Nat} {adj : AdjMatrix n}
   · rintro rfl
     exact OrbitPartition.refl v
 
-/-! ### §17.2 — Fact A placeholder + Theorem 1 assembly
+/-! ### §17.2 — The `CascadesAt` predicate
 
-**Fact A** (CFI cascade depth ≤ tw(H)) is classical Cai-Fürer-Immerman
-theory but requires CFI construction in Lean, which is a multi-week
-infrastructure project. We state it here as an axiom — pinning the
-shape of what's needed — and assemble Theorem 1 conditionally.
+The orbit-recovery program's Tier-1 hypothesis "warmRefine becomes
+discrete after some `S`" is, on its own, **trivially true for every
+graph** — take `S = univ`, every vertex gets a unique fresh colour, and
+warm refinement preserves discreteness. So the existential statement
+carries no CFI-specific content.
 
-The Fact A statement involves CFI(H), tw(H), and the canonical picker.
-For now we state the shape minimally: "there exists an `S` such that
-warmRefine is discrete after individualizing `S`."
+The interesting content is the **depth at which discreteness is
+reached**. We make depth explicit as a parameter `k`:
 
-The depth bound `|S| ≤ tw(H)` is the classical CFI content; the
-orbit-recovery doc notes that **any polynomial bound on `|S|`
-preserves polynomial runtime** for chain descent (Corollary 1). The
-axiom can later be tightened to `∃ S, |S| ≤ p(n) ∧ Discrete (...)` for
-any polynomial `p`; the current minimal form keeps the assembly
-unconditional on the bound's shape. -/
+> `CascadesAt adj P k` iff some `S` with `|S| ≤ k` yields a discrete
+> warmRefine.
 
-/-- **Fact A placeholder.** For a CFI graph (left abstract for now;
-`adj` here stands in for `CFI(H)` and `P` for its initial state), there
-exists a sequence of fresh-colour individualizations whose warm-refined
-partition is discrete. The treewidth bound `|S| ≤ tw(H)` is the
-classical content; here we just assert existence. -/
-axiom cfi_cascade_exists {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
+The orbit-recovery doc notes that **any polynomial bound on `|S|`
+preserves polynomial runtime** for chain descent (Corollary 1) — so
+the chain-descent polynomial argument only needs `CascadesAt adj P (p
+n)` for some polynomial `p`. The classical CFI cascade content is
+`|S| ≤ tw(H)`; we capture that abstractly in §17.4 below. -/
+
+/-- **Cascade at depth `k`**: some `S` with `|S| ≤ k` makes `warmRefine`
+discrete. Every graph satisfies `CascadesAt adj P n` trivially
+(`cascadesAt_univ`); the interesting case is `k` polynomial in `n` and
+strictly less than `n` for special families (CFI: `k ≤ tw(H)`). -/
+def CascadesAt {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (k : Nat) : Prop :=
+  ∃ S : Finset (Fin n),
+    S.card ≤ k ∧
+    Discrete (warmRefine adj P (individualizedColouring n S))
+
+/-- **Trivial cascade at depth `n`.** Take `S = univ`: each vertex gets
+a unique fresh colour `v.val + 1`, the initial colouring is discrete,
+and warm refinement preserves discreteness. This is the "every-graph
+fallback" — non-content in itself; the polynomial-depth claim is
+non-trivial only when `k < n`. -/
+theorem cascadesAt_univ {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
+    CascadesAt adj P n := by
+  refine ⟨Finset.univ, ?_, ?_⟩
+  · rw [Finset.card_univ, Fintype.card_fin]
+  · apply Discrete.warmRefine_preserves
+    intro i j hij
+    -- individualizedColouring n univ assigns each v the colour v.val + 1.
+    have hi : (i : Fin n) ∈ (Finset.univ : Finset (Fin n)) := Finset.mem_univ i
+    have hj : (j : Fin n) ∈ (Finset.univ : Finset (Fin n)) := Finset.mem_univ j
+    have hci : individualizedColouring n Finset.univ i = i.val + 1 := by
+      simp [individualizedColouring, hi]
+    have hcj : individualizedColouring n Finset.univ j = j.val + 1 := by
+      simp [individualizedColouring, hj]
+    rw [hci, hcj] at hij
+    exact Fin.ext (Nat.succ_injective hij)
+
+/-- Monotonicity: a cascade at depth `k` is a cascade at every depth `≥ k`. -/
+theorem CascadesAt.mono {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {k₁ k₂ : Nat} (hle : k₁ ≤ k₂) (h : CascadesAt adj P k₁) :
+    CascadesAt adj P k₂ := by
+  obtain ⟨S, hcard, hd⟩ := h
+  exact ⟨S, Nat.le_trans hcard hle, hd⟩
+
+/-! ### §17.3 — Theorem 1 (depth-parameterised, unconditional)
+
+Given a cascade hypothesis at depth `k`, the squeeze argument
+(§16.3 trivial direction + §17.1 Fact B) gives orbit recovery at
+`|S| ≤ k`. No axioms beyond the standard `refineStep` basis — all
+CFI specificity has been pushed into the `CascadesAt` hypothesis.
+
+This is the structural Theorem 1. Tier-1 specialisations
+(`theorem_1_HOR_at_n`, `theorem_1_HOR_cfi`) instantiate the cascade
+hypothesis from different sources (trivial bound vs. CFI axiom). -/
+
+/-- **Theorem 1 (depth-parametrised, unconditional).** If `adj`
+cascades at depth `k`, the 1-WL fixpoint partition equals the Aut_S
+orbit partition at some `S` with `|S| ≤ k`.
+
+This is the load-bearing theorem of Tier 1. The CFI-specific
+content lives in the cascade hypothesis. -/
+theorem theorem_1_HOR_at_depth {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {k : Nat} (h : CascadesAt adj P k) :
     ∃ S : Finset (Fin n),
-      Discrete (warmRefine adj P (individualizedColouring n S))
+      S.card ≤ k ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w := by
+  obtain ⟨S, hcard, hd⟩ := h
+  refine ⟨S, hcard, hd, ?_⟩
+  intro v w
+  constructor
+  · exact OrbitPartition.subset_warmRefine
+  · intro hχ
+    have hvw : v = w := hd v w hχ
+    rw [hvw]
+    exact OrbitPartition.refl w
 
-/-- **Theorem 1 (HOR for CFI), Lean form, partition version.**
+/-! ### §17.4 — Specialisations and the CFI placeholder axioms
 
-Given Fact A (`cfi_cascade_exists`), at the cascade depth the 1-WL
-fixpoint partition equals the `Aut_S`-orbit partition. In the discrete
-case both partitions reduce to the singleton partition, so this is
-trivially expressible as `v ~_orbit w ↔ v = w ↔ same warmRefine
-colour`. The bidirectional partition statement is what generalises
-cleanly to Tier 2, where the right-hand side is non-trivial. -/
+The Tier-1 theorem in three forms:
+- **Trivial-bound form** (`theorem_1_HOR_at_n`): every graph admits
+  orbit recovery at depth `n`. Axiom-free; not informative on its
+  own but useful as a smoke-test.
+- **Legacy form** (`theorem_1_HOR`): existential, no depth bound.
+  Axiom-free corollary of `theorem_1_HOR_at_n`.
+- **CFI polynomial-depth form** (`theorem_1_HOR_cfi`): conditional
+  on the CFI placeholder axioms. The actual deliverable for
+  Corollary 1 of the orbit-recovery doc.
+
+The CFI axioms mirror the Tier 2 (§18) structure: an abstract Prop
+predicate `IsCFI` (placeholder until CFI infrastructure lands) plus a
+single Fact-A-shaped existence axiom relating `IsCFI` to a polynomial
+cascade depth. -/
+
+/-- **Theorem 1, trivial-bound corollary.** Every graph admits orbit
+recovery at depth `n`. Axiom-free; specialises
+`theorem_1_HOR_at_depth` to the universal `cascadesAt_univ`. -/
+theorem theorem_1_HOR_at_n {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      S.card ≤ n ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w :=
+  theorem_1_HOR_at_depth (cascadesAt_univ adj P)
+
+/-- **Theorem 1 (legacy existential form).** No depth bound; some `S`
+makes `warmRefine` discrete and orbits = cells. Axiom-free corollary
+of `theorem_1_HOR_at_n`; kept for downstream use. -/
 theorem theorem_1_HOR {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
     ∃ S : Finset (Fin n),
       Discrete (warmRefine adj P (individualizedColouring n S)) ∧
@@ -3652,32 +3743,79 @@ theorem theorem_1_HOR {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
         OrbitPartition adj P S v w ↔
         warmRefine adj P (individualizedColouring n S) v =
           warmRefine adj P (individualizedColouring n S) w := by
-  obtain ⟨S, hd⟩ := cfi_cascade_exists adj P
-  refine ⟨S, hd, ?_⟩
-  intro v w
-  constructor
-  · -- Trivial direction (§16.3): orbits ⊆ cells.
-    exact OrbitPartition.subset_warmRefine
-  · -- Reverse direction (§17.1): when partition is discrete, cells = vertices,
-    -- and v = w gives OrbitPartition via identity.
-    intro hχ
-    have hvw : v = w := hd v w hχ
-    rw [hvw]
-    exact OrbitPartition.refl w
+  obtain ⟨S, _, hd, hpart⟩ := theorem_1_HOR_at_n adj P
+  exact ⟨S, hd, hpart⟩
 
-/-- **Theorem 1, pointwise corollary.** The original (Aut_S trivial)
-form, kept for direct downstream use. Derivable from the partition
-form via `aut_trivial_of_discrete_warmRefine`. -/
+/-- **Theorem 1, pointwise corollary.** Aut_S is trivial at the cascade
+depth. Axiom-free corollary of `theorem_1_HOR_at_n` +
+`aut_trivial_of_discrete_warmRefine`. -/
 theorem theorem_1_HOR_pointwise {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
     ∃ S : Finset (Fin n),
       Discrete (warmRefine adj P (individualizedColouring n S)) ∧
       ∀ (π : Equiv.Perm (Fin n)),
         IsAut π adj → (∀ v u, P (π v) (π u) = P v u) →
         FixesPointwise π S → π = Equiv.refl (Fin n) := by
-  obtain ⟨S, hd⟩ := cfi_cascade_exists adj P
+  obtain ⟨S, _, hd, _⟩ := theorem_1_HOR_at_n adj P
   refine ⟨S, hd, ?_⟩
   intro π hπ hP hπS
   exact aut_trivial_of_discrete_warmRefine hd hπ hP hπS
+
+/-! #### CFI placeholder axioms — polynomial-depth Fact A
+
+Three axioms, mirroring §18's Tier 2 structure:
+
+- `IsCFI adj` — abstract Prop placeholder for "the graph is a CFI
+  graph." No introduction rule until CFI infrastructure lands.
+- `cfi_depth_bound : Nat → Nat` + `cfi_depth_bound_le` — abstract
+  polynomial cascade-depth function for CFI, asserting `cfi_depth_bound
+  n ≤ n` as the (placeholder) polynomial relation. Classical content:
+  `cfi_depth_bound n = tw(H)` for `adj = CFI(H)`, often much smaller
+  than `n`.
+- `cfi_cascades_polynomially` — the Tier-1 Fact A. Asserts a CFI
+  graph cascades at depth `cfi_depth_bound n`. Becomes a theorem once
+  CFI infrastructure lands.
+
+Concrete (non-placeholder) realisations would tighten
+`cfi_depth_bound n ≤ n` to a meaningful polynomial relation (e.g.,
+`cfi_depth_bound n = tw H` where `n = |V(CFI(H))|` and the polynomial
+relation comes from `tw H ≤ n_H ≤ n`). -/
+
+/-- **Abstract Prop: the graph `adj` is a CFI graph.** Placeholder
+until CFI construction lands in Lean (~200-400 lines; G5 of
+orbit-recovery doc). Mirrors `IsSchurianSchemeGraph` in §18. -/
+axiom IsCFI {n : Nat} (adj : AdjMatrix n) : Prop
+
+/-- **Abstract polynomial cascade-depth function for CFI graphs.** A
+function `Nat → Nat` representing the classical bound `tw(H) ≤ n_H ≤ n`
+for `adj = CFI(H)`. Concrete realisation requires CFI infrastructure. -/
+axiom cfi_depth_bound : Nat → Nat
+
+/-- **The CFI depth bound is `≤ n`** — the placeholder polynomial
+relation. The classical content `tw H ≤ n` (where `H` is the CFI base
+graph) gives this trivially. -/
+axiom cfi_depth_bound_le : ∀ n, cfi_depth_bound n ≤ n
+
+/-- **Fact A (polynomial-depth form, placeholder).** A CFI graph
+cascades at depth `cfi_depth_bound n`. Becomes a theorem once
+`cfi_depth_bound` is given a concrete realisation (`tw H`) and CFI
+infrastructure makes the cascade lemma provable. -/
+axiom cfi_cascades_polynomially {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI adj) (P : PMatrix n) :
+    CascadesAt adj P (cfi_depth_bound n)
+
+/-- **Theorem 1 (CFI form, polynomial-depth).** A CFI graph admits
+orbit recovery at depth `cfi_depth_bound n ≤ n`. Conditional on the
+Tier-1 placeholder axioms (`IsCFI`, `cfi_cascades_polynomially`). -/
+theorem theorem_1_HOR_cfi {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI adj) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      S.card ≤ cfi_depth_bound n ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ v w,
+        OrbitPartition adj P S v w ↔
+        warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w :=
+  theorem_1_HOR_at_depth (cfi_cascades_polynomially h P)
 
 /-! ## §18 — Tier 2: orbit recovery for schurian scheme graphs
 
