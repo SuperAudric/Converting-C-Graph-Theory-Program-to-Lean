@@ -616,3 +616,36 @@ spine). The decomposition recursion (the experiment's original goal) is
 shelved as not-needed-for-CFI; option (1b) [linear oracle] is the
 algorithmically valuable follow-on.
 
+---
+
+## 11. Conclusion — superseded by orbit-recovery doc
+
+**Status: CONCLUDED 2026-05-26.** The §10.4 option (1c) recommendation
+was followed and produced a separate, focused workstream documented in
+[`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md).
+That doc is now the authoritative resource for the F7 / orbit-recovery
+direction.
+
+**Key outcomes that emerged after this experiment's closing date:**
+
+- F7 (cells = Aut_v orbits at depth 1) was tested rigorously across
+  4 connected CFI bases × 2 starts. **Found to hold in 7 of 8 cases,
+  fail in 1 (CFI(Rook3×3) subset start).** So F7 strict at depth 1
+  is **not universal** — the original claim in §10.2 of this doc was
+  overstated.
+- The refined statement (**F7-graded** / **HOR**): for any CFI(H),
+  the cell-orbit gap closes within `tw(H)` individualization steps.
+  Empirically: K4/K33/Petersen recover at depth 1; Rook3×3 subset
+  needs full tw(H) = 4. This is the actual Tier-1 theorem
+  ([orbit-recovery.md Theorem 1](./chain-descent-orbit-recovery.md#5-proof-of-theorem-1)).
+- The theorem's proof rests on classical CFI cascade theory plus
+  trivial assembly. The new content is the framing and the empirical
+  pattern map.
+- Side finding: CFI of odd-cycle bases is disconnected (two disjoint
+  cycles of length 3k for k-cycle base). Multi-component CFI is out
+  of scope for the single-Aut-stabilizer framing.
+
+**This experiment doc remains the historical record** of the
+Tier-2 decomposition attempt and the F7 finding that led to the
+orbit-recovery direction. For current state, see the orbit-recovery
+doc.

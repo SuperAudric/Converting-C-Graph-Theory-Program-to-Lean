@@ -377,16 +377,24 @@ Progress so far:
   edges-are-a-scheme half (Pieces A, B) is proved, the cascade half (Piece C) is
   scoped, and the doc delimits what this does *not* cover — only the *visible*
   Johnson is ruled out, not the encoded (CFI-style) one.
-- **Matroid framing of the propagation closure** — open working route in
-  [`chain-descent-matroid.md`](./chain-descent-matroid.md). Models the
-  forced-relation structure of warm refinement as a (candidate) matroid on
-  the pair-guesses, where Tier-1 = binary matroid (CFI-shaped, linear-oracle
-  territory) and Tier-2 = a non-binary minor present. The conjecture this
-  framework targets is "propagation closure is always binary," which would
-  rule out hidden Johnson by structural detection rather than by ruling out
-  a construction. Load-bearing open step: the matroid exchange axiom for
-  warm-refinement closure. Not paper-ready; see that doc for the working
-  notes.
+- **Matroid framing of the propagation closure** — **CLOSED 2026-05-23**;
+  full record in [`chain-descent-matroid.md`](./chain-descent-matroid.md).
+  Both partition-based `cl` and TC-based `cl_prov` tested; neither satisfies
+  the matroid exchange axiom. `cl_prov` IS a topological closure (CL0–CL3 hold)
+  but matroid M3 refuted via machine-checked `decide`. The binary-closure
+  conjecture as originally framed is not provable through this route.
+- **Tier-2 structure-tree decomposition** — **CLOSED 2026-05-26**; record in
+  [`chain-descent-tier2-decomposition-experiment.md`](./chain-descent-tier2-decomposition-experiment.md).
+  Empirically confirmed that the CFI ladder (C₃, K₄, Petersen) is all
+  Tier-1, not Tier-2 — restating the decomposability claim of this section.
+  The experiment surfaced F7 (1-WL recovers Aut_v orbits at depth 1 for
+  many CFI bases), which spun off the orbit-recovery program.
+- **Orbit-recovery for CFI** — active, see
+  [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md).
+  Theorem 1: for CFI(H), 1-WL after ≤ tw(H) fresh-colour individualizations
+  recovers Aut_S orbits. Proof via classical CFI cascade. Delivers
+  polynomial T-C for CFI with bounded tw(H) (the "Corollary 1" of that doc).
+  Tier-2 (association schemes) sketched as next paper target.
 - **CFI is a `Z₂`-hiding gadget.** No `Aₖ`-hiding gadget is known. Hiding a
   non-abelian simple group requires *fusing* refinement-resistance with
   non-abelianness in one non-decomposable obstruction; layered products

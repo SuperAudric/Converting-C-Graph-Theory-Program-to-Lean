@@ -209,6 +209,16 @@ built up (mathlib has the permutation/subgroup groundwork but not this action
 packaged); C2–C4 are lighter. A real but finite formalisation project —
 recommend paper-first, then assess Lean separately.
 
+**Connection to orbit-recovery work (2026-05-26).** Tier 2 of the
+orbit-recovery program
+([`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) §10)
+sketches a theorem that **subsumes Piece C** — orbit recovery for
+association schemes (Johnson, Hamming, distance-regular) at depth 1.
+The proof routes through scheme intersection-matrix theory rather than
+through Young subgroup combinatorics directly, which may give a
+cleaner path than the C1–C4 plan above. Worth comparing the two routes
+once Tier-1 orbit-recovery is settled.
+
 ---
 
 ## 6. What the near-theorem does and does not rule out
