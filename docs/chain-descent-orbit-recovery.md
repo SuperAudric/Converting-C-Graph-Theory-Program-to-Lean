@@ -901,11 +901,15 @@ The full cascade discharged for CFI graphs over odd-degree base graphs.
 directly via constructive proof. The original axiom remains for the
 general (non-OddDegree) case; future-work to fully discharge.
 
-**Hypothesis qualifier: `5 ≤ n`.** Required by `warmRefine_eq_iter_eq`
-when applying Phase 2.4 (round 5). For OddDegree H this is automatic
-(n ≥ 6 × baseSize ≥ 24), but proving the implication requires
-combinatorial reasoning about OddDegree → baseSize ≥ 4 → n ≥ 24 →
-n ≥ 5; left as a follow-on.
+**Hypothesis qualifier: `5 ≤ n` (DISCHARGED 2026-05-26).** Previously
+required by `warmRefine_eq_iter_eq` when applying Phase 2.4 (round 5).
+Now derived inside `cfi_cascades_polynomially_oddDeg` via the
+base-size dichotomy: `h.m = 0 → n = 0` (vacuous cascade with `S = ∅`)
+or `h.m ≥ 1 → 6 ≤ n` (from `six_baseSize_le`). The dichotomy needs
+only the existing `card_CFIVertex` and `six_baseSize_le` connectors,
+not the deeper OddDegree → baseSize ≥ 4 chain originally
+anticipated. `theorem_1_HOR_cfi_oddDeg` no longer carries an `hn_ge_5`
+parameter.
 
 *Stage 4 / general-degree case + saturated subsets (PENDING, future
 work):*
@@ -1263,6 +1267,16 @@ contains the `SchemeProfile` structure (bundling Step 1's
 reflected in the axiom budget — each tier adds exactly one
 Fact-A-shaped existence axiom. Discharging
 `schurian_scheme_profile_exists` is the G5 work proper.
+
+**Full Tier 2 Lean discharge plan written 2026-05-26:** see
+[`chain-descent-tier2-lean-plan.md`](./chain-descent-tier2-lean-plan.md)
+for the phase-by-phase build order (T2.1 association-scheme
+infrastructure → T2.2 v-profile + Step 1 → T2.3 Step 2 intersection
+numbers → T2.M4 assembly). Catalogues what transfers from Tier 1's
+OddDegree discharge (notably the iteration helpers
+`refineStep_iter_le_eq` / `warmRefine_eq_iter_eq` and the Approach-3
+step-lemma pattern), what's fully new (association schemes don't
+exist in Mathlib), and gives a ~9-12 day effort estimate.
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

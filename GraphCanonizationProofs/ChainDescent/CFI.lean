@@ -3016,16 +3016,48 @@ The OddDegree class covers the dominant interesting CFI bases (K₄,
 K₃,₃, Petersen). Even-degree bases (Rook3×3) are deferred to future
 work — they need additional cascade rounds for saturated subsets.
 
-**Proof structure**: case-split on vertex types via `h.e`. Each case
-applies a Phase lemma at round ≤ 5 and lifts to `warmRefine` via
-`warmRefine_eq_iter_eq`. The `hn_ge_5 : 5 ≤ n` hypothesis ensures the
-lift is valid; for OddDegree H this always holds (n ≥ 6 × baseSize
-≥ 24), but proving that requires more combinatorics — left as a
-follow-on. -/
+**Proof structure**: case-split on the base-size dichotomy.
+- `h.m = 0`: `CFIVertex` is empty, so `n = 0`; `CascadesAt` is
+  vacuous with `S = ∅`.
+- `h.m ≥ 1`: `six_baseSize_le` gives `n ≥ 6`, hence `5 ≤ n`. Then
+  case-split on vertex types via `h.e`; each case applies a Phase
+  lemma at round ≤ 5 and lifts to `warmRefine` via
+  `warmRefine_eq_iter_eq`.
+
+The previous `5 ≤ n` hypothesis is now derived from the base-size
+dichotomy and so no longer appears. -/
 theorem cfi_cascades_polynomially_oddDeg
     (h : IsCFI' adj) (h_odd : h.OddDegree)
-    (P : PMatrix n) (hn_ge_5 : 5 ≤ n) :
+    (P : PMatrix n) :
     CascadesAt adj P (cfi_depth_bound h) := by
+  -- Establish either `n = 0` (vacuous cascade) or `5 ≤ n` from the
+  -- combinatorial fact `n = 0 ∨ 6 ≤ n` (proved via `six_baseSize_le`
+  -- combined with `h.m = 0 → n = 0` from the CFI bijection).
+  by_cases hm0 : h.m = 0
+  · -- m = 0: every gadget index is uninhabited, so cfiVertexCount = 0,
+    -- so n = 0 (via the bijection h.e : Fin n ≃ CFIVertex).
+    have hcvc : h.H.cfiVertexCount = 0 := by
+      unfold CFIBase.cfiVertexCount
+      apply Finset.sum_eq_zero
+      intro v _
+      exfalso
+      have := v.isLt
+      omega
+    have hn_eq : n = 0 := by
+      have hc : Fintype.card (Fin n) = Fintype.card h.H.CFIVertex :=
+        Fintype.card_congr h.e
+      rw [Fintype.card_fin, h.H.card_CFIVertex, hcvc] at hc
+      exact hc
+    refine ⟨∅, by simp, ?_⟩
+    intro i _ _
+    exfalso
+    have := i.isLt
+    omega
+  -- m ≥ 1: from `six_baseSize_le`, `6 ≤ n`, hence `5 ≤ n`.
+  have hn_ge_5 : 5 ≤ n := by
+    have hm_pos : 0 < h.m := Nat.pos_of_ne_zero hm0
+    have h6 : 6 * h.m ≤ n := h.six_baseSize_le
+    omega
   refine ⟨h.allSeeds, le_of_eq h.allSeeds_card, ?_⟩
   intro i j hwarm
   by_contra hne
@@ -3183,13 +3215,14 @@ theorem cfi_cascades_polynomially_oddDeg
 for OddDegree CFI graphs at depth ≤ `h.baseSize`. Unlike
 `theorem_1_HOR_cfi`, this is **conditional on neither**
 `cfi_cascades_polynomially` (discharged by M4) nor any other CFI axiom
-— only the `OddDegree` and `5 ≤ n` hypotheses.
+— only the `OddDegree` hypothesis.
 
-The `hn_ge_5` hypothesis is automatic for OddDegree H (n ≥ 6 ×
-baseSize ≥ 24), but proving that in Lean requires further
-combinatorics; left as a follow-on. -/
+The earlier `5 ≤ n` side condition has been discharged inside
+`cfi_cascades_polynomially_oddDeg` via the base-size dichotomy
+(`h.m = 0 → n = 0` ∨ `h.m ≥ 1 → 6 ≤ n`), so it no longer needs to
+be supplied here. -/
 theorem theorem_1_HOR_cfi_oddDeg {n : Nat} {adj : AdjMatrix n}
-    (h : IsCFI' adj) (h_odd : h.OddDegree) (hn_ge_5 : 5 ≤ n) (P : PMatrix n) :
+    (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n) :
     ∃ S : Finset (Fin n),
       S.card ≤ cfi_depth_bound h ∧
       Discrete (warmRefine adj P (individualizedColouring n S)) ∧
@@ -3197,7 +3230,7 @@ theorem theorem_1_HOR_cfi_oddDeg {n : Nat} {adj : AdjMatrix n}
         OrbitPartition adj P S v w ↔
         warmRefine adj P (individualizedColouring n S) v =
           warmRefine adj P (individualizedColouring n S) w :=
-  theorem_1_HOR_at_depth (h.cfi_cascades_polynomially_oddDeg h_odd P hn_ge_5)
+  theorem_1_HOR_at_depth (h.cfi_cascades_polynomially_oddDeg h_odd P)
 
 end IsCFI'
 

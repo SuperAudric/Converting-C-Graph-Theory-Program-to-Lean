@@ -458,10 +458,16 @@ Discharges `cfi_cascades_polynomially` for OddDegree + n ≥ 5.
 for OddDegree H. Depends only on `refineStep` + `refineStep_iff` +
 standard basis. No CFI-specific axioms in dependency closure.
 
-**Caveats**: (a) requires `5 ≤ n` hypothesis (automatic for OddDegree H
-via n ≥ 6 × baseSize ≥ 24, but discharge left as follow-on);
-(b) general-degree case (Rook3×3) still uses the original axiom —
-saturated subsets need more cascade rounds.
+**`5 ≤ n` side condition — DISCHARGED 2026-05-26.** The earlier
+`hn_ge_5 : 5 ≤ n` parameter is gone. `cfi_cascades_polynomially_oddDeg`
+now case-splits on the base-size dichotomy: `h.m = 0 → n = 0`
+(via `card_CFIVertex`-collapses-to-zero on the empty index, so
+`CascadesAt` holds with `S = ∅`); `h.m ≥ 1 → 6 ≤ n` (via
+`six_baseSize_le`), hence `5 ≤ n`. `theorem_1_HOR_cfi_oddDeg` drops
+the hypothesis correspondingly and remains axiom-clean.
+
+**Remaining caveat**: general-degree case (Rook3×3) still uses the
+original axiom — saturated subsets need more cascade rounds.
 
 *Stage 4 / Phase 2.2 (2026-05-26):* b=0 endpoint inter-gadget at
 round 3 — first b=0 cascade step. §13.18-§13.20 of `CFI.lean`.
