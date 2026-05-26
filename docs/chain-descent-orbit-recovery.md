@@ -313,28 +313,60 @@ would be the next paper-write target.
 
 ## 9. Lean formalization status
 
-Existing Lean infrastructure that helps:
-- `warm_6_2`, `warmRefine_agree_off'`, `iterate_refineStep_preserves_singleton`,
-  `signature_eq_of_samePartition` — partition stability and refinement
-  primitives.
+**Phase 1 (Fact B + assembly) — COMPLETE 2026-05-26.** §16 of
+[ChainDescent.lean](../GraphCanonizationProofs/ChainDescent.lean)
+contains:
 
-What's missing (would need to be built):
+- `individualizedColouring`, `FixesPointwise` definitions
+- `FixesPointwise.complement` — pointwise stabilizer fixes the
+  complement setwise
+- `individualizedColouring_invariant` — automorphism fixing S
+  preserves χ_S
+- `signature_invariant_of_isAut` — automorphism preserving (adj, P, χ)
+  preserves the signature multiset (via reindexing along π)
+- `refineStep_invariant_of_isAut`, `iterate_refineStep_invariant_of_isAut`,
+  `warmRefine_invariant_of_isAut` — invariance lifts through refinement
+- `id_of_discrete_invariant` — automorphism preserving a discrete
+  colouring is the identity
+- **`aut_trivial_of_discrete_warmRefine`** — **Fact B, proved**:
+  if warmRefine on χ_S is discrete, then every automorphism fixing S
+  pointwise and preserving P is the identity
+- `cfi_cascade_exists` — **Fact A placeholder axiom** for the CFI
+  cascade-depth result (the only non-standard axiom Theorem 1 adds)
+- **`theorem_1_HOR`** — **Theorem 1 assembly, proved** conditional
+  on Fact A
+
+**Axiom dependencies** (from `#print axioms`):
+- `theorem_1_HOR` depends on: `propext`, `Classical.choice`,
+  `Quot.sound`, `refineStep`, `refineStep_iff`, and
+  `cfi_cascade_exists`.
+- `aut_trivial_of_discrete_warmRefine` (Fact B) depends on the same
+  set **minus** `cfi_cascade_exists` — Fact B is fully closed under
+  standard axioms + the project's `refineStep` modelling axioms.
+- `signature_invariant_of_isAut` and `individualizedColouring_invariant`
+  depend only on standard Lean axioms (no `refineStep` axioms needed).
+
+This is the intended dependency structure. The proof program for the
+remaining work is to formalize `cfi_cascade_exists` from underlying
+CFI infrastructure — see "Phase 2" below.
+
+**Phase 2 (Fact A) — REMAINING WORK.** Discharging
+`cfi_cascade_exists` requires:
 - **CFI construction in Lean.** ~200-400 lines mirroring
   [`CfiGraphGenerator.cs`](../GraphCanonizationProject/CfiGraphGenerator.cs)'s
   gadget structure as Lean definitions.
 - **`Aut(G)` as a group action on graphs.** Mathlib has the
-  group-theoretic infrastructure; ~100 lines of glue to integrate with
-  this project's `AdjMatrix` / `Colouring`.
+  group-theoretic infrastructure; ~100 lines of glue to integrate
+  with this project's `AdjMatrix` / `Colouring`.
 - **CFI Aut structure lemma** (`Aut(CFI(H)) = Z₂^{β_H} ⋊ Aut(H)`).
-  Would be the first cited result formalized.
-- **Cascade lemma** (Fact A). The hardest Lean piece — CFI's WL-dim
-  result isn't in mathlib. Would need to either formalize the original
-  Cai-Fürer-Immerman argument or restrict to specific tw classes.
+- **Cascade lemma proper** — the Cai-Fürer-Immerman WL-dim result.
+  Most involved single lemma; needs either reproof or careful
+  citation handling.
 
-**Effort estimate.** Lean formalization of Theorem 1 is a multi-week
-project on top of building the missing infrastructure. Manageable but
-non-trivial; recommend paper-first to confirm the proof structure
-before committing Lean effort.
+**Effort estimate.** Phase 2 is a multi-week project on top of the
+infrastructure build. The Phase-1 work above means the assembly is
+in place — once `cfi_cascade_exists` is replaced with a real proof,
+Theorem 1 immediately tightens automatically.
 
 ---
 

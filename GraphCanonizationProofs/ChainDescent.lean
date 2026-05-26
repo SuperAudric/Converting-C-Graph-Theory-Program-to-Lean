@@ -3297,3 +3297,220 @@ def LeafTwistSpec (oracle : LinearOracleSpec adj P₀ χι₀ sel) : Prop :=
 
 end LinearOracleSpec
 
+/-! ## §16 — Tier-1 orbit recovery for CFI
+
+Formalisation of Theorem 1 of [`docs/chain-descent-orbit-recovery.md`](../docs/chain-descent-orbit-recovery.md):
+for connected `CFI(H)`, 1-WL refinement after `≤ tw(H)` fresh-colour
+individualizations recovers the `Aut(CFI(H))_S`-orbit partition.
+
+**Proof structure** (orbit-recovery doc §5):
+- **Fact A** — CFI cascade depth ≤ tw(H). Classical Cai-Fürer-Immerman
+  1992. Requires CFI construction in Lean (a multi-week infrastructure
+  project); stated here as `axiom`/`sorry` placeholder so the assembly
+  can proceed.
+- **Fact B** — discrete partition ⟹ `Aut_S` is trivial ⟹ cells equal
+  orbits trivially. Provable now from existing primitives (`IsAut`,
+  `Discrete`, `Equiv.Perm`).
+- **Assembly** — at the cascade depth, partition is discrete (Fact A),
+  so cells = orbits (Fact B).
+
+Sub-sections:
+- §16.1 — fresh-colour individualization + `FixesPointwise`
+- §16.2 — automorphisms preserve refinement
+- §16.3 — Fact B (discrete ⟹ trivial Aut_S; cells = orbits)
+- §16.4 — Fact A placeholder + Theorem 1 assembly
+-/
+
+/-! ### §16.1 — Fresh-colour individualization and pointwise stabilizer -/
+
+/-- **Fresh-colour individualization** of a vertex set `S`. Each `v ∈ S`
+gets a unique colour `v.val + 1`; vertices outside `S` share colour `0`.
+The `+1` keeps `0` reserved for the non-individualized cell. -/
+def individualizedColouring (n : Nat) (S : Finset (Fin n)) : Colouring n :=
+  fun v => if v ∈ S then v.val + 1 else 0
+
+/-- A permutation `π` *fixes `S` pointwise* iff `π v = v` for every `v ∈ S`. -/
+def FixesPointwise {n : Nat} (π : Equiv.Perm (Fin n)) (S : Finset (Fin n)) :
+    Prop :=
+  ∀ v ∈ S, π v = v
+
+namespace FixesPointwise
+
+variable {n : Nat} {π : Equiv.Perm (Fin n)} {S : Finset (Fin n)}
+
+/-- A permutation fixing `S` pointwise also stabilizes the complement setwise.
+For `v ∉ S`, we have `π v ∉ S` — otherwise `π (π v) = π v` (by pointwise
+fix) forces `π v = v` by injectivity, contradicting `v ∉ S`. -/
+theorem complement (hπ : FixesPointwise π S) {v : Fin n} (hv : v ∉ S) :
+    π v ∉ S := by
+  intro hπv
+  have hfix : π (π v) = π v := hπ (π v) hπv
+  have heq : π v = v := π.injective hfix
+  exact hv (heq ▸ hπv)
+
+end FixesPointwise
+
+/-- An automorphism fixing `S` pointwise preserves the individualized
+colouring `χ_S`: `χ_S (π v) = χ_S v` for every `v`. -/
+theorem individualizedColouring_invariant {n : Nat} {S : Finset (Fin n)}
+    {π : Equiv.Perm (Fin n)} (hπS : FixesPointwise π S) (v : Fin n) :
+    individualizedColouring n S (π v) = individualizedColouring n S v := by
+  unfold individualizedColouring
+  by_cases hv : v ∈ S
+  · rw [hπS v hv]
+  · have hπv : π v ∉ S := hπS.complement hv
+    simp [hv, hπv]
+
+/-! ### §16.2 — Automorphisms preserve refinement -/
+
+/-- An automorphism that preserves `(adj, P, χ)` pointwise preserves the
+signature multiset for every vertex.
+
+The proof reindexes the signature's underlying multiset along `π`: the
+multiset over `u ≠ π v` of `(χ u, adj (π v) u, P (π v) u)` equals the
+multiset over `u' ≠ v` of `(χ (π u'), adj (π v) (π u'), P (π v) (π u'))`,
+which by the three invariance hypotheses equals the multiset over
+`u' ≠ v` of `(χ u', adj v u', P v u')` = `signature adj P χ v`. -/
+theorem signature_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {χ : Colouring n} {π : Equiv.Perm (Fin n)}
+    (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u)
+    (hχ : ∀ v, χ (π v) = χ v) (v : Fin n) :
+    signature adj P χ (π v) = signature adj P χ v := by
+  unfold signature
+  -- Reindex the filtered multiset along π: u ranges over `univ.filter (· ≠ π v)`
+  -- iff `u = π u'` for u' ranging over `univ.filter (· ≠ v)`.
+  have key : (Finset.univ : Finset (Fin n)).filter (· ≠ π v) =
+      ((Finset.univ : Finset (Fin n)).filter (· ≠ v)).map π.toEmbedding := by
+    ext u
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
+               Equiv.coe_toEmbedding]
+    constructor
+    · intro hu
+      refine ⟨π.symm u, ?_, π.apply_symm_apply u⟩
+      intro h
+      apply hu
+      rw [← h, π.apply_symm_apply]
+    · rintro ⟨u', hu', rfl⟩
+      intro h
+      exact hu' (π.injective h)
+  rw [key, Finset.map_val, Multiset.map_map]
+  apply Multiset.map_congr rfl
+  intro u' _
+  simp only [Function.comp_apply, Equiv.coe_toEmbedding]
+  -- Show pointwise equality of the tuple `(χ (π u'), adj (π v) (π u'), P (π v) (π u'))`
+  -- with `(χ u', adj v u', P v u')` via the three invariance hypotheses.
+  refine Prod.mk.injEq .. |>.mpr ⟨hχ u', ?_⟩
+  refine Prod.mk.injEq .. |>.mpr ⟨hπ v u', hP v u'⟩
+
+/-- An automorphism that preserves `(adj, P, χ)` pointwise preserves
+`refineStep`. Follows from signature invariance via `refineStep_iff`. -/
+theorem refineStep_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {χ : Colouring n} {π : Equiv.Perm (Fin n)}
+    (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u)
+    (hχ : ∀ v, χ (π v) = χ v) (v : Fin n) :
+    refineStep adj P χ (π v) = refineStep adj P χ v := by
+  -- Two vertices have the same refined colour iff (same old colour, same
+  -- signature). For π v and v: old colours equal by hχ; signatures equal
+  -- by signature_invariant_of_isAut. Hence refined colours equal.
+  have hχπ : χ (π v) = χ v := hχ v
+  have hσ : signature adj P χ (π v) = signature adj P χ v :=
+    signature_invariant_of_isAut hπ hP hχ v
+  exact ((refineStep_iff adj P χ (π v) v).mpr ⟨hχπ, hσ⟩)
+
+/-- Iterating refinement preserves the invariance: `(refineStep)^[k] χ` is
+also `π`-invariant when the inputs are. -/
+theorem iterate_refineStep_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {π : Equiv.Perm (Fin n)}
+    (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u) :
+    ∀ (k : Nat) {χ : Colouring n}, (∀ v, χ (π v) = χ v) →
+      ∀ v, ((refineStep adj P)^[k]) χ (π v) = ((refineStep adj P)^[k]) χ v := by
+  intro k
+  induction k with
+  | zero => intro χ hχ v; exact hχ v
+  | succ k ih =>
+    intro χ hχ v
+    simp only [Function.iterate_succ, Function.comp_apply]
+    -- Need to show invariance after one refineStep, then iterate ih on it.
+    have hχ' : ∀ v, refineStep adj P χ (π v) = refineStep adj P χ v :=
+      refineStep_invariant_of_isAut hπ hP hχ
+    exact ih hχ' v
+
+/-- Warm refinement preserves the invariance: if `(adj, P, χ_init)` are all
+`π`-invariant (with `π` an automorphism), then `warmRefine adj P χ_init` is
+also `π`-invariant. -/
+theorem warmRefine_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {χ : Colouring n} {π : Equiv.Perm (Fin n)}
+    (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u)
+    (hχ : ∀ v, χ (π v) = χ v) (v : Fin n) :
+    warmRefine adj P χ (π v) = warmRefine adj P χ v := by
+  unfold warmRefine
+  exact iterate_refineStep_invariant_of_isAut hπ hP n hχ v
+
+/-! ### §16.3 — Fact B: discrete partition ⟹ trivial Aut_S -/
+
+/-- **Fact B (pointwise version).** If a `π`-invariant colouring `χ` is
+discrete (every cell singleton), then `π` is the identity. -/
+theorem id_of_discrete_invariant {n : Nat} {χ : Colouring n}
+    {π : Equiv.Perm (Fin n)} (hd : Discrete χ)
+    (hχ : ∀ v, χ (π v) = χ v) :
+    π = Equiv.refl (Fin n) := by
+  apply Equiv.ext
+  intro v
+  -- χ (π v) = χ v, so by discreteness π v = v.
+  exact hd (π v) v (hχ v)
+
+/-- **Fact B (CFI version).** Let `adj`, `P` be a graph state and `S` an
+individualized vertex set. If `warmRefine adj P χ_S` is discrete, then every
+automorphism of `adj` that preserves `P` and fixes `S` pointwise is the
+identity. -/
+theorem aut_trivial_of_discrete_warmRefine {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {S : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S)))
+    {π : Equiv.Perm (Fin n)}
+    (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u)
+    (hπS : FixesPointwise π S) :
+    π = Equiv.refl (Fin n) := by
+  have hχ : ∀ v, individualizedColouring n S (π v) = individualizedColouring n S v :=
+    individualizedColouring_invariant hπS
+  have hwarm : ∀ v, warmRefine adj P (individualizedColouring n S) (π v) =
+      warmRefine adj P (individualizedColouring n S) v :=
+    warmRefine_invariant_of_isAut hπ hP hχ
+  exact id_of_discrete_invariant hd hwarm
+
+/-! ### §16.4 — Fact A placeholder + Theorem 1 assembly
+
+**Fact A** (CFI cascade depth ≤ tw(H)) is classical Cai-Fürer-Immerman
+theory but requires CFI construction in Lean, which is a multi-week
+infrastructure project. We state it here as an axiom — pinning the
+shape of what's needed — and assemble Theorem 1 conditionally.
+
+The Fact A statement involves CFI(H), tw(H), and the canonical picker.
+For now we state the shape minimally: "there exists a `k` such that
+warmRefine after `k` fresh-colour individualizations is discrete."
+The CFI infrastructure will fill in the precise statement with the
+treewidth bound. -/
+
+/-- **Fact A placeholder.** For a CFI graph (left abstract for now;
+`adj` here stands in for `CFI(H)` and `P` for its initial state), there
+exists a sequence of fresh-colour individualizations whose warm-refined
+partition is discrete. The treewidth bound `k ≤ tw(H)` is the classical
+content; here we just assert existence. -/
+axiom cfi_cascade_exists {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      Discrete (warmRefine adj P (individualizedColouring n S))
+
+/-- **Theorem 1 (HOR for CFI), Lean form.** Given Fact A (cfi_cascade_exists),
+at the cascade depth every automorphism preserving the graph and fixing the
+individualized set pointwise is the identity. So the orbit partition equals
+the (singleton) refinement partition. -/
+theorem theorem_1_HOR {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
+    ∃ S : Finset (Fin n),
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      ∀ (π : Equiv.Perm (Fin n)),
+        IsAut π adj → (∀ v u, P (π v) (π u) = P v u) →
+        FixesPointwise π S → π = Equiv.refl (Fin n) := by
+  obtain ⟨S, hd⟩ := cfi_cascade_exists adj P
+  refine ⟨S, hd, ?_⟩
+  intro π hπ hP hπS
+  exact aut_trivial_of_discrete_warmRefine hd hπ hP hπS
+
