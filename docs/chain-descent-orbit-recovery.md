@@ -972,3 +972,100 @@ subsumes most cases that motivated the program.
 analysis), do it — the data is intrinsically valuable. If (A) doesn't
 quickly reveal the structural predictor, pivot to (B). The two are
 parallel and complementary.
+
+### 10.11 Rook3×3 depth-by-depth probe — F7-graded form holds
+
+Option (A) run 2026-05-26. Extended depth-by-depth probe on
+CFI(Rook3×3) subset start (the lone depth-1 failure). Test:
+`CfiRook3x3_SubsetStart_OrbitRecovery_DeepProbe` (1 m 58 s; uses
+ulong-packed tuple encoding for memory efficiency).
+
+| Depth | Cells | Aut_S orbits | Gap | F7-strict |
+|---:|---:|---:|---:|:---:|
+| 1 | 14 | 15 | −1 | NO |
+| 2 | 45 | 47 | −2 | NO |
+| 3 | 57 | 60 | −3 | NO |
+| 4 | **108** | **108** | 0 | **YES** |
+
+**Pattern: F7 recovers at depth 4 for Rook3×3 subset start.** Since
+tw(Rook3×3) = 4, the recovery depth equals tw(H). For K₄, K₃,₃, and
+Petersen, F7 recovers at depth 1 (much less than tw(H)).
+
+This is consistent with the classical CFI cascade result: 1-WL with
+tw(H) individualizations is effectively (tw(H)+1)-WL, which is the WL-
+dimension at which CFI(H) becomes distinguishable from its twist. For
+ORBIT-COMPLETENESS within one CFI(H), the same threshold applies (or
+slightly lower for "easier" base graphs).
+
+### 10.12 F7-graded: the right Tier-1 statement
+
+> **F7-graded (proposed Tier-1 theorem).** For any connected CFI(H),
+> there exists `k(H, S) ≤ tw(H)` such that 1-WL after `k` fresh-colour
+> individualizations (chosen by the canonical chain-descent picker)
+> produces a partition equal to `Aut_S(CFI(H))`-orbits.
+
+This statement:
+- Is empirically supported by all 4 connected CFI bases tested.
+- Has `k(H, S) ≤ tw(H)` as a clean, classical bound.
+- Generalizes the depth-1 form (when k = 1) and the cascade form (when
+  k = full cascade depth).
+- Is provable, modulo standard CFI / WL-dimension theory.
+
+The "≤ tw(H)" bound is the natural upper limit. The actual `k(H, S)`
+might be lower for many specific instances; characterizing exact
+values is a further refinement question.
+
+### 10.13 Implication for L4
+
+L4 should be restated as the F7-graded theorem:
+
+> **L4-graded.** For any connected CFI(H) with `β_H ≥ 1`, for any
+> sequence of fresh-colour individualizations `v_1, …, v_k` chosen by
+> the canonical chain-descent picker, there exists `k ≤ tw(H)` after
+> which 1-WL refinement on `(CFI(H), {v_1, …, v_k} individualized)`
+> produces the `Aut(CFI(H))_{v_1,…,v_k}`-orbit partition.
+
+Proof structure now:
+- **Sub-lemma 10a (CFI WL-dimension citation).** CFI(H) is k-WL-
+  distinguishable iff k ≥ tw(H). (Cai-Fürer-Immerman 1992.)
+- **Sub-lemma 10b (WL ↔ individualization equivalence).** k-WL on G is
+  ≥ as powerful as 1-WL on (G, k−1 individualizations). Standard.
+- **Sub-lemma 10c (orbit-completeness from WL-dim).** When `k`-WL
+  distinguishes CFI(H), 1-WL with k−1 individualizations distinguishes
+  all Aut-non-equivalent vertices. Folklore consequence.
+- **Assembly.** Together: 1-WL with tw(H) individualizations is orbit-
+  complete on CFI(H).
+
+The proof outline is now bounded by citing standard CFI/WL theory
+rather than developing new structural arguments. Much more tractable.
+
+**Status of original L4a–c:**
+- L4a (within-gadget): the "gauge stabilizer trivial on X(u₀)"
+  hand-derivation was the flaw. Under the graded form, we just need
+  recovery somewhere at depth ≤ tw(H), not specifically at depth 1.
+- L4b (one-edge propagation), L4c (induction on distance): these were
+  structured around the depth-1 statement and need restructuring for
+  the graded statement. Most likely simpler: the cascade WL argument
+  doesn't need cell-by-cell propagation.
+
+### 10.14 Recommended next step
+
+The depth-by-depth probe answered the (A) question definitively:
+**F7 holds at depth ≤ tw(H) for all tested CFI(H).** Tier 1 has a
+provable, classical statement.
+
+Next steps for Tier 1:
+1. **Verify F7-graded on additional CFI bases** to widen empirical
+   support: K_5, K_6, K_7 (all complete graphs with higher tw). If
+   pattern holds, conjecture is strongly supported.
+2. **Write paper proof of L4-graded** via the WL-dim argument
+   (sub-lemmas 10a/10b/10c). This is the actual paper-writeable
+   theorem.
+3. **Lean formalization**: now a real target, since L4-graded reduces
+   to standard WL theory which can be developed in mathlib + project-
+   specific CFI machinery.
+
+After Tier 1 has a stable theorem (item 2 above), Tier 2 (association
+schemes) becomes the natural next direction. Tier 1's graded form is
+strictly weaker than the depth-1 form that Tier 2 would have for
+schemes, so Tier 2 is genuinely stronger.

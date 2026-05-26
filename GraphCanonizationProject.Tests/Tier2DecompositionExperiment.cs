@@ -180,6 +180,40 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
         AssertOrbitRecoveryAtDepth1(pair, expectedAutOrder: 73728, baseGraphName: "Rook3x3");
     }
 
+    // Depth-2 orbit-recovery probe (orbit-recovery doc §10.10 option A).
+    // For each connected CFI base, after individualizing v (subset start) and
+    // then v' (canonical pick from the depth-1 partition), check whether
+    // 1-WL cells at depth 2 equal Aut_{v,v'} orbits. Critical for the
+    // Rook3×3-subset case where depth-1 F7 failed.
+    [Fact]
+    public void AllConnectedBases_OrbitRecovery_Depth2_ReportPattern()
+    {
+        var bases = new (string name, BigInteger? autOrder)[]
+        {
+            ("K4",       192),
+            ("K33",      1152),
+            ("Petersen", 7680),
+            ("Rook3x3",  73728),
+        };
+        foreach (var (name, autOrder) in bases)
+        {
+            var pair = CfiGraphGenerator.Generate(name);
+            RunOrbitRecoveryUpToDepth(pair, autOrder, baseGraphName: name, maxDepth: 2);
+        }
+    }
+
+    // Deep-depth probe on Rook3×3 subset start — the lone depth-1 failure
+    // case. Track 1-WL cells vs Aut_S orbits across depths 1..6 to see if
+    // F7 ever recovers, or whether the gap persists / closes via cascade.
+    [Fact]
+    public void CfiRook3x3_SubsetStart_OrbitRecovery_DeepProbe()
+    {
+        var pair = CfiGraphGenerator.Generate("Rook3x3");
+        // Cap at depth 4 — tw(Rook3x3) = 4, expected cascade at ≤ 5. Beyond
+        // that, partition is discrete and orbit comparison is trivially YES.
+        RunOrbitRecoveryUpToDepth(pair, 73728, baseGraphName: "Rook3x3", maxDepth: 4);
+    }
+
     // Run the orbit-recovery check at depth 1 on both Aut-orbits (subset-start
     // and endpoint-start). For each, report whether 1-WL refinement after
     // fresh-colour individualization produces a partition equal to Aut_v orbits.
@@ -266,6 +300,147 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
             if (badOrbits > 0)
                 output.WriteLine($"  ⚠ {baseGraphName}/{startRole}: {badOrbits} orbit(s) split across cells — canonizer overgeneration or refiner bug");
         }
+    }
+
+    // Generalisation of AssertOrbitRecoveryAtDepth1 to multiple individualization
+    // depths. Picks v at depth 1 (subset start), then deterministically chains
+    // further individualizations by lowest-cell-id + role-lex. At each depth d,
+    // reports whether 1-WL cells = Aut_{v_1,...,v_d} orbits.
+    //
+    // Aut_{v_1,...,v_d} orbits computed via the (d+1)-tuple-orbit method: the
+    // orbit of w under the joint stabilizer = {w' : (v_1,...,v_d, w') in Aut
+    // diagonal orbit of (v_1,...,v_d, w)}.
+    private void RunOrbitRecoveryUpToDepth(
+        CfiGraphGenerator.CfiPair pair,
+        BigInteger? expectedAutOrder,
+        string baseGraphName,
+        int maxDepth)
+    {
+        int n = pair.Even.VertexCount;
+        var canonizer = new CanonGraphOrdererChainDescent();
+        canonizer.Run(new int[n], pair.Even);
+        Assert.NotNull(canonizer.LastAutomorphisms);
+        var aut = canonizer.LastAutomorphisms!;
+        var gens = aut.Generators.Where(g => g.Length == n).ToList();
+        output.WriteLine($"\n══ {baseGraphName} ══ |Aut| = {aut.Order} ({gens.Count} generators of size n={n})");
+        if (gens.Count != aut.Generators.Count)
+            output.WriteLine($"  ⚠ skipping {aut.Generators.Count - gens.Count} undersized generator(s) — multi-component CFI");
+        if (gens.Count == 0)
+        {
+            output.WriteLine($"  ⚠ no full-size generators — skipping {baseGraphName}");
+            return;
+        }
+        if (expectedAutOrder.HasValue && expectedAutOrder.Value != aut.Order)
+            output.WriteLine($"  ⚠ expected |Aut| = {expectedAutOrder.Value}, got {aut.Order}");
+
+        var roles = pair.VertexRoles;
+        var adj = FlattenAdj(pair.Even);
+
+        // Subset start only — that's where the depth-1 counterexample sits.
+        int v0 = Array.IndexOf(roles, "v0:subset:{}");
+        var individualized = new List<int> { v0 };
+        var color = new int[n];
+        OneWLRefine(adj, n, color);
+        color[v0] = color.Max() + 1;
+        OneWLRefine(adj, n, color);
+
+        for (int d = 1; d <= maxDepth; d++)
+        {
+            var cells = ExtractCells(color);
+            var stabOrbits = ComputeStabilizerOrbitsAtTuple(individualized, n, gens);
+            bool match = CellsEqualOrbits(cells, stabOrbits);
+            string indString = string.Join(", ", individualized.Select(i => roles[i]));
+            output.WriteLine($"  depth {d}: individualized [{indString}]");
+            output.WriteLine($"    cells: {cells.Count} sizes [{string.Join(",", cells.Select(c => c.Count).OrderByDescending(x => x))}]");
+            output.WriteLine($"    Aut_S orbits: {stabOrbits.Count} sizes [{string.Join(",", stabOrbits.Select(o => o.Count).OrderByDescending(x => x))}]");
+            output.WriteLine($"    → cells = Aut_S orbits? {(match ? "YES" : "NO")}");
+
+            if (d < maxDepth)
+            {
+                int next = PickNextIndividualization(color, n, roles);
+                if (next < 0)
+                {
+                    output.WriteLine($"    (already discrete; stopping)");
+                    break;
+                }
+                individualized.Add(next);
+                color[next] = color.Max() + 1;
+                OneWLRefine(adj, n, color);
+            }
+        }
+    }
+
+    // Joint stabilizer orbits via (d+1)-tuple-orbit method. Generalises the
+    // pair-orbit approach used in ComputeStabilizerOrbits.
+    private static List<HashSet<int>> ComputeStabilizerOrbitsAtTuple(
+        List<int> individualizedSeq, int n, IReadOnlyList<int[]> autGenerators)
+    {
+        int d = individualizedSeq.Count;
+        var indSet = new HashSet<int>(individualizedSeq);
+        var remaining = new HashSet<int>(Enumerable.Range(0, n).Where(i => !indSet.Contains(i)));
+        var stabOrbits = individualizedSeq.Select(i => new HashSet<int> { i }).ToList();
+        while (remaining.Count > 0)
+        {
+            int w = remaining.Min();
+            var orbit = TupleOrbitFilteredOnPrefix(individualizedSeq, w, autGenerators);
+            stabOrbits.Add(orbit);
+            remaining.ExceptWith(orbit);
+        }
+        return stabOrbits;
+    }
+
+    // Compute the Aut-orbit of (v_1,...,v_d, w) via diagonal action, then
+    // filter to tuples whose first d coordinates equal (v_1,...,v_d). The
+    // resulting set of w-values is the orbit of w under Aut_{v_1,...,v_d}.
+    //
+    // Memory-efficient encoding: pack a tuple of ints into ulong using
+    // 8 bits per coord. Requires n < 256 and d+1 ≤ 8. Fails fast if
+    // those bounds break (Rook3x3 has n=144, K33 n=60, Petersen n=100 — all fit).
+    private static HashSet<int> TupleOrbitFilteredOnPrefix(
+        List<int> prefix, int w, IReadOnlyList<int[]> autGenerators)
+    {
+        int d = prefix.Count;
+        int len = d + 1;
+        if (len > 8) throw new InvalidOperationException("Tuple depth exceeds packing capacity (max 8)");
+        // Pack: prefix[0] in bits 0..7, prefix[1] in 8..15, ..., w in (d*8)..(d*8+7).
+        var initial = new ulong[1];
+        for (int i = 0; i < d; i++)
+            initial[0] |= (ulong)(byte)prefix[i] << (i * 8);
+        initial[0] |= (ulong)(byte)w << (d * 8);
+        ulong prefixMask = 0UL;
+        ulong prefixValue = 0UL;
+        for (int i = 0; i < d; i++)
+        {
+            prefixMask |= 0xFFUL << (i * 8);
+            prefixValue |= (ulong)(byte)prefix[i] << (i * 8);
+        }
+        int wShift = d * 8;
+        ulong wMask = 0xFFUL << wShift;
+
+        var seen = new HashSet<ulong> { initial[0] };
+        var queue = new Queue<ulong>();
+        queue.Enqueue(initial[0]);
+        var result = new HashSet<int> { w };
+        while (queue.Count > 0)
+        {
+            ulong tup = queue.Dequeue();
+            foreach (var g in autGenerators)
+            {
+                ulong img = 0UL;
+                for (int i = 0; i < len; i++)
+                {
+                    int coord = (int)((tup >> (i * 8)) & 0xFF);
+                    img |= (ulong)(byte)g[coord] << (i * 8);
+                }
+                if (seen.Add(img))
+                {
+                    queue.Enqueue(img);
+                    if ((img & prefixMask) == prefixValue)
+                        result.Add((int)((img & wMask) >> wShift));
+                }
+            }
+        }
+        return result;
     }
 
     private static List<HashSet<int>> ExtractCells(int[] color)
