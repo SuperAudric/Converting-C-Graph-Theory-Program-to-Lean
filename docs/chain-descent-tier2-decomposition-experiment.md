@@ -388,3 +388,103 @@ Recommended order: (1) → (3), with (2) folded in as a doc cleanup once we
 know which detector wins. Step (1) keeps the calibration ladder honest;
 jumping straight to (3) risks misreading a complex partition.
 
+---
+
+## 9. Phase B step 1 — CFI(K₄) probe results
+
+**Date:** 2026-05-26. Code lives in
+[`GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs`](../GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs)
+and runs with `dotnet test --filter Tier2DecompositionExperiment`.
+
+### 9.1 Picker rule clarification
+
+The probe uses the **canonical chain-descent picker**: lowest cell id among
+non-singleton cells (cells are id'd by lex-sort rank of their 1-WL signature),
+within that cell the vertex with lex-smallest `VertexRoles` string. The role
+tiebreak uses ground-truth labels and is consistent across scramblings, so it
+serves the calibration purpose.
+
+A side finding: the C₃ hand-trace in §8.2 assumed picking from the *smallest*
+cell (size 2), but the canonical picker descends into the *lowest-id*
+non-singleton cell, which at depth 1 of CFI(C₃) is the size-9 H-cell. Under
+the canonical picker C₃ does **not** discretize in 2 individualizations — it
+goes 1 → 6 → 10 → 14 cells over depths 0 → 3. The "cascade after 2
+individualizations" claim in §8.2 was an artifact of the alternative pick.
+Both pickers are valid (lowest-id is iso-invariant, smallest-cell is also iso-
+invariant up to ties); the canonical chain-descent design uses lowest-id.
+
+### 9.2 CFI(K₄) — measured signatures
+
+| Depth | Individualized                  | Cell count | Cell sizes (desc) |
+|---:|---|---:|---|
+| 0 | (none)                           | 1  | [40] |
+| 1 | `v0:subset:{}` (subset start)     | 14 | [8, 4, 4, 4, 4, 4, 2, 2, 2, 2, 1, 1, 1, 1] |
+| 2 | `v0:end[w1]^0`                   | 24 | [2 × 16, 1 × 8] |
+| 3 | `v2:subset:{w0,w3}`              | 40 | [1 × 40] — **discrete** |
+
+The endpoint-start probe (`v0:end[w1]^0` at depth 1) gives a different but
+isomorphic-orbit signature at depth 1 and also discretizes at depth 3.
+
+### 9.3 Findings
+
+**F1 — Iso-invariance of cell-size signatures: CONFIRMED.** Across the
+identity input and one seeded permutation (seed=4711), all four signatures
+(both starts × identity/permuted) match at every depth. Empirical support
+for P2 on CFI(K₄). Stronger evidence needed at larger scale before
+generalizing.
+
+**F2 — Cascade depth for CFI(K₄) = 3, not 4.** The treewidth of K₄ is 3.
+P4's original "cascade by depth tw(H)+1" was too generous. Both depth-1
+starting orbits (subset-vertex and edge-endpoint) cascade at depth 3.
+**Revised P4:** cascade depth ≤ tw(H), reached by depth ≈ tw(H) for both
+Aut-orbits' starts. This matches the WL-individualization heuristic (each
+individualization is ~+1 WL dimension; CFI is k-WL-resistant for k < tw(H);
+so tw(H) individualizations suffice).
+
+**F3 — P3's exact form does NOT generalize.** On CFI(C₃) depth 1 the largest
+non-singleton cell had `|gadget|/2 = 3` per gadget (the H-cell, 9 vertices).
+On CFI(K₄) depth 1 the largest cell has 8 vertices = 4 + 4 spanning G₂ and
+G₃ — *not* the individualized gadget G₀, and concentrated in **two**
+gadgets, not all four. The "|gadget|/2 per gadget" pattern is C₃-specific.
+
+The actual generalization appears to be **cells classified by (refined
+position within gadget, distance class to individualized vertex)**. The
+individualized gadget refines most (8 cells in G₀: sizes 4,2,2,1,1 — plus
+the singleton v0). Other gadgets retain larger residual cells, often paired
+by base-edge structure. Worth formalizing as **P3' — cell-gadget overlap
+matrix is a function of the base graph's distance structure from the
+individualized base-vertex**.
+
+**F4 — P5 (refinement skew to gadgets) confirmed on K₄.** Many depth-1
+cells span multiple gadgets (e.g., cell 7 in the dump: 4 vertices in G₂, 4
+in G₃ — no overlap with G₀ or G₁). Cells concentrated in one gadget exist
+too (e.g., cell 12: all 4 in G₀). The overlap matrix is heterogeneous; cells
+are not aligned with gadgets, but the overlap structure is iso-invariant.
+
+### 9.4 What this means for the experiment trajectory
+
+The detection question (Q1) is in good shape for CFI(K₄):
+- **Cell-size signatures fingerprint the input up to isomorphism** (F1).
+- **Cascade reaches discrete at tw(H) individualizations** under the
+  canonical picker (F2), which would beat the budget `B(n) = n^c` for any
+  fixed c on the cascade-class CFI family if proved.
+- **The refinement structure is iso-invariant but not gadget-aligned** (F4)
+  — so gadget recovery isn't direct; needs a post-processing step that
+  reads the cell-gadget overlap matrix.
+
+Next move in priority order:
+
+1. **Scale up to CFI(Petersen).** 100 vertices, tw=4, expected cascade by
+   depth 4 (per F2). Confirms F1+F2 at the encoded-Johnson scale. This is
+   the actual Tier-2 probe.
+2. **State P3' precisely** — the cell-gadget overlap matrix's structure as
+   a function of (refined vertex-type within gadget, base-graph-distance to
+   individualized base-vertex). A Lean lemma at this level would be a
+   strong intermediate result.
+3. **Compare picker rules** — re-run CFI(K₄) with the smallest-cell picker
+   to see whether cascade depth changes. If yes, the picker rule is
+   load-bearing and the chain-descent design's lowest-id choice may need
+   re-examination for cascade-class graphs.
+
+(1) is the actionable next step. (2) and (3) are slower analytical work.
+
