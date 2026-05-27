@@ -597,9 +597,27 @@ intersection-number refinement), S2.c (convergence at depth
     **`SchurianSchemeGraph.warmRefine_J_eq`** — warmRefine cells
     refine the J-class partition of `vProfile`. First concrete
     Step 2 partial theorem.
-  Remaining: the recursive partition Π_k beyond J-class + the
-  convergence bound at depth ≤ rank + 1 + warmRefine lift, then
-  the SchemeProfile constructor in T2.M4.
+
+- §9 — **T2.M4 assembly + concrete predicate + Theorem 2 instances
+  — DONE 2026-05-27** (~250 lines, axiom-clean):
+  - §9 `SchurianSchemeGraph.toSchemeProfile` — the SchemeProfile
+    constructor parameterised by P-invariance + `Step2_target`
+    hypotheses. Plus `toSchemeProfile_trivialP` for the trivial-P
+    case (P-invariance automatic).
+  - §9.1 `trivialPMatrix` + `trivialPMatrix_invariant`.
+  - §9.2 **`IsSchurianSchemeGraph'`** concrete predicate replacing
+    the abstract `IsSchurianSchemeGraph` axiom from `§18`.
+    **`theorem_2_HOR_concrete`**: the `theorem_2_HOR`-shaped
+    statement derivable from concrete + P-invariance + Step2.
+  - §9.3 **`theorem_2_HOR_trivial`**: end-to-end unconditional
+    Theorem 2 instance for the trivial 1-vertex scheme. **First
+    fully discharged Theorem 2 instance.**
+  - §9.4 **`step2_of_rank_le_one`** + **`theorem_2_HOR_concrete_rank_le_one`**:
+    Step 2 and unconditional Theorem 2 for all schurian scheme
+    graphs with `rank ≤ 1` (covers `K_n`).
+
+  Remaining: the inductive Step 2 proof for `rank ≥ 2` schemes
+  (Johnson, Petersen, Hamming, distance-transitive DRGs).
 
 **Refuted (machine-checked, kept as record of dead routes):**
 

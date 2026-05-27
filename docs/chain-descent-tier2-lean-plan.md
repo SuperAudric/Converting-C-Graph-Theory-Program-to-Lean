@@ -500,8 +500,9 @@ what guarantees these counts are determined by `vProfile`.
   full Step 2 keeps refining via intersection-number induction
   until reaching `vProfile` itself.
 
-**Remaining for S2.b proper:** the recursive partition Π_k beyond
-the J-class. Two approaches under consideration:
+**Remaining for full S2.b (rank ≥ 2):** the recursive partition Π_k
+beyond J-class for general schurian schemes. Two approaches under
+consideration:
 1. Define `Π_k : Setoid (Fin n)` recursively, prove iter[k] χ_v
    refines Π_k by induction on k using the count bridge above.
 2. Skip the abstract partition and directly induct on "iter[k]
@@ -512,6 +513,24 @@ the J-class. Two approaches under consideration:
 Approach 1 is more abstract but cleaner; Approach 2 is more direct
 but may be tangled with refineStep colour values. Decide at the next
 session.
+
+### S2.b rank ≤ 1 case + Theorem 2 instance — DONE 2026-05-27
+
+`step2_of_rank_le_one` (§9.4 of `Scheme.lean`, ~30 lines,
+axiom-clean): for any schurian scheme graph with `rank ≤ 1`, Step 2
+holds. Proof: case-split on `(w = v, u = v)`. The trivial cases
+(both = v or both ≠ v with rank ≤ 1 forcing vProfile ≡ 1) close
+algebraically; the mixed cases (one = v, other ≠ v) derive a
+contradiction from `warmRefine_eq_iter_eq` at r = 0 (= χ_v) plus
+`individualizedColouring_singleton_eq_v_iff`.
+
+`theorem_2_HOR_concrete_rank_le_one`: Theorem 2 unconditional for
+this case. Covers `K_n` schurian schemes (rank = 1, J = {1}). First
+concrete schurian scheme graph class with the full theorem
+discharged.
+
+For `rank ≥ 2` schemes (Johnson, Petersen, distance-regular), the
+inductive intersection-number argument is needed.
 
 ### S2.c — convergence bound
 

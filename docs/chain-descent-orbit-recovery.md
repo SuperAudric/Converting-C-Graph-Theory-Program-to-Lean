@@ -1384,13 +1384,49 @@ layers:
   vProfile refinement; the full Step 2 keeps refining via
   intersection numbers until reaching `vProfile` itself.)
 
-**Remaining for full Step 2:** the recursive partition Π_k beyond
-J-class. Likely either (i) abstract Setoid-valued Π_k with
-inductive refinement proof, or (ii) direct induction on "iter[k]
-χ_v refines partition by intersection-number-rows up to depth k"
-using `intersectionCount_via_w`. Decide at next session. Then
-S2.c (convergence at depth ≤ rank+1) + S2.d (warmRefine lift) +
-T2.M4 (SchemeProfile constructor + axiom discharge).
+**Remaining for full Step 2 (rank ≥ 2):** the recursive partition Π_k
+beyond J-class for general schurian schemes. Either (i) abstract
+Setoid-valued Π_k with inductive refinement proof, or (ii) direct
+induction on "iter[k] χ_v refines partition by intersection-number-rows
+up to depth k" using `intersectionCount_via_w`. Decide at next session.
+
+*Stage T2.M4 — full SchemeProfile constructor + concrete predicate +
+trivial/rank-1 instances DONE 2026-05-27.* §9 of `Scheme.lean`
+(~250 lines, axiom-clean):
+
+- **`SchurianSchemeGraph.toSchemeProfile`**: SchemeProfile
+  constructor taking `(G, P, v, hP_invariant, hStep2)`. The
+  P-invariance hypothesis bridges `GraphOrbitFixing` to
+  `OrbitPartition adj P {v}` (drops the P-preservation conjunct
+  to/from the orbit predicate). Step2 hypothesis populates the
+  `warm_refines_profile` field.
+- `trivialPMatrix` + `trivialPMatrix_invariant`: the all-`unknown`
+  PMatrix is trivially permutation-invariant, so `toSchemeProfile_trivialP`
+  needs only the Step2 hypothesis.
+- **`IsSchurianSchemeGraph'`**: concrete predicate replacing the
+  abstract `IsSchurianSchemeGraph` axiom from `ChainDescent.lean §18`.
+  Bundles `(G : SchurianSchemeGraph, matching : G.adj = adj)`.
+- **`theorem_2_HOR_concrete`**: the `theorem_2_HOR`-shaped statement
+  derivable from `IsSchurianSchemeGraph'` + P-invariance + Step2,
+  matching `ChainDescent.lean §18`'s assembly form.
+  `theorem_2_HOR_concrete_trivialP`: trivial-P specialisation.
+
+**End-to-end unconditional Theorem 2 instances** (no remaining
+"open piece" for these cases):
+- **`theorem_2_HOR_trivial`** (§9.3): trivial 1-vertex scheme.
+  First fully discharged Theorem 2 instance — validates the
+  architecture end-to-end.
+- **`step2_of_rank_le_one`** + **`theorem_2_HOR_concrete_rank_le_one`**
+  (§9.4): all schurian scheme graphs with `rank ≤ 1` (covers
+  `K_n` with `J = {1}`). Proof: case-split on (w = v, u = v); the
+  inductive intersection-number argument isn't needed when vProfile
+  has at most 2 values.
+
+**Remaining for `rank ≥ 2` schemes** (Johnson, Petersen, Hamming,
+distance-transitive DRGs): the inductive S2.b intersection-number
+argument. The count infrastructure (§8.b.2) and assembly
+(§8.b.3, §9) are all in place; only the Π_k refinement induction
+remains.
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

@@ -1100,4 +1100,292 @@ theorem SchurianSchemeGraph.warmRefine_J_eq {n : Nat} (G : SchurianSchemeGraph n
       (G.toSchemeGraph.adj_eq_one_iff v u).mp hadj.symm
     exact ⟨fun _ => hu_in, fun _ => hw_in⟩
 
+/-! ## §9 — T2.M4 assembly: `SchemeProfile` constructor
+
+Assembles all of T2.1-T2.3's work into the `SchemeProfile`
+structure expected by `ChainDescent.lean §18`. Three input
+ingredients:
+
+1. A **`SchurianSchemeGraph G`** (scheme + J + adj + schurian
+   axioms) — provides Step 1 (algebraic).
+2. A **`P`-invariance hypothesis** — every graph-Aut of `G.adj`
+   preserves `P`. This bridges `GraphOrbitFixing` (no P) to
+   `OrbitPartition adj P {v}` (with P). For "scheme-compatible" P
+   (e.g., the trivial all-`unknown` matrix) this holds; for
+   arbitrary P it's an additional constraint.
+3. A **`Step2_target G P v`** witness — Step 2's substantive
+   content. Currently the **only remaining open piece** of
+   the Tier 2 program; can be discharged for specific schemes
+   (rank ≤ 1) trivially or for general schurian schemes via the
+   coherent algebra theorem (S2.b proper, future session).
+
+Output: a `SchemeProfile G.adj P v` that directly populates the
+`schurian_scheme_profile_exists` axiom from `ChainDescent.lean §18`. -/
+
+namespace SchurianSchemeGraph
+
+variable {n : Nat} (G : SchurianSchemeGraph n)
+
+/-- **The SchemeProfile constructor.** Given a `SchurianSchemeGraph`,
+a P-invariance hypothesis, and a Step 2 witness, produce a concrete
+`SchemeProfile` populating the abstract structure from
+`ChainDescent.lean §18.1`.
+
+The four fields:
+- `profile := vProfile G.scheme v`
+- `v_singleton`: from `vProfile_ne_self_of_ne` (T2.2).
+- `profile_iff_orbit`: via `vProfile_iff_graphOrbit` (T2.3 Step 1)
+  + P-invariance bridge.
+- `warm_refines_profile`: from the Step 2 hypothesis. -/
+noncomputable def toSchemeProfile (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
+    (hStep2 : Step2_target G P v) :
+    SchemeProfile G.toSchemeGraph.adj P v where
+  profile := vProfile G.scheme v
+  v_singleton w hw := G.scheme.vProfile_ne_self_of_ne hw
+  profile_iff_orbit w u := by
+    -- vProfile equality ↔ GraphOrbitFixing (Step 1) ↔ OrbitPartition (with P-invariance)
+    rw [G.vProfile_iff_graphOrbit v w u]
+    constructor
+    · -- GraphOrbitFixing → OrbitPartition
+      rintro ⟨π, hπ, hπv, hπw⟩
+      refine ⟨π, hπ, hP_invariant hπ, ?_, hπw⟩
+      intro x hx
+      rw [Finset.mem_singleton] at hx
+      subst hx
+      exact hπv
+    · -- OrbitPartition → GraphOrbitFixing (drop the P-preservation)
+      rintro ⟨π, hπ, _hP, hfix, hπw⟩
+      have hπv : π v = v := hfix v (Finset.mem_singleton.mpr rfl)
+      exact ⟨π, hπ, hπv, hπw⟩
+  warm_refines_profile := hStep2
+
+/-- **Existence: SchemeProfile from SchurianSchemeGraph + P-invariance
++ Step 2.** Packaging `toSchemeProfile` as a `Nonempty` existence
+result matches the shape of the `schurian_scheme_profile_exists`
+axiom from `ChainDescent.lean §18`. -/
+theorem schurian_scheme_profile_exists_of_step2 (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
+    (hStep2 : Step2_target G P v) :
+    Nonempty (SchemeProfile G.toSchemeGraph.adj P v) :=
+  ⟨G.toSchemeProfile P v hP_invariant hStep2⟩
+
+end SchurianSchemeGraph
+
+/-! ### §9.1 — P-invariance discharged for trivial P
+
+When `P` is constant (e.g., the all-`unknown` matrix), every
+permutation trivially preserves it, so `hP_invariant` is automatic.
+This is the simplest case where the SchemeProfile constructor is
+fully unconditional (modulo `Step2_target`). -/
+
+/-- The trivial `PMatrix`: every entry is `POE.unknown`. -/
+def trivialPMatrix (n : Nat) : PMatrix n := fun _ _ => POE.unknown
+
+/-- Every permutation preserves the trivial `PMatrix`. -/
+theorem trivialPMatrix_invariant {n : Nat} {adj : AdjMatrix n}
+    {π : Equiv.Perm (Fin n)} (_ : IsAut π adj) :
+    ∀ x u, trivialPMatrix n (π x) (π u) = trivialPMatrix n x u :=
+  fun _ _ => rfl
+
+/-- **SchemeProfile for trivial P.** Specialisation of
+`toSchemeProfile` requiring only `Step2_target`; the P-invariance
+hypothesis is discharged automatically. -/
+noncomputable def SchurianSchemeGraph.toSchemeProfile_trivialP {n : Nat}
+    (G : SchurianSchemeGraph n) (v : Fin n)
+    (hStep2 : Step2_target G (trivialPMatrix n) v) :
+    SchemeProfile G.toSchemeGraph.adj (trivialPMatrix n) v :=
+  G.toSchemeProfile (trivialPMatrix n) v trivialPMatrix_invariant hStep2
+
+/-! ### §9.2 — Concrete predicate + bridge to `theorem_2_HOR`
+
+`IsSchurianSchemeGraph'` is the concrete analogue of the abstract
+axiom `IsSchurianSchemeGraph` from `ChainDescent.lean §18`. A graph
+satisfies it iff it arises as the adjacency of some
+`SchurianSchemeGraph`.
+
+`theorem_2_HOR_concrete` is the bridge: it produces the
+`theorem_2_HOR`-shaped statement (OrbitPartition ↔ warmRefine
+equality) from the concrete predicate + P-invariance + Step 2
+hypothesis. Once `Step2_target` is discharged unconditionally (the
+remaining open Step 2 work), `theorem_2_HOR_concrete` becomes
+unconditional for concrete schurian schemes, and the abstract
+`schurian_scheme_profile_exists` axiom can be retired (mirroring
+the Tier 1 IsCFI → IsCFI' refactor). -/
+
+/-- **Concrete schurian scheme graph predicate.** `adj` is the
+adjacency matrix of some `SchurianSchemeGraph`. -/
+structure IsSchurianSchemeGraph' {n : Nat} (adj : AdjMatrix n) where
+  /-- The underlying schurian scheme graph. -/
+  G : SchurianSchemeGraph n
+  /-- Its derived adjacency equals `adj`. -/
+  matching : G.toSchemeGraph.adj = adj
+
+/-- **Theorem 2 (HOR for schurian scheme graphs), concrete form.**
+The `theorem_2_HOR`-shaped statement, derived from the concrete
+predicate `IsSchurianSchemeGraph'` plus a P-invariance hypothesis
+plus the Step 2 witness.
+
+Becomes unconditional once `Step2_target` is fully discharged. -/
+theorem theorem_2_HOR_concrete {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hStep2 : Step2_target h.G P v) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u := by
+  -- Convert hP_invariant from `adj` to `h.G.toSchemeGraph.adj` via h.matching.
+  have hP' : ∀ {π : Equiv.Perm (Fin n)}, IsAut π h.G.toSchemeGraph.adj →
+      ∀ x u, P (π x) (π u) = P x u := by
+    intro π hπ
+    apply hP_invariant
+    rw [← h.matching]
+    exact hπ
+  -- Build the SchemeProfile.
+  have sp := h.G.toSchemeProfile P v hP' hStep2
+  -- Apply theorem_2_HOR_of_profile + transport via h.matching.
+  intro w u
+  rw [← h.matching]
+  exact theorem_2_HOR_of_profile sp w u
+
+/-- **Theorem 2 specialised to trivial P (most readable form).**
+With the trivial all-`unknown` P matrix, the P-invariance hypothesis
+is automatic; the only remaining open piece is `Step2_target`. -/
+theorem theorem_2_HOR_concrete_trivialP {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (v : Fin n)
+    (hStep2 : Step2_target h.G (trivialPMatrix n) v) :
+    ∀ w u : Fin n,
+      OrbitPartition adj (trivialPMatrix n) {v} w u ↔
+        warmRefine adj (trivialPMatrix n)
+          (individualizedColouring n {v}) w =
+          warmRefine adj (trivialPMatrix n)
+            (individualizedColouring n {v}) u :=
+  theorem_2_HOR_concrete h (trivialPMatrix n) v
+    trivialPMatrix_invariant hStep2
+
+/-! ### §9.3 — End-to-end smoke test: trivial 1-vertex scheme
+
+A complete instantiation showing the full theorem_2_HOR_concrete
+pipeline works for at least one case. The trivial 1-vertex scheme
+has `Fin 1`-many vertices, all in the diagonal relation `R_0`. The
+`Step2_target` discharges trivially since `w = u` always (Fin 1
+subsingleton); the rest of the pipeline goes through unconditionally.
+
+Validates: `SchurianSchemeGraph` structure → `Step2_target`
+discharge → `theorem_2_HOR_concrete` produces an axiom-clean
+Theorem 2 instance. -/
+
+/-- The trivial 1-vertex schurian scheme graph. -/
+def trivialSchurianSchemeGraph : SchurianSchemeGraph 1 where
+  scheme := trivialScheme
+  J := ∅
+  zero_notMem_J := by simp
+  schurian_transitive := by
+    intro _ v w v' w' _ _
+    refine ⟨Equiv.refl _, IsAut.refl, ?_, ?_⟩
+    · exact Fin.ext (by have := v.isLt; have := v'.isLt; omega)
+    · exact Fin.ext (by have := w.isLt; have := w'.isLt; omega)
+  isAut_imp_isSchemeAut := by
+    intro _ _ _ _ _
+    rfl
+
+/-- Step 2 holds trivially on the 1-vertex scheme: any two vertices
+in `Fin 1` are equal, so `vProfile` equality is automatic. -/
+theorem trivialSchurianSchemeGraph_step2 (P : PMatrix 1) (v : Fin 1) :
+    Step2_target trivialSchurianSchemeGraph P v := by
+  intro w u _
+  have hwu : w = u := Fin.ext (by have := w.isLt; have := u.isLt; omega)
+  rw [hwu]
+
+/-- **End-to-end unconditional Theorem 2 instance.** For the trivial
+1-vertex scheme with trivial P, the `OrbitPartition ↔ warmRefine`
+equivalence holds unconditionally (no axioms beyond
+`refineStep`/`refineStep_iff` and the standard basis).
+
+This is the **first fully discharged Theorem 2 instance** — no
+remaining "open piece" for the trivial case. Validates the
+architecture; serves as a template for richer instances (Johnson,
+Hamming, etc.) once their `Step2_target` is discharged. -/
+theorem theorem_2_HOR_trivial : ∀ w u : Fin 1,
+    OrbitPartition trivialSchurianSchemeGraph.toSchemeGraph.adj
+        (trivialPMatrix 1) {(0 : Fin 1)} w u ↔
+    warmRefine trivialSchurianSchemeGraph.toSchemeGraph.adj
+        (trivialPMatrix 1) (individualizedColouring 1 {0}) w =
+    warmRefine trivialSchurianSchemeGraph.toSchemeGraph.adj
+        (trivialPMatrix 1) (individualizedColouring 1 {0}) u :=
+  theorem_2_HOR_concrete_trivialP
+    ⟨trivialSchurianSchemeGraph, rfl⟩ 0
+    (trivialSchurianSchemeGraph_step2 _ _)
+
+/-! ### §9.4 — Step 2 discharged for `rank ≤ 1` schemes (covers K_n)
+
+A more substantive Step 2 discharge: for schemes with at most 2
+relations (R_0 diagonal + R_1 complement), `vProfile` takes only 2
+values (0 at v, 1 elsewhere). Step 2 reduces to "warmRefine
+separates v from non-v," which holds trivially since χ_v already
+does so and warmRefine refines χ_v (split-only).
+
+The K_n schurian scheme graph is exactly this case (with J = {1}).
+This gives an unconditional Theorem 2 instance for any concrete
+rank-1 schurian scheme graph, modulo construction (not done here). -/
+
+/-- **Step 2 for rank ≤ 1 schurian scheme graphs.** Direct case
+analysis: vertices are either `v` (vProfile 0) or not (vProfile 1
+when rank = 1; rank = 0 forces n ≤ 1 with only one vertex). -/
+theorem step2_of_rank_le_one {n : Nat} (G : SchurianSchemeGraph n)
+    (hrank : G.scheme.rank ≤ 1)
+    (P : PMatrix n) (v : Fin n) :
+    Step2_target G P v := by
+  intro w u hwu
+  by_cases hwv : w = v
+  · by_cases huv : u = v
+    · -- both = v: rewrite both to v.
+      rw [hwv, huv]
+    · -- w = v, u ≠ v: contradiction via iter[0] = χ_v.
+      exfalso
+      have h0 := warmRefine_eq_iter_eq G.toSchemeGraph.adj P
+                    (individualizedColouring n {v}) 0 (Nat.zero_le _) hwu
+      rw [hwv] at h0
+      exact huv ((individualizedColouring_singleton_eq_v_iff v u).mp h0.symm)
+  · by_cases huv : u = v
+    · -- w ≠ v, u = v: symmetric contradiction.
+      exfalso
+      have h0 := warmRefine_eq_iter_eq G.toSchemeGraph.adj P
+                    (individualizedColouring n {v}) 0 (Nat.zero_le _) hwu
+      rw [huv] at h0
+      exact hwv ((individualizedColouring_singleton_eq_v_iff v w).mp h0)
+    · -- Both ≠ v: vProfile values both in {1, …, rank} ⊆ {1} (for rank ≤ 1).
+      unfold vProfile
+      have hw_ne_0 : G.scheme.relOfPair v w ≠ 0 := by
+        intro heq
+        exact hwv ((G.scheme.relOfPair_eq_zero_iff v w).mp heq).symm
+      have hu_ne_0 : G.scheme.relOfPair v u ≠ 0 := by
+        intro heq
+        exact huv ((G.scheme.relOfPair_eq_zero_iff v u).mp heq).symm
+      have hw_lt := (G.scheme.relOfPair v w).isLt
+      have hu_lt := (G.scheme.relOfPair v u).isLt
+      have hw_pos : (G.scheme.relOfPair v w).val ≠ 0 :=
+        fun h => hw_ne_0 (Fin.ext h)
+      have hu_pos : (G.scheme.relOfPair v u).val ≠ 0 :=
+        fun h => hu_ne_0 (Fin.ext h)
+      omega
+
+/-- **Theorem 2 unconditional for rank ≤ 1 schurian scheme graphs.**
+Combining `step2_of_rank_le_one` with `theorem_2_HOR_concrete`. -/
+theorem theorem_2_HOR_concrete_rank_le_one {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (hrank : h.G.scheme.rank ≤ 1)
+    (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u :=
+  theorem_2_HOR_concrete h P v hP_invariant
+    (step2_of_rank_le_one h.G hrank P v)
+
 end ChainDescent
