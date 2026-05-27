@@ -156,9 +156,14 @@ none-yet-known. Three concrete tiers:
 - **Tier 3 — cascade class** (most general). Orbit recovery for any
   graph in the cascade class of [`chain-descent-calculator.md`](./chain-descent-calculator.md) §3.
   Conjectural; essentially equivalent to T-C on cascade class.
+  Paper-first plan in [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
+  (decomposability framing, plus a visibility/no-hidden-symmetry
+  alternate framing for inversion arguments).
 
 This doc is currently focused on **Tier 1**. Tier 2 is sketched in §10
-as a follow-on direction. Tier 3 is left open.
+as a follow-on direction. Tier 3 is left open;
+[`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
+scopes a paper plan.
 
 ---
 

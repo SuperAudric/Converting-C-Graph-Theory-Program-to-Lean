@@ -418,6 +418,12 @@ arises *somewhere*. The proof target is: show every obstruction the descent
 produces decomposes as `(resistant-abelian) ⋊ (cascading)`. A counterexample
 would be the first clean hidden-Johnson graph.
 
+A paper-first plan for this proof target is sketched in
+[`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md),
+which decomposes it into three sub-claims (abelian-stripping, residual
+cascade, layered composition) and records a sibling visibility / no-hidden-
+symmetry framing for inversion arguments.
+
 ---
 
 ## 8. Implementation
