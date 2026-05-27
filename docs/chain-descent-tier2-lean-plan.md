@@ -563,6 +563,33 @@ to `vProfile` at some bounded depth.
 algebra rank for schurian schemes" content. Once discharged, every
 schurian scheme graph gets a fully unconditional Theorem 2 instance.
 
+### Convergence attempt (depth 1, attempted 2026-05-27)
+
+Tried: extract `adj v w = adj v u` from `schemePart_at G P v 1 w u`
+via the depth-1 count condition at `w' = v`. Conceptually
+straightforward — LHS-filter = `{v}` (since `schemePart_at_0 u' v`
+forces `u' = v`), so |LHS| = 1; by hkey |RHS| = 1; combined with
+`RHS ⊆ {v}`, get `RHS = {v}`; extract `adj u v = adj w v`.
+
+**Blocked by Lean technical obstacle.** Lean cannot unify the
+`Finset.filter` expression inside `hcount`'s output (which uses
+`schemePart_at`'s internal `Classical.decPred` via `letI`) with an
+identical-looking filter expression written externally (using a
+freshly-elaborated `Classical.decPred`). The two `Decidable`
+instance terms are not definitionally equal. Standard workarounds
+(`convert ... using N`, `Subsingleton.elim` on `Decidable`,
+`Eq.trans` chains, `▸` notation, `classical` tactic) all fail —
+the mismatch is at a level that congruence-based tactics don't
+bridge.
+
+**Cleaner restructure for future work.** Rewriting `schemePart_at`
+to use `Set.ncard` of `{u' | ...}` (decidability-uniform via
+Classical) instead of `(Finset.univ.filter ...).card` should
+sidestep the issue. This would require updating
+`iter_refines_schemePart_at`'s proof correspondingly. Estimated
+1-2 sessions; left as the single remaining open piece of Tier 2
+formalization.
+
 ### S2.c — convergence bound
 
 > `Π_k = vProfile partition` for `k ≥ rank + 1` (or some other

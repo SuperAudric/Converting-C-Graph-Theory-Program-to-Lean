@@ -1448,6 +1448,23 @@ proved for schurian schemes (classical coherent algebra content),
 every schurian scheme graph gets a fully unconditional
 `theorem_2_HOR_concrete` instance.
 
+*Convergence attempt 2026-05-27 — blocked by a Lean Decidable
+instance bridging issue.* Tried direct count extraction at depth 1
+(`schemePart_at G P v 1 w u → adj v w = adj v u`, which would
+give depth-1 convergence for schemes where adj-to-v distinguishes
+vProfile, e.g., Petersen via Johnson J(5,2)). The proof is
+conceptually straightforward — `LHS-filter = {v}` forces both
+filter cardinalities to be 1, hence `RHS-filter = {v}`, extract.
+But Lean cannot unify the `Finset.filter` Decidable instance
+inside `hcount`'s output (via `schemePart_at`'s internal `letI
+Classical.decPred`) with externally-elaborated `Classical.decPred _`
+instances. Standard workarounds (`convert`, `▸`, `Eq.trans`,
+`Subsingleton.elim`, `classical` tactic) all fail. **Cleaner
+restructure for future work:** rewrite `schemePart_at` to use
+`Set.ncard {u' | ...}` (decidability-uniform via Classical)
+instead of `(Finset.univ.filter ...).card`. Estimated 1-2 sessions
+of follow-up; left as the single remaining open piece.
+
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.
 

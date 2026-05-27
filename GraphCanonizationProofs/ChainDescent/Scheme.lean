@@ -1704,4 +1704,37 @@ theorem step2_converges_at_zero_of_rank_le_one {n : Nat}
   -- This matches step2_at_depth_zero_of_rank_le_one's body.
   exact step2_at_depth_zero_of_rank_le_one G hrank P v w u h
 
+/-! ### §10.5 — Convergence: the remaining open piece
+
+For full Step 2 on rank ≥ 2 schurian scheme graphs, we need to
+prove `Step2_converges_at G P v k_bound` for some appropriate
+bound (classically `k_bound = rank + 1`).
+
+**Approach attempted** (left open due to a Lean technicality below):
+extract `adj v w = adj v u` from `schemePart_at G P v 1 w u` via
+the depth-1 count condition at `w' = v`. The argument is conceptually
+straightforward: LHS-filter forces `u' = v` (via
+`schemePart_at_0 u' v ↔ u' = v`), making LHS-filter = {v}; by the
+count condition, RHS-filter has cardinality 1 too; combined with
+RHS-filter ⊆ {v}, we get RHS-filter = {v}; hence `v ∈ RHS-filter`
+yields `adj u v = adj w v`.
+
+**Lean technical obstacle.** Lean cannot unify the `Finset.filter`
+expression inside `hcount`'s output type (which uses
+`schemePart_at`'s internal `Classical.decPred` via `letI`) with an
+identical-looking filter expression written externally (which uses
+a freshly-elaborated `Classical.decPred` or similar). The two
+`Decidable` instance terms are not definitionally equal despite
+both reducing to classical choice on the same predicate. Standard
+workarounds (`convert ... using N`, `Subsingleton.elim` on
+`Decidable`, `Eq.trans` chains, `▸` notation) all fail because the
+mismatch is at a level that congruence-based tactics don't bridge.
+
+**Cleaner restructure for future work.** Rewriting `schemePart_at`
+to use `Set.ncard` of `{u' | ...}` (decidability-uniform via Classical)
+instead of `(Finset.univ.filter ...).card` should sidestep the
+issue. This would require updating `iter_refines_schemePart_at`'s
+proof correspondingly. Estimated 1-2 sessions; left as the
+single remaining open piece of Tier 2 formalization. -/
+
 end ChainDescent
