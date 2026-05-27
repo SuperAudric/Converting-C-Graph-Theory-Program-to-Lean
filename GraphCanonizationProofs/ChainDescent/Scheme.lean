@@ -1,6 +1,8 @@
 import ChainDescent
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Card
+import Mathlib.Data.Set.Card
+import Mathlib.Data.Set.Finite.Basic
 
 /-!
 # Association schemes (Tier 2 infrastructure)
@@ -1482,6 +1484,15 @@ using `iter_succ_eq_iff` + `signature_eq_countP_eq` +
 partition. This is the "coherent algebra rank = scheme rank"
 content; classical but non-trivial. -/
 
+/-- **Bridge lemma.** For a `Fintype` and any decidable predicate `p`,
+`Set.ncard {x | p x} = (Finset.univ.filter p).card`. The classical
+choice in `Set.ncard` is invisible because we have a `DecidablePred`,
+and the set-builder collapses to `Finset.univ.filter`. -/
+theorem ncard_setOf_eq_filter_card {n : Nat} (p : Fin n → Prop)
+    [DecidablePred p] :
+    {x : Fin n | p x}.ncard = (Finset.univ.filter p).card := by
+  rw [Set.ncard_eq_toFinset_card', Set.toFinset_setOf]
+
 /-- Recursive partition predicate at depth `k`. Two vertices are
 indistinguishable up to depth `k` iff:
 - k = 0: they share their χ_v colour (i.e., either both = v or
@@ -1492,8 +1503,10 @@ indistinguishable up to depth `k` iff:
   as `w'` with `adj w u' = a` and `P w u' = p` matches between
   `w` and `u`.
 
-Noncomputable: filters need classical decidability since
-`schemePart_at` recurses on `Prop`-valued predicates. -/
+Uses `Set.ncard` rather than `(Finset.univ.filter ...).card` to
+sidestep `Decidable` instance bridging issues — `Set.ncard` is
+`Nat.card`-backed (classical), so set-builder equalities are
+propositional and congruence-friendly. -/
 noncomputable def schemePart_at {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) : Nat → Fin n → Fin n → Prop
   | 0, w, u => individualizedColouring n {v} w = individualizedColouring n {v} u
@@ -1501,22 +1514,10 @@ noncomputable def schemePart_at {n : Nat} (G : SchurianSchemeGraph n) (P : PMatr
     schemePart_at G P v k w u ∧
     -- For each (a, p, w'), counts match between the w-perspective and the u-perspective.
     ∀ (a : Nat) (p : POE) (w' : Fin n),
-      letI : DecidablePred (fun u' : Fin n =>
-          u' ≠ w ∧ schemePart_at G P v k u' w' ∧
-          G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p) :=
-        Classical.decPred _
-      letI : DecidablePred (fun u' : Fin n =>
-          u' ≠ u ∧ schemePart_at G P v k u' w' ∧
-          G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p) :=
-        Classical.decPred _
-      (Finset.univ.filter
-        (fun u' : Fin n =>
-          u' ≠ w ∧ schemePart_at G P v k u' w' ∧
-          G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p)).card =
-      (Finset.univ.filter
-        (fun u' : Fin n =>
-          u' ≠ u ∧ schemePart_at G P v k u' w' ∧
-          G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p)).card
+      {u' : Fin n | u' ≠ w ∧ schemePart_at G P v k u' w' ∧
+                    G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p}.ncard =
+      {u' : Fin n | u' ≠ u ∧ schemePart_at G P v k u' w' ∧
+                    G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p}.ncard
 
 /-! ### §10.2 — `schemePart_at` is an equivalence relation
 
@@ -1647,11 +1648,23 @@ theorem iter_refines_schemePart_at {n : Nat} (G : SchurianSchemeGraph n)
         exact ⟨hne, (hequiv u').mpr hex, ha, hp⟩
       · rintro ⟨hne, hsp, ha, hp⟩
         exact ⟨hne, (hequiv u').mp hsp, ha, hp⟩
-    -- Chain: schemePart-w-count = p_pred-w-count = p_pred-u-count = schemePart-u-count.
-    -- The Decidable instances differ between schemePart_at's letI and our haveI,
-    -- but `convert ... using 3` aligns them via propext on Decidable Props.
-    convert (congrArg Finset.card h_w_filter).symm.trans
-      (hcount.trans (congrArg Finset.card h_u_filter)) using 3
+    -- Chain: schemePart-w-ncard = schemePart-w-card = p_pred-w-card = p_pred-u-card
+    --        = schemePart-u-card = schemePart-u-ncard. The Set.ncard ↔ Finset.card
+    -- bridge uses `ncard_setOf_eq_filter_card` (below) under the local DecidablePred.
+    have h_w_ncard : {u' : Fin n | u' ≠ w ∧ schemePart_at G P v k u' w' ∧
+                      G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p}.ncard =
+                    (Finset.univ.filter (fun u' : Fin n =>
+                      u' ≠ w ∧ schemePart_at G P v k u' w' ∧
+                      G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p)).card :=
+      ncard_setOf_eq_filter_card _
+    have h_u_ncard : {u' : Fin n | u' ≠ u ∧ schemePart_at G P v k u' w' ∧
+                      G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p}.ncard =
+                    (Finset.univ.filter (fun u' : Fin n =>
+                      u' ≠ u ∧ schemePart_at G P v k u' w' ∧
+                      G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p)).card :=
+      ncard_setOf_eq_filter_card _
+    rw [h_w_ncard, h_u_ncard, ← h_w_filter, ← h_u_filter]
+    exact hcount
 
 /-! ### §10.4 — Convergence assembly
 
@@ -1704,37 +1717,322 @@ theorem step2_converges_at_zero_of_rank_le_one {n : Nat}
   -- This matches step2_at_depth_zero_of_rank_le_one's body.
   exact step2_at_depth_zero_of_rank_le_one G hrank P v w u h
 
-/-! ### §10.5 — Convergence: the remaining open piece
+/-! ### §10.5 — Depth-1 extraction: `adj` and `P` to `v`
 
-For full Step 2 on rank ≥ 2 schurian scheme graphs, we need to
-prove `Step2_converges_at G P v k_bound` for some appropriate
-bound (classically `k_bound = rank + 1`).
+The previously-blocked lemma: extract `adj w v = adj u v` and
+`P w v = P u v` from `schemePart_at G P v 1 w u` via the depth-1
+count condition at `w' = v`. Argument:
+- LHS-set = `{v}` (the only `u' ≠ w` with `χ_v u' = χ_v v` is `v`,
+  via `individualizedColouring_singleton_eq_v_iff`).
+- |LHS-set| = 1; by the count condition, |RHS-set| = 1.
+- RHS-set ⊆ {v} by the same `χ_v` uniqueness; so RHS-set = {v}.
+- `v ∈ RHS-set` yields `adj u v = adj w v ∧ P u v = P w v`.
 
-**Approach attempted** (left open due to a Lean technicality below):
-extract `adj v w = adj v u` from `schemePart_at G P v 1 w u` via
-the depth-1 count condition at `w' = v`. The argument is conceptually
-straightforward: LHS-filter forces `u' = v` (via
-`schemePart_at_0 u' v ↔ u' = v`), making LHS-filter = {v}; by the
-count condition, RHS-filter has cardinality 1 too; combined with
-RHS-filter ⊆ {v}, we get RHS-filter = {v}; hence `v ∈ RHS-filter`
-yields `adj u v = adj w v`.
+This was blocked under the old `Finset.filter`-based `schemePart_at`
+by a `Decidable` instance unification issue; the `Set.ncard`
+restructure (§10.1) makes the argument go through cleanly because
+`Set.ncard` doesn't carry a Decidable instance to align. -/
 
-**Lean technical obstacle.** Lean cannot unify the `Finset.filter`
-expression inside `hcount`'s output type (which uses
-`schemePart_at`'s internal `Classical.decPred` via `letI`) with an
-identical-looking filter expression written externally (which uses
-a freshly-elaborated `Classical.decPred` or similar). The two
-`Decidable` instance terms are not definitionally equal despite
-both reducing to classical choice on the same predicate. Standard
-workarounds (`convert ... using N`, `Subsingleton.elim` on
-`Decidable`, `Eq.trans` chains, `▸` notation) all fail because the
-mismatch is at a level that congruence-based tactics don't bridge.
+/-- **Depth-1 extraction.** For `w, u ≠ v`, `schemePart_at G P v 1 w u`
+forces `adj w v = adj u v` and `P w v = P u v`. -/
+theorem schemePart_at_one_to_v {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v w u : Fin n) (hwv : w ≠ v) (huv : u ≠ v)
+    (h : schemePart_at G P v 1 w u) :
+    G.toSchemeGraph.adj.adj w v = G.toSchemeGraph.adj.adj u v ∧
+    P w v = P u v := by
+  obtain ⟨_, hcount⟩ := h
+  -- Specialize: (a, p, w') = (adj w v, P w v, v).
+  have hkey := hcount (G.toSchemeGraph.adj.adj w v) (P w v) v
+  -- Both sets collapse to a singleton-or-empty form via χ_v uniqueness.
+  have hLHS : {u' : Fin n |
+                u' ≠ w ∧ schemePart_at G P v 0 u' v ∧
+                G.toSchemeGraph.adj.adj w u' = G.toSchemeGraph.adj.adj w v ∧
+                P w u' = P w v} = {v} := by
+    ext u'
+    simp only [Set.mem_setOf_eq, Set.mem_singleton_iff]
+    refine ⟨?_, ?_⟩
+    · rintro ⟨_, h_sp0, _, _⟩
+      exact (individualizedColouring_singleton_eq_v_iff v u').mp h_sp0
+    · rintro rfl
+      exact ⟨hwv.symm, rfl, rfl, rfl⟩
+  -- RHS-set: same shape, with u in place of w.
+  -- First: every member equals v (χ_v uniqueness).
+  have hRHS_sub : {u' : Fin n |
+                u' ≠ u ∧ schemePart_at G P v 0 u' v ∧
+                G.toSchemeGraph.adj.adj u u' = G.toSchemeGraph.adj.adj w v ∧
+                P u u' = P w v} ⊆ {v} := by
+    intro u' h_mem
+    obtain ⟨_, h_sp0, _, _⟩ := h_mem
+    exact (individualizedColouring_singleton_eq_v_iff v u').mp h_sp0
+  -- The count condition: lhs.ncard = rhs.ncard, both equal 1 (lhs = {v}).
+  rw [hLHS] at hkey
+  have hcard_v : ({v} : Set (Fin n)).ncard = 1 := Set.ncard_singleton v
+  rw [hcard_v] at hkey
+  -- So |RHS| = 1 and RHS ⊆ {v}; hence RHS = {v}.
+  have hRHS_eq : {u' : Fin n |
+                u' ≠ u ∧ schemePart_at G P v 0 u' v ∧
+                G.toSchemeGraph.adj.adj u u' = G.toSchemeGraph.adj.adj w v ∧
+                P u u' = P w v} = {v} :=
+    Set.eq_of_subset_of_ncard_le hRHS_sub
+      (by rw [hcard_v]; exact hkey.le) (Set.finite_singleton v)
+  -- v belongs to the RHS-set, so adj u v = adj w v and P u v = P w v.
+  have hv_mem : v ∈ {u' : Fin n |
+                u' ≠ u ∧ schemePart_at G P v 0 u' v ∧
+                G.toSchemeGraph.adj.adj u u' = G.toSchemeGraph.adj.adj w v ∧
+                P u u' = P w v} := by
+    rw [hRHS_eq]
+    rfl
+  obtain ⟨_, _, hadj, hP⟩ := hv_mem
+  exact ⟨hadj.symm, hP.symm⟩
 
-**Cleaner restructure for future work.** Rewriting `schemePart_at`
-to use `Set.ncard` of `{u' | ...}` (decidability-uniform via Classical)
-instead of `(Finset.univ.filter ...).card` should sidestep the
-issue. This would require updating `iter_refines_schemePart_at`'s
-proof correspondingly. Estimated 1-2 sessions; left as the
-single remaining open piece of Tier 2 formalization. -/
+/-- **Depth-1 extraction, adj-only specialization.** -/
+theorem schemePart_at_one_adj_to_v {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v w u : Fin n) (hwv : w ≠ v) (huv : u ≠ v)
+    (h : schemePart_at G P v 1 w u) :
+    G.toSchemeGraph.adj.adj w v = G.toSchemeGraph.adj.adj u v :=
+  (schemePart_at_one_to_v G P v w u hwv huv h).1
+
+/-! ### §10.6 — Convergence at depth 1
+
+With the depth-1 extraction in hand, convergence reduces to a
+scheme-side **depth-1 separation hypothesis**: that `(adj v ·, P v ·)`
+determines `relOfPair v ·` on non-`v` vertices.
+
+This hypothesis is **automatic** for two important classes:
+- `rank ≤ 1` schemes (only one non-diagonal relation, so adj-to-v
+  classifies completely); subsumes the existing
+  `step2_converges_at_zero_of_rank_le_one`.
+- Rank-2 schemes with `J = {1}` (e.g., Johnson `J(5,2)` = Petersen,
+  Kneser graphs): adj-to-v separates the two non-diagonal relations.
+
+The hypothesis is **not** automatic for higher-rank schemes (e.g.,
+Hamming `H(2, 3)`, Johnson `J(m, k)` for `k ≥ 3`), where multiple
+non-diagonal relations share J-class membership and adj-to-v alone
+cannot distinguish them. Those require deeper convergence (depth 2+
+via intersection-number reasoning), which is left to future work as
+a per-scheme strengthening. -/
+
+/-- **Depth-1 separation hypothesis.** `(adj v ·, P v ·)` determines
+`relOfPair v ·` on non-`v` vertices: any two non-`v` vertices with
+matching adj/P to `v` lie in the same scheme relation with `v`. -/
+def RelOfPairDetByAdjP {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) : Prop :=
+  ∀ w u : Fin n, w ≠ v → u ≠ v →
+    G.toSchemeGraph.adj.adj w v = G.toSchemeGraph.adj.adj u v →
+    P w v = P u v →
+    G.scheme.relOfPair v w = G.scheme.relOfPair v u
+
+/-- **Step 2 convergence at depth 1 under depth-1 separation.** When
+`RelOfPairDetByAdjP G P v` holds, the depth-1 extraction
+(`schemePart_at_one_to_v`) immediately yields vProfile equality. -/
+theorem step2_converges_at_one_of_det {n : Nat}
+    (G : SchurianSchemeGraph n) (P : PMatrix n) (v : Fin n)
+    (hdet : RelOfPairDetByAdjP G P v) :
+    Step2_converges_at G P v 1 := by
+  intro w u h
+  -- Reduce to relOfPair equality (vProfile is its .val).
+  suffices h_rel : G.scheme.relOfPair v w = G.scheme.relOfPair v u by
+    unfold vProfile; rw [h_rel]
+  by_cases hwv : w = v
+  · -- w = v: by schemePart_at-0, also u = v.
+    obtain ⟨h0, _⟩ := h
+    rw [hwv] at h0
+    have hu : u = v :=
+      (individualizedColouring_singleton_eq_v_iff v u).mp h0.symm
+    rw [hwv, hu]
+  · by_cases huv : u = v
+    · -- u = v: symmetric.
+      obtain ⟨h0, _⟩ := h
+      rw [huv] at h0
+      have hw : w = v :=
+        (individualizedColouring_singleton_eq_v_iff v w).mp h0
+      rw [huv, hw]
+    · -- Both ≠ v: depth-1 extraction + hdet.
+      obtain ⟨hadj, hP⟩ := schemePart_at_one_to_v G P v w u hwv huv h
+      exact hdet w u hwv huv hadj hP
+
+/-- **`rank ≤ 1` implies depth-1 separation.** When the scheme has
+only one non-diagonal relation, adj-to-v trivially determines
+relOfPair v · (both non-v vertices land in the same unique
+non-diagonal relation). -/
+theorem relOfPairDetByAdjP_of_rank_le_one {n : Nat}
+    (G : SchurianSchemeGraph n) (hrank : G.scheme.rank ≤ 1)
+    (P : PMatrix n) (v : Fin n) :
+    RelOfPairDetByAdjP G P v := by
+  intro w u hwv huv _ _
+  -- Both relOfPair v · values are non-zero (since w, u ≠ v) and < rank + 1 ≤ 2.
+  -- Hence both = 1, forcing equality.
+  have hw_ne_0 : G.scheme.relOfPair v w ≠ 0 := by
+    intro heq
+    exact hwv ((G.scheme.relOfPair_eq_zero_iff v w).mp heq).symm
+  have hu_ne_0 : G.scheme.relOfPair v u ≠ 0 := by
+    intro heq
+    exact huv ((G.scheme.relOfPair_eq_zero_iff v u).mp heq).symm
+  have hw_lt := (G.scheme.relOfPair v w).isLt
+  have hu_lt := (G.scheme.relOfPair v u).isLt
+  apply Fin.ext
+  have hw_pos : (G.scheme.relOfPair v w).val ≠ 0 :=
+    fun h => hw_ne_0 (Fin.ext h)
+  have hu_pos : (G.scheme.relOfPair v u).val ≠ 0 :=
+    fun h => hu_ne_0 (Fin.ext h)
+  omega
+
+/-! ### §10.7 — End-to-end Theorem 2 via depth-1 convergence
+
+Compose `step2_converges_at_one_of_det` with `step2_of_converges_at`
+to get `Step2_target`, then plug into `theorem_2_HOR_concrete`. -/
+
+/-- **Step 2 from depth-1 separation.** For any schurian scheme graph
+on `n ≥ 1` vertices satisfying `RelOfPairDetByAdjP`,
+`Step2_target G P v` holds — unconditionally. -/
+theorem step2_of_det {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n)
+    (hdet : RelOfPairDetByAdjP G P v) :
+    Step2_target G P v :=
+  step2_of_converges_at G P v 1 (Nat.one_le_iff_ne_zero.mpr (by
+    intro h
+    rw [h] at v
+    exact (Fin.elim0 v))) (step2_converges_at_one_of_det G P v hdet)
+
+/-- **Theorem 2 unconditional under depth-1 separation.** -/
+theorem theorem_2_HOR_concrete_of_det {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hdet : RelOfPairDetByAdjP h.G P v) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u :=
+  theorem_2_HOR_concrete h P v hP_invariant (step2_of_det h.G P v hdet)
+
+/-! ### §10.8 — Adj-separation predicate and the rank-≤-2 case
+
+A cleaner reformulation: depth-1 separation follows from
+`(· ∈ J)` being injective on non-diagonal relations. This holds
+**iff** `rank ≤ 2` (the function has codomain `Bool`, so injectivity
+on a domain of size `> 2` is impossible). For `rank ≤ 2` we get:
+
+- `rank ≤ 1`: automatic (≤ 1 non-diagonal relation; trivially
+  injective). Already proved as
+  `relOfPairDetByAdjP_of_rank_le_one`.
+- `rank = 2` with `|J| = 1`: J splits the two non-diagonal
+  relations cleanly; injective. **Proved here.**
+- `rank = 2` with `|J| = 0` or `|J| = 2`: both non-diagonal
+  relations have the same J-membership; **not** injective —
+  depth-1 separation fails and a deeper convergence argument is
+  needed.
+
+For Petersen (= Kneser `K(5,2)` = `J(5,2)`), `rank = 2` and `|J| = 1`
+(`J = {1}` for the "share 1 element" relation), so the rank-2 case
+applies. -/
+
+/-- **Adj-separation:** `(· ∈ J)` restricted to non-diagonal
+relations is injective. Equivalent to depth-1 separation. -/
+def AdjSeparatesRelations {n : Nat} (G : SchemeGraph n) : Prop :=
+  ∀ i j : Fin (G.scheme.rank + 1), i ≠ 0 → j ≠ 0 →
+    ((i ∈ G.J) ↔ (j ∈ G.J)) → i = j
+
+/-- **`AdjSeparatesRelations` implies depth-1 separation.** -/
+theorem relOfPairDetByAdjP_of_adjSeparates {n : Nat}
+    (G : SchurianSchemeGraph n) (hsep : AdjSeparatesRelations G.toSchemeGraph)
+    (P : PMatrix n) (v : Fin n) :
+    RelOfPairDetByAdjP G P v := by
+  intro w u hwv huv hadj _hP
+  -- Both relOfPair v · are non-zero (since w, u ≠ v).
+  have hw_ne : G.scheme.relOfPair v w ≠ 0 :=
+    fun heq => hwv ((G.scheme.relOfPair_eq_zero_iff v w).mp heq).symm
+  have hu_ne : G.scheme.relOfPair v u ≠ 0 :=
+    fun heq => huv ((G.scheme.relOfPair_eq_zero_iff v u).mp heq).symm
+  -- (relOfPair v w ∈ J) ↔ (relOfPair v u ∈ J), from adj equality + symmetry.
+  have hiff : (G.scheme.relOfPair v w ∈ G.toSchemeGraph.J) ↔
+              (G.scheme.relOfPair v u ∈ G.toSchemeGraph.J) := by
+    rw [← G.toSchemeGraph.adj_eq_one_iff, ← G.toSchemeGraph.adj_eq_one_iff,
+        G.toSchemeGraph.adj_symm v w, G.toSchemeGraph.adj_symm v u, hadj]
+  exact hsep _ _ hw_ne hu_ne hiff
+
+/-- **`rank ≤ 1` implies adj-separation.** Automatic since
+the non-diagonal index set has size ≤ 1. -/
+theorem adjSeparates_of_rank_le_one {n : Nat}
+    (G : SchemeGraph n) (hrank : G.scheme.rank ≤ 1) :
+    AdjSeparatesRelations G := by
+  intro i j hi_ne hj_ne _
+  apply Fin.ext
+  have hi_lt := i.isLt
+  have hj_lt := j.isLt
+  have hi_pos : i.val ≠ 0 := fun h => hi_ne (Fin.ext h)
+  have hj_pos : j.val ≠ 0 := fun h => hj_ne (Fin.ext h)
+  omega
+
+/-- **`rank = 2` + `|J| = 1` implies adj-separation.** The unique
+element of J distinguishes the two non-diagonal relations. -/
+theorem adjSeparates_of_rank_two_J_singleton {n : Nat}
+    (G : SchemeGraph n) (hrank : G.scheme.rank = 2)
+    (hJ : G.J.card = 1) :
+    AdjSeparatesRelations G := by
+  intro i j hi_ne hj_ne hiff
+  obtain ⟨j_0, hJ_eq⟩ := Finset.card_eq_one.mp hJ
+  -- Both i, j ∈ {1, 2}; the J-membership iff says (i = j_0) ↔ (j = j_0).
+  have hi_lt := i.isLt
+  have hj_lt := j.isLt
+  have hi_pos : i.val ≠ 0 := fun h => hi_ne (Fin.ext h)
+  have hj_pos : j.val ≠ 0 := fun h => hj_ne (Fin.ext h)
+  -- i and j are each either j_0 or the other rank-2 element.
+  -- (i ∈ J) ↔ i = j_0; same for j. So hiff is (i = j_0) ↔ (j = j_0).
+  have hi_iff : (i ∈ G.J) ↔ i = j_0 := by
+    rw [hJ_eq]; exact Finset.mem_singleton
+  have hj_iff : (j ∈ G.J) ↔ j = j_0 := by
+    rw [hJ_eq]; exact Finset.mem_singleton
+  by_cases hi_j0 : i = j_0
+  · -- i = j_0; by hiff, j = j_0; so i = j.
+    have : j = j_0 := hj_iff.mp ((hiff.mp (hi_iff.mpr hi_j0)))
+    rw [hi_j0, this]
+  · -- i ≠ j_0; by hiff contrapositive, j ≠ j_0; both are the "other" element.
+    have hj_nj0 : j ≠ j_0 :=
+      fun heq => hi_j0 (hi_iff.mp (hiff.mpr (hj_iff.mpr heq)))
+    -- For rank = 2 with i, j ∈ {1, 2} and both ≠ j_0:
+    -- they must be the unique element of {1, 2} \ {j_0}, hence equal.
+    apply Fin.ext
+    -- j_0 ∈ {1, 2}; let j_0.val ∈ {1, 2}.
+    have hj0_lt := j_0.isLt
+    have hj0_mem : j_0 ∈ G.J := by
+      rw [hJ_eq]; exact Finset.mem_singleton_self _
+    have hj0_ne_zero : j_0.val ≠ 0 := by
+      intro h
+      have : j_0 = 0 := Fin.ext h
+      rw [this] at hj0_mem
+      exact G.zero_notMem_J hj0_mem
+    have hi_ne_j0_val : i.val ≠ j_0.val :=
+      fun heq => hi_j0 (Fin.ext heq)
+    have hj_ne_j0_val : j.val ≠ j_0.val :=
+      fun heq => hj_nj0 (Fin.ext heq)
+    -- All of i.val, j.val, j_0.val ∈ {1, 2}. j_0.val ∈ {1, 2} and i.val ≠ j_0.val,
+    -- and i.val ∈ {1, 2}, so i.val is the other element. Same for j.val. omega.
+    omega
+
+/-- **Combined: `rank = 2` + `|J| = 1` ⇒ depth-1 separation.** -/
+theorem relOfPairDetByAdjP_of_rank_two_J_singleton {n : Nat}
+    (G : SchurianSchemeGraph n) (hrank : G.scheme.rank = 2)
+    (hJ : G.toSchemeGraph.J.card = 1)
+    (P : PMatrix n) (v : Fin n) :
+    RelOfPairDetByAdjP G P v :=
+  relOfPairDetByAdjP_of_adjSeparates G
+    (adjSeparates_of_rank_two_J_singleton G.toSchemeGraph hrank hJ) P v
+
+/-- **Theorem 2 unconditional for `rank = 2` + `|J| = 1` schurian
+scheme graphs.** Covers Petersen (= Kneser `K(5,2)` = `J(5,2)`) and
+other "single-edge-relation" rank-2 schemes. -/
+theorem theorem_2_HOR_concrete_rank_two_J_singleton {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (hrank : h.G.scheme.rank = 2)
+    (hJ : h.G.toSchemeGraph.J.card = 1)
+    (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u :=
+  theorem_2_HOR_concrete_of_det h P v hP_invariant
+    (relOfPairDetByAdjP_of_rank_two_J_singleton h.G hrank hJ P v)
 
 end ChainDescent

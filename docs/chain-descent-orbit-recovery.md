@@ -1448,22 +1448,44 @@ proved for schurian schemes (classical coherent algebra content),
 every schurian scheme graph gets a fully unconditional
 `theorem_2_HOR_concrete` instance.
 
-*Convergence attempt 2026-05-27 — blocked by a Lean Decidable
-instance bridging issue.* Tried direct count extraction at depth 1
-(`schemePart_at G P v 1 w u → adj v w = adj v u`, which would
-give depth-1 convergence for schemes where adj-to-v distinguishes
-vProfile, e.g., Petersen via Johnson J(5,2)). The proof is
-conceptually straightforward — `LHS-filter = {v}` forces both
-filter cardinalities to be 1, hence `RHS-filter = {v}`, extract.
-But Lean cannot unify the `Finset.filter` Decidable instance
-inside `hcount`'s output (via `schemePart_at`'s internal `letI
-Classical.decPred`) with externally-elaborated `Classical.decPred _`
-instances. Standard workarounds (`convert`, `▸`, `Eq.trans`,
-`Subsingleton.elim`, `classical` tactic) all fail. **Cleaner
-restructure for future work:** rewrite `schemePart_at` to use
-`Set.ncard {u' | ...}` (decidability-uniform via Classical)
-instead of `(Finset.univ.filter ...).card`. Estimated 1-2 sessions
-of follow-up; left as the single remaining open piece.
+*Convergence at depth 1 — DONE 2026-05-27.* The Set.ncard
+restructure landed and unblocked the depth-1 extraction.
+§10.5-§10.8 of `Scheme.lean` (~280 lines, axiom-clean).
+
+- §10.1 (revised) — `schemePart_at` now uses
+  `Set.ncard {u' | ...}` instead of `(Finset.univ.filter ...).card`,
+  sidestepping the `Decidable` instance bridging issue. Bridge
+  lemma `ncard_setOf_eq_filter_card` (Set.ncard ↔ Finset.filter.card
+  under a DecidablePred) does the connecting work.
+- §10.3 (`iter_refines_schemePart_at`) re-proved cleanly against
+  the new definition.
+- §10.5 — **`schemePart_at_one_to_v`** (the originally-blocked
+  depth-1 extraction, now proved): for `w, u ≠ v`,
+  `schemePart_at G P v 1 w u → adj w v = adj u v ∧ P w v = P u v`.
+- §10.6 — **`RelOfPairDetByAdjP`** depth-1 separation predicate,
+  plus **`step2_converges_at_one_of_det`** (Step 2 convergence at
+  depth 1 under depth-1 separation).
+- §10.7 — **`theorem_2_HOR_concrete_of_det`**: end-to-end
+  unconditional Theorem 2 given depth-1 separation.
+- §10.8 — Cleaner reformulation as `AdjSeparatesRelations` (`(· ∈ J)`
+  injective on non-diagonal relations), with the rank-2 + |J|=1
+  instance: **`adjSeparates_of_rank_two_J_singleton`** and the
+  headline **`theorem_2_HOR_concrete_rank_two_J_singleton`** —
+  unconditional Theorem 2 for Petersen / Kneser `K(5,2)` /
+  Johnson `J(5,2)` (and any other rank-2 schurian scheme graph
+  with `|J| = 1`).
+
+**Coverage delivered:** Theorem 2 is now unconditional for all
+schurian scheme graphs with `rank ≤ 2 ∧ |J| ≤ 1` (or `|J| ≥ rank`).
+This covers all the small classical examples enumerated in §7's
+empirical landscape — Petersen and J(5,2) match here, K_n is in
+`rank ≤ 1`. Higher-rank schemes (Hamming `H(2, 3)`, Johnson
+`J(m, k)` for `k ≥ 3`) still need deeper convergence — depth 2+
+via intersection-number reasoning, sketched in §10.6 docs but
+left to a follow-on session as a per-scheme strengthening.
+
+All new lemmas axiom-clean (`refineStep` + `refineStep_iff` +
+standard basis; no scheme-specific axioms).
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

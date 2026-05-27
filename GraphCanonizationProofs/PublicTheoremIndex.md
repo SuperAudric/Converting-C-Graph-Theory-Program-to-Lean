@@ -404,11 +404,25 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `Step2_at_depth` | 1406-1415 | Depth-parametrised Step 2: iter[k] equality implies `vProfile` equality; a depth-explicit version of `Step2_target`. | §10 |
 | `step2_of_step2_at_depth` | 1417-1425 | `Step2_at_depth G P v k` for any `k ≤ n` lifts to `Step2_target G P v` via `warmRefine_eq_iter_eq`. | — |
 | `step2_at_depth_zero_of_rank_le_one` | 1427-1460 | Sanity instance: `Step2_at_depth G P v 0` for rank ≤ 1 schurian scheme graphs, the cleaner form of `step2_of_rank_le_one`. | — |
-| `schemePart_at` | 1485-1519 | Recursive partition predicate at depth `k`: at depth 0, `χ_v`-equality; at depth `k+1`, depth-`k` equivalence plus matching (adj, P, depth-`k` class) counts mimicking what `refineStep` computes. | Noncomputable; §10.1 |
-| `schemePart_at_refl` | 1527-1535 | `schemePart_at G P v k` is reflexive. | §10.2 |
-| `schemePart_at_symm` | 1537-1547 | `schemePart_at G P v k` is symmetric. | — |
-| `schemePart_at_trans` | 1549-1561 | `schemePart_at G P v k` is transitive. | — |
-| `iter_refines_schemePart_at` | 1579-1654 | Inductive refinement: the `iter[k] χ_v` partition refines `schemePart_at G P v k`; the substantive intersection-number induction step of Step 2. | §10.3 |
-| `Step2_converges_at` | 1672-1679 | Step 2 convergence at depth `k`: `schemePart_at`-k equivalence implies `vProfile` equality. The single remaining open content piece for full Step 2. | §10.4 |
-| `step2_of_converges_at` | 1681-1692 | Step 2 from convergence plus the inductive step: `Step2_converges_at G P v k` with `k ≤ n` implies `Step2_target G P v`. | — |
-| `step2_converges_at_zero_of_rank_le_one` | 1694-1705 | Sanity check: the convergence framework recovers the rank-≤-1 case at depth 0, where `schemePart_at` reduces to `χ_v`-equality. | — |
+| `ncard_setOf_eq_filter_card` | 1486-1494 | Bridge lemma: for `Fintype` and decidable predicate `p`, `{x | p x}.ncard = (Finset.univ.filter p).card`. Used to bridge `Set.ncard`-based `schemePart_at` to the `Finset.filter.card` form output by `signature_eq_countP_eq`. | — |
+| `schemePart_at` | 1510-1525 | Recursive partition predicate at depth `k`: at depth 0, `χ_v`-equality; at depth `k+1`, depth-`k` equivalence plus matching (adj, P, depth-`k` class) counts via `Set.ncard {u' \| ...}` (sidesteps `Decidable` instance bridging issues). | Noncomputable; §10.1 |
+| `schemePart_at_refl` | 1529-1537 | `schemePart_at G P v k` is reflexive. | §10.2 |
+| `schemePart_at_symm` | 1539-1549 | `schemePart_at G P v k` is symmetric. | — |
+| `schemePart_at_trans` | 1551-1563 | `schemePart_at G P v k` is transitive. | — |
+| `iter_refines_schemePart_at` | 1572-1670 | Inductive refinement: the `iter[k] χ_v` partition refines `schemePart_at G P v k`; the substantive intersection-number induction step of Step 2. | §10.3 |
+| `Step2_converges_at` | 1688-1695 | Step 2 convergence at depth `k`: `schemePart_at`-k equivalence implies `vProfile` equality. | §10.4 |
+| `step2_of_converges_at` | 1697-1708 | Step 2 from convergence plus the inductive step: `Step2_converges_at G P v k` with `k ≤ n` implies `Step2_target G P v`. | — |
+| `step2_converges_at_zero_of_rank_le_one` | 1711-1718 | Sanity check: the convergence framework recovers the rank-≤-1 case at depth 0, where `schemePart_at` reduces to `χ_v`-equality. | — |
+| `schemePart_at_one_to_v` | 1738-1786 | **Depth-1 extraction**: for `w, u ≠ v`, `schemePart_at G P v 1 w u` forces `adj w v = adj u v ∧ P w v = P u v`. Was originally blocked by a `Decidable` instance issue; the `Set.ncard` restructure made the proof go through cleanly. | §10.5 |
+| `schemePart_at_one_adj_to_v` | 1789-1793 | Depth-1 extraction, adj-only specialization. | — |
+| `RelOfPairDetByAdjP` | 1818-1823 | **Depth-1 separation hypothesis**: `(adj v ·, P v ·)` determines `relOfPair v ·` on non-`v` vertices. Sufficient for `Step2_converges_at G P v 1` via the depth-1 extraction. | §10.6 |
+| `step2_converges_at_one_of_det` | 1828-1856 | **Step 2 convergence at depth 1 under depth-1 separation**. Reduces to the depth-1 extraction plus the separation hypothesis. | — |
+| `relOfPairDetByAdjP_of_rank_le_one` | 1858-1880 | `rank ≤ 1` schurian scheme graphs trivially satisfy depth-1 separation. | — |
+| `step2_of_det` | 1888-1896 | `Step2_target G P v` from `RelOfPairDetByAdjP`; lifts depth-1 convergence to the full step-2 target via `step2_of_converges_at`. | §10.7 |
+| `theorem_2_HOR_concrete_of_det` | 1898-1908 | **Theorem 2 unconditional under depth-1 separation** (Petersen-class). Plugs `step2_of_det` into `theorem_2_HOR_concrete`. | T2.M4 |
+| `AdjSeparatesRelations` | 1932-1934 | Cleaner reformulation of depth-1 separation: `(· ∈ J)` is injective on non-diagonal relations. Equivalent to `RelOfPairDetByAdjP` and decoupled from `P`. | §10.8 |
+| `relOfPairDetByAdjP_of_adjSeparates` | 1937-1953 | `AdjSeparatesRelations` implies `RelOfPairDetByAdjP` (transport through adj symmetry + `adj_eq_one_iff`). | — |
+| `adjSeparates_of_rank_le_one` | 1956-1966 | `rank ≤ 1` ⇒ `AdjSeparatesRelations` (≤ 1 non-diagonal index, trivially injective). | — |
+| `adjSeparates_of_rank_two_J_singleton` | 1969-2011 | **`rank = 2` + `|J| = 1` ⇒ `AdjSeparatesRelations`.** The unique element of `J` distinguishes the two non-diagonal relations. Covers Petersen / Kneser `K(5,2)` / Johnson `J(5,2)`. | — |
+| `relOfPairDetByAdjP_of_rank_two_J_singleton` | 2014-2020 | Combined: `rank = 2` + `|J| = 1` ⇒ `RelOfPairDetByAdjP`. | — |
+| `theorem_2_HOR_concrete_rank_two_J_singleton` | 2025-2036 | **Theorem 2 unconditional for rank-2 + `|J| = 1` schurian scheme graphs** — covers Petersen, Kneser `K(5,2)`, Johnson `J(5,2)`. Axiom-clean (only `refineStep`/`refineStep_iff` + standard basis). | T2.M4 / headline |
