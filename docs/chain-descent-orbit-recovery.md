@@ -1359,28 +1359,38 @@ constructor + P-preservation bridge + discharge
 [`chain-descent-tier2-lean-plan.md`](./chain-descent-tier2-lean-plan.md)
 §7.
 
-*Stage T2.3 / Step 2 — §8.b infrastructure DONE 2026-05-27.*
-~80 lines, axiom-clean. Three foundational pieces:
-- `iter_succ_eq_iff`: round-by-round unfolding via `refineStep_iff`
-  + `Function.iterate_succ_apply'`. The inductive step's primary
-  tool.
-- `AssociationScheme.intersectionCount_via_w`: scheme-axiom
-  application showing intermediate-vertex counts via
-  `(R_i, R_l)`-pairs depend only on `relOfPair v w`. The algebraic
-  engine for the inductive step. No `refineStep` dependence.
-- `Step2_target G P v`: the eventual Step 2 statement, named for
-  reference downstream.
+*Stage T2.3 / Step 2 — §8.b infrastructure + count bridge +
+partial result DONE 2026-05-27.* ~280 lines, axiom-clean. Three
+layers:
 
-Plus helper abbreviation `iterSignature` and the trivial corollary
-`intersectionCount_eq_of_vProfile_eq`.
+- **§8.b.1 — iteration framework:** `iter_succ_eq_iff` (round-by-
+  round unfolding), `AssociationScheme.intersectionCount_via_w`
+  (scheme-axiom packaging), `Step2_target` def naming the eventual
+  full claim. Plus `iterSignature` and the trivial corollary
+  `intersectionCount_eq_of_vProfile_eq`.
+- **§8.b.2 — count bridge:** `signature_count_eq_card` and the
+  general `signature_countP_eq_card` (Multiset.count → Finset.card
+  via `Multiset.count_map` + `Finset.filter_val` +
+  `Finset.filter_filter`). Plus the count-equality consequences:
+  `signature_eq_card_eq`, `signature_eq_countP_eq`,
+  `iter_succ_count_eq`, `iter_succ_countP_eq`,
+  `iter_succ_colour_count_eq`. The workhorse for the inductive
+  step.
+- **§8.b.3 — partial Step 2:** `iter_succ_adj_eq` (S2.a lifted to
+  any depth ≥ 1 via `refineStep_iter_le_eq`), `warmRefine_adj_eq`
+  (warmRefine version), and **`SchurianSchemeGraph.warmRefine_J_eq`**
+  — the first concrete partial Step 2 theorem: warmRefine cells
+  refine the J-class partition of `vProfile`. (Coarsest non-trivial
+  vProfile refinement; the full Step 2 keeps refining via
+  intersection numbers until reaching `vProfile` itself.)
 
-**Remaining for S2.b proper:** pick the inductive partition Π_k
-formulation, prove `iter[k] χ_v` refines Π_k by induction, then
-S2.c (convergence at depth ≤ rank+1). Open design piece: a
-`signature_count_eq_card` helper bridging `Multiset.count` on
-signatures to `Finset.card` of preimage filters, needed to
-translate signature equality into intersection-number-indexed
-count equality.
+**Remaining for full Step 2:** the recursive partition Π_k beyond
+J-class. Likely either (i) abstract Setoid-valued Π_k with
+inductive refinement proof, or (ii) direct induction on "iter[k]
+χ_v refines partition by intersection-number-rows up to depth k"
+using `intersectionCount_via_w`. Decide at next session. Then
+S2.c (convergence at depth ≤ rank+1) + S2.d (warmRefine lift) +
+T2.M4 (SchemeProfile constructor + axiom discharge).
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

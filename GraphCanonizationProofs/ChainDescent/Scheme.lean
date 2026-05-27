@@ -906,4 +906,198 @@ def Step2_target {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
       warmRefine G.toSchemeGraph.adj P (individualizedColouring n {v}) u →
     vProfile G.scheme v w = vProfile G.scheme v u
 
+/-! ### §8.b.2 — Count bridge: Multiset.count on signatures → Finset.card
+
+`signature` is a `Multiset.map`; counts via `Multiset.count` correspond
+to cardinalities of preimage filters on the underlying Finset. The
+bridge lets the inductive step extract concrete vertex counts from
+abstract signature equality.
+
+Mathlib's `Multiset.count_map` gives:
+> `count b (map f s) = (s.filter (fun a => b = f a)).card`
+
+so combined with `Finset.filter_val` and `Finset.filter_filter` we
+collapse the two-level filter (the `(· ≠ w)` filter of `signature`
+plus the `count` filter) into a single Finset filter. -/
+
+/-- **Bridge lemma.** Multiset count on a signature equals Finset
+cardinality of the matching preimage filter (over `u' ≠ w`). -/
+theorem signature_count_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (w : Fin n) (t : Nat × Nat × POE) :
+    Multiset.count t (signature adj P χ w) =
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ w ∧ t = (χ u', adj.adj w u', P w u'))).card := by
+  unfold signature
+  rw [Multiset.count_map, ← Finset.filter_val]
+  show (Finset.filter (fun u : Fin n => t = (χ u, adj.adj w u, P w u))
+        (Finset.univ.filter (fun u : Fin n => u ≠ w))).card = _
+  rw [Finset.filter_filter]
+
+/-- **Count equality from signature equality.** If `signature χ w =
+signature χ u`, then for any tuple `t`, the count of `u' ≠ w`
+producing `t` from `w` equals the count of `u' ≠ u` producing `t`
+from `u`. Direct corollary of `signature_count_eq_card`. -/
+theorem signature_eq_card_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) {w u : Fin n}
+    (h : signature adj P χ w = signature adj P χ u)
+    (t : Nat × Nat × POE) :
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ w ∧ t = (χ u', adj.adj w u', P w u'))).card =
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ u ∧ t = (χ u', adj.adj u u', P u u'))).card := by
+  rw [← signature_count_eq_card adj P χ w t,
+      ← signature_count_eq_card adj P χ u t, h]
+
+/-- **Iter-round count equality.** If two vertices are equal at
+iter[k+1] under `χ_v`, then for any (round-k colour, adj-value,
+P-value) triple, the counts of intermediate vertices match. -/
+theorem iter_succ_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) {w u : Fin n}
+    (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
+         ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u)
+    (c : Nat) (a : Nat) (p : POE) :
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ w ∧ (c, a, p) = (((refineStep adj P)^[k])
+        (individualizedColouring n {v}) u', adj.adj w u', P w u'))).card =
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ u ∧ (c, a, p) = (((refineStep adj P)^[k])
+        (individualizedColouring n {v}) u', adj.adj u u', P u u'))).card := by
+  have hsig := ((iter_succ_eq_iff adj P v k w u).mp h).2
+  exact signature_eq_card_eq adj P _ hsig (c, a, p)
+
+/-- **Bridge generalised: `countP` form.** Multiset.countP on a
+signature equals Finset.card of the matching preimage filter. -/
+theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (w : Fin n) (p : Nat × Nat × POE → Prop) [DecidablePred p] :
+    Multiset.countP p (signature adj P χ w) =
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ w ∧ p (χ u', adj.adj w u', P w u'))).card := by
+  unfold signature
+  rw [Multiset.countP_map, ← Finset.filter_val]
+  show (Finset.filter (fun u : Fin n => p (χ u, adj.adj w u, P w u))
+        (Finset.univ.filter (fun u : Fin n => u ≠ w))).card = _
+  rw [Finset.filter_filter]
+
+/-- **Aggregate countP equality from signature equality.** -/
+theorem signature_eq_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) {w u : Fin n}
+    (h : signature adj P χ w = signature adj P χ u)
+    (p : Nat × Nat × POE → Prop) [DecidablePred p] :
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ w ∧ p (χ u', adj.adj w u', P w u'))).card =
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ u ∧ p (χ u', adj.adj u u', P u u'))).card := by
+  rw [← signature_countP_eq_card adj P χ w p,
+      ← signature_countP_eq_card adj P χ u p, h]
+
+/-- **Aggregate iter-round count equality.** Under iter[k+1] equality,
+the count of intermediate vertices `u'` whose (iter[k] colour, adj
+value, P value) satisfies any decidable predicate `p` matches between
+`w` and `u`. The workhorse aggregate version of `iter_succ_count_eq`. -/
+theorem iter_succ_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) {w u : Fin n}
+    (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
+         ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u)
+    (p : Nat × Nat × POE → Prop) [DecidablePred p] :
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ w ∧ p (((refineStep adj P)^[k])
+        (individualizedColouring n {v}) u', adj.adj w u', P w u'))).card =
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ u ∧ p (((refineStep adj P)^[k])
+        (individualizedColouring n {v}) u', adj.adj u u', P u u'))).card := by
+  have hsig := ((iter_succ_eq_iff adj P v k w u).mp h).2
+  exact signature_eq_countP_eq adj P _ hsig p
+
+/-- **Aggregate count via colour predicate.** Specialisation of
+`iter_succ_countP_eq` for predicates depending only on the round-k
+colour (ignoring adj and P values). The Σ-over-all-adj/P collapse:
+under iter[k+1] equality, the count of intermediate vertices whose
+round-k colour satisfies `q` matches between `w` and `u`. -/
+theorem iter_succ_colour_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) {w u : Fin n}
+    (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
+         ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u)
+    (q : Nat → Prop) [DecidablePred q] :
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ w ∧ q (((refineStep adj P)^[k])
+        (individualizedColouring n {v}) u'))).card =
+    (Finset.univ.filter (fun u' : Fin n =>
+      u' ≠ u ∧ q (((refineStep adj P)^[k])
+        (individualizedColouring n {v}) u'))).card := by
+  have := iter_succ_countP_eq adj P v k h (fun t => q t.1)
+  -- Predicates `(fun u' => q (iter[k] u'))` and `(fun u' => (fun t => q t.1)
+  -- (iter[k] u', adj w u', P w u'))` are definitionally equal.
+  exact this
+
+/-! ### §8.b.3 — S2.a lifted via iteration helper
+
+The round-1 lemma (S2.a) gives `adj w v = adj u v` from `refineStep
+χ_v w = refineStep χ_v u`. By `refineStep_iter_le_eq` (§16.4 of
+`ChainDescent.lean`), iter[k+1] equality implies iter[1] equality
+(since the partition only refines monotonically). Hence iter[k+1]
+equality at any depth `k+1 ≥ 1` already forces `adj w v = adj u v`.
+
+Useful for arguments that hold "after at least one round of
+refinement" — including the eventual full Step 2 statement, where
+warmRefine equality ≥ iter[1] equality. -/
+
+/-- **S2.a lifted to any depth ≥ 1.** Iter[k+1] equality between two
+non-v vertices forces matching adj-to-v. -/
+theorem iter_succ_adj_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    {v : Fin n} (k : Nat) {w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
+    (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
+         ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u) :
+    adj.adj w v = adj.adj u v := by
+  -- Convert k+1 to 1+k for `refineStep_iter_le_eq`, then use it with
+  -- k_inner = 1, d_inner = k.
+  have h' : ((refineStep adj P)^[1 + k]) (individualizedColouring n {v}) w =
+            ((refineStep adj P)^[1 + k]) (individualizedColouring n {v}) u := by
+    rw [Nat.add_comm]; exact h
+  have h1 := refineStep_iter_le_eq adj P (individualizedColouring n {v}) 1 k h'
+  rw [Function.iterate_one] at h1
+  exact refineStep_round1_adj_eq adj P hwv huv h1
+
+/-- **warmRefine version of S2.a.** Two non-v vertices in the same
+warmRefine cell share adjacency to v. -/
+theorem warmRefine_adj_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    {v : Fin n} {w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
+    (h : warmRefine adj P (individualizedColouring n {v}) w =
+         warmRefine adj P (individualizedColouring n {v}) u) :
+    adj.adj w v = adj.adj u v := by
+  -- warmRefine = iter[n]; we want iter[1] equality.
+  -- Pick k = 0 in iter_succ_adj_eq if n ≥ 1; handle n = 0 vacuously.
+  rcases Nat.eq_zero_or_pos n with hn | hn
+  · -- n = 0: Fin n is empty, no vertices, contradiction.
+    exact absurd w.isLt (by omega)
+  · -- n ≥ 1: lift via warmRefine_eq_iter_eq at r = 1.
+    have h1 := warmRefine_eq_iter_eq adj P (individualizedColouring n {v}) 1 hn h
+    rw [Function.iterate_one] at h1
+    exact refineStep_round1_adj_eq adj P hwv huv h1
+
+/-- **SchurianSchemeGraph J-class match from warmRefine equality.**
+Two non-v vertices in the same warmRefine cell share the J-class
+membership of `relOfPair v ·`. Proper Step 2 partial result: this
+gives the coarsest non-trivial refinement (J vs not-J), one of the
+"layers" that the full Step 2 induction would peel off. -/
+theorem SchurianSchemeGraph.warmRefine_J_eq {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) {v : Fin n} {w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
+    (h : warmRefine G.toSchemeGraph.adj P (individualizedColouring n {v}) w =
+         warmRefine G.toSchemeGraph.adj P (individualizedColouring n {v}) u) :
+    (G.scheme.relOfPair v w ∈ G.J ↔ G.scheme.relOfPair v u ∈ G.J) := by
+  have hadj := warmRefine_adj_eq G.toSchemeGraph.adj P hwv huv h
+  rw [G.toSchemeGraph.adj_symm w v, G.toSchemeGraph.adj_symm u v] at hadj
+  rcases G.toSchemeGraph.adj_eq_zero_or_one v w with hw0 | hw1
+  · have hw_notIn : G.scheme.relOfPair v w ∉ G.J :=
+      (G.toSchemeGraph.adj_eq_zero_iff v w).mp hw0
+    rw [hw0] at hadj
+    have hu_notIn : G.scheme.relOfPair v u ∉ G.J :=
+      (G.toSchemeGraph.adj_eq_zero_iff v u).mp hadj.symm
+    exact ⟨fun h => absurd h hw_notIn, fun h => absurd h hu_notIn⟩
+  · have hw_in : G.scheme.relOfPair v w ∈ G.J :=
+      (G.toSchemeGraph.adj_eq_one_iff v w).mp hw1
+    rw [hw1] at hadj
+    have hu_in : G.scheme.relOfPair v u ∈ G.J :=
+      (G.toSchemeGraph.adj_eq_one_iff v u).mp hadj.symm
+    exact ⟨fun _ => hu_in, fun _ => hw_in⟩
+
 end ChainDescent

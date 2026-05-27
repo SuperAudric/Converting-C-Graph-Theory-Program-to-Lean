@@ -579,17 +579,27 @@ intersection-number refinement), S2.c (convergence at depth
 (SchemeProfile constructor + P-preservation bridge + discharge
 `schurian_scheme_profile_exists`).
 
-- §8.b — **S2.b infrastructure — DONE 2026-05-27** (~80 lines,
-  axiom-clean). `iterSignature` abbreviation,
-  **`iter_succ_eq_iff`** (round-by-round unfolding via
-  `refineStep_iff`), **`AssociationScheme.intersectionCount_via_w`**
-  (scheme-axiom packaging: count of intermediate `u'` by
-  `(R_i, R_l)` indexed pairs equals
-  `intersectionNumber i l (relOfPair v w)`), trivial corollary
-  `intersectionCount_eq_of_vProfile_eq`, and `Step2_target` def
-  naming the eventual full claim. These are the inductive-step
-  primitives; the remaining piece is the Π_k partition
-  formulation + convergence at depth ≤ rank + 1.
+- §8.b — **S2.b infrastructure + count bridge + partial result —
+  DONE 2026-05-27** (~280 lines, axiom-clean). Three layers:
+  - §8.b.1 iteration framework: `iterSignature`,
+    `iter_succ_eq_iff`, `AssociationScheme.intersectionCount_via_w`,
+    `intersectionCount_eq_of_vProfile_eq`, `Step2_target`.
+  - §8.b.2 count bridge: `signature_count_eq_card` and the
+    general `signature_countP_eq_card` (Multiset.count → Finset.card
+    via `Multiset.count_map` + `Finset.filter_val` +
+    `Finset.filter_filter`); plus the iter[k+1]-applied versions
+    `signature_eq_card_eq`, `signature_eq_countP_eq`,
+    `iter_succ_count_eq`, `iter_succ_countP_eq`,
+    `iter_succ_colour_count_eq`. The workhorse for the inductive
+    step.
+  - §8.b.3 partial Step 2: `iter_succ_adj_eq` (S2.a lifted to any
+    depth ≥ 1), `warmRefine_adj_eq`,
+    **`SchurianSchemeGraph.warmRefine_J_eq`** — warmRefine cells
+    refine the J-class partition of `vProfile`. First concrete
+    Step 2 partial theorem.
+  Remaining: the recursive partition Π_k beyond J-class + the
+  convergence bound at depth ≤ rank + 1 + warmRefine lift, then
+  the SchemeProfile constructor in T2.M4.
 
 **Refuted (machine-checked, kept as record of dead routes):**
 

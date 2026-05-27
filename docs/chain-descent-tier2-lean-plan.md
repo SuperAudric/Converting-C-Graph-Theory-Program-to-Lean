@@ -453,38 +453,65 @@ The second is closer to what `refineStep` actually computes; likely
 the cleaner Lean formulation. The intersection-number axiom is
 what guarantees these counts are determined by `vProfile`.
 
-**S2.b infrastructure landed 2026-05-27** (§8.b of `Scheme.lean`,
-~80 lines, axiom-clean):
+**S2.b infrastructure + count bridge + partial result landed
+2026-05-27** (§8.b of `Scheme.lean`, ~280 lines, axiom-clean):
 
-- `iterSignature adj P v k w` (noncomputable def) — the signature
+### §8.b.1 — Iteration framework
+- `iterSignature adj P v k w` (noncomputable def) — signature
   multiset of `w` against the iter[k] refinement of `χ_v`.
 - **`iter_succ_eq_iff`** — round-by-round unfolding:
   `iter[k+1] χ_v w = iter[k+1] χ_v u` ↔ `iter[k] χ_v w = iter[k]
-  χ_v u` ∧ `iterSignature ... k w = iterSignature ... k u`.
-  Direct from `refineStep_iff` + `Function.iterate_succ_apply'`.
-  This is the primary inductive-step tool.
-- **`AssociationScheme.intersectionCount_via_w`** — scheme-axiom
-  application: for any `(v, w)`, count of `u'` with
-  `(v, u') ∈ R_i` and `(w, u') ∈ R_l` equals `intersectionNumber
-  i l (relOfPair v w)`. Doesn't depend on `refineStep`; pure
-  scheme algebra. This is the algebraic engine for the inductive
-  step.
-- **`AssociationScheme.intersectionCount_eq_of_vProfile_eq`** —
-  trivial corollary: vertices with same `vProfile` have matching
-  intersection counts. (The converse — count match → vProfile
-  match — is the substantive S2.b/c content.)
-- **`Step2_target`** — the eventual Step 2 statement, defined for
-  reference: `∀ w u, warmRefine ... w = warmRefine ... u →
-  vProfile v w = vProfile v u`. Becomes the
-  `SchemeProfile.warm_refines_profile` field once discharged.
+  χ_v u` ∧ `iterSignature ... k w = iterSignature ... k u`. The
+  primary inductive-step tool.
+- **`AssociationScheme.intersectionCount_via_w`** — scheme axiom
+  in usable form: count of `u'` with `(v, u') ∈ R_i ∧ (w, u') ∈
+  R_l` equals `intersectionNumber i l (relOfPair v w)`. Pure
+  scheme algebra, no `refineStep`.
+- `AssociationScheme.intersectionCount_eq_of_vProfile_eq` —
+  trivial corollary.
+- `Step2_target G P v` — the eventual full Step 2 claim.
 
-**Remaining for S2.b proper:** pick the Π_k formulation (likely
-"cell-multiplicities"), induct on k, use the count-extraction
-infrastructure above to push the invariant forward at each step.
-The main missing piece is a clean `signature_count_eq_card` lemma
-bridging `Multiset.count` on signature multisets to `Finset.card`
-of preimage filters — needed to translate signature equality into
-vertex-count equality, which then connects to intersection numbers.
+### §8.b.2 — Count bridge (Multiset.count → Finset.card)
+- **`signature_count_eq_card`** — `Multiset.count` of a specific
+  tuple in `signature` equals `Finset.card` of matching preimage
+  filter over `u' ≠ w`. Built via `Multiset.count_map` +
+  `Finset.filter_val` + `Finset.filter_filter`.
+- **`signature_countP_eq_card`** — generalised to any decidable
+  predicate `p`.
+- **`signature_eq_card_eq`** / **`signature_eq_countP_eq`** —
+  corollaries: signature equality between `w` and `u` gives
+  matching preimage counts.
+- **`iter_succ_count_eq`** / **`iter_succ_countP_eq`** /
+  **`iter_succ_colour_count_eq`** — iter[k+1] equality versions:
+  the workhorse for the inductive step. Counts of intermediate
+  vertices `u'` satisfying any decidable predicate on
+  `(iter[k] colour, adj w u', P w u')` (or just colour) match
+  between `w` and `u`.
+
+### §8.b.3 — Partial Step 2 result (J-class refinement)
+- **`iter_succ_adj_eq`** — S2.a iteratively lifted: iter[k+1]
+  equality at any depth k ≥ 0 already forces `adj w v = adj u v`
+  (via `refineStep_iter_le_eq` from §16.4).
+- **`warmRefine_adj_eq`** — warmRefine version: two non-v
+  vertices in the same warmRefine cell share adj-to-v.
+- **`SchurianSchemeGraph.warmRefine_J_eq`** — **the first concrete
+  Step 2 partial theorem**: warmRefine cells refine the J-class
+  partition of `vProfile`. This is the "level 1" refinement; the
+  full Step 2 keeps refining via intersection-number induction
+  until reaching `vProfile` itself.
+
+**Remaining for S2.b proper:** the recursive partition Π_k beyond
+the J-class. Two approaches under consideration:
+1. Define `Π_k : Setoid (Fin n)` recursively, prove iter[k] χ_v
+   refines Π_k by induction on k using the count bridge above.
+2. Skip the abstract partition and directly induct on "iter[k]
+   χ_v refines the partition determined by `intersectionNumber`-rows
+   up to depth k", using `intersectionCount_via_w` to extract
+   scheme content from `iter_succ_countP_eq` counts.
+
+Approach 1 is more abstract but cleaner; Approach 2 is more direct
+but may be tangled with refineStep colour values. Decide at the next
+session.
 
 ### S2.c — convergence bound
 
