@@ -199,21 +199,88 @@ set — a routine but bookkeeping-heavy lemma.
    representative per orbit, which is iso-invariantly settled by the
    canonical chain-descent picker
    ([orbit-recovery §3](./chain-descent-orbit-recovery.md)).
-2. **Iso-invariance of the layer chain.** The chain `(H_0, …, H_k)` is
-   not canonical in general — `Aut(G)` may admit multiple normal-
-   subgroup decompositions. For the cascade oracle to apply Theorem
-   3a deterministically, the layer chain must be derivable from `G`'s
-   structure, not chosen freely. For semidirect-product cases (CFI on
-   anything, scheme on anything), the chain is canonical.
-3. **Polynomial bound depends on `k`.** Corollary 3a needs `k` to be
+2. **Polynomial bound depends on `k`.** Corollary 3a needs `k` to be
    polynomial in `n` for the total cascade depth to stay polynomial.
    For layered constructions (`CFI^d(H)`), `k = d`, so we need `d` to
    grow polynomially. For "natural" graphs with constant-depth layer
    chains, `k` is bounded by a small constant.
-4. **`H_{i-1}/H_i` may not be in *one* known cascade class.** A layer
+3. **`H_{i-1}/H_i` may not be in *one* known cascade class.** A layer
    could combine CFI and scheme structure. The theorem statement is
    robust to this: as long as *some* cascade-class bound applies to
    each layer's quotient action, the sum works.
+4. **The proof runs on warm refinement of `(A, P)`, not pure 1-WL on
+   `A` alone.** The partial-order `P`-matrix substrate is **load-
+   bearing**: warm refinement on `(A, P)` is split-only
+   (`warmRefine_refines`), direction-symmetric (`warm_6_2`), and
+   compatible with the descent spine (`warmRefine_agree_off'`) — all
+   load-bearing for §4.5's reordering / implicit-discovery argument.
+   Pure 1-WL on adjacency alone is not direction-symmetric and would
+   break the reordering step ([strategy §10](./chain-descent-strategy.md)
+   spells out a fresh-1-WL counterexample on 3 vertices). Empirically
+   confirmed via an edge-case check.
+
+### 4.5 Implicit discovery — the chain is a proof artifact
+
+A consequence of §4.2 + the descent spine machinery: **the layer
+chain doesn't need to be discovered by a separate algorithm**. The
+chain descent (cascade + linear oracles, lex-leader descent) achieves
+the Theorem 3a bound implicitly, because:
+
+1. **Selection is irrelevant for correctness.** All layer chains end
+   at `{1}`. Whichever chain the descent's behaviour traces, the
+   resulting canonical form is the same — the lex-min over
+   relabellings (strategy §7, completeness).
+
+2. **Selection is automatic for the bound.** The descent doesn't
+   pre-select a chain. It just runs: at every node, the cascade
+   oracle certifies a target cell's orbit structure (when possible),
+   the linear oracle reads a candidate twist off a single branch's
+   propagation pattern (when possible), and the algorithm processes
+   cells in canonical id order. The implicit chain — the sequence
+   of subgroups that the descent's stripping happens to trace —
+   gives *some* `Σ f_i` ≤ the cascade depth of *whichever* admissible
+   chain the descent traversed.
+
+3. **Construction is automatic.** Every cascade oracle invocation
+   that certifies an orbit harvests a generator into the
+   `PermutationGroup` chain ([calculator §2](./chain-descent-calculator.md));
+   every linear oracle invocation that verifies a twist harvests a
+   generator. The accumulated generators witness the implicit chain
+   — they generate `H_0`, their action quotients to `H_1`, and so on
+   down to `H_k = {1}`. No explicit chain-identification step is
+   needed.
+
+4. **Reordering is paper-only.** §4.2's proof rearranges the
+   `S_i`-individualizations in a specific order to make the
+   induction clean. The *algorithm* doesn't reorder — it processes
+   cells in canonical id order, and the descent spine
+   (`warmRefine_agree_off'`) guarantees the partition is independent
+   of order. The reordering argument is a proof tool to bound `|S|`,
+   not an algorithmic step.
+
+**Corollary 3a' (implicit best-chain bound).** Let `G` be a graph
+admitting *at least one* cascade-class layer chain (i.e., satisfying
+Theorem 3a's hypothesis for some `H_0 ⊵ … ⊵ H_k`). Then the chain
+descent's cascade depth on `G` is at most
+`min { Σ_i f_i : (H_0, …, H_k) is an admissible cascade-class chain }`.
+
+The minimum is taken over all admissible chains — the algorithm gets
+the *best* chain's bound for free, without having to identify which
+chain is best.
+
+**What this collapses.** The original §8.3.1 (layer-chain
+discoverability) reduces to the single question: *does an admissible
+chain exist?* That's the broader Tier 3 question (existence of a
+cascade-class normal chain — equivalent to no-hidden-Johnson on `G`).
+Selection and construction are no longer separate sub-problems.
+
+**What this depends on.** Corollary 3a' depends on the linear oracle
+existing as a *formal object* (sub-claim 1 of the broader Tier 3
+plan, [tier3-decomposability §5](./chain-descent-tier3-decomposability.md)).
+Until the linear oracle is built, the "automatic discovery"
+argument is one-half complete — the cascade-oracle half is in the
+shipped harness; the linear-oracle half is spec only. See §9 below
+for the implementation implication.
 
 ---
 
@@ -354,8 +421,11 @@ What it does *not* buy:
 |---|---|
 | 4.2.3 (lift `S_1'` from `G_1` to `S_2` in `G`) | Low — routine; the canonical chain-descent picker handles the iso-invariance |
 | 4.2.5 (1-WL on cell = 1-WL on quotient vertex) | Low — follows from 1-WL's definition restricted to a cell + the quotient-graph definition |
-| Iso-invariance of the layer chain | Medium — needs the chain to be derivable from `G`'s structure, not chosen externally |
+| Reordering of individualizations (4.5.4) | Low — relies on the descent spine + warm refinement on `(A, P)`; pure 1-WL on `A` alone would not suffice |
 | Polynomial bound when `k` grows | Class-dependent — bounded `k` for natural graphs, unbounded for CFI towers |
+
+Discoverability of the chain is **not** on this list — §4.5 collapses
+selection and construction into the algorithm's natural behaviour.
 
 ### 8.2 Where the hypothesis could fail
 
@@ -364,27 +434,34 @@ The cascade-class layer hypothesis can fail if:
 1. **A layer's quotient action is non-cascade.** E.g., a hidden Johnson
    layer. By definition, Theorem 3a doesn't apply — this is exactly
    the Tier-2 wall.
-2. **`Aut(G)` doesn't admit a normal chain.** Rare for "natural"
-   graphs; even then, the theorem applies to any normal chain that
-   exists, but doesn't strip the residual non-decomposable part.
+2. **No admissible cascade-class chain exists.** This is the strong
+   form of existence — equivalent in scope to the broader Tier 3
+   decomposability claim, and the open mathematical content. (§4.5's
+   implicit-discovery argument needs *some* such chain to exist; if
+   none does, the algorithm flags rather than canonizing.)
 3. **The chain is unbounded (`k` super-polynomial).** Cumulative
    depth still bounded by `Σ f_i`, but no longer polynomial. Out of
    scope for cascade-class graphs.
 
 ### 8.3 Open questions worth flagging
 
-1. **Layer-chain discovery.** Theorem 3a assumes the layer chain is
-   given. The cascade oracle needs to *discover* it from `G`. For
-   CFI-on-anything and scheme-on-anything, discovery is direct (the
-   construction fingerprint is visible). For arbitrary `G`, finding
-   the layer chain may be as hard as canonization itself.
+1. **Existence of an admissible cascade-class chain.** The genuine
+   open Tier-3 content. Theorem 3a is conditional on existence;
+   §4.5's implicit-discovery argument makes selection/construction
+   automatic *given* existence. A counterexample (a graph admitting
+   *no* cascade-class normal chain) is a hidden-Johnson witness — same
+   as the broader construction question of
+   [calculator §7](./chain-descent-calculator.md).
 2. **Relation to GI lower bounds.** A graph that resists Theorem 3a
-   for every choice of layer chain is exactly a Tier-2 / hidden-Johnson
-   candidate. Counterexamples to Theorem 3a's hypothesis are the same
-   counterexamples as to the Tier 3 decomposability claim.
+   for *every* choice of layer chain is exactly a Tier-2 / hidden-
+   Johnson candidate. Counterexamples to Theorem 3a's hypothesis are
+   the same counterexamples as to the Tier 3 decomposability claim.
 3. **Sharpness of `Σ f_i`.** For specific compositions, tighter bounds
    may hold (e.g., overlapping individualizations could serve multiple
-   layers). `Σ f_i` is a worst-case bound, not always tight.
+   layers). The implicit best-chain corollary (Corollary 3a') already
+   gives the `min` over admissible chains — but tighter bounds may
+   come from accounting for individualization overlap *within* a
+   single chain.
 
 ---
 
@@ -432,24 +509,63 @@ subgroups.
   axiom-free.
 - Composition framing's only new mathematical content is routine
   bookkeeping (4.2.5).
+- Implicit-discovery argument (§4.5): the algorithm doesn't need to
+  identify a chain — descent does it automatically given existence.
+- Partial-order `(A, P)` substrate is load-bearing for the
+  reordering / implicit-discovery argument (§4.4 point 4); pure 1-WL
+  on `A` alone would not suffice.
 
 ### 10.2 Next (paper-first order)
 
 1. **Paper draft of Theorem 3a** — this doc upgraded to paper-rigorous,
-   with full proof of 4.2.5 spelled out.
+   with full proof of 4.2.5 spelled out and §4.5's implicit-discovery
+   argument made precise (in particular: the linear oracle's
+   harvested generators as witnesses to the chain).
 2. **Concrete instance write-ups** — `CFI(CFI(H))`, `CFI(Scheme_G)`,
    `Scheme(Scheme)` worked through end-to-end as worked examples.
 3. **Cover map verification** — for each row of §6, spell out the
    layer chain and confirm Theorem 3a's hypothesis is met.
-4. **Lean phase** — only after paper is reviewed. Phases A-D as in §9.
+4. **Linear oracle implementation** — see §10.4 below; the
+   implicit-discovery argument depends on the linear oracle existing
+   as a formal object, and the linear oracle is increasingly load-
+   bearing across the broader project.
+5. **Lean phase** — only after paper is reviewed. Phases A-D as in §9.
 
 ### 10.3 Risky
 
-- **Layer-chain discoverability** (open question 8.3.1) is the only
-  potentially blocking issue. Theorem 3a as stated assumes the chain
-  is given; whether the cascade oracle can discover it in polynomial
-  time is a separate question. For known constructions this is direct;
-  for arbitrary `G` it is open.
+- **Existence of an admissible cascade-class chain** (open question
+  8.3.1) is the only remaining mathematical risk. Theorem 3a is
+  conditional on existence; the implicit-discovery argument of §4.5
+  makes selection and construction automatic *given* existence. The
+  existence question is the broader Tier-3 open content — equivalent
+  in scope to the calculator §7 construction question, not a separate
+  Tier-3a sub-problem.
+
+### 10.4 Linear oracle as a near-term implementation priority
+
+The implicit-discovery argument (§4.5) depends on the linear oracle
+being a formal object — the abelian-layer half of the
+"automatic chain construction" runs through linear-oracle twist
+discovery, not just cascade-oracle orbit certification. The cascade-
+oracle half is in the shipped harness; the linear-oracle half is
+currently spec only ([calculator §6](./chain-descent-calculator.md)).
+
+The linear oracle is now load-bearing for:
+
+- **Tier 3 sub-claim 1** (abelian-stripping) — directly.
+- **Tier 3a Corollary 3a'** (implicit best-chain bound) — for the
+  abelian-layer half of construction.
+- **Tier 3 sub-claim 3** (composition) — for the alternation tolerance
+  argument.
+- **Calculator §6** (its original target) — handling genuine-decision
+  cells in CFI over non-cascading bases.
+
+Designing and implementing the linear oracle is the next concrete
+algorithmic step. Its construction predicate — turning a propagation
+pattern into a candidate twist — is the one genuinely unspecified
+piece ([calculator §9](./chain-descent-calculator.md), item 4).
+Multi-week effort, but with growing payoff as the proof program
+references it more.
 
 ---
 
