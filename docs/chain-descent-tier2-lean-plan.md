@@ -500,19 +500,9 @@ what guarantees these counts are determined by `vProfile`.
   full Step 2 keeps refining via intersection-number induction
   until reaching `vProfile` itself.
 
-**Remaining for full S2.b (rank ≥ 2):** the recursive partition Π_k
-beyond J-class for general schurian schemes. Two approaches under
-consideration:
-1. Define `Π_k : Setoid (Fin n)` recursively, prove iter[k] χ_v
-   refines Π_k by induction on k using the count bridge above.
-2. Skip the abstract partition and directly induct on "iter[k]
-   χ_v refines the partition determined by `intersectionNumber`-rows
-   up to depth k", using `intersectionCount_via_w` to extract
-   scheme content from `iter_succ_countP_eq` counts.
-
-Approach 1 is more abstract but cleaner; Approach 2 is more direct
-but may be tangled with refineStep colour values. Decide at the next
-session.
+**Remaining for full S2.b (rank ≥ 2): only the convergence content.**
+The inductive intersection-number step `iter_refines_schemePart_at`
+is **proved 2026-05-27**. See §10 below for details.
 
 ### S2.b rank ≤ 1 case + Theorem 2 instance — DONE 2026-05-27
 
@@ -531,6 +521,47 @@ discharged.
 
 For `rank ≥ 2` schemes (Johnson, Petersen, distance-regular), the
 inductive intersection-number argument is needed.
+
+### §10 framework — `Step2_at_depth`, `schemePart_at`, `iter_refines_schemePart_at`, `Step2_converges_at` — DONE 2026-05-27
+
+The Step 2 architecture is now built end-to-end except for the
+**single remaining content piece**: convergence of `schemePart_at`
+to `vProfile` at some bounded depth.
+
+- `Step2_at_depth G P v k`: iter[k] equality implies vProfile
+  equality. Lifts to `Step2_target` via `step2_of_step2_at_depth`
+  (uses `warmRefine_eq_iter_eq`).
+- `step2_at_depth_zero_of_rank_le_one`: cleaner restatement of
+  `step2_of_rank_le_one` via the depth-0 framework.
+- **`schemePart_at G P v k`**: the **recursive partition predicate**
+  on `Fin n × Fin n`. Depth 0 = χ_v partition; depth k+1 = depth
+  k AND for every (adj-value, P-value, class-representative), the
+  count of u' in that depth-k class with matching adj/P values
+  matches between w and u. Noncomputable (uses
+  `Classical.decPred` for the recursive filters).
+- `schemePart_at_refl/_symm/_trans`: equivalence-relation
+  structure.
+- **`iter_refines_schemePart_at`** — **THE INDUCTIVE STEP, PROVED**.
+  iter[k] χ_v partition refines `schemePart_at G P v k`. Proof: by
+  induction on k, using `iter_succ_eq_iff` + `signature_eq_countP_eq`
+  + the equivalence "schemePart_at k u' w' ↔ ∃ x, iter[k] x = iter[k]
+  u' ∧ schemePart_at k x w'" (from the inductive hypothesis +
+  transitivity).
+- **`Step2_converges_at G P v k`**: convergence statement —
+  schemePart_at-k equivalence implies vProfile equality. **The
+  single remaining content piece.**
+- **`step2_of_converges_at`**: assembly — convergence at any k ≤ n
+  gives `Step2_target` via `iter_refines_schemePart_at` +
+  `warmRefine_eq_iter_eq`.
+- `step2_converges_at_zero_of_rank_le_one`: convergence at depth 0
+  for the rank-≤-1 case (sanity check that the framework recovers
+  the simple case).
+
+**What remains for full Step 2 on rank ≥ 2 schemes:** prove
+`Step2_converges_at G P v (k_bound)` for some specific bound (e.g.,
+`k_bound = G.scheme.rank + 1`). This is the classical "coherent
+algebra rank for schurian schemes" content. Once discharged, every
+schurian scheme graph gets a fully unconditional Theorem 2 instance.
 
 ### S2.c — convergence bound
 

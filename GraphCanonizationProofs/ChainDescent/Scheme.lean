@@ -1388,4 +1388,320 @@ theorem theorem_2_HOR_concrete_rank_le_one {n : Nat} {adj : AdjMatrix n}
   theorem_2_HOR_concrete h P v hP_invariant
     (step2_of_rank_le_one h.G hrank P v)
 
+/-! ## §10 — Depth-parametrised Step 2 framework
+
+`Step2_at_depth G P v k` says iter[k] equality between any two
+vertices implies their vProfile equality. This is a depth-explicit
+version of `Step2_target` (which uses warmRefine, i.e., iter[n]).
+
+For concrete schemes, the convergence depth is bounded by something
+like `rank + 1`. Discharging `Step2_at_depth` at a specific small
+depth for a specific scheme then lifts to `Step2_target` via the
+`warmRefine_eq_iter_eq` helper.
+
+This framework lets specific schemes (Petersen, Johnson J(m,k), …)
+discharge Step 2 at their own characteristic depth without needing
+the general convergence-at-rank+1 argument. -/
+
+/-- **Step 2 at fixed depth k.** Iter[k] equality implies vProfile
+equality. -/
+def Step2_at_depth {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) : Prop :=
+  ∀ w u : Fin n,
+    ((refineStep G.toSchemeGraph.adj P)^[k])
+        (individualizedColouring n {v}) w =
+      ((refineStep G.toSchemeGraph.adj P)^[k])
+        (individualizedColouring n {v}) u →
+    vProfile G.scheme v w = vProfile G.scheme v u
+
+/-- **Step2_at_depth lifts to Step2_target.** For any `k ≤ n`,
+discharge at depth `k` implies the warmRefine-form. -/
+theorem step2_of_step2_at_depth {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) (k : Nat) (hk : k ≤ n)
+    (h : Step2_at_depth G P v k) : Step2_target G P v := by
+  intro w u hwu
+  apply h
+  exact warmRefine_eq_iter_eq G.toSchemeGraph.adj P
+          (individualizedColouring n {v}) k hk hwu
+
+/-- **Step2_at_depth at k = 0 for rank ≤ 1 schurian scheme graphs.**
+Specialisation of `step2_of_rank_le_one` to the cleaner
+`Step2_at_depth` form. -/
+theorem step2_at_depth_zero_of_rank_le_one {n : Nat} (G : SchurianSchemeGraph n)
+    (hrank : G.scheme.rank ≤ 1) (P : PMatrix n) (v : Fin n) :
+    Step2_at_depth G P v 0 := by
+  intro w u h0
+  -- h0 : iter[0] χ_v w = iter[0] χ_v u, already unfolded to χ_v w = χ_v u.
+  -- Decide whether w = v / u = v via χ_v uniqueness, then conclude vProfile equality.
+  by_cases hwv : w = v
+  · by_cases huv : u = v
+    · rw [hwv, huv]
+    · exfalso
+      rw [hwv] at h0
+      exact huv ((individualizedColouring_singleton_eq_v_iff v u).mp h0.symm)
+  · by_cases huv : u = v
+    · exfalso
+      rw [huv] at h0
+      exact hwv ((individualizedColouring_singleton_eq_v_iff v w).mp h0)
+    · -- Both ≠ v: rank ≤ 1 forces vProfile = 1 for both.
+      unfold vProfile
+      have hw_ne_0 : G.scheme.relOfPair v w ≠ 0 := by
+        intro heq
+        exact hwv ((G.scheme.relOfPair_eq_zero_iff v w).mp heq).symm
+      have hu_ne_0 : G.scheme.relOfPair v u ≠ 0 := by
+        intro heq
+        exact huv ((G.scheme.relOfPair_eq_zero_iff v u).mp heq).symm
+      have hw_lt := (G.scheme.relOfPair v w).isLt
+      have hu_lt := (G.scheme.relOfPair v u).isLt
+      have hw_pos : (G.scheme.relOfPair v w).val ≠ 0 :=
+        fun h => hw_ne_0 (Fin.ext h)
+      have hu_pos : (G.scheme.relOfPair v u).val ≠ 0 :=
+        fun h => hu_ne_0 (Fin.ext h)
+      omega
+
+/-! ### §10.1 — Inductive partition Π_k
+
+For schurian scheme graphs of `rank ≥ 2`, Step 2 needs the
+inductive intersection-number argument. We define a **recursive
+partition predicate** `schemePart_at` capturing what's
+distinguishable at depth `k`, and aim to prove
+`iter[k] χ_v` refines it.
+
+The partition at depth 0 separates `v` from everyone else (just
+the χ_v partition). At each successive depth, we refine by the
+multiset of (partition-class, adj, P) triples over neighbours —
+mimicking what `refineStep` computes.
+
+**Open inductive step:** prove
+`iter[k+1] χ_v w = iter[k+1] χ_v u → schemePart_at (k+1) w u`,
+using `iter_succ_eq_iff` + `signature_eq_countP_eq` +
+`intersectionCount_via_w`.
+
+**Open convergence claim:** for schurian schemes, at some
+`k ≤ rank + 1`, `schemePart_at k` coincides with the vProfile
+partition. This is the "coherent algebra rank = scheme rank"
+content; classical but non-trivial. -/
+
+/-- Recursive partition predicate at depth `k`. Two vertices are
+indistinguishable up to depth `k` iff:
+- k = 0: they share their χ_v colour (i.e., either both = v or
+  both ≠ v).
+- k = k'+1: indistinguishable at depth `k'`, AND for every adj
+  value `a`, every P value `p`, and every depth-`k'` class
+  representative `w'`, the count of `u'` in the same `Π_k'`-class
+  as `w'` with `adj w u' = a` and `P w u' = p` matches between
+  `w` and `u`.
+
+Noncomputable: filters need classical decidability since
+`schemePart_at` recurses on `Prop`-valued predicates. -/
+noncomputable def schemePart_at {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) : Nat → Fin n → Fin n → Prop
+  | 0, w, u => individualizedColouring n {v} w = individualizedColouring n {v} u
+  | k + 1, w, u =>
+    schemePart_at G P v k w u ∧
+    -- For each (a, p, w'), counts match between the w-perspective and the u-perspective.
+    ∀ (a : Nat) (p : POE) (w' : Fin n),
+      letI : DecidablePred (fun u' : Fin n =>
+          u' ≠ w ∧ schemePart_at G P v k u' w' ∧
+          G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p) :=
+        Classical.decPred _
+      letI : DecidablePred (fun u' : Fin n =>
+          u' ≠ u ∧ schemePart_at G P v k u' w' ∧
+          G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p) :=
+        Classical.decPred _
+      (Finset.univ.filter
+        (fun u' : Fin n =>
+          u' ≠ w ∧ schemePart_at G P v k u' w' ∧
+          G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p)).card =
+      (Finset.univ.filter
+        (fun u' : Fin n =>
+          u' ≠ u ∧ schemePart_at G P v k u' w' ∧
+          G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p)).card
+
+/-! ### §10.2 — `schemePart_at` is an equivalence relation
+
+Reflexivity, symmetry, transitivity by straightforward induction
+on `k`. Needed to argue that `iter[k] χ_v` (also an equivalence)
+refines `schemePart_at k`. -/
+
+/-- `schemePart_at` is reflexive. -/
+theorem schemePart_at_refl {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) (w : Fin n) : schemePart_at G P v k w w := by
+  induction k with
+  | zero => exact rfl
+  | succ k ih =>
+    refine ⟨ih, ?_⟩
+    intro _ _ _
+    rfl
+
+/-- `schemePart_at` is symmetric. -/
+theorem schemePart_at_symm {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) {w u : Fin n}
+    (h : schemePart_at G P v k w u) : schemePart_at G P v k u w := by
+  induction k generalizing w u with
+  | zero => exact h.symm
+  | succ k ih =>
+    obtain ⟨hk, hc⟩ := h
+    refine ⟨ih hk, ?_⟩
+    intro a p w'
+    exact (hc a p w').symm
+
+/-- `schemePart_at` is transitive. -/
+theorem schemePart_at_trans {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) {w u t : Fin n}
+    (h1 : schemePart_at G P v k w u) (h2 : schemePart_at G P v k u t) :
+    schemePart_at G P v k w t := by
+  induction k generalizing w u t with
+  | zero => exact h1.trans h2
+  | succ k ih =>
+    obtain ⟨hk1, hc1⟩ := h1
+    obtain ⟨hk2, hc2⟩ := h2
+    refine ⟨ih hk1 hk2, ?_⟩
+    intro a p w'
+    exact (hc1 a p w').trans (hc2 a p w')
+
+/-! ### §10.3 — `iter[k] χ_v` refines `schemePart_at G P v k`
+
+The substantive inductive step. Combines:
+- Base case: iter[0] = χ_v, matches `schemePart_at 0` by definition.
+- Inductive step: from iter[k+1] equality, get (a) iter[k] equality
+  (gives `schemePart_at k` by ih), (b) signature equality at iter[k]
+  (gives the count condition via `signature_eq_countP_eq` plus the
+  ih-derived equivalence "schemePart_at k u' w' ↔ ∃ x with iter[k]
+  x = iter[k] u' and schemePart_at k x w'").
+
+After this lemma, the only remaining piece for full Step 2 is the
+**convergence claim**: for schurian schemes, at some bounded `k ≤
+rank + 1`, `schemePart_at G P v k w u ↔ vProfile w = vProfile u`.
+That last piece is the coherent-algebra-style argument; classical
+but still open in this development. -/
+
+/-- **Inductive refinement.** `iter[k] χ_v` partition refines
+`schemePart_at G P v k`. -/
+theorem iter_refines_schemePart_at {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) :
+    ∀ (k : Nat) (w u : Fin n),
+      ((refineStep G.toSchemeGraph.adj P)^[k])
+          (individualizedColouring n {v}) w =
+        ((refineStep G.toSchemeGraph.adj P)^[k])
+          (individualizedColouring n {v}) u →
+      schemePart_at G P v k w u := by
+  intro k
+  induction k with
+  | zero =>
+    intro w u h
+    -- iter[0] = χ_v; schemePart_at 0 w u is just χ_v w = χ_v u (already).
+    exact h
+  | succ k ih =>
+    intro w u h
+    obtain ⟨hk, hsig⟩ :=
+      (iter_succ_eq_iff G.toSchemeGraph.adj P v k w u).mp h
+    refine ⟨ih w u hk, ?_⟩
+    intro a p w'
+    -- The key equivalence: schemePart_at k u' w' ↔ ∃ x, iter[k] x = iter[k] u' ∧ schemePart_at k x w'.
+    set χk := ((refineStep G.toSchemeGraph.adj P)^[k])
+                (individualizedColouring n {v}) with hχk_def
+    have hequiv : ∀ u', schemePart_at G P v k u' w' ↔
+                  ∃ x : Fin n, χk x = χk u' ∧ schemePart_at G P v k x w' := by
+      intro u'
+      refine ⟨fun h_sp => ⟨u', rfl, h_sp⟩, ?_⟩
+      rintro ⟨x, hx_eq, hx_sp⟩
+      have hux : schemePart_at G P v k u' x := ih u' x hx_eq.symm
+      exact schemePart_at_trans G P v k hux hx_sp
+    -- The iter-k-encoded predicate.
+    let p_pred : Nat × Nat × POE → Prop := fun t =>
+      (∃ x : Fin n, χk x = t.1 ∧ schemePart_at G P v k x w') ∧
+      t.2.1 = a ∧ t.2.2 = p
+    haveI : DecidablePred p_pred := Classical.decPred _
+    -- Apply signature_eq_countP_eq with p_pred.
+    have hcount := signature_eq_countP_eq G.toSchemeGraph.adj P χk hsig p_pred
+    -- Rewrite both filters to expose the schemePart_at form.
+    haveI : DecidablePred (fun u' : Fin n =>
+        u' ≠ w ∧ schemePart_at G P v k u' w' ∧
+        G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p) := Classical.decPred _
+    haveI : DecidablePred (fun u' : Fin n =>
+        u' ≠ u ∧ schemePart_at G P v k u' w' ∧
+        G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p) := Classical.decPred _
+    -- Filter equalities: p_pred-form ↔ schemePart_at-form (via hequiv).
+    have h_w_filter : (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ w ∧ p_pred (χk u', G.toSchemeGraph.adj.adj w u', P w u'))) =
+          (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ w ∧ schemePart_at G P v k u' w' ∧
+              G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p)) := by
+      apply Finset.filter_congr
+      intro u' _
+      constructor
+      · rintro ⟨hne, ⟨hex, ha, hp⟩⟩
+        exact ⟨hne, (hequiv u').mpr hex, ha, hp⟩
+      · rintro ⟨hne, hsp, ha, hp⟩
+        exact ⟨hne, (hequiv u').mp hsp, ha, hp⟩
+    have h_u_filter : (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ u ∧ p_pred (χk u', G.toSchemeGraph.adj.adj u u', P u u'))) =
+          (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ u ∧ schemePart_at G P v k u' w' ∧
+              G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p)) := by
+      apply Finset.filter_congr
+      intro u' _
+      constructor
+      · rintro ⟨hne, ⟨hex, ha, hp⟩⟩
+        exact ⟨hne, (hequiv u').mpr hex, ha, hp⟩
+      · rintro ⟨hne, hsp, ha, hp⟩
+        exact ⟨hne, (hequiv u').mp hsp, ha, hp⟩
+    -- Chain: schemePart-w-count = p_pred-w-count = p_pred-u-count = schemePart-u-count.
+    -- The Decidable instances differ between schemePart_at's letI and our haveI,
+    -- but `convert ... using 3` aligns them via propext on Decidable Props.
+    convert (congrArg Finset.card h_w_filter).symm.trans
+      (hcount.trans (congrArg Finset.card h_u_filter)) using 3
+
+/-! ### §10.4 — Convergence assembly
+
+With `iter_refines_schemePart_at` (the substantive inductive step
+done) and `warmRefine_eq_iter_eq` (the iter-to-warmRefine lift), the
+full Step 2 reduces to **one remaining content piece**: showing that
+at some bounded depth `k ≤ n`, `schemePart_at` coincides with
+`vProfile`.
+
+For schurian schemes, classical coherent algebra theory gives this
+at `k = rank + 1` — the intersection-number matrix has full column
+rank for the relation indices, so the "schemePart_at" partition
+uniquely identifies each `vProfile` class.
+
+We package this remaining piece as `Step2_converges_at` and the
+assembly `step2_of_converges_at` that lifts it to `Step2_target`. -/
+
+/-- **Step 2 convergence at depth `k`.** schemePart_at-k equivalence
+implies vProfile equality. This is the **single remaining open
+content piece** for full Step 2 (modulo the inductive step
+`iter_refines_schemePart_at` which is already proved). -/
+def Step2_converges_at {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) : Prop :=
+  ∀ w u : Fin n, schemePart_at G P v k w u →
+    vProfile G.scheme v w = vProfile G.scheme v u
+
+/-- **Step 2 from convergence + the inductive step.** Given
+`Step2_converges_at G P v k` for some `k ≤ n`, the full
+`Step2_target` holds. -/
+theorem step2_of_converges_at {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) (k : Nat) (hk : k ≤ n)
+    (hconv : Step2_converges_at G P v k) :
+    Step2_target G P v := by
+  intro w u hwu
+  apply hconv
+  apply iter_refines_schemePart_at
+  exact warmRefine_eq_iter_eq G.toSchemeGraph.adj P
+    (individualizedColouring n {v}) k hk hwu
+
+/-- **Step2_converges_at at depth 0 for rank ≤ 1 schemes.** A
+sanity check: the convergence framework recovers the rank-≤-1 case
+already proved directly. At depth 0, schemePart_at reduces to
+χ_v-equality. -/
+theorem step2_converges_at_zero_of_rank_le_one {n : Nat}
+    (G : SchurianSchemeGraph n) (hrank : G.scheme.rank ≤ 1)
+    (P : PMatrix n) (v : Fin n) :
+    Step2_converges_at G P v 0 := by
+  intro w u h
+  -- schemePart_at G P v 0 w u is, by def, χ_v w = χ_v u.
+  -- This matches step2_at_depth_zero_of_rank_le_one's body.
+  exact step2_at_depth_zero_of_rank_le_one G hrank P v w u h
+
 end ChainDescent

@@ -1422,11 +1422,31 @@ trivial/rank-1 instances DONE 2026-05-27.* §9 of `Scheme.lean`
   inductive intersection-number argument isn't needed when vProfile
   has at most 2 values.
 
-**Remaining for `rank ≥ 2` schemes** (Johnson, Petersen, Hamming,
-distance-transitive DRGs): the inductive S2.b intersection-number
-argument. The count infrastructure (§8.b.2) and assembly
-(§8.b.3, §9) are all in place; only the Π_k refinement induction
-remains.
+*Stage T2.3 / Step 2 inductive step + convergence framework — DONE
+2026-05-27.* §10 of `Scheme.lean` (~280 lines, axiom-clean).
+**Major milestone**: the technical heart of Step 2's intersection-
+number induction is now proved.
+
+- **`Step2_at_depth G P v k`** + **`step2_of_step2_at_depth`**:
+  framework lifting depth-k discharge to `Step2_target`.
+- **`schemePart_at G P v k`** (noncomputable): recursive partition
+  predicate. Equivalence (refl/symm/trans).
+- **`iter_refines_schemePart_at` (PROVED)** — `iter[k] χ_v`
+  partition refines `schemePart_at G P v k` for every `k`. The
+  substantive inductive step. Proof via `iter_succ_eq_iff` +
+  `signature_eq_countP_eq` + the inductive-hypothesis-derived
+  equivalence "schemePart_at k u' w' ↔ ∃ x, iter[k] x = iter[k] u'
+  ∧ schemePart_at k x w'".
+- **`Step2_converges_at G P v k`**: convergence statement (the
+  single remaining content piece).
+- **`step2_of_converges_at`**: assembles convergence + the
+  inductive step into `Step2_target`.
+
+**The Tier 2 architecture is now complete except for the
+convergence claim.** Once `Step2_converges_at G P v (rank+1)` is
+proved for schurian schemes (classical coherent algebra content),
+every schurian scheme graph gets a fully unconditional
+`theorem_2_HOR_concrete` instance.
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

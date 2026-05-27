@@ -619,6 +619,30 @@ intersection-number refinement), S2.c (convergence at depth
   Remaining: the inductive Step 2 proof for `rank ≥ 2` schemes
   (Johnson, Petersen, Hamming, distance-transitive DRGs).
 
+- §10 — **Step 2 inductive step + convergence framework — DONE
+  2026-05-27** (~280 lines, axiom-clean). **Major milestone**:
+  the technical heart of S2.b's intersection-number induction is
+  proved.
+  - `Step2_at_depth G P v k` + `step2_of_step2_at_depth`: framework
+    for depth-k discharge → `Step2_target`.
+  - `schemePart_at G P v k` (noncomputable, recursive): partition
+    predicate. Equivalence relation lemmas (`refl`/`symm`/`trans`).
+  - **`iter_refines_schemePart_at` (PROVED)**: `iter[k] χ_v` refines
+    `schemePart_at G P v k`. Proof via the inductive intersection-
+    number step using `iter_succ_eq_iff` + `signature_eq_countP_eq`
+    + the IH-derived equivalence.
+  - `Step2_converges_at G P v k`: convergence statement (the
+    remaining open content piece).
+  - `step2_of_converges_at`: convergence + inductive step →
+    `Step2_target`.
+  - `step2_converges_at_zero_of_rank_le_one`: sanity check that
+    the framework recovers the rank-≤-1 case at depth 0.
+
+  **Remaining for full Tier 2**: prove `Step2_converges_at G P v
+  (rank+1)` for schurian schemes — the classical coherent algebra
+  content. Once discharged, every schurian scheme graph gets an
+  unconditional `theorem_2_HOR_concrete` instance.
+
 **Refuted (machine-checked, kept as record of dead routes):**
 
 - `transitiveClose_swap` — false; `closeStep`'s `less`-first tie-break breaks
