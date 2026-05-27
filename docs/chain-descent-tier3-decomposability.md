@@ -199,9 +199,9 @@ Theorem 3 splits into three sub-claims, each independently scopable:
 |---|---|---|---|
 | 5 | **Abelian-stripping.** Every commit set produces either a unique candidate twist per coupled component, or a non-abelian residual (the wall). | Tractable — refines calculator §6's specification | Low — mostly bookkeeping over linear oracle's existing spec |
 | 6 | **Residual cascade.** After the abelian layer is stripped, the residual graph (the quotient by the discovered `Z_2^d`) is in the cascade class. | Hard — the load-bearing claim | High — this is where a counterexample would land |
-| 7 | **Layered composition.** The cascade and abelian layers compose without interleaving: descent through one layer does not re-introduce obstructions in the other. | Moderate — uses warm_6_2 + the descent spine | Medium — the spine machinery is proved but the composition argument is new |
+| 7 | **Layered composition.** The cascade and abelian oracles compose soundly under any call order, because the cascade oracle's failure mode is a polynomial-time *degenerate* output (every vertex its own orbit) rather than a flag, so the algorithm can alternate freely. | Low — reduces to cascade oracle's polynomial graceful degradation | Low — the alternation is incidental, not load-bearing |
 
-Sub-claim 6 is the genuine open content. Sub-claims 5 and 7 are
+Sub-claim 2 is the genuine open content. Sub-claims 1 and 3 are
 finite-effort consolidation of existing pieces.
 
 ---
@@ -297,42 +297,64 @@ them.
 
 ## 7. Sub-claim 3 — Layered composition
 
-**Statement.** The cascade oracle and the linear oracle compose
-without interleaving: applying the cascade oracle at one level and the
-linear oracle at the next produces the same residual symmetry as
-applying them in the reverse order, and neither re-introduces
-obstructions handled by the other.
+**Statement.** The cascade and linear oracles compose soundly under
+any call order. Specifically: the cascade oracle's failure mode is a
+polynomial-time *degenerate* output (return every target-cell vertex
+as its own orbit — sound but loose), not a flag. So the descent can
+freely alternate cascade-then-linear-then-cascade-…, terminating
+either when the cascade oracle returns a non-degenerate answer (true
+symmetry detected and pruned) or when both oracles produce no progress
+(flag).
 
-**Why this needs its own argument.** Sub-claims 1 and 2 handle the
-linear and cascade layers in isolation. Sub-claim 3 is the cross-talk
-guarantee: when the descent alternates between true-symmetry and
-genuine-decision cells (typical for any non-trivial graph), the order
-of oracle calls doesn't matter and the layers don't pollute each
-other's input.
+**Why composition is automatic, not load-bearing.** The earlier draft
+of this sub-claim treated composition as a "clean interleaving"
+guarantee requiring its own spine-commutation proof. That was
+over-engineered. The cascade oracle's spec
+([calculator §5](./chain-descent-calculator.md)) already permits
+"return all target-cell vertices" as a safe degenerate output — the
+harness then proceeds as budget-bounded IR search, which is correct,
+just slow. So the layered algorithm needs no claim about *whether*
+cascade-then-linear and linear-then-cascade produce equivalent
+outputs; both orderings are individually sound, and the algorithm
+picks whichever oracle has progress to report next.
 
-**Proof shape.** Two ingredients:
+**The sub-claim reduces to:**
 
-1. **Spine commutation.** The descent spine
-   ([strategy §12](./chain-descent-strategy.md)) shows that all `2^d`
-   leaves of a `d`-decision subtree share one *partition*; the
-   abelian commits only label-order, not partition. So a cascade
-   oracle call after a linear-oracle commit sees the same partition
-   as it would have seen without the commit — no spurious cells are
-   created.
-2. **Twist preservation.** A discovered twist `t ∈ N` from §5 fixes
-   `Aut(G)`-orbits setwise (every twist is an automorphism). So
-   cascade oracle calls before and after `t`'s discovery see the same
-   orbit structure — `t` doesn't shift the cascade oracle's job.
+1. **Cascade oracle terminates polynomially in failure**, returning a
+   sound degenerate output. Already true of the shipped
+   `CascadeOracle.cs` ([calculator §5, Phase-1 status](./chain-descent-calculator.md)) —
+   it certifies nothing a priori and returns every target-cell vertex,
+   the textbook degenerate output.
+2. **Linear oracle terminates polynomially**, either returning a
+   verified twist (one branch's pattern → candidate → edge-check) or
+   reporting "no unique candidate" (flag).
+3. **The two failure modes are disjoint** at any node: if cascade
+   returns non-degenerate, linear is not called; if linear returns a
+   twist, the cascade oracle re-runs on the next level's cell with
+   `N`-quotiented inputs. So sequential calls always make progress or
+   honestly flag.
 
-Both ingredients reduce to existing lemmas (`warm_6_2`,
-`warmRefine_agree_off'`, the descent spine). The composition
-statement is new but the components are proved.
+**Conjecturally stronger but not required.** It is likely *also* true
+that the alternation pattern is *guaranteed* in a specific sense — the
+spine machinery ([strategy §12](./chain-descent-strategy.md)) gives a
+direction-blind partition, so cascade calls before vs. after a linear
+commit see the same cells. If proved, this would imply the two
+orderings always *agree* on output, not just both *succeed*. Worth
+recording as a sub-conjecture:
 
-**Risk.** Medium. The spine machinery is rigorous, but composing it
-with the linear oracle's output requires the linear oracle to be
-*built* — currently it's a spec, not an implementation. Sub-claim 3 is
-provable in principle but pending the linear oracle's existence as a
-formal object.
+> **Sub-conjecture 3' (commutation, optional).** For any descent node,
+> running cascade-then-linear and linear-then-cascade produces the
+> same residual symmetry.
+
+This is not needed for the algorithm's correctness or polynomial-or-
+flag bound; it is a structural fact about the layered oracle's call
+graph and may have independent value (e.g. for the linear oracle's
+provenance tracking).
+
+**Risk.** Low. (1) holds in the shipped code; (2) is part of the
+linear oracle's spec; (3) follows from (1) + (2) by case analysis on
+which oracle returned non-degenerate at the current node. The optional
+sub-conjecture 3' adds zero risk to the main result.
 
 ---
 
@@ -367,31 +389,114 @@ The complementary use the user proposes:
 
 This is the **inversion strategy**. Decomposability (§6) asks "does
 every `G` admit the decomposition?"; visibility inverts: "does any
-construction produce a non-decomposable `G`?"
+construction or hiding mechanism produce a non-decomposable `G`?"
 
-The inversion is genuinely useful when:
+Two concrete inversion routes are available, listed in order of how
+naturally they extend the existing project:
 
-1. **The construction language is bounded.** If we have a finite
-   catalogue of graph-construction operators (CFI, products, blow-ups,
-   distance-powers, lex products, …), checking each individually for
-   "produces hidden Johnson?" is a bounded enumeration. If none does,
-   and the catalogue is universal, hidden Johnsons are ruled out by
-   exhaustion.
-2. **A specific layer's symmetry contribution is characterizable.** If
-   we know that CFI contributes `Z_2^β` and nothing else (already
-   proved — `Aut(CFI(H)) = Z_2^β ⋊ Aut(H)`), then any *iterated* CFI
-   construction's full symmetry is computable from base + tower depth.
-   Iterated CFI cannot hide a non-abelian residue; the decomposability
-   sub-claim (§6) is automatic for the CFI-tower class.
-3. **Counterexamples are constructive.** The inversion's failure mode
-   is a graph-construction operator that *does* produce a hidden
-   Johnson. Such an operator would be the first known clean
-   hidden-Johnson construction — itself a publishable result.
+- **§8.1 — Cascade-theorem self-undermining** (the user's preferred
+  route). Cascade theorems characterize what *enables* a symmetry to
+  be obscured. If every hiding mechanism requires structure that is
+  itself detected by the same cascade theorems, hiding bootstraps
+  into self-detection.
+- **§8.2 — Construction-language enumeration** (the catalogue route).
+  Pick a construction language `L`; show every `L`-construction either
+  cascades or produces only abelian residue; conclude no `L`-graph is
+  hidden-Johnson.
 
-### 8.1 Construction language scoping
+The user's preferred route (§8.1) does not require defining a
+construction language — it operates at the cascade-theorem level and
+self-bootstraps. The catalogue route (§8.2) is straightforward but
+risks being unboundedly large.
 
-The visibility framing requires a *construction language* `L` to
-induct over. Concrete candidates, in increasing scope:
+### 8.1 Cascade-theorem self-undermining inversion
+
+**The shape of the argument.** Suppose the cascade analysis (Tier 1,
+Tier 2, and any successors) produces theorems of the form:
+
+> *Obscuring theorem.* A symmetry `H ≤ Aut(G)` can be hidden from
+> 1-WL only in the presence of structure `S(H)` — typically a higher-
+> order symmetry, a coupled-component pattern, or a particular
+> construction constraint.
+
+Then the inversion: to hide a hidden Johnson `J ≤ Aut(G)`, the graph
+must carry the obscuring structure `S(J)`. But `S(J)` is itself a
+detectable structure — by the *same* cascade theorems, applied at the
+level of `S(J)` rather than `J`. So detecting `S(J)` exposes `J`. The
+hiding mechanism is self-undermining: it cannot conceal both `J` and
+`S(J)` simultaneously.
+
+**Why this might work where matroid detection didn't.** The matroid
+memo ([§7](./chain-descent-matroid.md)) tried to detect Tier-2
+structure by binary-vs-non-binary classification of a *single closure
+operator*. That failed because the closure operator was not a
+matroid. The self-undermining argument doesn't classify a fixed
+operator — it bootstraps off the existence of cascade theorems
+themselves, regardless of whether they describe a matroid. As long
+as the theorems describe *some* structure `S(H)` that's needed for
+hiding, the inversion runs.
+
+**Sketch of the cascade theorems that would enable this.** None of
+these are proved; they are the *shape* of theorems Tier 1/2/3a work
+is likely to produce as it deepens:
+
+- **(O1)** "A non-abelian simple group `H ≤ Aut(G)` is obscured from
+  1-WL only if `G` contains a coupled-component cluster of cycle
+  rank `≥ |H|`." *(Plausible from Tier-1 CFI cycle-space theory.)*
+- **(O2)** "An `A_k` action is obscured only if the obscuring layer
+  itself supports an `S_m` permutation for some `m ≥ k`." *(Plausible
+  from the orbital-structure argument of Pieces A+B.)*
+- **(O3)** "Hiding `k`-set structure requires the host graph to
+  realize a coherent algebra of rank `≥ k`." *(Plausible from
+  Tier-2 scheme theory.)*
+
+Any single theorem of this shape, *combined with the observation that
+the obscuring structure is itself in the cascade class*, gives the
+inversion. The §8.1 attack does not require knowing the obscuring
+structure's specific form — it requires showing that *whatever it is*,
+it must itself be cascade-detectable.
+
+**Concrete sub-target.** A theorem-shape worth aiming for, in
+decreasing strength:
+
+> **(O*) Self-detection lemma.** For every non-abelian-simple
+> `H ≤ Aut(G)`, the obscuring structure `S(H)` is itself a schurian
+> association scheme on the obscured vertex set. By Tier 2, 1-WL
+> recovers `S(H)`-classes at depth 1; by reading `S(H)` off the
+> 1-WL output, `H` is reconstructed.
+
+If (O*) holds, hidden Johnsons are ruled out by Tier-2 detection of
+the obscuring scheme — *without* defining a construction language and
+*without* solving sub-claim 2 directly. This is the cleanest version
+of the user's "dual route."
+
+**Why we don't have (O*) yet.** Tier-2 covers *visible* scheme graphs,
+not arbitrary obscuring schemes. (O*) would require showing that the
+obscuring structure is *itself* visible as a scheme on the obscured
+vertex set — a meta-statement about Tier-2's applicability. Currently
+the project has the components (Tier-2 detection mechanism, scheme
+theory) but not the bridge.
+
+**The route's value, even partially.** Even a *weaker* (O1)- or
+(O2)-shaped theorem narrows the search for hidden-Johnson
+counterexamples to graphs satisfying the obscuring-structure
+constraint. This is publishable independently — "any hidden Johnson
+must have such-and-such structural fingerprint" is a contribution
+even without closing the construction question.
+
+### 8.2 Construction language scoping
+
+This is the secondary inversion route — a fallback if the §8.1
+self-undermining argument doesn't produce a clean theorem. The
+catalogue route requires defining a construction language `L` and
+proving each operator preserves decomposability. **Risk:** `L` may not
+be of tractable size — if "every known graph type" demands its own
+theorem, the catalogue degenerates into an enumeration without closing
+the open case. The route is most attractive when `L` is small (a few
+operators) and each operator's contribution is structurally
+characterizable.
+
+Concrete candidates, in increasing scope:
 
 - **`L_CFI` — iterated CFI only.** Atomic: any base graph `H` with
   `tw(H) ≤ k` for fixed `k`. Operator: `CFI`. Bounded depth.
@@ -400,7 +505,7 @@ induct over. Concrete candidates, in increasing scope:
   schurian scheme. Operators: scheme products, blow-ups.
   *Visibility for `L_scheme` extends Tier 2 to nested schemes.*
 - **`L_layered` — `L_CFI` + `L_scheme` + abelian products.**
-  *Visibility for `L_layered` is the natural target for sub-claim 6.*
+  *Visibility for `L_layered` is the natural target for sub-claim 2.*
 - **`L_full` — every connected graph is in `L`.**
   *Visibility for `L_full` is full GI ∈ P.*
 
@@ -417,7 +522,7 @@ proving visibility for `L_layered` would:
   `L_layered` would be a counterexample, and would not match any
   known construction).
 
-### 8.2 Where decomposability and visibility meet
+### 8.3 Where decomposability and visibility meet
 
 The two framings agree on the following equivalence:
 
@@ -443,7 +548,7 @@ them is about *which direction the inductive argument runs*:
 The recommended use in this Tier-3 plan is to **lead with
 decomposability** (§1–§7) and use visibility (§8) **as a fallback** when
 a decomposability sub-claim resists direct attack — particularly
-sub-claim 6, which is the only one with genuine open content.
+sub-claim 2, which is the only one with genuine open content.
 
 ---
 
@@ -462,7 +567,7 @@ proof bookkeeping.
 
 ### 9.2 The value of a counterexample
 
-A counterexample to sub-claim 6 — a graph whose every layered
+A counterexample to sub-claim 2 — a graph whose every layered
 quotient remains non-cascade — would be the first explicit
 hidden-Johnson construction. This would:
 
@@ -490,7 +595,7 @@ inversion strategy) is the productive move.
 | Construction question (calc §7) | Open | Dual form of Theorem 3 |
 | Hidden-Johnson Pieces A+B | Proved | Rules out naive (visible-action) counterexamples to §6 |
 | `warm_6_2`, descent spine | Proved | Composition machinery for §7 |
-| Matroid framework | Closed (not a matroid) | Negative result; informs §8.2's class-level equivalence |
+| Matroid framework | Closed (not a matroid) | Negative result; informs §8.3's class-level equivalence |
 
 ### 10.2 Tier 3a as a stepping stone
 
@@ -540,7 +645,7 @@ the best general result.
 ## 11. Lean path
 
 **Paper-first, then Lean.** The paper draft of Theorem 3 should be
-complete and reviewed before any Lean work begins. Reason: sub-claim 6
+complete and reviewed before any Lean work begins. Reason: sub-claim 2
 has high mathematical risk, and Lean effort spent on a wrong proof
 sketch is wasted.
 
@@ -588,7 +693,7 @@ multi-month project even after the paper is settled.
    6; doable now.
 3. **Sub-claim 3 paper draft.** Composition theorem. Reduces to existing
    lemmas + a new commutation statement.
-4. **Sub-claim 6 paper draft (the hard one).** Attempt direct route
+4. **Sub-claim 2 paper draft (the hard one).** Attempt direct route
    (§6 route 1) first; pivot to inductive (§6 route 2) if it resists;
    pivot to counterexample search (§6 route 3) if both resist.
 5. **§8 visibility framing** as a parallel scratchpad — record any
@@ -598,7 +703,7 @@ multi-month project even after the paper is settled.
 
 ### 12.3 Risky
 
-- **Sub-claim 6** is the only sub-claim with genuine open content.
+- **Sub-claim 2** is the only sub-claim with genuine open content.
   Its three potential routes (direct / inductive / counterexample)
   are all unscoped.
 - **The construction language `L_layered`** is not yet rigorously
@@ -620,9 +725,9 @@ multi-month project even after the paper is settled.
   linear oracle (sub-claim 1's mechanism); §7 — construction question
   (Theorem 3's dual).
 - [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) —
-  Tier 1 (CFI) and Tier 2 (schemes) base cases for sub-claim 6.
+  Tier 1 (CFI) and Tier 2 (schemes) base cases for sub-claim 2.
 - [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) §6 —
-  naive hidden Johnson killed; encoded case is sub-claim 6's open
+  naive hidden Johnson killed; encoded case is sub-claim 2's open
   content.
 - [`chain-descent-matroid.md`](./chain-descent-matroid.md) §7, §8.4 —
   intended Tier-2 detector (failed) and the verdict that detection
