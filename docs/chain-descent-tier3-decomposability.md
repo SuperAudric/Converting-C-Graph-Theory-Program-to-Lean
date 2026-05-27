@@ -599,23 +599,30 @@ inversion strategy) is the productive move.
 
 ### 10.2 Tier 3a as a stepping stone
 
-Tier 3a (iterated CFI / `L_CFI` visibility) is a natural sub-target
-that doesn't require resolving the full Tier-3 difficulty:
+Tier 3a is a natural sub-target that doesn't require resolving the
+full Tier-3 difficulty. Plan written as
+[`chain-descent-tier3a-cascade-composition.md`](./chain-descent-tier3a-cascade-composition.md);
+the headline:
 
-- **Theorem 3a (CFI-tower cascade).** Let `T_d(H)` denote the
-  `d`-fold iterated CFI construction over base `H` (with
-  `tw(H) ≤ k` fixed). Then chain descent canonizes `T_d(H)` in
-  `poly(|V(T_d(H))|, d)` time.
+- **Theorem 3a (cascade composition).** If `Aut(G)` admits a normal
+  chain `H_0 ⊵ … ⊵ H_k = {1}` where each successive quotient is in a
+  known cascade class with depth bound `f_i`, then `G`'s cascade
+  depth is at most `Σ f_i`.
 
-This is a strict generalization of Tier 1 (which handles `d = 1`).
-The proof would induct on `d` using Tier 1's cascade lemma + the
-abelian-stripping argument of §5. Estimated effort: comparable to
-the original Tier 1 proof.
+This is a strict generalization of Tier 1 (CFI, `k = 1`) and Tier 2
+(scheme, `k = 1`, `f = 1`) to compositions — CFI∘CFI, CFI∘Scheme,
+Scheme∘CFI (where well-defined), Scheme∘Scheme, and iterated
+combinations. The proof is monotonicity of 1-WL in the
+individualization set (`warmRefine_refines`, proved) plus induction
+on chain length. Estimated paper effort: small (the inductive step is
+routine); Lean effort: ~1500-3000 lines of composition framework
+on top of existing Tier 1 + Tier 2.
 
-Tier 3a is **paper-tractable** and would deliver a Lean-formalizable
-strengthening of Tier 1 even if the full Tier 3 stays open. It's a
-recommended first concrete deliverable while the main Tier-3 plan
-matures.
+Tier 3a is **paper-tractable** and **forward-compatible** — any
+future cascade class (Hamming, distance-regular extensions, higher-
+rank schemes) automatically slots in as a one-layer instance without
+re-proving composition. Recommended first concrete deliverable while
+the main Tier-3 plan matures.
 
 ### 10.3 Babai connection
 
@@ -735,3 +742,5 @@ multi-month project even after the paper is settled.
 - [`chain-descent-tier2-decomposition-experiment.md`](./chain-descent-tier2-decomposition-experiment.md) —
   empirical confirmation that CFI ladder is Tier 1; baseline data for
   Tier 3a.
+- [`chain-descent-tier3a-cascade-composition.md`](./chain-descent-tier3a-cascade-composition.md) —
+  the Tier 3a paper plan (Theorem 3a, cascade composition).

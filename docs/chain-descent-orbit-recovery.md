@@ -158,7 +158,10 @@ none-yet-known. Three concrete tiers:
   Conjectural; essentially equivalent to T-C on cascade class.
   Paper-first plan in [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
   (decomposability framing, plus a visibility/no-hidden-symmetry
-  alternate framing for inversion arguments).
+  alternate framing for inversion arguments). Tier 3a — cascade
+  composition (Tier 1 + Tier 2 layers add their depths) — scoped in
+  [`chain-descent-tier3a-cascade-composition.md`](./chain-descent-tier3a-cascade-composition.md)
+  as the paper-tractable stepping stone.
 
 This doc is currently focused on **Tier 1**. Tier 2 is sketched in §10
 as a follow-on direction. Tier 3 is left open;
