@@ -1333,11 +1333,31 @@ scheme-Aut orbit) with refl/symm/trans. Step 1's algebraic core:
   P-preservation bridge (which collapses when `P` is
   permutation-invariant).
 
-All T2.2 + T2.3 prerequisites axiom-clean. **Next:** Step 2 itself
-(round-1 lemma → inductive step via intersection numbers →
-convergence bound; ~300 lines, 2-3 days estimated). Then T2.M4
-(SchemeProfile constructor + P-preservation bridge + discharge
-`schurian_scheme_profile_exists`).
+All T2.2 + T2.3 prerequisites axiom-clean.
+
+*Stage T2.3 / Step 2 — S2.a DONE 2026-05-27.* §8.a of `Scheme.lean`
+(~70 lines, axiom-clean). The **round-1 lemma**: for any `adj, P`
+and any `v`, if `refineStep adj P χ_v w = refineStep adj P χ_v u`
+for `w, u ≠ v`, then `adj w v = adj u v` (and `P w v = P u v`).
+
+Three forms exported:
+- `refineStep_round1_pair_eq`: both adj and P conjuncts (the full
+  multiset-tuple match content).
+- `refineStep_round1_adj_eq`: adj-only specialisation.
+- `SchemeGraph.refineStep_round1_J_eq`: scheme-specific form —
+  round-1 equality implies same J-class membership of `relOfPair v ·`.
+  This is the round-1 "vProfile coarsening" used by downstream S2.b.
+
+Plus helper `individualizedColouring_singleton_eq_v_iff` (a
+tier-agnostic `χ_v u = χ_v v ↔ u = v` lemma).
+
+**Next** (deferred to future session): S2.b (inductive step via
+intersection numbers), S2.c (convergence at depth `≤ rank + 1`),
+S2.d (lift via `warmRefine_eq_iter_eq`). Then T2.M4 (SchemeProfile
+constructor + P-preservation bridge + discharge
+`schurian_scheme_profile_exists`). Full plan in
+[`chain-descent-tier2-lean-plan.md`](./chain-descent-tier2-lean-plan.md)
+§7.
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

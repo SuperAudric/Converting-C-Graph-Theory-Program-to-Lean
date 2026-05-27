@@ -651,4 +651,149 @@ theorem vProfile_iff_graphOrbit (v w u : Fin n) :
 
 end SchurianSchemeGraph
 
+/-! ## §8 — Step 2 (combinatorial): 1-WL refines vProfile
+
+The substantive technical claim of Theorem 2: under `χ_v =
+individualizedColouring n {v}`, the 1-WL fixpoint partition (= the
+`warmRefine` colouring) refines the vProfile partition. Together
+with Step 1's `vProfile = graph-Aut-orbit-fixing-v` and the trivial
+`OrbitPartition.subset_warmRefine`, this gives the equality
+`warmRefine partition = vProfile partition = OrbitPartition`.
+
+**Phased proof** (see `docs/chain-descent-tier2-lean-plan.md` for
+the full plan):
+
+- **§8.a — S2.a (this revision)**: round-1 lemma. `iter[1] χ_v w
+  = iter[1] χ_v u` for `w, u ≠ v` implies `adj w v = adj u v`.
+  Generic: holds for any `adj`, `P` (no scheme structure needed).
+- **§8.b — S2.b (future)**: inductive refinement at round `k`,
+  using intersection-number well-definedness to argue that
+  signatures determine `vProfile w` (partially at each round).
+- **§8.c — S2.c (future)**: convergence at `k ≤ rank + 1`.
+- **§8.d — S2.d (future)**: lift to `warmRefine` via
+  `warmRefine_eq_iter_eq` from `ChainDescent.lean §16.4`.
+- **§8.e — assembly (future)**: produce the eventual
+  `SchemeProfile.warm_refines_profile` field. -/
+
+/-! ### §8.a — S2.a: round-1 distinguishes by adj-to-v
+
+Generic round-1 lemma that holds for ANY `adj`, `P`, and `v` (no
+scheme structure required). The intuition: `χ_v` is unique at `v`
+(positive colour `v.val + 1`) and zero elsewhere. The
+multiset-of-signatures comparison at `iter[1]` forces the tuple from
+`u' = v` to match between vertices `w` and `u`, giving `adj w v =
+adj u v`.
+
+Useful for both Tier 2's Step 2 (round-1 base case) and any other
+depth-1 reasoning. Placed in `Scheme.lean` for now since it's
+introduced for Step 2; could move to `ChainDescent.lean §16.4` if
+other tiers need it. -/
+
+/-- **Helper: χ_v uniqueness.** `individualizedColouring n {v} u =
+individualizedColouring n {v} v` iff `u = v`. Direct consequence of
+the definition (positive colour at `v`, zero elsewhere). -/
+theorem individualizedColouring_singleton_eq_v_iff {n : Nat} (v u : Fin n) :
+    individualizedColouring n {v} u = individualizedColouring n {v} v ↔
+    u = v := by
+  constructor
+  · intro h
+    by_contra hne
+    simp only [individualizedColouring, Finset.mem_singleton, hne,
+               if_false, if_true] at h
+    omega
+  · rintro rfl
+    rfl
+
+/-- **S2.a: round-1 lemma.** Under `χ_v = individualizedColouring n
+{v}`, if two non-`v` vertices `w, u` get the same colour after one
+`refineStep`, they have the same adjacency to `v` (and the same
+`P · v` value).
+
+The proof packs `(adj w v, P w v) = (adj u v, P u v)` rather than
+just `adj w v = adj u v` because the multiset-tuple match gives
+both for free; downstream callers typically only need the `adj`
+half. -/
+theorem refineStep_round1_pair_eq {n : Nat} (adj : AdjMatrix n)
+    (P : PMatrix n) {v w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
+    (h : refineStep adj P (individualizedColouring n {v}) w =
+         refineStep adj P (individualizedColouring n {v}) u) :
+    adj.adj w v = adj.adj u v ∧ P w v = P u v := by
+  set χ := individualizedColouring n {v} with hχ_def
+  -- Extract signature equality from refineStep_iff.
+  have hsig_eq : signature adj P χ w = signature adj P χ u :=
+    ((refineStep_iff adj P χ w u).mp h).2
+  -- Witness tuple at u' = v in signature(w): (χ v, adj w v, P w v).
+  have htw_in : (χ v, adj.adj w v, P w v) ∈ signature adj P χ w := by
+    unfold signature
+    refine Multiset.mem_map.mpr ⟨v, ?_, rfl⟩
+    rw [Finset.mem_val, Finset.mem_filter]
+    exact ⟨Finset.mem_univ _, fun heq => hwv heq.symm⟩
+  -- Transport to sig(u) by signature equality.
+  have htw_in_sigu : (χ v, adj.adj w v, P w v) ∈ signature adj P χ u :=
+    hsig_eq ▸ htw_in
+  -- Unfold sig(u) to extract a preimage u' ≠ u.
+  unfold signature at htw_in_sigu
+  obtain ⟨u', hu'mem, hu'eq⟩ := Multiset.mem_map.mp htw_in_sigu
+  rw [Finset.mem_val, Finset.mem_filter] at hu'mem
+  -- hu'eq : (χ u', adj u u', P u u') = (χ v, adj w v, P w v)
+  -- Project: χ u' = χ v, adj u u' = adj w v, P u u' = P w v.
+  have hχ : χ u' = χ v := by
+    have := (Prod.mk.injEq _ _ _ _).mp hu'eq
+    exact this.1
+  have hadj : adj.adj u u' = adj.adj w v := by
+    have h1 := (Prod.mk.injEq _ _ _ _).mp hu'eq
+    have h2 := (Prod.mk.injEq _ _ _ _).mp h1.2
+    exact h2.1
+  have hP : P u u' = P w v := by
+    have h1 := (Prod.mk.injEq _ _ _ _).mp hu'eq
+    have h2 := (Prod.mk.injEq _ _ _ _).mp h1.2
+    exact h2.2
+  -- χ u' = χ v ⟹ u' = v.
+  have hu'v : u' = v := (individualizedColouring_singleton_eq_v_iff v u').mp hχ
+  subst hu'v
+  -- Now: adj.adj u v = adj.adj w v ∧ P u v = P w v.
+  exact ⟨hadj.symm, hP.symm⟩
+
+/-- **S2.a (adj-only form).** Specialisation of
+`refineStep_round1_pair_eq` extracting only the `adj`-equality
+conjunct — the form typically needed by Step 2's S2.b. -/
+theorem refineStep_round1_adj_eq {n : Nat} (adj : AdjMatrix n)
+    (P : PMatrix n) {v w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
+    (h : refineStep adj P (individualizedColouring n {v}) w =
+         refineStep adj P (individualizedColouring n {v}) u) :
+    adj.adj w v = adj.adj u v :=
+  (refineStep_round1_pair_eq adj P hwv huv h).1
+
+/-- **S2.a (specialised to SchemeGraph).** Under `χ_v` for a scheme
+graph, round-1 equality implies the two vertices share the J-class
+of `relOfPair v ·` (i.e., either both `(v, ·) ∈ ⋃ R_j (j ∈ J)` or
+both `(v, ·) ∉ ⋃ R_j (j ∈ J)`). The scheme-internal form of
+`refineStep_round1_adj_eq`. -/
+theorem SchemeGraph.refineStep_round1_J_eq {n : Nat} (G : SchemeGraph n)
+    (P : PMatrix n) {v w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
+    (h : refineStep G.adj P (individualizedColouring n {v}) w =
+         refineStep G.adj P (individualizedColouring n {v}) u) :
+    (G.scheme.relOfPair v w ∈ G.J ↔ G.scheme.relOfPair v u ∈ G.J) := by
+  -- From S2.a (adj form), adj w v = adj u v.
+  have hadj := refineStep_round1_adj_eq G.adj P hwv huv h
+  -- adj (v, ·) symmetric, so adj v w = adj v u.
+  rw [G.adj_symm w v, G.adj_symm u v] at hadj
+  -- adj v · = 1 ↔ relOfPair v · ∈ J.
+  rcases G.adj_eq_zero_or_one v w with hw0 | hw1
+  · -- adj v w = 0, so relOfPair v w ∉ J.
+    have hw_notIn : G.scheme.relOfPair v w ∉ G.J :=
+      (G.adj_eq_zero_iff v w).mp hw0
+    rw [hw0] at hadj
+    have hu0 : G.adj.adj v u = 0 := hadj.symm
+    have hu_notIn : G.scheme.relOfPair v u ∉ G.J :=
+      (G.adj_eq_zero_iff v u).mp hu0
+    exact ⟨fun h => absurd h hw_notIn, fun h => absurd h hu_notIn⟩
+  · -- adj v w = 1, so relOfPair v w ∈ J.
+    have hw_in : G.scheme.relOfPair v w ∈ G.J :=
+      (G.adj_eq_one_iff v w).mp hw1
+    rw [hw1] at hadj
+    have hu_in : G.scheme.relOfPair v u ∈ G.J :=
+      (G.adj_eq_one_iff v u).mp hadj.symm
+    exact ⟨fun _ => hu_in, fun _ => hw_in⟩
+
 end ChainDescent

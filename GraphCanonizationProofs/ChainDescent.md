@@ -561,10 +561,23 @@ Same `Scheme.lean` module extended (~700 lines total now).
   the `SchemeProfile.profile_iff_orbit`-shaped statement (modulo
   P-preservation bridge for arbitrary P).
 
-All T2.2 + T2.3 prerequisites axiom-clean. **Remaining:** Step 2
-proper (round-1 lemma + intersection-number induction + warmRefine
-lift; ~300 lines) and T2.M4 (SchemeProfile constructor +
-P-preservation bridge + discharge `schurian_scheme_profile_exists`).
+All T2.2 + T2.3 prerequisites axiom-clean.
+
+- §8.a — **S2.a: round-1 lemma — DONE 2026-05-27** (~70 lines,
+  axiom-clean). Generic round-1 distinguishability: for any
+  `adj`, `P`, `v`, if `refineStep adj P χ_v w = refineStep adj P
+  χ_v u` for `w, u ≠ v`, then `adj w v = adj u v` (and `P w v =
+  P u v`). Three forms: `refineStep_round1_pair_eq` (full),
+  `refineStep_round1_adj_eq` (adj-only), and the SchemeGraph
+  specialisation `SchemeGraph.refineStep_round1_J_eq` (round-1
+  equality ↔ matching J-class of `relOfPair v ·`). Plus helper
+  `individualizedColouring_singleton_eq_v_iff`.
+
+**Remaining for full Step 2:** S2.b (inductive
+intersection-number refinement), S2.c (convergence at depth
+≤ rank + 1), S2.d (lift via `warmRefine_eq_iter_eq`). Then T2.M4
+(SchemeProfile constructor + P-preservation bridge + discharge
+`schurian_scheme_profile_exists`).
 
 **Refuted (machine-checked, kept as record of dead routes):**
 
