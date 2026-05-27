@@ -453,6 +453,39 @@ The second is closer to what `refineStep` actually computes; likely
 the cleaner Lean formulation. The intersection-number axiom is
 what guarantees these counts are determined by `vProfile`.
 
+**S2.b infrastructure landed 2026-05-27** (§8.b of `Scheme.lean`,
+~80 lines, axiom-clean):
+
+- `iterSignature adj P v k w` (noncomputable def) — the signature
+  multiset of `w` against the iter[k] refinement of `χ_v`.
+- **`iter_succ_eq_iff`** — round-by-round unfolding:
+  `iter[k+1] χ_v w = iter[k+1] χ_v u` ↔ `iter[k] χ_v w = iter[k]
+  χ_v u` ∧ `iterSignature ... k w = iterSignature ... k u`.
+  Direct from `refineStep_iff` + `Function.iterate_succ_apply'`.
+  This is the primary inductive-step tool.
+- **`AssociationScheme.intersectionCount_via_w`** — scheme-axiom
+  application: for any `(v, w)`, count of `u'` with
+  `(v, u') ∈ R_i` and `(w, u') ∈ R_l` equals `intersectionNumber
+  i l (relOfPair v w)`. Doesn't depend on `refineStep`; pure
+  scheme algebra. This is the algebraic engine for the inductive
+  step.
+- **`AssociationScheme.intersectionCount_eq_of_vProfile_eq`** —
+  trivial corollary: vertices with same `vProfile` have matching
+  intersection counts. (The converse — count match → vProfile
+  match — is the substantive S2.b/c content.)
+- **`Step2_target`** — the eventual Step 2 statement, defined for
+  reference: `∀ w u, warmRefine ... w = warmRefine ... u →
+  vProfile v w = vProfile v u`. Becomes the
+  `SchemeProfile.warm_refines_profile` field once discharged.
+
+**Remaining for S2.b proper:** pick the Π_k formulation (likely
+"cell-multiplicities"), induct on k, use the count-extraction
+infrastructure above to push the invariant forward at each step.
+The main missing piece is a clean `signature_count_eq_card` lemma
+bridging `Multiset.count` on signature multisets to `Finset.card`
+of preimage filters — needed to translate signature equality into
+vertex-count equality, which then connects to intersection numbers.
+
 ### S2.c — convergence bound
 
 > `Π_k = vProfile partition` for `k ≥ rank + 1` (or some other

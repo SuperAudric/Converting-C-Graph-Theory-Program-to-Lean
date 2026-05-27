@@ -579,6 +579,18 @@ intersection-number refinement), S2.c (convergence at depth
 (SchemeProfile constructor + P-preservation bridge + discharge
 `schurian_scheme_profile_exists`).
 
+- §8.b — **S2.b infrastructure — DONE 2026-05-27** (~80 lines,
+  axiom-clean). `iterSignature` abbreviation,
+  **`iter_succ_eq_iff`** (round-by-round unfolding via
+  `refineStep_iff`), **`AssociationScheme.intersectionCount_via_w`**
+  (scheme-axiom packaging: count of intermediate `u'` by
+  `(R_i, R_l)` indexed pairs equals
+  `intersectionNumber i l (relOfPair v w)`), trivial corollary
+  `intersectionCount_eq_of_vProfile_eq`, and `Step2_target` def
+  naming the eventual full claim. These are the inductive-step
+  primitives; the remaining piece is the Π_k partition
+  formulation + convergence at depth ≤ rank + 1.
+
 **Refuted (machine-checked, kept as record of dead routes):**
 
 - `transitiveClose_swap` — false; `closeStep`'s `less`-first tie-break breaks

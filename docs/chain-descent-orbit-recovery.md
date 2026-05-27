@@ -1359,6 +1359,29 @@ constructor + P-preservation bridge + discharge
 [`chain-descent-tier2-lean-plan.md`](./chain-descent-tier2-lean-plan.md)
 §7.
 
+*Stage T2.3 / Step 2 — §8.b infrastructure DONE 2026-05-27.*
+~80 lines, axiom-clean. Three foundational pieces:
+- `iter_succ_eq_iff`: round-by-round unfolding via `refineStep_iff`
+  + `Function.iterate_succ_apply'`. The inductive step's primary
+  tool.
+- `AssociationScheme.intersectionCount_via_w`: scheme-axiom
+  application showing intermediate-vertex counts via
+  `(R_i, R_l)`-pairs depend only on `relOfPair v w`. The algebraic
+  engine for the inductive step. No `refineStep` dependence.
+- `Step2_target G P v`: the eventual Step 2 statement, named for
+  reference downstream.
+
+Plus helper abbreviation `iterSignature` and the trivial corollary
+`intersectionCount_eq_of_vProfile_eq`.
+
+**Remaining for S2.b proper:** pick the inductive partition Π_k
+formulation, prove `iter[k] χ_v` refines Π_k by induction, then
+S2.c (convergence at depth ≤ rank+1). Open design piece: a
+`signature_count_eq_card` helper bridging `Multiset.count` on
+signatures to `Finset.card` of preimage filters, needed to
+translate signature equality into intersection-number-indexed
+count equality.
+
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.
 

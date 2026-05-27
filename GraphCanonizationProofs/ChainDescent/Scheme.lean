@@ -796,4 +796,114 @@ theorem SchemeGraph.refineStep_round1_J_eq {n : Nat} (G : SchemeGraph n)
       (G.adj_eq_one_iff v u).mp hadj.symm
     exact ⟨fun _ => hu_in, fun _ => hw_in⟩
 
+/-! ### §8.b — S2.b infrastructure: iteration unfolding + intersection counts
+
+Three foundational pieces for the round-by-round induction:
+1. `iterSignature`: the signature multiset computed at iter[k] χ_v.
+2. `iter_succ_eq_iff`: one-step unfolding via `refineStep_iff`.
+3. `intersectionCount_via_w`: scheme-axiom application — counts of
+   intermediate vertices by relation-index pairs are determined by
+   `relOfPair v w` (hence by `vProfile w`).
+
+These are the building blocks for the eventual S2.b proof. The
+inductive step uses `iter_succ_eq_iff` to reduce iter[k+1] equality
+to iter[k] equality plus signature equality, then
+`intersectionCount_via_w` to interpret the signature counts as
+intersection-number sums, then deduce vProfile equality.
+
+The remaining gap is the *convergence* claim: at some bounded k
+(≤ rank+1 for schurian schemes via coherent algebra theory),
+sufficient signature counts pin down `vProfile`. -/
+
+/-- The signature of `w` computed against the iter[k] refinement of
+`χ_v`. Round-(k+1) equality is determined by the round-k colour
+plus this signature (per `iter_succ_eq_iff`).
+
+Noncomputable because `refineStep` is axiomatised. -/
+noncomputable def iterSignature {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) (w : Fin n) : Multiset (Nat × Nat × POE) :=
+  signature adj P (((refineStep adj P)^[k]) (individualizedColouring n {v})) w
+
+/-- **Round-by-round unfolding via `refineStep_iff`.** Equality at
+iter[k+1] decomposes into equality at iter[k] plus matching
+iter-k signatures. The inductive step's primary tool. -/
+theorem iter_succ_eq_iff {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) (w u : Fin n) :
+    ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
+        ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u ↔
+      ((refineStep adj P)^[k]) (individualizedColouring n {v}) w =
+        ((refineStep adj P)^[k]) (individualizedColouring n {v}) u ∧
+      iterSignature adj P v k w = iterSignature adj P v k u := by
+  rw [Function.iterate_succ_apply']
+  exact refineStep_iff _ _ _ _ _
+
+/-- **Scheme intersection count.** For an association scheme `S` and
+any pair `(v, w)`, the count of intermediate vertices `u'` with
+`(v, u') ∈ R_i` and `(w, u') ∈ R_l` equals
+`intersectionNumber i l (relOfPair v w)`. Direct consequence of
+`intersectionNumber_well_defined` plus relation symmetry.
+
+This is the key scheme axiom in usable form: intersection counts
+indexed by `(v, w)` depend only on `relOfPair v w` (hence on
+`vProfile w`). Step 2's S2.b uses this to argue that iter[k]
+signatures aggregate intersection-number values determined by
+`vProfile`. -/
+theorem AssociationScheme.intersectionCount_via_w {n : Nat}
+    (S : AssociationScheme n) (v w : Fin n) (i l : Fin (S.rank + 1)) :
+    (Finset.univ.filter
+      (fun u' : Fin n => S.rel i v u' = true ∧ S.rel l w u' = true)).card
+      = S.intersectionNumber i l (S.relOfPair v w) := by
+  -- The axiom statement uses `S.rel l u' w`; we want `S.rel l w u'`.
+  -- These coincide by `S.rel_symm`. Rewrite the filter predicate via
+  -- `Finset.filter_congr`, then apply the axiom directly.
+  have h := S.intersectionNumber_well_defined i l (S.relOfPair v w) v w
+              (S.rel_relOfPair v w)
+  rw [show (Finset.univ.filter
+              (fun u' : Fin n => S.rel i v u' = true ∧ S.rel l w u' = true))
+       = (Finset.univ.filter
+              (fun u' : Fin n => S.rel i v u' = true ∧ S.rel l u' w = true)) from
+    Finset.filter_congr (fun u' _ => by rw [S.rel_symm l w u'])]
+  exact h
+
+/-- **Corollary: intersection counts share vProfile dependence.**
+If two vertices `w, u` have the same `vProfile` (i.e.,
+`relOfPair v w = relOfPair v u`), then for every `(i, l)` their
+intersection counts coincide. Trivial corollary of
+`intersectionCount_via_w`; included because Step 2's converse
+direction (count matches imply vProfile matches) is the actual
+content needed. -/
+theorem AssociationScheme.intersectionCount_eq_of_vProfile_eq {n : Nat}
+    (S : AssociationScheme n) {v w u : Fin n}
+    (h : S.relOfPair v w = S.relOfPair v u) (i l : Fin (S.rank + 1)) :
+    (Finset.univ.filter
+      (fun u' : Fin n => S.rel i v u' = true ∧ S.rel l w u' = true)).card
+      = (Finset.univ.filter
+          (fun u' : Fin n => S.rel i v u' = true ∧ S.rel l u u' = true)).card := by
+  rw [S.intersectionCount_via_w v w i l, S.intersectionCount_via_w v u i l, h]
+
+/-! ### §8.c — Step 2 statement + open gap
+
+The full Step 2 theorem statement, with the convergence step
+(S2.b proper + S2.c) marked as an explicit open subgoal. This
+keeps the eventual `SchemeProfile` constructor in T2.M4 close at
+hand: once the open subgoal is filled, the constructor follows. -/
+
+/-- **Step 2 statement (target).** For a schurian scheme graph and
+any compatible `P`, `warmRefine` cells refine `vProfile` classes.
+The trivial direction (vProfile ⊆ warmRefine) is `OrbitPartition.subset_warmRefine`
+combined with Step 1; this is the substantive opposite direction.
+
+**Status**: not yet proved. S2.a (round-1 lemma) is the base case;
+S2.b (inductive intersection-number step) and S2.c (convergence at
+depth ≤ rank+1) remain.
+
+When discharged, this directly produces the
+`SchemeProfile.warm_refines_profile` field in T2.M4. -/
+def Step2_target {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) : Prop :=
+  ∀ w u : Fin n,
+    warmRefine G.toSchemeGraph.adj P (individualizedColouring n {v}) w =
+      warmRefine G.toSchemeGraph.adj P (individualizedColouring n {v}) u →
+    vProfile G.scheme v w = vProfile G.scheme v u
+
 end ChainDescent
