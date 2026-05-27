@@ -347,10 +347,34 @@ SECTION_RE = re.compile(r"^##\s+(.+?)\s*$")
 
 
 def split_row(line: str) -> list[str] | None:
+    """Split a markdown table row on `|`, but ignore pipes inside backtick
+    spans (so descriptions like `{(i, j) | i < j}` round-trip cleanly)
+    and escaped `\\|` pipes.
+    """
     if not line.startswith("|") or not line.rstrip().endswith("|"):
         return None
     inner = line.rstrip()[1:-1]
-    return [c.strip() for c in inner.split("|")]
+    cells: list[str] = []
+    buf: list[str] = []
+    in_tick = False
+    i = 0
+    while i < len(inner):
+        ch = inner[i]
+        if ch == "\\" and i + 1 < len(inner) and inner[i + 1] == "|":
+            buf.append("|")
+            i += 2
+            continue
+        if ch == "`":
+            in_tick = not in_tick
+            buf.append(ch)
+        elif ch == "|" and not in_tick:
+            cells.append("".join(buf).strip())
+            buf = []
+        else:
+            buf.append(ch)
+        i += 1
+    cells.append("".join(buf).strip())
+    return cells
 
 
 def parse_index_file(path: Path) -> tuple[list[dict], dict[str, str]]:
