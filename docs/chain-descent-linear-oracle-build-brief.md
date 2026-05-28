@@ -305,6 +305,61 @@ count and `_seen` memory bounded, where the a-posteriori path hits the
 leaf-cache wall. That is the real before/after, replacing the false
 "K4 flags."
 
+### M6 — Results (measured 2026-05-28)
+
+The oracle is wired in (`EnableLinearOracle`, default on) and validated.
+The `_seen` leaf cache was switched to a 64-bit hash key (memory
+`O(leaves·n)` not `O(leaves·n²)`), so K7 completes and the *true* leaf
+counts are measurable. Full suite green incl. exhaustive size-5/6
+canonical-uniqueness.
+
+**Leaf count, off vs on (odd graph):**
+
+| base | β | n | leavesOff | leavesOn | ratio |
+|---|---|---|---|---|---|
+| K4 | 3 | 40 | 16 | 12 | 0.75 |
+| K33 | 4 | 60 | 42 | 22 | 0.52 |
+| Petersen | 6 | 100 | 29 | 22 | 0.76 |
+| Rook3×3 | 10 | 144 | 412 | 47 | 0.11 |
+| K6 | 10 | 156 | 378 | 76 | 0.20 |
+| K7 | 15 | 308 | 6531 | 941 | 0.14 |
+
+Correctness, `|Aut|`, and Even≠Odd preserved throughout (validated
+through K7). The construction-validation goal is **met**: every
+all-singleton decision yields a twist that passes `IsAutomorphism`
+(K4: 16/16) — the empirical `LeafTwistSpec` evidence.
+
+**But the O(β) path-collapse is *not* reached** (K7 on = 941 leaves, not
+~β). The reduction is a large constant factor (~7× at β≥10) — possibly a
+mild exponent improvement (on ≈ 2^0.73β vs off ≈ 2^0.82β over β=10→15),
+but both still grow steeply; polynomial-vs-quasipolynomial is unresolved
+by this sample (the K_m family couples n and β).
+
+**Attribution (K7 on, why 941 leaves):**
+
+| branching nodes | extra reps | cause |
+|---|---|---|
+| 0 (all-singleton footprint) | 0 | linear oracle fired → fully collapsed |
+| 555 (non-singleton footprint) | 940 | linear oracle starved → recursion branches |
+
+**100 %** of the residual branching is at **non-singleton footprints**:
+the linear oracle is *starved*, not weak — wherever it gets a clean
+footprint it collapses the node completely (941 twists harvested, 0
+branching). The leaf-count growth is entirely decisions whose coupled
+component still carries unresolved residual symmetry, so no forced twist
+exists. Per `theorem_1_HOR_cfi` that symmetry is always resolvable for
+CFI (no wall); the descent resolves it *a-posteriori* by branching rather
+than *a-priori* by certifying one rep per orbit.
+
+**Conclusion / next lever.** The linear oracle is the necessary first
+half and works exactly as designed. The binding constraint is now the
+**a-priori cascade oracle** (the unbuilt piece of
+[calculator §5/§9](./chain-descent-calculator.md)): resolve the residual
+symmetry before branching → footprints become all-singleton → the linear
+oracle finishes them → the tree collapses toward the depth-bounded path.
+This is the same a-priori orbit-harvesting the **spine** fact enables
+(read orbits off one branch's mirror). It is the path to polynomial CFI.
+
 ---
 
 ## 5. Constraints and gotchas

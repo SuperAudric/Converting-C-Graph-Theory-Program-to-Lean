@@ -510,17 +510,27 @@ and why the construction (§4.2) may be heuristic.
    [`CoveredByPathFixingAut`](../GraphCanonizationProject/ChainDescent.cs#L181)
    prunes them. ~200 lines.
 
-**Empirical bar (leaf-count, not flag).** As of 2026-05-28, CFI(K4…K6)
-*already* canonize under the default budget via a-posteriori pruning
-(leaf counts 16 / 42 / 29 / ~400, well below `2^β`); the a-posteriori
-path first strains at CFI(K7, n=308), where the `_seen` leaf cache
-(`O(leaves · n²)`) — not the node budget — is the binding constraint.
-So the bar is a **leaf-count collapse**, not "stops flagging": a-priori
-twist harvesting should (a) construct twists that pass edge verification
-on CFI(K4/K33/Petersen) — the empirical analogue of `LeafTwistSpec`
-(§2.3) — and (b) drop the explored leaf count toward `O(β)` (descent →
-~a path), keeping `_seen` `O(n)`-small and making CFI(K7+) tractable.
-The build brief's M6 carries the measured a-posteriori baseline to beat.
+**Status — built and measured (2026-05-28).** Steps 1–4 are implemented
+(`RefinementFootprint`, `TwistConstruction`, `HarvestTwists` in
+`ChainDescent`, default-on `EnableLinearOracle`); `_seen` now keys on a
+64-bit hash so memory is `O(leaves·n)`. Validated correctness-preserving
+through CFI(K7), incl. exhaustive size-5/6 canonical-uniqueness.
+
+The construction goal is **met**: every all-singleton decision yields a
+twist passing `IsAutomorphism` (the empirical `LeafTwistSpec`, §2.3).
+Leaf count drops off→on: K4 16→12, K6 378→76, **K7 6531→941** (~7× at
+β≥10). **But the `O(β)` path-collapse is not reached** — and the
+attribution is decisive: on CFI(K7), **100 % of the residual branching
+(555/555 nodes, all 940 extra reps) sits at non-singleton footprints**,
+where the oracle can't construct a twist; at all-singleton footprints it
+collapses the node completely (0 branching, 941 twists). **The linear
+oracle is *starved*, not weak.** The leaf growth is decisions whose
+coupled component still carries unresolved residual symmetry — for CFI
+always resolvable (`theorem_1_HOR_cfi`, no wall), but the descent resolves
+it *a-posteriori* (branching) rather than *a-priori* (one rep per orbit).
+So the binding constraint is the **a-priori cascade oracle** (§5/§9 of
+[calculator](./chain-descent-calculator.md)), which would feed clean
+footprints to the now-working linear oracle. See build brief §M6 results.
 
 ### 8.2 Lean (contract discharge)
 
