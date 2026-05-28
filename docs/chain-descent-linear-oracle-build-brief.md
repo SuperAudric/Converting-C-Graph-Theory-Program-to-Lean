@@ -34,7 +34,17 @@ antisymmetric. This is the spec's `PMatrix`. Good — no substrate to
 build.
 
 **What does NOT exist yet:**
-- **Provenance.** `TransitiveClose` ([ChainDescent.cs:257](../GraphCanonizationProject/ChainDescent.cs#L257)) writes derived `LESS`/`GREATER` entries but records *no* `DERIVED`/`driver` info. The coupled component cannot be delineated without this. **Build item 1.**
+- **Coupled-component extraction.** The coupled component must be read
+  from the **refinement footprint** (parent↔child partition diff), not
+  from TC provenance. **Build item M1.** *(Correction 2026-05-28: an
+  earlier draft proposed TC `DERIVED`/`driver` provenance on
+  [`TransitiveClose`](../GraphCanonizationProject/ChainDescent.cs#L257).
+  The build branch measured that TC produces **zero** derived entries
+  for within-cell decisions on uniform-type graphs — cellmates are
+  unordered among themselves, other cells P-incomparable — so TC
+  provenance is provably empty here. The cascade propagates through
+  refinement, so read the footprint from the partition diff. See spec
+  §3.)*
 - **Any a-priori twist discovery.** Automorphisms are only harvested a-posteriori from leaf collisions ([`HandleLeaf`](../GraphCanonizationProject/ChainDescent.cs#L212)).
 
 ---
@@ -58,14 +68,18 @@ representatives. Then the existing `CoveredByPathFixingAut` prunes them
 for free.
 
 So the build does **not** need a new pruning mechanism. It needs:
-1. provenance, to delineate the coupled component;
+1. **refinement-footprint extraction**, to delineate the coupled
+   component (parent↔child partition diff — *not* TC provenance);
 2. a twist-construction step, to build the candidate permutation from
-   the refinement + provenance;
-3. verification (reuse `IsAutomorphism`);
+   the explored branch's refined sub-cells (canonical-id matching);
+3. verification (reuse `IsAutomorphism`) — the unconditional soundness
+   gate;
 4. a hook that runs this after exploring the first representative and
-   feeds verified twists into `Automorphisms`.
+   feeds verified, path-fixing twists into `Automorphisms`.
 
 This is a much smaller change than "build a new oracle from scratch."
+**Soundness rests entirely on step 3** — the construction (step 2) may
+be heuristic; a wrong candidate just fails verification.
 
 ---
 
@@ -99,6 +113,29 @@ So: the spec's "twist swapping `e, f`" becomes, in this harness, "a
 path-fixing automorphism mapping the explored representative to an
 unexplored one." Same object, framed for the actual control flow.
 
+**Cell size — soundness vs. proof backing (resolves a build-branch
+question).** Two different bars:
+
+- **Soundness (the implementation):** works for a cell of **any size**.
+  Verification (§4.5) gates every harvested twist — a wrongly
+  constructed candidate for a size-`k` cell just fails the edge-check
+  and is discarded. So *attempt construction at any size*; it can never
+  produce a wrong answer, and attempting costs only an `O(n²)` verify.
+- **Clean proof backing (the Lean discharge):** `warm_6_2` is the
+  **size-2** result (the two directions of one pair — which is exactly
+  branching on `r_1` vs `r_2` of a 2-cell). For size-`k>2`, branching
+  on `r_i` is `k` different individualizations; the backing is the
+  spine (`warmRefine_agree_off'`, partition-sharing for a decision
+  set), which gives the *candidate* but not the automorphism property
+  — verification closes that.
+
+So: **implement construction at any cell size** (sound via verify);
+**scope the Lean Phase-1 proof to size-2** (clean `warm_6_2` backing).
+Do not *restrict the implementation* to size-2 — that would forgo sound
+pruning that costs only a verify to attempt. Empirically CFI decision
+cells are commonly size-2, so size-2 covers K4/K33/Petersen regardless;
+attempting larger cells is free upside.
+
 ---
 
 ## 4. Build milestones (ordered)
@@ -106,36 +143,45 @@ unexplored one." Same object, framed for the actual control flow.
 Each milestone is independently testable. Stop and validate before
 proceeding.
 
-### M1 — Provenance plumbing
-- Extend the closure to record, per derived `P` entry, the **driver**:
-  the primary guess (the `(v, cellmate)` write in `Branch`) that
-  completed its chain.
-- Suggested shape: a parallel `int[] driverOf` of length `n*n`
-  (driver entry index, or −1 for primaries / unknown), maintained by a
-  provenance-aware closure that replaces the bare `TransitiveClose`
-  inside `Branch`. Keep the existing `TransitiveClose` for the
-  type-seed path; only the in-descent closure needs provenance.
+### M1 — Refinement-footprint extraction
+*(Replaces the abandoned TC-provenance plumbing — TC is inert here,
+§1 / spec §3.)*
+- Capture the **parent partition** (before the branch) and the **child
+  partition** (after individualizing the representative + warm
+  refining), and diff them.
+- The **coupled component** is the set of cells that newly split
+  between parent and child — the cells the decision propagated to.
+- Suggested shape: both partitions are already `WarmPartition.CellOf`
+  arrays; the footprint is "which parent cells map to >1 child cell."
+  No closure changes, no `driverOf` array.
 - **Test:** on `CFI(Cycle3)`, after individualizing one parity rep,
-  the derived entries forced around the cycle all share one driver.
+  the footprint is the gadgets around the cycle (the cells that split).
 
-### M2 — Coupled-component extraction
-- `CoupledComponent(driver) → cells + order labels`: scan `driverOf`
-  for entries with the given driver; collect the cells those entries
-  split and the order direction on each.
-- **Test:** on `CFI(Cycle3)`, the coupled component is the whole cycle
-  of gadgets.
+### M2 — Coupled-component sub-cell structure
+- For each cell in the footprint, record its child sub-cells (by
+  canonical id). This is the data M3 matches against the mirror branch.
+- **Test:** on `CFI(Cycle3)`, each gadget on the cycle has split into
+  its two parity classes (singletons).
 
 ### M3 — Twist construction (the core, §4.2)
-- From the explored representative `r_1`'s refined partition + the
-  coupled component, construct the candidate permutation `t` by
-  mirror-matching: within each split cell, map each sub-cell to its
-  order-mirror; everything outside the component is fixed.
+*(Reframed — no P order-labels exist; refinement is split-only. Match
+by canonical-id structure, sound via verification.)*
+- For an unexplored rep `r_j`: construct candidate `t` carrying
+  `r_1 ↦ r_j` by matching `r_1`'s child sub-cells (M2) to `r_j`'s
+  mirror sub-cells **by canonical-id structure** (same refined-colour
+  signature), vertex-by-vertex within matched sub-cells. Identity
+  outside the footprint. **Construct `t` path-fixing by design** (it
+  must fix every individualized path vertex).
+- Start with the **all-singletons** case (§4.3): if any sub-cell has
+  ≥ 2 vertices, return "no unique candidate" (M5 handles it). The
+  matching is then forced.
 - For CFI this is "flip the parity of every gadget on the coupled
-  cycle." Start with the **all-singletons** case (§4.3): if any
-  split sub-cell has ≥ 2 vertices, return "no unique candidate" (M5
-  handles the consequence).
+  cycle."
 - **Test:** on `CFI(Cycle3)`, the constructed `t` is the parity-flip
   involution.
+- **Note:** the construction is a heuristic made sound by M4's verify;
+  it need not be provably correct to be safe to attempt. Attempt it for
+  cells of any size (§3) — verification filters.
 
 ### M4 — Verification + harvest
 - Verify `t` with the existing `IsAutomorphism`
@@ -155,6 +201,13 @@ proceeding.
   branch (and ultimately the budget flags if the exponential stacks).
   **This is correct, not a failure** — see [linear-oracle.md §4.4](./chain-descent-linear-oracle.md)
   option 1, [§6.3](./chain-descent-linear-oracle.md).
+- **Implement the *behaviour*, do not assert the *boundary*.** The
+  claim "all sub-cells singleton ⟺ abelian / non-singleton ⟺ the
+  non-abelian wall" is **Tier-3 / orbit-recovery open content, not
+  proven** (spec §4.3). What is unconditionally sound is the behaviour:
+  singleton → unique candidate the verifier checks; non-singleton →
+  fall back to budget-bounded search (always correct). Code the
+  behaviour; don't claim the boundary is established.
 - **Test:** the harness still canonizes everything it canonized before
   (no regressions on the `KnownGraphs` corpus / existing tests).
 
@@ -175,10 +228,11 @@ proceeding.
 Three things to demonstrate:
 
 1. **Construction validation (the de-risking evidence — primary goal).**
-   On CFI(K4/K33/Petersen), mirror-matching (§4.2) constructs a candidate
-   twist that passes `IsAutomorphism`. This is the direct empirical
-   stand-in for `LeafTwistSpec` (a verified twist relabels one branch's
-   canonical onto another's, [linear-oracle.md §2.3](./chain-descent-linear-oracle.md))
+   On CFI(K4/K33/Petersen), canonical-id sub-cell matching (§4.2)
+   constructs a candidate twist that passes `IsAutomorphism`. This is
+   the direct empirical stand-in for `LeafTwistSpec` (a verified twist
+   relabels one branch's canonical onto another's,
+   [linear-oracle.md §2.3](./chain-descent-linear-oracle.md))
    — the green light for the Lean discharge.
 
 2. **Leaf-count collapse (the scaling signal).** A-priori harvesting
@@ -229,7 +283,8 @@ leaf-cache wall. That is the real before/after, replacing the false
   depends on the oracle succeeding; only performance does.
 - **Reuse, don't duplicate.** `IsAutomorphism`, `CoveredByPathFixingAut`,
   `PermutationGroup.AddGenerator`, the `P`-matrix, `WarmPartition` all
-  exist. The genuinely new code is M1 (provenance) and M3 (construction).
+  exist. The genuinely new code is M1 (refinement-footprint diff) and
+  M3 (canonical-id construction).
 
 ---
 
@@ -241,8 +296,9 @@ leaf-cache wall. That is the real before/after, replacing the false
   `ChainDescent.Search` after the first branch, rather than forcing it
   behind the `Classify` seam. Keep the `ITransversalOracle` interface
   unchanged for now.
-- Provenance fields (`driverOf`) live in `ChainDescent` (or a small
-  `ProvenancePMatrix` wrapper) since closure happens there.
+- The refinement footprint (parent vs child `CellOf`) is computed in
+  `ChainDescent.Search`/`Branch` where both partitions are in hand — no
+  new closure plumbing, no `driverOf` array.
 - Tests in `GraphCanonizationProject.Tests/` alongside the existing
   `GraphCanonTests.ChainDescent.cs`; mirror the `CD_CfiCycle3_*`
   pattern for K4/K33/Petersen.
@@ -253,9 +309,10 @@ leaf-cache wall. That is the real before/after, replacing the false
 
 - M1–M6 complete.
 - **Construction validated (primary):** on CFI(K4/K33/Petersen), §4.2
-  mirror-matching constructs a twist that passes `IsAutomorphism` — the
-  empirical stand-in for `LeafTwistSpec`, and the green light for the
-  Lean contract discharge (spec [§10 risk 1](./chain-descent-linear-oracle.md),
+  canonical-id sub-cell matching constructs a twist that passes
+  `IsAutomorphism` — the empirical stand-in for `LeafTwistSpec`, and the
+  green light for the Lean contract discharge (spec
+  [§10 risk 1](./chain-descent-linear-oracle.md),
   [§8.2](./chain-descent-linear-oracle.md)).
 - **Leaf count collapses** from the M6 a-posteriori baseline toward
   ~`O(β)`: `LastLeafCount` drops sharply and `LastNodesByDepth` shows the

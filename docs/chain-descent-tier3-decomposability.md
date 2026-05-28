@@ -236,8 +236,11 @@ lines once paper-rigorous.
 
 **Risk.** Low. The uniqueness boundary is the same one calculator §6
 already names; this sub-claim just makes it a theorem rather than a
-spec. The main hazard is bookkeeping: tracking provenance cleanly
-across coupled components.
+spec. The main hazard is bookkeeping: delineating each coupled
+component cleanly from the refinement footprint (the parent↔child
+partition diff — *not* TC provenance, which is inert for the
+within-cell cascade; see
+[`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md) §3).
 
 ---
 
@@ -349,7 +352,7 @@ recording as a sub-conjecture:
 This is not needed for the algorithm's correctness or polynomial-or-
 flag bound; it is a structural fact about the layered oracle's call
 graph and may have independent value (e.g. for the linear oracle's
-provenance tracking).
+coupled-component delineation).
 
 **Risk.** Low. (1) holds in the shipped code; (2) is part of the
 linear oracle's spec; (3) follows from (1) + (2) by case analysis on

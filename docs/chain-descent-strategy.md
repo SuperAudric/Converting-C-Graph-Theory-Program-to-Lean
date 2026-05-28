@@ -340,11 +340,22 @@ insertion, and Floyd–Warshall both yield the same closed relation). This is th
 
 **Why the provenance matters — invariant 6.4.** Without driver tracking, closure
 can produce an `O(n)`-long chain of relations all tracing to one guess; the
-linear oracle (calculator doc §6) needs exactly this provenance — *which guess
-forced which derived relation* — to delineate a genuine decision's **coupled
-component** and to read the candidate twist off it. The provenance record is the
-linear oracle's required state. At most `n(n−1)` `DERIVED` records exist at any
-time, so the bookkeeping is polynomial.
+provenance record — *which guess forced which derived relation* — is what lets a
+**between-cell ordering** decision's coupled component be delineated where TC
+genuinely chains. At most `n(n−1)` `DERIVED` records exist at any time, so the
+bookkeeping is polynomial.
+
+> **Correction (2026-05-28).** An earlier version called this provenance "the
+> linear oracle's required state." That overstated its role for the oracle's
+> primary (CFI / within-cell) target: there the cascade propagates by
+> **refinement**, not transitive closure, and TC produces no derived entries to
+> track (under relegated TC there is no in-loop closure; in the implementation a
+> within-cell guess on a uniform-type graph chains nothing — measured zero). The
+> linear oracle delineates its coupled component from the **refinement
+> footprint** (the parent↔child partition diff), per
+> [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md) §3. TC
+> provenance remains the right tool for between-cell ordering, but it is not the
+> linear oracle's critical-path state.
 
 **Closure asymmetry on non-automorphic pairs is sound.** A genuine decision
 makes closure run differently in its two branches — a chain reaches one vertex

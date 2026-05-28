@@ -45,13 +45,15 @@ individualizing `e` (commit `e < f`) and individualizing `f` (commit
 
 The linear oracle's mechanism ([calculator §6](./chain-descent-calculator.md)):
 
-1. **Explore** one branch (commit `e < f`), propagate via warm
-   refinement; the propagation forces a chain of derived order
-   relations.
-2. **Delineate** the *coupled component* — the cells whose splits are
-   driven by this decision (read from the provenance record, §3).
-3. **Construct** a candidate twist `t : V → V` from the
-   reverse-symmetric propagation pattern (§4 — the open piece).
+1. **Explore** one branch (individualize a representative, commit
+   `e < f`), and **warm-refine**; refinement (not transitive closure)
+   propagates the decision by splitting cells.
+2. **Delineate** the *coupled component* — the cells that split as a
+   consequence, read from the **refinement footprint** (parent↔child
+   partition diff, §3).
+3. **Construct** a candidate twist `t : V → V` by matching the explored
+   branch's refined sub-cells to the mirror branch's by canonical id
+   (§4 — the open piece, sound via verification).
 4. **Verify** `t ∈ Aut(G)` edge-by-edge.
 5. **Prune** branch-`f` (and every decision coupled to `t`) without
    exploring it.
@@ -80,11 +82,11 @@ precise.
 ### 1.3 What this doc fixes vs. consolidates
 
 - **Consolidates** (already specified elsewhere): the contract (§2),
-  the provenance state (§3), the partition backdrop (the descent
-  spine), the lex-min objective.
+  the required state (§3, now the refinement footprint), the partition
+  backdrop (the descent spine), the lex-min objective.
 - **Fixes** (the gap): the candidate-twist construction predicate
-  (§4) — input format, the abelian construction, the uniqueness test,
-  the verification protocol, the polynomial bound.
+  (§4) — input format, the canonical-id matching construction, the
+  uniqueness test, the verification protocol, the polynomial bound.
 
 ---
 
@@ -153,39 +155,50 @@ them equivalent.
 
 ---
 
-## 3. Required state — provenance
+## 3. Required state — the refinement footprint
 
-**Firm-but-reshapeable.** The provenance *content* is required
-(invariant 6.4); the exact data structure is an implementation choice.
+> **Correction (2026-05-28, from the C# build branch).** An earlier
+> version of this section took the coupled component from the
+> transitive-closure provenance of [strategy §10](./chain-descent-strategy.md)
+> (`DERIVED`/`driver` records). That mechanism is **inert** for the
+> linear oracle's target: under relegated TC (the model `warm_6_2` is
+> proved in) there is no in-loop closure at all, and in the C# harness
+> a within-cell decision on a uniform-type graph gives TC *nothing to
+> chain* (cellmates are unordered among themselves; other cells are
+> P-incomparable) — measured zero derived entries. The propagation that
+> actually carries the cascade is **1-WL refinement**, so the coupled
+> component is read from the **refinement footprint**, not from TC.
 
-From [strategy §10](./chain-descent-strategy.md): after a guess writes
-a `P` entry, transitive closure derives further entries. Each derived
-entry carries:
+**What the oracle reads.** The propagation of a decision is the set of
+cells that **split as a consequence of individualizing the
+representative** — read from the **parent↔child partition diff**:
 
-- a **`DERIVED` record** marking it as closure-derived (not a primary
-  guess);
-- a **`driver` pointer** — the index of the primary guess whose write
-  completed the chain.
+- compute the partition before the decision (parent) and after
+  individualizing the representative + warm-refining (child);
+- the **coupled component `K`** is the set of cells that newly split
+  between parent and child — exactly the cells the decision propagated
+  to;
+- the sub-cell structure of `K` in the child partition is the
+  direction-dependent data the twist mirrors.
 
-**Why required (invariant 6.4).** The coupled component is exactly the
-set of derived relations sharing a driver. Without driver tracking, an
-`O(n)`-long derived chain all traces to one guess and the component
-can't be delineated. At most `n(n−1)` `DERIVED` records exist at once →
-polynomial.
+This is the same mechanism the orbit-recovery program uses (refinement,
+not TC) — `theorem_1_HOR_cfi_oddDeg` and the Tier-1/Tier-2 cascade are
+all `refineStep`/`warmRefine` results. The linear oracle reads the same
+footprint those theorems reason about.
 
-**What the oracle reads.** For the current decision's primary guess
-`g`:
-- the set of `P` entries with `driver = g` (the coupled component's
-  edges);
-- the cells those entries split (the coupled component's vertices);
-- the order labels on each split (the direction-dependent data the
-  twist mirrors).
+**Why no TC provenance.** TC-provenance (`DERIVED`/`driver`, invariant
+6.4) is still meaningful where TC genuinely chains — **between-cell
+ordering guesses** (e.g. the `2K2`-style case where distinct components
+must be ordered). That is *not* the linear oracle's CFI target, which is
+**within-cell** parity decisions propagated by refinement. So the
+oracle's required state is the refinement footprint; TC provenance is
+not on its critical path.
 
 **Reshapeable choices:**
-- Whether provenance is stored as per-entry records or as a separate
-  driver→entries index (the latter is faster for component lookup).
-- Whether the coupled component is computed lazily (on oracle call) or
-  maintained incrementally during closure.
+- Whether the footprint is computed by diffing full partitions or by
+  tracking which cells changed during the warm-refine rounds.
+- Whether it is computed lazily (on oracle call) or recorded as the
+  child refinement runs.
 
 ---
 
@@ -197,69 +210,86 @@ genuinely unspecified piece and the main implementation risk").
 
 ### 4.1 Input
 
-For the decision pair `(e, f)` with primary guess `g` (commit
-`e < f`):
-- **Coupled component `K`** — the cells split by relations with
-  `driver = g`, read from provenance (§3).
-- **The two order-label patterns** — by invariant 6.2 (`warm_6_2`,
-  proved), branch-`e` and branch-`f` produce the *same partition* of
-  `K`, differing only in order labels. We have branch-`e`'s labels;
-  branch-`f`'s are the mirror (we do *not* re-explore branch-`f` —
-  that's the point).
+The harness branches over a target cell's representatives `[r_1, r_2, …]`
+by individualizing one below its cellmates (whole-cell branching, not
+single-pair — see §0 note below and the build brief §3). For the
+explored representative `r_1`:
 
-### 4.2 The abelian construction
+- **Coupled component `K`** — the cells that split between the parent
+  partition and `r_1`'s child partition (the refinement footprint, §3).
+- **`r_1`'s child sub-cell structure** — the partition of `K` after
+  individualizing `r_1` and warm-refining. By the spine fact
+  (`warm_6_2` for a size-2 cell; `warmRefine_agree_off'` for larger
+  decision sets), the partition under any other representative `r_j` is
+  the same up to the `r_1 ↔ r_j` relabelling — so we do *not* re-explore
+  `r_j`; its structure is the mirror of `r_1`'s.
 
-For the abelian case, the candidate twist is determined by
-**mirror-matching within each split cell**:
+> **§0 note — whole-cell branching, not single pairs.** The substrate
+> model of [strategy §9](./chain-descent-strategy.md) is single-pair
+> guesses with two directions; the *implementation* individualizes a
+> representative below its whole cell. For a **size-2** cell, branching
+> on `r_1` vs `r_2` *is* the two directions of one pair — `warm_6_2`
+> applies directly and the proof is clean. For **size-`k`** cells the
+> clean `warm_6_2` backing does not transfer (branching on `r_i` is `k`
+> different individualizations); the general backing is the spine
+> (`warmRefine_agree_off'`), which proves partition-sharing but not the
+> automorphism property — that is closed operationally by verification
+> (§4.5). See §4.3.
 
-1. For each cell `C` in the coupled component, branch-`e` splits `C`
-   into ordered sub-cells `C = C_1 < C_2 < … < C_r` (by the
-   direction-dependent order labels).
-2. Branch-`f`, by invariant 6.2, splits `C` into the *same* sub-cells
-   with *reversed* order: `C_r < C_{r-1} < … < C_1`.
-3. The candidate twist `t` maps each sub-cell `C_i` to its mirror
-   `C_{r+1−i}`, matching vertices by their position within the
-   sub-cell.
+### 4.2 The construction (canonical-id sub-cell matching)
 
-For this to define a *permutation* (not just a cell-to-cell map), each
-sub-cell `C_i` and its mirror `C_{r+1−i}` must have the **same size**,
-and the within-sub-cell matching must be forced. The clean abelian case
-is when every sub-cell is a **singleton** — then `t` is the unique
-order-reversing involution on `C`, and `e ↦ f` falls out as the `r = 2`
-case.
+> **Correction (2026-05-28).** An earlier version constructed the twist
+> from *order labels* on sub-cells (`C_1 < C_2 < … < C_r`). Those order
+> labels **do not exist in the harness**: warm refinement is split-only
+> and never writes `P`, and TC is inert (§3). The construction instead
+> matches sub-cells by their **canonical-id structure** in the refined
+> partition, and is **sound via verification (§4.5)**, not via the
+> order-label argument.
+
+The candidate twist `t : V → V` carrying `r_1 ↦ r_j`:
+
+1. For each cell `C` in the coupled component `K`, take `r_1`'s child
+   sub-cells of `C` and `r_j`'s child sub-cells of `C` (the latter known
+   to be the `r_1 ↔ r_j` mirror by the spine fact, not re-explored).
+2. Match `r_1`'s sub-cells to `r_j`'s by canonical-id structure
+   (same refined-colour signature). Within matched sub-cells, match
+   vertices by canonical id.
+3. `t` is the resulting vertex map (identity outside `K`). It must be
+   **path-fixing** by construction (fix every individualized path
+   vertex — see §6) so the existing pruning machinery can consume it.
+
+For this to define a permutation, matched sub-cells must have equal
+size; the clean case is when every sub-cell is a **singleton**, giving a
+forced matching and `r_1 ↦ r_j` directly.
 
 **CFI specialization.** In CFI, `K` is a cycle of the base graph's
-cycle space; each gadget on the cycle splits into its two parities; `t`
-flips all parities on the cycle. The mirror-matching is forced because
-each parity class is a singleton after the decision propagates. This is
-the `Z_2` twist, and the construction is exactly "flip the coupled
-cycle."
+cycle space; individualizing a parity rep splits each gadget on the
+cycle into its two parities; `t` flips all parities on the cycle. Each
+parity class is a singleton after the decision propagates, so the
+matching is forced. This is the `Z_2` twist — "flip the coupled cycle."
 
-### 4.3 The uniqueness test (the boundary)
+### 4.3 The boundary — uniqueness vs. the wall
 
-The candidate twist is **unique** iff the mirror-matching in §4.2 is
-forced — equivalently:
+The candidate is **unique** when the canonical-id matching in §4.2 is
+forced — when every sub-cell of the coupled component is a **singleton**.
 
-> Every sub-cell `C_i` of every cell in the coupled component is a
-> **singleton** (or, weakly: `C_i` and its mirror `C_{r+1−i}` are both
-> singletons, with fixed points allowed in the middle).
-
-- **All singletons** → unique involution → abelian (`Z_2`) → **proceed**
-  (construct `t`, verify, prune).
+- **All singletons** → forced matching → a single candidate `t` →
+  **construct, verify, prune**.
 - **Some sub-cell has ≥ 2 vertices** → the within-sub-cell matching is
-  ambiguous → multiple candidate twists → non-abelian residual →
-  **flag**.
+  ambiguous → no single candidate → **fall back / flag** (§4.4).
 
-This is the precise form of calculator §6's "size of the per-decision
-residual symmetry." A sub-cell of size ≥ 2 that the decision cannot
-resolve is exactly a hidden non-abelian action on that sub-cell — the
-wall.
-
-**Connection to orbit recovery.** "Sub-cells are singletons" is the
-statement that the decision, propagated, *cascades to discreteness*
-within the coupled component. So the uniqueness test is a localized
-cascade check — tying the linear oracle's boundary to the orbit-recovery
-program ([orbit-recovery](./chain-descent-orbit-recovery.md)).
+> **Conjectural, not proven.** That "all sub-cells singleton ⟺
+> abelian / non-singleton ⟺ the non-abelian wall" is the
+> **Tier-3 / orbit-recovery open content**, not a proved theorem. What
+> *is* sound, unconditionally, is the **behaviour**: the singleton case
+> yields a unique candidate the verifier can check; the non-singleton
+> case has no unique candidate and the descent falls back to
+> budget-bounded search (always correct, §6.3). Implement the behaviour;
+> do not assert the boundary characterization as established. It is a
+> *localized cascade check* whose connection to the abelian/wall split
+> is the orbit-recovery conjecture ([orbit-recovery](./chain-descent-orbit-recovery.md)),
+> the same line as calculator §6's "size of the per-decision residual
+> symmetry."
 
 ### 4.4 General-case design options (open)
 
@@ -299,10 +329,10 @@ cell as a genuine `k`-way branch.
 ### 4.6 Polynomial bound
 
 Per decision:
-- Delineate coupled component from provenance: `O(n²)` (scan derived
-  records).
-- Construct candidate via mirror-matching: `O(n²)` (one pass over the
-  component's cells).
+- Delineate coupled component from the refinement footprint: `O(n²)`
+  (diff parent vs child partition).
+- Construct candidate via canonical-id sub-cell matching: `O(n²)` (one
+  pass over the component's cells).
 - Uniqueness test: `O(n²)` (check sub-cell sizes).
 - Verify: `O(n²)`.
 
@@ -320,12 +350,13 @@ with `β = 1` (a cycle has cycle rank 1).
    parity (the single `Z_2` gauge).
 2. The target cell is a gadget's parity-ambiguous pair `{e, f}` (the
    two parity representatives). Decision: commit `e < f`.
-3. Propagate. The parity choice forces the adjacent gadget's parity,
-   which forces the next, around the whole cycle. The provenance: every
-   derived parity relation has `driver = g` (the original commit).
-4. Coupled component `K` = all gadgets on the cycle. Each splits into
-   its two parity classes; each class is a singleton (one parity rep
-   per gadget after propagation).
+3. Propagate via warm refinement. The parity choice splits the adjacent
+   gadget's cell, which splits the next, around the whole cycle —
+   the refinement footprint.
+4. Coupled component `K` = all gadgets on the cycle (the cells that
+   split between parent and child). Each splits into its two parity
+   classes; each class is a singleton (one parity rep per gadget after
+   propagation).
 5. Uniqueness test: all sub-cells singletons → unique candidate.
 6. Construct `t` = flip every gadget's parity on the cycle. Verify
    edge-by-edge: `t` preserves all CFI adjacencies (parity flip is the
@@ -371,16 +402,16 @@ exploring the rest.
 ### 6.2 The explore-read-verify-prune loop
 
 ```
-on genuine decision {e, f, …} at a node:
-    explore branch-e (commit e < f, propagate)
-    K        := coupled_component(driver = this_commit)   // from provenance
-    if not all_subcells_singleton(K):                     // uniqueness test
-        flag (or fall through to k-way branch)
-    t        := construct_twist(K)                         // mirror-match
-    if not verify_automorphism(t, adj):                    // O(n²) edge check
-        fall through to k-way branch
-    harvest t into PermutationGroup
-    prune all branches coupled to t
+on target cell [r_1, r_2, …] at a node:
+    explore r_1 (individualize below cellmates, warm-refine → child)
+    K        := refinement_footprint(parent, child)   // cells that split
+    if not all_subcells_singleton(K):                 // uniqueness test
+        fall through to k-way branch                  // sound; may flag later
+    for each unexplored r_j:
+        t    := construct_twist(K, r_1, r_j)           // canonical-id match
+        if t is path-fixing and verify_automorphism(t, adj):  // O(n²)
+            harvest t into PermutationGroup            // CoveredByPathFixingAut
+    // existing a-posteriori pruning now skips the covered r_j
 ```
 
 The harvested `t` folds into the same `PermutationGroup` chain the
@@ -406,16 +437,17 @@ witnesses that branch-`e` and branch-`f` reach the same canonical form
 modulo `t`. Concretely:
 
 1. `t ∈ Aut(G)` (verified, §4.5).
-2. `t` maps branch-`e`'s order assignment to branch-`f`'s (it's the
-   mirror-matching, §4.2).
-3. So `canonAdj(branch-e)` and `canonAdj(branch-f)` are related by
+2. `t` is path-fixing and carries the explored representative `r_1` to
+   the unexplored `r_j` (the canonical-id matching, §4.2).
+3. So `canonAdj(r_1-branch)` and `canonAdj(r_j-branch)` are related by
    `relabelMatrix t` — exactly `LeafTwistSpec`.
-4. Hence the lex-min over `{branch-e, branch-f}` is achieved by either;
-   pruning branch-`f` cannot miss the minimum.
+4. Hence the lex-min over `{r_1-branch, r_j-branch}` is achieved by
+   either; pruning `r_j` cannot miss the minimum.
 
 The soundness rests *only* on the edge-by-edge verification (1) — not
-on invariant 6.2, which gives the *candidate* but not its correctness.
-This is why verification is mandatory and non-negotiable.
+on `warm_6_2`/the spine, which give the *candidate* but not its
+correctness. This is why verification is mandatory and non-negotiable,
+and why the construction (§4.2) may be heuristic.
 
 ---
 
@@ -423,16 +455,21 @@ This is why verification is mandatory and non-negotiable.
 
 ### 8.1 C# (empirical first)
 
-1. **Provenance plumbing.** Add `DERIVED`/`driver` records to the
-   `P`-matrix closure in the harness (if not already present). Index
-   by driver for component lookup. ~200 lines.
-2. **Coupled-component extraction.** `coupled_component(driver)` from
-   provenance. ~100 lines.
-3. **Twist construction + uniqueness test.** §4.2 + §4.3. ~200 lines.
-4. **Verification.** `O(n²)` edge check (likely already exists in the
-   harness's automorphism harvesting). ~50 lines.
-5. **Harness integration.** The explore-read-verify-prune loop (§6.2),
-   in option-(b) form. ~200 lines.
+1. **Refinement-footprint extraction** (replaces the abandoned
+   TC-provenance plumbing, §3). Diff the parent partition against the
+   child partition (after individualizing the representative + warm
+   refining) to get the coupled component — the cells that split.
+   ~150 lines.
+2. **Twist construction + uniqueness test.** §4.2 (canonical-id
+   sub-cell matching) + §4.3 (all-singleton check). ~200 lines.
+3. **Verification.** `O(n²)` edge check — reuse
+   [`IsAutomorphism`](../GraphCanonizationProject/ChainDescent.cs#L246).
+   ~20 lines of glue.
+4. **Harness integration.** The explore-read-verify-prune loop (§6.2),
+   harness-loop placement (option b). Harvest into `Automorphisms`
+   before the branch loop reaches unexplored reps, so the existing
+   [`CoveredByPathFixingAut`](../GraphCanonizationProject/ChainDescent.cs#L181)
+   prunes them. ~200 lines.
 
 **Empirical bar (leaf-count, not flag).** As of 2026-05-28, CFI(K4…K6)
 *already* canonize under the default budget via a-posteriori pruning
@@ -462,8 +499,8 @@ The build brief's M6 carries the measured a-posteriori baseline to beat.
 
 C# first (empirical validation that twist discovery works on CFI),
 then Lean (contract discharge). The C# implementation will surface
-whether §4.2's mirror-matching is the right construction before the
-Lean effort is committed.
+whether §4.2's canonical-id matching is the right construction before
+the Lean effort is committed.
 
 ---
 
@@ -475,14 +512,16 @@ Lean effort is committed.
 | `LinearOracleSpec` interface | **Firm** | Lean §15.8; output bundles `IsAut` proof |
 | `LeafTwistSpec` validity | **Firm** | Lean §15.8; the pruning-justification contract |
 | `some_isAut` soundness | **Firm** | Automatic from subtype |
-| `warm_6_2` (invariant 6.2) | **Firm** | Proved; gives partition symmetry / mirror pattern |
-| Descent spine (`warmRefine_agree_off'`) | **Firm** | Proved; single fixed partition backdrop |
-| Edge-by-edge verification (§4.5) | **Firm** | Mandatory for soundness |
-| Provenance content (invariant 6.4) | **Firm** | Required to delineate coupled component |
-| Provenance *data structure* | **Reshapeable** | Per-record vs. driver-indexed; lazy vs. incremental |
-| `ITransversalOracle` integration | **Reshapeable** | Online behavior may need interface extension or harness-loop placement (§6.1) |
-| Mirror-matching construction (§4.2) | **Reshapeable** | The proposed construction; C# validation will confirm or revise |
-| Non-singleton handling (§4.4) | **Reshapeable** | Phase 1 flags; options 2-3 for a future successor |
+| `warm_6_2` (invariant 6.2) | **Firm (size-2)** | Proved; the partition-mirror for one pair's two directions. Backs the construction cleanly only for size-2 decision cells (§4.1 §0 note). |
+| Descent spine (`warmRefine_agree_off'`) | **Firm** | Proved; partition-sharing over a decision set (size-`k`). Gives the *candidate* for larger cells, not the automorphism property — verification closes that. |
+| Edge-by-edge verification (§4.5) | **Firm** | Mandatory for soundness — the unconditional gate. Everything upstream may be heuristic. |
+| Coupled component = **refinement footprint** (§3) | **Firm** | Parent↔child partition diff. *Replaces* the TC-provenance model, which is inert for the within-cell cascade (measured 0). |
+| TC-provenance (`DERIVED`/`driver`, invariant 6.4) | **Not on critical path** | Meaningful only where TC genuinely chains (between-cell ordering). Inert for the linear oracle's within-cell CFI target. |
+| Footprint computation (full-diff vs. round-tracking; lazy vs. eager) | **Reshapeable** | Implementation choice. |
+| `ITransversalOracle` integration | **Reshapeable** | Online behavior needs harness-loop placement (§6.1), not the pre-branch `Classify` seam. |
+| Canonical-id matching construction (§4.2) | **Reshapeable (heuristic)** | Sound *via verification*, not proven. C# validation on CFI confirms or revises. |
+| Non-singleton handling (§4.4) | **Reshapeable** | Phase 1 falls back / flags; options 2-3 for a future successor. |
+| "All sub-cells singleton ⟺ abelian / wall" (§4.3) | **Conjectural** | Tier-3 / orbit-recovery open content. The *behaviour* (fall-back on non-singleton) is sound; the boundary characterization is not proven. |
 | "Output IS a binary matroid / IS the Tier-2 detector" | **Historical** | [matroid §8.4, §9](./chain-descent-matroid.md). The matroid framework is **closed** — neither closure operator is a matroid. The linear oracle's output is a set of `Z_2` generators; viewing it as a binary matroid is *optional commentary*, not a design requirement. Do not treat as binding. |
 
 **On the matroid framing specifically:** the matroid memo speculated
@@ -498,29 +537,35 @@ check, not a matroid-representability test.
 
 ## 10. Risks and open questions
 
-1. **Mirror-matching correctness (§4.2).** The proposed construction is
-   correct for CFI (validated by the worked example), but whether it's
-   the right construction for *all* abelian cases is unconfirmed. C#
-   validation on CFI variants is the first check. **Main implementation
-   risk**, as calculator §9 flagged.
-2. **Within-sub-cell matching when sub-cells aren't singletons.** §4.4
-   option 1 (flag) sidesteps this; a graph with a genuinely abelian
-   decision over non-singleton sub-cells (if such exists) would be
-   flagged unnecessarily. Whether such graphs exist is open.
-3. **Online interface placement (§6.1).** Whether to extend
-   `ITransversalOracle` or place the oracle in the harness loop is a
-   design decision with correctness implications (the harness must
-   still be iso-invariant). Recommended: harness-loop (option b), but
-   needs the iso-invariance argument.
-4. **Provenance completeness.** Whether the current harness's closure
-   already records enough provenance, or needs the §8.1 plumbing, is an
-   implementation audit item.
-5. **Iso-invariance of twist discovery.** Flag iso-invariance
-   ([strategy §15 gap 2](./chain-descent-strategy.md)) requires the
-   oracle's traversal and twist-discovery to be deterministic functions
-   of iso-invariant cell ids. The construction (§4.2) reads from
-   canonical-id-ordered cells, so this should hold by construction —
-   but it's a proof obligation.
+1. **Construction correctness (§4.2).** Canonical-id sub-cell matching
+   is correct for CFI (worked example), but whether it is the right
+   construction for *all* abelian cases is unconfirmed. Verification
+   (§4.5) keeps it *sound* regardless — a wrong candidate just fails the
+   edge-check. The risk is *effectiveness* (does it construct twists
+   that pass verification often enough to collapse the descent?), not
+   soundness. C# validation on CFI variants is the first check. **Main
+   implementation risk**, as calculator §9 flagged.
+2. **Size-`k>2` cells lack clean proof backing.** `warm_6_2` backs
+   size-2 cleanly; larger cells lean on the spine
+   (`warmRefine_agree_off'`, partition-sharing) plus verification for
+   the automorphism property. Sound to *attempt* at any size (verify
+   gates); the *Lean* discharge (§8.2) should scope Phase 1 to size-2.
+3. **Within-sub-cell matching when sub-cells aren't singletons.** §4.4
+   option 1 (fall back) sidesteps this; whether a genuinely abelian
+   decision over non-singleton sub-cells exists is open (the §4.3
+   conjecture).
+4. **Online interface placement (§6.1).** Harness-loop placement
+   (option b) is recommended; it must preserve iso-invariance of the
+   flag/canonical verdict.
+5. **Iso-invariance of twist discovery (undischarged).** Flag
+   iso-invariance ([strategy §15 gap 2](./chain-descent-strategy.md))
+   requires twist-discovery to be a deterministic function of
+   iso-invariant cell ids. `WarmPartition` ids are iso-invariant, so it
+   *should* hold by construction — but the obligation is **not
+   discharged**; treat it as an open proof obligation, not a given.
+6. **Empirical bar is leaf-count, not flag.** Small CFI already
+   canonizes under budget (no flag); the signal is the leaf/node-count
+   collapse toward a path. See §8.1 and the build brief M6.
 
 ---
 
@@ -530,8 +575,10 @@ check, not a matroid-representability test.
   the prose spec this doc makes precise; §9 item 4 (the construction
   gap).
 - [`chain-descent-strategy.md`](./chain-descent-strategy.md) §10
-  (provenance / closure-as-guess), §12 (`warm_6_2` + spine), §15
-  (flag iso-invariance obligation).
+  (closure-as-guess / TC provenance — *not* on the linear oracle's
+  critical path; see §3), §12 (`warm_6_2` + spine — the partition
+  backdrop the construction reads), §15 (flag iso-invariance
+  obligation).
 - [`ChainDescent.lean`](../GraphCanonizationProofs/ChainDescent.lean)
   §15.8 — the firm interface (`DirAssignment`, `LinearOracleSpec`,
   `LeafTwistSpec`); §15.7 (`canonForm`).

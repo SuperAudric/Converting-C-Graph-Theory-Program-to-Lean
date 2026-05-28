@@ -338,12 +338,19 @@ is not a coincidence.
 
 ### What the linear oracle requires
 
-- **State.** A descent node must carry not just the partial order `P` but a
-  **provenance record** — which guess forced which derived relation — so the
-  coupled component can be delineated and the candidate twist built. This is the
-  `DERIVED`-record-with-driver structure of
-  [`chain-descent-strategy.md`](./chain-descent-strategy.md) §10, closure as a
-  guess.
+- **State.** A descent node must let the oracle delineate the coupled
+  component and build the candidate twist. The mechanism is the **refinement
+  footprint** — the parent↔child partition diff (the cells that split when the
+  representative is individualized). *Correction (2026-05-28):* an earlier
+  version named the `DERIVED`-record-with-driver TC provenance of
+  [`chain-descent-strategy.md`](./chain-descent-strategy.md) §10 as the required
+  state. That TC provenance is **inert** for the within-cell cascade the linear
+  oracle targets (under relegated TC there is no in-loop closure; in the
+  implementation a within-cell decision on a uniform-type graph chains nothing —
+  measured zero). The cascade propagates by **refinement**, so the footprint is
+  read from the partition diff. TC provenance stays meaningful only for
+  between-cell ordering guesses, off the oracle's critical path. Full treatment:
+  [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md) §3.
 - **Invariant 6.2** — so the partition-sharing above is rigorous. Its
   load-bearing core is a *direction-symmetric split* lemma: a guess splits a cell
   into the **same sub-cells** under either direction. This is `warm_6_2` in
