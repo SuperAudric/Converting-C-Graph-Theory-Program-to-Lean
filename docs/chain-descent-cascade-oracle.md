@@ -659,6 +659,9 @@ de-risking path the linear oracle followed.
   §10.4, [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
   §2, §7 — where the a-priori cascade oracle is the next lever and how
   it composes with the linear oracle.
+- [`chain-descent-deferred-decisions.md`](./chain-descent-deferred-decisions.md) —
+  the scheduling layer to be picked up *after* this oracle: defer real
+  decisions, consume symmetry first, hand off the rigid residue whole.
 - C#: [ITransversalOracle.cs](../GraphCanonizationProject/ITransversalOracle.cs),
   [CascadeOracle.cs](../GraphCanonizationProject/CascadeOracle.cs),
   [ChainDescent.cs](../GraphCanonizationProject/ChainDescent.cs),

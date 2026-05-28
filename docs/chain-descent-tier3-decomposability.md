@@ -498,6 +498,15 @@ constraint. This is publishable independently — "any hidden Johnson
 must have such-and-such structural fingerprint" is a contribution
 even without closing the construction question.
 
+**Operational form.** (O\*) / "residue is rigid" is realized as an
+*algorithm* by the deferred-decision workflow
+([`chain-descent-deferred-decisions.md`](./chain-descent-deferred-decisions.md)):
+consume all symmetry first (deferring real decisions), and the clean
+two-phase form — polynomial oracle phase + oracle-free rigid residue —
+holds *iff* all symmetry is unconditional, which is exactly (O\*). That
+doc reframes the open content as the sharper sub-question "which
+symmetry is conditional on a non-symmetric choice?"
+
 ### 8.2 Construction language scoping
 
 This is the secondary inversion route — a fallback if the §8.1
