@@ -291,9 +291,19 @@ oracle calls dropping from ~(node count) to ~(decision count).
 4. **Rigid-residue solver is unspecified.** §7 names the slot; the
    actual global solver (Luks-style or otherwise) is separate future
    work. The hand-off is the contribution; the solver is not.
-5. **Interaction with the budget.** The Phase-1/Phase-2 split should
-   share one budget; a flag in either phase is a flag. Confirm the
-   handshake ([strategy §15 gap 1](./chain-descent-strategy.md)).
+5. **The budget is a Phase-2-only mechanism.** Phase 1 is
+   *unconditionally polynomial*: both oracles are bounded-work-or-degrade
+   (the cascade oracle's single-path recursion is `O(n³)` whether or not
+   it certifies; the linear oracle is `O(n²)` per decision), and Phase 1
+   makes polynomially many such calls on a single non-branching deferred
+   path. So Phase 1 **cannot exhaust the budget** — it always runs to
+   completion. The exponential lives entirely in Phase 2's rigid
+   enumeration, so the node budget bounds Phase 2 alone, and **every flag
+   originates in Phase 2**. (This sharpens the two-phase picture: a
+   guaranteed-polynomial symmetry-consumption phase, then a
+   budget-bounded enumeration phase — the budget handshake of
+   [strategy §15 gap 1](./chain-descent-strategy.md) only has to be
+   reasoned about for Phase 2.)
 
 ---
 
