@@ -11,4 +11,8 @@
     <None Include="Archive/**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GraphCanonizationProject.Tests" />
+  </ItemGroup>
+
 </Project>
