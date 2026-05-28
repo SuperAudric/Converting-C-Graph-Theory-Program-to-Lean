@@ -76,16 +76,21 @@ toward the depth-bounded single path.
 ### 1.2 The boundary (the cascade class)
 
 The oracle certifies **iff the recursion reaches all-singleton
-footprints within the orbit-recovery depth bound**:
+footprints within a polynomial depth bound**:
 
-- **Cascade class** — CFI(H) with bounded `tw(H)` (`theorem_1_HOR_cfi_oddDeg`,
-  depth ≤ `tw(H)`), schurian scheme graphs (`theorem_2_HOR_concrete_rank_two_J_singleton`,
-  depth 1), and their compositions (Theorem 3a). The recursion bottoms
-  out; certification succeeds.
+- **Cascade class** — CFI(H) for **any** `tw(H)` (`theorem_1_HOR_cfi_oddDeg`,
+  depth ≤ `tw(H) ≤ n`), schurian scheme graphs
+  (`theorem_2_HOR_concrete_rank_two_J_singleton`, depth 1), and their
+  compositions (Theorem 3a). Because single-path cost is `O(depth · n²)`
+  (§4.6), *unbounded* `tw(H)` is fine — the depth is polynomial in `n`,
+  not a branching exponent. The recursion bottoms out; certification
+  succeeds. (This is strictly broader than orbit-recovery Corollary 1's
+  *"fixed `tw`"* a-posteriori bound — see §4.6.)
 - **Off the cascade class** — a rigid IR blind spot
   ([strategy §15 gap 5](./chain-descent-strategy.md)) or the non-abelian
   wall (hidden Johnson). The recursion does not bottom out by the depth
-  bound; the budget flags. Sound — never a wrong answer.
+  bound, *or* the mirror-read finds no unique candidate; the budget
+  flags. Sound — never a wrong answer.
 
 This is the same boundary as "cell *is* a single orbit, cheaply
 certifiable" ([calculator §5](./chain-descent-calculator.md)) and the
@@ -302,34 +307,48 @@ a-posteriori branching.
 
 ```
 certify_orbits(cell, depth):
-    explore r_1 (individualize, warm-refine → child)
+    explore r_1   // ONE representative — individualize, warm-refine → child
     K := refinement_footprint(parent, child)
     if all_singletons(K):
-        for each other rep r_j:
-            t := construct_orbit_map(K, r_1, r_j)      // §4.2, shared
-            if verify_automorphism(t): harvest(t)      // §4.5
+        for each other rep r_j:                        // NOT explored —
+            t := construct_orbit_map(K, r_1, r_j)      //   read off r_1's
+            if verify_automorphism(t): harvest(t)      //   mirror (spine)
         return one rep per harvested-orbit
     else:
-        if depth ≥ orbit_recovery_bound(cell): flag    // off cascade class
-        pick a non-singleton sub-cell C ∈ K            // iso-invariantly
-        // recurse: descend one level into C, re-attempt deeper
-        for one rep c_1 of C (the others certified on return):
-            certify_orbits(C, depth + 1)
-        // C now cascaded to singletons ⇒ K refines ⇒ retry the harvest
-        retry construct/verify/harvest on the refined footprint
+        if depth ≥ depth_bound: flag                   // off cascade class
+        C := iso_invariant_nonsingleton_subcell(K)
+        certify_orbits(C, depth + 1)                   // recurse on ONE
+                                                       //   sub-cell rep only
+        retry construct/verify/harvest on refined K    // C now singletons
 ```
 
+> **⚠ Single-path is the whole point — it must NOT branch over
+> representatives.** At every level the oracle explores **exactly one**
+> representative (`r_1`, then one rep of `C`, …) and reads all cellmates
+> off that branch's **mirror** (the spine fact, §4.1). It descends a
+> *single path* of length ≤ `depth_bound`, never a tree. This is what
+> makes the cost a **sum** `O(depth · n²)`, not a **product**
+> `cell_size^depth`. See §4.6 — a branching recursion would be
+> exponential in depth and is exactly the thing this oracle exists to
+> replace.
+
 **Termination.** Each recursion level individualizes one more vertex; by
-orbit recovery (§3), after ≤ `orbit_recovery_bound` levels (`tw(H)` for
-CFI, 1 for schemes) the cell discretizes, so every footprint becomes
+orbit recovery (§3), after ≤ `depth_bound` levels (`tw(H)` for CFI, 1
+for schemes) the cell discretizes, so every footprint becomes
 all-singleton and the shared construction applies. Off the cascade
 class, the bound is exceeded and the run flags.
 
-**One representative per level.** The recursion explores *one* rep of
-each non-singleton sub-cell; the others are certified on the way back up
-(their orbit maps harvested, `CoveredByPathFixingAut` prunes them). This
-is the "single path" the design promises — the a-priori analogue of the
-a-posteriori branching the descent does today.
+**Why one representative suffices (the mirror-read).** The oracle does
+*not* explore the cellmates `r_2, …, r_k` or the sub-cell's other
+vertices. By the spine fact, individualizing `r_1` vs. `r_j` gives
+*mirror* partitions, so the generator carrying `r_1 ↦ r_j` is read off
+`r_1`'s single branch and verified — without exploring `r_j`'s subtree.
+Orbit recovery (§3) guarantees that, on the cascade class, *all* the
+orbit generators are visible this way, so single-path discovers a
+complete generating set. The a-posteriori descent, by contrast,
+explores every `r_j` and harvests from leaf collisions — that is the
+`cell_size^depth` product (orbit-recovery Corollary 1) the a-priori
+oracle replaces.
 
 **Iso-invariance of the recursion.** Picking the non-singleton sub-cell
 `C` and the explored rep `c_1` must be a function of iso-invariant cell
@@ -351,15 +370,47 @@ maps are harvested; a failure means the reps stay separate (sound
 over-split). Verification is the sole soundness anchor — the recursion
 and construction may be heuristic.
 
-### 4.6 Polynomial bound
+### 4.6 Polynomial bound — single-path vs. branching (the crux)
 
-Per cell, per recursion level:
-- footprint diff: O(n²); construction: O(n²); verify: O(n²).
+This is the load-bearing complexity argument, and the whole design
+hinges on it. There are two ways the recursion could run:
 
-Levels ≤ `orbit_recovery_bound` (≤ `tw(H)` for CFI, constant for
-bounded-tw). Reps per level ≤ n. Cells along a path ≤ n. So per descent
-path: O(n² · depth · n) = polynomial for bounded-depth cascade class,
-matching calculator §6's per-node O(n²) with the depth and path factors.
+- **Branching** — explore `b` representatives per level, `d` levels →
+  **`b^d` nodes**. Exponential in depth. With `d = tw(H)` (graph-
+  dependent, unbounded), this is super-polynomial. **This is exactly
+  the a-posteriori descent**: orbit-recovery Corollary 1 bounds it as
+  `cell_size^{tw(H)}`, which is why that corollary needs the *"for fixed
+  `tw(H)`"* qualifier.
+- **Single-path** (§4.4) — explore **one** representative per level,
+  read cellmates off the mirror, `d` levels → **`O(d · n²)`**. Per
+  level: footprint diff O(n²) + construction O(n²) + verify O(n²). With
+  `d ≤ depth_bound ≤ tw(H) ≤ n`, the total per descent path is
+  **`O(n³)`** — polynomial for **any** polynomial depth, including
+  *unbounded* `tw(H)`.
+
+**The depth bound is not a complexity bottleneck for single-path.**
+Because the cost is `d · n²` (a sum), any polynomial `d` is fine — the
+trivial `d = n` gives `O(n³)`. The tight `tw(H)` bound is a smaller
+constant, not a requirement for polynomiality. (Contrast branching,
+where only *constant* `d` is polynomial — which is why the a-posteriori
+Corollary 1 is restricted to fixed `tw`.)
+
+**So the a-priori cascade oracle, *if single-path is effective*, removes
+Corollary 1's fixed-`tw` restriction**: it would canonize all CFI —
+including unbounded-treewidth bases — in polynomial time, by replacing
+the `cell_size^{tw}` product with a `tw · n²` sum. That strengthening
+*is* the deliverable.
+
+**The open question is effectiveness, not soundness.** Single-path is
+sound regardless: if it misses a generator it over-splits (more reps
+than orbits — the safe direction), never over-merges. Whether the
+mirror-read finds a *complete* generating set without branching (so the
+descent fully collapses) is guaranteed by orbit recovery *on the
+cascade class* (§3) and is the empirical question the build's leaf-
+collapse bar (§8.1 M5) answers. The all-singleton case is already
+demonstrated single-path (the linear oracle harvested 941 K7 twists
+a-priori, 0 branching at those nodes); the unproven part is the
+non-singleton recursion.
 
 ---
 
@@ -418,7 +469,7 @@ on target cell [r_1, r_2, …] at a node, depth d:
         for each unexplored r_j:
             t := construct_orbit_map(K, r_1, r_j)        // §4.2 (shared)
             if verify_automorphism(t): AddGenerator(t)   // §4.5
-    else if d < orbit_recovery_bound:
+    else if d < depth_bound:
         C := iso_invariant_nonsingleton_subcell(K)       // §4.4
         certify_orbits(C, d + 1)                          // recurse
         retry harvest on the refined footprint
@@ -485,12 +536,12 @@ Building on the linear oracle's shipped pieces (`RefinementFootprint`,
 2. **Bounded-depth recursion.** The new content (§4.4): when
    `AllSingletons(K)` is false, descend one level into an
    iso-invariantly-chosen non-singleton sub-cell, re-refine, re-attempt.
-   Track recursion depth against `orbit_recovery_bound`. ~200-300 lines.
+   Track recursion depth against `depth_bound`. ~200-300 lines.
    M2.
 3. **Iso-invariant sub-cell + rep selection.** Choose `C` and `c_1` by
    canonical `CellOf` id; branch over the whole sub-cell. Reuse the
    harness's iso-invariant target-cell logic. M3.
-4. **Depth-bound + flag.** Wire `orbit_recovery_bound` (start with a
+4. **Depth-bound + flag.** Wire `depth_bound` (start with a
    generous `n`; tighten to `tw(H)` when the CFI base is identifiable);
    flag past the bound. M4.
 5. **Empirical bar (M5).** CFI(K4…K7): non-singleton footprints resolve
@@ -538,7 +589,7 @@ de-risking path the linear oracle followed.
 | Budget / soundness handshake | **Firm** | [strategy §15 gap 1](./chain-descent-strategy.md); interrupt mid-certification ⟹ flag, never partial unsound. |
 | Bounded work or flag | **Firm** | [strategy §5](./chain-descent-strategy.md). |
 | Unification (one component vs. separate cascade oracle) | **Reshapeable** | §1.4; the build decides packaging. |
-| `orbit_recovery_bound` value | **Reshapeable** | Start `n`; tighten to `tw(H)` when CFI base identifiable. |
+| `depth_bound` value | **Reshapeable** | Start `n`; tighten to `tw(H)` when CFI base identifiable. |
 | Lean `CascadeOracleSpec` | **Not yet built** | §2.5, §8.2; parallel to `LinearOracleSpec`. |
 | TC provenance (`DERIVED`/`driver`, invariant 6.4) | **Historical / not on critical path** | Inert for within-cell cascade (measured 0); the footprint is refinement-based. |
 | Matroid framing / "Tier-2 detector" | **Historical** | [matroid §8.4](./chain-descent-matroid.md), closed. Certification is a localized cascade check, not a matroid test. |
@@ -559,17 +610,21 @@ de-risking path the linear oracle followed.
    labelling-dependent. The whole-sub-cell branching makes the *choice*
    not bias the verdict, but the obligation is **undischarged**
    ([strategy §15 gap 2](./chain-descent-strategy.md)).
-3. **`orbit_recovery_bound` without identifying the CFI base.** The tight
+3. **`depth_bound` without identifying the CFI base.** The tight
    bound is `tw(H)`, but the oracle may not know `H` from the graph
    alone. A generous bound (`n`) is always sound (the budget catches
    stacking); tightening is an optimization, not a correctness need.
 4. **Unification packaging (§1.4).** One component or two? The build
    should confirm the all-singleton harvest is genuinely identical
    before committing to a unified API.
-5. **Depth vs. base-size for unbounded `tw(H)`.** For CFI towers or
-   high-treewidth bases, the recursion depth grows and the bound is
-   exceeded — correctly flagging (off the bounded-cascade class). This
-   is consistent with the design's flagged region, not a defect.
+5. **Unbounded `tw(H)` is NOT a flag (single-path).** Earlier framings
+   (and orbit-recovery Corollary 1) treated high-treewidth CFI as
+   needing a fixed-`tw` restriction — true for the *branching*
+   a-posteriori descent (`cell_size^{tw}`). For *single-path* (§4.6),
+   depth `tw(H) ≤ n` is a polynomial *factor*, not an exponent, so
+   unbounded-`tw` CFI is `O(n³)` and canonizes — *provided single-path
+   is effective* (risk 1). The genuine flag cases are the non-abelian
+   wall and IR blind spots, not high treewidth.
 6. **Empirical bar is leaf-count collapse, not flag.** Small CFI already
    canonizes ([calculator §9 item 4](./chain-descent-calculator.md)); the
    signal is leaf/node collapse toward the path, the metric the linear
