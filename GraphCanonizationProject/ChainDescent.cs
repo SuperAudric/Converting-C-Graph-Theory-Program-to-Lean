@@ -53,7 +53,14 @@ namespace Canonizer
         private readonly long _budget;
 
         private readonly List<int> _path = new();
-        private readonly Dictionary<int[], int[]> _seen;
+        // Leaf-collision table for a-posteriori automorphism harvesting, keyed by
+        // a 64-bit hash of the leaf matrix (value: the first permutation that
+        // produced that matrix). Hashing keeps this O(distinct-leaves · n) rather
+        // than O(distinct-leaves · n²); the canonical form is tracked separately
+        // (_bestMatrix), and a (vanishingly rare) hash collision only costs a
+        // missed harvest — the harvested twist is edge-verified regardless, so
+        // correctness never depends on the key being exact.
+        private readonly Dictionary<long, int[]> _seen = new();
 
         private long _nodeCount;
         private int _maxDepth;
@@ -88,7 +95,6 @@ namespace Canonizer
             _oracle = oracle;
             _budget = budget;
             Automorphisms = new PermutationGroup(n);
-            _seen = new Dictionary<int[], int[]>(IntArrayEq.Instance);
         }
 
         // A generous polynomial default node budget. Configurable so the
@@ -282,18 +288,33 @@ namespace Canonizer
             if (_bestMatrix == null || LexLess(matrix, _bestMatrix))
                 _bestMatrix = matrix;
 
-            if (_seen.TryGetValue(matrix, out int[]? firstPerm))
+            long key = HashMatrix(matrix);
+            if (_seen.TryGetValue(key, out int[]? firstPerm))
             {
-                // perm and firstPerm both produce `matrix`; the relabelling
-                // between them is an automorphism of the graph.
+                // perm and firstPerm produced matrices with the same hash; if the
+                // matrices truly coincide the relabelling between them is an
+                // automorphism — verified edge-by-edge before being harvested
+                // (a hash collision simply fails the check, harmlessly).
                 int[] auto = Perm.Compose(Perm.Inverse(perm), firstPerm);
                 if (IsAutomorphism(auto))
                     Automorphisms.AddGenerator(auto);
             }
             else
             {
-                _seen[matrix] = perm;
+                _seen[key] = perm;
             }
+        }
+
+        // FNV-1a 64-bit hash of a leaf matrix, for the collision table above.
+        private static long HashMatrix(int[] m)
+        {
+            ulong h = 14695981039346656037UL;
+            foreach (int x in m)
+            {
+                h ^= (uint)x;
+                h *= 1099511628211UL;
+            }
+            return unchecked((long)h);
         }
 
         // ── helpers ──────────────────────────────────────────────────────────
@@ -342,27 +363,6 @@ namespace Canonizer
             for (int i = 0; i < a.Length; i++)
                 if (a[i] != b[i]) return a[i] < b[i];
             return false;
-        }
-
-        private sealed class IntArrayEq : IEqualityComparer<int[]>
-        {
-            public static readonly IntArrayEq Instance = new();
-
-            public bool Equals(int[]? a, int[]? b)
-            {
-                if (ReferenceEquals(a, b)) return true;
-                if (a is null || b is null || a.Length != b.Length) return false;
-                for (int i = 0; i < a.Length; i++)
-                    if (a[i] != b[i]) return false;
-                return true;
-            }
-
-            public int GetHashCode(int[] a)
-            {
-                var h = new HashCode();
-                foreach (int x in a) h.Add(x);
-                return h.ToHashCode();
-            }
         }
     }
 }

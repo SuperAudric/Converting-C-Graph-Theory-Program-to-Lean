@@ -82,4 +82,46 @@ public class LinearOracleTests
         Assert.NotNull(odd.Matrix);
         Assert.NotEqual(even.Matrix, odd.Matrix);
     }
+
+    // M6 — the leaf-count scaling bar (docs/chain-descent-linear-oracle.md §8.1,
+    // build brief M6). The metric is *leaf count*, not memory: the spine (or any
+    // runtime optimization) lowers memory/time but never the leaf count, so leaf
+    // count isolates the oracle's behavioural effect (strategy §12). Logs the
+    // off-vs-on curve so we can see whether the oracle changes the growth
+    // *exponent* (polynomial vs exponential) or only a constant factor.
+    [Fact]
+    public void M6_LeafScaling_OffVsOn()
+    {
+        var bases = new (string Name, int Beta)[]
+        {
+            ("K4", 3), ("K33", 4), ("Petersen", 6), ("Rook3x3", 10), ("K6", 10),
+        };
+
+        _out.WriteLine($"{"base",-9}{"β",3} {"par",-5}{"n",5}  " +
+                       $"{"leavesOff",10}{"leavesOn",10}{"ratio",7}   " +
+                       $"{"nodesOff",10}{"nodesOn",10}  |Aut|");
+        foreach (var (name, beta) in bases)
+        {
+            var pair = CfiGraphGenerator.Generate(name);
+            foreach (var (label, g) in new[] { ("even", pair.Even), ("odd", pair.Odd) })
+            {
+                int n = g.VertexCount;
+                var adj = ExtractAdj(g);
+                var off = Run(n, adj, oracle: false);
+                var on = Run(n, adj, oracle: true);
+
+                Assert.False(off.Flagged);
+                Assert.False(on.Flagged);
+                Assert.Equal(off.Matrix, on.Matrix);                       // correctness
+                Assert.True(on.Stats.LeafCount <= off.Stats.LeafCount);    // no worse
+
+                double ratio = off.Stats.LeafCount == 0
+                    ? 1.0 : (double)on.Stats.LeafCount / off.Stats.LeafCount;
+                _out.WriteLine($"{name,-9}{beta,3} {label,-5}{n,5}  " +
+                               $"{off.Stats.LeafCount,10}{on.Stats.LeafCount,10}{ratio,7:F2}   " +
+                               $"{off.Stats.NodeCount,10}{on.Stats.NodeCount,10}  {on.ResidualGroup.Order}");
+            }
+        }
+    }
+
 }
