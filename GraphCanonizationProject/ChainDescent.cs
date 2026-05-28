@@ -66,6 +66,17 @@ namespace Canonizer
         // Descent-tree node count per depth — the per-level cost profile.
         private readonly List<int> _nodesByDepth = new();
 
+        // ── Linear oracle, M2: refinement-footprint observation ──────────────
+        // Off by default (zero cost on the normal path). When enabled, Branch
+        // records the parent↔child footprint of each individualized rep — the
+        // coupled component (docs/chain-descent-linear-oracle.md §3). This is an
+        // observation hook for validating the footprint on real descents; M4
+        // replaces "store the footprint" with "construct a twist, verify, and
+        // harvest it" in the same place.
+        internal bool CaptureFootprints { get; set; }
+        private readonly List<FootprintCapture> _capturedFootprints = new();
+        internal IReadOnlyList<FootprintCapture> CapturedFootprints => _capturedFootprints;
+
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
 
@@ -168,6 +179,20 @@ namespace Canonizer
             // v below its cellmates is always consistent (v becomes their
             // minimum); guard defensively against a closure contradiction.
             if (!TransitiveClose(pChild)) return;
+
+            // M2 observation hook (off by default): the coupled component is
+            // the parent↔child refinement footprint. A separate probe clone
+            // keeps the recursion path below byte-identical to the no-capture
+            // case. M4 will instead consume the footprint here (construct +
+            // verify + harvest a twist) before recursing.
+            if (CaptureFootprints)
+            {
+                var probe = partition.Clone();
+                probe.Refine(_adj, pChild);
+                _capturedFootprints.Add(new FootprintCapture(
+                    _path.Count, cell.Count, v,
+                    RefinementFootprint.Compute(_n, partition.CellOf, probe.CellOf)));
+            }
 
             _path.Add(v);
             Search(pChild, partition.Clone());

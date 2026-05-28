@@ -73,6 +73,26 @@ namespace Canonizer
         }
     }
 
+    // One footprint observed during a descent (the M2 observation hook in
+    // ChainDescent.Branch). The linear oracle proper (M4) will consume the
+    // footprint inline — construct/verify/harvest — rather than store it; this
+    // record exists so M2 can validate the structure on a real CFI(K4) descent.
+    internal readonly struct FootprintCapture
+    {
+        public int Depth { get; }
+        public int TargetCellSize { get; }
+        public int Rep { get; }
+        public RefinementFootprint Footprint { get; }
+
+        public FootprintCapture(int depth, int targetCellSize, int rep, RefinementFootprint footprint)
+        {
+            Depth = depth;
+            TargetCellSize = targetCellSize;
+            Rep = rep;
+            Footprint = footprint;
+        }
+    }
+
     // One parent cell of the coupled component, with the child sub-cells it
     // split into (ordered by canonical child cell id; each sub-cell ascending).
     internal readonly struct SplitCell
