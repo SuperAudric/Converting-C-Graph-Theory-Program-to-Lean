@@ -306,7 +306,7 @@ descending, one representative per level**, instead of falling through to
 a-posteriori branching.
 
 ```
-certify_orbits(cell, depth):
+certify_orbits(cell, depth):           // EXPLORATORY — on copies, not committed
     explore r_1   // ONE representative — individualize, warm-refine → child
     K := refinement_footprint(parent, child)
     if all_singletons(K):
@@ -314,12 +314,14 @@ certify_orbits(cell, depth):
             t := construct_orbit_map(K, r_1, r_j)      //   read off r_1's
             if verify_automorphism(t): harvest(t)      //   mirror (spine)
         return one rep per harvested-orbit
-    else:
-        if depth ≥ depth_bound: flag                   // off cascade class
+    else if depth < depth_bound:
         C := iso_invariant_nonsingleton_subcell(K)
         certify_orbits(C, depth + 1)                   // recurse on ONE
                                                        //   sub-cell rep only
         retry construct/verify/harvest on refined K    // C now singletons
+    else:
+        return all reps unmerged    // give up a-priori → over-split (sound);
+                                    //   harness branches; budget flags if it stacks
 ```
 
 > **⚠ Single-path is the whole point — it must NOT branch over
@@ -332,11 +334,20 @@ certify_orbits(cell, depth):
 > exponential in depth and is exactly the thing this oracle exists to
 > replace.
 
-**Termination.** Each recursion level individualizes one more vertex; by
-orbit recovery (§3), after ≤ `depth_bound` levels (`tw(H)` for CFI, 1
-for schemes) the cell discretizes, so every footprint becomes
-all-singleton and the shared construction applies. Off the cascade
-class, the bound is exceeded and the run flags.
+**Termination and the flag.** Each recursion level individualizes one
+more vertex, so the recursion *always* bottoms out at discreteness
+within ≤ `n` levels — termination is never the issue. `depth_bound` is
+the **give-up cutoff**, not a termination bound: on the cascade class,
+orbit recovery (§3) makes footprints all-singleton within ≤ `tw(H)` (CFI)
+or 1 (schemes) levels, so certification succeeds well before the cutoff.
+Off the cascade class, the cutoff is reached with the footprint still
+non-singleton (or the forced candidate fails verification); the oracle
+then **returns the reps unmerged (over-split)** and the harness branches
+on them. The recursion itself never flags — the flag is **downstream**,
+from the budget when those real branches stack (§6.4). The recursion is
+**exploratory** (run on copies to read footprints and harvest verified
+generators), so its single-path cost is separate from, and does not
+itself drive, the harness's branching.
 
 **Why one representative suffices (the mirror-read).** The oracle does
 *not* explore the cellmates `r_2, …, r_k` or the sub-cell's other
@@ -351,11 +362,17 @@ explores every `r_j` and harvests from leaf collisions — that is the
 oracle replaces.
 
 **Iso-invariance of the recursion.** Picking the non-singleton sub-cell
-`C` and the explored rep `c_1` must be a function of iso-invariant cell
-ids (`WarmPartition.CellOf`), and the descent branches over the *whole*
-sub-cell so the choice of `c_1` does not bias the verdict
-([extended-twist-viability.md](./chain-descent-extended-twist-viability.md)).
-This is the §10 flag-iso-invariance obligation, undischarged.
+`C` must be a function of iso-invariant cell ids (`WarmPartition.CellOf`).
+The explored rep `c_1` need *not* be canonical, because the **mirror-read
+covers every cellmate** regardless of which `c_1` is chosen: a different
+`c_1` yields a different generating *set* but the **same generated
+group** (the orbit of `C`), and the verdict (canonical form / flag)
+depends only on the group, not the chosen generators. So the choice of
+`c_1` does not bias the verdict — *not* because the descent branches over
+the whole sub-cell (single-path does not), but because the mirror-read is
+choice-symmetric. The remaining obligation — that the harvested *group*,
+hence the verdict, is a function of iso-invariant ids — is the §10
+flag-iso-invariance obligation, **undischarged**.
 
 > **This recursion is literally "orbit recovery applied to the
 > sub-cell"** ([linear-oracle.md §4.4](./chain-descent-linear-oracle.md)),
@@ -538,9 +555,10 @@ Building on the linear oracle's shipped pieces (`RefinementFootprint`,
    iso-invariantly-chosen non-singleton sub-cell, re-refine, re-attempt.
    Track recursion depth against `depth_bound`. ~200-300 lines.
    M2.
-3. **Iso-invariant sub-cell + rep selection.** Choose `C` and `c_1` by
-   canonical `CellOf` id; branch over the whole sub-cell. Reuse the
-   harness's iso-invariant target-cell logic. M3.
+3. **Iso-invariant sub-cell selection.** Choose `C` by canonical
+   `CellOf` id; `c_1` need not be canonical (mirror-read is
+   choice-symmetric, §4.4). Reuse the harness's iso-invariant
+   target-cell logic. M3.
 4. **Depth-bound + flag.** Wire `depth_bound` (start with a
    generous `n`; tighten to `tw(H)` when the CFI base is identifiable);
    flag past the bound. M4.
@@ -584,7 +602,7 @@ de-risking path the linear oracle followed.
 | Refinement footprint = coupled component (§4.1) | **Firm** | Parent↔child partition diff. Reused from the linear oracle; TC provenance is inert (below). |
 | All-singleton gate principled (no iso-invariant match in non-singleton sub-cell) | **Firm** | [extended-twist-viability.md §1](./chain-descent-extended-twist-viability.md); forces recursion over index-match. |
 | Path-fixing pruning | **Firm** | Only path-fixing automorphisms may prune (`CoveredByPathFixingAut`). |
-| Iso-invariant target-cell + sub-cell + rep selection | **Firm** | Canonical `CellOf` ids; branch over whole sub-cell. |
+| Iso-invariant target-cell + sub-cell selection | **Firm** | Canonical `CellOf` ids. Explored rep need not be canonical (mirror-read choice-symmetric, §4.4). |
 | Flag iso-invariance of certification (§4.4, §10) | **Firm obligation, UNDISCHARGED** | [strategy §15 gap 2](./chain-descent-strategy.md); online discovery must be a function of iso-invariant ids. |
 | Budget / soundness handshake | **Firm** | [strategy §15 gap 1](./chain-descent-strategy.md); interrupt mid-certification ⟹ flag, never partial unsound. |
 | Bounded work or flag | **Firm** | [strategy §5](./chain-descent-strategy.md). |
@@ -604,11 +622,12 @@ de-risking path the linear oracle followed.
    the CFI(K7) starvation footprints is the empirical question M5
    answers. **Main implementation risk** — the analogue of the linear
    oracle's construction-correctness risk.
-2. **Iso-invariance of the recursion's representative choice (§4.4).**
-   Picking the non-singleton sub-cell and its explored rep must read
-   only iso-invariant ids, or the flag/canonical verdict becomes
-   labelling-dependent. The whole-sub-cell branching makes the *choice*
-   not bias the verdict, but the obligation is **undischarged**
+2. **Iso-invariance of the recursion (§4.4).** The non-singleton
+   sub-cell `C` must be picked by iso-invariant cell id. The explored
+   rep `c_1` need not be canonical (the mirror-read is choice-symmetric:
+   different `c_1`, same generated group). The undischarged obligation is
+   that the harvested *group* — hence the canonical/flag verdict — is a
+   function of iso-invariant ids, not the labelling
    ([strategy §15 gap 2](./chain-descent-strategy.md)).
 3. **`depth_bound` without identifying the CFI base.** The tight
    bound is `tw(H)`, but the oracle may not know `H` from the graph
