@@ -199,11 +199,18 @@ set — a routine but bookkeeping-heavy lemma.
    representative per orbit, which is iso-invariantly settled by the
    canonical chain-descent picker
    ([orbit-recovery §3](./chain-descent-orbit-recovery.md)).
-2. **Polynomial bound depends on `k`.** Corollary 3a needs `k` to be
-   polynomial in `n` for the total cascade depth to stay polynomial.
-   For layered constructions (`CFI^d(H)`), `k = d`, so we need `d` to
-   grow polynomially. For "natural" graphs with constant-depth layer
-   chains, `k` is bounded by a small constant.
+2. **`k ≤ n` automatically.** Theorem T-B
+   ([calculator §4](./chain-descent-calculator.md)) bounds the
+   stabilizer chain length at ≤ `n`, so total individualizations
+   `|S| ≤ n` trivially. Combined with `|S| ≤ Σ f_i` and `f_i ≥ 1` per
+   non-trivial layer, this gives `k ≤ Σ f_i ≤ n`. No separate
+   hypothesis on `k`'s polynomial growth is needed — the polynomial-
+   bound question reduces entirely to **each `f_i` being polynomial**,
+   which each cascade class (Tier 1, Tier 2, future) delivers
+   individually. For `CFI^d(H)`, this also means `d ≤ n` is automatic,
+   though the cumulative `Σ tw(CFI^{i-1}(H))` may still blow up
+   super-polynomially when the tower's treewidth grows — the
+   polynomial bound is "all `f_i` polynomial," not just "few layers."
 3. **`H_{i-1}/H_i` may not be in *one* known cascade class.** A layer
    could combine CFI and scheme structure. The theorem statement is
    robust to this: as long as *some* cascade-class bound applies to
