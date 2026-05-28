@@ -154,14 +154,20 @@ proceeding.
 - Suggested shape: both partitions are already `WarmPartition.CellOf`
   arrays; the footprint is "which parent cells map to >1 child cell."
   No closure changes, no `driverOf` array.
-- **Test:** on `CFI(Cycle3)`, after individualizing one parity rep,
-  the footprint is the gadgets around the cycle (the cells that split).
+- **Test (mechanism smoke):** on `CFI(Cycle3)`, individualizing one
+  vertex and refining splits cells (the cascade propagates); the
+  footprint is the non-empty set of cells that split. This validates
+  the diff mechanism — `Cycle3` cascades by distance, so it has no
+  genuine parity decision; the *meaningful* footprint is M3's on
+  `CFI(K4)`.
 
 ### M2 — Coupled-component sub-cell structure
 - For each cell in the footprint, record its child sub-cells (by
   canonical id). This is the data M3 matches against the mirror branch.
-- **Test:** on `CFI(Cycle3)`, each gadget on the cycle has split into
-  its two parity classes (singletons).
+- **Test:** on `CFI(K4)`, at a genuine decision the footprint's split
+  cells break into singleton sub-cells (the all-singletons case M3
+  needs); `CFI(Cycle3)` smoke-tests that sub-cells are recorded
+  per split cell in canonical-id order.
 
 ### M3 — Twist construction (the core, §4.2)
 *(Reframed — no P order-labels exist; refinement is split-only. Match
@@ -177,8 +183,16 @@ by canonical-id structure, sound via verification.)*
   matching is then forced.
 - For CFI this is "flip the parity of every gadget on the coupled
   cycle."
-- **Test:** on `CFI(Cycle3)`, the constructed `t` is the parity-flip
-  involution.
+- **Test target: `CFI(K4)`, not `CFI(Cycle3)`.** A cycle base has
+  β = 1 realized as graph *topology* (odd = one 18-cycle, even = two
+  9-cycles); within canonizing the 18-cycle there is **no genuine
+  abelian decision** — it is pure cascade (D18, ~9 nodes), so there is
+  no parity twist for M3 to construct. The genuine `Z_2^β`
+  false-symmetry decisions first appear at **treewidth-≥3 bases**:
+  `CFI(K4)` (β = 3). **Test:** on `CFI(K4)`, the construction yields a
+  candidate `t` carrying one explored parity rep onto an unexplored
+  one that passes `IsAutomorphism` (a gadget-parity flip on the coupled
+  cycle).
 - **Note:** the construction is a heuristic made sound by M4's verify;
   it need not be provably correct to be safe to attempt. Attempt it for
   cells of any size (§3) — verification filters.
@@ -191,9 +205,12 @@ by canonical-id structure, sound via verification.)*
   M2+M3+M4 for the just-explored rep against each unexplored rep
   *before* the loop continues. The existing `CoveredByPathFixingAut`
   then prunes the covered reps.
-- **Test:** on `CFI(Cycle3)` odd (18-cycle), the descent canonizes
-  with the parity decisions collapsed; `LastPrunedBranches` reflects
-  a-priori pruning (compare against the a-posteriori-only baseline).
+- **Test:** on `CFI(K4)` (genuine `Z_2^3` decisions, not the cascading
+  cycle base), the descent canonizes with parity decisions collapsed
+  a-priori; the explored **leaf count drops** below the a-posteriori
+  baseline (16, per M6), scramble-invariantly, still distinguishing
+  Even from Odd. (`CFI(Cycle3)` remains a useful smoke test for the
+  M1/M2 footprint mechanism, but has no twist to discover.)
 
 ### M5 — Uniqueness test + graceful degradation
 - When M3 finds a non-singleton sub-cell (no unique candidate), the
