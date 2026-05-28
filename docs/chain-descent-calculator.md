@@ -223,8 +223,14 @@ the node budget exactly on graphs that cascade, and flag otherwise.
 This is honest but not the final form. A genuine cascade oracle would run a
 **bounded certification check** *before* branching and return one representative
 per certified orbit directly. Its exact certification predicate — what bounded
-check it runs, and what it guarantees — is undefined design work (§9). Both the
-Tier-1 polynomial proof and the oracle's code depend on nailing it down.
+check it runs, and what it guarantees — was undefined design work (§9); it is now
+specified in [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
+as the linear oracle's verified-footprint-map harvest wrapped in a bounded-depth
+recursion (depth ≤ `tw(H)` for CFI, 1 for schemes, via the orbit-recovery
+theorems). The a-priori cascade oracle became the binding constraint once the
+linear oracle was built and measured *starved* (2026-05-28) — 100% of CFI(K7)
+residual branching sits at non-singleton footprints the recursion would resolve.
+Both the Tier-1 polynomial proof and the oracle's code depend on it.
 
 The boundary of the cascade oracle is also the boundary of "cell *is* a single
 orbit" being cheaply certifiable. When the cell is **not** a single orbit — a
@@ -504,17 +510,19 @@ In rough priority order:
    oracle is the unproven Tier-1 theorem. The design makes it cleanly
    *targetable* (a per-node, inductive statement); it does not prove it.
 
-4. **The linear oracle is specified but not built.** §6 specifies it; Phase 1
-   ships only the cascade oracle. Note (measured 2026-05-28) this does *not* mean
-   CFI flags: the a-posteriori path canonizes CFI(K4…K6) under the default budget,
-   keeping leaf counts well below `2^β`. What grows is the explored **leaf count**
-   (16 → ~400 across β = 3 → 10), and with it the `O(leaves · n²)` leaf cache,
-   which is the binding constraint at larger bases (CFI(K7), n=308) — not the node
-   budget. The linear oracle's payoff is therefore collapsing the leaf count to
-   ~`O(β)` a-priori, not eliminating a flag. Its open piece is **cheap
-   candidate-twist construction** — turning a propagation pattern into a vertex
-   permutation — the one genuinely unspecified piece and the main implementation
-   risk.
+4. **The linear oracle is built; the a-priori cascade oracle is the open piece.**
+   §6 specifies the linear oracle; it was **built and validated through CFI(K7)
+   (2026-05-28)** — [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
+   §8.1. Note (measured 2026-05-28) the a-posteriori path already canonizes
+   CFI(K4…K6) under the default budget, keeping leaf counts well below `2^β`; the
+   binding constraint at larger bases is the `O(leaves · n²)` leaf cache, not the
+   node budget. The linear oracle collapses the leaf count (~7× on K7) but does
+   **not** reach `O(β)`: it is *starved* — 100% of residual CFI(K7) branching is
+   at non-singleton footprints where no forced map exists. The open piece is now
+   the **a-priori cascade oracle** ([`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)):
+   bounded-depth recursion that resolves those footprints into all-singleton ones,
+   feeding the linear oracle's (working) harvest. That is the path to polynomial
+   CFI and the main remaining implementation risk.
 
 5. **Is the wall reachable from the descent's output?** The construction
    question (§7). Target: prove every obstruction the descent produces

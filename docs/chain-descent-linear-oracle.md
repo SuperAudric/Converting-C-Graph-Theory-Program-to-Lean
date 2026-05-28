@@ -531,6 +531,8 @@ it *a-posteriori* (branching) rather than *a-priori* (one rep per orbit).
 So the binding constraint is the **a-priori cascade oracle** (§5/§9 of
 [calculator](./chain-descent-calculator.md)), which would feed clean
 footprints to the now-working linear oracle. See build brief §M6 results.
+Specified in [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
+as this oracle's harvest core wrapped in a bounded-depth recursion.
 
 ### 8.2 Lean (contract discharge)
 

@@ -591,6 +591,9 @@ This is the same a-priori orbit-harvesting the **spine** fact enables
 (read orbits off one branch's mirror), and it is exactly the
 cascade-oracle half of §4.5's implicit-discovery argument. Building it
 is the next concrete algorithmic step and the path to polynomial CFI.
+Specified in [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
+— the linear oracle's harvest core wrapped in a bounded-depth recursion
+(termination via the orbit-recovery theorems).
 
 The orbit-recovery program (Tier 1 `theorem_1_HOR_cfi_oddDeg`, Tier 2
 `theorem_2_HOR_concrete_rank_two_J_singleton`) is precisely the
