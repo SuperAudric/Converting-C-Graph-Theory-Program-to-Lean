@@ -83,13 +83,20 @@ namespace Canonizer
         public int TargetCellSize { get; }
         public int Rep { get; }
         public RefinementFootprint Footprint { get; }
+        // Decision context, for reconstructing sibling branches in tests/M3:
+        // the parent P-matrix at the node and the target cell's members.
+        public sbyte[] ParentP { get; }
+        public int[] CellMembers { get; }
 
-        public FootprintCapture(int depth, int targetCellSize, int rep, RefinementFootprint footprint)
+        public FootprintCapture(int depth, int targetCellSize, int rep,
+            RefinementFootprint footprint, sbyte[] parentP, int[] cellMembers)
         {
             Depth = depth;
             TargetCellSize = targetCellSize;
             Rep = rep;
             Footprint = footprint;
+            ParentP = parentP;
+            CellMembers = cellMembers;
         }
     }
 

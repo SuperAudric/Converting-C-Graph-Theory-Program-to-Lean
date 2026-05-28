@@ -92,10 +92,9 @@ whose termination is exactly *orbit recovery*.
 Refinement leaves `C` non-singleton ⇒ it cannot, *at this depth*,
 separate `C`'s vertices. The principled, iso-invariant move is to
 **individualize a representative of `C` and re-refine** — pushing the
-decision one level deeper ([linear-oracle.md §4.4](./chain-descent-linear-oracle.md)
-option 2). The extended construction then *reduces to the all-singletons
-case at greater depth* **iff `C` cascades to singletons in bounded
-depth**.
+decision one level deeper ([linear-oracle.md §4.4](./chain-descent-linear-oracle.md)).
+The extended construction then *reduces to the all-singletons case at
+greater depth* **iff `C` cascades to singletons in bounded depth**.
 
 That "iff" is the **orbit-recovery property**, already a theorem for the
 relevant classes:

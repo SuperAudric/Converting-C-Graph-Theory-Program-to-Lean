@@ -191,7 +191,8 @@ namespace Canonizer
                 probe.Refine(_adj, pChild);
                 _capturedFootprints.Add(new FootprintCapture(
                     _path.Count, cell.Count, v,
-                    RefinementFootprint.Compute(_n, partition.CellOf, probe.CellOf)));
+                    RefinementFootprint.Compute(_n, partition.CellOf, probe.CellOf),
+                    (sbyte[])p.Clone(), cell.ToArray()));
             }
 
             _path.Add(v);

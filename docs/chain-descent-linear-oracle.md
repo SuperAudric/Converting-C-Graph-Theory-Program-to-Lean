@@ -262,6 +262,19 @@ For this to define a permutation, matched sub-cells must have equal
 size; the clean case is when every sub-cell is a **singleton**, giving a
 forced matching and `r_1 ↦ r_j` directly.
 
+> **The all-singletons gate is principled, not just convenient
+> ([viability plan](./chain-descent-extended-twist-viability.md)).** A
+> non-singleton sub-cell is a *cell* — its vertices share one refined
+> colour, so they are refinement-indistinguishable, and **there is no
+> iso-invariant way to match a specific vertex to a specific image**
+> within it. A direct (index-based) match would be *sound* (verification
+> still gates it) but would make twist discovery — and hence the
+> node-count / flag verdict — depend on the input labelling, breaking
+> flag iso-invariance ([strategy §15 gap 2](./chain-descent-strategy.md)).
+> So the direct construction is well-defined **only for all-singleton
+> footprints**; the principled handling of non-singleton sub-cells is
+> *recursion*, not an arbitrary match (§4.4).
+
 **CFI specialization.** In CFI, `K` is a cycle of the base graph's
 cycle space; individualizing a parity rep splits each gadget on the
 cycle into its two parities; `t` flips all parities on the cycle. Each
@@ -290,28 +303,54 @@ forced — when every sub-cell of the coupled component is a **singleton**.
 > is the orbit-recovery conjecture ([orbit-recovery](./chain-descent-orbit-recovery.md)),
 > the same line as calculator §6's "size of the per-decision residual
 > symmetry."
+>
+> **Distinct from the above conjecture: the all-singletons gate itself is
+> principled, not heuristic.** Independently of whether singleton ⟺
+> abelian, the gate is *forced* by iso-invariance — a non-singleton
+> sub-cell admits no iso-invariant direct match (§4.2 note,
+> [viability plan](./chain-descent-extended-twist-viability.md)). So
+> "construct directly only when all-singleton, else recurse" is the
+> sound *and* iso-invariant rule regardless of how the abelian/wall
+> conjecture resolves.
 
-### 4.4 General-case design options (open)
+### 4.4 Non-singleton sub-cells — recursion, not direct matching
 
-When sub-cells are *not* all singletons, the construction is
-ambiguous. Three design options, in priority order:
+When sub-cells are *not* all singletons, the
+[viability analysis](./chain-descent-extended-twist-viability.md)
+settles what to do — and rules one option out:
 
-1. **Flag immediately.** Treat any non-singleton sub-cell as the wall.
-   Simplest, sound, and correct for the Phase-1 abelian target. Cost:
-   may flag some graphs that a smarter construction could handle. This
-   is the recommended Phase-1 behavior.
-2. **Recurse with more individualizations.** Individualize within the
-   ambiguous sub-cell and re-run — effectively pushing the decision
-   one level deeper. Sound, but risks the exponential the oracle exists
-   to avoid unless the recursion provably terminates polynomially
-   (which is the cascade-class question again).
-3. **Cross-branch triangulation.** Explore a second branch to
-   disambiguate the matching. This is what calculator §6 explicitly
-   warns "itself branches — exponential." Out of scope for the abelian
-   oracle; would only make sense for a future non-abelian oracle.
+- **Direct (index-based) matching is ruled out.** It is sound
+  (verification gates it) but **not iso-invariant** (§4.2 note): a
+  refinement-indistinguishable sub-cell has no canonical within-cell
+  vertex order, so the discovered twist — and the node-count / flag
+  verdict — would depend on the labelling. Not the principled route.
+- **Recursion is the principled extension.** Individualize within the
+  non-singleton sub-cell and re-refine — which is just letting the
+  *normal descent* branch on it (iso-invariant, because it branches over
+  the whole sub-cell). The footprint refines; the oracle re-fires at the
+  deeper level once the sub-cell has cascaded to singletons. **This is
+  literally orbit recovery applied to the sub-cell**, and it provably
+  terminates on the cascade class: `≤ tw(H)` levels for CFI
+  (`theorem_1_HOR_cfi_oddDeg`), depth 1 for rank-≤2 schurian schemes
+  (`theorem_2_HOR_concrete_rank_two_J_singleton`).
+- **Flag is the bounded-budget fallback.** If the sub-cell has *not*
+  cascaded to singletons by the orbit-recovery depth, it is either a
+  rigid IR blind spot ([strategy §15 gap 5](./chain-descent-strategy.md))
+  or the non-abelian wall — neither yields a harvestable twist, and the
+  budget flags. Sound; not a wrong answer.
 
-**Decision:** Phase 1 ships option 1 (flag on non-singleton sub-cell).
-Options 2-3 are recorded for a future non-abelian successor, not built.
+So the construction's behaviour is **all-singletons → construct directly;
+else → fall back to the normal `k`-way branch (recursion), re-firing the
+oracle deeper; else (no cascade within the bound) → flag**. The old
+"cross-branch triangulation" option is *not* pursued — calculator §6 notes
+it "itself branches — exponential," and recursion subsumes its intent
+iso-invariantly.
+
+**Decision.** Phase 1: direct construction on all-singleton footprints;
+recursion (the existing descent branch) on non-singleton sub-cells; flag
+on budget exhaustion. The Lean discharge is scoped to the all-singletons
+abelian case (§8.2); recursion's termination is inherited from the
+orbit-recovery theorems.
 
 ### 4.5 Verification protocol
 
@@ -520,7 +559,7 @@ the Lean effort is committed.
 | Footprint computation (full-diff vs. round-tracking; lazy vs. eager) | **Reshapeable** | Implementation choice. |
 | `ITransversalOracle` integration | **Reshapeable** | Online behavior needs harness-loop placement (§6.1), not the pre-branch `Classify` seam. |
 | Canonical-id matching construction (§4.2) | **Reshapeable (heuristic)** | Sound *via verification*, not proven. C# validation on CFI confirms or revises. |
-| Non-singleton handling (§4.4) | **Reshapeable** | Phase 1 falls back / flags; options 2-3 for a future successor. |
+| Non-singleton handling (§4.4) | **Firm (recurse, not index-match)** | Direct index-match is ruled out (not iso-invariant); recurse via the normal descent branch (iso-invariant), flag past the orbit-recovery depth. See [viability plan](./chain-descent-extended-twist-viability.md). |
 | "All sub-cells singleton ⟺ abelian / wall" (§4.3) | **Conjectural** | Tier-3 / orbit-recovery open content. The *behaviour* (fall-back on non-singleton) is sound; the boundary characterization is not proven. |
 | "Output IS a binary matroid / IS the Tier-2 detector" | **Historical** | [matroid §8.4, §9](./chain-descent-matroid.md). The matroid framework is **closed** — neither closure operator is a matroid. The linear oracle's output is a set of `Z_2` generators; viewing it as a binary matroid is *optional commentary*, not a design requirement. Do not treat as binding. |
 
@@ -551,9 +590,12 @@ check, not a matroid-representability test.
    the automorphism property. Sound to *attempt* at any size (verify
    gates); the *Lean* discharge (§8.2) should scope Phase 1 to size-2.
 3. **Within-sub-cell matching when sub-cells aren't singletons.** §4.4
-   option 1 (fall back) sidesteps this; whether a genuinely abelian
-   decision over non-singleton sub-cells exists is open (the §4.3
-   conjecture).
+   resolves this: no iso-invariant direct match exists, so recurse (the
+   normal descent branch) rather than index-match; the
+   [viability plan](./chain-descent-extended-twist-viability.md) shows
+   recursion is viable on the cascade class and flags otherwise. Whether
+   a genuinely abelian decision over non-singleton sub-cells resolves
+   below the orbit-recovery depth is the §4.3 conjecture.
 4. **Online interface placement (§6.1).** Harness-loop placement
    (option b) is recommended; it must preserve iso-invariance of the
    flag/canonical verdict.

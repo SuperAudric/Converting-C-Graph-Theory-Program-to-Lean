@@ -136,6 +136,23 @@ pruning that costs only a verify to attempt. Empirically CFI decision
 cells are commonly size-2, so size-2 covers K4/K33/Petersen regardless;
 attempting larger cells is free upside.
 
+**A second, orthogonal axis — sub-cell singletons — is the real gate
+([viability plan](./chain-descent-extended-twist-viability.md)).** Target
+*cell* size (above) is about which `warm_6_2`/spine backing applies. The
+*footprint's sub-cell* structure is a different axis and is what gates the
+**construction itself**: the `r_1 ↦ r_j` match is iso-invariantly forced
+**iff every coupled sub-cell is a singleton**. A non-singleton sub-cell is
+refinement-indistinguishable, so an index-based within-cell match would be
+sound (verify gates it) but would make the **flag verdict
+labelling-dependent** — breaking flag iso-invariance
+([strategy §15 gap 2](./chain-descent-strategy.md)). So "attempt at any
+size" means *run the oracle at every decision regardless of target-cell
+size and construct directly when the footprint is all-singletons* — **not**
+*index-match within non-singleton sub-cells*. Non-singleton sub-cells are
+handled by **recursion** (the normal descent branch, which re-fires the
+oracle deeper), which is iso-invariant and, on the cascade class, provably
+terminates (orbit recovery). See M5.
+
 ---
 
 ## 4. Build milestones (ordered)
@@ -194,8 +211,14 @@ by canonical-id structure, sound via verification.)*
   one that passes `IsAutomorphism` (a gadget-parity flip on the coupled
   cycle).
 - **Note:** the construction is a heuristic made sound by M4's verify;
-  it need not be provably correct to be safe to attempt. Attempt it for
-  cells of any size (§3) — verification filters.
+  it need not be provably correct to be safe to attempt. Run the oracle
+  at decisions of **any target-cell size** (§3). But the **construction
+  itself fires only when the footprint is all-singletons** — that match
+  is the iso-invariantly forced one. Do **not** index-match within a
+  non-singleton sub-cell: it is sound but breaks flag iso-invariance
+  ([viability plan](./chain-descent-extended-twist-viability.md), §4.2
+  note). Non-singleton ⇒ return "no candidate" and let M5's recursion
+  handle it.
 
 ### M4 — Verification + harvest
 - Verify `t` with the existing `IsAutomorphism`
@@ -212,12 +235,18 @@ by canonical-id structure, sound via verification.)*
   Even from Odd. (`CFI(Cycle3)` remains a useful smoke test for the
   M1/M2 footprint mechanism, but has no twist to discover.)
 
-### M5 — Uniqueness test + graceful degradation
-- When M3 finds a non-singleton sub-cell (no unique candidate), the
-  oracle returns nothing; the harness proceeds as the normal `k`-way
-  branch (and ultimately the budget flags if the exponential stacks).
-  **This is correct, not a failure** — see [linear-oracle.md §4.4](./chain-descent-linear-oracle.md)
-  option 1, [§6.3](./chain-descent-linear-oracle.md).
+### M5 — Uniqueness test + graceful degradation (recursion)
+- When M3 finds a non-singleton sub-cell (no forced candidate), the
+  oracle returns nothing and the harness proceeds as the normal `k`-way
+  branch. **This branch *is* the recursion** ([linear-oracle.md §4.4](./chain-descent-linear-oracle.md)):
+  individualizing into the sub-cell refines the footprint, and the oracle
+  **re-fires at the deeper level** once the sub-cell has cascaded to
+  singletons. It is iso-invariant (the descent branches over the whole
+  sub-cell) and, on the cascade class, provably terminates by the
+  orbit-recovery depth (`theorem_1_HOR_cfi_oddDeg` ≤ tw(H);
+  `theorem_2_HOR` depth 1). If it has *not* cascaded by then (rigid IR
+  blind spot or non-abelian wall), the budget flags. **This is correct,
+  not a failure.**
 - **Implement the *behaviour*, do not assert the *boundary*.** The
   claim "all sub-cells singleton ⟺ abelian / non-singleton ⟺ the
   non-abelian wall" is **Tier-3 / orbit-recovery open content, not
