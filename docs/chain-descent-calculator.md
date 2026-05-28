@@ -240,6 +240,12 @@ splits into `k ≥ 2` orbits. Genuine decisions are what make naive IR search
 exponential on CFI graphs; the linear oracle is the mechanism that defuses them
 for the abelian case. It is **specified here but not yet implemented**.
 
+> The consolidated spec + design — including the precise candidate-twist
+> construction predicate, the uniqueness test (the abelian/wall boundary), the
+> verification protocol, and the implementation plan — is in
+> [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md). This
+> section is the prose overview that doc makes precise.
+
 ### What a genuine decision looks like
 
 The simplest genuine decision: a target cell with two vertices `{e, f}` that

@@ -570,7 +570,8 @@ The linear oracle is now load-bearing for:
 Designing and implementing the linear oracle is the next concrete
 algorithmic step. Its construction predicate — turning a propagation
 pattern into a candidate twist — is the one genuinely unspecified
-piece ([calculator §9](./chain-descent-calculator.md), item 4).
+piece ([calculator §9](./chain-descent-calculator.md), item 4), now
+spec'd in [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md).
 Multi-week effort, but with growing payoff as the proof program
 references it more.
 
