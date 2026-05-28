@@ -434,10 +434,17 @@ This is why verification is mandatory and non-negotiable.
 5. **Harness integration.** The explore-read-verify-prune loop (§6.2),
    in option-(b) form. ~200 lines.
 
-**Empirical bar.** `CFI(K_4)`, `CFI(K_3,3)`, `CFI(Petersen)`,
-`CFI(C_m)` for several `m` — all should canonize *without flagging*
-(currently they flag, since only the cascade oracle ships). Node count
-should drop from exponential to `O(n · β)`.
+**Empirical bar (leaf-count, not flag).** As of 2026-05-28, CFI(K4…K6)
+*already* canonize under the default budget via a-posteriori pruning
+(leaf counts 16 / 42 / 29 / ~400, well below `2^β`); the a-posteriori
+path first strains at CFI(K7, n=308), where the `_seen` leaf cache
+(`O(leaves · n²)`) — not the node budget — is the binding constraint.
+So the bar is a **leaf-count collapse**, not "stops flagging": a-priori
+twist harvesting should (a) construct twists that pass edge verification
+on CFI(K4/K33/Petersen) — the empirical analogue of `LeafTwistSpec`
+(§2.3) — and (b) drop the explored leaf count toward `O(β)` (descent →
+~a path), keeping `_seen` `O(n)`-small and making CFI(K7+) tractable.
+The build brief's M6 carries the measured a-posteriori baseline to beat.
 
 ### 8.2 Lean (contract discharge)
 

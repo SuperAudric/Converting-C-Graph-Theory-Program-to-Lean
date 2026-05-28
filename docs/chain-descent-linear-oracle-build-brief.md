@@ -158,13 +158,52 @@ proceeding.
 - **Test:** the harness still canonizes everything it canonized before
   (no regressions on the `KnownGraphs` corpus / existing tests).
 
-### M6 — Empirical bar (the payoff)
-- `CFI(K4)`, `CFI(K33)`, `CFI(Petersen)` should now **canonize without
-  flagging** (they currently flag — only the cascade oracle ships).
-- Scramble-invariance must hold (same canonical across relabellings).
-- Even/Odd pairs must still produce **different** canonicals
-  (non-isomorphic).
-- Node count should drop toward `O(n · β)` from exponential.
+### M6 — Empirical bar (the payoff: leaf-count collapse + construction validation)
+
+> **The bar is leaf count, not "stops flagging."** Measured 2026-05-28:
+> CFI(K4…K6) *already* canonize under the default budget via the
+> a-posteriori path — the build brief's original "they currently flag"
+> premise was false. A-posteriori pruning keeps leaf counts well below
+> `2^β` (Petersen β=6: 29 leaves vs 64; K6 β=10: 378 vs 1024). The path
+> first strains only at CFI(K7, n=308), and there the binding constraint
+> is the `_seen` leaf cache (`O(distinct-leaves · n²)`, ~760 KB/leaf at
+> n=308), **not** the node budget. So the linear oracle's measurable job
+> is to collapse the explored **leaf count** — which both removes that
+> memory wall and is the empirical analogue of the Lean `LeafTwistSpec`
+> this build exists to de-risk.
+
+Three things to demonstrate:
+
+1. **Construction validation (the de-risking evidence — primary goal).**
+   On CFI(K4/K33/Petersen), mirror-matching (§4.2) constructs a candidate
+   twist that passes `IsAutomorphism`. This is the direct empirical
+   stand-in for `LeafTwistSpec` (a verified twist relabels one branch's
+   canonical onto another's, [linear-oracle.md §2.3](./chain-descent-linear-oracle.md))
+   — the green light for the Lean discharge.
+
+2. **Leaf-count collapse (the scaling signal).** A-priori harvesting
+   drops the explored leaf count toward ~`O(β)` (one resolved decision
+   per coupled component, not a growing tree), and `_seen` stays
+   `O(n)`-small. Measured a-posteriori baseline to beat (odd graph,
+   default budget, 2026-05-28):
+
+   | base | β | n | a-posteriori leaves | nodes |
+   |---|---|---|---|---|
+   | K4 | 3 | 40 | 16 | 40 |
+   | K33 | 4 | 60 | 42 | 116 |
+   | Petersen | 6 | 100 | 29 | 115 |
+   | Rook3x3 | 10 | 144 | 412 | 652 |
+   | K6 | 10 | 156 | 378 | 695 |
+   | K7 | 15 | 308 | ≥1835 (memory-capped, did not complete) | ≥3163 |
+
+3. **Correctness invariants preserved.** Scramble-invariance (same
+   canonical across relabellings) and Even ≠ Odd (non-isomorphic
+   distinguished) must still hold.
+
+**Payoff target.** CFI(K7) — and a fresh CFI(K8) — canonize with leaf
+count and `_seen` memory bounded, where the a-posteriori path hits the
+leaf-cache wall. That is the real before/after, replacing the false
+"K4 flags."
 
 ---
 
@@ -213,12 +252,14 @@ proceeding.
 ## 7. Definition of done
 
 - M1–M6 complete.
-- `CFI(K4)`, `CFI(K33)`, `CFI(Petersen)` canonize without flagging,
-  scramble-invariantly, distinguishing Even from Odd.
+- **Construction validated (primary):** on CFI(K4/K33/Petersen), §4.2
+  mirror-matching constructs a twist that passes `IsAutomorphism` — the
+  empirical stand-in for `LeafTwistSpec`, and the green light for the
+  Lean contract discharge (spec [§10 risk 1](./chain-descent-linear-oracle.md),
+  [§8.2](./chain-descent-linear-oracle.md)).
+- **Leaf count collapses** from the M6 a-posteriori baseline toward
+  ~`O(β)`: `LastLeafCount` drops sharply and `LastNodesByDepth` shows the
+  descent reduced to ~a path; `_seen` stays `O(n)`-small.
+- CFI(K7)/CFI(K8) canonize within bounded leaf-cache memory (the
+  a-posteriori wall), scramble-invariantly, distinguishing Even from Odd.
 - No regressions on the existing test suite.
-- Node-count instrumentation (`LastNodesByDepth`) shows the descent
-  collapsed toward a path on these CFI cases.
-- The twist-construction approach (§4.2 mirror-matching) is confirmed
-  working on real CFI graphs — this is the empirical validation the
-  spec's §10 risk 1 asks for, and the green light for the Lean
-  contract discharge.

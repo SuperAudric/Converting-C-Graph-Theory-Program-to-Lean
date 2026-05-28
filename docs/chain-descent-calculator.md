@@ -498,10 +498,16 @@ In rough priority order:
    *targetable* (a per-node, inductive statement); it does not prove it.
 
 4. **The linear oracle is specified but not built.** §6 specifies it; Phase 1
-   ships only the cascade oracle, so CFI over non-cascading bases flags until the
-   linear oracle is implemented. Its open piece is **cheap candidate-twist
-   construction** — turning a propagation pattern into a vertex permutation — the
-   one genuinely unspecified piece and the main implementation risk.
+   ships only the cascade oracle. Note (measured 2026-05-28) this does *not* mean
+   CFI flags: the a-posteriori path canonizes CFI(K4…K6) under the default budget,
+   keeping leaf counts well below `2^β`. What grows is the explored **leaf count**
+   (16 → ~400 across β = 3 → 10), and with it the `O(leaves · n²)` leaf cache,
+   which is the binding constraint at larger bases (CFI(K7), n=308) — not the node
+   budget. The linear oracle's payoff is therefore collapsing the leaf count to
+   ~`O(β)` a-priori, not eliminating a flag. Its open piece is **cheap
+   candidate-twist construction** — turning a propagation pattern into a vertex
+   permutation — the one genuinely unspecified piece and the main implementation
+   risk.
 
 5. **Is the wall reachable from the descent's output?** The construction
    question (§7). Target: prove every obstruction the descent produces
