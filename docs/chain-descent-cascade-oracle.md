@@ -541,6 +541,13 @@ under-merge).
 
 ## 8. Implementation plan
 
+> A harness-grounded, milestone-by-milestone build order — tagged by
+> proof-defensibility (which milestones produce proof-backed artifacts
+> vs. empirical-only de-risking) — is in
+> [`chain-descent-cascade-oracle-build-brief.md`](./chain-descent-cascade-oracle-build-brief.md)
+> (temporary, delete after build). The summary below is the spec-level
+> version.
+
 ### 8.1 C# (empirical first)
 
 Building on the linear oracle's shipped pieces (`RefinementFootprint`,

@@ -1,7 +1,7 @@
 # Linear oracle — C# build brief (temporary)
 
 > **Status: temporary build brief.** Working notes for the C#
-> implementation of the linear oracle. Delete or fold into a permanent
+> implementation of the linear oracle. Archive or fold into a permanent
 > doc once the implementation lands. The authoritative spec is
 > [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md);
 > this brief grounds that spec in the *actual current code* and gives a
