@@ -90,17 +90,28 @@ T-C splits into two cases by the cell shape:
   [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md).
 - **False-symmetry cells** (the cell splits into ≥ 2 orbits, a
   *genuine decision*). Handled by the linear oracle
-  ([calculator §6](./chain-descent-calculator.md)) when the decision's
-  residual symmetry is `Z_2` (a unique candidate twist). Specified
-  but not yet built.
+  ([calculator §6](./chain-descent-calculator.md),
+  [linear-oracle.md](./chain-descent-linear-oracle.md)) when the
+  decision's residual symmetry is `Z_2` (a unique candidate twist).
+  **Built and validated 2026-05-28** — collapses every all-singleton
+  footprint, correctness-preserving through CFI(K7). Measured to be
+  *starved* by the a-posteriori cascade oracle (see "remaining gap"
+  below), not weak.
 
 The remaining gap, on either side:
 
 - **Within Tier 1+2:** orbit recovery is settled for individual
   classes (CFI, schurian schemes), but not yet for arbitrary
-  cascade-class graphs (Tier 3 of orbit recovery, conjectural).
-- **Within the linear oracle:** the abelian case is specified; the
-  *non-abelian* case (the genuine wall, hidden Johnson) is open.
+  cascade-class graphs (Tier 3 of orbit recovery, conjectural). And
+  the *a-priori* cascade oracle — certify one rep per orbit before
+  branching — is unbuilt; the shipped cascade oracle is a-posteriori.
+  This is now the binding implementation constraint: the linear oracle
+  (built) is *starved* of clean footprints because the a-posteriori
+  cascade oracle leaves residual symmetry unresolved at branch time
+  ([linear-oracle §8.1](./chain-descent-linear-oracle.md)).
+- **Within the linear oracle:** the abelian case is built (all-
+  singleton footprints); the *non-abelian* case (the genuine wall,
+  hidden Johnson) is open.
 - **Between them:** even if both oracles work on their respective
   case classes, a layered graph (Tier-1-cascade composed with
   abelian residue) needs the two oracles to compose cleanly. This is
@@ -594,7 +605,8 @@ inversion strategy) is the productive move.
 |---|---|---|
 | Tier 1 (CFI cascade) | Proved, axiom-free in Lean for OddDegree | Base case for §6 (CFI residues are cascade-class) |
 | Tier 2 (schurian schemes) | Proved for rank ≤ 2 + |J| ≤ 1 in Lean; paper-rigorous in general | Base case for §6 (scheme residues are cascade-class) |
-| Linear oracle (calc §6) | Specified, not built | The abelian-stripping mechanism of §5 |
+| Linear oracle (calc §6) | Built + validated through CFI(K7) 2026-05-28; starved by a-posteriori cascade oracle | The abelian-stripping mechanism of §5 |
+| A-priori cascade oracle (calc §5) | Unbuilt — the binding constraint after the linear oracle landed | Feeds clean footprints to the linear oracle; path to polynomial CFI |
 | Construction question (calc §7) | Open | Dual form of Theorem 3 |
 | Hidden-Johnson Pieces A+B | Proved | Rules out naive (visible-action) counterexamples to §6 |
 | `warm_6_2`, descent spine | Proved | Composition machinery for §7 |
