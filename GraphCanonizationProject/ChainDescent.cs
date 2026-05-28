@@ -66,16 +66,17 @@ namespace Canonizer
         // Descent-tree node count per depth — the per-level cost profile.
         private readonly List<int> _nodesByDepth = new();
 
-        // ── Linear oracle, M2: refinement-footprint observation ──────────────
-        // Off by default (zero cost on the normal path). When enabled, Branch
-        // records the parent↔child footprint of each individualized rep — the
-        // coupled component (docs/chain-descent-linear-oracle.md §3). This is an
-        // observation hook for validating the footprint on real descents; M4
-        // replaces "store the footprint" with "construct a twist, verify, and
-        // harvest it" in the same place.
-        internal bool CaptureFootprints { get; set; }
-        private readonly List<FootprintCapture> _capturedFootprints = new();
-        internal IReadOnlyList<FootprintCapture> CapturedFootprints => _capturedFootprints;
+        // ── Linear oracle (docs/chain-descent-linear-oracle.md) ──────────────
+        // When enabled, after exploring the first representative of a genuine
+        // decision the descent constructs a candidate twist carrying it onto
+        // each other representative (canonical-colour matching on an
+        // all-singletons footprint, §4.2), verifies it edge-by-edge, and
+        // harvests it into Automorphisms *before* the branch loop reaches those
+        // representatives — so the existing CoveredByPathFixingAut prunes them
+        // a-priori. Sound regardless of the construction: only edge-verified
+        // automorphisms are harvested, and a non-all-singleton footprint falls
+        // back to the normal k-way branch (recursion, §4.4).
+        internal bool EnableLinearOracle { get; set; } = true;
 
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
@@ -153,6 +154,7 @@ namespace Canonizer
             // skipping any covered a posteriori by a harvested path-fixing
             // automorphism (its subtree is isomorphic to an explored one's).
             var explored = new List<int>();
+            bool harvested = false;
             foreach (int v in decision.Representatives)
             {
                 if (_flagged) return;
@@ -163,7 +165,58 @@ namespace Canonizer
                 }
                 explored.Add(v);
                 Branch(p, partition, members, v);
+
+                // Linear oracle: after the first explored representative, harvest
+                // verified twists carrying it onto the other representatives, so
+                // CoveredByPathFixingAut prunes them a priori (§4.2, §6.2).
+                if (EnableLinearOracle && !harvested)
+                {
+                    harvested = true;
+                    HarvestTwists(p, partition, members, v);
+                }
             }
+        }
+
+        // Construct, verify, and harvest twists carrying the explored rep r1
+        // onto each other representative of the cell. Only the all-singletons
+        // footprint gives a forced, iso-invariant candidate; a non-singleton
+        // sub-cell yields nothing here and the normal branching recurses
+        // (docs/chain-descent-linear-oracle.md §4.4). Verified twists are added
+        // to Automorphisms; CoveredByPathFixingAut's path-fix filter is the
+        // backstop for which of them may actually prune.
+        private void HarvestTwists(sbyte[] p, WarmPartition partition, List<int> cell, int r1)
+        {
+            var p1 = Individualize(p, cell, r1);
+            if (p1 is null) return;
+            var b1 = partition.Clone();
+            b1.Refine(_adj, p1);
+
+            var footprint = RefinementFootprint.Compute(_n, partition.CellOf, b1.CellOf);
+            if (footprint.SplitCells.Count == 0) return;
+            foreach (var sc in footprint.SplitCells)
+                if (!sc.AllSingletons) return; // recurse via the normal branch instead
+
+            foreach (int rj in cell)
+            {
+                if (rj == r1) continue;
+                var pj = Individualize(p, cell, rj);
+                if (pj is null) continue;
+                var bj = partition.Clone();
+                bj.Refine(_adj, pj);
+                var t = TwistConstruction.TryConstruct(_n, footprint, b1.CellOf, bj.CellOf);
+                if (t is not null && IsAutomorphism(t))
+                    Automorphisms.AddGenerator(t);
+            }
+        }
+
+        // Individualise rep below its cellmates (as Branch does) and close;
+        // returns the closed child P, or null on a closure contradiction.
+        private sbyte[]? Individualize(sbyte[] p, List<int> cell, int rep)
+        {
+            var pc = (sbyte[])p.Clone();
+            foreach (int w in cell)
+                if (w != rep) { pc[rep * _n + w] = LESS; pc[w * _n + rep] = GREATER; }
+            return TransitiveClose(pc) ? pc : null;
         }
 
         // Individualise v below every other member of its cell, then recurse.
@@ -179,21 +232,6 @@ namespace Canonizer
             // v below its cellmates is always consistent (v becomes their
             // minimum); guard defensively against a closure contradiction.
             if (!TransitiveClose(pChild)) return;
-
-            // M2 observation hook (off by default): the coupled component is
-            // the parent↔child refinement footprint. A separate probe clone
-            // keeps the recursion path below byte-identical to the no-capture
-            // case. M4 will instead consume the footprint here (construct +
-            // verify + harvest a twist) before recursing.
-            if (CaptureFootprints)
-            {
-                var probe = partition.Clone();
-                probe.Refine(_adj, pChild);
-                _capturedFootprints.Add(new FootprintCapture(
-                    _path.Count, cell.Count, v,
-                    RefinementFootprint.Compute(_n, partition.CellOf, probe.CellOf),
-                    (sbyte[])p.Clone(), cell.ToArray()));
-            }
 
             _path.Add(v);
             Search(pChild, partition.Clone());
