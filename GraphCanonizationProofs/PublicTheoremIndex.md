@@ -1,6 +1,7 @@
 # Public Theorem Index — GraphCanonizationProofs
 
 Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationProofs project (active source), grouped by source file path. Archived counterparts live in `Archive/PublicTheoremIndex.md`.
+The Name, Line, and if present "Used By" columns are mantained by GenerateTheoremIndexes, Description and notes are manually updated.
 ## Legend
 
 - **Line**: Source-line range `start-end` covering the declaration's header (attached doc comment / attributes) and its full body. Collapses to a single number when the declaration occupies one line. Gaps between theorems represent whitespace or comments.
@@ -56,7 +57,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `PartitionInvariant` | 905-909 | A target-cell selector is partition-invariant when it depends only on the partition the colouring induces, not on raw colour values. | — |
 | `target_direction_blind` | 911-920 | For a partition-invariant selector, the target cell chosen after `a < b` equals the target after `b < a`. Base case of the descent-spine induction. | — |
 | `target_agree_off` | 922-935 | Target-cell selection composes across descent levels: for a partition-invariant selector and matrices agreeing off a `D`-singletoned decision set, the target cell is the same even when start colourings only agree up to partition. | — |
-| `Egnd` | 964-965 | i < j}` on `Fin n`. | — |
+| `Egnd` | 964-965 | The canonical ground set on `Fin n`: ordered pairs `(i, j)` with `i < j`. | — |
 | `mem_Egnd` | 967-968 | Membership in `Egnd n` is exactly `p.1 < p.2`. | — |
 | `Egnd_ne` | 970-971 | Pairs in `Egnd n` have distinct endpoints: `p.1 ≠ p.2`. | — |
 | `Pof` | 973-986 | Commit a set `S ⊆ Egnd n` of pair-guesses into a P-matrix: write `less` at `(u,v) ∈ S` and `greater` at `(v,u)`, leaving other entries unchanged. | Definition (`noncomputable`) |
@@ -196,10 +197,10 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `id_of_discrete_invariant` | 3609-3618 | Fact B (pointwise): a `π`-invariant discrete colouring forces `π` to be the identity. | — |
 | `aut_trivial_of_discrete_warmRefine` | 3620-3636 | Fact B (CFI): if `warmRefine adj P χ_S` is discrete, then every automorphism preserving `(adj, P)` and fixing `S` pointwise is the identity. | — |
 | `orbit_iff_eq_of_discrete_warmRefine` | 3638-3656 | Fact B (partition): at discrete depth, `OrbitPartition adj P S v w ↔ v = w`. | — |
-| `CascadesAt` | 3678-3685 | ≤ k` makes `warmRefine adj P (individualizedColouring n S)` discrete. | — |
+| `CascadesAt` | 3678-3685 | Cascade-at-depth-`k` predicate: some `S` with `S.card ≤ k` makes `warmRefine adj P (individualizedColouring n S)` discrete. | — |
 | `cascadesAt_univ` | 3687-3706 | Trivial cascade at depth `n`: taking `S = univ` gives a discrete starting colouring preserved by warm refinement. | — |
 | `CascadesAt.mono` | 3708-3713 | Monotonicity: a cascade at depth `k₁` is a cascade at every depth `k₂ ≥ k₁`. | — |
-| `theorem_1_HOR_at_depth` | 3726-3749 | ≤ k` makes `warmRefine` discrete and `OrbitPartition adj P S = warmRefine`-partition. | **Key theorem** (Tier 1 HOR) |
+| `theorem_1_HOR_at_depth` | 3726-3749 | If `adj` cascades at depth `k`, some `S` with `S.card ≤ k` makes `warmRefine` discrete and the `Aut_S`-orbit partition equal to the `warmRefine` partition. The load-bearing Tier-1 theorem. | **Key theorem** (Tier 1 HOR) |
 | `theorem_1_HOR_at_n` | 3771-3782 | Theorem 1 trivial-bound corollary: every graph admits orbit recovery at depth `n`; axiom-free specialisation of `theorem_1_HOR_at_depth` to `cascadesAt_univ`. | — |
 | `theorem_1_HOR` | 3784-3795 | Theorem 1 (legacy existential form): some `S` makes `warmRefine` discrete and orbits equal cells. Axiom-free corollary of `theorem_1_HOR_at_n`. | — |
 | `theorem_1_HOR_pointwise` | 3797-3809 | Theorem 1 pointwise corollary: at the cascade depth, every automorphism preserving `(adj, P)` and fixing `S` is the identity. | — |
@@ -226,7 +227,7 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `cfiVertexCount_pos` | 132-139 | The CFI vertex count is positive whenever the base has at least one vertex (`0 < m`). | — |
 | `evenSubsetsOfNeighbors` | 147-150 | The `Finset` of even-cardinality subsets of `N(v)`; indexes the subset vertices `a_S^v` of `CFI(H)`. | — |
 | `empty_mem_evenSubsetsOfNeighbors` | 152-155 | The empty set belongs to `evenSubsetsOfNeighbors v` (cardinality 0 is even). | — |
-| `mem_evenSubsetsOfNeighbors` | 157-161 | % 2 = 0`. | `@[simp]` |
+| `mem_evenSubsetsOfNeighbors` | 157-161 | Membership: `S ∈ evenSubsetsOfNeighbors v` iff `S ⊆ N(v)` and `S.card` is even (`S.card % 2 = 0`). | `@[simp]` |
 | `triangleBase` | 171-182 | The triangle `K_3` as a `CFIBase 3`: the smallest base graph satisfying the degree-≥-2 invariant. | — |
 | `triangleBase_degree` | 184-186 | Every vertex of `triangleBase` has degree 2. | — |
 | `triangleBase_cfiVertexCount` | 188-190 | `triangleBase.cfiVertexCount = 18` — three gadgets of size 6. | — |
@@ -426,3 +427,27 @@ Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationP
 | `adjSeparates_of_rank_two_J_singleton` | 1969-2011 | **`rank = 2` + `|J| = 1` ⇒ `AdjSeparatesRelations`.** The unique element of `J` distinguishes the two non-diagonal relations. Covers Petersen / Kneser `K(5,2)` / Johnson `J(5,2)`. | — |
 | `relOfPairDetByAdjP_of_rank_two_J_singleton` | 2014-2020 | Combined: `rank = 2` + `|J| = 1` ⇒ `RelOfPairDetByAdjP`. | — |
 | `theorem_2_HOR_concrete_rank_two_J_singleton` | 2025-2036 | **Theorem 2 unconditional for rank-2 + `|J| = 1` schurian scheme graphs** — covers Petersen, Kneser `K(5,2)`, Johnson `J(5,2)`. Axiom-clean (only `refineStep`/`refineStep_iff` + standard basis). | T2.M4 / headline |
+
+## ChainDescent/CascadeOracle.lean
+
+The a-priori cascade-oracle Lean contract (plan: `docs/chain-descent-cascade-oracle-lean-brief.md`). Builds axiom-clean (only `refineStep`/`refineStep_iff` + Lean foundationals), no `sorry`. Phase A = soundness/validity, Phase B = the completeness reduction (wired to the axiom-free orbit-recovery theorems), Phase C = the open obligations as named `Prop`s. §C.0 also proves the deferred-decisions foundation `real_stays_real`.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `mono` | 53-62 | Orbit monotonicity in the fixed set: `S ⊆ S'` and `OrbitPartition adj P S' v w` give `OrbitPartition adj P S v w` (same witness; fixing the larger set pointwise implies fixing the smaller). | Deferred-decisions foundation; axiom-light |
+| `real_stays_real` | 64-72 | Contrapositive of `mono`: a real decision (no orbit relation) at `S` stays real at every `S' ⊇ S`. Makes deferring a real decision free. | Deferred-decisions §2 |
+| `CascadeOracleSpec` | 76-88 | A-priori cascade-oracle interface type: given a `SpineChain` (internal node, committed path `chain.D`) and reps `v w`, return `none` or a verified automorphism of `adj`. Parallel to `LinearOracleSpec` but not leaf-gated. | Definition (`Type`) |
+| `some_isAut` | 95-103 | Subtype-level soundness: a returned permutation is automatically an automorphism. Mirrors `LinearOracleSpec.some_isAut`. | — |
+| `OrbitMapSpec` | 105-117 | Cascade-orbit validity (the `LeafTwistSpec` analogue): a returned merge witnesses `OrbitPartition adj chain.P chain.D v w` — the soundness anchor that justifies pruning. | Definition |
+| `merged_sameCell` | 119-130 | A valid (`OrbitMapSpec`) oracle never merges across 1-WL cells: a certified merge forces `v, w` into the same `warmRefine` cell. Via `OrbitPartition.subset_warmRefine`. | — |
+| `OrbitRecoverableAt` | 152-161 | Oracle vocabulary for the orbit-recovery squeeze: the `Aut_S`-orbit relation equals the 1-WL cell relation at `S` — so refinement computes orbits and a complete oracle is realizable. | Definition |
+| `orbitRecoverable_of_cascade` | 163-171 | General foundation: on the cascade class (`CascadesAt adj P k`), orbits are recoverable at some `S` with `S.card ≤ k`. Re-export of `theorem_1_HOR_at_depth`. | — |
+| `orbitRecoverable_cfi` | 173-181 | CFI instance: OddDegree CFI graphs are orbit-recoverable at depth ≤ `cfi_depth_bound h`, via `theorem_1_HOR_cfi_oddDeg`. | axiom-free |
+| `orbitRecoverable_scheme` | 183-193 | Scheme instance: rank-2, single-edge-class (`J.card = 1`) schurian scheme graphs are orbit-recoverable at depth 1, via `theorem_2_HOR_concrete_rank_two_J_singleton` (non-trivial cells). | axiom-free |
+| `CascadeComplete` | 200-207 | Completeness predicate: the oracle certifies every genuine `OrbitPartition` pair. With `OrbitMapSpec` ⟹ the oracle computes the orbit relation exactly. | Definition |
+| `certifies_iff_orbit` | 209-223 | A sound (`OrbitMapSpec`) and complete (`CascadeComplete`) cascade oracle returns `some` for `v, w` iff they share an `Aut_D` orbit. | — |
+| `CellComplete` | 225-232 | Cell-completeness: the oracle certifies every pair sharing a 1-WL cell — the refinement-decidable (polynomial) completeness. | Definition |
+| `complete_of_cellComplete_recoverable` | 234-247 | The completeness payoff: at an orbit-recoverable node, cell-completeness suffices for orbit-completeness — the hard "certify every orbit map" reduces to the polynomial "certify every same-cell pair". | **Key theorem** |
+| `VerdictIsoInvariant` | 276-288 | OPEN obligation (strategy §15 gap 2): the oracle's merge decision depends only on the iso-invariant 1-WL partition (cell-equivalent pairs get the same answer). Partition-determined form. | Definition; stated, not proven |
+| `cascadeComplete_of_localization` | 290-301 | Capstone: cell-completeness plus all-nodes-recoverable gives `CascadeComplete`. Names the (open) localisation obligation as its two sufficient hypotheses. | — |
+| `computes_orbits_of_complete` | 303-315 | Capstone: a sound + complete oracle computes the `Aut_D`-orbit relation exactly (program-level correctness, conditional on the completeness obligation). | — |
