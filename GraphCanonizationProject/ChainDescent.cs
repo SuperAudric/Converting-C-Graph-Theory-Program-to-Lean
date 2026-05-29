@@ -73,6 +73,16 @@ namespace Canonizer
         // Descent-tree node count per depth — the per-level cost profile.
         private readonly List<int> _nodesByDepth = new();
 
+        // ── TEMP attribution diagnostic (cascade-oracle build M1; remove after) ──
+        // Classifies residual branching by footprint type at the harvest node:
+        // all-singleton (the linear oracle fired, leftover reps are true-symmetry
+        // the gauge twist doesn't cover) vs non-singleton (the linear oracle is
+        // starved — the case the a-priori cascade recursion targets).
+        internal long DiagDecisionNodes, DiagBranchingNodes,
+                      DiagBranchAllSingleton, DiagBranchNonSingleton,
+                      DiagExtraRepsAllSingleton, DiagExtraRepsNonSingleton,
+                      DiagTwistsHarvested;
+
         // ── Linear oracle (docs/chain-descent-linear-oracle.md) ──────────────
         // When enabled, after exploring the first representative of a genuine
         // decision the descent constructs a candidate twist carrying it onto
@@ -161,6 +171,7 @@ namespace Canonizer
             // automorphism (its subtree is isomorphic to an explored one's).
             var explored = new List<int>();
             bool harvested = false;
+            int footprintClass = -1; // 0=empty/fail, 1=all-singleton, 2=non-singleton
             foreach (int v in decision.Representatives)
             {
                 if (_flagged) return;
@@ -178,8 +189,18 @@ namespace Canonizer
                 if (EnableLinearOracle && !harvested)
                 {
                     harvested = true;
-                    HarvestTwists(p, partition, members, v);
+                    footprintClass = HarvestTwists(p, partition, members, v);
                 }
+            }
+
+            // TEMP attribution: classify this branching node's residual reps.
+            DiagDecisionNodes++;
+            int extra = explored.Count - 1;
+            if (extra > 0)
+            {
+                DiagBranchingNodes++;
+                if (footprintClass == 1) { DiagBranchAllSingleton++; DiagExtraRepsAllSingleton += extra; }
+                else if (footprintClass == 2) { DiagBranchNonSingleton++; DiagExtraRepsNonSingleton += extra; }
             }
         }
 
@@ -190,17 +211,20 @@ namespace Canonizer
         // (docs/chain-descent-linear-oracle.md §4.4). Verified twists are added
         // to Automorphisms; CoveredByPathFixingAut's path-fix filter is the
         // backstop for which of them may actually prune.
-        private void HarvestTwists(sbyte[] p, WarmPartition partition, List<int> cell, int r1)
+        // Returns the footprint class of r1's child: 0 = empty/closure-fail (no
+        // harvest possible), 1 = all-singleton (forced match attempted per rep),
+        // 2 = non-singleton (the starved case the cascade recursion will target).
+        private int HarvestTwists(sbyte[] p, WarmPartition partition, List<int> cell, int r1)
         {
             var p1 = Individualize(p, cell, r1);
-            if (p1 is null) return;
+            if (p1 is null) return 0;
             var b1 = partition.Clone();
             b1.Refine(_adj, p1);
 
             var footprint = RefinementFootprint.Compute(_n, partition.CellOf, b1.CellOf);
-            if (footprint.SplitCells.Count == 0) return;
+            if (footprint.SplitCells.Count == 0) return 0;
             foreach (var sc in footprint.SplitCells)
-                if (!sc.AllSingletons) return; // recurse via the normal branch instead
+                if (!sc.AllSingletons) return 2; // non-singleton: recurse via the normal branch
 
             foreach (int rj in cell)
             {
@@ -211,8 +235,12 @@ namespace Canonizer
                 bj.Refine(_adj, pj);
                 var t = TwistConstruction.TryConstruct(_n, footprint, b1.CellOf, bj.CellOf);
                 if (t is not null && IsAutomorphism(t))
+                {
                     Automorphisms.AddGenerator(t);
+                    DiagTwistsHarvested++;
+                }
             }
+            return 1; // all-singleton
         }
 
         // Individualise rep below its cellmates (as Branch does) and close;

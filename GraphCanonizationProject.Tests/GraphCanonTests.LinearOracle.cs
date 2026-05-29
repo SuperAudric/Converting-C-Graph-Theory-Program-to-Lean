@@ -124,4 +124,32 @@ public class LinearOracleTests
         }
     }
 
+    // TEMP (cascade-oracle build M1) — attribute the residual branching on a CFI
+    // base: all-singleton (linear oracle fired; leftover reps are true-symmetry
+    // the gauge twist doesn't cover) vs non-singleton footprint (linear oracle
+    // starved — the case the a-priori cascade recursion targets). Establishes the
+    // baseline M2's lockstep-deepen recursion is measured against.
+    [Theory]
+    [InlineData("Petersen")]
+    [InlineData("Rook3x3")]
+    [InlineData("K6")]
+    [InlineData("K7")]
+    public void M5_Attribution(string baseGraph)
+    {
+        var g = CfiGraphGenerator.Generate(baseGraph).Odd;
+        int n = g.VertexCount;
+        var adj = ExtractAdj(g);
+        var d = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
+        {
+            EnableLinearOracle = true
+        };
+        var r = d.Canonize(new sbyte[n * n], new WarmPartition(n));
+
+        _out.WriteLine($"CFI({baseGraph}) n={n}: {(r.Flagged ? "FLAG" : "CANON")} " +
+                       $"leaves={r.Stats.LeafCount} nodes={r.Stats.NodeCount}");
+        _out.WriteLine($"  decisionNodes={d.DiagDecisionNodes} branchingNodes={d.DiagBranchingNodes} " +
+                       $"twistsHarvested={d.DiagTwistsHarvested}");
+        _out.WriteLine($"  branch[allSingleton]={d.DiagBranchAllSingleton} extraReps={d.DiagExtraRepsAllSingleton}   (true-symmetry / cascade)");
+        _out.WriteLine($"  branch[nonSingleton]={d.DiagBranchNonSingleton} extraReps={d.DiagExtraRepsNonSingleton}   (starved linear oracle)");
+    }
 }

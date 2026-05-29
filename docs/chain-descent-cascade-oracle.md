@@ -257,8 +257,21 @@ descent state `(adj, P, χ)`:
 
 By the spine fact (`warm_6_2` for size-2, `warmRefine_agree_off'` for
 size-`k`), the partition under any other representative `r_j` is the
-`r_1 ↔ r_j` mirror of `r_1`'s — so `r_j` is **not re-explored** for the
-construction; its structure is known from `r_1`'s.
+`r_1 ↔ r_j` mirror of `r_1`'s.
+
+> **Superseded (2026-05-28, build review).** An earlier framing claimed
+> `r_j` is **not re-explored** — its structure "read off `r_1`'s mirror"
+> without re-refining. That is **not achievable as a shortcut**: the
+> spine gives *partition equality*, but to write the explicit vertex
+> bijection `t` you need `r_j`'s concrete refined colours to match
+> against, and deriving those without re-refining `r_j` would require
+> already knowing `t` (circular). So `r_j` **is** individualized and
+> refined — exactly as the depth-0 code does ([ChainDescent.cs ~205-215](../GraphCanonizationProject/ChainDescent.cs#L205)).
+> The mechanism is **lockstep per-rep single-path** (§4.4): each `r_j`
+> descends its own single path along the *same* iso-invariant cell-id
+> sub-cell sequence as `r_1`, so the two deep all-singleton footprints
+> are comparable for colour-matching. `k` additive paths, not a mirror
+> read.
 
 ### 4.2 The orbit-map construction (shared with the linear oracle)
 
@@ -324,15 +337,29 @@ certify_orbits(cell, depth):           // EXPLORATORY — on copies, not committ
                                     //   harness branches; budget flags if it stacks
 ```
 
-> **⚠ Single-path is the whole point — it must NOT branch over
-> representatives.** At every level the oracle explores **exactly one**
-> representative (`r_1`, then one rep of `C`, …) and reads all cellmates
-> off that branch's **mirror** (the spine fact, §4.1). It descends a
-> *single path* of length ≤ `depth_bound`, never a tree. This is what
-> makes the cost a **sum** `O(depth · n²)`, not a **product**
-> `cell_size^depth`. See §4.6 — a branching recursion would be
-> exponential in depth and is exactly the thing this oracle exists to
-> replace.
+> **⚠ The forbidden thing is multiplicative nesting, not exploring `k`
+> reps.** Sharpen the line (build review 2026-05-28):
+> - **Forbidden (exponential):** recurse into *every* sub-cell rep, and
+>   within each recursion again into *every* rep → `cell_size^depth`
+>   nodes. This is the a-posteriori descent this oracle replaces.
+> - **Allowed (polynomial):** the `k` representatives of the cell each
+>   descend their **own single path** — one sub-cell rep per level —
+>   following the *same* iso-invariant cell-id sub-cell sequence. That is
+>   `k` *additive* paths: `k · depth · n²`, the depth-0 per-`r_j` loop
+>   ([ChainDescent.cs ~205](../GraphCanonizationProject/ChainDescent.cs#L205))
+>   deepened. No single path branches.
+>
+> **Lockstep invariant (load-bearing).** All `k` paths descend the
+> **same iso-invariant cell-id sub-cell sequence** `S` (chosen by
+> `WarmPartition.CellOf`, not by vertex index). This is what makes the
+> deep all-singleton footprints *comparable* for the colour-match
+> construction (§4.2): if the paths diverged in *which cell* they
+> descended, the footprints would not line up and the constructed `t`
+> would be meaningless. The intermediate *rep* picked within each cell of
+> `S` need not correspond across paths (choice-symmetric — the final map
+> is read off refined colours, §4.4 iso-invariance paragraph); only the
+> *cell-id sequence* must. This sequence-iso-invariance is the live half
+> of the §10 flag-iso-invariance obligation. See §4.6 for the cost.
 
 **Termination and the flag.** Each recursion level individualizes one
 more vertex, so the recursion *always* bottoms out at discreteness
@@ -349,17 +376,35 @@ from the budget when those real branches stack (§6.4). The recursion is
 generators), so its single-path cost is separate from, and does not
 itself drive, the harness's branching.
 
-**Why one representative suffices (the mirror-read).** The oracle does
-*not* explore the cellmates `r_2, …, r_k` or the sub-cell's other
-vertices. By the spine fact, individualizing `r_1` vs. `r_j` gives
-*mirror* partitions, so the generator carrying `r_1 ↦ r_j` is read off
-`r_1`'s single branch and verified — without exploring `r_j`'s subtree.
-Orbit recovery (§3) guarantees that, on the cascade class, *all* the
-orbit generators are visible this way, so single-path discovers a
-complete generating set. The a-posteriori descent, by contrast,
-explores every `r_j` and harvests from leaf collisions — that is the
-`cell_size^depth` product (orbit-recovery Corollary 1) the a-priori
-oracle replaces.
+**Why the `k` paths stay polynomial (corrected).** ~~The oracle reads
+the generator off `r_1`'s single branch via the mirror, without exploring
+`r_j`.~~ **Superseded** — that mirror-read shortcut is circular (see §4.1
+note): you need `r_j`'s concrete refined colours to construct `t`. The
+correct accounting: each `r_j` descends its **own** single path (lockstep
+cell-id sequence `S`, above), so the oracle runs `k` *additive* single
+paths, not one. Per path: `depth · n²`; total per cell: `k · depth · n²`
+(§4.6). This is still a **sum**, not the a-posteriori `cell_size^depth`
+**product** (orbit-recovery Corollary 1), because no single path branches
+— the `k` is additive (one path per rep), the `depth` is additive (one
+sub-cell per level). Orbit recovery (§3) guarantees that, on the cascade
+class, each same-orbit `r_j`'s path reaches an all-singleton footprint
+comparable to `r_1`'s, so the colour-match yields a verified generator;
+different-orbit `r_j` fails verification and stays a separate rep (sound
+over-split).
+
+**Committed vs. exploratory (resolved 2026-05-28 build).** The deepening
+is **exploratory** — run on cloned partitions (`partition.Clone()`,
+`Individualize` on a copied `P`), harvesting only verified generators into
+`Automorphisms`; the committed descent path is **unchanged**. Rationale:
+(1) it keeps the harvest a standalone, non-`_path`-mutating unit, which is
+the shared discipline the deferred-decisions layer needs
+([deferred-decisions §1, §9](./chain-descent-deferred-decisions.md));
+(2) the depth-0 `HarvestTwists` is already exploratory, so this is a
+direct extension. Cost: the exploration is re-done per branching node →
+`O(n⁴)` total (vs. `O(n³)` if the path were committed and reused). Both
+polynomial; the proof only needs *polynomial*, and exploratory wins on
+composability. The `O(n³)` committed-reuse variant is a later
+optimization (fold-back, [build brief §5](./chain-descent-cascade-oracle-build-brief.md)).
 
 **Iso-invariance of the recursion.** Picking the non-singleton sub-cell
 `C` must be a function of iso-invariant cell ids (`WarmPartition.CellOf`).
