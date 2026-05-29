@@ -73,15 +73,16 @@ namespace Canonizer
         // Descent-tree node count per depth — the per-level cost profile.
         private readonly List<int> _nodesByDepth = new();
 
-        // ── TEMP attribution diagnostic (cascade-oracle build M1; remove after) ──
-        // Classifies residual branching by footprint type at the harvest node:
-        // all-singleton (the linear oracle fired, leftover reps are true-symmetry
-        // the gauge twist doesn't cover) vs non-singleton (the linear oracle is
-        // starved — the case the a-priori cascade recursion targets).
-        internal long DiagDecisionNodes, DiagBranchingNodes,
-                      DiagBranchAllSingleton, DiagBranchNonSingleton, DiagBranchResolved,
-                      DiagExtraRepsAllSingleton, DiagExtraRepsNonSingleton, DiagExtraRepsResolved,
-                      DiagTwistsHarvested, DiagResolvedNodes, DiagMaxRecursionDepth;
+        // ── A-priori cascade/linear oracle harvest attribution ──────────────
+        // Cost-shape accumulators for the cascade oracle, emitted as
+        // DescentStats.Cascade (docs/chain-descent-cascade-oracle.md): residual
+        // branching split by footprint class, generators harvested, and the
+        // single-path recursion depth (~ tw(H) on CFI). The decisive signal is
+        // _branchStarved → 0 (the cascade recursion resolved the starvation).
+        private long _decisionNodes, _branchingNodes,
+                     _branchAllSingleton, _branchResolved, _branchStarved,
+                     _generatorsHarvested, _resolvedByRecursion;
+        private int _maxRecursionDepth;
 
         // ── Linear oracle (docs/chain-descent-linear-oracle.md) ──────────────
         // When enabled, after exploring the first representative of a genuine
@@ -119,7 +120,11 @@ namespace Canonizer
 
             var stats = new DescentStats(
                 _nodeCount, _maxDepth, _leafCount, _prunedBranches,
-                _budget, _nodesByDepth.ToArray());
+                _budget, _nodesByDepth.ToArray(),
+                new CascadeStats(
+                    _decisionNodes, _branchingNodes,
+                    _branchAllSingleton, _branchResolved, _branchStarved,
+                    _generatorsHarvested, _resolvedByRecursion, _maxRecursionDepth));
 
             if (_flagged)
                 return CanonResult.Flag(_flagReason ?? "flagged", Automorphisms, stats);
@@ -193,17 +198,16 @@ namespace Canonizer
                 }
             }
 
-            // TEMP attribution: classify this branching node's residual reps.
-            // 1 = all-singleton at depth 0 (linear oracle), 3 = resolved by the
-            // cascade recursion, 2 = still non-singleton past the depth bound.
-            DiagDecisionNodes++;
-            int extra = explored.Count - 1;
-            if (extra > 0)
+            // Cascade attribution: classify this node's surviving branches by the
+            // footprint class the harvest saw (1 = all-singleton/linear, 3 = resolved
+            // by the recursion, 2 = starved past the depth bound). Feeds CascadeStats.
+            _decisionNodes++;
+            if (explored.Count > 1)
             {
-                DiagBranchingNodes++;
-                if (footprintClass == 1) { DiagBranchAllSingleton++; DiagExtraRepsAllSingleton += extra; }
-                else if (footprintClass == 3) { DiagBranchResolved++; DiagExtraRepsResolved += extra; }
-                else if (footprintClass == 2) { DiagBranchNonSingleton++; DiagExtraRepsNonSingleton += extra; }
+                _branchingNodes++;
+                if (footprintClass == 1) _branchAllSingleton++;
+                else if (footprintClass == 3) _branchResolved++;
+                else if (footprintClass == 2) _branchStarved++;
             }
         }
 
@@ -241,7 +245,7 @@ namespace Canonizer
                 if (t is not null && IsAutomorphism(t))
                 {
                     Automorphisms.AddGenerator(t);
-                    DiagTwistsHarvested++;
+                    _generatorsHarvested++;
                 }
             }
             return cls; // 1 (depth 0) or 3 (resolved via recursion)
@@ -287,8 +291,8 @@ namespace Canonizer
                 {
                     deep = curPart; footprint = fp;
                     cls = seq.Count == 0 ? 1 : 3;
-                    if (seq.Count > 0) DiagResolvedNodes++;
-                    if (seq.Count > DiagMaxRecursionDepth) DiagMaxRecursionDepth = seq.Count;
+                    if (seq.Count > 0) _resolvedByRecursion++;
+                    if (seq.Count > _maxRecursionDepth) _maxRecursionDepth = seq.Count;
                     return true;
                 }
 

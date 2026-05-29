@@ -229,8 +229,12 @@ as the linear oracle's verified-footprint-map harvest wrapped in a bounded-depth
 recursion (depth ≤ `tw(H)` for CFI, 1 for schemes, via the orbit-recovery
 theorems). The a-priori cascade oracle became the binding constraint once the
 linear oracle was built and measured *starved* (2026-05-28) — 100% of CFI(K7)
-residual branching sits at non-singleton footprints the recursion would resolve.
-Both the Tier-1 polynomial proof and the oracle's code depend on it.
+residual branching sat at non-singleton footprints the recursion would resolve.
+It was then **built (M1+M2, 2026-05-28)** as a lockstep per-rep single-path
+recursion and **resolved that starvation**: CFI(K7) collapsed 941 → 1 leaf,
+555 → 0 branching nodes, recursion depth ≈ `tw(H)` (correct + scramble-invariant
+through K7). The Tier-1 polynomial proof now has its constructive code; the
+remaining gap is the Lean discharge of the certification predicate.
 
 The boundary of the cascade oracle is also the boundary of "cell *is* a single
 orbit" being cheaply certifiable. When the cell is **not** a single orbit — a
@@ -518,11 +522,14 @@ In rough priority order:
    binding constraint at larger bases is the `O(leaves · n²)` leaf cache, not the
    node budget. The linear oracle collapses the leaf count (~7× on K7) but does
    **not** reach `O(β)`: it is *starved* — 100% of residual CFI(K7) branching is
-   at non-singleton footprints where no forced map exists. The open piece is now
-   the **a-priori cascade oracle** ([`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)):
+   at non-singleton footprints where no forced map exists. The
+   **a-priori cascade oracle** ([`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)) —
    bounded-depth recursion that resolves those footprints into all-singleton ones,
-   feeding the linear oracle's (working) harvest. That is the path to polynomial
-   CFI and the main remaining implementation risk.
+   feeding the linear oracle's (working) harvest — was **built 2026-05-28** (lockstep
+   per-rep single-path) and **eliminated the starvation**: CFI(K7) collapsed 941 → 1
+   leaf, 555 → 0 residual branching, recursion depth ≈ `tw(H)` (correct +
+   scramble-invariant through K7). The implementation risk is closed *on CFI*; the
+   remaining work is the Lean discharge and general-class (Tier-2/3) completeness.
 
 5. **Is the wall reachable from the descent's output?** The construction
    question (§7). Target: prove every obstruction the descent produces

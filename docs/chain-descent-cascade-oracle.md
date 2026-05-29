@@ -15,6 +15,23 @@ a-priori cascade oracle is what resolves the residual symmetry at those
 footprints, feeding clean (all-singleton) footprints to the linear
 oracle. It is the next lever and the path to polynomial CFI.
 
+> **BUILT + MEASURED 2026-05-28 (M1+M2, C#).** The starvation is
+> **eliminated**. The mechanism shipped as the **lockstep per-rep
+> single-path recursion** (§4.4) extending `HarvestTwists`
+> ([ChainDescent.cs](../GraphCanonizationProject/ChainDescent.cs):
+> `DeepenAnchor` + `ReplayDeepening`). On CFI: K7 **941 → 1 leaf**, 555
+> non-singleton branching nodes **→ 0**; K6 76 → 1; Petersen 22 → 2;
+> Rook3x3 47 → 3 (the 1–2 residual branches are genuine decisions, *not*
+> starvation — `BranchStarved = 0` on every base). Recursion depth
+> bottoms out at **≈ tw(H)** (Petersen 7, K6 6, K7 8), far below the `n`
+> bound — exactly `theorem_1_HOR_cfi_oddDeg`. Correctness preserved
+> (off == on through K6; scramble-invariant + Even ≠ Odd through K7).
+> Speedup: a K7 even+odd canonization went from a projected **~21 h** to
+> **~78 s** (~1000×). Effectiveness (§10 risk 1) is **confirmed**; the
+> mirror-read was dropped for lockstep (§4.1); the recursion is
+> **exploratory**, cost `O(n⁴)` (§4.4, §4.6). Remaining: the Lean
+> discharge (§8.2). Detail: [build brief](./chain-descent-cascade-oracle-build-brief.md).
+
 > **Central design claim.** The a-priori cascade oracle is **not a new
 > construction**. It is the linear oracle's already-built
 > *construct-footprint-map → verify → harvest-before-branch* core
@@ -593,31 +610,44 @@ under-merge).
 > (temporary, delete after build). The summary below is the spec-level
 > version.
 
-### 8.1 C# (empirical first)
+### 8.1 C# — **BUILT 2026-05-28** (was: empirical first)
 
-Building on the linear oracle's shipped pieces (`RefinementFootprint`,
-`TwistConstruction`, `HarvestTwists`, `CoveredByPathFixingAut`):
+Built on the linear oracle's shipped pieces (`RefinementFootprint`,
+`TwistConstruction`, `HarvestTwists`, `CoveredByPathFixingAut`). All five
+milestones done; M3/M4 folded into M2.
 
-1. **Orbit-map harvest = the existing all-singleton harvest.** Confirm
-   `HarvestTwists` already certifies true-symmetry orbit maps (it
-   constructs+verifies the footprint map regardless of type). Likely
-   ~0 new lines — validate it harvests orbit maps, not just twists. M1.
-2. **Bounded-depth recursion.** The new content (§4.4): when
-   `AllSingletons(K)` is false, descend one level into an
-   iso-invariantly-chosen non-singleton sub-cell, re-refine, re-attempt.
-   Track recursion depth against `depth_bound`. ~200-300 lines.
-   M2.
-3. **Iso-invariant sub-cell selection.** Choose `C` by canonical
-   `CellOf` id; `c_1` need not be canonical (mirror-read is
-   choice-symmetric, §4.4). Reuse the harness's iso-invariant
-   target-cell logic. M3.
-4. **Depth-bound + flag.** Wire `depth_bound` (start with a
-   generous `n`; tighten to `tw(H)` when the CFI base is identifiable);
-   flag past the bound. M4.
-5. **Empirical bar (M5).** CFI(K4…K7): non-singleton footprints resolve
-   a-priori; leaf count collapses from the linear-oracle baseline
-   (K7: 941) toward the depth-bounded path (~`O(β)`). Correctness/|Aut|/
-   Even≠Odd preserved throughout.
+1. **[DONE] M1 — orbit-map harvest = the existing all-singleton harvest.**
+   `HarvestTwists` certifies true-symmetry orbit maps unchanged (the
+   construction is type-agnostic; verification is class-blind). 0 new
+   lines; added the cost-shape attribution (`DescentStats.Cascade`).
+2. **[DONE] M2 — lockstep per-rep single-path recursion.** The new
+   content (§4.4): when the footprint is non-singleton, `DeepenAnchor`
+   descends `r_1` down the lowest-id non-singleton sub-cell — recording
+   the iso-invariant **cell-id sequence** — until all-singleton or the
+   depth bound; `ReplayDeepening` follows that *same* sequence on each
+   `r_j`; the shared construct/verify/harvest then runs at the deep level.
+   Exploratory (on clones), `_path` untouched. ~110 lines.
+3. **[DONE, folded into M2] M3 — iso-invariant sub-cell selection.** `C`
+   chosen by lowest `CellOf` id; the within-cell rep need not be
+   canonical (choice-symmetric).
+4. **[DONE, folded into M2] M4 — depth-bound + degrade.** `depth_bound = n`
+   (never approached — recursion bottoms out at ≈ tw(H)); past it the reps
+   are returned unmerged (over-split) and the harness branches. Not a flag.
+5. **[MET] M5 — empirical bar.** CFI(K4…K7): `BranchStarved → 0` on every
+   base; K7 leaves **941 → 1**, branching **555 → 0**; correctness / |Aut| /
+   Even≠Odd preserved; scramble-invariant through K7. Probe:
+   `Cascade_Attribution_StarvationResolved` (asserts `BranchStarved == 0`);
+   `CD_CfiLargeBase_…` (scramble-invariance, K6/K7).
+
+**Cost (measured).** The recursion is exploratory and re-done per
+branching node → `O(n⁴)` total; the `O(n³)` committed-reuse variant
+(§4.4) is a deferred optimization. This is why K7 (n = 308) is ~78 s per
+canonization — polynomial, not yet tuned.
+
+**Packaging (§1.4 decision).** Shipped as **one component** — the
+all-singleton case (depth 0) and the recursion are one path through the
+extended `HarvestTwists`, the linear oracle being the depth-0 special
+case. No separate cascade-oracle class.
 
 ### 8.2 Lean (contract discharge)
 
@@ -648,8 +678,8 @@ de-risking path the linear oracle followed.
 | `ITransversalOracle` seam | **Firm** | The oracle plugs in here; online behavior needs harness-loop placement (§6.1), not pre-branch `Classify`. |
 | Soundness: cover every orbit (over-split OK, under-merge fatal) | **Firm** | `ITransversalOracle` contract; satisfied by verify-before-merge. |
 | Edge-by-edge verification (§4.5) | **Firm** | The sole soundness anchor; mandatory. Everything upstream may be heuristic. |
-| Orbit-map construction (§4.2) | **Reshapeable (heuristic)** | The *same* code as `TwistConstruction`; sound via verification. C# validates effectiveness. |
-| Bounded-depth recursion (§4.4) | **Reshapeable (the new content)** | Termination from orbit recovery; depth bound `tw(H)` / 1. The genuine design contribution. |
+| Orbit-map construction (§4.2) | **Built; effectiveness validated** | The *same* code as `TwistConstruction`; sound via verification. C# confirmed it harvests orbit maps on CFI(K4…K7). |
+| Bounded-depth recursion (§4.4) | **Built (lockstep single-path)** | `DeepenAnchor` + `ReplayDeepening`. Termination from orbit recovery; depth bottoms out ≈ tw(H) (measured). The genuine design contribution. |
 | Recursion termination on cascade class | **Firm (foundation)** | `theorem_1_HOR_cfi_oddDeg`, `theorem_2_HOR_concrete_rank_two_J_singleton`, `theorem_1_HOR_at_depth`. |
 | Refinement footprint = coupled component (§4.1) | **Firm** | Parent↔child partition diff. Reused from the linear oracle; TC provenance is inert (below). |
 | All-singleton gate principled (no iso-invariant match in non-singleton sub-cell) | **Firm** | [extended-twist-viability.md §1](./chain-descent-extended-twist-viability.md); forces recursion over index-match. |
@@ -658,8 +688,8 @@ de-risking path the linear oracle followed.
 | Flag iso-invariance of certification (§4.4, §10) | **Firm obligation, UNDISCHARGED** | [strategy §15 gap 2](./chain-descent-strategy.md); online discovery must be a function of iso-invariant ids. |
 | Budget / soundness handshake | **Firm** | [strategy §15 gap 1](./chain-descent-strategy.md); interrupt mid-certification ⟹ flag, never partial unsound. |
 | Bounded work or flag | **Firm** | [strategy §5](./chain-descent-strategy.md). |
-| Unification (one component vs. separate cascade oracle) | **Reshapeable** | §1.4; the build decides packaging. |
-| `depth_bound` value | **Reshapeable** | Start `n`; tighten to `tw(H)` when CFI base identifiable. |
+| Unification (one component vs. separate cascade oracle) | **Decided: one component** | §1.4; shipped as the extended `HarvestTwists` (linear oracle = depth-0 case), no separate class. |
+| `depth_bound` value | **Shipped `n`** | Never approached (recursion bottoms out ≈ tw(H)); tightening is an unneeded optimization. |
 | Lean `CascadeOracleSpec` | **Not yet built** | §2.5, §8.2; parallel to `LinearOracleSpec`. |
 | TC provenance (`DERIVED`/`driver`, invariant 6.4) | **Historical / not on critical path** | Inert for within-cell cascade (measured 0); the footprint is refinement-based. |
 | Matroid framing / "Tier-2 detector" | **Historical** | [matroid §8.4](./chain-descent-matroid.md), closed. Certification is a localized cascade check, not a matroid test. |
@@ -669,11 +699,14 @@ de-risking path the linear oracle followed.
 
 ## 10. Risks and open questions
 
-1. **Recursion effectiveness (§4.4).** The bound is *sound* regardless
-   (flag past it), but whether bounded-depth recursion actually collapses
-   the CFI(K7) starvation footprints is the empirical question M5
-   answers. **Main implementation risk** — the analogue of the linear
-   oracle's construction-correctness risk.
+1. **Recursion effectiveness (§4.4) — CONFIRMED on CFI (2026-05-28).**
+   The lockstep single-path recursion collapses *all* the CFI(K4…K7)
+   starvation footprints: `BranchStarved → 0`, K7 leaves 941 → 1. So on
+   the measured CFI bases the empirical risk is **closed**. What remains
+   open is effectiveness on the *general* cascade class beyond CFI/schemes
+   (the Tier-3 completeness conjecture, [tier3-decomposability](./chain-descent-tier3-decomposability.md)) —
+   the build de-risked the mechanism but does not prove general-class
+   completeness. The bound stays *sound* regardless (over-split past it).
 2. **Iso-invariance of the recursion (§4.4).** The non-singleton
    sub-cell `C` must be picked by iso-invariant cell id. The explored
    rep `c_1` need not be canonical (the mirror-read is choice-symmetric:

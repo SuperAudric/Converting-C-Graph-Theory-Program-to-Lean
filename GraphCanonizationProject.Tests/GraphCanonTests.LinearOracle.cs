@@ -124,18 +124,21 @@ public class LinearOracleTests
         }
     }
 
-    // TEMP (cascade-oracle build M1) — attribute the residual branching on a CFI
-    // base: all-singleton (linear oracle fired; leftover reps are true-symmetry
-    // the gauge twist doesn't cover) vs non-singleton footprint (linear oracle
-    // starved — the case the a-priori cascade recursion targets). Establishes the
-    // baseline M2's lockstep-deepen recursion is measured against.
+    // The a-priori cascade oracle's cost-shape probe (docs/chain-descent-cascade-oracle.md
+    // §8.1 M5). Attributes the residual branching on a CFI base by footprint
+    // class: all-singleton (linear oracle, depth 0), resolved (cascade recursion
+    // deepened to all-singleton), or starved (still non-singleton past the depth
+    // bound). The bar the cascade oracle must clear: *no branching survives at a
+    // starved footprint* — the recursion resolves every non-singleton case on
+    // these CFI bases (baseline before M2: every branching node was starved, e.g.
+    // K7 had 555). The recursion depth bottoms out near tw(H), far below n.
     [Theory]
     [Trait("Category", "LongRunning")]
     [InlineData("Petersen")]
     [InlineData("Rook3x3")]
     [InlineData("K6")]
     [InlineData("K7")]
-    public void M5_Attribution(string baseGraph)
+    public void Cascade_Attribution_StarvationResolved(string baseGraph)
     {
         var g = CfiGraphGenerator.Generate(baseGraph).Odd;
         int n = g.VertexCount;
@@ -145,13 +148,18 @@ public class LinearOracleTests
             EnableLinearOracle = true
         };
         var r = d.Canonize(new sbyte[n * n], new WarmPartition(n));
+        var c = r.Stats.Cascade;
 
         _out.WriteLine($"CFI({baseGraph}) n={n}: {(r.Flagged ? "FLAG" : "CANON")} " +
                        $"leaves={r.Stats.LeafCount} nodes={r.Stats.NodeCount}");
-        _out.WriteLine($"  decisionNodes={d.DiagDecisionNodes} branchingNodes={d.DiagBranchingNodes} " +
-                       $"twistsHarvested={d.DiagTwistsHarvested} resolvedByRecursion={d.DiagResolvedNodes} maxRecDepth={d.DiagMaxRecursionDepth}");
-        _out.WriteLine($"  branch[allSingleton]={d.DiagBranchAllSingleton} extraReps={d.DiagExtraRepsAllSingleton}   (linear, depth 0)");
-        _out.WriteLine($"  branch[resolved]    ={d.DiagBranchResolved} extraReps={d.DiagExtraRepsResolved}   (cascade recursion harvested but left reps)");
-        _out.WriteLine($"  branch[nonSingleton]={d.DiagBranchNonSingleton} extraReps={d.DiagExtraRepsNonSingleton}   (still starved past depth bound)");
+        _out.WriteLine($"  decisionNodes={c.DecisionNodes} branchingNodes={c.BranchingNodes} " +
+                       $"harvested={c.GeneratorsHarvested} resolvedByRecursion={c.ResolvedByRecursion} maxRecDepth={c.MaxRecursionDepth}");
+        _out.WriteLine($"  branch[allSingleton]={c.BranchAllSingleton}  (linear, depth 0)");
+        _out.WriteLine($"  branch[resolved]    ={c.BranchResolved}  (cascade recursion harvested but a real rep remained)");
+        _out.WriteLine($"  branch[starved]     ={c.BranchStarved}  (still non-singleton past the depth bound)");
+
+        Assert.False(r.Flagged);
+        // The decisive bar: the cascade recursion leaves no starved branching.
+        Assert.Equal(0, c.BranchStarved);
     }
 }

@@ -15,12 +15,15 @@ defensible in a proof** (§1) — every milestone is tagged by whether it
 produces a proof-backed artifact, a proof target, an undischarged
 obligation, or empirical-only de-risking.
 
-**Empirical bar (the de-risking signal, not the goal).** CFI(K7): the
-linear oracle alone leaves **941** explored leaves with **555**
+**Empirical bar (the de-risking signal, not the goal) — MET 2026-05-28.**
+CFI(K7): the linear oracle alone left **941** explored leaves with **555**
 non-singleton-footprint branching nodes ([linear-oracle.md §8.1](./chain-descent-linear-oracle.md)).
-Target: the cascade recursion resolves those footprints → branching
-nodes → ~0 → leaf count collapses toward **O(β)**, correctness/|Aut|/
-Even≠Odd preserved, scramble-invariant.
+After M2: **K7 → 1 leaf, 0 branching** (`BranchStarved = 0`); K6 76 → 1;
+Petersen 22 → 2; Rook3x3 47 → 3 (residual = genuine decisions, not
+starvation). Correctness/|Aut|/Even≠Odd preserved; scramble-invariant
+through K7. Recursion depth ≈ tw(H), far below the `n` bound. So the
+mechanism is **confirmed on CFI**; the build is done (M1–M5), the Lean
+discharge (§8 below) is the remaining step.
 
 ---
 
@@ -238,20 +241,25 @@ CFI(K4…K7), oracle off vs on (cascade recursion enabled):
 
 ## 8. Done criteria + fold-back to the spec and Lean
 
-**Done when:**
-- M1–M4 implemented; M5 bar met (CFI(K7) non-singleton branching → ~0,
-  leaves → O(β)), correctness preserved through K7, scramble-invariant.
+**Done — 2026-05-28.** M1–M5 complete (M3/M4 folded into M2). M5 bar met:
+CFI(K7) branching 555 → 0, leaves 941 → 1; correctness preserved through
+K7; scramble-invariant. C# build complete; only the Lean discharge remains.
 
-**Fold back into [cascade-oracle.md](./chain-descent-cascade-oracle.md):**
-- The **unification decision** (§1.4): is the all-singleton harvest
-  genuinely identical for orbit maps and twists? If yes, ship one
-  component; record it.
-- The **cost accounting** (§5): O(n³) vs O(n⁴), and whether exploration
-  is reused.
-- The **effectiveness verdict**: did single-path collapse K7? If yes,
-  strong evidence for the general-class completeness conjecture; if it
-  stalls on some footprints, that is a precise new open sub-question
-  (which footprints, and why the mirror-read under-harvests there).
+**Folded back into [cascade-oracle.md](./chain-descent-cascade-oracle.md)
+(§8.1 build status, §10 risk 1, §9 constraint table):**
+- **Unification decision (§1.4):** YES — the all-singleton harvest is
+  identical for orbit maps and twists (construction type-agnostic,
+  verification class-blind). Shipped as **one component** (extended
+  `HarvestTwists`; linear oracle = depth-0 case), no separate class.
+- **Cost accounting (§5):** the recursion is **exploratory, re-done per
+  node → O(n⁴)** total. The O(n³) committed-reuse is a deferred
+  optimization (K7 is ~78 s/canonization — polynomial, untuned).
+- **Effectiveness verdict:** single-path **collapsed every CFI base**
+  (K4…K7) — `BranchStarved = 0`, recursion depth ≈ tw(H). Strong evidence
+  for the general-class completeness conjecture *on CFI*; it does **not**
+  prove it beyond CFI/schemes (Tier-3). The mirror-read shortcut was
+  dropped for lockstep per-rep single-path (circular — see spec §4.1); no
+  footprint under-harvested on the measured bases.
 
 **Then the Lean discharge** ([cascade-oracle.md §8.2](./chain-descent-cascade-oracle.md)),
 in proof-defensibility order:
