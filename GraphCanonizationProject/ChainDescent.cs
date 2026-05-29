@@ -79,9 +79,9 @@ namespace Canonizer
         // the gauge twist doesn't cover) vs non-singleton (the linear oracle is
         // starved — the case the a-priori cascade recursion targets).
         internal long DiagDecisionNodes, DiagBranchingNodes,
-                      DiagBranchAllSingleton, DiagBranchNonSingleton,
-                      DiagExtraRepsAllSingleton, DiagExtraRepsNonSingleton,
-                      DiagTwistsHarvested;
+                      DiagBranchAllSingleton, DiagBranchNonSingleton, DiagBranchResolved,
+                      DiagExtraRepsAllSingleton, DiagExtraRepsNonSingleton, DiagExtraRepsResolved,
+                      DiagTwistsHarvested, DiagResolvedNodes, DiagMaxRecursionDepth;
 
         // ── Linear oracle (docs/chain-descent-linear-oracle.md) ──────────────
         // When enabled, after exploring the first representative of a genuine
@@ -194,53 +194,144 @@ namespace Canonizer
             }
 
             // TEMP attribution: classify this branching node's residual reps.
+            // 1 = all-singleton at depth 0 (linear oracle), 3 = resolved by the
+            // cascade recursion, 2 = still non-singleton past the depth bound.
             DiagDecisionNodes++;
             int extra = explored.Count - 1;
             if (extra > 0)
             {
                 DiagBranchingNodes++;
                 if (footprintClass == 1) { DiagBranchAllSingleton++; DiagExtraRepsAllSingleton += extra; }
+                else if (footprintClass == 3) { DiagBranchResolved++; DiagExtraRepsResolved += extra; }
                 else if (footprintClass == 2) { DiagBranchNonSingleton++; DiagExtraRepsNonSingleton += extra; }
             }
         }
 
-        // Construct, verify, and harvest twists carrying the explored rep r1
-        // onto each other representative of the cell. Only the all-singletons
-        // footprint gives a forced, iso-invariant candidate; a non-singleton
-        // sub-cell yields nothing here and the normal branching recurses
-        // (docs/chain-descent-linear-oracle.md §4.4). Verified twists are added
-        // to Automorphisms; CoveredByPathFixingAut's path-fix filter is the
-        // backstop for which of them may actually prune.
-        // Returns the footprint class of r1's child: 0 = empty/closure-fail (no
-        // harvest possible), 1 = all-singleton (forced match attempted per rep),
-        // 2 = non-singleton (the starved case the cascade recursion will target).
+        // A-priori cascade / linear oracle harvest (docs/chain-descent-cascade-oracle.md).
+        //
+        // Explore the anchor rep r1 and harvest verified path-fixing automorphisms
+        // carrying it onto each other representative, so CoveredByPathFixingAut
+        // prunes those a priori. When r1's refinement footprint is already
+        // all-singleton the candidate map is forced directly (the linear oracle,
+        // §4.2). When it is non-singleton the cascade recursion (§4.4) deepens the
+        // anchor along a single iso-invariant cell-id path until the footprint is
+        // all-singleton, then replays that same cell-id sequence on each other rep
+        // (lockstep, §4.4) so their deep partitions are comparable for the
+        // colour-match. Sound regardless of the construction: only edge-verified
+        // automorphisms are harvested; an unverifiable candidate leaves the reps
+        // separate (a sound over-split). The whole deepening is exploratory — it
+        // runs on cloned partitions and never commits to _path.
+        //
+        // Returns the footprint class for attribution: 0 = empty/closure-fail,
+        // 1 = all-singleton at depth 0 (linear oracle), 3 = resolved by the cascade
+        // recursion, 2 = still non-singleton past the depth bound (starved).
         private int HarvestTwists(sbyte[] p, WarmPartition partition, List<int> cell, int r1)
         {
-            var p1 = Individualize(p, cell, r1);
-            if (p1 is null) return 0;
-            var b1 = partition.Clone();
-            b1.Refine(_adj, p1);
-
-            var footprint = RefinementFootprint.Compute(_n, partition.CellOf, b1.CellOf);
-            if (footprint.SplitCells.Count == 0) return 0;
-            foreach (var sc in footprint.SplitCells)
-                if (!sc.AllSingletons) return 2; // non-singleton: recurse via the normal branch
+            var seq = new List<int>();
+            if (!DeepenAnchor(p, partition, cell, r1, seq,
+                              out var b1, out var footprint, out int cls))
+                return cls; // 0 (nothing to harvest) or 2 (depth-bound, still non-singleton)
 
             foreach (int rj in cell)
             {
                 if (rj == r1) continue;
-                var pj = Individualize(p, cell, rj);
-                if (pj is null) continue;
-                var bj = partition.Clone();
-                bj.Refine(_adj, pj);
-                var t = TwistConstruction.TryConstruct(_n, footprint, b1.CellOf, bj.CellOf);
+                var bj = ReplayDeepening(p, partition, cell, rj, seq);
+                if (bj is null) continue; // rj could not follow the sequence ⇒ no candidate
+                var t = TwistConstruction.TryConstruct(_n, footprint!, b1!.CellOf, bj.CellOf);
                 if (t is not null && IsAutomorphism(t))
                 {
                     Automorphisms.AddGenerator(t);
                     DiagTwistsHarvested++;
                 }
             }
-            return 1; // all-singleton
+            return cls; // 1 (depth 0) or 3 (resolved via recursion)
+        }
+
+        // Exploratory single-path deepening of the anchor rep r1: individualize r1,
+        // then repeatedly descend the lowest-id non-singleton footprint sub-cell —
+        // recording its iso-invariant cell id into `seq` — and re-refine, until the
+        // footprint (vs the original parent partition) is all-singleton or the depth
+        // bound is spent. ONE sub-cell, ONE vertex per level: a single path, never a
+        // branch over reps (docs/chain-descent-cascade-oracle.md §4.4). On success
+        // (all-singleton) returns the deep partition + footprint, cls = 1 if no
+        // deepening was needed else 3. On failure returns false, cls = 0 (nothing
+        // split) or 2 (depth bound hit with the footprint still non-singleton).
+        private bool DeepenAnchor(
+            sbyte[] p, WarmPartition parent, List<int> cell, int r1, List<int> seq,
+            out WarmPartition? deep, out RefinementFootprint? footprint, out int cls)
+        {
+            deep = null; footprint = null; cls = 0;
+
+            var curP = Individualize(p, cell, r1);
+            if (curP is null) return false;
+            var curPart = parent.Clone();
+            curPart.Refine(_adj, curP);
+
+            for (int depth = 0; depth <= _n; depth++)
+            {
+                var fp = RefinementFootprint.Compute(_n, parent.CellOf, curPart.CellOf);
+                if (fp.SplitCells.Count == 0) { cls = 0; return false; }
+
+                // Lowest-id non-singleton sub-cell to descend (iso-invariant choice).
+                int[]? chosen = null;
+                int chosenId = int.MaxValue;
+                foreach (var sc in fp.SplitCells)
+                    foreach (var sub in sc.SubCells)
+                        if (sub.Length >= 2 && curPart.CellOf[sub[0]] < chosenId)
+                        {
+                            chosenId = curPart.CellOf[sub[0]];
+                            chosen = sub;
+                        }
+
+                if (chosen is null) // all-singleton: done
+                {
+                    deep = curPart; footprint = fp;
+                    cls = seq.Count == 0 ? 1 : 3;
+                    if (seq.Count > 0) DiagResolvedNodes++;
+                    if (seq.Count > DiagMaxRecursionDepth) DiagMaxRecursionDepth = seq.Count;
+                    return true;
+                }
+
+                if (depth == _n) { cls = 2; return false; } // depth bound, still non-singleton
+
+                seq.Add(chosenId);
+                var sub2 = new List<int>(chosen);          // ascending ⇒ sub2[0] is lowest id
+                var nextP = Individualize(curP, sub2, sub2[0]);
+                if (nextP is null) { cls = 2; return false; }
+                curP = nextP;
+                curPart = curPart.Clone();
+                curPart.Refine(_adj, curP);
+            }
+            cls = 2; return false;
+        }
+
+        // Replay the anchor's cell-id sequence on rep rj: individualize rj, then for
+        // each recorded id individualize the lowest-id vertex of the cell carrying
+        // that id and re-refine. Single path, exploratory (on clones). Returns rj's
+        // deep partition, or null if the sequence cannot be followed (rj is
+        // structurally unlike r1 ⇒ no candidate ⇒ the reps stay separate, sound).
+        private WarmPartition? ReplayDeepening(
+            sbyte[] p, WarmPartition parent, List<int> cell, int rj, List<int> seq)
+        {
+            var curP = Individualize(p, cell, rj);
+            if (curP is null) return null;
+            var curPart = parent.Clone();
+            curPart.Refine(_adj, curP);
+
+            foreach (int id in seq)
+            {
+                var members = new List<int>();
+                for (int v = 0; v < _n; v++)
+                    if (curPart.CellOf[v] == id) members.Add(v);
+                if (members.Count < 2) return null; // id absent or already singleton
+
+                var nextP = Individualize(curP, members, members[0]);
+                if (nextP is null) return null;
+                curP = nextP;
+                curPart = curPart.Clone();
+                curPart.Refine(_adj, curP);
+            }
+            return curPart;
         }
 
         // Individualise rep below its cellmates (as Branch does) and close;

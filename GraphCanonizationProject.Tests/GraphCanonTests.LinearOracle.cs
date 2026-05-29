@@ -130,6 +130,7 @@ public class LinearOracleTests
     // starved — the case the a-priori cascade recursion targets). Establishes the
     // baseline M2's lockstep-deepen recursion is measured against.
     [Theory]
+    [Trait("Category", "LongRunning")]
     [InlineData("Petersen")]
     [InlineData("Rook3x3")]
     [InlineData("K6")]
@@ -148,8 +149,9 @@ public class LinearOracleTests
         _out.WriteLine($"CFI({baseGraph}) n={n}: {(r.Flagged ? "FLAG" : "CANON")} " +
                        $"leaves={r.Stats.LeafCount} nodes={r.Stats.NodeCount}");
         _out.WriteLine($"  decisionNodes={d.DiagDecisionNodes} branchingNodes={d.DiagBranchingNodes} " +
-                       $"twistsHarvested={d.DiagTwistsHarvested}");
-        _out.WriteLine($"  branch[allSingleton]={d.DiagBranchAllSingleton} extraReps={d.DiagExtraRepsAllSingleton}   (true-symmetry / cascade)");
-        _out.WriteLine($"  branch[nonSingleton]={d.DiagBranchNonSingleton} extraReps={d.DiagExtraRepsNonSingleton}   (starved linear oracle)");
+                       $"twistsHarvested={d.DiagTwistsHarvested} resolvedByRecursion={d.DiagResolvedNodes} maxRecDepth={d.DiagMaxRecursionDepth}");
+        _out.WriteLine($"  branch[allSingleton]={d.DiagBranchAllSingleton} extraReps={d.DiagExtraRepsAllSingleton}   (linear, depth 0)");
+        _out.WriteLine($"  branch[resolved]    ={d.DiagBranchResolved} extraReps={d.DiagExtraRepsResolved}   (cascade recursion harvested but left reps)");
+        _out.WriteLine($"  branch[nonSingleton]={d.DiagBranchNonSingleton} extraReps={d.DiagExtraRepsNonSingleton}   (still starved past depth bound)");
     }
 }

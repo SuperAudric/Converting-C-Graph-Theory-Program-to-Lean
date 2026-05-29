@@ -181,4 +181,5 @@ public partial class GraphCanonTests
         Assert.True(_cd.LastPrunedBranches > 0,
             $"orbit pruning should have skipped branches; got {_cd.LastPrunedBranches}");
     }
+
 }

@@ -55,19 +55,22 @@ public partial class GraphCanonTests
     // path deterministically. A *natural* flag needs a graph whose descent
     // genuinely outgrows a polynomial budget — the rigid multipede family;
     // CFI, being abelian, is collapsed cheaply by orbit pruning (see the probe
-    // above), and no multipede generator exists yet.
+    // above), and no multipede generator exists yet. The a-priori cascade
+    // oracle collapses CFI(Cycle3) to a near-single path, so the budget must
+    // be below that handful of committed nodes (1) to still force the flag —
+    // the exploratory recursion runs on copies and does not spend the budget.
     [Fact]
     public void CDScale_TinyBudget_ForcesFlag()
     {
         var pair = CfiGraphGenerator.Generate("Cycle3");
-        var cd = new CanonGraphOrdererChainDescent { BudgetOverride = 3 };
+        var cd = new CanonGraphOrdererChainDescent { BudgetOverride = 1 };
 
         var ex = Assert.Throws<CanonizationFlaggedException>(
             () => { cd.Run(new VertexType[pair.Odd.VertexCount], pair.Odd); });
 
         Assert.Contains("budget", ex.Reason);
-        Assert.True(cd.LastNodeCount <= 4,
-            $"node count {cd.LastNodeCount} should respect budget 3");
+        Assert.True(cd.LastNodeCount <= 2,
+            $"node count {cd.LastNodeCount} should respect budget 1");
         Assert.NotEqual(FlagKind.None, cd.LastFlagKind);
     }
 }
