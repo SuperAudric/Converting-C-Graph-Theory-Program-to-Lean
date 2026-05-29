@@ -607,7 +607,7 @@ under-merge).
 > proof-defensibility (which milestones produce proof-backed artifacts
 > vs. empirical-only de-risking) — is in
 > [`chain-descent-cascade-oracle-build-brief.md`](./chain-descent-cascade-oracle-build-brief.md)
-> (temporary, delete after build). The summary below is the spec-level
+> (temporary, archive after build). The summary below is the spec-level
 > version.
 
 ### 8.1 C# — **BUILT 2026-05-28** (was: empirical first)

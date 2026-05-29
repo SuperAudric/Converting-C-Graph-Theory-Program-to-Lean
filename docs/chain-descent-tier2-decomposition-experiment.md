@@ -1,6 +1,6 @@
 # Tier-2 decomposition experiment
 
-**Status:** experimental, expected to be folded into a permanent doc or deleted
+**Status:** experimental, expected to be folded into a permanent doc or archived
 once the experiment concludes. Sister to
 [`chain-descent-matroid.md`](./chain-descent-matroid.md) (which closed the
 matroid framing) and
