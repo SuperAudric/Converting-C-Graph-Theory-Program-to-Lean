@@ -1,6 +1,7 @@
 import ChainDescent
 import ChainDescent.CFI
 import ChainDescent.Scheme
+import Mathlib.GroupTheory.Perm.Support
 
 /-!
 # §C — A-priori cascade oracle: interface and soundness
@@ -77,6 +78,53 @@ theorem real_stays_real {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
   fun h' => h (mono hsub h')
 
 end OrbitPartition
+
+/-! ## §C.0.1 — The support backbone
+
+Where does an individualization actually destroy a symmetry? `OrbitPartition.mono`
+says fixing *more* shrinks orbits, but the sharp statement is in terms of the
+permutation's **support** `π.support = {x | π x ≠ x}`: an automorphism `π` survives
+the individualization of `S` exactly when `S` avoids `supp(π)`
+(`π ∈ Aut_S ⟺ Disjoint S π.support`). Two consequences:
+
+* `orbitPartition_of_support_disjoint` — a `P`-preserving automorphism `π` with
+  `π v = w` witnesses `OrbitPartition … S v w` at **every** `S` disjoint from its
+  support. (The `FixesPointwise` conjunct of `OrbitPartition` *is* support-disjointness.)
+* `exists_orbit_witness_of_aut` — so the orbit pair `(v, π v)` stays available all the
+  way down to `S = (π.support)ᶜ`, of size `n − |supp π|`. This is the **availability
+  depth** behind the support-grading: a symmetry of support `s` is certifiable for any
+  individualization of `≤ n − s` vertices — fixed-point-free symmetries (e.g. rotations,
+  `s = n`) only at the root, transpositions (`s = 2`) down to depth `n − 2` (the twin
+  end). It is *availability*, not *certification*: whether the descent harvests `π`
+  before individualizing into `supp(π)` is the open bridging obligation (1b), now
+  phrased as a support condition rather than a depth one. -/
+
+/-- **Support-disjoint orbit witness.** A `P`-preserving automorphism `π` whose support
+is disjoint from the individualized set `S` (equivalently: `π` fixes `S` pointwise)
+and which sends `v` to `w` puts `v, w` in the same `Aut_S` orbit. The
+support-disjointness *is* the `FixesPointwise` conjunct, made explicit — fixing `S`
+collapses `π` only when `S` meets `supp(π)`. -/
+theorem orbitPartition_of_support_disjoint {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {S : Finset (Fin n)} {π : Equiv.Perm (Fin n)} {v w : Fin n}
+    (hπ : IsAut π adj) (hP : ∀ x u, P (π x) (π u) = P x u)
+    (hdisj : Disjoint S π.support) (hvw : π v = w) :
+    OrbitPartition adj P S v w := by
+  refine ⟨π, hπ, hP, fun s hs => ?_, hvw⟩
+  have hns : s ∉ π.support := Finset.disjoint_left.mp hdisj hs
+  rw [Equiv.Perm.mem_support, not_not] at hns
+  exact hns
+
+/-- **Availability depth.** An automorphism `π` of support `s = |supp π|` keeps its
+orbit pair `(v, π v)` alive for the individualization of *any* set avoiding `supp π`,
+in particular the full complement `(π.support)ᶜ` of size `n − s`. So a symmetry of
+support `s` is certifiable up to depth `n − s` — the support-graded bound. (Whether
+the canonical descent actually certifies it by then is obligation 1b.) -/
+theorem exists_orbit_witness_of_aut {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {π : Equiv.Perm (Fin n)} {v w : Fin n}
+    (hπ : IsAut π adj) (hP : ∀ x u, P (π x) (π u) = P x u) (hvw : π v = w) :
+    ∃ S : Finset (Fin n), S.card = n - π.support.card ∧ OrbitPartition adj P S v w :=
+  ⟨(π.support)ᶜ, by rw [Finset.card_compl, Fintype.card_fin],
+    orbitPartition_of_support_disjoint hπ hP disjoint_compl_left hvw⟩
 
 /-- **Cascade-oracle interface type.** Given a node — a `SpineChain` at level `k`,
 whose accumulated `chain.D` is the committed individualisation path — and two
