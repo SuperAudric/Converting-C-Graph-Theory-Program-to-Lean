@@ -30,6 +30,29 @@ public class LinearOracleTests
         return d.Canonize(new sbyte[n * n], new WarmPartition(n));
     }
 
+    // Relabel adj by a permutation: new[perm[i], perm[j]] = old[i, j].
+    private static int[] ApplyPerm(int n, int[] adj, int[] perm)
+    {
+        var m = new int[n * n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                m[perm[i] * n + perm[j]] = adj[i * n + j];
+        return m;
+    }
+
+    private static int[] SeededPerm(int n, int seed)
+    {
+        var p = new int[n];
+        for (int i = 0; i < n; i++) p[i] = i;
+        var rng = new System.Random(seed);
+        for (int i = n - 1; i > 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            (p[i], p[j]) = (p[j], p[i]);
+        }
+        return p;
+    }
+
     // The linear oracle must not change the answer (sound pruning by verified
     // automorphisms) and must not increase work — and on genuine-decision CFI
     // it should drop the explored leaf count.
@@ -161,5 +184,57 @@ public class LinearOracleTests
         Assert.False(r.Flagged);
         // The decisive bar: the cascade recursion leaves no starved branching.
         Assert.Equal(0, c.BranchStarved);
+    }
+
+    // Deferred decisions (docs/chain-descent-deferred-decisions.md), oracle ON.
+    // Deferral consumes symmetric cells first and defers real decisions to Phase 2.
+    // It produces a *different* canonical form than the lowest-id schedule (the
+    // schedule fixes the leaf labelling), so it is off by default; the property
+    // that must still hold is **iso-invariance** — relabellings canonize identically
+    // — plus Even≠Odd distinguishing. This is the correctness guard for the deferral
+    // path and the empirical check of the schedule-iso-invariance obligation.
+    [Theory]
+    [Trait("Category", "LongRunning")]
+    [InlineData("Petersen")]
+    [InlineData("Rook3x3")]
+    public void Deferral_ScrambleInvariant_AndDistinguishes(string baseGraph)
+    {
+        var pair = CfiGraphGenerator.Generate(baseGraph);
+        string? even = null, odd = null;
+        long deferralActive = 0, phase2 = 0;
+        foreach (var (slot, g) in new[] { ("even", pair.Even), ("odd", pair.Odd) })
+        {
+            int n = g.VertexCount;
+            var baseAdj = ExtractAdj(g);
+            string? canon = null;
+            for (int i = 0; i < 3; i++)
+            {
+                var adj = ApplyPerm(n, baseAdj, SeededPerm(n, 90210 + i));
+                var d = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
+                {
+                    EnableLinearOracle = true,
+                    EnableDeferral = true
+                };
+                var r = d.Canonize(new sbyte[n * n], new WarmPartition(n));
+                Assert.False(r.Flagged);
+                Assert.NotNull(r.Matrix);
+                string c = string.Join(",", r.Matrix!);
+                canon ??= c;
+                Assert.Equal(canon, c); // scramble-invariant under deferral
+                deferralActive += r.Stats.Cascade.DeferralActiveNodes;
+                phase2 += r.Stats.Cascade.Phase2Nodes;
+            }
+            if (slot == "even") even = canon; else odd = canon;
+        }
+        Assert.NotEqual(even, odd); // deferral still distinguishes Even/Odd
+
+        // Does deferral change the canonical vs the lowest-id schedule? Compare the
+        // even graph's canonical with deferral on vs off (no assert — informational).
+        int ne = pair.Even.VertexCount;
+        var offR = Run(ne, ExtractAdj(pair.Even), oracle: true); // deferral off (default)
+        bool sameCanon = even == string.Join(",", offR.Matrix!);
+        _out.WriteLine($"CFI({baseGraph}) deferral on: " +
+                       $"deferralActiveNodes(sum/6)={deferralActive} phase2Nodes(sum/6)={phase2}  " +
+                       $"canonical(on==off)={sameCanon}");
     }
 }

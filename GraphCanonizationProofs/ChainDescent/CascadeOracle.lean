@@ -40,6 +40,39 @@ individualisations, which a path-fixing automorphism preserves).
 
 namespace ChainDescent
 
+/-! ## §C.0 — Real-stays-real (the deferred-decisions foundation)
+
+The scheduling layer above the oracles (`docs/chain-descent-deferred-decisions.md`)
+defers *real* decisions and consumes symmetry first. Its soundness foundation is
+**real-stays-real**: a pair with no path-fixing automorphism swapping it never
+acquires one under further individualisation. In `OrbitPartition` terms this is
+pure monotonicity in the fixed set `S` — proved here. -/
+
+namespace OrbitPartition
+
+/-- **Orbit monotonicity in the fixed set.** Fixing *more* vertices only *shrinks*
+an orbit: if `v, w` are `Aut_{S'}`-orbit-equivalent and `S ⊆ S'`, they are
+`Aut_S`-orbit-equivalent too — the same witness `π`, whose pointwise-fixing of the
+larger `S'` implies pointwise-fixing of `S`. Pure stabilizer monotonicity; no
+warm-refinement or cascade content. -/
+theorem mono {n : Nat} {adj : AdjMatrix n} {P : PMatrix n} {S S' : Finset (Fin n)}
+    {v w : Fin n} (hsub : S ⊆ S') (h : OrbitPartition adj P S' v w) :
+    OrbitPartition adj P S v w := by
+  obtain ⟨π, hπ, hP, hπS', hvw⟩ := h
+  exact ⟨π, hπ, hP, fun x hx => hπS' x (hsub hx), hvw⟩
+
+/-- **Real-stays-real** (`docs/chain-descent-deferred-decisions.md` §2),
+the contrapositive of `mono`: a *real* decision at `S` — no orbit relation, i.e. no
+path-fixing automorphism swaps `v, w` — persists to every larger fixed set
+`S' ⊇ S`. So deferring a real decision is free: it is still real when Phase 2
+reaches it. -/
+theorem real_stays_real {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S S' : Finset (Fin n)} {v w : Fin n} (hsub : S ⊆ S')
+    (h : ¬ OrbitPartition adj P S v w) : ¬ OrbitPartition adj P S' v w :=
+  fun h' => h (mono hsub h')
+
+end OrbitPartition
+
 /-- **Cascade-oracle interface type.** Given a node — a `SpineChain` at level `k`,
 whose accumulated `chain.D` is the committed individualisation path — and two
 candidate representatives `v w`, return either `none` (no orbit map certified) or a

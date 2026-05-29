@@ -32,9 +32,14 @@ namespace Canonizer
         long BranchStarved,        // branched still non-singleton past the depth bound
         long GeneratorsHarvested,  // verified path-fixing automorphisms harvested
         long ResolvedByRecursion,  // harvest calls the recursion deepened (depth >= 1)
-        int MaxRecursionDepth)     // deepest single-path recursion (~ tw(H) on CFI)
+        int MaxRecursionDepth,     // deepest single-path recursion (~ tw(H) on CFI)
+        // Deferred-decision scheduling (docs/chain-descent-deferred-decisions.md):
+        long DeferralActiveNodes,  // nodes where deferral consumed a non-lowest-id
+                                   // symmetric cell, deferring a lower-id real one
+        long Phase2Nodes)          // nodes where every cell was a real decision —
+                                   // the rigid residue is branched (Phase 2)
     {
-        public static readonly CascadeStats Empty = new(0, 0, 0, 0, 0, 0, 0, 0);
+        public static readonly CascadeStats Empty = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     // The outcome of a chain-descent run (docs/chain-descent-strategy.md §4, §6):

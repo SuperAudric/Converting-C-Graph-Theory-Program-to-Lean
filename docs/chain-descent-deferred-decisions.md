@@ -7,13 +7,31 @@ polynomial (the exponential is confined to an oracle-free phase), and
 the rigid residue is handed off *whole* to a potential global solver
 rather than guessed at layer-by-layer.
 
-> **Status: future-work design note.** This is a *scheduling layer*
-> that sits above the two per-decision oracles (cascade, linear). It is
-> expected to be picked up **after** the a-priori cascade oracle is
-> built ([`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)),
-> since it reuses their per-decision classification and only changes
-> *when* decisions are resolved. Sound today; its *clean two-phase*
-> efficiency is conditional on the decomposability hypothesis (§5).
+> **Status: BUILT (gated off by default) 2026-05-28.** Implemented as the
+> `EnableDeferral` flag on `ChainDescent` (target-cell selection prefers a
+> cell the a-priori oracle collapses to one orbit, deferring real decisions;
+> Phase 2 branches the residue). Foundation `real_stays_real` is **proved in
+> Lean** ([ChainDescent/CascadeOracle.lean](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean)
+> `OrbitPartition.mono` / `real_stays_real`, axiom-light). Sound and
+> iso-invariant (scramble-invariant + Even≠Odd on Petersen and Rook3x3).
+>
+> **Correction to §4 (found while building).** Deferral does **not** reach the
+> same lex-min as the lowest-id schedule: the *schedule fixes the leaf
+> labelling* (the individualisation order determines `P`, which determines the
+> refinement numbering at each leaf), so reordering yields a **different — but
+> still iso-invariant — canonical form**. Measured: Rook3x3 (deferral reorders
+> at the residual → canonical changes), Petersen (no reorder → canonical
+> unchanged). Both stay scramble-invariant and distinguish Even/Odd. Hence
+> deferral is **off by default** (preserves the established canonical and the
+> off==on oracle cross-check); it is a valid *alternative* canonicaliser, not a
+> pure speedup. On CFI it rarely reorders (the cascade oracle already consumes
+> every cell except the lone residual), so its real value remains the
+> rigid-residue hand-off (§7) for mixed graphs.
+>
+> *Original note:* a scheduling layer above the two per-decision oracles
+> (cascade, linear); it reuses their per-decision classification and changes
+> *when* decisions are resolved. Its *clean two-phase* efficiency is
+> conditional on the decomposability hypothesis (§5).
 
 For the oracles this schedules:
 [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
@@ -115,12 +133,24 @@ The workflow is a pure scheduling change:
    verified automorphism (the oracles' soundness anchor, unchanged). No
    over-merging.
 3. **Phase 2 enumerates a rigid residue** — exhaustive branching over
-   real decisions reaches the lex-min, exactly as the current
-   exhaustive descent does, just without redundant oracle calls.
+   real decisions reaches *a* lex-min over a complete leaf set, just
+   without redundant oracle calls.
 
 At worst the workflow over-branches (treats conditional symmetry as
 real — §5), which is the safe direction. It never produces a wrong
 answer and never flags a graph the current flow would canonize.
+
+> **Correction (build, 2026-05-28).** An earlier version of point 3 said
+> "reaches the lex-min, **exactly as the current exhaustive descent does**."
+> That is **false**: the consumption schedule fixes the leaf labelling (the
+> individualisation order determines `P`, hence the refinement numbering at
+> each leaf), so reordering decisions changes *which* matrix is the lex-min.
+> Deferral produces a **different** canonical form than the lowest-id schedule
+> whenever it reorders (measured on Rook3x3; not on Petersen, which never
+> reorders). What *is* preserved is what matters for correctness:
+> **iso-invariance** (relabellings canonize identically) and **distinguishing**
+> (Even≠Odd) — both verified. So deferral is a sound *alternative*
+> canonicaliser, not a canonical-preserving speedup.
 
 ---
 

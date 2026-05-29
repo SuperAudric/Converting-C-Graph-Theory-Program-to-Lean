@@ -81,7 +81,8 @@ namespace Canonizer
         // _branchStarved → 0 (the cascade recursion resolved the starvation).
         private long _decisionNodes, _branchingNodes,
                      _branchAllSingleton, _branchResolved, _branchStarved,
-                     _generatorsHarvested, _resolvedByRecursion;
+                     _generatorsHarvested, _resolvedByRecursion,
+                     _deferralActiveNodes, _phase2Nodes;
         private int _maxRecursionDepth;
 
         // ── Linear oracle (docs/chain-descent-linear-oracle.md) ──────────────
@@ -95,6 +96,19 @@ namespace Canonizer
         // automorphisms are harvested, and a non-all-singleton footprint falls
         // back to the normal k-way branch (recursion, §4.4).
         internal bool EnableLinearOracle { get; set; } = true;
+
+        // ── Deferred decisions (docs/chain-descent-deferred-decisions.md) ────
+        // When enabled, target-cell selection prefers a cell the a-priori oracle
+        // collapses to a single orbit (symmetric — consume it) and DEFERS real
+        // decisions, branching them only when no symmetric cell remains (Phase 2).
+        // Sound (real-stays-real: a deferred real stays real) and iso-invariant
+        // (scramble-invariant + Even≠Odd hold). NOTE: it produces a *different*
+        // canonical form than the lowest-id schedule — the leaf labelling depends
+        // on the individualisation order (via P), so reordering the schedule
+        // changes the lex-min. (This refines the design's §4 claim that deferral
+        // "reaches the same lex-min".) Off by default so the established canonical
+        // and the off==on oracle cross-check are preserved.
+        internal bool EnableDeferral { get; set; } = false;
 
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
@@ -124,7 +138,8 @@ namespace Canonizer
                 new CascadeStats(
                     _decisionNodes, _branchingNodes,
                     _branchAllSingleton, _branchResolved, _branchStarved,
-                    _generatorsHarvested, _resolvedByRecursion, _maxRecursionDepth));
+                    _generatorsHarvested, _resolvedByRecursion, _maxRecursionDepth,
+                    _deferralActiveNodes, _phase2Nodes));
 
             if (_flagged)
                 return CanonResult.Flag(_flagReason ?? "flagged", Automorphisms, stats);
@@ -163,20 +178,52 @@ namespace Canonizer
             for (int c = 0; c < numCells; c++) cellMembers.Add(new List<int>());
             for (int v = 0; v < _n; v++) cellMembers[cellOf[v]].Add(v);
 
-            // Target cell: the lowest-id non-singleton cell. Cell ids are
-            // iso-invariant, so the choice is too. One exists (numCells < n).
-            int target = 0;
-            while (cellMembers[target].Count < 2) target++;
+            // Target-cell selection. Cell ids are iso-invariant, so the lowest-id
+            // non-singleton cell is the canonical default.
+            //
+            // With deferred decisions enabled (docs/chain-descent-deferred-decisions.md):
+            // among the non-singleton cells in id order, prefer one the a-priori
+            // oracle collapses to a single orbit (symmetric — consume it, a free
+            // single descent) and DEFER real decisions (cells that stay
+            // multi-orbit); branch a real one only when none is symmetric (Phase 2,
+            // the rigid residue). Sound because a deferred real stays real
+            // (`OrbitPartition.real_stays_real`, ChainDescent/CascadeOracle.lean).
+            // It changes the canonical form (the schedule fixes the leaf labelling),
+            // so it is off by default.
+            int target, footprintClass = -1;
+            bool harvestedInSelection = false;
+            if (EnableLinearOracle && EnableDeferral)
+            {
+                target = -1;
+                int firstNonSingleton = -1, fallback = -1, fallbackClass = -1;
+                for (int c = 0; c < numCells; c++)
+                {
+                    if (cellMembers[c].Count < 2) continue;
+                    if (firstNonSingleton == -1) firstNonSingleton = c;
+                    int cls = ClassifyCell(p, partition, cellMembers[c], out int survivors);
+                    if (survivors <= 1) { target = c; footprintClass = cls; break; }
+                    if (fallback == -1) { fallback = c; fallbackClass = cls; }
+                }
+                if (target == -1) { target = fallback; footprintClass = fallbackClass; _phase2Nodes++; }
+                if (target != firstNonSingleton) _deferralActiveNodes++;
+                harvestedInSelection = true; // ClassifyCell already harvested `target`
+            }
+            else
+            {
+                target = 0;
+                while (cellMembers[target].Count < 2) target++;
+            }
             var members = cellMembers[target];
 
             var decision = _oracle.Classify(_n, _adj, members, _path, Automorphisms);
 
-            // Branch over the oracle's representatives, in canonical order,
+            // Branch over the chosen cell's representatives, in canonical order,
             // skipping any covered a posteriori by a harvested path-fixing
-            // automorphism (its subtree is isomorphic to an explored one's).
+            // automorphism (its subtree is isomorphic to an explored one's). When
+            // deferral did the harvest during classification, the loop only
+            // descends and prunes; otherwise it harvests after the first rep.
             var explored = new List<int>();
-            bool harvested = false;
-            int footprintClass = -1; // 0=empty/fail, 1=all-singleton, 2=non-singleton
+            bool harvested = harvestedInSelection;
             foreach (int v in decision.Representatives)
             {
                 if (_flagged) return;
@@ -188,8 +235,8 @@ namespace Canonizer
                 explored.Add(v);
                 Branch(p, partition, members, v);
 
-                // Linear oracle: after the first explored representative, harvest
-                // verified twists carrying it onto the other representatives, so
+                // Linear/cascade oracle: after the first explored representative,
+                // harvest verified twists/orbit-maps onto the others so
                 // CoveredByPathFixingAut prunes them a priori (§4.2, §6.2).
                 if (EnableLinearOracle && !harvested)
                 {
@@ -209,6 +256,24 @@ namespace Canonizer
                 else if (footprintClass == 3) _branchResolved++;
                 else if (footprintClass == 2) _branchStarved++;
             }
+        }
+
+        // Classify a cell by running the a-priori oracle harvest (exploratory, on
+        // copies — adding only verified generators) and counting the representatives
+        // that survive path-fixing-orbit pruning. survivorCount == 1 ⟺ the cell is a
+        // single orbit (symmetric, consumable); > 1 ⟺ a real decision. Returns the
+        // harvest's footprint class for attribution. This is the per-cell
+        // classification the deferred-decision scheduler consults.
+        private int ClassifyCell(sbyte[] p, WarmPartition partition, List<int> cell,
+                                 out int survivorCount)
+        {
+            int cls = HarvestTwists(p, partition, cell, cell[0]);
+            var survivors = new List<int> { cell[0] };
+            for (int i = 1; i < cell.Count; i++)
+                if (!CoveredByPathFixingAut(cell[i], survivors))
+                    survivors.Add(cell[i]);
+            survivorCount = survivors.Count;
+            return cls;
         }
 
         // A-priori cascade / linear oracle harvest (docs/chain-descent-cascade-oracle.md).
