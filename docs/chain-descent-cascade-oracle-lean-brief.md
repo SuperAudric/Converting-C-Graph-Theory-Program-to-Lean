@@ -135,12 +135,25 @@ phase** — one discharged conditionally, one sharpened to its open core:
   localisation closes it for free. (The full `SpineChain`-relabelling form remains
   open, as for `LinearOracleSpec`.)
 - **`CellsAreOrbits` / `orbitRecoverableAt_iff_cellsAreOrbits`** — **localisation
-  sharpened.** `OrbitRecoverableAt` is an iff; its `orbits → cells` half is
-  unconditional (`subset_warmRefine`), so recoverability *equals* its `cells →
-  orbits` half (`CellsAreOrbits`). The open obligation is therefore *exactly* the
-  single implication "1-WL cells are no coarser than orbits at the node" — true at
-  cascade/discretizing depth, false at generic intermediate nodes (where genuine
-  decisions live). `cascadeComplete_of_cellsAreOrbits` restates the capstone over it.
+  sharpened, then split.** `OrbitRecoverableAt` is an iff; its `orbits → cells` half
+  is unconditional (`subset_warmRefine`), so recoverability *equals* its `cells →
+  orbits` half (`CellsAreOrbits`) — the single implication "1-WL cells no coarser than
+  orbits at the node." `cascadeComplete_of_cellsAreOrbits` restates the capstone over
+  it. **Crucially that obligation is *not* GI ∈ P — it splits in two:**
+  - **(1a) bounded-depth recoverability — PROVED on the cascade class.**
+    `RecoverableByDepth adj P bound` := "∃ S, |S| ≤ bound ∧ `CellsAreOrbits`" is the
+    "there is a polynomial depth where cells = orbits" statement. Discharged for
+    CFI(OddDegree) (`recoverableByDepth_cfi`, depth ≤ baseSize) and rank-≤2 schemes
+    (`recoverableByDepth_scheme`, depth 1, *non-trivially* — at the very node the oracle
+    acts on). At any discretizing depth it is automatic (`cellsAreOrbits_of_discrete` —
+    the recursion-bottom anchor, the reason this is not GI-hard). The *unbounded* form
+    is vacuous (`recoverableByDepth_univ`), so the polynomial bound is the whole content.
+  - **(1b) intermediate-to-deep bridging — OPEN, cascade-class-specific (not GI ∈ P).**
+    Recovery holds at the bounded `S`; the oracle acts at shallower `D ⊊ S` (cells
+    coarser than orbits). The lockstep recursion bridges `D → S`; that reconstruction
+    (C# confirms through CFI(K7)) + the `chain.χι ↔ individualizedColouring n chain.D`
+    correspondence is the residual. Construction-correctness on the cascade class, not
+    the general isomorphism problem.
 - **`cascadeComplete_of_localization`** (provable capstone) — `CellComplete` +
   all-nodes-recoverable ⟹ `CascadeComplete`. Names the localisation obligation as
   its two hypotheses; honest that node-recoverability is *false at generic
@@ -154,12 +167,18 @@ phase** — one discharged conditionally, one sharpened to its open core:
 **Status: the cascade-oracle Lean contract is complete (Phases A+B+C), builds
 clean, axiom-clean, no `sorry`.** Soundness is proved unconditionally; completeness
 is proved reducible to refinement on the cascade class via the axiom-free
-orbit-recovery theorems. Of the three Phase-C obligations, **verdict iso-invariance
-is now discharged conditionally** (it reduces to localisation) and **localisation is
-sharpened** to the single open implication `CellsAreOrbits`. The genuinely-open
-remainder — discharging `CellsAreOrbits` at the recursion's nodes (cascade-class
-construction correctness) and general-class completeness (`GI ∈ P`, not expected) —
-is research-level and stays open, stated not assumed.
+orbit-recovery theorems. Phase-C scorecard after 2026-05-29:
+- **Verdict iso-invariance (obl. 3):** discharged conditionally — reduces to
+  localisation, not independent.
+- **Localisation (obl. 1):** split into (1a) bounded-depth recoverability —
+  **PROVED** on the cascade class (CFI + rank-≤2 schemes, axiom-free) — and (1b)
+  intermediate-to-deep bridging — **open, but cascade-class construction correctness,
+  not GI ∈ P**. The "≡ GI ∈ P" label belongs to obl. 2 alone.
+- **General-class completeness (obl. 2):** ≡ `GI ∈ P`, conjecture not target.
+
+So the only GI-hard obligation is general-class completeness; the localisation
+content that is *not* GI-hard is now either proved (1a) or isolated as cascade-class
+construction correctness (1b). All stated, not assumed; no `sorry`, no new axioms.
 
 ---
 

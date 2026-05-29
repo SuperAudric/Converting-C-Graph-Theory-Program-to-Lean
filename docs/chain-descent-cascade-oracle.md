@@ -237,21 +237,30 @@ foundationals), no `sorry`:
   `verdictIsoInvariant_of_complete` — a sound + complete oracle at orbit-recoverable
   nodes is automatically verdict-iso-invariant (its verdict = orbit relation =
   iso-invariant cell relation), so iso-invariance ⊆ localisation, not independent.
-  The localisation obligation is **sharpened** by `orbitRecoverableAt_iff_cellsAreOrbits`:
-  recoverability equals its single non-trivial half `CellsAreOrbits` (cells no
-  coarser than orbits), since the other half is unconditional. Capstones
-  `cascadeComplete_of_localization` / `cascadeComplete_of_cellsAreOrbits` /
-  `computes_orbits_of_complete` name what suffices. General-class completeness ≡
-  `GI ∈ P`, recorded as a conjecture.
+  The localisation obligation is **sharpened** by `orbitRecoverableAt_iff_cellsAreOrbits`
+  (recoverability equals its single non-trivial half `CellsAreOrbits`, the other half
+  being unconditional) and then **split** — and the split shows localisation is *not*
+  GI-hard:
+  - **(1a) bounded-depth recoverability is PROVED** on the cascade class —
+    `RecoverableByDepth` ("∃ a polynomial depth where cells = orbits") via
+    `recoverableByDepth_cfi` (depth ≤ baseSize) and `recoverableByDepth_scheme`
+    (depth 1, non-trivially), anchored by `cellsAreOrbits_of_discrete` (cells = orbits
+    is automatic at any discretizing depth). The unbounded form is vacuous
+    (`recoverableByDepth_univ`), so the polynomial bound is the content.
+  - **(1b) bridging an intermediate node to that depth is OPEN** — the lockstep
+    recursion's reconstruction — but it is cascade-class construction correctness, *not*
+    `GI ∈ P`.
+
+  Capstones `cascadeComplete_of_localization` / `cascadeComplete_of_cellsAreOrbits` /
+  `computes_orbits_of_complete` name what suffices. **General-class completeness is the
+  only `GI ∈ P` obligation**, recorded as a conjecture.
 
 Soundness is proved unconditionally; completeness is proved reducible to
-refinement on the cascade class. Of the residual obligations, verdict
-iso-invariance now reduces to localisation, and localisation is pinned to the
-single open implication `CellsAreOrbits` (true at cascade depth, false at generic
-intermediate nodes); discharging it on the cascade class + general-class
-completeness stay open, isolated as named `Prop`s. The declarative contract follows
-the `LinearOracleSpec` precedent; the C# lockstep recursion is the constructive
-witness.
+refinement on the cascade class. Verdict iso-invariance reduces to localisation;
+localisation's bounded-recoverability half is proved on the cascade class and its
+bridging half is isolated as construction correctness; only general-class
+completeness is GI-hard. The declarative contract follows the `LinearOracleSpec`
+precedent; the C# lockstep recursion is the constructive witness.
 
 ---
 

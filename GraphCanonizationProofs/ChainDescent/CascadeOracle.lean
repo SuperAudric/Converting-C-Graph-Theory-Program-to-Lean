@@ -223,6 +223,70 @@ theorem orbitRecoverableAt_iff_cellsAreOrbits {n : Nat} {adj : AdjMatrix n}
   · intro h v w hcell; exact (h v w).mpr hcell
   · intro h v w; exact ⟨fun ho => OrbitPartition.subset_warmRefine ho, h v w⟩
 
+/-- **Cells-are-orbits is automatic at discretizing depth** — the recursion-bottom
+anchor, and the reason localisation is *not* GI-hard. When `warmRefine` at `S` is
+`Discrete`, both the cell relation and the `Aut_S`-orbit relation collapse to vertex
+equality (`orbit_iff_eq_of_discrete_warmRefine`, Fact B), so `CellsAreOrbits` holds
+for free. The cascade oracle's recursion deepens each node to discreteness, where
+this applies; the content left is reaching discreteness at *bounded* depth (the
+cascade property, proved below) and the recursion's reconstruction — never the
+coincidence itself. -/
+theorem cellsAreOrbits_of_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S))) :
+    CellsAreOrbits adj P S :=
+  fun v w hcell => (orbit_iff_eq_of_discrete_warmRefine hd v w).mpr (hd v w hcell)
+
+/-- **Orbit-recoverable by depth `bound`** — the oracle-contract statement of
+"there is a (polynomially bounded) depth at which 1-WL cells coincide with orbits",
+i.e. cascade-class membership. The *bound* carries all the content: the unbounded
+form `∃ S, CellsAreOrbits adj P S` is **vacuous** (`recoverableByDepth_univ` — take
+`S = univ`, where warm refinement is discrete, via `cellsAreOrbits_of_discrete`).
+The cascade class realises it at a polynomial bound (`recoverableByDepth_of_cascade`),
+CFI(OddDegree) at `cfi_depth_bound` (≤ baseSize), rank-≤2 schemes at depth 1. -/
+def RecoverableByDepth {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (bound : Nat) : Prop :=
+  ∃ S : Finset (Fin n), S.card ≤ bound ∧ CellsAreOrbits adj P S
+
+/-- **Cascade-class foundation.** A graph cascading at depth `k` is orbit-recoverable
+by depth `k`: refinement computes orbits at a set of size `≤ k`. Re-export of
+`theorem_1_HOR_at_depth` through the `CellsAreOrbits` decomposition. -/
+theorem recoverableByDepth_of_cascade {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {k : Nat} (h : CascadesAt adj P k) : RecoverableByDepth adj P k := by
+  obtain ⟨S, hcard, _, hrec⟩ := orbitRecoverable_of_cascade h
+  exact ⟨S, hcard, orbitRecoverableAt_iff_cellsAreOrbits.mp hrec⟩
+
+/-- **CFI instance** (axiom-free, OddDegree): recoverable by depth `cfi_depth_bound h`
+(≤ `baseSize` ≤ `n / 6`), via `theorem_1_HOR_cfi_oddDeg`. -/
+theorem recoverableByDepth_cfi {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n) :
+    RecoverableByDepth adj P (cfi_depth_bound h) := by
+  obtain ⟨S, hcard, _, hrec⟩ := orbitRecoverable_cfi h h_odd P
+  exact ⟨S, hcard, orbitRecoverableAt_iff_cellsAreOrbits.mp hrec⟩
+
+/-- **Scheme instance** (axiom-free, rank 2 / `|J| = 1`): recoverable by depth 1 —
+and *non-trivially*, the depth-1 cells are not singletons, so this is genuine
+recoverability at the very node the oracle acts on (unlike CFI's deep discretizing
+set). Via `theorem_2_HOR_concrete_rank_two_J_singleton`. -/
+theorem recoverableByDepth_scheme {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (hrank : h.G.scheme.rank = 2)
+    (hJ : h.G.toSchemeGraph.J.card = 1) (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u) :
+    RecoverableByDepth adj P 1 :=
+  ⟨{v}, (Finset.card_singleton v).le,
+    orbitRecoverableAt_iff_cellsAreOrbits.mp
+      (orbitRecoverable_scheme h hrank hJ P v hP_invariant)⟩
+
+/-- **The unbounded form is vacuous.** Every graph is orbit-recoverable by depth `n`
+(individualize everything: warm refinement is then discrete and cells = orbits =
+singletons). So "∃ a depth where cells are orbits" alone says nothing — only the
+*polynomial bound* (above) is cascade-class content. This is the oracle-contract
+mirror of `cascadesAt_univ` / `theorem_1_HOR_at_n`. -/
+theorem recoverableByDepth_univ {n : Nat} {adj : AdjMatrix n} {P : PMatrix n} :
+    RecoverableByDepth adj P n :=
+  recoverableByDepth_of_cascade (cascadesAt_univ adj P)
+
 namespace CascadeOracleSpec
 
 variable {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
@@ -285,25 +349,34 @@ isolated here — partly **discharged conditionally** (obligation 3, and the
 sharpening of obligation 1), partly genuinely **open** (the hard half of 1, and 2),
 all without `sorry` or new axioms:
 
-1. **Localisation** — that the descent's nodes are orbit-recoverable at the depth
-   the recursion reaches, and the oracle is cell-complete (refinement certifies every
-   same-cell pair). `cascadeComplete_of_localization` proves these two *suffice* for
-   `CascadeComplete`. **Sharpened (this phase):** `orbitRecoverableAt_iff_cellsAreOrbits`
-   shows the node-recoverability hypothesis is equivalent to its non-trivial half
-   `CellsAreOrbits` — the trivial half (orbits refine cells) is unconditional, so the
-   open obligation is *exactly* "1-WL cells are no coarser than orbits" at the node.
-   That single implication is *false at generic intermediate nodes* (cells coarser
-   than orbits, where genuine decisions live) and true at cascade/discretizing depth;
-   `cascadeComplete_of_cellsAreOrbits` restates the capstone over it. Discharging it
-   on the cascade class is the remaining open content (the construction-correctness
-   the C# confirms through CFI(K7), plus the
-   `chain.χι ↔ individualizedColouring n chain.D` partition correspondence).
+1. **Localisation** — that the oracle is cell-complete and its nodes are
+   orbit-recoverable at the depth the recursion reaches.
+   `cascadeComplete_of_localization` proves these *suffice* for `CascadeComplete`;
+   `orbitRecoverableAt_iff_cellsAreOrbits` sharpens node-recoverability to its single
+   non-trivial half `CellsAreOrbits` (the orbits-refine-cells half is unconditional).
+   **This obligation splits cleanly, and crucially it is *not* GI ∈ P:**
+   * **(1a) bounded-depth recoverability — PROVED on the cascade class.** "There is a
+     polynomially bounded depth where cells = orbits" is `RecoverableByDepth`; it holds
+     for CFI(OddDegree) (`recoverableByDepth_cfi`, depth ≤ baseSize) and rank-≤2 schemes
+     (`recoverableByDepth_scheme`, depth 1 — and there *non-trivially*, at the very node
+     the oracle acts on). At any discretizing depth it is automatic
+     (`cellsAreOrbits_of_discrete`). The *unbounded* form is vacuous
+     (`recoverableByDepth_univ`), so the polynomial bound is the entire content — and it
+     is discharged.
+   * **(1b) intermediate-to-deep bridging — OPEN, but cascade-class-specific.** Recovery
+     holds at the bounded depth `S` of (1a), whereas the oracle acts at a shallower node
+     `D ⊊ S` whose cells are coarser than orbits (the genuine-decision case). The
+     recursion bridges `D` to `S`; that bridging (the lockstep reconstruction, which the
+     C# confirms through CFI(K7)) plus the
+     `chain.χι ↔ individualizedColouring n chain.D` partition correspondence is the
+     remaining work. It is construction-correctness on the cascade class, **not** the
+     general isomorphism problem.
 
-2. **General-class completeness** — that the cascade class is *all* graphs. This is
-   `GI ∈ P`; the project's honest position is that it is **not** expected to hold in
-   general (the non-abelian wall / hidden Johnson), so it is recorded as a conjecture,
-   not a target. The proved instances are CFI(OddDegree) and rank-≤2 schemes
-   (`orbitRecoverable_cfi` / `_scheme`).
+2. **General-class completeness** — that the cascade class is *all* graphs. **This** is
+   the `GI ∈ P` obligation (and the only one): the project's honest position is that it
+   is **not** expected to hold in general (the non-abelian wall / hidden Johnson), so it
+   is recorded as a conjecture, not a target. The proved cascade-class instances are
+   CFI(OddDegree) and rank-≤2 schemes (`recoverableByDepth_cfi` / `_scheme`).
 
 3. **Verdict iso-invariance** — `VerdictIsoInvariant` below (strategy §15 gap 2).
    **Discharged conditionally (this phase):** `verdictIsoInvariant_of_complete` proves
