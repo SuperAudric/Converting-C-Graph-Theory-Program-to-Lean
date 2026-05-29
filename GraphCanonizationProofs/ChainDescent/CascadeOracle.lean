@@ -213,6 +213,74 @@ theorem complete_of_cellComplete_recoverable
     ∃ result : { π : Equiv.Perm (Fin n) // IsAut π adj }, oracle chain v w = some result :=
   hcell chain v w ((hrec v w).mp horb)
 
+/-! ### §C.3 — Phase C: the open obligations
+
+Phase A proved soundness (class-blind); Phase B proved the realizability reduction
+(completeness reduces to refinement at orbit-recoverable nodes). What remains is
+stated here as named `Prop`s and one provable conditional capstone — **documented,
+not proven** (no `sorry`, no new axioms):
+
+1. **Localisation** — that the descent's nodes are orbit-recoverable at the depth
+   the recursion reaches, and the oracle is cell-complete (refinement certifies every
+   same-cell pair). `cascadeComplete_of_localization` proves these two *suffice* for
+   `CascadeComplete`; discharging them is open (the construction-correctness the C#
+   confirms through CFI(K7), plus the `chain.χι ↔ individualizedColouring n chain.D`
+   partition correspondence). The node-recoverability hypothesis is *false at generic
+   intermediate nodes* — that subtlety (cells coarser than orbits where genuine
+   decisions live) is exactly the open content the capstone isolates.
+
+2. **General-class completeness** — that the cascade class is *all* graphs. This is
+   `GI ∈ P`; the project's honest position is that it is **not** expected to hold in
+   general (the non-abelian wall / hidden Johnson), so it is recorded as a conjecture,
+   not a target. The proved instances are CFI(OddDegree) and rank-≤2 schemes
+   (`orbitRecoverable_cfi` / `_scheme`).
+
+3. **Verdict iso-invariance** — `VerdictIsoInvariant` below (strategy §15 gap 2).
+   Shared with the linear oracle, whose Lean contract (`LinearOracleSpec`) likewise
+   leaves it to the strategy level; stated here at the partition-determined level the
+   declarative model supports. -/
+
+/-- **OPEN — verdict iso-invariance** (strategy §15 gap 2). The oracle's merge
+decision depends only on the iso-invariant 1-WL partition, not the raw labelling:
+cell-equivalent pairs get the same answer. A concrete, partition-determined form of
+the obligation; the full statement (transporting a `SpineChain` along a relabelling)
+is itself open work, as for `LinearOracleSpec`. **Stated, not proven.** -/
+def VerdictIsoInvariant (oracle : CascadeOracleSpec adj P₀ χι₀ sel) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (v w v' w' : Fin n),
+    warmRefine adj chain.P (individualizedColouring n chain.D) v =
+        warmRefine adj chain.P (individualizedColouring n chain.D) v' →
+    warmRefine adj chain.P (individualizedColouring n chain.D) w =
+        warmRefine adj chain.P (individualizedColouring n chain.D) w' →
+    ((∃ r : { π : Equiv.Perm (Fin n) // IsAut π adj }, oracle chain v w = some r) ↔
+      (∃ r : { π : Equiv.Perm (Fin n) // IsAut π adj }, oracle chain v' w' = some r))
+
+/-- **Capstone (provable).** The localisation obligation, made precise as a
+*sufficient* condition: if the oracle is cell-complete and every node is
+orbit-recoverable, then it is `CascadeComplete`. Discharging the two hypotheses on
+the cascade class is the open work (obligation 1 above) — this theorem shows they
+are exactly what is missing. -/
+theorem cascadeComplete_of_localization {oracle : CascadeOracleSpec adj P₀ χι₀ sel}
+    (hcell : CellComplete oracle)
+    (hrecAll : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k),
+      OrbitRecoverableAt adj chain.P chain.D) :
+    CascadeComplete oracle := by
+  intro k chain v w horb
+  exact complete_of_cellComplete_recoverable hcell chain (hrecAll chain) v w horb
+
+/-- **Capstone (provable).** Assembling the program: a sound oracle that is complete
+returns `some` for `v, w` iff they share an `Aut_D` orbit — it computes the orbit
+relation exactly. Soundness (`OrbitMapSpec`) is discharged (Phase A); completeness
+(`CascadeComplete`) is the localisation obligation (Phase C, obligation 1). Restates
+`certifies_iff_orbit` as the program-level correctness conditional on the one open
+hypothesis. -/
+theorem computes_orbits_of_complete {oracle : CascadeOracleSpec adj P₀ χι₀ sel}
+    (hsound : OrbitMapSpec oracle) (hcomplete : CascadeComplete oracle)
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (v w : Fin n) :
+    (∃ result : { π : Equiv.Perm (Fin n) // IsAut π adj },
+        oracle chain v w = some result) ↔
+      OrbitPartition adj chain.P chain.D v w :=
+  certifies_iff_orbit hsound hcomplete chain v w
+
 end CascadeOracleSpec
 
 end ChainDescent

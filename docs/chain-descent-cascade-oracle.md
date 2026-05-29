@@ -215,16 +215,33 @@ order, so the descent's lex-min over branches is unchanged. Coverage
 (§2.1) guarantees the lex-min is preserved; the oracle only removes
 provably-redundant branches.
 
-### 2.5 What is missing in Lean
+### 2.5 The Lean contract — **BUILT 2026-05-28**
 
-**[GAP]** There is no Lean `CascadeOracleSpec`. Only the linear oracle
-has a Lean contract (`LinearOracleSpec`/`LeafTwistSpec`/`DirAssignment`,
-[ChainDescent.lean §15.8 ~3254-3296](../GraphCanonizationProofs/ChainDescent.lean)).
-A parallel `CascadeOracleSpec` would mirror it: given a spine chain and
-a target cell, return certified orbit representatives + the generators
-witnessing the merges, with a validity predicate analogous to
-`LeafTwistSpec`. The correctness foundation (§3) already exists; the
-Lean deliverable is the constructive oracle + its discharge (§8.2).
+`CascadeOracleSpec` now exists, paralleling the linear oracle's contract
+([ChainDescent/CascadeOracle.lean](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean);
+plan in [the Lean brief](./chain-descent-cascade-oracle-lean-brief.md)).
+It builds clean, axiom-clean (only `refineStep`/`refineStep_iff` + Lean
+foundationals), no `sorry`:
+
+- **Phase A (soundness):** `CascadeOracleSpec` (internal-node interface, not
+  leaf-gated), `some_isAut`, `OrbitMapSpec` (validity = a returned merge
+  witnesses `OrbitPartition`, the `LeafTwistSpec` analogue), `merged_sameCell`.
+- **Phase B (completeness reduction):** `OrbitRecoverableAt` +
+  `orbitRecoverable_of_cascade`/`_cfi`/`_scheme` (the orbit-recovery squeeze in
+  oracle vocabulary, wired to the axiom-free `theorem_1_HOR_*`), `CascadeComplete`,
+  `certifies_iff_orbit`, and the payoff `complete_of_cellComplete_recoverable`
+  (at a recoverable node, refinement-decidable cell-completeness ⟹
+  orbit-completeness).
+- **Phase C (open obligations):** `VerdictIsoInvariant` (Prop, §15 gap 2),
+  `cascadeComplete_of_localization` + `computes_orbits_of_complete` (provable
+  capstones naming the localisation obligation). General-class completeness ≡
+  `GI ∈ P`, recorded as a conjecture.
+
+Soundness is proved unconditionally; completeness is proved reducible to
+refinement on the cascade class. The genuinely-open parts (localisation,
+general-class, verdict iso-invariance) are isolated as named `Prop`s — the
+honest residual. The declarative contract follows the `LinearOracleSpec`
+precedent; the C# lockstep recursion is the constructive witness.
 
 ---
 

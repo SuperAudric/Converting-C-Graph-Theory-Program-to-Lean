@@ -120,12 +120,30 @@ remaining connecting work; Phase B isolates them precisely rather than closing t
 
 ---
 
-## 5. Phase C — explicitly open  [stated, not proven] (~50 lines)
+## 5. Phase C — explicitly open  [stated, not proven] — **BUILT**
 
-Named `Prop`s with no `sorry`, recorded as the residual obligations:
-- **General-class completeness** (Tier-3 conjecture).
-- **Verdict iso-invariance** (§15 gap 2) — the lockstep cell-id sequence's
-  labelling-independence; multi-level version of the linear oracle's obligation.
+§C.3 in `ChainDescent/CascadeOracle.lean`. Named `Prop`s + provable conditional
+capstones, no `sorry`, no new axioms:
+- **`VerdictIsoInvariant`** (Prop, §15 gap 2) — merge decision depends only on the
+  iso-invariant 1-WL partition. Stated at the partition-determined level the
+  declarative model supports (full `SpineChain`-relabelling form is open, as for
+  `LinearOracleSpec`).
+- **`cascadeComplete_of_localization`** (provable capstone) — `CellComplete` +
+  all-nodes-recoverable ⟹ `CascadeComplete`. Names the localisation obligation as
+  its two hypotheses; honest that node-recoverability is *false at generic
+  intermediate nodes*, which is precisely the open content.
+- **`computes_orbits_of_complete`** (provable capstone) — sound + complete ⟹ the
+  oracle computes the orbit relation exactly (program-level correctness, conditional
+  on the completeness obligation).
+- **General-class completeness** ≡ `GI ∈ P` — recorded as a conjecture (not a
+  target); proved instances are CFI(OddDegree) and rank-≤2 schemes.
+
+**Status: the cascade-oracle Lean contract is complete (Phases A+B+C), builds
+clean (1076 jobs), axiom-clean, no `sorry`.** Soundness is proved unconditionally;
+completeness is proved reducible to refinement on the cascade class via the
+axiom-free orbit-recovery theorems; the genuinely-open parts are isolated as named
+`Prop`s. The residual obligations (localisation, general-class, iso-invariance) are
+research-level and stay open.
 
 ---
 
