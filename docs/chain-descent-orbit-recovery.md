@@ -992,10 +992,38 @@ standard basis) for a growing class, in
   scheme is the smallest instance. Strictly subsumes the rank-2/`|J|=1`
   case.
 
+- **Relation-isolation bootstrap (2026-05-29).** §10.11 generalises the
+  depth-1/depth-2 results into one mechanism. `RelIsolatedAt G P v k l`
+  says relation `l`'s `schemePart_at k` class is exactly its block `R_l`.
+  The edge relation is isolated at depth 1 (`relIsolatedAt_one_j0`); the
+  bootstrap `relIsolatedAt_succ` isolates a further relation at depth
+  `k+1` once its intersection counts into the already-isolated relations
+  pin it (`isolatedCount_eq` is the reusable counting heart); isolation
+  is monotone (`relIsolatedAt_mono`). When every relation is isolated by
+  some depth `k`, Theorem 2 follows (`theorem_2_HOR_concrete_of_isolation`).
+  The depth-2 `IntersectionSeparates` result is the `Iso = {j0}` instance;
+  `theorem_2_HOR_concrete_intersectionSeparates3` chains one round further
+  (a depth-2-isolated anchor `l0`) to reach rank-≥-4 schemes like the
+  9-cycle, where depth-2 alone cannot split the distance-3/4 relations.
+
 Open: full general convergence `Step2_converges_at … (rank+1)` (the
-coherent-algebra intersection-matrix full-rank theorem), and no concrete
-scheme is constructed in Lean (all results take `IsSchurianSchemeGraph'`
-as hypothesis, matching the abstract style).
+coherent-algebra intersection-matrix full-rank theorem) — now cleanly
+restated as *"every relation eventually isolates"* (an isolation chain
+exists); and no concrete scheme is constructed in Lean (all results take
+`IsSchurianSchemeGraph'` as hypothesis, matching the abstract style).
+
+**Tier-3 connection (flagged 2026-05-29).** The isolation bootstrap is a
+concrete model of the (O\*) **self-detection** lemma that the Tier-3
+decomposability plan ([`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
+§8.1) hunts for: *structure that obscures a hidden symmetry is itself
+detectable, and detecting it exposes the symmetry.* Here the edge
+relation is "free" (adjacency reveals it at depth 1) and every other
+relation becomes detectable **only by counting into already-detected
+ones** — detection bootstraps, monotonically. The "isolation chain
+exists" condition is the operational form of "residue is rigid / all
+symmetry unconditional" (the deferred-decisions framing). A scheme with a
+relation that *never* isolates would be a concrete obstruction — exactly
+the object Tier 3 / the construction question seeks.
 
 ---
 

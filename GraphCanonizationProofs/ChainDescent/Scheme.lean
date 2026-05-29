@@ -2385,4 +2385,360 @@ theorem theorem_2_HOR_concrete_intersectionSeparates {n : Nat} {adj : AdjMatrix 
   exact theorem_2_HOR_concrete_of_det2 h P v hP_invariant
     (depth2Det_of_intersectionSeparates h.G P v j0 hJ hP' hv_nbr hsep)
 
+/-! ### §10.11 — Relation-isolation bootstrap (general depth-k convergence)
+
+The depth-1 (`relOfPairDetByAdjP`) and depth-2 (`IntersectionSeparates`)
+results are two instances of one pattern: **a relation whose
+`schemePart_at k` class is exactly its relation block can serve as a
+counting anchor at depth `k+1`.** The edge relation is isolated at depth
+1 by adjacency; each further round bootstraps more relations using the
+intersection counts into the already-isolated ones.
+
+This section builds that bootstrap as reusable infrastructure:
+- `RelIsolatedAt G P v k l` — relation `l`'s `schemePart_at k` class is
+  exactly `R_l` (from `v`).
+- `isolatedCount_eq` — the reusable heart: a depth-`k`-isolated `l` lets
+  `schemePart_at (k+1)` pin the intersection number `p^{·}_{l, j0}`.
+- `relIsolatedAt_one_j0` (base, edge at depth 1), `relIsolatedAt_succ`
+  (bootstrap), `convergence_of_all_isolated` (all relations isolated at
+  depth `k` ⟹ Step 2 converges at `k`).
+
+An instantiator proves Theorem 2 for any single-edge schurian scheme
+graph by exhibiting an **isolation chain** (edge at depth 1, then deeper
+relations round by round). This re-derives the depth-2 case and newly
+reaches depth-≥-3 schemes (e.g. the 9-cycle, where the distance-2
+relation isolates at depth 2 and distance-3/4 separate at depth 3).
+General convergence is then exactly "an isolation chain always exists"
+— the coherent-algebra content, cleanly isolated. -/
+
+/-- **Relation `l` is isolated at depth `k`.** Its `schemePart_at k`
+class is exactly the relation block `R_l` from `v`: any two vertices,
+one of which is at relation `l` with `v`, are `schemePart_at k`-related
+iff the other is also at relation `l` with `v`. -/
+def RelIsolatedAt {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) (l : Fin (G.scheme.rank + 1)) : Prop :=
+  ∀ w u : Fin n, G.scheme.relOfPair v w = l →
+    (schemePart_at G P v k w u ↔ G.scheme.relOfPair v u = l)
+
+/-- **The ⊇ direction, general and free.** Same relation with `v` ⟹
+same `schemePart_at k` class (via the orbit chain). -/
+theorem vProfile_imp_schemePart_at {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
+    {k : Nat} (hk : k ≤ n) {w u : Fin n}
+    (h : vProfile G.scheme v w = vProfile G.scheme v u) :
+    schemePart_at G P v k w u :=
+  schemePart_at_of_orbit G P v hk (orbit_of_vProfile_eq G P v hP_invariant h)
+
+/-- `schemePart_at` is downward-monotone in the depth. -/
+theorem schemePart_at_le {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) {j k : Nat} (hjk : j ≤ k) {w u : Fin n}
+    (h : schemePart_at G P v k w u) : schemePart_at G P v j w u := by
+  induction k with
+  | zero =>
+    have : j = 0 := Nat.le_zero.mp hjk
+    subst this; exact h
+  | succ k ih =>
+    rcases Nat.eq_or_lt_of_le hjk with h' | h'
+    · subst h'; exact h
+    · exact ih (Nat.le_of_lt_succ h') h.1
+
+/-- **Common-neighbour count = intersection number** (general `l, m`):
+`#{u' : (v,u') ∈ R_l ∧ (z,u') ∈ R_m}` is the structure constant
+`p^{relOfPair v z}_{l,m}`. Generalises the `hcommon` step of
+`depth2Det_of_intersectionSeparates`. -/
+theorem AssociationScheme.relCommon_eq_intersectionNumber {n : Nat}
+    (S : AssociationScheme n) (v z : Fin n) (l m : Fin (S.rank + 1)) :
+    {u' : Fin n | S.relOfPair v u' = l ∧ S.relOfPair z u' = m}.ncard
+      = S.intersectionNumber l m (S.relOfPair v z) := by
+  rw [ncard_setOf_eq_filter_card,
+    ← S.intersectionNumber_well_defined l m (S.relOfPair v z) v z
+      (S.rel_relOfPair v z)]
+  congr 1
+  ext u'
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  rw [S.rel_iff_relOfPair, S.rel_iff_relOfPair, S.relOfPair_symm u' z]
+  exact ⟨fun ⟨a, b⟩ => ⟨a.symm, b.symm⟩, fun ⟨a, b⟩ => ⟨a.symm, b.symm⟩⟩
+
+/-- **The bootstrap counting lemma.** A relation `l` isolated at depth
+`k` (with a nonempty block from `v`) lets `schemePart_at (k+1)` pin the
+intersection number `p^{relOfPair v ·}_{l, j0}` — the count of common
+edge-neighbours via `R_l`. The depth-`(k+1)` block-degree into `R_l`
+(summed over `P`) equals this intersection number. -/
+theorem isolatedCount_eq {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (j0 : Fin (G.scheme.rank + 1)) (hJ : G.toSchemeGraph.J = {j0})
+    {k : Nat} {l : Fin (G.scheme.rank + 1)}
+    (hiso : RelIsolatedAt G P v k l)
+    (hl_nbr : ∃ w₀ : Fin n, G.scheme.relOfPair v w₀ = l)
+    {w u : Fin n} (h : schemePart_at G P v (k + 1) w u) :
+    G.scheme.intersectionNumber l j0 (G.scheme.relOfPair v w)
+      = G.scheme.intersectionNumber l j0 (G.scheme.relOfPair v u) := by
+  classical
+  have hj0_ne : j0 ≠ 0 := by
+    intro hz; subst hz
+    exact G.toSchemeGraph.zero_notMem_J (by rw [hJ]; exact Finset.mem_singleton_self _)
+  have hadj_iff : ∀ x y : Fin n,
+      G.toSchemeGraph.adj.adj x y = 1 ↔ G.scheme.relOfPair x y = j0 := by
+    intro x y; rw [G.toSchemeGraph.adj_eq_one_iff, hJ, Finset.mem_singleton]
+  obtain ⟨w₀, hw₀⟩ := hl_nbr
+  obtain ⟨_, hcount⟩ := h
+  have hiso' : ∀ u' : Fin n,
+      schemePart_at G P v k u' w₀ ↔ G.scheme.relOfPair v u' = l := by
+    intro u'
+    rw [show schemePart_at G P v k u' w₀ ↔ schemePart_at G P v k w₀ u' from
+      ⟨schemePart_at_symm G P v k, schemePart_at_symm G P v k⟩]
+    exact hiso w₀ u' hw₀
+  rw [← G.scheme.relCommon_eq_intersectionNumber v w l j0,
+    ← G.scheme.relCommon_eq_intersectionNumber v u l j0,
+    ncard_eq_sum_POE P w, ncard_eq_sum_POE P u]
+  apply Finset.sum_congr rfl
+  intro p _
+  have hAw : {u' : Fin n | (G.scheme.relOfPair v u' = l ∧
+                G.scheme.relOfPair w u' = j0) ∧ P w u' = p}
+           = {u' : Fin n | u' ≠ w ∧ schemePart_at G P v k u' w₀ ∧
+                G.toSchemeGraph.adj.adj w u' = 1 ∧ P w u' = p} := by
+    ext u'; simp only [Set.mem_setOf_eq]
+    constructor
+    · rintro ⟨⟨hv', hw'⟩, hp⟩
+      refine ⟨?_, (hiso' u').mpr hv', (hadj_iff w u').mpr hw', hp⟩
+      intro he; rw [he, G.scheme.relOfPair_self] at hw'; exact hj0_ne hw'.symm
+    · rintro ⟨_, hsp, hadj1, hp⟩
+      exact ⟨⟨(hiso' u').mp hsp, (hadj_iff w u').mp hadj1⟩, hp⟩
+  have hAu : {u' : Fin n | (G.scheme.relOfPair v u' = l ∧
+                G.scheme.relOfPair u u' = j0) ∧ P u u' = p}
+           = {u' : Fin n | u' ≠ u ∧ schemePart_at G P v k u' w₀ ∧
+                G.toSchemeGraph.adj.adj u u' = 1 ∧ P u u' = p} := by
+    ext u'; simp only [Set.mem_setOf_eq]
+    constructor
+    · rintro ⟨⟨hv', hu'⟩, hp⟩
+      refine ⟨?_, (hiso' u').mpr hv', (hadj_iff u u').mpr hu', hp⟩
+      intro he; rw [he, G.scheme.relOfPair_self] at hu'; exact hj0_ne hu'.symm
+    · rintro ⟨_, hsp, hadj1, hp⟩
+      exact ⟨⟨(hiso' u').mp hsp, (hadj_iff u u').mp hadj1⟩, hp⟩
+  rw [hAw, hAu]
+  exact hcount 1 p w₀
+
+/-- **Base case: the edge relation is isolated at depth 1.** `R_{j0}` is
+exactly the depth-1 (`schemePart_at 1`) class of any edge-neighbour of
+`v` — ⊆ from `schemePart_at_one_to_v` + `|J|=1`, ⊇ from the orbit chain. -/
+theorem relIsolatedAt_one_j0 {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (j0 : Fin (G.scheme.rank + 1)) (hJ : G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u) :
+    RelIsolatedAt G P v 1 j0 := by
+  classical
+  have hn : 1 ≤ n :=
+    Nat.one_le_iff_ne_zero.mpr (by intro hz; rw [hz] at v; exact Fin.elim0 v)
+  have hj0_ne : j0 ≠ 0 := by
+    intro hz; subst hz
+    exact G.toSchemeGraph.zero_notMem_J (by rw [hJ]; exact Finset.mem_singleton_self _)
+  have hadj_iff : ∀ x y : Fin n,
+      G.toSchemeGraph.adj.adj x y = 1 ↔ G.scheme.relOfPair x y = j0 := by
+    intro x y; rw [G.toSchemeGraph.adj_eq_one_iff, hJ, Finset.mem_singleton]
+  intro w u hwj0
+  have hwv : w ≠ v := by
+    intro he; rw [he, G.scheme.relOfPair_self] at hwj0; exact hj0_ne hwj0.symm
+  constructor
+  · intro hsp
+    by_cases huv : u = v
+    · exfalso
+      obtain ⟨h0, _⟩ := hsp
+      rw [huv] at h0
+      exact hwv ((individualizedColouring_singleton_eq_v_iff v w).mp h0)
+    · have hext := schemePart_at_one_to_v G P v w u hwv huv hsp
+      have hwadj : G.toSchemeGraph.adj.adj v w = 1 := (hadj_iff v w).mpr hwj0
+      have hvu : G.toSchemeGraph.adj.adj v u = 1 := by
+        rw [G.toSchemeGraph.adj_symm v u, ← hext.1, G.toSchemeGraph.adj_symm w v]
+        exact hwadj
+      exact (hadj_iff v u).mp hvu
+  · intro hru
+    have hvp : vProfile G.scheme v w = vProfile G.scheme v u := by
+      unfold vProfile; rw [hwj0, hru]
+    exact vProfile_imp_schemePart_at G P v hP_invariant hn hvp
+
+/-- **The diagonal relation is isolated at every depth.** `R_0` is the
+singleton `{v}`, which is always its own `schemePart_at k` class. -/
+theorem relIsolatedAt_zero {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (k : Nat) : RelIsolatedAt G P v k 0 := by
+  intro w u hw0
+  have hwv : w = v := ((G.scheme.relOfPair_eq_zero_iff v w).mp hw0).symm
+  rw [hwv]
+  constructor
+  · intro hsp
+    have h1 := schemePart_at_le G P v (Nat.zero_le k) hsp
+    have : u = v := (individualizedColouring_singleton_eq_v_iff v u).mp h1.symm
+    rw [this]; exact G.scheme.relOfPair_self v
+  · intro hu0
+    have : u = v := ((G.scheme.relOfPair_eq_zero_iff v u).mp hu0).symm
+    rw [this]; exact schemePart_at_refl G P v k v
+
+/-- **Isolation is upward-closed in depth.** A relation isolated at
+depth `k` stays isolated at every depth `k ≤ j ≤ n`. -/
+theorem relIsolatedAt_mono {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
+    {k j : Nat} {l : Fin (G.scheme.rank + 1)} (hkj : k ≤ j) (hjn : j ≤ n)
+    (h : RelIsolatedAt G P v k l) : RelIsolatedAt G P v j l := by
+  intro w u hwl
+  constructor
+  · intro hsp
+    exact (h w u hwl).mp (schemePart_at_le G P v hkj hsp)
+  · intro hul
+    have hvp : vProfile G.scheme v w = vProfile G.scheme v u := by
+      unfold vProfile; rw [hwl, hul]
+    exact vProfile_imp_schemePart_at G P v hP_invariant hjn hvp
+
+/-- **The bootstrap step.** If a finset `Iso` of relations is isolated
+at depth `k` (each with a nonempty block from `v`), and relation `i` is
+uniquely pinned among non-diagonal relations by its adjacency-to-`v`
+class together with the intersection counts `p^{·}_{l, j0}` into the
+`Iso` relations, then `i` is isolated at depth `k+1`. -/
+theorem relIsolatedAt_succ {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (j0 : Fin (G.scheme.rank + 1)) (hJ : G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
+    {k : Nat} (hkn : k + 1 ≤ n) (Iso : Finset (Fin (G.scheme.rank + 1)))
+    (hIso : ∀ l ∈ Iso, RelIsolatedAt G P v k l)
+    (hIso_nbr : ∀ l ∈ Iso, ∃ w₀ : Fin n, G.scheme.relOfPair v w₀ = l)
+    (i : Fin (G.scheme.rank + 1)) (hi_ne : i ≠ 0)
+    (hsep : ∀ i' : Fin (G.scheme.rank + 1), i' ≠ 0 →
+        ((i' = j0) ↔ (i = j0)) →
+        (∀ l ∈ Iso, G.scheme.intersectionNumber l j0 i'
+          = G.scheme.intersectionNumber l j0 i) →
+        i' = i) :
+    RelIsolatedAt G P v (k + 1) i := by
+  classical
+  have hadj_iff : ∀ x y : Fin n,
+      G.toSchemeGraph.adj.adj x y = 1 ↔ G.scheme.relOfPair x y = j0 := by
+    intro x y; rw [G.toSchemeGraph.adj_eq_one_iff, hJ, Finset.mem_singleton]
+  intro w u hwi
+  have hwv : w ≠ v := by
+    intro he; rw [he, G.scheme.relOfPair_self] at hwi; exact hi_ne hwi.symm
+  constructor
+  · intro hsp
+    have hsp1 : schemePart_at G P v 1 w u :=
+      schemePart_at_le G P v (by omega) hsp
+    have huv : u ≠ v := by
+      intro he
+      obtain ⟨h0, _⟩ := hsp1
+      rw [he] at h0
+      exact hwv ((individualizedColouring_singleton_eq_v_iff v w).mp h0)
+    have hext := schemePart_at_one_to_v G P v w u hwv huv hsp1
+    have hadj_match : (G.scheme.relOfPair v u = j0) ↔ (i = j0) := by
+      rw [← hwi, ← hadj_iff v u, ← hadj_iff v w,
+        G.toSchemeGraph.adj_symm v u, G.toSchemeGraph.adj_symm v w, hext.1]
+    apply hsep (G.scheme.relOfPair v u)
+    · intro hz; exact huv ((G.scheme.relOfPair_eq_zero_iff v u).mp hz).symm
+    · exact hadj_match
+    · intro l hl
+      have hc := isolatedCount_eq G P v j0 hJ (hIso l hl) (hIso_nbr l hl) hsp
+      rw [← hwi]; exact hc.symm
+  · intro hui
+    have hvp : vProfile G.scheme v w = vProfile G.scheme v u := by
+      unfold vProfile; rw [hwi, hui]
+    exact vProfile_imp_schemePart_at G P v hP_invariant hkn hvp
+
+/-- **Convergence from full isolation.** If every relation is isolated
+at depth `k`, then `schemePart_at k` equals the `vProfile` partition —
+`Step2_converges_at G P v k`. -/
+theorem convergence_of_all_isolated {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) {k : Nat}
+    (hall : ∀ l : Fin (G.scheme.rank + 1), RelIsolatedAt G P v k l) :
+    Step2_converges_at G P v k := by
+  intro w u hsp
+  have h := (hall (G.scheme.relOfPair v w) w u rfl).mp hsp
+  unfold vProfile; rw [h]
+
+/-- **Theorem 2 from an isolation chain.** If an instantiator exhibits
+that every relation is isolated by depth `k ≤ n` (edge at depth 1 via
+`relIsolatedAt_one_j0`, deeper relations via `relIsolatedAt_succ`,
+lifting earlier ones with `relIsolatedAt_mono`), Theorem 2 holds
+unconditionally. This is the general engine; the depth-2
+`IntersectionSeparates` result is its `Iso = {j0}`, `k = 2` instance,
+and depth-≥-3 schemes (e.g. the 9-cycle) chain `relIsolatedAt_succ`
+further. -/
+theorem theorem_2_HOR_concrete_of_isolation {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n) {k : Nat}
+    (hk : k ≤ n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hall : ∀ l : Fin (h.G.scheme.rank + 1), RelIsolatedAt h.G P v k l) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u :=
+  theorem_2_HOR_concrete h P v hP_invariant
+    (step2_of_converges_at h.G P v k hk (convergence_of_all_isolated h.G P v hall))
+
+/-- **Theorem 2 for depth-3 single-anchor schemes** (e.g. the 9-cycle).
+A worked instance of the isolation bootstrap reaching depth 3: the edge
+relation `j0` isolates at depth 1; a single anchor relation `l0` —
+pinned among the non-edge relations by its common-edge-neighbour count
+`p^{·}_{j0,j0}` — isolates at depth 2; then the full profile
+`(adjacency, p^{·}_{j0,j0}, p^{·}_{l0,j0})` separates every relation, so
+all isolate by depth 3 and Theorem 2 holds. Covers rank-≥-3 schemes the
+single-count depth-2 result cannot (the 9-cycle: distance-2 isolates at
+depth 2, distance-3/4 separate at depth 3 via counts into distance-2). -/
+theorem theorem_2_HOR_concrete_intersectionSeparates3 {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 l0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (h3n : 3 ≤ n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hj0_nbr : ∃ w₀ : Fin n, h.G.scheme.relOfPair v w₀ = j0)
+    (hl0_nbr : ∃ w₀ : Fin n, h.G.scheme.relOfPair v w₀ = l0)
+    (hl0_ne0 : l0 ≠ 0) (hl0_nej0 : l0 ≠ j0)
+    (hl0_iso : ∀ i : Fin (h.G.scheme.rank + 1), i ≠ 0 → i ≠ j0 →
+        h.G.scheme.intersectionNumber j0 j0 i
+          = h.G.scheme.intersectionNumber j0 j0 l0 → i = l0)
+    (hsep3 : ∀ i i' : Fin (h.G.scheme.rank + 1), i ≠ 0 → i' ≠ 0 →
+        ((i = j0) ↔ (i' = j0)) →
+        h.G.scheme.intersectionNumber j0 j0 i
+          = h.G.scheme.intersectionNumber j0 j0 i' →
+        h.G.scheme.intersectionNumber l0 j0 i
+          = h.G.scheme.intersectionNumber l0 j0 i' →
+        i = i') :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u := by
+  have hP' : ∀ {π : Equiv.Perm (Fin n)}, IsAut π h.G.toSchemeGraph.adj →
+      ∀ x u, P (π x) (π u) = P x u := by
+    intro π hπ; apply hP_invariant; rw [← h.matching]; exact hπ
+  have hj0_1 : RelIsolatedAt h.G P v 1 j0 := relIsolatedAt_one_j0 h.G P v j0 hJ hP'
+  have hj0_2 : RelIsolatedAt h.G P v 2 j0 :=
+    relIsolatedAt_mono h.G P v hP' (by omega) (by omega) hj0_1
+  have hl0_2 : RelIsolatedAt h.G P v 2 l0 := by
+    refine relIsolatedAt_succ h.G P v j0 hJ hP' (by omega) {j0} ?_ ?_ l0 hl0_ne0 ?_
+    · intro m hm; rw [Finset.mem_singleton] at hm; subst hm; exact hj0_1
+    · intro m hm; rw [Finset.mem_singleton] at hm; subst hm; exact hj0_nbr
+    · intro i' hi'0 hadjmatch hcounts
+      have hi'j : i' ≠ j0 := fun hc => hl0_nej0 (hadjmatch.mp hc)
+      exact hl0_iso i' hi'0 hi'j (hcounts j0 (Finset.mem_singleton_self _))
+  have hall : ∀ l : Fin (h.G.scheme.rank + 1), RelIsolatedAt h.G P v 3 l := by
+    intro l
+    by_cases hl0eq : l = 0
+    · subst hl0eq; exact relIsolatedAt_zero h.G P v 3
+    · by_cases hlj : l = j0
+      · subst hlj; exact relIsolatedAt_mono h.G P v hP' (by omega) h3n hj0_2
+      · by_cases hll0 : l = l0
+        · subst hll0; exact relIsolatedAt_mono h.G P v hP' (by omega) h3n hl0_2
+        · refine relIsolatedAt_succ h.G P v j0 hJ hP' h3n {j0, l0} ?_ ?_ l hl0eq ?_
+          · intro m hm
+            rw [Finset.mem_insert, Finset.mem_singleton] at hm
+            rcases hm with rfl | rfl
+            · exact hj0_2
+            · exact hl0_2
+          · intro m hm
+            rw [Finset.mem_insert, Finset.mem_singleton] at hm
+            rcases hm with rfl | rfl
+            · exact hj0_nbr
+            · exact hl0_nbr
+          · intro i' hi'0 hadjmatch hcounts
+            exact hsep3 i' l hi'0 hl0eq hadjmatch
+              (hcounts j0 (by simp)) (hcounts l0 (by simp))
+  exact theorem_2_HOR_concrete_of_isolation h P v h3n hP_invariant hall
+
 end ChainDescent

@@ -438,6 +438,18 @@ The Name, Line, and if present "Used By" columns are mantained by GenerateTheore
 | `IntersectionSeparates` | 2234-2240 | **Intersection-number separation hypothesis**: `intersectionNumber j0 j0 ·` distinguishes the non-edge, non-diagonal relations (the ones adjacency alone cannot). | Definition |
 | `depth2Det_of_intersectionSeparates` | 2245-2360 | **Discharges `Depth2Det`** for single-edge (`J = {j0}`) schurian scheme graphs with an edge-neighbour of `v` and intersection-number separation. The `schemePart_at 1` class of an edge-neighbour is exactly `R_{j0}`, so the depth-2 block-degree = `intersectionNumber j0 j0`. | **Key theorem** |
 | `theorem_2_HOR_concrete_intersectionSeparates` | 2371-2386 | **Theorem 2 unconditional for single-edge schurian scheme graphs with intersection-number separation** — first genuinely rank-≥-3 coverage (depth-1 insufficient, depth-2 sufficient; e.g. the 7-cycle scheme). Strictly subsumes the rank-2/`|J|=1` case. Axiom-clean. | T2 depth-2 / headline |
+| `RelIsolatedAt` | 2418-2423 | **Relation-isolation predicate** (§10.11): relation `l`'s `schemePart_at k` class is exactly `R_l` from `v`. The bootstrap's central object. | Definition |
+| `vProfile_imp_schemePart_at` | 2425-2433 | The free ⊇ direction: same relation with `v` ⟹ same `schemePart_at k` class (composes `orbit_of_vProfile_eq` + `schemePart_at_of_orbit`). | — |
+| `schemePart_at_le` | 2435-2449 | `schemePart_at` is downward-monotone in the depth. | — |
+| `relCommon_eq_intersectionNumber` | 2451-2467 | Common-neighbour count = structure constant: `#{u' : (v,u')∈R_l ∧ (z,u')∈R_m} = p^{relOfPair v z}_{l,m}`. Generalises the depth-2 `hcommon`. | `AssociationScheme` |
+| `isolatedCount_eq` | 2469-2523 | **The reusable counting heart**: a depth-`k`-isolated `l` lets `schemePart_at (k+1)` pin the intersection number `p^{·}_{l,j0}` (block-degree into `R_l`, summed over `P`). | **Key theorem** |
+| `relIsolatedAt_one_j0` | 2525-2560 | **Base case**: the edge relation `j0` is isolated at depth 1 (⊆ from `schemePart_at_one_to_v` + `|J|=1`, ⊇ from the orbit chain). | — |
+| `relIsolatedAt_zero` | 2562-2576 | The diagonal `R_0 = {v}` is isolated at every depth. | — |
+| `relIsolatedAt_mono` | 2578-2596 | Isolation is upward-closed in depth (`k ≤ j ≤ n`). | — |
+| `relIsolatedAt_succ` | 2598-2644 | **The bootstrap step**: a finset `Iso` of depth-`k`-isolated relations + a separation pinning `i` by `(adjacency, counts into Iso)` ⟹ `i` is isolated at depth `k+1`. | **Key theorem** |
+| `convergence_of_all_isolated` | 2646-2660 | All relations isolated at depth `k` ⟹ `Step2_converges_at G P v k` (`schemePart_at k` = `vProfile` partition). | — |
+| `theorem_2_HOR_concrete_of_isolation` | 2662-2682 | **Theorem 2 from an isolation chain** — the general engine. An instantiator proves Theorem 2 for any scheme by exhibiting that every relation isolates by depth `k ≤ n` (edge via `one_j0`, deeper via `succ`, lifting via `mono`). Axiom-clean. | T2 general engine |
+| `theorem_2_HOR_concrete_intersectionSeparates3` | 2684-2742 | **Theorem 2 for depth-3 single-anchor schemes** (e.g. the 9-cycle) — edge isolates at depth 1, anchor `l0` at depth 2 (by `p^{·}_{j0,j0}`), all relations at depth 3 (by `(adj, p^{·}_{j0,j0}, p^{·}_{l0,j0})`). Reaches rank-≥-4 schemes the depth-2 result cannot. Axiom-clean. | T2 depth-3 / headline |
 
 ## ChainDescent/CascadeOracle.lean
 
