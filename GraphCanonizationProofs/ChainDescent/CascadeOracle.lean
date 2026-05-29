@@ -1,4 +1,6 @@
 import ChainDescent
+import ChainDescent.CFI
+import ChainDescent.Scheme
 
 /-!
 # §C — A-priori cascade oracle: interface and soundness
@@ -93,6 +95,123 @@ theorem merged_sameCell {oracle : CascadeOracleSpec adj P₀ χι₀ sel}
     warmRefine adj chain.P (individualizedColouring n chain.D) v =
       warmRefine adj chain.P (individualizedColouring n chain.D) w :=
   OrbitPartition.subset_warmRefine (hvalid chain v w result h)
+
+end CascadeOracleSpec
+
+/-! ## §C.2 — Phase B: completeness on the cascade class
+
+The soundness side (Phase A) is class-blind. Completeness — that the oracle
+returns *one representative per orbit*, missing no merge — is realizable exactly
+where the **orbit relation coincides with the 1-WL cell relation**, because the
+cell relation is refinement-computable (polynomial). That coincidence is the
+content of the orbit-recovery theorems, here re-exported in oracle vocabulary
+(`OrbitRecoverableAt`) and instantiated for CFI and schemes.
+
+**Scope (honest).** `theorem_1_HOR_at_depth` characterises orbits at the
+*discretizing* depth `S` (`|S| ≤ k`); the actual oracle acts at *intermediate*
+nodes `D ⊊ S`, where cells are coarser than orbits (the genuine-decision case).
+Bridging the per-node intermediate behaviour to the cascade-depth recoverability
+is the localisation obligation (Phase C / open). What Phase B establishes:
+the characterisation (`certifies_iff_orbit`), the foundation that completeness
+reduces to refinement at recoverable nodes (`complete_of_cellComplete_recoverable`),
+and the axiom-free recoverability instances for CFI and rank-≤2 schemes. -/
+
+/-- **Orbit recoverable at `S`** (oracle vocabulary for the orbit-recovery
+squeeze). The `Aut_S`-orbit relation equals the 1-WL cell relation under the
+individualisation of `S`. Where this holds, refinement — polynomial — computes
+the orbit partition, so a complete cascade oracle is realizable. This is exactly
+the conclusion of `theorem_1_HOR_at_depth` and its specialisations. -/
+def OrbitRecoverableAt {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (S : Finset (Fin n)) : Prop :=
+  ∀ v w, OrbitPartition adj P S v w ↔
+    warmRefine adj P (individualizedColouring n S) v =
+      warmRefine adj P (individualizedColouring n S) w
+
+/-- **General foundation.** On the cascade class, orbits are recoverable at some
+depth `≤ k`. Direct re-export of `theorem_1_HOR_at_depth`. -/
+theorem orbitRecoverable_of_cascade {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {k : Nat} (h : CascadesAt adj P k) :
+    ∃ S : Finset (Fin n), S.card ≤ k ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      OrbitRecoverableAt adj P S := by
+  obtain ⟨S, hcard, hd, hiff⟩ := theorem_1_HOR_at_depth h
+  exact ⟨S, hcard, hd, hiff⟩
+
+/-- **CFI instance** (axiom-free, OddDegree). Orbits are recoverable at depth
+`≤ cfi_depth_bound h`, via `theorem_1_HOR_cfi_oddDeg`. -/
+theorem orbitRecoverable_cfi {n : Nat} {adj : AdjMatrix n}
+    (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n) :
+    ∃ S : Finset (Fin n), S.card ≤ cfi_depth_bound h ∧
+      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
+      OrbitRecoverableAt adj P S := by
+  obtain ⟨S, hcard, hd, hiff⟩ := IsCFI'.theorem_1_HOR_cfi_oddDeg h h_odd P
+  exact ⟨S, hcard, hd, hiff⟩
+
+/-- **Scheme instance** (axiom-free, rank 2 / `|J| = 1`). Orbits are recoverable at
+depth 1 (the singleton `{v}`), via `theorem_2_HOR_concrete_rank_two_J_singleton`.
+Unlike the CFI case the cells here are *not* singletons — depth-1 individualisation
+recovers the non-trivial `Aut_v`-orbit = cell partition. -/
+theorem orbitRecoverable_scheme {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (hrank : h.G.scheme.rank = 2)
+    (hJ : h.G.toSchemeGraph.J.card = 1) (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u) :
+    OrbitRecoverableAt adj P {v} :=
+  theorem_2_HOR_concrete_rank_two_J_singleton h hrank hJ P v hP_invariant
+
+namespace CascadeOracleSpec
+
+variable {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+  {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+
+/-- **Completeness.** The oracle certifies *every* genuine orbit pair at a node
+(returns `some`). With `OrbitMapSpec` (Phase A) this gives the oracle computes the
+`Aut_D`-orbit relation exactly. The polynomial collapse of the descent rests on
+this: only genuine (false-symmetry) decisions survive as branches. -/
+def CascadeComplete (oracle : CascadeOracleSpec adj P₀ χι₀ sel) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (v w : Fin n),
+    OrbitPartition adj chain.P chain.D v w →
+    ∃ result : { π : Equiv.Perm (Fin n) // IsAut π adj }, oracle chain v w = some result
+
+/-- **Exact orbit computation.** A sound (`OrbitMapSpec`) and complete
+(`CascadeComplete`) cascade oracle returns `some` for `v, w` **iff** they lie in
+the same `Aut_D` orbit. The two halves combine to pin the oracle to the orbit
+relation. -/
+theorem certifies_iff_orbit {oracle : CascadeOracleSpec adj P₀ χι₀ sel}
+    (hsound : OrbitMapSpec oracle) (hcomplete : CascadeComplete oracle)
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (v w : Fin n) :
+    (∃ result : { π : Equiv.Perm (Fin n) // IsAut π adj },
+        oracle chain v w = some result) ↔
+      OrbitPartition adj chain.P chain.D v w := by
+  constructor
+  · rintro ⟨result, h⟩
+    exact hsound chain v w result h
+  · intro h
+    exact hcomplete chain v w h
+
+/-- **Cell-completeness.** The oracle certifies every pair sharing a 1-WL cell.
+This is the *refinement-decidable* completeness — refinement computes the cell
+relation in polynomial time. -/
+def CellComplete (oracle : CascadeOracleSpec adj P₀ χι₀ sel) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (v w : Fin n),
+    warmRefine adj chain.P (individualizedColouring n chain.D) v =
+        warmRefine adj chain.P (individualizedColouring n chain.D) w →
+    ∃ result : { π : Equiv.Perm (Fin n) // IsAut π adj }, oracle chain v w = some result
+
+/-- **The completeness payoff.** At an *orbit-recoverable* node — one where the
+orbit relation equals the cell relation (the cascade class, by
+`orbitRecoverable_cfi` / `_scheme`) — cell-completeness (refinement-decidable)
+suffices for orbit-completeness. So on the cascade class the genuinely hard
+"certify every orbit map" reduces to the polynomial "certify every same-cell
+pair". (The remaining obligation is that the node's `chain.D` is itself a
+recoverable cascade-depth set — the localisation, open.) -/
+theorem complete_of_cellComplete_recoverable
+    {oracle : CascadeOracleSpec adj P₀ χι₀ sel} (hcell : CellComplete oracle)
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (hrec : OrbitRecoverableAt adj chain.P chain.D)
+    (v w : Fin n) (horb : OrbitPartition adj chain.P chain.D v w) :
+    ∃ result : { π : Equiv.Perm (Fin n) // IsAut π adj }, oracle chain v w = some result :=
+  hcell chain v w ((hrec v w).mp horb)
 
 end CascadeOracleSpec
 

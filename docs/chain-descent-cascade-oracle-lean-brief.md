@@ -68,10 +68,10 @@ because those theorems exist and are axiom-free.
 
 ---
 
-## 3. Phase A — interface + soundness/validity  [PROOF-BACKED] (~150 lines)
+## 3. Phase A — interface + soundness/validity  [PROOF-BACKED] — **BUILT**
 
-New file `ChainDescent/CascadeOracle.lean`, `import ChainDescent`. New section
-"§C — a-priori cascade oracle". Deliverables:
+File `ChainDescent/CascadeOracle.lean`, §C. Builds clean, axiom-clean (only
+`refineStep`/`refineStep_iff` + Lean foundationals). Deliverables:
 
 1. **`CascadeOracleSpec`** — interface `Type`, parallel to `LinearOracleSpec` but
    **not leaf-gated** (the cascade oracle harvests at internal target cells):
@@ -90,20 +90,33 @@ CFI/Scheme.
 
 ---
 
-## 4. Phase B — completeness on the proven subclasses  [PROOF TARGET] (~200–400 lines)
+## 4. Phase B — completeness on the proven subclasses  [PROOF TARGET] — **BUILT**
 
-Imports `ChainDescent.CFI` and `ChainDescent.Scheme`. Deliverables:
+Imports `ChainDescent.CFI` and `ChainDescent.Scheme`. **A design refinement found
+while building** (recorded so the plan stays honest): `theorem_1_HOR_at_depth`
+characterises orbits at the *discretizing* depth `S` (where, being discrete, orbits
+collapse to `v = w`); the oracle acts at *intermediate* nodes `D ⊊ S`, where cells
+are coarser than orbits. So "a complete oracle exists" is either vacuous (decide
+`OrbitPartition` directly — exponential) or needs the localisation `D = S`. Phase B
+therefore proves the *realizability reduction*, not a blanket existence claim.
+Delivered (all axiom-clean — only `refineStep`/`refineStep_iff` + Lean foundationals):
 
-1. **`CascadeComplete`** — predicate: on a target cell, the oracle's certified-merge
-   relation *equals* the `Aut_D`-orbit partition restricted to the cell (covers
-   every orbit — no under-merge / over-split).
-2. **Existence theorem on the cascade class** — *a complete-and-valid cascade oracle
-   exists* when `CascadesAt adj P k`, discharged by packaging `theorem_1_HOR_at_depth`
-   (general) → `theorem_1_HOR_cfi_oddDeg` (CFI) / `theorem_2_HOR_concrete_…`
-   (schemes). The `↔ cells-coincide` direction *is* the coverage proof.
-3. **Localisation bridge** — from the *global* `Discrete (warmRefine … S)` statement
-   to the *per-node, per-cell* "this 1-WL cell is an `Aut_D` orbit." The one genuine
-   piece of new connecting work (see risk #2).
+1. **`CascadeComplete`** — the oracle certifies every `OrbitPartition` pair at a node.
+2. **`certifies_iff_orbit`** — `OrbitMapSpec` + `CascadeComplete` ⟹ the oracle returns
+   `some` **iff** `OrbitPartition` (computes the orbit relation exactly).
+3. **`OrbitRecoverableAt`** + **`orbitRecoverable_of_cascade`** / **`_cfi`** / **`_scheme`**
+   — the orbit-recovery squeeze in oracle vocabulary, wired to `theorem_1_HOR_at_depth`
+   / `theorem_1_HOR_cfi_oddDeg` / `theorem_2_HOR_concrete_rank_two_J_singleton`.
+   (Scheme instance confirmed *not* to pull `schurian_scheme_profile_exists`.)
+4. **`complete_of_cellComplete_recoverable`** (the payoff) — at an orbit-recoverable
+   node, *cell*-completeness (refinement-decidable, polynomial) ⟹ orbit-completeness.
+   So on the cascade class the hard "certify every orbit map" reduces to the easy
+   "certify every same-cell pair".
+
+**Residual (→ Phase C / open):** the **localisation** — that an intermediate node's
+`chain.D` is itself a recoverable cascade-depth set — and the `chain.χι` ↔
+`individualizedColouring n chain.D` partition correspondence. These are the genuine
+remaining connecting work; Phase B isolates them precisely rather than closing them.
 
 ---
 
