@@ -232,16 +232,26 @@ foundationals), no `sorry`:
   `certifies_iff_orbit`, and the payoff `complete_of_cellComplete_recoverable`
   (at a recoverable node, refinement-decidable cell-completeness ⟹
   orbit-completeness).
-- **Phase C (open obligations):** `VerdictIsoInvariant` (Prop, §15 gap 2),
-  `cascadeComplete_of_localization` + `computes_orbits_of_complete` (provable
-  capstones naming the localisation obligation). General-class completeness ≡
+- **Phase C (residual obligations — partly discharged 2026-05-29):**
+  `VerdictIsoInvariant` (Prop, §15 gap 2) is **discharged conditionally** by
+  `verdictIsoInvariant_of_complete` — a sound + complete oracle at orbit-recoverable
+  nodes is automatically verdict-iso-invariant (its verdict = orbit relation =
+  iso-invariant cell relation), so iso-invariance ⊆ localisation, not independent.
+  The localisation obligation is **sharpened** by `orbitRecoverableAt_iff_cellsAreOrbits`:
+  recoverability equals its single non-trivial half `CellsAreOrbits` (cells no
+  coarser than orbits), since the other half is unconditional. Capstones
+  `cascadeComplete_of_localization` / `cascadeComplete_of_cellsAreOrbits` /
+  `computes_orbits_of_complete` name what suffices. General-class completeness ≡
   `GI ∈ P`, recorded as a conjecture.
 
 Soundness is proved unconditionally; completeness is proved reducible to
-refinement on the cascade class. The genuinely-open parts (localisation,
-general-class, verdict iso-invariance) are isolated as named `Prop`s — the
-honest residual. The declarative contract follows the `LinearOracleSpec`
-precedent; the C# lockstep recursion is the constructive witness.
+refinement on the cascade class. Of the residual obligations, verdict
+iso-invariance now reduces to localisation, and localisation is pinned to the
+single open implication `CellsAreOrbits` (true at cascade depth, false at generic
+intermediate nodes); discharging it on the cascade class + general-class
+completeness stay open, isolated as named `Prop`s. The declarative contract follows
+the `LinearOracleSpec` precedent; the C# lockstep recursion is the constructive
+witness.
 
 ---
 

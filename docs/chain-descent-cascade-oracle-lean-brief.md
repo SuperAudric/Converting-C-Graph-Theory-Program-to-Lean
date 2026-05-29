@@ -120,14 +120,27 @@ remaining connecting work; Phase B isolates them precisely rather than closing t
 
 ---
 
-## 5. Phase C — explicitly open  [stated, not proven] — **BUILT**
+## 5. Phase C — residual obligations  [partly discharged, 2026-05-29] — **BUILT**
 
-§C.3 in `ChainDescent/CascadeOracle.lean`. Named `Prop`s + provable conditional
-capstones, no `sorry`, no new axioms:
+§C.3 in `ChainDescent/CascadeOracle.lean`. Named `Prop`s + provable capstones, no
+`sorry`, no new axioms. **Two of the three obligations have been advanced this
+phase** — one discharged conditionally, one sharpened to its open core:
 - **`VerdictIsoInvariant`** (Prop, §15 gap 2) — merge decision depends only on the
-  iso-invariant 1-WL partition. Stated at the partition-determined level the
-  declarative model supports (full `SpineChain`-relabelling form is open, as for
-  `LinearOracleSpec`).
+  iso-invariant 1-WL partition. **Discharged conditionally** by
+  `verdictIsoInvariant_of_complete`: a sound (`OrbitMapSpec`) + complete
+  (`CascadeComplete`) oracle at orbit-recoverable nodes is automatically
+  verdict-iso-invariant — by `certifies_iff_orbit` its verdict equals the orbit
+  relation, which at a recoverable node equals the iso-invariant cell relation. So
+  **iso-invariance ⊆ localisation**: it is not an independent obligation, and closing
+  localisation closes it for free. (The full `SpineChain`-relabelling form remains
+  open, as for `LinearOracleSpec`.)
+- **`CellsAreOrbits` / `orbitRecoverableAt_iff_cellsAreOrbits`** — **localisation
+  sharpened.** `OrbitRecoverableAt` is an iff; its `orbits → cells` half is
+  unconditional (`subset_warmRefine`), so recoverability *equals* its `cells →
+  orbits` half (`CellsAreOrbits`). The open obligation is therefore *exactly* the
+  single implication "1-WL cells are no coarser than orbits at the node" — true at
+  cascade/discretizing depth, false at generic intermediate nodes (where genuine
+  decisions live). `cascadeComplete_of_cellsAreOrbits` restates the capstone over it.
 - **`cascadeComplete_of_localization`** (provable capstone) — `CellComplete` +
   all-nodes-recoverable ⟹ `CascadeComplete`. Names the localisation obligation as
   its two hypotheses; honest that node-recoverability is *false at generic
@@ -139,11 +152,14 @@ capstones, no `sorry`, no new axioms:
   target); proved instances are CFI(OddDegree) and rank-≤2 schemes.
 
 **Status: the cascade-oracle Lean contract is complete (Phases A+B+C), builds
-clean (1076 jobs), axiom-clean, no `sorry`.** Soundness is proved unconditionally;
-completeness is proved reducible to refinement on the cascade class via the
-axiom-free orbit-recovery theorems; the genuinely-open parts are isolated as named
-`Prop`s. The residual obligations (localisation, general-class, iso-invariance) are
-research-level and stay open.
+clean, axiom-clean, no `sorry`.** Soundness is proved unconditionally; completeness
+is proved reducible to refinement on the cascade class via the axiom-free
+orbit-recovery theorems. Of the three Phase-C obligations, **verdict iso-invariance
+is now discharged conditionally** (it reduces to localisation) and **localisation is
+sharpened** to the single open implication `CellsAreOrbits`. The genuinely-open
+remainder — discharging `CellsAreOrbits` at the recursion's nodes (cascade-class
+construction correctness) and general-class completeness (`GI ∈ P`, not expected) —
+is research-level and stays open, stated not assumed.
 
 ---
 
