@@ -427,6 +427,17 @@ The Name, Line, and if present "Used By" columns are mantained by GenerateTheore
 | `adjSeparates_of_rank_two_J_singleton` | 1969-2011 | **`rank = 2` + `|J| = 1` ⇒ `AdjSeparatesRelations`.** The unique element of `J` distinguishes the two non-diagonal relations. Covers Petersen / Kneser `K(5,2)` / Johnson `J(5,2)`. | — |
 | `relOfPairDetByAdjP_of_rank_two_J_singleton` | 2014-2020 | Combined: `rank = 2` + `|J| = 1` ⇒ `RelOfPairDetByAdjP`. | — |
 | `theorem_2_HOR_concrete_rank_two_J_singleton` | 2025-2036 | **Theorem 2 unconditional for rank-2 + `|J| = 1` schurian scheme graphs** — covers Petersen, Kneser `K(5,2)`, Johnson `J(5,2)`. Axiom-clean (only `refineStep`/`refineStep_iff` + standard basis). | T2.M4 / headline |
+| `Depth2Det` | 2070-2083 | **Depth-2 separation predicate** (§10.9). The depth-2 invariant — adj/`P`-to-`v` plus the depth-1 block-degree vector — determines `relOfPair v ·`. Weaker than `RelOfPairDetByAdjP` (may use block-degrees). | Definition |
+| `det2_of_det` | 2085-2089 | Depth-1 separation ⇒ depth-2 separation (ignores block-degrees). Confirms depth-2 subsumes the depth-1 coverage. | — |
+| `step2_converges_at_two_of_det2` | 2096-2124 | **Step 2 convergence at depth 2 under depth-2 separation.** The 2nd component of `schemePart_at 2` is the block-degree condition; the 1st yields adj/`P`-to-`v` via `schemePart_at_one_to_v`. | — |
+| `step2_of_det2` | 2126-2140 | Lifts `Step2_converges_at … 2` to `Step2_target` (`2 ≤ n`; `n < 2` vacuous via `Fin` subsingleton). | — |
+| `theorem_2_HOR_concrete_of_det2` | 2142-2153 | Theorem 2 from depth-2 separation; depth-2 analogue of `theorem_2_HOR_concrete_of_det`. | — |
+| `schemePart_at_of_orbit` | 2188-2193 | A v-fixing `P`-preserving automorphism puts `w, u` in the same `schemePart_at k` class (orbit ⟹ `subset_warmRefine` ⟹ iter[k] ⟹ `schemePart_at k`). | — |
+| `orbit_of_vProfile_eq` | 2199-2208 | `vProfile`-equality ⟹ `OrbitPartition` (schurian Step 1 gives a v-fixing graph aut; `P`-invariance upgrades it). | — |
+| `ncard_eq_sum_POE` | 2216-2228 | P-value fibering of an `ncard`: counting splits over the finitely-many `POE` values of `P x ·`. Drops `P` from a block-degree count to recover an intersection number. | — |
+| `IntersectionSeparates` | 2234-2240 | **Intersection-number separation hypothesis**: `intersectionNumber j0 j0 ·` distinguishes the non-edge, non-diagonal relations (the ones adjacency alone cannot). | Definition |
+| `depth2Det_of_intersectionSeparates` | 2245-2360 | **Discharges `Depth2Det`** for single-edge (`J = {j0}`) schurian scheme graphs with an edge-neighbour of `v` and intersection-number separation. The `schemePart_at 1` class of an edge-neighbour is exactly `R_{j0}`, so the depth-2 block-degree = `intersectionNumber j0 j0`. | **Key theorem** |
+| `theorem_2_HOR_concrete_intersectionSeparates` | 2371-2386 | **Theorem 2 unconditional for single-edge schurian scheme graphs with intersection-number separation** — first genuinely rank-≥-3 coverage (depth-1 insufficient, depth-2 sufficient; e.g. the 7-cycle scheme). Strictly subsumes the rank-2/`|J|=1` case. Axiom-clean. | T2 depth-2 / headline |
 
 ## ChainDescent/CascadeOracle.lean
 
@@ -437,7 +448,7 @@ The a-priori cascade-oracle Lean contract (plan: `docs/chain-descent-cascade-ora
 | `mono` | 53-62 | Orbit monotonicity in the fixed set: `S ⊆ S'` and `OrbitPartition adj P S' v w` give `OrbitPartition adj P S v w` (same witness; fixing the larger set pointwise implies fixing the smaller). | Deferred-decisions foundation; axiom-light |
 | `real_stays_real` | 64-72 | Contrapositive of `mono`: a real decision (no orbit relation) at `S` stays real at every `S' ⊇ S`. Makes deferring a real decision free. | Deferred-decisions §2 |
 | `CascadeOracleSpec` | 76-88 | A-priori cascade-oracle interface type: given a `SpineChain` (internal node, committed path `chain.D`) and reps `v w`, return `none` or a verified automorphism of `adj`. Parallel to `LinearOracleSpec` but not leaf-gated. | Definition (`Type`) |
-| `some_isAut` | 95-103 | Subtype-level soundness: a returned permutation is automatically an automorphism. Mirrors `LinearOracleSpec.some_isAut`. | — |
+| `some_isAut` | 95-103 | Subtype-level soundness: a returned permutation is automatically an automorphism. Mirrors  `LinearOracleSpec.some_isAut`. | — |
 | `OrbitMapSpec` | 105-117 | Cascade-orbit validity (the `LeafTwistSpec` analogue): a returned merge witnesses `OrbitPartition adj chain.P chain.D v w` — the soundness anchor that justifies pruning. | Definition |
 | `merged_sameCell` | 119-130 | A valid (`OrbitMapSpec`) oracle never merges across 1-WL cells: a certified merge forces `v, w` into the same `warmRefine` cell. Via `OrbitPartition.subset_warmRefine`. | — |
 | `OrbitRecoverableAt` | 152-161 | Oracle vocabulary for the orbit-recovery squeeze: the `Aut_S`-orbit relation equals the 1-WL cell relation at `S` — so refinement computes orbits and a complete oracle is realizable. | Definition |

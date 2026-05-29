@@ -2035,4 +2035,354 @@ theorem theorem_2_HOR_concrete_rank_two_J_singleton {n : Nat} {adj : AdjMatrix n
   theorem_2_HOR_concrete_of_det h P v hP_invariant
     (relOfPairDetByAdjP_of_rank_two_J_singleton h.G hrank hJ P v)
 
+/-! ### §10.9 — Depth-2 convergence layer
+
+The depth-1 path (§10.5–§10.8) converges only when `(adj v ·, P v ·)`
+already determines `relOfPair v ·` — i.e. `rank ≤ 2` with a single
+edge-relation. For higher-rank schurian schemes (Johnson `J(m, k)`,
+`k ≥ 3`; Hamming `H(d, q)`, `d ≥ 3`; rank-≥-3 distance-regular graphs)
+the single 0/1 adjacency-to-`v` value cannot separate the ≥ 3
+non-diagonal relations, and `schemePart_at 1` is strictly coarser than
+`vProfile` — it merges relations that share an adjacency-to-`v` value.
+
+One further refinement round separates them: counting, for each
+depth-1 block and each adjacency value, how many block-members each
+vertex is adjacent to (the **block-degree vector**). This is the
+intersection-number refinement of coherent-algebra theory, realised
+here as `schemePart_at 2`.
+
+This section builds the **abstract depth-2 layer**, mirroring §10.5–§10.8
+one level up. The separation predicate `Depth2Det` is phrased over the
+depth-2 extractables (adj/P-to-`v`, proved by `schemePart_at_one_to_v`,
+plus the depth-1 block-degree counts, which are *definitionally* the
+second component of `schemePart_at 2`). Discharging `Depth2Det` for a
+concrete higher-rank scheme — the intersection-number argument — is the
+remaining open content (the analogue of `adjSeparates_of_rank_two_J_singleton`
+one level up). Full generality (convergence at `k = rank + 1`, the
+coherent-algebra matrix-rank theorem) stays open. -/
+
+/-- **Depth-2 separation hypothesis.** The depth-2 invariant of a non-`v`
+vertex — its adjacency/`P` value to `v`, together with its block-degree
+vector (for each depth-1 class `w'` and each `(a, p)`, the number of
+depth-1-`w'`-class members it is `(a, p)`-adjacent to) — determines
+`relOfPair v ·`. Weaker (easier to satisfy) than `RelOfPairDetByAdjP`:
+it may use the block-degree counts, not just adj/`P`-to-`v`. -/
+def Depth2Det {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) : Prop :=
+  ∀ w u : Fin n, w ≠ v → u ≠ v →
+    G.toSchemeGraph.adj.adj w v = G.toSchemeGraph.adj.adj u v →
+    P w v = P u v →
+    (∀ (a : Nat) (p : POE) (w' : Fin n),
+      {u' : Fin n | u' ≠ w ∧ schemePart_at G P v 1 u' w' ∧
+                    G.toSchemeGraph.adj.adj w u' = a ∧ P w u' = p}.ncard =
+      {u' : Fin n | u' ≠ u ∧ schemePart_at G P v 1 u' w' ∧
+                    G.toSchemeGraph.adj.adj u u' = a ∧ P u u' = p}.ncard) →
+    G.scheme.relOfPair v w = G.scheme.relOfPair v u
+
+/-- **Depth-1 separation is a special case of depth-2 separation.**
+`RelOfPairDetByAdjP` ignores the block-degree counts, so it trivially
+implies `Depth2Det`. Confirms depth-2 subsumes the depth-1 coverage. -/
+theorem det2_of_det {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (hdet : RelOfPairDetByAdjP G P v) :
+    Depth2Det G P v := by
+  intro w u hwv huv hadj hP _hcount
+  exact hdet w u hwv huv hadj hP
+
+/-- **Step 2 convergence at depth 2 under depth-2 separation.** The
+second component of `schemePart_at 2` is definitionally the
+block-degree count condition; the first component yields adj/`P`-to-`v`
+equality via `schemePart_at_one_to_v`. Feeding both to `Depth2Det`
+gives `relOfPair`-equality, hence `vProfile`-equality. -/
+theorem step2_converges_at_two_of_det2 {n : Nat}
+    (G : SchurianSchemeGraph n) (P : PMatrix n) (v : Fin n)
+    (hdet2 : Depth2Det G P v) :
+    Step2_converges_at G P v 2 := by
+  intro w u h
+  suffices h_rel : G.scheme.relOfPair v w = G.scheme.relOfPair v u by
+    unfold vProfile; rw [h_rel]
+  obtain ⟨h1, hcount⟩ := h
+  by_cases hwv : w = v
+  · -- w = v: schemePart_at 0 forces u = v.
+    obtain ⟨h0, _⟩ := h1
+    rw [hwv] at h0
+    have hu : u = v :=
+      (individualizedColouring_singleton_eq_v_iff v u).mp h0.symm
+    rw [hwv, hu]
+  · by_cases huv : u = v
+    · -- u = v: symmetric.
+      obtain ⟨h0, _⟩ := h1
+      rw [huv] at h0
+      have hw : w = v :=
+        (individualizedColouring_singleton_eq_v_iff v w).mp h0
+      rw [huv, hw]
+    · -- Both ≠ v: depth-1 extraction + the block-degree counts + hdet2.
+      obtain ⟨hadj, hP⟩ := schemePart_at_one_to_v G P v w u hwv huv h1
+      exact hdet2 w u hwv huv hadj hP hcount
+
+/-- **Step 2 from depth-2 separation.** Lifts `Step2_converges_at … 2`
+to `Step2_target` via `step2_of_converges_at` (depth `2 ≤ n`). The
+`n < 2` case is vacuous: `v : Fin n` forces `n = 1`, where `Fin n` is a
+subsingleton and `vProfile` is constant. -/
+theorem step2_of_det2 {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) (hdet2 : Depth2Det G P v) :
+    Step2_target G P v := by
+  by_cases hn : 2 ≤ n
+  · exact step2_of_converges_at G P v 2 hn
+      (step2_converges_at_two_of_det2 G P v hdet2)
+  · -- n < 2 and v : Fin n ⟹ n = 1; all vertices coincide.
+    intro w u _
+    have hne : n ≠ 0 := by intro h; rw [h] at v; exact Fin.elim0 v
+    have hn1 : n = 1 := by omega
+    subst hn1
+    rw [Subsingleton.elim w u]
+
+/-- **Theorem 2 unconditional under depth-2 separation.** The depth-2
+analogue of `theorem_2_HOR_concrete_of_det`; covers any schurian scheme
+graph whose `Depth2Det` is discharged. -/
+theorem theorem_2_HOR_concrete_of_det2 {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hdet2 : Depth2Det h.G P v) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u :=
+  theorem_2_HOR_concrete h P v hP_invariant (step2_of_det2 h.G P v hdet2)
+
+/-! ### §10.10 — Discharging Depth2Det via intersection-number separation
+
+The depth-2 layer (§10.9) reduces Theorem 2 for a scheme graph to
+`Depth2Det`. This section discharges `Depth2Det` for the first
+genuinely-rank-≥-3 class, via an abstract scheme-side condition —
+mirroring how §10.8 discharged the depth-1 `RelOfPairDetByAdjP` for
+`rank = 2 ∧ |J| = 1` without ever constructing a concrete scheme.
+
+**The mechanism.** For a single-edge scheme (`J = {j0}`), the
+`schemePart_at 1` class of an edge-neighbour `w₀` of `v` is *exactly*
+the edge-relation block `R_{j0}` from `v`:
+- `⊆`: `schemePart_at_one_to_v` forces adj-to-`v` equality, and for
+  `|J| = 1` adj-to-`v` pins membership in `R_{j0}`.
+- `⊇`: same relation with `v` ⟹ a v-fixing automorphism (schurian
+  Step 1) ⟹ (with `P`-invariance) an `OrbitPartition` ⟹ equal
+  `warmRefine` ⟹ equal `schemePart_at 1`.
+
+So the depth-2 block-degree of `w` into that class, summed over the
+`P`-value, counts `{x : relOfPair v x = j0 ∧ relOfPair w x = j0}` =
+the intersection number `p^{relOfPair v w}_{j0,j0}`. The depth-2 count
+condition then equates these intersection numbers for `w` and `u`,
+and the separating hypothesis — `intersectionNumber j0 j0 ·` injective
+on the non-edge relations — forces `relOfPair v w = relOfPair v u`.
+
+This covers any single-edge schurian scheme graph whose common-edge-
+neighbour-with-`v` count distinguishes the relations that adjacency
+alone cannot (rank-≥-3 distance-regular graphs, e.g. the 7-cycle;
+Johnson `J(m, k)` and Hamming `H(d, q)` once the count separates their
+relations). It strictly subsumes the `rank = 2 ∧ |J| = 1` case, where
+there is at most one non-edge relation and the hypothesis is vacuous. -/
+
+/-- **`schemePart_at`-from-orbit chain.** A v-fixing `P`-preserving
+automorphism mapping `w` to `u` puts them in the same `schemePart_at k`
+class (`k ≤ n`): orbit ⟹ equal `warmRefine` (`subset_warmRefine`) ⟹
+equal iter[k] ⟹ `schemePart_at k`. -/
+theorem schemePart_at_of_orbit {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) {k : Nat} (hk : k ≤ n) {w u : Fin n}
+    (h : OrbitPartition G.toSchemeGraph.adj P {v} w u) :
+    schemePart_at G P v k w u :=
+  iter_refines_schemePart_at G P v k w u
+    (warmRefine_eq_iter_eq G.toSchemeGraph.adj P (individualizedColouring n {v}) k hk
+      (OrbitPartition.subset_warmRefine h))
+
+/-- **vProfile equality ⟹ OrbitPartition** (given `P`-invariance).
+Schurian Step 1 supplies a v-fixing graph automorphism; `P`-invariance
+upgrades it to a `P`-preserving one. -/
+theorem orbit_of_vProfile_eq {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
+    {w u : Fin n} (h : vProfile G.scheme v w = vProfile G.scheme v u) :
+    OrbitPartition G.toSchemeGraph.adj P {v} w u := by
+  obtain ⟨π, hπ, hπv, hπw⟩ := G.vProfile_eq_imp_graphOrbit v w u h
+  refine ⟨π, hπ, hP_invariant hπ, ?_, hπw⟩
+  intro x hx
+  rw [Finset.mem_singleton] at hx
+  subst hx
+  exact hπv
+
+/-- **P-value fibering of an `ncard`.** Counting splits over the
+finitely-many `POE` values of `P x ·`. Used to drop the `P`-component
+from a depth-2 block-degree count, recovering a pure intersection
+number. -/
+theorem ncard_eq_sum_POE {n : Nat} (P : PMatrix n) (x : Fin n)
+    (q : Fin n → Prop) [DecidablePred q] :
+    {u' : Fin n | q u'}.ncard
+      = ∑ p : POE, {u' : Fin n | q u' ∧ P x u' = p}.ncard := by
+  classical
+  rw [ncard_setOf_eq_filter_card,
+    Finset.card_eq_sum_card_fiberwise
+      (s := Finset.univ.filter q) (t := (Finset.univ : Finset POE))
+      (f := fun u' => P x u') (fun u' _ => Finset.mem_univ _)]
+  apply Finset.sum_congr rfl
+  intro p _
+  rw [ncard_setOf_eq_filter_card, ← Finset.filter_filter]
+
+/-- **Intersection-number separation hypothesis.** The common-edge-
+neighbour count `intersectionNumber j0 j0 ·` distinguishes the
+non-edge, non-diagonal relations from each other. (For `|J| = 1`,
+adjacency already separates the edge relation `j0`; this handles the
+relations adjacency cannot.) -/
+def IntersectionSeparates {n : Nat} (G : SchurianSchemeGraph n)
+    (j0 : Fin (G.scheme.rank + 1)) : Prop :=
+  ∀ i i' : Fin (G.scheme.rank + 1), i ≠ 0 → i' ≠ 0 → i ≠ j0 → i' ≠ j0 →
+    G.scheme.intersectionNumber j0 j0 i = G.scheme.intersectionNumber j0 j0 i' →
+    i = i'
+
+/-- **Depth-2 separation from intersection-number separation.** For a
+single-edge schurian scheme graph (`J = {j0}`) with an edge-neighbour
+of `v`, whose `intersectionNumber j0 j0 ·` separates the non-edge
+relations, `Depth2Det` holds — so `schemePart_at 2` converges to
+`vProfile`. -/
+theorem depth2Det_of_intersectionSeparates {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) (j0 : Fin (G.scheme.rank + 1))
+    (hJ : G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
+      IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
+    (hv_nbr : ∃ w₀ : Fin n, G.scheme.relOfPair v w₀ = j0)
+    (hsep : IntersectionSeparates G j0) :
+    Depth2Det G P v := by
+  classical
+  have hn : 1 ≤ n :=
+    Nat.one_le_iff_ne_zero.mpr (by intro h; rw [h] at v; exact Fin.elim0 v)
+  have hj0_ne : j0 ≠ 0 := by
+    intro h; subst h
+    exact G.toSchemeGraph.zero_notMem_J (by rw [hJ]; exact Finset.mem_singleton_self _)
+  -- |J| = 1 turns adjacency into edge-relation membership.
+  have hadj_iff : ∀ x y : Fin n,
+      G.toSchemeGraph.adj.adj x y = 1 ↔ G.scheme.relOfPair x y = j0 := by
+    intro x y
+    rw [G.toSchemeGraph.adj_eq_one_iff, hJ, Finset.mem_singleton]
+  obtain ⟨w₀, hw₀⟩ := hv_nbr
+  have hw₀v : w₀ ≠ v := by
+    intro h; subst h
+    rw [G.scheme.relOfPair_self] at hw₀; exact hj0_ne hw₀.symm
+  -- L1: schemePart_at 1 · w₀  ↔  relOfPair v · = j0.
+  have hL1 : ∀ u' : Fin n,
+      schemePart_at G P v 1 u' w₀ ↔ G.scheme.relOfPair v u' = j0 := by
+    intro u'
+    constructor
+    · intro hsp
+      by_cases hu'v : u' = v
+      · exfalso
+        obtain ⟨h0, _⟩ := hsp
+        rw [hu'v] at h0
+        exact hw₀v ((individualizedColouring_singleton_eq_v_iff v w₀).mp h0.symm)
+      · have hext := schemePart_at_one_to_v G P v u' w₀ hu'v hw₀v hsp
+        have hw₀adj : G.toSchemeGraph.adj.adj v w₀ = 1 := (hadj_iff v w₀).mpr hw₀
+        have hvu' : G.toSchemeGraph.adj.adj v u' = 1 := by
+          rw [G.toSchemeGraph.adj_symm v u', hext.1, ← G.toSchemeGraph.adj_symm v w₀]
+          exact hw₀adj
+        exact (hadj_iff v u').mp hvu'
+    · intro hrel
+      have hvp : vProfile G.scheme v u' = vProfile G.scheme v w₀ := by
+        unfold vProfile; rw [hrel, hw₀]
+      exact schemePart_at_of_orbit G P v hn (orbit_of_vProfile_eq G P v hP_invariant hvp)
+  -- Common-edge-neighbour count = intersection number p^{relOfPair v z}_{j0 j0}.
+  have hcommon : ∀ z : Fin n,
+      {u' : Fin n | G.scheme.relOfPair v u' = j0 ∧ G.scheme.relOfPair z u' = j0}.ncard
+        = G.scheme.intersectionNumber j0 j0 (G.scheme.relOfPair v z) := by
+    intro z
+    rw [ncard_setOf_eq_filter_card,
+      ← G.scheme.intersectionNumber_well_defined j0 j0 (G.scheme.relOfPair v z) v z
+        (G.scheme.rel_relOfPair v z)]
+    congr 1
+    ext u'
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    rw [G.scheme.rel_iff_relOfPair, G.scheme.rel_iff_relOfPair,
+      G.scheme.relOfPair_symm u' z]
+    exact ⟨fun ⟨a, b⟩ => ⟨a.symm, b.symm⟩, fun ⟨a, b⟩ => ⟨a.symm, b.symm⟩⟩
+  -- The main statement.
+  intro w u hwv huv hadjwv _hPwv hcount
+  by_cases hwadj : G.toSchemeGraph.adj.adj w v = 1
+  · -- Both adjacent to v ⟹ both in the edge relation j0.
+    have hrw : G.scheme.relOfPair v w = j0 := by
+      rw [← hadj_iff v w, G.toSchemeGraph.adj_symm v w]; exact hwadj
+    have hru : G.scheme.relOfPair v u = j0 := by
+      rw [← hadj_iff v u, G.toSchemeGraph.adj_symm v u]; exact hadjwv ▸ hwadj
+    rw [hrw, hru]
+  · -- Both non-adjacent to v ⟹ both in non-edge relations; use the counts.
+    have hwadj0 : G.toSchemeGraph.adj.adj w v = 0 := by
+      rcases G.toSchemeGraph.adj_eq_zero_or_one w v with h | h
+      · exact h
+      · exact absurd h hwadj
+    have huadj0 : G.toSchemeGraph.adj.adj u v = 0 := hadjwv ▸ hwadj0
+    have hrw_ne_0 : G.scheme.relOfPair v w ≠ 0 :=
+      fun heq => hwv ((G.scheme.relOfPair_eq_zero_iff v w).mp heq).symm
+    have hru_ne_0 : G.scheme.relOfPair v u ≠ 0 :=
+      fun heq => huv ((G.scheme.relOfPair_eq_zero_iff v u).mp heq).symm
+    have hrw_ne_j0 : G.scheme.relOfPair v w ≠ j0 := by
+      intro hc
+      have h1 : G.toSchemeGraph.adj.adj v w = 1 := (hadj_iff v w).mpr hc
+      rw [G.toSchemeGraph.adj_symm v w, hwadj0] at h1
+      exact one_ne_zero h1.symm
+    have hru_ne_j0 : G.scheme.relOfPair v u ≠ j0 := by
+      intro hc
+      have h1 : G.toSchemeGraph.adj.adj v u = 1 := (hadj_iff v u).mpr hc
+      rw [G.toSchemeGraph.adj_symm v u, huadj0] at h1
+      exact one_ne_zero h1.symm
+    -- Intersection numbers for w and u match, via the depth-2 count condition.
+    have hkey : G.scheme.intersectionNumber j0 j0 (G.scheme.relOfPair v w)
+              = G.scheme.intersectionNumber j0 j0 (G.scheme.relOfPair v u) := by
+      rw [← hcommon w, ← hcommon u, ncard_eq_sum_POE P w, ncard_eq_sum_POE P u]
+      apply Finset.sum_congr rfl
+      intro p _
+      have hAw : {u' : Fin n | (G.scheme.relOfPair v u' = j0 ∧
+                    G.scheme.relOfPair w u' = j0) ∧ P w u' = p}
+               = {u' : Fin n | u' ≠ w ∧ schemePart_at G P v 1 u' w₀ ∧
+                    G.toSchemeGraph.adj.adj w u' = 1 ∧ P w u' = p} := by
+        ext u'
+        simp only [Set.mem_setOf_eq]
+        constructor
+        · rintro ⟨⟨hv', hw'⟩, hp⟩
+          refine ⟨?_, (hL1 u').mpr hv', (hadj_iff w u').mpr hw', hp⟩
+          intro he; rw [he, G.scheme.relOfPair_self] at hw'; exact hj0_ne hw'.symm
+        · rintro ⟨_, hsp, hadj1, hp⟩
+          exact ⟨⟨(hL1 u').mp hsp, (hadj_iff w u').mp hadj1⟩, hp⟩
+      have hAu : {u' : Fin n | (G.scheme.relOfPair v u' = j0 ∧
+                    G.scheme.relOfPair u u' = j0) ∧ P u u' = p}
+               = {u' : Fin n | u' ≠ u ∧ schemePart_at G P v 1 u' w₀ ∧
+                    G.toSchemeGraph.adj.adj u u' = 1 ∧ P u u' = p} := by
+        ext u'
+        simp only [Set.mem_setOf_eq]
+        constructor
+        · rintro ⟨⟨hv', hu'⟩, hp⟩
+          refine ⟨?_, (hL1 u').mpr hv', (hadj_iff u u').mpr hu', hp⟩
+          intro he; rw [he, G.scheme.relOfPair_self] at hu'; exact hj0_ne hu'.symm
+        · rintro ⟨_, hsp, hadj1, hp⟩
+          exact ⟨⟨(hL1 u').mp hsp, (hadj_iff u u').mp hadj1⟩, hp⟩
+      rw [hAw, hAu]
+      exact hcount 1 p w₀
+    exact hsep _ _ hrw_ne_0 hru_ne_0 hrw_ne_j0 hru_ne_j0 hkey
+
+/-- **Theorem 2 unconditional for single-edge schurian scheme graphs
+with intersection-number separation.** Strictly subsumes the
+`rank = 2 ∧ |J| = 1` case and covers the first genuinely-rank-≥-3
+schemes (depth-1 insufficient, depth-2 sufficient — e.g. the 7-cycle
+scheme). Axiom-clean. -/
+theorem theorem_2_HOR_concrete_intersectionSeparates {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hv_nbr : ∃ w₀ : Fin n, h.G.scheme.relOfPair v w₀ = j0)
+    (hsep : IntersectionSeparates h.G j0) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u := by
+  have hP' : ∀ {π : Equiv.Perm (Fin n)}, IsAut π h.G.toSchemeGraph.adj →
+      ∀ x u, P (π x) (π u) = P x u := by
+    intro π hπ; apply hP_invariant; rw [← h.matching]; exact hπ
+  exact theorem_2_HOR_concrete_of_det2 h P v hP_invariant
+    (depth2Det_of_intersectionSeparates h.G P v j0 hJ hP' hv_nbr hsep)
+
 end ChainDescent

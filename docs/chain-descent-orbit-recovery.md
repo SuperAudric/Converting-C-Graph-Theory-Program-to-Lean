@@ -967,6 +967,36 @@ The CFI module is built as a sub-target (`defaultTargets =
 assemblies in place mean the structure is set — once the Fact-A-shape
 axioms are discharged, both theorems tighten automatically.
 
+**Update — Tier 2 discharged concretely, no axioms (2026-05-27 →
+2026-05-29).** The Tier-2 Fact-A axiom (`schurian_scheme_profile_exists`)
+is no longer the route: a concrete predicate `IsSchurianSchemeGraph'`
+plus a Lean proof of Step 2 (`Step2_target`) now give `theorem_2_HOR`
+**unconditionally** (axiom-clean: only `refineStep`/`refineStep_iff` +
+standard basis) for a growing class, in
+[`ChainDescent/Scheme.lean`](../GraphCanonizationProofs/ChainDescent/Scheme.lean):
+
+- **Depth-1 convergence (2026-05-27).** Step 2 reduces to a depth-2
+  recursive partition `schemePart_at`; the substantive inductive
+  refinement `iter_refines_schemePart_at` is proved, and convergence at
+  depth 1 (`step2_converges_at_one_of_det`) discharges `rank ≤ 2 ∧ |J|=1`
+  — covering Petersen / Kneser `K(5,2)` / Johnson `J(5,2)`
+  (`theorem_2_HOR_concrete_rank_two_J_singleton`).
+- **Depth-2 convergence (2026-05-29).** §10.9 adds the depth-2 layer
+  (`Depth2Det`, `step2_converges_at_two_of_det2`) mirroring the depth-1
+  chain. §10.10 discharges it abstractly via `IntersectionSeparates`
+  (`intersectionNumber j0 j0 ·` separating the non-edge relations):
+  `theorem_2_HOR_concrete_intersectionSeparates` covers the first
+  genuinely rank-≥-3 single-edge schemes — where adjacency-to-`v` alone
+  cannot separate the relations (depth-1 insufficient) but the
+  common-edge-neighbour count does (depth-2 sufficient). The 7-cycle
+  scheme is the smallest instance. Strictly subsumes the rank-2/`|J|=1`
+  case.
+
+Open: full general convergence `Step2_converges_at … (rank+1)` (the
+coherent-algebra intersection-matrix full-rank theorem), and no concrete
+scheme is constructed in Lean (all results take `IsSchurianSchemeGraph'`
+as hypothesis, matching the abstract style).
+
 ---
 
 ## 10. Tier 2 sketch (follow-on direction)
