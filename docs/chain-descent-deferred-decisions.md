@@ -7,13 +7,22 @@ polynomial (the exponential is confined to an oracle-free phase), and
 the rigid residue is handed off *whole* to a potential global solver
 rather than guessed at layer-by-layer.
 
-> **Status: BUILT (gated off by default) 2026-05-28.** Implemented as the
-> `EnableDeferral` flag on `ChainDescent` (target-cell selection prefers a
-> cell the a-priori oracle collapses to one orbit, deferring real decisions;
-> Phase 2 branches the residue). Foundation `real_stays_real` is **proved in
-> Lean** ([ChainDescent/CascadeOracle.lean](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean)
-> `OrbitPartition.mono` / `real_stays_real`, axiom-light). Sound and
-> iso-invariant (scramble-invariant + Even≠Odd on Petersen and Rook3x3).
+> **Status: BUILT — complex version, default ON 2026-05-28.** Implemented as
+> the `EnableDeferral` flag on `ChainDescent` (**default true**): target-cell
+> selection prefers a cell the a-priori oracle collapses to one orbit (consume),
+> defers real decisions, Phase 2 branches the residue. **Complex version**: real
+> decisions are cached (`_knownReal`, path-scoped) and classified once, so the
+> oracle work **detaches from the Phase-2 enumeration** (the rigid-residue /
+> multipede case — `O(n⁴)·(n−k) + 2^k` instead of `O(n⁴)·2^k·(n−k)`). Foundation
+> `real_stays_real` is **proved in Lean**
+> ([ChainDescent/CascadeOracle.lean](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean)
+> `OrbitPartition.mono` / `real_stays_real`, axiom-light); the cache adds **no new
+> Lean obligation** (a cache hit can only over-split — the sound direction per the
+> `ITransversalOracle` coverage contract). Sound + iso-invariant: full fast suite
+> green incl. exhaustive size-5/6 unique-canonical counts + scramble-invariance +
+> Even≠Odd on Petersen / Rook3x3 / K6. The two off==on brute-force cross-checks
+> pin `EnableDeferral=false` (they validate oracle pruning on the fixed schedule;
+> that transfers to the deferral path since the pruning code is identical).
 >
 > **Correction to §4 (found while building).** Deferral does **not** reach the
 > same lex-min as the lowest-id schedule: the *schedule fixes the leaf

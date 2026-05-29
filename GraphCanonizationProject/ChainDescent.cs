@@ -82,8 +82,19 @@ namespace Canonizer
         private long _decisionNodes, _branchingNodes,
                      _branchAllSingleton, _branchResolved, _branchStarved,
                      _generatorsHarvested, _resolvedByRecursion,
-                     _deferralActiveNodes, _phase2Nodes;
+                     _deferralActiveNodes, _phase2Nodes, _cachedRealSkips;
         private int _maxRecursionDepth;
+
+        // Real-decision cache for the complex deferred-decision scheduler: unordered
+        // vertex pairs known to be a *real* decision (different orbits) at the
+        // current path. Sound by real-stays-real (OrbitPartition.real_stays_real):
+        // a pair real at a path stays real at every extension, so a cached entry is
+        // valid throughout the subtree where it was added. Path-scoped — each Search
+        // call removes the entries it added before returning (so siblings don't
+        // inherit a deeper branch's cache; keeps the schedule iso-invariant). A
+        // cell whose every rep-pair is cached is fully real → its harvest is skipped
+        // (the oracle work that detaches from the Phase-2 enumeration).
+        private readonly HashSet<long> _knownReal = new();
 
         // ── Linear oracle (docs/chain-descent-linear-oracle.md) ──────────────
         // When enabled, after exploring the first representative of a genuine
@@ -101,14 +112,17 @@ namespace Canonizer
         // When enabled, target-cell selection prefers a cell the a-priori oracle
         // collapses to a single orbit (symmetric — consume it) and DEFERS real
         // decisions, branching them only when no symmetric cell remains (Phase 2).
-        // Sound (real-stays-real: a deferred real stays real) and iso-invariant
-        // (scramble-invariant + Even≠Odd hold). NOTE: it produces a *different*
-        // canonical form than the lowest-id schedule — the leaf labelling depends
-        // on the individualisation order (via P), so reordering the schedule
-        // changes the lex-min. (This refines the design's §4 claim that deferral
-        // "reaches the same lex-min".) Off by default so the established canonical
-        // and the off==on oracle cross-check are preserved.
-        internal bool EnableDeferral { get; set; } = false;
+        // Real decisions are cached (_knownReal) so they are classified once and the
+        // oracle work detaches from the Phase-2 enumeration (the rigid-residue case,
+        // e.g. multipedes). Sound (real-stays-real: a deferred real stays real; a
+        // cache hit can only over-split, the safe direction) and iso-invariant
+        // (scramble-invariant + Even≠Odd + the size-5/6 unique-canonical counts
+        // hold). NOTE: it produces a *different* canonical form than the lowest-id
+        // schedule when it reorders (the leaf labelling depends on the
+        // individualisation order via P) — still a valid iso-invariant canonical,
+        // just not the same lex-min. The two off==on cross-check tests pin
+        // EnableDeferral=false to keep validating oracle pruning against brute force.
+        internal bool EnableDeferral { get; set; } = true;
 
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
@@ -139,7 +153,7 @@ namespace Canonizer
                     _decisionNodes, _branchingNodes,
                     _branchAllSingleton, _branchResolved, _branchStarved,
                     _generatorsHarvested, _resolvedByRecursion, _maxRecursionDepth,
-                    _deferralActiveNodes, _phase2Nodes));
+                    _deferralActiveNodes, _phase2Nodes, _cachedRealSkips));
 
             if (_flagged)
                 return CanonResult.Flag(_flagReason ?? "flagged", Automorphisms, stats);
@@ -192,21 +206,26 @@ namespace Canonizer
             // so it is off by default.
             int target, footprintClass = -1;
             bool harvestedInSelection = false;
+            // Real-decision cache entries added by this node's classification, to be
+            // removed before returning (path-scoped — §_knownReal). null when deferral
+            // is off (no caching).
+            List<long>? cacheAdded = null;
             if (EnableLinearOracle && EnableDeferral)
             {
+                cacheAdded = new List<long>();
                 target = -1;
                 int firstNonSingleton = -1, fallback = -1, fallbackClass = -1;
                 for (int c = 0; c < numCells; c++)
                 {
                     if (cellMembers[c].Count < 2) continue;
                     if (firstNonSingleton == -1) firstNonSingleton = c;
-                    int cls = ClassifyCell(p, partition, cellMembers[c], out int survivors);
+                    int cls = ClassifyCell(p, partition, cellMembers[c], cacheAdded, out int survivors);
                     if (survivors <= 1) { target = c; footprintClass = cls; break; }
                     if (fallback == -1) { fallback = c; fallbackClass = cls; }
                 }
                 if (target == -1) { target = fallback; footprintClass = fallbackClass; _phase2Nodes++; }
                 if (target != firstNonSingleton) _deferralActiveNodes++;
-                harvestedInSelection = true; // ClassifyCell already harvested `target`
+                harvestedInSelection = true; // ClassifyCell already harvested/cached `target`
             }
             else
             {
@@ -245,6 +264,14 @@ namespace Canonizer
                 }
             }
 
+            // Path-scoped cleanup: drop the real-decision cache entries this node
+            // added, so sibling branches don't inherit them (keeps the schedule
+            // iso-invariant). Entries added by deeper Search calls were already
+            // removed by those calls. (Skipped on a flagged early-return above — the
+            // run is ending, so the cache is irrelevant.)
+            if (cacheAdded != null)
+                foreach (long k in cacheAdded) _knownReal.Remove(k);
+
             // Cascade attribution: classify this node's surviving branches by the
             // footprint class the harvest saw (1 = all-singleton/linear, 3 = resolved
             // by the recursion, 2 = starved past the depth bound). Feeds CascadeStats.
@@ -258,21 +285,56 @@ namespace Canonizer
             }
         }
 
+        // Encode an unordered vertex pair as a single long key for the real cache.
+        private static long PairKey(int a, int b)
+        {
+            int lo = a < b ? a : b, hi = a < b ? b : a;
+            return ((long)lo << 32) | (uint)hi;
+        }
+
         // Classify a cell by running the a-priori oracle harvest (exploratory, on
         // copies — adding only verified generators) and counting the representatives
         // that survive path-fixing-orbit pruning. survivorCount == 1 ⟺ the cell is a
         // single orbit (symmetric, consumable); > 1 ⟺ a real decision. Returns the
         // harvest's footprint class for attribution. This is the per-cell
         // classification the deferred-decision scheduler consults.
+        //
+        // Real-decision cache: if every rep-pair of `cell` is already known-real
+        // (real-stays-real, valid down this path), the cell is fully real — skip the
+        // O(n⁴) harvest entirely (this is what detaches the oracle from the Phase-2
+        // enumeration). After a harvest that finds a real decision, the surviving
+        // (distinct-orbit) rep-pairs are cached, recording the additions in
+        // `cacheAdded` for the caller's path-scoped cleanup.
         private int ClassifyCell(sbyte[] p, WarmPartition partition, List<int> cell,
-                                 out int survivorCount)
+                                 List<long> cacheAdded, out int survivorCount)
         {
+            // Cache hit: all rep-pairs known-real ⟹ fully real, no harvest needed.
+            bool fullyReal = true;
+            for (int i = 0; i < cell.Count && fullyReal; i++)
+                for (int j = i + 1; j < cell.Count; j++)
+                    if (!_knownReal.Contains(PairKey(cell[i], cell[j]))) { fullyReal = false; break; }
+            if (fullyReal)
+            {
+                _cachedRealSkips++;
+                survivorCount = cell.Count; // every rep its own orbit
+                return -1;                  // unclassified footprint (cache hit)
+            }
+
             int cls = HarvestTwists(p, partition, cell, cell[0]);
             var survivors = new List<int> { cell[0] };
             for (int i = 1; i < cell.Count; i++)
                 if (!CoveredByPathFixingAut(cell[i], survivors))
                     survivors.Add(cell[i]);
             survivorCount = survivors.Count;
+
+            // Cache the real decision: distinct survivors are in distinct orbits.
+            if (survivorCount > 1)
+                for (int i = 0; i < survivors.Count; i++)
+                    for (int j = i + 1; j < survivors.Count; j++)
+                    {
+                        long k = PairKey(survivors[i], survivors[j]);
+                        if (_knownReal.Add(k)) cacheAdded.Add(k);
+                    }
             return cls;
         }
 

@@ -21,11 +21,16 @@ public class LinearOracleTests
         return adj;
     }
 
+    // Fixed-schedule run (deferral OFF) — used by the off==on cross-checks, which
+    // validate oracle pruning against brute force on the lowest-id schedule. Deferral
+    // is on by default in production; it produces a different (valid) canonical, so
+    // these cross-checks pin it off (docs/chain-descent-deferred-decisions.md).
     private static CanonResult Run(int n, int[] adj, bool oracle)
     {
         var d = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
         {
-            EnableLinearOracle = oracle
+            EnableLinearOracle = oracle,
+            EnableDeferral = false
         };
         return d.Canonize(new sbyte[n * n], new WarmPartition(n));
     }

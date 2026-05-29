@@ -36,10 +36,13 @@ namespace Canonizer
         // Deferred-decision scheduling (docs/chain-descent-deferred-decisions.md):
         long DeferralActiveNodes,  // nodes where deferral consumed a non-lowest-id
                                    // symmetric cell, deferring a lower-id real one
-        long Phase2Nodes)          // nodes where every cell was a real decision —
+        long Phase2Nodes,          // nodes where every cell was a real decision —
                                    // the rigid residue is branched (Phase 2)
+        long CachedRealSkips)      // harvests skipped because the cell was already
+                                   // known-real (real-stays-real cache) — the oracle
+                                   // work detached from the Phase-2 enumeration
     {
-        public static readonly CascadeStats Empty = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        public static readonly CascadeStats Empty = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     // The outcome of a chain-descent run (docs/chain-descent-strategy.md §4, §6):
