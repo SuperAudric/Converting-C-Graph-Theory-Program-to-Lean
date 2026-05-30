@@ -514,3 +514,9 @@ The linear-oracle / abelian-stripping work (tractable-buildout B2; plan in `docs
 | `twistWitness_of_isAut` | 218-229 | The oracle reduces to verification: a verified-automorphism candidate yields a complete `TwistWitness`. Discovery = one decidable edge-check on the forced candidate. | Definition (`noncomputable`) |
 | `canonicalTwistOracle` | 237-246 | A **fully concrete** `LinearOracleSpec`: for the selected pair, compute the forced candidate, return it iff `IsAut` verifies. Only abstracted piece = pair selection (which decision — soundness-irrelevant). | Definition (`noncomputable`) |
 | `canonicalTwistOracle_leafTwist` | 251-256 | `canonicalTwistOracle` satisfies `LeafTwistSpec` (it is a `twistOracle`) — a concrete verified linear oracle, sound by construction. | **Key theorem**; axiom-light |
+
+### §L.3 — Abelian structure (B2.4, partial)
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `candidateTwist_flip_inv` | 283-289 | The twist is a `Z₂` involution at the twist level: the forced candidate for the flip-back is the inverse of the candidate for the flip. With `DirAssignment.flipPair_comm` (commuting flips) = the elementary-abelian `Z₂^d` structure of the residual. | axiom-light |

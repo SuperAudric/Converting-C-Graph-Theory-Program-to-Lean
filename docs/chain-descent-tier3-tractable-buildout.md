@@ -88,6 +88,34 @@ sources is a comment in `CFI.lean`). The orbit-recovery program
 So Part A is a genuine prerequisite for Part B1 (and a convenience for
 B2/B3).
 
+**Permutation-level precursors already built (what Part A lifts to the group).**
+Two strands of recent work live at the single-permutation level and *motivate* —
+and would be made rigorous by — Part A's group object:
+
+- **The support backbone** (`CascadeOracle.lean` §C.0.1:
+  `orbitPartition_of_support_disjoint`, `exists_orbit_witness_of_aut`). These pin
+  `π ∈ Aut_S ⟺ Disjoint S (π.support)` at the permutation level — exactly A1's
+  "OrbitPartition ↔ pointwise-`S`-stabilizer" bridge, minus the `Subgroup`. The
+  related correction "**fixing a vertex in `supp(π)` *relocates* `π` to the
+  stabilizer-chain transversal, it does not *destroy* it**" (it stays in `Aut(G)`)
+  is currently *stated only informally* — making it rigorous needs the stabilizer
+  chain, i.e. **A2 (MulAction/orbits) + A3 (the chain)**. The support-graded
+  availability depth `n − |supp π|` then becomes a statement about chain depth.
+- **B2's twists are concrete transversal elements.** The linear oracle's verified
+  twists (`LinearOracle.lean`: `candidateTwist`, `canonicalTwistOracle`) are the
+  `Z₂` coset representatives for each abelian decision — the elements that, under
+  A1/A2, populate the level transversals and generate the residual
+  **elementary-abelian** factor `N = Z₂^d`. The abelian structure is already proved
+  at the `DirAssignment` level (`flipPair_idempotent` = involution,
+  `flipPair_comm` = commuting); A1 lifts it to "`N` is an elementary-abelian
+  *subgroup* of `AutGroup`", which is what `Aut(G) = N ⋊ Q` (§0) actually asserts.
+
+So the **B2 → Part A path** is: B2 establishes the twists/soundness at the
+permutation level; Part A's group object then (a) makes "relocation to transversal"
+a theorem, and (b) packages the twists as the `N = Z₂^d` normal factor of the
+semidirect product. Neither is needed for B2's own soundness (done), but both are
+the natural next rigor once Part A lands.
+
 ### A1 — `Aut(G)` as a group
 
 - **Define** `AutGroup adj : Subgroup (Equiv.Perm (Fin n))` as
