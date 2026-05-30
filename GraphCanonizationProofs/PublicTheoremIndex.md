@@ -553,6 +553,27 @@ partition equality is vacuous; the content is in the rank order). Provable progr
 | `candidateTwist_eq_one_of_rankPerm_eq` | **Absorbed decision**: equal leaf rank-perms ⟹ forced candidate `= 1`. | axiom-light |
 | `isAut_candidateTwist_of_rankPerm_eq` | The absorbed decision fires (candidate `= 1 ∈ Aut`) — the degenerate genuine abelian instance (branches give the identical canonical leaf). | axiom-light |
 
+### §L.7 — The CFI bridge (M1b): candidate as a conjugate of a graph automorphism
+
+Now that `refineStep` is concrete, the cross-config transport (`§16.2b` in ChainDescent.lean)
+lets us express the forced candidate via a *real* automorphism. A **config-swap** `g` carries the
+σ-branch config onto the flip-branch config; it forces `π_σ = π_flip · g`, so the candidate is the
+`π_σ`-conjugate of `g⁻¹`. This reduces the opaque `IsAut candidate adj` to the structural gadget
+rank-alignment, isolating the genuine CFI nut (shared with Tier-3a B1 `hwit`): (1) a config-swap
+exists, (2) its `π_σ`-conjugate is an automorphism.
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `vertexRank_comp` | `vertexRank (χ ∘ g) v = vertexRank χ (g v)` — pure `Finset.card` reindex along `g`. | axiom-light |
+| `ConfigSwap` | An automorphism carrying σ-config onto flip-config (`IsAut`, fixes `χι`, `(flipPair σ).σ (g·)(g·) = σ.σ`). For CFI: the gadget twist swapping the decided pair. | Structure |
+| `candidateTwist_eq_conjugate` | **The reduction**: given a `ConfigSwap g`, `candidateTwist = π_σ · g⁻¹ · π_σ⁻¹` (transport forces `π_σ = π_flip · g`). The forced candidate is the `π_σ`-conjugate of a genuine graph automorphism. | **Key**; axiom-light |
+| `isAut_candidateTwist_iff_conjugate` | `IsAut candidate adj ↔ IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj` — the firing obligation is exactly the gadget rank-alignment, via a real automorphism. | axiom-light |
+
+Transport chain it builds on (ChainDescent.lean `§16.2b`): `signature_transport`, `sigKey_transport`,
+`refineStep_transport`, `iterate_refineStep_transport`, `warmRefine_transport` — cross-config (two
+`(P,χ)` related by an automorphism), the value-level generalisation of the `*_invariant_of_isAut`
+chain, newly provable because `refineStep` is concrete. All axiom-light.
+
 ### §L.6 — Relativized completeness (the retargeting)
 
 The general completeness statement ("forced candidate fires whenever the branches are

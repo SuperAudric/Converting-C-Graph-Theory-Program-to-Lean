@@ -585,4 +585,92 @@ theorem oracleFires_of_abelianSufficiencyHolds {k : Nat}
   oracleFires_of_abelianSufficiency selectPair chain isLeaf σ a b ha hb hsel
     (hholds chain isLeaf σ a b ha hb) hreal
 
+/-! ## §L.7 — The CFI bridge (M1b): the forced candidate is a conjugate of a graph automorphism
+
+A **config-swap** for decision `(a, b)` is an automorphism `g` of `adj` that carries
+the σ-branch configuration onto the flip-branch configuration — it fixes the initial
+colouring `χι` and transforms `σ.σ` into `(flipPair σ).σ`. For CFI this is the gadget
+twist swapping the decided pair (its existence is gadget-level content, the M1b
+obligation). Given a config-swap, the cross-config transport (`warmRefine_transport`,
+§16.2b) forces the two leaf rank permutations to differ by exactly `g`:
+`π_σ = π_flip · g`. Hence the forced candidate is the **`π_σ`-conjugate of `g⁻¹`**
+(`candidateTwist_eq_conjugate`). This turns the opaque obligation
+`IsAut candidateTwist adj` into the concrete, structural
+`IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj` — the gadget rank-alignment, the genuine open nut,
+now stated via a *real* automorphism rather than a rank-rebasing. -/
+
+/-- Reindexing `vertexRank` along a permutation: the rank of `v` under `χ ∘ g`
+equals the rank of `g v` under `χ`. Pure `Finset.card` reindex (mirrors
+`signature_transport`'s reindex). -/
+theorem vertexRank_comp (χ : Colouring n) (g : Equiv.Perm (Fin n)) (v : Fin n) :
+    Colouring.vertexRank (fun u => χ (g u)) v = Colouring.vertexRank χ (g v) := by
+  apply Fin.ext
+  show (Finset.univ.filter (fun u => χ (g u) < χ (g v))).card
+     = (Finset.univ.filter (fun w => χ w < χ (g v))).card
+  have key : (Finset.univ : Finset (Fin n)).filter (fun w => χ w < χ (g v))
+      = ((Finset.univ : Finset (Fin n)).filter (fun u => χ (g u) < χ (g v))).map
+          g.toEmbedding := by
+    ext w
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
+               Equiv.coe_toEmbedding]
+    constructor
+    · intro hw
+      exact ⟨g.symm w, by rw [g.apply_symm_apply]; exact hw, g.apply_symm_apply w⟩
+    · rintro ⟨u, hu, rfl⟩; exact hu
+  rw [key, Finset.card_map]
+
+/-- A **config-swap** for decision `(a, b)`: a graph automorphism carrying the σ-branch
+configuration onto the flip-branch configuration (fixes `χι`, sends `σ.σ` to
+`(flipPair σ).σ`). For CFI, the gadget twist swapping the decided pair. -/
+structure ConfigSwap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) where
+  /-- The swapping automorphism. -/
+  g : Equiv.Perm (Fin n)
+  /-- It is a graph automorphism. -/
+  isAut : IsAut g adj
+  /-- It fixes the initial colouring. -/
+  fixesχι : ∀ v, chain.χι (g v) = chain.χι v
+  /-- It carries `σ.σ` onto `(flipPair σ).σ`. -/
+  swapsConfig : ∀ v u, (σ.flipPair a b ha hb).σ (g v) (g u) = σ.σ v u
+
+/-- **The forced candidate is the `π_σ`-conjugate of `g⁻¹`.** Given a config-swap `g`,
+the cross-config transport forces `π_σ = π_flip · g`, so `candidateTwist = π_flip · π_σ⁻¹
+= π_σ · g⁻¹ · π_σ⁻¹`. The opaque rank-rebasing is exposed as the conjugate of a genuine
+graph automorphism — the M1b reduction. -/
+theorem candidateTwist_eq_conjugate {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (cs : ConfigSwap chain σ a b ha hb) :
+    candidateTwist chain isLeaf σ a b ha hb
+      = Colouring.rankPerm _ (branch_discrete chain isLeaf σ) * cs.g⁻¹
+        * (Colouring.rankPerm _ (branch_discrete chain isLeaf σ))⁻¹ := by
+  -- π_σ = π_flip · g, from transport + the rank reindex.
+  have hrank : Colouring.rankPerm _ (branch_discrete chain isLeaf σ)
+      = Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb)) * cs.g := by
+    apply Equiv.ext; intro v
+    have hfun : (warmRefine adj σ.σ chain.χι)
+        = fun u => warmRefine adj (σ.flipPair a b ha hb).σ chain.χι (cs.g u) :=
+      funext fun u =>
+        (warmRefine_transport cs.isAut cs.swapsConfig cs.fixesχι u).symm
+    rw [Equiv.Perm.mul_apply, Colouring.rankPerm_apply, Colouring.rankPerm_apply, hfun]
+    exact vertexRank_comp _ cs.g v
+  -- π_flip = π_σ · g⁻¹, hence the conjugate form.
+  have hf : Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+      = Colouring.rankPerm _ (branch_discrete chain isLeaf σ) * cs.g⁻¹ := by
+    rw [hrank, mul_assoc, mul_inv_cancel, mul_one]
+  rw [candidateTwist, hf]
+
+/-- **The reduction.** `IsAut candidateTwist adj` ⟺ `IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj`:
+the firing obligation is exactly the gadget rank-alignment (the `π_σ`-conjugate of the
+config-swap is a graph automorphism). This is the concrete remaining nut, shared with
+Tier-3a B1. -/
+theorem isAut_candidateTwist_iff_conjugate {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (cs : ConfigSwap chain σ a b ha hb) :
+    IsAut (candidateTwist chain isLeaf σ a b ha hb) adj
+      ↔ IsAut (Colouring.rankPerm _ (branch_discrete chain isLeaf σ) * cs.g⁻¹
+          * (Colouring.rankPerm _ (branch_discrete chain isLeaf σ))⁻¹) adj := by
+  rw [candidateTwist_eq_conjugate chain isLeaf σ a b ha hb cs]
+
 end ChainDescent
