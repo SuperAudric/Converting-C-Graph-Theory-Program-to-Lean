@@ -285,6 +285,209 @@ theorem cellsAreOrbits_of_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
     CellsAreOrbits adj P S :=
   fun v w hcell => (orbit_iff_eq_of_discrete_warmRefine hd v w).mpr (hd v w hcell)
 
+/-- **General-singleton round-1 match.** If `s` is a `χ`-singleton (uniquely
+coloured) and `a, b` (both `≠ s`) get the same colour after one `refineStep`, they
+share adjacency and `P`-relation to `s`. The arbitrary-singleton generalisation of
+`Scheme.refineStep_round1_pair_eq` (which fixes the singleton to be the individualized
+vertex); the same witness-tuple argument. -/
+theorem refineStep_singleton_pair_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    {χ : Colouring n} {s a b : Fin n} (hsing : ∀ u, u ≠ s → χ u ≠ χ s)
+    (has : a ≠ s) (hbs : b ≠ s)
+    (h : refineStep adj P χ a = refineStep adj P χ b) :
+    adj.adj a s = adj.adj b s ∧ P a s = P b s := by
+  have hsig : signature adj P χ a = signature adj P χ b :=
+    ((refineStep_iff adj P χ a b).mp h).2
+  have hin : (χ s, adj.adj a s, P a s) ∈ signature adj P χ a := by
+    unfold signature
+    refine Multiset.mem_map.mpr ⟨s, ?_, rfl⟩
+    rw [Finset.mem_val, Finset.mem_filter]
+    exact ⟨Finset.mem_univ _, fun heq => has heq.symm⟩
+  have hinb : (χ s, adj.adj a s, P a s) ∈ signature adj P χ b := hsig ▸ hin
+  unfold signature at hinb
+  obtain ⟨s', hmem, heq⟩ := Multiset.mem_map.mp hinb
+  rw [Finset.mem_val, Finset.mem_filter] at hmem
+  have hχ : χ s' = χ s := ((Prod.mk.injEq _ _ _ _).mp heq).1
+  have hrest := (Prod.mk.injEq _ _ _ _).mp ((Prod.mk.injEq _ _ _ _).mp heq).2
+  have hs' : s' = s := by by_contra hne; exact hsing s' hne hχ
+  subst hs'
+  exact ⟨hrest.1.symm, hrest.2.symm⟩
+
+/-- **Twin endpoint of the support-grading** (the `s = 2` end). When the individualized
+set omits at most two vertices (`Sᶜ.card ≤ 2`, i.e. `|S| ≥ n − 2`), `CellsAreOrbits`
+holds: the only possible non-singleton 1-WL cell is the omitted pair `{v, w}`, a
+same-cell pair is necessarily a **twin pair** (identical adjacency/`P` to every
+individualized vertex), and the transposition `(v w)` is then a `P`-preserving
+automorphism fixing `S` pointwise — the `OrbitPartition` witness. Together with
+`cellsAreOrbits_of_discrete` (the discrete end) this pins both ends of the support
+spectrum (`exists_orbit_witness_of_aut`): full-support symmetries are certifiable at
+the root, support-2 transpositions down to depth `n − 2`.
+
+The hypotheses are the simple-graph / partial-order setting that CFI and scheme graphs
+satisfy: `adj` symmetric and loopless, `P` antisymmetric (needed because a same-cell
+pair only constrains the *subject* side of adjacency/`P` to each singleton; symmetry /
+antisymmetry transport it to the other side). -/
+theorem cellsAreOrbits_of_compl_card_le_two {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {S : Finset (Fin n)}
+    (hsymm : ∀ a b, adj.adj a b = adj.adj b a)
+    (hloop : ∀ a, adj.adj a a = 0)
+    (hanti : ∀ a b, P a b = POE.neg (P b a))
+    (hcard : Sᶜ.card ≤ 2) :
+    CellsAreOrbits adj P S := by
+  intro v w hcell
+  by_cases hvw : v = w
+  · subst hvw; exact OrbitPartition.refl v
+  set χ := individualizedColouring n S with hχ
+  have hcol : χ v = χ w := warmRefine_refines adj P χ hcell
+  -- A vertex sharing a distinct vertex's colour is outside S.
+  have hnotS : ∀ x y : Fin n, x ≠ y → χ x = χ y → x ∉ S := by
+    intro x y hxy heq hxS
+    have hx : χ x = x.val + 1 := by rw [hχ]; simp [individualizedColouring, hxS]
+    rw [hx] at heq
+    by_cases hyS : y ∈ S
+    · have hy : χ y = y.val + 1 := by rw [hχ]; simp [individualizedColouring, hyS]
+      rw [hy] at heq; exact hxy (Fin.ext (Nat.succ_injective heq))
+    · have hy : χ y = 0 := by rw [hχ]; simp [individualizedColouring, hyS]
+      rw [hy] at heq; exact Nat.succ_ne_zero _ heq
+  have hvS : v ∉ S := hnotS v w hvw hcol
+  have hwS : w ∉ S := hnotS w v (Ne.symm hvw) hcol.symm
+  -- Hence `Sᶜ = {v, w}`.
+  have hsub : ({v, w} : Finset (Fin n)) ⊆ Sᶜ := by
+    intro x hx
+    rcases Finset.mem_insert.mp hx with h | h
+    · subst h; exact Finset.mem_compl.mpr hvS
+    · rw [Finset.mem_singleton] at h; subst h; exact Finset.mem_compl.mpr hwS
+  have hcard2 : ({v, w} : Finset (Fin n)).card = 2 := by
+    rw [Finset.card_insert_of_notMem (Finset.notMem_singleton.mpr hvw),
+      Finset.card_singleton]
+  have hSc : Sᶜ = ({v, w} : Finset (Fin n)) :=
+    (Finset.eq_of_subset_of_card_le hsub (by rw [hcard2]; exact hcard)).symm
+  have hmemS : ∀ s, s ≠ v → s ≠ w → s ∈ S := by
+    intro s hsv hsw
+    by_contra hsS
+    have hmem : s ∈ Sᶜ := Finset.mem_compl.mpr hsS
+    rw [hSc] at hmem
+    rcases Finset.mem_insert.mp hmem with h | h
+    · exact hsv h
+    · exact hsw (Finset.mem_singleton.mp h)
+  -- Reduce the same-cell hypothesis to round 1.
+  have hn1 : 1 ≤ n := by have := v.isLt; omega
+  have hround : refineStep adj P χ v = refineStep adj P χ w := by
+    have h1 := warmRefine_eq_iter_eq adj P χ 1 hn1 hcell
+    simpa [Function.iterate_one] using h1
+  -- Twin facts: matching adjacency / `P` to every individualized vertex.
+  have htwin : ∀ s, s ≠ v → s ≠ w → adj.adj v s = adj.adj w s ∧ P v s = P w s := by
+    intro s hsv hsw
+    have hsS := hmemS s hsv hsw
+    have hsing : ∀ u, u ≠ s → χ u ≠ χ s := by
+      intro u hus heq
+      have hcs : χ s = s.val + 1 := by rw [hχ]; simp [individualizedColouring, hsS]
+      rw [hcs] at heq
+      by_cases huS : u ∈ S
+      · have hcu : χ u = u.val + 1 := by rw [hχ]; simp [individualizedColouring, huS]
+        rw [hcu] at heq; exact hus (Fin.ext (Nat.succ_injective heq))
+      · have hcu : χ u = 0 := by rw [hχ]; simp [individualizedColouring, huS]
+        rw [hcu] at heq; exact Nat.succ_ne_zero _ heq.symm
+    exact refineStep_singleton_pair_eq adj P hsing (Ne.symm hsv) (Ne.symm hsw) hround
+  -- Cross-pair fact: same cell forces `P v w = P w v`, hence (with antisymmetry) unknown.
+  have hcross : P v w = P w v := by
+    have hsig : signature adj P χ v = signature adj P χ w :=
+      ((refineStep_iff adj P χ v w).mp hround).2
+    have hin : (χ w, adj.adj v w, P v w) ∈ signature adj P χ v := by
+      unfold signature
+      refine Multiset.mem_map.mpr ⟨w, ?_, rfl⟩
+      rw [Finset.mem_val, Finset.mem_filter]
+      exact ⟨Finset.mem_univ _, fun heq => hvw heq.symm⟩
+    have hinw : (χ w, adj.adj v w, P v w) ∈ signature adj P χ w := hsig ▸ hin
+    unfold signature at hinw
+    obtain ⟨u, hmem, heq⟩ := Multiset.mem_map.mp hinw
+    rw [Finset.mem_val, Finset.mem_filter] at hmem
+    have hχu : χ u = χ w := ((Prod.mk.injEq _ _ _ _).mp heq).1
+    have hcw0 : χ w = 0 := by rw [hχ]; simp [individualizedColouring, hwS]
+    have huv : u = v := by
+      have huS : u ∉ S := by
+        intro huin
+        have hcu : χ u = u.val + 1 := by rw [hχ]; simp [individualizedColouring, huin]
+        rw [hcu, hcw0] at hχu; exact Nat.succ_ne_zero _ hχu
+      have hmemc : u ∈ Sᶜ := Finset.mem_compl.mpr huS
+      rw [hSc] at hmemc
+      rcases Finset.mem_insert.mp hmemc with h | h
+      · exact h
+      · exact absurd (Finset.mem_singleton.mp h) hmem.2
+    subst huv
+    have hrest := (Prod.mk.injEq _ _ _ _).mp ((Prod.mk.injEq _ _ _ _).mp heq).2
+    exact hrest.2.symm
+  -- `P` collapses to `unknown` where the swap could otherwise break antisymmetry.
+  have keyP : ∀ e : POE, e = POE.neg e → e = POE.unknown := by
+    intro e he
+    cases e with
+    | less => exact absurd he (by decide)
+    | unknown => rfl
+    | greater => exact absurd he (by decide)
+  have hself : P v w = POE.neg (P v w) := by
+    have hh := hanti v w; rw [← hcross] at hh; exact hh
+  have hPvw : P v w = POE.unknown := keyP _ hself
+  have hPwv : P w v = POE.unknown := by rw [← hcross]; exact hPvw
+  have hPdiag : ∀ a, P a a = POE.unknown := fun a => keyP _ (hanti a a)
+  -- The transposition `(v w)` is the orbit witness.
+  refine ⟨Equiv.swap v w, ?_, ?_, ?_, ?_⟩
+  · -- IsAut. Case on whether `a, b ∈ {v, w}`; rewrite (not subst) to keep `v, w`.
+    intro a b
+    rcases eq_or_ne a v with ha | hav
+    · rw [ha]
+      rcases eq_or_ne b v with hb | hbv
+      · rw [hb, Equiv.swap_apply_left, hloop, hloop]
+      · rcases eq_or_ne b w with hb | hbw
+        · rw [hb, Equiv.swap_apply_left, Equiv.swap_apply_right]; exact hsymm w v
+        · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne hbv hbw]
+          exact ((htwin b hbv hbw).1).symm
+    · rcases eq_or_ne a w with ha | haw
+      · rw [ha]
+        rcases eq_or_ne b v with hb | hbv
+        · rw [hb, Equiv.swap_apply_right, Equiv.swap_apply_left]; exact hsymm v w
+        · rcases eq_or_ne b w with hb | hbw
+          · rw [hb, Equiv.swap_apply_right, hloop, hloop]
+          · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne hbv hbw]
+            exact (htwin b hbv hbw).1
+      · rw [Equiv.swap_apply_of_ne_of_ne hav haw]
+        rcases eq_or_ne b v with hb | hbv
+        · rw [hb, Equiv.swap_apply_left, hsymm a w, hsymm a v]
+          exact ((htwin a hav haw).1).symm
+        · rcases eq_or_ne b w with hb | hbw
+          · rw [hb, Equiv.swap_apply_right, hsymm a v, hsymm a w]
+            exact (htwin a hav haw).1
+          · rw [Equiv.swap_apply_of_ne_of_ne hbv hbw]
+  · -- `P`-preservation. Same case structure; antisymmetry handles the subject-flip.
+    intro x u
+    rcases eq_or_ne x v with hx | hxv
+    · rw [hx]
+      rcases eq_or_ne u v with hu | huv
+      · rw [hu, Equiv.swap_apply_left, hPdiag, hPdiag]
+      · rcases eq_or_ne u w with hu | huw
+        · rw [hu, Equiv.swap_apply_left, Equiv.swap_apply_right, hPwv, hPvw]
+        · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne huv huw]
+          exact ((htwin u huv huw).2).symm
+    · rcases eq_or_ne x w with hx | hxw
+      · rw [hx]
+        rcases eq_or_ne u v with hu | huv
+        · rw [hu, Equiv.swap_apply_right, Equiv.swap_apply_left, hPvw, hPwv]
+        · rcases eq_or_ne u w with hu | huw
+          · rw [hu, Equiv.swap_apply_right, hPdiag, hPdiag]
+          · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne huv huw]
+            exact (htwin u huv huw).2
+      · rw [Equiv.swap_apply_of_ne_of_ne hxv hxw]
+        rcases eq_or_ne u v with hu | huv
+        · rw [hu, Equiv.swap_apply_left, hanti x w, hanti x v, (htwin x hxv hxw).2]
+        · rcases eq_or_ne u w with hu | huw
+          · rw [hu, Equiv.swap_apply_right, hanti x v, hanti x w, (htwin x hxv hxw).2]
+          · rw [Equiv.swap_apply_of_ne_of_ne huv huw]
+  · -- FixesPointwise
+    intro s hs
+    have hsv : s ≠ v := fun h => hvS (h ▸ hs)
+    have hsw : s ≠ w := fun h => hwS (h ▸ hs)
+    exact Equiv.swap_apply_of_ne_of_ne hsv hsw
+  · -- maps `v` to `w`
+    exact Equiv.swap_apply_left v w
+
 /-- **Orbit-recoverable by depth `bound`** — the oracle-contract statement of
 "there is a (polynomially bounded) depth at which 1-WL cells coincide with orbits",
 i.e. cascade-class membership. The *bound* carries all the content: the unbounded

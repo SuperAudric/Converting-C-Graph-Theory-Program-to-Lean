@@ -57,6 +57,20 @@ Both Tier-3 docs predate recent work and are stale on two points:
   recovery* (cells = orbits at that depth) — a completeness foundation,
   not a polynomial-efficiency bound. Polynomial runtime still rests on
   the unformalized `tw` bound + bounded `tw`.
+- **The cascade-oracle localisation obligation is NOT the wall — keep it
+  distinct from sub-claim 2 / (O\*).** Phase-C work (2026-05-29,
+  `CascadeOracle.lean`) split the oracle's *localisation* obligation into
+  (1a) bounded-depth recoverability — **proved** on the cascade class
+  (`RecoverableByDepth` + `recoverableByDepth_cfi`/`_scheme`, anchored at
+  both ends by `cellsAreOrbits_of_discrete` and
+  `cellsAreOrbits_of_compl_card_le_two`) — and (1b) intermediate→deep
+  bridging — **open, but cascade-class construction correctness, not
+  `GI ∈ P`**. This is a *different object* from Tier-3 **sub-claim 2 /
+  (O\*) / existence of an admissible cascade-class chain**, which **is**
+  the `GI ∈ P` wall (§8). Do not conflate: "localisation is not GI-hard"
+  refers to the oracle contract *given* a recoverable chain; it says
+  nothing about whether such a chain exists. Verdict iso-invariance is
+  likewise discharged conditionally (it reduces to localisation).
 
 ---
 
