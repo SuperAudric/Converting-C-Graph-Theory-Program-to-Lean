@@ -523,6 +523,23 @@ The linear-oracle / abelian-stripping work (tractable-buildout B2; plan + status
 |------|------|-------------|-------|
 | `candidateTwist_flip_inv` | 283-289 | The twist is a `Z₂` involution at the twist level: the forced candidate for the flip-back is the inverse of the candidate for the flip. With `DirAssignment.flipPair_comm` (commuting flips) = the elementary-abelian `Z₂^d` structure of the residual. | axiom-light |
 
+### §L.4 — Completeness / effectiveness (when the oracle fires)
+
+Characterizes *when* the oracle fires and proves firing is semantically justified. The
+oracle is complete exactly on the **abelian regime** (forced candidate ∈ Aut) — the
+calculator §6 boundary; the general converse fails (conjugation gap). The
+abelian-sufficiency lemma (forced candidate IsAut for genuine abelian flips, via
+`warm_6_2` rank machinery) is the open core scoped in the §L.4 doc-comment.
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `candidateTwist_mul_rankPerm` | The forced candidate satisfies the rank-alignment equation `candidate · π_σ = π_flip`. | axiom-light |
+| `isAut_candidateTwist_iff_aligned` | **Firing characterisation**: `IsAut candidate ⟺ ∃ g ∈ Aut(adj)` rank-aligned (`g · π_σ = π_flip`). Forward = the candidate; backward = `candidateTwist_unique`. | **Key**; axiom-light |
+| `RealizableFlip` | The decision is a genuine `Aut(adj)` symmetry: some automorphism realises the flip (branches isomorphic). | Definition |
+| `realizableFlip_of_isAut_candidateTwist` | **Firing is semantically justified**: when the forced candidate verifies, the branches are genuinely `Aut(adj)`-equivalent (candidate is the witness). Pruning reflects a real symmetry. | axiom-light |
+| `canonicalTwistOracle_isSome_iff` | **The oracle fires ⟺ forced candidate is an automorphism** (given the pair selector returns `(a,b)`). The whole completeness question = one decidable edge-check. | **Key**; axiom-light |
+| `candidateTwist_flipBack_isAut` | **`Z₂`-direction-consistency**: firing on `σ → flip` forces firing on the flip-back `flip → σ` (its inverse, via `candidateTwist_flip_inv` + `IsAut.symm`). | axiom-light |
+
 ## ChainDescent/Group.lean
 
 Part A (A1–A3) of `docs/chain-descent-tier3-tractable-buildout.md` — the group object

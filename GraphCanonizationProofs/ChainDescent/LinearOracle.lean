@@ -289,4 +289,109 @@ theorem candidateTwist_flip_inv {k : Nat} (chain : SpineChain adj P₀ χι₀ s
       = (candidateTwist chain isLeaf σ a b ha hb)⁻¹ := by
   simp only [candidateTwist, mul_inv_rev, inv_inv, DirAssignment.flipPair_idempotent]
 
+/-! ## §L.4 — Completeness (effectiveness): when does the oracle fire?
+
+Soundness (§L.1–L.2) says: *if* the forced candidate verifies, pruning is sound.
+Completeness is the converse-flavoured question — does the oracle fire **whenever it
+should**, i.e. whenever the decision is a genuine symmetry? The answer is sharp and
+matches the design boundary (`chain-descent-calculator.md` §6):
+
+* The oracle fires **iff the forced candidate is an automorphism**
+  (`canonicalTwistOracle_isSome_iff`), equivalently iff a *rank-aligned* automorphism
+  exists (`isAut_candidateTwist_iff_aligned`).
+* When it fires, the two branches are **genuinely `Aut(adj)`-equivalent** — pruning is
+  justified by a real automorphism, not bookkeeping (`realizableFlip_of_isAut_candidateTwist`).
+* Firing is **`Z₂`-direction-consistent**: pruning `σ → flip` forces pruning
+  `flip → σ` (`candidateTwist_flipBack_isAut`).
+
+**The completeness boundary (why this is not unconditional).** A genuine automorphism `g`
+realising the flip need only agree with the *rank-aligned* candidate up to
+`Aut(canonAdj σ)` — a conjugate of `Aut(adj)`. So "the branches are `Aut`-equivalent"
+does **not** in general imply "the *forced* candidate is an automorphism": that holds
+exactly when the decision is **abelian** (the unique-candidate / `Z₂` regime). For a
+non-abelian residual the forced candidate fails the edge-check and the oracle does not
+fire — the budget then flags. This is precisely Babai's split-or-Johnson boundary
+(calculator §6). The remaining content — *forced candidate ∈ Aut(adj)* for genuine
+abelian decisions, via the `warm_6_2` rank machinery — is the abelian-sufficiency lemma
+(the §8.2 step-3 / orbit-recovery connection), the open core of B2's completeness. -/
+
+/-- The forced candidate satisfies the rank-alignment equation `candidate · π_σ = π_flip`
+(definitional; the inverse cancels). The algebraic heart of the determinacy. -/
+theorem candidateTwist_mul_rankPerm {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
+    candidateTwist chain isLeaf σ a b ha hb
+        * Colouring.rankPerm _ (branch_discrete chain isLeaf σ)
+      = Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb)) := by
+  rw [candidateTwist, inv_mul_cancel_right]
+
+/-- **Firing characterisation (algebraic).** The forced candidate is an automorphism
+**iff** some automorphism is rank-aligned (`g · π_σ = π_flip`). Forward: the candidate
+itself. Backward: determinacy (`candidateTwist_unique`) forces `g = candidate`. So the
+whole completeness question is "does a rank-aligned automorphism exist?" -/
+theorem isAut_candidateTwist_iff_aligned {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
+    IsAut (candidateTwist chain isLeaf σ a b ha hb) adj
+      ↔ ∃ g : Equiv.Perm (Fin n), IsAut g adj
+          ∧ g * Colouring.rankPerm _ (branch_discrete chain isLeaf σ)
+            = Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb)) := by
+  constructor
+  · intro h
+    exact ⟨_, h, candidateTwist_mul_rankPerm chain isLeaf σ a b ha hb⟩
+  · rintro ⟨g, hg, heq⟩
+    rwa [candidateTwist_unique chain isLeaf σ a b ha hb g heq] at hg
+
+/-- **The decision is a genuine `Aut(adj)` symmetry**: some automorphism realises the
+flip (carries `σ`'s leaf to the flipped branch's). The graph-intrinsic statement that
+the two branches are isomorphic — what pruning *should* require. -/
+def RealizableFlip {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
+    Prop :=
+  ∃ g : Equiv.Perm (Fin n), IsAut g adj ∧ RealizesFlip chain isLeaf σ g a b ha hb
+
+/-- **Firing is semantically justified.** When the forced candidate verifies, the two
+branches are genuinely `Aut(adj)`-equivalent (the candidate itself is the witnessing
+automorphism). So a pruning the oracle performs reflects a real graph symmetry — not a
+labelling artefact. (The converse — every real symmetry is *caught* — fails outside the
+abelian regime; see the boundary discussion above.) -/
+theorem realizableFlip_of_isAut_candidateTwist {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (h : IsAut (candidateTwist chain isLeaf σ a b ha hb) adj) :
+    RealizableFlip chain isLeaf σ a b ha hb :=
+  ⟨candidateTwist chain isLeaf σ a b ha hb, h,
+    candidateTwist_realizesFlip chain isLeaf σ a b ha hb⟩
+
+/-- **The oracle fires iff the forced candidate is an automorphism.** Given the pair
+selector returns `(a, b)`, `canonicalTwistOracle` returns `some` exactly when the forced
+candidate passes the §4.5 edge-check. The entire completeness question is this one
+decidable predicate. -/
+theorem canonicalTwistOracle_isSome_iff {k : Nat}
+    (selectPair : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_ : chain.IsLeaf)
+      (_σ : DirAssignment P₀ chain.D),
+      Option (Σ' (a : Fin n) (b : Fin n), a ∈ chain.D ∧ b ∈ chain.D))
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hsel : selectPair chain isLeaf σ = some ⟨a, b, ha, hb⟩) :
+    (canonicalTwistOracle selectPair chain isLeaf σ).isSome
+      ↔ IsAut (candidateTwist chain isLeaf σ a b ha hb) adj := by
+  simp only [canonicalTwistOracle, twistOracle, Option.isSome_map, hsel, Option.bind_some]
+  by_cases h : IsAut (candidateTwist chain isLeaf σ a b ha hb) adj
+  · simp [h]
+  · simp [h]
+
+/-- **Firing is `Z₂`-direction-consistent.** If the forced candidate for `σ → flip`
+verifies, then the forced candidate for the flip-back `flip → σ` (its inverse,
+`candidateTwist_flip_inv`) also verifies. So the oracle prunes both directions of a
+genuine `Z₂` decision consistently — a completeness/coherence property of the abelian
+regime. -/
+theorem candidateTwist_flipBack_isAut {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (h : IsAut (candidateTwist chain isLeaf σ a b ha hb) adj) :
+    IsAut (candidateTwist chain isLeaf (σ.flipPair a b ha hb) a b ha hb) adj := by
+  rw [candidateTwist_flip_inv]
+  exact IsAut.symm h
+
 end ChainDescent

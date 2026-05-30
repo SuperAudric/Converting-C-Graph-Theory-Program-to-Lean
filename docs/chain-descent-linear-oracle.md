@@ -576,19 +576,34 @@ as this oracle's harvest core wrapped in a bounded-depth recursion.
 3. **Tie to `canonForm`** — a descent guided by the verified oracle
    reaches the same lex-min as brute force over `DirAssignment`s. The
    descent's high-level correctness theorem (ChainDescent.md §15.8
-   "remaining genuine work"). ~1000 lines. (B2.4 — remaining; plus the
-   *completeness* question: does the forced candidate always verify when the
-   abelian decision is a real symmetry — the effectiveness side, C#-validated
-   on CFI, Lean-connectable to orbit recovery.)
+   "remaining genuine work"). ~1000 lines. (B2.4 — remaining.)
+
+4. **Completeness / effectiveness (§L.4 — characterised 2026-05-30).** Built in
+   `ChainDescent/LinearOracle.lean` §L.4 (axiom-clean): the oracle **fires iff the
+   forced candidate is an automorphism** (`canonicalTwistOracle_isSome_iff`),
+   equivalently iff a *rank-aligned* automorphism exists
+   (`isAut_candidateTwist_iff_aligned`); when it fires the branches are **genuinely
+   `Aut(adj)`-equivalent** (`realizableFlip_of_isAut_candidateTwist`); firing is
+   **`Z₂`-direction-consistent** (`candidateTwist_flipBack_isAut`). **Key structural
+   finding:** completeness is *not* unconditional and is not meant to be — a genuine
+   automorphism realising the flip need only agree with the forced (rank-aligned)
+   candidate up to `Aut(canonAdj σ)` (a conjugate of `Aut(adj)`), so "branches
+   `Aut`-equivalent" implies "forced candidate ∈ Aut" **exactly in the abelian
+   (unique-candidate) regime** — the [calculator §6](./chain-descent-calculator.md)
+   split-or-Johnson boundary. The remaining open core is the **abelian-sufficiency
+   lemma**: forced candidate ∈ Aut(adj) for genuine abelian decisions, via the
+   `warm_6_2` rank machinery (the orbit-recovery connection).
 
 **Net (2026-05-30):** soundness of the linear oracle is fully discharged in
 Lean — `canonicalTwistOracle` is a concrete, verification-gated `LinearOracleSpec`
 satisfying `LeafTwistSpec`, with the twist construction *forced* (rank rebasing),
 not heuristic. The construction risk §4.2/§10 flagged ("turning a propagation
 pattern into a vertex permutation") dissolves at the leaf level: the permutation
-is determined; only the §4.5 edge-check is runtime content. Remaining: the
-`canonForm` lex-min tie (B2.4) and completeness/effectiveness (when the candidate
-verifies).
+is determined; only the §4.5 edge-check is runtime content. **Completeness is now
+characterised (§L.4): the oracle fires ⟺ forced candidate ∈ Aut, complete exactly on
+the abelian regime; firing is semantically justified and direction-consistent.**
+Remaining: the `canonForm` lex-min tie (B2.4) and the abelian-sufficiency lemma (the
+open core of completeness — forced candidate verifies for real abelian decisions).
 
 ### 8.3 Order
 

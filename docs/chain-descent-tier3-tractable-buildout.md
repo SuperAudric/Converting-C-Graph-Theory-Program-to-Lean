@@ -299,12 +299,20 @@ label-choice the canonizer otherwise avoids) is left until B1 forces a concrete
 >   (select pair → forced candidate → return iff `IsAut` verifies) satisfying
 >   `LeafTwistSpec`; `candidateTwist_flip_inv` (the `Z₂` involution) — with
 >   `flipPair_comm` the elementary-abelian `Z₂^d` structure.
+> - **Completeness CHARACTERISED (2026-05-30, `LinearOracle.lean` §L.4, axiom-clean).**
+>   The oracle **fires ⟺ forced candidate ∈ Aut** (`canonicalTwistOracle_isSome_iff`);
+>   firing is semantically justified (`realizableFlip_of_isAut_candidateTwist` — branches
+>   genuinely `Aut`-equivalent) and `Z₂`-direction-consistent (`candidateTwist_flipBack_isAut`).
+>   **Key finding:** completeness is regime-dependent *by design* — the forced
+>   (rank-aligned) candidate ∈ Aut exactly on **abelian** decisions (the calculator §6
+>   boundary); the general converse fails (conjugation gap). The open core is the
+>   **abelian-sufficiency lemma** (forced candidate verifies for real abelian flips, via
+>   `warm_6_2`).
 > - **Remaining (B2):** (i) the `canonForm` lex-min tie (Tier-3 §8.2 step 3 — needs
->   a descent-with-pruning model, the genuine big piece); (ii) *completeness* — the
->   forced candidate verifies **iff** the decision is a real abelian symmetry
->   (the effectiveness side, C#-validated on CFI, Lean-connectable to orbit
->   recovery); (iii) lifting the twists to an elementary-abelian *subgroup* `N` —
->   that is **Part A** (see the precursors note at the top of Part A).
+>   a descent-with-pruning model, the genuine big piece); (ii) the **abelian-sufficiency
+>   lemma** (the open core of completeness, above); (iii) lifting the twists to an
+>   elementary-abelian *subgroup* `N` — that is **Part A** (now built; see the precursors
+>   note at the top of Part A).
 
 ### B3 — Sub-claim 3 (oracle alternation) — *needs B2*
 
