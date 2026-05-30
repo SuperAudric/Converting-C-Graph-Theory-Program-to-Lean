@@ -49,7 +49,17 @@
       "Bash(grep -rln \"^import FullCorrectness$\" --include=\"*.lean\" .)",
       "Bash(grep -E \"uses \\\\`sorry\\\\`\" /tmp/lake_output.log)",
       "Bash(dotnet run *)",
-      "Bash(ps -o pid,etime,pcpu,pmem,stat,cmd -p 79263 79347)"
+      "Bash(ps -o pid,etime,pcpu,pmem,stat,cmd -p 79263 79347)",
+      "Bash(tail *)",
+      "Bash(tail)",
+      "Bash(timeout * lake build *)",
+      "Bash(timeout * lake env *)",
+      "Bash(timeout * lake exe *)",
+      "Bash(cd /workspace/GraphCanonizationProofs && lake build *)",
+      "Bash(cd /workspace/GraphCanonizationProofs && lake env *)",
+      "Bash(cd /workspace/GraphCanonizationProofs && lake exe *)",
+      "Bash(cd /workspace/GraphCanonizationProofs && timeout * lake build *)",
+      "Bash(cd /workspace/GraphCanonizationProofs && timeout * lake env *)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",
