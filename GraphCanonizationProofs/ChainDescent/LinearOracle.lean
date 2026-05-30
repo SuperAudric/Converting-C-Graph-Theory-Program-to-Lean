@@ -1,4 +1,5 @@
 import ChainDescent
+import Mathlib.GroupTheory.Perm.Basic
 
 /-!
 # §L — Linear oracle: abelian-stripping (B2)
@@ -110,5 +111,148 @@ theorem twistOracle_leafTwist
   -- `result.val = tw.t`, and `tw.realizes` is exactly the required equality.
   rw [← hmk]
   exact tw.realizes
+
+/-! ## §L.2 — The candidate twist is forced (B2.2)
+
+At a leaf, both branches `σ` and `flipPair σ a b` have **discrete** warm-refined
+colourings (`samePartition_chain` + `isLeaf`), so each canonically labels the graph by
+colour-rank: `canonAdj σ = labelledAdj (rankPerm π_σ) adj`. The two labellings therefore
+differ by exactly one permutation — the **rank rebasing**
+`rankPerm π_flip * (rankPerm π_σ)⁻¹` — and *that* permutation always realises the flip
+(`candidateTwist_realizesFlip`). So the twist is not *discovered* among many candidates;
+it is **forced**, the unique rank-aligning map (`candidateTwist_unique`). The linear
+oracle's entire content collapses to one question — **is the forced candidate a graph
+automorphism?** — the mandatory §4.5 edge-check, and nothing more
+(`twistWitness_of_isAut`, `canonicalTwistOracle`).
+
+This **discharges the iso-invariance obligation** (strategy §15 gap 2) for the linear
+oracle at the leaf level: the candidate is a function of iso-invariant rank data, so the
+discovery is deterministic. (The §4.3 all-singleton-vs-non-singleton ambiguity is a
+*decision-node* concern in the C# online behaviour — subsumed here because the descent
+reaches a discrete leaf before the oracle fires.) The candidate is precisely the
+canonical **transversal element** for the decision (cf. the support / stabilizer-chain
+relocation discussion): verifying it asks whether that coset representative is a real
+symmetry. The abelian `Z₂` structure is `flipPair_idempotent` (the candidate for the
+flip-back is the inverse) + `flipPair_comm` (disjoint decisions commute). -/
+
+/-- **Relabelling composes.** Relabelling a labelled adjacency by `t` is labelling by the
+product `t * s` — the `Equiv.Perm` group action on labelled matrices. -/
+theorem relabelMatrix_labelledAdj (t s : Equiv.Perm (Fin n)) :
+    relabelMatrix t (labelledAdj s adj) = labelledAdj (t * s) adj := by
+  funext i j
+  simp only [relabelMatrix, labelledAdj]
+  rw [show (t * s).symm i = s.symm (t.symm i) by
+        rw [Equiv.Perm.mul_def, Equiv.symm_trans_apply],
+      show (t * s).symm j = s.symm (t.symm j) by
+        rw [Equiv.Perm.mul_def, Equiv.symm_trans_apply]]
+
+/-- `canonAdj` is `labelledAdj` of the rank permutation. Holds for *any* discreteness
+proof (the rank permutation is proof-irrelevant), so `rfl`. -/
+theorem canonAdj_eq_labelledAdj {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (hd : Discrete (warmRefine adj σ.σ chain.χι)) :
+    chain.canonAdj isLeaf σ = labelledAdj (Colouring.rankPerm _ hd) adj := rfl
+
+/-- **Rank rebasing relates any two branches' leaves.** For branches `σ, σ'`, relabelling
+`σ`'s canonical leaf by the rank rebasing `rankPerm π_{σ'} * (rankPerm π_σ)⁻¹` gives
+`σ'`'s canonical leaf. General over the two branches; the flip is the instance
+`σ' = flipPair σ`. -/
+theorem canonAdj_rebase {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ σ' : DirAssignment P₀ chain.D)
+    (hσ : Discrete (warmRefine adj σ.σ chain.χι))
+    (hσ' : Discrete (warmRefine adj σ'.σ chain.χι)) :
+    relabelMatrix (Colouring.rankPerm _ hσ' * (Colouring.rankPerm _ hσ)⁻¹)
+      (chain.canonAdj isLeaf σ) = chain.canonAdj isLeaf σ' := by
+  rw [canonAdj_eq_labelledAdj chain isLeaf σ hσ,
+      canonAdj_eq_labelledAdj chain isLeaf σ' hσ', relabelMatrix_labelledAdj]
+  have hmul : Colouring.rankPerm _ hσ' * (Colouring.rankPerm _ hσ)⁻¹
+        * Colouring.rankPerm _ hσ = Colouring.rankPerm _ hσ' := by
+    rw [mul_assoc, inv_mul_cancel, mul_one]
+  rw [hmul]
+
+/-- The discreteness proof for a branch's warm-refined colouring at a leaf, derived
+exactly as `canonAdj` derives it (so the rank permutations match definitionally). -/
+theorem branch_discrete {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D) :
+    Discrete (warmRefine adj σ.σ chain.χι) :=
+  Discrete.of_samePartition
+    (samePartition.symm (DirAssignment.samePartition_chain chain σ)) isLeaf
+
+/-- **The forced candidate twist** for decision `(a, b)` on branch `σ` at a leaf: the rank
+rebasing carrying `σ`'s canonical leaf labels to the flipped branch's. Always realises the
+flip (`candidateTwist_realizesFlip`); the only open question is whether it is an
+automorphism (`twistWitness_of_isAut`). -/
+noncomputable def candidateTwist {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) : Equiv.Perm (Fin n) :=
+  Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+    * (Colouring.rankPerm _ (branch_discrete chain isLeaf σ))⁻¹
+
+/-- **The candidate always realises the flip.** Instance of `canonAdj_rebase` at
+`σ' = flipPair σ`. The construction is forced — no choice, no ambiguity. -/
+theorem candidateTwist_realizesFlip {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
+    RealizesFlip chain isLeaf σ (candidateTwist chain isLeaf σ a b ha hb) a b ha hb :=
+  canonAdj_rebase chain isLeaf σ (σ.flipPair a b ha hb)
+    (branch_discrete chain isLeaf σ) (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+
+/-- **Determinacy.** The candidate is the *unique* permutation aligning `σ`'s rank labels
+to the flipped branch's (`t * rankPerm π_σ = rankPerm π_flip`). So twist discovery is a
+deterministic function of iso-invariant rank data — the iso-invariance gate (§15 gap 2)
+at the leaf level. (Other permutations may *also* realise the flip — they differ from the
+candidate by an automorphism of `adj` — but the construction canonically picks this one.) -/
+theorem candidateTwist_unique {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (t : Equiv.Perm (Fin n))
+    (h : t * Colouring.rankPerm _ (branch_discrete chain isLeaf σ)
+       = Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))) :
+    t = candidateTwist chain isLeaf σ a b ha hb := by
+  rw [candidateTwist, ← h, mul_assoc, mul_inv_cancel, mul_one]
+
+/-- **The oracle reduces to verification.** When the forced candidate verifies as an
+automorphism (the §4.5 edge-check), it yields a complete `TwistWitness` — the decided
+pair, the candidate, its `IsAut` proof, and the (always-true) `RealizesFlip`. Twist
+*discovery* is thus a single decidable check on the canonical candidate. -/
+noncomputable def twistWitness_of_isAut {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hAut : IsAut (candidateTwist chain isLeaf σ a b ha hb) adj) :
+    TwistWitness chain isLeaf σ where
+  a := a
+  b := b
+  ha := ha
+  hb := hb
+  t := candidateTwist chain isLeaf σ a b ha hb
+  isAut := hAut
+  realizes := candidateTwist_realizesFlip chain isLeaf σ a b ha hb
+
+open Classical in
+/-- **The canonical twist oracle.** Parameterised only by an abstracted *pair selector*
+(which decision to resolve — C#-side, soundness-irrelevant). For the selected pair it
+computes the forced candidate and returns it **iff** it verifies as an automorphism. A
+fully concrete `LinearOracleSpec`: the construction is determined, the only runtime choice
+is the edge-check. -/
+noncomputable def canonicalTwistOracle
+    (selectPair : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_ : chain.IsLeaf)
+      (_σ : DirAssignment P₀ chain.D),
+      Option (Σ' (a : Fin n) (b : Fin n), a ∈ chain.D ∧ b ∈ chain.D)) :
+    LinearOracleSpec adj P₀ χι₀ sel :=
+  twistOracle (fun {_} chain isLeaf σ =>
+    (selectPair chain isLeaf σ).bind (fun s =>
+      if h : IsAut (candidateTwist chain isLeaf σ s.1 s.2.1 s.2.2.1 s.2.2.2) adj then
+        some (twistWitness_of_isAut chain isLeaf σ s.1 s.2.1 s.2.2.1 s.2.2.2 h)
+      else none))
+
+/-- `canonicalTwistOracle` satisfies `LeafTwistSpec` — it is a `twistOracle`, so the
+soundness discharge of B2.1 applies directly. Every twist it returns is a verified
+automorphism relating `σ`'s leaf to the flipped branch `σ' = flipPair σ`. -/
+theorem canonicalTwistOracle_leafTwist
+    (selectPair : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_ : chain.IsLeaf)
+      (_σ : DirAssignment P₀ chain.D),
+      Option (Σ' (a : Fin n) (b : Fin n), a ∈ chain.D ∧ b ∈ chain.D)) :
+    LinearOracleSpec.LeafTwistSpec (canonicalTwistOracle selectPair) :=
+  twistOracle_leafTwist _
 
 end ChainDescent

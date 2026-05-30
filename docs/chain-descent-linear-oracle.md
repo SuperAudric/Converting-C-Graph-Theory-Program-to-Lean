@@ -545,19 +545,35 @@ as this oracle's harvest core wrapped in a bounded-depth recursion.
    the verified-twist data (the §4.5 edge-check lives in `TwistWitness.isAut`).
 2. **Prove it satisfies `LeafTwistSpec`** — the deliverable §2.3 names
    as missing. Uses `warm_6_2` (partition symmetry) + the verification
-   (automorphism). ~1000 lines. **B2.1 PARTIAL (2026-05-30)** —
-   `twistOracle_leafTwist` discharges `LeafTwistSpec` for `twistOracle`,
-   with the flipped branch as the *explicit* witness `σ' = flipPair σ`
-   (sharper than the existential), **given** a sound discovery (one whose
-   output is verified `IsAut` + `RealizesFlip`). What remains is B2.3: to
-   *construct* a `RealizesFlip` twist from the `warm_6_2` /
-   `flipPair_partition_invariant` partition mirror rather than take it as
-   the discovery's contract — i.e. discharge the discovery itself on the
-   all-singleton abelian case (B2.2 = its determinacy, `UniqueCandidateTwist`).
+   (automorphism). **DONE 2026-05-30 (B2.1 + B2.2/B2.3).** Two layers:
+   - *B2.1* — `twistOracle_leafTwist` discharges `LeafTwistSpec` for any
+     verified-twist discovery, with the explicit witness `σ' = flipPair σ`.
+   - *B2.2/B2.3* — the construction is **forced, not searched**:
+     `canonAdj_rebase` shows relabelling `σ`'s leaf by the **rank rebasing**
+     `rankPerm π_flip * (rankPerm π_σ)⁻¹` (`candidateTwist`) *always* realises
+     the flip (`candidateTwist_realizesFlip`) — this is the `warm_6_2`/spine →
+     `canonAdj` bridge (via `samePartition_chain`, which generalises `warm_6_2`,
+     making both branch leaves discrete). So the entire oracle collapses to one
+     edge-check: `twistWitness_of_isAut` (verify ⟹ witness) and the concrete
+     `canonicalTwistOracle` (compute forced candidate, return iff `IsAut`).
+     `candidateTwist_unique` discharges the iso-invariance gate (§15 gap 2) at
+     the leaf level — the candidate is a function of iso-invariant rank data.
 3. **Tie to `canonForm`** — a descent guided by the verified oracle
    reaches the same lex-min as brute force over `DirAssignment`s. The
    descent's high-level correctness theorem (ChainDescent.md §15.8
-   "remaining genuine work"). ~1000 lines. (B2.4.)
+   "remaining genuine work"). ~1000 lines. (B2.4 — remaining; plus the
+   *completeness* question: does the forced candidate always verify when the
+   abelian decision is a real symmetry — the effectiveness side, C#-validated
+   on CFI, Lean-connectable to orbit recovery.)
+
+**Net (2026-05-30):** soundness of the linear oracle is fully discharged in
+Lean — `canonicalTwistOracle` is a concrete, verification-gated `LinearOracleSpec`
+satisfying `LeafTwistSpec`, with the twist construction *forced* (rank rebasing),
+not heuristic. The construction risk §4.2/§10 flagged ("turning a propagation
+pattern into a vertex permutation") dissolves at the leaf level: the permutation
+is determined; only the §4.5 edge-check is runtime content. Remaining: the
+`canonForm` lex-min tie (B2.4) and completeness/effectiveness (when the candidate
+verifies).
 
 ### 8.3 Order
 

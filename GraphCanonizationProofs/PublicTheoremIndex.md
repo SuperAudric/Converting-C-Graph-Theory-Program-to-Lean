@@ -499,3 +499,18 @@ The linear-oracle / abelian-stripping work (tractable-buildout B2; plan in `docs
 | `TwistWitness` | 64-85 | The verified data a twist discovery produces: decided pair `(a,b)`, candidate permutation `t`, its `IsAut` proof (the §4.5 edge-check — sole soundness anchor), and a `RealizesFlip` proof. | Structure |
 | `twistOracle` | 87-98 | A concrete `LinearOracleSpec` instance parameterised by an abstracted `discover` function (canonical-id matching, C#-side). Returns the verified automorphism on a `TwistWitness`, `none` otherwise; verification is inside the witness so every output is a genuine automorphism. | Definition |
 | `twistOracle_leafTwist` | 100-114 | **B2.1 discharge**: `twistOracle` satisfies `LeafTwistSpec`, with the flipped branch as the **explicit** witness `σ' = flipPair σ` (sharper than the bare existential). Closes the §2.3 pruning-justification contract modulo discovery. | **Key theorem**; axiom-light |
+
+### §L.2 — The forced candidate twist (B2.2 + most of B2.3)
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `relabelMatrix_labelledAdj` | 140-149 | Relabelling composes: `relabelMatrix t (labelledAdj s adj) = labelledAdj (t * s) adj` — the `Equiv.Perm` group action on labelled matrices. | axiom-light |
+| `canonAdj_eq_labelledAdj` | 151-158 | `canonAdj σ = labelledAdj (rankPerm π_σ) adj` for any discreteness proof (rank perm is proof-irrelevant); `rfl`. | axiom-light |
+| `canonAdj_rebase` | 160-173 | **The bridge (B2.3 core)**: relabelling `σ`'s canonical leaf by the rank rebasing `rankPerm π_{σ'} * (rankPerm π_σ)⁻¹` gives `σ'`'s leaf. General over branches; the flip is the `σ' = flipPair σ` instance. | **Key theorem**; axiom-light |
+| `branch_discrete` | 175-179 | A branch's warm-refined colouring is discrete at a leaf (`samePartition_chain` + `isLeaf`), derived as `canonAdj` derives it. | axiom-light |
+| `candidateTwist` | 185-191 | **The forced candidate**: the rank rebasing `rankPerm π_flip * (rankPerm π_σ)⁻¹`. The twist is determined, not searched. | Definition (`noncomputable`) |
+| `candidateTwist_realizesFlip` | 193-203 | The forced candidate **always** realises the flip (`canonAdj_rebase` at the flip). Construction is forced — no ambiguity. | **Key theorem**; axiom-light |
+| `candidateTwist_unique` | 205-216 | Determinacy: the candidate is the unique perm rank-aligning `σ` to the flipped branch — the iso-invariance gate (§15 gap 2) at the leaf level. | axiom-light |
+| `twistWitness_of_isAut` | 218-229 | The oracle reduces to verification: a verified-automorphism candidate yields a complete `TwistWitness`. Discovery = one decidable edge-check on the forced candidate. | Definition (`noncomputable`) |
+| `canonicalTwistOracle` | 237-246 | A **fully concrete** `LinearOracleSpec`: for the selected pair, compute the forced candidate, return it iff `IsAut` verifies. Only abstracted piece = pair selection (which decision — soundness-irrelevant). | Definition (`noncomputable`) |
+| `canonicalTwistOracle_leafTwist` | 251-256 | `canonicalTwistOracle` satisfies `LeafTwistSpec` (it is a `twistOracle`) — a concrete verified linear oracle, sound by construction. | **Key theorem**; axiom-light |
