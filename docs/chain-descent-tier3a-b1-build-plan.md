@@ -107,30 +107,59 @@ is the *refinement-transfer*. We isolate it as one hypothesis and discharge it l
   paper's actual structure (4.2.5 is the only genuinely new content). This deliverable
   alone is the bulk of B1's value and is genuinely tractable.
 
-### Phase D — the transfer lemma (§4.2.5) — the hard residual, isolated
+### Phase D — discharging `LayerStep` (§4.2.5) — the hard residual, isolated
 
-Discharge `RelativeRecoverable adj P T S` (the per-layer step) from the Tier-1/Tier-2
-theorems, which are stated about the *quotient* graph `G_T`. This is the one place the
-quotient bites.
+> **STATUS — Phase D infrastructure DONE (2026-05-30); full per-layer discharge (step 5)
+> remains.** Built in
+> [`ChainDescent/Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean)
+> §"Phase D" (axiom-clean). Steps 1–4 below are done: set-monotonicity
+> (`warmRefine_indiv_mono`, via `signature_refines`), the reduction
+> (`layerStep_of_witnessUpgrade`), the trivial instances, and the support-backbone
+> bridge (`witnessUpgrade_of_pathFixing`). **Step 5 — connecting `WitnessUpgrade` to the
+> Tier-1/Tier-2 theorems for a concrete layer class — is the genuine remaining work.**
 
-- **Statement** (intrinsic, on `Fin n` — preferred): for `T` with `CellsAreOrbits adj P T`,
-  refining a cell of `(G, T)` by adding `S` behaves as the layer cascade on the quotient
-  `G_T` — i.e. `warmRefine_{G}(T ∪ S)` separates two same-`T`-cell vertices iff the layer
-  theorem's refinement on `G_T` separates their orbit images. A4's `cell_iff_orbitMk_eq`
-  is the `S = ∅` base of this; the work is the inductive `refineStep`-commutes-with-quotient
-  step (uses `quotientAdj` well-defined under `QuotientAdjCompatible`, A4).
-- **Two sub-routes for the quotient side:**
-  1. **Intrinsic (recommended):** never materialize `G_T` as `AdjMatrix m`; phrase the
-     transfer via `signature`/`refineStep` restricted to `T`-cells, using
-     `quotientAdj`'s defining equation. Avoids the re-indexing.
-  2. **Materialized (fallback):** build `G_T : AdjMatrix (card OrbitQuotient)` via
-     `Fintype.equivFin` (the deferred A4 bookkeeping) and prove `warmRefine` commutes
-     with the relabelling. Heavier but more mechanical.
-- **Discharge order:** easiest layers first — (a) a *rigid base* (last layer trivial,
-  transfer vacuous); (b) a **Tier-2 layer at depth 1** (the increment is one vertex, the
-  quotient is the scheme — smallest nontrivial transfer); (c) a **Tier-1 CFI layer**.
-  Each discharged instance turns `cascadeComposition`'s hypothesis into an unconditional
-  corollary for that composition (`CFI(scheme)`, `CFI(CFI)`, …).
+Discharge `LayerStep adj P T S` (`CellsAreOrbits T → CellsAreOrbits (T ∪ S)`) — the
+per-layer step. This is the one place the quotient bites.
+
+**Approach decision (2026-05-30).** Two routes were weighed:
+
+- **(A) Materialized quotient — REJECTED.** Build `G_T : AdjMatrix m` via
+  `Fintype.equivFin` and prove `warmRefine` commutes with the quotient. `refineStep` is
+  an **axiom** specified only by `refineStep_iff` (signatures = multisets over *all*
+  vertices); the quotient changes the vertex set and reweights neighbour multiplicities,
+  and there is no API relating `refineStep` at size `n` to size `m`. Needs new
+  axiom-level machinery — high risk, likely intractable.
+- **(B) Intrinsic, on `Fin n` — CHOSEN.** Never materialize `G_T`. Reduce `LayerStep` to
+  a **witness-upgrade** via set-monotonicity, reusing the existing `refineStep_iff` API.
+
+**Phase D structure (Approach B):**
+
+1. **Set-monotonicity of warm refinement** (the load-bearing, independently-valuable
+   lemma — the docs mis-cite `warmRefine_refines` for this; that lemma actually relates
+   `warmRefine` to its *initial* colouring, not two individualization sets):
+   - `Refines χ₁ χ₂ := ∀ a b, χ₁ a = χ₁ b → χ₂ a = χ₂ b`.
+   - `signature_refines` — `Refines χ₁ χ₂` ⟹ `signature χ₁` separations carry to
+     `signature χ₂` (the coarsening-map argument: `sig χ₂ = (sig χ₁).map G` for a
+     coarsening `G` built from `Refines`). The crux.
+   - `refineStep_refines` (via `refineStep_iff` + `signature_refines`),
+     `warmRefine_refines_initial` (iterate `n`).
+   - `individualizedColouring_refines` (`T ⊆ T'` ⟹ `Refines (indiv T') (indiv T)`),
+     `warmRefine_indiv_mono` (the payoff: same `T∪S`-cell ⟹ same `T`-cell).
+2. **The reduction.** `WitnessUpgrade adj P T S` := for same-`T`-orbit, same-`(T∪S)`-cell
+   `v, w`, conclude `OrbitPartition adj P (T ∪ S) v w`. Then
+   `layerStep_of_witnessUpgrade` (uses `warmRefine_indiv_mono` + `CellsAreOrbits T`).
+3. **Trivial instances** (real corollaries, validate interface): `layerStep_empty`,
+   `layerStep_subset` (`S ⊆ T`), `layerStep_of_cellsAreOrbits`, `layerStep_of_discrete`
+   (the recursion bottom).
+4. **Support-backbone sufficient condition.** `witnessUpgrade_of_pathFixing`: if every
+   such `v, w` admits a `P`-preserving automorphism with support disjoint from `T ∪ S`
+   (fixing the committed path) realizing `v ↦ w`, the upgrade holds (via
+   `orbitPartition_of_support_disjoint`). This is exactly what harvested/verified
+   generators (cascade + linear oracle) produce — the bridge to the algorithm.
+5. **Full discharge per layer class — the genuine remaining work.** Connect
+   `WitnessUpgrade` to the Tier-1/Tier-2 theorems for an actual layer (the existence of
+   the path-fixing witnesses). Easiest-first: rigid base (vacuous) → Tier-2 depth-1 →
+   CFI. Each yields an unconditional composition corollary.
 
 ## 4. The group-chain interpretation (faithfulness bridge) — optional, ~80 lines
 

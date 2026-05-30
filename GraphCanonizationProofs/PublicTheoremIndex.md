@@ -595,3 +595,22 @@ basis; `refineStep` via `warmRefine`).
 | `cumulative_card_le` | **Depths add (cardinality)**: `|⋃_{i≤k} S i| ≤ Σ_{i≤k} f i` when `|S i| ≤ f i` (`card_biUnion_le` + `sum_le_sum`). | axiom-light |
 | `cascadeComposition` | **Theorem 3a headline (conditional)**: cumulative sets + layer-1 base + per-layer transfer steps + final set a base ⟹ warm refinement at `T k` is `Discrete`. With `cumulative_card_le`, depth `≤ Σ fᵢ`. Conditional on `hstep` (= §4.2.5, Phase D). | **Key theorem**; axiom-light |
 | `cascadeComposition_single` | The `k = 0` case: a single cascade-class layer (Tier-1/2) that is a base reaches discreteness — recovers the orbit-recovery theorems as the composition's base case. | axiom-light |
+
+### Phase D — discharging `LayerStep` (the §4.2.5 transfer), intrinsic route
+
+Approach B (build-plan §3): stay on `Fin n`, reduce `LayerStep` to a witness-upgrade via
+**set-monotonicity** of warm refinement (reusing `refineStep_iff`); the materialized-quotient
+route was rejected (`refineStep` axiomatic, no cross-size API).
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `Refines χ₁ χ₂` | `χ₁` refines `χ₂` (finer partition): `∀ a b, χ₁ a = χ₁ b → χ₂ a = χ₂ b`. | Definition |
+| `signature_refines` | **The crux**: `Refines χ₁ χ₂` ⟹ equal `χ₁`-signatures give equal `χ₂`-signatures (`signature χ₂ = (signature χ₁).map G` for a coarsening map `G` built from `Refines`). | axiom-light |
+| `refineStep_mono` | `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)` (via `refineStep_iff` + `signature_refines`). | axiom-light |
+| `iterate_refineStep_refines` / `warmRefine_refines_initial` | warm refinement monotone in the initial colouring's partition order. | axiom-light |
+| `individualizedColouring_refines` | `T ⊆ T'` ⟹ `Refines (individualizedColouring n T') (individualizedColouring n T)`. | axiom-light |
+| `warmRefine_indiv_mono` | **Set-monotonicity (the payoff)**: same `(T ∪ S)`-cell ⟹ same `T`-cell. "1-WL monotone in the individualization set" — the lemma the docs had mis-cited as `warmRefine_refines`. | **Key**; axiom-light |
+| `WitnessUpgrade adj P T S` | The genuine §4.2.5 content: same-`Aut_T`-orbit + same-`(T∪S)`-cell `v,w` ⟹ `OrbitPartition (T∪S) v w` (the orbit relation upgrades to the finer stabilizer). | Definition |
+| `layerStep_of_witnessUpgrade` | **The reduction**: a witness-upgrade discharges a `LayerStep` (via `warmRefine_indiv_mono` + `CellsAreOrbits T`). Where Phase C meets the per-layer content. | **Key**; axiom-light |
+| `layerStep_empty` / `layerStep_subset` / `layerStep_of_cellsAreOrbits` / `layerStep_of_discrete` | Trivial real instances: no-op layer (`S = ∅`), `S ⊆ T`, independently-recoverable target, and the discretizing recursion-bottom. | axiom-light |
+| `witnessUpgrade_of_pathFixing` | **Bridge to harvested generators**: if every same-orbit, same-cell pair has a `P`-preserving automorphism with support disjoint from `T ∪ S` (fixing the committed path) sending `v ↦ w`, the upgrade holds (`orbitPartition_of_support_disjoint`). Exactly what the cascade/linear oracles produce. | axiom-light |

@@ -123,4 +123,152 @@ theorem cascadeComposition_single {T₀ : Finset (Fin n)}
     Discrete (warmRefine adj P (individualizedColouring n T₀)) :=
   cascadeComposition (fun _ => T₀) hco (fun i h => absurd h (Nat.not_lt_zero i)) hbaseSet
 
+/-! ## Phase D — discharging `LayerStep` (the §4.2.5 transfer), intrinsic route
+
+Approach B (build-plan §3): stay on `Fin n`, reduce `LayerStep` to a *witness-upgrade*
+via **set-monotonicity** of warm refinement, reusing the `refineStep_iff` API. We do
+*not* materialize the quotient graph (Approach A, rejected — `refineStep` is axiomatic
+and does not transfer across a change of vertex set). -/
+
+/-! ### Set-monotonicity of warm refinement
+
+The load-bearing prerequisite: warm refinement is monotone in the partition order of its
+initial colouring. (The docs mis-cite `warmRefine_refines` for this; that lemma relates
+`warmRefine` to its *initial* colouring, a different statement.) -/
+
+/-- `χ₁` refines `χ₂` — the partition of `χ₁` is finer (more classes). -/
+def Refines (χ₁ χ₂ : Colouring n) : Prop := ∀ a b, χ₁ a = χ₁ b → χ₂ a = χ₂ b
+
+/-- **Signatures respect refinement.** If `χ₁` refines `χ₂`, then any signature
+*separation* under `χ₁` carries to `χ₂`: `signature χ₂` is the image of `signature χ₁`
+under the coarsening map on colours, so equal `χ₁`-signatures give equal `χ₂`-signatures.
+The crux of warm-refinement monotonicity. -/
+theorem signature_refines {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂)
+    {v w : Fin n} (h : signature adj P χ₁ v = signature adj P χ₁ w) :
+    signature adj P χ₂ v = signature adj P χ₂ w := by
+  classical
+  -- coarsening map `g` with `g (χ₁ u) = χ₂ u` (well-defined since `χ₁` refines `χ₂`).
+  set g : Nat → Nat := fun c => if h : ∃ u, χ₁ u = c then χ₂ h.choose else 0 with hg_def
+  have hg : ∀ u, g (χ₁ u) = χ₂ u := by
+    intro u
+    have hex : ∃ u', χ₁ u' = χ₁ u := ⟨u, rfl⟩
+    simp only [hg_def, dif_pos hex]
+    exact href _ _ hex.choose_spec
+  have key : ∀ x : Fin n, signature adj P χ₂ x
+      = (signature adj P χ₁ x).map (fun t => (g t.1, t.2.1, t.2.2)) := by
+    intro x
+    simp only [signature, Multiset.map_map]
+    refine Multiset.map_congr rfl (fun u _ => ?_)
+    simp only [Function.comp_apply, hg u]
+  rw [key v, key w, h]
+
+/-- One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁)
+(refineStep χ₂)`. From `refineStep_iff` (same colour ∧ same signature) + `signature_refines`. -/
+theorem refineStep_mono {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
+    Refines (refineStep adj P χ₁) (refineStep adj P χ₂) := by
+  intro a b hab
+  rw [refineStep_iff] at hab ⊢
+  exact ⟨href _ _ hab.1, signature_refines href hab.2⟩
+
+/-- Iterating refinement preserves refinement. -/
+theorem iterate_refineStep_refines {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
+    ∀ k, Refines ((refineStep adj P)^[k] χ₁) ((refineStep adj P)^[k] χ₂) := by
+  intro k
+  induction k with
+  | zero => exact href
+  | succ m ih =>
+    simp only [Function.iterate_succ', Function.comp_apply]
+    exact refineStep_mono ih
+
+/-- **Warm refinement is monotone in the initial colouring.** A finer initial colouring
+yields a finer warm-refined partition. -/
+theorem warmRefine_refines_initial {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
+    Refines (warmRefine adj P χ₁) (warmRefine adj P χ₂) :=
+  iterate_refineStep_refines href n
+
+/-- Individualizing a *superset* gives a finer initial colouring: `T ⊆ T'` ⟹
+`individualizedColouring n T'` refines `individualizedColouring n T`. -/
+theorem individualizedColouring_refines {T T' : Finset (Fin n)} (hsub : T ⊆ T') :
+    Refines (individualizedColouring n T') (individualizedColouring n T) := by
+  intro a b hab
+  simp only [individualizedColouring] at hab ⊢
+  by_cases ha' : a ∈ T' <;> by_cases hb' : b ∈ T'
+  · rw [if_pos ha', if_pos hb'] at hab
+    have hab' : a = b := Fin.ext (by omega)
+    rw [hab']
+  · rw [if_pos ha', if_neg hb'] at hab; exact absurd hab (Nat.succ_ne_zero _)
+  · rw [if_neg ha', if_pos hb'] at hab; exact absurd hab.symm (Nat.succ_ne_zero _)
+  · rw [if_neg (fun h => ha' (hsub h)), if_neg (fun h => hb' (hsub h))]
+
+/-- **Set-monotonicity (the payoff).** Two vertices in the same `(T ∪ S)`-cell are in the
+same `T`-cell: warm refinement at a larger individualization set refines warm refinement
+at a smaller one. This is "1-WL monotone in the individualization set". -/
+theorem warmRefine_indiv_mono {T S : Finset (Fin n)} {v w : Fin n}
+    (h : warmRefine adj P (individualizedColouring n (T ∪ S)) v
+       = warmRefine adj P (individualizedColouring n (T ∪ S)) w) :
+    warmRefine adj P (individualizedColouring n T) v
+      = warmRefine adj P (individualizedColouring n T) w :=
+  warmRefine_refines_initial (individualizedColouring_refines Finset.subset_union_left) v w h
+
+/-! ### The reduction: `LayerStep` from a witness-upgrade -/
+
+/-- **The witness-upgrade (the genuine §4.2.5 content).** For vertices `v, w` already in
+the same `Aut_T`-orbit and the same `(T ∪ S)`-cell, the orbit relation *upgrades* to
+`Aut_{T∪S}`: there is a `(T∪S)`-fixing automorphism relating them. Discharging this from
+the Tier-1/Tier-2 layer theorems is the remaining Phase-D work (build-plan §3 step 5). -/
+def WitnessUpgrade (adj : AdjMatrix n) (P : PMatrix n) (T S : Finset (Fin n)) : Prop :=
+  ∀ v w, OrbitPartition adj P T v w →
+    warmRefine adj P (individualizedColouring n (T ∪ S)) v
+      = warmRefine adj P (individualizedColouring n (T ∪ S)) w →
+    OrbitPartition adj P (T ∪ S) v w
+
+/-- **The reduction.** A witness-upgrade discharges a layer step. Uses set-monotonicity
+(`warmRefine_indiv_mono`) to pull a `(T∪S)`-cell back to a `T`-cell, then `CellsAreOrbits T`
+to get the `Aut_T`-orbit, then the upgrade. This is where the Phase-C composition meets
+the per-layer content. -/
+theorem layerStep_of_witnessUpgrade {T S : Finset (Fin n)}
+    (hwu : WitnessUpgrade adj P T S) : LayerStep adj P T S := by
+  intro hco v w hcell
+  exact hwu v w (hco v w (warmRefine_indiv_mono hcell)) hcell
+
+/-! ### Trivial layer-step instances (real corollaries) -/
+
+/-- The empty layer is a no-op: `LayerStep adj P T ∅`. -/
+theorem layerStep_empty {T : Finset (Fin n)} : LayerStep adj P T ∅ := by
+  intro h; rwa [Finset.union_empty]
+
+/-- A layer adding nothing new (`S ⊆ T`) is a no-op. -/
+theorem layerStep_subset {T S : Finset (Fin n)} (hS : S ⊆ T) : LayerStep adj P T S := by
+  intro h; rwa [Finset.union_eq_left.mpr hS]
+
+/-- If the widened set is independently orbit-recoverable, the step holds (its hypothesis
+is irrelevant). The hook for a layer theorem that applies to `G` directly. -/
+theorem layerStep_of_cellsAreOrbits {T S : Finset (Fin n)}
+    (h : CellsAreOrbits adj P (T ∪ S)) : LayerStep adj P T S := fun _ => h
+
+/-- **The recursion bottom.** If the widened set discretizes warm refinement, the step
+holds unconditionally (`cellsAreOrbits_of_discrete`). The final layer reaching `{1}`. -/
+theorem layerStep_of_discrete {T S : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n (T ∪ S)))) :
+    LayerStep adj P T S := fun _ => cellsAreOrbits_of_discrete hd
+
+/-! ### Support-backbone sufficient condition (bridge to harvested generators) -/
+
+/-- **Witness-upgrade from path-fixing automorphisms.** If every same-orbit, same-cell
+pair `v, w` admits a `P`-preserving automorphism whose support avoids the committed set
+`T ∪ S` (so it fixes the whole individualized path) and sends `v ↦ w`, the upgrade holds
+(via `orbitPartition_of_support_disjoint`). This is exactly what the cascade/linear
+oracles harvest — a verified generator fixing the committed path — so it is the bridge
+from Theorem 3a's per-layer obligation to the algorithm's actual output. -/
+theorem witnessUpgrade_of_pathFixing {T S : Finset (Fin n)}
+    (h : ∀ v w, OrbitPartition adj P T v w →
+      warmRefine adj P (individualizedColouring n (T ∪ S)) v
+        = warmRefine adj P (individualizedColouring n (T ∪ S)) w →
+      ∃ π : Equiv.Perm (Fin n), IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u)
+        ∧ Disjoint (T ∪ S) π.support ∧ π v = w) :
+    WitnessUpgrade adj P T S := by
+  intro v w horb hcell
+  obtain ⟨π, hπ, hP, hdisj, hvw⟩ := h v w horb hcell
+  exact orbitPartition_of_support_disjoint hπ hP hdisj hvw
+
 end ChainDescent
