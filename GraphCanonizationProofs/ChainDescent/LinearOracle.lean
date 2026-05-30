@@ -46,6 +46,8 @@ namespace ChainDescent
 variable {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
   {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
 
+/-! ## §L.1 — Soundness anchor (B2.1) -/
+
 /-- **A twist realises the flip of decision `(a, b)` on branch `σ`.** The permutation
 `t`, acting on the leaf adjacency matrix by relabelling, carries `σ`'s canonical leaf to
 that of the flipped branch `σ.flipPair a b`. This is the exact shape of the

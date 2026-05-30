@@ -163,6 +163,16 @@ phase** — one discharged conditionally, one sharpened to its open core:
   on the completeness obligation).
 - **General-class completeness** ≡ `GI ∈ P` — recorded as a conjecture (not a
   target); proved instances are CFI(OddDegree) and rank-≤2 schemes.
+- **Support backbone (§C.0.1) + support-grading.** `orbitPartition_of_support_disjoint`
+  / `exists_orbit_witness_of_aut` pin `π ∈ Aut_S ⟺ Disjoint S (π.support)` at the
+  permutation level, grading recoverability by `|supp π|`: a symmetry of support `s` is a
+  within-cell orbit witness down to depth `n − s`. **Both ends of the spectrum are
+  proved** — full-support (rotations) at the root, and the `s = 2` **twin endpoint**
+  `cellsAreOrbits_of_compl_card_le_two` (`|S| ≥ n − 2 ⟹ CellsAreOrbits`, the
+  transposition-of-twins witness) — with `cellsAreOrbits_of_discrete` the discrete
+  anchor in between. *Caveat (informal):* "fixing into `supp(π)` removes `π` from the
+  *pointwise stabiliser*" is **relocation to the stabilizer-chain transversal, not
+  destruction**; making that rigorous needs the group object (tractable-buildout Part A).
 
 **Status: the cascade-oracle Lean contract is complete (Phases A+B+C), builds
 clean, axiom-clean, no `sorry`.** Soundness is proved unconditionally; completeness

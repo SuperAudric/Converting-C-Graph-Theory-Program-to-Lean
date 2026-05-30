@@ -32,6 +32,21 @@ load-bearing:
 > **historical** (recorded but not binding — notably the matroid
 > framing, which is closed). See §9.
 
+> **Lean status (2026-05-30) — the construction gap is resolved at the leaf
+> level; read §8.2 then this doc.** The "one genuinely unspecified piece" framing
+> below (the candidate-twist *construction*, §4) is the **C# / online / decision-node**
+> view. The Lean contract operates at **leaves**, and there the construction is
+> **forced, not searched**: `canonAdj σ = labelledAdj (rankPerm π_σ) adj`, so the two
+> branches' leaves differ by exactly the rank rebasing `candidateTwist`, which always
+> realises the flip — soundness is fully discharged (`canonicalTwistOracle` satisfies
+> `LeafTwistSpec`), and only the §4.5 edge-check is runtime content.
+> [`ChainDescent/LinearOracle.lean`](../GraphCanonizationProofs/ChainDescent/LinearOracle.lean)
+> (§L.1–§L.3), detail in §8.2 below. So §4's prose is the *design intent* (and the
+> decision-node behaviour the C# implements); the Lean *soundness* no longer depends on
+> resolving §4.2's matching — it is determined. What remains open is **completeness**
+> (does the forced candidate verify exactly when the decision is a real abelian
+> symmetry) and the `canonForm` lex-min tie — see §8.2.
+
 ---
 
 ## 1. Purpose and scope

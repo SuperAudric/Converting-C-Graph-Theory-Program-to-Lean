@@ -220,6 +220,38 @@ the natural next rigor once Part A lands.
   predicate + discovery precise. Main hazard: cleanly delineating a
   coupled component from the refinement footprint.
 
+> **STATUS — B2 soundness core DONE (2026-05-30).** Built in
+> [`ChainDescent/LinearOracle.lean`](../GraphCanonizationProofs/ChainDescent/LinearOracle.lean)
+> (module `ChainDescent.LinearOracle`, axiom-light, no `sorry`); detail in
+> [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md) §8.2;
+> theorem map in `PublicTheoremIndex.md` §L.1–§L.3.
+>
+> - **The plan above is superseded on one point.** It anticipated a
+>   `UniqueCandidateTwist S K t` predicate + "discovery as a total function". At
+>   the **leaf level** (where `LinearOracleSpec` operates) the twist is not
+>   *searched* among candidates — it is **forced**: `canonAdj σ = labelledAdj
+>   (rankPerm π_σ) adj`, so the two branches' leaves differ by exactly the rank
+>   rebasing `candidateTwist = rankPerm π_flip · (rankPerm π_σ)⁻¹`, which *always*
+>   realises the flip (`candidateTwist_realizesFlip`, via the `canonAdj_rebase`
+>   bridge = the `warm_6_2`/spine → `canonAdj` step). Determinacy is then automatic
+>   (`candidateTwist_unique`), discharging the iso-invariance gate (strategy §15
+>   gap 2) at the leaf level. The §4.2 "construction risk" (calculator §9 item 4)
+>   **dissolves**: the permutation is determined; only the §4.5 edge-check is
+>   runtime content.
+> - **Delivered:** `RealizesFlip`, `TwistWitness`, `twistOracle` +
+>   `twistOracle_leafTwist` (soundness for any verified discovery, explicit witness
+>   `σ' = flipPair σ`); `candidateTwist` + `canonAdj_rebase` + the forced-candidate
+>   realisation; `canonicalTwistOracle` — a **fully concrete** `LinearOracleSpec`
+>   (select pair → forced candidate → return iff `IsAut` verifies) satisfying
+>   `LeafTwistSpec`; `candidateTwist_flip_inv` (the `Z₂` involution) — with
+>   `flipPair_comm` the elementary-abelian `Z₂^d` structure.
+> - **Remaining (B2):** (i) the `canonForm` lex-min tie (Tier-3 §8.2 step 3 — needs
+>   a descent-with-pruning model, the genuine big piece); (ii) *completeness* — the
+>   forced candidate verifies **iff** the decision is a real abelian symmetry
+>   (the effectiveness side, C#-validated on CFI, Lean-connectable to orbit
+>   recovery); (iii) lifting the twists to an elementary-abelian *subgroup* `N` —
+>   that is **Part A** (see the precursors note at the top of Part A).
+
 ### B3 — Sub-claim 3 (oracle alternation) — *needs B2*
 
 > The cascade and linear oracles compose soundly under any call order,
@@ -251,17 +283,20 @@ the natural next rigor once Part A lands.
    (independent) ── B2 (linear) ────┴── B3 (alternation)
 ```
 
-**Recommended order:**
+**Recommended order** (progress as of 2026-05-30):
 
-1. **B2 first.** It is the most self-contained (permutation-level,
-   leans on already-proved `warm_6_2`/spine/`flipPair`), formalizes a
-   *built-and-validated* C# component, and produces a reusable formal
-   object that B3 and the Tier-3 narrative both want. Lowest infra cost.
-2. **Part A (A1→A2→A3→A4).** The gating infrastructure for B1. A4 is the
-   only real work; A1–A3 are glue.
+1. **B2 — soundness core DONE** (see B2 STATUS above). The reusable formal object
+   (`canonicalTwistOracle`, `candidateTwist`) that B3 and the Tier-3 narrative want
+   exists. Remaining B2 pieces (canonForm tie, completeness, subgroup `N`) are
+   listed there; (iii) is Part A.
+2. **Part A (A1→A2→A3→A4) — NEXT, now the convergence point.** The gating
+   infrastructure for B1, *and* what makes rigorous (a) the support backbone's
+   "fixing relocates to transversal, not destroys" and (b) B2's twists-as-`N`
+   (the Part A precursors note). A4 is the only real work; A1–A3 are glue.
 3. **B1 (Tier 3a).** The headline composition theorem, once A4's
    cell = quotient-vertex lemma is in hand.
-4. **B3.** Cheap capstone once B2 + the cascade contract are in place.
+4. **B3.** Cheap capstone once B2 + the cascade contract are in place. (Cascade
+   side already axiom-clean; B2 soundness done — B3 is the alternation glue.)
 
 Each step independently axiom-clean and independently valuable: B2 gives
 the abelian-stripping theorem; A+B1 gives polynomial canonization for

@@ -491,7 +491,9 @@ The a-priori cascade-oracle Lean contract (plan: `docs/chain-descent-cascade-ora
 
 ## ChainDescent/LinearOracle.lean
 
-The linear-oracle / abelian-stripping work (tractable-buildout B2; plan in `docs/chain-descent-linear-oracle.md`). Built on the §15.8 scaffolding (`DirAssignment`/`flipPair`/`LinearOracleSpec`/`LeafTwistSpec`/`canonAdj`). Builds axiom-clean (`refineStep`/`refineStep_iff` + foundationals), no `sorry`. **B2.1 (soundness anchor)** complete; B2.2 (construction determinacy) and B2.3 (`warm_6_2`→`canonAdj` bridge) are later milestones. The abelian `Z₂^d` structure is the already-proved `DirAssignment.flipPair_comm`/`flipPair_idempotent`.
+The linear-oracle / abelian-stripping work (tractable-buildout B2; plan + status in `docs/chain-descent-linear-oracle.md` §8.2). Built on the §15.8 scaffolding (`DirAssignment`/`flipPair`/`LinearOracleSpec`/`LeafTwistSpec`/`canonAdj`). Builds axiom-clean (`refineStep`/`refineStep_iff` + foundationals), no `sorry`. **B2 soundness core DONE 2026-05-30:** §L.1 soundness anchor, §L.2 the *forced* candidate twist (rank rebasing — the construction is determined, not searched; the `canonAdj_rebase` bridge), §L.3 abelian `Z₂^d` structure. Remaining: `canonForm` lex-min tie (needs descent-with-pruning model), completeness, lifting twists to subgroup `N` (Part A).
+
+### §L.1 — Soundness anchor (B2.1)
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
