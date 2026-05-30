@@ -614,3 +614,10 @@ route was rejected (`refineStep` axiomatic, no cross-size API).
 | `layerStep_of_witnessUpgrade` | **The reduction**: a witness-upgrade discharges a `LayerStep` (via `warmRefine_indiv_mono` + `CellsAreOrbits T`). Where Phase C meets the per-layer content. | **Key**; axiom-light |
 | `layerStep_empty` / `layerStep_subset` / `layerStep_of_cellsAreOrbits` / `layerStep_of_discrete` | Trivial real instances: no-op layer (`S = ∅`), `S ⊆ T`, independently-recoverable target, and the discretizing recursion-bottom. | axiom-light |
 | `witnessUpgrade_of_pathFixing` | **Bridge to harvested generators**: if every same-orbit, same-cell pair has a `P`-preserving automorphism with support disjoint from `T ∪ S` (fixing the committed path) sending `v ↦ w`, the upgrade holds (`orbitPartition_of_support_disjoint`). Exactly what the cascade/linear oracles produce. | axiom-light |
+
+### Step 5 — the synthesis (Theorem 3a reduced to harvested generators)
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `cascadeComposition_pathFixing` | **Theorem 3a, reduced to harvested path-fixing generators**: cumulative sets by increments + layer-1 recoverable + *every layer's residual symmetry realized by path-fixing automorphisms* (`hwit`, = harvested generators) + final set a base ⟹ warm refinement at `T k` is `Discrete`. Reduces the whole of Theorem 3a to one hypothesis (per-layer path-fixing witness existence). The bridge to calculator §2's harvested-chain picture. | **Key theorem**; axiom-light |
+| `cascadeComposition_twoLayer` | The smallest genuine composition: outer cascade-class layer at `T₀` + inner path-fixing layer (increment `S`) + union a base ⟹ `Discrete`. The `CFI(scheme)` / `Scheme(CFI)` shape once the inner witnesses are constructed. | axiom-light |

@@ -271,4 +271,61 @@ theorem witnessUpgrade_of_pathFixing {T S : Finset (Fin n)}
   obtain ⟨π, hπ, hP, hdisj, hvw⟩ := h v w horb hcell
   exact orbitPartition_of_support_disjoint hπ hP hdisj hvw
 
+/-! ### Step 5 — the synthesis: Theorem 3a reduced to harvested path-fixing generators
+
+The end-to-end composition. Chaining `cascadeComposition` (Phase C) through
+`layerStep_of_witnessUpgrade` + `witnessUpgrade_of_pathFixing` (Phase D) reduces the
+**whole** of Theorem 3a to a single hypothesis: *at every layer, the residual orbit
+symmetry is realized by automorphisms that fix the committed path* (support disjoint
+from the cumulative individualization set). That hypothesis is exactly the
+**harvested-generator** picture of [`chain-descent-calculator.md`](../../docs/chain-descent-calculator.md)
+§2 — every cascade-oracle orbit certification and every linear-oracle twist is a
+verified automorphism fixing the path. So this theorem is the precise bridge from the
+combinatorial composition to the algorithm's actual output.
+
+What it does **not** yet contain: the *existence* of those path-fixing witnesses for a
+concrete layer class (CFI gadget twists, scheme automorphisms). That is the remaining
+deep work — it needs the gadget/scheme machinery to construct the witnesses — and is
+correctly isolated here as the sole hypothesis. -/
+
+/-- **Theorem 3a, reduced to harvested path-fixing generators.** Cumulative
+individualization sets `T` built by increments `S` (`T (i+1) = T i ∪ S i`), with layer 1
+recoverable (`hbase`), every layer's residual symmetry realized by **path-fixing**
+automorphisms (`hwit` — support disjoint from the committed set, i.e. harvested
+generators), and the final set a base (`hbaseSet`). Then warm refinement on `(G, T k)`
+reaches the **discrete** partition. With `cumulative_card_le`, depth `≤ Σ fᵢ` — the
+depths add, *unconditionally modulo the existence of the per-layer path-fixing
+witnesses*. -/
+theorem cascadeComposition_pathFixing {k : Nat}
+    (T : Nat → Finset (Fin n)) (S : Nat → Finset (Fin n))
+    (hT : ∀ i, i < k → T (i + 1) = T i ∪ S i)
+    (hbase : CellsAreOrbits adj P (T 0))
+    (hwit : ∀ i, i < k → ∀ v w, OrbitPartition adj P (T i) v w →
+      warmRefine adj P (individualizedColouring n (T i ∪ S i)) v
+        = warmRefine adj P (individualizedColouring n (T i ∪ S i)) w →
+      ∃ π : Equiv.Perm (Fin n), IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u)
+        ∧ Disjoint (T i ∪ S i) π.support ∧ π v = w)
+    (hbaseSet : IsBase adj P (T k)) :
+    Discrete (warmRefine adj P (individualizedColouring n (T k))) := by
+  refine cascadeComposition T hbase (fun i hi => ?_) hbaseSet
+  rw [hT i hi]
+  exact layerStep_of_witnessUpgrade (witnessUpgrade_of_pathFixing (hwit i hi))
+
+/-- **Two-layer corollary** — the smallest genuine composition. An outer layer
+recoverable at `T₀` (a cascade-class set, e.g. Tier 1/2 on `G`), an inner layer with
+increment `S` whose residual symmetry is path-fixing, and the union a base. The
+`CFI(scheme)` / `Scheme(CFI)` shape (build-plan §5.b) once the inner witnesses are
+constructed. -/
+theorem cascadeComposition_twoLayer {T₀ S : Finset (Fin n)}
+    (hbase : CellsAreOrbits adj P T₀)
+    (hwit : ∀ v w, OrbitPartition adj P T₀ v w →
+      warmRefine adj P (individualizedColouring n (T₀ ∪ S)) v
+        = warmRefine adj P (individualizedColouring n (T₀ ∪ S)) w →
+      ∃ π : Equiv.Perm (Fin n), IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u)
+        ∧ Disjoint (T₀ ∪ S) π.support ∧ π v = w)
+    (hbaseSet : IsBase adj P (T₀ ∪ S)) :
+    Discrete (warmRefine adj P (individualizedColouring n (T₀ ∪ S))) :=
+  discrete_of_cellsAreOrbits_base
+    (layerStep_of_witnessUpgrade (witnessUpgrade_of_pathFixing hwit) hbase) hbaseSet
+
 end ChainDescent

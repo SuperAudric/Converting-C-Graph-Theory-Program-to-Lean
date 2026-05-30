@@ -161,6 +161,26 @@ per-layer step. This is the one place the quotient bites.
    the path-fixing witnesses). Easiest-first: rigid base (vacuous) → Tier-2 depth-1 →
    CFI. Each yields an unconditional composition corollary.
 
+> **STATUS — step 5 synthesis DONE (2026-05-30); concrete per-class witness existence
+> remains.** Built `cascadeComposition_pathFixing` and `cascadeComposition_twoLayer` in
+> [`ChainDescent/Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean)
+> (axiom-clean). **The whole of Theorem 3a is now reduced to a single hypothesis**: at
+> every layer the residual orbit symmetry is realized by **path-fixing automorphisms**
+> (support disjoint from the committed set) — i.e. the harvested-generator picture
+> (calculator §2). The rigid/trivial layer is `layerStep_empty` (done).
+>
+> **What genuinely remains (the deep work):** the *existence* of the path-fixing
+> witnesses for a concrete layer class. Analysis during the build clarified *why* this
+> is the residue and not more: any layer dischargeable by a whole-graph Tier theorem is
+> already covered by `cascadeComposition_single` (no composition needed); composition's
+> value is layers dischargeable only *relative* to the previous level, whose witnesses
+> are exactly the path-fixing automorphisms `hwit` abstracts. Constructing them
+> concretely (CFI gadget twists; scheme automorphisms) needs the gadget/scheme
+> machinery and a concrete layered graph — a multi-session effort, correctly isolated as
+> the single hypothesis of `cascadeComposition_pathFixing`. The linear oracle's verified
+> twists (B2 `canonicalTwistOracle`) are a candidate witness source for the abelian/CFI
+> layer, pending a support-disjointness bound on `candidateTwist`.
+
 ## 4. The group-chain interpretation (faithfulness bridge) — optional, ~80 lines
 
 The core (Phases A–C) is stated combinatorially (cumulative individualization sets +
