@@ -81,10 +81,10 @@ end OrbitPartition
 
 /-! ## §C.0.1 — The support backbone
 
-Where does an individualization actually destroy a symmetry? `OrbitPartition.mono`
-says fixing *more* shrinks orbits, but the sharp statement is in terms of the
-permutation's **support** `π.support = {x | π x ≠ x}`: an automorphism `π` survives
-the individualization of `S` exactly when `S` avoids `supp(π)`
+When does an individualization remove a symmetry from the **pointwise stabilizer**?
+`OrbitPartition.mono` says fixing *more* shrinks orbits, but the sharp statement is in
+terms of the permutation's **support** `π.support = {x | π x ≠ x}`: an automorphism `π`
+lies in `Aut_S` exactly when `S` avoids `supp(π)`
 (`π ∈ Aut_S ⟺ Disjoint S π.support`). Two consequences:
 
 * `orbitPartition_of_support_disjoint` — a `P`-preserving automorphism `π` with
@@ -92,18 +92,29 @@ the individualization of `S` exactly when `S` avoids `supp(π)`
   support. (The `FixesPointwise` conjunct of `OrbitPartition` *is* support-disjointness.)
 * `exists_orbit_witness_of_aut` — so the orbit pair `(v, π v)` stays available all the
   way down to `S = (π.support)ᶜ`, of size `n − |supp π|`. This is the **availability
-  depth** behind the support-grading: a symmetry of support `s` is certifiable for any
-  individualization of `≤ n − s` vertices — fixed-point-free symmetries (e.g. rotations,
-  `s = n`) only at the root, transpositions (`s = 2`) down to depth `n − 2` (the twin
-  end). It is *availability*, not *certification*: whether the descent harvests `π`
-  before individualizing into `supp(π)` is the open bridging obligation (1b), now
-  phrased as a support condition rather than a depth one. -/
+  depth** behind the support-grading: a symmetry of support `s` is a *within-cell* orbit
+  witness for any individualization of `≤ n − s` vertices — fixed-point-free symmetries
+  (e.g. rotations, `s = n`) only at the root, transpositions (`s = 2`) down to depth
+  `n − 2` (the twin end).
+
+**Caveat — this is the clean-harvest *window*, not a deadline.** `S ∩ supp(π) ≠ ∅`
+removes `π` from the *pointwise stabilizer* `Aut_S`, but `π` is **not destroyed** — it
+relocates to the stabilizer-chain transversal (a coset representative relating
+branches), still a member of `Aut(adj)`, harvested cross-branch instead of within-cell.
+`Aut(adj)` is graph-intrinsic; no individualization/ordering decision can remove a graph
+automorphism (a decision ordering `(a,b)` consumes only the symmetries with `π a = b` —
+those for which `(a,b)` is a *projected pair*; every `π` with `π a ≠ b` maps the decision
+to a parallel one and survives intact). So the real open obligation (1b) is *discovery* —
+the oracle recognizing each orbit/transversal so it prunes rather than branches — not a
+race against destruction. Fully modelling the transversal relocation needs the
+stabilizer-chain group object (tractable-buildout Part A), not yet built. -/
 
 /-- **Support-disjoint orbit witness.** A `P`-preserving automorphism `π` whose support
 is disjoint from the individualized set `S` (equivalently: `π` fixes `S` pointwise)
 and which sends `v` to `w` puts `v, w` in the same `Aut_S` orbit. The
-support-disjointness *is* the `FixesPointwise` conjunct, made explicit — fixing `S`
-collapses `π` only when `S` meets `supp(π)`. -/
+support-disjointness *is* the `FixesPointwise` conjunct, made explicit — `S` meeting
+`supp(π)` removes `π` from the pointwise stabilizer `Aut_S` (relocating it to the
+stabilizer-chain transversal, *not* destroying it; see §C.0.1). -/
 theorem orbitPartition_of_support_disjoint {n : Nat} {adj : AdjMatrix n}
     {P : PMatrix n} {S : Finset (Fin n)} {π : Equiv.Perm (Fin n)} {v w : Fin n}
     (hπ : IsAut π adj) (hP : ∀ x u, P (π x) (π u) = P x u)
