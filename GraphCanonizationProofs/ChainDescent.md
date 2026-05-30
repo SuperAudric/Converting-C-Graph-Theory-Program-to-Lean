@@ -127,14 +127,20 @@ coincidence; the fresh colour rules that out).
 - `Colouring n := Fin n → Nat` — a vertex colouring.
 - `applyGuess P a b dir` — set `P(a,b) := dir`, `P(b,a) := neg dir`, else `P`.
 - `signature adj P χ v` — the multiset of `(χ u, adj v u, P v u)` over all `u ≠ v`.
-- `refineStep` — **the one axiom.** One round of 1-WL refinement, characterised by
+- `refineStep` — one round of 1-WL refinement, now a **concrete `def`** (not an
+  axiom): `refineStep adj P χ v := Encodable.encode (sigKey adj P χ v)`, where
+  `sigKey` is the canonical key `χ v :: sort (map encTuple (signature adj P χ v))`
+  (own colour, then the sorted encoded signature — the C#'s
+  `WarmPartition.RefineRound`). Its partition behaviour is the **theorem**
   `refineStep_iff`:
   > `refineStep adj P χ v = refineStep adj P χ w  ↔  χ v = χ w ∧ signature adj P χ v = signature adj P χ w`.
 
-  It is axiomatised, not defined, because the colour *encoding* (how
-  `(old colour, signature)` injects into `Nat`) is irrelevant to partition-level
-  reasoning. Every proof uses **only** `refineStep_iff` — never the encoding. This
-  is the sole modelling axiom; everything else is a concrete `def`.
+  Concretised 2026-05-30 (was previously the sole modelling axiom). The
+  `Encodable` encoding fixes a canonical, iso-invariant cell-id order; the induced
+  *partition* is identical to any injective encoding, so partition-level proofs are
+  unchanged — they now go through the `refineStep_iff` *theorem*. Concreteness also
+  makes **value-level** facts provable (the cross-config `*_transport` lemmas the
+  abelian-sufficiency discharge needs), which the abstract axiom could not support.
 - `warmRefine adj P χ := (refineStep adj P)^[n] χ` — warm refinement (`n` rounds
   always suffice to reach fixpoint).
 - `samePartition χ χ' := ∀ i j, χ i = χ j ↔ χ' i = χ' j` — same cell partition;
@@ -145,9 +151,12 @@ coincidence; the fresh colour rules that out).
 ## 7. Proof state
 
 All results below are **proved with no `sorry`** and depend only on
-`propext`, the modelling axioms `refineStep` / `refineStep_iff`,
-`Classical.choice`, `Quot.sound` — in particular **no `native_decide`**
-(machine-checked refutations use kernel `decide`).
+`propext`, `Classical.choice`, `Quot.sound` — in particular **no `native_decide`**
+(machine-checked refutations use kernel `decide`). As of 2026-05-30 `refineStep`
+is a concrete `def` (no longer an axiom), so `refineStep` / `refineStep_iff` have
+**left the axiom basis** — every former "axiom-clean (refineStep + refineStep_iff)"
+result is now clean over the strictly smaller basis above. (Per-lemma "axiom-clean"
+labels elsewhere remain true; the basis they name has shrunk.)
 
 **Proved:**
 

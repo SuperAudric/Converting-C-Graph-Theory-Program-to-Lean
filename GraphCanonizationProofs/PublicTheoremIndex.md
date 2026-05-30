@@ -36,7 +36,8 @@ The Name, Line, and if present "Used By" columns are mantained by GenerateTheore
 | `transitiveClose_swap_false` | 283-297 | Refutation that `transitiveClose` commutes with σ-swap unconditionally; uses `conflictMatrix` as a 4-vertex witness. | Machine-checked refutation |
 | `Colouring` | 301-302 | A vertex colouring `Fin n → Nat`. | Definition |
 | `signature` | 304-328 | Multiset signature of vertex `v` under colouring `χ` and state `(adj, P)`: collects `(χ u, adj.adj v u, P v u)` tuples for all `u ≠ v`. | — |
-| `warmRefine` | 330-339 | Warm 1-WL refinement: iterate `refineStep` `n` times starting from `initial`. `noncomputable` because `refineStep` is axiomatised. | Definition (`noncomputable`) |
+| `warmRefine` | 330-339 | Warm 1-WL refinement: iterate `refineStep` `n` times starting from `initial`. `noncomputable` (downstream of `Encodable.encode`). | Definition (`noncomputable`) |
+| `refineStep` / `refineStep_iff` | ~320-417 | **Concrete (2026-05-30, no longer axioms):** `refineStep adj P χ v := Encodable.encode (sigKey adj P χ v)` (own colour + sorted encoded signature = the C# `WarmPartition.RefineRound`); `refineStep_iff` (same colour ⟺ same old colour + same signature) is now a **theorem**. Removes `refineStep`/`refineStep_iff` from the axiom basis project-wide. Helpers: `POE.toNat`(_injective), `encTuple`(_injective), `sigKey`, `sigKey_eq_iff`. | Def + theorem |
 | `samePartition` | 343-346 | Two colourings induce the same partition iff their equivalence classes coincide: `χ₁ i = χ₁ j ↔ χ₂ i = χ₂ j` for every `i, j`. | — |
 | `refineStep_refines` | 365-370 | Refinement is split-only (one round): if two vertices end up with the same refined colour they had the same old colour. | — |
 | `warmRefine_refines` | 372-398 | Warm refinement is split-only: `warmRefine adj P initial v = warmRefine adj P initial w` implies `initial v = initial w`. | — |

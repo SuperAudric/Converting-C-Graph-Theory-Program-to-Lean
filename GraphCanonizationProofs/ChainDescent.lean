@@ -3,7 +3,10 @@ import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Fintype.Pi
 import Mathlib.Data.Fintype.Prod
 import Mathlib.Data.Multiset.Basic
+import Mathlib.Data.Multiset.Sort
+import Mathlib.Data.Nat.Pairing
 import Mathlib.Data.List.FinRange
+import Mathlib.Logic.Equiv.List
 import Mathlib.Order.PiLex
 import Mathlib.Logic.Function.Iterate
 
@@ -309,23 +312,80 @@ def signature {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
   ((Finset.univ : Finset (Fin n)).filter (· ≠ v)).val.map fun u =>
     (χ u, adj.adj v u, P v u)
 
-/-- One round of 1-WL refinement: assign each vertex a new colour
-encoding `(old colour, signature)`.
+/-- Numeric code for a partial-order entry, matching the C# packing (`p + 1`,
+with `less = -1`): `less ↦ 0 < unknown ↦ 1 < greater ↦ 2`. -/
+def POE.toNat : POE → Nat
+  | .less => 0
+  | .unknown => 1
+  | .greater => 2
 
-We abstract over the encoding via the axiom `refineStep_iff` below.
-Concretely the canonical implementation would pair `(χ v, sortedSig v)`
-and inject into `Nat` via a fixed `(Nat × Multiset _) ↪ Nat`; we don't
-fix one because the partition-level reasoning that downstream proofs use
-doesn't depend on the encoding. -/
-axiom refineStep {n : Nat} : AdjMatrix n → PMatrix n → Colouring n → Colouring n
+theorem POE.toNat_injective : Function.Injective POE.toNat := by
+  intro a b h
+  cases a <;> cases b <;> first | rfl | exact absurd h (by decide)
 
-/-- Partition-level characterisation of `refineStep`: two vertices get
-the same refined colour iff they had the same old colour AND the same
-signature. -/
-axiom refineStep_iff {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+/-- Canonical injection of a signature tuple `(neighbour-colour, edge-label,
+P-relation)` into `Nat` (Cantor pairing). Mirrors the C#'s packing of a
+neighbour tuple into one machine word; any injection induces the same
+partition, so the specific choice only fixes a canonical (iso-invariant)
+cell-id order. -/
+def encTuple : Nat × Nat × POE → Nat :=
+  fun t => Nat.pair t.1 (Nat.pair t.2.1 t.2.2.toNat)
+
+theorem encTuple_injective : Function.Injective encTuple := by
+  rintro ⟨c, a, p⟩ ⟨c', a', p'⟩ h
+  simp only [encTuple, Nat.pair_eq_pair] at h
+  obtain ⟨rfl, rfl, hp⟩ := h
+  obtain rfl := POE.toNat_injective hp
+  rfl
+
+/-- The canonical refinement **key** of a vertex `v`: its old colour, followed by
+the sorted (encoded) signature multiset, viewed as a `List Nat` under the
+lexicographic order. This is the C#'s `[own-color, sorted neighbour-tuples]`
+signature. Two vertices share a key iff they have the same old colour and the
+same signature (`sigKey_eq_iff`). -/
+def sigKey {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (χ : Colouring n)
+    (v : Fin n) : List Nat :=
+  χ v :: Multiset.sort ((signature adj P χ v).map encTuple) (· ≤ ·)
+
+theorem sigKey_eq_iff {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) (v w : Fin n) :
+    sigKey adj P χ v = sigKey adj P χ w ↔
+      χ v = χ w ∧ signature adj P χ v = signature adj P χ w := by
+  unfold sigKey
+  rw [List.cons.injEq]
+  refine and_congr_right (fun _ => ?_)
+  constructor
+  · intro hsort
+    have hmap : (signature adj P χ v).map encTuple
+        = (signature adj P χ w).map encTuple := by
+      have := congrArg (fun l : List Nat => (↑l : Multiset Nat)) hsort
+      simpa only [Multiset.sort_eq] using this
+    exact Multiset.map_injective encTuple_injective hmap
+  · intro hsig; rw [hsig]
+
+/-- One round of 1-WL refinement (concrete): recolour each vertex by a fixed
+injective encoding of its canonical `sigKey`. This realises the C#'s
+`WarmPartition.RefineRound` (canonical sort of `(own-color, sorted
+neighbour-tuple multiset)`): the induced **partition is identical** (same
+signature ⟹ same colour, `refineStep_iff`), and the colour order is a fixed
+iso-invariant order on cells (the `Encodable` encoding fixes a canonical cell
+numbering; any injection induces the same partition, so the program's
+order-independent properties are unaffected). -/
+noncomputable def refineStep {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ : Colouring n) : Colouring n :=
+  fun v => Encodable.encode (sigKey adj P χ v)
+
+/-- Partition-level characterisation of `refineStep`: two vertices get the same
+refined colour iff they had the same old colour AND the same signature. Formerly
+an axiom; now a theorem, since `refineStep` is concrete. -/
+theorem refineStep_iff {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) (v w : Fin n) :
     refineStep adj P χ v = refineStep adj P χ w ↔
+      χ v = χ w ∧ signature adj P χ v = signature adj P χ w := by
+  show Encodable.encode (sigKey adj P χ v) = Encodable.encode (sigKey adj P χ w) ↔
       χ v = χ w ∧ signature adj P χ v = signature adj P χ w
+  rw [Encodable.encode_injective.eq_iff]
+  exact sigKey_eq_iff adj P χ v w
 
 /-- Warm refinement: iterate `refineStep` `n` times starting from
 `initial`. `n` iterations always suffice because each round either
@@ -3453,6 +3513,91 @@ theorem warmRefine_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
     warmRefine adj P χ (π v) = warmRefine adj P χ v := by
   unfold warmRefine
   exact iterate_refineStep_invariant_of_isAut hπ hP n hχ v
+
+/-! ### §16.2b — Cross-config transport under an automorphism
+
+Now that `refineStep` is concrete, we can relate refinements of *two different*
+`(P, χ)` configurations that an automorphism `g` carries onto one another — not
+just the invariance of a single configuration (§16.2). If `g ∈ Aut(adj)` maps
+config `(P₁, χ₁)` to `(P₂, χ₂)` — `P₂ (g·)(g·) = P₁` and `χ₂ ∘ g = χ₁` — then warm
+refinement transports: `warmRefine adj P₂ χ₂ (g v) = warmRefine adj P₁ χ₁ v`. This
+is the engine for `realizableFlip_of_cfi` (M1): the orbit automorphism that swaps a
+decided pair carries the `σ`-branch refinement onto the flip-branch refinement, so
+the two leaves coincide up to `g`. (Impossible against the old abstract `refineStep`
+axiom, which fixed only the partition, not the colour values.) -/
+
+/-- **Signature transport.** An automorphism `g` carrying `(P₁, χ₁)` to `(P₂, χ₂)`
+maps the `(P₂, χ₂)`-signature at `g v` to the `(P₁, χ₁)`-signature at `v`.
+Cross-config generalisation of `signature_invariant_of_isAut`. -/
+theorem signature_transport {n : Nat} {adj : AdjMatrix n}
+    {P₁ P₂ : PMatrix n} {χ₁ χ₂ : Colouring n} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u)
+    (hχ : ∀ v, χ₂ (g v) = χ₁ v) (v : Fin n) :
+    signature adj P₂ χ₂ (g v) = signature adj P₁ χ₁ v := by
+  unfold signature
+  have key : (Finset.univ : Finset (Fin n)).filter (· ≠ g v) =
+      ((Finset.univ : Finset (Fin n)).filter (· ≠ v)).map g.toEmbedding := by
+    ext u
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
+               Equiv.coe_toEmbedding]
+    constructor
+    · intro hu
+      refine ⟨g.symm u, ?_, g.apply_symm_apply u⟩
+      intro h; apply hu; rw [← h, g.apply_symm_apply]
+    · rintro ⟨u', hu', rfl⟩
+      intro h; exact hu' (g.injective h)
+  rw [key, Finset.map_val, Multiset.map_map]
+  apply Multiset.map_congr rfl
+  intro u' _
+  simp only [Function.comp_apply, Equiv.coe_toEmbedding]
+  refine Prod.mk.injEq .. |>.mpr ⟨hχ u', ?_⟩
+  exact Prod.mk.injEq .. |>.mpr ⟨hg v u', hP v u'⟩
+
+/-- **`sigKey` transport** — immediate from `signature_transport` and `χ₂ ∘ g = χ₁`. -/
+theorem sigKey_transport {n : Nat} {adj : AdjMatrix n}
+    {P₁ P₂ : PMatrix n} {χ₁ χ₂ : Colouring n} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u)
+    (hχ : ∀ v, χ₂ (g v) = χ₁ v) (v : Fin n) :
+    sigKey adj P₂ χ₂ (g v) = sigKey adj P₁ χ₁ v := by
+  unfold sigKey
+  rw [hχ v, signature_transport hg hP hχ v]
+
+/-- **`refineStep` transport** — one round, cross-config. -/
+theorem refineStep_transport {n : Nat} {adj : AdjMatrix n}
+    {P₁ P₂ : PMatrix n} {χ₁ χ₂ : Colouring n} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u)
+    (hχ : ∀ v, χ₂ (g v) = χ₁ v) (v : Fin n) :
+    refineStep adj P₂ χ₂ (g v) = refineStep adj P₁ χ₁ v := by
+  show Encodable.encode (sigKey adj P₂ χ₂ (g v))
+     = Encodable.encode (sigKey adj P₁ χ₁ v)
+  rw [sigKey_transport hg hP hχ v]
+
+/-- **Iterated `refineStep` transport.** The `P`-hypothesis is fixed across rounds;
+the `χ`-hypothesis re-establishes itself each round (`refineStep_transport` on the
+once-refined colourings), so the induction carries it. -/
+theorem iterate_refineStep_transport {n : Nat} {adj : AdjMatrix n}
+    {P₁ P₂ : PMatrix n} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u) :
+    ∀ (k : Nat) {χ₁ χ₂ : Colouring n}, (∀ v, χ₂ (g v) = χ₁ v) →
+      ∀ v, ((refineStep adj P₂)^[k]) χ₂ (g v) = ((refineStep adj P₁)^[k]) χ₁ v := by
+  intro k
+  induction k with
+  | zero => intro χ₁ χ₂ hχ v; exact hχ v
+  | succ k ih =>
+    intro χ₁ χ₂ hχ v
+    simp only [Function.iterate_succ, Function.comp_apply]
+    exact ih (fun v' => refineStep_transport hg hP hχ v') v
+
+/-- **Warm-refinement transport.** An automorphism carrying `(P₁, χ₁)` to `(P₂, χ₂)`
+carries the warm refinement of the first onto that of the second. The cross-config
+form of `warmRefine_invariant_of_isAut`. -/
+theorem warmRefine_transport {n : Nat} {adj : AdjMatrix n}
+    {P₁ P₂ : PMatrix n} {χ₁ χ₂ : Colouring n} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hP : ∀ v u, P₂ (g v) (g u) = P₁ v u)
+    (hχ : ∀ v, χ₂ (g v) = χ₁ v) (v : Fin n) :
+    warmRefine adj P₂ χ₂ (g v) = warmRefine adj P₁ χ₁ v := by
+  unfold warmRefine
+  exact iterate_refineStep_transport hg hP n hχ v
 
 /-! ### §16.3 — Orbit partition and the trivial direction
 
