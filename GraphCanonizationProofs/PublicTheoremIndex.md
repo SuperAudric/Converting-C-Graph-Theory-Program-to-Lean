@@ -540,6 +540,18 @@ abelian-sufficiency lemma (forced candidate IsAut for genuine abelian flips, via
 | `canonicalTwistOracle_isSome_iff` | **The oracle fires ⟺ forced candidate is an automorphism** (given the pair selector returns `(a,b)`). The whole completeness question = one decidable edge-check. | **Key**; axiom-light |
 | `candidateTwist_flipBack_isAut` | **`Z₂`-direction-consistency**: firing on `σ → flip` forces firing on the flip-back `flip → σ` (its inverse, via `candidateTwist_flip_inv` + `IsAut.symm`). | axiom-light |
 
+### §L.5 — Toward abelian sufficiency (partial)
+
+The open core of completeness — *forced candidate ∈ Aut for abelian decisions* — needs
+gadget-level rank-alignment (at a leaf both branches are discrete, so `warm_6_2`'s
+partition equality is vacuous; the content is in the rank order). Provable progress:
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `rankPerm_comp` | **Rank reindexing**: `rankPerm (χ ∘ e) = rankPerm χ · e` (relabelling conjugate-shifts the rank perm). Pure `Finset.card` reindex. The precise reason colouring-alignment gives a *conjugate* of the realizing aut, not the forced candidate — the conjugation gap. | axiom-light (`propext, Quot.sound`) |
+| `candidateTwist_eq_one_of_rankPerm_eq` | **Absorbed decision**: equal leaf rank-perms ⟹ forced candidate `= 1`. | axiom-light |
+| `isAut_candidateTwist_of_rankPerm_eq` | The absorbed decision fires (candidate `= 1 ∈ Aut`) — the degenerate genuine abelian instance (branches give the identical canonical leaf). | axiom-light |
+
 ## ChainDescent/Group.lean
 
 Part A (A1–A3) of `docs/chain-descent-tier3-tractable-buildout.md` — the group object

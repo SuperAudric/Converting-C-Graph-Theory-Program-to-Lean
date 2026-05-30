@@ -394,4 +394,72 @@ theorem candidateTwist_flipBack_isAut {k : Nat} (chain : SpineChain adj P₀ χ�
   rw [candidateTwist_flip_inv]
   exact IsAut.symm h
 
+/-! ## §L.5 — Toward abelian sufficiency (partial)
+
+The open core of completeness (§L.4): *the forced candidate is an automorphism for a
+genuine abelian decision*. This section makes provable progress.
+
+**Why the leaf hides the structure.** At a leaf both branches are **discrete**, so
+`warm_6_2`'s *partition* equality (`flipPair_partition_invariant`) is **vacuous** there
+— both partitions are all-singletons. The content lives entirely in the *rank order*.
+The reindexing lemma `rankPerm_comp` makes the consequence precise: relabelling a
+colouring **conjugates** its rank permutation. So if the flip-colouring were merely
+`σ`-colouring relabelled by an automorphism `g` (the colouring-level symmetry), the
+candidate would be a *conjugate* of `g` by `rankPerm π_σ` — **not** `g`, and a conjugate
+by a non-automorphism need not be an automorphism. This is the exact reason
+colouring-alignment is insufficient and the forced candidate needs *rank*-alignment
+(C2) — which the gadget twist supplies. That gadget-level rank-alignment is the
+remaining research content.
+
+**What is provable now:** (1) `rankPerm_comp`, the reindexing infrastructure; (2) the
+**absorbed-decision** instance — when the flip leaves the leaf rank permutation
+unchanged, the candidate is the *identity* automorphism, so the oracle fires (the most
+degenerate genuine abelian symmetry: the two branches give the identical canonical
+leaf). -/
+
+/-- **Rank permutation under relabelling (reindexing).** Relabelling a colouring by a
+permutation `e` *conjugate-shifts* its rank permutation on the right:
+`rankPerm (χ ∘ e) = rankPerm χ · e`. Pure combinatorics of `vertexRank` (count of
+smaller colours), via a `Finset.card` reindex along `e`. The precise statement behind
+the §L.5 conjugation gap. -/
+theorem rankPerm_comp (χ : Colouring n) (e : Equiv.Perm (Fin n))
+    (h : Discrete χ) (h' : Discrete (fun v => χ (e v))) :
+    Colouring.rankPerm (fun v => χ (e v)) h' = Colouring.rankPerm χ h * e := by
+  ext v
+  simp only [Colouring.rankPerm_apply, Equiv.Perm.mul_apply]
+  show (Finset.univ.filter (fun u => χ (e u) < χ (e v))).card
+      = (Finset.univ.filter (fun w => χ w < χ (e v))).card
+  have key : (Finset.univ.filter (fun u => χ (e u) < χ (e v)))
+      = (Finset.univ.filter (fun w => χ w < χ (e v))).map e.symm.toEmbedding := by
+    ext u
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
+      Equiv.coe_toEmbedding]
+    constructor
+    · intro hu; exact ⟨e u, hu, by simp⟩
+    · rintro ⟨w, hw, rfl⟩; simpa using hw
+  rw [key, Finset.card_map]
+
+/-- **Absorbed-decision sufficiency.** When the two branches induce the **same leaf rank
+permutation**, the forced candidate is the identity — a trivially genuine automorphism —
+so the oracle fires. This is the degenerate end of the abelian regime: the decision is
+absorbed by refinement (the branches produce the identical canonical leaf, `canonAdj σ =
+canonAdj flip`), and the realizing symmetry is the identity. -/
+theorem candidateTwist_eq_one_of_rankPerm_eq {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (h : Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+       = Colouring.rankPerm _ (branch_discrete chain isLeaf σ)) :
+    candidateTwist chain isLeaf σ a b ha hb = 1 := by
+  rw [candidateTwist, h, mul_inv_cancel]
+
+/-- The absorbed decision fires: the forced candidate (the identity) is an automorphism. -/
+theorem isAut_candidateTwist_of_rankPerm_eq {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (h : Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+       = Colouring.rankPerm _ (branch_discrete chain isLeaf σ)) :
+    IsAut (candidateTwist chain isLeaf σ a b ha hb) adj := by
+  rw [candidateTwist_eq_one_of_rankPerm_eq chain isLeaf σ a b ha hb h]
+  exact IsAut.refl
+
 end ChainDescent
