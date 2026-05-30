@@ -30,7 +30,7 @@ oracle. It is the next lever and the path to polynomial CFI.
 > **~78 s** (~1000×). Effectiveness (§10 risk 1) is **confirmed**; the
 > mirror-read was dropped for lockstep (§4.1); the recursion is
 > **exploratory**, cost `O(n⁴)` (§4.4, §4.6). Remaining: the Lean
-> discharge (§8.2). Detail: [build brief](./chain-descent-cascade-oracle-build-brief.md).
+> discharge (§8.2). Detail: [build brief](./Archive/ChainDescent/chain-descent-cascade-oracle-build-brief.md).
 
 > **Central design claim.** The a-priori cascade oracle is **not a new
 > construction**. It is the linear oracle's already-built
@@ -219,7 +219,7 @@ provably-redundant branches.
 
 `CascadeOracleSpec` now exists, paralleling the linear oracle's contract
 ([ChainDescent/CascadeOracle.lean](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean);
-plan in [the Lean brief](./chain-descent-cascade-oracle-lean-brief.md)).
+plan in [the Lean brief](./Archive/ChainDescent/chain-descent-cascade-oracle-lean-brief.md)).
 It builds clean, axiom-clean (only `refineStep`/`refineStep_iff` + Lean
 foundationals), no `sorry`:
 
@@ -457,7 +457,7 @@ direct extension. Cost: the exploration is re-done per branching node →
 `O(n⁴)` total (vs. `O(n³)` if the path were committed and reused). Both
 polynomial; the proof only needs *polynomial*, and exploratory wins on
 composability. The `O(n³)` committed-reuse variant is a later
-optimization (fold-back, [build brief §5](./chain-descent-cascade-oracle-build-brief.md)).
+optimization (fold-back, [build brief §5](./Archive/ChainDescent/chain-descent-cascade-oracle-build-brief.md)).
 
 **Iso-invariance of the recursion.** Picking the non-singleton sub-cell
 `C` must be a function of iso-invariant cell ids (`WarmPartition.CellOf`).
@@ -642,7 +642,7 @@ under-merge).
 > A harness-grounded, milestone-by-milestone build order — tagged by
 > proof-defensibility (which milestones produce proof-backed artifacts
 > vs. empirical-only de-risking) — is in
-> [`chain-descent-cascade-oracle-build-brief.md`](./chain-descent-cascade-oracle-build-brief.md)
+> [`chain-descent-cascade-oracle-build-brief.md`](./Archive/ChainDescent/chain-descent-cascade-oracle-build-brief.md)
 > (temporary, archive after build). The summary below is the spec-level
 > version.
 
@@ -726,9 +726,9 @@ de-risking path the linear oracle followed.
 | Bounded work or flag | **Firm** | [strategy §5](./chain-descent-strategy.md). |
 | Unification (one component vs. separate cascade oracle) | **Decided: one component** | §1.4; shipped as the extended `HarvestTwists` (linear oracle = depth-0 case), no separate class. |
 | `depth_bound` value | **Shipped `n`** | Never approached (recursion bottoms out ≈ tw(H)); tightening is an unneeded optimization. |
-| Lean `CascadeOracleSpec` | **Not yet built** | §2.5, §8.2; parallel to `LinearOracleSpec`. |
+| Lean `CascadeOracleSpec` | **Built (axiom-clean)** | `ChainDescent/CascadeOracle.lean`; parallel to `LinearOracleSpec`. Phase A (soundness/validity) + Phase B (completeness reduction, wired to the orbit-recovery theorems) + Phase C (residual obligations — verdict iso-invariance discharged conditionally, localisation split into proved bounded-depth recoverability + open-but-not-GI∈P bridging). §2.5, §8.2. |
 | TC provenance (`DERIVED`/`driver`, invariant 6.4) | **Historical / not on critical path** | Inert for within-cell cascade (measured 0); the footprint is refinement-based. |
-| Matroid framing / "Tier-2 detector" | **Historical** | [matroid §8.4](./chain-descent-matroid.md), closed. Certification is a localized cascade check, not a matroid test. |
+| Matroid framing / "Tier-2 detector" | **Historical** | [matroid §8.4](./Archive/ChainDescent/chain-descent-matroid.md), closed. Certification is a localized cascade check, not a matroid test. |
 | Boolean-class certification | **Historical** | [calculator §10.2](./chain-descent-calculator.md), closed. |
 
 ---

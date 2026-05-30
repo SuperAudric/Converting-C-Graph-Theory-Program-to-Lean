@@ -28,6 +28,9 @@ GraphCanonizationProofs/                  — active Lean (ChainDescent.lean + C
 docs/                                     — active strategy / design docs
 */Archive/V4/                             — retired V4 canonizer (Apr 20–29)
 */Archive/Exploration/                    — retired exploration era (Apr 30 – May 14)
+docs/Archive/ChainDescent/                — closed chain-descent sub-threads
+                                            (matroid memo, Tier-2 experiment,
+                                            completed build briefs) — see its README
 scripts/                                  — helper scripts (long-test runner, theorem-index regen)
 ```
 

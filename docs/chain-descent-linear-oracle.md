@@ -632,7 +632,7 @@ the Lean effort is committed.
 | Canonical-id matching construction (§4.2) | **Reshapeable (heuristic)** | Sound *via verification*, not proven. C# validation on CFI confirms or revises. |
 | Non-singleton handling (§4.4) | **Firm (recurse, not index-match)** | Direct index-match is ruled out (not iso-invariant); recurse via the normal descent branch (iso-invariant), flag past the orbit-recovery depth. See [viability plan](./chain-descent-extended-twist-viability.md). |
 | "All sub-cells singleton ⟺ abelian / wall" (§4.3) | **Conjectural** | Tier-3 / orbit-recovery open content. The *behaviour* (fall-back on non-singleton) is sound; the boundary characterization is not proven. |
-| "Output IS a binary matroid / IS the Tier-2 detector" | **Historical** | [matroid §8.4, §9](./chain-descent-matroid.md). The matroid framework is **closed** — neither closure operator is a matroid. The linear oracle's output is a set of `Z_2` generators; viewing it as a binary matroid is *optional commentary*, not a design requirement. Do not treat as binding. |
+| "Output IS a binary matroid / IS the Tier-2 detector" | **Historical** | [matroid §8.4, §9](./Archive/ChainDescent/chain-descent-matroid.md). The matroid framework is **closed** — neither closure operator is a matroid. The linear oracle's output is a set of `Z_2` generators; viewing it as a binary matroid is *optional commentary*, not a design requirement. Do not treat as binding. |
 
 **On the matroid framing specifically:** the matroid memo speculated
 that the linear oracle's output, viewed as a binary matroid, *would be*
@@ -707,6 +707,6 @@ check, not a matroid-representability test.
 - [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) —
   the uniqueness test (§4.3) is a localized cascade check, tying to the
   orbit-recovery program.
-- [`chain-descent-matroid.md`](./chain-descent-matroid.md) §8.4, §9 —
+- [`chain-descent-matroid.md`](./Archive/ChainDescent/chain-descent-matroid.md) §8.4, §9 —
   **closed** framework; the "output is a binary matroid" framing is
   historical (§9 of this doc).

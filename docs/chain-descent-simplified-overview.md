@@ -227,7 +227,8 @@ named component instead of smearing it across the algorithm.
 section is the other case: a **genuine decision**, a cell that splits into
 `k ≥ 2` orbits. Genuine decisions are what make naive IR search exponential on
 CFI graphs; this is the mechanism that defuses them for the abelian case. It is
-*specified but not yet built* — the calculator doc has the full spec.
+*specified and built* (C#, plus a Lean soundness contract) — the calculator and
+linear-oracle docs have the full spec.
 
 ### 7.1 What a genuine decision looks like
 
@@ -352,7 +353,7 @@ Two places carry the precise list of what is incomplete or unproven:
   genuine hard core but also rigid "IR blind spot" graphs that have no symmetry
   to consume).
 - [`chain-descent-calculator.md`](./chain-descent-calculator.md) §9 — the oracle
-  gaps: the open per-node problem, the precise definition of "cascade", and the
-  unbuilt linear oracle.
+  gaps: the open per-node problem (T-C), the precise definition of "cascade", and
+  general-class (Tier-2/3) completeness of the now-built oracles.
 
 Read those two next; this overview was written to make them legible.

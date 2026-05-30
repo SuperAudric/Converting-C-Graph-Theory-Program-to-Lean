@@ -292,21 +292,23 @@ twists from one branch's footprint).
   gets an all-singleton footprint it collapses the decision completely.
   Sub-claim 1's abelian-stripping mechanism is empirically confirmed
   for the all-singleton case.
-- **Cascade-oracle half — the binding constraint.** The *shipped*
-  cascade oracle is the Phase-1 **a-posteriori** version (certifies
-  nothing before branching; prunes after, via harvested automorphisms).
-  The **a-priori** cascade oracle — certify one rep per orbit *before*
-  branching — is unbuilt ([calculator §5/§9](./chain-descent-calculator.md)).
-  Measured consequence: on CFI(K7) **100% of residual branching is at
-  non-singleton footprints**, where the linear oracle is *starved*
-  (no forced twist). The a-priori cascade oracle would resolve the
-  residual symmetry before branching → all-singleton footprints → the
-  linear oracle finishes them → the tree collapses toward the
-  depth-bounded path.
+- **Cascade-oracle half — now built.** The original Phase-1 cascade
+  oracle was **a-posteriori** (certified nothing before branching;
+  pruned after, via harvested automorphisms), which *starved* the
+  linear oracle: on CFI(K7), 100% of residual branching sat at
+  non-singleton footprints where no forced twist exists. The
+  **a-priori** cascade oracle — certify one rep per orbit *before*
+  branching — was **built 2026-05-28**
+  ([calculator §9 item 4](./chain-descent-calculator.md),
+  [cascade-oracle.md](./chain-descent-cascade-oracle.md)). It resolves
+  the residual symmetry before branching → all-singleton footprints →
+  the linear oracle finishes them → the tree collapses to the
+  depth-bounded path. Measured: CFI(K4…K7) all collapse to a single
+  path, recursion depth ≈ tw(H).
 
-So the implicit-discovery argument's linear-oracle half is confirmed;
-the cascade-oracle (a-priori) half is now the gap, and the path to
-polynomial CFI. See §9.
+So both halves of the implicit-discovery argument are confirmed *on CFI*;
+the remaining gap is the Lean discharge of the cascade-oracle contract
+and general-class (Tier-2/3) completeness. See §9.
 
 ---
 
@@ -581,17 +583,19 @@ discharges all of these for the all-singleton case.
 The measured result: the linear oracle is *starved*, not weak — on
 CFI(K7), 100% of residual branching is at non-singleton footprints,
 where the residual symmetry hasn't been stripped before branching.
-The shipped cascade oracle is Phase-1 a-*posteriori* (certifies
-nothing before branching; prunes after). The a-*priori* cascade
-oracle — certify one representative per orbit *before* branching, the
-unbuilt piece of [calculator §5/§9](./chain-descent-calculator.md) —
-would feed clean all-singleton footprints to the linear oracle.
+The original Phase-1 cascade oracle was a-*posteriori* (certified
+nothing before branching; pruned after). The a-*priori* cascade
+oracle — certify one representative per orbit *before* branching
+([calculator §5/§9](./chain-descent-calculator.md)) — feeds clean
+all-singleton footprints to the linear oracle. It was **built
+2026-05-28** and eliminated the starvation (CFI(K4…K7) collapse to a
+single path; see below).
 
 This is the same a-priori orbit-harvesting the **spine** fact enables
 (read orbits off one branch's mirror), and it is exactly the
-cascade-oracle half of §4.5's implicit-discovery argument. Building it
-is the next concrete algorithmic step and the path to polynomial CFI.
-Specified in [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
+cascade-oracle half of §4.5's implicit-discovery argument. It is now
+**built** — the path to polynomial CFI is realized on the measured
+bases. Specified in [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
 — the linear oracle's harvest core wrapped in a bounded-depth recursion
 (termination via the orbit-recovery theorems).
 
@@ -599,17 +603,20 @@ The orbit-recovery program (Tier 1 `theorem_1_HOR_cfi_oddDeg`, Tier 2
 `theorem_2_HOR_concrete_rank_two_J_singleton`) is precisely the
 *correctness foundation* for an a-priori cascade oracle: it proves
 1-WL recovers orbits at bounded depth, so certifying one rep per orbit
-a-priori is sound on the cascade class. The implementation gap is
-turning those existence theorems into a before-branching certification
-procedure.
+a-priori is sound on the cascade class. The implementation turns those
+existence theorems into a before-branching certification procedure; the
+remaining gap is the Lean discharge of that contract (the existence
+theorems → the procedure's correctness) and general-class completeness.
 
-Designing and implementing the linear oracle is the next concrete
-algorithmic step. Its construction predicate — turning a propagation
-pattern into a candidate twist — is the one genuinely unspecified
-piece ([calculator §9](./chain-descent-calculator.md), item 4), now
-spec'd in [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md).
-Multi-week effort, but with growing payoff as the proof program
-references it more.
+The linear oracle is now **built**. Its construction predicate —
+turning a propagation pattern into a candidate twist — was the one
+genuinely unspecified piece ([calculator §9](./chain-descent-calculator.md),
+item 4); it is resolved (the *forced* candidate twist, a rank-rebasing
+that always realizes the flip, with verification the sole runtime
+content) and spec'd in
+[`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md).
+The proof program now references it directly (Lean `LinearOracle.lean`,
+B2).
 
 ---
 

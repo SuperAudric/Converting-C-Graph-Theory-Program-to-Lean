@@ -14,9 +14,9 @@ weaker threshold structure), aimed at attacking T-C and the Tier-2 wall.
 > but a different workstream. Sections §1–§5 are kept as historical record
 > of the original framing; §6 and §8 are the verdicts.
 
-For the wider project see [`chain-descent-calculator.md`](./chain-descent-calculator.md)
+For the wider project see [`chain-descent-calculator.md`](../../chain-descent-calculator.md)
 (the oracle the matroid framework was trying to supply) and
-[`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) (the
+[`chain-descent-hidden-johnson.md`](../../chain-descent-hidden-johnson.md) (the
 companion Tier-2 attack from the symmetry side).
 
 ---
@@ -211,7 +211,7 @@ own triggers; combine.
 
 Naïve combination of dependencies gives an exponentially large Boolean DAG —
 this is exactly the dead-end the boolean-class era hit
-([`chain-descent-calculator.md`](./chain-descent-calculator.md) §10.2). The
+([`chain-descent-calculator.md`](../../chain-descent-calculator.md) §10.2). The
 new ingredient: knowing each propagation is `c-of-k`-shaped lets you maintain
 only the threshold form throughout, sidestepping the DAG.
 
@@ -456,7 +456,7 @@ exist.
 This is **not a generic framework** — it's specific to the algebraic
 structure of the particular graph's automorphism group. Building it is
 equivalent to (or strictly harder than) implementing the linear oracle of
-[`chain-descent-strategy.md`](./chain-descent-strategy.md) §10. That is a
+[`chain-descent-strategy.md`](../../chain-descent-strategy.md) §10. That is a
 substantial project on its own and lives in the linear-oracle workstream,
 not in this matroid-framework one.
 
@@ -486,15 +486,15 @@ not in this matroid-framework one.
 With the matroid framework on commit-set closures closed (§6, §8), Tier-2
 attack moves to the other workstreams:
 
-1. **Linear oracle implementation** ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §6) — builds the
+1. **Linear oracle implementation** ([`chain-descent-calculator.md`](../../chain-descent-calculator.md) §6) — builds the
    `Z₂` Gaussian-elimination oracle for CFI-style decisions. The matroid
    structure of the linear oracle's output IS the binary matroid we wanted;
    classifying it as binary-vs-not-binary IS the Tier-2 detector. This is
    the most directly relevant work given §8's finding.
-2. **Hidden-Johnson Piece C** ([`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) §5) —
+2. **Hidden-Johnson Piece C** ([`chain-descent-hidden-johnson.md`](../../chain-descent-hidden-johnson.md) §5) —
    complete the cascade-half of the near-theorem (visible Johnson is
    Tier-1). Doesn't address encoded Johnson but is solid finite progress.
-3. **k-WL widening** ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §7) — bound how much
+3. **k-WL widening** ([`chain-descent-calculator.md`](../../chain-descent-calculator.md) §7) — bound how much
    `k`-WL refinement widens Tier-1; known to absorb visible Johnson schemes,
    doesn't cross the true wall.
 4. **Local-rule universality lemma** (§4) — moderate-size Lean lemma about
@@ -509,20 +509,20 @@ and are now obsolete — the framework they were premised on doesn't exist.
 
 ## 10. Cross-references
 
-- [`ChainDescent.md`](../GraphCanonizationProofs/ChainDescent.md) — Lean
+- [`ChainDescent.md`](../../../GraphCanonizationProofs/ChainDescent.md) — Lean
   proof state. Holds `warm_6_2`, `warmRefine_agree_off'`, the spine
   machinery — the partition-sharing scaffolding this framework sits on.
-- [`chain-descent-calculator.md`](./chain-descent-calculator.md) — the
+- [`chain-descent-calculator.md`](../../chain-descent-calculator.md) — the
   oracle this framework is trying to supply. §4 (T-A/T-B/T-C decomposition)
   and §6 (linear oracle) define what a polynomial calculator must do; the
   matroid here is one candidate route. §10.2 records the boolean-class era —
   the matroid framing is the *next* attempt at the same target, with the
   `c-of-k` constraint as the new ingredient.
-- [`chain-descent-strategy.md`](./chain-descent-strategy.md) — algorithm
+- [`chain-descent-strategy.md`](../../chain-descent-strategy.md) — algorithm
   spec. §10 ("closure as a guess") prescribes the `DERIVED`-record
   provenance the matroid framework requires for the gap fix; §12 (invariant
   6.2) is the partition-sharing this rests on.
-- [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) —
+- [`chain-descent-hidden-johnson.md`](../../chain-descent-hidden-johnson.md) —
   the companion Tier-2 attack from the symmetry side. Where this doc tries
   to *detect* a hidden Johnson via matroid structure, that doc tries to
   *rule out* visible Johnson via association-scheme cascades. The two are

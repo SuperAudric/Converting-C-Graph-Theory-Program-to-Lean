@@ -3,14 +3,14 @@
 > **Status: temporary build brief.** Working notes for the C#
 > implementation of the linear oracle. Archive or fold into a permanent
 > doc once the implementation lands. The authoritative spec is
-> [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md);
+> [`chain-descent-linear-oracle.md`](../../chain-descent-linear-oracle.md);
 > this brief grounds that spec in the *actual current code* and gives a
 > concrete, milestone-ordered build path.
 
 **Read first, in order:**
-1. [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md) — the spec (what the oracle does, §4 construction, §4.3 boundary, §4.5 verification).
+1. [`chain-descent-linear-oracle.md`](../../chain-descent-linear-oracle.md) — the spec (what the oracle does, §4 construction, §4.3 boundary, §4.5 verification).
 2. This brief — how it maps onto the existing harness.
-3. [`chain-descent-strategy.md`](./chain-descent-strategy.md) §9–§12 — the substrate (`P`-matrix, warm refinement, invariant 6.2, the spine) if you need the theory.
+3. [`chain-descent-strategy.md`](../../chain-descent-strategy.md) §9–§12 — the substrate (`P`-matrix, warm refinement, invariant 6.2, the spine) if you need the theory.
 
 ---
 
@@ -20,13 +20,13 @@ All paths under `GraphCanonizationProject/`.
 
 | File | Role | Key facts for this build |
 |---|---|---|
-| [`ChainDescent.cs`](../GraphCanonizationProject/ChainDescent.cs) | The descent harness | `Search` (one node), `Branch` (individualize + recurse), `HandleLeaf` (harvest auts a-posteriori), `CoveredByPathFixingAut` (a-posteriori pruning), `TransitiveClose` (Floyd–Warshall, **no provenance**), `IsAutomorphism` (the O(n²) edge check — reuse for verification). |
-| [`WarmPartition.cs`](../GraphCanonizationProject/WarmPartition.cs) | Warm 1-WL refinement on `(adj, P)` | `CellOf[]`, `NumCells`, `Refine(adj, p)`, `Clone()`. Cell ids iso-invariant (canonical lex-sort of signatures). The signature already packs `(neighbour-color, edge-label, Prel)` per neighbour. |
-| [`ITransversalOracle.cs`](../GraphCanonizationProject/ITransversalOracle.cs) | The oracle seam | `Classify(n, adj, targetCell, path, knownGroup) → TransversalDecision` (a representative list). Called **before** branching. |
-| [`CascadeOracle.cs`](../GraphCanonizationProject/CascadeOracle.cs) | Phase-1 oracle | Returns the whole cell; all pruning is a-posteriori. The linear oracle is the second implementation. |
-| [`PermutationGroup.cs`](../GraphCanonizationProject/PermutationGroup.cs) | Residual group | `AddGenerator`, `Orbit`, `Contains`, Schreier–Sims chain, `Order`. Already consumed by `CoveredByPathFixingAut`. |
-| [`CanonGraphOrdererChainDescent.cs`](../GraphCanonizationProject/CanonGraphOrdererChainDescent.cs) | Entry point | `RunConnected` builds the `CascadeOracle` at line ~83. Swap/augment here. |
-| [`CfiGraphGenerator.cs`](../GraphCanonizationProject/CfiGraphGenerator.cs) | Test graphs | `Generate("K4"|"K33"|"Petersen"|"Rook3x3"|"Cycle{n}")` → `CfiPair(Even, Odd, …)`. |
+| [`ChainDescent.cs`](../../../GraphCanonizationProject/ChainDescent.cs) | The descent harness | `Search` (one node), `Branch` (individualize + recurse), `HandleLeaf` (harvest auts a-posteriori), `CoveredByPathFixingAut` (a-posteriori pruning), `TransitiveClose` (Floyd–Warshall, **no provenance**), `IsAutomorphism` (the O(n²) edge check — reuse for verification). |
+| [`WarmPartition.cs`](../../../GraphCanonizationProject/WarmPartition.cs) | Warm 1-WL refinement on `(adj, P)` | `CellOf[]`, `NumCells`, `Refine(adj, p)`, `Clone()`. Cell ids iso-invariant (canonical lex-sort of signatures). The signature already packs `(neighbour-color, edge-label, Prel)` per neighbour. |
+| [`ITransversalOracle.cs`](../../../GraphCanonizationProject/ITransversalOracle.cs) | The oracle seam | `Classify(n, adj, targetCell, path, knownGroup) → TransversalDecision` (a representative list). Called **before** branching. |
+| [`CascadeOracle.cs`](../../../GraphCanonizationProject/CascadeOracle.cs) | Phase-1 oracle | Returns the whole cell; all pruning is a-posteriori. The linear oracle is the second implementation. |
+| [`PermutationGroup.cs`](../../../GraphCanonizationProject/PermutationGroup.cs) | Residual group | `AddGenerator`, `Orbit`, `Contains`, Schreier–Sims chain, `Order`. Already consumed by `CoveredByPathFixingAut`. |
+| [`CanonGraphOrdererChainDescent.cs`](../../../GraphCanonizationProject/CanonGraphOrdererChainDescent.cs) | Entry point | `RunConnected` builds the `CascadeOracle` at line ~83. Swap/augment here. |
+| [`CfiGraphGenerator.cs`](../../../GraphCanonizationProject/CfiGraphGenerator.cs) | Test graphs | `Generate("K4"|"K33"|"Petersen"|"Rook3x3"|"Cycle{n}")` → `CfiPair(Even, Odd, …)`. |
 
 **The `P`-matrix substrate already exists.** `sbyte[] p`, indexed
 `p[i*n + j]`, values `LESS = -1`, `UNKNOWN = 0`, `GREATER = 1`, held
@@ -38,14 +38,14 @@ build.
   from the **refinement footprint** (parent↔child partition diff), not
   from TC provenance. **Build item M1.** *(Correction 2026-05-28: an
   earlier draft proposed TC `DERIVED`/`driver` provenance on
-  [`TransitiveClose`](../GraphCanonizationProject/ChainDescent.cs#L257).
+  [`TransitiveClose`](../../../GraphCanonizationProject/ChainDescent.cs#L257).
   The build branch measured that TC produces **zero** derived entries
   for within-cell decisions on uniform-type graphs — cellmates are
   unordered among themselves, other cells P-incomparable — so TC
   provenance is provably empty here. The cascade propagates through
   refinement, so read the footprint from the partition diff. See spec
   §3.)*
-- **Any a-priori twist discovery.** Automorphisms are only harvested a-posteriori from leaf collisions ([`HandleLeaf`](../GraphCanonizationProject/ChainDescent.cs#L212)).
+- **Any a-priori twist discovery.** Automorphisms are only harvested a-posteriori from leaf collisions ([`HandleLeaf`](../../../GraphCanonizationProject/ChainDescent.cs#L212)).
 
 ---
 
@@ -55,7 +55,7 @@ build.
 exists a-posteriori.**
 
 The harness already prunes redundant branches via
-[`CoveredByPathFixingAut`](../GraphCanonizationProject/ChainDescent.cs#L181):
+[`CoveredByPathFixingAut`](../../../GraphCanonizationProject/ChainDescent.cs#L181):
 once a path-fixing automorphism is in `Automorphisms`, any
 representative reachable from an explored one is skipped. Today those
 automorphisms arrive *late* — harvested from coinciding leaves, after
@@ -85,12 +85,12 @@ be heuristic; a wrong candidate just fails verification.
 
 ## 3. The spec-vs-implementation gap (read carefully)
 
-The spec ([linear-oracle.md §4](./chain-descent-linear-oracle.md))
+The spec ([linear-oracle.md §4](../../chain-descent-linear-oracle.md))
 describes a **single-pair** decision `{e, f}` with two directions
 (`e < f` vs `f < e`) and reverse-symmetric propagation. The **current
-harness does not branch on single pairs** — [`Branch`](../GraphCanonizationProject/ChainDescent.cs#L159)
+harness does not branch on single pairs** — [`Branch`](../../../GraphCanonizationProject/ChainDescent.cs#L159)
 individualizes a representative `v` *below all its cellmates* at once
-(the whole-cell branching of [calculator §10.1](./chain-descent-calculator.md),
+(the whole-cell branching of [calculator §10.1](../../chain-descent-calculator.md),
 which is forced-correct for iso-invariance).
 
 **Do not refactor the harness to single-pair guesses.** That is a large,
@@ -137,7 +137,7 @@ cells are commonly size-2, so size-2 covers K4/K33/Petersen regardless;
 attempting larger cells is free upside.
 
 **A second, orthogonal axis — sub-cell singletons — is the real gate
-([viability plan](./chain-descent-extended-twist-viability.md)).** Target
+([viability plan](../../chain-descent-extended-twist-viability.md)).** Target
 *cell* size (above) is about which `warm_6_2`/spine backing applies. The
 *footprint's sub-cell* structure is a different axis and is what gates the
 **construction itself**: the `r_1 ↦ r_j` match is iso-invariantly forced
@@ -145,7 +145,7 @@ attempting larger cells is free upside.
 refinement-indistinguishable, so an index-based within-cell match would be
 sound (verify gates it) but would make the **flag verdict
 labelling-dependent** — breaking flag iso-invariance
-([strategy §15 gap 2](./chain-descent-strategy.md)). So "attempt at any
+([strategy §15 gap 2](../../chain-descent-strategy.md)). So "attempt at any
 size" means *run the oracle at every decision regardless of target-cell
 size and construct directly when the footprint is all-singletons* — **not**
 *index-match within non-singleton sub-cells*. Non-singleton sub-cells are
@@ -216,13 +216,13 @@ by canonical-id structure, sound via verification.)*
   itself fires only when the footprint is all-singletons** — that match
   is the iso-invariantly forced one. Do **not** index-match within a
   non-singleton sub-cell: it is sound but breaks flag iso-invariance
-  ([viability plan](./chain-descent-extended-twist-viability.md), §4.2
+  ([viability plan](../../chain-descent-extended-twist-viability.md), §4.2
   note). Non-singleton ⇒ return "no candidate" and let M5's recursion
   handle it.
 
 ### M4 — Verification + harvest
 - Verify `t` with the existing `IsAutomorphism`
-  ([ChainDescent.cs:246](../GraphCanonizationProject/ChainDescent.cs#L246)).
+  ([ChainDescent.cs:246](../../../GraphCanonizationProject/ChainDescent.cs#L246)).
   On success, `Automorphisms.AddGenerator(t)`.
 - Hook: in `Search`, after exploring the first representative, run
   M2+M3+M4 for the just-explored rep against each unexplored rep
@@ -238,7 +238,7 @@ by canonical-id structure, sound via verification.)*
 ### M5 — Uniqueness test + graceful degradation (recursion)
 - When M3 finds a non-singleton sub-cell (no forced candidate), the
   oracle returns nothing and the harness proceeds as the normal `k`-way
-  branch. **This branch *is* the recursion** ([linear-oracle.md §4.4](./chain-descent-linear-oracle.md)):
+  branch. **This branch *is* the recursion** ([linear-oracle.md §4.4](../../chain-descent-linear-oracle.md)):
   individualizing into the sub-cell refines the footprint, and the oracle
   **re-fires at the deeper level** once the sub-cell has cascaded to
   singletons. It is iso-invariant (the descent branches over the whole
@@ -278,7 +278,7 @@ Three things to demonstrate:
    constructs a candidate twist that passes `IsAutomorphism`. This is
    the direct empirical stand-in for `LeafTwistSpec` (a verified twist
    relabels one branch's canonical onto another's,
-   [linear-oracle.md §2.3](./chain-descent-linear-oracle.md))
+   [linear-oracle.md §2.3](../../chain-descent-linear-oracle.md))
    — the green light for the Lean discharge.
 
 2. **Leaf-count collapse (the scaling signal).** A-priori harvesting
@@ -354,7 +354,7 @@ than *a-priori* by certifying one rep per orbit.
 **Conclusion / next lever.** The linear oracle is the necessary first
 half and works exactly as designed. The binding constraint is now the
 **a-priori cascade oracle** (the unbuilt piece of
-[calculator §5/§9](./chain-descent-calculator.md)): resolve the residual
+[calculator §5/§9](../../chain-descent-calculator.md)): resolve the residual
 symmetry before branching → footprints become all-singleton → the linear
 oracle finishes them → the tree collapses toward the depth-bounded path.
 This is the same a-priori orbit-harvesting the **spine** fact enables
@@ -392,7 +392,7 @@ This is the same a-priori orbit-harvesting the **spine** fact enables
 ## 6. Suggested file layout
 
 - New `LinearOracle.cs` — but note it can't be a pure pre-branch
-  `ITransversalOracle.Classify` (it's online, §3 + [linear-oracle.md §6.1](./chain-descent-linear-oracle.md)).
+  `ITransversalOracle.Classify` (it's online, §3 + [linear-oracle.md §6.1](../../chain-descent-linear-oracle.md)).
   Recommended: a helper class `TwistDiscovery` invoked from
   `ChainDescent.Search` after the first branch, rather than forcing it
   behind the `Classify` seam. Keep the `ITransversalOracle` interface
@@ -413,8 +413,8 @@ This is the same a-priori orbit-harvesting the **spine** fact enables
   canonical-id sub-cell matching constructs a twist that passes
   `IsAutomorphism` — the empirical stand-in for `LeafTwistSpec`, and the
   green light for the Lean contract discharge (spec
-  [§10 risk 1](./chain-descent-linear-oracle.md),
-  [§8.2](./chain-descent-linear-oracle.md)).
+  [§10 risk 1](../../chain-descent-linear-oracle.md),
+  [§8.2](../../chain-descent-linear-oracle.md)).
 - **Leaf count collapses** from the M6 a-posteriori baseline toward
   ~`O(β)`: `LastLeafCount` drops sharply and `LastNodesByDepth` shows the
   descent reduced to ~a path; `_seen` stays `O(n)`-small.

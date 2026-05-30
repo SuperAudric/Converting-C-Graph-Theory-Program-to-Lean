@@ -2,7 +2,7 @@
 
 > **Temporary doc — archive after the discharge.** Grounds the Lean
 > discharge of the a-priori cascade oracle (the C# side is built + measured,
-> [cascade-oracle.md §8.1](./chain-descent-cascade-oracle.md)) in the actual
+> [cascade-oracle.md §8.1](../../chain-descent-cascade-oracle.md)) in the actual
 > `GraphCanonizationProofs` source, with a milestone order tagged by
 > proof-defensibility. Parallels the C# build brief
 > ([chain-descent-cascade-oracle-build-brief.md](./chain-descent-cascade-oracle-build-brief.md)).
@@ -27,7 +27,7 @@ constructive witness; Lean states the existential.
 
 ## 1. What the Lean already gives us
 
-All in `namespace ChainDescent` ([ChainDescent.lean](../GraphCanonizationProofs/ChainDescent.lean)):
+All in `namespace ChainDescent` ([ChainDescent.lean](../../../GraphCanonizationProofs/ChainDescent.lean)):
 
 - **`OrbitPartition adj P S v w`** (3471) — `∃ π, IsAut π adj ∧ (π preserves P) ∧
   FixesPointwise π S ∧ π v = w`. A verified path-fixing automorphism carrying
@@ -237,19 +237,19 @@ construction correctness (1b). All stated, not assumed; no `sorry`, no new axiom
   rank-≤2 schemes, wired to the axiom-free orbit-recovery theorems.
 - Phase C: general completeness and verdict iso-invariance stated as named open
   obligations, no `sorry`.
-- Then fold the Lean status back into [cascade-oracle.md §8.2](./chain-descent-cascade-oracle.md)
+- Then fold the Lean status back into [cascade-oracle.md §8.2](../../chain-descent-cascade-oracle.md)
   and archive this brief.
 
 ---
 
 ## 9. Cross-references
 
-- [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md) §2.5
+- [`chain-descent-cascade-oracle.md`](../../chain-descent-cascade-oracle.md) §2.5
   (no Lean spec yet), §8.2 (the skeleton this brief replaces).
 - [`chain-descent-cascade-oracle-build-brief.md`](./chain-descent-cascade-oracle-build-brief.md) —
   the C# brief this parallels; §1 proof-defensibility map.
-- [`ChainDescent.lean`](../GraphCanonizationProofs/ChainDescent.lean) §15.8
+- [`ChainDescent.lean`](../../../GraphCanonizationProofs/ChainDescent.lean) §15.8
   (`LinearOracleSpec`/`LeafTwistSpec`), `OrbitPartition`, `theorem_1_HOR_at_depth`.
-- [CFI.lean](../GraphCanonizationProofs/ChainDescent/CFI.lean)
-  (`theorem_1_HOR_cfi_oddDeg`), [Scheme.lean](../GraphCanonizationProofs/ChainDescent/Scheme.lean)
+- [CFI.lean](../../../GraphCanonizationProofs/ChainDescent/CFI.lean)
+  (`theorem_1_HOR_cfi_oddDeg`), [Scheme.lean](../../../GraphCanonizationProofs/ChainDescent/Scheme.lean)
   (`theorem_2_HOR_concrete_rank_two_J_singleton`).

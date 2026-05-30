@@ -44,13 +44,14 @@ with the existence of such a chain left as the (excluded) open content.
 
 ### 0.1 Corrections to the existing Tier-3 docs (apply on fold-back)
 
-Both Tier-3 docs predate recent work and are stale on two points:
+Both Tier-3 docs predate recent work and were stale on two points:
 
 - **The a-priori cascade oracle is BUILT** (C#, M1+M2, 2026-05-28; it
-  eliminated CFI(K7) starvation, maxRecDepth ≈ tw(H)). The docs say
-  "unbuilt" — wrong. The implicit-discovery argument's binding
-  constraint is now the *Lean discharge of its contract*, not the
-  implementation.
+  eliminated CFI(K7) starvation, maxRecDepth ≈ tw(H)). The implicit-
+  discovery argument's binding constraint is now the *Lean discharge of
+  its contract*, not the implementation. *(Correction applied
+  2026-05-30: the "unbuilt" claims in tier3-decomposability.md and
+  tier3a-cascade-composition.md have been updated.)*
 - **The proven Tier-1 depth bound is `baseSize` (one seed per gadget,
   linear, `≤ n/6`), NOT `tw(H)`.** The `tw(H)` bound is classical and
   documented but **not formalized**. Tier 1's Lean content is *orbit

@@ -36,14 +36,14 @@ a clean counterexample requiring depth = tw(H) = 4.
 
 This direction emerged from two earlier closed workstreams:
 
-- **Matroid framework** ([`chain-descent-matroid.md`](./chain-descent-matroid.md)) —
+- **Matroid framework** ([`chain-descent-matroid.md`](./Archive/ChainDescent/chain-descent-matroid.md)) —
   attempted to model warm-refinement closure on commit-set guesses as
   a matroid, enabling a Tier-2 detector via binary-matroid testing.
   Closed 2026-05-23 after the exchange axiom failed on both partition-
   based `cl` and TC-based `cl_prov` (despite `cl_prov` being a
   topological closure).
 - **Tier-2 decomposition experiment**
-  ([`chain-descent-tier2-decomposition-experiment.md`](./chain-descent-tier2-decomposition-experiment.md))
+  ([`chain-descent-tier2-decomposition-experiment.md`](./Archive/ChainDescent/chain-descent-tier2-decomposition-experiment.md))
   — attempted a Luks/Babai structure-tree approach against CFI(Petersen).
   Closed 2026-05-26 with the finding "CFI ladder is Tier-1, not Tier-2"
   (confirmed calculator.md §7's decomposability claim).
@@ -1072,7 +1072,7 @@ and unblocks the cascade half of the hidden-Johnson near-theorem.
   claim that "CFI applied to a Johnson base ... is decomposable" via
   empirical verification at depth 1 for Petersen (which equals
   J(5,2)). Both subset and endpoint Aut-orbits cleanly recover.
-- **[`chain-descent-matroid.md`](./chain-descent-matroid.md).** Closed
+- **[`chain-descent-matroid.md`](./Archive/ChainDescent/chain-descent-matroid.md).** Closed
   framework; the binary-closure conjecture (§10 of matroid memo)
   conjectured "every graph's propagation closure is a binary matroid."
   Theorem 1 is a related but distinct claim — it's about refinement-
@@ -1100,7 +1100,7 @@ and unblocks the cascade half of the hidden-Johnson near-theorem.
   tests can extract generators for orbit comparison. One property +
   one assignment, no behaviour change.
 - **Sibling docs:**
-  [`chain-descent-tier2-decomposition-experiment.md`](./chain-descent-tier2-decomposition-experiment.md)
+  [`chain-descent-tier2-decomposition-experiment.md`](./Archive/ChainDescent/chain-descent-tier2-decomposition-experiment.md)
   documents the experiment that surfaced F7. Now-concluded; the
   positive Tier-1 finding here is its main outcome.
 

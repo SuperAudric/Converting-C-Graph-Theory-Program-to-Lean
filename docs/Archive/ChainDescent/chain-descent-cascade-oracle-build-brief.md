@@ -1,7 +1,7 @@
 # Chain descent — a-priori cascade oracle build brief (temporary)
 
 > **Temporary doc — archive after the build.** This grounds the spec
-> ([`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md))
+> ([`chain-descent-cascade-oracle.md`](../../chain-descent-cascade-oracle.md))
 > in the actual C# harness and gives a milestone-by-milestone build
 > order. Once built and the spec's open decisions are resolved, fold the
 > findings back into the spec (§8) and archive this file — exactly as the
@@ -17,7 +17,7 @@ obligation, or empirical-only de-risking.
 
 **Empirical bar (the de-risking signal, not the goal) — MET 2026-05-28.**
 CFI(K7): the linear oracle alone left **941** explored leaves with **555**
-non-singleton-footprint branching nodes ([linear-oracle.md §8.1](./chain-descent-linear-oracle.md)).
+non-singleton-footprint branching nodes ([linear-oracle.md §8.1](../../chain-descent-linear-oracle.md)).
 After M2: **K7 → 1 leaf, 0 branching** (`BranchStarved = 0`); K6 76 → 1;
 Petersen 22 → 2; Rook3x3 47 → 3 (residual = genuine decisions, not
 starvation). Correctness/|Aut|/Even≠Odd preserved; scramble-invariant
@@ -31,7 +31,7 @@ discharge (§8 below) is the remaining step.
 
 The Lean bar is a `CascadeOracleSpec` + a validity predicate, parallel
 to the linear oracle's `LinearOracleSpec`/`LeafTwistSpec`
-([ChainDescent.lean §15.8](../GraphCanonizationProofs/ChainDescent.lean)).
+([ChainDescent.lean §15.8](../../../GraphCanonizationProofs/ChainDescent.lean)).
 Each property the build touches falls into one of four buckets:
 
 | Property | Bucket | Basis |
@@ -62,18 +62,18 @@ informs them but does not close them.
 ## 2. Reuse inventory — what already exists in the harness
 
 The linear oracle shipped most of the machinery
-([ChainDescent.cs](../GraphCanonizationProject/ChainDescent.cs),
+([ChainDescent.cs](../../../GraphCanonizationProject/ChainDescent.cs),
 default-on `EnableLinearOracle`):
 
 | Piece | Location | Role for the cascade oracle |
 |---|---|---|
-| `RefinementFootprint.Compute` | [RefinementFootprint.cs](../GraphCanonizationProject/RefinementFootprint.cs) | Parent↔child split-cell diff + `AllSingletons` gate + `CoupledVertices()`. **Reused unchanged.** |
-| `TwistConstruction.TryConstruct` | [TwistConstruction.cs](../GraphCanonizationProject/TwistConstruction.cs) | Canonical-id sub-cell matching on all-singleton footprint. **The orbit-map construction — reused unchanged** (type-agnostic: produces whatever the forced matching gives). |
-| `HarvestTwists` | [ChainDescent.cs ~193](../GraphCanonizationProject/ChainDescent.cs#L193) | Explore `r_1`, footprint, per-`r_j` construct+verify+`AddGenerator`. **The all-singleton harvest — extended by M2's recursion.** |
-| `IsAutomorphism` | [ChainDescent.cs ~331](../GraphCanonizationProject/ChainDescent.cs#L331) | O(n²) edge-check. **The soundness anchor — reused unchanged.** |
-| `CoveredByPathFixingAut` | [ChainDescent.cs ~251](../GraphCanonizationProject/ChainDescent.cs#L251) | Path-fixing-orbit pruning from harvested generators. **Consumes the cascade oracle's harvest identically.** |
-| branch loop / harvest placement | [ChainDescent.cs ~178](../GraphCanonizationProject/ChainDescent.cs#L178) | Post-`r_1`, pre-unexplored-reps. **The cascade recursion hooks here.** |
-| `PermutationGroup` | [PermutationGroup.cs](../GraphCanonizationProject/PermutationGroup.cs) | Schreier–Sims chain. **Harvest sink — unchanged.** |
+| `RefinementFootprint.Compute` | [RefinementFootprint.cs](../../../GraphCanonizationProject/RefinementFootprint.cs) | Parent↔child split-cell diff + `AllSingletons` gate + `CoupledVertices()`. **Reused unchanged.** |
+| `TwistConstruction.TryConstruct` | [TwistConstruction.cs](../../../GraphCanonizationProject/TwistConstruction.cs) | Canonical-id sub-cell matching on all-singleton footprint. **The orbit-map construction — reused unchanged** (type-agnostic: produces whatever the forced matching gives). |
+| `HarvestTwists` | [ChainDescent.cs ~193](../../../GraphCanonizationProject/ChainDescent.cs#L193) | Explore `r_1`, footprint, per-`r_j` construct+verify+`AddGenerator`. **The all-singleton harvest — extended by M2's recursion.** |
+| `IsAutomorphism` | [ChainDescent.cs ~331](../../../GraphCanonizationProject/ChainDescent.cs#L331) | O(n²) edge-check. **The soundness anchor — reused unchanged.** |
+| `CoveredByPathFixingAut` | [ChainDescent.cs ~251](../../../GraphCanonizationProject/ChainDescent.cs#L251) | Path-fixing-orbit pruning from harvested generators. **Consumes the cascade oracle's harvest identically.** |
+| branch loop / harvest placement | [ChainDescent.cs ~178](../../../GraphCanonizationProject/ChainDescent.cs#L178) | Post-`r_1`, pre-unexplored-reps. **The cascade recursion hooks here.** |
+| `PermutationGroup` | [PermutationGroup.cs](../../../GraphCanonizationProject/PermutationGroup.cs) | Schreier–Sims chain. **Harvest sink — unchanged.** |
 
 So the **all-singleton path is already built and proof-relevant**: the
 construction is forced (provable) and verification anchors soundness
@@ -245,7 +245,7 @@ CFI(K4…K7), oracle off vs on (cascade recursion enabled):
 CFI(K7) branching 555 → 0, leaves 941 → 1; correctness preserved through
 K7; scramble-invariant. C# build complete; only the Lean discharge remains.
 
-**Folded back into [cascade-oracle.md](./chain-descent-cascade-oracle.md)
+**Folded back into [cascade-oracle.md](../../chain-descent-cascade-oracle.md)
 (§8.1 build status, §10 risk 1, §9 constraint table):**
 - **Unification decision (§1.4):** YES — the all-singleton harvest is
   identical for orbit maps and twists (construction type-agnostic,
@@ -261,7 +261,7 @@ K7; scramble-invariant. C# build complete; only the Lean discharge remains.
   dropped for lockstep per-rep single-path (circular — see spec §4.1); no
   footprint under-harvested on the measured bases.
 
-**Then the Lean discharge** ([cascade-oracle.md §8.2](./chain-descent-cascade-oracle.md)),
+**Then the Lean discharge** ([cascade-oracle.md §8.2](../../chain-descent-cascade-oracle.md)),
 in proof-defensibility order:
 1. **`CascadeOracleSpec` + validity predicate** — the soundness half.
    PROOF-BACKED; mirrors `LeafTwistSpec`. Do this first; it is the
@@ -281,24 +281,24 @@ in proof-defensibility order:
 
 ## 9. Cross-references
 
-- [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md) —
+- [`chain-descent-cascade-oracle.md`](../../chain-descent-cascade-oracle.md) —
   the spec this grounds (§4 the recursion, §8 the build/Lean plan, §9
   the constraint table).
-- [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
+- [`chain-descent-linear-oracle.md`](../../chain-descent-linear-oracle.md)
   §8.1 — the starvation finding (the empirical bar's baseline) and the
   shared harvest core.
-- [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) —
+- [`chain-descent-orbit-recovery.md`](../../chain-descent-orbit-recovery.md) —
   `theorem_1_HOR_cfi_oddDeg`, `theorem_2_HOR_concrete_rank_two_J_singleton`:
   the proof targets M2's completeness wires to.
-- [`chain-descent-deferred-decisions.md`](./chain-descent-deferred-decisions.md) —
+- [`chain-descent-deferred-decisions.md`](../../chain-descent-deferred-decisions.md) —
   the scheduling layer to be built *after* this oracle; it reuses this
   oracle's classification unchanged.
-- C#: [ChainDescent.cs](../GraphCanonizationProject/ChainDescent.cs),
-  [RefinementFootprint.cs](../GraphCanonizationProject/RefinementFootprint.cs),
-  [TwistConstruction.cs](../GraphCanonizationProject/TwistConstruction.cs),
-  [ITransversalOracle.cs](../GraphCanonizationProject/ITransversalOracle.cs),
-  [CascadeOracle.cs](../GraphCanonizationProject/CascadeOracle.cs).
-- Lean: [ChainDescent.lean](../GraphCanonizationProofs/ChainDescent.lean)
+- C#: [ChainDescent.cs](../../../GraphCanonizationProject/ChainDescent.cs),
+  [RefinementFootprint.cs](../../../GraphCanonizationProject/RefinementFootprint.cs),
+  [TwistConstruction.cs](../../../GraphCanonizationProject/TwistConstruction.cs),
+  [ITransversalOracle.cs](../../../GraphCanonizationProject/ITransversalOracle.cs),
+  [CascadeOracle.cs](../../../GraphCanonizationProject/CascadeOracle.cs).
+- Lean: [ChainDescent.lean](../../../GraphCanonizationProofs/ChainDescent.lean)
   §15.8 (`LinearOracleSpec`/`LeafTwistSpec` to parallel),
-  `theorem_1_HOR_at_depth`; [CFI.lean](../GraphCanonizationProofs/ChainDescent/CFI.lean),
-  [Scheme.lean](../GraphCanonizationProofs/ChainDescent/Scheme.lean).
+  `theorem_1_HOR_at_depth`; [CFI.lean](../../../GraphCanonizationProofs/ChainDescent/CFI.lean),
+  [Scheme.lean](../../../GraphCanonizationProofs/ChainDescent/Scheme.lean).

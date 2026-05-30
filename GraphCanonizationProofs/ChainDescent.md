@@ -733,7 +733,7 @@ theorems:
 5. **The Tier-1 polynomial proof** — T-C for the cascade class; would pin the
    node budget `B(n)`.
 6. **Propagation-closure as a matroid** — open working investigation written up
-   in [`../docs/chain-descent-matroid.md`](../docs/chain-descent-matroid.md).
+   in [`../docs/Archive/ChainDescent/chain-descent-matroid.md`](../docs/Archive/ChainDescent/chain-descent-matroid.md).
    Models warm-refinement's forced-relation structure as a closure operator on
    pair-guesses. The next concrete Lean step (item 2 of that doc's §9) is
    proving the matroid **exchange axiom** for this closure — the load-bearing

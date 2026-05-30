@@ -22,7 +22,7 @@ refinement footprint (coupled-component sub-cells) of `r_1` to that of
   target, [linear-oracle.md §8.2](./chain-descent-linear-oracle.md)).
 - **Extended (non-singleton) case:** some sub-cell `C` has `|C| ≥ 2`.
   The within-`C` vertex matching is *not* forced. The "attempt any size,
-  verify gates" stance ([build brief §3](./chain-descent-linear-oracle-build-brief.md))
+  verify gates" stance ([build brief §3](./Archive/ChainDescent/chain-descent-linear-oracle-build-brief.md))
   says to attempt it anyway and let the edge-check filter. Empirically
   (CFI K4, 2026-05-28) this case is common: 13/29 size-2 decision
   footprints and *all* size-3+ footprints have a non-singleton sub-cell.

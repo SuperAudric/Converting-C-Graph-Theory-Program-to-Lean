@@ -4,7 +4,7 @@
 once the experiment concludes. Sister to
 [`chain-descent-matroid.md`](./chain-descent-matroid.md) (which closed the
 matroid framing) and
-[`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) §6 (which
+[`chain-descent-hidden-johnson.md`](../../chain-descent-hidden-johnson.md) §6 (which
 sharpened the encoded-Johnson gap).
 
 ---
@@ -46,7 +46,7 @@ bounds. It is a one-instance probe.
 ## 2. Test instances
 
 The project already ships
-[`CfiGraphGenerator`](../GraphCanonizationProject/CfiGraphGenerator.cs) with
+[`CfiGraphGenerator`](../../../GraphCanonizationProject/CfiGraphGenerator.cs) with
 named bases. Relevant sizes:
 
 | Base graph | `|V|` of base | CFI vertex count | Notes |
@@ -393,7 +393,7 @@ jumping straight to (3) risks misreading a complex partition.
 ## 9. Phase B step 1 — CFI(K₄) probe results
 
 **Date:** 2026-05-26. Code lives in
-[`GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs`](../GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs)
+[`GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs`](../../../GraphCanonizationProject.Tests/Tier2DecompositionExperiment.cs)
 and runs with `dotnet test --filter Tier2DecompositionExperiment`.
 
 ### 9.1 Picker rule clarification
@@ -622,7 +622,7 @@ algorithmically valuable follow-on.
 
 **Status: CONCLUDED 2026-05-26.** The §10.4 option (1c) recommendation
 was followed and produced a separate, focused workstream documented in
-[`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md).
+[`chain-descent-orbit-recovery.md`](../../chain-descent-orbit-recovery.md).
 That doc is now the authoritative resource for the F7 / orbit-recovery
 direction.
 
@@ -637,7 +637,7 @@ direction.
   the cell-orbit gap closes within `tw(H)` individualization steps.
   Empirically: K4/K33/Petersen recover at depth 1; Rook3×3 subset
   needs full tw(H) = 4. This is the actual Tier-1 theorem
-  ([orbit-recovery.md Theorem 1](./chain-descent-orbit-recovery.md#5-proof-of-theorem-1)).
+  ([orbit-recovery.md Theorem 1](../../chain-descent-orbit-recovery.md#5-proof-of-theorem-1)).
 - The theorem's proof rests on classical CFI cascade theory plus
   trivial assembly. The new content is the framing and the empirical
   pattern map.

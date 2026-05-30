@@ -612,8 +612,8 @@ the polynomial bound (§8). The proof is the final bar; GI ∈ P is open, so the
 bar for the polynomial claim is high.
 
 **Algorithm-level gaps.** Oracle-level gaps (the open T-C problem, the cascade
-predicate, the unbuilt linear oracle) are in
-[`chain-descent-calculator.md`](./chain-descent-calculator.md) §9.
+predicate, and general-class completeness of the built linear / cascade oracles)
+are in [`chain-descent-calculator.md`](./chain-descent-calculator.md) §9.
 
 1. **Budget / soundness handshake.** If the budget interrupts the oracle
    mid-certification, the oracle must flag — never return a partially-built,

@@ -248,7 +248,10 @@ The cascade oracle (§5) handles true-symmetry cells: certify one orbit, descend
 This section is the other case — a **genuine decision**, a target cell that
 splits into `k ≥ 2` orbits. Genuine decisions are what make naive IR search
 exponential on CFI graphs; the linear oracle is the mechanism that defuses them
-for the abelian case. It is **specified here but not yet implemented**.
+for the abelian case. It is **specified here and built** (C#, and a Lean
+soundness contract) — see
+[`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md) §8 and
+§9 item 4 below.
 
 > The consolidated spec + design — including the precise candidate-twist
 > construction predicate, the uniqueness test (the abelian/wall boundary), the
@@ -401,13 +404,13 @@ Progress so far:
   scoped, and the doc delimits what this does *not* cover — only the *visible*
   Johnson is ruled out, not the encoded (CFI-style) one.
 - **Matroid framing of the propagation closure** — **CLOSED 2026-05-23**;
-  full record in [`chain-descent-matroid.md`](./chain-descent-matroid.md).
+  full record in [`chain-descent-matroid.md`](./Archive/ChainDescent/chain-descent-matroid.md).
   Both partition-based `cl` and TC-based `cl_prov` tested; neither satisfies
   the matroid exchange axiom. `cl_prov` IS a topological closure (CL0–CL3 hold)
   but matroid M3 refuted via machine-checked `decide`. The binary-closure
   conjecture as originally framed is not provable through this route.
 - **Tier-2 structure-tree decomposition** — **CLOSED 2026-05-26**; record in
-  [`chain-descent-tier2-decomposition-experiment.md`](./chain-descent-tier2-decomposition-experiment.md).
+  [`chain-descent-tier2-decomposition-experiment.md`](./Archive/ChainDescent/chain-descent-tier2-decomposition-experiment.md).
   Empirically confirmed that the CFI ladder (C₃, K₄, Petersen) is all
   Tier-1, not Tier-2 — restating the decomposability claim of this section.
   The experiment surfaced F7 (1-WL recovers Aut_v orbits at depth 1 for
@@ -664,7 +667,9 @@ Anything short of this is a research checkpoint.
 - **Settled:** the tier classification (0 / 1 / 2) and the cascade ×
   composition-factor hardness map.
 - **Implemented:** the chain-descent harness, the `ITransversalOracle` seam, the
-  Phase-1 `CascadeOracle` — correct and budget-bounded.
-- **Specified, not built:** the linear oracle (§6).
-- **Open:** T-C in general; whether Tier 2 arises from the descent at all (the
-  construction question).
+  Phase-1 `CascadeOracle`, the **linear oracle** (§6), and the **a-priori cascade
+  oracle** — all correct and budget-bounded; the a-priori cascade oracle
+  eliminated linear-oracle starvation and collapsed every measured CFI base
+  (K4…K7) to a single path (§9 item 4).
+- **Open:** T-C in general; the polynomial-bound Lean discharge; whether Tier 2
+  arises from the descent at all (the construction question).

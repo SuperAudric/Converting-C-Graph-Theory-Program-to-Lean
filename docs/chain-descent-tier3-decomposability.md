@@ -13,7 +13,7 @@ have to land in Lean once the paper is rigorous.
 
 > ⚠ **Equivalence to GI ∈ P.** The Tier-3 statement as written is
 > equivalent in strength to graph isomorphism being in P. The matroid
-> memo ([`chain-descent-matroid.md`](./chain-descent-matroid.md) §8.4)
+> memo ([`chain-descent-matroid.md`](./Archive/ChainDescent/chain-descent-matroid.md) §8.4)
 > and the calculator's construction question
 > ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §7)
 > both make this explicit. This plan does not claim to close that gap;
@@ -102,13 +102,15 @@ The remaining gap, on either side:
 
 - **Within Tier 1+2:** orbit recovery is settled for individual
   classes (CFI, schurian schemes), but not yet for arbitrary
-  cascade-class graphs (Tier 3 of orbit recovery, conjectural). And
-  the *a-priori* cascade oracle — certify one rep per orbit before
-  branching — is unbuilt; the shipped cascade oracle is a-posteriori.
-  This is now the binding implementation constraint: the linear oracle
-  (built) is *starved* of clean footprints because the a-posteriori
-  cascade oracle leaves residual symmetry unresolved at branch time
-  ([linear-oracle §8.1](./chain-descent-linear-oracle.md)).
+  cascade-class graphs (Tier 3 of orbit recovery, conjectural). The
+  *a-priori* cascade oracle — certify one rep per orbit before
+  branching — is **built** (C#, 2026-05-28); it eliminated the
+  linear-oracle starvation, collapsing every measured CFI base
+  (K4…K7) to a single path, maxRecDepth ≈ tw(H)
+  ([cascade-oracle §10](./chain-descent-cascade-oracle.md),
+  [calculator §9 item 4](./chain-descent-calculator.md)). The binding
+  constraint is now the *Lean discharge of its contract* and
+  general-class (Tier-3) completeness, not the implementation.
 - **Within the linear oracle:** the abelian case is built (all-
   singleton footprints); the *non-abelian* case (the genuine wall,
   hidden Johnson) is open.
@@ -129,7 +131,7 @@ is already phrased as decomposability:
 > Target: prove every obstruction the descent produces decomposes as
 > `(resistant-abelian) ⋊ (cascading)` — or find a counterexample.
 
-The matroid memo independently arrived at the same shape ([§8.4](./chain-descent-matroid.md)):
+The matroid memo independently arrived at the same shape ([§8.4](./Archive/ChainDescent/chain-descent-matroid.md)):
 
 > Tier-2 detection (if it exists at all) lives at a different layer —
 > either the linear oracle (which makes the structure F_2-explicit) or
@@ -181,7 +183,7 @@ propagation argument (`warm_6_2`, proved) makes this well-defined.
 **Commit set.** The set of pair-guesses committed up to a given
 descent node. The propagation closure of a commit set is the substrate
 underlying the linear oracle's twist-discovery
-([matroid §2](./chain-descent-matroid.md)).
+([matroid §2](./Archive/ChainDescent/chain-descent-matroid.md)).
 
 **Residual symmetry at a node.** `Aut_desc(G)` is the subgroup of
 `Aut(G)` consistent with the descent path so far. It shrinks as the
@@ -441,7 +443,7 @@ hiding mechanism is self-undermining: it cannot conceal both `J` and
 `S(J)` simultaneously.
 
 **Why this might work where matroid detection didn't.** The matroid
-memo ([§7](./chain-descent-matroid.md)) tried to detect Tier-2
+memo ([§7](./Archive/ChainDescent/chain-descent-matroid.md)) tried to detect Tier-2
 structure by binary-vs-non-binary classification of a *single closure
 operator*. That failed because the closure operator was not a
 matroid. The self-undermining argument doesn't classify a fixed
@@ -614,8 +616,8 @@ inversion strategy) is the productive move.
 |---|---|---|
 | Tier 1 (CFI cascade) | Proved, axiom-free in Lean for OddDegree | Base case for §6 (CFI residues are cascade-class) |
 | Tier 2 (schurian schemes) | Proved for rank ≤ 2 + |J| ≤ 1 in Lean; paper-rigorous in general | Base case for §6 (scheme residues are cascade-class) |
-| Linear oracle (calc §6) | Built + validated through CFI(K7) 2026-05-28; starved by a-posteriori cascade oracle | The abelian-stripping mechanism of §5 |
-| A-priori cascade oracle (calc §5) | Unbuilt — the binding constraint after the linear oracle landed | Feeds clean footprints to the linear oracle; path to polynomial CFI |
+| Linear oracle (calc §6) | Built + validated through CFI(K7) 2026-05-28 | The abelian-stripping mechanism of §5 |
+| A-priori cascade oracle (calc §5) | Built 2026-05-28 — eliminated linear-oracle starvation; CFI(K4…K7) collapse to a single path. Binding constraint is now the Lean discharge + Tier-3 completeness | Feeds clean footprints to the linear oracle; path to polynomial CFI |
 | Construction question (calc §7) | Open | Dual form of Theorem 3 |
 | Hidden-Johnson Pieces A+B | Proved | Rules out naive (visible-action) counterexamples to §6 |
 | `warm_6_2`, descent spine | Proved | Composition machinery for §7 |
@@ -760,10 +762,10 @@ multi-month project even after the paper is settled.
 - [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) §6 —
   naive hidden Johnson killed; encoded case is sub-claim 2's open
   content.
-- [`chain-descent-matroid.md`](./chain-descent-matroid.md) §7, §8.4 —
+- [`chain-descent-matroid.md`](./Archive/ChainDescent/chain-descent-matroid.md) §7, §8.4 —
   intended Tier-2 detector (failed) and the verdict that detection
   must live at the layered-oracle level.
-- [`chain-descent-tier2-decomposition-experiment.md`](./chain-descent-tier2-decomposition-experiment.md) —
+- [`chain-descent-tier2-decomposition-experiment.md`](./Archive/ChainDescent/chain-descent-tier2-decomposition-experiment.md) —
   empirical confirmation that CFI ladder is Tier 1; baseline data for
   Tier 3a.
 - [`chain-descent-tier3a-cascade-composition.md`](./chain-descent-tier3a-cascade-composition.md) —
