@@ -537,14 +537,27 @@ as this oracle's harvest core wrapped in a bounded-depth recursion.
 ### 8.2 Lean (contract discharge)
 
 1. **Model the construction** as a concrete `LinearOracleSpec` instance
-   for the abelian case. ~500 lines.
+   for the abelian case. ~500 lines. **DONE 2026-05-30 (B2.1)** —
+   `ChainDescent/LinearOracle.lean`: `twistOracle`, a concrete
+   `LinearOracleSpec` instance parameterised by an abstracted discovery
+   function (the canonical-id matching stays C#-side, exactly as the
+   interface abstracts discovery); `RealizesFlip` + `TwistWitness` carry
+   the verified-twist data (the §4.5 edge-check lives in `TwistWitness.isAut`).
 2. **Prove it satisfies `LeafTwistSpec`** — the deliverable §2.3 names
    as missing. Uses `warm_6_2` (partition symmetry) + the verification
-   (automorphism). ~1000 lines.
+   (automorphism). ~1000 lines. **B2.1 PARTIAL (2026-05-30)** —
+   `twistOracle_leafTwist` discharges `LeafTwistSpec` for `twistOracle`,
+   with the flipped branch as the *explicit* witness `σ' = flipPair σ`
+   (sharper than the existential), **given** a sound discovery (one whose
+   output is verified `IsAut` + `RealizesFlip`). What remains is B2.3: to
+   *construct* a `RealizesFlip` twist from the `warm_6_2` /
+   `flipPair_partition_invariant` partition mirror rather than take it as
+   the discovery's contract — i.e. discharge the discovery itself on the
+   all-singleton abelian case (B2.2 = its determinacy, `UniqueCandidateTwist`).
 3. **Tie to `canonForm`** — a descent guided by the verified oracle
    reaches the same lex-min as brute force over `DirAssignment`s. The
    descent's high-level correctness theorem (ChainDescent.md §15.8
-   "remaining genuine work"). ~1000 lines.
+   "remaining genuine work"). ~1000 lines. (B2.4.)
 
 ### 8.3 Order
 

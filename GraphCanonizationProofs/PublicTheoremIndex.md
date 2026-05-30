@@ -488,3 +488,14 @@ The a-priori cascade-oracle Lean contract (plan: `docs/chain-descent-cascade-ora
 | `cascadeComplete_of_cellsAreOrbits` | 303-316 | Sharpened capstone: cell-completeness plus `CellsAreOrbits` at every node gives `CascadeComplete`. Same strength as `cascadeComplete_of_localization` (via the iff) but states the hypothesis as the single genuinely-open implication. | — |
 | `verdictIsoInvariant_of_complete` | 318-336 | **Phase C obligation 3, discharged conditionally**: a sound + complete oracle at orbit-recoverable nodes is automatically `VerdictIsoInvariant` — its verdict equals the orbit relation (`certifies_iff_orbit`) which equals the iso-invariant cell relation. Iso-invariance ⊆ localisation, not independent. | **Key theorem** |
 | `computes_orbits_of_complete` | 303-315 | Capstone: a sound + complete oracle computes the `Aut_D`-orbit relation exactly (program-level correctness, conditional on the completeness obligation). | — |
+
+## ChainDescent/LinearOracle.lean
+
+The linear-oracle / abelian-stripping work (tractable-buildout B2; plan in `docs/chain-descent-linear-oracle.md`). Built on the §15.8 scaffolding (`DirAssignment`/`flipPair`/`LinearOracleSpec`/`LeafTwistSpec`/`canonAdj`). Builds axiom-clean (`refineStep`/`refineStep_iff` + foundationals), no `sorry`. **B2.1 (soundness anchor)** complete; B2.2 (construction determinacy) and B2.3 (`warm_6_2`→`canonAdj` bridge) are later milestones. The abelian `Z₂^d` structure is the already-proved `DirAssignment.flipPair_comm`/`flipPair_idempotent`.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `RealizesFlip` | 53-62 | The precise relation "twist `t` relabels branch `σ`'s leaf to the flipped branch `flipPair σ a b`'s leaf" (`relabelMatrix t (canonAdj σ) = canonAdj (flipPair σ a b)`). The `LeafTwistSpec` conclusion with the partner branch pinned to the flip. | Definition |
+| `TwistWitness` | 64-85 | The verified data a twist discovery produces: decided pair `(a,b)`, candidate permutation `t`, its `IsAut` proof (the §4.5 edge-check — sole soundness anchor), and a `RealizesFlip` proof. | Structure |
+| `twistOracle` | 87-98 | A concrete `LinearOracleSpec` instance parameterised by an abstracted `discover` function (canonical-id matching, C#-side). Returns the verified automorphism on a `TwistWitness`, `none` otherwise; verification is inside the witness so every output is a genuine automorphism. | Definition |
+| `twistOracle_leafTwist` | 100-114 | **B2.1 discharge**: `twistOracle` satisfies `LeafTwistSpec`, with the flipped branch as the **explicit** witness `σ' = flipPair σ` (sharper than the bare existential). Closes the §2.3 pruning-justification contract modulo discovery. | **Key theorem**; axiom-light |
