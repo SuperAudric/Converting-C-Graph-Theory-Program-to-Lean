@@ -522,3 +522,35 @@ The linear-oracle / abelian-stripping work (tractable-buildout B2; plan + status
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `candidateTwist_flip_inv` | 283-289 | The twist is a `Z₂` involution at the twist level: the forced candidate for the flip-back is the inverse of the candidate for the flip. With `DirAssignment.flipPair_comm` (commuting flips) = the elementary-abelian `Z₂^d` structure of the residual. | axiom-light |
+
+## ChainDescent/Group.lean
+
+Part A (A1–A3) of `docs/chain-descent-tier3-tractable-buildout.md` — the group object
+the orbit-recovery program deliberately avoided, now needed for Tier-3 vocabulary
+(`H₀ ⊵ … ⊵ H_k`, quotient graphs). Pure glue over Mathlib group theory + the existing
+`IsAut` lemmas; **no `refineStep`** dependency (axioms `[propext, Classical.choice, Quot.sound]`).
+A4 (the quotient *graph* `G/H` + cell = quotient-vertex lemma) is **not** here — it is the
+medium-risk Mathlib gap gating B1.
+
+### A1 — `Aut(G)` as a group
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `AutGroup adj` | The subgroup `{π | IsAut π adj}` of `Equiv.Perm (Fin n)`. `Subgroup` axioms discharged from `IsAut.refl/.trans/.symm` (`mul_mem'` uses `a * b = b.trans a`). | Definition |
+| `mem_autGroup` | `π ∈ AutGroup adj ↔ IsAut π adj`. | `@[simp]` |
+| `orbitPartition_iff_autGroup` | **The bridge**: `OrbitPartition adj P S v w ↔ ∃ g : AutGroup adj, (g preserves P) ∧ FixesPointwise ↑g S ∧ ↑g v = w` — repackages `OrbitPartition`'s bare `π` as a group element (in the pointwise-`S`-stabilizer), keeping `OrbitPartition` the working object. | axiom-light |
+
+### A2 — Action on vertices + orbit bridge
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `autGroup_smul` | The subgroup action's smul is permutation application: `g • v = (↑g) v`. | `@[simp]`, `rfl` |
+| `mem_orbit_autGroup_iff` | `w ∈ MulAction.orbit (AutGroup adj) v ↔ ∃ π, IsAut π adj ∧ π v = w` — orbit membership unfolded (pure, pre-`P`). | axiom-light |
+| `mem_orbit_autGroup_iff_orbitPartition` | **Orbit bridge**: under `P`-invariance (`∀ π, IsAut π adj → π preserves P`; the Tier-2 `hP_invariant` pattern), `v`'s `AutGroup`-orbit = the root relation `OrbitPartition adj P ∅` (no individualization). | axiom-light |
+
+### A3 — Normal subgroup chains
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `LayerChain adj` | A finite descending chain `AutGroup adj = layer 0 ⊵ … ⊵ layer len = ⊥` with each layer relatively normal in its predecessor (`(layer (i+1)).subgroupOf (layer i)` is `Normal`). The `H₀ ⊵ … ⊵ H_k` substrate B1 (Tier 3a) is stated over. | Structure |
+| `LayerChain.trivial` | The one-step chain `AutGroup adj ⊵ ⊥` (`⊥` normal in anything) — witnesses `LayerChain` is inhabited (`Inhabited` instance). | Definition |

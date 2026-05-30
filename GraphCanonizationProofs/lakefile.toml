@@ -1,6 +1,6 @@
 name = "GraphCanonizationProofs"
 version = "0.0.1"
-defaultTargets = ["ChainDescent", "ChainDescent.CFI", "ChainDescent.Scheme", "ChainDescent.CascadeOracle", "ChainDescent.LinearOracle"]
+defaultTargets = ["ChainDescent", "ChainDescent.CFI", "ChainDescent.Scheme", "ChainDescent.CascadeOracle", "ChainDescent.LinearOracle", "ChainDescent.Group"]
 
 # Active library: chain-descent canonizer correctness work.
 # The retired V4 lean stack (LeanGraphCanonizerV4, UniqueGraphsBySize,

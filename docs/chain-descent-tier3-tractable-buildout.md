@@ -116,38 +116,54 @@ a theorem, and (b) packages the twists as the `N = Z₂^d` normal factor of the
 semidirect product. Neither is needed for B2's own soundness (done), but both are
 the natural next rigor once Part A lands.
 
-### A1 — `Aut(G)` as a group
+> **STATUS — A1–A3 (the glue tier) DONE (2026-05-30).** Built in
+> [`ChainDescent/Group.lean`](../GraphCanonizationProofs/ChainDescent/Group.lean)
+> (module `ChainDescent.Group`, axiom-clean — `[propext, Classical.choice, Quot.sound]`,
+> **no `refineStep`**, no `sorry`); theorem map in `PublicTheoremIndex.md`
+> §"ChainDescent/Group.lean". Only **A4** (the quotient *graph*) remains in Part A.
+
+### A1 — `Aut(G)` as a group — **DONE**
 
 - **Define** `AutGroup adj : Subgroup (Equiv.Perm (Fin n))` as
   `{π | IsAut π adj}`. Discharge the `Subgroup` axioms from the existing
   `IsAut.refl / .trans / .symm` (already proved in `ChainDescent.lean`).
+  ✅ `AutGroup` + `mem_autGroup` (`mul_mem'` reads `IsAut.trans hb ha`,
+  since `Equiv.Perm` multiplication is `a * b = b.trans a`).
 - **Mathlib:** `Subgroup`, `Equiv.Perm` group structure — all present.
   Pure glue.
 - **Bridge to keep:** `OrbitPartition adj P S v w` ↔ "∃ `g ∈` the
   pointwise-`S`-stabilizer of `AutGroup adj` *that also preserves `P`*,
   with `g v = w`." Keep `OrbitPartition` as the working object; `AutGroup`
-  is only needed where the *chain* is referenced.
-- **Effort:** ~100–150 lines. **Risk:** low.
+  is only needed where the *chain* is referenced. ✅ `orbitPartition_iff_autGroup`
+  (the `FixesPointwise ↑g S` conjunct *is* the pointwise-`S`-stabilizer condition).
+- **Effort:** ~100–150 lines. **Risk:** low. *(landed ~70 lines)*
 
-### A2 — Action on vertices + orbit bridge
+### A2 — Action on vertices + orbit bridge — **DONE**
 
 - **Define** the `MulAction (AutGroup adj) (Fin n)` (restriction of the
-  perm action). Relate its orbits to `OrbitPartition adj P univ`-classes
-  (the `P`-preservation conjunct is the wrinkle — handle as in the Tier-2
-  `hP_invariant` bridge, or restrict to permutation-invariant `P`).
+  perm action). ✅ Inherited automatically (subgroup restriction of
+  `Equiv.Perm.applyMulAction`); `autGroup_smul : g • v = ↑g v` (`rfl`).
+  Relate its orbits to the **root** orbit relation `OrbitPartition adj P ∅`
+  (the `S = ∅` case — `FixesPointwise π ∅` vacuous; *not* `univ`, which is
+  trivial). The `P`-preservation conjunct is the wrinkle — handled by a
+  `P`-invariance hypothesis (`∀ π, IsAut π adj → π` preserves `P`; the
+  Tier-2 `hP_invariant` pattern, holds for trivial/profile `P`).
+  ✅ `mem_orbit_autGroup_iff` (pure, pre-`P`) +
+  `mem_orbit_autGroup_iff_orbitPartition` (with `P`-invariance).
 - **Mathlib:** `MulAction`, `MulAction.orbit`, `orbitRel` — present.
-- **Effort:** ~100 lines. **Risk:** low (the `P`-vs-no-`P` mismatch is
-  the only subtlety; the Tier-2 `GraphOrbitFixing ↔ OrbitPartition`
-  pattern already solves it for the trivial/invariant-`P` case).
+- **Effort:** ~100 lines. **Risk:** low. *(landed ~30 lines)*
 
-### A3 — Normal subgroup chains
+### A3 — Normal subgroup chains — **DONE**
 
 - **Define** `LayerChain adj` := a finite descending chain
   `H_0 = AutGroup adj ⊵ H_1 ⊵ … ⊵ H_k = ⊥` of normal subgroups
-  (`Subgroup.Normal` of each in its predecessor).
-- **Mathlib:** `Subgroup.Normal`, `QuotientGroup` — present. The chain
-  bookkeeping is standard.
-- **Effort:** ~150 lines. **Risk:** low.
+  (relative normality: `(layer (i+1)).subgroupOf (layer i)` is `Normal`).
+  ✅ `LayerChain` structure (`len`, `layer : ℕ → Subgroup`, `head_eq`,
+  `last_eq`, `descending`, `normal`) + `LayerChain.trivial` (the one-step
+  `AutGroup ⊵ ⊥` chain) + `Inhabited` instance.
+- **Mathlib:** `Subgroup.Normal`, `subgroupOf`, `QuotientGroup` — present.
+  The chain bookkeeping is standard.
+- **Effort:** ~150 lines. **Risk:** low. *(landed ~50 lines)*
 
 ### A4 — Quotient graph `G/H` (the Mathlib gap)
 
@@ -165,7 +181,8 @@ the natural next rigor once Part A lands.
   well-definedness, the restriction lemma). Everything else in A is glue.
 
 **Part A total:** ~600–800 lines, mostly glue except A4. Axiom-clean
-(uses Mathlib group theory + existing `IsAut` lemmas).
+(uses Mathlib group theory + existing `IsAut` lemmas). **A1–A3 landed
+2026-05-30 (~150 lines, axiom-clean); A4 is the remaining piece.**
 
 ---
 
@@ -289,10 +306,15 @@ the natural next rigor once Part A lands.
    (`canonicalTwistOracle`, `candidateTwist`) that B3 and the Tier-3 narrative want
    exists. Remaining B2 pieces (canonForm tie, completeness, subgroup `N`) are
    listed there; (iii) is Part A.
-2. **Part A (A1→A2→A3→A4) — NEXT, now the convergence point.** The gating
-   infrastructure for B1, *and* what makes rigorous (a) the support backbone's
-   "fixing relocates to transversal, not destroys" and (b) B2's twists-as-`N`
-   (the Part A precursors note). A4 is the only real work; A1–A3 are glue.
+2. **Part A — A1→A2→A3 DONE (2026-05-30), A4 NEXT.** The group object now exists
+   (`ChainDescent.Group`: `AutGroup`, the vertex `MulAction` + orbit bridge,
+   `LayerChain`). That gives the substrate for B1, *and* the home for making rigorous
+   (a) the support backbone's "fixing relocates to transversal, not destroys" and
+   (b) B2's twists-as-`N` (the Part A precursors note) — both now stateable as
+   group-level theorems (not yet proved; they want A2's orbit machinery + A1's
+   subgroup, both present). **A4 (quotient graph `G/H` + cell = quotient-vertex)
+   is the one remaining Part-A piece and the gate for B1** — the only medium-risk
+   work in Part A.
 3. **B1 (Tier 3a).** The headline composition theorem, once A4's
    cell = quotient-vertex lemma is in hand.
 4. **B3.** Cheap capstone once B2 + the cascade contract are in place. (Cascade
