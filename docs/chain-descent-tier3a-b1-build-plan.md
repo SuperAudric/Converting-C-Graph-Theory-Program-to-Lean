@@ -61,6 +61,18 @@ is the *refinement-transfer*. We isolate it as one hypothesis and discharge it l
 
 ## 3. Phased plan
 
+> **STATUS — Phases A + C DONE (2026-05-30).** Built in
+> [`ChainDescent/Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean)
+> (module `ChainDescent.Cascade`, axiom-clean, no `sorry`); theorem map in
+> `PublicTheoremIndex.md` §"ChainDescent/Cascade.lean". The headline
+> `cascadeComposition` ("depths add") is proved **conditional on the per-layer
+> `LayerStep` hypotheses** (= §4.2.5 transferred); the cardinality companion
+> `cumulative_card_le` gives `|T_k| ≤ Σ fᵢ`. **Phase D (the transfer) is the remaining
+> work** and the headline does not depend on it. Note: `RelativeRecoverable` collapsed
+> to `LayerStep` (`CellsAreOrbits T → CellsAreOrbits (T ∪ S)`) — the cleanest interface
+> the induction consumes; the induction is seeded by layer-1's *unconditional*
+> recoverability (`CellsAreOrbits` at `T 0`), avoiding a false `CellsAreOrbits ∅` base.
+
 ### Phase A — abstraction (`CascadeClass` + relative recoverability) — ~150 lines, low risk
 
 - **`CascadeClass`**: a predicate/structure on `(adj, P)` carrying a depth bound `f`

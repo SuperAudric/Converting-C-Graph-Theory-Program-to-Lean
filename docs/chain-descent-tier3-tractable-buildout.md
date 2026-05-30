@@ -222,6 +222,15 @@ label-choice the canonizer otherwise avoids) is left until B1 forces a concrete
 > quotient `H_{i-1}/H_i` acts on `G_{i-1} = G/H_i` in a cascade class
 > with depth bound `f_i`, then `G`'s cascade depth is `≤ Σ f_i`.
 
+> **STATUS — Phases A + C DONE (2026-05-30).** The headline `cascadeComposition`
+> ("depths add") is proved in
+> [`ChainDescent/Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean)
+> (axiom-clean), **conditional on the per-layer transfer** `LayerStep` (= §4.2.5);
+> `cumulative_card_le` gives `|S| ≤ Σ fᵢ`. **Phase D — discharging `LayerStep` from
+> Tier-1/2 via A4's quotient (the §4.2.5 transfer) — is the remaining work**, attacked
+> intrinsically on `Fin n` (build-plan §3, easiest-layer-first). Full plan:
+> [`chain-descent-tier3a-b1-build-plan.md`](./chain-descent-tier3a-b1-build-plan.md).
+
 - **New mathematical content:** essentially one lemma — step 4.2.5 of the
   Tier-3a doc ("1-WL on a cell = 1-WL on the quotient vertex," = A4's key
   lemma) — plus an induction on chain length.

@@ -568,3 +568,30 @@ medium-risk Mathlib gap gating B1.
 | `quotientAdjCompatible_of_discrete` | At discreteness the quotient graph is always well-defined (orbits singletons) — the recursion-bottom anchor, paralleling `cellsAreOrbits_of_discrete`. | axiom-light |
 | `orbitPartition_empty_iff_orbitRel` | The root orbit relation `OrbitPartition adj P ∅` = the `AutGroup` `MulAction` orbit relation (under `P`-invariance) — relational form, symmetrised for `orbitRel`. | axiom-light |
 | `orbitQuotientEquivAutGroup` | **The root quotient is `V(G)/Aut(G)`**: `OrbitQuotient adj P ∅ ≃ MulAction.orbitRel.Quotient (AutGroup adj) (Fin n)` (under `P`-invariance), tying A4's relational quotient back to A1/A2's group object. | Definition (`noncomputable`) |
+
+## ChainDescent/Cascade.lean
+
+B1 (Tier 3a cascade composition) of `docs/chain-descent-tier3-tractable-buildout.md`,
+Phases A + C. Build plan: `docs/chain-descent-tier3a-b1-build-plan.md`. The headline
+"depths add" theorem, **conditional on the per-layer transfer** (`LayerStep`, = paper
+§4.2.5, discharged in the not-yet-built Phase D). Stays on `Fin n` (no quotient
+re-typing) by telescoping cumulative individualization sets. Axiom-clean (standard
+basis; `refineStep` via `warmRefine`).
+
+### Phase A — interface
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `IsBase adj P T` | `T` is a base of the `P`-preserving automorphism group: `Aut_T`-orbits are trivial (`OrbitPartition adj P T v w → v = w`). The chain's bottom `H_k = {1}`. | Definition |
+| `LayerStep adj P T S` | The per-layer transfer obligation: `CellsAreOrbits adj P T → CellsAreOrbits adj P (T ∪ S)` (paper §4.2.5 transferred to `G`). Consumed by the composition induction; discharged from Tier-1/2 in Phase D. | Definition |
+| (cascade-class predicate) | `RecoverableByDepth adj P bound` (in `CascadeOracle.lean`) — Tier-1 (`recoverableByDepth_cfi`) / Tier-2 (`recoverableByDepth_scheme`) instances already proved. | (existing) |
+
+### Phase C — composition theorem
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `discrete_of_cellsAreOrbits_base` | **(C1) Finish**: `CellsAreOrbits adj P T` + `IsBase adj P T` ⟹ `Discrete (warmRefine … T)`. Same-cell → same-orbit → equality. | axiom-light |
+| `cellsAreOrbits_compose` | **(C2) The induction**: from layer-1 recoverability (`CellsAreOrbits` at `T 0`) + per-layer steps (`hstep i : CellsAreOrbits (T i) → CellsAreOrbits (T (i+1))`), conclude `CellsAreOrbits` at the final cumulative `T k`. Telescopes the layers. | **Key theorem**; axiom-light |
+| `cumulative_card_le` | **Depths add (cardinality)**: `|⋃_{i≤k} S i| ≤ Σ_{i≤k} f i` when `|S i| ≤ f i` (`card_biUnion_le` + `sum_le_sum`). | axiom-light |
+| `cascadeComposition` | **Theorem 3a headline (conditional)**: cumulative sets + layer-1 base + per-layer transfer steps + final set a base ⟹ warm refinement at `T k` is `Discrete`. With `cumulative_card_le`, depth `≤ Σ fᵢ`. Conditional on `hstep` (= §4.2.5, Phase D). | **Key theorem**; axiom-light |
+| `cascadeComposition_single` | The `k = 0` case: a single cascade-class layer (Tier-1/2) that is a base reaches discreteness — recovers the orbit-recovery theorems as the composition's base case. | axiom-light |
