@@ -554,3 +554,17 @@ medium-risk Mathlib gap gating B1.
 |------|-------------|-------|
 | `LayerChain adj` | A finite descending chain `AutGroup adj = layer 0 ⊵ … ⊵ layer len = ⊥` with each layer relatively normal in its predecessor (`(layer (i+1)).subgroupOf (layer i)` is `Normal`). The `H₀ ⊵ … ⊵ H_k` substrate B1 (Tier 3a) is stated over. | Structure |
 | `LayerChain.trivial` | The one-step chain `AutGroup adj ⊵ ⊥` (`⊥` normal in anything) — witnesses `LayerChain` is inhabited (`Inhabited` instance). | Definition |
+
+### A4 — quotient graph + cell = quotient-vertex
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `orbitSetoid adj P S` | The `Aut_S`-orbit relation `OrbitPartition adj P S` packaged as a `Setoid` (from its proved `refl/symm/trans`). | Definition |
+| `OrbitQuotient adj P S` | **The quotient vertex set** `V(G)/Aut_S` = `Quotient (orbitSetoid …)`. `Fintype` + `DecidableEq` instances (noncomputable, classical). | `abbrev` |
+| `orbitMk` / `orbitMk_eq_iff` | The quotient map `v ↦ ⟦v⟧`; `orbitMk v = orbitMk w ↔ OrbitPartition adj P S v w`. | Definition / `Quotient.eq` |
+| `cell_iff_orbitMk_eq` | **The cell = quotient-vertex lemma** (B1's induction step): under `CellsAreOrbits`, `v,w` share a 1-WL cell of `(G,S)` **iff** `orbitMk v = orbitMk w`. Forward = `CellsAreOrbits`+`Quotient.sound`; backward = unconditional `subset_warmRefine`+`Quotient.exact`. | **Key theorem**; axiom-light |
+| `QuotientAdjCompatible` | The well-definedness condition for a simple induced quotient adjacency: `adj v w` constant on `Aut_S`-orbit pairs. (Genuinely conditional — fails for coarse `S`; the multigraph subtlety the doc flags.) | Definition |
+| `quotientAdj` / `quotientAdj_mk` | The induced adjacency on `OrbitQuotient`, well-defined under `QuotientAdjCompatible` (via `Quotient.lift₂`); `quotientAdj h ⟦v⟧ ⟦w⟧ = adj.adj v w` (`rfl`). | Definition / `@[simp]` |
+| `quotientAdjCompatible_of_discrete` | At discreteness the quotient graph is always well-defined (orbits singletons) — the recursion-bottom anchor, paralleling `cellsAreOrbits_of_discrete`. | axiom-light |
+| `orbitPartition_empty_iff_orbitRel` | The root orbit relation `OrbitPartition adj P ∅` = the `AutGroup` `MulAction` orbit relation (under `P`-invariance) — relational form, symmetrised for `orbitRel`. | axiom-light |
+| `orbitQuotientEquivAutGroup` | **The root quotient is `V(G)/Aut(G)`**: `OrbitQuotient adj P ∅ ≃ MulAction.orbitRel.Quotient (AutGroup adj) (Fin n)` (under `P`-invariance), tying A4's relational quotient back to A1/A2's group object. | Definition (`noncomputable`) |

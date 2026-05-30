@@ -175,4 +175,140 @@ instance (adj : AdjMatrix n) : Inhabited (LayerChain adj) := ⟨trivial adj⟩
 
 end LayerChain
 
+/-! ## A4 — the quotient graph `G/H` and the cell = quotient-vertex lemma
+
+The one piece Mathlib does not package: the quotient of a graph by the orbits of a
+(normal) subgroup of its automorphism group. Here the relevant orbits are the
+`Aut_S`-orbits — the classes of `OrbitPartition adj P S` (the pointwise-`S`-stabilizer
+orbits; `= MulAction.orbit` of the stabilizer subgroup, bridged by A1/A2 at the root).
+`OrbitPartition` is already an equivalence relation (`refl/symm/trans` proved), so its
+quotient is the quotient **vertex set**; the **cell = quotient-vertex** lemma
+(`cell_iff_orbitMk_eq`) is then immediate from the cascade machinery
+(`CellsAreOrbits` + `OrbitPartition.subset_warmRefine`). This is the lemma B1's
+induction step rests on.
+
+The quotient *graph adjacency* is the genuinely conditional part: `adj v w` is **not**
+constant on orbit-pairs in general (`adj (g v) w = adj v (g⁻¹ w)`, a different
+representative), so a simple induced adjacency is well-defined exactly under
+`QuotientAdjCompatible`. We give the lift under that hypothesis and its defining
+equation — honest about where the friction the doc flags actually sits. -/
+
+variable {n : Nat}
+
+/-- The `Aut_S`-orbit relation as a `Setoid` — `OrbitPartition`'s proved
+`refl`/`symm`/`trans` packaged as an equivalence. -/
+def orbitSetoid (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) :
+    Setoid (Fin n) where
+  r := OrbitPartition adj P S
+  iseqv := ⟨OrbitPartition.refl, OrbitPartition.symm, OrbitPartition.trans⟩
+
+/-- **The quotient vertex set** `V(G)/Aut_S` — vertices of the quotient graph. -/
+abbrev OrbitQuotient (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) : Type :=
+  Quotient (orbitSetoid adj P S)
+
+/-- The quotient map sending a vertex to its `Aut_S`-orbit (its quotient vertex). -/
+def orbitMk (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (v : Fin n) :
+    OrbitQuotient adj P S :=
+  Quotient.mk (orbitSetoid adj P S) v
+
+/-- `orbitMk v = orbitMk w` iff `v, w` lie in the same `Aut_S`-orbit. -/
+theorem orbitMk_eq_iff {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+    {v w : Fin n} : orbitMk adj P S v = orbitMk adj P S w ↔ OrbitPartition adj P S v w :=
+  Quotient.eq
+
+/-- The quotient vertex set is finite (a quotient of `Fin n`). -/
+noncomputable instance (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) :
+    Fintype (OrbitQuotient adj P S) := Fintype.ofFinite _
+
+noncomputable instance (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) :
+    DecidableEq (OrbitQuotient adj P S) := Classical.decEq _
+
+/-- **The cell = quotient-vertex lemma.** Under `CellsAreOrbits` (cells are no coarser
+than orbits — the open localisation half, proved on the cascade class), two vertices
+share a 1-WL cell of `(G, S)` **iff** they are the same quotient vertex. The forward
+direction is `CellsAreOrbits` + `Quotient.sound`; the backward is the unconditional
+`OrbitPartition.subset_warmRefine` (orbits refine cells) + `Quotient.exact`. This is
+the correspondence B1's cascade-composition induction steps through: the per-layer
+cascade class runs on the quotient `G/Aut_S`, whose vertices are exactly the cells. -/
+theorem cell_iff_orbitMk_eq {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+    (hco : CellsAreOrbits adj P S) (v w : Fin n) :
+    warmRefine adj P (individualizedColouring n S) v =
+        warmRefine adj P (individualizedColouring n S) w ↔
+      orbitMk adj P S v = orbitMk adj P S w := by
+  constructor
+  · intro hcell
+    exact Quotient.sound (hco v w hcell)
+  · intro hmk
+    exact OrbitPartition.subset_warmRefine (Quotient.exact hmk)
+
+/-! ### The quotient graph adjacency (conditional on compatibility) -/
+
+/-- **Quotient-adjacency compatibility.** The adjacency `adj v w` is constant on
+`Aut_S`-orbit pairs — exactly the well-definedness condition for a simple induced
+adjacency on the quotient. Holds trivially at discreteness (orbits are singletons);
+fails for coarser `S` in general (the multigraph/symmetrisation subtlety the doc
+flags). The quotient *graph* is well-defined precisely here. -/
+def QuotientAdjCompatible (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) :
+    Prop :=
+  ∀ v v' w w', OrbitPartition adj P S v v' → OrbitPartition adj P S w w' →
+    adj.adj v w = adj.adj v' w'
+
+/-- **The induced adjacency on the quotient graph**, well-defined under
+`QuotientAdjCompatible`. Lifts `adj.adj` along both quotient coordinates. -/
+def quotientAdj {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+    (h : QuotientAdjCompatible adj P S) :
+    OrbitQuotient adj P S → OrbitQuotient adj P S → Nat :=
+  Quotient.lift₂ (fun v w => adj.adj v w) (fun v w v' w' hv hw => h v v' w w' hv hw)
+
+/-- The quotient adjacency's defining equation: on representatives it is the original
+adjacency. (`Quotient.lift₂` computation; `rfl`.) -/
+@[simp] theorem quotientAdj_mk {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+    (h : QuotientAdjCompatible adj P S) (v w : Fin n) :
+    quotientAdj h (orbitMk adj P S v) (orbitMk adj P S w) = adj.adj v w := rfl
+
+/-- At discreteness the compatibility holds for free (orbits are singletons, so
+`v' = v` and `w' = w`): the quotient graph is always well-defined at the recursion
+bottom — the same anchor as `cellsAreOrbits_of_discrete`. -/
+theorem quotientAdjCompatible_of_discrete {adj : AdjMatrix n} {P : PMatrix n}
+    {S : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S))) :
+    QuotientAdjCompatible adj P S := by
+  intro v v' w w' hvv' hww'
+  -- orbits collapse to equality at discreteness (`subset_warmRefine` + `Discrete`).
+  have hv : v = v' := hd v v' (OrbitPartition.subset_warmRefine hvv')
+  have hw : w = w' := hd w w' (OrbitPartition.subset_warmRefine hww')
+  rw [hv, hw]
+
+/-! ### Tying A4 back to the group object (A1/A2)
+
+The quotient above is by the *relation* `OrbitPartition adj P ∅` (the working object).
+Under `P`-invariance it coincides with the orbit relation of the **group** `AutGroup adj`
+(A1) acting on vertices (A2) — so the quotient vertex set is literally `V(G)/Aut(G)`,
+the group-theoretic object the Tier-3 narrative names. This honors the doc's
+"quotient by a (normal) subgroup of `Aut(G)`" framing for the root case. -/
+
+/-- The root orbit relation = the `AutGroup` MulAction orbit relation (under
+`P`-invariance). The relational form of the A2 orbit bridge, symmetrised for the
+`orbitRel` direction. -/
+theorem orbitPartition_empty_iff_orbitRel {adj : AdjMatrix n} {P : PMatrix n}
+    (hPinv : ∀ π : Equiv.Perm (Fin n), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (a b : Fin n) :
+    OrbitPartition adj P ∅ a b ↔ (MulAction.orbitRel (AutGroup adj) (Fin n)).r a b := by
+  rw [MulAction.orbitRel_apply, ← mem_orbit_autGroup_iff_orbitPartition hPinv,
+      MulAction.mem_orbit_iff, MulAction.mem_orbit_iff]
+  -- goal: (∃ g, g • a = b) ↔ (∃ g, g • b = a)
+  constructor
+  · rintro ⟨g, hg⟩; exact ⟨g⁻¹, by rw [← hg, inv_smul_smul]⟩
+  · rintro ⟨g, hg⟩; exact ⟨g⁻¹, by rw [← hg, inv_smul_smul]⟩
+
+/-- **The root quotient is `V(G)/Aut(G)`.** Under `P`-invariance, the relational
+quotient `OrbitQuotient adj P ∅` is equivalent to the `MulAction` orbit quotient of
+the group `AutGroup adj` — the group-theoretic quotient vertex set. -/
+noncomputable def orbitQuotientEquivAutGroup {adj : AdjMatrix n} {P : PMatrix n}
+    (hPinv : ∀ π : Equiv.Perm (Fin n), IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
+    OrbitQuotient adj P ∅ ≃ MulAction.orbitRel.Quotient (AutGroup adj) (Fin n) :=
+  Quotient.congr (Equiv.refl (Fin n)) (by
+    intro a b
+    simpa using orbitPartition_empty_iff_orbitRel hPinv a b)
+
 end ChainDescent

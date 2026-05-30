@@ -165,24 +165,52 @@ the natural next rigor once Part A lands.
   The chain bookkeeping is standard.
 - **Effort:** ~150 lines. **Risk:** low. *(landed ~50 lines)*
 
-### A4 — Quotient graph `G/H` (the Mathlib gap)
+### A4 — Quotient graph `G/H` (the Mathlib gap) — **DONE (core)**
 
-- **Define** the quotient graph on `H`-orbits of `V(G)`: vertices =
-  orbit set, adjacency induced by `G`'s edge set (well-defined because
-  `H ≤ Aut(G)` preserves edges). This is the **one piece Mathlib does
-  not package** — "quotient of a graph by a normal subgroup of its
-  automorphism group acting on vertices."
-- **Key lemma needed:** the 1-WL partition on `(G, S)` restricted to an
-  `H`-orbit coincides with 1-WL on the corresponding quotient vertex
-  (the "cell = quotient-vertex" fact, used by B1's induction step). This
-  is the bookkeeping-heavy lemma both docs flag.
-- **Effort:** ~250–400 lines. **Risk:** medium — the only place in Part
-  A with real friction (orbit-set as a `Fintype`, induced adjacency
-  well-definedness, the restriction lemma). Everything else in A is glue.
+> **STATUS — A4 DONE (2026-05-30).** Built in
+> [`ChainDescent/Group.lean`](../GraphCanonizationProofs/ChainDescent/Group.lean)
+> §A4 (axiom-clean; `cell_iff_orbitMk_eq`/`quotientAdjCompatible_of_discrete` use the
+> permitted `refineStep`/`refineStep_iff` basis via `warmRefine`). Index:
+> `PublicTheoremIndex.md` §A4. **Part A is now complete.**
 
-**Part A total:** ~600–800 lines, mostly glue except A4. Axiom-clean
-(uses Mathlib group theory + existing `IsAut` lemmas). **A1–A3 landed
-2026-05-30 (~150 lines, axiom-clean); A4 is the remaining piece.**
+- **Define** the quotient graph on the `Aut_S`-orbits of `V(G)`: vertices =
+  orbit set, adjacency induced by `G`'s edge set. ✅ The vertex set is
+  `OrbitQuotient adj P S = Quotient (orbitSetoid …)` (the orbits of
+  `OrbitPartition adj P S`, already an equivalence relation), with
+  `Fintype`/`DecidableEq` and the quotient map `orbitMk`.
+  *Design note — the orbit object.* The quotient is taken by the **relation**
+  `OrbitPartition adj P S` (the cascade machinery's working object = `Aut_S`-orbits),
+  not directly by a `Subgroup` `H`; under `P`-invariance these coincide with the
+  `AutGroup` `MulAction` orbits — `orbitQuotientEquivAutGroup` exhibits
+  `OrbitQuotient adj P ∅ ≃ V(G)/Aut(G)`, tying A4 back to A1/A2 and honoring the
+  "quotient by a subgroup of `Aut(G)`" framing for the root case.
+  *Induced adjacency is genuinely conditional.* `adj v w` is **not** constant on
+  orbit-pairs in general (`adj (g v) w = adj v (g⁻¹ w)`), so the simple induced
+  adjacency `quotientAdj` is well-defined exactly under `QuotientAdjCompatible`
+  (constant-on-orbit-pairs) — given, with the defining equation
+  `quotientAdj ⟦v⟧ ⟦w⟧ = adj v w` and the discreteness anchor
+  `quotientAdjCompatible_of_discrete`. This is the "induced adjacency
+  well-definedness" friction the plan flagged, now isolated as a hypothesis (the
+  multigraph/symmetrisation subtlety lives there).
+- **Key lemma needed:** the 1-WL partition on `(G, S)` corresponds to the quotient
+  vertices. ✅ `cell_iff_orbitMk_eq`: under `CellsAreOrbits`, `v, w` share a 1-WL cell
+  **iff** `orbitMk v = orbitMk w`. Forward = `CellsAreOrbits` + `Quotient.sound`;
+  backward = the unconditional `OrbitPartition.subset_warmRefine` + `Quotient.exact`.
+  This is the bookkeeping lemma both docs flag — it came out clean because the orbit
+  *relation* (not a re-indexed `AdjMatrix (Fin m)`) is the quotient carrier.
+- **Effort:** ~250–400 lines estimated. **Risk:** medium. *(landed ~90 lines —
+  cheaper than feared by quotienting the relation directly and leaving the induced
+  adjacency conditional; the deferred bookkeeping is the `OrbitQuotient ≃ AdjMatrix
+  (Fin m)` re-indexing, needed only if B1 wants the quotient literally typed as an
+  `AdjMatrix` rather than an adjacency function on the orbit type.)*
+
+**Part A total:** ~600–800 lines estimated, mostly glue except A4. Axiom-clean
+(uses Mathlib group theory + existing `IsAut` lemmas). **A1–A4 all landed
+2026-05-30 (~240 lines total, axiom-clean). Part A complete; B1 is now unblocked.**
+*Deferred sub-bookkeeping:* the orbit-type → `AdjMatrix (Fin m)` re-indexing (a
+label-choice the canonizer otherwise avoids) is left until B1 forces a concrete
+`AdjMatrix`-typed quotient; the adjacency *function* on the orbit type
+(`quotientAdj`) is in hand.
 
 ---
 
@@ -306,15 +334,17 @@ the natural next rigor once Part A lands.
    (`canonicalTwistOracle`, `candidateTwist`) that B3 and the Tier-3 narrative want
    exists. Remaining B2 pieces (canonForm tie, completeness, subgroup `N`) are
    listed there; (iii) is Part A.
-2. **Part A — A1→A2→A3 DONE (2026-05-30), A4 NEXT.** The group object now exists
-   (`ChainDescent.Group`: `AutGroup`, the vertex `MulAction` + orbit bridge,
-   `LayerChain`). That gives the substrate for B1, *and* the home for making rigorous
-   (a) the support backbone's "fixing relocates to transversal, not destroys" and
-   (b) B2's twists-as-`N` (the Part A precursors note) — both now stateable as
-   group-level theorems (not yet proved; they want A2's orbit machinery + A1's
-   subgroup, both present). **A4 (quotient graph `G/H` + cell = quotient-vertex)
-   is the one remaining Part-A piece and the gate for B1** — the only medium-risk
-   work in Part A.
+2. **Part A — A1→A2→A3→A4 ALL DONE (2026-05-30). Part A complete.** The group object
+   exists (`ChainDescent.Group`: `AutGroup`, the vertex `MulAction` + orbit bridge,
+   `LayerChain`), *and* the quotient layer (`OrbitQuotient`, `cell_iff_orbitMk_eq`,
+   `quotientAdj` + the root `≃ V(G)/Aut(G)`). That gives the full substrate for B1,
+   *and* the home for making rigorous (a) the support backbone's "fixing relocates to
+   transversal, not destroys" and (b) B2's twists-as-`N` (the Part A precursors note)
+   — both now stateable as group-level theorems (not yet proved; they want A2's orbit
+   machinery + A1's subgroup, both present). **B1 (Tier 3a) is now unblocked** — its
+   induction step is `cell_iff_orbitMk_eq`. One deferred sub-bookkeeping remains
+   (orbit-type → `AdjMatrix (Fin m)` re-indexing), needed only if B1 demands a
+   literally `AdjMatrix`-typed quotient.
 3. **B1 (Tier 3a).** The headline composition theorem, once A4's
    cell = quotient-vertex lemma is in hand.
 4. **B3.** Cheap capstone once B2 + the cascade contract are in place. (Cascade
