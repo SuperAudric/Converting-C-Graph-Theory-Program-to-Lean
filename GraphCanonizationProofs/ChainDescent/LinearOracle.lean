@@ -462,4 +462,127 @@ theorem isAut_candidateTwist_of_rankPerm_eq {k : Nat} (chain : SpineChain adj P�
   rw [candidateTwist_eq_one_of_rankPerm_eq chain isLeaf σ a b ha hb h]
   exact IsAut.refl
 
+/-! ## §L.6 — Relativized completeness (the retargeting)
+
+§L.4 showed the oracle fires ⟺ the forced candidate is an automorphism, and that the
+*general* completeness statement ("fires whenever the two branches are isomorphic")
+cannot hold: a realizing automorphism agrees with the forced candidate only up to
+`Aut(canonAdj σ)` — a *conjugate* of `Aut(adj)`, pinned by `rankPerm_comp` — so for a
+**non-abelian** residual the candidate genuinely misses, which is the
+`chain-descent-calculator.md` §6 split-or-Johnson wall *by design*.
+
+The fix mirrors the a-priori cascade oracle's **Phase B** (`CascadeOracle.lean`): do not
+target the general statement; **relativize** completeness to the recoverable/abelian class
+and reduce it to orbit recovery. This is the *same* gap the cascade oracle carries
+(`construct → verify → harvest`, the "[FIRM behavior, CONJECTURAL characterization]"
+boundary, `chain-descent-cascade-oracle.md` §4.3) and the *same* resolution.
+
+The scaffold:
+
+* `RankAligned` — the algebraic firing condition (a rank-aligned automorphism exists);
+  `isAut_candidateTwist_iff_rankAligned` is the interface (= `isAut_candidateTwist_iff_aligned`).
+* `AbelianSufficiency` — the **per-decision relativized target**: *if* the flip is a real
+  symmetry (`RealizableFlip`) *then* the forced candidate verifies. FALSE in the non-abelian
+  regime (the wall), the claim to discharge on the abelian/cascade class.
+* `oracleFires_of_abelianSufficiency` — the capstone ("what suffices"): given
+  `AbelianSufficiency` and a real symmetry, the oracle fires. Linear-oracle analog of
+  cascade's `cascadeComplete_of_localization`.
+* `abelianSufficiency_of_rankPerm_eq` — a **non-vacuous closed instance** (the absorbed
+  decision), validating the scaffold.
+* `AbelianSufficiencyHolds` — the graph-level predicate (every leaf decision is
+  abelian-sufficient), the discharge target. The remaining open obligation is
+  `abelianSufficiencyHolds_of_cfi : IsCFI adj → AbelianSufficiencyHolds adj`, provable
+  downstream (`CFI.lean`) by wiring to the axiom-free `theorem_1_HOR_cfi_oddDeg` — the
+  gadget rank-alignment, **the same nut as Tier-3a B1's path-fixing witness** (`hwit`).
+  Not proven here (and not a `sorry`: it is the conjecturally-true content of the abelian
+  regime, isolated as a single named statement). -/
+
+/-- **The algebraic firing condition: a rank-aligned automorphism exists.** Names the
+right-hand side of `isAut_candidateTwist_iff_aligned`. The oracle fires exactly when this
+holds (`isAut_candidateTwist_iff_rankAligned`). -/
+def RankAligned {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
+    Prop :=
+  ∃ g : Equiv.Perm (Fin n), IsAut g adj
+    ∧ g * Colouring.rankPerm _ (branch_discrete chain isLeaf σ)
+      = Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+
+/-- **Interface.** The forced candidate is an automorphism ⟺ `RankAligned`. So the entire
+completeness question is "does a rank-aligned automorphism exist?" (= `isAut_candidateTwist_iff_aligned`,
+restated against the named predicate). -/
+theorem isAut_candidateTwist_iff_rankAligned {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
+    IsAut (candidateTwist chain isLeaf σ a b ha hb) adj
+      ↔ RankAligned chain isLeaf σ a b ha hb :=
+  isAut_candidateTwist_iff_aligned chain isLeaf σ a b ha hb
+
+/-- **The per-decision relativized completeness target (abelian-sufficiency).** *If* the
+decision `(a, b)` is a real symmetry — some automorphism realises the flip — *then* the
+forced candidate verifies as an automorphism, so the oracle fires. This is the abelian
+direction of completeness. It is **false in general** (the non-abelian wall: a realizing
+automorphism need not be rank-aligned), and it is precisely the claim to discharge on the
+abelian / cascade class. -/
+def AbelianSufficiency {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
+    Prop :=
+  RealizableFlip chain isLeaf σ a b ha hb
+    → IsAut (candidateTwist chain isLeaf σ a b ha hb) adj
+
+/-- **Capstone — what suffices.** Given abelian-sufficiency for the selected decision and a
+genuine realizing symmetry, the oracle fires. The linear-oracle analog of cascade's
+`cascadeComplete_of_localization`: it reduces the oracle's effectiveness to the single
+relativized obligation `AbelianSufficiency`. -/
+theorem oracleFires_of_abelianSufficiency {k : Nat}
+    (selectPair : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_ : chain.IsLeaf)
+      (_σ : DirAssignment P₀ chain.D),
+      Option (Σ' (a : Fin n) (b : Fin n), a ∈ chain.D ∧ b ∈ chain.D))
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hsel : selectPair chain isLeaf σ = some ⟨a, b, ha, hb⟩)
+    (habs : AbelianSufficiency chain isLeaf σ a b ha hb)
+    (hreal : RealizableFlip chain isLeaf σ a b ha hb) :
+    (canonicalTwistOracle selectPair chain isLeaf σ).isSome := by
+  rw [canonicalTwistOracle_isSome_iff selectPair chain isLeaf σ a b ha hb hsel]
+  exact habs hreal
+
+/-- **Non-vacuous closed instance: the absorbed decision is abelian-sufficient.** When the
+two branches induce the same leaf rank permutation, the forced candidate is the identity —
+an automorphism regardless — so `AbelianSufficiency` holds (its conclusion is true outright,
+independent of the `RealizableFlip` hypothesis). The degenerate end of the abelian regime;
+it validates the scaffold against a real instance. -/
+theorem abelianSufficiency_of_rankPerm_eq {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (h : Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+       = Colouring.rankPerm _ (branch_discrete chain isLeaf σ)) :
+    AbelianSufficiency chain isLeaf σ a b ha hb :=
+  fun _ => isAut_candidateTwist_of_rankPerm_eq chain isLeaf σ a b ha hb h
+
+/-- **The graph-level discharge target.** Every leaf decision of `adj` is abelian-sufficient.
+True for graphs with abelian residual symmetry (CFI); the open obligation
+`abelianSufficiencyHolds_of_cfi : IsCFI adj → AbelianSufficiencyHolds adj` is provable
+downstream (`CFI.lean`) via `theorem_1_HOR_cfi_oddDeg` — the gadget rank-alignment, the same
+content as Tier-3a B1's path-fixing witness. -/
+def AbelianSufficiencyHolds : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D),
+    AbelianSufficiency chain isLeaf σ a b ha hb
+
+/-- **Graph-level capstone.** If `adj` satisfies abelian-sufficiency everywhere, then the
+oracle fires at every leaf decision that is a real symmetry. This is the relativized
+completeness statement: on the abelian class, the oracle is complete. -/
+theorem oracleFires_of_abelianSufficiencyHolds {k : Nat}
+    (selectPair : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_ : chain.IsLeaf)
+      (_σ : DirAssignment P₀ chain.D),
+      Option (Σ' (a : Fin n) (b : Fin n), a ∈ chain.D ∧ b ∈ chain.D))
+    (hholds : AbelianSufficiencyHolds (adj := adj) (P₀ := P₀) (χι₀ := χι₀) (sel := sel))
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hsel : selectPair chain isLeaf σ = some ⟨a, b, ha, hb⟩)
+    (hreal : RealizableFlip chain isLeaf σ a b ha hb) :
+    (canonicalTwistOracle selectPair chain isLeaf σ).isSome :=
+  oracleFires_of_abelianSufficiency selectPair chain isLeaf σ a b ha hb hsel
+    (hholds chain isLeaf σ a b ha hb) hreal
+
 end ChainDescent

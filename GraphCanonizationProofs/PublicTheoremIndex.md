@@ -552,6 +552,27 @@ partition equality is vacuous; the content is in the rank order). Provable progr
 | `candidateTwist_eq_one_of_rankPerm_eq` | **Absorbed decision**: equal leaf rank-perms ⟹ forced candidate `= 1`. | axiom-light |
 | `isAut_candidateTwist_of_rankPerm_eq` | The absorbed decision fires (candidate `= 1 ∈ Aut`) — the degenerate genuine abelian instance (branches give the identical canonical leaf). | axiom-light |
 
+### §L.6 — Relativized completeness (the retargeting)
+
+The general completeness statement ("forced candidate fires whenever the branches are
+isomorphic") *provably* cannot close — a realizing aut agrees with the forced candidate only
+up to a conjugate of `Aut(adj)` (`rankPerm_comp`), the split-or-Johnson wall *by design*, and
+the **same gap the a-priori cascade oracle carries** (`CascadeOracle.lean` §4.3). The fix is
+the cascade oracle's **Phase-B move**: relativize completeness to the recoverable/abelian
+class and reduce it to orbit recovery. This scaffold names the relativized target and isolates
+the one open obligation (`AbelianSufficiencyHolds` on the CFI class — the leaf-level instance
+of orbit recovery, the same nut as Tier-3a B1's `hwit`).
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `RankAligned` | The algebraic firing condition: a rank-aligned automorphism exists (`∃ g ∈ Aut, g · π_σ = π_flip`). | Definition |
+| `isAut_candidateTwist_iff_rankAligned` | **Interface**: forced candidate `∈ Aut ⟺ RankAligned`. The whole completeness question is "does a rank-aligned aut exist?" (= `isAut_candidateTwist_iff_aligned`). | axiom-light |
+| `AbelianSufficiency` | **Per-decision relativized target**: `RealizableFlip → IsAut candidate`. FALSE in the non-abelian regime (the wall); the claim to discharge on the abelian/cascade class. | Definition |
+| `oracleFires_of_abelianSufficiency` | **Capstone (what suffices)**: `AbelianSufficiency` + a real symmetry ⟹ the oracle fires. Linear-oracle analog of cascade's `cascadeComplete_of_localization`. | axiom-light |
+| `abelianSufficiency_of_rankPerm_eq` | **Non-vacuous closed instance**: the absorbed decision is abelian-sufficient (candidate `= 1 ∈ Aut` outright). Validates the scaffold. | axiom-light |
+| `AbelianSufficiencyHolds` | Graph-level discharge target (every leaf decision abelian-sufficient). Open obligation `abelianSufficiencyHolds_of_cfi : IsCFI adj → AbelianSufficiencyHolds adj` (downstream, via `theorem_1_HOR_cfi_oddDeg` — the gadget rank-alignment = B1 `hwit`). | Definition |
+| `oracleFires_of_abelianSufficiencyHolds` | **Graph-level capstone**: `AbelianSufficiencyHolds` ⟹ the oracle fires at every leaf decision that is a real symmetry (relativized completeness on the abelian class). | axiom-light |
+
 ## ChainDescent/Group.lean
 
 Part A (A1–A3) of `docs/chain-descent-tier3-tractable-buildout.md` — the group object

@@ -594,6 +594,35 @@ as this oracle's harvest core wrapped in a bounded-depth recursion.
    lemma**: forced candidate ∈ Aut(adj) for genuine abelian decisions, via the
    `warm_6_2` rank machinery (the orbit-recovery connection).
 
+   **Retargeting (2026-05-30) — the general statement can't close, so relativize.**
+   "Forced candidate fires whenever the branches are isomorphic" *provably* cannot
+   close: a realizing automorphism `g` agrees with the forced (rank-aligned)
+   candidate only up to `Aut(canonAdj σ)`, a **conjugate** of `Aut(adj)`
+   (`rankPerm_comp` pins this exactly), so for a *non-abelian* residual the candidate
+   genuinely misses — which is the [calculator §6](./chain-descent-calculator.md)
+   split-or-Johnson wall, *by design*. This is **not linear-oracle-specific**: the
+   a-priori cascade oracle uses the identical *construct → verify → harvest* pattern
+   and carries the same **"[FIRM behavior, CONJECTURAL characterization]"** boundary
+   ([cascade-oracle §4.3](./chain-descent-cascade-oracle.md)). The fix is the cascade
+   oracle's **Phase-B move**: don't target the general statement — *relativize*
+   completeness to the recoverable/abelian class and discharge it via the
+   orbit-recovery theorems (axiom-free for CFI `theorem_1_HOR_cfi_oddDeg`, schemes
+   `theorem_2_HOR_*`). **Abelian-sufficiency is the leaf-level instance of orbit
+   recovery** — the same open nut as Tier-3a B1's path-fixing witness (`hwit`). *Why
+   it should hold:* the residual freedom is `Aut(canonAdj σ)`; in the Z₂ /
+   unique-candidate regime the realizing automorphism is essentially unique, forcing
+   the discrepancy `a := candidate⁻¹·g = 1`, hence `candidate = g ∈ Aut`. The
+   conjugation gap bites only when `Aut(canonAdj σ)` is large (non-abelian).
+   Empirically the built oracle fires on 100% of CFI all-singleton footprints
+   (K4–K7 collapse). **Impact is confined to completeness** — never soundness, never
+   the T1 `canonForm` tie — and, given abelian-sufficiency, coincides exactly with
+   the intended wall. Fallbacks if abelian-sufficiency proves only partial: bounded
+   coset search (the realizing aut lies in `candidate · Aut(canonAdj σ)`, small in
+   the abelian regime), higher-WL widening (calculator §9 item 7), or the a-posteriori
+   `CoveredByPathFixingAut` floor (degrades a miss to explore-then-prune cost, not
+   incorrectness). The Lean scaffold for this relativization is §L.6 of
+   `LinearOracle.lean`.
+
 **Net (2026-05-30):** soundness of the linear oracle is fully discharged in
 Lean — `canonicalTwistOracle` is a concrete, verification-gated `LinearOracleSpec`
 satisfying `LeafTwistSpec`, with the twist construction *forced* (rank rebasing),

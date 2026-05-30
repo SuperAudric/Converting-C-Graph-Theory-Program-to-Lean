@@ -255,6 +255,14 @@ foundationals), no `sorry`:
   `computes_orbits_of_complete` name what suffices. **General-class completeness is the
   only `GI ∈ P` obligation**, recorded as a conjecture.
 
+  **Shared with the linear oracle.** The forced-candidate completeness gap is *not*
+  cascade-specific: the linear oracle's "forced twist fires whenever the branches are
+  isomorphic" fails for the same reason (the realizing automorphism agrees with the
+  forced candidate only up to a *conjugate* of `Aut(adj)`). The fix is identical —
+  relativize completeness to the recoverable/abelian class and discharge via orbit
+  recovery. The linear oracle's **abelian-sufficiency** is the *leaf-level* instance of
+  this Phase-B move ([linear-oracle §8.2](./chain-descent-linear-oracle.md), `§L.6`).
+
 Soundness is proved unconditionally; completeness is proved reducible to
 refinement on the cascade class. Verdict iso-invariance reduces to localisation;
 localisation's bounded-recoverability half is proved on the cascade class and its
