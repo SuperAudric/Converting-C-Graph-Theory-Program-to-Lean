@@ -580,6 +580,24 @@ rank rebasing).
 | `canonAdj_eq_of_configSwap` | **Equal canonical leaves**: a `ConfigSwap` ⟹ `canonAdj σ = canonAdj flip` (via `π_flip = π_σ·g⁻¹` + `g⁻¹ ∈ Aut`, so relabelling by it is invisible). Pruning the flip branch loses nothing. | **Key**; axiom-light |
 | `realizableFlip_of_configSwap` | A `ConfigSwap` ⟹ `RealizableFlip` (identity witness, since the leaves coincide) — the decision is a genuine `Aut(adj)` symmetry, with no rank-alignment obligation. | axiom-light |
 
+**§L.8 — CFI completeness: config-swap from a swapping automorphism (M1c step 3, the cascade-1b bridge).**
+*Where a config-swap comes from.* A swapping automorphism `g` (`g a = b`, `g b = a`) is exactly an
+`OrbitPartition adj P S a b` witness specialised to the size-2 decision cell — the cascade oracle's
+currency. So linear-oracle CFI completeness reduces to the **shared cascade-1b** obligation
+(bounded-depth half `recoverableByDepth_cfi` proved; decision-node-depth bridge open, *not* `GI∈P`).
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `configSwap_of_swap` | **Closed instance**: a σ-cell-coherent *transposition* automorphism (`g` swaps `a,b`, fixes the rest + `χι`; `σ.σ a w = σ.σ b w` off the pair) *is* a `ConfigSwap`. The `Z₂` twin-swap — the simplest genuine abelian decision. Real proof content (swap case-analysis + antisymmetry). | **Key**; axiom-light |
+| `ConfigSwapRecoverable` | Graph-level predicate: every leaf decision admits a config-swap = the linear oracle's **decision-node recoverability** = the named cascade-1b obligation (analog of `AbelianSufficiencyHolds`). | def |
+| `canonAdj_eq_of_configSwapRecoverable` | Capstone (pruning soundness): `ConfigSwapRecoverable` ⟹ both branches give the identical canonical leaf at every decision. | axiom-light |
+| `realizableFlip_of_configSwapRecoverable` | Capstone (real symmetry): `ConfigSwapRecoverable` ⟹ every decision is a genuine `Aut(adj)` symmetry — vertex-model completeness, no rank-alignment. | axiom-light |
+
+Open (not a `sorry`): `configSwapRecoverable_of_cfi : IsCFI adj → ConfigSwapRecoverable` — the general
+gadget twist (non-transposition `g`, moves the whole coupled component) needs the deferred Stage-3
+`Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery = the same `hwit` as Tier-3a B1; plus the decision-node-depth half
+of cascade-1b.
+
 Transport chain it builds on (ChainDescent.lean `§16.2b`): `signature_transport`, `sigKey_transport`,
 `refineStep_transport`, `iterate_refineStep_transport`, `warmRefine_transport` — cross-config (two
 `(P,χ)` related by an automorphism), the value-level generalisation of the `*_invariant_of_isAut`

@@ -726,4 +726,141 @@ theorem realizableFlip_of_configSwap {k : Nat} (chain : SpineChain adj P₀ χι
     funext i j; rfl
   rw [h1, canonAdj_eq_of_configSwap chain isLeaf σ a b ha hb cs]
 
+/-! ## §L.8 — CFI completeness: config-swap from a swapping automorphism (the cascade-1b bridge)
+
+§L.7b gave the vertex-model **soundness**: a `ConfigSwap` ⟹ the two branches give the
+identical canonical leaf (`canonAdj_eq_of_configSwap`) ⟹ `RealizableFlip`. This section is the
+**completeness** direction — *where a config-swap comes from* — and it reduces that to the
+cascade oracle's currency, a **swapping automorphism**: a graph automorphism `g` with
+`g a = b`, `g b = a`. That is exactly an `OrbitPartition adj P S a b` witness (an `IsAut`
+automorphism mapping `a ↦ b`, `ChainDescent.lean` §16.3) specialised to the size-2 decision
+cell `{a, b}`. So this is the linear oracle's half of the **shared cascade-1b** obligation
+(`chain-descent-cascade-oracle.md` §2): its bounded-depth recoverability is proved
+(`recoverableByDepth_cfi`); obtaining the witness *at the decision-node depth* is the open,
+**not-`GI∈P`** bridge.
+
+**What is proved here (closed, axiom-clean):** `configSwap_of_swap` — when the swapping
+automorphism acts as a *transposition* (`g` fixes every vertex off `{a, b}` and fixes `χι`)
+and the pair is **σ-cell-coherent** (`σ.σ a w = σ.σ b w` for `w ∉ {a, b}`: `a, b` relate
+identically to all other vertices under the direction assignment), `g` *is* a `ConfigSwap`.
+This is the simplest genuine abelian (`Z₂` twin-swap) decision: the cell `{a, b}` is a true
+2-element orbit resolved by a transposition. With §L.7b it fires the oracle on that class —
+the non-vacuous closed instance validating the scaffold (mirroring `abelianSufficiency_of_rankPerm_eq`
+for §L.6).
+
+**What stays open (the named nut, not a `sorry`):** the general CFI gadget twist moves the
+*whole* coupled component (`g` is **not** a transposition), so `swapsConfig` for it needs the
+CFI gadget structure — the deferred Stage-3 `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery — the same
+content as Tier-3a B1's path-fixing witness (`hwit`). That construction, plus producing any
+such `g` at decision-node depth (cascade-1b), is the remaining work; it is isolated as the
+graph-level hypothesis `ConfigSwapRecoverable`, which the capstones reduce oracle
+effectiveness to. -/
+
+/-- **A σ-cell-coherent transposition automorphism is a config-swap.** If `g` is a graph
+automorphism that swaps the distinct pair `a, b`, fixes every other vertex and the initial
+colouring (`χι a = χι b`), and the pair is σ-cell-coherent (`σ.σ a w = σ.σ b w` for
+`w ≠ a, b`), then `g` carries the σ-branch configuration onto the flip-branch configuration —
+a `ConfigSwap`. The `Z₂` twin-swap instance of the cascade-1b bridge. -/
+def configSwap_of_swap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hab : a ≠ b)
+    (g : Equiv.Perm (Fin n)) (hg : IsAut g adj)
+    (hga : g a = b) (hgb : g b = a) (hgfix : ∀ v, v ≠ a → v ≠ b → g v = v)
+    (hχab : chain.χι a = chain.χι b)
+    (hcoh : ∀ w, w ≠ a → w ≠ b → σ.σ a w = σ.σ b w) :
+    ConfigSwap chain σ a b ha hb where
+  g := g
+  isAut := hg
+  fixesχι := by
+    intro v
+    by_cases hva : v = a
+    · subst hva; rw [hga]; exact hχab.symm
+    by_cases hvb : v = b
+    · subst hvb; rw [hgb]; exact hχab
+    rw [hgfix v hva hvb]
+  swapsConfig := by
+    have happ : ∀ i j : Fin n, (σ.flipPair a b ha hb).σ i j
+        = if (i = a ∧ j = b) ∨ (i = b ∧ j = a) then POE.neg (σ.σ i j) else σ.σ i j :=
+      fun _ _ => rfl
+    have hdiag : ∀ x : Fin n, σ.σ x x = POE.unknown := by
+      intro x
+      have h := σ.antisym x x
+      cases hc : σ.σ x x with
+      | less => simp only [hc, POE.neg] at h; exact absurd h (by decide)
+      | unknown => rfl
+      | greater => simp only [hc, POE.neg] at h; exact absurd h (by decide)
+    have hcoh' : ∀ w : Fin n, w ≠ a → w ≠ b → σ.σ w a = σ.σ w b := by
+      intro w hwa hwb
+      rw [σ.antisym w a, σ.antisym w b, hcoh w hwa hwb]
+    intro v u
+    rw [happ]
+    by_cases hva : v = a
+    · by_cases hub : u = b
+      · rw [hva, hub, hga, hgb, if_pos (Or.inr ⟨rfl, rfl⟩)]
+        exact (σ.antisym a b).symm
+      · by_cases hua : u = a
+        · rw [hva, hua, hga, if_neg (by rintro (⟨h, _⟩ | ⟨_, h⟩) <;> exact hab h.symm)]
+          rw [hdiag b, hdiag a]
+        · rw [hva, hgfix u hua hub, hga,
+            if_neg (by rintro (⟨h, _⟩ | ⟨_, h⟩) <;> first | exact hab h.symm | exact hua h)]
+          exact (hcoh u hua hub).symm
+    · by_cases hvb : v = b
+      · by_cases hua : u = a
+        · rw [hvb, hua, hgb, hga, if_pos (Or.inl ⟨rfl, rfl⟩)]
+          exact (σ.antisym b a).symm
+        · by_cases hub : u = b
+          · rw [hvb, hub, hgb, if_neg (by rintro (⟨_, h⟩ | ⟨h, _⟩) <;> exact hab h)]
+            rw [hdiag a, hdiag b]
+          · rw [hvb, hgfix u hua hub, hgb,
+              if_neg (by rintro (⟨_, h⟩ | ⟨h, _⟩) <;> first | exact hub h | exact hab h)]
+            exact hcoh u hua hub
+      · by_cases hua : u = a
+        · rw [hgfix v hva hvb, hua, hga,
+            if_neg (by rintro (⟨h, _⟩ | ⟨h, _⟩) <;> first | exact hva h | exact hvb h)]
+          exact (hcoh' v hva hvb).symm
+        · by_cases hub : u = b
+          · rw [hgfix v hva hvb, hub, hgb,
+              if_neg (by rintro (⟨h, _⟩ | ⟨h, _⟩) <;> first | exact hva h | exact hvb h)]
+            exact hcoh' v hva hvb
+          · rw [hgfix v hva hvb, hgfix u hua hub,
+              if_neg (by rintro (⟨h, _⟩ | ⟨h, _⟩) <;> first | exact hva h | exact hvb h)]
+
+/-- **Decision-node recoverability (the named cascade-1b obligation for the linear oracle).**
+Every leaf decision `(a, b)` (distinct pair in the decision set) admits a config-swap. Holds
+for the recoverable / abelian class (CFI: every undecided pair is a real symmetry); the open
+discharge `configSwapRecoverable_of_cfi : IsCFI adj → ConfigSwapRecoverable` is downstream
+content (`CFI.lean`), provable via the gadget twists + `theorem_1_HOR_cfi_oddDeg` — the same
+`hwit` as Tier-3a B1, and the decision-node-depth half of cascade-1b. The graph-level analog
+of `AbelianSufficiencyHolds`. -/
+def ConfigSwapRecoverable : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D),
+    a ≠ b → Nonempty (ConfigSwap chain σ a b ha hb)
+
+/-- **Capstone (soundness of pruning).** If `adj` is config-swap-recoverable, then at every
+leaf decision the two branches produce the identical canonical leaf — so pruning the flipped
+branch loses nothing. Reduces the linear oracle's effectiveness on CFI to the single
+`ConfigSwapRecoverable` hypothesis. -/
+theorem canonAdj_eq_of_configSwapRecoverable {k : Nat}
+    (h : ConfigSwapRecoverable (adj := adj) (P₀ := P₀) (χι₀ := χι₀) (sel := sel))
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hab : a ≠ b) :
+    chain.canonAdj isLeaf σ = chain.canonAdj isLeaf (σ.flipPair a b ha hb) := by
+  obtain ⟨cs⟩ := h chain isLeaf σ a b ha hb hab
+  exact canonAdj_eq_of_configSwap chain isLeaf σ a b ha hb cs
+
+/-- **Capstone (the decision is a real symmetry).** Config-swap-recoverability gives a genuine
+realizing automorphism for every leaf decision — the vertex-model completeness statement: on
+the recoverable class the oracle's pruning is always justified by a real `Aut(adj)` symmetry,
+no rank-alignment needed. -/
+theorem realizableFlip_of_configSwapRecoverable {k : Nat}
+    (h : ConfigSwapRecoverable (adj := adj) (P₀ := P₀) (χι₀ := χι₀) (sel := sel))
+    (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hab : a ≠ b) :
+    RealizableFlip chain isLeaf σ a b ha hb := by
+  obtain ⟨cs⟩ := h chain isLeaf σ a b ha hb hab
+  exact realizableFlip_of_configSwap chain isLeaf σ a b ha hb cs
+
 end ChainDescent
