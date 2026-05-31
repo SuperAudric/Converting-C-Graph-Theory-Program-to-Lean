@@ -164,7 +164,7 @@ theorem signature_refines {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ�
 
 /-- One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁)
 (refineStep χ₂)`. From `refineStep_iff` (same colour ∧ same signature) + `signature_refines`. -/
-theorem refineStep_mono {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
+private theorem refineStep_mono {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
     Refines (refineStep adj P χ₁) (refineStep adj P χ₂) := by
   intro a b hab
   rw [refineStep_iff] at hab ⊢

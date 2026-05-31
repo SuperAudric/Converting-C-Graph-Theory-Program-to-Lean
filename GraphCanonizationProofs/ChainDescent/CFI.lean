@@ -94,7 +94,7 @@ theorem mem_neighbors_symm {v w : Fin m} :
   rw [mem_neighbors, mem_neighbors, H.symm]
 
 /-- The number of edges in the base graph, counted by ordered pairs. -/
-def edgeCountOrdered : Nat :=
+private def edgeCountOrdered : Nat :=
   Finset.univ.sum H.degree
 
 /-! ## §3 — CFI vertex count formula
@@ -130,7 +130,7 @@ theorem gadgetSize_ge_six (v : Fin m) : 6 ≤ H.gadgetSize v := by
   omega
 
 /-- `cfiVertexCount H` is positive when `m > 0`. -/
-theorem cfiVertexCount_pos (hm : 0 < m) : 0 < H.cfiVertexCount := by
+private theorem cfiVertexCount_pos (hm : 0 < m) : 0 < H.cfiVertexCount := by
   unfold cfiVertexCount
   apply Finset.sum_pos
   · intro v _
@@ -685,7 +685,7 @@ variable {m : Nat} (H : CFIBase m)
 /-- The number of even-cardinality subsets of `H.neighbors v` is
 `2^(H.degree v - 1)`. Applies `Finset.card_powerset_filter_even` to
 the neighbour set, which is nonempty since `H.degree v ≥ 2`. -/
-theorem card_evenSubsetsOfNeighbors (v : Fin m) :
+private theorem card_evenSubsetsOfNeighbors (v : Fin m) :
     (H.evenSubsetsOfNeighbors v).card = 2 ^ (H.degree v - 1) := by
   have hnonempty : (H.neighbors v).Nonempty := by
     rw [← Finset.card_pos]
@@ -695,7 +695,7 @@ theorem card_evenSubsetsOfNeighbors (v : Fin m) :
   exact Finset.card_powerset_filter_even hnonempty
 
 /-- `Fintype.card SubsetVertex = ∑ v, 2^(degree v - 1)`. -/
-theorem card_SubsetVertex :
+private theorem card_SubsetVertex :
     Fintype.card H.SubsetVertex = ∑ v, 2 ^ (H.degree v - 1) := by
   rw [Fintype.card_sigma]
   apply Finset.sum_congr rfl
@@ -704,7 +704,7 @@ theorem card_SubsetVertex :
   exact H.card_evenSubsetsOfNeighbors v
 
 /-- `Fintype.card EndpointVertex = ∑ v, 2 * degree v`. -/
-theorem card_EndpointVertex :
+private theorem card_EndpointVertex :
     Fintype.card H.EndpointVertex = ∑ v, 2 * H.degree v := by
   rw [Fintype.card_sigma]
   apply Finset.sum_congr rfl
@@ -985,7 +985,7 @@ theorem adj_endpoint_seed_true (h : IsCFI' adj) {v w : Fin h.m}
 /-- **Cross-gadget**: `adj (seedVertex v) (endpointVertex v' w b) = 0`
 when v ≠ v'. Seeds and endpoints in different gadgets are never
 adjacent. -/
-theorem adj_seed_endpoint_diff_gadget (h : IsCFI' adj)
+private theorem adj_seed_endpoint_diff_gadget (h : IsCFI' adj)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v') (b : Bool) :
     adj.adj (h.seedVertex v) (h.endpointVertex hw b) = 0 := by
@@ -994,7 +994,7 @@ theorem adj_seed_endpoint_diff_gadget (h : IsCFI' adj)
 
 /-- Symmetric: `adj (endpointVertex v' w b) (seedVertex v) = 0` when
 v ≠ v'. -/
-theorem adj_endpoint_seed_diff_gadget (h : IsCFI' adj)
+private theorem adj_endpoint_seed_diff_gadget (h : IsCFI' adj)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v') (b : Bool) :
     adj.adj (h.endpointVertex hw b) (h.seedVertex v) = 0 := by
@@ -1004,7 +1004,7 @@ theorem adj_endpoint_seed_diff_gadget (h : IsCFI' adj)
 /-- **Bridge adjacency (Fin n)**: the endpoint `e^b_{v→w}` is adjacent
 to its bridge partner `e^b_{w→v}`. Lifts `CFIBase.cfiAdj_bridge`
 through `h.matching`. -/
-theorem adj_bridge (h : IsCFI' adj) {v w : Fin h.m}
+private theorem adj_bridge (h : IsCFI' adj) {v w : Fin h.m}
     (hw : w ∈ h.H.neighbors v) (b : Bool) :
     adj.adj (h.endpointVertex hw b)
             (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b) = 1 := by
@@ -1015,7 +1015,7 @@ theorem adj_bridge (h : IsCFI' adj) {v w : Fin h.m}
 gadget `v` and the endpoint at gadget `w` (its bridge partner) are
 distinct `Fin n` vertices, because `v ≠ w` follows from `w ∈ N(v)` +
 looplessness. -/
-theorem endpointVertex_ne_bridge (h : IsCFI' adj) {v w : Fin h.m}
+private theorem endpointVertex_ne_bridge (h : IsCFI' adj) {v w : Fin h.m}
     (hw : w ∈ h.H.neighbors v) (b : Bool) :
     h.endpointVertex hw b ≠
     h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b := by
@@ -1058,7 +1058,7 @@ distinction is the first proof that needs them. -/
   simp [individualizedColouring, h]
 
 /-- The seed's colour is positive (i.e. nonzero). -/
-theorem individualizedColouring_singleton_self_pos {n : Nat} (seed : Fin n) :
+private theorem individualizedColouring_singleton_self_pos {n : Nat} (seed : Fin n) :
     individualizedColouring n {seed} seed ≠ 0 := by
   rw [individualizedColouring_singleton_self]
   exact Nat.succ_ne_zero _
@@ -1066,7 +1066,7 @@ theorem individualizedColouring_singleton_self_pos {n : Nat} (seed : Fin n) :
 /-- **Uniqueness**: `individualizedColouring n {seed} u = individualizedColouring n {seed} seed`
 iff `u = seed`. The forward direction is the key fact powering M2's
 signature distinction — only the seed has the fresh colour. -/
-theorem individualizedColouring_singleton_eq_seed_iff {n : Nat}
+private theorem individualizedColouring_singleton_eq_seed_iff {n : Nat}
     {seed u : Fin n} :
     individualizedColouring n {seed} u =
       individualizedColouring n {seed} seed ↔ u = seed := by
@@ -1098,7 +1098,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 /-- **M2.4 — Signature distinction.** The signatures of the b=0 and
 b=1 endpoints at gadget `v` (toward `w ∈ N(v)`) differ under the
 individualized colouring of the seed vertex `h.seedVertex v`. -/
-theorem signature_endpoint_false_ne_true (h : IsCFI' adj) (P : PMatrix n)
+private theorem signature_endpoint_false_ne_true (h : IsCFI' adj) (P : PMatrix n)
     {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
     signature adj P (individualizedColouring n {h.seedVertex v})
         (h.endpointVertex hw false) ≠
@@ -1157,7 +1157,7 @@ colours.
 This is the foundational M2 cascade lemma: individualizing one seed
 per gadget makes 1-WL distinguish v's endpoints by parity in a single
 round. -/
-theorem refineStep_endpoint_false_ne_true (h : IsCFI' adj) (P : PMatrix n)
+private theorem refineStep_endpoint_false_ne_true (h : IsCFI' adj) (P : PMatrix n)
     {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
     refineStep adj P (individualizedColouring n {h.seedVertex v})
         (h.endpointVertex hw false) ≠
@@ -1247,7 +1247,7 @@ the cascade individualization has at most `n / 6` vertices. -/
     Finset.card_univ, Fintype.card_fin]
 
 /-- `|allSeeds| ≤ h.baseSize`. Convenience form for downstream use. -/
-theorem allSeeds_card_le_baseSize (h : IsCFI' adj) :
+private theorem allSeeds_card_le_baseSize (h : IsCFI' adj) :
     h.allSeeds.card ≤ h.baseSize :=
   le_of_eq h.allSeeds_card
 
@@ -1275,7 +1275,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 Witness tuple: `(χ seed_v, 1, P endpoint_true seed_v)`. Same argument
 as M2.4, with `individualizedColouring_eq_iff_of_mem` providing
 uniqueness from `seed_v ∈ allSeeds`. -/
-theorem signature_endpoint_false_ne_true_allSeeds (h : IsCFI' adj)
+private theorem signature_endpoint_false_ne_true_allSeeds (h : IsCFI' adj)
     (P : PMatrix n) {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
     signature adj P (individualizedColouring n h.allSeeds)
         (h.endpointVertex hw false) ≠
@@ -1324,7 +1324,7 @@ b=1 endpoints at gadget `v` (toward `w ∈ N(v)`) distinct colours.
 
 The natural cascade-context generalisation of M2: the same parity-split
 holds under the actual M4 individualization (all seeds). -/
-theorem refineStep_endpoint_false_ne_true_allSeeds (h : IsCFI' adj)
+private theorem refineStep_endpoint_false_ne_true_allSeeds (h : IsCFI' adj)
     (P : PMatrix n) {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
     refineStep adj P (individualizedColouring n h.allSeeds)
         (h.endpointVertex hw false) ≠
@@ -1366,7 +1366,7 @@ endpoints. Same witness tuple `(c_v, 1, ?)` as M3.B; the only difference
 is that the "absence" argument uses cross-gadget non-adjacency
 (`adj_endpoint_seed_diff_gadget`) rather than within-gadget
 parity-mismatch (`adj_endpoint_seed_false`). -/
-theorem signature_endpoint_true_inter_gadget (h : IsCFI' adj) (P : PMatrix n)
+private theorem signature_endpoint_true_inter_gadget (h : IsCFI' adj) (P : PMatrix n)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
     {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v') :
@@ -1416,7 +1416,7 @@ Combined with M3.B (same-gadget parity split), we have: at round 1,
 b=true endpoints split by `v` (gadget); b=0 vs b=1 split within each
 gadget. Remaining cases (b=0 inter-gadget, within-gadget by `w`,
 subset vertex distinction) require multi-round bridge propagation. -/
-theorem refineStep_endpoint_true_inter_gadget (h : IsCFI' adj)
+private theorem refineStep_endpoint_true_inter_gadget (h : IsCFI' adj)
     (P : PMatrix n) {v v' : Fin h.m} (hvv : v ≠ v')
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
     {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v') :
@@ -1463,7 +1463,7 @@ Preconditions:
 
 Conclusion: the signature multisets of the two endpoints under χ
 differ. -/
-theorem signature_bridge_step (h : IsCFI' adj) (P : PMatrix n)
+private theorem signature_bridge_step (h : IsCFI' adj) (P : PMatrix n)
     (χ : Colouring n) {v w v' w' : Fin h.m}
     (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v') (b : Bool)
     (hbridge : χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b) ≠
@@ -1518,7 +1518,7 @@ uniqueness at `ev'`, not `ev`. This is intentional: the proof finds a
 witness tuple in `ev`'s signature and absent from `ev'`'s. The
 symmetric version (uniqueness at `ev` instead) follows by swapping
 arguments. -/
-theorem refineStep_bridge_step (h : IsCFI' adj) (P : PMatrix n)
+private theorem refineStep_bridge_step (h : IsCFI' adj) (P : PMatrix n)
     (χ : Colouring n) {v w v' w' : Fin h.m}
     (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v') (b : Bool)
     (hbridge : χ (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b) ≠
@@ -1680,7 +1680,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 Under `χ_1 = refineStep χ_{allSeeds}`, applying one more refineStep
 distinguishes b=true endpoints at the same gadget toward different
 partners. -/
-theorem refineStep_endpoint_true_intra_gadget_partner (h : IsCFI' adj)
+private theorem refineStep_endpoint_true_intra_gadget_partner (h : IsCFI' adj)
     (P : PMatrix n) {v w w' : Fin h.m} (hww : w ≠ w')
     (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v) :
     refineStep adj P (refineStep adj P (individualizedColouring n h.allSeeds))
@@ -1772,13 +1772,13 @@ def subset {v : Fin m} {S : Finset (Fin m)}
   Sum.inl ⟨v, ⟨S, hS⟩⟩
 
 /-- `aEmpty v` is the empty-subset case of `subset`. -/
-theorem aEmpty_eq_subset_empty (v : Fin m) :
+private theorem aEmpty_eq_subset_empty (v : Fin m) :
     H.aEmpty v = H.subset (H.empty_mem_evenSubsetsOfNeighbors v) := rfl
 
 /-- `cfiAdj (a_S^v) (e^1_{v→w}) = 1` when `w ∉ S`. The Phase 2.3 witness
 adjacency: a non-saturated subset has at least one b=1 endpoint as a
 neighbour. -/
-theorem cfiAdj_subset_endpoint_same_gadget_true_of_not_mem {v w : Fin m}
+private theorem cfiAdj_subset_endpoint_same_gadget_true_of_not_mem {v w : Fin m}
     {S : Finset (Fin m)} (hS : S ∈ H.evenSubsetsOfNeighbors v)
     (hw : w ∈ H.neighbors v) (hwS : w ∉ S) :
     H.cfiAdj (H.subset hS) (H.endpoint hw true) = 1 := by
@@ -1790,7 +1790,7 @@ theorem cfiAdj_subset_endpoint_same_gadget_true_of_not_mem {v w : Fin m}
 /-- `cfiAdj (a_S^v) (e^0_{v→w}) = 1` when `w ∈ S`. The Phase 2.2 witness
 adjacency: a subset containing `w` is adjacent to the b=0 endpoint
 pointing at `w`. -/
-theorem cfiAdj_subset_endpoint_same_gadget_false_of_mem {v w : Fin m}
+private theorem cfiAdj_subset_endpoint_same_gadget_false_of_mem {v w : Fin m}
     {S : Finset (Fin m)} (hS : S ∈ H.evenSubsetsOfNeighbors v)
     (hw : w ∈ H.neighbors v) (hwS : w ∈ S) :
     H.cfiAdj (H.subset hS) (H.endpoint hw false) = 1 := by
@@ -1802,7 +1802,7 @@ theorem cfiAdj_subset_endpoint_same_gadget_false_of_mem {v w : Fin m}
 /-- **Cross-gadget non-adjacency for subsets.** `subset hS` at gadget `v`
 is not adjacent to `endpoint hw b` at gadget `v' ≠ v`. Generalises
 `cfiAdj_aEmpty_endpoint_diff_gadget` from §13.2. -/
-theorem cfiAdj_subset_endpoint_diff_gadget {v v' w : Fin m}
+private theorem cfiAdj_subset_endpoint_diff_gadget {v v' w : Fin m}
     {S : Finset (Fin m)} (hS : S ∈ H.evenSubsetsOfNeighbors v)
     (hw : w ∈ H.neighbors v') (b : Bool) (hvv : v ≠ v') :
     H.cfiAdj (H.subset hS) (H.endpoint hw b) = 0 := by
@@ -1813,7 +1813,7 @@ theorem cfiAdj_subset_endpoint_diff_gadget {v v' w : Fin m}
 
 /-- `subset hS ≠ endpoint hw b` — distinct CFI vertices (Sum tags
 differ). -/
-theorem subset_ne_endpoint {v w : Fin m} {S : Finset (Fin m)}
+private theorem subset_ne_endpoint {v w : Fin m} {S : Finset (Fin m)}
     (hS : S ∈ H.evenSubsetsOfNeighbors v) (hw : w ∈ H.neighbors v) (b : Bool) :
     H.subset hS ≠ H.endpoint hw b := by
   intro heq
@@ -1843,12 +1843,12 @@ variable {n : Nat} {adj : AdjMatrix n}
   exact Equiv.apply_symm_apply _ _
 
 /-- `seedVertex v` is the empty-subset case of `subsetVertex`. -/
-theorem seedVertex_eq_subsetVertex_empty (h : IsCFI' adj) (v : Fin h.m) :
+private theorem seedVertex_eq_subsetVertex_empty (h : IsCFI' adj) (v : Fin h.m) :
     h.seedVertex v =
       h.subsetVertex (h.H.empty_mem_evenSubsetsOfNeighbors v) := rfl
 
 /-- Subset vertices and endpoint vertices are distinct in `Fin n`. -/
-theorem subsetVertex_ne_endpointVertex (h : IsCFI' adj)
+private theorem subsetVertex_ne_endpointVertex (h : IsCFI' adj)
     {v w : Fin h.m} {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v) (hw : w ∈ h.H.neighbors v) (b : Bool) :
     h.subsetVertex hS ≠ h.endpointVertex hw b := by
@@ -1859,7 +1859,7 @@ theorem subsetVertex_ne_endpointVertex (h : IsCFI' adj)
 
 /-- `adj (subsetVertex_v hS) (endpointVertex_v hw true) = 1` when `w ∉ S`
 (Fin-n level). The Phase 2.3 witness adjacency. -/
-theorem adj_subsetVertex_endpoint_same_gadget_true_of_not_mem (h : IsCFI' adj)
+private theorem adj_subsetVertex_endpoint_same_gadget_true_of_not_mem (h : IsCFI' adj)
     {v w : Fin h.m} {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v) (hw : w ∈ h.H.neighbors v)
     (hwS : w ∉ S) :
@@ -1869,7 +1869,7 @@ theorem adj_subsetVertex_endpoint_same_gadget_true_of_not_mem (h : IsCFI' adj)
 
 /-- `adj (subsetVertex_v hS) (endpointVertex_v hw false) = 1` when `w ∈ S`
 (Fin-n level). The Phase 2.2 witness adjacency. -/
-theorem adj_subsetVertex_endpoint_same_gadget_false_of_mem (h : IsCFI' adj)
+private theorem adj_subsetVertex_endpoint_same_gadget_false_of_mem (h : IsCFI' adj)
     {v w : Fin h.m} {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v) (hw : w ∈ h.H.neighbors v)
     (hwS : w ∈ S) :
@@ -1879,7 +1879,7 @@ theorem adj_subsetVertex_endpoint_same_gadget_false_of_mem (h : IsCFI' adj)
 
 /-- Cross-gadget Fin-n non-adjacency:
 `adj (subsetVertex_v hS) (endpointVertex_v' hw b) = 0` when v ≠ v'. -/
-theorem adj_subsetVertex_endpoint_diff_gadget (h : IsCFI' adj)
+private theorem adj_subsetVertex_endpoint_diff_gadget (h : IsCFI' adj)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {w : Fin h.m} {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
@@ -1968,7 +1968,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 A b=0 endpoint at any gadget `v'` has a different signature multiset
 from a b=1 endpoint at gadget `v` (regardless of whether v = v') under
 `χ_{allSeeds}`. -/
-theorem signature_endpoint_b0_ne_b1_general_allSeeds (h : IsCFI' adj)
+private theorem signature_endpoint_b0_ne_b1_general_allSeeds (h : IsCFI' adj)
     (P : PMatrix n) {v v' : Fin h.m}
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
     {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v') :
@@ -2020,7 +2020,7 @@ theorem signature_endpoint_b0_ne_b1_general_allSeeds (h : IsCFI' adj)
 (refineStep form). Under `χ_{allSeeds}`, one refineStep round gives the
 b=0 endpoint at any gadget `v'` and the b=1 endpoint at gadget `v`
 distinct colours. -/
-theorem refineStep_endpoint_b0_ne_b1_general_allSeeds (h : IsCFI' adj)
+private theorem refineStep_endpoint_b0_ne_b1_general_allSeeds (h : IsCFI' adj)
     (P : PMatrix n) {v v' : Fin h.m}
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
     {w' : Fin h.m} (hw' : w' ∈ h.H.neighbors v') :
@@ -2063,7 +2063,7 @@ Preconditions:
   adj=1 neighbour of `subset hS'`.
 
 Conclusion: the signature multisets under χ differ. -/
-theorem signature_subset_step (h : IsCFI' adj) (P : PMatrix n)
+private theorem signature_subset_step (h : IsCFI' adj) (P : PMatrix n)
     (χ : Colouring n) {v v' w : Fin h.m}
     {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
     {S' : Finset (Fin h.m)} (hS' : S' ∈ h.H.evenSubsetsOfNeighbors v')
@@ -2110,7 +2110,7 @@ This is the **Approach 3 primitive** for subset propagation: pair it
 with a concrete-round driver (Phase 2.3 instantiates at χ = χ_1; later
 phases may instantiate at other rounds) to discharge specific cascade
 cases. -/
-theorem refineStep_subset_step (h : IsCFI' adj) (P : PMatrix n)
+private theorem refineStep_subset_step (h : IsCFI' adj) (P : PMatrix n)
     (χ : Colouring n) {v v' w : Fin h.m}
     {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
     {S' : Finset (Fin h.m)} (hS' : S' ∈ h.H.evenSubsetsOfNeighbors v')
@@ -2179,7 +2179,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 Under `χ_1 = refineStep χ_{allSeeds}`, the signature multisets (at χ_1)
 of two subset vertices at different gadgets differ, provided the LHS
 subset has a witness `w ∈ N(v) \ S`. -/
-theorem signature_subset_inter_gadget_round2 (h : IsCFI' adj) (P : PMatrix n)
+private theorem signature_subset_inter_gadget_round2 (h : IsCFI' adj) (P : PMatrix n)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
     {S' : Finset (Fin h.m)} (hS' : S' ∈ h.H.evenSubsetsOfNeighbors v')
@@ -2222,7 +2222,7 @@ This is the **subset distinction at cascade round 2** — the second-round
 analogue of the b=1 endpoint inter-gadget distinction (M3.C, round 1).
 Unlocks Phase 2.2 (b=0 endpoint inter-gadget at round 3 via subset
 adjacencies). -/
-theorem refineStep_subset_inter_gadget_round2 (h : IsCFI' adj) (P : PMatrix n)
+private theorem refineStep_subset_inter_gadget_round2 (h : IsCFI' adj) (P : PMatrix n)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
     {S' : Finset (Fin h.m)} (hS' : S' ∈ h.H.evenSubsetsOfNeighbors v')
@@ -2261,7 +2261,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 (which are subsets) are never CFI-adjacent. Special case of the general
 "subset-subset adj = 0" fact, instantiated for the seed on the right —
 the form needed in M3.B++. -/
-theorem adj_subsetVertex_seedVertex (h : IsCFI' adj)
+private theorem adj_subsetVertex_seedVertex (h : IsCFI' adj)
     {v : Fin h.m} {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v) (w : Fin h.m) :
     adj.adj (h.subsetVertex hS) (h.seedVertex w) = 0 := by
@@ -2275,7 +2275,7 @@ endpoint at gadget v are distinguished at round 1 under `χ_{allSeeds}`.
 Same witness tuple as M3.B+; the absence argument is even cleaner —
 multi-seed uniqueness forces `u = seed_v`, but `adj subsetVertex seed_v
 = 0` (subset-subset) directly contradicts `adj subsetVertex u = 1`. -/
-theorem signature_subsetVertex_ne_endpoint_true_allSeeds (h : IsCFI' adj)
+private theorem signature_subsetVertex_ne_endpoint_true_allSeeds (h : IsCFI' adj)
     (P : PMatrix n) {v : Fin h.m}
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
     {v' : Fin h.m} {T : Finset (Fin h.m)}
@@ -2319,7 +2319,7 @@ theorem signature_subsetVertex_ne_endpoint_true_allSeeds (h : IsCFI' adj)
 
 /-- **M3.B++ / refineStep** — subset vertex (any) vs b=1 endpoint at v
 distinguished after one `refineStep` round on `χ_{allSeeds}`. -/
-theorem refineStep_subsetVertex_ne_endpoint_true_allSeeds (h : IsCFI' adj)
+private theorem refineStep_subsetVertex_ne_endpoint_true_allSeeds (h : IsCFI' adj)
     (P : PMatrix n) {v : Fin h.m}
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
     {v' : Fin h.m} {T : Finset (Fin h.m)}
@@ -2368,7 +2368,7 @@ Hypotheses:
 Conclusion: round-1 signatures of `subsetVertex hS` and
 `endpointVertex hwf false` (under χ_1 = refineStep χ_{allSeeds}) differ.
 Combined with `refineStep_iff`, χ_2 colours differ. -/
-theorem signature_subsetVertex_ne_endpoint_false_round2 (h : IsCFI' adj)
+private theorem signature_subsetVertex_ne_endpoint_false_round2 (h : IsCFI' adj)
     (P : PMatrix n)
     {v : Fin h.m} {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
@@ -2470,7 +2470,7 @@ b=0 endpoint (any gadget): their χ_2 colours differ.
 
 Lift of `signature_subsetVertex_ne_endpoint_false_round2` through
 `refineStep_iff`. -/
-theorem refineStep_subsetVertex_ne_endpoint_false_round2 (h : IsCFI' adj)
+private theorem refineStep_subsetVertex_ne_endpoint_false_round2 (h : IsCFI' adj)
     (P : PMatrix n)
     {v : Fin h.m} {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v)
@@ -2519,7 +2519,7 @@ distinction at χ_2.
 Under `χ_2 = refineStep χ_1 = refineStep (refineStep χ_{allSeeds})`,
 the signature multisets of two b=0 endpoints at different gadgets
 differ, given a witness subset `a_S^v` with `w ∈ S` and `x ∈ N(v) \ S`. -/
-theorem signature_endpoint_false_inter_gadget_round3 (h : IsCFI' adj)
+private theorem signature_endpoint_false_inter_gadget_round3 (h : IsCFI' adj)
     (P : PMatrix n)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
@@ -2625,7 +2625,7 @@ subset `a_S^v` with `w ∈ S` and `x ∈ N(v) \ S` (which exists when
 
 This unlocks Phase 2.X (b=0 within-gadget partner distinction) via the
 bridge step lemma at round 4. -/
-theorem refineStep_endpoint_false_inter_gadget_round3 (h : IsCFI' adj)
+private theorem refineStep_endpoint_false_inter_gadget_round3 (h : IsCFI' adj)
     (P : PMatrix n)
     {v v' : Fin h.m} (hvv : v ≠ v')
     {w : Fin h.m} (hw : w ∈ h.H.neighbors v)
@@ -2703,7 +2703,7 @@ theorem exists_witness_of_oddDegree (h : IsCFI' adj) (h_odd : h.OddDegree)
 witness `x ∈ N(w) \ S`. Used by Phase 2.X to invoke Phase 2.2 at the
 bridge-partner gadget `w`. Builds `S = {v, x_other}` with
 `x_other ∈ N(w) \ {v}` (exists because `deg(w) ≥ 3` under OddDegree). -/
-theorem exists_phase22_witness (h : IsCFI' adj) (h_odd : h.OddDegree)
+private theorem exists_phase22_witness (h : IsCFI' adj) (h_odd : h.OddDegree)
     {w v : Fin h.m} (hv_in_Nw : v ∈ h.H.neighbors w) :
     ∃ (S : Finset (Fin h.m)),
       ∃ (_hS : S ∈ h.H.evenSubsetsOfNeighbors w),
@@ -2779,7 +2779,7 @@ at gadget v toward different partners w ≠ w' get distinct colours.
 
 Hypothesis `h.OddDegree` ensures all needed witness subsets exist
 automatically (S = {v, x_other} for various v/w/x_other). -/
-theorem refineStep_endpoint_false_intra_gadget_partner_round4
+private theorem refineStep_endpoint_false_intra_gadget_partner_round4
     (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n)
     {v w w' : Fin h.m} (hww : w ≠ w')
     (hw : w ∈ h.H.neighbors v) (hw' : w' ∈ h.H.neighbors v) :
@@ -2908,7 +2908,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 Under five nested `refineStep` rounds on `χ_{allSeeds}`, two subset
 vertices at gadget v with `S ≠ S'` (witnessed by `y ∈ S, y ∉ S'`)
 get distinct colours. -/
-theorem refineStep_subset_intra_gadget_S_round5
+private theorem refineStep_subset_intra_gadget_S_round5
     (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n)
     {v : Fin h.m} {S S' : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v)

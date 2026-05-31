@@ -694,7 +694,7 @@ other tiers need it. -/
 /-- **Helper: χ_v uniqueness.** `individualizedColouring n {v} u =
 individualizedColouring n {v} v` iff `u = v`. Direct consequence of
 the definition (positive colour at `v`, zero elsewhere). -/
-theorem individualizedColouring_singleton_eq_v_iff {n : Nat} (v u : Fin n) :
+private theorem individualizedColouring_singleton_eq_v_iff {n : Nat} (v u : Fin n) :
     individualizedColouring n {v} u = individualizedColouring n {v} v ↔
     u = v := by
   constructor
@@ -925,7 +925,7 @@ plus the `count` filter) into a single Finset filter. -/
 
 /-- **Bridge lemma.** Multiset count on a signature equals Finset
 cardinality of the matching preimage filter (over `u' ≠ w`). -/
-theorem signature_count_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem signature_count_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) (w : Fin n) (t : Nat × Nat × POE) :
     Multiset.count t (signature adj P χ w) =
     (Finset.univ.filter (fun u' : Fin n =>
@@ -940,7 +940,7 @@ theorem signature_count_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 signature χ u`, then for any tuple `t`, the count of `u' ≠ w`
 producing `t` from `w` equals the count of `u' ≠ u` producing `t`
 from `u`. Direct corollary of `signature_count_eq_card`. -/
-theorem signature_eq_card_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem signature_eq_card_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) {w u : Fin n}
     (h : signature adj P χ w = signature adj P χ u)
     (t : Nat × Nat × POE) :
@@ -954,7 +954,7 @@ theorem signature_eq_card_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 /-- **Iter-round count equality.** If two vertices are equal at
 iter[k+1] under `χ_v`, then for any (round-k colour, adj-value,
 P-value) triple, the counts of intermediate vertices match. -/
-theorem iter_succ_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem iter_succ_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (v : Fin n) (k : Nat) {w u : Fin n}
     (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
          ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u)
@@ -970,7 +970,7 @@ theorem iter_succ_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 
 /-- **Bridge generalised: `countP` form.** Multiset.countP on a
 signature equals Finset.card of the matching preimage filter. -/
-theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) (w : Fin n) (p : Nat × Nat × POE → Prop) [DecidablePred p] :
     Multiset.countP p (signature adj P χ w) =
     (Finset.univ.filter (fun u' : Fin n =>
@@ -982,7 +982,7 @@ theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
   rw [Finset.filter_filter]
 
 /-- **Aggregate countP equality from signature equality.** -/
-theorem signature_eq_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem signature_eq_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) {w u : Fin n}
     (h : signature adj P χ w = signature adj P χ u)
     (p : Nat × Nat × POE → Prop) [DecidablePred p] :
@@ -997,7 +997,7 @@ theorem signature_eq_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 the count of intermediate vertices `u'` whose (iter[k] colour, adj
 value, P value) satisfies any decidable predicate `p` matches between
 `w` and `u`. The workhorse aggregate version of `iter_succ_count_eq`. -/
-theorem iter_succ_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem iter_succ_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (v : Fin n) (k : Nat) {w u : Fin n}
     (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
          ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u)
@@ -1016,7 +1016,7 @@ theorem iter_succ_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 colour (ignoring adj and P values). The Σ-over-all-adj/P collapse:
 under iter[k+1] equality, the count of intermediate vertices whose
 round-k colour satisfies `q` matches between `w` and `u`. -/
-theorem iter_succ_colour_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem iter_succ_colour_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (v : Fin n) (k : Nat) {w u : Fin n}
     (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
          ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u)
@@ -1430,7 +1430,7 @@ theorem step2_of_step2_at_depth {n : Nat} (G : SchurianSchemeGraph n)
 /-- **Step2_at_depth at k = 0 for rank ≤ 1 schurian scheme graphs.**
 Specialisation of `step2_of_rank_le_one` to the cleaner
 `Step2_at_depth` form. -/
-theorem step2_at_depth_zero_of_rank_le_one {n : Nat} (G : SchurianSchemeGraph n)
+private theorem step2_at_depth_zero_of_rank_le_one {n : Nat} (G : SchurianSchemeGraph n)
     (hrank : G.scheme.rank ≤ 1) (P : PMatrix n) (v : Fin n) :
     Step2_at_depth G P v 0 := by
   intro w u h0
@@ -1527,7 +1527,7 @@ on `k`. Needed to argue that `iter[k] χ_v` (also an equivalence)
 refines `schemePart_at k`. -/
 
 /-- `schemePart_at` is reflexive. -/
-theorem schemePart_at_refl {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem schemePart_at_refl {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) (k : Nat) (w : Fin n) : schemePart_at G P v k w w := by
   induction k with
   | zero => exact rfl
@@ -1537,7 +1537,7 @@ theorem schemePart_at_refl {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     rfl
 
 /-- `schemePart_at` is symmetric. -/
-theorem schemePart_at_symm {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem schemePart_at_symm {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) (k : Nat) {w u : Fin n}
     (h : schemePart_at G P v k w u) : schemePart_at G P v k u w := by
   induction k generalizing w u with
@@ -1549,7 +1549,7 @@ theorem schemePart_at_symm {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     exact (hc a p w').symm
 
 /-- `schemePart_at` is transitive. -/
-theorem schemePart_at_trans {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem schemePart_at_trans {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) (k : Nat) {w u t : Fin n}
     (h1 : schemePart_at G P v k w u) (h2 : schemePart_at G P v k u t) :
     schemePart_at G P v k w t := by
@@ -1709,7 +1709,7 @@ theorem step2_of_converges_at {n : Nat} (G : SchurianSchemeGraph n)
 sanity check: the convergence framework recovers the rank-≤-1 case
 already proved directly. At depth 0, schemePart_at reduces to
 χ_v-equality. -/
-theorem step2_converges_at_zero_of_rank_le_one {n : Nat}
+private theorem step2_converges_at_zero_of_rank_le_one {n : Nat}
     (G : SchurianSchemeGraph n) (hrank : G.scheme.rank ≤ 1)
     (P : PMatrix n) (v : Fin n) :
     Step2_converges_at G P v 0 := by
@@ -1787,7 +1787,7 @@ theorem schemePart_at_one_to_v {n : Nat} (G : SchurianSchemeGraph n) (P : PMatri
   exact ⟨hadj.symm, hP.symm⟩
 
 /-- **Depth-1 extraction, adj-only specialization.** -/
-theorem schemePart_at_one_adj_to_v {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem schemePart_at_one_adj_to_v {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v w u : Fin n) (hwv : w ≠ v) (huv : u ≠ v)
     (h : schemePart_at G P v 1 w u) :
     G.toSchemeGraph.adj.adj w v = G.toSchemeGraph.adj.adj u v :=
@@ -1856,7 +1856,7 @@ theorem step2_converges_at_one_of_det {n : Nat}
 only one non-diagonal relation, adj-to-v trivially determines
 relOfPair v · (both non-v vertices land in the same unique
 non-diagonal relation). -/
-theorem relOfPairDetByAdjP_of_rank_le_one {n : Nat}
+private theorem relOfPairDetByAdjP_of_rank_le_one {n : Nat}
     (G : SchurianSchemeGraph n) (hrank : G.scheme.rank ≤ 1)
     (P : PMatrix n) (v : Fin n) :
     RelOfPairDetByAdjP G P v := by
@@ -1954,7 +1954,7 @@ theorem relOfPairDetByAdjP_of_adjSeparates {n : Nat}
 
 /-- **`rank ≤ 1` implies adj-separation.** Automatic since
 the non-diagonal index set has size ≤ 1. -/
-theorem adjSeparates_of_rank_le_one {n : Nat}
+private theorem adjSeparates_of_rank_le_one {n : Nat}
     (G : SchemeGraph n) (hrank : G.scheme.rank ≤ 1) :
     AdjSeparatesRelations G := by
   intro i j hi_ne hj_ne _

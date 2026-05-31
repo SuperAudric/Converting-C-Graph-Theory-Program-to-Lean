@@ -2,7 +2,7 @@
 """Maintenance tool for the GraphCanonizationProofs theorem index.
 
 Usage:
-  GenerateTheoremIndexes.py rewrite [--with-line-numbers]
+  GenerateTheoremIndexes.py rewrite [--with-line-numbers] [--descriptions JSON]
 
 `rewrite` regenerates the four index files from the Lean source + the existing
 indices. What it does, per the current requirements:
@@ -14,7 +14,9 @@ indices. What it does, per the current requirements:
      `example` have no identifier and are skipped.)
   2. **Line column** (`--with-line-numbers`): a `start-end` source range
      covering the declaration's header (doc comment / attributes) and body.
-  3. **Description** is hand-written and preserved verbatim.
+  3. **Description** is hand-written and preserved verbatim — or bulk-applied
+     from a `--descriptions JSON` map (`{decl_name: description}`), which
+     overrides the column for the names it lists.
   4. **Notes** are computed from source for every row — the infrastructure
      kind, `noncomputable`, and `@[…]` attributes; `private` is omitted
      (encoded by the public/private split). Semantic annotations belong in
@@ -39,6 +41,7 @@ excluding `.lake/`. Files under `Archive/...` are *archived*; else *active*.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -187,6 +190,36 @@ def _classify_lines(text: str) -> list[str]:
 
 _TERMINATOR_RE = re.compile(r"^\s*(namespace|end|section)\b")
 _ANON_INSTANCE_RE = re.compile(r"^\s*(?:@\[[^\]]*\]\s*)*instance\s*[:({\[]")
+_NAMESPACE_RE = re.compile(r"^\s*namespace\s+(\S+)")
+_SECTION_RE = re.compile(r"^\s*section\b\s*(\S+)?")
+_END_RE = re.compile(r"^\s*end\b\s*(\S+)?")
+
+
+def _namespace_prefixes(lines: list[str], line_kinds: list[str]) -> list[str]:
+    """Per-line active namespace prefix (e.g. `ChainDescent.OrbitPartition`).
+
+    Tracks a scope stack: `namespace X` qualifies subsequent decls; `section`
+    (named or anonymous) scopes without qualifying; `end [X]` pops the top
+    scope. Only `code` lines carry directives. The prefix returned for line `i`
+    reflects scopes opened on *earlier* lines (a decl picks up the namespaces
+    enclosing it)."""
+    stack: list[tuple[str, bool]] = []  # (name, is_namespace)
+    prefixes: list[str] = []
+    for i, ln in enumerate(lines):
+        prefixes.append(".".join(n for n, is_ns in stack if is_ns))
+        if line_kinds[i] != "code":
+            continue
+        m = _NAMESPACE_RE.match(ln)
+        if m:
+            stack.append((m.group(1), True))
+            continue
+        ms = _SECTION_RE.match(ln)
+        if ms:
+            stack.append((ms.group(1) or "", False))
+            continue
+        if _END_RE.match(ln) and stack:
+            stack.pop()
+    return prefixes
 
 
 def _is_decl_terminator(line: str) -> bool:
@@ -227,6 +260,7 @@ def parse_lean_file(path: Path) -> list[dict]:
     text = path.read_text()
     lines = text.split("\n")
     line_kinds = _classify_lines(text)
+    prefixes = _namespace_prefixes(lines, line_kinds)
 
     decls: list[dict] = []
     for i, line in enumerate(lines):
@@ -239,8 +273,10 @@ def parse_lean_file(path: Path) -> list[dict]:
         attrs, modifiers, kind, name = m.groups()
         if not (name[0].isalpha() or name[0] == "_"):
             continue
+        qualified = f"{prefixes[i]}.{name}" if prefixes[i] else name
         decls.append({
             "name": name,
+            "qualified": qualified,
             "kind": kind,
             "attrs": ATTR_RE.findall(attrs or ""),
             "line": i + 1,           # 1-indexed
@@ -300,23 +336,30 @@ def _iter_lean_files() -> list[Path]:
 
 
 def parse_all_lean() -> dict[str, dict]:
-    """name -> {path, line, is_private, is_simp, body, stripped_body}."""
+    """Fully-qualified-name -> decl dict {name, qualified, path, line,
+    header_start, end_line, kind, attrs, is_private, is_noncomputable, …}.
+
+    Keyed by the **qualified** name (`ChainDescent.OrbitPartition.refl`) so that
+    same-segment decls in different namespaces (`OrbitPartition.refl` vs
+    `samePartition.refl`) do not clobber each other."""
     out: dict[str, dict] = {}
     for path in _iter_lean_files():
         for d in parse_lean_file(path):
             d["path"] = path.relative_to(ROOT)
             d["stripped_body"] = strip_comments(d["body"])
-            out[d["name"]] = d
+            out[d["qualified"]] = d
     return out
+
 
 # ---------------------------------------------------------------------------
 # Source-name resolution
 #
-# The Lean parser stores *unqualified* names ("trivial"), but an index row may
-# display a namespace-qualified name ("LayerChain.trivial") or a definition
-# with its arguments ("AutGroup adj") or several decls in one cell
-# ("orbitMk / orbitMk_eq_iff"). We resolve a row to its source decl(s) by
-# matching identifier tokens on their final `.`-segment.
+# Source decls are keyed by qualified name; an index row may *display* a name
+# bare (`cfiAdj`), partially-qualified (`OrbitPartition.refl`), with arguments
+# (`AutGroup adj`), or several in one cell (`orbitMk / orbitMk_eq_iff`). We
+# resolve a row's display token to a qualified decl by **suffix match**
+# (`Q == tok` or `Q` ends with `.tok`), disambiguating collisions by the row's
+# section path (same-file preference).
 # ---------------------------------------------------------------------------
 # Split a Name cell into identifier tokens. We split on separators rather than
 # match a character class, because Lean identifiers contain unicode (σ, τ,
@@ -325,21 +368,33 @@ _TOKEN_SEP_RE = re.compile(r"[\s/,]+")
 
 
 def build_last_segment_index(source: dict[str, dict]) -> dict[str, list[str]]:
-    """`last segment` -> list of source decl names sharing it."""
+    """last segment -> list of qualified names sharing it."""
     by_last: dict[str, list[str]] = defaultdict(list)
-    for name in source:
-        by_last[name.split(".")[-1]].append(name)
+    for qual in source:
+        by_last[qual.split(".")[-1]].append(qual)
     return by_last
 
 
 def resolve_token(token: str, source: dict[str, dict],
-                  by_last: dict[str, list[str]]) -> str | None:
-    """Resolve one identifier token to a single source decl name, or None.
-    Exact name wins; otherwise an *unambiguous* last-segment match."""
-    if token in source:
-        return token
-    cands = by_last.get(token.split(".")[-1], [])
-    return cands[0] if len(cands) == 1 else None
+                  by_last: dict[str, list[str]],
+                  section_path: str | None = None,
+                  hint_line: int | None = None) -> str | None:
+    """Resolve one display token to a single qualified decl, or None.
+    Suffix match on the qualified name; ties broken first by same-file
+    preference, then (for same-file bare collisions like `refl`) by closeness
+    to the row's existing Line."""
+    cands = [q for q in by_last.get(token.split(".")[-1], [])
+             if q == token or q.endswith("." + token)]
+    if len(cands) == 1:
+        return cands[0]
+    if section_path is not None:
+        same = [q for q in cands if str(source[q]["path"]) == section_path]
+        if len(same) == 1:
+            return same[0]
+        if len(same) > 1 and hint_line is not None:
+            return min(same, key=lambda q: abs((source[q].get("header_start")
+                                                or source[q].get("line") or 0) - hint_line))
+    return None
 
 
 def row_decl_tokens(name_cell: str) -> list[str]:
@@ -349,10 +404,12 @@ def row_decl_tokens(name_cell: str) -> list[str]:
 
 
 def resolve_row(name_cell: str, source: dict[str, dict],
-                by_last: dict[str, list[str]]) -> str | None:
-    """The decl a (tracked) row is *about*: its first resolvable token."""
+                by_last: dict[str, list[str]],
+                section_path: str | None = None,
+                hint_line: int | None = None) -> str | None:
+    """The qualified decl a (tracked) row is *about*: its first resolvable token."""
     for tok in row_decl_tokens(name_cell):
-        d = resolve_token(tok, source, by_last)
+        d = resolve_token(tok, source, by_last, section_path, hint_line)
         if d is not None:
             return d
     return None
@@ -458,13 +515,16 @@ def parse_index_layout(path: Path) -> dict:
             continue
         cells = split_row(line)
         if _is_data_row(cells):
-            tracked = len(cells) >= 4 and bool(LINE_CELL_RE.match(cells[1].strip("` ").strip()))
+            line_cell = cells[1].strip("` ").strip() if len(cells) >= 4 else ""
+            tracked = bool(LINE_CELL_RE.match(line_cell))
+            m_hint = re.match(r"\d+", line_cell)
             cur["items"].append(("row", {
                 "name": cells[0].strip().strip("`").strip(),
                 "raw": line,
                 "description": cells[-2],
                 "notes": cells[-1],
                 "tracked": tracked,
+                "line_hint": int(m_hint.group()) if m_hint else None,
             }))
         else:
             cur["items"].append(("prose", line))
@@ -501,17 +561,63 @@ def _emit_row(name: str, line_cell: str | None, description: str, notes: str,
     return "| " + " | ".join(cells) + " |"
 
 
-def render_tracked_row(decl: str, source: dict, row: dict, with_line_numbers: bool) -> str:
+def _lookup_desc(decl: str, desc_override: dict) -> str | None:
+    """Find an override for a qualified decl, trying the most specific key
+    first: full qualified name, then display (`ChainDescent.`-stripped), then
+    bare last segment. Lets the JSON key by the natural display name and reserve
+    qualified keys for collisions."""
+    for key in (decl, index_name(decl), decl.split(".")[-1]):
+        if key in desc_override:
+            return desc_override[key]
+    return None
+
+
+def render_tracked_row(decl: str, source: dict, row: dict, desc_override: dict,
+                       with_line_numbers: bool) -> str:
     # Refresh the Line column and recompute Notes from source; keep the
-    # hand-written Description (Notes is now derived — see compute_notes).
+    # hand-written Description unless a --descriptions override supplies one.
     info = source[decl]
-    return _emit_row(row["name"], render_line(info), row["description"],
+    desc = _lookup_desc(decl, desc_override) or row["description"]
+    return _emit_row(row["name"], render_line(info), desc,
                      compute_notes(info), with_line_numbers)
 
 
-def render_new_row(decl: str, source: dict, global_desc: dict, with_line_numbers: bool) -> str:
+def index_name(qualified: str) -> str:
+    """Display name for a qualified decl: drop the project-root `ChainDescent.`
+    prefix (kept for deeper namespaces, matching the existing index style:
+    `OrbitPartition.refl`, but bare `warm_6_2`)."""
+    return qualified.removeprefix("ChainDescent.")
+
+
+def _concept_row_with_override(row: dict, source: dict, by_last: dict,
+                               section_path: str, desc_override: dict) -> str:
+    """A conceptual row, verbatim — unless a --descriptions override applies, in
+    which case its Description cell is replaced (name + other cells preserved).
+
+    A row whose Name cell joins several decls with `/` (e.g.
+    `orbitMk / orbitMk_eq_iff`) is left verbatim (no single description fits).
+    Otherwise the row names one decl, possibly with arguments (`AutGroup adj`);
+    we take its first resolvable token's override."""
+    if "/" in row["name"]:
+        return row["raw"]
+    for tok in row_decl_tokens(row["name"]):
+        decl = resolve_token(tok, source, by_last, section_path, row.get("line_hint"))
+        if decl is not None:
+            new_desc = _lookup_desc(decl, desc_override)
+            if new_desc:
+                cells = split_row(row["raw"])
+                cells[-2] = new_desc
+                return "| " + " | ".join(cells) + " |"
+            break
+    return row["raw"]
+
+
+def render_new_row(decl: str, source: dict, global_desc: dict, desc_override: dict,
+                   with_line_numbers: bool) -> str:
     info = source[decl]
-    return _emit_row(decl, render_line(info), global_desc.get(decl, "—"),
+    name = index_name(decl)
+    desc = _lookup_desc(decl, desc_override) or global_desc.get(decl, "—")
+    return _emit_row(name, render_line(info), desc,
                      compute_notes(info), with_line_numbers)
 
 
@@ -536,12 +642,15 @@ _INDEX_PATHS = {
 
 
 def default_preamble(key: tuple[str, bool], with_line_numbers: bool) -> list[str]:
-    out = [f"# {_INDEX_TITLES[key]}", "", _INDEX_DESCRIPTIONS[key], "", "## Legend", ""]
+    out = [f"# {_INDEX_TITLES[key]}", "", _INDEX_DESCRIPTIONS[key], "",
+           "Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: "
+           "**Name**, **Line**, **Notes** are computed from source; **Description** is "
+           "hand-written and preserved.", "## Legend", ""]
     if with_line_numbers:
         out.append("- **Line**: Source-line range `start-end` covering the declaration's header (attached doc comment / attributes) and its full body. Collapses to a single number when the declaration occupies one line.")
     out += [
-        "- **Description**: A short description of what the theorem proves.",
-        "- **Notes**: infrastructure kind, `noncomputable`, and `@[…]` attributes (computed from source).",
+        "- **Description**: What the declaration achieves / why a consumer would use it (not how it is proved), in ≤ 2 sentences; a leading `§…` marker or **bold anchor** links to documentation.",
+        "- **Notes**: Computed from source — infrastructure kind, `noncomputable`, and `@[…]` attributes (`private` omitted; it is encoded by the public/private split).",
         "",
     ]
     return out
@@ -549,7 +658,8 @@ def default_preamble(key: tuple[str, bool], with_line_numbers: bool) -> list[str
 
 def render_layout(layout: dict, key: tuple[str, bool], source: dict,
                   by_last: dict, bucket_decls: set[str], bucket_of: dict,
-                  global_desc: dict, new_by_section: dict[str, list[str]],
+                  global_desc: dict, desc_override: dict,
+                  new_by_section: dict[str, list[str]],
                   with_line_numbers: bool, orphans: list[str]) -> str:
     out: list[str] = list(layout["preamble"]) if layout["preamble"] \
         else default_preamble(key, with_line_numbers)
@@ -567,7 +677,7 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
         def _flush(limit: int, _p=pending) -> None:
             nonlocal pi
             while pi < len(_p) and _hs(_p[pi]) <= limit:
-                out.append(render_new_row(_p[pi], source, global_desc, with_line_numbers))
+                out.append(render_new_row(_p[pi], source, global_desc, desc_override, with_line_numbers))
                 pi += 1
 
         for item in sec["items"]:
@@ -576,9 +686,14 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
                 continue
             row = item[1]
             if not row["tracked"]:
-                out.append(row["raw"])            # conceptual → verbatim
+                # Conceptual row (no Line): kept verbatim, except a
+                # --descriptions override for a *single*-decl conceptual row
+                # (e.g. `AutGroup adj`) replaces its Description cell. Combined
+                # rows (`a / b`) — several resolvable decls — stay verbatim.
+                out.append(_concept_row_with_override(row, source, by_last,
+                                                      sec["path"], desc_override))
                 continue
-            decl = resolve_row(row["name"], source, by_last)
+            decl = resolve_row(row["name"], source, by_last, sec["path"], row.get("line_hint"))
             if decl is None:
                 out.append(row["raw"])            # unresolved → keep (report)
                 orphans.append(row["name"])
@@ -586,9 +701,9 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
             if bucket_of[decl] != key:
                 continue                          # migrated to another file → drop here
             _flush(_hs(decl))
-            out.append(render_tracked_row(decl, source, row, with_line_numbers))
+            out.append(render_tracked_row(decl, source, row, desc_override, with_line_numbers))
         while pi < len(pending):
-            out.append(render_new_row(pending[pi], source, global_desc, with_line_numbers))
+            out.append(render_new_row(pending[pi], source, global_desc, desc_override, with_line_numbers))
             pi += 1
 
     # Files with new decls but no existing section: append a fresh section.
@@ -598,7 +713,7 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
         out += [f"## {sec_path}", ""]
         out += table_header(with_line_numbers)
         for decl in sorted(new_by_section[sec_path], key=_hs):
-            out.append(render_new_row(decl, source, global_desc, with_line_numbers))
+            out.append(render_new_row(decl, source, global_desc, desc_override, with_line_numbers))
         out.append("")
 
     return "\n".join(out).rstrip() + "\n"
@@ -610,6 +725,14 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
 def cmd_rewrite(args: argparse.Namespace) -> None:
     source = parse_all_lean()
     by_last = build_last_segment_index(source)
+
+    # Optional description overrides: a JSON `{decl_name: description}` (keyed by
+    # the source decl name) that supersedes the hand-written Description column.
+    # Used to bulk-apply regenerated descriptions; names absent from it keep
+    # their existing Description.
+    desc_override: dict[str, str] = {}
+    if args.descriptions:
+        desc_override = json.loads(Path(args.descriptions).read_text())
 
     def bucket_of_decl(decl: str) -> tuple[str, bool]:
         info = source[decl]
@@ -629,7 +752,8 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
             for item in sec["items"]:
                 if item[0] != "row":
                     continue
-                decl = resolve_row(item[1]["name"], source, by_last)
+                decl = resolve_row(item[1]["name"], source, by_last, sec["path"],
+                                   item[1].get("line_hint"))
                 if decl is not None and item[1].get("description") not in (None, "", "—"):
                     global_desc.setdefault(decl, item[1]["description"])
 
@@ -644,7 +768,7 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
                 if item[0] != "row":
                     continue
                 for tok in row_decl_tokens(item[1]["name"]):
-                    d = resolve_token(tok, source, by_last)
+                    d = resolve_token(tok, source, by_last, sec["path"], item[1].get("line_hint"))
                     if d is not None:
                         covered.add(d)
         new_by_section: dict[str, list[str]] = defaultdict(list)
@@ -654,7 +778,7 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(render_layout(
             layout, key, source, by_last, bucket_decls, bucket_of,
-            global_desc, new_by_section, args.with_line_numbers, orphans))
+            global_desc, desc_override, new_by_section, args.with_line_numbers, orphans))
         added = sum(len(v) for v in new_by_section.values())
         print(f"Wrote {path.relative_to(REPO_ROOT)} "
               f"({len(bucket_decls)} decls, {added} newly added)")
@@ -676,6 +800,9 @@ def main() -> None:
     p_rw = sp.add_parser("rewrite", help="Regenerate the four index files.")
     p_rw.add_argument("--with-line-numbers", action="store_true",
                       help="Include the 'Line' column (header + body source range).")
+    p_rw.add_argument("--descriptions", metavar="JSON",
+                      help="Path to a JSON `{decl_name: description}` map whose "
+                           "entries override the Description column.")
     p_rw.set_defaults(func=cmd_rewrite)
     args = parser.parse_args()
     args.func(args)

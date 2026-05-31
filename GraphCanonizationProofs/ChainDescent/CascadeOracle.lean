@@ -301,7 +301,7 @@ coloured) and `a, b` (both `≠ s`) get the same colour after one `refineStep`, 
 share adjacency and `P`-relation to `s`. The arbitrary-singleton generalisation of
 `Scheme.refineStep_round1_pair_eq` (which fixes the singleton to be the individualized
 vertex); the same witness-tuple argument. -/
-theorem refineStep_singleton_pair_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem refineStep_singleton_pair_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     {χ : Colouring n} {s a b : Fin n} (hsing : ∀ u, u ≠ s → χ u ≠ χ s)
     (has : a ≠ s) (hbs : b ≠ s)
     (h : refineStep adj P χ a = refineStep adj P χ b) :

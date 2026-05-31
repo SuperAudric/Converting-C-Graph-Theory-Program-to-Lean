@@ -237,12 +237,12 @@ def conflictMatrix : PMatrix 4 := fun i j =>
   | _, _ => .unknown
 
 /-- `closeStep` never demotes a decided `less` entry. -/
-theorem closeStep_keeps_less {n : Nat} (Q : PMatrix n) {i j : Fin n}
+private theorem closeStep_keeps_less {n : Nat} (Q : PMatrix n) {i j : Fin n}
     (h : Q i j = .less) : closeStep Q i j = .less := by
   simp only [closeStep, h]
 
 /-- Iterating `closeStep` preserves a `less` entry — once decided, frozen. -/
-theorem iterate_closeStep_keeps_less {n : Nat} (i j : Fin n) :
+private theorem iterate_closeStep_keeps_less {n : Nat} (i j : Fin n) :
     ∀ (k : Nat) (Q : PMatrix n), Q i j = .less →
       ((closeStep^[k]) Q) i j = .less := by
   intro k
@@ -266,7 +266,7 @@ theorem closeStep_swap_false :
 
 /-- `transitiveClose conflictMatrix` decides the conflicted pair `(0,1)`
 as `less` (the `less`-chain wins the first `if`). -/
-theorem transitiveClose_conflict_less :
+private theorem transitiveClose_conflict_less :
     transitiveClose conflictMatrix 0 1 = .less := by
   have h1 : closeStep conflictMatrix 0 1 = POE.less := by decide
   show (closeStep^[4 * 4]) conflictMatrix 0 1 = .less
@@ -275,7 +275,7 @@ theorem transitiveClose_conflict_less :
 
 /-- `transitiveClose (swap conflictMatrix)` *also* decides `(0,1)` as
 `less` — the σ-swap did not flip the tie-break. -/
-theorem transitiveClose_swap_conflict_less :
+private theorem transitiveClose_swap_conflict_less :
     transitiveClose (PMatrix.swap conflictMatrix) 0 1 = .less := by
   have h1 : closeStep (PMatrix.swap conflictMatrix) 0 1 = POE.less := by decide
   show (closeStep^[4 * 4]) (PMatrix.swap conflictMatrix) 0 1 = .less
@@ -319,7 +319,7 @@ def POE.toNat : POE → Nat
   | .unknown => 1
   | .greater => 2
 
-theorem POE.toNat_injective : Function.Injective POE.toNat := by
+private theorem POE.toNat_injective : Function.Injective POE.toNat := by
   intro a b h
   cases a <;> cases b <;> first | rfl | exact absurd h (by decide)
 
@@ -331,7 +331,7 @@ cell-id order. -/
 def encTuple : Nat × Nat × POE → Nat :=
   fun t => Nat.pair t.1 (Nat.pair t.2.1 t.2.2.toNat)
 
-theorem encTuple_injective : Function.Injective encTuple := by
+private theorem encTuple_injective : Function.Injective encTuple := by
   rintro ⟨c, a, p⟩ ⟨c', a', p'⟩ h
   simp only [encTuple, Nat.pair_eq_pair] at h
   obtain ⟨rfl, rfl, hp⟩ := h
@@ -1607,7 +1607,7 @@ theorem closeStep_decided {n : Nat} (P : PMatrix n) (i j : Fin n)
   | unknown => exact absurd hPij hP
 
 /-- `closeStep` at an `.unknown` entry, expanded. -/
-theorem closeStep_unknown_eq {n : Nat} (P : PMatrix n) (i j : Fin n)
+private theorem closeStep_unknown_eq {n : Nat} (P : PMatrix n) (i j : Fin n)
     (hP : P i j = .unknown) :
     closeStep P i j =
       (if (List.finRange n).any
@@ -1847,7 +1847,7 @@ theorem numUnknown_le {n : Nat} (P : PMatrix n) : numUnknown P ≤ n * n := by
     _ = n * n := by rw [Finset.card_univ, Fintype.card_prod, Fintype.card_fin]
 
 /-- The unknown set of `closeStep P` is contained in the unknown set of `P`. -/
-theorem closeStep_unknown_subset {n : Nat} (P : PMatrix n) :
+private theorem closeStep_unknown_subset {n : Nat} (P : PMatrix n) :
     ((Finset.univ : Finset (Fin n × Fin n)).filter
         (fun p => closeStep P p.1 p.2 = .unknown)) ⊆
     ((Finset.univ : Finset (Fin n × Fin n)).filter
@@ -1976,7 +1976,7 @@ theorem transitiveClose_idempotent {n : Nat} (M : PMatrix n) :
 /-! ### CL2 — idempotence (proved) -/
 
 /-- `cl_prov S` is canonical. -/
-theorem cl_prov_canonical {n : Nat} (S : Finset (Fin n × Fin n)) :
+private theorem cl_prov_canonical {n : Nat} (S : Finset (Fin n × Fin n)) :
     ∀ p ∈ cl_prov S, p.1.val < p.2.val := by
   intro p hp
   simp only [cl_prov, Finset.mem_filter, Finset.mem_univ, true_and] at hp
@@ -1984,7 +1984,7 @@ theorem cl_prov_canonical {n : Nat} (S : Finset (Fin n × Fin n)) :
 
 /-- `commitsToP (cl_prov S)` is `.less`-bounded by `transitiveClose
 (commitsToP S)`. -/
-theorem commitsToP_cl_prov_lessMono {n : Nat} (S : Finset (Fin n × Fin n))
+private theorem commitsToP_cl_prov_lessMono {n : Nat} (S : Finset (Fin n × Fin n))
     (hScanon : ∀ p ∈ S, p.1.val < p.2.val) :
     LessMono (commitsToP (cl_prov S)) (transitiveClose (commitsToP S)) := by
   have hCanS : CanConsistent (commitsToP S) := commitsToP_canConsistent S hScanon
@@ -3012,7 +3012,7 @@ variable {n : Nat}
 def vertexRankNat (χ : Colouring n) (v : Fin n) : Nat :=
   (Finset.univ.filter (fun u => χ u < χ v)).card
 
-theorem vertexRankNat_lt_n (χ : Colouring n) (v : Fin n) :
+private theorem vertexRankNat_lt_n (χ : Colouring n) (v : Fin n) :
     vertexRankNat χ v < n := by
   show (Finset.univ.filter (fun u => χ u < χ v)).card < n
   have hlt : (Finset.univ.filter (fun u => χ u < χ v)).card
