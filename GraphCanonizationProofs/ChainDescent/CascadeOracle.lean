@@ -323,6 +323,42 @@ theorem refineStep_singleton_pair_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix 
   subst hs'
   exact ⟨hrest.1.symm, hrest.2.symm⟩
 
+/-- **A twin pair's transposition is an automorphism.** If `v, w` are adjacency-twins
+(`adj v s = adj w s` for every other `s`) of a simple graph (`hsymm` symmetric, `hloop`
+loopless), the transposition `(v w)` preserves every edge — `IsAut (Equiv.swap v w) adj`.
+The `adj`-only half of the twin swap witness; extracted so the linear oracle can build a
+`ConfigSwap` from the same twin hypothesis (`LinearOracle.configSwap_of_twin`). -/
+theorem isAut_swap_of_twin {n : Nat} {adj : AdjMatrix n} {v w : Fin n}
+    (hsymm : ∀ a b, adj.adj a b = adj.adj b a)
+    (hloop : ∀ a, adj.adj a a = 0)
+    (htwin : ∀ s, s ≠ v → s ≠ w → adj.adj v s = adj.adj w s) :
+    IsAut (Equiv.swap v w) adj := by
+  intro a b
+  rcases eq_or_ne a v with ha | hav
+  · rw [ha]
+    rcases eq_or_ne b v with hb | hbv
+    · rw [hb, Equiv.swap_apply_left, hloop, hloop]
+    · rcases eq_or_ne b w with hb | hbw
+      · rw [hb, Equiv.swap_apply_left, Equiv.swap_apply_right]; exact hsymm w v
+      · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne hbv hbw]
+        exact (htwin b hbv hbw).symm
+  · rcases eq_or_ne a w with ha | haw
+    · rw [ha]
+      rcases eq_or_ne b v with hb | hbv
+      · rw [hb, Equiv.swap_apply_right, Equiv.swap_apply_left]; exact hsymm v w
+      · rcases eq_or_ne b w with hb | hbw
+        · rw [hb, Equiv.swap_apply_right, hloop, hloop]
+        · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne hbv hbw]
+          exact htwin b hbv hbw
+    · rw [Equiv.swap_apply_of_ne_of_ne hav haw]
+      rcases eq_or_ne b v with hb | hbv
+      · rw [hb, Equiv.swap_apply_left, hsymm a w, hsymm a v]
+        exact (htwin a hav haw).symm
+      · rcases eq_or_ne b w with hb | hbw
+        · rw [hb, Equiv.swap_apply_right, hsymm a v, hsymm a w]
+          exact htwin a hav haw
+        · rw [Equiv.swap_apply_of_ne_of_ne hbv hbw]
+
 /-- **Transposition orbit witness from a twin pair** — the support-grading's
 reconstruction mechanism, isolated from any depth bound. If `v, w` are an
 *order-undecided twin pair* outside the individualized set `S` — identical adjacency
@@ -334,8 +370,9 @@ This is the core of the twin endpoint extracted so it applies at **any** support
 needs only that `v, w` be twins, *not* that the omitted set `Sᶜ` be small. The
 `Sᶜ.card ≤ 2` and `twin-cells` lemmas both consume it, differing only in how they
 *establish* the twin condition. The simple-graph / partial-order hypotheses (`hsymm`,
-`hloop`, `hanti`) transport the twin condition across the subject/object sides. -/
-private theorem orbitPartition_swap_of_twin {n : Nat} {adj : AdjMatrix n}
+`hloop`, `hanti`) transport the twin condition across the subject/object sides. The
+`adj`-only half is `isAut_swap_of_twin` (reused by the linear oracle). -/
+theorem orbitPartition_swap_of_twin {n : Nat} {adj : AdjMatrix n}
     {P : PMatrix n} {S : Finset (Fin n)} {v w : Fin n}
     (hsymm : ∀ a b, adj.adj a b = adj.adj b a)
     (hloop : ∀ a, adj.adj a a = 0)
@@ -355,33 +392,8 @@ private theorem orbitPartition_swap_of_twin {n : Nat} {adj : AdjMatrix n}
   have hPwv : P w v = POE.unknown := by rw [hanti w v, hPvw]; rfl
   have hPdiag : ∀ a, P a a = POE.unknown := fun a => keyP _ (hanti a a)
   -- The transposition `(v w)` is the orbit witness.
-  refine ⟨Equiv.swap v w, ?_, ?_, ?_, ?_⟩
-  · -- IsAut. Case on whether `a, b ∈ {v, w}`; rewrite (not subst) to keep `v, w`.
-    intro a b
-    rcases eq_or_ne a v with ha | hav
-    · rw [ha]
-      rcases eq_or_ne b v with hb | hbv
-      · rw [hb, Equiv.swap_apply_left, hloop, hloop]
-      · rcases eq_or_ne b w with hb | hbw
-        · rw [hb, Equiv.swap_apply_left, Equiv.swap_apply_right]; exact hsymm w v
-        · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne hbv hbw]
-          exact ((htwin b hbv hbw).1).symm
-    · rcases eq_or_ne a w with ha | haw
-      · rw [ha]
-        rcases eq_or_ne b v with hb | hbv
-        · rw [hb, Equiv.swap_apply_right, Equiv.swap_apply_left]; exact hsymm v w
-        · rcases eq_or_ne b w with hb | hbw
-          · rw [hb, Equiv.swap_apply_right, hloop, hloop]
-          · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne hbv hbw]
-            exact (htwin b hbv hbw).1
-      · rw [Equiv.swap_apply_of_ne_of_ne hav haw]
-        rcases eq_or_ne b v with hb | hbv
-        · rw [hb, Equiv.swap_apply_left, hsymm a w, hsymm a v]
-          exact ((htwin a hav haw).1).symm
-        · rcases eq_or_ne b w with hb | hbw
-          · rw [hb, Equiv.swap_apply_right, hsymm a v, hsymm a w]
-            exact (htwin a hav haw).1
-          · rw [Equiv.swap_apply_of_ne_of_ne hbv hbw]
+  refine ⟨Equiv.swap v w, isAut_swap_of_twin hsymm hloop (fun s h1 h2 => (htwin s h1 h2).1),
+    ?_, ?_, ?_⟩
   · -- `P`-preservation. Same case structure; antisymmetry handles the subject-flip.
     intro x u
     rcases eq_or_ne x v with hx | hxv

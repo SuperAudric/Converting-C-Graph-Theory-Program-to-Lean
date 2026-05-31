@@ -1,4 +1,5 @@
 import ChainDescent
+import ChainDescent.CascadeOracle
 import Mathlib.GroupTheory.Perm.Basic
 
 /-!
@@ -824,6 +825,30 @@ def configSwap_of_swap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
             exact hcoh' v hva hvb
           · rw [hgfix v hva hvb, hgfix u hua hub,
               if_neg (by rintro (⟨h, _⟩ | ⟨h, _⟩) <;> first | exact hva h | exact hvb h)]
+
+/-- **A twin decision pair admits a config-swap** — the linear-oracle analogue of the
+cascade oracle's `cellsAreOrbits_of_twin_cells`, sharing the *same* twin hypothesis and
+the *same* transposition witness (`CascadeOracle.isAut_swap_of_twin`). When the decision
+pair `(a, b)` is an **(adj, σ)-twin**: an adjacency-twin (`adj a s = adj b s` for every
+other `s`, on a simple graph) *and* a σ-cell-coherent pair (`σ.σ a w = σ.σ b w`), with
+`χι a = χι b`, then the transposition `(a b)` is a `ConfigSwap`. This is the abelian /
+`Z₂` twin-swap decision resolved without any rank-alignment — the linear oracle's half of
+the twin-reconstructible slice of cascade-1b, now closed at **decision-node depth** (no
+descent to discreteness, no `|Sᶜ|` bound), exactly as `cellsAreOrbits_of_twin_cells` is on
+the orbit side. The two oracles fire on the same twin class via one shared lemma. -/
+def configSwap_of_twin {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (hab : a ≠ b)
+    (hsymm : ∀ x y, adj.adj x y = adj.adj y x) (hloop : ∀ x, adj.adj x x = 0)
+    (htwinAdj : ∀ s, s ≠ a → s ≠ b → adj.adj a s = adj.adj b s)
+    (hχab : chain.χι a = chain.χι b)
+    (hcoh : ∀ w, w ≠ a → w ≠ b → σ.σ a w = σ.σ b w) :
+    ConfigSwap chain σ a b ha hb :=
+  configSwap_of_swap chain σ a b ha hb hab (Equiv.swap a b)
+    (isAut_swap_of_twin hsymm hloop htwinAdj)
+    (Equiv.swap_apply_left a b) (Equiv.swap_apply_right a b)
+    (fun _ hva hvb => Equiv.swap_apply_of_ne_of_ne hva hvb)
+    hχab hcoh
 
 /-- **Decision-node recoverability (the named cascade-1b obligation for the linear oracle).**
 Every leaf decision `(a, b)` (distinct pair in the decision set) admits a config-swap. Holds
