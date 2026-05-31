@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Maintenance tool for the GraphCanonizationProofs theorem index.
 
+The human/agent process on top of this tool — routine refresh, editing a few
+descriptions, making a decl `private`, and the full description-rewrite +
+privatization pass (with the subagent prompt template) — is documented in
+`scripts/theorem-index-maintenance.md`.
+
 Usage:
   GenerateTheoremIndexes.py rewrite [--with-line-numbers] [--descriptions JSON]
 
