@@ -1,51 +1,45 @@
 #!/usr/bin/env python3
 """Maintenance tool for the GraphCanonizationProofs theorem index.
 
-Subcommands:
-  check                Sanity-check the 'Used By' column against the source.
-  rewrite              Regenerate the index file(s), preserving description /
-                       notes and emitting a chosen set of optional columns.
-  split                One-shot: split TheoremIndex.md into the four-file
-                       layout (active vs. archived × public vs. private),
-                       grouped by source file path.
+Usage:
+  GenerateTheoremIndexes.py rewrite [--with-line-numbers]
 
-Optional columns (flags on `rewrite` / `split`):
-  --with-used-by       Recompute and include the 'Used By' column. For
-                       `@[simp]` theorems this column is left empty since they
-                       are usually applied implicitly via the `simp` tactic.
-  --with-line-numbers  Include a 'Line' column with a source-line *range*
-                       covering the declaration's header (attached doc
-                       comment / attributes) plus its body.
+`rewrite` regenerates the four index files from the Lean source + the existing
+indices. What it does, per the current requirements:
 
-Discovery (flag on `rewrite`):
-  --include-new        Append placeholder entries for source declarations not
-                       yet in the index. Use after adding new lemmas / new
-                       files (e.g. ChainDescent.lean) so they appear in the
-                       regenerated index for description-filling.
+  1. **Discovery.** Every named source declaration (theorem/lemma/def, plus
+     infrastructure: structure/class/inductive/abbrev/axiom/named instance)
+     is ensured to have a row in the table for its file, creating the `##
+     <path>` section + table header if none exists. (Anonymous `instance` /
+     `example` have no identifier and are skipped.)
+  2. **Line column** (`--with-line-numbers`): a `start-end` source range
+     covering the declaration's header (doc comment / attributes) and body.
+  3. **Description** is hand-written and preserved verbatim.
+  4. **Notes** are computed from source for every row — the infrastructure
+     kind, `noncomputable`, and `@[…]` attributes; `private` is omitted
+     (encoded by the public/private split). Semantic annotations belong in
+     Description, not Notes.
+  5. **Four files** (active|archive × public|private) are read, merged, and
+     re-split: a row migrates between files when its decl's archive/visibility
+     status changes, carrying its description.
 
-Index layout (always emitted as four files post-rewrite):
-  GraphCanonizationProofs/PublicTheoremIndex.md         — active, public
-  GraphCanonizationProofs/PrivateTheoremIndex.md        — active, private
-  GraphCanonizationProofs/Archive/PublicTheoremIndex.md  — archived, public
-  GraphCanonizationProofs/Archive/PrivateTheoremIndex.md — archived, private
+Tracked vs. conceptual rows. A row that carries a Line cell is *tracked* and is
+refreshed. A 3-cell row (no Line — a def shown with its args, or several decls
+in one cell, e.g. `AutGroup adj` / `orbitMk / orbitMk_eq_iff`) is *conceptual*
+and kept verbatim; it still *covers* its decls (matched by last name-segment)
+so discovery does not duplicate them.
 
-The rewrite command reads from whichever of these (or the legacy single /
-two-file layouts) currently exist on disk and re-emits the four-file
-layout, automatically moving an entry between the active and archived
-indices when its source file moves into or out of `Archive/`. Hand-written
-description / notes columns are preserved across moves.
+Prose between tables — `### …` sub-headers, per-file descriptions, the intro
+note, the Legend — is passed through untouched and never moved between files
+(structure: TableHeader → rows → [ignored prose] → TableHeader → rows → …).
 
 Source-scan scope: all `.lean` files under `GraphCanonizationProofs/`,
-excluding the `.lake/` build / package cache. Files under `Archive/...`
-are classified as *archived*; everything else as *active*. Section
-headers use the full path relative to `GraphCanonizationProofs/`
-(e.g. `## Archive/V4/FullCorrectness/Basic.lean`).
+excluding `.lake/`. Files under `Archive/...` are *archived*; else *active*.
 """
 from __future__ import annotations
 
 import argparse
 import re
-import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -55,28 +49,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ROOT = REPO_ROOT / "GraphCanonizationProofs"
 
-SINGLE_INDEX = ROOT / "TheoremIndex.md"
-
-# Active (non-archived) indices.
+# The four index files: active|archive × public|private. Archived indices live
+# next to the archived Lean source under `Archive/`.
 ACTIVE_PUBLIC_INDEX = ROOT / "PublicTheoremIndex.md"
 ACTIVE_PRIVATE_INDEX = ROOT / "PrivateTheoremIndex.md"
-
-# Archived indices: live next to the archived Lean source under `Archive/`.
 ARCHIVE_PUBLIC_INDEX = ROOT / "Archive" / "PublicTheoremIndex.md"
 ARCHIVE_PRIVATE_INDEX = ROOT / "Archive" / "PrivateTheoremIndex.md"
-
-# Legacy aliases kept for migration. The two-file split layout pre-dating
-# the active/archived split lived at PUBLIC_INDEX / PRIVATE_INDEX (i.e. the
-# same paths we now use for ACTIVE_PUBLIC_INDEX / ACTIVE_PRIVATE_INDEX).
-PUBLIC_INDEX = ACTIVE_PUBLIC_INDEX
-PRIVATE_INDEX = ACTIVE_PRIVATE_INDEX
-
-ALL_INDEX_FILES = (
-    ACTIVE_PUBLIC_INDEX,
-    ACTIVE_PRIVATE_INDEX,
-    ARCHIVE_PUBLIC_INDEX,
-    ARCHIVE_PRIVATE_INDEX,
-)
 
 # A source path is considered archived iff it sits anywhere under `Archive/`
 # (relative to ROOT). The four-file layout pivots on this.
@@ -89,13 +67,6 @@ def is_archived_path(path_str: str) -> bool:
         return False
     return path_str.replace("\\", "/").startswith(ARCHIVE_PREFIX)
 
-# Names auto-generated by attributes/structures rather than written as
-# explicit declarations (e.g. `@[ext]` on a structure synthesises `<S>.ext`).
-# Maps the auto-generated name to the source file where its origin sits
-# (relative to ROOT).
-AUTOGENERATED: dict[str, str] = {
-    "AdjMatrix.ext": "Archive/V4/FullCorrectness/Basic.lean",
-}
 
 # Directory components excluded from the source scan — build artefacts and
 # package caches we don't want to walk.
@@ -105,22 +76,19 @@ EXCLUDED_DIRS = {".lake"}
 # ---------------------------------------------------------------------------
 # Lean source parser
 # ---------------------------------------------------------------------------
-DECL_RE = re.compile(
-    r"^\s*"
-    r"(?:@\[[^\]]*\]\s*)*"
-    r"(?:private\s+|protected\s+|noncomputable\s+|partial\s+|unsafe\s+)*"
-    r"(theorem|lemma|def|instance|abbrev|structure|class|inductive)"
-    r"\s+([^\s:({\[]+)",
-    re.UNICODE,
-)
+# Declaration keywords we index. Includes infrastructure kinds
+# (`structure`/`class`/`inductive`/`abbrev`/`axiom`/named `instance`) so that
+# infra "shows up" even if only with a simple line number — anonymous
+# `instance`/`example` have no identifier and are intentionally skipped.
 DECL_LINE_RE = re.compile(
     r"^\s*"
     r"((?:@\[[^\]]*\]\s*)*)"
     r"((?:private\s+|protected\s+|noncomputable\s+|partial\s+|unsafe\s+)*)"
-    r"(theorem|lemma|def|instance|abbrev|structure|class|inductive)"
+    r"(theorem|lemma|def|instance|abbrev|structure|class|inductive|axiom)"
     r"\s+([^\s:({\[]+)",
     re.UNICODE,
 )
+ATTR_RE = re.compile(r"@\[[^\]]*\]")
 
 
 def strip_comments(body: str) -> str:
@@ -268,14 +236,17 @@ def parse_lean_file(path: Path) -> list[dict]:
         m = DECL_LINE_RE.match(line)
         if not m:
             continue
-        attrs, modifiers, _kind, name = m.groups()
+        attrs, modifiers, kind, name = m.groups()
         if not (name[0].isalpha() or name[0] == "_"):
             continue
         decls.append({
             "name": name,
+            "kind": kind,
+            "attrs": ATTR_RE.findall(attrs or ""),
             "line": i + 1,           # 1-indexed
             "_line_idx": i,
             "is_private": bool(re.search(r"\bprivate\b", modifiers)),
+            "is_noncomputable": bool(re.search(r"\bnoncomputable\b", modifiers)),
             "is_simp": "@[simp" in (attrs or ""),
         })
 
@@ -338,19 +309,96 @@ def parse_all_lean() -> dict[str, dict]:
             out[d["name"]] = d
     return out
 
+# ---------------------------------------------------------------------------
+# Source-name resolution
+#
+# The Lean parser stores *unqualified* names ("trivial"), but an index row may
+# display a namespace-qualified name ("LayerChain.trivial") or a definition
+# with its arguments ("AutGroup adj") or several decls in one cell
+# ("orbitMk / orbitMk_eq_iff"). We resolve a row to its source decl(s) by
+# matching identifier tokens on their final `.`-segment.
+# ---------------------------------------------------------------------------
+# Split a Name cell into identifier tokens. We split on separators rather than
+# match a character class, because Lean identifiers contain unicode (σ, τ,
+# subscripts) and `!`/`?` that a `[A-Za-z…]` class would truncate.
+_TOKEN_SEP_RE = re.compile(r"[\s/,]+")
+
+
+def build_last_segment_index(source: dict[str, dict]) -> dict[str, list[str]]:
+    """`last segment` -> list of source decl names sharing it."""
+    by_last: dict[str, list[str]] = defaultdict(list)
+    for name in source:
+        by_last[name.split(".")[-1]].append(name)
+    return by_last
+
+
+def resolve_token(token: str, source: dict[str, dict],
+                  by_last: dict[str, list[str]]) -> str | None:
+    """Resolve one identifier token to a single source decl name, or None.
+    Exact name wins; otherwise an *unambiguous* last-segment match."""
+    if token in source:
+        return token
+    cands = by_last.get(token.split(".")[-1], [])
+    return cands[0] if len(cands) == 1 else None
+
+
+def row_decl_tokens(name_cell: str) -> list[str]:
+    """Identifier tokens in a row's Name cell — handles `foo adj`, `foo / bar`,
+    and unicode names (`comparePathSegments_σ_equivariant`)."""
+    return [t for t in _TOKEN_SEP_RE.split(name_cell.replace("`", " ").strip()) if t]
+
+
+def resolve_row(name_cell: str, source: dict[str, dict],
+                by_last: dict[str, list[str]]) -> str | None:
+    """The decl a (tracked) row is *about*: its first resolvable token."""
+    for tok in row_decl_tokens(name_cell):
+        d = resolve_token(tok, source, by_last)
+        if d is not None:
+            return d
+    return None
+
 
 # ---------------------------------------------------------------------------
-# Markdown index parser
+# Notes (computed from the source declaration, for every row)
+#
+# The infrastructure kind, `noncomputable`, and `@[…]` attributes; `private`
+# is omitted (encoded by the public/private split). Notes is fully derived —
+# any semantic annotation a row used to carry in Notes belongs in Description.
 # ---------------------------------------------------------------------------
-ROW_RE = re.compile(r"^\|\s*(.*?)\s*\|\s*$")
+_KIND_NOTE = {
+    "def": "Definition", "structure": "Structure", "inductive": "Inductive",
+    "class": "Class", "abbrev": "`abbrev`", "axiom": "axiom", "instance": "Instance",
+}
+
+
+def compute_notes(decl: dict) -> str:
+    parts: list[str] = []
+    k = _KIND_NOTE.get(decl["kind"])
+    if k:
+        parts.append(k)
+    if decl.get("is_noncomputable"):
+        parts.append("`noncomputable`")
+    parts += [f"`{a}`" for a in decl.get("attrs", [])]
+    return ", ".join(parts) if parts else "—"
+
+
+# ---------------------------------------------------------------------------
+# Markdown index layout (prose + rows, captured for lossless re-render)
+#
+# A file is `preamble` (everything before the first `## …` header) plus an
+# ordered list of sections. Each section keeps its items in order; an item is
+# either a verbatim prose line or a data row. Anything that is not a data row
+# — section headers, `### …` sub-headers, descriptions, table headers and
+# separators, blank lines — is prose and is passed through untouched. Prose is
+# never moved between files.
+# ---------------------------------------------------------------------------
 SECTION_RE = re.compile(r"^##\s+(.+?)\s*$")
+LINE_CELL_RE = re.compile(r"^(?:\d+(?:\s*[-–]\s*\d+)?|—|-)$")
 
 
 def split_row(line: str) -> list[str] | None:
-    """Split a markdown table row on `|`, but ignore pipes inside backtick
-    spans (so descriptions like `{(i, j) | i < j}` round-trip cleanly)
-    and escaped `\\|` pipes.
-    """
+    """Split a markdown table row on `|`, ignoring pipes inside backtick spans
+    and escaped `\\|`."""
     if not line.startswith("|") or not line.rstrip().endswith("|"):
         return None
     inner = line.rstrip()[1:-1]
@@ -377,477 +425,22 @@ def split_row(line: str) -> list[str] | None:
     return cells
 
 
-def parse_index_file(path: Path) -> tuple[list[dict], dict[str, str]]:
-    """Returns (entries, section_to_path_hint).
-
-    Each entry is a dict {name, used_by[list], description, notes, section}.
-    `section_to_path_hint` is best-effort: if a section header looks like
-    `path/to/file.lean`, it maps the section name to that path string.
-    """
-    entries: list[dict] = []
-    section: str | None = None
-    section_path_hint: dict[str, str] = {}
-    if not path.exists():
-        return [], {}
-    for line in path.read_text().splitlines():
-        m_sec = SECTION_RE.match(line)
-        if m_sec:
-            section = m_sec.group(1).strip()
-            if section.endswith(".lean"):
-                section_path_hint[section] = section
-            continue
-        cells = split_row(line)
-        if cells is None:
-            continue
-        # Header / separator rows: skip them.
-        if not cells or cells[0].strip("`") in ("Name", "") or set("".join(cells).replace(" ", "")) <= set("-"):
-            continue
-        if not cells[0].startswith("`"):
-            continue
-        name = cells[0].strip().strip("`").strip()
-        # Locate description / notes / used_by columns by header heuristic:
-        # rows have variable column counts depending on file flavour. We
-        # always take the LAST two cells as (description, notes).
-        if len(cells) < 3:
-            continue
-        notes = cells[-1]
-        description = cells[-2]
-        # Any in-between cells are optional columns (Used By, Line).
-        # We only care about Used By here; skip Line if present. The Line
-        # column is either a bare integer (legacy) or a `start-end` range
-        # (post header-range update).
-        middle = cells[1:-2]
-        used_by_raw = ""
-        for c in middle:
-            cs = c.strip()
-            if cs.isdigit():
-                continue
-            if re.match(r"^\d+\s*[-–]\s*\d+$", cs):
-                continue
-            used_by_raw = c
-            break
-        used_by = parse_used_by_cell(used_by_raw)
-        entries.append({
-            "name": name,
-            "used_by": used_by,
-            "description": description,
-            "notes": notes,
-            "section": section,
-        })
-    return entries, section_path_hint
+def _is_data_row(cells: list[str] | None) -> bool:
+    return bool(cells and len(cells) >= 3 and cells[0].startswith("`")
+                and cells[0].strip("`").strip() != "Name")
 
 
-def parse_used_by_cell(cell: str) -> list[str]:
-    cell = cell.strip()
-    if cell in ("—", "-", ""):
-        return []
-    return [
-        x.strip().strip("`")
-        for x in cell.split(",")
-        if x.strip().strip("`")
-    ]
+def parse_index_layout(path: Path) -> dict:
+    """Capture a file as {"preamble": [str], "sections": [section]}.
 
+    section = {"header": str, "path": str, "items": [item]}
+    item    = ("prose", raw_line)
+            | ("row", {name, raw, description, notes, tracked})
 
-def detect_layout() -> str:
-    """Identify the index layout present on disk.
-
-    Returns one of:
-      - 'four'   : the four-file active/archive × public/private layout.
-      - 'split'  : the legacy two-file public/private layout (active-only).
-      - 'single' : the original single-file `TheoremIndex.md` layout.
-
-    Detection prefers the most-evolved layout that has any file present:
-    if any of the archive indices exist, we're in 'four'; otherwise if
-    either active index exists, 'split'; otherwise 'single'.
-    """
-    if ARCHIVE_PUBLIC_INDEX.exists() or ARCHIVE_PRIVATE_INDEX.exists():
-        return "four"
-    if ACTIVE_PUBLIC_INDEX.exists() or ACTIVE_PRIVATE_INDEX.exists():
-        return "split"
-    return "single"
-
-
-def load_existing_index() -> tuple[list[dict], dict[str, str]]:
-    """Read whichever index files exist and merge their entries.
-
-    Reads every layout file that currently exists on disk (including the
-    legacy single and two-file variants) and concatenates their entries.
-    Hand-written description / notes columns are preserved across moves
-    between active and archive indices — when a Lean file is moved into
-    `Archive/`, the next rewrite migrates its entries without losing the
-    notes column.
-
-    Duplicate names (same declaration appearing in more than one source
-    file — should not happen in practice but is defensive) keep only the
-    first occurrence.
-    """
-    all_entries: list[dict] = []
-    all_hints: dict[str, str] = {}
-    seen: set[str] = set()
-    for f in (*ALL_INDEX_FILES, SINGLE_INDEX):
-        if not f.exists():
-            continue
-        entries, hints = parse_index_file(f)
-        all_hints.update(hints)
-        for e in entries:
-            if e["name"] in seen:
-                continue
-            seen.add(e["name"])
-            all_entries.append(e)
-    return all_entries, all_hints
-
-
-# ---------------------------------------------------------------------------
-# Used-By computation
-# ---------------------------------------------------------------------------
-def compute_used_by_map(source: dict[str, dict]) -> dict[str, set[str]]:
-    """For each declaration A in `source`, find all other declarations B whose
-    body textually references A (last-segment-as-word matching, with fallback
-    to qualified-name when the last segment is ambiguous)."""
-    last_seg_count: dict[str, int] = defaultdict(int)
-    for name in source:
-        last_seg_count[name.split(".")[-1]] += 1
-
-    actual: dict[str, set[str]] = defaultdict(set)
-    possible: dict[str, set[str]] = defaultdict(set)
-
-    decls = list(source.items())
-    for A, A_info in decls:
-        last_seg = A.split(".")[-1]
-        is_ambig = last_seg_count[last_seg] > 1
-        if is_ambig:
-            definite_pat = re.compile(rf"(?<![\w.]){re.escape(A)}(?!\w)")
-            possible_pat: re.Pattern | None = re.compile(
-                rf"(?:(?<=[\w]))\.{re.escape(last_seg)}\b"
-            )
-        else:
-            definite_pat = re.compile(rf"\b{re.escape(last_seg)}\b")
-            possible_pat = None
-        for B, B_info in decls:
-            if B == A:
-                continue
-            body = B_info["stripped_body"]
-            if definite_pat.search(body):
-                actual[A].add(B)
-            elif possible_pat is not None and possible_pat.search(body):
-                possible[A].add(B)
-    # Stitch: also include possible-only matches as actual users (we err on
-    # the side of recording references; the check command flags ambiguity).
-    for A, users in possible.items():
-        actual[A] |= users
-    return actual
-
-
-# ---------------------------------------------------------------------------
-# `check` subcommand  (the original behaviour)
-# ---------------------------------------------------------------------------
-def cmd_check(_args: argparse.Namespace) -> None:
-    entries, _ = load_existing_index()
-    declared_used_by = {e["name"]: set(e["used_by"]) for e in entries}
-    index_names = {e["name"] for e in entries}
-    source = parse_all_lean()
-
-    print(f"Loaded {len(entries)} indexed entries from {detect_layout()} layout")
-    print(f"Loaded {len(source)} declarations from Lean source files\n")
-
-    last_seg_count: dict[str, int] = defaultdict(int)
-    for name in source:
-        last_seg_count[name.split(".")[-1]] += 1
-
-    source_names = set(source) | set(AUTOGENERATED)
-    not_found_in_source = sorted(
-        a for a in index_names
-        if a not in source_names and " " not in a and "(" not in a
-    )
-
-    skipped: list[str] = []
-    ambiguous: list[str] = []
-    actual: dict[str, set[str]] = defaultdict(set)
-    possible: dict[str, set[str]] = defaultdict(set)
-
-    for A in index_names:
-        if " " in A or "(" in A:
-            skipped.append(A)
-            continue
-        last_seg = A.split(".")[-1]
-        is_ambig = last_seg_count[last_seg] > 1
-        if is_ambig:
-            ambiguous.append(A)
-            definite_pat = re.compile(rf"(?<![\w.]){re.escape(A)}(?!\w)")
-            possible_pat: re.Pattern | None = re.compile(
-                rf"(?:(?<=[\w]))\.{re.escape(last_seg)}\b"
-            )
-        else:
-            definite_pat = re.compile(rf"\b{re.escape(last_seg)}\b")
-            possible_pat = None
-        for B, info in source.items():
-            if B == A:
-                continue
-            body = info["stripped_body"]
-            if definite_pat.search(body):
-                actual[A].add(B)
-            elif possible_pat is not None and possible_pat.search(body):
-                possible[A].add(B)
-
-    real_disc: list[tuple[str, list[str], list[str]]] = []
-    for A in sorted(index_names):
-        if A in skipped:
-            continue
-        declared = declared_used_by[A]
-        actual_in_idx = {n for n in actual[A] if n in index_names}
-        all_in_idx = actual_in_idx | {n for n in possible[A] if n in index_names}
-        false_pos = sorted(
-            x for x in declared - all_in_idx
-            if " " not in x and "(" not in x
-        )
-        missing = sorted(actual_in_idx - declared)
-        if false_pos or missing:
-            real_disc.append((A, false_pos, missing))
-
-    if skipped:
-        print(f"Skipped {len(skipped)} typeclass-instance descriptors\n")
-    if not_found_in_source:
-        print(f"Indexed names with no source declaration ({len(not_found_in_source)}):")
-        for n in not_found_in_source:
-            print(f"    {n}")
-        print()
-    if ambiguous:
-        print(f"{len(ambiguous)} indexed names share their last segment "
-              "(matched only by full qualified name):")
-        for a in ambiguous:
-            print(f"    {a}")
-        print()
-
-    fp_only = [d for d in real_disc if d[1] and not d[2]]
-    miss_only = [d for d in real_disc if d[2] and not d[1]]
-    both = [d for d in real_disc if d[1] and d[2]]
-
-    print("=" * 64)
-    print(f" REPORT 1: {len(fp_only) + len(both)} entries with FALSE POSITIVES")
-    print(" (declared 'Used By' entries with no textual mention in source)")
-    print("=" * 64 + "\n")
-    for A, fps, _ in fp_only + both:
-        print(f"--- {A} ---")
-        for x in fps:
-            print(f"      {x}")
-        print()
-
-    print("\n" + "=" * 64)
-    print(f" REPORT 2: {len(miss_only) + len(both)} entries with MISSING REFERENCES")
-    print(" (textual mentions in source absent from 'Used By')")
-    print("=" * 64 + "\n")
-    for A, _, missing in miss_only + both:
-        print(f"--- {A} ---")
-        for x in missing:
-            print(f"      {x}")
-        print()
-
-
-# ---------------------------------------------------------------------------
-# `rewrite` subcommand
-# ---------------------------------------------------------------------------
-def build_section_path_map(
-    entries: list[dict],
-    source: dict[str, dict],
-    section_path_hints: dict[str, str],
-) -> dict[str, str]:
-    """Map an index section header to a source file path.
-
-    Used to assign typeclass-instance entries (which have no Lean identifier)
-    to the same file as the named theorems they sit alongside.
-
-    Resolution order:
-      1. Best-by-count from source-resolved entries in the section.
-      2. The section-header hint (`## path/to/file.lean`) **only if** the
-         hinted file still exists on disk. Stale hints from before an
-         archival move are dropped — the inferred best path wins.
-    """
-    section_to_path: dict[str, str] = {}
-    counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    for e in entries:
-        sec = e["section"]
-        if sec is None or e["name"] not in source:
-            continue
-        path_str = str(source[e["name"]]["path"])
-        counts[sec][path_str] += 1
-    for sec, dist in counts.items():
-        # Pick the file path with the most entries in that section.
-        best = max(dist.items(), key=lambda kv: kv[1])[0]
-        section_to_path[sec] = best
-    for sec, hint in section_path_hints.items():
-        if (ROOT / hint).exists() and sec not in section_to_path:
-            section_to_path[sec] = hint
-    return section_to_path
-
-
-def assemble_entries(
-    existing: list[dict],
-    source: dict[str, dict],
-    section_to_path: dict[str, str],
-) -> list[dict]:
-    """Produce a list of fully-resolved entries.
-
-    Each output entry carries:
-      - name, used_by, description, notes : carried over from `existing`.
-      - path                              : source file relative to ROOT.
-      - line, header_start, end_line      : 1-indexed source positions
-                                            (None if not resolvable from
-                                            source, e.g. typeclass-instance
-                                            descriptors).
-      - is_private, is_simp               : visibility / attribute flags.
-      - is_archived                       : True iff `path` lives under
-                                            `Archive/`. The four-file
-                                            renderer pivots on this.
-    """
-    out: list[dict] = []
-    for e in existing:
-        name = e["name"]
-        if name in source:
-            info = source[name]
-            path_str = str(info["path"])
-            line = info["line"]
-            header_start = info["header_start"]
-            end_line = info["end_line"]
-            is_private = info["is_private"] or "private" in e["notes"].lower()
-            is_simp = info["is_simp"] or "@[simp]" in e["notes"]
-        else:
-            path_str = (
-                AUTOGENERATED.get(name)
-                or section_to_path.get(e["section"], "")
-            )
-            line = None
-            header_start = None
-            end_line = None
-            is_private = "private" in e["notes"].lower()
-            is_simp = "@[simp]" in e["notes"]
-        out.append({
-            **e,
-            "path": path_str,
-            "line": line,
-            "header_start": header_start,
-            "end_line": end_line,
-            "is_private": is_private,
-            "is_simp": is_simp,
-            "is_archived": is_archived_path(path_str),
-        })
-    return out
-
-
-def render_used_by(items: list[str]) -> str:
-    if not items:
-        return "—"
-    return ", ".join(f"`{x}`" for x in sorted(set(items), key=lambda s: s.lower()))
-
-
-def render_line_range(r: dict) -> str:
-    """Render the Line column as a `start-end` range.
-
-    Uses header_start (the topmost attached attribute / doc-comment line
-    above the declaration keyword) for the lower bound and end_line (last
-    non-blank line before the next declaration's header) for the upper
-    bound. Collapses to a single number when start == end, and falls back
-    to '—' when neither bound is known (typeclass instances, autogenerated
-    `.ext` lemmas, etc.).
-    """
-    start = r.get("header_start") or r.get("line")
-    end = r.get("end_line") or r.get("line")
-    if start is None and end is None:
-        return "—"
-    if start is None:
-        start = end
-    if end is None or end == start:
-        return str(start)
-    return f"{start}-{end}"
-
-
-def render_row(
-    r: dict,
-    *,
-    with_used_by: bool,
-    with_line_numbers: bool,
-) -> str:
-    """Render a single data row. `new_used_by` may be absent (defaults empty)."""
-    cells = [f"`{r['name']}`"]
-    if with_used_by:
-        cells.append(render_used_by(r.get("new_used_by", [])))
-    if with_line_numbers:
-        cells.append(render_line_range(r))
-    cells.append(r["description"] or "—")
-    cells.append(r["notes"] or "—")
-    return "| " + " | ".join(cells) + " |"
-
-
-def render_table_header(*, with_used_by: bool, with_line_numbers: bool) -> list[str]:
-    headers = ["Name"]
-    if with_used_by:
-        headers.append("Used By")
-    if with_line_numbers:
-        headers.append("Line")
-    headers += ["Description", "Notes"]
-    return [
-        "| " + " | ".join(headers) + " |",
-        "|" + "|".join("-" * (len(h) + 2) for h in headers) + "|",
-    ]
-
-
-def render_table(
-    rows: list[dict],
-    *,
-    with_used_by: bool,
-    with_line_numbers: bool,
-) -> list[str]:
-    out = render_table_header(with_used_by=with_used_by, with_line_numbers=with_line_numbers)
-    for r in rows:
-        out.append(render_row(r, with_used_by=with_used_by, with_line_numbers=with_line_numbers))
-    return out
-
-
-def _legend_lines(*, with_used_by: bool, with_line_numbers: bool) -> list[str]:
-    """The auto-generated `## Legend` block (fallback when a file has no
-    captured preamble of its own)."""
-    legend = ["## Legend", ""]
-    if with_used_by:
-        legend.append(
-            "- **Used By**: Theorems/definitions that directly reference this one. "
-            "Empty for `@[simp]` theorems (used implicitly via the `simp` tactic)."
-        )
-    if with_line_numbers:
-        legend.append(
-            "- **Line**: Source-line range `start-end` covering the declaration's "
-            "header (attached doc comment / attributes) and its full body. "
-            "Collapses to a single number when the declaration occupies one line."
-        )
-    legend.extend([
-        "- **Description**: A short description of what the theorem proves.",
-        "- **Notes**: `@[simp]` / `@[ext]` attributes, `private`, instances, "
-        "or other special properties.",
-        "",
-    ])
-    return legend
-
-
-# ---------------------------------------------------------------------------
-# Structure-preserving capture + render
-#
-# `rewrite` regenerates an index from scratch. To avoid clobbering the
-# hand-written prose that lives *between* tables — per-file descriptions,
-# `### §…` sub-section headers, the intro note, the Legend — we capture each
-# index file's full line structure (prose interleaved with data rows) and
-# re-emit it verbatim, refreshing only the data-row cells (Line numbers) and
-# merging genuinely-new declarations in by source-line position.
-# ---------------------------------------------------------------------------
-def parse_index_structure(path: Path) -> dict:
-    """Capture a file's prose + row ordering for lossless re-render.
-
-    Returns `{"preamble": [str], "sections": [section]}` where each `section`
-    is `{"header": str, "path": str, "items": [item]}` and each `item` is
-    `("prose", raw_line)` (blank lines, `###` headers, paragraphs, table
-    headers/separators — everything that is not a data row) or
-    `("row", name, raw_line)` (a `| \`name\` | … |` data row).
-
-    `preamble` is every line before the first `##` header (title, description,
-    intro note). The `## Legend` block is captured as an ordinary prose-only
-    section, so it round-trips verbatim too.
+    A row is `tracked` iff it carries a Line cell (≥4 cells with a line-range
+    2nd cell). Tracked rows are refreshed on re-render; 3-cell *conceptual*
+    rows (a def shown with its args, or several decls in one cell) are kept
+    verbatim.
     """
     if not path.exists():
         return {"preamble": [], "sections": []}
@@ -864,391 +457,226 @@ def parse_index_structure(path: Path) -> dict:
             preamble.append(line)
             continue
         cells = split_row(line)
-        if (cells is not None and cells and cells[0].startswith("`")
-                and len(cells) >= 3 and cells[0].strip("`").strip() != "Name"):
-            name = cells[0].strip().strip("`").strip()
-            cur["items"].append(("row", name, line))
+        if _is_data_row(cells):
+            tracked = len(cells) >= 4 and bool(LINE_CELL_RE.match(cells[1].strip("` ").strip()))
+            cur["items"].append(("row", {
+                "name": cells[0].strip().strip("`").strip(),
+                "raw": line,
+                "description": cells[-2],
+                "notes": cells[-1],
+                "tracked": tracked,
+            }))
         else:
             cur["items"].append(("prose", line))
     return {"preamble": preamble, "sections": sections}
 
 
-def render_structured_index(
-    structure: dict,
-    bucket_by_name: dict[str, dict],
-    new_by_path: dict[str, list[dict]],
-    *,
-    fallback_title: str,
-    fallback_description: str,
-    with_used_by: bool,
-    with_line_numbers: bool,
-) -> str:
-    """Re-emit a captured index `structure`, refreshing row data.
+# ---------------------------------------------------------------------------
+# Rendering
+# ---------------------------------------------------------------------------
+def render_line(info: dict) -> str:
+    start = info.get("header_start") or info.get("line")
+    end = info.get("end_line") or info.get("line")
+    if start is None:
+        return "—"
+    if end is None or end == start:
+        return str(start)
+    return f"{start}-{end}"
 
-    - `bucket_by_name`: resolved entries (name → entry) belonging to *this*
-      index file's bucket. A captured row whose name is absent here has been
-      deleted or migrated to another bucket and is dropped.
-    - `new_by_path`: entries belonging to this bucket that the captured
-      structure does not list yet (freshly-discovered decls + migrated-in
-      entries), grouped by source path. They are spliced into the matching
-      section in source-line order, or appended as a new section.
-    """
-    out: list[str] = []
-    if structure["preamble"]:
-        out.extend(structure["preamble"])
-    else:
-        out.extend([f"# {fallback_title}", "", fallback_description, ""])
-        out.extend(_legend_lines(with_used_by=with_used_by, with_line_numbers=with_line_numbers))
 
-    def _pos(e: dict) -> int:
-        return e.get("header_start") or e.get("line") or 0
+def table_header(with_line_numbers: bool) -> list[str]:
+    headers = ["Name"] + (["Line"] if with_line_numbers else []) + ["Description", "Notes"]
+    return [
+        "| " + " | ".join(headers) + " |",
+        "|" + "|".join("-" * (len(h) + 2) for h in headers) + "|",
+    ]
 
-    emitted_paths: set[str] = set()
-    for sec in structure["sections"]:
+
+def _emit_row(name: str, line_cell: str | None, description: str, notes: str,
+              with_line_numbers: bool) -> str:
+    cells = [f"`{name}`"]
+    if with_line_numbers:
+        cells.append(line_cell or "—")
+    cells += [description or "—", notes or "—"]
+    return "| " + " | ".join(cells) + " |"
+
+
+def render_tracked_row(decl: str, source: dict, row: dict, with_line_numbers: bool) -> str:
+    # Refresh the Line column and recompute Notes from source; keep the
+    # hand-written Description (Notes is now derived — see compute_notes).
+    info = source[decl]
+    return _emit_row(row["name"], render_line(info), row["description"],
+                     compute_notes(info), with_line_numbers)
+
+
+def render_new_row(decl: str, source: dict, global_desc: dict, with_line_numbers: bool) -> str:
+    info = source[decl]
+    return _emit_row(decl, render_line(info), global_desc.get(decl, "—"),
+                     compute_notes(info), with_line_numbers)
+
+
+_INDEX_TITLES = {
+    ("active", False): "Public Theorem Index — GraphCanonizationProofs",
+    ("active", True): "Private Theorem Index — GraphCanonizationProofs",
+    ("archive", False): "Archived Public Theorem Index — GraphCanonizationProofs",
+    ("archive", True): "Archived Private Theorem Index — GraphCanonizationProofs",
+}
+_INDEX_DESCRIPTIONS = {
+    ("active", False): "Index of public Lean theorems, lemmas, and definitions in the GraphCanonizationProofs project (active source), grouped by source file path. Archived counterparts live in `Archive/PublicTheoremIndex.md`.",
+    ("active", True): "Index of private Lean theorems, lemmas, and definitions in the GraphCanonizationProofs project (active source), grouped by source file path. Archived counterparts live in `Archive/PrivateTheoremIndex.md`.",
+    ("archive", False): "Index of public Lean theorems, lemmas, and definitions in the archived (`Archive/...`) portion of the project. Active counterparts live in `../PublicTheoremIndex.md`.",
+    ("archive", True): "Index of private Lean theorems, lemmas, and definitions in the archived (`Archive/...`) portion of the project. Active counterparts live in `../PrivateTheoremIndex.md`.",
+}
+_INDEX_PATHS = {
+    ("active", False): ACTIVE_PUBLIC_INDEX,
+    ("active", True): ACTIVE_PRIVATE_INDEX,
+    ("archive", False): ARCHIVE_PUBLIC_INDEX,
+    ("archive", True): ARCHIVE_PRIVATE_INDEX,
+}
+
+
+def default_preamble(key: tuple[str, bool], with_line_numbers: bool) -> list[str]:
+    out = [f"# {_INDEX_TITLES[key]}", "", _INDEX_DESCRIPTIONS[key], "", "## Legend", ""]
+    if with_line_numbers:
+        out.append("- **Line**: Source-line range `start-end` covering the declaration's header (attached doc comment / attributes) and its full body. Collapses to a single number when the declaration occupies one line.")
+    out += [
+        "- **Description**: A short description of what the theorem proves.",
+        "- **Notes**: infrastructure kind, `noncomputable`, and `@[…]` attributes (computed from source).",
+        "",
+    ]
+    return out
+
+
+def render_layout(layout: dict, key: tuple[str, bool], source: dict,
+                  by_last: dict, bucket_decls: set[str], bucket_of: dict,
+                  global_desc: dict, new_by_section: dict[str, list[str]],
+                  with_line_numbers: bool, orphans: list[str]) -> str:
+    out: list[str] = list(layout["preamble"]) if layout["preamble"] \
+        else default_preamble(key, with_line_numbers)
+
+    def _hs(decl: str) -> int:
+        return source[decl].get("header_start") or source[decl].get("line") or 0
+
+    emitted_sections: set[str] = set()
+    for sec in layout["sections"]:
         out.append(sec["header"])
-        path = sec["path"]
-        emitted_paths.add(path)
-        pending = sorted(new_by_path.get(path, []), key=_pos)
+        emitted_sections.add(sec["path"])
+        pending = sorted(new_by_section.get(sec["path"], []), key=_hs)
         pi = 0
 
-        def _flush_before(limit: int, _pending=pending) -> None:
+        def _flush(limit: int, _p=pending) -> None:
             nonlocal pi
-            while pi < len(_pending) and _pos(_pending[pi]) <= limit:
-                out.append(render_row(_pending[pi], with_used_by=with_used_by,
-                                      with_line_numbers=with_line_numbers))
+            while pi < len(_p) and _hs(_p[pi]) <= limit:
+                out.append(render_new_row(_p[pi], source, global_desc, with_line_numbers))
                 pi += 1
 
         for item in sec["items"]:
             if item[0] == "prose":
                 out.append(item[1])
                 continue
-            name, raw_line = item[1], item[2]
-            ent = bucket_by_name.get(name)
-            if ent is None:
-                continue  # deleted / migrated out
-            if ent.get("header_start") is None and ent.get("line") is None:
-                out.append(raw_line)  # unresolvable (hand-authored row) — keep verbatim
-            else:
-                _flush_before(_pos(ent))
-                out.append(render_row(ent, with_used_by=with_used_by,
-                                      with_line_numbers=with_line_numbers))
+            row = item[1]
+            if not row["tracked"]:
+                out.append(row["raw"])            # conceptual → verbatim
+                continue
+            decl = resolve_row(row["name"], source, by_last)
+            if decl is None:
+                out.append(row["raw"])            # unresolved → keep (report)
+                orphans.append(row["name"])
+                continue
+            if bucket_of[decl] != key:
+                continue                          # migrated to another file → drop here
+            _flush(_hs(decl))
+            out.append(render_tracked_row(decl, source, row, with_line_numbers))
         while pi < len(pending):
-            out.append(render_row(pending[pi], with_used_by=with_used_by,
-                                  with_line_numbers=with_line_numbers))
+            out.append(render_new_row(pending[pi], source, global_desc, with_line_numbers))
             pi += 1
 
-    # Paths with entries but no captured section (brand-new files): append fresh.
-    for path in sorted(new_by_path):
-        if path in emitted_paths or not path:
+    # Files with new decls but no existing section: append a fresh section.
+    for sec_path in sorted(new_by_section):
+        if sec_path in emitted_sections or not sec_path:
             continue
-        out.append(f"## {path}")
-        out.append("")
-        out.extend(render_table_header(with_used_by=with_used_by, with_line_numbers=with_line_numbers))
-        for e in sorted(new_by_path[path], key=_pos):
-            out.append(render_row(e, with_used_by=with_used_by, with_line_numbers=with_line_numbers))
+        out += [f"## {sec_path}", ""]
+        out += table_header(with_line_numbers)
+        for decl in sorted(new_by_section[sec_path], key=_hs):
+            out.append(render_new_row(decl, source, global_desc, with_line_numbers))
         out.append("")
 
     return "\n".join(out).rstrip() + "\n"
 
 
-def render_index(
-    entries: list[dict],
-    *,
-    title: str,
-    description: str,
-    with_used_by: bool,
-    with_line_numbers: bool,
-) -> str:
-    # Group by path; preserve existing path order based on first appearance.
-    path_order: list[str] = []
-    by_path: dict[str, list[dict]] = defaultdict(list)
-    for e in entries:
-        if e["path"] not in by_path:
-            path_order.append(e["path"])
-        by_path[e["path"]].append(e)
-
-    # Within a section, sort by header_start (falling back to line).
-    # None bounds go last.
-    def _sort_key(r: dict) -> tuple[int, int]:
-        s = r.get("header_start") or r.get("line")
-        return (1 if s is None else 0, s or 0)
-    for p in by_path:
-        by_path[p].sort(key=_sort_key)
-
-    legend = ["## Legend", ""]
-    if with_used_by:
-        legend.append(
-            "- **Used By**: Theorems/definitions that directly reference this one. "
-            "Empty for `@[simp]` theorems (used implicitly via the `simp` tactic)."
-        )
-    if with_line_numbers:
-        legend.append(
-            "- **Line**: Source-line range `start-end` covering the declaration's "
-            "header (attached doc comment / attributes) and its full body. "
-            "Collapses to a single number when the declaration occupies one line."
-        )
-    legend.extend([
-        "- **Description**: A short description of what the theorem proves.",
-        "- **Notes**: `@[simp]` / `@[ext]` attributes, `private`, instances, "
-        "or other special properties.",
-        "",
-    ])
-
-    out: list[str] = [f"# {title}", "", description, ""]
-    out.extend(legend)
-    for p in path_order:
-        if not p:
-            continue
-        out.append(f"## {p}")
-        out.append("")
-        out.extend(render_table(
-            by_path[p],
-            with_used_by=with_used_by,
-            with_line_numbers=with_line_numbers,
-        ))
-        out.append("")
-    return "\n".join(out).rstrip() + "\n"
-
-
-def discover_new_entries(
-    existing: list[dict],
-    source: dict[str, dict],
-) -> list[dict]:
-    """Source declarations not yet in the index, as fresh placeholder entries.
-
-    Each new entry gets `description = "—"` and `notes = "—"` (per the index
-    convention for empty cells). They show up in the regenerated index so a
-    human can fill them in incrementally without losing newly-added lemmas.
-    """
-    already = {e["name"] for e in existing}
-    new_entries: list[dict] = []
-    for name, info in source.items():
-        if name in already:
-            continue
-        new_entries.append({
-            "name": name,
-            "used_by": [],
-            "description": "—",
-            "notes": "—",
-            "section": str(info["path"]),
-        })
-    return new_entries
-
-
-_INDEX_TITLES = {
-    ("active",  False): "Public Theorem Index — GraphCanonizationProofs",
-    ("active",  True):  "Private Theorem Index — GraphCanonizationProofs",
-    ("archive", False): "Archived Public Theorem Index — GraphCanonizationProofs",
-    ("archive", True):  "Archived Private Theorem Index — GraphCanonizationProofs",
-}
-
-_INDEX_DESCRIPTIONS = {
-    ("active", False): (
-        "Index of public Lean theorems, lemmas, and definitions in the "
-        "GraphCanonizationProofs project (active source), grouped by "
-        "source file path. Archived counterparts live in "
-        "`Archive/PublicTheoremIndex.md`."
-    ),
-    ("active", True): (
-        "Index of private Lean theorems, lemmas, and definitions in the "
-        "GraphCanonizationProofs project (active source), grouped by "
-        "source file path. Archived counterparts live in "
-        "`Archive/PrivateTheoremIndex.md`."
-    ),
-    ("archive", False): (
-        "Index of public Lean theorems, lemmas, and definitions in the "
-        "archived (`Archive/...`) portion of the GraphCanonizationProofs "
-        "project, grouped by source file path. Active counterparts live "
-        "in `../PublicTheoremIndex.md`."
-    ),
-    ("archive", True): (
-        "Index of private Lean theorems, lemmas, and definitions in the "
-        "archived (`Archive/...`) portion of the GraphCanonizationProofs "
-        "project, grouped by source file path. Active counterparts live "
-        "in `../PrivateTheoremIndex.md`."
-    ),
-}
-
-_INDEX_PATHS = {
-    ("active",  False): ACTIVE_PUBLIC_INDEX,
-    ("active",  True):  ACTIVE_PRIVATE_INDEX,
-    ("archive", False): ARCHIVE_PUBLIC_INDEX,
-    ("archive", True):  ARCHIVE_PRIVATE_INDEX,
-}
-
-
-def _partition_four(entries: list[dict]) -> dict[tuple[str, bool], list[dict]]:
-    """Bucket entries into (active|archive) × (public|private)."""
-    buckets: dict[tuple[str, bool], list[dict]] = {
-        ("active",  False): [],
-        ("active",  True):  [],
-        ("archive", False): [],
-        ("archive", True):  [],
-    }
-    for e in entries:
-        bucket = "archive" if e["is_archived"] else "active"
-        buckets[(bucket, bool(e["is_private"]))].append(e)
-    return buckets
-
-
-def _write_four_indices(
-    entries: list[dict],
-    *,
-    with_used_by: bool,
-    with_line_numbers: bool,
-) -> None:
-    """Render and write all four index files from scratch. Mkdir for the
-    archive subdir. Used by `split` (no prior four-file layout to preserve)."""
-    ARCHIVE_PUBLIC_INDEX.parent.mkdir(parents=True, exist_ok=True)
-    buckets = _partition_four(entries)
-    counts: dict[tuple[str, bool], int] = {}
-    for key, bucket_entries in buckets.items():
-        path = _INDEX_PATHS[key]
-        path.write_text(render_index(
-            bucket_entries,
-            title=_INDEX_TITLES[key],
-            description=_INDEX_DESCRIPTIONS[key],
-            with_used_by=with_used_by,
-            with_line_numbers=with_line_numbers,
-        ))
-        counts[key] = len(bucket_entries)
-    for key, count in counts.items():
-        path = _INDEX_PATHS[key]
-        print(f"Wrote {path.relative_to(REPO_ROOT)} ({count} entries)")
-
-
-def _write_four_indices_preserving(
-    entries: list[dict],
-    *,
-    with_used_by: bool,
-    with_line_numbers: bool,
-) -> None:
-    """Render and write all four index files, **preserving** each file's
-    existing prose (per-file descriptions, `### §…` sub-headers, intro note,
-    Legend) by re-emitting its captured structure with refreshed row data.
-
-    Falls back to a from-scratch render for any of the four files that does
-    not exist yet (no structure to preserve).
-    """
-    ARCHIVE_PUBLIC_INDEX.parent.mkdir(parents=True, exist_ok=True)
-    for key, path in _INDEX_PATHS.items():
-        bucket_entries = [
-            e for e in entries
-            if ("archive" if e["is_archived"] else "active", bool(e["is_private"])) == key
-        ]
-        bucket_by_name = {e["name"]: e for e in bucket_entries}
-        structure = parse_index_structure(path)
-        captured = {
-            item[1]
-            for sec in structure["sections"]
-            for item in sec["items"]
-            if item[0] == "row"
-        }
-        new_by_path: dict[str, list[dict]] = defaultdict(list)
-        for e in bucket_entries:
-            if e["name"] not in captured:
-                new_by_path[e["path"]].append(e)
-        path.write_text(render_structured_index(
-            structure,
-            bucket_by_name,
-            new_by_path,
-            fallback_title=_INDEX_TITLES[key],
-            fallback_description=_INDEX_DESCRIPTIONS[key],
-            with_used_by=with_used_by,
-            with_line_numbers=with_line_numbers,
-        ))
-        print(f"Wrote {path.relative_to(REPO_ROOT)} ({len(bucket_entries)} entries)")
-
-
+# ---------------------------------------------------------------------------
+# `rewrite` command
+# ---------------------------------------------------------------------------
 def cmd_rewrite(args: argparse.Namespace) -> None:
-    existing, hints = load_existing_index()
     source = parse_all_lean()
-    if args.include_new:
-        existing = existing + discover_new_entries(existing, source)
-    section_to_path = build_section_path_map(existing, source, hints)
-    entries = assemble_entries(existing, source, section_to_path)
+    by_last = build_last_segment_index(source)
 
-    if args.with_used_by:
-        used_by_map = compute_used_by_map(source)
-        index_names = {e["name"] for e in entries}
-        for e in entries:
-            if e["is_simp"]:
-                e["new_used_by"] = []  # ignore for simp
-            else:
-                refs = used_by_map.get(e["name"], set())
-                e["new_used_by"] = sorted(r for r in refs if r in index_names)
-    else:
-        for e in entries:
-            e["new_used_by"] = []
+    def bucket_of_decl(decl: str) -> tuple[str, bool]:
+        info = source[decl]
+        archived = is_archived_path(str(info["path"]))
+        return ("archive" if archived else "active", bool(info["is_private"]))
 
-    _write_four_indices_preserving(
-        entries,
-        with_used_by=args.with_used_by,
-        with_line_numbers=args.with_line_numbers,
-    )
+    bucket_of = {d: bucket_of_decl(d) for d in source}
 
+    # Parse all four existing files once.
+    layouts = {key: parse_index_layout(path) for key, path in _INDEX_PATHS.items()}
 
-# ---------------------------------------------------------------------------
-# `split` subcommand
-# ---------------------------------------------------------------------------
-def cmd_split(args: argparse.Namespace) -> None:
-    """One-shot migration from the legacy single-file `TheoremIndex.md` to
-    the four-file active/archive × public/private layout."""
-    if not SINGLE_INDEX.exists():
-        sys.exit(f"{SINGLE_INDEX} does not exist; nothing to split.")
+    # Global description map (preserved across active↔archive / visibility moves):
+    # a decl's hand-written description, taken from whichever file currently rows it.
+    global_desc: dict[str, str] = {}
+    for layout in layouts.values():
+        for sec in layout["sections"]:
+            for item in sec["items"]:
+                if item[0] != "row":
+                    continue
+                decl = resolve_row(item[1]["name"], source, by_last)
+                if decl is not None and item[1].get("description") not in (None, "", "—"):
+                    global_desc.setdefault(decl, item[1]["description"])
 
-    existing, hints = parse_index_file(SINGLE_INDEX)
-    source = parse_all_lean()
-    section_to_path = build_section_path_map(existing, source, hints)
-    entries = assemble_entries(existing, source, section_to_path)
+    orphans: list[str] = []
+    for key, path in _INDEX_PATHS.items():
+        layout = layouts[key]
+        bucket_decls = {d for d in source if bucket_of[d] == key}
+        # Decls already represented in THIS file (by any covering row).
+        covered: set[str] = set()
+        for sec in layout["sections"]:
+            for item in sec["items"]:
+                if item[0] != "row":
+                    continue
+                for tok in row_decl_tokens(item[1]["name"]):
+                    d = resolve_token(tok, source, by_last)
+                    if d is not None:
+                        covered.add(d)
+        new_by_section: dict[str, list[str]] = defaultdict(list)
+        for d in bucket_decls:
+            if d not in covered:
+                new_by_section[str(source[d]["path"])].append(d)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(render_layout(
+            layout, key, source, by_last, bucket_decls, bucket_of,
+            global_desc, new_by_section, args.with_line_numbers, orphans))
+        added = sum(len(v) for v in new_by_section.values())
+        print(f"Wrote {path.relative_to(REPO_ROOT)} "
+              f"({len(bucket_decls)} decls, {added} newly added)")
 
-    if args.with_used_by:
-        used_by_map = compute_used_by_map(source)
-        index_names = {e["name"] for e in entries}
-        for e in entries:
-            if e["is_simp"]:
-                e["new_used_by"] = []
-            else:
-                refs = used_by_map.get(e["name"], set())
-                e["new_used_by"] = sorted(r for r in refs if r in index_names)
-    else:
-        for e in entries:
-            e["new_used_by"] = []
-
-    _write_four_indices(
-        entries,
-        with_used_by=args.with_used_by,
-        with_line_numbers=args.with_line_numbers,
-    )
-    SINGLE_INDEX.unlink()
+    if orphans:
+        print(f"\n{len(orphans)} tracked row(s) with no matching source decl "
+              f"(kept verbatim — delete by hand if stale):")
+        for o in sorted(set(orphans)):
+            print(f"    {o}")
 
 
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = parser.add_subparsers(dest="command", required=True)
-
-    sp.add_parser("check", help="Sanity-check 'Used By' against source.").set_defaults(func=cmd_check)
-
-    p_rw = sp.add_parser("rewrite", help="Regenerate the index file(s).")
-    p_rw.add_argument("--with-used-by", action="store_true",
-                      help="Include the 'Used By' column (skipped for `@[simp]`).")
+    p_rw = sp.add_parser("rewrite", help="Regenerate the four index files.")
     p_rw.add_argument("--with-line-numbers", action="store_true",
-                      help="Include the 'Line' column (source line number).")
-    p_rw.add_argument("--include-new", action="store_true",
-                      help="Add placeholder entries for source declarations "
-                           "not yet in the index (description/notes = '—').")
+                      help="Include the 'Line' column (header + body source range).")
     p_rw.set_defaults(func=cmd_rewrite)
-
-    p_sp = sp.add_parser("split",
-                         help="One-shot: split TheoremIndex.md into Public + Private.")
-    p_sp.add_argument("--with-used-by", action="store_true")
-    p_sp.add_argument("--with-line-numbers", action="store_true")
-    p_sp.set_defaults(func=cmd_split)
-
     args = parser.parse_args()
     args.func(args)
 
