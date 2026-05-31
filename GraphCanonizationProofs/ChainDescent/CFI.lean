@@ -1210,7 +1210,7 @@ i.e. one seed per base graph vertex.
 Used as the witness in `cfi_cascades_polynomially`: this is `S` in
 "there exists `S` of size ≤ `cfi_depth_bound h` such that
 `warmRefine adj P χ_S` is `Discrete`." -/
-noncomputable def allSeeds (h : IsCFI' adj) : Finset (Fin n) :=
+def allSeeds (h : IsCFI' adj) : Finset (Fin n) :=
   Finset.univ.image h.seedVertex
 
 /-- `seedVertex` is injective: different base vertices map to different

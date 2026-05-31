@@ -1508,7 +1508,7 @@ Uses `Set.ncard` rather than `(Finset.univ.filter ...).card` to
 sidestep `Decidable` instance bridging issues — `Set.ncard` is
 `Nat.card`-backed (classical), so set-builder equalities are
 propositional and congruence-friendly. -/
-noncomputable def schemePart_at {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+def schemePart_at {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) : Nat → Fin n → Fin n → Prop
   | 0, w, u => individualizedColouring n {v} w = individualizedColouring n {v} u
   | k + 1, w, u =>

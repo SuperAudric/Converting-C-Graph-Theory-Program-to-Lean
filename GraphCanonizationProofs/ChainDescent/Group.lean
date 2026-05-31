@@ -304,7 +304,7 @@ theorem orbitPartition_empty_iff_orbitRel {adj : AdjMatrix n} {P : PMatrix n}
 /-- **The root quotient is `V(G)/Aut(G)`.** Under `P`-invariance, the relational
 quotient `OrbitQuotient adj P ∅` is equivalent to the `MulAction` orbit quotient of
 the group `AutGroup adj` — the group-theoretic quotient vertex set. -/
-noncomputable def orbitQuotientEquivAutGroup {adj : AdjMatrix n} {P : PMatrix n}
+def orbitQuotientEquivAutGroup {adj : AdjMatrix n} {P : PMatrix n}
     (hPinv : ∀ π : Equiv.Perm (Fin n), IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
     OrbitQuotient adj P ∅ ≃ MulAction.orbitRel.Quotient (AutGroup adj) (Fin n) :=
   Quotient.congr (Equiv.refl (Fin n)) (by

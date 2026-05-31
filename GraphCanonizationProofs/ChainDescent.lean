@@ -1051,7 +1051,7 @@ noncomputable def Pof {n : Nat} (P₀ : PMatrix n) (S : Set (Fin n × Fin n)) :
 
 /-- The propagation closure: pairs in the canonical ground set whose endpoints
 are separated by warm refinement after committing `S`. -/
-noncomputable def cl {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+def cl {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
     (χι : Colouring n) (S : Set (Fin n × Fin n)) : Set (Fin n × Fin n) :=
   { p | p ∈ Egnd n ∧
     warmRefine adj (Pof P₀ S) χι p.1 ≠ warmRefine adj (Pof P₀ S) χι p.2 }
@@ -2354,7 +2354,7 @@ variable {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
 
 /-- The chain's level-`k` partition: warm refinement applied to the
 chain's accumulated `(P, χι)`. -/
-noncomputable def partition (chain : SpineChain adj P₀ χι₀ sel k) :
+def partition (chain : SpineChain adj P₀ χι₀ sel k) :
     Colouring n :=
   warmRefine adj chain.P chain.χι
 
@@ -2486,7 +2486,7 @@ choice inside the same equivalence class — same partition by spine. -/
 /-- The level-`k` colouring of the default chain: iterate "refine then
 individualise via `IndivStep.default`," starting from `χι₀`. The
 matrix is held fixed at `P₀` throughout. -/
-noncomputable def defaultColouring {n : Nat} (adj : AdjMatrix n)
+def defaultColouring {n : Nat} (adj : AdjMatrix n)
     (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) : Nat → Colouring n
   | 0 => χι₀
@@ -2497,7 +2497,7 @@ noncomputable def defaultColouring {n : Nat} (adj : AdjMatrix n)
 
 /-- The level-`k` decision set of the default chain: accumulate
 `sel (warmRefine adj P₀ (defaultColouring k))` across all levels. -/
-noncomputable def defaultD {n : Nat} (adj : AdjMatrix n)
+def defaultD {n : Nat} (adj : AdjMatrix n)
     (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) : Nat → Finset (Fin n)
   | 0 => ∅
@@ -2507,7 +2507,7 @@ noncomputable def defaultD {n : Nat} (adj : AdjMatrix n)
     defaultD adj P₀ χι₀ sel k ∪ sel π
 
 /-- The concrete `DescentTrace` for the default construction. -/
-noncomputable def defaultTrace {n : Nat} (adj : AdjMatrix n)
+def defaultTrace {n : Nat} (adj : AdjMatrix n)
     (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) :
     (k : Nat) → DescentTrace adj P₀ χι₀ sel k
@@ -2522,7 +2522,7 @@ noncomputable def defaultTrace {n : Nat} (adj : AdjMatrix n)
       (fun _ _ _ => rfl)
 
 /-- The concrete reference `SpineChain` at every level. -/
-noncomputable def defaultSpineChain {n : Nat} (adj : AdjMatrix n)
+def defaultSpineChain {n : Nat} (adj : AdjMatrix n)
     (P₀ : PMatrix n) (χι₀ : Colouring n)
     (sel : Colouring n → Finset (Fin n)) (k : Nat) :
     SpineChain adj P₀ χι₀ sel k where
@@ -4116,4 +4116,3 @@ theorem theorem_2_HOR {n : Nat} {adj : AdjMatrix n}
   obtain ⟨sp⟩ := schurian_scheme_profile_exists h P v
   intro w u
   exact theorem_2_HOR_of_profile sp w u
-
