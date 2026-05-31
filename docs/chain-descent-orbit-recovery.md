@@ -321,6 +321,17 @@ would be the next paper-write target.
 
 ## 9. Lean formalization status
 
+> **Currency note.** This section is dated 2026-05-26. Tier-2 was since extended
+> (2026-05-29) with the depth-2 / depth-3 layers and the relation-isolation
+> bootstrap (`Depth2Det`, `theorem_2_HOR_concrete_intersectionSeparates`,
+> `RelIsolatedAt`/`relIsolatedAt_succ`, `theorem_2_HOR_concrete_of_isolation`,
+> `theorem_2_HOR_concrete_intersectionSeparates3` — covering rank-≥3/4 single-edge
+> schurian schemes, e.g. C₇/C₉). Also note `refineStep`/`refineStep_iff` were
+> concretized out of the axiom basis (2026-05-30): the basis is now
+> `[propext, Classical.choice, Quot.sound]`. See
+> [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) for
+> the authoritative, current theorem list.
+
 **Phase 1 (Tier 1 + Tier 2 assemblies, shared OrbitPartition framework) —
 COMPLETE 2026-05-26.** [ChainDescent.lean](../GraphCanonizationProofs/ChainDescent.lean)
 is organised as three sections, mirroring the paper structure:
@@ -337,8 +348,8 @@ is organised as three sections, mirroring the paper structure:
   structure.
 - **`OrbitPartition.subset_warmRefine`** — **the trivial direction,
   proved.** Orbits refine 1-WL cells. Load-bearing for both tiers'
-  squeeze. Axiom-clean: depends only on the standard `refineStep`
-  basis.
+  squeeze. Axiom-clean: depends only on the standard basis
+  `[propext, Classical.choice, Quot.sound]`.
 
 **§17 — Tier 1 (CFI graphs):**
 - `id_of_discrete_invariant`, **`aut_trivial_of_discrete_warmRefine`**
@@ -395,7 +406,7 @@ is organised as three sections, mirroring the paper structure:
 
 **Axiom dependencies** (from `#print axioms`):
 
-*Axiom-free* (standard `refineStep` basis only):
+*Axiom-free* (standard basis `[propext, Classical.choice, Quot.sound]` only):
 - `OrbitPartition.subset_warmRefine` (the trivial direction).
 - `OrbitPartition.refl/symm/trans`: only `propext` and `Quot.sound`.
 - `CascadesAt`, `cascadesAt_univ`.
@@ -594,8 +605,8 @@ b=1 endpoints. Lean development (`ChainDescent/CFI.lean` §13):
   have distinct refined colours after one round.
 
 All M2 lemmas axiom-clean (`refineStep_endpoint_false_ne_true`
-depends only on `refineStep`, `refineStep_iff` and the standard
-basis — no CFI-specific axioms used).
+depends only on the standard basis
+`[propext, Classical.choice, Quot.sound]` — no CFI-specific axioms used).
 
 *Stage 4 / M3.A + M3.B — multi-seed cascade setup + lifted M2 —
 DONE 2026-05-26.* `ChainDescent/CFI.lean` §13.8-§13.9:
@@ -686,8 +697,8 @@ Witness tuple `(χ bp, 1, P ev bp)` — in `ev`'s signature via the
 bridge partner u = bp (adj=1, χ matches); absent from `ev'`'s
 signature by (P2). Proof structure identical to M2/M3.B/M3.C.
 
-All M3.D Phase 1 lemmas axiom-clean (`refineStep` + `refineStep_iff`
-+ standard basis).
+All M3.D Phase 1 lemmas axiom-clean (standard basis
+`[propext, Classical.choice, Quot.sound]`).
 
 *Stage 4 / M3.D Phase 2.0 + 2.1 — first cascade step beyond round 1 —
 DONE 2026-05-26.* `ChainDescent/CFI.lean` §13.12 (structural helpers)
@@ -794,8 +805,8 @@ of this form. That degenerate subset is deferred to a later cascade
 round once Phase 2.2 makes b=0 endpoints distinguishable by gadget
 (unlocking a parallel "subset step lemma" using b=0 endpoint witnesses).
 
-All Phase 2.3 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
-standard basis only; no CFI-specific axioms used).
+All Phase 2.3 lemmas axiom-clean (standard basis
+`[propext, Classical.choice, Quot.sound]` only; no CFI-specific axioms used).
 
 *Stage 4 / M3.D Phase 2.2 — b=0 endpoint inter-gadget at round 3 —
 DONE 2026-05-26.* `ChainDescent/CFI.lean` §13.18-§13.20. Distinguishes
@@ -842,8 +853,8 @@ exists). For `deg(v) = 2`, no such witness — Phase 2.2 as stated
 doesn't apply. That degenerate case needs a separate argument (more
 cascade rounds via subset propagation through neighbouring gadgets).
 
-All Phase 2.2 lemmas axiom-clean (`refineStep` + `refineStep_iff` +
-standard basis only; no CFI-specific axioms used).
+All Phase 2.2 lemmas axiom-clean (standard basis
+`[propext, Classical.choice, Quot.sound]` only; no CFI-specific axioms used).
 
 *Stage 4 / Phase 2.X + Phase 2.4 + M4 — DONE 2026-05-26 (OddDegree
 class).* `ChainDescent/CFI.lean` §13.21-§13.24 plus a new corollary.
@@ -901,8 +912,8 @@ The full cascade discharged for CFI graphs over odd-degree base graphs.
   - endpoint/endpoint, b=false, diff gadget: Phase 2.2 (round 3).
 - **`theorem_1_HOR_cfi_oddDeg`** — the **axiom-free** CFI form of
   Theorem 1 for OddDegree H. No CFI placeholder axioms in its
-  dependency closure (only `refineStep`, `refineStep_iff`, and
-  standard basis).
+  dependency closure (only the standard basis
+  `[propext, Classical.choice, Quot.sound]`).
 
 **Axiom budget for Tier 1 (OddDegree subclass): 0 placeholders.**
 `theorem_1_HOR_cfi_oddDeg` discharges `cfi_cascades_polynomially`
@@ -971,8 +982,8 @@ axioms are discharged, both theorems tighten automatically.
 2026-05-29).** The Tier-2 Fact-A axiom (`schurian_scheme_profile_exists`)
 is no longer the route: a concrete predicate `IsSchurianSchemeGraph'`
 plus a Lean proof of Step 2 (`Step2_target`) now give `theorem_2_HOR`
-**unconditionally** (axiom-clean: only `refineStep`/`refineStep_iff` +
-standard basis) for a growing class, in
+**unconditionally** (axiom-clean: only the standard basis
+`[propext, Classical.choice, Quot.sound]`) for a growing class, in
 [`ChainDescent/Scheme.lean`](../GraphCanonizationProofs/ChainDescent/Scheme.lean):
 
 - **Depth-1 convergence (2026-05-27).** Step 2 reduces to a depth-2
@@ -1550,8 +1561,8 @@ empirical landscape — Petersen and J(5,2) match here, K_n is in
 via intersection-number reasoning, sketched in §10.6 docs but
 left to a follow-on session as a per-scheme strengthening.
 
-All new lemmas axiom-clean (`refineStep` + `refineStep_iff` +
-standard basis; no scheme-specific axioms).
+All new lemmas axiom-clean (standard basis
+`[propext, Classical.choice, Quot.sound]`; no scheme-specific axioms).
 
 **G6 (empirical verification).** **Done 2026-05-26.** Two scheme
 graphs tested at depth 1; both pass Theorem 2 strictly.

@@ -17,8 +17,8 @@ with per-layer depth bounds `f_i`, then 1-WL on `(G, S)` for some `S` with
 
 "Done" = a theorem `cascadeComposition` in `ChainDescent/Group.lean` (or a new
 `ChainDescent/Cascade.lean`) with `#print axioms` showing only the standard basis
-(`propext, Classical.choice, Quot.sound` + `refineStep, refineStep_iff` via
-`warmRefine`).
+(`propext, Classical.choice, Quot.sound`; `refineStep`/`refineStep_iff` are now
+concrete defs, not axioms).
 
 ## 1. The pivotal formalization decision
 
@@ -124,11 +124,11 @@ per-layer step. This is the one place the quotient bites.
 **Approach decision (2026-05-30).** Two routes were weighed:
 
 - **(A) Materialized quotient — REJECTED.** Build `G_T : AdjMatrix m` via
-  `Fintype.equivFin` and prove `warmRefine` commutes with the quotient. `refineStep` is
-  an **axiom** specified only by `refineStep_iff` (signatures = multisets over *all*
-  vertices); the quotient changes the vertex set and reweights neighbour multiplicities,
-  and there is no API relating `refineStep` at size `n` to size `m`. Needs new
-  axiom-level machinery — high risk, likely intractable.
+  `Fintype.equivFin` and prove `warmRefine` commutes with the quotient. `refineStep`'s
+  signature is a multiset over *all* `n` vertices (now a concrete def, but only
+  `refineStep_iff` is used downstream); the quotient changes the vertex set and reweights
+  neighbour multiplicities, and there is no API relating `refineStep` at size `n` to size
+  `m`. Needs new cross-size machinery — high risk, likely intractable.
 - **(B) Intrinsic, on `Fin n` — CHOSEN.** Never materialize `G_T`. Reduce `LayerStep` to
   a **witness-upgrade** via set-monotonicity, reusing the existing `refineStep_iff` API.
 

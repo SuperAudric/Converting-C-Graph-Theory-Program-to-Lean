@@ -170,8 +170,8 @@ the natural next rigor once Part A lands.
 
 > **STATUS — A4 DONE (2026-05-30).** Built in
 > [`ChainDescent/Group.lean`](../GraphCanonizationProofs/ChainDescent/Group.lean)
-> §A4 (axiom-clean; `cell_iff_orbitMk_eq`/`quotientAdjCompatible_of_discrete` use the
-> permitted `refineStep`/`refineStep_iff` basis via `warmRefine`). Index:
+> §A4 (axiom-clean `[propext, Classical.choice, Quot.sound]`; `cell_iff_orbitMk_eq`/`quotientAdjCompatible_of_discrete`
+> use the now-concrete `refineStep`/`refineStep_iff` via `warmRefine`). Index:
 > `PublicTheoremIndex.md` §A4. **Part A is now complete.**
 
 - **Define** the quotient graph on the `Aut_S`-orbits of `V(G)`: vertices =
@@ -394,8 +394,8 @@ the GI-independent, finite-effort remainder.
   new group/quotient infra likely a new sub-module
   `ChainDescent/Group.lean` registered in `lakefile.toml` defaultTargets.
 - After each lemma: `#print axioms <name>` must show only the standard
-  basis (`propext, Classical.choice, Quot.sound` + `refineStep`,
-  `refineStep_iff` where refinement is used). **No new placeholder
+  basis (`propext, Classical.choice, Quot.sound`; `refineStep`/`refineStep_iff`
+  are now concrete defs, not axioms). **No new placeholder
   axioms.** Mathlib group theory adds none.
 - Incremental: build after each piece; the existing Tier-1/2 + bootstrap
   results must stay green and axiom-clean.

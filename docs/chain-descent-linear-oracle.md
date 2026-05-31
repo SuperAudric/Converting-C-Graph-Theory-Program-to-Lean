@@ -539,7 +539,10 @@ and why the construction (§4.2) may be heuristic.
 (`RefinementFootprint`, `TwistConstruction`, `HarvestTwists` in
 `ChainDescent`, default-on `EnableLinearOracle`); `_seen` now keys on a
 64-bit hash so memory is `O(leaves·n)`. Validated correctness-preserving
-through CFI(K7), incl. exhaustive size-5/6 canonical-uniqueness.
+through CFI(K7), incl. exhaustive size-5/6 canonical-uniqueness. The oracle
+is correctness-preserving across non-CFI families too — baseline (oracle-off)
+leaf counts span e.g. Rook3×3 412, K₃,₃ 42, Petersen 29, all canonizing
+within budget without flagging.
 
 The construction goal is **met**: every all-singleton decision yields a
 twist passing `IsAutomorphism` (the empirical `LeafTwistSpec`, §2.3).

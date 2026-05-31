@@ -220,7 +220,7 @@ provably-redundant branches.
 `CascadeOracleSpec` now exists, paralleling the linear oracle's contract
 ([ChainDescent/CascadeOracle.lean](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean);
 plan in [the Lean brief](./Archive/ChainDescent/chain-descent-cascade-oracle-lean-brief.md)).
-It builds clean, axiom-clean (only `refineStep`/`refineStep_iff` + Lean
+It builds clean, axiom-clean (only the standard basis `[propext, Classical.choice, Quot.sound]` + Lean
 foundationals), no `sorry`:
 
 - **Phase A (soundness):** `CascadeOracleSpec` (internal-node interface, not
@@ -535,6 +535,35 @@ collapse bar (§8.1 M5) answers. The all-singleton case is already
 demonstrated single-path (the linear oracle harvested 941 K7 twists
 a-priori, 0 branching at those nodes); the unproven part is the
 non-singleton recursion.
+
+### 4.7 Support grading and transversal relocation
+
+A symmetry's reach into the descent is graded by its **support** `s = |supp π|`. A
+path-fixing automorphism `π` can certify orbits at any node whose individualized set
+`S` is disjoint from `supp π` — i.e. down to depth `n − s`:
+
+- **Full-support** symmetries (e.g. a cycle's rotation, `s = n`) are certifiable
+  only at the root (`exists_orbit_witness_of_aut`).
+- **Twins** (a transposition, `s = 2`) are certifiable all the way down to depth
+  `n − 2` (`cellsAreOrbits_of_compl_card_le_two`).
+- At a **discrete** node every cell is a singleton, so orbits collapse trivially
+  (`cellsAreOrbits_of_discrete`).
+
+Both endpoints and the discrete case are proved in Lean; the middle (general
+support) is the open (1b) bridging.
+
+**Fixing relocates a symmetry; it does not destroy it.** Individualizing a vertex in
+`supp π` removes `π` from the *pointwise stabilizer* `Aut_S`, but `π` survives in the
+stabilizer-chain **transversal** (the coset rep relating two branches), to be
+harvested *cross-branch* rather than within-cell. Concretely, an ordering decision
+`(a,b)` is consumed only by symmetries with `π a = b`; every `π` with `π a ≠ b` maps
+the decision to a *parallel* one and survives intact into the sub-problem. So a
+large-support symmetry is untouched by ordering a non-`π`-pair even when both
+endpoints lie in `supp π`. The 1b obligation is therefore one of **discovery**
+(recognize the orbit/transversal and prune) — *not* a race against destruction — and
+the natural attack is "consume each symmetry before individualizing into its
+support" (the [deferred-decisions](./chain-descent-deferred-decisions.md) strategy,
+with the refinement footprint as a support proxy).
 
 ---
 
