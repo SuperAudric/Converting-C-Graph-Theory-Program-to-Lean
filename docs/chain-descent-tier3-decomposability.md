@@ -55,7 +55,7 @@ For broader context:
 >
 > Moreover, the decomposition is *constructively obtained* by the
 > layered oracle in polynomial time, without exploring more than one
-> branch per genuine decision.
+> branch per decision.
 
 The corollary is the polynomial-or-flag bound for the chain-descent
 canonizer:
@@ -88,11 +88,12 @@ T-C splits into two cases by the cell shape:
   whose correctness reduces to orbit recovery — settled for CFI
   graphs (Tier 1) and schurian scheme graphs (Tier 2) in
   [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md).
-- **False-symmetry cells** (the cell splits into ≥ 2 orbits, a
-  *genuine decision*). Handled by the linear oracle
+- **Apparent decisions hiding an abelian symmetry** (a cell 1-WL can't
+  split whose two directions are related by a hidden `Z_2` twist — a *true*
+  symmetry refinement can't see). Handled by the linear oracle
   ([calculator §6](./chain-descent-calculator.md),
   [linear-oracle.md](./chain-descent-linear-oracle.md)) when the
-  decision's residual symmetry is `Z_2` (a unique candidate twist).
+  decision's residual symmetry is `Z_2` (a unique candidate twist exposes it).
   **Built and validated 2026-05-28** — collapses every all-singleton
   footprint, correctness-preserving through CFI(K7). Measured to be
   *starved* by the a-posteriori cascade oracle (see "remaining gap"
@@ -163,20 +164,20 @@ theorem with three sub-claims (§5–§7).
 **Layered oracle.** Two oracles wired in sequence at every descent
 node:
 
-1. **Cascade oracle** — for true-symmetry cells. Returns a single
-   representative if the cell is one orbit (certified via orbit
+1. **Cascade oracle** — for true-symmetry cells refinement exposes. Returns a
+   single representative if the cell is one orbit (certified via orbit
    recovery: Tier 1, Tier 2, or future Tier 3a — see §10).
-2. **Linear oracle** — for genuine decisions. Reads a candidate twist
-   `t` off one branch's reverse-symmetric propagation pattern, verifies
-   `t` edge-by-edge, and uses it to prune the mirror branches. Returns
-   one representative per *coupled component* of decisions.
+2. **Linear oracle** — for apparent decisions hiding an abelian symmetry. Reads a
+   candidate twist `t` off one branch's reverse-symmetric propagation pattern,
+   verifies `t` edge-by-edge, and uses it to prune the mirror branches. Returns
+   one representative per *coupled component*.
 
 A **layered run** of the descent calls the cascade oracle first; if it
-defers (cell is not one orbit), the linear oracle takes over for the
-genuine-decision cell.
+defers (cell is not a visibly single orbit), the linear oracle takes over for the
+apparent decision.
 
 **Coupled component.** A maximal set of cells whose order labels swap
-together under a single genuine decision's two directions
+together under a single decision's two directions
 ([strategy §12](./chain-descent-strategy.md)). The reverse-symmetric
 propagation argument (`warm_6_2`, proved) makes this well-defined.
 

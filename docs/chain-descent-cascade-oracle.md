@@ -140,7 +140,7 @@ The difference is *only what the verified permutation turns out to be*:
 
 | | Linear oracle | A-priori cascade oracle |
 |---|---|---|
-| Cell type | False symmetry (genuine decision) | True symmetry (one orbit) |
+| Cell type | Apparent decision (hidden abelian symmetry) | Visible true symmetry (one orbit) |
 | Verified `r_1 ↦ r_j` is | an abelian twist (Z_2 flip) | an orbit map (interchangeable reps) |
 | Footprint handled | all-singleton only | all-singleton **+ bounded-depth recursion** to reach it |
 | Construction | `TwistConstruction.TryConstruct` | the **same** construction, applied at each recursion level |
@@ -349,8 +349,9 @@ unchanged:
    construction.
 
 This is identical to the linear oracle. Whether `t` is an abelian twist
-(false symmetry) or an orbit map (true symmetry) is *not decided here* —
-it is whatever the forced matching produces, and §4.5 verifies it.
+(a hidden symmetry, the linear case) or an orbit map (a visible true-symmetry
+cell) — both verified automorphisms — is *not decided here*: it is whatever the
+forced matching produces, and §4.5 verifies it.
 
 ### 4.3 The all-singleton boundary
 

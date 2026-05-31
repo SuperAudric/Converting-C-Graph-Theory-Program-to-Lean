@@ -1,11 +1,18 @@
 # Chain descent — the linear oracle (spec + design)
 
 The **linear oracle** is the second `ITransversalOracle` implementation:
-the component that resolves **genuine-decision cells** (false symmetry)
-for the **abelian** case, by discovering a verified automorphism
-("twist") from a single branch's propagation pattern. The cascade
-oracle handles true-symmetry cells; the linear oracle handles the
-abelian sub-case of false-symmetry cells; the rest flags.
+the component that **exposes a hidden abelian true symmetry** — one 1-WL
+cannot see — by discovering a verified automorphism ("twist") from a single
+branch's propagation pattern, and pruning the redundant branch. Both oracles
+certify *real* symmetries; they differ only in how the symmetry is exposed.
+The cascade oracle handles true symmetries refinement makes *visible* as a
+single-orbit cell; the linear oracle handles the abelian true symmetries that
+stay *hidden* from 1-WL (CFI gauge twists). A cell 1-WL cannot split is an
+**apparent decision**: the oracle decides whether it is a real symmetry
+(prune) or a genuine decision — *no automorphism* — which neither oracle
+resolves and which is branched exhaustively. What *flags* is a hidden Johnson
+(a true *non-abelian* symmetry, uncertifiable) or a rigid IR blind spot (a
+multipede — refinement-resistant, with no symmetry at all).
 
 This doc is the linear oracle's consolidated spec. Most of the
 surrounding machinery is already fixed (a Lean-backed interface, a
@@ -53,10 +60,13 @@ load-bearing:
 
 ### 1.1 What the linear oracle does
 
-A **genuine decision** is a target cell that 1-WL cannot split but the
-graph treats as ≥ 2 orbits. The simplest case: a cell `{e, f}` where
-individualizing `e` (commit `e < f`) and individualizing `f` (commit
-`f < e`) are the two directions of one ordering decision.
+An **apparent decision** is a target cell that 1-WL cannot split — so the
+descent would otherwise have to branch. The simplest case: a cell `{e, f}`
+where individualizing `e` (commit `e < f`) and individualizing `f` (commit
+`f < e`) are the two directions of one ordering decision. When a verified
+twist relates the two directions, the apparent decision was a hidden abelian
+*true* symmetry (one orbit under the path stabilizer); when none exists, it
+is a genuine decision.
 
 The linear oracle's mechanism ([calculator §6](./chain-descent-calculator.md)):
 

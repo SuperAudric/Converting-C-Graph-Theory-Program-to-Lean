@@ -14,8 +14,10 @@ Authoritative companions: [`chain-descent-linear-oracle.md`](./chain-descent-lin
 
 ## 1. The problem, in one paragraph
 
-The linear oracle resolves an **abelian genuine decision**: a size-2 target cell `{a,b}`
-1-WL can't separate, whose two branches are `σ` (= "`a<b`") and `flipPair σ a b` (= "`b<a`").
+The linear oracle exposes a **hidden abelian symmetry** at an *apparent decision*: a
+size-2 target cell `{a,b}` 1-WL can't separate, whose two branches are `σ` (= "`a<b`")
+and `flipPair σ a b` (= "`b<a`"). When the twist verifies, the two branches are
+equivalent — `{a,b}` was a true symmetry 1-WL couldn't see, not a genuine decision.
 At a leaf both branches refine to **discrete** colourings; relabelling `adj` by colour-rank
 gives each branch's canonical leaf matrix `canonAdj σ` / `canonAdj flip`. **Soundness** of
 the oracle is fully proved (`§L.1–L.2`). The open question is **completeness on CFI**: does

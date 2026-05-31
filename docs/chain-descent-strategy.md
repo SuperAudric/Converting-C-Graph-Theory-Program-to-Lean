@@ -80,13 +80,20 @@ individualizing `w` leads to the *same* canonical form — the two subtrees are
 mirror images. **You may pick any one vertex, descend, and never look at the
 rest.**
 
-**False symmetry — a genuine decision.** The vertices of `C` merely *look* alike
-to refinement; the graph really treats them differently. Different choices give
-different canonicals, and you genuinely have to compare them.
+**False symmetry — a genuine decision.** The vertices of `C` are genuinely
+different: there is *no* automorphism carrying one to another, so different choices
+give different canonicals and you genuinely have to compare them.
+
+**Refinement cannot tell these apart** — both present as a cell 1-WL cannot split,
+an **apparent decision**; deciding which it is is the oracle's job. A true symmetry
+can be *hidden* (CFI gauge cells look like decisions but are true symmetries the
+linear oracle exposes — calculator §5/§6), so "genuine decision" strictly means
+*no automorphism exists*.
 
 If every branch were a true symmetry, canonization would be a single descending
-path — polynomial. **Exponential blow-up is genuine decisions piling up.** The
-whole algorithm is organized around telling the two apart cheaply.
+path — polynomial. **Exponential blow-up is apparent decisions piling up.** The
+whole algorithm is organized around cheaply telling a (possibly hidden) true
+symmetry from a genuine decision.
 
 ## 4. The algorithm: chain descent
 

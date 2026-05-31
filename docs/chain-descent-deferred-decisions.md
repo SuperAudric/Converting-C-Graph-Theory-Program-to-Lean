@@ -44,8 +44,8 @@ rather than guessed at layer-by-layer.
 
 For the oracles this schedules:
 [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
-(true symmetry), [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
-(abelian false symmetry). For the hypothesis its clean form rests on:
+(true symmetry, visible), [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
+(hidden abelian symmetry). For the hypothesis its clean form rests on:
 [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
 §8.1 (the (O\*) self-detection lemma / "residue is rigid"). For the
 descent and budget it modifies:
@@ -191,7 +191,7 @@ rigid" = the (O\*) self-detection lemma of
 §8.1. The deferred-decision workflow is the *algorithm*; "residue is
 rigid" is its *correctness condition for the clean two-phase form*. If
 the hypothesis holds, deferral gives the polynomial oracle phase for
-free. If it fails (a hidden Johnson — non-abelian *false* symmetry the
+free. If it fails (a hidden Johnson — non-abelian *true* symmetry the
 oracles can't catch), that symmetry is never consumed in Phase 1 and
 manifests as exponential branching in Phase 2 — caught by the budget as
 a flag.
@@ -210,7 +210,7 @@ hypothesis fails:
 
 - **Cascade class / decomposable graphs** → all symmetry unconditional →
   polynomial Phase 1 + clean rigid hand-off (§7).
-- **Hidden Johnson** → non-abelian false symmetry uncatchable by either
+- **Hidden Johnson** → non-abelian true symmetry uncatchable by either
   oracle → not consumed in Phase 1 → Phase 2 branching stacks → budget
   flags. Same flag the current flow gives, reached the same way.
 - **IR blind spots** (rigid, refinement-resistant —

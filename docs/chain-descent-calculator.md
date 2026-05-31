@@ -237,19 +237,22 @@ through K7). The Tier-1 polynomial proof now has its constructive code; the
 remaining gap is the Lean discharge of the certification predicate.
 
 The boundary of the cascade oracle is also the boundary of "cell *is* a single
-orbit" being cheaply certifiable. When the cell is **not** a single orbit — a
-genuine decision — §6 takes over.
+orbit" being cheaply certifiable. When the cell is **not** a visibly single orbit —
+an apparent decision — §6 takes over.
 
 ---
 
-## 6. The linear oracle (the genuine-decision case)
+## 6. The linear oracle (the hidden-abelian-symmetry case)
 
-The cascade oracle (§5) handles true-symmetry cells: certify one orbit, descend.
-This section is the other case — a **genuine decision**, a target cell that
-splits into `k ≥ 2` orbits. Genuine decisions are what make naive IR search
-exponential on CFI graphs; the linear oracle is the mechanism that defuses them
-for the abelian case. It is **specified here and built** (C#, and a Lean
-soundness contract) — see
+The cascade oracle (§5) handles true symmetries refinement makes *visible* as a
+single-orbit cell. This section is the other way a cell can be a true symmetry: an
+**apparent decision** — a target cell 1-WL cannot split — whose two branches turn
+out to be related by a *hidden* abelian automorphism (a CFI gauge "twist"). These
+hidden symmetries are what make naive IR search exponential on CFI graphs (each
+fork looks like a fresh decision); the linear oracle is the mechanism that defuses
+them, by exposing and verifying the twist. A genuine decision proper — *no*
+automorphism — is resolved by neither oracle (exhaustive branching). It is
+**specified here and built** (C#, and a Lean soundness contract) — see
 [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md) §8 and
 §9 item 4 below.
 
@@ -259,13 +262,13 @@ soundness contract) — see
 > [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md). This
 > section is the prose overview that doc makes precise.
 
-### What a genuine decision looks like
+### What an apparent decision looks like
 
-The simplest genuine decision: a target cell with two vertices `{e, f}` that
-1-WL cannot separate but that the graph treats differently given the path
-already fixed. Individualizing `e` means "`e < f`"; individualizing `f` means
-"`f < e`". So the two branches are the two *directions* of one ordering
-decision.
+The simplest apparent decision: a target cell with two vertices `{e, f}` that
+1-WL cannot separate. Individualizing `e` means "`e < f`"; individualizing `f`
+means "`f < e`", so the two branches are the two *directions* of one ordering
+decision. 1-WL cannot tell whether the two directions are equivalent (a hidden
+symmetry the oracle can expose) or genuinely different (a real decision).
 
 ### Reverse-symmetric propagation
 
@@ -283,7 +286,7 @@ structure — not a single partner cell.
 
 ### Coupled components are independent — the genuine "sum"
 
-A genuine decision propagates only as far as the constraints carry it; cells
+Such a decision propagates only as far as the constraints carry it; cells
 outside its coupled component are untouched. Distinct coupled components
 therefore do not interact — the canonical form decomposes
 component-by-component, each solved on its own. Independent decisions resolve
@@ -307,7 +310,7 @@ concrete vertex-pairing over the coupled component — a candidate automorphism
    *without being explored*. Being a global automorphism, `t` also collapses
    every other decision coupled to it.
 
-Discover one twist per genuine decision — each from a *single* branch's
+Discover one twist per such decision — each from a *single* branch's
 propagation, *before* any leaf — and the twists generate the residual group.
 Orbit pruning with that group turns every coupled decision into a `k = 1` step,
 and the descent collapses to a **single path**. For CFI, the `2^d` IR tree
