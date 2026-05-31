@@ -157,15 +157,20 @@ orbit-recovery picture. **The reduction landed** (`§L.8`, axiom-clean):
   linear-oracle analog of `AbelianSufficiencyHolds`, and — since a swapping automorphism *is*
   an `OrbitPartition adj P S a b` witness specialised to the size-2 cell — it **unifies
   linear-oracle completeness with the cascade oracle's localization** (the doc's goal).
-- **Twin bridge landed (2026-05-31).** `configSwap_of_twin` (`§L.8`) closes the abelian/`Z₂`
-  slice via the *same* twin hypothesis and the *same* transposition witness as the cascade
-  oracle: an **(adj, σ)-twin** decision pair (adjacency-twin on a simple graph + σ-cell-coherent,
-  `χι a = χι b`) ⟹ `ConfigSwap`, by feeding `configSwap_of_swap` the shared lemma
+- **Twin bridge landed (2026-05-31).** `configSwap_of_twin` (`§L.8`) closes the genuine-twin
+  `Z₂` decision class via the *same* twin hypothesis and the *same* transposition witness as the
+  cascade oracle: an **(adj, σ)-twin** decision pair (adjacency-twin on a simple graph +
+  σ-cell-coherent, `χι a = χι b`) ⟹ `ConfigSwap`, by feeding `configSwap_of_swap` the shared lemma
   `CascadeOracle.isAut_swap_of_twin`. LinearOracle now `import`s `ChainDescent.CascadeOracle`.
-  This is the linear-oracle analogue of `cellsAreOrbits_of_twin_cells` — **both oracles fire on
-  the same twin class through one shared lemma**, at decision-node depth, no `|Sᶜ|` bound, no
-  rank-alignment. So the twin slice of remaining-point-2 below is now *proved recoverable at
-  decision-node depth*; the residual is only the non-twin (general-gadget) case.
+  Linear-oracle analogue of `cellsAreOrbits_of_twin_cells` — **both oracles fire on the same twin
+  class through one shared lemma**, at decision-node depth, no `|Sᶜ|` bound, no rank-alignment.
+  - **IMPORTANT scope correction (2026-05-31): this twin class is NOT CFI.** `CFI(H)` has no twins
+    (`CFI.cfi_triangle_no_twins`, `native_decide`; general: unique bridge partner per endpoint,
+    subset neighbourhoods encode the subset) — CFI's `Z₂` is a global gadget-flip involution, not a
+    transposition. So the twin bridge does **not** discharge CFI; it covers the complementary
+    genuine-twin / module class. CFI still needs remaining-point-1 below (the general
+    non-transposition gadget twist via `configSwap_of_swap`). Remaining-point-2 (decision-node
+    depth) is reduced only for the twin/module class, not for CFI.
 
 **What remains (the named nut, NOT a `sorry`):** `configSwapRecoverable_of_cfi : IsCFI adj →
 ConfigSwapRecoverable`, which has two open pieces, both shared:

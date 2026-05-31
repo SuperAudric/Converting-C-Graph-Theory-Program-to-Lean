@@ -252,12 +252,14 @@ foundationals), no `sorry`:
     `GI ∈ P`. **Sharpened (2026-05-31):** the **twin-reconstructible slice** of 1b is
     now **proved at arbitrary support** — `cellsAreOrbits_of_twin_cells` /
     `orbitRecoverableAt_of_twin_cells` (witness = the extracted transposition core
-    `orbitPartition_swap_of_twin`). When same-cell pairs are order-undecided twins the
-    orbit is recovered with no depth bound; this is the elementary-abelian / CFI regime
-    (a gadget Z₂-flip = a twin transposition), the orbit-level analogue of the linear
-    oracle's abelian sufficiency. The 1b residual is now precisely the **non-twin**
-    same-cell case — a genuine 1-WL-blind decision = the Johnson wall — which stays open
-    by design.
+    `orbitPartition_swap_of_twin` / `isAut_swap_of_twin`). When same-cell pairs are
+    order-undecided twins the orbit is recovered with no depth bound. **This is the
+    genuine-twin / module abelian regime, NOT CFI** (corrected 2026-05-31): `CFI(H)` has
+    no twins (`CFI.cfi_triangle_no_twins`), its `Z₂` is a global gadget-flip involution
+    not a transposition, so the twin slice and CFI are *complementary* — CFI's residual
+    cells are non-twin and route through the general orbit recovery + gadget twist. The
+    1b residual is the **non-twin** same-cell case (genuine orbit / general gadget),
+    which includes all of CFI and stays open by design.
 
   Capstones `cascadeComplete_of_localization` / `cascadeComplete_of_cellsAreOrbits` /
   `computes_orbits_of_complete` name what suffices. **General-class completeness is the
@@ -562,13 +564,20 @@ support) splits in two: the **twin-reconstructible** part is now **proved**
 (`cellsAreOrbits_of_twin_cells` / `orbitRecoverableAt_of_twin_cells`,
 `CascadeOracle.lean` — when every same-cell pair is an order-undecided *twin* pair,
 the transposition is the orbit witness at **any** support, no `|Sᶜ|` bound); the
-remaining **non-twin** same-cell case is the genuine decision (1-WL blind, no swap
-automorphism) — the Johnson wall — and stays open. So the open (1b) bridging is now
-sharply *the non-twin residual only*. The twin endpoint's witness construction was
-extracted (`orbitPartition_swap_of_twin`) so all three support-grading results share
-one transposition core; the twin regime is precisely the elementary-abelian / CFI
-case (a gadget Z₂-flip *is* a twin transposition), making this the cascade-oracle
-(orbit-level) analogue of the linear oracle's abelian sufficiency.
+remaining **non-twin** same-cell case is the genuine orbit (no swap automorphism) and
+stays open. The twin endpoint's witness construction was extracted
+(`orbitPartition_swap_of_twin`, `isAut_swap_of_twin`) so all three support-grading
+results share one transposition core.
+
+**Scope correction (2026-05-31).** The twin regime is the **genuine-twin / module**
+abelian case, **not** CFI. `CFI(H)` has *no* twins (`CFI.cfi_triangle_no_twins`; each
+endpoint has a unique bridge partner, each subset vertex's neighbourhood encodes its
+subset), so its `Z₂` is a global gadget-flip involution, *not* a transposition. The
+twin slice and CFI are **complementary** abelian classes: CFI's residual cells are
+non-twin and route through the *general* orbit recovery (`theorem_1_HOR_cfi_oddDeg`)
+plus the general gadget twist, not the twin lemma. (An earlier draft of this paragraph
+wrongly called the twin regime "the CFI case / a gadget Z₂-flip is a twin
+transposition" — corrected.)
 
 **Fixing relocates a symmetry; it does not destroy it.** Individualizing a vertex in
 `supp π` removes `π` from the *pointwise stabilizer* `Aut_S`, but `π` survives in the

@@ -361,6 +361,34 @@ theorem cfiAdj_loopless (x : H.CFIVertex) : H.cfiAdj x x = 0 := by
 
 end CFIBase
 
+/-! ## §8.1 — CFI has no twins (the twin slice is complementary to CFI)
+
+A **twin pair** is two distinct vertices with identical adjacency to every other
+vertex; a twin pair is resolved by the *transposition* `(v w)`, the witness behind
+`CascadeOracle.cellsAreOrbits_of_twin_cells` / `orbitPartition_swap_of_twin` and the
+linear oracle's `configSwap_of_twin`. A natural question (raised when wiring the twin
+slice to CFI completeness) is whether CFI's abelian `Z₂` symmetry discharges the twin
+hypothesis. **It does not** — `CFI(H)` has *no* twins at all:
+
+- Every endpoint `e^b_{v→w}` has **exactly one** endpoint-neighbour, its bridge partner
+  `e^b_{w→v}`, which is unique to it — so two distinct endpoints have distinct
+  endpoint-neighbours, never twins.
+- Every subset vertex `a_S^v` has `degree v ≥ 2` endpoint-neighbours and its
+  neighbourhood encodes `S` uniquely — so distinct subset vertices differ, and a subset
+  vertex (≥ 2 endpoint-neighbours) is never a twin of an endpoint (exactly 1).
+
+So CFI's `Z₂` is realised by a **global gadget-flip involution**, *not* a transposition
+(matching `LinearOracle.configSwap_of_swap`'s non-`hgfix` general case). The twin slice
+(`cellsAreOrbits_of_twin_cells`) and CFI are therefore **complementary** abelian classes:
+the twin slice covers genuine-twin / module graphs; CFI completeness routes through the
+*general* orbit recovery (`theorem_1_HOR_cfi_oddDeg`) plus the general gadget twist, not
+the twin lemma. Confirmed concretely for `CFI(triangle)` below; the argument above is
+general. -/
+theorem cfi_triangle_no_twins :
+    ∀ x y : triangleBase.CFIVertex, x ≠ y →
+      ∃ z, triangleBase.cfiAdj x z ≠ triangleBase.cfiAdj y z := by
+  native_decide
+
 /-! ## §9 — Stage 2.3: lift to `AdjMatrix` + concrete `IsCFI`
 
 Three deliverables:

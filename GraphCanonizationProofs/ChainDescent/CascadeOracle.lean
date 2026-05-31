@@ -554,13 +554,19 @@ the `Sᶜ.card ≤ 2` endpoint; the difference is purely that the twin condition
 (`cellsAreOrbits_of_discrete`, support 0; `cellsAreOrbits_of_compl_card_le_two`,
 support ≤ 2) but the general-support *middle* cannot hold unconditionally — at a
 generic intermediate node a same-cell pair can be a genuine decision (1-WL blind, no
-swap automorphism), and certifying it is the Johnson wall (`GI ∈ P`). This lemma closes
-exactly the **complementary** case: when same-cell pairs are *twins*, the orbit is
-recovered by a transposition at any depth. Twin classes are precisely the
-elementary-abelian / CFI regime — a CFI gadget Z₂-flip *is* a transposition on a coupled
-twin pair — so this is the cascade-oracle (orbit-level) analogue of the linear oracle's
-abelian sufficiency, here unbounded in support. What stays open is the non-twin
-same-cell case, which is the wall and must remain so. -/
+swap automorphism). This lemma closes the case when same-cell pairs are *twins*: the
+orbit is recovered by a transposition at any depth.
+
+**Scope (corrected 2026-05-31).** Twin classes are the **genuine-twin / module** abelian
+regime — vertices with identical neighbourhoods, whose `Z₂` symmetry *is* a transposition.
+This is **not** CFI: `CFI(H)` has *no* twins (`CFI.cfi_triangle_no_twins`; each endpoint
+has a unique bridge partner, each subset vertex's neighbourhood encodes its subset), so
+CFI's `Z₂` is a global gadget-flip involution, *not* a transposition. The twin slice and
+CFI are therefore **complementary** abelian classes; CFI completeness routes through the
+*general* orbit recovery (`theorem_1_HOR_cfi_oddDeg`) plus the general (non-transposition)
+gadget twist, not this lemma. What this lemma adds is the support-grading *middle* for the
+twin/module class (any support, no `|Sᶜ|` bound); the non-twin same-cell case — including
+all of CFI's residual cells — stays open (the genuine-decision / general-orbit content). -/
 theorem cellsAreOrbits_of_twin_cells {n : Nat} {adj : AdjMatrix n}
     {P : PMatrix n} {S : Finset (Fin n)}
     (hsymm : ∀ a b, adj.adj a b = adj.adj b a)

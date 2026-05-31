@@ -831,11 +831,17 @@ cascade oracle's `cellsAreOrbits_of_twin_cells`, sharing the *same* twin hypothe
 the *same* transposition witness (`CascadeOracle.isAut_swap_of_twin`). When the decision
 pair `(a, b)` is an **(adj, σ)-twin**: an adjacency-twin (`adj a s = adj b s` for every
 other `s`, on a simple graph) *and* a σ-cell-coherent pair (`σ.σ a w = σ.σ b w`), with
-`χι a = χι b`, then the transposition `(a b)` is a `ConfigSwap`. This is the abelian /
-`Z₂` twin-swap decision resolved without any rank-alignment — the linear oracle's half of
-the twin-reconstructible slice of cascade-1b, now closed at **decision-node depth** (no
-descent to discreteness, no `|Sᶜ|` bound), exactly as `cellsAreOrbits_of_twin_cells` is on
-the orbit side. The two oracles fire on the same twin class via one shared lemma. -/
+`χι a = χι b`, then the transposition `(a b)` is a `ConfigSwap`. The genuine-twin `Z₂`
+swap decision resolved without any rank-alignment, at **decision-node depth** (no descent
+to discreteness, no `|Sᶜ|` bound), exactly as `cellsAreOrbits_of_twin_cells` is on the
+orbit side — the two oracles fire on the same twin class via one shared lemma.
+
+**Scope (corrected 2026-05-31).** This is the **genuine-twin / module** class, **not**
+CFI: `CFI(H)` has no twins (`CFI.cfi_triangle_no_twins`), so its `Z₂` is a global
+gadget-flip involution and a CFI decision pair is *not* an `(adj, σ)-twin`. CFI fires the
+oracle through `configSwap_of_swap` with the *general* (non-transposition, non-`hgfix`)
+gadget twist `g`, which is the deferred `configSwapRecoverable_of_cfi` content — not this
+lemma. `configSwap_of_twin` is the closed abelian instance for the twin/module class. -/
 def configSwap_of_twin {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
     (hab : a ≠ b)
