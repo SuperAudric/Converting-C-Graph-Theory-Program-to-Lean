@@ -323,6 +323,97 @@ theorem refineStep_singleton_pair_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix 
   subst hs'
   exact ⟨hrest.1.symm, hrest.2.symm⟩
 
+/-- **Transposition orbit witness from a twin pair** — the support-grading's
+reconstruction mechanism, isolated from any depth bound. If `v, w` are an
+*order-undecided twin pair* outside the individualized set `S` — identical adjacency
+and `P`-relation to every *other* vertex (`htwin`) and `unknown` between themselves
+(`hund`) — then the transposition `(v w)` is a `P`-preserving automorphism fixing `S`
+pointwise, witnessing `OrbitPartition adj P S v w`.
+
+This is the core of the twin endpoint extracted so it applies at **any** support: it
+needs only that `v, w` be twins, *not* that the omitted set `Sᶜ` be small. The
+`Sᶜ.card ≤ 2` and `twin-cells` lemmas both consume it, differing only in how they
+*establish* the twin condition. The simple-graph / partial-order hypotheses (`hsymm`,
+`hloop`, `hanti`) transport the twin condition across the subject/object sides. -/
+private theorem orbitPartition_swap_of_twin {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {S : Finset (Fin n)} {v w : Fin n}
+    (hsymm : ∀ a b, adj.adj a b = adj.adj b a)
+    (hloop : ∀ a, adj.adj a a = 0)
+    (hanti : ∀ a b, P a b = POE.neg (P b a))
+    (hvS : v ∉ S) (hwS : w ∉ S)
+    (htwin : ∀ s, s ≠ v → s ≠ w → adj.adj v s = adj.adj w s ∧ P v s = P w s)
+    (hund : P v w = POE.unknown) :
+    OrbitPartition adj P S v w := by
+  -- `P` collapses to `unknown` exactly where the swap could break antisymmetry.
+  have keyP : ∀ e : POE, e = POE.neg e → e = POE.unknown := by
+    intro e he
+    cases e with
+    | less => exact absurd he (by decide)
+    | unknown => rfl
+    | greater => exact absurd he (by decide)
+  have hPvw : P v w = POE.unknown := hund
+  have hPwv : P w v = POE.unknown := by rw [hanti w v, hPvw]; rfl
+  have hPdiag : ∀ a, P a a = POE.unknown := fun a => keyP _ (hanti a a)
+  -- The transposition `(v w)` is the orbit witness.
+  refine ⟨Equiv.swap v w, ?_, ?_, ?_, ?_⟩
+  · -- IsAut. Case on whether `a, b ∈ {v, w}`; rewrite (not subst) to keep `v, w`.
+    intro a b
+    rcases eq_or_ne a v with ha | hav
+    · rw [ha]
+      rcases eq_or_ne b v with hb | hbv
+      · rw [hb, Equiv.swap_apply_left, hloop, hloop]
+      · rcases eq_or_ne b w with hb | hbw
+        · rw [hb, Equiv.swap_apply_left, Equiv.swap_apply_right]; exact hsymm w v
+        · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne hbv hbw]
+          exact ((htwin b hbv hbw).1).symm
+    · rcases eq_or_ne a w with ha | haw
+      · rw [ha]
+        rcases eq_or_ne b v with hb | hbv
+        · rw [hb, Equiv.swap_apply_right, Equiv.swap_apply_left]; exact hsymm v w
+        · rcases eq_or_ne b w with hb | hbw
+          · rw [hb, Equiv.swap_apply_right, hloop, hloop]
+          · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne hbv hbw]
+            exact (htwin b hbv hbw).1
+      · rw [Equiv.swap_apply_of_ne_of_ne hav haw]
+        rcases eq_or_ne b v with hb | hbv
+        · rw [hb, Equiv.swap_apply_left, hsymm a w, hsymm a v]
+          exact ((htwin a hav haw).1).symm
+        · rcases eq_or_ne b w with hb | hbw
+          · rw [hb, Equiv.swap_apply_right, hsymm a v, hsymm a w]
+            exact (htwin a hav haw).1
+          · rw [Equiv.swap_apply_of_ne_of_ne hbv hbw]
+  · -- `P`-preservation. Same case structure; antisymmetry handles the subject-flip.
+    intro x u
+    rcases eq_or_ne x v with hx | hxv
+    · rw [hx]
+      rcases eq_or_ne u v with hu | huv
+      · rw [hu, Equiv.swap_apply_left, hPdiag, hPdiag]
+      · rcases eq_or_ne u w with hu | huw
+        · rw [hu, Equiv.swap_apply_left, Equiv.swap_apply_right, hPwv, hPvw]
+        · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne huv huw]
+          exact ((htwin u huv huw).2).symm
+    · rcases eq_or_ne x w with hx | hxw
+      · rw [hx]
+        rcases eq_or_ne u v with hu | huv
+        · rw [hu, Equiv.swap_apply_right, Equiv.swap_apply_left, hPvw, hPwv]
+        · rcases eq_or_ne u w with hu | huw
+          · rw [hu, Equiv.swap_apply_right, hPdiag, hPdiag]
+          · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne huv huw]
+            exact (htwin u huv huw).2
+      · rw [Equiv.swap_apply_of_ne_of_ne hxv hxw]
+        rcases eq_or_ne u v with hu | huv
+        · rw [hu, Equiv.swap_apply_left, hanti x w, hanti x v, (htwin x hxv hxw).2]
+        · rcases eq_or_ne u w with hu | huw
+          · rw [hu, Equiv.swap_apply_right, hanti x v, hanti x w, (htwin x hxv hxw).2]
+          · rw [Equiv.swap_apply_of_ne_of_ne huv huw]
+  · -- FixesPointwise
+    intro s hs
+    have hsv : s ≠ v := fun h => hvS (h ▸ hs)
+    have hsw : s ≠ w := fun h => hwS (h ▸ hs)
+    exact Equiv.swap_apply_of_ne_of_ne hsv hsw
+  · -- maps `v` to `w`
+    exact Equiv.swap_apply_left v w
+
 /-- **Twin endpoint of the support-grading** (the `s = 2` end). When the individualized
 set omits at most two vertices (`Sᶜ.card ≤ 2`, i.e. `|S| ≥ n − 2`), `CellsAreOrbits`
 holds: the only possible non-singleton 1-WL cell is the omitted pair `{v, w}`, a
@@ -427,77 +518,90 @@ theorem cellsAreOrbits_of_compl_card_le_two {n : Nat} {adj : AdjMatrix n}
     subst huv
     have hrest := (Prod.mk.injEq _ _ _ _).mp ((Prod.mk.injEq _ _ _ _).mp heq).2
     exact hrest.2.symm
-  -- `P` collapses to `unknown` where the swap could otherwise break antisymmetry.
-  have keyP : ∀ e : POE, e = POE.neg e → e = POE.unknown := by
-    intro e he
-    cases e with
-    | less => exact absurd he (by decide)
+  -- `v, w` are order-undecided (their `P`-relation collapses to `unknown` by
+  -- antisymmetry + the cross-pair fact), so they are a twin pair: the extracted
+  -- swap witness (`orbitPartition_swap_of_twin`) finishes.
+  have hund : P v w = POE.unknown := by
+    have hh := hanti v w
+    rw [← hcross] at hh
+    cases hpv : P v w with
+    | less => rw [hpv] at hh; exact absurd hh (by decide)
     | unknown => rfl
-    | greater => exact absurd he (by decide)
-  have hself : P v w = POE.neg (P v w) := by
-    have hh := hanti v w; rw [← hcross] at hh; exact hh
-  have hPvw : P v w = POE.unknown := keyP _ hself
-  have hPwv : P w v = POE.unknown := by rw [← hcross]; exact hPvw
-  have hPdiag : ∀ a, P a a = POE.unknown := fun a => keyP _ (hanti a a)
-  -- The transposition `(v w)` is the orbit witness.
-  refine ⟨Equiv.swap v w, ?_, ?_, ?_, ?_⟩
-  · -- IsAut. Case on whether `a, b ∈ {v, w}`; rewrite (not subst) to keep `v, w`.
-    intro a b
-    rcases eq_or_ne a v with ha | hav
-    · rw [ha]
-      rcases eq_or_ne b v with hb | hbv
-      · rw [hb, Equiv.swap_apply_left, hloop, hloop]
-      · rcases eq_or_ne b w with hb | hbw
-        · rw [hb, Equiv.swap_apply_left, Equiv.swap_apply_right]; exact hsymm w v
-        · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne hbv hbw]
-          exact ((htwin b hbv hbw).1).symm
-    · rcases eq_or_ne a w with ha | haw
-      · rw [ha]
-        rcases eq_or_ne b v with hb | hbv
-        · rw [hb, Equiv.swap_apply_right, Equiv.swap_apply_left]; exact hsymm v w
-        · rcases eq_or_ne b w with hb | hbw
-          · rw [hb, Equiv.swap_apply_right, hloop, hloop]
-          · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne hbv hbw]
-            exact (htwin b hbv hbw).1
-      · rw [Equiv.swap_apply_of_ne_of_ne hav haw]
-        rcases eq_or_ne b v with hb | hbv
-        · rw [hb, Equiv.swap_apply_left, hsymm a w, hsymm a v]
-          exact ((htwin a hav haw).1).symm
-        · rcases eq_or_ne b w with hb | hbw
-          · rw [hb, Equiv.swap_apply_right, hsymm a v, hsymm a w]
-            exact (htwin a hav haw).1
-          · rw [Equiv.swap_apply_of_ne_of_ne hbv hbw]
-  · -- `P`-preservation. Same case structure; antisymmetry handles the subject-flip.
-    intro x u
-    rcases eq_or_ne x v with hx | hxv
-    · rw [hx]
-      rcases eq_or_ne u v with hu | huv
-      · rw [hu, Equiv.swap_apply_left, hPdiag, hPdiag]
-      · rcases eq_or_ne u w with hu | huw
-        · rw [hu, Equiv.swap_apply_left, Equiv.swap_apply_right, hPwv, hPvw]
-        · rw [Equiv.swap_apply_left, Equiv.swap_apply_of_ne_of_ne huv huw]
-          exact ((htwin u huv huw).2).symm
-    · rcases eq_or_ne x w with hx | hxw
-      · rw [hx]
-        rcases eq_or_ne u v with hu | huv
-        · rw [hu, Equiv.swap_apply_right, Equiv.swap_apply_left, hPvw, hPwv]
-        · rcases eq_or_ne u w with hu | huw
-          · rw [hu, Equiv.swap_apply_right, hPdiag, hPdiag]
-          · rw [Equiv.swap_apply_right, Equiv.swap_apply_of_ne_of_ne huv huw]
-            exact (htwin u huv huw).2
-      · rw [Equiv.swap_apply_of_ne_of_ne hxv hxw]
-        rcases eq_or_ne u v with hu | huv
-        · rw [hu, Equiv.swap_apply_left, hanti x w, hanti x v, (htwin x hxv hxw).2]
-        · rcases eq_or_ne u w with hu | huw
-          · rw [hu, Equiv.swap_apply_right, hanti x v, hanti x w, (htwin x hxv hxw).2]
-          · rw [Equiv.swap_apply_of_ne_of_ne huv huw]
-  · -- FixesPointwise
-    intro s hs
-    have hsv : s ≠ v := fun h => hvS (h ▸ hs)
-    have hsw : s ≠ w := fun h => hwS (h ▸ hs)
-    exact Equiv.swap_apply_of_ne_of_ne hsv hsw
-  · -- maps `v` to `w`
-    exact Equiv.swap_apply_left v w
+    | greater => rw [hpv] at hh; exact absurd hh (by decide)
+  exact orbitPartition_swap_of_twin hsymm hloop hanti hvS hwS htwin hund
+
+/-- **Twin-cells: cells-are-orbits at ARBITRARY support** — the twin-reconstructible
+slice of the localisation obligation (1b). When *every* same-cell distinct pair is an
+**order-undecided twin pair** (`unknown` between themselves, identical adjacency/`P` to
+every other vertex), `CellsAreOrbits adj P S` holds — for **any** `S`, with no bound on
+`|Sᶜ|`. The witness is the transposition (`orbitPartition_swap_of_twin`), exactly as in
+the `Sᶜ.card ≤ 2` endpoint; the difference is purely that the twin condition is now a
+*hypothesis on the partition* rather than forced by a small omitted set.
+
+**Why this is the right slice of 1b.** The support-grading proved its two extremes
+(`cellsAreOrbits_of_discrete`, support 0; `cellsAreOrbits_of_compl_card_le_two`,
+support ≤ 2) but the general-support *middle* cannot hold unconditionally — at a
+generic intermediate node a same-cell pair can be a genuine decision (1-WL blind, no
+swap automorphism), and certifying it is the Johnson wall (`GI ∈ P`). This lemma closes
+exactly the **complementary** case: when same-cell pairs are *twins*, the orbit is
+recovered by a transposition at any depth. Twin classes are precisely the
+elementary-abelian / CFI regime — a CFI gadget Z₂-flip *is* a transposition on a coupled
+twin pair — so this is the cascade-oracle (orbit-level) analogue of the linear oracle's
+abelian sufficiency, here unbounded in support. What stays open is the non-twin
+same-cell case, which is the wall and must remain so. -/
+theorem cellsAreOrbits_of_twin_cells {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {S : Finset (Fin n)}
+    (hsymm : ∀ a b, adj.adj a b = adj.adj b a)
+    (hloop : ∀ a, adj.adj a a = 0)
+    (hanti : ∀ a b, P a b = POE.neg (P b a))
+    (htwins : ∀ v w : Fin n,
+      warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w →
+        v ≠ w →
+        P v w = POE.unknown ∧
+          (∀ s, s ≠ v → s ≠ w → adj.adj v s = adj.adj w s ∧ P v s = P w s)) :
+    CellsAreOrbits adj P S := by
+  intro v w hcell
+  by_cases hvw : v = w
+  · subst hvw; exact OrbitPartition.refl v
+  set χ := individualizedColouring n S with hχ
+  have hcol : χ v = χ w := warmRefine_refines adj P χ hcell
+  -- A vertex sharing a distinct vertex's colour is outside `S` (the general
+  -- individualized-colouring argument; not specific to a small `Sᶜ`).
+  have hnotS : ∀ x y : Fin n, x ≠ y → χ x = χ y → x ∉ S := by
+    intro x y hxy heq hxS
+    have hx : χ x = x.val + 1 := by rw [hχ]; simp [individualizedColouring, hxS]
+    rw [hx] at heq
+    by_cases hyS : y ∈ S
+    · have hy : χ y = y.val + 1 := by rw [hχ]; simp [individualizedColouring, hyS]
+      rw [hy] at heq; exact hxy (Fin.ext (Nat.succ_injective heq))
+    · have hy : χ y = 0 := by rw [hχ]; simp [individualizedColouring, hyS]
+      rw [hy] at heq; exact Nat.succ_ne_zero _ heq
+  have hvS : v ∉ S := hnotS v w hvw hcol
+  have hwS : w ∉ S := hnotS w v (Ne.symm hvw) hcol.symm
+  obtain ⟨hund, htwin⟩ := htwins v w hcell hvw
+  exact orbitPartition_swap_of_twin hsymm hloop hanti hvS hwS htwin hund
+
+/-- **Twin-cells ⟹ orbit-recoverable at arbitrary support** — the oracle-vocabulary
+form of `cellsAreOrbits_of_twin_cells`, via `orbitRecoverableAt_iff_cellsAreOrbits`.
+Where the 1-WL cells are twin classes, refinement (polynomial) computes the
+`Aut_S`-orbit partition with *no* depth bound — so a complete cascade oracle is
+realisable on the twin regime at any node, not only near discreteness. This is the
+within-the-wall-boundary half of the localisation obligation, discharged. -/
+theorem orbitRecoverableAt_of_twin_cells {n : Nat} {adj : AdjMatrix n}
+    {P : PMatrix n} {S : Finset (Fin n)}
+    (hsymm : ∀ a b, adj.adj a b = adj.adj b a)
+    (hloop : ∀ a, adj.adj a a = 0)
+    (hanti : ∀ a b, P a b = POE.neg (P b a))
+    (htwins : ∀ v w : Fin n,
+      warmRefine adj P (individualizedColouring n S) v =
+          warmRefine adj P (individualizedColouring n S) w →
+        v ≠ w →
+        P v w = POE.unknown ∧
+          (∀ s, s ≠ v → s ≠ w → adj.adj v s = adj.adj w s ∧ P v s = P w s)) :
+    OrbitRecoverableAt adj P S :=
+  orbitRecoverableAt_iff_cellsAreOrbits.mpr
+    (cellsAreOrbits_of_twin_cells hsymm hloop hanti htwins)
 
 /-- **Orbit-recoverable by depth `bound`** — the oracle-contract statement of
 "there is a (polynomially bounded) depth at which 1-WL cells coincide with orbits",

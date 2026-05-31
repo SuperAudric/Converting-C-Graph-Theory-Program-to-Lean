@@ -249,7 +249,15 @@ foundationals), no `sorry`:
     (`recoverableByDepth_univ`), so the polynomial bound is the content.
   - **(1b) bridging an intermediate node to that depth is OPEN** — the lockstep
     recursion's reconstruction — but it is cascade-class construction correctness, *not*
-    `GI ∈ P`.
+    `GI ∈ P`. **Sharpened (2026-05-31):** the **twin-reconstructible slice** of 1b is
+    now **proved at arbitrary support** — `cellsAreOrbits_of_twin_cells` /
+    `orbitRecoverableAt_of_twin_cells` (witness = the extracted transposition core
+    `orbitPartition_swap_of_twin`). When same-cell pairs are order-undecided twins the
+    orbit is recovered with no depth bound; this is the elementary-abelian / CFI regime
+    (a gadget Z₂-flip = a twin transposition), the orbit-level analogue of the linear
+    oracle's abelian sufficiency. The 1b residual is now precisely the **non-twin**
+    same-cell case — a genuine 1-WL-blind decision = the Johnson wall — which stays open
+    by design.
 
   Capstones `cascadeComplete_of_localization` / `cascadeComplete_of_cellsAreOrbits` /
   `computes_orbits_of_complete` name what suffices. **General-class completeness is the
@@ -549,8 +557,18 @@ path-fixing automorphism `π` can certify orbits at any node whose individualize
 - At a **discrete** node every cell is a singleton, so orbits collapse trivially
   (`cellsAreOrbits_of_discrete`).
 
-Both endpoints and the discrete case are proved in Lean; the middle (general
-support) is the open (1b) bridging.
+Both endpoints and the discrete case are proved in Lean. The middle (general
+support) splits in two: the **twin-reconstructible** part is now **proved**
+(`cellsAreOrbits_of_twin_cells` / `orbitRecoverableAt_of_twin_cells`,
+`CascadeOracle.lean` — when every same-cell pair is an order-undecided *twin* pair,
+the transposition is the orbit witness at **any** support, no `|Sᶜ|` bound); the
+remaining **non-twin** same-cell case is the genuine decision (1-WL blind, no swap
+automorphism) — the Johnson wall — and stays open. So the open (1b) bridging is now
+sharply *the non-twin residual only*. The twin endpoint's witness construction was
+extracted (`orbitPartition_swap_of_twin`) so all three support-grading results share
+one transposition core; the twin regime is precisely the elementary-abelian / CFI
+case (a gadget Z₂-flip *is* a twin transposition), making this the cascade-oracle
+(orbit-level) analogue of the linear oracle's abelian sufficiency.
 
 **Fixing relocates a symmetry; it does not destroy it.** Individualizing a vertex in
 `supp π` removes `π` from the *pointwise stabilizer* `Aut_S`, but `π` survives in the
