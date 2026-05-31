@@ -821,8 +821,9 @@ sufficient signature counts pin down `vProfile`. -/
 `χ_v`. Round-(k+1) equality is determined by the round-k colour
 plus this signature (per `iter_succ_eq_iff`).
 
-Noncomputable because `refineStep` is axiomatised. -/
-noncomputable def iterSignature {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+Computable: `signature` and the `refineStep` iterate both reduce (`refineStep`
+is concrete since the M0 concretization). -/
+def iterSignature {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (v : Fin n) (k : Nat) (w : Fin n) : Multiset (Nat × Nat × POE) :=
   signature adj P (((refineStep adj P)^[k]) (individualizedColouring n {v})) w
 

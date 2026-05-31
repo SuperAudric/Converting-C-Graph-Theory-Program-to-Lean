@@ -268,17 +268,22 @@ Verify the vertex type cardinalities match the formula
 
 /-- Triangle's subset vertices: 6 total (3 base vertices × 2 even subsets).
 
-`native_decide` is required: kernel `decide` chokes on the Fintype
-instance's `Finset.attach`-based enumeration. The native-compiled
-form reduces in milliseconds. -/
-example : Fintype.card triangleBase.SubsetVertex = 6 := by native_decide
+Proved by kernel `decide` (axiom-clean: `[propext, Classical.choice,
+Quot.sound]`). These triangle cardinalities are *subsumed* by the general,
+structural §11 lemmas (`card_SubsetVertex` / `card_EndpointVertex` /
+`card_CFIVertex`); they are retained as direct Stage-2.1 smoke tests that
+do not forward-reference §11. (Formerly `native_decide`, which compiled to
+native code but polluted the axiom set with `native_decide.ax`; kernel
+`decide` keeps the whole module axiom-clean — the Fintype enumeration is
+small enough to reduce in the kernel.) -/
+example : Fintype.card triangleBase.SubsetVertex = 6 := by decide
 
 /-- Triangle's endpoint vertices: 12 total (3 × 2 × 2). -/
-example : Fintype.card triangleBase.EndpointVertex = 12 := by native_decide
+example : Fintype.card triangleBase.EndpointVertex = 12 := by decide
 
 /-- Triangle's full CFI vertex type: 18 elements, matching `cfiVertexCount`. -/
 theorem triangleBase_cfiVertex_card :
-    Fintype.card triangleBase.CFIVertex = 18 := by native_decide
+    Fintype.card triangleBase.CFIVertex = 18 := by decide
 
 /-! ## §8 — CFI adjacency function (Stage 2.2)
 
@@ -383,11 +388,16 @@ So CFI's `Z₂` is realised by a **global gadget-flip involution**, *not* a tran
 the twin slice covers genuine-twin / module graphs; CFI completeness routes through the
 *general* orbit recovery (`theorem_1_HOR_cfi_oddDeg`) plus the general gadget twist, not
 the twin lemma. Confirmed concretely for `CFI(triangle)` below; the argument above is
-general. -/
+general.
+
+Proved by kernel `decide` (axiom-clean: `[propext, Classical.choice, Quot.sound]`).
+Formerly `native_decide`, which compiled the `∀∀∃`-over-18-vertices search to native code
+but added a `native_decide.ax` axiom to the module; the kernel reduces the same search
+directly, keeping the file axiom-clean. -/
 theorem cfi_triangle_no_twins :
     ∀ x y : triangleBase.CFIVertex, x ≠ y →
       ∃ z, triangleBase.cfiAdj x z ≠ triangleBase.cfiAdj y z := by
-  native_decide
+  decide
 
 /-! ## §9 — Stage 2.3: lift to `AdjMatrix` + concrete `IsCFI`
 
@@ -2707,7 +2717,7 @@ theorem exists_phase22_witness (h : IsCFI' adj) (h_odd : h.OddDegree)
   obtain ⟨x_other, hxother_in_Nw, hxother_ne_v⟩ :
       ∃ x ∈ h.H.neighbors w, x ≠ v := by
     by_contra h_no
-    push_neg at h_no
+    push Not at h_no
     have hsub : h.H.neighbors w ⊆ {v} := fun x hx =>
       Finset.mem_singleton.mpr (h_no x hx)
     have hle := Finset.card_le_card hsub
@@ -3093,7 +3103,7 @@ theorem cfi_cascades_polynomially_oddDeg
           rfl
         have h_or : (∃ y ∈ S_i, y ∉ S_j) ∨ (∃ y ∈ S_j, y ∉ S_i) := by
           by_contra h_no
-          push_neg at h_no
+          push Not at h_no
           exact hSij (Finset.Subset.antisymm h_no.1 h_no.2)
         rcases h_or with ⟨y, hy_in_Si, hy_notin_Sj⟩ |
                           ⟨y, hy_in_Sj, hy_notin_Si⟩

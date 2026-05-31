@@ -760,32 +760,195 @@ def render_line_range(r: dict) -> str:
     return f"{start}-{end}"
 
 
-def render_table(
-    rows: list[dict],
+def render_row(
+    r: dict,
     *,
     with_used_by: bool,
     with_line_numbers: bool,
-) -> list[str]:
+) -> str:
+    """Render a single data row. `new_used_by` may be absent (defaults empty)."""
+    cells = [f"`{r['name']}`"]
+    if with_used_by:
+        cells.append(render_used_by(r.get("new_used_by", [])))
+    if with_line_numbers:
+        cells.append(render_line_range(r))
+    cells.append(r["description"] or "—")
+    cells.append(r["notes"] or "—")
+    return "| " + " | ".join(cells) + " |"
+
+
+def render_table_header(*, with_used_by: bool, with_line_numbers: bool) -> list[str]:
     headers = ["Name"]
     if with_used_by:
         headers.append("Used By")
     if with_line_numbers:
         headers.append("Line")
     headers += ["Description", "Notes"]
+    return [
+        "| " + " | ".join(headers) + " |",
+        "|" + "|".join("-" * (len(h) + 2) for h in headers) + "|",
+    ]
 
-    out: list[str] = []
-    out.append("| " + " | ".join(headers) + " |")
-    out.append("|" + "|".join("-" * (len(h) + 2) for h in headers) + "|")
+
+def render_table(
+    rows: list[dict],
+    *,
+    with_used_by: bool,
+    with_line_numbers: bool,
+) -> list[str]:
+    out = render_table_header(with_used_by=with_used_by, with_line_numbers=with_line_numbers)
     for r in rows:
-        cells = [f"`{r['name']}`"]
-        if with_used_by:
-            cells.append(render_used_by(r["new_used_by"]))
-        if with_line_numbers:
-            cells.append(render_line_range(r))
-        cells.append(r["description"] or "—")
-        cells.append(r["notes"] or "—")
-        out.append("| " + " | ".join(cells) + " |")
+        out.append(render_row(r, with_used_by=with_used_by, with_line_numbers=with_line_numbers))
     return out
+
+
+def _legend_lines(*, with_used_by: bool, with_line_numbers: bool) -> list[str]:
+    """The auto-generated `## Legend` block (fallback when a file has no
+    captured preamble of its own)."""
+    legend = ["## Legend", ""]
+    if with_used_by:
+        legend.append(
+            "- **Used By**: Theorems/definitions that directly reference this one. "
+            "Empty for `@[simp]` theorems (used implicitly via the `simp` tactic)."
+        )
+    if with_line_numbers:
+        legend.append(
+            "- **Line**: Source-line range `start-end` covering the declaration's "
+            "header (attached doc comment / attributes) and its full body. "
+            "Collapses to a single number when the declaration occupies one line."
+        )
+    legend.extend([
+        "- **Description**: A short description of what the theorem proves.",
+        "- **Notes**: `@[simp]` / `@[ext]` attributes, `private`, instances, "
+        "or other special properties.",
+        "",
+    ])
+    return legend
+
+
+# ---------------------------------------------------------------------------
+# Structure-preserving capture + render
+#
+# `rewrite` regenerates an index from scratch. To avoid clobbering the
+# hand-written prose that lives *between* tables — per-file descriptions,
+# `### §…` sub-section headers, the intro note, the Legend — we capture each
+# index file's full line structure (prose interleaved with data rows) and
+# re-emit it verbatim, refreshing only the data-row cells (Line numbers) and
+# merging genuinely-new declarations in by source-line position.
+# ---------------------------------------------------------------------------
+def parse_index_structure(path: Path) -> dict:
+    """Capture a file's prose + row ordering for lossless re-render.
+
+    Returns `{"preamble": [str], "sections": [section]}` where each `section`
+    is `{"header": str, "path": str, "items": [item]}` and each `item` is
+    `("prose", raw_line)` (blank lines, `###` headers, paragraphs, table
+    headers/separators — everything that is not a data row) or
+    `("row", name, raw_line)` (a `| \`name\` | … |` data row).
+
+    `preamble` is every line before the first `##` header (title, description,
+    intro note). The `## Legend` block is captured as an ordinary prose-only
+    section, so it round-trips verbatim too.
+    """
+    if not path.exists():
+        return {"preamble": [], "sections": []}
+    preamble: list[str] = []
+    sections: list[dict] = []
+    cur: dict | None = None
+    for line in path.read_text().splitlines():
+        m_sec = SECTION_RE.match(line)
+        if m_sec:
+            cur = {"header": line, "path": m_sec.group(1).strip(), "items": []}
+            sections.append(cur)
+            continue
+        if cur is None:
+            preamble.append(line)
+            continue
+        cells = split_row(line)
+        if (cells is not None and cells and cells[0].startswith("`")
+                and len(cells) >= 3 and cells[0].strip("`").strip() != "Name"):
+            name = cells[0].strip().strip("`").strip()
+            cur["items"].append(("row", name, line))
+        else:
+            cur["items"].append(("prose", line))
+    return {"preamble": preamble, "sections": sections}
+
+
+def render_structured_index(
+    structure: dict,
+    bucket_by_name: dict[str, dict],
+    new_by_path: dict[str, list[dict]],
+    *,
+    fallback_title: str,
+    fallback_description: str,
+    with_used_by: bool,
+    with_line_numbers: bool,
+) -> str:
+    """Re-emit a captured index `structure`, refreshing row data.
+
+    - `bucket_by_name`: resolved entries (name → entry) belonging to *this*
+      index file's bucket. A captured row whose name is absent here has been
+      deleted or migrated to another bucket and is dropped.
+    - `new_by_path`: entries belonging to this bucket that the captured
+      structure does not list yet (freshly-discovered decls + migrated-in
+      entries), grouped by source path. They are spliced into the matching
+      section in source-line order, or appended as a new section.
+    """
+    out: list[str] = []
+    if structure["preamble"]:
+        out.extend(structure["preamble"])
+    else:
+        out.extend([f"# {fallback_title}", "", fallback_description, ""])
+        out.extend(_legend_lines(with_used_by=with_used_by, with_line_numbers=with_line_numbers))
+
+    def _pos(e: dict) -> int:
+        return e.get("header_start") or e.get("line") or 0
+
+    emitted_paths: set[str] = set()
+    for sec in structure["sections"]:
+        out.append(sec["header"])
+        path = sec["path"]
+        emitted_paths.add(path)
+        pending = sorted(new_by_path.get(path, []), key=_pos)
+        pi = 0
+
+        def _flush_before(limit: int, _pending=pending) -> None:
+            nonlocal pi
+            while pi < len(_pending) and _pos(_pending[pi]) <= limit:
+                out.append(render_row(_pending[pi], with_used_by=with_used_by,
+                                      with_line_numbers=with_line_numbers))
+                pi += 1
+
+        for item in sec["items"]:
+            if item[0] == "prose":
+                out.append(item[1])
+                continue
+            name, raw_line = item[1], item[2]
+            ent = bucket_by_name.get(name)
+            if ent is None:
+                continue  # deleted / migrated out
+            if ent.get("header_start") is None and ent.get("line") is None:
+                out.append(raw_line)  # unresolvable (hand-authored row) — keep verbatim
+            else:
+                _flush_before(_pos(ent))
+                out.append(render_row(ent, with_used_by=with_used_by,
+                                      with_line_numbers=with_line_numbers))
+        while pi < len(pending):
+            out.append(render_row(pending[pi], with_used_by=with_used_by,
+                                  with_line_numbers=with_line_numbers))
+            pi += 1
+
+    # Paths with entries but no captured section (brand-new files): append fresh.
+    for path in sorted(new_by_path):
+        if path in emitted_paths or not path:
+            continue
+        out.append(f"## {path}")
+        out.append("")
+        out.extend(render_table_header(with_used_by=with_used_by, with_line_numbers=with_line_numbers))
+        for e in sorted(new_by_path[path], key=_pos):
+            out.append(render_row(e, with_used_by=with_used_by, with_line_numbers=with_line_numbers))
+        out.append("")
+
+    return "\n".join(out).rstrip() + "\n"
 
 
 def render_index(
@@ -934,7 +1097,8 @@ def _write_four_indices(
     with_used_by: bool,
     with_line_numbers: bool,
 ) -> None:
-    """Render and write all four index files. Mkdir for the archive subdir."""
+    """Render and write all four index files from scratch. Mkdir for the
+    archive subdir. Used by `split` (no prior four-file layout to preserve)."""
     ARCHIVE_PUBLIC_INDEX.parent.mkdir(parents=True, exist_ok=True)
     buckets = _partition_four(entries)
     counts: dict[tuple[str, bool], int] = {}
@@ -951,6 +1115,49 @@ def _write_four_indices(
     for key, count in counts.items():
         path = _INDEX_PATHS[key]
         print(f"Wrote {path.relative_to(REPO_ROOT)} ({count} entries)")
+
+
+def _write_four_indices_preserving(
+    entries: list[dict],
+    *,
+    with_used_by: bool,
+    with_line_numbers: bool,
+) -> None:
+    """Render and write all four index files, **preserving** each file's
+    existing prose (per-file descriptions, `### §…` sub-headers, intro note,
+    Legend) by re-emitting its captured structure with refreshed row data.
+
+    Falls back to a from-scratch render for any of the four files that does
+    not exist yet (no structure to preserve).
+    """
+    ARCHIVE_PUBLIC_INDEX.parent.mkdir(parents=True, exist_ok=True)
+    for key, path in _INDEX_PATHS.items():
+        bucket_entries = [
+            e for e in entries
+            if ("archive" if e["is_archived"] else "active", bool(e["is_private"])) == key
+        ]
+        bucket_by_name = {e["name"]: e for e in bucket_entries}
+        structure = parse_index_structure(path)
+        captured = {
+            item[1]
+            for sec in structure["sections"]
+            for item in sec["items"]
+            if item[0] == "row"
+        }
+        new_by_path: dict[str, list[dict]] = defaultdict(list)
+        for e in bucket_entries:
+            if e["name"] not in captured:
+                new_by_path[e["path"]].append(e)
+        path.write_text(render_structured_index(
+            structure,
+            bucket_by_name,
+            new_by_path,
+            fallback_title=_INDEX_TITLES[key],
+            fallback_description=_INDEX_DESCRIPTIONS[key],
+            with_used_by=with_used_by,
+            with_line_numbers=with_line_numbers,
+        ))
+        print(f"Wrote {path.relative_to(REPO_ROOT)} ({len(bucket_entries)} entries)")
 
 
 def cmd_rewrite(args: argparse.Namespace) -> None:
@@ -974,7 +1181,7 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
         for e in entries:
             e["new_used_by"] = []
 
-    _write_four_indices(
+    _write_four_indices_preserving(
         entries,
         with_used_by=args.with_used_by,
         with_line_numbers=args.with_line_numbers,

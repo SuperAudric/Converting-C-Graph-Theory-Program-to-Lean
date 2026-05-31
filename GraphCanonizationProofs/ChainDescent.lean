@@ -370,8 +370,11 @@ neighbour-tuple multiset)`): the induced **partition is identical** (same
 signature ⟹ same colour, `refineStep_iff`), and the colour order is a fixed
 iso-invariant order on cells (the `Encodable` encoding fixes a canonical cell
 numbering; any injection induces the same partition, so the program's
-order-independent properties are unaffected). -/
-noncomputable def refineStep {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+order-independent properties are unaffected).
+
+Computable (matching the C#): `sigKey` is a `Multiset.sort` and `Encodable.encode`
+on `List ℕ` both reduce, so the whole refinement round executes. -/
+def refineStep {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) : Colouring n :=
   fun v => Encodable.encode (sigKey adj P χ v)
 
@@ -392,9 +395,10 @@ theorem refineStep_iff {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 strictly refines the partition (one fewer cell-mate pair stays equivalent)
 or reaches fixpoint, and there are at most `n` non-trivial rounds.
 
-Marked `noncomputable` because `refineStep` is axiomatised (only its
-partition behaviour, via `refineStep_iff`, is specified). -/
-noncomputable def warmRefine {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+Computable: `refineStep` is concrete (`Encodable.encode (sigKey …)`), so the
+`n`-fold iterate executes. Proofs use only its partition behaviour
+(`refineStep_iff`), but the definition is no longer `noncomputable`. -/
+def warmRefine {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (initial : Colouring n) : Colouring n :=
   ((refineStep adj P)^[n]) initial
 
@@ -1359,10 +1363,11 @@ Documented for completeness; no Tier-2-detection power.
 **M3 unhypothesised — concrete counterexample (kept as record).** With
 `n = 4`, `adj ≡ 0`, `χι ≡ 0`, `S = {(0,1)}`, `x = (0,2)`, `y = (2,3)`: the
 M3 premise holds (`y ∈ cl(S ∪ {x}) ∖ cl S`) but the conclusion's `x ∉ cl S`
-clause fails — `(0,2) ∈ cl({(0,1)})`. Not encoded as a Lean refutation
-because `warmRefine` is noncomputable (the refutation would need invariance-
-based equality arguments for the surviving direction). Manual verification
-in `docs/chain-descent-matroid.md` §6.
+clause fails — `(0,2) ∈ cl({(0,1)})`. Not encoded as a Lean refutation: although
+`warmRefine` is computable, a `decide` would have to reduce the `n`-fold
+refinement iterate (impractical), so the refutation would instead need
+invariance-based equality arguments for the surviving direction. Manual
+verification in `docs/chain-descent-matroid.md` §6.
 
 **If matroid-like-structure work is revived in the future**, the natural
 next object to study is `cl_prov` — closure tracking the *provenance* of
