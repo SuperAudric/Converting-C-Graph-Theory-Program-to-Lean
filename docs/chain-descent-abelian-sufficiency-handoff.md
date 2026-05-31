@@ -122,12 +122,19 @@ Milestones, in dependency order:
   C# soundness: pruning rests on a *real* automorphism, no rank-alignment.
 
 - **M1c Approach C, step 3 — the cascade-1b bridge** (`LinearOracle.lean` `§L.8`).
-  **`configSwap_of_swap`**: a σ-cell-coherent *transposition* automorphism (`g` swaps `a,b`,
-  fixes the rest and `χι`; `σ.σ a w = σ.σ b w` off the pair) *is* a `ConfigSwap` — the
-  `Z₂` twin-swap, the simplest genuine abelian decision, the non-vacuous closed instance
-  (real proof content: swap case-analysis + antisymmetry). **`ConfigSwapRecoverable`** (every
-  leaf decision admits a config-swap = the linear oracle's decision-node recoverability) +
-  capstones **`canonAdj_eq_of_configSwapRecoverable`** / **`realizableFlip_of_configSwapRecoverable`**
+  **`configSwap_of_aut`** (the *general* constructor, added 2026-05-31): **any** swapping
+  automorphism `g` (`g a = b`, `g b = a`) that fixes `χι` and preserves `σ.σ` *off the flip
+  pair* (`σ.σ (g v)(g u) = σ.σ v u` for `(v,u) ∉ {(a,b),(b,a)}`) *is* a `ConfigSwap` — `g` need
+  **not** be a transposition; it may move the whole coupled component (the CFI gadget twist).
+  The flip-pair cells are exactly where `flipPair` negates and `g` co-swaps, compensating via
+  antisymmetry. This **removes the config-swap packaging from the open content**: once the
+  gadget twist `g` + its off-pair `σ`-action are in hand, the `ConfigSwap` is built with no
+  rank-alignment — `hwit` plugs straight in. **`configSwap_of_swap`** is now a thin
+  transposition specialisation (σ-cell-coherence = off-pair preservation for a transposition);
+  the `Z₂` twin-swap, simplest genuine abelian decision (real proof content: swap case-analysis
+  + antisymmetry). **`ConfigSwapRecoverable`** (every leaf decision admits a config-swap = the
+  linear oracle's decision-node recoverability) + capstones
+  **`canonAdj_eq_of_configSwapRecoverable`** / **`realizableFlip_of_configSwapRecoverable`**
   reduce oracle effectiveness to that one hypothesis. The reduction is *landed*: a swapping
   automorphism (`g a = b`, `g b = a`) is an `OrbitPartition` witness specialised to the size-2
   cell, so this unifies linear-oracle completeness with the cascade oracle's localization.
@@ -177,11 +184,12 @@ ConfigSwapRecoverable`, which has two open pieces, both shared:
 
 1. **The general gadget twist.** Real CFI's resolving `g` moves the *whole* coupled component
    — it is **not** a transposition, so `configSwap_of_swap`'s `hgfix` (fix off `{a,b}`) does
-   not apply. Constructing that `g` and its `swapsConfig` needs the deferred Stage-3
-   `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery (`CFI.lean`) = the **same `hwit` as Tier-3a B1**.
-   (`configSwap_of_swap` generalises straightforwardly once `g`'s action off `{a,b}` is known:
-   drop `hgfix`, replace `hcoh` by "`g` preserves `σ.σ` off the flip pair" — the case-analysis
-   skeleton already covers it.)
+   not apply. **The config-swap packaging is now done in general** (`configSwap_of_aut`,
+   2026-05-31): drop `hgfix`, replace `hcoh` by "`g` preserves `σ.σ` off the flip pair" — so
+   the *only* remaining content is **constructing** `g` and knowing its off-pair `σ`-action,
+   which needs the deferred Stage-3 `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery (`CFI.lean`) = the
+   **same `hwit` as Tier-3a B1**. Once `hwit` yields `g`, `configSwap_of_aut` closes the bridge
+   with no further rank-alignment.
 2. **Decision-node depth (cascade-1b).** The witness is needed where `a,b` still share a cell,
    not at `theorem_1_HOR_cfi`'s discretizing depth — the intermediate-node → discretizing-depth
    bridge, **open but not GI∈P**, **shared with the cascade oracle** (`cascade-oracle.md` §2:

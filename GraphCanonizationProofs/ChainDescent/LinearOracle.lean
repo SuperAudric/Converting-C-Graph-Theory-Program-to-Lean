@@ -740,28 +740,75 @@ cell `{a, b}`. So this is the linear oracle's half of the **shared cascade-1b** 
 (`recoverableByDepth_cfi`); obtaining the witness *at the decision-node depth* is the open,
 **not-`GI∈P`** bridge.
 
-**What is proved here (closed, axiom-clean):** `configSwap_of_swap` — when the swapping
-automorphism acts as a *transposition* (`g` fixes every vertex off `{a, b}` and fixes `χι`)
-and the pair is **σ-cell-coherent** (`σ.σ a w = σ.σ b w` for `w ∉ {a, b}`: `a, b` relate
-identically to all other vertices under the direction assignment), `g` *is* a `ConfigSwap`.
-This is the simplest genuine abelian (`Z₂` twin-swap) decision: the cell `{a, b}` is a true
-2-element orbit resolved by a transposition. With §L.7b it fires the oracle on that class —
-the non-vacuous closed instance validating the scaffold (mirroring `abelianSufficiency_of_rankPerm_eq`
-for §L.6).
+**What is proved here (closed, axiom-clean):** `configSwap_of_aut` — the *general*
+constructor: **any** swapping automorphism `g` (`g a = b`, `g b = a`) that fixes `χι` and
+preserves `σ.σ` *off the flip pair* `{(a,b),(b,a)}` *is* a `ConfigSwap`. `g` need **not** be a
+transposition: it may move the whole coupled component (the CFI gadget twist). The flip-pair
+cells are exactly where `flipPair` negates and `g` co-swaps, so the two compensate via
+antisymmetry. `configSwap_of_swap` is the transposition specialisation (the simplest genuine
+abelian `Z₂` twin-swap decision: `{a, b}` a true 2-element orbit), and `configSwap_of_twin`
+the (adj, σ)-twin instance. With §L.7b these fire the oracle on those classes.
 
-**What stays open (the named nut, not a `sorry`):** the general CFI gadget twist moves the
-*whole* coupled component (`g` is **not** a transposition), so `swapsConfig` for it needs the
-CFI gadget structure — the deferred Stage-3 `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery — the same
-content as Tier-3a B1's path-fixing witness (`hwit`). That construction, plus producing any
-such `g` at decision-node depth (cascade-1b), is the remaining work; it is isolated as the
-graph-level hypothesis `ConfigSwapRecoverable`, which the capstones reduce oracle
-effectiveness to. -/
+**What stays open (the named nut, not a `sorry`):** *producing* the general CFI gadget twist
+`g` and knowing its off-pair `σ`-action. `configSwap_of_aut` removes the config-swap
+*packaging* from the open content — once `g` and its `σ`-action are in hand, the `ConfigSwap`
+is built with no rank-alignment. What remains is the CFI gadget structure itself: the deferred
+Stage-3 `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery (the same `hwit` as Tier-3a B1), plus producing
+`g` at decision-node depth (cascade-1b). Both are isolated as the graph-level hypothesis
+`ConfigSwapRecoverable`, which the capstones reduce oracle effectiveness to. -/
 
-/-- **A σ-cell-coherent transposition automorphism is a config-swap.** If `g` is a graph
-automorphism that swaps the distinct pair `a, b`, fixes every other vertex and the initial
-colouring (`χι a = χι b`), and the pair is σ-cell-coherent (`σ.σ a w = σ.σ b w` for
-`w ≠ a, b`), then `g` carries the σ-branch configuration onto the flip-branch configuration —
-a `ConfigSwap`. The `Z₂` twin-swap instance of the cascade-1b bridge. -/
+/-- **A swapping automorphism that preserves `σ.σ` off the flip pair is a config-swap.**
+The *general* config-swap constructor: `g` need only be a graph automorphism that swaps the
+pair `a, b` (`g a = b`, `g b = a`), fix the initial colouring (`∀ v, χι (g v) = χι v`), and
+preserve the direction assignment *everywhere except the flip-pair cells*
+(`σ.σ (g v) (g u) = σ.σ v u` whenever `(v, u) ∉ {(a, b), (b, a)}`). It need **not** be a
+transposition — `g` may move the whole coupled component (the CFI gadget twist). The
+flip-pair cells are exactly where `flipPair` negates, and `g` co-swaps them via `g a = b`,
+`g b = a` + antisymmetry, so the two compensate. This is the entry point the deferred CFI
+gadget twist (`hwit`, Stage-3 `Aut(CFI)`) plugs into: once `g` and its off-pair `σ`-action
+are known, packaging it as a `ConfigSwap` is *done* — no further rank-alignment. -/
+def configSwap_of_aut {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (g : Equiv.Perm (Fin n)) (hg : IsAut g adj)
+    (hga : g a = b) (hgb : g b = a)
+    (hgχ : ∀ v, chain.χι (g v) = chain.χι v)
+    (hgpres : ∀ v u, ¬((v = a ∧ u = b) ∨ (v = b ∧ u = a)) → σ.σ (g v) (g u) = σ.σ v u) :
+    ConfigSwap chain σ a b ha hb where
+  g := g
+  isAut := hg
+  fixesχι := hgχ
+  swapsConfig := by
+    have happ : ∀ i j : Fin n, (σ.flipPair a b ha hb).σ i j
+        = if (i = a ∧ j = b) ∨ (i = b ∧ j = a) then POE.neg (σ.σ i j) else σ.σ i j :=
+      fun _ _ => rfl
+    intro v u
+    rw [happ]
+    by_cases hg2 : (g v = a ∧ g u = b) ∨ (g v = b ∧ g u = a)
+    · rw [if_pos hg2]
+      rcases hg2 with ⟨hv, hu⟩ | ⟨hv, hu⟩
+      · have hvb : v = b := g.injective (hv.trans hgb.symm)
+        have hua : u = a := g.injective (hu.trans hga.symm)
+        rw [hv, hu, hvb, hua]
+        exact (σ.antisym b a).symm
+      · have hva : v = a := g.injective (hv.trans hga.symm)
+        have hub : u = b := g.injective (hu.trans hgb.symm)
+        rw [hv, hu, hva, hub]
+        exact (σ.antisym a b).symm
+    · rw [if_neg hg2]
+      apply hgpres v u
+      intro hcontra
+      apply hg2
+      rcases hcontra with ⟨hv, hu⟩ | ⟨hv, hu⟩
+      · rw [hv, hu]; exact Or.inr ⟨hga, hgb⟩
+      · rw [hv, hu]; exact Or.inl ⟨hgb, hga⟩
+
+/-- **A σ-cell-coherent transposition automorphism is a config-swap.** The closed `Z₂`
+twin-swap instance: if `g` is a graph automorphism that swaps the distinct pair `a, b`,
+fixes every other vertex and the initial colouring (`χι a = χι b`), and the pair is
+σ-cell-coherent (`σ.σ a w = σ.σ b w` for `w ≠ a, b`), then `g` is a `ConfigSwap`. A thin
+specialisation of `configSwap_of_aut`: a transposition fixing `χι a = χι b` automatically
+fixes `χι`, and σ-cell-coherence is exactly off-pair `σ`-preservation for a transposition
+(the only moved vertices are `a, b`). -/
 def configSwap_of_swap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
     (hab : a ≠ b)
@@ -769,62 +816,44 @@ def configSwap_of_swap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (hga : g a = b) (hgb : g b = a) (hgfix : ∀ v, v ≠ a → v ≠ b → g v = v)
     (hχab : chain.χι a = chain.χι b)
     (hcoh : ∀ w, w ≠ a → w ≠ b → σ.σ a w = σ.σ b w) :
-    ConfigSwap chain σ a b ha hb where
-  g := g
-  isAut := hg
-  fixesχι := by
+    ConfigSwap chain σ a b ha hb := by
+  have hgχ : ∀ v, chain.χι (g v) = chain.χι v := by
     intro v
     by_cases hva : v = a
     · subst hva; rw [hga]; exact hχab.symm
     by_cases hvb : v = b
     · subst hvb; rw [hgb]; exact hχab
     rw [hgfix v hva hvb]
-  swapsConfig := by
-    have happ : ∀ i j : Fin n, (σ.flipPair a b ha hb).σ i j
-        = if (i = a ∧ j = b) ∨ (i = b ∧ j = a) then POE.neg (σ.σ i j) else σ.σ i j :=
-      fun _ _ => rfl
-    have hdiag : ∀ x : Fin n, σ.σ x x = POE.unknown := by
-      intro x
-      have h := σ.antisym x x
-      cases hc : σ.σ x x with
-      | less => simp only [hc, POE.neg] at h; exact absurd h (by decide)
-      | unknown => rfl
-      | greater => simp only [hc, POE.neg] at h; exact absurd h (by decide)
-    have hcoh' : ∀ w : Fin n, w ≠ a → w ≠ b → σ.σ w a = σ.σ w b := by
-      intro w hwa hwb
-      rw [σ.antisym w a, σ.antisym w b, hcoh w hwa hwb]
-    intro v u
-    rw [happ]
+  have hdiag : ∀ x : Fin n, σ.σ x x = POE.unknown := by
+    intro x
+    have h := σ.antisym x x
+    cases hc : σ.σ x x with
+    | less => simp only [hc, POE.neg] at h; exact absurd h (by decide)
+    | unknown => rfl
+    | greater => simp only [hc, POE.neg] at h; exact absurd h (by decide)
+  have hcoh' : ∀ w : Fin n, w ≠ a → w ≠ b → σ.σ w a = σ.σ w b := by
+    intro w hwa hwb
+    rw [σ.antisym w a, σ.antisym w b, hcoh w hwa hwb]
+  have hgpres : ∀ v u, ¬((v = a ∧ u = b) ∨ (v = b ∧ u = a)) → σ.σ (g v) (g u) = σ.σ v u := by
+    intro v u hne
     by_cases hva : v = a
     · by_cases hub : u = b
-      · rw [hva, hub, hga, hgb, if_pos (Or.inr ⟨rfl, rfl⟩)]
-        exact (σ.antisym a b).symm
+      · exact absurd (Or.inl ⟨hva, hub⟩) hne
       · by_cases hua : u = a
-        · rw [hva, hua, hga, if_neg (by rintro (⟨h, _⟩ | ⟨_, h⟩) <;> exact hab h.symm)]
-          rw [hdiag b, hdiag a]
-        · rw [hva, hgfix u hua hub, hga,
-            if_neg (by rintro (⟨h, _⟩ | ⟨_, h⟩) <;> first | exact hab h.symm | exact hua h)]
-          exact (hcoh u hua hub).symm
+        · rw [hva, hua, hga, hdiag b, hdiag a]
+        · rw [hva, hga, hgfix u hua hub]; exact (hcoh u hua hub).symm
     · by_cases hvb : v = b
       · by_cases hua : u = a
-        · rw [hvb, hua, hgb, hga, if_pos (Or.inl ⟨rfl, rfl⟩)]
-          exact (σ.antisym b a).symm
+        · exact absurd (Or.inr ⟨hvb, hua⟩) hne
         · by_cases hub : u = b
-          · rw [hvb, hub, hgb, if_neg (by rintro (⟨_, h⟩ | ⟨h, _⟩) <;> exact hab h)]
-            rw [hdiag a, hdiag b]
-          · rw [hvb, hgfix u hua hub, hgb,
-              if_neg (by rintro (⟨_, h⟩ | ⟨h, _⟩) <;> first | exact hub h | exact hab h)]
-            exact hcoh u hua hub
+          · rw [hvb, hub, hgb, hdiag a, hdiag b]
+          · rw [hvb, hgb, hgfix u hua hub]; exact hcoh u hua hub
       · by_cases hua : u = a
-        · rw [hgfix v hva hvb, hua, hga,
-            if_neg (by rintro (⟨h, _⟩ | ⟨h, _⟩) <;> first | exact hva h | exact hvb h)]
-          exact (hcoh' v hva hvb).symm
+        · rw [hgfix v hva hvb, hua, hga]; exact (hcoh' v hva hvb).symm
         · by_cases hub : u = b
-          · rw [hgfix v hva hvb, hub, hgb,
-              if_neg (by rintro (⟨h, _⟩ | ⟨h, _⟩) <;> first | exact hva h | exact hvb h)]
-            exact hcoh' v hva hvb
-          · rw [hgfix v hva hvb, hgfix u hua hub,
-              if_neg (by rintro (⟨h, _⟩ | ⟨h, _⟩) <;> first | exact hva h | exact hvb h)]
+          · rw [hgfix v hva hvb, hub, hgb]; exact hcoh' v hva hvb
+          · rw [hgfix v hva hvb, hgfix u hua hub]
+  exact configSwap_of_aut chain σ a b ha hb g hg hga hgb hgχ hgpres
 
 /-- **A twin decision pair admits a config-swap** — the linear-oracle analogue of the
 cascade oracle's `cellsAreOrbits_of_twin_cells`, sharing the *same* twin hypothesis and
