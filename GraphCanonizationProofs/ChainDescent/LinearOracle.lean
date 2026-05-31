@@ -633,10 +633,35 @@ structure ConfigSwap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
   /-- It carries `σ.σ` onto `(flipPair σ).σ`. -/
   swapsConfig : ∀ v u, (σ.flipPair a b ha hb).σ (g v) (g u) = σ.σ v u
 
+/-- **The leaf rank permutations differ by exactly `g`.** Cross-config transport
+(`warmRefine_transport`) forces `χ_σ = χ_flip ∘ g`, so by the rank reindex
+(`vertexRank_comp`), `π_σ = π_flip · g`. The algebraic heart of both the M1b reduction
+and the soundness `canonAdj σ = canonAdj flip`. -/
+theorem configSwap_rankPerm {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (cs : ConfigSwap chain σ a b ha hb) :
+    Colouring.rankPerm _ (branch_discrete chain isLeaf σ)
+      = Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb)) * cs.g := by
+  apply Equiv.ext; intro v
+  have hfun : (warmRefine adj σ.σ chain.χι)
+      = fun u => warmRefine adj (σ.flipPair a b ha hb).σ chain.χι (cs.g u) :=
+    funext fun u => (warmRefine_transport cs.isAut cs.swapsConfig cs.fixesχι u).symm
+  rw [Equiv.Perm.mul_apply, Colouring.rankPerm_apply, Colouring.rankPerm_apply, hfun]
+  exact vertexRank_comp _ cs.g v
+
+/-- `π_flip = π_σ · g⁻¹` — the rearrangement of `configSwap_rankPerm`. -/
+theorem configSwap_rankPerm_flip {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (cs : ConfigSwap chain σ a b ha hb) :
+    Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
+      = Colouring.rankPerm _ (branch_discrete chain isLeaf σ) * cs.g⁻¹ := by
+  rw [configSwap_rankPerm chain isLeaf σ a b ha hb cs, mul_assoc, mul_inv_cancel, mul_one]
+
 /-- **The forced candidate is the `π_σ`-conjugate of `g⁻¹`.** Given a config-swap `g`,
-the cross-config transport forces `π_σ = π_flip · g`, so `candidateTwist = π_flip · π_σ⁻¹
-= π_σ · g⁻¹ · π_σ⁻¹`. The opaque rank-rebasing is exposed as the conjugate of a genuine
-graph automorphism — the M1b reduction. -/
+`candidateTwist = π_flip · π_σ⁻¹ = π_σ · g⁻¹ · π_σ⁻¹`. The opaque rank-rebasing is exposed
+as the conjugate of a genuine graph automorphism — the M1b reduction. -/
 theorem candidateTwist_eq_conjugate {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
     (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
@@ -644,21 +669,7 @@ theorem candidateTwist_eq_conjugate {k : Nat} (chain : SpineChain adj P₀ χι�
     candidateTwist chain isLeaf σ a b ha hb
       = Colouring.rankPerm _ (branch_discrete chain isLeaf σ) * cs.g⁻¹
         * (Colouring.rankPerm _ (branch_discrete chain isLeaf σ))⁻¹ := by
-  -- π_σ = π_flip · g, from transport + the rank reindex.
-  have hrank : Colouring.rankPerm _ (branch_discrete chain isLeaf σ)
-      = Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb)) * cs.g := by
-    apply Equiv.ext; intro v
-    have hfun : (warmRefine adj σ.σ chain.χι)
-        = fun u => warmRefine adj (σ.flipPair a b ha hb).σ chain.χι (cs.g u) :=
-      funext fun u =>
-        (warmRefine_transport cs.isAut cs.swapsConfig cs.fixesχι u).symm
-    rw [Equiv.Perm.mul_apply, Colouring.rankPerm_apply, Colouring.rankPerm_apply, hfun]
-    exact vertexRank_comp _ cs.g v
-  -- π_flip = π_σ · g⁻¹, hence the conjugate form.
-  have hf : Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
-      = Colouring.rankPerm _ (branch_discrete chain isLeaf σ) * cs.g⁻¹ := by
-    rw [hrank, mul_assoc, mul_inv_cancel, mul_one]
-  rw [candidateTwist, hf]
+  rw [candidateTwist, configSwap_rankPerm_flip chain isLeaf σ a b ha hb cs]
 
 /-- **The reduction.** `IsAut candidateTwist adj` ⟺ `IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj`:
 the firing obligation is exactly the gadget rank-alignment (the `π_σ`-conjugate of the
@@ -672,5 +683,47 @@ theorem isAut_candidateTwist_iff_conjugate {k : Nat} (chain : SpineChain adj P�
       ↔ IsAut (Colouring.rankPerm _ (branch_discrete chain isLeaf σ) * cs.g⁻¹
           * (Colouring.rankPerm _ (branch_discrete chain isLeaf σ))⁻¹) adj := by
   rw [candidateTwist_eq_conjugate chain isLeaf σ a b ha hb cs]
+
+/-! ### §L.7b — Vertex-model soundness: equal canonical leaves
+
+The vertex-space view (matching the C# `TwistConstruction`): a config-swap is an
+*actual graph automorphism* carrying one branch's configuration onto the other, so the
+two branches produce the **same canonical leaf** — `canonAdj σ = canonAdj flip`. This is
+the clean soundness statement (pruning the flip branch loses nothing) and it does **not**
+go through the rank-space candidate: it needs only that the config-swap is an
+automorphism (`g⁻¹ ∈ Aut(adj)`) and the rank relation `π_flip = π_σ · g⁻¹`. -/
+
+/-- **Equal canonical leaves.** Given a config-swap, both branches of the decision produce
+the identical canonical leaf adjacency matrix. (`canonAdj flip = labelledAdj (π_σ · g⁻¹) adj
+= labelledAdj π_σ adj` because `g⁻¹` is an automorphism, so relabelling by it is invisible.) -/
+theorem canonAdj_eq_of_configSwap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (cs : ConfigSwap chain σ a b ha hb) :
+    chain.canonAdj isLeaf σ = chain.canonAdj isLeaf (σ.flipPair a b ha hb) := by
+  have hinv : IsAut cs.g⁻¹ adj := IsAut.symm cs.isAut
+  rw [canonAdj_eq_labelledAdj chain isLeaf σ (branch_discrete chain isLeaf σ),
+      canonAdj_eq_labelledAdj chain isLeaf (σ.flipPair a b ha hb)
+        (branch_discrete chain isLeaf (σ.flipPair a b ha hb)),
+      configSwap_rankPerm_flip chain isLeaf σ a b ha hb cs,
+      ← relabelMatrix_labelledAdj (Colouring.rankPerm _ (branch_discrete chain isLeaf σ)) cs.g⁻¹,
+      labelledAdj_eq_of_isAut hinv]
+  rfl
+
+/-- **`RealizableFlip` from a config-swap.** Since the two branches give the identical
+canonical leaf, the identity automorphism realises the flip — so the decision is a genuine
+`Aut(adj)`-symmetry. This is the vertex-model completeness witness: pruning is justified by
+a real automorphism (`cs.g`), with no rank-alignment obligation. -/
+theorem realizableFlip_of_configSwap {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (cs : ConfigSwap chain σ a b ha hb) :
+    RealizableFlip chain isLeaf σ a b ha hb := by
+  refine ⟨1, IsAut.refl, ?_⟩
+  show relabelMatrix 1 (chain.canonAdj isLeaf σ) = chain.canonAdj isLeaf (σ.flipPair a b ha hb)
+  have h1 : relabelMatrix (1 : Equiv.Perm (Fin n)) (chain.canonAdj isLeaf σ)
+      = chain.canonAdj isLeaf σ := by
+    funext i j; rfl
+  rw [h1, canonAdj_eq_of_configSwap chain isLeaf σ a b ha hb cs]
 
 end ChainDescent

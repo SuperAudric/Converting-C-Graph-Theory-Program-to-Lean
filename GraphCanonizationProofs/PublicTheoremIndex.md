@@ -566,8 +566,19 @@ exists, (2) its `π_σ`-conjugate is an automorphism.
 |------|-------------|-------|
 | `vertexRank_comp` | `vertexRank (χ ∘ g) v = vertexRank χ (g v)` — pure `Finset.card` reindex along `g`. | axiom-light |
 | `ConfigSwap` | An automorphism carrying σ-config onto flip-config (`IsAut`, fixes `χι`, `(flipPair σ).σ (g·)(g·) = σ.σ`). For CFI: the gadget twist swapping the decided pair. | Structure |
-| `candidateTwist_eq_conjugate` | **The reduction**: given a `ConfigSwap g`, `candidateTwist = π_σ · g⁻¹ · π_σ⁻¹` (transport forces `π_σ = π_flip · g`). The forced candidate is the `π_σ`-conjugate of a genuine graph automorphism. | **Key**; axiom-light |
-| `isAut_candidateTwist_iff_conjugate` | `IsAut candidate adj ↔ IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj` — the firing obligation is exactly the gadget rank-alignment, via a real automorphism. | axiom-light |
+| `configSwap_rankPerm` / `_flip` | The leaf rank perms differ by `g`: `π_σ = π_flip · g` (resp. `π_flip = π_σ · g⁻¹`), from transport + `vertexRank_comp`. | axiom-light |
+| `candidateTwist_eq_conjugate` | **The rank-space reduction**: given a `ConfigSwap g`, `candidateTwist = π_σ · g⁻¹ · π_σ⁻¹`. The forced candidate is the `π_σ`-conjugate of a genuine graph automorphism. | axiom-light |
+| `isAut_candidateTwist_iff_conjugate` | `IsAut candidate adj ↔ IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj` — the *rank-space* firing obligation is exactly the gadget rank-alignment. | axiom-light |
+
+**§L.7b — vertex-model soundness (Approach C, the faithful C# model).** A config-swap is a real
+graph automorphism, so both branches give the *same canonical leaf* — no rank-alignment needed. This
+is the soundness the C# `TwistConstruction` actually uses (it verifies a vertex automorphism, not the
+rank rebasing).
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `canonAdj_eq_of_configSwap` | **Equal canonical leaves**: a `ConfigSwap` ⟹ `canonAdj σ = canonAdj flip` (via `π_flip = π_σ·g⁻¹` + `g⁻¹ ∈ Aut`, so relabelling by it is invisible). Pruning the flip branch loses nothing. | **Key**; axiom-light |
+| `realizableFlip_of_configSwap` | A `ConfigSwap` ⟹ `RealizableFlip` (identity witness, since the leaves coincide) — the decision is a genuine `Aut(adj)` symmetry, with no rank-alignment obligation. | axiom-light |
 
 Transport chain it builds on (ChainDescent.lean `§16.2b`): `signature_transport`, `sigKey_transport`,
 `refineStep_transport`, `iterate_refineStep_transport`, `warmRefine_transport` — cross-config (two
