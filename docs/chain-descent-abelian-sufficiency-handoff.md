@@ -135,6 +135,12 @@ discharge the canonical-leaf equality, and why σ-coherence resurfaces.
 3. **Isolate σ-coherence + decision-char as named hypotheses** and land only the mechanical
    Σ-translation — honest but names a nut that's known-false-in-general (low value without option 1).
 4. **Pause cascade-1b**, consolidate (the gadget-flip construction is complete and solid).
+5. **The harvest-window route (proposed 2026-06-01, recommended exploration).** A class-agnostic
+   support-counting argument that harvests via **footprint-matching** (the cascade/linear core), so it
+   **never invokes σ-coherence** — substantiating option 1's "the `ConfigSwap` over-specifies." The
+   firing condition becomes "footprint singletonizes within the residual base" (= the hidden-Johnson
+   screen), and the `tw(H)` / σ-coherence derivations become corollaries. If valid this supersedes
+   `C1b.3` outright. Concept + designed first test: [`chain-descent-harvest-window.md`](./chain-descent-harvest-window.md).
 
 ### 0.6 Key pointers
 
