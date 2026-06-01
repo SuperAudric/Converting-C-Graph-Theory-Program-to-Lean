@@ -35,54 +35,57 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `CFIBase.edgeCountOrdered` | 96-98 | Ordered-pair edge count of the base graph, `∑ v, H.degree v`. | Definition |
-| `CFIBase.cfiVertexCount_pos` | 132-139 | The CFI vertex count is positive whenever the base has at least one vertex (`0 < m`). | — |
-| `Finset.card_powerset_filter_even` | 625-677 | Even-cardinality subsets of a nonempty finset count `2^(card−1)` — the classical combinatorial identity underlying `card_SubsetVertex`. | — |
-| `CFIBase.card_evenSubsetsOfNeighbors` | 685-695 | `(H.evenSubsetsOfNeighbors v).card = 2^(H.degree v − 1)`. | — |
-| `CFIBase.card_SubsetVertex` | 697-704 | `Fintype.card H.SubsetVertex = ∑ v, 2^(H.degree v − 1)`. | — |
-| `CFIBase.card_EndpointVertex` | 706-715 | `Fintype.card H.EndpointVertex = ∑ v, 2 * H.degree v`. | — |
-| `IsCFI'.adj_seed_endpoint_diff_gadget` | 985-993 | Cross-gadget non-adjacency: a seed and an endpoint in different gadgets (v ≠ v') are never adjacent. | — |
-| `IsCFI'.adj_endpoint_seed_diff_gadget` | 995-1002 | Cross-gadget non-adjacency (symmetric form): `adj (endpointVertex v' w b) (seedVertex v) = 0` when v ≠ v'. | — |
-| `IsCFI'.adj_bridge` | 1004-1012 | An endpoint `e^b_{v→w}` is adjacent to its bridge partner `e^b_{w→v}` (Fin-n level). | — |
-| `IsCFI'.endpointVertex_ne_bridge` | 1014-1036 | An endpoint and its bridge partner are distinct `Fin n` vertices. | — |
-| `individualizedColouring_singleton_self_pos` | 1060-1064 | The individualized seed's colour is nonzero. | — |
-| `individualizedColouring_singleton_eq_seed_iff` | 1066-1079 | Under a singleton individualization, a vertex shares the seed's colour iff it is the seed — only the seed carries the fresh colour. | — |
-| `IsCFI'.signature_endpoint_false_ne_true` | 1098-1144 | §13.6 M2.4 — under the single-seed individualization, the b=0 and b=1 endpoints at gadget v toward w have distinct signature multisets. | — |
-| `IsCFI'.refineStep_endpoint_false_ne_true` | 1152-1168 | §13.7 M2.5 — one `refineStep` round on a single-seed individualization gives gadget v's b=0 and b=1 endpoints distinct colours. | — |
-| `IsCFI'.allSeeds_card_le_baseSize` | 1249-1252 | `|allSeeds| ≤ h.baseSize` (convenience inequality form). | — |
-| `IsCFI'.signature_endpoint_false_ne_true_allSeeds` | 1271-1319 | §13.9 M3.B — multi-seed analogue of M2.4: under `χ_{allSeeds}` the b=0 and b=1 endpoints at gadget v have distinct signatures. | — |
-| `IsCFI'.refineStep_endpoint_false_ne_true_allSeeds` | 1321-1335 | §13.9 M3.B — one `refineStep` round on `χ_{allSeeds}` splits gadget v's b=0 and b=1 endpoints by parity. | — |
-| `IsCFI'.signature_endpoint_true_inter_gadget` | 1364-1409 | §13.10 M3.C — inter-gadget signature distinction: b=true endpoints at different gadgets (v ≠ v') differ under `χ_{allSeeds}`. | — |
-| `IsCFI'.refineStep_endpoint_true_inter_gadget` | 1411-1429 | §13.10 M3.C — one `refineStep` round on `χ_{allSeeds}` gives b=true endpoints at different gadgets distinct colours. | — |
-| `IsCFI'.signature_bridge_step` | 1455-1506 | §13.11 M3.D — bridge-propagation signature step: if bridge partners are χ-distinguished and that colour is absent from the second endpoint's adj=1 reach, the two endpoints' signatures differ. | — |
-| `IsCFI'.refineStep_bridge_step` | 1508-1532 | §13.11 M3.D Phase 1 — the local bridge-propagation step: under the no-match precondition, one `refineStep` distinguishes an endpoint pair from their distinguished bridge partners. The reusable inductive engine for the cascade. | — |
-| `IsCFI'.refineStep_endpoint_true_intra_gadget_partner` | 1678-1742 | §13.13 Phase 2.1 — at round 2 on `χ_{allSeeds}`, b=true endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
-| `CFIBase.aEmpty_eq_subset_empty` | 1774-1776 | `aEmpty v` is the empty-subset case of `subset`. | — |
-| `CFIBase.cfiAdj_subset_endpoint_same_gadget_true_of_not_mem` | 1778-1788 | `cfiAdj (a_S^v) (e^1_{v→w}) = 1` when w ∉ S — a non-saturated subset is adjacent to some b=1 endpoint. | — |
-| `CFIBase.cfiAdj_subset_endpoint_same_gadget_false_of_mem` | 1790-1800 | `cfiAdj (a_S^v) (e^0_{v→w}) = 1` when w ∈ S. | — |
-| `CFIBase.cfiAdj_subset_endpoint_diff_gadget` | 1802-1812 | Cross-gadget non-adjacency: `subset hS` at v is not adjacent to an endpoint at v' ≠ v. | — |
-| `CFIBase.subset_ne_endpoint` | 1814-1821 | A subset vertex and an endpoint vertex are distinct CFI vertices. | — |
-| `IsCFI'.seedVertex_eq_subsetVertex_empty` | 1845-1848 | `seedVertex v` is the empty-subset case of `subsetVertex`. | — |
-| `IsCFI'.subsetVertex_ne_endpointVertex` | 1850-1858 | Subset and endpoint vertices are distinct in `Fin n`. | — |
-| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_true_of_not_mem` | 1860-1868 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw true) = 1` when w ∉ S. | — |
-| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_false_of_mem` | 1870-1878 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw false) = 1` when w ∈ S. | — |
-| `IsCFI'.adj_subsetVertex_endpoint_diff_gadget` | 1880-1889 | Fin-n cross-gadget non-adjacency between a subset vertex and an endpoint at a different gadget. | — |
-| `IsCFI'.signature_endpoint_b0_ne_b1_general_allSeeds` | 1966-2017 | §13.15 M3.B+ — a b=0 endpoint at any gadget has a different signature from a b=1 endpoint at gadget v under `χ_{allSeeds}`. | — |
-| `IsCFI'.refineStep_endpoint_b0_ne_b1_general_allSeeds` | 2019-2033 | §13.15 M3.B+ — one `refineStep` round on `χ_{allSeeds}` distinguishes any b=0 endpoint from a b=1 endpoint at gadget v. | — |
-| `IsCFI'.signature_subset_step` | 2057-2102 | §13.16 Subset-step signature distinction: given a within-gadget b=1 witness endpoint whose colour is absent from the second subset's adj=1 reach, the two subsets' signatures differ. | — |
-| `IsCFI'.refineStep_subset_step` | 2104-2124 | §13.16 The generic subset-propagation step (Approach 3 primitive): under the no-match precondition one `refineStep` distinguishes two subset vertices, ready to instantiate at any cascade round. | — |
-| `IsCFI'.signature_subset_inter_gadget_round2` | 2177-2212 | §13.17 Phase 2.3 — at round 2 on `χ_{allSeeds}`, two subset vertices at different gadgets have distinct signatures, given the LHS subset has a witness w ∈ N(v) \ S. | — |
-| `IsCFI'.refineStep_subset_inter_gadget_round2` | 2214-2236 | §13.17 Phase 2.3 — at round 2, subset vertices at different gadgets get distinct colours (LHS subset needs a witness w ∈ N(v) \ S). | — |
-| `IsCFI'.adj_subsetVertex_seedVertex` | 2260-2270 | Subset-subset non-adjacency: a subset vertex and a seed vertex are never adjacent. | — |
-| `IsCFI'.signature_subsetVertex_ne_endpoint_true_allSeeds` | 2272-2318 | §13.18 M3.B++ — a subset vertex (any gadget) and a b=1 endpoint at gadget v have distinct signatures at round 1 under `χ_{allSeeds}`. | — |
-| `IsCFI'.refineStep_subsetVertex_ne_endpoint_true_allSeeds` | 2320-2333 | §13.18 M3.B++ — one `refineStep` round on `χ_{allSeeds}` distinguishes a subset vertex from a b=1 endpoint at gadget v. | — |
-| `IsCFI'.signature_subsetVertex_ne_endpoint_false_round2` | 2359-2466 | §13.19 Cross-type round-2 signature distinction: a witnessed subset vertex and a b=0 endpoint (any gadget) differ at χ_1. | — |
-| `IsCFI'.refineStep_subsetVertex_ne_endpoint_false_round2` | 2468-2485 | §13.19 Cross-type round-2 — at χ_2 a witnessed subset vertex and a b=0 endpoint (any gadget) get distinct colours. | — |
-| `IsCFI'.signature_endpoint_false_inter_gadget_round3` | 2516-2616 | §13.20 Phase 2.2 — at χ_2, two b=0 endpoints at different gadgets have distinct signatures, given a witness subset at the LHS gadget. | — |
-| `IsCFI'.refineStep_endpoint_false_inter_gadget_round3` | 2618-2645 | §13.20 Phase 2.2 — at round 3, b=0 endpoints at different gadgets get distinct colours, given a witness subset (exists when deg(v) ≥ 3). | — |
-| `IsCFI'.exists_phase22_witness` | 2701-2750 | §13.21 Under `OddDegree`, for any v ∈ N(w) builds an even subset S ⊆ N(w) with v ∈ S plus a witness x ∈ N(w) \ S; used to invoke Phase 2.2 at a bridge-partner gadget. | — |
-| `IsCFI'.refineStep_endpoint_false_intra_gadget_partner_round4` | 2774-2880 | §13.22 Phase 2.X — under `OddDegree`, at round 4 b=0 endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
-| `IsCFI'.refineStep_subset_intra_gadget_S_round5` | 2906-2991 | §13.23 Phase 2.4 — under `OddDegree`, at round 5 two subset vertices at the same gadget with S ≠ S' get distinct colours. | — |
+| `CFIBase.edgeCountOrdered` | 102-104 | Ordered-pair edge count of the base graph, `∑ v, H.degree v`. | Definition |
+| `CFIBase.cfiVertexCount_pos` | 138-145 | The CFI vertex count is positive whenever the base has at least one vertex (`0 < m`). | — |
+| `Finset.card_powerset_filter_even` | 631-683 | Even-cardinality subsets of a nonempty finset count `2^(card−1)` — the classical combinatorial identity underlying `card_SubsetVertex`. | — |
+| `CFIBase.card_evenSubsetsOfNeighbors` | 691-701 | `(H.evenSubsetsOfNeighbors v).card = 2^(H.degree v − 1)`. | — |
+| `CFIBase.card_SubsetVertex` | 703-710 | `Fintype.card H.SubsetVertex = ∑ v, 2^(H.degree v − 1)`. | — |
+| `CFIBase.card_EndpointVertex` | 712-721 | `Fintype.card H.EndpointVertex = ∑ v, 2 * H.degree v`. | — |
+| `IsCFI'.adj_seed_endpoint_diff_gadget` | 991-999 | Cross-gadget non-adjacency: a seed and an endpoint in different gadgets (v ≠ v') are never adjacent. | — |
+| `IsCFI'.adj_endpoint_seed_diff_gadget` | 1001-1008 | Cross-gadget non-adjacency (symmetric form): `adj (endpointVertex v' w b) (seedVertex v) = 0` when v ≠ v'. | — |
+| `IsCFI'.adj_bridge` | 1010-1018 | An endpoint `e^b_{v→w}` is adjacent to its bridge partner `e^b_{w→v}` (Fin-n level). | — |
+| `IsCFI'.endpointVertex_ne_bridge` | 1020-1042 | An endpoint and its bridge partner are distinct `Fin n` vertices. | — |
+| `individualizedColouring_singleton_self_pos` | 1066-1070 | The individualized seed's colour is nonzero. | — |
+| `individualizedColouring_singleton_eq_seed_iff` | 1072-1085 | Under a singleton individualization, a vertex shares the seed's colour iff it is the seed — only the seed carries the fresh colour. | — |
+| `IsCFI'.signature_endpoint_false_ne_true` | 1104-1150 | §13.6 M2.4 — under the single-seed individualization, the b=0 and b=1 endpoints at gadget v toward w have distinct signature multisets. | — |
+| `IsCFI'.refineStep_endpoint_false_ne_true` | 1158-1174 | §13.7 M2.5 — one `refineStep` round on a single-seed individualization gives gadget v's b=0 and b=1 endpoints distinct colours. | — |
+| `IsCFI'.allSeeds_card_le_baseSize` | 1255-1258 | `|allSeeds| ≤ h.baseSize` (convenience inequality form). | — |
+| `IsCFI'.signature_endpoint_false_ne_true_allSeeds` | 1277-1325 | §13.9 M3.B — multi-seed analogue of M2.4: under `χ_{allSeeds}` the b=0 and b=1 endpoints at gadget v have distinct signatures. | — |
+| `IsCFI'.refineStep_endpoint_false_ne_true_allSeeds` | 1327-1341 | §13.9 M3.B — one `refineStep` round on `χ_{allSeeds}` splits gadget v's b=0 and b=1 endpoints by parity. | — |
+| `IsCFI'.signature_endpoint_true_inter_gadget` | 1370-1415 | §13.10 M3.C — inter-gadget signature distinction: b=true endpoints at different gadgets (v ≠ v') differ under `χ_{allSeeds}`. | — |
+| `IsCFI'.refineStep_endpoint_true_inter_gadget` | 1417-1435 | §13.10 M3.C — one `refineStep` round on `χ_{allSeeds}` gives b=true endpoints at different gadgets distinct colours. | — |
+| `IsCFI'.signature_bridge_step` | 1461-1512 | §13.11 M3.D — bridge-propagation signature step: if bridge partners are χ-distinguished and that colour is absent from the second endpoint's adj=1 reach, the two endpoints' signatures differ. | — |
+| `IsCFI'.refineStep_bridge_step` | 1514-1538 | §13.11 M3.D Phase 1 — the local bridge-propagation step: under the no-match precondition, one `refineStep` distinguishes an endpoint pair from their distinguished bridge partners. The reusable inductive engine for the cascade. | — |
+| `IsCFI'.refineStep_endpoint_true_intra_gadget_partner` | 1684-1748 | §13.13 Phase 2.1 — at round 2 on `χ_{allSeeds}`, b=true endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
+| `CFIBase.aEmpty_eq_subset_empty` | 1780-1782 | `aEmpty v` is the empty-subset case of `subset`. | — |
+| `CFIBase.cfiAdj_subset_endpoint_same_gadget_true_of_not_mem` | 1784-1794 | `cfiAdj (a_S^v) (e^1_{v→w}) = 1` when w ∉ S — a non-saturated subset is adjacent to some b=1 endpoint. | — |
+| `CFIBase.cfiAdj_subset_endpoint_same_gadget_false_of_mem` | 1796-1806 | `cfiAdj (a_S^v) (e^0_{v→w}) = 1` when w ∈ S. | — |
+| `CFIBase.cfiAdj_subset_endpoint_diff_gadget` | 1808-1818 | Cross-gadget non-adjacency: `subset hS` at v is not adjacent to an endpoint at v' ≠ v. | — |
+| `CFIBase.subset_ne_endpoint` | 1820-1827 | A subset vertex and an endpoint vertex are distinct CFI vertices. | — |
+| `IsCFI'.seedVertex_eq_subsetVertex_empty` | 1851-1854 | `seedVertex v` is the empty-subset case of `subsetVertex`. | — |
+| `IsCFI'.subsetVertex_ne_endpointVertex` | 1856-1864 | Subset and endpoint vertices are distinct in `Fin n`. | — |
+| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_true_of_not_mem` | 1866-1874 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw true) = 1` when w ∉ S. | — |
+| `IsCFI'.adj_subsetVertex_endpoint_same_gadget_false_of_mem` | 1876-1884 | Fin-n witness adjacency: `adj (subsetVertex hS) (endpointVertex hw false) = 1` when w ∈ S. | — |
+| `IsCFI'.adj_subsetVertex_endpoint_diff_gadget` | 1886-1895 | Fin-n cross-gadget non-adjacency between a subset vertex and an endpoint at a different gadget. | — |
+| `IsCFI'.signature_endpoint_b0_ne_b1_general_allSeeds` | 1972-2023 | §13.15 M3.B+ — a b=0 endpoint at any gadget has a different signature from a b=1 endpoint at gadget v under `χ_{allSeeds}`. | — |
+| `IsCFI'.refineStep_endpoint_b0_ne_b1_general_allSeeds` | 2025-2039 | §13.15 M3.B+ — one `refineStep` round on `χ_{allSeeds}` distinguishes any b=0 endpoint from a b=1 endpoint at gadget v. | — |
+| `IsCFI'.signature_subset_step` | 2063-2108 | §13.16 Subset-step signature distinction: given a within-gadget b=1 witness endpoint whose colour is absent from the second subset's adj=1 reach, the two subsets' signatures differ. | — |
+| `IsCFI'.refineStep_subset_step` | 2110-2130 | §13.16 The generic subset-propagation step (Approach 3 primitive): under the no-match precondition one `refineStep` distinguishes two subset vertices, ready to instantiate at any cascade round. | — |
+| `IsCFI'.signature_subset_inter_gadget_round2` | 2183-2218 | §13.17 Phase 2.3 — at round 2 on `χ_{allSeeds}`, two subset vertices at different gadgets have distinct signatures, given the LHS subset has a witness w ∈ N(v) \ S. | — |
+| `IsCFI'.refineStep_subset_inter_gadget_round2` | 2220-2242 | §13.17 Phase 2.3 — at round 2, subset vertices at different gadgets get distinct colours (LHS subset needs a witness w ∈ N(v) \ S). | — |
+| `IsCFI'.adj_subsetVertex_seedVertex` | 2266-2276 | Subset-subset non-adjacency: a subset vertex and a seed vertex are never adjacent. | — |
+| `IsCFI'.signature_subsetVertex_ne_endpoint_true_allSeeds` | 2278-2324 | §13.18 M3.B++ — a subset vertex (any gadget) and a b=1 endpoint at gadget v have distinct signatures at round 1 under `χ_{allSeeds}`. | — |
+| `IsCFI'.refineStep_subsetVertex_ne_endpoint_true_allSeeds` | 2326-2339 | §13.18 M3.B++ — one `refineStep` round on `χ_{allSeeds}` distinguishes a subset vertex from a b=1 endpoint at gadget v. | — |
+| `IsCFI'.signature_subsetVertex_ne_endpoint_false_round2` | 2365-2472 | §13.19 Cross-type round-2 signature distinction: a witnessed subset vertex and a b=0 endpoint (any gadget) differ at χ_1. | — |
+| `IsCFI'.refineStep_subsetVertex_ne_endpoint_false_round2` | 2474-2491 | §13.19 Cross-type round-2 — at χ_2 a witnessed subset vertex and a b=0 endpoint (any gadget) get distinct colours. | — |
+| `IsCFI'.signature_endpoint_false_inter_gadget_round3` | 2522-2622 | §13.20 Phase 2.2 — at χ_2, two b=0 endpoints at different gadgets have distinct signatures, given a witness subset at the LHS gadget. | — |
+| `IsCFI'.refineStep_endpoint_false_inter_gadget_round3` | 2624-2651 | §13.20 Phase 2.2 — at round 3, b=0 endpoints at different gadgets get distinct colours, given a witness subset (exists when deg(v) ≥ 3). | — |
+| `IsCFI'.exists_phase22_witness` | 2707-2756 | §13.21 Under `OddDegree`, for any v ∈ N(w) builds an even subset S ⊆ N(w) with v ∈ S plus a witness x ∈ N(w) \ S; used to invoke Phase 2.2 at a bridge-partner gadget. | — |
+| `IsCFI'.refineStep_endpoint_false_intra_gadget_partner_round4` | 2780-2886 | §13.22 Phase 2.X — under `OddDegree`, at round 4 b=0 endpoints at the same gadget toward different partners (w ≠ w') get distinct colours. | — |
+| `IsCFI'.refineStep_subset_intra_gadget_S_round5` | 2912-2997 | §13.23 Phase 2.4 — under `OddDegree`, at round 5 two subset vertices at the same gadget with S ≠ S' get distinct colours. | — |
+| `card_symmDiff_mod_two` | 3271-3281 | **Parity helper.** `|S ∆ T| ≡ |S| + |T| (mod 2)` — the fact behind "an even subgraph preserves the even-subset invariant." | — |
+| `xor_eq_xor_iff` | 3283-3285 | Xor right-cancellation on `Bool` (`(a⊕c) = (b⊕c) ↔ a = b`, and the `≠` form). | — |
+| `xor_ne_xor_iff` | 3287-3289 | Xor right-cancellation on `Bool`, `≠` form: `(a ⊕ c) ≠ (b ⊕ c) ↔ a ≠ b` (companion to `xor_eq_xor_iff`). | — |
 ## ChainDescent/Cascade.lean
 
 | Name | Line | Description | Notes |
@@ -93,7 +96,7 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `refineStep_singleton_pair_eq` | 299-325 | After individualizing a singleton `s`, two other vertices sharing a colour one refinement round later have identical adjacency and order-relation to `s`. Arbitrary-singleton generalisation of `Scheme.refineStep_round1_pair_eq`. | — |
+| `refineStep_singleton_pair_eq` | 299-324 | After individualizing a singleton `s`, two other vertices sharing a colour one refinement round later have identical adjacency and order-relation to `s`. Arbitrary-singleton generalisation of `Scheme.refineStep_round1_pair_eq`. | — |
 
 ## ChainDescent/Scheme.lean
 

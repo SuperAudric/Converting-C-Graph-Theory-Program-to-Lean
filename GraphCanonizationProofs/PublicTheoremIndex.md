@@ -226,78 +226,78 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `CFIBase` | 51-62 | §1 A **CFI base graph** on `Fin m`: a simple (symmetric, loopless) `AdjMatrix m` with every vertex of degree at least 2 — the structural prerequisite for building CFI gadgets. | Structure |
-| `neighbors` | 70-72 | The neighbour set of `v` in the base graph, as a `Finset (Fin m)`. | Definition |
-| `degree` | 74-75 | The degree of `v` in the base graph: `(H.neighbors v).card`. | Definition |
-| `mem_neighbors` | 77-80 | Membership characterisation: `w ∈ H.neighbors v ↔ H.adj.adj v w ≠ 0`. | `@[simp]` |
-| `degree_ge_two` | 82-83 | The structural CFI invariant: every base vertex has degree at least 2. | — |
-| `not_self_mem_neighbors` | 85-89 | No vertex is its own neighbour (looplessness): `v ∉ H.neighbors v`. | — |
-| `mem_neighbors_symm` | 91-94 | The neighbour relation is symmetric: `w ∈ H.neighbors v ↔ v ∈ H.neighbors w`. | — |
-| `gadgetSize` | 111-113 | §3 Size of the CFI gadget at base vertex `v`: `2^(degree v − 1) + 2 * degree v` — even-subset vertices plus endpoint vertices. | Definition |
-| `cfiVertexCount` | 115-117 | Total vertex count of `CFI(H)`: `∑ v, H.gadgetSize v`. | Definition |
-| `gadgetSize_ge_six` | 119-130 | Every CFI gadget contains at least 6 vertices (`degree v ≥ 2` gives `2^1 + 2*2 = 6`). | — |
-| `evenSubsetsOfNeighbors` | 147-150 | §4 The `Finset` of even-cardinality subsets of `N(v)`; indexes the subset vertices `a_S^v` of `CFI(H)`. | Definition |
-| `empty_mem_evenSubsetsOfNeighbors` | 152-155 | The empty set belongs to `evenSubsetsOfNeighbors v` (cardinality 0 is even) — supplies the `a_∅^v` seed witness. | — |
-| `mem_evenSubsetsOfNeighbors` | 157-161 | Membership: `S ∈ evenSubsetsOfNeighbors v ↔ S ⊆ N(v) ∧ S.card % 2 = 0`. | `@[simp]` |
-| `triangleBase` | 171-182 | §5 The triangle `K_3` as a `CFIBase 3`: the smallest base graph satisfying the degree-≥-2 invariant; the running smoke-test base. | Definition |
-| `triangleBase_degree` | 184-186 | Every vertex of `triangleBase` has degree 2. | — |
-| `triangleBase_cfiVertexCount` | 188-190 | `triangleBase.cfiVertexCount = 18` — three gadgets of size 6. | — |
-| `SubsetVertex` | 213-215 | §6 Type-level encoding of subset vertices of `CFI(H)`: pairs `(v, S)` with `S ∈ evenSubsetsOfNeighbors v`. | `abbrev` |
-| `EndpointVertex` | 217-220 | §6 Type-level encoding of endpoint vertices of `CFI(H)`: triples `(v, w, b)` with `w ∈ N(v)` and `b : Bool`. | `abbrev` |
-| `CFIVertex` | 222-230 | §6 The vertex type of `CFI(H)`: the sum `SubsetVertex ⊕ EndpointVertex`. | `abbrev` |
-| `triangleBase_cfiVertex_card` | 284-286 | §7 Smoke test: `Fintype.card triangleBase.CFIVertex = 18`, matching `cfiVertexCount`. | — |
-| `cfiAdj` | 312-325 | §8 **The CFI adjacency function** on `CFIVertex H`, returning 0/1 per the subset/endpoint clauses and the untwisted inter-gadget bridge formula. | Definition |
-| `cfiAdj_symm` | 327-346 | `cfiAdj` is symmetric: `H.cfiAdj x y = H.cfiAdj y x`. | — |
-| `cfiAdj_loopless` | 348-365 | `cfiAdj` is loopless: `H.cfiAdj x x = 0` for every CFI vertex `x`. | — |
-| `cfi_triangle_no_twins` | 397-400 | §8.1 `CFI(triangle)` has no twin pairs: any two distinct vertices are separated by some third vertex. Confirms CFI's `Z₂` is a global gadget-flip, not a transposition — so the twin slice and CFI are complementary abelian classes. | — |
-| `cfiAdjMatrix` | 427-437 | §9 **The CFI adjacency matrix** on `Fin (Fintype.card H.CFIVertex)`, lifting `cfiAdj` through `Fintype.equivFin`. | Definition, `noncomputable` |
-| `cfiAdjMatrix_symm` | 439-443 | `cfiAdjMatrix` is symmetric. | — |
-| `cfiAdjMatrix_loopless` | 445-449 | `cfiAdjMatrix` is loopless. | — |
-| `IsCFI'` | 453-473 | §9 **Concrete `IsCFI` predicate.** A witness that `adj : AdjMatrix n` is the CFI of some base `H : CFIBase m`, exposing the base graph and bijection `Fin n ≃ H.CFIVertex` as addressable data. | Structure |
-| `IsCFI'.baseSize` | 475-480 | The base graph's vertex count `h.m` for a CFI witness `h`; the depth-bound API ties `cfi_depth_bound h` to `h.baseSize`. | `abbrev` |
-| `cfiAdjMatrix_is_cfi` | 482-513 | **Self-witness**: every `H.cfiAdjMatrix` satisfies `IsCFI'`, with `H` itself as the base. | Definition, `noncomputable` |
-| `cfi_depth_bound` | 537-551 | §10 **Cascade-depth function for CFI graphs**, concretely `h.baseSize` (discharges the former axiom in Stage-4 M1). | Definition |
-| `cfi_depth_bound_le` | 553-557 | **The CFI depth bound is `≤ baseSize`**, trivial after the M1 concretization. | — |
-| `cfi_cascades_polynomially` | 559-568 | §10 **Fact A (cascade axiom).** A CFI graph cascades at depth `cfi_depth_bound h`; the sole remaining Tier-1 CFI axiom, awaiting the Cai-Fürer-Immerman cascade formalisation. | axiom |
-| `theorem_1_HOR_cfi` | 570-585 | §10 **Theorem 1 (CFI form).** A CFI graph admits orbit recovery at depth `cfi_depth_bound h`; conditional on `cfi_cascades_polynomially`, and tighter than the `n`-bounded `theorem_1_HOR_at_n`. | — |
-| `theorem_1_HOR_cfi_baseSize` | 587-603 | **Corollary**: orbit recovery at depth `≤ h.baseSize`, the headline `Nat`-shaped CFI bound for downstream consumers. | — |
-| `card_CFIVertex` | 717-724 | §11 **The cardinality identity**: `Fintype.card H.CFIVertex = H.cfiVertexCount` — the abstract vertex type matches the gadget-size sum formula. | — |
-| `IsCFI'.six_baseSize_le` | 742-770 | §12 **Connector**: a CFI graph has at least `6 * baseSize` vertices (each gadget contributes ≥ 6) — yields the `n/6` depth bound. | — |
-| `theorem_1_HOR_cfi_n_bound` | 772-794 | §12 **Corollary (n-shaped bound).** Orbit recovery on a CFI graph holds at depth `≤ n/6` (as `6 * S.card ≤ n`), strictly tighter than the trivial `≤ n` bound. | — |
-| `aEmpty` | 813-818 | §13.1 The canonical seed vertex `a_∅^v` of `CFI(H)`: the subset vertex at gadget `v` with the empty subset, individualized by the M2-M4 cascade. | Definition |
-| `endpoint` | 820-823 | §13.1 The endpoint vertex `e^b_{v→w}` of `CFI(H)` at gadget `v`, pointing toward `w ∈ N(v)` with parity bit `b`. | Definition |
-| `cfiAdj_aEmpty_endpoint_false` | 832-837 | §13.2 `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=false endpoint is not adjacent to the empty-subset seed. | — |
-| `cfiAdj_aEmpty_endpoint_true` | 839-844 | §13.2 `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=true endpoint is adjacent to the empty-subset seed. | — |
-| `aEmpty_ne_endpoint` | 846-853 | `H.aEmpty v ≠ H.endpoint hw b`: subset and endpoint vertices are distinct (different `Sum` tags). | — |
-| `cfiAdj_aEmpty_endpoint_diff_gadget` | 855-868 | **Cross-gadget non-adjacency**: `cfiAdj (a_∅^v) (e^b_{v'→w}) = 0` when `v ≠ v'`. | — |
-| `cfiAdj_bridge` | 870-886 | **The bridge edge**: `cfiAdj (e^b_{v→w}) (e^b_{w→v}) = 1` — same-parity endpoints at neighbouring gadgets pointing toward each other. | — |
-| `IsCFI'.seedVertex` | 899-903 | §13.3 The `Fin n` vertex corresponding to the seed `a_∅^v` for an `IsCFI'` witness — what the cascade individualizes. | Definition |
-| `IsCFI'.endpointVertex` | 905-909 | §13.3 The `Fin n` vertex corresponding to `e^b_{v→w}` for an `IsCFI'` witness — the endpoints the cascade probes. | Definition |
-| `e_seedVertex` | 915-919 | Bijection round-trip: `h.e (h.seedVertex v) = h.H.aEmpty v`. | `@[simp]` |
-| `e_endpointVertex` | 921-926 | Bijection round-trip: `h.e (h.endpointVertex hw b) = h.H.endpoint hw b`. | `@[simp]` |
-| `seedVertex_ne_endpointVertex` | 928-938 | Seed and endpoint vertices are distinct in `Fin n` (their abstract counterparts have different `Sum` tags). | — |
-| `adj_seed_endpoint_false` | 953-959 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w false) = 0`. | — |
-| `adj_seed_endpoint_true` | 961-967 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w true) = 1`. | — |
-| `adj_endpoint_seed_false` | 969-975 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w false) (seedVertex v) = 0`. | — |
-| `adj_endpoint_seed_true` | 977-983 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w true) (seedVertex v) = 1`. | — |
-| `individualizedColouring_singleton_self` | 1049-1052 | Individualizing a single seed gives it colour `seed.val + 1`. | `@[simp]` |
-| `individualizedColouring_singleton_other` | 1054-1058 | Under a singleton individualization, every non-seed vertex gets colour `0`. | `@[simp]` |
-| `individualizedColouring_eq_iff_of_mem` | 1185-1201 | Multi-seed uniqueness: under `individualizedColouring n S`, for `v ∈ S` a vertex shares v's colour iff it equals v. Generalises the singleton form to arbitrary S. | — |
-| `allSeeds` | 1207-1214 | §13.8 The cascade individualization set `{seedVertex v : v ∈ Fin m}` — one seed per base vertex; the witness used in `cfi_cascades_polynomially`. | Definition |
-| `seedVertex_injective` | 1216-1234 | `seedVertex` is injective: distinct base vertices map to distinct `Fin n` indices. | — |
-| `seedVertex_mem_allSeeds` | 1236-1239 | Every `seedVertex v` lies in `allSeeds`. | — |
-| `allSeeds_card` | 1241-1247 | `|allSeeds| = h.baseSize`; with `six_baseSize_le` the cascade individualization has at most n/6 vertices. | `@[simp]` |
-| `adj_endpointVertex_eq_one_iff` | 1546-1568 | §13.12 Endpoint-endpoint adjacency characterisation: two endpoints are adjacent iff they form a bridge pair (`v_a = w_b ∧ w_a = v_b ∧ b_a = b_b`). | — |
-| `adj_seedVertex_eq_one_iff` | 1570-1645 | §13.12 Seed-adjacency characterisation: a vertex is adjacent to `seedVertex w` iff it is a b=true endpoint in gadget w. Key structural fact for the cascade's no-match preconditions. | — |
-| `subset` | 1767-1772 | §13.14 The CFI vertex `a_S^v`: the subset vertex at gadget v with even subset S ⊆ N(v). Generalises `aEmpty v` (the S = ∅ case). | Definition |
-| `IsCFI'.subsetVertex` | 1825-1831 | §13.14 The `Fin n` vertex for `a_S^v`. Generalises `seedVertex v` (the empty-subset case). | Definition |
-| `e_subsetVertex` | 1837-1843 | Bijection round-trip: `h.e (subsetVertex hS) = subset hS`. | `@[simp]` |
-| `adj_subsetVertex_eq_one_iff` | 1891-1944 | §13.14 Subset-adjacency characterisation: `adj u (subsetVertex_{v'} hS') = 1` iff u is an endpoint at v' whose parity satisfies `(w' ∈ S') ⊕ b`. Generalises `adj_seedVertex_eq_one_iff` (S' = ∅). | — |
-| `IsCFI'.adj_symm` | 2143-2147 | §13.16.5 CFI adjacency is symmetric at the `Fin n` level: `adj.adj i j = adj.adj j i`. | — |
-| `OddDegree` | 2673-2676 | §13.21 Odd-degree CFI base: every base vertex has odd degree, ensuring no even subset of N(v) is saturated. Hypothesis for the axiom-free cascade (covers K₄, K₃,₃, Petersen). | Definition |
-| `exists_witness_of_oddDegree` | 2678-2699 | §13.21 Under `OddDegree`, every even subset of N(v) has a strict non-element y ∈ N(v) \ S — the subset-distinction witness. | — |
-| `cfi_cascades_polynomially_oddDeg` | 3011-3215 | §13.24 M4 — for OddDegree CFI graphs, `warmRefine adj P χ_{allSeeds}` is `Discrete`; discharges `CascadesAt` (the cascade axiom) axiom-free at depth `cfi_depth_bound h`. | — |
-| `theorem_1_HOR_cfi_oddDeg` | 3217-3236 | **Tier-1 CFI orbit recovery.** Theorem 1 for OddDegree CFI graphs, axiom-free: orbit partition coincides with the warm-refined colouring at depth ≤ baseSize, conditional only on `OddDegree`. | — |
+| `CFIBase` | 57-68 | §1 A **CFI base graph** on `Fin m`: a simple (symmetric, loopless) `AdjMatrix m` with every vertex of degree at least 2 — the structural prerequisite for building CFI gadgets. | Structure |
+| `neighbors` | 76-78 | The neighbour set of `v` in the base graph, as a `Finset (Fin m)`. | Definition |
+| `degree` | 80-81 | The degree of `v` in the base graph: `(H.neighbors v).card`. | Definition |
+| `mem_neighbors` | 83-86 | Membership characterisation: `w ∈ H.neighbors v ↔ H.adj.adj v w ≠ 0`. | `@[simp]` |
+| `degree_ge_two` | 88-89 | The structural CFI invariant: every base vertex has degree at least 2. | — |
+| `not_self_mem_neighbors` | 91-95 | No vertex is its own neighbour (looplessness): `v ∉ H.neighbors v`. | — |
+| `mem_neighbors_symm` | 97-100 | The neighbour relation is symmetric: `w ∈ H.neighbors v ↔ v ∈ H.neighbors w`. | — |
+| `gadgetSize` | 117-119 | §3 Size of the CFI gadget at base vertex `v`: `2^(degree v − 1) + 2 * degree v` — even-subset vertices plus endpoint vertices. | Definition |
+| `cfiVertexCount` | 121-123 | Total vertex count of `CFI(H)`: `∑ v, H.gadgetSize v`. | Definition |
+| `gadgetSize_ge_six` | 125-136 | Every CFI gadget contains at least 6 vertices (`degree v ≥ 2` gives `2^1 + 2*2 = 6`). | — |
+| `evenSubsetsOfNeighbors` | 153-156 | §4 The `Finset` of even-cardinality subsets of `N(v)`; indexes the subset vertices `a_S^v` of `CFI(H)`. | Definition |
+| `empty_mem_evenSubsetsOfNeighbors` | 158-161 | The empty set belongs to `evenSubsetsOfNeighbors v` (cardinality 0 is even) — supplies the `a_∅^v` seed witness. | — |
+| `mem_evenSubsetsOfNeighbors` | 163-167 | Membership: `S ∈ evenSubsetsOfNeighbors v ↔ S ⊆ N(v) ∧ S.card % 2 = 0`. | `@[simp]` |
+| `triangleBase` | 177-188 | §5 The triangle `K_3` as a `CFIBase 3`: the smallest base graph satisfying the degree-≥-2 invariant; the running smoke-test base. | Definition |
+| `triangleBase_degree` | 190-192 | Every vertex of `triangleBase` has degree 2. | — |
+| `triangleBase_cfiVertexCount` | 194-196 | `triangleBase.cfiVertexCount = 18` — three gadgets of size 6. | — |
+| `SubsetVertex` | 219-221 | §6 Type-level encoding of subset vertices of `CFI(H)`: pairs `(v, S)` with `S ∈ evenSubsetsOfNeighbors v`. | `abbrev` |
+| `EndpointVertex` | 223-226 | §6 Type-level encoding of endpoint vertices of `CFI(H)`: triples `(v, w, b)` with `w ∈ N(v)` and `b : Bool`. | `abbrev` |
+| `CFIVertex` | 228-236 | §6 The vertex type of `CFI(H)`: the sum `SubsetVertex ⊕ EndpointVertex`. | `abbrev` |
+| `triangleBase_cfiVertex_card` | 290-292 | §7 Smoke test: `Fintype.card triangleBase.CFIVertex = 18`, matching `cfiVertexCount`. | — |
+| `cfiAdj` | 318-331 | §8 **The CFI adjacency function** on `CFIVertex H`, returning 0/1 per the subset/endpoint clauses and the untwisted inter-gadget bridge formula. | Definition |
+| `cfiAdj_symm` | 333-352 | `cfiAdj` is symmetric: `H.cfiAdj x y = H.cfiAdj y x`. | — |
+| `cfiAdj_loopless` | 354-371 | `cfiAdj` is loopless: `H.cfiAdj x x = 0` for every CFI vertex `x`. | — |
+| `cfi_triangle_no_twins` | 403-406 | §8.1 `CFI(triangle)` has no twin pairs: any two distinct vertices are separated by some third vertex. Confirms CFI's `Z₂` is a global gadget-flip, not a transposition — so the twin slice and CFI are complementary abelian classes. | — |
+| `cfiAdjMatrix` | 433-443 | §9 **The CFI adjacency matrix** on `Fin (Fintype.card H.CFIVertex)`, lifting `cfiAdj` through `Fintype.equivFin`. | Definition, `noncomputable` |
+| `cfiAdjMatrix_symm` | 445-449 | `cfiAdjMatrix` is symmetric. | — |
+| `cfiAdjMatrix_loopless` | 451-455 | `cfiAdjMatrix` is loopless. | — |
+| `IsCFI'` | 459-479 | §9 **Concrete `IsCFI` predicate.** A witness that `adj : AdjMatrix n` is the CFI of some base `H : CFIBase m`, exposing the base graph and bijection `Fin n ≃ H.CFIVertex` as addressable data. | Structure |
+| `IsCFI'.baseSize` | 481-486 | The base graph's vertex count `h.m` for a CFI witness `h`; the depth-bound API ties `cfi_depth_bound h` to `h.baseSize`. | `abbrev` |
+| `cfiAdjMatrix_is_cfi` | 488-519 | **Self-witness**: every `H.cfiAdjMatrix` satisfies `IsCFI'`, with `H` itself as the base. | Definition, `noncomputable` |
+| `cfi_depth_bound` | 543-557 | §10 **Cascade-depth function for CFI graphs**, concretely `h.baseSize` (discharges the former axiom in Stage-4 M1). | Definition |
+| `cfi_depth_bound_le` | 559-563 | **The CFI depth bound is `≤ baseSize`**, trivial after the M1 concretization. | — |
+| `cfi_cascades_polynomially` | 565-574 | §10 **Fact A (cascade axiom).** A CFI graph cascades at depth `cfi_depth_bound h`; the sole remaining Tier-1 CFI axiom, awaiting the Cai-Fürer-Immerman cascade formalisation. | axiom |
+| `theorem_1_HOR_cfi` | 576-591 | §10 **Theorem 1 (CFI form).** A CFI graph admits orbit recovery at depth `cfi_depth_bound h`; conditional on `cfi_cascades_polynomially`, and tighter than the `n`-bounded `theorem_1_HOR_at_n`. | — |
+| `theorem_1_HOR_cfi_baseSize` | 593-609 | **Corollary**: orbit recovery at depth `≤ h.baseSize`, the headline `Nat`-shaped CFI bound for downstream consumers. | — |
+| `card_CFIVertex` | 723-730 | §11 **The cardinality identity**: `Fintype.card H.CFIVertex = H.cfiVertexCount` — the abstract vertex type matches the gadget-size sum formula. | — |
+| `IsCFI'.six_baseSize_le` | 748-776 | §12 **Connector**: a CFI graph has at least `6 * baseSize` vertices (each gadget contributes ≥ 6) — yields the `n/6` depth bound. | — |
+| `theorem_1_HOR_cfi_n_bound` | 778-800 | §12 **Corollary (n-shaped bound).** Orbit recovery on a CFI graph holds at depth `≤ n/6` (as `6 * S.card ≤ n`), strictly tighter than the trivial `≤ n` bound. | — |
+| `aEmpty` | 819-824 | §13.1 The canonical seed vertex `a_∅^v` of `CFI(H)`: the subset vertex at gadget `v` with the empty subset, individualized by the M2-M4 cascade. | Definition |
+| `endpoint` | 826-829 | §13.1 The endpoint vertex `e^b_{v→w}` of `CFI(H)` at gadget `v`, pointing toward `w ∈ N(v)` with parity bit `b`. | Definition |
+| `cfiAdj_aEmpty_endpoint_false` | 838-843 | §13.2 `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=false endpoint is not adjacent to the empty-subset seed. | — |
+| `cfiAdj_aEmpty_endpoint_true` | 845-850 | §13.2 `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=true endpoint is adjacent to the empty-subset seed. | — |
+| `aEmpty_ne_endpoint` | 852-859 | `H.aEmpty v ≠ H.endpoint hw b`: subset and endpoint vertices are distinct (different `Sum` tags). | — |
+| `cfiAdj_aEmpty_endpoint_diff_gadget` | 861-874 | **Cross-gadget non-adjacency**: `cfiAdj (a_∅^v) (e^b_{v'→w}) = 0` when `v ≠ v'`. | — |
+| `cfiAdj_bridge` | 876-892 | **The bridge edge**: `cfiAdj (e^b_{v→w}) (e^b_{w→v}) = 1` — same-parity endpoints at neighbouring gadgets pointing toward each other. | — |
+| `IsCFI'.seedVertex` | 905-909 | §13.3 The `Fin n` vertex corresponding to the seed `a_∅^v` for an `IsCFI'` witness — what the cascade individualizes. | Definition |
+| `IsCFI'.endpointVertex` | 911-915 | §13.3 The `Fin n` vertex corresponding to `e^b_{v→w}` for an `IsCFI'` witness — the endpoints the cascade probes. | Definition |
+| `e_seedVertex` | 921-925 | Bijection round-trip: `h.e (h.seedVertex v) = h.H.aEmpty v`. | `@[simp]` |
+| `e_endpointVertex` | 927-932 | Bijection round-trip: `h.e (h.endpointVertex hw b) = h.H.endpoint hw b`. | `@[simp]` |
+| `seedVertex_ne_endpointVertex` | 934-944 | Seed and endpoint vertices are distinct in `Fin n` (their abstract counterparts have different `Sum` tags). | — |
+| `adj_seed_endpoint_false` | 959-965 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w false) = 0`. | — |
+| `adj_seed_endpoint_true` | 967-973 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w true) = 1`. | — |
+| `adj_endpoint_seed_false` | 975-981 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w false) (seedVertex v) = 0`. | — |
+| `adj_endpoint_seed_true` | 983-989 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w true) (seedVertex v) = 1`. | — |
+| `individualizedColouring_singleton_self` | 1055-1058 | Individualizing a single seed gives it colour `seed.val + 1`. | `@[simp]` |
+| `individualizedColouring_singleton_other` | 1060-1064 | Under a singleton individualization, every non-seed vertex gets colour `0`. | `@[simp]` |
+| `individualizedColouring_eq_iff_of_mem` | 1191-1207 | Multi-seed uniqueness: under `individualizedColouring n S`, for `v ∈ S` a vertex shares v's colour iff it equals v. Generalises the singleton form to arbitrary S. | — |
+| `allSeeds` | 1213-1220 | §13.8 The cascade individualization set `{seedVertex v : v ∈ Fin m}` — one seed per base vertex; the witness used in `cfi_cascades_polynomially`. | Definition |
+| `seedVertex_injective` | 1222-1240 | `seedVertex` is injective: distinct base vertices map to distinct `Fin n` indices. | — |
+| `seedVertex_mem_allSeeds` | 1242-1245 | Every `seedVertex v` lies in `allSeeds`. | — |
+| `allSeeds_card` | 1247-1253 | `|allSeeds| = h.baseSize`; with `six_baseSize_le` the cascade individualization has at most n/6 vertices. | `@[simp]` |
+| `adj_endpointVertex_eq_one_iff` | 1552-1574 | §13.12 Endpoint-endpoint adjacency characterisation: two endpoints are adjacent iff they form a bridge pair (`v_a = w_b ∧ w_a = v_b ∧ b_a = b_b`). | — |
+| `adj_seedVertex_eq_one_iff` | 1576-1651 | §13.12 Seed-adjacency characterisation: a vertex is adjacent to `seedVertex w` iff it is a b=true endpoint in gadget w. Key structural fact for the cascade's no-match preconditions. | — |
+| `subset` | 1773-1778 | §13.14 The CFI vertex `a_S^v`: the subset vertex at gadget v with even subset S ⊆ N(v). Generalises `aEmpty v` (the S = ∅ case). | Definition |
+| `IsCFI'.subsetVertex` | 1831-1837 | §13.14 The `Fin n` vertex for `a_S^v`. Generalises `seedVertex v` (the empty-subset case). | Definition |
+| `e_subsetVertex` | 1843-1849 | Bijection round-trip: `h.e (subsetVertex hS) = subset hS`. | `@[simp]` |
+| `adj_subsetVertex_eq_one_iff` | 1897-1950 | §13.14 Subset-adjacency characterisation: `adj u (subsetVertex_{v'} hS') = 1` iff u is an endpoint at v' whose parity satisfies `(w' ∈ S') ⊕ b`. Generalises `adj_seedVertex_eq_one_iff` (S' = ∅). | — |
+| `IsCFI'.adj_symm` | 2149-2153 | §13.16.5 CFI adjacency is symmetric at the `Fin n` level: `adj.adj i j = adj.adj j i`. | — |
+| `OddDegree` | 2679-2682 | §13.21 Odd-degree CFI base: every base vertex has odd degree, ensuring no even subset of N(v) is saturated. Hypothesis for the axiom-free cascade (covers K₄, K₃,₃, Petersen). | Definition |
+| `exists_witness_of_oddDegree` | 2684-2705 | §13.21 Under `OddDegree`, every even subset of N(v) has a strict non-element y ∈ N(v) \ S — the subset-distinction witness. | — |
+| `cfi_cascades_polynomially_oddDeg` | 3017-3221 | §13.24 M4 — for OddDegree CFI graphs, `warmRefine adj P χ_{allSeeds}` is `Discrete`; discharges `CascadesAt` (the cascade axiom) axiom-free at depth `cfi_depth_bound h`. | — |
+| `theorem_1_HOR_cfi_oddDeg` | 3223-3242 | **Tier-1 CFI orbit recovery.** Theorem 1 for OddDegree CFI graphs, axiom-free: orbit partition coincides with the warm-refined colouring at depth ≤ baseSize, conditional only on `OddDegree`. | — |
 
 **§15 — Stage 3: gadget-flip automorphisms (the `Z₂^β` generators).** *We build the generator
 *existence* (the cycle-space flips), not the full `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` iso — the hard
@@ -346,6 +346,18 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `triFlip_isAut_check` | **Phase-0 crux:** the triangle gadget flip preserves `cfiAdj` on all 18×18 pairs (`decide`) — validates cycle-flip-is-automorphism on the smallest case before the general Phase-2 proof. | — |
 | `triFlip_nontrivial` | Phase-0 smoke test: the triangle gadget flip moves some vertex — a nontrivial `CFI(triangle)` automorphism. | — |
 
+| `CFIBase.flipSet_subset` | 3303-3306 | The flip set is a set of neighbours: `flipSet F v ⊆ N(v)`. | — |
+| `CFIBase.mem_flipSet` | 3308-3311 | Membership in the flip set: `w ∈ flipSet F v ↔ w ∈ N(v) ∧ F v w`. | `@[simp]` |
+| `CFIBase.cfiFlip_endpoint_swap` | 3450-3459 | **C1b.0.** The flip swaps the parity-pair `e^0_{v→w}/e^1_{v→w}` iff `F v w = true` (the swap companion of `cfiFlip_endpoint`). | — |
+| `CFIBase.triEdge_symm` | 3494-3496 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
+| `CFIBase.triEdge_apex` | 3498-3500 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
+| `CFIBase.triEdge_cyclic` | 3502-3504 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
+| `CFIBase.triEdge_iff` | 3506-3510 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
+| `CFIBase.flipSet_triEdge_other` | 3529-3539 | **D-locality.** Off the triangle `{v,w,u}` the triangle's flip set is empty, so the triangle flip fixes every other gadget. | — |
+| `CFIBase.evenPermEdge_symm` | 3592-3595 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
+| `CFIBase.evenPermEdge_iff_of_mem` | 3597-3611 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
+| `CFIBase.flipSet_evenPermEdge_of_fixed` | 3625-3634 | **D-locality (triangle-free bases).** At a `σ`-fixed vertex the permutation-cycle flip set is empty, so the cycle flip avoids every fixed gadget. | — |
+| `IsCFI'.cfiFlipAut_swaps_endpointVertex` | 3798-3810 | **C1b.0 (lifted to `Fin n`).** `cfiFlipAut F` swaps `endpointVertex hw false ↔ true` iff `F v w = true` — the foundational decision-pair swap C1b.1 keys on. | — |
 ## ChainDescent/Scheme.lean
 
 | Name | Line | Description | Notes |
@@ -482,25 +494,25 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `CellsAreOrbits` | 259-272 | The genuinely-open half of orbit recovery: every same-cell pair is a real `Aut_S`-orbit pair. Holds at cascade and discretizing depth, fails at generic intermediate nodes — this predicate names the open localisation content. | Definition |
 | `orbitRecoverableAt_iff_cellsAreOrbits` | 274-283 | Orbit recoverability is exactly `CellsAreOrbits` (the other half is unconditional), pinning localisation to a single implication. | — |
 | `cellsAreOrbits_of_discrete` | 285-297 | **Recursion-bottom anchor.** At any discretizing depth `CellsAreOrbits` holds for free, so localisation is never GI-hard — the descent can always deepen to where cells = orbits. | — |
-| `isAut_swap_of_twin` | 327-361 | A twin pair's transposition is an automorphism: if `v, w` have identical adjacency to every other vertex of a simple graph, `swap v w` preserves `adj`. Shared with the linear oracle's twin `ConfigSwap`. | — |
-| `orbitPartition_swap_of_twin` | 363-428 | An order-undecided twin pair `v, w ∉ S` is an `Aut_S`-orbit pair at **any** individualized set, witnessed by the transposition `(v w)`. The reconstruction core behind the twin-endpoint and twin-cells results. | — |
-| `cellsAreOrbits_of_compl_card_le_two` | 430-544 | **Twin endpoint of the support spectrum.** When at most two vertices stay un-individualized (`|Sᶜ| ≤ 2`), `CellsAreOrbits` holds via the omitted pair's transposition; with `cellsAreOrbits_of_discrete` it pins both ends. | — |
-| `cellsAreOrbits_of_twin_cells` | 546-602 | `CellsAreOrbits` at **arbitrary** support whenever every same-cell pair is an order-undecided twin — the genuine-twin / module abelian regime (not CFI, which has no twins). The twin-reconstructible slice of the open localisation obligation. | — |
-| `orbitRecoverableAt_of_twin_cells` | 604-623 | Oracle-vocabulary form of `cellsAreOrbits_of_twin_cells`: on the twin regime refinement computes the orbit partition at any node, with no depth bound. | — |
-| `RecoverableByDepth` | 625-634 | Cascade-class membership for the oracle contract: there is a polynomially-bounded depth at which cells = orbits (the bound carries all the content). | Definition |
-| `recoverableByDepth_of_cascade` | 636-642 | Cascading at depth `k` gives `RecoverableByDepth … k` — the cascade-class foundation in oracle-contract form. | — |
-| `recoverableByDepth_cfi` | 644-650 | **(1a), proved for CFI** (axiom-free, odd-degree): recoverable by depth `cfi_depth_bound h` (≤ baseSize ≤ n/6). | — |
-| `recoverableByDepth_scheme` | 652-664 | **(1a), proved for schemes** (axiom-free, rank 2 / `|J| = 1`): recoverable by depth 1, at the very node the oracle acts on. | — |
-| `recoverableByDepth_univ` | 666-673 | Every graph is trivially recoverable by depth `n` (individualize everything), so only the *polynomial* depth bound is cascade-class content. | — |
-| `CascadeComplete` | 680-687 | Completeness contract: the oracle certifies every genuine `Aut_D`-orbit pair; with soundness it then computes the orbit relation exactly. | Definition |
-| `certifies_iff_orbit` | 689-703 | For a sound and complete cascade oracle, it returns `some` exactly on the pairs sharing an `Aut_D`-orbit. | — |
-| `CellComplete` | 705-712 | The polynomial completeness contract: the oracle certifies every pair sharing a 1-WL cell (refinement-decidable). | Definition |
-| `complete_of_cellComplete_recoverable` | 714-727 | **Key theorem.** At an orbit-recoverable node, certifying every same-cell pair already certifies every orbit — reducing orbit-completeness to a polynomial check. | — |
-| `VerdictIsoInvariant` | 774-787 | Iso-invariance contract (strategy §15 gap 2): the oracle's verdict depends only on the iso-invariant 1-WL partition. Derivable — see `verdictIsoInvariant_of_complete`. | Definition |
-| `cascadeComplete_of_localization` | 789-800 | Capstone: cell-completeness plus all-nodes recoverability yields `CascadeComplete`, naming the open localisation obligation as its hypotheses. | — |
-| `cascadeComplete_of_cellsAreOrbits` | 802-813 | Capstone stated against the single open implication: cell-completeness plus `CellsAreOrbits` at every node yields `CascadeComplete`. | — |
-| `verdictIsoInvariant_of_complete` | 815-830 | **Key theorem.** A sound, complete oracle at orbit-recoverable nodes is automatically iso-invariant, so iso-invariance is part of localisation rather than a separate obligation. | — |
-| `computes_orbits_of_complete` | 832-844 | Capstone: a sound and complete cascade oracle computes the `Aut_D`-orbit relation exactly (program-level correctness, given the completeness obligation). | — |
+| `isAut_swap_of_twin` | 326-360 | A twin pair's transposition is an automorphism: if `v, w` have identical adjacency to every other vertex of a simple graph, `swap v w` preserves `adj`. Shared with the linear oracle's twin `ConfigSwap`. | — |
+| `orbitPartition_swap_of_twin` | 362-427 | An order-undecided twin pair `v, w ∉ S` is an `Aut_S`-orbit pair at **any** individualized set, witnessed by the transposition `(v w)`. The reconstruction core behind the twin-endpoint and twin-cells results. | — |
+| `cellsAreOrbits_of_compl_card_le_two` | 429-543 | **Twin endpoint of the support spectrum.** When at most two vertices stay un-individualized (`|Sᶜ| ≤ 2`), `CellsAreOrbits` holds via the omitted pair's transposition; with `cellsAreOrbits_of_discrete` it pins both ends. | — |
+| `cellsAreOrbits_of_twin_cells` | 545-601 | `CellsAreOrbits` at **arbitrary** support whenever every same-cell pair is an order-undecided twin — the genuine-twin / module abelian regime (not CFI, which has no twins). The twin-reconstructible slice of the open localisation obligation. | — |
+| `orbitRecoverableAt_of_twin_cells` | 603-622 | Oracle-vocabulary form of `cellsAreOrbits_of_twin_cells`: on the twin regime refinement computes the orbit partition at any node, with no depth bound. | — |
+| `RecoverableByDepth` | 624-633 | Cascade-class membership for the oracle contract: there is a polynomially-bounded depth at which cells = orbits (the bound carries all the content). | Definition |
+| `recoverableByDepth_of_cascade` | 635-641 | Cascading at depth `k` gives `RecoverableByDepth … k` — the cascade-class foundation in oracle-contract form. | — |
+| `recoverableByDepth_cfi` | 643-649 | **(1a), proved for CFI** (axiom-free, odd-degree): recoverable by depth `cfi_depth_bound h` (≤ baseSize ≤ n/6). | — |
+| `recoverableByDepth_scheme` | 651-663 | **(1a), proved for schemes** (axiom-free, rank 2 / `|J| = 1`): recoverable by depth 1, at the very node the oracle acts on. | — |
+| `recoverableByDepth_univ` | 665-672 | Every graph is trivially recoverable by depth `n` (individualize everything), so only the *polynomial* depth bound is cascade-class content. | — |
+| `CascadeComplete` | 679-686 | Completeness contract: the oracle certifies every genuine `Aut_D`-orbit pair; with soundness it then computes the orbit relation exactly. | Definition |
+| `certifies_iff_orbit` | 688-702 | For a sound and complete cascade oracle, it returns `some` exactly on the pairs sharing an `Aut_D`-orbit. | — |
+| `CellComplete` | 704-711 | The polynomial completeness contract: the oracle certifies every pair sharing a 1-WL cell (refinement-decidable). | Definition |
+| `complete_of_cellComplete_recoverable` | 713-726 | **Key theorem.** At an orbit-recoverable node, certifying every same-cell pair already certifies every orbit — reducing orbit-completeness to a polynomial check. | — |
+| `VerdictIsoInvariant` | 773-786 | Iso-invariance contract (strategy §15 gap 2): the oracle's verdict depends only on the iso-invariant 1-WL partition. Derivable — see `verdictIsoInvariant_of_complete`. | Definition |
+| `cascadeComplete_of_localization` | 788-799 | Capstone: cell-completeness plus all-nodes recoverability yields `CascadeComplete`, naming the open localisation obligation as its hypotheses. | — |
+| `cascadeComplete_of_cellsAreOrbits` | 801-812 | Capstone stated against the single open implication: cell-completeness plus `CellsAreOrbits` at every node yields `CascadeComplete`. | — |
+| `verdictIsoInvariant_of_complete` | 814-829 | **Key theorem.** A sound, complete oracle at orbit-recoverable nodes is automatically iso-invariant, so iso-invariance is part of localisation rather than a separate obligation. | — |
+| `computes_orbits_of_complete` | 831-843 | Capstone: a sound and complete cascade oracle computes the `Aut_D`-orbit relation exactly (program-level correctness, given the completeness obligation). | — |
 
 ## ChainDescent/LinearOracle.lean
 
@@ -601,12 +613,12 @@ currency. So linear-oracle CFI completeness reduces to the **shared cascade-1b**
 
 | Name | Description | Notes |
 |------|-------------|-------|
-| `configSwap_of_aut` | 770-811 | **General constructor (the `hwit` entry point).** *Any* swapping automorphism `g` (`g a = b`, `g b = a`) that fixes `χι` and preserves `σ.σ` *off the flip pair* (`σ.σ (g v)(g u) = σ.σ v u` for `(v,u) ∉ {(a,b),(b,a)}`) is a `ConfigSwap` — `g` need **not** be a transposition (may move the whole coupled component). Removes the config-swap *packaging* from the open content: once the CFI gadget twist `g` and its off-pair `σ`-action are known, the `ConfigSwap` is built with no rank-alignment. | Definition |
-| `configSwap_of_swap` | 812-872 | **Closed instance (the `Z₂` twin-swap).** A σ-cell-coherent transposition automorphism (`g` swaps `a,b`, fixes the rest and `χι`) is a `ConfigSwap` — the simplest genuine abelian decision. Now a thin specialisation of `configSwap_of_aut` (transposition ⇒ off-pair preservation = σ-cell-coherence). | Definition |
-| `configSwap_of_twin` | 874-893 | **The twin → config-swap bridge.** An (adj, σ)-twin decision pair (adjacency-twin on a simple graph plus σ-cell-coherent, `χι a = χι b`) admits a `ConfigSwap` via the transposition `(a b)` — the linear-oracle analog of `cellsAreOrbits_of_twin_cells`, both oracles firing on the same twin/module class through one shared lemma. Not CFI (which has no twins). | Definition |
-| `ConfigSwapRecoverable` | 895-903 | **Decision-node recoverability** (the named cascade-1b obligation for the linear oracle): every leaf decision admits a config-swap. The graph-level analog of `AbelianSufficiencyHolds`; open discharge `configSwapRecoverable_of_cfi` is downstream. | Definition |
-| `canonAdj_eq_of_configSwapRecoverable` | 904-915 | **Capstone (pruning soundness).** Config-swap-recoverability implies both branches give the identical canonical leaf at every decision — reducing the oracle's effectiveness to the single `ConfigSwapRecoverable` hypothesis. | — |
-| `realizableFlip_of_configSwapRecoverable` | 917-928 | **Capstone (real symmetry).** Config-swap-recoverability implies every leaf decision is a genuine `Aut(adj)` symmetry — vertex-model completeness, no rank-alignment needed. | — |
+| `configSwap_of_aut` | 760-803 | **General constructor (the `hwit` entry point).** *Any* swapping automorphism `g` (`g a = b`, `g b = a`) that fixes `χι` and preserves `σ.σ` *off the flip pair* (`σ.σ (g v)(g u) = σ.σ v u` for `(v,u) ∉ {(a,b),(b,a)}`) is a `ConfigSwap` — `g` need **not** be a transposition (may move the whole coupled component). Removes the config-swap *packaging* from the open content: once the CFI gadget twist `g` and its off-pair `σ`-action are known, the `ConfigSwap` is built with no rank-alignment. | Definition |
+| `configSwap_of_swap` | 805-856 | **Closed instance (the `Z₂` twin-swap).** A σ-cell-coherent transposition automorphism (`g` swaps `a,b`, fixes the rest and `χι`) is a `ConfigSwap` — the simplest genuine abelian decision. Now a thin specialisation of `configSwap_of_aut` (transposition ⇒ off-pair preservation = σ-cell-coherence). | Definition |
+| `configSwap_of_twin` | 858-886 | **The twin → config-swap bridge.** An (adj, σ)-twin decision pair (adjacency-twin on a simple graph plus σ-cell-coherent, `χι a = χι b`) admits a `ConfigSwap` via the transposition `(a b)` — the linear-oracle analog of `cellsAreOrbits_of_twin_cells`, both oracles firing on the same twin/module class through one shared lemma. Not CFI (which has no twins). | Definition |
+| `ConfigSwapRecoverable` | 888-898 | **Decision-node recoverability** (the named cascade-1b obligation for the linear oracle): every leaf decision admits a config-swap. The graph-level analog of `AbelianSufficiencyHolds`; open discharge `configSwapRecoverable_of_cfi` is downstream. | Definition |
+| `canonAdj_eq_of_configSwapRecoverable` | 900-911 | **Capstone (pruning soundness).** Config-swap-recoverability implies both branches give the identical canonical leaf at every decision — reducing the oracle's effectiveness to the single `ConfigSwapRecoverable` hypothesis. | — |
+| `realizableFlip_of_configSwapRecoverable` | 913-924 | **Capstone (real symmetry).** Config-swap-recoverability implies every leaf decision is a genuine `Aut(adj)` symmetry — vertex-model completeness, no rank-alignment needed. | — |
 
 **§L.9 — CFI gadget twist fires the oracle (Phase 6a: wiring the Stage-3 cycle-space flip).** The
 Stage-3 gadget flip (`CFI.lean §15`, `IsCFI'.cfiFlipAut`) is now constructed; this section wires it into
@@ -779,3 +791,24 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `CFILayerGadgetFlippable` | Per-layer CFI gadget-flip existence: for each layer and same-orbit/same-cell pair `(v,w)`, an even-symmetric cycle `F` whose flip maps `v ↦ w` with `T i ∪ S i` in `F`-free gadgets. The `hwit` analog of the linear oracle's `CFIGadgetFlippableLocal`. | Definition |
 | `cfiLayer_pathFixing_hwit` | **The `hwit` drop-in.** `CFILayerGadgetFlippable` (+ `P` Aut-invariant) ⟹ the Tier-3a `hwit` hypothesis, directly via `cfiFlipAut_pathFixing_witness`. | — |
 | `cascadeComposition_cfi` | **Theorem 3a for CFI layers.** A CFI layering whose residual orbit maps are realised by committed-set-avoiding gadget flips reaches the discrete partition — `cascadeComposition_pathFixing` with `hwit` discharged by the Stage-3 flips (conditional only on the cascade-1b cycle existence). | — |
+| `recoverableByDepth_of_pathFixing_layers` | 399-417 | **The harvest-window connector.** Lands `cascadeComposition_pathFixing`'s `Discrete` output onto the harvest `RecoverableByDepth` conclusion: a layer chain with per-layer path-fixing `hwit` and a base endpoint gives `RecoverableByDepth adj P b` at the chain-length bound. | — |
+| `recoverableByDepth_of_cascadeComposition_cfi` | 419-432 | **CFI corollary of the connector.** `RecoverableByDepth` for a CFI layering via `cascadeComposition_cfi` — the connector with `hwit` discharged by the Stage-3 gadget flips. | — |
+| `ResidualAut` | 447-453 | **Residual automorphism.** A `P`-preserving automorphism of `adj` fixing `S` pointwise — an element of the residual group `Aut_S^P`; the building block of the screen predicates. `OrbitPartition adj P S v w ↔ ∃ π, ResidualAut π ∧ π v = w`. | Definition |
+| `ResidualAbelian` | 455-460 | **D2 — abelian residual.** The residual group `Aut_S^P` is abelian (any two residual automorphisms commute) — the screen's hidden-abelian / linear leg (calculator §6); the `¬IsBase`-guarded form is the D2 disjunct. | Definition |
+| `orbitPartition_iff_residualAut` | 462-468 | `OrbitPartition adj P S v w` unfolds to a `ResidualAut` carrying `v ↦ w`. | — |
+| `residualAut_eq_one_of_isBase` | 470-477 | Under a base (`IsBase`), every residual automorphism is the identity — it can move no point. | — |
+| `residualAbelian_of_isBase` | 479-484 | **Trichotomy base case.** A trivial residual (under `IsBase`) is vacuously abelian, so `ResidualAbelian` holds at any base. | — |
+| `residualAbelian_mono` | 486-493 | **D2 inherited down the descent.** `ResidualAbelian` passes from `S` to any `S' ⊇ S` (the residual shrinks to a subgroup of an abelian group). | — |
+| `VisiblyRecoverable` | 516-532 | **D1 (explicit-chain form).** A single-vertex, per-step symmetry-only chain from `S₀` reaching `CellsAreOrbits` within a depth bound — the unconditional/cascade leg's structural witness, retained alongside the inductive `Findable`. | Definition |
+| `recoverableByDepth_of_visiblyRecoverable` | 534-539 | **D1 leg (free).** `VisiblyRecoverable ⟹ RecoverableByDepth` — the chain ends on a `CellsAreOrbits` set within the bound. | — |
+| `visiblyRecoverable_bound_mono` | 541-545 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
+| `cellsAreOrbits_empty_of_schurian` | 547-560 | **Schurian scheme graphs are vertex-transitive: `CellsAreOrbits adj P ∅`.** The `Aut`-orbit relation at `∅` is total (witness from `schurian_transitive` at the diagonal `R₀`), unblocking the symmetry-only first step. | — |
+| `visiblyRecoverable_of_cellsAreOrbits_singleton` | 562-575 | **`CellsAreOrbits` at a singleton + vertex-transitivity ⟹ D1 at depth 1.** The one-step chain `∅ → {v}` is symmetry-only with `CellsAreOrbits {v}` as endpoint recovery. | — |
+| `visiblyRecoverable_scheme` | 577-587 | **D1 instance — rank-2, `|J|=1` schurian scheme is visibly recoverable.** Validates `VisiblyRecoverable` against the proved depth-1 scheme orbit recovery (`orbitRecoverable_scheme`). | — |
+| `SymmetryOnlyStep` | 591-604 | **D1 per-decision primitive (§6.10).** Individualizing `v` commits no real decision: `v`'s 1-WL cell is non-singleton and a single `Aut_S`-orbit. The non-singleton conjunct is load-bearing (forces `v ∉ S`); lifted out of `VisiblyRecoverable`. | Definition |
+| `symmetryOnlyStep_of_cellsAreOrbits` | 606-616 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
+| `symmetryOnlyStep_empty_scheme` | 618-639 | **Scheme validation of the primitive.** A vertex-transitive schurian scheme is one orbit at `∅`, so individualizing any `v` (with `n ≥ 2`) is a `SymmetryOnlyStep`. | — |
+| `Findable` | 658-670 | **The harvest-window screen (sequential D1/D2, §6.10+§6.11).** Least-fixed-point inductive: `recovered` (`Discrete` — the F1-correct stop), `abelian` (`ResidualAbelian ∧ ¬IsBase` — guarded D2), `step` (`SymmetryOnlyStep` + recurse). Bound-free classification; `¬Findable` is the seal's wall (IR-blind-spot / Cameron by residual order). | Inductive |
+| `FindableWithin` | 681-699 | **`Findable` with its recovery depth (Phase 0).** Bound-indexed companion: `recovered`→`b=S.card`, `step` propagates `b`, `abelian` carries `RecoverableByDepth adj P b` as a field (the D2-bridge interface). De-vacuates the `∃ b` conclusion (`recoverableByDepth_univ`). | Inductive |
+| `recoverableByDepth_of_findableWithin` | 701-711 | **Screen soundness — non-vacuous.** `FindableWithin adj P S b ⟹ RecoverableByDepth adj P b` at the carried bound: `recovered`/`step` free, `abelian` returns its carried recoverability field. | — |
+| `findable_of_findableWithin` | 713-722 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
