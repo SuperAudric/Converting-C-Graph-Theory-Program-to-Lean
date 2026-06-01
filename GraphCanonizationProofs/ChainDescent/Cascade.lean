@@ -431,4 +431,65 @@ theorem recoverableByDepth_of_cascadeComposition_cfi (h : IsCFI' adj) {k : Nat} 
     RecoverableByDepth adj P b :=
   ⟨T k, hb, cellsAreOrbits_of_discrete (cascadeComposition_cfi h hP T S hT hbase hflip hbaseSet)⟩
 
+/-! ## Screen predicate D2 — abelian residual (the harvest-window screen, leg B)
+
+The harvest-window screen ([`docs/chain-descent-harvest-window.md`](../../../docs/chain-descent-harvest-window.md)
+§3) is the seal's negation-complete `D1 ∨ D2`. This section defines **D2**, the *unique-candidate /
+abelian* leg: the residual symmetry (the `P`-preserving automorphisms fixing the committed set `S`
+pointwise) forms an **abelian** group. By the calculator's §6 boundary, abelian ⟺ each apparent
+decision exposes a *unique* candidate twist — exactly the regime the linear oracle reads. Its negation
+(non-abelian residual) is the Johnson / `Aₖ` fingerprint that leg C consumes.
+
+Stated **relative to `S`** deliberately: CFI's *full* `Aut = Z₂^β ⋊ Aut(H)` is non-abelian, but once `S`
+fixes the `Aut(H)` part the residual `Z₂^β` is abelian — so D2 holds at the committed sets the descent
+actually reaches, not at the root. (D1 — the visible/cascade leg — is the companion, to follow.) -/
+
+/-- **Residual automorphism.** A `P`-preserving automorphism of `adj` fixing `S` pointwise — the
+elements of the residual group `Aut_S^P`. `OrbitPartition adj P S v w` is exactly
+`∃ π, ResidualAut adj P S π ∧ π v = w` (`orbitPartition_iff_residualAut`). The reusable building block
+for the screen predicates. -/
+def ResidualAut (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n))
+    (π : Equiv.Perm (Fin n)) : Prop :=
+  IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u) ∧ FixesPointwise π S
+
+/-- **D2 — abelian residual.** The residual group `Aut_S^P` is abelian: any two residual automorphisms
+commute. The harvest-window screen's *unique-candidate / linear* leg (⟺ abelian, calculator §6); its
+negation is the leg-C Johnson fingerprint. Relative to `S` (see section note). -/
+def ResidualAbelian (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) : Prop :=
+  ∀ π₁ π₂ : Equiv.Perm (Fin n),
+    ResidualAut adj P S π₁ → ResidualAut adj P S π₂ → π₁ * π₂ = π₂ * π₁
+
+/-- `OrbitPartition` unfolds to a `ResidualAut` carrying `v ↦ w`. -/
+theorem orbitPartition_iff_residualAut {S : Finset (Fin n)} {v w : Fin n} :
+    OrbitPartition adj P S v w ↔ ∃ π, ResidualAut adj P S π ∧ π v = w := by
+  unfold OrbitPartition ResidualAut
+  constructor
+  · rintro ⟨π, h1, h2, h3, h4⟩; exact ⟨π, ⟨h1, h2, h3⟩, h4⟩
+  · rintro ⟨π, ⟨h1, h2, h3⟩, h4⟩; exact ⟨π, h1, h2, h3, h4⟩
+
+/-- **Under a base, every residual automorphism is the identity.** `IsBase adj P S` says the
+`Aut_S`-orbit relation is equality, so a residual auto cannot move any point: it fixes everything,
+hence is `1`. -/
+theorem residualAut_eq_one_of_isBase {S : Finset (Fin n)} {π : Equiv.Perm (Fin n)}
+    (hbase : IsBase adj P S) (hπ : ResidualAut adj P S π) : π = 1 := by
+  refine Equiv.ext (fun v => ?_)
+  show π v = v
+  exact (hbase v (π v) ⟨π, hπ.1, hπ.2.1, hπ.2.2, rfl⟩).symm
+
+/-- **Base case of the trichotomy: a trivial residual is abelian.** When `S` is a base, the residual
+group is `{1}`, vacuously abelian. This is the recursion bottom — `D2` holds for free at discreteness. -/
+theorem residualAbelian_of_isBase {S : Finset (Fin n)} (hbase : IsBase adj P S) :
+    ResidualAbelian adj P S := by
+  intro π₁ π₂ h₁ h₂
+  rw [residualAut_eq_one_of_isBase hbase h₁, residualAut_eq_one_of_isBase hbase h₂]
+
+/-- **D2 is inherited as the committed set grows.** Fixing *more* points (`S ⊆ S'`) shrinks the
+residual group to a subgroup, and a subgroup of an abelian group is abelian. So `ResidualAbelian` passes
+*down* the descent chain — once abelian at a node, abelian at every deeper node. -/
+theorem residualAbelian_mono {S S' : Finset (Fin n)} (h : ResidualAbelian adj P S)
+    (hSS' : S ⊆ S') : ResidualAbelian adj P S' := by
+  intro π₁ π₂ h₁ h₂
+  exact h π₁ π₂ ⟨h₁.1, h₁.2.1, fun v hv => h₁.2.2 v (hSS' hv)⟩
+    ⟨h₂.1, h₂.2.1, fun v hv => h₂.2.2 v (hSS' hv)⟩
+
 end ChainDescent

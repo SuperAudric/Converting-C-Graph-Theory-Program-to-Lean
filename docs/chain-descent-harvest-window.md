@@ -465,6 +465,25 @@ supplied by the screen. The remaining content is exactly two things, both deferr
 seal); (2) **the bridge `D1∨D2 ⟹ hwit`** (= leg-A/B completeness / cascade-1b generalized — the open
 core, exported to leg C on failure). The induction and the conclusion-connector are done.
 
+### 6.6 D2 defined in Lean — abelian residual (2026-06-01)
+
+Chosen def (option D2-A, abelian residual; D2-C/ConfigSwap rejected to avoid re-importing σ-coherence).
+Built in [`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean), axiom-clean
+(`[propext, Quot.sound]` — no `Classical.choice`), full build green:
+
+- `ResidualAut adj P S π` — the residual-automorphism predicate (`IsAut ∧ P-preserving ∧
+  FixesPointwise S`); `OrbitPartition = ∃ π, ResidualAut ∧ π v = w` (`orbitPartition_iff_residualAut`).
+- **`ResidualAbelian adj P S`** (= **D2**) — any two `ResidualAut`s commute. Stated *relative to `S`*
+  (CFI's full `Aut` is non-abelian; the residual `Z₂^β` after `S` kills `Aut(H)` is abelian).
+- `residualAbelian_of_isBase` — **trichotomy base case**: a trivial residual is abelian (recursion
+  bottom).
+- `residualAbelian_mono` — **D2 is inherited down the chain** (`S ⊆ S'`: a subgroup of an abelian group
+  is abelian) — the property the trichotomy induction needs to carry D2 deeper.
+
+Note the negation is clean: `¬ResidualAbelian` = "∃ two non-commuting residual autos" = the non-abelian
+residual, which (with `¬D1`) is the leg-C Johnson fingerprint — exported, not proved here. **D1 (the
+visible/cascade leg) is next.**
+
 ---
 
 ## 7. Honest caveats (so the concept does not over-claim)
