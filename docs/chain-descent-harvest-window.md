@@ -1,6 +1,7 @@
 # Chain descent — the harvest-window lemma (support-bounded orbit recovery)
 
-> **STATUS: PROPOSED concept (2026-06-01); Case-1 test PASSED with a refinement (§6.1).** This doc records a
+> **STATUS: PROPOSED concept (2026-06-01); both specialization tests PASSED — they reveal a two-mode
+> structure (§6.1–§6.3).** This doc records a
 > class-agnostic reframing of why the cascade/linear oracles find their symmetry within a
 > bounded depth — the **harvest window** — derived from the *support* of the symmetry rather
 > than from per-class structure (treewidth, σ-coherence). It is a **hypothesis with a designed
@@ -200,8 +201,9 @@ specializes to the two proved instances.** This is decisive either way.
 1. **Schurian schemes** — `recoverableByDepth_scheme` (depth-1 witness at the decision node). Check it
    is the lemma with **case (c) terminating at depth 1** (base 1: one individualization makes cells =
    orbits — *non-singleton*, the structural mode; see §6.1 result). **✓ DONE — §6.1.**
-2. **Odd-degree CFI** — `theorem_1_HOR_cfi_oddDeg` (`k ≤ tw(H)`). Check it is the lemma with
-   **`base(g) = tw(H)`** (the gadget flip's residual base = treewidth).
+2. **Odd-degree CFI** — `theorem_1_HOR_cfi_oddDeg` (`k ≤ baseSize`). Check it is the lemma with
+   **`b(g) = baseSize`** (the gadget group's discretizing depth). **✓ DONE — §6.2** (discretizing mode;
+   bound is class-specific, as anticipated).
 
 Outcomes:
 - **Both fall out** ⟹ the induction is the general tool; the per-class proofs are corollaries; proceed
@@ -211,6 +213,14 @@ Outcomes:
   it as a gap entry here and re-plan.
 
 Either outcome is a win and neither commits to the stuck σ-coherence model.
+
+> **Both cases done (2026-06-01).** Both specialize at the conclusion level (`RecoverableByDepth`), and
+> together they reveal the **two-mode structure** (§6.3): the conclusion form is right and already
+> formalized; the open content is the class-agnostic trichotomy *skeleton* plus a per-node **mode-split**
+> (structural witness vs discretizing bound). The scheme refined the firing condition to `CellsAreOrbits`
+> (§6.1); CFI confirmed the discretizing-mode bound is class-specific (§6.2). The concept survives and is
+> sharper. **Next: formalize the trichotomy skeleton** (`recoverableByDepth_of_findable`), with the two
+> instances as its mode anchors.
 
 ### 6.1 Case 1 — schurian scheme: RESULT (2026-06-01)
 
@@ -257,6 +267,54 @@ proved base cases it must reproduce. The Lean target is therefore sharp: a class
 `recoverableByDepth_of_findable` whose hypothesis is the screen (§3) and whose two existing instances
 are the discretizing (CFI) and structural (scheme) recovery modes.
 
+### 6.2 Case 2 — odd-degree CFI: RESULT (2026-06-01)
+
+**Verdict: conclusion aligns; this is the *discretizing* mode, and the bound `b = baseSize` is
+genuinely CFI-theory content — the §6 "doesn't expose base(g) generically" outcome, *expected* for
+this mode and not a resist of the concept.**
+
+- **Conclusion aligns.** `recoverableByDepth_cfi : RecoverableByDepth adj P (cfi_depth_bound h)` with
+  `cfi_depth_bound h = h.baseSize` ([`CFI.lean:556`](../GraphCanonizationProofs/ChainDescent/CFI.lean)) —
+  the `b = baseSize` instance. Same `RecoverableByDepth` conclusion as Case 1, different `b`.
+- **Mode = discretizing, and it shows in the type.** CFI's residual is the elementary-abelian gadget
+  group `Z₂^β`, whose intermediate 1-WL cells are *strictly coarser than orbits* (exactly why CFI
+  defeats 1-WL). So `CellsAreOrbits` holds **only at discreteness**: `theorem_1_HOR_cfi_oddDeg` carries
+  a **`Discrete (warmRefine …)`** conjunct ([`CFI.lean:3237`](../GraphCanonizationProofs/ChainDescent/CFI.lean))
+  and recovery is `cellsAreOrbits_of_discrete`. Contrast Case 1: `orbitRecoverable_scheme` has **no
+  `Discrete` conjunct** — *the mode split is visible in the theorem signatures.*
+- **The bound needs the class theory.** `b = baseSize` = one seed per gadget = the discretizing depth.
+  The proof that `allSeeds` (size `baseSize`) discretizes within ~5 refinement rounds is a
+  per-vertex-type cascade analysis (`refineStep_subset_intra_gadget_S_round5` etc.; case-split
+  subset/endpoint × subset/endpoint, [`CFI.lean:3038`](../GraphCanonizationProofs/ChainDescent/CFI.lean)) —
+  CFI combinatorics, **not** derivable from a generic support-induction. The induction supplies the
+  *skeleton* (consume the gadget generators); the *number* (`baseSize`) is CFI-specific.
+
+### 6.3 The emerging pattern (watch-item for the general theorem)
+
+Cases 1 and 2 together give the shape `recoverableByDepth_of_findable` should take — the reusable
+structure for the larger theorem:
+
+- **`b(g)` = recoverability depth** (least `|S|` with `CellsAreOrbits adj P S`). It is *not* the support
+  `|S|` (Case 1: scheme support can be large, `b=1`) and *not* uniformly the residual-group base (Case 1:
+  `S_n` base is `n−1`, yet `b=1`). The earlier "≤ base(g) ≤ |S|" (§2) should be read as this
+  recoverability depth.
+- **Two recovery modes certify `CellsAreOrbits`; the depth depends on which fires:**
+  - **structural** — non-singleton cells = orbits, witness from structure (`orbitPartition_swap_of_twin`,
+    scheme transitivity). Fires **early**, `b` small, **no `Discrete`**. (scheme; twins/modules)
+  - **discretizing** — cells = orbits only at discreteness, `cellsAreOrbits_of_discrete`. `b` = the
+    discretizing depth (≈ residual-group base). (CFI)
+- **The trichotomy induction (§2) is the universal skeleton — independent of mode.** Consume the residual
+  structure one generator per (a)/(c) step. The modes differ *only* in the **per-forced-node witness**:
+  a structural lemma vs a discretizing-depth bound.
+- **The screen (§3) unifies them:** *findable* = some mode certifies `CellsAreOrbits` within poly `b`;
+  *hidden-Johnson* = neither does within poly depth.
+
+So the general theorem is a **mode-split over a common induction**: prove the trichotomy skeleton once
+(class-agnostic), then discharge each forced node by *either* a structural witness *or* a
+discretizing-depth bound — each class-specific, but slotting into one frame. The two proved instances
+are the modes' anchors (`recoverableByDepth_scheme` structural / `recoverableByDepth_cfi` discretizing).
+**This mode-split is the structural handle to carry into the larger-theorem work.**
+
 ---
 
 ## 7. Honest caveats (so the concept does not over-claim)
@@ -267,9 +325,10 @@ are the discretizing (CFI) and structural (scheme) recovery modes.
   routes couldn't, and unifying legs A+B — not an escape from the open hard core.
 - **It is a hypothesis until §6 passes.** The induction's termination + the forced-node iso-invariance
   are argued, not proved; the specialization test is the gate.
-- **`base(g)` must be made a usable handle.** "Residual base size" is the right *quantity*, but the
-  Lean proofs may expose treewidth / scheme-depth instead. Reconciling those with `base(g)` is part of
-  §6, and a mismatch is informative, not fatal.
+- **`b(g)` is the recoverability depth, and it is mode-dependent (§6.3).** Resolved by the tests: it is
+  the least `|S|` with `CellsAreOrbits` — small in the structural mode (scheme `b=1`), the discretizing
+  depth in the discretizing mode (CFI `b=baseSize`). Not the support, not uniformly the group base. The
+  per-class bound is supplied by whichever mode fires; only the trichotomy skeleton is class-agnostic.
 
 ---
 
