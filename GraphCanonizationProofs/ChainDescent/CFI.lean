@@ -3501,6 +3501,44 @@ theorem disjoint_support_cfiFlipAut (h : IsCFI' adj) (F : Fin h.m → Fin h.m �
   exact (Equiv.Perm.mem_support.mp hi)
     (h.cfiFlipAut_eq_self_of_flipSet_empty F hEven (hT i hiT))
 
+/-! ### Phase 5 — `P`-preservation and the path-fixing witness
+
+A *component-moving* automorphism like the gadget flip preserves a partial-order matrix `P`
+exactly when `P` is invariant under automorphisms of `adj` (cf. `orbitPartition_swap_of_twin`,
+which discharges its `P`-conjunct only from `P`-relations on the swapped vertices). The
+descent's profile / trivial `P` is such an invariant; for it, the flip preserves `P` by
+transporting through `isAut_cfiFlipAut`. Phase 5 packages this and assembles Phases 3–5 into
+the exact existential the Tier-3a B1 `hwit` consumes. -/
+
+/-- **`P`-preservation.** The lifted gadget flip preserves any partial-order matrix `P` that
+every automorphism of `adj` preserves (`hP`) — instantiated at `cfiFlipAut F`, an automorphism
+by `isAut_cfiFlipAut`. This is the honest, complete statement: a component-moving flip
+preserves precisely the automorphism-invariant `P`'s (the descent's profile/trivial `P`). -/
+theorem cfiFlipAut_preserves_P (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) (hFsymm : ∀ v w, F v w = F w v)
+    {P : PMatrix n}
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
+    ∀ x u, P (h.cfiFlipAut F hEven x) (h.cfiFlipAut F hEven u) = P x u :=
+  hP _ (h.isAut_cfiFlipAut F hEven hFsymm)
+
+/-- **Phase-5 deliverable — the path-fixing witness (Tier-3a B1 `hwit` shape).** Assembling the
+gadget flip's three controlled properties — it is an automorphism (Phase 3), it preserves an
+invariant `P` (Phase 5), its support avoids any committed set in `F`-free gadgets (Phase 4) —
+and that it realises the target map `v ↦ w`, gives exactly the existential
+`Cascade.cascadeComposition_pathFixing`'s `hwit` requires. So once an `F` realising the layer's
+orbit map is in hand, the CFI side of `hwit` is discharged. -/
+theorem cfiFlipAut_pathFixing_witness (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) (hFsymm : ∀ v w, F v w = F w v)
+    {P : PMatrix n}
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    {T : Finset (Fin n)} (hT : ∀ i ∈ T, h.H.flipSet F (h.H.gadget (h.e i)) = ∅)
+    {v w : Fin n} (hvw : h.cfiFlipAut F hEven v = w) :
+    ∃ π : Equiv.Perm (Fin n), IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u)
+      ∧ Disjoint T (Equiv.Perm.support π) ∧ π v = w :=
+  ⟨h.cfiFlipAut F hEven, h.isAut_cfiFlipAut F hEven hFsymm,
+    h.cfiFlipAut_preserves_P F hEven hFsymm hP,
+    h.disjoint_support_cfiFlipAut F hEven hT, hvw⟩
+
 end IsCFI'
 
 /-! ### Phase 0 — `triangleBase` prototype (β = 1: the single 3-cycle)
