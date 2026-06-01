@@ -492,75 +492,51 @@ theorem residualAbelian_mono {S S' : Finset (Fin n)} (h : ResidualAbelian adj P 
   exact h π₁ π₂ ⟨h₁.1, h₁.2.1, fun v hv => h₁.2.2 v (hSS' hv)⟩
     ⟨h₂.1, h₂.2.1, fun v hv => h₂.2.2 v (hSS' hv)⟩
 
-/-! ## Screen predicate D1 — visible / cells=orbits chain (leg A)
+/-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).
-The symmetry is **exposed by symmetry-only individualization**: starting from the committed set `S₀`,
-a chain of **single-vertex** individualizations reaches `CellsAreOrbits` while keeping cells = orbits at
-*every* step — no apparent-decision (coarser-than-orbit) cell is ever individualized. This is the
-visible/refinement regime (rank-2 schemes recover at depth 1, see `visiblyRecoverable_scheme`).
+The symmetry is **exposed by symmetry-only individualization**: starting from `S₀`, a chain of
+single-vertex individualizations — each one **symmetry-only**, i.e. the individualized vertex's cell at
+that node is a single `Aut`-orbit, so no *real* decision is committed — reaches `CellsAreOrbits` at the
+**end**. This admits depth-≥2-recoverable graphs (the Johnson / Hamming *graphs*, recoverable DRGs) while
+still excluding CFI and the hidden Johnson *wall*: their intermediate cells are strictly coarser than
+orbits, so no symmetry-only step past depth 1 can be certified — the chain gets stuck before reaching
+cells = orbits. So `¬D1 ∧ ¬D2` = hidden + non-abelian = the leg-C Johnson/Cameron fingerprint.
 
-The three conjuncts beyond the chain are load-bearing for the screen's *negation* — they make D1 exclude
-**both** CFI and Johnson: `0 < k` kills the trivial `S₀ = ∅` recovery (cells = orbits holds vacuously at
-`∅` for any vertex-transitive graph — Johnson included); single-vertex increments forbid jumping
-straight to discreteness; and cells = orbits at *every* step then forces the chain through depth 1,
-where CFI and Johnson both fail cells = orbits. So `¬D1 ∧ ¬D2` = hidden + non-abelian = the leg-C
-Johnson/Cameron fingerprint, as intended.
+Asymmetry with D2: `D1 ⟹ RecoverableByDepth` is *free* (the def carries cells = orbits at its endpoint),
+so D1's content is the per-class *instance* check (scheme ✓ — `visiblyRecoverable_scheme`); D2's open
+content was the abelian-sufficiency bridge instead.
 
-Asymmetry with D2: `D1 ⟹ RecoverableByDepth` is *free* (the def carries cells = orbits at its endpoint —
-faithful to "exposable by symmetry-only individualization"), so D1's genuine content is the per-class
-*instance* check (scheme ✓ — `visiblyRecoverable_scheme`; CFI/Johnson ✗); D2's open content was the
-abelian-sufficiency bridge instead.
+History: this is the **multi-step** form. An earlier draft required `IsBase` (over-shot depth-1 scheme
+recovery, admitted trivial-∅); a second collapsed D1-from-∅ to *one-step* recovery (cells = orbits at
+every step), which would false-wall depth-≥2-recoverable graphs. The per-step *symmetry-only* condition
+below is the fix — cells = orbits only at the end, each step certified symmetry-only. The bound stays
+loose (≤ `n` suffices). -/
 
-History: an earlier draft required reaching a *base* (`IsBase`), but that over-shot the proved depth-1
-scheme recovery (`recoverableByDepth_scheme`) and admitted the trivial-∅ case. The recovery-depth form
-below matches the proved instance and the §6.3 `b(g)` framing. -/
-
-/-- **D1 — visibly recoverable.** A single-vertex, `CellsAreOrbits`-preserving chain from `S₀` reaching a
-recovered set of size `≤ bound`: `T 0 = S₀`, each `T (i+1)` inserts one vertex, and `CellsAreOrbits adj P
-(T i)` at every step `i ≥ 1` (with `0 < k`, so at least one genuine individualization). The visible /
-cascade leg of the screen, relative to the committed set `S₀`. -/
+/-- **D1 — visibly recoverable.** A single-vertex, **symmetry-only** chain from `S₀` reaching
+`CellsAreOrbits` within `bound`: `T 0 = S₀` (`0 < k`), each `T (i+1) = insert v (T i)` where `v`'s cell at
+`T i` is a single `Aut_{T i}`-orbit (every `T i`-cellmate of `v` is `OrbitPartition`-related to it — the
+step commits no real decision), and `CellsAreOrbits adj P (T k)` at the end, `|T k| ≤ bound`. The visible
+/ cascade leg of the screen, relative to `S₀`. -/
 def VisiblyRecoverable (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n))
     (bound : Nat) : Prop :=
   ∃ (k : Nat) (T : Nat → Finset (Fin n)),
     0 < k ∧
     T 0 = S₀ ∧
-    (∀ i, i < k → ∃ v, T (i + 1) = insert v (T i)) ∧
-    (∀ i, 0 < i → i ≤ k → CellsAreOrbits adj P (T i)) ∧
+    (∀ i, i < k → ∃ v,
+      T (i + 1) = insert v (T i) ∧
+      (∀ u, warmRefine adj P (individualizedColouring n (T i)) u
+            = warmRefine adj P (individualizedColouring n (T i)) v
+          → OrbitPartition adj P (T i) v u)) ∧
+    CellsAreOrbits adj P (T k) ∧
     (T k).card ≤ bound
 
-/-- **The D1 leg of the harvest-window lemma.** `D1 ⟹ RecoverableByDepth` — free, since the visible
-chain ends (at step `k ≥ 1`) on a set carrying `CellsAreOrbits` within the bound. -/
+/-- **The D1 leg of the harvest-window lemma.** `D1 ⟹ RecoverableByDepth` — free, since the chain ends on
+a set carrying `CellsAreOrbits` within the bound. -/
 theorem recoverableByDepth_of_visiblyRecoverable {S₀ : Finset (Fin n)} {bound : Nat}
     (h : VisiblyRecoverable adj P S₀ bound) : RecoverableByDepth adj P bound := by
-  obtain ⟨k, T, hk, _, _, hcells, hcard⟩ := h
-  exact ⟨T k, hcard, hcells k hk (le_refl k)⟩
-
-/-- **`CellsAreOrbits` at a singleton gives D1 at depth 1.** The one-step chain `∅ → {v}` is a visible
-descent witnessed by `CellsAreOrbits adj P {v}`. The general positive direction; `visiblyRecoverable_scheme`
-is its scheme corollary. -/
-theorem visiblyRecoverable_of_cellsAreOrbits_singleton {v : Fin n}
-    (hco : CellsAreOrbits adj P {v}) : VisiblyRecoverable adj P ∅ 1 := by
-  refine ⟨1, fun i => if i = 0 then ∅ else {v}, Nat.one_pos, by simp, ?_, ?_, by simp⟩
-  · intro i hi
-    have hi0 : i = 0 := by omega
-    subst hi0
-    exact ⟨v, by simp⟩
-  · intro i hi0 hi1
-    have hi1' : i = 1 := by omega
-    subst hi1'
-    simpa using hco
-
-/-- **D1 instance check — the rank-2 / `|J| = 1` schurian scheme is visibly recoverable at depth 1.**
-`CellsAreOrbits adj P {v}` holds by `orbitRecoverable_scheme` (the proved depth-1 orbit recovery,
-`theorem_2_HOR_concrete_rank_two_J_singleton`), so the one-step chain `∅ → {v}` is a visible descent.
-Validates `VisiblyRecoverable` against the proved scheme instance — the D1 analogue of Cases 1/2. -/
-theorem visiblyRecoverable_scheme (h : IsSchurianSchemeGraph' adj)
-    (hrank : h.G.scheme.rank = 2) (hJ : h.G.toSchemeGraph.J.card = 1) (v : Fin n)
-    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
-    VisiblyRecoverable adj P ∅ 1 :=
-  visiblyRecoverable_of_cellsAreOrbits_singleton
-    (orbitRecoverableAt_iff_cellsAreOrbits.mp (orbitRecoverable_scheme h hrank hJ P v hP_invariant))
+  obtain ⟨k, T, _, _, _, hcells, hcard⟩ := h
+  exact ⟨T k, hcard, hcells⟩
 
 /-- **D1 is monotone in the depth bound** (a looser bound is easier). -/
 theorem visiblyRecoverable_bound_mono {S₀ : Finset (Fin n)} {b b' : Nat}
@@ -568,35 +544,47 @@ theorem visiblyRecoverable_bound_mono {S₀ : Finset (Fin n)} {b b' : Nat}
   obtain ⟨k, T, hk, hT0, hinc, hcells, hcard⟩ := h
   exact ⟨k, T, hk, hT0, hinc, hcells, le_trans hcard hbb'⟩
 
-/-- **The negative direction — closing the D1 loop (current, one-step scope).** If **no** singleton is
-orbit-recovered (`∀ v, ¬ CellsAreOrbits adj P {v}` — the depth-1 failure that is CFI's and the hidden
-Johnson's fingerprint), then the graph is **not** visibly recoverable from `∅`: any chain's single-vertex
-first step `{v}` would need `CellsAreOrbits adj P {v}`, which fails. So `¬D1` lands exactly on graphs that
-fail depth-1 recovery — the screen's negation behaving correctly. -/
-theorem not_visiblyRecoverable_of_depth_one_fails {bound : Nat}
-    (hfail : ∀ v : Fin n, ¬ CellsAreOrbits adj P {v}) :
-    ¬ VisiblyRecoverable adj P ∅ bound := by
-  rintro ⟨k, T, hk, hT0, hinc, hcells, _⟩
-  obtain ⟨v, hv⟩ := hinc 0 hk
-  have hco : CellsAreOrbits adj P (T 1) := hcells 1 Nat.one_pos hk
-  rw [hv, hT0] at hco
-  exact hfail v (by simpa using hco)
+/-- **Schurian scheme graphs are vertex-transitive: `CellsAreOrbits adj P ∅`.** At `∅` the `Aut`-orbit
+relation is total (any two vertices are related), so it trivially refines the cell relation. The witness
+comes from `schurian_transitive` at the **diagonal** relation `R₀` (`rel_zero_iff_eq`): for any `a, b`,
+the diagonal pairs `(a,a), (b,b)` are connected by a graph automorphism `a ↦ b`, transported to `adj`
+via `matching` and made `P`-preserving by `hP_invariant`. This unblocks the symmetry-only first step. -/
+theorem cellsAreOrbits_empty_of_schurian (h : IsSchurianSchemeGraph' adj)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
+    CellsAreOrbits adj P ∅ := by
+  intro a b _
+  have hrel0a : h.G.scheme.rel 0 a a = true := (h.G.scheme.rel_zero_iff_eq a a).mpr rfl
+  have hrel0b : h.G.scheme.rel 0 b b = true := (h.G.scheme.rel_zero_iff_eq b b).mpr rfl
+  obtain ⟨π, hπ, hπa, _⟩ := h.G.schurian_transitive 0 a a b b hrel0a hrel0b
+  have hπ' : IsAut π adj := h.matching ▸ hπ
+  exact ⟨π, hπ', hP_invariant hπ', fun x hx => absurd hx (Finset.notMem_empty x), hπa⟩
 
-/-- **D1-from-`∅` is exactly depth-1 recovery (the loop, characterised).** Combining the two directions:
-visibly recoverable from `∅` (within any `bound ≥ 1`) ⟺ some singleton is orbit-recovered. This *closes*
-the D1 correctness loop at the current scope — `¬D1 ⟺ ∀v, ¬CellsAreOrbits{v}` — and *documents* its
-limitation: the current def collapses D1-from-`∅` to **one-step** recovery (right for rank-2 schemes and
-CFI, which decide at depth 1; the multi-step generalisation for depth-≥2-recoverable graphs — Johnson /
-Hamming *graphs*, not the hidden-Johnson wall — is future work, and needs scheme vertex-transitivity,
-derivable from `SchurianSchemeGraph.schurian_transitive` at relation 0). -/
-theorem visiblyRecoverable_empty_iff {bound : Nat} (hb : 1 ≤ bound) :
-    VisiblyRecoverable adj P ∅ bound ↔ ∃ v : Fin n, CellsAreOrbits adj P {v} := by
-  constructor
-  · intro h
-    by_contra hcon
-    exact not_visiblyRecoverable_of_depth_one_fails (not_exists.mp hcon) h
-  · rintro ⟨v, hco⟩
-    exact visiblyRecoverable_bound_mono (visiblyRecoverable_of_cellsAreOrbits_singleton hco) hb
+/-- **`CellsAreOrbits` at a singleton (plus vertex-transitivity) gives D1 at depth 1.** The one-step chain
+`∅ → {v}` is symmetry-only: `htrans` (`CellsAreOrbits adj P ∅`) certifies the step (`v`'s `∅`-cell is a
+single orbit), and `hco` (`CellsAreOrbits adj P {v}`) is the endpoint recovery. The positive direction;
+`visiblyRecoverable_scheme` is its scheme corollary. -/
+theorem visiblyRecoverable_of_cellsAreOrbits_singleton {v : Fin n}
+    (htrans : CellsAreOrbits adj P ∅) (hco : CellsAreOrbits adj P {v}) :
+    VisiblyRecoverable adj P ∅ 1 := by
+  refine ⟨1, fun i => match i with | 0 => ∅ | _ + 1 => {v}, Nat.one_pos, rfl, ?_, ?_, ?_⟩
+  · intro i hi
+    have hi0 : i = 0 := by omega
+    subst hi0
+    exact ⟨v, by simp, fun u hu => htrans v u hu.symm⟩
+  · exact hco
+  · simp
+
+/-- **D1 instance check — the rank-2 / `|J| = 1` schurian scheme is visibly recoverable.** The one-step
+chain `∅ → {v}` is symmetry-only: vertex-transitivity (`cellsAreOrbits_empty_of_schurian`) certifies the
+step, and `CellsAreOrbits adj P {v}` (the proved depth-1 orbit recovery `orbitRecoverable_scheme`) is the
+endpoint. Validates the *multi-step* `VisiblyRecoverable` against the proved scheme instance. -/
+theorem visiblyRecoverable_scheme (h : IsSchurianSchemeGraph' adj)
+    (hrank : h.G.scheme.rank = 2) (hJ : h.G.toSchemeGraph.J.card = 1) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
+    VisiblyRecoverable adj P ∅ 1 :=
+  visiblyRecoverable_of_cellsAreOrbits_singleton
+    (cellsAreOrbits_empty_of_schurian h hP_invariant)
+    (orbitRecoverableAt_iff_cellsAreOrbits.mp (orbitRecoverable_scheme h hrank hJ P v hP_invariant))
 
 /-! ### The screen `Findable = D1 ∨ D2` -/
 

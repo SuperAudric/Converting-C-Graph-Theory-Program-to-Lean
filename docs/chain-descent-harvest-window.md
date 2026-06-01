@@ -514,36 +514,37 @@ Chosen def (option D1-A, visible / cells=orbits chain to a base). Built in
 is the per-class instance check — **the scheme positive direction is done in Lean
 (`visiblyRecoverable_scheme`)**.
 
-### 6.8 D1 correctness loop — closed at the current (one-step) scope (2026-06-01)
+### 6.8 D1 made multi-step — the correct (non-false-walling) form (2026-06-01)
 
-The negative direction, now in [`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean)
-(axiom-clean, build green):
+A first pass closed the loop for a *one-step* def (cells = orbits at every step), but the iff it produced
+(`VisiblyRecoverable adj P ∅ bound ↔ ∃v, CellsAreOrbits{v}`) revealed that form collapses D1-from-∅ to
+**one-step (depth-1) recovery** — correct for rank-2 schemes (depth 1) and CFI (fails depth 1), but it
+**false-walls depth-≥2-recoverable graphs** (the Johnson / Hamming *graphs* — recoverable DRGs, *not* the
+hidden-Johnson *wall*): `¬D1` + non-abelian ⟹ wrongly `¬screen`. So the def was revised to the correct
+**multi-step** form ([`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean), axiom-clean,
+build green):
 
-- `visiblyRecoverable_of_cellsAreOrbits_singleton` — positive direction generalised (`CellsAreOrbits adj
-  P {v} ⟹ VisiblyRecoverable adj P ∅ 1`); `visiblyRecoverable_scheme` is its scheme corollary.
-- **`not_visiblyRecoverable_of_depth_one_fails`** — the **loop-closer**: `(∀ v, ¬CellsAreOrbits adj P
-  {v}) ⟹ ¬VisiblyRecoverable adj P ∅ bound`. A chain from `∅` must take a single-vertex first step
-  `{v}` needing cells=orbits there; depth-1 failure (CFI's / the hidden Johnson's fingerprint) kills it.
-- **`visiblyRecoverable_empty_iff`** — the crisp characterisation: `VisiblyRecoverable adj P ∅ bound ↔
-  ∃ v, CellsAreOrbits adj P {v}` (for `bound ≥ 1`). So `¬D1 ⟺ ∀v ¬CellsAreOrbits{v}` — the screen's
-  D1-negation lands *exactly* on depth-1 failure.
+- **`VisiblyRecoverable`** (multi-step) — a single-vertex chain where each step is **symmetry-only** (the
+  individualized vertex's cell at that node is a single `Aut`-orbit — no real decision), reaching
+  `CellsAreOrbits` only at the **end**. Admits depth-≥2 recovery; still excludes CFI / hidden-Johnson
+  (their intermediate cells are coarser than orbits, so symmetry-only steps can't be certified past depth
+  1 — the chain gets stuck).
+- `recoverableByDepth_of_visiblyRecoverable` — D1-leg, still **free**.
+- **`cellsAreOrbits_empty_of_schurian`** — vertex-transitivity `CellsAreOrbits adj P ∅`, proved from
+  `SchurianSchemeGraph.schurian_transitive` at the diagonal relation `R₀` (auto transported via
+  `matching`, P-preservation via `hP_invariant`). The unblocker the previous turn flagged.
+- **`visiblyRecoverable_scheme`** — re-proved in the multi-step def: the `∅ → {v}` step is symmetry-only
+  by transitivity, with `CellsAreOrbits {v}` from `orbitRecoverable_scheme`. The scheme instance now sits
+  in the *correct* def, no false-wall.
 
-**What "closed" means, honestly.** The iff *also documents a limitation*: the current def collapses
-**D1-from-`∅` to one-step (depth-1) recovery**. That is correct for the current formalised scope —
-rank-2 schemes recover at depth 1 (`visiblyRecoverable_scheme`), CFI fails at depth 1 — so the loop is
-closed *there*. But it **mis-tiles depth-≥2-recoverable graphs** (the Johnson / Hamming *graphs* —
-recoverable DRGs, **not** the hidden-Johnson *wall*): they would be `¬D1` and, if non-abelian, wrongly
-`¬screen` (a false wall). The fix is the **multi-step** form (per-step symmetry-only: the individualised
-*cell* is a single orbit, reaching cells=orbits at the end), whose scheme instance needs vertex-
-transitivity — now known **derivable from `SchurianSchemeGraph.schurian_transitive` at relation 0**
-(checked this turn). That generalisation is the flagged next refinement.
+**Dropped** (one-step-specific, false under multi-step): `not_visiblyRecoverable_of_depth_one_fails`,
+`visiblyRecoverable_empty_iff`. The multi-step **negative** (CFI / hidden-Johnson `¬D1`) has no clean
+one-liner — it's "the symmetry-only chain gets stuck before recovery," needing CFI's coarser-cells fact —
+and stays the isolated structural residual.
 
-The concrete CFI discharge — `∀v, ¬CellsAreOrbits adj P {v}` (CFI's depth-1 cells-coarser-than-orbits
-fact) — stays the isolated structural residual (needs CFI gadget analysis, not formalised).
-
-Both screen predicates and the screen are in Lean. **Remaining: the D2 bridge (`ResidualAbelian ⟹
-hwit`, = cascade-1b generalized); the multi-step D1 generalisation (+ scheme transitivity); the concrete
-CFI ¬D1 discharge.**
+Both screen predicates and the screen are in Lean, with the scheme positive instance in the correct def.
+**Remaining: the D2 bridge (`ResidualAbelian ⟹ hwit`, = cascade-1b generalized); the multi-step D1
+*negative* (CFI/hidden-Johnson ¬D1 — the chain-gets-stuck residual).**
 
 ---
 
