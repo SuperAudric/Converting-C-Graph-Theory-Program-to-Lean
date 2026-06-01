@@ -1,6 +1,6 @@
 # Chain descent — the harvest-window lemma (support-bounded orbit recovery)
 
-> **STATUS: PROPOSED concept (2026-06-01), not yet validated.** This doc records a
+> **STATUS: PROPOSED concept (2026-06-01); Case-1 test PASSED with a refinement (§6.1).** This doc records a
 > class-agnostic reframing of why the cascade/linear oracles find their symmetry within a
 > bounded depth — the **harvest window** — derived from the *support* of the symmetry rather
 > than from per-class structure (treewidth, σ-coherence). It is a **hypothesis with a designed
@@ -125,13 +125,19 @@ survives either way.
 
 ---
 
-## 3. The footprint-singletonizing hypothesis = the hidden-Johnson screen
+## 3. The recoverability hypothesis = the hidden-Johnson screen
 
-The lemma's one load-bearing hypothesis is that `g`'s residual action **singletonizes its footprint
+> **Refined by Case 1 (§6.1):** the hypothesis below was first stated as "the footprint singletonizes."
+> The scheme test showed that is only the *discretizing* mode; the general condition is
+> **`CellsAreOrbits adj P S` at the residual base** (cells coincide with orbits — reached by *either*
+> singletonizing *or* a structural non-singleton witness). Read "singletonizes" below as the
+> discretizing instance of "cells = orbits."
+
+The lemma's one load-bearing hypothesis is that `g`'s residual action reaches **`CellsAreOrbits`
 within the residual base bound**. This is *not* a free assumption — it is the wall boundary wearing a
 different coat:
 
-- **Findable (in-scope):** the footprint singletonizes within `base(g)` ⟹ unique candidate ⟹ harvest.
+- **Findable (in-scope):** cells = orbits within `b(g)` ⟹ refinement computes the orbit map ⟹ harvest.
 - **Hidden Johnson (the wall):** individualizing within the orbit leaves large symmetric sub-cells —
   the footprint **stays non-singleton** past the bound. No unique candidate from one branch
   (cross-branch triangulation needed — exponential).
@@ -180,7 +186,7 @@ is **legs A + B of the seal in one object**, class-agnostic.
 
 | Gap | What | Status |
 |---|---|---|
-| **1** | Firing requires the footprint to singletonize (unique candidate). | **= the hypothesis = the screen** (§3). Load-bearing; must be *stated* as the residual property, not assumed. It is the wall boundary relocated, not removed. |
+| **1** | Firing requires `CellsAreOrbits adj P S` at the residual base (cells coincide with orbits). | **= the hypothesis = the screen** (§3). **Corrected by §6.1:** the condition is `CellsAreOrbits`, achieved by *either* mode — discretizing (singletons, `cellsAreOrbits_of_discrete`) or structural (non-singleton cells, `orbitPartition_swap_of_twin` / scheme transitivity). "Footprint singletonizes" is only the discretizing case. Load-bearing; the wall boundary relocated, not removed. |
 | **2** | Is the recursion single-path (cost `O(depth)`) or exploratory (`O(n^depth)`) at the bound? | **Parked sub-investigation.** Docs say exploratory `O(n⁴)` (cascade-oracle §4.4/§4.6); build brief says "lockstep single-path." Reconcile — it's the difference between cheap-at-any-depth and needing a base-size cost argument. C# hasn't hit it empirically (depths bottom out `≈ tw(H)`), but not proof-worthy. |
 | **3** | Path-determinism / iso-invariance of "the forced node." | **Spine + (c)-induction.** Spine gives the *path* is deterministic and the forced node is unique+iso-invariant; the (c)-induction gives the forced node *exists* under premature support decisions (it's "residual support is all that remains," not literally "complement individualized"). Closing step: every exit harvests ⟹ choice-independent. |
 
@@ -192,8 +198,8 @@ Before any formalization, **state the lemma against the existing Lean objects an
 specializes to the two proved instances.** This is decisive either way.
 
 1. **Schurian schemes** — `recoverableByDepth_scheme` (depth-1 witness at the decision node). Check it
-   is the lemma with **case (c) terminating at depth 1** (base size 1: one individualization
-   singletonizes the footprint).
+   is the lemma with **case (c) terminating at depth 1** (base 1: one individualization makes cells =
+   orbits — *non-singleton*, the structural mode; see §6.1 result). **✓ DONE — §6.1.**
 2. **Odd-degree CFI** — `theorem_1_HOR_cfi_oddDeg` (`k ≤ tw(H)`). Check it is the lemma with
    **`base(g) = tw(H)`** (the gadget flip's residual base = treewidth).
 
@@ -206,14 +212,59 @@ Outcomes:
 
 Either outcome is a win and neither commits to the stuck σ-coherence model.
 
+### 6.1 Case 1 — schurian scheme: RESULT (2026-06-01)
+
+**Verdict: specializes cleanly at the conclusion level; the test *corrects the firing condition*.**
+Productive middle outcome — the conclusion form is right (and already formalized), but the mechanism
+as stated in §1/§3 was too narrow.
+
+**Conclusion aligns, and the Lean home already exists.** The harvest-window depth bound *is*
+`RecoverableByDepth adj P b := ∃ S, S.card ≤ b ∧ CellsAreOrbits adj P S`
+([`CascadeOracle.lean:631`](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean)), and
+`recoverableByDepth_scheme` is its **`b = 1`** instance (witness `S = {v}`). The trichotomy induction
+on a rank-2 / `|J|=1` scheme reproduces it exactly: the root is one cell = one orbit
+(vertex-transitive) ⟹ case (a) picks rep `v`; the residual `Aut_v` satisfies `CellsAreOrbits` at depth
+1 (`theorem_2_HOR_concrete_rank_two_J_singleton`). Forced node `= {v}`, recoverability depth
+`b(g) = 1`. Matches the proved theorem.
+
+**The refinement the test forces** (a sharpening, not a failure):
+
+1. **Firing condition is `CellsAreOrbits`, not "footprint singletonizes."** The scheme recovers at
+   depth 1 with **non-singleton cells** that *coincide with orbits* — the orbit witness comes from the
+   scheme's transitivity, not from the cells collapsing to singletons. So §1/§3's "all-singleton
+   footprint = unique candidate" is only **one of two recovery modes**:
+   - **discretizing mode** — deepen to singletons; `CellsAreOrbits` holds for free
+     (`cellsAreOrbits_of_discrete`). This is CFI's route and the linear oracle's all-singleton-footprint
+     path.
+   - **structural mode** — `CellsAreOrbits` at coarse, *non-singleton* cells; the orbit witness is built
+     from structure (`orbitPartition_swap_of_twin` for twins/modules; scheme transitivity for
+     `recoverableByDepth_scheme`).
+
+   The unifying firing condition is **`CellsAreOrbits adj P S`** — already the project's localisation
+   predicate (`orbitRecoverableAt_iff_cellsAreOrbits`) — with "footprint singletonizes" as the
+   discretizing special case. §1/§3 should read `CellsAreOrbits`, not singletonization.
+
+2. **The depth is the recoverability depth `b(g)`, not the support `|S|`.** For the scheme `b = 1`
+   while the *element* support can be large. So §2's "≤ `base(g)` ≤ `|S|`" should be read: the bound is
+   the **recoverability depth** — the least `|S|` with `CellsAreOrbits adj P S`, which
+   `RecoverableByDepth` already names. Support size is a loose upper envelope, not the quantity.
+
+**Consequence for the Lean target.** Because the harvest-window *conclusion* is `RecoverableByDepth`,
+both anchors already exist axiom-free (`recoverableByDepth_scheme` at `b=1`, `recoverableByDepth_cfi`
+at `b=cfi_depth_bound`). The general lemma's only new content is producing `RecoverableByDepth adj P
+(b(g))` for an arbitrary *findable* `g` via the trichotomy induction; the per-class theorems are the
+proved base cases it must reproduce. The Lean target is therefore sharp: a class-agnostic
+`recoverableByDepth_of_findable` whose hypothesis is the screen (§3) and whose two existing instances
+are the discretizing (CFI) and structural (scheme) recovery modes.
+
 ---
 
 ## 7. Honest caveats (so the concept does not over-claim)
 
-- **The wall is not removed.** The footprint-singletonizing hypothesis (§3) is doing all the
-  hard-boundary work; it *is* the seal's D2 / split-or-Johnson line. The win is **organizational and
-  general** — proving the bound the per-class / σ-coherence routes couldn't, and unifying legs A+B —
-  not an escape from the open hard core.
+- **The wall is not removed.** The recoverability hypothesis (`CellsAreOrbits` within `b(g)`, §3 as
+  corrected by §6.1) is doing all the hard-boundary work; it *is* the seal's D2 / split-or-Johnson
+  line. The win is **organizational and general** — proving the bound the per-class / σ-coherence
+  routes couldn't, and unifying legs A+B — not an escape from the open hard core.
 - **It is a hypothesis until §6 passes.** The induction's termination + the forced-node iso-invariance
   are argued, not proved; the specialization test is the gate.
 - **`base(g)` must be made a usable handle.** "Residual base size" is the right *quantity*, but the
