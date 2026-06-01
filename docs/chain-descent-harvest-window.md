@@ -489,24 +489,34 @@ Chosen def (option D1-A, visible / cells=orbits chain to a base). Built in
 [`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean), axiom-clean
 (`[propext, Classical.choice, Quot.sound]`), full build green:
 
-- **`VisiblyRecoverable adj P S₀ bound`** (= **D1**) — a monotone chain `T 0 = S₀ ⊆ … ⊆ T k` with
-  `CellsAreOrbits adj P (T i)` at **every** step and `IsBase adj P (T k)`, `|T k| ≤ bound`. The
-  cells=orbits-throughout + reaches-a-base conjuncts are what exclude CFI (its descent to a base must
-  pass coarser-than-orbit intermediates; `IsBase` at `∅` is false since `Aut(CFI)` is non-trivial) and
-  admit scheme / clean GRR.
+- **`VisiblyRecoverable adj P S₀ bound`** (= **D1**, *refined — see below*) — a **single-vertex** chain
+  `T 0 = S₀`, each `T (i+1) = insert v (T i)`, with `0 < k` and `CellsAreOrbits adj P (T i)` at **every**
+  step `i ≥ 1`, `|T k| ≤ bound`. The three conjuncts (`0 < k`, single-vertex increments, cells=orbits
+  throughout) make D1 exclude **both CFI and Johnson**: `0 < k` kills the trivial-∅ recovery (cells =
+  orbits holds vacuously at `∅` for any vertex-transitive graph — *Johnson included*), single-vertex
+  steps forbid jumping to discreteness, and cells = orbits at every step forces the chain through depth
+  1, where CFI and Johnson both fail.
+  > **Refinement (this turn):** the earlier `IsBase`-to-a-base form over-shot the proved depth-1 scheme
+  > recovery *and* admitted trivial-∅ (Johnson). The recovery-depth form above matches the proved
+  > instance and the §6.3 `b(g)` framing. (3rd pass — early-stage, def-swapping is cheap.)
 - `recoverableByDepth_of_visiblyRecoverable` — the **D1 leg** of the harvest-window lemma, *free* from
-  the def (cells=orbits sits at the endpoint). Faithful to "exposable by symmetry-only individualization."
-- `visiblyRecoverable_of_discrete` — **base case** (discrete ⟹ D1, trivial chain): the D1 recursion
-  bottom, mirroring `residualAbelian_of_isBase`.
+  the def (cells=orbits sits at step `k`). Faithful to "exposable by symmetry-only individualization."
+- **`visiblyRecoverable_scheme`** — **the D1 instance check, validated in Lean**: a rank-2 / `|J|=1`
+  schurian scheme satisfies `VisiblyRecoverable adj P ∅ 1` via the one-step chain `∅ → {v}`, with
+  `CellsAreOrbits adj P {v}` supplied by the proved `orbitRecoverable_scheme`
+  (`theorem_2_HOR_concrete_rank_two_J_singleton`). The D1 analogue of Cases 1/2, now a Lean theorem.
 - **`Findable adj P S₀`** (= the **screen `D1 ∨ D2`**) — `(∃ bound, VisiblyRecoverable …) ∨
   ResidualAbelian …`. Bound-free (D1's depth quantified existentially) = the pure negation-complete
   classification; `recoverableByDepth_of_findable_visible` discharges the D1 disjunct's recoverability
   now, the D2 disjunct awaiting the bridge.
 
 **Asymmetry recorded:** `D1 ⟹ recoverable` is *free* (def bakes in cells=orbits), so D1's genuine content
-is the per-class instance check (scheme ✓, CFI ✗) — deferred; D2's open content was the abelian bridge.
-Both screen predicates and the screen itself are now in Lean. **Remaining: the D2 bridge
-(`ResidualAbelian ⟹ hwit`, = cascade-1b generalized) and the per-class D1 instance checks.**
+is the per-class instance check — **the scheme positive direction is now done in Lean
+(`visiblyRecoverable_scheme`)**; the CFI/Johnson negative direction (¬D1) and the D2 bridge remain.
+Both screen predicates and the screen itself are in Lean. **Remaining: the D2 bridge
+(`ResidualAbelian ⟹ hwit`, = cascade-1b generalized); the D1 *negative* instance (`¬VisiblyRecoverable`
+for CFI/Johnson — needs cells≠orbits at depth 1); and a possible D1 loosening for depth-≥2-visible
+graphs (cells=orbits at the *individualized cell* per step, vs globally).**
 
 ---
 
