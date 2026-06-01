@@ -3466,6 +3466,111 @@ theorem cfiFlip_subset (F : Fin m → Fin m → Bool)
     (hS : S ∈ H.evenSubsetsOfNeighbors v) :
     H.cfiFlip F hEven (H.subset hS) = H.subset (H.symmDiff_flipSet_mem_even F hEven hS) := rfl
 
+/-! ### C1b.2a — the common-neighbour triangle (a concrete even subgraph through an edge)
+
+The minimal even subgraph through an edge `{v, w}`: a triangle `{v, w, u}` with `u` a common
+neighbour of `v` and `w`. Every triangle vertex has F-degree 2 (even), every other vertex 0. This is
+the concrete witness that the even cycle `F` cascade-1b (C1b.1) needs *exists* — for any decision edge
+with a common neighbour outside the forbidden (decided-gadget) set. Covers triangle-containing CFI
+bases (e.g. K₄, an odd-degree base); bipartite/triangle-free bases (K₃,₃, Petersen) need the general
+cycle (C1b.2b). -/
+
+/-- Symmetric indicator of a single undirected edge `{a, b}`. -/
+def isEdgeOf (a b p q : Fin m) : Bool := (p == a && q == b) || (p == b && q == a)
+
+/-- The triangle even-subgraph through edge `{v, w}` with apex `u`: the indicator of the three
+undirected edges `{v,w}, {w,u}, {u,v}`. -/
+def triEdge (v w u : Fin m) : Fin m → Fin m → Bool :=
+  fun p q => isEdgeOf v w p q || isEdgeOf w u p q || isEdgeOf u v p q
+
+/-- Membership characterisation of the triangle indicator. -/
+theorem triEdge_eq_true {v w u p q : Fin m} :
+    triEdge v w u p q = true ↔
+      ((p = v ∧ q = w) ∨ (p = w ∧ q = v)) ∨
+      ((p = w ∧ q = u) ∨ (p = u ∧ q = w)) ∨
+      ((p = u ∧ q = v) ∨ (p = v ∧ q = u)) := by
+  simp only [triEdge, isEdgeOf, Bool.or_eq_true, Bool.and_eq_true, beq_iff_eq]; tauto
+
+/-- The triangle indicator is symmetric (undirected). -/
+theorem triEdge_symm (v w u p q : Fin m) : triEdge v w u p q = triEdge v w u q p := by
+  rw [Bool.eq_iff_iff, triEdge_eq_true, triEdge_eq_true]; tauto
+
+/-- The triangle contains its base edge `{v, w}`. -/
+theorem triEdge_apex (v w u : Fin m) : triEdge v w u v w = true := by
+  rw [triEdge_eq_true]; exact Or.inl (Or.inl ⟨rfl, rfl⟩)
+
+/-- The triangle indicator is cyclically invariant: `{v,w,u}` and `{w,u,v}` are the same triangle. -/
+theorem triEdge_cyclic (v w u : Fin m) : triEdge v w u = triEdge w u v := by
+  funext p q; rw [Bool.eq_iff_iff, triEdge_eq_true, triEdge_eq_true]; tauto
+
+/-- F-neighbour characterisation grouped by source vertex. -/
+theorem triEdge_iff {v w u x q : Fin m} :
+    triEdge v w u x q = true ↔
+      (x = v ∧ (q = w ∨ q = u)) ∨ (x = w ∧ (q = v ∨ q = u)) ∨ (x = u ∧ (q = v ∨ q = w)) := by
+  rw [triEdge_eq_true]; tauto
+
+/-- **The triangle's flip set at its base vertex** is the other two vertices. -/
+theorem flipSet_triEdge (v w u : Fin m) (hvw : v ≠ w) (hvu : v ≠ u)
+    (hwN : w ∈ H.neighbors v) (huN : u ∈ H.neighbors v) :
+    H.flipSet (triEdge v w u) v = {w, u} := by
+  ext q
+  rw [mem_flipSet, Finset.mem_insert, Finset.mem_singleton]
+  constructor
+  · rintro ⟨_, hq⟩
+    rw [triEdge_iff] at hq
+    rcases hq with ⟨_, h⟩ | ⟨h, _⟩ | ⟨h, _⟩
+    · exact h
+    · exact absurd h hvw
+    · exact absurd h hvu
+  · rintro (rfl | rfl)
+    · exact ⟨hwN, by rw [triEdge_iff]; exact Or.inl ⟨rfl, Or.inl rfl⟩⟩
+    · exact ⟨huN, by rw [triEdge_iff]; exact Or.inl ⟨rfl, Or.inr rfl⟩⟩
+
+/-- **Off the triangle, the flip set is empty** — the avoidance property (gives D-locality). -/
+theorem flipSet_triEdge_other {v w u x : Fin m} (hxv : x ≠ v) (hxw : x ≠ w) (hxu : x ≠ u) :
+    H.flipSet (triEdge v w u) x = ∅ := by
+  ext q
+  simp only [mem_flipSet, Finset.notMem_empty, iff_false, not_and]
+  intro _ hq
+  rw [triEdge_iff] at hq
+  rcases hq with ⟨h, _⟩ | ⟨h, _⟩ | ⟨h, _⟩
+  · exact hxv h
+  · exact hxw h
+  · exact hxu h
+
+/-- **The triangle is an even subgraph.** Every vertex has F-degree `2` (on the triangle) or `0`
+(off it) — both even. Needs the three triangle edges to be `H`-edges (`u` a common neighbour). -/
+theorem triEdge_even {v w u : Fin m} (hvw : v ≠ w) (hvu : v ≠ u) (hwu : w ≠ u)
+    (hwN : w ∈ H.neighbors v) (huNv : u ∈ H.neighbors v) (huNw : u ∈ H.neighbors w) :
+    ∀ x, (H.flipSet (triEdge v w u) x).card % 2 = 0 := by
+  intro x
+  by_cases hxv : x = v
+  · rw [hxv, H.flipSet_triEdge v w u hvw hvu hwN huNv, Finset.card_pair hwu]
+  by_cases hxw : x = w
+  · rw [hxw, triEdge_cyclic v w u,
+        H.flipSet_triEdge w u v hwu (Ne.symm hvw) huNw (H.mem_neighbors_symm.mp hwN),
+        Finset.card_pair (Ne.symm hvu)]
+  by_cases hxu : x = u
+  · rw [hxu, triEdge_cyclic v w u, triEdge_cyclic w u v,
+        H.flipSet_triEdge u v w (Ne.symm hvu) (Ne.symm hwu)
+          (H.mem_neighbors_symm.mp huNv) (H.mem_neighbors_symm.mp huNw),
+        Finset.card_pair hvw]
+  rw [H.flipSet_triEdge_other hxv hxw hxu, Finset.card_empty]
+
+/-- **C1b.2a — existence of the avoiding even subgraph (triangle case).** If the decision edge
+`{v, w}` has a common neighbour `u` (distinct, in `N(v) ∩ N(w)`), there is an even symmetric subgraph
+`F` through `{v, w}` whose support is exactly `{v, w, u}` — so it avoids every vertex outside
+`{v, w, u}`. The concrete witness for the even cycle cascade-1b (C1b.1) needs, for any decision edge
+with a common neighbour outside the forbidden set. -/
+theorem exists_even_triangle {v w u : Fin m} (hvw : v ≠ w) (hvu : v ≠ u) (hwu : w ≠ u)
+    (hwN : w ∈ H.neighbors v) (huNv : u ∈ H.neighbors v) (huNw : u ∈ H.neighbors w) :
+    ∃ (F : Fin m → Fin m → Bool) (_hEven : ∀ x, (H.flipSet F x).card % 2 = 0),
+      (∀ p q, F p q = F q p) ∧ F v w = true ∧
+      (∀ x, x ≠ v → x ≠ w → x ≠ u → H.flipSet F x = ∅) :=
+  ⟨triEdge v w u, H.triEdge_even hvw hvu hwu hwN huNv huNw,
+   triEdge_symm v w u, triEdge_apex v w u,
+   fun _ hxv hxw hxu => H.flipSet_triEdge_other hxv hxw hxu⟩
+
 end CFIBase
 
 /-! ### Phase 3 — lift the gadget flip to `Aut(adj)` on `Fin n`
