@@ -1,11 +1,11 @@
 # Handoff — abelian-sufficiency / linear-oracle completeness on CFI
 
-**Status (2026-06-01): active Lean work.** This doc lets a cold reader pick up the
-in-flight proof that the **linear oracle is complete on CFI** (it fires whenever it
-should). It records the approach, the alternates, and what is built vs. open.
-**Update (2026-06-01):** the Stage-3 gadget twist (`hwit`) is now **built and proven sound for
-both oracles** (`CFI.lean §15`, Phases 0–6) — the open residual has collapsed from "hwit +
-cascade-1b" to **just cascade-1b** (the decision-local cycle's existence; see §4–§5).
+**Status (2026-06-01): PAUSED at a foundational finding — read §0 first.** This doc lets a cold
+reader pick up the in-flight proof that the **linear oracle is complete on CFI** (it fires whenever
+it should). The Stage-3 gadget twist + most of cascade-1b are **built and axiom-clean**, but the
+final step (`C1b.3`) hit a **known-false-in-general property at its core** (σ-cell-coherence). The
+problem is paused there pending a decision on how to proceed. **§0 is the authoritative current-state
+handoff**; §1–§7 are the historical detail it points into.
 
 Authoritative companions: [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
 §8.2 (the retargeting), [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
@@ -23,6 +23,132 @@ Authoritative companions: [`chain-descent-linear-oracle.md`](./chain-descent-lin
 > that ¬D2 property is a positive input to the Cameron leg (leg C), not a dead end.
 > The named nut already isolates this correctly (`hwit` + cascade-1b are shared and
 > non-GI∈P); the seal just asks that the *failure boundary* be exported as data.
+
+---
+
+## 0. START HERE — current state, the reduction chain, and the open finding (2026-06-01)
+
+### 0.1 The goal & the reduction chain
+
+**Goal:** prove the linear oracle (and, via the same object, Tier-3a B1's `hwit`) **fires on every
+CFI decision** ⟹ the descent collapses CFI to a single path ⟹ polynomial CFI. The C# already shows
+this empirically through CFI(K7); this is the Lean proof.
+
+**Approach C (chosen long ago, still right):** model the pruning certificate as a **`ConfigSwap`** —
+a *vertex-space* automorphism `g` of `adj` that fixes the leaf colouring `χι` and carries the order
+assignment `σ` onto its flip `flipPair σ a b`. This sidesteps the rank-alignment / conjugation nut
+(§2). The whole completeness proof is a chain of reductions, **all axiom-clean
+`[propext, Classical.choice, Quot.sound]`, all built except the last link**:
+
+```
+  CFI gadget twist  ──soundness──▶  ConfigSwap  ──▶  ConfigSwapRecoverable  ──capstones──▶  oracle fires
+  (cfiFlipAut F)                    (configSwap_of_cfiFlipAut)                              (canonAdj_eq_…, realizableFlip_…)
+
+  Discharging ConfigSwapRecoverable for CFI, reduced step by step:
+    ConfigSwapRecoverable
+      ◀── configSwapRecoverable_of_cfi        (CFIGadgetFlippable)
+      ◀── …_of_cfi_local                      (CFIGadgetFlippableLocal — conditions decoupled to locality+coherence)
+      ◀── cfiGadgetFlippableLocal_of_parity   (CFIParityDecisionFlippable — decisions are parity-pairs; swap pre-discharged)
+      ◀── [C1b.3]  ← THE OPEN / BLOCKED STEP
+```
+
+Tier-3a B1 consumes the *same* gadget twist: `Cascade.cfiLayer_pathFixing_hwit` /
+`cascadeComposition_cfi` ◀── `CFILayerGadgetFlippable` (the `hwit` analog of `CFIGadgetFlippableLocal`).
+
+### 0.2 What is BUILT (axiom-clean; full serial build green, `scripts/build.sh`)
+
+- **The Stage-3 gadget twist** = the **`Z₂^β` cycle-space generators**, NOT the full
+  `Aut(CFI)≅Z₂^β⋊Aut(H)` iso (the surjectivity half no consumer needs). `CFI.lean §15`:
+  - **Phases 0–5** — `cfiFlip F`/`cfiFlipEquiv` (even subgraph `F` ⟹ involution), `cfiFlip_isAut`
+    (preserves `cfiAdj`), `IsCFI'.cfiFlipAut` + `isAut_cfiFlipAut` (an honest `Aut(adj)` involution on
+    `Fin n`), `disjoint_support_cfiFlipAut` (support localised to `F`-touched gadgets),
+    `cfiFlipAut_preserves_P` + `cfiFlipAut_pathFixing_witness` (the Tier-3a `hwit` existential).
+  - **C1b.0** — `cfiFlip_endpoint`/`cfiFlipAut_swaps_endpointVertex`: the flip swaps the parity-pair
+    `e^0_{v→w}/e^1_{v→w}` **iff `{v,w}∈F`** (and subset-pairs via `cfiFlip_subset`). The decision-pair
+    swap is settled in advance.
+  - **C1b.2a** — `exists_even_triangle`: the common-neighbour triangle, a concrete even `F` through
+    `{v,w}` avoiding everything else (covers triangle-containing bases, e.g. K₄).
+  - **C1b.2b** — `exists_even_cycle`: the **general** even subgraph via a **permutation-cycle** `σ`
+    (vertex `p`'s F-neighbours `={σ p, σ⁻¹ p}`, so even-degree is immediate — no list arithmetic).
+    Covers triangle-free bases. The cycle's *existence* in `H−Σ` (a `σ` fixing the forbidden set `Σ`)
+    is the isolated graph-theoretic hypothesis where **treewidth/connectivity** enters.
+- **Linear-oracle wiring** (`LinearOracle.lean §L.8–L.9`): `configSwap_of_aut` (general config-swap
+  constructor), `configSwap_of_cfiFlipAut`, `CFIGadgetFlippable`, `configSwapRecoverable_of_cfi`; the
+  **locality reduction** `swapsConfig_off_pair_of_local` (reduces the σ-off-pair condition to
+  σ-cell-coherence + locality), `preserves_D_of_involutive_local`, `cfiFlipAut_fixesχι_of_support`,
+  `configSwap_of_cfiFlipAut_local`, `CFIGadgetFlippableLocal`, `configSwapRecoverable_of_cfi_local`;
+  **C1b.1** `CFIParityDecisionFlippable` + `cfiGadgetFlippableLocal_of_parity`.
+- **Tier-3a wiring** (`Cascade.lean` Phase 6b): `CFILayerGadgetFlippable`, `cfiLayer_pathFixing_hwit`,
+  `cascadeComposition_cfi`.
+
+### 0.3 The open step (C1b.3) and the FINDING — read this carefully
+
+`C1b.3` must discharge the remaining conjuncts of `CFIParityDecisionFlippable`, per decision `(a,b)`:
+1. **decisions are parity-pairs** (`a=e^{b₀}_{v→w}`, `b=e^{¬b₀}`);
+2. **σ-cell-coherence** `∀ u∉{a,b}, σ.σ a u = σ.σ b u`;
+3. **χι-coherence** on the F-support;
+4. the **Σ↔decided-gadgets** translation (mechanical).
+
+> **MAJOR FINDING (the blocker).** The load-bearing piece **(2) σ-cell-coherence is the
+> "cell-uniform signature" property the project has already machine-checked to be FALSE in general**
+> — `cell_split_uniform_false` ([`ChainDescent.lean:464–491`](../GraphCanonizationProofs/ChainDescent.lean)).
+> Cell-mates can relate symmetrically to a *cell* but **asymmetrically to an individual vertex in it**.
+> The doc there states explicitly: *"a correct version needs `a,b` to be **singleton cells** … not the
+> unindividualised partner in a k≥2 target cell — **which is exactly the regime the linear oracle must
+> handle**."* The linear oracle's decision pair `{a,b}` **shares a χι-cell** (non-singleton — that's
+> what 1-WL can't split), so the σ-coherence C1b.3 needs is squarely in the **known-false-in-general**
+> regime. **`swapsConfig_off_pair_of_local` proves the gadget-flip `ConfigSwap` genuinely requires this
+> coherence** (the `v=a, u∈D\{a,b}` case), so it is not optional in the current model.
+
+Consequence: the σ-coherence conjunct in `CFIGadgetFlippable`/`CFIParityDecisionFlippable` **may be
+unsatisfiable as stated** for real CFI decisions ⟹ those predicates could be vacuous and
+`configSwapRecoverable_of_cfi` an undischargeable (though correct, axiom-clean) implication. Whether
+CFI's gadget structure *rescues* coherence (the counterexample is a generic graph, not CFI) is unproven
+and is the genuine hard content. Sub-piece (1) additionally needs the CFI WL-cascade analysis
+(`cfi_cascades_polynomially_oddDeg` is proved axiom-free for odd degree but exposes **no intermediate
+cell structure** — only final discretization).
+
+### 0.4 A model subtlety the picker-upper MUST know
+
+There are **two individualization mechanisms** in the descent, and conflating them causes confusion:
+- **Colour-individualization** (`DescentTrace`/`IndivStep`, `ChainDescent.lean`): the selected cell is
+  singletonized in `χ'`. `DescentTrace.singletons` ⟹ vertices in `D` are **χι-singletons** (distinct
+  colours). `samePartition_pair`/`warmRefine_agree_off'` give that **all `DirAssignment`s over `(P₀,D)`
+  yield the same partition when `D` is χι-singletonized** — i.e. branch order doesn't affect partition.
+- **Order-individualization** (the **linear oracle** model, the `ConfigSwap` setting): the decision pair
+  `{a,b}` **shares a χι-cell** (`χι a = χι b`) and is separated by the **order `σ`**, *not* by colour.
+  So `ConfigSwap.fixesχι` (`χι(g a)=χι a` with `g a=b`, i.e. `χι a=χι b`) is consistent **only** in this
+  model. Here `D` is **not** χι-singletonized, so `samePartition_pair` does **not** directly apply.
+
+This gap is why the partition-level invariance (`samePartition_pair`, free) does **not** trivially
+discharge the canonical-leaf equality, and why σ-coherence resurfaces.
+
+### 0.5 Options forward (none is a quick win — a decision is needed before more building)
+
+1. **Re-examine the soundness model (recommended first).** `samePartition_pair` gives *same partition*
+   for free (in the colour-individualization model). The only genuinely open thing is the *canonical
+   relabelling* (rank alignment). Investigate whether the gadget-flip `ConfigSwap` **over-specifies** —
+   whether a partition-level or singleton-restricted route discharges CFI completeness **without** the
+   false σ-coherence conjunct. This either unblocks C1b.3 or definitively characterizes the nut.
+2. **Singleton-restricted re-modelling.** Re-cast the decision so one of `a,b` is the individualized
+   rep (singleton), where coherence *does* hold (per the doc's note) — changes the `ConfigSwap` setup.
+3. **Isolate σ-coherence + decision-char as named hypotheses** and land only the mechanical
+   Σ-translation — honest but names a nut that's known-false-in-general (low value without option 1).
+4. **Pause cascade-1b**, consolidate (the gadget-flip construction is complete and solid).
+
+### 0.6 Key pointers
+
+- **Lean (built):** `CFI.lean §15` (the whole gadget-flip program, C1b.0/2a/2b);
+  `LinearOracle.lean §L.8–L.9`; `Cascade.lean` Phase 6b. Index: `PublicTheoremIndex.md` (search §15,
+  §L.8, §L.9, Cascade Phase 6b, C1b).
+- **Lean (the finding):** `cell_split_uniform_false` + the "needs singleton cells" note at
+  `ChainDescent.lean:464–491`; `samePartition_pair` (`ChainDescent.lean ~2776`), `warmRefine_agree_off'`
+  (`~882`), `DescentTrace.singletons`, `spine_branch_independent` (`~2400`), `warm_6_2` (`~704`).
+- **Memory:** `project_cfi_gadget_flip_2026-06-01.md` (full Phase 0–6 + C1b detail + the finding).
+- **Cascade-1b framing:** [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md) §2
+  (1a proved / 1b open). Cascade-1b is **CFI-specific** (schemes are done: `recoverableByDepth_scheme`
+  gives the witness at the depth-1 decision node; CFI's recovery is only at the trivial discretizing
+  depth).
 
 ---
 
