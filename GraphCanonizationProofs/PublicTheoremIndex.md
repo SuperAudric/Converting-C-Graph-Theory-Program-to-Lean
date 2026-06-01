@@ -628,6 +628,14 @@ cell-coherence), not the opaque `configSwap_of_aut` package.
 | `CFIGadgetFlippableLocal` | The reduced per-decision predicate: an even-symmetric **D-local** `F` whose flip swaps `(a,b)`, with σ cell-coherent and χι coherent on the F-support. The conditions are now the descent-coherence / cycle-locality (cascade-1b) facts. | Definition |
 | `configSwapRecoverable_of_cfi_local` | `ConfigSwapRecoverable` from `CFIGadgetFlippableLocal` (+ `P₀` Aut-invariance) — the discharge via the decoupled hypotheses. | — |
 
+**§L.9 (C1b.1) — the CFI glue: parity-pair decisions.** Reduces `CFIGadgetFlippableLocal` to the
+explicit-edge form, discharging the swap obligation in advance (via C1b.0).
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `CFIParityDecisionFlippable` | The reduced cascade-1b hypothesis: every decision `(a,b)` is the parity-pair of a base edge `{v,w}` (`a = e^{b₀}_{v→w}`, `b = e^{¬b₀}`) admitting an even-symmetric cycle `F` with `{v,w} ∈ F`, D-local, σ/χι cell-coherent. The swap is no longer an obligation (it's `cfiFlipAut_swaps_endpointVertex`); only cycle existence + coherence remain. | Definition |
+| `cfiGadgetFlippableLocal_of_parity` | **The C1b.1 glue.** `CFIParityDecisionFlippable → CFIGadgetFlippableLocal` — the body's two swap conjuncts from `cfiFlipAut_endpointVertex` + `F v w = true`; the rest passes through. Open content narrows to C1b.2 (cycle exists) + C1b.3 (decisions are parity-pairs + coherence). | — |
+
 Transport chain it builds on (ChainDescent.lean `§16.2b`): `signature_transport`, `sigKey_transport`,
 `refineStep_transport`, `iterate_refineStep_transport`, `warmRefine_transport` — cross-config (two
 `(P,χ)` related by an automorphism), the value-level generalisation of the `*_invariant_of_isAut`

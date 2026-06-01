@@ -1144,4 +1144,47 @@ theorem configSwapRecoverable_of_cfi_local (h : IsCFI' adj)
   exact ⟨configSwap_of_cfiFlipAut_local h chain σ a b ha hb F hEven hFsymm hga hgb
     hFlocalD hcoh hP0inv hχsupp⟩
 
+/-! ### §L.9 (C1b.1) — the CFI glue: parity-pair decisions
+
+C1b.0 settled that the gadget flip swaps a parity-pair `e^0_{v→w}/e^1_{v→w}` exactly when `{v,w} ∈ F`
+(`cfiFlipAut_swaps_endpointVertex`). C1b.1 uses this to reduce `CFIGadgetFlippableLocal` to the
+**parity-pair** form: the open content becomes "every decision is a parity-pair edge admitting a
+D-local even cycle through it, with cell-coherence" — the swap obligation is now discharged in advance.
+The remaining pieces are C1b.2 (the cycle exists in `H`) and C1b.3 (decisions *are* parity-pairs + the
+descent provides coherence). The complementary **subset-pair** decision class (`cfiFlip_subset`) is the
+parallel case, deferred. -/
+
+/-- **Parity-pair decision recoverability** (the reduced cascade-1b hypothesis). Every leaf decision
+`(a, b)` is the parity-pair of some base edge `{v, w}` (`a = e^{b₀}_{v→w}`, `b = e^{¬b₀}_{v→w}`) and
+admits an even-symmetric cycle `F` with `{v,w} ∈ F` (so the flip swaps the pair), confined to `F`-free
+gadgets off `{a,b}`, with `σ` cell-coherent and `χι` coherent on the F-support. The explicit-edge form
+of `CFIGadgetFlippableLocal` — the swap is no longer an obligation (it is `cfiFlipAut_swaps_endpointVertex`),
+only the cycle's existence and the coherence remain. -/
+def CFIParityDecisionFlippable (h : IsCFI' adj) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (_ha : a ∈ chain.D) (_hb : b ∈ chain.D),
+    a ≠ b →
+    ∃ (v w : Fin h.m) (hw : w ∈ h.H.neighbors v) (b₀ : Bool)
+      (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ x, (h.H.flipSet F x).card % 2 = 0),
+      a = h.endpointVertex hw b₀ ∧ b = h.endpointVertex hw (!b₀) ∧
+      (∀ p q, F p q = F q p) ∧ F v w = true ∧
+      (∀ x, x ∈ chain.D → x ≠ a → x ≠ b → h.H.flipSet F (h.H.gadget (h.e x)) = ∅) ∧
+      (∀ u, u ≠ a → u ≠ b → σ.σ a u = σ.σ b u) ∧
+      (∀ x, h.H.flipSet F (h.H.gadget (h.e x)) ≠ ∅ → chain.χι (h.cfiFlipAut F hEven x) = chain.χι x)
+
+/-- **The CFI glue (C1b.1).** A parity-pair decision recoverable graph is gadget-flip recoverable:
+`CFIParityDecisionFlippable → CFIGadgetFlippableLocal`. The two swap conjuncts of the latter's body are
+discharged by `cfiFlipAut_endpointVertex` + `F v w = true` (C1b.0); the rest passes through. Composing
+with `configSwapRecoverable_of_cfi_local` gives the linear oracle's CFI completeness from the
+parity-pair form. -/
+theorem cfiGadgetFlippableLocal_of_parity (h : IsCFI' adj)
+    (hpar : CFIParityDecisionFlippable (P₀ := P₀) (χι₀ := χι₀) (sel := sel) h) :
+    CFIGadgetFlippableLocal (P₀ := P₀) (χι₀ := χι₀) (sel := sel) h := by
+  intro k chain isLeaf σ a b ha hb hab
+  obtain ⟨v, w, hw, b₀, F, hEven, hEqa, hEqb, hFsymm, hFvw, hFlocalD, hcoh, hχsupp⟩ :=
+    hpar chain isLeaf σ a b ha hb hab
+  refine ⟨F, hEven, hFsymm, ?_, ?_, hFlocalD, hcoh, hχsupp⟩
+  · rw [hEqa, hEqb, h.cfiFlipAut_endpointVertex, hFvw]; cases b₀ <;> rfl
+  · rw [hEqb, hEqa, h.cfiFlipAut_endpointVertex, hFvw]; cases b₀ <;> rfl
+
 end ChainDescent
