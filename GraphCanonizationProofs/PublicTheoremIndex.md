@@ -314,6 +314,9 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `CFIBase.cfiFlip` | **The cycle-space gadget flip** on `CFIVertex H`: toggles endpoint parities along `F` (`e^b_{v→w} ↦ e^{b⊕F v w}_{v→w}`) and complements subsets (`a_S^v ↦ a_{S ∆ flipSet F v}^v`). | Definition (Phase 1) |
 | `CFIBase.cfiFlip_involutive` | The gadget flip is an involution (`(S ∆ F) ∆ F = S`; `(b⊕c)⊕c = b`). | — |
 | `CFIBase.cfiFlipEquiv` | The gadget flip as an `Equiv.Perm CFIVertex` (self-inverse). | Definition |
+| `xor_eq_xor_iff` / `xor_ne_xor_iff` | Xor right-cancellation on `Bool` (`(a⊕c) = (b⊕c) ↔ a = b`, and the `≠` form). | private |
+| `CFIBase.decide_mem_symmDiff_flipSet` | **Phase 2 bridge.** For `w ∈ N(v)`, `w ∈ S ∆ flipSet F v ↔ (w∈S) ⊕ F v w` — endpoint parity and subset membership flip together. | — |
+| `CFIBase.cfiFlip_isAut` | **Phase 2 (the automorphism core).** For `F` an even subgraph that is symmetric (`F v w = F w v`), `cfiFlip F` preserves `cfiAdj` on every pair. Subset–endpoint: the `(w∈S)⊕b` invariant survives the joint flip; endpoint–endpoint bridge: the single edge `{v,w}` has one `F`-bit (symmetry), so `b₁=b₂` survives. | — |
 | `triFlipEdges` / `triFlip_even` | **Phase-0 prototype:** `triangleBase`'s unique nontrivial even subgraph (all 3 edges; β=1) and its even-flip-set fact. | Definition / — |
 | `triFlip_involutive_check` | Phase-0 smoke test: triangle gadget flip is an involution (`decide`, kernel, axiom-clean). | — |
 | `triFlip_isAut_check` | **Phase-0 crux:** the triangle gadget flip preserves `cfiAdj` on all 18×18 pairs (`decide`) — validates cycle-flip-is-automorphism on the smallest case before the general Phase-2 proof. | — |

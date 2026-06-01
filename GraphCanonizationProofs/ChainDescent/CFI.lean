@@ -3275,6 +3275,14 @@ private theorem card_symmDiff_mod_two {α : Type*} [DecidableEq α] (S T : Finse
     omega
   omega
 
+/-- **Xor right-cancellation (`=`).** `(a ⊕ c) = (b ⊕ c) ↔ a = b`. -/
+private theorem xor_eq_xor_iff (a b c : Bool) : (xor a c = xor b c) ↔ a = b := by
+  cases a <;> cases b <;> cases c <;> decide
+
+/-- **Xor right-cancellation (`≠`).** `(a ⊕ c) ≠ (b ⊕ c) ↔ a ≠ b`. -/
+private theorem xor_ne_xor_iff (a b c : Bool) : (xor a c ≠ xor b c) ↔ a ≠ b := by
+  cases a <;> cases b <;> cases c <;> decide
+
 namespace CFIBase
 
 variable {m : Nat} (H : CFIBase m)
@@ -3342,6 +3350,50 @@ def cfiFlipEquiv (F : Fin m → Fin m → Bool)
     (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) :
     Equiv.Perm H.CFIVertex :=
   Function.Involutive.toPerm _ (H.cfiFlip_involutive F hEven)
+
+/-! ### Phase 2 — the gadget flip preserves `cfiAdj` (the automorphism core) -/
+
+/-- **Subset membership flips as an xor with the flip-edge bit.** For a neighbour `w ∈ N(v)`,
+`w ∈ S ∆ flipSet F v` iff `(w ∈ S) ⊕ F v w` — the algebraic heart of "endpoint parity and
+subset membership flip together." -/
+theorem decide_mem_symmDiff_flipSet (F : Fin m → Fin m → Bool) {v w : Fin m}
+    (hw : w ∈ H.neighbors v) (S : Finset (Fin m)) :
+    decide (w ∈ symmDiff S (H.flipSet F v)) = xor (decide (w ∈ S)) (F v w) := by
+  by_cases hwS : w ∈ S <;> cases hfvw : F v w <;>
+    simp [Finset.mem_symmDiff, mem_flipSet, hw, hwS, hfvw]
+
+/-- **The gadget flip is a graph automorphism of `CFI(H)`.** For `F` an even subgraph
+(`hEven`) that is symmetric (`hFsymm` — `F` undirected), `cfiFlip F` preserves the CFI
+adjacency on every pair. The three substantive cases:
+- *subset–endpoint:* under same gadget, the endpoint parity bit and the subset membership of
+  `w` both flip by `F v w`, so the `(w ∈ S) ⊕ b` adjacency invariant is preserved
+  (`decide_mem_symmDiff_flipSet` + `xor_ne_xor_iff`);
+- *endpoint–endpoint bridge:* the bridge `e^b_{v→w} ∼ e^b_{w→v}` is along the single edge
+  `{v, w}`, whose `F`-bit is the same from both ends (`hFsymm`), so both parities flip in
+  lockstep and `b₁ = b₂` is preserved (`xor_eq_xor_iff`). -/
+theorem cfiFlip_isAut (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0)
+    (hFsymm : ∀ v w, F v w = F w v) :
+    ∀ x y : H.CFIVertex,
+      H.cfiAdj (H.cfiFlip F hEven x) (H.cfiFlip F hEven y) = H.cfiAdj x y := by
+  rintro (⟨va, S, hS⟩ | ⟨ve, ⟨w, hw⟩, b⟩) (⟨va', S', hS'⟩ | ⟨ve', ⟨w', hw'⟩, b'⟩)
+  · -- subset, subset: never adjacent
+    rfl
+  · -- subset (a_S^va), endpoint (e^b'_{ve'→w'})
+    simp only [cfiFlip, cfiAdj]
+    refine if_congr (and_congr_right ?_) rfl rfl
+    intro hve; subst hve
+    rw [H.decide_mem_symmDiff_flipSet F hw' S, xor_ne_xor_iff]
+  · -- endpoint (e^b_{ve→w}), subset (a_S'^va')
+    simp only [cfiFlip, cfiAdj]
+    refine if_congr (and_congr_right ?_) rfl rfl
+    intro hve; subst hve
+    rw [H.decide_mem_symmDiff_flipSet F hw S', xor_ne_xor_iff]
+  · -- endpoint, endpoint: bridge
+    simp only [cfiFlip, cfiAdj]
+    refine if_congr (and_congr_right fun hvw => and_congr_right fun hwv => ?_) rfl rfl
+    have hF : F ve w = F ve' w' := by rw [hvw, hwv]; exact hFsymm w' ve'
+    rw [hF, xor_eq_xor_iff]
 
 end CFIBase
 
