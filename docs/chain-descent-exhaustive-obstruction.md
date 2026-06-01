@@ -46,6 +46,103 @@ hides.**
 
 ---
 
+## 0.5 The oracle-capability seal — the primary framing (2026-05-31)
+
+> **This supersedes the group-classification framing as the *organizing*
+> structure.** §1's statement and §5's approaches still hold, but they are now
+> *legs* of the seal below rather than the top-level plan. The change matters
+> because it makes **exhaustiveness free** — and isolates the only Cameron-
+> dependent content to one leg.
+
+**The insight (user, 2026-05-31): case-split on what the *oracles* can detect,
+not on what the *graph* is.** Each oracle gets a capability theorem; the three
+compose into a watertight seal *without enumerating symmetry types or graphs*,
+because the case split is on **negation-complete predicates** — there is no room
+for a fourth species.
+
+**Conditioning.** The whole seal is under the hypothesis **a symmetry exists**
+(an automorphism relates two reps of the target cell). The *no-symmetry* case —
+rigid / IR-blind-spot / **multipede** — is the *other* flag cause (residual group
+**trivial**, distinguished at flag time by group order; strategy §15 gap 5) and
+sits **outside** the seal. Leg C must not be asked to absorb it.
+
+**Two discriminators** (both decidable predicates on the symmetry at a node):
+
+- **D1 — unconditional?** Is the symmetry exposable by *symmetry-only*
+  individualization (orbit representatives), within the **polynomial depth
+  bound**, *without committing a real (non-symmetric) decision*? This is exactly
+  the **unconditional vs. conditional** line of
+  [deferred-decisions §5/§8](./chain-descent-deferred-decisions.md) — "revealed
+  without fixing a real decision" *is* "unconditional." **D1 must be defined
+  abstractly** (∃ a poly-length symmetry-only individualization that exposes it),
+  *not* "the built oracle finds it," or leg A is circular.
+- **D2 — unique candidate?** Among *not-unconditional* symmetries, does one
+  branch's propagation expose a **unique candidate twist**? This is the
+  [calculator §6](./chain-descent-calculator.md) abelian/wall boundary
+  (unique candidate ⟺ abelian).
+
+**The three legs (oracle-relative theorems) and the tiling:**
+
+| Bucket | Predicate | Handler | Leg = which program |
+|---|---|---|---|
+| **A** | D1 (unconditional, *any* group) | cascade oracle | **orbit recovery** — leg A's boundary (the "unless revealed by a real decision" caveat) **is** the D1 cutoff = the cascade-1b decision-node frontier |
+| **B** | ¬D1 ∧ D2 (hidden abelian) | linear oracle | **abelian-sufficiency** (the handoff doc's open core: "abelian ⟹ linear finds it") |
+| **C** | ¬D1 ∧ ¬D2 (hidden, non-abelian, no unique candidate) | **flag** | **the new structural leg: ⟹ Cameron** |
+
+The seal is the **tautology** `D1 ∨ (¬D1 ∧ D2) ∨ (¬D1 ∧ ¬D2)`. Exhaustiveness
+needs **no** classification — Cameron/O'Nan–Scott is required only *inside leg
+C*, never to close the seal. This is the structural improvement over §1's framing.
+
+- **Leg A (cascade capability):** *"every unconditional symmetry is cascade-
+  certifiable."* = orbit-recovery completeness. Real content (D1 abstract ⟹ the
+  built oracle realizes it); the cascade-1b / decision-node-depth frontier is
+  literally the D1 boundary.
+- **Leg B (linear capability):** *"every hidden abelian symmetry is linear-
+  certifiable."* = the abelian-sufficiency lemma (handoff §1–§5).
+- **Leg C (the Cameron leg):** *"a symmetry that is non-abelian **and** survives
+  all poly-depth symmetry-only individualization is a Cameron/Johnson section."*
+  Proof strategy below.
+
+**Leg C's proof = the inversion (user's method, sharpening §8.1 of tier3-decomp).**
+Do **not** start from "an arbitrary primitive group." Instead:
+1. **Extract the oracle-limit fingerprint** from legs A and B's *completeness
+   proofs*: cascade succeeds because property `X` holds and fails exactly at
+   `¬X`; linear succeeds because `Y` and fails at `¬Y`. The bucket-C hypothesis
+   `¬D1 ∧ ¬D2` *unfolds* into a concrete property list — *primitive* (no
+   refinement-visible block system — else cascade would split it), *large base*
+   (survives poly-depth individualization — the D1 cutoff, my R3), *no abelian
+   regular structure on the cell* (no unique candidate — ¬D2).
+2. **Prove `fingerprint ⟹ Cameron`** with that concrete hypothesis, citing the
+   classification only here. **Jordan's theorem** (Mathlib, R5) plausibly carries
+   the *large-base ⟹ `A_k`* step, possibly Cameron-free for a restricted slice.
+
+This is why the inversion beats the abstract route: leg C's hypothesis is the
+*exact oracle-failure boundary the Lean proofs already produce*, not a generic
+primitive group. The "obscuring-structure" `S(H)` of
+[tier3-decomp §8.1](./chain-descent-tier3-decomposability.md) is now **defined**
+as that fingerprint, not hypothesized.
+
+**Honest caveats (so the seal does not leak):**
+- **Legs A and B are the program's existing open frontiers.** The seal *unifies*
+  — the EOL becomes a **capstone of finishing oracle completeness + leg C**, not
+  a separate effort — but it does not make A/B free.
+- **Per-node, lifted by composition.** The seal classifies the symmetry *at one
+  decision node*; whole-graph coverage rides on the layer decomposition
+  (Part A `LayerChain` / Tier-3a "depths add") stripping `N ⋊ Q` layer by layer.
+- **Leg C still cites Cameron** — but with the concrete fingerprint hypothesis,
+  and possibly Cameron-free on the Jordan-reachable / scheme-restricted slice
+  (Approach 3).
+
+**How the §5 approaches re-map onto the legs:** Approach 0 (disentangle) is still
+the prerequisite. Approach 2 (empirical) now *also* stress-tests the leg-C
+fingerprint (does every oracle-failure-with-symmetry have it?). Approach 1
+*becomes* leg C via the inversion above. Approach 3 (Cameron-free on schemes) is
+the restricted leg-C proof. Legs A and B are **not new** — they are the
+orbit-recovery and abelian-sufficiency programs, now recognized as two-thirds of
+the seal.
+
+---
+
 ## 1. Statement of the lemma (mechanism-pinned)
 
 Informal target:
