@@ -669,22 +669,56 @@ inductive Findable (adj : AdjMatrix n) (P : PMatrix n) : Finset (Fin n) → Prop
   | step {S : Finset (Fin n)} {v : Fin n} :
       SymmetryOnlyStep adj P S v → Findable adj P (insert v S) → Findable adj P S
 
-/-- **Soundness of the screen, modulo the D2 bridge.** If every non-trivial abelian residual the descent
-reaches is recoverable (`hbridge` — the open `D2 ⟹ hwit` obligation, cascade-1b generalised), then
-`Findable` implies the graph is `RecoverableByDepth`. The `recovered` case is free
-(`Discrete ⟹ CellsAreOrbits`, `cellsAreOrbits_of_discrete`); the `step` case is the induction hypothesis
-verbatim (`RecoverableByDepth` is a property of the whole graph, not of the node); the `abelian` case is
-exactly where `hbridge` is consumed. A `Findable` derivation never using the `abelian` constructor (the
-pure D1 leg) is therefore **unconditionally** recoverable — independently witnessed by
-`recoverableByDepth_of_visiblyRecoverable`. -/
-theorem recoverableByDepth_of_findable
-    (hbridge : ∀ S : Finset (Fin n), ResidualAbelian adj P S → ¬ IsBase adj P S →
-      ∃ b, RecoverableByDepth adj P b)
-    {S : Finset (Fin n)} (h : Findable adj P S) :
-    ∃ b, RecoverableByDepth adj P b := by
+/-! ### The bound-carrying recoverability layer (Phase 0)
+
+`Findable` (above) is the *bound-free classification* — the right object for the screen and its negation
+(the wall). `FindableWithin adj P S b` is its **bound-indexed** companion, pinning the **polynomial recovery
+depth `b`** at which `CellsAreOrbits` is reached. This is the form the recoverability lemma needs:
+`RecoverableByDepth adj P n` is *trivially* true for every graph (`recoverableByDepth_univ`, by individualizing
+`univ`), so "`∃ b, RecoverableByDepth`" is **vacuous** and only a *specific* bound carries content — the
+project convention (`recoverableByDepth_cfi` concludes at `cfi_depth_bound`, never `∃ b`). -/
+
+/-- **`Findable` with its recovery depth.** Same three legs as `Findable`, each pinning the bound `b`:
+- `recovered` at `S` (Discrete) ⟹ `CellsAreOrbits S`, so `b = S.card`;
+- `step` consumes a symmetry-only individualization and **propagates the same `b`** (the recovery node is
+  unchanged — `RecoverableByDepth` is a whole-graph property);
+- `abelian` **carries `RecoverableByDepth adj P b` as a field** — this field *is the D2-bridge interface*:
+  building the abelian leg requires supplying the hidden-abelian residual's recoverability at a specific `b`
+  (discharged per instance — `recoverableByDepth_cfi` for the CFI gauge; the general discharge is the open
+  `cfi_cascades`-generalisation = `AbelianSufficiencyHolds`). -/
+inductive FindableWithin (adj : AdjMatrix n) (P : PMatrix n) : Finset (Fin n) → Nat → Prop where
+  /-- **Recovered at depth `S.card`.** Warm refinement at `S` is `Discrete` ⟹ `CellsAreOrbits S`. -/
+  | recovered {S : Finset (Fin n)} :
+      Discrete (warmRefine adj P (individualizedColouring n S)) → FindableWithin adj P S S.card
+  /-- **D2 leg, carrying the bridge.** A hidden non-trivial abelian residual, *together with* its
+  recoverability at a specific bound `b` (the field to discharge — the D2 bridge). -/
+  | abelian {S : Finset (Fin n)} {b : Nat} :
+      ResidualAbelian adj P S → ¬ IsBase adj P S → RecoverableByDepth adj P b → FindableWithin adj P S b
+  /-- **D1 leg.** Consume a symmetry-only step; the recovery depth `b` is inherited from the residual. -/
+  | step {S : Finset (Fin n)} {v : Fin n} {b : Nat} :
+      SymmetryOnlyStep adj P S v → FindableWithin adj P (insert v S) b → FindableWithin adj P S b
+
+/-- **Soundness of the screen — NON-VACUOUS, at a specific bound.** `FindableWithin adj P S b` implies the
+graph is `RecoverableByDepth adj P b` for the **carried** `b`, not a free `∃ b`. The `recovered` case is
+free (`cellsAreOrbits_of_discrete`, witness `S` of card `≤ S.card`); the `step` case is the induction
+hypothesis verbatim; the `abelian` case returns its carried recoverability field. So the D1 fragment (no
+`abelian`) is unconditional, and the abelian leg's recoverability is exactly the supplied bridge. -/
+theorem recoverableByDepth_of_findableWithin {S : Finset (Fin n)} {b : Nat}
+    (h : FindableWithin adj P S b) : RecoverableByDepth adj P b := by
   induction h with
-  | @recovered S hd => exact ⟨S.card, S, le_refl _, cellsAreOrbits_of_discrete hd⟩
-  | @abelian S h1 h2 => exact hbridge S h1 h2
+  | @recovered S hd => exact ⟨S, le_refl _, cellsAreOrbits_of_discrete hd⟩
+  | @abelian S b h1 h2 hrec => exact hrec
   | step _ _ ih => exact ih
+
+/-- **The bound-carrying descent is a `Findable` classification.** Forgetting the bound (and the abelian
+leg's recoverability witness) collapses `FindableWithin` to the bound-free screen `Findable`. The reverse
+fails in general — recovering the bound requires the D2 bridge — so `FindableWithin` is the strictly
+stronger object, exactly because it carries it. -/
+theorem findable_of_findableWithin {S : Finset (Fin n)} {b : Nat}
+    (h : FindableWithin adj P S b) : Findable adj P S := by
+  induction h with
+  | recovered hd => exact Findable.recovered hd
+  | abelian h1 h2 _ => exact Findable.abelian h1 h2
+  | step hstep _ ih => exact Findable.step hstep ih
 
 end ChainDescent

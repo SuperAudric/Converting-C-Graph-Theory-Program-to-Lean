@@ -34,10 +34,19 @@
 >   `SymmetryOnlyStep` (D1 primitive, non-singleton single-orbit cell); `symmetryOnlyStep_of_cellsAreOrbits`
 >   (helper) + `symmetryOnlyStep_empty_scheme` (scheme validation); the screen as an **inductive**
 >   `Findable` (constructors `recovered`=`Discrete` [F1], `abelian`=`ResidualAbelian ∧ ¬IsBase` [guarded D2],
->   `step`=`SymmetryOnlyStep` + recurse); `recoverableByDepth_of_findable` (soundness **modulo the D2 bridge
->   `hbridge`** — `recovered`/`step` free, `abelian` consumes `hbridge`). Old `VisiblyRecoverable` +
->   `visiblyRecoverable_scheme` retained as the unconditional-D1 / structural witness. **The D2 bridge
->   (`ResidualAbelian ∧ ¬IsBase ⟹ recoverable`) is now the sole open core**, and `hbridge` is its exact interface.
+>   `step`=`SymmetryOnlyStep` + recurse). Old `VisiblyRecoverable` + `visiblyRecoverable_scheme` retained as
+>   the unconditional-D1 / structural witness.
+> - **PHASE 0 DONE (2026-06-01, de-vacuated soundness).** The earlier `recoverableByDepth_of_findable`
+>   concluded `∃ b, RecoverableByDepth` — **VACUOUS** (`recoverableByDepth_univ`: every graph is recoverable
+>   at depth `n` by individualizing `univ`, so "∃ b" is free; the project convention is to thread a *specific*
+>   bound, cf. `recoverableByDepth_cfi` at `cfi_depth_bound`). Replaced by **`FindableWithin adj P S b`**
+>   (bound-indexed inductive: `recovered`→`b=S.card`, `step` propagates `b`, **`abelian` carries
+>   `RecoverableByDepth adj P b` as a field = the D2-bridge interface**) + `recoverableByDepth_of_findableWithin`
+>   (NON-vacuous: `→ RecoverableByDepth adj P b` for the carried `b`) + `findable_of_findableWithin` (forgetful
+>   link). Bound-free `Findable` kept as the classification. **The D2 bridge is now the `RecoverableByDepth adj
+>   P b` field of `FindableWithin.abelian`** — a *discretizing* recovery (mirror `recoverableByDepth_cfi`, NOT
+>   the structural connector), with CFI(odd-deg) the proved instance and the general case the open
+>   `cfi_cascades`-generalisation (= `AbelianSufficiencyHolds`, substrate-conditional).
 > - **Other open frontiers:** the **D2 bridge** `ResidualAbelian ⟹ hwit` (= cascade-1b generalized, the
 >   load-bearing open core); the multi-step D1 **negative** (CFI/hidden-Johnson `¬D1` = chain-gets-stuck).
 > - **Build/check:** `cd /workspace && bash scripts/build.sh` (serial, ~14s); `lake env lean` a file with
@@ -687,12 +696,46 @@ no step, `IsBase` ⟹ D2 guard fails ⟹ **¬Findable = blind-spot flag** (bare 
 **NEXT (implementation). — DONE (2026-06-01, axiom-clean).** Built in `Cascade.lean`: `SymmetryOnlyStep`
 (D1 primitive), `symmetryOnlyStep_of_cellsAreOrbits` + `symmetryOnlyStep_empty_scheme` (scheme validation),
 the **inductive** `Findable` (`recovered`=`Discrete` per §6.11 F1, `abelian`=`ResidualAbelian ∧ ¬IsBase`,
-`step`=`SymmetryOnlyStep` + recurse), and `recoverableByDepth_of_findable` (soundness modulo a D2-bridge
-hypothesis `hbridge`). Design note: `Findable` is realised as a **least-fixed-point inductive** (not a
-well-founded recursive `def`) — no termination proof, and the `step` constructor's non-singleton guard
+`step`=`SymmetryOnlyStep` + recurse). Design note: `Findable` is realised as a **least-fixed-point inductive**
+(not a well-founded recursive `def`) — no termination proof, and the `step` constructor's non-singleton guard
 forces `v ∉ S`. The old explicit-chain `VisiblyRecoverable` + `visiblyRecoverable_scheme` were **retained**
-(not re-expressed) as the unconditional-D1 / structural witness. The D2 bridge (`hbridge`'s body) is the
-sole open core.
+(not re-expressed) as the unconditional-D1 / structural witness.
+
+---
+
+### 6.12 Phase 0 — de-vacuated soundness + the D2-bridge interface, index-grounded (2026-06-01)
+
+Investigating the D2 bridge against `PublicTheoremIndex.md` produced two corrections and a clean Phase-0 fix.
+
+**The vacuity (now fixed).** The first soundness `recoverableByDepth_of_findable : Findable S → ∃ b,
+RecoverableByDepth adj P b` is **vacuous** — `recoverableByDepth_univ` proves `RecoverableByDepth adj P n`
+for *every* graph (individualize `univ` ⟹ discrete), so the `∃ b` conclusion holds with no hypotheses. The
+project convention (stated at `RecoverableByDepth`'s def and `recoverableByDepth_cfi`) is that **only a
+*specific* bound carries content.** **FIX (built, axiom-clean):** `FindableWithin adj P S b` — bound-indexed
+(`recovered`→`b=S.card`; `step` propagates `b`; **`abelian` carries `RecoverableByDepth adj P b` as a field**)
+— with `recoverableByDepth_of_findableWithin : FindableWithin S b → RecoverableByDepth adj P b` (non-vacuous,
+the carried `b`) and `findable_of_findableWithin` (forgetful to the bound-free classification). The reverse
+(Findable → FindableWithin) needs the bridge, so `FindableWithin` is strictly stronger — exactly because it
+carries it.
+
+**The D2-bridge interface is now concrete: the `RecoverableByDepth adj P b` field of `FindableWithin.abelian`.**
+Two index-grounded corrections to the *route*:
+- **It is the *discretizing* recovery, not the structural connector.** `cascadeComposition_pathFixing` needs
+  `CellsAreOrbits (T 0)` at layer 1 — but D2 is *hidden* (cells coarser than orbits), so layer 1 is not
+  `CellsAreOrbits`. The right prototype is **`recoverableByDepth_cfi`** (discretizing mode, §6.3): individualize
+  the residual's base, `warmRefine` there is `Discrete`. The connector is for *composites* (cascade-outer +
+  path-fixing-inner).
+- **CFI(odd-deg) is a *proved* instance**, not just a scaffold: `recoverableByDepth_cfi` /
+  `cfi_cascades_polynomially_oddDeg` (axiom-free) *is* "hidden `Z₂^β` gauge ⟹ recoverable at `baseSize`." The
+  general bridge is its abelian generalisation, **= `AbelianSufficiencyHolds` (LinearOracle §L.6) = cascade-1b
+  `hwit`** (one open core), and **substrate-conditional** (CFI-over-multipede / high-tw = gap-B: abelian yet
+  only discretizes at large depth — the bound is the tractable/flagged discriminator, so the bridge is *not*
+  an unconditional `∀ S, abelian ⟹ recoverable`). The twin regime is **D1** (`cellsAreOrbits_of_twin_cells`,
+  visible), not a D2 beachhead.
+
+**NEXT:** Phase 1 — wire `recoverableByDepth_cfi` as the proved D2-bridge instance (discharge
+`FindableWithin.abelian`'s field for the CFI gauge). Then Phase 2 — isolate the general nut
+(`AbelianDiscretizes`, the `cfi_cascades`-generalisation), stated conditionally.
 
 ---
 
