@@ -586,25 +586,105 @@ theorem visiblyRecoverable_scheme (h : IsSchurianSchemeGraph' adj)
     (cellsAreOrbits_empty_of_schurian h hP_invariant)
     (orbitRecoverableAt_iff_cellsAreOrbits.mp (orbitRecoverable_scheme h hrank hJ P v hP_invariant))
 
-/-! ### The screen `Findable = D1 ∨ D2` -/
+/-! ### Screen primitive — the per-decision symmetry-only step (§6.10) -/
 
-/-- **The harvest-window screen** (the seal's negation-complete `D1 ∨ D2`, relative to the committed set
-`S₀`): the residual symmetry is *visibly recoverable* (D1) **or** *abelian* (D2). Its negation
-`¬Findable` — no visible descent to a base **and** a non-abelian residual — is the hidden + non-abelian
-case = the leg-C Johnson/Cameron fingerprint (exported, not handled here). Bound-free: the D1 disjunct
-quantifies the depth existentially, so `Findable` is the pure classification; the poly bound enters the
-recoverability lemma. -/
-def Findable (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) : Prop :=
-  (∃ bound, VisiblyRecoverable adj P S₀ bound) ∨ ResidualAbelian adj P S₀
+/-- **D1, per-decision: a symmetry-only step.** At committed set `S`, individualizing `v` commits
+**no real decision**: `v`'s 1-WL cell is **non-singleton** (some `u ≠ v` shares its colour) and is a
+**single `Aut_S`-orbit** (every cell-mate is `OrbitPartition`-related to `v`). The non-singleton
+conjunct is load-bearing — without it a singleton cell satisfies the orbit condition vacuously (only
+`u = v`), so `∃ v, SymmetryOnlyStep` would be trivially true and the descent could spin on no-op steps;
+with it, the step strictly refines the partition and forces `v ∉ S`. This is the step-condition
+formerly inlined in `VisiblyRecoverable` (lines above), lifted out as the screen's D1 primitive
+([harvest-window §6.10](../../../docs/chain-descent-harvest-window.md)). -/
+def SymmetryOnlyStep (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (v : Fin n) : Prop :=
+  (∃ u, u ≠ v ∧ warmRefine adj P (individualizedColouring n S) u
+                = warmRefine adj P (individualizedColouring n S) v)
+  ∧ (∀ u, warmRefine adj P (individualizedColouring n S) u
+          = warmRefine adj P (individualizedColouring n S) v
+        → OrbitPartition adj P S v u)
 
-/-- **The D1 disjunct of the screen already yields recoverability.** If `Findable` holds via its D1
-(visible) disjunct, `RecoverableByDepth` follows now (`recoverableByDepth_of_visiblyRecoverable`). The
-D2 (abelian) disjunct's recoverability is the remaining open bridge (`D2 ⟹ hwit`, cascade-1b
-generalized). -/
-theorem recoverableByDepth_of_findable_visible {S₀ : Finset (Fin n)}
-    (h : ∃ bound, VisiblyRecoverable adj P S₀ bound) :
-    ∃ bound, RecoverableByDepth adj P bound := by
-  obtain ⟨bound, hv⟩ := h
-  exact ⟨bound, recoverableByDepth_of_visiblyRecoverable hv⟩
+/-- **`CellsAreOrbits` upgrades any non-singleton cell to a symmetry-only step.** When cells coincide
+with orbits at `S`, a vertex `v` whose cell is non-singleton has every cell-mate in its orbit, so the
+step `S → insert v S` is symmetry-only. The bridge from the recovery predicate to the screen's D1
+primitive (and the route by which a `CellsAreOrbits` non-discrete node always offers a `SymmetryOnlyStep`
+to recurse on — the §6.11 soundness of using `Discrete`, not bare `CellsAreOrbits`, as the stop). -/
+theorem symmetryOnlyStep_of_cellsAreOrbits {S : Finset (Fin n)} {v : Fin n}
+    (hco : CellsAreOrbits adj P S)
+    (hns : ∃ u, u ≠ v ∧ warmRefine adj P (individualizedColouring n S) u
+                       = warmRefine adj P (individualizedColouring n S) v) :
+    SymmetryOnlyStep adj P S v :=
+  ⟨hns, fun u hu => hco v u hu.symm⟩
+
+/-- **Validation: the first step is symmetry-only on a schurian scheme.** A vertex-transitive scheme is
+one `Aut`-orbit at `∅`, so individualizing any `v` (with `n ≥ 2`, witnessed by a second vertex `u ≠ v`)
+is a `SymmetryOnlyStep`: vertex-transitivity (`cellsAreOrbits_empty_of_schurian`) gives the single-orbit
+half, and `u, v` share the `∅`-cell because the transitivity automorphism `π : v ↦ u`
+(`schurian_transitive` at `R₀`) preserves warm refinement (`warmRefine_invariant_of_isAut`; the empty
+individualization is the constant colour, so `π`-invariant). Validates the new `SymmetryOnlyStep`
+primitive on the same instance as `visiblyRecoverable_scheme`. -/
+theorem symmetryOnlyStep_empty_scheme (h : IsSchurianSchemeGraph' adj)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    {v u : Fin n} (huv : u ≠ v) :
+    SymmetryOnlyStep adj P ∅ v := by
+  refine symmetryOnlyStep_of_cellsAreOrbits
+    (cellsAreOrbits_empty_of_schurian h hP_invariant) ⟨u, huv, ?_⟩
+  have hrel0v : h.G.scheme.rel 0 v v = true := (h.G.scheme.rel_zero_iff_eq v v).mpr rfl
+  have hrel0u : h.G.scheme.rel 0 u u = true := (h.G.scheme.rel_zero_iff_eq u u).mpr rfl
+  obtain ⟨π, hπ, hπv, _⟩ := h.G.schurian_transitive 0 v v u u hrel0v hrel0u
+  have hπ' : IsAut π adj := h.matching ▸ hπ
+  have hχ : ∀ w, individualizedColouring n ∅ (π w) = individualizedColouring n ∅ w := by
+    intro w; simp [individualizedColouring]
+  have hinv := warmRefine_invariant_of_isAut hπ' (hP_invariant hπ') hχ v
+  rw [hπv] at hinv
+  exact hinv
+
+/-! ### The screen `Findable` — the sequential D1/D2 screen (§6.10 + §6.11 F1 fix)
+
+The seal's discriminator, made **sequential** (consume visible D1 symmetry, *then* classify the
+residual). Realised as a least-fixed-point inductive, the faithful Lean form of the doc's recursive
+`Findable S := Discrete S ∨ (ResidualAbelian S ∧ ¬IsBase S) ∨ (∃ v, SymmetryOnlyStep S v ∧ Findable (insert v S))`.
+
+Two precision points baked in:
+- **§6.11 F1** — the recovered/stop disjunct is `Discrete`, **not** bare `CellsAreOrbits`: the latter is
+  *vacuously true at a vertex-transitive node* (one cell = one orbit), so it would mark a Johnson graph
+  (the Cameron wall) `Findable` at `∅`. `Discrete` is the genuine stop, and is non-false-walling
+  (`symmetryOnlyStep_of_cellsAreOrbits`: a `CellsAreOrbits` non-discrete node offers a step to recurse on).
+- **D2 `¬IsBase` guard** — bare `ResidualAbelian` is vacuously true on a trivial residual (the
+  multipede / IR-blind-spot), which would falsely assert `D2 ⟹ recoverable` on a refinement-stuck rigid
+  graph; `¬IsBase` keeps it out (= "a symmetry exists").
+
+`¬Findable` is the seal's wall, split by residual-group order: trivial ⟹ IR-blind-spot, non-trivial
+non-abelian ⟹ Cameron (leg C). -/
+inductive Findable (adj : AdjMatrix n) (P : PMatrix n) : Finset (Fin n) → Prop where
+  /-- **Recovered.** Warm refinement at `S` is `Discrete` — fully canonized (the §6.11 F1-correct stop). -/
+  | recovered {S : Finset (Fin n)} :
+      Discrete (warmRefine adj P (individualizedColouring n S)) → Findable adj P S
+  /-- **D2 — hidden non-trivial abelian.** The residual is abelian (`ResidualAbelian`) and non-trivial
+  (`¬IsBase`): the linear oracle's unique-candidate twist. The `¬IsBase` guard excludes the IR-blind-spot. -/
+  | abelian {S : Finset (Fin n)} :
+      ResidualAbelian adj P S → ¬ IsBase adj P S → Findable adj P S
+  /-- **D1 — consume a symmetry-only step, recurse.** A symmetry-only step at `v` is available and the
+  residual after taking it is `Findable`. The non-singleton guard in `SymmetryOnlyStep` forces `v ∉ S`,
+  so `S` strictly grows and the recursion is well-founded (bounded by `n`). -/
+  | step {S : Finset (Fin n)} {v : Fin n} :
+      SymmetryOnlyStep adj P S v → Findable adj P (insert v S) → Findable adj P S
+
+/-- **Soundness of the screen, modulo the D2 bridge.** If every non-trivial abelian residual the descent
+reaches is recoverable (`hbridge` — the open `D2 ⟹ hwit` obligation, cascade-1b generalised), then
+`Findable` implies the graph is `RecoverableByDepth`. The `recovered` case is free
+(`Discrete ⟹ CellsAreOrbits`, `cellsAreOrbits_of_discrete`); the `step` case is the induction hypothesis
+verbatim (`RecoverableByDepth` is a property of the whole graph, not of the node); the `abelian` case is
+exactly where `hbridge` is consumed. A `Findable` derivation never using the `abelian` constructor (the
+pure D1 leg) is therefore **unconditionally** recoverable — independently witnessed by
+`recoverableByDepth_of_visiblyRecoverable`. -/
+theorem recoverableByDepth_of_findable
+    (hbridge : ∀ S : Finset (Fin n), ResidualAbelian adj P S → ¬ IsBase adj P S →
+      ∃ b, RecoverableByDepth adj P b)
+    {S : Finset (Fin n)} (h : Findable adj P S) :
+    ∃ b, RecoverableByDepth adj P b := by
+  induction h with
+  | @recovered S hd => exact ⟨S.card, S, le_refl _, cellsAreOrbits_of_discrete hd⟩
+  | @abelian S h1 h2 => exact hbridge S h1 h2
+  | step _ _ ih => exact ih
 
 end ChainDescent
