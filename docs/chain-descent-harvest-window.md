@@ -133,6 +133,10 @@ survives either way.
 > **`CellsAreOrbits adj P S` at the residual base** (cells coincide with orbits — reached by *either*
 > singletonizing *or* a structural non-singleton witness). Read "singletonizes" below as the
 > discretizing instance of "cells = orbits."
+>
+> **Reframed (§6.4):** the screen is the seal's negation-complete **`D1 ∨ D2`** (conditioned on
+> symmetry-exists), with `¬screen = ¬D1∧¬D2 =` leg C. The recovery *modes* are an orthogonal
+> recovery-depth axis whose coincidence with the `D1`/`D2` discriminators is the gating check (W2).
 
 The lemma's one load-bearing hypothesis is that `g`'s residual action reaches **`CellsAreOrbits`
 within the residual base bound**. This is *not* a free assumption — it is the wall boundary wearing a
@@ -306,8 +310,11 @@ structure for the larger theorem:
 - **The trichotomy induction (§2) is the universal skeleton — independent of mode.** Consume the residual
   structure one generator per (a)/(c) step. The modes differ *only* in the **per-forced-node witness**:
   a structural lemma vs a discretizing-depth bound.
-- **The screen (§3) unifies them:** *findable* = some mode certifies `CellsAreOrbits` within poly `b`;
-  *hidden-Johnson* = neither does within poly depth.
+- **The mode is *not* the screen (corrected by W2 — §6.4.1).** Mode (structural/discretizing) is an
+  orthogonal *recovery-depth* axis governed by point-stabilizer granularity; the screen is the seal's
+  **`D1∨D2`** (visibility/uniqueness), governed independently. The mode-disjunction is exhaustive and
+  therefore *vacuous* as a screen. Earlier "structural≈A / discretizing≈B" was a coincidence of the two
+  diagonal data points — see §6.4.1 for the off-diagonal (GRR = D1 + discretizing).
 
 So the general theorem is a **mode-split over a common induction**: prove the trichotomy skeleton once
 (class-agnostic), then discharge each forced node by *either* a structural witness *or* a
@@ -315,14 +322,100 @@ discretizing-depth bound — each class-specific, but slotting into one frame. T
 are the modes' anchors (`recoverableByDepth_scheme` structural / `recoverableByDepth_cfi` discretizing).
 **This mode-split is the structural handle to carry into the larger-theorem work.**
 
+### 6.4 Working through the screen (plan, 2026-06-01)
+
+The screen (§3) is the load-bearing hypothesis and the seam to the wall, so it is worked through before
+the trichotomy skeleton is formalized (the screen reshapes the skeleton's *hypothesis*). The reasoning
+that surfaced this:
+
+**The screen is *not* at σ-coherence vacuity risk — but it *is* the wall.** σ-coherence was
+machine-checked false in its operative regime; the screen is *true* for findable classes (CFI, schemes)
+and *false* for Johnson (correctly — the flag). Both sides are populated. The danger is the opposite:
+its hard direction ("not-Johnson ⟹ recovers in poly depth") *is* the open core. **Discipline: never try
+to prove the screen decidable** (that is GI∈P). Operationalize the positive side, export the negative.
+
+**The reshaping realization: the screen = the seal's `D1 ∨ D2`.** Conditioned on "a symmetry exists"
+([exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)), the screen is exactly the
+seal's discriminator disjunction:
+- **`D1`** — unconditional (exposable by symmetry-only individualization within poly depth, no real
+  decision committed) — leg A / cascade.
+- **`¬D1 ∧ D2`** — hidden but unique-candidate (one branch exposes a unique twist ⟺ abelian) — leg B /
+  linear.
+- **`¬D1 ∧ ¬D2`** — `¬screen` — leg C / Cameron — *the flag, exported as data.*
+
+This is negation-complete by construction (`D1 ∨ (¬D1∧D2) ∨ (¬D1∧¬D2)` is a tautology), so **defining the
+screen as `D1∨D2` makes exhaustiveness free** — no risk of a fourth species leaking through. The
+harvest-window lemma and leg C are the **two sides of one screen**.
+
+**Open gating check (this is W2, below): does the recovery *mode* (§6.3) coincide with the seal
+*discriminator*?** The correlation on the two data points is suggestive — scheme = structural + `D1`,
+CFI = discretizing + `¬D1∧D2` — but *mode* (cells=orbits early vs only-at-discreteness) and
+*discriminator* (`D1` vs `¬D1∧D2`) are a-priori **different axes**. The leak-risk: discretizing-mode
+recovery could occur *within* `D1` (an unconditional symmetry whose cells coincide with orbits only
+deep — and the cascade oracle's own recursion *does* deepen to discreteness). If so, mode ≠ leg, and
+the screen must be defined by `D1∨D2` (the negation-complete axis), **not** by the mode disjunction
+(which would then be non-exhaustive). Verifying this is the gate before the doc's §3/§6.3 framing is
+committed.
+
+**The four workstreams:**
+- **W1 — define the screen as `D1∨D2`, negation-complete.** Reshape §3/§6.3 so the screen is the seal
+  discriminator, with the modes as *proof techniques for the positive side*, not the definition.
+- **W2 — pin (or refute) the mode ↔ leg correspondence** (the gate above). **✓ DONE — §6.4.1: REFUTED
+  as an identity; the modes are orthogonal to `D1`/`D2`. This validates defining the screen by `D1∨D2`
+  (W1), not by the modes.**
+- **W3 — operationalize the positive side as the budget** (attempt-certify, flag on exceed; sound by
+  construction). Iso-invariance is then **free**: `verdictIsoInvariant_of_complete`
+  ([`CascadeOracle.lean`](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean) §C.3 obligation 3)
+  derives flag iso-invariance from soundness + completeness + recoverability.
+- **W4 — the negative side = the leg-C inversion**, co-developed: `¬screen` produces a non-collapsing
+  residual = the leg-C fingerprint; prove `fingerprint ⟹ Cameron` (Jordan, Mathlib). Export `¬screen`
+  as named data (the orbit-recovery doc's forward-compat plea).
+
+**Honest open risk:** completeness ("not-Johnson ⟹ poly-recoverable") is the wall — *not* proved inside
+the lemma; punted to leg C's characterization. The lemma proves only `D1∨D2 ⟹ recovered`. The "poly" in
+poly-`b` is the budget `B(n)`; a findable-but-super-poly-depth class would be wrongly flagged, but within
+"not-Johnson" that is the cascade/T-C openness, conjectured not to arise.
+
+### 6.4.1 W2 — mode ↔ leg correspondence: RESULT (2026-06-01)
+
+**Verdict: REFUTED as an identity. Mode and leg are orthogonal axes — which *validates* defining the
+screen by `D1∨D2` (W1) and forbids defining it by the modes.**
+
+Precise definitions used: **`D1`** (unconditional) = consumable without committing a real decision
+([deferred-decisions §5](./chain-descent-deferred-decisions.md)); **`D2`** = among `¬D1`, one branch
+exposes a *unique* candidate twist ⟺ abelian ([calculator §6](./chain-descent-calculator.md)).
+
+- **`structural ⟹ D1`** holds: non-singleton cells = orbits means the orbit is refinement-*visible*, i.e.
+  exposed by symmetry-only individualization. (one direction)
+- **`discretizing ⟹ ¬D1` FAILS.** Witness: a **GRR** (graphical regular representation) — `Aut(G)` acts
+  *regularly* (transitive, trivial point-stabilizer). Individualizing any `v` is symmetry-only (transitive
+  ⟹ orbit rep, *no* real decision) so it is **`D1`** — yet `Aut_v` is trivial, so orbits at `{v}` are
+  singletons and `CellsAreOrbits` holds only via `Discrete`: the **discretizing** mode. So **`(D1,
+  discretizing)` is populated** — the off-diagonal the two data points hid.
+
+**The two axes, separated:**
+- **Mode** (structural/discretizing) is governed by **point-stabilizer granularity**: non-trivial
+  stabilizer → non-singleton orbits → structural (scheme); trivial residual stabilizer → must reach
+  singletons → discretizing (CFI, GRR). It is a *recovery-depth/complexity* descriptor.
+- **Leg / screen** (`D1` / `¬D1∧D2` / `¬D1∧¬D2`) is governed by **visibility + uniqueness**. It is the
+  *negation-complete* boundary.
+
+**The decisive consequence:** `structural ∨ discretizing` is **exhaustive** (a recovery set is discrete
+or not) — so it equals "recoverable at *some* depth" = `recoverableByDepth_univ`, which is **vacuously
+true** for every graph. The modes therefore **cannot** be the screen. The screen is the *poly-bounded*
+recoverability, and the poly bound holds iff **`D1∨D2`** (cascade-visible OR hidden-but-unique). This is
+consistent with the oracle taxonomy ("cascade + linear detect all symmetry except a hidden Johnson"):
+`screen = D1∨D2`, `¬screen = ¬D1∧¬D2 =` hidden Johnson. **W1 (define the screen as `D1∨D2`) is therefore
+mandatory; the modes are an orthogonal recovery-depth axis, not part of the screen's definition.**
+
 ---
 
 ## 7. Honest caveats (so the concept does not over-claim)
 
-- **The wall is not removed.** The recoverability hypothesis (`CellsAreOrbits` within `b(g)`, §3 as
-  corrected by §6.1) is doing all the hard-boundary work; it *is* the seal's D2 / split-or-Johnson
-  line. The win is **organizational and general** — proving the bound the per-class / σ-coherence
-  routes couldn't, and unifying legs A+B — not an escape from the open hard core.
+- **The wall is not removed.** The screen (`D1∨D2`, §6.4/§6.4.1) is doing all the hard-boundary work; it
+  *is* the seal's `D1∨D2` boundary, with `¬screen = ¬D1∧¬D2` the split-or-Johnson wall. The win is
+  **organizational and general** — proving the bound the per-class / σ-coherence routes couldn't, and
+  unifying legs A+B — not an escape from the open hard core.
 - **It is a hypothesis until §6 passes.** The induction's termination + the forced-node iso-invariance
   are argued, not proved; the specialization test is the gate.
 - **`b(g)` is the recoverability depth, and it is mode-dependent (§6.3).** Resolved by the tests: it is
