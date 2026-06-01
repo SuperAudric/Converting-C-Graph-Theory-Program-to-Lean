@@ -299,6 +299,26 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `cfi_cascades_polynomially_oddDeg` | 3011-3215 | §13.24 M4 — for OddDegree CFI graphs, `warmRefine adj P χ_{allSeeds}` is `Discrete`; discharges `CascadesAt` (the cascade axiom) axiom-free at depth `cfi_depth_bound h`. | — |
 | `theorem_1_HOR_cfi_oddDeg` | 3217-3236 | **Tier-1 CFI orbit recovery.** Theorem 1 for OddDegree CFI graphs, axiom-free: orbit partition coincides with the warm-refined colouring at depth ≤ baseSize, conditional only on `OddDegree`. | — |
 
+**§15 — Stage 3: gadget-flip automorphisms (the `Z₂^β` generators).** *We build the generator
+*existence* (the cycle-space flips), not the full `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` iso — the hard
+surjectivity half is needed by no consumer. Both consumers (`LinearOracle.configSwap_of_aut`
+and Tier-3a B1's `hwit`) want the same object: a CFI automorphism with controlled support,
+realised by the even-subgraph (cycle-space) flip. Phases 0–1 below; Phases 2–6 (adjacency
+preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring) follow.*
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `card_symmDiff_mod_two` | **Parity helper.** `|S ∆ T| ≡ |S| + |T| (mod 2)` — the fact behind "an even subgraph preserves the even-subset invariant." | private |
+| `CFIBase.flipSet` | The `F`-incident neighbours of `v` (`F : Fin m → Fin m → Bool` an even subgraph), as a subset of `N(v)`. | Definition |
+| `CFIBase.symmDiff_flipSet_mem_even` | **Even-subset invariant preserved.** If every `flipSet F v` is even (`F` an even subgraph), `S ∆ flipSet F v` stays an even subset of `N(v)`. | — |
+| `CFIBase.cfiFlip` | **The cycle-space gadget flip** on `CFIVertex H`: toggles endpoint parities along `F` (`e^b_{v→w} ↦ e^{b⊕F v w}_{v→w}`) and complements subsets (`a_S^v ↦ a_{S ∆ flipSet F v}^v`). | Definition (Phase 1) |
+| `CFIBase.cfiFlip_involutive` | The gadget flip is an involution (`(S ∆ F) ∆ F = S`; `(b⊕c)⊕c = b`). | — |
+| `CFIBase.cfiFlipEquiv` | The gadget flip as an `Equiv.Perm CFIVertex` (self-inverse). | Definition |
+| `triFlipEdges` / `triFlip_even` | **Phase-0 prototype:** `triangleBase`'s unique nontrivial even subgraph (all 3 edges; β=1) and its even-flip-set fact. | Definition / — |
+| `triFlip_involutive_check` | Phase-0 smoke test: triangle gadget flip is an involution (`decide`, kernel, axiom-clean). | — |
+| `triFlip_isAut_check` | **Phase-0 crux:** the triangle gadget flip preserves `cfiAdj` on all 18×18 pairs (`decide`) — validates cycle-flip-is-automorphism on the smallest case before the general Phase-2 proof. | — |
+| `triFlip_nontrivial` | Phase-0 smoke test: the triangle gadget flip moves some vertex — a nontrivial `CFI(triangle)` automorphism. | — |
+
 ## ChainDescent/Scheme.lean
 
 | Name | Line | Description | Notes |

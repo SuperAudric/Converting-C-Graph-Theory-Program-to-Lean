@@ -7,6 +7,7 @@ import Mathlib.Data.Fintype.Sigma
 import Mathlib.Data.Fintype.Sum
 import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Data.Nat.Choose.Sum
+import Mathlib.Data.Finset.SymmDiff
 
 /-!
 # CFI infrastructure (Stage 1: foundational definitions)
@@ -3236,5 +3237,148 @@ theorem theorem_1_HOR_cfi_oddDeg {n : Nat} {adj : AdjMatrix n}
   theorem_1_HOR_at_depth (h.cfi_cascades_polynomially_oddDeg h_odd P)
 
 end IsCFI'
+
+/-! ## §15 — Stage 3: gadget-flip automorphisms (the `Z₂^β` generators)
+
+The `Aut(CFI(H)) ≅ Z₂^{β_H} ⋊ Aut(H)` structure (file header, Stage 3) is needed
+downstream only for its **existence half** — the `Z₂^β` generators, *not* the full
+isomorphism (whose hard surjectivity content no consumer needs). The two consumers both
+want the *same* object, a CFI automorphism with controlled support:
+
+- the **linear oracle** (`LinearOracle.configSwap_of_aut` ⟶ `configSwapRecoverable_of_cfi`)
+  wants an involution swapping a decision pair, fixing the seeds, preserving the direction
+  assignment off the pair;
+- **Tier-3a B1** (`Cascade.cascadeComposition_pathFixing`'s `hwit`) wants a `P`-preserving
+  automorphism with support disjoint from the committed set, sending `v ↦ w`.
+
+Both are realised by the **cycle-space flip**: for an edge set of `H` in which every vertex
+has even degree (`F` an even subgraph = an element of the GF(2) cycle space), the involution
+that toggles endpoint parities along `F` and complements subset membership by the `F`-incident
+neighbours. The even-degree condition is exactly what keeps subset vertices' even-cardinality
+invariant — so the construction earns the cycle space rather than single edges.
+
+This section builds the construction (Phase 1) and validates it on `triangleBase` (Phase 0);
+the adjacency-preservation proof (Phase 2), the `Fin n` lift (Phase 3), support/locality
+(Phase 4), `P`-preservation (Phase 5) and the consumer wiring (Phase 6) follow. The
+construction is **class-agnostic** (any `CFIBase`, any even subgraph) — odd degree enters only
+downstream, where the decision-pair existence (cascade-1b) is discharged. -/
+
+/-- **Parity of a symmetric-difference cardinality.** `|S ∆ T| ≡ |S| + |T| (mod 2)`. The
+algebraic fact behind "an even subgraph preserves the even-subset invariant." -/
+private theorem card_symmDiff_mod_two {α : Type*} [DecidableEq α] (S T : Finset α) :
+    (symmDiff S T).card % 2 = (S.card + T.card) % 2 := by
+  have key : (symmDiff S T).card + 2 * (S ∩ T).card = S.card + T.card := by
+    rw [symmDiff_def, Finset.sup_eq_union, Finset.card_union_of_disjoint disjoint_sdiff_sdiff]
+    have h1 := Finset.card_sdiff_add_card_inter S T
+    have h2 := Finset.card_sdiff_add_card_inter T S
+    rw [Finset.inter_comm T S] at h2
+    omega
+  omega
+
+namespace CFIBase
+
+variable {m : Nat} (H : CFIBase m)
+
+/-! ### Phase 1 — the cycle-space flip on `CFIVertex H` -/
+
+/-- The `F`-incident neighbours of `v`: neighbours `w ∈ N(v)` with the flip-edge indicator
+`F v w` set. `F : Fin m → Fin m → Bool` represents a subgraph of `H`; `flipSet F v` is the set
+of `v`-incident flip edges, viewed as a subset of `N(v)`. -/
+def flipSet (F : Fin m → Fin m → Bool) (v : Fin m) : Finset (Fin m) :=
+  (H.neighbors v).filter (fun w => F v w = true)
+
+/-- `flipSet F v ⊆ N(v)`. -/
+theorem flipSet_subset (F : Fin m → Fin m → Bool) (v : Fin m) :
+    H.flipSet F v ⊆ H.neighbors v :=
+  Finset.filter_subset _ _
+
+/-- Membership in the flip set. -/
+@[simp] theorem mem_flipSet {F : Fin m → Fin m → Bool} {v w : Fin m} :
+    w ∈ H.flipSet F v ↔ w ∈ H.neighbors v ∧ F v w = true := by
+  simp [flipSet]
+
+/-- **The even subgraph preserves the even-subset invariant.** If every `flipSet F v` has even
+cardinality (`F` an even subgraph), then `S ∆ flipSet F v` is again an even subset of `N(v)`. -/
+theorem symmDiff_flipSet_mem_even (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0)
+    {v : Fin m} {S : Finset (Fin m)} (hS : S ∈ H.evenSubsetsOfNeighbors v) :
+    symmDiff S (H.flipSet F v) ∈ H.evenSubsetsOfNeighbors v := by
+  rw [mem_evenSubsetsOfNeighbors] at hS ⊢
+  obtain ⟨hSsub, hScard⟩ := hS
+  refine ⟨?_, ?_⟩
+  · intro x hx
+    rw [Finset.mem_symmDiff] at hx
+    rcases hx with ⟨hxS, _⟩ | ⟨hxf, _⟩
+    · exact hSsub hxS
+    · exact H.flipSet_subset F v hxf
+  · have hF := hEven v
+    rw [card_symmDiff_mod_two]
+    omega
+
+/-- **The cycle-space gadget flip** on `CFIVertex H`, for an even subgraph `F`. Toggles every
+endpoint parity along an `F`-edge (`e^b_{v→w} ↦ e^{b ⊕ F v w}_{v→w}`) and complements each
+subset vertex by its `F`-incident neighbours (`a_S^v ↦ a_{S ∆ flipSet F v}^v`). The
+even-subgraph hypothesis keeps the subset image even. -/
+def cfiFlip (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) :
+    H.CFIVertex → H.CFIVertex
+  | Sum.inl ⟨v, S, hS⟩ =>
+      Sum.inl ⟨v, symmDiff S (H.flipSet F v), H.symmDiff_flipSet_mem_even F hEven hS⟩
+  | Sum.inr ⟨v, ⟨w, hw⟩, b⟩ =>
+      Sum.inr ⟨v, ⟨w, hw⟩, xor b (F v w)⟩
+
+/-- **The gadget flip is an involution.** Flipping along `F` twice restores every vertex:
+`(S ∆ F) ∆ F = S` on subsets, `(b ⊕ c) ⊕ c = b` on endpoint parities. -/
+theorem cfiFlip_involutive (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) :
+    Function.Involutive (H.cfiFlip F hEven) := by
+  rintro (⟨v, S, hS⟩ | ⟨v, ⟨w, hw⟩, b⟩)
+  · simp only [cfiFlip, symmDiff_symmDiff_cancel_right]
+  · simp only [cfiFlip]
+    cases b <;> cases hF : F v w <;> rfl
+
+/-- The gadget flip packaged as a permutation of `CFIVertex H` (it is its own inverse). -/
+def cfiFlipEquiv (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) :
+    Equiv.Perm H.CFIVertex :=
+  Function.Involutive.toPerm _ (H.cfiFlip_involutive F hEven)
+
+end CFIBase
+
+/-! ### Phase 0 — `triangleBase` prototype (β = 1: the single 3-cycle)
+
+`triangleBase = K₃` has cycle-space dimension `β = |E| − |V| + 1 = 3 − 3 + 1 = 1`: the unique
+nontrivial gadget flip is the all-edges flip `F = (i ≠ j)`. (Triangle is even-degree, so it
+tests the *construction mechanics* only, not the odd-degree completeness path — exactly the
+cheap de-risking we want before the general Phase 2 proof.) -/
+
+/-- The triangle's unique nontrivial even subgraph: all three edges. -/
+def triFlipEdges : Fin 3 → Fin 3 → Bool := fun i j => decide (i ≠ j)
+
+/-- The triangle's flip set at every vertex is its 2-element neighbourhood — even. -/
+theorem triFlip_even : ∀ v, (triangleBase.flipSet triFlipEdges v).card % 2 = 0 := by decide
+
+/-- **Phase-0 smoke test (involution).** The triangle gadget flip is an involution
+(decidable pointwise form). -/
+theorem triFlip_involutive_check :
+    ∀ x : triangleBase.CFIVertex,
+      triangleBase.cfiFlip triFlipEdges triFlip_even
+          (triangleBase.cfiFlip triFlipEdges triFlip_even x) = x := by decide
+
+/-- **Phase-0 smoke test (the crux: it is an automorphism).** The triangle gadget flip
+preserves `cfiAdj` on all `18 × 18` vertex pairs — validating the cycle-flip-is-automorphism
+computation on the smallest case before the general Phase-2 proof. -/
+theorem triFlip_isAut_check :
+    ∀ x y : triangleBase.CFIVertex,
+      triangleBase.cfiAdj (triangleBase.cfiFlip triFlipEdges triFlip_even x)
+          (triangleBase.cfiFlip triFlipEdges triFlip_even y)
+        = triangleBase.cfiAdj x y := by decide
+
+/-- **Phase-0 smoke test (nontriviality).** The triangle gadget flip genuinely moves some
+vertex (e.g. flips an endpoint parity), so it witnesses a nontrivial automorphism of
+`CFI(triangle)`. -/
+theorem triFlip_nontrivial :
+    ∃ x : triangleBase.CFIVertex,
+      triangleBase.cfiFlip triFlipEdges triFlip_even x ≠ x := by decide
 
 end ChainDescent
