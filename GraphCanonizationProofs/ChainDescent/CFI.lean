@@ -8,6 +8,7 @@ import Mathlib.Data.Fintype.Sum
 import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Data.Nat.Choose.Sum
 import Mathlib.Data.Finset.SymmDiff
+import Mathlib.GroupTheory.Perm.Support
 
 /-!
 # CFI infrastructure (Stage 1: foundational definitions)
@@ -3395,6 +3396,39 @@ theorem cfiFlip_isAut (F : Fin m → Fin m → Bool)
     have hF : F ve w = F ve' w' := by rw [hvw, hwv]; exact hFsymm w' ve'
     rw [hF, xor_eq_xor_iff]
 
+/-! ### Phase 4 — support / locality
+
+The gadget flip moves only vertices in gadgets *touched* by `F` (those `v` with a nonempty
+`flipSet F v`). A vertex whose base gadget is `F`-free is fixed — the locality fact that lets a
+flip avoid the committed individualization path. -/
+
+/-- The base vertex (gadget) of a CFI vertex. -/
+def gadget : H.CFIVertex → Fin m
+  | Sum.inl ⟨v, _⟩ => v
+  | Sum.inr ⟨v, _⟩ => v
+
+/-- **Locality.** If `F` has no edge incident to `x`'s gadget (`flipSet F (gadget x) = ∅`), the
+gadget flip fixes `x`. Subset side: `S ∆ ∅ = S`; endpoint side: an empty flip set means
+`F v w = false` for the neighbour `w`, so the parity is unchanged. -/
+theorem cfiFlip_eq_self_of_flipSet_empty (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) {x : H.CFIVertex}
+    (hx : H.flipSet F (H.gadget x) = ∅) :
+    H.cfiFlip F hEven x = x := by
+  rcases x with ⟨v, S, hS⟩ | ⟨v, ⟨w, hw⟩, b⟩
+  · simp only [gadget] at hx
+    have hSD : symmDiff S (H.flipSet F v) = S := by
+      rw [hx]; ext a; simp [Finset.mem_symmDiff]
+    simp only [cfiFlip]
+    exact congrArg Sum.inl (Sigma.ext rfl (heq_of_eq (Subtype.ext hSD)))
+  · simp only [gadget] at hx
+    have hfvw : F v w = false := by
+      rcases hh : F v w with _ | _
+      · rfl
+      · have hmem : w ∈ H.flipSet F v := H.mem_flipSet.mpr ⟨hw, hh⟩
+        rw [hx] at hmem
+        simp at hmem
+    simp only [cfiFlip, hfvw, Bool.xor_false]
+
 end CFIBase
 
 /-! ### Phase 3 — lift the gadget flip to `Aut(adj)` on `Fin n`
@@ -3444,6 +3478,28 @@ theorem cfiFlipAut_involutive (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool
   intro v
   apply h.e.injective
   rw [h.e_cfiFlipAut, h.e_cfiFlipAut, (h.H.cfiFlip_involutive F hEven) (h.e v)]
+
+/-- **Locality, lifted to `Fin n`.** If `F`'s edges avoid the gadget of `i`'s CFI vertex, the
+lifted gadget flip fixes `i`. -/
+theorem cfiFlipAut_eq_self_of_flipSet_empty (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) {i : Fin n}
+    (hi : h.H.flipSet F (h.H.gadget (h.e i)) = ∅) :
+    h.cfiFlipAut F hEven i = i := by
+  apply h.e.injective
+  rw [h.e_cfiFlipAut]
+  exact h.H.cfiFlip_eq_self_of_flipSet_empty F hEven hi
+
+/-- **Phase-4 deliverable (support disjointness).** If every vertex of a committed set `T`
+lives in an `F`-free gadget, the lifted gadget flip's support avoids `T` — exactly the
+`Disjoint (committed set) π.support` the path-fixing consumers (`hwit`, `configSwap`) require. -/
+theorem disjoint_support_cfiFlipAut (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) {T : Finset (Fin n)}
+    (hT : ∀ i ∈ T, h.H.flipSet F (h.H.gadget (h.e i)) = ∅) :
+    Disjoint T (Equiv.Perm.support (h.cfiFlipAut F hEven)) := by
+  rw [Finset.disjoint_right]
+  intro i hi hiT
+  exact (Equiv.Perm.mem_support.mp hi)
+    (h.cfiFlipAut_eq_self_of_flipSet_empty F hEven (hT i hiT))
 
 end IsCFI'
 
