@@ -492,4 +492,72 @@ theorem residualAbelian_mono {S S' : Finset (Fin n)} (h : ResidualAbelian adj P 
   exact h π₁ π₂ ⟨h₁.1, h₁.2.1, fun v hv => h₁.2.2 v (hSS' hv)⟩
     ⟨h₂.1, h₂.2.1, fun v hv => h₂.2.2 v (hSS' hv)⟩
 
+/-! ## Screen predicate D1 — visible / cells=orbits chain to a base (leg A)
+
+**D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).
+The symmetry is **exposed by symmetry-only individualization**: there is a descent from the committed set
+`S₀` to a base along which 1-WL cells coincide with orbits at *every* step — no apparent-decision
+(coarser-than-orbit) cell is ever individualized. This is the visible/refinement regime (scheme, clean
+GRR); CFI fails it (any descent to a base passes through intermediate sets where its cells are strictly
+coarser than orbits — and `IsBase` at `∅` is false since `Aut(CFI)` is non-trivial, so the trivial
+chain cannot shortcut it). Together with D2 (`ResidualAbelian`) this is the negation-complete screen;
+`¬D1 ∧ ¬D2` = hidden + non-abelian = the leg-C Johnson fingerprint.
+
+Asymmetry with D2: here `D1 ⟹ RecoverableByDepth` is *free* (the def carries cells=orbits at its
+endpoint — faithful to "exposable by symmetry-only individualization"), so D1's genuine content is the
+per-class *instance* check (scheme ✓, CFI ✗) and negation-completeness, deferred; D2's open content was
+the abelian-sufficiency bridge instead. -/
+
+/-- **D1 — visibly recoverable.** A `CellsAreOrbits`-preserving descent from `S₀` to a base of size
+`≤ bound`: a monotone chain `T` with `T 0 = S₀`, `CellsAreOrbits adj P (T i)` at every step, and
+`IsBase adj P (T k)`. The visible/cascade leg of the screen (relative to the committed set `S₀`). -/
+def VisiblyRecoverable (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n))
+    (bound : Nat) : Prop :=
+  ∃ (k : Nat) (T : Nat → Finset (Fin n)),
+    T 0 = S₀ ∧
+    (∀ i, i < k → T i ⊆ T (i + 1)) ∧
+    (∀ i, i ≤ k → CellsAreOrbits adj P (T i)) ∧
+    IsBase adj P (T k) ∧
+    (T k).card ≤ bound
+
+/-- **The D1 leg of the harvest-window lemma.** `D1 ⟹ RecoverableByDepth` — free, since the visible
+descent ends at a set carrying `CellsAreOrbits` within the bound. -/
+theorem recoverableByDepth_of_visiblyRecoverable {S₀ : Finset (Fin n)} {bound : Nat}
+    (h : VisiblyRecoverable adj P S₀ bound) : RecoverableByDepth adj P bound := by
+  obtain ⟨k, T, _, _, hcells, _, hcard⟩ := h
+  exact ⟨T k, hcard, hcells k (le_refl k)⟩
+
+/-- **Base case of the trichotomy: discreteness gives D1.** If warm refinement at `S₀` is already
+`Discrete`, the trivial one-node chain `T ≡ S₀` is a visible descent to a base — cells = orbits =
+singletons there (`cellsAreOrbits_of_discrete`), and discreteness forces `IsBase` (orbits refine cells,
+which are singletons). The recursion bottom for the D1 leg, mirroring `residualAbelian_of_isBase`. -/
+theorem visiblyRecoverable_of_discrete {S₀ : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S₀))) :
+    VisiblyRecoverable adj P S₀ S₀.card := by
+  refine ⟨0, fun _ => S₀, rfl, fun i hi => absurd hi (Nat.not_lt_zero i),
+    fun i _ => cellsAreOrbits_of_discrete hd, ?_, le_refl _⟩
+  intro v w ho
+  exact hd v w (OrbitPartition.subset_warmRefine ho)
+
+/-! ### The screen `Findable = D1 ∨ D2` -/
+
+/-- **The harvest-window screen** (the seal's negation-complete `D1 ∨ D2`, relative to the committed set
+`S₀`): the residual symmetry is *visibly recoverable* (D1) **or** *abelian* (D2). Its negation
+`¬Findable` — no visible descent to a base **and** a non-abelian residual — is the hidden + non-abelian
+case = the leg-C Johnson/Cameron fingerprint (exported, not handled here). Bound-free: the D1 disjunct
+quantifies the depth existentially, so `Findable` is the pure classification; the poly bound enters the
+recoverability lemma. -/
+def Findable (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) : Prop :=
+  (∃ bound, VisiblyRecoverable adj P S₀ bound) ∨ ResidualAbelian adj P S₀
+
+/-- **The D1 disjunct of the screen already yields recoverability.** If `Findable` holds via its D1
+(visible) disjunct, `RecoverableByDepth` follows now (`recoverableByDepth_of_visiblyRecoverable`). The
+D2 (abelian) disjunct's recoverability is the remaining open bridge (`D2 ⟹ hwit`, cascade-1b
+generalized). -/
+theorem recoverableByDepth_of_findable_visible {S₀ : Finset (Fin n)}
+    (h : ∃ bound, VisiblyRecoverable adj P S₀ bound) :
+    ∃ bound, RecoverableByDepth adj P bound := by
+  obtain ⟨bound, hv⟩ := h
+  exact ⟨bound, recoverableByDepth_of_visiblyRecoverable hv⟩
+
 end ChainDescent

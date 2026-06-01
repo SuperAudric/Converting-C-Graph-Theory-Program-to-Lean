@@ -481,8 +481,32 @@ Built in [`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean),
   is abelian) — the property the trichotomy induction needs to carry D2 deeper.
 
 Note the negation is clean: `¬ResidualAbelian` = "∃ two non-commuting residual autos" = the non-abelian
-residual, which (with `¬D1`) is the leg-C Johnson fingerprint — exported, not proved here. **D1 (the
-visible/cascade leg) is next.**
+residual, which (with `¬D1`) is the leg-C Johnson fingerprint — exported, not proved here.
+
+### 6.7 D1 + the screen `Findable` defined in Lean (2026-06-01)
+
+Chosen def (option D1-A, visible / cells=orbits chain to a base). Built in
+[`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean), axiom-clean
+(`[propext, Classical.choice, Quot.sound]`), full build green:
+
+- **`VisiblyRecoverable adj P S₀ bound`** (= **D1**) — a monotone chain `T 0 = S₀ ⊆ … ⊆ T k` with
+  `CellsAreOrbits adj P (T i)` at **every** step and `IsBase adj P (T k)`, `|T k| ≤ bound`. The
+  cells=orbits-throughout + reaches-a-base conjuncts are what exclude CFI (its descent to a base must
+  pass coarser-than-orbit intermediates; `IsBase` at `∅` is false since `Aut(CFI)` is non-trivial) and
+  admit scheme / clean GRR.
+- `recoverableByDepth_of_visiblyRecoverable` — the **D1 leg** of the harvest-window lemma, *free* from
+  the def (cells=orbits sits at the endpoint). Faithful to "exposable by symmetry-only individualization."
+- `visiblyRecoverable_of_discrete` — **base case** (discrete ⟹ D1, trivial chain): the D1 recursion
+  bottom, mirroring `residualAbelian_of_isBase`.
+- **`Findable adj P S₀`** (= the **screen `D1 ∨ D2`**) — `(∃ bound, VisiblyRecoverable …) ∨
+  ResidualAbelian …`. Bound-free (D1's depth quantified existentially) = the pure negation-complete
+  classification; `recoverableByDepth_of_findable_visible` discharges the D1 disjunct's recoverability
+  now, the D2 disjunct awaiting the bridge.
+
+**Asymmetry recorded:** `D1 ⟹ recoverable` is *free* (def bakes in cells=orbits), so D1's genuine content
+is the per-class instance check (scheme ✓, CFI ✗) — deferred; D2's open content was the abelian bridge.
+Both screen predicates and the screen itself are now in Lean. **Remaining: the D2 bridge
+(`ResidualAbelian ⟹ hwit`, = cascade-1b generalized) and the per-class D1 instance checks.**
 
 ---
 
