@@ -32,6 +32,17 @@ load-bearing:
 [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
 §5.
 
+> **Forward-compat — leg B of the oracle-capability seal**
+> ([exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)). The
+> linear oracle's completeness (abelian-sufficiency,
+> [handoff doc](./chain-descent-abelian-sufficiency-handoff.md)) *is* the seal's
+> leg B. Target form: *every hidden abelian symmetry (¬D1 ∧ has-a-unique-candidate
+> — the seal's predicate D2) is certified.* **Surface the failure boundary — *no
+> unique candidate* (¬D2) — as a named property**, not just "the wall": ¬D2 is the
+> other half of the leg-C fingerprint the Cameron leg consumes. The intro's two
+> flag causes (hidden Johnson / multipede) are exactly the seal's leg-C (Cameron,
+> residual non-trivial) and the *out-of-seal* IR core (residual trivial).
+
 > **Constraint status (read first).** The constraints below come from
 > several docs of varying currency. This doc marks each as **firm**
 > (Lean-backed or proved — do not change without re-proving),

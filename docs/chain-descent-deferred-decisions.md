@@ -201,6 +201,16 @@ And even when the hypothesis fails, the *unconditional* symmetry is
 still hoisted — the workflow is never worse than the current flow, and
 usually better.
 
+> **Forward-compat (2026-05-31).** This doc's **unconditional vs. conditional**
+> line *is* the oracle-capability seal's predicate **D1**
+> ([exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)):
+> unconditional = exposable without committing a real decision = the cascade leg's
+> domain; *conditional, non-abelian, surviving poly-depth* = the Cameron (leg-C)
+> candidate. The §6 three-outcome split (cascade-class / hidden-Johnson / IR blind
+> spot) is the seal's bucket A / leg C / *out-of-seal IR core* — keep the IR core
+> (no symmetry, residual group trivial) distinct from Cameron (unconsumed symmetry,
+> residual non-trivial), per [§0.6](./chain-descent-exhaustive-obstruction.md).
+
 ---
 
 ## 6. Graceful degradation

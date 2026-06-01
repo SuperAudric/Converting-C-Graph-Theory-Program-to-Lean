@@ -30,6 +30,18 @@ interesting content is empirical: F7 (cells = orbits at depth 1)
 holds for many CFI bases but **not** all — Rook3×3 subset start is
 a clean counterexample requiring depth = tw(H) = 4.
 
+> **Forward-compat — this program is leg A of the oracle-capability seal**
+> ([exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)).
+> Orbit recovery *is* the cascade oracle's completeness leg. When this is pushed
+> past the current per-class results, state the target in **seal-compatible**
+> form: *every **unconditional** symmetry — one exposable by symmetry-only
+> individualization within the polynomial depth bound (the seal's predicate D1) —
+> is recovered.* Critically, **surface the un-recovered boundary as a named
+> property of the residual, not as a class restriction**: that boundary (the
+> decision-node-depth / cascade-1b frontier) is the predicate ¬D1, and ¬D1 is
+> *half of the leg-C fingerprint* the Cameron leg consumes. Burying the failure
+> mode inside "proved for class X" loses the load-bearing downstream input.
+
 ---
 
 ## 2. Background and motivation

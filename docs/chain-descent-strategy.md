@@ -665,6 +665,16 @@ are in [`chain-descent-calculator.md`](./chain-descent-calculator.md) §9.
    distinguishable at flag time by the residual group order (§14): non-trivial ⇒
    Tier-2-like, trivial ⇒ IR blind spot.
 
+   > **Endpoint statement (oracle-capability seal, 2026-05-31).** State the goal
+   > as **two separate guarantees**, never one — the IR core has *no* symmetry, so
+   > it must not be folded into the Tier-2 / Cameron case:
+   > **(1) symmetry completeness** — *every symmetry is consumed by an oracle **or**
+   > is a Cameron section* (residual non-trivial); **(2) polynomial time** — *poly
+   > **unless** a Cameron section **or** an IR blind spot* (residual trivial). The
+   > seal proves (1); the IR-core escape in (2) is orthogonal and is the slot for a
+   > future Phase-2 blind-spot handler. See
+   > [exhaustive-obstruction §0.6](./chain-descent-exhaustive-obstruction.md).
+
 6. **Both-directions-dead error mode.** If both directions of a guess contradict
    on closure, neither branch produces a canonical form. The algorithm needs a
    defined error mode and, ideally, a structural argument that this cannot arise

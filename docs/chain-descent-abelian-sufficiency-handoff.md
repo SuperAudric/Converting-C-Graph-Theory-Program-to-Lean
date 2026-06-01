@@ -10,6 +10,17 @@ Authoritative companions: [`chain-descent-linear-oracle.md`](./chain-descent-lin
 [`GraphCanonizationProofs/ChainDescent/LinearOracle.lean`](../GraphCanonizationProofs/ChainDescent/LinearOracle.lean)
 (`§L.1–L.7b`) on top of [`ChainDescent.lean`](../GraphCanonizationProofs/ChainDescent.lean).
 
+> **Forward-compat (2026-05-31) — this proof is leg B of the oracle-capability
+> seal** ([exhaustive-obstruction §0.5/§0.6](./chain-descent-exhaustive-obstruction.md)).
+> "Abelian ⟹ the oracle fires" *is* the seal's leg B (bucket ¬D1 ∧ D2). Two things
+> to preserve so the seal can consume this leg later: **(i)** keep the completeness
+> statement class-agnostic — "abelian / unique-candidate ⟹ certified", not
+> CFI-only — so it plugs in without re-derivation; **(ii)** when the converse fails
+> (the conjugation gap / no unique candidate), **record *which property* fails** —
+> that ¬D2 property is a positive input to the Cameron leg (leg C), not a dead end.
+> The named nut already isolates this correctly (`hwit` + cascade-1b are shared and
+> non-GI∈P); the seal just asks that the *failure boundary* be exported as data.
+
 ---
 
 ## 1. The problem, in one paragraph

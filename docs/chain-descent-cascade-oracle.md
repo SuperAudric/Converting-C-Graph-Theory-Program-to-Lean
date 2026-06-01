@@ -159,6 +159,17 @@ case) or as a *separate cascade oracle* that calls the shared
 construction. This doc specifies the mechanism; the packaging is
 reshapeable.
 
+> **Forward-compat — leg A mechanism of the oracle-capability seal**
+> ([exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)). The
+> localisation split maps directly onto the seal: **1a (bounded-depth
+> recoverability) = the D1-interior; 1b (decision-node-depth bridging) = the D1
+> boundary.** A residual that escapes 1b for a *symmetry* reason (not a budget
+> cutoff) is a **leg-C (Cameron) candidate** — surface that escape as a *named
+> property* (it is the ¬D1 input to the Cameron leg), distinct from the budget /
+> IR-blind-spot escape (which has *no* symmetry — out of the seal). Keep
+> "escaped because the symmetry is non-abelian-and-hidden" separate from "escaped
+> because there is no symmetry to find."
+
 ---
 
 ## 2. The firm contract

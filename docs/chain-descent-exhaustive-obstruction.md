@@ -29,7 +29,9 @@ and it is exactly the user's hypothesis.
   chain descent would canonize every graph ⟹ **GI ∈ P**. The wall. **Excluded,
   correctly.**
 - **(O\*)-classification** — *"**if** a residual does not cascade and is
-  non-abelian, **then** it contains a Johnson/Cameron section."* This is the
+  non-abelian, **then** it contains a Johnson/Cameron section"* (**Cameron** =
+  Cameron's *large-primitive-group theorem*, §1 disambiguation box — **not** the
+  Cameron graph). This is the
   user's hypothesis. It says nothing about whether the bad case *arises*; it
   says that *when* it arises it is the named, flaggable one. **This is the
   Exhaustive-Obstruction Lemma, and it is NOT GI ∈ P** (proving it canonizes no
@@ -143,6 +145,37 @@ the seal.
 
 ---
 
+## 0.6 The two flag causes — the seal classifies symmetry; the IR core is orthogonal
+
+The seal (§0.5) is conditioned on **a symmetry exists**. The program flags for
+**two independent reasons**, and they must *never* collapse into one — the IR
+core has **no symmetry**, so folding a multipede into Cameron is a category error
+(**Cameron = unconsumed symmetry**; **multipede = absence of symmetry**).
+
+State the endpoint as **two separate guarantees**, never a single sentence:
+
+1. **Symmetry completeness (the seal).** *Every symmetry is consumed by an oracle,
+   **OR** it is a Cameron section.* This is §0.5. In the flag case the residual
+   group is **non-trivial**.
+2. **Polynomial time (two conditional escapes).** *The residue canonizes in
+   polynomial time **unless** it contains a Cameron section (unconsumed symmetry,
+   residual group **non-trivial**) **OR** it is an IR blind spot (a **multipede** —
+   refinement-resistant rigid core, **no** symmetry, residual group **trivial**).*
+
+The IR core is **outside the seal by construction**: the seal classifies
+*symmetric* obstructions, and a multipede is the *¬∃-symmetry* flag. The two are
+separated operationally at flag time by **residual-group order** (non-trivial ⟹
+Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.md),
+[calculator §14](./chain-descent-calculator.md)).
+
+**Drafting rule for every downstream statement.** "All symmetry removed **or**
+Cameron" (statement 1) is **not** the time bound (statement 2): statement 2 carries
+the *extra* IR-core escape. A future Phase-2 blind-spot handler
+([deferred-decisions §7](./chain-descent-deferred-decisions.md)) addresses **only**
+that escape — never the seal. Keep both clauses, always.
+
+---
+
 ## 1. Statement of the lemma (mechanism-pinned)
 
 Informal target:
@@ -161,15 +194,30 @@ Informal target:
 > Contrapositive (= the user's hypothesis): **there is no non-cascade,
 > non-abelian, non-Cameron symmetric obstruction.**
 
+> **Terminology — disambiguation (read once).** "Cameron" here means **Cameron's
+> theorem on large primitive permutation groups** (P. J. Cameron, 1981; sharpened
+> by Maróti) — *not* "the Cameron graph" (the strongly regular graph on 231
+> vertices tied to M₂₂ / the Steiner system S(3,6,22)), which is an unrelated
+> single object. A **Cameron group** is a primitive group sandwiched
+> `(A_m)^d ◁ G ≤ S_m ≀ S_d` acting in **product action** on `d`-tuples of
+> `k`-subsets of `[m]` (degree `n = C(m,k)^d`). The `d = 1` case is `S_m`/`A_m` on
+> `k`-subsets = **the Johnson group** (the project's "hidden Johnson"). A **Cameron
+> section** = a subquotient of the residual that is such a group. The class is
+> **richly constructed and fully classified** (Johnson/Hamming/Grassmann schemes,
+> `A_m`-on-subsets, product actions) — the *opposite* of "no known constructions";
+> that abundance + classification is exactly what makes leg C conclude. Same usage
+> as [hidden-johnson §3](./chain-descent-hidden-johnson.md) ("O'Nan–Scott +
+> Cameron/Maróti").
+
 **Why "Cameron section," not "Johnson section" (a correction to fold back).**
-Cameron's classification of large primitive groups yields `A_k`-on-subsets
-(Johnson) **and** product actions (`A_k^d` in product action) and a small list
-of exceptions. The docs say "Johnson" as shorthand; the *honest* obstruction
-class is **Cameron**. Strict "Johnson-only" is **too narrow** — a product-action
-Cameron group would be a genuine instance of the user's "fourth species"
-(non-cascade, non-abelian, **not strictly Johnson**) that is nonetheless still
-*classified and flaggable*. Naming the target as **Cameron** is what makes the
-hypothesis actually true rather than narrowly false. (See §6 refutation R3.)
+Cameron's classification yields `A_k`-on-subsets (Johnson, `d=1`) **and** product
+actions (`d>1`) and a small list of exceptions. The docs say "Johnson" as
+shorthand; the *honest* obstruction class is **Cameron**. Strict "Johnson-only" is
+**too narrow** — a product-action Cameron group would be a genuine instance of the
+user's "fourth species" (non-cascade, non-abelian, **not strictly Johnson**) that
+is nonetheless still *classified and flaggable*. Naming the target as **Cameron**
+is what makes the hypothesis actually true rather than narrowly false. (See §6
+refutation R3.)
 
 **Why "mechanism-pinned" is load-bearing.** If "cascade-class" is *defined* as
 "whatever refinement + individualization can reach," then disjunct 1 is true by
