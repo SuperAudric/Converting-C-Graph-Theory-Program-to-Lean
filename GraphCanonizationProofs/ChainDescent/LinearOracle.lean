@@ -968,7 +968,7 @@ the leaf colouring, and carries `σ` off the pair. This commits the linear oracl
 per decision (the cycle through the decision edge, local to the decided gadget), which is cascade-1b. -/
 def CFIGadgetFlippable (h : IsCFI' adj) : Prop :=
   ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_isLeaf : chain.IsLeaf)
-    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D),
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (_ha : a ∈ chain.D) (_hb : b ∈ chain.D),
     a ≠ b →
     ∃ (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0),
       (∀ v w, F v w = F w v) ∧
@@ -988,5 +988,160 @@ theorem configSwapRecoverable_of_cfi (h : IsCFI' adj)
   intro k chain isLeaf σ a b ha hb hab
   obtain ⟨F, hEven, hFsymm, hga, hgb, hgχ, hgpres⟩ := hflip chain isLeaf σ a b ha hb hab
   exact ⟨configSwap_of_cfiFlipAut h chain σ a b ha hb F hEven hFsymm hga hgb hgχ hgpres⟩
+
+/-! ### §L.9 follow-on — reducing the config-swap conditions to locality + cell-coherence
+
+`configSwap_of_aut`'s three conditions (swap, `χι`-fix, `σ`-off-pair) entangle the gadget-flip
+mechanics with the descent's cell structure. The lemmas below **decouple** them: the σ-off-pair
+condition reduces to *σ-cell-coherence* (`a, b` relate identically under `σ` to every other decided
+vertex) plus *F-locality* (the flip fixes the decided vertices off `{a,b}`); the `χι`-fix reduces to
+*χι-coherence on the F-touched support*. Coherence is the "`{a,b}` is a genuine cell" content the
+descent provides (shared with cascade-1b); F-locality is a property of the chosen cycle. The σ
+reduction is general (any `g`), reusable beyond CFI. -/
+
+/-- **σ-off-pair preservation from locality (the `hgpres` reduction, general `g`).** Any `g` that
+swaps `(a, b)`, fixes every *other* decided vertex (`hgfixD`), preserves the decided set
+(`hgD`), and preserves `P₀` (`hP0`) satisfies `configSwap_of_aut`'s off-pair condition — given only
+**σ-cell-coherence** at `(a, b)` (`hcoh`). Off the decided set, `agrees_off` + `P₀`-invariance close
+it; on it, the coherence case-analysis (as in `configSwap_of_swap`). Decouples the twist mechanics
+from the descent-coherence fact `hcoh`. -/
+theorem swapsConfig_off_pair_of_local {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n)
+    (g : Equiv.Perm (Fin n)) (hga : g a = b) (hgb : g b = a)
+    (hgfixD : ∀ x, x ∈ chain.D → x ≠ a → x ≠ b → g x = x)
+    (hgD : ∀ x, g x ∈ chain.D ↔ x ∈ chain.D)
+    (hcoh : ∀ w, w ≠ a → w ≠ b → σ.σ a w = σ.σ b w)
+    (hP0 : ∀ x y, P₀ (g x) (g y) = P₀ x y) :
+    ∀ v u, ¬((v = a ∧ u = b) ∨ (v = b ∧ u = a)) → σ.σ (g v) (g u) = σ.σ v u := by
+  have hdiag : ∀ x : Fin n, σ.σ x x = POE.unknown := by
+    intro x
+    have h := σ.antisym x x
+    cases hc : σ.σ x x with
+    | less => simp only [hc, POE.neg] at h; exact absurd h (by decide)
+    | unknown => rfl
+    | greater => simp only [hc, POE.neg] at h; exact absurd h (by decide)
+  have hcoh' : ∀ w : Fin n, w ≠ a → w ≠ b → σ.σ w a = σ.σ w b := by
+    intro w hwa hwb
+    rw [σ.antisym w a, σ.antisym w b, hcoh w hwa hwb]
+  intro v u hne
+  by_cases hvD : v ∈ chain.D
+  · by_cases huD : u ∈ chain.D
+    · by_cases hva : v = a
+      · by_cases hub : u = b
+        · exact absurd (Or.inl ⟨hva, hub⟩) hne
+        · by_cases hua : u = a
+          · rw [hva, hua, hga, hdiag b, hdiag a]
+          · rw [hva, hga, hgfixD u huD hua hub]; exact (hcoh u hua hub).symm
+      · by_cases hvb : v = b
+        · by_cases hua : u = a
+          · exact absurd (Or.inr ⟨hvb, hua⟩) hne
+          · by_cases hub : u = b
+            · rw [hvb, hub, hgb, hdiag a, hdiag b]
+            · rw [hvb, hgb, hgfixD u huD hua hub]; exact hcoh u hua hub
+        · by_cases hua : u = a
+          · rw [hgfixD v hvD hva hvb, hua, hga]; exact (hcoh' v hva hvb).symm
+          · by_cases hub : u = b
+            · rw [hgfixD v hvD hva hvb, hub, hgb]; exact hcoh' v hva hvb
+            · rw [hgfixD v hvD hva hvb, hgfixD u huD hua hub]
+    · rw [σ.agrees_off (g v) (g u) (Or.inr (mt (hgD u).mp huD)),
+          σ.agrees_off v u (Or.inr huD), hP0]
+  · rw [σ.agrees_off (g v) (g u) (Or.inl (mt (hgD v).mp hvD)),
+        σ.agrees_off v u (Or.inl hvD), hP0]
+
+/-- **Decided-set preservation for an involutive local swap.** An involution that swaps `(a, b)`
+and fixes every other decided vertex maps the decided set to itself, hence preserves membership
+(`g x ∈ D ↔ x ∈ D`). The `hgD` input to `swapsConfig_off_pair_of_local`, discharged for the
+gadget flip (an involution by `cfiFlipAut_involutive`). -/
+theorem preserves_D_of_involutive_local {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (g : Equiv.Perm (Fin n)) (hinv : Function.Involutive g)
+    (hga : g a = b) (hgb : g b = a)
+    (hgfixD : ∀ x, x ∈ chain.D → x ≠ a → x ≠ b → g x = x) :
+    ∀ x, g x ∈ chain.D ↔ x ∈ chain.D := by
+  have hinto : ∀ x, x ∈ chain.D → g x ∈ chain.D := by
+    intro x hx
+    by_cases hxa : x = a
+    · rw [hxa, hga]; exact hb
+    · by_cases hxb : x = b
+      · rw [hxb, hgb]; exact ha
+      · rw [hgfixD x hx hxa hxb]; exact hx
+  intro x
+  refine ⟨fun hgx => ?_, hinto x⟩
+  have := hinto (g x) hgx
+  rwa [hinv x] at this
+
+/-- **`χι`-fix from χι-coherence on the F-support (the `hgχ` reduction).** The gadget flip fixes
+the leaf colouring `χι` once it does so on the gadgets `F` actually touches — Phase-4 locality
+(`cfiFlipAut_eq_self_of_flipSet_empty`) fixes everything in an `F`-free gadget outright. Reduces the
+global `hgχ` to χι-coherence on the (small) F-support. -/
+theorem cfiFlipAut_fixesχι_of_support (h : IsCFI' adj) {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0)
+    (hχsupp : ∀ v, h.H.flipSet F (h.H.gadget (h.e v)) ≠ ∅ →
+      chain.χι (h.cfiFlipAut F hEven v) = chain.χι v) :
+    ∀ v, chain.χι (h.cfiFlipAut F hEven v) = chain.χι v := by
+  intro v
+  by_cases hv : h.H.flipSet F (h.H.gadget (h.e v)) = ∅
+  · rw [h.cfiFlipAut_eq_self_of_flipSet_empty F hEven hv]
+  · exact hχsupp v hv
+
+/-- **The CFI gadget twist is a config-swap, from locality + cell-coherence (the reduced bridge).**
+The three `configSwap_of_aut` conditions are replaced by: the flip swaps `(a, b)`; `F` is **D-local**
+(its edges avoid the gadgets of decided vertices other than `a, b`); `σ` is **cell-coherent** at
+`(a, b)`; `P₀` is automorphism-invariant; and `χι` is coherent on the F-support. The σ-off-pair and
+`χι`-fix conditions are then discharged by `swapsConfig_off_pair_of_local` (+ `preserves_D_…`,
+Phase-5 `P₀`-preservation) and `cfiFlipAut_fixesχι_of_support`. -/
+def configSwap_of_cfiFlipAut_local (h : IsCFI' adj) {k : Nat}
+    (chain : SpineChain adj P₀ χι₀ sel k) (σ : DirAssignment P₀ chain.D)
+    (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0)
+    (hFsymm : ∀ v w, F v w = F w v)
+    (hga : h.cfiFlipAut F hEven a = b) (hgb : h.cfiFlipAut F hEven b = a)
+    (hFlocalD : ∀ x, x ∈ chain.D → x ≠ a → x ≠ b →
+      h.H.flipSet F (h.H.gadget (h.e x)) = ∅)
+    (hcoh : ∀ w, w ≠ a → w ≠ b → σ.σ a w = σ.σ b w)
+    (hP0inv : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x y, P₀ (π x) (π y) = P₀ x y)
+    (hχsupp : ∀ v, h.H.flipSet F (h.H.gadget (h.e v)) ≠ ∅ →
+      chain.χι (h.cfiFlipAut F hEven v) = chain.χι v) :
+    ConfigSwap chain σ a b ha hb :=
+  let g := h.cfiFlipAut F hEven
+  have hgfixD : ∀ x, x ∈ chain.D → x ≠ a → x ≠ b → g x = x :=
+    fun x hx hxa hxb => h.cfiFlipAut_eq_self_of_flipSet_empty F hEven (hFlocalD x hx hxa hxb)
+  have hgD := preserves_D_of_involutive_local chain a b ha hb g
+    (h.cfiFlipAut_involutive F hEven) hga hgb hgfixD
+  configSwap_of_cfiFlipAut h chain σ a b ha hb F hEven hFsymm hga hgb
+    (cfiFlipAut_fixesχι_of_support h chain F hEven hχsupp)
+    (swapsConfig_off_pair_of_local chain σ a b g hga hgb hgfixD hgD hcoh
+      (h.cfiFlipAut_preserves_P F hEven hFsymm hP0inv))
+
+/-- **The reduced CFI gadget-flip recoverability hypothesis.** Per decision: an even-symmetric `F`
+that is **D-local** (avoids decided gadgets off `{a,b}`), whose flip swaps `(a, b)`, with `σ`
+cell-coherent and `χι` coherent on the F-support — plus the global `P₀`-invariance. The conditions
+are now the descent-coherence / cycle-locality facts (the cascade-1b content), not the opaque
+`configSwap_of_aut` package. -/
+def CFIGadgetFlippableLocal (h : IsCFI' adj) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (_ha : a ∈ chain.D) (_hb : b ∈ chain.D),
+    a ≠ b →
+    ∃ (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0),
+      (∀ v w, F v w = F w v) ∧
+      h.cfiFlipAut F hEven a = b ∧ h.cfiFlipAut F hEven b = a ∧
+      (∀ x, x ∈ chain.D → x ≠ a → x ≠ b → h.H.flipSet F (h.H.gadget (h.e x)) = ∅) ∧
+      (∀ w, w ≠ a → w ≠ b → σ.σ a w = σ.σ b w) ∧
+      (∀ v, h.H.flipSet F (h.H.gadget (h.e v)) ≠ ∅ →
+        chain.χι (h.cfiFlipAut F hEven v) = chain.χι v)
+
+/-- **`ConfigSwapRecoverable` for CFI via the reduced (locality + coherence) hypothesis.** Same
+discharge as `configSwapRecoverable_of_cfi`, but consuming the decoupled `CFIGadgetFlippableLocal`
+— the open content is now F-locality + descent cell-coherence, the cascade-1b shape. -/
+theorem configSwapRecoverable_of_cfi_local (h : IsCFI' adj)
+    (hP0inv : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x y, P₀ (π x) (π y) = P₀ x y)
+    (hflip : CFIGadgetFlippableLocal (P₀ := P₀) (χι₀ := χι₀) (sel := sel) h) :
+    ConfigSwapRecoverable (adj := adj) (P₀ := P₀) (χι₀ := χι₀) (sel := sel) := by
+  intro k chain isLeaf σ a b ha hb hab
+  obtain ⟨F, hEven, hFsymm, hga, hgb, hFlocalD, hcoh, hχsupp⟩ :=
+    hflip chain isLeaf σ a b ha hb hab
+  exact ⟨configSwap_of_cfiFlipAut_local h chain σ a b ha hb F hEven hFsymm hga hgb
+    hFlocalD hcoh hP0inv hχsupp⟩
 
 end ChainDescent

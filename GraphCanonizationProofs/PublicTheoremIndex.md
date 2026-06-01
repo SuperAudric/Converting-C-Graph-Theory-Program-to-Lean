@@ -609,8 +609,20 @@ Open (not a `sorry`): **`CFIGadgetFlippable`** — that the decision-local even 
 decision (the flip is built and proven sound; what remains is the cycle through the decision edge, local
 to the decided gadget). Its three per-decision obligations (swap `(a,b)`, fix `χι`, carry `σ` off the
 pair) are the descent-coherence content of cascade-1b — the decision-node-depth half, shared with the
-cascade oracle, *not* `GI∈P`. Reducing them further (`χι` via partition-invariance, `σ` via locality +
-σ-cell-coherence) is follow-on groundwork.
+cascade oracle, *not* `GI∈P`.
+
+**§L.9 follow-on — the conditions reduced to locality + cell-coherence.** Decouples the gadget-flip
+mechanics from the descent's cell structure, so the residual is the cascade-1b shape (F-locality +
+cell-coherence), not the opaque `configSwap_of_aut` package.
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `swapsConfig_off_pair_of_local` | **The σ-off-pair reduction (general `g`, reusable).** Any `g` swapping `(a,b)`, fixing decided vertices off `{a,b}`, preserving the decided set and `P₀`, satisfies the off-pair condition given only **σ-cell-coherence** at `(a,b)`. Off-D via `agrees_off` + P₀-invariance; on-D via the coherence case-analysis. | — |
+| `preserves_D_of_involutive_local` | Decided-set preservation for an involutive local swap (`g x ∈ D ↔ x ∈ D` from `g²=id` + swap + fix-off-`{a,b}`). The `hgD` input above, discharged for the gadget flip. | — |
+| `cfiFlipAut_fixesχι_of_support` | **The `hgχ` reduction.** The flip fixes `χι` once it does on the F-touched gadgets — Phase-4 locality fixes every `F`-free gadget outright. Reduces global `hgχ` to χι-coherence on the (small) F-support. | — |
+| `configSwap_of_cfiFlipAut_local` | **The reduced bridge.** A `ConfigSwap` from {`F` even+symmetric, swap, **F is D-local**, σ-cell-coherent, `P₀` Aut-invariant, χι-coherent on F-support} — the three `configSwap_of_aut` conditions discharged via the reductions above. | Definition |
+| `CFIGadgetFlippableLocal` | The reduced per-decision predicate: an even-symmetric **D-local** `F` whose flip swaps `(a,b)`, with σ cell-coherent and χι coherent on the F-support. The conditions are now the descent-coherence / cycle-locality (cascade-1b) facts. | Definition |
+| `configSwapRecoverable_of_cfi_local` | `ConfigSwapRecoverable` from `CFIGadgetFlippableLocal` (+ `P₀` Aut-invariance) — the discharge via the decoupled hypotheses. | — |
 
 Transport chain it builds on (ChainDescent.lean `§16.2b`): `signature_transport`, `sigKey_transport`,
 `refineStep_transport`, `iterate_refineStep_transport`, `warmRefine_transport` — cross-config (two
