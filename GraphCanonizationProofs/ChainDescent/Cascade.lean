@@ -380,4 +380,55 @@ theorem cascadeComposition_cfi (h : IsCFI' adj) {k : Nat}
     Discrete (warmRefine adj P (individualizedColouring n (T k))) :=
   cascadeComposition_pathFixing T S hT hbase (cfiLayer_pathFixing_hwit h hP hflip) hbaseSet
 
+/-! ## Harvest-window connector — Theorem 3a's `Discrete` output as a `RecoverableByDepth` certificate
+
+The harvest-window lemma ([`docs/chain-descent-harvest-window.md`](../../../docs/chain-descent-harvest-window.md))
+states its conclusion as `RecoverableByDepth adj P (b g)`, with `b g` the recoverability depth (§6.3
+there). Theorem 3a (`cascadeComposition_pathFixing`) outputs `Discrete (warmRefine … (T k))`. These
+connect: a discrete warm refinement at the cumulative set `T k` **is** a `RecoverableByDepth` certificate
+at depth `|T k|` (via `cellsAreOrbits_of_discrete`). So the harvest-window's `recoverableByDepth_of_findable`
+is exactly `cascadeComposition_pathFixing` re-housed in the `RecoverableByDepth` conclusion, with
+`b g = |T k|` the cumulative individualization size (`≤ Σ |S i|` by `cumulative_card_le` — the depths add).
+
+What this connector does **not** contain — and what the harvest-window *screen* `D1∨D2` would supply — is
+the per-layer `hwit` (the path-fixing witnesses). That bridge, **screen `D1∨D2` ⟹ `hwit`**, is the
+class-agnostic generalization of cascade-1b (the `CFILayerGadgetFlippable` existence above), reached via
+the support trichotomy rather than the (false-in-general) σ-coherence route. Defining `D1`/`D2` as Lean
+predicates and proving that bridge is the remaining content; here it is correctly isolated as `hwit`. -/
+
+/-- **Harvest-window conclusion from path-fixing layers.** Theorem 3a's discrete output, re-expressed as
+the harvest-window's `RecoverableByDepth adj P b` for any `b ≥ |T k|`. Witness set = the cumulative `T k`;
+`cellsAreOrbits_of_discrete` turns discreteness into `CellsAreOrbits`. This lands the harvest-window's
+*stated conclusion* on the existing composition machinery, isolating `hwit` (= the screen-supplies-
+witnesses bridge) as the sole residual. -/
+theorem recoverableByDepth_of_pathFixing_layers {k : Nat}
+    (T : Nat → Finset (Fin n)) (S : Nat → Finset (Fin n)) {b : Nat}
+    (hT : ∀ i, i < k → T (i + 1) = T i ∪ S i)
+    (hbase : CellsAreOrbits adj P (T 0))
+    (hwit : ∀ i, i < k → ∀ v w, OrbitPartition adj P (T i) v w →
+      warmRefine adj P (individualizedColouring n (T i ∪ S i)) v
+        = warmRefine adj P (individualizedColouring n (T i ∪ S i)) w →
+      ∃ π : Equiv.Perm (Fin n), IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u)
+        ∧ Disjoint (T i ∪ S i) π.support ∧ π v = w)
+    (hbaseSet : IsBase adj P (T k))
+    (hb : (T k).card ≤ b) :
+    RecoverableByDepth adj P b :=
+  ⟨T k, hb, cellsAreOrbits_of_discrete
+    (cascadeComposition_pathFixing T S hT hbase hwit hbaseSet)⟩
+
+/-- **CFI corollary.** The harvest-window conclusion for CFI layers: `RecoverableByDepth adj P b` for any
+`b ≥ |T k|`, given per-layer committed-set-avoiding gadget flips (`CFILayerGadgetFlippable`). The CFI
+instance of `recoverableByDepth_of_pathFixing_layers`, conditional only on the (cascade-1b) per-layer
+cycle existence. -/
+theorem recoverableByDepth_of_cascadeComposition_cfi (h : IsCFI' adj) {k : Nat} {b : Nat}
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (T : Nat → Finset (Fin n)) (S : Nat → Finset (Fin n))
+    (hT : ∀ i, i < k → T (i + 1) = T i ∪ S i)
+    (hbase : CellsAreOrbits adj P (T 0))
+    (hflip : CFILayerGadgetFlippable (P := P) h k T S)
+    (hbaseSet : IsBase adj P (T k))
+    (hb : (T k).card ≤ b) :
+    RecoverableByDepth adj P b :=
+  ⟨T k, hb, cellsAreOrbits_of_discrete (cascadeComposition_cfi h hP T S hT hbase hflip hbaseSet)⟩
+
 end ChainDescent

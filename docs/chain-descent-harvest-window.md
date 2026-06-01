@@ -437,6 +437,34 @@ consistent with the oracle taxonomy ("cascade + linear detect all symmetry excep
 `screen = D1∨D2`, `¬screen = ¬D1∧¬D2 =` hidden Johnson. **W1 (define the screen as `D1∨D2`) is therefore
 mandatory; the modes are an orthogonal recovery-depth axis, not part of the screen's definition.**
 
+### 6.5 Trichotomy skeleton — scoping + connector (2026-06-01)
+
+**Scoping result: the skeleton's *induction* already exists.** `cascadeComposition_pathFixing` (Theorem
+3a, [`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean), axiom-clean) is the common
+induction: it chains per-layer `LayerStep`s from a base, the depths add (`cumulative_card_le`), and it
+reduces the *whole* of recoverability to a single per-layer hypothesis **`hwit`** — "at every layer the
+residual orbit map is realized by a path-fixing automorphism (support disjoint from the committed set)."
+Its own doc-comment already isolates "the *existence* of those witnesses … the remaining deep work … the
+sole hypothesis." So the trichotomy skeleton is **not** new induction to build; it is exactly this, with:
+- layers `T_i, S_i` from the trichotomy (each (c)-step adds `S_i`); depth `b(g) = |T k| ≤ Σ|S_i|`;
+- `hwit` = the **screen `D1∨D2` ⟹ path-fixing witnesses** bridge — the open content, = cascade-1b
+  generalized (`CFILayerGadgetFlippable`), reached via the support trichotomy not σ-coherence.
+
+**Built this step (axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green):** the
+**connector** from Theorem 3a's `Discrete` output to the harvest-window's *stated* conclusion
+`RecoverableByDepth adj P (b g)`:
+- `recoverableByDepth_of_pathFixing_layers` — discrete-at-`T k` ⟹ `RecoverableByDepth adj P b` for any
+  `b ≥ |T k|` (witness `T k`, via `cellsAreOrbits_of_discrete`). Lands the harvest-window conclusion on
+  the existing machinery, isolating `hwit` as the sole residual.
+- `recoverableByDepth_of_cascadeComposition_cfi` — the CFI corollary (via the Stage-3 gadget flips),
+  conditional only on the (cascade-1b) per-layer cycle existence.
+
+**Net.** `recoverableByDepth_of_findable` = `recoverableByDepth_of_pathFixing_layers` once `hwit` is
+supplied by the screen. The remaining content is exactly two things, both deferred to dedicated steps:
+(1) **define `D1`/`D2` as Lean predicates** (research-design — must be abstract/non-circular per the
+seal); (2) **the bridge `D1∨D2 ⟹ hwit`** (= leg-A/B completeness / cascade-1b generalized — the open
+core, exported to leg C on failure). The induction and the conclusion-connector are done.
+
 ---
 
 ## 7. Honest caveats (so the concept does not over-claim)
