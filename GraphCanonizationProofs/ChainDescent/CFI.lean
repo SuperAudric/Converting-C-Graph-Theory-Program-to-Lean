@@ -3433,6 +3433,39 @@ theorem cfiFlip_eq_self_of_flipSet_empty (F : Fin m → Fin m → Bool)
         simp at hmem
     simp only [cfiFlip, hfvw, Bool.xor_false]
 
+/-! ### C1b.0 — the flip's action on named vertices (cascade-1b recon)
+
+To discharge cascade-1b (`CFIGadgetFlippableLocal` / `CFILayerGadgetFlippable`) the gadget flip must
+*swap the decision pair*. These lemmas pin its action on the named constructors: on an endpoint it
+toggles the parity by the flip-edge bit, on a subset it symmetric-differences by the flip set. So the
+flip swaps the parity-pair `e^0_{v→w}/e^1_{v→w}` exactly when `{v, w} ∈ F`, and a subset pair exactly
+when the gadget is `F`-touched — the two kinds of **flippable decision pair** the cascade-1b
+construction (C1b.1) will key on. -/
+
+/-- **Flip action on an endpoint.** `cfiFlip F` toggles the parity of `e^b_{v→w}` by `F v w`. -/
+@[simp] theorem cfiFlip_endpoint (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) {v w : Fin m} (hw : w ∈ H.neighbors v) (b : Bool) :
+    H.cfiFlip F hEven (H.endpoint hw b) = H.endpoint hw (xor b (F v w)) := rfl
+
+/-- **The flip swaps an edge's parity-pair iff the edge is in `F`.** When `F v w = true`, the gadget
+flip swaps `e^0_{v→w} ↔ e^1_{v→w}` — the primary flippable CFI decision pair. -/
+theorem cfiFlip_endpoint_swap (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) {v w : Fin m} (hw : w ∈ H.neighbors v)
+    (hF : F v w = true) :
+    H.cfiFlip F hEven (H.endpoint hw false) = H.endpoint hw true ∧
+      H.cfiFlip F hEven (H.endpoint hw true) = H.endpoint hw false := by
+  refine ⟨?_, ?_⟩
+  · rw [cfiFlip_endpoint, hF]; rfl
+  · rw [cfiFlip_endpoint, hF]; rfl
+
+/-- **Flip action on a subset.** `cfiFlip F` symmetric-differences `a_S^v` by the flip set
+`flipSet F v`. So it swaps the subset pair `a_S^v ↔ a_{S ∆ flipSet F v}^v` exactly when the gadget
+`v` is `F`-touched (`flipSet F v ≠ ∅`). -/
+theorem cfiFlip_subset (F : Fin m → Fin m → Bool)
+    (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) {v : Fin m} {S : Finset (Fin m)}
+    (hS : S ∈ H.evenSubsetsOfNeighbors v) :
+    H.cfiFlip F hEven (H.subset hS) = H.subset (H.symmDiff_flipSet_mem_even F hEven hS) := rfl
+
 end CFIBase
 
 /-! ### Phase 3 — lift the gadget flip to `Aut(adj)` on `Fin n`
@@ -3543,6 +3576,32 @@ theorem cfiFlipAut_pathFixing_witness (h : IsCFI' adj) (F : Fin h.m → Fin h.m 
     h.cfiFlipAut_preserves_P F hEven hFsymm hP,
     h.disjoint_support_cfiFlipAut F hEven hT, hvw⟩
 
+/-! #### C1b.0 (lifted) — the gadget flip swaps an edge's parity-pair on `Fin n` -/
+
+/-- **Lifted flip action on an endpoint vertex.** `cfiFlipAut F` toggles the parity of
+`endpointVertex hw b` by `F v w`. -/
+theorem cfiFlipAut_endpointVertex (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    h.cfiFlipAut F hEven (h.endpointVertex hw b) = h.endpointVertex hw (xor b (F v w)) := by
+  apply h.e.injective
+  rw [h.e_cfiFlipAut, e_endpointVertex, e_endpointVertex]
+  rfl
+
+/-- **The gadget flip swaps an edge's parity-pair iff the edge is in `F`** (the foundational
+cascade-1b swap fact, lifted to `Fin n`). When `F v w = true`, `cfiFlipAut F` swaps the decision
+pair `endpointVertex hw false ↔ endpointVertex hw true` — so a parity-pair decision is *flippable*
+by any even `F` containing its edge. This is what C1b.1 will use to discharge the swap obligation of
+`CFIGadgetFlippableLocal`. -/
+theorem cfiFlipAut_swaps_endpointVertex (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (hF : F v w = true) :
+    h.cfiFlipAut F hEven (h.endpointVertex hw false) = h.endpointVertex hw true ∧
+      h.cfiFlipAut F hEven (h.endpointVertex hw true) = h.endpointVertex hw false := by
+  refine ⟨?_, ?_⟩
+  · rw [cfiFlipAut_endpointVertex, hF]; rfl
+  · rw [cfiFlipAut_endpointVertex, hF]; rfl
+
 end IsCFI'
 
 /-! ### Phase 0 — `triangleBase` prototype (β = 1: the single 3-cycle)
@@ -3580,5 +3639,15 @@ vertex (e.g. flips an endpoint parity), so it witnesses a nontrivial automorphis
 theorem triFlip_nontrivial :
     ∃ x : triangleBase.CFIVertex,
       triangleBase.cfiFlip triFlipEdges triFlip_even x ≠ x := by decide
+
+/-- **C1b.0 prototype validation (the parity-swap on a real edge).** On the triangle's edge
+`{0, 1}`, the gadget flip swaps the parity-pair `e^0_{0→1} ↔ e^1_{0→1}` — an independent `decide`
+confirmation of `cfiFlip_endpoint_swap` on a concrete decision pair (the flippable-pair shape
+C1b.1 keys on). -/
+theorem triFlip_swaps_edge_01 :
+    triangleBase.cfiFlip triFlipEdges triFlip_even
+        (triangleBase.endpoint (show (1 : Fin 3) ∈ triangleBase.neighbors 0 by decide) false)
+      = triangleBase.endpoint (show (1 : Fin 3) ∈ triangleBase.neighbors 0 by decide) true := by
+  decide
 
 end ChainDescent
