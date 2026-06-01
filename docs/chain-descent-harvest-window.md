@@ -17,11 +17,15 @@
 >   (D1-leg, free), `cellsAreOrbits_empty_of_schurian` (vertex-transitivity from `schurian_transitive` at
 >   rel 0), `visiblyRecoverable_of_cellsAreOrbits_singleton`, `visiblyRecoverable_scheme` (the proved scheme
 >   instance); the screen `Findable := (∃ b, VisiblyRecoverable …) ∨ ResidualAbelian` + `recoverableByDepth_of_findable_visible`.
-> - **THE OPEN ISSUE (§6.9, top priority):** the **flat** `Findable = D1∨D2` is **incomplete** — `CFI(Kₘ)`,
->   `m ≥ 3` (recoverable, *not* Cameron) is `¬D1∧¬D2` at `∅` because it is **mixed** (visible `Sₘ` over
->   hidden abelian `Z₂^β`). Fix = make `D1`/`Findable` **per-decision** and let the induction
->   (`cascadeComposition`) do the "consume visible, then classify residual" sequencing (deferred-decisions
->   §1). **Do this before** building the D2 bridge.
+> - **THE OPEN ISSUE (§6.9 → §6.10, top priority):** the **flat** `Findable = D1∨D2` is **incomplete** —
+>   `CFI(Kₘ)`, `m ≥ 3` (recoverable, *not* Cameron) is `¬D1∧¬D2` at `∅` because it is **mixed** (visible
+>   `Sₘ` over hidden abelian `Z₂^β`). **§6.10 confirms the fixed sequential screen and audits soundness:**
+>   `Findable S := CellsAreOrbits S ∨ (ResidualAbelian S ∧ ¬IsBase S) ∨ (∃v, SymmetryOnlyStep S v ∧ Findable (insert v S))`.
+>   Two precision points: **D1** = per-decision `SymmetryOnlyStep` (non-singleton single-orbit cell), not
+>   full recovery; **D2 needs a `¬IsBase` (non-trivial-residual) guard** — bare `ResidualAbelian` is
+>   *vacuously true on the multipede* (trivial residual), which would make `D2 ⟹ recoverable` FALSE. With
+>   the guard the screen is sound + exhaustive (modulo EOL), and `¬Findable` splits cleanly into
+>   blind-spot (trivial) vs Cameron (non-trivial non-abelian). **Implement §6.10 before** the D2 bridge.
 > - **Other open frontiers:** the **D2 bridge** `ResidualAbelian ⟹ hwit` (= cascade-1b generalized, the
 >   load-bearing open core); the multi-step D1 **negative** (CFI/hidden-Johnson `¬D1` = chain-gets-stuck).
 > - **Build/check:** `cd /workspace && bash scripts/build.sh` (serial, ~14s); `lake env lean` a file with
@@ -602,6 +606,77 @@ express.
 
 **RECOMMENDATION:** re-granularize `Findable`/`D1` (above) **before** building the D2 bridge on top of an
 incomplete screen. This is the top open item.
+
+---
+
+### 6.10 The CONFIRMED sequential screen — precise D1/D2 and soundness audit (2026-06-01)
+
+Acting on §6.9, with the goal of **fixing the definitions before three legs of proof (D1, D2, Cameron
+contrapositive) depend on them.** The audit confirms the screen is logically sound and exhaustive
+**modulo one precision fix to D2** (a non-triviality guard). Grounded in the real predicates:
+`CellsAreOrbits := ∀ v w, same-cell → OrbitPartition` and `OrbitPartition := ∃ residual-aut π, π v = w`
+(so `orbit ⊆ cell` is free via `subset_warmRefine`; thus `∀` same-cell `u`, `OrbitPartition v u` ⟺
+`cell(v) = orbit(v)`).
+
+**The precise definitions.**
+
+- **D1 — per-decision `SymmetryOnlyStep adj P S v`:** `v`'s cell is **non-singleton** *and* a **single
+  orbit** — `(∃ u ≠ v, same-cell u v) ∧ (∀ u, same-cell u v → OrbitPartition adj P S v u)`. The
+  non-singleton conjunct is **load-bearing**: without it, every singleton cell satisfies the orbit
+  condition vacuously (`u = v`), so `∃v SymmetryOnlyStep` would be trivially true and the recursion
+  could spin on no-op steps. This is the step-condition already inside `VisiblyRecoverable` (Cascade.lean
+  lines 528–530), lifted out as the primitive; `VisiblyRecoverable` becomes the derived all-D1-steps
+  closure.
+- **D2 — `ResidualAbelian adj P S ∧ ¬ IsBase adj P S`** (the fix). `¬IsBase` ⟺ a non-identity residual
+  automorphism exists (`residualAut_eq_one_of_isBase` gives `IsBase ⟹` trivial residual) ⟺ "**a symmetry
+  exists**" — the seal's standing conditioning, now a *predicate* conjunct.
+- **Sequential screen:**
+  `Findable S := CellsAreOrbits S ∨ (ResidualAbelian S ∧ ¬IsBase S) ∨ (∃ v, SymmetryOnlyStep S v ∧ Findable (insert v S))`,
+  terminating (each `SymmetryOnlyStep` strictly refines the partition; ≤ n steps).
+
+**The soundness obligations (each checked).**
+
+1. **Termination** — `SymmetryOnlyStep` needs a non-singleton cell; individualizing splits it; cells
+   strictly increase, bounded by `n`. ✓
+2. **Exhaustiveness / no fourth species** — `¬Findable` ⟹ every maximal symmetry-only descent bottoms at
+   `¬CellsAreOrbits ∧ ¬∃v SymmetryOnlyStep` ⟹ no cell is a single orbit ⟹ residual orbits *strictly
+   refine* cells = **hidden**. The residual is then exactly one of {trivial, non-trivial abelian,
+   non-trivial non-abelian} — a partition of all groups; exhaustive by tautology, modulo the per-node EOL
+   for the last. ✓
+3. **D1 soundness** (`D1-recursion ⟹ recoverable`) — a `SymmetryOnlyStep` chain ending at `CellsAreOrbits`
+   *is* `VisiblyRecoverable ⟹ RecoverableByDepth` (free); chains ending at D2 reduce to the D2 bridge. ✓
+4. **D2 soundness** (`D2 ⟹ recoverable`) — **THE FIX.** Non-trivial abelian residual ⟹ each orbit is a
+   regular abelian action ⟹ a *unique* candidate twist per orbit ⟹ the linear oracle reads + verifies a
+   **real** automorphism ⟹ recoverable. **Without `¬IsBase` this is false:** `ResidualAbelian` is
+   *vacuously true* on a **trivial** residual, and `trivial residual ∧ ¬CellsAreOrbits` is precisely the
+   **multipede / IR-blind-spot** — refinement-stuck, NOT recoverable. Bare `ResidualAbelian` would assert
+   the blind-spot is D2-recoverable. The guard excludes it. ✓ (with fix)
+5. **Composability** — the residual at `insert v S` is a point-stabilizer subgroup; `ResidualAbelian` is
+   inherited (`residualAbelian_mono`). A step that trivializes the residual lands on `CellsAreOrbits`
+   (discrete) or a blind-spot — never spuriously D2. ✓
+6. **Escape = the leg-C residual, cleanly** — `¬Findable` bottoms at *hidden* residuals split by **order**:
+   trivial ⟹ IR-blind-spot flag, non-trivial non-abelian ⟹ Cameron flag — exactly
+   [exhaustive-obstruction §0.6](./chain-descent-exhaustive-obstruction.md)'s two flag causes. The
+   `¬IsBase` guard is what makes that residual-order separation a **predicate-level** fact.
+
+**Why the D2 fix is binding for the project target.** Under "polynomial-or-flag-on-blind-spot/Cameron,"
+bare `ResidualAbelian` folds the multipede into D2 (a category error against §0.6's *Cameron = unconsumed
+symmetry; multipede = absence of symmetry*). The `¬IsBase` guard keeps the multipede in `¬Findable`
+(residual-order trivial), so **when a rigid solver is later added for the blind spot, the Cameron leg is
+already exactly "hidden ∧ non-trivial ∧ non-abelian"** — no re-derivation. Catching it now avoids proving a
+*false* D2 bridge.
+
+**Test cases under the precise screen.** scheme → one step → `CellsAreOrbits` (D1); **GRR** → one step →
+regular ⟹ trivial stabilizer ⟹ discrete (**D1**, not D2 — correct); CFI/rigid base → no step, abelian
+non-trivial (**D2**); **CFI(Kₘ)** → consume `Sₘ` via ~m−1 steps → `Z₂^β` abelian non-trivial (**D2**, §6.9
+resolved); Johnson → no step, non-trivial non-abelian (**escape = Cameron**); **multipede** → `¬CellsAreOrbits`,
+no step, `IsBase` ⟹ D2 guard fails ⟹ **¬Findable = blind-spot flag** (bare D2 would wrongly say Findable).
+
+**NEXT (implementation).** Define `SymmetryOnlyStep` and the guarded D2 in Lean; re-express
+`VisiblyRecoverable` as the `SymmetryOnlyStep`-chain closure (keeps `visiblyRecoverable_scheme` — the ∅
+step is symmetry-only since the scheme cell is vertex-transitive & non-singleton for `n ≥ 2`); replace the
+flat `Findable` with the sequential def above. Then the D2 bridge (`D2 ⟹ hwit`) sits on the confirmed
+screen.
 
 ---
 

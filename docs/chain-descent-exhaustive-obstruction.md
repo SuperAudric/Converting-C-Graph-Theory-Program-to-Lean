@@ -168,6 +168,18 @@ separated operationally at flag time by **residual-group order** (non-trivial �
 Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.md),
 [calculator §14](./chain-descent-calculator.md)).
 
+> **This separation is now a *predicate-level* fact in the screen, not only an
+> operational one.** [harvest-window §6.10](./chain-descent-harvest-window.md) defines
+> the screen's abelian leg as `ResidualAbelian S ∧ ¬IsBase S` — the **`¬IsBase`
+> (non-trivial-residual) guard** is exactly the "a symmetry exists" conditioning,
+> made structural. Bare `ResidualAbelian` is *vacuously true on the multipede*
+> (trivial residual), so without the guard the abelian leg would absorb the IR core
+> (asserting `D2 ⟹ recoverable` on a refinement-stuck rigid graph — false). With it,
+> `¬Findable` bottoms at hidden residuals partitioned by order: **trivial ⟹ IR core,
+> non-trivial non-abelian ⟹ Cameron** — so leg C's escape set is precisely the
+> non-trivial non-abelian residual, which is what makes the strict-Cameron target
+> (R1) statable once a rigid solver retires the trivial-residual flag.
+
 **Drafting rule for every downstream statement.** "All symmetry removed **or**
 Cameron" (statement 1) is **not** the time bound (statement 2): statement 2 carries
 the *extra* IR-core escape. A future Phase-2 blind-spot handler
