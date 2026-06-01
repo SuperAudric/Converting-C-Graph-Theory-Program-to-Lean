@@ -594,11 +594,23 @@ currency. So linear-oracle CFI completeness reduces to the **shared cascade-1b**
 | `canonAdj_eq_of_configSwapRecoverable` | 904-915 | **Capstone (pruning soundness).** Config-swap-recoverability implies both branches give the identical canonical leaf at every decision — reducing the oracle's effectiveness to the single `ConfigSwapRecoverable` hypothesis. | — |
 | `realizableFlip_of_configSwapRecoverable` | 917-928 | **Capstone (real symmetry).** Config-swap-recoverability implies every leaf decision is a genuine `Aut(adj)` symmetry — vertex-model completeness, no rank-alignment needed. | — |
 
-Open (not a `sorry`): `configSwapRecoverable_of_cfi : IsCFI adj → ConfigSwapRecoverable` — *producing*
-the general gadget twist `g` (non-transposition, moves the whole coupled component) and its off-pair
-`σ`-action; `configSwap_of_aut` already discharges the config-swap packaging. The construction of `g`
-needs the deferred Stage-3 `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery = the same `hwit` as Tier-3a B1; plus
-the decision-node-depth half of cascade-1b.
+**§L.9 — CFI gadget twist fires the oracle (Phase 6a: wiring the Stage-3 cycle-space flip).** The
+Stage-3 gadget flip (`CFI.lean §15`, `IsCFI'.cfiFlipAut`) is now constructed; this section wires it into
+`configSwap_of_aut` and reduces `ConfigSwapRecoverable` for CFI to the existence of the right cycle `F`
+per decision.
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `configSwap_of_cfiFlipAut` | **The CFI gadget twist is a config-swap** (unconditional bridge). `configSwap_of_aut` instantiated with `g := cfiFlipAut F` (an `Aut(adj)` involution by `isAut_cfiFlipAut`): if the flip swaps `(a,b)`, fixes `χι`, and carries `σ` off the pair, it is a `ConfigSwap`. The concrete soundness — the vertex-space gadget twist (the C#'s witness) fires the oracle, no rank-alignment. | Definition |
+| `CFIGadgetFlippable` | **The named cascade-1b residual.** Every leaf decision admits an even-symmetric cycle `F` whose gadget flip swaps `(a,b)`, fixes `χι`, carries `σ` off the pair. Commits the CFI witness to the gadget-flip mechanism (matching the C#); the open content is purely `F`'s existence per decision (cascade-1b). | Definition |
+| `configSwapRecoverable_of_cfi` | **`ConfigSwapRecoverable` for CFI via the gadget flip.** `CFIGadgetFlippable h → ConfigSwapRecoverable` — the discharge reduced to its irreducible combinatorial core (the decision-local even cycle's existence). Feeds the capstones ⟹ oracle fires on every CFI decision. | — |
+
+Open (not a `sorry`): **`CFIGadgetFlippable`** — that the decision-local even cycle `F` *exists* for every
+decision (the flip is built and proven sound; what remains is the cycle through the decision edge, local
+to the decided gadget). Its three per-decision obligations (swap `(a,b)`, fix `χι`, carry `σ` off the
+pair) are the descent-coherence content of cascade-1b — the decision-node-depth half, shared with the
+cascade oracle, *not* `GI∈P`. Reducing them further (`χι` via partition-invariance, `σ` via locality +
+σ-cell-coherence) is follow-on groundwork.
 
 Transport chain it builds on (ChainDescent.lean `§16.2b`): `signature_transport`, `sigKey_transport`,
 `refineStep_transport`, `iterate_refineStep_transport`, `warmRefine_transport` — cross-config (two

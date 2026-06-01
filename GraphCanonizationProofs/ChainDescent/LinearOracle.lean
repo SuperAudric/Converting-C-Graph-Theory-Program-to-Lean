@@ -923,4 +923,70 @@ theorem realizableFlip_of_configSwapRecoverable {k : Nat}
   obtain ⟨cs⟩ := h chain isLeaf σ a b ha hb hab
   exact realizableFlip_of_configSwap chain isLeaf σ a b ha hb cs
 
+/-! ## §L.9 — CFI gadget twist fires the oracle (Phase 6a: wiring the cycle-space flip)
+
+The Stage-3 gadget flip (`CFI.lean §15`, `IsCFI'.cfiFlipAut`) is the **vertex-space twist** the C#
+constructs and §2 of the handoff identified as the right completeness witness. Phases 3–5 built it as
+a controlled `Aut(adj)` involution with localised support. This section wires it into
+`configSwap_of_aut`, giving the concrete statement that **the CFI gadget twist is a valid config-swap**
+(no rank-alignment), and reduces `ConfigSwapRecoverable` for CFI to the existence of the right cycle
+`F` per decision — the shared, non-`GI∈P` cascade-1b nut.
+
+**What is unconditional here:** that a gadget flip *suffices* — `configSwap_of_cfiFlipAut` proves an
+`IsCFI'` gadget twist satisfying the (swap, `χι`-fix, `σ`-off-pair) conditions IS a `ConfigSwap`. This
+is the soundness Approach C set out to establish: the genuine `Aut(adj)` symmetry prunes the branch.
+
+**What stays open (the residual = cascade-1b):** that such a flip *exists* for every decision —
+isolated as `CFIGadgetFlippable`. Its three per-decision obligations (the flip swaps `(a,b)`, fixes the
+leaf colouring `χι`, and carries `σ` off the pair) are exactly the descent-coherence content of
+cascade-1b: an even-symmetric cycle through the decision edge, local to the decided gadget. Discharging
+them (via partition-invariance for `χι` and locality + σ-cell-coherence for `σ`) is follow-on
+groundwork; here they are bundled so the gadget-flip mechanism is committed and the remainder is purely
+the cycle's existence. -/
+
+/-- **The CFI gadget twist is a config-swap.** Instantiating `configSwap_of_aut` with the Stage-3
+gadget flip `cfiFlipAut F` (an `Aut(adj)` involution by `isAut_cfiFlipAut`): if the flip swaps the
+decision pair, fixes the leaf colouring, and carries `σ` off the pair, it is a `ConfigSwap`. The
+concrete realisation that the vertex-space gadget twist (the C#'s witness) fires the linear oracle —
+no rank-alignment. -/
+def configSwap_of_cfiFlipAut (h : IsCFI' adj) {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
+    (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0)
+    (hFsymm : ∀ v w, F v w = F w v)
+    (hga : h.cfiFlipAut F hEven a = b) (hgb : h.cfiFlipAut F hEven b = a)
+    (hgχ : ∀ v, chain.χι (h.cfiFlipAut F hEven v) = chain.χι v)
+    (hgpres : ∀ v u, ¬((v = a ∧ u = b) ∨ (v = b ∧ u = a)) →
+      σ.σ (h.cfiFlipAut F hEven v) (h.cfiFlipAut F hEven u) = σ.σ v u) :
+    ConfigSwap chain σ a b ha hb :=
+  configSwap_of_aut chain σ a b ha hb (h.cfiFlipAut F hEven)
+    (h.isAut_cfiFlipAut F hEven hFsymm) hga hgb hgχ hgpres
+
+/-- **The CFI gadget-flip recoverability hypothesis (the named cascade-1b residual).** Every leaf
+decision `(a, b)` admits an even-symmetric cycle `F` whose Stage-3 gadget flip swaps `(a, b)`, fixes
+the leaf colouring, and carries `σ` off the pair. This commits the linear oracle's CFI witness to the
+**gadget-flip mechanism** (matching the C#) — the open content is purely the existence of such an `F`
+per decision (the cycle through the decision edge, local to the decided gadget), which is cascade-1b. -/
+def CFIGadgetFlippable (h : IsCFI' adj) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (_isLeaf : chain.IsLeaf)
+    (σ : DirAssignment P₀ chain.D) (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D),
+    a ≠ b →
+    ∃ (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0),
+      (∀ v w, F v w = F w v) ∧
+      h.cfiFlipAut F hEven a = b ∧ h.cfiFlipAut F hEven b = a ∧
+      (∀ v, chain.χι (h.cfiFlipAut F hEven v) = chain.χι v) ∧
+      (∀ v u, ¬((v = a ∧ u = b) ∨ (v = b ∧ u = a)) →
+        σ.σ (h.cfiFlipAut F hEven v) (h.cfiFlipAut F hEven u) = σ.σ v u)
+
+/-- **`ConfigSwapRecoverable` for CFI, via the gadget flip.** If every CFI leaf decision admits the
+right gadget-flip cycle (`CFIGadgetFlippable`), then `adj` is config-swap-recoverable — so the linear
+oracle fires on every CFI decision (capstones `canonAdj_eq_of_configSwapRecoverable` /
+`realizableFlip_of_configSwapRecoverable`). This is the discharge `configSwapRecoverable_of_cfi`
+reduced to its irreducible combinatorial core: the existence of the decision-local even cycle. -/
+theorem configSwapRecoverable_of_cfi (h : IsCFI' adj)
+    (hflip : CFIGadgetFlippable (P₀ := P₀) (χι₀ := χι₀) (sel := sel) h) :
+    ConfigSwapRecoverable (adj := adj) (P₀ := P₀) (χι₀ := χι₀) (sel := sel) := by
+  intro k chain isLeaf σ a b ha hb hab
+  obtain ⟨F, hEven, hFsymm, hga, hgb, hgχ, hgpres⟩ := hflip chain isLeaf σ a b ha hb hab
+  exact ⟨configSwap_of_cfiFlipAut h chain σ a b ha hb F hEven hFsymm hga hgb hgχ hgpres⟩
+
 end ChainDescent
