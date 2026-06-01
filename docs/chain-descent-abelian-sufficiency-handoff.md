@@ -1,8 +1,11 @@
 # Handoff — abelian-sufficiency / linear-oracle completeness on CFI
 
-**Status (2026-05-31): active Lean work.** This doc lets a cold reader pick up the
+**Status (2026-06-01): active Lean work.** This doc lets a cold reader pick up the
 in-flight proof that the **linear oracle is complete on CFI** (it fires whenever it
 should). It records the approach, the alternates, and what is built vs. open.
+**Update (2026-06-01):** the Stage-3 gadget twist (`hwit`) is now **built and proven sound for
+both oracles** (`CFI.lean §15`, Phases 0–6) — the open residual has collapsed from "hwit +
+cascade-1b" to **just cascade-1b** (the decision-local cycle's existence; see §4–§5).
 
 Authoritative companions: [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
 §8.2 (the retargeting), [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
@@ -150,6 +153,22 @@ Milestones, in dependency order:
   automorphism (`g a = b`, `g b = a`) is an `OrbitPartition` witness specialised to the size-2
   cell, so this unifies linear-oracle completeness with the cascade oracle's localization.
 
+- **Stage-3 gadget flip (the `hwit` construction) — BUILT 2026-06-01** (`CFI.lean §15` +
+  `LinearOracle.lean §L.9` + `Cascade.lean`, axiom-clean, full build green). Scoped to the
+  **`Z₂^β` generators, not the full `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` iso** (the surjectivity half no
+  consumer needs). The generator is the **cycle-space flip** `cfiFlip F` for an even-subgraph `F`
+  (toggle endpoint parities along `F`, complement subsets by `F`-incident neighbours; even degree
+  keeps the even-subset invariant). Phases: **0** triangle prototype (`decide`-validated
+  automorphism), **1** `cfiFlip`/`cfiFlipEquiv` + involution, **2** `cfiFlip_isAut` (preserves
+  `cfiAdj`; the 4-case crux — endpoint parity + subset-`w` membership flip together, bridge edge
+  one `F`-bit), **3** lift to `Fin n` `IsCFI'.cfiFlipAut` + `isAut_cfiFlipAut` (an honest
+  `Aut(adj)` involution), **4** support/locality (`disjoint_support_cfiFlipAut` — fixes `F`-free
+  gadgets), **5** `P`-preservation + `cfiFlipAut_pathFixing_witness` (the Tier-3a `hwit` shape),
+  **6a** `configSwap_of_cfiFlipAut` (the flip IS a config-swap — linear oracle) + the locality
+  reduction (`swapsConfig_off_pair_of_local` etc.), **6b** `cfiLayer_pathFixing_hwit` /
+  `cascadeComposition_cfi` (Theorem 3a for CFI layers). Both oracles now fire through one
+  construction, reduced to the shared cascade-1b `…GadgetFlippable…` existence hypothesis.
+
 Earlier scaffolding still standing (`LinearOracle.lean` `§L.1–L.6`): `RealizesFlip`,
 `TwistWitness`, `twistOracle`/`canonicalTwistOracle` + `LeafTwistSpec` discharge (soundness),
 `candidateTwist`(`_realizesFlip`/`_unique`), `isAut_candidateTwist_iff_aligned`,
@@ -190,26 +209,28 @@ orbit-recovery picture. **The reduction landed** (`§L.8`, axiom-clean):
     non-transposition gadget twist via `configSwap_of_swap`). Remaining-point-2 (decision-node
     depth) is reduced only for the twin/module class, not for CFI.
 
-**What remains (the named nut, NOT a `sorry`):** `configSwapRecoverable_of_cfi : IsCFI adj →
-ConfigSwapRecoverable`, which has two open pieces, both shared:
+**The gadget twist (`hwit`) is now BUILT — the named nut collapses to cascade-1b.**
+Stage-3's gadget flip was constructed and proven sound for *both* oracles
+([`CFI.lean §15`](../GraphCanonizationProofs/ChainDescent/CFI.lean), Phases 0–6, axiom-clean —
+see §4 below). So of the two formerly-open pieces:
 
-1. **The general gadget twist.** Real CFI's resolving `g` moves the *whole* coupled component
-   — it is **not** a transposition, so `configSwap_of_swap`'s `hgfix` (fix off `{a,b}`) does
-   not apply. **The config-swap packaging is now done in general** (`configSwap_of_aut`,
-   2026-05-31): drop `hgfix`, replace `hcoh` by "`g` preserves `σ.σ` off the flip pair" — so
-   the *only* remaining content is **constructing** `g` and knowing its off-pair `σ`-action,
-   which needs the deferred Stage-3 `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` machinery (`CFI.lean`) = the
-   **same `hwit` as Tier-3a B1**. Once `hwit` yields `g`, `configSwap_of_aut` closes the bridge
-   with no further rank-alignment.
-2. **Decision-node depth (cascade-1b).** The witness is needed where `a,b` still share a cell,
-   not at `theorem_1_HOR_cfi`'s discretizing depth — the intermediate-node → discretizing-depth
-   bridge, **open but not GI∈P**, **shared with the cascade oracle** (`cascade-oracle.md` §2:
-   1a proved, 1b open).
+1. **The general gadget twist — DONE.** `IsCFI'.cfiFlipAut F` (the cycle-space flip) is an
+   `Aut(adj)` involution with localised support, proven to satisfy `configSwap_of_aut`
+   (`configSwap_of_cfiFlipAut`) — i.e. the CFI gadget twist genuinely fires the oracle, no
+   rank-alignment. The full `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` iso was **not needed** — only the `Z₂^β`
+   generators (the existence half). `hwit` is no longer open.
+2. **Decision-node depth (cascade-1b) — the sole remaining open content.** The flip exists and
+   fires; what's open is that a *decision-local* cycle `F` exists for every decision — mapping
+   the pair, confined to `F`-free gadgets off the committed set, with cell-coherence
+   (`σ.σ a w = σ.σ b w`, `χι` on the F-support). Isolated as `CFIGadgetFlippableLocal`
+   (`LinearOracle.lean §L.9`) / `CFILayerGadgetFlippable` (`Cascade.lean`, Tier-3a `hwit`).
+   **Open but not GI∈P**, **shared with the cascade oracle** (`cascade-oracle.md` §2: 1a proved,
+   1b open).
 
-Net: the genuine open content is now exactly `hwit` (gadget twist) + cascade-1b — both shared,
-neither GI∈P, neither the rank-alignment. Discharge for odd-degree CFI routes through
-`theorem_1_HOR_cfi_oddDeg` ([`CFI.lean`](../GraphCanonizationProofs/ChainDescent/CFI.lean),
-axiom-free) once those are in place.
+Net: the genuine open content is now exactly **cascade-1b** (the decision-local even cycle's
+existence + cell-coherence) — one object, shared by both oracles, neither GI∈P nor the
+rank-alignment. Discharge for odd-degree CFI routes through `theorem_1_HOR_cfi_oddDeg`
+([`CFI.lean`](../GraphCanonizationProofs/ChainDescent/CFI.lean), axiom-free) once it is in place.
 
 ---
 

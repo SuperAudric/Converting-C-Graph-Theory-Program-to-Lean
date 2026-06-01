@@ -328,4 +328,56 @@ theorem cascadeComposition_twoLayer {T₀ S : Finset (Fin n)}
   discrete_of_cellsAreOrbits_base
     (layerStep_of_witnessUpgrade (witnessUpgrade_of_pathFixing hwit) hbase) hbaseSet
 
+/-! ## Phase 6b — CFI gadget flips discharge the Tier-3a `hwit`
+
+The Stage-3 gadget flip (`CFI.lean §15`) packaged its three controlled properties into the exact
+path-fixing existential `cascadeComposition_pathFixing`'s `hwit` requires
+(`IsCFI'.cfiFlipAut_pathFixing_witness`). This section is the drop-in: it discharges `hwit` for a CFI
+layering from the per-layer existence of committed-set-avoiding gadget flips, and gives Theorem 3a for
+CFI layers conditional only on that existence (the same cascade-1b content as the linear oracle's
+`CFIGadgetFlippableLocal`). -/
+
+/-- **Per-layer CFI gadget-flip existence.** For each layer `i` and same-orbit, same-cell pair
+`(v, w)`, an even-symmetric cycle `F` whose gadget flip maps `v ↦ w`, with the committed set
+`T i ∪ S i` confined to `F`-free gadgets. The `hwit` analog of the linear oracle's
+`CFIGadgetFlippableLocal`. -/
+def CFILayerGadgetFlippable (h : IsCFI' adj) (k : Nat) (T S : Nat → Finset (Fin n)) : Prop :=
+  ∀ i, i < k → ∀ v w, OrbitPartition adj P (T i) v w →
+    warmRefine adj P (individualizedColouring n (T i ∪ S i)) v
+      = warmRefine adj P (individualizedColouring n (T i ∪ S i)) w →
+    ∃ (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ x, (h.H.flipSet F x).card % 2 = 0),
+      (∀ a b, F a b = F b a) ∧
+      (∀ x ∈ T i ∪ S i, h.H.flipSet F (h.H.gadget (h.e x)) = ∅) ∧
+      h.cfiFlipAut F hEven v = w
+
+/-- **CFI gadget flips discharge the path-fixing witness** (Phase 6b). Given per-layer
+committed-set-avoiding gadget flips realising each residual orbit map (`CFILayerGadgetFlippable`) and
+an automorphism-invariant `P`, the Tier-3a `hwit` hypothesis holds — directly via
+`cfiFlipAut_pathFixing_witness`. The connector from the Stage-3 construction to Theorem 3a. -/
+theorem cfiLayer_pathFixing_hwit (h : IsCFI' adj) {k : Nat}
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    {T S : Nat → Finset (Fin n)} (hflip : CFILayerGadgetFlippable (P := P) h k T S) :
+    ∀ i, i < k → ∀ v w, OrbitPartition adj P (T i) v w →
+      warmRefine adj P (individualizedColouring n (T i ∪ S i)) v
+        = warmRefine adj P (individualizedColouring n (T i ∪ S i)) w →
+      ∃ π : Equiv.Perm (Fin n), IsAut π adj ∧ (∀ x u, P (π x) (π u) = P x u)
+        ∧ Disjoint (T i ∪ S i) π.support ∧ π v = w := by
+  intro i hi v w horb hcell
+  obtain ⟨F, hEven, hFsymm, hTfree, hvw⟩ := hflip i hi v w horb hcell
+  exact h.cfiFlipAut_pathFixing_witness F hEven hFsymm hP hTfree hvw
+
+/-- **Theorem 3a for CFI layers** (Phase 6b capstone). If a graph decomposes into CFI layers whose
+residual orbit maps are realised by committed-set-avoiding gadget flips, the descent reaches the
+discrete partition. The CFI instance of `cascadeComposition_pathFixing`, with `hwit` discharged by the
+Stage-3 gadget flips — conditional only on the (cascade-1b) existence of the per-layer cycles. -/
+theorem cascadeComposition_cfi (h : IsCFI' adj) {k : Nat}
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (T : Nat → Finset (Fin n)) (S : Nat → Finset (Fin n))
+    (hT : ∀ i, i < k → T (i + 1) = T i ∪ S i)
+    (hbase : CellsAreOrbits adj P (T 0))
+    (hflip : CFILayerGadgetFlippable (P := P) h k T S)
+    (hbaseSet : IsBase adj P (T k)) :
+    Discrete (warmRefine adj P (individualizedColouring n (T k))) :=
+  cascadeComposition_pathFixing T S hT hbase (cfiLayer_pathFixing_hwit h hP hflip) hbaseSet
+
 end ChainDescent

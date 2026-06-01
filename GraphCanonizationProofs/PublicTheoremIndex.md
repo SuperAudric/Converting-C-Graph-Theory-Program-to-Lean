@@ -747,3 +747,13 @@ route was rejected (`refineStep` axiomatic, no cross-size API).
 |------|-------------|-------|
 | `cascadeComposition_pathFixing` | 291-312 | **Theorem 3a, reduced to harvested path-fixing generators.** Cumulative sets by increments, layer-1 recoverable, every layer's residual symmetry realized by path-fixing automorphisms (`hwit`), and the final set a base ⟹ discrete warm refinement at `T k`. Reduces all of Theorem 3a to the single hypothesis of per-layer path-fixing witness existence. | — |
 | `cascadeComposition_twoLayer` | 314-329 | **Smallest genuine composition.** An outer cascade-class layer at `T₀`, an inner path-fixing layer with increment `S`, and the union a base ⟹ discreteness — the `CFI(scheme)` / `Scheme(CFI)` shape. | — |
+
+**Phase 6b — CFI gadget flips discharge the Tier-3a `hwit`.** The Stage-3 gadget flip (`CFI.lean §15`)
+discharges `cascadeComposition_pathFixing`'s `hwit` for a CFI layering, conditional only on the per-layer
+existence of committed-set-avoiding gadget flips (the cascade-1b content).
+
+| Name | Description | Notes |
+|------|-------------|-------|
+| `CFILayerGadgetFlippable` | Per-layer CFI gadget-flip existence: for each layer and same-orbit/same-cell pair `(v,w)`, an even-symmetric cycle `F` whose flip maps `v ↦ w` with `T i ∪ S i` in `F`-free gadgets. The `hwit` analog of the linear oracle's `CFIGadgetFlippableLocal`. | Definition |
+| `cfiLayer_pathFixing_hwit` | **The `hwit` drop-in.** `CFILayerGadgetFlippable` (+ `P` Aut-invariant) ⟹ the Tier-3a `hwit` hypothesis, directly via `cfiFlipAut_pathFixing_witness`. | — |
+| `cascadeComposition_cfi` | **Theorem 3a for CFI layers.** A CFI layering whose residual orbit maps are realised by committed-set-avoiding gadget flips reaches the discrete partition — `cascadeComposition_pathFixing` with `hwit` discharged by the Stage-3 flips (conditional only on the cascade-1b cycle existence). | — |

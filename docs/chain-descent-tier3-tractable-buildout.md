@@ -231,6 +231,14 @@ label-choice the canonizer otherwise avoids) is left until B1 forces a concrete
 > Tier-1/2 via A4's quotient (the §4.2.5 transfer) — is the remaining work**, attacked
 > intrinsically on `Fin n` (build-plan §3, easiest-layer-first). Full plan:
 > [`chain-descent-tier3a-b1-build-plan.md`](./chain-descent-tier3a-b1-build-plan.md).
+>
+> **CFI-layer instance DONE (2026-06-01).** The path-fixing-witness form
+> (`cascadeComposition_pathFixing`) is now discharged for **CFI layers** by the Stage-3 gadget
+> flip: `cascadeComposition_cfi` + `cfiLayer_pathFixing_hwit` (`Cascade.lean`) reduce the
+> per-layer `hwit` to `CFILayerGadgetFlippable` — the existence of committed-set-avoiding gadget
+> flips per residual orbit map. That existence is the shared **cascade-1b** content (= the linear
+> oracle's `CFIGadgetFlippableLocal`); the gadget flip itself is built and proven sound
+> ([`CFI.lean §15`](../GraphCanonizationProofs/ChainDescent/CFI.lean), Phases 0–6).
 
 - **New mathematical content:** essentially one lemma — step 4.2.5 of the
   Tier-3a doc ("1-WL on a cell = 1-WL on the quotient vertex," = A4's key

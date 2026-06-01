@@ -56,7 +56,8 @@
       "Bash(cd /workspace/GraphCanonizationProofs && awk 'NR==*')",
       "Bash(awk 'NR>=*')",
       "Bash(awk 'NR==*')",
-      "Bash(bash /workspace/scripts/build.sh)"
+      "Bash(bash /workspace/scripts/build.sh)",
+      "Bash(bash scripts/build.sh)"
     ],
     "additionalDirectories": [
       "/workspace/GraphCanonizationProofs/FullCorrectness",

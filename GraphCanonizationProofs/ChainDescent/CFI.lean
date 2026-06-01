@@ -28,7 +28,11 @@ The full CFI program is structured as four stages:
    flattening bijection to `Fin N`, the CFI adjacency function.
    Replaces the abstract `IsCFI` axiom with a concrete predicate.
 3. **Stage 3** — `Aut(CFI(H)) ≅ Z₂^{β_H} ⋊ Aut(H)` structure lemma.
-   Multi-week; not strictly required for Theorem 1.
+   **Generators built (§15, 2026-06-01):** the `Z₂^β` cycle-space flips
+   (`cfiFlip`/`cfiFlipAut`, Phases 0–6) — the *existence* half no full iso
+   is needed for, proven to fire both oracles (`LinearOracle §L.9`,
+   `Cascade` Phase 6b). The surjectivity / full semidirect-product iso
+   remains unbuilt and is not required by any consumer.
 4. **Stage 4** — the cascade lemma (Cai-Fürer-Immerman WL-dim
    result). Discharges `cfi_cascades_polynomially`. Multi-week.
 
