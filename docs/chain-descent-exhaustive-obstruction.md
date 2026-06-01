@@ -180,6 +180,21 @@ Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.
 > non-trivial non-abelian residual, which is what makes the strict-Cameron target
 > (R1) statable once a rigid solver retires the trivial-residual flag.
 
+> **F2 — the *operational* order signal is abelian-blind (composite-graph audit,
+> 2026-06-01; [harvest-window §6.11](./chain-descent-harvest-window.md)).** The
+> *predicate-level* separator above is "non-trivial **non-abelian** ⟹ Cameron." But
+> the coarse *operational* flag signal often quoted as "non-trivial residual ⟹
+> Johnson-like" ([strategy §14](./chain-descent-strategy.md)) checks **order, not
+> abelian-ness** — so an *unconsumed abelian* residual (e.g. a CFI gauge over an
+> **unbounded-treewidth** base, the §2 gap-(B) flagged region) is non-trivial *and*
+> abelian, and the order-signal would mis-tag it "Johnson-like" though it is **not
+> Cameron**. The predicate screen is unaffected (abelian ⟹ D2, never reaches the
+> order test); but any *operational* flag classifier must test **abelian-ness**, not
+> just order, before routing to leg C. NB the trigger is **unbounded tw**, not
+> rigidity: CFI cascade depth is governed by `tw(H)` alone, so a rigid *bounded-tw*
+> base consumes its gauge cleanly (the audit corrected an "IR-resistance blocks the
+> gauge" mis-attribution).
+
 **Drafting rule for every downstream statement.** "All symmetry removed **or**
 Cameron" (statement 1) is **not** the time bound (statement 2): statement 2 carries
 the *extra* IR-core escape. A future Phase-2 blind-spot handler

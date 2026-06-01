@@ -25,7 +25,11 @@
 >   full recovery; **D2 needs a `¬IsBase` (non-trivial-residual) guard** — bare `ResidualAbelian` is
 >   *vacuously true on the multipede* (trivial residual), which would make `D2 ⟹ recoverable` FALSE. With
 >   the guard the screen is sound + exhaustive (modulo EOL), and `¬Findable` splits cleanly into
->   blind-spot (trivial) vs Cameron (non-trivial non-abelian). **Implement §6.10 before** the D2 bridge.
+>   blind-spot (trivial) vs Cameron (non-trivial non-abelian). **§6.11 (composite-graph audit) adds two
+>   more fixes:** F1 — the stop disjunct must be **`Discrete`, not bare `CellsAreOrbits`** (vacuously true at
+>   transitive ∅ ⟹ would mark Johnson Findable); F2 — the *operational* order-signal is abelian-blind (use
+>   "non-trivial *non-abelian* ⟹ Cameron"). No composite manufactures a fourth species; the workflow is
+>   confirmed. **Implement §6.10+§6.11 before** the D2 bridge.
 > - **Other open frontiers:** the **D2 bridge** `ResidualAbelian ⟹ hwit` (= cascade-1b generalized, the
 >   load-bearing open core); the multi-step D1 **negative** (CFI/hidden-Johnson `¬D1` = chain-gets-stuck).
 > - **Build/check:** `cd /workspace && bash scripts/build.sh` (serial, ~14s); `lake env lean` a file with
@@ -673,10 +677,53 @@ resolved); Johnson → no step, non-trivial non-abelian (**escape = Cameron**); 
 no step, `IsBase` ⟹ D2 guard fails ⟹ **¬Findable = blind-spot flag** (bare D2 would wrongly say Findable).
 
 **NEXT (implementation).** Define `SymmetryOnlyStep` and the guarded D2 in Lean; re-express
-`VisiblyRecoverable` as the `SymmetryOnlyStep`-chain closure (keeps `visiblyRecoverable_scheme` — the ∅
-step is symmetry-only since the scheme cell is vertex-transitive & non-singleton for `n ≥ 2`); replace the
-flat `Findable` with the sequential def above. Then the D2 bridge (`D2 ⟹ hwit`) sits on the confirmed
-screen.
+`VisiblyRecoverable` as the `SymmetryOnlyStep`-chain closure; replace the flat `Findable` with the sequential
+def — **with the §6.11 F1 fix** (stop disjunct = `Discrete`, not bare `CellsAreOrbits`). Then the D2 bridge
+(`D2 ⟹ hwit`) sits on the confirmed screen.
+
+---
+
+### 6.11 Composite-graph audit — two definitional fixes (F1, F2) (2026-06-01)
+
+Adversarial audit (8 agents: analyze + skeptic per case) of the §6.10 screen on **composite** graphs —
+CFI(Multipede), Multipede+small-Z₂, Cameron×Cameron (swap join), disjoint normal⊔Cameron. **Result: the
+seal/workflow is confirmed — NO composition manufactures a hidden non-Cameron non-abelian "fourth species";
+in every case symmetry is stripped to the Cameron / IR-blind-spot section in poly time** (the user's stated
+workflow). The pass found **two precision bugs in the §6.10 *definitions* (not the concept)** and corrected
+one prediction.
+
+**F1 — the "recovered" base case must be `Discrete`, NOT bare `CellsAreOrbits`.** `CellsAreOrbits S :=
+∀ v w, same-cell → same-orbit` is **vacuously true** whenever there is one cell = one orbit — i.e. **at ∅
+for ANY vertex-transitive graph, including Johnson.** So the §6.10 `Findable` first disjunct `CellsAreOrbits S`
+would fire at ∅ for the **Cameron wall itself**, falsely marking Johnson Findable. `CellsAreOrbits` is
+recovery-meaningful only *at a base* (`discrete_of_cellsAreOrbits_base`, Cascade.lean:73: `CellsAreOrbits ∧
+IsBase ⟹ Discrete`). **FIX:** stop disjunct = `Discrete (warmRefine adj P (individualizedColouring n S))`
+(≡ `CellsAreOrbits S ∧ IsBase S`). Sound + non-false-walling: at a `CellsAreOrbits` non-discrete node the
+non-singleton cell *is* a single orbit ⟹ a `SymmetryOnlyStep` exists ⟹ recursion continues to `Discrete`
+(scheme reaches it via symmetry-only steps; Johnson gets stuck first — correct). So the corrected screen is
+`Findable S := Discrete(…) ∨ (ResidualAbelian S ∧ ¬IsBase S) ∨ (∃v, SymmetryOnlyStep S v ∧ Findable (insert v S))`.
+*Side-check:* the existing `RecoverableByDepth := ∃S, CellsAreOrbits S` has the same latent depth-0 vacuity
+for transitive graphs — likely harmless (completeness not soundness; used at bases) but worth confirming guarded.
+
+**F2 — the *operational* residual-order flag signal is abelian-blind.** §0.6 / strategy §14's "non-trivial
+residual ⟹ Johnson-like" checks *order*, not abelian-ness. An unconsumed **abelian** residual (CFI over an
+unbounded-tw base) is non-trivial *and abelian*, so the order-signal would tag it Johnson-like though it is
+not Cameron. The **predicate-level** screen is fine (abelian ⟹ D2, never reaches the order test); the
+separator must be stated **"non-trivial *non-abelian* ⟹ Cameron"** (which §6.10 obl. 6 does), and the
+*operational* signal needs an abelian check, not just order. Same theme as the D2 `¬IsBase` fix and F1: all
+three are "meaningful only with the right base/abelian guard." (Recorded also in exhaustive-obstruction §0.6.)
+
+**CFI(Multipede) — prediction corrected.** "IR-resistance starves the linear oracle" was *wrong*: CFI
+discretization is governed by **tw(H) alone**, not Aut(H) (orbit-recovery Fact A / Cai–Fürer–Immerman; the
+linear oracle reads the gauge off H's *cycle space*, not by canonizing H). Rigid + *bounded-tw* base ⟹ gauge
+consumed, `D2 ⟹ recoverable` holds (clean). Only *unbounded-tw* blocks it = the already-documented flagged
+region (exhaustive-obstruction §2 gap B) — a poly-*time* escape, not a symmetry misclassification, and not
+composition-induced.
+
+**Positive insight — rigidity *decouples*.** A rigid core cannot *lend* its refinement-resistance to a
+symmetry: any automorphism's support is *forced off the rigid core* (it can't move core vertices), so an
+added symmetry lives off-core and its footprint singletonizes ⟹ stays consumable (Multipede+Z₂ = CLEAN).
+This is §0.6's orthogonality, here **forced** by the rigidity hypothesis rather than assumed.
 
 ---
 
