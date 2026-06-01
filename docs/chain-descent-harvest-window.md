@@ -1,14 +1,31 @@
 # Chain descent — the harvest-window lemma (support-bounded orbit recovery)
 
-> **STATUS: PROPOSED concept (2026-06-01); both specialization tests PASSED — they reveal a two-mode
-> structure (§6.1–§6.3).** This doc records a
-> class-agnostic reframing of why the cascade/linear oracles find their symmetry within a
-> bounded depth — the **harvest window** — derived from the *support* of the symmetry rather
-> than from per-class structure (treewidth, σ-coherence). It is a **hypothesis with a designed
-> first test** (§6): if it specializes to the two already-proved instances
-> (`recoverableByDepth_scheme`, `theorem_1_HOR_cfi_oddDeg`) it is the general tool and they are
-> corollaries; if one resists, the resisting case names the missing tool. Written before the
-> test so the concept is recorded at peak clarity.
+> **STATUS: concept VALIDATED + screen predicates BUILT in Lean; one OPEN ISSUE blocks (§6.9).**
+> The harvest-window concept is a class-agnostic reframing of why the cascade/linear oracles find their
+> symmetry within a bounded depth, derived from the *support* of the symmetry rather than per-class
+> structure (treewidth, σ-coherence). Both specialization tests passed (§6.1–§6.3, two-mode structure);
+> the screen `D1∨D2` is identified with the seal's discriminator (§6.4); the trichotomy skeleton's
+> induction already exists as `cascadeComposition_pathFixing` (§6.5); D2 (`ResidualAbelian`) and D1
+> (`VisiblyRecoverable`, multi-step) are **defined in Lean, axiom-clean** with proved positive anchors
+> (§6.6–§6.8).
+>
+> **▶ HANDOFF — read this first.** Current state and the blocking issue, for a fresh agent:
+> - **What's in Lean** (`ChainDescent/Cascade.lean`, all `[propext, Classical.choice, Quot.sound]`): the
+>   connector `recoverableByDepth_of_pathFixing_layers` (+ CFI corollary); **D2** = `ResidualAbelian`
+>   (+ `residualAbelian_of_isBase`, `residualAbelian_mono`, `ResidualAut`, `orbitPartition_iff_residualAut`);
+>   **D1** = `VisiblyRecoverable` (multi-step, per-step symmetry-only) with `recoverableByDepth_of_visiblyRecoverable`
+>   (D1-leg, free), `cellsAreOrbits_empty_of_schurian` (vertex-transitivity from `schurian_transitive` at
+>   rel 0), `visiblyRecoverable_of_cellsAreOrbits_singleton`, `visiblyRecoverable_scheme` (the proved scheme
+>   instance); the screen `Findable := (∃ b, VisiblyRecoverable …) ∨ ResidualAbelian` + `recoverableByDepth_of_findable_visible`.
+> - **THE OPEN ISSUE (§6.9, top priority):** the **flat** `Findable = D1∨D2` is **incomplete** — `CFI(Kₘ)`,
+>   `m ≥ 3` (recoverable, *not* Cameron) is `¬D1∧¬D2` at `∅` because it is **mixed** (visible `Sₘ` over
+>   hidden abelian `Z₂^β`). Fix = make `D1`/`Findable` **per-decision** and let the induction
+>   (`cascadeComposition`) do the "consume visible, then classify residual" sequencing (deferred-decisions
+>   §1). **Do this before** building the D2 bridge.
+> - **Other open frontiers:** the **D2 bridge** `ResidualAbelian ⟹ hwit` (= cascade-1b generalized, the
+>   load-bearing open core); the multi-step D1 **negative** (CFI/hidden-Johnson `¬D1` = chain-gets-stuck).
+> - **Build/check:** `cd /workspace && bash scripts/build.sh` (serial, ~14s); `lake env lean` a file with
+>   `#print axioms <name>` for axiom-cleanliness.
 >
 > Origin: user reconstruction of the harvest-window argument (2026-06-01), refined over three
 > exchanges into the induction form of §2. The motivating concern: the abelian-sufficiency proof
@@ -543,8 +560,48 @@ one-liner — it's "the symmetry-only chain gets stuck before recovery," needing
 and stays the isolated structural residual.
 
 Both screen predicates and the screen are in Lean, with the scheme positive instance in the correct def.
-**Remaining: the D2 bridge (`ResidualAbelian ⟹ hwit`, = cascade-1b generalized); the multi-step D1
-*negative* (CFI/hidden-Johnson ¬D1 — the chain-gets-stuck residual).**
+
+### 6.9 SMOKE-TEST FINDING — the flat screen is INCOMPLETE (mixed graphs escape) (2026-06-01)
+
+**Adversarial audit (look for findable-but-`¬D1∧¬D2`, non-Cameron). Found a real escape: `CFI(Kₘ)` for
+`m ≥ 3`** — the *central findable example* — is `¬Findable adj P ∅` under the current **flat** `D1 ∨ D2`,
+grounded entirely in existing facts:
+
+- **Recoverable, not Cameron:** `recoverableByDepth_cfi` proves `RecoverableByDepth adj P (cfi_depth_bound)`.
+- **`¬D1` (`¬VisiblyRecoverable adj P ∅`):** CFI recovers via the **discretizing** mode
+  (`recoverableByDepth_cfi` carries the `Discrete` conjunct), *not* a symmetry-only chain; its intermediate
+  cells are *strictly coarser than orbits* (CascadeOracle §"CellsAreOrbits … fails at generic intermediate
+  nodes"), so no per-step symmetry-only certificate exists — the chain gets stuck.
+- **`¬D2` (`¬ResidualAbelian adj P ∅`):** `Aut(CFI(Kₘ)) = Z₂^β ⋊ Sₘ`, and `Sₘ` (m ≥ 3) is **non-abelian**.
+
+So `¬D1 ∧ ¬D2` on a recoverable, non-Cameron graph ⟹ **the seal's `¬(D1∨D2) = Cameron` claim fails for the
+flat single-node reading.**
+
+**Root cause — granularity.** CFI(Kₘ) is **mixed**: a *visible* `Sₘ` (a D1) over a *hidden abelian* `Z₂^β`
+(a D2). The flat reading fails because `VisiblyRecoverable` demands **full** symmetry-only recovery (the
+`Z₂^β` blocks it) and `ResidualAbelian` demands the **whole** residual be abelian (the `Sₘ` blocks it). The
+seal's *intended* structure is **sequential** — deferred-decisions §1's "**consume symmetry first**":
+consume the visible `D1` (`Sₘ`), *then* the residual `Z₂^β` is `D2`. That is exactly what the trichotomy
+**induction** (`cascadeComposition`) does. So the seal is fine *read sequentially*; the **Lean `Findable`
+instantiated the flat single-node reading, which is incomplete.**
+
+**The fix (granularity — not yet done):**
+1. **Re-granularize `D1` to per-decision** — "the *target cell* at this node is a single `Aut`-orbit"
+   (one symmetry-only step available), **not** full recovery. `VisiblyRecoverable` (full symmetry-only
+   recovery) should become the *derived* all-D1-steps special case.
+2. **Make `Findable` per-decision-along-the-descent**, with `cascadeComposition` doing the consume-visible-
+   then-classify-residual sequencing — so mixed graphs are covered.
+3. Apply `ResidualAbelian` (D2) to the **post-D1-consumption residual**, not the `∅`-residual.
+
+**Bounds are fine** (numeric): D1's `bound ≤ n` is polynomial; mixed-case depth `|Sₘ| + |Z₂^β| ≤ n`. The
+issue is **structural (flat vs sequential), not numeric**.
+
+**Side-insight:** this shows the induction (`cascadeComposition_pathFixing`) is **load-bearing for
+completeness**, not just plumbing — it does the visible-then-hidden sequencing the flat screen can't
+express.
+
+**RECOMMENDATION:** re-granularize `Findable`/`D1` (above) **before** building the D2 bridge on top of an
+incomplete screen. This is the top open item.
 
 ---
 
