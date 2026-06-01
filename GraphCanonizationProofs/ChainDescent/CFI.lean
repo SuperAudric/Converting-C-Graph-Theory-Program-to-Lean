@@ -3397,6 +3397,56 @@ theorem cfiFlip_isAut (F : Fin m → Fin m → Bool)
 
 end CFIBase
 
+/-! ### Phase 3 — lift the gadget flip to `Aut(adj)` on `Fin n`
+
+The construction so far lives on the abstract `H.CFIVertex`; the consumers operate on
+`adj : AdjMatrix n`. `IsCFI'` carries the labelling `e : Fin n ≃ H.CFIVertex` and
+`matching : adj.adj i j = cfiAdj (e i) (e j)`, so the gadget flip transports by conjugation
+`g = e⁻¹ ∘ cfiFlip F ∘ e`, and `cfiFlip_isAut` makes `g` an automorphism of `adj`. -/
+
+namespace IsCFI'
+
+variable {n : Nat} {adj : AdjMatrix n}
+
+/-- **The gadget flip on `adj`'s vertices.** The cycle-space flip `cfiFlip F` transported to
+`Fin n` via the CFI labelling `h.e`: `g = e⁻¹ ∘ cfiFlip F ∘ e`. -/
+def cfiFlipAut (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) : Equiv.Perm (Fin n) :=
+  (h.e.trans (h.H.cfiFlipEquiv F hEven)).trans h.e.symm
+
+/-- **Transport identity.** `e` intertwines `cfiFlipAut` (on `Fin n`) with `cfiFlip` (on
+`CFIVertex`): `e (g v) = cfiFlip F (e v)`. The workhorse for the automorphism and involution
+proofs. -/
+theorem e_cfiFlipAut (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) (v : Fin n) :
+    h.e (h.cfiFlipAut F hEven v) = h.H.cfiFlip F hEven (h.e v) := by
+  show h.e (h.e.symm (h.H.cfiFlipEquiv F hEven (h.e v))) = _
+  rw [Equiv.apply_symm_apply]
+  rfl
+
+/-- **The lifted gadget flip is an automorphism of `adj`.** For `F` an even subgraph (`hEven`)
+that is symmetric (`hFsymm`), `cfiFlipAut F` is in `Aut(adj)` — reducing through `matching` to
+`cfiFlip_isAut` on the base. This is the Phase-3 deliverable: an honest `IsAut … adj` the
+consumers (`configSwap_of_aut`, Tier-3a `hwit`) can use. -/
+theorem isAut_cfiFlipAut (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0)
+    (hFsymm : ∀ v w, F v w = F w v) :
+    IsAut (h.cfiFlipAut F hEven) adj := by
+  intro v w
+  rw [h.matching, h.matching, h.e_cfiFlipAut, h.e_cfiFlipAut]
+  exact h.H.cfiFlip_isAut F hEven hFsymm (h.e v) (h.e w)
+
+/-- **The lifted gadget flip is an involution** (conjugate of the `CFIVertex` involution).
+Needed downstream where the decision pair must be *swapped* (`g a = b ∧ g b = a`). -/
+theorem cfiFlipAut_involutive (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) :
+    Function.Involutive (h.cfiFlipAut F hEven) := by
+  intro v
+  apply h.e.injective
+  rw [h.e_cfiFlipAut, h.e_cfiFlipAut, (h.H.cfiFlip_involutive F hEven) (h.e v)]
+
+end IsCFI'
+
 /-! ### Phase 0 — `triangleBase` prototype (β = 1: the single 3-cycle)
 
 `triangleBase = K₃` has cycle-space dimension `β = |E| − |V| + 1 = 3 − 3 + 1 = 1`: the unique
