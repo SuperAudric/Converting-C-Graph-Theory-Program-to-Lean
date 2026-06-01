@@ -511,12 +511,39 @@ Chosen def (option D1-A, visible / cells=orbits chain to a base). Built in
   now, the D2 disjunct awaiting the bridge.
 
 **Asymmetry recorded:** `D1 ⟹ recoverable` is *free* (def bakes in cells=orbits), so D1's genuine content
-is the per-class instance check — **the scheme positive direction is now done in Lean
-(`visiblyRecoverable_scheme`)**; the CFI/Johnson negative direction (¬D1) and the D2 bridge remain.
-Both screen predicates and the screen itself are in Lean. **Remaining: the D2 bridge
-(`ResidualAbelian ⟹ hwit`, = cascade-1b generalized); the D1 *negative* instance (`¬VisiblyRecoverable`
-for CFI/Johnson — needs cells≠orbits at depth 1); and a possible D1 loosening for depth-≥2-visible
-graphs (cells=orbits at the *individualized cell* per step, vs globally).**
+is the per-class instance check — **the scheme positive direction is done in Lean
+(`visiblyRecoverable_scheme`)**.
+
+### 6.8 D1 correctness loop — closed at the current (one-step) scope (2026-06-01)
+
+The negative direction, now in [`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean)
+(axiom-clean, build green):
+
+- `visiblyRecoverable_of_cellsAreOrbits_singleton` — positive direction generalised (`CellsAreOrbits adj
+  P {v} ⟹ VisiblyRecoverable adj P ∅ 1`); `visiblyRecoverable_scheme` is its scheme corollary.
+- **`not_visiblyRecoverable_of_depth_one_fails`** — the **loop-closer**: `(∀ v, ¬CellsAreOrbits adj P
+  {v}) ⟹ ¬VisiblyRecoverable adj P ∅ bound`. A chain from `∅` must take a single-vertex first step
+  `{v}` needing cells=orbits there; depth-1 failure (CFI's / the hidden Johnson's fingerprint) kills it.
+- **`visiblyRecoverable_empty_iff`** — the crisp characterisation: `VisiblyRecoverable adj P ∅ bound ↔
+  ∃ v, CellsAreOrbits adj P {v}` (for `bound ≥ 1`). So `¬D1 ⟺ ∀v ¬CellsAreOrbits{v}` — the screen's
+  D1-negation lands *exactly* on depth-1 failure.
+
+**What "closed" means, honestly.** The iff *also documents a limitation*: the current def collapses
+**D1-from-`∅` to one-step (depth-1) recovery**. That is correct for the current formalised scope —
+rank-2 schemes recover at depth 1 (`visiblyRecoverable_scheme`), CFI fails at depth 1 — so the loop is
+closed *there*. But it **mis-tiles depth-≥2-recoverable graphs** (the Johnson / Hamming *graphs* —
+recoverable DRGs, **not** the hidden-Johnson *wall*): they would be `¬D1` and, if non-abelian, wrongly
+`¬screen` (a false wall). The fix is the **multi-step** form (per-step symmetry-only: the individualised
+*cell* is a single orbit, reaching cells=orbits at the end), whose scheme instance needs vertex-
+transitivity — now known **derivable from `SchurianSchemeGraph.schurian_transitive` at relation 0**
+(checked this turn). That generalisation is the flagged next refinement.
+
+The concrete CFI discharge — `∀v, ¬CellsAreOrbits adj P {v}` (CFI's depth-1 cells-coarser-than-orbits
+fact) — stays the isolated structural residual (needs CFI gadget analysis, not formalised).
+
+Both screen predicates and the screen are in Lean. **Remaining: the D2 bridge (`ResidualAbelian ⟹
+hwit`, = cascade-1b generalized); the multi-step D1 generalisation (+ scheme transitivity); the concrete
+CFI ¬D1 discharge.**
 
 ---
 

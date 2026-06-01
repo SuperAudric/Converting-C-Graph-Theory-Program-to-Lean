@@ -536,16 +536,11 @@ theorem recoverableByDepth_of_visiblyRecoverable {S₀ : Finset (Fin n)} {bound 
   obtain ⟨k, T, hk, _, _, hcells, hcard⟩ := h
   exact ⟨T k, hcard, hcells k hk (le_refl k)⟩
 
-/-- **D1 instance check — the rank-2 / `|J| = 1` schurian scheme is visibly recoverable at depth 1.**
-The one-step chain `∅ → {v}` is a visible descent: `CellsAreOrbits adj P {v}` holds by
-`orbitRecoverable_scheme` (the proved depth-1 orbit recovery, `theorem_2_HOR_concrete_rank_two_J_singleton`).
-This validates `VisiblyRecoverable` against the proved scheme instance, the D1 analogue of Cases 1/2. -/
-theorem visiblyRecoverable_scheme (h : IsSchurianSchemeGraph' adj)
-    (hrank : h.G.scheme.rank = 2) (hJ : h.G.toSchemeGraph.J.card = 1) (v : Fin n)
-    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
-    VisiblyRecoverable adj P ∅ 1 := by
-  have hco : CellsAreOrbits adj P {v} :=
-    orbitRecoverableAt_iff_cellsAreOrbits.mp (orbitRecoverable_scheme h hrank hJ P v hP_invariant)
+/-- **`CellsAreOrbits` at a singleton gives D1 at depth 1.** The one-step chain `∅ → {v}` is a visible
+descent witnessed by `CellsAreOrbits adj P {v}`. The general positive direction; `visiblyRecoverable_scheme`
+is its scheme corollary. -/
+theorem visiblyRecoverable_of_cellsAreOrbits_singleton {v : Fin n}
+    (hco : CellsAreOrbits adj P {v}) : VisiblyRecoverable adj P ∅ 1 := by
   refine ⟨1, fun i => if i = 0 then ∅ else {v}, Nat.one_pos, by simp, ?_, ?_, by simp⟩
   · intro i hi
     have hi0 : i = 0 := by omega
@@ -555,6 +550,53 @@ theorem visiblyRecoverable_scheme (h : IsSchurianSchemeGraph' adj)
     have hi1' : i = 1 := by omega
     subst hi1'
     simpa using hco
+
+/-- **D1 instance check — the rank-2 / `|J| = 1` schurian scheme is visibly recoverable at depth 1.**
+`CellsAreOrbits adj P {v}` holds by `orbitRecoverable_scheme` (the proved depth-1 orbit recovery,
+`theorem_2_HOR_concrete_rank_two_J_singleton`), so the one-step chain `∅ → {v}` is a visible descent.
+Validates `VisiblyRecoverable` against the proved scheme instance — the D1 analogue of Cases 1/2. -/
+theorem visiblyRecoverable_scheme (h : IsSchurianSchemeGraph' adj)
+    (hrank : h.G.scheme.rank = 2) (hJ : h.G.toSchemeGraph.J.card = 1) (v : Fin n)
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
+    VisiblyRecoverable adj P ∅ 1 :=
+  visiblyRecoverable_of_cellsAreOrbits_singleton
+    (orbitRecoverableAt_iff_cellsAreOrbits.mp (orbitRecoverable_scheme h hrank hJ P v hP_invariant))
+
+/-- **D1 is monotone in the depth bound** (a looser bound is easier). -/
+theorem visiblyRecoverable_bound_mono {S₀ : Finset (Fin n)} {b b' : Nat}
+    (h : VisiblyRecoverable adj P S₀ b) (hbb' : b ≤ b') : VisiblyRecoverable adj P S₀ b' := by
+  obtain ⟨k, T, hk, hT0, hinc, hcells, hcard⟩ := h
+  exact ⟨k, T, hk, hT0, hinc, hcells, le_trans hcard hbb'⟩
+
+/-- **The negative direction — closing the D1 loop (current, one-step scope).** If **no** singleton is
+orbit-recovered (`∀ v, ¬ CellsAreOrbits adj P {v}` — the depth-1 failure that is CFI's and the hidden
+Johnson's fingerprint), then the graph is **not** visibly recoverable from `∅`: any chain's single-vertex
+first step `{v}` would need `CellsAreOrbits adj P {v}`, which fails. So `¬D1` lands exactly on graphs that
+fail depth-1 recovery — the screen's negation behaving correctly. -/
+theorem not_visiblyRecoverable_of_depth_one_fails {bound : Nat}
+    (hfail : ∀ v : Fin n, ¬ CellsAreOrbits adj P {v}) :
+    ¬ VisiblyRecoverable adj P ∅ bound := by
+  rintro ⟨k, T, hk, hT0, hinc, hcells, _⟩
+  obtain ⟨v, hv⟩ := hinc 0 hk
+  have hco : CellsAreOrbits adj P (T 1) := hcells 1 Nat.one_pos hk
+  rw [hv, hT0] at hco
+  exact hfail v (by simpa using hco)
+
+/-- **D1-from-`∅` is exactly depth-1 recovery (the loop, characterised).** Combining the two directions:
+visibly recoverable from `∅` (within any `bound ≥ 1`) ⟺ some singleton is orbit-recovered. This *closes*
+the D1 correctness loop at the current scope — `¬D1 ⟺ ∀v, ¬CellsAreOrbits{v}` — and *documents* its
+limitation: the current def collapses D1-from-`∅` to **one-step** recovery (right for rank-2 schemes and
+CFI, which decide at depth 1; the multi-step generalisation for depth-≥2-recoverable graphs — Johnson /
+Hamming *graphs*, not the hidden-Johnson wall — is future work, and needs scheme vertex-transitivity,
+derivable from `SchurianSchemeGraph.schurian_transitive` at relation 0). -/
+theorem visiblyRecoverable_empty_iff {bound : Nat} (hb : 1 ≤ bound) :
+    VisiblyRecoverable adj P ∅ bound ↔ ∃ v : Fin n, CellsAreOrbits adj P {v} := by
+  constructor
+  · intro h
+    by_contra hcon
+    exact not_visiblyRecoverable_of_depth_one_fails (not_exists.mp hcon) h
+  · rintro ⟨v, hco⟩
+    exact visiblyRecoverable_bound_mono (visiblyRecoverable_of_cellsAreOrbits_singleton hco) hb
 
 /-! ### The screen `Findable = D1 ∨ D2` -/
 
