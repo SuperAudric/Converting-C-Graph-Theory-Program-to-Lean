@@ -3571,6 +3571,108 @@ theorem exists_even_triangle {v w u : Fin m} (hvw : v ≠ w) (hvu : v ≠ u) (hw
    triEdge_symm v w u, triEdge_apex v w u,
    fun _ hxv hxw hxu => H.flipSet_triEdge_other hxv hxw hxu⟩
 
+/-! ### C1b.2b — the general even subgraph via a permutation-cycle
+
+A general cycle (for triangle-free bases) is represented as a permutation `σ` — the cycle's
+"next-vertex" map. Then a vertex `p`'s F-neighbours are exactly `{σ p, σ⁻¹ p}` (predecessor +
+successor), so the even-degree count is immediate (degree 2 on the cycle, 0 off it) — no list/index
+arithmetic. Subsumes the triangle (a 3-cycle). The existence of such a `σ` (a cycle through `{v,w}`
+in `H − Σ`) is the isolated graph hypothesis, where treewidth/connectivity enters. -/
+
+/-- The even-subgraph edge indicator of a permutation-cycle `σ`: `{p, q}` is an edge iff `σ` maps one
+endpoint to the other (and that endpoint is moved). -/
+def evenPermEdge (σ : Equiv.Perm (Fin m)) : Fin m → Fin m → Bool :=
+  fun p q => (decide (σ p = q) && decide (¬ σ p = p)) || (decide (σ q = p) && decide (¬ σ q = q))
+
+/-- Membership characterisation of the permutation-cycle indicator. -/
+theorem evenPermEdge_eq_true {σ : Equiv.Perm (Fin m)} {p q : Fin m} :
+    evenPermEdge σ p q = true ↔ (σ p = q ∧ σ p ≠ p) ∨ (σ q = p ∧ σ q ≠ q) := by
+  simp [evenPermEdge]
+
+/-- The permutation-cycle indicator is symmetric (undirected). -/
+theorem evenPermEdge_symm (σ : Equiv.Perm (Fin m)) (p q : Fin m) :
+    evenPermEdge σ p q = evenPermEdge σ q p := by
+  rw [Bool.eq_iff_iff, evenPermEdge_eq_true, evenPermEdge_eq_true]; tauto
+
+/-- At a moved vertex `p` (`σ p ≠ p`), the F-neighbours are exactly the successor `σ p` and
+predecessor `σ⁻¹ p`. -/
+theorem evenPermEdge_iff_of_mem {σ : Equiv.Perm (Fin m)} {p : Fin m} (hp : σ p ≠ p) (q : Fin m) :
+    evenPermEdge σ p q = true ↔ q = σ p ∨ q = σ.symm p := by
+  rw [evenPermEdge_eq_true]
+  constructor
+  · rintro (⟨h, _⟩ | ⟨h, _⟩)
+    · exact Or.inl h.symm
+    · exact Or.inr (by rw [← h, Equiv.symm_apply_apply])
+  · rintro (rfl | rfl)
+    · exact Or.inl ⟨rfl, hp⟩
+    · refine Or.inr ⟨Equiv.apply_symm_apply σ p, ?_⟩
+      rw [Equiv.apply_symm_apply]
+      intro h
+      exact hp ((congrArg σ h).trans (Equiv.apply_symm_apply σ p))
+
+/-- **The cycle's flip set at a moved vertex** is `{σ p, σ⁻¹ p}` (degree 2). -/
+theorem flipSet_evenPermEdge_of_mem (σ : Equiv.Perm (Fin m)) {p : Fin m} (hp : σ p ≠ p)
+    (hN : σ p ∈ H.neighbors p) (hN' : σ.symm p ∈ H.neighbors p) :
+    H.flipSet (evenPermEdge σ) p = {σ p, σ.symm p} := by
+  ext q
+  rw [mem_flipSet, Finset.mem_insert, Finset.mem_singleton, evenPermEdge_iff_of_mem hp]
+  constructor
+  · rintro ⟨_, h⟩; exact h
+  · rintro (rfl | rfl)
+    · exact ⟨hN, Or.inl rfl⟩
+    · exact ⟨hN', Or.inr rfl⟩
+
+/-- **Off the cycle (fixed points), the flip set is empty** — the avoidance property. -/
+theorem flipSet_evenPermEdge_of_fixed (σ : Equiv.Perm (Fin m)) {x : Fin m} (hx : σ x = x) :
+    H.flipSet (evenPermEdge σ) x = ∅ := by
+  ext q
+  simp only [mem_flipSet, Finset.notMem_empty, iff_false, not_and]
+  intro _ hq
+  rw [evenPermEdge_eq_true] at hq
+  rcases hq with ⟨_, h⟩ | ⟨h, h'⟩
+  · exact h hx
+  · exact h' (by rw [show q = x from σ.injective (h.trans hx.symm)]; exact hx)
+
+/-- **The permutation-cycle indicator is an even subgraph.** Each moved vertex has F-degree 2
+(`{σ p, σ⁻¹ p}`, distinct by the no-2-cycle hypothesis); fixed points have degree 0. -/
+theorem evenPermEdge_even (σ : Equiv.Perm (Fin m))
+    (hEdge : ∀ p, σ p ≠ p → σ p ∈ H.neighbors p)
+    (hNo2 : ∀ p, σ p ≠ p → σ (σ p) ≠ p) :
+    ∀ x, (H.flipSet (evenPermEdge σ) x).card % 2 = 0 := by
+  intro x
+  by_cases hx : σ x = x
+  · rw [H.flipSet_evenPermEdge_of_fixed σ hx, Finset.card_empty]
+  · have hsymm_ne : σ.symm x ≠ x := by
+      intro h
+      apply hx
+      have hc : σ (σ.symm x) = σ x := congrArg σ h
+      rw [Equiv.apply_symm_apply] at hc
+      exact hc.symm
+    have hN' : σ.symm x ∈ H.neighbors x := by
+      have hmoved : σ (σ.symm x) ≠ σ.symm x := by
+        rw [Equiv.apply_symm_apply]; exact Ne.symm hsymm_ne
+      have hin := hEdge (σ.symm x) hmoved
+      rw [Equiv.apply_symm_apply] at hin
+      exact H.mem_neighbors_symm.mp hin
+    have hne : σ x ≠ σ.symm x := fun h => hNo2 x hx (by rw [h, Equiv.apply_symm_apply])
+    rw [H.flipSet_evenPermEdge_of_mem σ hx (hEdge x hx) hN', Finset.card_pair hne]
+
+/-- **C1b.2b — existence of the avoiding even subgraph (general cycle case).** A permutation-cycle
+`σ` through edge `{v, w}` (`σ v = w`) whose moved-vertex edges are `H`-edges (`hEdge`) and whose
+orbits have length ≥ 3 (`hNo2`, no 2-cycles) yields an even symmetric subgraph `F` through `{v, w}`
+that avoids every vertex `σ` fixes. So discharging cascade-1b's cycle obligation reduces to: **a cycle
+through `{v, w}` in `H − Σ` exists** (`σ` fixing the forbidden set `Σ`) — the isolated graph-theoretic
+core, where bounded treewidth / connectivity enters. -/
+theorem exists_even_cycle {v w : Fin m} (σ : Equiv.Perm (Fin m)) (hσvw : σ v = w) (hvw : v ≠ w)
+    (hEdge : ∀ p, σ p ≠ p → σ p ∈ H.neighbors p)
+    (hNo2 : ∀ p, σ p ≠ p → σ (σ p) ≠ p) :
+    ∃ (F : Fin m → Fin m → Bool) (_hEven : ∀ x, (H.flipSet F x).card % 2 = 0),
+      (∀ p q, F p q = F q p) ∧ F v w = true ∧
+      (∀ x, σ x = x → H.flipSet F x = ∅) :=
+  ⟨evenPermEdge σ, H.evenPermEdge_even σ hEdge hNo2, evenPermEdge_symm σ,
+   by rw [evenPermEdge_eq_true]; exact Or.inl ⟨hσvw, by rw [hσvw]; exact Ne.symm hvw⟩,
+   fun _ hx => H.flipSet_evenPermEdge_of_fixed σ hx⟩
+
 end CFIBase
 
 /-! ### Phase 3 — lift the gadget flip to `Aut(adj)` on `Fin n`
