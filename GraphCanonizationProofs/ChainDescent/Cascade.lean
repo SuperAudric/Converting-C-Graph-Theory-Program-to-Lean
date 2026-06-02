@@ -845,4 +845,91 @@ theorem exists_symmetryOnly_saturated (adj : AdjMatrix n) (P : PMatrix n)
     rw [soStep_pos hex] at hfix
     exact symmetryOnlyStep_not_mem hex.choose_spec (Finset.insert_eq_self.mp hfix)
 
+/-! ## Leg A — the general support induction (reaching a base)
+
+`exists_symmetryOnly_saturated` saturates the *D1 (symmetry-only)* chain, but a symmetry-only
+step is unavailable in the hidden/CFI case (the cell is coarser than the orbit — `¬D1`). The
+*general* support induction tracks **moved** vertices instead (weaker than symmetry-only) and
+**provably reaches a base**: it is the class-agnostic formalization of harvest-window §2's
+termination — "case (c) strictly shrinks the residual's support, bottoming out at
+`base(g) ≤ |support|`" — for *every* graph, via the same `Saturation` engine. -/
+
+/-- **A vertex moved by some residual automorphism at `S`.** Weaker than a `SymmetryOnlyStep`
+(a moved vertex's cell may be *coarser* than its orbit — the hidden/CFI case), so this is the
+right object for the *general* support induction. `MovedAt ⟹ v ∉ S` is immediate (a residual
+auto fixes `S` pointwise). -/
+def MovedAt (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (v : Fin n) : Prop :=
+  ∃ π, ResidualAut adj P S π ∧ π v ≠ v
+
+theorem movedAt_not_mem {S : Finset (Fin n)} {v : Fin n} (h : MovedAt adj P S v) : v ∉ S := by
+  obtain ⟨π, hπ, hπv⟩ := h
+  exact fun hvS => hπv (hπ.2.2 v hvS)
+
+/-- A node with **no moved vertex is a base** (trivial residual): an `OrbitPartition` pair
+`v ↦ w` with `v ≠ w` would be a residual automorphism moving `v`. -/
+theorem isBase_of_no_moved {S : Finset (Fin n)} (h : ¬ ∃ v, MovedAt adj P S v) :
+    IsBase adj P S := by
+  intro v w hvw
+  by_contra hne
+  rw [orbitPartition_iff_residualAut] at hvw
+  obtain ⟨π, hπ, hπv⟩ := hvw
+  exact h ⟨v, π, hπ, fun hpvv => hne (by rw [← hπv, hpvv])⟩
+
+open Classical in
+/-- One round of the **moved-vertex closure**: individualize a moved vertex if one exists, else
+stay. Extensive; strictly grows until the residual is trivial (a base). -/
+noncomputable def movedStep (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) :
+    Finset (Fin n) :=
+  if h : ∃ v, MovedAt adj P S v then insert h.choose S else S
+
+theorem movedStep_extensive (S : Finset (Fin n)) : S ⊆ movedStep adj P S := by
+  unfold movedStep; split_ifs with h
+  · exact Finset.subset_insert _ _
+  · exact Finset.Subset.refl _
+
+theorem movedStep_pos {S : Finset (Fin n)} (hex : ∃ v, MovedAt adj P S v) :
+    movedStep adj P S = insert hex.choose S := by
+  unfold movedStep; rw [dif_pos hex]
+
+/-- **Leg A — the general support induction (every graph reaches a base).** From any `S₀`,
+individualizing moved vertices reaches a **base** `S* ⊇ S₀` (trivial residual,
+`base(g) ≤ |support|`) within `≤ n − |S₀|` rounds. The class-agnostic termination of the
+harvest-window trichotomy, via the `Saturation` engine — holding for *every* graph (CFI,
+schemes, rigid alike). Recovery at the base additionally needs `Discrete` there
+(`CellsAreOrbits`-at-base ⟺ `Discrete`), the orthogonal IR-stickiness axis. -/
+theorem exists_isBase_saturated (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) :
+    ∃ k, k ≤ Fintype.card (Fin n) - S₀.card ∧
+      S₀ ⊆ (movedStep adj P)^[k] S₀ ∧ IsBase adj P ((movedStep adj P)^[k] S₀) := by
+  obtain ⟨k, hk, hfix⟩ :=
+    Saturation.exists_iterate_isFixed (movedStep adj P) movedStep_extensive S₀
+  refine ⟨k, hk, ?_, ?_⟩
+  · have hm := Saturation.iterate_mono (movedStep adj P) movedStep_extensive S₀ (Nat.zero_le k)
+    rwa [Function.iterate_zero_apply] at hm
+  · apply isBase_of_no_moved
+    intro hex
+    rw [movedStep_pos hex] at hfix
+    exact movedAt_not_mem hex.choose_spec (Finset.insert_eq_self.mp hfix)
+
+/-! ## Leg A / D1 — the whole metric/DRG family (de-classing `visiblyRecoverable_scheme`)
+
+The scheme de-classing (`Scheme.lean §10.13`, `theorem_2_HOR_of_pPolynomial`) recovers orbits
+at **depth 1** for the *entire* metric family — schemes are algebraic, so 1-WL captures them
+after one individualization regardless of diameter. That makes the one-step chain `∅ → {v}`
+visibly recoverable for every P-polynomial scheme, generalizing the rank-2 `visiblyRecoverable_scheme`
+to all of Johnson/Hamming/cycles/DRGs: Leg-A's D1 is now class-general on the metric class. -/
+
+/-- **D1 for every P-polynomial (metric / DRG) scheme graph.** Generalizes
+`visiblyRecoverable_scheme` (rank-2 / `|J|=1`) to the whole distance-regular family via the
+depth-1 metric recovery `theorem_2_HOR_of_pPolynomial`. -/
+theorem visiblyRecoverable_pPolynomial (h : IsSchurianSchemeGraph' adj) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (hpp : PPolynomial h.G v j0) :
+    VisiblyRecoverable adj P ∅ 1 := by
+  have hrec : OrbitRecoverableAt adj P {v} :=
+    theorem_2_HOR_of_pPolynomial h P v j0 hJ hP_invariant hpp
+  exact visiblyRecoverable_of_cellsAreOrbits_singleton
+    (cellsAreOrbits_empty_of_schurian h hP_invariant)
+    (orbitRecoverableAt_iff_cellsAreOrbits.mp hrec)
+
 end ChainDescent
