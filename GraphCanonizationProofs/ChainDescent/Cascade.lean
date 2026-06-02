@@ -1,6 +1,7 @@
 import ChainDescent
 import ChainDescent.CascadeOracle
 import ChainDescent.Group
+import ChainDescent.Saturation
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 
@@ -778,5 +779,70 @@ theorem findable_cfi_gauge (P : PMatrix n) {adj : AdjMatrix n}
     (habelian : ResidualAbelian adj P S) (hnonbase : ¬ IsBase adj P S) :
     Findable adj P S :=
   findable_of_findableWithin (findableWithin_cfi_gauge P h h_odd habelian hnonbase)
+
+/-! ## Leg A — bounded termination of the symmetry-only process (engine transplant)
+
+The first Leg-A deliverable, transplanting the `ChainDescent.Saturation` engine that closed
+the scheme rank ladder (`Scheme.lean §10.12/§10.13`). The symmetry-only (D1) individualization
+process is an **extensive closure** on the committed set: each `SymmetryOnlyStep` strictly grows
+`S` (its non-singleton guard forces `v ∉ S` — `symmetryOnlyStep_not_mem`), so by
+`exists_iterate_isFixed` it **saturates within `≤ n − |S₀|` rounds** at a node where no
+symmetry-only step remains. This is the class-agnostic, engine-powered half of
+[harvest-window](../../../docs/chain-descent-harvest-window.md) gap 3 (bounded termination of
+the D1 chain). The forced-node iso-invariance (the spine) and "a *visible* symmetry keeps a step
+available until `Discrete`" (the (c)-trichotomy) remain the open research core.
+
+This is the Leg-A/D1 mirror of the scheme `isolationStep`/`EdgeGenerates` saturation — *same
+engine, carrier = vertices instead of relations, bound `B = univ` (the support refinement is the
+next step).* `EdgeGenerates`/`PPolynomial` were graded **D1** witnesses; here the saturated node
+is the operational endpoint of the same D1 closure. -/
+
+open Classical in
+/-- One round of the **symmetry-only closure**: individualize a symmetry-only vertex if one
+exists, else stay put. Extensive; strictly grows until no symmetry-only step remains. -/
+noncomputable def soStep (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) :
+    Finset (Fin n) :=
+  if h : ∃ v, SymmetryOnlyStep adj P S v then insert h.choose S else S
+
+/-- The closure round is **extensive** — it only ever adds the chosen vertex. -/
+theorem soStep_extensive (S : Finset (Fin n)) : S ⊆ soStep adj P S := by
+  unfold soStep; split_ifs with h
+  · exact Finset.subset_insert _ _
+  · exact Finset.Subset.refl _
+
+/-- **A symmetry-only step's vertex is not yet committed** (`v ∉ S`). Its cell is
+non-singleton, but a committed vertex is an initial `individualizedColouring` singleton that
+warm refinement preserves (`warmRefine_refines` + `individualizedColouring_eq_iff_of_mem`) — so
+no other vertex could share its colour. This is what makes `soStep` strictly grow until stuck. -/
+theorem symmetryOnlyStep_not_mem {S : Finset (Fin n)} {v : Fin n}
+    (h : SymmetryOnlyStep adj P S v) : v ∉ S := by
+  intro hvS
+  obtain ⟨u, huv, hcol⟩ := h.1
+  exact huv ((individualizedColouring_eq_iff_of_mem S hvS).mp
+    (warmRefine_refines adj P (individualizedColouring n S) hcol))
+
+/-- When a symmetry-only step exists, the closure round takes it. -/
+theorem soStep_pos {S : Finset (Fin n)} (hex : ∃ v, SymmetryOnlyStep adj P S v) :
+    soStep adj P S = insert hex.choose S := by
+  unfold soStep; rw [dif_pos hex]
+
+/-- **Leg A — bounded termination of the symmetry-only process.** From any committed `S₀`,
+iterating the symmetry-only closure reaches a **saturated** node `S* ⊇ S₀` — one with *no*
+symmetry-only step available — within `≤ n − |S₀|` rounds. The engine-powered, class-agnostic
+half of the harvest-window trichotomy's termination: the D1 chain cannot run forever. At `S*`
+the symmetry is either fully recovered (`Discrete`) or genuinely hidden (→ D2 / the wall). -/
+theorem exists_symmetryOnly_saturated (adj : AdjMatrix n) (P : PMatrix n)
+    (S₀ : Finset (Fin n)) :
+    ∃ k, k ≤ Fintype.card (Fin n) - S₀.card ∧
+      S₀ ⊆ (soStep adj P)^[k] S₀ ∧
+      ¬ ∃ v, SymmetryOnlyStep adj P ((soStep adj P)^[k] S₀) v := by
+  obtain ⟨k, hk, hfix⟩ :=
+    Saturation.exists_iterate_isFixed (soStep adj P) (soStep_extensive) S₀
+  refine ⟨k, hk, ?_, ?_⟩
+  · have hm := Saturation.iterate_mono (soStep adj P) (soStep_extensive) S₀ (Nat.zero_le k)
+    rwa [Function.iterate_zero_apply] at hm
+  · intro hex
+    rw [soStep_pos hex] at hfix
+    exact symmetryOnlyStep_not_mem hex.choose_spec (Finset.insert_eq_self.mp hfix)
 
 end ChainDescent
