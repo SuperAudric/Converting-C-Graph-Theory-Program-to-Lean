@@ -418,27 +418,8 @@ unchanged, the candidate is the *identity* automorphism, so the oracle fires (th
 degenerate genuine abelian symmetry: the two branches give the identical canonical
 leaf). -/
 
-/-- **Rank permutation under relabelling (reindexing).** Relabelling a colouring by a
-permutation `e` *conjugate-shifts* its rank permutation on the right:
-`rankPerm (χ ∘ e) = rankPerm χ · e`. Pure combinatorics of `vertexRank` (count of
-smaller colours), via a `Finset.card` reindex along `e`. The precise statement behind
-the §L.5 conjugation gap. -/
-theorem rankPerm_comp (χ : Colouring n) (e : Equiv.Perm (Fin n))
-    (h : Discrete χ) (h' : Discrete (fun v => χ (e v))) :
-    Colouring.rankPerm (fun v => χ (e v)) h' = Colouring.rankPerm χ h * e := by
-  ext v
-  simp only [Colouring.rankPerm_apply, Equiv.Perm.mul_apply]
-  show (Finset.univ.filter (fun u => χ (e u) < χ (e v))).card
-      = (Finset.univ.filter (fun w => χ w < χ (e v))).card
-  have key : (Finset.univ.filter (fun u => χ (e u) < χ (e v)))
-      = (Finset.univ.filter (fun w => χ w < χ (e v))).map e.symm.toEmbedding := by
-    ext u
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
-      Equiv.coe_toEmbedding]
-    constructor
-    · intro hu; exact ⟨e u, hu, by simp⟩
-    · rintro ⟨w, hw, rfl⟩; simpa using hw
-  rw [key, Finset.card_map]
+-- `rankPerm_comp` relocated to `ChainDescent.lean` (after `end Colouring`) so the
+-- cascade oracle's `colourMatchPerm` (M-B) can consume it; still in scope via import.
 
 /-- **Absorbed-decision sufficiency.** When the two branches induce the **same leaf rank
 permutation**, the forced candidate is the identity — a trivially genuine automorphism —
@@ -600,25 +581,8 @@ obligation). Given a config-swap, the cross-config transport (`warmRefine_transp
 `IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj` — the gadget rank-alignment, the genuine open nut,
 now stated via a *real* automorphism rather than a rank-rebasing. -/
 
-/-- Reindexing `vertexRank` along a permutation: the rank of `v` under `χ ∘ g`
-equals the rank of `g v` under `χ`. Pure `Finset.card` reindex (mirrors
-`signature_transport`'s reindex). -/
-theorem vertexRank_comp (χ : Colouring n) (g : Equiv.Perm (Fin n)) (v : Fin n) :
-    Colouring.vertexRank (fun u => χ (g u)) v = Colouring.vertexRank χ (g v) := by
-  apply Fin.ext
-  show (Finset.univ.filter (fun u => χ (g u) < χ (g v))).card
-     = (Finset.univ.filter (fun w => χ w < χ (g v))).card
-  have key : (Finset.univ : Finset (Fin n)).filter (fun w => χ w < χ (g v))
-      = ((Finset.univ : Finset (Fin n)).filter (fun u => χ (g u) < χ (g v))).map
-          g.toEmbedding := by
-    ext w
-    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
-               Equiv.coe_toEmbedding]
-    constructor
-    · intro hw
-      exact ⟨g.symm w, by rw [g.apply_symm_apply]; exact hw, g.apply_symm_apply w⟩
-    · rintro ⟨u, hu, rfl⟩; exact hu
-  rw [key, Finset.card_map]
+-- `vertexRank_comp` relocated to `ChainDescent.lean` (after `end Colouring`);
+-- still in scope via import.
 
 /-- A **config-swap** for decision `(a, b)`: a graph automorphism carrying the σ-branch
 configuration onto the flip-branch configuration (fixes `χι`, sends `σ.σ` to

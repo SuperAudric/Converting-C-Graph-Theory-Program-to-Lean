@@ -1017,4 +1017,179 @@ theorem computes_orbits_of_complete {oracle : CascadeOracleSpec adj P₀ χι₀
 
 end CascadeOracleSpec
 
+/-! ### §C.4 — M-B: the concrete colour-match oracle (`colourMatchPerm` / `matchOracle`)
+
+The shared open construction that fires *both* oracles
+([declassing §9](../../docs/chain-descent-declassing.md),
+[cascade-oracle §2.6](../../docs/chain-descent-cascade-oracle.md)). `colourMatchPerm` is the explicit
+`Equiv.Perm` built from the two *discrete* branch colourings as the rank composition
+`(rankPerm χ_w)⁻¹ * (rankPerm χ_v)`; `matchOracle` **constructs** it and then **verifies**
+`IsAut ∧ P-preserving ∧ fixes D ∧ v ↦ w` (construct-and-check — *not* the existential shortcut, so
+soundness *derives* the orbit witness from the constructed perm, and completeness genuinely uses
+`colourMatchPerm = g` via `vertexRank_comp`). Soundness (`OrbitMapSpec`) is **unconditional**;
+completeness reduces to the two named-open hypotheses (one-step discretizing depth = M-C / "B's core";
+`CellsAreOrbits` = localisation). -/
+
+/-- The rank-composition identity behind `colourMatchPerm = g`: if `g` value-matches the two
+colourings (`χ₂ ∘ g = χ₁`), then `(rankPerm χ₂)⁻¹ * rankPerm χ₁ = g` — pure `vertexRank` reindexing
+(`vertexRank_comp`), no graph structure. -/
+theorem rankPerm_inv_mul_eq_of_match {n : Nat} {χ₁ χ₂ : Colouring n} {g : Equiv.Perm (Fin n)}
+    (h₁ : Discrete χ₁) (h₂ : Discrete χ₂) (hmatch : ∀ x, χ₂ (g x) = χ₁ x) :
+    (Colouring.rankPerm χ₂ h₂)⁻¹ * Colouring.rankPerm χ₁ h₁ = g := by
+  have hcomp : Colouring.rankPerm χ₁ h₁ = Colouring.rankPerm χ₂ h₂ * g := by
+    ext v
+    simp only [Equiv.Perm.coe_mul, Function.comp_apply, Colouring.rankPerm_apply]
+    have hfun : (fun x => χ₂ (g x)) = χ₁ := funext hmatch
+    rw [← hfun]
+    exact congrArg _ (vertexRank_comp χ₂ g v)
+  rw [hcomp, inv_mul_cancel_left]
+
+/-- **M-B — the colour-match permutation.** The explicit `Equiv.Perm` matching branch-`v`'s discrete
+refined colouring to branch-`w`'s, as the rank composition `(rankPerm χ_w)⁻¹ * (rankPerm χ_v)`
+(`χ_r = warmRefine adj P (indivWithRep n D r)`). Always a well-defined permutation given the two
+discreteness proofs; equal to the orbit automorphism at a recoverable node
+(`colourMatchPerm_eq_of_orbit`). -/
+noncomputable def colourMatchPerm {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (D : Finset (Fin n)) (v w : Fin n)
+    (hv : Discrete (warmRefine adj P (indivWithRep n D v)))
+    (hw : Discrete (warmRefine adj P (indivWithRep n D w))) : Equiv.Perm (Fin n) :=
+  (Colouring.rankPerm (warmRefine adj P (indivWithRep n D w)) hw)⁻¹ *
+    Colouring.rankPerm (warmRefine adj P (indivWithRep n D v)) hv
+
+/-- **`colourMatchPerm` is the orbit automorphism, at a recoverable node.** An `Aut_D` witness `g`
+(`g v = w`, `w ∉ D`) value-matches the two branch colourings (`colourMatch_complete`), so the
+rank-composition `colourMatchPerm` equals it. The completeness linchpin — built from the colours,
+not assumed. -/
+theorem colourMatchPerm_eq_of_orbit {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {D : Finset (Fin n)} {v w : Fin n} {g : Equiv.Perm (Fin n)}
+    (hv : Discrete (warmRefine adj P (indivWithRep n D v)))
+    (hw : Discrete (warmRefine adj P (indivWithRep n D w)))
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgD : FixesPointwise g D) (hgvw : g v = w) (hwD : w ∉ D) :
+    colourMatchPerm adj P D v w hv hw = g :=
+  rankPerm_inv_mul_eq_of_match hv hw (colourMatch_complete hg hgP hgD hgvw hwD)
+
+open Classical in
+/-- **M-B — the colour-match cascade oracle.** Construct `colourMatchPerm` from the two branch
+colourings (when both footprints are discrete), then return it **iff** it verifies as an `Aut_D`
+orbit map (`IsAut ∧ P-preserving ∧ fixes D ∧ v ↦ w`). Construct-and-check: *not* the existential
+shortcut, so soundness derives the orbit witness from the constructed perm rather than assuming it. -/
+noncomputable def matchOracle {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) :
+    CascadeOracleSpec adj P₀ χι₀ sel :=
+  fun {k} chain v w =>
+    if hv : Discrete (warmRefine adj chain.P (indivWithRep n chain.D v)) then
+      if hw : Discrete (warmRefine adj chain.P (indivWithRep n chain.D w)) then
+        if hchk : IsAut (colourMatchPerm adj chain.P chain.D v w hv hw) adj
+            ∧ (∀ x u, chain.P (colourMatchPerm adj chain.P chain.D v w hv hw x)
+                              (colourMatchPerm adj chain.P chain.D v w hv hw u) = chain.P x u)
+            ∧ FixesPointwise (colourMatchPerm adj chain.P chain.D v w hv hw) chain.D
+            ∧ colourMatchPerm adj chain.P chain.D v w hv hw v = w then
+          some ⟨colourMatchPerm adj chain.P chain.D v w hv hw, hchk.1⟩
+        else none
+      else none
+    else none
+
+/-- **The oracle fires once the constructed perm passes the checks.** A reusable evaluation lemma:
+given the discreteness proofs and the four verification facts about `colourMatchPerm`, `matchOracle`
+returns `some`. The engine of the completeness proof. -/
+theorem matchOracle_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
+    (hv : Discrete (warmRefine adj chain.P (indivWithRep n chain.D v)))
+    (hw : Discrete (warmRefine adj chain.P (indivWithRep n chain.D w)))
+    (hAut : IsAut (colourMatchPerm adj chain.P chain.D v w hv hw) adj)
+    (hP : ∀ x u, chain.P (colourMatchPerm adj chain.P chain.D v w hv hw x)
+                         (colourMatchPerm adj chain.P chain.D v w hv hw u) = chain.P x u)
+    (hFix : FixesPointwise (colourMatchPerm adj chain.P chain.D v w hv hw) chain.D)
+    (hvw : colourMatchPerm adj chain.P chain.D v w hv hw v = w) :
+    ∃ result, matchOracle adj P₀ χι₀ sel chain v w = some result := by
+  have hchk : IsAut (colourMatchPerm adj chain.P chain.D v w hv hw) adj
+      ∧ (∀ x u, chain.P (colourMatchPerm adj chain.P chain.D v w hv hw x)
+                        (colourMatchPerm adj chain.P chain.D v w hv hw u) = chain.P x u)
+      ∧ FixesPointwise (colourMatchPerm adj chain.P chain.D v w hv hw) chain.D
+      ∧ colourMatchPerm adj chain.P chain.D v w hv hw v = w := ⟨hAut, hP, hFix, hvw⟩
+  refine ⟨⟨colourMatchPerm adj chain.P chain.D v w hv hw, hAut⟩, ?_⟩
+  simp only [matchOracle]
+  rw [dif_pos hv, dif_pos hw, dif_pos hchk]
+
+/-- **M-B soundness — `OrbitMapSpec`, unconditional.** When `matchOracle` fires, its four checks
+*are* the `OrbitPartition` witness conditions, so the returned perm certifies a genuine `Aut_D` orbit
+pair. No discreteness or recoverability hypothesis. -/
+theorem matchOracle_orbitMapSpec {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n)) :
+    CascadeOracleSpec.OrbitMapSpec (matchOracle adj P₀ χι₀ sel) := by
+  intro _k chain v w _result heq
+  simp only [matchOracle] at heq
+  split_ifs at heq with hv hw hchk
+  exact ⟨colourMatchPerm adj chain.P chain.D v w hv hw,
+    hchk.1, hchk.2.1, hchk.2.2.1, hchk.2.2.2⟩
+
+/-- **M-B completeness — `CellComplete` on the discretizing recoverable class.** Conditional on the
+two named-open hypotheses: every node one-step-discretizing (`hdisc`, = the exposure-depth witness /
+M-C / "B's core") and `CellsAreOrbits` at every node (`hco`, = localisation). At a same-cell pair the
+orbit automorphism `g` exists (`hco`), `colourMatchPerm = g` (`colourMatchPerm_eq_of_orbit`), so the
+checks pass and the oracle fires. The `w ∈ D` edge case collapses to `v = w` (where
+`colourMatchPerm = 1`). -/
+theorem matchOracle_cellComplete {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    (hdisc : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (r : Fin n),
+       Discrete (warmRefine adj chain.P (indivWithRep n chain.D r)))
+    (hco : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k),
+       CellsAreOrbits adj chain.P chain.D) :
+    CascadeOracleSpec.CellComplete (matchOracle adj P₀ χι₀ sel) := by
+  intro k chain v w hcell
+  have hv := hdisc chain v
+  have hw := hdisc chain w
+  have hinit : individualizedColouring n chain.D v = individualizedColouring n chain.D w :=
+    warmRefine_refines adj chain.P (individualizedColouring n chain.D) hcell
+  by_cases hwD : w ∈ chain.D
+  · have hvw : v = w := (individualizedColouring_eq_iff_of_mem chain.D hwD).mp hinit
+    subst hvw
+    have hid : colourMatchPerm adj chain.P chain.D v v hv hw = 1 := by
+      simp only [colourMatchPerm]
+      exact inv_mul_cancel _
+    refine matchOracle_fires chain hv hw ?_ ?_ ?_ ?_
+    · rw [hid]; exact fun _ _ => rfl
+    · rw [hid]; exact fun _ _ => rfl
+    · rw [hid]; exact fun _ _ => rfl
+    · rw [hid]; rfl
+  · obtain ⟨g, hg, hgP, hgD, hgvw⟩ := hco chain v w hcell
+    have hcmp : colourMatchPerm adj chain.P chain.D v w hv hw = g :=
+      colourMatchPerm_eq_of_orbit hv hw hg hgP hgD hgvw hwD
+    refine matchOracle_fires chain hv hw ?_ ?_ ?_ ?_
+    · rw [hcmp]; exact hg
+    · rw [hcmp]; exact hgP
+    · rw [hcmp]; exact hgD
+    · rw [hcmp]; exact hgvw
+
+/-- **M-B capstone — `CascadeComplete`.** The construct-and-check `matchOracle` computes the orbit
+relation exactly, reduced to the two named-open hypotheses (discretizing depth + `CellsAreOrbits`).
+Soundness (`matchOracle_orbitMapSpec`) is already unconditional; this supplies completeness. -/
+theorem matchOracle_cascadeComplete {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    (hdisc : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (r : Fin n),
+       Discrete (warmRefine adj chain.P (indivWithRep n chain.D r)))
+    (hco : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k),
+       CellsAreOrbits adj chain.P chain.D) :
+    CascadeOracleSpec.CascadeComplete (matchOracle adj P₀ χι₀ sel) :=
+  CascadeOracleSpec.cascadeComplete_of_cellsAreOrbits
+    (matchOracle_cellComplete hdisc hco) hco
+
+/-- **M-B — flag iso-invariance, free.** With soundness (unconditional) and completeness (under the
+two hypotheses), `verdictIsoInvariant_of_complete` gives the oracle's verdict as a function of the
+iso-invariant 1-WL partition — discharging strategy §15 gap 2 for `matchOracle` on the recoverable
+class. -/
+theorem matchOracle_verdictIsoInvariant {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    (hdisc : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (r : Fin n),
+       Discrete (warmRefine adj chain.P (indivWithRep n chain.D r)))
+    (hco : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k),
+       CellsAreOrbits adj chain.P chain.D) :
+    CascadeOracleSpec.VerdictIsoInvariant (matchOracle adj P₀ χι₀ sel) :=
+  CascadeOracleSpec.verdictIsoInvariant_of_complete
+    (matchOracle_orbitMapSpec adj P₀ χι₀ sel)
+    (matchOracle_cascadeComplete hdisc hco)
+    (fun chain => orbitRecoverableAt_iff_cellsAreOrbits.mpr (hco chain))
+
 end ChainDescent

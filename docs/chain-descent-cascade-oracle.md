@@ -344,21 +344,23 @@ is the engine for it. Status of the seal-driven assembly
 - `IsColourMatch`, `colourMatch_complete` (g *is* a colour-match), `colourMatch_unique` (colour-match
   + discrete ⟹ `= g`) — the construction interface, both directions.
 
-**Open — the next unit (M-B):** turn leg (a) into `CellComplete` for a *concrete* oracle. Leg (a) is
-the *ingredient*; `CellComplete` for the concrete oracle is **not yet discharged**.
-- **Build `colourMatchPerm`** — the explicit `Equiv.Perm` from the two *discrete* refined colourings
-  (two injective `Fin n → Nat` of equal range → a permutation), with **anchoring** lemmas (it fixes
-  `D` and maps `v ↦ w` *by construction*).
-- **Define `matchOracle`** (returns the verified `colourMatchPerm`, else `none`); prove `OrbitMapSpec`
-  (soundness, from anchoring) and `CellComplete` at one-step-discretizing nodes (completeness, from
-  `colourMatch_complete` + recoverability); assemble `CascadeComplete` via
-  `cascadeComplete_of_cellsAreOrbits`.
-- **⚠ Trap — do not take the existential shortcut.** Defining the oracle as "fires iff
-  `∃ t, IsAut t ∧ fixes D ∧ t v = w`" is **circular**: an orbit automorphism is *automatically* a
-  colour-match (`colourMatch_complete`), so that conjunct is implied, `CellComplete` becomes trivially
-  true, and **leg (a) is never used**. The oracle must *construct* `colourMatchPerm` from the colours,
-  so soundness *derives* `fixes D ∧ v ↦ w` from the match rather than assuming it — the only
-  non-vacuous use of leg (a).
+**M-B — BUILT 2026-06-02, axiom-clean (`CascadeOracle.lean §C.4`).** Leg (a) is now turned into
+`CellComplete` for a *concrete* oracle, via construct-and-check (the trap below avoided):
+- **`colourMatchPerm`** — the explicit `Equiv.Perm` from the two *discrete* refined colourings, as the
+  rankPerm composition `(rankPerm χ_w)⁻¹ * (rankPerm χ_v)`. `colourMatchPerm_eq_of_orbit` shows it equals
+  the orbit automorphism `g` at a recoverable node (`rankPerm_inv_mul_eq_of_match` ← the relocated
+  `vertexRank_comp` + `colourMatch_complete`) — **completeness via `colourMatchPerm = g`, not anchoring**.
+- **`matchOracle`** constructs `colourMatchPerm` and returns it **iff** it verifies
+  `IsAut ∧ P-preserving ∧ fixes D ∧ v ↦ w`. **`matchOracle_orbitMapSpec` (`OrbitMapSpec`) is
+  unconditional** (the four checks *are* the `OrbitPartition` witness). **`matchOracle_cellComplete` /
+  `_cascadeComplete`** discharge completeness reduced to two named-open hypotheses (every node
+  one-step-discretizing = the depth witness / M-C; `CellsAreOrbits` everywhere = localisation), assembled
+  via `cascadeComplete_of_cellsAreOrbits`. **`matchOracle_verdictIsoInvariant`** gives flag iso-invariance
+  free (`verdictIsoInvariant_of_complete`).
+- **⚠ Trap avoided — not the existential shortcut.** "Fires iff `∃ t, IsAut t ∧ fixes D ∧ t v = w`" is
+  **circular** (an orbit automorphism is automatically a colour-match, so `CellComplete` is trivially true
+  and leg (a) is never used). `matchOracle` *constructs* `colourMatchPerm` from the colours, so soundness
+  *derives* `fixes D ∧ v ↦ w` from the verified perm and completeness genuinely uses `colourMatchPerm = g`.
 
 **Then (M-C / b1):** generalize `indivWithRep` to a multi-step `indivWithSet` (+ transport) so the
 discrete footprint is reachable over a *sequence* — CFI's `tw(H)` depth (single-rep `indivWithRep`

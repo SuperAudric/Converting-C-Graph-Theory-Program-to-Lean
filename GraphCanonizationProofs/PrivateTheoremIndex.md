@@ -13,24 +13,24 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `closeStep_keeps_less` | 239-242 | `closeStep` never demotes a decided `less` entry. | — |
-| `iterate_closeStep_keeps_less` | 244-254 | Iterating `closeStep` preserves any `less` entry — once decided, frozen. | — |
-| `transitiveClose_conflict_less` | 267-274 | `transitiveClose conflictMatrix 0 1 = .less` (the `less`-chain wins the first `if`). | — |
-| `transitiveClose_swap_conflict_less` | 276-284 | `transitiveClose (swap conflictMatrix) 0 1 = .less` — the σ-swap fails to flip the tie-break. | — |
-| `POE.toNat_injective` | 322-324 | `POE.toNat` is injective. | — |
-| `encTuple_injective` | 334-339 | `encTuple` is injective. | — |
-| `witnessAdj` | 502-504 | Witness adjacency: the empty graph on 5 vertices (the `cell_split_uniform_false` discrepancy lives entirely in `P`). | Definition |
-| `witnessP0` | 506-515 | Witness pre-guess matrix (`0 < 2`, `1 < 3`): cell-mates `0,1` relate symmetrically to the cell `{2,3}` but asymmetrically to vertices `2`, `3`. | Definition |
-| `witnessChi` | 517-524 | Witness colouring with cells `{0,1}`, `{2,3}`, `{4}`. | Definition |
-| `witnessTC` | 526-538 | Explicit `closeStep`-fixpoint of `applyGuess witnessP0 2 4 less` (`witnessP0` plus `2 < 4` plus the closure entry `0 < 4`). | Definition |
-| `witnessTC_eq` | 540-552 | `transitiveClose (applyGuess witnessP0 2 4 less) = witnessTC`. | — |
-| `witnessChi_stable` | 554-563 | `witnessChi` is 1-WL-stable for `(witnessAdj, witnessP0)`. | — |
+| `closeStep_keeps_less` | 240-243 | `closeStep` never demotes a decided `less` entry. | — |
+| `iterate_closeStep_keeps_less` | 245-255 | Iterating `closeStep` preserves any `less` entry — once decided, frozen. | — |
+| `transitiveClose_conflict_less` | 268-275 | `transitiveClose conflictMatrix 0 1 = .less` (the `less`-chain wins the first `if`). | — |
+| `transitiveClose_swap_conflict_less` | 277-285 | `transitiveClose (swap conflictMatrix) 0 1 = .less` — the σ-swap fails to flip the tie-break. | — |
+| `POE.toNat_injective` | 323-325 | `POE.toNat` is injective. | — |
+| `encTuple_injective` | 335-340 | `encTuple` is injective. | — |
+| `witnessAdj` | 503-505 | Witness adjacency: the empty graph on 5 vertices (the `cell_split_uniform_false` discrepancy lives entirely in `P`). | Definition |
+| `witnessP0` | 507-516 | Witness pre-guess matrix (`0 < 2`, `1 < 3`): cell-mates `0,1` relate symmetrically to the cell `{2,3}` but asymmetrically to vertices `2`, `3`. | Definition |
+| `witnessChi` | 518-525 | Witness colouring with cells `{0,1}`, `{2,3}`, `{4}`. | Definition |
+| `witnessTC` | 527-539 | Explicit `closeStep`-fixpoint of `applyGuess witnessP0 2 4 less` (`witnessP0` plus `2 < 4` plus the closure entry `0 < 4`). | Definition |
+| `witnessTC_eq` | 541-553 | `transitiveClose (applyGuess witnessP0 2 4 less) = witnessTC`. | — |
+| `witnessChi_stable` | 555-564 | `witnessChi` is 1-WL-stable for `(witnessAdj, witnessP0)`. | — |
 
-| `closeStep_unknown_eq` | 1609-1621 | Expansion of `closeStep P i j` when `P i j = .unknown`, exposing the explicit `if`-chain. | — |
-| `closeStep_unknown_subset` | 1849-1858 | The unknown-entry set of `closeStep P` is contained in that of `P`. | — |
-| `cl_prov_canonical` | 1978-1983 | Every pair in `cl_prov S` is canonical (`p.1.val < p.2.val`). | — |
-| `commitsToP_cl_prov_lessMono` | 1985-2003 | `commitsToP (cl_prov S)` is `.less`-bounded by `transitiveClose (commitsToP S)` for canonical `S`. | — |
-| `Colouring.vertexRankNat_lt_n` | 3015-3029 | `vertexRankNat χ v < n` for every `v` (the rank is a valid `Fin n` value). | — |
+| `closeStep_unknown_eq` | 1610-1622 | Expansion of `closeStep P i j` when `P i j = .unknown`, exposing the explicit `if`-chain. | — |
+| `closeStep_unknown_subset` | 1850-1859 | The unknown-entry set of `closeStep P` is contained in that of `P`. | — |
+| `cl_prov_canonical` | 1979-1984 | Every pair in `cl_prov S` is canonical (`p.1.val < p.2.val`). | — |
+| `commitsToP_cl_prov_lessMono` | 1986-2004 | `commitsToP (cl_prov S)` is `.less`-bounded by `transitiveClose (commitsToP S)` for canonical `S`. | — |
+| `Colouring.vertexRankNat_lt_n` | 3016-3030 | `vertexRankNat χ v < n` for every `v` (the rank is a valid `Fin n` value). | — |
 ## ChainDescent/CFI.lean
 
 | Name | Line | Description | Notes |

@@ -30,12 +30,14 @@
 > - **Unified oracle** (§6) — both oracles fire through *one* mechanism: recovery → colour-match →
 >   verify; the seal's D1 / D2 / wall becomes a **depth** distinction.
 >
-> **Open frontier — where a fresh reader picks up (§9):** **M-B** (the concrete
-> `colourMatchPerm` / `matchOracle` construction — the one shared open unit firing *both* oracles),
-> **M-C** (multi-step depth for `tw(H)`), **"B's core"** (the substrate-conditional depth witness),
-> **flag iso-invariance**, the **IR-stickiness axis** (multipede, flagged), and the **wall**
-> (¬D1∧¬D2, Cameron/Johnson). The first four are bounded / not GI-hard; the last two are the honest
-> boundary.
+> **M-B LANDED (2026-06-02, axiom-clean):** the concrete `colourMatchPerm` / `matchOracle` (construct-
+> and-check) firing *both* oracles — soundness (`OrbitMapSpec`) unconditional, completeness reduced to
+> the depth witness + localisation, flag iso-invariance free (`CascadeOracle.lean §C.4`). **Open frontier
+> — where a fresh reader picks up (§9):** **M-C** (multi-step depth for `tw(H)`: the `indivWithSet`
+> generalization so a discrete footprint is reachable over a *sequence*, not one step), **"B's core"**
+> (the substrate-conditional depth witness), the **IR-stickiness axis** (multipede, flagged), and the
+> **wall** (¬D1∧¬D2, Cameron/Johnson). The first two are bounded / not GI-hard; the last two are the
+> honest boundary.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
@@ -283,6 +285,12 @@ Class-specificity is thereby quarantined into a **single depth-witness predicate
   `colourMatch_exists_of_cellsAreOrbits` (the colour-model firing, §5.2); `ResidualInvolutive`,
   `residualAbelian_of_involutive`, `orbitPartition_swap_of_involutive`,
   `swap_of_cellsAreOrbits_involutive` (the D2 predicate + swap certificate, §5.3). All axiom-clean.
+- **M-B — the concrete colour-match oracle** (`CascadeOracle.lean §C.4`, all axiom-clean): `colourMatchPerm`
+  (the rankPerm composition), `colourMatchPerm_eq_of_orbit` (`= g` via `vertexRank_comp`),
+  `matchOracle : CascadeOracleSpec` (construct-and-check), `matchOracle_orbitMapSpec` (**unconditional**
+  soundness), `matchOracle_cellComplete` / `_cascadeComplete` (completeness reduced to discretizing-depth
+  + `CellsAreOrbits`), `matchOracle_verdictIsoInvariant` (flag iso-invariance, free). `vertexRank_comp` /
+  `rankPerm_comp` relocated to `ChainDescent.lean`.
 
 **Leg A's own frontier — now closed except the flagged residual.** What was the deep Leg-A frontier
 (the tight support bound, forced-node iso-invariance, the recovery-axes reduction, arbitrary-relabel
@@ -341,14 +349,20 @@ the wall — not another rung on a class ladder.
 For a fresh reader continuing the work. Every item is *isolated* by the de-classing; the first four
 are bounded (not GI-hard), the last two are the honest boundary.
 
-1. **M-B — the concrete colour-match oracle (the one shared open construction; fires *both* oracles).**
-   Build `colourMatchPerm` — the `Equiv.Perm` from the two discrete branch colourings, as the rankPerm
-   composition `(rankPerm χ_w)⁻¹ * (rankPerm χ_v)` — and `matchOracle : CascadeOracleSpec`; prove
-   `OrbitMapSpec` (soundness) and `CellComplete` (completeness, via `colourMatchPerm = g` from
-   `vertexRank_comp`) ⟹ `CascadeComplete` (via `cascadeComplete_of_cellsAreOrbits`). Recommended:
-   rankPerm composition + *construct-and-check* (avoid the existential-shortcut trap,
-   [cascade-oracle §2.6](./chain-descent-cascade-oracle.md)). Suggested home: relocate `vertexRank_comp`
-   / `rankPerm_comp` from `LinearOracle.lean` to `ChainDescent.lean`, build M-B in `CascadeOracle.lean`.
+1. **M-B — the concrete colour-match oracle — LANDED 2026-06-02, axiom-clean.** Built in
+   `CascadeOracle.lean §C.4` (construct-and-check, *not* the existential-shortcut trap): `colourMatchPerm`
+   = the rankPerm composition `(rankPerm χ_w)⁻¹ * (rankPerm χ_v)` from the two discrete branch colourings;
+   `colourMatchPerm_eq_of_orbit` (= `g` via `rankPerm_inv_mul_eq_of_match` ← `vertexRank_comp` +
+   `colourMatch_complete`); `matchOracle : CascadeOracleSpec` (constructs `colourMatchPerm`, returns it
+   **iff** it verifies `IsAut ∧ P-preserving ∧ fixes D ∧ v↦w`). **Soundness `matchOracle_orbitMapSpec`
+   (`OrbitMapSpec`) is unconditional** — the checks *are* the `OrbitPartition` witness. **Completeness**
+   `matchOracle_cellComplete` / `_cascadeComplete` (`CellComplete`/`CascadeComplete` via
+   `cascadeComplete_of_cellsAreOrbits`) is reduced to exactly the two named-open hypotheses: every node
+   one-step-discretizing (= the exposure-depth witness, items 2–3) and `CellsAreOrbits` everywhere (=
+   localisation). **Flag iso-invariance** falls out free (`matchOracle_verdictIsoInvariant` via
+   `verdictIsoInvariant_of_complete` — item 4 discharged on the recoverable class). `vertexRank_comp` /
+   `rankPerm_comp` relocated `LinearOracle.lean` → `ChainDescent.lean`. The single M-B residual is the
+   *depth witness* (items 2–3), not the construction.
 2. **M-C — multi-step depth.** Generalize `indivWithRep` to a multi-step `indivWithSet` (+ transport)
    so a discrete footprint is reachable over a *sequence* — CFI's `tw(H)` depth (M-B's `CellComplete`
    covers one-step-discretizing nodes only).
