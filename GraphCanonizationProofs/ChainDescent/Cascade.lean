@@ -1102,6 +1102,80 @@ theorem forcedNode_residual_invariant (S₀ : Finset (Fin n)) {g : Equiv.Perm (F
     · intro hx; exact ⟨x, hx, hFix x hx⟩
   rw [← forcedNode_image hAut hP S₀, hS₀]
 
+/-! ## Leg A — tying the two axes: recovery at the base ⟺ no IR-stickiness
+
+The harvest-window §2.3 thesis is that orbit recovery has **two orthogonal obstructions**:
+the *symmetry axis* (consume the hidden symmetry — reach a base) and the *IR-stickiness axis*
+(refinement must actually singletonize — `Discrete`). The symmetry axis is closed
+(`forcedNode_isBase`). At a base these two collapse into a single equivalence: since a base
+already has discrete *orbits* and "orbits refine cells" is free (`subset_warmRefine`),
+**recovery holds iff refinement is discrete there**. So the *only* remaining obstruction is
+stickiness — the multipede / IR-blind-spot (strategy §15 gap 5), correctly *flagged*, not
+solved. This separates the axes formally and pins the flag to exactly `¬ Discrete` at the
+canonical node. -/
+
+/-- **Recovery at a base ⟺ discreteness there.** Once the residual symmetry is consumed (`S`
+is a base), orbit recovery reduces *exactly* to the IR-stickiness axis: `OrbitRecoverableAt`
+holds iff `warmRefine` is `Discrete`. The `⟸` direction (`cellsAreOrbits_of_discrete`) needs
+no base; the base is what upgrades it to an iff (same cell ⟹ orbit ⟹ equal). -/
+theorem recoverableAt_base_iff_discrete (S : Finset (Fin n)) (hbase : IsBase adj P S) :
+    OrbitRecoverableAt adj P S ↔
+      Discrete (warmRefine adj P (individualizedColouring n S)) := by
+  constructor
+  · intro hrec i j hcell
+    exact hbase i j ((hrec i j).mpr hcell)
+  · intro hd
+    exact orbitRecoverableAt_iff_cellsAreOrbits.mpr (cellsAreOrbits_of_discrete hd)
+
+/-- **Tying the axes at the canonical forced node.** At `forcedNode adj P S₀` (a base by
+`forcedNode_isBase`), orbit recovery is *exactly* discreteness of `warmRefine`. Symmetry
+consumed (the forced node is a base) **and** no IR-stickiness (`Discrete`) ⟺ recovery — the
+two obstructions of harvest-window §2.3 separated, with the second the sole remaining (flagged)
+input. -/
+theorem forcedNode_recoverable_iff_discrete (S₀ : Finset (Fin n)) :
+    OrbitRecoverableAt adj P (forcedNode adj P S₀) ↔
+      Discrete (warmRefine adj P
+        (individualizedColouring n (forcedNode adj P S₀))) :=
+  recoverableAt_base_iff_discrete (forcedNode adj P S₀) (forcedNode_isBase S₀)
+
+/-! ## Leg A — computability of the support at recoverable nodes
+
+`movedSet` (hence `forcedNode`) is defined semantically (via the residual group), GI-hard to
+compute in general. But at a node where recovery *does* hold, the residual group is visible to
+1-WL: `v` is moved iff it sits in a **non-singleton cell**. So where it matters, `forcedNode`
+is refinement-computable — the bridge turning the canonical node into an actual algorithm input. -/
+
+/-- **The support is the non-singleton cells, at a recoverable node.** When
+`OrbitRecoverableAt adj P S`, a vertex `v` is moved by the residual at `S` iff it shares its
+1-WL cell with some other vertex. Refinement therefore computes `movedSet` (and `forcedNode`)
+exactly where orbit recovery holds. -/
+theorem mem_movedSet_iff_nonsingleton_cell_of_recoverable (S : Finset (Fin n))
+    (hrec : OrbitRecoverableAt adj P S) {v : Fin n} :
+    v ∈ movedSet adj P S ↔ ∃ w, w ≠ v ∧
+      warmRefine adj P (individualizedColouring n S) v =
+        warmRefine adj P (individualizedColouring n S) w := by
+  rw [mem_movedSet]
+  constructor
+  · rintro ⟨π, hres, hπv⟩
+    exact ⟨π v, hπv, (hrec v (π v)).mp ⟨π, hres.1, hres.2.1, hres.2.2, rfl⟩⟩
+  · rintro ⟨w, hwv, hcell⟩
+    obtain ⟨π, hAut, hP, hFix, hπvw⟩ := (hrec v w).mpr hcell
+    exact ⟨π, ⟨hAut, hP, hFix⟩, by rw [hπvw]; exact hwv⟩
+
+open Classical in
+/-- **`movedSet` is refinement-computed at a recoverable node** (Finset form): it equals the
+union of the non-singleton 1-WL cells. The literal statement that `forcedNode` is computable
+where recovery holds. -/
+theorem movedSet_eq_nonsingletonCells_of_recoverable (S : Finset (Fin n))
+    (hrec : OrbitRecoverableAt adj P S) :
+    movedSet adj P S = Finset.univ.filter (fun v => ∃ w, w ≠ v ∧
+      warmRefine adj P (individualizedColouring n S) v =
+        warmRefine adj P (individualizedColouring n S) w) := by
+  ext v
+  rw [Finset.mem_filter]
+  simp only [Finset.mem_univ, true_and]
+  exact mem_movedSet_iff_nonsingleton_cell_of_recoverable S hrec
+
 /-! ## Leg A / D1 — the whole metric/DRG family (de-classing `visiblyRecoverable_scheme`)
 
 The scheme de-classing (`Scheme.lean §10.13`, `theorem_2_HOR_of_pPolynomial`) recovers orbits

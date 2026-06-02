@@ -34,9 +34,15 @@
 > (its `defaultColouring` is index-based, not aut-invariant); the *semantic* `movedSet` is directly
 > equivariant. Axiom-clean. See §5.
 >
-> **Open (the deep frontier):** full recovery tying the symmetry and IR-stickiness axes — and,
-> folded in, the arbitrary-relabelling equivariance + refinement-*computability* of `forcedNode`.
-> See §5.
+> **Recovery axes separated — LANDED (2026-06-02).** `recoverableAt_base_iff_discrete` /
+> `forcedNode_recoverable_iff_discrete`: at the canonical base, orbit recovery is *exactly*
+> `Discrete (warmRefine …)`, so the two axes (symmetry / IR-stickiness) are formally separated and
+> the flag is pinned to `¬ Discrete`. Plus `movedSet_eq_nonsingletonCells_of_recoverable`:
+> `forcedNode` is refinement-computable where recovery holds. Axiom-clean. See §5 item 3.
+>
+> **Open (the remaining frontier):** the IR-stickiness axis itself (3b — the multipede boundary,
+> correctly *flagged*, not solved) and the arbitrary-relabelling equivariance (3c — mechanical,
+> needs an `(adj, P)`-relabel action). See §5.
 >
 > Companions: [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) (the witness
 > layer this generalizes), [`chain-descent-harvest-window.md`](./chain-descent-harvest-window.md)
@@ -227,9 +233,28 @@ the Leg-A screen predicates (`Findable`/`VisiblyRecoverable`) in saturation-clos
    the arbitrary-relabelling form (any `σ`, not just `σ ∈ Aut`) is the same conjugation over an
    `(adj, P)`-relabel action; refinement-*computing* `forcedNode` is the recovery content below.
 3. **Full recovery** tying the two **orthogonal axes** (harvest-window §2.3): symmetry consumed
-   (= base reached, done) **and** no IR-stickiness ⟹ `Discrete` at the base ⟹ `CellsAreOrbits`.
-   The second axis is the multipede / IR-blind-spot direction (strategy §15 gap 5), correctly
-   *flagged*, not solved.
+   (= base reached) **and** no IR-stickiness ⟹ `Discrete` at the base ⟹ `CellsAreOrbits`. Now
+   **separated into pieces** (most of it landed 2026-06-02):
+   - **3a — the reduction, DONE.** `recoverableAt_base_iff_discrete` /
+     `forcedNode_recoverable_iff_discrete`: at a base (in particular `forcedNode`), orbit recovery
+     is *exactly* `Discrete (warmRefine …)`. This **separates the two axes formally** — once the
+     symmetry is consumed, the *only* remaining obstruction is IR-stickiness, and the flag is
+     pinned to `¬ Discrete` at the canonical node. (`⟸` is `cellsAreOrbits_of_discrete`; the base
+     upgrades it to an iff.) Axiom-clean.
+   - **3d — computability of the support, DONE.**
+     `mem_movedSet_iff_nonsingleton_cell_of_recoverable` /
+     `movedSet_eq_nonsingletonCells_of_recoverable`: at a recoverable node, `v` is moved iff it
+     sits in a **non-singleton 1-WL cell**, so `movedSet`/`forcedNode` are refinement-computable
+     exactly where recovery holds — the bridge from math object to algorithm input. Axiom-clean.
+   - **3b — the stickiness axis (the flagged boundary), OPEN by design.** "Is `warmRefine`
+     discrete at the base?" is unconditionally *false* (multipede / IR-blind-spot, strategy §15
+     gap 5) — correctly *flagged*, not solved. For specific classes it is the existing `CascadesAt`
+     / `recoverableByDepth_cfi`/`_scheme` witnesses; deliverable is to wire those in, not prove it
+     unconditionally.
+   - **3c — arbitrary-relabel equivariance, OPEN (mechanical).** §2 gave automorphism-equivariance
+     (`σ ∈ Aut`); the full cross-relabelling form is the same conjugation over an `(adj, P)`-relabel
+     action (needs that action built; `labelledAdj` exists, the `P` analogue + `IsAut`-transfer do
+     not yet).
 
 **Still genuinely hard / out of scope** (unchanged by this turn): the **wall** — hidden
 non-abelian (`¬D1 ∧ ¬D2`, Cameron/Johnson), and `(O*)-existence` (≡ GI ∈ P).
