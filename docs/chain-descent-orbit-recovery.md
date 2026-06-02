@@ -1049,6 +1049,32 @@ restated as *"every relation eventually isolates"* (an isolation chain
 exists); and no concrete scheme is constructed in Lean (all results take
 `IsSchurianSchemeGraph'` as hypothesis, matching the abstract style).
 
+> **Update (2026-06-02) — the rank ladder is closed for the metric class
+> (the "de-classing" pivot).** Rather than discharge convergence rank-by-rank,
+> the general engine is now built (axiom-clean, `[propext, Classical.choice,
+> Quot.sound]`; full build green). **Strategy:** stop the per-rank ladder; prove
+> *non-class-specific* convergence once. **Progress:**
+> - `ChainDescent/Saturation.lean` (NEW, Mathlib-only): generic
+>   `exists_iterate_isFixed_within` — an extensive `Finset` operator saturates
+>   to a fixpoint within `|B| − |s₀|` rounds. The reusable engine (also the
+>   Leg-A support-induction skeleton).
+> - `Scheme.lean §10.12`: `isolationStep` (closure round), `EdgeGenerates`
+>   (closure of `{R₀,R_{j0}}` reaches every occurring relation),
+>   **`theorem_2_HOR_of_edgeGenerates`** — one uniform theorem; the old
+>   `…rank_two`/`…intersectionSeparates`/`…Separates3` are now special cases.
+> - `Scheme.lean §10.13`: `PPolynomial` (metric/distance-regular predicate),
+>   **`theorem_2_HOR_of_pPolynomial`** — **the entire metric/DRG family (cycles,
+>   Johnson, Hamming, all DRGs) in one theorem**, no per-scheme separation data.
+>
+> **Honest scope:** unconditional "all schurian schemes converge" is *false*
+> (imprimitive schemes deadlock — correctly: 1-WL doesn't recover their orbits).
+> `EdgeGenerates` is the exact necessary condition; `PPolynomial` the clean
+> structural sufficient one. **Next:** this is the rehearsal for **Leg A** —
+> `EdgeGenerates` is a concrete **D1** instance, `PPolynomial` a *graded* D1, and
+> the saturation engine transplants to Leg A's support induction
+> ([harvest-window](./chain-descent-harvest-window.md) gap 3). Full doc/index
+> update deferred; authoritative state is the Lean sources.
+
 **Tier-3 connection (flagged 2026-05-29).** The isolation bootstrap is a
 concrete model of the (O\*) **self-detection** lemma that the Tier-3
 decomposability plan ([`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
