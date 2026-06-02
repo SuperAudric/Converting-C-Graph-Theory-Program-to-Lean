@@ -255,3 +255,50 @@ A, B, C does not shrink the real Tier-2 question; it *sharpens* it: any genuine
 hidden Johnson **must** be encoded, never naive. Ruling out the encoded case is
 the open construction question of `chain-descent-calculator.md` §7 — and it is
 Babai-hard.
+
+---
+
+## 7. Construction vs. classification — and the Cameron grounding
+
+§6 leaves an *encoded* hidden Johnson as the open threat. Two **different**
+claims hide in that sentence, and conflating them is the trap that
+[`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)
+§0 exists to pull apart:
+
+- **Construction / existence.** *Does an encoded hidden Johnson ever arise as a
+  residual of the descent?* This is the construction question of
+  `chain-descent-calculator.md` §7. Proving it never arises would canonize every
+  graph, so it is **equivalent in strength to GI ∈ P** — Babai-hard, correctly
+  excluded, no Lean obligation. This is what §6 above is pointing at.
+- **Classification.** *If* a residual is non-cascade **and** non-abelian, *is it*
+  a Johnson/Cameron section? This is a structural classification, and it is the
+  **Exhaustive-Obstruction Lemma**. It canonizes no new graph (the obstruction
+  still flags), so it is **not GI ∈ P** — it is **Cameron-hard**: tractable
+  *modulo citing the classification of large primitive groups*.
+
+**The classification's grounding (cited literature, not a project conjecture).**
+"A non-cascade, non-abelian residual contains a Johnson/Cameron section" is the
+graph-isomorphism-flavoured shadow of **O'Nan–Scott** (primitive permutation
+groups fall into a short list of types) together with **Cameron's theorem on
+large primitive groups** (P. J. Cameron 1981, sharpened by Maróti): a primitive
+group of large enough order, relative to its degree, is a **Cameron group** —
+sandwiched `(A_m)^d ◁ G ≤ S_m ≀ S_d` in product action on `d`-tuples of
+`k`-subsets of `[m]`. It is a *known-hard but not known-impossible* result: a
+real theorem in the literature, the **opposite** of "no known construction." The
+abundance and full classification of these groups (Johnson/Hamming/Grassmann
+schemes, `A_m`-on-subsets, product actions) is exactly what lets the
+classification *conclude*.
+
+**Cameron, not Johnson — the obstruction class is broader.** The `d = 1` case of
+a Cameron group is `S_m`/`A_m` on `k`-subsets = the **Johnson group** (this doc's
+subject). For `d > 1` the product actions are non-Johnson but *still classified
+and flaggable*. So stating the obstruction class as strictly "Johnson" is **too
+narrow** — a product-action Cameron group would be a genuine non-cascade,
+non-abelian, non-Johnson residual that the strict statement would wrongly call a
+"fourth species." Naming the class **Cameron** is what makes the classification
+hypothesis actually true rather than narrowly false.
+
+The full plan for the Exhaustive-Obstruction Lemma — its statement, the
+oracle-capability seal (legs A/B/C), the empirical de-risking, and the cited-vs-
+proved boundary — is in
+[`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md).

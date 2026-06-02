@@ -669,13 +669,23 @@ are in [`chain-descent-calculator.md`](./chain-descent-calculator.md) §9.
    proven — a small pre-existing gap inherited from the prior code.
 
 5. **The flagged region exceeds Tier 2.** Tier 2 (no cascade + a non-abelian
-   `A_k` factor) is the genuine hard core, aligned with Babai's
-   split-or-Johnson obstruction — flagging it is honest hardness. Whether a
-   Tier-2 obstruction can arise from the descent at all is the *construction
-   question*; the near-theorem — you cannot hide a Johnson as a graph's
-   *visible* symmetry — is written up in
+   factor — a **Cameron section**, of which a Johnson / `A_k`-on-subsets group
+   is the leading `d=1` case; product actions are the non-Johnson instances) is
+   the genuine hard core, aligned with Babai's split-or-Johnson obstruction —
+   flagging it is honest hardness. **Two distinct claims must not be conflated
+   here** (the disentangling is
+   [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)
+   §0): *(O\*)-existence* — that such an obstruction *never arises* from the
+   descent — is the **construction question**, equivalent in strength to
+   **GI ∈ P**, and correctly excluded (no Lean obligation, the boundary); whereas
+   *(O\*)-classification*, the **Exhaustive-Obstruction Lemma** — that *if* a
+   non-cascade, non-abelian residual arises it *is* a Cameron section — is
+   **Cameron-hard, not GI-hard**: a finite target with a genuine Lean obligation,
+   not part of the wall. The near-theorem — you cannot hide a Johnson as a
+   graph's *visible* symmetry — is written up in
    [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md)
-   (Pieces A and B proved, Piece C scoped). But the
+   (Pieces A and B proved, Piece C scoped; the existence/classification split and
+   its O'Nan–Scott / Cameron grounding are in that doc's §7). But the
    flagged region also contains **IR blind spots**: rigid,
    refinement-resistant graphs (the Neuen–Schweitzer multipede family) with *no*
    symmetry at all. These are hard for the individualization-refinement

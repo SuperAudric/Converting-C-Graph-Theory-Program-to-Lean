@@ -23,6 +23,17 @@ have to land in Lean once the paper is rigorous.
 > the layered interaction. A successful Tier 3 proof would resolve GI;
 > a clean Tier-3 *counterexample* — a graph the layered oracle cannot
 > peel — would be the first known hidden-Johnson graph.
+>
+> **Scope note — this doc is the *existence* side.** Everything here is
+> *(O\*)-existence*: "does every obstruction decompose / never hit the wall?",
+> which is GI ∈ P. Its **separable sibling** — *(O\*)-classification*, the
+> **Exhaustive-Obstruction Lemma**: *if* a non-cascade, non-abelian residual
+> arises, it *is* a **Cameron section** (Cameron's large-primitive-group theorem;
+> Johnson = the `d=1` case, product actions also) — is **Cameron-hard, not
+> GI-hard**, and lives in
+> [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md).
+> Where this doc writes "(O\*)" (notably §8.1) it means the existence side; do
+> not read the classification obligation as also GI-hard.
 
 For broader context:
 [`chain-descent-strategy.md`](./chain-descent-strategy.md) (algorithm),
@@ -270,7 +281,12 @@ edge set). Then `G/N` is in the cascade class — orbit recovery on
 "after stripping the abelian gauge, what's left is something the
 cascade oracle can handle." It rules out the hidden-Johnson
 construction question: a graph whose quotient by every discoverable
-abelian layer is itself non-cascade.
+abelian layer is itself non-cascade. **This is existence, hence GI-hard.**
+It is *not* the classification claim "such a residual, if it exists, is a
+Cameron section" — that is the separable, Cameron-hard-not-GI-hard
+Exhaustive-Obstruction Lemma
+([`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)).
+Sub-claim 2 being open does not make the classification open in the same sense.
 
 **Proof shape (target).** Three potential routes, each open:
 
@@ -442,6 +458,15 @@ detectable structure — by the *same* cascade theorems, applied at the
 level of `S(J)` rather than `J`. So detecting `S(J)` exposes `J`. The
 hiding mechanism is self-undermining: it cannot conceal both `J` and
 `S(J)` simultaneously.
+
+> **`S(J)` is the seal's leg-C fingerprint.** The oracle-capability seal
+> ([`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)
+> §0.5) *defines* the obscuring structure as the concrete oracle-failure
+> fingerprint that legs A and B's completeness proofs produce on their `¬X`/`¬Y`
+> boundaries (primitive ∧ large-base ∧ no-abelian-regular on the cell), rather
+> than hypothesizing it. The self-detection lemma here and that fingerprint are
+> the same object from the two framings (existence-side route vs. classifier); a
+> partial (O1)/(O2)-shape result feeds directly into leg C's inversion.
 
 **Why this might work where matroid detection didn't.** The matroid
 memo ([§7](./Archive/ChainDescent/chain-descent-matroid.md)) tried to detect Tier-2

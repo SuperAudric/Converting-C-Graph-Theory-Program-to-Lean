@@ -12,7 +12,7 @@
 > (Piece C / the (O\*) lemma), [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
 > §2/§4/§8 (the two-axis map, sub-claim 2, the wall),
 > [`chain-descent-calculator.md`](./chain-descent-calculator.md) §3 (hardness axes),
-> [`chain-descent-strategy.md`](./chain-descent-strategy.md) §15 gap 7.
+> [`chain-descent-strategy.md`](./chain-descent-strategy.md) §15 gap 5.
 
 ---
 
@@ -38,13 +38,16 @@ and it is exactly the user's hypothesis.
   new graph — the Johnson case still flags). It is **Cameron-hard**, not
   **GI-hard**.
 
-The docs already half-know this — [hidden-johnson §3](./chain-descent-hidden-johnson.md)
+The docs already half-know this — [hidden-johnson §7](./chain-descent-hidden-johnson.md)
 calls the classification *"a known-hard but not known-impossible classification
-result"* and grounds it in **O'Nan–Scott + Cameron/Maróti** — but
-[strategy gap 7](./chain-descent-strategy.md) and the cross-references collapse it
-back into *"= GI ∈ P, no Lean obligation."* That collapse is the conflation this
-item removes. **The user's "unnamed gap" is precisely the gap this conflation
-hides.**
+result"* and grounds it in **O'Nan–Scott + Cameron/Maróti**. Earlier framings
+collapsed it back into *"= GI ∈ P, no Lean obligation"* (and pointed at a
+nonexistent "strategy gap 7" rather than the real
+[strategy §15 gap 5](./chain-descent-strategy.md)). That collapse is the
+conflation this item removes; the **Approach-0 disentangle has now been written**
+(2026-06-02) across strategy §15 gap 5, calculator §3/§6/§7/§9, tier3-decomposability
+§0/§6/§8.1, and hidden-johnson §7. **The user's "unnamed gap" was precisely the gap
+this conflation hid.**
 
 ---
 
@@ -233,7 +236,7 @@ Informal target:
 > **richly constructed and fully classified** (Johnson/Hamming/Grassmann schemes,
 > `A_m`-on-subsets, product actions) — the *opposite* of "no known constructions";
 > that abundance + classification is exactly what makes leg C conclude. Same usage
-> as [hidden-johnson §3](./chain-descent-hidden-johnson.md) ("O'Nan–Scott +
+> as [hidden-johnson §7](./chain-descent-hidden-johnson.md) ("O'Nan–Scott +
 > Cameron/Maróti").
 
 **Why "Cameron section," not "Johnson section" (a correction to fold back).**
@@ -284,7 +287,7 @@ handed to the empirical/translation track.
 ## 3. What supports the hypothesis (evidence already in the project)
 
 1. **The theory is already cited and is a real classification, not a hope.**
-   [hidden-johnson §3](./chain-descent-hidden-johnson.md): "non-trivial residual
+   [hidden-johnson §7](./chain-descent-hidden-johnson.md): "non-trivial residual
    ⟹ Johnson section" is "the graph-isomorphism-flavored shadow of O'Nan–Scott +
    Cameron." The structural backbone for (A) is named and standard.
 2. **The "non-cascade ⟹ primitive" half is already articulated.**
@@ -343,10 +346,14 @@ gate (§5 step 2) is built to hit these.
   faster than the bound, it is *abstractly* cascade-class yet *mechanically*
   flagged — again a gap-B fourth species. **The depth bound is part of the
   hypothesis, not a free parameter.**
-- **R4 — the docs' own conflation as inertia.** strategy gap 7 declares the
-  whole of (O\*) "**No Lean obligation** (the boundary, not a built claim)."
-  Proceeding requires first *overturning that classification* for the (A) half
-  (Approach 0). Until then the item has no sanctioned home.
+- **R4 — the docs' own conflation as inertia. (RESOLVED 2026-06-02.)** Earlier
+  framings collapsed all of (O\*) into "no Lean obligation, the boundary," and
+  R4 cited a "strategy gap 7" that never existed (the real flagged-region text is
+  [strategy §15 gap 5](./chain-descent-strategy.md)). The Approach-0 disentangle
+  has now been written into strategy §15 gap 5, calculator §3/§6/§7/§9,
+  tier3-decomposability §0/§6/§8.1, and hidden-johnson §7 — the classification
+  half is recorded everywhere as **Cameron-hard, not GI-hard, a finite target**.
+  The item now has a sanctioned home; R4 is no longer a blocker.
 - **R5 — Cameron/O'Nan–Scott are not in Mathlib (but the primitivity layer IS).**
   **Verified against the pinned Mathlib** (`.lake/packages/mathlib`, 2026-05-31):
   - *Present and directly usable* — `Mathlib/GroupTheory/GroupAction/Primitive.lean`
@@ -374,7 +381,7 @@ gate (§5 step 2) is built to hit these.
 Four approaches; they are **complementary stages**, not alternatives. Recommended
 order: **0 → 2 → (1 ∥ 3)**.
 
-### Approach 0 — Disentangle (documentation; prerequisite, cheap)
+### Approach 0 — Disentangle (documentation; prerequisite, cheap) — **DONE 2026-06-02**
 Split (O\*)-existence from (O\*)-classification across hidden-johnson.md,
 tier3-decomposability.md, strategy §15, calculator §9. Downgrade the
 classification half from "= GI ∈ P / no Lean obligation" to "**Cameron-hard, not
@@ -382,6 +389,14 @@ GI-hard; a finite formal target** (this doc)." Add **Cameron** (not just Johnson
 as the obstruction class. *No Lean.* **This is a true prerequisite** — without it
 the item has no sanctioned status (R4) and the Johnson/Cameron scope (R1) stays
 wrong. ~half a day.
+
+> **Executed (2026-06-02).** The split is now written into: strategy §15 gap 5
+> (existence = GI∈P vs classification = EOL, Cameron-hard); calculator §3 wall
+> bullet + §6 boundary + §7 box + §9 gap 5; tier3-decomposability §0 scope note +
+> §6 + §8.1 (with `S(J)` linked to this doc's leg-C fingerprint); and the new
+> **hidden-johnson §7** carrying the O'Nan–Scott + Cameron/Maróti grounding (the
+> note §0 above had previously *cited as if it already existed*). "Cameron, not
+> Johnson" (R1) is recorded at each site.
 
 ### Approach 2 — Empirical falsification harness (de-risking gate; do before formal investment)
 Before formalizing, **try to break it.** Enumerate primitive groups up to some
@@ -466,8 +481,9 @@ target rather than a disguised assault on the wall.
 
 ## 7. Concrete first steps (when the item is picked up)
 
-1. **Approach 0** — write the existence/classification split into hidden-johnson.md
-   §3 + tier3 §8 + strategy gap 7; add Cameron-vs-Johnson note. (No code.)
+1. **Approach 0 (DONE 2026-06-02)** — existence/classification split written into
+   hidden-johnson.md §7 (new) + tier3-decomposability §0/§6/§8.1 + strategy §15
+   gap 5 + calculator §3/§6/§7/§9; Cameron-vs-Johnson note added at each. (No code.)
 2. **Mathlib primitivity API — VERIFIED present (2026-05-31, see R5):**
    `IsPreprimitive`, `IsBlock`/blocks, `MultiplePrimitivity`, `Jordan`,
    `Perm/MaximalSubgroups`, `Alternating/MaximalSubgroups`. (B1)/(B2) bridges are
@@ -486,17 +502,17 @@ target rather than a disguised assault on the wall.
 
 ## 8. Cross-references
 
-- [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) — the
+- [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md) §7 — the
   (O\*) lemma and its O'Nan–Scott/Cameron grounding (the classification this
-  item formalizes; **to be split** per Approach 0).
+  item formalizes; the existence/classification split is written there, Approach 0).
 - [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
   §2 (two-axis map), §4–5 ((O\*)-existence = the wall), §8 ((O\*) as the open
   core — the conflation site).
 - [`chain-descent-calculator.md`](./chain-descent-calculator.md) §3 (hardness
   axes — the non-cascade∧non-abelian corner).
 - [`chain-descent-strategy.md`](./chain-descent-strategy.md) §15 gap 5
-  (multipede — the *other*, asymmetric flag cause, outside EOL) + gap 7 ((O\*),
-  the conflation to overturn for the (A) half).
+  (multipede — the *other*, asymmetric flag cause, outside EOL; and now the
+  existence-vs-classification split — there is no separate "gap 7").
 - [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) /
   `Scheme.lean` — the association-scheme machinery Approach 3 builds on.
 - `ChainDescent/Group.lean` — `AutGroup`/`MulAction`/`OrbitPartition`, the
