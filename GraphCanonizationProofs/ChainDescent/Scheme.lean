@@ -1,4 +1,5 @@
 import ChainDescent
+import ChainDescent.Saturation
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Set.Card
@@ -2741,5 +2742,197 @@ theorem theorem_2_HOR_concrete_intersectionSeparates3 {n : Nat} {adj : AdjMatrix
             exact hsep3 i' l hi'0 hl0eq hadjmatch
               (hcounts j0 (by simp)) (hcounts l0 (by simp))
   exact theorem_2_HOR_concrete_of_isolation h P v h3n hP_invariant hall
+
+/-! ### §10.12 — General convergence: the isolation closure
+
+`theorem_2_HOR_concrete_intersectionSeparates3` reached depth-3 schemes but took
+the per-scheme separation data (`hl0_iso`, `hsep3`) as hypotheses — the
+rank-by-rank ladder. This subsection replaces the ladder with **one** structural
+hypothesis, `EdgeGenerates`: the *isolation closure* of `{R₀, R_{j0}}` — the
+diagonal and edge relation, then everything iteratively pinned by
+intersection-counts into the already-isolated relations — reaches every relation
+occurring from `v`.
+
+The closure round `isolationStep` is an **extensive operator** on
+`Finset (Fin (rank+1))`, so the generic `ChainDescent.Saturation` engine bounds
+its saturation depth; running it inside `B = occursFromV` keeps that depth `≤ n`
+even when empty relations inflate the nominal carrier `Fin (rank+1)` beyond `n`.
+`EdgeGenerates` is the concrete, decidable realisation of the oracle-capability
+seal's **D1** ("a poly-length symmetry-only process exposes the symmetry") for
+scheme graphs. -/
+
+/-- The relations that actually **occur from `v`** (non-empty blocks `R_l` from
+`v`). The honest carrier for the isolation closure: `relIsolatedAt_succ`'s
+counting needs non-empty blocks, and relations that never occur from `v` are
+vacuously isolated. -/
+noncomputable def occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) :
+    Finset (Fin (G.scheme.rank + 1)) :=
+  Finset.univ.image (fun w => G.scheme.relOfPair v w)
+
+theorem mem_occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+    {l : Fin (G.scheme.rank + 1)} :
+    l ∈ occursFromV G v ↔ ∃ w, G.scheme.relOfPair v w = l := by
+  simp only [occursFromV, Finset.mem_image, Finset.mem_univ, true_and]
+
+theorem zero_mem_occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) :
+    (0 : Fin (G.scheme.rank + 1)) ∈ occursFromV G v :=
+  (mem_occursFromV G v).mpr ⟨v, G.scheme.relOfPair_self v⟩
+
+theorem occursFromV_card_le {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) :
+    (occursFromV G v).card ≤ n := by
+  refine le_trans Finset.card_image_le ?_
+  rw [Finset.card_univ, Fintype.card_fin]
+
+/-- **`i` is pinned by `Iso`**: `i` is the unique non-diagonal relation with its
+`(edge-membership, intersection-counts into Iso)` signature — exactly the `hsep`
+hypothesis of `relIsolatedAt_succ`. -/
+def IsoPinned {n : Nat} (G : SchurianSchemeGraph n)
+    (j0 Iso_i : Fin (G.scheme.rank + 1)) (Iso : Finset (Fin (G.scheme.rank + 1)))
+    : Prop :=
+  Iso_i ≠ 0 ∧ ∀ i' : Fin (G.scheme.rank + 1), i' ≠ 0 → ((i' = j0) ↔ (Iso_i = j0)) →
+    (∀ l ∈ Iso, G.scheme.intersectionNumber l j0 i'
+      = G.scheme.intersectionNumber l j0 Iso_i) → i' = Iso_i
+
+/-- One round of the **isolation closure**: keep `Iso`, and add every relation
+occurring from `v` that is pinned by `Iso`. -/
+noncomputable def isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+    (j0 : Fin (G.scheme.rank + 1)) (Iso : Finset (Fin (G.scheme.rank + 1))) :
+    Finset (Fin (G.scheme.rank + 1)) :=
+  Iso ∪ @Finset.filter _ (fun i => IsoPinned G j0 i Iso)
+    (Classical.decPred _) (occursFromV G v)
+
+/-- Membership in one closure round: already isolated, or newly pinned. -/
+theorem mem_isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+    (j0 : Fin (G.scheme.rank + 1)) {Iso : Finset (Fin (G.scheme.rank + 1))}
+    {i : Fin (G.scheme.rank + 1)} :
+    i ∈ isolationStep G v j0 Iso ↔
+      i ∈ Iso ∨ (i ∈ occursFromV G v ∧ IsoPinned G j0 i Iso) := by
+  classical
+  rw [isolationStep, Finset.mem_union, Finset.mem_filter]
+
+/-- The closure round is **extensive** — the input drives the engine. -/
+theorem subset_isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+    (j0 : Fin (G.scheme.rank + 1)) (Iso : Finset (Fin (G.scheme.rank + 1))) :
+    Iso ⊆ isolationStep G v j0 Iso :=
+  Finset.subset_union_left
+
+/-- The closure round **preserves the `occursFromV` bound** — so the generic
+engine saturates within `occursFromV.card ≤ n` steps. -/
+theorem isolationStep_subset_occursFromV {n : Nat} (G : SchurianSchemeGraph n)
+    (v : Fin n) (j0 : Fin (G.scheme.rank + 1))
+    {Iso : Finset (Fin (G.scheme.rank + 1))} (h : Iso ⊆ occursFromV G v) :
+    isolationStep G v j0 Iso ⊆ occursFromV G v := by
+  classical
+  rw [isolationStep]
+  exact Finset.union_subset h (Finset.filter_subset _ _)
+
+/-- Relations that never occur from `v` are **vacuously isolated** at any depth
+(the `relOfPair v w = l` premise is never met). -/
+theorem relIsolatedAt_of_not_occurs {n : Nat} (G : SchurianSchemeGraph n)
+    (P : PMatrix n) (v : Fin n) (k : Nat) {l : Fin (G.scheme.rank + 1)}
+    (hl : l ∉ occursFromV G v) : RelIsolatedAt G P v k l := by
+  intro w u hwl
+  exact absurd ((mem_occursFromV G v).mpr ⟨w, hwl⟩) hl
+
+/-- **Stage lemma (the closure ⇒ isolation engine).** Every relation present in
+the `m`-th closure round `isolationStep^[m] {0, j0}` is isolated at depth
+`m + 1`. Proved by induction: the seed `{R₀, R_{j0}}` is isolated at depth 1
+(`relIsolatedAt_zero` / `relIsolatedAt_one_j0`); a relation carried from the
+previous round lifts via `relIsolatedAt_mono`; a newly-pinned relation isolates
+at the next depth via `relIsolatedAt_succ` (its `hsep` is exactly the
+`IsoPinned` witness the closure round filtered on, `hIso_nbr` from the
+`occursFromV` bound). -/
+theorem stage_relIsolatedAt {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+    (v : Fin n) (j0 : Fin (G.scheme.rank + 1)) (hJ : G.toSchemeGraph.J = {j0})
+    (hP' : ∀ {π : Equiv.Perm (Fin n)}, IsAut π G.toSchemeGraph.adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hseed : ({0, j0} : Finset (Fin (G.scheme.rank + 1))) ⊆ occursFromV G v) :
+    ∀ m : ℕ, m + 1 ≤ n →
+      ∀ l ∈ (isolationStep G v j0)^[m] {0, j0}, RelIsolatedAt G P v (m + 1) l := by
+  intro m
+  induction m with
+  | zero =>
+    intro _ l hl
+    rw [Function.iterate_zero_apply, Finset.mem_insert, Finset.mem_singleton] at hl
+    rcases hl with rfl | hlj
+    · exact relIsolatedAt_zero G P v 1
+    · rw [hlj]; exact relIsolatedAt_one_j0 G P v j0 hJ hP'
+  | succ m ih =>
+    intro hm l hl
+    rw [Function.iterate_succ_apply', mem_isolationStep] at hl
+    have hsub : (isolationStep G v j0)^[m] {0, j0} ⊆ occursFromV G v :=
+      Saturation.iterate_subset_of_invariant (isolationStep G v j0)
+        (occursFromV G v) {0, j0} hseed
+        (fun s hs => isolationStep_subset_occursFromV G v j0 hs) m
+    rcases hl with hlold | ⟨_, hpin⟩
+    · exact relIsolatedAt_mono G P v hP' (by omega) hm (ih (by omega) l hlold)
+    · obtain ⟨hi_ne, hsep⟩ := hpin
+      exact relIsolatedAt_succ G P v j0 hJ hP' (k := m + 1) hm
+        ((isolationStep G v j0)^[m] {0, j0})
+        (fun l' hl' => ih (by omega) l' hl')
+        (fun l' hl' => (mem_occursFromV G v).mp (hsub hl'))
+        l hi_ne hsep
+
+/-- **EdgeGenerates** — the one structural hypothesis replacing the rank ladder.
+The isolation closure of `{R₀, R_{j0}}`, iterated `|occursFromV|` times (≥ the
+saturation bound), reaches every relation occurring from `v`. Equivalently: the
+edge relation, by iterated common-neighbour counting, *exposes* every relation —
+the scheme-graph realisation of the seal's **D1**. -/
+def EdgeGenerates {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+    (j0 : Fin (G.scheme.rank + 1)) : Prop :=
+  occursFromV G v ⊆ (isolationStep G v j0)^[(occursFromV G v).card] {0, j0}
+
+/-- **General convergence — Theorem 2 from `EdgeGenerates`.** A single theorem
+covering *every* single-edge schurian scheme graph whose edge relation
+generates the scheme, with **no per-rank separation data**: the saturation
+engine bounds the closure depth at `≤ n`, the stage lemma turns the closure into
+full isolation, and `theorem_2_HOR_concrete_of_isolation` finishes. The
+per-instance `…rank_two_J_singleton` / `…intersectionSeparates` /
+`…intersectionSeparates3` theorems are now special cases (each proves
+`EdgeGenerates` in `1`/`2`/`3` rounds). -/
+theorem theorem_2_HOR_of_edgeGenerates {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hj0_nbr : ∃ w₀ : Fin n, h.G.scheme.relOfPair v w₀ = j0)
+    (hEG : EdgeGenerates h.G v j0) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u := by
+  classical
+  have hP' : ∀ {π : Equiv.Perm (Fin n)}, IsAut π h.G.toSchemeGraph.adj →
+      ∀ x u, P (π x) (π u) = P x u := by
+    intro π hπ; apply hP_invariant; rw [← h.matching]; exact hπ
+  have hseed : ({0, j0} : Finset (Fin (h.G.scheme.rank + 1))) ⊆ occursFromV h.G v := by
+    intro x hx
+    rw [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with rfl | hxj
+    · exact zero_mem_occursFromV h.G v
+    · rw [hxj]; exact (mem_occursFromV h.G v).mpr hj0_nbr
+  have hn : 0 < n := lt_of_le_of_lt (Nat.zero_le v.val) v.isLt
+  obtain ⟨k₀, hk₀le, hfix⟩ :=
+    Saturation.exists_iterate_isFixed_within (isolationStep h.G v j0)
+      (subset_isolationStep h.G v j0) (occursFromV h.G v) {0, j0} hseed
+      (fun s hs => isolationStep_subset_occursFromV h.G v j0 hs)
+  have hcardle : (occursFromV h.G v).card ≤ n := occursFromV_card_le h.G v
+  have hseedpos : 0 < ({0, j0} : Finset (Fin (h.G.scheme.rank + 1))).card :=
+    Finset.card_pos.mpr ⟨0, Finset.mem_insert_self _ _⟩
+  have hKn : k₀ + 1 ≤ n := by omega
+  have hreach : occursFromV h.G v ⊆ (isolationStep h.G v j0)^[k₀] {0, j0} := by
+    have hCk : (isolationStep h.G v j0)^[(occursFromV h.G v).card] {0, j0}
+        = (isolationStep h.G v j0)^[k₀] {0, j0} := by
+      conv_lhs => rw [show (occursFromV h.G v).card
+        = ((occursFromV h.G v).card - k₀) + k₀ from by omega]
+      rw [Function.iterate_add_apply]
+      exact Saturation.iterate_eq_of_isFixed (isolationStep h.G v j0) hfix _
+    rw [← hCk]; exact hEG
+  have hall : ∀ l : Fin (h.G.scheme.rank + 1), RelIsolatedAt h.G P v (k₀ + 1) l := by
+    intro l
+    by_cases hlo : l ∈ occursFromV h.G v
+    · exact stage_relIsolatedAt h.G P v j0 hJ hP' hseed k₀ hKn l (hreach hlo)
+    · exact relIsolatedAt_of_not_occurs h.G P v (k₀ + 1) hlo
+  exact theorem_2_HOR_concrete_of_isolation h P v hKn hP_invariant hall
 
 end ChainDescent

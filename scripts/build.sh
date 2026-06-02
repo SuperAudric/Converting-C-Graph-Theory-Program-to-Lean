@@ -34,6 +34,7 @@ VERBOSE=0
 # Topological order: base first, then modules in increasing dependency depth.
 MODULES=(
   ChainDescent              # base (everything imports this)
+  ChainDescent.Saturation   # ← Mathlib only (generic; shared by Scheme + Cascade)
   ChainDescent.CFI          # ← base
   ChainDescent.Scheme       # ← base
   ChainDescent.CascadeOracle # ← base, CFI, Scheme
