@@ -41,6 +41,20 @@ a clean counterexample requiring depth = tw(H) = 4.
 > decision-node-depth / cascade-1b frontier) is the predicate ¬D1, and ¬D1 is
 > *half of the leg-C fingerprint* the Cameron leg consumes. Burying the failure
 > mode inside "proved for class X" loses the load-bearing downstream input.
+>
+> **Update (2026-06-02) — the seal-driven split is now realised; these theorems are
+> *witnesses*.** The harvest *argument* ("a symmetry with a poly-depth harvest window is
+> harvested") is proved **class-agnostically** — `colourMatch_eq_aut` /
+> `harvest_isAut_of_discrete`
+> ([`CascadeOracle.lean`](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean) §C.2): at a
+> discrete footprint the colour-match candidate equals the orbit automorphism (`warmRefine_transport`).
+> So **Theorem 1 (CFI) and Theorem 2 (schemes) are now correctly positioned as the *witnesses*
+> populating the abstract `CascadesAt` / D1 predicate** (the graph *has* a poly-depth harvest
+> window), not as the harvest reasoning. The only genuinely class-specific quantity is the window's
+> **depth** — and only for the *hidden-abelian* (leg-B) case, where it is the *concealment*
+> structure (CFI's `tw(H)` cycle-space, substrate-conditional). For *visible* symmetry (leg A) the
+> depth is `base(g)`, seal-characterizable. Full statement:
+> [harvest-window §2.4](./chain-descent-harvest-window.md).
 
 ---
 

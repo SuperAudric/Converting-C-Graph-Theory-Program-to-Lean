@@ -290,6 +290,22 @@ foundationals), no `sorry`:
     cells are non-twin and route through the general orbit recovery + gadget twist. The
     1b residual is the **non-twin** same-cell case (genuine orbit / general gadget),
     which includes all of CFI and stays open by design.
+  - **Sharpened (2026-06-02) — the reconstruction's *argument* is PROVED; only the
+    *depth witness* remains.** Leg (a) of the harvest-window — that the lockstep
+    reconstruction's colour-match candidate **is** the orbit automorphism — is now proved
+    *class-agnostically*: `colourMatch_eq_aut` / `harvest_isAut_of_discrete`
+    ([`CascadeOracle.lean`](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean) §C.2,
+    axiom-clean), via `warmRefine_transport` + injectivity at a **discrete** footprint — **no
+    σ-coherence, no cycle construction, no rank rebasing** (so it sidesteps both the σ-route and
+    the conjugation gap below). The decisive consequence: the 1b residual is **not** the
+    reconstruction but the **depth witness** — that the recursion reaches a discrete footprint at
+    *bounded* depth (`CascadesAt adj P k`, polynomial `k`; lifted to recovery by the axiom-free
+    `theorem_1_HOR_at_depth`). And that witness is **class-agnostic for visible symmetry** (leg A:
+    depth = `base(g)`, the symmetry's own support) and **class-specific only for hidden-abelian**
+    (leg B: CFI's `tw(H)` via cycle-space, **substrate-conditional**) — i.e. exactly "B's core"
+    (`AbelianSufficiencyHolds`), never the harvest itself. The per-class CFI/scheme theorems are
+    *witnesses* populating `CascadesAt`, not steps of the certification argument. Full statement:
+    [harvest-window §2.4](./chain-descent-harvest-window.md).
 
   Capstones `cascadeComplete_of_localization` / `cascadeComplete_of_cellsAreOrbits` /
   `computes_orbits_of_complete` name what suffices. **General-class completeness is the
@@ -339,6 +355,13 @@ The gap between "orbit recovery exists" (Tier 1/2) and "the oracle
 certifies a-priori" is exactly: turn the existential bounded-depth
 discretization into a constructive, online, per-level orbit-map harvest.
 That is §4.
+
+> **The harvest half of that gap is now closed class-agnostically (2026-06-02).**
+> `harvest_isAut_of_discrete` (§C.2) proves the constructed orbit-map *verifies whenever
+> an orbit automorphism exists*, at a discrete footprint — so "constructive harvest"
+> reduces to "reach a discrete footprint at bounded depth." The depth is the only
+> class-specific residual, and only for the hidden-abelian (leg-B) case; for visible
+> symmetry it is `base(g)`. See [harvest-window §2.4](./chain-descent-harvest-window.md).
 
 ---
 

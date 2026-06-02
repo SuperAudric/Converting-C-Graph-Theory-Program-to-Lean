@@ -108,6 +108,24 @@ C*, never to close the seal. This is the structural improvement over §1's frami
   all poly-depth symmetry-only individualization is a Cameron/Johnson section."*
   Proof strategy below.
 
+> **The harvest window realises legs A+B, and its *argument* is now PROVED class-agnostic
+> (2026-06-02).** [harvest-window §2.4](./chain-descent-harvest-window.md): "a symmetry with a
+> (poly-depth) harvest window is harvested" is `colourMatch_eq_aut` / `harvest_isAut_of_discrete`
+> ([`CascadeOracle.lean`](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean) §C.2,
+> axiom-clean) — at a discrete footprint the colour-match candidate **equals** the orbit
+> automorphism (via `warmRefine_transport`), independent of graph class, with no σ-coherence /
+> cycle / rank rebasing. So legs A and B are **one** mechanism, and the seal **is** the
+> harvest-window's existence characterization: `D1∨D2` ⟺ "has a harvest window," with
+> `Findable ⟹ RecoverableByDepth ⟹ CellComplete ⟹ CascadeComplete` class-agnostic end to end. The
+> only class-specificity is the window's **depth**, and it splits exactly along A/B: **leg A
+> (visible, any group incl. non-abelian)** depth = `base(g)` — the symmetry's *own support*,
+> seal-characterizable; **leg B (hidden abelian)** depth = the *concealment structure* (CFI's
+> `tw(H)`, via cycle-space; **substrate-conditional** — this is "B's core" /
+> `AbelianSufficiencyHolds`). **Leg C is the *absence* of a harvest window** — the wall. The
+> per-class CFI/scheme theorems are therefore A/B *witnesses* populating `CascadesAt`, **not** the
+> seal's reasoning; in particular the cascade-1b "decision-node-depth frontier" named under leg A
+> above is precisely the leg-B *depth witness*, not the harvest argument (which is now closed).
+
 **Leg C's proof = the inversion (user's method, sharpening §8.1 of tier3-decomp).**
 Do **not** start from "an arbitrary primitive group." Instead:
 1. **Extract the oracle-limit fingerprint** from legs A and B's *completeness

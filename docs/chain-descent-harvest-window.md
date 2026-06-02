@@ -23,6 +23,21 @@
 > explicit-chain `VisiblyRecoverable` is retained as the unconditional-D1 / structural
 > witness.
 >
+> **Leg (a) — the harvest *argument* — is PROVED and class-agnostic (2026-06-02).**
+> `colourMatch_eq_aut` / `harvest_isAut_of_discrete` (`CascadeOracle.lean` §C.2, axiom-clean):
+> at a **discrete** footprint the colour-match candidate *equals* the orbit automorphism `g`
+> (forced by `warmRefine_transport` + injectivity), so it verifies — **no σ-coherence, no
+> cycle construction, no rank rebasing** (hence no conjugation gap). The decisive consequence
+> (the re-orientation, §2.4): **class-specificity lives only in the *witness* that a graph has
+> a polynomial-depth harvest window** (satisfies `CascadesAt` / D1∨D2), *never in the harvest
+> itself*. The seal **is** that characterization (D1/D2 are abstract), so the spine
+> `Findable ⟹ RecoverableByDepth ⟹ CellComplete [leg-(a)] ⟹ CascadeComplete` is class-agnostic.
+> The single irreducible class-specific remainder is **leg B's depth** — hidden-abelian: *how
+> deep until the gauge becomes visible* (CFI's `tw(H)`, via cycle-space; **substrate-conditional**) —
+> *not* leg A (visible: depth = `base(g)`, the symmetry's own support, seal-characterizable). The
+> per-class CFI/scheme theorems are **witnesses**, and CFI's cycle-space proof is specifically the
+> leg-B depth witness.
+>
 > **Open (= the next priority, "B's core").** The **general D2 bridge** —
 > `ResidualAbelian ⟹ recoverable` beyond the CFI(odd-deg) anchor — is the load-bearing
 > open core, equal to `AbelianSufficiencyHolds` (LinearOracle §L.6) and the cascade-1b
@@ -62,6 +77,13 @@ it through σ-cell-coherence. **The claim of this doc: that depth is bounded for
 symmetry by the size of its support, via a stabilizer-chain induction, with the per-class bounds as
 corollaries — and the bound doubles as the hidden-Johnson screen.** It routes through the
 footprint-matching harvest, so it **never invokes σ-coherence** (the `C1b.3` blocker).
+
+> **Refined (§2.4).** Sharper than first stated: the class-agnostic, now-*proved* part is the harvest
+> **argument** (leg-(a) — "a symmetry with a harvest window is harvested"). The support bound
+> `base(g)` is the depth for the **visible** (leg-A) case; a **hidden-abelian** (leg-B) symmetry's
+> window closes at its **concealment** structure (CFI's `tw(H)`, via cycle-space, *substrate-conditional*),
+> *not* its support. So "depth = support" is the leg-A reading; the depth is a class-specific witness,
+> the argument is not.
 
 ---
 
@@ -116,8 +138,10 @@ decision pair `{v, g(v)}`.
 
 ### 2.1 Why each leg holds
 
-- **(a)** is the cascade/linear harvest of §1, under the screen (`D1∨D2`): D1 gives a cascade
-  (structural or discretizing) certification, ¬D1∧D2 gives the linear unique-twist read.
+- **(a)** is the cascade/linear harvest of §1 — **PROVED class-agnostic** (`colourMatch_eq_aut` /
+  `harvest_isAut_of_discrete`, §2.4): at a discrete footprint the colour-match candidate *is* the
+  orbit automorphism `g` (via `warmRefine_transport` + injectivity), so verification succeeds. D1
+  gives a cascade (structural or discretizing) certification, ¬D1∧D2 the linear unique-twist read.
 - **(b)** is immediate: `g` fixes the individualized vertex, so it remains an automorphism of the
   refined coloured graph.
 - **(c)** is the **transforming case** — the one that makes this an induction rather than a flat
@@ -152,6 +176,67 @@ coincides with `base(g)` only when **1-WL cells = orbits**. The gap between them
 *not* the symmetry axis. Keep them separate: the harvest-window bound is about symmetry; the
 stickiness is a different (orthogonal) failure cause. Both are polynomial, so the *polynomial claim*
 survives either way.
+
+There is a **third** reason `base(g)` can undershoot the recovery depth, and it is neither
+stickiness nor a different symmetry: a **hidden** symmetry, where 1-WL cells ≠ orbits at `base(g)`
+not because refinement is stuck but because the symmetry is *concealed* (CFI's gauge — visible only
+after `tw(H)` individualizations break the cycle space). For such a symmetry the recovery depth is the
+**concealment** structure, not `base(g)` (a single gauge flip has `base = 1` yet stays hidden to depth
+`tw(H)`). This is the leg-B / hidden-abelian case of §2.4, and it is **substrate-conditional**
+(unbounded `tw` breaks the bound). So the depth has three regimes — `base(g)` (visible / leg A),
+concealment (hidden-abelian / leg B), and the orthogonal IR-stickiness — only the first of which is
+support-bounded.
+
+### 2.4 Class-agnostic argument vs. class-specific witness (the seal-driven split)
+
+The lemma decomposes into two halves with **opposite** dependence on the graph class:
+
+- **The harvest *argument* — "harvest window ⟹ harvested" — is class-agnostic, and proved.**
+  Leg (a) is `colourMatch_eq_aut` (`CascadeOracle.lean` §C.2): if a genuine orbit automorphism `g`
+  exists and the footprint is **discrete**, the colour-match candidate `t` (§1 step 3) satisfies
+  `t = g` — forced by `warmRefine_transport` (automorphism-equivariance) + injectivity of a discrete
+  colouring — so `t` verifies. That is the whole of "exit ⟹ harvest," and it touches no class
+  structure: no σ-coherence, no cycle, no rank rebasing (so it sidesteps both the `C1b.3` blocker and
+  the linear oracle's conjugation gap, which were artifacts of the σ-/rank *packaging*). The sole
+  hypothesis it consumes is **discreteness of the footprint**.
+
+- **The class-specificity is entirely in the *witness* that the graph *has* a polynomial-depth
+  harvest window** — that `CascadesAt adj P k` holds for polynomial `k` (cells = orbits at a bounded
+  `S`). `theorem_1_HOR_at_depth` (proved, axiom-free) already turns `CascadesAt k` into orbit recovery
+  class-agnostically; the per-class `cfi_cascades_polynomially_oddDeg` (CFI, `tw(H)`) and the scheme
+  analogue (depth 1) are **witnesses populating `CascadesAt`**, not steps of the harvest argument.
+
+**Why the seal *is* the characterization.** Because `D1`/`D2` are defined *abstractly* ("∃ a
+poly-length symmetry-only individualization exposing the symmetry" / "one branch exposes a unique
+candidate" — [exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)), the chain
+
+```
+   Findable (D1∨D2)  ⟹  RecoverableByDepth  ⟹  CellComplete  ⟹  CascadeComplete
+        seal predicate      (has harvest window)   (leg-(a))        (harvested)
+```
+
+is class-agnostic end-to-end: `recoverableByDepth_of_findableWithin` and
+`complete_of_cellComplete_recoverable` are proved, and leg-(a) supplies the `CellComplete` step. The
+graph class enters *only* by populating the disjuncts of `Findable` — as the witness, not the
+reasoning. This is the sense in which the harvest window is "defined by the seal."
+
+**Where class-specificity is irreducible — and it is leg B, not leg A.** The depth `k` at which the
+window closes splits by leg:
+
+- **Leg A (visible / D1, *any* group incl. non-abelian — Johnson, schemes).** `k = base(g) ≤ |support(g)|`,
+  bounded by the **symmetry's own support**. "Visible ⟹ window at `base(g)`" leans only on the
+  symmetry being refinement-exposable (D1's definition), so it is seal-characterizable — the target
+  for a class-agnostic leg-A.
+- **Leg B (hidden abelian / ¬D1∧D2 — CFI).** `k` = *how deep until the hidden gauge becomes visible*,
+  which is **not** `base(g)` (a single gauge flip has small support yet stays hidden until its whole
+  cycle is broken). It is a property of the *hiding structure* — `tw(H)` for CFI, via cycle-space —
+  and is **substrate-conditional** (unbounded `tw` breaks the polynomial bound; the tractable/flagged
+  discriminator). This is the only place CFI's cycle-space theory is irreducible, and it is exactly
+  **"B's core"** (`AbelianSufficiencyHolds` / the general D2 bridge).
+
+So the harvest window **unifies legs A and B**, but they differ precisely where the seal would want:
+A's depth is the *symmetry*, B's depth is the *concealment*. Leg C (hidden non-abelian) is the
+absence of a window — the wall.
 
 ---
 
