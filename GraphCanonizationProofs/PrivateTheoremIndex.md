@@ -90,7 +90,7 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `refineStep_mono` | 165-171 | One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)`. | — |
+| `refineStep_mono` | 166-172 | One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)`. | — |
 
 ## ChainDescent/CascadeOracle.lean
 
@@ -102,19 +102,24 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `individualizedColouring_singleton_eq_v_iff` | 694-707 | `χ_v` uniqueness: `individualizedColouring n {v} u = individualizedColouring n {v} v ↔ u = v`. | — |
-| `signature_count_eq_card` | 926-937 | §8.b.2 Bridge lemma: `Multiset.count t (signature adj P χ w)` equals the cardinality of the matching `u' ≠ w` preimage filter. | — |
-| `signature_eq_card_eq` | 939-952 | Count equality from signature equality: equal signatures give equal preimage-filter cardinalities for every tuple `t`. | — |
-| `iter_succ_count_eq` | 954-969 | Iter-round count equality: `iter[k+1]` equality forces matching intermediate-vertex counts for every (round-k colour, adj, P) triple. | — |
-| `signature_countP_eq_card` | 971-982 | §8.b.2 `countP` form of `signature_count_eq_card`. | — |
-| `signature_eq_countP_eq` | 984-994 | Aggregate `countP` equality from signature equality, for any decidable predicate `p`. | — |
-| `iter_succ_countP_eq` | 996-1012 | Aggregate iter-round count equality: under `iter[k+1]` equality, intermediate-vertex counts for any decidable `p` over (iter[k] colour, adj, P) match between `w` and `u`. | — |
-| `iter_succ_colour_count_eq` | 1014-1033 | Colour-only specialisation of `iter_succ_countP_eq`: under `iter[k+1]` equality, the count of intermediate vertices whose round-k colour satisfies `q` matches between `w` and `u`. | — |
-| `step2_at_depth_zero_of_rank_le_one` | 1430-1463 | Sanity instance: `Step2_at_depth G P v 0` for rank ≤ 1 schurian scheme graphs. | — |
-| `schemePart_at_refl` | 1529-1537 | `schemePart_at G P v k` is reflexive. | — |
-| `schemePart_at_symm` | 1539-1549 | `schemePart_at G P v k` is symmetric. | — |
-| `schemePart_at_trans` | 1551-1563 | `schemePart_at G P v k` is transitive. | — |
-| `step2_converges_at_zero_of_rank_le_one` | 1708-1719 | Sanity check: the convergence framework recovers the rank-≤-1 case at depth 0. | — |
-| `schemePart_at_one_adj_to_v` | 1789-1794 | Depth-1 extraction, adj-only specialisation. | — |
-| `relOfPairDetByAdjP_of_rank_le_one` | 1855-1879 | `rank ≤ 1` schurian scheme graphs trivially satisfy depth-1 separation. | — |
-| `adjSeparates_of_rank_le_one` | 1955-1966 | `rank ≤ 1` ⇒ `AdjSeparatesRelations` (≤ 1 non-diagonal index). | — |
+| `individualizedColouring_singleton_eq_v_iff` | 695-708 | `χ_v` uniqueness: `individualizedColouring n {v} u = individualizedColouring n {v} v ↔ u = v`. | — |
+| `signature_count_eq_card` | 927-938 | §8.b.2 Bridge lemma: `Multiset.count t (signature adj P χ w)` equals the cardinality of the matching `u' ≠ w` preimage filter. | — |
+| `signature_eq_card_eq` | 940-953 | Count equality from signature equality: equal signatures give equal preimage-filter cardinalities for every tuple `t`. | — |
+| `iter_succ_count_eq` | 955-970 | Iter-round count equality: `iter[k+1]` equality forces matching intermediate-vertex counts for every (round-k colour, adj, P) triple. | — |
+| `signature_countP_eq_card` | 972-983 | §8.b.2 `countP` form of `signature_count_eq_card`. | — |
+| `signature_eq_countP_eq` | 985-995 | Aggregate `countP` equality from signature equality, for any decidable predicate `p`. | — |
+| `iter_succ_countP_eq` | 997-1013 | Aggregate iter-round count equality: under `iter[k+1]` equality, intermediate-vertex counts for any decidable `p` over (iter[k] colour, adj, P) match between `w` and `u`. | — |
+| `iter_succ_colour_count_eq` | 1015-1034 | Colour-only specialisation of `iter_succ_countP_eq`: under `iter[k+1]` equality, the count of intermediate vertices whose round-k colour satisfies `q` matches between `w` and `u`. | — |
+| `step2_at_depth_zero_of_rank_le_one` | 1431-1464 | Sanity instance: `Step2_at_depth G P v 0` for rank ≤ 1 schurian scheme graphs. | — |
+| `schemePart_at_refl` | 1530-1538 | `schemePart_at G P v k` is reflexive. | — |
+| `schemePart_at_symm` | 1540-1550 | `schemePart_at G P v k` is symmetric. | — |
+| `schemePart_at_trans` | 1552-1564 | `schemePart_at G P v k` is transitive. | — |
+| `step2_converges_at_zero_of_rank_le_one` | 1709-1720 | Sanity check: the convergence framework recovers the rank-≤-1 case at depth 0. | — |
+| `schemePart_at_one_adj_to_v` | 1790-1795 | Depth-1 extraction, adj-only specialisation. | — |
+| `relOfPairDetByAdjP_of_rank_le_one` | 1856-1880 | `rank ≤ 1` schurian scheme graphs trivially satisfy depth-1 separation. | — |
+| `adjSeparates_of_rank_le_one` | 1956-1967 | `rank ≤ 1` ⇒ `AdjSeparatesRelations` (≤ 1 non-diagonal index). | — |
+## ChainDescent/Saturation.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Saturation.card_add_le_of_strict` | 67-79 | — | — |

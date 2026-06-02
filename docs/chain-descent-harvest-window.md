@@ -1,5 +1,18 @@
 # Chain descent — the harvest-window lemma (support-bounded orbit recovery)
 
+> **Update (2026-06-02) — the termination is now PROVED class-agnostically; see
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md) for the current approach in full.**
+> The trichotomy's *termination* half (§2: "case (c) strictly shrinks the residual's support,
+> bottoming out at the base") is now a theorem — `exists_isBase_saturated` (`Cascade.lean`), for
+> **every** graph — via a generic saturation engine (`Saturation.lean`) that also de-classed the
+> scheme rank ladder. Leg-A's D1 now holds for the whole metric / distance-regular family
+> (`visiblyRecoverable_pPolynomial`, generalizing the rank-2 `visiblyRecoverable_scheme`). The
+> seal's **D1** has concrete realizations: `EdgeGenerates` = D1, `PPolynomial` = *graded* D1. Note
+> a correction the build forced: "visible symmetry ⟹ symmetry-only step" is **false** (CFI), so the
+> general induction tracks *moved* vertices, not symmetry-only ones. Still open: the *tight* support
+> bound `base(g) ≤ |support|`, forced-node iso-invariance, and full recovery (the IR-stickiness
+> axis) — de-classing doc §5. The original STATUS below stands for the lemma's own development.
+
 > **STATUS: concept VALIDATED; screen predicates + Phase-0/Phase-1 anchors BUILT in
 > Lean, axiom-clean. Open core = "B's core" (the general D2 bridge).**
 >

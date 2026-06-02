@@ -1,5 +1,16 @@
 # Chain descent — orbit recovery for CFI graphs
 
+> **⚠️ Read [`chain-descent-declassing.md`](./chain-descent-declassing.md) first (2026-06-02) —
+> this doc is the WITNESS LAYER, not the strategy.** Its tier-1 / tier-2 / rank-by-rank /
+> OddDegree-CFI proofs are correct and load-bearing *as examples*, but the project **no longer
+> recovers orbits class-by-class** (there are unboundedly many classes — that ladder stalls). The
+> per-class results are now **witnesses** populating abstract predicates (`CascadesAt`,
+> `EdgeGenerates`, `VisiblyRecoverable`) that the general theorems `theorem_2_HOR_of_edgeGenerates`
+> / `theorem_2_HOR_of_pPolynomial` discharge for whole structural families — *the entire metric /
+> distance-regular class (cycles, Johnson, Hamming, all DRGs) in one theorem*. Do **not** read the
+> tier ladder or the §9 "remaining work" lists below as an open proof-obligation queue; read the
+> de-classing doc for the current approach in full.
+
 A focused theorem about how 1-WL refinement interacts with the
 automorphism orbit partition of CFI graphs, with a path toward a
 polynomial-cost bound for chain descent's cascade class.

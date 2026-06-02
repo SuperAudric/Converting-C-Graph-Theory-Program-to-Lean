@@ -125,6 +125,14 @@ C*, never to close the seal. This is the structural improvement over §1's frami
 > per-class CFI/scheme theorems are therefore A/B *witnesses* populating `CascadesAt`, **not** the
 > seal's reasoning; in particular the cascade-1b "decision-node-depth frontier" named under leg A
 > above is precisely the leg-B *depth witness*, not the harvest argument (which is now closed).
+>
+> **D1 now has concrete realizations (2026-06-02).** `EdgeGenerates` (a scheme's edge relation
+> exposes all relations by bounded-round counting) **is** D1 for scheme graphs, and `PPolynomial`
+> (the distance ladder) is its *graded* form — both discharged via a generic saturation engine that
+> de-classed the scheme rank ladder (the metric/DRG family in one theorem,
+> `theorem_2_HOR_of_pPolynomial`). The same engine proves Leg-A's support-induction termination for
+> *every* graph (`exists_isBase_saturated`). Full account:
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md).
 
 **Leg C's proof = the inversion (user's method, sharpening §8.1 of tier3-decomp).**
 Do **not** start from "an arbitrary primitive group." Instead:

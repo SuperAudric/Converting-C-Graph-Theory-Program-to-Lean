@@ -248,6 +248,15 @@ The boundary of the cascade oracle is also the boundary of "cell *is* a single
 orbit" being cheaply certifiable. When the cell is **not** a visibly single orbit —
 an apparent decision — §6 takes over.
 
+> **Update (2026-06-02) — "cascade" is being *de-classed*, not certified per family.**
+> The cascade-class certification was heading toward one Lean proof per graph family
+> (a non-terminating ladder). The current approach proves orbit recovery
+> *non-class-specifically* behind a generic saturation engine, with per-class proofs
+> demoted to *witnesses*; the entire **metric / distance-regular** family (cycles,
+> Johnson, Hamming, all DRGs) is now one theorem. Read
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md) for the current shape;
+> §9's "cascade not precisely defined" / general-class items are reframed there.
+
 ---
 
 ## 6. The linear oracle (the hidden-abelian-symmetry case)
