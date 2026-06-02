@@ -1176,6 +1176,111 @@ theorem movedSet_eq_nonsingletonCells_of_recoverable (S : Finset (Fin n))
   simp only [Finset.mem_univ, true_and]
   exact mem_movedSet_iff_nonsingleton_cell_of_recoverable S hrec
 
+/-! ## Leg A — arbitrary-relabelling equivariance of the forced node (full iso-invariance)
+
+§2 proved the forced node commutes with graph *automorphisms* (`forcedNode_image`, `g ∈ Aut`).
+The canonization-sense iso-invariance is stronger: relabelling the *input* by **any** `σ` maps
+the forced node correspondingly. A relabelling `σ` carries `(adj, P)` to `(relabelAdj σ adj,
+relabelP σ P)` — `σ` is a graph isomorphism — and the conjugate `σ π σ⁻¹` carries residual
+automorphisms across it. So `forcedNode (relabel… σ) (S₀.image σ) = (forcedNode adj P S₀).image
+σ`: the canonical construction commutes with relabelling, which is exactly iso-invariance. -/
+
+/-- **Relabel a graph by `σ`:** the adjacency where `σ v` plays the role `v` did. -/
+def relabelAdj (σ : Equiv.Perm (Fin n)) (A : AdjMatrix n) : AdjMatrix n :=
+  ⟨fun i j => A.adj (σ.symm i) (σ.symm j)⟩
+
+@[simp] theorem relabelAdj_adj (σ : Equiv.Perm (Fin n)) (A : AdjMatrix n) (i j : Fin n) :
+    (relabelAdj σ A).adj i j = A.adj (σ.symm i) (σ.symm j) := rfl
+
+/-- **Relabel a `P`-matrix by `σ`.** -/
+def relabelP (σ : Equiv.Perm (Fin n)) (Q : PMatrix n) : PMatrix n :=
+  fun i j => Q (σ.symm i) (σ.symm j)
+
+@[simp] theorem relabelP_apply (σ : Equiv.Perm (Fin n)) (Q : PMatrix n) (i j : Fin n) :
+    relabelP σ Q i j = Q (σ.symm i) (σ.symm j) := rfl
+
+/-- **Residual automorphisms transport along a relabelling** (forward), via the conjugate
+`σ π σ⁻¹`. -/
+theorem residualAut_relabel (σ : Equiv.Perm (Fin n)) {S : Finset (Fin n)}
+    {π : Equiv.Perm (Fin n)} (hres : ResidualAut adj P S π) :
+    ResidualAut (relabelAdj σ adj) (relabelP σ P) (S.image σ) ((σ.symm.trans π).trans σ) := by
+  obtain ⟨hAut, hP, hFix⟩ := hres
+  refine ⟨?_, ?_, ?_⟩
+  · intro a b
+    simp only [relabelAdj_adj, Equiv.trans_apply, Equiv.symm_apply_apply]
+    exact hAut (σ.symm a) (σ.symm b)
+  · intro x u
+    simp only [relabelP_apply, Equiv.trans_apply, Equiv.symm_apply_apply]
+    exact hP (σ.symm x) (σ.symm u)
+  · intro s hs
+    rw [Finset.mem_image] at hs
+    obtain ⟨s₀, hs₀, rfl⟩ := hs
+    simp only [Equiv.trans_apply, Equiv.symm_apply_apply]
+    rw [hFix s₀ hs₀]
+
+/-- **Residual automorphisms transport back from a relabelling** (reverse), via `σ⁻¹ π σ`. -/
+theorem residualAut_relabel_symm (σ : Equiv.Perm (Fin n)) {S : Finset (Fin n)}
+    {π : Equiv.Perm (Fin n)}
+    (hres : ResidualAut (relabelAdj σ adj) (relabelP σ P) (S.image σ) π) :
+    ResidualAut adj P S ((σ.trans π).trans σ.symm) := by
+  obtain ⟨hAut, hP, hFix⟩ := hres
+  refine ⟨?_, ?_, ?_⟩
+  · intro a b
+    have h := hAut (σ a) (σ b)
+    simp only [relabelAdj_adj, Equiv.symm_apply_apply] at h
+    simpa only [Equiv.trans_apply] using h
+  · intro x u
+    have h := hP (σ x) (σ u)
+    simp only [relabelP_apply, Equiv.symm_apply_apply] at h
+    simpa only [Equiv.trans_apply] using h
+  · intro s hs
+    simp only [Equiv.trans_apply]
+    rw [hFix (σ s) (Finset.mem_image_of_mem σ hs), Equiv.symm_apply_apply]
+
+/-- **`MovedAt` is equivariant under relabelling.** A vertex `v` is moved at `S₀` iff its
+relabelled image `σ v` is moved at `S₀.image σ` in the relabelled graph. -/
+theorem movedAt_relabel_iff (σ : Equiv.Perm (Fin n)) {S₀ : Finset (Fin n)} (v : Fin n) :
+    MovedAt (relabelAdj σ adj) (relabelP σ P) (S₀.image σ) (σ v) ↔ MovedAt adj P S₀ v := by
+  constructor
+  · rintro ⟨π, hres, hπv⟩
+    refine ⟨(σ.trans π).trans σ.symm, residualAut_relabel_symm σ hres, ?_⟩
+    simp only [Equiv.trans_apply]
+    intro h
+    apply hπv
+    have hc := congrArg σ h
+    simpa only [Equiv.apply_symm_apply] using hc
+  · rintro ⟨π, hres, hπv⟩
+    refine ⟨(σ.symm.trans π).trans σ, residualAut_relabel σ hres, ?_⟩
+    simp only [Equiv.trans_apply, Equiv.symm_apply_apply]
+    exact fun h => hπv (σ.injective h)
+
+/-- **The residual support is equivariant under relabelling.** -/
+theorem movedSet_relabel (σ : Equiv.Perm (Fin n)) (S₀ : Finset (Fin n)) :
+    movedSet (relabelAdj σ adj) (relabelP σ P) (S₀.image σ)
+      = (movedSet adj P S₀).image σ := by
+  ext w
+  rw [mem_movedSet, Finset.mem_image]
+  constructor
+  · intro hw
+    refine ⟨σ.symm w, ?_, by rw [Equiv.apply_symm_apply]⟩
+    rw [mem_movedSet]
+    have key : MovedAt (relabelAdj σ adj) (relabelP σ P) (S₀.image σ) (σ (σ.symm w))
+        ↔ MovedAt adj P S₀ (σ.symm w) := movedAt_relabel_iff σ (σ.symm w)
+    rw [Equiv.apply_symm_apply] at key
+    exact key.mp hw
+  · rintro ⟨v, hv, rfl⟩
+    exact (movedAt_relabel_iff σ v).mpr (mem_movedSet.mp hv)
+
+/-- **The forced node is equivariant under arbitrary relabelling — full iso-invariance.**
+Relabelling the input by *any* `σ` (not just an automorphism) maps the canonical forced node
+correspondingly. The construction commutes with relabelling, which is exactly what it means for
+the forced node to be a function of iso-invariant data. -/
+theorem forcedNode_relabel (σ : Equiv.Perm (Fin n)) (S₀ : Finset (Fin n)) :
+    forcedNode (relabelAdj σ adj) (relabelP σ P) (S₀.image σ)
+      = (forcedNode adj P S₀).image σ := by
+  unfold forcedNode
+  rw [Finset.image_union, movedSet_relabel]
+
 /-! ## Leg A / D1 — the whole metric/DRG family (de-classing `visiblyRecoverable_scheme`)
 
 The scheme de-classing (`Scheme.lean §10.13`, `theorem_2_HOR_of_pPolynomial`) recovers orbits

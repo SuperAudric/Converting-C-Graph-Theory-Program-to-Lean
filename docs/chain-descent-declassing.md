@@ -40,9 +40,14 @@
 > the flag is pinned to `¬ Discrete`. Plus `movedSet_eq_nonsingletonCells_of_recoverable`:
 > `forcedNode` is refinement-computable where recovery holds. Axiom-clean. See §5 item 3.
 >
-> **Open (the remaining frontier):** the IR-stickiness axis itself (3b — the multipede boundary,
-> correctly *flagged*, not solved) and the arbitrary-relabelling equivariance (3c — mechanical,
-> needs an `(adj, P)`-relabel action). See §5.
+> **Arbitrary-relabel equivariance — LANDED (2026-06-02).** The `(adj, P)`-relabel action
+> (`relabelAdj` / `relabelP`) is built and `forcedNode_relabel` proves the forced node commutes
+> with **any** relabelling `σ` (not just `σ ∈ Aut`) — full canonization-sense iso-invariance.
+> Axiom-clean. See §5 item 3c.
+>
+> **Open (the remaining frontier):** only the IR-stickiness axis itself (3b — the multipede
+> boundary, correctly *flagged*, not solved; per-class it is the existing `CascadesAt` witnesses).
+> See §5.
 >
 > Companions: [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) (the witness
 > layer this generalizes), [`chain-descent-harvest-window.md`](./chain-descent-harvest-window.md)
@@ -251,10 +256,13 @@ the Leg-A screen predicates (`Findable`/`VisiblyRecoverable`) in saturation-clos
      gap 5) — correctly *flagged*, not solved. For specific classes it is the existing `CascadesAt`
      / `recoverableByDepth_cfi`/`_scheme` witnesses; deliverable is to wire those in, not prove it
      unconditionally.
-   - **3c — arbitrary-relabel equivariance, OPEN (mechanical).** §2 gave automorphism-equivariance
-     (`σ ∈ Aut`); the full cross-relabelling form is the same conjugation over an `(adj, P)`-relabel
-     action (needs that action built; `labelledAdj` exists, the `P` analogue + `IsAut`-transfer do
-     not yet).
+   - **3c — arbitrary-relabel equivariance, DONE (2026-06-02).** The `(adj, P)`-relabel action is
+     built (`relabelAdj` / `relabelP`), residual automorphisms transport across a relabelling both
+     ways (`residualAut_relabel` / `_symm`, via the conjugate `σ π σ⁻¹`), and the canonical node
+     commutes with **any** `σ` (not just `σ ∈ Aut`): `forcedNode_relabel : forcedNode (relabel… σ)
+     (S₀.image σ) = (forcedNode adj P S₀).image σ` (through `movedAt_relabel_iff` /
+     `movedSet_relabel`). This is full canonization-sense iso-invariance of the forced node.
+     Axiom-clean.
 
 **Still genuinely hard / out of scope** (unchanged by this turn): the **wall** — hidden
 non-abelian (`¬D1 ∧ ¬D2`, Cameron/Johnson), and `(O*)-existence` (≡ GI ∈ P).
