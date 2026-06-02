@@ -2935,4 +2935,176 @@ theorem theorem_2_HOR_of_edgeGenerates {n : Nat} {adj : AdjMatrix n}
     · exact relIsolatedAt_of_not_occurs h.G P v (k₀ + 1) hlo
   exact theorem_2_HOR_concrete_of_isolation h P v hKn hP_invariant hall
 
+/-! ### §10.13 — The structural class: P-polynomial (metric / distance-regular) schemes
+
+`theorem_2_HOR_of_edgeGenerates` is the uniform engine, but `EdgeGenerates` is
+still proved per scheme. This subsection discharges it **for an entire
+structural family at once**: every *P-polynomial* (metric, i.e.
+distance-regular) schurian scheme — Johnson, Hamming, cycles, all DRGs.
+
+A scheme is P-polynomial when its relations are *distance* relations
+`R 0, R 1, …, R d` (`R 1 = j0` the edge) with a **tridiagonal** intersection
+array: `intersectionNumber (R a) j0 (R k) = 0` for `|a − k| ≥ 2`, and the
+subdiagonal `c_k = intersectionNumber (R (k−1)) j0 (R k)` is nonzero. Then the
+edge relation generates: distance `R k` is the *unique* relation whose
+intersection counts into the closer distances match (the `m </=/> k` case
+split below), so the isolation closure walks out the distance ladder and
+reaches every relation — `EdgeGenerates`.
+
+**Leg-A pattern.** The leveling `R : ℕ → relation` with "each level pinned by
+strictly-lower levels" is the scheme instance of D1's *graded* exposure: a
+poly-length symmetry-only process (here: BFS by distance) that exposes the whole
+structure. The `IsoPinned.mono` + closure-fixpoint induction is the reusable
+"a graded pinning saturates the closure" skeleton — directly transplantable to
+Leg A's support induction. -/
+
+/-- **Pinning is monotone in the isolated set.** A larger `Iso` only adds
+matching constraints, so it can only *shrink* the set of rival relations — if
+`i` was uniquely pinned by `Iso1`, it stays uniquely pinned by any `Iso2 ⊇
+Iso1`. The lemma that lets a graded chain feed the closure's growing fixpoint. -/
+theorem IsoPinned.mono {n : Nat} {G : SchurianSchemeGraph n}
+    {j0 i : Fin (G.scheme.rank + 1)} {Iso1 Iso2 : Finset (Fin (G.scheme.rank + 1))}
+    (h : IsoPinned G j0 i Iso1) (hsub : Iso1 ⊆ Iso2) : IsoPinned G j0 i Iso2 := by
+  obtain ⟨hne, hsep⟩ := h
+  refine ⟨hne, fun i' hi'_ne hadj hcounts =>
+    hsep i' hi'_ne hadj (fun l hl => hcounts l (hsub hl))⟩
+
+/-- **P-polynomial (metric) schurian scheme** w.r.t. edge relation `j0`. The
+relations are a distance ladder `R 0 = R₀, R 1 = j0, …, R rank` (bijective onto
+all relations, each occurring from `v`) with a tridiagonal intersection array
+and nonzero subdiagonal. This is the abstract form of "distance-regular". -/
+structure PPolynomial {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+    (j0 : Fin (G.scheme.rank + 1)) where
+  /-- Distance-`k` relation. -/
+  R : ℕ → Fin (G.scheme.rank + 1)
+  /-- The diameter is at least 1 (there is an edge relation). -/
+  one_le_rank : 1 ≤ G.scheme.rank
+  /-- `R 0` is the diagonal. -/
+  R_zero : R 0 = 0
+  /-- `R 1` is the edge relation. -/
+  R_one : R 1 = j0
+  /-- The distance ladder is injective on `[0, rank]`. -/
+  R_inj : ∀ a b, a ≤ G.scheme.rank → b ≤ G.scheme.rank → R a = R b → a = b
+  /-- …and surjective onto all relations (so there are no extra relations). -/
+  R_surj : ∀ i : Fin (G.scheme.rank + 1), ∃ k, k ≤ G.scheme.rank ∧ R k = i
+  /-- Every distance relation occurs from `v`. -/
+  R_occurs : ∀ k, k ≤ G.scheme.rank → R k ∈ occursFromV G v
+  /-- **Tridiagonal**: counts vanish off the distance band `|a − k| ≤ 1`. -/
+  tridiagonal : ∀ a k, a ≤ G.scheme.rank → k ≤ G.scheme.rank →
+    (a + 1 < k ∨ k + 1 < a) → G.scheme.intersectionNumber (R a) j0 (R k) = 0
+  /-- **Nonzero subdiagonal** `c_k`: each distance is reachable from the prior. -/
+  subdiagonal : ∀ k, 1 ≤ k → k ≤ G.scheme.rank →
+    G.scheme.intersectionNumber (R (k - 1)) j0 (R k) ≠ 0
+
+/-- **The metric pinning lemma.** In a P-polynomial scheme, distance relation
+`R k` (`k ≥ 2`) is uniquely pinned among non-diagonal relations by its
+intersection counts into the strictly-closer distances `{R 0, …, R (k−1)}`. A
+rival `R m` is excluded by a single off-band zero: if `m > k`, its count into
+`R (k−1)` vanishes while `c_k ≠ 0`; if `m < k`, its own subdiagonal `c_m ≠ 0`
+clashes with the off-band zero into `R (m−1)`. -/
+theorem pPolynomial_pinned {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+    (j0 : Fin (G.scheme.rank + 1)) (hpp : PPolynomial G v j0)
+    {k : ℕ} (hk2 : 2 ≤ k) (hkd : k ≤ G.scheme.rank) :
+    IsoPinned G j0 (hpp.R k) ((Finset.range k).image hpp.R) := by
+  refine ⟨?_, ?_⟩
+  · intro hRk0
+    have : k = 0 := hpp.R_inj k 0 hkd (Nat.zero_le _) (by rw [hRk0, hpp.R_zero])
+    omega
+  · intro i' hi'_ne _hadj hcounts
+    obtain ⟨m, hmd, hRm⟩ := hpp.R_surj i'
+    rcases lt_trichotomy m k with hmk | hmk | hmk
+    · exfalso
+      rcases Nat.eq_zero_or_pos m with hm0 | hmpos
+      · subst hm0
+        exact hi'_ne (by rw [← hRm, hpp.R_zero])
+      · have hc := hcounts (hpp.R (m - 1))
+          (Finset.mem_image_of_mem hpp.R (Finset.mem_range.mpr (by omega)))
+        rw [← hRm,
+          hpp.tridiagonal (m - 1) k (by omega) hkd (Or.inl (by omega))] at hc
+        exact hpp.subdiagonal m (by omega) (by omega) hc
+    · rw [← hRm, hmk]
+    · exfalso
+      have hc := hcounts (hpp.R (k - 1))
+        (Finset.mem_image_of_mem hpp.R (Finset.mem_range.mpr (by omega)))
+      rw [← hRm,
+        hpp.tridiagonal (k - 1) m (by omega) hmd (Or.inl (by omega))] at hc
+      exact hpp.subdiagonal k (by omega) hkd hc.symm
+
+/-- **EdgeGenerates for every P-polynomial scheme.** The distance ladder walks
+out the isolation closure: by fixpoint induction, distance `R k` lands in the
+closure once all closer distances do (its prefix pinning lifts to the fixpoint
+via `IsoPinned.mono`), so the closure contains every relation. -/
+theorem edgeGenerates_of_pPolynomial {n : Nat} (G : SchurianSchemeGraph n)
+    (v : Fin n) (j0 : Fin (G.scheme.rank + 1)) (hpp : PPolynomial G v j0) :
+    EdgeGenerates G v j0 := by
+  classical
+  have hseed : ({0, j0} : Finset (Fin (G.scheme.rank + 1))) ⊆ occursFromV G v := by
+    intro x hx
+    rw [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with rfl | hxj
+    · exact zero_mem_occursFromV G v
+    · rw [hxj, ← hpp.R_one]; exact hpp.R_occurs 1 hpp.one_le_rank
+  obtain ⟨k₀, hk₀le, hfix⟩ :=
+    Saturation.exists_iterate_isFixed_within (isolationStep G v j0)
+      (subset_isolationStep G v j0) (occursFromV G v) {0, j0} hseed
+      (fun s hs => isolationStep_subset_occursFromV G v j0 hs)
+  set F := (isolationStep G v j0)^[k₀] {0, j0} with hF
+  have hseedF : ({0, j0} : Finset (Fin (G.scheme.rank + 1))) ⊆ F := by
+    have hm := Saturation.iterate_mono (isolationStep G v j0)
+      (subset_isolationStep G v j0) {0, j0} (Nat.zero_le k₀)
+    rwa [Function.iterate_zero_apply] at hm
+  have hmem : ∀ k, k ≤ G.scheme.rank → hpp.R k ∈ F := by
+    intro k
+    induction k using Nat.strong_induction_on with
+    | _ k ih =>
+      intro hkd
+      by_cases hk0 : k = 0
+      · subst hk0; rw [hpp.R_zero]; exact hseedF (Finset.mem_insert_self _ _)
+      · by_cases hk1 : k = 1
+        · subst hk1; rw [hpp.R_one]
+          exact hseedF (Finset.mem_insert_of_mem (Finset.mem_singleton_self j0))
+        · have hpre : ((Finset.range k).image hpp.R) ⊆ F := by
+            intro x hx
+            rw [Finset.mem_image] at hx
+            obtain ⟨a, ha, rfl⟩ := hx
+            rw [Finset.mem_range] at ha
+            exact ih a ha (by omega)
+          have hpin : IsoPinned G j0 (hpp.R k) F :=
+            (pPolynomial_pinned G v j0 hpp (by omega) hkd).mono hpre
+          have hmemF : hpp.R k ∈ isolationStep G v j0 F :=
+            (mem_isolationStep G v j0).mpr (Or.inr ⟨hpp.R_occurs k hkd, hpin⟩)
+          rwa [hfix] at hmemF
+  have hoccF : occursFromV G v ⊆ F := by
+    intro l hl
+    obtain ⟨m, hmd, hRm⟩ := hpp.R_surj l
+    rw [← hRm]; exact hmem m hmd
+  intro l hl
+  have hlF : l ∈ F := hoccF hl
+  rw [hF] at hlF
+  exact Saturation.iterate_mono (isolationStep G v j0)
+    (subset_isolationStep G v j0) {0, j0} (by omega) hlF
+
+/-- **General convergence for the metric class — Theorem 2 for every
+P-polynomial schurian scheme graph.** One theorem covering the entire
+distance-regular family (cycles, Johnson, Hamming, all DRGs), with **no
+per-scheme separation data**: the P-polynomial structure discharges
+`EdgeGenerates`, which the convergence engine turns into orbit recovery. The
+rank ladder is closed for the metric class. -/
+theorem theorem_2_HOR_of_pPolynomial {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hpp : PPolynomial h.G v j0) :
+    ∀ w u : Fin n,
+      OrbitPartition adj P {v} w u ↔
+        warmRefine adj P (individualizedColouring n {v}) w =
+          warmRefine adj P (individualizedColouring n {v}) u := by
+  have hj0_nbr : ∃ w₀ : Fin n, h.G.scheme.relOfPair v w₀ = j0 := by
+    have hocc := hpp.R_occurs 1 hpp.one_le_rank
+    rw [hpp.R_one] at hocc
+    exact (mem_occursFromV h.G v).mp hocc
+  exact theorem_2_HOR_of_edgeGenerates h P v j0 hJ hP_invariant hj0_nbr
+    (edgeGenerates_of_pPolynomial h.G v j0 hpp)
+
 end ChainDescent
