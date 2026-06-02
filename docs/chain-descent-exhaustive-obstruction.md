@@ -127,6 +127,40 @@ primitive group. The "obscuring-structure" `S(H)` of
 [tier3-decomp §8.1](./chain-descent-tier3-decomposability.md) is now **defined**
 as that fingerprint, not hypothesized.
 
+**Leg C as a consistency check on D1/D2 — the diagnostic reading (one potential
+use, distinct from the forward proof).** Because the tiling
+`D1 ∨ (¬D1∧D2) ∨ (¬D1∧¬D2)` is a tautology, the bucket-C cell does double duty:
+beyond being the *thing to classify* (forward, above), it is the **error surface
+that audits the D1/D2 predicates themselves**. The check: leg C is supposed to be
+exactly the genuine Cameron sections. So a symmetry the program can actually
+*consume* (recoverable in poly depth), or that is otherwise demonstrably **not** a
+Cameron section, yet lands in `¬D1∧¬D2`, is a **leak** — a signal that D1/D2 (or
+the oracle set behind them) is failing to model a capability it has, *not* a new
+hard case. This is what makes the seal self-auditing rather than merely asserted.
+
+- **The remediation is open-ended — a leak does *not* force D1/D2 surgery.** A
+  discovered leak can be closed by *any* of: **(i)** refining the D1/D2
+  definitions (what happened to the **flat screen**: `CFI(Kₘ)` is recoverable yet
+  was `¬D1∧¬D2` under the single-node reading — fixed by the *sequential* screen +
+  the `¬IsBase` guard, [harvest-window §6](./chain-descent-harvest-window.md));
+  **(ii)** adding a **new oracle / capability leg** for the leaked class; or
+  **(iii)** **re-routing** the case into one of the two existing oracles. The leg-C
+  partition tells you *that* something is unmodeled and *where*; it does not dictate
+  which of these three fixes applies.
+- **Already productive before any formal leg-C proof.** Used purely as a
+  refinement/diagnostic discipline, the negation-complete partition has already
+  ruled out unviable options: the **σ-cell-coherence route** (`C1b.3`,
+  machine-checked false in its operative regime); the **flat screen** (above); and
+  **CFI(triangle base)** — `cfi_triangle_no_twins` showed CFI's `Z₂` is a *global
+  gadget-flip*, not a transposition, so a twin-based handling of CFI's abelian
+  symmetry is the wrong model (the twin slice and CFI are complementary abelian
+  classes). None of these required proving leg C; the *exhaustiveness discipline*
+  alone was the useful tool.
+- **It remains "one potential."** The diagnostic reading is complementary to —
+  not a replacement for — the forward Cameron-classification target, and it may
+  be that the most valuable output of leg C is this auditing role even if the full
+  `¬D1∧¬D2 ⟹ Cameron` proof is never reached.
+
 **Honest caveats (so the seal does not leak):**
 - **Legs A and B are the program's existing open frontiers.** The seal *unifies*
   — the EOL becomes a **capstone of finishing oracle completeness + leg C**, not
@@ -172,7 +206,7 @@ Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.
 [calculator §14](./chain-descent-calculator.md)).
 
 > **This separation is now a *predicate-level* fact in the screen, not only an
-> operational one.** [harvest-window §6.10](./chain-descent-harvest-window.md) defines
+> operational one.** [harvest-window §6](./chain-descent-harvest-window.md) defines
 > the screen's abelian leg as `ResidualAbelian S ∧ ¬IsBase S` — the **`¬IsBase`
 > (non-trivial-residual) guard** is exactly the "a symmetry exists" conditioning,
 > made structural. Bare `ResidualAbelian` is *vacuously true on the multipede*
@@ -184,7 +218,7 @@ Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.
 > (R1) statable once a rigid solver retires the trivial-residual flag.
 
 > **F2 — the *operational* order signal is abelian-blind (composite-graph audit,
-> 2026-06-01; [harvest-window §6.11](./chain-descent-harvest-window.md)).** The
+> 2026-06-01; [harvest-window §6](./chain-descent-harvest-window.md)).** The
 > *predicate-level* separator above is "non-trivial **non-abelian** ⟹ Cameron." But
 > the coarse *operational* flag signal often quoted as "non-trivial residual ⟹
 > Johnson-like" ([strategy §14](./chain-descent-strategy.md)) checks **order, not
