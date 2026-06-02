@@ -7,6 +7,21 @@ final step (`C1b.3`) hit a **known-false-in-general property at its core** (σ-c
 problem is paused there pending a decision on how to proceed. **§0 is the authoritative current-state
 handoff**; §1–§7 are the historical detail it points into.
 
+> **De-classing update (2026-06-02) — Stage 1 landed (the class-agnostic swap certificate).** The
+> linear oracle was designed early (pre-recovery-framework), which is why the abstract D2 predicate
+> `ResidualAbelian` was *orphaned* (zero uses in `LinearOracle.lean`) and completeness routed per-class
+> through CFI gadget involutions. First de-classing step now in `Cascade.lean` (axiom-clean): the
+> precise D2 predicate **`ResidualInvolutive`** (exponent-2 residual — the honest `Z₂^β` form;
+> `ResidualAbelian` alone does not give involutions), `residualAbelian_of_involutive` (exponent-2 ⟹
+> abelian, wiring the orphaned predicate in), **`orbitPartition_swap_of_involutive`** (an involutive
+> orbit witness is a *swap* `g a = b ∧ g b = a` — closing the map-vs-swap gap class-agnostically), and
+> **`swap_of_cellsAreOrbits_involutive`** (at a recoverable node, every same-cell pair has a swapping
+> orbit automorphism — the "swap exists" certificate, from recovery + D2, replacing the per-class
+> `CFIGadgetFlippable`/`cfiGadgetFlippableLocal_of_parity` derivation). **Scope:** this delivers the
+> class-agnostic *symmetry* (the swap); the remaining order-model `ConfigSwap` coherence (`fixesχι` +
+> off-pair σ-preservation) is the §0.4 model gap — *unchanged*, separately scoped. The σ-coherence
+> blocker (C1b.3) is **bypassed for the swap half**, not resolved for the coherence half.
+
 Authoritative companions: [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
 §8.2 (the retargeting), [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)
 §2/§4.3 (the shared completeness gap). Lean lives in

@@ -468,6 +468,80 @@ theorem orbitPartition_iff_residualAut {S : Finset (Fin n)} {v w : Fin n} :
   · rintro ⟨π, h1, h2, h3, h4⟩; exact ⟨π, ⟨h1, h2, h3⟩, h4⟩
   · rintro ⟨π, ⟨h1, h2, h3⟩, h4⟩; exact ⟨π, h1, h2, h3, h4⟩
 
+/-! ## Leg B (de-classing) — the involutive (D2) swap certificate
+
+The linear oracle (Leg B, hidden-abelian) was designed early, before the recovery framework, so
+its completeness routed per-class through CFI gadget involutions (`cfiFlipAut_swaps_endpointVertex`,
+`CFIParityDecisionFlippable`) and left the abstract D2 predicate `ResidualAbelian` orphaned. The
+class-agnostic content the per-class route hard-codes is: **the orbit automorphism witnessing a
+decision pair is automatically a *swap* `g a = b ∧ g b = a` when the residual is exponent-2** (every
+element an involution — precisely CFI's `Z₂^β` gauge group). `ResidualAbelian` (commuting) is *not*
+enough for that; the precise predicate is `ResidualInvolutive` below, and it implies `ResidualAbelian`.
+
+This produces the **swap** the config-swap constructors (`configSwap_of_aut`/`_of_swap`,
+`LinearOracle.lean`) consume as their first input, class-agnostically and via the recovery machinery
+(`CellsAreOrbits`) — *no* gadget cycle, *no* `tw(H)`, *no* σ-coherence. (Connecting this swap to the
+order-model `ConfigSwap`'s remaining coherence — `fixesχι` + off-pair σ-preservation — is the separate
+§0.4 model-gap step, not closed here.) -/
+
+/-- **The residual group is closed under composition.** Composition of `P`-preserving
+automorphisms fixing `S` pointwise is again one. -/
+theorem ResidualAut.mul {S : Finset (Fin n)} {π₁ π₂ : Equiv.Perm (Fin n)}
+    (h₁ : ResidualAut adj P S π₁) (h₂ : ResidualAut adj P S π₂) :
+    ResidualAut adj P S (π₁ * π₂) := by
+  obtain ⟨hA₁, hP₁, hF₁⟩ := h₁
+  obtain ⟨hA₂, hP₂, hF₂⟩ := h₂
+  refine ⟨?_, ?_, ?_⟩
+  · intro v w; simp only [Equiv.Perm.mul_apply]; rw [hA₁, hA₂]
+  · intro x u; simp only [Equiv.Perm.mul_apply]; rw [hP₁, hP₂]
+  · intro v hv; rw [Equiv.Perm.mul_apply, hF₂ v hv, hF₁ v hv]
+
+/-- **D2, the precise (exponent-2) form.** Every residual automorphism is an involution — the
+residual group has exponent ≤ 2, i.e. is an elementary-abelian `Z₂^d` (CFI's gauge group). This is
+the form of D2 the swap content needs: `ResidualAbelian` (commuting) does *not* give involutions.
+See `residualAbelian_of_involutive` (it *implies* the abelian predicate) and
+`orbitPartition_swap_of_involutive` (it turns an orbit *map* into a *swap*). -/
+def ResidualInvolutive (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) : Prop :=
+  ∀ π : Equiv.Perm (Fin n), ResidualAut adj P S π → π * π = 1
+
+/-- **Exponent-2 ⟹ abelian** (the classic group fact), wiring the orphaned `ResidualAbelian`
+predicate to the precise `ResidualInvolutive`: a residual group of involutions commutes. -/
+theorem residualAbelian_of_involutive {S : Finset (Fin n)}
+    (hinv : ResidualInvolutive adj P S) : ResidualAbelian adj P S := by
+  intro π₁ π₂ h₁ h₂
+  have e1 : π₁⁻¹ = π₁ := inv_eq_of_mul_eq_one_right (hinv _ h₁)
+  have e2 : π₂⁻¹ = π₂ := inv_eq_of_mul_eq_one_right (hinv _ h₂)
+  have e12 : (π₁ * π₂)⁻¹ = π₁ * π₂ := inv_eq_of_mul_eq_one_right (hinv _ (h₁.mul h₂))
+  rw [mul_inv_rev, e1, e2] at e12
+  exact e12.symm
+
+/-- **An involutive orbit witness is a swap.** Closing the map-vs-swap gap class-agnostically: if the
+residual is exponent-2 (`ResidualInvolutive`) and `a, b` are an orbit pair, the witnessing residual
+automorphism `g` satisfies `g a = b` **and** `g b = a` (from `g (g a) = a`). This is what the CFI
+route obtains from gadget involutions — here from the abstract `Z₂^d` structure. -/
+theorem orbitPartition_swap_of_involutive {S : Finset (Fin n)} {a b : Fin n}
+    (hinv : ResidualInvolutive adj P S) (h : OrbitPartition adj P S a b) :
+    ∃ g, ResidualAut adj P S g ∧ g a = b ∧ g b = a := by
+  rw [orbitPartition_iff_residualAut] at h
+  obtain ⟨g, hg, hgab⟩ := h
+  refine ⟨g, hg, hgab, ?_⟩
+  have h2 : (g * g) a = (1 : Equiv.Perm (Fin n)) a := by rw [hinv g hg]
+  simp only [Equiv.Perm.mul_apply, Equiv.Perm.one_apply] at h2
+  rw [hgab] at h2
+  exact h2
+
+/-- **The class-agnostic swap certificate at a recoverable node.** Where orbit recovery holds
+(`CellsAreOrbits`) and the residual is exponent-2 (`ResidualInvolutive`), every same-cell decision
+pair `{a, b}` carries a **swapping** orbit automorphism (`g a = b ∧ g b = a`). This is the firing
+certificate's symmetry half — the linear oracle's "a swap exists" input — produced from recovery + D2,
+replacing the per-class `CFIGadgetFlippable`/`cfiGadgetFlippableLocal_of_parity` derivation. -/
+theorem swap_of_cellsAreOrbits_involutive {S : Finset (Fin n)} {a b : Fin n}
+    (hco : CellsAreOrbits adj P S) (hinv : ResidualInvolutive adj P S)
+    (hcell : warmRefine adj P (individualizedColouring n S) a
+           = warmRefine adj P (individualizedColouring n S) b) :
+    ∃ g, ResidualAut adj P S g ∧ g a = b ∧ g b = a :=
+  orbitPartition_swap_of_involutive hinv (hco a b hcell)
+
 /-- **Under a base, every residual automorphism is the identity.** `IsBase adj P S` says the
 `Aut_S`-orbit relation is equality, so a residual auto cannot move any point: it fixes everything,
 hence is `1`. -/
