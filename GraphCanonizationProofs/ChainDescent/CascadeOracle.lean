@@ -388,6 +388,41 @@ theorem harvest_isAut_of_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
     IsAut t adj :=
   colourMatch_isAut hg hP (indivWithRep_transport hgS hgr hr₂S) hdisc ht
 
+/-- **The colour-match relation** (the cascade harvest's construction, cascade-oracle §4.2):
+`t` matches branch-`w`'s refined colours to branch-`v`'s — `warmRefine χ_w ∘ t = warmRefine χ_v`
+with `χ_v = indivWithRep D v`, `χ_w = indivWithRep D w`. The harvest builds `t` this way and verifies
+`IsAut t`; the two bricks below pin it at a discrete footprint (it *exists* and is *unique*, = `g`). -/
+def IsColourMatch {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (D : Finset (Fin n))
+    (v w : Fin n) (t : Equiv.Perm (Fin n)) : Prop :=
+  ∀ x, warmRefine adj P (indivWithRep n D w) (t x) = warmRefine adj P (indivWithRep n D v) x
+
+/-- **Completeness brick — the orbit automorphism IS a colour-match.** An `Aut_D` witness `g`
+(`IsAut`, `P`-preserving, fixes `D`, `g v = w`, `w ∉ D`) satisfies `IsColourMatch` — directly by
+`warmRefine_transport` ∘ `indivWithRep_transport`. So at a recoverable node, where a same-cell pair
+has such a `g`, the colour-match construction is non-empty: leg-(a)'s *completeness* direction, the
+key to discharging `CellComplete`. -/
+theorem colourMatch_complete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {D : Finset (Fin n)} {v w : Fin n} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgD : FixesPointwise g D) (hgvw : g v = w) (hwD : w ∉ D) :
+    IsColourMatch adj P D v w g :=
+  fun x => warmRefine_transport hg hgP (indivWithRep_transport hgD hgvw hwD) x
+
+/-- **Uniqueness brick — at a discrete footprint every colour-match equals the orbit
+automorphism.** `colourMatch_eq_aut` restated against `IsColourMatch`: given a genuine `g` and a
+discrete branch-`w` footprint, any `IsColourMatch` `t` satisfies `t = g`. Combined with
+`colourMatch_complete`, the colour-match candidate at a discrete recoverable node *exists and is
+unique*, and it is the orbit automorphism — the harvest both fires (completeness) and pins the unique
+verified map. -/
+theorem colourMatch_unique {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {D : Finset (Fin n)} {v w : Fin n} {g t : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgD : FixesPointwise g D) (hgvw : g v = w) (hwD : w ∉ D)
+    (hdisc : Discrete (warmRefine adj P (indivWithRep n D w)))
+    (ht : IsColourMatch adj P D v w t) :
+    t = g :=
+  colourMatch_eq_aut hg hgP (indivWithRep_transport hgD hgvw hwD) hdisc ht
+
 /-- **General-singleton round-1 match.** If `s` is a `χ`-singleton (uniquely
 coloured) and `a, b` (both `≠ s`) get the same colour after one `refineStep`, they
 share adjacency and `P`-relation to `s`. The arbitrary-singleton generalisation of
