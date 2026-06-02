@@ -1048,6 +1048,23 @@ symmetry unconditional" (the deferred-decisions framing). A scheme with a
 relation that *never* isolates would be a concrete obstruction — exactly
 the object Tier 3 / the construction question seeks.
 
+**Lean idioms / gotchas (CFI/Scheme proofs).** Developer time-savers
+collected while formalizing the above — proof-engineering notes, not
+research claims:
+
+- `subst` is unreliable on equations; prefer `rw`. In particular,
+  `subst hva` on `hva : v = a` *eliminates* the parameter — use
+  `rw [hva]` instead to keep `a, b` in scope.
+- `Classical.decPred` to get a `Decidable` instance on recursive `Prop`s.
+- `▸` (the rewrite arrow) fails on dependent motives — fall back to an
+  explicit `rw`/`cases`.
+- Watch `Finset.sum_const_nat` (the constant-summand simp lemma).
+- `cases hc : σ.σ x x` substitutes the value into the goal; close the
+  unknown branch with `rfl`.
+
+(The `Set.ncard ↔ Finset.filter` card bridge is covered above under §14's
+`ncard_setOf_eq_filter_card`.)
+
 ---
 
 ## 10. Tier 2 sketch (follow-on direction)

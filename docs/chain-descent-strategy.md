@@ -387,6 +387,14 @@ guess. The σ-relabel shortcut "`transitiveClose` commutes with the
 `less ↔ greater` swap" is **false** (`transitiveClose_swap_false` in
 `ChainDescent.lean`, witness `conflictMatrix`); it is moot under TC relegation.
 
+**A fidelity gap between the two TC operators.** The Lean `closeStep` /
+`transitiveClose` **resolves** order conflicts as part of producing the closed
+relation; the C# `TransitiveClose` (`ChainDescent.cs` ~lines 592–615) is
+**partial** — on a cycle or direction conflict it returns `false` and the caller
+prunes the branch. The two agree in practice (a conflicting branch is dead
+either way), but they are *different operators*, and the distinction matters for
+C#-side validation and any future reconciliation of the two implementations.
+
 ## 11. Why single-pair guesses do not prune interleavings
 
 A guess writes **one** `P` entry, not a block. This was a deliberate choice, and
@@ -508,6 +516,20 @@ and — the recursion stringing them across the descent — `spine_branch_indepe
 The spine is **not yet implemented in the C#** (the descent re-refines per
 node). Full account:
 [`ChainDescent.md`](../GraphCanonizationProofs/ChainDescent.md) §11.
+
+**What the spine does *not* rest on.** Symmetric "forcing" — the idea that a
+guess's two directions force each other into a fixed order — is **not** a viable
+foundation for branch reduction. It is only an order-*label* claim, and it is
+valid solely in the abelian / `Z₂^d` regime; outside it there is no such forcing
+to lean on. The viable foundation is the **automorphism-equivariance of
+`warmRefine`** — the `*_invariant_of_isAut` / `*_transport` lemmas — which is
+what `warm_6_2` and the spine results above actually use. That positive
+foundation is documented elsewhere and is not re-derived here
+([`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) §13.5,
+[`chain-descent-abelian-sufficiency-handoff.md`](./chain-descent-abelian-sufficiency-handoff.md)
+§4 M1a); only the rejection of forcing and its abelian-regime scoping are
+recorded here. (Not to be conflated with orbit-recovery §313's "Q3", which is a
+different question — universal early-recovery for `CFI(H)`.)
 
 ---
 

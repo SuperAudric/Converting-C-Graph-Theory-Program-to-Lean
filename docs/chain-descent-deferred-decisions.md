@@ -318,6 +318,10 @@ re-consumption across branches), and Phase 2 should be trivial (residue
 rigid). Compare oracle-call counts vs. the per-node flow — the win is
 oracle calls dropping from ~(node count) to ~(decision count).
 
+**Telemetry.** The `CascadeStats` instrumentation exposes the metric
+fields `DeferralActiveNodes`, `Phase2Nodes`, and `CachedRealSkips` for
+this (Rook3x3 measures `deferralActive = 6`).
+
 ---
 
 ## 10. Risks and open questions

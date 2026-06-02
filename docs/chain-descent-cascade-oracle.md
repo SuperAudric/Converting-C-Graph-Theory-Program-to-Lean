@@ -109,6 +109,13 @@ footprints within a polynomial depth bound**:
   bound, *or* the mirror-read finds no unique candidate; the budget
   flags. Sound — never a wrong answer.
 
+> **Dihedral is NOT the wall** (correction). Dihedral symmetry (e.g. on a
+> cycle) *cascades* — its `Z_2` flips are the linear oracle's domain and
+> its rotations cascade — so it sits on the **easy side**. An earlier
+> framing wrongly lumped dihedral together with `A_k` as the wall; that
+> was wrong. The wall remains the **non-abelian-simple `A_k`-on-subsets
+> hidden Johnson only**.
+
 This is the same boundary as "cell *is* a single orbit, cheaply
 certifiable" ([calculator §5](./chain-descent-calculator.md)) and the
 same line as the linear oracle's abelian/non-abelian split — the two
@@ -151,6 +158,18 @@ whether it is a twist or an orbit map. The genuinely new content of the
 a-priori cascade oracle is the **bounded-depth recursion** that resolves
 a non-singleton footprint into all-singleton sub-problems, where the
 shared construction then applies.
+
+> **Oracle grain — involution vs constructed map** (2026-05-31). The
+> abelian/non-abelian and visible-orbit/hidden-twist splits above have a
+> sharper operational form. The linear oracle's domain is specifically
+> **commuting involutions** — a *unique candidate readable off one branch*
+> (the forced `Z_2` twist). A **constructed non-involution map** (e.g. a
+> `k`-cycle) is the **cascade oracle's** job: it verifies a *constructed*
+> map, not an involution pair-swap. So "`k`-cycle" is **one cascade
+> instance, not the cascade oracle's definition** — the cascade oracle is
+> defined by *verifying a constructed map*, of which the `k`-cycle is a
+> single case. The wall is the **non-commuting / non-abelian-simple** case,
+> where no unique candidate is readable and no constructed map bottoms out.
 
 **Design decision to confirm in build (§10):** whether to ship this as
 *one unified component* ("a-priori symmetry harvesting" = shared
