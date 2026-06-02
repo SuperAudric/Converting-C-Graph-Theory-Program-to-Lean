@@ -21,6 +21,22 @@ handoff**; §1–§7 are the historical detail it points into.
 > class-agnostic *symmetry* (the swap); the remaining order-model `ConfigSwap` coherence (`fixesχι` +
 > off-pair σ-preservation) is the §0.4 model gap — *unchanged*, separately scoped. The σ-coherence
 > blocker (C1b.3) is **bypassed for the swap half**, not resolved for the coherence half.
+>
+> **De-classing update (2026-06-02) — Stage 2 anchor landed: the fold (Path A).** Decision taken:
+> **fold Leg B firing into the colour-model recovery/harvest**, retiring the order-model
+> `RealizableFlip`/`ConfigSwap` route for *firing* (the σ-coherence blocker is then structurally
+> bypassed, not fought). The colour model needs only the orbit *map* (not the swap), so Stage 1's
+> swap was order-model packaging — confirming the fold. Anchor in `CascadeOracle.lean §C.2`
+> (axiom-clean): **`colourMatch_exists_of_cellsAreOrbits`** (at a recoverable node the orbit
+> automorphism *is* a verifying colour-match — the firing certificate exists, no discreteness) and
+> **`harvest_fires_of_cellsAreOrbits_discrete`** (at a recoverable + discrete footprint any
+> colour-match verifies — Leg B fires in the colour model). This is the **same** harvest both oracles
+> use → legs A+B unified. **Soundness** is inherited from `OrbitPartition` (`OrbitMapSpec`), not
+> `RealizableFlip`. **Remaining gaps (isolated, not solved):** (i) M-B — the concrete `colourMatchPerm`
+> that *builds* `t` (shared with the cascade oracle); (ii) "B's core" — the exposure-depth witness
+> (discrete+recoverable within poly depth for abelian residuals; substrate-conditional — CFI `tw(H)`,
+> schemes depth-1). The order-model machinery (`ConfigSwap`/`CFIGadgetFlippable`/`canonAdj`-firing) is
+> now legacy (soundness-only); the C1b.3 σ-coherence route is **retired**, not pending.
 
 Authoritative companions: [`chain-descent-linear-oracle.md`](./chain-descent-linear-oracle.md)
 §8.2 (the retargeting), [`chain-descent-cascade-oracle.md`](./chain-descent-cascade-oracle.md)

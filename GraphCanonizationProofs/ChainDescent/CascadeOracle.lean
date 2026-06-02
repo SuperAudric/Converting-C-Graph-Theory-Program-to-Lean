@@ -423,6 +423,52 @@ theorem colourMatch_unique {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
     t = g :=
   colourMatch_eq_aut hg hgP (indivWithRep_transport hgD hgvw hwD) hdisc ht
 
+/-! #### §C.2 — the colour-model firing (legs A+B unified; the de-classing of Leg B)
+
+The linear oracle (Leg B, hidden-abelian) originally fired in the **order model** — a twist
+relabels `canonAdj σ` to `canonAdj (flip)` (`RealizableFlip`) — which forces the σ-cell-coherence
+that `cell_split_uniform_false` proves false. The two lemmas below fire **in the colour model**
+instead, straight from orbit recovery: where `CellsAreOrbits` holds, the orbit automorphism *is* a
+verifying colour-match (it exists), and at a discrete footprint *any* colour-match verifies (it is
+unique and `= g`). This is the **same** harvest both oracles use, so Leg B's firing folds into Leg
+A's — no order `σ`, no `ConfigSwap`, no σ-coherence. The class-specificity that remains is only the
+**depth** at which the footprint becomes discrete/recoverable (the exposure depth — `tw(H)` for CFI,
+depth-1 for schemes), and the concrete construction of `t` (the open M-B `colourMatchPerm`). Pruning
+soundness is inherited semantically from `OrbitPartition` (a certified orbit pair ⟹ the branches are
+`Aut`-equivalent), not from the retired `RealizableFlip`. -/
+
+/-- **The firing certificate exists at a recoverable node.** Where `CellsAreOrbits` holds, a
+same-cell decision pair `(r₁, r₂)` (with `r₂ ∉ S`) has a verifying colour-match — namely the orbit
+automorphism `g` itself (`colourMatch_complete`). So the harvest's construction target is non-empty
+without any order/σ data; this is the completeness (existence) half of the fold, and it needs no
+discreteness. -/
+theorem colourMatch_exists_of_cellsAreOrbits {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S : Finset (Fin n)} {r₁ r₂ : Fin n}
+    (hco : CellsAreOrbits adj P S)
+    (hcell : warmRefine adj P (individualizedColouring n S) r₁
+           = warmRefine adj P (individualizedColouring n S) r₂)
+    (hr₂S : r₂ ∉ S) :
+    ∃ t : Equiv.Perm (Fin n), IsAut t adj ∧ IsColourMatch adj P S r₁ r₂ t := by
+  obtain ⟨g, hg, hgP, hgS, hgr⟩ := hco r₁ r₂ hcell
+  exact ⟨g, hg, colourMatch_complete hg hgP hgS hgr hr₂S⟩
+
+/-- **The harvest fires at a recoverable + discrete footprint.** Where `CellsAreOrbits` holds and the
+branch-`r₂` footprint is `Discrete`, *any* constructed colour-match `t` for the decision pair verifies
+as an automorphism (`harvest_isAut_of_discrete`, fed the orbit automorphism from `CellsAreOrbits`).
+This is Leg B's firing in the colour model — order-free and class-agnostic; the only remaining input
+is discreteness within a bounded depth (the exposure-depth witness, "B's core"). -/
+theorem harvest_fires_of_cellsAreOrbits_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S : Finset (Fin n)} {r₁ r₂ : Fin n} {t : Equiv.Perm (Fin n)}
+    (hco : CellsAreOrbits adj P S)
+    (hcell : warmRefine adj P (individualizedColouring n S) r₁
+           = warmRefine adj P (individualizedColouring n S) r₂)
+    (hr₂S : r₂ ∉ S)
+    (hdisc : Discrete (warmRefine adj P (indivWithRep n S r₂)))
+    (ht : IsColourMatch adj P S r₁ r₂ t) :
+    IsAut t adj := by
+  obtain ⟨g, hg, hgP, hgS, hgr⟩ := hco r₁ r₂ hcell
+  exact harvest_isAut_of_discrete hg hgP hgS hgr hr₂S hdisc ht
+
 /-- **General-singleton round-1 match.** If `s` is a `χ`-singleton (uniquely
 coloured) and `a, b` (both `≠ s`) get the same colour after one `refineStep`, they
 share adjacency and `P`-relation to `s`. The arbitrary-singleton generalisation of
