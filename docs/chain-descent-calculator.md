@@ -13,6 +13,10 @@ descent, the budget, what the algorithm requires *of* the oracle — see
 [`chain-descent-strategy.md`](./chain-descent-strategy.md). For a gentle
 introduction to the whole project, start with
 [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md).
+After this doc, read [`chain-descent-declassing.md`](./chain-descent-declassing.md):
+it is the current architecture for both orbit recovery and oracle firing (the two
+oracles below are now one recovery-based harvest), and it supersedes the per-oracle
+framing here where they differ.
 
 ---
 
@@ -206,8 +210,13 @@ chain *machinery* is not the problem. T-C is entirely the *missing input*:
 discovering each level's transversal — the new coset representatives — when
 refinement does not expose it for free.
 
-The two concrete oracles below are the two cases where T-C is tractable: §5
-(cascade) and §6 (abelian / linear).
+The two oracles below — §5 (cascade) and §6 (abelian / linear) — cover the two
+cases where T-C is tractable. In the current model they are not two separate
+mechanisms but **two faces of one recovery-based harvest** (see
+[`chain-descent-declassing.md`](./chain-descent-declassing.md) §6 unified oracle):
+at a recoverable node, construct a colour-match permutation from the two branch
+colourings, verify it edge-by-edge, harvest it. The T-A/T-B/T-C skeleton stands;
+the §5/§6 split below is now a depth distinction within that single harvest.
 
 ---
 
@@ -241,8 +250,11 @@ residual branching sat at non-singleton footprints the recursion would resolve.
 It was then **built (M1+M2, 2026-05-28)** as a lockstep per-rep single-path
 recursion and **resolved that starvation**: CFI(K7) collapsed 941 → 1 leaf,
 555 → 0 branching nodes, recursion depth ≈ `tw(H)` (correct + scramble-invariant
-through K7). The Tier-1 polynomial proof now has its constructive code; the
-remaining gap is the Lean discharge of the certification predicate.
+through K7). The Tier-1 polynomial proof now has its constructive code.
+The certification predicate is no longer undefined design work: it *is* the recovery/harvest
+(construct a colour-match permutation, verify edge-by-edge, harvest). The one remaining shared
+open construction unit is M-B (the concrete `colourMatchPerm`/`matchOracle`) — see
+[`chain-descent-declassing.md`](./chain-descent-declassing.md) §9 frontier.
 
 The boundary of the cascade oracle is also the boundary of "cell *is* a single
 orbit" being cheaply certifiable. When the cell is **not** a visibly single orbit —
@@ -260,6 +272,16 @@ an apparent decision — §6 takes over.
 ---
 
 ## 6. The linear oracle (the hidden-abelian-symmetry case)
+
+> **Legacy framing (relabel, 2026-06-02).** This section describes the *order-model*
+> firing — reading a unique candidate twist off one branch's reverse-symmetric
+> propagation / coupled component / relabelled `canonAdj`. That firing path is
+> retained here for the **soundness story**, but it is no longer how the oracle
+> fires. The current firing is the unified **colour-model harvest** shared with the
+> cascade oracle (one harvest, two faces) — see
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md) §5 Leg B and §6
+> unified oracle. Read the section body below as the soundness account, not the
+> firing path.
 
 The cascade oracle (§5) handles true symmetries refinement makes *visible* as a
 single-orbit cell. This section is the other way a cell can be a true symmetry: an
@@ -402,8 +424,10 @@ whether the flagged case arises at all.
   label-optimisation rather than `2^d` distinct refinement worlds — see
   [`chain-descent-strategy.md`](./chain-descent-strategy.md) §12.
 - **Cheap candidate construction** (step 2) — turning a propagation pattern into
-  a vertex permutation — is the one genuinely unspecified piece and the main
-  implementation risk (§9).
+  a vertex permutation — was the one genuinely unspecified piece. In the current
+  model this is superseded: the shared open construction is M-B
+  (`colourMatchPerm`), built from the two branch *colourings*, not from propagation
+  patterns — see [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9.
 
 ---
 
@@ -538,12 +562,12 @@ In rough priority order:
    is equivalent to GI ∈ P. The design isolates this; it does not close it.
    Every gap below is a consequence.
 
-2. **"Cascade" is not yet precisely defined.** Refinement gives cells that are
-   *supersets* of orbits; certifying that a cell *is* a single orbit needs more
-   than refinement. The cascade oracle's exact certification predicate — what
-   bounded check it runs, and what it guarantees — is undefined design work
-   (§5). This is the first thing to nail down: both the Tier-1 proof and the
-   oracle's code depend on it.
+2. **"Cascade" — certification predicate now defined.** Refinement gives cells
+   that are *supersets* of orbits; certifying that a cell *is* a single orbit
+   needs more than refinement. The cascade oracle's certification predicate is no
+   longer undefined design work: it *is* the recovery/harvest, and it is de-classed
+   for the metric / distance-regular family (one theorem, not one per class) — see
+   [`chain-descent-declassing.md`](./chain-descent-declassing.md).
 
 3. **Tier 1 → polynomial is a target, not a theorem.** Even if every node
    certifies cheaply, genuine decisions could in principle still stack. The
@@ -568,6 +592,10 @@ In rough priority order:
    leaf, 555 → 0 residual branching, recursion depth ≈ `tw(H)` (correct +
    scramble-invariant through K7). The implementation risk is closed *on CFI*; the
    remaining work is the Lean discharge and general-class (Tier-2/3) completeness.
+   *Note (2026-06-02):* firing has since been folded into the colour-model harvest —
+   the two oracles are now one (legs unified). The order-model footprint / forced-map
+   description above is legacy soundness account; the remaining shared open unit is
+   M-B (`colourMatchPerm`) — see [`chain-descent-declassing.md`](./chain-descent-declassing.md) §5.
 
 5. **Is the wall reachable from the descent's output?** The construction
    question (§7). Target: prove every obstruction the descent produces
@@ -710,6 +738,8 @@ Anything short of this is a research checkpoint.
   Phase-1 `CascadeOracle`, the **linear oracle** (§6), and the **a-priori cascade
   oracle** — all correct and budget-bounded; the a-priori cascade oracle
   eliminated linear-oracle starvation and collapsed every measured CFI base
-  (K4…K7) to a single path (§9 item 4).
+  (K4…K7) to a single path (§9 item 4). (The linear and a-priori cascade oracles
+  are now unified — one recovery-based harvest, two faces; see
+  [`chain-descent-declassing.md`](./chain-descent-declassing.md) §6.)
 - **Open:** T-C in general; the polynomial-bound Lean discharge; whether Tier 2
   arises from the descent at all (the construction question).

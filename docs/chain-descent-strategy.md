@@ -6,8 +6,11 @@ it polynomial-or-flag, and the propagation substrate the whole thing runs on.
 
 The hardest single component — the **oracle** that sorts a cell into orbits, the
 one piece whose polynomial bound is open — has its own doc:
-[`chain-descent-calculator.md`](./chain-descent-calculator.md). A gentle,
-build-from-nothing introduction is
+[`chain-descent-calculator.md`](./chain-descent-calculator.md). The current
+oracle architecture — de-classed (non-class-specific) recovery and the unified
+oracle that the cascade and linear faces fold into — lives in
+[`chain-descent-declassing.md`](./chain-descent-declassing.md); read it as a key
+companion to this doc. A gentle, build-from-nothing introduction is
 [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md).
 
 > **Lineage.** The current design is *chain descent* — a single budgeted
@@ -139,7 +142,9 @@ the algorithm.
 The **oracle** is the component that, given a target cell `C`, returns its
 partition into orbits. It is reached through one interface (`ITransversalOracle`
 in code); the algorithm makes no other assumption about it. The oracle itself —
-how it certifies orbits, the cascade and linear variants — is the subject of
+how it certifies orbits, the cascade and linear faces of one recovery-based
+harvest (see [`chain-descent-declassing.md`](./chain-descent-declassing.md) §6) —
+is the subject of
 [`chain-descent-calculator.md`](./chain-descent-calculator.md). What the
 *algorithm* requires of any oracle:
 
@@ -227,8 +232,12 @@ or flag — on every labelling of a graph. Because "exceeds `B(n)`" is a functio
 of the node count, the node count must not depend on the input labelling. This
 is sharper now that the linear oracle is *online* (calculator doc §6): its
 branch-traversal and twist-discovery must be a deterministic function of
-iso-invariant cell ids. Invariance must hold by construction; it is a proof
-obligation (§12).
+iso-invariant cell ids. In the current (folded) model this iso-invariance
+obligation attaches to the recovery / forced-node layer (`forcedNode_relabel`,
+[`declassing`](./chain-descent-declassing.md) §4/§7); the "twist-discovery"
+phrasing above is the legacy order model, but the obligation itself stands —
+only its target is retargeted. Invariance must hold by construction; it is a
+proof obligation (§12).
 
 Correctness is **independent of which oracle is plugged in** and independent of
 the budget — exhausting the budget only ever causes a flag, never a wrong
@@ -508,7 +517,13 @@ distinct order on `D` (for a rigid graph all `2^d` are distinct; §15 gap 5). It
 reduces the descent to "polynomially many refinements + a residual `Z₂^d` label
 optimisation", handing the linear oracle
 ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §6) one fixed
-partition to optimise over. Proved: `warmRefine_agree_off` and its composable
+partition to optimise over. **(Role note.)** The spine, invariant 6.2, and 6.4
+below are **proved** and remain the load-bearing substrate; but their stated
+role as *what the linear oracle rests on to fire* is the **legacy order model**.
+In the current model firing is the unified colour-model harvest
+([`declassing`](./chain-descent-declassing.md) §6) and these invariants back the
+substrate, not the firing mechanism. The proofs are unaffected. Proved:
+`warmRefine_agree_off` and its composable
 form `warmRefine_agree_off'`, `target_direction_blind`, `target_agree_off`,
 and — the recursion stringing them across the descent — `spine_branch_independent`
 (trace form) / `SpineChain.branch_independent` (chain form) in
@@ -575,9 +590,9 @@ design.
 - the **`P`-matrix / single-pair / warm-1-WL substrate** (§9) — the partition
   engine;
 - **closure-as-guess** with `DERIVED`/`driver` records, the old `§3.4`/`§6.4`
-  (§10) — the linear oracle's provenance state;
-- **invariant 6.2**, the old `§6.2` (§12) — the linear oracle's correctness
-  dependency, since proved as `warm_6_2`;
+  (§10) — substrate provenance state (legacy: the linear oracle's provenance state);
+- **invariant 6.2**, the old `§6.2` (§12) — a substrate invariant, since proved
+  as `warm_6_2` (legacy: the linear oracle's firing dependency — see §12 role note);
 - **invariant 6.1**, iso-invariance of cell ids (§7);
 - the **single-pair-does-not-prune-interleavings** rationale, the old `§7` (§11).
 
@@ -591,9 +606,9 @@ is where each landed.
 | Old | Statement | Where it is now |
 |---|---|---|
 | 6.1 | Iso-invariance of cell ids | **Live** — §7, a correctness building block. |
-| 6.2 | Reverse-symmetric propagation of warm refinement | **Live** — §12; proved as `warm_6_2`; the linear oracle's correctness dependency. |
+| 6.2 | Reverse-symmetric propagation of warm refinement | **Live** — §12; proved as `warm_6_2`; a substrate invariant (legacy role: the linear oracle's firing dependency — see §12 role note). |
 | 6.3 | Deeper-guess locks survive shallow flips | **Retired** — a property of the flip-validation backward pass; chain descent has no backward sweep and no "deeper locks" to survive. |
-| 6.4 | Closure as a guess (`DERIVED` records + `driver`) | **Live** — §10; the linear oracle's provenance state. |
+| 6.4 | Closure as a guess (`DERIVED` records + `driver`) | **Live** — §10; substrate provenance state (legacy: the linear oracle's provenance state). |
 | 6.5 | Every canonical form reachable from any pair selection | **Live, re-housed** — the invariant *the branch representatives cover every orbit of the target cell* is the §7 **completeness** requirement; the enumerate-and-lex-min operation is lex-leader descent over a per-level transversal ([`chain-descent-calculator.md`](./chain-descent-calculator.md) §2). The flip-validation backward-pass implementation (replay, fixpoint iteration) is retired. |
 
 The old `§6` header decomposed the claims as *correct iff 6.1 + 6.4 + 6.5;
@@ -640,9 +655,11 @@ alongside `ChainDescent.lean`: correctness (§7) and, conditional on the oracle,
 the polynomial bound (§8). The proof is the final bar; GI ∈ P is open, so the
 bar for the polynomial claim is high.
 
-**Algorithm-level gaps.** Oracle-level gaps (the open T-C problem, the cascade
-predicate, and general-class completeness of the built linear / cascade oracles)
-are in [`chain-descent-calculator.md`](./chain-descent-calculator.md) §9.
+**Algorithm-level gaps.** Recovery is now proved *non-class-specifically*
+([`declassing`](./chain-descent-declassing.md)), so per-class completeness is
+the witness layer rather than a standalone gap. The current oracle frontier —
+M-B, depth witnesses, flag iso-invariance, and the wall — is in
+[`declassing`](./chain-descent-declassing.md) §9.
 
 1. **Budget / soundness handshake.** If the budget interrupts the oracle
    mid-certification, the oracle must flag — never return a partially-built,

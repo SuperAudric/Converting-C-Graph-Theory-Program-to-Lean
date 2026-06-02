@@ -1,58 +1,48 @@
 # Chain descent — the de-classing turn: non-class-specific orbit recovery via the saturation engine
 
-> **STATUS (2026-06-02): the organizing strategy for orbit recovery.** Read this
-> *before* the per-class material in
-> [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) — it reframes
-> that doc's tier-1/tier-2/rank-by-rank narrative as a **witness layer**, not the plan.
+> **STATUS (2026-06-02): the organizing strategy for orbit recovery *and* oracle firing.** Read this
+> **after** the overview/strategy/calculator and **before** the per-class material in
+> [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md). It reframes that doc's
+> tier/rank narrative as a **witness layer**, and it reframes the calculator/overview's *two separate
+> oracles* (cascade + linear) as **one recovery-based harvest** — both are the current model; the
+> older framing is superseded here.
 >
-> **The thesis.** Orbit recovery was being discharged *class by class* (CFI odd-degree, then
-> even/saturated; schemes rank-2, then rank-3, rank-4, …). There are **unboundedly many
-> classes**, so that ladder stalls the project. The turn: prove recovery **non-class-specifically**
-> — once, behind a generic engine — with the per-class theorems demoted to *witnesses* that
-> populate an abstract predicate.
+> **The thesis.** Recovery (and the oracle firing built on it) was being discharged *class by class* —
+> CFI odd-degree then even, schemes rank-2/3/4, *and* the linear oracle's CFI-gadget completeness.
+> There are **unboundedly many classes**, so that ladder stalls. The turn: prove recovery
+> **non-class-specifically**, once, behind a generic engine, with per-class theorems demoted to
+> *witnesses* of an abstract predicate — and **fold both oracles' firing into that one recovery-based
+> harvest**, so class-specificity is quarantined into a single *depth* witness.
 >
 > **What is built (all axiom-clean `[propext, Classical.choice, Quot.sound]`; full build green):**
-> - **The engine** — [`ChainDescent/Saturation.lean`](../GraphCanonizationProofs/ChainDescent/Saturation.lean):
->   an *extensive* `Finset` operator saturates to a fixpoint in bounded rounds
->   (`exists_iterate_isFixed_within`). One lemma, two consumers.
-> - **Schemes de-classed** — `Scheme.lean §10.12/§10.13`: `EdgeGenerates` (the uniform
->   condition) and **`theorem_2_HOR_of_pPolynomial`** — *the entire metric / distance-regular
->   family (cycles, Johnson, Hamming, all DRGs) in one theorem*, no per-rank data.
-> - **Leg A transplanted** — `Cascade.lean`: the support induction (`exists_isBase_saturated`),
->   the D1-chain termination (`exists_symmetryOnly_saturated`), and metric D1
->   (`visiblyRecoverable_pPolynomial`) — the *same engine* now drives Leg A.
+> - **Engine** (`Saturation.lean`, §2) — an *extensive* `Finset` operator saturates to a fixpoint in
+>   bounded rounds (`exists_iterate_isFixed_within`). One lemma, every consumer.
+> - **Schemes** (`Scheme.lean`, §3) — `EdgeGenerates` + **`theorem_2_HOR_of_pPolynomial`**: the entire
+>   metric / distance-regular family (cycles, Johnson, Hamming, all DRGs) in **one theorem**.
+> - **Leg A** (`Cascade.lean`, §4, §7) — the support induction to a base (`exists_isBase_saturated`),
+>   the tight bound `base(g) ≤ |support|` (`exists_isBase_saturated_support`), the choice-free
+>   iso-invariant **forced node** (`forcedNode`, `forcedNode_relabel`), and the recovery-axes
+>   separation (`recoverableAt_base_iff_discrete`: recovery ⟺ `Discrete` at the base).
+> - **Leg B** (`Cascade.lean`, `CascadeOracle.lean`, §5) — the linear oracle's firing **folded into the
+>   colour-model recovery/harvest** (`harvest_fires_of_cellsAreOrbits_discrete`); the precise D2
+>   predicate `ResidualInvolutive` (+ `residualAbelian_of_involutive`, wiring in the orphaned
+>   `ResidualAbelian`); the order-model firing now **legacy**.
+> - **Unified oracle** (§6) — both oracles fire through *one* mechanism: recovery → colour-match →
+>   verify; the seal's D1 / D2 / wall becomes a **depth** distinction.
 >
-> **Tight support bound — LANDED (2026-06-02).** `base(g) ≤ |support|` is now proved
-> (`exists_isBase_saturated_support`, `Cascade.lean`), via an **interval-invariant** engine
-> variant (`exists_iterate_isFixed_within'`, `Saturation.lean`) — invariance required only on the
-> `f`-reachable sets `S₀ ⊆ s ⊆ B`, not all of `B`. Axiom-clean. See §5.
+> **Open frontier — where a fresh reader picks up (§9):** **M-B** (the concrete
+> `colourMatchPerm` / `matchOracle` construction — the one shared open unit firing *both* oracles),
+> **M-C** (multi-step depth for `tw(H)`), **"B's core"** (the substrate-conditional depth witness),
+> **flag iso-invariance**, the **IR-stickiness axis** (multipede, flagged), and the **wall**
+> (¬D1∧¬D2, Cameron/Johnson). The first four are bounded / not GI-hard; the last two are the honest
+> boundary.
 >
-> **Forced-node iso-invariance — LANDED (2026-06-02), not via the spine.** The choice-free
-> canonical base is `forcedNode adj P S₀ := S₀ ∪ movedSet adj P S₀` (individualize the whole
-> residual support): `forcedNode_isBase` (a base, no `Classical.choice`) + `forcedNode_image` /
-> `movedAt_image_iff` (automorphism-equivariant, hence iso-invariant). The spine route is blocked
-> (its `defaultColouring` is index-based, not aut-invariant); the *semantic* `movedSet` is directly
-> equivariant. Axiom-clean. See §5.
->
-> **Recovery axes separated — LANDED (2026-06-02).** `recoverableAt_base_iff_discrete` /
-> `forcedNode_recoverable_iff_discrete`: at the canonical base, orbit recovery is *exactly*
-> `Discrete (warmRefine …)`, so the two axes (symmetry / IR-stickiness) are formally separated and
-> the flag is pinned to `¬ Discrete`. Plus `movedSet_eq_nonsingletonCells_of_recoverable`:
-> `forcedNode` is refinement-computable where recovery holds. Axiom-clean. See §5 item 3.
->
-> **Arbitrary-relabel equivariance — LANDED (2026-06-02).** The `(adj, P)`-relabel action
-> (`relabelAdj` / `relabelP`) is built and `forcedNode_relabel` proves the forced node commutes
-> with **any** relabelling `σ` (not just `σ ∈ Aut`) — full canonization-sense iso-invariance.
-> Axiom-clean. See §5 item 3c.
->
-> **Open (the remaining frontier):** only the IR-stickiness axis itself (3b — the multipede
-> boundary, correctly *flagged*, not solved; per-class it is the existing `CascadesAt` witnesses).
-> See §5.
->
-> Companions: [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) (the witness
-> layer this generalizes), [`chain-descent-harvest-window.md`](./chain-descent-harvest-window.md)
-> (the lemma this realizes — Leg A), [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)
-> §0.5 (the seal: `EdgeGenerates`/`PPolynomial` are concrete **D1**).
+> Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
+> [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
+> [cascade-oracle](./chain-descent-cascade-oracle.md) + [linear-oracle](./chain-descent-linear-oracle.md)
+> (the two oracles, **unified here** — those docs' order-model firing is now legacy),
+> [exhaustive-obstruction](./chain-descent-exhaustive-obstruction.md) §0.5 (the seal: `EdgeGenerates`/
+> `PPolynomial` are concrete **D1**).
 
 ---
 
@@ -201,7 +191,75 @@ the Leg-A screen predicates (`Findable`/`VisiblyRecoverable`) in saturation-clos
 
 ---
 
-## 5. What is proved vs. open
+## 5. Leg B de-classed — the linear oracle's firing folded into recovery
+
+`Cascade.lean`, `CascadeOracle.lean`. **Leg B** of the seal is the *hidden-abelian* (¬D1 ∧ D2) case:
+a true symmetry 1-WL cannot see (CFI gauge twists). The **linear oracle** is its component. It was
+designed *early*, before the recovery framework, so it grew a parallel completeness machinery routed
+**class by class** through CFI gadgets — the same drift the scheme ladder had, in a different file.
+
+### 5.1 The early-design drift
+
+The linear oracle fired in the **order model**: read a unique candidate twist off one branch's
+reverse-symmetric propagation, relabel the canonical leaf matrix (`canonAdj`), and prune
+(`RealizableFlip` / `ConfigSwap`). Discharging that for CFI ran through `CFIGadgetFlippable` /
+`CFIParityDecisionFlippable` (gadget cycle-space, `tw(H)`) — **per class** — and bottomed out at
+**σ-cell-coherence**, a property `cell_split_uniform_false` proves *false* in exactly the regime the
+oracle must handle (the decision pair shares a 1-WL cell). The abstract D2 predicate `ResidualAbelian`
+was left **orphaned** — defined but unused by the firing story.
+
+### 5.2 The fold (the colour model)
+
+The fix mirrors Leg A's spine-vs-semantic resolution (§4.1): bypass the order-model packaging and fire
+in the **colour model**, straight from recovery. The colour-model harvest needs only the orbit *map*
+`g r₁ = r₂` (not a *swap*), so the order-model σ-coherence never arises:
+
+- **`harvest_fires_of_cellsAreOrbits_discrete`** (`CascadeOracle.lean §C.2`) — at a recoverable +
+  discrete footprint, *any* colour-match candidate verifies (it equals the orbit automorphism, via
+  `harvest_isAut_of_discrete` + `warmRefine_transport`). **`colourMatch_exists_of_cellsAreOrbits`** —
+  the firing certificate *exists* (the orbit automorphism *is* a colour-match). Together: Leg B fires,
+  **order-free and class-agnostic**.
+- The order-model machinery (`ConfigSwap`, `CFIGadgetFlippable`, `canonAdj`-firing, `RealizableFlip`)
+  is now **legacy** — kept for the order-model *soundness* story, *not* the firing path. The
+  σ-coherence route (`C1b.3`) is **retired**, not pending.
+
+### 5.3 The precise D2 predicate (wiring `ResidualAbelian` in)
+
+`ResidualAbelian` (commuting) is too weak to make an orbit *map* a *swap*; the precise D2 is exponent-2:
+
+- **`ResidualInvolutive`** — every residual automorphism is an involution (the honest `Z₂^d` /
+  elementary-abelian form, exactly CFI's gauge group).
+- `residualAbelian_of_involutive` — exponent-2 ⟹ abelian, so the orphaned `ResidualAbelian` is now
+  *implied* by the precise predicate.
+- `orbitPartition_swap_of_involutive` / `swap_of_cellsAreOrbits_involutive` — an involutive orbit
+  witness is automatically a *swap* (`g a = b ∧ g b = a`); at a recoverable node every same-cell pair
+  has one. (The *swap* is what the legacy order model needs; the colour model (§5.2) needs only the
+  map — which is exactly why the swap turned out to be order-model packaging.)
+
+---
+
+## 6. The unified oracle: one harvest, two faces; the seal as depth
+
+With both legs folded into recovery, the **cascade oracle** (Leg A, visible) and the **linear oracle**
+(Leg B, hidden-abelian) are **one mechanism, two faces** ([cascade-oracle §1.4](./chain-descent-cascade-oracle.md)):
+at a recoverable node, construct the colour-match permutation from the two branch colourings, verify
+it edge-by-edge, harvest it before branching. The only differences are *what the verified map turns
+out to be* (a visible orbit map or a hidden gauge twist) and *how deep* one individualizes to reach
+recovery. The calculator/overview "two oracles" framing is the pre-fold view.
+
+So the seal's **D1 / D2 / ¬D1∧¬D2** trichotomy is now a **depth** distinction on one recovery axis:
+
+- **D1 (visible)** — recovery at depth `base(g)` (the symmetry's own support; Leg A).
+- **D2 (hidden-abelian)** — recovery at a deeper *concealment* depth (`tw(H)` for CFI; Leg B).
+- **¬D1 ∧ ¬D2 (the wall)** — recovery never at *polynomial* depth (non-abelian / hidden Johnson).
+
+Class-specificity is thereby quarantined into a **single depth-witness predicate** (`CascadesAt` /
+`recoverableByDepth`); the firing argument itself is class-agnostic. The per-class theorems (CFI
+`tw(H)`, schemes depth-1) are *witnesses* populating that predicate — see §8.
+
+---
+
+## 7. What is proved vs. open
 
 **Proved (axiom-clean, full build green):**
 - The engine (`Saturation.lean`).
@@ -216,60 +274,29 @@ the Leg-A screen predicates (`Findable`/`VisiblyRecoverable`) in saturation-clos
   (`Saturation.lean`); `MovedAt.anti` (the moved-set shrinks as `S₀` grows — the residual at
   `S ⊇ S₀` is a residual at `S₀`); `movedSet` / `movedStep_subset_bound` (the bound is
   `S₀ ∪ movedSet`, interval-invariant under `movedStep`). All axiom-clean.
+- **Leg A recovery-axes separation** — `recoverableAt_base_iff_discrete` /
+  `forcedNode_recoverable_iff_discrete` (recovery ⟺ `Discrete` at the base; the symmetry axis closed,
+  the IR-stickiness axis the sole residual), `movedSet_eq_nonsingletonCells_of_recoverable`
+  (`forcedNode` refinement-computable where recovery holds), and the full relabel equivariance
+  `forcedNode_relabel` (the forced node commutes with *any* `σ`). All axiom-clean.
+- **Leg B fold + D2 predicate** — `harvest_fires_of_cellsAreOrbits_discrete` /
+  `colourMatch_exists_of_cellsAreOrbits` (the colour-model firing, §5.2); `ResidualInvolutive`,
+  `residualAbelian_of_involutive`, `orbitPartition_swap_of_involutive`,
+  `swap_of_cellsAreOrbits_involutive` (the D2 predicate + swap certificate, §5.3). All axiom-clean.
 
-**Open (the deep frontier — each needs genuine design, not a quick add):**
-1. ~~**Tight support bound** `base(g) ≤ |support|`.~~ **DONE (2026-06-02)** —
-   `exists_isBase_saturated_support`, above. The engine variant whose invariance hypothesis is on
-   `f`-*reachable* sets (⊇ `S₀`), not all of `B`, is `exists_iterate_isFixed_within'`; it is
-   reusable as predicted.
-2. ~~**Forced-node iso-invariance.**~~ **DONE (2026-06-02), via a cleaner route than the spine.**
-   `soStep`/`movedStep` use `Classical.choice`, so their endpoint is not canonical. The fix
-   bypasses the choice entirely: `forcedNode adj P S₀ := S₀ ∪ movedSet adj P S₀` individualizes
-   the **whole residual support** at once, which is already a base (`forcedNode_isBase` — fixing
-   every moved point trivializes the residual group), and it is **automorphism-equivariant**
-   (`forcedNode_image` / `movedAt_image_iff`, via the conjugate `g π g⁻¹`), hence a canonical
-   function of iso-invariant data — not an arbitrary choice. `forcedNode_residual_invariant`: the
-   node is fixed by the very symmetry it resolves. All axiom-clean. **Why not the spine** (the
-   originally-anticipated route): the spine reaches discreteness of the *index-based*
-   `defaultColouring`, which is **not** automorphism-invariant, so it cannot constrain the
-   semantic residual group (the Fact-B bridge `orbit_iff_eq_of_discrete_warmRefine` only fires
-   through `individualizedColouring`, matching `defaultColouring` only at `D = univ`). The
-   semantic `movedSet` is directly equivariant — no spine needed. *Remaining* (folds into item 3):
-   the arbitrary-relabelling form (any `σ`, not just `σ ∈ Aut`) is the same conjugation over an
-   `(adj, P)`-relabel action; refinement-*computing* `forcedNode` is the recovery content below.
-3. **Full recovery** tying the two **orthogonal axes** (harvest-window §2.3): symmetry consumed
-   (= base reached) **and** no IR-stickiness ⟹ `Discrete` at the base ⟹ `CellsAreOrbits`. Now
-   **separated into pieces** (most of it landed 2026-06-02):
-   - **3a — the reduction, DONE.** `recoverableAt_base_iff_discrete` /
-     `forcedNode_recoverable_iff_discrete`: at a base (in particular `forcedNode`), orbit recovery
-     is *exactly* `Discrete (warmRefine …)`. This **separates the two axes formally** — once the
-     symmetry is consumed, the *only* remaining obstruction is IR-stickiness, and the flag is
-     pinned to `¬ Discrete` at the canonical node. (`⟸` is `cellsAreOrbits_of_discrete`; the base
-     upgrades it to an iff.) Axiom-clean.
-   - **3d — computability of the support, DONE.**
-     `mem_movedSet_iff_nonsingleton_cell_of_recoverable` /
-     `movedSet_eq_nonsingletonCells_of_recoverable`: at a recoverable node, `v` is moved iff it
-     sits in a **non-singleton 1-WL cell**, so `movedSet`/`forcedNode` are refinement-computable
-     exactly where recovery holds — the bridge from math object to algorithm input. Axiom-clean.
-   - **3b — the stickiness axis (the flagged boundary), OPEN by design.** "Is `warmRefine`
-     discrete at the base?" is unconditionally *false* (multipede / IR-blind-spot, strategy §15
-     gap 5) — correctly *flagged*, not solved. For specific classes it is the existing `CascadesAt`
-     / `recoverableByDepth_cfi`/`_scheme` witnesses; deliverable is to wire those in, not prove it
-     unconditionally.
-   - **3c — arbitrary-relabel equivariance, DONE (2026-06-02).** The `(adj, P)`-relabel action is
-     built (`relabelAdj` / `relabelP`), residual automorphisms transport across a relabelling both
-     ways (`residualAut_relabel` / `_symm`, via the conjugate `σ π σ⁻¹`), and the canonical node
-     commutes with **any** `σ` (not just `σ ∈ Aut`): `forcedNode_relabel : forcedNode (relabel… σ)
-     (S₀.image σ) = (forcedNode adj P S₀).image σ` (through `movedAt_relabel_iff` /
-     `movedSet_relabel`). This is full canonization-sense iso-invariance of the forced node.
-     Axiom-clean.
+**Leg A's own frontier — now closed except the flagged residual.** What was the deep Leg-A frontier
+(the tight support bound, forced-node iso-invariance, the recovery-axes reduction, arbitrary-relabel
+equivariance) all **landed (2026-06-02)** — see the Proved list above. The single Leg-A residual is
+**3b — the IR-stickiness axis**: "is `warmRefine` discrete at the
+base?" is unconditionally *false* (multipede / IR-blind-spot, strategy §15 gap 5) — correctly
+*flagged*, not solved; per-class it is the existing `CascadesAt` / `recoverableByDepth` witnesses.
 
-**Still genuinely hard / out of scope** (unchanged by this turn): the **wall** — hidden
-non-abelian (`¬D1 ∧ ¬D2`, Cameron/Johnson), and `(O*)-existence` (≡ GI ∈ P).
+**The full current frontier (both legs), and where to pick up, is §9.** It includes 3b above plus the
+Leg-B items (M-B, M-C, "B's core") and the cross-cutting flag-iso-invariance and wall.
 
 ---
 
-## 6. How this reframes the older docs
+## 8. How this reframes the older docs
 
 A fresh reader should treat the class-specific material as the **bottom (witness) layer**, not the
 plan:
@@ -284,13 +311,55 @@ plan:
   D1 screen is realized for the metric class. The "depth = `base(g)`" claim is the support induction
   here; the *tight* bound is open item (1).
 - [`chain-descent-calculator.md`](./chain-descent-calculator.md) §3/§5 — "cascade" as a class is
-  de-classed for metric schemes: no per-family certification predicate is needed there.
+  de-classed for metric schemes: no per-family certification predicate is needed there. **§6 (the
+  linear oracle) and §9's "two oracles"** describe the **order-model** firing (read a twist off
+  propagation, relabel `canonAdj`); that is now **legacy / soundness-only** — firing is the unified
+  colour-model harvest (§5–§6 here). Treat calculator §6 as the order-model soundness story, not the
+  current firing path.
+- [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md) §6/§7 — likewise
+  frames cascade and linear as two mechanisms with §7's order-model twist-reading; read it as the
+  gentle intro, but the current firing is the one harvest (§6 here).
+- [`chain-descent-strategy.md`](./chain-descent-strategy.md) §12/§13 — `warm_6_2` / the spine /
+  invariant 6.2 are **proved and load-bearing**, but their stated *role* as "what the linear oracle
+  fires on" (coupled component, provenance) is the legacy order model; in the current model they back
+  the substrate, and firing iso-invariance attaches to the forced node (`forcedNode_relabel`).
 - [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) §0.5 — the
-  seal's **D1** has concrete realizations (`EdgeGenerates`, `PPolynomial`); the seal itself
-  (exhaustiveness, leg C) is unchanged.
+  seal's **D1/D2/wall** has concrete realizations (`EdgeGenerates`, `PPolynomial`) and is now a
+  **depth** distinction (§6); the seal itself (exhaustiveness, leg C) is unchanged.
 
-**Bottom line for a fresh reader.** The project's recovery story is no longer "enumerate graph
-classes and grind each in Lean". It is: *one engine; one reduction to an abstract "the closure
-reaches the top" predicate; structural theorems that discharge that predicate for whole families;
-and per-class proofs only as witnesses.* The work left is genuine (the §5 frontier and the wall),
-not another rung on a class ladder.
+**Bottom line for a fresh reader.** The project's recovery-and-firing story is no longer "enumerate
+graph classes and grind each in Lean," nor "two separate oracles." It is: *one engine; one reduction
+to an abstract recovery predicate; structural theorems discharging it for whole families; one
+recovery-based harvest firing both oracles; and per-class proofs only as witnesses populating a single
+depth predicate.* The work left (§9) is genuine — the construction unit M-B, the depth witnesses, and
+the wall — not another rung on a class ladder.
+
+---
+
+## 9. Where to pick up — the current frontier
+
+For a fresh reader continuing the work. Every item is *isolated* by the de-classing; the first four
+are bounded (not GI-hard), the last two are the honest boundary.
+
+1. **M-B — the concrete colour-match oracle (the one shared open construction; fires *both* oracles).**
+   Build `colourMatchPerm` — the `Equiv.Perm` from the two discrete branch colourings, as the rankPerm
+   composition `(rankPerm χ_w)⁻¹ * (rankPerm χ_v)` — and `matchOracle : CascadeOracleSpec`; prove
+   `OrbitMapSpec` (soundness) and `CellComplete` (completeness, via `colourMatchPerm = g` from
+   `vertexRank_comp`) ⟹ `CascadeComplete` (via `cascadeComplete_of_cellsAreOrbits`). Recommended:
+   rankPerm composition + *construct-and-check* (avoid the existential-shortcut trap,
+   [cascade-oracle §2.6](./chain-descent-cascade-oracle.md)). Suggested home: relocate `vertexRank_comp`
+   / `rankPerm_comp` from `LinearOracle.lean` to `ChainDescent.lean`, build M-B in `CascadeOracle.lean`.
+2. **M-C — multi-step depth.** Generalize `indivWithRep` to a multi-step `indivWithSet` (+ transport)
+   so a discrete footprint is reachable over a *sequence* — CFI's `tw(H)` depth (M-B's `CellComplete`
+   covers one-step-discretizing nodes only).
+3. **"B's core" — the depth witness.** That an abelian (D2) residual's footprint discretizes within
+   *polynomial* depth. **Substrate-conditional** (CFI `tw(H)`, schemes depth-1 are the witnesses); NOT
+   provable unconditionally (false for unbounded treewidth) — this is the tractable/flagged
+   discriminator, the honest residual of completeness.
+4. **Flag iso-invariance** ([strategy §15 gap 2](./chain-descent-strategy.md)) — the constructed
+   oracle's verdict as a function of iso-invariant ids. `colourMatchPerm` is built from iso-invariant
+   colourings, so it *should* hold by construction; the obligation is undischarged.
+5. **The IR-stickiness axis (3b)** — "is `warmRefine` discrete at the base?" Unconditionally *false*
+   (multipede / IR-blind-spot, strategy §15 gap 5); correctly **flagged**, not solved.
+6. **The wall (leg C)** — hidden non-abelian (¬D1 ∧ ¬D2, Cameron/Johnson); `(O*)-existence` ≡ GI ∈ P.
+   Out of scope by design (the seal classifies it; it does not solve it).

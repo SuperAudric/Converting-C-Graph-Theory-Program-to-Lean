@@ -13,8 +13,11 @@ companion docs carry the detail:
 - [`chain-descent-calculator.md`](./chain-descent-calculator.md) — the
   **oracle**, the hardest single component, specified on its own so it can be
   worked on directly.
+- [`chain-descent-declassing.md`](./chain-descent-declassing.md) — read after
+  the two above: the *current* architecture (a unified oracle over de-classed
+  recovery) that supersedes this gentle intro's two-oracle framing.
 
-The aim of this doc is that after reading it, those two read easily.
+The aim of this doc is that after reading it, those read easily.
 
 ---
 
@@ -221,6 +224,10 @@ cheaply. The regime where it does:
   are hidden true symmetries, defused by discovering those twists from propagation
   patterns: the **linear oracle** (§7).
 
+(These two are now understood as two *faces* of one recovery-based harvest, not
+two separate mechanisms; the class-specificity above is only the recovery
+*depth*. See [declassing §6](./chain-descent-declassing.md).)
+
 Three supporting facts, standard from computational group theory, keep the
 *rest* of the accounting free: the chain is polynomial-size (you store
 generators, not group elements); the descent has ≤ `n` levels; and — the only
@@ -232,6 +239,13 @@ named component instead of smearing it across the algorithm.
 ---
 
 ## 7. The hidden-symmetry case: the linear oracle
+
+> **Framing note.** This section gives the *intuition* for hidden abelian
+> symmetry and the order-model *soundness* picture. It is no longer the firing
+> path: the current design fires a single unified colour-model harvest in which
+> the cascade and linear oracles are one mechanism (see
+> [declassing §5–§6](./chain-descent-declassing.md)). Read §7 for why the
+> hidden-symmetry case is sound, not for how it is now triggered.
 
 §4's oracle handles true symmetries whose orbit refinement *exposes* — certify one
 orbit, descend. This section is the other way a cell can be a true symmetry: the
@@ -370,4 +384,10 @@ Two places carry the precise list of what is incomplete or unproven:
   gaps: the open per-node problem (T-C), the precise definition of "cascade", and
   general-class (Tier-2/3) completeness of the now-built oracles.
 
-Read those two next; this overview was written to make them legible.
+The de-classing turn reframes the last two: recovery is now proved
+*non-class-specifically*, and per-class completeness is demoted to a witness
+layer rather than an oracle gap. For the current open list — M-B, the depth
+witnesses, and the wall — see [declassing](./chain-descent-declassing.md) §9
+frontier.
+
+Read those next; this overview was written to make them legible.

@@ -9,9 +9,12 @@
 > (`visiblyRecoverable_pPolynomial`, generalizing the rank-2 `visiblyRecoverable_scheme`). The
 > seal's **D1** has concrete realizations: `EdgeGenerates` = D1, `PPolynomial` = *graded* D1. Note
 > a correction the build forced: "visible symmetry ⟹ symmetry-only step" is **false** (CFI), so the
-> general induction tracks *moved* vertices, not symmetry-only ones. Still open: the *tight* support
-> bound `base(g) ≤ |support|`, forced-node iso-invariance, and full recovery (the IR-stickiness
-> axis) — de-classing doc §5. The original STATUS below stands for the lemma's own development.
+> general induction tracks *moved* vertices, not symmetry-only ones. **Update (2026-06-02):** the
+> *tight* support bound `base(g) ≤ |support|` and forced-node iso-invariance both **landed**
+> (`exists_isBase_saturated_support`, `forcedNode`/`forcedNode_relabel`); the recovery axes are
+> formally separated (`recoverableAt_base_iff_discrete`), leaving only the **IR-stickiness axis**
+> (multipede, flagged). The current frontier is **de-classing doc §9**. The original STATUS below
+> stands for the lemma's own development.
 
 > **STATUS: concept VALIDATED; screen predicates + Phase-0/Phase-1 anchors BUILT in
 > Lean, axiom-clean. Open core = "B's core" (the general D2 bridge).**

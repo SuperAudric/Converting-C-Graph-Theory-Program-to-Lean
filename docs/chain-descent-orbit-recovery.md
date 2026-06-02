@@ -41,31 +41,21 @@ interesting content is empirical: F7 (cells = orbits at depth 1)
 holds for many CFI bases but **not** all — Rook3×3 subset start is
 a clean counterexample requiring depth = tw(H) = 4.
 
-> **Forward-compat — this program is leg A of the oracle-capability seal**
-> ([exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)).
-> Orbit recovery *is* the cascade oracle's completeness leg. When this is pushed
-> past the current per-class results, state the target in **seal-compatible**
-> form: *every **unconditional** symmetry — one exposable by symmetry-only
-> individualization within the polynomial depth bound (the seal's predicate D1) —
-> is recovered.* Critically, **surface the un-recovered boundary as a named
-> property of the residual, not as a class restriction**: that boundary (the
-> decision-node-depth / cascade-1b frontier) is the predicate ¬D1, and ¬D1 is
-> *half of the leg-C fingerprint* the Cameron leg consumes. Burying the failure
-> mode inside "proved for class X" loses the load-bearing downstream input.
->
-> **Update (2026-06-02) — the seal-driven split is now realised; these theorems are
-> *witnesses*.** The harvest *argument* ("a symmetry with a poly-depth harvest window is
-> harvested") is proved **class-agnostically** — `colourMatch_eq_aut` /
+> **Where this sits now — leg A of the seal, and a *witness* (2026-06-02).** Orbit recovery is the
+> backbone of the cascade oracle's completeness ([exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruction.md)),
+> but the **harvest argument is now proved class-agnostically** — `colourMatch_eq_aut` /
 > `harvest_isAut_of_discrete`
 > ([`CascadeOracle.lean`](../GraphCanonizationProofs/ChainDescent/CascadeOracle.lean) §C.2): at a
 > discrete footprint the colour-match candidate equals the orbit automorphism (`warmRefine_transport`).
-> So **Theorem 1 (CFI) and Theorem 2 (schemes) are now correctly positioned as the *witnesses*
-> populating the abstract `CascadesAt` / D1 predicate** (the graph *has* a poly-depth harvest
-> window), not as the harvest reasoning. The only genuinely class-specific quantity is the window's
-> **depth** — and only for the *hidden-abelian* (leg-B) case, where it is the *concealment*
-> structure (CFI's `tw(H)` cycle-space, substrate-conditional). For *visible* symmetry (leg A) the
-> depth is `base(g)`, seal-characterizable. Full statement:
-> [harvest-window §2.4](./chain-descent-harvest-window.md).
+> So **Theorem 1 (CFI) and Theorem 2 (schemes) below are not the recovery *plan*; they are
+> *witnesses*** that a graph *has* a poly-depth harvest window (populating the abstract `CascadesAt` /
+> D1 predicate). The only genuinely class-specific quantity is that window's **depth**, and only for
+> the *hidden-abelian* (leg-B) case — there it is the *concealment* structure (CFI's `tw(H)`
+> cycle-space, **substrate-conditional**). For *visible* symmetry (leg A) the depth is `base(g)`,
+> seal-characterizable. The un-recovered boundary is therefore a **named property of the residual**
+> (¬D1 — half of the leg-C / Cameron fingerprint), *not* a class restriction. Full statement:
+> [harvest-window §2.4](./chain-descent-harvest-window.md); the current approach in full:
+> [chain-descent-declassing.md](./chain-descent-declassing.md).
 
 ---
 
@@ -200,10 +190,14 @@ none-yet-known. Three concrete tiers:
   [`chain-descent-tier3a-cascade-composition.md`](./chain-descent-tier3a-cascade-composition.md)
   as the paper-tractable stepping stone.
 
-This doc is currently focused on **Tier 1**. Tier 2 is sketched in §10
-as a follow-on direction. Tier 3 is left open;
-[`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
-scopes a paper plan.
+**These tiers are the witness layer, not the live program.** The de-classing turn
+([`chain-descent-declassing.md`](./chain-descent-declassing.md)) replaced the tier-by-tier ladder
+with one class-agnostic reduction: the metric / distance-regular family (Tier 2's schemes and more)
+is now a **single** theorem (`theorem_2_HOR_of_pPolynomial`), and Tier 1 / Tier 3 are subsumed as
+*witnesses* populating the abstract `CascadesAt` predicate. Everything from §5 on is the historical
+per-class proof development — correct and load-bearing **as witnesses** (and a candidate for archival
+once fully subsumed), **not** an open proof-obligation queue. Read its "remaining work" / "next paper"
+phrasings as the record of how the witnesses were built, not as the current plan.
 
 ---
 
@@ -264,8 +258,11 @@ The "for fixed `tw(H)`" qualifier is essential. For unbounded `tw`,
 the bound is not polynomial; this is consistent with chain descent's
 flagged region containing CFI over high-treewidth bases.
 
-This Corollary is the actual deliverable for chain descent's
-**cascade-class polynomial-or-flag guarantee** at the CFI level.
+This Corollary is the **CFI witness** of the cascade-class guarantee — not the deliverable itself.
+The deliverable is the class-agnostic harvest ([declassing §6](./chain-descent-declassing.md)); this
+is its bounded-`tw(H)` CFI instance. The cascade oracle's single-path recursion in fact removes the
+*fixed-`tw`* restriction ([cascade-oracle §4.6](./chain-descent-cascade-oracle.md)), replacing the
+`cell_size^{tw}` **product** with a `tw · n²` **sum**.
 
 ---
 
@@ -351,8 +348,9 @@ are precisely the high-tw cases where IR struggles.
 **Q5 (Tier 2 connection).** For association schemes (Tier 2 of §4),
 1-WL at depth 1 is orbit-complete (essentially Piece C of
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md)).
-This is strictly stronger than Tier 1's `k ≤ tw(H)` bound. Tier 2
-would be the next paper-write target.
+This is strictly stronger than Tier 1's `k ≤ tw(H)` bound. *(Historical: Tier 2 was the next
+paper-write target; it has since been **subsumed** — the metric/DRG family, schemes included, is one
+theorem `theorem_2_HOR_of_pPolynomial`. See [declassing §3](./chain-descent-declassing.md).)*
 
 ---
 
@@ -1719,8 +1717,10 @@ Status as of 2026-05-26:
   paragraph about how the CFI wrapper interacts with the scheme
   structure of the base.
 
-Once G1–G4 and G7 have explicit paragraphs, Theorem 2 is
-**paper-finalized**. G5 (Lean) is a separate multi-week project.
+*(Historical framing.)* Once G1–G4 and G7 had explicit paragraphs, Theorem 2 would be
+**paper-finalized**. **Superseded:** the per-class Theorem-2 paper goal is replaced by the de-classing
+result `theorem_2_HOR_of_pPolynomial` (the whole metric/DRG family in one theorem); the material below
+stands as the witness-layer record. See [declassing §3](./chain-descent-declassing.md).
 
 **Note on the Tier 1 / Tier 2 contrast:**
 
