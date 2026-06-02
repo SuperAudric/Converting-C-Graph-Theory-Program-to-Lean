@@ -122,4 +122,4 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Saturation.card_add_le_of_strict` | 67-79 | — | — |
+| `Saturation.card_add_le_of_strict` | 83-95 | — | — |

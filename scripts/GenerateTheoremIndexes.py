@@ -672,6 +672,11 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
     def _hs(decl: str) -> int:
         return source[decl].get("header_start") or source[decl].get("line") or 0
 
+    # Records each newly-added row's exact rendered line, so the caller can
+    # locate it (by index) in the written file and report where to edit its
+    # Description.
+    new_row_strs: dict[str, str] = {}
+
     emitted_sections: set[str] = set()
     for sec in layout["sections"]:
         out.append(sec["header"])
@@ -682,7 +687,9 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
         def _flush(limit: int, _p=pending) -> None:
             nonlocal pi
             while pi < len(_p) and _hs(_p[pi]) <= limit:
-                out.append(render_new_row(_p[pi], source, global_desc, desc_override, with_line_numbers))
+                _r = render_new_row(_p[pi], source, global_desc, desc_override, with_line_numbers)
+                out.append(_r)
+                new_row_strs[_p[pi]] = _r
                 pi += 1
 
         for item in sec["items"]:
@@ -708,7 +715,9 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
             _flush(_hs(decl))
             out.append(render_tracked_row(decl, source, row, desc_override, with_line_numbers))
         while pi < len(pending):
-            out.append(render_new_row(pending[pi], source, global_desc, desc_override, with_line_numbers))
+            _r = render_new_row(pending[pi], source, global_desc, desc_override, with_line_numbers)
+            out.append(_r)
+            new_row_strs[pending[pi]] = _r
             pi += 1
 
     # Files with new decls but no existing section: append a fresh section.
@@ -718,10 +727,12 @@ def render_layout(layout: dict, key: tuple[str, bool], source: dict,
         out += [f"## {sec_path}", ""]
         out += table_header(with_line_numbers)
         for decl in sorted(new_by_section[sec_path], key=_hs):
-            out.append(render_new_row(decl, source, global_desc, desc_override, with_line_numbers))
+            _r = render_new_row(decl, source, global_desc, desc_override, with_line_numbers)
+            out.append(_r)
+            new_row_strs[decl] = _r
         out.append("")
 
-    return "\n".join(out).rstrip() + "\n"
+    return "\n".join(out).rstrip() + "\n", new_row_strs
 
 
 # ---------------------------------------------------------------------------
@@ -763,6 +774,10 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
                     global_desc.setdefault(decl, item[1]["description"])
 
     orphans: list[str] = []
+    # Newly-discovered rows, surfaced at end-of-run by their location *in the
+    # index file* so their (still-blank) Description cell can be edited directly
+    # without diffing. Line + Notes are already computed; only Description is owed.
+    new_rows: list[tuple[str, int, str]] = []  # (index-file path, index-file line, qualified-name)
     for key, path in _INDEX_PATHS.items():
         layout = layouts[key]
         bucket_decls = {d for d in source if bucket_of[d] == key}
@@ -781,9 +796,15 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
             if d not in covered:
                 new_by_section[str(source[d]["path"])].append(d)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(render_layout(
+        text, new_row_strs = render_layout(
             layout, key, source, by_last, bucket_decls, bucket_of,
-            global_desc, desc_override, new_by_section, args.with_line_numbers, orphans))
+            global_desc, desc_override, new_by_section, args.with_line_numbers, orphans)
+        path.write_text(text)
+        rel = str(path.relative_to(REPO_ROOT))
+        file_lines = text.split("\n")
+        for d, row_str in new_row_strs.items():
+            ln = file_lines.index(row_str) + 1 if row_str in file_lines else 0
+            new_rows.append((rel, ln, d))
         added = sum(len(v) for v in new_by_section.values())
         print(f"Wrote {path.relative_to(REPO_ROOT)} "
               f"({len(bucket_decls)} decls, {added} newly added)")
@@ -793,6 +814,12 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
               f"(kept verbatim — delete by hand if stale):")
         for o in sorted(set(orphans)):
             print(f"    {o}")
+
+    if new_rows:
+        print(f"\n{len(new_rows)} newly added row(s) — edit the Description cell "
+              f"at each index-file location below:")
+        for rel, ln, decl in sorted(new_rows):
+            print(f"    {rel}:{ln}  {decl}")
 
 
 # ---------------------------------------------------------------------------

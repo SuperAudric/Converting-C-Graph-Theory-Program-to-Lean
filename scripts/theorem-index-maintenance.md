@@ -42,6 +42,10 @@ changes. Existing Descriptions are preserved. Then sanity-check:
 - The run prints "N tracked row(s) with no matching source decl". A small stable set of
   anonymous-instance rows (`Decidable (…)`, `Fintype …`) is expected and kept verbatim.
   Anything else is a stale row to delete by hand or a resolution bug.
+- The run also prints "N newly added row(s)" with each new row's **location in the index file**
+  (`PublicTheoremIndex.md:<line>  <qualified-name>`). Line + Notes are already filled; only the
+  Description is owed — jump to each location and write it (or supply them via `--descriptions`,
+  §2). The locations are exact for the file as just written.
 - `git diff` should be row-level only (no prose +/- lines).
 
 ---
