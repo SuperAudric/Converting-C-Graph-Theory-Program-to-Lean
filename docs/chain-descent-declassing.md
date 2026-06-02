@@ -27,9 +27,16 @@
 > variant (`exists_iterate_isFixed_within'`, `Saturation.lean`) — invariance required only on the
 > `f`-reachable sets `S₀ ⊆ s ⊆ B`, not all of `B`. Axiom-clean. See §5.
 >
-> **Open (the deep frontier, each needs design):** forced-node iso-invariance (a
-> partition-invariant selector + the spine); full recovery tying the symmetry and IR-stickiness
-> axes. See §5.
+> **Forced-node iso-invariance — LANDED (2026-06-02), not via the spine.** The choice-free
+> canonical base is `forcedNode adj P S₀ := S₀ ∪ movedSet adj P S₀` (individualize the whole
+> residual support): `forcedNode_isBase` (a base, no `Classical.choice`) + `forcedNode_image` /
+> `movedAt_image_iff` (automorphism-equivariant, hence iso-invariant). The spine route is blocked
+> (its `defaultColouring` is index-based, not aut-invariant); the *semantic* `movedSet` is directly
+> equivariant. Axiom-clean. See §5.
+>
+> **Open (the deep frontier):** full recovery tying the symmetry and IR-stickiness axes — and,
+> folded in, the arbitrary-relabelling equivariance + refinement-*computability* of `forcedNode`.
+> See §5.
 >
 > Companions: [`chain-descent-orbit-recovery.md`](./chain-descent-orbit-recovery.md) (the witness
 > layer this generalizes), [`chain-descent-harvest-window.md`](./chain-descent-harvest-window.md)
@@ -204,11 +211,21 @@ the Leg-A screen predicates (`Findable`/`VisiblyRecoverable`) in saturation-clos
    `exists_isBase_saturated_support`, above. The engine variant whose invariance hypothesis is on
    `f`-*reachable* sets (⊇ `S₀`), not all of `B`, is `exists_iterate_isFixed_within'`; it is
    reusable as predicted.
-2. **Forced-node iso-invariance.** `soStep`/`movedStep` use `Classical.choice`, so the saturated
-   node is not canonical. Iso-invariance needs a **partition-invariant selector** wired to the
-   **spine** (`spine_branch_independent` / `SpineChain.eq_default`,
-   [`chain-descent-strategy.md`](./chain-descent-strategy.md) §12). This is the flag-iso-invariance
-   content (strategy §15 gap 2).
+2. ~~**Forced-node iso-invariance.**~~ **DONE (2026-06-02), via a cleaner route than the spine.**
+   `soStep`/`movedStep` use `Classical.choice`, so their endpoint is not canonical. The fix
+   bypasses the choice entirely: `forcedNode adj P S₀ := S₀ ∪ movedSet adj P S₀` individualizes
+   the **whole residual support** at once, which is already a base (`forcedNode_isBase` — fixing
+   every moved point trivializes the residual group), and it is **automorphism-equivariant**
+   (`forcedNode_image` / `movedAt_image_iff`, via the conjugate `g π g⁻¹`), hence a canonical
+   function of iso-invariant data — not an arbitrary choice. `forcedNode_residual_invariant`: the
+   node is fixed by the very symmetry it resolves. All axiom-clean. **Why not the spine** (the
+   originally-anticipated route): the spine reaches discreteness of the *index-based*
+   `defaultColouring`, which is **not** automorphism-invariant, so it cannot constrain the
+   semantic residual group (the Fact-B bridge `orbit_iff_eq_of_discrete_warmRefine` only fires
+   through `individualizedColouring`, matching `defaultColouring` only at `D = univ`). The
+   semantic `movedSet` is directly equivariant — no spine needed. *Remaining* (folds into item 3):
+   the arbitrary-relabelling form (any `σ`, not just `σ ∈ Aut`) is the same conjugation over an
+   `(adj, P)`-relabel action; refinement-*computing* `forcedNode` is the recovery content below.
 3. **Full recovery** tying the two **orthogonal axes** (harvest-window §2.3): symmetry consumed
    (= base reached, done) **and** no IR-stickiness ⟹ `Discrete` at the base ⟹ `CellsAreOrbits`.
    The second axis is the multipede / IR-blind-spot direction (strategy §15 gap 5), correctly

@@ -982,6 +982,126 @@ theorem exists_isBase_saturated_support (adj : AdjMatrix n) (P : PMatrix n)
     rw [movedStep_pos hex] at hfix
     exact movedAt_not_mem hex.choose_spec (Finset.insert_eq_self.mp hfix)
 
+/-! ## Leg A — forced-node iso-invariance (the choice-free canonical base)
+
+`exists_isBase_saturated`/`movedStep` reach a base via `Classical.choice` (`h.choose` picks
+*some* moved vertex), so the node they land on is not canonical. The fix is to bypass the
+choice entirely: individualizing the **whole residual support** `movedSet adj P S₀` at once
+already yields a base (fixing every moved point trivializes the residual group), and this
+node — `forcedNode adj P S₀` — is a *deterministic* function of `(adj, P, S₀)`,
+**automorphism-equivariant** (`forcedNode_image`), hence iso-invariant: it commutes with the
+graph's symmetries rather than depending on an arbitrary choice.
+
+Note this does **not** go through the spine (`SpineChain.eq_default`): the spine reaches
+discreteness of the *index-based* `defaultColouring`, which is not automorphism-invariant, so
+it cannot constrain the semantic residual group except at `D = univ`. The semantic
+`movedSet` is directly equivariant, which is cleaner. Refinement-*computing* `forcedNode` at a
+node (rather than defining it) is the open recovery content (declassing §5 item 3). The
+arbitrary-relabelling form (any `σ`, not just `σ ∈ Aut`) is the same conjugation over an
+`(adj, P)`-relabel action. -/
+
+/-- **The canonical forced node:** individualize `S₀` together with the *entire* residual
+support `movedSet adj P S₀`. Choice-free — the deterministic, iso-invariant counterpart of the
+`Classical.choice`-driven `movedStep` saturation. -/
+noncomputable def forcedNode (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) :
+    Finset (Fin n) :=
+  S₀ ∪ movedSet adj P S₀
+
+/-- **The forced node is a base — choice-free.** Individualizing the full residual support
+trivializes the residual group: a residual automorphism at `forcedNode` moving some `v` would,
+by `MovedAt.anti`, move `v` already at `S₀`, putting `v ∈ movedSet ⊆ forcedNode`; but residual
+automorphisms fix `forcedNode` pointwise. The deterministic counterpart of
+`exists_isBase_saturated` (no `Classical.choice`). -/
+theorem forcedNode_isBase (S₀ : Finset (Fin n)) : IsBase adj P (forcedNode adj P S₀) := by
+  apply isBase_of_no_moved
+  rintro ⟨v, hv⟩
+  have hvnotin : v ∉ forcedNode adj P S₀ := movedAt_not_mem hv
+  have hv0 : MovedAt adj P S₀ v := hv.anti Finset.subset_union_left
+  exact hvnotin (Finset.mem_union_right _ (mem_movedSet.mpr hv0))
+
+/-- **Automorphism-equivariance of `MovedAt` (one direction).** A graph automorphism `g`
+preserving `P` carries a moved vertex at `S₀` to a moved vertex at the relabelled set
+`S₀.image g`, via the conjugate residual automorphism `g π g⁻¹`. -/
+theorem movedAt_image {g : Equiv.Perm (Fin n)} (hg : IsAut g adj)
+    (hgP : ∀ x u, P (g x) (g u) = P x u) {S₀ : Finset (Fin n)} {v : Fin n}
+    (h : MovedAt adj P S₀ v) : MovedAt adj P (S₀.image g) (g v) := by
+  obtain ⟨π, ⟨hAut, hP, hFix⟩, hπv⟩ := h
+  refine ⟨(g.symm.trans π).trans g,
+    ⟨IsAut.trans (IsAut.trans (IsAut.symm hg) hAut) hg, ?_, ?_⟩, ?_⟩
+  · -- `P`-preservation of `g π g⁻¹`
+    intro x u
+    show P (g (π (g.symm x))) (g (π (g.symm u))) = P x u
+    rw [hgP (π (g.symm x)) (π (g.symm u)), hP (g.symm x) (g.symm u)]
+    have h2 := hgP (g.symm x) (g.symm u)
+    simp only [Equiv.apply_symm_apply] at h2
+    exact h2.symm
+  · -- fixes `S₀.image g` pointwise
+    intro s hs
+    rw [Finset.mem_image] at hs
+    obtain ⟨s₀, hs₀, rfl⟩ := hs
+    show g (π (g.symm (g s₀))) = g s₀
+    rw [Equiv.symm_apply_apply, hFix s₀ hs₀]
+  · -- moves `g v`
+    show g (π (g.symm (g v))) ≠ g v
+    rw [Equiv.symm_apply_apply]
+    exact fun heq => hπv (g.injective heq)
+
+/-- **Automorphism-equivariance of `MovedAt`.** The iff form of `movedAt_image`; the reverse
+direction is `movedAt_image` applied at `g⁻¹`. -/
+theorem movedAt_image_iff {g : Equiv.Perm (Fin n)} (hg : IsAut g adj)
+    (hgP : ∀ x u, P (g x) (g u) = P x u) {S₀ : Finset (Fin n)} (v : Fin n) :
+    MovedAt adj P (S₀.image g) (g v) ↔ MovedAt adj P S₀ v := by
+  refine ⟨fun h => ?_, movedAt_image hg hgP⟩
+  have hgP' : ∀ x u, P (g.symm x) (g.symm u) = P x u := by
+    intro x u
+    have := hgP (g.symm x) (g.symm u)
+    simpa only [Equiv.apply_symm_apply] using this.symm
+  have key := movedAt_image (IsAut.symm hg) hgP' (S₀ := S₀.image g) (v := g v) h
+  simpa only [Finset.image_image, Equiv.symm_comp_self, Finset.image_id,
+    Equiv.symm_apply_apply] using key
+
+/-- **The residual support commutes with automorphisms.** A `P`-preserving graph automorphism
+`g` carries the support at `S₀` to the support at the relabelled set `S₀.image g`. -/
+theorem movedSet_image {g : Equiv.Perm (Fin n)} (hg : IsAut g adj)
+    (hgP : ∀ x u, P (g x) (g u) = P x u) (S₀ : Finset (Fin n)) :
+    movedSet adj P (S₀.image g) = (movedSet adj P S₀).image g := by
+  ext w
+  rw [mem_movedSet, Finset.mem_image]
+  constructor
+  · intro hw
+    refine ⟨g.symm w, ?_, by rw [Equiv.apply_symm_apply]⟩
+    rw [mem_movedSet]
+    have key : MovedAt adj P (S₀.image g) (g (g.symm w)) ↔ MovedAt adj P S₀ (g.symm w) :=
+      movedAt_image_iff hg hgP (g.symm w)
+    rw [Equiv.apply_symm_apply] at key
+    exact key.mp hw
+  · rintro ⟨v, hv, rfl⟩
+    exact (movedAt_image_iff hg hgP v).mpr (mem_movedSet.mp hv)
+
+/-- **The forced node is automorphism-equivariant (iso-invariance).** `forcedNode` commutes
+with every `P`-preserving graph automorphism: it is a canonical function of iso-invariant
+data, not an arbitrary `Classical.choice`. -/
+theorem forcedNode_image {g : Equiv.Perm (Fin n)} (hg : IsAut g adj)
+    (hgP : ∀ x u, P (g x) (g u) = P x u) (S₀ : Finset (Fin n)) :
+    forcedNode adj P (S₀.image g) = (forcedNode adj P S₀).image g := by
+  unfold forcedNode
+  rw [Finset.image_union, movedSet_image hg hgP]
+
+/-- **The forced node is fixed by the residual group it resolves.** Every residual
+automorphism at `S₀` maps `forcedNode adj P S₀` to itself setwise — the canonical node is
+invariant under exactly the symmetry it is meant to consume. -/
+theorem forcedNode_residual_invariant (S₀ : Finset (Fin n)) {g : Equiv.Perm (Fin n)}
+    (hg : ResidualAut adj P S₀ g) :
+    (forcedNode adj P S₀).image g = forcedNode adj P S₀ := by
+  obtain ⟨hAut, hP, hFix⟩ := hg
+  have hS₀ : S₀.image g = S₀ := by
+    ext x
+    simp only [Finset.mem_image]
+    constructor
+    · rintro ⟨y, hy, rfl⟩; rwa [hFix y hy]
+    · intro hx; exact ⟨x, hx, hFix x hx⟩
+  rw [← forcedNode_image hAut hP S₀, hS₀]
+
 /-! ## Leg A / D1 — the whole metric/DRG family (de-classing `visiblyRecoverable_scheme`)
 
 The scheme de-classing (`Scheme.lean §10.13`, `theorem_2_HOR_of_pPolynomial`) recovers orbits
