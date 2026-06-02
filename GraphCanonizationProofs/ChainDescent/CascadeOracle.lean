@@ -296,6 +296,98 @@ theorem cellsAreOrbits_of_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
     CellsAreOrbits adj P S :=
   fun v w hcell => (orbit_iff_eq_of_discrete_warmRefine hd v w).mpr (hd v w hcell)
 
+/-! ### §C.2 — Leg (a): the colour-match candidate *is* the orbit automorphism
+
+The cascade oracle harvests by constructing a candidate `t` that matches one branch's
+refined colours to the other's (`docs/chain-descent-cascade-oracle.md` §4.2), then
+verifying `t ∈ Aut`. **Leg (a) of the harvest-window argument** is that this verification
+*succeeds whenever a genuine orbit automorphism exists* — i.e. the construction is
+complete, not just sound. The lemma below is the mechanical core: at a **discrete**
+footprint, any permutation `t` realising the colour-match `χ₂ ∘ t = χ₁` (where
+`χᵢ = warmRefine …`) **equals** the orbit automorphism `g`, hence is itself an
+automorphism. No σ-coherence, no cycle construction, no rank rebasing (so no conjugation
+gap): the witness is forced by `warmRefine_transport` (equivariance) + injectivity.
+
+The transport hypothesis `hχ : ∀ v, χ₂ (g v) = χ₁ v` is what couples the two branches;
+discharging it for a concrete individualization is the downstream obligation (it needs a
+*uniform* fresh colour on the explored representative — the index-based
+`individualizedColouring` gives the swapped pair `r₁, r₂` distinct colours and breaks
+`hχ` at exactly that pair). Here it is taken as given, isolating the linchpin. -/
+
+/-- **Leg (a) linchpin — the colour-match candidate equals the orbit automorphism.**
+If `g ∈ Aut(adj)` carries the branch-1 configuration `(P, χ₁)` onto the branch-2
+configuration `(P, χ₂)` (`hP`, `hχ`), the branch-2 refinement is `Discrete`, and `t`
+realises the colour-match `warmRefine … χ₂ (t v) = warmRefine … χ₁ v`, then `t = g`.
+Forced by `warmRefine_transport` + injectivity at the discrete footprint. -/
+theorem colourMatch_eq_aut {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {g t : Equiv.Perm (Fin n)} {χ₁ χ₂ : Colouring n}
+    (hg : IsAut g adj) (hP : ∀ v u, P (g v) (g u) = P v u)
+    (hχ : ∀ v, χ₂ (g v) = χ₁ v)
+    (hdisc : Discrete (warmRefine adj P χ₂))
+    (ht : ∀ v, warmRefine adj P χ₂ (t v) = warmRefine adj P χ₁ v) :
+    t = g := by
+  have htrans : ∀ v, warmRefine adj P χ₂ (g v) = warmRefine adj P χ₁ v :=
+    fun v => warmRefine_transport hg hP hχ v
+  refine Equiv.ext (fun v => hdisc (t v) (g v) ?_)
+  rw [ht v, htrans v]
+
+/-- **Leg (a) deliverable — the colour-match candidate verifies.** Under the same
+hypotheses, the constructed candidate `t` is an automorphism of `adj` (it equals `g`).
+This is exactly "the harvest's verification step succeeds whenever the orbit pair is
+genuine" — the completeness half the cascade oracle needs, given a discrete footprint. -/
+theorem colourMatch_isAut {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {g t : Equiv.Perm (Fin n)} {χ₁ χ₂ : Colouring n}
+    (hg : IsAut g adj) (hP : ∀ v u, P (g v) (g u) = P v u)
+    (hχ : ∀ v, χ₂ (g v) = χ₁ v)
+    (hdisc : Discrete (warmRefine adj P χ₂))
+    (ht : ∀ v, warmRefine adj P χ₂ (t v) = warmRefine adj P χ₁ v) :
+    IsAut t adj := by
+  rw [colourMatch_eq_aut hg hP hχ hdisc ht]; exact hg
+
+/-- **Uniform-colour individualization of an explored representative.** Individualize the
+committed set `S` by index (`individualizedColouring`) **plus** an explored rep `r` with a
+single *uniform* fresh colour `n+1` (distinct from every index colour `{1,…,n}` and the
+background `0`). The uniform colour on `r` is exactly what makes the orbit automorphism
+transport branch-`r₁` onto branch-`r₂`: the index-based colouring would hand `r₁` and `r₂`
+*distinct* colours and break the transport hypothesis at the swapped pair. -/
+def indivWithRep (n : Nat) (S : Finset (Fin n)) (r : Fin n) : Colouring n :=
+  fun v => if v = r then n + 1 else individualizedColouring n S v
+
+/-- **The transport hypothesis, discharged for `indivWithRep`.** An orbit automorphism `g`
+that fixes the committed set `S` pointwise and sends `r₁ ↦ r₂` (with `r₂ ∉ S`) carries the
+branch-`r₁` colouring onto the branch-`r₂` colouring: `χ₂ (g v) = χ₁ v` for every `v`. This
+is the `hχ` that `colourMatch_eq_aut` consumes, now proved rather than assumed. -/
+theorem indivWithRep_transport {n : Nat} {S : Finset (Fin n)} {g : Equiv.Perm (Fin n)}
+    {r₁ r₂ : Fin n} (hgS : FixesPointwise g S) (hgr : g r₁ = r₂) (hr₂S : r₂ ∉ S) (v : Fin n) :
+    indivWithRep n S r₂ (g v) = indivWithRep n S r₁ v := by
+  unfold indivWithRep individualizedColouring
+  by_cases hv1 : v = r₁
+  · subst hv1; rw [hgr]; simp
+  · rw [if_neg hv1]
+    by_cases hvS : v ∈ S
+    · have hgv : g v = v := hgS v hvS
+      have hvr2 : v ≠ r₂ := fun h => hr₂S (h ▸ hvS)
+      rw [hgv, if_neg hvr2, if_pos hvS]
+    · have hgvS : g v ∉ S := hgS.complement hvS
+      have hgvr2 : g v ≠ r₂ := by rw [← hgr]; exact fun h => hv1 (g.injective h)
+      rw [if_neg hgvr2, if_neg hgvS, if_neg hvS]
+
+/-- **Leg (a), grounded — the harvest's candidate verifies at a discrete footprint.**
+Combining the linchpin with the discharged transport: given a genuine orbit automorphism
+`g` (fixes the committed path `S`, `g r₁ = r₂`, `r₂ ∉ S`), a **discrete** branch-`r₂`
+footprint, and any colour-match permutation `t`, the candidate `t` is an automorphism of
+`adj`. No σ-coherence, no cycle, no rank rebasing. The remaining input — *discreteness of
+the footprint within a bounded depth* — is what the recursion (orbit recovery) supplies. -/
+theorem harvest_isAut_of_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {g t : Equiv.Perm (Fin n)} {S : Finset (Fin n)} {r₁ r₂ : Fin n}
+    (hg : IsAut g adj) (hP : ∀ v u, P (g v) (g u) = P v u)
+    (hgS : FixesPointwise g S) (hgr : g r₁ = r₂) (hr₂S : r₂ ∉ S)
+    (hdisc : Discrete (warmRefine adj P (indivWithRep n S r₂)))
+    (ht : ∀ v, warmRefine adj P (indivWithRep n S r₂) (t v)
+             = warmRefine adj P (indivWithRep n S r₁) v) :
+    IsAut t adj :=
+  colourMatch_isAut hg hP (indivWithRep_transport hgS hgr hr₂S) hdisc ht
+
 /-- **General-singleton round-1 match.** If `s` is a `χ`-singleton (uniquely
 coloured) and `a, b` (both `≠ s`) get the same colour after one `refineStep`, they
 share adjacency and `P`-relation to `s`. The arbitrary-singleton generalisation of
