@@ -96,7 +96,7 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `refineStep_singleton_pair_eq` | 391-416 | After individualizing a singleton `s`, two other vertices sharing a colour one refinement round later have identical adjacency and order-relation to `s`. Arbitrary-singleton generalisation of `Scheme.refineStep_round1_pair_eq`. | — |
+| `refineStep_singleton_pair_eq` | 426-451 | After individualizing a singleton `s`, two other vertices sharing a colour one refinement round later have identical adjacency and order-relation to `s`. Arbitrary-singleton generalisation of `Scheme.refineStep_round1_pair_eq`. | — |
 
 ## ChainDescent/Scheme.lean
 

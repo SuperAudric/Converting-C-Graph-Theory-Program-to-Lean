@@ -31,8 +31,11 @@
 > (the re-orientation, §2.4): **class-specificity lives only in the *witness* that a graph has
 > a polynomial-depth harvest window** (satisfies `CascadesAt` / D1∨D2), *never in the harvest
 > itself*. The seal **is** that characterization (D1/D2 are abstract), so the spine
-> `Findable ⟹ RecoverableByDepth ⟹ CellComplete [leg-(a)] ⟹ CascadeComplete` is class-agnostic.
-> The single irreducible class-specific remainder is **leg B's depth** — hidden-abelian: *how
+> `Findable ⟹ RecoverableByDepth ⟹ CellComplete [leg-(a)] ⟹ CascadeComplete` is class-agnostic *at
+> the reduction level* — its two ends and leg-(a) are proved; **the concrete `CellComplete` wiring
+> (`colourMatchPerm` + `matchOracle`) is the open unit M-B**, planned in
+> [cascade-oracle §2.6](./chain-descent-cascade-oracle.md). The single irreducible class-specific
+> remainder is **leg B's depth** — hidden-abelian: *how
 > deep until the gauge becomes visible* (CFI's `tw(H)`, via cycle-space; **substrate-conditional**) —
 > *not* leg A (visible: depth = `base(g)`, the symmetry's own support, seal-characterizable). The
 > per-class CFI/scheme theorems are **witnesses**, and CFI's cycle-space proof is specifically the
@@ -215,10 +218,15 @@ candidate" — [exhaustive-obstruction §0.5](./chain-descent-exhaustive-obstruc
         seal predicate      (has harvest window)   (leg-(a))        (harvested)
 ```
 
-is class-agnostic end-to-end: `recoverableByDepth_of_findableWithin` and
-`complete_of_cellComplete_recoverable` are proved, and leg-(a) supplies the `CellComplete` step. The
-graph class enters *only* by populating the disjuncts of `Findable` — as the witness, not the
-reasoning. This is the sense in which the harvest window is "defined by the seal."
+is class-agnostic end-to-end at the *reduction* level: `recoverableByDepth_of_findableWithin` and
+`complete_of_cellComplete_recoverable` are proved, and leg-(a) (`colourMatch_eq_aut` + the M-A bricks
+`colourMatch_complete`/`_unique`) is the **engine** for the `CellComplete` step. **Status (be
+precise):** the `CellComplete` *step for a concrete oracle is not yet discharged* — that is the open
+unit **M-B** (build `colourMatchPerm` + `matchOracle`; see
+[cascade-oracle §2.6](./chain-descent-cascade-oracle.md) for the plan and the circularity trap to
+avoid). What *is* settled is that the graph class enters *only* by populating the disjuncts of
+`Findable` — as the witness, not the reasoning. That is the sense in which the harvest window is
+"defined by the seal."
 
 **Where class-specificity is irreducible — and it is leg B, not leg A.** The depth `k` at which the
 window closes splits by leg:

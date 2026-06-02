@@ -326,6 +326,47 @@ bridging half is isolated as construction correctness; only general-class
 completeness is GI-hard. The declarative contract follows the `LinearOracleSpec`
 precedent; the C# lockstep recursion is the constructive witness.
 
+### 2.6 Assembly status & next steps — leg-(a) → `CellComplete` → `CascadeComplete` (2026-06-02)
+
+The Phase-C reduction (`cascadeComplete_of_cellsAreOrbits`: cell-completeness + recoverability ⟹
+`CascadeComplete`, **proved**) and recoverability (`recoverableByDepth_cfi`/`_scheme`, **proved**)
+leave **one** non-vacuous gap: `CellComplete` for a *concrete* oracle. The harvest-window's **leg (a)**
+is the engine for it. Status of the seal-driven assembly
+`Findable ⟹ RecoverableByDepth ⟹ CellComplete ⟹ CascadeComplete`:
+
+**Built (`CascadeOracle.lean §C.2`, axiom-clean `[propext, Classical.choice, Quot.sound]`):**
+- `colourMatch_eq_aut` / `harvest_isAut_of_discrete` — **leg (a)**: at a *discrete* footprint the
+  colour-match candidate `t` equals the orbit automorphism `g` (via `warmRefine_transport` +
+  injectivity), so it verifies. No σ-coherence, no cycle, no rank rebasing.
+- `indivWithRep` / `indivWithRep_transport` — the **uniform-colour** individualization that makes the
+  transport hypothesis hold (the index-based `individualizedColouring` gives the swapped pair `v, w`
+  distinct colours and breaks it).
+- `IsColourMatch`, `colourMatch_complete` (g *is* a colour-match), `colourMatch_unique` (colour-match
+  + discrete ⟹ `= g`) — the construction interface, both directions.
+
+**Open — the next unit (M-B):** turn leg (a) into `CellComplete` for a *concrete* oracle. Leg (a) is
+the *ingredient*; `CellComplete` for the concrete oracle is **not yet discharged**.
+- **Build `colourMatchPerm`** — the explicit `Equiv.Perm` from the two *discrete* refined colourings
+  (two injective `Fin n → Nat` of equal range → a permutation), with **anchoring** lemmas (it fixes
+  `D` and maps `v ↦ w` *by construction*).
+- **Define `matchOracle`** (returns the verified `colourMatchPerm`, else `none`); prove `OrbitMapSpec`
+  (soundness, from anchoring) and `CellComplete` at one-step-discretizing nodes (completeness, from
+  `colourMatch_complete` + recoverability); assemble `CascadeComplete` via
+  `cascadeComplete_of_cellsAreOrbits`.
+- **⚠ Trap — do not take the existential shortcut.** Defining the oracle as "fires iff
+  `∃ t, IsAut t ∧ fixes D ∧ t v = w`" is **circular**: an orbit automorphism is *automatically* a
+  colour-match (`colourMatch_complete`), so that conjunct is implied, `CellComplete` becomes trivially
+  true, and **leg (a) is never used**. The oracle must *construct* `colourMatchPerm` from the colours,
+  so soundness *derives* `fixes D ∧ v ↦ w` from the match rather than assuming it — the only
+  non-vacuous use of leg (a).
+
+**Then (M-C / b1):** generalize `indivWithRep` to a multi-step `indivWithSet` (+ transport) so the
+discrete footprint is reachable over a *sequence* — CFI's `tw(H)` depth (single-rep `indivWithRep`
+only covers one-step-discretizing nodes). **(M-D / b2 + b4):** automate the deepening recursion and
+discharge flag iso-invariance via *completeness at the iso-invariant depth* (the spine,
+`spine_branch_independent`). Full seal-driven framing:
+[harvest-window §2.4](./chain-descent-harvest-window.md).
+
 ---
 
 ## 3. Correctness foundation — why a-priori certification is sound on the cascade class
