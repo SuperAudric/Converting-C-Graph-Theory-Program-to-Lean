@@ -22,8 +22,12 @@
 >   the D1-chain termination (`exists_symmetryOnly_saturated`), and metric D1
 >   (`visiblyRecoverable_pPolynomial`) — the *same engine* now drives Leg A.
 >
-> **Open (the deep frontier, each needs design):** the tight support bound `base(g) ≤ |support|`
-> (needs a reachable-set-invariance engine variant); forced-node iso-invariance (a
+> **Tight support bound — LANDED (2026-06-02).** `base(g) ≤ |support|` is now proved
+> (`exists_isBase_saturated_support`, `Cascade.lean`), via an **interval-invariant** engine
+> variant (`exists_iterate_isFixed_within'`, `Saturation.lean`) — invariance required only on the
+> `f`-reachable sets `S₀ ⊆ s ⊆ B`, not all of `B`. Axiom-clean. See §5.
+>
+> **Open (the deep frontier, each needs design):** forced-node iso-invariance (a
 > partition-invariant selector + the spine); full recovery tying the symmetry and IR-stickiness
 > axes. See §5.
 >
@@ -187,11 +191,19 @@ the Leg-A screen predicates (`Findable`/`VisiblyRecoverable`) in saturation-clos
   `theorem_2_HOR_of_pPolynomial`.
 - Leg A: support-induction termination `exists_isBase_saturated`; D1-chain termination
   `exists_symmetryOnly_saturated`; metric D1 `visiblyRecoverable_pPolynomial`.
+- **Tight support bound** `base(g) ≤ |support|` — `exists_isBase_saturated_support`: the
+  moved-vertex closure reaches a base within `≤ |movedSet adj P S₀|` rounds (the residual
+  *support* at `S₀`), not the full `n`. Supporting pieces: the **interval-invariant** engine
+  variant `exists_iterate_isFixed_within'` / `iterate_subset_of_invariant'`
+  (`Saturation.lean`); `MovedAt.anti` (the moved-set shrinks as `S₀` grows — the residual at
+  `S ⊇ S₀` is a residual at `S₀`); `movedSet` / `movedStep_subset_bound` (the bound is
+  `S₀ ∪ movedSet`, interval-invariant under `movedStep`). All axiom-clean.
 
 **Open (the deep frontier — each needs genuine design, not a quick add):**
-1. **Tight support bound** `base(g) ≤ |support|` (currently `≤ n`). Needs an engine variant whose
-   invariance hypothesis is on `f`-*reachable* sets (⊇ `S₀`), not all of `B`: `movedStep` is
-   support-invariant only on supersets of `S₀`. That variant is itself reusable.
+1. ~~**Tight support bound** `base(g) ≤ |support|`.~~ **DONE (2026-06-02)** —
+   `exists_isBase_saturated_support`, above. The engine variant whose invariance hypothesis is on
+   `f`-*reachable* sets (⊇ `S₀`), not all of `B`, is `exists_iterate_isFixed_within'`; it is
+   reusable as predicted.
 2. **Forced-node iso-invariance.** `soStep`/`movedStep` use `Classical.choice`, so the saturated
    node is not canonical. Iso-invariance needs a **partition-invariant selector** wired to the
    **spine** (`spine_branch_independent` / `SpineChain.eq_default`,

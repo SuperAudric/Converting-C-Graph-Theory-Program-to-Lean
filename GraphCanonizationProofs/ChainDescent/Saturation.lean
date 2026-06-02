@@ -64,6 +64,22 @@ theorem iterate_subset_of_invariant (f : Finset α → Finset α) (B s₀ : Fins
   | zero => exact hs₀
   | succ k ih => rw [Function.iterate_succ_apply']; exact hB _ ih
 
+/-- **Interval-invariant** version of `iterate_subset_of_invariant`: iterates stay inside
+`B` when `f` preserves `B` only on the *`f`-reachable* sets `s₀ ⊆ s ⊆ B`. Extensiveness
+(`hf`) supplies `s₀ ⊆ f^[k] s₀`, so the inductive step only ever applies `hB` to a superset
+of `s₀`. This is the form Leg A's support induction needs: `movedStep` preserves the
+moved-set bound only on supersets of the seed, never on arbitrary `s ⊆ B`. -/
+theorem iterate_subset_of_invariant' (f : Finset α → Finset α) (hf : ∀ s, s ⊆ f s)
+    (B s₀ : Finset α) (hs₀ : s₀ ⊆ B) (hB : ∀ s, s₀ ⊆ s → s ⊆ B → f s ⊆ B)
+    (k : ℕ) : f^[k] s₀ ⊆ B := by
+  induction k with
+  | zero => exact hs₀
+  | succ k ih =>
+    rw [Function.iterate_succ_apply']
+    refine hB _ ?_ ih
+    have h := iterate_mono f hf s₀ (Nat.zero_le k)
+    rwa [Function.iterate_zero_apply] at h
+
 /-- A strictly-increasing `ℕ`-sequence over an initial range grows at least as
 fast as the identity: `c 0 + M ≤ c M`. The pigeonhole that turns "no fixpoint
 yet" into a cardinality blow-up. -/
@@ -78,22 +94,21 @@ private theorem card_add_le_of_strict (c : ℕ → ℕ) :
     have h2 : c M < c (M + 1) := h M (Nat.lt_succ_self M)
     omega
 
-/-- **Saturation within a bound (the general form).** If `f` is extensive and
-preserves a bound `B ⊇ s₀`, iterating from `s₀` reaches a fixpoint within
-`|B| − |s₀|` steps. Seeded with a `c`-element set inside a carrier of effective
-size `|B|`, saturation takes `|B| − c` rounds — this is the form the scheme
-convergence uses with `B = occursFromV` (so the depth is `≤ n` even when empty
-relations make the nominal carrier `Fin (rank+1)` larger than `n`), and the
-form Leg A will use with `B` the support set. -/
-theorem exists_iterate_isFixed_within (f : Finset α → Finset α)
+/-- **Saturation within a bound, interval-invariant form.** As
+`exists_iterate_isFixed_within`, but `f` need only preserve `B` on the *`f`-reachable*
+sets `s₀ ⊆ s ⊆ B`, not on every `s ⊆ B`. This is the form Leg A's support induction uses
+with `B = S₀ ∪ movedSet`: `movedStep` keeps the moved-set bound only on supersets of the
+seed `S₀` (a vertex moved at `s ⊉ S₀` need not be moved at `S₀`), so full invariance fails
+while interval invariance holds — yielding the tight `base(g) ≤ |support|` depth. -/
+theorem exists_iterate_isFixed_within' (f : Finset α → Finset α)
     (hf : ∀ s, s ⊆ f s) (B s₀ : Finset α) (hs₀ : s₀ ⊆ B)
-    (hB : ∀ s, s ⊆ B → f s ⊆ B) :
+    (hB : ∀ s, s₀ ⊆ s → s ⊆ B → f s ⊆ B) :
     ∃ k, k ≤ B.card - s₀.card ∧ f (f^[k] s₀) = f^[k] s₀ := by
   classical
   by_contra hcon
   simp only [not_exists, not_and] at hcon
   set N := B.card - s₀.card with hN
-  have hsubB : ∀ k, f^[k] s₀ ⊆ B := iterate_subset_of_invariant f B s₀ hs₀ hB
+  have hsubB : ∀ k, f^[k] s₀ ⊆ B := iterate_subset_of_invariant' f hf B s₀ hs₀ hB
   have hstrict : ∀ k < N + 1, (f^[k] s₀).card < (f^[k + 1] s₀).card := by
     intro k hk
     have hsub : f^[k] s₀ ⊆ f^[k + 1] s₀ := iterate_subset_succ f hf s₀ k
@@ -107,6 +122,20 @@ theorem exists_iterate_isFixed_within (f : Finset α → Finset α)
   have hcN : (f^[N + 1] s₀).card ≤ B.card := Finset.card_le_card (hsubB (N + 1))
   have hsc : s₀.card ≤ B.card := Finset.card_le_card hs₀
   omega
+
+/-- **Saturation within a bound (the general form).** If `f` is extensive and
+preserves a bound `B ⊇ s₀`, iterating from `s₀` reaches a fixpoint within
+`|B| − |s₀|` steps. Seeded with a `c`-element set inside a carrier of effective
+size `|B|`, saturation takes `|B| − c` rounds — this is the form the scheme
+convergence uses with `B = occursFromV` (so the depth is `≤ n` even when empty
+relations make the nominal carrier `Fin (rank+1)` larger than `n`). The
+interval-invariant `exists_iterate_isFixed_within'` is the sharper form Leg A
+uses with `B` the support set. -/
+theorem exists_iterate_isFixed_within (f : Finset α → Finset α)
+    (hf : ∀ s, s ⊆ f s) (B s₀ : Finset α) (hs₀ : s₀ ⊆ B)
+    (hB : ∀ s, s ⊆ B → f s ⊆ B) :
+    ∃ k, k ≤ B.card - s₀.card ∧ f (f^[k] s₀) = f^[k] s₀ :=
+  exists_iterate_isFixed_within' f hf B s₀ hs₀ (fun s _ hsB => hB s hsB)
 
 variable [Fintype α]
 

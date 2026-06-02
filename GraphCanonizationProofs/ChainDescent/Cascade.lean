@@ -910,6 +910,78 @@ theorem exists_isBase_saturated (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Fins
     rw [movedStep_pos hex] at hfix
     exact movedAt_not_mem hex.choose_spec (Finset.insert_eq_self.mp hfix)
 
+/-! ## Leg A — the tight support bound (`base(g) ≤ |support|`)
+
+`exists_isBase_saturated` reaches a base within `≤ n − |S₀|` rounds (enough for *polynomial*,
+but vacuous as the harvest-window depth claim). The sharp bound is the **support of the
+residual group at `S₀`** — the vertices moved by *some* residual automorphism. The
+ingredient that turns the `n` bound into `|support|` is that the moved-set only *shrinks* as
+`S₀` grows (`MovedAt.anti`), so it is an interval-invariant saturation bound for `movedStep`;
+the engine's `exists_iterate_isFixed_within'` then closes within `|support|` rounds. The gap
+between `|support|` and the cruder `n − |S₀|` envelope is exactly the orthogonal IR-stickiness
+axis (harvest-window §2.3), not the symmetry axis. -/
+
+/-- **Moved-set anti-monotonicity.** A residual automorphism fixing `S` pointwise also fixes
+every `S₀ ⊆ S`, so it is a residual automorphism at `S₀`. Hence a vertex moved by the residual
+at `S` is already moved by the residual at `S₀`: the moved-set *shrinks* as the individualized
+set grows — what makes it a saturation bound. -/
+theorem MovedAt.anti {S₀ S : Finset (Fin n)} (hsub : S₀ ⊆ S) {v : Fin n}
+    (h : MovedAt adj P S v) : MovedAt adj P S₀ v := by
+  obtain ⟨π, ⟨hAut, hP, hFix⟩, hv⟩ := h
+  exact ⟨π, ⟨hAut, hP, fun x hx => hFix x (hsub hx)⟩, hv⟩
+
+open Classical in
+/-- **The residual support at `S₀`:** the vertices moved by *some* residual automorphism
+fixing `S₀` — the support of the residual group `Aut_{S₀}^P`. Disjoint from `S₀`
+(`movedAt_not_mem`); its cardinality is `|support(g)|`, the harvest-window depth. -/
+noncomputable def movedSet (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) :
+    Finset (Fin n) :=
+  Finset.univ.filter (fun v => MovedAt adj P S₀ v)
+
+theorem mem_movedSet {S₀ : Finset (Fin n)} {v : Fin n} :
+    v ∈ movedSet adj P S₀ ↔ MovedAt adj P S₀ v := by
+  simp [movedSet]
+
+/-- **Interval invariance of the support bound.** On every `f`-reachable set `S₀ ⊆ s ⊆
+S₀ ∪ movedSet`, `movedStep` stays inside the bound: the vertex it individualizes is moved at
+`s`, hence (anti-monotonicity) moved at `S₀`, hence in `movedSet`. Full invariance would
+fail — a vertex moved at `s ⊉ S₀` need not be moved at `S₀` — which is why the saturation
+engine's interval-invariant form is needed. -/
+theorem movedStep_subset_bound {S₀ s : Finset (Fin n)}
+    (hS₀s : S₀ ⊆ s) (hsB : s ⊆ S₀ ∪ movedSet adj P S₀) :
+    movedStep adj P s ⊆ S₀ ∪ movedSet adj P S₀ := by
+  unfold movedStep
+  split_ifs with hex
+  · rw [Finset.insert_subset_iff]
+    refine ⟨?_, hsB⟩
+    exact Finset.mem_union_right _ (mem_movedSet.mpr ((hex.choose_spec).anti hS₀s))
+  · exact hsB
+
+/-- **Leg A — the tight support bound (`base(g) ≤ |support|`).** Sharpens
+`exists_isBase_saturated`: from any `S₀`, the moved-vertex closure reaches a **base** within
+`≤ |movedSet adj P S₀|` rounds — the **support of the residual group at `S₀`**, not the full
+`n`. This is the harvest-window depth claim (§2.3) made precise; the gap to the `n − |S₀|`
+envelope is the orthogonal IR-stickiness axis. Via the interval-invariant saturation engine,
+since `movedStep` preserves the support bound only on supersets of `S₀`. -/
+theorem exists_isBase_saturated_support (adj : AdjMatrix n) (P : PMatrix n)
+    (S₀ : Finset (Fin n)) :
+    ∃ k, k ≤ (movedSet adj P S₀).card ∧
+      S₀ ⊆ (movedStep adj P)^[k] S₀ ∧ IsBase adj P ((movedStep adj P)^[k] S₀) := by
+  obtain ⟨k, hk, hfix⟩ :=
+    Saturation.exists_iterate_isFixed_within' (movedStep adj P) movedStep_extensive
+      (S₀ ∪ movedSet adj P S₀) S₀ Finset.subset_union_left
+      (fun s hS₀s hsB => movedStep_subset_bound hS₀s hsB)
+  refine ⟨k, ?_, ?_, ?_⟩
+  · have hle : (S₀ ∪ movedSet adj P S₀).card ≤ S₀.card + (movedSet adj P S₀).card :=
+      Finset.card_union_le _ _
+    omega
+  · have hm := Saturation.iterate_mono (movedStep adj P) movedStep_extensive S₀ (Nat.zero_le k)
+    rwa [Function.iterate_zero_apply] at hm
+  · apply isBase_of_no_moved
+    intro hex
+    rw [movedStep_pos hex] at hfix
+    exact movedAt_not_mem hex.choose_spec (Finset.insert_eq_self.mp hfix)
+
 /-! ## Leg A / D1 — the whole metric/DRG family (de-classing `visiblyRecoverable_scheme`)
 
 The scheme de-classing (`Scheme.lean §10.13`, `theorem_2_HOR_of_pPolynomial`) recovers orbits
