@@ -721,4 +721,62 @@ theorem findable_of_findableWithin {S : Finset (Fin n)} {b : Nat}
   | abelian h1 h2 _ => exact Findable.abelian h1 h2
   | step hstep _ ih => exact Findable.step hstep ih
 
+/-! ### Phase 1 — the D2-bridge anchor for the CFI gauge (axiom-clean)
+
+The `abelian` constructor of `FindableWithin` carries a `RecoverableByDepth adj P b` **field** — the
+**D2-bridge interface** ([harvest-window §6.12](../../../docs/chain-descent-harvest-window.md)): building
+the abelian leg requires supplying the hidden-abelian residual's recoverability at a *specific* polynomial
+bound. This section discharges that field for the **odd-degree CFI gauge** with the **axiom-free**
+`recoverableByDepth_cfi` — *not* the open `AbelianSufficiencyHolds` axiom. It is the D2 analogue of the
+D1 anchor `visiblyRecoverable_scheme`: a real, central example showing the abelian leg is populated by
+proved recoverability, not a placeholder.
+
+**Two index-grounded facts make this the right wiring** (§6.12):
+- The CFI recovery is **discretizing**, prototyped by `recoverableByDepth_cfi` (individualize the gauge's
+  base, `warmRefine` there is `Discrete`) — *not* the structural connector `cascadeComposition_pathFixing`,
+  which needs `CellsAreOrbits` at layer 1, false for a *hidden* (cell-coarser-than-orbit) D2 residual.
+- `recoverableByDepth_cfi` is **axiom-free for `OddDegree`** and carries **no `P`-invariance hypothesis**,
+  so the recovery field is free at `cfi_depth_bound h` for *every* committed set `S` (whole-graph property).
+
+**What stays a hypothesis (honest scope).** `ResidualAbelian adj P S` and `¬ IsBase adj P S` are the
+screen's **D2 predicate** — *consumed, never decided* (deciding it is GI-hard; the seal flags on
+budget-exceed, [harvest-window §3](../../../docs/chain-descent-harvest-window.md)). Discharging
+`ResidualAbelian` *unconditionally* for a real CFI residual would need the `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)`
+**surjectivity** (a `Z₂^β` upper bound on the residual) — deliberately **not** built (`CFI.lean §15` builds
+only generator *existence*). The asymmetry with the D1 anchor is intrinsic: D1's positive content
+(cells = orbits) is *refinement-visible* hence provable (`visiblyRecoverable_scheme`); D2's (residual is
+abelian) is *hidden* hence needs unbuilt group structure. -/
+
+/-- **D2-bridge anchor — CFI gauge.** For an odd-degree CFI graph, whenever the residual at a committed
+set `S` is the hidden non-trivial abelian gauge (`ResidualAbelian adj P S ∧ ¬ IsBase adj P S`, the screen's
+D2 predicate), the `FindableWithin.abelian` recoverability field is discharged by the **axiom-free**
+`recoverableByDepth_cfi` at depth `cfi_depth_bound h` (`≤ baseSize ≤ n/6`). The D2 analogue of
+`visiblyRecoverable_scheme`: the abelian leg's recoverability obligation is met by proved math on the
+central CFI example, isolating the only open content to the (consumed, not decided) D2 *predicate*. -/
+theorem findableWithin_cfi_gauge (P : PMatrix n) {adj : AdjMatrix n}
+    (h : IsCFI' adj) (h_odd : h.OddDegree) {S : Finset (Fin n)}
+    (habelian : ResidualAbelian adj P S) (hnonbase : ¬ IsBase adj P S) :
+    FindableWithin adj P S (cfi_depth_bound h) :=
+  FindableWithin.abelian habelian hnonbase (recoverableByDepth_cfi h h_odd P)
+
+/-- **Recoverability of the CFI gauge, via the anchored D2 leg.** The bound-carrying soundness applied to
+`findableWithin_cfi_gauge`: a hidden non-trivial abelian CFI residual is `RecoverableByDepth` at
+`cfi_depth_bound h`. (Unfolds to `recoverableByDepth_cfi` — but routed *through* the screen, certifying the
+D2 leg is non-vacuous end-to-end.) -/
+theorem recoverableByDepth_of_cfi_gauge (P : PMatrix n) {adj : AdjMatrix n}
+    (h : IsCFI' adj) (h_odd : h.OddDegree) {S : Finset (Fin n)}
+    (habelian : ResidualAbelian adj P S) (hnonbase : ¬ IsBase adj P S) :
+    RecoverableByDepth adj P (cfi_depth_bound h) :=
+  recoverableByDepth_of_findableWithin (findableWithin_cfi_gauge P h h_odd habelian hnonbase)
+
+/-- **The CFI gauge is `Findable`** (bound-free classification): forgetting the bound, a hidden non-trivial
+abelian CFI residual lands in the screen's D2 leg. The screen's abelian disjunct is populated by the
+central recoverable, non-Cameron example — the §6.9 escape (`CFI(Kₘ)` slips the *flat* screen) closed at
+the predicate level by the sequential screen's `abelian` constructor. -/
+theorem findable_cfi_gauge (P : PMatrix n) {adj : AdjMatrix n}
+    (h : IsCFI' adj) (h_odd : h.OddDegree) {S : Finset (Fin n)}
+    (habelian : ResidualAbelian adj P S) (hnonbase : ¬ IsBase adj P S) :
+    Findable adj P S :=
+  findable_of_findableWithin (findableWithin_cfi_gauge P h h_odd habelian hnonbase)
+
 end ChainDescent

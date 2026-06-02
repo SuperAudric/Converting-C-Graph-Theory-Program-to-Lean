@@ -50,8 +50,16 @@
 >   P b` field of `FindableWithin.abelian`** — a *discretizing* recovery (mirror `recoverableByDepth_cfi`, NOT
 >   the structural connector), with CFI(odd-deg) the proved instance and the general case the open
 >   `cfi_cascades`-generalisation (= `AbelianSufficiencyHolds`, substrate-conditional).
-> - **Other open frontiers:** the **D2 bridge** `ResidualAbelian ⟹ hwit` (= cascade-1b generalized, the
->   load-bearing open core); the multi-step D1 **negative** (CFI/hidden-Johnson `¬D1` = chain-gets-stuck).
+> - **PHASE 1 DONE (2026-06-01, the D2-bridge anchor — §6.13).** `findableWithin_cfi_gauge` (+
+>   `recoverableByDepth_of_cfi_gauge`, `findable_cfi_gauge`) discharges `FindableWithin.abelian`'s
+>   recoverability field for the odd-degree CFI gauge with the **axiom-free `recoverableByDepth_cfi`** (NOT
+>   the open `AbelianSufficiencyHolds`; all three `#print axioms` = `[propext, Classical.choice, Quot.sound]`).
+>   The D2 analogue of `visiblyRecoverable_scheme`; closes the §6.9 escape at the predicate level. The
+>   `ResidualAbelian`/`¬IsBase` *hypotheses* stay the consumed-not-decided D2 predicate (unconditional
+>   discharge needs the unbuilt `Aut(CFI)≅Z₂^β⋊Aut(H)` surjectivity — intrinsic D1/D2 asymmetry).
+> - **Other open frontiers:** the **general D2 bridge** (Phase 2) — `ResidualAbelian ⟹ recoverable` beyond
+>   the CFI(odd-deg) instance, the substrate-conditional `AbelianSufficiencyHolds` / cascade-1b generalized,
+>   the load-bearing open core; the multi-step D1 **negative** (CFI/hidden-Johnson `¬D1` = chain-gets-stuck).
 > - **Build/check:** `cd /workspace && bash scripts/build.sh` (serial, ~14s); `lake env lean` a file with
 >   `#print axioms <name>` for axiom-cleanliness.
 >
@@ -791,10 +799,47 @@ Two index-grounded corrections to the *route*:
   visible), not a D2 beachhead.
 
 **NEXT:** Phase 1 — wire `recoverableByDepth_cfi` as the proved D2-bridge instance (discharge
-`FindableWithin.abelian`'s field for the CFI gauge). Then Phase 2 — isolate the general nut
-(`AbelianDiscretizes`, the `cfi_cascades`-generalisation), stated conditionally.
+`FindableWithin.abelian`'s field for the CFI gauge). **✓ DONE — §6.13.** Then Phase 2 — isolate the
+general nut (`AbelianDiscretizes`, the `cfi_cascades`-generalisation), stated conditionally.
 
 ---
+
+### 6.13 Phase 1 — the D2-bridge anchor for the CFI gauge: DONE (2026-06-01)
+
+**Built in [`Cascade.lean`](../GraphCanonizationProofs/ChainDescent/Cascade.lean), axiom-clean
+(`[propext, Classical.choice, Quot.sound]` — *no* project axioms, in particular **not**
+`AbelianSufficiencyHolds`; full serial build green, all three `#print axioms` confirmed):**
+
+- **`findableWithin_cfi_gauge`** — the anchor. For an odd-degree CFI graph, whenever the residual at a
+  committed set `S` is the hidden non-trivial abelian gauge (`ResidualAbelian adj P S ∧ ¬ IsBase adj P S`,
+  the screen's D2 predicate), it builds `FindableWithin adj P S (cfi_depth_bound h)` via the `abelian`
+  constructor, **discharging the recoverability field with the axiom-free `recoverableByDepth_cfi`**.
+- **`recoverableByDepth_of_cfi_gauge`** — the end-to-end soundness routed *through* the screen
+  (`recoverableByDepth_of_findableWithin ∘ findableWithin_cfi_gauge`): the D2 leg is non-vacuous.
+- **`findable_cfi_gauge`** — the bound-free corollary: the CFI gauge lands in `Findable`'s `abelian`
+  disjunct, **closing the §6.9 escape at the predicate level** (the central recoverable, non-Cameron
+  example `CFI(Kₘ)` that slipped the *flat* screen is now in the D2 leg of the *sequential* screen).
+
+**This is the D2 analogue of the D1 anchor `visiblyRecoverable_scheme`:** the abelian leg's recoverability
+obligation is met by *proved* math on the central CFI example, not a placeholder. Two index-grounded facts
+made this the right wiring (§6.12): CFI recovery is **discretizing** (prototype `recoverableByDepth_cfi`,
+*not* the structural `cascadeComposition_pathFixing` — which needs `CellsAreOrbits` at layer 1, false for a
+*hidden* D2 residual); and `recoverableByDepth_cfi` is **axiom-free for `OddDegree` with no `P`-invariance
+hypothesis**, so the field is free at `cfi_depth_bound h` for *every* `S`.
+
+**Honest scope (what stays a hypothesis).** `ResidualAbelian` and `¬ IsBase` are the screen's **D2
+predicate** — *consumed, never decided* (deciding it is GI-hard; the oracle flags on budget-exceed, §3).
+Discharging `ResidualAbelian` *unconditionally* for a real CFI residual would need the
+`Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` **surjectivity** (a `Z₂^β` upper bound on the residual), deliberately **not**
+built (`CFI.lean §15` builds only generator *existence*). The asymmetry with the D1 anchor is **intrinsic**:
+D1's positive content (cells = orbits) is *refinement-visible* hence provable; D2's (residual is abelian) is
+*hidden* hence needs unbuilt group structure. So Phase 1 anchors the **recovery half** (the genuinely hard
+field) with proved math, leaving the abelian *classification* as the screen input it is designed to be.
+
+**NEXT:** Phase 2 — isolate the **general** D2 nut as a marked conditional (`AbelianDiscretizes` /
+`AbelianSufficiencyHolds`), with the depth bound as a hypothesis (the unbounded-tw caveat, §6.11/§6.12 —
+CFI over an unbounded-treewidth base is abelian yet discretizes only at large depth, so the bridge is *not*
+an unconditional `∀ S, abelian ⟹ recoverable`). The CFI(odd-deg) anchor above is its proved instance.
 
 ## 7. Honest caveats (so the concept does not over-claim)
 
