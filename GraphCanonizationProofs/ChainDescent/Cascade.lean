@@ -774,6 +774,55 @@ theorem card_stabilizerAt_eq_orbit_mul (b : Fin n) {S : Finset (Fin n)} :
   rw [MulAction.index_stabilizer, card_stabilizer_eq] at h1
   rw [← h1]; ring
 
+/-! ### Part A (Stage A3.5) — the full order product over a base sequence
+
+`card_stabilizerAt_eq_orbit_mul` is one chain level. Telescoping it over an ordered **base sequence**
+gives `order = ∏ basic-orbit sizes` — the abstract counterpart of `PermutationGroup.cs`'s
+`Order = ∏ level.OrbitSize`. This needs **no** computable BSGS (it is pure induction on the per-level
+recursion), so it is separated out of Stage A4: the order story / `Aut(G)`-as-a-byproduct lands at the
+abstract layer, and the concrete `Level`/transversal structure is needed only for *computing* the
+product, not for the identity. -/
+
+/-- **The basic-orbit-size product along a base sequence.** Consuming `bs` from the individualized set
+`S`: each `b` contributes the size of its orbit under the *current* residual `Aut_S^P`, then the residual
+descends to `Aut_{insert b S}^P` for the tail. The right-hand side of `order = ∏ basic-orbit sizes`. -/
+noncomputable def orbitSizeProd (adj : AdjMatrix n) (P : PMatrix n) :
+    List (Fin n) → Finset (Fin n) → Nat
+  | [], _ => 1
+  | b :: bs, S => (MulAction.orbit (StabilizerAt adj P S) b).ncard * orbitSizeProd adj P bs (insert b S)
+
+/-- **`order = ∏ basic-orbit sizes` — the telescoping identity.** For *any* sequence `bs`,
+`|Aut_S^P|` equals the product of basic-orbit sizes along `bs` times the residual order at the
+fully-accumulated set. Induction on `bs` via `card_stabilizerAt_eq_orbit_mul`; no computable BSGS. -/
+theorem card_stabilizerAt_eq_prod (bs : List (Fin n)) (S : Finset (Fin n)) :
+    Nat.card (StabilizerAt adj P S)
+      = orbitSizeProd adj P bs S
+        * Nat.card (StabilizerAt adj P (bs.foldl (fun s b => insert b s) S)) := by
+  induction bs generalizing S with
+  | nil => simp [orbitSizeProd]
+  | cons b bs ih =>
+    simp only [orbitSizeProd, List.foldl_cons]
+    rw [card_stabilizerAt_eq_orbit_mul b (S := S), ih (insert b S)]
+    ring
+
+/-- **`order = ∏ basic-orbit sizes` at a base.** When the accumulated set `bs.foldl … S` is a base, the
+trailing residual is trivial (order 1, `card_stabilizerAt_eq_one_iff_isBase`), so `|Aut_S^P|` is exactly
+the product of basic-orbit sizes — the abstract `Order = ∏ OrbitSize` of `PermutationGroup.cs`, with no
+computable BSGS. -/
+theorem card_stabilizerAt_eq_prod_of_base (bs : List (Fin n)) (S : Finset (Fin n))
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Nat.card (StabilizerAt adj P S) = orbitSizeProd adj P bs S := by
+  rw [card_stabilizerAt_eq_prod bs S, card_stabilizerAt_eq_one_iff_isBase.mpr hbase, mul_one]
+
+/-- **`Aut(G)^P` as a byproduct: its order is `∏ basic-orbit sizes`.** The `S = ∅` headline of
+`card_stabilizerAt_eq_prod_of_base`: `StabilizerAt adj P ∅` is the whole `P`-preserving automorphism
+group (`mem_stabilizerAt_empty`), so a base sequence `bs` from `∅` reads off `|Aut(G)^P|` as the orbit-size
+product — computing the canonical form yields the group order for free (strategy §6, the chain). -/
+theorem card_autP_eq_prod_of_base (bs : List (Fin n))
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅)) :
+    Nat.card (StabilizerAt adj P ∅) = orbitSizeProd adj P bs ∅ :=
+  card_stabilizerAt_eq_prod_of_base bs ∅ hbase
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).
