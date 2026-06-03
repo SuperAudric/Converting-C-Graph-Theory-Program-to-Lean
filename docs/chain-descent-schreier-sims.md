@@ -1,10 +1,13 @@
 # Chain descent — Part A: the stabilizer-chain / Schreier–Sims object (planning & staging)
 
-> **STATUS (2026-06-03): planning doc, not yet implemented.** This is the build plan and context dump
-> for formalizing a permutation-group **stabilizer chain** (Schreier–Sims) in Lean — "tractable-buildout
-> Part A". Nothing here is built yet; the `Stage A1–A4` sections are the proposed order. A fresh reader
-> should be able to start Stage A1 from this doc alone: it lists every existing theorem (Mathlib and
-> internal) the build rests on or consolidates, by name and location.
+> **STATUS (2026-06-03): the abstract layer (Stages A1–A3) is LANDED; A4 deferred.** Build plan + context
+> dump for a permutation-group **stabilizer chain** (Schreier–Sims) in Lean — "tractable-buildout Part A".
+> **Done (axiom-clean, full build green, `Cascade.lean` "Part A (Stage A1/A2/A3)"):** the residual group
+> `Aut_S^P` as a Mathlib `Subgroup` (`StabilizerAt`), the cross-branch harvest-soundness seam, and the
+> order + rigid verdict (trivial ⟺ base; the orbit–stabilizer order recursion). See §7 for the landed
+> theorem names. **Remaining:** Stage A4 (the concrete computable BSGS data structure mirroring the C#),
+> deferred — only needed for the computable object, not the abstract verdict. A fresh reader can still use
+> this doc as the full context/name index (Mathlib + internal) for A4 or for consuming A1–A3.
 >
 > **Why now (the trigger).** The discretizing colour-match oracle was just **proven unable** to harvest a
 > multi-step moved orbit: `lockstep_disc_imp_stab_trivial` (`CascadeOracle.lean §C.8`) shows its two
@@ -188,11 +191,13 @@ All paths under `GraphCanonizationProofs/ChainDescent/`. These are what Part A b
 
 ## 5. What is ABSENT (the actual build)
 
-Confirmed absent in both Mathlib and the project: a **base** (sequence of points, not a set — note `IsBase`
-is a *predicate on a set*, not a base sequence); a **strong generating set**; **Schreier generators** as a
-construction; a **sift/strip/membership** procedure; **group-order computation** from the chain; an
-explicit **stabilizer-chain** structure; the **transversal-of-stabilizer** per level; the **cross-branch
-fold-in/consume** seam in Lean.
+Originally absent in both Mathlib and the project. **Now built by A1–A3** (Cascade.lean): the **cross-branch
+fold-in/consume seam** (`closure_le_stabilizerAt`, `covered_sound`), the **per-level group-order recursion**
+(`card_stabilizerAt_eq_orbit_mul`), and the **stabilizer object + base predicate** (`StabilizerAt`,
+`stabilizerAt_eq_bot_iff_isBase`). **Still absent (Stage A4):** an explicit **base sequence** (note
+`IsBase` is a *predicate on a set*, not an ordered base), a **strong generating set**, **Schreier generators**
+as a construction, a **sift/strip/membership** procedure, the **full order product** over a base, and the
+**concrete computable** `Level`/transversal structure mirroring `PermutationGroup.cs`.
 
 ---
 
@@ -215,7 +220,14 @@ fold-in/consume** seam in Lean.
 
 Abstract-`Subgroup`-first (the reasoning the project needs); concrete BSGS later.
 
-### Stage A1 — `StabilizerAt` as a `Subgroup` (the consolidation; low-risk, do first)
+### Stage A1 — `StabilizerAt` as a `Subgroup` (the consolidation) — **LANDED 2026-06-03, axiom-clean**
+Built in `Cascade.lean` "Part A (Stage A1)": `StabilizerAt adj P S : Subgroup (Equiv.Perm (Fin n))`
+(carrier `ResidualAut`; `mem_stabilizerAt`, `stabilizerAt_smul`), `mem_stabilizerAt_empty` (root = ambient
+`P`-preserving group — `AutGroupP` folded in, not a separate def), `stabilizerAt_mono`,
+`stabilizerAt_eq_bot_iff_isBase`, `mem_orbit_stabilizerAt_iff` (per-node orbit bridge). **Shape decision:**
+the carrier-`ResidualAut` form was used (robust, self-contained), *not* the `⊓ fixingSubgroup` form — the
+`MulAction.orbit` bridge is still proved, so the Mathlib hook is present without the `⊓` plumbing. Original
+plan below.
 - Define `AutGroupP adj P : Subgroup (Equiv.Perm (Fin n))` = automorphisms preserving **both** `adj` and
   `P` (carrier `IsAut π adj ∧ ∀ x u, P (π x) (π u) = P x u`; closure mirrors `AutGroup` + the `P` clause).
   (`AutGroup` `:55` is the `P = ⊥`/no-`P` case; consider generalizing or keeping both.)
@@ -231,7 +243,12 @@ Abstract-`Subgroup`-first (the reasoning the project needs); concrete BSGS later
 - *Bar:* builds, axiom-clean, no behavioural change — pure consolidation that re-exports existing lemmas
   through the new object. **Minimal first deliverable; unblocks A2/A3.**
 
-### Stage A2 — the harvest seam (soundness)
+### Stage A2 — the harvest seam (soundness) — **LANDED 2026-06-03, axiom-clean**
+Built in `Cascade.lean` "Part A (Stage A2)": `residualAut_mem_stabilizerAt` (fold-in entry),
+`closure_le_stabilizerAt` (the harvested `Subgroup.closure` of verified gens stays inside the true
+residual — the over-split-sound contract), `orbit_pathFixing_sound` (orbit under any `H ≤ StabilizerAt S`
+⟹ `OrbitPartition`), and the capstone `covered_sound` (`CoveredByPathFixingAut` soundness). Original plan
+below.
 - A verified automorphism (`IsAut` + `P`-preservation, i.e. an edge-checked relabelling) is in `AutGroupP`;
   if it fixes the path it is in `StabilizerAt adj P path`. Formalize the **fold-in**: a generating
   `Finset` of such, `Subgroup.closure gens ≤ AutGroupP` (and `≤ StabilizerAt path` when all fix the path).
@@ -241,7 +258,14 @@ Abstract-`Subgroup`-first (the reasoning the project needs); concrete BSGS later
 - *Bar:* the cross-branch harvest's soundness is a theorem; this is the conservation-finding's required
   mechanism, now grounded.
 
-### Stage A3 — order & the rigid/Cameron verdict
+### Stage A3 — order & the rigid/Cameron verdict — **LANDED 2026-06-03, axiom-clean**
+Built in `Cascade.lean` "Part A (Stage A3)": `card_stabilizerAt_pos` (finite), **`card_stabilizerAt_eq_one_iff_isBase`**
+(the rigid verdict — residual trivial ⟺ base; its negation is the non-rigid/Tier-2-like side), and the order
+recursion `subgroupOf_insert_eq_stabilizer` → `card_stabilizer_eq` → **`card_stabilizerAt_eq_orbit_mul`**
+(`|Aut_S^P| = |orbit b| · |Aut_{insert b S}^P|`, the inductive step of `order = ∏ orbit sizes`, via
+`Subgroup.card_mul_index` + `MulAction.index_stabilizer`). Required added imports `Mathlib.GroupTheory.Index`
++ `Mathlib.Algebra.Group.Subgroup.Finite`. Assembling the full product over a base sequence is the thin
+Stage-A4 layer. Original plan below.
 - `Nat.card (StabilizerAt adj P S)` via the chain `= ∏ basic-orbit sizes` (Mathlib orbit–stabilizer over
   the base). `IsBase ⟺ StabilizerAt = ⊥ ⟺ Nat.card = 1 ⟺ rigid`. Express the flag diagnostic
   (non-trivial residual ⟹ Tier-2/Cameron; trivial ⟹ IR blind spot) as a Lean statement.
@@ -254,18 +278,18 @@ Abstract-`Subgroup`-first (the reasoning the project needs); concrete BSGS later
 
 ---
 
-## 8. Open decisions (resolve at Stage A1)
-1. **`StabilizerAt` shape:** `⊓`-of-Mathlib-pieces (`AutGroupP ⊓ fixingSubgroup S` — maximal Mathlib reuse,
-   `MulAction`/orbit machinery comes for free) **vs** carrier-`ResidualAut` directly (closest to existing
-   code, but re-proves closure). Lean toward the `⊓` form; confirm the `MulAction` instance on `Fin n`
-   under `AutGroupP` is the convenient one.
-2. **`AutGroup` vs `AutGroupP`:** unify (`AutGroup` = `AutGroupP` at trivial `P`) or keep both. The `P`
-   conjunct is load-bearing (`OrbitPartition`/`ResidualAut` carry it); the chain must too.
-3. **`LayerChain` (Group.lean:139):** refactor the stabilizer chain *as* a `LayerChain` instance, or
-   build a parallel base-ordered structure and relate them.
-4. **Computability scope:** how faithfully Stage A4 mirrors the unsifted C# variant vs. uses Mathlib's
-   (noncomputable) transversal existence. The abstract layer (A1–A3) is noncomputable and sufficient for
-   the verdicts; A4 is the only stage needing decidable/`Fintype` computation.
+## 8. Decisions (1–2 resolved at A1; 3–4 open for A4)
+1. **`StabilizerAt` shape — RESOLVED:** used the **carrier-`ResidualAut`** form (robust, reuses
+   `ResidualAut.mul`), *not* `⊓ fixingSubgroup`. The `MulAction.orbit` bridge (`mem_orbit_stabilizerAt_iff`)
+   is proved directly, so the Mathlib hook is present without the `⊓` plumbing.
+2. **`AutGroup` vs `AutGroupP` — RESOLVED:** no separate `AutGroupP`; the ambient `P`-preserving group is
+   `StabilizerAt adj P ∅` (`mem_stabilizerAt_empty`). `AutGroup` (Group.lean) is the no-`P` root and stays.
+3. **`LayerChain` (Group.lean:139) — OPEN (A4):** whether to realize the stabilizer chain *as* a
+   `LayerChain` instance or a parallel base-ordered structure. The A3 order recursion
+   (`card_stabilizerAt_eq_orbit_mul`) is the per-level step either way.
+4. **Computability scope — OPEN (A4):** how faithfully Stage A4 mirrors the unsifted C# variant vs. uses
+   Mathlib's (noncomputable) transversal existence. The abstract layer (A1–A3) is noncomputable and
+   sufficient for the verdicts; A4 is the only stage needing decidable/`Fintype` computation.
 
 ## 9. Honest caveats
 - The chain proves **correctness**, not the **poly bound** (T-A stays Sims's citation; the C# is unsifted).
