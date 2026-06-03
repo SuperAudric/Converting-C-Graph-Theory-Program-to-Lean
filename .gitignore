@@ -6,3 +6,4 @@ obj/
 # Reproducible via: lake update (uses lake-manifest.json) && lake build
 **/.lake/build/
 **/.lake/packages/
+.claude/scheduled_tasks.lock
