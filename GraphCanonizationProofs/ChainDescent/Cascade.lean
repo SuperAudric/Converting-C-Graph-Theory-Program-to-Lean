@@ -567,6 +567,93 @@ theorem residualAbelian_mono {S S' : Finset (Fin n)} (h : ResidualAbelian adj P 
   exact h π₁ π₂ ⟨h₁.1, h₁.2.1, fun v hv => h₁.2.2 v (hSS' hv)⟩
     ⟨h₂.1, h₂.2.1, fun v hv => h₂.2.2 v (hSS' hv)⟩
 
+/-! ## Part A (Stage A1) — the residual group `Aut_S^P` as a `Subgroup`
+
+The path-fixing residual `ResidualAut adj P S` is the carrier of an honest Mathlib `Subgroup`,
+`StabilizerAt adj P S`. This packages the scattered predicate-level residual reasoning as a group
+object — the bottom layer of the stabilizer-chain / Schreier–Sims buildout
+([`docs/chain-descent-schreier-sims.md`](../../../docs/chain-descent-schreier-sims.md), Stage A1). It
+consolidates `ResidualAut.mul` (closure), `residualAut_eq_one_of_isBase` (base ⟺ trivial), and the
+`FixesPointwise`-monotonicity into subgroup form, and exposes `MulAction.orbit` per node (generalizing
+`Group.lean`'s root bridge `mem_orbit_autGroup_iff_orbitPartition` off `S = ∅`). -/
+
+/-- **The residual group `Aut_S^P` as a `Subgroup`.** Carrier: the `P`-preserving automorphisms fixing
+`S` pointwise (`ResidualAut adj P S`). Closure is `ResidualAut.mul`; identity and inverses are direct.
+The group object underlying the stabilizer chain; `StabilizerAt adj P ∅` is the ambient `P`-preserving
+automorphism group (`mem_stabilizerAt_empty`). -/
+def StabilizerAt (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) :
+    Subgroup (Equiv.Perm (Fin n)) where
+  carrier := {π | ResidualAut adj P S π}
+  one_mem' := ⟨fun _ _ => rfl, fun _ _ => rfl, fun _ _ => rfl⟩
+  mul_mem' := fun ha hb => ResidualAut.mul ha hb
+  inv_mem' := by
+    intro a ha
+    obtain ⟨hA, hP, hF⟩ := ha
+    have hax : ∀ y, a (a⁻¹ y) = y := fun y => by
+      rw [← Equiv.Perm.mul_apply, mul_inv_cancel, Equiv.Perm.one_apply]
+    refine ⟨IsAut.symm hA, ?_, ?_⟩
+    · intro x u
+      have h := hP (a⁻¹ x) (a⁻¹ u)
+      rw [hax, hax] at h
+      exact h.symm
+    · intro v hv
+      have hav := hF v hv
+      calc a⁻¹ v = a⁻¹ (a v) := by rw [hav]
+        _ = (a⁻¹ * a) v := (Equiv.Perm.mul_apply a⁻¹ a v).symm
+        _ = v := by rw [inv_mul_cancel, Equiv.Perm.one_apply]
+
+@[simp] theorem mem_stabilizerAt {S : Finset (Fin n)} {π : Equiv.Perm (Fin n)} :
+    π ∈ StabilizerAt adj P S ↔ ResidualAut adj P S π := Iff.rfl
+
+/-- The subgroup action's `smul` is application of the underlying permutation (as for `AutGroup`). -/
+@[simp] theorem stabilizerAt_smul {S : Finset (Fin n)} (g : StabilizerAt adj P S) (v : Fin n) :
+    g • v = (g : Equiv.Perm (Fin n)) v := rfl
+
+/-- **Root = the ambient `P`-preserving automorphism group.** `FixesPointwise π ∅` is vacuous, so
+`StabilizerAt adj P ∅` is exactly the `P`-preserving automorphisms of `adj`. -/
+theorem mem_stabilizerAt_empty {π : Equiv.Perm (Fin n)} :
+    π ∈ StabilizerAt adj P ∅ ↔ IsAut π adj ∧ ∀ x u, P (π x) (π u) = P x u := by
+  rw [mem_stabilizerAt]
+  exact ⟨fun ⟨hA, hP, _⟩ => ⟨hA, hP⟩,
+    fun ⟨hA, hP⟩ => ⟨hA, hP, fun v hv => absurd hv (Finset.notMem_empty v)⟩⟩
+
+/-- **Monotonicity (stabilizer containment).** Fixing *more* points gives a *smaller* group:
+`S ⊆ S' → StabilizerAt adj P S' ≤ StabilizerAt adj P S`. The subgroup form of `OrbitPartition.mono`. -/
+theorem stabilizerAt_mono {S S' : Finset (Fin n)} (h : S ⊆ S') :
+    StabilizerAt adj P S' ≤ StabilizerAt adj P S := by
+  intro π hπ
+  obtain ⟨hA, hP, hF⟩ := hπ
+  exact ⟨hA, hP, fun v hv => hF v (h hv)⟩
+
+/-- **`StabilizerAt = ⊥ ⟺ base.** The chain's bottom: the residual group is trivial exactly when `S`
+is a base (`IsBase`). Forward via `Subgroup.mem_bot`; backward via `residualAut_eq_one_of_isBase`. -/
+theorem stabilizerAt_eq_bot_iff_isBase {S : Finset (Fin n)} :
+    StabilizerAt adj P S = ⊥ ↔ IsBase adj P S := by
+  constructor
+  · intro h v w hvw
+    obtain ⟨π, hres, hπvw⟩ := orbitPartition_iff_residualAut.mp hvw
+    have hmem : π ∈ StabilizerAt adj P S := hres
+    rw [h, Subgroup.mem_bot] at hmem
+    rw [hmem] at hπvw
+    simpa using hπvw
+  · intro hbase
+    rw [Subgroup.eq_bot_iff_forall]
+    intro π hπ
+    exact residualAut_eq_one_of_isBase hbase hπ
+
+/-- **Per-node orbit bridge.** `v`'s orbit under `StabilizerAt adj P S` is exactly the `OrbitPartition`
+relation at `S` — generalizing `Group.lean`'s root bridge `mem_orbit_autGroup_iff_orbitPartition` off
+`S = ∅`. So `MulAction.orbit (StabilizerAt …)` *is* the working orbit relation, with the group element
+available. -/
+theorem mem_orbit_stabilizerAt_iff {S : Finset (Fin n)} {v w : Fin n} :
+    w ∈ MulAction.orbit (StabilizerAt adj P S) v ↔ OrbitPartition adj P S v w := by
+  constructor
+  · rintro ⟨g, hg⟩
+    obtain ⟨hA, hP, hF⟩ := g.2
+    exact ⟨(g : Equiv.Perm (Fin n)), hA, hP, hF, by simpa using hg⟩
+  · rintro ⟨π, hA, hP, hF, hvw⟩
+    exact ⟨⟨π, hA, hP, hF⟩, by simpa using hvw⟩
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).
