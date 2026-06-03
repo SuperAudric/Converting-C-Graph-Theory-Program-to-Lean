@@ -1653,4 +1653,122 @@ theorem matchOracle_certifies_iff_orbit_of_insertDiscrete {n : Nat} {adj : AdjMa
     exact matchOracle_orbitMapSpec adj P₀ χι₀ sel chain v w result h
   · exact matchOracle_fires_of_insertDiscrete chain hvD hwD hinsv hinsw
 
+/-! ### §C.8 — Leg 1 (A1): the level-coloured exploration sequence and its depth-witness bridge
+
+The multi-step depth witness `hdiscSet` (M-D, §C.6) is stated for `indivWithSet`, which colours the
+explored set **uniformly** — too coarse to discretize shallowly (the probe: CFI(K4) indexed seeds
+discretize at the empty commit, uniform-block seeds do not), and with **no** §C.4b-style bridge to the
+*indexed* `RecoverableByDepth` framework (uniform marking of a ≥2 set is strictly coarser than indexing
+it). Uniform was forced by transport, because the orbit automorphism *moves* the set.
+
+Leg 1 replaces the uniform set with a **level-coloured sequence**: thread the explored vertices as an
+ordered list `rs`, colouring the `i`-th by its **position** `n+1+i` (not its vertex index). Position
+colours are globally distinct, so — exactly as for one rep in §C.4b — the sequence footprint has the
+**same partition** as the *indexed* `individualizedColouring (S ∪ rs.toFinset)`, and discreteness
+transfers (`discrete_indivWithSeq_of_discrete_union`). So `hdiscSeq ⟸ recoverableByDepth` — the depth
+witness, in the indexed form already proved for CFI/schemes. (A2 — transport under `g`, which needs the
+position colouring rather than the vertex index — is the level-wise lockstep, deferred.)
+
+This is A1: the bridge half. It is unconditional (no `Nodup`/disjointness), because position-colours and
+index-colours induce the same partition regardless. -/
+
+/-- **Level-coloured exploration sequence.** The committed set `S` by index (`individualizedColouring`)
+plus the `i`-th element of the list `rs` by its *position* colour `n+1+i` (via `rs.idxOf`). The position
+colouring — not the vertex index — is what will transport under the orbit automorphism in A2 (an index
+colouring breaks `χ₂ ∘ g = χ₁` on the moved set, exactly as the §C.4b note explains for a single rep). -/
+def indivWithSeq (n : Nat) (S : Finset (Fin n)) (rs : List (Fin n)) : Colouring n :=
+  fun v => if v ∈ rs then n + 1 + rs.idxOf v else individualizedColouring n S v
+
+/-- `indivWithRep` (M-B) is the singleton-sequence case (`n+1+0 = n+1`). -/
+theorem indivWithRep_eq_indivWithSeq_singleton {n : Nat} (S : Finset (Fin n)) (r : Fin n) :
+    indivWithRep n S r = indivWithSeq n S [r] := by
+  funext v
+  simp only [indivWithRep, indivWithSeq, List.mem_singleton]
+  by_cases h : v = r
+  · subst h; simp [List.idxOf_cons_self]
+  · simp [h]
+
+/-- **Same partition: level-coloured sequence = indexed union.** `indivWithSeq n S rs` and the *indexed*
+`individualizedColouring n (S ∪ rs.toFinset)` induce the same partition: each `rs`-vertex gets a globally
+unique colour either way (positions are distinct via `List.idxOf_inj`, and `≥ n+1 >` every index/
+background colour `≤ n`), and off `rs` the two colourings agree. The sequence generalization of
+`samePartition_indivWithRep_insert`; unconditional. -/
+theorem samePartition_indivWithSeq {n : Nat} (S : Finset (Fin n)) (rs : List (Fin n)) :
+    samePartition (indivWithSeq n S rs) (individualizedColouring n (S ∪ rs.toFinset)) := by
+  -- off `rs`, the two colourings are literally equal
+  have hoff : ∀ v, v ∉ rs → indivWithSeq n S rs v = individualizedColouring n (S ∪ rs.toFinset) v := by
+    intro v hv
+    rw [indivWithSeq, if_neg hv]
+    by_cases hvS : v ∈ S
+    · rw [individualizedColouring, if_pos hvS, individualizedColouring,
+          if_pos (Finset.mem_union_left _ hvS)]
+    · rw [individualizedColouring, if_neg hvS, individualizedColouring,
+          if_neg (by simp [Finset.mem_union, hvS, List.mem_toFinset, hv])]
+  -- an `rs`-vertex's colour is globally unique under `indivWithSeq`
+  have huSeq : ∀ v, v ∈ rs → ∀ w, w ≠ v →
+      indivWithSeq n S rs w ≠ indivWithSeq n S rs v := by
+    intro v hv w hwv
+    have hvc : indivWithSeq n S rs v = n + 1 + rs.idxOf v := by simp only [indivWithSeq, if_pos hv]
+    by_cases hw : w ∈ rs
+    · have hwc : indivWithSeq n S rs w = n + 1 + rs.idxOf w := by simp only [indivWithSeq, if_pos hw]
+      rw [hvc, hwc]
+      intro h
+      have : rs.idxOf w = rs.idxOf v := by omega
+      exact hwv ((List.idxOf_inj hw).mp this)
+    · have hwc : indivWithSeq n S rs w = individualizedColouring n S w := by
+        simp only [indivWithSeq, if_neg hw]
+      have hle : individualizedColouring n S w ≤ n := by
+        rw [individualizedColouring]; split
+        · exact w.is_lt
+        · exact Nat.zero_le n
+      rw [hvc, hwc]; omega
+  -- an `rs`-vertex's colour is globally unique under the indexed union colouring
+  have huIdx : ∀ v, v ∈ rs → ∀ w, w ≠ v →
+      individualizedColouring n (S ∪ rs.toFinset) w
+        ≠ individualizedColouring n (S ∪ rs.toFinset) v := by
+    intro v hv w hwv
+    have hvU : v ∈ S ∪ rs.toFinset := Finset.mem_union_right _ (List.mem_toFinset.mpr hv)
+    have hvc : individualizedColouring n (S ∪ rs.toFinset) v = v.val + 1 := by
+      rw [individualizedColouring, if_pos hvU]
+    rw [hvc, individualizedColouring]
+    split
+    · intro h; exact hwv (Fin.ext (by omega))
+    · omega
+  intro i j
+  by_cases hi : i ∈ rs
+  · by_cases hj : j ∈ rs
+    · have hic : indivWithSeq n S rs i = n + 1 + rs.idxOf i := by simp only [indivWithSeq, if_pos hi]
+      have hjc : indivWithSeq n S rs j = n + 1 + rs.idxOf j := by simp only [indivWithSeq, if_pos hj]
+      have hiU : individualizedColouring n (S ∪ rs.toFinset) i = i.val + 1 := by
+        rw [individualizedColouring, if_pos (Finset.mem_union_right _ (List.mem_toFinset.mpr hi))]
+      have hjU : individualizedColouring n (S ∪ rs.toFinset) j = j.val + 1 := by
+        rw [individualizedColouring, if_pos (Finset.mem_union_right _ (List.mem_toFinset.mpr hj))]
+      rw [hic, hjc, hiU, hjU]
+      constructor
+      · intro h
+        have hidx : rs.idxOf i = rs.idxOf j := by omega
+        rw [(List.idxOf_inj hi).mp hidx]
+      · intro h; rw [Fin.ext (show i.val = j.val by omega)]
+    · have hji : j ≠ i := by rintro rfl; exact hj hi
+      exact ⟨fun h => absurd h.symm (huSeq i hi j hji),
+             fun h => absurd h.symm (huIdx i hi j hji)⟩
+  · by_cases hj : j ∈ rs
+    · have hij : i ≠ j := by rintro rfl; exact hi hj
+      exact ⟨fun h => absurd h (huSeq j hj i hij),
+             fun h => absurd h (huIdx j hj i hij)⟩
+    · rw [hoff i hi, hoff j hj]
+
+/-- **The Leg-1 depth-witness bridge (sequence).** Discreteness of the level-coloured sequence footprint
+`indivWithSeq n S rs` *follows* from discreteness of the **indexed** `individualizedColouring n (S ∪
+rs.toFinset)` — the `RecoverableByDepth` / discretizing-depth shape that `recoverableByDepth_cfi` /
+`_scheme` populate. The sequence generalization of `discrete_indivWithRep_of_discrete_insert`: it
+converts the multi-step depth witness from the unreducible *uniform* form into the indexed form already
+proved on the cascade class. (Transport — A2 — is separate; this is the discreteness half.) -/
+theorem discrete_indivWithSeq_of_discrete_union {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (S : Finset (Fin n)) (rs : List (Fin n))
+    (hd : Discrete (warmRefine adj P (individualizedColouring n (S ∪ rs.toFinset)))) :
+    Discrete (warmRefine adj P (indivWithSeq n S rs)) :=
+  discrete_of_samePartition
+    (warmRefine_samePartition adj P (samePartition_indivWithSeq S rs).symm) hd
+
 end ChainDescent
