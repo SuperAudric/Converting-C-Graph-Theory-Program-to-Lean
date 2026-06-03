@@ -1553,4 +1553,104 @@ theorem matchOracleSet_verdictIsoInvariant {n : Nat} {adj : AdjMatrix n} {P₀ :
     (matchOracleSet_cascadeComplete hdiscSet hco hlock)
     (fun chain => orbitRecoverableAt_iff_cellsAreOrbits.mpr (hco chain))
 
+/-! ### §C.7 — Honest completeness: fire at the deepened node, propagate via `mono`
+
+`matchOracle_cascadeComplete` discharges `CascadeComplete` from two hypotheses quantified over
+**every** node: `hdisc` (the single-rep footprint `indivWithRep chain.D r` is discrete) and `hco`
+(`CellsAreOrbits chain.D`). For CFI **both are false at shallow nodes** — one rep does not discretize
+until depth ≈ `tw(H)`, and cells stay strictly coarser than orbits until then (the Rook3×3 gap,
+orbit-recovery §7.2). So the ∀-node form is *not* what the cascade class provides; it demands the
+oracle fire exactly where it provably cannot construct `colourMatchPerm`.
+
+This section restates completeness in the shape the descent realizes (the §C.0.1 support window made
+operational), in two pieces:
+
+* **Fire at the deepened node, `hco`-free.** `matchOracle` is *construct-and-check*, so a genuine
+  `Aut_D` orbit pair `(v, w)` already makes `colourMatchPerm = g` (`colourMatchPerm_eq_of_orbit`) and
+  the checks pass — the orbit witness is consumed *directly*. `hco` was only the cell→orbit bridge of
+  `complete_of_cellComplete_recoverable`; feeding the orbit pair directly bypasses it. The only input
+  left is discreteness, taken in the **indexed** `RecoverableByDepth` form (`individualizedColouring
+  (insert · chain.D)` discretizes — what `recoverableByDepth_cfi`/`_scheme` supply) and bridged to the
+  footprint by §C.4b. This is `matchOracle_fires_of_insertDiscrete`.
+* **Propagate via `mono`.** A merge certified at the (deep) node holds at every **shallower** committed
+  set `S ⊆ chain.D` with the same `chain.P`: the returned automorphism fixes `chain.D ⊇ S` pointwise,
+  so `OrbitPartition.mono` reuses it as an `Aut_S` witness. This is `matchOracle_orbit_of_fire_mono` —
+  the "fire deep, prune shallow" step, justifying an ancestor target-cell decision by a certification
+  harvested after deepening.
+
+What stays open is then the single honest obligation (1b), no longer two false ones: the descent must
+**reach** such a deepened node while keeping `(v, w)` an orbit pair — i.e. extend `chain.D` into
+`(supp g)ᶜ` up to discreteness. `exists_orbit_witness_of_aut` shows the room exists (the pair stays
+available down to depth `n − |supp g|`); that the *canonical* descent lands there is the cascade-class
+construction-correctness still owed, and is not `GI ∈ P`. -/
+
+/-- **Honest per-node firing (`hco`-free).** At a node where individualizing the committed path plus
+the query rep discretizes — the indexed `RecoverableByDepth` form (`recoverableByDepth_cfi`/`_scheme`),
+bridged to the footprint by §C.4b — `matchOracle` fires on **any genuine `Aut_D` orbit pair** `(v, w)`
+with `v, w ∉ chain.D`. The orbit witness `g` is consumed directly (`colourMatchPerm = g`), so no
+`CellsAreOrbits` hypothesis is needed: this is the construct-and-check completeness the descent
+actually invokes, at the depth the recursion reaches (not the unsatisfiable ∀-node `hdisc`/`hco`). -/
+theorem matchOracle_fires_of_insertDiscrete {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
+    (hvD : v ∉ chain.D) (hwD : w ∉ chain.D)
+    (hinsv : Discrete (warmRefine adj chain.P (individualizedColouring n (insert v chain.D))))
+    (hinsw : Discrete (warmRefine adj chain.P (individualizedColouring n (insert w chain.D))))
+    (horb : OrbitPartition adj chain.P chain.D v w) :
+    ∃ result, matchOracle adj P₀ χι₀ sel chain v w = some result := by
+  have hv := discrete_indivWithRep_of_discrete_insert adj chain.P chain.D v hvD hinsv
+  have hw := discrete_indivWithRep_of_discrete_insert adj chain.P chain.D w hwD hinsw
+  obtain ⟨g, hg, hgP, hgD, hgvw⟩ := horb
+  have hcmp : colourMatchPerm adj chain.P chain.D v w hv hw = g :=
+    colourMatchPerm_eq_of_orbit hv hw hg hgP hgD hgvw hwD
+  refine matchOracle_fires chain hv hw ?_ ?_ ?_ ?_
+  · rw [hcmp]; exact hg
+  · rw [hcmp]; exact hgP
+  · rw [hcmp]; exact hgD
+  · rw [hcmp]; exact hgvw
+
+/-- **Propagate the certification via `mono`.** A merge `matchOracle` certifies at a node holds at
+every **shallower** committed set `S ⊆ chain.D` (same `chain.P`): the returned automorphism fixes
+`chain.D ⊇ S` pointwise, so it witnesses the `Aut_S` orbit pair too (`OrbitPartition.mono`). The
+"fire deep, prune shallow" step — a decision at an ancestor target cell justified by a certification
+harvested after deepening. Together with `matchOracle_fires_of_insertDiscrete` this is the honest
+form of the localisation discharge: fire where the footprint discretizes, reuse upward by `mono`. -/
+theorem matchOracle_orbit_of_fire_mono {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
+    {S : Finset (Fin n)} (hS : S ⊆ chain.D)
+    {result : { π : Equiv.Perm (Fin n) // IsAut π adj }}
+    (hfire : matchOracle adj P₀ χι₀ sel chain v w = some result) :
+    OrbitPartition adj chain.P S v w :=
+  OrbitPartition.mono hS
+    (matchOracle_orbitMapSpec adj P₀ χι₀ sel chain v w result hfire)
+
+/-- **Exact orbit decider at the discretizing depth (`hco`-free).** Combining unconditional soundness
+(`matchOracle_orbitMapSpec`) with `matchOracle_fires_of_insertDiscrete`: at a node where committing the
+path plus the query rep discretizes (`hinsv`/`hinsw`), `matchOracle` fires on `(v, w)` **iff** they are
+a genuine `Aut_{chain.D}` orbit pair. No `CellsAreOrbits`/localisation assumption — at the discretizing
+depth the construct-and-check oracle *is* the path-fixing-orbit relation exactly.
+
+**Read the limits precisely.** (1) This is an iff *only under the discreteness hypotheses* — i.e. at a
+node one individualization from a leaf. The depth at which they become satisfiable is the cascade depth
+(`tw(H)` for CFI); for the wall / IR-blind-spot it is *not* polynomial, and there this lemma simply does
+not apply (its hypotheses are unmet — that unreachability, not non-firing, is the Cameron/flag signal).
+(2) The relation decided is `Aut_{chain.D}` — the **path-fixing** stabilizer, not `Aut(adj)`. Non-firing
+means no automorphism *fixing the committed path* swaps `v, w`; a global symmetry that *moves* the path
+is not destroyed, only relocated to the stabilizer-chain transversal (§C.0.1), to be harvested
+cross-branch. So non-firing is a genuine **local** decision at this node, not a verdict of global
+rigidity. -/
+theorem matchOracle_certifies_iff_orbit_of_insertDiscrete {n : Nat} {adj : AdjMatrix n}
+    {P₀ : PMatrix n} {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
+    (hvD : v ∉ chain.D) (hwD : w ∉ chain.D)
+    (hinsv : Discrete (warmRefine adj chain.P (individualizedColouring n (insert v chain.D))))
+    (hinsw : Discrete (warmRefine adj chain.P (individualizedColouring n (insert w chain.D)))) :
+    (∃ result, matchOracle adj P₀ χι₀ sel chain v w = some result)
+      ↔ OrbitPartition adj chain.P chain.D v w := by
+  constructor
+  · rintro ⟨result, h⟩
+    exact matchOracle_orbitMapSpec adj P₀ χι₀ sel chain v w result h
+  · exact matchOracle_fires_of_insertDiscrete chain hvD hwD hinsv hinsw
+
 end ChainDescent
