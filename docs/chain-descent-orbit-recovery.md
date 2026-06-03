@@ -23,6 +23,35 @@ oracle and the cost model.
 
 ---
 
+## 0. How to read this doc (witness layer — a reading map)
+
+This doc is **the witness layer**, written as a chronological research/development
+record. After the de-classing turn ([`chain-descent-declassing.md`](./chain-descent-declassing.md))
+its per-class results are *examples populating abstract predicates*, **not** a plan. So
+read selectively:
+
+- **Live as witnesses (the lasting content).** §5–§6 (Theorem 1: CFI cascade depth
+  ≤ tw(H), and the polynomial-cost corollary) and §14.2–§14.3 (Theorem 2 for schurian
+  scheme graphs). These are the concrete facts that the general theorems
+  `theorem_2_HOR_of_edgeGenerates` / `theorem_2_HOR_of_pPolynomial` and the abstract
+  `CascadesAt` / `EdgeGenerates` / `VisiblyRecoverable` predicates are *witnessed by*.
+- **Historical development record (read only for "how the witnesses were built").** §9
+  (the multi-week CFI cascade M-phase grind and the Tier-2 rank ladder), §8 (open
+  questions), §13 ("what's next"), §14.5/§14.7 (Tier-2 finalization gaps). Their
+  "remaining work" / "next paper" / "open" phrasings are **superseded** — the metric/DRG
+  family is now *one* theorem, and per-class recovery is the witness layer, not a queue.
+- **Where the current plan actually lives.** Recovery + firing:
+  [`chain-descent-declassing.md`](./chain-descent-declassing.md) (§6 the unified harvest,
+  §9 the live frontier). The multi-step hidden-abelian case is *not* harvested within-cell
+  (proved: `lockstep_disc_imp_stab_trivial`); it goes through the cross-branch
+  stabilizer-chain object, [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md).
+
+Nothing below is wrong; it is just *witness-level*, not *strategy-level*. When a section
+says "open" or "next paper," cross-check the STATUS block of the doc it points to before
+treating it as live.
+
+---
+
 ## 1. Headline
 
 > **Theorem 1 (HOR for CFI).** Let `H` be a connected graph with all
@@ -316,6 +345,13 @@ HOR / F7-graded statement (gap closes by depth tw(H) = 4) holds.
 ---
 
 ## 8. Open questions
+
+> **Witness-layer caveat (read §0).** These were open *within the per-class program*.
+> The program itself was superseded by de-classing: Q5 (Tier-2 = depth-1) is **subsumed**
+> (the metric/DRG family is one theorem, `theorem_2_HOR_of_pPolynomial`); Q1–Q4 (exact
+> depth, gap dynamics, early-recovery classes, unbounded-tw) are **research curiosities
+> about the witnesses**, not blockers for the current plan. The live frontier is
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9.
 
 The proof gives us Tier 1 cleanly but leaves several interesting
 questions open. Listed roughly by how much they would change the
@@ -1196,6 +1232,13 @@ and unblocks the cascade half of the hidden-Johnson near-theorem.
 ---
 
 ## 13. What's settled and what's next
+
+> **Witness-layer caveat (read §0).** "Settled" below is current (these are the witnesses).
+> The "**Next**" list is the **historical** per-class plan (sketch Tier-2 paper, discharge
+> Fact-A axioms, Tier-3) — **superseded** by de-classing: the metric/DRG class is now one
+> theorem and the tier ladder is the witness layer. For what is actually next, see
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9 and
+> [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md).
 
 **Settled:**
 - Theorem 1 (F7-graded / HOR for CFI) with cascade-based proof (§5).

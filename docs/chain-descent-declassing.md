@@ -51,6 +51,14 @@
 > **IR-stickiness axis** (multipede, flagged); and the **wall** (¬D1∧¬D2, Cameron/Johnson). The first
 > three are bounded; the last two are the honest boundary.
 >
+> **Part A progress (2026-06-03, axiom-clean — see [schreier-sims](./chain-descent-schreier-sims.md)).** The
+> cross-branch group object's *container* is built: `StabilizerAt` (residual `Aut_S^P` as a `Subgroup`), the
+> harvest **soundness** seam (fold-in ⊆ residual, prune sound), the rigid verdict (trivial ⟺ base), and the
+> full `order = ∏ basic-orbit sizes` (`card_autP_eq_prod_of_base`). **The load-bearing open piece is the
+> harvest *completeness* seam** (`StabilizerAt ⊆ closure of harvested generators`, the multi-step firing) —
+> the dual of the soundness seam, reduced to a budget/collision witness; that, not the concrete BSGS, is the
+> next constructive step toward "reaches a rigid or Cameron residual on all classes."
+>
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
 > [cascade-oracle](./chain-descent-cascade-oracle.md) + [linear-oracle](./chain-descent-linear-oracle.md)

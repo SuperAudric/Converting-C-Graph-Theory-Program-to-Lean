@@ -1,13 +1,24 @@
 # Chain descent — Part A: the stabilizer-chain / Schreier–Sims object (planning & staging)
 
-> **STATUS (2026-06-03): the abstract layer (Stages A1–A3) is LANDED; A4 deferred.** Build plan + context
-> dump for a permutation-group **stabilizer chain** (Schreier–Sims) in Lean — "tractable-buildout Part A".
-> **Done (axiom-clean, full build green, `Cascade.lean` "Part A (Stage A1/A2/A3)"):** the residual group
-> `Aut_S^P` as a Mathlib `Subgroup` (`StabilizerAt`), the cross-branch harvest-soundness seam, and the
-> order + rigid verdict (trivial ⟺ base; the orbit–stabilizer order recursion). See §7 for the landed
-> theorem names. **Remaining:** Stage A4 (the concrete computable BSGS data structure mirroring the C#),
-> deferred — only needed for the computable object, not the abstract verdict. A fresh reader can still use
-> this doc as the full context/name index (Mathlib + internal) for A4 or for consuming A1–A3.
+> **STATUS (2026-06-03): the abstract layer (Stages A1–A3, A3.5) is LANDED; the cross-branch *completeness*
+> seam (A2-complete) and the concrete BSGS (A4) are open.** Build plan + context dump for a
+> permutation-group **stabilizer chain** (Schreier–Sims) in Lean — "tractable-buildout Part A".
+> **Done (axiom-clean, full build green, `Cascade.lean` "Part A"):** the residual group `Aut_S^P` as a
+> Mathlib `Subgroup` (`StabilizerAt`); the cross-branch harvest-**soundness** seam (fold-in ⊆ true
+> residual, orbit-prune sound); the rigid verdict (trivial ⟺ base); the per-level orbit–stabilizer order
+> recursion; **and (A3.5) the full `order = ∏ basic-orbit sizes` over a base sequence** — the abstract
+> `Order = ∏ OrbitSize` of `PermutationGroup.cs`, needing no computable BSGS. See §7 for the landed theorem
+> names. **Open — the two pieces the conservation finding actually requires next:**
+> - **A2-complete — the cross-branch harvest *completeness* seam (`StabilizerAt ⊆ closure of harvested
+>   generators`).** A2 proved only soundness (`closure_le_stabilizerAt`, the `⊆` direction); the **dual**
+>   — that the leaf-collision harvest's generators *generate* the residual — is the property the multi-step
+>   redirect was about, and was **missing from the original A1–A4 staging**. This, not A4, is the load-bearing
+>   next step (mirrors how the within-cell oracle reduced completeness to a depth witness). See §7.
+> - **A4 — the concrete computable BSGS** mirroring the C# (`Level`/transversal/sift). Validation breadth;
+>   needed only for the *computable* object, not the abstract verdict.
+>
+> A fresh reader can still use this doc as the full context/name index (Mathlib + internal) for consuming
+> A1–A3.5 or building A2-complete / A4.
 >
 > **Why now (the trigger).** The discretizing colour-match oracle was just **proven unable** to harvest a
 > multi-step moved orbit: `lockstep_disc_imp_stab_trivial` (`CascadeOracle.lean §C.8`) shows its two
@@ -25,12 +36,17 @@
    orbit structure, its **order** (`= ∏ basic-orbit sizes`), and a base/transversal (BSGS) decomposition.
 2. **The cross-branch harvest seam** — *fold in* a verified automorphism (the a-posteriori "two branches
    reach the same leaf ⟹ the relabelling is an automorphism" harvest, strategy §4 step 6), and *consume*
-   it (a folded generator that fixes the path prunes sibling branches). This seam is **entirely
-   unformalized in Lean** today; it is the mechanism the conservation finding established as required.
+   it (a folded generator that fixes the path prunes sibling branches). The **soundness** half is now
+   formalized (Stage A2: fold-in `⊆` true residual, prune sound); the **completeness** half (the harvested
+   generators *generate* the residual) is **open — Stage A2-complete (§7)**, and is the mechanism the
+   conservation finding established as required.
 
 The project needs the *reasoning* ("the harvested generators generate the path-fixing stabilizer";
 "residual trivial ⟺ rigid"), not a fast computable sift. So **build the abstract `Subgroup` layer first**
-(Stages A1–A3); the concrete computable BSGS data structure mirroring the C# (Stage A4) is later/optional.
+(Stages A1–A3.5, the container + soundness + order — landed; then **A2-complete**, the harvest
+*completeness* — the load-bearing open piece); the concrete computable BSGS data structure mirroring the
+C# (Stage A4) is later/optional. Note the *reasoning* the project most needs — "harvested generators
+**generate** the stabilizer" — is exactly the open A2-complete, not anything in A4.
 
 ---
 
@@ -191,26 +207,35 @@ All paths under `GraphCanonizationProofs/ChainDescent/`. These are what Part A b
 
 ## 5. What is ABSENT (the actual build)
 
-Originally absent in both Mathlib and the project. **Now built by A1–A3** (Cascade.lean): the **cross-branch
-fold-in/consume seam** (`closure_le_stabilizerAt`, `covered_sound`), the **per-level group-order recursion**
-(`card_stabilizerAt_eq_orbit_mul`), and the **stabilizer object + base predicate** (`StabilizerAt`,
-`stabilizerAt_eq_bot_iff_isBase`). **Still absent (Stage A4):** an explicit **base sequence** (note
-`IsBase` is a *predicate on a set*, not an ordered base), a **strong generating set**, **Schreier generators**
-as a construction, a **sift/strip/membership** procedure, the **full order product** over a base, and the
+Originally absent in both Mathlib and the project. **Now built by A1–A3.5** (Cascade.lean): the **cross-branch
+fold-in/consume *soundness* seam** (`closure_le_stabilizerAt`, `covered_sound`), the **per-level group-order
+recursion** (`card_stabilizerAt_eq_orbit_mul`), the **full order product over a base sequence** (A3.5 —
+`orbitSizeProd`, `card_stabilizerAt_eq_prod`, `card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base`),
+and the **stabilizer object + base predicate** (`StabilizerAt`, `stabilizerAt_eq_bot_iff_isBase`).
+**Still absent — the harvest *completeness* seam (Stage A2-complete):** that the harvested generators
+*generate* `StabilizerAt` (`StabilizerAt ⊆ Subgroup.closure gens`, the dual of `closure_le_stabilizerAt`),
+reduced to a budget/collision witness — the multi-step harvest mechanism the conservation finding requires.
+**Still absent (Stage A4, computable only):** an explicit **ordered base sequence** as data (note `IsBase`
+is a *predicate on a set*; A3.5 takes the base sequence as a `List` argument but constructs none), a **strong
+generating set**, **Schreier generators** as a construction, a **sift/strip/membership** procedure, and the
 **concrete computable** `Level`/transversal structure mirroring `PermutationGroup.cs`.
 
 ---
 
 ## 6. What Part A solves / trivializes / consolidates
 
-- **Solves (now *required*, not optional):** the multi-step moved-orbit harvest (cross-branch), which the
-  discretizing oracle provably can't do (`lockstep_disc_imp_stab_trivial`); the **rigid-residual verdict**;
-  **`Aut(G)` as a byproduct** of canonization; **§C.0.1 transversal relocation** made rigorous.
-- **Trivializes:** the **residual-group-order diagnostic** — `order = ∏ orbit sizes` is Mathlib's
-  orbit–stabilizer (`card_orbit_mul_card_stabilizer_eq_card_group` / `index_stabilizer`); the
-  Tier2Like-vs-IRblindspot flag split (already coded in C#) becomes a Lean theorem. **T-A/T-B** become
-  Lean-reachable (orbit-stabilizer product) rather than pure citations — *except* the poly-size bound,
-  which stays Sims's citation (see §1 caveat).
+- **Solves:** the **rigid-residual verdict** (`card_stabilizerAt_eq_one_iff_isBase`); **`Aut(G)` order as a
+  byproduct** of canonization (A3.5 `card_autP_eq_prod_of_base`, `= ∏ basic-orbit sizes` — a theorem, not a
+  citation); **§C.0.1 transversal relocation** made rigorous; and the **soundness** of the cross-branch
+  multi-step harvest. **Provides the container for, but does not yet solve, the multi-step moved-orbit
+  harvest itself** — the discretizing oracle provably can't do it (`lockstep_disc_imp_stab_trivial`), and
+  the cross-branch harvest that replaces it needs its **completeness** seam (Stage A2-complete, §7) firing.
+- **Trivializes:** the **residual-group-order diagnostic** — `order = ∏ orbit sizes` is now a **Lean
+  theorem** (A3.5 `card_autP_eq_prod_of_base`, built on Mathlib's orbit–stabilizer
+  `card_mul_index` / `index_stabilizer`), not just citation-reachable; the rigid verdict
+  (`card_stabilizerAt_eq_one_iff_isBase`) makes the Tier2Like-vs-IRblindspot flag split a Lean statement.
+  **T-A/T-B** become Lean-reachable (orbit-stabilizer product) rather than pure citations — *except* the
+  poly-size bound, which stays Sims's citation (see §1 caveat).
 - **Consolidates:** the scattered predicate-level `ResidualAut` / `OrbitPartition` / support reasoning into
   one `Subgroup` object; likely subsumes `LayerChain`'s descent role; turns the §C.0.1 caveat into theorem.
 
@@ -264,17 +289,45 @@ Built in `Cascade.lean` "Part A (Stage A3)": `card_stabilizerAt_pos` (finite), *
 recursion `subgroupOf_insert_eq_stabilizer` → `card_stabilizer_eq` → **`card_stabilizerAt_eq_orbit_mul`**
 (`|Aut_S^P| = |orbit b| · |Aut_{insert b S}^P|`, the inductive step of `order = ∏ orbit sizes`, via
 `Subgroup.card_mul_index` + `MulAction.index_stabilizer`). Required added imports `Mathlib.GroupTheory.Index`
-+ `Mathlib.Algebra.Group.Subgroup.Finite`. Assembling the full product over a base sequence is the thin
-Stage-A4 layer. Original plan below.
++ `Mathlib.Algebra.Group.Subgroup.Finite`. The full product over a base sequence is **A3.5** (below), not
+A4 — it is abstract. Original plan below.
 - `Nat.card (StabilizerAt adj P S)` via the chain `= ∏ basic-orbit sizes` (Mathlib orbit–stabilizer over
   the base). `IsBase ⟺ StabilizerAt = ⊥ ⟺ Nat.card = 1 ⟺ rigid`. Express the flag diagnostic
   (non-trivial residual ⟹ Tier-2/Cameron; trivial ⟹ IR blind spot) as a Lean statement.
 
+### Stage A3.5 — the full order product over a base sequence — **LANDED 2026-06-03, axiom-clean**
+Built in `Cascade.lean` "Part A (Stage A3.5)". Telescopes `card_stabilizerAt_eq_orbit_mul` over an ordered
+base sequence — pure induction, **no computable BSGS**, so separated out of A4:
+- `orbitSizeProd adj P bs S` (noncomputable): the basic-orbit-size product along `bs` from `S`.
+- `card_stabilizerAt_eq_prod`: the telescoping identity `|Aut_S^P| = orbitSizeProd bs S · |Aut_(foldl)^P|`
+  for *any* sequence (induction on `bs` over `card_stabilizerAt_eq_orbit_mul`).
+- `card_stabilizerAt_eq_prod_of_base`: at a base the trailing factor is 1, so `|Aut_S^P| = ∏ orbit sizes`.
+- `card_autP_eq_prod_of_base`: the `S = ∅` headline — `|Aut(G)^P| = ∏ basic-orbit sizes`, the group order
+  as a byproduct of canonization. The abstract `Order = ∏ level.OrbitSize` of `PermutationGroup.cs`.
+- *Open within A3.5:* A3.5 takes the base sequence as a `List` argument; constructing a *canonical* one
+  (and an existence corollary from `exists_isBase_saturated`) is small follow-on, lumpable with A4's
+  ordered-base data.
+
+### Stage A2-complete — the cross-branch harvest *completeness* seam — **OPEN (the load-bearing next step)**
+A2 proved harvest **soundness** (`closure_le_stabilizerAt`: the folded chain stays `⊆ StabilizerAt`). The
+**completeness dual** — that the harvested generators *generate* the residual — was **never staged**, yet it
+is exactly what the conservation finding (`lockstep_disc_imp_stab_trivial`) redirected the project to. Plan:
+- Define the leaf-collision generating set: from the a-posteriori harvest (`HandleLeaf`, strategy §4 step 6),
+  the verified relabellings between branches reaching equal leaves.
+- Prove `StabilizerAt adj P S ≤ Subgroup.closure harvestGens` **reduced to a budget/collision witness** (the
+  harvest sees enough leaf collisions to generate the residual) — mirroring how the within-cell oracle
+  reduced completeness to a depth witness, with soundness left unconditional.
+- Discharge the witness for bounded-`tw` CFI (the mechanism already canonizes CFI(K₄–K₇) in the C#), the
+  multi-step case the discretizing oracle provably cannot reach.
+- *Bar:* `closure harvestGens = StabilizerAt` under the witness — the residual is *exactly* what the harness
+  folds in. This closes the cross-branch harvest the same way A2 closed its soundness half.
+
 ### Stage A4 — concrete computable BSGS (defer)
-- Model `Level` / base sequence / `Transversal` / Schreier generators / `sift` as computable structures;
-  prove `computes` against `StabilizerAt` and `order = ∏ OrbitSize`. Verification corpus = the C# tests
-  (S₃–S₇, D₄, D18, D9≀Z2). Builds on Mathlib `LeftTransversal` + `closure_mul_image_eq` (Schreier).
-  Needed only for the *computable* object; the abstract verdict (A3) does not require it.
+- Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
+  computable structures; prove `computes` against `StabilizerAt` and `order = ∏ OrbitSize` (the abstract
+  product is already A3.5). Verification corpus = the C# tests (S₃–S₇, D₄, D18, D9≀Z2). Builds on Mathlib
+  `LeftTransversal` + `closure_mul_image_eq` (Schreier). Needed only for the *computable* object; the
+  abstract verdict (A3/A3.5) does not require it.
 
 ---
 
@@ -288,8 +341,9 @@ Stage-A4 layer. Original plan below.
    `LayerChain` instance or a parallel base-ordered structure. The A3 order recursion
    (`card_stabilizerAt_eq_orbit_mul`) is the per-level step either way.
 4. **Computability scope — OPEN (A4):** how faithfully Stage A4 mirrors the unsifted C# variant vs. uses
-   Mathlib's (noncomputable) transversal existence. The abstract layer (A1–A3) is noncomputable and
-   sufficient for the verdicts; A4 is the only stage needing decidable/`Fintype` computation.
+   Mathlib's (noncomputable) transversal existence. The abstract layer (A1–A3.5, and the open A2-complete)
+   is noncomputable and sufficient for the verdicts; A4 is the only stage needing decidable/`Fintype`
+   computation.
 
 ## 9. Honest caveats
 - The chain proves **correctness**, not the **poly bound** (T-A stays Sims's citation; the C# is unsifted).
@@ -316,6 +370,13 @@ Stage-A4 layer. Original plan below.
 `IsBase` (Cascade.lean:57), `exists_isBase_saturated_support` (Cascade.lean:1040), `movedSet`
 (Cascade.lean:1011), `movedSet_image` (Cascade.lean:1139), `forcedNode` (Cascade.lean:1080),
 `lockstep_disc_imp_stab_trivial` (CascadeOracle.lean:2056, the trigger).
+
+**Part A landed (Cascade.lean "Part A"):** `StabilizerAt`, `mem_stabilizerAt_empty`, `stabilizerAt_mono`,
+`stabilizerAt_eq_bot_iff_isBase`, `mem_orbit_stabilizerAt_iff` (A1); `residualAut_mem_stabilizerAt`,
+`closure_le_stabilizerAt`, `orbit_pathFixing_sound`, `covered_sound` (A2 soundness); `card_stabilizerAt_pos`,
+`card_stabilizerAt_eq_one_iff_isBase`, `subgroupOf_insert_eq_stabilizer`, `card_stabilizer_eq`,
+`card_stabilizerAt_eq_orbit_mul` (A3); `orbitSizeProd`, `card_stabilizerAt_eq_prod`,
+`card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base` (A3.5).
 
 **C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
 161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,
