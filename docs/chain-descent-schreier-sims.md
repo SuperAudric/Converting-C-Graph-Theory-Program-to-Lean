@@ -1,0 +1,298 @@
+# Chain descent — Part A: the stabilizer-chain / Schreier–Sims object (planning & staging)
+
+> **STATUS (2026-06-03): planning doc, not yet implemented.** This is the build plan and context dump
+> for formalizing a permutation-group **stabilizer chain** (Schreier–Sims) in Lean — "tractable-buildout
+> Part A". Nothing here is built yet; the `Stage A1–A4` sections are the proposed order. A fresh reader
+> should be able to start Stage A1 from this doc alone: it lists every existing theorem (Mathlib and
+> internal) the build rests on or consolidates, by name and location.
+>
+> **Why now (the trigger).** The discretizing colour-match oracle was just **proven unable** to harvest a
+> multi-step moved orbit: `lockstep_disc_imp_stab_trivial` (`CascadeOracle.lean §C.8`) shows its two
+> completeness hypotheses are jointly satisfiable only when one rep already kills the residual. So the
+> multi-step hidden-abelian case (CFI gauge twists, `tw ≥ 2`) **must** be harvested *cross-branch* — and
+> the cross-branch harvest needs a group object to fold automorphisms into. That object is this doc.
+> Companion: [declassing](./chain-descent-declassing.md) §6/§9 (the redirect), the memory note
+> `project_discretizing_oracle_limit_2026-06-03.md`.
+
+---
+
+## 0. The two layers this builds
+
+1. **The group object** — the path-fixing stabilizer `Aut_S^P` as a real Mathlib `Subgroup`, with its
+   orbit structure, its **order** (`= ∏ basic-orbit sizes`), and a base/transversal (BSGS) decomposition.
+2. **The cross-branch harvest seam** — *fold in* a verified automorphism (the a-posteriori "two branches
+   reach the same leaf ⟹ the relabelling is an automorphism" harvest, strategy §4 step 6), and *consume*
+   it (a folded generator that fixes the path prunes sibling branches). This seam is **entirely
+   unformalized in Lean** today; it is the mechanism the conservation finding established as required.
+
+The project needs the *reasoning* ("the harvested generators generate the path-fixing stabilizer";
+"residual trivial ⟺ rigid"), not a fast computable sift. So **build the abstract `Subgroup` layer first**
+(Stages A1–A3); the concrete computable BSGS data structure mirroring the C# (Stage A4) is later/optional.
+
+---
+
+## 1. The formalization target — the C# object
+
+`GraphCanonizationProject/PermutationGroup.cs` (297 lines) is the reference implementation; the Lean
+object should be provably equivalent to it (Stage A4) and is the spec for the abstract layer.
+
+- **`static class Perm`** (lines 13–73): a permutation is `int[] p` (`p[i]` = image of `i`). Ops:
+  `Identity`, `Compose(p,q)` — **right operand first**: `Compose(p,q)[i] = p[q[i]]` (load-bearing
+  convention; the Lean model uses `Equiv.Perm` whose `*` is also right-first, so they match), `Inverse`,
+  `IsIdentity`, `IsPermutation`, `FromCycles`, `FirstMoved` (first non-fixed point, else `-1`).
+- **`sealed class PermutationGroup`** (94–296): `int N`; `List<int[]> _generators`; lazy `List<Level>?
+  _chain` (nulled on each `AddGenerator`, rebuilt by `EnsureChain`).
+  - **`Level`** (103–110): one chain level — `int BasePoint`; `int[]?[] Transversal` indexed by orbit
+    point (`Transversal[pt]` is a group element `u` with `u[BasePoint] = pt`, or `null`); `int OrbitSize`.
+    This is the BSGS triple (base point, basic transversal, strong generators implicit in `_generators` +
+    recursively-derived Schreier generators).
+  - **Ops:** `AddGenerator` (123 — the fold-in entry point; validates, drops identities, invalidates
+    chain), `Order` = `∏ level.OrbitSize` (136, the orbit-stabilizer product), `BasePoints` (150),
+    `Contains` = sift/strip (161: at each level look up the rep for `cur[BasePoint]`; `null` ⟹ reject;
+    else `cur := Inverse(rep) ∘ cur`; member iff final residue is identity), `Orbit(point)` BFS (177),
+    **`BuildChain`** = recursive Schreier–Sims (209–274: pick first moved point as base; BFS the basic
+    orbit building coset reps `u_img = g ∘ u_o`; form Schreier generators `sg = u_{g[o]}⁻¹ ∘ g ∘ u_o`,
+    deduped via `PermComparer`; recurse; stop when residual gens are all identity).
+- **Tests** (`GraphCanonizationProject.Tests/PermutationGroupTests.cs`): `Order` is the oracle. Corpus to
+  mirror: trivial, single transposition (2), cyclic (= cycle length), **`S₃–S₇`** via `⟨(0 1),
+  n-cycle⟩` = `n!`, **`D₄`** = 8, **`D18` = Aut(C18)** = 36, **`D9 ≀ Z2` = Aut(C9⊔C9)** = 648; plus orbit
+  correctness, incremental-generator order growth, redundant-generator idempotence.
+
+**Caveat:** this C# BSGS is the *unsifted* textbook variant (lines 89–93) — correct for **all** groups,
+but the polynomial-construction sifting is deferred. A faithful Lean model proves **correctness** (order =
+orbit product, membership = identity residue); the **poly-size** claim (T-A) stays a *citation* (Sims:
+base ≤ n, SGS `O(n²)`), not a consequence of the data-structure proof. Do not conflate them.
+
+---
+
+## 2. The cross-branch harvest interface (the seam)
+
+How automorphisms enter and leave the chain, from `GraphCanonizationProject/ChainDescent.cs`. The chain
+is the public `PermutationGroup Automorphisms`. Two feed paths, both via `Automorphisms.AddGenerator`:
+
+1. **A-posteriori leaf-collision harvest** (the canonical strategy §4 step 6). `HandleLeaf` (532–556):
+   each discrete leaf yields a labelling `perm` and a permuted adjacency matrix, keyed by a 64-bit hash
+   into `_seen`. On a hash hit, the relabelling `auto = Inverse(perm) ∘ firstPerm` is the candidate; it is
+   **edge-verified** by `IsAutomorphism` (581–588) — a hash collision just fails harmlessly — and only
+   then `AddGenerator(auto)`.
+2. **A-priori cascade/linear harvest** `HarvestTwists` (359–379): explore the anchor rep, replay the
+   iso-invariant deepening on each other rep, construct a candidate twist, edge-verify, fold in.
+
+**Consumption — how the folded chain prunes.** `CoveredByPathFixingAut` (501–527): collect harvested
+generators that fix every path vertex (`g[pt]==pt` for `pt ∈ _path`), BFS the orbit of explored reps
+under just those, and skip `v` if it lands in that orbit. So a path-fixing folded automorphism prunes
+redundant siblings — the "useful mid-run" property (strategy §6).
+
+- Oracle seam: `ITransversalOracle.cs` `Classify(n, adj, targetCell, path, knownGroup)` is *handed the
+  live `PermutationGroup`*; soundness contract "over-split sound, under-merge not".
+- Output: `CanonGraphOrdererChainDescent.cs` `LastAutomorphisms` / `LastAutomorphismGroupOrder`;
+  `FlagKind.Tier2Like` vs `IrBlindSpot` keyed on `result.ResidualGroup.IsTrivial` (≈ line 95).
+
+---
+
+## 3. Foundations that EXIST — Mathlib (reuse the mathematics)
+
+Verdict: **Schreier–Sims / BSGS / base / SGS / sift are ABSENT** from Mathlib (must build). But every
+*underlying* primitive is present. Paths are under `.lake/packages/mathlib/Mathlib/`.
+
+### Group action (the core foundation) — `GroupTheory/GroupAction/`
+- `MulAction.orbit (a : α) : Set α`, `MulAction.stabilizer G a : Subgroup G` — `Defs.lean`.
+- **Orbit–stabilizer, constructive:** `MulAction.orbitProdStabilizerEquivGroup b : orbit α b × stabilizer
+  α b ≃ α`, and `MulAction.card_orbit_mul_card_stabilizer_eq_card_group` — `Quotient.lean`. **This is what
+  makes "order = ∏ orbit sizes" nearly free** (the Stage A3 deliverable).
+- `MulAction.orbitRel`, `MulAction.fixedPoints`, `MulAction.fixedBy`.
+- **`fixingSubgroup M s : Subgroup M`** with `mem_fixingSubgroup_iff : m ∈ fixingSubgroup M s ↔ ∀ y ∈ s,
+  m • y = y` — `GroupAction/FixingSubgroup.lean:113/117`. **This is exactly the project's `FixesPointwise`
+  as a Mathlib `Subgroup`** — the pointwise stabilizer is *not* new code. (Mathlib uses `Set α`; the
+  project uses `Finset`, so a `↑s` coercion.)
+
+### Transversals & Schreier's lemma — `GroupTheory/`
+- `Subgroup.LeftTransversal H` / `RightTransversal H` (abbrevs of `{S // IsComplement …}`), `IsComplement
+  S T`, `IsComplement.toLeftFun/toRightFun`, `IsComplement.leftQuotientEquiv : (G ⧸ H) ≃ leftTransversal`,
+  `exists_isComplement_left/right` — `Complement.lean`.
+- **Schreier's lemma:** `Subgroup.closure_mul_image_eq` (`H` is generated by `(R*S).image (g ↦ g *
+  (hR.toRightFun g)⁻¹)`), `closure_mul_image_eq_top'`, `Subgroup.fg_of_index_ne_zero`,
+  `rank_le_index_mul_rank` — `Schreier.lean`. This is the generators-from-transversal step the
+  per-level Schreier-generator construction needs.
+
+### Index / order / Lagrange — `GroupTheory/Index.lean`
+- `Subgroup.index = Nat.card (G ⧸ H)`, `Subgroup.card_mul_index : Nat.card H * H.index = Nat.card G`,
+  `Subgroup.index_dvd_card`, `Subgroup.relIndex`, **`MulAction.index_stabilizer : (stabilizer G a).index
+  = Nat.card (orbit G a)`** (orbit = index of stabilizer — the per-level factor).
+
+### Equiv.Perm / closure — `GroupTheory/Perm/`, `Algebra/Group/Subgroup/Lattice.lean`
+- `Equiv.Perm.support`, `Equiv.Perm.Disjoint`, `Subgroup.closure` (subgroup generated by a set), `Fintype
+  (Equiv.Perm (Fin n))` (computability), perm order. `Subgroup.subgroupOf` (for chain quotients).
+
+---
+
+## 4. Foundations that EXIST — internal (and the consolidation map)
+
+All paths under `GraphCanonizationProofs/ChainDescent/`. These are what Part A builds on or **consolidates**.
+
+### The group, already (Group.lean)
+- `AutGroup adj : Subgroup (Equiv.Perm (Fin n))` (carrier `IsAut · adj`) — `:55`; `mem_autGroup` `:69`.
+  **= the ambient `G` (modulo adding the `P`-preservation conjunct, see Stage A1).**
+- `autGroup_smul` `:97`, `mem_orbit_autGroup_iff` `:103`, **`mem_orbit_autGroup_iff_orbitPartition` `:116`**
+  (bridges `MulAction.orbit (AutGroup adj)` to `OrbitPartition adj P ∅` — the **root** orbit bridge; Part A
+  generalizes it per-level via `StabilizerAt`).
+- `LayerChain adj` (descending **normal** chain `AutGroup ⊵ … ⊵ ⊥`, fields `len/layer/head_eq/last_eq/
+  descending/normal`) `:139`; `LayerChain.trivial` `:157`. **The stabilizer chain is the canonical
+  *specialization* (base-ordered, with transversals); this may be refactored/subsumed.**
+- Quotient-graph machinery: `orbitSetoid` `:200`, `OrbitQuotient` `:206`, `orbitMk` `:210`,
+  `orbitMk_eq_iff` `:215`, `cell_iff_orbitMk_eq` `:233` (cell = quotient vertex under `CellsAreOrbits`),
+  `quotientAdj` `:258`, `orbitPartition_empty_iff_orbitRel` `:293`, **`orbitQuotientEquivAutGroup` `:307`**
+  (`OrbitQuotient … ∅ ≃ V/Aut(G)` — the root quotient is literally `V/Aut(G)`).
+
+### Automorphism + stabilizer predicates (ChainDescent.lean / Cascade.lean)
+- `IsAut` `ChainDescent.lean:2939`; `IsAut.refl/.trans/.symm` `:2947/:2950/:2957` (the `AutGroup` closure
+  proofs); `labelledAdj_eq_of_isAut` `:2980`, `isAut_of_labelledAdj_eq` `:2992`.
+- `FixesPointwise π S := ∀ v ∈ S, π v = v` `:3450`; `FixesPointwise.complement` `:3461`;
+  `individualizedColouring_invariant` `:3472`. **= `fixingSubgroup` membership (Mathlib).**
+- **`ResidualAut adj P S π := IsAut π adj ∧ (P-preserving) ∧ FixesPointwise π S` `Cascade.lean:452`** — the
+  path-fixing stabilizer **as a predicate**; `orbitPartition_iff_residualAut` `:464`; **`ResidualAut.mul`
+  `:489`** (closure). `ResidualAbelian` `:459`, `ResidualInvolutive` `:504`, `residualAbelian_of_involutive`
+  `:509`, `orbitPartition_swap_of_involutive` `:522`, `residualAut_eq_one_of_isBase` `:548`,
+  `residualAbelian_of_isBase` `:556`, `residualAbelian_mono` `:564`. **THE primary consolidation target:
+  package as `StabilizerAt … : Subgroup`; these lemmas become subgroup properties.**
+
+### Orbit relation + support backbone
+- `OrbitPartition adj P S v w := ∃ π, IsAut π adj ∧ P-pres ∧ FixesPointwise π S ∧ π v = w`
+  `ChainDescent.lean:3667`; `.refl/.symm/.trans` `:3679/:3683/:3700`; `subset_warmRefine` `:3722` (orbits
+  refine 1-WL cells). **= per-level `MulAction.orbit` of `StabilizerAt`.**
+- `OrbitPartition.mono` `CascadeOracle.lean:64` (fixing more shrinks orbits — **= stabilizer containment
+  `StabilizerAt S' ≤ StabilizerAt S` for `S ⊆ S'`**); `real_stays_real` `:75`.
+- **`orbitPartition_of_support_disjoint` `CascadeOracle.lean:118`** (`Disjoint S π.support` + `π v = w` ⟹
+  `OrbitPartition … S v w`), **`exists_orbit_witness_of_aut` `:133`** (a symmetry of support `s` keeps its
+  orbit pair alive to depth `n − s`). **These are the transversal-relocation / availability-depth facts
+  the chain makes rigorous (§C.0.1 caveat).**
+
+### Base + residual support (Cascade.lean)
+- `IsBase adj P T := ∀ v w, OrbitPartition adj P T v w → v = w` `:57` (**= `StabilizerAt T = ⊥`**);
+  `discrete_of_cellsAreOrbits_base` `:74`; `isBase_of_no_moved` `:944`; `exists_isBase_saturated` `:974`
+  (reach a base in `≤ n − |S₀|` rounds); **`exists_isBase_saturated_support` `:1040`** (tight: `≤
+  |movedSet|` rounds — **= base length ≤ support size**).
+- `MovedAt` `:935`, `movedSet adj P S₀` `:1011` (the residual support), `forcedNode := S₀ ∪ movedSet`
+  `:1080`; `MovedAt.anti` `:1002`, **`movedSet_image` `:1139`** / `forcedNode_image` `:1158` (equivariance),
+  `forcedNode_isBase` `:1089`, `recoverableAt_base_iff_discrete` `:1195`. **= base-point selection (first
+  moved point) + the equivariance a canonical base needs.**
+- `CellsAreOrbits` `CascadeOracle.lean:268`, `OrbitRecoverableAt` `:221`,
+  `mem_movedSet_iff_nonsingleton_cell_of_recoverable` `Cascade.lean:1226` (residual support =
+  refinement-visible non-singleton cells, where recovery holds).
+
+### The trigger (do not re-litigate)
+- `lockstep_disc_imp_stab_trivial` `CascadeOracle.lean:2056` — the discretizing oracle cannot harvest a
+  multi-step moved orbit; this is *why* Part A is required.
+
+---
+
+## 5. What is ABSENT (the actual build)
+
+Confirmed absent in both Mathlib and the project: a **base** (sequence of points, not a set — note `IsBase`
+is a *predicate on a set*, not a base sequence); a **strong generating set**; **Schreier generators** as a
+construction; a **sift/strip/membership** procedure; **group-order computation** from the chain; an
+explicit **stabilizer-chain** structure; the **transversal-of-stabilizer** per level; the **cross-branch
+fold-in/consume** seam in Lean.
+
+---
+
+## 6. What Part A solves / trivializes / consolidates
+
+- **Solves (now *required*, not optional):** the multi-step moved-orbit harvest (cross-branch), which the
+  discretizing oracle provably can't do (`lockstep_disc_imp_stab_trivial`); the **rigid-residual verdict**;
+  **`Aut(G)` as a byproduct** of canonization; **§C.0.1 transversal relocation** made rigorous.
+- **Trivializes:** the **residual-group-order diagnostic** — `order = ∏ orbit sizes` is Mathlib's
+  orbit–stabilizer (`card_orbit_mul_card_stabilizer_eq_card_group` / `index_stabilizer`); the
+  Tier2Like-vs-IRblindspot flag split (already coded in C#) becomes a Lean theorem. **T-A/T-B** become
+  Lean-reachable (orbit-stabilizer product) rather than pure citations — *except* the poly-size bound,
+  which stays Sims's citation (see §1 caveat).
+- **Consolidates:** the scattered predicate-level `ResidualAut` / `OrbitPartition` / support reasoning into
+  one `Subgroup` object; likely subsumes `LayerChain`'s descent role; turns the §C.0.1 caveat into theorem.
+
+---
+
+## 7. The staged plan
+
+Abstract-`Subgroup`-first (the reasoning the project needs); concrete BSGS later.
+
+### Stage A1 — `StabilizerAt` as a `Subgroup` (the consolidation; low-risk, do first)
+- Define `AutGroupP adj P : Subgroup (Equiv.Perm (Fin n))` = automorphisms preserving **both** `adj` and
+  `P` (carrier `IsAut π adj ∧ ∀ x u, P (π x) (π u) = P x u`; closure mirrors `AutGroup` + the `P` clause).
+  (`AutGroup` `:55` is the `P = ⊥`/no-`P` case; consider generalizing or keeping both.)
+- Define `StabilizerAt adj P S := AutGroupP adj P ⊓ fixingSubgroup _ (↑S)` — carrier provably
+  `ResidualAut adj P S` (via `mem_fixingSubgroup_iff` + `mem_inf`). Deliverable: `mem_stabilizerAt_iff :
+  π ∈ StabilizerAt adj P S ↔ ResidualAut adj P S π`.
+- Port the `ResidualAut` lemmas to subgroup form: monotonicity `S ⊆ S' → StabilizerAt adj P S' ≤
+  StabilizerAt adj P S` (from `OrbitPartition.mono` / `FixesPointwise` monotonicity); `StabilizerAt adj P
+  S = ⊥ ↔ IsBase adj P S` (from `residualAut_eq_one_of_isBase` `:548`); re-express `ResidualAbelian` /
+  `ResidualInvolutive` as `IsCommutative` / exponent-2 of the subgroup.
+- Bridge orbits: `MulAction.orbit (StabilizerAt adj P S) v` relates to `OrbitPartition adj P S v ·`
+  (generalize `mem_orbit_autGroup_iff_orbitPartition` `:116` off the root).
+- *Bar:* builds, axiom-clean, no behavioural change — pure consolidation that re-exports existing lemmas
+  through the new object. **Minimal first deliverable; unblocks A2/A3.**
+
+### Stage A2 — the harvest seam (soundness)
+- A verified automorphism (`IsAut` + `P`-preservation, i.e. an edge-checked relabelling) is in `AutGroupP`;
+  if it fixes the path it is in `StabilizerAt adj P path`. Formalize the **fold-in**: a generating
+  `Finset` of such, `Subgroup.closure gens ≤ AutGroupP` (and `≤ StabilizerAt path` when all fix the path).
+- Formalize the **consumption** (`CoveredByPathFixingAut`): the subgroup generated by path-fixing
+  harvested generators acts on explored reps; landing in one orbit certifies the prune (soundness: the
+  branches are `Aut`-equivalent — via `OrbitPartition`/`labelledAdj_eq_of_isAut`).
+- *Bar:* the cross-branch harvest's soundness is a theorem; this is the conservation-finding's required
+  mechanism, now grounded.
+
+### Stage A3 — order & the rigid/Cameron verdict
+- `Nat.card (StabilizerAt adj P S)` via the chain `= ∏ basic-orbit sizes` (Mathlib orbit–stabilizer over
+  the base). `IsBase ⟺ StabilizerAt = ⊥ ⟺ Nat.card = 1 ⟺ rigid`. Express the flag diagnostic
+  (non-trivial residual ⟹ Tier-2/Cameron; trivial ⟹ IR blind spot) as a Lean statement.
+
+### Stage A4 — concrete computable BSGS (defer)
+- Model `Level` / base sequence / `Transversal` / Schreier generators / `sift` as computable structures;
+  prove `computes` against `StabilizerAt` and `order = ∏ OrbitSize`. Verification corpus = the C# tests
+  (S₃–S₇, D₄, D18, D9≀Z2). Builds on Mathlib `LeftTransversal` + `closure_mul_image_eq` (Schreier).
+  Needed only for the *computable* object; the abstract verdict (A3) does not require it.
+
+---
+
+## 8. Open decisions (resolve at Stage A1)
+1. **`StabilizerAt` shape:** `⊓`-of-Mathlib-pieces (`AutGroupP ⊓ fixingSubgroup S` — maximal Mathlib reuse,
+   `MulAction`/orbit machinery comes for free) **vs** carrier-`ResidualAut` directly (closest to existing
+   code, but re-proves closure). Lean toward the `⊓` form; confirm the `MulAction` instance on `Fin n`
+   under `AutGroupP` is the convenient one.
+2. **`AutGroup` vs `AutGroupP`:** unify (`AutGroup` = `AutGroupP` at trivial `P`) or keep both. The `P`
+   conjunct is load-bearing (`OrbitPartition`/`ResidualAut` carry it); the chain must too.
+3. **`LayerChain` (Group.lean:139):** refactor the stabilizer chain *as* a `LayerChain` instance, or
+   build a parallel base-ordered structure and relate them.
+4. **Computability scope:** how faithfully Stage A4 mirrors the unsifted C# variant vs. uses Mathlib's
+   (noncomputable) transversal existence. The abstract layer (A1–A3) is noncomputable and sufficient for
+   the verdicts; A4 is the only stage needing decidable/`Fintype` computation.
+
+## 9. Honest caveats
+- The chain proves **correctness**, not the **poly bound** (T-A stays Sims's citation; the C# is unsifted).
+- Part A does **not** touch T-C (per-level transversal *discovery* — the GI-hard core), the wall (leg C),
+  or IR-blind-spot tractability. It is breadth (representation + the multi-step harvest mechanism), not
+  the polynomial-bound needle. See the earlier impact analysis in the memory note.
+
+---
+
+## Appendix — quick name index
+
+**Mathlib:** `MulAction.orbit`, `MulAction.stabilizer`, `MulAction.orbitProdStabilizerEquivGroup`,
+`MulAction.card_orbit_mul_card_stabilizer_eq_card_group`, `MulAction.index_stabilizer`, `fixingSubgroup` +
+`mem_fixingSubgroup_iff` (`GroupAction/FixingSubgroup.lean`), `Subgroup.LeftTransversal`/`RightTransversal`
++ `IsComplement` (`Complement.lean`), `Subgroup.closure_mul_image_eq` (`Schreier.lean`), `Subgroup.index` +
+`card_mul_index` (`Index.lean`), `Subgroup.closure`, `Equiv.Perm.support`.
+
+**Internal (file:line):** `AutGroup` (Group.lean:55), `LayerChain` (Group.lean:139),
+`orbitQuotientEquivAutGroup` (Group.lean:307), `mem_orbit_autGroup_iff_orbitPartition` (Group.lean:116),
+`IsAut` (ChainDescent.lean:2939), `FixesPointwise` (ChainDescent.lean:3450), `OrbitPartition`
+(ChainDescent.lean:3667), `OrbitPartition.mono` (CascadeOracle.lean:64), `orbitPartition_of_support_disjoint`
+(CascadeOracle.lean:118), `exists_orbit_witness_of_aut` (CascadeOracle.lean:133), `ResidualAut`
+(Cascade.lean:452), `ResidualAut.mul` (Cascade.lean:489), `residualAut_eq_one_of_isBase` (Cascade.lean:548),
+`IsBase` (Cascade.lean:57), `exists_isBase_saturated_support` (Cascade.lean:1040), `movedSet`
+(Cascade.lean:1011), `movedSet_image` (Cascade.lean:1139), `forcedNode` (Cascade.lean:1080),
+`lockstep_disc_imp_stab_trivial` (CascadeOracle.lean:2056, the trigger).
+
+**C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
+161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,
+`CoveredByPathFixingAut` 501); `ITransversalOracle.cs`; tests `PermutationGroupTests.cs`.
