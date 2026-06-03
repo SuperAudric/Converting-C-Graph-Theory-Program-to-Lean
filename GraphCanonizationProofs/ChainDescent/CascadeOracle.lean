@@ -1771,4 +1771,103 @@ theorem discrete_indivWithSeq_of_discrete_union {n : Nat} (adj : AdjMatrix n) (P
   discrete_of_samePartition
     (warmRefine_samePartition adj P (samePartition_indivWithSeq S rs).symm) hd
 
+/-! #### §C.8 — Leg 1 (A2a): transport for the level-coloured sequence, and the lifted harvest core
+
+The discreteness half (A1, above) is order-blind. The **transport** half is what the position
+colouring is *for*: an orbit automorphism `g` moves the explored set, and only a colour that tracks
+*position* (not vertex index) survives the move. The position colouring transports because **`map`
+preserves position under an injective function** — a pure list fact (`idxOf_map_of_injective`); off the
+sequence it is the existing `individualizedColouring` invariance. Given transport, the M-C harvest
+bricks lift verbatim (they are colouring-generic), so the level-coloured harvest *fires* at a footprint
+that is **both** discretized (A1 ⟸ `recoverableByDepth`) **and** transport-correct. The remaining piece
+(A2b) is the equivariant *ordering* of the exploration — the `LockstepExpand` analogue for sequences —
+which needs the incremental recursive exploration, not a static sort. -/
+
+/-- **Position is preserved by `map` under an injection.** `(l.map g).idxOf (g a) = l.idxOf a` for a
+permutation `g`. The pure-list core of sequence transport: `g` sends the `i`-th element of `l` to the
+`i`-th element of `l.map g`, so position colours match across the two branches. -/
+theorem idxOf_map_of_injective {n : Nat} (g : Equiv.Perm (Fin n)) (a : Fin n) :
+    ∀ l : List (Fin n), (l.map g).idxOf (g a) = l.idxOf a
+  | [] => by simp
+  | x :: xs => by
+    rw [List.map_cons]
+    by_cases hxa : x = a
+    · subst hxa; rw [List.idxOf_cons_self, List.idxOf_cons_self]
+    · have hgx : g x ≠ g a := fun h => hxa (g.injective h)
+      rw [List.idxOf_cons_ne (xs.map g) hgx, List.idxOf_cons_ne xs hxa,
+          idxOf_map_of_injective g a xs]
+
+/-- **Sequence transport.** An orbit automorphism `g` fixing the committed set `S`, with branch-`w`'s
+sequence `rs₂` the `g`-image of branch-`v`'s `rs₁` (`rs₂ = rs₁.map g`), carries the branch-`v` level
+colouring onto the branch-`w` one (`χ₂ ∘ g = χ₁`). On the sequence it is `idxOf_map_of_injective`
+(position preserved); off it, the `individualizedColouring` invariance (`g` fixes `S`, moves its
+complement to its complement). The `indivWithSet_transport` analogue — now position-, not uniform-,
+based, so it composes with the A1 discreteness bridge. -/
+theorem indivWithSeq_transport {n : Nat} {S : Finset (Fin n)} {rs₁ rs₂ : List (Fin n)}
+    {g : Equiv.Perm (Fin n)} (hgS : FixesPointwise g S) (hrs : rs₂ = rs₁.map g) (v : Fin n) :
+    indivWithSeq n S rs₂ (g v) = indivWithSeq n S rs₁ v := by
+  unfold indivWithSeq
+  by_cases hv : v ∈ rs₁
+  · have hgv : g v ∈ rs₂ := by rw [hrs]; exact List.mem_map_of_mem hv
+    rw [if_pos hgv, if_pos hv, hrs, idxOf_map_of_injective g v rs₁]
+  · have hgv : g v ∉ rs₂ := by
+      rw [hrs, List.mem_map]
+      rintro ⟨u, hu, hgu⟩
+      exact hv ((g.injective hgu) ▸ hu)
+    rw [if_neg hgv, if_neg hv]
+    by_cases hvS : v ∈ S
+    · rw [hgS v hvS]
+    · have hgvS : g v ∉ S := hgS.complement hvS
+      simp only [individualizedColouring, if_neg hgvS, if_neg hvS]
+
+/-- **The sequence colour-match relation** (`IsColourMatch` / `IsColourMatchSet` analogue). -/
+def IsColourMatchSeq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n))
+    (rs₁ rs₂ : List (Fin n)) (t : Equiv.Perm (Fin n)) : Prop :=
+  ∀ x, warmRefine adj P (indivWithSeq n S rs₂) (t x) = warmRefine adj P (indivWithSeq n S rs₁) x
+
+/-- **Sequence completeness brick.** The orbit automorphism `g` (fixing `S`, `rs₂ = rs₁.map g`) *is* a
+colour-match — `warmRefine_transport ∘ indivWithSeq_transport`. The `colourMatchSet_complete` analogue. -/
+theorem colourMatchSeq_complete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+    {rs₁ rs₂ : List (Fin n)} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgS : FixesPointwise g S) (hrs : rs₂ = rs₁.map g) :
+    IsColourMatchSeq adj P S rs₁ rs₂ g :=
+  fun x => warmRefine_transport hg hgP (indivWithSeq_transport hgS hrs) x
+
+/-- **The sequence colour-match permutation.** The rank composition for level-coloured footprints;
+`colourMatchPermSet` (M-C) with the uniform set replaced by the level-coloured sequence. -/
+noncomputable def colourMatchPermSeq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n))
+    (rs₁ rs₂ : List (Fin n))
+    (h₁ : Discrete (warmRefine adj P (indivWithSeq n S rs₁)))
+    (h₂ : Discrete (warmRefine adj P (indivWithSeq n S rs₂))) : Equiv.Perm (Fin n) :=
+  (Colouring.rankPerm (warmRefine adj P (indivWithSeq n S rs₂)) h₂)⁻¹ *
+    Colouring.rankPerm (warmRefine adj P (indivWithSeq n S rs₁)) h₁
+
+/-- **`colourMatchPermSeq` is the orbit automorphism, at a recoverable level-coloured footprint.** Same
+shape as `colourMatchPermSet_eq_of_orbit` (`rankPerm_inv_mul_eq_of_match` ← `vertexRank_comp` +
+`colourMatchSeq_complete`), now over a level-coloured sequence whose discreteness is A1-reducible. -/
+theorem colourMatchPermSeq_eq_of_orbit {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S : Finset (Fin n)} {rs₁ rs₂ : List (Fin n)} {g : Equiv.Perm (Fin n)}
+    (h₁ : Discrete (warmRefine adj P (indivWithSeq n S rs₁)))
+    (h₂ : Discrete (warmRefine adj P (indivWithSeq n S rs₂)))
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgS : FixesPointwise g S) (hrs : rs₂ = rs₁.map g) :
+    colourMatchPermSeq adj P S rs₁ rs₂ h₁ h₂ = g :=
+  rankPerm_inv_mul_eq_of_match h₁ h₂ (colourMatchSeq_complete hg hgP hgS hrs)
+
+/-- **The level-coloured firing certificate exists.** Where `CellsAreOrbits` gives the orbit
+automorphism `g` for a same-cell pair `(v, w)`, then for *any* exploration sequence `rs₁` the partner
+`rs₂ = rs₁.map g` and `g` is a colour-match between them. The `colourMatchSet_exists_of_cellsAreOrbits`
+analogue, now at a level-coloured (hence A1-reducible) footprint. The open piece (A2b) is that the
+oracle's branch-`w` sequence *is* this `rs₁.map g` (the level-wise lockstep). -/
+theorem colourMatchSeq_exists_of_cellsAreOrbits {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S : Finset (Fin n)} {v w : Fin n} (rs₁ : List (Fin n))
+    (hco : CellsAreOrbits adj P S)
+    (hcell : warmRefine adj P (individualizedColouring n S) v
+           = warmRefine adj P (individualizedColouring n S) w) :
+    ∃ g : Equiv.Perm (Fin n), IsAut g adj ∧ (∀ x u, P (g x) (g u) = P x u)
+      ∧ FixesPointwise g S ∧ g v = w ∧ IsColourMatchSeq adj P S rs₁ (rs₁.map g) g := by
+  obtain ⟨g, hg, hgP, hgS, hgvw⟩ := hco v w hcell
+  exact ⟨g, hg, hgP, hgS, hgvw, colourMatchSeq_complete hg hgP hgS rfl⟩
+
 end ChainDescent
