@@ -362,11 +362,18 @@ is the engine for it. Status of the seal-driven assembly
   and leg (a) is never used). `matchOracle` *constructs* `colourMatchPerm` from the colours, so soundness
   *derives* `fixes D ∧ v ↦ w` from the verified perm and completeness genuinely uses `colourMatchPerm = g`.
 
-**Then (M-C / b1):** generalize `indivWithRep` to a multi-step `indivWithSet` (+ transport) so the
-discrete footprint is reachable over a *sequence* — CFI's `tw(H)` depth (single-rep `indivWithRep`
-only covers one-step-discretizing nodes). **(M-D / b2 + b4):** automate the deepening recursion and
-discharge flag iso-invariance via *completeness at the iso-invariant depth* (the spine,
-`spine_branch_independent`). Full seal-driven framing:
+**M-C — BUILT 2026-06-03, axiom-clean (`CascadeOracle.lean §C.5`).** `indivWithRep` generalized to the
+multi-step `indivWithSet n S R` (an explored *set* `R`, **uniformly** coloured — the only
+transport-compatible choice, since an orbit aut moves `R`) + `indivWithSet_transport`, with `indivWithRep`
+the singleton case. The harvest bricks lift verbatim (the generic `colourMatch_eq_aut`/`_isAut` + the new
+transport): `IsColourMatchSet`, `colourMatchSet_complete`/`_unique`, `harvestSet_isAut_of_discrete`,
+`colourMatchPermSet` (+ `_eq_of_orbit`), `colourMatchSet_exists_of_cellsAreOrbits` — so the harvest fires
+at a footprint discretized over a *sequence* (CFI's `tw(H)` depth), not just one rep.
+
+**Then (M-D / b2 + b4):** the multi-step *oracle* `matchOracleSet` + the **lockstep** argument that
+branch-`w`'s independently chosen exploration set equals `(branch-v's).image g` (the spine,
+`spine_branch_independent`); automate the deepening recursion; discharge flag iso-invariance via
+*completeness at the iso-invariant depth*. Full seal-driven framing:
 [harvest-window §2.4](./chain-descent-harvest-window.md).
 
 ---

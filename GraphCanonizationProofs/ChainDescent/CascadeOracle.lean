@@ -1192,4 +1192,127 @@ theorem matchOracle_verdictIsoInvariant {n : Nat} {adj : AdjMatrix n} {P₀ : PM
     (matchOracle_cascadeComplete hdisc hco)
     (fun chain => orbitRecoverableAt_iff_cellsAreOrbits.mpr (hco chain))
 
+/-! ### §C.5 — M-C: multi-step depth (`indivWithSet`)
+
+`indivWithRep` (M-B) marks a single explored rep; CFI's `tw(H)` depth needs a *sequence* of explored
+vertices before the footprint discretizes. `indivWithSet` marks an arbitrary explored *set* `R`,
+**uniformly** — the only transport-compatible choice: an orbit automorphism *moves* `R` (`R₂ = g(R₁) ≠
+R₁`), so distinct/index colours would break `χ₂ ∘ g = χ₁` on `R`, and a `g`-dependent distinct
+colouring is unavailable to an oracle that does not know `g`. The harvest bricks lift verbatim
+(`colourMatch_eq_aut` / `colourMatch_isAut` are already *colouring-generic*; only the **transport**
+specializes), so the colour-match candidate equals the orbit automorphism at a *set*-discretized
+footprint. `indivWithRep` is the singleton case.
+
+**Scope.** M-C delivers the depth-correct *ingredients* (colouring + transport + lifted bricks + the
+multi-step `colourMatchPermSet`). The multi-step *oracle* `matchOracleSet` and the **lockstep** argument
+that branch-`w`'s independently chosen exploration set equals `(branch-`v`'s).image g` are **M-D**. -/
+
+/-- **Multi-step uniform individualization.** Individualize the committed set `S` by index, plus an
+explored *set* `R` with a single uniform fresh colour `n+1`. Generalizes `indivWithRep` (the `R = {r}`
+case). Uniform on `R` is forced by transport (an orbit automorphism moves `R`, so only a colour
+constant on `R` satisfies `χ₂ ∘ g = χ₁`). -/
+def indivWithSet (n : Nat) (S R : Finset (Fin n)) : Colouring n :=
+  fun v => if v ∈ R then n + 1 else individualizedColouring n S v
+
+/-- `indivWithRep` is the singleton case of `indivWithSet`. -/
+theorem indivWithRep_eq_indivWithSet {n : Nat} (S : Finset (Fin n)) (r : Fin n) :
+    indivWithRep n S r = indivWithSet n S {r} := by
+  funext v; simp only [indivWithRep, indivWithSet, Finset.mem_singleton]
+
+/-- **The multi-step transport hypothesis.** An orbit automorphism `g` fixing the committed set `S`
+and mapping the explored set `R₁` onto `R₂ = R₁.image g` carries the branch-`R₁` colouring onto the
+branch-`R₂` colouring (`χ₂ ∘ g = χ₁`). The `indivWithRep_transport` generalization — uniform colour on
+`R` is exactly what makes it hold on the moved set. -/
+theorem indivWithSet_transport {n : Nat} {S R₁ R₂ : Finset (Fin n)} {g : Equiv.Perm (Fin n)}
+    (hgS : FixesPointwise g S) (hR : R₂ = R₁.image g) (v : Fin n) :
+    indivWithSet n S R₂ (g v) = indivWithSet n S R₁ v := by
+  unfold indivWithSet
+  by_cases hv : v ∈ R₁
+  · have hgv : g v ∈ R₂ := by rw [hR]; exact Finset.mem_image_of_mem g hv
+    rw [if_pos hgv, if_pos hv]
+  · have hgv : g v ∉ R₂ := by
+      rw [hR, Finset.mem_image]
+      rintro ⟨u, hu, hgu⟩
+      exact hv ((g.injective hgu) ▸ hu)
+    rw [if_neg hgv, if_neg hv]
+    by_cases hvS : v ∈ S
+    · rw [hgS v hvS]
+    · have hgvS : g v ∉ S := hgS.complement hvS
+      simp only [individualizedColouring, if_neg hgvS, if_neg hvS]
+
+/-- **The multi-step colour-match relation.** `t` matches branch-`R₂`'s refined colours to
+branch-`R₁`'s. The `IsColourMatch` generalization. -/
+def IsColourMatchSet {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S R₁ R₂ : Finset (Fin n))
+    (t : Equiv.Perm (Fin n)) : Prop :=
+  ∀ x, warmRefine adj P (indivWithSet n S R₂) (t x) = warmRefine adj P (indivWithSet n S R₁) x
+
+/-- **Multi-step completeness brick.** The orbit automorphism `g` (fixing `S`, `R₂ = R₁.image g`) *is* a
+colour-match — via `warmRefine_transport ∘ indivWithSet_transport`. -/
+theorem colourMatchSet_complete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S R₁ R₂ : Finset (Fin n)} {g : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgS : FixesPointwise g S) (hR : R₂ = R₁.image g) :
+    IsColourMatchSet adj P S R₁ R₂ g :=
+  fun x => warmRefine_transport hg hgP (indivWithSet_transport hgS hR) x
+
+/-- **Multi-step uniqueness brick.** At a discrete branch-`R₂` footprint, any colour-match equals the
+orbit automorphism `g` — via the colouring-generic `colourMatch_eq_aut`. The `colourMatch_unique`
+generalization. -/
+theorem colourMatchSet_unique {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S R₁ R₂ : Finset (Fin n)} {g t : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgS : FixesPointwise g S) (hR : R₂ = R₁.image g)
+    (hdisc : Discrete (warmRefine adj P (indivWithSet n S R₂)))
+    (ht : IsColourMatchSet adj P S R₁ R₂ t) :
+    t = g :=
+  colourMatch_eq_aut hg hgP (indivWithSet_transport hgS hR) hdisc ht
+
+/-- **Multi-step harvest brick.** At a discrete branch-`R₂` footprint, any colour-match candidate
+verifies as an automorphism (it equals `g`). The `harvest_isAut_of_discrete` generalization: the
+harvest now fires at a footprint discretized by an explored *set* (a sequence), not just one rep. -/
+theorem harvestSet_isAut_of_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S R₁ R₂ : Finset (Fin n)} {g t : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgS : FixesPointwise g S) (hR : R₂ = R₁.image g)
+    (hdisc : Discrete (warmRefine adj P (indivWithSet n S R₂)))
+    (ht : IsColourMatchSet adj P S R₁ R₂ t) :
+    IsAut t adj :=
+  colourMatch_isAut hg hgP (indivWithSet_transport hgS hR) hdisc ht
+
+/-- **M-C — the multi-step colour-match permutation.** The rank composition for set footprints;
+`colourMatchPerm` (M-B) is the `R₁ = {v}`, `R₂ = {w}` case. -/
+noncomputable def colourMatchPermSet {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (S R₁ R₂ : Finset (Fin n))
+    (h₁ : Discrete (warmRefine adj P (indivWithSet n S R₁)))
+    (h₂ : Discrete (warmRefine adj P (indivWithSet n S R₂))) : Equiv.Perm (Fin n) :=
+  (Colouring.rankPerm (warmRefine adj P (indivWithSet n S R₂)) h₂)⁻¹ *
+    Colouring.rankPerm (warmRefine adj P (indivWithSet n S R₁)) h₁
+
+/-- **`colourMatchPermSet` is the orbit automorphism, at a recoverable set-footprint.** Same proof
+shape as `colourMatchPerm_eq_of_orbit` (`rankPerm_inv_mul_eq_of_match` ← `vertexRank_comp` +
+`colourMatchSet_complete`), now over an explored set. -/
+theorem colourMatchPermSet_eq_of_orbit {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S R₁ R₂ : Finset (Fin n)} {g : Equiv.Perm (Fin n)}
+    (h₁ : Discrete (warmRefine adj P (indivWithSet n S R₁)))
+    (h₂ : Discrete (warmRefine adj P (indivWithSet n S R₂)))
+    (hg : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgS : FixesPointwise g S) (hR : R₂ = R₁.image g) :
+    colourMatchPermSet adj P S R₁ R₂ h₁ h₂ = g :=
+  rankPerm_inv_mul_eq_of_match h₁ h₂ (colourMatchSet_complete hg hgP hgS hR)
+
+/-- **The multi-step firing certificate exists.** Where `CellsAreOrbits` gives the orbit automorphism
+`g` for a same-cell pair `(v, w)`, then for *any* exploration set `R₁` the partner `R₂ = R₁.image g`
+exists, contains `w` whenever `v ∈ R₁`, and `g` is a colour-match between them. The multi-step analogue
+of `colourMatch_exists_of_cellsAreOrbits`; the open piece (M-D) is that the oracle's independently
+chosen branch-`w` set *is* this `R₁.image g` (lockstep). -/
+theorem colourMatchSet_exists_of_cellsAreOrbits {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S : Finset (Fin n)} {v w : Fin n} (R₁ : Finset (Fin n))
+    (hco : CellsAreOrbits adj P S)
+    (hcell : warmRefine adj P (individualizedColouring n S) v
+           = warmRefine adj P (individualizedColouring n S) w) :
+    ∃ g : Equiv.Perm (Fin n), IsAut g adj ∧ (∀ x u, P (g x) (g u) = P x u)
+      ∧ FixesPointwise g S ∧ g v = w ∧ IsColourMatchSet adj P S R₁ (R₁.image g) g := by
+  obtain ⟨g, hg, hgP, hgS, hgvw⟩ := hco v w hcell
+  exact ⟨g, hg, hgP, hgS, hgvw, colourMatchSet_complete hg hgP hgS rfl⟩
+
 end ChainDescent

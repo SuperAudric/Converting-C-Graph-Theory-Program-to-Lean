@@ -30,14 +30,16 @@
 > - **Unified oracle** (§6) — both oracles fire through *one* mechanism: recovery → colour-match →
 >   verify; the seal's D1 / D2 / wall becomes a **depth** distinction.
 >
-> **M-B LANDED (2026-06-02, axiom-clean):** the concrete `colourMatchPerm` / `matchOracle` (construct-
-> and-check) firing *both* oracles — soundness (`OrbitMapSpec`) unconditional, completeness reduced to
-> the depth witness + localisation, flag iso-invariance free (`CascadeOracle.lean §C.4`). **Open frontier
-> — where a fresh reader picks up (§9):** **M-C** (multi-step depth for `tw(H)`: the `indivWithSet`
-> generalization so a discrete footprint is reachable over a *sequence*, not one step), **"B's core"**
-> (the substrate-conditional depth witness), the **IR-stickiness axis** (multipede, flagged), and the
-> **wall** (¬D1∧¬D2, Cameron/Johnson). The first two are bounded / not GI-hard; the last two are the
-> honest boundary.
+> **M-B + M-C LANDED (2026-06-02/03, axiom-clean, `CascadeOracle.lean §C.4/§C.5`):** the concrete
+> `colourMatchPerm` / `matchOracle` (construct-and-check) firing *both* oracles — soundness
+> (`OrbitMapSpec`) unconditional, completeness reduced to the depth witness + localisation, flag
+> iso-invariance free; and the multi-step `indivWithSet` (+ transport + lifted harvest bricks +
+> `colourMatchPermSet`) so the harvest fires at a footprint discretized by a *set* (a sequence), not one
+> rep. **Open frontier — where a fresh reader picks up (§9):** **M-D** (the multi-step *oracle*
+> `matchOracleSet` + the **lockstep** argument that branch-`w`'s exploration set is the `g`-image of
+> branch-`v`'s), **"B's core"** (the substrate-conditional depth witness), the **IR-stickiness axis**
+> (multipede, flagged), and the **wall** (¬D1∧¬D2, Cameron/Johnson). The first two are bounded / not
+> GI-hard; the last two are the honest boundary.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
@@ -291,6 +293,11 @@ Class-specificity is thereby quarantined into a **single depth-witness predicate
   soundness), `matchOracle_cellComplete` / `_cascadeComplete` (completeness reduced to discretizing-depth
   + `CellsAreOrbits`), `matchOracle_verdictIsoInvariant` (flag iso-invariance, free). `vertexRank_comp` /
   `rankPerm_comp` relocated to `ChainDescent.lean`.
+- **M-C — multi-step depth** (`CascadeOracle.lean §C.5`, all axiom-clean): `indivWithSet` (+
+  `indivWithRep_eq_indivWithSet` singleton bridge), `indivWithSet_transport`, the lifted harvest bricks
+  (`IsColourMatchSet`, `colourMatchSet_complete`, `colourMatchSet_unique`, `harvestSet_isAut_of_discrete`),
+  `colourMatchPermSet` + `colourMatchPermSet_eq_of_orbit`, and `colourMatchSet_exists_of_cellsAreOrbits` —
+  the harvest fires at a *set*-discretized footprint (CFI `tw(H)` depth over a sequence).
 
 **Leg A's own frontier — now closed except the flagged residual.** What was the deep Leg-A frontier
 (the tight support bound, forced-node iso-invariance, the recovery-axes reduction, arbitrary-relabel
@@ -363,9 +370,19 @@ are bounded (not GI-hard), the last two are the honest boundary.
    `verdictIsoInvariant_of_complete` — item 4 discharged on the recoverable class). `vertexRank_comp` /
    `rankPerm_comp` relocated `LinearOracle.lean` → `ChainDescent.lean`. The single M-B residual is the
    *depth witness* (items 2–3), not the construction.
-2. **M-C — multi-step depth.** Generalize `indivWithRep` to a multi-step `indivWithSet` (+ transport)
-   so a discrete footprint is reachable over a *sequence* — CFI's `tw(H)` depth (M-B's `CellComplete`
-   covers one-step-discretizing nodes only).
+2. **M-C — multi-step depth — LANDED 2026-06-03, axiom-clean** (`CascadeOracle.lean §C.5`).
+   `indivWithSet n S R` (M-B's `indivWithRep` generalized to an explored *set* `R`, **uniformly**
+   coloured — the only transport-compatible choice, since an orbit aut moves `R` so distinct/index
+   colours break `χ₂∘g=χ₁` and a `g`-dependent distinct colouring is unavailable to the oracle);
+   `indivWithRep_eq_indivWithSet` (singleton bridge); `indivWithSet_transport` (the `indivWithRep_transport`
+   generalization). The harvest bricks lift verbatim (the generic `colourMatch_eq_aut`/`_isAut` + the new
+   transport): `IsColourMatchSet`, `colourMatchSet_complete`, `colourMatchSet_unique`,
+   `harvestSet_isAut_of_discrete`; plus `colourMatchPermSet` + `colourMatchPermSet_eq_of_orbit` (the
+   multi-step `colourMatchPerm = g`) and `colourMatchSet_exists_of_cellsAreOrbits` (the firing certificate
+   exists for any exploration set, partner = `R₁.image g`). **The harvest now fires at a footprint
+   discretized by a *set* (a sequence), not just one rep.** The remaining piece — the multi-step *oracle*
+   `matchOracleSet` and the **lockstep** argument that branch-`w`'s independently chosen exploration set
+   equals `(branch-v's).image g` — is **M-D** (below / cascade-oracle §2.6).
 3. **"B's core" — the depth witness.** That an abelian (D2) residual's footprint discretizes within
    *polynomial* depth. **Substrate-conditional** (CFI `tw(H)`, schemes depth-1 are the witnesses); NOT
    provable unconditionally (false for unbounded treewidth) — this is the tractable/flagged
