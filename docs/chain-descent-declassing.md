@@ -30,16 +30,18 @@
 > - **Unified oracle** (§6) — both oracles fire through *one* mechanism: recovery → colour-match →
 >   verify; the seal's D1 / D2 / wall becomes a **depth** distinction.
 >
-> **M-B + M-C LANDED (2026-06-02/03, axiom-clean, `CascadeOracle.lean §C.4/§C.5`):** the concrete
-> `colourMatchPerm` / `matchOracle` (construct-and-check) firing *both* oracles — soundness
-> (`OrbitMapSpec`) unconditional, completeness reduced to the depth witness + localisation, flag
-> iso-invariance free; and the multi-step `indivWithSet` (+ transport + lifted harvest bricks +
-> `colourMatchPermSet`) so the harvest fires at a footprint discretized by a *set* (a sequence), not one
-> rep. **Open frontier — where a fresh reader picks up (§9):** **M-D** (the multi-step *oracle*
-> `matchOracleSet` + the **lockstep** argument that branch-`w`'s exploration set is the `g`-image of
-> branch-`v`'s), **"B's core"** (the substrate-conditional depth witness), the **IR-stickiness axis**
-> (multipede, flagged), and the **wall** (¬D1∧¬D2, Cameron/Johnson). The first two are bounded / not
-> GI-hard; the last two are the honest boundary.
+> **M-B + M-C + M-D LANDED (2026-06-02/03, axiom-clean, `CascadeOracle.lean §C.4/§C.5/§C.6` +
+> `Cascade.lean`):** the concrete `colourMatchPerm` / `matchOracle` (construct-and-check) firing *both*
+> oracles — soundness (`OrbitMapSpec`) unconditional, completeness reduced to the depth witness +
+> localisation, flag iso-invariance free; the multi-step `indivWithSet` (+ transport + lifted bricks +
+> `colourMatchPermSet`) so the harvest fires at a *set*-discretized footprint; and the multi-step oracle
+> `matchOracleSet` (+ unconditional soundness, conditional completeness) with the **lockstep discharged**
+> — `lockstepExpand_forcedExpand` proves the exploration rule's equivariance via Leg A's `movedSet_image`,
+> so the only remaining completeness hypothesis is the depth witness. **Open frontier — where a fresh
+> reader picks up (§9):** **"B's core"** (the substrate-conditional depth witness — the set-footprint
+> discreteness `matchOracleSet`'s completeness still assumes), the **IR-stickiness axis** (multipede,
+> flagged), and the **wall** (¬D1∧¬D2, Cameron/Johnson). The first is bounded; the last two are the
+> honest boundary.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
@@ -298,6 +300,14 @@ Class-specificity is thereby quarantined into a **single depth-witness predicate
   (`IsColourMatchSet`, `colourMatchSet_complete`, `colourMatchSet_unique`, `harvestSet_isAut_of_discrete`),
   `colourMatchPermSet` + `colourMatchPermSet_eq_of_orbit`, and `colourMatchSet_exists_of_cellsAreOrbits` —
   the harvest fires at a *set*-discretized footprint (CFI `tw(H)` depth over a sequence).
+- **M-D — the multi-step oracle + the lockstep discharged** (`CascadeOracle.lean §C.6` + `Cascade.lean`,
+  all axiom-clean): `matchOracleSet expand : CascadeOracleSpec` (multi-step `matchOracle`),
+  `matchOracleSet_orbitMapSpec` (**unconditional** soundness), the `LockstepExpand` predicate (equivariance
+  of the exploration rule), `matchOracleSet_cellComplete` / `_cascadeComplete` / `_verdictIsoInvariant`
+  (completeness + flag iso-invariance reduced to set-footprint discreteness + `CellsAreOrbits` +
+  `LockstepExpand`), and the **discharge** `forcedExpand` + `lockstepExpand_forcedExpand` (the lockstep is a
+  *theorem* via `movedSet_image`, not a hypothesis). So the multi-step oracle's only open completeness
+  input is the depth witness ("B's core").
 
 **Leg A's own frontier — now closed except the flagged residual.** What was the deep Leg-A frontier
 (the tight support bound, forced-node iso-invariance, the recovery-axes reduction, arbitrary-relabel

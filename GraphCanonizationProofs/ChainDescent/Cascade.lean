@@ -1377,4 +1377,40 @@ theorem visiblyRecoverable_pPolynomial (h : IsSchurianSchemeGraph' adj) (v : Fin
     (cellsAreOrbits_empty_of_schurian h hP_invariant)
     (orbitRecoverableAt_iff_cellsAreOrbits.mp hrec)
 
+/-! ## M-D instance — the canonical exploration rule discharges the lockstep
+
+The multi-step oracle `matchOracleSet` (`CascadeOracle.lean §C.6`) reduces completeness to
+`LockstepExpand` — the *equivariance* of the exploration-set selector. This is **discharged** (not
+assumed) for the canonical iso-invariant rule: individualize the rep together with its residual support
+(`forcedExpand`), whose equivariance is exactly Leg A's `movedSet_image`. So the multi-step oracle's
+only remaining hypothesis is the set-footprint depth witness ("B's core") — the lockstep is a theorem. -/
+
+/-- **The canonical exploration rule.** For rep `r` at a node, explore `r` together with the residual
+support after committing it: `insert r (movedSet adj chain.P (insert r chain.D))`. Iso-invariant and
+automorphism-equivariant (the forced-node idea, per rep). -/
+noncomputable def forcedExpand (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (r : Fin n) :
+    Finset (Fin n) :=
+  insert r (movedSet adj chain.P (insert r chain.D))
+
+/-- **The lockstep is a theorem (M-D).** `forcedExpand` satisfies `LockstepExpand`: a `P`-preserving
+automorphism `g` fixing the committed path carries one branch's exploration set onto the other's. The
+residual-support half is exactly `movedSet_image`; the committed prefix is fixed setwise by `g`. So the
+multi-step oracle `matchOracleSet (forcedExpand …)` needs no lockstep hypothesis — only the depth
+witness. -/
+theorem lockstepExpand_forcedExpand (adj : AdjMatrix n) (P₀ : PMatrix n) (χι₀ : Colouring n)
+    (sel : Colouring n → Finset (Fin n)) :
+    LockstepExpand (forcedExpand adj P₀ χι₀ sel) := by
+  intro k chain g v hg hgP hgD
+  have hDfix : chain.D.image (g : Fin n → Fin n) = chain.D := by
+    ext x
+    simp only [Finset.mem_image]
+    constructor
+    · rintro ⟨a, ha, rfl⟩; rw [hgD a ha]; exact ha
+    · intro hx; exact ⟨x, hx, hgD x hx⟩
+  show forcedExpand adj P₀ χι₀ sel chain (g v)
+      = (forcedExpand adj P₀ χι₀ sel chain v).image g
+  unfold forcedExpand
+  rw [Finset.image_insert, ← movedSet_image hg hgP, Finset.image_insert, hDfix]
+
 end ChainDescent

@@ -370,11 +370,18 @@ transport): `IsColourMatchSet`, `colourMatchSet_complete`/`_unique`, `harvestSet
 `colourMatchPermSet` (+ `_eq_of_orbit`), `colourMatchSet_exists_of_cellsAreOrbits` — so the harvest fires
 at a footprint discretized over a *sequence* (CFI's `tw(H)` depth), not just one rep.
 
-**Then (M-D / b2 + b4):** the multi-step *oracle* `matchOracleSet` + the **lockstep** argument that
-branch-`w`'s independently chosen exploration set equals `(branch-v's).image g` (the spine,
-`spine_branch_independent`); automate the deepening recursion; discharge flag iso-invariance via
-*completeness at the iso-invariant depth*. Full seal-driven framing:
-[harvest-window §2.4](./chain-descent-harvest-window.md).
+**M-D — BUILT 2026-06-03, axiom-clean (`CascadeOracle.lean §C.6` + `Cascade.lean`).** The multi-step
+*oracle* `matchOracleSet expand` (the `matchOracle` analogue over an exploration-set selector):
+`matchOracleSet_orbitMapSpec` (**unconditional** soundness), and completeness/flag-iso-invariance
+(`matchOracleSet_cellComplete` / `_cascadeComplete` / `_verdictIsoInvariant`) reduced to set-footprint
+discreteness + `CellsAreOrbits` + **`LockstepExpand`** (equivariance of the exploration rule). The
+**lockstep is discharged, not assumed**: `forcedExpand chain r := insert r (movedSet adj chain.P (insert r
+chain.D))` (individualize the rep + its residual support) satisfies `LockstepExpand`
+(`lockstepExpand_forcedExpand`) because its equivariance is exactly Leg A's `movedSet_image` — not the
+order-model spine. So `matchOracleSet (forcedExpand …)` needs *no* lockstep hypothesis; its only open
+completeness input is the depth witness ("B's core"). The remaining work is **"B's core"** (that the
+set-footprint discretizes within poly depth) — substrate-conditional, not GI-hard. Full seal-driven
+framing: [harvest-window §2.4](./chain-descent-harvest-window.md).
 
 ---
 

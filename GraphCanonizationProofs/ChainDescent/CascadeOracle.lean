@@ -1315,4 +1315,159 @@ theorem colourMatchSet_exists_of_cellsAreOrbits {n : Nat} {adj : AdjMatrix n} {P
   obtain ⟨g, hg, hgP, hgS, hgvw⟩ := hco v w hcell
   exact ⟨g, hg, hgP, hgS, hgvw, colourMatchSet_complete hg hgP hgS rfl⟩
 
+/-! ### §C.6 — M-D: the multi-step oracle (`matchOracleSet`) + the lockstep
+
+M-C lifted the harvest bricks to an explored *set* `R`, leaving open the *oracle* that threads the set
+and the **lockstep** correspondence — that branch-`w`'s independently chosen exploration set is the
+`g`-image of branch-`v`'s (`R₂ = R₁.image g`). `matchOracleSet` is the multi-step `matchOracle`,
+parameterized by an exploration-set selector `expand`. Soundness is **unconditional** (as M-B);
+completeness reduces to set-footprint discreteness + `CellsAreOrbits` + **`LockstepExpand expand`** (the
+equivariance of `expand`). The lockstep is *not assumed in general*: it is **discharged** for the
+canonical iso-invariant rule `forcedExpand` (in `Cascade.lean`, via Leg A's `movedSet_image`). -/
+
+open Classical in
+/-- **M-D — the multi-step colour-match oracle.** Like `matchOracle` but individualizes a whole
+explored *set* `expand chain r` (per the selector) on top of the committed path. Construct
+`colourMatchPermSet`, return it **iff** it verifies `IsAut ∧ P-preserving ∧ fixes D ∧ v ↦ w`. -/
+noncomputable def matchOracleSet {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n))
+    (expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)) :
+    CascadeOracleSpec adj P₀ χι₀ sel :=
+  fun {k} chain v w =>
+    if hv : Discrete (warmRefine adj chain.P (indivWithSet n chain.D (expand chain v))) then
+      if hw : Discrete (warmRefine adj chain.P (indivWithSet n chain.D (expand chain w))) then
+        if hchk :
+            IsAut (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw) adj
+            ∧ (∀ x u, chain.P (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw x)
+                              (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw u)
+                       = chain.P x u)
+            ∧ FixesPointwise (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw) chain.D
+            ∧ colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw v = w then
+          some ⟨colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw, hchk.1⟩
+        else none
+      else none
+    else none
+
+/-- Evaluation lemma: given discreteness + the four verification facts about `colourMatchPermSet`,
+`matchOracleSet` fires. The engine of the completeness proof. -/
+theorem matchOracleSet_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)}
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
+    (hv : Discrete (warmRefine adj chain.P (indivWithSet n chain.D (expand chain v))))
+    (hw : Discrete (warmRefine adj chain.P (indivWithSet n chain.D (expand chain w))))
+    (hAut : IsAut (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw) adj)
+    (hP : ∀ x u, chain.P (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw x)
+                         (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw u)
+                  = chain.P x u)
+    (hFix : FixesPointwise (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw) chain.D)
+    (hvw : colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw v = w) :
+    ∃ result, matchOracleSet adj P₀ χι₀ sel expand chain v w = some result := by
+  have hchk :
+      IsAut (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw) adj
+      ∧ (∀ x u, chain.P (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw x)
+                        (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw u)
+                 = chain.P x u)
+      ∧ FixesPointwise (colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw) chain.D
+      ∧ colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw v = w :=
+    ⟨hAut, hP, hFix, hvw⟩
+  refine ⟨⟨colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw, hAut⟩, ?_⟩
+  simp only [matchOracleSet]
+  rw [dif_pos hv, dif_pos hw, dif_pos hchk]
+
+/-- **M-D soundness — `OrbitMapSpec`, unconditional.** As for `matchOracle`: when it fires, the four
+checks *are* the `OrbitPartition` witness. No discreteness/recoverability/lockstep hypothesis. -/
+theorem matchOracleSet_orbitMapSpec {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+    (χι₀ : Colouring n) (sel : Colouring n → Finset (Fin n))
+    (expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)) :
+    CascadeOracleSpec.OrbitMapSpec (matchOracleSet adj P₀ χι₀ sel expand) := by
+  intro _k chain v w _result heq
+  simp only [matchOracleSet] at heq
+  split_ifs at heq with hv hw hchk
+  exact ⟨colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw,
+    hchk.1, hchk.2.1, hchk.2.2.1, hchk.2.2.2⟩
+
+/-- **The lockstep correspondence** (the genuinely new M-D content, stated as a property of the
+exploration rule): `expand` is *equivariant* — any `P`-preserving automorphism `g` fixing the committed
+path carries one branch's exploration set onto the other's. With `g v = w` this gives
+`expand chain w = (expand chain v).image g`, exactly the `R₂ = R₁.image g` the harvest needs. Discharged
+for the canonical rule by `lockstepExpand_forcedExpand` (`Cascade.lean`). -/
+def LockstepExpand {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)}
+    (expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)) : Prop :=
+  ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (g : Equiv.Perm (Fin n)) (v : Fin n),
+    IsAut g adj → (∀ x u, chain.P (g x) (g u) = chain.P x u) → FixesPointwise g chain.D →
+    expand chain (g v) = (expand chain v).image g
+
+/-- **M-D completeness — `CellComplete`.** Conditional on three named-open hypotheses: set-footprint
+discreteness (`hdiscSet`, = the multi-step depth witness / "B's core"), `CellsAreOrbits` (`hco`, =
+localisation), and `LockstepExpand` (`hlock` — *discharged* for `forcedExpand`). At a same-cell pair the
+orbit automorphism `g` exists (`hco`); the lockstep supplies `R₂ = R₁.image g`, so
+`colourMatchPermSet = g` and the oracle fires. The `w ∈ D` edge case collapses to `v = w` (identity). -/
+theorem matchOracleSet_cellComplete {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)}
+    (hdiscSet : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (r : Fin n),
+       Discrete (warmRefine adj chain.P (indivWithSet n chain.D (expand chain r))))
+    (hco : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k),
+       CellsAreOrbits adj chain.P chain.D)
+    (hlock : LockstepExpand expand) :
+    CascadeOracleSpec.CellComplete (matchOracleSet adj P₀ χι₀ sel expand) := by
+  intro k chain v w hcell
+  have hv := hdiscSet chain v
+  have hw := hdiscSet chain w
+  have hinit : individualizedColouring n chain.D v = individualizedColouring n chain.D w :=
+    warmRefine_refines adj chain.P (individualizedColouring n chain.D) hcell
+  by_cases hwD : w ∈ chain.D
+  · have hvw : v = w := (individualizedColouring_eq_iff_of_mem chain.D hwD).mp hinit
+    subst hvw
+    have hid : colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain v) hv hw = 1 := by
+      simp only [colourMatchPermSet]
+      exact inv_mul_cancel _
+    refine matchOracleSet_fires chain hv hw ?_ ?_ ?_ ?_
+    · rw [hid]; exact fun _ _ => rfl
+    · rw [hid]; exact fun _ _ => rfl
+    · rw [hid]; exact fun _ _ => rfl
+    · rw [hid]; rfl
+  · obtain ⟨g, hg, hgP, hgD, hgvw⟩ := hco chain v w hcell
+    have hR : expand chain w = (expand chain v).image g := by
+      have h := hlock chain g v hg hgP hgD
+      rwa [hgvw] at h
+    have hcmps : colourMatchPermSet adj chain.P chain.D (expand chain v) (expand chain w) hv hw = g :=
+      colourMatchPermSet_eq_of_orbit hv hw hg hgP hgD hR
+    refine matchOracleSet_fires chain hv hw ?_ ?_ ?_ ?_
+    · rw [hcmps]; exact hg
+    · rw [hcmps]; exact hgP
+    · rw [hcmps]; exact hgD
+    · rw [hcmps]; exact hgvw
+
+/-- **M-D capstone — `CascadeComplete`.** The multi-step oracle computes the orbit relation exactly,
+reduced to the three named-open hypotheses (the lockstep being discharged for `forcedExpand`). -/
+theorem matchOracleSet_cascadeComplete {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)}
+    (hdiscSet : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (r : Fin n),
+       Discrete (warmRefine adj chain.P (indivWithSet n chain.D (expand chain r))))
+    (hco : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k),
+       CellsAreOrbits adj chain.P chain.D)
+    (hlock : LockstepExpand expand) :
+    CascadeOracleSpec.CascadeComplete (matchOracleSet adj P₀ χι₀ sel expand) :=
+  CascadeOracleSpec.cascadeComplete_of_cellsAreOrbits
+    (matchOracleSet_cellComplete hdiscSet hco hlock) hco
+
+/-- **M-D — flag iso-invariance, free.** As for `matchOracle`. -/
+theorem matchOracleSet_verdictIsoInvariant {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)}
+    (hdiscSet : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (r : Fin n),
+       Discrete (warmRefine adj chain.P (indivWithSet n chain.D (expand chain r))))
+    (hco : ∀ {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k),
+       CellsAreOrbits adj chain.P chain.D)
+    (hlock : LockstepExpand expand) :
+    CascadeOracleSpec.VerdictIsoInvariant (matchOracleSet adj P₀ χι₀ sel expand) :=
+  CascadeOracleSpec.verdictIsoInvariant_of_complete
+    (matchOracleSet_orbitMapSpec adj P₀ χι₀ sel expand)
+    (matchOracleSet_cascadeComplete hdiscSet hco hlock)
+    (fun chain => orbitRecoverableAt_iff_cellsAreOrbits.mpr (hco chain))
+
 end ChainDescent
