@@ -37,11 +37,19 @@
 > `colourMatchPermSet`) so the harvest fires at a *set*-discretized footprint; and the multi-step oracle
 > `matchOracleSet` (+ unconditional soundness, conditional completeness) with the **lockstep discharged**
 > — `lockstepExpand_forcedExpand` proves the exploration rule's equivariance via Leg A's `movedSet_image`,
-> so the only remaining completeness hypothesis is the depth witness. **Open frontier — where a fresh
-> reader picks up (§9):** **"B's core"** (the substrate-conditional depth witness — the set-footprint
-> discreteness `matchOracleSet`'s completeness still assumes), the **IR-stickiness axis** (multipede,
-> flagged), and the **wall** (¬D1∧¬D2, Cameron/Johnson). The first is bounded; the last two are the
-> honest boundary.
+> so the only remaining completeness hypothesis is the depth witness.
+>
+> **§C.7 + §C.8 LANDED + the discretizing-oracle limit (2026-06-03, axiom-clean).** §C.7 made `matchOracle`'s
+> completeness *honest* (fire at the discretizing depth, propagate via `OrbitPartition.mono`; the orbit pair
+> is consumed directly, so no `CellsAreOrbits`). §C.8 built **Leg 1** — the level-coloured sequence
+> (`indivWithSeq`, A1-reducible `hdiscSeq`, A2 position-transport) and the oracle `matchOracleSeq`. But
+> `lockstep_disc_imp_stab_trivial` proves its hypotheses `LockstepExpandSeq ∧ hdiscSeq ⟹ stab(v)=1`:
+> **the discretizing colour-match cannot harvest a multi-step moved orbit** (no iso-invariant ordering of
+> an orbit exists). **Open frontier — where a fresh reader picks up (§9):** the **cross-branch /
+> stabilizer-chain (Schreier–Sims, Part A)** harvest — now *required* for multi-step hidden symmetry,
+> not optional; the single-rep localisation-`hco`/1b; the structural-mode scheme oracle; the
+> **IR-stickiness axis** (multipede, flagged); and the **wall** (¬D1∧¬D2, Cameron/Johnson). The first
+> three are bounded; the last two are the honest boundary.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
@@ -320,6 +328,33 @@ Class-specificity is thereby quarantined into a **single depth-witness predicate
   strictly coarser than the indexed `individualizedColouring (D ∪ R)`, so M-D's `hdiscSet` has *no* such
   bridge (CFI(K4): indexed seeds discretize at the empty commit, uniform-block seeds do not). The single
   rep is the discretizing-mode harvest's natural unit.
+- **§C.7 — honest single-rep completeness (LANDED 2026-06-03, axiom-clean):** `matchOracle`'s
+  capstone `matchOracle_cascadeComplete` quantifies its two hypotheses (`hdisc`, `hco`) over *every*
+  node, which is **false at shallow CFI nodes**. §C.7 restates it the way the descent actually works:
+  `matchOracle_fires_of_insertDiscrete` fires on a genuine `Aut_D` orbit pair from **only** the indexed
+  (`recoverableByDepth`-shaped) discreteness — *no* `hco`, since construct-and-check consumes the orbit
+  witness directly; `matchOracle_orbit_of_fire_mono` propagates a deep certification to shallower
+  decision nodes via `OrbitPartition.mono`; `matchOracle_certifies_iff_orbit_of_insertDiscrete` is the
+  exact-orbit-decider iff *at the discretizing depth*. Net: the two false ∀-node hypotheses are replaced
+  by one honest "fire deep, prune shallow" obligation, isolating localisation-1b cleanly.
+- **§C.8 — Leg 1: the level-coloured sequence (LANDED 2026-06-03, axiom-clean), and its wall.** The
+  indexed-sequence reformulation declassing §9 item 3 called for. **A1** (`indivWithSeq`,
+  `samePartition_indivWithSeq`, `discrete_indivWithSeq_of_discrete_union`) colours the exploration by
+  *position* `n+1+i`, so its depth witness `hdiscSeq` **is** A1-reducible to `recoverableByDepth` (the
+  §C.4b bridge generalized to sequences). **A2 transport** (`idxOf_map_of_injective`,
+  `indivWithSeq_transport`, the lifted `colourMatchPermSeq` / `…_exists`) works because `map` preserves
+  position under an injection. The full oracle `matchOracleSeq` (sound unconditionally; complete modulo
+  `hdiscSeq` + `hco` + `LockstepExpandSeq`) is assembled. **But the obstruction is conserved, not
+  removed:** `lockstep_disc_imp_stab_trivial` proves `LockstepExpandSeq ∧ hdiscSeq ⟹ stab_{Aut_D}(v) = 1`
+  — the two completeness hypotheses are **jointly satisfiable only in the single-rep regime**. For
+  genuine multi-step CFI (`tw ≥ 2`) they are *incompatible*: no iso-invariant ordering of a moved orbit
+  exists (that would itself be a canonizer), so all three colourings (uniform → `hdiscSet` false; indexed
+  → transport false; position → `LockstepExpandSeq` false) are stuck. **The multi-step moved orbit cannot
+  be harvested within-cell by the discretizing colour-match; it belongs to the cross-branch
+  (stabilizer-chain / Schreier–Sims) harvest.** This bounds the discretizing oracle's reach to exactly
+  the single-rep / `stab(v)=1` case (`matchOracle`, §C.7) and **corrects the "one harvest fires both
+  legs" thesis (§6): the unified colour-match covers single-step (visible Leg A, depth-1 schemes) but
+  *not* multi-step hidden (Leg B at `tw ≥ 2`).**
 
 **Leg A's own frontier — now closed except the flagged residual.** What was the deep Leg-A frontier
 (the tight support bound, forced-node iso-invariance, the recovery-axes reduction, arbitrary-relabel
@@ -420,11 +455,20 @@ are bounded (not GI-hard), the last two are the honest boundary.
    only at the recovery depth, while **schemes recover *structurally*** (cells = orbits at non-singleton
    cells) and so are *not* consumed by `colourMatchPerm` at all — the structural mode needs a different
    concrete construction. (iii) The **multi-step uniform** `hdiscSet` has *no* bridge (uniform marking of a
-   `≥2` set is strictly coarser than indexing it); genuinely shallow multi-step harvest for CFI would need an
-   **indexed-sequence + rank-matching** reformulation of `matchOracleSet` (probe: indexed seeds discretize
-   CFI(K4) at the empty commit; uniform-block seeds do not). The remaining open content is then exactly:
-   the localisation/`hco` half (declassing's 1b, intermediate→deep bridging — NOT GI-hard, cascade-class
-   construction-correctness), plus the structural-mode oracle for schemes.
+   `≥2` set is strictly coarser than indexing it). **The indexed-sequence reformulation this called for was
+   built (§C.8 / Leg 1) and proven to fail (2026-06-03).** `matchOracleSeq` colours the exploration by
+   *position* (A1-reducible `hdiscSeq`) and transports (`indivWithSeq_transport`), but
+   `lockstep_disc_imp_stab_trivial` shows its two completeness hypotheses `LockstepExpandSeq ∧ hdiscSeq ⟹
+   stab_{Aut_D}(v) = 1` — **jointly satisfiable only in the single-rep regime.** The obstruction is
+   *conserved*: uniform → `hdiscSet` false; indexed → transport false; position → `LockstepExpandSeq`
+   false; the boundary (an iso-invariant ordering of a moved orbit) does not exist, since that *is* a
+   canonizer. **Conclusion (the redirect): the multi-step moved (hidden-abelian, `tw ≥ 2`) orbit is NOT
+   harvestable within-cell by any discretizing colour-match. It must go through the cross-branch
+   transversal harvest — the stabilizer-chain / Schreier–Sims object (Part A), now established as
+   *required*, not merely consolidating.** The discretizing oracle's reach is exactly the single-rep /
+   `stab(v)=1` case (`matchOracle`, §C.7). Remaining open content is then: the **cross-branch/Part-A
+   harvest** for multi-step hidden symmetry, the localisation/`hco` half (1b, single-rep, NOT GI-hard),
+   and the structural-mode oracle for schemes.
 4. **Flag iso-invariance** ([strategy §15 gap 2](./chain-descent-strategy.md)) — the constructed
    oracle's verdict as a function of iso-invariant ids. `colourMatchPerm` is built from iso-invariant
    colourings, so it *should* hold by construction; the obligation is undischarged.

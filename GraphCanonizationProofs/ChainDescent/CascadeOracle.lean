@@ -2023,4 +2023,70 @@ theorem matchOracleSeq_verdictIsoInvariant {n : Nat} {adj : AdjMatrix n} {P₀ :
     (matchOracleSeq_cascadeComplete hdiscSeq hco hlock)
     (fun chain => orbitRecoverableAt_iff_cellsAreOrbits.mpr (hco chain))
 
+/-! #### §C.8 — Leg 1: the discretizing-oracle limit (conservation of obstruction)
+
+`matchOracleSeq` trades `matchOracleSet`'s unreducible uniform depth witness for an A1-reducible one,
+but the obstruction is **conserved, not removed** — it relocates from `hdiscSet` (false) to
+`LockstepExpandSeq` (also false in the regime it is needed). The theorem below makes this precise: the
+two completeness hypotheses of `matchOracleSeq` are **jointly satisfiable only in the single-rep
+regime**.
+
+The argument (no `Classical`, no new axioms): take any path-fixing `P`-preserving automorphism `g` that
+*fixes* `v` (`g ∈ stab_{Aut_D}(v)`). The lockstep at `g` reads `expand chain v = (expand chain v).map g`,
+forcing `g` to fix every explored vertex pointwise; the level-footprint discreteness (via the A1
+`samePartition` bridge to the indexed footprint) then forces `g = 1` by Fact B
+(`aut_trivial_of_discrete_warmRefine`). So `stab_{Aut_D}(v)` is trivial — i.e. **one rep already kills
+the residual**. For genuine multi-step CFI (`tw ≥ 2`, nontrivial residual after one rep) the two
+hypotheses are therefore *incompatible*: the multi-step moved orbit **cannot** be harvested within-cell
+by the discretizing colour-match, and belongs to the cross-branch (stabilizer-chain / Schreier–Sims)
+harvest. This bounds the discretizing oracle's reach to exactly the single-rep / `stab(v)=1` case
+(`matchOracle`, §C.7); it is the conserved core behind all three colourings (uniform / indexed /
+position) being stuck. -/
+
+/-- A list equal to its own image under `g` is fixed pointwise by `g`. -/
+theorem fixedPointwise_of_map_self {n : Nat} {g : Equiv.Perm (Fin n)} :
+    ∀ (l : List (Fin n)), l.map g = l → ∀ x ∈ l, g x = x
+  | [], _, x, hx => by simp at hx
+  | y :: ys, h, x, hx => by
+    rw [List.map_cons, List.cons.injEq] at h
+    rcases List.mem_cons.mp hx with rfl | hmem
+    · exact h.1
+    · exact fixedPointwise_of_map_self ys h.2 x hmem
+
+/-- **The discretizing-oracle limit.** If the sequence lockstep holds and rep `v`'s level-coloured
+footprint discretizes, then every path-fixing `P`-preserving automorphism fixing `v` is the identity:
+`stab_{Aut_{chain.D}}(v)` is trivial. Hence `LockstepExpandSeq` and `hdiscSeq` hold *together* only
+where one rep already kills the residual — for genuine multi-step they are incompatible, and the moved
+orbit must be harvested cross-branch (Schreier–Sims / Part A), not by the within-cell discretizing
+colour-match. The honest boundary of Leg 1 (conservation of obstruction). -/
+theorem lockstep_disc_imp_stab_trivial {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+    {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
+    {expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → List (Fin n)}
+    (hlock : LockstepExpandSeq expand)
+    {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) (v : Fin n)
+    (hdisc : Discrete (warmRefine adj chain.P (indivWithSeq n chain.D (expand chain v))))
+    {g : Equiv.Perm (Fin n)} (hg : IsAut g adj)
+    (hgP : ∀ x u, chain.P (g x) (g u) = chain.P x u)
+    (hgD : FixesPointwise g chain.D) (hgv : g v = v) :
+    g = Equiv.refl (Fin n) := by
+  -- 1. lockstep at `g` (which fixes `v`): `expand chain v` is fixed setwise/ordered by `g`
+  have hmap : (expand chain v).map g = expand chain v := by
+    have h := hlock chain g v hg hgP hgD
+    rw [hgv] at h
+    exact h.symm
+  -- 2-3. `g` fixes `chain.D ∪ (expand chain v)` pointwise
+  have hfixS : FixesPointwise g (chain.D ∪ (expand chain v).toFinset) := by
+    intro x hx
+    rcases Finset.mem_union.mp hx with hxD | hxR
+    · exact hgD x hxD
+    · exact fixedPointwise_of_map_self (expand chain v) hmap x (List.mem_toFinset.mp hxR)
+  -- 4. discreteness of the indexed union footprint (A1 `samePartition` bridge)
+  have hdiscU : Discrete (warmRefine adj chain.P
+      (individualizedColouring n (chain.D ∪ (expand chain v).toFinset))) :=
+    discrete_of_samePartition
+      (warmRefine_samePartition adj chain.P (samePartition_indivWithSeq chain.D (expand chain v)))
+      hdisc
+  -- 5. Fact B: a discrete footprint trivializes the path-fixing residual
+  exact aut_trivial_of_discrete_warmRefine hdiscU hg hgP hfixS
+
 end ChainDescent
