@@ -1192,6 +1192,89 @@ theorem matchOracle_verdictIsoInvariant {n : Nat} {adj : AdjMatrix n} {P₀ : PM
     (matchOracle_cascadeComplete hdisc hco)
     (fun chain => orbitRecoverableAt_iff_cellsAreOrbits.mpr (hco chain))
 
+/-! ### §C.4b — the depth-witness bridge (single-rep): `hdisc` ⟸ indexed-recovery discreteness
+
+The feasibility probe (`docs/Archive/ChainDescent/cfi.lean`) established, and this section formalizes,
+that the single-rep footprint `indivWithRep D r` has the **same partition** as the *indexed*
+`individualizedColouring (insert r D)` — `r` is marked by a globally-unique colour either way (`n+1`
+vs `r.val+1`), and the two colourings agree off `r`. Hence M-B's depth witness
+`hdisc` (`Discrete (warmRefine … (indivWithRep D r))`) follows from discreteness of the *indexed*
+colouring `individualizedColouring (insert r D)` — i.e. from the `RecoverableByDepth` / discretizing-depth
+framework that `recoverableByDepth_cfi` / `_scheme` populate, **class-agnostically**.
+
+**Asymmetry the probe also pinned (why this is single-rep only).** The multi-step *uniform*
+`indivWithSet D R` (the whole set `R` one block colour `n+1`) is strictly **coarser** than the indexed
+`individualizedColouring (D ∪ R)` whenever `|R| ≥ 2`, so it has **no** such bridge — uniform marking of a
+≥2 set genuinely loses resolution. Concretely (probe): for CFI(K4) the indexed seeds discretize at the
+empty commit while the uniform-block seeds do not. This is exactly why M-D's `hdiscSet` is strictly harder
+than M-B's `hdisc`, and why the single rep is the discretizing-mode harvest's natural unit. -/
+
+/-- Discreteness transfers across `samePartition` (both directions are the same partition). -/
+theorem discrete_of_samePartition {n : Nat} {χ₁ χ₂ : Colouring n}
+    (h : samePartition χ₁ χ₂) (hd : Discrete χ₁) : Discrete χ₂ :=
+  fun i j hij => hd i j ((h i j).mpr hij)
+
+/-- `warmRefine` respects `samePartition` (specialization of `warmRefine_agree_off'`, `D = ∅`). -/
+theorem warmRefine_samePartition {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    {χ χ' : Colouring n} (h : samePartition χ χ') :
+    samePartition (warmRefine adj P χ) (warmRefine adj P χ') :=
+  warmRefine_agree_off' adj P P χ χ' ∅ h (fun _ _ _ => rfl)
+    (fun x hx => absurd hx (by simp))
+
+/-- **Same partition: single-rep footprint = indexed `insert`.** For `r ∉ D`, `indivWithRep n D r` and
+`individualizedColouring n (insert r D)` induce the same partition: they agree off `r`, and at `r` each
+assigns a colour distinct from every other vertex's. -/
+theorem samePartition_indivWithRep_insert {n : Nat} (D : Finset (Fin n)) (r : Fin n) (hr : r ∉ D) :
+    samePartition (indivWithRep n D r) (individualizedColouring n (insert r D)) := by
+  -- off `r`, the two colourings are literally equal
+  have hoff : ∀ v, v ≠ r → indivWithRep n D r v = individualizedColouring n (insert r D) v := by
+    intro v hv
+    rw [indivWithRep, if_neg hv]
+    by_cases hvD : v ∈ D
+    · rw [individualizedColouring, if_pos hvD, individualizedColouring,
+          if_pos (Finset.mem_insert_of_mem hvD)]
+    · rw [individualizedColouring, if_neg hvD, individualizedColouring,
+          if_neg (by simp [Finset.mem_insert, hv, hvD])]
+  -- `r`'s colour is globally unique under `indivWithRep` (it is `n+1`, others are `≤ n` or `0`)
+  have huA : ∀ v, v ≠ r → indivWithRep n D r v ≠ indivWithRep n D r r := by
+    intro v hv
+    have hrr : indivWithRep n D r r = n + 1 := by rw [indivWithRep, if_pos rfl]
+    have hle : indivWithRep n D r v ≤ n := by
+      rw [indivWithRep, if_neg hv, individualizedColouring]
+      split
+      · exact v.is_lt
+      · exact Nat.zero_le n
+    rw [hrr]; omega
+  -- `r`'s colour is globally unique under the indexed colouring (it is `r.val+1`)
+  have huB : ∀ v, v ≠ r → individualizedColouring n (insert r D) v
+      ≠ individualizedColouring n (insert r D) r := by
+    intro v hv
+    have hrr : individualizedColouring n (insert r D) r = r.val + 1 := by
+      rw [individualizedColouring, if_pos (Finset.mem_insert_self r D)]
+    rw [hrr, individualizedColouring]
+    by_cases hvD : v ∈ D
+    · rw [if_pos (Finset.mem_insert_of_mem hvD)]; intro h; exact hv (Fin.ext (by omega))
+    · rw [if_neg (by simp [Finset.mem_insert, hv, hvD])]; omega
+  intro i j
+  by_cases hi : i = r <;> by_cases hj : j = r
+  · subst hi; subst hj; exact ⟨fun _ => rfl, fun _ => rfl⟩
+  · subst hi
+    exact ⟨fun h => absurd h.symm (huA j hj), fun h => absurd h.symm (huB j hj)⟩
+  · subst hj
+    exact ⟨fun h => absurd h (huA i hi), fun h => absurd h (huB i hi)⟩
+  · rw [hoff i hi, hoff j hj]
+
+/-- **The M-B depth-witness bridge.** `hdisc` for rep `r` (discreteness of the single-rep footprint)
+follows from discreteness of the *indexed* `individualizedColouring (insert r D)`. This connects M-B's
+depth witness to the `RecoverableByDepth` / discretizing-depth framework (class-agnostic); the per-class
+CFI / scheme recovery theorems supply the indexed discreteness as witnesses. -/
+theorem discrete_indivWithRep_of_discrete_insert {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (D : Finset (Fin n)) (r : Fin n) (hr : r ∉ D)
+    (hd : Discrete (warmRefine adj P (individualizedColouring n (insert r D)))) :
+    Discrete (warmRefine adj P (indivWithRep n D r)) :=
+  discrete_of_samePartition
+    (warmRefine_samePartition adj P (samePartition_indivWithRep_insert D r hr).symm) hd
+
 /-! ### §C.5 — M-C: multi-step depth (`indivWithSet`)
 
 `indivWithRep` (M-B) marks a single explored rep; CFI's `tw(H)` depth needs a *sequence* of explored

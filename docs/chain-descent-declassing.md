@@ -308,6 +308,18 @@ Class-specificity is thereby quarantined into a **single depth-witness predicate
   `LockstepExpand`), and the **discharge** `forcedExpand` + `lockstepExpand_forcedExpand` (the lockstep is a
   *theorem* via `movedSet_image`, not a hypothesis). So the multi-step oracle's only open completeness
   input is the depth witness ("B's core").
+- **Depth-witness bridge (single-rep) — LANDED 2026-06-03, axiom-clean** (`CascadeOracle.lean §C.4b`):
+  `samePartition_indivWithRep_insert` (the single-rep footprint `indivWithRep D r` has the *same
+  partition* as the indexed `individualizedColouring (insert r D)` — `r` marked uniquely either way),
+  `warmRefine_samePartition` (warmRefine respects `samePartition`, via `warmRefine_agree_off'`),
+  `discrete_of_samePartition`, and **`discrete_indivWithRep_of_discrete_insert`** — M-B's depth witness
+  `hdisc` *follows* from discreteness of the **indexed** `individualizedColouring (insert r D)`, i.e. from
+  the `RecoverableByDepth` / discretizing-depth framework, **class-agnostically**. Motivated and validated
+  by the feasibility probe (`docs/Archive/ChainDescent/{probe,cfi}.lean`). **Asymmetry the probe pinned:**
+  the bridge is single-rep *only* — the multi-step *uniform* `indivWithSet D R` (`|R|≥2`, one block) is
+  strictly coarser than the indexed `individualizedColouring (D ∪ R)`, so M-D's `hdiscSet` has *no* such
+  bridge (CFI(K4): indexed seeds discretize at the empty commit, uniform-block seeds do not). The single
+  rep is the discretizing-mode harvest's natural unit.
 
 **Leg A's own frontier — now closed except the flagged residual.** What was the deep Leg-A frontier
 (the tight support bound, forced-node iso-invariance, the recovery-axes reduction, arbitrary-relabel
@@ -397,6 +409,22 @@ are bounded (not GI-hard), the last two are the honest boundary.
    *polynomial* depth. **Substrate-conditional** (CFI `tw(H)`, schemes depth-1 are the witnesses); NOT
    provable unconditionally (false for unbounded treewidth) — this is the tractable/flagged
    discriminator, the honest residual of completeness.
+   *Refined 2026-06-03 (feasibility probe + the single-rep bridge, §7).* Two findings sharpen this:
+   (i) The **single-rep** depth witness `hdisc` is now *reduced* to the indexed-recovery framework by
+   `discrete_indivWithRep_of_discrete_insert` — it follows from `Discrete (warmRefine (individualizedColouring
+   (insert r D)))`, the discretizing-recovery shape `recoverableByDepth_cfi`/`_scheme` speak about. So the
+   remaining single-rep work is supplying that *indexed* discreteness (a `Discrete`-at-recovery witness for
+   the discretizing mode) — **not** a new per-class cascade ladder. (ii) The probe established the **mode
+   capability boundary** (the answer to the oracle-conflation concern): the colour-match oracle is the
+   *discretizing* mode (needs a discrete footprint); CFI satisfies that but its cells equal its gauge orbits
+   only at the recovery depth, while **schemes recover *structurally*** (cells = orbits at non-singleton
+   cells) and so are *not* consumed by `colourMatchPerm` at all — the structural mode needs a different
+   concrete construction. (iii) The **multi-step uniform** `hdiscSet` has *no* bridge (uniform marking of a
+   `≥2` set is strictly coarser than indexing it); genuinely shallow multi-step harvest for CFI would need an
+   **indexed-sequence + rank-matching** reformulation of `matchOracleSet` (probe: indexed seeds discretize
+   CFI(K4) at the empty commit; uniform-block seeds do not). The remaining open content is then exactly:
+   the localisation/`hco` half (declassing's 1b, intermediate→deep bridging — NOT GI-hard, cascade-class
+   construction-correctness), plus the structural-mode oracle for schemes.
 4. **Flag iso-invariance** ([strategy §15 gap 2](./chain-descent-strategy.md)) — the constructed
    oracle's verdict as a function of iso-invariant ids. `colourMatchPerm` is built from iso-invariant
    colourings, so it *should* hold by construction; the obligation is undischarged.
