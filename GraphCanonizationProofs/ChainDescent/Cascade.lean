@@ -4,6 +4,8 @@ import ChainDescent.Group
 import ChainDescent.Saturation
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Mathlib.GroupTheory.Index
+import Mathlib.Algebra.Group.Subgroup.Finite
 
 /-!
 # B1 — cascade composition (Theorem 3a), Phases A + C
@@ -708,6 +710,69 @@ theorem covered_sound {S : Finset (Fin n)} {gens : Set (Equiv.Perm (Fin n))}
     (hv : v ∈ MulAction.orbit (Subgroup.closure gens) w) :
     OrbitPartition adj P S w v :=
   orbit_pathFixing_sound (closure_le_stabilizerAt hgens) hv
+
+/-! ## Part A (Stage A3) — order and the rigid/Cameron verdict
+
+With `Aut_S^P` a `Subgroup` (Stage A1) its **order** `Nat.card (StabilizerAt adj P S)` is a finite,
+meaningful quantity. Two payoffs:
+
+* **The rigid verdict** (`card_stabilizerAt_eq_one_iff_isBase`): the residual is trivial (order 1)
+  **iff** `S` is a base — i.e. the descent has reached a rigid node. Its negation (`≠ 1`) is the
+  non-rigid / Tier-2-like side (a non-trivial residual; classifying it as a Cameron section is
+  Cameron-hard, out of scope — but "residual non-trivial" is now a precise predicate). This is the Lean
+  form of the flag diagnostic (`CanonGraphOrdererChainDescent.cs`: `Tier2Like` vs `IrBlindSpot`).
+* **The order recursion** (`card_stabilizerAt_eq_orbit_mul`): `|Aut_S^P| = |orbit of b| · |Aut_{S∪{b}}^P|`
+  — the inductive step of `order = ∏ basic-orbit sizes`, via Mathlib's orbit–stabilizer
+  (`Subgroup.card_mul_index` + `index_stabilizer`) plus the carrier match `stabilizer(Aut_S^P, b) =
+  Aut_{insert b S}^P` (`subgroupOf_insert_eq_stabilizer`). Assembling the full product over a base
+  sequence is the thin Stage-A4 layer.
+([`docs/chain-descent-schreier-sims.md`](../../../docs/chain-descent-schreier-sims.md), Stage A3.) -/
+
+/-- The residual group is finite (a subgroup of `Equiv.Perm (Fin n)`), so its order is positive. -/
+theorem card_stabilizerAt_pos {S : Finset (Fin n)} : 0 < Nat.card (StabilizerAt adj P S) :=
+  Nat.card_pos
+
+/-- **The rigid verdict.** The residual group is trivial (order 1) **iff** `S` is a base. So
+`Nat.card (StabilizerAt adj P S) = 1` is exactly "the descent is rigid at `S`"; `≠ 1` is the non-rigid
+(Tier-2-like) residual. Composes `Subgroup.eq_bot_iff_card` with `stabilizerAt_eq_bot_iff_isBase`. -/
+theorem card_stabilizerAt_eq_one_iff_isBase {S : Finset (Fin n)} :
+    Nat.card (StabilizerAt adj P S) = 1 ↔ IsBase adj P S := by
+  rw [← Subgroup.eq_bot_iff_card, stabilizerAt_eq_bot_iff_isBase]
+
+/-- **The chain carrier match.** Inside the residual group `Aut_S^P`, the stabilizer of a point `b` is
+exactly `Aut_{insert b S}^P` (adding `b` to the base): a residual fixing `S` and `b` fixes `insert b S`.
+The bridge for the order recursion. -/
+theorem subgroupOf_insert_eq_stabilizer (b : Fin n) {S : Finset (Fin n)} :
+    (StabilizerAt adj P (insert b S)).subgroupOf (StabilizerAt adj P S)
+      = MulAction.stabilizer (StabilizerAt adj P S) b := by
+  ext x
+  rw [Subgroup.mem_subgroupOf, MulAction.mem_stabilizer_iff, mem_stabilizerAt, stabilizerAt_smul]
+  constructor
+  · intro hres
+    exact hres.2.2 b (Finset.mem_insert_self b S)
+  · intro hxb
+    obtain ⟨hA, hP, hF⟩ := x.2
+    exact ⟨hA, hP, fun v hv => (Finset.mem_insert.mp hv).elim (fun h => h.symm ▸ hxb) (fun h => hF v h)⟩
+
+/-- The point-stabilizer inside `Aut_S^P` has the same order as `Aut_{insert b S}^P`
+(`subgroupOf_insert_eq_stabilizer` + `subgroupOfEquivOfLe`). -/
+theorem card_stabilizer_eq (b : Fin n) {S : Finset (Fin n)} :
+    Nat.card (MulAction.stabilizer (StabilizerAt adj P S) b)
+      = Nat.card (StabilizerAt adj P (insert b S)) := by
+  rw [← subgroupOf_insert_eq_stabilizer]
+  exact Nat.card_congr
+    (Subgroup.subgroupOfEquivOfLe (stabilizerAt_mono (Finset.subset_insert b S))).toEquiv
+
+/-- **The order recursion (one chain level).** `|Aut_S^P| = |orbit of b under Aut_S^P| · |Aut_{insert b
+S}^P|` — the inductive step of `order = ∏ basic-orbit sizes`, from Mathlib's orbit–stabilizer
+(`Subgroup.card_mul_index` + `index_stabilizer`) and the carrier match `card_stabilizer_eq`. -/
+theorem card_stabilizerAt_eq_orbit_mul (b : Fin n) {S : Finset (Fin n)} :
+    Nat.card (StabilizerAt adj P S)
+      = (MulAction.orbit (StabilizerAt adj P S) b).ncard
+        * Nat.card (StabilizerAt adj P (insert b S)) := by
+  have h1 := Subgroup.card_mul_index (MulAction.stabilizer (StabilizerAt adj P S) b)
+  rw [MulAction.index_stabilizer, card_stabilizer_eq] at h1
+  rw [← h1]; ring
 
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
