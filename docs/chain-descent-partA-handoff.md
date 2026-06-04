@@ -141,6 +141,17 @@ hardcode them — they drift). All in `ChainDescent/Cascade.lean` unless marked 
 
 ## 4. THE IMMEDIATE NEXT TARGET — CFI-cov.3 core
 
+> ⚠️ **SUPERSEDED (2026-06-04) — read before acting on this section.** The plan below ("build the full
+> `Aut(CFI)≅Z₂^β⋊Aut(H)` structure theorem + `Φ(σ)` lift", sub-step 2 — the multi-week nut) has been
+> **de-classed away**. `coversOrbits_of_residualInvolutive` /
+> `closure_eq_stabilizerAt_of_residualInvolutive` (`Cascade.lean`, axiom-clean) now discharge `CoversOrbits`
+> for the whole exponent-2 / elementary-abelian-(`Z₂^d`)-residual class in one theorem — the harvested
+> involutions generate the residual *whatever their internal description*, so the `Φ(σ)` lift and the literal
+> gauge-flip identification are **not needed**. The remaining CFI work is the single focused predicate
+> `ResidualInvolutive adj P S` at a gauge-regime `S` (seeds kill the `Aut(H)` factor). **Do not build the
+> structure theorem.** See `chain-descent-schreier-sims.md` §7 (CFI-cov.3 stage 2) for the current route.
+> The structure-theorem material below is retained only as a record of the abandoned plan.
+
 **Goal:** prove `cfi_coversOrbits : CoversOrbits adj P (cfiGaugeGens h) bs ∅` for the odd-degree-CFI base
 sequence `bs` from `cfi_exists_base_seq`. Combined with the already-landed pieces this gives, end-to-end:
 `Subgroup.closure (cfiGaugeGens h) = StabilizerAt adj P ∅` (via `closure_eq_stabilizerAt_empty_of_coversOrbits`,

@@ -977,6 +977,77 @@ theorem card_closure_gensAt_eq_prod_of_coversOrbits {gens : Set (Equiv.Perm (Fin
   rw [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov]
   exact card_stabilizerAt_eq_prod_of_base bs S (coversOrbits_isBase_foldl bs hcov)
 
+/-! ### Part A (Stage A2-complete) — de-classed `CoversOrbits` for the involutive (`Z₂^d`) residual
+
+A2-complete reduces the cross-branch harvest's *completeness* to a coverage witness `CoversOrbits`, and the
+per-class plan was to discharge it for CFI via the `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem. This block
+**de-classes** that discharge: a single abstract hypothesis — the residual group is **exponent-2**
+(`ResidualInvolutive`, an elementary-abelian `Z₂^d`) — yields `CoversOrbits` for the *generating set of all
+involutive residual automorphisms*, for **every** class with that residual structure (CFI's gauge regime, the
+twin/module regime, …). It is the cross-branch analogue of how `theorem_2_HOR_of_pPolynomial` de-classed the
+metric/DRG family: one structural predicate, no per-class grind.
+
+The mechanism is exactly the existing swap brick. At an involutive node, `orbitPartition_swap_of_involutive`
+turns *each* orbit pair `(b, w)` into an involutive residual automorphism `g` with `g b = w` — a single
+generator realizing that orbit-mate. If `gens` contains every involutive root residual automorphism (which is
+what the leaf-collision harvest, folding in *verified* involutions, supplies), `g ∈ gensAt`, so
+`coversOrbits_realize_of_mem` discharges the level. No structure theorem, no `Φ(σ)` base-aut lift: the
+identification of the residual with the *literal* gauge flips is sidestepped — the harvested involutions
+generate the residual whatever their internal description.
+
+The remaining class-specific obligation is then a single focused predicate — `ResidualInvolutive adj P S`
+at the relevant committed set (for CFI: a gauge-regime `S` where the `Aut(H)` factor is killed, so the
+residual is the exponent-2 gauge group) — not the full semidirect-product structure theorem. -/
+
+/-- **`ResidualInvolutive` is inherited as the committed set grows** (the exponent-2 analogue of
+`residualAbelian_mono`): fixing more points (`S ⊆ S'`) shrinks the residual to a subgroup, and a subgroup of
+an exponent-2 group has exponent ≤ 2. So once the residual is involutive at a node, it is involutive at every
+deeper node — which lets `coversOrbits_of_residualInvolutive` carry the hypothesis down the base sequence. -/
+theorem residualInvolutive_mono {S S' : Finset (Fin n)} (h : ResidualInvolutive adj P S)
+    (hSS' : S ⊆ S') : ResidualInvolutive adj P S' :=
+  fun π hπ => h π ⟨hπ.1, hπ.2.1, fun v hv => hπ.2.2 v (hSS' hv)⟩
+
+/-- **De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual group at `S` is
+involutive (`ResidualInvolutive`, hence at every deeper node by `residualInvolutive_mono`), the generating set
+`gens` contains every involutive residual automorphism (`hgens` — what the leaf-collision harvest supplies),
+and the base sequence `bs` terminates at a base, then `CoversOrbits adj P gens bs S` holds. Per level, the
+swap brick `orbitPartition_swap_of_involutive` realizes each orbit-mate of the base point by a single
+involutive path-fixing generator, discharged through `coversOrbits_realize_of_mem`. Discharges the
+A2-complete coverage witness for the whole elementary-abelian-residual class in one theorem — no per-class
+structure theorem. -/
+theorem coversOrbits_of_residualInvolutive {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hinv : ResidualInvolutive adj P S)
+    (hgens : ∀ g, ResidualAut adj P S g → g * g = 1 → g ∈ gens)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    CoversOrbits adj P gens bs S := by
+  induction bs generalizing S with
+  | nil => exact hbase
+  | cons b bs ih =>
+      refine ⟨coversOrbits_realize_of_mem (fun w hw => ?_), ?_⟩
+      · obtain ⟨g, hg, hgbw, _⟩ := orbitPartition_swap_of_involutive hinv hw
+        exact ⟨g, ⟨hgens g hg (hinv g hg), mem_stabilizerAt.mpr hg⟩, hgbw⟩
+      · refine ih (S := insert b S) (residualInvolutive_mono hinv (Finset.subset_insert b S))
+          (fun g hg' hginv' => hgens g
+            ⟨hg'.1, hg'.2.1, fun v hv => hg'.2.2 v (Finset.mem_insert_of_mem hv)⟩ hginv') ?_
+        simpa using hbase
+
+/-- **De-classed harvest completeness — the involutive residual *is* the closure of harvested involutions.**
+Combining `coversOrbits_of_residualInvolutive` with the A2-complete equality
+`stabilizerAt_eq_closure_gensAt_of_coversOrbits`: at an exponent-2 node the path-fixing closure of the
+harvested involutive generators equals the residual, `Subgroup.closure (gensAt adj P gens S) = StabilizerAt
+adj P S`. The cross-branch completeness for *every* elementary-abelian-residual class, with no per-class
+structure theorem (CFI's gauge regime is a witness, supplying only `ResidualInvolutive` at a gauge-regime
+`S`). The cross-branch analogue of `theorem_2_HOR_of_pPolynomial`. -/
+theorem closure_eq_stabilizerAt_of_residualInvolutive {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hinv : ResidualInvolutive adj P S)
+    (hgens : ∀ g, ResidualAut adj P S g → g * g = 1 → g ∈ gens)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
+  stabilizerAt_eq_closure_gensAt_of_coversOrbits bs
+    (coversOrbits_of_residualInvolutive bs hinv hgens hbase)
+
 /-! ### Part A (Stage A2-complete) — CFI instance: gauge flips as path-fixing residual generators
 
 The cross-branch harvest for a CFI graph folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β`

@@ -57,10 +57,15 @@
 > ⟺ base); the full `order = ∏ basic-orbit sizes` (`card_autP_eq_prod_of_base`); **and the harvest
 > *completeness* seam** (`closure_eq_stabilizerAt_empty_of_coversOrbits`: `closure gens = StabilizerAt ∅`
 > under a path-fixing coverage witness `CoversOrbits`, so the folded chain reproduces the residual group
-> *and* its order). **The remaining content is the coverage witness** (`CoversOrbits` for multi-step CFI
-> bounded-`tw` — the honest analog of
-> the within-cell depth witness, *not* GI-hard) and the concrete computable BSGS (A4, validation-only). The
-> abstract cross-branch mechanism toward "reaches a rigid or Cameron residual on all classes" is grounded.
+> *and* its order). **The coverage witness is now DE-CLASSED** (2026-06-04, axiom-clean):
+> `coversOrbits_of_residualInvolutive` / `closure_eq_stabilizerAt_of_residualInvolutive` discharge
+> `CoversOrbits` for the **whole exponent-2 / elementary-abelian-(`Z₂^d`)-residual class in one theorem** —
+> the cross-branch analogue of `theorem_2_HOR_of_pPolynomial`, sidestepping the per-class `Aut(CFI)≅Z₂^β⋊Aut(H)`
+> structure theorem (the harvested involutions generate the residual whatever their internal description, no
+> `Φ(σ)` lift). **The remaining content is per-class: supply `ResidualInvolutive` at a gauge-regime `S`** (for
+> CFI, the seeds kill the `Aut(H)` factor) — a single focused predicate, *not* GI-hard — and the concrete
+> computable BSGS (A4, validation-only). The abstract cross-branch mechanism toward "reaches a rigid or
+> Cameron residual on all classes" is grounded.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),

@@ -17,9 +17,17 @@
 >   landed** (2026-06-04): the residual-membership bridge (`cfiFlipAut_residualAut` etc.; forward coverage),
 >   the cycle-space `Z₂^β` object (`CycleSpace`, `xorF`, `flipSet_xorF`, closure), and the odd-degree base
 >   sequence (`cfi_exists_base_seq`). **CFI-cov.3 stage 1 landed** (2026-06-04): the gauge-flip group
->   homomorphism `Z₂^β → Aut` (`cfiFlip_xorF`, `cfiFlipAut_xorF`, `cfiFlipAut_one`). **Remaining (CFI-cov.3
->   core):** the `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem + per-level orbit-coverage ⟹ `cfi_coversOrbits`.
->   Firing content (C# already canonizes CFI(K₄–K₇)), not GI-hard. See §7.
+>   homomorphism `Z₂^β → Aut` (`cfiFlip_xorF`, `cfiFlipAut_xorF`, `cfiFlipAut_one`).
+> - **DE-CLASSED COVERAGE LANDED** (2026-06-04, axiom-clean): `coversOrbits_of_residualInvolutive` /
+>   `closure_eq_stabilizerAt_of_residualInvolutive` (+ `residualInvolutive_mono`) discharge `CoversOrbits`
+>   for the **whole elementary-abelian-(`Z₂^d`)-residual class in one theorem** — the cross-branch analogue
+>   of `theorem_2_HOR_of_pPolynomial`. **This supersedes the per-class `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure
+>   theorem as the CFI route:** the abstract coverage holds once the residual is exponent-2 and `gens`
+>   contains the harvested involutions, *without* identifying them as the literal cycle-space flips (no
+>   `Φ(σ)` lift). **Remaining (CFI witness):** the single focused predicate `ResidualInvolutive adj P S` at
+>   a gauge-regime `S` (residual = exponent-2 gauge group, the `Aut(H)` factor killed by the committed
+>   seeds) — far smaller than the structure theorem. Firing content (C# canonizes CFI(K₄–K₇)), not GI-hard.
+>   See §7.
 >
 > A fresh reader can still use this doc as the full context/name index (Mathlib + internal) for consuming
 > A1–A3.5 / A2-complete or building A4.
@@ -374,10 +382,24 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
     `cfiFlip_xorF` (`cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'`), `cfiFlip_const_false` (zero ↦ id), and
     the lifted `cfiFlipAut_xorF` / `cfiFlipAut_one`. So `F ↦ cfiFlipAut F` is a group homomorphism from the
     cycle space into `Aut`, with image the gauge group — the `Z₂^β`-factor structure.
-  - **Remaining:** the `Aut(CFI(H)) ≅ Z₂^β ⋊ Aut(H)` structure theorem — that every path-fixing residual
-    decomposes into path-fixing gauge flips (so the gauge image *is* the residual at a path that kills the
-    `Aut(H)` factor) — then the per-level orbit-coverage clauses. The mechanism already canonizes CFI(K₄–K₇)
-    in the C#, so it is firing content, not GI-hard.
+  - **Stage 2 — DE-CLASSED, the structure theorem SIDESTEPPED — LANDED 2026-06-04, axiom-clean**
+    (`Cascade.lean`): `residualInvolutive_mono`, `coversOrbits_of_residualInvolutive`,
+    `closure_eq_stabilizerAt_of_residualInvolutive`. Rather than prove the per-class `Aut(CFI(H)) ≅ Z₂^β ⋊
+    Aut(H)` structure theorem (the `Φ(σ)` base-aut lift + decomposition), this discharges `CoversOrbits` from
+    a **single abstract hypothesis** — the residual is exponent-2 (`ResidualInvolutive`, an elementary-abelian
+    `Z₂^d`) — for the *generating set of all involutive residual automorphisms*. The swap brick
+    `orbitPartition_swap_of_involutive` realizes each orbit-mate by one path-fixing involution; the harvested
+    involutions generate the residual **whatever their internal description**, so the literal-gauge-flip
+    identification (and the `Φ` lift) is never needed. This is the cross-branch analogue of
+    `theorem_2_HOR_of_pPolynomial`: one structural predicate covers the whole elementary-abelian-residual
+    class (CFI's gauge regime, the twin/module regime, …), not a per-class grind.
+  - **Remaining (the CFI witness):** supply `ResidualInvolutive adj P S` at a **gauge-regime** committed set
+    `S` — one where the committed seeds have killed the `Aut(H)` factor so the residual is exactly the
+    exponent-2 gauge group (gauge flips are involutions, `cfiFlipAut_involutive`). This is a single focused
+    predicate, far smaller than the abandoned full structure theorem, and is the honest residual class
+    boundary (at shallow `S` the `Aut(H)` factor is alive and non-involutive — that part is the orthogonal
+    *visible/cascade* leg, handled by the scheme/`PPolynomial` recovery). C# canonizes CFI(K₄–K₇), so this is
+    firing content, not GI-hard.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
@@ -437,7 +459,9 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
 `closure_gensAt_le_stabilizerAt`, `closure_gensAt_anti`, `gensAt_empty_eq`, `stabilizerAt_le_closure_gensAt_step`,
 `CoversOrbits`, `coversOrbits_realize_of_mem`, `coversOrbits_isBase_foldl`,
 `stabilizerAt_le_closure_gensAt_of_coversOrbits`, `stabilizerAt_eq_closure_gensAt_of_coversOrbits`,
-`closure_eq_stabilizerAt_empty_of_coversOrbits`, `card_closure_gensAt_eq_prod_of_coversOrbits` (A2-complete).
+`closure_eq_stabilizerAt_empty_of_coversOrbits`, `card_closure_gensAt_eq_prod_of_coversOrbits` (A2-complete);
+`residualInvolutive_mono`, `coversOrbits_of_residualInvolutive`, `closure_eq_stabilizerAt_of_residualInvolutive`
+(A2-complete de-classed — `CoversOrbits` for the whole exponent-2/`Z₂^d`-residual class in one theorem).
 
 **C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
 161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,

@@ -13,216 +13,216 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `POE` | 71-75 | Partial-order entries: the three values `less`, `unknown`, `greater` that populate a `PMatrix`. | Inductive |
-| `neg` | 88-92 | Antisymmetric reverse on one entry: swaps `less`/`greater`, fixes `unknown`. | Definition |
-| `neg_neg` | 94-95 | `neg` is an involution: `neg (neg e) = e`. | `@[simp]` |
-| `POE.swap` | 97-100 | σ-swap on one entry (the matrix-wide relabelling of the direction-symmetry argument); coincides with `neg`. | Definition |
-| `POE.swap_swap` | 102 | σ-swap is an involution: `swap (swap e) = e`. | `@[simp]` |
-| `swap_less` | 104 | `swap .less = .greater`. | `@[simp]` |
-| `swap_greater` | 105 | `swap .greater = .less`. | `@[simp]` |
-| `swap_unknown` | 106 | `swap .unknown = .unknown`. | `@[simp]` |
-| `PMatrix` | 112-113 | The partial-order matrix type `Fin n → Fin n → POE`. | Definition |
-| `swap` | 119-120 | Pointwise σ-swap of a `PMatrix`: swap `less` with `greater` at every entry. | Definition |
-| `swap_swap` | 122-123 | σ-swap is an involution on `PMatrix`: `swap (swap P) = P`. | `@[simp]` |
-| `Antisymmetric` | 125-127 | A `PMatrix` is antisymmetric when `P i j = POE.neg (P j i)` for all `i, j`. | Definition |
-| `AdjMatrix` | 136-137 | Self-contained adjacency matrix on `Fin n`, wrapping a `Fin n → Fin n → Nat` field. | Structure |
-| `applyGuess` | 141-148 | Apply a single guess `(a, b, dir)` to `P`: set `P a b := dir`, `P b a := neg dir`, leaving every other entry unchanged. Does not transitively close. | Definition |
-| `applyGuess_swap` | 150-171 | Applying `(a, b, swap dir)` to the σ-swapped matrix equals σ-swapping after `applyGuess P a b dir` (needs `a ≠ b`); links the two guess directions through σ. | — |
-| `closeStep` | 175-188 | Single-step transitive closure: derive `P i j` from a uniform chain `i → k → j`, with `less`-chains taking priority over `greater`-chains at ties. | Definition |
-| `transitiveClose` | 190-194 | Transitive closure of a `PMatrix` by iterating `closeStep` `n*n` times — enough rounds to reach fixpoint. | Definition |
-| `conflictMatrix` | 225-238 | Concrete 4-vertex witness with a conflicted pair `(0,1)` carrying both a `less`-chain and a `greater`-chain; refutes σ-swap commutation. | Definition |
-| `closeStep_swap_false` | 257-266 | **Refutation:** `closeStep` does not commute with σ-swap unconditionally — the `less`-first tie-break is not σ-symmetric (fails on `conflictMatrix`). | — |
-| `transitiveClose_swap_false` | 287-301 | **Refutation:** `transitiveClose` does not commute with σ-swap unconditionally (witnessed by `conflictMatrix`). | — |
-| `Colouring` | 305-306 | A vertex colouring `Fin n → Nat`. | Definition |
-| `signature` | 308-314 | Multiset signature of vertex `v` under colouring `χ` and state `(adj, P)`: the `(χ u, adj.adj v u, P v u)` tuples over all `u ≠ v`. | Definition |
-| `POE.toNat` | 316-321 | Numeric code for a `POE` entry matching the C# packing: `less ↦ 0`, `unknown ↦ 1`, `greater ↦ 2`. | Definition |
-| `encTuple` | 327-333 | Canonical injection of a signature tuple `(colour, edge-label, POE)` into `Nat` (Cantor pairing); mirrors the C# neighbour-tuple packing. | Definition |
-| `sigKey` | 342-349 | Canonical refinement key of a vertex: its old colour followed by the sorted encoded signature multiset (the C# `[own-colour, sorted neighbour-tuples]`). | Definition |
-| `sigKey_eq_iff` | 351-365 | Two vertices share a `sigKey` iff they have the same old colour and the same signature. | — |
-| `warmRefine` | 394-404 | Warm 1-WL refinement: iterate `refineStep` `n` times from `initial`; concrete and computable. | Definition |
+| `POE` | 76-80 | Partial-order entries: the three values `less`, `unknown`, `greater` that populate a `PMatrix`. | Inductive |
+| `neg` | 93-97 | Antisymmetric reverse on one entry: swaps `less`/`greater`, fixes `unknown`. | Definition |
+| `neg_neg` | 99-100 | `neg` is an involution: `neg (neg e) = e`. | `@[simp]` |
+| `POE.swap` | 102-105 | σ-swap on one entry (the matrix-wide relabelling of the direction-symmetry argument); coincides with `neg`. | Definition |
+| `POE.swap_swap` | 107 | σ-swap is an involution: `swap (swap e) = e`. | `@[simp]` |
+| `swap_less` | 109 | `swap .less = .greater`. | `@[simp]` |
+| `swap_greater` | 110 | `swap .greater = .less`. | `@[simp]` |
+| `swap_unknown` | 111 | `swap .unknown = .unknown`. | `@[simp]` |
+| `PMatrix` | 117-118 | The partial-order matrix type `Fin n → Fin n → POE`. | Definition |
+| `swap` | 124-125 | Pointwise σ-swap of a `PMatrix`: swap `less` with `greater` at every entry. | Definition |
+| `swap_swap` | 127-128 | σ-swap is an involution on `PMatrix`: `swap (swap P) = P`. | `@[simp]` |
+| `Antisymmetric` | 130-132 | A `PMatrix` is antisymmetric when `P i j = POE.neg (P j i)` for all `i, j`. | Definition |
+| `AdjMatrix` | 141-142 | Self-contained adjacency matrix on `Fin n`, wrapping a `Fin n → Fin n → Nat` field. | Structure |
+| `applyGuess` | 146-153 | Apply a single guess `(a, b, dir)` to `P`: set `P a b := dir`, `P b a := neg dir`, leaving every other entry unchanged. Does not transitively close. | Definition |
+| `applyGuess_swap` | 155-176 | Applying `(a, b, swap dir)` to the σ-swapped matrix equals σ-swapping after `applyGuess P a b dir` (needs `a ≠ b`); links the two guess directions through σ. | — |
+| `closeStep` | 180-193 | Single-step transitive closure: derive `P i j` from a uniform chain `i → k → j`, with `less`-chains taking priority over `greater`-chains at ties. | Definition |
+| `transitiveClose` | 195-199 | Transitive closure of a `PMatrix` by iterating `closeStep` `n*n` times — enough rounds to reach fixpoint. | Definition |
+| `conflictMatrix` | 230-243 | Concrete 4-vertex witness with a conflicted pair `(0,1)` carrying both a `less`-chain and a `greater`-chain; refutes σ-swap commutation. | Definition |
+| `closeStep_swap_false` | 262-271 | **Refutation:** `closeStep` does not commute with σ-swap unconditionally — the `less`-first tie-break is not σ-symmetric (fails on `conflictMatrix`). | — |
+| `transitiveClose_swap_false` | 292-306 | **Refutation:** `transitiveClose` does not commute with σ-swap unconditionally (witnessed by `conflictMatrix`). | — |
+| `Colouring` | 310-311 | A vertex colouring `Fin n → Nat`. | Definition |
+| `signature` | 313-319 | Multiset signature of vertex `v` under colouring `χ` and state `(adj, P)`: the `(χ u, adj.adj v u, P v u)` tuples over all `u ≠ v`. | Definition |
+| `POE.toNat` | 321-326 | Numeric code for a `POE` entry matching the C# packing: `less ↦ 0`, `unknown ↦ 1`, `greater ↦ 2`. | Definition |
+| `encTuple` | 332-338 | Canonical injection of a signature tuple `(colour, edge-label, POE)` into `Nat` (Cantor pairing); mirrors the C# neighbour-tuple packing. | Definition |
+| `sigKey` | 347-354 | Canonical refinement key of a vertex: its old colour followed by the sorted encoded signature multiset (the C# `[own-colour, sorted neighbour-tuples]`). | Definition |
+| `sigKey_eq_iff` | 356-370 | Two vertices share a `sigKey` iff they have the same old colour and the same signature. | — |
+| `warmRefine` | 399-409 | Warm 1-WL refinement: iterate `refineStep` `n` times from `initial`; concrete and computable. | Definition |
 | `refineStep` / `refineStep_iff` | ~320-417 | **Concrete (2026-05-30, no longer axioms):** `refineStep adj P χ v := Encodable.encode (sigKey adj P χ v)` (own colour + sorted encoded signature = the C# `WarmPartition.RefineRound`); `refineStep_iff` (same colour ⟺ same old colour + same signature) is now a **theorem**. Removes `refineStep`/`refineStep_iff` from the axiom basis project-wide. Helpers: `POE.toNat`(_injective), `encTuple`(_injective), `sigKey`, `sigKey_eq_iff`. | Def + theorem |
-| `samePartition` | 408-411 | Two colourings induce the same partition: `χ₁ i = χ₁ j ↔ χ₂ i = χ₂ j` for every `i, j`. | Definition |
-| `samePartition.refl` | 417 | `samePartition` is reflexive. | — |
-| `samePartition.symm` | 419-420 | `samePartition` is symmetric. | — |
-| `samePartition.trans` | 422-424 | `samePartition` is transitive. | — |
-| `refineStep_refines` | 430-435 | **Refinement is split-only (one round).** Equal refined colour implies equal old colour. | — |
-| `warmRefine_refines` | 437-463 | Warm refinement is split-only: equal warm-refined colour implies equal starting colour. | — |
-| `iterate_closeStep_fix` | 495-501 | Iterating `closeStep` from a fixpoint of itself stays at that fixpoint. | — |
-| `cell_split_uniform_false` | 566-591 | **Refutation:** cell-mates do not in general keep equal signatures after a guess plus TC (witnessed by `witnessP0`, the gap fixed only by singleton-cell `a`, `b`). | — |
-| `refineStep_preserves_singleton` | 613-620 | One refinement round preserves a singleton: if no vertex shares `a`'s colour, none does after `refineStep`. | — |
-| `iterate_refineStep_preserves_singleton` | 622-635 | Iterating refinement preserves a singleton for any number of rounds. | — |
-| `signature_applyGuess_off` | 637-651 | Off the guessed pair, the guess is invisible: for `x ∉ {a,b}` the signature under `applyGuess P₀ a b dir` equals the signature under `P₀`. | — |
-| `signature_eq_of_samePartition` | 653-680 | **Signature equality is a partition invariant of the colouring:** partition-equal colourings induce the same signature-equality relation between vertices. | — |
-| `warm_6_2` | 682-759 | **§6.2 direction invariance.** With `a, b` `χι`-singletons, warm refinement after `a < b` and after `b < a` induce the same partition. | — |
-| `signature_swap` | 763-773 | σ-swapping `P` relabels each signature's `POE` component by `POE.swap`, leaving colour and adjacency components untouched. | — |
-| `warmRefine_swap` | 775-817 | **Direction-blindness (Q1).** Warm refinement on `P` and on its σ-swap induce the same partition. | — |
-| `warmRefine_applyGuess_swap` | 819-829 | Warm refinement after `a < b` on `P₀` and after `b < a` on the σ-swapped `P₀` induce the same partition. | — |
-| `applyGuess_comm` | 831-849 | **Q2 — guesses commute.** Guessing on `{a,b}` then `{b,c}` (pairwise-distinct vertices) gives the same `(adj, P)` as the reverse order, since the writes touch disjoint matrix entries. | — |
-| `signature_agree_off` | 857-868 | If `P` and `Q` agree on every entry with an endpoint outside `D`, then off `D` they yield the same signature. | — |
-| `warmRefine_agree_off'` | 870-917 | **§6.2 — composable cross-branch sharing.** Matrices agreeing off `D` and `samePartition`-equal starting colourings (with `D` all `χ`-singletons) yield the same warm-refined partition; the cross-level form that chains across descent levels. | — |
-| `warmRefine_agree_off` | 919-953 | **§6.2 — the cell partition depends only on the matrix off the decision set `D`.** Matrices agreeing off `D` (its vertices `χι`-singletoned) yield the same partition; the same-`χι` specialisation of `warmRefine_agree_off'`. | — |
-| `PartitionInvariant` | 970-974 | A target-cell selector is partition-invariant when it depends only on the partition a colouring induces, not on raw colour values. | Definition |
-| `target_direction_blind` | 976-985 | **§6.2 spine — base case.** For a partition-invariant selector, the target cell chosen after `a < b` equals the one after `b < a`. | — |
-| `target_agree_off` | 987-1000 | **§6.2 spine — inductive step.** For a partition-invariant selector and matrices agreeing off a singletoned decision set `D`, the target cell is the same even when the start colourings only agree up to partition. | — |
-| `Egnd` | 1029-1030 | **§13.** The canonical ground set on `Fin n`: ordered pairs `(i, j)` with `i < j`. | Definition |
-| `mem_Egnd` | 1032-1033 | Membership in `Egnd n` is exactly `p.1 < p.2`. | — |
-| `Egnd_ne` | 1035-1036 | Pairs in `Egnd n` have distinct endpoints: `p.1 ≠ p.2`. | — |
-| `Pof` | 1038-1051 | **§13.** Commit a set `S ⊆ Egnd n` of pair-guesses into a P-matrix: write `less` at `(u,v) ∈ S`, `greater` at `(v,u)`, leaving other entries unchanged. | Definition, `noncomputable` |
-| `cl` | 1053-1058 | **§13.** Propagation closure on pair-guesses: the canonical pairs whose endpoints get separated by warm refinement after committing `S`. | Definition |
-| `SingletonAt` | 1068-1070 | The fresh-colour hypothesis at a pair `p`: both `p.1` and `p.2` are `χι`-singletons. | Definition |
-| `cl_extensive` | 1072-1087 | **§13 M1 — extensiveness of `cl`.** For canonical `S` whose vertices are all `χι`-singletons, every pair in `S` lies in `cl S`. | — |
-| `Pof_mono_entry_of_unknown` | 1117-1141 | Entry-wise monotonicity of `Pof` from the all-unknown base: for canonical `S ⊆ T`, each entry of `Pof _ S` is either `unknown` or equal to the corresponding `Pof _ T` entry (does not lift to a `cl` monotonicity result). | — |
-| `FullyDiscrete` | 1153-1155 | A colouring is fully discrete when every vertex is its own `χι`-singleton. | Definition |
-| `cl_monotone_discrete` | 1157-1174 | **§13 M0, vacuous case.** Under `FullyDiscrete`, every canonical pair lies in every `cl S`, so `cl S = Egnd n` and monotonicity carries no structural information. | — |
-| `TVerticesSingletons` | 1187-1189 | Every endpoint of every pair in `T` is a `χι`-singleton. | Definition |
-| `warmRefine_samePartition_T_individualised` | 1191-1276 | **§13 M0, strong form.** Warm refinement under `Pof P₀ S` and `Pof P₀ T` induces the *same* partition when `S ⊆ T` and every endpoint of every `T`-pair is a `χι`-singleton. | — |
-| `cl_monotone_T_individualised` | 1278-1289 | **§13 M0 — monotonicity of `cl`** under the T-individualised hypothesis: `S ⊆ T` implies `cl S ⊆ cl T`. | — |
-| `cl_idempotent` | 1315-1329 | **§13 M2 — idempotence of `cl`** under fresh-colour individualisation of `S ∪ cl S`: `cl (cl S) = cl S`. | — |
-| `Pof_fs` | 1401-1407 | **§14.** Finset-based computable analogue of `Pof`, enabling `decide`-checkable refutations. | Definition |
-| `commitsToP` | 1409-1411 | **§14.** All-unknown-base commits-to-matrix shortcut: `Pof_fs (fun _ _ => .unknown) S`. | Definition |
-| `cl_prov` | 1413-1418 | **§14.** Provenance closure (TC-based): the canonical pair-guesses whose direction is decided by `transitiveClose` of `commitsToP S`. | Definition |
-| `closeStep_unknown` | 1422-1426 | `closeStep` returns `.unknown` at every entry of the all-unknown matrix. | — |
-| `closeStep_unknown_fixpoint` | 1428-1431 | The all-unknown matrix is a fixpoint of `closeStep`. | — |
-| `transitiveClose_unknown` | 1433-1445 | `transitiveClose` of the all-unknown matrix is the all-unknown matrix. | — |
-| `cl_prov_empty` | 1449-1458 | **§14 CL0 for `cl_prov`:** `cl_prov ∅ = ∅`. | — |
-| `cl_prov_extensive` | 1460-1474 | **§14 CL1 for `cl_prov`:** for canonical `S`, every commit's direct `less` write survives transitive closure, so `S ⊆ cl_prov S`. | — |
-| `cl_prov_M3_false` | 1492-1502 | **§14 — refutes matroid M3 exchange for `cl_prov`.** A concrete `n=5, S={(1,2),(3,4)}, x=(2,3), y=(1,4)` counterexample where the M3 premise holds but the conclusion fails; machine-checked by `decide`. | — |
-| `hasLessChain` | 1516-1519 | Existence of a `.less`-chain in `P` from `i` to `j` via some intermediate `k` with both edges `.less`. | Definition |
-| `hasGreaterChain` | 1521-1523 | Existence of a `.greater`-chain in `P` from `i` to `j` via some intermediate `k`. | Definition |
-| `CanConsistent` | 1525-1529 | A `PMatrix` is canonical-consistent when every `.less` entry sits at `i.val < j.val` and every `.greater` entry at `i.val > j.val`. | Definition |
-| `LessMono` | 1531-1534 | One-sided `.less`-direction entry-wise monotonicity between two matrices: `P i j = .less → Q i j = .less`. | Definition |
-| `canConsistent_no_conflict` | 1536-1546 | Under canonical-consistency, no pair simultaneously hosts both a `.less`-chain and a `.greater`-chain. | — |
-| `commitsToP_classify` | 1548-1565 | Three-way classification of `commitsToP S i j` by `S`-membership of `(i,j)` and `(j,i)`. | — |
-| `commitsToP_canConsistent` | 1567-1581 | `commitsToP` of a canonical `S` is canonical-consistent. | — |
-| `closeStep_keeps_greater` | 1585-1588 | `closeStep` never demotes a decided `.greater` entry. | — |
-| `iterate_closeStep_keeps_greater` | 1590-1600 | Iterating `closeStep` preserves any `.greater` entry — once decided, frozen. | — |
-| `closeStep_decided` | 1602-1608 | `closeStep` preserves any decided entry (`.less` or `.greater`). | — |
-| `closeStep_eq_less_iff` | 1624-1658 | `closeStep P i j = .less` iff `P i j` was already `.less`, or it was `.unknown` with a `.less`-chain through some intermediate vertex. | — |
-| `closeStep_eq_greater_iff` | 1660-1712 | `closeStep P i j = .greater` iff `P i j` was already `.greater`, or it was `.unknown` with no `.less`-chain but a `.greater`-chain. | — |
-| `closeStep_canConsistent` | 1714-1725 | `closeStep` preserves canonical-consistency. | — |
-| `iterate_closeStep_canConsistent` | 1727-1735 | Iterating `closeStep` preserves canonical-consistency. | — |
-| `transitiveClose_canConsistent` | 1737-1740 | `transitiveClose` preserves canonical-consistency. | — |
-| `closeStep_lessMono` | 1742-1768 | Joint inductive step: under canonical-consistency of `Q` and `LessMono P Q`, `closeStep` preserves `.less`-mono. | — |
-| `iterate_closeStep_lessMono` | 1770-1779 | Iterating `closeStep` preserves `.less`-mono under joint canonical-consistency. | — |
-| `transitiveClose_lessMono` | 1781-1785 | `transitiveClose` preserves `.less`-mono under joint canonical-consistency. | — |
-| `commitsToP_lessMono` | 1787-1800 | Base case for CL3: canonical `S ⊆ T` gives `LessMono (commitsToP S) (commitsToP T)`. | — |
-| `cl_prov_monotone` | 1804-1829 | **§14 CL3 — monotonicity for `cl_prov`:** canonical `S ⊆ T` implies `cl_prov S ⊆ cl_prov T`. | — |
-| `numUnknown` | 1838-1841 | Number of `.unknown` entries in a `PMatrix` — the strictly-decreasing potential bounding TC iteration. | Definition |
-| `numUnknown_le` | 1843-1848 | `numUnknown P ≤ n * n`. | — |
-| `closeStep_numUnknown_lt` | 1861-1886 | If `closeStep P ≠ P`, then `numUnknown` strictly drops under one closure round. | — |
-| `iterate_closeStep_progress` | 1888-1915 | After `k` `closeStep` iterations, either a fixpoint has been reached at some step `≤ k`, or `numUnknown` has dropped by at least `k`. | — |
-| `transitiveClose_is_fixpoint` | 1917-1967 | After `n*n` iterations of `closeStep`, the result is a fixpoint: `closeStep (transitiveClose P) = transitiveClose P`. | — |
-| `transitiveClose_idempotent` | 1969-1975 | **TC idempotence.** `transitiveClose (transitiveClose M) = transitiveClose M`. | — |
-| `cl_prov_idempotent` | 2006-2036 | **CL2 — idempotence.** `cl_prov (cl_prov S) = cl_prov S` for canonical `S`. | — |
-| `IndivStep` | 2123-2147 | Existential witness of one descent-step individualisation: a colouring `χ'` that singletons every vertex in target `T` and refines `χ` outside `T`. Data, not a function — the trace carries one per step. | Structure |
-| `singletons_union` | 2151-2172 | **D-singletons preserved.** If `χ` singletons every `v ∈ D`, an `IndivStep` with target `T` singletons every `v ∈ D ∪ T`. | — |
-| `samePartition_of_samePartition` | 2174-2204 | Two `IndivStep`s applied to `samePartition`-equal colourings with the same target `T` produce `samePartition`-equal results — the inductive engine of the spine theorem. | — |
-| `IndivStep.default` | 2206-2257 | **Concrete `IndivStep` witness.** A constructive individualisation step (parity-tagged base-`n` encoding), proving traces exist at every level so the spine theorem is non-vacuous. | Definition |
-| `DescentTrace` | 2266-2304 | Inductive predicate: `(D, P, χι)` is reachable by `k` descent steps from `(P₀, χι₀)` under selector `sel`, each step carrying an `IndivStep` witness and a matrix agreeing with `P₀` off the enlarged decision set. | Inductive |
-| `singletons` | 2308-2325 | **Trace invariant.** A trace's colouring singletons its whole decision set `D`. | — |
-| `P_agrees` | 2327-2337 | **Trace invariant.** A trace's matrix agrees with `P₀` on every entry with an endpoint outside `D`. | — |
-| `SpineChain` | 2341-2349 | Bundle of a `DescentTrace` with its derived state `(D, P, χι)`. The spine theorem is branch-independence of two such chains. | Structure |
-| `partition` | 2356-2360 | The chain's level-`k` partition: warm refinement of its accumulated `(P, χι)`. | Definition |
-| `IndivStep.samePartition_het` | 2366-2379 | Heterogeneous `samePartition_of_samePartition`: accepts separate targets `T₁, T₂` with an equality hypothesis. Used at the spine induction's level-`k+1` step. | — |
-| `spine_branch_independent` | 2381-2455 | **The spine theorem (branch independence).** Any two `DescentTrace`s through `k` levels agree on the accumulated `D` (literal) and the level-`k` partition (`samePartition`) — handing the oracle one fixed partition instead of `2^d` refinement worlds. | — |
-| `SpineChain.branch_independent` | 2457-2466 | **The spine theorem, `SpineChain` wrapper.** Two chains at level `k` share `D` and level-`k` partition. | — |
-| `defaultColouring` | 2487-2497 | The level-`k` colouring of the default reference chain: iterate refine-then-individualise (via `IndivStep.default`) from `χι₀`, with the matrix held fixed at `P₀`. | Definition |
-| `defaultD` | 2499-2508 | The level-`k` decision set of the default chain: accumulate `sel (warmRefine adj P₀ (defaultColouring k))` across all levels. | Definition |
-| `defaultTrace` | 2510-2523 | The concrete `DescentTrace` realising the default construction, using `IndivStep.default` at every level and `P = P₀` throughout. | Definition |
-| `defaultSpineChain` | 2525-2533 | The concrete reference `SpineChain` at every level, bundling `defaultD`/`P₀`/`defaultColouring`/`defaultTrace`. | Definition |
-| `SpineChain.eq_default` | 2535-2546 | **Reference corollary.** Every `SpineChain` at level `k` shares `D` and level-`k` partition with `defaultSpineChain` — there is a canonical level-`k` partition, computable by one deterministic descent. | — |
-| `Discrete` | 2570-2573 | A colouring is discrete when every cell is a singleton — equivalently, `χ : Fin n → Nat` is injective. | Definition |
-| `of_samePartition` | 2577-2581 | Discreteness is `samePartition`-invariant: equal partitions transport `Discrete`. | — |
-| `warmRefine_preserves` | 2583-2592 | Warm refinement preserves discreteness: if `χ` is injective, so is `warmRefine adj P χ`. | — |
-| `SpineChain.IsLeaf` | 2596-2602 | A `SpineChain` reaches a leaf when its level-`k` partition is discrete (every vertex a singleton). | Definition |
-| `SpineChain.isLeaf_iff_default` | 2604-2613 | `IsLeaf` is spine-invariant: a chain is a leaf iff `defaultSpineChain` at the same level is. | — |
-| `TargetsNonsingletonCell` | 2617-2623 | Selector hypothesis: every returned vertex has a same-colour partner (`sel` only picks from non-singleton cells). | Definition |
-| `NonemptyOnNonDiscrete` | 2625-2630 | Selector hypothesis: `sel χ` is non-empty whenever `χ` is not yet discrete. | Definition |
-| `defaultD_univ_isLeaf` | 2632-2647 | **`D` covers all vertices ⇒ leaf.** When the accumulated decision set is the full vertex set, the default chain's spine partition is discrete. | — |
-| `defaultD_grows_if_not_leaf` | 2649-2688 | **`D` strictly grows on every non-leaf step.** Under the two selector hypotheses, a non-leaf level-`k` chain has `|defaultD k| < |defaultD (k+1)|`. | — |
-| `defaultSpineChain_reaches_leaf` | 2690-2729 | **Leaf existence.** Under `TargetsNonsingletonCell` and `NonemptyOnNonDiscrete`, the default descent reaches a leaf within `n` levels. | — |
-| `DirAssignment` | 2752-2758 | Order assignment relative to `(P₀, D)`: an antisymmetric matrix agreeing with `P₀` on every entry with an endpoint outside `D`. The linear oracle's input shape — a point in the order-label residual. | Structure |
-| `default` | 2764-2771 | **Trivial `DirAssignment`.** When `P₀` is antisymmetric, `P₀` itself is a valid order assignment for any `D` (witnesses non-emptiness). | Definition |
-| `samePartition_pair` | 2773-2785 | Any two `DirAssignment`s over the same `(P₀, D)`, refined against a `D`-singletoning colouring, induce the same partition. | — |
-| `samePartition_chain` | 2787-2800 | **Spine equivalence.** A `DirAssignment` over a chain's `D`, refined against the chain's colouring, induces the chain's partition — the residual is exactly the choice of `DirAssignment`, partition fixed. | — |
-| `flipPair` | 2804-2848 | **Single-pair direction flip.** Negate the `(a, b)` and `(b, a)` entries of a `DirAssignment` via `POE.neg`. The generator of the `Z₂` group action on direction choices. | Definition |
-| `eq_of_σ_eq` | 2850-2860 | `DirAssignment` equality is determined by the matrix field — propositional fields subsumed by proof irrelevance. | — |
-| `flipPair_idempotent` | 2862-2871 | **Flip is an involution.** Two applications of `flipPair` to the same pair return the original `DirAssignment` — the `Z₂` generator squares to identity. | — |
-| `flipPair_partition_invariant` | 2873-2883 | **Flipping preserves the partition.** `σ` and `σ.flipPair a b` share the spine partition — the order labels move, the partition doesn't. | — |
-| `flipPair_comm` | 2885-2909 | **Flips on disjoint pairs commute** — the abelian-ness of the `Z₂^d` action: distinct decisions don't interfere. | — |
-| `IsAut` | 2937-2940 | A `Fin n`-permutation `π` is a graph automorphism of `adj` when it preserves adjacency edge-by-edge: `adj.adj (π v) (π w) = adj.adj v w`. | Definition |
-| `IsAut.refl` | 2946-2947 | The identity permutation is an automorphism. | — |
-| `IsAut.trans` | 2949-2954 | Composition of automorphisms is an automorphism. | — |
-| `IsAut.symm` | 2956-2962 | The inverse of an automorphism is an automorphism. | — |
-| `labelledAdj` | 2966-2972 | **Labelled adjacency.** Adjacency matrix relabelled by `π`: entry `(i, j)` is the original adjacency between `π⁻¹ i` and `π⁻¹ j`. | Definition |
-| `labelledAdj_eq_of_isAut` | 2974-2987 | **Automorphisms fix the labelled adjacency.** `IsAut π adj` implies `labelledAdj π adj = adj.adj` — an automorphism is invisible at the labelled level. | — |
-| `isAut_of_labelledAdj_eq` | 2989-2999 | **Converse.** A permutation preserving the labelled adjacency is an automorphism. | — |
-| `vertexRankNat` | 3012-3014 | Strict rank of vertex `v`: the count of vertices `u` with `χ u < χ v`. | Definition |
-| `vertexRank` | 3032-3034 | Vertex rank packaged as `Fin n` via `vertexRankNat_lt_n`. | Definition |
-| `vertexRank_strict_mono` | 3036-3055 | `vertexRank` is strictly monotonic in the colour value: `χ v < χ w` implies `vertexRank χ v < vertexRank χ w`. | — |
-| `vertexRank_injective` | 3057-3067 | On a `Discrete` colouring, `vertexRank` is injective. | — |
-| `vertexRank_bijective` | 3069-3072 | On a `Discrete` colouring, `vertexRank` is bijective. | — |
-| `rankPerm` | 3074-3078 | **The rank permutation.** Bijection `Fin n ≃ Fin n` mapping each vertex to its colour-rank on a `Discrete` colouring. | Definition, `noncomputable` |
-| `rankPerm_apply` | 3080-3081 | Unfolding lemma: `rankPerm χ h v = vertexRank χ v`. | `@[simp]` |
-| `vertexRank_comp` | 3085-3104 | `vertexRank (χ ∘ g) v = vertexRank χ (g v)` — a pure `Finset.card` reindex along `g`. *(Relocated from `LinearOracle.lean` for the cascade oracle's `colourMatchPerm` (M-B).)* | — |
-| `rankPerm_comp` | 3106-3126 | **Rank reindexing.** `rankPerm (χ ∘ e) = rankPerm χ · e` — relabelling conjugate-shifts the rank permutation (the §L.5 conjugation gap). *(Relocated from `LinearOracle.lean`.)* | — |
-| `SpineChain.canonAdj` | 3142-3168 | **Leaf canonical adjacency.** Given a leaf `SpineChain` and a `DirAssignment σ` over its `D`, relabel `adj` by the rank permutation of the warm-refined partition. | Definition, `noncomputable` |
-| `matrixLT` | 3172-3179 | **Row-major lex strict less-than on `n × n` matrices.** The first disagreeing cell `(i, j)` (row-then-column order) has `M₁ i j < M₂ i j`. | Definition |
-| `matrixLT_irrefl` | 3181-3184 | `matrixLT` is irreflexive: no matrix is `<` itself. | — |
-| `matrixLT_asymm` | 3186-3207 | `matrixLT` is asymmetric: `M₁ < M₂` implies `¬ M₂ < M₁` (strict-order fact). | — |
-| `PMatrix.fintype` | 3211-3216 | `Fintype` instance for `PMatrix n`, stated explicitly since `PMatrix` is a `def` and so does not inherit the `Pi` instance transparently. | Instance |
-| `DirAssignment.fintype` | 3222-3232 | **`Fintype` on `DirAssignment P₀ D`.** Obtained by injecting the σ-field into the `Fintype` `PMatrix n`. | Instance, `noncomputable` |
-| `relabelMatrix` | 3236-3243 | **Relabel a bare matrix** `Fin n → Fin n → Nat` by a permutation `π`: entry `(i,j)` becomes `M (π⁻¹ i) (π⁻¹ j)`. Lets `LeafTwistSpec` state the leaf-relabelling property without re-wrapping as an `AdjMatrix`. | Definition |
-| `MatrixLex` | 3245-3250 | `Fin n → Fin n → Nat` viewed under the row-major lex order via nested `Pi.Lex`. | `abbrev` |
-| `toMatrixLex` | 3252-3255 | Wrap a matrix into its Lex'd form (identity at runtime — `Lex` is a type synonym). | Definition |
-| `ofMatrixLex` | 3257-3259 | Unwrap a Lex'd matrix back to a plain `Fin n → Fin n → Nat`. | Definition |
-| `ofMatrixLex_toMatrixLex` | 3261-3262 | `ofMatrixLex (toMatrixLex M) = M`. | `@[simp]` |
-| `toMatrixLex_ofMatrixLex` | 3264-3265 | `toMatrixLex (ofMatrixLex M) = M`. | `@[simp]` |
-| `toMatrixLex_injective` | 3267-3271 | `toMatrixLex` is injective. | — |
-| `canonFormImages` | 3273-3282 | The Finset of Lex-wrapped `canonAdj` images over all `DirAssignment`s for a leaf chain — the candidate set `canonForm` minimises over. | Definition, `noncomputable` |
-| `canonFormImages_nonempty` | 3284-3290 | `canonFormImages chain isLeaf` is non-empty when `DirAssignment P₀ chain.D` is. | — |
-| `canonForm` | 3292-3312 | **The canonical leaf adjacency matrix:** the lex-min `canonAdj` over all `DirAssignment`s (row-major lex). Requires `Nonempty (DirAssignment P₀ chain.D)`. | Definition, `noncomputable` |
-| `canonForm_mem_image` | 3314-3329 | **`canonForm` comes from some `DirAssignment`:** it equals `canonAdj σ` for some `σ`. | — |
-| `canonForm_le_canonAdj` | 3331-3347 | **`canonForm` is the lex-minimum:** `toMatrixLex (canonForm) ≤ toMatrixLex (canonAdj σ)` for every `DirAssignment σ`. | — |
-| `LinearOracleSpec` | 3351-3367 | **The linear-oracle interface type:** given a leaf chain and a current-branch `DirAssignment`, return either `none` or a verified automorphism of `adj` (bundled as a subtype). | Definition |
-| `some_isAut` | 3374-3386 | **Soundness (subtype-level):** when the oracle returns `some result`, the returned permutation is automatically an automorphism. | — |
-| `LeafTwistSpec` | 3388-3405 | **Leaf-twist validity spec:** when the oracle returns `some result`, the returned `π` relabels the input branch's canonical adjacency to that of some other `DirAssignment σ'` — the property justifying pruning. | Definition |
-| `individualizedColouring` | 3443-3447 | **Fresh-colour individualisation** of a vertex set `S`: each `v ∈ S` gets unique colour `v.val + 1`; vertices outside `S` share colour `0`. | Definition |
-| `FixesPointwise` | 3449-3452 | Predicate: permutation `π` fixes every vertex in `S` pointwise (`π v = v` for `v ∈ S`). | Definition |
-| `complement` | 3458-3466 | A pointwise-fixing permutation stabilises the complement setwise: `v ∉ S` implies `π v ∉ S`. | — |
-| `individualizedColouring_invariant` | 3470-3479 | An automorphism fixing `S` pointwise preserves the individualised colouring: `χ_S (π v) = χ_S v` for every `v`. | — |
-| `signature_invariant_of_isAut` | 3483-3520 | An automorphism preserving `(adj, P, χ)` pointwise preserves the signature multiset at every vertex. | — |
-| `refineStep_invariant_of_isAut` | 3522-3535 | An automorphism preserving `(adj, P, χ)` pointwise preserves one round of `refineStep`. | — |
-| `iterate_refineStep_invariant_of_isAut` | 3537-3553 | Iterated refinement preserves automorphism invariance for any number of rounds. | — |
-| `warmRefine_invariant_of_isAut` | 3555-3564 | Warm refinement preserves automorphism invariance: if `(adj, P, χ_init)` are all `π`-invariant, so is `warmRefine adj P χ_init`. | — |
-| `signature_transport` | 3578-3603 | **Signature transport.** An automorphism `g` carrying `(P₁, χ₁)` to `(P₂, χ₂)` maps the `(P₂, χ₂)`-signature at `g v` to the `(P₁, χ₁)`-signature at `v`. Cross-config form of `signature_invariant_of_isAut`. | — |
-| `sigKey_transport` | 3605-3612 | **`sigKey` transport** — cross-config: `sigKey adj P₂ χ₂ (g v) = sigKey adj P₁ χ₁ v`. | — |
-| `refineStep_transport` | 3614-3622 | **`refineStep` transport** — one round, cross-config: `refineStep adj P₂ χ₂ (g v) = refineStep adj P₁ χ₁ v`. | — |
-| `iterate_refineStep_transport` | 3624-3638 | **Iterated `refineStep` transport** across any number of rounds, cross-config. | — |
-| `warmRefine_transport` | 3640-3649 | **Warm-refinement transport.** An automorphism carrying `(P₁, χ₁)` to `(P₂, χ₂)` carries the warm refinement of the first onto the second. | — |
-| `OrbitPartition` | 3665-3671 | **Aut_S orbit relation** on vertices: `v ~ w` iff some automorphism of `adj` preserving `P` and fixing `S` pointwise sends `v` to `w`. | Definition |
-| `refl` | 3677-3680 | Reflexivity of `OrbitPartition` (via the identity permutation). | — |
-| `symm` | 3682-3697 | Symmetry of `OrbitPartition` (via permutation inverse). | — |
-| `trans` | 3699-3714 | Transitivity of `OrbitPartition` (via permutation composition). | — |
-| `subset_warmRefine` | 3716-3731 | **Trivial direction of the squeeze:** orbits refine 1-WL cells — `OrbitPartition v w` implies `warmRefine` colours of `v` and `w` agree. | — |
-| `refineStep_iter_le_eq` | 3744-3762 | Refinement is split-only across iterations: equality at iterate `k + d` implies equality at iterate `k`. | — |
-| `warmRefine_eq_iter_eq` | 3764-3778 | `warmRefine` equality implies iterate-`r` equality for any `r ≤ n`; the bridge from the fixpoint partition to any earlier-round partition. | — |
-| `id_of_discrete_invariant` | 3803-3812 | **Fact B (pointwise):** a `π`-invariant discrete colouring forces `π` to be the identity. | — |
-| `aut_trivial_of_discrete_warmRefine` | 3814-3830 | **Fact B (CFI):** if `warmRefine adj P χ_S` is discrete, every automorphism preserving `(adj, P)` and fixing `S` pointwise is the identity. | — |
-| `orbit_iff_eq_of_discrete_warmRefine` | 3832-3850 | **Fact B (partition):** at discrete depth, `OrbitPartition adj P S v w ↔ v = w`. | — |
-| `CascadesAt` | 3872-3879 | **Cascade-at-depth-`k` predicate:** some `S` with `S.card ≤ k` makes `warmRefine adj P (individualizedColouring n S)` discrete. | Definition |
-| `cascadesAt_univ` | 3881-3900 | **Trivial cascade at depth `n`:** taking `S = univ` gives a discrete starting colouring preserved by warm refinement — the every-graph fallback. | — |
-| `CascadesAt.mono` | 3902-3907 | Monotonicity: a cascade at depth `k₁` is a cascade at every depth `k₂ ≥ k₁`. | — |
-| `theorem_1_HOR_at_depth` | 3920-3943 | **Key theorem (Tier 1 HOR).** If `adj` cascades at depth `k`, some `S` with `S.card ≤ k` makes `warmRefine` discrete and the `Aut_S`-orbit partition equal to the `warmRefine` partition. | — |
-| `theorem_1_HOR_at_n` | 3965-3976 | **Theorem 1, trivial-bound corollary:** every graph admits orbit recovery at depth `n`. Axiom-free specialisation to `cascadesAt_univ`. | — |
-| `theorem_1_HOR` | 3978-3989 | **Theorem 1 (legacy existential form):** some `S` makes `warmRefine` discrete and orbits equal cells. | — |
-| `theorem_1_HOR_pointwise` | 3991-4003 | **Theorem 1, pointwise corollary:** at the cascade depth, every automorphism preserving `(adj, P)` and fixing `S` is the identity. | — |
-| `SchemeProfile` | 4054-4070 | **Key structure (Tier 2).** Bundles a v-profile colouring with its structural facts: profile classes equal `Aut_v` orbits (schurian Step 1) and 1-WL refines the profile partition (intersection-number Step 2). | Structure |
-| `warm_iff_profile` | 4076-4089 | **Squeeze for `SchemeProfile`:** the 1-WL fixpoint partition equals the profile partition. | — |
-| `IsSchurianSchemeGraph` | 4109-4113 | **Abstract predicate** (axiom-Prop): placeholder for `adj` admitting a vertex-transitive schurian association scheme containing its edge relation. Becomes a real definition once the scheme machinery lands. | axiom |
-| `schurian_scheme_profile_exists` | 4115-4126 | **Scheme-profile existence axiom (Tier-2 Fact A analogue):** any graph satisfying `IsSchurianSchemeGraph` admits a `SchemeProfile` at every vertex. Becomes a theorem once association-scheme infrastructure lands. | axiom |
-| `theorem_2_HOR_of_profile` | 4128-4144 | **Theorem 2 (assembly form):** given a `SchemeProfile` witness at `v`, the 1-WL fixpoint partition at depth 1 equals the `Aut_v`-orbit partition. | — |
-| `theorem_2_HOR` | 4146-4162 | **Key theorem (Tier 2 HOR).** For any graph satisfying `IsSchurianSchemeGraph`, the depth-1 1-WL fixpoint partition equals the `Aut_v`-orbit partition. Conditional on the `schurian_scheme_profile_exists` axiom. | — |
+| `samePartition` | 413-416 | Two colourings induce the same partition: `χ₁ i = χ₁ j ↔ χ₂ i = χ₂ j` for every `i, j`. | Definition |
+| `samePartition.refl` | 422 | `samePartition` is reflexive. | — |
+| `samePartition.symm` | 424-425 | `samePartition` is symmetric. | — |
+| `samePartition.trans` | 427-429 | `samePartition` is transitive. | — |
+| `refineStep_refines` | 435-440 | **Refinement is split-only (one round).** Equal refined colour implies equal old colour. | — |
+| `warmRefine_refines` | 442-468 | Warm refinement is split-only: equal warm-refined colour implies equal starting colour. | — |
+| `iterate_closeStep_fix` | 500-506 | Iterating `closeStep` from a fixpoint of itself stays at that fixpoint. | — |
+| `cell_split_uniform_false` | 571-596 | **Refutation:** cell-mates do not in general keep equal signatures after a guess plus TC (witnessed by `witnessP0`, the gap fixed only by singleton-cell `a`, `b`). | — |
+| `refineStep_preserves_singleton` | 618-625 | One refinement round preserves a singleton: if no vertex shares `a`'s colour, none does after `refineStep`. | — |
+| `iterate_refineStep_preserves_singleton` | 627-640 | Iterating refinement preserves a singleton for any number of rounds. | — |
+| `signature_applyGuess_off` | 642-656 | Off the guessed pair, the guess is invisible: for `x ∉ {a,b}` the signature under `applyGuess P₀ a b dir` equals the signature under `P₀`. | — |
+| `signature_eq_of_samePartition` | 658-685 | **Signature equality is a partition invariant of the colouring:** partition-equal colourings induce the same signature-equality relation between vertices. | — |
+| `warm_6_2` | 687-764 | **§6.2 direction invariance.** With `a, b` `χι`-singletons, warm refinement after `a < b` and after `b < a` induce the same partition. | — |
+| `signature_swap` | 768-778 | σ-swapping `P` relabels each signature's `POE` component by `POE.swap`, leaving colour and adjacency components untouched. | — |
+| `warmRefine_swap` | 780-822 | **Direction-blindness (Q1).** Warm refinement on `P` and on its σ-swap induce the same partition. | — |
+| `warmRefine_applyGuess_swap` | 824-834 | Warm refinement after `a < b` on `P₀` and after `b < a` on the σ-swapped `P₀` induce the same partition. | — |
+| `applyGuess_comm` | 836-854 | **Q2 — guesses commute.** Guessing on `{a,b}` then `{b,c}` (pairwise-distinct vertices) gives the same `(adj, P)` as the reverse order, since the writes touch disjoint matrix entries. | — |
+| `signature_agree_off` | 862-873 | If `P` and `Q` agree on every entry with an endpoint outside `D`, then off `D` they yield the same signature. | — |
+| `warmRefine_agree_off'` | 875-922 | **§6.2 — composable cross-branch sharing.** Matrices agreeing off `D` and `samePartition`-equal starting colourings (with `D` all `χ`-singletons) yield the same warm-refined partition; the cross-level form that chains across descent levels. | — |
+| `warmRefine_agree_off` | 924-958 | **§6.2 — the cell partition depends only on the matrix off the decision set `D`.** Matrices agreeing off `D` (its vertices `χι`-singletoned) yield the same partition; the same-`χι` specialisation of `warmRefine_agree_off'`. | — |
+| `PartitionInvariant` | 975-979 | A target-cell selector is partition-invariant when it depends only on the partition a colouring induces, not on raw colour values. | Definition |
+| `target_direction_blind` | 981-990 | **§6.2 spine — base case.** For a partition-invariant selector, the target cell chosen after `a < b` equals the one after `b < a`. | — |
+| `target_agree_off` | 992-1005 | **§6.2 spine — inductive step.** For a partition-invariant selector and matrices agreeing off a singletoned decision set `D`, the target cell is the same even when the start colourings only agree up to partition. | — |
+| `Egnd` | 1034-1035 | **§13.** The canonical ground set on `Fin n`: ordered pairs `(i, j)` with `i < j`. | Definition |
+| `mem_Egnd` | 1037-1038 | Membership in `Egnd n` is exactly `p.1 < p.2`. | — |
+| `Egnd_ne` | 1040-1041 | Pairs in `Egnd n` have distinct endpoints: `p.1 ≠ p.2`. | — |
+| `Pof` | 1043-1056 | **§13.** Commit a set `S ⊆ Egnd n` of pair-guesses into a P-matrix: write `less` at `(u,v) ∈ S`, `greater` at `(v,u)`, leaving other entries unchanged. | Definition, `noncomputable` |
+| `cl` | 1058-1063 | **§13.** Propagation closure on pair-guesses: the canonical pairs whose endpoints get separated by warm refinement after committing `S`. | Definition |
+| `SingletonAt` | 1073-1075 | The fresh-colour hypothesis at a pair `p`: both `p.1` and `p.2` are `χι`-singletons. | Definition |
+| `cl_extensive` | 1077-1092 | **§13 M1 — extensiveness of `cl`.** For canonical `S` whose vertices are all `χι`-singletons, every pair in `S` lies in `cl S`. | — |
+| `Pof_mono_entry_of_unknown` | 1122-1146 | Entry-wise monotonicity of `Pof` from the all-unknown base: for canonical `S ⊆ T`, each entry of `Pof _ S` is either `unknown` or equal to the corresponding `Pof _ T` entry (does not lift to a `cl` monotonicity result). | — |
+| `FullyDiscrete` | 1158-1160 | A colouring is fully discrete when every vertex is its own `χι`-singleton. | Definition |
+| `cl_monotone_discrete` | 1162-1179 | **§13 M0, vacuous case.** Under `FullyDiscrete`, every canonical pair lies in every `cl S`, so `cl S = Egnd n` and monotonicity carries no structural information. | — |
+| `TVerticesSingletons` | 1192-1194 | Every endpoint of every pair in `T` is a `χι`-singleton. | Definition |
+| `warmRefine_samePartition_T_individualised` | 1196-1281 | **§13 M0, strong form.** Warm refinement under `Pof P₀ S` and `Pof P₀ T` induces the *same* partition when `S ⊆ T` and every endpoint of every `T`-pair is a `χι`-singleton. | — |
+| `cl_monotone_T_individualised` | 1283-1294 | **§13 M0 — monotonicity of `cl`** under the T-individualised hypothesis: `S ⊆ T` implies `cl S ⊆ cl T`. | — |
+| `cl_idempotent` | 1320-1334 | **§13 M2 — idempotence of `cl`** under fresh-colour individualisation of `S ∪ cl S`: `cl (cl S) = cl S`. | — |
+| `Pof_fs` | 1406-1412 | **§14.** Finset-based computable analogue of `Pof`, enabling `decide`-checkable refutations. | Definition |
+| `commitsToP` | 1414-1416 | **§14.** All-unknown-base commits-to-matrix shortcut: `Pof_fs (fun _ _ => .unknown) S`. | Definition |
+| `cl_prov` | 1418-1423 | **§14.** Provenance closure (TC-based): the canonical pair-guesses whose direction is decided by `transitiveClose` of `commitsToP S`. | Definition |
+| `closeStep_unknown` | 1427-1431 | `closeStep` returns `.unknown` at every entry of the all-unknown matrix. | — |
+| `closeStep_unknown_fixpoint` | 1433-1436 | The all-unknown matrix is a fixpoint of `closeStep`. | — |
+| `transitiveClose_unknown` | 1438-1450 | `transitiveClose` of the all-unknown matrix is the all-unknown matrix. | — |
+| `cl_prov_empty` | 1454-1463 | **§14 CL0 for `cl_prov`:** `cl_prov ∅ = ∅`. | — |
+| `cl_prov_extensive` | 1465-1479 | **§14 CL1 for `cl_prov`:** for canonical `S`, every commit's direct `less` write survives transitive closure, so `S ⊆ cl_prov S`. | — |
+| `cl_prov_M3_false` | 1497-1507 | **§14 — refutes matroid M3 exchange for `cl_prov`.** A concrete `n=5, S={(1,2),(3,4)}, x=(2,3), y=(1,4)` counterexample where the M3 premise holds but the conclusion fails; machine-checked by `decide`. | — |
+| `hasLessChain` | 1521-1524 | Existence of a `.less`-chain in `P` from `i` to `j` via some intermediate `k` with both edges `.less`. | Definition |
+| `hasGreaterChain` | 1526-1528 | Existence of a `.greater`-chain in `P` from `i` to `j` via some intermediate `k`. | Definition |
+| `CanConsistent` | 1530-1534 | A `PMatrix` is canonical-consistent when every `.less` entry sits at `i.val < j.val` and every `.greater` entry at `i.val > j.val`. | Definition |
+| `LessMono` | 1536-1539 | One-sided `.less`-direction entry-wise monotonicity between two matrices: `P i j = .less → Q i j = .less`. | Definition |
+| `canConsistent_no_conflict` | 1541-1551 | Under canonical-consistency, no pair simultaneously hosts both a `.less`-chain and a `.greater`-chain. | — |
+| `commitsToP_classify` | 1553-1570 | Three-way classification of `commitsToP S i j` by `S`-membership of `(i,j)` and `(j,i)`. | — |
+| `commitsToP_canConsistent` | 1572-1586 | `commitsToP` of a canonical `S` is canonical-consistent. | — |
+| `closeStep_keeps_greater` | 1590-1593 | `closeStep` never demotes a decided `.greater` entry. | — |
+| `iterate_closeStep_keeps_greater` | 1595-1605 | Iterating `closeStep` preserves any `.greater` entry — once decided, frozen. | — |
+| `closeStep_decided` | 1607-1613 | `closeStep` preserves any decided entry (`.less` or `.greater`). | — |
+| `closeStep_eq_less_iff` | 1629-1663 | `closeStep P i j = .less` iff `P i j` was already `.less`, or it was `.unknown` with a `.less`-chain through some intermediate vertex. | — |
+| `closeStep_eq_greater_iff` | 1665-1717 | `closeStep P i j = .greater` iff `P i j` was already `.greater`, or it was `.unknown` with no `.less`-chain but a `.greater`-chain. | — |
+| `closeStep_canConsistent` | 1719-1730 | `closeStep` preserves canonical-consistency. | — |
+| `iterate_closeStep_canConsistent` | 1732-1740 | Iterating `closeStep` preserves canonical-consistency. | — |
+| `transitiveClose_canConsistent` | 1742-1745 | `transitiveClose` preserves canonical-consistency. | — |
+| `closeStep_lessMono` | 1747-1773 | Joint inductive step: under canonical-consistency of `Q` and `LessMono P Q`, `closeStep` preserves `.less`-mono. | — |
+| `iterate_closeStep_lessMono` | 1775-1784 | Iterating `closeStep` preserves `.less`-mono under joint canonical-consistency. | — |
+| `transitiveClose_lessMono` | 1786-1790 | `transitiveClose` preserves `.less`-mono under joint canonical-consistency. | — |
+| `commitsToP_lessMono` | 1792-1805 | Base case for CL3: canonical `S ⊆ T` gives `LessMono (commitsToP S) (commitsToP T)`. | — |
+| `cl_prov_monotone` | 1809-1834 | **§14 CL3 — monotonicity for `cl_prov`:** canonical `S ⊆ T` implies `cl_prov S ⊆ cl_prov T`. | — |
+| `numUnknown` | 1843-1846 | Number of `.unknown` entries in a `PMatrix` — the strictly-decreasing potential bounding TC iteration. | Definition |
+| `numUnknown_le` | 1848-1853 | `numUnknown P ≤ n * n`. | — |
+| `closeStep_numUnknown_lt` | 1866-1891 | If `closeStep P ≠ P`, then `numUnknown` strictly drops under one closure round. | — |
+| `iterate_closeStep_progress` | 1893-1920 | After `k` `closeStep` iterations, either a fixpoint has been reached at some step `≤ k`, or `numUnknown` has dropped by at least `k`. | — |
+| `transitiveClose_is_fixpoint` | 1922-1972 | After `n*n` iterations of `closeStep`, the result is a fixpoint: `closeStep (transitiveClose P) = transitiveClose P`. | — |
+| `transitiveClose_idempotent` | 1974-1980 | **TC idempotence.** `transitiveClose (transitiveClose M) = transitiveClose M`. | — |
+| `cl_prov_idempotent` | 2011-2041 | **CL2 — idempotence.** `cl_prov (cl_prov S) = cl_prov S` for canonical `S`. | — |
+| `IndivStep` | 2128-2152 | Existential witness of one descent-step individualisation: a colouring `χ'` that singletons every vertex in target `T` and refines `χ` outside `T`. Data, not a function — the trace carries one per step. | Structure |
+| `singletons_union` | 2156-2177 | **D-singletons preserved.** If `χ` singletons every `v ∈ D`, an `IndivStep` with target `T` singletons every `v ∈ D ∪ T`. | — |
+| `samePartition_of_samePartition` | 2179-2209 | Two `IndivStep`s applied to `samePartition`-equal colourings with the same target `T` produce `samePartition`-equal results — the inductive engine of the spine theorem. | — |
+| `IndivStep.default` | 2211-2262 | **Concrete `IndivStep` witness.** A constructive individualisation step (parity-tagged base-`n` encoding), proving traces exist at every level so the spine theorem is non-vacuous. | Definition |
+| `DescentTrace` | 2271-2309 | Inductive predicate: `(D, P, χι)` is reachable by `k` descent steps from `(P₀, χι₀)` under selector `sel`, each step carrying an `IndivStep` witness and a matrix agreeing with `P₀` off the enlarged decision set. | Inductive |
+| `singletons` | 2313-2330 | **Trace invariant.** A trace's colouring singletons its whole decision set `D`. | — |
+| `P_agrees` | 2332-2342 | **Trace invariant.** A trace's matrix agrees with `P₀` on every entry with an endpoint outside `D`. | — |
+| `SpineChain` | 2346-2354 | Bundle of a `DescentTrace` with its derived state `(D, P, χι)`. The spine theorem is branch-independence of two such chains. | Structure |
+| `partition` | 2361-2365 | The chain's level-`k` partition: warm refinement of its accumulated `(P, χι)`. | Definition |
+| `IndivStep.samePartition_het` | 2371-2384 | Heterogeneous `samePartition_of_samePartition`: accepts separate targets `T₁, T₂` with an equality hypothesis. Used at the spine induction's level-`k+1` step. | — |
+| `spine_branch_independent` | 2386-2460 | **The spine theorem (branch independence).** Any two `DescentTrace`s through `k` levels agree on the accumulated `D` (literal) and the level-`k` partition (`samePartition`) — handing the oracle one fixed partition instead of `2^d` refinement worlds. | — |
+| `SpineChain.branch_independent` | 2462-2471 | **The spine theorem, `SpineChain` wrapper.** Two chains at level `k` share `D` and level-`k` partition. | — |
+| `defaultColouring` | 2492-2502 | The level-`k` colouring of the default reference chain: iterate refine-then-individualise (via `IndivStep.default`) from `χι₀`, with the matrix held fixed at `P₀`. | Definition |
+| `defaultD` | 2504-2513 | The level-`k` decision set of the default chain: accumulate `sel (warmRefine adj P₀ (defaultColouring k))` across all levels. | Definition |
+| `defaultTrace` | 2515-2528 | The concrete `DescentTrace` realising the default construction, using `IndivStep.default` at every level and `P = P₀` throughout. | Definition |
+| `defaultSpineChain` | 2530-2538 | The concrete reference `SpineChain` at every level, bundling `defaultD`/`P₀`/`defaultColouring`/`defaultTrace`. | Definition |
+| `SpineChain.eq_default` | 2540-2551 | **Reference corollary.** Every `SpineChain` at level `k` shares `D` and level-`k` partition with `defaultSpineChain` — there is a canonical level-`k` partition, computable by one deterministic descent. | — |
+| `Discrete` | 2575-2578 | A colouring is discrete when every cell is a singleton — equivalently, `χ : Fin n → Nat` is injective. | Definition |
+| `of_samePartition` | 2582-2586 | Discreteness is `samePartition`-invariant: equal partitions transport `Discrete`. | — |
+| `warmRefine_preserves` | 2588-2597 | Warm refinement preserves discreteness: if `χ` is injective, so is `warmRefine adj P χ`. | — |
+| `SpineChain.IsLeaf` | 2601-2607 | A `SpineChain` reaches a leaf when its level-`k` partition is discrete (every vertex a singleton). | Definition |
+| `SpineChain.isLeaf_iff_default` | 2609-2618 | `IsLeaf` is spine-invariant: a chain is a leaf iff `defaultSpineChain` at the same level is. | — |
+| `TargetsNonsingletonCell` | 2622-2628 | Selector hypothesis: every returned vertex has a same-colour partner (`sel` only picks from non-singleton cells). | Definition |
+| `NonemptyOnNonDiscrete` | 2630-2635 | Selector hypothesis: `sel χ` is non-empty whenever `χ` is not yet discrete. | Definition |
+| `defaultD_univ_isLeaf` | 2637-2652 | **`D` covers all vertices ⇒ leaf.** When the accumulated decision set is the full vertex set, the default chain's spine partition is discrete. | — |
+| `defaultD_grows_if_not_leaf` | 2654-2693 | **`D` strictly grows on every non-leaf step.** Under the two selector hypotheses, a non-leaf level-`k` chain has `|defaultD k| < |defaultD (k+1)|`. | — |
+| `defaultSpineChain_reaches_leaf` | 2695-2734 | **Leaf existence.** Under `TargetsNonsingletonCell` and `NonemptyOnNonDiscrete`, the default descent reaches a leaf within `n` levels. | — |
+| `DirAssignment` | 2757-2763 | Order assignment relative to `(P₀, D)`: an antisymmetric matrix agreeing with `P₀` on every entry with an endpoint outside `D`. The linear oracle's input shape — a point in the order-label residual. | Structure |
+| `default` | 2769-2776 | **Trivial `DirAssignment`.** When `P₀` is antisymmetric, `P₀` itself is a valid order assignment for any `D` (witnesses non-emptiness). | Definition |
+| `samePartition_pair` | 2778-2790 | Any two `DirAssignment`s over the same `(P₀, D)`, refined against a `D`-singletoning colouring, induce the same partition. | — |
+| `samePartition_chain` | 2792-2805 | **Spine equivalence.** A `DirAssignment` over a chain's `D`, refined against the chain's colouring, induces the chain's partition — the residual is exactly the choice of `DirAssignment`, partition fixed. | — |
+| `flipPair` | 2809-2853 | **Single-pair direction flip.** Negate the `(a, b)` and `(b, a)` entries of a `DirAssignment` via `POE.neg`. The generator of the `Z₂` group action on direction choices. | Definition |
+| `eq_of_σ_eq` | 2855-2865 | `DirAssignment` equality is determined by the matrix field — propositional fields subsumed by proof irrelevance. | — |
+| `flipPair_idempotent` | 2867-2876 | **Flip is an involution.** Two applications of `flipPair` to the same pair return the original `DirAssignment` — the `Z₂` generator squares to identity. | — |
+| `flipPair_partition_invariant` | 2878-2888 | **Flipping preserves the partition.** `σ` and `σ.flipPair a b` share the spine partition — the order labels move, the partition doesn't. | — |
+| `flipPair_comm` | 2890-2914 | **Flips on disjoint pairs commute** — the abelian-ness of the `Z₂^d` action: distinct decisions don't interfere. | — |
+| `IsAut` | 2942-2945 | A `Fin n`-permutation `π` is a graph automorphism of `adj` when it preserves adjacency edge-by-edge: `adj.adj (π v) (π w) = adj.adj v w`. | Definition |
+| `IsAut.refl` | 2951-2952 | The identity permutation is an automorphism. | — |
+| `IsAut.trans` | 2954-2959 | Composition of automorphisms is an automorphism. | — |
+| `IsAut.symm` | 2961-2967 | The inverse of an automorphism is an automorphism. | — |
+| `labelledAdj` | 2971-2977 | **Labelled adjacency.** Adjacency matrix relabelled by `π`: entry `(i, j)` is the original adjacency between `π⁻¹ i` and `π⁻¹ j`. | Definition |
+| `labelledAdj_eq_of_isAut` | 2979-2992 | **Automorphisms fix the labelled adjacency.** `IsAut π adj` implies `labelledAdj π adj = adj.adj` — an automorphism is invisible at the labelled level. | — |
+| `isAut_of_labelledAdj_eq` | 2994-3004 | **Converse.** A permutation preserving the labelled adjacency is an automorphism. | — |
+| `vertexRankNat` | 3017-3019 | Strict rank of vertex `v`: the count of vertices `u` with `χ u < χ v`. | Definition |
+| `vertexRank` | 3037-3039 | Vertex rank packaged as `Fin n` via `vertexRankNat_lt_n`. | Definition |
+| `vertexRank_strict_mono` | 3041-3060 | `vertexRank` is strictly monotonic in the colour value: `χ v < χ w` implies `vertexRank χ v < vertexRank χ w`. | — |
+| `vertexRank_injective` | 3062-3072 | On a `Discrete` colouring, `vertexRank` is injective. | — |
+| `vertexRank_bijective` | 3074-3077 | On a `Discrete` colouring, `vertexRank` is bijective. | — |
+| `rankPerm` | 3079-3083 | **The rank permutation.** Bijection `Fin n ≃ Fin n` mapping each vertex to its colour-rank on a `Discrete` colouring. | Definition, `noncomputable` |
+| `rankPerm_apply` | 3085-3086 | Unfolding lemma: `rankPerm χ h v = vertexRank χ v`. | `@[simp]` |
+| `vertexRank_comp` | 3090-3109 | `vertexRank (χ ∘ g) v = vertexRank χ (g v)` — a pure `Finset.card` reindex along `g`. *(Relocated from `LinearOracle.lean` for the cascade oracle's `colourMatchPerm` (M-B).)* | — |
+| `rankPerm_comp` | 3111-3131 | **Rank reindexing.** `rankPerm (χ ∘ e) = rankPerm χ · e` — relabelling conjugate-shifts the rank permutation (the §L.5 conjugation gap). *(Relocated from `LinearOracle.lean`.)* | — |
+| `SpineChain.canonAdj` | 3147-3173 | **Leaf canonical adjacency.** Given a leaf `SpineChain` and a `DirAssignment σ` over its `D`, relabel `adj` by the rank permutation of the warm-refined partition. | Definition, `noncomputable` |
+| `matrixLT` | 3177-3184 | **Row-major lex strict less-than on `n × n` matrices.** The first disagreeing cell `(i, j)` (row-then-column order) has `M₁ i j < M₂ i j`. | Definition |
+| `matrixLT_irrefl` | 3186-3189 | `matrixLT` is irreflexive: no matrix is `<` itself. | — |
+| `matrixLT_asymm` | 3191-3212 | `matrixLT` is asymmetric: `M₁ < M₂` implies `¬ M₂ < M₁` (strict-order fact). | — |
+| `PMatrix.fintype` | 3216-3221 | `Fintype` instance for `PMatrix n`, stated explicitly since `PMatrix` is a `def` and so does not inherit the `Pi` instance transparently. | Instance |
+| `DirAssignment.fintype` | 3227-3237 | **`Fintype` on `DirAssignment P₀ D`.** Obtained by injecting the σ-field into the `Fintype` `PMatrix n`. | Instance, `noncomputable` |
+| `relabelMatrix` | 3241-3248 | **Relabel a bare matrix** `Fin n → Fin n → Nat` by a permutation `π`: entry `(i,j)` becomes `M (π⁻¹ i) (π⁻¹ j)`. Lets `LeafTwistSpec` state the leaf-relabelling property without re-wrapping as an `AdjMatrix`. | Definition |
+| `MatrixLex` | 3250-3255 | `Fin n → Fin n → Nat` viewed under the row-major lex order via nested `Pi.Lex`. | `abbrev` |
+| `toMatrixLex` | 3257-3260 | Wrap a matrix into its Lex'd form (identity at runtime — `Lex` is a type synonym). | Definition |
+| `ofMatrixLex` | 3262-3264 | Unwrap a Lex'd matrix back to a plain `Fin n → Fin n → Nat`. | Definition |
+| `ofMatrixLex_toMatrixLex` | 3266-3267 | `ofMatrixLex (toMatrixLex M) = M`. | `@[simp]` |
+| `toMatrixLex_ofMatrixLex` | 3269-3270 | `toMatrixLex (ofMatrixLex M) = M`. | `@[simp]` |
+| `toMatrixLex_injective` | 3272-3276 | `toMatrixLex` is injective. | — |
+| `canonFormImages` | 3278-3287 | The Finset of Lex-wrapped `canonAdj` images over all `DirAssignment`s for a leaf chain — the candidate set `canonForm` minimises over. | Definition, `noncomputable` |
+| `canonFormImages_nonempty` | 3289-3295 | `canonFormImages chain isLeaf` is non-empty when `DirAssignment P₀ chain.D` is. | — |
+| `canonForm` | 3297-3317 | **The canonical leaf adjacency matrix:** the lex-min `canonAdj` over all `DirAssignment`s (row-major lex). Requires `Nonempty (DirAssignment P₀ chain.D)`. | Definition, `noncomputable` |
+| `canonForm_mem_image` | 3319-3334 | **`canonForm` comes from some `DirAssignment`:** it equals `canonAdj σ` for some `σ`. | — |
+| `canonForm_le_canonAdj` | 3336-3352 | **`canonForm` is the lex-minimum:** `toMatrixLex (canonForm) ≤ toMatrixLex (canonAdj σ)` for every `DirAssignment σ`. | — |
+| `LinearOracleSpec` | 3356-3372 | **The linear-oracle interface type:** given a leaf chain and a current-branch `DirAssignment`, return either `none` or a verified automorphism of `adj` (bundled as a subtype). | Definition |
+| `some_isAut` | 3379-3391 | **Soundness (subtype-level):** when the oracle returns `some result`, the returned permutation is automatically an automorphism. | — |
+| `LeafTwistSpec` | 3393-3410 | **Leaf-twist validity spec:** when the oracle returns `some result`, the returned `π` relabels the input branch's canonical adjacency to that of some other `DirAssignment σ'` — the property justifying pruning. | Definition |
+| `individualizedColouring` | 3448-3452 | **Fresh-colour individualisation** of a vertex set `S`: each `v ∈ S` gets unique colour `v.val + 1`; vertices outside `S` share colour `0`. | Definition |
+| `FixesPointwise` | 3454-3457 | Predicate: permutation `π` fixes every vertex in `S` pointwise (`π v = v` for `v ∈ S`). | Definition |
+| `complement` | 3463-3471 | A pointwise-fixing permutation stabilises the complement setwise: `v ∉ S` implies `π v ∉ S`. | — |
+| `individualizedColouring_invariant` | 3475-3484 | An automorphism fixing `S` pointwise preserves the individualised colouring: `χ_S (π v) = χ_S v` for every `v`. | — |
+| `signature_invariant_of_isAut` | 3488-3525 | An automorphism preserving `(adj, P, χ)` pointwise preserves the signature multiset at every vertex. | — |
+| `refineStep_invariant_of_isAut` | 3527-3540 | An automorphism preserving `(adj, P, χ)` pointwise preserves one round of `refineStep`. | — |
+| `iterate_refineStep_invariant_of_isAut` | 3542-3558 | Iterated refinement preserves automorphism invariance for any number of rounds. | — |
+| `warmRefine_invariant_of_isAut` | 3560-3569 | Warm refinement preserves automorphism invariance: if `(adj, P, χ_init)` are all `π`-invariant, so is `warmRefine adj P χ_init`. | — |
+| `signature_transport` | 3583-3608 | **Signature transport.** An automorphism `g` carrying `(P₁, χ₁)` to `(P₂, χ₂)` maps the `(P₂, χ₂)`-signature at `g v` to the `(P₁, χ₁)`-signature at `v`. Cross-config form of `signature_invariant_of_isAut`. | — |
+| `sigKey_transport` | 3610-3617 | **`sigKey` transport** — cross-config: `sigKey adj P₂ χ₂ (g v) = sigKey adj P₁ χ₁ v`. | — |
+| `refineStep_transport` | 3619-3627 | **`refineStep` transport** — one round, cross-config: `refineStep adj P₂ χ₂ (g v) = refineStep adj P₁ χ₁ v`. | — |
+| `iterate_refineStep_transport` | 3629-3643 | **Iterated `refineStep` transport** across any number of rounds, cross-config. | — |
+| `warmRefine_transport` | 3645-3654 | **Warm-refinement transport.** An automorphism carrying `(P₁, χ₁)` to `(P₂, χ₂)` carries the warm refinement of the first onto the second. | — |
+| `OrbitPartition` | 3670-3676 | **Aut_S orbit relation** on vertices: `v ~ w` iff some automorphism of `adj` preserving `P` and fixing `S` pointwise sends `v` to `w`. | Definition |
+| `refl` | 3682-3685 | Reflexivity of `OrbitPartition` (via the identity permutation). | — |
+| `symm` | 3687-3702 | Symmetry of `OrbitPartition` (via permutation inverse). | — |
+| `trans` | 3704-3719 | Transitivity of `OrbitPartition` (via permutation composition). | — |
+| `subset_warmRefine` | 3721-3736 | **Trivial direction of the squeeze:** orbits refine 1-WL cells — `OrbitPartition v w` implies `warmRefine` colours of `v` and `w` agree. | — |
+| `refineStep_iter_le_eq` | 3749-3767 | Refinement is split-only across iterations: equality at iterate `k + d` implies equality at iterate `k`. | — |
+| `warmRefine_eq_iter_eq` | 3769-3783 | `warmRefine` equality implies iterate-`r` equality for any `r ≤ n`; the bridge from the fixpoint partition to any earlier-round partition. | — |
+| `id_of_discrete_invariant` | 3808-3817 | **Fact B (pointwise):** a `π`-invariant discrete colouring forces `π` to be the identity. | — |
+| `aut_trivial_of_discrete_warmRefine` | 3819-3835 | **Fact B (CFI):** if `warmRefine adj P χ_S` is discrete, every automorphism preserving `(adj, P)` and fixing `S` pointwise is the identity. | — |
+| `orbit_iff_eq_of_discrete_warmRefine` | 3837-3855 | **Fact B (partition):** at discrete depth, `OrbitPartition adj P S v w ↔ v = w`. | — |
+| `CascadesAt` | 3877-3884 | **Cascade-at-depth-`k` predicate:** some `S` with `S.card ≤ k` makes `warmRefine adj P (individualizedColouring n S)` discrete. | Definition |
+| `cascadesAt_univ` | 3886-3905 | **Trivial cascade at depth `n`:** taking `S = univ` gives a discrete starting colouring preserved by warm refinement — the every-graph fallback. | — |
+| `CascadesAt.mono` | 3907-3912 | Monotonicity: a cascade at depth `k₁` is a cascade at every depth `k₂ ≥ k₁`. | — |
+| `theorem_1_HOR_at_depth` | 3925-3948 | **Key theorem (Tier 1 HOR).** If `adj` cascades at depth `k`, some `S` with `S.card ≤ k` makes `warmRefine` discrete and the `Aut_S`-orbit partition equal to the `warmRefine` partition. | — |
+| `theorem_1_HOR_at_n` | 3970-3981 | **Theorem 1, trivial-bound corollary:** every graph admits orbit recovery at depth `n`. Axiom-free specialisation to `cascadesAt_univ`. | — |
+| `theorem_1_HOR` | 3983-3994 | **Theorem 1 (legacy existential form):** some `S` makes `warmRefine` discrete and orbits equal cells. | — |
+| `theorem_1_HOR_pointwise` | 3996-4008 | **Theorem 1, pointwise corollary:** at the cascade depth, every automorphism preserving `(adj, P)` and fixing `S` is the identity. | — |
+| `SchemeProfile` | 4059-4075 | **Key structure (Tier 2).** Bundles a v-profile colouring with its structural facts: profile classes equal `Aut_v` orbits (schurian Step 1) and 1-WL refines the profile partition (intersection-number Step 2). | Structure |
+| `warm_iff_profile` | 4081-4094 | **Squeeze for `SchemeProfile`:** the 1-WL fixpoint partition equals the profile partition. | — |
+| `IsSchurianSchemeGraph` | 4114-4118 | **Abstract predicate** (axiom-Prop): placeholder for `adj` admitting a vertex-transitive schurian association scheme containing its edge relation. Becomes a real definition once the scheme machinery lands. | axiom |
+| `schurian_scheme_profile_exists` | 4120-4131 | **Scheme-profile existence axiom (Tier-2 Fact A analogue):** any graph satisfying `IsSchurianSchemeGraph` admits a `SchemeProfile` at every vertex. Becomes a theorem once association-scheme infrastructure lands. | axiom |
+| `theorem_2_HOR_of_profile` | 4133-4149 | **Theorem 2 (assembly form):** given a `SchemeProfile` witness at `v`, the 1-WL fixpoint partition at depth 1 equals the `Aut_v`-orbit partition. | — |
+| `theorem_2_HOR` | 4151-4167 | **Key theorem (Tier 2 HOR).** For any graph satisfying `IsSchurianSchemeGraph`, the depth-1 1-WL fixpoint partition equals the `Aut_v`-orbit partition. Conditional on the `schurian_scheme_profile_exists` axiom. | — |
 
 ## ChainDescent/CFI.lean
 
@@ -928,72 +928,75 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `stabilizerAt_eq_closure_gensAt_of_coversOrbits` | 951-957 | **(A2-complete) Harvest completeness (equality).** Soundness (`closure_gensAt_le_stabilizerAt`) + coverage give `Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S` — the path-fixing closure is *exactly* the residual. No separate soundness hypothesis. | — |
 | `closure_eq_stabilizerAt_empty_of_coversOrbits` | 959-968 | **(A2-complete) Completeness at the root — the harvested chain *is* `Aut(G)^P`.** At `S = ∅`, coverage + soundness give `Subgroup.closure gens = StabilizerAt adj P ∅`. Closes the cross-branch harvest the way A2 closed soundness. | — |
 | `card_closure_gensAt_eq_prod_of_coversOrbits` | 970-978 | **(A2-complete) Capstone — the chain reproduces the residual order.** With A3.5, coverage gives `Nat.card (Subgroup.closure (gensAt adj P gens S)) = orbitSizeProd adj P bs S` (= `∏ basic-orbit sizes`): the folded path-fixing generators recover both the residual group and its order. | — |
-| `cfiFlipAut_residualAut` | 994-1005 | **(A2-complete / CFI-cov.1) Gauge flip is a path-fixing residual aut.** A symmetric, even gauge flip `cfiFlipAut F` that is `F`-free on `S`'s gadgets is a `ResidualAut adj P S` (assembles `isAut_cfiFlipAut` + `cfiFlipAut_preserves_P` + locality). The bridge from the `CFI.lean` gauge-flip layer to the A2-complete residual vocabulary. | — |
-| `cfiFlipAut_mem_stabilizerAt` | 1007-1013 | **(CFI-cov.1)** A path-fixing gauge flip is an element of the residual group `StabilizerAt adj P S`. | — |
-| `cfiFlipAut_orbitPartition` | 1015-1023 | **(CFI-cov.1) Forward coverage.** A path-fixing gauge flip moves `v` within its `Aut_S^P`-orbit: `OrbitPartition adj P S v (cfiFlipAut F v)`. (Reverse — realizing the *full* orbit — is the staged cycle-space content.) | — |
-| `cfiGaugeGens` | 1025-1031 | **(CFI-cov.1) The CFI gauge generating set.** All symmetric, even gauge flips `cfiFlipAut F` — the cycle-space `Z₂^β` generators the harvest folds in; `Subgroup.closure (cfiGaugeGens h)` is the gauge group. | Definition |
-| `cfiGaugeGens_residualAut_empty` | 1033-1040 | **(CFI-cov.1) Root soundness.** Every gauge flip is a `P`-preserving automorphism (`ResidualAut adj P ∅`) — the Stage-A2 soundness hypothesis `closure_eq_stabilizerAt_empty_of_coversOrbits` consumes. | — |
-| `cfiFlipAut_mem_gensAt` | 1042-1050 | **(CFI-cov.1)** A path-fixing gauge flip lies in the path-fixing generators `gensAt adj P (cfiGaugeGens h) S` — gauge generator + member of `StabilizerAt adj P S`. The hook the coverage discharge (CFI-cov.3) uses to realize orbits. | — |
-| `isBase_of_discrete_warmRefine` | 1059-1065 | **(CFI-cov.2) Discreteness ⟹ base.** If `warmRefine adj P (individualizedColouring n S)` is discrete then `S` is a base — the orbit partition collapses to equality (`orbit_iff_eq_of_discrete_warmRefine`). The general bridge from cascade `Discrete` output to the `IsBase` terminal of `CoversOrbits`. | — |
-| `foldl_insert_eq_union` | 1067-1073 | **(CFI-cov.2)** Folding `insert` over a list from `s` accumulates its elements: `l.foldl (insert) s = s ∪ l.toFinset`. | — |
-| `foldl_insert_empty_eq_toFinset` | 1075-1078 | **(CFI-cov.2)** Folding `insert` over a list from `∅` rebuilds its underlying finset (`= l.toFinset`) — matches `CoversOrbits`/A3.5's `foldl`. | — |
-| `cfi_exists_base_seq` | 1080-1089 | **(CFI-cov.2) CFI base sequence (odd-degree).** From the axiom-free cascade discreteness (`theorem_1_HOR_cfi_oddDeg`), an odd-degree CFI graph has an ordered base sequence `bs` with `bs.foldl insert ∅` a base — the `IsBase` terminal a `CoversOrbits` witness for CFI requires. | — |
-| `VisiblyRecoverable` | 1112-1128 | **D1 (explicit-chain form).** A single-vertex, per-step symmetry-only chain from `S₀` reaching `CellsAreOrbits` within a depth bound — the unconditional/cascade leg's structural witness, retained alongside the inductive `Findable`. | Definition |
-| `recoverableByDepth_of_visiblyRecoverable` | 1130-1135 | **D1 leg (free).** `VisiblyRecoverable ⟹ RecoverableByDepth` — the chain ends on a `CellsAreOrbits` set within the bound. | — |
-| `visiblyRecoverable_bound_mono` | 1137-1141 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
-| `cellsAreOrbits_empty_of_schurian` | 1143-1156 | **Schurian scheme graphs are vertex-transitive: `CellsAreOrbits adj P ∅`.** The `Aut`-orbit relation at `∅` is total (witness from `schurian_transitive` at the diagonal `R₀`), unblocking the symmetry-only first step. | — |
-| `visiblyRecoverable_of_cellsAreOrbits_singleton` | 1158-1171 | **`CellsAreOrbits` at a singleton + vertex-transitivity ⟹ D1 at depth 1.** The one-step chain `∅ → {v}` is symmetry-only with `CellsAreOrbits {v}` as endpoint recovery. | — |
-| `visiblyRecoverable_scheme` | 1173-1183 | **D1 instance — rank-2, `|J|=1` schurian scheme is visibly recoverable.** Validates `VisiblyRecoverable` against the proved depth-1 scheme orbit recovery (`orbitRecoverable_scheme`). | — |
-| `SymmetryOnlyStep` | 1187-1200 | **D1 per-decision primitive (§6.10).** Individualizing `v` commits no real decision: `v`'s 1-WL cell is non-singleton and a single `Aut_S`-orbit. The non-singleton conjunct is load-bearing (forces `v ∉ S`); lifted out of `VisiblyRecoverable`. | Definition |
-| `symmetryOnlyStep_of_cellsAreOrbits` | 1202-1212 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
-| `symmetryOnlyStep_empty_scheme` | 1214-1235 | **Scheme validation of the primitive.** A vertex-transitive schurian scheme is one orbit at `∅`, so individualizing any `v` (with `n ≥ 2`) is a `SymmetryOnlyStep`. | — |
-| `Findable` | 1254-1266 | **The harvest-window screen (sequential D1/D2, §6.10+§6.11).** Least-fixed-point inductive: `recovered` (`Discrete` — the F1-correct stop), `abelian` (`ResidualAbelian ∧ ¬IsBase` — guarded D2), `step` (`SymmetryOnlyStep` + recurse). Bound-free classification; `¬Findable` is the seal's wall (IR-blind-spot / Cameron by residual order). | Inductive |
-| `FindableWithin` | 1277-1295 | **`Findable` with its recovery depth (Phase 0).** Bound-indexed companion: `recovered`→`b=S.card`, `step` propagates `b`, `abelian` carries `RecoverableByDepth adj P b` as a field (the D2-bridge interface). De-vacuates the `∃ b` conclusion (`recoverableByDepth_univ`). | Inductive |
-| `recoverableByDepth_of_findableWithin` | 1297-1307 | **Screen soundness — non-vacuous.** `FindableWithin adj P S b ⟹ RecoverableByDepth adj P b` at the carried bound: `recovered`/`step` free, `abelian` returns its carried recoverability field. | — |
-| `findable_of_findableWithin` | 1309-1318 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
-| `findableWithin_cfi_gauge` | 1346-1356 | **D2-bridge anchor (CFI gauge).** For an odd-degree CFI graph, a hidden non-trivial abelian residual (`ResidualAbelian ∧ ¬ IsBase`, the screen's D2 predicate) discharges `FindableWithin` at `cfi_depth_bound h` via the axiom-free `recoverableByDepth_cfi` — the D2 analogue of `visiblyRecoverable_scheme`. | — |
-| `recoverableByDepth_of_cfi_gauge` | 1358-1366 | **The CFI gauge is `RecoverableByDepth`.** Bound-carrying soundness applied to `findableWithin_cfi_gauge`: a hidden non-trivial abelian CFI residual recovers by depth `cfi_depth_bound h`, routed through the screen so the D2 leg is certified non-vacuous end-to-end. | — |
-| `findable_cfi_gauge` | 1368-1376 | **The CFI gauge is `Findable`** (bound-free classification): a hidden non-trivial abelian CFI residual lands in the screen's D2 leg — the abelian disjunct populated by the central recoverable, non-Cameron example. | — |
-| `soStep` | 1396-1400 | Leg A — one round of the symmetry-only closure: individualize a symmetry-only vertex if one exists, else stay put. Extensive; strictly grows until no symmetry-only step remains. | Definition, `noncomputable` |
-| `soStep_extensive` | 1402-1406 | The symmetry-only closure round is extensive — it only ever adds the chosen vertex. | — |
-| `symmetryOnlyStep_not_mem` | 1408-1417 | A symmetry-only step's vertex is not yet committed (`v ∉ S`): a committed vertex is a warm-refinement-preserved singleton, so its cell could not be non-singleton. This is what makes `soStep` strictly grow until stuck. | — |
-| `soStep_pos` | 1419-1422 | When a symmetry-only step exists, the closure round takes it (inserts the chosen vertex). | — |
-| `exists_symmetryOnly_saturated` | 1424-1441 | **Leg A — bounded termination of the symmetry-only process.** Iterating the symmetry-only closure from any `S₀` reaches a saturated node `S* ⊇ S₀` with no symmetry-only step available, within `≤ n − |S₀|` rounds — the engine-powered, class-agnostic half of the harvest-window trichotomy's termination. | — |
-| `MovedAt` | 1452-1457 | Leg A — a vertex moved by some residual automorphism at `S`; weaker than a symmetry-only step (its cell may be coarser than its orbit), so the right object for the general support induction. | Definition |
-| `movedAt_not_mem` | 1459-1461 | A moved vertex is not committed (`v ∉ S`), since a residual automorphism fixes `S` pointwise. | — |
-| `isBase_of_no_moved` | 1463-1473 | A node with no moved vertex is a base (trivial residual). | — |
-| `movedStep` | 1474-1478 | Leg A — one round of the moved-vertex closure: individualize a moved vertex if one exists, else stay. Extensive; strictly grows until the residual is trivial (a base). | Definition, `noncomputable` |
-| `movedStep_extensive` | 1480-1483 | The moved-vertex closure round is extensive. | — |
-| `movedStep_pos` | 1485-1487 | When a moved vertex exists, the closure round takes it. | — |
-| `exists_isBase_saturated` | 1489-1506 | **Leg A — the general support induction (every graph reaches a base).** Individualizing moved vertices from any `S₀` reaches a base `S* ⊇ S₀` (trivial residual) within `≤ n − |S₀|` rounds, via the `Saturation` engine — holding for every graph (CFI, schemes, rigid alike). | — |
-| `MovedAt.anti` | 1519-1528 | **Moved-set anti-monotonicity.** A residual automorphism fixing `S` also fixes any `S₀ ⊆ S`, so a vertex moved at `S` is already moved at `S₀` — the moved-set shrinks as the individualized set grows, which makes it a saturation bound. | — |
-| `movedSet` | 1529-1534 | **The residual support at `S₀`:** the vertices moved by some residual automorphism fixing `S₀` (the support of `Aut_{S₀}^P`). Disjoint from `S₀`; its cardinality is the harvest-window depth `|support(g)|`. | Definition, `noncomputable` |
-| `mem_movedSet` | 1536-1538 | Membership in `movedSet`: `v ∈ movedSet adj P S₀ ↔ MovedAt adj P S₀ v`. | — |
-| `movedStep_subset_bound` | 1540-1553 | Interval invariance of the support bound: on every `f`-reachable set `S₀ ⊆ s ⊆ S₀ ∪ movedSet`, `movedStep` stays inside `S₀ ∪ movedSet` — the hypothesis feeding the interval-invariant saturation engine. | — |
-| `exists_isBase_saturated_support` | 1555-1578 | **Leg A — the tight support bound (`base(g) ≤ |support|`).** Sharpens `exists_isBase_saturated`: the moved-vertex closure reaches a base within `≤ |movedSet adj P S₀|` rounds — the residual support, not the full `n`. | — |
-| `forcedNode` | 1598-1603 | **The canonical forced node:** `S₀ ∪ movedSet adj P S₀`, individualizing the whole residual support at once. Choice-free — the deterministic, iso-invariant counterpart of the `Classical.choice`-driven `movedStep` saturation. | Definition, `noncomputable` |
-| `forcedNode_isBase` | 1605-1615 | **The forced node is a base — choice-free.** Individualizing the full residual support trivializes the residual group, so `forcedNode adj P S₀` is a base with no `Classical.choice`. | — |
-| `movedAt_image` | 1617-1642 | **Automorphism-equivariance of `MovedAt`** (one direction). A `P`-preserving automorphism `g` carries a vertex moved at `S₀` to one moved at `S₀.image g`, via the conjugate `g π g⁻¹`. | — |
-| `movedAt_image_iff` | 1644-1656 | **Automorphism-equivariance of `MovedAt`** (iff form): `MovedAt adj P (S₀.image g) (g v) ↔ MovedAt adj P S₀ v` for a `P`-preserving automorphism `g`. | — |
-| `movedSet_image` | 1658-1674 | The residual support commutes with automorphisms: `movedSet adj P (S₀.image g) = (movedSet adj P S₀).image g`. | — |
-| `forcedNode_image` | 1676-1683 | **The forced node is automorphism-equivariant (iso-invariance).** `forcedNode` commutes with every `P`-preserving automorphism — a canonical function of iso-invariant data, not an arbitrary `Classical.choice`. | — |
-| `forcedNode_residual_invariant` | 1685-1698 | **The forced node is fixed by the residual group it resolves.** Every residual automorphism at `S₀` maps `forcedNode adj P S₀` to itself setwise. | — |
-| `recoverableAt_base_iff_discrete` | 1712-1723 | **Recovery at a base ⟺ discreteness.** At a base `S`, `OrbitRecoverableAt adj P S` holds iff `warmRefine` is `Discrete` — separating the (consumed) symmetry axis from the sole remaining IR-stickiness axis. | — |
-| `forcedNode_recoverable_iff_discrete` | 1725-1734 | **Tying the two axes at the canonical node.** At `forcedNode` (a base), orbit recovery is exactly discreteness of `warmRefine`: symmetry consumed plus no IR-stickiness ⟺ recovery. | — |
-| `mem_movedSet_iff_nonsingleton_cell_of_recoverable` | 1743-1760 | **The support is the non-singleton cells, at a recoverable node.** Where `OrbitRecoverableAt adj P S`, a vertex is moved iff it shares its 1-WL cell with another — so refinement computes `movedSet`/`forcedNode`. | — |
-| `movedSet_eq_nonsingletonCells_of_recoverable` | 1761-1772 | `movedSet` is refinement-computed at a recoverable node (Finset form): it equals the union of the non-singleton 1-WL cells. | — |
-| `relabelAdj` | 1783-1785 | **Relabel a graph by `σ`:** the adjacency where `σ v` plays the role `v` did. `σ` is the canonical graph isomorphism `adj → relabelAdj σ adj`. | Definition |
-| `relabelAdj_adj` | 1787-1788 | Unfolding lemma: `(relabelAdj σ A).adj i j = A.adj (σ.symm i) (σ.symm j)`. | `@[simp]` |
-| `relabelP` | 1790-1792 | **Relabel a `P`-matrix by `σ`:** `Q (σ⁻¹ ·) (σ⁻¹ ·)`. | Definition |
-| `relabelP_apply` | 1794-1795 | Unfolding lemma: `relabelP σ Q i j = Q (σ.symm i) (σ.symm j)`. | `@[simp]` |
-| `residualAut_relabel` | 1797-1814 | **Residual automorphisms transport along a relabelling** (forward), via the conjugate `σ π σ⁻¹`: a residual aut at `S` becomes one at `S.image σ` in the relabelled graph. | — |
-| `residualAut_relabel_symm` | 1816-1833 | **Residual automorphisms transport back from a relabelling** (reverse), via `σ⁻¹ π σ`. | — |
-| `movedAt_relabel_iff` | 1835-1850 | **`MovedAt` is equivariant under relabelling:** `MovedAt (relabelAdj σ adj) (relabelP σ P) (S₀.image σ) (σ v) ↔ MovedAt adj P S₀ v`. | — |
-| `movedSet_relabel` | 1852-1867 | The residual support is equivariant under relabelling: `movedSet (relabel… σ) (S₀.image σ) = (movedSet adj P S₀).image σ`. | — |
-| `forcedNode_relabel` | 1869-1877 | **Forced node equivariant under arbitrary relabelling — full iso-invariance.** Relabelling the input by any `σ` (not just an automorphism) maps the canonical forced node correspondingly. | — |
-| `visiblyRecoverable_pPolynomial` | 1887-1899 | **D1 for every P-polynomial (metric / DRG) scheme graph.** Generalizes `visiblyRecoverable_scheme` (rank-2 / `|J|=1`) to the whole distance-regular family via the depth-1 metric recovery `theorem_2_HOR_of_pPolynomial`. | — |
-| `forcedExpand` | 1909-1915 | **M-D instance — the canonical exploration rule.** For rep `r` at a node, explore `r` together with its residual support: `insert r (movedSet adj chain.P (insert r chain.D))`. Iso-invariant and automorphism-equivariant (the per-rep forced node). | Definition, `noncomputable` |
-| `lockstepExpand_forcedExpand` | 1917-1935 | **M-D — the lockstep is a theorem.** `forcedExpand` satisfies `LockstepExpand` — the residual-support half is exactly `movedSet_image`, the committed prefix is fixed setwise by `g`. So `matchOracleSet (forcedExpand …)` needs no lockstep hypothesis, only the depth witness. | — |
+| `residualInvolutive_mono` | 1002-1008 | **(A2-complete, de-classed) `ResidualInvolutive` inherited down the descent.** `ResidualInvolutive S → S ⊆ S' → ResidualInvolutive S'` — a subgroup of an exponent-2 group has exponent ≤ 2; the involutive analogue of `residualAbelian_mono`, letting the de-classed coverage carry its hypothesis down the base sequence. | — |
+| `coversOrbits_of_residualInvolutive` | 1010-1033 | **(A2-complete) De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual is involutive (`ResidualInvolutive`) and `gens` contains every involutive residual automorphism (what the leaf-collision harvest supplies), `CoversOrbits adj P gens bs S` holds: `orbitPartition_swap_of_involutive` realizes each orbit-mate by one involutive path-fixing generator, via `coversOrbits_realize_of_mem`. Discharges the coverage witness for the whole elementary-abelian-residual class in one theorem — no per-class `Aut(CFI)≅Z₂^β⋊Aut(H)` structure theorem. | — |
+| `closure_eq_stabilizerAt_of_residualInvolutive` | 1035-1049 | **(A2-complete) De-classed harvest completeness — the involutive residual *is* the closure of harvested involutions.** At an exponent-2 node, `Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S` (via `coversOrbits_of_residualInvolutive` + `stabilizerAt_eq_closure_gensAt_of_coversOrbits`). The cross-branch completeness for every elementary-abelian-residual class with no per-class structure theorem — the cross-branch analogue of `theorem_2_HOR_of_pPolynomial`; CFI's gauge regime is a witness supplying only `ResidualInvolutive` at a gauge-regime `S`. | — |
+| `cfiFlipAut_residualAut` | 1065-1076 | **(A2-complete / CFI-cov.1) Gauge flip is a path-fixing residual aut.** A symmetric, even gauge flip `cfiFlipAut F` that is `F`-free on `S`'s gadgets is a `ResidualAut adj P S` (assembles `isAut_cfiFlipAut` + `cfiFlipAut_preserves_P` + locality). The bridge from the `CFI.lean` gauge-flip layer to the A2-complete residual vocabulary. | — |
+| `cfiFlipAut_mem_stabilizerAt` | 1078-1084 | **(CFI-cov.1)** A path-fixing gauge flip is an element of the residual group `StabilizerAt adj P S`. | — |
+| `cfiFlipAut_orbitPartition` | 1086-1094 | **(CFI-cov.1) Forward coverage.** A path-fixing gauge flip moves `v` within its `Aut_S^P`-orbit: `OrbitPartition adj P S v (cfiFlipAut F v)`. (Reverse — realizing the *full* orbit — is the staged cycle-space content.) | — |
+| `cfiGaugeGens` | 1096-1102 | **(CFI-cov.1) The CFI gauge generating set.** All symmetric, even gauge flips `cfiFlipAut F` — the cycle-space `Z₂^β` generators the harvest folds in; `Subgroup.closure (cfiGaugeGens h)` is the gauge group. | Definition |
+| `cfiGaugeGens_residualAut_empty` | 1104-1111 | **(CFI-cov.1) Root soundness.** Every gauge flip is a `P`-preserving automorphism (`ResidualAut adj P ∅`) — the Stage-A2 soundness hypothesis `closure_eq_stabilizerAt_empty_of_coversOrbits` consumes. | — |
+| `cfiFlipAut_mem_gensAt` | 1113-1121 | **(CFI-cov.1)** A path-fixing gauge flip lies in the path-fixing generators `gensAt adj P (cfiGaugeGens h) S` — gauge generator + member of `StabilizerAt adj P S`. The hook the coverage discharge (CFI-cov.3) uses to realize orbits. | — |
+| `isBase_of_discrete_warmRefine` | 1130-1136 | **(CFI-cov.2) Discreteness ⟹ base.** If `warmRefine adj P (individualizedColouring n S)` is discrete then `S` is a base — the orbit partition collapses to equality (`orbit_iff_eq_of_discrete_warmRefine`). The general bridge from cascade `Discrete` output to the `IsBase` terminal of `CoversOrbits`. | — |
+| `foldl_insert_eq_union` | 1138-1144 | **(CFI-cov.2)** Folding `insert` over a list from `s` accumulates its elements: `l.foldl (insert) s = s ∪ l.toFinset`. | — |
+| `foldl_insert_empty_eq_toFinset` | 1146-1149 | **(CFI-cov.2)** Folding `insert` over a list from `∅` rebuilds its underlying finset (`= l.toFinset`) — matches `CoversOrbits`/A3.5's `foldl`. | — |
+| `cfi_exists_base_seq` | 1151-1160 | **(CFI-cov.2) CFI base sequence (odd-degree).** From the axiom-free cascade discreteness (`theorem_1_HOR_cfi_oddDeg`), an odd-degree CFI graph has an ordered base sequence `bs` with `bs.foldl insert ∅` a base — the `IsBase` terminal a `CoversOrbits` witness for CFI requires. | — |
+| `VisiblyRecoverable` | 1183-1199 | **D1 (explicit-chain form).** A single-vertex, per-step symmetry-only chain from `S₀` reaching `CellsAreOrbits` within a depth bound — the unconditional/cascade leg's structural witness, retained alongside the inductive `Findable`. | Definition |
+| `recoverableByDepth_of_visiblyRecoverable` | 1201-1206 | **D1 leg (free).** `VisiblyRecoverable ⟹ RecoverableByDepth` — the chain ends on a `CellsAreOrbits` set within the bound. | — |
+| `visiblyRecoverable_bound_mono` | 1208-1212 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
+| `cellsAreOrbits_empty_of_schurian` | 1214-1227 | **Schurian scheme graphs are vertex-transitive: `CellsAreOrbits adj P ∅`.** The `Aut`-orbit relation at `∅` is total (witness from `schurian_transitive` at the diagonal `R₀`), unblocking the symmetry-only first step. | — |
+| `visiblyRecoverable_of_cellsAreOrbits_singleton` | 1229-1242 | **`CellsAreOrbits` at a singleton + vertex-transitivity ⟹ D1 at depth 1.** The one-step chain `∅ → {v}` is symmetry-only with `CellsAreOrbits {v}` as endpoint recovery. | — |
+| `visiblyRecoverable_scheme` | 1244-1254 | **D1 instance — rank-2, `|J|=1` schurian scheme is visibly recoverable.** Validates `VisiblyRecoverable` against the proved depth-1 scheme orbit recovery (`orbitRecoverable_scheme`). | — |
+| `SymmetryOnlyStep` | 1258-1271 | **D1 per-decision primitive (§6.10).** Individualizing `v` commits no real decision: `v`'s 1-WL cell is non-singleton and a single `Aut_S`-orbit. The non-singleton conjunct is load-bearing (forces `v ∉ S`); lifted out of `VisiblyRecoverable`. | Definition |
+| `symmetryOnlyStep_of_cellsAreOrbits` | 1273-1283 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
+| `symmetryOnlyStep_empty_scheme` | 1285-1306 | **Scheme validation of the primitive.** A vertex-transitive schurian scheme is one orbit at `∅`, so individualizing any `v` (with `n ≥ 2`) is a `SymmetryOnlyStep`. | — |
+| `Findable` | 1325-1337 | **The harvest-window screen (sequential D1/D2, §6.10+§6.11).** Least-fixed-point inductive: `recovered` (`Discrete` — the F1-correct stop), `abelian` (`ResidualAbelian ∧ ¬IsBase` — guarded D2), `step` (`SymmetryOnlyStep` + recurse). Bound-free classification; `¬Findable` is the seal's wall (IR-blind-spot / Cameron by residual order). | Inductive |
+| `FindableWithin` | 1348-1366 | **`Findable` with its recovery depth (Phase 0).** Bound-indexed companion: `recovered`→`b=S.card`, `step` propagates `b`, `abelian` carries `RecoverableByDepth adj P b` as a field (the D2-bridge interface). De-vacuates the `∃ b` conclusion (`recoverableByDepth_univ`). | Inductive |
+| `recoverableByDepth_of_findableWithin` | 1368-1378 | **Screen soundness — non-vacuous.** `FindableWithin adj P S b ⟹ RecoverableByDepth adj P b` at the carried bound: `recovered`/`step` free, `abelian` returns its carried recoverability field. | — |
+| `findable_of_findableWithin` | 1380-1389 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
+| `findableWithin_cfi_gauge` | 1417-1427 | **D2-bridge anchor (CFI gauge).** For an odd-degree CFI graph, a hidden non-trivial abelian residual (`ResidualAbelian ∧ ¬ IsBase`, the screen's D2 predicate) discharges `FindableWithin` at `cfi_depth_bound h` via the axiom-free `recoverableByDepth_cfi` — the D2 analogue of `visiblyRecoverable_scheme`. | — |
+| `recoverableByDepth_of_cfi_gauge` | 1429-1437 | **The CFI gauge is `RecoverableByDepth`.** Bound-carrying soundness applied to `findableWithin_cfi_gauge`: a hidden non-trivial abelian CFI residual recovers by depth `cfi_depth_bound h`, routed through the screen so the D2 leg is certified non-vacuous end-to-end. | — |
+| `findable_cfi_gauge` | 1439-1447 | **The CFI gauge is `Findable`** (bound-free classification): a hidden non-trivial abelian CFI residual lands in the screen's D2 leg — the abelian disjunct populated by the central recoverable, non-Cameron example. | — |
+| `soStep` | 1467-1471 | Leg A — one round of the symmetry-only closure: individualize a symmetry-only vertex if one exists, else stay put. Extensive; strictly grows until no symmetry-only step remains. | Definition, `noncomputable` |
+| `soStep_extensive` | 1473-1477 | The symmetry-only closure round is extensive — it only ever adds the chosen vertex. | — |
+| `symmetryOnlyStep_not_mem` | 1479-1488 | A symmetry-only step's vertex is not yet committed (`v ∉ S`): a committed vertex is a warm-refinement-preserved singleton, so its cell could not be non-singleton. This is what makes `soStep` strictly grow until stuck. | — |
+| `soStep_pos` | 1490-1493 | When a symmetry-only step exists, the closure round takes it (inserts the chosen vertex). | — |
+| `exists_symmetryOnly_saturated` | 1495-1512 | **Leg A — bounded termination of the symmetry-only process.** Iterating the symmetry-only closure from any `S₀` reaches a saturated node `S* ⊇ S₀` with no symmetry-only step available, within `≤ n − |S₀|` rounds — the engine-powered, class-agnostic half of the harvest-window trichotomy's termination. | — |
+| `MovedAt` | 1523-1528 | Leg A — a vertex moved by some residual automorphism at `S`; weaker than a symmetry-only step (its cell may be coarser than its orbit), so the right object for the general support induction. | Definition |
+| `movedAt_not_mem` | 1530-1532 | A moved vertex is not committed (`v ∉ S`), since a residual automorphism fixes `S` pointwise. | — |
+| `isBase_of_no_moved` | 1534-1544 | A node with no moved vertex is a base (trivial residual). | — |
+| `movedStep` | 1545-1549 | Leg A — one round of the moved-vertex closure: individualize a moved vertex if one exists, else stay. Extensive; strictly grows until the residual is trivial (a base). | Definition, `noncomputable` |
+| `movedStep_extensive` | 1551-1554 | The moved-vertex closure round is extensive. | — |
+| `movedStep_pos` | 1556-1558 | When a moved vertex exists, the closure round takes it. | — |
+| `exists_isBase_saturated` | 1560-1577 | **Leg A — the general support induction (every graph reaches a base).** Individualizing moved vertices from any `S₀` reaches a base `S* ⊇ S₀` (trivial residual) within `≤ n − |S₀|` rounds, via the `Saturation` engine — holding for every graph (CFI, schemes, rigid alike). | — |
+| `MovedAt.anti` | 1590-1599 | **Moved-set anti-monotonicity.** A residual automorphism fixing `S` also fixes any `S₀ ⊆ S`, so a vertex moved at `S` is already moved at `S₀` — the moved-set shrinks as the individualized set grows, which makes it a saturation bound. | — |
+| `movedSet` | 1600-1605 | **The residual support at `S₀`:** the vertices moved by some residual automorphism fixing `S₀` (the support of `Aut_{S₀}^P`). Disjoint from `S₀`; its cardinality is the harvest-window depth `|support(g)|`. | Definition, `noncomputable` |
+| `mem_movedSet` | 1607-1609 | Membership in `movedSet`: `v ∈ movedSet adj P S₀ ↔ MovedAt adj P S₀ v`. | — |
+| `movedStep_subset_bound` | 1611-1624 | Interval invariance of the support bound: on every `f`-reachable set `S₀ ⊆ s ⊆ S₀ ∪ movedSet`, `movedStep` stays inside `S₀ ∪ movedSet` — the hypothesis feeding the interval-invariant saturation engine. | — |
+| `exists_isBase_saturated_support` | 1626-1649 | **Leg A — the tight support bound (`base(g) ≤ |support|`).** Sharpens `exists_isBase_saturated`: the moved-vertex closure reaches a base within `≤ |movedSet adj P S₀|` rounds — the residual support, not the full `n`. | — |
+| `forcedNode` | 1669-1674 | **The canonical forced node:** `S₀ ∪ movedSet adj P S₀`, individualizing the whole residual support at once. Choice-free — the deterministic, iso-invariant counterpart of the `Classical.choice`-driven `movedStep` saturation. | Definition, `noncomputable` |
+| `forcedNode_isBase` | 1676-1686 | **The forced node is a base — choice-free.** Individualizing the full residual support trivializes the residual group, so `forcedNode adj P S₀` is a base with no `Classical.choice`. | — |
+| `movedAt_image` | 1688-1713 | **Automorphism-equivariance of `MovedAt`** (one direction). A `P`-preserving automorphism `g` carries a vertex moved at `S₀` to one moved at `S₀.image g`, via the conjugate `g π g⁻¹`. | — |
+| `movedAt_image_iff` | 1715-1727 | **Automorphism-equivariance of `MovedAt`** (iff form): `MovedAt adj P (S₀.image g) (g v) ↔ MovedAt adj P S₀ v` for a `P`-preserving automorphism `g`. | — |
+| `movedSet_image` | 1729-1745 | The residual support commutes with automorphisms: `movedSet adj P (S₀.image g) = (movedSet adj P S₀).image g`. | — |
+| `forcedNode_image` | 1747-1754 | **The forced node is automorphism-equivariant (iso-invariance).** `forcedNode` commutes with every `P`-preserving automorphism — a canonical function of iso-invariant data, not an arbitrary `Classical.choice`. | — |
+| `forcedNode_residual_invariant` | 1756-1769 | **The forced node is fixed by the residual group it resolves.** Every residual automorphism at `S₀` maps `forcedNode adj P S₀` to itself setwise. | — |
+| `recoverableAt_base_iff_discrete` | 1783-1794 | **Recovery at a base ⟺ discreteness.** At a base `S`, `OrbitRecoverableAt adj P S` holds iff `warmRefine` is `Discrete` — separating the (consumed) symmetry axis from the sole remaining IR-stickiness axis. | — |
+| `forcedNode_recoverable_iff_discrete` | 1796-1805 | **Tying the two axes at the canonical node.** At `forcedNode` (a base), orbit recovery is exactly discreteness of `warmRefine`: symmetry consumed plus no IR-stickiness ⟺ recovery. | — |
+| `mem_movedSet_iff_nonsingleton_cell_of_recoverable` | 1814-1831 | **The support is the non-singleton cells, at a recoverable node.** Where `OrbitRecoverableAt adj P S`, a vertex is moved iff it shares its 1-WL cell with another — so refinement computes `movedSet`/`forcedNode`. | — |
+| `movedSet_eq_nonsingletonCells_of_recoverable` | 1832-1843 | `movedSet` is refinement-computed at a recoverable node (Finset form): it equals the union of the non-singleton 1-WL cells. | — |
+| `relabelAdj` | 1854-1856 | **Relabel a graph by `σ`:** the adjacency where `σ v` plays the role `v` did. `σ` is the canonical graph isomorphism `adj → relabelAdj σ adj`. | Definition |
+| `relabelAdj_adj` | 1858-1859 | Unfolding lemma: `(relabelAdj σ A).adj i j = A.adj (σ.symm i) (σ.symm j)`. | `@[simp]` |
+| `relabelP` | 1861-1863 | **Relabel a `P`-matrix by `σ`:** `Q (σ⁻¹ ·) (σ⁻¹ ·)`. | Definition |
+| `relabelP_apply` | 1865-1866 | Unfolding lemma: `relabelP σ Q i j = Q (σ.symm i) (σ.symm j)`. | `@[simp]` |
+| `residualAut_relabel` | 1868-1885 | **Residual automorphisms transport along a relabelling** (forward), via the conjugate `σ π σ⁻¹`: a residual aut at `S` becomes one at `S.image σ` in the relabelled graph. | — |
+| `residualAut_relabel_symm` | 1887-1904 | **Residual automorphisms transport back from a relabelling** (reverse), via `σ⁻¹ π σ`. | — |
+| `movedAt_relabel_iff` | 1906-1921 | **`MovedAt` is equivariant under relabelling:** `MovedAt (relabelAdj σ adj) (relabelP σ P) (S₀.image σ) (σ v) ↔ MovedAt adj P S₀ v`. | — |
+| `movedSet_relabel` | 1923-1938 | The residual support is equivariant under relabelling: `movedSet (relabel… σ) (S₀.image σ) = (movedSet adj P S₀).image σ`. | — |
+| `forcedNode_relabel` | 1940-1948 | **Forced node equivariant under arbitrary relabelling — full iso-invariance.** Relabelling the input by any `σ` (not just an automorphism) maps the canonical forced node correspondingly. | — |
+| `visiblyRecoverable_pPolynomial` | 1958-1970 | **D1 for every P-polynomial (metric / DRG) scheme graph.** Generalizes `visiblyRecoverable_scheme` (rank-2 / `|J|=1`) to the whole distance-regular family via the depth-1 metric recovery `theorem_2_HOR_of_pPolynomial`. | — |
+| `forcedExpand` | 1980-1986 | **M-D instance — the canonical exploration rule.** For rep `r` at a node, explore `r` together with its residual support: `insert r (movedSet adj chain.P (insert r chain.D))`. Iso-invariant and automorphism-equivariant (the per-rep forced node). | Definition, `noncomputable` |
+| `lockstepExpand_forcedExpand` | 1988-2006 | **M-D — the lockstep is a theorem.** `forcedExpand` satisfies `LockstepExpand` — the residual-support half is exactly `movedSet_image`, the committed prefix is fixed setwise by `g`. So `matchOracleSet (forcedExpand …)` needs no lockstep hypothesis, only the depth witness. | — |
 ## ChainDescent/Saturation.lean
 
 | Name | Line | Description | Notes |
