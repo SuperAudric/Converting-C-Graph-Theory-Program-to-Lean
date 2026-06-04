@@ -24,10 +24,16 @@
 >   of `theorem_2_HOR_of_pPolynomial`. **This supersedes the per-class `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure
 >   theorem as the CFI route:** the abstract coverage holds once the residual is exponent-2 and `gens`
 >   contains the harvested involutions, *without* identifying them as the literal cycle-space flips (no
->   `Φ(σ)` lift). **Remaining (CFI witness):** the single focused predicate `ResidualInvolutive adj P S` at
->   a gauge-regime `S` (residual = exponent-2 gauge group, the `Aut(H)` factor killed by the committed
->   seeds) — far smaller than the structure theorem. Firing content (C# canonizes CFI(K₄–K₇)), not GI-hard.
->   See §7.
+>   `Φ(σ)` lift).
+> - **CFI WITNESS LANDED conditional on gauge-generation** (2026-06-04, axiom-clean): `gaugeSubgroup`
+>   (the gauge group `Z₂^β` as a `Subgroup`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self` (the gauge group
+>   is exponent-2), and **`cfi_coversOrbits` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt_eq_prod`**
+>   (`|Aut(CFI)^P| = ∏ basic-orbit sizes`). All reduced to a **single** CFI hypothesis: **gauge-generation**
+>   `StabilizerAt adj P ∅ ≤ Subgroup.closure (cfiGaugeGens h)` (every `P`-preserving automorphism is a product
+>   of gauge flips — the *surjective half* of the classical structure theorem; the converse is free). The
+>   `Φ(σ)` lift, the semidirect decomposition, and the per-level orbit-coverage clauses are **all gone**.
+>   **Remaining (the sole CFI nut):** discharge **gauge-generation** for CFI. Firing content (C# canonizes
+>   CFI(K₄–K₇)), not GI-hard. See §7.
 >
 > A fresh reader can still use this doc as the full context/name index (Mathlib + internal) for consuming
 > A1–A3.5 / A2-complete or building A4.
@@ -393,13 +399,24 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
     identification (and the `Φ` lift) is never needed. This is the cross-branch analogue of
     `theorem_2_HOR_of_pPolynomial`: one structural predicate covers the whole elementary-abelian-residual
     class (CFI's gauge regime, the twin/module regime, …), not a per-class grind.
-  - **Remaining (the CFI witness):** supply `ResidualInvolutive adj P S` at a **gauge-regime** committed set
-    `S` — one where the committed seeds have killed the `Aut(H)` factor so the residual is exactly the
-    exponent-2 gauge group (gauge flips are involutions, `cfiFlipAut_involutive`). This is a single focused
-    predicate, far smaller than the abandoned full structure theorem, and is the honest residual class
-    boundary (at shallow `S` the `Aut(H)` factor is alive and non-involutive — that part is the orthogonal
-    *visible/cascade* leg, handled by the scheme/`PPolynomial` recovery). C# canonizes CFI(K₄–K₇), so this is
-    firing content, not GI-hard.
+  - **Stage 3 — the CFI witness wired, conditional on gauge-generation — LANDED 2026-06-04, axiom-clean**
+    (`Cascade.lean`): `gaugeSubgroup` (the gauge group `Z₂^β` as a `Subgroup` — `cfiGaugeGens` is closed under
+    the group ops via `cfiFlipAut_xorF`/`_one`/`_involutive`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self`
+    (the gauge group is exponent-2). Then **`cfi_coversOrbits`** (the long-sought coverage witness, via
+    `coversOrbits_of_residualInvolutive`), **`cfi_closure_eq_stabilizerAt`** (`closure cfiGaugeGens =
+    StabilizerAt ∅`), and **`cfi_card_stabilizerAt_eq_prod`** (`|Aut(CFI)^P| = ∏ basic-orbit sizes`) — all
+    reduced to a **single** CFI hypothesis: **gauge-generation** `StabilizerAt adj P ∅ ≤ closure (cfiGaugeGens
+    h)`. Gauge-generation makes the residual exponent-2 (so `ResidualInvolutive` holds) and puts every residual
+    automorphism in `cfiGaugeGens` (so `hgens` holds), discharging the de-classed coverage with **no** `Φ(σ)`
+    lift, no semidirect decomposition, no per-level orbit-coverage.
+  - **Remaining (the sole CFI nut): discharge gauge-generation** `StabilizerAt adj P ∅ ≤ closure (cfiGaugeGens
+    h)` — that every `P`-preserving automorphism of `CFI(H)` is a product of gauge flips (the surjective half
+    of `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)`; the converse `≤` is free, `cfiGaugeGens_residualAut_empty`). This is the
+    one honest residual: the `Aut(H)` factor is real (at a `P` that is *not* automorphism-rich, base
+    permutations survive), so gauge-generation is *not* unconditional — it holds for the descent's
+    automorphism-invariant `P` regime / where the cascade has pinned the base graph, which is the orthogonal
+    visible/cascade leg (scheme/`PPolynomial` recovery). C# canonizes CFI(K₄–K₇), so it is firing content,
+    not GI-hard.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
@@ -461,7 +478,10 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
 `stabilizerAt_le_closure_gensAt_of_coversOrbits`, `stabilizerAt_eq_closure_gensAt_of_coversOrbits`,
 `closure_eq_stabilizerAt_empty_of_coversOrbits`, `card_closure_gensAt_eq_prod_of_coversOrbits` (A2-complete);
 `residualInvolutive_mono`, `coversOrbits_of_residualInvolutive`, `closure_eq_stabilizerAt_of_residualInvolutive`
-(A2-complete de-classed — `CoversOrbits` for the whole exponent-2/`Z₂^d`-residual class in one theorem).
+(A2-complete de-classed — `CoversOrbits` for the whole exponent-2/`Z₂^d`-residual class in one theorem);
+`gaugeSubgroup`, `mem_gaugeSubgroup`, `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self`, `cfi_coversOrbits`,
+`cfi_closure_eq_stabilizerAt`, `cfi_card_stabilizerAt_eq_prod` (CFI-cov.3 — the CFI witness reduced to
+gauge-generation `StabilizerAt ∅ ≤ closure cfiGaugeGens`, the sole remaining CFI obligation).
 
 **C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
 161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,

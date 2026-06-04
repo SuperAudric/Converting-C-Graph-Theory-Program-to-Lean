@@ -62,10 +62,13 @@
 > `CoversOrbits` for the **whole exponent-2 / elementary-abelian-(`Z₂^d`)-residual class in one theorem** —
 > the cross-branch analogue of `theorem_2_HOR_of_pPolynomial`, sidestepping the per-class `Aut(CFI)≅Z₂^β⋊Aut(H)`
 > structure theorem (the harvested involutions generate the residual whatever their internal description, no
-> `Φ(σ)` lift). **The remaining content is per-class: supply `ResidualInvolutive` at a gauge-regime `S`** (for
-> CFI, the seeds kill the `Aut(H)` factor) — a single focused predicate, *not* GI-hard — and the concrete
-> computable BSGS (A4, validation-only). The abstract cross-branch mechanism toward "reaches a rigid or
-> Cameron residual on all classes" is grounded.
+> `Φ(σ)` lift). **The CFI witness is wired** (2026-06-04, axiom-clean): `gaugeSubgroup` (gauge group `Z₂^β`),
+> `cfi_coversOrbits`, `cfi_closure_eq_stabilizerAt`, `cfi_card_stabilizerAt_eq_prod` (`|Aut(CFI)^P| = ∏
+> basic-orbit sizes`) — all reduced to a **single** CFI hypothesis, **gauge-generation** `StabilizerAt adj P ∅
+> ≤ closure (cfiGaugeGens h)` (every `P`-preserving automorphism is a product of gauge flips; the converse is
+> free). **The remaining content is then: discharge gauge-generation for CFI** (the surjective half of the
+> structure theorem; *not* GI-hard) — and the concrete computable BSGS (A4, validation-only). The abstract
+> cross-branch mechanism toward "reaches a rigid or Cameron residual on all classes" is grounded.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),

@@ -1159,6 +1159,117 @@ theorem cfi_exists_base_seq (h : IsCFI' adj) (h_odd : h.OddDegree) :
   rw [foldl_insert_empty_eq_toFinset, Finset.toList_toFinset]
   exact isBase_of_discrete_warmRefine hd
 
+/-! ### Part A (Stage A2-complete) — CFI-cov.3 (de-classed): the gauge group + harvest from gauge-generation
+
+The de-classed coverage `coversOrbits_of_residualInvolutive` discharges `CoversOrbits` for any exponent-2
+residual, from a generating set containing the harvested involutions. For CFI the gauge flips `cfiGaugeGens`
+are exactly such involutions: by the cycle-space homomorphism (`cfiFlipAut_xorF` / `cfiFlipAut_one`) they form
+a **subgroup** (`gaugeSubgroup`), and each is an involution (`cfiFlipAut_involutive`), so the gauge group is
+elementary-abelian `Z₂^β` — every element squares to `1`.
+
+This collapses the entire CFI cross-branch harvest — `cfi_coversOrbits`, `closure cfiGaugeGens = StabilizerAt
+∅`, and the order `|Aut(CFI)^P| = ∏ basic-orbit sizes` — onto a **single** CFI obligation: **gauge-generation**
+`StabilizerAt adj P ∅ ≤ closure (cfiGaugeGens h)` (every `P`-preserving automorphism is a product of gauge
+flips — the surjective half of the classical `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem; the converse `≤`
+is free, `cfiGaugeGens_residualAut_empty`). The `Φ(σ)` base-aut lift, the semidirect decomposition, and the
+per-level orbit-coverage clauses are **gone**; only this containment remains. Firing content (C# canonizes
+CFI(K₄–K₇)), not GI-hard. -/
+
+/-- **The CFI gauge group as a `Subgroup` — the `Z₂^β` factor.** `cfiGaugeGens h` is closed under the group
+operations: `cfiFlipAut_xorF` gives `cfiFlipAut F * cfiFlipAut F' = cfiFlipAut (xorF F F')` (a flip), with the
+flip-subgraph `xorF F F'` even (`even_xorF`) and symmetric; `cfiFlipAut_one` gives the identity; and
+`cfiFlipAut_involutive` makes each its own inverse. So the gauge generators are already a subgroup, not merely
+a generating set. -/
+def gaugeSubgroup (h : IsCFI' adj) : Subgroup (Equiv.Perm (Fin n)) where
+  carrier := cfiGaugeGens h
+  one_mem' := by
+    have hcf : ∀ v, (h.H.flipSet (fun _ _ => false) v).card % 2 = 0 := by
+      intro v
+      have : h.H.flipSet (fun _ _ => false) v = ∅ := by ext w; simp [CFIBase.mem_flipSet]
+      rw [this]; rfl
+    exact ⟨fun _ _ => false, hcf, fun _ _ => rfl, h.cfiFlipAut_one hcf⟩
+  mul_mem' := by
+    rintro a b ⟨F, hF, hFs, rfl⟩ ⟨F', hF', hF's, rfl⟩
+    exact ⟨CFIBase.xorF F F', h.H.even_xorF hF hF',
+      fun v w => by simp only [CFIBase.xorF]; rw [hFs v w, hF's v w],
+      h.cfiFlipAut_xorF F F' hF hF'⟩
+  inv_mem' := by
+    rintro a ⟨F, hF, hFs, rfl⟩
+    have hinv : h.cfiFlipAut F hF * h.cfiFlipAut F hF = 1 :=
+      Equiv.ext fun v => by
+        rw [Equiv.Perm.mul_apply, h.cfiFlipAut_involutive F hF v, Equiv.Perm.one_apply]
+    rw [inv_eq_of_mul_eq_one_right hinv]
+    exact ⟨F, hF, hFs, rfl⟩
+
+@[simp] theorem mem_gaugeSubgroup (h : IsCFI' adj) {g : Equiv.Perm (Fin n)} :
+    g ∈ gaugeSubgroup h ↔ g ∈ cfiGaugeGens h := Iff.rfl
+
+/-- The closure of the gauge generators *is* the gauge subgroup — they already form a subgroup. -/
+theorem closure_cfiGaugeGens_eq (h : IsCFI' adj) :
+    Subgroup.closure (cfiGaugeGens h) = gaugeSubgroup h :=
+  le_antisymm ((Subgroup.closure_le _).mpr (fun _ hg => hg))
+    (fun _ hg => Subgroup.subset_closure hg)
+
+/-- **The gauge group is exponent-2 (elementary-abelian).** Every gauge generator is a flip `cfiFlipAut F`,
+and flips are involutions (`cfiFlipAut_involutive`), so `g * g = 1`. The exponent-2 fact the de-classed
+coverage `coversOrbits_of_residualInvolutive` needs of the residual, supplied here for the gauge group. -/
+theorem cfiGauge_mul_self (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hg : g ∈ cfiGaugeGens h) : g * g = 1 := by
+  obtain ⟨F, hF, _, rfl⟩ := hg
+  exact Equiv.ext fun v => by
+    rw [Equiv.Perm.mul_apply, h.cfiFlipAut_involutive F hF v, Equiv.Perm.one_apply]
+
+/-- **`cfi_coversOrbits` — the CFI coverage witness, via de-classing (no structure theorem).** Given
+**gauge-generation** (`hgen`: every `P`-preserving automorphism is a product of gauge flips), the odd-degree
+CFI graph's gauge flips cover every level's residual orbit along the base sequence — discharging the
+A2-complete `CoversOrbits`. Obtained from `coversOrbits_of_residualInvolutive`: gauge-generation makes the
+residual exponent-2 (`ResidualInvolutive`, via `cfiGauge_mul_self`) and puts every residual automorphism in
+`cfiGaugeGens` (`hgens`), with **no** `Φ(σ)` lift or semidirect decomposition. This is the long-sought
+`cfi_coversOrbits`, reached by de-classing the per-class structure theorem down to the single `hgen`.
+(No `P`-invariance hypothesis is needed: the coverage follows purely from gauge-generation and the
+exponent-2 structure of the gauge group.) -/
+theorem cfi_coversOrbits (h : IsCFI' adj) (h_odd : h.OddDegree)
+    (hgen : StabilizerAt adj P ∅ ≤ Subgroup.closure (cfiGaugeGens h)) :
+    ∃ bs : List (Fin n), CoversOrbits adj P (cfiGaugeGens h) bs ∅ := by
+  obtain ⟨bs, hbase⟩ := cfi_exists_base_seq (P := P) h h_odd
+  refine ⟨bs, coversOrbits_of_residualInvolutive bs ?_ ?_ hbase⟩
+  · intro g hg
+    have hgc : g ∈ cfiGaugeGens h := by
+      have := hgen (mem_stabilizerAt.mpr hg); rwa [closure_cfiGaugeGens_eq, mem_gaugeSubgroup] at this
+    exact cfiGauge_mul_self h hgc
+  · intro g hg _
+    have := hgen (mem_stabilizerAt.mpr hg); rwa [closure_cfiGaugeGens_eq, mem_gaugeSubgroup] at this
+
+/-- **CFI cross-branch harvest completeness, via de-classing.** With gauge-generation the harvested gauge
+chain *is* the residual `P`-preserving automorphism group: `closure (cfiGaugeGens h) = StabilizerAt adj P ∅`.
+(The `≤` is free — `cfiGaugeGens_residualAut_empty`; `hgen` supplies the `≥`.) The de-classed coverage's
+genuine new content is the *order* below; this equality also follows directly from the two containments. -/
+theorem cfi_closure_eq_stabilizerAt (h : IsCFI' adj)
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (hgen : StabilizerAt adj P ∅ ≤ Subgroup.closure (cfiGaugeGens h)) :
+    Subgroup.closure (cfiGaugeGens h) = StabilizerAt adj P ∅ :=
+  le_antisymm
+    ((Subgroup.closure_le _).mpr
+      (fun g hg => mem_stabilizerAt.mpr (cfiGaugeGens_residualAut_empty h hP g hg)))
+    hgen
+
+/-- **`|Aut(CFI(H))^P| = ∏ basic-orbit sizes`, via the harvested gauge chain.** With gauge-generation, the
+order of the residual `P`-preserving automorphism group is the basic-orbit-size product along the CFI base
+sequence — the `Order = ∏ OrbitSize` of `PermutationGroup.cs`, for CFI, computed from the *folded* gauge
+generators. The genuine de-classed payoff: it needs the full coverage chain (`cfi_coversOrbits` →
+`card_closure_gensAt_eq_prod_of_coversOrbits`), not just the two containments of the group equality. -/
+theorem cfi_card_stabilizerAt_eq_prod (h : IsCFI' adj) (h_odd : h.OddDegree)
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (hgen : StabilizerAt adj P ∅ ≤ Subgroup.closure (cfiGaugeGens h)) :
+    ∃ bs : List (Fin n), Nat.card (StabilizerAt adj P ∅) = orbitSizeProd adj P bs ∅ := by
+  obtain ⟨bs, hcov⟩ := cfi_coversOrbits h h_odd hgen
+  refine ⟨bs, ?_⟩
+  have hge : gensAt adj P (cfiGaugeGens h) ∅ = cfiGaugeGens h :=
+    gensAt_empty_eq (fun g hg => mem_stabilizerAt.mpr (cfiGaugeGens_residualAut_empty h hP g hg))
+  have hcard := card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
+  rw [hge] at hcard
+  rwa [cfi_closure_eq_stabilizerAt h hP hgen] at hcard
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).
