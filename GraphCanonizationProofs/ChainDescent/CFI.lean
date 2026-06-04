@@ -3328,6 +3328,53 @@ theorem symmDiff_flipSet_mem_even (F : Fin m → Fin m → Bool)
     rw [card_symmDiff_mod_two]
     omega
 
+/-! #### The cycle space `Z₂^β` (CFI-cov.2)
+
+The gauge factor of `Aut(CFI(H))` is indexed by **even, symmetric flip-subgraphs** `F` — the cycle space
+`Z₂^β`. The `Z₂` sum is pointwise XOR (`xorF`), which acts on each vertex's incident flip-edges by symmetric
+difference (`flipSet_xorF`); the cycle space is closed under it (`cycleSpace_xorF`), with the empty subgraph
+as zero. This is the carrier the gauge flips `cfiFlip` range over; relating `xorF` to flip composition (the
+group homomorphism `Z₂^β → Aut`) is CFI-cov.3 content. -/
+
+/-- Pointwise XOR of two flip-edge indicators — the cycle-space addition (`Z₂` sum). -/
+def xorF (F F' : Fin m → Fin m → Bool) : Fin m → Fin m → Bool :=
+  fun v w => xor (F v w) (F' v w)
+
+/-- **The flip-set of an XOR is the symmetric difference of the flip-sets.** The cycle-space sum acts on
+each vertex's incident flip-edges by symmetric difference. -/
+theorem flipSet_xorF (F F' : Fin m → Fin m → Bool) (v : Fin m) :
+    H.flipSet (xorF F F') v = symmDiff (H.flipSet F v) (H.flipSet F' v) := by
+  ext w
+  by_cases hw : w ∈ H.neighbors v
+  · simp only [mem_flipSet, Finset.mem_symmDiff, xorF, hw, true_and]
+    cases F v w <;> cases F' v w <;> simp
+  · simp [mem_flipSet, Finset.mem_symmDiff, hw]
+
+/-- An even flip-subgraph stays even under the `Z₂` sum (`flipSet` symmetric-difference preserves even
+cardinality, `card_symmDiff_mod_two`). -/
+theorem even_xorF {F F' : Fin m → Fin m → Bool}
+    (hF : ∀ v, (H.flipSet F v).card % 2 = 0) (hF' : ∀ v, (H.flipSet F' v).card % 2 = 0) :
+    ∀ v, (H.flipSet (xorF F F') v).card % 2 = 0 := by
+  intro v
+  rw [flipSet_xorF, card_symmDiff_mod_two]
+  have h1 := hF v; have h2 := hF' v; omega
+
+/-- **The cycle space `Z₂^β`** of a CFI base: symmetric, even flip-subgraphs `F`. These index exactly the
+gauge flips `cfiFlip F` (the `Z₂^β` factor of `Aut(CFI(H))`). -/
+def CycleSpace (F : Fin m → Fin m → Bool) : Prop :=
+  (∀ v w, F v w = F w v) ∧ (∀ v, (H.flipSet F v).card % 2 = 0)
+
+/-- The cycle space is closed under the `Z₂` sum `xorF`. -/
+theorem cycleSpace_xorF {F F' : Fin m → Fin m → Bool}
+    (hF : H.CycleSpace F) (hF' : H.CycleSpace F') : H.CycleSpace (xorF F F') :=
+  ⟨fun v w => by simp only [xorF, hF.1 v w, hF'.1 v w], H.even_xorF hF.2 hF'.2⟩
+
+/-- The empty flip-subgraph (zero) is in the cycle space. -/
+theorem cycleSpace_const_false : H.CycleSpace (fun _ _ => false) := by
+  refine ⟨fun _ _ => rfl, fun v => ?_⟩
+  have hflip : H.flipSet (fun _ _ => false) v = ∅ := by ext w; simp [mem_flipSet]
+  rw [hflip, Finset.card_empty]
+
 /-- **The cycle-space gadget flip** on `CFIVertex H`, for an even subgraph `F`. Toggles every
 endpoint parity along an `F`-edge (`e^b_{v→w} ↦ e^{b ⊕ F v w}_{v→w}`) and complements each
 subset vertex by its `F`-incident neighbours (`a_S^v ↦ a_{S ∆ flipSet F v}^v`). The

@@ -1049,6 +1049,45 @@ theorem cfiFlipAut_mem_gensAt (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool
     h.cfiFlipAut F hEven ∈ gensAt adj P (cfiGaugeGens h) S :=
   ⟨⟨F, hEven, hFsymm, rfl⟩, cfiFlipAut_mem_stabilizerAt h F hEven hFsymm hP hS⟩
 
+/-! ### Part A (Stage A2-complete) — CFI-cov.2: the base sequence
+
+`CoversOrbits adj P gens bs ∅` terminates in `IsBase adj P (bs.foldl insert ∅)`. For an odd-degree CFI
+graph the axiom-free cascade discreteness (`theorem_1_HOR_cfi_oddDeg`) gives a discrete set, hence a base
+(`isBase_of_discrete_warmRefine`); enumerating it yields the ordered base sequence the coverage witness
+quantifies over. (The per-level coverage clauses are CFI-cov.3.) -/
+
+/-- **Discreteness ⟹ base.** If `warmRefine adj P (individualizedColouring n S)` is discrete then `S` is a
+base (`IsBase adj P S`) — at discrete depth the orbit partition collapses to equality
+(`orbit_iff_eq_of_discrete_warmRefine`). The general bridge from the cascade's `Discrete` output to the
+`IsBase` terminal of `CoversOrbits`. -/
+theorem isBase_of_discrete_warmRefine {S : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S))) : IsBase adj P S :=
+  fun v w hvw => (orbit_iff_eq_of_discrete_warmRefine hd v w).mp hvw
+
+/-- Folding `insert` over a list from `s` accumulates the list's elements: `= s ∪ l.toFinset`. -/
+theorem foldl_insert_eq_union (l : List (Fin n)) (s : Finset (Fin n)) :
+    l.foldl (fun acc b => insert b acc) s = s ∪ l.toFinset := by
+  induction l generalizing s with
+  | nil => simp
+  | cons a t ih =>
+    rw [List.foldl_cons, ih, List.toFinset_cons, Finset.insert_union, Finset.union_insert]
+
+/-- Folding `insert` over a list from `∅` rebuilds the list's underlying finset. -/
+theorem foldl_insert_empty_eq_toFinset (l : List (Fin n)) :
+    l.foldl (fun acc b => insert b acc) ∅ = l.toFinset := by
+  rw [foldl_insert_eq_union]; exact Finset.empty_union _
+
+/-- **CFI base sequence (odd-degree).** From the axiom-free cascade discreteness
+(`theorem_1_HOR_cfi_oddDeg`), an odd-degree CFI graph has an ordered base sequence: a list `bs` whose
+accumulated set `bs.foldl insert ∅` is a base. This is the terminal (`IsBase`) case a `CoversOrbits`
+witness for CFI requires; the per-level coverage is CFI-cov.3. -/
+theorem cfi_exists_base_seq (h : IsCFI' adj) (h_odd : h.OddDegree) :
+    ∃ bs : List (Fin n), IsBase adj P (bs.foldl (fun acc b => insert b acc) ∅) := by
+  obtain ⟨S, _, hd, _⟩ := h.theorem_1_HOR_cfi_oddDeg h_odd P
+  refine ⟨S.toList, ?_⟩
+  rw [foldl_insert_empty_eq_toFinset, Finset.toList_toFinset]
+  exact isBase_of_discrete_warmRefine hd
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).

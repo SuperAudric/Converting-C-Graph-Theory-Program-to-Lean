@@ -13,11 +13,12 @@
 > - **A4 — the concrete computable BSGS** mirroring the C# (`Level`/transversal/sift). Validation breadth;
 >   needed only for the *computable* object, not the abstract verdict.
 > - **The coverage witness for multi-step CFI** (in progress — CFI instance of A2-complete). A2-complete
->   reduces completeness to `CoversOrbits` over the path-fixing gauge generators. **CFI-cov.1 landed**
->   (2026-06-04): the residual-membership bridge `cfiFlipAut_residualAut` etc. (gauge flips ⟹
->   `ResidualAut`/`gensAt`; forward coverage). **Remaining (CFI-cov.2/3):** the cycle-space `Z₂^β` + base
->   sequence, and the *reverse* orbit-coverage (path-fixing flips realize each base point's full orbit) ⟹
->   `cfi_coversOrbits`. Firing content (C# already canonizes CFI(K₄–K₇)), not GI-hard. See §7.
+>   reduces completeness to `CoversOrbits` over the path-fixing gauge generators. **CFI-cov.1 + CFI-cov.2
+>   landed** (2026-06-04): the residual-membership bridge (`cfiFlipAut_residualAut` etc.; forward coverage),
+>   the cycle-space `Z₂^β` object (`CycleSpace`, `xorF`, `flipSet_xorF`, closure), and the odd-degree base
+>   sequence (`cfi_exists_base_seq`). **Remaining (CFI-cov.3):** the *reverse* orbit-coverage (path-fixing
+>   flips realize each base point's full orbit) ⟹ `cfi_coversOrbits`. Firing content (C# already canonizes
+>   CFI(K₄–K₇)), not GI-hard. See §7.
 >
 > A fresh reader can still use this doc as the full context/name index (Mathlib + internal) for consuming
 > A1–A3.5 / A2-complete or building A4.
@@ -358,13 +359,19 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
   `cfiGaugeGens` (the gauge generating set) + `cfiGaugeGens_residualAut_empty` (root soundness), and
   `cfiFlipAut_mem_gensAt` (path-fixing flip ∈ `gensAt (cfiGaugeGens h) S`). Connects the gauge-flip layer to
   the A2-complete `ResidualAut`/`StabilizerAt`/`gensAt`/`CoversOrbits` vocabulary.
-- **CFI-cov.2 (next):** the cycle-space `Z₂^β` structure and a canonical base sequence (`allSeeds` / forced-node
-  chain) for CFI.
+- **CFI-cov.2 — cycle-space `Z₂^β` + base sequence — LANDED 2026-06-04, axiom-clean.** *Cycle space*
+  (`CFI.lean`): `xorF` (the `Z₂` sum), `flipSet_xorF` (`flipSet (xorF F F') = flipSet F ∆ flipSet F'`),
+  `even_xorF`, `CycleSpace` (symmetric + even flip-subgraphs = the `Z₂^β` index set), `cycleSpace_xorF`
+  (closed under the sum), `cycleSpace_const_false` (zero). *Base sequence* (`Cascade.lean`):
+  `isBase_of_discrete_warmRefine` (the general `Discrete ⟹ IsBase` bridge), `foldl_insert_empty_eq_toFinset`,
+  and `cfi_exists_base_seq` (odd-degree CFI has an ordered base sequence, from the axiom-free cascade
+  discreteness `theorem_1_HOR_cfi_oddDeg`).
 - **CFI-cov.3 (the multi-week core):** the **reverse** orbit-coverage — at each level the path-fixing gauge
   flips' closure realizes the *full* `Aut_S^P`-orbit of the base point — yielding `cfi_coversOrbits`, hence
-  `closure (cfiGaugeGens h) = StabilizerAt ∅` and `|Aut(CFI)^P| = ∏ basic-orbit sizes`. This is the genuine
-  cycle-space content; the mechanism already canonizes CFI(K₄–K₇) in the C#, so it is firing content, not
-  GI-hard.
+  `closure (cfiGaugeGens h) = StabilizerAt ∅` and `|Aut(CFI)^P| = ∏ basic-orbit sizes`. Entry point: relate
+  `xorF` to flip composition (the `Z₂^β → Aut` homomorphism), then the `Aut(CFI(H)) ≅ Z₂^β ⋊ Aut(H)`
+  structure showing every path-fixing residual decomposes into path-fixing gauge flips. The mechanism already
+  canonizes CFI(K₄–K₇) in the C#, so it is firing content, not GI-hard.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
