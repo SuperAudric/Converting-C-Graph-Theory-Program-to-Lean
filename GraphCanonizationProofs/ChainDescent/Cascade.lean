@@ -1535,6 +1535,67 @@ theorem cfi_residualInvolutive (h : IsCFI' adj) {S : Finset (Fin n)}
     (hsep : PSeparatesGadgets adj P S h) : ResidualInvolutive adj P S :=
   fun _g hg => cfiAut_gadgetFixing_mul_self h hg.1 (gadgetPreserving_of_pSeparates h hg hsep)
 
+/-! #### CFI-cov.4 — the harvest wiring at a base-resolved `S`
+
+With `cfi_residualInvolutive` supplying the exponent-2 hypothesis, the de-classed coverage discharges the
+cross-branch harvest at any base-resolved `S` — *provided a base sequence from `S`*. The cascade gives a base
+at `allSeeds` (`theorem_1_HOR_cfi_oddDeg`); since `IsBase` is upward-closed, `(allSeeds \ S).toList` is a base
+sequence from `S`. The headline is at a **nonempty** `S` (`PSeparatesGadgets` at `∅` is vacuously false), so
+the order is the gauge-layer residual order, matching the decomposability picture. -/
+
+/-- **`IsBase` is upward-closed.** Individualizing more can only shrink the residual, so a base stays a base:
+`IsBase adj P S → S ⊆ T → IsBase adj P T`. -/
+theorem isBase_mono {S T : Finset (Fin n)} (hbase : IsBase adj P S) (hST : S ⊆ T) :
+    IsBase adj P T := by
+  rw [← stabilizerAt_eq_bot_iff_isBase] at hbase ⊢
+  rw [eq_bot_iff] at hbase ⊢
+  exact le_trans (stabilizerAt_mono hST) hbase
+
+/-- **A base sequence from any `S`** for an odd-degree CFI graph: the cascade discretizes at `allSeeds`
+(`theorem_1_HOR_cfi_oddDeg`), giving `IsBase allSeeds`; appending `allSeeds \ S` to `S` reaches a superset of
+`allSeeds`, still a base by `isBase_mono`. Generalizes `cfi_exists_base_seq` (the `S = ∅` case). -/
+theorem cfi_exists_base_seq_from (h : IsCFI' adj) (h_odd : h.OddDegree) (S : Finset (Fin n)) :
+    ∃ bs : List (Fin n), IsBase adj P (bs.foldl (fun acc b => insert b acc) S) := by
+  obtain ⟨S₀, _, hd, _⟩ := h.theorem_1_HOR_cfi_oddDeg h_odd P
+  have hbase₀ : IsBase adj P S₀ := isBase_of_discrete_warmRefine hd
+  refine ⟨(S₀ \ S).toList, ?_⟩
+  rw [foldl_insert_eq_union, Finset.toList_toFinset]
+  refine isBase_mono hbase₀ (fun x hx => ?_)
+  by_cases hxS : x ∈ S
+  · exact Finset.mem_union_left _ hxS
+  · exact Finset.mem_union_right _ (Finset.mem_sdiff.mpr ⟨hx, hxS⟩)
+
+/-- **CFI cross-branch harvest completeness in the base-resolved regime.** Where `P` separates gadgets at a
+committed set `S` (`PSeparatesGadgets`, so the residual is the exponent-2 gauge group), the closure of the
+harvested involutive residual automorphisms *is* the residual: `closure {g | ResidualAut adj P S g ∧ g²=1} =
+StabilizerAt adj P S`. Via `cfi_residualInvolutive` + the de-classed `closure_eq_stabilizerAt_of_residualInvolutive`
+over the base sequence `cfi_exists_base_seq_from` — **no** structure theorem, no `Φ(σ)` lift. -/
+theorem cfi_closure_eq_stabilizerAt_of_pSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
+    {S : Finset (Fin n)} (hsep : PSeparatesGadgets adj P S h) :
+    Subgroup.closure {g | ResidualAut adj P S g ∧ g * g = 1} = StabilizerAt adj P S := by
+  obtain ⟨bs, hbase⟩ := cfi_exists_base_seq_from (P := P) h h_odd S
+  have hgensAt : gensAt adj P {g | ResidualAut adj P S g ∧ g * g = 1} S
+               = {g | ResidualAut adj P S g ∧ g * g = 1} :=
+    Set.Subset.antisymm (fun g hg => hg.1) (fun g hg => ⟨hg, mem_stabilizerAt.mpr hg.1⟩)
+  have hmain := stabilizerAt_eq_closure_gensAt_of_coversOrbits (gens := {g | ResidualAut adj P S g ∧ g * g = 1})
+    bs (coversOrbits_of_residualInvolutive bs (cfi_residualInvolutive h hsep)
+      (fun g hg hginv => ⟨hg, hginv⟩) hbase)
+  rwa [hgensAt] at hmain
+
+/-- **`|Aut_S^P| = ∏ basic-orbit sizes` in the base-resolved regime.** Where `P` separates gadgets at `S`,
+the order of the residual group is the basic-orbit-size product along the CFI base sequence — the gauge-layer
+`Order = ∏ OrbitSize` of `PermutationGroup.cs`, computed from the folded involutive generators. The genuine
+de-classed payoff (needs the full coverage chain). -/
+theorem cfi_card_stabilizerAt_of_pSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
+    {S : Finset (Fin n)} (hsep : PSeparatesGadgets adj P S h) :
+    ∃ bs : List (Fin n), Nat.card (StabilizerAt adj P S) = orbitSizeProd adj P bs S := by
+  obtain ⟨bs, hbase⟩ := cfi_exists_base_seq_from (P := P) h h_odd S
+  refine ⟨bs, ?_⟩
+  have hcov := coversOrbits_of_residualInvolutive (gens := {g | ResidualAut adj P S g ∧ g * g = 1})
+    bs (cfi_residualInvolutive h hsep) (fun g hg hginv => ⟨hg, hginv⟩) hbase
+  have hcard := card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
+  rwa [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov] at hcard
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).

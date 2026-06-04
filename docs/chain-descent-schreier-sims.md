@@ -423,13 +423,15 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
     `mulSelf_endpoint`/`_subset`): a gadget-fixing CFI aut squares to `1` (type-preservation via the
     cross-gadget-neighbour distinguisher; endpoint involution via direction-preservation + 2-element-set
     injectivity; subset involution via determined-by-endpoint-adjacency). **Capstone `cfi_residualInvolutive`
-    (LANDED)**: `PSeparatesGadgets adj P S h → ResidualInvolutive adj P S` — the CFI witness
-    `coversOrbits_of_residualInvolutive` consumes, no structure theorem / `Φ(σ)` lift. **Remaining:** (i) the
-    harvest wiring (closure = StabilizerAt + order) at a nonempty base-resolved `S` — needs a
-    base-sequence-from-`S` helper (`PSeparatesGadgets` at `S=∅` is vacuously false); (ii) discharging
-    `PSeparatesGadgets` for the descent's actual `P` — the orthogonal visible/cascade leg
-    (scheme/`PPolynomial`). C# canonizes CFI(K₄–K₇); firing content, not GI-hard. Plan:
-    [`chain-descent-cfi-gauge-discharge-plan.md`](./chain-descent-cfi-gauge-discharge-plan.md).
+    (LANDED)**: `PSeparatesGadgets adj P S h → ResidualInvolutive adj P S`. **Harvest wiring LANDED
+    2026-06-04, axiom-clean**: `isBase_mono` (`IsBase` upward-closed), `cfi_exists_base_seq_from` (base
+    sequence from any `S`, via `allSeeds` + monotonicity), **`cfi_closure_eq_stabilizerAt_of_pSeparates`**
+    (`closure {g | ResidualAut adj P S g ∧ g²=1} = StabilizerAt adj P S`) and
+    **`cfi_card_stabilizerAt_of_pSeparates`** (`|Aut_S^P| = ∏ basic-orbit sizes`), at a nonempty base-resolved
+    `S` (`PSeparatesGadgets` at `S=∅` is vacuously false). **CFI-cov.4 is complete; the sole remaining CFI
+    obligation is discharging `PSeparatesGadgets`** for the descent's actual `P` — the orthogonal
+    visible/cascade leg (scheme/`PPolynomial`), a separate thread. C# canonizes CFI(K₄–K₇); firing content,
+    not GI-hard. Plan: [`chain-descent-cfi-gauge-discharge-plan.md`](./chain-descent-cfi-gauge-discharge-plan.md).
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
@@ -499,7 +501,9 @@ gauge-generation `StabilizerAt ∅ ≤ closure cfiGaugeGens`); `gadgetOf`, `PSep
 `subset_mem_iff_adj`, `isEndpt`(`_endpointVertex`/`_equivariant`), `not_isEndpt_subsetVertex`,
 `gadgetFixingAut_endpoint`/`_subset`/`_dir`, `mulSelf_endpoint`/`_subset`, `cfiAut_gadgetFixing_mul_self`
 (CFI-cov.4 Lemma B), `cfi_residualInvolutive` (CFI-cov.4 capstone A+B — `PSeparatesGadgets ⟹
-ResidualInvolutive`; plan `chain-descent-cfi-gauge-discharge-plan.md`).
+ResidualInvolutive`); `isBase_mono`, `cfi_exists_base_seq_from`, `cfi_closure_eq_stabilizerAt_of_pSeparates`,
+`cfi_card_stabilizerAt_of_pSeparates` (CFI-cov.4 harvest wiring — closure=StabilizerAt + order at a
+base-resolved `S`; plan `chain-descent-cfi-gauge-discharge-plan.md`).
 
 **C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
 161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,

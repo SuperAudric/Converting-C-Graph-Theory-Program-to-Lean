@@ -1,7 +1,8 @@
 # Build plan — discharging the CFI gauge nut (`ResidualInvolutive` via P-separation)
 
-> **STATUS (2026-06-04): Lemmas A + B + capstone `cfi_residualInvolutive` LANDED (axiom-clean). Remaining:
-> the harvest wiring (base sequence from a nonempty `S`) + discharging `PSeparatesGadgets`.** The build plan for the one remaining CFI
+> **STATUS (2026-06-04): Lemmas A + B + capstone + harvest wiring all LANDED (axiom-clean). The ONLY
+> remaining obligation is discharging `PSeparatesGadgets` for the descent's `P` (the orthogonal
+> visible/cascade leg).** The build plan for the one remaining CFI
 > obligation left after the de-classed coverage landed. Authoritative companions:
 > [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) §7 (Part A staging, CFI-cov.3),
 > [`chain-descent-declassing.md`](./chain-descent-declassing.md) (the de-classing architecture),
@@ -194,9 +195,15 @@ explicit cycle-space construction.
 > **Note on the regime (do not wire the harvest at `S = ∅`).** `PSeparatesGadgets adj P ∅` is *vacuously too
 > strong* — its premise `∀ s ∈ ∅, …` is trivial, so it would require *all* gadgets equal (false for `m ≥ 2`).
 > The `PSeparatesGadgets` regime is meaningful only at a **nonempty** `S` (where `P`-relations to `S`
-> distinguish gadgets). So the harvest capstone (closure = StabilizerAt, order) must be stated at a nonempty
-> base-resolved `S`, which needs a **base sequence from `S`** (e.g. `(allSeeds \ S).toList`, terminating at
-> the cascade's `IsBase allSeeds`). That base-seq-from-`S` helper is the next build step.
+> distinguish gadgets). So the harvest capstone (closure = StabilizerAt, order) is stated at a nonempty
+> base-resolved `S`, using a **base sequence from `S`** (`(allSeeds \ S).toList`, terminating at the cascade's
+> `IsBase allSeeds` lifted by `isBase_mono`).
+
+**✅ HARVEST WIRING LANDED 2026-06-04** (axiom-clean): `isBase_mono` (`IsBase` upward-closed),
+`cfi_exists_base_seq_from` (base sequence from any `S`), **`cfi_closure_eq_stabilizerAt_of_pSeparates`**
+(`closure {g | ResidualAut adj P S g ∧ g²=1} = StabilizerAt adj P S`) and
+**`cfi_card_stabilizerAt_of_pSeparates`** (`|Aut_S^P| = ∏ basic-orbit sizes`) — both from `cfi_residualInvolutive`
++ the de-classed coverage over `cfi_exists_base_seq_from`. CFI-cov.4 is complete modulo `PSeparatesGadgets`.
 
 ---
 
@@ -204,10 +211,15 @@ explicit cycle-space construction.
 
 1. **Lemma A** (`gadgetOf`, `PSeparatesGadgets`, `gadgetPreserving_of_pSeparates`) — ✅ LANDED.
 2. **Lemma B** (`cfiAut_gadgetFixing_mul_self`, B1–B4) — ✅ LANDED (the medium-risk grind, no surprises).
-3. **Capstone** `cfi_residualInvolutive` — ✅ LANDED. **Harvest wiring** (closure = StabilizerAt + order at a
-   nonempty base-resolved `S`, via a base-sequence-from-`S` helper) — NEXT.
+3. **Capstone** `cfi_residualInvolutive` — ✅ LANDED. **Harvest wiring** (`isBase_mono`,
+   `cfi_exists_base_seq_from`, `cfi_closure_eq_stabilizerAt_of_pSeparates`, `cfi_card_stabilizerAt_of_pSeparates`)
+   — ✅ LANDED.
 4. *(Optional)* gauge-generation extension: recover `g = cfiFlipAut F` (symmetric/even `F`) on top of B for
    the literal gauge statement.
+
+**CFI-cov.4 is complete.** The sole remaining obligation for the CFI cross-branch harvest is discharging
+**`PSeparatesGadgets`** for the descent's actual `P` (§6 below) — the orthogonal visible/cascade leg, a
+separate thread.
 
 Each step: builds green, axiom-clean; then regen+fill `PublicTheoremIndex.md`, update
 `chain-descent-schreier-sims.md` §7 + STATUS, and the `MEMORY.md` Part A pointer.
