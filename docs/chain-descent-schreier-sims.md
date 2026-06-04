@@ -210,9 +210,10 @@ All paths under `GraphCanonizationProofs/ChainDescent/`. These are what Part A b
 
 Originally absent in both Mathlib and the project. **Now built by A1–A3.5 + A2-complete** (Cascade.lean): the
 **cross-branch fold-in/consume seam, both directions** — *soundness* (`closure_le_stabilizerAt`,
-`covered_sound`) and *completeness* (A2-complete: `stabilizerAt_le_of_orbit_realized`, `CoversOrbits`,
-`stabilizerAt_eq_closure_of_coversOrbits`, `card_closure_eq_prod_of_coversOrbits` — `closure gens =
-StabilizerAt` under a coverage witness); the **per-level group-order recursion** (`card_stabilizerAt_eq_orbit_mul`);
+`covered_sound`) and *completeness* (A2-complete: `gensAt`, `stabilizerAt_le_closure_gensAt_step`,
+`CoversOrbits`, `stabilizerAt_eq_closure_gensAt_of_coversOrbits`, `closure_eq_stabilizerAt_empty_of_coversOrbits`,
+`card_closure_gensAt_eq_prod_of_coversOrbits` — `closure (gensAt … S) = StabilizerAt S` under a path-fixing
+coverage witness); the **per-level group-order recursion** (`card_stabilizerAt_eq_orbit_mul`);
 the **full order product over a base sequence** (A3.5 — `orbitSizeProd`, `card_stabilizerAt_eq_prod`,
 `card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base`); and the **stabilizer object + base
 predicate** (`StabilizerAt`, `stabilizerAt_eq_bot_iff_isBase`).
@@ -317,21 +318,39 @@ base sequence — pure induction, **no computable BSGS**, so separated out of A4
 A2 proved harvest **soundness** (`closure_le_stabilizerAt`: the folded chain stays `⊆ StabilizerAt`). The
 **completeness dual** — that the harvested generators *generate* the residual — was missing from the original
 A1–A4 staging, and is exactly what the conservation finding (`lockstep_disc_imp_stab_trivial`) redirected the
-project to. Built in `Cascade.lean` "Part A (Stage A2-complete)":
-- `stabilizerAt_le_of_orbit_realized` — the **one-level completeness core** (strong-generation step): if a
-  subgroup `H` contains the next base point's stabilizer and realizes the full `Aut_S^P`-orbit of that point,
-  then `StabilizerAt adj P S ≤ H`. The classical "an SGS generates the group" lemma; the dual of
+project to.
+
+> **Design note — the witness must be path-fixing (non-circularity).** A first cut required the realizer to be
+> *any* element of `closure gens` fixing the path. That is **circular**: since the residual shrinks down the
+> base (`StabilizerAt S ≤ StabilizerAt ∅`), `closure gens = StabilizerAt ∅` already realizes every deeper orbit,
+> so the "witness" is equivalent to the conclusion. The genuine reduction is the classical **strong generating
+> set** condition: the realizer at level `S` must come from the *path-fixing* generators
+> `gensAt adj P gens S := {g ∈ gens | g ∈ StabilizerAt adj P S}`, whose closure can be a *proper* subgroup of
+> `StabilizerAt S` even when `gens` generate the top group. That is what the per-level path-fixing harvest
+> (`CoveredByPathFixingAut`) actually supplies, and it is genuinely stronger than top-level generation.
+
+Built in `Cascade.lean` "Part A (Stage A2-complete)":
+- `gensAt adj P gens S` (path-fixing generators), with `gensAt_anti`, `closure_gensAt_le_stabilizerAt`,
+  `closure_gensAt_anti` (the descent step), `gensAt_empty_eq` (`gensAt … ∅ = gens`).
+- `stabilizerAt_le_closure_gensAt_step` — the **one-level completeness core** (strong-generation step): if the
+  path-fixing closure at the next level contains `StabilizerAt (insert b S)` and the path-fixing closure at `S`
+  realizes the full `Aut_S^P`-orbit of `b`, then it contains `StabilizerAt adj P S`. The dual of
   `closure_le_stabilizerAt`.
-- `CoversOrbits adj P gens bs S` — the **coverage witness** along a base sequence (the leaf-collision harvest
-  of strategy §4 step 6 supplies it): at each level the closure realizes the current residual orbit; the
-  honest analog of the within-cell depth witness, **class-conditional** (not unconditional).
-- `stabilizerAt_le_closure_of_coversOrbits` (the `≤` iteration), `stabilizerAt_eq_closure_of_coversOrbits`
-  (with A2 soundness, `closure gens = StabilizerAt` — the chain *is* the residual), and the capstone
-  `card_closure_eq_prod_of_coversOrbits` (with A3.5, the folded chain reproduces the residual **order** too).
-- *Open content (not abstraction):* discharging `CoversOrbits` for bounded-`tw` CFI — the mechanism already
-  canonizes CFI(K₄–K₇) in the C#; this is the remaining firing witness, not GI-hard.
-- *Bar (met):* `closure gens = StabilizerAt` under the coverage witness — the residual is *exactly* what the
-  harness folds in. Closes the cross-branch harvest the way A2 closed its soundness half.
+- `CoversOrbits adj P gens bs S` — the **coverage witness** along a base sequence: at each level the
+  *path-fixing* closure `closure (gensAt … S)` realizes the current residual orbit; the honest analog of the
+  within-cell depth witness, **class-conditional**. `coversOrbits_realize_of_mem` is the harvest interface
+  (path-fixing *generators* realizing the orbit discharge a step).
+- `stabilizerAt_le_closure_gensAt_of_coversOrbits` (the `≤` iteration), `stabilizerAt_eq_closure_gensAt_of_coversOrbits`
+  (`closure (gensAt … S) = StabilizerAt S`, soundness intrinsic), `closure_eq_stabilizerAt_empty_of_coversOrbits`
+  (root: `closure gens = StabilizerAt ∅`), and the capstone `card_closure_gensAt_eq_prod_of_coversOrbits` (with
+  A3.5, the folded chain reproduces the residual **order** too).
+- *Open content (not abstraction):* discharging `CoversOrbits` for bounded-`tw` CFI — i.e. exhibiting the
+  path-fixing gauge generators that realize each level's orbit. `swap_of_cellsAreOrbits_involutive` produces such
+  swapping automorphisms for the involutive `Z₂^β` case; that they are *in* the harvested `gens` is the
+  harvest-collection content, needing the CFI Aut-structure (the orbit-recovery §9 "Aut structure lemma",
+  multi-week). The mechanism already canonizes CFI(K₄–K₇) in the C#; not GI-hard.
+- *Bar (met):* `closure (gensAt … S) = StabilizerAt S` under the coverage witness — the residual is *exactly*
+  what the harness folds in. Closes the cross-branch harvest the way A2 closed its soundness half.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
@@ -387,9 +406,11 @@ project to. Built in `Cascade.lean` "Part A (Stage A2-complete)":
 `closure_le_stabilizerAt`, `orbit_pathFixing_sound`, `covered_sound` (A2 soundness); `card_stabilizerAt_pos`,
 `card_stabilizerAt_eq_one_iff_isBase`, `subgroupOf_insert_eq_stabilizer`, `card_stabilizer_eq`,
 `card_stabilizerAt_eq_orbit_mul` (A3); `orbitSizeProd`, `card_stabilizerAt_eq_prod`,
-`card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base` (A3.5); `stabilizerAt_le_of_orbit_realized`,
-`CoversOrbits`, `coversOrbits_isBase_foldl`, `stabilizerAt_le_closure_of_coversOrbits`,
-`stabilizerAt_eq_closure_of_coversOrbits`, `card_closure_eq_prod_of_coversOrbits` (A2-complete).
+`card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base` (A3.5); `gensAt`, `gensAt_anti`,
+`closure_gensAt_le_stabilizerAt`, `closure_gensAt_anti`, `gensAt_empty_eq`, `stabilizerAt_le_closure_gensAt_step`,
+`CoversOrbits`, `coversOrbits_realize_of_mem`, `coversOrbits_isBase_foldl`,
+`stabilizerAt_le_closure_gensAt_of_coversOrbits`, `stabilizerAt_eq_closure_gensAt_of_coversOrbits`,
+`closure_eq_stabilizerAt_empty_of_coversOrbits`, `card_closure_gensAt_eq_prod_of_coversOrbits` (A2-complete).
 
 **C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
 161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,

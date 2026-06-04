@@ -55,9 +55,10 @@
 > cross-branch group object is built, **both harvest directions**: `StabilizerAt` (residual `Aut_S^P` as a
 > `Subgroup`); the harvest **soundness** seam (fold-in ⊆ residual, prune sound); the rigid verdict (trivial
 > ⟺ base); the full `order = ∏ basic-orbit sizes` (`card_autP_eq_prod_of_base`); **and the harvest
-> *completeness* seam** (`stabilizerAt_eq_closure_of_coversOrbits`: `closure gens = StabilizerAt` under a
-> coverage witness, so the folded chain reproduces the residual group *and* its order). **The remaining
-> content is the coverage witness** (`CoversOrbits` for multi-step CFI bounded-`tw` — the honest analog of
+> *completeness* seam** (`closure_eq_stabilizerAt_empty_of_coversOrbits`: `closure gens = StabilizerAt ∅`
+> under a path-fixing coverage witness `CoversOrbits`, so the folded chain reproduces the residual group
+> *and* its order). **The remaining content is the coverage witness** (`CoversOrbits` for multi-step CFI
+> bounded-`tw` — the honest analog of
 > the within-cell depth witness, *not* GI-hard) and the concrete computable BSGS (A4, validation-only). The
 > abstract cross-branch mechanism toward "reaches a rigid or Cameron residual on all classes" is grounded.
 >

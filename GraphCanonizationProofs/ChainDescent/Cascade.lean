@@ -826,34 +826,73 @@ theorem card_autP_eq_prod_of_base (bs : List (Fin n))
 /-! ### Part A (Stage A2-complete) — the cross-branch harvest *completeness* seam
 
 Stage A2 proved harvest **soundness** (`closure_le_stabilizerAt`: the folded chain stays `⊆ StabilizerAt`).
-This is the **dual** — that the harvested generators *generate* the residual (`StabilizerAt ⊆ closure gens`),
-the property the multi-step conservation finding (`lockstep_disc_imp_stab_trivial`) redirected the project
-to. The mathematical heart is the classical *strong-generating-set-generates* fact: if a subgroup `H`
-contains the next base point's stabilizer and realizes the full residual orbit of that point, then `H` is
-the whole residual. Iterated down a base sequence, a **coverage witness** (`CoversOrbits` — the honest
-analog of the within-cell depth witness; the leaf-collision harvest of strategy §4 step 6 supplies it)
-gives `closure gens = StabilizerAt`. With Stage A3.5 this means the harvested chain reproduces both the
-residual **group** and its **order** `= ∏ basic-orbit sizes`.
+This is the **dual** — that the harvested generators *generate* the residual — the property the multi-step
+conservation finding (`lockstep_disc_imp_stab_trivial`) redirected the project to.
+
+**Why the realizers must be path-fixing (the genuine reduction).** A naive "every orbit element is realized
+by *some* element of `closure gens`" is *circular*: since the residual shrinks down the base
+(`StabilizerAt S ≤ StabilizerAt ∅`), `closure gens = StabilizerAt ∅` already realizes every deeper orbit, so
+that condition is equivalent to the conclusion. The honest content is the classical **strong generating set**
+condition: at level `S` the realizer must come from the *path-fixing* generators `gensAt adj P gens S`
+(the subset of `gens` lying in `StabilizerAt adj P S`), whose closure can be a *proper* subgroup of
+`StabilizerAt S` even when `gens` generate the top group — exactly what sifting/Schreier generators exist to
+establish, and exactly what the per-level path-fixing harvest (`CoveredByPathFixingAut`) supplies.
+
+Iterated down a base sequence, this **coverage witness** (`CoversOrbits`) gives
+`closure (gensAt … S) = StabilizerAt S`, hence `closure gens = StabilizerAt ∅` at the root; with Stage A3.5
+the harvested chain reproduces both the residual **group** and its **order** `= ∏ basic-orbit sizes`.
 ([`docs/chain-descent-schreier-sims.md`](../../../docs/chain-descent-schreier-sims.md), Stage A2-complete.) -/
 
-/-- **The one-level completeness core (strong-generation step).** If a subgroup `H` contains the
-point-stabilizer `StabilizerAt adj P (insert b S)` and **realizes the full `Aut_S^P`-orbit of `b`** (every
-orbit-mate `w` of `b` is `h b` for some residual `h ∈ H`), then `H` already contains the whole residual
-`StabilizerAt adj P S`. The dual of `closure_le_stabilizerAt`: orbit-coverage + next level ⟹ this level.
-Proof: for `g ∈ StabilizerAt S`, pick `h ∈ H` with `h b = g b`; then `h⁻¹ * g` fixes `b`, lies in
-`StabilizerAt (insert b S) ≤ H`, so `g = h * (h⁻¹ * g) ∈ H`. -/
-theorem stabilizerAt_le_of_orbit_realized {S : Finset (Fin n)}
-    {H : Subgroup (Equiv.Perm (Fin n))} (b : Fin n)
-    (hstab : StabilizerAt adj P (insert b S) ≤ H)
-    (hreal : ∀ w, OrbitPartition adj P S b w → ∃ h ∈ H, ResidualAut adj P S h ∧ h b = w) :
-    StabilizerAt adj P S ≤ H := by
+/-- **Path-fixing generators at `S`.** The subset of `gens` lying in `StabilizerAt adj P S` (i.e. fixing the
+committed path `S` pointwise). The strong-generating-set machinery realizes each level's orbit from *these*,
+not from the full `closure gens` — see the section note on why that distinction is the genuine content. -/
+def gensAt (adj : AdjMatrix n) (P : PMatrix n) (gens : Set (Equiv.Perm (Fin n)))
+    (S : Finset (Fin n)) : Set (Equiv.Perm (Fin n)) :=
+  {g | g ∈ gens ∧ g ∈ StabilizerAt adj P S}
+
+/-- The path-fixing generators shrink as the path grows: `S ⊆ S' → gensAt … S' ⊆ gensAt … S`
+(fixing more points is a stronger condition), via `stabilizerAt_mono`. -/
+theorem gensAt_anti {gens : Set (Equiv.Perm (Fin n))} {S S' : Finset (Fin n)} (h : S ⊆ S') :
+    gensAt adj P gens S' ⊆ gensAt adj P gens S :=
+  fun _ hg => ⟨hg.1, stabilizerAt_mono h hg.2⟩
+
+/-- The closure of the path-fixing generators is inside the residual (soundness, intrinsic to `gensAt`). -/
+theorem closure_gensAt_le_stabilizerAt {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)} :
+    Subgroup.closure (gensAt adj P gens S) ≤ StabilizerAt adj P S :=
+  (Subgroup.closure_le _).mpr (fun _ hg => hg.2)
+
+/-- Monotonicity of the path-fixing closure: `S ⊆ S' → closure (gensAt … S') ≤ closure (gensAt … S)`.
+The step that makes the completeness induction descend the base. -/
+theorem closure_gensAt_anti {gens : Set (Equiv.Perm (Fin n))} {S S' : Finset (Fin n)} (h : S ⊆ S') :
+    Subgroup.closure (gensAt adj P gens S') ≤ Subgroup.closure (gensAt adj P gens S) :=
+  Subgroup.closure_mono (gensAt_anti h)
+
+/-- At the empty path the path-fixing condition is vacuous, so `gensAt … ∅ = gens` once every generator is
+a `P`-preserving automorphism (the Stage-A2 soundness hypothesis, here as `∈ StabilizerAt ∅`). -/
+theorem gensAt_empty_eq {gens : Set (Equiv.Perm (Fin n))}
+    (hsound : ∀ g ∈ gens, g ∈ StabilizerAt adj P ∅) : gensAt adj P gens ∅ = gens := by
+  ext g; exact ⟨fun h => h.1, fun h => ⟨h, hsound g h⟩⟩
+
+/-- **The one-level completeness core (strong-generation step).** If the *path-fixing* closure at the next
+level contains `StabilizerAt adj P (insert b S)`, and the path-fixing closure at `S` **realizes the full
+`Aut_S^P`-orbit of `b`**, then it already contains the whole residual `StabilizerAt adj P S`. The dual of
+`closure_le_stabilizerAt`. Proof: for `g ∈ StabilizerAt S`, pick `h ∈ closure (gensAt … S)` with `h b = g b`;
+then `h⁻¹ * g` fixes `b`, lies in `StabilizerAt (insert b S) ≤ closure (gensAt … (insert b S)) ≤
+closure (gensAt … S)`, so `g = h * (h⁻¹ * g) ∈ closure (gensAt … S)`. The `≤ closure (gensAt … S)` step is
+`closure_gensAt_anti` — where the path-fixing form (not the full `closure gens`) is essential. -/
+theorem stabilizerAt_le_closure_gensAt_step {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)}
+    (b : Fin n)
+    (hstab : StabilizerAt adj P (insert b S) ≤ Subgroup.closure (gensAt adj P gens (insert b S)))
+    (hreal : ∀ w, OrbitPartition adj P S b w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens S), h b = w) :
+    StabilizerAt adj P S ≤ Subgroup.closure (gensAt adj P gens S) := by
   intro g hg
   have hgr : ResidualAut adj P S g := mem_stabilizerAt.mp hg
-  obtain ⟨h, hhH, hhr, hhb⟩ := hreal (g b) (orbitPartition_iff_residualAut.mpr ⟨g, hgr, rfl⟩)
+  obtain ⟨h, hhcl, hhb⟩ := hreal (g b) (orbitPartition_iff_residualAut.mpr ⟨g, hgr, rfl⟩)
+  have hhS : h ∈ StabilizerAt adj P S := closure_gensAt_le_stabilizerAt hhcl
   have hfixb : (h⁻¹ * g) b = b := by
     rw [Equiv.Perm.mul_apply, ← hhb, ← Equiv.Perm.mul_apply, inv_mul_cancel, Equiv.Perm.one_apply]
-  have hmemS : h⁻¹ * g ∈ StabilizerAt adj P S :=
-    mul_mem (inv_mem (mem_stabilizerAt.mpr hhr)) hg
+  have hmemS : h⁻¹ * g ∈ StabilizerAt adj P S := mul_mem (inv_mem hhS) hg
   obtain ⟨hA, hP, hF⟩ := mem_stabilizerAt.mp hmemS
   have hins : h⁻¹ * g ∈ StabilizerAt adj P (insert b S) :=
     mem_stabilizerAt.mpr ⟨hA, hP, by
@@ -861,21 +900,35 @@ theorem stabilizerAt_le_of_orbit_realized {S : Finset (Fin n)}
       rcases Finset.mem_insert.mp hv with rfl | hvS
       · exact hfixb
       · exact hF v hvS⟩
-  have hgH : h * (h⁻¹ * g) ∈ H := mul_mem hhH (hstab hins)
-  rwa [mul_inv_cancel_left] at hgH
+  have hdeep : h⁻¹ * g ∈ Subgroup.closure (gensAt adj P gens S) :=
+    closure_gensAt_anti (Finset.subset_insert b S) (hstab hins)
+  have hmul : h * (h⁻¹ * g) ∈ Subgroup.closure (gensAt adj P gens S) := mul_mem hhcl hdeep
+  rwa [mul_inv_cancel_left] at hmul
 
 /-- **Orbit-coverage along a base sequence (the harvest's strong-generating-set witness).** Consuming `bs`
-from `S`: at the head `b`, the harvested set's closure realizes the full `Aut_S^P`-orbit of `b` (via
-residual elements of `closure gens`), then the same recursively at `insert b S`; the empty tail requires `S`
-a base. The honest analog of the within-cell depth witness — the leaf-collision harvest (strategy §4 step 6)
-is what supplies it; class-conditional, not unconditional (multi-step CFI bounded-`tw` is the witness). -/
+from `S`: at the head `b`, the **path-fixing** generators' closure `closure (gensAt … S)` realizes the full
+`Aut_S^P`-orbit of `b`, then the same recursively at `insert b S`; the empty tail requires `S` a base. The
+honest analog of the within-cell depth witness — the per-level path-fixing harvest (`CoveredByPathFixingAut`,
+strategy §4 step 6) supplies it; class-conditional, not unconditional (multi-step CFI bounded-`tw` is the
+witness). Genuinely *stronger* than "`gens` generate the top group" — see the section note. -/
 def CoversOrbits (adj : AdjMatrix n) (P : PMatrix n) (gens : Set (Equiv.Perm (Fin n))) :
     List (Fin n) → Finset (Fin n) → Prop
   | [], S => IsBase adj P S
   | b :: bs, S =>
       (∀ w, OrbitPartition adj P S b w →
-          ∃ h ∈ Subgroup.closure gens, ResidualAut adj P S h ∧ h b = w)
+          ∃ h ∈ Subgroup.closure (gensAt adj P gens S), h b = w)
         ∧ CoversOrbits adj P gens bs (insert b S)
+
+/-- **Coverage step from path-fixing realizers (the harvest interface).** If the path-fixing *generators*
+themselves (`gensAt … S`, not merely their closure) realize `b`'s full orbit, the coverage clause holds —
+the realizers land in `closure (gensAt … S)` via `Subgroup.subset_closure`. This is the hook concrete
+gauge-generator work (CFI / schemes) plugs into: exhibit, among the path-fixing harvested generators at `S`,
+one mapping `b` to each orbit-mate. (`swap_of_cellsAreOrbits_involutive` produces such automorphisms for the
+involutive/`Z₂^β` case; whether they are *in* `gens` is the harvest-collection content.) -/
+theorem coversOrbits_realize_of_mem {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)} {b : Fin n}
+    (hreal : ∀ w, OrbitPartition adj P S b w → ∃ h ∈ gensAt adj P gens S, h b = w) :
+    ∀ w, OrbitPartition adj P S b w → ∃ h ∈ Subgroup.closure (gensAt adj P gens S), h b = w :=
+  fun w hw => let ⟨h, hmem, hb⟩ := hreal w hw; ⟨h, Subgroup.subset_closure hmem, hb⟩
 
 /-- The terminal accumulated set of a coverage witness is a base (matches A3.5's `foldl`). -/
 theorem coversOrbits_isBase_foldl {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
@@ -885,38 +938,43 @@ theorem coversOrbits_isBase_foldl {gens : Set (Equiv.Perm (Fin n))} (bs : List (
   | nil => exact hcov
   | cons b bs ih => simpa using ih hcov.2
 
-/-- **Harvest completeness (`≤`).** A coverage witness makes the harvested closure contain the whole
-residual: `StabilizerAt adj P S ≤ Subgroup.closure gens`. Iterates `stabilizerAt_le_of_orbit_realized` down
-the base; the dual of `closure_le_stabilizerAt`. -/
-theorem stabilizerAt_le_closure_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))}
+/-- **Harvest completeness (`≤`).** A coverage witness makes the path-fixing closure contain the residual:
+`StabilizerAt adj P S ≤ Subgroup.closure (gensAt adj P gens S)`. Iterates `stabilizerAt_le_closure_gensAt_step`
+down the base; the dual of `closure_le_stabilizerAt`. -/
+theorem stabilizerAt_le_closure_gensAt_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))}
     (bs : List (Fin n)) {S : Finset (Fin n)} (hcov : CoversOrbits adj P gens bs S) :
-    StabilizerAt adj P S ≤ Subgroup.closure gens := by
+    StabilizerAt adj P S ≤ Subgroup.closure (gensAt adj P gens S) := by
   induction bs generalizing S with
   | nil => rw [stabilizerAt_eq_bot_iff_isBase.mpr hcov]; exact bot_le
-  | cons b bs ih => exact stabilizerAt_le_of_orbit_realized b (ih hcov.2) hcov.1
+  | cons b bs ih => exact stabilizerAt_le_closure_gensAt_step b (ih hcov.2) hcov.1
 
-/-- **Harvest completeness (equality) — the harvested chain *is* the residual.** Coverage plus the Stage-A2
-soundness hypothesis (every generator a verified path-fixing automorphism) give
-`Subgroup.closure gens = StabilizerAt adj P S`: soundness (`≤`) is `closure_le_stabilizerAt`, completeness
-(`≥`) is the coverage witness. This closes the cross-branch harvest the way Stage A2 closed its soundness
-half. -/
-theorem stabilizerAt_eq_closure_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))}
-    (bs : List (Fin n)) {S : Finset (Fin n)}
-    (hsound : ∀ g ∈ gens, ResidualAut adj P S g)
-    (hcov : CoversOrbits adj P gens bs S) :
-    Subgroup.closure gens = StabilizerAt adj P S :=
-  le_antisymm (closure_le_stabilizerAt hsound) (stabilizerAt_le_closure_of_coversOrbits bs hcov)
+/-- **Harvest completeness (equality) — the path-fixing closure *is* the residual.** Soundness (`≤`,
+`closure_gensAt_le_stabilizerAt`, intrinsic to `gensAt`) and the coverage witness (`≥`) give
+`Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S`. No separate soundness hypothesis needed. -/
+theorem stabilizerAt_eq_closure_gensAt_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)} (hcov : CoversOrbits adj P gens bs S) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
+  le_antisymm closure_gensAt_le_stabilizerAt (stabilizerAt_le_closure_gensAt_of_coversOrbits bs hcov)
+
+/-- **Harvest completeness at the root — the harvested chain *is* `Aut(G)^P`.** At `S = ∅` the path-fixing
+condition is vacuous (`gensAt_empty_eq`), so a coverage witness plus the Stage-A2 soundness hypothesis give
+`Subgroup.closure gens = StabilizerAt adj P ∅` — the folded generators generate exactly the `P`-preserving
+automorphism group. Closes the cross-branch harvest the way Stage A2 closed its soundness half. -/
+theorem closure_eq_stabilizerAt_empty_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) (hsound : ∀ g ∈ gens, g ∈ StabilizerAt adj P ∅)
+    (hcov : CoversOrbits adj P gens bs ∅) :
+    Subgroup.closure gens = StabilizerAt adj P ∅ := by
+  rw [← gensAt_empty_eq hsound]
+  exact stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov
 
 /-- **Capstone — the harvested chain reproduces the residual *order*.** With Stage A3.5, a coverage witness
-gives `Nat.card (Subgroup.closure gens) = orbitSizeProd adj P bs S` (= `∏ basic-orbit sizes`): the
-cross-branch harvest recovers not just the residual group but its order — the `Order = ∏ OrbitSize` of
-`PermutationGroup.cs`, computed from the *folded* generators. -/
-theorem card_closure_eq_prod_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))}
-    (bs : List (Fin n)) {S : Finset (Fin n)}
-    (hsound : ∀ g ∈ gens, ResidualAut adj P S g)
-    (hcov : CoversOrbits adj P gens bs S) :
-    Nat.card (Subgroup.closure gens) = orbitSizeProd adj P bs S := by
-  rw [stabilizerAt_eq_closure_of_coversOrbits bs hsound hcov]
+gives `Nat.card (Subgroup.closure (gensAt adj P gens S)) = orbitSizeProd adj P bs S` (= `∏ basic-orbit
+sizes`): the cross-branch harvest recovers not just the residual group but its order — the
+`Order = ∏ OrbitSize` of `PermutationGroup.cs`, computed from the *folded* path-fixing generators. -/
+theorem card_closure_gensAt_eq_prod_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)} (hcov : CoversOrbits adj P gens bs S) :
+    Nat.card (Subgroup.closure (gensAt adj P gens S)) = orbitSizeProd adj P bs S := by
+  rw [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov]
   exact card_stabilizerAt_eq_prod_of_base bs S (coversOrbits_isBase_foldl bs hcov)
 
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
