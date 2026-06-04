@@ -1312,6 +1312,229 @@ theorem gadgetPreserving_of_pSeparates (h : IsCFI' adj) {S : Finset (Fin n)}
   have hP : P (g x) (g s) = P x s := hg.2.1 x s
   rwa [hgs] at hP
 
+/-! #### CFI-cov.4 Lemma B — a gadget-fixing CFI automorphism is an involution
+
+Building blocks first (data/adjacency helpers), then the three steps (type preservation, `g²` fixes
+endpoints, `g²` fixes subsets), then the assembly `cfiAut_gadgetFixing_mul_self`. Plan:
+[`docs/chain-descent-cfi-gauge-discharge-plan.md`](../../../docs/chain-descent-cfi-gauge-discharge-plan.md) §4. -/
+
+/-- `gadgetOf` of a subset vertex is its gadget. -/
+@[simp] theorem gadgetOf_subsetVertex (h : IsCFI' adj) {v : Fin h.m} {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v) : gadgetOf h (h.subsetVertex hS) = v := by
+  unfold gadgetOf; rw [h.e_subsetVertex]; rfl
+
+/-- `gadgetOf` of an endpoint vertex is its gadget. -/
+@[simp] theorem gadgetOf_endpointVertex (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (b : Bool) : gadgetOf h (h.endpointVertex hw b) = v := by
+  unfold gadgetOf; rw [h.e_endpointVertex]; rfl
+
+/-- **Vertex destructor.** Every `x : Fin n` is a subset vertex or an endpoint vertex of the CFI graph. -/
+theorem exists_vertex_form (h : IsCFI' adj) (x : Fin n) :
+    (∃ (v : Fin h.m) (S : Finset (Fin h.m)) (hS : S ∈ h.H.evenSubsetsOfNeighbors v),
+        x = h.subsetVertex hS) ∨
+    (∃ (v w : Fin h.m) (hw : w ∈ h.H.neighbors v) (b : Bool), x = h.endpointVertex hw b) := by
+  rcases hex : h.e x with ⟨v, S, hS⟩ | ⟨v, ⟨w, hw⟩, b⟩
+  · refine Or.inl ⟨v, S, hS, h.e.injective ?_⟩
+    rw [h.e_subsetVertex, hex]; rfl
+  · refine Or.inr ⟨v, w, hw, b, h.e.injective ?_⟩
+    rw [h.e_endpointVertex, hex]; rfl
+
+/-- Endpoint vertices at the same gadget/direction are equal only for equal parity bits. -/
+theorem endpointVertex_bool_inj (h : IsCFI' adj) {v w : Fin h.m} (hw : w ∈ h.H.neighbors v)
+    {b₁ b₂ : Bool} (heq : h.endpointVertex hw b₁ = h.endpointVertex hw b₂) : b₁ = b₂ := by
+  have h2 : h.H.endpoint hw b₁ = h.H.endpoint hw b₂ := by
+    have := congrArg h.e heq; rwa [h.e_endpointVertex, h.e_endpointVertex] at this
+  rw [CFIBase.endpoint, CFIBase.endpoint] at h2
+  simp only [Sum.inr.injEq, Sigma.mk.inj_iff, heq_eq_eq, Prod.mk.injEq, true_and] at h2
+  exact h2
+
+/-- Endpoint vertices at gadget `v` are equal only for equal direction and parity. -/
+theorem endpointVertex_inj (h : IsCFI' adj) {v w₁ w₂ : Fin h.m}
+    (hw₁ : w₁ ∈ h.H.neighbors v) (hw₂ : w₂ ∈ h.H.neighbors v) {b₁ b₂ : Bool}
+    (heq : h.endpointVertex hw₁ b₁ = h.endpointVertex hw₂ b₂) : w₁ = w₂ ∧ b₁ = b₂ := by
+  have h2 : h.H.endpoint hw₁ b₁ = h.H.endpoint hw₂ b₂ := by
+    have := congrArg h.e heq; rwa [h.e_endpointVertex, h.e_endpointVertex] at this
+  rw [CFIBase.endpoint, CFIBase.endpoint] at h2
+  simp only [Sum.inr.injEq, Sigma.mk.inj_iff, heq_eq_eq, Prod.mk.injEq, Subtype.mk.injEq, true_and] at h2
+  exact h2
+
+/-- **A subset vertex's membership is read off its adjacency to the `b=false` endpoints.**
+`w ∈ S ↔ e^0_{v→w} ~ a_S^v`. The fact that lets `g²` (fixing endpoints) pin a subset vertex. -/
+theorem subset_mem_iff_adj (h : IsCFI' adj) {v : Fin h.m} {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v) {w : Fin h.m} (hw : w ∈ h.H.neighbors v) :
+    adj.adj (h.endpointVertex hw false) (h.subsetVertex hS) = 1 ↔ w ∈ S := by
+  rw [h.adj_subsetVertex_eq_one_iff hS (h.endpointVertex hw false)]
+  constructor
+  · rintro ⟨w', hw', b, hpar, heq⟩
+    obtain ⟨hww, hbb⟩ := endpointVertex_inj h hw hw' heq
+    subst hww; subst hbb
+    simpa using hpar
+  · intro hwS
+    exact ⟨w, hw, false, by simp [hwS], rfl⟩
+
+/-- **Has a cross-gadget neighbour.** The structural distinguisher of endpoint vertices: an endpoint has a
+bridge neighbour in another gadget, a subset vertex's neighbours are all in its own gadget. -/
+def isEndpt (h : IsCFI' adj) (x : Fin n) : Prop :=
+  ∃ y, adj.adj x y = 1 ∧ gadgetOf h y ≠ gadgetOf h x
+
+/-- An endpoint vertex has a cross-gadget neighbour (its bridge partner). -/
+theorem isEndpt_endpointVertex (h : IsCFI' adj) {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    isEndpt h (h.endpointVertex hw b) := by
+  refine ⟨h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b, ?_, ?_⟩
+  · rw [h.adj_endpointVertex_eq_one_iff]; exact ⟨rfl, rfl, rfl⟩
+  · simp only [gadgetOf_endpointVertex]
+    intro heq
+    exact h.H.not_self_mem_neighbors v (heq ▸ hw)
+
+/-- A subset vertex has no cross-gadget neighbour (all its neighbours are endpoints at its gadget). -/
+theorem not_isEndpt_subsetVertex (h : IsCFI' adj) {v : Fin h.m} {S : Finset (Fin h.m)}
+    (hS : S ∈ h.H.evenSubsetsOfNeighbors v) : ¬ isEndpt h (h.subsetVertex hS) := by
+  rintro ⟨y, hadj, hg⟩
+  rw [h.adj_symm] at hadj
+  obtain ⟨w', hw', b, _, rfl⟩ := (h.adj_subsetVertex_eq_one_iff hS y).mp hadj
+  apply hg
+  rw [gadgetOf_endpointVertex, gadgetOf_subsetVertex]
+
+/-- **`isEndpt` is automorphism-invariant** for a gadget-fixing automorphism: substitute `y = g z`. -/
+theorem isEndpt_equivariant (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x) (x : Fin n) :
+    isEndpt h (g x) ↔ isEndpt h x := by
+  constructor
+  · rintro ⟨y, hadj, hg⟩
+    refine ⟨g.symm y, ?_, ?_⟩
+    · have h1 := hAut x (g.symm y); rw [Equiv.apply_symm_apply] at h1; rw [← h1]; exact hadj
+    · have e1 := hfix (g.symm y); rw [Equiv.apply_symm_apply] at e1
+      rw [← e1, ← hfix x]; exact hg
+  · rintro ⟨z, hadj, hg⟩
+    exact ⟨g z, by rw [hAut x z]; exact hadj, by rw [hfix z, hfix x]; exact hg⟩
+
+/-- **B1 (type preservation, endpoints).** A gadget-fixing automorphism maps an endpoint vertex to an
+endpoint vertex at the same gadget. -/
+theorem gadgetFixingAut_endpoint (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x)
+    {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    ∃ (w' : Fin h.m) (hw' : w' ∈ h.H.neighbors v) (b' : Bool),
+      g (h.endpointVertex hw b) = h.endpointVertex hw' b' := by
+  have hE : isEndpt h (g (h.endpointVertex hw b)) :=
+    (isEndpt_equivariant h hAut hfix _).mpr (isEndpt_endpointVertex h hw b)
+  rcases exists_vertex_form h (g (h.endpointVertex hw b)) with ⟨v2, S2, hS2, hx⟩ | ⟨v2, w2, hw2, b2, hx⟩
+  · exact absurd (hx ▸ hE) (not_isEndpt_subsetVertex h hS2)
+  · have hgad : gadgetOf h (g (h.endpointVertex hw b)) = v := by
+      rw [hfix (h.endpointVertex hw b), gadgetOf_endpointVertex]
+    rw [hx, gadgetOf_endpointVertex] at hgad
+    subst hgad
+    exact ⟨w2, hw2, b2, hx⟩
+
+/-- **B1 (type preservation, subsets).** A gadget-fixing automorphism maps a subset vertex to a subset
+vertex at the same gadget. -/
+theorem gadgetFixingAut_subset (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x)
+    {v : Fin h.m} {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v) :
+    ∃ (S' : Finset (Fin h.m)) (hS' : S' ∈ h.H.evenSubsetsOfNeighbors v),
+      g (h.subsetVertex hS) = h.subsetVertex hS' := by
+  have hNE : ¬ isEndpt h (g (h.subsetVertex hS)) := by
+    rw [isEndpt_equivariant h hAut hfix]; exact not_isEndpt_subsetVertex h hS
+  rcases exists_vertex_form h (g (h.subsetVertex hS)) with ⟨v2, S2, hS2, hx⟩ | ⟨v2, w2, hw2, b2, hx⟩
+  · have hgad : gadgetOf h (g (h.subsetVertex hS)) = v := by
+      rw [hfix (h.subsetVertex hS), gadgetOf_subsetVertex]
+    rw [hx, gadgetOf_subsetVertex] at hgad
+    subst hgad
+    exact ⟨S2, hS2, hx⟩
+  · exact absurd (isEndpt_endpointVertex h hw2 b2) (hx ▸ hNE)
+
+/-- **B2 (direction preservation).** A gadget-fixing automorphism maps `e^b_{v→w}` to `e^{b'}_{v→w}` (the
+bridge target `w` is preserved): only the parity bit may change. -/
+theorem gadgetFixingAut_dir (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x)
+    {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    ∃ b', g (h.endpointVertex hw b) = h.endpointVertex hw b' := by
+  obtain ⟨w', hw', b', hx⟩ := gadgetFixingAut_endpoint h hAut hfix hw b
+  obtain ⟨w'', hw'', b'', hy⟩ := gadgetFixingAut_endpoint h hAut hfix (h.H.mem_neighbors_symm.mp hw) b
+  have hbridge : adj.adj (h.endpointVertex hw b)
+      (h.endpointVertex (h.H.mem_neighbors_symm.mp hw) b) = 1 := by
+    rw [h.adj_endpointVertex_eq_one_iff]; exact ⟨rfl, rfl, rfl⟩
+  have hg : adj.adj (h.endpointVertex hw' b') (h.endpointVertex hw'' b'') = 1 := by
+    rw [← hx, ← hy, hAut]; exact hbridge
+  rw [h.adj_endpointVertex_eq_one_iff] at hg
+  obtain ⟨_, hw'w, _⟩ := hg
+  subst hw'w
+  exact ⟨b', hx⟩
+
+/-- **B2 (`g²` fixes endpoints).** A gadget-fixing automorphism maps the parity pair `{e^0_{v→w}, e^1_{v→w}}`
+into itself (direction preserved, `gadgetFixingAut_dir`); being injective on a 2-element set, it squares to
+the identity there. -/
+theorem mulSelf_endpoint (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x)
+    {v w : Fin h.m} (hw : w ∈ h.H.neighbors v) (b : Bool) :
+    g (g (h.endpointVertex hw b)) = h.endpointVertex hw b := by
+  obtain ⟨b1, h1⟩ := gadgetFixingAut_dir h hAut hfix hw b
+  obtain ⟨b2, h2⟩ := gadgetFixingAut_dir h hAut hfix hw b1
+  have key : b2 = b := by
+    by_cases hb1b : b1 = b
+    · subst hb1b
+      exact (endpointVertex_bool_inj h hw (h1.symm.trans h2)).symm
+    · by_cases hb2b1 : b2 = b1
+      · exfalso; subst hb2b1
+        exact hb1b (endpointVertex_bool_inj h hw (g.injective (h1.trans h2.symm))).symm
+      · have bp : ∀ {a x y : Bool}, x ≠ a → y ≠ x → y = a := by decide
+        exact bp hb1b hb2b1
+  rw [h1, h2, key]
+
+/-- **B3 (`g²` fixes subsets).** `g²` preserves adjacency and fixes every endpoint (B2), so a subset vertex
+and its `g²`-image have identical adjacency to all endpoints; a subset vertex is determined by that
+(`subset_mem_iff_adj`), so `g²` fixes it. -/
+theorem mulSelf_subset (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x)
+    {v : Fin h.m} {S : Finset (Fin h.m)} (hS : S ∈ h.H.evenSubsetsOfNeighbors v) :
+    g (g (h.subsetVertex hS)) = h.subsetVertex hS := by
+  obtain ⟨S1, hS1, h1⟩ := gadgetFixingAut_subset h hAut hfix hS
+  obtain ⟨S2, hS2, h2⟩ := gadgetFixingAut_subset h hAut hfix hS1
+  rw [h1, h2]
+  have hSsub : S ⊆ h.H.neighbors v := (h.H.mem_evenSubsetsOfNeighbors.mp hS).1
+  have hS2sub : S2 ⊆ h.H.neighbors v := (h.H.mem_evenSubsetsOfNeighbors.mp hS2).1
+  have hSeq : S2 = S := by
+    ext w
+    by_cases hw : w ∈ h.H.neighbors v
+    · have ha := mulSelf_endpoint h hAut hfix hw false
+      have hb : g (g (h.subsetVertex hS)) = h.subsetVertex hS2 := by rw [h1, h2]
+      have step : adj.adj (g (g (h.endpointVertex hw false))) (g (g (h.subsetVertex hS)))
+                = adj.adj (h.endpointVertex hw false) (h.subsetVertex hS) := by rw [hAut, hAut]
+      rw [ha, hb] at step
+      constructor
+      · intro hwS2
+        exact (subset_mem_iff_adj h hS hw).mp (step.symm.trans ((subset_mem_iff_adj h hS2 hw).mpr hwS2))
+      · intro hwS
+        exact (subset_mem_iff_adj h hS2 hw).mp (step.trans ((subset_mem_iff_adj h hS hw).mpr hwS))
+    · constructor
+      · intro hwS2; exact absurd (hS2sub hwS2) hw
+      · intro hwS; exact absurd (hSsub hwS) hw
+  subst hSeq
+  rfl
+
+/-- **Lemma B — a gadget-fixing CFI automorphism is an involution.** `IsAut g adj` together with
+gadget-preservation (`hfix`) forces `g * g = 1`: by the destructor every vertex is a subset (B3) or endpoint
+(B2) vertex, and `g²` fixes both. Combined with Lemma A (`gadgetPreserving_of_pSeparates`), this discharges
+`ResidualInvolutive` for CFI in the base-resolved (`PSeparatesGadgets`) regime. -/
+theorem cfiAut_gadgetFixing_mul_self (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
+    (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x) :
+    g * g = 1 := by
+  refine Equiv.ext (fun x => ?_)
+  rw [Equiv.Perm.mul_apply, Equiv.Perm.one_apply]
+  rcases exists_vertex_form h x with ⟨v, S, hS, rfl⟩ | ⟨v, w, hw, b, rfl⟩
+  · exact mulSelf_subset h hAut hfix hS
+  · exact mulSelf_endpoint h hAut hfix hw b
+
+/-- **CFI-cov.4 capstone — `ResidualInvolutive` for CFI in the base-resolved regime (Lemma A + Lemma B).**
+Where the committed `P` separates gadgets (`PSeparatesGadgets`, the `Aut(H)` factor killed), every residual
+automorphism fixes gadgets (Lemma A, `gadgetPreserving_of_pSeparates`) and a gadget-fixing CFI automorphism
+is an involution (Lemma B, `cfiAut_gadgetFixing_mul_self`), so the residual is exponent-2. This is the CFI
+witness the de-classed `coversOrbits_of_residualInvolutive` consumes — discharged with **no** structure
+theorem, no `Φ(σ)` lift, no gauge-flip identification. (The remaining input is a base sequence from `S`, which
+feeds the harvest completeness + order.) -/
+theorem cfi_residualInvolutive (h : IsCFI' adj) {S : Finset (Fin n)}
+    (hsep : PSeparatesGadgets adj P S h) : ResidualInvolutive adj P S :=
+  fun _g hg => cfiAut_gadgetFixing_mul_self h hg.1 (gadgetPreserving_of_pSeparates h hg hsep)
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).

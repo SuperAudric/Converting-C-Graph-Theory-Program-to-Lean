@@ -414,16 +414,22 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
     de-classed nut is **`ResidualInvolutive adj P S`** (the residual is exponent-2), *strictly weaker* than
     gauge-generation (`g²=1`, not "`g` is a literal cycle-space flip"). It holds in the **base-resolved
     regime** — where the committed `P` distinguishes gadgets (`PSeparatesGadgets`; the `Aut(H)` factor
-    killed), the decomposability premise. Two lemmas: **Lemma A — gadget-preservation from `P`
-    (`gadgetPreserving_of_pSeparates`, LANDED 2026-06-04, axiom-clean)**: a residual aut fixes `S` pointwise
-    and preserves `P`, so it preserves `P`-relations-to-`S` (`P (g x) s = P (g x)(g s) = P x s`), forcing
-    gadget-preservation under `PSeparatesGadgets` — the key move that *sidesteps* the subtle structural "CFI
-    auts preserve gadgets". **Lemma B — per-gadget involution** (`cfiAut_gadgetFixing_mul_self`, NEXT,
-    medium risk): a gadget-fixing CFI aut squares to `1` (type-preservation + endpoint/subset involution on
-    the gadget vertex API). Then `ResidualInvolutive` = A+B ⟹ the harvest + order via
-    `coversOrbits_of_residualInvolutive`. **The remaining obligation after this is discharging
-    `PSeparatesGadgets`** for the descent's actual `P` — the orthogonal visible/cascade leg
-    (scheme/`PPolynomial`), not part of this gauge plan. C# canonizes CFI(K₄–K₇); firing content, not GI-hard.
+    killed), the decomposability premise. Two lemmas, **both LANDED 2026-06-04, axiom-clean**: **Lemma A — gadget-preservation from `P`
+    (`gadgetPreserving_of_pSeparates`)**: a residual aut fixes `S` pointwise and preserves `P`, so it
+    preserves `P`-relations-to-`S` (`P (g x) s = P (g x)(g s) = P x s`), forcing gadget-preservation under
+    `PSeparatesGadgets` — the key move that *sidesteps* the subtle structural "CFI auts preserve gadgets".
+    **Lemma B — per-gadget involution** (`cfiAut_gadgetFixing_mul_self` + ~12 supporting lemmas:
+    `exists_vertex_form`, `isEndpt`/`isEndpt_equivariant`, `gadgetFixingAut_endpoint`/`_subset`/`_dir`,
+    `mulSelf_endpoint`/`_subset`): a gadget-fixing CFI aut squares to `1` (type-preservation via the
+    cross-gadget-neighbour distinguisher; endpoint involution via direction-preservation + 2-element-set
+    injectivity; subset involution via determined-by-endpoint-adjacency). **Capstone `cfi_residualInvolutive`
+    (LANDED)**: `PSeparatesGadgets adj P S h → ResidualInvolutive adj P S` — the CFI witness
+    `coversOrbits_of_residualInvolutive` consumes, no structure theorem / `Φ(σ)` lift. **Remaining:** (i) the
+    harvest wiring (closure = StabilizerAt + order) at a nonempty base-resolved `S` — needs a
+    base-sequence-from-`S` helper (`PSeparatesGadgets` at `S=∅` is vacuously false); (ii) discharging
+    `PSeparatesGadgets` for the descent's actual `P` — the orthogonal visible/cascade leg
+    (scheme/`PPolynomial`). C# canonizes CFI(K₄–K₇); firing content, not GI-hard. Plan:
+    [`chain-descent-cfi-gauge-discharge-plan.md`](./chain-descent-cfi-gauge-discharge-plan.md).
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
@@ -489,8 +495,11 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
 `gaugeSubgroup`, `mem_gaugeSubgroup`, `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self`, `cfi_coversOrbits`,
 `cfi_closure_eq_stabilizerAt`, `cfi_card_stabilizerAt_eq_prod` (CFI-cov.3 — the CFI witness reduced to
 gauge-generation `StabilizerAt ∅ ≤ closure cfiGaugeGens`); `gadgetOf`, `PSeparatesGadgets`,
-`gadgetPreserving_of_pSeparates` (CFI-cov.4 Lemma A — gadget-preservation from `P`-separation, the reframed
-nut `ResidualInvolutive`; plan `chain-descent-cfi-gauge-discharge-plan.md`).
+`gadgetPreserving_of_pSeparates` (CFI-cov.4 Lemma A); `exists_vertex_form`, `endpointVertex_bool_inj`/`_inj`,
+`subset_mem_iff_adj`, `isEndpt`(`_endpointVertex`/`_equivariant`), `not_isEndpt_subsetVertex`,
+`gadgetFixingAut_endpoint`/`_subset`/`_dir`, `mulSelf_endpoint`/`_subset`, `cfiAut_gadgetFixing_mul_self`
+(CFI-cov.4 Lemma B), `cfi_residualInvolutive` (CFI-cov.4 capstone A+B — `PSeparatesGadgets ⟹
+ResidualInvolutive`; plan `chain-descent-cfi-gauge-discharge-plan.md`).
 
 **C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
 161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,

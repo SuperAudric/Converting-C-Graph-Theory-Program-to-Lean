@@ -1,6 +1,7 @@
 # Build plan — discharging the CFI gauge nut (`ResidualInvolutive` via P-separation)
 
-> **STATUS (2026-06-04): Lemma A LANDED (axiom-clean); Lemma B next.** The build plan for the one remaining CFI
+> **STATUS (2026-06-04): Lemmas A + B + capstone `cfi_residualInvolutive` LANDED (axiom-clean). Remaining:
+> the harvest wiring (base sequence from a nonempty `S`) + discharging `PSeparatesGadgets`.** The build plan for the one remaining CFI
 > obligation left after the de-classed coverage landed. Authoritative companions:
 > [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) §7 (Part A staging, CFI-cov.3),
 > [`chain-descent-declassing.md`](./chain-descent-declassing.md) (the de-classing architecture),
@@ -107,29 +108,71 @@ the traced `refine hsep (g x) x (fun s hs => ?_); … rwa [hg.2.2 s hs] at (hg.2
 
 ---
 
-## 4. Lemma B — `cfiAut_gadgetFixing_mul_self` (NEXT, medium risk)
+## 4. Lemma B — `cfiAut_gadgetFixing_mul_self` (NEXT, medium risk) — detailed plan
 
 ```
 theorem cfiAut_gadgetFixing_mul_self (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
     (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x) :
     g * g = 1
 ```
-Sub-steps, on the gadget vertex API (`SubsetVertex`/`EndpointVertex`, `seedVertex`/`endpointVertex`/
-`subsetVertex`, the `adj_…_eq_one_iff` characterizations, `cfiAdj_aEmpty_endpoint_diff_gadget`):
+Worked at the **Fin n** level, reusing the comprehensive `adj_subsetVertex_eq_one_iff` /
+`adj_endpointVertex_eq_one_iff` (which already encode the gadget combinatorics). Vertices are
+`h.subsetVertex hS` / `h.endpointVertex hw b`; adjacency facts (exact, confirmed in source):
+- `adj_endpointVertex_eq_one_iff`: `adj (endpointVertex hwa bₐ)(endpointVertex hwb b_b) = 1 ↔
+  v_a = w_b ∧ w_a = v_b ∧ bₐ = b_b` (bridge form);
+- `adj_subsetVertex_eq_one_iff`: `adj u (subsetVertex hS'@v') = 1 ↔ ∃ w' (hw':w'∈N v') b,
+  decide(w'∈S')≠b ∧ u = endpointVertex hw' b` (subset neighbours are endpoints at the **same** gadget `v'`);
+- `cfiAdj_bridge` / `mem_neighbors_symm` / `not_self_mem_neighbors` (the bridge partner `e^b_{w→v}`, in
+  gadget `w ≠ v`).
 
-- **B1 — type preservation.** `g` maps subset↔subset and endpoint↔endpoint. A subset vertex has all
-  neighbours inside its gadget; an endpoint has exactly one bridge neighbour in another gadget. Since `g`
-  fixes gadgets, it preserves "has a cross-gadget neighbour" = endpoint-ness.
-- **B2 — endpoint involution.** `g` maps the parity pair `{e⁰_{v→w}, e¹_{v→w}}` to itself (gadget `v` fixed;
-  bridge target gadget `w` fixed, so the direction `w` is preserved) — acting as identity or swap, an
-  involution. Mirrors `cfiFlipAut_swaps_endpointVertex`.
-- **B3 — subset involution.** `g`'s action on `a_T^v` is determined by its action on the endpoints (subset
-  adjacency `adj_subsetVertex_eq_one_iff`), hence also an involution.
-- **B4 — assemble** `g² = 1` via `Equiv.ext`, casing on subset/endpoint vertex (through `h.e`).
+### Building blocks (Cascade.lean, CFI-cov.4)
 
-*Risk: medium — the `Sum`/`Sigma` vertex encoding and the "rw motive is not type correct" gotcha (prove the
-underlying data equality as a standalone `have`, then `Sigma.ext`/`Subtype.ext`/`congrArg`; see the handoff
-§2 patterns).*
+- **`gadgetOf_subsetVertex`** `gadgetOf h (h.subsetVertex hS@v) = v`; **`gadgetOf_endpointVertex`**
+  `gadgetOf h (h.endpointVertex hw b@v) = v`. (`unfold gadgetOf …Vertex; simp [gadget, e_…Vertex]`.)
+- **`exists_vertex_form`** (destructor) `∀ x, (∃ v S (hS:S∈even v), x = h.subsetVertex hS) ∨
+  (∃ v w (hw:w∈N v) b, x = h.endpointVertex hw b)`. Via `cases h.e x`, `obtain` the Σ, then
+  `x = e.symm (e x)` round-trip into the constructor (`subsetVertex`/`endpointVertex` are `e.symm ∘ subset`/
+  `endpoint`, both defeq to the `Sum.inl/inr` form).
+- **`isEndpt h x := ∃ y, adj.adj x y = 1 ∧ gadgetOf h y ≠ gadgetOf h x`** (has a cross-gadget neighbour).
+  - `isEndpt_endpointVertex` : `isEndpt h (endpointVertex hw b)` — witness the bridge partner
+    `endpointVertex (mem_neighbors_symm.mp hw) b`; its gadget is `w ≠ v` (`not_self_mem_neighbors`).
+  - `not_isEndpt_subsetVertex` : `¬ isEndpt h (subsetVertex hS@v)` — every neighbour is `endpointVertex … @v`
+    (`adj_subsetVertex_eq_one_iff` + `gadgetOf_endpointVertex`), so gadget = `v`, no cross neighbour.
+  - `isEndpt_equivariant` : `isEndpt h (g x) ↔ isEndpt h x` for `g` aut + gadget-fixing — substitute
+    `y = g z` (g bijective), `adj (g x)(g z) = adj x z` (`hAut`), gadgets via `hfix`.
+
+### The three steps
+
+- **B1 (type preservation).** `gadgetFixingAut_endpoint`: `g (endpointVertex hw b)` is an endpoint at gadget
+  `v` — by destructor it is subset or endpoint; `isEndpt_equivariant` + `isEndpt_endpointVertex` make it
+  `isEndpt`, and `not_isEndpt_subsetVertex` rules out subset; gadget `= v` by `hfix` + `gadgetOf_…`.
+  Symmetric `gadgetFixingAut_subset`: `g (subsetVertex hS@v)` is a subset at gadget `v` (¬isEndpt side).
+- **B2 (g² fixes endpoints).** `mulSelf_endpoint`: from B1, `g (endpointVertex hw b) = endpointVertex hw'
+  b'` at gadget `v`. **Direction**: the bridge partner `y = endpointVertex (v∈N w) b @ w`; `g y` is an
+  endpoint at gadget `w` (B1); `adj (g x)(g y) = adj x y = 1` (bridge) + `adj_endpointVertex_eq_one_iff` ⟹
+  `w' = w`. So `g` maps `{endpointVertex hw false, endpointVertex hw true}` into itself; `g` injective +
+  `endpointVertex … false ≠ … true` ⟹ a bijection of the 2-set ⟹ `g (g (endpointVertex hw b)) =
+  endpointVertex hw b`. (Case on the two images.)
+- **B3 (g² fixes subsets).** `mulSelf_subset`: `g²(subsetVertex hS@v)` is a subset at gadget `v` (B1 twice).
+  `g²` preserves adjacency (`hAut.trans hAut`) and fixes every endpoint (B2), so `g²(x)` has the **same
+  endpoint-adjacencies** as `x`: `adj (g² x) e = adj (g² x)(g² e) = adj x e`. A subset is determined by them
+  (`adj_subsetVertex_eq_one_iff` with `b = false`: `endpointVertex hw false ~ subsetVertex hS ↔ w ∈ S`), so
+  `S'' = S` on `N(v)`, hence `g²(subsetVertex hS) = subsetVertex hS`.
+- **B4 (assemble).** `g * g = 1` via `Equiv.ext`: `(g*g) x = g (g x)` (`Equiv.Perm.mul_apply`); destructor on
+  `x`; B2 / B3 give `g (g x) = x`.
+
+*Risk: medium — the destructor round-trips and the `Sum`/`Sigma`/`Subtype` proof-irrelevance plumbing
+(handoff §2 patterns: prove the data equality as a standalone `have`, avoid `rw` under dependent binders).
+Build the building blocks first, check each, then assemble.*
+
+**✅ LANDED 2026-06-04** (`Cascade.lean`, CFI-cov.4), axiom-clean, built in three chunks (data helpers →
+type-preservation/direction → involution steps), each compiling cleanly. All declarations:
+`gadgetOf_subsetVertex`/`_endpointVertex`, `exists_vertex_form`, `endpointVertex_bool_inj`/`_inj`,
+`subset_mem_iff_adj`, `isEndpt` + `isEndpt_endpointVertex`/`not_isEndpt_subsetVertex`/`isEndpt_equivariant`,
+`gadgetFixingAut_endpoint`/`_subset`/`_dir`, `mulSelf_endpoint`/`_subset`, `cfiAut_gadgetFixing_mul_self`.
+The endpoint involution used the `bool_pigeon : x≠a → y≠x → y=a` (`by decide`) + `g.injective` argument as
+planned; no surprises. The conjugation-to-CFIVertex alternative was not needed — the Fin n route reusing
+`adj_subsetVertex_eq_one_iff` / `adj_endpointVertex_eq_one_iff` worked directly.
 
 ---
 
@@ -140,18 +183,29 @@ theorem cfi_residualInvolutive (h : IsCFI' adj) {S}
     (hsep : PSeparatesGadgets adj P S h) : ResidualInvolutive adj P S
   := fun g hg => cfiAut_gadgetFixing_mul_self h hg.1 (gadgetPreserving_of_pSeparates h hg hsep)
 ```
+**✅ `cfi_residualInvolutive` LANDED 2026-06-04** (axiom-clean): `PSeparatesGadgets adj P S h →
+ResidualInvolutive adj P S`, the direct Lemma A + Lemma B capstone, valid at any `S`.
+
 Then feed `coversOrbits_of_residualInvolutive` / `closure_eq_stabilizerAt_of_residualInvolutive` with
-`gens = {involutive residual auts}` (or reuse the CFI `cfi_*` wiring with the gauge extension) to obtain the
-harvest completeness and the order `|Aut_S^P| = ∏ basic-orbit sizes` in the base-resolved (`PSeparatesGadgets`)
-regime — with **no** structural L1 and **no** explicit cycle-space construction.
+`gens = {involutive residual auts}` to obtain the harvest completeness and the order `|Aut_S^P| = ∏
+basic-orbit sizes` in the base-resolved (`PSeparatesGadgets`) regime — with **no** structural L1 and **no**
+explicit cycle-space construction.
+
+> **Note on the regime (do not wire the harvest at `S = ∅`).** `PSeparatesGadgets adj P ∅` is *vacuously too
+> strong* — its premise `∀ s ∈ ∅, …` is trivial, so it would require *all* gadgets equal (false for `m ≥ 2`).
+> The `PSeparatesGadgets` regime is meaningful only at a **nonempty** `S` (where `P`-relations to `S`
+> distinguish gadgets). So the harvest capstone (closure = StabilizerAt, order) must be stated at a nonempty
+> base-resolved `S`, which needs a **base sequence from `S`** (e.g. `(allSeeds \ S).toList`, terminating at
+> the cascade's `IsBase allSeeds`). That base-seq-from-`S` helper is the next build step.
 
 ---
 
 ## 6. Build order, bars, and the remaining obligation
 
-1. **Lemma A** (`gadgetOf`, `PSeparatesGadgets`, `gadgetPreserving_of_pSeparates`) — this step.
-2. **Lemma B** (`cfiAut_gadgetFixing_mul_self`, B1–B4) — the medium-risk grind.
-3. **Capstone** (`cfi_residualInvolutive` + harvest wiring).
+1. **Lemma A** (`gadgetOf`, `PSeparatesGadgets`, `gadgetPreserving_of_pSeparates`) — ✅ LANDED.
+2. **Lemma B** (`cfiAut_gadgetFixing_mul_self`, B1–B4) — ✅ LANDED (the medium-risk grind, no surprises).
+3. **Capstone** `cfi_residualInvolutive` — ✅ LANDED. **Harvest wiring** (closure = StabilizerAt + order at a
+   nonempty base-resolved `S`, via a base-sequence-from-`S` helper) — NEXT.
 4. *(Optional)* gauge-generation extension: recover `g = cfiFlipAut F` (symmetric/even `F`) on top of B for
    the literal gauge statement.
 
