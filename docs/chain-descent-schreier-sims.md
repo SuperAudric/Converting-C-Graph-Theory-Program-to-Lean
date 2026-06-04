@@ -12,10 +12,12 @@
 > and its **order**. See §7 for the landed theorem names. **Remaining:**
 > - **A4 — the concrete computable BSGS** mirroring the C# (`Level`/transversal/sift). Validation breadth;
 >   needed only for the *computable* object, not the abstract verdict.
-> - **The coverage witness for multi-step CFI.** A2-complete reduces completeness to `CoversOrbits` (the
->   harvest collected a strong generating set) — the honest analog of the within-cell depth witness. Proving
->   it fires for bounded-`tw` CFI (where the C# mechanism already canonizes) is the remaining *content* (not
->   GI-hard); the abstract reduction is done.
+> - **The coverage witness for multi-step CFI** (in progress — CFI instance of A2-complete). A2-complete
+>   reduces completeness to `CoversOrbits` over the path-fixing gauge generators. **CFI-cov.1 landed**
+>   (2026-06-04): the residual-membership bridge `cfiFlipAut_residualAut` etc. (gauge flips ⟹
+>   `ResidualAut`/`gensAt`; forward coverage). **Remaining (CFI-cov.2/3):** the cycle-space `Z₂^β` + base
+>   sequence, and the *reverse* orbit-coverage (path-fixing flips realize each base point's full orbit) ⟹
+>   `cfi_coversOrbits`. Firing content (C# already canonizes CFI(K₄–K₇)), not GI-hard. See §7.
 >
 > A fresh reader can still use this doc as the full context/name index (Mathlib + internal) for consuming
 > A1–A3.5 / A2-complete or building A4.
@@ -344,13 +346,25 @@ Built in `Cascade.lean` "Part A (Stage A2-complete)":
   (`closure (gensAt … S) = StabilizerAt S`, soundness intrinsic), `closure_eq_stabilizerAt_empty_of_coversOrbits`
   (root: `closure gens = StabilizerAt ∅`), and the capstone `card_closure_gensAt_eq_prod_of_coversOrbits` (with
   A3.5, the folded chain reproduces the residual **order** too).
-- *Open content (not abstraction):* discharging `CoversOrbits` for bounded-`tw` CFI — i.e. exhibiting the
-  path-fixing gauge generators that realize each level's orbit. `swap_of_cellsAreOrbits_involutive` produces such
-  swapping automorphisms for the involutive `Z₂^β` case; that they are *in* the harvested `gens` is the
-  harvest-collection content, needing the CFI Aut-structure (the orbit-recovery §9 "Aut structure lemma",
-  multi-week). The mechanism already canonizes CFI(K₄–K₇) in the C#; not GI-hard.
 - *Bar (met):* `closure (gensAt … S) = StabilizerAt S` under the coverage witness — the residual is *exactly*
   what the harness folds in. Closes the cross-branch harvest the way A2 closed its soundness half.
+
+**CFI instance of A2-complete — discharging `CoversOrbits` for CFI (the multi-week arc).** The cross-branch
+harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β` generators already in
+`CFI.lean`, with `isAut_cfiFlipAut` / `cfiFlipAut_preserves_P` / locality / `disjoint_support`). Staging:
+- **CFI-cov.1 — the residual-membership bridge — LANDED 2026-06-04, axiom-clean** (`Cascade.lean`):
+  `cfiFlipAut_residualAut` (a path-fixing gauge flip is a `ResidualAut adj P S`), `cfiFlipAut_mem_stabilizerAt`,
+  `cfiFlipAut_orbitPartition` (the **forward** coverage direction — a flip moves `v` within its orbit),
+  `cfiGaugeGens` (the gauge generating set) + `cfiGaugeGens_residualAut_empty` (root soundness), and
+  `cfiFlipAut_mem_gensAt` (path-fixing flip ∈ `gensAt (cfiGaugeGens h) S`). Connects the gauge-flip layer to
+  the A2-complete `ResidualAut`/`StabilizerAt`/`gensAt`/`CoversOrbits` vocabulary.
+- **CFI-cov.2 (next):** the cycle-space `Z₂^β` structure and a canonical base sequence (`allSeeds` / forced-node
+  chain) for CFI.
+- **CFI-cov.3 (the multi-week core):** the **reverse** orbit-coverage — at each level the path-fixing gauge
+  flips' closure realizes the *full* `Aut_S^P`-orbit of the base point — yielding `cfi_coversOrbits`, hence
+  `closure (cfiGaugeGens h) = StabilizerAt ∅` and `|Aut(CFI)^P| = ∏ basic-orbit sizes`. This is the genuine
+  cycle-space content; the mechanism already canonizes CFI(K₄–K₇) in the C#, so it is firing content, not
+  GI-hard.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as

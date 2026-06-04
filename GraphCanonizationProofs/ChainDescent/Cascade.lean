@@ -977,6 +977,78 @@ theorem card_closure_gensAt_eq_prod_of_coversOrbits {gens : Set (Equiv.Perm (Fin
   rw [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov]
   exact card_stabilizerAt_eq_prod_of_base bs S (coversOrbits_isBase_foldl bs hcov)
 
+/-! ### Part A (Stage A2-complete) — CFI instance: gauge flips as path-fixing residual generators
+
+The cross-branch harvest for a CFI graph folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β`
+generators built in `CFI.lean`). This block bridges those flips to the A2-complete vocabulary: a gauge flip
+that is `F`-free on the committed path's gadgets fixes the path pointwise
+(`cfiFlipAut_eq_self_of_flipSet_empty`), is an automorphism (`isAut_cfiFlipAut`), and preserves an
+automorphism-invariant `P` (`cfiFlipAut_preserves_P`) — i.e. it is a path-fixing `ResidualAut adj P S`,
+hence an element of `StabilizerAt adj P S` and of the path-fixing generators `gensAt`. So the harvested
+gauge generators `cfiGaugeGens` populate `gensAt`, and each moves a vertex within its `Aut_S^P`-orbit.
+
+**This is the *forward* direction of coverage** (flips ⟹ orbit moves). The *reverse* — that the path-fixing
+flips' closure realizes the *full* orbit of each base point (the genuine `CoversOrbits` discharge) — is the
+cycle-space content staged next (CFI-cov.2/3): it needs the `Z₂^β` structure and a base sequence. -/
+
+/-- **A path-fixing gauge flip is a residual automorphism.** A symmetric (`hFsymm`), even (`hEven`) gauge
+flip `cfiFlipAut F` whose flip-set is empty on every gadget of `S` (`hS`, so it fixes `S` pointwise) is an
+`IsAut` preserving any automorphism-invariant `P` (`hP`) — i.e. a `ResidualAut adj P S`. The bridge from the
+`CFI.lean` gauge-flip layer to the A2-complete residual vocabulary. -/
+theorem cfiFlipAut_residualAut (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) (hFsymm : ∀ v w, F v w = F w v)
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    {S : Finset (Fin n)} (hS : ∀ i ∈ S, h.H.flipSet F (h.H.gadget (h.e i)) = ∅) :
+    ResidualAut adj P S (h.cfiFlipAut F hEven) :=
+  ⟨h.isAut_cfiFlipAut F hEven hFsymm,
+   h.cfiFlipAut_preserves_P F hEven hFsymm hP,
+   fun i hi => h.cfiFlipAut_eq_self_of_flipSet_empty F hEven (hS i hi)⟩
+
+/-- A path-fixing gauge flip is an element of the residual group `StabilizerAt adj P S`. -/
+theorem cfiFlipAut_mem_stabilizerAt (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) (hFsymm : ∀ v w, F v w = F w v)
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    {S : Finset (Fin n)} (hS : ∀ i ∈ S, h.H.flipSet F (h.H.gadget (h.e i)) = ∅) :
+    h.cfiFlipAut F hEven ∈ StabilizerAt adj P S :=
+  mem_stabilizerAt.mpr (cfiFlipAut_residualAut h F hEven hFsymm hP hS)
+
+/-- **Forward coverage — a path-fixing gauge flip moves `v` within its `Aut_S^P`-orbit.**
+`OrbitPartition adj P S v (cfiFlipAut F v)`: every gauge flip fixing the path realizes one orbit move.
+(The *reverse* — realizing the full orbit — is the staged cycle-space content.) -/
+theorem cfiFlipAut_orbitPartition (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) (hFsymm : ∀ v w, F v w = F w v)
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    {S : Finset (Fin n)} (hS : ∀ i ∈ S, h.H.flipSet F (h.H.gadget (h.e i)) = ∅) (v : Fin n) :
+    OrbitPartition adj P S v (h.cfiFlipAut F hEven v) :=
+  orbitPartition_iff_residualAut.mpr ⟨_, cfiFlipAut_residualAut h F hEven hFsymm hP hS, rfl⟩
+
+/-- **The CFI gauge generating set.** All symmetric, even gauge flips `cfiFlipAut F` — the cycle-space
+`Z₂^β` generators the harvest folds in. `Subgroup.closure (cfiGaugeGens h)` is the gauge group; the
+A2-complete machinery (`closure_eq_stabilizerAt_empty_of_coversOrbits`) turns a coverage witness over these
+into `closure = StabilizerAt ∅`. -/
+def cfiGaugeGens (h : IsCFI' adj) : Set (Equiv.Perm (Fin n)) :=
+  {g | ∃ (F : Fin h.m → Fin h.m → Bool) (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0),
+        (∀ v w, F v w = F w v) ∧ h.cfiFlipAut F hEven = g}
+
+/-- **Root soundness of the gauge generators.** Every gauge flip is a `P`-preserving automorphism
+(`ResidualAut adj P ∅`, the path-fixing condition vacuous at `∅`) — the Stage-A2 soundness hypothesis
+`closure_eq_stabilizerAt_empty_of_coversOrbits` consumes. -/
+theorem cfiGaugeGens_residualAut_empty (h : IsCFI' adj)
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u) :
+    ∀ g ∈ cfiGaugeGens h, ResidualAut adj P ∅ g := by
+  rintro g ⟨F, hEven, hFsymm, rfl⟩
+  exact cfiFlipAut_residualAut h F hEven hFsymm hP (by simp)
+
+/-- A path-fixing gauge flip lies in the path-fixing generators `gensAt adj P (cfiGaugeGens h) S` — it is
+both a gauge generator and a member of `StabilizerAt adj P S`. The hook the coverage discharge (CFI-cov.3)
+will use to realize orbits from `cfiGaugeGens`. -/
+theorem cfiFlipAut_mem_gensAt (h : IsCFI' adj) (F : Fin h.m → Fin h.m → Bool)
+    (hEven : ∀ v, (h.H.flipSet F v).card % 2 = 0) (hFsymm : ∀ v w, F v w = F w v)
+    (hP : ∀ (π : Equiv.Perm (Fin n)), IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    {S : Finset (Fin n)} (hS : ∀ i ∈ S, h.H.flipSet F (h.H.gadget (h.e i)) = ∅) :
+    h.cfiFlipAut F hEven ∈ gensAt adj P (cfiGaugeGens h) S :=
+  ⟨⟨F, hEven, hFsymm, rfl⟩, cfiFlipAut_mem_stabilizerAt h F hEven hFsymm hP hS⟩
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).
