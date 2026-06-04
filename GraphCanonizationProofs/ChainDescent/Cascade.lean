@@ -1270,6 +1270,48 @@ theorem cfi_card_stabilizerAt_eq_prod (h : IsCFI' adj) (h_odd : h.OddDegree)
   rw [hge] at hcard
   rwa [cfi_closure_eq_stabilizerAt h hP hgen] at hcard
 
+/-! ### Part A (Stage A2-complete) — CFI-cov.4 (the gauge nut): `ResidualInvolutive` via P-separation
+
+The de-classed coverage (`coversOrbits_of_residualInvolutive`) reduced the CFI harvest to the **faithful**
+hypothesis `ResidualInvolutive adj P S` (the residual is exponent-2), *strictly weaker* than gauge-generation
+(`g² = 1`, not "`g` is a literal cycle-space flip"). This block discharges `ResidualInvolutive` for CFI in
+the **base-resolved regime** — where the committed individualization, through the partial order `P`, already
+distinguishes gadgets (the `Aut(H)` factor killed). That regime is exactly the decomposability premise
+(calculator §7): resolve the cascading base layer first, leaving the gauge `Z₂^β` as a clean exponent-2
+residual.
+
+**The key move (Lemma A): gadget-preservation comes from `P`-preservation, not from a structural recovery
+argument.** A residual automorphism fixes the committed set `S` pointwise *and* preserves `P`, so it
+preserves each vertex's `P`-relations to `S` (`P (g x) s = P (g x)(g s) = P x s`). If those relations
+determine the gadget (`PSeparatesGadgets`), `g` fixes gadgets — sidestepping the subtle "every CFI
+automorphism preserves gadgets" (which would need a graph-recovery proof). Full plan:
+[`docs/chain-descent-cfi-gauge-discharge-plan.md`](../../../docs/chain-descent-cfi-gauge-discharge-plan.md). -/
+
+/-- The **gadget (base vertex) of a CFI vertex** `x : Fin n`, through the CFI labelling `h.e`. -/
+def gadgetOf (h : IsCFI' adj) (x : Fin n) : Fin h.m := h.H.gadget (h.e x)
+
+/-- **`P` separates gadgets** — the honest "base layer resolved" hypothesis. The committed set `S`, through
+the partial order `P` it induces, distinguishes gadgets: if two vertices have the same `P`-relations to every
+committed vertex, they live in the same gadget. This is what makes a residual automorphism (which preserves
+those relations) fix gadgets, with no structural gadget-recovery argument. -/
+def PSeparatesGadgets (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (h : IsCFI' adj) : Prop :=
+  ∀ x y : Fin n, (∀ s ∈ S, P x s = P y s) → gadgetOf h x = gadgetOf h y
+
+/-- **Lemma A — gadget-preservation from `P`-separation.** A residual automorphism `g` (fixing the committed
+set `S` pointwise and preserving `P`) preserves each vertex's `P`-relations to `S`
+(`P (g x) s = P (g x)(g s) = P x s`), so under `PSeparatesGadgets` it fixes every gadget:
+`gadgetOf (g x) = gadgetOf x`. The reduction that replaces the subtle structural "CFI automorphisms preserve
+gadgets" with an honest hypothesis on `P` (the base-resolved regime). -/
+theorem gadgetPreserving_of_pSeparates (h : IsCFI' adj) {S : Finset (Fin n)}
+    {g : Equiv.Perm (Fin n)} (hg : ResidualAut adj P S g)
+    (hsep : PSeparatesGadgets adj P S h) :
+    ∀ x, gadgetOf h (g x) = gadgetOf h x := by
+  intro x
+  refine hsep (g x) x (fun s hs => ?_)
+  have hgs : g s = s := hg.2.2 s hs
+  have hP : P (g x) (g s) = P x s := hg.2.1 x s
+  rwa [hgs] at hP
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).

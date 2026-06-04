@@ -59,7 +59,8 @@
       "Bash(bash scripts/build.sh)",
       "Bash(timeout * ./scripts/build.sh)",
       "Bash(python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers --descriptions /tmp/idx_desc.json)",
-      "Bash(echo *)"
+      "Bash(echo *)",
+      "Bash(python3 ../scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",
