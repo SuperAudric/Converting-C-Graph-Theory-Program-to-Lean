@@ -1,24 +1,24 @@
 # Chain descent — Part A: the stabilizer-chain / Schreier–Sims object (planning & staging)
 
-> **STATUS (2026-06-03): the abstract layer (Stages A1–A3, A3.5) is LANDED; the cross-branch *completeness*
-> seam (A2-complete) and the concrete BSGS (A4) are open.** Build plan + context dump for a
-> permutation-group **stabilizer chain** (Schreier–Sims) in Lean — "tractable-buildout Part A".
+> **STATUS (2026-06-04): the abstract layer (Stages A1–A3, A3.5, A2-complete) is LANDED; only the concrete
+> BSGS (A4) remains.** Build plan + context dump for a permutation-group **stabilizer chain**
+> (Schreier–Sims) in Lean — "tractable-buildout Part A".
 > **Done (axiom-clean, full build green, `Cascade.lean` "Part A"):** the residual group `Aut_S^P` as a
-> Mathlib `Subgroup` (`StabilizerAt`); the cross-branch harvest-**soundness** seam (fold-in ⊆ true
-> residual, orbit-prune sound); the rigid verdict (trivial ⟺ base); the per-level orbit–stabilizer order
-> recursion; **and (A3.5) the full `order = ∏ basic-orbit sizes` over a base sequence** — the abstract
-> `Order = ∏ OrbitSize` of `PermutationGroup.cs`, needing no computable BSGS. See §7 for the landed theorem
-> names. **Open — the two pieces the conservation finding actually requires next:**
-> - **A2-complete — the cross-branch harvest *completeness* seam (`StabilizerAt ⊆ closure of harvested
->   generators`).** A2 proved only soundness (`closure_le_stabilizerAt`, the `⊆` direction); the **dual**
->   — that the leaf-collision harvest's generators *generate* the residual — is the property the multi-step
->   redirect was about, and was **missing from the original A1–A4 staging**. This, not A4, is the load-bearing
->   next step (mirrors how the within-cell oracle reduced completeness to a depth witness). See §7.
+> Mathlib `Subgroup` (`StabilizerAt`); the cross-branch harvest **soundness** seam (fold-in ⊆ true residual,
+> orbit-prune sound); the rigid verdict (trivial ⟺ base); the per-level orbit–stabilizer order recursion;
+> the full `order = ∏ basic-orbit sizes` over a base sequence (A3.5 — the abstract `Order = ∏ OrbitSize` of
+> `PermutationGroup.cs`); **and (A2-complete) the harvest *completeness* seam** — `StabilizerAt = closure of
+> harvested generators` under a coverage witness, so the folded chain reproduces both the residual **group**
+> and its **order**. See §7 for the landed theorem names. **Remaining:**
 > - **A4 — the concrete computable BSGS** mirroring the C# (`Level`/transversal/sift). Validation breadth;
 >   needed only for the *computable* object, not the abstract verdict.
+> - **The coverage witness for multi-step CFI.** A2-complete reduces completeness to `CoversOrbits` (the
+>   harvest collected a strong generating set) — the honest analog of the within-cell depth witness. Proving
+>   it fires for bounded-`tw` CFI (where the C# mechanism already canonizes) is the remaining *content* (not
+>   GI-hard); the abstract reduction is done.
 >
 > A fresh reader can still use this doc as the full context/name index (Mathlib + internal) for consuming
-> A1–A3.5 or building A2-complete / A4.
+> A1–A3.5 / A2-complete or building A4.
 >
 > **Why now (the trigger).** The discretizing colour-match oracle was just **proven unable** to harvest a
 > multi-step moved orbit: `lockstep_disc_imp_stab_trivial` (`CascadeOracle.lean §C.8`) shows its two
@@ -36,17 +36,18 @@
    orbit structure, its **order** (`= ∏ basic-orbit sizes`), and a base/transversal (BSGS) decomposition.
 2. **The cross-branch harvest seam** — *fold in* a verified automorphism (the a-posteriori "two branches
    reach the same leaf ⟹ the relabelling is an automorphism" harvest, strategy §4 step 6), and *consume*
-   it (a folded generator that fixes the path prunes sibling branches). The **soundness** half is now
-   formalized (Stage A2: fold-in `⊆` true residual, prune sound); the **completeness** half (the harvested
-   generators *generate* the residual) is **open — Stage A2-complete (§7)**, and is the mechanism the
-   conservation finding established as required.
+   it (a folded generator that fixes the path prunes sibling branches). Both halves are now formalized:
+   **soundness** (Stage A2: fold-in `⊆` true residual, prune sound) and **completeness** (Stage A2-complete:
+   under a coverage witness the harvested generators *generate* the residual, `closure gens = StabilizerAt`).
+   The remaining open piece is the coverage witness itself for multi-step CFI — the mechanism the
+   conservation finding established as required (§7).
 
 The project needs the *reasoning* ("the harvested generators generate the path-fixing stabilizer";
-"residual trivial ⟺ rigid"), not a fast computable sift. So **build the abstract `Subgroup` layer first**
-(Stages A1–A3.5, the container + soundness + order — landed; then **A2-complete**, the harvest
-*completeness* — the load-bearing open piece); the concrete computable BSGS data structure mirroring the
-C# (Stage A4) is later/optional. Note the *reasoning* the project most needs — "harvested generators
-**generate** the stabilizer" — is exactly the open A2-complete, not anything in A4.
+"residual trivial ⟺ rigid"), not a fast computable sift. So the abstract `Subgroup` layer was built first
+(Stages A1–A3.5 — container + soundness + order; A2-complete — the harvest *completeness*, "harvested
+generators **generate** the stabilizer", reduced to a coverage witness); the concrete computable BSGS data
+structure mirroring the C# (Stage A4) is later/optional. The *reasoning* the project most needs is the
+landed A2-complete, not anything in A4.
 
 ---
 
@@ -207,18 +208,21 @@ All paths under `GraphCanonizationProofs/ChainDescent/`. These are what Part A b
 
 ## 5. What is ABSENT (the actual build)
 
-Originally absent in both Mathlib and the project. **Now built by A1–A3.5** (Cascade.lean): the **cross-branch
-fold-in/consume *soundness* seam** (`closure_le_stabilizerAt`, `covered_sound`), the **per-level group-order
-recursion** (`card_stabilizerAt_eq_orbit_mul`), the **full order product over a base sequence** (A3.5 —
-`orbitSizeProd`, `card_stabilizerAt_eq_prod`, `card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base`),
-and the **stabilizer object + base predicate** (`StabilizerAt`, `stabilizerAt_eq_bot_iff_isBase`).
-**Still absent — the harvest *completeness* seam (Stage A2-complete):** that the harvested generators
-*generate* `StabilizerAt` (`StabilizerAt ⊆ Subgroup.closure gens`, the dual of `closure_le_stabilizerAt`),
-reduced to a budget/collision witness — the multi-step harvest mechanism the conservation finding requires.
+Originally absent in both Mathlib and the project. **Now built by A1–A3.5 + A2-complete** (Cascade.lean): the
+**cross-branch fold-in/consume seam, both directions** — *soundness* (`closure_le_stabilizerAt`,
+`covered_sound`) and *completeness* (A2-complete: `stabilizerAt_le_of_orbit_realized`, `CoversOrbits`,
+`stabilizerAt_eq_closure_of_coversOrbits`, `card_closure_eq_prod_of_coversOrbits` — `closure gens =
+StabilizerAt` under a coverage witness); the **per-level group-order recursion** (`card_stabilizerAt_eq_orbit_mul`);
+the **full order product over a base sequence** (A3.5 — `orbitSizeProd`, `card_stabilizerAt_eq_prod`,
+`card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base`); and the **stabilizer object + base
+predicate** (`StabilizerAt`, `stabilizerAt_eq_bot_iff_isBase`).
+**Still absent — the coverage witness (content, not abstraction):** that `CoversOrbits` *holds* for
+multi-step CFI bounded-`tw` (the leaf-collision harvest collected a strong generating set) — the honest
+analog of the depth witness; not GI-hard, but the remaining firing content.
 **Still absent (Stage A4, computable only):** an explicit **ordered base sequence** as data (note `IsBase`
-is a *predicate on a set*; A3.5 takes the base sequence as a `List` argument but constructs none), a **strong
-generating set**, **Schreier generators** as a construction, a **sift/strip/membership** procedure, and the
-**concrete computable** `Level`/transversal structure mirroring `PermutationGroup.cs`.
+is a *predicate on a set*; A3.5 / A2-complete take the base sequence as a `List` argument but construct none),
+**Schreier generators** as a construction, a **sift/strip/membership** procedure, and the **concrete
+computable** `Level`/transversal structure mirroring `PermutationGroup.cs`.
 
 ---
 
@@ -226,10 +230,11 @@ generating set**, **Schreier generators** as a construction, a **sift/strip/memb
 
 - **Solves:** the **rigid-residual verdict** (`card_stabilizerAt_eq_one_iff_isBase`); **`Aut(G)` order as a
   byproduct** of canonization (A3.5 `card_autP_eq_prod_of_base`, `= ∏ basic-orbit sizes` — a theorem, not a
-  citation); **§C.0.1 transversal relocation** made rigorous; and the **soundness** of the cross-branch
-  multi-step harvest. **Provides the container for, but does not yet solve, the multi-step moved-orbit
-  harvest itself** — the discretizing oracle provably can't do it (`lockstep_disc_imp_stab_trivial`), and
-  the cross-branch harvest that replaces it needs its **completeness** seam (Stage A2-complete, §7) firing.
+  citation); **§C.0.1 transversal relocation** made rigorous; and **both halves of the cross-branch
+  multi-step harvest** — soundness (A2) *and* completeness (A2-complete: the folded chain reproduces the
+  residual group and its order, given a coverage witness). The discretizing oracle provably can't harvest a
+  multi-step moved orbit (`lockstep_disc_imp_stab_trivial`); the cross-branch harvest that replaces it is now
+  fully grounded **modulo the coverage witness** for multi-step CFI (the remaining firing content, §7).
 - **Trivializes:** the **residual-group-order diagnostic** — `order = ∏ orbit sizes` is now a **Lean
   theorem** (A3.5 `card_autP_eq_prod_of_base`, built on Mathlib's orbit–stabilizer
   `card_mul_index` / `index_stabilizer`), not just citation-reachable; the rigid verdict
@@ -308,19 +313,25 @@ base sequence — pure induction, **no computable BSGS**, so separated out of A4
   (and an existence corollary from `exists_isBase_saturated`) is small follow-on, lumpable with A4's
   ordered-base data.
 
-### Stage A2-complete — the cross-branch harvest *completeness* seam — **OPEN (the load-bearing next step)**
+### Stage A2-complete — the cross-branch harvest *completeness* seam — **LANDED 2026-06-04, axiom-clean**
 A2 proved harvest **soundness** (`closure_le_stabilizerAt`: the folded chain stays `⊆ StabilizerAt`). The
-**completeness dual** — that the harvested generators *generate* the residual — was **never staged**, yet it
-is exactly what the conservation finding (`lockstep_disc_imp_stab_trivial`) redirected the project to. Plan:
-- Define the leaf-collision generating set: from the a-posteriori harvest (`HandleLeaf`, strategy §4 step 6),
-  the verified relabellings between branches reaching equal leaves.
-- Prove `StabilizerAt adj P S ≤ Subgroup.closure harvestGens` **reduced to a budget/collision witness** (the
-  harvest sees enough leaf collisions to generate the residual) — mirroring how the within-cell oracle
-  reduced completeness to a depth witness, with soundness left unconditional.
-- Discharge the witness for bounded-`tw` CFI (the mechanism already canonizes CFI(K₄–K₇) in the C#), the
-  multi-step case the discretizing oracle provably cannot reach.
-- *Bar:* `closure harvestGens = StabilizerAt` under the witness — the residual is *exactly* what the harness
-  folds in. This closes the cross-branch harvest the same way A2 closed its soundness half.
+**completeness dual** — that the harvested generators *generate* the residual — was missing from the original
+A1–A4 staging, and is exactly what the conservation finding (`lockstep_disc_imp_stab_trivial`) redirected the
+project to. Built in `Cascade.lean` "Part A (Stage A2-complete)":
+- `stabilizerAt_le_of_orbit_realized` — the **one-level completeness core** (strong-generation step): if a
+  subgroup `H` contains the next base point's stabilizer and realizes the full `Aut_S^P`-orbit of that point,
+  then `StabilizerAt adj P S ≤ H`. The classical "an SGS generates the group" lemma; the dual of
+  `closure_le_stabilizerAt`.
+- `CoversOrbits adj P gens bs S` — the **coverage witness** along a base sequence (the leaf-collision harvest
+  of strategy §4 step 6 supplies it): at each level the closure realizes the current residual orbit; the
+  honest analog of the within-cell depth witness, **class-conditional** (not unconditional).
+- `stabilizerAt_le_closure_of_coversOrbits` (the `≤` iteration), `stabilizerAt_eq_closure_of_coversOrbits`
+  (with A2 soundness, `closure gens = StabilizerAt` — the chain *is* the residual), and the capstone
+  `card_closure_eq_prod_of_coversOrbits` (with A3.5, the folded chain reproduces the residual **order** too).
+- *Open content (not abstraction):* discharging `CoversOrbits` for bounded-`tw` CFI — the mechanism already
+  canonizes CFI(K₄–K₇) in the C#; this is the remaining firing witness, not GI-hard.
+- *Bar (met):* `closure gens = StabilizerAt` under the coverage witness — the residual is *exactly* what the
+  harness folds in. Closes the cross-branch harvest the way A2 closed its soundness half.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as
@@ -341,8 +352,8 @@ is exactly what the conservation finding (`lockstep_disc_imp_stab_trivial`) redi
    `LayerChain` instance or a parallel base-ordered structure. The A3 order recursion
    (`card_stabilizerAt_eq_orbit_mul`) is the per-level step either way.
 4. **Computability scope — OPEN (A4):** how faithfully Stage A4 mirrors the unsifted C# variant vs. uses
-   Mathlib's (noncomputable) transversal existence. The abstract layer (A1–A3.5, and the open A2-complete)
-   is noncomputable and sufficient for the verdicts; A4 is the only stage needing decidable/`Fintype`
+   Mathlib's (noncomputable) transversal existence. The abstract layer (A1–A3.5 + A2-complete) is
+   noncomputable and sufficient for the verdicts; A4 is the only stage needing decidable/`Fintype`
    computation.
 
 ## 9. Honest caveats
@@ -376,7 +387,9 @@ is exactly what the conservation finding (`lockstep_disc_imp_stab_trivial`) redi
 `closure_le_stabilizerAt`, `orbit_pathFixing_sound`, `covered_sound` (A2 soundness); `card_stabilizerAt_pos`,
 `card_stabilizerAt_eq_one_iff_isBase`, `subgroupOf_insert_eq_stabilizer`, `card_stabilizer_eq`,
 `card_stabilizerAt_eq_orbit_mul` (A3); `orbitSizeProd`, `card_stabilizerAt_eq_prod`,
-`card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base` (A3.5).
+`card_stabilizerAt_eq_prod_of_base`, `card_autP_eq_prod_of_base` (A3.5); `stabilizerAt_le_of_orbit_realized`,
+`CoversOrbits`, `coversOrbits_isBase_foldl`, `stabilizerAt_le_closure_of_coversOrbits`,
+`stabilizerAt_eq_closure_of_coversOrbits`, `card_closure_eq_prod_of_coversOrbits` (A2-complete).
 
 **C# target:** `GraphCanonizationProject/PermutationGroup.cs` (`Level` 103, `Order` 136, `Contains`/sift
 161, `BuildChain` 209); harvest `ChainDescent.cs` (`HandleLeaf` 532, `HarvestTwists` 359,

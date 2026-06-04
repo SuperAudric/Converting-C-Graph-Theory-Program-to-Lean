@@ -51,13 +51,15 @@
 > **IR-stickiness axis** (multipede, flagged); and the **wall** (¬D1∧¬D2, Cameron/Johnson). The first
 > three are bounded; the last two are the honest boundary.
 >
-> **Part A progress (2026-06-03, axiom-clean — see [schreier-sims](./chain-descent-schreier-sims.md)).** The
-> cross-branch group object's *container* is built: `StabilizerAt` (residual `Aut_S^P` as a `Subgroup`), the
-> harvest **soundness** seam (fold-in ⊆ residual, prune sound), the rigid verdict (trivial ⟺ base), and the
-> full `order = ∏ basic-orbit sizes` (`card_autP_eq_prod_of_base`). **The load-bearing open piece is the
-> harvest *completeness* seam** (`StabilizerAt ⊆ closure of harvested generators`, the multi-step firing) —
-> the dual of the soundness seam, reduced to a budget/collision witness; that, not the concrete BSGS, is the
-> next constructive step toward "reaches a rigid or Cameron residual on all classes."
+> **Part A progress (2026-06-04, axiom-clean — see [schreier-sims](./chain-descent-schreier-sims.md)).** The
+> cross-branch group object is built, **both harvest directions**: `StabilizerAt` (residual `Aut_S^P` as a
+> `Subgroup`); the harvest **soundness** seam (fold-in ⊆ residual, prune sound); the rigid verdict (trivial
+> ⟺ base); the full `order = ∏ basic-orbit sizes` (`card_autP_eq_prod_of_base`); **and the harvest
+> *completeness* seam** (`stabilizerAt_eq_closure_of_coversOrbits`: `closure gens = StabilizerAt` under a
+> coverage witness, so the folded chain reproduces the residual group *and* its order). **The remaining
+> content is the coverage witness** (`CoversOrbits` for multi-step CFI bounded-`tw` — the honest analog of
+> the within-cell depth witness, *not* GI-hard) and the concrete computable BSGS (A4, validation-only). The
+> abstract cross-branch mechanism toward "reaches a rigid or Cameron residual on all classes" is grounded.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
