@@ -1067,6 +1067,26 @@ theorem closure_eq_stabilizerAt_of_realizers {gens : Set (Equiv.Perm (Fin n))}
     Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
   stabilizerAt_eq_closure_gensAt_of_coversOrbits bs (coversOrbits_of_realizers bs hreal hbase)
 
+/-- **The localisation core — recovery makes the harvest refinement-decidable.** At a node `T` where orbits
+are recovered (`CellsAreOrbits`), the refinement-**visible** realizer hypothesis (over same-`warmRefine`-cell
+pairs — polynomially computable) is *equivalent* to the orbit realizer hypothesis (over `OrbitPartition`
+pairs). The `→` direction is free (orbits refine cells, `OrbitPartition.subset_warmRefine`); the `←` direction
+is exactly where recovery is used (a visible cell-mate is a genuine orbit-mate). This pins what localisation
+buys the cross-branch harvest: coverage **correctness** holds from orbit realizers unconditionally
+(`coversOrbits_of_realizers`), and recovery is what makes the *equivalent* harvest target
+**refinement-computable** — the polynomiality layer, not a correctness gap. Per-level recovery down the base
+sequence is therefore the substrate-conditional content (the cascade property iterated; `RecoverableByDepth`
+witnesses), distinct from and downstream of the now-unconditional coverage core. -/
+theorem orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits {gens : Set (Equiv.Perm (Fin n))}
+    {T : Finset (Fin n)} (hrec : CellsAreOrbits adj P T) :
+    (∀ b w : Fin n, OrbitPartition adj P T b w → ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+      ↔ (∀ b w : Fin n, warmRefine adj P (individualizedColouring n T) b
+            = warmRefine adj P (individualizedColouring n T) w →
+          ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w) := by
+  constructor
+  · intro horb b w hcell; exact horb b w (hrec b w hcell)
+  · intro hvis b w ho; exact hvis b w (OrbitPartition.subset_warmRefine ho)
+
 /-- **De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual group at `S` is
 involutive (`ResidualInvolutive`, hence at every deeper node by `residualInvolutive_mono`), the generating set
 `gens` contains every involutive residual automorphism (`hgens` — what the leaf-collision harvest supplies),

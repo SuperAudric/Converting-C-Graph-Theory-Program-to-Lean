@@ -33,8 +33,18 @@
 >   (`orbitPartition_swap_of_involutive` supplies the realizer). The harvest-facing `coversOrbits_of_visibleRealizers`
 >   keys the realizer hypothesis on the **refinement-visible cell relation** (polynomially computable) — the
 >   shape the structural (scheme/recovery) harvest plugs into, since at a recoverable node cells *are* orbits.
->   **Open (the scheme consumer):** discharge the visible-realizer hypothesis for the metric/DRG family from
->   `theorem_2_HOR_of_pPolynomial` (`CellsAreOrbits` at depth 1), + export it to `RecoverableByDepth`.
+> - **LOCALISATION SCOPED + first pieces LANDED** (2026-06-04, axiom-clean). The scheme consumer's content is
+>   **localisation = the polynomiality layer, not a coverage-correctness gap**: a same-cell→orbit realizer
+>   comes from `OrbitPartition` directly, so coverage correctness (`closure (gensAt …) = StabilizerAt`, order)
+>   holds from `coversOrbits_of_realizers` *unconditionally* given the harvest collected realizers; recovery is
+>   what makes the equivalent harvest target **refinement-computable**. Landed: `recoverableByDepth_pPolynomial`
+>   (`CascadeOracle.lean` — the whole metric/DRG family exported to `RecoverableByDepth` at depth 1, generalizing
+>   the rank-2-only `recoverableByDepth_scheme`); `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`
+>   (`Cascade.lean` — at a recovered node the visible-cell-mate harvest ≡ the orbit-mate harvest, the localisation
+>   core). **Honest boundary:** *per-level* recovery down the base sequence (`CellsAreOrbits` at each intermediate
+>   level, not just depth 1) is **substrate-conditional** — the cascade property iterated; it is **not**
+>   unconditionally true for all DRGs (the WL-dimension boundary), so it is the cascade-class discriminator
+>   (`RecoverableByDepth` witnesses), not a closable theorem — the cross-branch analog of declassing §9's "B's core".
 > - **CFI WITNESS LANDED conditional on gauge-generation** (2026-06-04, axiom-clean): `gaugeSubgroup`
 >   (the gauge group `Z₂^β` as a `Subgroup`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self` (the gauge group
 >   is exponent-2), and **`cfi_coversOrbits` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt_eq_prod`**

@@ -835,6 +835,25 @@ theorem recoverableByDepth_scheme {n : Nat} {adj : AdjMatrix n}
     orbitRecoverableAt_iff_cellsAreOrbits.mp
       (orbitRecoverable_scheme h hrank hJ P v hP_invariant)⟩
 
+/-- **Metric / DRG instance** (axiom-free, the whole P-polynomial family): recoverable
+by depth 1, via `theorem_2_HOR_of_pPolynomial`. Generalizes `recoverableByDepth_scheme`
+(rank-2 only) to *every* P-polynomial schurian scheme graph — cycles, Johnson `J(m,k)`,
+Hamming, all DRGs — in one export, the oracle-vocabulary form of the de-classed
+metric-family recovery. Like the rank-2 case, the depth-1 cells are non-singletons, so
+this is genuine recovery at the node the structural oracle acts on (no deep discretizing
+set). The remaining cross-branch-coverage content is *per-level* recovery down the base
+sequence (localisation), substrate-conditional past depth 1. -/
+theorem recoverableByDepth_pPolynomial {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hpp : PPolynomial h.G v j0) :
+    RecoverableByDepth adj P 1 :=
+  ⟨{v}, (Finset.card_singleton v).le,
+    orbitRecoverableAt_iff_cellsAreOrbits.mp
+      (theorem_2_HOR_of_pPolynomial h P v j0 hJ hP_invariant hpp)⟩
+
 /-- **The unbounded form is vacuous.** Every graph is orbit-recoverable by depth `n`
 (individualize everything: warm refinement is then discrete and cells = orbits =
 singletons). So "∃ a depth where cells are orbits" alone says nothing — only the
