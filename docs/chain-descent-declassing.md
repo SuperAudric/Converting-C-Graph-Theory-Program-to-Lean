@@ -399,9 +399,9 @@ plan:
   propagation, relabel `canonAdj`); that is now **legacy / soundness-only** — firing is the unified
   colour-model harvest (§5–§6 here). Treat calculator §6 as the order-model soundness story, not the
   current firing path.
-- [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md) §6/§7 — likewise
-  frames cascade and linear as two mechanisms with §7's order-model twist-reading; read it as the
-  gentle intro, but the current firing is the one harvest (§6 here).
+- The gentle intro is now [`00-START-HERE.md`](./00-START-HERE.md) (the old
+  `simplified-overview` §6/§7 likewise framed cascade and linear as two mechanisms with §7's
+  order-model twist-reading; that overview is archived — the current firing is the one harvest, §6 here).
 - [`chain-descent-strategy.md`](./chain-descent-strategy.md) §12/§13 — `warm_6_2` / the spine /
   invariant 6.2 are **proved and load-bearing**, but their stated *role* as "what the linear oracle
   fires on" (coupled component, provenance) is the legacy order model; in the current model they back

@@ -1,4 +1,16 @@
-# Chain descent — orbit recovery for CFI graphs
+# Chain descent — orbit recovery for CFI graphs (ARCHIVED v1 — full research log)
+
+> **ARCHIVED 2026-06-04.** This is the complete 1778-line chronological
+> orbit-recovery research log. The **live witness theorems** (Theorem 1 — CFI
+> cascade depth ≤ tw(H), §5–§6; Theorem 2 — schurian scheme graphs, §14.1–§14.4)
+> were kept in the trimmed live doc
+> [`docs/chain-descent-orbit-recovery.md`](../../chain-descent-orbit-recovery.md).
+> Everything historical — the §4 tier ladder, §8 open questions, the §9 Lean
+> formalization phase log, §10/§13 "what's next", §14.5/§14.7 finalization gaps —
+> was removed from the live doc and preserved here. None of it is an open
+> proof-obligation queue; the current approach is
+> [`chain-descent-declassing.md`](../../chain-descent-declassing.md). Note: links
+> below are relative to the original `docs/` location and may not resolve from here.
 
 > **⚠️ Read [`chain-descent-declassing.md`](./chain-descent-declassing.md) first (2026-06-02) —
 > this doc is the WITNESS LAYER, not the strategy.** Its tier-1 / tier-2 / rank-by-rank /

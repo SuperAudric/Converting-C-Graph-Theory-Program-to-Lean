@@ -182,7 +182,8 @@ gauge `Z₂^β` factor = single flips.
 
 ### Honest difficulty
 Step 2 (the decomposition / `Φ(σ)` infra) is the genuine multi-week nut — it is exactly the long-pending
-"CFI Aut structure lemma" noted in `chain-descent-orbit-recovery.md §9`. Steps 1, 3, 4 are tractable *given* 2.
+"CFI Aut structure lemma" noted in the archived orbit-recovery research log
+(`Archive/ChainDescent/chain-descent-orbit-recovery-v1.md` §9). Steps 1, 3, 4 are tractable *given* 2.
 The C# canonizer already computes `Aut(CFI(K₄–K₇))` correctly, so this is *firing content, not GI-hard* — but
 it is a substantial Lean build. Consider whether a **narrower first win** is wanted: e.g. prove
 `cfi_coversOrbits` for a *fully-individualized tail* (where `Sᵢ = allSeeds`, the base, so the clause is vacuous
@@ -228,9 +229,10 @@ triangle-free bases) with their locality lemmas `flipSet_triEdge_other` / `flipS
   turn; §9 frontier). Its STATUS notes the Part A progress.
 - **Theorem index (line numbers):** [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md)
   — every landed declaration with a one-line description; regenerated from source.
-- **Reading order for full context:** `chain-descent-simplified-overview.md` → `chain-descent-strategy.md` →
-  `chain-descent-calculator.md` → `chain-descent-declassing.md` → (`chain-descent-orbit-recovery.md` as the
-  *witness layer*, see its §0 reading map) → the index. Also `MEMORY.md` (the project's auto-memory index).
+- **Reading order for full context:** `00-START-HERE.md` → `chain-descent-strategy.md` →
+  `chain-descent-calculator.md` → `chain-descent-declassing.md` → `chain-descent-schreier-sims.md` →
+  (`chain-descent-orbit-recovery.md` as the *witness layer*) → the index. Also `MEMORY.md`
+  (the project's auto-memory index).
 - **C# reference** (the object the Lean mirrors / validates against): `GraphCanonizationProject/PermutationGroup.cs`
   (BSGS, `Order = ∏ OrbitSize`), `ChainDescent.cs` (`HandleLeaf` a-posteriori harvest, `CoveredByPathFixingAut`
   consumption), `CfiGraphGenerator.cs`.

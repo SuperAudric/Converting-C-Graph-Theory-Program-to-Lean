@@ -17,11 +17,16 @@ import Mathlib.Logic.Function.Iterate
 This file states and proves the load-bearing direction-symmetry invariant
 ("invariant 6.2") for the **chain-descent** canonizer.
 
-**Companion: [`ChainDescent.md`](./ChainDescent.md)** — the self-contained
-proving guide: the C# implementation modelled, the Lean ↔ C# correspondence,
-the TC-relegation equivalence, the modelling axiom, the proof state, the
-hardness map, the gaps and the future work. Read that plus this file; the
-`docs/` design files are not needed.
+**Companion: [`ChainDescent/README.md`](./ChainDescent/README.md)** — the Lean
+proving reference: the module layout, the C# implementation modelled, the Lean ↔
+C# correspondence, the TC-relegation equivalence, the model objects, and the
+model gaps. For *what is proved* see [`PublicTheoremIndex.md`](./PublicTheoremIndex.md);
+for architecture and the live frontier see `docs/chain-descent-declassing.md` and
+`docs/chain-descent-schreier-sims.md`; for the project idea + reading order start
+at `docs/00-START-HERE.md`. (The older, fuller proving guide with its dated
+proof-state log is archived at
+`docs/Archive/ChainDescent/chain-descent-lean-proving-guide-v1.md`; the inline
+`§N` breadcrumbs below cite its section numbers.)
 
 ## Informal claim
 
@@ -38,7 +43,7 @@ the order labels on the splits. This is `warm_6_2`, proved below.
   sit in the refinement loop, and `P⁻`/`P⁺` differ only at `(a,b)`/`(b,a)`.
 - **Individualisation assigns a fresh colour**, making the guessed vertices
   singletons by construction — the property the canonizer's oracle relies
-  on, rather than left to a refinement hand-wave (see `ChainDescent.md` §5).
+  on, rather than left to a refinement hand-wave (see the archived proving guide §5).
 
 The earlier route (`cell_split_uniform`: cell-mates keep *equal signatures*,
 no split) is false — `cell_split_uniform_false` refutes it. The route that
@@ -488,7 +493,7 @@ A *correct* version needs `a` and `b` to be **singleton `χ₀`-cells** (so
 "relates to `a`'s cell" coincides with "relates to `a`"). That holds for
 the individualised vertex in chain descent, but not for the unindividualised
 partner in a `k ≥ 2` target cell — which is exactly the regime the linear
-oracle must handle (`ChainDescent.md` §10). Stating and proving the
+oracle must handle (the archived proving guide §10). Stating and proving the
 singleton-restricted lemma is left as follow-up.
 -/
 
@@ -602,7 +607,7 @@ The model here is the one settled in design discussion:
 * **Individualisation assigns a fresh colour.** Warm refinement starts from a
   colouring `χι` in which the guessed vertices `a` and `b` are *singletons*
   (their own cells). This is the "`A`, `B` are always singletons" property
-  the canonizer's oracle relies on (`ChainDescent.md` §5); modelling it
+  the canonizer's oracle relies on (the archived proving guide §5); modelling it
   directly makes it true by construction rather than by a refinement hand-wave.
 
 Under this model 6.2 is provable: `P⁻` and `P⁺` differ only inside `{a,b}`,
@@ -689,7 +694,7 @@ the **same partition**. The two runs differ only in the order labels on the
 splits — the partition itself is direction-independent.
 
 This is the partition-level ("weak") form of invariant 6.2 (see
-[`ChainDescent.md`](./ChainDescent.md)), empirically checked on `C4`, `K3`,
+[`ChainDescent/README.md`](./ChainDescent/README.md)), empirically checked on `C4`, `K3`,
 and the 6-vertex asymmetric graph.
 
 Proof. `applyGuess P₀ a b less` and `applyGuess P₀ a b greater` differ at only
@@ -942,7 +947,7 @@ hypothesis holds. Consequences:
   entirely: the *order labels* — which `D`-singleton is "less". The descent is
   thereby reduced from "explore `2^d` partitions" to "one fixed partition,
   optimise the labelling over `Z₂^d`". Closing *that* `Z₂^d` optimisation
-  cheaply is exactly the linear oracle (`ChainDescent.md` §10); this theorem
+  cheaply is exactly the linear oracle (the archived proving guide §10); this theorem
   is the reduction that hands it a well-posed problem.
 -/
 theorem warmRefine_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
@@ -959,7 +964,7 @@ directions. The canonizer's next move is *target-cell selection* — from the
 refined partition it picks the cell to branch on next. If that selection reads
 only the partition (not raw refined colour ids) it is direction-blind too, and
 the descent's whole sequence of target cells is a fixed **spine** shared by
-every branch. See `ChainDescent.md` §11 for the full argument and consequences.
+every branch. See the archived proving guide §11 for the full argument and consequences.
 
 The selection **must** be partition-invariant: across the `a<b` and `b<a`
 branches the refined colour *values* genuinely diverge (a non-`D` vertex's
@@ -988,7 +993,7 @@ theorem target_direction_blind {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
 partition-invariant selector and matrices `P`, `Q` agreeing off an
 all-singleton decision set `D`, the target cell is the same — even when the
 two starting colourings only agree up to partition. This is the inductive step
-of the descent-spine argument (`ChainDescent.md` §11): it composes because
+of the descent-spine argument (the archived proving guide §11): it composes because
 `warmRefine_agree_off'` accepts `samePartition` starting colourings. -/
 theorem target_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
     (χ χ' : Colouring n) (D : Finset (Fin n))
@@ -2064,7 +2069,7 @@ matroid representability and the intended Tier-2 detection scheme. See
 
 /-! ## §15 — the descent spine
 
-Formalisation of `ChainDescent.md` §11. The headline (spine) theorem is
+Formalisation of the archived proving guide §11. The headline (spine) theorem is
 
 > *With a partition-invariant target selector, the descent's per-level
 > state `(D_k, π_k, T_k)` — individualised vertex set, refined partition,
@@ -2117,7 +2122,7 @@ Out of scope for this section:
 * the linear oracle's `Z₂^d` reduction (the spine sets up its precondition,
   but the reduction itself lives in a future section).
 
-See `ChainDescent.md` §11 for the full informal argument and §10 item 1
+See the archived proving guide §11 for the full informal argument and §10 item 1
 for context. -/
 
 /-- A *witness* of one descent-step's individualisation: from a starting

@@ -6,6 +6,9 @@ once it looks worth proving about. The project does not claim a polynomial
 canonizer exists — it isolates the hard part behind one component (the
 oracle) and proves the surrounding structural invariants.
 
+> **New here? Start with [`docs/00-START-HERE.md`](docs/00-START-HERE.md)** — the
+> idea, the current state, and a curated reading order for the design docs.
+
 ## Active design — chain descent
 
 A budget-bounded recursive descent of the individualization–refinement (IR)
@@ -15,17 +18,27 @@ decision induce the same cell partition (`warm_6_2`, proved).
 
 - C#: [`GraphCanonizationProject/ChainDescent.cs`](GraphCanonizationProject/ChainDescent.cs)
   + [`CanonGraphOrdererChainDescent.cs`](GraphCanonizationProject/CanonGraphOrdererChainDescent.cs)
-- Lean: [`GraphCanonizationProofs/ChainDescent.lean`](GraphCanonizationProofs/ChainDescent.lean)
-- Proving guide: [`GraphCanonizationProofs/ChainDescent.md`](GraphCanonizationProofs/ChainDescent.md)
-- Strategy / overview docs: `docs/chain-descent-*.md`
+- Lean: the [`GraphCanonizationProofs/ChainDescent/`](GraphCanonizationProofs/ChainDescent/)
+  module split (Saturation / Scheme / Cascade / CascadeOracle / LinearOracle / CFI /
+  Group), plus the top-level [`ChainDescent.lean`](GraphCanonizationProofs/ChainDescent.lean)
+  (direction-invariance + spine invariants) that everything imports.
+- Lean proving reference: [`GraphCanonizationProofs/ChainDescent/README.md`](GraphCanonizationProofs/ChainDescent/README.md)
+  (model + C#↔Lean correspondence); theorem index:
+  [`GraphCanonizationProofs/PublicTheoremIndex.md`](GraphCanonizationProofs/PublicTheoremIndex.md)
+  (what is proved — the ground truth).
+- Strategy / design docs: `docs/chain-descent-*.md` — read in the order given by
+  [`docs/00-START-HERE.md`](docs/00-START-HERE.md).
 
 ## Layout
 
 ```
 GraphCanonizationProject/                 — active C# (chain descent + shared infra)
 GraphCanonizationProject.Tests/           — active xunit tests
-GraphCanonizationProofs/                  — active Lean (ChainDescent.lean + ChainDescent.md)
+GraphCanonizationProofs/                  — active Lean: ChainDescent/ module split
+                                            + top-level ChainDescent.lean; theorem
+                                            index PublicTheoremIndex.md
 docs/                                     — active strategy / design docs
+                                            (00-START-HERE.md is the entry point)
 */Archive/V4/                             — retired V4 canonizer (Apr 20–29)
 */Archive/Exploration/                    — retired exploration era (Apr 30 – May 14)
 docs/Archive/ChainDescent/                — closed chain-descent sub-threads
@@ -47,8 +60,10 @@ dotnet build workspace.sln
 dotnet test GraphCanonizationProject.Tests/GraphCanonizationProject.Tests.csproj
 scripts/run-long-tests.sh                 # the LongRunning xunit category
 
-# Lean
-cd GraphCanonizationProofs && lake build ChainDescent
+# Lean (all modules; serial, avoids RAM thrash — see scripts/build.sh)
+bash scripts/build.sh
+# or one module:
+cd GraphCanonizationProofs && lake build ChainDescent.CFI   # .Cascade, .CascadeOracle, …
 ```
 
 `Archive/**` is excluded from the C# build (`Compile Remove` in each csproj)

@@ -1,13 +1,19 @@
-# Chain-descent canonizer — Lean proving guide
+# Chain-descent canonizer — Lean proving guide (ARCHIVED v1, pre-2026-06)
 
-Self-contained companion to [`ChainDescent.lean`](./ChainDescent.lean). Everything
-needed to work on the proofs is here: what the C# implementation does, how the
-Lean model relates to it, the modelling decisions, the current proof state, the
-hardness map, and the open work. This file is meant to contain the information
-from the `docs/` files, however if you do need them they are available at
-`docs/chain-descent-calculator.md`
-`docs/chain-descent-strategy.md`
-`docs/chain-descent-simplified-overview.md`
+> **ARCHIVED 2026-06-04.** This was the original self-contained Lean proving guide
+> (formerly `GraphCanonizationProofs/ChainDescent.md`). It predates the de-classing
+> turn, Part A, and the unified oracle (all 2026-06-02→04) and has **zero** mention
+> of them; its §7 "Proof state" and §10 "Future work" are stale dated logs.
+> **The durable modelling content** (C#↔Lean correspondence, TC-relegation, the
+> model objects/axiom, the model gaps, the spine) was distilled into the live
+> [`GraphCanonizationProofs/ChainDescent/README.md`](../../../GraphCanonizationProofs/ChainDescent/README.md).
+> **Current state:** see [`PublicTheoremIndex.md`](../../../GraphCanonizationProofs/PublicTheoremIndex.md),
+> [`chain-descent-declassing.md`](../../chain-descent-declassing.md), and
+> [`chain-descent-schreier-sims.md`](../../chain-descent-schreier-sims.md).
+> Kept because Lean docstrings cite its `§N` section numbers (e.g. §5, §10, §11,
+> §15.8) and for the historical proof-state record below.
+
+The original framing follows, unedited.
 
 ---
 

@@ -776,8 +776,7 @@ multi-month project even after the paper is settled.
 
 ## 13. Cross-references
 
-- [`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md) —
-  gentle intro to the project.
+- [`00-START-HERE.md`](./00-START-HERE.md) — gentle intro to the project + reading order.
 - [`chain-descent-strategy.md`](./chain-descent-strategy.md) §15 —
   algorithm-level gaps including the flagged-region scope.
 - [`chain-descent-calculator.md`](./chain-descent-calculator.md) §6 —

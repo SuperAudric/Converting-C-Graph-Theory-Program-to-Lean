@@ -1,10 +1,16 @@
-# Chain descent — Tier 3 tractable buildout (TEMPORARY)
+# Chain descent — Tier 3 tractable buildout (planning roadmap)
 
-> **STATUS: TEMPORARY working doc.** Scopes the *buildable* parts of Tier 3
-> — the infrastructure prerequisites and the conditional ("tractable")
-> theorems — as an actionable work plan. **Archive once the buildout
-> lands** (move to `docs/archive/` and fold any surviving content into
-> [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
+> **STATUS (updated 2026-06-04): partially landed.** Scopes the *buildable* parts
+> of Tier 3 — the infrastructure prerequisites and the conditional ("tractable")
+> theorems — as an actionable work plan.
+> - **Part A (infrastructure) has LANDED** and is now its own doc:
+>   [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) (the
+>   stabilizer-chain / Schreier–Sims object, A1–A3.5 + A2-complete, axiom-clean).
+>   Read that for Part A; the Part-A sketch below is superseded by it.
+> - **Part B (B1 Tier-3a, B2 abelian-stripping, B3 oracle alternation) remains an
+>   open paper-stage roadmap** — this doc is still its working plan.
+> Not yet fully consumed; **do not archive** until Part B lands (then fold survivors
+> into [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
 > / [`chain-descent-tier3a-cascade-composition.md`](./chain-descent-tier3a-cascade-composition.md)).
 
 This doc deliberately **excludes the wall**. Tier 3's hard core —

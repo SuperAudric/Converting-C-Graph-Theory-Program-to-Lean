@@ -599,8 +599,9 @@ as this oracle's harvest core wrapped in a bounded-depth recursion.
      the leaf level — the candidate is a function of iso-invariant rank data.
 3. **Tie to `canonForm`** — a descent guided by the verified oracle
    reaches the same lex-min as brute force over `DirAssignment`s. The
-   descent's high-level correctness theorem (ChainDescent.md §15.8
-   "remaining genuine work"). ~1000 lines. (B2.4 — remaining.)
+   descent's high-level correctness theorem (`ChainDescent.lean` §15.8
+   "remaining genuine work"; informal account in the archived proving guide
+   §15.8). ~1000 lines. (B2.4 — remaining.)
 
 4. **Completeness / effectiveness (§L.4 — characterised 2026-05-30).** Built in
    `ChainDescent/LinearOracle.lean` §L.4 (axiom-clean): the oracle **fires iff the
@@ -748,9 +749,10 @@ check, not a matroid-representability test.
 - [`ChainDescent.lean`](../GraphCanonizationProofs/ChainDescent.lean)
   §15.8 — the firm interface (`DirAssignment`, `LinearOracleSpec`,
   `LeafTwistSpec`); §15.7 (`canonForm`).
-- [`ChainDescent.md`](../GraphCanonizationProofs/ChainDescent.md)
-  §15.8, §11 — the spine / Phase-2 framing; "remaining genuine work"
-  (the `LeafTwistSpec` discharge this doc plans).
+- [`ChainDescent/README.md`](../GraphCanonizationProofs/ChainDescent/README.md)
+  §8 — the spine framing. The "remaining genuine work" / Phase-2 §15.8 detail
+  (the `LeafTwistSpec` discharge this doc plans) is in the archived proving guide
+  [`§15.8/§11`](./Archive/ChainDescent/chain-descent-lean-proving-guide-v1.md).
 - [`chain-descent-tier3-decomposability.md`](./chain-descent-tier3-decomposability.md)
   §5 (sub-claim 1, abelian-stripping — the linear oracle is the
   mechanism); §7 (graceful degradation).

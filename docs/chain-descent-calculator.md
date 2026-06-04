@@ -12,7 +12,7 @@ the construction question. For the algorithm that *calls* the oracle — the
 descent, the budget, what the algorithm requires *of* the oracle — see
 [`chain-descent-strategy.md`](./chain-descent-strategy.md). For a gentle
 introduction to the whole project, start with
-[`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md).
+[`00-START-HERE.md`](./00-START-HERE.md).
 After this doc, read [`chain-descent-declassing.md`](./chain-descent-declassing.md):
 it is the current architecture for both orbit recovery and oracle firing (the two
 oracles below are now one recovery-based harvest), and it supersedes the per-oracle
@@ -219,6 +219,19 @@ colourings, verify it edge-by-edge, harvest it. The T-A/T-B/T-C skeleton stands;
 the §5/§6 split below is now a depth distinction within that single harvest.
 
 ---
+
+> ## ⚠️ §5–§7 are the pre-de-classing oracle design (legacy framing)
+>
+> Sections 5–7 describe **two separate oracles** (cascade + linear) and the
+> **order-model** firing (read a twist off propagation, relabel `canonAdj`). The
+> de-classing turn folded both into **one recovery-based colour-model harvest**,
+> and proved recovery **non-class-specifically** — so the per-class cascade/linear
+> split is now only a *depth* distinction within one mechanism. **Read §5–§7 for
+> the soundness intuition and the hardness map, not for how the oracle fires or
+> for an open proof-obligation queue.** The current architecture is
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md) (§5–§6 the unified
+> harvest, §9 the live frontier); the §1–§4 material above (problem framing,
+> stabilizer-chain model, T-A/T-B/T-C) remains current.
 
 ## 5. The cascade oracle (Phase 1)
 

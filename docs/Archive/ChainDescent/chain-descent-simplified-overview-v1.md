@@ -1,4 +1,13 @@
-# Chain-descent canonizer — a simplified overview
+# Chain-descent canonizer — a simplified overview (ARCHIVED v1)
+
+> **ARCHIVED 2026-06-04.** Superseded as the project's onramp by
+> [`docs/00-START-HERE.md`](../../00-START-HERE.md), which absorbed this doc's
+> conceptual core (the idea, the IR tree, true-vs-false symmetry, the worked
+> example, the honest "settled vs open" framing) and adds the current state +
+> reading order. This doc's §4.1–§4.3, §6, and §7 use the **pre-de-classing**
+> two-oracle / order-model framing (superseded — see
+> [`chain-descent-declassing.md`](../../chain-descent-declassing.md)). Kept for
+> the historical record and for its longer-form prose.
 
 A plain-language introduction to the project: what it computes, why the obvious
 method is too slow, the one idea the design turns on, and how the pieces fit

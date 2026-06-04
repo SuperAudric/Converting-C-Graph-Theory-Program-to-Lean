@@ -10,8 +10,8 @@ one piece whose polynomial bound is open — has its own doc:
 oracle architecture — de-classed (non-class-specific) recovery and the unified
 oracle that the cascade and linear faces fold into — lives in
 [`chain-descent-declassing.md`](./chain-descent-declassing.md); read it as a key
-companion to this doc. A gentle, build-from-nothing introduction is
-[`chain-descent-simplified-overview.md`](./chain-descent-simplified-overview.md).
+companion to this doc. A gentle, build-from-nothing introduction (the idea, the
+current state, and the reading order) is [`00-START-HERE.md`](./00-START-HERE.md).
 
 > **Lineage.** The current design is *chain descent* — a single budgeted
 > recursion. An earlier generation was a two-pass "flip-validation" strategy (a
@@ -530,7 +530,7 @@ and — the recursion stringing them across the descent — `spine_branch_indepe
 `ChainDescent.lean` §15, under existential `IndivStep` individualisation.
 The spine is **not yet implemented in the C#** (the descent re-refines per
 node). Full account:
-[`ChainDescent.md`](../GraphCanonizationProofs/ChainDescent.md) §11.
+[`ChainDescent/README.md`](../GraphCanonizationProofs/ChainDescent/README.md) §8.
 
 **What the spine does *not* rest on.** Symmetric "forcing" — the idea that a
 guess's two directions force each other into a fixed order — is **not** a viable
