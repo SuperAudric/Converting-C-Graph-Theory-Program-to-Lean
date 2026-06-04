@@ -357,15 +357,19 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `CFIBase.cycleSpace_xorF` | 3367-3370 | **(CFI-cov.2)** The cycle space is closed under the `Z₂` sum `xorF` (symmetric + even both preserved). | — |
 | `CFIBase.cycleSpace_const_false` | 3372-3376 | **(CFI-cov.2)** The empty flip-subgraph (zero) lies in the cycle space. | — |
 | `CFIBase.cfiFlip_endpoint_swap` | 3497-3506 | **C1b.0.** The flip swaps the parity-pair `e^0_{v→w}/e^1_{v→w}` iff `F v w = true` (the swap companion of `cfiFlip_endpoint`). | — |
-| `CFIBase.triEdge_symm` | 3541-3543 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
-| `CFIBase.triEdge_apex` | 3545-3547 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
-| `CFIBase.triEdge_cyclic` | 3549-3551 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
-| `CFIBase.triEdge_iff` | 3553-3557 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
-| `CFIBase.flipSet_triEdge_other` | 3576-3586 | **D-locality.** Off the triangle `{v,w,u}` the triangle's flip set is empty, so the triangle flip fixes every other gadget. | — |
-| `CFIBase.evenPermEdge_symm` | 3639-3642 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
-| `CFIBase.evenPermEdge_iff_of_mem` | 3644-3658 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
-| `CFIBase.flipSet_evenPermEdge_of_fixed` | 3672-3681 | **D-locality (triangle-free bases).** At a `σ`-fixed vertex the permutation-cycle flip set is empty, so the cycle flip avoids every fixed gadget. | — |
-| `IsCFI'.cfiFlipAut_swaps_endpointVertex` | 3845-3857 | **C1b.0 (lifted to `Fin n`).** `cfiFlipAut F` swaps `endpointVertex hw false ↔ true` iff `F v w = true` — the foundational decision-pair swap C1b.1 keys on. | — |
+| `CFIBase.cfiFlip_xorF` | 3524-3539 | **(CFI-cov.3) Gauge flip is a homomorphism on the cycle space:** `cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'` (endpoint: Bool-xor assoc/comm; subset: symmDiff assoc/comm via `flipSet_xorF`). The `Z₂^β`-factor group structure. | — |
+| `CFIBase.cfiFlip_const_false` | 3541-3552 | **(CFI-cov.3)** The zero subgraph is the identity flip: `cfiFlip (fun _ _ => false) = id` (cycle-space zero ↦ identity). | — |
+| `CFIBase.triEdge_symm` | 3579-3581 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
+| `CFIBase.triEdge_apex` | 3583-3585 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
+| `CFIBase.triEdge_cyclic` | 3587-3589 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
+| `CFIBase.triEdge_iff` | 3591-3595 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
+| `CFIBase.flipSet_triEdge_other` | 3614-3624 | **D-locality.** Off the triangle `{v,w,u}` the triangle's flip set is empty, so the triangle flip fixes every other gadget. | — |
+| `CFIBase.evenPermEdge_symm` | 3677-3680 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
+| `CFIBase.evenPermEdge_iff_of_mem` | 3682-3696 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
+| `CFIBase.flipSet_evenPermEdge_of_fixed` | 3710-3719 | **D-locality (triangle-free bases).** At a `σ`-fixed vertex the permutation-cycle flip set is empty, so the cycle flip avoids every fixed gadget. | — |
+| `IsCFI'.cfiFlipAut_swaps_endpointVertex` | 3883-3895 | **C1b.0 (lifted to `Fin n`).** `cfiFlipAut F` swaps `endpointVertex hw false ↔ true` iff `F v w = true` — the foundational decision-pair swap C1b.1 keys on. | — |
+| `IsCFI'.cfiFlipAut_xorF` | 3899-3907 | **(CFI-cov.3) The lifted gauge-flip homomorphism:** `cfiFlipAut (xorF F F') = cfiFlipAut F * cfiFlipAut F'` (the `Fin n` form of `cfiFlip_xorF` via `e_cfiFlipAut`). So `F ↦ cfiFlipAut F` is a group homomorphism `(Z₂^β, xorF) → Equiv.Perm (Fin n)`, image the gauge group. | — |
+| `IsCFI'.cfiFlipAut_one` | 3909-3915 | **(CFI-cov.3)** The zero gauge flip is the identity: `cfiFlipAut (fun _ _ => false) = 1` — the homomorphism preserves the unit. | — |
 ## ChainDescent/Scheme.lean
 
 | Name | Line | Description | Notes |

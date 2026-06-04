@@ -16,9 +16,10 @@
 >   reduces completeness to `CoversOrbits` over the path-fixing gauge generators. **CFI-cov.1 + CFI-cov.2
 >   landed** (2026-06-04): the residual-membership bridge (`cfiFlipAut_residualAut` etc.; forward coverage),
 >   the cycle-space `Z₂^β` object (`CycleSpace`, `xorF`, `flipSet_xorF`, closure), and the odd-degree base
->   sequence (`cfi_exists_base_seq`). **Remaining (CFI-cov.3):** the *reverse* orbit-coverage (path-fixing
->   flips realize each base point's full orbit) ⟹ `cfi_coversOrbits`. Firing content (C# already canonizes
->   CFI(K₄–K₇)), not GI-hard. See §7.
+>   sequence (`cfi_exists_base_seq`). **CFI-cov.3 stage 1 landed** (2026-06-04): the gauge-flip group
+>   homomorphism `Z₂^β → Aut` (`cfiFlip_xorF`, `cfiFlipAut_xorF`, `cfiFlipAut_one`). **Remaining (CFI-cov.3
+>   core):** the `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem + per-level orbit-coverage ⟹ `cfi_coversOrbits`.
+>   Firing content (C# already canonizes CFI(K₄–K₇)), not GI-hard. See §7.
 >
 > A fresh reader can still use this doc as the full context/name index (Mathlib + internal) for consuming
 > A1–A3.5 / A2-complete or building A4.
@@ -368,10 +369,15 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
   discreteness `theorem_1_HOR_cfi_oddDeg`).
 - **CFI-cov.3 (the multi-week core):** the **reverse** orbit-coverage — at each level the path-fixing gauge
   flips' closure realizes the *full* `Aut_S^P`-orbit of the base point — yielding `cfi_coversOrbits`, hence
-  `closure (cfiGaugeGens h) = StabilizerAt ∅` and `|Aut(CFI)^P| = ∏ basic-orbit sizes`. Entry point: relate
-  `xorF` to flip composition (the `Z₂^β → Aut` homomorphism), then the `Aut(CFI(H)) ≅ Z₂^β ⋊ Aut(H)`
-  structure showing every path-fixing residual decomposes into path-fixing gauge flips. The mechanism already
-  canonizes CFI(K₄–K₇) in the C#, so it is firing content, not GI-hard.
+  `closure (cfiGaugeGens h) = StabilizerAt ∅` and `|Aut(CFI)^P| = ∏ basic-orbit sizes`.
+  - **Stage 1 — the gauge-flip group homomorphism `Z₂^β → Aut` — LANDED 2026-06-04, axiom-clean** (`CFI.lean`):
+    `cfiFlip_xorF` (`cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'`), `cfiFlip_const_false` (zero ↦ id), and
+    the lifted `cfiFlipAut_xorF` / `cfiFlipAut_one`. So `F ↦ cfiFlipAut F` is a group homomorphism from the
+    cycle space into `Aut`, with image the gauge group — the `Z₂^β`-factor structure.
+  - **Remaining:** the `Aut(CFI(H)) ≅ Z₂^β ⋊ Aut(H)` structure theorem — that every path-fixing residual
+    decomposes into path-fixing gauge flips (so the gauge image *is* the residual at a path that kills the
+    `Aut(H)` factor) — then the per-level orbit-coverage clauses. The mechanism already canonizes CFI(K₄–K₇)
+    in the C#, so it is firing content, not GI-hard.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as

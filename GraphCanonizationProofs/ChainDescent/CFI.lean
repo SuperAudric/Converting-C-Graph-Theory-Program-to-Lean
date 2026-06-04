@@ -3513,6 +3513,44 @@ theorem cfiFlip_subset (F : Fin m → Fin m → Bool)
     (hS : S ∈ H.evenSubsetsOfNeighbors v) :
     H.cfiFlip F hEven (H.subset hS) = H.subset (H.symmDiff_flipSet_mem_even F hEven hS) := rfl
 
+/-! #### The gauge-flip group homomorphism `Z₂^β → Aut` (CFI-cov.3, stage 1)
+
+`F ↦ cfiFlip F` is a homomorphism from the cycle space `(Z₂^β, xorF)` to permutations: composing two
+flips XORs their subgraphs (`cfiFlip_xorF`), and the zero subgraph is the identity (`cfiFlip_const_false`).
+On endpoints this is Bool-`xor` associativity/commutativity; on subsets it is symmetric-difference
+associativity/commutativity (with `flipSet_xorF`). This is the `Z₂^β` factor's group structure — the
+scaffolding the cov.3 structure theorem (`Aut(CFI(H)) ≅ Z₂^β ⋊ Aut(H)`) builds on. -/
+
+/-- **The gauge flip is a homomorphism on the cycle space:** `cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip
+F'`. (Endpoint: `b ⊕ (F⊕F') = (b ⊕ F') ⊕ F`; subset: `S ∆ (A ∆ B) = (S ∆ B) ∆ A`.) -/
+theorem cfiFlip_xorF (F F' : Fin m → Fin m → Bool)
+    (hF : ∀ v, (H.flipSet F v).card % 2 = 0) (hF' : ∀ v, (H.flipSet F' v).card % 2 = 0) :
+    H.cfiFlip (xorF F F') (H.even_xorF hF hF') = H.cfiFlip F hF ∘ H.cfiFlip F' hF' := by
+  funext x
+  rcases x with ⟨v, S, hS⟩ | ⟨v, ⟨w, hw⟩, b⟩
+  · simp only [cfiFlip, Function.comp_apply]
+    have hset : symmDiff S (H.flipSet (xorF F F') v)
+        = symmDiff (symmDiff S (H.flipSet F' v)) (H.flipSet F v) := by
+      rw [flipSet_xorF, symmDiff_assoc, symmDiff_comm (H.flipSet F v) (H.flipSet F' v)]
+    exact congrArg Sum.inl (Sigma.ext rfl (heq_of_eq (Subtype.ext hset)))
+  · simp only [cfiFlip, Function.comp_apply, xorF]
+    refine congrArg Sum.inr (Sigma.ext rfl (heq_of_eq
+      (congrArg (Prod.mk (⟨w, hw⟩ : {x // x ∈ H.neighbors v})) ?_)))
+    cases b <;> cases F v w <;> cases F' v w <;> rfl
+
+/-- **The zero subgraph is the identity flip:** `cfiFlip (fun _ _ => false) = id`. The cycle-space zero
+maps to the identity automorphism. -/
+theorem cfiFlip_const_false (hEven : ∀ v, (H.flipSet (fun _ _ => false) v).card % 2 = 0) :
+    H.cfiFlip (fun _ _ => false) hEven = id := by
+  funext x
+  rcases x with ⟨v, S, hS⟩ | ⟨v, ⟨w, hw⟩, b⟩
+  · simp only [cfiFlip, id_eq]
+    have hset : symmDiff S (H.flipSet (fun _ _ => false) v) = S := by
+      have hempty : H.flipSet (fun _ _ => false) v = ∅ := by ext a; simp [mem_flipSet]
+      rw [hempty]; ext a; simp [Finset.mem_symmDiff]
+    exact congrArg Sum.inl (Sigma.ext rfl (heq_of_eq (Subtype.ext hset)))
+  · simp only [cfiFlip, id_eq, Bool.xor_false]
+
 /-! ### C1b.2a — the common-neighbour triangle (a concrete even subgraph through an edge)
 
 The minimal even subgraph through an edge `{v, w}`: a triangle `{v, w, u}` with `u` a common
@@ -3855,6 +3893,26 @@ theorem cfiFlipAut_swaps_endpointVertex (h : IsCFI' adj) (F : Fin h.m → Fin h.
   refine ⟨?_, ?_⟩
   · rw [cfiFlipAut_endpointVertex, hF]; rfl
   · rw [cfiFlipAut_endpointVertex, hF]; rfl
+
+/-! #### The lifted gauge-flip group homomorphism on `Fin n` (CFI-cov.3, stage 1) -/
+
+/-- **The lifted gauge flip is a homomorphism:** `cfiFlipAut (xorF F F') = cfiFlipAut F * cfiFlipAut F'`.
+The `Fin n` form of `cfiFlip_xorF`, transported through `e_cfiFlipAut` — so `F ↦ cfiFlipAut F` is a group
+homomorphism from the cycle space `(Z₂^β, xorF)` into `Equiv.Perm (Fin n)`, with image the gauge group. -/
+theorem cfiFlipAut_xorF (h : IsCFI' adj) (F F' : Fin h.m → Fin h.m → Bool)
+    (hF : ∀ v, (h.H.flipSet F v).card % 2 = 0) (hF' : ∀ v, (h.H.flipSet F' v).card % 2 = 0) :
+    h.cfiFlipAut (CFIBase.xorF F F') (h.H.even_xorF hF hF')
+      = h.cfiFlipAut F hF * h.cfiFlipAut F' hF' := by
+  refine Equiv.ext fun v => h.e.injective ?_
+  simp only [e_cfiFlipAut, Equiv.Perm.mul_apply, h.H.cfiFlip_xorF F F' hF hF', Function.comp_apply]
+
+/-- **The zero gauge flip is the identity:** `cfiFlipAut (fun _ _ => false) = 1`. The cycle-space zero
+maps to the identity permutation — the homomorphism preserves the unit. -/
+theorem cfiFlipAut_one (h : IsCFI' adj)
+    (hEven : ∀ v, (h.H.flipSet (fun _ _ => false) v).card % 2 = 0) :
+    h.cfiFlipAut (fun _ _ => false) hEven = 1 := by
+  refine Equiv.ext fun v => h.e.injective ?_
+  rw [h.e_cfiFlipAut, h.H.cfiFlip_const_false hEven, id_eq, Equiv.Perm.one_apply]
 
 end IsCFI'
 
