@@ -365,9 +365,11 @@ Built in `Cascade.lean` "Part A (Stage A2-complete)":
 - *Bar (met):* `closure (gensAt … S) = StabilizerAt S` under the coverage witness — the residual is *exactly*
   what the harness folds in. Closes the cross-branch harvest the way A2 closed its soundness half.
 
-**CFI instance of A2-complete — discharging `CoversOrbits` for CFI (the multi-week arc).** The cross-branch
-harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β` generators already in
-`CFI.lean`, with `isAut_cfiFlipAut` / `cfiFlipAut_preserves_P` / locality / `disjoint_support`). Staging:
+**CFI instance of A2-complete — discharging `CoversOrbits` for CFI (COMPLETE in the base-resolved regime).**
+The cross-branch harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β` generators
+already in `CFI.lean`, with `isAut_cfiFlipAut` / `cfiFlipAut_preserves_P` / locality / `disjoint_support`).
+What was scoped as a multi-week structure-theorem arc was **de-classed** to a fast discharge (see below).
+Staging:
 - **CFI-cov.1 — the residual-membership bridge — LANDED 2026-06-04, axiom-clean** (`Cascade.lean`):
   `cfiFlipAut_residualAut` (a path-fixing gauge flip is a `ResidualAut adj P S`), `cfiFlipAut_mem_stabilizerAt`,
   `cfiFlipAut_orbitPartition` (the **forward** coverage direction — a flip moves `v` within its orbit),
@@ -381,57 +383,58 @@ harvest for CFI folds in **gauge flips** (`cfiFlipAut`, the cycle-space `Z₂^β
   `isBase_of_discrete_warmRefine` (the general `Discrete ⟹ IsBase` bridge), `foldl_insert_empty_eq_toFinset`,
   and `cfi_exists_base_seq` (odd-degree CFI has an ordered base sequence, from the axiom-free cascade
   discreteness `theorem_1_HOR_cfi_oddDeg`).
-- **CFI-cov.3 (the multi-week core):** the **reverse** orbit-coverage — at each level the path-fixing gauge
-  flips' closure realizes the *full* `Aut_S^P`-orbit of the base point — yielding `cfi_coversOrbits`, hence
-  `closure (cfiGaugeGens h) = StabilizerAt ∅` and `|Aut(CFI)^P| = ∏ basic-orbit sizes`.
-  - **Stage 1 — the gauge-flip group homomorphism `Z₂^β → Aut` — LANDED 2026-06-04, axiom-clean** (`CFI.lean`):
-    `cfiFlip_xorF` (`cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'`), `cfiFlip_const_false` (zero ↦ id), and
-    the lifted `cfiFlipAut_xorF` / `cfiFlipAut_one`. So `F ↦ cfiFlipAut F` is a group homomorphism from the
-    cycle space into `Aut`, with image the gauge group — the `Z₂^β`-factor structure.
-  - **Stage 2 — DE-CLASSED, the structure theorem SIDESTEPPED — LANDED 2026-06-04, axiom-clean**
-    (`Cascade.lean`): `residualInvolutive_mono`, `coversOrbits_of_residualInvolutive`,
-    `closure_eq_stabilizerAt_of_residualInvolutive`. Rather than prove the per-class `Aut(CFI(H)) ≅ Z₂^β ⋊
-    Aut(H)` structure theorem (the `Φ(σ)` base-aut lift + decomposition), this discharges `CoversOrbits` from
-    a **single abstract hypothesis** — the residual is exponent-2 (`ResidualInvolutive`, an elementary-abelian
-    `Z₂^d`) — for the *generating set of all involutive residual automorphisms*. The swap brick
-    `orbitPartition_swap_of_involutive` realizes each orbit-mate by one path-fixing involution; the harvested
-    involutions generate the residual **whatever their internal description**, so the literal-gauge-flip
-    identification (and the `Φ` lift) is never needed. This is the cross-branch analogue of
-    `theorem_2_HOR_of_pPolynomial`: one structural predicate covers the whole elementary-abelian-residual
-    class (CFI's gauge regime, the twin/module regime, …), not a per-class grind.
-  - **Stage 3 — the CFI witness wired, conditional on gauge-generation — LANDED 2026-06-04, axiom-clean**
-    (`Cascade.lean`): `gaugeSubgroup` (the gauge group `Z₂^β` as a `Subgroup` — `cfiGaugeGens` is closed under
-    the group ops via `cfiFlipAut_xorF`/`_one`/`_involutive`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self`
-    (the gauge group is exponent-2). Then **`cfi_coversOrbits`** (the long-sought coverage witness, via
-    `coversOrbits_of_residualInvolutive`), **`cfi_closure_eq_stabilizerAt`** (`closure cfiGaugeGens =
-    StabilizerAt ∅`), and **`cfi_card_stabilizerAt_eq_prod`** (`|Aut(CFI)^P| = ∏ basic-orbit sizes`) — all
-    reduced to a **single** CFI hypothesis: **gauge-generation** `StabilizerAt adj P ∅ ≤ closure (cfiGaugeGens
-    h)`. Gauge-generation makes the residual exponent-2 (so `ResidualInvolutive` holds) and puts every residual
-    automorphism in `cfiGaugeGens` (so `hgens` holds), discharging the de-classed coverage with **no** `Φ(σ)`
-    lift, no semidirect decomposition, no per-level orbit-coverage.
-  - **Stage 4 — the gauge nut, REFRAMED to `ResidualInvolutive` + IN PROGRESS.** Build plan:
-    [`chain-descent-cfi-gauge-discharge-plan.md`](./chain-descent-cfi-gauge-discharge-plan.md). The faithful
-    de-classed nut is **`ResidualInvolutive adj P S`** (the residual is exponent-2), *strictly weaker* than
-    gauge-generation (`g²=1`, not "`g` is a literal cycle-space flip"). It holds in the **base-resolved
-    regime** — where the committed `P` distinguishes gadgets (`PSeparatesGadgets`; the `Aut(H)` factor
-    killed), the decomposability premise. Two lemmas, **both LANDED 2026-06-04, axiom-clean**: **Lemma A — gadget-preservation from `P`
-    (`gadgetPreserving_of_pSeparates`)**: a residual aut fixes `S` pointwise and preserves `P`, so it
-    preserves `P`-relations-to-`S` (`P (g x) s = P (g x)(g s) = P x s`), forcing gadget-preservation under
-    `PSeparatesGadgets` — the key move that *sidesteps* the subtle structural "CFI auts preserve gadgets".
-    **Lemma B — per-gadget involution** (`cfiAut_gadgetFixing_mul_self` + ~12 supporting lemmas:
-    `exists_vertex_form`, `isEndpt`/`isEndpt_equivariant`, `gadgetFixingAut_endpoint`/`_subset`/`_dir`,
-    `mulSelf_endpoint`/`_subset`): a gadget-fixing CFI aut squares to `1` (type-preservation via the
-    cross-gadget-neighbour distinguisher; endpoint involution via direction-preservation + 2-element-set
-    injectivity; subset involution via determined-by-endpoint-adjacency). **Capstone `cfi_residualInvolutive`
-    (LANDED)**: `PSeparatesGadgets adj P S h → ResidualInvolutive adj P S`. **Harvest wiring LANDED
-    2026-06-04, axiom-clean**: `isBase_mono` (`IsBase` upward-closed), `cfi_exists_base_seq_from` (base
-    sequence from any `S`, via `allSeeds` + monotonicity), **`cfi_closure_eq_stabilizerAt_of_pSeparates`**
-    (`closure {g | ResidualAut adj P S g ∧ g²=1} = StabilizerAt adj P S`) and
-    **`cfi_card_stabilizerAt_of_pSeparates`** (`|Aut_S^P| = ∏ basic-orbit sizes`), at a nonempty base-resolved
-    `S` (`PSeparatesGadgets` at `S=∅` is vacuously false). **CFI-cov.4 is complete; the sole remaining CFI
-    obligation is discharging `PSeparatesGadgets`** for the descent's actual `P` — the orthogonal
-    visible/cascade leg (scheme/`PPolynomial`), a separate thread. C# canonizes CFI(K₄–K₇); firing content,
-    not GI-hard. Plan: [`chain-descent-cfi-gauge-discharge-plan.md`](./chain-descent-cfi-gauge-discharge-plan.md).
+- **CFI-cov.3 stage 1 — the gauge-flip group homomorphism `Z₂^β → Aut` — LANDED 2026-06-04, axiom-clean**
+  (`CFI.lean`): `cfiFlip_xorF` (`cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'`), `cfiFlip_const_false`
+  (zero ↦ id), and the lifted `cfiFlipAut_xorF` / `cfiFlipAut_one`. So `F ↦ cfiFlipAut F` is a group
+  homomorphism from the cycle space into `Aut`, with image the gauge group — the `Z₂^β`-factor structure.
+- **The de-classed coverage — the structure theorem SIDESTEPPED — LANDED 2026-06-04, axiom-clean**
+  (`Cascade.lean`): `residualInvolutive_mono`, `coversOrbits_of_residualInvolutive`,
+  `closure_eq_stabilizerAt_of_residualInvolutive`. Rather than prove the per-class `Aut(CFI(H)) ≅ Z₂^β ⋊
+  Aut(H)` structure theorem (the `Φ(σ)` base-aut lift + decomposition), this discharges `CoversOrbits` from a
+  **single abstract hypothesis** — the residual is exponent-2 (`ResidualInvolutive`, an elementary-abelian
+  `Z₂^d`) — for the *generating set of all involutive residual automorphisms*. `orbitPartition_swap_of_involutive`
+  realizes each orbit-mate by one path-fixing involution; the harvested involutions generate the residual
+  **whatever their internal description**, so the literal-gauge-flip identification (and the `Φ` lift) is never
+  needed. The cross-branch analogue of `theorem_2_HOR_of_pPolynomial`: one structural predicate covers the
+  whole elementary-abelian-residual class (CFI's gauge regime, the twin/module regime, …). **This is the
+  enabler of both CFI routes below.**
+
+The two CFI routes are complementary — same goal (`closure {harvested} = StabilizerAt`, the order), different
+hypothesis:
+
+- **CFI-cov.3 — the literal-gauge route (gauge-generation), LANDED 2026-06-04, axiom-clean** (`Cascade.lean`):
+  `gaugeSubgroup` (the gauge group `Z₂^β` as a `Subgroup` — `cfiGaugeGens` is closed under the group ops via
+  `cfiFlipAut_xorF`/`_one`/`_involutive`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self` (gauge is exponent-2);
+  then `cfi_coversOrbits` / `cfi_closure_eq_stabilizerAt` (`closure cfiGaugeGens = StabilizerAt ∅`) /
+  `cfi_card_stabilizerAt_eq_prod` — all conditional on **gauge-generation** `StabilizerAt adj P ∅ ≤ closure
+  (cfiGaugeGens h)`. This identifies the residual with the *literal* cycle-space flips; its hypothesis is the
+  *surjective half* of the structure theorem, and at `S = ∅` it is **false for non-rigid bases** (the `Aut(H)`
+  factor survives), so this route is the **rigid-base / full-`Aut`-at-root framing**. The `gaugeSubgroup` +
+  exponent-2 infrastructure is reusable.
+- **CFI-cov.4 — the primary route (`PSeparatesGadgets` / `ResidualInvolutive`), COMPLETE 2026-06-04,
+  axiom-clean** (`Cascade.lean`; plan
+  [`chain-descent-cfi-gauge-discharge-plan.md`](./chain-descent-cfi-gauge-discharge-plan.md)). The faithful
+  de-classed nut is **`ResidualInvolutive adj P S`** (the residual is exponent-2) — *strictly weaker* than
+  gauge-generation (`g²=1`, not "`g` is a literal flip") — discharged in the **base-resolved regime** where the
+  committed `P` distinguishes gadgets (`PSeparatesGadgets`, the decomposability premise; the `Aut(H)` factor
+  killed by the committed individualization). **Lemma A** (`gadgetPreserving_of_pSeparates`): a residual aut
+  fixes `S` pointwise and preserves `P`, so it preserves `P`-relations-to-`S` (`P (g x) s = P (g x)(g s) =
+  P x s`), forcing gadget-preservation — the key move that *sidesteps* the structural "CFI auts preserve
+  gadgets". **Lemma B** (`cfiAut_gadgetFixing_mul_self` + ~12 supporting lemmas: `exists_vertex_form`,
+  `isEndpt`/`_equivariant`, `gadgetFixingAut_endpoint`/`_subset`/`_dir`, `mulSelf_endpoint`/`_subset`): a
+  gadget-fixing CFI aut squares to `1` (type-preservation via the cross-gadget-neighbour distinguisher;
+  endpoint involution via direction-preservation + 2-element-set injectivity; subset involution via
+  determined-by-endpoint-adjacency). **Capstone** `cfi_residualInvolutive` (Lemma A + B). **Harvest wiring**:
+  `isBase_mono`, `cfi_exists_base_seq_from` (base sequence from any `S`, via `allSeeds` + monotonicity),
+  **`cfi_closure_eq_stabilizerAt_of_pSeparates`** (`closure {g | ResidualAut adj P S g ∧ g²=1} = StabilizerAt
+  adj P S`) and **`cfi_card_stabilizerAt_of_pSeparates`** (`|Aut_S^P| = ∏ basic-orbit sizes`), at a **nonempty**
+  base-resolved `S` (`PSeparatesGadgets` at `S=∅` is vacuously false → all gadgets equal). **This is the
+  genuine route for real (non-rigid) CFI.** C# canonizes CFI(K₄–K₇); firing content, not GI-hard.
+
+**The sole remaining CFI obligation** (after CFI-cov.4) is discharging **`PSeparatesGadgets`** for the
+descent's actual `P` — that the committed individualization resolves the base layer. That is the **orthogonal
+visible/cascade leg** (scheme / `PPolynomial` base-graph recovery), a separate thread, not part of the gauge
+work.
 
 ### Stage A4 — concrete computable BSGS (defer)
 - Model `Level` / ordered base sequence (as data) / `Transversal` / Schreier generators / `sift` as

@@ -62,13 +62,17 @@
 > `CoversOrbits` for the **whole exponent-2 / elementary-abelian-(`Z₂^d`)-residual class in one theorem** —
 > the cross-branch analogue of `theorem_2_HOR_of_pPolynomial`, sidestepping the per-class `Aut(CFI)≅Z₂^β⋊Aut(H)`
 > structure theorem (the harvested involutions generate the residual whatever their internal description, no
-> `Φ(σ)` lift). **The CFI witness is wired** (2026-06-04, axiom-clean): `gaugeSubgroup` (gauge group `Z₂^β`),
-> `cfi_coversOrbits`, `cfi_closure_eq_stabilizerAt`, `cfi_card_stabilizerAt_eq_prod` (`|Aut(CFI)^P| = ∏
-> basic-orbit sizes`) — all reduced to a **single** CFI hypothesis, **gauge-generation** `StabilizerAt adj P ∅
-> ≤ closure (cfiGaugeGens h)` (every `P`-preserving automorphism is a product of gauge flips; the converse is
-> free). **The remaining content is then: discharge gauge-generation for CFI** (the surjective half of the
-> structure theorem; *not* GI-hard) — and the concrete computable BSGS (A4, validation-only). The abstract
-> cross-branch mechanism toward "reaches a rigid or Cameron residual on all classes" is grounded.
+> `Φ(σ)` lift). **The CFI cross-branch harvest is COMPLETE in the base-resolved regime** (CFI-cov.1–4,
+> 2026-06-04, axiom-clean): from `cfi_residualInvolutive` (a residual fixing a gadget-separating `P` is
+> exponent-2 — Lemma A `gadgetPreserving_of_pSeparates` + Lemma B `cfiAut_gadgetFixing_mul_self`),
+> `cfi_closure_eq_stabilizerAt_of_pSeparates` (`closure {involutive residual auts} = StabilizerAt S`) and
+> `cfi_card_stabilizerAt_of_pSeparates` (`|Aut_S^P| = ∏ basic-orbit sizes`) at a nonempty base-resolved `S`.
+> (A literal-gauge variant `cfi_closure_eq_stabilizerAt` / `cfi_coversOrbits` conditional on gauge-generation
+> `StabilizerAt ∅ ≤ closure cfiGaugeGens` is also built — the rigid-base framing — see schreier-sims §7.)
+> **The sole remaining CFI obligation is discharging `PSeparatesGadgets`** (the committed `P` resolves the
+> base layer) — the orthogonal visible/cascade leg (scheme / `PPolynomial`), *not* GI-hard — plus the concrete
+> computable BSGS (A4, validation-only). The abstract cross-branch mechanism toward "reaches a rigid or
+> Cameron residual on all classes" is grounded.
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),

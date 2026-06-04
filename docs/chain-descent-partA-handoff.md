@@ -1,13 +1,16 @@
 # HANDOFF — Part A / cross-branch harvest / CFI coverage (temporary, archive when consumed)
 
-> **STATUS: TEMPORARY HANDOFF (2026-06-04).** Brings a fresh agent up to speed to continue the
-> **Part A → A2-complete → CFI-coverage** work thread immediately. **Archive/delete this file once the next
-> worker has internalized it** — the authoritative, durable record is
-> [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) (Part A doc) +
-> [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) (theorem list with line
-> numbers) + [`chain-descent-declassing.md`](./chain-descent-declassing.md) (current architecture). This
-> doc is a *pointer + working-notes* layer, not a source of truth; where it disagrees with the Lean source,
-> the source wins.
+> **STATUS: CONSUMED (2026-06-04).** The **Part A → A2-complete → CFI-coverage** work thread this doc bootstrapped
+> is **complete** — de-classed coverage + CFI-cov.1–4 all landed (CFI cross-branch harvest done in the
+> base-resolved regime; sole remaining CFI obligation = `PSeparatesGadgets`, the orthogonal visible leg).
+> **This doc's §3 "what is landed" and §4 "next target" are obsolete** (§4 names the abandoned `Aut(CFI)≅Z₂^β⋊Aut(H)`
+> structure theorem). It is retained ONLY as a reference for **§1 (build/verify/doc-sync conventions)** and
+> **§2 (Lean gotchas)** — both still current and useful for future CFI Lean work. For the actual state, read
+> [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) §7 (Part A + CFI-cov),
+> [`chain-descent-cfi-gauge-discharge-plan.md`](./chain-descent-cfi-gauge-discharge-plan.md) (CFI-cov.4),
+> [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md), and
+> [`chain-descent-declassing.md`](./chain-descent-declassing.md). Where this doc disagrees with the Lean
+> source, the source wins.
 
 ---
 
@@ -22,9 +25,11 @@ automorphisms into a residual group object. We have built that object and its so
 abstractly, and are now instancing it for **CFI** graphs. Read [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md)
 in full first — it is the authoritative Part A doc and this handoff mirrors its staging.
 
-**If you read nothing else:** the immediate next target is **CFI-cov.3 core** (§4 below) — the
-`Aut(CFI(H)) ≅ Z₂^β ⋊ Aut(H)` *structure theorem* plus per-level orbit-coverage, yielding `cfi_coversOrbits`.
-Everything before it is landed and axiom-clean.
+**⚠️ OBSOLETE (this whole §0/§3/§4 framing — see the STATUS banner).** This doc claimed the next target was
+**CFI-cov.3 core** (§4) — the `Aut(CFI(H)) ≅ Z₂^β ⋊ Aut(H)` *structure theorem*. That was **abandoned**: the
+de-classed coverage (`coversOrbits_of_residualInvolutive`) + CFI-cov.4 (`PSeparatesGadgets` / `cfi_residualInvolutive`)
+landed the CFI harvest **without** the structure theorem. Read §1–§2 for conventions/gotchas only; for the
+real state see [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) §7.
 
 ---
 

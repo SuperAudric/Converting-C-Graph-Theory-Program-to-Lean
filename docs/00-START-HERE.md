@@ -117,8 +117,17 @@ are **folded into one** recovery-based harvest; their old distinction is now a
   Mathlib `Subgroup`) with both harvest seams: **soundness** and **completeness**
   (`closure gens = StabilizerAt` under a coverage witness), plus the full
   `order = ∏ basic-orbit sizes` (`Cascade.lean`, "Part A");
-- the CFI coverage instance up through **CFI-cov.3 stage 1** — the gauge-flip group
-  homomorphism `Z₂^β → Aut` (`CFI.lean`).
+- the **de-classed coverage** — `coversOrbits_of_residualInvolutive`: the coverage
+  witness for the *entire* exponent-2 / elementary-abelian-(`Z₂^d`)-residual class
+  in one theorem (the cross-branch analogue of `theorem_2_HOR_of_pPolynomial`),
+  which **sidesteps the `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem** (`Cascade.lean`);
+- the **CFI cross-branch harvest** (CFI-cov.1–4) — gauge flips → the residual
+  vocabulary, the cycle-space `Z₂^β`, the gauge-flip group homomorphism, and the
+  full discharge in the **base-resolved regime**: `cfi_residualInvolutive` (Lemma A
+  + Lemma B: a residual fixing a gadget-separating `P` is exponent-2) ⇒
+  `closure {involutive residual auts} = StabilizerAt S` and `|Aut_S^P| = ∏
+  basic-orbit sizes` (`cfi_closure_eq_stabilizerAt_of_pSeparates` /
+  `cfi_card_stabilizerAt_of_pSeparates`, `Cascade.lean` / `CFI.lean`).
 
 **The conservation finding that set the current direction.** The within-cell
 discretizing oracle was *proven unable* to harvest a multi-step moved orbit
@@ -126,14 +135,18 @@ discretizing oracle was *proven unable* to harvest a multi-step moved orbit
 twists, `tw ≥ 2`) **must** be harvested **cross-branch** — which is why Part A (a
 group object to fold automorphisms into) exists.
 
-**The live frontier.** The immediate target is **CFI-cov.3 core**: the
-`Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem + per-level orbit coverage, yielding
-`cfi_coversOrbits` ⇒ `closure cfiGaugeGens = StabilizerAt ∅`. This is firing
-content, **not** GI-hard (C# already canonizes CFI(K₄–K₇)). The broader project
-target is *"correctly reaches a rigid or Cameron residual on all graph classes."*
-The remaining genuine hard core — non-abelian Johnson/Cameron factors — is **the
-wall** (≡ GI ∈ P), tracked in [`chain-descent-declassing.md`](./chain-descent-declassing.md)
-§9 and [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
+**The live frontier.** The cross-branch harvest for CFI is now **complete in the
+base-resolved regime** (CFI-cov.4), reproducing the residual group and its order —
+reached by *de-classing* the once-planned `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure
+theorem down to a single exponent-2 hypothesis (firing content, not GI-hard; C#
+canonizes CFI(K₄–K₇)). The **one remaining CFI obligation** is discharging
+`PSeparatesGadgets` — that the committed `P` resolves the base layer — which is the
+**orthogonal visible/cascade leg** (scheme / `PPolynomial` base-graph recovery), a
+separate thread. The broader project target is *"correctly reaches a rigid or
+Cameron residual on all graph classes."* The remaining genuine hard core —
+non-abelian Johnson/Cameron factors — is **the wall** (≡ GI ∈ P), tracked in
+[`chain-descent-declassing.md`](./chain-descent-declassing.md) §9 and
+[`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
 
 ---
 
@@ -178,10 +191,14 @@ only if working that thread): `chain-descent-tier3-decomposability.md`,
 Part B is the open roadmap), `chain-descent-tier3a-cascade-composition.md`
 (+ `-tier3a-b1-build-plan.md`), `chain-descent-tier2-lean-plan.md`,
 `chain-descent-extended-twist-viability.md`,
-`chain-descent-abelian-sufficiency-handoff.md`.
+`chain-descent-abelian-sufficiency-handoff.md`,
+`chain-descent-cfi-gauge-discharge-plan.md` (the CFI-cov.4 gauge-nut build plan; CFI harvest landed, only
+the `PSeparatesGadgets` discharge — the visible/cascade leg — remains).
 
-**Temporary handoffs** (delete once consumed):
-`chain-descent-partA-handoff.md` (live bring-up for the current Part A → CFI thread).
+**Temporary handoffs** (consumed — retained only for build conventions + Lean gotchas, not the work thread):
+`chain-descent-partA-handoff.md`. **Its §4 "next target" is obsolete** (that thread — de-classing →
+CFI-cov.4 — is done; see [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) §7). Read it
+only for §1 (build/verify/doc-sync conventions) and §2 (Lean gotchas).
 
 ---
 
