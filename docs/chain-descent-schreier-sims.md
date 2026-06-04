@@ -25,6 +25,16 @@
 >   theorem as the CFI route:** the abstract coverage holds once the residual is exponent-2 and `gens`
 >   contains the harvested involutions, *without* identifying them as the literal cycle-space flips (no
 >   `Φ(σ)` lift).
+> - **GENERAL (NON-ABELIAN) COVERAGE LANDED** (2026-06-04, axiom-clean): `coversOrbits_of_realizers` /
+>   `coversOrbits_of_visibleRealizers` / `closure_eq_stabilizerAt_of_realizers` discharge `CoversOrbits` (and
+>   `closure (gensAt …) = StabilizerAt`) from **per-level path-fixing realizers with NO group-structure
+>   hypothesis** — abelian *or* non-abelian (schemes, Cameron sections). This is the honest "covers everything,
+>   no class ladder" coverage core: `coversOrbits_of_residualInvolutive` is now its exponent-2 **corollary**
+>   (`orbitPartition_swap_of_involutive` supplies the realizer). The harvest-facing `coversOrbits_of_visibleRealizers`
+>   keys the realizer hypothesis on the **refinement-visible cell relation** (polynomially computable) — the
+>   shape the structural (scheme/recovery) harvest plugs into, since at a recoverable node cells *are* orbits.
+>   **Open (the scheme consumer):** discharge the visible-realizer hypothesis for the metric/DRG family from
+>   `theorem_2_HOR_of_pPolynomial` (`CellsAreOrbits` at depth 1), + export it to `RecoverableByDepth`.
 > - **CFI WITNESS LANDED conditional on gauge-generation** (2026-06-04, axiom-clean): `gaugeSubgroup`
 >   (the gauge group `Z₂^β` as a `Subgroup`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self` (the gauge group
 >   is exponent-2), and **`cfi_coversOrbits` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt_eq_prod`**
@@ -495,8 +505,11 @@ work.
 `CoversOrbits`, `coversOrbits_realize_of_mem`, `coversOrbits_isBase_foldl`,
 `stabilizerAt_le_closure_gensAt_of_coversOrbits`, `stabilizerAt_eq_closure_gensAt_of_coversOrbits`,
 `closure_eq_stabilizerAt_empty_of_coversOrbits`, `card_closure_gensAt_eq_prod_of_coversOrbits` (A2-complete);
-`residualInvolutive_mono`, `coversOrbits_of_residualInvolutive`, `closure_eq_stabilizerAt_of_residualInvolutive`
-(A2-complete de-classed — `CoversOrbits` for the whole exponent-2/`Z₂^d`-residual class in one theorem);
+`residualInvolutive_mono`, `coversOrbits_of_realizers`, `coversOrbits_of_visibleRealizers`,
+`closure_eq_stabilizerAt_of_realizers` (A2-complete de-classed, **general/non-abelian** — `CoversOrbits` +
+`closure=StabilizerAt` from per-level path-fixing realizers, no group-structure hypothesis; the scheme/Cameron
+coverage core), `coversOrbits_of_residualInvolutive`, `closure_eq_stabilizerAt_of_residualInvolutive`
+(A2-complete de-classed exponent-2 corollary — `CoversOrbits` for the `Z₂^d`-residual class in one theorem);
 `gaugeSubgroup`, `mem_gaugeSubgroup`, `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self`, `cfi_coversOrbits`,
 `cfi_closure_eq_stabilizerAt`, `cfi_card_stabilizerAt_eq_prod` (CFI-cov.3 — the CFI witness reduced to
 gauge-generation `StabilizerAt ∅ ≤ closure cfiGaugeGens`); `gadgetOf`, `PSeparatesGadgets`,

@@ -1007,6 +1007,66 @@ theorem residualInvolutive_mono {S S' : Finset (Fin n)} (h : ResidualInvolutive 
     (hSS' : S ⊆ S') : ResidualInvolutive adj P S' :=
   fun π hπ => h π ⟨hπ.1, hπ.2.1, fun v hv => hπ.2.2 v (hSS' hv)⟩
 
+/-- **De-classed coverage, general (non-abelian) form — `CoversOrbits` from per-level path-fixing realizers.**
+The honest "covers everything, no class ladder" core of the cross-branch harvest: if at every level `T ⊇ S`
+the harvested generating set `gens` contains a **path-fixing realizer** for each orbit-mate of each base point
+(a residual automorphism `g ∈ gens` at `T` with `g b = w`), and the base sequence `bs` terminates at a base,
+then `CoversOrbits adj P gens bs S` holds. No assumption on the residual's group structure — abelian *or*
+non-abelian (schemes, Cameron sections) — so it is the cross-branch analogue of `theorem_2_HOR_of_pPolynomial`
+generalized past the exponent-2 case. The realizer is supplied directly to `gensAt` (path-fixing generators),
+not to `closure gens`, so this is genuinely the strong-generating-set condition, not the circular one (see the
+A2-complete section note). `coversOrbits_of_residualInvolutive` is the special case where the realizers are the
+swap involutions; the metric/scheme family is the case where they come from recovery (`CellsAreOrbits`). -/
+theorem coversOrbits_of_realizers {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hreal : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        OrbitPartition adj P T b w → ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    CoversOrbits adj P gens bs S := by
+  induction bs generalizing S with
+  | nil => exact hbase
+  | cons b bs ih =>
+      refine ⟨coversOrbits_realize_of_mem (fun w hw => ?_), ?_⟩
+      · obtain ⟨g, hgmem, hgres, hgbw⟩ := hreal S (Finset.Subset.refl S) b w hw
+        exact ⟨g, ⟨hgmem, mem_stabilizerAt.mpr hgres⟩, hgbw⟩
+      · refine ih (S := insert b S)
+          (fun T hT b' w' hw' =>
+            hreal T (Finset.Subset.trans (Finset.subset_insert b S) hT) b' w' hw')
+          (by simpa using hbase)
+
+/-- **Harvest-facing form — realizers keyed on the refinement-visible cell relation.** The same general
+coverage, but the realizer hypothesis ranges over *same-`warmRefine`-cell* pairs (polynomially computable)
+rather than over `OrbitPartition` pairs: since orbits refine cells (`OrbitPartition.subset_warmRefine`), a
+realizer for every visible cell-mate covers every orbit-mate a fortiori. This is the shape the structural
+(scheme/recovery) harvest actually supplies — at a recoverable node cells *are* orbits, so the visible
+cell-mates are exactly the orbit-mates, and the leaf-collision harvest collects a path-fixing realizer for
+each. (At a non-recoverable node the hypothesis demands realizers for cell-mates that are not orbit-mates, so
+it is only satisfiable in the recoverable regime — which is correct.) -/
+theorem coversOrbits_of_visibleRealizers {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hreal : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    CoversOrbits adj P gens bs S :=
+  coversOrbits_of_realizers bs
+    (fun T hT b w hw => hreal T hT b w (OrbitPartition.subset_warmRefine hw)) hbase
+
+/-- **General harvest completeness — the path-fixing closure *is* the residual, from realizers.** Composing
+`coversOrbits_of_realizers` with the A2-complete equality `stabilizerAt_eq_closure_gensAt_of_coversOrbits`:
+given per-level path-fixing realizers (abelian *or* non-abelian), `Subgroup.closure (gensAt adj P gens S) =
+StabilizerAt adj P S`. The general (non-exponent-2) analogue of `closure_eq_stabilizerAt_of_residualInvolutive`
+— the cross-branch harvest reproduces the residual group for the whole recoverable class, no group-structure
+hypothesis. With Stage A3.5 the order `= ∏ basic-orbit sizes` follows (`card_closure_gensAt_eq_prod_of_coversOrbits`). -/
+theorem closure_eq_stabilizerAt_of_realizers {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hreal : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        OrbitPartition adj P T b w → ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
+  stabilizerAt_eq_closure_gensAt_of_coversOrbits bs (coversOrbits_of_realizers bs hreal hbase)
+
 /-- **De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual group at `S` is
 involutive (`ResidualInvolutive`, hence at every deeper node by `residualInvolutive_mono`), the generating set
 `gens` contains every involutive residual automorphism (`hgens` — what the leaf-collision harvest supplies),
@@ -1021,16 +1081,11 @@ theorem coversOrbits_of_residualInvolutive {gens : Set (Equiv.Perm (Fin n))}
     (hgens : ∀ g, ResidualAut adj P S g → g * g = 1 → g ∈ gens)
     (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
     CoversOrbits adj P gens bs S := by
-  induction bs generalizing S with
-  | nil => exact hbase
-  | cons b bs ih =>
-      refine ⟨coversOrbits_realize_of_mem (fun w hw => ?_), ?_⟩
-      · obtain ⟨g, hg, hgbw, _⟩ := orbitPartition_swap_of_involutive hinv hw
-        exact ⟨g, ⟨hgens g hg (hinv g hg), mem_stabilizerAt.mpr hg⟩, hgbw⟩
-      · refine ih (S := insert b S) (residualInvolutive_mono hinv (Finset.subset_insert b S))
-          (fun g hg' hginv' => hgens g
-            ⟨hg'.1, hg'.2.1, fun v hv => hg'.2.2 v (Finset.mem_insert_of_mem hv)⟩ hginv') ?_
-        simpa using hbase
+  refine coversOrbits_of_realizers bs (fun T hT b w hw => ?_) hbase
+  have hinvT : ResidualInvolutive adj P T := residualInvolutive_mono hinv hT
+  obtain ⟨g, hgT, hgbw, _⟩ := orbitPartition_swap_of_involutive hinvT hw
+  have hgS : ResidualAut adj P S g := ⟨hgT.1, hgT.2.1, fun v hv => hgT.2.2 v (hT hv)⟩
+  exact ⟨g, hgens g hgS (hinvT g hgT), hgT, hgbw⟩
 
 /-- **De-classed harvest completeness — the involutive residual *is* the closure of harvested involutions.**
 Combining `coversOrbits_of_residualInvolutive` with the A2-complete equality
