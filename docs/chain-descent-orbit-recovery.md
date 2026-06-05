@@ -527,12 +527,8 @@ restricted to `R_{j(w)}` — same for all `w` with same `j(w)`.
 So at fixpoint, the 1-WL partition is at most as fine as the
 `v`-profile partition (cells ⊆ profile classes).
 
-Conversely, the `v`-profile partition is preserved by `Aut(G)_v`
-(Step 1), and hence preserved by 1-WL (trivial direction). So 1-WL
-partition refines `v`-profile partition... wait that's the wrong
-direction. Let me re-state.
-
-The trivial direction says: if `w, w'` are `Aut_v`-equivalent (same
+Conversely, the trivial direction gives the reverse inclusion: if
+`w, w'` are `Aut_v`-equivalent (same
 profile by Step 1), they have the same 1-WL colour at every round.
 So 1-WL cell of `w` contains all `w'` with `j(w') = j(w)`. I.e.,
 profile classes ⊆ 1-WL cells.
