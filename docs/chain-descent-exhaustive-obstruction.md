@@ -330,6 +330,25 @@ Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.
 > *classification* is validated directly (a tight-budget flag on a certified-rigid multipede → trivial
 > residual → `IrBlindSpot`, scramble-invariantly); the **natural-flag-at-scale** over a meager base
 > (hundreds+ vertices) is the scoped follow-on.
+>
+> **Cameron battery — positive-control half LANDED (Probe A, 2026-06-05) — and a strong positive result.**
+> `CameronGraphGenerator.cs` builds the two Cameron-group shapes: **`Johnson(n,k)`** (the `d=1` `Aₖ`-on-
+> subsets case, `Aut = Sₙ`) and **`Hamming(d,q)`** (the **product action** `S_q ≀ S_d` — the direct control
+> for **R1**, "Johnson is too narrow"), plus **`Kneser(n,k)`** (a second `Sₙ` control). The near-theorem
+> (§3 item 2; [hidden-johnson](./chain-descent-hidden-johnson.md)) predicts a *visible* Cameron group is a
+> scheme graph ⟹ cascades ⟹ canonizes, never `Tier2Like`. **Confirmed:** all 10 measured instances
+> (`J(4..8,2)`, `H(2,3)/(3,2)/(2,4)/(3,3)`, `K(5,2)/(7,3)`; 6–35 vertices) **canonize** in 4–7 nodes, and
+> the harvested `|Aut|` **exactly equals** the known closed form in every case — including the non-abelian
+> `S₇ = 5040` and `S₄≀S₂ = 1152`. This empirically validates the scheme/cascade leg
+> (`theorem_2_HOR_of_pPolynomial`), the a-posteriori harvest computing the *full* automorphism group, and
+> the no-visible-hidden-Cameron near-theorem. Tests: `CameronGraphGeneratorTests.cs` (with an independent
+> brute-force `Aut` cross-check pinning the formulas) + `GraphCanonTests.Cameron.cs` (canonize + exact-Aut
+> + scramble-invariant canonical form). **The hard half — an ENCODED non-cascade non-abelian obstruction —
+> is NOT built and is out of scope by construction:** it is the GI-hard `(O*)-existence` question (the open
+> EOL frontier); visible Cameron groups *can't* be the hard residual precisely because they cascade. So the
+> empirical Approach-2 gate (C+B+A) confirms every constructible *visible* obstruction is consumed-or-rigid,
+> and isolates the two genuine open items (a meager multipede at scale; an encoded Cameron section) as the
+> *same* asymptotic / GI-hard frontier the theory already routes around.
 
 **Drafting rule for every downstream statement.** "All symmetry removed **or**
 Cameron" (statement 1) is **not** the time bound (statement 2): statement 2 carries

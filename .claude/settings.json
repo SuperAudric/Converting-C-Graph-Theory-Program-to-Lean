@@ -60,7 +60,10 @@
       "Bash(timeout * ./scripts/build.sh)",
       "Bash(python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers --descriptions /tmp/idx_desc.json)",
       "Bash(echo *)",
-      "Bash(python3 ../scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers)"
+      "Bash(python3 ../scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers)",
+      "WebSearch",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:ar5iv.labs.arxiv.org)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",
