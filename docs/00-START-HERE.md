@@ -152,7 +152,9 @@ Lemma** — and the two claims under "the wall" must be kept apart: *whether* a
 non-abelian obstruction arises (≡ **GI ∈ P**, out of scope) versus *classifying* one
 that does as a Cameron section (**Cameron-hard, NOT GI-hard** — a finite target,
 **now an active thread**: Approach 3, the Cameron-free *scheme leg*, with scheme
-primitivity + the imprimitive ⟹ refinement-visible bridge landed in `Scheme.lean`).
+primitivity, the imprimitive ⟹ refinement-visible bridge, and the group-side bridge
+(`isPreprimitive_iff_isPrimitive`: scheme `IsPrimitive` ⟺ Mathlib `IsPreprimitive`) landed in
+`Scheme.lean`; the refinement-side decomposition is deferred as substrate-conditional, capstone cited).
 Tracked in [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md),
 [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9, and
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
@@ -194,8 +196,9 @@ witness layer, not onboarding):
 - the wall (hidden Johnson) → [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md)
 - oracle-capability seal + **the Exhaustive-Obstruction Lemma (the current forward thread, 2026-06-05)** →
   [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) — the "or Cameron"
-  half of the goal; Approach 3 (Cameron-free scheme leg) active, scheme primitivity + the imprimitive ⟹
-  refinement-visible bridge landed
+  half of the goal; Approach 3 (Cameron-free scheme leg) active — scheme primitivity, the imprimitive ⟹
+  refinement-visible bridge, and the group-side `isPreprimitive_iff_isPrimitive` bridge landed; the
+  refinement-side decomposition deferred (substrate-conditional), capstone cited
 
 **Paper-stage / planning docs** (theoretical targets, not yet formalized — read
 only if working that thread): `chain-descent-tier3-decomposability.md`,

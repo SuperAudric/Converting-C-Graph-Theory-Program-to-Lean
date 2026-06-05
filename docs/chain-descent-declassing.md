@@ -84,9 +84,12 @@
 > (`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`; `recoverableByDepth_pPolynomial` exports the
 > whole metric/DRG family). Per-level recovery is the substrate-conditional remainder (WL-dimension
 > boundary). (3) **The "or Cameron" half of the goal is now an ACTIVE thread** — the Exhaustive-Obstruction
-> Lemma, Approach 3 (Cameron-free *scheme leg*): scheme primitivity (`ClosedSubset`/`IsPrimitive`) + the
-> **imprimitive ⟹ refinement-visible bridge** (`schemeEquiv_warmRefine_of_pPolynomial`) landed in
-> `Scheme.lean`. See §9 items 3 and 6, and [exhaustive-obstruction](./chain-descent-exhaustive-obstruction.md).
+> Lemma, Approach 3 (Cameron-free *scheme leg*): scheme primitivity (`ClosedSubset`/`IsPrimitive`), the
+> **imprimitive ⟹ refinement-visible bridge** (`schemeEquiv_warmRefine_of_pPolynomial`), **and the
+> group-side bridge `isPreprimitive_iff_isPrimitive`** (`Scheme.lean §11`: combinatorial `IsPrimitive` ⟺
+> Mathlib `IsPreprimitive` of `SchemeAutGroup`) all landed in `Scheme.lean`. The *refinement-side*
+> decomposition conclusion is deferred (substrate-conditional / under-modeled — see §9 item 6); the capstone
+> stays cited. See §9 items 3 and 6, and [exhaustive-obstruction](./chain-descent-exhaustive-obstruction.md).
 >
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
@@ -532,8 +535,16 @@ are bounded (not GI-hard), the last two are the honest boundary.
    Cameron section) = the **Exhaustive-Obstruction Lemma**, **Cameron-hard, NOT GI-hard**, and **now an
    ACTIVE thread** ([exhaustive-obstruction](./chain-descent-exhaustive-obstruction.md); **Approach 3** =
    the Cameron-free *scheme leg*). **Landed 2026-06-05, axiom-clean** (`Scheme.lean`): scheme primitivity
-   (`ClosedSubset` / `schemeEquiv` / `IsPrimitive` — a block system = a closed relation subset) and the
+   (`ClosedSubset` / `schemeEquiv` / `IsPrimitive` — a block system = a closed relation subset), the
    **imprimitive ⟹ refinement-visible bridge** (`schemeEquiv_warmRefine_of_pPolynomial`: a `ClosedSubset`'s
-   block is a union of `warmRefine` cells), the ingredient for "non-cascade ⟹ primitive". Remaining: the
-   cascade/decomposition conclusion (lighter) and the primitive-high-rank ⟹ Johnson/Hamming capstone
-   (Higman/Hanaki, heavy). The seal *classifies* the obstruction; it does not solve existence.
+   block is a union of `warmRefine` cells), **and the GROUP-SIDE bridge `isPreprimitive_iff_isPrimitive`**
+   (`Scheme.lean §11`: combinatorial `IsPrimitive` ⟺ Mathlib `MulAction.IsPreprimitive` of `SchemeAutGroup`,
+   via `isBlock_schemeEquiv` + transitivity-free-from-schurian) — grounding "primitive scheme" in the
+   standard primitive-permutation-group notion the cited capstone is stated against. **Finding (correcting
+   the earlier "decomposition conclusion (lighter)"):** the *refinement-side* decomposition is NOT light —
+   `schemeEquiv_warmRefine_of_pPolynomial` is `PPolynomial`-gated (⟹ "non-cascade ⟹ primitive" vacuous on
+   P-poly); generalizing off `PPolynomial` is the WL-dimension boundary (this §9's "B's core",
+   substrate-conditional); and quotient+fiber descent decomposition is under-modeled. So it is deferred as
+   heavy/substrate-conditional; the primitive-high-rank ⟹ Johnson/Hamming **capstone** stays a cited
+   hypothesis (`PrimitiveCCClassification`, Babai/Sun–Wilmes, heavy). The seal *classifies* the obstruction;
+   it does not solve existence.
