@@ -25,11 +25,29 @@
 > `schemeEquiv I` block, by composing recovery (`theorem_2_HOR_of_pPolynomial`: cell ⟹ `OrbitPartition adj P {v}`)
 > with `schemeEquiv_graphOrbit` (dropping the P-clause via `h.matching`). So a `ClosedSubset`'s **block is a
 > union of `warmRefine` cells = refinement-visible**: scheme-imprimitivity is seen by refinement, the ingredient
-> for "imprimitive ⟹ cascade" / contrapositive "non-cascade ⟹ primitive". **Remaining on the bridge:** the
-> *cascade*/decomposition conclusion proper (refinement-visible block ⟹ the descent decomposes into
-> quotient + fibers in bounded depth) — the lighter combinatorial follow-on, **fully provable** from the
-> landed bridge + Mathlib's block layer. **Then (the capstone):** primitive high-rank scheme with no abelian
-> regular subgroup ⟹ Johnson/Hamming-type.
+> for "imprimitive ⟹ cascade" / contrapositive "non-cascade ⟹ primitive".
+>
+> **GROUP-SIDE primitivity bridge LANDED (2026-06-05, axiom-clean, `Scheme.lean §11`).** The combinatorial
+> `IsPrimitive` is now proved to **coincide with Mathlib's `MulAction.IsPreprimitive`** of the scheme-Aut
+> group — `isPreprimitive_iff_isPrimitive` (a schurian scheme where every relation occurs). Pieces:
+> `SchemeAutGroup` (scheme-Aut as a `Subgroup`), `schemeAutGroup_isPretransitive` (transitivity is *free*
+> from the schurian axiom at `R_0`), `isBlock_schemeEquiv` (a `ClosedSubset`'s `schemeEquiv` class is a
+> Mathlib `IsBlock`), and both directions `isPrimitive_of_isPreprimitive` / `isPreprimitive_of_isPrimitive`.
+> This grounds "primitive scheme" in the **standard primitive-permutation-group notion** the cited capstone
+> (Babai / Sun–Wilmes) is stated against, and unlocks Mathlib's primitivity layer (R5) for the leg — the
+> genuinely-new Lean content of the (B1) bridge, group side, **with no refinement / WL-dimension content**.
+>
+> **FINDING (2026-06-05) — the *refinement-side* "decomposition conclusion" is NOT the light next step the
+> earlier STATUS claimed; the group side above was the right provable piece.** Three obstructions surfaced
+> reading the landed code: (i) `schemeEquiv_warmRefine_of_pPolynomial` is **gated on `PPolynomial`**, which
+> already forces cascade at depth 1, so the contrapositive "non-cascade ⟹ primitive" is **vacuous on the
+> P-polynomial class**; (ii) generalizing the bridge off `PPolynomial` (where the contrapositive bites) is
+> exactly the **WL-dimension / cascade boundary** — declassing §9 "B's core", substrate-conditional, *not*
+> a clean theorem; (iii) the full "descent decomposes into quotient + fibers in bounded depth" needs the
+> quotient-graph + fiber-graph + depth machinery **modelled in Lean** (only the spine is, today) — a large
+> modelling task, not "lighter". So the refinement-side decomposition is deferred as heavy/substrate-
+> conditional; the **capstone** (primitive high-rank scheme w/ no abelian regular ⟹ Johnson/Hamming) remains
+> a **cited hypothesis** (`PrimitiveCCClassification`, §4 R5), now statable against the standard `IsPreprimitive`.
 >
 > **Capstone target pinned + Mathlib reality (2026-06-05 — corrects the "Cameron-free = lighter capstone"
 > reading; see §4 R5 and §5 Approach 3).** The capstone's classical content is **Babai's classification of

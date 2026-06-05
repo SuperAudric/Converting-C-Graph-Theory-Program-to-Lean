@@ -4,6 +4,8 @@ import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Set.Card
 import Mathlib.Data.Set.Finite.Basic
+import Mathlib.GroupTheory.GroupAction.Blocks
+import Mathlib.GroupTheory.GroupAction.Primitive
 
 /-!
 # Association schemes (Tier 2 infrastructure)
@@ -3245,5 +3247,253 @@ theorem schemeEquiv_warmRefine_of_pPolynomial {n : Nat} {adj : AdjMatrix n}
   have hgo : GraphOrbitFixing h.G.toSchemeGraph.adj v w u := by
     rw [h.matching]; exact ⟨π, hAut, hπv, hπwu⟩
   exact h.G.schemeEquiv_graphOrbit hgo
+
+/-! ## §11 — Scheme primitivity = group-action preprimitivity (EOL scheme leg, group side)
+
+The combinatorial `AssociationScheme.IsPrimitive` (only `{R_0}` and `univ` are closed subsets) is shown
+here to coincide with Mathlib's `MulAction.IsPreprimitive` of the **scheme-automorphism group** — the
+standard primitive-permutation-group notion the Exhaustive-Obstruction Lemma's cited classification
+(Babai / Sun–Wilmes on primitive coherent configurations) is stated against. This is the group-theoretic
+half of leg C's primitivity bridge (the doc's (B1)); it has **no refinement content**, so unlike the
+combinatorial→refinement bridge (`schemeEquiv_warmRefine_of_pPolynomial`, gated on `PPolynomial`) it is
+free of the cascade / WL-dimension boundary.
+
+Three ingredients: (i) the scheme-Aut group `SchemeAutGroup` as a Mathlib `Subgroup`; (ii) on a schurian
+scheme it acts pretransitively (free — the diagonal `R_0` is a single relation); (iii) a `ClosedSubset`'s
+`schemeEquiv` classes are blocks (`schemeEquiv_isSchemeAut`), and conversely every block's relation set is
+a closed subset (schurian: relations are the Aut-orbitals). The correspondence needs every relation to
+**occur** (non-degeneracy — an empty relation is invisible to the action; the `AssociationScheme` axioms
+do not force relations non-empty), the standard reduced-scheme hypothesis. -/
+
+namespace AssociationScheme
+
+variable {n : Nat} (S : AssociationScheme n)
+
+open scoped Pointwise
+
+/-- **The scheme automorphism group** as a subgroup of `Equiv.Perm (Fin n)` — the permutations
+preserving every relation. Mirrors `AutGroup`; closure is `IsSchemeAut.refl/.trans/.symm`. -/
+def SchemeAutGroup : Subgroup (Equiv.Perm (Fin n)) where
+  carrier := {π | IsSchemeAut S π}
+  one_mem' := IsSchemeAut.refl
+  mul_mem' := by
+    intro a b ha hb
+    show IsSchemeAut S (a * b)
+    rw [Equiv.Perm.mul_def]
+    exact IsSchemeAut.trans hb ha
+  inv_mem' := by
+    intro a ha
+    show IsSchemeAut S a⁻¹
+    rw [Equiv.Perm.inv_def]
+    exact IsSchemeAut.symm ha
+
+@[simp] theorem mem_schemeAutGroup {π : Equiv.Perm (Fin n)} :
+    π ∈ S.SchemeAutGroup ↔ IsSchemeAut S π := Iff.rfl
+
+@[simp] theorem schemeAutGroup_smul (g : S.SchemeAutGroup) (v : Fin n) :
+    g • v = (g : Equiv.Perm (Fin n)) v := rfl
+
+/-- The `schemeEquiv I`-class of `a` moves under `g ∈ SchemeAutGroup` to the class of `g • a`:
+`g • {y | schemeEquiv I a y} = {y | schemeEquiv I (g • a) y}`. The key step is
+`schemeEquiv_isSchemeAut` (the block system is Aut-invariant). -/
+theorem smul_schemeEquiv_class {I : Finset (Fin (S.rank + 1))} (g : S.SchemeAutGroup) (a : Fin n) :
+    g • {y | S.schemeEquiv I a y} = {y | S.schemeEquiv I (g • a) y} := by
+  ext y
+  simp only [Set.mem_smul_set, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨x, hx, rfl⟩
+    have := (schemeEquiv_isSchemeAut (I := I) g.2 a x).mpr hx
+    simpa using this
+  · intro hy
+    refine ⟨(g : Equiv.Perm (Fin n)).symm y, ?_, by simp⟩
+    have hsa : S.schemeEquiv I (g • a) ((g : Equiv.Perm (Fin n)) ((g : Equiv.Perm (Fin n)).symm y)) := by
+      simpa using hy
+    exact (schemeEquiv_isSchemeAut (I := I) g.2 a ((g : Equiv.Perm (Fin n)).symm y)).mp hsa
+
+/-- **A closed subset's block is a genuine block.** Each `schemeEquiv I`-class is a Mathlib `IsBlock`
+for the scheme-Aut action: translates of the class are classes (`smul_schemeEquiv_class`), and distinct
+classes of an equivalence (`schemeEquiv_equivalence`) are disjoint. -/
+theorem isBlock_schemeEquiv {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset I) (a : Fin n) :
+    MulAction.IsBlock S.SchemeAutGroup {y | S.schemeEquiv I a y} := by
+  have hequiv := S.schemeEquiv_equivalence hcl
+  rw [MulAction.isBlock_iff_smul_eq_or_disjoint]
+  intro g
+  rw [smul_schemeEquiv_class]
+  by_cases hbridge : S.schemeEquiv I (g • a) a
+  · -- classes coincide
+    left
+    ext y
+    simp only [Set.mem_setOf_eq]
+    exact ⟨fun h => hequiv.trans (hequiv.symm hbridge) h, fun h => hequiv.trans hbridge h⟩
+  · -- classes disjoint
+    right
+    rw [Set.disjoint_left]
+    rintro z hz1 hz2
+    simp only [Set.mem_setOf_eq] at hz1 hz2
+    exact hbridge (hequiv.trans hz1 (hequiv.symm hz2))
+
+end AssociationScheme
+
+open scoped Pointwise
+
+/-- **Pretransitivity is free on a schurian scheme.** The diagonal `R_0` is a single relation, so the
+schurian axiom at `i = 0` connects any two points by a scheme automorphism. -/
+theorem schemeAutGroup_isPretransitive {n : Nat} (S : SchurianScheme n) :
+    MulAction.IsPretransitive S.toAssociationScheme.SchemeAutGroup (Fin n) := by
+  refine ⟨fun a b => ?_⟩
+  obtain ⟨π, hπ, hπa, _⟩ :=
+    S.schurian 0 a a b b ((S.rel_zero_iff_eq a a).mpr rfl) ((S.rel_zero_iff_eq b b).mpr rfl)
+  exact ⟨⟨π, hπ⟩, by simpa using hπa⟩
+
+/-- **Every relation is realized from any fixed point** on a schurian scheme where every relation
+occurs: `∃ u, relOfPair a u = j`. (The transitive action carries an occurring `R_j`-pair onto `a`.)
+The non-degeneracy companion used by both directions of the primitivity correspondence. -/
+theorem exists_relOfPair_from {n : Nat} (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true) (a : Fin n)
+    (j : Fin (S.rank + 1)) : ∃ u, S.toAssociationScheme.relOfPair a u = j := by
+  haveI := schemeAutGroup_isPretransitive S
+  obtain ⟨v, w, hvw⟩ := hne j
+  obtain ⟨g, hg⟩ := MulAction.exists_smul_eq S.toAssociationScheme.SchemeAutGroup v a
+  refine ⟨(g : Equiv.Perm (Fin n)) w, ?_⟩
+  have hgperm : (g : Equiv.Perm (Fin n)) v = a := hg
+  have hkey := IsSchemeAut.relOfPair_eq g.2 v w
+  rw [hgperm] at hkey
+  rw [hkey]
+  exact ((S.toAssociationScheme.rel_iff_relOfPair).mp hvw).symm
+
+/-- **Group-primitive ⟹ scheme-primitive** (under non-degeneracy: every relation occurs). If the
+scheme-Aut action is preprimitive, the only closed subsets are `{R_0}` and `univ` — because a closed
+subset's `schemeEquiv` class is a block, hence trivial, and (every relation occurring) a trivial block
+forces the closed subset trivial. -/
+theorem isPrimitive_of_isPreprimitive {n : Nat} (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hpp : MulAction.IsPreprimitive S.toAssociationScheme.SchemeAutGroup (Fin n)) :
+    S.toAssociationScheme.IsPrimitive := by
+  haveI := schemeAutGroup_isPretransitive S
+  intro I hcl
+  obtain ⟨a, -, -⟩ := hne 0
+  have hblock := S.toAssociationScheme.isBlock_schemeEquiv hcl a
+  have hrealize : ∀ j : Fin (S.rank + 1), ∃ u, S.toAssociationScheme.relOfPair a u = j :=
+    exists_relOfPair_from S hne a
+  rcases hpp.isTrivialBlock_of_isBlock hblock with hsub | huniv
+  · -- subsingleton block ⟹ I = {0}
+    left
+    apply Finset.Subset.antisymm
+    · intro j hj
+      obtain ⟨u, hu⟩ := hrealize j
+      have ha_mem : a ∈ {y | S.toAssociationScheme.schemeEquiv I a y} := by
+        simp only [Set.mem_setOf_eq, AssociationScheme.schemeEquiv,
+          S.toAssociationScheme.relOfPair_self]; exact hcl.1
+      have hu_mem : u ∈ {y | S.toAssociationScheme.schemeEquiv I a y} := by
+        simp only [Set.mem_setOf_eq, AssociationScheme.schemeEquiv, hu]; exact hj
+      have hau : a = u := hsub ha_mem hu_mem
+      rw [Finset.mem_singleton, ← hu, ← hau, S.toAssociationScheme.relOfPair_self]
+    · intro j hj
+      rw [Finset.mem_singleton] at hj; subst hj; exact hcl.1
+  · -- block = univ ⟹ I = univ
+    right
+    rw [Finset.eq_univ_iff_forall]
+    intro j
+    obtain ⟨u, hu⟩ := hrealize j
+    have hmem : u ∈ {y | S.toAssociationScheme.schemeEquiv I a y} := huniv ▸ Set.mem_univ u
+    simp only [Set.mem_setOf_eq, AssociationScheme.schemeEquiv, hu] at hmem
+    exact hmem
+
+/-- **Scheme-primitive ⟹ group-primitive** (the leg-C-useful direction, under non-degeneracy). On a
+schurian scheme whose closed subsets are only `{R_0}`/`univ`, the scheme-Aut action is preprimitive.
+A block `B ∋ a` is `Aut_a`-invariant (it is a block sharing `a` with its `Aut_a`-translates), hence a
+union of `vProfile` classes (Step 1), so `B = schemeEquiv I_B` for `I_B` = the relations from `a` into
+`B`; the intersection numbers make `I_B` closed, so primitivity forces `I_B ∈ {{0}, univ}`, i.e. `B`
+trivial. -/
+theorem isPreprimitive_of_isPrimitive {n : Nat} (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hprim : S.toAssociationScheme.IsPrimitive) :
+    MulAction.IsPreprimitive S.toAssociationScheme.SchemeAutGroup (Fin n) := by
+  classical
+  haveI := schemeAutGroup_isPretransitive S
+  obtain ⟨a, -, -⟩ := hne 0
+  apply MulAction.IsPreprimitive.of_isTrivialBlock_base a
+  intro B haB hB
+  -- A block sharing `a` with its image is preserved.
+  have block_smul : ∀ (g : S.toAssociationScheme.SchemeAutGroup),
+      (g : Equiv.Perm (Fin n)) a ∈ B → g • B = B := by
+    intro g hga
+    exact hB.smul_eq_of_mem (a := a) haB (by rw [AssociationScheme.schemeAutGroup_smul]; exact hga)
+  -- `I_B`: the relation indices from `a` into `B`.
+  set I_B : Finset (Fin (S.rank + 1)) :=
+    Finset.univ.filter (fun i => ∃ u, S.toAssociationScheme.relOfPair a u = i ∧ u ∈ B) with hIB
+  -- Characterisation: `B` is exactly the `schemeEquiv I_B` class of `a`.
+  have hchar : ∀ y, y ∈ B ↔ S.toAssociationScheme.schemeEquiv I_B a y := by
+    intro y
+    simp only [AssociationScheme.schemeEquiv, hIB, Finset.mem_filter, Finset.mem_univ, true_and]
+    constructor
+    · intro hy; exact ⟨y, rfl, hy⟩
+    · rintro ⟨u, hu, huB⟩
+      have hprof : vProfile S.toAssociationScheme a u = vProfile S.toAssociationScheme a y :=
+        (S.toAssociationScheme.vProfile_eq_iff a u y).mpr hu
+      obtain ⟨π, hπ, hπa, hπu⟩ := S.vProfile_eq_imp_schemeOrbit a u y hprof
+      have hgB := block_smul ⟨π, hπ⟩ (by rw [hπa]; exact haB)
+      have hyB' : (⟨π, hπ⟩ : S.toAssociationScheme.SchemeAutGroup) • u ∈ B := by
+        have hmem : (⟨π, hπ⟩ : S.toAssociationScheme.SchemeAutGroup) • u ∈
+            (⟨π, hπ⟩ : S.toAssociationScheme.SchemeAutGroup) • B := Set.smul_mem_smul_set huB
+        rw [hgB] at hmem; exact hmem
+      rw [AssociationScheme.schemeAutGroup_smul, hπu] at hyB'; exact hyB'
+  -- `I_B` is a closed subset.
+  have hclosed : S.toAssociationScheme.ClosedSubset I_B := by
+    refine ⟨?_, ?_⟩
+    · simp only [hIB, Finset.mem_filter, Finset.mem_univ, true_and]
+      exact ⟨a, S.toAssociationScheme.relOfPair_self a, haB⟩
+    · intro i hi j hj k hk
+      obtain ⟨w, hw⟩ := exists_relOfPair_from S hne a k
+      have hrelk : S.rel k a w = true := (S.toAssociationScheme.rel_iff_relOfPair).mpr hw.symm
+      have hcard := S.toAssociationScheme.intersectionNumber_well_defined i j k a w hrelk
+      have hpos : 0 < (Finset.univ.filter
+          (fun u : Fin n => S.rel i a u = true ∧ S.rel j u w = true)).card := by
+        rw [hcard]; exact Nat.pos_of_ne_zero hk
+      obtain ⟨u, hu_mem⟩ := Finset.card_pos.mp hpos
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hu_mem
+      obtain ⟨hiu, hjw⟩ := hu_mem
+      have hui : S.toAssociationScheme.relOfPair a u = i :=
+        ((S.toAssociationScheme.rel_iff_relOfPair).mp hiu).symm
+      have huB : u ∈ B := (hchar u).mpr (by
+        simp only [AssociationScheme.schemeEquiv, hui]; exact hi)
+      -- `w ∈ B`: `j ∈ I_B` gives `y ∈ B` with `relOfPair a y = j = relOfPair u w`, schurian `a↦u, y↦w`.
+      simp only [hIB, Finset.mem_filter, Finset.mem_univ, true_and] at hj
+      obtain ⟨y, hyj, hyB⟩ := hj
+      have hay : S.rel j a y = true := (S.toAssociationScheme.rel_iff_relOfPair).mpr hyj.symm
+      obtain ⟨π, hπ, hπa, hπy⟩ := S.schurian j a y u w hay hjw
+      have hgB := block_smul ⟨π, hπ⟩ (by rw [hπa]; exact huB)
+      have hwB : w ∈ B := by
+        have hmem : (⟨π, hπ⟩ : S.toAssociationScheme.SchemeAutGroup) • y ∈
+            (⟨π, hπ⟩ : S.toAssociationScheme.SchemeAutGroup) • B := Set.smul_mem_smul_set hyB
+        rw [hgB] at hmem
+        rw [AssociationScheme.schemeAutGroup_smul, hπy] at hmem; exact hmem
+      simp only [hIB, Finset.mem_filter, Finset.mem_univ, true_and]
+      exact ⟨w, hw, hwB⟩
+  -- Primitivity forces `I_B` trivial, hence `B` trivial.
+  rcases hprim I_B hclosed with h0 | huniv
+  · left
+    intro x hx z hz
+    rw [hchar] at hx hz
+    simp only [AssociationScheme.schemeEquiv, h0, Finset.mem_singleton] at hx hz
+    have hax : a = x := (S.toAssociationScheme.relOfPair_eq_zero_iff a x).mp hx
+    have haz : a = z := (S.toAssociationScheme.relOfPair_eq_zero_iff a z).mp hz
+    rw [← hax, ← haz]
+  · right
+    rw [Set.eq_univ_iff_forall]
+    intro y
+    rw [hchar]
+    simp only [AssociationScheme.schemeEquiv, huniv, Finset.mem_univ]
+
+/-- **Scheme primitivity = group-action preprimitivity.** On a schurian scheme where every relation
+occurs, the combinatorial `IsPrimitive` (only `{R_0}`/`univ` closed) is exactly Mathlib's
+`IsPreprimitive` of the scheme-automorphism group — the standard primitive-permutation-group notion the
+Exhaustive-Obstruction Lemma's cited classification (Babai / Sun–Wilmes on primitive coherent
+configurations) is stated against. The group-theoretic half of leg C's primitivity bridge. -/
+theorem isPreprimitive_iff_isPrimitive {n : Nat} (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true) :
+    MulAction.IsPreprimitive S.toAssociationScheme.SchemeAutGroup (Fin n) ↔
+      S.toAssociationScheme.IsPrimitive :=
+  ⟨isPrimitive_of_isPreprimitive S hne, isPreprimitive_of_isPrimitive S hne⟩
 
 end ChainDescent
