@@ -912,4 +912,157 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
     }
 
     private static string DepthLabel(int d) => d < 0 ? "> probe limit (not cascaded)" : d.ToString();
+
+    // ── A2-i de-risking probe (EOL §0.7 / Scheme.lean §13 BlockRefinementVisible) ──
+    //
+    // Question: does 1-WL respect a closed-subset block of the individualized
+    // vertex `v`? (`BlockRefinementVisible`: same 1-WL cell ⟹ same block-of-`v`.)
+    //
+    // **Validity scope (the methodology fix).** Closed subsets of a scheme ≡ block
+    // systems of `Aut`, and block systems are only defined for a TRANSITIVE action.
+    // So this test is meaningful only on **vertex-transitive (homogeneous) scheme
+    // graphs** — CFI graphs are vertex-INtransitive (subset vs endpoint vertices),
+    // so "blocks via MinimalBlock across all of V" is ill-defined there and an
+    // earlier CFI run produced spurious straddles (retracted). The blocks are
+    // **based at `v`** (the individualized vertex), matching `schemeEquiv I v ·`.
+    //
+    // Test: for each 1-WL cell `C` (after individualizing `v = 0`) and each
+    // `w ∈ C`, compute the minimal block of `v` containing `w` (Atkinson). If a
+    // *proper* block-of-`v` `B` fails to contain all of `C`, then `C` straddles
+    // `B`'s block system — an A2 counterexample. No straddle ⇒ block-visibility
+    // held. `imprimitive` flags whether a proper block-of-`v` exists at all (so
+    // the test is non-vacuous on that graph).
+    //
+    // Investigation, not a regression: the verdict is the output, no hard assert.
+    [Fact]
+    public void A2i_BlockVisibility_Probe()
+    {
+        output.WriteLine("=== A2-i: does 1-WL respect closed-subset blocks (block-of-v) on homogeneous schemes? ===");
+        output.WriteLine("only vertex-transitive scheme graphs are valid (CFI is intransitive — excluded); blocks based at v=0\n");
+
+        var graphs = new List<(string name, AdjMatrix g)>
+        {
+            ("Petersen=Kneser(5,2)", CameronGraphGenerator.Kneser(5, 2).Graph),
+            ("Johnson(5,2)",         CameronGraphGenerator.Johnson(5, 2).Graph),
+            ("rook3x3=Hamming(2,3)", CameronGraphGenerator.Hamming(2, 3).Graph),
+            ("cube=Hamming(3,2)",    CameronGraphGenerator.Hamming(3, 2).Graph),   // imprimitive (bipartite/antipodal)
+            ("Johnson(6,3)",         CameronGraphGenerator.Johnson(6, 3).Graph),   // imprimitive (antipodal, n=2k)
+            ("Hamming(2,4)",         CameronGraphGenerator.Hamming(2, 4).Graph),
+        };
+        int offRecovery = 0, totalStraddles = 0, imprimCount = 0, testedImprim = 0;
+
+        foreach (var (name, g) in graphs)
+        {
+            int n = g.VertexCount;
+            var canonizer = new CanonGraphOrdererChainDescent();
+            canonizer.Run(new int[n], g);
+            if (canonizer.LastAutomorphisms is not { } aut) { output.WriteLine($"{name}: no Aut harvested, skip"); continue; }
+            var gens = aut.Generators.Where(x => x.Length == n).ToList();
+            if (gens.Count == 0) { output.WriteLine($"{name}: no full-size generators, skip"); continue; }
+            var adj = FlattenAdj(g);
+
+            int v = 0;
+            var color = new int[n];
+            OneWLRefine(adj, n, color);
+            color[v] = color.Max() + 1;
+            OneWLRefine(adj, n, color);
+            var cells = ExtractCells(color);
+            var orbits = ComputeStabilizerOrbits(v, n, gens);
+            bool recovered = CellsEqualOrbits(cells, orbits);
+            if (!recovered) offRecovery++;
+
+            // Imprimitivity: a proper minimal block of v (size strictly between 1 and n).
+            int minBlock = n;
+            for (int w = 0; w < n; w++)
+                if (w != v)
+                {
+                    var B = MinimalBlock(v, w, gens, n);
+                    if (B.Count < n && B.Count > 1) minBlock = Math.Min(minBlock, B.Count);
+                }
+            bool imprimitive = minBlock < n;
+            if (imprimitive) { imprimCount++; testedImprim++; }
+
+            int straddles = CountBlockStraddles(cells, gens, n, v, name);
+            totalStraddles += straddles;
+            output.WriteLine($"{name}: n={n}, |Aut|={aut.Order}, recovered={recovered}, "
+                             + $"imprimitive={imprimitive}{(imprimitive ? $" (min block {minBlock})" : "")}, straddles={straddles}");
+        }
+
+        output.WriteLine($"\n=== VERDICT: {graphs.Count} vertex-transitive scheme graph(s); {imprimCount} imprimitive; "
+                         + $"{offRecovery} off-recovery; {totalStraddles} block-straddle(s) ===");
+        if (totalStraddles > 0)
+            output.WriteLine("A2 REFUTED (as unconditional): a 1-WL cell straddled a block-of-v on a homogeneous scheme.");
+        else if (offRecovery > 0)
+            output.WriteLine("A2 SUPPORTED: block-visibility held even off the recovery class on a homogeneous scheme.");
+        else
+            output.WriteLine(
+                "INCONCLUSIVE for the hard regime, with positive confirmation on examples:\n"
+              + $"  • No straddle anywhere; {testedImprim} imprimitive scheme(s) had their block-of-v respected by 1-WL\n"
+              + "    (block coarser than orbit ⇒ visible) — A2 holds on every reachable example.\n"
+              + "  • BUT all available vertex-transitive scheme graphs are metric/PPolynomial, so they RECOVER\n"
+              + "    at depth 1 (cells = orbits ⊆ blocks). The genuinely-uncertain regime — OFF-recovery +\n"
+              + "    imprimitive + vertex-transitive — is not reachable with current generators (it is the\n"
+              + "    WL-dimension boundary itself). So the gate cannot fire here: A2 must go to the A2-iii\n"
+              + "    proof attempt, OR exotic high-WL imprimitive homogeneous schemes must be constructed.\n"
+              + "  • Candidate structural lead for Step 3: if imprimitive homogeneous schemes ALWAYS have\n"
+              + "    bounded WL-dimension (recover), then 'non-cascade ⟹ primitive' holds — worth a theory pass.");
+    }
+
+    // For each cell C, test whether a proper block-of-`v` (the individualized
+    // vertex) fails to contain all of C — i.e. C straddles that block system.
+    // Returns the number of straddling cells (≥1 ⇒ block-visibility fails).
+    private int CountBlockStraddles(List<HashSet<int>> cells, IReadOnlyList<int[]> gens, int n, int v, string name)
+    {
+        int straddles = 0;
+        foreach (var C in cells)
+        {
+            if (C.Count < 2 || C.Contains(v)) continue;     // v's own cell is the singleton {v}
+            var seen = new HashSet<string>();
+            foreach (var w in C)
+            {
+                var B = MinimalBlock(v, w, gens, n);          // minimal block of v containing w
+                if (B.Count >= n) continue;                   // whole space — no proper block-of-v
+                if (!seen.Add(string.Join(",", B.OrderBy(z => z)))) continue;
+                var outside = C.Where(u => !B.Contains(u)).ToList();
+                if (outside.Count > 0)
+                {
+                    straddles++;
+                    output.WriteLine($"    ⚠ A2 COUNTEREXAMPLE [{name}]: cell (size {C.Count}) straddles block-of-v "
+                                     + $"(size {B.Count}); w={w}∈B, {outside.Count} cell member(s) outside (e.g. {outside.First()})");
+                    break;
+                }
+            }
+        }
+        return straddles;
+    }
+
+    // Atkinson's minimal block algorithm: the smallest block of <gens> (transitive
+    // on 0..n-1) containing both a and b, via union-find congruence closure
+    // (x ~ y ⟹ g x ~ g y). The lattice of such blocks ≡ closed subsets of the
+    // orbital scheme, so this enumerates the (closed-subset) block systems.
+    private static HashSet<int> MinimalBlock(int a, int b, IReadOnlyList<int[]> gens, int n)
+    {
+        var rep = new int[n];
+        for (int i = 0; i < n; i++) rep[i] = i;
+        int Find(int x) { while (rep[x] != x) { rep[x] = rep[rep[x]]; x = rep[x]; } return x; }
+        var q = new Queue<int>();
+        void Merge(int x, int y)
+        {
+            int rx = Find(x), ry = Find(y);
+            if (rx == ry) return;
+            rep[rx] = ry;
+            q.Enqueue(rx);
+        }
+        Merge(a, b);
+        while (q.Count > 0)
+        {
+            int γ = q.Dequeue();
+            int r = Find(γ);
+            foreach (var g in gens) Merge(g[γ], g[r]);
+        }
+        int ra = Find(a);
+        var block = new HashSet<int>();
+        for (int i = 0; i < n; i++) if (Find(i) == ra) block.Add(i);
+        return block;
+    }
 }

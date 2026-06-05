@@ -458,10 +458,27 @@ by orbit).
    `BlockRefinementVisible` (quarantining the WL-dimension boundary), its discharge on the orbit-recovery
    class (`blockRefinementVisible_of_edgeGenerates`, widening the `PPolynomial` bridge to `EdgeGenerates`),
    and the reduction `cell_splits_of_imprimitive` (non-trivial closed subset + visibility ⟹ `warmRefine`
-   separates two non-`v` vertices = genuine progress). **Next — the A2 probe:** attempt
+   separates two non-`v` vertices = genuine progress). The A2 probe attempts
    `blockRefinementVisible` *off* the recovery class, directly from the `ClosedSubset` closure (which
    mirrors 1-WL counting), since the block is coarser than the orbit — the one realistic shot at closing
    Step 3a unconditionally. (3b) and the A2 probe are the remaining open content of this step.
+
+   **A2-i de-risking gate — RESULT (2026-06-05, `Tier2DecompositionExperiment.A2i_BlockVisibility_Probe`):
+   INCONCLUSIVE for the hard regime, no counterexample, positive confirmation on examples.**
+   *Methodology correction first:* block systems ≡ closed subsets only for a **transitive** `Aut`, so the
+   probe is valid only on **vertex-transitive (homogeneous) scheme graphs** — CFI is vertex-*intransitive*
+   (subset vs endpoint vertices), and an initial CFI run produced spurious "straddles" (`MinimalBlock`
+   merging across intransitive orbits); that run is **retracted**. On the corrected battery (6 VT scheme
+   graphs — Petersen, Johnson(5,2)/(6,3), Hamming(2,3)/(3,2)/(2,4); blocks based at `v`, Atkinson minimal
+   block): **0 straddles**, and the 2 imprimitive cases (cube `H(3,2)`, Johnson(6,3)) had their block-of-`v`
+   **respected** by 1-WL — block-visibility held on every reachable example. *But* all available VT scheme
+   graphs are metric/`PPolynomial`, so they **recover at depth 1** (cells = orbits ⊆ blocks); the
+   genuinely-uncertain regime — **off-recovery ∧ imprimitive ∧ vertex-transitive** — is **not reachable
+   with current generators** (it *is* the WL-dimension boundary). So the gate cannot fire: A2 must go to the
+   **A2-iii** proof attempt, or exotic high-WL imprimitive homogeneous schemes must be constructed.
+   **Structural lead surfaced for Step 3:** if imprimitive homogeneous schemes *always* have bounded
+   WL-dimension (i.e. always recover), then `non-cascade ⟹ primitive` holds outright — a theory question
+   worth a pass, and the most promising route to closing Step 3 non-vacuously.
 
 4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
    degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact
