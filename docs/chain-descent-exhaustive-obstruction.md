@@ -480,6 +480,20 @@ by orbit).
    WL-dimension (i.e. always recover), then `non-cascade ⟹ primitive` holds outright — a theory question
    worth a pass, and the most promising route to closing Step 3 non-vacuously.
 
+   **A2-i circulant battery — RESULT (2026-06-05, `A2i_Circulant_BlockVisibility_Probe`, INDEPENDENT
+   brute-force Aut): no failure case; circulants are too 1-WL-easy to reach the regime.** 18 connected
+   circulants (Cayley graphs of `Z_n`, `n ∈ {8,9,10}`, structured connection sets), **all imprimitive**,
+   ground-truth `Aut` by brute force (not the canonizer) — **all recovered at depth 1, 0 block-straddles.**
+   Circulants have bounded WL-dimension (Muzychuk), so they recover and can't enter the off-recovery
+   regime where A2 could fail. Net across both A2-i runs: **every reachable imprimitive vertex-transitive
+   scheme (6 metric scheme graphs + 18 circulants) has its block-of-`v` respected by 1-WL — no
+   counterexample anywhere, and mounting support for the structural lead.** The genuine failure case (if
+   it exists) needs constructions beyond circulants/metric schemes; the leading candidate (CFI) is
+   vertex-*intransitive* and thus outside the homogeneous-scheme predicate. **Tentative read: off-recovery
+   imprimitive *vertex-transitive* schemes may be rare or nonexistent — i.e. the structural lead may be
+   TRUE and Step 3a may hold for homogeneous schemes.** Decisive next move is the **theory pass** on
+   "imprimitive homogeneous ⟹ bounded WL-dimension," not more generator-hunting.
+
 4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
    degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact
    Step 2 gave from candidate-counting, now from the order side. **Lean (axiom-clean, `Group.lean`):**

@@ -1065,4 +1065,118 @@ public class Tier2DecompositionExperiment(ITestOutputHelper output)
         for (int i = 0; i < n; i++) if (Find(i) == ra) block.Add(i);
         return block;
     }
+
+    // ── A2-i, circulant battery with INDEPENDENT (brute-force) Aut ──────────────
+    //
+    // The metric scheme graphs all recover at depth 1, so the gate never fires on
+    // them. Circulants (Cayley graphs of Z_n) are vertex-transitive and, on
+    // composite n with structured connection sets, imprimitive — and some are
+    // off-recovery at depth 1. This battery hunts for the genuine A2 failure case:
+    // an off-recovery, imprimitive, vertex-transitive scheme where 1-WL merges
+    // across a block-of-v (block-visibility fails). Ground-truth Aut is computed
+    // by **brute force** (independent of the canonizer under test), so any
+    // counterexample is airtight. Capped at n ≤ 10 for brute-force feasibility.
+    [Fact]
+    public void A2i_Circulant_BlockVisibility_Probe()
+    {
+        output.WriteLine("=== A2-i circulant battery (independent brute-force Aut) ===");
+        output.WriteLine("hunting an off-recovery, imprimitive, vertex-transitive scheme whose 1-WL cell straddles a block-of-v\n");
+
+        var battery = new (int n, int[] conn)[]
+        {
+            (8, new[]{1,2}), (8, new[]{1,3}), (8, new[]{1,4}), (8, new[]{2,3}), (8, new[]{1,2,3}), (8, new[]{1,3,4}), (8, new[]{2,4}),
+            (9, new[]{1,2}), (9, new[]{1,3}), (9, new[]{1,4}), (9, new[]{2,3}), (9, new[]{1,2,4}), (9, new[]{3,4}),
+            (10, new[]{1,2}), (10, new[]{1,5}), (10, new[]{2,3}), (10, new[]{1,2,5}), (10, new[]{1,3,5}), (10, new[]{2,4}), (10, new[]{1,4}),
+        };
+        int tested = 0, offRecovery = 0, imprimCount = 0, totalStraddles = 0;
+
+        foreach (var (n, conn) in battery)
+        {
+            // Connectivity: a circulant is connected iff gcd(conn ∪ {n}) = 1.
+            int gg = n; foreach (var c in conn) gg = Gcd(gg, c);
+            if (gg != 1) { output.WriteLine($"C{n}{{{string.Join(",", conn)}}}: disconnected (gcd={gg}), skip"); continue; }
+
+            var adj = CirculantAdj(n, conn);
+            var aut = BruteForceAut(adj, n);          // independent ground truth
+            // vertex-transitive by construction (Z_n ⊆ Aut); sanity: orbit of 0 = all.
+            var color = new int[n];
+            OneWLRefine(adj, n, color);
+            color[0] = color.Max() + 1;
+            OneWLRefine(adj, n, color);
+            var cells = ExtractCells(color);
+            var orbits = ComputeStabilizerOrbits(0, n, aut);
+            bool recovered = CellsEqualOrbits(cells, orbits);
+
+            int minBlock = n;
+            for (int w = 1; w < n; w++)
+            {
+                var B = MinimalBlock(0, w, aut, n);
+                if (B.Count < n && B.Count > 1) minBlock = Math.Min(minBlock, B.Count);
+            }
+            bool imprimitive = minBlock < n;
+
+            int straddles = CountBlockStraddles(cells, aut, n, 0, $"C{n}{{{string.Join(",", conn)}}}");
+            tested++;
+            if (!recovered) offRecovery++;
+            if (imprimitive) imprimCount++;
+            totalStraddles += straddles;
+            output.WriteLine($"C{n}{{{string.Join(",", conn)}}}: |Aut|={aut.Count}, recovered={recovered}, "
+                             + $"imprimitive={imprimitive}{(imprimitive ? $" (min block {minBlock})" : "")}, "
+                             + $"off-recovery={!recovered}, straddles={straddles}");
+        }
+
+        output.WriteLine($"\n=== VERDICT: {tested} connected circulant(s); {imprimCount} imprimitive; "
+                         + $"{offRecovery} off-recovery; {totalStraddles} block-straddle(s) ===");
+        if (totalStraddles > 0)
+            output.WriteLine("A2 REFUTED (brute-force Aut): an off-recovery imprimitive vertex-transitive scheme straddles a\n"
+                           + "block-of-v — Step 3a IS the WL-dimension boundary for blocks. Redirect Step 3a to the A2-ii\n"
+                           + "graded form (BlockGenerates ⟹ visible, holding only up to the block's closure complexity).");
+        else if (offRecovery > 0)
+            output.WriteLine("Notable: off-recovery circulants exist, yet NONE straddled a block-of-v — block-visibility held\n"
+                           + "even off the recovery class. Strengthens the A2-iii (unconditional block-visibility) case.");
+        else
+            output.WriteLine("All connected circulants recovered at depth 1 (still 1-WL-easy) — gate did not fire; the\n"
+                           + "off-recovery imprimitive vertex-transitive regime needs richer constructions than circulants.");
+    }
+
+    private static int Gcd(int a, int b) { while (b != 0) (a, b) = (b, a % b); return a; }
+
+    // Circulant (Cayley graph of Z_n): i ~ j iff (i-j mod n) ∈ ±conn. Flat adjacency.
+    private static int[] CirculantAdj(int n, int[] conn)
+    {
+        var s = new HashSet<int>();
+        foreach (var c in conn) { s.Add(((c % n) + n) % n); s.Add(((n - c) % n + n) % n); }
+        s.Remove(0);
+        var adj = new int[n * n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                adj[i * n + j] = s.Contains(((i - j) % n + n) % n) ? 1 : 0;
+        return adj;
+    }
+
+    // All automorphisms of `adj` (flat n×n, symmetric 0/1) by backtracking with
+    // adjacency pruning. Independent of the canonizer. For small n (≤ ~10).
+    private static List<int[]> BruteForceAut(int[] adj, int n)
+    {
+        var autos = new List<int[]>();
+        var perm = new int[n];
+        var used = new bool[n];
+        void Rec(int k)
+        {
+            if (k == n) { autos.Add((int[])perm.Clone()); return; }
+            for (int cand = 0; cand < n; cand++)
+            {
+                if (used[cand]) continue;
+                bool ok = true;
+                for (int j = 0; j < k; j++)
+                    if (adj[j * n + k] != adj[perm[j] * n + cand]) { ok = false; break; }
+                if (!ok) continue;
+                perm[k] = cand; used[cand] = true;
+                Rec(k + 1);
+                used[cand] = false;
+            }
+        }
+        Rec(0);
+        return autos;
+    }
 }
