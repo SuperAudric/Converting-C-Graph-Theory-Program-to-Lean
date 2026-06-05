@@ -840,6 +840,11 @@ medium-risk Mathlib gap gating B1.
 | `orbitPartition_empty_iff_orbitRel` | 290-302 | §A4 The root orbit relation `OrbitPartition adj P ∅` equals the `AutGroup` `MulAction` orbit relation (under `P`-invariance) — the relational form of the A2 orbit bridge, symmetrised for `orbitRel`. | — |
 | `orbitQuotientEquivAutGroup` | 304-312 | §A4 **The root quotient is `V(G)/Aut(G)`.** Under `P`-invariance, `OrbitQuotient adj P ∅` is equivalent to the `MulAction` orbit quotient of `AutGroup adj`, tying A4's relational quotient back to A1/A2's group object. | Definition |
 
+| `stabilizer_eq_bot_of_isPretransitive_comm` | 324-342 | **(seal core L1, [exhaustive-obstruction §0.7](../docs/chain-descent-exhaustive-obstruction.md))** A transitive, faithful, **abelian** action is **free**: every point-stabilizer is trivial ("transitive abelian ⟹ regular"). The textbook root of "no non-consumed abelian species". | — |
+| `existsUnique_smul_of_isPretransitive_comm` | 344-355 | **(seal core L2)** Unique candidate: in a transitive faithful abelian action exactly one group element moves `a` to `b` (existence from transitivity, uniqueness from L1's trivial stabilizer). | — |
+| `smul_eq_on_orbit_of_comm` | 357-366 | **(seal core L3 — load-bearing, axiom-free)** Quotient-free, faithfulness-free form: if `g, h` both move `a` to `b` then they agree on the **whole orbit** of `a` (`g•c = k•b = h•c` for `c = k•a`). The "unique-candidate-on-the-cell" the linear-oracle harvest reads — holds for an abelian residual even with non-trivial global stabilizers (CFI). | — |
+| `aut_agree_on_orbit_of_comm` | 368-382 | **(seal instantiation)** L3 for `AutGroup adj`: an **abelian residual** ⟹ two automorphisms both sending `a ↦ b` agree on every `c` in `a`'s orbit, so the decision is determined on its cell (always consumable). | — |
+| `not_comm_of_orbit_disagree` | 384-393 | **(seal headline — no non-consumed abelian species)** Contrapositive: a decision `a ↦ b` whose two candidate automorphisms **disagree** on the cell forces a **non-abelian** residual. With the §12 capstone (large primitive non-abelian ⟹ Cameron), the only non-consumed symmetry is a Cameron section — the bottom-up, citation-free half of the seal. | — |
 ## ChainDescent/Cascade.lean
 
 B1 (Tier 3a cascade composition) of `docs/chain-descent-tier3-tractable-buildout.md`,

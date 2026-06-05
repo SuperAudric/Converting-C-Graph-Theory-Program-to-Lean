@@ -311,4 +311,85 @@ def orbitQuotientEquivAutGroup {adj : AdjMatrix n} {P : PMatrix n}
     intro a b
     simpa using orbitPartition_empty_iff_orbitRel hPinv a b)
 
+/-! ## Mechanism-side seal core — "no non-consumed abelian species" (L1–L3)
+
+The bottom-up complement to the §12 EOL capstone
+([exhaustive-obstruction §0.7](../../docs/chain-descent-exhaustive-obstruction.md)): a *non-consumed*
+symmetry must be **non-abelian**. The rigorous heart is the textbook fact **a transitive abelian action
+is regular** (L1/L2) and its quotient-free, per-orbit form **two candidates for a decision agree on the
+whole orbit** (L3) — the form the linear-oracle harvest consumes. L3 needs *no* faithfulness, so it
+survives the CFI case where an abelian residual has non-trivial *global* stabilizers (flips off the
+gadget) while being unique *on the cell*. No citation, no WL-dimension content. -/
+
+/-- **L1 — a transitive, faithful, abelian action is free.** The stabilizer of any point is trivial: for
+`s` fixing `a`, abelianness slides `s` past any transporter `g` (`g • a = b`), so `s` fixes every `b`,
+hence `s = 1` by faithfulness. ("Transitive abelian ⟹ regular.") -/
+theorem stabilizer_eq_bot_of_isPretransitive_comm
+    {G : Type*} {α : Type*} [Group G] [MulAction G α] [MulAction.IsPretransitive G α]
+    [FaithfulSMul G α] (comm : ∀ g h : G, g * h = h * g) (a : α) :
+    MulAction.stabilizer G a = ⊥ := by
+  rw [Subgroup.eq_bot_iff_forall]
+  intro s hs
+  have hsa : s • a = a := (MulAction.mem_stabilizer_iff).mp hs
+  refine FaithfulSMul.eq_of_smul_eq_smul (fun (b : α) => ?_)
+  obtain ⟨g, hg⟩ := MulAction.exists_smul_eq G a b
+  calc s • b = s • (g • a) := by rw [hg]
+    _ = (s * g) • a := by rw [mul_smul]
+    _ = (g * s) • a := by rw [comm]
+    _ = g • (s • a) := by rw [mul_smul]
+    _ = g • a := by rw [hsa]
+    _ = b := hg
+    _ = (1 : G) • b := (one_smul G b).symm
+
+/-- **L2 — unique candidate.** In a transitive faithful abelian action, exactly one group element moves
+`a` to `b`: existence from transitivity, uniqueness from `stabilizer = ⊥` (L1). -/
+theorem existsUnique_smul_of_isPretransitive_comm
+    {G : Type*} {α : Type*} [Group G] [MulAction G α] [MulAction.IsPretransitive G α]
+    [FaithfulSMul G α] (comm : ∀ g h : G, g * h = h * g) (a b : α) :
+    ∃! g : G, g • a = b := by
+  obtain ⟨g, hg⟩ := MulAction.exists_smul_eq G a b
+  refine ⟨g, hg, fun h hh => ?_⟩
+  have hstab : (g⁻¹ * h) ∈ MulAction.stabilizer G a := by
+    rw [MulAction.mem_stabilizer_iff, mul_smul, hh, ← hg, inv_smul_smul]
+  rw [stabilizer_eq_bot_of_isPretransitive_comm comm a, Subgroup.mem_bot, inv_mul_eq_one] at hstab
+  exact hstab.symm
+
+/-- **L3 — the seal form (quotient-free, no faithfulness).** If `g` and `h` both move `a` to `b`, they
+agree on the *entire orbit* of `a`: for `c = k • a`, abelianness gives `g • c = k • (g • a) = k • b =
+h • c`. So the swap a decision induces on its cell is *determined* — the unique-candidate-on-the-cell the
+harvest reads. Holds for an abelian residual even with non-trivial global stabilizers (CFI). -/
+theorem smul_eq_on_orbit_of_comm
+    {G : Type*} {α : Type*} [Group G] [MulAction G α] (comm : ∀ g h : G, g * h = h * g)
+    {a b : α} {g h : G} (hg : g • a = b) (hh : h • a = b)
+    {c : α} (hc : c ∈ MulAction.orbit G a) : g • c = h • c := by
+  obtain ⟨k, hk⟩ := hc
+  rw [← hk, ← mul_smul, ← mul_smul, comm g k, comm h k, mul_smul, mul_smul, hg, hh]
+
+/-- **Seal instantiation — abelian residual ⟹ decision candidates agree on the cell.** L3 specialised to
+`AutGroup adj`: if the residual automorphism group is abelian, two automorphisms `g, h` both sending
+`a ↦ b` agree on every vertex `c` in `a`'s orbit. So an abelian residual's decisions are uniquely
+determined on their cell — always consumable, never a non-consumed species. -/
+theorem aut_agree_on_orbit_of_comm {adj : AdjMatrix n}
+    (hcomm : ∀ g h : AutGroup adj, g * h = h * g)
+    {a b c : Fin n} {g h : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hh : IsAut h adj) (hga : g a = b) (hha : h a = b)
+    (hc : ∃ k : Equiv.Perm (Fin n), IsAut k adj ∧ k a = c) :
+    g c = h c := by
+  have hcorbit : c ∈ MulAction.orbit (AutGroup adj) a := mem_orbit_autGroup_iff.mpr hc
+  have hres := smul_eq_on_orbit_of_comm (G := AutGroup adj) hcomm
+    (a := a) (b := b) (g := ⟨g, hg⟩) (h := ⟨h, hh⟩)
+    (by rw [autGroup_smul]; exact hga) (by rw [autGroup_smul]; exact hha) hcorbit
+  simpa [autGroup_smul] using hres
+
+/-- **No non-consumed abelian species (the headline, contrapositive of the seal instantiation).** If a
+decision `a ↦ b` carries two candidate automorphisms that *disagree* somewhere on `a`'s cell, the residual
+is **non-abelian**. Combined with the §12 capstone (large primitive non-abelian ⟹ Cameron), the only
+non-consumed symmetry is a Cameron section — the bottom-up, citation-free half of the seal. -/
+theorem not_comm_of_orbit_disagree {adj : AdjMatrix n}
+    {a b c : Fin n} {g h : Equiv.Perm (Fin n)}
+    (hg : IsAut g adj) (hh : IsAut h adj) (hga : g a = b) (hha : h a = b)
+    (hc : ∃ k : Equiv.Perm (Fin n), IsAut k adj ∧ k a = c) (hne : g c ≠ h c) :
+    ¬ (∀ g h : AutGroup adj, g * h = h * g) :=
+  fun hcomm => hne (aut_agree_on_orbit_of_comm hcomm hg hh hga hha hc)
+
 end ChainDescent

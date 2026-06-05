@@ -408,6 +408,94 @@ that escape — never the seal. Keep both clauses, always.
 
 ---
 
+## 0.7 The mechanism-side derivation (bottom-up) — an independent route to the seal
+
+> **STATUS (2026-06-05): a second, independent derivation of the seal's leg-C conclusion, from the
+> *harvest mechanism* rather than the *group classification*.** Where §0.5/§1 reach "the non-consumed
+> obstruction is a Cameron section" **top-down** (cite O'Nan–Scott / Babai–Sun–Wilmes), this section
+> reaches the *same* conclusion **bottom-up** — from what the oracle can and cannot harvest, plus one
+> textbook group fact (*a transitive abelian action is regular*). The two routes meeting at the same
+> wall is a faithfulness cross-check; and the bottom-up route makes **leg B's "abelian ⟹ consumed" half
+> citation-free and Lean-provable** (the §12 capstone still cites the classification only for leg C).
+
+### 0.7.1 The question
+
+Call a symmetry **non-consumed** if the oracle never harvests it within the polynomial budget, yet — by
+soundness — it is never returned *wrong* (the descent over-splits on it instead). What must a graph look
+like for a non-consumed symmetry to *exist*? The derivation answers: **it can only be a Cameron section**
+— there is *no* non-consumed *abelian* species — and exhibiting one is therefore the wall (`(O*)`-existence,
+GI-hard), not something constructible cheaply.
+
+### 0.7.2 The derivation (per refinement-stable orbit `O`)
+
+Fix one residual-orbit `O` (the residual acts transitively on it; a multi-orbit cell is handled orbit
+by orbit).
+
+1. **Non-consumed ⟹ `¬D1` (does not cascade).** Any symmetry visible by symmetry-only individualization
+   at polynomial depth is harvested by leg A (orbit recovery) at depth `base(σ) ≤ |support σ| ≤ n`,
+   *regardless of its group*. So a non-consumed symmetry is hidden: `¬D1`.
+
+2. **The rigorous core — on `O`, abelian ⟹ unique candidate (`D2`).** The candidates for a decision
+   `e ↦ f` are exactly `{g : g • e = f}` = a coset of the point-stabilizer `Stab(e)` *in the image acting
+   on `O`*. A **transitive abelian** action is **regular** (`Stab = 1`): for `s ∈ Stab(e)` and any `c = k•e`,
+   `s•c = (s k)•e = (k s)•e = k•(s•e) = k•e = c`, so `s` fixes `O` pointwise. Hence **abelian ⟹ the swap on
+   the cell is unique**, which one branch's propagation pins and the linear-oracle harvest consumes
+   (cost `≤ n³`, single-path). *So a non-consumed symmetry is `¬D2` = non-abelian.* This is the step with
+   **no citation and no WL-dimension content** — the Lean lemmas **L1–L3** (`Group.lean`; see
+   [PublicTheoremIndex](../GraphCanonizationProofs/PublicTheoremIndex.md)). The load-bearing form is **L3**
+   (`smul_eq_on_orbit_of_comm`): *any two candidates for a decision agree on the whole orbit* — quotient-free,
+   needing no faithfulness, so it survives the CFI subtlety that an abelian residual has non-trivial
+   *global* stabilizers (flips off the gadget) while being unique *on the cell*.
+
+3. **`¬D1` ⟹ primitive, and ⟹ large.** Imprimitive on `O` ⟹ a block system = a refinement-visible closed
+   relation subset ⟹ refinement splits it ⟹ cascades ⟹ `D1`, contradiction. So `¬D1 ⟹ primitive`. And
+   `¬D1` = "no harvest window at poly depth" = high WL-dimension = the **large** (super-polynomial-`|Aut|`)
+   regime. *(This is the substrate-conditional refinement-side bridge — the deferred piece of §12; it is the
+   one non-rigorous link.)*
+
+4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
+   degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact
+   Step 2 gave from candidate-counting, now from the order side.
+
+**Conclusion.** `non-consumed ⟹ ¬D1 ∧ ¬D2 ⟹ large primitive non-abelian action on a WL-stable cell =
+a Cameron section`. The chain has **no slot for a non-consumed abelian symmetry** (Step 2 forecloses it
+rigorously). This is exactly bucket C of §0.5 — so "a non-consumed symmetry exists" **is** the
+`(O*)`-existence question (GI-hard), and the graph must carry a *hidden* Johnson/Hamming-type scheme.
+
+### 0.7.3 Why the two routes agree — and what each owns
+
+`non-consumed ⟺ ¬D1 ∧ ¬D2 ⟺ large primitive non-abelian ⟺ Cameron`. The **top-down** capstone (§12)
+reaches the final `⟺` by citing the classification; the **bottom-up** derivation reaches it by candidate
+counting (Step 2) + `large primitive ⟹ non-abelian` (Step 4). The split of labour:
+
+| Leg | Statement | Route | Lean status |
+|---|---|---|---|
+| **A** (D1) | recovers at poly depth ⟹ consumed | orbit recovery | proved (witnesses; `theorem_2_HOR_of_pPolynomial`, …) |
+| **B** (¬D1∧D2) | **abelian ⟹ unique candidate ⟹ consumed** | **bottom-up (L1–L3)** | **provable, citation-free** |
+| **C** (¬D1∧¬D2) | large primitive non-abelian ⟹ Cameron | top-down (§12) | stated modulo cited `PrimitiveCCClassification` |
+
+So the bottom-up route is **leg B's clean proof core**, complementing — not replacing — leg C's cited
+capstone. Merging them: the seal = A (recovery) ∨ B (L1–L3) ∨ C (§12).
+
+### 0.7.4 The high-tw CFI resolution (effectiveness ≠ species)
+
+Step 2 settles a tension recorded elsewhere. CFI's gauge is `Z₂^β` (abelian), so by L3 every gauge
+decision is a *locally unique* swap, consumable single-path at `tw·n² ≤ n³` ([cascade-oracle §4.6](./chain-descent-cascade-oracle.md)).
+There is therefore **no "non-consumed abelian" species**, even at unbounded treewidth. High-tw CFI under
+the *branching* a-posteriori oracle costs `cell_size^{tw}` (flags); under the *single-path* a-priori
+oracle it is `O(n³)` (poly) — and L3 *guarantees the poly one exists*. So the §0.6 F2 / §2 gap-(B)
+"flagged region" for high-tw CFI is a **mechanism-effectiveness** question (does the built oracle realize
+the single-path harvest), **not** a third mathematical flag species. This **corrects an earlier reading**
+that treated unbounded-WL-dimension as a distinct escape in guarantee 2: there are exactly two symmetric
+outcomes — *consumed* or *Cameron* — plus the orthogonal IR-core (no symmetry).
+
+> **Drafting consequence.** Guarantee 2's escapes are **Cameron** (non-trivial non-abelian residual) and
+> **IR-core** (trivial residual); an *unconsumed abelian* residual (high-tw CFI) is **not** a third escape
+> — it is a consumed-in-principle case whose poly harvest is an *effectiveness* obligation, falsifiable by
+> the `AbelianUnconsumed` e2e probe (which thereby tests single-path effectiveness, not a species).
+
+---
+
 ## 1. Statement of the lemma (mechanism-pinned)
 
 Informal target:
