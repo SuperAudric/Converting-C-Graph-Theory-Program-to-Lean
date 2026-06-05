@@ -217,12 +217,9 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `theorem_1_HOR_at_n` | 3970-3981 | **Theorem 1, trivial-bound corollary:** every graph admits orbit recovery at depth `n`. Axiom-free specialisation to `cascadesAt_univ`. | — |
 | `theorem_1_HOR` | 3983-3994 | **Theorem 1 (legacy existential form):** some `S` makes `warmRefine` discrete and orbits equal cells. | — |
 | `theorem_1_HOR_pointwise` | 3996-4008 | **Theorem 1, pointwise corollary:** at the cascade depth, every automorphism preserving `(adj, P)` and fixing `S` is the identity. | — |
-| `SchemeProfile` | 4059-4075 | **Key structure (Tier 2).** Bundles a v-profile colouring with its structural facts: profile classes equal `Aut_v` orbits (schurian Step 1) and 1-WL refines the profile partition (intersection-number Step 2). | Structure |
-| `warm_iff_profile` | 4081-4094 | **Squeeze for `SchemeProfile`:** the 1-WL fixpoint partition equals the profile partition. | — |
-| `IsSchurianSchemeGraph` | 4114-4118 | **Abstract predicate** (axiom-Prop): placeholder for `adj` admitting a vertex-transitive schurian association scheme containing its edge relation. Becomes a real definition once the scheme machinery lands. | axiom |
-| `schurian_scheme_profile_exists` | 4120-4131 | **Scheme-profile existence axiom (Tier-2 Fact A analogue):** any graph satisfying `IsSchurianSchemeGraph` admits a `SchemeProfile` at every vertex. Becomes a theorem once association-scheme infrastructure lands. | axiom |
-| `theorem_2_HOR_of_profile` | 4133-4149 | **Theorem 2 (assembly form):** given a `SchemeProfile` witness at `v`, the 1-WL fixpoint partition at depth 1 equals the `Aut_v`-orbit partition. | — |
-| `theorem_2_HOR` | 4151-4167 | **Key theorem (Tier 2 HOR).** For any graph satisfying `IsSchurianSchemeGraph`, the depth-1 1-WL fixpoint partition equals the `Aut_v`-orbit partition. Conditional on the `schurian_scheme_profile_exists` axiom. | — |
+| `SchemeProfile` | 4061-4077 | **Key structure (Tier 2).** Bundles a v-profile colouring with its structural facts: profile classes equal `Aut_v` orbits (schurian Step 1) and 1-WL refines the profile partition (intersection-number Step 2). | Structure |
+| `warm_iff_profile` | 4083-4096 | **Squeeze for `SchemeProfile`:** the 1-WL fixpoint partition equals the profile partition. | — |
+| `theorem_2_HOR_of_profile` | 4112-4128 | **Theorem 2 (assembly form):** given a `SchemeProfile` witness at `v`, the 1-WL fixpoint partition at depth 1 equals the `Aut_v`-orbit partition. The axiom-free assembly lemma `Scheme.lean`'s `theorem_2_HOR_concrete` consumes (the placeholder axioms `IsSchurianSchemeGraph` / `schurian_scheme_profile_exists` and the conditional `theorem_2_HOR` were retired 2026-06-05). | — |
 
 ## ChainDescent/CFI.lean
 
@@ -258,48 +255,44 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `IsCFI'` | 459-479 | §9 **Concrete `IsCFI` predicate.** A witness that `adj : AdjMatrix n` is the CFI of some base `H : CFIBase m`, exposing the base graph and bijection `Fin n ≃ H.CFIVertex` as addressable data. | Structure |
 | `IsCFI'.baseSize` | 481-486 | The base graph's vertex count `h.m` for a CFI witness `h`; the depth-bound API ties `cfi_depth_bound h` to `h.baseSize`. | `abbrev` |
 | `cfiAdjMatrix_is_cfi` | 488-519 | **Self-witness**: every `H.cfiAdjMatrix` satisfies `IsCFI'`, with `H` itself as the base. | Definition, `noncomputable` |
-| `cfi_depth_bound` | 543-557 | §10 **Cascade-depth function for CFI graphs**, concretely `h.baseSize` (discharges the former axiom in Stage-4 M1). | Definition |
-| `cfi_depth_bound_le` | 559-563 | **The CFI depth bound is `≤ baseSize`**, trivial after the M1 concretization. | — |
-| `cfi_cascades_polynomially` | 565-574 | §10 **Fact A (cascade axiom).** A CFI graph cascades at depth `cfi_depth_bound h`; the sole remaining Tier-1 CFI axiom, awaiting the Cai-Fürer-Immerman cascade formalisation. | axiom |
-| `theorem_1_HOR_cfi` | 576-591 | §10 **Theorem 1 (CFI form).** A CFI graph admits orbit recovery at depth `cfi_depth_bound h`; conditional on `cfi_cascades_polynomially`, and tighter than the `n`-bounded `theorem_1_HOR_at_n`. | — |
-| `theorem_1_HOR_cfi_baseSize` | 593-609 | **Corollary**: orbit recovery at depth `≤ h.baseSize`, the headline `Nat`-shaped CFI bound for downstream consumers. | — |
-| `card_CFIVertex` | 723-730 | §11 **The cardinality identity**: `Fintype.card H.CFIVertex = H.cfiVertexCount` — the abstract vertex type matches the gadget-size sum formula. | — |
-| `IsCFI'.six_baseSize_le` | 748-776 | §12 **Connector**: a CFI graph has at least `6 * baseSize` vertices (each gadget contributes ≥ 6) — yields the `n/6` depth bound. | — |
-| `theorem_1_HOR_cfi_n_bound` | 778-800 | §12 **Corollary (n-shaped bound).** Orbit recovery on a CFI graph holds at depth `≤ n/6` (as `6 * S.card ≤ n`), strictly tighter than the trivial `≤ n` bound. | — |
-| `aEmpty` | 819-824 | §13.1 The canonical seed vertex `a_∅^v` of `CFI(H)`: the subset vertex at gadget `v` with the empty subset, individualized by the M2-M4 cascade. | Definition |
-| `endpoint` | 826-829 | §13.1 The endpoint vertex `e^b_{v→w}` of `CFI(H)` at gadget `v`, pointing toward `w ∈ N(v)` with parity bit `b`. | Definition |
-| `cfiAdj_aEmpty_endpoint_false` | 838-843 | §13.2 `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=false endpoint is not adjacent to the empty-subset seed. | — |
-| `cfiAdj_aEmpty_endpoint_true` | 845-850 | §13.2 `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=true endpoint is adjacent to the empty-subset seed. | — |
-| `aEmpty_ne_endpoint` | 852-859 | `H.aEmpty v ≠ H.endpoint hw b`: subset and endpoint vertices are distinct (different `Sum` tags). | — |
-| `cfiAdj_aEmpty_endpoint_diff_gadget` | 861-874 | **Cross-gadget non-adjacency**: `cfiAdj (a_∅^v) (e^b_{v'→w}) = 0` when `v ≠ v'`. | — |
-| `cfiAdj_bridge` | 876-892 | **The bridge edge**: `cfiAdj (e^b_{v→w}) (e^b_{w→v}) = 1` — same-parity endpoints at neighbouring gadgets pointing toward each other. | — |
-| `IsCFI'.seedVertex` | 905-909 | §13.3 The `Fin n` vertex corresponding to the seed `a_∅^v` for an `IsCFI'` witness — what the cascade individualizes. | Definition |
-| `IsCFI'.endpointVertex` | 911-915 | §13.3 The `Fin n` vertex corresponding to `e^b_{v→w}` for an `IsCFI'` witness — the endpoints the cascade probes. | Definition |
-| `e_seedVertex` | 921-925 | Bijection round-trip: `h.e (h.seedVertex v) = h.H.aEmpty v`. | `@[simp]` |
-| `e_endpointVertex` | 927-932 | Bijection round-trip: `h.e (h.endpointVertex hw b) = h.H.endpoint hw b`. | `@[simp]` |
-| `seedVertex_ne_endpointVertex` | 934-944 | Seed and endpoint vertices are distinct in `Fin n` (their abstract counterparts have different `Sum` tags). | — |
-| `adj_seed_endpoint_false` | 959-965 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w false) = 0`. | — |
-| `adj_seed_endpoint_true` | 967-973 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w true) = 1`. | — |
-| `adj_endpoint_seed_false` | 975-981 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w false) (seedVertex v) = 0`. | — |
-| `adj_endpoint_seed_true` | 983-989 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w true) (seedVertex v) = 1`. | — |
-| `individualizedColouring_singleton_self` | 1055-1058 | Individualizing a single seed gives it colour `seed.val + 1`. | `@[simp]` |
-| `individualizedColouring_singleton_other` | 1060-1064 | Under a singleton individualization, every non-seed vertex gets colour `0`. | `@[simp]` |
-| `individualizedColouring_eq_iff_of_mem` | 1191-1207 | Multi-seed uniqueness: under `individualizedColouring n S`, for `v ∈ S` a vertex shares v's colour iff it equals v. Generalises the singleton form to arbitrary S. | — |
-| `allSeeds` | 1213-1220 | §13.8 The cascade individualization set `{seedVertex v : v ∈ Fin m}` — one seed per base vertex; the witness used in `cfi_cascades_polynomially`. | Definition |
-| `seedVertex_injective` | 1222-1240 | `seedVertex` is injective: distinct base vertices map to distinct `Fin n` indices. | — |
-| `seedVertex_mem_allSeeds` | 1242-1245 | Every `seedVertex v` lies in `allSeeds`. | — |
-| `allSeeds_card` | 1247-1253 | `|allSeeds| = h.baseSize`; with `six_baseSize_le` the cascade individualization has at most n/6 vertices. | `@[simp]` |
-| `adj_endpointVertex_eq_one_iff` | 1552-1574 | §13.12 Endpoint-endpoint adjacency characterisation: two endpoints are adjacent iff they form a bridge pair (`v_a = w_b ∧ w_a = v_b ∧ b_a = b_b`). | — |
-| `adj_seedVertex_eq_one_iff` | 1576-1651 | §13.12 Seed-adjacency characterisation: a vertex is adjacent to `seedVertex w` iff it is a b=true endpoint in gadget w. Key structural fact for the cascade's no-match preconditions. | — |
-| `subset` | 1773-1778 | §13.14 The CFI vertex `a_S^v`: the subset vertex at gadget v with even subset S ⊆ N(v). Generalises `aEmpty v` (the S = ∅ case). | Definition |
-| `IsCFI'.subsetVertex` | 1831-1837 | §13.14 The `Fin n` vertex for `a_S^v`. Generalises `seedVertex v` (the empty-subset case). | Definition |
-| `e_subsetVertex` | 1843-1849 | Bijection round-trip: `h.e (subsetVertex hS) = subset hS`. | `@[simp]` |
-| `adj_subsetVertex_eq_one_iff` | 1897-1950 | §13.14 Subset-adjacency characterisation: `adj u (subsetVertex_{v'} hS') = 1` iff u is an endpoint at v' whose parity satisfies `(w' ∈ S') ⊕ b`. Generalises `adj_seedVertex_eq_one_iff` (S' = ∅). | — |
-| `IsCFI'.adj_symm` | 2149-2153 | §13.16.5 CFI adjacency is symmetric at the `Fin n` level: `adj.adj i j = adj.adj j i`. | — |
-| `OddDegree` | 2679-2682 | §13.21 Odd-degree CFI base: every base vertex has odd degree, ensuring no even subset of N(v) is saturated. Hypothesis for the axiom-free cascade (covers K₄, K₃,₃, Petersen). | Definition |
-| `exists_witness_of_oddDegree` | 2684-2705 | §13.21 Under `OddDegree`, every even subset of N(v) has a strict non-element y ∈ N(v) \ S — the subset-distinction witness. | — |
-| `cfi_cascades_polynomially_oddDeg` | 3017-3221 | §13.24 M4 — for OddDegree CFI graphs, `warmRefine adj P χ_{allSeeds}` is `Discrete`; discharges `CascadesAt` (the cascade axiom) axiom-free at depth `cfi_depth_bound h`. | — |
-| `theorem_1_HOR_cfi_oddDeg` | 3223-3242 | **Tier-1 CFI orbit recovery.** Theorem 1 for OddDegree CFI graphs, axiom-free: orbit partition coincides with the warm-refined colouring at depth ≤ baseSize, conditional only on `OddDegree`. | — |
+| `cfi_depth_bound` | 550-564 | §10 **Cascade-depth function for CFI graphs**, concretely `h.baseSize` (discharges the former axiom in Stage-4 M1). | Definition |
+| `cfi_depth_bound_le` | 566-581 | **The CFI depth bound is `≤ baseSize`**, trivial after the M1 concretization. | — |
+| `card_CFIVertex` | 695-702 | §11 **The cardinality identity**: `Fintype.card H.CFIVertex = H.cfiVertexCount` — the abstract vertex type matches the gadget-size sum formula. | — |
+| `IsCFI'.six_baseSize_le` | 720-754 | §12 **Connector**: a CFI graph has at least `6 * baseSize` vertices (each gadget contributes ≥ 6) — yields the `n/6` depth bound. | — |
+| `aEmpty` | 773-778 | §13.1 The canonical seed vertex `a_∅^v` of `CFI(H)`: the subset vertex at gadget `v` with the empty subset, individualized by the M2-M4 cascade. | Definition |
+| `endpoint` | 780-783 | §13.1 The endpoint vertex `e^b_{v→w}` of `CFI(H)` at gadget `v`, pointing toward `w ∈ N(v)` with parity bit `b`. | Definition |
+| `cfiAdj_aEmpty_endpoint_false` | 792-797 | §13.2 `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=false endpoint is not adjacent to the empty-subset seed. | — |
+| `cfiAdj_aEmpty_endpoint_true` | 799-804 | §13.2 `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=true endpoint is adjacent to the empty-subset seed. | — |
+| `aEmpty_ne_endpoint` | 806-813 | `H.aEmpty v ≠ H.endpoint hw b`: subset and endpoint vertices are distinct (different `Sum` tags). | — |
+| `cfiAdj_aEmpty_endpoint_diff_gadget` | 815-828 | **Cross-gadget non-adjacency**: `cfiAdj (a_∅^v) (e^b_{v'→w}) = 0` when `v ≠ v'`. | — |
+| `cfiAdj_bridge` | 830-846 | **The bridge edge**: `cfiAdj (e^b_{v→w}) (e^b_{w→v}) = 1` — same-parity endpoints at neighbouring gadgets pointing toward each other. | — |
+| `IsCFI'.seedVertex` | 859-863 | §13.3 The `Fin n` vertex corresponding to the seed `a_∅^v` for an `IsCFI'` witness — what the cascade individualizes. | Definition |
+| `IsCFI'.endpointVertex` | 865-869 | §13.3 The `Fin n` vertex corresponding to `e^b_{v→w}` for an `IsCFI'` witness — the endpoints the cascade probes. | Definition |
+| `e_seedVertex` | 875-879 | Bijection round-trip: `h.e (h.seedVertex v) = h.H.aEmpty v`. | `@[simp]` |
+| `e_endpointVertex` | 881-886 | Bijection round-trip: `h.e (h.endpointVertex hw b) = h.H.endpoint hw b`. | `@[simp]` |
+| `seedVertex_ne_endpointVertex` | 888-898 | Seed and endpoint vertices are distinct in `Fin n` (their abstract counterparts have different `Sum` tags). | — |
+| `adj_seed_endpoint_false` | 913-919 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w false) = 0`. | — |
+| `adj_seed_endpoint_true` | 921-927 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w true) = 1`. | — |
+| `adj_endpoint_seed_false` | 929-935 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w false) (seedVertex v) = 0`. | — |
+| `adj_endpoint_seed_true` | 937-943 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w true) (seedVertex v) = 1`. | — |
+| `individualizedColouring_singleton_self` | 1009-1012 | Individualizing a single seed gives it colour `seed.val + 1`. | `@[simp]` |
+| `individualizedColouring_singleton_other` | 1014-1018 | Under a singleton individualization, every non-seed vertex gets colour `0`. | `@[simp]` |
+| `individualizedColouring_eq_iff_of_mem` | 1145-1161 | Multi-seed uniqueness: under `individualizedColouring n S`, for `v ∈ S` a vertex shares v's colour iff it equals v. Generalises the singleton form to arbitrary S. | — |
+| `allSeeds` | 1167-1174 | §13.8 The cascade individualization set `{seedVertex v : v ∈ Fin m}` — one seed per base vertex; the witness used in `cfi_cascades_polynomially`. | Definition |
+| `seedVertex_injective` | 1176-1194 | `seedVertex` is injective: distinct base vertices map to distinct `Fin n` indices. | — |
+| `seedVertex_mem_allSeeds` | 1196-1199 | Every `seedVertex v` lies in `allSeeds`. | — |
+| `allSeeds_card` | 1201-1207 | `|allSeeds| = h.baseSize`; with `six_baseSize_le` the cascade individualization has at most n/6 vertices. | `@[simp]` |
+| `adj_endpointVertex_eq_one_iff` | 1506-1528 | §13.12 Endpoint-endpoint adjacency characterisation: two endpoints are adjacent iff they form a bridge pair (`v_a = w_b ∧ w_a = v_b ∧ b_a = b_b`). | — |
+| `adj_seedVertex_eq_one_iff` | 1530-1605 | §13.12 Seed-adjacency characterisation: a vertex is adjacent to `seedVertex w` iff it is a b=true endpoint in gadget w. Key structural fact for the cascade's no-match preconditions. | — |
+| `subset` | 1727-1732 | §13.14 The CFI vertex `a_S^v`: the subset vertex at gadget v with even subset S ⊆ N(v). Generalises `aEmpty v` (the S = ∅ case). | Definition |
+| `IsCFI'.subsetVertex` | 1785-1791 | §13.14 The `Fin n` vertex for `a_S^v`. Generalises `seedVertex v` (the empty-subset case). | Definition |
+| `e_subsetVertex` | 1797-1803 | Bijection round-trip: `h.e (subsetVertex hS) = subset hS`. | `@[simp]` |
+| `adj_subsetVertex_eq_one_iff` | 1851-1904 | §13.14 Subset-adjacency characterisation: `adj u (subsetVertex_{v'} hS') = 1` iff u is an endpoint at v' whose parity satisfies `(w' ∈ S') ⊕ b`. Generalises `adj_seedVertex_eq_one_iff` (S' = ∅). | — |
+| `IsCFI'.adj_symm` | 2103-2107 | §13.16.5 CFI adjacency is symmetric at the `Fin n` level: `adj.adj i j = adj.adj j i`. | — |
+| `OddDegree` | 2633-2636 | §13.21 Odd-degree CFI base: every base vertex has odd degree, ensuring no even subset of N(v) is saturated. Hypothesis for the axiom-free cascade (covers K₄, K₃,₃, Petersen). | Definition |
+| `exists_witness_of_oddDegree` | 2638-2659 | §13.21 Under `OddDegree`, every even subset of N(v) has a strict non-element y ∈ N(v) \ S — the subset-distinction witness. | — |
+| `cfi_cascades_polynomially_oddDeg` | 2971-3175 | §13.24 M4 — for OddDegree CFI graphs, `warmRefine adj P χ_{allSeeds}` is `Discrete`; discharges `CascadesAt` (the cascade axiom) axiom-free at depth `cfi_depth_bound h`. | — |
+| `theorem_1_HOR_cfi_oddDeg` | 3177-3196 | **Tier-1 CFI orbit recovery.** Theorem 1 for OddDegree CFI graphs, axiom-free: orbit partition coincides with the warm-refined colouring at depth ≤ baseSize, conditional only on `OddDegree`. | — |
 
 **§15 — Stage 3: gadget-flip automorphisms (the `Z₂^β` generators).** *We build the generator
 *existence* (the cycle-space flips), not the full `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` iso — the hard
@@ -348,28 +341,28 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `triFlip_isAut_check` | **Phase-0 crux:** the triangle gadget flip preserves `cfiAdj` on all 18×18 pairs (`decide`) — validates cycle-flip-is-automorphism on the smallest case before the general Phase-2 proof. | — |
 | `triFlip_nontrivial` | Phase-0 smoke test: the triangle gadget flip moves some vertex — a nontrivial `CFI(triangle)` automorphism. | — |
 
-| `CFIBase.flipSet_subset` | 3303-3306 | The flip set is a set of neighbours: `flipSet F v ⊆ N(v)`. | — |
-| `CFIBase.mem_flipSet` | 3308-3311 | Membership in the flip set: `w ∈ flipSet F v ↔ w ∈ N(v) ∧ F v w`. | `@[simp]` |
-| `CFIBase.xorF` | 3339-3341 | **(CFI-cov.2)** Pointwise XOR of two flip-edge indicators — the cycle-space `Z₂` sum. | Definition |
-| `CFIBase.flipSet_xorF` | 3343-3351 | **(CFI-cov.2)** The flip-set of an XOR is the symmetric difference of the flip-sets: `flipSet (xorF F F') v = flipSet F v ∆ flipSet F' v`. The reusable core of the cycle-space sum. | — |
-| `CFIBase.even_xorF` | 3353-3360 | **(CFI-cov.2)** Even flip-subgraphs stay even under `xorF` (symmetric-difference preserves even cardinality, via `card_symmDiff_mod_two`). | — |
-| `CFIBase.CycleSpace` | 3362-3365 | **(CFI-cov.2) The cycle space `Z₂^β`**: symmetric, even flip-subgraphs `F` — the index set of the gauge flips `cfiFlip F` (the `Z₂^β` factor of `Aut(CFI(H))`). | Definition |
-| `CFIBase.cycleSpace_xorF` | 3367-3370 | **(CFI-cov.2)** The cycle space is closed under the `Z₂` sum `xorF` (symmetric + even both preserved). | — |
-| `CFIBase.cycleSpace_const_false` | 3372-3376 | **(CFI-cov.2)** The empty flip-subgraph (zero) lies in the cycle space. | — |
-| `CFIBase.cfiFlip_endpoint_swap` | 3497-3506 | **C1b.0.** The flip swaps the parity-pair `e^0_{v→w}/e^1_{v→w}` iff `F v w = true` (the swap companion of `cfiFlip_endpoint`). | — |
-| `CFIBase.cfiFlip_xorF` | 3524-3539 | **(CFI-cov.3) Gauge flip is a homomorphism on the cycle space:** `cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'` (endpoint: Bool-xor assoc/comm; subset: symmDiff assoc/comm via `flipSet_xorF`). The `Z₂^β`-factor group structure. | — |
-| `CFIBase.cfiFlip_const_false` | 3541-3552 | **(CFI-cov.3)** The zero subgraph is the identity flip: `cfiFlip (fun _ _ => false) = id` (cycle-space zero ↦ identity). | — |
-| `CFIBase.triEdge_symm` | 3579-3581 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
-| `CFIBase.triEdge_apex` | 3583-3585 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
-| `CFIBase.triEdge_cyclic` | 3587-3589 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
-| `CFIBase.triEdge_iff` | 3591-3595 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
-| `CFIBase.flipSet_triEdge_other` | 3614-3624 | **D-locality.** Off the triangle `{v,w,u}` the triangle's flip set is empty, so the triangle flip fixes every other gadget. | — |
-| `CFIBase.evenPermEdge_symm` | 3677-3680 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
-| `CFIBase.evenPermEdge_iff_of_mem` | 3682-3696 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
-| `CFIBase.flipSet_evenPermEdge_of_fixed` | 3710-3719 | **D-locality (triangle-free bases).** At a `σ`-fixed vertex the permutation-cycle flip set is empty, so the cycle flip avoids every fixed gadget. | — |
-| `IsCFI'.cfiFlipAut_swaps_endpointVertex` | 3883-3895 | **C1b.0 (lifted to `Fin n`).** `cfiFlipAut F` swaps `endpointVertex hw false ↔ true` iff `F v w = true` — the foundational decision-pair swap C1b.1 keys on. | — |
-| `IsCFI'.cfiFlipAut_xorF` | 3899-3907 | **(CFI-cov.3) The lifted gauge-flip homomorphism:** `cfiFlipAut (xorF F F') = cfiFlipAut F * cfiFlipAut F'` (the `Fin n` form of `cfiFlip_xorF` via `e_cfiFlipAut`). So `F ↦ cfiFlipAut F` is a group homomorphism `(Z₂^β, xorF) → Equiv.Perm (Fin n)`, image the gauge group. | — |
-| `IsCFI'.cfiFlipAut_one` | 3909-3915 | **(CFI-cov.3)** The zero gauge flip is the identity: `cfiFlipAut (fun _ _ => false) = 1` — the homomorphism preserves the unit. | — |
+| `CFIBase.flipSet_subset` | 3257-3260 | The flip set is a set of neighbours: `flipSet F v ⊆ N(v)`. | — |
+| `CFIBase.mem_flipSet` | 3262-3265 | Membership in the flip set: `w ∈ flipSet F v ↔ w ∈ N(v) ∧ F v w`. | `@[simp]` |
+| `CFIBase.xorF` | 3293-3295 | **(CFI-cov.2)** Pointwise XOR of two flip-edge indicators — the cycle-space `Z₂` sum. | Definition |
+| `CFIBase.flipSet_xorF` | 3297-3305 | **(CFI-cov.2)** The flip-set of an XOR is the symmetric difference of the flip-sets: `flipSet (xorF F F') v = flipSet F v ∆ flipSet F' v`. The reusable core of the cycle-space sum. | — |
+| `CFIBase.even_xorF` | 3307-3314 | **(CFI-cov.2)** Even flip-subgraphs stay even under `xorF` (symmetric-difference preserves even cardinality, via `card_symmDiff_mod_two`). | — |
+| `CFIBase.CycleSpace` | 3316-3319 | **(CFI-cov.2) The cycle space `Z₂^β`**: symmetric, even flip-subgraphs `F` — the index set of the gauge flips `cfiFlip F` (the `Z₂^β` factor of `Aut(CFI(H))`). | Definition |
+| `CFIBase.cycleSpace_xorF` | 3321-3324 | **(CFI-cov.2)** The cycle space is closed under the `Z₂` sum `xorF` (symmetric + even both preserved). | — |
+| `CFIBase.cycleSpace_const_false` | 3326-3330 | **(CFI-cov.2)** The empty flip-subgraph (zero) lies in the cycle space. | — |
+| `CFIBase.cfiFlip_endpoint_swap` | 3451-3460 | **C1b.0.** The flip swaps the parity-pair `e^0_{v→w}/e^1_{v→w}` iff `F v w = true` (the swap companion of `cfiFlip_endpoint`). | — |
+| `CFIBase.cfiFlip_xorF` | 3478-3493 | **(CFI-cov.3) Gauge flip is a homomorphism on the cycle space:** `cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'` (endpoint: Bool-xor assoc/comm; subset: symmDiff assoc/comm via `flipSet_xorF`). The `Z₂^β`-factor group structure. | — |
+| `CFIBase.cfiFlip_const_false` | 3495-3506 | **(CFI-cov.3)** The zero subgraph is the identity flip: `cfiFlip (fun _ _ => false) = id` (cycle-space zero ↦ identity). | — |
+| `CFIBase.triEdge_symm` | 3533-3535 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
+| `CFIBase.triEdge_apex` | 3537-3539 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
+| `CFIBase.triEdge_cyclic` | 3541-3543 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
+| `CFIBase.triEdge_iff` | 3545-3549 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
+| `CFIBase.flipSet_triEdge_other` | 3568-3578 | **D-locality.** Off the triangle `{v,w,u}` the triangle's flip set is empty, so the triangle flip fixes every other gadget. | — |
+| `CFIBase.evenPermEdge_symm` | 3631-3634 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
+| `CFIBase.evenPermEdge_iff_of_mem` | 3636-3650 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
+| `CFIBase.flipSet_evenPermEdge_of_fixed` | 3664-3673 | **D-locality (triangle-free bases).** At a `σ`-fixed vertex the permutation-cycle flip set is empty, so the cycle flip avoids every fixed gadget. | — |
+| `IsCFI'.cfiFlipAut_swaps_endpointVertex` | 3837-3849 | **C1b.0 (lifted to `Fin n`).** `cfiFlipAut F` swaps `endpointVertex hw false ↔ true` iff `F v w = true` — the foundational decision-pair swap C1b.1 keys on. | — |
+| `IsCFI'.cfiFlipAut_xorF` | 3853-3861 | **(CFI-cov.3) The lifted gauge-flip homomorphism:** `cfiFlipAut (xorF F F') = cfiFlipAut F * cfiFlipAut F'` (the `Fin n` form of `cfiFlip_xorF` via `e_cfiFlipAut`). So `F ↦ cfiFlipAut F` is a group homomorphism `(Z₂^β, xorF) → Equiv.Perm (Fin n)`, image the gauge group. | — |
+| `IsCFI'.cfiFlipAut_one` | 3863-3869 | **(CFI-cov.3)** The zero gauge flip is the identity: `cfiFlipAut (fun _ _ => false) = 1` — the homomorphism preserves the unit. | — |
 ## ChainDescent/Scheme.lean
 
 | Name | Line | Description | Notes |
@@ -443,78 +436,78 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `warmRefine_adj_eq` | 1176-1191 | warmRefine form of S2.a: two non-`v` vertices in the same warmRefine cell share adjacency to `v`. | — |
 | `SchurianSchemeGraph.warmRefine_J_eq` | 1193-1217 | Two non-`v` vertices in the same warmRefine cell share J-class membership of `relOfPair v ·` — the coarsest non-trivial Step 2 refinement. | — |
 | `toSchemeProfile` | 1245-1278 | **T2.M4 assembly.** The `SchemeProfile` constructor: from a `SchurianSchemeGraph`, a P-invariance hypothesis, and a `Step2_target` witness, build the abstract `SchemeProfile G.adj P v`. | Definition, `noncomputable` |
-| `schurian_scheme_profile_exists_of_step2` | 1280-1289 | Packages `toSchemeProfile` as the `Nonempty` existence result matching the `schurian_scheme_profile_exists` axiom. | — |
-| `trivialPMatrix` | 1300-1301 | §9.1 The trivial `PMatrix`: every entry is `POE.unknown`. | Definition |
-| `trivialPMatrix_invariant` | 1303-1307 | Every permutation preserves `trivialPMatrix`, discharging the P-invariance hypothesis automatically. | — |
-| `SchurianSchemeGraph.toSchemeProfile_trivialP` | 1309-1316 | Specialisation of `toSchemeProfile` to trivial P: P-invariance is automatic, leaving only `Step2_target`. | Definition, `noncomputable` |
-| `IsSchurianSchemeGraph'` | 1334-1340 | §9.2 Concrete schurian-scheme-graph predicate: `adj` arises as the derived adjacency of some `SchurianSchemeGraph`. | Structure |
-| `theorem_2_HOR_concrete` | 1342-1369 | **Theorem 2 (HOR for schurian scheme graphs), concrete form.** From `IsSchurianSchemeGraph' adj` plus P-invariance plus a `Step2_target` witness, derive the `OrbitPartition ↔ warmRefine` equivalence. | — |
-| `theorem_2_HOR_concrete_trivialP` | 1371-1384 | `theorem_2_HOR_concrete` for trivial P: P-invariance becomes automatic, leaving only `Step2_target`. | — |
-| `trivialSchurianSchemeGraph` | 1398-1410 | §9.3 The trivial 1-vertex schurian scheme graph (empty edge set, identity automorphism only). | Definition |
-| `trivialSchurianSchemeGraph_step2` | 1412-1418 | `Step2_target` holds trivially on the 1-vertex scheme: any two vertices in `Fin 1` are equal. | — |
-| `theorem_2_HOR_trivial` | 1420-1438 | **First fully discharged Theorem 2 instance.** For the trivial 1-vertex scheme with trivial P, the `OrbitPartition ↔ warmRefine` equivalence holds unconditionally. | — |
-| `step2_of_rank_le_one` | 1452-1491 | §9.4 Step 2 for rank ≤ 1 schurian scheme graphs: `vProfile` takes only `0` (at `v`) and `1` (elsewhere), so warmRefine separation suffices. | — |
-| `theorem_2_HOR_concrete_rank_le_one` | 1493-1505 | **Theorem 2 unconditional for rank ≤ 1 schurian scheme graphs** (e.g. K_n). | — |
-| `Step2_at_depth` | 1522-1531 | §10 Depth-parametrised Step 2: iter[k] equality implies `vProfile` equality; a depth-explicit version of `Step2_target`. | Definition |
-| `step2_of_step2_at_depth` | 1533-1541 | `Step2_at_depth G P v k` for `k ≤ n` lifts to `Step2_target G P v`. | — |
-| `ncard_setOf_eq_filter_card` | 1601-1608 | Bridge lemma: for `Fintype` and decidable `p`, `{x | p x}.ncard = (Finset.univ.filter p).card`. Bridges `Set.ncard`-based `schemePart_at` to `Finset.filter.card` outputs. | — |
-| `schemePart_at` | 1610-1634 | §10.1 Recursive partition predicate at depth `k`: depth 0 is `χ_v`-equality; depth `k+1` adds matching (adj, P, depth-`k` class) counts over neighbours. | Definition |
-| `iter_refines_schemePart_at` | 1694-1781 | §10.3 **Inductive refinement.** The `iter[k] χ_v` partition refines `schemePart_at G P v k`; the substantive intersection-number induction step of Step 2. | — |
-| `Step2_converges_at` | 1799-1806 | §10.4 Step 2 convergence at depth `k`: `schemePart_at`-k equivalence implies `vProfile` equality. | Definition |
-| `step2_of_converges_at` | 1808-1819 | Step 2 from convergence plus the inductive step: `Step2_converges_at G P v k` with `k ≤ n` gives `Step2_target G P v`. | — |
-| `schemePart_at_one_to_v` | 1850-1900 | §10.5 **Depth-1 extraction.** For `w, u ≠ v`, `schemePart_at G P v 1 w u` forces `adj w v = adj u v ∧ P w v = P u v`. | — |
-| `RelOfPairDetByAdjP` | 1929-1937 | §10.6 **Depth-1 separation hypothesis**: `(adj v ·, P v ·)` determines `relOfPair v ·` on non-`v` vertices. | Definition |
-| `step2_converges_at_one_of_det` | 1939-1966 | **Step 2 convergence at depth 1 under depth-1 separation.** | — |
-| `step2_of_det` | 1999-2009 | §10.7 `Step2_target G P v` from `RelOfPairDetByAdjP` (lifts depth-1 convergence). | — |
-| `theorem_2_HOR_concrete_of_det` | 2011-2021 | **Theorem 2 unconditional under depth-1 separation** (Petersen-class). | — |
-| `AdjSeparatesRelations` | 2044-2048 | §10.8 Cleaner reformulation of depth-1 separation: `(· ∈ J)` is injective on non-diagonal relations. P-free. | Definition |
-| `relOfPairDetByAdjP_of_adjSeparates` | 2050-2066 | `AdjSeparatesRelations` implies `RelOfPairDetByAdjP`. | — |
-| `adjSeparates_of_rank_two_J_singleton` | 2081-2125 | **`rank = 2` + `|J| = 1` ⇒ `AdjSeparatesRelations`.** The unique element of `J` distinguishes the two non-diagonal relations. | — |
-| `relOfPairDetByAdjP_of_rank_two_J_singleton` | 2127-2134 | Combined: `rank = 2` + `|J| = 1` ⇒ `RelOfPairDetByAdjP`. | — |
-| `theorem_2_HOR_concrete_rank_two_J_singleton` | 2136-2150 | **Theorem 2 unconditional for rank-2 + `|J| = 1` schurian scheme graphs** — covers Petersen, Kneser `K(5,2)`, Johnson `J(5,2)`. Axiom-clean. | — |
-| `Depth2Det` | 2178-2194 | §10.9 **Depth-2 separation predicate**: the depth-2 invariant (adj/`P`-to-`v` plus the depth-1 block-degree vector) determines `relOfPair v ·`. Weaker than `RelOfPairDetByAdjP`. | Definition |
-| `det2_of_det` | 2196-2203 | Depth-1 separation ⇒ depth-2 separation (ignores block-degrees). | — |
-| `step2_converges_at_two_of_det2` | 2205-2234 | **Step 2 convergence at depth 2 under depth-2 separation.** | — |
-| `step2_of_det2` | 2236-2251 | Lifts `Step2_converges_at … 2` to `Step2_target` (`n < 2` vacuous via `Fin` subsingleton). | — |
-| `theorem_2_HOR_concrete_of_det2` | 2253-2265 | **Theorem 2 unconditional under depth-2 separation**; depth-2 analogue of `theorem_2_HOR_concrete_of_det`. | — |
-| `schemePart_at_of_orbit` | 2298-2308 | A v-fixing `P`-preserving automorphism puts `w, u` in the same `schemePart_at k` class (`k ≤ n`). | — |
-| `orbit_of_vProfile_eq` | 2310-2324 | `vProfile`-equality ⟹ `OrbitPartition` (schurian Step 1 plus P-invariance). | — |
-| `ncard_eq_sum_POE` | 2326-2341 | P-value fibering of an `ncard`: the count splits over the finitely-many `POE` values of `P x ·`, dropping `P` from a block-degree count. | — |
-| `IntersectionSeparates` | 2343-2352 | §10.10 **Intersection-number separation hypothesis**: `intersectionNumber j0 j0 ·` distinguishes the non-edge, non-diagonal relations (those adjacency cannot). | Definition |
-| `depth2Det_of_intersectionSeparates` | 2354-2478 | **Discharges `Depth2Det`** for single-edge (`J = {j0}`) schurian scheme graphs with an edge-neighbour of `v` and intersection-number separation. | — |
-| `theorem_2_HOR_concrete_intersectionSeparates` | 2480-2500 | **Theorem 2 unconditional for single-edge schurian scheme graphs with intersection-number separation** — first genuinely rank-≥-3 coverage (e.g. the 7-cycle). Strictly subsumes the rank-2/`|J|=1` case. Axiom-clean. | — |
-| `RelIsolatedAt` | 2528-2535 | §10.11 **Relation-isolation predicate**: relation `l`'s `schemePart_at k` class is exactly `R_l` from `v`. The bootstrap's central object. | Definition |
-| `vProfile_imp_schemePart_at` | 2537-2546 | The free ⊇ direction: same relation with `v` ⟹ same `schemePart_at k` class. | — |
-| `schemePart_at_le` | 2548-2559 | `schemePart_at` is downward-monotone in the depth. | — |
-| `relCommon_eq_intersectionNumber` | 2561-2576 | Common-neighbour count = structure constant: `#{u' : (v,u')∈R_l ∧ (z,u')∈R_m} = p^{relOfPair v z}_{l,m}`. | — |
-| `isolatedCount_eq` | 2578-2634 | **The reusable counting heart**: a depth-`k`-isolated `l` lets `schemePart_at (k+1)` pin the intersection number `p^{·}_{l,j0}` (block-degree into `R_l`, summed over `P`). | — |
-| `relIsolatedAt_one_j0` | 2636-2672 | **Base case**: the edge relation `j0` is isolated at depth 1. | — |
-| `relIsolatedAt_zero` | 2674-2688 | The diagonal `R_0 = {v}` is isolated at every depth. | — |
-| `relIsolatedAt_mono` | 2690-2705 | Isolation is upward-closed in depth (`k ≤ j ≤ n`). | — |
-| `relIsolatedAt_succ` | 2707-2755 | **The bootstrap step**: a finset `Iso` of depth-`k`-isolated relations plus a separation pinning `i` by `(adjacency, counts into Iso)` ⟹ `i` is isolated at depth `k+1`. | — |
-| `convergence_of_all_isolated` | 2757-2766 | All relations isolated at depth `k` ⟹ `Step2_converges_at G P v k` (`schemePart_at k` = `vProfile` partition). | — |
-| `theorem_2_HOR_concrete_of_isolation` | 2768-2787 | **Theorem 2 from an isolation chain** — the general engine. Exhibiting that every relation isolates by depth `k ≤ n` gives Theorem 2 unconditionally. Axiom-clean. | — |
-| `theorem_2_HOR_concrete_intersectionSeparates3` | 2789-2856 | **Theorem 2 for depth-3 single-anchor schemes** (e.g. the 9-cycle) — reaches rank-≥-4 schemes the depth-2 result cannot. Axiom-clean. | — |
+| `schurian_scheme_profile_exists_of_step2` | 1280-1290 | Packages `toSchemeProfile` as the `Nonempty` existence result matching the `schurian_scheme_profile_exists` axiom. | — |
+| `trivialPMatrix` | 1301-1302 | §9.1 The trivial `PMatrix`: every entry is `POE.unknown`. | Definition |
+| `trivialPMatrix_invariant` | 1304-1308 | Every permutation preserves `trivialPMatrix`, discharging the P-invariance hypothesis automatically. | — |
+| `SchurianSchemeGraph.toSchemeProfile_trivialP` | 1310-1317 | Specialisation of `toSchemeProfile` to trivial P: P-invariance is automatic, leaving only `Step2_target`. | Definition, `noncomputable` |
+| `IsSchurianSchemeGraph'` | 1336-1342 | §9.2 Concrete schurian-scheme-graph predicate: `adj` arises as the derived adjacency of some `SchurianSchemeGraph`. | Structure |
+| `theorem_2_HOR_concrete` | 1344-1371 | **Theorem 2 (HOR for schurian scheme graphs), concrete form.** From `IsSchurianSchemeGraph' adj` plus P-invariance plus a `Step2_target` witness, derive the `OrbitPartition ↔ warmRefine` equivalence. | — |
+| `theorem_2_HOR_concrete_trivialP` | 1373-1386 | `theorem_2_HOR_concrete` for trivial P: P-invariance becomes automatic, leaving only `Step2_target`. | — |
+| `trivialSchurianSchemeGraph` | 1400-1412 | §9.3 The trivial 1-vertex schurian scheme graph (empty edge set, identity automorphism only). | Definition |
+| `trivialSchurianSchemeGraph_step2` | 1414-1420 | `Step2_target` holds trivially on the 1-vertex scheme: any two vertices in `Fin 1` are equal. | — |
+| `theorem_2_HOR_trivial` | 1422-1440 | **First fully discharged Theorem 2 instance.** For the trivial 1-vertex scheme with trivial P, the `OrbitPartition ↔ warmRefine` equivalence holds unconditionally. | — |
+| `step2_of_rank_le_one` | 1454-1493 | §9.4 Step 2 for rank ≤ 1 schurian scheme graphs: `vProfile` takes only `0` (at `v`) and `1` (elsewhere), so warmRefine separation suffices. | — |
+| `theorem_2_HOR_concrete_rank_le_one` | 1495-1507 | **Theorem 2 unconditional for rank ≤ 1 schurian scheme graphs** (e.g. K_n). | — |
+| `Step2_at_depth` | 1524-1533 | §10 Depth-parametrised Step 2: iter[k] equality implies `vProfile` equality; a depth-explicit version of `Step2_target`. | Definition |
+| `step2_of_step2_at_depth` | 1535-1543 | `Step2_at_depth G P v k` for `k ≤ n` lifts to `Step2_target G P v`. | — |
+| `ncard_setOf_eq_filter_card` | 1603-1610 | Bridge lemma: for `Fintype` and decidable `p`, `{x | p x}.ncard = (Finset.univ.filter p).card`. Bridges `Set.ncard`-based `schemePart_at` to `Finset.filter.card` outputs. | — |
+| `schemePart_at` | 1612-1636 | §10.1 Recursive partition predicate at depth `k`: depth 0 is `χ_v`-equality; depth `k+1` adds matching (adj, P, depth-`k` class) counts over neighbours. | Definition |
+| `iter_refines_schemePart_at` | 1696-1783 | §10.3 **Inductive refinement.** The `iter[k] χ_v` partition refines `schemePart_at G P v k`; the substantive intersection-number induction step of Step 2. | — |
+| `Step2_converges_at` | 1801-1808 | §10.4 Step 2 convergence at depth `k`: `schemePart_at`-k equivalence implies `vProfile` equality. | Definition |
+| `step2_of_converges_at` | 1810-1821 | Step 2 from convergence plus the inductive step: `Step2_converges_at G P v k` with `k ≤ n` gives `Step2_target G P v`. | — |
+| `schemePart_at_one_to_v` | 1852-1902 | §10.5 **Depth-1 extraction.** For `w, u ≠ v`, `schemePart_at G P v 1 w u` forces `adj w v = adj u v ∧ P w v = P u v`. | — |
+| `RelOfPairDetByAdjP` | 1931-1939 | §10.6 **Depth-1 separation hypothesis**: `(adj v ·, P v ·)` determines `relOfPair v ·` on non-`v` vertices. | Definition |
+| `step2_converges_at_one_of_det` | 1941-1968 | **Step 2 convergence at depth 1 under depth-1 separation.** | — |
+| `step2_of_det` | 2001-2011 | §10.7 `Step2_target G P v` from `RelOfPairDetByAdjP` (lifts depth-1 convergence). | — |
+| `theorem_2_HOR_concrete_of_det` | 2013-2023 | **Theorem 2 unconditional under depth-1 separation** (Petersen-class). | — |
+| `AdjSeparatesRelations` | 2046-2050 | §10.8 Cleaner reformulation of depth-1 separation: `(· ∈ J)` is injective on non-diagonal relations. P-free. | Definition |
+| `relOfPairDetByAdjP_of_adjSeparates` | 2052-2068 | `AdjSeparatesRelations` implies `RelOfPairDetByAdjP`. | — |
+| `adjSeparates_of_rank_two_J_singleton` | 2083-2127 | **`rank = 2` + `|J| = 1` ⇒ `AdjSeparatesRelations`.** The unique element of `J` distinguishes the two non-diagonal relations. | — |
+| `relOfPairDetByAdjP_of_rank_two_J_singleton` | 2129-2136 | Combined: `rank = 2` + `|J| = 1` ⇒ `RelOfPairDetByAdjP`. | — |
+| `theorem_2_HOR_concrete_rank_two_J_singleton` | 2138-2152 | **Theorem 2 unconditional for rank-2 + `|J| = 1` schurian scheme graphs** — covers Petersen, Kneser `K(5,2)`, Johnson `J(5,2)`. Axiom-clean. | — |
+| `Depth2Det` | 2180-2196 | §10.9 **Depth-2 separation predicate**: the depth-2 invariant (adj/`P`-to-`v` plus the depth-1 block-degree vector) determines `relOfPair v ·`. Weaker than `RelOfPairDetByAdjP`. | Definition |
+| `det2_of_det` | 2198-2205 | Depth-1 separation ⇒ depth-2 separation (ignores block-degrees). | — |
+| `step2_converges_at_two_of_det2` | 2207-2236 | **Step 2 convergence at depth 2 under depth-2 separation.** | — |
+| `step2_of_det2` | 2238-2253 | Lifts `Step2_converges_at … 2` to `Step2_target` (`n < 2` vacuous via `Fin` subsingleton). | — |
+| `theorem_2_HOR_concrete_of_det2` | 2255-2267 | **Theorem 2 unconditional under depth-2 separation**; depth-2 analogue of `theorem_2_HOR_concrete_of_det`. | — |
+| `schemePart_at_of_orbit` | 2300-2310 | A v-fixing `P`-preserving automorphism puts `w, u` in the same `schemePart_at k` class (`k ≤ n`). | — |
+| `orbit_of_vProfile_eq` | 2312-2326 | `vProfile`-equality ⟹ `OrbitPartition` (schurian Step 1 plus P-invariance). | — |
+| `ncard_eq_sum_POE` | 2328-2343 | P-value fibering of an `ncard`: the count splits over the finitely-many `POE` values of `P x ·`, dropping `P` from a block-degree count. | — |
+| `IntersectionSeparates` | 2345-2354 | §10.10 **Intersection-number separation hypothesis**: `intersectionNumber j0 j0 ·` distinguishes the non-edge, non-diagonal relations (those adjacency cannot). | Definition |
+| `depth2Det_of_intersectionSeparates` | 2356-2480 | **Discharges `Depth2Det`** for single-edge (`J = {j0}`) schurian scheme graphs with an edge-neighbour of `v` and intersection-number separation. | — |
+| `theorem_2_HOR_concrete_intersectionSeparates` | 2482-2502 | **Theorem 2 unconditional for single-edge schurian scheme graphs with intersection-number separation** — first genuinely rank-≥-3 coverage (e.g. the 7-cycle). Strictly subsumes the rank-2/`|J|=1` case. Axiom-clean. | — |
+| `RelIsolatedAt` | 2530-2537 | §10.11 **Relation-isolation predicate**: relation `l`'s `schemePart_at k` class is exactly `R_l` from `v`. The bootstrap's central object. | Definition |
+| `vProfile_imp_schemePart_at` | 2539-2548 | The free ⊇ direction: same relation with `v` ⟹ same `schemePart_at k` class. | — |
+| `schemePart_at_le` | 2550-2561 | `schemePart_at` is downward-monotone in the depth. | — |
+| `relCommon_eq_intersectionNumber` | 2563-2578 | Common-neighbour count = structure constant: `#{u' : (v,u')∈R_l ∧ (z,u')∈R_m} = p^{relOfPair v z}_{l,m}`. | — |
+| `isolatedCount_eq` | 2580-2636 | **The reusable counting heart**: a depth-`k`-isolated `l` lets `schemePart_at (k+1)` pin the intersection number `p^{·}_{l,j0}` (block-degree into `R_l`, summed over `P`). | — |
+| `relIsolatedAt_one_j0` | 2638-2674 | **Base case**: the edge relation `j0` is isolated at depth 1. | — |
+| `relIsolatedAt_zero` | 2676-2690 | The diagonal `R_0 = {v}` is isolated at every depth. | — |
+| `relIsolatedAt_mono` | 2692-2707 | Isolation is upward-closed in depth (`k ≤ j ≤ n`). | — |
+| `relIsolatedAt_succ` | 2709-2757 | **The bootstrap step**: a finset `Iso` of depth-`k`-isolated relations plus a separation pinning `i` by `(adjacency, counts into Iso)` ⟹ `i` is isolated at depth `k+1`. | — |
+| `convergence_of_all_isolated` | 2759-2768 | All relations isolated at depth `k` ⟹ `Step2_converges_at G P v k` (`schemePart_at k` = `vProfile` partition). | — |
+| `theorem_2_HOR_concrete_of_isolation` | 2770-2789 | **Theorem 2 from an isolation chain** — the general engine. Exhibiting that every relation isolates by depth `k ≤ n` gives Theorem 2 unconditionally. Axiom-clean. | — |
+| `theorem_2_HOR_concrete_intersectionSeparates3` | 2791-2858 | **Theorem 2 for depth-3 single-anchor schemes** (e.g. the 9-cycle) — reaches rank-≥-4 schemes the depth-2 result cannot. Axiom-clean. | — |
 
-| `occursFromV` | 2876-2882 | §10.12 — The relations that actually occur from `v` (non-empty blocks `R_l`); the honest carrier for the isolation closure, keeping its saturation depth `≤ n`. | Definition, `noncomputable` |
-| `mem_occursFromV` | 2884-2887 | Membership criterion: `l` occurs from `v` iff some `w` has `relOfPair v w = l`. | — |
-| `zero_mem_occursFromV` | 2889-2891 | The diagonal relation `R₀` always occurs from `v`. | — |
-| `occursFromV_card_le` | 2893-2896 | At most `n` relations occur from `v` — the bound that holds the closure depth at `≤ n`. | — |
-| `IsoPinned` | 2898-2906 | §10.12 — `i` is uniquely pinned by `Iso`: the only non-diagonal relation with its `(edge-membership, intersection-counts into Iso)` signature, exactly the `hsep` hypothesis of `relIsolatedAt_succ`. | Definition |
-| `isolationStep` | 2908-2914 | §10.12 — One round of the isolation closure: keep `Iso` and add every relation occurring from `v` that is pinned by `Iso`. The extensive operator driving the saturation engine. | Definition, `noncomputable` |
-| `mem_isolationStep` | 2916-2923 | Membership in one closure round: already isolated, or occurring from `v` and newly pinned. | — |
-| `subset_isolationStep` | 2925-2929 | The closure round is extensive (`Iso ⊆ isolationStep`), feeding the generic saturation engine. | — |
-| `isolationStep_subset_occursFromV` | 2931-2939 | The closure round preserves the `occursFromV` bound, so the engine saturates within `≤ n` steps. | — |
-| `relIsolatedAt_of_not_occurs` | 2941-2947 | Relations that never occur from `v` are vacuously isolated at any depth. | — |
-| `stage_relIsolatedAt` | 2949-2986 | **Stage lemma (closure ⇒ isolation engine).** Every relation in the `m`-th closure round `isolationStep^[m] {0, j0}` is isolated at depth `m + 1`, turning the saturated closure into full isolation. | — |
-| `EdgeGenerates` | 2988-2995 | §10.12 — The one structural hypothesis replacing the rank ladder: the isolation closure of `{R₀, R_{j0}}` reaches every relation occurring from `v`. The scheme-graph realisation of the seal's **D1**. | Definition |
-| `theorem_2_HOR_of_edgeGenerates` | 2997-3048 | **General convergence — Theorem 2 from `EdgeGenerates`.** Covers every single-edge schurian scheme graph whose edge relation generates the scheme, with no per-rank separation data: the saturation engine plus stage lemma yield orbit recovery at depth `≤ n`. | — |
-| `IsoPinned.mono` | 3073-3082 | Pinning is monotone in the isolated set: a uniquely-pinned relation stays pinned under any larger `Iso ⊇ Iso1`, letting a graded chain feed the closure's growing fixpoint. | — |
-| `PPolynomial` | 3084-3109 | §10.13 — A P-polynomial (metric / distance-regular) schurian scheme w.r.t. edge `j0`: relations form a distance ladder `R 0,…,R rank` with a tridiagonal intersection array and nonzero subdiagonal. The abstract form of "distance-regular". | Structure |
-| `pPolynomial_pinned` | 3111-3143 | The metric pinning lemma: in a P-polynomial scheme, distance `R k` (`k ≥ 2`) is uniquely pinned among non-diagonal relations by its counts into the strictly-closer distances `{R 0,…,R (k−1)}`. | — |
-| `edgeGenerates_of_pPolynomial` | 3145-3197 | **EdgeGenerates for every P-polynomial scheme.** The distance ladder walks out the isolation closure (each `R k` lands once all closer distances do), so the closure contains every relation. | — |
-| `theorem_2_HOR_of_pPolynomial` | 3199-3220 | **General convergence for the metric class — Theorem 2 for every P-polynomial schurian scheme graph.** One theorem covering the entire distance-regular family (cycles, Johnson, Hamming, all DRGs) with no per-scheme separation data; the P-polynomial structure discharges `EdgeGenerates`, which the engine turns into orbit recovery. | — |
-| `schemeEquiv_warmRefine_of_pPolynomial` | 3222-3245 | **(EOL scheme leg — bridge CLOSED) The block of `v` is refinement-visible.** On a P-polynomial schurian scheme graph, same `warmRefine` cell (after individualizing `v`) ⟹ same `schemeEquiv I` block. Composes recovery (`theorem_2_HOR_of_pPolynomial`: cell ⟹ `OrbitPartition adj P {v}`) with `schemeEquiv_graphOrbit` (drop the P-clause via `h.matching`). So a `ClosedSubset`'s block is a **union of `warmRefine` cells** — scheme-imprimitivity ⟹ refinement-visible split, the ingredient for "non-cascade ⟹ primitive". | — |
+| `occursFromV` | 2878-2884 | §10.12 — The relations that actually occur from `v` (non-empty blocks `R_l`); the honest carrier for the isolation closure, keeping its saturation depth `≤ n`. | Definition, `noncomputable` |
+| `mem_occursFromV` | 2886-2889 | Membership criterion: `l` occurs from `v` iff some `w` has `relOfPair v w = l`. | — |
+| `zero_mem_occursFromV` | 2891-2893 | The diagonal relation `R₀` always occurs from `v`. | — |
+| `occursFromV_card_le` | 2895-2898 | At most `n` relations occur from `v` — the bound that holds the closure depth at `≤ n`. | — |
+| `IsoPinned` | 2900-2908 | §10.12 — `i` is uniquely pinned by `Iso`: the only non-diagonal relation with its `(edge-membership, intersection-counts into Iso)` signature, exactly the `hsep` hypothesis of `relIsolatedAt_succ`. | Definition |
+| `isolationStep` | 2910-2916 | §10.12 — One round of the isolation closure: keep `Iso` and add every relation occurring from `v` that is pinned by `Iso`. The extensive operator driving the saturation engine. | Definition, `noncomputable` |
+| `mem_isolationStep` | 2918-2925 | Membership in one closure round: already isolated, or occurring from `v` and newly pinned. | — |
+| `subset_isolationStep` | 2927-2931 | The closure round is extensive (`Iso ⊆ isolationStep`), feeding the generic saturation engine. | — |
+| `isolationStep_subset_occursFromV` | 2933-2941 | The closure round preserves the `occursFromV` bound, so the engine saturates within `≤ n` steps. | — |
+| `relIsolatedAt_of_not_occurs` | 2943-2949 | Relations that never occur from `v` are vacuously isolated at any depth. | — |
+| `stage_relIsolatedAt` | 2951-2988 | **Stage lemma (closure ⇒ isolation engine).** Every relation in the `m`-th closure round `isolationStep^[m] {0, j0}` is isolated at depth `m + 1`, turning the saturated closure into full isolation. | — |
+| `EdgeGenerates` | 2990-2997 | §10.12 — The one structural hypothesis replacing the rank ladder: the isolation closure of `{R₀, R_{j0}}` reaches every relation occurring from `v`. The scheme-graph realisation of the seal's **D1**. | Definition |
+| `theorem_2_HOR_of_edgeGenerates` | 2999-3050 | **General convergence — Theorem 2 from `EdgeGenerates`.** Covers every single-edge schurian scheme graph whose edge relation generates the scheme, with no per-rank separation data: the saturation engine plus stage lemma yield orbit recovery at depth `≤ n`. | — |
+| `IsoPinned.mono` | 3075-3084 | Pinning is monotone in the isolated set: a uniquely-pinned relation stays pinned under any larger `Iso ⊇ Iso1`, letting a graded chain feed the closure's growing fixpoint. | — |
+| `PPolynomial` | 3086-3111 | §10.13 — A P-polynomial (metric / distance-regular) schurian scheme w.r.t. edge `j0`: relations form a distance ladder `R 0,…,R rank` with a tridiagonal intersection array and nonzero subdiagonal. The abstract form of "distance-regular". | Structure |
+| `pPolynomial_pinned` | 3113-3145 | The metric pinning lemma: in a P-polynomial scheme, distance `R k` (`k ≥ 2`) is uniquely pinned among non-diagonal relations by its counts into the strictly-closer distances `{R 0,…,R (k−1)}`. | — |
+| `edgeGenerates_of_pPolynomial` | 3147-3199 | **EdgeGenerates for every P-polynomial scheme.** The distance ladder walks out the isolation closure (each `R k` lands once all closer distances do), so the closure contains every relation. | — |
+| `theorem_2_HOR_of_pPolynomial` | 3201-3222 | **General convergence for the metric class — Theorem 2 for every P-polynomial schurian scheme graph.** One theorem covering the entire distance-regular family (cycles, Johnson, Hamming, all DRGs) with no per-scheme separation data; the P-polynomial structure discharges `EdgeGenerates`, which the engine turns into orbit recovery. | — |
+| `schemeEquiv_warmRefine_of_pPolynomial` | 3224-3247 | **(EOL scheme leg — bridge CLOSED) The block of `v` is refinement-visible.** On a P-polynomial schurian scheme graph, same `warmRefine` cell (after individualizing `v`) ⟹ same `schemeEquiv I` block. Composes recovery (`theorem_2_HOR_of_pPolynomial`: cell ⟹ `OrbitPartition adj P {v}`) with `schemeEquiv_graphOrbit` (drop the P-clause via `h.matching`). So a `ClosedSubset`'s block is a **union of `warmRefine` cells** — scheme-imprimitivity ⟹ refinement-visible split, the ingredient for "non-cascade ⟹ primitive". | — |
 ## ChainDescent/CascadeOracle.lean
 
 The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chain-descent-cascade-oracle-lean-brief.md`). Builds axiom-clean (only `refineStep`/`refineStep_iff` + Lean foundationals), no `sorry`. Phase A = soundness/validity, Phase B = the completeness reduction (wired to the axiom-free orbit-recovery theorems), Phase C = the residual obligations: verdict iso-invariance is *discharged conditionally* (`verdictIsoInvariant_of_complete` — it reduces to localisation), and localisation is *split* into (1a) bounded-depth recoverability — **proved** on the cascade class (`RecoverableByDepth` + `recoverableByDepth_cfi`/`_scheme`, anchored by `cellsAreOrbits_of_discrete`) — and (1b) intermediate-to-deep bridging, **open but not GI ∈ P** (cascade-class construction correctness). Only general-class completeness is the GI ∈ P obligation. §C.0 also proves the deferred-decisions foundation `real_stays_real`.

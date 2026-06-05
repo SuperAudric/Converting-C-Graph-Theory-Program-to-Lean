@@ -531,14 +531,21 @@ bearing for the depth-bound API).
   `def cfi_depth_bound h := h.baseSize`.
 - `cfi_depth_bound_le` — was an axiom; **discharged in M1** as
   `Nat.le_refl _`.
-- `cfi_cascades_polynomially` — the cascade lemma proper. **The sole
-  remaining Tier-1 axiom.** Discharging it is M2-M4 (multi-week):
-  gadget-level distinguishability + bridge propagation + assembly.
+- `cfi_cascades_polynomially` — the general (any-connected-base)
+  cascade lemma proper. **Retired (2026-06-05):** it was a citation
+  placeholder (Cai-Fürer-Immerman) that nothing live consumed, and
+  the project's live CFI witness is the **axiom-free**
+  `cfi_cascades_polynomially_oddDeg` / `theorem_1_HOR_cfi_oddDeg`
+  (M4, §22), which the oracles use. The general even-degree case is
+  no longer *stated* as a conditional theorem here; re-add it as an
+  explicit citation if ever needed. CFI is now a *witness* class
+  (declassing), so the unconditional odd-degree form suffices.
 
 The Tier 2 analogue (`IsSchurianSchemeGraph`,
-`schurian_scheme_profile_exists`) still lives in `ChainDescent.lean
-§18` and uses an abstract Prop; it'll be relocated similarly once
-its concrete-scheme-based predicate is built. -/
+`schurian_scheme_profile_exists`) has likewise been retired from
+`ChainDescent.lean §18` — the concrete `AssociationScheme` /
+`SchurianSchemeGraph` machinery in `ChainDescent/Scheme.lean`
+replaces it. The project now declares **no custom axioms**. -/
 
 /-- **Cascade-depth function for CFI graphs.** Concretely defined as
 `h.baseSize` — the cascade depth is bounded by the number of base
@@ -562,51 +569,16 @@ axiom. -/
 theorem cfi_depth_bound_le {n : Nat} {adj : AdjMatrix n} (h : IsCFI' adj) :
     cfi_depth_bound h ≤ h.baseSize := Nat.le_refl _
 
-/-- **Fact A (polynomial-depth form).** A CFI graph cascades at depth
-`cfi_depth_bound h`. Stated using the concrete `IsCFI'` structure;
-combined with `cfi_depth_bound_le`, gives orbit recovery at depth
-`≤ h.baseSize`.
-
-Becomes a theorem once the Cai-Fürer-Immerman cascade argument is
-formalised in Lean (Stage 4 of the CFI program). -/
-axiom cfi_cascades_polynomially {n : Nat} {adj : AdjMatrix n}
-    (h : IsCFI' adj) (P : PMatrix n) :
-    CascadesAt adj P (cfi_depth_bound h)
-
-/-- **Theorem 1 (CFI form, polynomial-depth).** A CFI graph admits
-orbit recovery at depth `cfi_depth_bound h ≤ h.baseSize`. Conditional
-on the Tier-1 placeholder axioms (`cfi_depth_bound`,
-`cfi_depth_bound_le`, `cfi_cascades_polynomially`). The depth bound
-references the witness `h` (not just `n`), so the result is strictly
-tighter than the axiom-free `theorem_1_HOR_at_n`. -/
-theorem theorem_1_HOR_cfi {n : Nat} {adj : AdjMatrix n}
-    (h : IsCFI' adj) (P : PMatrix n) :
-    ∃ S : Finset (Fin n),
-      S.card ≤ cfi_depth_bound h ∧
-      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
-      ∀ v w,
-        OrbitPartition adj P S v w ↔
-        warmRefine adj P (individualizedColouring n S) v =
-          warmRefine adj P (individualizedColouring n S) w :=
-  theorem_1_HOR_at_depth (cfi_cascades_polynomially h P)
-
-/-- **Corollary (baseSize bound).** Combining `theorem_1_HOR_cfi` with
-`cfi_depth_bound_le` exposes the simpler `S.card ≤ h.baseSize` claim.
-
-The headline CFI-specific result for downstream consumers that only
-need a `Nat`-shaped bound; see also `theorem_1_HOR_cfi_n_bound` below
-for the further-weakened `≤ n / 6` form via §12's connector. -/
-theorem theorem_1_HOR_cfi_baseSize {n : Nat} {adj : AdjMatrix n}
-    (h : IsCFI' adj) (P : PMatrix n) :
-    ∃ S : Finset (Fin n),
-      S.card ≤ h.baseSize ∧
-      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
-      ∀ v w,
-        OrbitPartition adj P S v w ↔
-        warmRefine adj P (individualizedColouring n S) v =
-          warmRefine adj P (individualizedColouring n S) w := by
-  obtain ⟨S, hS, hd, hpart⟩ := theorem_1_HOR_cfi h P
-  exact ⟨S, le_trans hS (cfi_depth_bound_le h), hd, hpart⟩
+/- **Fact A (general polynomial-depth form) — RETIRED 2026-06-05.**
+The axiom `cfi_cascades_polynomially` (a CFI graph cascades at depth
+`cfi_depth_bound h`, for *any* connected base) and the theorems it
+fed — `theorem_1_HOR_cfi`, `theorem_1_HOR_cfi_baseSize`,
+`theorem_1_HOR_cfi_n_bound` — have been removed. They were a citation
+placeholder (Cai-Fürer-Immerman) with no live consumer; the live,
+**axiom-free** CFI witness is `cfi_cascades_polynomially_oddDeg` /
+`theorem_1_HOR_cfi_oddDeg` (M4, §22), which the cascade/linear oracles
+and the Part-A base-sequence builder all use. Removing this block makes
+the CFI witness fully axiom-clean. -/
 
 /-! ## §11 — Combinatorial: `Fintype.card CFIVertex = cfiVertexCount`
 
@@ -738,12 +710,12 @@ and its base graph's vertex count `h.baseSize = h.m`. Since each
 gadget has at least 6 vertices (`gadgetSize_ge_six`) and there are `m`
 gadgets, the CFI graph has at least `6 m` vertices.
 
-Combined with the depth-bound axiom `cfi_depth_bound h ≤ h.baseSize`
-(§10), this gives `cfi_depth_bound h ≤ n / 6`. So
-`theorem_1_HOR_cfi_n_bound` (below) yields a strictly tighter
-specialisation than `theorem_1_HOR_at_n`: orbit recovery on a CFI
-graph happens at depth `≤ n / 6`, not just `≤ n`. The CFI-specific
-axioms now carry meaningful content. -/
+Combined with the depth bound `cfi_depth_bound h ≤ h.baseSize` (§10),
+this gives `cfi_depth_bound h ≤ n / 6` — the geometric ingredient that
+turned the (now-retired) general CFI orbit-recovery bound into the
+`≤ n / 6` form. `six_baseSize_le` is kept as a standalone connector;
+the axiom-free odd-degree witness (`theorem_1_HOR_cfi_oddDeg`, §22)
+is the live orbit-recovery result. -/
 
 /-- **Connector**: a CFI graph has at least `6 * baseSize` vertices.
 
@@ -775,29 +747,11 @@ theorem IsCFI'.six_baseSize_le {n : Nat} {adj : AdjMatrix n}
   -- Chain: 6 * h.baseSize = 6 * h.m ≤ h.H.cfiVertexCount = n.
   exact hsum.trans h_card.le
 
-/-- **Corollary (n-shaped bound).** Orbit recovery on a CFI graph holds
-at depth `≤ n / 6` — strictly tighter than the trivial `≤ n` bound
-provided axiom-free by `theorem_1_HOR_at_n`.
-
-This is the CFI-specific content: even before discharging Stage 4
-(the cascade lemma), the two CFI-specific axioms already buy us a
-factor-of-6 improvement on the depth bound, just from gadget size
-geometry. Once Stage 4 lands and `cfi_depth_bound h` is realised as
-`tw h.H`, the bound tightens further (treewidth is typically much
-smaller than `m / 6 = n / 36`). -/
-theorem theorem_1_HOR_cfi_n_bound {n : Nat} {adj : AdjMatrix n}
-    (h : IsCFI' adj) (P : PMatrix n) :
-    ∃ S : Finset (Fin n),
-      6 * S.card ≤ n ∧
-      Discrete (warmRefine adj P (individualizedColouring n S)) ∧
-      ∀ v w,
-        OrbitPartition adj P S v w ↔
-        warmRefine adj P (individualizedColouring n S) v =
-          warmRefine adj P (individualizedColouring n S) w := by
-  obtain ⟨S, hS, hd, hpart⟩ := theorem_1_HOR_cfi_baseSize h P
-  refine ⟨S, ?_, hd, hpart⟩
-  calc 6 * S.card ≤ 6 * h.baseSize := by exact Nat.mul_le_mul_left 6 hS
-    _ ≤ n := h.six_baseSize_le
+/- **Corollary (n-shaped bound) — RETIRED 2026-06-05** along with the
+`cfi_cascades_polynomially` chain it depended on (`theorem_1_HOR_cfi_n_bound`,
+the `≤ n / 6` form). The `six_baseSize_le` connector above is retained;
+the live orbit-recovery witness is the axiom-free `theorem_1_HOR_cfi_oddDeg`
+(§22). -/
 
 /-! ## §13 — M2: gadget-level distinguishability lemmas
 

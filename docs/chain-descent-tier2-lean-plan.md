@@ -1,5 +1,15 @@
 # Tier 2 Lean formalization plan — schurian scheme orbit recovery
 
+> **STATUS (2026-06-05): GOAL ACHIEVED — this plan is historical.** The Tier-2
+> axioms this doc set out to discharge (`IsSchurianSchemeGraph`,
+> `schurian_scheme_profile_exists`, and the conditional `theorem_2_HOR`) have been
+> **retired from the project**: the concrete `AssociationScheme` / `SchurianSchemeGraph`
+> machinery in `ChainDescent/Scheme.lean` replaces them, with `toSchemeProfile` /
+> `theorem_2_HOR_concrete` the axiom-free realizations and the de-classed
+> `theorem_2_HOR_of_pPolynomial` covering the whole metric/DRG family. The project now
+> declares **no custom axioms**. Read this doc only for the historical build order and
+> the scheme-machinery design rationale; the "discharge the axioms" goal is done.
+
 Plan for discharging the remaining Tier 2 axioms in Lean. Written after
 Tier 1's OddDegree cascade was fully discharged (2026-05-26); collects
 the Tier 2 state, what carries over, what is fully new, and a

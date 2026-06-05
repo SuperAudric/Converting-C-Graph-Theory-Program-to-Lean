@@ -1279,8 +1279,9 @@ noncomputable def toSchemeProfile (P : PMatrix n) (v : Fin n)
 
 /-- **Existence: SchemeProfile from SchurianSchemeGraph + P-invariance
 + Step 2.** Packaging `toSchemeProfile` as a `Nonempty` existence
-result matches the shape of the `schurian_scheme_profile_exists`
-axiom from `ChainDescent.lean §18`. -/
+result is the concrete, axiom-free replacement for the retired
+`schurian_scheme_profile_exists` placeholder axiom (formerly in
+`ChainDescent.lean §18`). -/
 theorem schurian_scheme_profile_exists_of_step2 (P : PMatrix n) (v : Fin n)
     (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
       IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
@@ -1317,19 +1318,20 @@ noncomputable def SchurianSchemeGraph.toSchemeProfile_trivialP {n : Nat}
 
 /-! ### §9.2 — Concrete predicate + bridge to `theorem_2_HOR`
 
-`IsSchurianSchemeGraph'` is the concrete analogue of the abstract
-axiom `IsSchurianSchemeGraph` from `ChainDescent.lean §18`. A graph
-satisfies it iff it arises as the adjacency of some
+`IsSchurianSchemeGraph'` is the concrete replacement for the retired
+abstract axiom `IsSchurianSchemeGraph` (formerly `ChainDescent.lean
+§18`). A graph satisfies it iff it arises as the adjacency of some
 `SchurianSchemeGraph`.
 
 `theorem_2_HOR_concrete` is the bridge: it produces the
-`theorem_2_HOR`-shaped statement (OrbitPartition ↔ warmRefine
-equality) from the concrete predicate + P-invariance + Step 2
-hypothesis. Once `Step2_target` is discharged unconditionally (the
-remaining open Step 2 work), `theorem_2_HOR_concrete` becomes
-unconditional for concrete schurian schemes, and the abstract
-`schurian_scheme_profile_exists` axiom can be retired (mirroring
-the Tier 1 IsCFI → IsCFI' refactor). -/
+`theorem_2_HOR_of_profile`-shaped statement (OrbitPartition ↔
+warmRefine equality) from the concrete predicate + P-invariance +
+Step 2 hypothesis. With this concrete machinery in place, the abstract
+`IsSchurianSchemeGraph` / `schurian_scheme_profile_exists` axioms (and
+the axiom-conditional `theorem_2_HOR`) have been **retired** — mirroring
+the Tier 1 IsCFI → IsCFI' refactor. Once `Step2_target` is discharged
+unconditionally (the remaining open Step 2 work), `theorem_2_HOR_concrete`
+becomes unconditional for concrete schurian schemes. -/
 
 /-- **Concrete schurian scheme graph predicate.** `adj` is the
 adjacency matrix of some `SchurianSchemeGraph`. -/

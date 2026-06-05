@@ -27,9 +27,25 @@
 > union of `warmRefine` cells = refinement-visible**: scheme-imprimitivity is seen by refinement, the ingredient
 > for "imprimitive ⟹ cascade" / contrapositive "non-cascade ⟹ primitive". **Remaining on the bridge:** the
 > *cascade*/decomposition conclusion proper (refinement-visible block ⟹ the descent decomposes into
-> quotient + fibers in bounded depth) — the lighter combinatorial follow-on. **Then (the capstone, heavy):**
-> primitive high-rank scheme with no abelian regular subgroup ⟹ Johnson/Hamming-type (rank/coherent-algebra;
-> Higman/Hanaki; thin Mathlib support — the harder follow-on).
+> quotient + fibers in bounded depth) — the lighter combinatorial follow-on, **fully provable** from the
+> landed bridge + Mathlib's block layer. **Then (the capstone):** primitive high-rank scheme with no abelian
+> regular subgroup ⟹ Johnson/Hamming-type.
+>
+> **Capstone target pinned + Mathlib reality (2026-06-05 — corrects the "Cameron-free = lighter capstone"
+> reading; see §4 R5 and §5 Approach 3).** The capstone's classical content is **Babai's classification of
+> primitive coherent configurations** (Babai 1981; Sun–Wilmes 2015: a primitive CC of rank ≥ 3 whose
+> automorphism group is super-polynomially large is a Cameron scheme — Johnson/Hamming). **Mathlib has *zero*
+> substrate for it:** no association schemes, coherent configurations, Bose–Mesner algebra, distance-regular
+> graphs, or scheme spectral theory (the "Higman/Hanaki" eigenvalue/character machinery is entirely absent —
+> only Higman's-lemma / HNN false-positive string matches exist). What *is* present is the primitive
+> permutation-group action layer (`Primitive`/`IsPreprimitive`, `Blocks`, `Jordan`, `MultiplePrimitivity`),
+> which is exactly what the **landed bridge** and the **decomposition conclusion** use. So the capstone, like
+> Cameron in Approach 1, must enter as a **named cited hypothesis** (`PrimitiveCCClassification`), not a
+> from-Mathlib proof. **The genuine, axiom-clean deliverable of Approach 3 is therefore the bridge +
+> decomposition (pieces 1), not the capstone.** Approach 3's advantage over Approach 1 is *not* "no deep
+> citation" — it is (a) narrower scope (scheme/CC residuals = the project's WL-stable-partition setting), (b)
+> the clean bridge with no coarsest-equitable gap (provable, landed), and (c) a more *natural* citation
+> (combinatorial CC classification vs group-theoretic O'Nan–Scott/Cameron).
 >
 > Original planning note: this doc plans the item the user surfaced 2026-05-31: the
 > hypothesis that **"a graph that does not decompose into the cascade+abelian
@@ -399,7 +415,8 @@ handed to the empirical/translation track.
    were not before Part A). This is the enabling infrastructure.
 6. **The Tier-2 scheme machinery is a Cameron-free beachhead.** The WL-stable
    partition of a cell **is a coherent configuration / association scheme**; the
-   project already reasons about these (`IsSchurianSchemeGraph`, `RelIsolatedAt`,
+   project already reasons about these (`IsSchurianSchemeGraph'` — the concrete
+   structure that replaced the retired placeholder axiom — `RelIsolatedAt`,
    the depth-1/2/3 isolation bootstrap). On schemes the obstruction classifies
    via *rank / coherent-algebra* arguments (Higman/Hanaki-style) **without**
    importing Cameron — a place to prove a restricted EOL outright (Approach 3).
@@ -461,6 +478,22 @@ gate (§5 step 2) is built to hit these.
   **restricted** EOL (e.g. "primitive of small base ⟹ `A_k`-ish") be proved
   Cameron-*free* further than expected. A from-scratch Mathlib proof of full
   Cameron is out of scope (years of work).
+  - **Scheme-side survey (2026-06-05) — the Approach-3 capstone is *also* uncited
+    in Mathlib.** Re-ran the survey against the pinned Mathlib for the
+    coherent-configuration / scheme classification Approach 3 would cite: **wholly
+    absent** — no `AssociationScheme`, coherent configuration, Bose–Mesner algebra,
+    distance-regular graph, or scheme spectral theory (eigenvalue/multiplicity,
+    Krein/absolute bounds); the project's `AssociationScheme` in `Scheme.lean` is
+    home-grown and carries only `rank`/`intersectionNumber`/`relOfPair`, no spectral
+    layer. The capstone's classical content — *primitive coherent configuration of
+    rank ≥ 3 with super-polynomial Aut ⟹ Cameron (Johnson/Hamming)* — is **Babai
+    (1981) / Sun–Wilmes (2015)**, a deep combinatorial theorem with no Mathlib
+    substrate. **Consequence:** Approach 3's capstone is *not* lighter to formalize
+    than Approach 1's; it too must enter as a **named cited hypothesis**
+    (`PrimitiveCCClassification`). What *is* well-supported (and what the landed
+    bridge uses) is the primitive-group action layer above. The deliverable,
+    fully-axiom-clean part of Approach 3 is the **bridge + decomposition conclusion**,
+    not the capstone.
 
 ---
 
@@ -508,10 +541,15 @@ classification:
   the imprimitive ⟹ cascade contrapositive; this is the genuinely new Lean
   content).
 - **(Cameron, cited)** primitive + large base ⟹ Cameron group — stated as a
-  **named hypothesis** `CameronClassification` (in the spirit of the existing
-  `schurian_scheme_profile_exists`/`cfi_cascades_polynomially` axiomatic
-  placeholders), with a doc note that it is a *true theorem in the literature*,
-  not a project conjecture.
+  **named hypothesis** `CameronClassification`, with a doc note that it is a *true
+  theorem in the literature*, not a project conjecture. **NB (2026-06-05):** the
+  project is now **free of custom axioms** (the former `IsSchurianSchemeGraph` /
+  `schurian_scheme_profile_exists` / `cfi_cascades_polynomially` placeholders were
+  retired once their concrete replacements landed). So `CameronClassification`
+  would be the *first* re-introduced cited hypothesis; prefer a hypothesis carried
+  on the theorem statement (an explicit argument) over a fresh `axiom`, to keep the
+  axiom basis clean and the citation visible at every use site. The same applies to
+  Approach 3's `PrimitiveCCClassification` (Babai/Sun–Wilmes; see §5 Approach 3).
 - **(B2)** a Cameron group's natural action on the cell ⟹ the EOL disjunct 3
   (it *is* the flagged obstruction); plus disjuncts 1/2 for the small/abelian
   cases.
@@ -531,6 +569,26 @@ schemes — the *first concrete instance*, and the analogue of how Tier-2 proved
 schemes before the abstract route. Builds directly on `Scheme.lean` +
 `RelIsolatedAt`. Lower ceiling, no Cameron dependency, fully checkable. Good as
 the **proof-of-concept that the lemma is even true** in a real sub-case.
+
+> **Scope correction (2026-06-05) — what "Cameron-free" buys, precisely.** The
+> capstone classification *primitive scheme of rank ≥ 3 with no abelian regular
+> subgroup ⟹ Johnson/Hamming* is **Babai (1981) / Sun–Wilmes (2015)** on primitive
+> coherent configurations, and Mathlib has **no** scheme/CC substrate (no
+> association schemes, coherent configurations, Bose–Mesner algebra, DRGs, or
+> scheme spectral theory — survey under §4 R5). So the capstone must be a **named
+> cited hypothesis** (`PrimitiveCCClassification`) exactly as Approach 1 cites
+> `CameronClassification`; it is **not** a from-Mathlib proof, and **not** lighter
+> than Approach 1's citation. The real, deliverable, axiom-clean content of
+> Approach 3 is **(i)** the imprimitive ⟹ refinement-visible **bridge** (LANDED)
+> and **(ii)** the **decomposition conclusion** (refinement-visible block ⟹ the
+> descent decomposes into quotient + fibers in bounded depth) — both provable from
+> the project's `AssociationScheme` + Mathlib's block layer. Approach 3 wins over
+> Approach 1 on **scope** (scheme/CC residuals = the WL-stable-partition setting),
+> **bridge cleanliness** (no coarsest-equitable gap), and **citation naturality**
+> (combinatorial CC vs group-theoretic O'Nan–Scott), *not* on avoiding a deep
+> citation. **Implication for sequencing:** the high-value formal work is pieces
+> (i)+(ii); the capstone should be *stated* as a hypothesis and the empirical
+> gate (Approach 2) should precede any attempt to discharge it from scratch.
 
 ---
 

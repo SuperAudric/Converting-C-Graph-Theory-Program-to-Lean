@@ -4023,18 +4023,20 @@ The paper proof (orbit-recovery doc §14.3) routes through:
 
 Lean structure mirrors Tier 1 (§17):
 - §18.1 — `SchemeProfile` structure bundling Steps 1 and 2 as fields.
-- §18.2 — Scheme profile existence axiom + Theorem 2 assembly.
+- §18.2 — Theorem 2 assembly (`theorem_2_HOR_of_profile`).
 
 The full association-scheme machinery (relations `R_0,…,R_d`,
-intersection numbers, schurian property) is not yet in Mathlib —
-multi-week infrastructure work tracked as G5 in the orbit-recovery
-doc §14.5. Here we axiomatise the existence of a `SchemeProfile` so
-the assembly can proceed, exactly as Tier 1 axiomatises
-`cfi_cascade_exists`.
-
-Once the scheme infrastructure lands, `schurian_scheme_profile_exists`
-becomes a theorem — the SchemeProfile fields are constructible from
-the scheme's intersection numbers and the schurian orbit identity.
+intersection numbers, the schurian property, and the `SchemeProfile`
+existence) is now formalised concretely in `ChainDescent/Scheme.lean`
+(the `AssociationScheme` / `SchurianSchemeGraph` structures,
+`toSchemeProfile`, and the de-classed `theorem_2_HOR_of_pPolynomial`
+covering the whole metric / distance-regular family). The earlier
+placeholder axioms `IsSchurianSchemeGraph` /
+`schurian_scheme_profile_exists` and the axiom-conditional unconditional
+form `theorem_2_HOR` have therefore been **retired**; only the
+axiom-free `SchemeProfile` bundle and the `theorem_2_HOR_of_profile`
+assembly remain here, consumed by `Scheme.lean`'s
+`theorem_2_HOR_concrete`.
 -/
 
 /-! ### §18.1 — `SchemeProfile`: the v-profile partition
@@ -4095,40 +4097,17 @@ theorem warm_iff_profile (sp : SchemeProfile adj P v) (w u : Fin n) :
 
 end SchemeProfile
 
-/-! ### §18.2 — Existence axiom + Theorem 2 assembly
+/-! ### §18.2 — Theorem 2 assembly
 
-The existence of a `SchemeProfile` is the load-bearing axiom for
-Tier 2 — the analogue of Tier 1's `cfi_cascade_exists`. It
-encapsulates "this graph is a vertex-transitive schurian scheme
-graph" without committing to a particular formalisation of
-association schemes.
-
-`IsSchurianSchemeGraph` is left as an `axiom`-declared Prop: a
-constant predicate with no introduction rule. Concrete graphs
-(Johnson `J(m,k)`, Hamming `H(d,q)`, distance-transitive DRGs) will
-satisfy it once the scheme infrastructure provides a real
-definition; for now no graph satisfies it, so the existence axiom
-is dormant — it constrains nothing until a real
-`IsSchurianSchemeGraph` proof appears. -/
-
-/-- **Abstract predicate.** Placeholder for "the graph `adj` admits a
-vertex-transitive schurian association scheme that contains its edge
-relation." Declared as an axiom-Prop until the scheme machinery
-lands; full formalization is G5 of the orbit-recovery doc. -/
-axiom IsSchurianSchemeGraph {n : Nat} (adj : AdjMatrix n) : Prop
-
-/-- **Scheme profile existence (Tier 2 Fact A analogue).** For any
-graph satisfying `IsSchurianSchemeGraph` and any vertex `v`, a
-`SchemeProfile adj P v` exists. The witness encodes:
-- the v-profile colouring (which scheme relation each w ≠ v shares
-  with v);
-- the schurian identity (profile classes = Aut_v orbits);
-- the intersection-number lemma (1-WL refines profile).
-
-Becomes a theorem once association-scheme infrastructure lands. -/
-axiom schurian_scheme_profile_exists {n : Nat} {adj : AdjMatrix n}
-    (h : IsSchurianSchemeGraph adj) (P : PMatrix n) (v : Fin n) :
-    Nonempty (SchemeProfile adj P v)
+`theorem_2_HOR_of_profile` turns a `SchemeProfile` witness into the
+depth-1 orbit-recovery equality. The witness itself is produced
+concretely in `ChainDescent/Scheme.lean` (`toSchemeProfile`, built
+from a `SchurianSchemeGraph` plus a Step-2 discharge), so the former
+placeholder axioms (`IsSchurianSchemeGraph`,
+`schurian_scheme_profile_exists`) and the axiom-conditional
+unconditional form (`theorem_2_HOR`) have been retired. This assembly
+lemma is axiom-clean and is the bridge `Scheme.lean`'s
+`theorem_2_HOR_concrete` calls. -/
 
 /-- **Theorem 2 (HOR for schurian scheme graphs), assembly form.**
 
@@ -4147,21 +4126,3 @@ theorem theorem_2_HOR_of_profile {n : Nat} {adj : AdjMatrix n}
   -- OrbitPartition ↔ profile (Step 1 backwards), then profile ↔ warmRefine
   -- (sp.warm_iff_profile backwards).
   (sp.profile_iff_orbit w u).symm.trans (sp.warm_iff_profile w u).symm
-
-/-- **Theorem 2 (HOR for schurian scheme graphs), unconditional form.**
-
-For any graph satisfying `IsSchurianSchemeGraph`, the 1-WL fixpoint
-partition at depth 1 equals the Aut_v orbit partition.
-
-Conditional on `schurian_scheme_profile_exists` (the Tier-2 Fact A
-analogue). The Lean theorem becomes unconditional once the scheme
-infrastructure provides a constructive witness. -/
-theorem theorem_2_HOR {n : Nat} {adj : AdjMatrix n}
-    (h : IsSchurianSchemeGraph adj) (P : PMatrix n) (v : Fin n) :
-    ∀ w u,
-      OrbitPartition adj P {v} w u ↔
-        warmRefine adj P (individualizedColouring n {v}) w =
-          warmRefine adj P (individualizedColouring n {v}) u := by
-  obtain ⟨sp⟩ := schurian_scheme_profile_exists h P v
-  intro w u
-  exact theorem_2_HOR_of_profile sp w u
