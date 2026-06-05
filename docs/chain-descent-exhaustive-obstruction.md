@@ -482,6 +482,42 @@ by orbit).
    mirrors 1-WL counting), since the block is coarser than the orbit — the one realistic shot at closing
    Step 3a unconditionally. (3b) and the A2 probe are the remaining open content of this step.
 
+   **(3b) SCOPING PASS — RESULT (2026-06-05): do NOT build it. It does not de-risk Step 3, and it is not
+   needed.** Four grounded findings:
+   - **(i) The closed-subset quotient is mathematically cleaner than the orbit-graph quotient — but that
+     does not help in Lean.** For a `ClosedSubset I`, the *scheme* quotient `S//I` on the blocks
+     (`schemeEquiv I` classes) is **always** a well-defined association scheme (classical; relations = the
+     `I`-`I` double cosets), with **no** analogue of the `QuotientAdjCompatible` friction that makes
+     `Group.lean §A4`'s orbit-graph `quotientAdj` conditional (well-defined only at discreteness). So the
+     lead "block-system quotient avoids the discreteness condition" is **correct** — mathematically.
+   - **(ii) But materializing *any* quotient is the already-rejected route, and the scheme quotient is the
+     heaviest.** The project faced this exact fork for Tier-3a's `LayerStep` (the §4.2.5 transfer) and
+     **explicitly rejected** the materialized quotient (`tier3a-b1-build-plan.md` §4 Approach A: re-typed
+     `AdjMatrix m` via `Fintype.equivFin`, "`refineStep` cross-size API gap… high risk, likely
+     intractable"), choosing the intrinsic `Fin n` route (Approach B, **landed**: `WitnessUpgrade` /
+     `cascadeComposition` / set-monotonicity). A quotient `AssociationScheme` on the block set is
+     **strictly heavier** than the rejected orbit-graph quotient: it needs the same `Fin n/~ → Fin m`
+     re-indexing **plus** re-establishing all five `AssociationScheme` axioms — including the load-bearing
+     `intersectionNumber_well_defined` — via the double-coset homomorphism theorem, with **zero** Mathlib
+     substrate (no schemes at all; §4 R5 survey). The cleaner math translates to *more* Lean, not less.
+   - **(iii) The intrinsic 3b is gated by the same open content as 3a (Shrikhande-confirmed).** 3b can
+     instead telescope individualization sets (a `LayerChain`: resolve the block/quotient structure, then a
+     fiber) reusing `cascadeComposition`. But the per-layer **block-transfer** step (a block analogue of
+     `LayerStep`) needs block-visibility/recovery at the block layer — exactly the **depth-graded**
+     WL-dimension content the A2-iii/Shrikhande result showed is **not free**. So intrinsic 3b lands
+     **conditional** on that transfer (mirroring `cascadeComposition`'s conditionality on `LayerStep`), not
+     as a closing of Step 3. 3b is **not independently de-riskable** from the A2 open core.
+   - **(iv) And 3b is not needed.** The top-down §12 capstone (`exhaustiveObstruction_scheme`) reaches leg
+     C modulo the cited classification **without** 3a or 3b — it carries `IsPrimitive`, `IsLargeScheme`, and
+     the classification as hypotheses. 3a+3b are the *bottom-up* attempt to **derive** primitive ∧ large
+     from `¬D1` — precisely the substrate-conditional content the project routes around.
+   **Recommendation:** leave 3b unbuilt. The productive paths are (1) bank the §12 capstone (Tier-3 success,
+   modulo cited classification); (2) add a **stated** `non-cascade-at-poly-depth ⟹ IsLargeScheme` bridge so
+   the capstone's antecedent is traceable rather than free-floating (cheaper than 3b, avoids the WL-dim
+   wall); (3) treat the bottom-up route's value as banked (leg-B citation-free L1–L3 + the "no non-consumed
+   abelian species" clarity) — it was never going to close leg C unconditionally (the classification is
+   cited either way).
+
    **A2-i de-risking gate — RESULT (2026-06-05, `Tier2DecompositionExperiment.A2i_BlockVisibility_Probe`):
    INCONCLUSIVE for the hard regime, no counterexample, positive confirmation on examples.**
    *Methodology correction first:* block systems ≡ closed subsets only for a **transitive** `Aut`, so the
