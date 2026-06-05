@@ -3496,4 +3496,16 @@ theorem isPreprimitive_iff_isPrimitive {n : Nat} (S : SchurianScheme n)
       S.toAssociationScheme.IsPrimitive :=
   ⟨isPrimitive_of_isPreprimitive S hne, isPreprimitive_of_isPrimitive S hne⟩
 
+/- **Note on `hne` (every relation occurs) — supply it at the use site; do NOT try to discharge it.**
+The scheme axioms do not force `hne`: `rel_partition` constrains pairs, not relation-occupancy, so a
+phantom empty `R_i` is consistent with `AssociationScheme` (and with `SchurianScheme` — an empty
+relation satisfies the schurian transitivity vacuously). So `hne` is a genuine side-condition, carried
+as an explicit hypothesis here. It is **free in the real application**: in leg C the relations are
+`Aut`-orbitals / 1-WL pair-colours, each containing the pair that generated it, so every relation is
+inhabited by construction — discharge `hne` by handing over that witness pair at the assembly site.
+A previously-attempted `Reduced`-predicate + valency route (`relOccurs_iff_valency_ne_zero`:
+`(∃ v w, rel i v w) ↔ intersectionNumber i i 0 ≠ 0`) only **renames** the obligation — both sides need
+a witness, and the scheme is presented with explicit vertices, so the valency form is no easier to
+discharge. It was reverted as sunk cost; do not reinstate it. -/
+
 end ChainDescent
