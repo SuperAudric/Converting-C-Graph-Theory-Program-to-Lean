@@ -163,4 +163,110 @@ public class PermutationGroupTests
         Assert.False(g.Contains(Cycle(4, 0, 2))); // bare transposition is not in C4
         Assert.False(g.Contains(Cycle(4, 0, 1))); // nor is this one
     }
+
+    // ── Abelian / elementary-abelian predicates ──────────────────────────────
+    // Foundation for the abelian-aware flag classifier (the "F2" fix,
+    // docs/chain-descent-exhaustive-obstruction.md §0.6): an unconsumed abelian
+    // residual (CFI gauge Z_2^d) must be told apart from a non-abelian Tier-2
+    // residual, which an order-only signal cannot do.
+
+    [Fact]
+    public void IsAbelian_TrivialGroup_IsVacuouslyAbelian()
+    {
+        var g = new PermutationGroup(3); // no generators
+        Assert.True(g.IsTrivial);
+        Assert.True(g.IsAbelian);
+        Assert.True(g.IsElementaryAbelian); // exponent 1 divides 2
+    }
+
+    [Fact]
+    public void IsAbelian_CyclicC5_IsAbelianButNotElementary()
+    {
+        var g = new PermutationGroup(5);
+        g.AddGenerator(Cycle(5, 0, 1, 2, 3, 4)); // C5, order 5
+        Assert.Equal(5L, (long)g.Order);
+        Assert.True(g.IsAbelian);
+        Assert.False(g.IsElementaryAbelian); // exponent 5, not 2
+    }
+
+    [Fact]
+    public void IsAbelian_KleinFourZ2xZ2_IsElementaryAbelian()
+    {
+        var g = new PermutationGroup(4);
+        g.AddGenerator(Cycle(4, 0, 1)); // (0 1)
+        g.AddGenerator(Cycle(4, 2, 3)); // (2 3) — disjoint, so commute
+        Assert.Equal(4L, (long)g.Order); // Z_2 × Z_2
+        Assert.True(g.IsAbelian);
+        Assert.True(g.IsElementaryAbelian); // the CFI-gauge signature
+    }
+
+    [Fact]
+    public void IsAbelian_ElementaryAbelianZ2Cubed()
+    {
+        var g = new PermutationGroup(6);
+        g.AddGenerator(Cycle(6, 0, 1));
+        g.AddGenerator(Cycle(6, 2, 3));
+        g.AddGenerator(Cycle(6, 4, 5)); // Z_2^3, order 8
+        Assert.Equal(8L, (long)g.Order);
+        Assert.True(g.IsElementaryAbelian);
+    }
+
+    [Fact]
+    public void IsAbelian_S3_IsNotAbelian()
+    {
+        var g = new PermutationGroup(3);
+        g.AddGenerator(Cycle(3, 0, 1));
+        g.AddGenerator(Cycle(3, 0, 1, 2)); // ⟨(0 1),(0 1 2)⟩ = S3
+        Assert.Equal(6L, (long)g.Order);
+        Assert.False(g.IsAbelian);
+        Assert.False(g.IsElementaryAbelian);
+    }
+
+    [Fact]
+    public void IsAbelian_D4_IsNotAbelian()
+    {
+        var g = new PermutationGroup(4);
+        g.AddGenerator(Cycle(4, 0, 1, 2, 3));               // r
+        g.AddGenerator(Perm.FromCycles(4, new[] { 1, 3 })); // s
+        Assert.Equal(8L, (long)g.Order); // D4
+        Assert.False(g.IsAbelian);
+    }
+
+    // ── Flag classifier (CanonizationFlaggedException.ClassifyFlag) ───────────
+    // The seal's two flag causes, refined by F2 into a trichotomy on the
+    // harvested residual: trivial ⟹ IRblindspot (multipede, no symmetry);
+    // non-trivial abelian ⟹ AbelianUnconsumed (CFI gauge, NOT Cameron);
+    // non-trivial non-abelian ⟹ Tier2Like (the Cameron-section candidate).
+
+    [Fact]
+    public void ClassifyFlag_TrivialResidual_IsIrBlindSpot()
+    {
+        var g = new PermutationGroup(4); // trivial
+        Assert.Equal(FlagKind.IrBlindSpot, CanonizationFlaggedException.ClassifyFlag(g));
+    }
+
+    [Fact]
+    public void ClassifyFlag_NonTrivialAbelianResidual_IsAbelianUnconsumed()
+    {
+        // Z_2^2 — a CFI-gauge-shaped residual. Order-only would mis-tag this
+        // Tier2Like; the abelian test routes it to AbelianUnconsumed instead.
+        var z2sq = new PermutationGroup(4);
+        z2sq.AddGenerator(Cycle(4, 0, 1));
+        z2sq.AddGenerator(Cycle(4, 2, 3));
+        Assert.Equal(FlagKind.AbelianUnconsumed, CanonizationFlaggedException.ClassifyFlag(z2sq));
+
+        // A cyclic (abelian, non-elementary) residual is also AbelianUnconsumed.
+        var c5 = new PermutationGroup(5);
+        c5.AddGenerator(Cycle(5, 0, 1, 2, 3, 4));
+        Assert.Equal(FlagKind.AbelianUnconsumed, CanonizationFlaggedException.ClassifyFlag(c5));
+    }
+
+    [Fact]
+    public void ClassifyFlag_NonTrivialNonAbelianResidual_IsTier2Like()
+    {
+        var s3 = new PermutationGroup(3);
+        s3.AddGenerator(Cycle(3, 0, 1));
+        s3.AddGenerator(Cycle(3, 0, 1, 2));
+        Assert.Equal(FlagKind.Tier2Like, CanonizationFlaggedException.ClassifyFlag(s3));
+    }
 }

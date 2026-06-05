@@ -72,5 +72,9 @@ public partial class GraphCanonTests
         Assert.True(cd.LastNodeCount <= 2,
             $"node count {cd.LastNodeCount} should respect budget 1");
         Assert.NotEqual(FlagKind.None, cd.LastFlagKind);
+        // The exception and the orderer classify the *same* harvested residual,
+        // so their FlagKinds must agree (both route through ClassifyFlag — the
+        // abelian-aware F2 trichotomy, not the old order-only split).
+        Assert.Equal(cd.LastFlagKind, ex.Kind);
     }
 }

@@ -301,6 +301,19 @@ Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.
 > rigidity: CFI cascade depth is governed by `tw(H)` alone, so a rigid *bounded-tw*
 > base consumes its gauge cleanly (the audit corrected an "IR-resistance blocks the
 > gauge" mis-attribution).
+>
+> **F2 fix LANDED in the C# (2026-06-05).** The operational flag classifier now tests
+> abelian-ness: `PermutationGroup.IsAbelian` / `IsElementaryAbelian` (generators
+> pairwise commute / are involutions) drive `CanonizationFlaggedException.ClassifyFlag`,
+> which routes the harvested residual into a **trichotomy** — trivial ⟹ `IrBlindSpot`
+> (multipede), non-trivial **abelian** ⟹ **`AbelianUnconsumed`** (CFI gauge `Z₂^d`,
+> *not* Cameron), non-trivial **non-abelian** ⟹ `Tier2Like` (the leg-C / Cameron
+> candidate). Both the thrown exception and `CanonGraphOrdererChainDescent.LastFlagKind`
+> classify the same residual through this one method, so an unconsumed abelian residual
+> is no longer mis-tagged Cameron-like. Tested deterministically on known groups
+> (Z₂², Z₂³, C₅, S₃, D₄) in `PermutationGroupTests.cs`; the abelian-blind order-only
+> signal is retired. (A deliberate *end-to-end* CFI-over-high-tw flag that exercises the
+> `AbelianUnconsumed` bucket is a follow-on, paired with the Approach-2 battery.)
 
 **Drafting rule for every downstream statement.** "All symmetry removed **or**
 Cameron" (statement 1) is **not** the time bound (statement 2): statement 2 carries

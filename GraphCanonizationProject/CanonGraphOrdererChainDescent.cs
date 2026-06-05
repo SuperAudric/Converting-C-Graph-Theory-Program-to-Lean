@@ -93,12 +93,12 @@ namespace Canonizer
             LastAutomorphisms = result.ResidualGroup;
             LastFlagReason = result.Flagged ? result.FlagReason : null;
             LastFlagKind = result.Flagged
-                ? (result.ResidualGroup.IsTrivial ? FlagKind.IrBlindSpot : FlagKind.Tier2Like)
+                ? CanonizationFlaggedException.ClassifyFlag(result.ResidualGroup)
                 : FlagKind.None;
 
             if (result.Flagged)
                 throw new CanonizationFlaggedException(
-                    result.FlagReason ?? "flagged", result.ResidualGroup.Order);
+                    result.FlagReason ?? "flagged", result.ResidualGroup);
 
             int[] best = result.Matrix!;
             var canonical = new EdgeType[n, n];

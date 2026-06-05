@@ -146,6 +146,44 @@ namespace Canonizer
 
         public bool IsTrivial => Order.IsOne;
 
+        // Whether the group is abelian. A group is abelian iff its generators
+        // pairwise commute, so this is a sound + complete test on `_generators`
+        // (no chain needed). Used to tell a hidden-*abelian* residual (a CFI
+        // gauge Z_2^d the linear/cross-branch harvest would consume — NOT a
+        // Cameron section) apart from a genuinely non-abelian Tier-2 residual:
+        // the "F2" distinction of docs/chain-descent-exhaustive-obstruction.md
+        // §0.6, which an order-only flag signal cannot make.
+        public bool IsAbelian
+        {
+            get
+            {
+                for (int i = 0; i < _generators.Count; i++)
+                    for (int j = i + 1; j < _generators.Count; j++)
+                        if (!Perm.IsIdentity(
+                                Perm.Compose(Perm.Inverse(Perm.Compose(_generators[i], _generators[j])),
+                                             Perm.Compose(_generators[j], _generators[i]))))
+                            return false;
+                return true;
+            }
+        }
+
+        // Whether the group is elementary abelian of exponent 2 (a Z_2^d) —
+        // abelian with every generator an involution (for an abelian group,
+        // g^2 = 1 on the generators forces exponent 2 on the whole group). This
+        // is exactly the CFI gauge group's signature; it pins the
+        // `AbelianUnconsumed` flag cause to the structure the project's harvest
+        // is built to absorb.
+        public bool IsElementaryAbelian
+        {
+            get
+            {
+                if (!IsAbelian) return false;
+                foreach (var g in _generators)
+                    if (!Perm.IsIdentity(Perm.Compose(g, g))) return false;
+                return true;
+            }
+        }
+
         // The base of the computed stabilizer chain.
         public int[] BasePoints
         {
