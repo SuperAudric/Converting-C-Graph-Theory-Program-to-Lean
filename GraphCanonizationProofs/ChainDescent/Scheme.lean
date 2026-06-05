@@ -753,6 +753,17 @@ theorem vProfile_iff_graphOrbit (v w u : Fin n) :
   ⟨G.vProfile_eq_imp_graphOrbit v w u,
    fun h => G.graphOrbit_imp_vProfile_eq h⟩
 
+/-- **(EOL scheme leg, bridge) The block of `v` is a union of graph-Aut orbits.** Graph version of
+`schemeEquiv_schemeOrbit`: a graph automorphism fixing `v` (i.e. `GraphOrbitFixing`) preserves the
+`schemeEquiv I` block, because on a schurian scheme graph every graph automorphism is a scheme
+automorphism (`isAut_imp_isSchemeAut`). So the block system is coarser than the v-stabilized graph-orbit
+partition — the graph-side half of the imprimitivity bridge, ready to compose with orbit recovery. -/
+theorem schemeEquiv_graphOrbit {I : Finset (Fin (G.scheme.rank + 1))} {v w u : Fin n}
+    (h : GraphOrbitFixing G.toSchemeGraph.adj v w u) :
+    G.scheme.schemeEquiv I v w ↔ G.scheme.schemeEquiv I v u := by
+  obtain ⟨π, hπ, hπv, hπw⟩ := h
+  exact schemeEquiv_schemeOrbit ⟨π, G.isAut_imp_isSchemeAut hπ, hπv, hπw⟩
+
 end SchurianSchemeGraph
 
 /-! ## §8 — Step 2 (combinatorial): 1-WL refines vProfile
@@ -3207,5 +3218,30 @@ theorem theorem_2_HOR_of_pPolynomial {n : Nat} {adj : AdjMatrix n}
     exact (mem_occursFromV h.G v).mp hocc
   exact theorem_2_HOR_of_edgeGenerates h P v j0 hJ hP_invariant hj0_nbr
     (edgeGenerates_of_pPolynomial h.G v j0 hpp)
+
+/-- **(EOL scheme leg — the bridge closed) The block of `v` is refinement-visible.** On a P-polynomial
+schurian scheme graph, two vertices in the same `warmRefine` cell (after individualizing `v`) lie in the
+same `schemeEquiv I` block. Composes orbit recovery (`theorem_2_HOR_of_pPolynomial`: same cell ⟹
+`OrbitPartition adj P {v}`) with the graph-orbit coarseness `schemeEquiv_graphOrbit` (dropping the
+`P`-clause): so a `ClosedSubset`'s block is a **union of `warmRefine` cells**. This is the bridge from
+scheme-imprimitivity to refinement: a non-trivial closed subset is refinement-visible, so an imprimitive
+scheme's cell splits along the blocks — the ingredient for "imprimitive ⟹ cascade", whence the
+contrapositive "non-cascade ⟹ primitive" the Exhaustive-Obstruction Lemma's leg C needs. -/
+theorem schemeEquiv_warmRefine_of_pPolynomial {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj →
+      ∀ x u, P (π x) (π u) = P x u)
+    (hpp : PPolynomial h.G v j0) {I : Finset (Fin (h.G.scheme.rank + 1))} {w u : Fin n}
+    (hcell : warmRefine adj P (individualizedColouring n {v}) w =
+             warmRefine adj P (individualizedColouring n {v}) u) :
+    h.G.scheme.schemeEquiv I v w ↔ h.G.scheme.schemeEquiv I v u := by
+  have hrec := theorem_2_HOR_of_pPolynomial h P v j0 hJ hP_invariant hpp
+  have horb : OrbitPartition adj P {v} w u := (hrec w u).mpr hcell
+  obtain ⟨π, hAut, _hP, hfix, hπwu⟩ := horb
+  have hπv : π v = v := hfix v (Finset.mem_singleton.mpr rfl)
+  have hgo : GraphOrbitFixing h.G.toSchemeGraph.adj v w u := by
+    rw [h.matching]; exact ⟨π, hAut, hπv, hπwu⟩
+  exact h.G.schemeEquiv_graphOrbit hgo
 
 end ChainDescent

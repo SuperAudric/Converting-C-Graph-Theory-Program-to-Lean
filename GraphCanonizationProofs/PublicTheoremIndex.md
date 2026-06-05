@@ -430,89 +430,91 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `vProfile_eq_imp_graphOrbit` | 725-734 | Step 1 (forward, graph-Aut terms): equal `vProfile` implies graph-orbit equivalence. | — |
 | `graphOrbit_imp_vProfile_eq` | 736-744 | Step 1 (reverse, graph-Aut terms): graph-orbit equivalence implies equal `vProfile`. | — |
 | `vProfile_iff_graphOrbit` | 746-754 | Step 1 (graph-Aut combined): `vProfile` equality iff v-stabilized graph-Aut orbit equivalence — the form bridging to `OrbitPartition adj P {v}` in T2.M4. | — |
-| `refineStep_round1_pair_eq` | 811-859 | §8.a S2.a round-1 lemma: under `χ_v`, equal colour after one `refineStep` for non-`v` `w, u` forces `(adj w v, P w v) = (adj u v, P u v)`. | — |
-| `refineStep_round1_adj_eq` | 861-869 | S2.a (adj-only): round-1 equality forces `adj w v = adj u v`. | — |
-| `SchemeGraph.refineStep_round1_J_eq` | 871-901 | S2.a for scheme graphs: round-1 equality under `χ_v` forces matching J-class membership of `relOfPair v ·`. | — |
-| `iterSignature` | 922-930 | §8.b The signature multiset of `w` computed against the `iter[k]` refinement of `χ_v`. | Definition |
-| `iter_succ_eq_iff` | 932-943 | Round-by-round unfolding: `iter[k+1]` equality decomposes into `iter[k]` equality plus matching iter-k signatures. | — |
-| `AssociationScheme.intersectionCount_via_w` | 945-971 | Scheme axiom in usable form: the count of `u'` with `(v,u') ∈ R_i` and `(w,u') ∈ R_l` equals `intersectionNumber i l (relOfPair v w)` — depends only on `vProfile w`. | — |
-| `AssociationScheme.intersectionCount_eq_of_vProfile_eq` | 973-987 | Corollary: if `relOfPair v w = relOfPair v u`, the intersection counts at `(v,w)` and `(v,u)` coincide for every `(i, l)`. | — |
-| `Step2_target` | 996-1012 | §8.c Step 2 statement (target): for a `SchurianSchemeGraph` and compatible `P`, `warmRefine` cells refine `vProfile` classes. | Definition |
-| `iter_succ_adj_eq` | 1149-1163 | §8.b.3 S2.a lifted to any depth ≥ 1: `iter[k+1]` equality between non-`v` vertices forces matching adj-to-`v`. | — |
-| `warmRefine_adj_eq` | 1165-1180 | warmRefine form of S2.a: two non-`v` vertices in the same warmRefine cell share adjacency to `v`. | — |
-| `SchurianSchemeGraph.warmRefine_J_eq` | 1182-1206 | Two non-`v` vertices in the same warmRefine cell share J-class membership of `relOfPair v ·` — the coarsest non-trivial Step 2 refinement. | — |
-| `toSchemeProfile` | 1234-1267 | **T2.M4 assembly.** The `SchemeProfile` constructor: from a `SchurianSchemeGraph`, a P-invariance hypothesis, and a `Step2_target` witness, build the abstract `SchemeProfile G.adj P v`. | Definition, `noncomputable` |
-| `schurian_scheme_profile_exists_of_step2` | 1269-1278 | Packages `toSchemeProfile` as the `Nonempty` existence result matching the `schurian_scheme_profile_exists` axiom. | — |
-| `trivialPMatrix` | 1289-1290 | §9.1 The trivial `PMatrix`: every entry is `POE.unknown`. | Definition |
-| `trivialPMatrix_invariant` | 1292-1296 | Every permutation preserves `trivialPMatrix`, discharging the P-invariance hypothesis automatically. | — |
-| `SchurianSchemeGraph.toSchemeProfile_trivialP` | 1298-1305 | Specialisation of `toSchemeProfile` to trivial P: P-invariance is automatic, leaving only `Step2_target`. | Definition, `noncomputable` |
-| `IsSchurianSchemeGraph'` | 1323-1329 | §9.2 Concrete schurian-scheme-graph predicate: `adj` arises as the derived adjacency of some `SchurianSchemeGraph`. | Structure |
-| `theorem_2_HOR_concrete` | 1331-1358 | **Theorem 2 (HOR for schurian scheme graphs), concrete form.** From `IsSchurianSchemeGraph' adj` plus P-invariance plus a `Step2_target` witness, derive the `OrbitPartition ↔ warmRefine` equivalence. | — |
-| `theorem_2_HOR_concrete_trivialP` | 1360-1373 | `theorem_2_HOR_concrete` for trivial P: P-invariance becomes automatic, leaving only `Step2_target`. | — |
-| `trivialSchurianSchemeGraph` | 1387-1399 | §9.3 The trivial 1-vertex schurian scheme graph (empty edge set, identity automorphism only). | Definition |
-| `trivialSchurianSchemeGraph_step2` | 1401-1407 | `Step2_target` holds trivially on the 1-vertex scheme: any two vertices in `Fin 1` are equal. | — |
-| `theorem_2_HOR_trivial` | 1409-1427 | **First fully discharged Theorem 2 instance.** For the trivial 1-vertex scheme with trivial P, the `OrbitPartition ↔ warmRefine` equivalence holds unconditionally. | — |
-| `step2_of_rank_le_one` | 1441-1480 | §9.4 Step 2 for rank ≤ 1 schurian scheme graphs: `vProfile` takes only `0` (at `v`) and `1` (elsewhere), so warmRefine separation suffices. | — |
-| `theorem_2_HOR_concrete_rank_le_one` | 1482-1494 | **Theorem 2 unconditional for rank ≤ 1 schurian scheme graphs** (e.g. K_n). | — |
-| `Step2_at_depth` | 1511-1520 | §10 Depth-parametrised Step 2: iter[k] equality implies `vProfile` equality; a depth-explicit version of `Step2_target`. | Definition |
-| `step2_of_step2_at_depth` | 1522-1530 | `Step2_at_depth G P v k` for `k ≤ n` lifts to `Step2_target G P v`. | — |
-| `ncard_setOf_eq_filter_card` | 1590-1597 | Bridge lemma: for `Fintype` and decidable `p`, `{x | p x}.ncard = (Finset.univ.filter p).card`. Bridges `Set.ncard`-based `schemePart_at` to `Finset.filter.card` outputs. | — |
-| `schemePart_at` | 1599-1623 | §10.1 Recursive partition predicate at depth `k`: depth 0 is `χ_v`-equality; depth `k+1` adds matching (adj, P, depth-`k` class) counts over neighbours. | Definition |
-| `iter_refines_schemePart_at` | 1683-1770 | §10.3 **Inductive refinement.** The `iter[k] χ_v` partition refines `schemePart_at G P v k`; the substantive intersection-number induction step of Step 2. | — |
-| `Step2_converges_at` | 1788-1795 | §10.4 Step 2 convergence at depth `k`: `schemePart_at`-k equivalence implies `vProfile` equality. | Definition |
-| `step2_of_converges_at` | 1797-1808 | Step 2 from convergence plus the inductive step: `Step2_converges_at G P v k` with `k ≤ n` gives `Step2_target G P v`. | — |
-| `schemePart_at_one_to_v` | 1839-1889 | §10.5 **Depth-1 extraction.** For `w, u ≠ v`, `schemePart_at G P v 1 w u` forces `adj w v = adj u v ∧ P w v = P u v`. | — |
-| `RelOfPairDetByAdjP` | 1918-1926 | §10.6 **Depth-1 separation hypothesis**: `(adj v ·, P v ·)` determines `relOfPair v ·` on non-`v` vertices. | Definition |
-| `step2_converges_at_one_of_det` | 1928-1955 | **Step 2 convergence at depth 1 under depth-1 separation.** | — |
-| `step2_of_det` | 1988-1998 | §10.7 `Step2_target G P v` from `RelOfPairDetByAdjP` (lifts depth-1 convergence). | — |
-| `theorem_2_HOR_concrete_of_det` | 2000-2010 | **Theorem 2 unconditional under depth-1 separation** (Petersen-class). | — |
-| `AdjSeparatesRelations` | 2033-2037 | §10.8 Cleaner reformulation of depth-1 separation: `(· ∈ J)` is injective on non-diagonal relations. P-free. | Definition |
-| `relOfPairDetByAdjP_of_adjSeparates` | 2039-2055 | `AdjSeparatesRelations` implies `RelOfPairDetByAdjP`. | — |
-| `adjSeparates_of_rank_two_J_singleton` | 2070-2114 | **`rank = 2` + `|J| = 1` ⇒ `AdjSeparatesRelations`.** The unique element of `J` distinguishes the two non-diagonal relations. | — |
-| `relOfPairDetByAdjP_of_rank_two_J_singleton` | 2116-2123 | Combined: `rank = 2` + `|J| = 1` ⇒ `RelOfPairDetByAdjP`. | — |
-| `theorem_2_HOR_concrete_rank_two_J_singleton` | 2125-2139 | **Theorem 2 unconditional for rank-2 + `|J| = 1` schurian scheme graphs** — covers Petersen, Kneser `K(5,2)`, Johnson `J(5,2)`. Axiom-clean. | — |
-| `Depth2Det` | 2167-2183 | §10.9 **Depth-2 separation predicate**: the depth-2 invariant (adj/`P`-to-`v` plus the depth-1 block-degree vector) determines `relOfPair v ·`. Weaker than `RelOfPairDetByAdjP`. | Definition |
-| `det2_of_det` | 2185-2192 | Depth-1 separation ⇒ depth-2 separation (ignores block-degrees). | — |
-| `step2_converges_at_two_of_det2` | 2194-2223 | **Step 2 convergence at depth 2 under depth-2 separation.** | — |
-| `step2_of_det2` | 2225-2240 | Lifts `Step2_converges_at … 2` to `Step2_target` (`n < 2` vacuous via `Fin` subsingleton). | — |
-| `theorem_2_HOR_concrete_of_det2` | 2242-2254 | **Theorem 2 unconditional under depth-2 separation**; depth-2 analogue of `theorem_2_HOR_concrete_of_det`. | — |
-| `schemePart_at_of_orbit` | 2287-2297 | A v-fixing `P`-preserving automorphism puts `w, u` in the same `schemePart_at k` class (`k ≤ n`). | — |
-| `orbit_of_vProfile_eq` | 2299-2313 | `vProfile`-equality ⟹ `OrbitPartition` (schurian Step 1 plus P-invariance). | — |
-| `ncard_eq_sum_POE` | 2315-2330 | P-value fibering of an `ncard`: the count splits over the finitely-many `POE` values of `P x ·`, dropping `P` from a block-degree count. | — |
-| `IntersectionSeparates` | 2332-2341 | §10.10 **Intersection-number separation hypothesis**: `intersectionNumber j0 j0 ·` distinguishes the non-edge, non-diagonal relations (those adjacency cannot). | Definition |
-| `depth2Det_of_intersectionSeparates` | 2343-2467 | **Discharges `Depth2Det`** for single-edge (`J = {j0}`) schurian scheme graphs with an edge-neighbour of `v` and intersection-number separation. | — |
-| `theorem_2_HOR_concrete_intersectionSeparates` | 2469-2489 | **Theorem 2 unconditional for single-edge schurian scheme graphs with intersection-number separation** — first genuinely rank-≥-3 coverage (e.g. the 7-cycle). Strictly subsumes the rank-2/`|J|=1` case. Axiom-clean. | — |
-| `RelIsolatedAt` | 2517-2524 | §10.11 **Relation-isolation predicate**: relation `l`'s `schemePart_at k` class is exactly `R_l` from `v`. The bootstrap's central object. | Definition |
-| `vProfile_imp_schemePart_at` | 2526-2535 | The free ⊇ direction: same relation with `v` ⟹ same `schemePart_at k` class. | — |
-| `schemePart_at_le` | 2537-2548 | `schemePart_at` is downward-monotone in the depth. | — |
-| `relCommon_eq_intersectionNumber` | 2550-2565 | Common-neighbour count = structure constant: `#{u' : (v,u')∈R_l ∧ (z,u')∈R_m} = p^{relOfPair v z}_{l,m}`. | — |
-| `isolatedCount_eq` | 2567-2623 | **The reusable counting heart**: a depth-`k`-isolated `l` lets `schemePart_at (k+1)` pin the intersection number `p^{·}_{l,j0}` (block-degree into `R_l`, summed over `P`). | — |
-| `relIsolatedAt_one_j0` | 2625-2661 | **Base case**: the edge relation `j0` is isolated at depth 1. | — |
-| `relIsolatedAt_zero` | 2663-2677 | The diagonal `R_0 = {v}` is isolated at every depth. | — |
-| `relIsolatedAt_mono` | 2679-2694 | Isolation is upward-closed in depth (`k ≤ j ≤ n`). | — |
-| `relIsolatedAt_succ` | 2696-2744 | **The bootstrap step**: a finset `Iso` of depth-`k`-isolated relations plus a separation pinning `i` by `(adjacency, counts into Iso)` ⟹ `i` is isolated at depth `k+1`. | — |
-| `convergence_of_all_isolated` | 2746-2755 | All relations isolated at depth `k` ⟹ `Step2_converges_at G P v k` (`schemePart_at k` = `vProfile` partition). | — |
-| `theorem_2_HOR_concrete_of_isolation` | 2757-2776 | **Theorem 2 from an isolation chain** — the general engine. Exhibiting that every relation isolates by depth `k ≤ n` gives Theorem 2 unconditionally. Axiom-clean. | — |
-| `theorem_2_HOR_concrete_intersectionSeparates3` | 2778-2845 | **Theorem 2 for depth-3 single-anchor schemes** (e.g. the 9-cycle) — reaches rank-≥-4 schemes the depth-2 result cannot. Axiom-clean. | — |
+| `SchurianSchemeGraph.schemeEquiv_graphOrbit` | 756-765 | **(EOL scheme leg, bridge) The block of `v` is a union of graph-Aut orbits.** Graph version of `schemeEquiv_schemeOrbit`: a graph automorphism fixing `v` (`GraphOrbitFixing`) preserves the `schemeEquiv I` block, since on a schurian scheme graph every graph aut is a scheme aut (`isAut_imp_isSchemeAut`). Block system coarser than the v-stabilized graph-orbit partition — ready to compose with recovery. | — |
+| `refineStep_round1_pair_eq` | 822-870 | §8.a S2.a round-1 lemma: under `χ_v`, equal colour after one `refineStep` for non-`v` `w, u` forces `(adj w v, P w v) = (adj u v, P u v)`. | — |
+| `refineStep_round1_adj_eq` | 872-880 | S2.a (adj-only): round-1 equality forces `adj w v = adj u v`. | — |
+| `SchemeGraph.refineStep_round1_J_eq` | 882-912 | S2.a for scheme graphs: round-1 equality under `χ_v` forces matching J-class membership of `relOfPair v ·`. | — |
+| `iterSignature` | 933-941 | §8.b The signature multiset of `w` computed against the `iter[k]` refinement of `χ_v`. | Definition |
+| `iter_succ_eq_iff` | 943-954 | Round-by-round unfolding: `iter[k+1]` equality decomposes into `iter[k]` equality plus matching iter-k signatures. | — |
+| `AssociationScheme.intersectionCount_via_w` | 956-982 | Scheme axiom in usable form: the count of `u'` with `(v,u') ∈ R_i` and `(w,u') ∈ R_l` equals `intersectionNumber i l (relOfPair v w)` — depends only on `vProfile w`. | — |
+| `AssociationScheme.intersectionCount_eq_of_vProfile_eq` | 984-998 | Corollary: if `relOfPair v w = relOfPair v u`, the intersection counts at `(v,w)` and `(v,u)` coincide for every `(i, l)`. | — |
+| `Step2_target` | 1007-1023 | §8.c Step 2 statement (target): for a `SchurianSchemeGraph` and compatible `P`, `warmRefine` cells refine `vProfile` classes. | Definition |
+| `iter_succ_adj_eq` | 1160-1174 | §8.b.3 S2.a lifted to any depth ≥ 1: `iter[k+1]` equality between non-`v` vertices forces matching adj-to-`v`. | — |
+| `warmRefine_adj_eq` | 1176-1191 | warmRefine form of S2.a: two non-`v` vertices in the same warmRefine cell share adjacency to `v`. | — |
+| `SchurianSchemeGraph.warmRefine_J_eq` | 1193-1217 | Two non-`v` vertices in the same warmRefine cell share J-class membership of `relOfPair v ·` — the coarsest non-trivial Step 2 refinement. | — |
+| `toSchemeProfile` | 1245-1278 | **T2.M4 assembly.** The `SchemeProfile` constructor: from a `SchurianSchemeGraph`, a P-invariance hypothesis, and a `Step2_target` witness, build the abstract `SchemeProfile G.adj P v`. | Definition, `noncomputable` |
+| `schurian_scheme_profile_exists_of_step2` | 1280-1289 | Packages `toSchemeProfile` as the `Nonempty` existence result matching the `schurian_scheme_profile_exists` axiom. | — |
+| `trivialPMatrix` | 1300-1301 | §9.1 The trivial `PMatrix`: every entry is `POE.unknown`. | Definition |
+| `trivialPMatrix_invariant` | 1303-1307 | Every permutation preserves `trivialPMatrix`, discharging the P-invariance hypothesis automatically. | — |
+| `SchurianSchemeGraph.toSchemeProfile_trivialP` | 1309-1316 | Specialisation of `toSchemeProfile` to trivial P: P-invariance is automatic, leaving only `Step2_target`. | Definition, `noncomputable` |
+| `IsSchurianSchemeGraph'` | 1334-1340 | §9.2 Concrete schurian-scheme-graph predicate: `adj` arises as the derived adjacency of some `SchurianSchemeGraph`. | Structure |
+| `theorem_2_HOR_concrete` | 1342-1369 | **Theorem 2 (HOR for schurian scheme graphs), concrete form.** From `IsSchurianSchemeGraph' adj` plus P-invariance plus a `Step2_target` witness, derive the `OrbitPartition ↔ warmRefine` equivalence. | — |
+| `theorem_2_HOR_concrete_trivialP` | 1371-1384 | `theorem_2_HOR_concrete` for trivial P: P-invariance becomes automatic, leaving only `Step2_target`. | — |
+| `trivialSchurianSchemeGraph` | 1398-1410 | §9.3 The trivial 1-vertex schurian scheme graph (empty edge set, identity automorphism only). | Definition |
+| `trivialSchurianSchemeGraph_step2` | 1412-1418 | `Step2_target` holds trivially on the 1-vertex scheme: any two vertices in `Fin 1` are equal. | — |
+| `theorem_2_HOR_trivial` | 1420-1438 | **First fully discharged Theorem 2 instance.** For the trivial 1-vertex scheme with trivial P, the `OrbitPartition ↔ warmRefine` equivalence holds unconditionally. | — |
+| `step2_of_rank_le_one` | 1452-1491 | §9.4 Step 2 for rank ≤ 1 schurian scheme graphs: `vProfile` takes only `0` (at `v`) and `1` (elsewhere), so warmRefine separation suffices. | — |
+| `theorem_2_HOR_concrete_rank_le_one` | 1493-1505 | **Theorem 2 unconditional for rank ≤ 1 schurian scheme graphs** (e.g. K_n). | — |
+| `Step2_at_depth` | 1522-1531 | §10 Depth-parametrised Step 2: iter[k] equality implies `vProfile` equality; a depth-explicit version of `Step2_target`. | Definition |
+| `step2_of_step2_at_depth` | 1533-1541 | `Step2_at_depth G P v k` for `k ≤ n` lifts to `Step2_target G P v`. | — |
+| `ncard_setOf_eq_filter_card` | 1601-1608 | Bridge lemma: for `Fintype` and decidable `p`, `{x | p x}.ncard = (Finset.univ.filter p).card`. Bridges `Set.ncard`-based `schemePart_at` to `Finset.filter.card` outputs. | — |
+| `schemePart_at` | 1610-1634 | §10.1 Recursive partition predicate at depth `k`: depth 0 is `χ_v`-equality; depth `k+1` adds matching (adj, P, depth-`k` class) counts over neighbours. | Definition |
+| `iter_refines_schemePart_at` | 1694-1781 | §10.3 **Inductive refinement.** The `iter[k] χ_v` partition refines `schemePart_at G P v k`; the substantive intersection-number induction step of Step 2. | — |
+| `Step2_converges_at` | 1799-1806 | §10.4 Step 2 convergence at depth `k`: `schemePart_at`-k equivalence implies `vProfile` equality. | Definition |
+| `step2_of_converges_at` | 1808-1819 | Step 2 from convergence plus the inductive step: `Step2_converges_at G P v k` with `k ≤ n` gives `Step2_target G P v`. | — |
+| `schemePart_at_one_to_v` | 1850-1900 | §10.5 **Depth-1 extraction.** For `w, u ≠ v`, `schemePart_at G P v 1 w u` forces `adj w v = adj u v ∧ P w v = P u v`. | — |
+| `RelOfPairDetByAdjP` | 1929-1937 | §10.6 **Depth-1 separation hypothesis**: `(adj v ·, P v ·)` determines `relOfPair v ·` on non-`v` vertices. | Definition |
+| `step2_converges_at_one_of_det` | 1939-1966 | **Step 2 convergence at depth 1 under depth-1 separation.** | — |
+| `step2_of_det` | 1999-2009 | §10.7 `Step2_target G P v` from `RelOfPairDetByAdjP` (lifts depth-1 convergence). | — |
+| `theorem_2_HOR_concrete_of_det` | 2011-2021 | **Theorem 2 unconditional under depth-1 separation** (Petersen-class). | — |
+| `AdjSeparatesRelations` | 2044-2048 | §10.8 Cleaner reformulation of depth-1 separation: `(· ∈ J)` is injective on non-diagonal relations. P-free. | Definition |
+| `relOfPairDetByAdjP_of_adjSeparates` | 2050-2066 | `AdjSeparatesRelations` implies `RelOfPairDetByAdjP`. | — |
+| `adjSeparates_of_rank_two_J_singleton` | 2081-2125 | **`rank = 2` + `|J| = 1` ⇒ `AdjSeparatesRelations`.** The unique element of `J` distinguishes the two non-diagonal relations. | — |
+| `relOfPairDetByAdjP_of_rank_two_J_singleton` | 2127-2134 | Combined: `rank = 2` + `|J| = 1` ⇒ `RelOfPairDetByAdjP`. | — |
+| `theorem_2_HOR_concrete_rank_two_J_singleton` | 2136-2150 | **Theorem 2 unconditional for rank-2 + `|J| = 1` schurian scheme graphs** — covers Petersen, Kneser `K(5,2)`, Johnson `J(5,2)`. Axiom-clean. | — |
+| `Depth2Det` | 2178-2194 | §10.9 **Depth-2 separation predicate**: the depth-2 invariant (adj/`P`-to-`v` plus the depth-1 block-degree vector) determines `relOfPair v ·`. Weaker than `RelOfPairDetByAdjP`. | Definition |
+| `det2_of_det` | 2196-2203 | Depth-1 separation ⇒ depth-2 separation (ignores block-degrees). | — |
+| `step2_converges_at_two_of_det2` | 2205-2234 | **Step 2 convergence at depth 2 under depth-2 separation.** | — |
+| `step2_of_det2` | 2236-2251 | Lifts `Step2_converges_at … 2` to `Step2_target` (`n < 2` vacuous via `Fin` subsingleton). | — |
+| `theorem_2_HOR_concrete_of_det2` | 2253-2265 | **Theorem 2 unconditional under depth-2 separation**; depth-2 analogue of `theorem_2_HOR_concrete_of_det`. | — |
+| `schemePart_at_of_orbit` | 2298-2308 | A v-fixing `P`-preserving automorphism puts `w, u` in the same `schemePart_at k` class (`k ≤ n`). | — |
+| `orbit_of_vProfile_eq` | 2310-2324 | `vProfile`-equality ⟹ `OrbitPartition` (schurian Step 1 plus P-invariance). | — |
+| `ncard_eq_sum_POE` | 2326-2341 | P-value fibering of an `ncard`: the count splits over the finitely-many `POE` values of `P x ·`, dropping `P` from a block-degree count. | — |
+| `IntersectionSeparates` | 2343-2352 | §10.10 **Intersection-number separation hypothesis**: `intersectionNumber j0 j0 ·` distinguishes the non-edge, non-diagonal relations (those adjacency cannot). | Definition |
+| `depth2Det_of_intersectionSeparates` | 2354-2478 | **Discharges `Depth2Det`** for single-edge (`J = {j0}`) schurian scheme graphs with an edge-neighbour of `v` and intersection-number separation. | — |
+| `theorem_2_HOR_concrete_intersectionSeparates` | 2480-2500 | **Theorem 2 unconditional for single-edge schurian scheme graphs with intersection-number separation** — first genuinely rank-≥-3 coverage (e.g. the 7-cycle). Strictly subsumes the rank-2/`|J|=1` case. Axiom-clean. | — |
+| `RelIsolatedAt` | 2528-2535 | §10.11 **Relation-isolation predicate**: relation `l`'s `schemePart_at k` class is exactly `R_l` from `v`. The bootstrap's central object. | Definition |
+| `vProfile_imp_schemePart_at` | 2537-2546 | The free ⊇ direction: same relation with `v` ⟹ same `schemePart_at k` class. | — |
+| `schemePart_at_le` | 2548-2559 | `schemePart_at` is downward-monotone in the depth. | — |
+| `relCommon_eq_intersectionNumber` | 2561-2576 | Common-neighbour count = structure constant: `#{u' : (v,u')∈R_l ∧ (z,u')∈R_m} = p^{relOfPair v z}_{l,m}`. | — |
+| `isolatedCount_eq` | 2578-2634 | **The reusable counting heart**: a depth-`k`-isolated `l` lets `schemePart_at (k+1)` pin the intersection number `p^{·}_{l,j0}` (block-degree into `R_l`, summed over `P`). | — |
+| `relIsolatedAt_one_j0` | 2636-2672 | **Base case**: the edge relation `j0` is isolated at depth 1. | — |
+| `relIsolatedAt_zero` | 2674-2688 | The diagonal `R_0 = {v}` is isolated at every depth. | — |
+| `relIsolatedAt_mono` | 2690-2705 | Isolation is upward-closed in depth (`k ≤ j ≤ n`). | — |
+| `relIsolatedAt_succ` | 2707-2755 | **The bootstrap step**: a finset `Iso` of depth-`k`-isolated relations plus a separation pinning `i` by `(adjacency, counts into Iso)` ⟹ `i` is isolated at depth `k+1`. | — |
+| `convergence_of_all_isolated` | 2757-2766 | All relations isolated at depth `k` ⟹ `Step2_converges_at G P v k` (`schemePart_at k` = `vProfile` partition). | — |
+| `theorem_2_HOR_concrete_of_isolation` | 2768-2787 | **Theorem 2 from an isolation chain** — the general engine. Exhibiting that every relation isolates by depth `k ≤ n` gives Theorem 2 unconditionally. Axiom-clean. | — |
+| `theorem_2_HOR_concrete_intersectionSeparates3` | 2789-2856 | **Theorem 2 for depth-3 single-anchor schemes** (e.g. the 9-cycle) — reaches rank-≥-4 schemes the depth-2 result cannot. Axiom-clean. | — |
 
-| `occursFromV` | 2865-2871 | §10.12 — The relations that actually occur from `v` (non-empty blocks `R_l`); the honest carrier for the isolation closure, keeping its saturation depth `≤ n`. | Definition, `noncomputable` |
-| `mem_occursFromV` | 2873-2876 | Membership criterion: `l` occurs from `v` iff some `w` has `relOfPair v w = l`. | — |
-| `zero_mem_occursFromV` | 2878-2880 | The diagonal relation `R₀` always occurs from `v`. | — |
-| `occursFromV_card_le` | 2882-2885 | At most `n` relations occur from `v` — the bound that holds the closure depth at `≤ n`. | — |
-| `IsoPinned` | 2887-2895 | §10.12 — `i` is uniquely pinned by `Iso`: the only non-diagonal relation with its `(edge-membership, intersection-counts into Iso)` signature, exactly the `hsep` hypothesis of `relIsolatedAt_succ`. | Definition |
-| `isolationStep` | 2897-2903 | §10.12 — One round of the isolation closure: keep `Iso` and add every relation occurring from `v` that is pinned by `Iso`. The extensive operator driving the saturation engine. | Definition, `noncomputable` |
-| `mem_isolationStep` | 2905-2912 | Membership in one closure round: already isolated, or occurring from `v` and newly pinned. | — |
-| `subset_isolationStep` | 2914-2918 | The closure round is extensive (`Iso ⊆ isolationStep`), feeding the generic saturation engine. | — |
-| `isolationStep_subset_occursFromV` | 2920-2928 | The closure round preserves the `occursFromV` bound, so the engine saturates within `≤ n` steps. | — |
-| `relIsolatedAt_of_not_occurs` | 2930-2936 | Relations that never occur from `v` are vacuously isolated at any depth. | — |
-| `stage_relIsolatedAt` | 2938-2975 | **Stage lemma (closure ⇒ isolation engine).** Every relation in the `m`-th closure round `isolationStep^[m] {0, j0}` is isolated at depth `m + 1`, turning the saturated closure into full isolation. | — |
-| `EdgeGenerates` | 2977-2984 | §10.12 — The one structural hypothesis replacing the rank ladder: the isolation closure of `{R₀, R_{j0}}` reaches every relation occurring from `v`. The scheme-graph realisation of the seal's **D1**. | Definition |
-| `theorem_2_HOR_of_edgeGenerates` | 2986-3037 | **General convergence — Theorem 2 from `EdgeGenerates`.** Covers every single-edge schurian scheme graph whose edge relation generates the scheme, with no per-rank separation data: the saturation engine plus stage lemma yield orbit recovery at depth `≤ n`. | — |
-| `IsoPinned.mono` | 3062-3071 | Pinning is monotone in the isolated set: a uniquely-pinned relation stays pinned under any larger `Iso ⊇ Iso1`, letting a graded chain feed the closure's growing fixpoint. | — |
-| `PPolynomial` | 3073-3098 | §10.13 — A P-polynomial (metric / distance-regular) schurian scheme w.r.t. edge `j0`: relations form a distance ladder `R 0,…,R rank` with a tridiagonal intersection array and nonzero subdiagonal. The abstract form of "distance-regular". | Structure |
-| `pPolynomial_pinned` | 3100-3132 | The metric pinning lemma: in a P-polynomial scheme, distance `R k` (`k ≥ 2`) is uniquely pinned among non-diagonal relations by its counts into the strictly-closer distances `{R 0,…,R (k−1)}`. | — |
-| `edgeGenerates_of_pPolynomial` | 3134-3186 | **EdgeGenerates for every P-polynomial scheme.** The distance ladder walks out the isolation closure (each `R k` lands once all closer distances do), so the closure contains every relation. | — |
-| `theorem_2_HOR_of_pPolynomial` | 3188-3209 | **General convergence for the metric class — Theorem 2 for every P-polynomial schurian scheme graph.** One theorem covering the entire distance-regular family (cycles, Johnson, Hamming, all DRGs) with no per-scheme separation data; the P-polynomial structure discharges `EdgeGenerates`, which the engine turns into orbit recovery. | — |
+| `occursFromV` | 2876-2882 | §10.12 — The relations that actually occur from `v` (non-empty blocks `R_l`); the honest carrier for the isolation closure, keeping its saturation depth `≤ n`. | Definition, `noncomputable` |
+| `mem_occursFromV` | 2884-2887 | Membership criterion: `l` occurs from `v` iff some `w` has `relOfPair v w = l`. | — |
+| `zero_mem_occursFromV` | 2889-2891 | The diagonal relation `R₀` always occurs from `v`. | — |
+| `occursFromV_card_le` | 2893-2896 | At most `n` relations occur from `v` — the bound that holds the closure depth at `≤ n`. | — |
+| `IsoPinned` | 2898-2906 | §10.12 — `i` is uniquely pinned by `Iso`: the only non-diagonal relation with its `(edge-membership, intersection-counts into Iso)` signature, exactly the `hsep` hypothesis of `relIsolatedAt_succ`. | Definition |
+| `isolationStep` | 2908-2914 | §10.12 — One round of the isolation closure: keep `Iso` and add every relation occurring from `v` that is pinned by `Iso`. The extensive operator driving the saturation engine. | Definition, `noncomputable` |
+| `mem_isolationStep` | 2916-2923 | Membership in one closure round: already isolated, or occurring from `v` and newly pinned. | — |
+| `subset_isolationStep` | 2925-2929 | The closure round is extensive (`Iso ⊆ isolationStep`), feeding the generic saturation engine. | — |
+| `isolationStep_subset_occursFromV` | 2931-2939 | The closure round preserves the `occursFromV` bound, so the engine saturates within `≤ n` steps. | — |
+| `relIsolatedAt_of_not_occurs` | 2941-2947 | Relations that never occur from `v` are vacuously isolated at any depth. | — |
+| `stage_relIsolatedAt` | 2949-2986 | **Stage lemma (closure ⇒ isolation engine).** Every relation in the `m`-th closure round `isolationStep^[m] {0, j0}` is isolated at depth `m + 1`, turning the saturated closure into full isolation. | — |
+| `EdgeGenerates` | 2988-2995 | §10.12 — The one structural hypothesis replacing the rank ladder: the isolation closure of `{R₀, R_{j0}}` reaches every relation occurring from `v`. The scheme-graph realisation of the seal's **D1**. | Definition |
+| `theorem_2_HOR_of_edgeGenerates` | 2997-3048 | **General convergence — Theorem 2 from `EdgeGenerates`.** Covers every single-edge schurian scheme graph whose edge relation generates the scheme, with no per-rank separation data: the saturation engine plus stage lemma yield orbit recovery at depth `≤ n`. | — |
+| `IsoPinned.mono` | 3073-3082 | Pinning is monotone in the isolated set: a uniquely-pinned relation stays pinned under any larger `Iso ⊇ Iso1`, letting a graded chain feed the closure's growing fixpoint. | — |
+| `PPolynomial` | 3084-3109 | §10.13 — A P-polynomial (metric / distance-regular) schurian scheme w.r.t. edge `j0`: relations form a distance ladder `R 0,…,R rank` with a tridiagonal intersection array and nonzero subdiagonal. The abstract form of "distance-regular". | Structure |
+| `pPolynomial_pinned` | 3111-3143 | The metric pinning lemma: in a P-polynomial scheme, distance `R k` (`k ≥ 2`) is uniquely pinned among non-diagonal relations by its counts into the strictly-closer distances `{R 0,…,R (k−1)}`. | — |
+| `edgeGenerates_of_pPolynomial` | 3145-3197 | **EdgeGenerates for every P-polynomial scheme.** The distance ladder walks out the isolation closure (each `R k` lands once all closer distances do), so the closure contains every relation. | — |
+| `theorem_2_HOR_of_pPolynomial` | 3199-3220 | **General convergence for the metric class — Theorem 2 for every P-polynomial schurian scheme graph.** One theorem covering the entire distance-regular family (cycles, Johnson, Hamming, all DRGs) with no per-scheme separation data; the P-polynomial structure discharges `EdgeGenerates`, which the engine turns into orbit recovery. | — |
+| `schemeEquiv_warmRefine_of_pPolynomial` | 3222-3245 | **(EOL scheme leg — bridge CLOSED) The block of `v` is refinement-visible.** On a P-polynomial schurian scheme graph, same `warmRefine` cell (after individualizing `v`) ⟹ same `schemeEquiv I` block. Composes recovery (`theorem_2_HOR_of_pPolynomial`: cell ⟹ `OrbitPartition adj P {v}`) with `schemeEquiv_graphOrbit` (drop the P-clause via `h.matching`). So a `ClosedSubset`'s block is a **union of `warmRefine` cells** — scheme-imprimitivity ⟹ refinement-visible split, the ingredient for "non-cascade ⟹ primitive". | — |
 ## ChainDescent/CascadeOracle.lean
 
 The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chain-descent-cascade-oracle-lean-brief.md`). Builds axiom-clean (only `refineStep`/`refineStep_iff` + Lean foundationals), no `sorry`. Phase A = soundness/validity, Phase B = the completeness reduction (wired to the axiom-free orbit-recovery theorems), Phase C = the residual obligations: verdict iso-invariance is *discharged conditionally* (`verdictIsoInvariant_of_complete` — it reduces to localisation), and localisation is *split* into (1a) bounded-depth recoverability — **proved** on the cascade class (`RecoverableByDepth` + `recoverableByDepth_cfi`/`_scheme`, anchored by `cellsAreOrbits_of_discrete`) — and (1b) intermediate-to-deep bridging, **open but not GI ∈ P** (cascade-class construction correctness). Only general-class completeness is the GI ∈ P obligation. §C.0 also proves the deferred-decisions foundation `real_stays_real`.
