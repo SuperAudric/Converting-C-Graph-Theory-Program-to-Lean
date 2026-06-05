@@ -494,6 +494,45 @@ by orbit).
    TRUE and Step 3a may hold for homogeneous schemes.** Decisive next move is the **theory pass** on
    "imprimitive homogeneous ⟹ bounded WL-dimension," not more generator-hunting.
 
+   **A2 THEORY PASS — RESULT (2026-06-05): the question was aimed one notch too high; the right target is
+   weaker and more likely true.** The A2-i framing ("imprimitive homogeneous ⟹ *recover*") asks for more
+   than Step 3a needs. The §13 reduction `cell_splits_of_imprimitive` rests on **`BlockRefinementVisible`**
+   (cells ⊆ blocks — 1-WL respects only the *2-way* I/¬I boundary), **not** on full recovery (cells =
+   orbits — the whole v-profile separated). On the recovery class the two coincide, which is *why* the gate
+   couldn't separate them: 24/24 "recover" only witnessed block-visibility via the strong route; the real
+   A2 question (does block-visibility survive *without* recovery) was never exercised.
+   - **Full recovery is the wrong target (probably false off the reachable class).** Recovery ⟺ the
+     residual coherent configuration is **schurian** (1-WL closure = orbital configuration); `¬D1` ⟺
+     **non-schurian** (1-WL strictly coarser than orbits). "Imprimitive homogeneous ⟹ recover" = "no
+     imprimitive homogeneous non-schurian high-WL-dimension CC exists" — almost certainly false (high-WL
+     *vertex-transitive* structures are known; they are simply not metric/circulant, which is exactly why
+     the probe's generators can't reach them). So the structural lead, *as stated*, is likely **false** —
+     but Step 3a does not require it.
+   - **Block-visibility is the right target — and CFI is evidence *for* it.** CFI itself has **visible
+     blocks while recovery fails**: 1-WL separates the gadgets (the blocks) perfectly; it cannot resolve
+     the *parity within* a gadget. So CFI is a direct witness that A2's weaker property *survives into the
+     off-recovery regime where the strong one dies.* The structural reason to expect this generally: a
+     `ClosedSubset I` is closed under the **complex product** — *the same counting operation 1-WL
+     implements* — so the coarse I-boundary is "1-WL-closed by construction" in a way the fine orbit
+     structure is not.
+   - **The reframe.** Step 3 reads cleanly as `¬D1` (non-schurian residual) ⟹ *block-visible* ⟹ cell
+     splits ⟹ recurse on quotient/fiber ⟹ bottom out at a **primitive** `¬D1` piece = Cameron (Step 5).
+     CFI fits: visible gadget-blocks let the recursion proceed; the irreducible parity sits at the
+     primitive base. No "imprimitive ⟹ recover" anywhere.
+   - **The one remaining risk, now sharp.** Block-visibility fails iff a closed subset `I` is
+     **counting-symmetric** from `v` — `I` and `¬I` carry identical intersection-number signatures, so
+     1-WL cannot separate even the coarse boundary. That is a *strictly rarer and stranger* object than a
+     high-WL-dimension scheme (it needs the **coarse block** invisible, not just the fine structure). So
+     the empirical gate's "can't fire" is itself informative: A2's true obstruction is not "high-WL," it
+     is "coarse-block-invisible," which is far more constrained.
+   - **Redirect.** Drop "imprimitive ⟹ recover"; target `BlockRefinementVisible` for every `ClosedSubset`
+     **directly** (A2-iii), via the closed-subset-closure ↔ 1-WL-counting induction (reuse
+     `RelIsolatedAt`/`isolatedCount_eq` applied to the **set `I`**, not singletons). The gating sub-question
+     is small and decisive: *can a closed subset be counting-symmetric from `v`?* If closure forbids it →
+     A2-iii closes Step 3a unconditionally; if not → that scheme is the exact object to build. **Moderate
+     optimism A2-iii closes**, pessimism only on the narrow counting-symmetric escape. Plan:
+     [`chain-descent-a2iii-plan.md`](./chain-descent-a2iii-plan.md).
+
 4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
    degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact
    Step 2 gave from candidate-counting, now from the order side. **Lean (axiom-clean, `Group.lean`):**
