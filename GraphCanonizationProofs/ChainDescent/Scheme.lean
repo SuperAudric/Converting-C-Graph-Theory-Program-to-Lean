@@ -3508,4 +3508,98 @@ A previously-attempted `Reduced`-predicate + valency route (`relOccurs_iff_valen
 a witness, and the scheme is presented with explicit vertices, so the valency form is no easier to
 discharge. It was reverted as sunk cost; do not reinstate it. -/
 
+/-! ## §12 — The Exhaustive-Obstruction Lemma on scheme residuals (leg C, Approach 3)
+
+The capstone of the EOL's Cameron-free **scheme leg**
+([`chain-descent-exhaustive-obstruction.md`](../../docs/chain-descent-exhaustive-obstruction.md) §5
+Approach 3): on an association-scheme residual, a **primitive, large (non-cascade), rank-≥-3**
+obstruction *is* a **Cameron section** — *modulo* the cited Babai (1981) / Sun–Wilmes (2015)
+classification of primitive coherent configurations.
+
+**Project-original, axiom-clean content (the reduction).** The proof threads the landed group-side
+bridge `isPreprimitive_of_isPrimitive` (§11): it converts the **combinatorial** primitivity the descent
+observes (`IsPrimitive`, no closed relation subset = no refinement-visible block system) into the
+**group** preprimitivity (`MulAction.IsPreprimitive`) the cited classification is stated against. That
+conversion is exactly why the group side was built.
+
+**Cited, NOT a fresh axiom.** `PrimitiveCCClassification` is carried as an explicit hypothesis. Mathlib
+has no association-scheme / coherent-configuration substrate (plan §4 R5), so the classification — *a
+group-preprimitive, coherent-configuration-rank-≥-3, **large** schurian scheme is a Cameron
+(Johnson/Hamming) scheme* — enters as a **named hypothesis**, keeping the project's (now custom-axiom-free)
+basis clean and the citation visible at every use site. `IsCameronScheme` and `IsLargeScheme` are
+arbitrary predicates (cited black boxes — the EOL never inspects them; it only routes the descent
+observation into the classification's antecedent).
+
+**Largeness is the genuine driver — NOT non-abelian, NOT primitive-alone (the C₇ trap).** The classical
+antecedent (Sun–Wilmes) is **super-polynomial `|Aut|`** — equivalently, the residual *survives* cascade +
+abelian consumption (it does not recover at polynomial depth = high WL-dimension). It is **essential and
+cannot be dropped or replaced by non-abelian:** the 7-cycle scheme `C₇` is schurian, **primitive** (7
+prime), **rank 3**, and **non-abelian** (`Aut = D₇`) — yet it *cascades* (it is metric/`PPolynomial`,
+recovers at depth 1) and is **not** Cameron (`|Aut| = 14`, small). So `IsPrimitive ∧ rank≥3 ∧ non-abelian`
+does **not** imply Cameron; the `IsLargeScheme` hypothesis is what excludes `C₇` and makes the cited
+statement *true* (plan §4 R3, the base-size / non-abelian-vs-large gap). Deriving `IsLargeScheme` from the
+descent's "non-cascade" observation is the substrate-conditional refinement-side content (WL-dimension
+boundary, declassing §9), so it is carried as a hypothesis here.
+
+**Deferred (documented, not used here).** `IsPrimitive` is likewise taken as a **hypothesis** (deriving
+it from "refinement finds no block" is the `PPolynomial`-gated refinement-side bridge): this EOL
+classifies the obstruction *given* it is a primitive, large residual — the honest scheme-leg interface.
+(`2 ≤ S.rank` is coherent-configuration rank ≥ 3, counting the diagonal `R_0`.) -/
+
+/-- **The cited classification** (Babai 1981 / Sun–Wilmes 2015 on primitive coherent configurations),
+as a named `Prop` parametrized by the largeness predicate `IsLargeScheme` and the Cameron-scheme
+predicate `IsCameronScheme`, carried as an explicit hypothesis — **never a fresh `axiom`** (keeps the
+axiom basis clean, the citation visible at each use site). Statement: every **group-preprimitive**,
+coherent-configuration-**rank-≥-3**, **large** schurian scheme in which every relation occurs is a
+Cameron scheme. Largeness is essential — without it `C₇` (primitive, rank 3, but small/cascading) would
+be a counterexample. -/
+def PrimitiveCCClassification
+    (IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop) : Prop :=
+  ∀ (m : Nat) (S : SchurianScheme m),
+    (∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true) →
+    MulAction.IsPreprimitive S.toAssociationScheme.SchemeAutGroup (Fin m) →
+    2 ≤ S.rank →
+    IsLargeScheme m S →
+    IsCameronScheme m S
+
+/-- **Exhaustive-Obstruction Lemma on scheme residuals (leg C), modulo the cited classification.**
+A **primitive** (`IsPrimitive`), **large** (`IsLargeScheme` — non-cascade / super-polynomial `|Aut|`),
+coherent-configuration-rank-≥-3 schurian scheme residual is a Cameron section. The whole content is the
+landed bridge `isPreprimitive_of_isPrimitive` turning the descent's **combinatorial** primitivity into the
+**group** preprimitivity the cited `hClassify` consumes; everything else is routing. Proves no new graph
+canonizable (the Cameron case still flags) — this is the *classification* half, Cameron-hard, **not**
+GI-hard. The `IsLargeScheme` hypothesis is the genuine driver (excludes the cascading `C₇`); it is **not**
+implied by non-abelian-ness (plan §4 R3). -/
+theorem exhaustiveObstruction_scheme {n : Nat}
+    {IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hprim : S.toAssociationScheme.IsPrimitive)
+    (hrank : 2 ≤ S.rank)
+    (hlarge : IsLargeScheme n S) :
+    IsCameronScheme n S :=
+  hClassify n S hne (isPreprimitive_of_isPrimitive S hne hprim) hrank hlarge
+
+/-- **EOL trichotomy (the doc §1 disjunction form).** Given the cited classification and rank ≥ 3, every
+schurian scheme residual (every relation occurring) is one of: **not primitive** — cascade-recoverable, a
+closed relation subset is a refinement-visible block system to split; **not large** — small `|Aut|`, the
+recoverable / hidden-abelian region the cascade + linear oracles consume; or a **Cameron scheme** — the
+flagged obstruction. The negation-complete tiling on scheme residuals (primitive? large?), faithfully
+excluding the small-but-primitive `C₇`-type schemes from the Cameron branch. -/
+theorem exhaustiveObstruction_scheme_trichotomy {n : Nat}
+    {IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) :
+    ¬ S.toAssociationScheme.IsPrimitive ∨
+      ¬ IsLargeScheme n S ∨
+      IsCameronScheme n S := by
+  by_cases hprim : S.toAssociationScheme.IsPrimitive
+  · by_cases hlarge : IsLargeScheme n S
+    · exact Or.inr (Or.inr (exhaustiveObstruction_scheme hClassify S hne hprim hrank hlarge))
+    · exact Or.inr (Or.inl hlarge)
+  · exact Or.inl hprim
+
 end ChainDescent

@@ -49,6 +49,38 @@
 > conditional; the **capstone** (primitive high-rank scheme w/ no abelian regular ⟹ Johnson/Hamming) remains
 > a **cited hypothesis** (`PrimitiveCCClassification`, §4 R5), now statable against the standard `IsPreprimitive`.
 >
+> **CAPSTONE ASSEMBLED (2026-06-05, axiom-clean, `Scheme.lean §12`).** The leg-C EOL is now *stated* on
+> scheme residuals and reduced to the cited classification: `exhaustiveObstruction_scheme` — a **primitive**
+> (`IsPrimitive`), **large** (`IsLargeScheme`), CC-rank-≥-3 schurian scheme residual is a **Cameron
+> section** — plus the doc-§1 disjunction form `exhaustiveObstruction_scheme_trichotomy`
+> (`¬IsPrimitive ∨ ¬IsLarge ∨ Cameron`). The **only** non-routing step is the §11 group-side bridge
+> `isPreprimitive_of_isPrimitive`, converting the descent's *combinatorial* `IsPrimitive` into the *group*
+> `IsPreprimitive` the citation is phrased over — exactly what the bridge was built for.
+> **`PrimitiveCCClassification` is a `def` (Prop) carried as an explicit hypothesis argument, NOT a fresh
+> `axiom`** (verified: all new decls depend only on `[propext, Classical.choice, Quot.sound]`; the project
+> stays custom-axiom-free); `IsCameronScheme` and `IsLargeScheme` are arbitrary predicate parameters (cited
+> black boxes — the EOL routes into them, never inspects them).
+>
+> **Faithfulness fix during assembly — largeness is the driver, NOT non-abelian (the C₇ trap).** A first
+> cut keyed the Cameron branch on **non-abelian** (the seal's ¬D2). That makes the cited
+> `PrimitiveCCClassification` **factually false**: the 7-cycle scheme `C₇` is schurian, **primitive** (7
+> prime), **rank 3**, **non-abelian** (`Aut = D₇`), yet *cascades* (metric/`PPolynomial`, recovers at depth
+> 1) and is **not** Cameron (`|Aut| = 14`). Babai/Sun–Wilmes genuinely needs **super-polynomial `|Aut|`**
+> (largeness) — `IsPrimitive` is **not** "non-cascade" (the FINDING above; primitive ⊉ non-cascade on the
+> P-poly class) and non-abelian is **not** largeness (this is precisely §4 R3, the base-size gap). Fixed:
+> the antecedent is now **`IsLargeScheme`** (carried abstractly = super-poly Aut / non-cascade survival /
+> high WL-dimension), which correctly excludes `C₇`. Deriving `IsLargeScheme` from the descent's
+> "non-cascade" observation is the substrate-conditional refinement-side content (declassing §9), so it is
+> a hypothesis. **Lesson for downstream:** when stating the EOL anywhere, the Cameron-branch driver is
+> *largeness/non-cascade*, never *non-abelian* alone.
+>
+> **Honest scope:** `IsPrimitive` and `IsLargeScheme` are both *hypotheses*; the theorem canonizes no new
+> graph (Cameron still flags) — the *classification* half, Cameron-hard, not GI-hard. This is the
+> **Tier-3/Approach-1 deliverable shape** (EOL modulo a cited classification, new content axiom-clean),
+> realized on the Approach-3 scheme-residual class. What remains genuinely open is unchanged: the
+> refinement-side decomposition (substrate-conditional) and discharging the cited classification itself
+> (deep, out of scope).
+>
 > **Capstone target pinned + Mathlib reality (2026-06-05 — corrects the "Cameron-free = lighter capstone"
 > reading; see §4 R5 and §5 Approach 3).** The capstone's classical content is **Babai's classification of
 > primitive coherent configurations** (Babai 1981; Sun–Wilmes 2015: a primitive CC of rank ≥ 3 whose
