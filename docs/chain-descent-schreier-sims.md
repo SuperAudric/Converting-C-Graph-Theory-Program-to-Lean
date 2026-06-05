@@ -1,8 +1,11 @@
 # Chain descent — Part A: the stabilizer-chain / Schreier–Sims object (planning & staging)
 
-> **STATUS (2026-06-04): the abstract layer (Stages A1–A3, A3.5, A2-complete) is LANDED; only the concrete
-> BSGS (A4) remains.** Build plan + context dump for a permutation-group **stabilizer chain**
-> (Schreier–Sims) in Lean — "tractable-buildout Part A".
+> **STATUS (2026-06-05): the abstract layer (Stages A1–A3, A3.5, A2-complete) is LANDED, and the coverage
+> discharge is now GENERAL (non-abelian) + localisation-scoped; within Part A only the concrete BSGS (A4)
+> remains, and the forward thread has moved downstream to the Exhaustive-Obstruction Lemma (the "or Cameron"
+> half of the goal — see [exhaustive-obstruction](./chain-descent-exhaustive-obstruction.md), Approach 3).**
+> Build plan + context dump for a permutation-group **stabilizer chain** (Schreier–Sims) in Lean —
+> "tractable-buildout Part A".
 > **Done (axiom-clean, full build green, `Cascade.lean` "Part A"):** the residual group `Aut_S^P` as a
 > Mathlib `Subgroup` (`StabilizerAt`); the cross-branch harvest **soundness** seam (fold-in ⊆ true residual,
 > orbit-prune sound); the rigid verdict (trivial ⟺ base); the per-level orbit–stabilizer order recursion;

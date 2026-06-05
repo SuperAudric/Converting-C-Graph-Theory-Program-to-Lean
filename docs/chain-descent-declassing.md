@@ -74,6 +74,20 @@
 > computable BSGS (A4, validation-only). The abstract cross-branch mechanism toward "reaches a rigid or
 > Cameron residual on all classes" is grounded.
 >
+> **Update 2026-06-05 (axiom-clean — three advances).** (1) **Coverage generalized past exponent-2:**
+> `coversOrbits_of_realizers` / `coversOrbits_of_visibleRealizers` / `closure_eq_stabilizerAt_of_realizers`
+> discharge coverage + `closure (gensAt …) = StabilizerAt` from per-level **path-fixing realizers** with
+> **no group-structure hypothesis** (abelian *or* non-abelian — schemes/Cameron); the involutive
+> `coversOrbits_of_residualInvolutive` is its exponent-2 corollary. (2) **Localisation scoped** as the
+> *polynomiality* layer — coverage correctness (the residual group + order) is unconditional given the
+> harvest collected realizers; recovery only makes the target refinement-computable
+> (`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`; `recoverableByDepth_pPolynomial` exports the
+> whole metric/DRG family). Per-level recovery is the substrate-conditional remainder (WL-dimension
+> boundary). (3) **The "or Cameron" half of the goal is now an ACTIVE thread** — the Exhaustive-Obstruction
+> Lemma, Approach 3 (Cameron-free *scheme leg*): scheme primitivity (`ClosedSubset`/`IsPrimitive`) + the
+> **imprimitive ⟹ refinement-visible bridge** (`schemeEquiv_warmRefine_of_pPolynomial`) landed in
+> `Scheme.lean`. See §9 items 3 and 6, and [exhaustive-obstruction](./chain-descent-exhaustive-obstruction.md).
+>
 > Companions: [orbit-recovery](./chain-descent-orbit-recovery.md) (the witness layer this generalizes),
 > [harvest-window](./chain-descent-harvest-window.md) (the Leg-A lemma this realizes),
 > [cascade-oracle](./chain-descent-cascade-oracle.md) + [linear-oracle](./chain-descent-linear-oracle.md)
@@ -492,10 +506,34 @@ are bounded (not GI-hard), the last two are the honest boundary.
    `stab(v)=1` case (`matchOracle`, §C.7). Remaining open content is then: the **cross-branch/Part-A
    harvest** for multi-step hidden symmetry, the localisation/`hco` half (1b, single-rep, NOT GI-hard),
    and the structural-mode oracle for schemes.
+   *Update 2026-06-05 (general coverage + localisation scoped — these three sub-items advanced).* The
+   **cross-branch/Part-A harvest is now general (non-abelian)**: `coversOrbits_of_realizers` /
+   `coversOrbits_of_visibleRealizers` / `closure_eq_stabilizerAt_of_realizers` (`Cascade.lean`, axiom-clean)
+   discharge coverage + `closure (gensAt …) = StabilizerAt` from per-level **path-fixing realizers** with
+   **no group-structure hypothesis** — the involutive `coversOrbits_of_residualInvolutive` is now its
+   exponent-2 corollary. So schemes/Cameron residuals are reproduced by the *same* mechanism: the
+   **structural-mode oracle done the general way** — generalize the coverage discharge, **not** build a 2nd
+   within-node construction (this supersedes (ii)'s "schemes need a different concrete construction"). And
+   **localisation is now scoped as the POLYNOMIALITY layer, not a coverage-correctness gap**: a
+   same-cell→orbit realizer comes straight from `OrbitPartition`, so coverage *correctness* (the residual
+   group + its order) holds **unconditionally** given the harvest collected realizers; recovery only makes
+   the equivalent harvest target **refinement-computable** (`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`;
+   `recoverableByDepth_pPolynomial` exports the whole metric/DRG family to `RecoverableByDepth` at depth 1).
+   Per-level recovery down the base sequence is the substrate-conditional remainder — the cascade
+   discriminator / WL-dimension boundary, not a closable theorem.
 4. **Flag iso-invariance** ([strategy §15 gap 2](./chain-descent-strategy.md)) — the constructed
    oracle's verdict as a function of iso-invariant ids. `colourMatchPerm` is built from iso-invariant
    colourings, so it *should* hold by construction; the obligation is undischarged.
 5. **The IR-stickiness axis (3b)** — "is `warmRefine` discrete at the base?" Unconditionally *false*
    (multipede / IR-blind-spot, strategy §15 gap 5); correctly **flagged**, not solved.
-6. **The wall (leg C)** — hidden non-abelian (¬D1 ∧ ¬D2, Cameron/Johnson); `(O*)-existence` ≡ GI ∈ P.
-   Out of scope by design (the seal classifies it; it does not solve it).
+6. **The wall (leg C)** — hidden non-abelian (¬D1 ∧ ¬D2, Cameron/Johnson). **Two claims, do not
+   conflate:** *(O\*)-existence* (does such an obstruction ever arise from the descent) ≡ GI ∈ P — **out
+   of scope by design**; *(O\*)-classification* (if a non-cascade, non-abelian residual arises, it **is** a
+   Cameron section) = the **Exhaustive-Obstruction Lemma**, **Cameron-hard, NOT GI-hard**, and **now an
+   ACTIVE thread** ([exhaustive-obstruction](./chain-descent-exhaustive-obstruction.md); **Approach 3** =
+   the Cameron-free *scheme leg*). **Landed 2026-06-05, axiom-clean** (`Scheme.lean`): scheme primitivity
+   (`ClosedSubset` / `schemeEquiv` / `IsPrimitive` — a block system = a closed relation subset) and the
+   **imprimitive ⟹ refinement-visible bridge** (`schemeEquiv_warmRefine_of_pPolynomial`: a `ClosedSubset`'s
+   block is a union of `warmRefine` cells), the ingredient for "non-cascade ⟹ primitive". Remaining: the
+   cascade/decomposition conclusion (lighter) and the primitive-high-rank ⟹ Johnson/Hamming capstone
+   (Higman/Hanaki, heavy). The seal *classifies* the obstruction; it does not solve existence.

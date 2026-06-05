@@ -117,10 +117,11 @@ are **folded into one** recovery-based harvest; their old distinction is now a
   Mathlib `Subgroup`) with both harvest seams: **soundness** and **completeness**
   (`closure gens = StabilizerAt` under a coverage witness), plus the full
   `order = ∏ basic-orbit sizes` (`Cascade.lean`, "Part A");
-- the **de-classed coverage** — `coversOrbits_of_residualInvolutive`: the coverage
-  witness for the *entire* exponent-2 / elementary-abelian-(`Z₂^d`)-residual class
-  in one theorem (the cross-branch analogue of `theorem_2_HOR_of_pPolynomial`),
-  which **sidesteps the `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem** (`Cascade.lean`);
+- the **de-classed coverage** — `coversOrbits_of_realizers` (general, non-abelian:
+  the coverage witness from per-level **path-fixing realizers**, *no* group-structure
+  hypothesis — abelian *or* schemes/Cameron) with `coversOrbits_of_residualInvolutive`
+  as its exponent-2 corollary (the entire `Z₂^d`-residual class in one theorem,
+  sidestepping the `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure theorem) (`Cascade.lean`);
 - the **CFI cross-branch harvest** (CFI-cov.1–4) — gauge flips → the residual
   vocabulary, the cycle-space `Z₂^β`, the gauge-flip group homomorphism, and the
   full discharge in the **base-resolved regime**: `cfi_residualInvolutive` (Lemma A
@@ -135,17 +136,25 @@ discretizing oracle was *proven unable* to harvest a multi-step moved orbit
 twists, `tw ≥ 2`) **must** be harvested **cross-branch** — which is why Part A (a
 group object to fold automorphisms into) exists.
 
-**The live frontier.** The cross-branch harvest for CFI is now **complete in the
-base-resolved regime** (CFI-cov.4), reproducing the residual group and its order —
-reached by *de-classing* the once-planned `Aut(CFI) ≅ Z₂^β ⋊ Aut(H)` structure
-theorem down to a single exponent-2 hypothesis (firing content, not GI-hard; C#
-canonizes CFI(K₄–K₇)). The **one remaining CFI obligation** is discharging
-`PSeparatesGadgets` — that the committed `P` resolves the base layer — which is the
-**orthogonal visible/cascade leg** (scheme / `PPolynomial` base-graph recovery), a
-separate thread. The broader project target is *"correctly reaches a rigid or
-Cameron residual on all graph classes."* The remaining genuine hard core —
-non-abelian Johnson/Cameron factors — is **the wall** (≡ GI ∈ P), tracked in
-[`chain-descent-declassing.md`](./chain-descent-declassing.md) §9 and
+**The live frontier (2026-06-05).** The cross-branch harvest is now **general**:
+`coversOrbits_of_realizers` reproduces *any* residual group (abelian or non-abelian)
+from harvested realizers, with the CFI exponent-2 case as a corollary (CFI-cov.4
+complete in the base-resolved regime; C# canonizes CFI(K₄–K₇)). **Localisation** —
+the gap between this and full polynomiality — is scoped as the *polynomiality* layer:
+coverage *correctness* is unconditional; recovery only makes the harvest
+refinement-computable (`recoverableByDepth_pPolynomial` exports the whole metric/DRG
+family), and *per-level* recovery is the substrate-conditional cascade/WL-dimension
+discriminator. The broader project target is *"correctly reaches a rigid or Cameron
+residual on all graph classes."* That goal's two outcomes are now both being worked:
+**rigid** (cascade/abelian — the recovery + cross-branch mechanism above) and
+**Cameron** (the flag region). The "or Cameron" half is the **Exhaustive-Obstruction
+Lemma** — and the two claims under "the wall" must be kept apart: *whether* a
+non-abelian obstruction arises (≡ **GI ∈ P**, out of scope) versus *classifying* one
+that does as a Cameron section (**Cameron-hard, NOT GI-hard** — a finite target,
+**now an active thread**: Approach 3, the Cameron-free *scheme leg*, with scheme
+primitivity + the imprimitive ⟹ refinement-visible bridge landed in `Scheme.lean`).
+Tracked in [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md),
+[`chain-descent-declassing.md`](./chain-descent-declassing.md) §9, and
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
 
 ---
@@ -183,7 +192,10 @@ witness layer, not onboarding):
 - deferred decisions → [`chain-descent-deferred-decisions.md`](./chain-descent-deferred-decisions.md)
 - harvest-window lemma → [`chain-descent-harvest-window.md`](./chain-descent-harvest-window.md)
 - the wall (hidden Johnson) → [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md)
-- oracle-capability seal → [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)
+- oracle-capability seal + **the Exhaustive-Obstruction Lemma (the current forward thread, 2026-06-05)** →
+  [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) — the "or Cameron"
+  half of the goal; Approach 3 (Cameron-free scheme leg) active, scheme primitivity + the imprimitive ⟹
+  refinement-visible bridge landed
 
 **Paper-stage / planning docs** (theoretical targets, not yet formalized — read
 only if working that thread): `chain-descent-tier3-decomposability.md`,
