@@ -314,6 +314,22 @@ Cameron; trivial ⟹ IR core — [strategy §15 gap 5](./chain-descent-strategy.
 > (Z₂², Z₂³, C₅, S₃, D₄) in `PermutationGroupTests.cs`; the abelian-blind order-only
 > signal is retired. (A deliberate *end-to-end* CFI-over-high-tw flag that exercises the
 > `AbelianUnconsumed` bucket is a follow-on, paired with the Approach-2 battery.)
+>
+> **IR-blind-spot fixture LANDED (Probe B, 2026-06-05) — and a finding.** `MultipedeGenerator.cs`
+> builds the faithful Neuen–Schweitzer/Gurevich–Shelah multipede (STOC 2018, arXiv:1705.03283): from a
+> bipartite base `(V,W)`, each `w` → a segment `{a(w),b(w)}`, each `v` → a CFI parity gadget over `N(v)`
+> (the gadgets *share* the segments — no inter-gadget bridges, the delta from CFI). The fine-coloured
+> `R(G)` is **rigid ⟺ the base is "odd" ⟺ its biadjacency has full F₂ column rank** (Lemma 4.3/4.4;
+> `IsOdd`), so a small deterministic **circulant** base ({0,1,3} on Z_m, odd ⟺ 7∤m, 6m vertices) yields a
+> certified-rigid multipede — the project's first IR-core fixture (closes the "zero IR-core tests" gap,
+> strategy §14/§15 gap 5). **Finding:** chain descent **canonizes** small/mid rigid multipedes (circulant
+> to 72 v; random-3/5-regular to 288 v) — rigid (residual trivial, *confirming* rigidity) but discretizing
+> in ≤ 7 levels. A *natural* IrBlindSpot **flag** requires a **meager** (locally sparse / high-girth) base
+> at **scale** — the NS lower bound is asymptotic, and expanders propagate parity fast (easy), so small
+> instances do not flag. The descent is thus **robust on small rigid IR-cores**. The IrBlindSpot
+> *classification* is validated directly (a tight-budget flag on a certified-rigid multipede → trivial
+> residual → `IrBlindSpot`, scramble-invariantly); the **natural-flag-at-scale** over a meager base
+> (hundreds+ vertices) is the scoped follow-on.
 
 **Drafting rule for every downstream statement.** "All symmetry removed **or**
 Cameron" (statement 1) is **not** the time bound (statement 2): statement 2 carries
