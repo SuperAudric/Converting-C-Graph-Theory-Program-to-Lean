@@ -452,6 +452,16 @@ by orbit).
    `¬D1` = "no harvest window at poly depth" = high WL-dimension = the **large** (super-polynomial-`|Aut|`)
    regime. *(This is the substrate-conditional refinement-side bridge — the deferred piece of §12; it is the
    one non-rigorous link.)*
+   **Scoped as Approach A (`Scheme.lean §13`).** Step 3 factors into **(3a) block-visibility** (imprimitive
+   ⟹ refinement sees the block ⟹ the cell splits) and **(3b) the quotient/fiber decomposition recursion**
+   (unbuilt). **(3a) conditional form LANDED (2026-06-05, axiom-clean):** the predicate
+   `BlockRefinementVisible` (quarantining the WL-dimension boundary), its discharge on the orbit-recovery
+   class (`blockRefinementVisible_of_edgeGenerates`, widening the `PPolynomial` bridge to `EdgeGenerates`),
+   and the reduction `cell_splits_of_imprimitive` (non-trivial closed subset + visibility ⟹ `warmRefine`
+   separates two non-`v` vertices = genuine progress). **Next — the A2 probe:** attempt
+   `blockRefinementVisible` *off* the recovery class, directly from the `ClosedSubset` closure (which
+   mirrors 1-WL counting), since the block is coarser than the orbit — the one realistic shot at closing
+   Step 3a unconditionally. (3b) and the A2 probe are the remaining open content of this step.
 
 4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
    degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact

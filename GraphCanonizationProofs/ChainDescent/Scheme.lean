@@ -3602,4 +3602,98 @@ theorem exhaustiveObstruction_scheme_trichotomy {n : Nat}
     · exact Or.inr (Or.inl hlarge)
   · exact Or.inl hprim
 
+/-! ## §13 — Step 3a of the bottom-up EOL: imprimitive ⟹ the cell splits (block-visibility)
+
+The refinement-side half of the seal's Step 3 (`¬D1 ⟹ primitive`), scoped per
+[exhaustive-obstruction §0.7](../../docs/chain-descent-exhaustive-obstruction.md) Approach A. Step 3
+factors into **(3a) block-visibility** — an imprimitive scheme's block is seen by `warmRefine`, so the
+cell splits — and **(3b) the quotient/fiber decomposition recursion** (unbuilt). This section delivers
+(3a)'s *conditional* form: the predicate `BlockRefinementVisible` (quarantining the WL-dimension
+boundary), its discharge on the orbit-recovery class (`EdgeGenerates`, widening the `PPolynomial`
+bridge), and the reduction `cell_splits_of_imprimitive` (non-trivial closed subset + visibility ⟹
+`warmRefine` separates two non-`v` vertices = genuine refinement progress). Whether visibility holds
+*off* the recovery class — the block is coarser than the orbit, so it may — is the **A2 probe**, next. -/
+
+/-- **The block of `v` is refinement-visible** (Step 3a's quarantined hypothesis): two vertices in the
+same `warmRefine` cell (after individualizing `v`) lie in the same `schemeEquiv I` block. Implied by
+orbit recovery; whether it holds more broadly (coarse block vs. fine orbit) is the open A2 probe. -/
+def BlockRefinementVisible {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (S : AssociationScheme n) (v : Fin n) (I : Finset (Fin (S.rank + 1))) : Prop :=
+  ∀ w u : Fin n,
+    warmRefine adj P (individualizedColouring n {v}) w
+      = warmRefine adj P (individualizedColouring n {v}) u →
+    (S.schemeEquiv I v w ↔ S.schemeEquiv I v u)
+
+/-- **The block bridge on the `EdgeGenerates` class** (widening `schemeEquiv_warmRefine_of_pPolynomial`
+from metric/`PPolynomial` to every edge-generating schurian scheme graph). Same proof: orbit recovery
+(`theorem_2_HOR_of_edgeGenerates`) gives `cell ⟹ OrbitPartition`, then `schemeEquiv_graphOrbit` (general)
+gives `⟹ same block`. -/
+theorem schemeEquiv_warmRefine_of_edgeGenerates {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (hj0_nbr : ∃ w₀ : Fin n, h.G.scheme.relOfPair v w₀ = j0)
+    (hEG : EdgeGenerates h.G v j0) {I : Finset (Fin (h.G.scheme.rank + 1))} {w u : Fin n}
+    (hcell : warmRefine adj P (individualizedColouring n {v}) w =
+             warmRefine adj P (individualizedColouring n {v}) u) :
+    h.G.scheme.schemeEquiv I v w ↔ h.G.scheme.schemeEquiv I v u := by
+  have hrec := theorem_2_HOR_of_edgeGenerates h P v j0 hJ hP_invariant hj0_nbr hEG
+  have horb : OrbitPartition adj P {v} w u := (hrec w u).mpr hcell
+  obtain ⟨π, hAut, _hP, hfix, hπwu⟩ := horb
+  have hπv : π v = v := hfix v (Finset.mem_singleton.mpr rfl)
+  have hgo : GraphOrbitFixing h.G.toSchemeGraph.adj v w u := by
+    rw [h.matching]; exact ⟨π, hAut, hπv, hπwu⟩
+  exact h.G.schemeEquiv_graphOrbit hgo
+
+/-- **Discharge `BlockRefinementVisible` on the recovery (`EdgeGenerates`) class.** Repackages the bridge:
+where the edge relation generates the scheme, every closed-subset block of `v` is refinement-visible. -/
+theorem blockRefinementVisible_of_edgeGenerates {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (j0 : Fin (h.G.scheme.rank + 1)) (hJ : h.G.toSchemeGraph.J = {j0})
+    (hP_invariant : ∀ {π : Equiv.Perm (Fin n)}, IsAut π adj → ∀ x u, P (π x) (π u) = P x u)
+    (hj0_nbr : ∃ w₀ : Fin n, h.G.scheme.relOfPair v w₀ = j0)
+    (hEG : EdgeGenerates h.G v j0) (I : Finset (Fin (h.G.scheme.rank + 1))) :
+    BlockRefinementVisible adj P h.G.scheme v I :=
+  fun w u hcell => schemeEquiv_warmRefine_of_edgeGenerates h P v j0 hJ hP_invariant hj0_nbr hEG hcell
+
+/-- **Step 3a — imprimitive ⟹ the cell splits.** Given a *non-trivial* closed subset `I` (a witness of
+imprimitivity: `I ≠ {0}`, `I ≠ univ`) and block-visibility, `warmRefine` (after individualizing `v`)
+separates two **non-`v`** vertices — one *inside* the block of `v`, one *outside* it — so refinement
+makes genuine progress on an imprimitive scheme (the ingredient for the (3b) decomposition recursion
+toward the primitive base case, §12 capstone). Needs only that every relation occurs from `v` (`hocc`,
+free on a vertex-transitive scheme). -/
+theorem cell_splits_of_imprimitive {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    (hocc : ∀ j : Fin (h.G.scheme.rank + 1), ∃ u : Fin n, h.G.scheme.relOfPair v u = j)
+    {I : Finset (Fin (h.G.scheme.rank + 1))}
+    (hcl : h.G.scheme.ClosedSubset I) (hI0 : I ≠ {0}) (hIuniv : I ≠ Finset.univ)
+    (hvis : BlockRefinementVisible adj P h.G.scheme v I) :
+    ∃ w u : Fin n, w ≠ v ∧ u ≠ v ∧
+      warmRefine adj P (individualizedColouring n {v}) w
+        ≠ warmRefine adj P (individualizedColouring n {v}) u := by
+  -- a non-zero relation in `I` (block ⊋ {v}) and a relation off `I` (block ≠ univ)
+  obtain ⟨j, hjI, hj0⟩ : ∃ j ∈ I, j ≠ 0 := by
+    by_contra hcon
+    apply hI0
+    apply Finset.Subset.antisymm
+    · intro x hx; rw [Finset.mem_singleton]; by_contra hx0; exact hcon ⟨x, hx, hx0⟩
+    · intro x hx; rw [Finset.mem_singleton] at hx; subst hx; exact hcl.1
+  obtain ⟨k, hkI⟩ : ∃ k : Fin (h.G.scheme.rank + 1), k ∉ I := by
+    by_contra hcon
+    apply hIuniv; rw [Finset.eq_univ_iff_forall]; intro x; by_contra hx; exact hcon ⟨x, hx⟩
+  obtain ⟨u, hu⟩ := hocc j
+  obtain ⟨z, hz⟩ := hocc k
+  have huv : u ≠ v := fun he => hj0 (by rw [← hu, he]; exact h.G.scheme.relOfPair_self v)
+  have hzv : z ≠ v := by
+    intro he; apply hkI
+    have hk0 : k = 0 := by rw [← hz, he]; exact h.G.scheme.relOfPair_self v
+    rw [hk0]; exact hcl.1
+  have hub : h.G.scheme.schemeEquiv I v u := by
+    show h.G.scheme.relOfPair v u ∈ I
+    rw [hu]; exact hjI
+  have hzb : ¬ h.G.scheme.schemeEquiv I v z := by
+    show ¬ h.G.scheme.relOfPair v z ∈ I
+    rw [hz]; exact hkI
+  exact ⟨u, z, huv, hzv, fun hcell => hzb ((hvis u z hcell).mp hub)⟩
+
 end ChainDescent
