@@ -455,7 +455,11 @@ by orbit).
 
 4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
    degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact
-   Step 2 gave from candidate-counting, now from the order side.
+   Step 2 gave from candidate-counting, now from the order side. **Lean (axiom-clean, `Group.lean`):**
+   `card_eq_of_isPretransitive_comm` (transitive faithful abelian ⟹ `Nat.card G = Nat.card α`, via the
+   bijection `g ↦ g•a`) and the headline `not_comm_of_isPreprimitive_card_lt` (`Nat.card α < Nat.card G`
+   + preprimitive faithful ⟹ non-abelian). So **Steps 2 *and* 4 are now formalized**; only Step 3
+   (`¬D1 ⟹ primitive`, the deferred refinement-side bridge) remains non-rigorous.
 
 **Conclusion.** `non-consumed ⟹ ¬D1 ∧ ¬D2 ⟹ large primitive non-abelian action on a WL-stable cell =
 a Cameron section`. The chain has **no slot for a non-consumed abelian symmetry** (Step 2 forecloses it

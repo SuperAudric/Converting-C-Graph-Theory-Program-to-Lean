@@ -392,4 +392,48 @@ theorem not_comm_of_orbit_disagree {adj : AdjMatrix n}
     ¬ (∀ g h : AutGroup adj, g * h = h * g) :=
   fun hcomm => hne (aut_agree_on_orbit_of_comm hcomm hg hh hga hha hc)
 
+/-! ## Step 4 — large primitive ⟹ non-abelian (the §0.7 closure)
+
+The companion to L1–L3: where L3 gives "abelian ⟹ unique candidate", these give the *order* side of the
+same coin — **a transitive faithful abelian action has `|G| = |α|` (regular: order = degree)**, so a
+*large* one (more elements than its degree) is non-abelian. Together with the §12 capstone this closes the
+bottom-up chain `non-consumed ⟹ ¬D1 ⟹ large primitive ⟹ non-abelian ⟹ Cameron`: the only step left
+non-rigorous is `¬D1 ⟹ primitive` (the deferred refinement-side bridge). No scheme/CC substrate — pure
+Mathlib group action + L1. -/
+
+/-- **The regular orbit map.** For a faithful abelian transitive action the orbit map `g ↦ g • a` is a
+bijection `G ≃ α` (free from L1, surjective from transitivity), so `Nat.card G = Nat.card α`: a transitive
+abelian group has *order equal to its degree* (the structural "abelian primitive ⟹ regular, so small"). -/
+theorem card_eq_of_isPretransitive_comm
+    {G : Type*} {α : Type*} [Group G] [MulAction G α] [MulAction.IsPretransitive G α]
+    [FaithfulSMul G α] (comm : ∀ g h : G, g * h = h * g) (a : α) :
+    Nat.card G = Nat.card α := by
+  refine Nat.card_congr (Equiv.ofBijective (fun g : G => g • a) ⟨?_, ?_⟩)
+  · intro g h hgh
+    have hgh' : g • a = h • a := hgh
+    have hstab : (g⁻¹ * h) ∈ MulAction.stabilizer G a := by
+      rw [MulAction.mem_stabilizer_iff, mul_smul, ← hgh', inv_smul_smul]
+    rw [stabilizer_eq_bot_of_isPretransitive_comm comm a, Subgroup.mem_bot, inv_mul_eq_one] at hstab
+    exact hstab
+  · intro b; exact MulAction.exists_smul_eq G a b
+
+/-- **Large ⟹ non-abelian (qualitative).** A transitive faithful action with a *non-trivial* point
+stabilizer (i.e. not regular — "larger than its degree") is non-abelian. Direct contrapositive of L1. -/
+theorem not_comm_of_isPretransitive_of_stabilizer_ne_bot
+    {G : Type*} {α : Type*} [Group G] [MulAction G α] [MulAction.IsPretransitive G α]
+    [FaithfulSMul G α] {a : α} (hne : MulAction.stabilizer G a ≠ ⊥) :
+    ¬ (∀ g h : G, g * h = h * g) :=
+  fun comm => hne (stabilizer_eq_bot_of_isPretransitive_comm comm a)
+
+/-- **Large primitive ⟹ non-abelian (§0.7 Step 4, the headline).** A **preprimitive** faithful action
+whose group is strictly larger than its degree (`Nat.card α < Nat.card G`) is **non-abelian** — because a
+transitive abelian action is regular, with order exactly the degree (`card_eq_of_isPretransitive_comm`).
+This is the order-side proof that "large primitive ⟹ non-abelian": a primitive abelian group is `Z_p`
+(order = degree), so it is never large. Closes the bottom-up route's Step 4 with no citation. -/
+theorem not_comm_of_isPreprimitive_card_lt
+    {G : Type*} {α : Type*} [Group G] [MulAction G α] [MulAction.IsPreprimitive G α]
+    [FaithfulSMul G α] (a : α) (hlt : Nat.card α < Nat.card G) :
+    ¬ (∀ g h : G, g * h = h * g) :=
+  fun comm => by have := card_eq_of_isPretransitive_comm comm a; omega
+
 end ChainDescent
