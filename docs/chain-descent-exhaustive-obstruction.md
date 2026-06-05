@@ -13,11 +13,17 @@
 > (`Scheme.lean §1.2`, axiom-clean):** `ClosedSubset` (block system = diagonal-containing,
 > complex-product-closed relation subset), `schemeEquiv` (+ `_refl`/`_symm`/`_trans`/`_equivalence` — the
 > block system is a genuine equivalence, transitivity from the intersection numbers), `closedSubset_univ`,
-> `IsPrimitive` (only `{R_0}` and `univ` closed — Cameron-free scheme primitivity). **Next (the bridge):**
-> imprimitive scheme residual ⟹ `schemeEquiv` is a non-trivial refinement-visible partition ⟹ the cell
-> splits ⟹ cascade (connect `schemeEquiv` to `warmRefine` via the `IsSchurianSchemeGraph'` / `SchemeProfile`
-> machinery). **Then (the capstone, heavy):** primitive high-rank scheme with no abelian regular subgroup
-> ⟹ Johnson/Hamming-type (rank/coherent-algebra; Higman/Hanaki; thin Mathlib support — the harder follow-on).
+> `IsPrimitive` (only `{R_0}` and `univ` closed — Cameron-free scheme primitivity). **Bridge, foundational
+> half LANDED (`Scheme.lean §4.2.1`, axiom-clean):** `schemeEquiv_isSchemeAut` (the block system is
+> scheme-automorphism-invariant — a genuine *system of imprimitivity*, from `IsSchemeAut.relOfPair_eq`) and
+> `schemeEquiv_schemeOrbit` (the block of `v` is a union of v-stabilized scheme-Aut orbits — the block
+> system is coarser than the orbit partition). So a non-trivial `ClosedSubset` is an Aut-invariant block
+> structure compatible with the orbit action — the combinatorial-closed-subset → group/orbit bridge.
+> **Next (close the bridge):** compose `schemeEquiv_schemeOrbit` with orbit recovery
+> (`theorem_2_HOR_of_pPolynomial`: v-orbits = `warmRefine` cells) to get *block = union of `warmRefine`
+> cells* = **refinement-visible**, hence imprimitive ⟹ cascade; contrapositive non-cascade ⟹ primitive.
+> **Then (the capstone, heavy):** primitive high-rank scheme with no abelian regular subgroup ⟹
+> Johnson/Hamming-type (rank/coherent-algebra; Higman/Hanaki; thin Mathlib support — the harder follow-on).
 >
 > Original planning note: this doc plans the item the user surfaced 2026-05-31: the
 > hypothesis that **"a graph that does not decompose into the cascade+abelian

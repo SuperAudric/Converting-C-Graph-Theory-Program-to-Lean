@@ -483,6 +483,40 @@ theorem vProfile_eq_of_schemeOrbit {n : Nat} {S : AssociationScheme n}
   rw [hπw] at hinv
   exact hinv.symm
 
+/-! ### §4.2.1 — The block system is a system of imprimitivity (EOL scheme leg, the bridge)
+
+A `ClosedSubset`'s block system `schemeEquiv I` is preserved by every scheme automorphism, and is
+coarser than the v-stabilized scheme-Aut orbits. So scheme-imprimitivity (a non-trivial `ClosedSubset`,
+`¬IsPrimitive`) is a genuine **Aut-invariant block structure** — the bridge from the combinatorial
+closed subset to the group/orbit action the Exhaustive-Obstruction Lemma's leg C needs. Composed with
+orbit recovery (`theorem_2_HOR_of_pPolynomial`: at depth 1 the v-orbits = `warmRefine` cells), the block
+of `v` is a union of `warmRefine` cells — **refinement-visible** — so an imprimitive scheme cascades
+(the cell splits along the blocks). Contrapositive: a non-cascade scheme is primitive. -/
+
+/-- **The block system is scheme-automorphism-invariant.** For a scheme automorphism `π`,
+`schemeEquiv I (π v) (π w) ↔ schemeEquiv I v w` — the closed subset's induced partition is preserved by
+the symmetry, i.e. a genuine system of imprimitivity. Immediate from `IsSchemeAut.relOfPair_eq`. -/
+theorem schemeEquiv_isSchemeAut {n : Nat} {S : AssociationScheme n}
+    {I : Finset (Fin (S.rank + 1))} {π : Equiv.Perm (Fin n)} (hπ : IsSchemeAut S π) (v w : Fin n) :
+    S.schemeEquiv I (π v) (π w) ↔ S.schemeEquiv I v w := by
+  unfold AssociationScheme.schemeEquiv
+  rw [hπ.relOfPair_eq v w]
+
+/-- **The block of `v` is a union of v-stabilized scheme-Aut orbits** (the block system is coarser than
+the orbit partition): if `w` and `u` lie in the same `v`-orbit, they share their `schemeEquiv I`
+block. With orbit recovery (v-orbits = `warmRefine` cells) this makes the block refinement-visible — the
+content that turns scheme-imprimitivity into a cascade. -/
+theorem schemeEquiv_schemeOrbit {n : Nat} {S : AssociationScheme n}
+    {I : Finset (Fin (S.rank + 1))} {v w u : Fin n} (h : SchemeOrbitPartition S v w u) :
+    S.schemeEquiv I v w ↔ S.schemeEquiv I v u := by
+  obtain ⟨π, hπ, hπv, hπw⟩ := h
+  have key : S.relOfPair v u = S.relOfPair v w := by
+    have h := hπ.relOfPair_eq v w
+    rw [hπv, hπw] at h
+    exact h
+  unfold AssociationScheme.schemeEquiv
+  rw [key]
+
 namespace SchurianScheme
 
 variable {n : Nat} (S : SchurianScheme n)
