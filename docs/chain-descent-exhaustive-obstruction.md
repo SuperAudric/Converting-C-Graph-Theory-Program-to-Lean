@@ -1,9 +1,25 @@
 # Chain descent — the Exhaustive-Obstruction Lemma (plan)
 
-> **STATUS: planning doc for a NEW, not-yet-started item.** Prerequisite
-> ordering (set by the user): `hwit` (Stage-3 `Aut(CFI)`) and the existing
-> Tier-3 buildout are pursued *first*; another branch already plans that work.
-> This doc plans the *separate* item the user surfaced 2026-05-31: the
+> **STATUS (2026-06-05): Approach 3 (Cameron-free, scheme leg) STARTED — primitivity foundation
+> LANDED, axiom-clean.** After the cross-branch coverage core generalized to non-abelian residuals
+> (`coversOrbits_of_realizers`) and localisation was scoped (the polynomiality layer; per-level recovery
+> = substrate-conditional WL-dimension boundary), the EOL was chosen as the goal-closing thread (it is
+> what "reach a rigid **or Cameron** residual on all classes" actually requires). **Approach 3 chosen**
+> (Cameron-free EOL on coherent-configuration residuals) over Approach 1 (cite-Cameron general): it
+> yields a fully axiom-clean theorem, and a technical finding sharpens why — the general B1 bridge has a
+> **coarsest-equitable gap** (1-WL computes the *coarsest* equitable partition, a block system is
+> *finer*, so block ⟹ refinement-split is **not** free in general), whereas **on schemes a block system
+> = a closed relation subset = refinement-visible by construction** (1-WL computes the scheme). **Landed
+> (`Scheme.lean §1.2`, axiom-clean):** `ClosedSubset` (block system = diagonal-containing,
+> complex-product-closed relation subset), `schemeEquiv` (+ `_refl`/`_symm`/`_trans`/`_equivalence` — the
+> block system is a genuine equivalence, transitivity from the intersection numbers), `closedSubset_univ`,
+> `IsPrimitive` (only `{R_0}` and `univ` closed — Cameron-free scheme primitivity). **Next (the bridge):**
+> imprimitive scheme residual ⟹ `schemeEquiv` is a non-trivial refinement-visible partition ⟹ the cell
+> splits ⟹ cascade (connect `schemeEquiv` to `warmRefine` via the `IsSchurianSchemeGraph'` / `SchemeProfile`
+> machinery). **Then (the capstone, heavy):** primitive high-rank scheme with no abelian regular subgroup
+> ⟹ Johnson/Hamming-type (rank/coherent-algebra; Higman/Hanaki; thin Mathlib support — the harder follow-on).
+>
+> Original planning note: this doc plans the item the user surfaced 2026-05-31: the
 > hypothesis that **"a graph that does not decompose into the cascade+abelian
 > class *is* a hidden Johnson."** It is a **hypothesis, not a certainty** — the
 > plan deliberately budgets for refuting it.

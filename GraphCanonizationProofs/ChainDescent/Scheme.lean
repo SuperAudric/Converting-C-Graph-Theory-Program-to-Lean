@@ -144,6 +144,73 @@ theorem relOfPair_eq_zero_iff (v w : Fin n) :
   · rintro rfl
     exact S.relOfPair_self v
 
+/-! ### §1.2 — Closed subsets and primitivity (Exhaustive-Obstruction Lemma, scheme leg)
+
+The association-scheme form of a **block system**. A subset `I` of the relations, containing the
+diagonal `R_0` and **closed under the complex product** (if `R_i, R_j ∈ I` and `R_k` can occur as a
+composite, `intersectionNumber i j k ≠ 0`, then `R_k ∈ I`), induces an equivalence relation
+`schemeEquiv I` whose union `⋃_{i ∈ I} R_i` is exactly the block system. Crucially it is a **union of
+scheme relations**, so on a schurian scheme graph — where 1-WL computes the scheme — it is
+**refinement-visible**: this is what makes the EOL's primitivity bridge tractable on schemes (block ⟹
+closed subset ⟹ refinement-visible split ⟹ cascade), where it is subtle in general graphs. A scheme is
+**primitive** when its only closed subsets are the diagonal `{R_0}` and the whole relation set — the
+Cameron-free, scheme-theoretic primitivity the EOL's leg C needs on coherent-configuration residuals. -/
+
+/-- A relation subset `I` is **closed** when it contains the diagonal `R_0` and is closed under the
+complex (relational) product: `R_i, R_j ∈ I` and `intersectionNumber i j k ≠ 0` force `R_k ∈ I`. The
+association-scheme form of a block system / sub-equivalence. -/
+def ClosedSubset (I : Finset (Fin (S.rank + 1))) : Prop :=
+  (0 : Fin (S.rank + 1)) ∈ I ∧
+    ∀ i ∈ I, ∀ j ∈ I, ∀ k, S.intersectionNumber i j k ≠ 0 → k ∈ I
+
+/-- The equivalence candidate induced by a relation subset: `v ~ w` iff `(v, w)`'s relation lies in
+`I`. Under `ClosedSubset` this is a genuine equivalence (`schemeEquiv_equivalence`), the block system. -/
+def schemeEquiv (I : Finset (Fin (S.rank + 1))) (v w : Fin n) : Prop :=
+  S.relOfPair v w ∈ I
+
+theorem schemeEquiv_refl {I : Finset (Fin (S.rank + 1))} (hI : (0 : Fin (S.rank + 1)) ∈ I)
+    (v : Fin n) : S.schemeEquiv I v v := by
+  unfold schemeEquiv; rw [S.relOfPair_self]; exact hI
+
+theorem schemeEquiv_symm {I : Finset (Fin (S.rank + 1))} {v w : Fin n}
+    (h : S.schemeEquiv I v w) : S.schemeEquiv I w v := by
+  unfold schemeEquiv at *; rwa [S.relOfPair_symm]
+
+/-- **Transitivity from closure under the complex product.** If `v ~ w` (`(v,w) ∈ R_i`, `i ∈ I`) and
+`w ~ x` (`(w,x) ∈ R_j`, `j ∈ I`), then `w` itself witnesses `intersectionNumber i j (relOfPair v x) ≠ 0`,
+so the closure clause puts `relOfPair v x ∈ I`, i.e. `v ~ x`. This is where the scheme's intersection
+numbers do the work a raw block system could not. -/
+theorem schemeEquiv_trans {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset I)
+    {v w x : Fin n} (h1 : S.schemeEquiv I v w) (h2 : S.schemeEquiv I w x) :
+    S.schemeEquiv I v x := by
+  unfold schemeEquiv at *
+  have hk : S.intersectionNumber (S.relOfPair v w) (S.relOfPair w x) (S.relOfPair v x) ≠ 0 := by
+    have hcard := S.intersectionNumber_well_defined (S.relOfPair v w) (S.relOfPair w x)
+      (S.relOfPair v x) v x (S.rel_relOfPair v x)
+    have hw : w ∈ Finset.univ.filter
+        (fun u : Fin n => S.rel (S.relOfPair v w) v u = true ∧ S.rel (S.relOfPair w x) u x = true) := by
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+      exact ⟨S.rel_relOfPair v w, S.rel_relOfPair w x⟩
+    rw [← hcard]
+    exact Finset.card_ne_zero.mpr ⟨w, hw⟩
+  exact hcl.2 (S.relOfPair v w) h1 (S.relOfPair w x) h2 (S.relOfPair v x) hk
+
+/-- A closed subset's induced relation is a genuine **equivalence relation** — the block system. -/
+theorem schemeEquiv_equivalence {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset I) :
+    Equivalence (S.schemeEquiv I) :=
+  ⟨S.schemeEquiv_refl hcl.1, S.schemeEquiv_symm, fun h1 h2 => S.schemeEquiv_trans hcl h1 h2⟩
+
+/-- The whole relation set is always a closed subset (the trivial "one block" system). -/
+theorem closedSubset_univ : S.ClosedSubset Finset.univ :=
+  ⟨Finset.mem_univ _, fun _ _ _ _ k _ => Finset.mem_univ k⟩
+
+/-- A scheme is **primitive** when its only closed subsets are the diagonal `{R_0}` and the whole
+relation set — no non-trivial block system. The scheme-theoretic, Cameron-free primitivity for the
+Exhaustive-Obstruction Lemma's leg C on coherent-configuration residuals. -/
+def IsPrimitive : Prop :=
+  ∀ I : Finset (Fin (S.rank + 1)), S.ClosedSubset I →
+    I = {0} ∨ I = Finset.univ
+
 end AssociationScheme
 
 /-! ## §2 — Scheme automorphisms and `SchurianScheme`
