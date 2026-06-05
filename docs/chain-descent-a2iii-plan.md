@@ -53,6 +53,45 @@ This single question gates everything:
 counting-symmetric proper closed subset would be a very special object). But G is genuinely open — settle
 it before investing in §2.
 
+### 1.1 Gate-G pass (2026-06-05) — reduction + a trap, but not yet resolved
+
+**Trap caught (guardrail).** `ClosedSubset` is the **complex-product** closure (`Scheme.lean §1.2`,
+lines 161–166); the 1-WL recovery machinery (`EdgeGenerates`/`isolationStep`) is a **pinning/counting**
+closure — *different*. Do **not** argue "off-recovery ⟹ the edge-closure `J*` is a proper closed subset
+⟹ imprimitive": `J*` is the *pinning* closure, not a `ClosedSubset`. Off-recovery does **not** imply
+imprimitive (a **primitive** scheme can fail `EdgeGenerates` — the Cameron/Johnson case). Step 3's
+direction (`¬D1 ⟹ primitive`) is *not* threatened by this.
+
+**The reduction (real progress).** Via `iter_refines_schemePart_at` (warmRefine **finer than**
+`schemePart_at`):
+> **`schemePart_at(k)` separates I-membership ⟹ `BlockRefinementVisible`** (same cell ⟹ same `iter[n]`
+> ⟹ same `schemePart_at(n)` class ⟹ same I-membership).
+
+`schemePart_at` converges (from `v`) to the **WL-fusion `W`** = the relation partition 1-WL resolves
+(the `EdgeGenerates`-reachable structure). Hence:
+> **Gate G ⟺ does every `ClosedSubset I` respect `W`** (is `I` always a union of `W`-classes)? A
+> counting-symmetric `I` is exactly a closed subset that *cuts across* a `W`-class — separating two
+> relations 1-WL merges.
+
+So G is relocated from "high WL-dimension" (unreachable, per the probe) to a sharp algebraic question
+about two closures on one scheme.
+
+**Status: open, leaning uncertain.** No closure argument yet that closed subsets respect `W`. **Named
+counterexample mechanism:** relation-algebra **counting-twins** — relations `a, b` with identical
+intersection numbers (so `schemePart_at` merges them) that a closed subset splits (`a ∈ I`, `b ∉ I`).
+That is a *non-schurian-flavored* relation-algebra symmetry; whether `ClosedSubset` closure forbids
+splitting a twin pair is the decider, and is unresolved.
+
+**Concrete Lean step — LANDED (2026-06-05, axiom-clean, `Scheme.lean §13`).**
+`SchemePartSeparatesBlock` (the predicate "`schemePart_at n` separates I") +
+`blockRefinementVisible_of_schemePartSeparates` (discharge via `iter_refines_schemePart_at`). Strictly
+**wider than the `EdgeGenerates` discharge** (covers off-recovery `I` that respect `W`), the honest A2-ii
+graded form, and it turns the Gate-G crux into a **named Lean hypothesis** `SchemePartSeparatesBlock`.
+
+**Gate G is now exactly: discharge `SchemePartSeparatesBlock` for every `ClosedSubset`** (= every closed
+subset respects `W`), or refute it with a counting-twin scheme. That single Lean obligation *is* G — the
+next move is to attack or refute it (the twin-pair question of §1.1), no longer armchair reasoning.
+
 ## 2. The proof, conditional on G = no (the build)
 
 Mirror `theorem_2_HOR_of_edgeGenerates`'s assembly, but track the **I-boundary** instead of full isolation.

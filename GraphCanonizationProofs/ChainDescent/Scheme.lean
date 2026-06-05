@@ -3656,6 +3656,35 @@ theorem blockRefinementVisible_of_edgeGenerates {n : Nat} {adj : AdjMatrix n}
     BlockRefinementVisible adj P h.G.scheme v I :=
   fun w u hcell => schemeEquiv_warmRefine_of_edgeGenerates h P v j0 hJ hP_invariant hj0_nbr hEG hcell
 
+/-- **The counting partition separates the block** (the Gate-G crux, as a named predicate): the depth-`n`
+counting partition `schemePart_at` already distinguishes I-membership of `relOfPair v ·`. By
+`iter_refines_schemePart_at` (warmRefine is *finer than* `schemePart_at`), this is **sufficient** for
+block-visibility — and it is **strictly weaker than `EdgeGenerates`** (it asks only that the counting
+fusion `W` respect the I-boundary, not that the edge generate the whole scheme). The open A2-iii question
+is exactly whether *every* `ClosedSubset` satisfies it (does every closed subset respect `W`?); the
+candidate obstruction is a relation-algebra counting-twin pair split by `I`
+([`chain-descent-a2iii-plan.md`](../../docs/chain-descent-a2iii-plan.md) §1.1). -/
+def SchemePartSeparatesBlock {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n) (v : Fin n)
+    (I : Finset (Fin (G.scheme.rank + 1))) : Prop :=
+  ∀ w u : Fin n, schemePart_at G P v n w u →
+    (G.scheme.schemeEquiv I v w ↔ G.scheme.schemeEquiv I v u)
+
+/-- **Discharge `BlockRefinementVisible` from counting-separation (the A2-ii graded form).** Wider than
+`blockRefinementVisible_of_edgeGenerates`: block-visibility holds whenever the depth-`n` counting
+partition separates the I-boundary, even off the full-recovery class. Proof: a shared `warmRefine` cell
+is a shared `(refineStep)^[n]` colour, which `iter_refines_schemePart_at` sends into a shared
+`schemePart_at n` class, on which `hsep` reads off equal I-membership. -/
+theorem blockRefinementVisible_of_schemePartSeparates {n : Nat} {adj : AdjMatrix n}
+    (h : IsSchurianSchemeGraph' adj) (P : PMatrix n) (v : Fin n)
+    {I : Finset (Fin (h.G.scheme.rank + 1))}
+    (hsep : SchemePartSeparatesBlock h.G P v I) :
+    BlockRefinementVisible adj P h.G.scheme v I := by
+  intro w u hcell
+  apply hsep
+  apply iter_refines_schemePart_at h.G P v n w u
+  rw [h.matching]
+  exact hcell
+
 /-- **Step 3a — imprimitive ⟹ the cell splits.** Given a *non-trivial* closed subset `I` (a witness of
 imprimitivity: `I ≠ {0}`, `I ≠ univ`) and block-visibility, `warmRefine` (after individualizing `v`)
 separates two **non-`v`** vertices — one *inside* the block of `v`, one *outside* it — so refinement
