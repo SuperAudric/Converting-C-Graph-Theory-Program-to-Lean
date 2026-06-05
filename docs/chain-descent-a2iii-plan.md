@@ -1,15 +1,17 @@
 # A2-iii — unconditional block-visibility for closed subsets (short-lived plan)
 
-> **STATUS (2026-06-05): working scratch, intentionally short-lived.** The **durable** record of the A2
-> sub-approaches (A2-i empirical gate / A2-ii graded discharge / A2-iii unconditional) and their status
-> now lives in [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) §0.7
-> ("A2 status" block). This doc is the detailed scratch for the **one open obligation** — the A2-iii
-> twin-pair question (§1.1) — and should be deleted once that resolves.
->
-> **Where a fresh reader picks up (one line):** discharge the predicate `SchemePartSeparatesBlock` (`Scheme.lean §13`)
-> for every `ClosedSubset` — equivalently, prove no `ClosedSubset` splits a relation-algebra counting-twin
-> pair — or refute it with such a scheme. A2-ii (`blockRefinementVisible_of_schemePartSeparates`) has
-> **already landed** the discharge *from* that predicate; only discharging the predicate itself remains.
+> **STATUS (2026-06-05): RESOLVED NEGATIVELY — this scratch is CONSUMED.** The twin-pair question is
+> settled: the **Shrikhande graph** refutes unconditional A2-iii. The graph-first / Aut-faithful search
+> (`TwinPairSearchExperiment.cs`; `Verify_Shrikhande_BlockInvisible`, `|Aut|` cross-checked 192/1152) found
+> a `ClosedSubset` `I={R₀,R₂}` (genuine block system, 4 blocks of 4) on Shrikhande's *own* rank-4 orbital
+> scheme that 1-WL-from-`v` cannot see (3 SRG cells vs 4 orbital classes). So `SchemePartSeparatesBlock`
+> does **not** hold for every `ClosedSubset`; block-visibility is **depth-graded**, not depth-1. **Two
+> corrections to the plan below:** (1) the "counting-twin (identical intersection numbers)" framing is too
+> narrow — the witness merges `R₂` (val 3) and `R₃` (val 6), *non-twins*; the real obstruction is
+> single-vertex **WL-dimension ≥ 2**. (2) §1's "G = yes → exotic `(O*)` scheme to build" expectation was
+> **wrong**: Shrikhande recovers at **depth 2** (small WL-dim), so a Gate-G failure is **not** a hard
+> residual. **Durable record + redirect: [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)
+> §0.7 "A2-iii RESULT".** Do not pursue the §2 unconditional build. Everything below is closed attempt history.
 
 ## 0. What A2-iii is, in one line
 

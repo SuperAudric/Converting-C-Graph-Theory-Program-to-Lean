@@ -103,12 +103,18 @@
 > axiom-clean** (`Group.lean`: `smul_eq_on_orbit_of_comm` etc. = abelian ⟹ unique candidate ⟹ consumed;
 > `not_comm_of_isPreprimitive_card_lt` = large primitive ⟹ non-abelian). **Step 3a (imprimitive ⟹ cell
 > splits) conditional form + A2-ii graded discharge landed** (`Scheme.lean §13`: `BlockRefinementVisible`,
-> `cell_splits_of_imprimitive`, `blockRefinementVisible_of_schemePartSeparates`). **THE OPEN FRONTIER —
-> where a fresh reader picks up:** discharge `SchemePartSeparatesBlock` for every `ClosedSubset` ⟺ no
-> closed subset splits a relation-algebra **counting-twin** pair (§0.7 "A2 status"; scratch detail in
-> [`chain-descent-a2iii-plan.md`](./chain-descent-a2iii-plan.md)). Closes Step 3a unconditionally if it
-> holds; names the `(O*)`-existence witness if it fails. The only Step-3 piece beyond this is (3b), the
-> heavy unbuilt quotient/fiber recursion.
+> `cell_splits_of_imprimitive`, `blockRefinementVisible_of_schemePartSeparates`). **A2-iii RESOLVED
+> NEGATIVELY (2026-06-05): unconditional block-visibility is FALSE** — the twin-pair search
+> (`TwinPairSearchExperiment.cs`, graph-first/Aut-faithful) found the **Shrikhande graph** as a clean,
+> verified witness (rank-4 orbital scheme, block system `I={R₀,R₂}` = 4 blocks of 4, 1-WL-from-`v` blind:
+> 3 SRG cells vs 4 orbital classes). So `SchemePartSeparatesBlock` does **not** hold for every
+> `ClosedSubset`; block-visibility is **depth-graded**, not depth-1, and collapses into the
+> substrate-conditional WL-dimension boundary. **Do not pursue unconditional A2-iii (dead).** Crucially the
+> witness is **recoverable at depth 2** (small WL-dimension) — so a Gate-G failure is **NOT** an
+> `(O*)`-existence witness, correcting the earlier binary. Full record + redirect in §0.7 "A2-iii RESULT".
+> **THE OPEN FRONTIER now:** close Step 3 via the top-down §12 capstone (no A2-iii needed) or a
+> depth-graded block-visibility tied to `RecoverableByDepth`; plus (3b), the heavy unbuilt quotient/fiber
+> recursion.
 >
 > Original planning note: this doc plans the item the user surfaced 2026-05-31: the
 > hypothesis that **"a graph that does not decompose into the cascade+abelian
@@ -558,23 +564,54 @@ by orbit).
      warmRefine is finer than `schemePart_at`). **Strictly wider than `blockRefinementVisible_of_edgeGenerates`**
      (holds off the full-recovery class, whenever the WL-fusion `W` respects the I-boundary). This is the
      honest graded form and it quarantines the open content into one named predicate.
-   - **A2-iii — unconditional discharge. OPEN, reduced to one obligation.** The Gate-G pass (below) reduced
-     "is every closed subset block-visible" to: **discharge `SchemePartSeparatesBlock` for every
-     `ClosedSubset`** ⟺ **does every closed subset respect the WL-fusion `W`** (is it a union of
-     `W`-classes)? Equivalently: *can a `ClosedSubset` split a relation-algebra **counting-twin** pair* —
-     two relations `a, b` with identical intersection numbers (merged by `schemePart_at`) with `a ∈ I`,
-     `b ∉ I`? If `ClosedSubset` closure forbids it → A2-iii closes Step 3a unconditionally for homogeneous
-     schemes; if a twin-splitting closed subset exists → that scheme is the exact `(O*)`-existence witness.
-     **This twin-pair question is THE open obligation — where a fresh reader picks up.**
+   - **A2-iii — unconditional discharge. RESOLVED NEGATIVELY (2026-06-05): unconditional A2-iii is FALSE.**
+     The twin-pair search (`TwinPairSearchExperiment.cs`, graph-first / Aut-faithful — see the RESULT block
+     below) found a clean, verified witness: the **Shrikhande graph**. So `SchemePartSeparatesBlock` does
+     **not** hold for every `ClosedSubset`, and `BlockRefinementVisible` is **not** dischargeable at
+     single-vertex depth. **Do not pursue a Lean proof of unconditional A2-iii — it is refuted.** The honest
+     shape is the graded **A2-ii** form (`blockRefinementVisible_of_schemePartSeparates`), with block-visibility
+     re-cast as **depth-graded** (holds after ≥ the WL-dimension's depth of individualization, not at depth 1).
 
-   **Gate-G pass findings (2026-06-05) — a trap and the reduction.** (i) **Guardrail:** `ClosedSubset` is
-   the *complex-product* closure; `EdgeGenerates`/`isolationStep` is the *pinning* closure — **different**.
-   Do not argue "off-recovery ⟹ edge-closure `J*` is a proper closed subset ⟹ imprimitive": `J*` is the
-   pinning closure, not a `ClosedSubset`, so off-recovery does **not** imply imprimitive (primitive schemes
-   can fail `EdgeGenerates` — the Cameron/Johnson case), and Step 3's direction is unthreatened. (ii) **The
-   reduction:** `schemePart_at` converges from `v` to the WL-fusion `W`, so block-visibility ⟸
-   "`schemePart_at` separates I" ⟸ "`I` respects `W`" — relocating Gate G from "high WL-dimension"
-   (unreachable) to the sharp algebraic twin-pair question above. Leaning uncertain.
+   **A2-iii RESULT — Shrikhande refutes unconditional block-visibility (2026-06-05, axiom-free C# verification).**
+   The graph-first, Aut-faithful search (`TwinPairSearchExperiment.cs`; `Verify_Shrikhande_BlockInvisible`,
+   `|Aut|` cross-checked against the known 192 / 1152) settles the twin-pair question — **negatively**:
+   - **Witness:** the **Shrikhande graph** (SRG(16,6,2,2), `|Aut| = 192`). Its *own* orbital scheme is
+     **rank 4** (valencies `[1,6,3,6]`) — finer than the rank-2 SRG, because `Aut` is **not** rank-3. It has
+     exactly one non-trivial `ClosedSubset`, `I = {R₀, R₂}`, a **genuine block system (4 blocks of 4)**.
+     1-WL-from-`v` gives only **3 cells** (the SRG partition `{self, 6 nbrs, 9 non-nbrs}`) vs **4** orbital
+     classes — so it is **blind to the block** (it merges an `R₂`-vertex *in* the block with an `R₃`-vertex
+     *out* of it). Contrast control: the **rook graph** `K₄□K₄` (same SRG parameters, but rank-3 `Aut`,
+     `|Aut| = 1152`) is **primitive** (no closed subset) and **recovers** — the two SRG(16,6,2,2) graphs
+     behave oppositely.
+   - **The doc's "counting-twin" mechanism was too narrow.** The merged relations `R₂` (valency 3) and `R₃`
+     (valency 6) are **not** global intersection-twins. The real obstruction is **single-vertex WL-dimension
+     ≥ 2**, which merges even non-twin relations from one basepoint — weaker (so more common) than "identical
+     intersection numbers." Replace "counting-twin split by `I`" with "1-WL-from-`v` cannot separate the
+     `I`-boundary on a WL-dim-≥-2 schurian scheme."
+   - **KEY NUANCE — a Gate-G failure is NOT an `(O*)`-existence witness (correcting the doc's binary).**
+     Shrikhande is **recoverable** (it discretizes at **depth 2** — `D1`, small WL-dimension), *not* a wall
+     case. So "block invisible at depth 1" ⇏ "`(O*)`-existence / hard." The earlier framing ("if a
+     twin-splitting closed subset exists → that scheme is the exact `(O*)` witness") was wrong: the witness
+     is a *depth-2-recoverable* graph, not a hard residual.
+   - **Net redirect.** A2-iii (unconditional, single-vertex) is **dead**. Block-visibility collapses back
+     into the **substrate-conditional WL-dimension / depth-witness boundary** ("B's core") that the rest of
+     the project already flags as the honest open boundary — it is *not* a separable closable theorem. The
+     Lean `cell_splits_of_imprimitive` keeping `BlockRefinementVisible` as a **hypothesis** is **vindicated**
+     (correctly conditional). For closing Step 3, route via the **top-down §12 capstone** (which needs no
+     A2-iii) or a **depth-graded** block-visibility tied to `RecoverableByDepth`.
+
+   **Gate-G pass findings (2026-06-05) — a trap, the reduction, and a methodology lesson.** (i) **Guardrail:**
+   `ClosedSubset` is the *complex-product* closure; `EdgeGenerates`/`isolationStep` is the *pinning* closure —
+   **different**. Do not argue "off-recovery ⟹ edge-closure `J*` is a proper closed subset ⟹ imprimitive":
+   `J*` is the pinning closure, not a `ClosedSubset`, so off-recovery does **not** imply imprimitive (primitive
+   schemes can fail `EdgeGenerates` — the Cameron/Johnson case), and Step 3's direction is unthreatened.
+   (ii) **The reduction:** `schemePart_at` converges from `v` to the WL-fusion `W`, so block-visibility ⟸
+   "`schemePart_at` separates I" ⟸ "`I` respects `W`". (iii) **Methodology lesson (the same trap A2-i hit):**
+   the search MUST use the orbital scheme of the graph's *own* `Aut`, never an a-priori group scheme paired
+   with a non-generating single relation — a first cut (Z₈ scheme + antipodal matching, whose real `Aut` is
+   `S₂≀S₄ ⊋ Z₈`) produced **43 spurious straddles**, all artifacts of invalid `(scheme, graph)` pairs. The
+   graph-first form (compute `Aut(G)`, use its orbital scheme so `(G, S_G)` is schurian by construction) is
+   the faithful test; the Shrikhande witness survives it.
 
 4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
    degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact
