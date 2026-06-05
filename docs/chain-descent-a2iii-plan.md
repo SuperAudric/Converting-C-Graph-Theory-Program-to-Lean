@@ -1,9 +1,15 @@
 # A2-iii — unconditional block-visibility for closed subsets (short-lived plan)
 
-> **STATUS (2026-06-05): working plan, intentionally short-lived.** Delete or fold the surviving
-> conclusion into [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md)
-> §0.7 once A2-iii resolves (closes, or names the counterexample). This doc is scratch for the attempt,
-> not a durable record.
+> **STATUS (2026-06-05): working scratch, intentionally short-lived.** The **durable** record of the A2
+> sub-approaches (A2-i empirical gate / A2-ii graded discharge / A2-iii unconditional) and their status
+> now lives in [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) §0.7
+> ("A2 status" block). This doc is the detailed scratch for the **one open obligation** — the A2-iii
+> twin-pair question (§1.1) — and should be deleted once that resolves.
+>
+> **Where a fresh reader picks up (one line):** discharge the predicate `SchemePartSeparatesBlock` (`Scheme.lean §13`)
+> for every `ClosedSubset` — equivalently, prove no `ClosedSubset` splits a relation-algebra counting-twin
+> pair — or refute it with such a scheme. A2-ii (`blockRefinementVisible_of_schemePartSeparates`) has
+> **already landed** the discharge *from* that predicate; only discharging the predicate itself remains.
 
 ## 0. What A2-iii is, in one line
 
@@ -96,10 +102,11 @@ next move is to attack or refute it (the twin-pair question of §1.1), no longer
 
 Mirror `theorem_2_HOR_of_edgeGenerates`'s assembly, but track the **I-boundary** instead of full isolation.
 
-- **B1 — the counting bridge (already have the hard half).** `iter_refines_schemePart_at` gives
-  `warmRefine` **finer than** `schemePart_at k`. So it *suffices* to show `schemePart_at k` separates the
-  I-boundary — then 1-WL (finer) separates it too. This turns "1-WL sees the block" into "the explicit
-  depth-`k` counting partition sees the block," which is the tractable object.
+- **B1 — the counting bridge. LANDED** as `blockRefinementVisible_of_schemePartSeparates` +
+  `SchemePartSeparatesBlock` (`Scheme.lean §13`, axiom-clean). `iter_refines_schemePart_at` gives
+  `warmRefine` **finer than** `schemePart_at k`, so "`schemePart_at` separates the I-boundary" *suffices*
+  for block-visibility — turning "1-WL sees the block" into the explicit counting question. **B1 = A2-ii.**
+  The remaining work (B2–B3) is exactly *discharging* `SchemePartSeparatesBlock` = the §1.1 twin question.
 - **B2 — block-isolation predicate.** Define `BlockGenerates v I` (or `IBoundaryIsolatedAt v I k`): the
   saturation closure detects I-membership within `k ≤ n` rounds. The closure operator is `isolationStep`
   applied to the **set `I`** (and its complement), not to singleton relations — reuse `isolationStep` /
@@ -128,7 +135,10 @@ content of Step 3a's predicate. Axiom-clean `[propext, Classical.choice, Quot.so
 | `ClosedSubset` (closure clause) | block-system definition (§1.2) | B3 — the structural input forcing detectability |
 | `schemeEquiv_graphOrbit` (general) | bridge's un-gated half | unchanged — only needed in the *recovery* route, not here |
 
-New: `BlockGenerates`/`IBoundaryIsolatedAt`, its `_succ` step, `blockRefinementVisible_of_closedSubset`.
+**Landed (B1/A2-ii):** `SchemePartSeparatesBlock`, `blockRefinementVisible_of_schemePartSeparates`.
+**Still needed (B3 = the twin question):** discharge `SchemePartSeparatesBlock` for every `ClosedSubset`
+— either a structural lemma (closure forbids twin-splitting; may reuse `isolatedCount_eq` on the set `I`)
+yielding `blockRefinementVisible_of_closedSubset`, or a refuting twin-splitting scheme.
 
 ## 4. Outcomes (all three are progress)
 
@@ -136,12 +146,20 @@ New: `BlockGenerates`/`IBoundaryIsolatedAt`, its `_succ` step, `blockRefinementV
    modulo only the Step-5 citation. Best case.
 2. **G = yes →** the counting-symmetric witness is the exact scheme to build; the A2 gate fires; Step 3a is
    genuinely substrate-conditional and we have *named* the boundary (the coarse-block-invisible object).
-3. **G = no but B3 only graded (needs bounded closure depth) →** `BlockGenerates ⟹ BlockRefinementVisible`
-   lands, strictly widening the discharged class past `EdgeGenerates`, with the depth bound as the residual
-   — the honest middle.
+3. **Graded discharge (A2-ii) — ALREADY LANDED.** `blockRefinementVisible_of_schemePartSeparates` strictly
+   widens the discharged class past `EdgeGenerates` (covers off-recovery `I` respecting `W`), with
+   `SchemePartSeparatesBlock` as the named residual hypothesis. This is the secured middle outcome; A2-iii
+   (outcome 1) vs the counterexample (outcome 2) is what the twin question now decides.
 
-## 5. Sequencing
+## 5. Sequencing (updated 2026-06-05 — B1/A2-ii landed)
 
-G (§1) → then §2 only if G = no. Do **not** build §2 before settling G — B3 leans on G, and a G = yes
-result makes §2 moot. Start with the structural argument for G (the `R_{j0} ∈ I` vs `∉ I` split); fall back
-to the `decide`/probe check if it stalls.
+B1 (the counting bridge = A2-ii) is **done**. The single remaining obligation is **discharging
+`SchemePartSeparatesBlock` for every `ClosedSubset`** (= the §1.1 twin-pair question). Start there:
+1. **Structural attempt** — does `ClosedSubset` closure (complex-product) forbid splitting a counting-twin
+   pair (two relations with identical intersection numbers)? Try the `R_{j0} ∈ I` vs `∉ I` split.
+2. **`decide`/probe fallback** — search small schurian schemes for a `ClosedSubset` that splits a twin
+   pair (extend the `Tier2DecompositionExperiment` battery with a "counting-signature of I vs ¬I" check).
+
+If discharged → `blockRefinementVisible_of_closedSubset` (unconditional, supersedes the `EdgeGenerates`
+and graded forms) → Step 3a closes for homogeneous schemes. If refuted → the twin-splitting scheme is the
+`(O*)`-existence witness. Either resolves A2-iii; then fold the conclusion into §0.7 and delete this doc.

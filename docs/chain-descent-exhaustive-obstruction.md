@@ -97,6 +97,19 @@
 > the clean bridge with no coarsest-equitable gap (provable, landed), and (c) a more *natural* citation
 > (combinatorial CC classification vs group-theoretic O'Nan–Scott/Cameron).
 >
+> **BOTTOM-UP ROUTE + current frontier (2026-06-05 — orientation; full record in §0.7).** Independently of
+> the cited capstone, the seal's leg-C conclusion is derived from the harvest mechanism (§0.7):
+> `non-consumed ⟺ ¬D1 ∧ ¬D2 ⟺ large primitive non-abelian ⟺ Cameron`. **Steps 2 & 4 formalized
+> axiom-clean** (`Group.lean`: `smul_eq_on_orbit_of_comm` etc. = abelian ⟹ unique candidate ⟹ consumed;
+> `not_comm_of_isPreprimitive_card_lt` = large primitive ⟹ non-abelian). **Step 3a (imprimitive ⟹ cell
+> splits) conditional form + A2-ii graded discharge landed** (`Scheme.lean §13`: `BlockRefinementVisible`,
+> `cell_splits_of_imprimitive`, `blockRefinementVisible_of_schemePartSeparates`). **THE OPEN FRONTIER —
+> where a fresh reader picks up:** discharge `SchemePartSeparatesBlock` for every `ClosedSubset` ⟺ no
+> closed subset splits a relation-algebra **counting-twin** pair (§0.7 "A2 status"; scratch detail in
+> [`chain-descent-a2iii-plan.md`](./chain-descent-a2iii-plan.md)). Closes Step 3a unconditionally if it
+> holds; names the `(O*)`-existence witness if it fails. The only Step-3 piece beyond this is (3b), the
+> heavy unbuilt quotient/fiber recursion.
+>
 > Original planning note: this doc plans the item the user surfaced 2026-05-31: the
 > hypothesis that **"a graph that does not decompose into the cascade+abelian
 > class *is* a hidden Johnson."** It is a **hypothesis, not a certainty** — the
@@ -530,8 +543,38 @@ by orbit).
      `RelIsolatedAt`/`isolatedCount_eq` applied to the **set `I`**, not singletons). The gating sub-question
      is small and decisive: *can a closed subset be counting-symmetric from `v`?* If closure forbids it →
      A2-iii closes Step 3a unconditionally; if not → that scheme is the exact object to build. **Moderate
-     optimism A2-iii closes**, pessimism only on the narrow counting-symmetric escape. Plan:
-     [`chain-descent-a2iii-plan.md`](./chain-descent-a2iii-plan.md).
+     optimism A2-iii closes**, pessimism only on the narrow counting-symmetric escape. Scratch plan:
+     [`chain-descent-a2iii-plan.md`](./chain-descent-a2iii-plan.md) (short-lived; this block is the durable
+     record).
+
+   **A2 status — the three sub-approaches and where each stands (durable handoff record, 2026-06-05).**
+   The A2 effort (discharge `BlockRefinementVisible` off the recovery class) split into three:
+   - **A2-i — empirical de-risking gate. DONE, exhausted.** 24/24 reachable imprimitive VT schemes (6
+     metric + 18 circulants) respect the block-of-`v`; the off-recovery regime is unreachable with current
+     generators (CFI is intransitive; circulants/metric recover). No counterexample, gate can't fire.
+   - **A2-ii — graded discharge. LANDED (axiom-clean, `Scheme.lean §13`).** `SchemePartSeparatesBlock`
+     (predicate: the depth-`n` counting partition `schemePart_at` separates the I-boundary) +
+     `blockRefinementVisible_of_schemePartSeparates` (discharge via `iter_refines_schemePart_at` —
+     warmRefine is finer than `schemePart_at`). **Strictly wider than `blockRefinementVisible_of_edgeGenerates`**
+     (holds off the full-recovery class, whenever the WL-fusion `W` respects the I-boundary). This is the
+     honest graded form and it quarantines the open content into one named predicate.
+   - **A2-iii — unconditional discharge. OPEN, reduced to one obligation.** The Gate-G pass (below) reduced
+     "is every closed subset block-visible" to: **discharge `SchemePartSeparatesBlock` for every
+     `ClosedSubset`** ⟺ **does every closed subset respect the WL-fusion `W`** (is it a union of
+     `W`-classes)? Equivalently: *can a `ClosedSubset` split a relation-algebra **counting-twin** pair* —
+     two relations `a, b` with identical intersection numbers (merged by `schemePart_at`) with `a ∈ I`,
+     `b ∉ I`? If `ClosedSubset` closure forbids it → A2-iii closes Step 3a unconditionally for homogeneous
+     schemes; if a twin-splitting closed subset exists → that scheme is the exact `(O*)`-existence witness.
+     **This twin-pair question is THE open obligation — where a fresh reader picks up.**
+
+   **Gate-G pass findings (2026-06-05) — a trap and the reduction.** (i) **Guardrail:** `ClosedSubset` is
+   the *complex-product* closure; `EdgeGenerates`/`isolationStep` is the *pinning* closure — **different**.
+   Do not argue "off-recovery ⟹ edge-closure `J*` is a proper closed subset ⟹ imprimitive": `J*` is the
+   pinning closure, not a `ClosedSubset`, so off-recovery does **not** imply imprimitive (primitive schemes
+   can fail `EdgeGenerates` — the Cameron/Johnson case), and Step 3's direction is unthreatened. (ii) **The
+   reduction:** `schemePart_at` converges from `v` to the WL-fusion `W`, so block-visibility ⟸
+   "`schemePart_at` separates I" ⟸ "`I` respects `W`" — relocating Gate G from "high WL-dimension"
+   (unreachable) to the sharp algebraic twin-pair question above. Leaning uncertain.
 
 4. **Large + primitive ⟹ non-abelian, automatically.** A *primitive abelian* group is `Z_p` (order =
    degree = polynomial), hence **not** large. So a large primitive group is non-abelian — the same fact
