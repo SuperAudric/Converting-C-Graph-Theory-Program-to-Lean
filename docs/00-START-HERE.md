@@ -160,9 +160,14 @@ primitivity, the imprimitive ⟹ refinement-visible bridge, and the group-side b
 (`isPreprimitive_iff_isPrimitive`: scheme `IsPrimitive` ⟺ Mathlib `IsPreprimitive`) landed in
 `Scheme.lean`; the refinement-side decomposition is deferred as substrate-conditional, capstone cited).
 The capstone's **largeness** antecedent is itself now an **active track** — *derived* (not hypothesized)
-from a *no-fusion* witness via the landed order identity `|Aut| = ∏ basic-orbit sizes`, validated by an
-adversarial battery ([`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md));
-the unconditional block-visibility route to *primitivity* was refuted (Shrikhande, depth-graded). Tracked in
+from a *no-fusion* witness via the landed order identity `|Aut| = ∏ basic-orbit sizes` (PP1+PP3 landed
+axiom-clean, `Cascade.lean` Part A `NoFusion`/`autP_reproduced_of_noFusion`). The adversarial battery has
+**run, all three tiers** ([`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md),
+`FusionBatteryExperiment.cs`): **no genuine fusion is constructible** — "fusion" splits into a *separable*
+case (Tier-0-handled, where all constructible hidden non-abelian symmetry lives) and a *non-decomposable*
+case that is empirically unwitnessable = a genuine Cameron section (no third species), with consumption
+governed by candidate-pinning/recovery (orthogonal to abelian-ness). The unconditional block-visibility route
+to *primitivity* was refuted (Shrikhande, depth-graded). Tracked in
 [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) (§0.7.5),
 [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9, and
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).

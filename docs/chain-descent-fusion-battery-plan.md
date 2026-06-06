@@ -61,8 +61,14 @@ derivable on already-landed machinery.**
   level (`CellsAreOrbits`) and the harvest collected the visible cell-mate realizers, `NoFusion` holds — *why
   metric/CFI (refinement-visible) symmetry never fuses*. The **fully-general Tier-0 disjoint-decoupling** form
   ("disjoint structure ⟹ `NoFusion`") is **deferred** — it needs the component-decomposition machinery that is
-  a pre-existing project gap (strategy §15 gap 4, "assumed not proven"), not a cheap win. The battery's
-  friendly + disjoint controls are the empirical shadow of that deferred form.
+  a pre-existing project gap (strategy §15 gap 4, "assumed not proven"), not a cheap win.
+  **Sharpened by Tier-3 (2026-06-06).** The consumption condition is **candidate-pinning** (recovery),
+  **orthogonal to abelian-ness**: `noFusion_of_visibleRecovery` consumes *any* symmetry — including a non-abelian
+  `S_k` over IR-core copies — once recovery pins the construct-and-check candidate (Tier-3: label-aligned IR-core
+  copies ⇒ S₃ consumed). It is missed *only* when the candidate is unpinnable (matching 1-WL-resistant copies is
+  GI-hard), and **every such miss the battery produced was decomposable** (separable / Tier-0). So PP2's separable
+  case is not just a "friendly shadow" — it is **where all constructible hidden non-abelian symmetry lives**, and
+  it is Tier-0-handled. The deferred general form is therefore precisely the **non-decomposable** residual (PP4).
 - **PP3 — largeness traceable from the harvest (the payoff, on landed machinery). LANDED 2026-06-06
   (axiom-clean):** `reproducesResidual_of_noFusion` / **`autP_reproduced_of_noFusion`** — under `NoFusion`
   with a terminal base, the folded harvest is **exactly** `Aut(G)^P` **and** `|Aut(G)^P| = ∏ basic-orbit
@@ -79,14 +85,26 @@ derivable on already-landed machinery.**
 - **PP4 — Carry the entangled case as a battery-backed witness.** Unconditional `NoFusion` = unconditional
   decomposability = the wall, so the entangled regime stays a witness (the battery is its evidence, exactly
   as the cascade backs `recoverableByDepth_cfi`). The structural bridge for the separable part is PP2.
+  **Sharpened by Tier-3 (2026-06-06) — the witness's burden is now specifically the NON-DECOMPOSABLE residual.**
+  The battery found **no** non-decomposable non-abelian fusion: every hidden non-abelian symmetry it could build
+  decomposed into IR-core blocks under an outer `S_k` (calculator §7 "layered products decompose" confirmed
+  empirically), and the *separable* part is PP2-provable (Tier-0). By the bottom-up route (non-consumed ∧
+  non-abelian ⟹ primitive ⟹ Cameron, `Group.lean` Steps 2/4 landed), the non-decomposable residual **equals a
+  genuine Cameron section — no third graftable species**. So PP4 reduces to "no non-decomposable non-abelian
+  fusion outside Cameron": the witness is the *same* cited-Cameron boundary, now empirically backed (the battery
+  could not exhibit a counterexample), not a new unmodeled object.
 - **PP5 — Wire to the capstone.** `exhaustiveObstruction_scheme` (`Scheme.lean` §12) with **largeness now
   derived** (PP3) → "leg C ⟹ Cameron" modulo (cited Babai classification + `NoFusion` witness + the
   *separate* primitivity witness). Primitivity stays its own depth-graded line (Shrikhande-evidenced; the
   battery may measure "imprimitive ⟹ recovers" as a secondary signal but it is **not** the largeness target).
 
 **Net endpoint:** largeness is *derived from a battery-validated witness via the landed order theorem*, with
-the genuinely-open residual (the entangled case) honestly witnessed rather than ground out. This is a real
-tightening of leg C, not a closure of the wall.
+the genuinely-open residual now sharply pinned (Tier-3): it is the **non-decomposable ∧ recovery-resistant ∧
+has-symmetry** case = a **genuine Cameron section** (no third species), the *already-cited* boundary — the
+separable case is Tier-0-handled (PP2) and the consumption mechanism is candidate-pinning/recovery (orthogonal
+to abelian-ness). This is a real tightening of leg C — the `NoFusion` gap collapses onto layers the project
+already isolates (recovery/WL-dimension + Tier-0 + cited Cameron), with **no** room for a non-abelian fusion
+species — not a closure of the wall.
 
 ## 2. The reduction chain (why this is the right target)
 
@@ -102,6 +120,19 @@ sharing cells — with rigid / genuine-decision structure in a way that gates it
 - The witness is substrate-conditional, and the **multipede** is why: trivial `|Aut|` yet high WL-dimension —
   so "small group ⟹ low WL-dim ⟹ recovers" is false in general. The multipede is the IR-core (trivial
   residual), *outside* the seal; the leak the battery hunts is the **small-but-non-trivial** analogue.
+
+**Sharpened by Tier-3 (2026-06-06) — the split is the proof structure.** A small hidden non-abelian symmetry is
+either **separable/decomposable** (it permutes IR-core blocks under an outer action — disjoint, or severed by a
+small cut; **Tier-0 + per-block canonization closes it**, PP2) or **non-decomposable** (the genuine residual).
+The battery could build *only* the separable kind (scrambled IR-core copies: harvest misses the `S₃`, but the
+graph decomposes); the non-decomposable kind was **unwitnessable**, and by the bottom-up route equals a genuine
+**Cameron** section (no third species). And the consumption mechanism is **candidate-pinning (recovery),
+orthogonal to abelian-ness**: `small ⟹ consumed` is really `small ⟹ recovery pins the construct-and-check
+candidate`, which fails *only* on the WL-resistant matching of *separable* IR-core blocks (Tier-3: aligned copies
+consumed, scrambled missed). So the open content of `NoFusion` is exactly **non-decomposable ∧ recovery-resistant
+∧ has-symmetry = genuine Cameron** — already the cited boundary, not a new unmodeled species. This collapses the
+"completeness of deferral" gap onto the WL-dimension/recovery layer ("B's core") the project already isolates,
+*plus* the separate (Tier-0) decomposition handler — with **no** room left for a non-abelian fusion species.
 
 ## 3. The decisive measurement
 

@@ -745,6 +745,27 @@ decision).
   (schurian ⟹ vertex-transitive), so the bridge is sound to *state* on the scheme-residual class; the
   residual content (a *primitive small* non-cascading scheme) is the WL-dimension boundary — why it stays a
   hypothesis. This realizes §0.7.2 (3b) recommendation item (2).
+- **PP1 + PP3 + PP2-core LANDED (2026-06-06, axiom-clean, `Cascade.lean` Part A).** `NoFusion` (PP1, the
+  orbit-realizer coverage — the symmetry-only harvest reproduces every orbit, **no recovery hypothesis**);
+  `reproducesResidual_of_noFusion` / `autP_reproduced_of_noFusion` (PP3 — `NoFusion` ⟹ `closure = Aut^P ∧ |·| =
+  ∏ orbit-sizes` via the landed order identity, largeness *read off the harvest*, no Babai/no WL-dim);
+  `noFusion_of_visibleRecovery` (PP2 provable core — recovery ⟹ no fusion). PP3 reworded honestly: the order
+  identity is unconditional, `NoFusion` makes the product the *harvest's* output ⟹ largeness derived-from-witness.
+- **THE NO-FUSION BATTERY RAN — all 3 tiers, decisive (2026-06-06, `FusionBatteryExperiment.cs`, 17/17 green).**
+  Recovery-only harvest (`ChainDescent.RecoveryOnly`, the rigid-residue hand-off) vs brute-force `Aut`, triaged
+  by an **orbit-partition** comparison + a **decomposability** probe. **Result: no genuine fusion is
+  constructible.** Tier-1 cascading Cameron ⇒ harvest = `Aut`; Tier-2 products (tensor/lex) ⇒ harvest = `Aut`
+  (products don't fuse); Tier-3 CFI gauge ⇒ consumed (abelian, §0.7.4). The decisive Tier-3 datum: a non-abelian
+  `S₃` over **label-aligned** IR-core multipede copies is **consumed** (construct-and-check certifies the swap
+  directly), while over **label-scrambled** copies it is **missed** — but that miss is **decomposable**
+  (disconnected), i.e. the **separable / Tier-0** case, *not* a genuine connected fusion. **Two proof-relevant
+  sharpenings (now folded into the plan §1/§2):** (i) consumption is **candidate-pinning (recovery), orthogonal
+  to abelian-ness** — `small ⟹ consumed` is really `small ⟹ recovery pins the candidate`, failing only on
+  WL-resistant matching of *separable* IR-core blocks; (ii) "fusion" **splits** into separable (PP2 / Tier-0-
+  provable, where *all* constructible hidden non-abelian symmetry lives) vs non-decomposable (empirically
+  unwitnessable = a genuine **Cameron** section, no third species). So `NoFusion`'s open content collapses onto
+  **non-decomposable ∧ recovery-resistant ∧ has-symmetry = genuine Cameron** — the cited boundary, now
+  empirically backed, with no room left for a non-abelian fusion species. Full record: the plan §5/§6/§7.
 
 ---
 

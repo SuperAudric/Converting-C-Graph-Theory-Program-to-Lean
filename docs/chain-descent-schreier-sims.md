@@ -61,6 +61,15 @@
 >   the chain is unconditional. Witnesses populating recovery: `recoverableByDepth_pPolynomial` (metric/DRG),
 >   `recoverableByDepth_cfi` (CFI). The remaining content is *discharging* recovery on a class (the substrate-conditional
 >   boundary) and the harvest-collection (firing), not the capstone.
+> - **NO-FUSION layer LANDED + battery-validated** (2026-06-06, axiom-clean, `Cascade.lean` "Part A"): `NoFusion`
+>   (the orbit-realizer coverage — the symmetry-only/defer-all-reals harvest reproduces every orbit, **no recovery
+>   hypothesis**, distinct from the visible-realizer capstone), `reproducesResidual_of_noFusion` /
+>   `autP_reproduced_of_noFusion` (`NoFusion` ⟹ `closure = Aut^P ∧ |·| = ∏ orbit-sizes` — largeness read off the
+>   harvest, no Babai/no WL-dim), `noFusion_of_visibleRecovery` (recovery ⟹ no fusion). This is the leg-C
+>   *largeness*-derivation layer (PP1/PP3, [fusion-battery-plan](./chain-descent-fusion-battery-plan.md);
+>   exhaustive-obstruction §0.7.5), validated by the adversarial battery (`FusionBatteryExperiment.cs`, 17/17):
+>   **no genuine fusion constructible** — "fusion" splits into separable (Tier-0-handled) vs non-decomposable
+>   (= genuine Cameron, no third species); consumption is candidate-pinning/recovery, orthogonal to abelian-ness.
 > - **CFI base-layer, colour-model RE-WIRING DONE** (2026-06-06, axiom-clean, `Cascade.lean` CFI-cov.4). **Scoping
 >   finding:** `PSeparatesGadgets` (the prior "sole CFI obligation") is stated over `P`-relations but the descent's
 >   CFI recovery runs on trivial `P` + colour individualization, so it is **vacuously false** at every `S` for
