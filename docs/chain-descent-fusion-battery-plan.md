@@ -19,6 +19,18 @@
 > hypothesis) once `NoFusion` is validated. The bridge is stated, not proved (PP3 is the derivation). The
 > doc-comment records the multipede caveat (sound to state only on the schurian-scheme class, which is
 > vertex-transitive). Origin: exhaustive-obstruction §0.7.2 (3b) rec (2) / §0.7.5 "stated bridge LANDED".
+>
+> **PP1 + PP3 + PP2-core LANDED (2026-06-06, axiom-clean, `Cascade.lean` Part A).** The no-fusion predicate
+> and the largeness-traceability engine are now first-class Lean objects (§1): `NoFusion` (PP1, the
+> orbit-realizer coverage — the symmetry-only harvest reproduces every orbit, **no recovery hypothesis**),
+> `reproducesResidual_of_noFusion` / `autP_reproduced_of_noFusion` (PP3, `NoFusion` ⟹ `closure = Aut^P ∧ |·| =
+> ∏ orbit-sizes` via the landed order identity — largeness *read off the harvest*, no Babai / no WL-dimension),
+> and `noFusion_of_visibleRecovery` (PP2 provable core — recovery ⟹ no fusion). **Routing finding:** PP2's
+> axes-separation is already landed (`recoverableAt_base_iff_discrete`); the heavy Tier-0 disjoint-decoupling
+> form is deferred (component-decomposition gap, strategy §15 gap 4). **PP3 reworded honestly** (§1): the order
+> identity is unconditional; `NoFusion` is what makes the orbit product the *harvest's* output, so largeness is
+> *derived from the witness*, not proven. The remaining open content is purely **whether `NoFusion` holds** —
+> exactly what the battery (§3–§5) measures.
 
 ## 0. One-line goal
 
@@ -32,23 +44,38 @@ Babai classification + the no-fusion witness + the separate primitivity witness)
 Work backward from what we would build *if* the battery shows no fusion. The key: **largeness becomes
 derivable on already-landed machinery.**
 
-- **PP1 — Name the property as a witness.** `NoFusion` / `DeferralComplete`: under a *defer-all-reals*
-  policy (consume only certifiable/recovered symmetries, never make a genuine decision), the symmetry-only
-  harvest finds the **full** `Aut_S`. Equivalently: the stuck-state residual is **never small-but-non-trivial**
-  — only *trivial* (IR-core) or *large*. A witness predicate, in the `RecoverableByDepth` mould.
-- **PP2 — Prove the separable case unconditionally.** Disjoint / non-shared-cell structure ⟹ deferral
-  separates symmetry from rigidity, via `forcedNode` / `movedSet` (the forced node individualizes only the
-  moved support, deferring the rigid part) + Tier-0 component decomposition + `recoverableAt_base_iff_discrete`
-  (at a base, recovery ⟺ discreteness — the symmetry axis and the IR-stickiness axis are independent
-  coordinates). This is the part that is **not** substrate-conditional; the battery's friendly + disjoint
-  controls are its empirical shadow.
-- **PP3 — Derive largeness (the payoff, on landed machinery).** By `card_autP_eq_prod_of_base`
-  (`Cascade.lean` Part A, **landed**), `|Aut| = ∏ basic-orbit sizes` along the recovery base sequence. Under
-  `NoFusion` the consumption path is *symmetry-only*, so its cost **is** that orbit-size product. Hence
-  **¬D1 (not consumed at poly cost) ∧ NoFusion ⟹ ∏ orbit-sizes super-poly ⟹ `|Aut|` super-poly = large.**
-  No Babai needed for this step — the order identity does it. *(The multipede escapes cleanly: it has no
-  symmetry-only path, so its cost is all real decisions, not orbit sizes — `NoFusion` does not apply, it is
-  the IR-core, trivial residual.)*
+- **PP1 — Name the property as a witness. LANDED 2026-06-06 (axiom-clean, `Cascade.lean` Part A):**
+  `NoFusion adj P gens S` — the orbit-realizer coverage form: under a *defer-all-reals* policy (consume only
+  certifiable/recovered symmetries, never make a genuine decision), the symmetry-only harvest's `gens`
+  reproduces **every** `Aut_T`-orbit pair at every level `T ⊇ S` — i.e. it finds the **full** `Aut_S`. This is
+  the **orbit-realizer** (not visible-cell) form, so it carries **no** recovery hypothesis: it asserts the
+  harvest *found* the symmetry, independent of whether 1-WL *sees* it. `real_stays_real` is its soundness dual
+  (deferred reals stay real ⟹ the harvest folds only genuine orbit pairs); `NoFusion` is the completeness
+  dual, the single substrate-conditional witness the battery validates. Equivalently the stuck-state residual
+  is **never small-but-non-trivial** — only *trivial* (IR-core) or *large*.
+- **PP2 — the separable case. Provable core LANDED, general form routed around.** *Routing finding:* PP2's
+  conceptual halves are **already landed** — the axes-separation (symmetry-consumption vs. IR-stickiness are
+  independent) is `recoverableAt_base_iff_discrete` / `forcedNode_recoverable_iff_discrete`, and the
+  coverage→group→order engine is `coversOrbits_of_realizers` (+ A3.5). The genuinely-provable separable
+  sub-case is **`noFusion_of_visibleRecovery`** (`Cascade.lean`, axiom-clean): where orbits recover at every
+  level (`CellsAreOrbits`) and the harvest collected the visible cell-mate realizers, `NoFusion` holds — *why
+  metric/CFI (refinement-visible) symmetry never fuses*. The **fully-general Tier-0 disjoint-decoupling** form
+  ("disjoint structure ⟹ `NoFusion`") is **deferred** — it needs the component-decomposition machinery that is
+  a pre-existing project gap (strategy §15 gap 4, "assumed not proven"), not a cheap win. The battery's
+  friendly + disjoint controls are the empirical shadow of that deferred form.
+- **PP3 — largeness traceable from the harvest (the payoff, on landed machinery). LANDED 2026-06-06
+  (axiom-clean):** `reproducesResidual_of_noFusion` / **`autP_reproduced_of_noFusion`** — under `NoFusion`
+  with a terminal base, the folded harvest is **exactly** `Aut(G)^P` **and** `|Aut(G)^P| = ∏ basic-orbit
+  sizes` (= `orbitSizeProd adj P bs ∅`), via the **landed** order identity `card_autP_eq_prod_of_base` /
+  `card_closure_gensAt_eq_prod_of_coversOrbits`. *Honest framing (the reword):* the order identity holds
+  **unconditionally** (it is `|Aut| = ∏ orbit-sizes` for any graph — K_n included); what PP3 buys is that
+  under `NoFusion` the orbit-size product is **computed by the symmetry-only harvest**, so the **largeness
+  predicate (that product super-poly) is read off the harvest** rather than asserted. So largeness is *derived
+  from the `NoFusion` witness*, not proven unconditionally; "super-poly ⟹ large" stays definitional. This is
+  the no-fusion analogue of `autP_reproduced_of_visibleRealizers`, but keyed on **orbit** (not visible-cell)
+  realizers — so it needs **no recovery / no WL-dimension boundary**, and **no Babai** (the order identity does
+  it). *(The multipede escapes cleanly: trivial residual, no orbit pairs to cover, so `NoFusion` holds
+  vacuously and the product is 1 — small, not large; it is the IR-core, outside the seal.)*
 - **PP4 — Carry the entangled case as a battery-backed witness.** Unconditional `NoFusion` = unconditional
   decomposability = the wall, so the entangled regime stays a witness (the battery is its evidence, exactly
   as the cascade backs `recoverableByDepth_cfi`). The structural bridge for the separable part is PP2.

@@ -1145,6 +1145,94 @@ theorem autP_reproduced_of_visibleRealizers {gens : Set (Equiv.Perm (Fin n))} (b
   rw [← gensAt_empty_eq hsound]
   exact card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
 
+/-! ### No-fusion: largeness traceable to the symmetry-only harvest, with no recovery hypothesis
+
+The capstones above (`crossBranchHarvest_reproduces_residual`, `autP_reproduced_of_visibleRealizers`) key on
+**visible-cell** realizers — satisfiable only on the *recoverable* class (a visible cell-mate is a genuine
+orbit-mate only where `CellsAreOrbits`). The **no-fusion / deferral** track
+(`docs/chain-descent-fusion-battery-plan.md`, exhaustive-obstruction §0.7.5) wants the orthogonal claim:
+*largeness traceable from the symmetry-only harvest, independent of recovery / the WL-dimension boundary.*
+That is the **orbit-realizer** form (`coversOrbits_of_realizers`) — it asks only that the defer-all-reals
+harvest reproduce every genuine *orbit* pair, never that refinement *see* them.
+
+`NoFusion` names that condition (PP1): the harvested `gens` realizes every residual orbit pair at every level
+— equivalently, the defer-all-reals harvest finds the **full** `Aut_S` (no symmetry is 1-WL-entangled with
+rigid structure so as to gate its recovery on a real decision). `real_stays_real` (`CascadeOracle.lean`) is the
+**soundness** of deferral — a deferred real stays real, so the harvest only ever folds genuine orbit pairs;
+`NoFusion` is its **completeness** dual, the single battery-validated witness. Under it, `reproducesResidual_of_noFusion`
+gives `closure = Aut_S^P` **and** `|·| = ∏ basic-orbit sizes` via the landed order identity — so the largeness
+predicate (the orbit-size product super-poly) is **read off the harvest**, not cited (PP3). The genuinely-open
+content is *whether* `NoFusion` holds (the completeness gap "uncertifiable ≠ real" — the multipede witnesses
+small/trivial `|Aut|` + high WL-dimension), which is what the adversarial battery probes.
+
+**Routed around (deferred): the Tier-0 disjoint-decoupling separable case.** PP2's fully-general "disjoint
+structure ⟹ `NoFusion`" needs the component-decomposition machinery that is a pre-existing project gap
+(strategy §15 gap 4, "assumed not proven"). What *is* provable here unconditionally is the **recoverable**
+sufficient condition `noFusion_of_visibleRecovery` (where recovery holds, no fusion — the metric/CFI witnesses);
+the disjoint controls remain the battery's empirical shadow. -/
+
+/-- **No-fusion / deferral-complete (PP1) — the symmetry-only harvest reproduces every orbit.** The harvested
+generating set `gens` contains, at every level `T ⊇ S`, a **path-fixing residual realizer** for every genuine
+`Aut_T`-orbit pair (`OrbitPartition adj P T b w → ∃ g ∈ gens, ResidualAut adj P T g ∧ g b = w`). This is the
+orbit-realizer (not visible-cell) coverage, so it carries **no** recovery / refinement-visibility hypothesis:
+it asserts the defer-all-reals harvest *found* the full `Aut_S`, independent of whether 1-WL *sees* it. The
+single substrate-conditional witness of the no-fusion track, validated by the adversarial battery
+(`docs/chain-descent-fusion-battery-plan.md`). Soundness of the harvest that supplies it is `real_stays_real`. -/
+def NoFusion (adj : AdjMatrix n) (P : PMatrix n)
+    (gens : Set (Equiv.Perm (Fin n))) (S : Finset (Fin n)) : Prop :=
+  ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+    OrbitPartition adj P T b w → ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w
+
+/-- **PP3 — largeness traceable from the no-fusion harvest, no recovery hypothesis.** Under `NoFusion` (the
+symmetry-only harvest reproduces every orbit) with a terminal base, the folded path-fixing generators are
+**exactly** the residual `Aut_S^P` *and* their order is the basic-orbit-size product. So the largeness
+predicate (this product super-poly) is **read off the harvest** via the landed order identity
+(`card_closure_gensAt_eq_prod_of_coversOrbits`), citing neither Babai nor the WL-dimension boundary — the
+orthogonal claim to the visible-realizer capstone, whose `hreal` is satisfiable only on the recoverable class. -/
+theorem reproducesResidual_of_noFusion {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hnf : NoFusion adj P gens S)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S
+      ∧ Nat.card (Subgroup.closure (gensAt adj P gens S)) = orbitSizeProd adj P bs S := by
+  have hcov := coversOrbits_of_realizers bs hnf hbase
+  exact ⟨stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov,
+    card_closure_gensAt_eq_prod_of_coversOrbits bs hcov⟩
+
+/-- **PP3, root headline — `Aut(G)^P` and its order from the no-fusion harvest.** The `S = ∅` case of
+`reproducesResidual_of_noFusion` (via `gensAt_empty_eq`): under `NoFusion` at the root, the folded harvested
+generators generate **exactly** `Aut(G)^P`, and `|Aut(G)^P| = ∏ basic-orbit sizes`. Largeness is then the
+single number `orbitSizeProd adj P bs ∅` being super-polynomial — derived from the harvest, not hypothesized.
+The no-fusion analogue of `autP_reproduced_of_visibleRealizers`, but keyed on orbit (not visible-cell)
+realizers, so it needs **no** recovery: largeness from `NoFusion`, not from the WL-dimension boundary. -/
+theorem autP_reproduced_of_noFusion {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
+    (hsound : ∀ g ∈ gens, g ∈ StabilizerAt adj P ∅)
+    (hnf : NoFusion adj P gens ∅)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅)) :
+    Subgroup.closure gens = StabilizerAt adj P ∅
+      ∧ Nat.card (Subgroup.closure gens) = orbitSizeProd adj P bs ∅ := by
+  have hcov := coversOrbits_of_realizers bs hnf hbase
+  refine ⟨closure_eq_stabilizerAt_empty_of_coversOrbits bs hsound hcov, ?_⟩
+  rw [← gensAt_empty_eq hsound]
+  exact card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
+
+/-- **PP2 (provable core) — recovery ⟹ no fusion.** The separable case in its unconditional, recoverable
+form: where orbits are recovered at every level (`CellsAreOrbits T`) and the leaf-collision harvest collected
+a path-fixing realizer for every *visible cell-mate*, `NoFusion` holds — a visible cell-mate is then a genuine
+orbit-mate (`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`), so the orbit coverage is supplied. This
+is why the metric / CFI (refinement-visible) symmetry never fuses; the genuinely-open completeness gap is the
+*non*-recoverable regime the battery probes. (The fully-general Tier-0 disjoint-decoupling separable case is
+deferred — it needs the component-decomposition gap, strategy §15 gap 4.) -/
+theorem noFusion_of_visibleRecovery {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)}
+    (hrec : ∀ T : Finset (Fin n), S ⊆ T → CellsAreOrbits adj P T)
+    (hvis : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w) :
+    NoFusion adj P gens S :=
+  fun T hT =>
+    (orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits (hrec T hT)).mpr (hvis T hT)
+
 /-- **De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual group at `S` is
 involutive (`ResidualInvolutive`, hence at every deeper node by `residualInvolutive_mono`), the generating set
 `gens` contains every involutive residual automorphism (`hgens` — what the leaf-collision harvest supplies),
