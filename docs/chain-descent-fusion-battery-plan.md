@@ -159,8 +159,21 @@ constructions most likely to surface new behaviour are the products and the engi
 >   multipede ⇒ harvest 1 = Aut 1 (TrivialResidual); multipede ⊔ C₇ ⇒ harvest = 14, **stuck** (Clean — the
 >   separable case PP2 working empirically); verdict scramble-invariant.
 >
-> **Next (Increment 2):** Tier-2 product generators (lexicographic / tensor) + the leak triage
-> (mechanism-gap-B vs abstract-fusion-A). **Increment 3:** Tier-3 adversarial grafts (the decisive core).
+> **Increment 2 LANDED (2026-06-06) — Tier-2 products + orbit-based leak triage (harness-only).**
+> - **Product generators** — `Tensor` (categorical) and `Lex` (lexicographic, the wreath structure-fuser).
+> - **Leak triage** — sharpened to an **orbit-partition** comparison (the faithful "fusion = missed symmetry"
+>   criterion): `MechanismGapB` = harvest recovered the full Aut-**orbit** partition but a proper subgroup
+>   (representation/transversal gap, *not* a missed symmetry); `AbstractFusionA` = harvest's orbits are
+>   strictly **finer** than Aut's (a genuine symmetry unreachable without a real decision = fusion). The
+>   full-canonizer harvest is logged as a cross-check that the canonizer itself reaches Aut. Both branches
+>   validated deterministically (`Triage_DistinguishesMechanismFromFusion`, Z₅ vs trivial harvest on C₅).
+> - **Tier-2 result (all Clean, <0.2s):** every product preserves NoFusion — `C5×C3` (|Aut|=60), `C5×C5`
+>   (200), `C5[K2]` (320), `C4[K2]` (128) all give harvest **= full Aut**. Products of cascade-class graphs
+>   do not fuse. 13/13 battery tests green.
+>
+> **Next (Increment 3):** Tier-3 adversarial grafts (the decisive core) — graft a small (non-abelian) symmetry
+> onto a coloured rigid multipede so orbits share 1-WL cells; brute-force the *actual* Aut (faithfulness rule);
+> the triage's `AbstractFusionA` branch is the signal a fusion was built (a place to work from).
 
 - **Recovery-only mode.** A descent that consumes only certifiable/recovered orbits and *stops* a branch
   rather than making a genuine decision (sidesteps the a-posteriori-needs-leaves tension). Reuses the

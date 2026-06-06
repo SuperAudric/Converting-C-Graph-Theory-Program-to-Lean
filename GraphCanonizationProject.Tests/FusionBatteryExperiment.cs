@@ -91,8 +91,10 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
         return col;
     }
 
-    // ── Ground truth: brute-force |Aut(G)| — BFS-ordered, colour-filtered, capped ──
-    public static (BigInteger order, bool capped) BruteForceAutOrder(
+    // ── Ground truth: brute-force Aut(G) — BFS-ordered, colour-filtered, capped ──
+    // Returns |Aut|, whether the cap was hit, and the Aut-orbit partition on vertices
+    // (union-find over images during enumeration — for the leak triage).
+    public static (BigInteger order, bool capped, int[] orbitId) BruteForceAutInfo(
         int[] adj, int n, int[]? types = null, long cap = 3_000_000)
     {
         int[] col = OneWLColours(adj, n, types);
@@ -112,13 +114,17 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
             }
         }
 
+        var parent = Enumerable.Range(0, n).ToArray();
+        int Find(int x) { while (parent[x] != x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; }
+        void Union(int a2, int b2) { int ra = Find(a2), rb = Find(b2); if (ra != rb) parent[ra] = rb; }
+
         long nodes = 0; BigInteger count = 0; bool capped = false;
         var img = new int[n]; var used = new bool[n]; Array.Fill(img, -1);
 
         void Rec(int oi)
         {
             if (capped) return;
-            if (oi == n) { count++; return; }
+            if (oi == n) { count++; for (int w = 0; w < n; w++) Union(w, img[w]); return; }
             int v = order[oi];
             for (int c = 0; c < n; c++)
             {
@@ -133,7 +139,18 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
             }
         }
         Rec(0);
-        return (count, capped);
+
+        var orbitId = new int[n];
+        var rep = new Dictionary<int, int>(); int next = 0;
+        for (int v = 0; v < n; v++) { int r = Find(v); if (!rep.TryGetValue(r, out int id)) { id = next++; rep[r] = id; } orbitId[v] = id; }
+        return (count, capped, orbitId);
+    }
+
+    public static (BigInteger order, bool capped) BruteForceAutOrder(
+        int[] adj, int n, int[]? types = null, long cap = 3_000_000)
+    {
+        var (o, c, _) = BruteForceAutInfo(adj, n, types, cap);
+        return (o, c);
     }
 
     // ── The recovery-only (defer-all-reals) harvest ──────────────────────────────
@@ -147,6 +164,18 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
         };
         d.Canonize(SeedFromTypes(n, types), new WarmPartition(n));
         return (d.Automorphisms, d.StuckResidual);
+    }
+
+    // Full canonizer harvest (Phase-2 on) — the byproduct Aut(G), for leak triage.
+    public static PermutationGroup FullHarvest(int[] adj, int n, int[]? types = null)
+    {
+        var d = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
+        {
+            EnableLinearOracle = true,
+            EnableDeferral = true,
+        };
+        d.Canonize(SeedFromTypes(n, types), new WarmPartition(n));
+        return d.Automorphisms;
     }
 
     // ── Graph utilities ──────────────────────────────────────────────────────────
@@ -179,6 +208,92 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
         for (int i = 0; i < na; i++) { types[i] = ta?[i] ?? 0; if (types[i] > maxA) maxA = types[i]; }
         for (int i = 0; i < nb; i++) types[na + i] = (tb?[i] ?? 0) + maxA + 1;   // disjoint type ranges
         return (c, n, types);
+    }
+
+    // Tensor (categorical) product G × H: (i,h)~(i',h') iff i~i' in G AND h~h' in H.
+    // Aut ⊇ Aut(G) × Aut(H). Keep factors non-bipartite (else disconnected).
+    public static (int[] adj, int n) Tensor(int[] a, int na, int[] b, int nb)
+    {
+        int n = na * nb;
+        var c = new int[n * n];
+        for (int i = 0; i < na; i++) for (int ip = 0; ip < na; ip++)
+        {
+            if (a[i * na + ip] != 1) continue;
+            for (int h = 0; h < nb; h++) for (int hp = 0; hp < nb; hp++)
+                if (b[h * nb + hp] == 1) c[(i * nb + h) * n + (ip * nb + hp)] = 1;
+        }
+        return (c, n);
+    }
+
+    // Lexicographic product G[H]: (i,h)~(i',h') iff i~i' in G, or (i==i' and h~h' in H).
+    // The classic structure-fuser (Aut is a wreath-like product, Sabidussi).
+    public static (int[] adj, int n) Lex(int[] a, int na, int[] b, int nb)
+    {
+        int n = na * nb;
+        var c = new int[n * n];
+        for (int i = 0; i < na; i++) for (int ip = 0; ip < na; ip++)
+            for (int h = 0; h < nb; h++) for (int hp = 0; hp < nb; hp++)
+            {
+                if (i == ip && h == hp) continue;
+                bool edge = a[i * na + ip] == 1 || (i == ip && b[h * nb + hp] == 1);
+                if (edge) c[(i * nb + h) * n + (ip * nb + hp)] = 1;
+            }
+        return (c, n);
+    }
+
+    public static int[] Complete(int n)
+    {
+        var a = new int[n * n];
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) if (i != j) a[i * n + j] = 1;
+        return a;
+    }
+
+    // Orbit partition (vertex → orbit id) under a permutation group.
+    public static int[] OrbitsOf(PermutationGroup g, int n)
+    {
+        var id = new int[n]; Array.Fill(id, -1);
+        int next = 0;
+        for (int v = 0; v < n; v++)
+        {
+            if (id[v] != -1) continue;
+            foreach (int u in g.Orbit(v)) id[u] = next;
+            next++;
+        }
+        return id;
+    }
+
+    // Two labellings induce the same partition iff (a[i]==a[j] ⟺ b[i]==b[j]) for all i,j.
+    public static bool SamePartition(int[] a, int[] b, int n)
+    {
+        for (int i = 0; i < n; i++)
+            for (int j = i + 1; j < n; j++)
+                if ((a[i] == a[j]) != (b[i] == b[j])) return false;
+        return true;
+    }
+
+    // ── Leak triage (plan §2/§6): mechanism-gap-B vs abstract-fusion-A ───────────
+    //
+    // A leak is harvest ⊊ Aut. Distinguish:
+    //   • MechanismGapB — harvest recovered the full ORBIT partition (saw all the
+    //     symmetry structure) but a proper subgroup (missed transversal generators):
+    //     a representation/depth gap of the built oracle, not a missed symmetry.
+    //   • AbstractFusionA — harvest's orbits are strictly FINER than Aut's: a genuine
+    //     symmetry the recovery-only harvest could not see without a real decision —
+    //     the fusion the theory predicts is hard to build (a place to work from).
+    // The full-canonizer harvest (Phase-2 on) is logged as a cross-check that the
+    // canonizer itself reaches Aut (else the canonizer, not fusion, is incomplete).
+    public enum LeakKind { None, MechanismGapB, AbstractFusionA }
+
+    private LeakKind Triage(int[] adj, int n, int[]? types, PermutationGroup harvest,
+                            BigInteger autOrder, int[] autOrbits)
+    {
+        if (harvest.Order == autOrder) return LeakKind.None;
+        var harvestOrbits = OrbitsOf(harvest, n);
+        var kind = SamePartition(harvestOrbits, autOrbits, n) ? LeakKind.MechanismGapB : LeakKind.AbstractFusionA;
+        var full = FullHarvest(adj, n, types).Order;
+        int ho = harvestOrbits.Distinct().Count(), ao = autOrbits.Distinct().Count();
+        output.WriteLine($"    triage: {kind}  harvestOrbits={ho} autOrbits={ao}  fullCanonizer={full} (Aut={autOrder})");
+        return kind;
     }
 
     public static int[] Scramble(int[] adj, int n, int[] perm)
@@ -275,6 +390,64 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
         // rigid multipede part — PP2's separable case, empirically.
         Assert.Equal(FusionVerdict.Clean, verdict);
         Assert.True(stuck, "the rigid multipede component should leave a stuck residue");
+    }
+
+    // ── Tier 2 — operation closure: products preserve NoFusion (the structure-fusers) ─
+
+    private static (int[] adj, int n) Factor(string s) => s switch
+    {
+        "C3" => (Cycle(3), 3),
+        "C4" => (Cycle(4), 4),
+        "C5" => (Cycle(5), 5),
+        "K2" => (Complete(2), 2),
+        _ => throw new ArgumentException(s),
+    };
+
+    [Theory]
+    [InlineData("tensor", "C5", "C3")]   // 15v — circulant, |Aut|=60
+    [InlineData("tensor", "C5", "C5")]   // 25v — |Aut|=200 (with factor swap)
+    [InlineData("lex", "C5", "K2")]      // 10v — wreath D5 ≀ S2, |Aut|=320
+    [InlineData("lex", "C4", "K2")]      // 8v  — |Aut|=128
+    public void Tier2_Products_PreserveNoFusion(string op, string f1, string f2)
+    {
+        var (a, na) = Factor(f1);
+        var (b, nb) = Factor(f2);
+        var (adj, n) = op == "tensor" ? Tensor(a, na, b, nb) : Lex(a, na, b, nb);
+
+        var (autOrd, capped, autOrbits) = BruteForceAutInfo(adj, n);
+        Assert.False(capped, $"{f1} {op} {f2} brute force hit the cap");
+
+        var (harvest, stuck) = RecoveryOnlyHarvest(adj, n);
+        var verdict = Classify(harvest.Order, autOrd);
+        Log($"{f1} {op} {f2}", n, autOrd, harvest.Order, stuck, verdict);
+        var leak = Triage(adj, n, null, harvest, autOrd, autOrbits);
+
+        // A product of cascade-class graphs must not FUSE: the symmetry-only harvest
+        // sees the full orbit structure (no abstract-fusion leak). A MechanismGapB
+        // (orbits found, proper subgroup) is logged but is not a fusion.
+        Assert.NotEqual(LeakKind.AbstractFusionA, leak);
+    }
+
+    // Deterministic validation of the triage's two branches (no leak occurs naturally
+    // on Tier-1/2, so exercise the logic directly with synthetic harvest groups on C₅,
+    // whose Aut = D₅ (order 10, single orbit)).
+    [Fact]
+    public void Triage_DistinguishesMechanismFromFusion()
+    {
+        var adj = Cycle(5);
+        var (autOrd, _, autOrbits) = BruteForceAutInfo(adj, 5);
+        Assert.Equal(new BigInteger(10), autOrd);            // D₅
+
+        // Trivial harvest: orbits are 5 singletons ⊊ Aut's single orbit ⇒ a missed
+        // symmetry ⇒ AbstractFusionA.
+        var trivial = new PermutationGroup(5);
+        Assert.Equal(LeakKind.AbstractFusionA, Triage(adj, 5, null, trivial, autOrd, autOrbits));
+
+        // Z₅ harvest (rotations only): same single orbit as D₅ but proper subgroup
+        // (missed the reflections) ⇒ MechanismGapB, not a fusion.
+        var z5 = new PermutationGroup(5);
+        z5.AddGenerator(Perm.FromCycles(5, new[] { 0, 1, 2, 3, 4 }));
+        Assert.Equal(LeakKind.MechanismGapB, Triage(adj, 5, null, z5, autOrd, autOrbits));
     }
 
     // ── Measurement scramble-invariance (verdict must be relabel-independent) ─────
