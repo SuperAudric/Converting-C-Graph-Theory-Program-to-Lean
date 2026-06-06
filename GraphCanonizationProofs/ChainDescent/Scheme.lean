@@ -3508,6 +3508,45 @@ A previously-attempted `Reduced`-predicate + valency route (`relOccurs_iff_valen
 a witness, and the scheme is presented with explicit vertices, so the valency form is no easier to
 discharge. It was reverted as sunk cost; do not reinstate it. -/
 
+/-! ### §11.1 — The imprimitive-decomposition gate: fiber and quotient stay transitive (schurian)
+
+Route B (discharging the seal's `hImprimitive`, [exhaustive-obstruction §0.7.6](../../docs/chain-descent-exhaustive-obstruction.md))
+recurses an imprimitive schurian scheme into its **fiber** (the block stabiliser acting on one block) and
+**quotient** (the group acting on the set of blocks). The recursion's induction hypothesis ranges over
+*schurian* schemes, so it must stay in that class. These two lemmas are the **gate**: both induced actions
+are **transitive**, hence their orbital configurations are schurian — so the deep-research non-schurity risk
+(Evdokimov–Ponomarenko, arXiv:1012.5393, on *abstract* generalized-wreath S-rings) does **not** bite the
+descent's genuine group-block-system. Both reduce to Mathlib's block theory via the landed
+`isBlock_schemeEquiv` + `schemeAutGroup_isPretransitive`. -/
+
+/-- **Fiber transitivity (the gate, the non-trivial direction).** The stabiliser of a closed-subset block
+acts transitively on that block: `orbit (stabilizer (block of a)) a = block of a`. The block stabiliser is
+the fiber group, and its orbital configuration on the block is therefore schurian — the recursion's fiber
+constituent stays in the schurian class. Mathlib `IsBlock.orbit_stabilizer_eq` applied to
+`isBlock_schemeEquiv`, with vertex transitivity supplying `[IsPretransitive]`. -/
+theorem schemeBlock_fiber_transitive {n : Nat} (S : SchurianScheme n)
+    {I : Finset (Fin (S.rank + 1))} (hcl : S.toAssociationScheme.ClosedSubset I) (a : Fin n) :
+    MulAction.orbit
+        (MulAction.stabilizer S.toAssociationScheme.SchemeAutGroup
+          {y | S.toAssociationScheme.schemeEquiv I a y}) a
+      = {y | S.toAssociationScheme.schemeEquiv I a y} := by
+  haveI := schemeAutGroup_isPretransitive S
+  exact (S.toAssociationScheme.isBlock_schemeEquiv hcl a).orbit_stabilizer_eq
+    (S.toAssociationScheme.schemeEquiv_refl hcl.1 a)
+
+/-- **Quotient transitivity (the gate, the easy direction).** The scheme-Aut group carries any block onto
+any other (`smul_schemeEquiv_class` + vertex transitivity), so the action on the set of blocks is
+transitive and the quotient scheme is schurian — the recursion's quotient constituent also stays in the
+schurian class. Together with `schemeBlock_fiber_transitive`, this discharges the Route-B schurity gate. -/
+theorem schemeBlocks_transitive {n : Nat} (S : SchurianScheme n)
+    {I : Finset (Fin (S.rank + 1))} (a b : Fin n) :
+    ∃ g : S.toAssociationScheme.SchemeAutGroup,
+      g • {y | S.toAssociationScheme.schemeEquiv I a y}
+        = {y | S.toAssociationScheme.schemeEquiv I b y} := by
+  haveI := schemeAutGroup_isPretransitive S
+  obtain ⟨g, hg⟩ := MulAction.exists_smul_eq S.toAssociationScheme.SchemeAutGroup a b
+  exact ⟨g, by rw [S.toAssociationScheme.smul_schemeEquiv_class g a, hg]⟩
+
 /-! ## §12 — The Exhaustive-Obstruction Lemma on scheme residuals (leg C, Approach 3)
 
 The capstone of the EOL's Cameron-free **scheme leg**
