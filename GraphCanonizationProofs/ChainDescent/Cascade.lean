@@ -1087,6 +1087,64 @@ theorem orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits {gens : Set (Equiv
   · intro horb b w hcell; exact horb b w (hrec b w hcell)
   · intro hvis b w ho; exact hvis b w (OrbitPartition.subset_warmRefine ho)
 
+/-- **General polynomiality capstone (group side, refinement-computable).** `closure_eq_stabilizerAt_of_realizers`
+keys on `OrbitPartition` realizers (the orbits being *computed*); the honest harvest interface is `warmRefine`
+*cells* (refinement-computable). Composing `coversOrbits_of_visibleRealizers` with the A2-complete equality:
+per-level path-fixing realizers for every same-`warmRefine`-cell pair give `Subgroup.closure (gensAt adj P gens
+S) = StabilizerAt adj P S`. The visible-realizer hypothesis is satisfiable exactly on the recoverable class
+(`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`), so this is the cross-branch harvest reproducing the
+residual *group* through the interface it actually computes on — the polynomiality layer made explicit. -/
+theorem closure_eq_stabilizerAt_of_visibleRealizers {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hreal : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
+  stabilizerAt_eq_closure_gensAt_of_coversOrbits bs (coversOrbits_of_visibleRealizers bs hreal hbase)
+
+/-- **General polynomiality capstone — the cross-branch harvest reproduces the residual group AND order from
+the refinement-computable harvest.** The polynomiality-layer analogue of `exhaustiveObstruction_scheme`: from
+per-level path-fixing *visible* (cell) realizers — what the leaf-collision harvest supplies, satisfiable on the
+recoverable class — and a terminal base, BOTH `Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S`
+and its order `Nat.card … = orbitSizeProd adj P bs S` (= `∏ basic-orbit sizes`). The single substrate-conditional
+input is **recovery** (which makes the visible-realizer hypothesis satisfiable, via
+`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`); the coverage → group → order chain is unconditional and
+axiom-clean. The witnesses populating recovery are `recoverableByDepth_pPolynomial` (metric/DRG) and
+`recoverableByDepth_cfi` (CFI). -/
+theorem crossBranchHarvest_reproduces_residual {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hreal : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S
+      ∧ Nat.card (Subgroup.closure (gensAt adj P gens S)) = orbitSizeProd adj P bs S := by
+  have hcov := coversOrbits_of_visibleRealizers bs hreal hbase
+  exact ⟨stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov,
+    card_closure_gensAt_eq_prod_of_coversOrbits bs hcov⟩
+
+/-- **Root headline — the descent reproduces `Aut(G)^P` and `|Aut(G)^P|` from the refinement-computable harvest.**
+The `S = ∅` case of `crossBranchHarvest_reproduces_residual` (via `gensAt_empty_eq`): on the recoverable class,
+the folded harvested generators generate **exactly** the `P`-preserving automorphism group, and its order is the
+basic-orbit-size product — `Order = ∏ OrbitSize` of `PermutationGroup.cs`, computed end-to-end from the visible
+(cell) harvest with no group-structure hypothesis (abelian or non-abelian). -/
+theorem autP_reproduced_of_visibleRealizers {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
+    (hsound : ∀ g ∈ gens, g ∈ StabilizerAt adj P ∅)
+    (hreal : ∀ T : Finset (Fin n), (∅ : Finset (Fin n)) ⊆ T → ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅)) :
+    Subgroup.closure gens = StabilizerAt adj P ∅
+      ∧ Nat.card (Subgroup.closure gens) = orbitSizeProd adj P bs ∅ := by
+  have hcov := coversOrbits_of_visibleRealizers bs hreal hbase
+  refine ⟨closure_eq_stabilizerAt_empty_of_coversOrbits bs hsound hcov, ?_⟩
+  rw [← gensAt_empty_eq hsound]
+  exact card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
+
 /-- **De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual group at `S` is
 involutive (`ResidualInvolutive`, hence at every deeper node by `residualInvolutive_mono`), the generating set
 `gens` contains every involutive residual automorphism (`hgens` — what the leaf-collision harvest supplies),
@@ -1696,6 +1754,64 @@ theorem cfi_card_stabilizerAt_of_pSeparates (h : IsCFI' adj) (h_odd : h.OddDegre
   refine ⟨bs, ?_⟩
   have hcov := coversOrbits_of_residualInvolutive (gens := {g | ResidualAut adj P S g ∧ g * g = 1})
     bs (cfi_residualInvolutive h hsep) (fun g hg hginv => ⟨hg, hginv⟩) hbase
+  have hcard := card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
+  rwa [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov] at hcard
+
+/-! #### CFI-cov.4 — the harvest wiring on the colour model (`CellSeparatesGadgets`)
+
+The `PSeparatesGadgets` versions above are stated over `P`-relations, but the descent's CFI recovery runs on
+trivial `P` + colour individualization, where `PSeparatesGadgets` is **vacuously false** (no `P`-relation
+distinguishes anything, and it is vacuous at `S=∅`). The colour-model `CellSeparatesGadgets` is the
+dischargeable form — separation lives in the `warmRefine` colouring, which the cascade discretizes. These
+re-wire `cfi_residualInvolutive` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt` onto it, via the
+colour-model Lemma A (`gadgetPreserving_of_cellSeparates`); the existing Lemma B
+(`cfiAut_gadgetFixing_mul_self`) is reused verbatim (it is independent of how gadget-preservation is obtained).
+They **supersede** the `pSeparates` versions for consuming the descent's actual mechanism. -/
+
+/-- **CFI-cov.4 capstone, colour model — `ResidualInvolutive` from cell-separation (Lemma A colour + Lemma B).**
+Where `warmRefine` separates gadgets at `S` (`CellSeparatesGadgets`), every residual automorphism fixes gadgets
+(`gadgetPreserving_of_cellSeparates`) and a gadget-fixing CFI automorphism is an involution
+(`cfiAut_gadgetFixing_mul_self`), so the residual is exponent-2. The dischargeable counterpart of
+`cfi_residualInvolutive` (which keys on the vacuous-on-trivial-`P` `PSeparatesGadgets`). -/
+theorem cfi_residualInvolutive_cell (h : IsCFI' adj) {S : Finset (Fin n)}
+    (hsep : CellSeparatesGadgets adj P S h) : ResidualInvolutive adj P S :=
+  fun _g hg => cfiAut_gadgetFixing_mul_self h hg.1 (gadgetPreserving_of_cellSeparates h hg hsep)
+
+/-- **Cascade bridge — `CellSeparatesGadgets` from `warmRefine` discreteness.** When the cascade discretizes
+the `S`-individualized colouring (every cell a singleton, e.g. `theorem_1_HOR_cfi_oddDeg` at `allSeeds`), the
+colour-model separation holds for free: same cell ⟹ same vertex ⟹ same gadget. The connection from the proven
+CFI cascade to the colour-model base-resolved hypothesis (the `P`-form had no such bridge). -/
+theorem cellSeparatesGadgets_of_discrete (h : IsCFI' adj) {S : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S))) :
+    CellSeparatesGadgets adj P S h :=
+  fun x y hxy => by rw [hd x y hxy]
+
+/-- **CFI cross-branch harvest completeness, colour model.** Where `warmRefine` separates gadgets at `S`, the
+closure of the harvested involutive residual automorphisms *is* the residual:
+`closure {g | ResidualAut adj P S g ∧ g²=1} = StabilizerAt adj P S`. Colour-model counterpart of
+`cfi_closure_eq_stabilizerAt_of_pSeparates`, dischargeable by the cascade (`cellSeparatesGadgets_of_discrete`). -/
+theorem cfi_closure_eq_stabilizerAt_of_cellSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
+    {S : Finset (Fin n)} (hsep : CellSeparatesGadgets adj P S h) :
+    Subgroup.closure {g | ResidualAut adj P S g ∧ g * g = 1} = StabilizerAt adj P S := by
+  obtain ⟨bs, hbase⟩ := cfi_exists_base_seq_from (P := P) h h_odd S
+  have hgensAt : gensAt adj P {g | ResidualAut adj P S g ∧ g * g = 1} S
+               = {g | ResidualAut adj P S g ∧ g * g = 1} :=
+    Set.Subset.antisymm (fun g hg => hg.1) (fun g hg => ⟨hg, mem_stabilizerAt.mpr hg.1⟩)
+  have hmain := stabilizerAt_eq_closure_gensAt_of_coversOrbits (gens := {g | ResidualAut adj P S g ∧ g * g = 1})
+    bs (coversOrbits_of_residualInvolutive bs (cfi_residualInvolutive_cell h hsep)
+      (fun g hg hginv => ⟨hg, hginv⟩) hbase)
+  rwa [hgensAt] at hmain
+
+/-- **`|Aut_S^P| = ∏ basic-orbit sizes`, colour model.** Where `warmRefine` separates gadgets at `S`, the
+residual order is the basic-orbit-size product along the CFI base sequence. Colour-model counterpart of
+`cfi_card_stabilizerAt_of_pSeparates`. -/
+theorem cfi_card_stabilizerAt_of_cellSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
+    {S : Finset (Fin n)} (hsep : CellSeparatesGadgets adj P S h) :
+    ∃ bs : List (Fin n), Nat.card (StabilizerAt adj P S) = orbitSizeProd adj P bs S := by
+  obtain ⟨bs, hbase⟩ := cfi_exists_base_seq_from (P := P) h h_odd S
+  refine ⟨bs, ?_⟩
+  have hcov := coversOrbits_of_residualInvolutive (gens := {g | ResidualAut adj P S g ∧ g * g = 1})
+    bs (cfi_residualInvolutive_cell h hsep) (fun g hg hginv => ⟨hg, hginv⟩) hbase
   have hcard := card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
   rwa [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov] at hcard
 

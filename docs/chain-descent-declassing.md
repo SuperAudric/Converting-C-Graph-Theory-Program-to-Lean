@@ -524,6 +524,11 @@ are bounded (not GI-hard), the last two are the honest boundary.
    `recoverableByDepth_pPolynomial` exports the whole metric/DRG family to `RecoverableByDepth` at depth 1).
    Per-level recovery down the base sequence is the substrate-conditional remainder — the cascade
    discriminator / WL-dimension boundary, not a closable theorem.
+   *Update 2026-06-06 (general polynomiality capstone landed — see [schreier-sims](./chain-descent-schreier-sims.md) STATUS).*
+   The coverage→group→order chain is now packaged through the **refinement-computable (visible-cell) realizer**
+   interface (`crossBranchHarvest_reproduces_residual`: group **and** order from per-level visible realizers + base;
+   `autP_reproduced_of_visibleRealizers`: the `S=∅` headline reproducing `Aut(G)^P` + its order) — the polynomiality-layer
+   analogue of the leg-C §12 capstone, axiom-clean, with **recovery** as the single substrate-conditional input.
 4. **Flag iso-invariance** ([strategy §15 gap 2](./chain-descent-strategy.md)) — the constructed
    oracle's verdict as a function of iso-invariant ids. `colourMatchPerm` is built from iso-invariant
    colourings, so it *should* hold by construction; the obligation is undischarged.

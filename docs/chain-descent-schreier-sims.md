@@ -50,6 +50,29 @@
 >   level, not just depth 1) is **substrate-conditional** — the cascade property iterated; it is **not**
 >   unconditionally true for all DRGs (the WL-dimension boundary), so it is the cascade-class discriminator
 >   (`RecoverableByDepth` witnesses), not a closable theorem — the cross-branch analog of declassing §9's "B's core".
+> - **GENERAL POLYNOMIALITY CAPSTONE LANDED** (2026-06-06, axiom-clean, `Cascade.lean` "Part A"): the
+>   coverage→group→order chain packaged through the **refinement-computable (visible-cell) realizer** interface —
+>   the honest harvest interface (the leaf-collision harvest works with `warmRefine` cells, not orbits).
+>   `closure_eq_stabilizerAt_of_visibleRealizers` (group side, computable), **`crossBranchHarvest_reproduces_residual`**
+>   (group **and** order, general `S` — the polynomiality-layer analogue of `exhaustiveObstruction_scheme`), and
+>   `autP_reproduced_of_visibleRealizers` (the `S=∅` headline: the folded harvest generates *exactly* `Aut(G)^P` and
+>   its order `= ∏ basic-orbit sizes`, no group-structure hypothesis). The **single substrate-conditional input is
+>   recovery** (makes the visible-realizer hypothesis satisfiable, via `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`);
+>   the chain is unconditional. Witnesses populating recovery: `recoverableByDepth_pPolynomial` (metric/DRG),
+>   `recoverableByDepth_cfi` (CFI). The remaining content is *discharging* recovery on a class (the substrate-conditional
+>   boundary) and the harvest-collection (firing), not the capstone.
+> - **CFI base-layer, colour-model RE-WIRING DONE** (2026-06-06, axiom-clean, `Cascade.lean` CFI-cov.4). **Scoping
+>   finding:** `PSeparatesGadgets` (the prior "sole CFI obligation") is stated over `P`-relations but the descent's
+>   CFI recovery runs on trivial `P` + colour individualization, so it is **vacuously false** at every `S` for
+>   multi-gadget CFI (and vacuous at `S=∅`). The colour-model `CellSeparatesGadgets` (same `warmRefine` cell ⟹ same
+>   gadget) is the dischargeable form. Landed: `gadgetPreserving_of_cellSeparates` (Lemma A colour, via
+>   `warmRefine_invariant_of_isAut`), `cfi_residualInvolutive_cell` (capstone; Lemma B `cfiAut_gadgetFixing_mul_self`
+>   reused verbatim), `cellSeparatesGadgets_of_discrete` (cascade bridge — `warmRefine` discreteness ⟹
+>   `CellSeparatesGadgets`, the connection the `P`-form lacked), and `cfi_closure_eq_stabilizerAt_of_cellSeparates` /
+>   `cfi_card_stabilizerAt_of_cellSeparates` (harvest completeness + order). These **supersede** the `pSeparates`
+>   versions for the descent's actual mechanism. **Remaining:** discharge `CellSeparatesGadgets` at a *non-trivial*
+>   (gauge-remaining) `S` via the bounded base-graph lemma (1-WL separates CFI gadgets ⟸ 1-WL separates `H`) — the
+>   "orthogonal cascade leg"; `cellSeparatesGadgets_of_discrete` covers the (vacuous-harvest) base case.
 > - **CFI WITNESS LANDED conditional on gauge-generation** (2026-06-04, axiom-clean): `gaugeSubgroup`
 >   (the gauge group `Z₂^β` as a `Subgroup`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self` (the gauge group
 >   is exponent-2), and **`cfi_coversOrbits` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt_eq_prod`**
