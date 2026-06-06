@@ -1263,6 +1263,60 @@ theorem noFusion_of_warmSeparatedPartition {ι : Type*} (β : Fin n → ι)
   fun T hT b w hbw =>
     hcov T hT b w hbw (hsep T hT b w (OrbitPartition.subset_warmRefine hbw))
 
+/-! ### Route B — the swap decomposition of orbit coverage (the imprimitive recursion's core)
+
+For an **imprimitive** residual, `Aut_S` *permutes* a block system, so orbit pairs cross block boundaries —
+the case `noFusion_of_warmSeparatedPartition` (which requires orbits to *respect* the partition) cannot reach.
+The decomposition uses that `CoversOrbits`'s coverage clause is keyed on `Subgroup.closure (gensAt …)` — a
+group, **closed under composition** — so a cross-block orbit pair is realized by composing a **block-swap**
+(reach the orbit-mate's block) with a **fiber move** (within that block). This is the wreath structure of an
+imprimitive group, and it factors the full-orbit coverage into:
+* **block-reach** (`hreach`, the *quotient* recovery): the closure can send `b` into the block of every
+  orbit-mate `w` (`β (σ b) = β w`);
+* **within-block coverage** (`hfiber`, the *fiber* recovery): the closure realizes every *same-block* orbit
+  pair.
+
+The two constituents are recovered on the *smaller* quotient and fiber actions — both transitive/schurian by
+the Phase-0 gate (`schemeBlock_fiber_transitive`, `schemeBlocks_transitive`, `Scheme.lean §11.1`) — so the
+size-induction (Phase 2) discharges them via its IH. Discharging the seal's `hImprimitive`
+([exhaustive-obstruction §0.7.6](../../../docs/chain-descent-exhaustive-obstruction.md)). -/
+
+/-- **Phase 1 core — swap decomposition of a coverage clause.** The closure-based coverage of base point
+`b`'s full residual orbit factors, along a partition `β`, into **block-reach** `hreach` and **within-block
+coverage** `hfiber`. The realizer is the composite `h * σ` (block-swap `σ` then fiber move `h`), which lands
+in the closure subgroup — why this needs `closure (gensAt …)` (composition-closed), not single generators.
+Generalizes `noFusion_of_warmSeparatedPartition` to the Aut-**permuted** (block-swapping) case. -/
+theorem orbitCoverage_of_blockDecomposition {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)} (b : Fin n)
+    (hreach : ∀ w, OrbitPartition adj P S b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens S), β (σ b) = β w)
+    (hfiber : ∀ u w, OrbitPartition adj P S u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens S), h u = w) :
+    ∀ w, OrbitPartition adj P S b w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens S), h b = w := by
+  intro w hbw
+  obtain ⟨σ, hσcl, hσβ⟩ := hreach w hbw
+  have hσres : ResidualAut adj P S σ := mem_stabilizerAt.mp (closure_gensAt_le_stabilizerAt hσcl)
+  have hb_σb : OrbitPartition adj P S b (σ b) :=
+    orbitPartition_iff_residualAut.mpr ⟨σ, hσres, rfl⟩
+  have hσb_w : OrbitPartition adj P S (σ b) w := (hb_σb.symm).trans hbw
+  obtain ⟨h, hhcl, hhσb⟩ := hfiber (σ b) w hσb_w hσβ
+  exact ⟨h * σ, mul_mem hhcl hσcl, by rw [Equiv.Perm.mul_apply, hhσb]⟩
+
+/-- **Phase 1 wiring — a `CoversOrbits` step from the block decomposition.** Assembles one
+`CoversOrbits (b :: bs) S` level: the head clause from `orbitCoverage_of_blockDecomposition` (block-reach +
+within-block coverage at `b`) and the tail from the recursion on `insert b S`. The recursion-ready interface
+the Phase-2 size-induction iterates down the base sequence. -/
+theorem coversOrbits_cons_of_blockDecomposition {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)} (b : Fin n) (bs : List (Fin n))
+    (hreach : ∀ w, OrbitPartition adj P S b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens S), β (σ b) = β w)
+    (hfiber : ∀ u w, OrbitPartition adj P S u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens S), h u = w)
+    (htail : CoversOrbits adj P gens bs (insert b S)) :
+    CoversOrbits adj P gens (b :: bs) S :=
+  ⟨orbitCoverage_of_blockDecomposition β b hreach hfiber, htail⟩
+
 /-! ### The `LargenessBridge` graph core — largeness of `Aut(G)^P` read off the no-fusion harvest
 
 These two theorems are the **class-agnostic** content of "leg C ⟹ large ⟸ `NoFusion`" — the mechanical
