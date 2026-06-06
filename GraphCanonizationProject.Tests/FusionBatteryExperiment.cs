@@ -296,6 +296,71 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
         return kind;
     }
 
+    // k interchangeable copies of a unit (IDENTICAL types per copy ⇒ Aut ⊇ S_k
+    // permuting copies). Disjoint (no inter-copy edges).
+    public static (int[] adj, int n, int[] types) KCopies(int[] u, int nu, int[] ut, int k)
+    {
+        int n = nu * k;
+        var adj = new int[n * n];
+        var types = new int[n];
+        for (int c = 0; c < k; c++)
+            for (int i = 0; i < nu; i++)
+            {
+                types[c * nu + i] = ut[i];                         // identical across copies
+                for (int j = 0; j < nu; j++) adj[(c * nu + i) * n + (c * nu + j)] = u[i * nu + j];
+            }
+        return (adj, n, types);
+    }
+
+    // Add a single hub vertex adjacent to vertex `anchor` of every copy — connects the
+    // copies symmetrically (S_k still permutes copies, fixing the hub). The hub is an
+    // articulation vertex: removing it restores the disjoint copies (layered/decomposable).
+    public static (int[] adj, int n, int[] types) AddHub(
+        (int[] adj, int n, int[] types) g, int nu, int k, int anchor)
+    {
+        int n2 = g.n + 1, hub = g.n;
+        var adj = new int[n2 * n2];
+        for (int i = 0; i < g.n; i++) for (int j = 0; j < g.n; j++) adj[i * n2 + j] = g.adj[i * g.n + j];
+        for (int c = 0; c < k; c++) { int a = c * nu + anchor; adj[hub * n2 + a] = 1; adj[a * n2 + hub] = 1; }
+        var types = new int[n2];
+        int maxT = g.types.Max();
+        for (int i = 0; i < g.n; i++) types[i] = g.types[i];
+        types[hub] = maxT + 1;
+        return (adj, n2, types);
+    }
+
+    // ── Decomposability probe (separable-layered vs genuine fusion) ──────────────
+    // Number of connected components, optionally after deleting a vertex set.
+    public static int ComponentCount(int[] adj, int n, HashSet<int>? deleted = null)
+    {
+        var seen = new bool[n]; int comps = 0;
+        var st = new Stack<int>();
+        for (int s = 0; s < n; s++)
+        {
+            if (seen[s] || (deleted?.Contains(s) ?? false)) continue;
+            comps++; seen[s] = true; st.Push(s);
+            while (st.Count > 0)
+            {
+                int x = st.Pop();
+                for (int y = 0; y < n; y++)
+                    if (adj[x * n + y] == 1 && !seen[y] && !(deleted?.Contains(y) ?? false)) { seen[y] = true; st.Push(y); }
+            }
+        }
+        return comps;
+    }
+
+    // A leak is "decomposable" (separable / layered — the calculator §7 case that is NOT
+    // the hard fusion) if the graph is disconnected, or a small vertex cut (here: a few
+    // highest-degree vertices, e.g. a hub) disconnects it into ≥ 2 pieces.
+    public static bool LeakIsDecomposable(int[] adj, int n, int cutBudget = 1)
+    {
+        if (ComponentCount(adj, n) >= 2) return true;
+        var deg = new int[n];
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) deg[i] += adj[i * n + j];
+        var top = Enumerable.Range(0, n).OrderByDescending(v => deg[v]).Take(cutBudget).ToHashSet();
+        return ComponentCount(adj, n, top) >= 2;
+    }
+
     public static int[] Scramble(int[] adj, int n, int[] perm)
     {
         var b = new int[n * n];
@@ -448,6 +513,116 @@ public class FusionBatteryExperiment(ITestOutputHelper output)
         var z5 = new PermutationGroup(5);
         z5.AddGenerator(Perm.FromCycles(5, new[] { 0, 1, 2, 3, 4 }));
         Assert.Equal(LeakKind.MechanismGapB, Triage(adj, 5, null, z5, autOrd, autOrbits));
+    }
+
+    // ── Tier 3 — adversarial grafts (the decisive non-abelian fusion attempt) ────
+    //
+    // Tries to BUILD a hidden non-abelian symmetry. A genuine fusion = a CONNECTED,
+    // NON-decomposable graph whose recovery-only harvest misses a small non-abelian
+    // symmetry (AbstractFusionA ∧ ¬decomposable). The copy-based constructions are
+    // predicted to register as SEPARABLE/LAYERED (the S₃ is an outer action over
+    // identifiable IR-core blocks — calculator §7 "layered products decompose"), NOT
+    // genuine fusion. Watch the failure mode: it is the proof insight.
+
+    // Combined Tier-3 measurement + classification. Returns (leak, decomposable).
+    private (LeakKind leak, bool decomposable) Tier3Measure(string name, int[] adj, int n, int[]? types)
+    {
+        var (autOrd, capped, autOrbits) = BruteForceAutInfo(adj, n, types);
+        Assert.False(capped, $"{name}: brute force hit the cap");
+        var (harvest, stuck) = RecoveryOnlyHarvest(adj, n, types);
+        var verdict = Classify(harvest.Order, autOrd);
+        var leak = Triage(adj, n, types, harvest, autOrd, autOrbits);
+        bool decomp = LeakIsDecomposable(adj, n);
+        int comps = ComponentCount(adj, n);
+        string interp = leak switch
+        {
+            LeakKind.AbstractFusionA when decomp => "SEPARABLE/layered (Tier-0/IR-core — NOT fusion)",
+            LeakKind.AbstractFusionA => "*** GENUINE CONNECTED FUSION ***",
+            LeakKind.MechanismGapB => "mechanism gap (orbits found, proper subgroup)",
+            _ => verdict.ToString(),
+        };
+        output.WriteLine($"{name,-26} n={n,3}  |Aut|={autOrd,-6} harvest={harvest.Order,-6} " +
+                         $"stuck={(stuck ? "Y" : "N")} comps={comps} decomp={(decomp ? "Y" : "N")} " +
+                         $"⇒ {verdict} / {leak} — {interp}");
+        return (leak, decomp);
+    }
+
+    [Fact]
+    public void Tier3_DisjointCopies_S3_IsSeparable()
+    {
+        var mp = MultipedeGenerator.BuildCirculant(5);
+        var (adj, n, types) = KCopies(Flatten(mp.Graph), mp.Graph.VertexCount, mp.VertexTypes, 3);
+        var (leak, decomp) = Tier3Measure("3× Multipede(5) disjoint", adj, n, types);
+
+        // Aut ⊇ S₃ (interchangeable IR-core copies, order 6 — non-abelian). If recovery-only
+        // misses it (raw ChainDescent has no Tier-0), it MUST be the separable/Tier-0 case
+        // (disconnected), never a genuine connected fusion.
+        if (leak == LeakKind.AbstractFusionA)
+            Assert.True(decomp, "a disjoint-copy leak must be decomposable (separable, PP2 / Tier-0)");
+    }
+
+    [Fact]
+    public void Tier3_HubBridgedCopies_S3_IsLayeredSeparable()
+    {
+        var mp = MultipedeGenerator.BuildCirculant(5);
+        int nu = mp.Graph.VertexCount;
+        var copies = KCopies(Flatten(mp.Graph), nu, mp.VertexTypes, 3);
+        var (adj, n, types) = AddHub(copies, nu, 3, anchor: 0);   // connect copies via one hub vertex
+        var (leak, decomp) = Tier3Measure("3× Multipede(5) + hub", adj, n, types);
+
+        // Connected now, but the hub is an articulation vertex — removing it restores the
+        // disjoint copies, so the S₃ is an outer action over identifiable blocks (layered,
+        // calculator §7 "decomposes"). Any leak must be flagged decomposable — NOT a
+        // genuine connected non-decomposable fusion. If this fails, a fusion was built.
+        if (leak == LeakKind.AbstractFusionA)
+            Assert.True(decomp, "a hub-bridged leak must be decomposable (layered, calculator §7)");
+    }
+
+    // k copies, each independently RELABELLED (structurally identical, label-misaligned).
+    // Tests that the harvest certifies the copy-swap STRUCTURALLY (construct-and-check),
+    // not by label-alignment — the adversarial sharpening of the disjoint case.
+    public static (int[] adj, int n, int[] types) KCopiesScrambled(int[] u, int nu, int[] ut, int k)
+    {
+        int n = nu * k;
+        var adj = new int[n * n]; var types = new int[n];
+        for (int c = 0; c < k; c++)
+        {
+            var pi = RandomPerm(nu, 7000 + c);
+            for (int i = 0; i < nu; i++)
+            {
+                types[c * nu + pi[i]] = ut[i];
+                for (int j = 0; j < nu; j++) adj[(c * nu + pi[i]) * n + (c * nu + pi[j])] = u[i * nu + j];
+            }
+        }
+        return (adj, n, types);
+    }
+
+    [Fact]
+    public void Tier3_ScrambledCopies_S3_StillConsumed()
+    {
+        var mp = MultipedeGenerator.BuildCirculant(5);
+        var (adj, n, types) = KCopiesScrambled(Flatten(mp.Graph), mp.Graph.VertexCount, mp.VertexTypes, 3);
+        var (leak, decomp) = Tier3Measure("3× Multipede(5) scrambled", adj, n, types);
+
+        // The S₃ now maps structurally-corresponding (not label-aligned) vertices. The
+        // construct-and-check harvest must still certify it — and any miss must be the
+        // separable/Tier-0 case (disconnected), never a genuine connected fusion.
+        if (leak == LeakKind.AbstractFusionA)
+            Assert.True(decomp, "a scrambled-copy leak must be decomposable (separable, Tier-0)");
+    }
+
+    [Fact]
+    public void Tier3_Cfi_Abelian_IsNotFusion()
+    {
+        var cfi = CfiGraphGenerator.Generate("K4").Even;
+        int n = cfi.VertexCount;
+        var adj = Flatten(cfi);
+        var (leak, _) = Tier3Measure("CFI(K4) [abelian gauge]", adj, n, null);
+
+        // CFI's hidden symmetry is the abelian Z₂^β gauge. By the bottom-up route (L3,
+        // §0.7.4) abelian is unique-candidate ⟹ consumable — never a fusion species. At
+        // low treewidth it cascades (consumed); regardless it must not be AbstractFusionA.
+        Assert.NotEqual(LeakKind.AbstractFusionA, leak);
     }
 
     // ── Measurement scramble-invariance (verdict must be relabel-independent) ─────

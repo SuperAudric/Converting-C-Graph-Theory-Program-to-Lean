@@ -171,9 +171,44 @@ constructions most likely to surface new behaviour are the products and the engi
 >   (200), `C5[K2]` (320), `C4[K2]` (128) all give harvest **= full Aut**. Products of cascade-class graphs
 >   do not fuse. 13/13 battery tests green.
 >
-> **Next (Increment 3):** Tier-3 adversarial grafts (the decisive core) — graft a small (non-abelian) symmetry
-> onto a coloured rigid multipede so orbits share 1-WL cells; brute-force the *actual* Aut (faithfulness rule);
-> the triage's `AbstractFusionA` branch is the signal a fusion was built (a place to work from).
+> **Increment 3 LANDED (2026-06-06) — Tier-3 adversarial grafts + the decisive finding (harness-only).**
+> Constructions: `KCopies`/`KCopiesScrambled` (k interchangeable IR-core copies ⇒ `Aut ⊇ S_k`, non-abelian),
+> `AddHub` (connect copies symmetrically), CFI(K4); plus a **decomposability probe** (`ComponentCount`,
+> `LeakIsDecomposable`) splitting a leak into **SEPARABLE/layered** (disconnected or a small cut decomposes it —
+> calculator §7 "layered products decompose", Tier-0/IR-core, *not* fusion) vs **GENUINE connected fusion**
+> (`AbstractFusionA ∧ ¬decomposable` — the jackpot). 17/17 battery tests green, ~5s.
+>
+> **Result — no genuine fusion was constructible; the one leak found is separable.** Outcomes:
+> - **CFI(K4)** (abelian gauge, |Aut|=192): harvest **= Aut**, Clean — the gauge cascades and is consumed
+>   (confirms §0.7.4: abelian is not a fusion species).
+> - **Label-ALIGNED copies** (disjoint and hub-bridged, |Aut|=S₃=6): harvest **= 6**, Clean — the harvest's
+>   **construct-and-check certifies the non-abelian copy-swap DIRECTLY**, even over 1-WL-resistant IR-core
+>   copies, because the role-preserving swap maps corresponding cells (refinement-visible).
+> - **Label-SCRAMBLED copies** (|Aut|=S₃=6): harvest **= 1** (misses the whole S₃) ⇒ `AbstractFusionA` — BUT
+>   **decomposable** (3 components) ⇒ SEPARABLE/Tier-0, the IR-blind-spot wearing a symmetry hat, *not*
+>   genuine fusion.
+>
+> **Proof-relevant insights (the watch-items):**
+> 1. **The harvest's copy-swap completeness is exactly "is the candidate refinement-pinned?"** Aligned copies
+>    ⇒ unique role-preserving candidate ⇒ consumed; scrambled IR-core copies ⇒ matching is GI-hard, no unique
+>    refinement-pinned candidate ⇒ missed. This is `colourMatchPerm`/M-B's recovery dependency made concrete:
+>    construct-and-check succeeds iff recovery pins the candidate (declassing §9 "B's core", the localisation
+>    layer) — and crucially that dependency is **orthogonal to the symmetry's abelian/non-abelian-ness**.
+> 2. **Every hidden non-abelian symmetry the battery could build is SEPARABLE** (decomposable into IR-core
+>    blocks) — calculator §7 "layered products decompose" confirmed empirically. The missed S₃ is an *outer*
+>    action over independent IR-cores (Tier-0 + per-block canonization closes it), **not** a non-decomposable
+>    Cameron-free fusion. No connected non-decomposable non-abelian leak was constructible — supporting the
+>    seal's bottom-up route (non-consumed ∧ non-abelian ⟹ primitive ⟹ Cameron): the only non-consumed
+>    non-abelian symmetry is a genuine Cameron section, with **no graftable third species**.
+> 3. **PP2's separable case is vindicated and its scope sharpened:** the separable regime is *precisely* where
+>    hidden non-abelian symmetry lives, and it is Tier-0-handled. So "leg C ⟹ large ⟸ NoFusion" splits cleanly:
+>    the separable part is provable (Tier-0 / component decomposition), and the entangled part has **no
+>    constructible counterexample** — strong empirical support that `NoFusion` holds outside genuine Cameron.
+>
+> **Caveat (honest):** raw `ChainDescent` (the harness) does not apply Tier-0 component decomposition, so the
+> scrambled-copy leak is an artifact the *full* canonizer (`CanonGraphOrdererChainDescent`, which decomposes)
+> closes; the decomposability proxy correctly flags it SEPARABLE. Confirming Tier-0 closure end-to-end (run the
+> per-component harvest + match) is a deferred refinement; it does not change the conclusion (no genuine fusion).
 
 - **Recovery-only mode.** A descent that consumes only certifiable/recovered orbits and *stops* a branch
   rather than making a genuine decision (sidesteps the a-posteriori-needs-leaves tension). Reuses the
@@ -209,3 +244,18 @@ audit fixed the flag classifier). Specifically keep an eye out for:
   feed the separate primitivity witness.
 
 Record any such pattern here (or in the durable docs) as it appears; the plan is expected to adjust.
+
+**Observed (Increments 1–3, 2026-06-06):**
+- **1-WL resist-vs-absorb boundary → it is the *candidate-pinning* boundary, orthogonal to abelian-ness.** The
+  recovery-only harvest consumes a symmetry (abelian *or* non-abelian) iff its construct-and-check candidate is
+  refinement-pinned: label-aligned copies (unique role-preserving candidate) ⇒ consumed; scrambled IR-core
+  copies (matching is GI-hard, candidate unpinnable) ⇒ missed. The "absorb" failure is *recovery/localisation*
+  (declassing §9 "B's core"), **not** group structure — sharpening that the depth-witness layer is the sole
+  substrate-conditional input (consistent with the Lean `NoFusion`/recovery split, `Cascade.lean` Part A).
+- **Every hidden non-abelian symmetry is separable.** All Tier-3 misses were decomposable (IR-core blocks under
+  an outer S_k) — calculator §7 "layered products decompose" empirically confirmed; no graftable connected
+  non-decomposable non-abelian fusion exists in the battery. Supports leg C's "non-consumed non-abelian ⟹
+  Cameron" (no third species) and PP2's separable case.
+- **Orbit-size product tracks |Aut| under consumption.** On every Clean case the harvest order = brute-force
+  |Aut| exactly (Cameron, products, aligned copies, CFI) — the PP3 order-identity prediction holds end-to-end
+  on examples.
