@@ -563,7 +563,10 @@ by orbit).
    circulants (Cayley graphs of `Z_n`, `n ∈ {8,9,10}`, structured connection sets), **all imprimitive**,
    ground-truth `Aut` by brute force (not the canonizer) — **all recovered at depth 1, 0 block-straddles.**
    Circulants have bounded WL-dimension (Muzychuk), so they recover and can't enter the off-recovery
-   regime where A2 could fail. Net across both A2-i runs: **every reachable imprimitive vertex-transitive
+   regime where A2 could fail. [**PREMISE CORRECTED 2026-06-06 — see §0.7.6:** circulant WL-dim is in fact
+   *unbounded* (`≥c√log n`, Wu–Ren–Ponomarenko 2025); only prime-power order is bounded (`≤3`). The `n∈{8,9,10}`
+   here are low-Ω so still low-WL — the empirics stand, but the reason is "low prime-factor count," not "Muzychuk
+   bounded."] Net across both A2-i runs: **every reachable imprimitive vertex-transitive
    scheme (6 metric scheme graphs + 18 circulants) has its block-of-`v` respected by 1-WL — no
    counterexample anywhere, and mounting support for the structural lead.** The genuine failure case (if
    it exists) needs constructions beyond circulants/metric schemes; the leading candidate (CFI) is
@@ -802,6 +805,58 @@ decision).
   separation axis. The **isomorphic-copy / swap** case (blocks 1-WL-indistinguishable) is correctly excluded —
   it routes through recovery + the sort-key gap (strategy §15 gap 4), the substrate-conditional remainder; the
   full disjoint-union construction with the wreath swap stays deferred.
+
+### 0.7.6 The `hImprimitive` leak — deep-research verdict: GENUINELY OPEN, not citable (2026-06-06)
+
+After the seal capstone (`reachesRigidOrCameron`, §0.5) reduced the goal to the exact remainder, a literature
+deep-research pass (`wf_96b049bd`, 103 agents, 21 primary sources, 3-vote adversarial verification) targeted the
+one open in-scope hypothesis `hImprimitive` (`¬IsPrimitive ⟹ ReachesRigid`). The question: is the leak —
+**imprimitive ∧ block-invisible-at-all-poly-depths ∧ non-abelian ∧ non-Cameron ∧ has-symmetry** — citably
+impossible (Route a)? **Verdict: GENUINELY OPEN. Route (a) [discharge by citation] does not work.**
+
+**What supports emptiness (but only as absence-of-evidence — weaker than the Cameron citation):**
+- All classical hard WL/IR instances (CFI, multipedes) have **4-bounded ABELIAN color classes**, and their
+  hardness is *abelian-color-class structured* (Lichter–Rassmann–Schweitzer, arXiv:2402.11531, CSL 2025) — but
+  the authors' own phrasing is "**almost all** known hard instances," a deliberate hedge.
+- **No non-abelian CFI exists** in the literature: the generalization line is Z₂→Z_q→Z_{2^i} (all cyclic/abelian,
+  Lichter arXiv:2104.12999); the multipede `R^I(G)` is **provably rigid for every individualization set** (odd
+  base; Neuen–Schweitzer Lemma 4.3, arXiv:1705.03283). So high-WL structure is empirically abelian-gauge **or**
+  rigid — never non-abelian-symmetric. Suggestive, not a theorem.
+- Abelian color-class WL-dimension is **P-decidable** (leg B is provably tame, 2402.11531).
+
+**What it does NOT establish (why it is not citable):** no source exhibits the leak quadrant (so no known
+counterexample — consistent with emptiness) **and** no source proves it empty. The closest structural tool —
+the generalized-wreath imprimitive decomposition — **does not preserve schurity** (Evdokimov–Ponomarenko,
+arXiv:1012.5393: generalized wreath products of schurian S-rings need not be schurian), so the
+imprimitive→primitive recursion (Route b) is *riskier* than hoped: a quotient/fiber can be non-schurian.
+
+**Two corrections the pass forced:**
+1. **PREMISE FIXED — circulant WL-dimension is UNBOUNDED.** The earlier "circulants bounded WL-dim (Muzychuk)"
+   premise (§0.7.2 circulant battery; MEMORY) is **wrong**: Wu–Ren–Ponomarenko (arXiv:2507.10116, Jul/Dec 2025)
+   prove circulant *absolute* WL-dimension is `≥ c√log n` for infinitely many `n` (high-Ω(n) composite orders);
+   only **prime-power order** is bounded (`≤3`, Ponomarenko arXiv:2206.15028). The battery's `n∈{8,9,10}` are
+   low-Ω so still low-WL empirically — the empirics stand, but the justification is "low-prime-factor ⟹ low-WL,"
+   not "circulants bounded." **Consequence: "abelian + vertex-transitive ⟹ bounded WL" is FALSE** — abelian
+   vertex-transitive structures *can* be high-WL (they stay leg-B abelian, so not themselves a leak, but the
+   intuition "high-WL only from CFI" is weakened).
+2. **LEG-C CITATION CAVEAT.** `PrimitiveCCClassification` is solid only at **rank 3** (Babai 2014, SRGs) and
+   **rank 4** (Kivva 2023); the all-rank Babai dichotomy was **refuted** by Eberhard's rank-28 counterexamples
+   (2022) → at high rank use the revised "Cameron sandwich" formulation. Our Lean carries it as an abstract
+   hypothesis, so it stays sound to *cite*, but the rank-3/4-vs-high-rank nuance should be recorded at the cite.
+
+**The right vocabulary to STATE the conjecture (Evdokimov–Ponomarenko):** every CC has a **separability number**
+`s(C)` with `s(C) ≤ m ⟺ C is determined by its m-dimensional intersection numbers` — essentially the WL-dimension;
+**schurian** = orbital of a permutation group. The leak is precisely *a schurian CC with high `s(C)`, imprimitive,
+non-abelian, non-Cameron* — and **no theorem in the corpus bounds `s(C)` for such CCs**. This is the formal handle
+for any future attack (Lean statement, or a targeted paper question).
+
+**Conclusion / status of `hImprimitive`:** it stays a **carried witness** (like the `NoFusion` witness), now
+*precisely characterized* and *confirmed to be an open research frontier* — not a known gap with a known
+counterexample, and not citably closeable. The seal is complete modulo {Babai rank-3/4 citation + this open
+emptiness conjecture (stated via `s(C)`) + the leg-A cascade-recovery reduction}. Open sub-questions worth a
+future pass: WL-dimension of general *non-abelian* Cayley graphs (the natural home of a would-be leak; uncovered
+by the corpus), and whether an imprimitive-scheme `s(C)` reduction-to-constituents theorem exists (it was sought
+and *not located*).
 
 ---
 

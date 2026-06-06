@@ -3552,7 +3552,16 @@ predicate `IsCameronScheme`, carried as an explicit hypothesis — **never a fre
 axiom basis clean, the citation visible at each use site). Statement: every **group-preprimitive**,
 coherent-configuration-**rank-≥-3**, **large** schurian scheme in which every relation occurs is a
 Cameron scheme. Largeness is essential — without it `C₇` (primitive, rank 3, but small/cascading) would
-be a counterexample. -/
+be a counterexample.
+
+**Citation robustness (deep-research pass, 2026-06-06; exhaustive-obstruction §0.7.6).** This statement is
+keyed on **largeness** (super-polynomial `|Aut|`), which maps to the *solid* **Sun–Wilmes** classification of
+primitive coherent configurations with `> exp(Õ(n^{1/3}))` automorphisms (and Babai 1981: only the trivial PCC
+exceeds `exp(Õ(n^{1/2}))`). It is **not** the all-rank *minimal-degree* dichotomy ("non-Cameron primitive ⟹
+small minimal degree"), whose clean form is proven only at rank 3 (Babai 2014) / rank 4 (Kivva 2023) and was
+**refuted at rank 28** by Eberhard (2022) (needs a revised "Cameron sandwich"). So the largeness antecedent is
+exactly what keeps this citation robust at all ranks — validating the "driver is largeness, not non-abelian"
+choice. -/
 def PrimitiveCCClassification
     (IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop) : Prop :=
   ∀ (m : Nat) (S : SchurianScheme m),
