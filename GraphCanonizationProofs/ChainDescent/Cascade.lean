@@ -3134,4 +3134,84 @@ theorem reachesRigidOrCameron_viaHarvest {n : Nat} {IsLarge : Nat → Prop}
     ReachesRigid n S ∨ IsCameronScheme n S :=
   reachesRigidOrCameron hClassify (largenessBridge_viaHarvest IsLarge) S hne hrank hCascade hImprimitive
 
+/-! ### Discharging the seal's `hImprimitive` via Route B — the imprimitive branch reduced to coverage
+
+The optional wiring connecting Route B (the block-decomposition chain `reachesRigid_of_blockDecomposition`)
+to the seal capstone. `hImprimitive` is no longer an opaque hypothesis: it is **reduced** to the two intrinsic
+coverage interfaces (`hreach` = quotient block-reach, `hfiber` = fiber within-block) the imprimitive residual's
+recovery supplies — the same `schemeAdj` bridge pattern as the `LargenessBridge` discharge. `SchemeReproduced`
+instantiates the capstone's abstract `ReachesRigid` as "the harvest reproduces `SchemeAutGroup`." -/
+
+/-- **Concrete `ReachesRigid`: the harvest reproduces the scheme's automorphism group.** A descent reaches a
+rigid residual on scheme `S` when its harvested generators generate exactly `SchemeAutGroup S` (soundness is
+implied by the equality). The block-decomposition route discharges it on imprimitive residuals. -/
+def SchemeReproduced : ∀ (m : Nat), SchurianScheme m → Prop :=
+  fun _ S => ∃ gens : Set (Equiv.Perm (Fin _)),
+    Subgroup.closure gens = S.toAssociationScheme.SchemeAutGroup
+
+/-- **Route B → scheme bridge: `SchemeReproduced` from a block decomposition.** Run
+`reachesRigid_of_blockDecomposition` on the labelled encoding `schemeAdj S` (trivial all-`unknown` `P`) and
+carry the result across the `schemeAdj` bridge: `gensAt_empty_eq` (soundness ⟹ `gensAt … ∅ = gens`) and
+`stabilizerAt_schemeAdj_empty_eq` (`StabilizerAt (schemeAdj S) ⊥ ∅ = SchemeAutGroup S`) turn
+`closure (gensAt … ∅) = StabilizerAt … ∅` into `closure gens = SchemeAutGroup S`. The partition `β` is
+arbitrary (the block-class of the imprimitive scheme at the use site); the bridge itself is `β`-agnostic. -/
+theorem schemeReproduced_of_blockDecomposition {n : Nat} (S : SchurianScheme n)
+    {ι : Type*} (β : Fin n → ι) {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
+    (hsound : ∀ g ∈ gens,
+        g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅)
+    (hreach : ∀ T : Finset (Fin n), ∀ b w,
+        OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T b w →
+        ∃ σ ∈ Subgroup.closure
+            (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens T), β (σ b) = β w)
+    (hfiber : ∀ T : Finset (Fin n), ∀ u w,
+        OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T u w → β u = β w →
+        ∃ h ∈ Subgroup.closure
+            (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens T), h u = w)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (bs.foldl (fun s b => insert b s) ∅)) :
+    SchemeReproduced n S := by
+  refine ⟨gens, ?_⟩
+  have hreaches := reachesRigid_of_blockDecomposition β bs ∅ hreach hfiber hbase
+  rw [gensAt_empty_eq hsound] at hreaches
+  exact hreaches.trans (stabilizerAt_schemeAdj_empty_eq S)
+
+/-- **The seal capstone with `hImprimitive` discharged via Route B.** `reachesRigidOrCameron_viaHarvest`
+specialised to `ReachesRigid := SchemeReproduced`, with the imprimitive branch supplied by
+`schemeReproduced_of_blockDecomposition`: an imprimitive `S` provides the block-decomposition harvest
+(`hBlockHarvest` — the partition `β`, the path-fixing generators, the per-level block-reach + within-block
+coverage, a terminal base) and the harvest reproduces `SchemeAutGroup S`. So `hImprimitive` is no longer
+opaque — it is **reduced to the two intrinsic coverage interfaces** `hreach`/`hfiber` (quotient/fiber
+recovery, the carried depth-graded-block-visibility frontier). The free inputs are then: cited
+`PrimitiveCCClassification`, the cascade-recovery reduction `hCascade` (leg A), and `hBlockHarvest` (the
+imprimitive recovery, Route-B-reduced). -/
+theorem reachesRigidOrCameron_viaBlocks {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : ¬ NonCascadeViaHarvest IsLarge n S → SchemeReproduced n S)
+    (hBlockHarvest : ¬ S.toAssociationScheme.IsPrimitive →
+        ∃ (β : Fin n → Set (Fin n)) (gens : Set (Equiv.Perm (Fin n))) (bs : List (Fin n)),
+          (∀ g ∈ gens,
+              g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+          (∀ T : Finset (Fin n), ∀ b w,
+              OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T b w →
+              ∃ σ ∈ Subgroup.closure
+                  (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens T),
+                β (σ b) = β w) ∧
+          (∀ T : Finset (Fin n), ∀ u w,
+              OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T u w →
+                β u = β w →
+              ∃ h ∈ Subgroup.closure
+                  (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens T), h u = w) ∧
+          IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (bs.foldl (fun s b => insert b s) ∅)) :
+    SchemeReproduced n S ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaHarvest (ReachesRigid := SchemeReproduced)
+    hClassify S hne hrank hCascade ?_
+  intro himp
+  obtain ⟨β, gens, bs, hsound, hreach, hfiber, hbase⟩ := hBlockHarvest himp
+  exact schemeReproduced_of_blockDecomposition S β bs hsound hreach hfiber hbase
+
 end ChainDescent
