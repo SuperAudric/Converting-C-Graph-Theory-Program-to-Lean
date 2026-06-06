@@ -78,6 +78,19 @@ derivable on already-landed machinery.**
   GI-hard), and **every such miss the battery produced was decomposable** (separable / Tier-0). So PP2's separable
   case is not just a "friendly shadow" — it is **where all constructible hidden non-abelian symmetry lives**, and
   it is Tier-0-handled. The deferred general form is therefore precisely the **non-decomposable** residual (PP4).
+  **SEPARABLE-DECOMPOSITION LEMMA LANDED 2026-06-06 (axiom-clean, `Cascade.lean` Part A):**
+  `noFusion_of_warmSeparatedPartition` — `NoFusion` decomposes along a **1-WL-separated** partition `β : Fin n → ι`
+  (sharing a `warmRefine` cell ⟹ same block) into **per-block coverage**, via `OrbitPartition.subset_warmRefine`
+  (orbits refine cells ⟹ no orbit crosses a block). This is the divide-and-conquer the non-isomorphic separable
+  case needs: the distinguishing witness `hsep` (parts 1-WL-told-apart, what canonizing distinct components
+  supplies) + the per-component recursion `hcov` (itself dischargeable by `noFusion_of_visibleRecovery` where a
+  block recovers). Strictly more general than `noFusion_of_visibleRecovery` on the separation axis (block-level
+  separation, not full `CellsAreOrbits`). **Honest scope:** handles the **non-isomorphic** (1-WL-distinguished)
+  components; the **isomorphic-copy / swap** case (blocks 1-WL-*indistinguishable*) fails `hsep` — those pairs
+  cross `β`-blocks — and routes through recovery + the sort-key completeness gap (strategy §15 gap 4), still the
+  substrate-conditional remainder. The full Tier-0 disjoint-union `AdjMatrix` construction (with the wreath swap)
+  remains deferred (heavy `Fin`-reindexing + the assumed sort-key gap); this lemma is the reusable abstract core
+  it would consume.
 - **PP3 — largeness traceable from the harvest (the payoff, on landed machinery). LANDED 2026-06-06
   (axiom-clean):** `reproducesResidual_of_noFusion` / **`autP_reproduced_of_noFusion`** — under `NoFusion`
   with a terminal base, the folded harvest is **exactly** `Aut(G)^P` **and** `|Aut(G)^P| = ∏ basic-orbit

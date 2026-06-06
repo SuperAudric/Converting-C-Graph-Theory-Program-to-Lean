@@ -781,6 +781,14 @@ decision).
   `NonCascadeViaHarvest`). PP3's reword realized in Lean: the order identity is unconditional; `NoFusion` makes the
   orbit product the *harvest's* output, so largeness is **derived from the witness**, the substrate-conditional
   content sitting as an explicit antecedent rather than a free-floating implication.
+- **PP2 SEPARABLE-DECOMPOSITION LEMMA LANDED (2026-06-06, axiom-clean, `Cascade.lean` Part A).**
+  `noFusion_of_warmSeparatedPartition`: `NoFusion` decomposes along a **1-WL-separated** partition into per-block
+  coverage (orbits refine cells ⟹ no orbit crosses a block, via `OrbitPartition.subset_warmRefine`). The honest
+  divide-and-conquer for the **non-isomorphic** separable case — the distinguishing witness `hsep` (parts told
+  apart by 1-WL) + per-component recursion `hcov`. Strictly more general than `noFusion_of_visibleRecovery` on the
+  separation axis. The **isomorphic-copy / swap** case (blocks 1-WL-indistinguishable) is correctly excluded —
+  it routes through recovery + the sort-key gap (strategy §15 gap 4), the substrate-conditional remainder; the
+  full disjoint-union construction with the wreath swap stays deferred.
 
 ---
 

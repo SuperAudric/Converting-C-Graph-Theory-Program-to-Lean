@@ -1233,6 +1233,36 @@ theorem noFusion_of_visibleRecovery {gens : Set (Equiv.Perm (Fin n))} {S : Finse
   fun T hT =>
     (orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits (hrec T hT)).mpr (hvis T hT)
 
+/-- **No-fusion decomposes along a 1-WL-separated partition (PP2 — the separable case, class-agnostic).**
+If a partition of the vertices `β : Fin n → ι` is **1-WL-separated** — at every level `T ⊇ S`, sharing a
+`warmRefine` cell forces the same block (`hsep`) — then no orbit pair can cross a block boundary (orbits
+refine cells, `OrbitPartition.subset_warmRefine`), so `NoFusion` follows from **per-block coverage** alone
+(`hcov`: every orbit pair *within a block* is realized by a harvested generator). This is the honest
+mechanical core of the Tier-0 / separable case: the global no-fusion obligation is split into the
+distinguishing witness `hsep` (the parts are 1-WL-told-apart — what canonizing distinct components supplies)
+and the per-component obligation `hcov` (the recursion / base case — itself dischargeable by
+`noFusion_of_visibleRecovery` where a block recovers).
+
+Strictly more general than `noFusion_of_visibleRecovery` on the separation axis: it needs only **block-level**
+1-WL separation, not full `CellsAreOrbits` recovery (a block may hold many cells/orbits). **Scope (honest):**
+this is the case where the parts are *1-WL-distinguished* — the **non-isomorphic** separable case (a disjoint
+union of distinguishable components; `β` = the component id, `hsep` = 1-WL separates the degree/colour regimes).
+The **isomorphic-copy** separable case (blocks 1-WL-*indistinguishable*, realized only by copy-swaps) is **not**
+covered here — those orbit pairs *do* cross `β`-blocks, so `hsep` fails; they route through recovery
+(`noFusion_of_visibleRecovery` at the matched-copy level) and the sort-key completeness gap (strategy §15 gap 4),
+correctly left as the substrate-conditional remainder. -/
+theorem noFusion_of_warmSeparatedPartition {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)}
+    (hsep : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w → β b = β w)
+    (hcov : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
+        OrbitPartition adj P T b w → β b = β w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w) :
+    NoFusion adj P gens S :=
+  fun T hT b w hbw =>
+    hcov T hT b w hbw (hsep T hT b w (OrbitPartition.subset_warmRefine hbw))
+
 /-! ### The `LargenessBridge` graph core — largeness of `Aut(G)^P` read off the no-fusion harvest
 
 These two theorems are the **class-agnostic** content of "leg C ⟹ large ⟸ `NoFusion`" — the mechanical
