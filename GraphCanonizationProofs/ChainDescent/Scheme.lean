@@ -3602,6 +3602,80 @@ theorem exhaustiveObstruction_scheme_trichotomy {n : Nat}
     · exact Or.inr (Or.inl hlarge)
   · exact Or.inl hprim
 
+/-! ### §12.1 — Traceable largeness: the stated non-cascade bridge
+
+The §12 capstone takes `IsLargeScheme` as a **free** hypothesis. This section makes that antecedent
+**traceable rather than free-floating** by factoring largeness through
+
+  `NonCascade` (a descent observation) ──`LargenessBridge`──▶ `IsLargeScheme` (classification antecedent)
+
+so the capstone is reached from what the descent actually produces — the residual does **not** recover at
+polynomial depth (high WL-dimension) — via a single, named, substrate-conditional input `LargenessBridge`.
+That bridge is exactly the implication the **no-fusion / deferral** track derives and the adversarial
+battery validates (`docs/chain-descent-fusion-battery-plan.md` PP3; exhaustive-obstruction §0.7.5: `¬D1 ∧
+NoFusion ⟹ |Aut| = ∏ orbit-sizes super-poly`, via the landed `card_autP_eq_prod_of_base`). It is
+**stated, not proved** here — the genuine derivation needs the `NoFusion` witness — and is carried as a
+hypothesis in the same style as `PrimitiveCCClassification`, keeping the dependency explicit and the
+(custom-axiom-free) basis clean.
+
+**Why the bridge is sound to *state* on this class (the multipede is not a counterexample).** In general
+`non-cascade ⟹ large` is **false**: the multipede is non-cascade (high WL-dimension) yet has trivial `Aut`
+(the IR-core). But the IR-core is **rigid**, hence not a `SchurianScheme` — a schurian scheme is
+vertex-transitive (`schemeAutGroup_isPretransitive`, `cellsAreOrbits_empty_of_schurian`), so a symmetry
+always exists on this class. The genuine residual content — a *primitive, small* non-cascading scheme — is
+the WL-dimension boundary (declassing §9 "B's core"), which is exactly why the bridge stays a hypothesis. -/
+
+/-- **The stated largeness bridge** (substrate-conditional, validated by the no-fusion battery — **never a
+fresh `axiom`**): the descent's `NonCascade` observation ("the residual does not recover at polynomial
+depth") implies the classification's `IsLargeScheme` antecedent. The genuine derivation (`¬D1 ∧ NoFusion ⟹
+|Aut| = ∏ orbit-sizes super-poly`, via `card_autP_eq_prod_of_base`) is the no-fusion track
+(exhaustive-obstruction §0.7.5, `docs/chain-descent-fusion-battery-plan.md`); carried here as a hypothesis
+so the capstone's largeness antecedent is traceable to a descent observation rather than asserted from
+nowhere. Declared as a named `Prop` mirroring `PrimitiveCCClassification`. -/
+def LargenessBridge
+    (NonCascade IsLargeScheme : ∀ (m : Nat), SchurianScheme m → Prop) : Prop :=
+  ∀ (m : Nat) (S : SchurianScheme m), NonCascade m S → IsLargeScheme m S
+
+/-- **Exhaustive-Obstruction Lemma with a *traceable* largeness antecedent.** Identical to
+`exhaustiveObstruction_scheme` but the free `IsLargeScheme` hypothesis is reached *through* the descent's
+`NonCascade` observation and the stated `LargenessBridge` — so the largeness driver is no longer
+free-floating. `LargenessBridge` is the single named substrate-conditional input the no-fusion battery
+validates (exhaustive-obstruction §0.7.5); everything else is the §12 routing. Proves no new graph
+canonizable (the Cameron case still flags) — still the classification half, Cameron-hard, **not** GI-hard. -/
+theorem exhaustiveObstruction_scheme_of_nonCascade {n : Nat}
+    {NonCascade IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
+    (hbridge : LargenessBridge NonCascade IsLargeScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hprim : S.toAssociationScheme.IsPrimitive)
+    (hrank : 2 ≤ S.rank)
+    (hnc : NonCascade n S) :
+    IsCameronScheme n S :=
+  exhaustiveObstruction_scheme hClassify S hne hprim hrank (hbridge n S hnc)
+
+/-- **EOL trichotomy in descent-observable terms.** Routing `exhaustiveObstruction_scheme_trichotomy`
+through the largeness bridge restates the disjunction against the descent's own `NonCascade` observable:
+every rank-≥-3 schurian scheme residual is **not primitive** (imprimitive ⟹ a refinement-visible block
+system to cascade on), **cascades** (`¬ NonCascade` — recovers at polynomial depth, the cascade/abelian
+region the oracles consume), or is a **Cameron scheme** (the flagged obstruction). -/
+theorem exhaustiveObstruction_scheme_nonCascade_trichotomy {n : Nat}
+    {NonCascade IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
+    (hbridge : LargenessBridge NonCascade IsLargeScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) :
+    ¬ S.toAssociationScheme.IsPrimitive ∨
+      ¬ NonCascade n S ∨
+      IsCameronScheme n S := by
+  by_cases hprim : S.toAssociationScheme.IsPrimitive
+  · by_cases hnc : NonCascade n S
+    · exact Or.inr (Or.inr
+        (exhaustiveObstruction_scheme_of_nonCascade hClassify hbridge S hne hprim hrank hnc))
+    · exact Or.inr (Or.inl hnc)
+  · exact Or.inl hprim
+
 /-! ## §13 — Step 3a of the bottom-up EOL: imprimitive ⟹ the cell splits (block-visibility)
 
 The refinement-side half of the seal's Step 3 (`¬D1 ⟹ primitive`), scoped per

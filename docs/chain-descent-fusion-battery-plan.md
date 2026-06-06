@@ -10,6 +10,15 @@
 >
 > Companions: exhaustive-obstruction §0.7 (the mechanism-side seal, where "leg C ⟹ Cameron" lives),
 > schreier-sims STATUS (Part A, `card_autP_eq_prod_of_base`), the deferred-decisions doc (`real_stays_real`).
+>
+> **Precursor LANDED (2026-06-06, axiom-clean, `Scheme.lean §12.1`).** Ahead of the battery, the §12
+> capstone's largeness antecedent is now **traceable** via a *stated* bridge: `LargenessBridge`
+> (`NonCascade m S → IsLargeScheme m S`, a named `Prop`), `exhaustiveObstruction_scheme_of_nonCascade`, and
+> `exhaustiveObstruction_scheme_nonCascade_trichotomy`. This isolates the single substrate-conditional input
+> the battery validates and gives **PP3 its concrete Lean target** — discharge `LargenessBridge` (currently a
+> hypothesis) once `NoFusion` is validated. The bridge is stated, not proved (PP3 is the derivation). The
+> doc-comment records the multipede caveat (sound to state only on the schurian-scheme class, which is
+> vertex-transitive). Origin: exhaustive-obstruction §0.7.2 (3b) rec (2) / §0.7.5 "stated bridge LANDED".
 
 ## 0. One-line goal
 

@@ -522,7 +522,9 @@ by orbit).
    **Recommendation:** leave 3b unbuilt. The productive paths are (1) bank the §12 capstone (Tier-3 success,
    modulo cited classification); (2) add a **stated** `non-cascade-at-poly-depth ⟹ IsLargeScheme` bridge so
    the capstone's antecedent is traceable rather than free-floating (cheaper than 3b, avoids the WL-dim
-   wall); (3) treat the bottom-up route's value as banked (leg-B citation-free L1–L3 + the "no non-consumed
+   wall) — **DONE 2026-06-06, axiom-clean** (`Scheme.lean §12.1`: `LargenessBridge` /
+   `exhaustiveObstruction_scheme_of_nonCascade` / `exhaustiveObstruction_scheme_nonCascade_trichotomy`; see
+   §0.7.5 "stated bridge LANDED"); (3) treat the bottom-up route's value as banked (leg-B citation-free L1–L3 + the "no non-consumed
    abelian species" clarity) — it was never going to close leg C unconditionally (the classification is
    cited either way).
 
@@ -731,6 +733,18 @@ decision).
   fusion leak). Endpoint: "leg C ⟹ Cameron" modulo (cited Babai classification + `NoFusion` witness + the
   *separate* primitivity witness), with **largeness derived**. Primitivity remains its own depth-graded line
   (§0.7.2 Step 3 / Shrikhande), not part of this route.
+- **The stated bridge LANDED (2026-06-06, axiom-clean, `Scheme.lean §12.1`).** Ahead of the battery, the
+  capstone's largeness antecedent is now *traceable*, not free-floating: `LargenessBridge` (`∀ m S,
+  NonCascade m S → IsLargeScheme m S`, a named `Prop` mirroring `PrimitiveCCClassification`),
+  `exhaustiveObstruction_scheme_of_nonCascade` (the capstone reached *through* the descent's `NonCascade`
+  observation + the bridge), and `exhaustiveObstruction_scheme_nonCascade_trichotomy` (`¬IsPrimitive ∨
+  ¬NonCascade ∨ Cameron` — the disjunction in the descent's own observable). The bridge is **stated, not
+  proved** (the genuine derivation = PP3, needs the `NoFusion` witness) and is the single named input the
+  battery validates. **Caveat baked into the doc-comment:** `non-cascade ⟹ large` is false in general (the
+  multipede is non-cascade + trivial `Aut`), but the multipede is *rigid* hence not a `SchurianScheme`
+  (schurian ⟹ vertex-transitive), so the bridge is sound to *state* on the scheme-residual class; the
+  residual content (a *primitive small* non-cascading scheme) is the WL-dimension boundary — why it stays a
+  hypothesis. This realizes §0.7.2 (3b) recommendation item (2).
 
 ---
 
