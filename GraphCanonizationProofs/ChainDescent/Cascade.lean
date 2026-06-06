@@ -1317,6 +1317,46 @@ theorem coversOrbits_cons_of_blockDecomposition {ι : Type*} (β : Fin n → ι)
     CoversOrbits adj P gens (b :: bs) S :=
   ⟨orbitCoverage_of_blockDecomposition β b hreach hfiber, htail⟩
 
+/-- **Phase 2 — assemble full coverage from per-level block decomposition.** Iterating
+`coversOrbits_cons_of_blockDecomposition` down a base sequence `bs`: if at *every* level `T` the closure has
+**block-reach** (`hreach`, the quotient constituent) and **within-block coverage** (`hfiber`, the fiber
+constituent) for the partition `β`, and the accumulated set is a base, then `CoversOrbits adj P gens bs S`
+holds. The induction is on `bs` and stays entirely on `Fin n` — `hreach`/`hfiber` are block-restricted
+quantifiers over the *original* vertex set, so **no sub-scheme is ever materialized** (the rejected
+quotient-`AdjMatrix` route is sidestepped; the recursion lives in the coverage predicate, not in new types). -/
+theorem coversOrbits_of_blockDecomposition {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n)) (S : Finset (Fin n))
+    (hreach : ∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens T), β (σ b) = β w)
+    (hfiber : ∀ T : Finset (Fin n), ∀ u w, OrbitPartition adj P T u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens T), h u = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    CoversOrbits adj P gens bs S := by
+  induction bs generalizing S with
+  | nil => exact hbase
+  | cons b bs ih =>
+      exact coversOrbits_cons_of_blockDecomposition β b bs (hreach S b) (hfiber S)
+        (ih (insert b S) hbase)
+
+/-- **Phase 2 — `ReachesRigid` (the harvest reproduces `Aut_S`) from the block decomposition.** With the
+per-level block-reach + within-block coverage and a terminal base, the path-fixing harvest reproduces the
+residual group: `closure (gensAt … S) = StabilizerAt adj P S`. This is the Route-B reduction completed at the
+harvest level — the imprimitive residual's group is reproduced from **quotient** (block-reach) + **fiber**
+(within-block) coverage, each on the smaller constituent (transitive/schurian by the §11.1 gate
+`schemeBlock_fiber_transitive`/`schemeBlocks_transitive`), with **no sub-scheme materialized**. The remaining
+open content is discharging `hreach`/`hfiber` from the constituents' recovery (the substrate-conditional
+depth-graded block-visibility, A2-ii) — the honest frontier, now localized to two intrinsic coverage interfaces. -/
+theorem reachesRigid_of_blockDecomposition {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n)) (S : Finset (Fin n))
+    (hreach : ∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens T), β (σ b) = β w)
+    (hfiber : ∀ T : Finset (Fin n), ∀ u w, OrbitPartition adj P T u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens T), h u = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
+  stabilizerAt_eq_closure_gensAt_of_coversOrbits bs
+    (coversOrbits_of_blockDecomposition β bs S hreach hfiber hbase)
+
 /-! ### The `LargenessBridge` graph core — largeness of `Aut(G)^P` read off the no-fusion harvest
 
 These two theorems are the **class-agnostic** content of "leg C ⟹ large ⟸ `NoFusion`" — the mechanical

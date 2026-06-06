@@ -850,9 +850,32 @@ imprimitive→primitive recursion (Route b) is *riskier* than hoped: a quotient/
 non-abelian, non-Cameron* — and **no theorem in the corpus bounds `s(C)` for such CCs**. This is the formal handle
 for any future attack (Lean statement, or a targeted paper question).
 
+**ROUTE B (the intrinsic decomposition) — MECHANICAL CHAIN LANDED axiom-clean (2026-06-06).** Despite the
+"riskier" headline, the user directed an attempt, and it went through at the graph level. Three phases:
+**Phase 0 gate** (`Scheme.lean §11.1`: `schemeBlock_fiber_transitive` + `schemeBlocks_transitive`) — the
+fiber (block stabiliser on a block) and quotient (group on blocks) are transitive, hence schurian, so the
+recursion stays in-class; the deep-research non-schurity risk (E–P 1012.5393) is about *abstract* S-ring
+wreaths and does **not** bite the descent's genuine group-block-system. **Phase 1 swap decomposition**
+(`Cascade.lean`: `orbitCoverage_of_blockDecomposition` + `coversOrbits_cons_of_blockDecomposition`) — a
+cross-block orbit pair is realized by composing a **block-swap** with a **fiber move**, landing in the
+closure subgroup (this needs `CoversOrbits`'s `closure (gensAt …)` form, composition-closed, not single
+generators — the genuine wreath content `noFusion_of_warmSeparatedPartition` could not reach). **Phase 2
+assembly** (`Cascade.lean`: `coversOrbits_of_blockDecomposition` + `reachesRigid_of_blockDecomposition`) —
+iterating Phase 1 down a base sequence reproduces the residual group `closure (gensAt … S) = StabilizerAt
+adj P S` = `ReachesRigid`. **The rejected materialized-quotient route is genuinely sidestepped:** the
+per-level block-reach (`hreach`, quotient) and within-block (`hfiber`, fiber) coverage are
+*block-restricted quantifiers over the original `Fin n`* — the recursion lives in the **coverage
+predicate**, not in new sub-scheme types. **What remains open is exactly `hreach`/`hfiber`** — discharging
+them from the smaller constituents' recovery (the depth-graded block-visibility A2-ii / `s(C)` boundary).
+So `hImprimitive` is no longer opaque: it is *reduced* to two intrinsic coverage interfaces, with the
+mechanical wreath chain proved and only the substrate-conditional recovery carried. (Optional next wiring:
+connect to the seal capstone — discharge `hImprimitive` modulo `{hreach, hfiber}` via the `schemeAdj` bridge
+with `β` = block-class, the same pattern as the `LargenessBridge` discharge.)
+
 **Conclusion / status of `hImprimitive`:** it stays a **carried witness** (like the `NoFusion` witness), now
-*precisely characterized* and *confirmed to be an open research frontier* — not a known gap with a known
-counterexample, and not citably closeable. The seal is complete modulo {Babai rank-3/4 citation + this open
+*precisely characterized*, *confirmed to be an open research frontier* (not a known gap with a known
+counterexample, not citably closeable), **and — via Route B — mechanically reduced to two intrinsic coverage
+interfaces** (`hreach`/`hfiber`), so the only carried content is the constituents' depth-graded recovery. The seal is complete modulo {Babai rank-3/4 citation + this open
 emptiness conjecture (stated via `s(C)`) + the leg-A cascade-recovery reduction}. Open sub-questions worth a
 future pass: WL-dimension of general *non-abelian* Cayley graphs (the natural home of a would-be leak; uncovered
 by the corpus), and whether an imprimitive-scheme `s(C)` reduction-to-constituents theorem exists (it was sought
