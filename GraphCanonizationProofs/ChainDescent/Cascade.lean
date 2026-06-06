@@ -1815,6 +1815,33 @@ theorem cfi_card_stabilizerAt_of_cellSeparates (h : IsCFI' adj) (h_odd : h.OddDe
   have hcard := card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
   rwa [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov] at hcard
 
+/-! #### CFI base-graph projection — discharging `CellSeparatesGadgets` from base identification
+
+`CellSeparatesGadgets` at a non-trivial (gauge-remaining) `S` is **substrate-conditional on the base `H`**:
+it holds exactly when 1-WL identifies `H`'s vertices — the gadget-level analogue of `RecoverableByDepth`,
+false when 1-WL cannot crack `H`. The bounded content is the *implication* "1-WL identifies `H` ⟹ 1-WL
+separates gadgets", which rests on the structural fact that CFI refinement projects onto base-graph
+refinement along the gadget map. **Brick 1** (here) is that structural foundation; the refinement-projection
+induction (Brick 2) and the `Discrete`-`H` conclusion (Brick 3) build on it. -/
+
+/-- **Brick 1 — a cross-gadget adjacency is a base-graph edge.** The only cross-gadget adjacencies in CFI(H)
+are the endpoint bridges (subset vertices have only same-gadget neighbours, `not_isEndpt_subsetVertex`), and a
+bridge `e^b_{v→w} ~ e^b_{w→v}` connects gadgets `v, w` that are neighbours in the base `H`
+(`adj_endpointVertex_eq_one_iff`). So `adj x y = 1` with `x, y` in different gadgets forces
+`gadgetOf y ∈ N_H(gadgetOf x)`: a vertex's cross-gadget neighbourhood projects onto its gadget's
+`H`-neighbourhood — the structural foundation tying CFI 1-WL to base-graph 1-WL. -/
+theorem gadget_mem_neighbors_of_adj_cross (h : IsCFI' adj) {x y : Fin n}
+    (hadj : adj.adj x y = 1) (hg : gadgetOf h x ≠ gadgetOf h y) :
+    gadgetOf h y ∈ h.H.neighbors (gadgetOf h x) := by
+  rcases exists_vertex_form h x with ⟨vx, Sx, hSx, rfl⟩ | ⟨vx, wx, hwx, bx, rfl⟩
+  · exact absurd ⟨y, hadj, hg.symm⟩ (not_isEndpt_subsetVertex h hSx)
+  rcases exists_vertex_form h y with ⟨vy, Sy, hSy, rfl⟩ | ⟨vy, wy, hwy, by', rfl⟩
+  · exact absurd ⟨h.endpointVertex hwx bx, by rw [h.adj_symm]; exact hadj, hg⟩
+      (not_isEndpt_subsetVertex h hSy)
+  · simp only [gadgetOf_endpointVertex] at hg ⊢
+    obtain ⟨_, hwxvy, _⟩ := (h.adj_endpointVertex_eq_one_iff hwx hwy bx by').mp hadj
+    rw [← hwxvy]; exact hwx
+
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
 **D1**, the *unconditional / cascade* leg of the screen ([harvest-window §3](../../../docs/chain-descent-harvest-window.md)).

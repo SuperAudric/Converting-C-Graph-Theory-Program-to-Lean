@@ -70,9 +70,16 @@
 >   reused verbatim), `cellSeparatesGadgets_of_discrete` (cascade bridge — `warmRefine` discreteness ⟹
 >   `CellSeparatesGadgets`, the connection the `P`-form lacked), and `cfi_closure_eq_stabilizerAt_of_cellSeparates` /
 >   `cfi_card_stabilizerAt_of_cellSeparates` (harvest completeness + order). These **supersede** the `pSeparates`
->   versions for the descent's actual mechanism. **Remaining:** discharge `CellSeparatesGadgets` at a *non-trivial*
->   (gauge-remaining) `S` via the bounded base-graph lemma (1-WL separates CFI gadgets ⟸ 1-WL separates `H`) — the
->   "orthogonal cascade leg"; `cellSeparatesGadgets_of_discrete` covers the (vacuous-harvest) base case.
+>   versions for the descent's actual mechanism.
+> - **CFI base-graph lemma — PLANNED + Brick 1 LANDED** (2026-06-06, axiom-clean). Discharging
+>   `CellSeparatesGadgets` at a *non-trivial* (gauge-remaining) `S` is **substrate-conditional on the base `H`**
+>   (the gadget-level analogue of `RecoverableByDepth`); the bounded content is the implication **"1-WL identifies
+>   `H` ⟹ 1-WL separates gadgets"** (statable since `h.H.adj : AdjMatrix h.m`). Three bricks: **(1) structural
+>   foundation — LANDED:** `gadget_mem_neighbors_of_adj_cross` (a cross-gadget adjacency is a base-graph edge —
+>   only cross-gadget CFI edges are endpoint bridges, connecting `H`-adjacent gadgets); **(2) refinement-projection
+>   induction (the substantive middle, NEXT):** CFI 1-WL refines the gadget-pullback of `H` 1-WL; **(3) conclusion
+>   (easy):** `Discrete (H-warmRefine) ⟹ CellSeparatesGadgets`. `cellSeparatesGadgets_of_discrete` covers the
+>   (vacuous-harvest) full-discreteness base case.
 > - **CFI WITNESS LANDED conditional on gauge-generation** (2026-06-04, axiom-clean): `gaugeSubgroup`
 >   (the gauge group `Z₂^β` as a `Subgroup`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self` (the gauge group
 >   is exponent-2), and **`cfi_coversOrbits` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt_eq_prod`**
