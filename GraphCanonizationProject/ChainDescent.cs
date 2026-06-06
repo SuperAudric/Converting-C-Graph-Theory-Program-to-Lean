@@ -124,6 +124,23 @@ namespace Canonizer
         // EnableDeferral=false to keep validating oracle pruning against brute force.
         internal bool EnableDeferral { get; set; } = true;
 
+        // ── Recovery-only / defer-all-reals harvest (docs/chain-descent-deferred-decisions.md
+        // §7 the rigid-residue hand-off; docs/chain-descent-fusion-battery-plan.md §3).
+        // When enabled (with EnableLinearOracle + EnableDeferral), the descent consumes
+        // only symmetric cells and, at a node where every cell is a real decision
+        // (the Phase-1/Phase-2 boundary), STOPS that branch instead of branching the
+        // rigid residue. `Automorphisms` then holds exactly the *symmetry-only* harvest
+        // (the full Aut_S the defer-all-reals process found before any real decision),
+        // and StuckResidual records whether a real-only node was hit. This is the
+        // no-fusion measurement instrument: harvest ⊊ brute-force Aut while |Aut| is
+        // small is a fusion leak (a symmetry the harvest could not reach without a real
+        // decision). Default OFF — pure additive instrumentation, no change to canonization.
+        internal bool RecoveryOnly { get; set; } = false;
+
+        // Set by a RecoveryOnly run when it stops at a real-only (Phase-2) node — i.e.
+        // the defer-all-reals harvest reached a stuck residue rather than a leaf.
+        public bool StuckResidual { get; private set; }
+
         // The residual automorphism group, grown by leaf-collision harvesting.
         public PermutationGroup Automorphisms { get; }
 
@@ -223,7 +240,21 @@ namespace Canonizer
                     if (survivors <= 1) { target = c; footprintClass = cls; break; }
                     if (fallback == -1) { fallback = c; fallbackClass = cls; }
                 }
-                if (target == -1) { target = fallback; footprintClass = fallbackClass; _phase2Nodes++; }
+                if (target == -1)
+                {
+                    _phase2Nodes++;
+                    // Recovery-only: every remaining cell is a real decision — the
+                    // Phase-1/Phase-2 boundary. Stop here (do not branch the rigid
+                    // residue); `Automorphisms` is now the symmetry-only harvest.
+                    // Path-scoped cleanup of this node's real-cache entries first.
+                    if (RecoveryOnly)
+                    {
+                        StuckResidual = true;
+                        foreach (long k in cacheAdded) _knownReal.Remove(k);
+                        return;
+                    }
+                    target = fallback; footprintClass = fallbackClass;
+                }
                 if (target != firstNonSingleton) _deferralActiveNodes++;
                 harvestedInSelection = true; // ClassifyCell already harvested/cached `target`
             }

@@ -143,11 +143,31 @@ constructions most likely to surface new behaviour are the products and the engi
 
 ## 5. Implementation notes
 
+> **Increment 1 LANDED (2026-06-06) — instrument built + Tier-1 validated.** `GraphCanonizationProject.Tests/FusionBatteryExperiment.cs`.
+> - **Recovery-only mode** — `ChainDescent.RecoveryOnly` (additive, gated, default off ⇒ zero regression;
+>   9 deferral/linear/cascade tests still green). At the Phase-1/Phase-2 boundary (a node where every cell is
+>   a real decision) it stops instead of branching the rigid residue; `Automorphisms` then holds the
+>   symmetry-only harvest, `StuckResidual` records whether a real-only node was hit. This is the
+>   deferred-decisions §7 "rigid-residue hand-off", previously unbuilt.
+> - **Ground truth** — colour-aware brute-force `|Aut|`, **BFS-ordered + 1-WL-filtered + node-capped**
+>   (naive in-order backtracking is *exponential* on rigid multipedes by construction — the runtime lesson;
+>   the cap + BFS order + colour filter make it ms-fast). Verified exact against the Cameron closed forms.
+> - **Colouring matters** — the multipede is the IR-core only *vertex-coloured*; its raw adjacency keeps the
+>   circulant base's `Dₘ` symmetry. The harness seeds vertex types into both the descent `P` (TC-free
+>   `SeedFromTypes`, type-< already transitive) and the brute-force initial colour.
+> - **Tier-1 validated (all pass, <1 min):** cascading Cameron ⇒ harvest **= Aut** (Clean); coloured
+>   multipede ⇒ harvest 1 = Aut 1 (TrivialResidual); multipede ⊔ C₇ ⇒ harvest = 14, **stuck** (Clean — the
+>   separable case PP2 working empirically); verdict scramble-invariant.
+>
+> **Next (Increment 2):** Tier-2 product generators (lexicographic / tensor) + the leak triage
+> (mechanism-gap-B vs abstract-fusion-A). **Increment 3:** Tier-3 adversarial grafts (the decisive core).
+
 - **Recovery-only mode.** A descent that consumes only certifiable/recovered orbits and *stops* a branch
   rather than making a genuine decision (sidesteps the a-posteriori-needs-leaves tension). Reuses the
   cascade/recovery oracle; the new pieces are the defer-reals control flow + the residual-size classifier.
 - **Ground truth.** Brute-force `Aut(G)` (independent of the canonizer), as the Cameron battery already does;
-  compare `|recovery-only harvest|` to `|Aut|`.
+  compare `|recovery-only harvest|` to `|Aut|`. **Must be refinement-pruned + capped** — naive backtracking
+  is exponential on the rigid multipede inputs.
 - **Reuse.** `CameronGraphGenerator.cs`, `MultipedeGenerator.cs`, and the `Tier2DecompositionExperiment`
   harness already provide most generators + the harvested-Aut comparison; Tier 3 is the main new generator work.
 
