@@ -1387,6 +1387,34 @@ theorem gadgetPreserving_of_pSeparates (h : IsCFI' adj) {S : Finset (Fin n)}
   have hP : P (g x) (g s) = P x s := hg.2.1 x s
   rwa [hgs] at hP
 
+/-- **`warmRefine` separates gadgets** — the colour-model "base layer resolved" hypothesis, matching the
+recovery framework (fresh-colour individualization of `S`) rather than the `P`-relation form
+`PSeparatesGadgets`. Two vertices in the same `warmRefine` cell (after individualizing `S`) live in the
+same gadget. This is the form the descent's actual mechanism can discharge: with the recovery framework's
+trivial `P`, `PSeparatesGadgets` is vacuously *false* (no `P`-relation distinguishes anything), but the
+`warmRefine` colouring does the separating — and the cascade discretizes it at a gadget-resolving `S`. -/
+def CellSeparatesGadgets (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (h : IsCFI' adj) : Prop :=
+  ∀ x y : Fin n,
+    warmRefine adj P (individualizedColouring n S) x
+      = warmRefine adj P (individualizedColouring n S) y →
+    gadgetOf h x = gadgetOf h y
+
+/-- **Lemma A, colour model — gadget-preservation from cell-separation.** A residual automorphism `g`
+preserves `(adj, P)` and fixes `S` pointwise, so it preserves the `warmRefine` partition of the
+`S`-individualized colouring (`warmRefine (g x) = warmRefine x`, via `warmRefine_invariant_of_isAut` +
+`individualizedColouring_invariant`); under `CellSeparatesGadgets` it therefore fixes every gadget. The
+colour-model counterpart of `gadgetPreserving_of_pSeparates`, dischargeable by the cascade (`warmRefine`
+discreteness at a gadget-resolving `S`) where the `P`-relation form is not (trivial `P` ⟹ that form
+vacuously false). -/
+theorem gadgetPreserving_of_cellSeparates (h : IsCFI' adj) {S : Finset (Fin n)}
+    {g : Equiv.Perm (Fin n)} (hg : ResidualAut adj P S g)
+    (hsep : CellSeparatesGadgets adj P S h) :
+    ∀ x, gadgetOf h (g x) = gadgetOf h x := by
+  intro x
+  refine hsep (g x) x ?_
+  exact warmRefine_invariant_of_isAut hg.1 hg.2.1
+    (fun v => individualizedColouring_invariant hg.2.2 v) x
+
 /-! #### CFI-cov.4 Lemma B — a gadget-fixing CFI automorphism is an involution
 
 Building blocks first (data/adjacency helpers), then the three steps (type preservation, `g²` fixes
