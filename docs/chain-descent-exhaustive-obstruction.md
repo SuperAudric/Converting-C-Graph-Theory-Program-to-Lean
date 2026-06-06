@@ -219,6 +219,19 @@ The seal is the **tautology** `D1 ∨ (¬D1 ∧ D2) ∨ (¬D1 ∧ ¬D2)`. Exhaus
 needs **no** classification — Cameron/O'Nan–Scott is required only *inside leg
 C*, never to close the seal. This is the structural improvement over §1's framing.
 
+> **THE SEAL IS ASSEMBLED AS ONE THEOREM (2026-06-06, axiom-clean, `Cascade.lean` Part A).**
+> `reachesRigidOrCameron` / `reachesRigidOrCameron_viaHarvest`: every rank-≥3 schurian scheme residual
+> `ReachesRigid ∨ IsCameronScheme` — reaches a rigid residual (legs A/B consume it) or is a Cameron section
+> (leg C flags). Wires the landed `exhaustiveObstruction_scheme_nonCascade_trichotomy` (`¬IsPrimitive ∨
+> ¬NonCascade ∨ Cameron`): `¬NonCascade`→cascade-recovery (leg A), Cameron→landed; with the largeness bridge
+> discharged (`largenessBridge_viaHarvest`), the **free inputs are exactly the honest remainder** — the cited
+> `PrimitiveCCClassification` (Babai/Sun–Wilmes), the leg-A cascade-recovery reduction (well-supported), and the
+> **primitivity reduction** `¬IsPrimitive ⟹ ReachesRigid` (the one open in-scope gap; §0.7.2 Step 3 /
+> Shrikhande's depth-graded block-visibility). The goal is now a typed object whose hypothesis list is the
+> to-do list; the live target is the primitivity reduction in *correctness* (eventual-visibility + cell-size
+> induction) form. `ReachesRigid` is the abstract descent-outcome predicate (descent dynamics are not one Lean
+> object); the IR-core / no-symmetry case (residual trivial) sits outside the seal (§0.6, the other flag cause).
+
 - **Leg A (cascade capability):** *"every unconditional symmetry is cascade-
   certifiable."* = orbit-recovery completeness. Real content (D1 abstract ⟹ the
   built oracle realizes it); the cascade-1b / decision-node-depth frontier is

@@ -172,6 +172,15 @@ to *primitivity* was refuted (Shrikhande, depth-graded). Tracked in
 [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9, and
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
 
+**The goal is now a single theorem (2026-06-06, axiom-clean, `Cascade.lean` Part A).** The oracle-capability
+seal is **assembled**: `reachesRigidOrCameron` / `reachesRigidOrCameron_viaHarvest` — every rank-≥3 schurian
+scheme residual `ReachesRigid ∨ IsCameronScheme` (reaches a rigid residual via the cascade/abelian oracles, or
+is a Cameron section), wiring the landed `exhaustiveObstruction_scheme_nonCascade_trichotomy`. With the
+largeness bridge discharged, the **free inputs are exactly the honest remainder**: the cited
+`PrimitiveCCClassification` (Babai/Sun–Wilmes), the cascade-recovery reduction (leg A, well-supported), and the
+primitivity reduction (`¬IsPrimitive ⟹ ReachesRigid` — the one open in-scope gap, depth-graded block-visibility,
+Shrikhande). Crystallizing the goal this way surfaces the to-do list as a typed hypothesis set.
+
 ---
 
 ## 3. Reading order

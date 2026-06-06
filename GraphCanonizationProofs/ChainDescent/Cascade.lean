@@ -2980,4 +2980,64 @@ theorem exhaustiveObstruction_scheme_of_harvest {m : Nat} {IsLarge : Nat → Pro
   exhaustiveObstruction_scheme_of_nonCascade hClassify (largenessBridge_viaHarvest IsLarge)
     S hne hprim hrank hnc
 
+/-! ### The oracle-capability seal, assembled — "reaches a rigid or Cameron residual"
+
+The project's top-level goal (`docs/00-START-HERE.md` §2, strategy §15 the two guarantees, exhaustive-obstruction
+§0.5 the seal) as a **single theorem**: every rank-≥3 schurian scheme residual either **reaches a rigid
+residual** (is driven to a trivial residual by the cascade/abelian oracles — legs A/B) or **is a Cameron
+section** (the honest flag — leg C). It wires the landed `exhaustiveObstruction_scheme_nonCascade_trichotomy`
+(`¬IsPrimitive ∨ ¬NonCascade ∨ IsCameronScheme`) into that dichotomy, mapping each non-Cameron branch to its
+leg via an explicit reduction hypothesis. The value is **crystallization**: the goal becomes one object, and the
+hypothesis list + `#print axioms` are the exact, honest remainder.
+
+`ReachesRigid : ∀ m, SchurianScheme m → Prop` is the abstract residual-outcome predicate (the descent drives this
+residual to a rigid/discrete node) — kept abstract because the descent dynamics are not a single Lean object; the
+two reduction hypotheses are its interface. **Status of each input:**
+* `hClassify` — the cited Babai 1981 / Sun–Wilmes classification (a legitimate external citation, never an axiom).
+* `hCascade` — `¬NonCascade` (the residual cascades / recovers at poly depth) ⟹ reaches rigid. This is **leg A**
+  (orbit recovery), the well-supported branch — `recoverableByDepth_pPolynomial`/`_cfi` are its witnesses.
+* `hImprimitive` — `¬IsPrimitive` (imprimitive) ⟹ reaches rigid (refine on the block system). This is the **one
+  genuine open, in-scope, theorem-shaped gap** (the primitivity reduction; `cell_splits_of_imprimitive` modulo
+  `BlockRefinementVisible`, the depth-graded boundary Shrikhande pinned). The correctness-form route (eventual
+  block visibility + cell-size induction) is the live target. -/
+
+/-- **The seal capstone (general form): a scheme residual reaches rigid or is Cameron.** Given the cited
+classification, the largeness bridge, and the two leg-reduction hypotheses (cascade ⟹ rigid; imprimitive ⟹
+rigid), every rank-≥3 schurian scheme residual satisfies `ReachesRigid ∨ IsCameronScheme`. Pure assembly of
+`exhaustiveObstruction_scheme_nonCascade_trichotomy`; the conclusion is the project's goal as one statement. -/
+theorem reachesRigidOrCameron {n : Nat}
+    {NonCascade IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    {ReachesRigid : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
+    (hbridge : LargenessBridge NonCascade IsLargeScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : ¬ NonCascade n S → ReachesRigid n S)
+    (hImprimitive : ¬ S.toAssociationScheme.IsPrimitive → ReachesRigid n S) :
+    ReachesRigid n S ∨ IsCameronScheme n S := by
+  rcases exhaustiveObstruction_scheme_nonCascade_trichotomy hClassify hbridge S hne hrank with
+    h | h | h
+  · exact Or.inl (hImprimitive h)
+  · exact Or.inl (hCascade h)
+  · exact Or.inr h
+
+/-- **The seal capstone (headline): largeness bridge discharged.** `reachesRigidOrCameron` with the
+`LargenessBridge` supplied by the landed `largenessBridge_viaHarvest` (so largeness is derived from the
+no-fusion harvest, not carried). The remaining free inputs are then **exactly** the honest remainder: the cited
+`PrimitiveCCClassification` (Babai/Sun–Wilmes), the cascade-recovery reduction `hCascade` (leg A, well-supported),
+and the primitivity reduction `hImprimitive` (the one open in-scope gap). `IsLarge : Nat → Prop` stays the
+abstract super-polynomiality citation. -/
+theorem reachesRigidOrCameron_viaHarvest {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    {ReachesRigid : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : ¬ NonCascadeViaHarvest IsLarge n S → ReachesRigid n S)
+    (hImprimitive : ¬ S.toAssociationScheme.IsPrimitive → ReachesRigid n S) :
+    ReachesRigid n S ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron hClassify (largenessBridge_viaHarvest IsLarge) S hne hrank hCascade hImprimitive
+
 end ChainDescent
