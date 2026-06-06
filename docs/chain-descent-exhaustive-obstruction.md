@@ -116,6 +116,14 @@
 > depth-graded block-visibility tied to `RecoverableByDepth`; plus (3b), the heavy unbuilt quotient/fiber
 > recursion.
 >
+> **ACTIVE TRACK (2026-06-06) — deriving the *largeness* antecedent (§0.7.5).** Independently of primitivity,
+> the **largeness** antecedent of the §12 capstone is now being *derived* (not hypothesized): `leg C ⟹ large`
+> ⟸ `small ⟹ consumed` ⟸ completeness of deferral ⟸ **no fusion**, with the payoff lemma `¬D1 ∧ NoFusion ⟹
+> |Aut| = ∏ orbit-sizes super-poly = large` resting on the **landed** `card_autP_eq_prod_of_base`. The
+> separable case is provable; the entangled case is the **`NoFusion` witness**, validated by an adversarial
+> battery. Plan: [`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md); orientation
+> in §0.7.5. (Primitivity stays the separate depth-graded line above.)
+>
 > Original planning note: this doc plans the item the user surfaced 2026-05-31: the
 > hypothesis that **"a graph that does not decompose into the cascade+abelian
 > class *is* a hidden Johnson."** It is a **hypothesis, not a certainty** — the
@@ -693,6 +701,36 @@ outcomes — *consumed* or *Cameron* — plus the orthogonal IR-core (no symmetr
 > **IR-core** (trivial residual); an *unconsumed abelian* residual (high-tw CFI) is **not** a third escape
 > — it is a consumed-in-principle case whose poly harvest is an *effectiveness* obligation, falsifiable by
 > the `AbelianUnconsumed` e2e probe (which thereby tests single-path effectiveness, not a species).
+
+### 0.7.5 Deriving the *largeness* antecedent — the no-fusion / deferral route (2026-06-06)
+
+> **The active route to *deriving* leg C's largeness antecedent instead of hypothesizing it.** Full plan:
+> [`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md).
+
+The §12 capstone `exhaustiveObstruction_scheme` carries **largeness** (`IsLargeScheme`) as a free hypothesis.
+This route derives it from what the descent observes, via a chain that bottoms out on **already-landed**
+machinery:
+
+`leg C ⟹ large` ⟸ `small ⟹ consumed` (contrapositive) ⟸ **completeness of deferral** (deferring all real
+decisions, the harvest finds every symmetry before any real is forced) ⟸ **no fusion** (no symmetry is
+1-WL-entangled — sharing cells — with rigid / genuine-decision structure so as to gate its recovery on a real
+decision).
+
+- **`real_stays_real` = soundness of deferral** (a deferred real stays real). The **open** part is
+  *completeness*; the exact gap is **"uncertifiable ≠ real"** — an uncertifiable cell can hide a symmetry
+  (high WL-dimension), and the **multipede** witnesses small/trivial-`|Aut|` + high-WL, so no-fusion is
+  **substrate-conditional** (a witness, not a free theorem).
+- **The payoff lemma (PP3), on landed machinery:** by `card_autP_eq_prod_of_base` (Part A),
+  `|Aut| = ∏ basic-orbit sizes` along the recovery base sequence; under no-fusion the consumption path is
+  symmetry-only, so its cost **is** that product — hence **`¬D1 ∧ NoFusion ⟹ ∏ orbit-sizes super-poly ⟹
+  |Aut|` super-poly = large.** No Babai needed for this step. (The multipede escapes: no symmetry-only path,
+  cost is all real decisions — it is the IR-core, not large.)
+- **Status:** the separable case is provable (`forcedNode`/`movedSet` + `recoverableAt_base_iff_discrete` +
+  Tier-0); the entangled case is carried as the **`NoFusion` witness**, validated by an adversarial battery
+  (defer-all-reals harvest vs brute-force `Aut`; decisive signal = harvest `⊊ Aut` while `|Aut|` **small** =
+  fusion leak). Endpoint: "leg C ⟹ Cameron" modulo (cited Babai classification + `NoFusion` witness + the
+  *separate* primitivity witness), with **largeness derived**. Primitivity remains its own depth-graded line
+  (§0.7.2 Step 3 / Shrikhande), not part of this route.
 
 ---
 

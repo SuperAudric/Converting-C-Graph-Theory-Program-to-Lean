@@ -2,7 +2,8 @@
 
 > **STATUS: CONSUMED (2026-06-04).** The **Part A → A2-complete → CFI-coverage** work thread this doc bootstrapped
 > is **complete** — de-classed coverage + CFI-cov.1–4 all landed (CFI cross-branch harvest done in the
-> base-resolved regime; sole remaining CFI obligation = `PSeparatesGadgets`, the orthogonal visible leg).
+> base-resolved regime; remaining CFI obligation = the base-resolved witness, **re-wired 2026-06-06** from the
+> vacuous `PSeparatesGadgets` onto the colour-model `CellSeparatesGadgets` — see schreier-sims STATUS).
 > **This doc's §3 "what is landed" and §4 "next target" are obsolete** (§4 names the abandoned `Aut(CFI)≅Z₂^β⋊Aut(H)`
 > structure theorem). It is retained ONLY as a reference for **§1 (build/verify/doc-sync conventions)** and
 > **§2 (Lean gotchas)** — both still current and useful for future CFI Lean work. For the actual state, read

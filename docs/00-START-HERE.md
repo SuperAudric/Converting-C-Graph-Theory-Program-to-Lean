@@ -136,14 +136,18 @@ discretizing oracle was *proven unable* to harvest a multi-step moved orbit
 twists, `tw ≥ 2`) **must** be harvested **cross-branch** — which is why Part A (a
 group object to fold automorphisms into) exists.
 
-**The live frontier (2026-06-05).** The cross-branch harvest is now **general**:
+**The live frontier (2026-06-06).** The cross-branch harvest is now **general**:
 `coversOrbits_of_realizers` reproduces *any* residual group (abelian or non-abelian)
 from harvested realizers, with the CFI exponent-2 case as a corollary (CFI-cov.4
-complete in the base-resolved regime; C# canonizes CFI(K₄–K₇)). **Localisation** —
-the gap between this and full polynomiality — is scoped as the *polynomiality* layer:
-coverage *correctness* is unconditional; recovery only makes the harvest
-refinement-computable (`recoverableByDepth_pPolynomial` exports the whole metric/DRG
-family), and *per-level* recovery is the substrate-conditional cascade/WL-dimension
+complete in the base-resolved regime; C# canonizes CFI(K₄–K₇)). The **general
+polynomiality capstone** now ties this off: `crossBranchHarvest_reproduces_residual` /
+`autP_reproduced_of_visibleRealizers` (`Cascade.lean` Part A) — the descent reproduces
+the residual **group and order** from the refinement-computable harvest, modulo a single
+recovery witness; the polynomiality-layer analogue of `exhaustiveObstruction_scheme`.
+**Localisation** — the gap between this and full polynomiality — is scoped as the
+*polynomiality* layer: coverage *correctness* is unconditional; recovery only makes the
+harvest refinement-computable (`recoverableByDepth_pPolynomial` exports the whole
+metric/DRG family), and *per-level* recovery is the substrate-conditional cascade/WL-dimension
 discriminator. The broader project target is *"correctly reaches a rigid or Cameron
 residual on all graph classes."* That goal's two outcomes are now both being worked:
 **rigid** (cascade/abelian — the recovery + cross-branch mechanism above) and
@@ -155,7 +159,11 @@ that does as a Cameron section (**Cameron-hard, NOT GI-hard** — a finite targe
 primitivity, the imprimitive ⟹ refinement-visible bridge, and the group-side bridge
 (`isPreprimitive_iff_isPrimitive`: scheme `IsPrimitive` ⟺ Mathlib `IsPreprimitive`) landed in
 `Scheme.lean`; the refinement-side decomposition is deferred as substrate-conditional, capstone cited).
-Tracked in [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md),
+The capstone's **largeness** antecedent is itself now an **active track** — *derived* (not hypothesized)
+from a *no-fusion* witness via the landed order identity `|Aut| = ∏ basic-orbit sizes`, validated by an
+adversarial battery ([`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md));
+the unconditional block-visibility route to *primitivity* was refuted (Shrikhande, depth-graded). Tracked in
+[`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) (§0.7.5),
 [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9, and
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
 
@@ -207,8 +215,10 @@ Part B is the open roadmap), `chain-descent-tier3a-cascade-composition.md`
 (+ `-tier3a-b1-build-plan.md`), `chain-descent-tier2-lean-plan.md`,
 `chain-descent-extended-twist-viability.md`,
 `chain-descent-abelian-sufficiency-handoff.md`,
-`chain-descent-cfi-gauge-discharge-plan.md` (the CFI-cov.4 gauge-nut build plan; CFI harvest landed, only
-the `PSeparatesGadgets` discharge — the visible/cascade leg — remains).
+`chain-descent-cfi-gauge-discharge-plan.md` (the CFI-cov.4 gauge-nut build plan; CFI harvest landed; the
+base-resolved hypothesis re-wired 2026-06-06 from the vacuous `PSeparatesGadgets` onto the colour-model
+`CellSeparatesGadgets`, carried as a witness — the orthogonal visible/cascade leg),
+`chain-descent-fusion-battery-plan.md` (the no-fusion battery + the route to *deriving* leg C's largeness).
 
 **Temporary handoffs** (consumed — retained only for build conventions + Lean gotchas, not the work thread):
 `chain-descent-partA-handoff.md`. **Its §4 "next target" is obsolete** (that thread — de-classing →

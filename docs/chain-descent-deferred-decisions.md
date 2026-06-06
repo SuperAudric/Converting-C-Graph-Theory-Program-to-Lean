@@ -24,6 +24,15 @@ rather than guessed at layer-by-layer.
 > pin `EnableDeferral=false` (they validate oracle pruning on the fixed schedule;
 > that transfers to the deferral path since the pruning code is identical).
 >
+> **Used by the largeness-via-deferral track (2026-06-06).** This deferral architecture (consume symmetry,
+> defer reals) + `real_stays_real` are the foundation of the route to *deriving* leg C's **largeness**
+> antecedent: `real_stays_real` is the **soundness of deferral**; the open question is the **completeness of
+> deferral** (does the deferred-real harvest find *every* symmetry before a real is forced) ⟺ **no fusion**
+> (no symmetry 1-WL-entangled with rigid structure). If it holds, `¬D1 ∧ NoFusion ⟹ |Aut| = ∏ orbit-sizes
+> super-poly = large` (via the landed `card_autP_eq_prod_of_base`). Validated by an adversarial battery. Plan:
+> [`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md); EOL context:
+> [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) §0.7.5.
+>
 > **Correction to §4 (found while building).** Deferral does **not** reach the
 > same lex-min as the lowest-id schedule: the *schedule fixes the leaf
 > labelling* (the individualisation order determines `P`, which determines the

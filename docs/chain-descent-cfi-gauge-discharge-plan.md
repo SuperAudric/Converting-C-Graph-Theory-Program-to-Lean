@@ -1,9 +1,26 @@
 # Build plan — discharging the CFI gauge nut (`ResidualInvolutive` via P-separation)
 
-> **STATUS (2026-06-04): Lemmas A + B + capstone + harvest wiring all LANDED (axiom-clean). The ONLY
-> remaining obligation is discharging `PSeparatesGadgets` for the descent's `P` (the orthogonal
-> visible/cascade leg).** The build plan for the one remaining CFI
-> obligation left after the de-classed coverage landed. Authoritative companions:
+> **STATUS (2026-06-04): Lemmas A + B + capstone + harvest wiring all LANDED (axiom-clean).** The build plan
+> for the one remaining CFI obligation left after the de-classed coverage landed.
+>
+> **UPDATE (2026-06-06) — `PSeparatesGadgets` is the WRONG (vacuous) hypothesis; re-wired onto the colour
+> model.** Scoping finding: `PSeparatesGadgets` is stated over `P`-relations, but the descent's CFI recovery
+> runs on **trivial `P`** + colour individualization, where it is **vacuously false at every `S`** (no
+> `P`-relation distinguishes anything; also vacuous at `S=∅`). The descent's separation lives in the
+> `warmRefine` **colouring**, not in `P`. Fix (landed, axiom-clean, `Cascade.lean` CFI-cov.4): the colour-model
+> `CellSeparatesGadgets` + Lemma A `gadgetPreserving_of_cellSeparates` (via `warmRefine_invariant_of_isAut`),
+> re-wiring `cfi_residualInvolutive` → **`cfi_residualInvolutive_cell`** (Lemma B `cfiAut_gadgetFixing_mul_self`
+> reused verbatim), with `cellSeparatesGadgets_of_discrete` (cascade bridge) and
+> `cfi_closure_eq_stabilizerAt_of_cellSeparates` / `cfi_card_stabilizerAt_of_cellSeparates`. These **supersede**
+> the `pSeparates` versions for the descent's actual mechanism. **DESIGN SETTLED:** `CellSeparatesGadgets` is
+> carried as a substrate-conditional **witness** (gadget-level analogue of `RecoverableByDepth`); the structural
+> projection foundation (`gadget_mem_neighbors_of_adj_cross` + `endpoint_crossGadget_gadget`) is landed; the full
+> "1-WL identifies `H` ⟹ separates gadgets" implication (a base-relative CFI cascade) is deferred to a future
+> witness-discharge. Full record: [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) STATUS.
+> **The §2 `PSeparatesGadgets` material below is retained for the structural argument (Lemma A's shape), but read
+> `CellSeparatesGadgets` as its live replacement.**
+>
+> Authoritative companions:
 > [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) §7 (Part A staging, CFI-cov.3),
 > [`chain-descent-declassing.md`](./chain-descent-declassing.md) (the de-classing architecture),
 > [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) (landed declarations). Where

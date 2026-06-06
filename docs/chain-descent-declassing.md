@@ -69,10 +69,15 @@
 > `cfi_card_stabilizerAt_of_pSeparates` (`|Aut_S^P| = ∏ basic-orbit sizes`) at a nonempty base-resolved `S`.
 > (A literal-gauge variant `cfi_closure_eq_stabilizerAt` / `cfi_coversOrbits` conditional on gauge-generation
 > `StabilizerAt ∅ ≤ closure cfiGaugeGens` is also built — the rigid-base framing — see schreier-sims §7.)
-> **The sole remaining CFI obligation is discharging `PSeparatesGadgets`** (the committed `P` resolves the
-> base layer) — the orthogonal visible/cascade leg (scheme / `PPolynomial`), *not* GI-hard — plus the concrete
-> computable BSGS (A4, validation-only). The abstract cross-branch mechanism toward "reaches a rigid or
-> Cameron residual on all classes" is grounded.
+> **The remaining CFI obligation is the base-layer-resolved witness** — **re-wired 2026-06-06 onto the colour
+> model**: `PSeparatesGadgets` (over `P`-relations) is **vacuously false** under the descent's trivial `P`, so it
+> is replaced by `CellSeparatesGadgets` (same `warmRefine` cell ⟹ same gadget), carried as a substrate-conditional
+> **witness** (gadget-level analogue of `RecoverableByDepth`); `cfi_residualInvolutive_cell` /
+> `cfi_closure_eq_stabilizerAt_of_cellSeparates` supersede the `pSeparates` versions, `cellSeparatesGadgets_of_discrete`
+> discharges the base case, and the structural projection foundation (`gadget_mem_neighbors_of_adj_cross`) is landed.
+> The orthogonal visible/cascade leg, *not* GI-hard — plus the concrete computable BSGS (A4, validation-only). See
+> [schreier-sims](./chain-descent-schreier-sims.md) STATUS. The abstract cross-branch mechanism toward "reaches a
+> rigid or Cameron residual on all classes" is grounded.
 >
 > **Update 2026-06-05 (axiom-clean — three advances).** (1) **Coverage generalized past exponent-2:**
 > `coversOrbits_of_realizers` / `coversOrbits_of_visibleRealizers` / `closure_eq_stabilizerAt_of_realizers`
