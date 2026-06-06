@@ -1233,6 +1233,52 @@ theorem noFusion_of_visibleRecovery {gens : Set (Equiv.Perm (Fin n))} {S : Finse
   fun T hT =>
     (orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits (hrec T hT)).mpr (hvis T hT)
 
+/-! ### The `LargenessBridge` graph core — largeness of `Aut(G)^P` read off the no-fusion harvest
+
+These two theorems are the **class-agnostic** content of "leg C ⟹ large ⟸ `NoFusion`" — the mechanical
+half of `LargenessBridge` (`Scheme.lean §12.1`), discharged at the bare-`AdjMatrix` level with **no** scheme
+structure. The abstract `IsLarge : Nat → Prop` is the asymptotic super-polynomiality citation, carried as a
+parameter and **never concretized** (largeness stays the abstract notion `IsLargeScheme` mirrors).
+
+The split is the honest one (PP3's reword, `docs/chain-descent-fusion-battery-plan.md` §1):
+* `isLargeAutP_of_isLargeProd` — the order identity `|Aut^P| = ∏ orbit-sizes` is **unconditional**
+  (`card_autP_eq_prod_of_base`, true for any graph including `K_n`), so largeness of the product transports
+  to largeness of the group with no `NoFusion`;
+* `isLargeAutP_of_noFusion` — `NoFusion` is what makes the orbit-size product the **harvest's own output**:
+  the symmetry-only harvest reproduces `Aut^P` exactly (`autP_reproduced_of_noFusion`), so largeness
+  *observed on the harvest* (`closure gens`) certifies the true group's largeness. This is the precise sense
+  in which largeness is **derived from the witness** rather than proved — no Babai, no WL-dimension boundary.
+
+The scheme-typed `LargenessBridge` itself is discharged from these below (`largenessBridge_viaHarvest`),
+with `schemeAdj` faithfully encoding a scheme as a labelled graph; the core here owns no scheme. -/
+
+/-- **Order-transport: a large orbit-product ⟹ a large `Aut(G)^P` (unconditional).** Largeness of the
+basic-orbit-size product transports to largeness of the `P`-preserving automorphism group via the landed
+order identity `card_autP_eq_prod_of_base`. No `NoFusion` — the identity holds for every graph. The abstract
+`IsLarge` is the super-polynomiality citation. -/
+theorem isLargeAutP_of_isLargeProd {IsLarge : Nat → Prop} (bs : List (Fin n))
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅))
+    (hprod : IsLarge (orbitSizeProd adj P bs ∅)) :
+    IsLarge (Nat.card (StabilizerAt adj P ∅)) := by
+  rw [card_autP_eq_prod_of_base bs hbase]; exact hprod
+
+/-- **Largeness read off the no-fusion harvest (the graph-side `LargenessBridge` core, modulo `NoFusion`).**
+Under `NoFusion` with a terminal base, the symmetry-only / defer-all-reals harvest reproduces `Aut(G)^P`
+exactly (`autP_reproduced_of_noFusion`: `closure gens = StabilizerAt adj P ∅`), so largeness *observed on the
+harvest's own output* `closure gens` certifies largeness of the true group. The mechanical content of the
+no-fusion track: the harvest order is a lower bound that `NoFusion` promotes to the group order — no Babai,
+no WL-dimension boundary. The genuinely substrate-conditional inputs (that `NoFusion` holds and that the
+harvest is large) are the *hypotheses*, exactly as they should be. -/
+theorem isLargeAutP_of_noFusion {IsLarge : Nat → Prop} {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n))
+    (hsound : ∀ g ∈ gens, g ∈ StabilizerAt adj P ∅)
+    (hnf : NoFusion adj P gens ∅)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅))
+    (hharvest : IsLarge (Nat.card (Subgroup.closure gens))) :
+    IsLarge (Nat.card (StabilizerAt adj P ∅)) := by
+  obtain ⟨hclo, _⟩ := autP_reproduced_of_noFusion bs hsound hnf hbase
+  rw [← hclo]; exact hharvest
+
 /-- **De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual group at `S` is
 involutive (`ResidualInvolutive`, hence at every deeper node by `residualInvolutive_mono`), the generating set
 `gens` contains every involutive residual automorphism (`hgens` — what the leaf-collision harvest supplies),
@@ -2800,5 +2846,108 @@ theorem lockstepExpand_forcedExpand (adj : AdjMatrix n) (P₀ : PMatrix n) (χι
       = (forcedExpand adj P₀ χι₀ sel chain v).image g
   unfold forcedExpand
   rw [Finset.image_insert, ← movedSet_image hg hgP, Finset.image_insert, hDfix]
+
+/-! ### Discharging the scheme-typed `LargenessBridge` modulo `NoFusion`
+
+`LargenessBridge` (`Scheme.lean §12.1`) is stated over bare `SchurianScheme`, which carries no `AdjMatrix`.
+Here it is **discharged** (turned from a carried hypothesis into a proved theorem for concrete,
+descent-observable predicates) by faithfully encoding a scheme as a *labelled* graph and reducing to the
+class-agnostic core `isLargeAutP_of_noFusion`.
+
+* `schemeAdj` encodes `S` as the labelled adjacency `(v, w) ↦ (relOfPair v w).val` — a single graph whose
+  edge labels are the relation indices, so `IsAut` on it coincides exactly with `IsSchemeAut`
+  (`isAut_schemeAdj_iff`); hence `StabilizerAt (schemeAdj S) ⊥ ∅ = SchemeAutGroup S`
+  (`stabilizerAt_schemeAdj_empty_eq`, trivial all-`unknown` `P`).
+* `IsLargeSchemeViaAut`/`NonCascadeViaHarvest` are the concrete instantiations: largeness is
+  super-polynomiality of `|SchemeAutGroup|` (the genuine Cameron driver), and non-cascade is the
+  *descent observable* "the defer-all-reals harvest reproduced a large group under `NoFusion`".
+* `largenessBridge_viaHarvest` proves `LargenessBridge` between them — so the substrate-conditional content
+  (`NoFusion` + a large harvest) sits as an **explicit antecedent**, not a free-floating implication.
+* `exhaustiveObstruction_scheme_of_harvest` reaches the §12 capstone with the bridge **discharged**: only
+  the cited `PrimitiveCCClassification` (Babai/Sun–Wilmes) and the battery-validated `NoFusion` antecedent
+  remain. The abstract `IsLarge : Nat → Prop` (super-polynomiality citation) is never concretized. -/
+
+/-- **A scheme as a labelled graph.** Encodes `S` into a single `AdjMatrix` whose entry `(v, w)` is the
+index of the relation containing `(v, w)`. The labels make graph automorphisms of `schemeAdj S` coincide
+with scheme automorphisms (`isAut_schemeAdj_iff`), bridging the scheme to the graph-side stabilizer-chain
+machinery. -/
+noncomputable def schemeAdj {m : Nat} (S : AssociationScheme m) : AdjMatrix m :=
+  ⟨fun v w => (S.relOfPair v w).val⟩
+
+/-- **Faithfulness of the encoding.** A permutation is a graph automorphism of `schemeAdj S` iff it is a
+scheme automorphism of `S`: the labelled adjacency separates the relations, so preserving it is exactly
+preserving every relation index. -/
+theorem isAut_schemeAdj_iff {m : Nat} (S : AssociationScheme m) (π : Equiv.Perm (Fin m)) :
+    IsAut π (schemeAdj S) ↔ IsSchemeAut S π := by
+  constructor
+  · intro hAut i v w
+    have hr : S.relOfPair (π v) (π w) = S.relOfPair v w := by
+      apply Fin.ext; exact hAut v w
+    have h1 : S.rel i (π v) (π w) = true ↔ i = S.relOfPair v w := by
+      rw [S.rel_iff_relOfPair, hr]
+    have h2 : S.rel i v w = true ↔ i = S.relOfPair v w := S.rel_iff_relOfPair
+    cases hb1 : S.rel i (π v) (π w) <;> cases hb2 : S.rel i v w <;> simp_all
+  · intro hSA v w
+    show (S.relOfPair (π v) (π w)).val = (S.relOfPair v w).val
+    rw [IsSchemeAut.relOfPair_eq hSA v w]
+
+/-- **The scheme-Aut group is the graph-stabilizer of the encoding.** With the trivial all-`unknown` `P`
+(no order constraint), `StabilizerAt (schemeAdj S) ⊥ ∅` — the `P`-preserving automorphisms of the labelled
+graph — is exactly `SchemeAutGroup S`. Carries `|·|` equality across the two sides of the bridge. -/
+theorem stabilizerAt_schemeAdj_empty_eq {m : Nat} (S : SchurianScheme m) :
+    StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅
+      = S.toAssociationScheme.SchemeAutGroup := by
+  ext π
+  rw [mem_stabilizerAt_empty, isAut_schemeAdj_iff]
+  exact ⟨fun h => h.1, fun h => ⟨h, fun _ _ => rfl⟩⟩
+
+/-- **Concrete largeness predicate (the genuine Cameron driver).** A scheme is large when its automorphism
+group `SchemeAutGroup` has super-polynomial order, with `IsLarge : Nat → Prop` the abstract asymptotic
+citation. The instantiation of the §12 `IsLargeScheme` parameter the bridge discharges into. -/
+def IsLargeSchemeViaAut (IsLarge : Nat → Prop) : ∀ (m : Nat), SchurianScheme m → Prop :=
+  fun _ S => IsLarge (Nat.card S.toAssociationScheme.SchemeAutGroup)
+
+/-- **Concrete non-cascade predicate (the descent observable).** A scheme is non-cascade when the
+defer-all-reals harvest on its labelled encoding reproduced a *large* group under `NoFusion` — i.e. there is
+a sound, no-fusion, base-terminating harvest `gens` whose own order is large. This packages the
+substrate-conditional content (`NoFusion` + a large harvest) as an explicit, battery-validated antecedent. -/
+def NonCascadeViaHarvest (IsLarge : Nat → Prop) : ∀ (m : Nat), SchurianScheme m → Prop :=
+  fun m S => ∃ (gens : Set (Equiv.Perm (Fin m))) (bs : List (Fin m)),
+    (∀ g ∈ gens, g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+      NoFusion (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens ∅ ∧
+      IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (bs.foldl (fun s b => insert b s) ∅) ∧
+      IsLarge (Nat.card (Subgroup.closure gens))
+
+/-- **The `LargenessBridge` discharged modulo `NoFusion`.** For the concrete predicates above,
+`NonCascade ⟹ IsLargeScheme` is now a *theorem* (no longer a carried hypothesis): the no-fusion harvest
+reproduces `SchemeAutGroup` exactly (`isLargeAutP_of_noFusion` + `stabilizerAt_schemeAdj_empty_eq`), so a
+large harvest certifies a large scheme group. The genuinely-open content is whether `NonCascadeViaHarvest`
+holds (the `NoFusion` witness the battery validates), not the bridge itself. -/
+theorem largenessBridge_viaHarvest (IsLarge : Nat → Prop) :
+    LargenessBridge (NonCascadeViaHarvest IsLarge) (IsLargeSchemeViaAut IsLarge) := by
+  intro m S hnc
+  obtain ⟨gens, bs, hsound, hnf, hbase, hharvest⟩ := hnc
+  have h := isLargeAutP_of_noFusion (IsLarge := IsLarge) bs hsound hnf hbase hharvest
+  rw [stabilizerAt_schemeAdj_empty_eq] at h
+  exact h
+
+/-- **EOL capstone with the largeness bridge discharged.** `exhaustiveObstruction_scheme_of_nonCascade`
+specialised to the concrete descent-observable predicates, with `LargenessBridge` supplied by
+`largenessBridge_viaHarvest` rather than carried. A primitive, CC-rank-≥-3 schurian scheme whose
+defer-all-reals harvest reproduces a large group under `NoFusion` is a Cameron scheme — modulo only the
+cited `PrimitiveCCClassification` and the (explicit, battery-validated) `NoFusion` antecedent inside
+`NonCascadeViaHarvest`. Largeness is no longer a free hypothesis; it is derived from the harvest. -/
+theorem exhaustiveObstruction_scheme_of_harvest {m : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (k : Nat), SchurianScheme k → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme m)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hprim : S.toAssociationScheme.IsPrimitive)
+    (hrank : 2 ≤ S.rank)
+    (hnc : NonCascadeViaHarvest IsLarge m S) :
+    IsCameronScheme m S :=
+  exhaustiveObstruction_scheme_of_nonCascade hClassify (largenessBridge_viaHarvest IsLarge)
+    S hne hprim hrank hnc
 
 end ChainDescent

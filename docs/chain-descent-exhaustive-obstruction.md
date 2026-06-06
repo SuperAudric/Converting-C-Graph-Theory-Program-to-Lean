@@ -766,6 +766,21 @@ decision).
   unwitnessable = a genuine **Cameron** section, no third species). So `NoFusion`'s open content collapses onto
   **non-decomposable ∧ recovery-resistant ∧ has-symmetry = genuine Cameron** — the cited boundary, now
   empirically backed, with no room left for a non-abelian fusion species. Full record: the plan §5/§6/§7.
+- **LARGENESS BRIDGE DISCHARGED modulo `NoFusion` — LANDED (2026-06-06, axiom-clean, `Cascade.lean` Part A).**
+  The stated `LargenessBridge` is now a **proved theorem** for concrete descent-observable predicates, no longer
+  a carried hypothesis. Two layers: (1) the **class-agnostic graph core** `isLargeAutP_of_noFusion` (+ the
+  unconditional order-transport `isLargeAutP_of_isLargeProd`) — under `NoFusion` the symmetry-only harvest
+  reproduces `Aut(G)^P` exactly, so largeness *observed on the harvest's own output* (`closure gens`) certifies
+  the true group's largeness, on bare `AdjMatrix`, no scheme structure, with `IsLarge : Nat → Prop` the abstract
+  super-poly citation (never concretized); (2) the **scheme discharge** — `schemeAdj` faithfully encodes a scheme
+  as a labelled graph (`isAut_schemeAdj_iff`: `IsAut`=`IsSchemeAut`), `stabilizerAt_schemeAdj_empty_eq` identifies
+  `StabilizerAt (schemeAdj S) ⊥ ∅ = SchemeAutGroup S`, and `largenessBridge_viaHarvest` proves `LargenessBridge
+  (NonCascadeViaHarvest IsLarge) (IsLargeSchemeViaAut IsLarge)`. The capstone `exhaustiveObstruction_scheme_of_harvest`
+  then reaches the §12 Cameron conclusion with the bridge **supplied, not carried** — modulo only the cited
+  `PrimitiveCCClassification` and the explicit, battery-validated `NoFusion` antecedent (folded inside
+  `NonCascadeViaHarvest`). PP3's reword realized in Lean: the order identity is unconditional; `NoFusion` makes the
+  orbit product the *harvest's* output, so largeness is **derived from the witness**, the substrate-conditional
+  content sitting as an explicit antecedent rather than a free-floating implication.
 
 ---
 

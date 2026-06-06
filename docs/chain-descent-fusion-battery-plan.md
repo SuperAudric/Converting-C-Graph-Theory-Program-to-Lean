@@ -32,6 +32,15 @@
 > *derived from the witness*, not proven. The remaining open content is purely **whether `NoFusion` holds** —
 > exactly what the battery (§3–§5) measures.
 
+> **LARGENESS BRIDGE DISCHARGED modulo `NoFusion` — LANDED (2026-06-06, axiom-clean, `Cascade.lean` Part A).**
+> The `LargenessBridge` is now a **proved theorem** (PP5), not a carried hypothesis. Class-agnostic graph core:
+> `isLargeAutP_of_noFusion` (largeness read off the harvest, bare `AdjMatrix`) + the unconditional order-transport
+> `isLargeAutP_of_isLargeProd`. Scheme discharge: `schemeAdj` (faithful scheme→labelled-graph encoding,
+> `isAut_schemeAdj_iff`), `stabilizerAt_schemeAdj_empty_eq` (`StabilizerAt ⊥ ∅ = SchemeAutGroup`),
+> `largenessBridge_viaHarvest` (proves `LargenessBridge`), and `exhaustiveObstruction_scheme_of_harvest` (the §12
+> capstone with the bridge *supplied, not carried*). `IsLarge : Nat → Prop` stays the abstract super-poly citation.
+> Only the cited `PrimitiveCCClassification` + the explicit, battery-validated `NoFusion` antecedent remain.
+
 ## 0. One-line goal
 
 Close leg C's **largeness** antecedent by **deriving** it from a battery-validated **no-fusion** witness, via
@@ -93,10 +102,16 @@ derivable on already-landed machinery.**
   genuine Cameron section — no third graftable species**. So PP4 reduces to "no non-decomposable non-abelian
   fusion outside Cameron": the witness is the *same* cited-Cameron boundary, now empirically backed (the battery
   could not exhibit a counterexample), not a new unmodeled object.
-- **PP5 — Wire to the capstone.** `exhaustiveObstruction_scheme` (`Scheme.lean` §12) with **largeness now
-  derived** (PP3) → "leg C ⟹ Cameron" modulo (cited Babai classification + `NoFusion` witness + the
-  *separate* primitivity witness). Primitivity stays its own depth-graded line (Shrikhande-evidenced; the
-  battery may measure "imprimitive ⟹ recovers" as a secondary signal but it is **not** the largeness target).
+- **PP5 — Wire to the capstone. LANDED 2026-06-06 (axiom-clean, `Cascade.lean` Part A).**
+  `exhaustiveObstruction_scheme_of_harvest` reaches the §12 Cameron conclusion with **largeness derived** and the
+  `LargenessBridge` **discharged** (`largenessBridge_viaHarvest`), not carried. Two layers: the class-agnostic
+  graph core `isLargeAutP_of_noFusion` (+ unconditional `isLargeAutP_of_isLargeProd`) on bare `AdjMatrix`, and the
+  scheme discharge via the faithful encoding `schemeAdj` (`isAut_schemeAdj_iff`, `stabilizerAt_schemeAdj_empty_eq`:
+  `StabilizerAt (schemeAdj S) ⊥ ∅ = SchemeAutGroup S`). Net: "leg C ⟹ Cameron" modulo (cited Babai classification
+  + the explicit `NoFusion` antecedent inside `NonCascadeViaHarvest` + the *separate* primitivity witness), with
+  `IsLarge : Nat → Prop` the abstract super-poly citation (never concretized). Primitivity stays its own
+  depth-graded line (Shrikhande-evidenced; "imprimitive ⟹ recovers" is a secondary signal, **not** the largeness
+  target).
 
 **Net endpoint:** largeness is *derived from a battery-validated witness via the landed order theorem*, with
 the genuinely-open residual now sharply pinned (Tier-3): it is the **non-decomposable ∧ recovery-resistant ∧

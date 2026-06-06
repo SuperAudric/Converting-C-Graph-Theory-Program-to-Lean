@@ -70,6 +70,14 @@
 >   exhaustive-obstruction §0.7.5), validated by the adversarial battery (`FusionBatteryExperiment.cs`, 17/17):
 >   **no genuine fusion constructible** — "fusion" splits into separable (Tier-0-handled) vs non-decomposable
 >   (= genuine Cameron, no third species); consumption is candidate-pinning/recovery, orthogonal to abelian-ness.
+> - **LARGENESS BRIDGE DISCHARGED modulo `NoFusion` LANDED** (2026-06-06, axiom-clean, `Cascade.lean` Part A):
+>   the order identity `card_autP_eq_prod_of_base` (A3.5) is wired to the no-fusion harvest to *derive* leg C's
+>   largeness. Class-agnostic core `isLargeAutP_of_noFusion` (+ unconditional `isLargeAutP_of_isLargeProd`): under
+>   `NoFusion` the harvest reproduces `Aut(G)^P` exactly, so largeness read off `closure gens` certifies the group.
+>   Scheme discharge `largenessBridge_viaHarvest` via the faithful encoding `schemeAdj`/`isAut_schemeAdj_iff` and
+>   `stabilizerAt_schemeAdj_empty_eq` (`StabilizerAt (schemeAdj S) ⊥ ∅ = SchemeAutGroup S`); the §12 capstone
+>   `exhaustiveObstruction_scheme_of_harvest` then carries the bridge *supplied, not hypothesized* (PP3/PP5,
+>   [fusion-battery-plan](./chain-descent-fusion-battery-plan.md), exhaustive-obstruction §0.7.5).
 > - **CFI base-layer, colour-model RE-WIRING DONE** (2026-06-06, axiom-clean, `Cascade.lean` CFI-cov.4). **Scoping
 >   finding:** `PSeparatesGadgets` (the prior "sole CFI obligation") is stated over `P`-relations but the descent's
 >   CFI recovery runs on trivial `P` + colour individualization, so it is **vacuously false** at every `S` for
