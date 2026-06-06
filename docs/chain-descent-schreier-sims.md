@@ -75,11 +75,20 @@
 >   `CellSeparatesGadgets` at a *non-trivial* (gauge-remaining) `S` is **substrate-conditional on the base `H`**
 >   (the gadget-level analogue of `RecoverableByDepth`); the bounded content is the implication **"1-WL identifies
 >   `H` ⟹ 1-WL separates gadgets"** (statable since `h.H.adj : AdjMatrix h.m`). Three bricks: **(1) structural
->   foundation — LANDED:** `gadget_mem_neighbors_of_adj_cross` (a cross-gadget adjacency is a base-graph edge —
->   only cross-gadget CFI edges are endpoint bridges, connecting `H`-adjacent gadgets); **(2) refinement-projection
->   induction (the substantive middle, NEXT):** CFI 1-WL refines the gadget-pullback of `H` 1-WL; **(3) conclusion
->   (easy):** `Discrete (H-warmRefine) ⟹ CellSeparatesGadgets`. `cellSeparatesGadgets_of_discrete` covers the
->   (vacuous-harvest) full-discreteness base case.
+>   foundation — LANDED:** `gadget_mem_neighbors_of_adj_cross` (a cross-gadget adjacency is a base-graph edge) +
+>   `endpoint_crossGadget_gadget` (sharpened: an endpoint's cross-gadget neighbour lands in the bridge-target gadget
+>   `w` exactly — pins the projection's multiplicity); **(2) refinement-projection induction:** CFI 1-WL refines the
+>   gadget-pullback of `H` 1-WL; **(3) conclusion:** `Discrete (H-warmRefine) ⟹ CellSeparatesGadgets`.
+>   `cellSeparatesGadgets_of_discrete` covers the (vacuous-harvest) full-discreteness base case.
+>   **DESIGN SETTLED (2026-06-06) — `CellSeparatesGadgets` carried as a WITNESS (option 1 banked).** Brick 2 (the
+>   refinement-projection induction) proved to be a *base-relative CFI cascade* (Step A subset-follows-endpoints +
+>   Step B endpoint-separation via bridge + `H`-1-WL simulation, ~3–4 increments), whose **only payoff is a
+>   non-vacuity demonstration** — the capstone + CFI re-wiring are already complete, and
+>   `cellSeparatesGadgets_of_discrete` discharges the full-discreteness base case. Following the project's recovery
+>   pattern (`RecoverableByDepth`/`recoverableByDepth_cfi`), base-identification is therefore a **substrate-conditional
+>   witness** the harvest consumes, not a closed theorem. The structural bridge (Brick 1 `gadget_mem_neighbors_of_adj_cross`
+>   + sharpening `endpoint_crossGadget_gadget`) is the landed well-definedness foundation; the full implication is
+>   deferred to a future witness-discharge if a concrete non-vacuous instance is wanted.
 > - **CFI WITNESS LANDED conditional on gauge-generation** (2026-06-04, axiom-clean): `gaugeSubgroup`
 >   (the gauge group `Z₂^β` as a `Subgroup`), `closure_cfiGaugeGens_eq`, `cfiGauge_mul_self` (the gauge group
 >   is exponent-2), and **`cfi_coversOrbits` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt_eq_prod`**

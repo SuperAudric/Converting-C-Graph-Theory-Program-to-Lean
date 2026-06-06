@@ -1819,10 +1819,19 @@ theorem cfi_card_stabilizerAt_of_cellSeparates (h : IsCFI' adj) (h_odd : h.OddDe
 
 `CellSeparatesGadgets` at a non-trivial (gauge-remaining) `S` is **substrate-conditional on the base `H`**:
 it holds exactly when 1-WL identifies `H`'s vertices — the gadget-level analogue of `RecoverableByDepth`,
-false when 1-WL cannot crack `H`. The bounded content is the *implication* "1-WL identifies `H` ⟹ 1-WL
-separates gadgets", which rests on the structural fact that CFI refinement projects onto base-graph
-refinement along the gadget map. **Brick 1** (here) is that structural foundation; the refinement-projection
-induction (Brick 2) and the `Discrete`-`H` conclusion (Brick 3) build on it. -/
+false when 1-WL cannot crack `H`.
+
+**Design (settled): `CellSeparatesGadgets` is carried as a WITNESS, not proved.** Following the project's
+recovery pattern (`RecoverableByDepth` / `CellsAreOrbits`), base-identification is a substrate-conditional
+*witness* the harvest consumes (`cfi_closure_eq_stabilizerAt_of_cellSeparates`), with
+`cellSeparatesGadgets_of_discrete` discharging the full-discreteness base case. The *implication* "1-WL
+identifies `H` ⟹ `CellSeparatesGadgets`" is a genuine theorem but heavy (a base-relative CFI cascade); its
+only payoff would be a non-vacuity *demonstration*, so it is deferred to a future witness-discharge.
+
+What is **landed** here is the structural foundation that makes any such projection well-defined: CFI
+refinement projects onto base-graph refinement along the gadget map — **Brick 1**
+(`gadget_mem_neighbors_of_adj_cross`: cross-gadget adjacency is a base-graph edge) and its **sharpening**
+(`endpoint_crossGadget_gadget`: the cross-gadget neighbour lands in the bridge-target gadget exactly). -/
 
 /-- **Brick 1 — a cross-gadget adjacency is a base-graph edge.** The only cross-gadget adjacencies in CFI(H)
 are the endpoint bridges (subset vertices have only same-gadget neighbours, `not_isEndpt_subsetVertex`), and a
@@ -1841,6 +1850,22 @@ theorem gadget_mem_neighbors_of_adj_cross (h : IsCFI' adj) {x y : Fin n}
   · simp only [gadgetOf_endpointVertex] at hg ⊢
     obtain ⟨_, hwxvy, _⟩ := (h.adj_endpointVertex_eq_one_iff hwx hwy bx by').mp hadj
     rw [← hwxvy]; exact hwx
+
+/-- **Brick 1, sharpened — an endpoint's cross-gadget neighbour lands in the bridge-target gadget.** A
+cross-gadget neighbour of `e^b_{v→w}` lies in gadget `w` *exactly* (the bridge target), not merely in some
+`H`-neighbour gadget: each endpoint has a *single* cross-gadget (bridge) neighbour, in gadget `w`. This pins
+the projection's multiplicity — a vertex's cross-gadget neighbourhood is distributed over `N_H(gadget)` by
+the bridge structure, one neighbour per outgoing endpoint direction. -/
+theorem endpoint_crossGadget_gadget (h : IsCFI' adj) {v w : Fin h.m}
+    (hw : w ∈ h.H.neighbors v) (b : Bool) {y : Fin n}
+    (hadj : adj.adj (h.endpointVertex hw b) y = 1) (hg : gadgetOf h y ≠ v) :
+    gadgetOf h y = w := by
+  rcases exists_vertex_form h y with ⟨vy, Sy, hSy, rfl⟩ | ⟨vy, wy, hwy, by', rfl⟩
+  · exact absurd ⟨h.endpointVertex hw b, by rw [h.adj_symm]; exact hadj,
+      by simp only [gadgetOf_endpointVertex]; exact hg.symm⟩ (not_isEndpt_subsetVertex h hSy)
+  · rw [gadgetOf_endpointVertex]
+    obtain ⟨_, hwvy, _⟩ := (h.adj_endpointVertex_eq_one_iff hw hwy b by').mp hadj
+    exact hwvy.symm
 
 /-! ## Screen predicate D1 — visible / symmetry-only chain (leg A)
 
