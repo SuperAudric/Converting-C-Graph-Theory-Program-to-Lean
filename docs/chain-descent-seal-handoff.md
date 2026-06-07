@@ -463,8 +463,12 @@ conservation route, T2, and P3 are **the same statement**.
 **Concrete next lemma (Lean-ready, the sharpest form of P3):** *a relation-pair that is a two-base-twin at **every** base
 pair generates a non-trivial `ClosedSubset`* — i.e. **base-homogeneous gap ⟹ imprimitive**, stated against `IsoPinned` +
 `ClosedSubset` + `IsPrimitive`. Proving it closes the affine floor and the primitive floor together. The supporting
-**realization lemma** (two-base distinguishing count ⟹ pair-individualization separates) is the low-risk warm-up, on the
-`Depth2Det`/`schemePart_at` machinery.
+**realization lemma is LANDED** (2026-06-07, axiom-clean, `Scheme.lean §10.3b`): `schemePartFrom` (the depth-`k` counting
+partition from an **arbitrary** initial colouring `χ₀` — `schemePart_at` generalized off the single base, since the base
+is used only at depth 0) + `iterFrom_refines_schemePartFrom` (`iter[k] χ₀` refines it) + `iterSet_refines_schemePartFrom`
+(the descent form: individualizing a base **set** `S` and warm-refining sees the multi-base counting partition). So *a
+multi-base counting separation is realized as a warm-refinement split* — the easy half. The **crux remains** the converse
+(primitive ⟹ the gap is broken at base + O(1)).
 
 **THE THREAD BOARD (what's worth doing, by tier — regardless of immediacy).**
 - **Tier 1 — bankable slice-closures (provable now, shrink the wall but don't close it):**
@@ -478,7 +482,8 @@ pair generates a non-trivial `ClosedSubset`* — i.e. **base-homogeneous gap ⟹
   **not** group commutativity (`not_comm_of_orbit_disagree` is ¬leg-B, a *different* statement — do not anchor on it).
   - **(c) The sharpest-form P3 lemma (the target):** *a relation-pair that is a two-base-twin at every base pair generates
     a non-trivial `ClosedSubset`* — base-homogeneous gap ⟹ imprimitive (against `IsoPinned`/`ClosedSubset`/`IsPrimitive`).
-    Warm-up: the **realization lemma** (two-base distinguishing count ⟹ pair-individualization separates, on `Depth2Det`).
+    Warm-up **LANDED** (`Scheme.lean §10.3b`: `schemePartFrom` + `iterFrom_refines_schemePartFrom` +
+    `iterSet_refines_schemePartFrom`) — the multi-base counting partition is realized by warm refinement.
   - **(d) Thread T2** — the affine instance of (c): primitive ⟹ separable via invariant-subspace = block; **verify the
     wreath-characterization literature dependency** (could make affine-primitive ⟹ separable a near-theorem by citation).
   - **(e) The P1–P4 / Gate-G proof** of "primitive ⟹ separable" — (c) is its crux P3.

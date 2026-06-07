@@ -1815,6 +1815,147 @@ theorem iter_refines_schemePart_at {n : Nat} (G : SchurianSchemeGraph n)
     rw [h_w_ncard, h_u_ncard, ← h_w_filter, ← h_u_filter]
     exact hcount
 
+/-! ### §10.3b — Multi-vantage realization: `iter[k] χ₀` refines the counting partition from ANY base colouring
+
+`schemePart_at` / `iter_refines_schemePart_at` above start the counting from `individualizedColouring n {v}`
+— a **single** individualized base point. The descent's *multi-vantage* recovery individualizes a base **set**
+`S` (the "second vantage" that breaks a separability gap — e.g. the index-3 cyclotomic schemes recover at
+`base + O(1)`, not depth 1). The base appears only at depth 0, so the whole development generalizes
+mechanically to an **arbitrary initial colouring `χ₀`**, and it is a pure 1-WL fact (no scheme structure).
+This is the **realization half** of the two-vantage step
+([`chain-descent-seal-handoff.md`](../../../docs/chain-descent-seal-handoff.md) §"G2 attack board"): *a
+multi-base counting separation is seen by warm refinement.* The open converse — a primitive scheme's gap is
+broken at bounded depth (`base + O(1)`) — is the crux (sharpest-form P3). -/
+
+/-- **Counting partition from an arbitrary initial colouring `χ₀`.** Generalizes `schemePart_at` (the
+`χ₀ = individualizedColouring n {v}` case): depth 0 is `χ₀`-equality, the counting recursion identical.
+The descent's two/multi-base recovery is the `χ₀ = individualizedColouring n S` instance. -/
+def schemePartFrom {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ₀ : Colouring n) : Nat → Fin n → Fin n → Prop
+  | 0, w, u => χ₀ w = χ₀ u
+  | k + 1, w, u =>
+    schemePartFrom adj P χ₀ k w u ∧
+    ∀ (a : Nat) (p : POE) (w' : Fin n),
+      {u' : Fin n | u' ≠ w ∧ schemePartFrom adj P χ₀ k u' w' ∧
+                    adj.adj w u' = a ∧ P w u' = p}.ncard =
+      {u' : Fin n | u' ≠ u ∧ schemePartFrom adj P χ₀ k u' w' ∧
+                    adj.adj u u' = a ∧ P u u' = p}.ncard
+
+/-- `schemePartFrom` is reflexive. -/
+theorem schemePartFrom_refl {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ₀ : Colouring n) (k : Nat) (w : Fin n) : schemePartFrom adj P χ₀ k w w := by
+  induction k with
+  | zero => exact rfl
+  | succ k ih => exact ⟨ih, fun _ _ _ => rfl⟩
+
+/-- `schemePartFrom` is symmetric. -/
+theorem schemePartFrom_symm {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ₀ : Colouring n) (k : Nat) {w u : Fin n}
+    (h : schemePartFrom adj P χ₀ k w u) : schemePartFrom adj P χ₀ k u w := by
+  induction k generalizing w u with
+  | zero => exact h.symm
+  | succ k ih =>
+    obtain ⟨hk, hc⟩ := h
+    exact ⟨ih hk, fun a p w' => (hc a p w').symm⟩
+
+/-- `schemePartFrom` is transitive. -/
+theorem schemePartFrom_trans {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ₀ : Colouring n) (k : Nat) {w u t : Fin n}
+    (h1 : schemePartFrom adj P χ₀ k w u) (h2 : schemePartFrom adj P χ₀ k u t) :
+    schemePartFrom adj P χ₀ k w t := by
+  induction k generalizing w u t with
+  | zero => exact h1.trans h2
+  | succ k ih =>
+    obtain ⟨hk1, hc1⟩ := h1
+    obtain ⟨hk2, hc2⟩ := h2
+    exact ⟨ih hk1 hk2, fun a p w' => (hc1 a p w').trans (hc2 a p w')⟩
+
+/-- **Multi-vantage realization (inductive refinement, general base).** For ANY initial colouring `χ₀`, the
+`iter[k] χ₀` partition refines `schemePartFrom adj P χ₀ k`: equal warm-refined colour ⟹ the depth-`k`
+multi-base counts agree. Generalizes `iter_refines_schemePart_at` to an arbitrary base; the base is used only
+at depth 0, so the inductive step is verbatim. -/
+theorem iterFrom_refines_schemePartFrom {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (χ₀ : Colouring n) :
+    ∀ (k : Nat) (w u : Fin n),
+      ((refineStep adj P)^[k]) χ₀ w = ((refineStep adj P)^[k]) χ₀ u →
+      schemePartFrom adj P χ₀ k w u := by
+  intro k
+  induction k with
+  | zero => intro w u h; exact h
+  | succ k ih =>
+    intro w u h
+    rw [Function.iterate_succ_apply'] at h
+    obtain ⟨hk, hsig⟩ := (refineStep_iff adj P _ w u).mp h
+    refine ⟨ih w u hk, ?_⟩
+    intro a p w'
+    set χk := ((refineStep adj P)^[k]) χ₀ with hχk_def
+    have hequiv : ∀ u', schemePartFrom adj P χ₀ k u' w' ↔
+                  ∃ x : Fin n, χk x = χk u' ∧ schemePartFrom adj P χ₀ k x w' := by
+      intro u'
+      refine ⟨fun h_sp => ⟨u', rfl, h_sp⟩, ?_⟩
+      rintro ⟨x, hx_eq, hx_sp⟩
+      exact schemePartFrom_trans adj P χ₀ k (ih u' x hx_eq.symm) hx_sp
+    let p_pred : Nat × Nat × POE → Prop := fun t =>
+      (∃ x : Fin n, χk x = t.1 ∧ schemePartFrom adj P χ₀ k x w') ∧
+      t.2.1 = a ∧ t.2.2 = p
+    haveI : DecidablePred p_pred := Classical.decPred _
+    have hcount := signature_eq_countP_eq adj P χk hsig p_pred
+    haveI : DecidablePred (fun u' : Fin n =>
+        u' ≠ w ∧ schemePartFrom adj P χ₀ k u' w' ∧
+        adj.adj w u' = a ∧ P w u' = p) := Classical.decPred _
+    haveI : DecidablePred (fun u' : Fin n =>
+        u' ≠ u ∧ schemePartFrom adj P χ₀ k u' w' ∧
+        adj.adj u u' = a ∧ P u u' = p) := Classical.decPred _
+    have h_w_filter : (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ w ∧ p_pred (χk u', adj.adj w u', P w u'))) =
+          (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ w ∧ schemePartFrom adj P χ₀ k u' w' ∧
+              adj.adj w u' = a ∧ P w u' = p)) := by
+      apply Finset.filter_congr
+      intro u' _
+      constructor
+      · rintro ⟨hne, ⟨hex, ha, hp⟩⟩
+        exact ⟨hne, (hequiv u').mpr hex, ha, hp⟩
+      · rintro ⟨hne, hsp, ha, hp⟩
+        exact ⟨hne, (hequiv u').mp hsp, ha, hp⟩
+    have h_u_filter : (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ u ∧ p_pred (χk u', adj.adj u u', P u u'))) =
+          (Finset.univ.filter (fun u' : Fin n =>
+              u' ≠ u ∧ schemePartFrom adj P χ₀ k u' w' ∧
+              adj.adj u u' = a ∧ P u u' = p)) := by
+      apply Finset.filter_congr
+      intro u' _
+      constructor
+      · rintro ⟨hne, ⟨hex, ha, hp⟩⟩
+        exact ⟨hne, (hequiv u').mpr hex, ha, hp⟩
+      · rintro ⟨hne, hsp, ha, hp⟩
+        exact ⟨hne, (hequiv u').mp hsp, ha, hp⟩
+    have h_w_ncard : {u' : Fin n | u' ≠ w ∧ schemePartFrom adj P χ₀ k u' w' ∧
+                      adj.adj w u' = a ∧ P w u' = p}.ncard =
+                    (Finset.univ.filter (fun u' : Fin n =>
+                      u' ≠ w ∧ schemePartFrom adj P χ₀ k u' w' ∧
+                      adj.adj w u' = a ∧ P w u' = p)).card :=
+      ncard_setOf_eq_filter_card _
+    have h_u_ncard : {u' : Fin n | u' ≠ u ∧ schemePartFrom adj P χ₀ k u' w' ∧
+                      adj.adj u u' = a ∧ P u u' = p}.ncard =
+                    (Finset.univ.filter (fun u' : Fin n =>
+                      u' ≠ u ∧ schemePartFrom adj P χ₀ k u' w' ∧
+                      adj.adj u u' = a ∧ P u u' = p)).card :=
+      ncard_setOf_eq_filter_card _
+    rw [h_w_ncard, h_u_ncard, ← h_w_filter, ← h_u_filter]
+    exact hcount
+
+/-- **The two-vantage realization, descent form.** Individualizing a base **set** `S` and warm-refining
+(iterating `refineStep` from `individualizedColouring n S`) sees the multi-base counting partition: equal
+refined colour ⟹ the depth-`k` multi-base counts agree. The `S = {e, e'}` instance is the two-vantage step's
+realization half — *a distinguishing two-base count is realized as a warm-refinement split.* -/
+theorem iterSet_refines_schemePartFrom {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (S : Finset (Fin n)) (k : Nat) (w u : Fin n)
+    (h : ((refineStep adj P)^[k]) (individualizedColouring n S) w =
+         ((refineStep adj P)^[k]) (individualizedColouring n S) u) :
+    schemePartFrom adj P (individualizedColouring n S) k w u :=
+  iterFrom_refines_schemePartFrom adj P (individualizedColouring n S) k w u h
+
 /-! ### §10.4 — Convergence assembly
 
 With `iter_refines_schemePart_at` (the substantive inductive step
