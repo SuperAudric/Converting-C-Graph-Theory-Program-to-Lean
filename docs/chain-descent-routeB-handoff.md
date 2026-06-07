@@ -22,9 +22,18 @@
 > general case is exactly the separability-number reduction-to-constituents (§4 item 5), and these suppliers ARE that
 > shape — supply `hquot`/`hfib` from the constituents, assemble via the chain.** On a *fully* recoverable class
 > the decomposition is subsumed (β unused), so its independent value is the regime where quotient/fiber recover
-> at lower depth than the whole. Still open: (a) producing the block system `β` + base from `¬IsPrimitive`
-> (scheme-side: imprimitive ⟹ non-trivial `ClosedSubset` ⟹ β), and (b) supplying `hquot`/`hfib` in the
-> *non-whole-recovering* regime (the genuine `s(C)` content).
+> at lower depth than the whole.
+>
+> **UPDATE (2026-06-07, cont'd): (a) the block system is now DERIVED from `¬IsPrimitive` — end-to-end firing
+> LANDED (axiom-clean).** `exists_nontrivial_closedSubset_of_not_isPrimitive` (`Scheme.lean`: imprimitive ⟹ a
+> non-trivial closed subset `I`) + `schemeEquiv_class_eq_iff` (`β u = β w ↔ schemeEquiv I u w`) +
+> `blockHarvest_of_not_isPrimitive_of_visibleRecovery` (`Cascade.lean`: `¬IsPrimitive` + recovery ⟹ the full
+> `hBlockHarvest` bundle, β = `schemeEquiv I`-block-class built internally) + `reachesRigidOrCameron_viaRecovery`
+> (the **fully-fired seal**: both branches keyed on recovery, only the cited `PrimitiveCCClassification`
+> external). So the imprimitive branch fires with **no hand-supplied block system**. **The single remaining open
+> content is (b):** supplying `hquot`/`hfib` (equivalently the recovery witness) in the *non-whole-recovering*
+> regime — the genuine `s(C)` content (handoff §4 item 5), where the quotient/fiber recover but the whole does
+> not. That is the substrate-conditional frontier the whole project carries.
 >
 > **Quality bar (unchanged):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; full build
 > green (`bash scripts/build.sh`, serial ~30–130s); regen `PublicTheoremIndex.md` via

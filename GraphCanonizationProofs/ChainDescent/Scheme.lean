@@ -213,6 +213,37 @@ def IsPrimitive : Prop :=
   ∀ I : Finset (Fin (S.rank + 1)), S.ClosedSubset I →
     I = {0} ∨ I = Finset.univ
 
+/-- **Imprimitive ⟹ a non-trivial block system exists.** Unfolding `¬IsPrimitive`: there is a closed
+subset `I` that is neither the diagonal `{R_0}` nor the whole relation set — a genuine non-trivial block
+system. This is the entry point that lets the Route B imprimitive discharge construct its partition `β`
+(the `schemeEquiv I` block-class) from the descent's combinatorial `¬IsPrimitive` observation. -/
+theorem exists_nontrivial_closedSubset_of_not_isPrimitive (hnp : ¬ S.IsPrimitive) :
+    ∃ I : Finset (Fin (S.rank + 1)), S.ClosedSubset I ∧ I ≠ {0} ∧ I ≠ Finset.univ := by
+  unfold IsPrimitive at hnp
+  push_neg at hnp
+  obtain ⟨I, hcl, h1, h2⟩ := hnp
+  exact ⟨I, hcl, h1, h2⟩
+
+/-- **The block-class set is an equivalence class: `β u = β w ↔ schemeEquiv I u w`.** For a closed subset
+`I`, the `schemeEquiv I`-classes `{y | schemeEquiv I v y}` are the blocks of the block system, so two are
+equal exactly when their basepoints are `schemeEquiv I`-related. This is the honest characterization of the
+Route B partition `β v := {y | schemeEquiv I v y}` — needed wherever the `β u = β w` block-condition must be
+related back to the scheme (e.g. a future non-recovering `hfiber` that genuinely restricts to within-block
+pairs). Standard equivalence-class machinery on `schemeEquiv_equivalence`. -/
+theorem schemeEquiv_class_eq_iff {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset I)
+    (u w : Fin n) :
+    {y | S.schemeEquiv I u y} = {y | S.schemeEquiv I w y} ↔ S.schemeEquiv I u w := by
+  constructor
+  · intro h
+    have hw : w ∈ {y | S.schemeEquiv I w y} := S.schemeEquiv_refl hcl.1 w
+    rw [← h] at hw
+    exact hw
+  · intro huw
+    ext y
+    simp only [Set.mem_setOf_eq]
+    exact ⟨fun h => S.schemeEquiv_trans hcl (S.schemeEquiv_symm huw) h,
+           fun h => S.schemeEquiv_trans hcl huw h⟩
+
 end AssociationScheme
 
 /-! ## §2 — Scheme automorphisms and `SchurianScheme`

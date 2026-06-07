@@ -3436,4 +3436,110 @@ theorem reachesRigidOrCameron_viaBlocksAndCascade {n : Nat} {IsLarge : Nat → P
     obtain ⟨β, gens, bs, hsound, hreach, hfiber, hbase⟩ := hBlockHarvest himp
     exact schemeReproduced_of_blockDecomposition S β bs hsound hreach hfiber hbase
 
+/-! ### End-to-end imprimitive firing — the block system derived from `¬IsPrimitive`
+
+The Route B capstones above carry the partition `β` and the coverage interfaces `hreach`/`hfiber` as
+hypotheses. The bridge below closes that gap on the recoverable class: it **derives** `β` from the descent's
+combinatorial `¬IsPrimitive` observation (via `exists_nontrivial_closedSubset_of_not_isPrimitive`, taking the
+`schemeEquiv I`-block-class of a non-trivial closed subset `I`) and supplies `hreach`/`hfiber` from a recovery
+witness (`blockHarvest_of_visibleRecovery`). So the imprimitive branch fires from recovery alone, with no
+block system handed in. -/
+
+/-- **`hBlockHarvest` from `¬IsPrimitive` + recovery (block system derived).** Given a recovery witness on the
+labelled encoding `schemeAdj S` — path-fixing generators (`hsound`), per-level orbit recovery (`hrec`,
+`CellsAreOrbits`), refinement-visible realizers (`hvis`), and a terminal base (`hbase`) — and the descent's
+`¬IsPrimitive` observation, this produces the full `hBlockHarvest` bundle that `reachesRigidOrCameron_viaBlocks`
+/`…viaBlocksAndCascade` consume: the partition `β` is the `schemeEquiv I`-block-class of a non-trivial closed
+subset `I` extracted from `¬IsPrimitive`, and `hreach`/`hfiber` come from `blockHarvest_of_visibleRecovery`. On
+the recoverable class the block decomposition is subsumed (β is unused by the suppliers — see
+`blockHarvest_of_realizers`), so this is the honest end-to-end firing, not new canonization power beyond leg A;
+its value is making the imprimitive branch fire without a hand-supplied block system. -/
+theorem blockHarvest_of_not_isPrimitive_of_visibleRecovery {n : Nat} (S : SchurianScheme n)
+    {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
+    (hsound : ∀ g ∈ gens,
+        g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅)
+    (hrec : ∀ T : Finset (Fin n),
+        CellsAreOrbits (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T)
+    (hvis : ∀ T : Finset (Fin n), ∀ b w : Fin n,
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) b
+            = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) w →
+        ∃ g, g ∈ gens
+          ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g b = w)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (bs.foldl (fun s b => insert b s) ∅))
+    (hnp : ¬ S.toAssociationScheme.IsPrimitive) :
+    ∃ (β : Fin n → Set (Fin n)) (gens' : Set (Equiv.Perm (Fin n))) (bs' : List (Fin n)),
+      (∀ g ∈ gens',
+          g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+      (∀ T : Finset (Fin n), ∀ b w,
+          OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T b w →
+          ∃ σ ∈ Subgroup.closure
+              (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens' T),
+            β (σ b) = β w) ∧
+      (∀ T : Finset (Fin n), ∀ u w,
+          OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T u w →
+            β u = β w →
+          ∃ h ∈ Subgroup.closure
+              (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens' T), h u = w) ∧
+      IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (bs'.foldl (fun s b => insert b s) ∅) := by
+  obtain ⟨I, hcl, _, _⟩ :=
+    S.toAssociationScheme.exists_nontrivial_closedSubset_of_not_isPrimitive hnp
+  obtain ⟨hreach, hfiber⟩ :=
+    blockHarvest_of_visibleRecovery
+      (β := fun v => {y | S.toAssociationScheme.schemeEquiv I v y}) hrec hvis
+  exact ⟨fun v => {y | S.toAssociationScheme.schemeEquiv I v y}, gens, bs,
+    hsound, hreach, hfiber, hbase⟩
+
+/-- **The fully-fired seal — both branches keyed on recovery, block system derived.** The end state of the
+Route B + leg-A discharge: `reachesRigidOrCameron_viaBlocksAndCascade` with the cascade branch supplied by the
+visible-realizer harvest (`hCascadeHarvest`, via `schemeReproduced_of_visibleRealizers`) and the imprimitive
+branch supplied by a recovery witness (`hImprimRecovery`, via `blockHarvest_of_not_isPrimitive_of_visibleRecovery`
+— the block system `β` derived internally from `¬IsPrimitive`, no longer hypothesized). So a rank-≥3 schurian
+scheme residual that recovers (on both the primitive-cascade and imprimitive branches) is `SchemeReproduced ∨
+IsCameronScheme`, with the **only** external input the cited `PrimitiveCCClassification`. Both branches now
+bottom out at the same per-level recovery interface, and the imprimitive block system is constructed, not
+carried. -/
+theorem reachesRigidOrCameron_viaRecovery {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascadeHarvest : ¬ NonCascadeViaHarvest IsLarge n S →
+        ∃ (gens : Set (Equiv.Perm (Fin n))) (bs : List (Fin n)),
+          (∀ g ∈ gens,
+              g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+          (∀ T : Finset (Fin n), (∅ : Finset (Fin n)) ⊆ T → ∀ b w : Fin n,
+              warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) b
+                  = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) w →
+              ∃ g, g ∈ gens
+                ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g b = w) ∧
+          IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (bs.foldl (fun s b => insert b s) ∅))
+    (hImprimRecovery : ¬ S.toAssociationScheme.IsPrimitive →
+        ∃ (gens : Set (Equiv.Perm (Fin n))) (bs : List (Fin n)),
+          (∀ g ∈ gens,
+              g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+          (∀ T : Finset (Fin n),
+              CellsAreOrbits (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T) ∧
+          (∀ T : Finset (Fin n), ∀ b w : Fin n,
+              warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) b
+                  = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) w →
+              ∃ g, g ∈ gens
+                ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g b = w) ∧
+          IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (bs.foldl (fun s b => insert b s) ∅)) :
+    SchemeReproduced n S ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaBlocksAndCascade hClassify S hne hrank hCascadeHarvest ?_
+  intro hnp
+  obtain ⟨gens, bs, hsound, hrec, hvis, hbase⟩ := hImprimRecovery hnp
+  exact blockHarvest_of_not_isPrimitive_of_visibleRecovery S bs hsound hrec hvis hbase hnp
+
 end ChainDescent
