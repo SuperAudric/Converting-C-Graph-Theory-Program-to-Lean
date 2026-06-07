@@ -1,5 +1,9 @@
 # Chain descent — Route B handoff: the imprimitive branch, and the open `hreach`/`hfiber` frontier
 
+> **➡️ SUPERSEDED (2026-06-07) by [`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md)** — the
+> authoritative seal handoff records the full state and all gaps (Route B is now one partial attack on gap G2-A
+> there). Read this doc only for the Route B blow-by-blow and the correction note below.
+>
 > **⚠️ CRITICAL CORRECTION (2026-06-07) — read before the rest of this doc.** A wiring-verification pass found
 > that the seal's concrete rigid predicate `SchemeReproduced := ∃ gens, closure gens = SchemeAutGroup S` is
 > **vacuously true** (machine-checked: `⟨↑SchemeAutGroup, Subgroup.closure_eq _⟩` proves it for *every* scheme —

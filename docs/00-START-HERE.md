@@ -221,11 +221,16 @@ witness layer, not onboarding):
   half of the goal; Approach 3 (Cameron-free scheme leg) active — scheme primitivity, the imprimitive ⟹
   refinement-visible bridge, and the group-side `isPreprimitive_iff_isPrimitive` bridge landed; the
   refinement-side decomposition deferred (substrate-conditional), capstone cited
-- **Route B — the imprimitive branch + the live `hreach`/`hfiber` frontier (THE CURRENT HANDOFF, 2026-06-06)** →
-  [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) — the seal's `hImprimitive` reduced
-  (axiom-clean, 4 layers) from an opaque hypothesis to two intrinsic coverage interfaces; the open work is
-  discharging `hreach` (quotient block-reach) / `hfiber` (fiber within-block) recovery. Start here to pick up
-  the imprimitive thread.
+- **THE SEAL HANDOFF — current state + all the gaps to "consumed-or-Cameron" (THE CURRENT HANDOFF, 2026-06-07)** →
+  [`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md) — the authoritative handoff. Records the seal's
+  state after the **vacuity correction** (the old `∃ gens, closure = SchemeAutGroup` rigid predicate was trivially
+  true; replaced by the visible-realizer `SchemeRecovered`), and the four gaps: G1a depth-graded recovery, **G1b
+  leg B (abelian) missing — the most actionable**, G2 the leaks (open `s(C)` frontier), G3 the citation. Start here
+  for *any* gap. **Subsumes** the Route B handoff below.
+- **Route B — the imprimitive branch (SUPERSEDED by the seal handoff; read for the G2-A blow-by-blow only)** →
+  [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) — its capstones were found vacuous (see its
+  top correction note); the genuine, kept pieces (`hfiber_of_fiberVisibleRealizers`, the conditional chain) are
+  catalogued in the seal handoff §4 G2-A / §5.
 
 **Paper-stage / planning docs** (theoretical targets, not yet formalized — read
 only if working that thread): `chain-descent-tier3-decomposability.md`,
