@@ -35,6 +35,36 @@
 > regime — the genuine `s(C)` content (handoff §4 item 5), where the quotient/fiber recover but the whole does
 > not. That is the substrate-conditional frontier the whole project carries.
 >
+> **UPDATE (2026-06-07, cont'd): Approach A (recursive reduction) STARTED — base-sequence phase-split tool
+> LANDED (axiom-clean, `Cascade.lean`).** `CoversOrbitsAlong` (partial coverage, no terminal base) +
+> `coversOrbits_append` (glue `CoversOrbitsAlong bs₁ S` + `CoversOrbits bs₂ (foldl S bs₁)` ⟹ `CoversOrbits
+> (bs₁++bs₂) S`) + `coversOrbitsAlong_of_coversOrbits`. This is the structural enabler for ordering the descent
+> **block-representatives-first, then within-block** (handoff §5.3): the quotient phase is partial coverage, the
+> fiber phase the full tail, each supplied by a different (smaller/coarser) constituent's recovery.
+> **HONEST RECALIBRATION (correcting the §3 base-sequence claim):** tracing the chain
+> (`coversOrbits_of_blockDecomposition` → `stabilizerAt_le_closure_gensAt_step`), coverage is consumed at the
+> base-sequence prefix levels *starting at `S=∅`*, and each level genuinely needs that level's head
+> *orbit-transversal realized* — which **cannot** be sourced from deeper recovery (a deep aut fixes too much to
+> move a shallow orbit). So per-level orbit-realization is **intrinsic**; the base-sequence freedom does **not**
+> give a free shallow-recovery win. What it *does* give is the phase-split above, which is the genuine Approach-A
+> prerequisite. NEXT (Approach A proper): supply `hquot`/`hfib` from constituent recovery — quotient via
+> block-`warmRefine`/`BlockRefinementVisible` (A2-ii), fiber via block-restricted `CellsAreOrbits` — using
+> `coversOrbits_append` to sequence the two phases; carry primitive-constituent recovery as the witness.
+>
+> **UPDATE (2026-06-07, cont'd): per-level fiber half LANDED + a difficulty-flip finding (axiom-clean,
+> `Cascade.lean`).** `hfiber_of_fiberVisibleRealizers` discharges `hfiber` from **within-block visible
+> realizers** (same-`warmRefine`-cell pairs *within a block*) — clean, no new machinery, and **strictly weaker
+> than whole recovery** (satisfiable when within each block cells=orbits even if globally cells⊋orbits;
+> Shrikhande-relevant, since its 1-WL merges are *across* blocks). **FINDING — the difficulty is the reverse of
+> §4.1's "hreach is easier":** `BlockRefinementVisible` ("cells ⊆ blocks") makes a same-cell realizer stay
+> *within* a block (`β(gb)=β(b)`) — that supports the **fiber**, not block-*moves*. `hreach` needs realizers
+> that *move* `b` toward an orbit-mate's (possibly different) block, and the only way to harvest block-moves
+> without whole-graph recovery is to recover the **block-orbits** = a **block-level 1-WL** (a `blockCell` colour
+> = block-image of `warmRefine`, with `blockCells = blockOrbits`). So **the fiber is the clean direction; the
+> quotient (`hreach`) needs block-1-WL modelling** — the focused next step (define `blockCell`, prove the
+> block-image refinement + block-orbit recovery ⟹ block-reach realizers ⟹ `hreach` via
+> `hreach_of_quotientRealizers`).
+>
 > **Quality bar (unchanged):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; full build
 > green (`bash scripts/build.sh`, serial ~30–130s); regen `PublicTheoremIndex.md` via
 > `python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers` and hand-fill Descriptions; **do not

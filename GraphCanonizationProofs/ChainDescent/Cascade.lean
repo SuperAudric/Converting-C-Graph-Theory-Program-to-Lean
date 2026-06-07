@@ -956,6 +956,42 @@ theorem stabilizerAt_eq_closure_gensAt_of_coversOrbits {gens : Set (Equiv.Perm (
     Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
   le_antisymm closure_gensAt_le_stabilizerAt (stabilizerAt_le_closure_gensAt_of_coversOrbits bs hcov)
 
+/-- **Partial coverage along a base-sequence segment (no terminal base).** The per-head orbit-coverage clauses
+of `CoversOrbits` for the segment `bs` from `S`, *without* requiring the accumulated set to be a base. This is
+the piece that lets a base sequence be split into phases: `coversOrbits_append` glues a partial segment to a
+full `CoversOrbits` tail. The structural tool for ordering the descent — e.g. **block representatives first,
+then within-block points** — that the imprimitive decomposition (Route B) needs: the quotient phase is partial
+coverage, the fiber phase the full tail. -/
+def CoversOrbitsAlong (adj : AdjMatrix n) (P : PMatrix n) (gens : Set (Equiv.Perm (Fin n))) :
+    List (Fin n) → Finset (Fin n) → Prop
+  | [], _ => True
+  | b :: bs, S =>
+      (∀ w, OrbitPartition adj P S b w →
+          ∃ h ∈ Subgroup.closure (gensAt adj P gens S), h b = w)
+        ∧ CoversOrbitsAlong adj P gens bs (insert b S)
+
+/-- A full `CoversOrbits` witness yields partial coverage along its sequence (forget the terminal base). -/
+theorem coversOrbitsAlong_of_coversOrbits {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
+    {S : Finset (Fin n)} (hcov : CoversOrbits adj P gens bs S) :
+    CoversOrbitsAlong adj P gens bs S := by
+  induction bs generalizing S with
+  | nil => trivial
+  | cons b bs ih => exact ⟨hcov.1, ih hcov.2⟩
+
+/-- **Base-sequence phase split.** Partial coverage along `bs₁` from `S`, followed by a full `CoversOrbits`
+witness for `bs₂` from the accumulated set `bs₁.foldl insert S`, glue to `CoversOrbits (bs₁ ++ bs₂) S`. This is
+the freedom to choose the descent order — resolve one phase (e.g. the quotient / block representatives) before
+another (the fibers / within-block points) — that the imprimitive decomposition exploits: each phase's coverage
+is supplied by a different (smaller/coarser) constituent's recovery. -/
+theorem coversOrbits_append {gens : Set (Equiv.Perm (Fin n))} (bs₁ bs₂ : List (Fin n))
+    {S : Finset (Fin n)}
+    (h1 : CoversOrbitsAlong adj P gens bs₁ S)
+    (h2 : CoversOrbits adj P gens bs₂ (bs₁.foldl (fun s b => insert b s) S)) :
+    CoversOrbits adj P gens (bs₁ ++ bs₂) S := by
+  induction bs₁ generalizing S with
+  | nil => simpa using h2
+  | cons b bs ih => exact ⟨h1.1, ih h1.2 h2⟩
+
 /-- **Harvest completeness at the root — the harvested chain *is* `Aut(G)^P`.** At `S = ∅` the path-fixing
 condition is vacuous (`gensAt_empty_eq`), so a coverage witness plus the Stage-A2 soundness hypothesis give
 `Subgroup.closure gens = StabilizerAt adj P ∅` — the folded generators generate exactly the `P`-preserving
@@ -1412,6 +1448,28 @@ theorem hfiber_of_fiberRealizers {ι : Type*} (β : Fin n → ι)
   intro T u w huw hβ
   obtain ⟨h, hmem, hres, hhuw⟩ := hfib T u w huw hβ
   exact ⟨h, mem_closure_gensAt_of_realizer hmem hres, hhuw⟩
+
+/-- **`hfiber` from within-block *visible* realizers — the fiber discharged from refinement-computable
+recovery (Approach A, fiber half).** The refinement-computable form of `hfiber_of_fiberRealizers`: the harvest
+need only realize the *same-`warmRefine`-cell* pairs that lie **within a block** (`β u = β w`), and `hfiber`
+follows. Since orbits refine cells (`OrbitPartition.subset_warmRefine`), a same-block orbit pair is a same-block
+cell pair, so the within-block visible realizer applies. This is **strictly weaker than whole-graph recovery**:
+the hypothesis is satisfiable exactly when *within each block* cells = orbits (the **fiber recovers**), even
+when globally cells ⊋ orbits (the whole does not recover) — the regime where the block decomposition earns its
+keep (e.g. Shrikhande, whose 1-WL merges happen *across* blocks). The fiber half of the per-level
+quotient/fiber split that `orbitCoverage_of_blockDecomposition` composes; the quotient half (`hreach` from
+block-orbit recovery) needs a block-level 1-WL and is the next step. -/
+theorem hfiber_of_fiberVisibleRealizers {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))}
+    (hfvis : ∀ T : Finset (Fin n), ∀ u w : Fin n, β u = β w →
+        warmRefine adj P (individualizedColouring n T) u
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g u = w) :
+    ∀ T : Finset (Fin n), ∀ u w, OrbitPartition adj P T u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens T), h u = w := by
+  intro T u w huw hβ
+  obtain ⟨g, hmem, hres, hguw⟩ := hfvis T u w hβ (OrbitPartition.subset_warmRefine huw)
+  exact ⟨g, mem_closure_gensAt_of_realizer hmem hres, hguw⟩
 
 /-- **Full orbit realizers supply both interfaces (the subsumption / non-vacuity floor).** If the harvest
 contains an exact realizer (`g b = w`) for every orbit pair at every level, then *both* `hreach` and `hfiber`
