@@ -350,10 +350,120 @@ degeneracy) vs `G₀` (non-abelian — predicted to forbid it). Findings:
 1. **Theory (the prize):** prove the self-detection lemma for translation/schurian schemes via the counting route —
    *does a non-abelian coupling provably leave an asymmetric intersection-number count?* Project-internal; closes A4.
 2. **Experiment (decisive for affine, cheap):** enumerate non-abelian irreducible `G₀ ≤ GL(d,p)` for small
-   `d∈{2,3}`, small `p`; build the orbital scheme; measure WL-dimension / recovery depth. All-recover → the affine
-   sub-case closes empirically and G2-B narrows to the classical cases; any non-recovering → a genuine candidate
-   counterexample (the most informative outcome). Sharper than the earlier A2/circulant probes because the target
-   family is pinned and the predicted answer is precise.
+   `d∈{2,3}`, small `p`; build the orbital scheme; measure WL-dimension / recovery depth. **RAN 2026-06-07 (partial)
+   — see the G2 attack board below; the affine floor came back *tame but mild*.**
+
+### G2 attack board — probe results, the corrected target, the conservation route, and the threads
+
+This subsection consolidates the work (2026-06-07) that turned the §G2-anatomy conjecture into a concrete program
+with a result, a corrected theorem target, and a prioritized thread list. **It is the live to-do.**
+
+**The affine probe RAN — affine floor is tame, but the result is *mild*.** `GraphCanonizationProject.Tests/AffineSchemeProbe.cs`
+(two `[Fact]`s: a general `d≤5` enumeration + `Probe_CyclotomicFamily_Index3`) built translation schemes `V⋊G₀` over
+`F₂^d` (relations = `G₀`-orbits, intersection numbers, primitivity = `G₀` irreducible, recovery = the `EdgeGenerates`
+closure + greedy individualization depth). Results:
+- The predicted danger zone — index-3 Singer/cyclotomic schemes (Clebsch family: `Z₅⊂GL(4,2)`, `Z₂₁⊂GL(6,2)`,
+  `Z₈₅⊂GL(8,2)`; three equal-valency relations `(2^d−1)/3`) — is primitive, non-abelian-residual, and **fails depth-1
+  recovery**: the equal-valency relations are interchangeable by an algebraic automorphism = the separability gap
+  `Ĝ⊋G` made concrete (an `S₃`-on-relations the group only partly realizes). **But recovery depth is bounded and flat:
+  4, 3, 3 across `|V| = 16, 64, 256`** (≈ base 2 + bounded stickiness, decreasing not growing) ⟹ leg-A depth-graded =
+  consumed, **not** a counterexample.
+- Across the enumeration this family's `d=4` member was the *only* primitive depth-1-non-recoverer; **all other
+  primitives recovered at depth 1, and every persistent (high-rank) deadlock had reducible `G₀` (imprimitive)** — direct
+  empirical support for "primitive ⟺ recovers" and P3 (deadlock ⟹ imprimitive).
+- **CAVEAT (load-bearing):** the cyclotomic `G₀` are **cyclic (abelian)** Singer subgroups, so the gap is the
+  **Galois/cyclotomy** gap — bounded by `d`, abelian-flavored. The probe strongly confirms the *expected easy case*
+  (bounded-`d` abelian-multiplicative gaps are tame); the genuinely-**non-abelian-`G₀`** affine case (where the
+  self-detection mechanism actually fires) and the non-affine types are **undertested** (~9 primitives; greedy depth is
+  an upper-bound proxy). "Held but mild."
+
+**The corrected target (forced by the probe).** Depth-1 `EdgeGenerates` is the *wrong* predicate — cyclotomic fails it
+yet recovers. The target must be **bounded-depth recovery**: **primitive schurian ⟹ recovers at depth ≤ base + O(1)**
+(`RecoverableByDepth`-shaped, not per-level). This **unifies the self-detection lemma with G1a** for the primitive floor
+— the same statement.
+
+**The clean theorem + piece decomposition.** The counting route's target is **determinacy**, not asymmetry:
+non-recovery ⟺ the structure constants fail to determine the scheme = **non-separable** (high `s(C)`). Literature pins
+it: **separable ⟹ WL-dim ≤ 2 (recovers)** ([1903.00409](https://arxiv.org/pdf/1903.00409)); **non-separability of
+schurian S-rings = generalized-wreath = imprimitive** ([1709.03937](https://arxiv.org/pdf/1709.03937)); the *only*
+bounded-rank elementary-abelian exceptions are **E₁₆=F₂⁴, E₃₂=F₂⁵** (concrete, 16/32 points). So the clean target is
+**primitive schurian ⟹ separable ⟹ `EdgeGenerates` ⟹ recovers**, which **collapses all leaks onto G2-A (the block
+tower)** plus a primitive floor that recovers. Pieces (mapped to `Scheme.lean`):
+
+| P | Statement | Status |
+|---|---|---|
+| **P1** | separable ⟺ `EdgeGenerates`/recovery | provable; engine landed (`theorem_2_HOR_of_edgeGenerates`) |
+| **P2** | ¬recovery ⟹ a proper WL-stable fusion `W` (isolation deadlock) | provable (`isolationStep` saturates below `EdgeGenerates`) |
+| **P3** | the deadlock fusion `W` is a `ClosedSubset` (block) ⟹ imprimitive | **CRUX = the project's Gate-G**, now with wreath-literature support + a finite test |
+| **P4** | primitive ⟹ no deadlock ⟹ recovers | follows P2+P3 |
+
+**P3 is Gate-G.** The counting route reaches the project's existing Gate-G (exhaustive-obstruction §0.7.2) from the
+structure-constant side, now backed by the wreath literature and a concrete falsification (E₁₆/E₃₂).
+
+**The C₇ correction (do NOT reintroduce the naive counting route).** "non-abelian ⟹ asymmetric intersection-number
+count" is **false**: a *symmetric* scheme has a **commutative** Bose–Mesner algebra (`p^k_{ij}=p^k_{ji}`) regardless of
+the group — C₇'s scheme is symmetric/commutative though `D₇` is non-abelian, and it recovers via its *metric* structure.
+So the counting route cannot key on algebra non-commutativity; the asymmetry (when present) is a *specific* count whose
+form varies (metric for C₇), and exhibiting it is the genuine work. Content = determinacy/separability, not commutativity.
+
+**Thread T2 — linear-coupling = block-system (the main provable thread).** A persistent (growing-depth) gap requires an
+**F₂-linear coupling** = a `G₀`-invariant subspace `W ⊆ V` = a **block system** ⟹ **imprimitive**. **Primitive (`G₀`
+irreducible) forbids it.** The cyclotomic case is the proof-of-concept: `Z₅` acts *irreducibly* on `F₂⁴`, so its only gap
+is the *bounded* Galois one (depth 4). This may be a **near-theorem for the affine case via the wreath literature**: if
+"non-separable schurian S-ring ⟹ proper `G₀`-invariant section," then `G₀` irreducible ⟹ separable ⟹ recovers.
+**Dependency to verify:** is the wreath characterization clean at the needed generality (not just order-4p/odd/p-group)?
+T2 generalizes off the affine case to *exactly* P3.
+
+**The conservation route — the user's accounting instinct, made precise (the most promising attack).** A four-term
+conservation governs recovery depth:
+
+> `recovery depth  =  base(G)  +  log-scale(separability gap Ĝ/G)  +  IR-core(true decisions)`
+
+with the three sources **separately budgeted** — none can masquerade as another. Three terms are landed: the vertex
+partition `n = free + true + moved`; `|Aut| = ∏ basic-orbit sizes` (`card_autP_eq_prod_of_base`), base `≤ log₂|Aut|`
+(`exists_isBase_saturated_support`); and `real_stays_real` (true decisions persist, never consumed by symmetry, extract
+to the IR-core). The **stickiness** is the *fourth* term — the gap `Ĝ/G` between the symmetry that exists (`G`) and the
+one 1-WL hallucinates (`Ĝ` = WL-closure automorphism group); the cyclotomic `S₃`-on-relations *is* this `Ĝ/G`.
+
+The engine ("hiding requires external decisions"): to stay concealed through `k` individualizations a symmetry needs `k`
+**independent** hidden generators, and **independence forces them toward commuting (abelian)** — CFI confirms it (its
+`β`-dim concealment IS the abelian gauge `Z₂^β`). So **the concealable part of any symmetry is an abelian section (→ leg
+B); the non-abelian part has no stackable concealment (→ leg A recovers it); the unstackable residue is asymmetric (→
+IR-core).** That is A4.
+
+**Why this is the payoff: the crux becomes the landed leg-B core, not the open WL-characterization.** "Concealment ⟹
+abelian" has its *group side already proved* — `not_comm_of_orbit_disagree` (non-abelian ⟹ candidates disagree on the
+orbit). The missing half is the **counting realization**: *candidate-disagreement ⟹ a 1-WL-visible intersection-number
+asymmetry*. Two faces, both on landed machinery: **(group)** independently-stackable hidden generators commute;
+**(counting)** disagreement leaves an asymmetric count (subject to the C₇ caution — not algebra-commutativity).
+**Concrete first lemma (the two-vantage step):** take `s = g⁻¹h ∈ Stab(e)` (a non-trivial stabilizer element from a
+non-abelian decision) and prove that `s` having non-trivial support forces an **asymmetric suborbit count from a second
+base point** — the precise "a second vantage detects the disagreement" the cyclotomic `base+2` data hints at.
+
+**THE THREAD BOARD (what's worth doing, by tier — regardless of immediacy).**
+- **Tier 1 — bankable slice-closures (provable now, shrink the wall but don't close it):**
+  - **(a) G1b — leg B** via a new L3-keyed `AbelianConsumed` (NOT `Findable`; §4 G1b). Closes the abelian wall-slice,
+    citation-free. Most actionable. The conservation route now shows the abelian-concealable part *is* leg B.
+  - **(b) G1a — depth-graded recovery** (`RecoverableByDepth` at base+O(1)). Captures CFI/Shrikhande; now the *same*
+    target as the primitive-floor self-detection.
+- **Tier 2 — the G2 attack (the only route that actually closes the seal):**
+  - **(c) The conservation route** — prove "concealment is abelian" via the counting realization of
+    `not_comm_of_orbit_disagree`; **first lemma = the two-vantage step** (above). Project-internal, on landed L3.
+  - **(d) Thread T2** — primitive ⟹ separable via linear-coupling = block; **verify the wreath-characterization
+    literature dependency** (could make affine-primitive ⟹ separable a near-theorem by citation).
+  - **(e) The P1–P4 / Gate-G proof** of "primitive ⟹ separable" (P3 = the crux).
+- **Tier 3 — decisive cheap experiments:**
+  - **(f) The E₁₆/E₃₂ test** — are the non-separable schurian S-rings over `F₂⁴/F₂⁵` **imprimitive** (supports
+    primitive⟹separable / P3) or **primitive + non-abelian** (a 16/32-vertex G2-B counterexample)? The sharpest
+    falsification; small and decisive.
+  - **(g) Extend `AffineSchemeProbe.cs`** to **non-abelian irreducible `G₀`** (the actual A4 mechanism, not the Galois
+    gap) and higher `d` — the undertested zone (the existing probe is abelian-`G₀`/Galois only).
+- **Tier 4 — doc-sync / record-keeping (the NoFusion over-claim):**
+  - **(h)** The NoFusion/largeness-derivation track is **undercut by the orbit-level vacuity** (§3): `largenessBridge_viaHarvest`
+    is *tautological* (the §2 note says so), but the `PublicTheoremIndex` descriptions of the `NoFusion` family and
+    [exhaustive-obstruction §0.7.5](./chain-descent-exhaustive-obstruction.md) still claim "largeness derived from the
+    harvest." The Lean is sound; the *prose over-claims*. Reconcile so future readers don't treat NoFusion as live
+    evidence that G2-B is closeable (it isn't — that route is vacuous, confirming G2-B's open status).
 
 ### G3 — the citation
 
@@ -441,6 +551,12 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
   form (A2-ii, `blockRefinementVisible_of_schemePartSeparates`) is available.
 - **Do not try to discharge the leaks (G2) by citation** — the deep research established the
   imprimitive/small-primitive non-abelian high-`s(C)` quadrant is genuinely open, not citably impossible.
+- **Do not key the counting route on algebra non-commutativity** ("non-abelian group ⟹ asymmetric intersection
+  numbers") — false: symmetric schemes have *commutative* Bose–Mesner algebras regardless of the group (C₇/D₇ recovers
+  via metric structure, not commutativity). The counting content is **determinacy/separability**, not commutativity
+  (G2 attack board, "C₇ correction").
+- **Do not use depth-1 `EdgeGenerates` as the recovery predicate** — the cyclotomic family fails it yet recovers; the
+  target is **bounded-depth recovery** (base + O(1) / `RecoverableByDepth`), which also unifies with G1a.
 - **Do not re-attempt a within-cell harvest for multi-step (`tw ≥ 2`) hidden symmetry** — provably futile (insight
   4). Route through the cross-branch / Part-A harvest.
 - **Do not build the tower level-by-level** — `cascadeComposition` collapses it (insight 3).
