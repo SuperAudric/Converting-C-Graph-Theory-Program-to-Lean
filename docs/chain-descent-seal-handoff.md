@@ -1,9 +1,17 @@
 # Chain descent — THE SEAL HANDOFF: current state and the gaps to "consumed-or-Cameron"
 
-> **STATUS (2026-06-07): this is the authoritative handoff for the oracle-capability seal.** It **subsumes**
+> **STATUS (2026-06-07, rev. 2): this is the authoritative handoff for the oracle-capability seal.** It **subsumes**
 > [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) (Route B is now one *partial* attack on
 > one gap, G2-A below, and its capstones were found vacuous — see §3). Read this doc to pick up *any* of the
 > open gaps. The goal is to close all of them, including pushing through the GI-adjacent frontier (G2).
+>
+> **Rev. 2 (the closure-logic pass) folds in three findings — read §4.0 first.** (a) **No re-keying of the rigid
+> predicate closes the seal** — closure is gated on the leaks (G2) under *any* keying (§4.0). (b) The tempting
+> `Findable`/`FindableWithin` re-key **conflates leg B into leg A** and is the wrong vehicle for G1b; leg B needs a
+> new L3-keyed `AbelianConsumed` (§4 G1b). (c) The leaks have an **anatomy**: non-recovery is *definitionally* a
+> 1-WL-invisible real decision, its persistence requires a **linear (abelian) coupling**, and the lone theorem-route
+> to closing G2 is the **self-detection lemma** (§4 G2 + §6). The live target is no longer "instantiate the seal at
+> a better predicate" — it is the self-detection lemma / G2-B emptiness.
 >
 > **Quality bar (unchanged):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; full build
 > green (`bash scripts/build.sh`, serial ~20–60s); regen `PublicTheoremIndex.md` via
@@ -135,7 +143,31 @@ with `gens = ↑(the group)` or `gens = all auts`; if that works, it's vacuous.
 ## 4. The gaps
 
 Four gaps stand between the current state and the unconditional `(legA ∨ legB) ∨ Cameron`. Each subsection is
-self-contained for a fresh reader attacking *that* gap.
+self-contained for a fresh reader attacking *that* gap. **Read §4.0 first — it is the through-line.**
+
+### 4.0 — The closure logic: no re-keying closes the seal; the crux is G2
+
+The abstract capstone `reachesRigidOrCameron` (`Cascade.lean`) is parametric in `ReachesRigid` and hard-wired to the
+trichotomy `¬IsPrimitive ∨ ¬NonCascade ∨ Cameron`, so it **always** carries the same two branch reductions —
+*whatever* `ReachesRigid` is instantiated to:
+
+```
+hImprimitive : ¬ IsPrimitive  → ReachesRigid     -- imprimitive ⟹ rigid
+hCascade     : ¬ NonCascade   → ReachesRigid     -- small ⟹ rigid
+```
+
+So "re-keying the rigid predicate" changes the *target*, not the *count* of obligations. And under **any
+non-vacuous** `ReachesRigid`, both reductions are **false on the leaks** (non-recovering ∧ non-Cameron) *by
+construction* — "rigid-false" is exactly what "non-recovering" means (§G2 anatomy). Therefore:
+
+> **The seal closes ⟺ both reductions are provable ⟺ the leaks (G2) are empty.** G2-A (imprimitive) reduces to
+> G2-B (primitive) via the block tower (≤ log n layers). **G2-B closure = the self-detection lemma (§G2 anatomy).**
+> No instantiation of `ReachesRigid` — `SchemeRecovered`, `Findable`, anything — changes this; the work is G2.
+
+What re-keying / leg-B work *does* buy is **closure of slices** (depth-graded leg A captures CFI/Shrikhande; leg B
+captures hidden-abelian), which shrinks the wall to exactly G2-B but does not eliminate it. The seal's honest
+end-state is a conditional theorem `modulo {G3 cited classification + G2-B}`; the only thing that discharges G2-B is
+the self-detection lemma, which is research, not engineering.
 
 ### G1a — `SchemeRecovered` is depth-1-only; it must become depth-graded (leg A scope)
 
@@ -162,7 +194,7 @@ realizers."
 **The honest subtlety (the localisation gap).** The harvest chain (`coversOrbits`) consumes coverage at
 base-sequence *prefix* levels including shallow ones, and **per-level orbit-realization is intrinsic** — a deep
 automorphism fixes too much to move a shallow orbit, so deep recovery does *not* supply shallow coverage for free
-(established 2026-06-07; see [routeB-handoff §base-sequence recalibration]). So a depth-graded `SchemeRecovered`
+(established 2026-06-07; the base-sequence recalibration — per-level recovery is intrinsic, §6 insight 7). So a depth-graded `SchemeRecovered`
 keyed on a single bounded recovery set must be reconciled with the chain's per-prefix demand. The likely route:
 the **tower / `cascadeComposition`** (G2-A's machinery) — recovery composes across layers with *depths add*, and
 each prefix's coverage is a layer. This couples G1a to the tower.
@@ -196,6 +228,16 @@ not on an unconstrained `∃ gens`. The discretizing-oracle limit (§6) says mul
 *cross-branch* harvest, so leg B's consumption witness for `tw ≥ 2` is the Part-A harvest at the recovery depth,
 not a within-cell read — keep that in scope.
 
+> **⚠️ Do NOT use `Findable`/`FindableWithin` as the leg-B vehicle (rev. 2 finding).** The existing D1/D2 screen
+> (`Cascade.lean`, `inductive Findable … | recovered | abelian | step`) looks like the natural object, but it
+> **conflates leg B into leg A**: `FindableWithin`'s `abelian` leg carries a `RecoverableByDepth b` field, which is
+> `∃ S, S.card ≤ b ∧ CellsAreOrbits S` = **visible (1-WL) recovery** at depth `b` — exactly what genuinely-hidden
+> abelian (the point of leg B) *lacks*. At a poly bound it only re-expresses leg A. And bound-free `Findable`'s
+> `abelian` constructor concludes from `ResidualAbelian ∧ ¬IsBase` **with no consumption proof** (a soft vacuity:
+> "should be consumable" asserted by fiat, not earned). So `AbelianConsumed` must be a *new* predicate keyed on the
+> **unique candidate (L3)** + the cross-branch harvest — not `Findable`. Even done right, leg B closes the *abelian
+> slice*, not the seal (§4.0).
+
 ### G2 — the leaks: non-recovering ∧ non-Cameron (the open frontier)
 
 `hImprimRecovery` and `hCascadeHarvest` are carried because they are **false in general** — imprimitive does not
@@ -216,12 +258,15 @@ which (using `non-Cameron ⟹ ¬primitive ∨ small`, from the classification) s
   (`cells ⊆ blocks`) supports the *fiber* (same-cell stays in-block), **not** block-moves; the quotient genuinely
   needs the block-1-WL.
 
-- **G2-B — Leak-B: small, primitive, non-abelian, non-recovering, non-Cameron.** The small-but-high-WL-dimension
-  frontier (a primitive small non-cascading scheme; [exhaustive-obstruction §0.7.6](./chain-descent-exhaustive-obstruction.md)
-  flags this exact quadrant). After leg B removes the abelian case, this is the non-abelian remainder. The
-  bottom-up route claims *non-consumed ⟹ large* (so this quadrant would be empty), but that derivation rests on the
-  largeness argument, which is **tautological** under the orbit-level vacuity (§2 note) — so it does **not** yet
-  rule Leak-B out. Genuinely open.
+- **G2-B — Leak-B: small, primitive, non-abelian, non-recovering, non-Cameron.** The irreducible core (G2-A bottoms
+  out here). The bottom-up route claims *non-consumed ⟹ large* (so this quadrant would be empty), but that rests on
+  the largeness argument, which is **tautological** under the orbit-level vacuity (§2 note) — so it does **not** yet
+  rule Leak-B out. **Candidate-narrowing (rev. 2):** small ⟹ small base (`b(G) ≤ log₂|G|`, since `|G| = ∏` basic
+  orbit sizes `≥ 2^b`); then O'Nan–Scott + poly-order collapses the candidates — most poly-order primitives are
+  **2-transitive ⟹ rank-2 ⟹ recover trivially**, leaving essentially **bounded-dimension affine** `V⋊G₀`
+  (`F_p^d`, `d=O(1)`) and a few classical subset/flag actions. So G2-B's only live family is bounded-dim affine +
+  a handful of classical cases. The full anatomy (why it's open, the affine reduction, the one theorem-route) is
+  the **§G2 anatomy** subsection below. Genuinely open.
 
 **The well-foundedness that bounds G2-A** (do not mistake the recursion for infinite regress): an imprimitive
 scheme decomposes into a **quotient** (`m < n` blocks) + **fiber** (`|B| < n` points), both strictly smaller and
@@ -238,6 +283,77 @@ layer, reused for all). **But (caveat from the §3 wiring check):** `cascadeComp
 (`Discrete` / `CellsAreOrbits`), and connecting that to a non-vacuous group reproduction must go through *visible*
 realizers — verify the `hwit → visible-realizer → SchemeRecovered` wiring is non-vacuous before relying on it (the
 old `SchemeReproduced` route here was exactly what was vacuous).
+
+### G2 anatomy — the refinement axis, self-detection, and the affine reduction (the live frontier)
+
+This is where the work now is. Four moves turn "G2 is open" into a single, attackable conjecture.
+
+**(1) Non-recovery is *definitionally* a 1-WL-invisible real decision.** Unfold `¬CellsAreOrbits adj P S`: ∃ `u,v`
+in the same `warmRefine` cell with `¬OrbitPartition adj P S u v` — same 1-WL colour, **no** residual automorphism
+`u↦v`. That is exactly a **genuine (real) decision the refinement cannot see**. So the refinement axis is high ⟺ a
+hidden real decision exists — i.e. it is an **asymmetry** quantity, not a property of the symmetric group. ("The
+only thing that raises the refinement axis is an asymmetry"; abelian symmetry enters only in (3).)
+
+**(2) The contributor decomposition routes two of three to handlers.** A residual's non-recovery is attributable
+to: (a) **real decisions (asymmetry)** — *proven extractable to the IR-core*: `real_stays_real` (a genuine decision
+stays genuine, never consumed by symmetry) + the support induction `exists_isBase_saturated` (the descent
+individualizes the residual support to a base) + `recoverableAt_base_iff_discrete` (at the base, non-discrete =
+IR-core, residual-trivial). So asymmetry separates out, residual-trivial, flagged as IR-core. (b) **abelian
+symmetry** — consumed by **leg B** (L1–L3, closeable). (c) **non-abelian symmetry** — the residual claim **A4: it
+contributes *nothing* to the hidden-real-decision count** (recovers). A4 is G2-B restated. The decomposition is a
+clean *separation* only when the structure decomposes (imprimitive = the block tower, G2-A); at the **primitive
+floor** (G2-B) asymmetry and symmetry are potentially **entangled** — which is precisely why G2-B, not G2-A, is the
+irreducible core.
+
+**(3) Persistence requires a *linear* coupling — one mechanism, two faces.** A hidden real decision cannot persist
+in isolation (1-WL would count a local difference and resolve it). To stay invisible across individualizations it
+must be **coupled to a set of further decisions** (your "external decisions") whose *joint* configuration is
+**homogeneous** — every parity assignment yields the same local intersection-number profile. The only couplings
+with that property are **linear (F_p/F₂) codes** (equivalently, a **character/eigenvalue degeneracy** of the
+scheme). Live-symmetric linear coupling = **CFI** (leg B); rigidified (full-rank) linear coupling = **multipede**
+(IR-core). This is the unification of "abelian symmetry **or** asymmetry" — both are faces of the *linear-coupling
+requirement*. It matches the literature exactly: [Lichter–Rassmann–Schweitzer (arXiv:2402.11531)](https://arxiv.org/abs/2402.11531)
+state that **all known high-WL constructions are CFI/multipede = abelian-color-class**, and the abelian-color case
+is **polynomial-time** — i.e. no non-linear high-WL construction is known.
+
+**(4) The self-detection lemma = the lone theorem-route to closing G2** (your (2), made precise):
+
+> **Self-detection (conjecture, with mechanism):** a persistent hidden real decision requires a linear /
+> character-degenerate (abelian) coupling. A **non-abelian** coupling produces **asymmetric intersection numbers**,
+> which 1-WL reads off and *resolves* the decision. Hence non-abelian symmetric structure cannot host a persistent
+> hidden decision (closes A4 ⟹ closes G2-B ⟹ closes the seal, modulo G3).
+
+Why this is *attackable* (unlike "characterize WL-hardness"): it is a statement about **intersection numbers of a
+coherent configuration** — the exact objects `Scheme.lean` already models, and the same counting the
+`isolationStep`/`EdgeGenerates` engine runs. The concrete proof route your "external decisions" framing predicts: the
+support of a hiding coupling is itself a 1-WL-countable quantity **unless linear**, so the lemma may fall to
+*"a non-abelian coupling leaves a parity-asymmetric intersection-number count."* That would be a project-internal
+theorem, not a citation of the open WL-characterization.
+
+**The affine reduction (the sharpest concrete test).** The bounded-dim affine family `V⋊G₀` is where (3)'s two
+forces collide inside one group: `V` (translations, regular abelian — the *linear* part that could host a
+degeneracy) vs `G₀` (non-abelian — predicted to forbid it). Findings:
+- **The entanglement is genuine — affine is NOT leg B.** A decision `α↦β` has exactly `|G₀|` candidates
+  (`(β−h(α), h)` for each `h∈G₀`); distinct candidates *disagree on the orbit* (`β + h₁(γ−α)` vs `β + h₂(γ−α)`), so
+  `not_comm_of_orbit_disagree` fires — the residual is non-abelian and leg B does not consume it. The unique
+  translation `t=β−α` is canonical *within* `V`, but the descent sees the full `V⋊G₀`.
+- **But it is *tame*** — `V` regular normal abelian ⟹ the orbital scheme is a **translation scheme (Schur ring over
+  `F_p^d`)**. So affine-G2-B lands in **Schur-ring separability theory** (Evdokimov–Ponomarenko), not a wild regime:
+  > **affine-G2-B recovers ⟺ the schurian Schur ring of `G₀` over `F_p^d` is separable** (low `s(C)`).
+- **Predicted verdict: recovers (no leak).** Self-detection + bounded `d` ⟹ only `O(1)` linear room for a character
+  degeneracy ⟹ separable — mirroring Ponomarenko's prime-power circulant bound (`WL-dim ≤ 3`) and the
+  Wu–Ren–Ponomarenko picture (high WL-dim needs *many* independent directions ↔ large `d`). **Honest gap:** schurity
+  and separability are *independent* (Evdokimov–Ponomarenko), so a schurian non-separable S-ring over bounded `F_p^d`
+  is exactly what a counterexample would be — whether it exists is the S-ring research frontier.
+
+**The two next moves (theory + experiment).**
+1. **Theory (the prize):** prove the self-detection lemma for translation/schurian schemes via the counting route —
+   *does a non-abelian coupling provably leave an asymmetric intersection-number count?* Project-internal; closes A4.
+2. **Experiment (decisive for affine, cheap):** enumerate non-abelian irreducible `G₀ ≤ GL(d,p)` for small
+   `d∈{2,3}`, small `p`; build the orbital scheme; measure WL-dimension / recovery depth. All-recover → the affine
+   sub-case closes empirically and G2-B narrows to the classical cases; any non-recovering → a genuine candidate
+   counterexample (the most informative outcome). Sharper than the earlier A2/circulant probes because the target
+   family is pinned and the predicted answer is precise.
 
 ### G3 — the citation
 
@@ -293,6 +409,19 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 7. **Per-level orbit-realization is intrinsic** — deep automorphisms fix too much to move shallow orbits, so the
    harvest's shallow-level coverage genuinely needs shallow recovery; the base-sequence freedom buys only the
    *phase-split* (`coversOrbits_append`), not a free shallow win. This is why G1a/G2-A route through the tower.
+8. **No re-keying closes the seal** (§4.0). The abstract capstone carries both branch reductions for *any*
+   `ReachesRigid`; under any non-vacuous keying they are false on the leaks. Closure ⟺ leaks empty ⟺ self-detection
+   lemma. Stop hunting for a better rigid predicate; the work is G2.
+9. **Non-recovery is, definitionally, a 1-WL-invisible real decision** (`¬CellsAreOrbits` = a same-cell different-orbit
+   pair). The refinement axis is an **asymmetry** quantity; abelian symmetry enters only as the **linear coupling**
+   that lets an asymmetry *persist*. CFI (live) and multipede (rigidified) are the two faces of one linear-coupling
+   mechanism — matching [Lichter et al. 2402.11531](https://arxiv.org/abs/2402.11531) (all known high-WL = CFI/multipede
+   = abelian-color).
+10. **The self-detection lemma is the lone theorem-route to G2** (§G2 anatomy): a persistent hidden decision needs a
+    linear/character-degenerate coupling; a non-abelian coupling leaves *asymmetric intersection numbers* that 1-WL
+    resolves. Attackable by intersection-number counting (project-internal), unlike the open WL-characterization.
+    **affine-G2-B ⟺ separability of schurian Schur rings over bounded `F_p^d`** (predicted separable; the decisive
+    cheap experiment is enumerating `G₀ ≤ GL(d,p)`).
 
 ---
 
@@ -301,6 +430,10 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 - **Do not state a rigid/recovery predicate as `∃ gens, closure gens = group` or via orbit-level coverage** — it is
   vacuous (§3). Always key on visible realizers / a polynomial depth bound, and run the `gens = ↑group` non-vacuity
   test.
+- **Do not expect re-keying the rigid predicate to close the seal** (§4.0) — the two branch reductions are carried
+  regardless of keying and are false on the leaks; closure ⟺ G2 empty. In particular **do not use
+  `Findable`/`FindableWithin` as the leg-B vehicle** — its `abelian` leg requires `RecoverableByDepth` (visible
+  recovery), conflating leg B into leg A; build a new L3-keyed `AbelianConsumed` instead (§4 G1b).
 - **Do not materialize the quotient/fiber as `AssociationScheme`/`AdjMatrix` on a smaller `Fin m`** — re-indexing +
   re-establishing all 5 scheme axioms is intractable (exhaustive-obstruction §0.7.2 (ii); tier3a-b1-build-plan §4
   Approach A). Stay intrinsic on `Fin n`.
