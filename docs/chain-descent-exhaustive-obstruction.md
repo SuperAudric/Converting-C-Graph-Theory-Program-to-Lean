@@ -850,8 +850,10 @@ imprimitive→primitive recursion (Route b) is *riskier* than hoped: a quotient/
 non-abelian, non-Cameron* — and **no theorem in the corpus bounds `s(C)` for such CCs**. This is the formal handle
 for any future attack (Lean statement, or a targeted paper question).
 
-**ROUTE B (the intrinsic decomposition) — MECHANICAL CHAIN LANDED axiom-clean (2026-06-06).** Despite the
-"riskier" headline, the user directed an attempt, and it went through at the graph level. Three phases:
+**ROUTE B (the intrinsic decomposition) — MECHANICAL CHAIN LANDED axiom-clean (2026-06-06).** *Full handoff
+for a fresh reader (the live `hreach`/`hfiber` frontier):* [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md).
+Despite the "riskier" headline, the user directed an attempt, and it went through at the graph level. Four layers
+(the fourth wires it to the seal capstone):
 **Phase 0 gate** (`Scheme.lean §11.1`: `schemeBlock_fiber_transitive` + `schemeBlocks_transitive`) — the
 fiber (block stabiliser on a block) and quotient (group on blocks) are transitive, hence schurian, so the
 recursion stays in-class; the deep-research non-schurity risk (E–P 1012.5393) is about *abstract* S-ring
@@ -868,9 +870,13 @@ per-level block-reach (`hreach`, quotient) and within-block (`hfiber`, fiber) co
 predicate**, not in new sub-scheme types. **What remains open is exactly `hreach`/`hfiber`** — discharging
 them from the smaller constituents' recovery (the depth-graded block-visibility A2-ii / `s(C)` boundary).
 So `hImprimitive` is no longer opaque: it is *reduced* to two intrinsic coverage interfaces, with the
-mechanical wreath chain proved and only the substrate-conditional recovery carried. (Optional next wiring:
-connect to the seal capstone — discharge `hImprimitive` modulo `{hreach, hfiber}` via the `schemeAdj` bridge
-with `β` = block-class, the same pattern as the `LargenessBridge` discharge.)
+mechanical wreath chain proved and only the substrate-conditional recovery carried. **Phase 3 — capstone wiring
+LANDED** (`Cascade.lean`: `SchemeReproduced`, `schemeReproduced_of_blockDecomposition`,
+`reachesRigidOrCameron_viaBlocks`): the `schemeAdj` bridge (with `β` = block-class) carries the graph-level
+`closure gens = StabilizerAt` to `closure gens = SchemeAutGroup S`, and the seal capstone is restated with
+`hImprimitive` **supplied, not hypothesized** — reduced to `hreach`/`hfiber` bundled as `hBlockHarvest`. The
+seal's free inputs are then exactly {cited `PrimitiveCCClassification`, `hCascade` (leg A), `hBlockHarvest`
+(imprimitive recovery, Route-B-reduced)}. The live frontier is now `hreach`/`hfiber` — see the handoff doc.
 
 **Conclusion / status of `hImprimitive`:** it stays a **carried witness** (like the `NoFusion` witness), now
 *precisely characterized*, *confirmed to be an open research frontier* (not a known gap with a known

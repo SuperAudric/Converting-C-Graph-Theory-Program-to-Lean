@@ -221,6 +221,11 @@ witness layer, not onboarding):
   half of the goal; Approach 3 (Cameron-free scheme leg) active — scheme primitivity, the imprimitive ⟹
   refinement-visible bridge, and the group-side `isPreprimitive_iff_isPrimitive` bridge landed; the
   refinement-side decomposition deferred (substrate-conditional), capstone cited
+- **Route B — the imprimitive branch + the live `hreach`/`hfiber` frontier (THE CURRENT HANDOFF, 2026-06-06)** →
+  [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) — the seal's `hImprimitive` reduced
+  (axiom-clean, 4 layers) from an opaque hypothesis to two intrinsic coverage interfaces; the open work is
+  discharging `hreach` (quotient block-reach) / `hfiber` (fiber within-block) recovery. Start here to pick up
+  the imprimitive thread.
 
 **Paper-stage / planning docs** (theoretical targets, not yet formalized — read
 only if working that thread): `chain-descent-tier3-decomposability.md`,
