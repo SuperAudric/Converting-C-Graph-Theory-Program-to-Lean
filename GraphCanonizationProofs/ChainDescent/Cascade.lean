@@ -1357,6 +1357,102 @@ theorem reachesRigid_of_blockDecomposition {ι : Type*} (β : Fin n → ι)
   stabilizerAt_eq_closure_gensAt_of_coversOrbits bs
     (coversOrbits_of_blockDecomposition β bs S hreach hfiber hbase)
 
+/-! ### Class-agnostic suppliers for the Route B coverage interfaces `hreach`/`hfiber`
+
+The Route B chain (`reachesRigid_of_blockDecomposition`) reduces the imprimitive branch to two coverage
+interfaces, `hreach` (quotient / block-reach) and `hfiber` (fiber / within-block). These suppliers discharge
+them **class-agnostically**, each from a hypothesis strictly *weaker* than whole-residual recovery — exposing
+the general decomposition the eventual unconditional proof must follow:
+
+* `hreach` needs only **quotient realizers** — residual auts in `gens` that land `b` in the *block* of every
+  orbit-mate `w` (`β (σ b) = β w`), **not** `σ b = w`. This is recovery of the (coarser) action on blocks.
+* `hfiber` needs only **fiber realizers** — residual auts realizing *same-block* orbit pairs exactly. This is
+  recovery on the (smaller) within-block action.
+
+Full orbit realizers imply both (`blockHarvest_of_realizers`, with `β` unused) — so any whole-graph-recoverable
+class satisfies both interfaces (non-vacuity floor); the *independent* value of the block decomposition is
+exactly the regime where the quotient and fiber recover at lower depth than the whole. The class-agnostic crux
+the open general case turns on is a **separability-number reduction-to-constituents** (`s(C)` of an imprimitive
+scheme bounded via its quotient and fiber — exhaustive-obstruction §0.7.6, sought-and-not-located): supplying
+`hquot`/`hfib` from the constituents and assembling via the Route B chain is precisely that shape, with only
+per-constituent recovery carried. -/
+
+/-- A harvested residual automorphism (`g ∈ gens`, `ResidualAut adj P T g`) sits in the path-fixing closure
+`Subgroup.closure (gensAt adj P gens T)` — the single membership step both Route B suppliers below share. -/
+theorem mem_closure_gensAt_of_realizer {gens : Set (Equiv.Perm (Fin n))} {T : Finset (Fin n)}
+    {g : Equiv.Perm (Fin n)} (hg : g ∈ gens) (hres : ResidualAut adj P T g) :
+    g ∈ Subgroup.closure (gensAt adj P gens T) :=
+  Subgroup.subset_closure ⟨hg, mem_stabilizerAt.mpr hres⟩
+
+/-- **`hreach` from quotient realizers (the weaker, block-accurate interface).** If at every level the harvest
+contains a residual automorphism sending each base point `b` into the *block* of every orbit-mate `w`
+(`β (σ b) = β w` — not necessarily `σ b = w`), then the block-reach interface `hreach` holds. This is recovery
+of the **quotient** (action on blocks) only — strictly weaker than full orbit recovery, and the part of Route B
+that can hold when the whole residual does not recover. -/
+theorem hreach_of_quotientRealizers {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))}
+    (hquot : ∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ σ, σ ∈ gens ∧ ResidualAut adj P T σ ∧ β (σ b) = β w) :
+    ∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens T), β (σ b) = β w := by
+  intro T b w hbw
+  obtain ⟨σ, hσmem, hσres, hσβ⟩ := hquot T b w hbw
+  exact ⟨σ, mem_closure_gensAt_of_realizer hσmem hσres, hσβ⟩
+
+/-- **`hfiber` from fiber realizers (recovery on the smaller within-block action).** If at every level the
+harvest contains a residual automorphism exactly realizing every *same-block* orbit pair (`β u = β w → h u = w`),
+then the within-block interface `hfiber` holds. This is recovery of the **fiber** (the block action, on
+`|B| < n` points) only — the second, smaller constituent of the imprimitive decomposition. -/
+theorem hfiber_of_fiberRealizers {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))}
+    (hfib : ∀ T : Finset (Fin n), ∀ u w, OrbitPartition adj P T u w → β u = β w →
+        ∃ h, h ∈ gens ∧ ResidualAut adj P T h ∧ h u = w) :
+    ∀ T : Finset (Fin n), ∀ u w, OrbitPartition adj P T u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens T), h u = w := by
+  intro T u w huw hβ
+  obtain ⟨h, hmem, hres, hhuw⟩ := hfib T u w huw hβ
+  exact ⟨h, mem_closure_gensAt_of_realizer hmem hres, hhuw⟩
+
+/-- **Full orbit realizers supply both interfaces (the subsumption / non-vacuity floor).** If the harvest
+contains an exact realizer (`g b = w`) for every orbit pair at every level, then *both* `hreach` and `hfiber`
+hold — for **any** partition `β`, which is left unused: an exact realizer is a fortiori block-accurate
+(`β (g b) = β w` since `g b = w`) and within-block-exact. So any whole-residual-recoverable class satisfies the
+Route B interfaces; the block decomposition's independent content is strictly the regime where `hquot`/`hfib`
+are reachable but full recovery is not. -/
+theorem blockHarvest_of_realizers {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))}
+    (hreal : ∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w) :
+    (∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens T), β (σ b) = β w)
+    ∧ (∀ T : Finset (Fin n), ∀ u w, OrbitPartition adj P T u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens T), h u = w) :=
+  ⟨hreach_of_quotientRealizers β (fun T b w hbw => by
+      obtain ⟨g, hg, hres, hgw⟩ := hreal T b w hbw
+      exact ⟨g, hg, hres, by rw [hgw]⟩),
+   hfiber_of_fiberRealizers β (fun T u w huw _ => hreal T u w huw)⟩
+
+/-- **Witness supplier — recovery + visible realizers supply both interfaces.** The refinement-computable
+form: where orbits are recovered at every level (`CellsAreOrbits T`) and the leaf-collision harvest collected a
+path-fixing realizer for every *visible cell-mate*, both `hreach` and `hfiber` hold (for any `β`). A visible
+cell-mate is a genuine orbit-mate under recovery (`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`), so
+the orbit realizers `blockHarvest_of_realizers` needs are supplied. This is the Route B analogue of
+`noFusion_of_visibleRecovery`: the metric/DRG (`recoverableByDepth_pPolynomial`) and CFI (`recoverableByDepth_cfi`)
+recovery witnesses plug straight in to discharge the imprimitive branch on the whole recoverable class. -/
+theorem blockHarvest_of_visibleRecovery {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))}
+    (hrec : ∀ T : Finset (Fin n), CellsAreOrbits adj P T)
+    (hvis : ∀ T : Finset (Fin n), ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w) :
+    (∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens T), β (σ b) = β w)
+    ∧ (∀ T : Finset (Fin n), ∀ u w, OrbitPartition adj P T u w → β u = β w →
+        ∃ h ∈ Subgroup.closure (gensAt adj P gens T), h u = w) :=
+  blockHarvest_of_realizers β
+    (fun T => (orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits (hrec T)).mpr (hvis T))
+
 /-! ### The `LargenessBridge` graph core — largeness of `Aut(G)^P` read off the no-fusion harvest
 
 These two theorems are the **class-agnostic** content of "leg C ⟹ large ⟸ `NoFusion`" — the mechanical
@@ -3286,5 +3382,58 @@ theorem reachesRigidOrCameron_viaCascadeHarvest {n : Nat} {IsLarge : Nat → Pro
   intro hnc
   obtain ⟨gens, bs, hsound, hreal, hbase⟩ := hCascadeHarvest hnc
   exact schemeReproduced_of_visibleRealizers S bs hsound hreal hbase
+
+/-- **The seal capstone with BOTH rigid-side legs discharged.** `reachesRigidOrCameron_viaHarvest` at
+`ReachesRigid := SchemeReproduced` with **neither** rigid-side hypothesis carried: the cascade branch supplied by
+`schemeReproduced_of_visibleRealizers` (from `hCascadeHarvest`) and the imprimitive branch by
+`schemeReproduced_of_blockDecomposition` (from `hBlockHarvest`). Combines `reachesRigidOrCameron_viaCascadeHarvest`
+and `reachesRigidOrCameron_viaBlocks`. The seal's free inputs are then **exactly** {cited
+`PrimitiveCCClassification`, `hCascadeHarvest` (leg-A recovery), `hBlockHarvest` (imprimitive recovery)} — and
+the two harvest hypotheses bottom out at the *same* substrate-conditional recovery interface (visible realizers /
+within-block + block-reach recovery), so the entire rigid side rests on per-level recovery alone. -/
+theorem reachesRigidOrCameron_viaBlocksAndCascade {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascadeHarvest : ¬ NonCascadeViaHarvest IsLarge n S →
+        ∃ (gens : Set (Equiv.Perm (Fin n))) (bs : List (Fin n)),
+          (∀ g ∈ gens,
+              g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+          (∀ T : Finset (Fin n), (∅ : Finset (Fin n)) ⊆ T → ∀ b w : Fin n,
+              warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) b
+                  = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) w →
+              ∃ g, g ∈ gens
+                ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g b = w) ∧
+          IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (bs.foldl (fun s b => insert b s) ∅))
+    (hBlockHarvest : ¬ S.toAssociationScheme.IsPrimitive →
+        ∃ (β : Fin n → Set (Fin n)) (gens : Set (Equiv.Perm (Fin n))) (bs : List (Fin n)),
+          (∀ g ∈ gens,
+              g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+          (∀ T : Finset (Fin n), ∀ b w,
+              OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T b w →
+              ∃ σ ∈ Subgroup.closure
+                  (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens T),
+                β (σ b) = β w) ∧
+          (∀ T : Finset (Fin n), ∀ u w,
+              OrbitPartition (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T u w →
+                β u = β w →
+              ∃ h ∈ Subgroup.closure
+                  (gensAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens T), h u = w) ∧
+          IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (bs.foldl (fun s b => insert b s) ∅)) :
+    SchemeReproduced n S ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaHarvest (ReachesRigid := SchemeReproduced)
+    hClassify S hne hrank ?_ ?_
+  · intro hnc
+    obtain ⟨gens, bs, hsound, hreal, hbase⟩ := hCascadeHarvest hnc
+    exact schemeReproduced_of_visibleRealizers S bs hsound hreal hbase
+  · intro himp
+    obtain ⟨β, gens, bs, hsound, hreach, hfiber, hbase⟩ := hBlockHarvest himp
+    exact schemeReproduced_of_blockDecomposition S β bs hsound hreach hfiber hbase
 
 end ChainDescent

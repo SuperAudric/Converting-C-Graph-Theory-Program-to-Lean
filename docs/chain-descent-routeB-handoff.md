@@ -7,6 +7,25 @@
 > content is discharging `hreach`/`hfiber`** from the imprimitive residual's recovery. This doc catches a fresh
 > reader up to that point.
 >
+> **UPDATE (2026-06-07): seal rigid side made symmetric + class-agnostic `hreach`/`hfiber` suppliers LANDED
+> (axiom-clean, `Cascade.lean`).** Two advances since the chain landed: **(1)** the *leg-A* branch `hCascade` is
+> now discharged the same way `hImprimitive` is — `schemeReproduced_of_visibleRealizers` (leg-A mirror of
+> `schemeReproduced_of_blockDecomposition`) + `reachesRigidOrCameron_viaCascadeHarvest`, and the combined
+> `reachesRigidOrCameron_viaBlocksAndCascade` discharges **both** rigid-side legs at once, so both bottom out at
+> the *same* per-level recovery interface. **(2)** a **class-agnostic supplier toolkit** for the Route B
+> interfaces: `hreach_of_quotientRealizers` (`hreach` from quotient/block-accurate realizers — strictly weaker
+> than full recovery), `hfiber_of_fiberRealizers` (`hfiber` from within-block realizers), `blockHarvest_of_realizers`
+> (full orbit realizers ⟹ both, `β` unused = the non-vacuity floor / subsumption), and `blockHarvest_of_visibleRecovery`
+> (recovery + visible realizers ⟹ both — the metric/CFI witnesses plug straight in; Route B analogue of
+> `noFusion_of_visibleRecovery`). **The structural finding (do carry forward): whole-residual recovery FACTORS as
+> quotient-recovery (`hquot`) + fiber-recovery (`hfib`), each on a strictly smaller/coarser object; the open
+> general case is exactly the separability-number reduction-to-constituents (§4 item 5), and these suppliers ARE that
+> shape — supply `hquot`/`hfib` from the constituents, assemble via the chain.** On a *fully* recoverable class
+> the decomposition is subsumed (β unused), so its independent value is the regime where quotient/fiber recover
+> at lower depth than the whole. Still open: (a) producing the block system `β` + base from `¬IsPrimitive`
+> (scheme-side: imprimitive ⟹ non-trivial `ClosedSubset` ⟹ β), and (b) supplying `hquot`/`hfib` in the
+> *non-whole-recovering* regime (the genuine `s(C)` content).
+>
 > **Quality bar (unchanged):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; full build
 > green (`bash scripts/build.sh`, serial ~30–130s); regen `PublicTheoremIndex.md` via
 > `python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers` and hand-fill Descriptions; **do not
