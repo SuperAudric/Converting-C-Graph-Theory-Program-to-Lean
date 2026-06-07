@@ -3418,4 +3418,97 @@ theorem reachesRigidOrCameron_viaRecovery {n : Nat} {IsLarge : Nat → Prop}
     obtain ⟨gens, bs, hsound, hreal, hbase⟩ := hImprimRecovery himp
     exact schemeRecovered_of_visibleRealizers S bs hsound hreal hbase
 
+/-! ### Leg B in the seal — the hidden-abelian consumption certificate (G1b)
+
+`SchemeRecovered` (above) is **visible recovery only**: it asks that same-`warmRefine`-cell pairs be
+realized by harvested automorphisms, which holds exactly where cells = orbits. A **hidden-abelian**
+residual — a `Z₂^d`/abelian symmetry 1-WL cannot see (CFI gauge twists; high-WL circulants, whose
+WL-dimension is *unbounded*, Wu–Ren–Ponomarenko 2025) — fails `SchemeRecovered` *and* is not Cameron, so
+the recovery-only seal cannot place it. It is consumed by the **linear oracle (leg B)** instead: the
+abelian residual's decision candidates are **uniquely determined on the cell** (L1–L3, `Group.lean`), so
+the oracle reads the single determined candidate and collapses the branch — no 1-WL cell/orbit
+coincidence required.
+
+The honest, non-vacuous leg-B certificate is that **determinacy**, *earned* from abelianness via L3
+(`aut_agree_on_orbit_of_comm`), not asserted by fiat. Contrast the bound-free `Findable.abelian`
+constructor, which concludes from `ResidualAbelian ∧ ¬IsBase` with *no* consumption proof (a soft
+vacuity), and `FindableWithin.abelian`, which keys on `RecoverableByDepth` = visible recovery and so
+**conflates leg B into leg A** (the rev. 2 finding; do not use them here — see
+[`chain-descent-seal-handoff.md`](../../docs/chain-descent-seal-handoff.md) §4 G1b). Non-vacuity check:
+the determinacy clause is genuinely **false** for a non-abelian residual whose candidates disagree on a
+cell — that is exactly `not_comm_of_orbit_disagree` (`Group.lean`). -/
+
+/-- **The leg-B (hidden-abelian) consumption certificate.** A scheme residual is *abelian-consumed* when
+its root residual is non-trivial (`¬ IsBase`) and every decision is **uniquely determined on its cell**:
+any two automorphisms `g, h` that send `a ↦ b` agree on the whole orbit of `a`. This is the linear
+oracle's "unique candidate" property — the content of leg B — keyed via L3, so it is *not*
+orbit-level-vacuous: it **fails** for a non-abelian residual with disagreeing candidates
+(`not_comm_of_orbit_disagree`). Earned from `ResidualAbelian` by `abelianConsumed_of_residualAbelian`. -/
+def AbelianConsumed : ∀ (m : Nat), SchurianScheme m → Prop :=
+  fun m S =>
+    (¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+    ∀ (a b c : Fin m) (g h : Equiv.Perm (Fin m)),
+      IsAut g (schemeAdj S.toAssociationScheme) → IsAut h (schemeAdj S.toAssociationScheme) →
+      g a = b → h a = b →
+      (∃ k : Equiv.Perm (Fin m), IsAut k (schemeAdj S.toAssociationScheme) ∧ k a = c) →
+      g c = h c
+
+/-- **Abelian residual ⟹ abelian-consumed (the leg-B core, citation-free).** If the root residual group
+is abelian (`ResidualAbelian`) and non-trivial (`¬ IsBase`), the residual is consumed: its decisions are
+uniquely determined on their cells. The determinacy is `aut_agree_on_orbit_of_comm` (L3, `Group.lean`) —
+the consumption is *proven*, not assumed. No citation, no WL-dimension content; it survives CFI's
+non-trivial global stabilizers exactly because L3 is faithfulness/quotient-free. -/
+theorem abelianConsumed_of_residualAbelian {n : Nat} {S : SchurianScheme n}
+    (hcomm : ResidualAbelian (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅)
+    (hnb : ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) :
+    AbelianConsumed n S := by
+  refine ⟨hnb, fun a b c g h hg hh hga hha hc => ?_⟩
+  have hAG : ∀ p q : AutGroup (schemeAdj S.toAssociationScheme), p * q = q * p := by
+    intro p q
+    have hres : ∀ r : AutGroup (schemeAdj S.toAssociationScheme),
+        ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅ (r : Equiv.Perm (Fin n)) :=
+      fun r => ⟨mem_autGroup.mp r.2, fun _ _ => rfl, fun v hv => absurd hv (Finset.notMem_empty v)⟩
+    exact Subtype.ext (by
+      rw [Subgroup.coe_mul, Subgroup.coe_mul]
+      exact hcomm (p : Equiv.Perm (Fin n)) (q : Equiv.Perm (Fin n)) (hres p) (hres q))
+  exact aut_agree_on_orbit_of_comm hAG hg hh hga hha hc
+
+/-- **The seal capstone with leg B — recovery OR hidden-abelian, else Cameron (NON-VACUOUS).** Widens
+`reachesRigidOrCameron_viaRecovery` so each non-Cameron branch may discharge via **either** visible
+recovery (`SchemeRecovered`, leg A) **or** a hidden-abelian residual (`ResidualAbelian ∧ ¬ IsBase`, leg
+B) — the latter routed to `AbelianConsumed` by the citation-free `abelianConsumed_of_residualAbelian`.
+The branch hypotheses are therefore strictly **weaker** than the recovery-only form: an
+abelian-but-not-visibly-recovering residual (high-WL circulant, CFI `tw ≥ 2`) now satisfies them via the
+abelian disjunct, where `reachesRigidOrCameron_viaRecovery` could not. Conclusion:
+`(SchemeRecovered ∨ AbelianConsumed) ∨ IsCameronScheme` — the seal's honest `(legA ∨ legB) ∨ Cameron`
+dichotomy on the symmetric case. The residual open content is the same `s(C)` leak (G2): a
+*non-abelian, non-recovering, non-Cameron* residual still cannot be placed, which is why the branch
+hypotheses are carried. -/
+theorem reachesRigidOrCameron_viaRecoveryOrAbelian {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : ¬ NonCascadeViaHarvest IsLarge n S →
+        SchemeRecovered n S ∨
+        (ResidualAbelian (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅ ∧
+          ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeRecovered n S ∨
+        (ResidualAbelian (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅ ∧
+          ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅)) :
+    (SchemeRecovered n S ∨ AbelianConsumed n S) ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaHarvest
+    (ReachesRigid := fun m S => SchemeRecovered m S ∨ AbelianConsumed m S)
+    hClassify S hne hrank ?_ ?_
+  · intro hnc
+    rcases hCascade hnc with hrec | ⟨hab, hnb⟩
+    · exact Or.inl hrec
+    · exact Or.inr (abelianConsumed_of_residualAbelian hab hnb)
+  · intro himp
+    rcases hImprim himp with hrec | ⟨hab, hnb⟩
+    · exact Or.inl hrec
+    · exact Or.inr (abelianConsumed_of_residualAbelian hab hnb)
+
 end ChainDescent

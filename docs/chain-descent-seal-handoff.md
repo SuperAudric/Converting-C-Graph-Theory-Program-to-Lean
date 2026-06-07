@@ -238,15 +238,30 @@ consumed* with no citation. The Lean core is in **`Group.lean`**:
 - `aut_agree_on_orbit_of_comm`, `not_comm_of_orbit_disagree` (cell-disagreement ⟹ non-abelian),
   `card_eq_of_isPretransitive_comm`, `not_comm_of_isPreprimitive_card_lt` (large primitive ⟹ non-abelian).
 
-**What to build (the task).** Define an `AbelianConsumed` (leg-B) predicate — the honest non-vacuous form is "the
-residual on the cell is abelian (commuting), and the unique candidate is realized," keyed via L3 so it is *not*
-orbit-level-vacuous (the uniqueness is the content). Then widen the rigid side: prove
-`reachesRigidOrCameron_viaAB : (SchemeRecovered ∨ AbelianConsumed) ∨ IsCameronScheme`, routing the **¬D2** /
-abelian branch to leg B. **Caution:** check non-vacuity exactly as in §3 — "abelian" as a bare predicate on the
-group is fine (it's a real restriction), but make the *consumption* witness depend on the unique-candidate (L3),
-not on an unconstrained `∃ gens`. The discretizing-oracle limit (§6) says multi-step abelian (`tw ≥ 2`) needs the
-*cross-branch* harvest, so leg B's consumption witness for `tw ≥ 2` is the Part-A harvest at the recovery depth,
-not a within-cell read — keep that in scope.
+**LANDED (2026-06-07, axiom-clean `[propext, Classical.choice, Quot.sound]`, `Cascade.lean`).** The leg-B core is
+in the seal:
+- **`AbelianConsumed n S`** — the non-vacuous certificate: `¬ IsBase` (non-trivial root residual) ∧ *every decision
+  is uniquely determined on its cell* (any two auts sending `a↦b` agree on `a`'s whole orbit). The determinacy is
+  keyed via L3, **not** orbit-level coverage — it is genuinely *false* for a non-abelian residual with disagreeing
+  candidates (`not_comm_of_orbit_disagree`), so it passes the §3 non-vacuity test (no `∃ gens`; a real restriction).
+- **`abelianConsumed_of_residualAbelian`** — `ResidualAbelian (schemeAdj S) unknown ∅ ∧ ¬IsBase ⟹ AbelianConsumed`,
+  **earned** via `aut_agree_on_orbit_of_comm` (L3), citation-free. This is the consumption *proof* the fiat
+  `Findable.abelian` lacked.
+- **`reachesRigidOrCameron_viaRecoveryOrAbelian`** — the widened capstone
+  `(SchemeRecovered ∨ AbelianConsumed) ∨ IsCameronScheme`. Each non-Cameron branch now discharges via **either**
+  visible recovery (leg A) **or** `ResidualAbelian ∧ ¬IsBase` (leg B): strictly weaker branch hypotheses, so an
+  abelian-but-not-visibly-recovering residual (high-WL circulant, CFI `tw≥2`) is now placeable where
+  `reachesRigidOrCameron_viaRecovery` failed. This closes the abelian wall-slice, citation-free.
+
+**Scope note (honest boundary).** `AbelianConsumed` is the leg-B *symmetry-completeness* certificate (the unique
+candidate is determined). The *polynomiality* of reading it — for multi-step abelian (`tw ≥ 2`) via the Part-A
+cross-branch harvest at recovery depth, per the discretizing-oracle limit (§6) — is the orthogonal layer, not in this
+predicate (mirroring recovery's correctness-vs-polynomiality split). The residual open content is unchanged: the seal
+still cannot place a *non-abelian* non-recovering non-Cameron residual (the `s(C)` leak G2-B).
+
+**Original task (for reference).** Define an `AbelianConsumed` (leg-B) predicate keyed via L3 so it is *not*
+orbit-level-vacuous (the uniqueness is the content), then widen the rigid side to
+`(SchemeRecovered ∨ AbelianConsumed) ∨ IsCameronScheme`, routing the abelian branch to leg B — done as above.
 
 > **CAUTION — Do NOT use `Findable`/`FindableWithin` as the leg-B vehicle (rev. 2 finding).** The existing D1/D2 screen
 > (`Cascade.lean`, `inductive Findable … | recovered | abelian | step`) looks like the natural object, but it
@@ -560,8 +575,9 @@ multi-base counting separation is realized as a warm-refinement split* — the e
 
 **THE THREAD BOARD (what's worth doing, by tier — regardless of immediacy).**
 - **Tier 1 — bankable slice-closures (provable now, shrink the wall but don't close it):**
-  - **(a) G1b — leg B** via a new L3-keyed `AbelianConsumed` (NOT `Findable`; §4 G1b). Closes the abelian wall-slice,
-    citation-free. Most actionable. The conservation route now shows the abelian-concealable part *is* leg B.
+  - **(a) G1b — leg B — LANDED (2026-06-07).** `AbelianConsumed` + `abelianConsumed_of_residualAbelian` (L3-earned,
+    citation-free) + `reachesRigidOrCameron_viaRecoveryOrAbelian` (`Cascade.lean`, axiom-clean). Closes the abelian
+    wall-slice; the seal is now `(SchemeRecovered ∨ AbelianConsumed) ∨ Cameron`. See §4 G1b.
   - **(b) G1a — depth-graded recovery** (`RecoverableByDepth` at base+O(1)). Captures CFI/Shrikhande; now the *same*
     target as the primitive-floor self-detection.
 - **Tier 2 — the G2 attack (the only route that actually closes the seal). The conservation route, Thread T2, and P3
@@ -624,7 +640,8 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 | Abstract seal | `reachesRigidOrCameron`, `reachesRigidOrCameron_viaHarvest` (`Cascade.lean`) |
 | Concrete seal | `SchemeRecovered`, `schemeRecovered_of_visibleRealizers`, `schemeAutGroup_eq_closure_of_recovered`, `reachesRigidOrCameron_viaRecovery` (`Cascade.lean`) |
 | Trichotomy / leg C | `exhaustiveObstruction_scheme(_of_nonCascade)(_nonCascade_trichotomy)`, `PrimitiveCCClassification`, `isPreprimitive_of_isPrimitive` (`Scheme.lean`) |
-| Leg B core | `smul_eq_on_orbit_of_comm` (L3), `not_comm_of_isPreprimitive_card_lt`, L1/L2 + helpers (`Group.lean`) |
+| Leg B core | `smul_eq_on_orbit_of_comm` (L3), `aut_agree_on_orbit_of_comm`, `not_comm_of_orbit_disagree`, `not_comm_of_isPreprimitive_card_lt`, L1/L2 (`Group.lean`) |
+| Leg B in the seal (G1b) | `AbelianConsumed`, `abelianConsumed_of_residualAbelian`, `reachesRigidOrCameron_viaRecoveryOrAbelian` (`Cascade.lean`) |
 | Cross-branch harvest (recovery ⟹ group) | `closure_eq_stabilizerAt_of_visibleRealizers`, `crossBranchHarvest_reproduces_residual`, `autP_reproduced_of_visibleRealizers`, `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits` (`Cascade.lean`) |
 | Tower (depths add) | `cascadeComposition`, `cascadeComposition_pathFixing`, `cellsAreOrbits_compose`, `cumulative_card_le`, `LayerStep` (`Cascade.lean`) |
 | Recovery witnesses | `RecoverableByDepth`, `recoverableByDepth_pPolynomial` / `_cfi` / `_scheme`, `cellsAreOrbits_of_discrete` (`CascadeOracle.lean`) |
