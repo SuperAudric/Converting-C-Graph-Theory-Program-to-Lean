@@ -511,11 +511,14 @@ multi-base counting separation is realized as a warm-refinement split* — the e
   - **(g) Extend `AffineSchemeProbe.cs`** to **non-abelian irreducible `G₀`** (the actual A4 mechanism, not the Galois
     gap) and higher `d` — the undertested zone (the existing probe is abelian-`G₀`/Galois only).
 - **Tier 4 — doc-sync / record-keeping (the NoFusion over-claim):**
-  - **(h)** The NoFusion/largeness-derivation track is **undercut by the orbit-level vacuity** (§3): `largenessBridge_viaHarvest`
-    is *tautological* (the §2 note says so), but the `PublicTheoremIndex` descriptions of the `NoFusion` family and
-    [exhaustive-obstruction §0.7.5](./chain-descent-exhaustive-obstruction.md) still claim "largeness derived from the
-    harvest." The Lean is sound; the *prose over-claims*. Reconcile so future readers don't treat NoFusion as live
-    evidence that G2-B is closeable (it isn't — that route is vacuous, confirming G2-B's open status).
+  - **(h) DONE (2026-06-07).** The NoFusion/largeness-derivation over-claim is **reconciled**: `largenessBridge_viaHarvest`
+    is *tautological* (orbit-level vacuity, §2–§3), and the prose that claimed "largeness derived from the harvest" has
+    been corrected with ⚠️ banners in `PublicTheoremIndex.md` (the `NoFusion` family: `NoFusion`, `reproducesResidual_of_noFusion`,
+    `autP_reproduced_of_noFusion`, `isLargeAutP_of_noFusion`, `largenessBridge_viaHarvest`, `LargenessBridge`,
+    `exhaustiveObstruction_scheme_of_harvest`, `reachesRigidOrCameron_viaHarvest`), in
+    [exhaustive-obstruction §0.7.5](./chain-descent-exhaustive-obstruction.md) (top banner), and in
+    [`00-START-HERE.md`](./00-START-HERE.md) §2. The Lean is sound (the theorems are true, just vacuous/tautological as
+    *evidence*); future readers are now warned not to treat NoFusion as live evidence that G2-B is closeable.
 
 ### G3 — the citation
 

@@ -159,9 +159,13 @@ that does as a Cameron section (**Cameron-hard, NOT GI-hard** — a finite targe
 primitivity, the imprimitive ⟹ refinement-visible bridge, and the group-side bridge
 (`isPreprimitive_iff_isPrimitive`: scheme `IsPrimitive` ⟺ Mathlib `IsPreprimitive`) landed in
 `Scheme.lean`; the refinement-side decomposition is deferred as substrate-conditional, capstone cited).
-The capstone's **largeness** antecedent is itself now an **active track** — *derived* (not hypothesized)
-from a *no-fusion* witness via the landed order identity `|Aut| = ∏ basic-orbit sizes` (PP1+PP3 landed
-axiom-clean, `Cascade.lean` Part A `NoFusion`/`autP_reproduced_of_noFusion`). The adversarial battery has
+The capstone's **largeness** antecedent has a *no-fusion* track (`Cascade.lean` Part A
+`NoFusion`/`autP_reproduced_of_noFusion`, via the order identity `|Aut| = ∏ basic-orbit sizes`), but
+**⚠️ that track does NOT genuinely derive largeness — the "derivation" is tautological** (`NoFusion` is
+orbit-level coverage, which is vacuously satisfiable; `largenessBridge_viaHarvest` is `IsLarge ⟹ IsLarge`
+once that vacuous coverage is stripped — see [`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md)
+§2–§3 and [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) §0.7.5). The
+genuine "¬consumed ⟹ large" is still open (G2-B). The adversarial battery has
 **run, all three tiers** ([`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md),
 `FusionBatteryExperiment.cs`): **no genuine fusion is constructible** — "fusion" splits into a *separable*
 case (Tier-0-handled, where all constructible hidden non-abelian symmetry lives) and a *non-decomposable*
@@ -175,11 +179,15 @@ to *primitivity* was refuted (Shrikhande, depth-graded). Tracked in
 **The goal is now a single theorem (2026-06-06, axiom-clean, `Cascade.lean` Part A).** The oracle-capability
 seal is **assembled**: `reachesRigidOrCameron` / `reachesRigidOrCameron_viaHarvest` — every rank-≥3 schurian
 scheme residual `ReachesRigid ∨ IsCameronScheme` (reaches a rigid residual via the cascade/abelian oracles, or
-is a Cameron section), wiring the landed `exhaustiveObstruction_scheme_nonCascade_trichotomy`. With the
-largeness bridge discharged, the **free inputs are exactly the honest remainder**: the cited
-`PrimitiveCCClassification` (Babai/Sun–Wilmes), the cascade-recovery reduction (leg A, well-supported), and the
-primitivity reduction (`¬IsPrimitive ⟹ ReachesRigid` — the one open in-scope gap, depth-graded block-visibility,
-Shrikhande). Crystallizing the goal this way surfaces the to-do list as a typed hypothesis set.
+is a Cameron section), wiring the landed `exhaustiveObstruction_scheme_nonCascade_trichotomy`. The free inputs
+are the cited `PrimitiveCCClassification` (Babai/Sun–Wilmes), the cascade-recovery reduction (leg A,
+well-supported), and the primitivity reduction (`¬IsPrimitive ⟹ ReachesRigid` — an open in-scope gap).
+Crystallizing the goal this way surfaces the to-do list as a typed hypothesis set. **⚠️ Two caveats the later
+handoff sharpens** ([`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md), the authoritative state):
+(1) the "largeness bridge discharged" above is **tautological**, not a genuine derivation (orbit-level vacuity,
+§2–§3 there) — the real "¬consumed ⟹ large" is open; (2) the open frontier is **G2** (non-recovering ∧
+non-Cameron, the `s(C)` boundary), of which the primitivity reduction is one face — and **no re-keying of the
+rigid predicate closes the seal** (§4.0 there).
 
 ---
 

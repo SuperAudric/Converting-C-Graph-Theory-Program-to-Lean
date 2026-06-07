@@ -116,13 +116,15 @@
 > depth-graded block-visibility tied to `RecoverableByDepth`; plus (3b), the heavy unbuilt quotient/fiber
 > recursion.
 >
-> **ACTIVE TRACK (2026-06-06) — deriving the *largeness* antecedent (§0.7.5).** Independently of primitivity,
-> the **largeness** antecedent of the §12 capstone is now being *derived* (not hypothesized): `leg C ⟹ large`
-> ⟸ `small ⟹ consumed` ⟸ completeness of deferral ⟸ **no fusion**, with the payoff lemma `¬D1 ∧ NoFusion ⟹
-> |Aut| = ∏ orbit-sizes super-poly = large` resting on the **landed** `card_autP_eq_prod_of_base`. The
-> separable case is provable; the entangled case is the **`NoFusion` witness**, validated by an adversarial
-> battery. Plan: [`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md); orientation
-> in §0.7.5. (Primitivity stays the separate depth-graded line above.)
+> **~~ACTIVE TRACK~~ ABANDONED (2026-06-06 attempt; ⚠️ retracted 2026-06-07) — the largeness "derivation" is
+> TAUTOLOGICAL.** The route `leg C ⟹ large ⟸ small ⟹ consumed ⟸ completeness of deferral ⟸ no fusion`, with
+> payoff `¬D1 ∧ NoFusion ⟹ |Aut| = ∏ orbit-sizes super-poly = large`, was meant to *derive* the §12 capstone's
+> largeness antecedent. **It does not:** `NoFusion` is orbit-level coverage, which is **vacuously satisfiable**
+> (orbit-mates are aut-related by definition; seal-handoff §2–§3), so the payoff is `IsLarge ⟹ IsLarge`, not a
+> derivation. The genuine "¬consumed ⟹ large" (which would empty G2-B) stays **open**. The adversarial battery's
+> "no genuine fusion constructible" is a real *constructibility* signal but not a formal discharge. See §0.7.5's
+> top correction banner. Largeness stays a carried hypothesis (`LargenessBridge`); primitivity stays the separate
+> depth-graded line above.
 >
 > Original planning note: this doc plans the item the user surfaced 2026-05-31: the
 > hypothesis that **"a graph that does not decompose into the cascade+abelian
@@ -722,7 +724,22 @@ outcomes — *consumed* or *Cameron* — plus the orthogonal IR-core (no symmetr
 
 ### 0.7.5 Deriving the *largeness* antecedent — the no-fusion / deferral route (2026-06-06)
 
-> **The active route to *deriving* leg C's largeness antecedent instead of hypothesizing it.** Full plan:
+> **⚠️ CORRECTION (2026-06-07) — this route does NOT genuinely derive largeness; the "derivation" is
+> TAUTOLOGICAL. Read this before the historical bullets below.** The vacuity check
+> ([`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md) §2–§3) found that `NoFusion` is
+> **orbit-level** coverage (`OrbitPartition T b w → ∃ g ∈ gens, …`), which is **vacuously satisfiable** —
+> orbit-mates are automorphism-related *by definition*, so `gens = all automorphisms` witnesses it. Therefore
+> `largenessBridge_viaHarvest` (and the `NonCascadeViaHarvest ⟹ IsLargeScheme` chain) is **`IsLarge ⟹ IsLarge`
+> once the vacuous coverage is stripped** — it transports a largeness assumption, it does not *establish*
+> largeness. The genuine "¬consumed ⟹ large" (which would empty G2-B) is **still open**. The Lean theorems
+> below are all sound (true), but they are tautological/vacuous as *evidence*, not a derivation. **Do not cite
+> this route as live evidence that G2-B is closeable** — it is not (that is precisely why G2-B stays the open
+> frontier; seal-handoff §4 G2-B, Tier-4(h)). The adversarial-battery finding ("no genuine fusion
+> constructible") is still a real empirical signal about *constructibility*, but it does not discharge the
+> formal largeness obligation. The bullets below are retained as the historical record of the route.
+
+> **The (former) route to *deriving* leg C's largeness antecedent instead of hypothesizing it** — now known
+> tautological (see the correction banner above). Full plan:
 > [`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md).
 
 The §12 capstone `exhaustiveObstruction_scheme` carries **largeness** (`IsLargeScheme`) as a free hypothesis.
