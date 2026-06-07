@@ -470,6 +470,23 @@ is used only at depth 0) + `iterFrom_refines_schemePartFrom` (`iter[k] χ₀` re
 multi-base counting separation is realized as a warm-refinement split* — the easy half. The **crux remains** the converse
 (primitive ⟹ the gap is broken at base + O(1)).
 
+> **⚠️ MAJOR CAUTION (2026-06-07, citability check) — the crux direction above ("base-homogeneous gap ⟹ imprimitive",
+> "primitive ⟹ separable") is likely BACKWARDS; do NOT implement the point-twin / `ClosedSubset` lemma until this is
+> resolved.** A literature check found **Evdokimov–Ponomarenko (Sep./Schurity numbers of CCs, EJC 2000): an *imprimitive*
+> 3/2-homogeneous scheme has `s(C) ≤ 2`** — i.e. **imprimitive homogeneous schemes are *separable* (recover at depth 2)**.
+> The project's own **Shrikhande** (imprimitive, recovers at depth 2 — A2-iii) is exactly an `s(C)=2` witness. So
+> **non-recovery is a *primitive* phenomenon, not an imprimitive one** — the opposite of P3's "deadlock ⟹ imprimitive".
+> **Tentative reorientation (to confirm via deep-research before rewriting the gaps):** (i) **G2-A (imprimitive) likely
+> RECOVERS** by a *citable* `s(C) ≤ 2` (the block tower was addressing a recoverable case); (ii) **G2-B (primitive) is the
+> genuine and only homogeneous-scheme leak**; (iii) **"primitive ⟹ separable" is likely FALSE in general** (high-`s(C)`
+> lives on primitive schemes), so the real question is the *quantitative* one the program already named — *small / poly-Aut*
+> primitive homogeneous ⟹ bounded `s(C)`? The known non-separable small CCs (16 pts, fiber 4 = E₁₆) are **multi-fiber**
+> (not homogeneous), so they are not yet a G2-B witness. **Decisive next step:** a focused deep-research pass on the
+> separability landscape for *homogeneous* schemes (imprimitive ⟹ `s≤2` scope; primitive separability bounds; can a *small*
+> primitive homogeneous scheme be non-separable?) — this decides what is *citable* (G2-A ⟹ recovers) vs the genuine carried
+> leak, and whether the self-detection target needs re-pointing from "primitive ⟹ separable" to "*small* primitive ⟹
+> bounded `s(C)`". **Until confirmed, the realization lemma (above) stands (direction-agnostic); the crux lemma does not.**
+
 **THE THREAD BOARD (what's worth doing, by tier — regardless of immediacy).**
 - **Tier 1 — bankable slice-closures (provable now, shrink the wall but don't close it):**
   - **(a) G1b — leg B** via a new L3-keyed `AbelianConsumed` (NOT `Findable`; §4 G1b). Closes the abelian wall-slice,
