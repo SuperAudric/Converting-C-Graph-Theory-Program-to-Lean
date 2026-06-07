@@ -222,11 +222,13 @@ needs **no** classification — Cameron/O'Nan–Scott is required only *inside l
 C*, never to close the seal. This is the structural improvement over §1's framing.
 
 > **THE SEAL IS ASSEMBLED AS ONE THEOREM (2026-06-06, axiom-clean, `Cascade.lean` Part A).**
-> `reachesRigidOrCameron` / `reachesRigidOrCameron_viaHarvest`: every rank-≥3 schurian scheme residual
-> `ReachesRigid ∨ IsCameronScheme` — reaches a rigid residual (legs A/B consume it) or is a Cameron section
-> (leg C flags). Wires the landed `exhaustiveObstruction_scheme_nonCascade_trichotomy` (`¬IsPrimitive ∨
-> ¬NonCascade ∨ Cameron`): `¬NonCascade`→cascade-recovery (leg A), Cameron→landed; with the largeness bridge
-> discharged (`largenessBridge_viaHarvest`), the **free inputs are exactly the honest remainder** — the cited
+> `reachesRigidOrCameron` (abstract) → `reachesRigidOrCameron_viaRecovery` (concrete headline): every rank-≥3
+> schurian scheme residual `ReachesRigid ∨ IsCameronScheme` — reaches a rigid residual (legs A/B consume it) or is
+> a Cameron section (leg C flags). Wires the landed `exhaustiveObstruction_scheme_nonCascade_trichotomy`
+> (`¬IsPrimitive ∨ ¬NonCascade ∨ Cameron`): `¬NonCascade`→cascade-recovery (leg A), Cameron→landed; with the
+> largeness bridge **carried honestly as the identity** at `IsLargeSchemeViaAut` (the old vacuous
+> `largenessBridge_viaHarvest` was excised 2026-06-07, seal-handoff Tier-4 h′), the **free inputs are exactly the
+> honest remainder** — the cited
 > `PrimitiveCCClassification` (Babai/Sun–Wilmes), the leg-A cascade-recovery reduction (well-supported), and the
 > **primitivity reduction** `¬IsPrimitive ⟹ ReachesRigid` (the one open in-scope gap; §0.7.2 Step 3 /
 > Shrikhande's depth-graded block-visibility). The goal is now a typed object whose hypothesis list is the
@@ -724,8 +726,10 @@ outcomes — *consumed* or *Cameron* — plus the orthogonal IR-core (no symmetr
 
 ### 0.7.5 Deriving the *largeness* antecedent — the no-fusion / deferral route (2026-06-06)
 
-> **⚠️ CORRECTION (2026-06-07) — this route does NOT genuinely derive largeness; the "derivation" is
-> TAUTOLOGICAL. Read this before the historical bullets below.** The vacuity check
+> **EXCISED (2026-06-07) — the entire no-fusion/largeness-derivation Lean family below has been REMOVED from
+> `Cascade.lean` (seal-handoff Tier-4 h′); the section is retained only as a historical record of a dead route.**
+> The seal capstones now carry largeness honestly via the **identity** `LargenessBridge` at `IsLargeSchemeViaAut`.
+> Why it was removed: the "derivation" was **TAUTOLOGICAL.** The vacuity check
 > ([`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md) §2–§3) found that `NoFusion` is
 > **orbit-level** coverage (`OrbitPartition T b w → ∃ g ∈ gens, …`), which is **vacuously satisfiable** —
 > orbit-mates are automorphism-related *by definition*, so `gens = all automorphisms` witnesses it. Therefore

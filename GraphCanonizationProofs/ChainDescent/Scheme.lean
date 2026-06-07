@@ -3830,13 +3830,16 @@ The §12 capstone takes `IsLargeScheme` as a **free** hypothesis. This section m
   `NonCascade` (a descent observation) ──`LargenessBridge`──▶ `IsLargeScheme` (classification antecedent)
 
 so the capstone is reached from what the descent actually produces — the residual does **not** recover at
-polynomial depth (high WL-dimension) — via a single, named, substrate-conditional input `LargenessBridge`.
-That bridge is exactly the implication the **no-fusion / deferral** track derives and the adversarial
-battery validates (`docs/chain-descent-fusion-battery-plan.md` PP3; exhaustive-obstruction §0.7.5: `¬D1 ∧
-NoFusion ⟹ |Aut| = ∏ orbit-sizes super-poly`, via the landed `card_autP_eq_prod_of_base`). It is
-**stated, not proved** here — the genuine derivation needs the `NoFusion` witness — and is carried as a
+polynomial depth (high WL-dimension) — via a single, named input `LargenessBridge`. It is carried as a
 hypothesis in the same style as `PrimitiveCCClassification`, keeping the dependency explicit and the
 (custom-axiom-free) basis clean.
+
+**The honest instantiation (2026-06-07).** The seal capstones (`Cascade.lean`) instantiate `NonCascade` and
+`IsLargeScheme` *both* at the concrete `IsLargeSchemeViaAut IsLarge` (super-polynomiality of `|SchemeAutGroup|`)
+and supply this bridge as the **identity** `fun _ _ h => h` — largeness is honestly **carried**, with `¬ NonCascade`
+= "the group is small" the cascade branch's antecedent. An earlier no-fusion "derivation" of this bridge
+(`largenessBridge_viaHarvest`) was found to rest on the orbit-level-**vacuous** `NoFusion` predicate (seal-handoff
+§2–§3) and has been **excised**; largeness is not derived, it is the carried citation, transparently.
 
 **Why the bridge is sound to *state* on this class (the multipede is not a counterexample).** In general
 `non-cascade ⟹ large` is **false**: the multipede is non-cascade (high WL-dimension) yet has trivial `Aut`
@@ -3845,13 +3848,12 @@ vertex-transitive (`schemeAutGroup_isPretransitive`, `cellsAreOrbits_empty_of_sc
 always exists on this class. The genuine residual content — a *primitive, small* non-cascading scheme — is
 the WL-dimension boundary (declassing §9 "B's core"), which is exactly why the bridge stays a hypothesis. -/
 
-/-- **The stated largeness bridge** (substrate-conditional, validated by the no-fusion battery — **never a
-fresh `axiom`**): the descent's `NonCascade` observation ("the residual does not recover at polynomial
-depth") implies the classification's `IsLargeScheme` antecedent. The genuine derivation (`¬D1 ∧ NoFusion ⟹
-|Aut| = ∏ orbit-sizes super-poly`, via `card_autP_eq_prod_of_base`) is the no-fusion track
-(exhaustive-obstruction §0.7.5, `docs/chain-descent-fusion-battery-plan.md`); carried here as a hypothesis
-so the capstone's largeness antecedent is traceable to a descent observation rather than asserted from
-nowhere. Declared as a named `Prop` mirroring `PrimitiveCCClassification`. -/
+/-- **The stated largeness bridge** (carried hypothesis — **never a fresh `axiom`**): the descent's
+`NonCascade` observation ("the residual does not recover at polynomial depth") implies the classification's
+`IsLargeScheme` antecedent. The seal capstones discharge it with the **identity** at `NonCascade = IsLargeScheme
+= IsLargeSchemeViaAut` (largeness honestly carried, not derived; the prior no-fusion "derivation" rested on the
+vacuous `NoFusion` and was excised — seal-handoff §2–§3). Declared as a named `Prop` mirroring
+`PrimitiveCCClassification`, keeping the dependency explicit. -/
 def LargenessBridge
     (NonCascade IsLargeScheme : ∀ (m : Nat), SchurianScheme m → Prop) : Prop :=
   ∀ (m : Nat) (S : SchurianScheme m), NonCascade m S → IsLargeScheme m S

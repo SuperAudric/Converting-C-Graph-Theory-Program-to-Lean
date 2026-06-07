@@ -82,10 +82,11 @@ closing the seal to that statement.
 
 ## 2. Current Lean state of the seal
 
-**The abstract capstone (genuine, untouched):** `reachesRigidOrCameron` and `reachesRigidOrCameron_viaHarvest`
-(`Cascade.lean`) — parametric in an abstract `ReachesRigid : ∀ m, SchurianScheme m → Prop`; they *reduce*
-`ReachesRigid ∨ IsCameronScheme` to two branch hypotheses + the classification. Their content depends entirely on
-what `ReachesRigid` is instantiated to.
+**The abstract capstone (genuine):** `reachesRigidOrCameron` (`Cascade.lean`) — parametric in an abstract
+`ReachesRigid : ∀ m, SchurianScheme m → Prop` and the `NonCascade`/`LargenessBridge` interface; it *reduces*
+`ReachesRigid ∨ IsCameronScheme` to two branch hypotheses + the classification. Its content depends entirely on
+what `ReachesRigid` is instantiated to. (The old `reachesRigidOrCameron_viaHarvest` headline was **excised**
+2026-06-07 — see Tier-4 (h′) — along with the whole vacuous `NoFusion`/`largenessBridge_viaHarvest` family.)
 
 **The concrete headline:** `reachesRigidOrCameron_viaRecovery : SchemeRecovered n S ∨ IsCameronScheme n S`
 (`Cascade.lean`), with `ReachesRigid := SchemeRecovered`. It reduces the goal to three carried inputs:
@@ -93,18 +94,18 @@ what `ReachesRigid` is instantiated to.
 | Input | What it is | Status |
 |---|---|---|
 | `hClassify : PrimitiveCCClassification …` | cited Babai 1981 / Sun–Wilmes 2015: primitive, large, rank ≥ 3 ⟹ Cameron | cited; solid rank 3/4 (G3) |
-| `hCascadeHarvest : ¬ NonCascadeViaHarvest IsLarge n S → SchemeRecovered n S` | **"small ⟹ recovered"** (see note) | carried (G1, G2) |
+| `hCascadeHarvest : ¬ IsLargeSchemeViaAut IsLarge n S → SchemeRecovered n S` | **"small ⟹ recovered"** (see note) | carried (G1, G2) |
 | `hImprimRecovery : ¬ S.…IsPrimitive → SchemeRecovered n S` | **"imprimitive ⟹ recovered"** | carried (G1, G2) |
 
-**Note — what `NonCascade` actually is.** `NonCascadeViaHarvest IsLarge n S` (`Cascade.lean`) is
-`∃ gens bs, hsound ∧ NoFusion … ∧ base ∧ IsLarge (Nat.card (closure gens))`. Its `NoFusion` clause is *orbit*-level
-coverage, which is **vacuously satisfiable** (§3), so `NonCascadeViaHarvest ≈ IsLarge(|Aut|)` = "the group is
-large." Hence `¬NonCascade ≈ small`. The trichotomy
-`exhaustiveObstruction_scheme_nonCascade_trichotomy : ¬IsPrimitive ∨ ¬NonCascade ∨ Cameron` (`Scheme.lean`) is
-therefore genuine — it is `primitive ∧ large ∧ rank≥3 ⟹ Cameron` (the classification) cased out. The
-`LargenessBridge` / `largenessBridge_viaHarvest` (`NonCascade ⟹ IsLargeScheme`) is **tautological** (`IsLarge ⟹
-IsLarge` once the vacuous coverage is stripped) — it does *not* derive largeness; the genuine "¬consumed ⟹ large"
-is open (part of G2).
+**Note — what `NonCascade` actually is (post-excision).** The concrete capstones now instantiate the abstract
+`NonCascade` directly at `IsLargeSchemeViaAut IsLarge n S = IsLarge (Nat.card SchemeAutGroup)` = "the group is
+large," with the `LargenessBridge` supplied as the **identity** (`fun _ _ h => h`) — largeness honestly *carried*,
+not derived. So `¬NonCascade` = "small," transparently. The trichotomy
+`exhaustiveObstruction_scheme_nonCascade_trichotomy : ¬IsPrimitive ∨ ¬NonCascade ∨ Cameron` (`Scheme.lean`,
+parametric in `NonCascade`/`hbridge`) is genuine — `primitive ∧ large ∧ rank≥3 ⟹ Cameron` (the classification)
+cased out. (Previously `NonCascade := NonCascadeViaHarvest` carried a `NoFusion` clause whose orbit-level coverage
+was vacuous, §3, making the largeness "derivation" tautological; that whole family is now removed.) The genuine
+"¬consumed ⟹ large" stays open (part of G2).
 
 **`SchemeRecovered` (the rigid predicate), `Cascade.lean`:**
 ```lean
@@ -639,12 +640,18 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     [exhaustive-obstruction §0.7.5](./chain-descent-exhaustive-obstruction.md) (top banner), and in
     [`00-START-HERE.md`](./00-START-HERE.md) §2. The Lean is sound (the theorems are true, just vacuous/tautological as
     *evidence*); future readers are now warned not to treat NoFusion as live evidence that G2-B is closeable.
-  - **(h′) PENDING Lean excision (deferred past G1b).** The doc-sync above flags the vacuous `NoFusion`/orbit-level
-    family but does **not** remove it — those lemmas (and their `largenessBridge_viaHarvest` consumer + the
-    `reachesRigidOrCameron_viaHarvest` headline that leans on it) still carry the vacuous orbit-level hypothesis in
-    `Cascade.lean`. The clean end-state is to **retire the NoFusion/largeness-derivation family** (keeping the
-    non-vacuous visible-realizer capstone `reachesRigidOrCameron_viaRecovery` as the headline) so no vacuous
-    hypothesis lingers in the source. Not urgent (the warnings prevent misreading); slated **after G1b**.
+  - **(h′) DONE (2026-06-07) — Lean excision complete, axiom-clean.** The vacuous `NoFusion`/largeness-derivation
+    family is **removed** from `Cascade.lean`: deleted `NoFusion`, `reproducesResidual_of_noFusion`,
+    `autP_reproduced_of_noFusion`, `noFusion_of_visibleRecovery`, `noFusion_of_warmSeparatedPartition`,
+    `isLargeAutP_of_isLargeProd`, `isLargeAutP_of_noFusion`, `NonCascadeViaHarvest`, `largenessBridge_viaHarvest`,
+    `exhaustiveObstruction_scheme_of_harvest`, `reachesRigidOrCameron_viaHarvest` (11 decls + their index rows).
+    The 3 concrete capstones (`_viaRecovery`, `_viaRecoveryOrAbelian`, `_viaDepthRecovery`) were **re-wired** to
+    call `reachesRigidOrCameron` directly with `NonCascade := IsLargeSchemeViaAut IsLarge` and the **identity**
+    `LargenessBridge` (`fun _ _ h => h`) — largeness honestly carried, `¬IsLargeSchemeViaAut` = "small" the cascade
+    antecedent. Kept the clean pieces (`schemeAdj`, `isAut_schemeAdj_iff`, `stabilizerAt_schemeAdj_empty_eq`,
+    `IsLargeSchemeViaAut`, abstract `LargenessBridge`/`reachesRigidOrCameron`, the trichotomy) and the Route B
+    block-decomposition family (separate, not NoFusion). Full build green, all capstones axiom-clean
+    `[propext, Classical.choice, Quot.sound]`. **No vacuous hypothesis lingers in the source.**
 
 ### G3 — the citation
 
@@ -662,7 +669,7 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 
 | Layer | Key decls (file) |
 |---|---|
-| Abstract seal | `reachesRigidOrCameron`, `reachesRigidOrCameron_viaHarvest` (`Cascade.lean`) |
+| Abstract seal | `reachesRigidOrCameron` (parametric in `NonCascade`/`LargenessBridge`), `IsLargeSchemeViaAut`, `schemeAdj`/`isAut_schemeAdj_iff`/`stabilizerAt_schemeAdj_empty_eq` (`Cascade.lean`) |
 | Concrete seal | `SchemeRecovered`, `schemeRecovered_of_visibleRealizers`, `schemeAutGroup_eq_closure_of_recovered`, `reachesRigidOrCameron_viaRecovery` (`Cascade.lean`) |
 | Trichotomy / leg C | `exhaustiveObstruction_scheme(_of_nonCascade)(_nonCascade_trichotomy)`, `PrimitiveCCClassification`, `isPreprimitive_of_isPrimitive` (`Scheme.lean`) |
 | Leg B core | `smul_eq_on_orbit_of_comm` (L3), `aut_agree_on_orbit_of_comm`, `not_comm_of_orbit_disagree`, `not_comm_of_isPreprimitive_card_lt`, L1/L2 (`Group.lean`) |

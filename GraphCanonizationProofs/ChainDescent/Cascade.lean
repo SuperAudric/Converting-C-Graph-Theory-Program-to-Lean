@@ -1181,128 +1181,10 @@ theorem autP_reproduced_of_visibleRealizers {gens : Set (Equiv.Perm (Fin n))} (b
   rw [← gensAt_empty_eq hsound]
   exact card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
 
-/-! ### No-fusion: largeness traceable to the symmetry-only harvest, with no recovery hypothesis
-
-The capstones above (`crossBranchHarvest_reproduces_residual`, `autP_reproduced_of_visibleRealizers`) key on
-**visible-cell** realizers — satisfiable only on the *recoverable* class (a visible cell-mate is a genuine
-orbit-mate only where `CellsAreOrbits`). The **no-fusion / deferral** track
-(`docs/chain-descent-fusion-battery-plan.md`, exhaustive-obstruction §0.7.5) wants the orthogonal claim:
-*largeness traceable from the symmetry-only harvest, independent of recovery / the WL-dimension boundary.*
-That is the **orbit-realizer** form (`coversOrbits_of_realizers`) — it asks only that the defer-all-reals
-harvest reproduce every genuine *orbit* pair, never that refinement *see* them.
-
-`NoFusion` names that condition (PP1): the harvested `gens` realizes every residual orbit pair at every level
-— equivalently, the defer-all-reals harvest finds the **full** `Aut_S` (no symmetry is 1-WL-entangled with
-rigid structure so as to gate its recovery on a real decision). `real_stays_real` (`CascadeOracle.lean`) is the
-**soundness** of deferral — a deferred real stays real, so the harvest only ever folds genuine orbit pairs;
-`NoFusion` is its **completeness** dual, the single battery-validated witness. Under it, `reproducesResidual_of_noFusion`
-gives `closure = Aut_S^P` **and** `|·| = ∏ basic-orbit sizes` via the landed order identity — so the largeness
-predicate (the orbit-size product super-poly) is **read off the harvest**, not cited (PP3). The genuinely-open
-content is *whether* `NoFusion` holds (the completeness gap "uncertifiable ≠ real" — the multipede witnesses
-small/trivial `|Aut|` + high WL-dimension), which is what the adversarial battery probes.
-
-**Routed around (deferred): the Tier-0 disjoint-decoupling separable case.** PP2's fully-general "disjoint
-structure ⟹ `NoFusion`" needs the component-decomposition machinery that is a pre-existing project gap
-(strategy §15 gap 4, "assumed not proven"). What *is* provable here unconditionally is the **recoverable**
-sufficient condition `noFusion_of_visibleRecovery` (where recovery holds, no fusion — the metric/CFI witnesses);
-the disjoint controls remain the battery's empirical shadow. -/
-
-/-- **No-fusion / deferral-complete (PP1) — the symmetry-only harvest reproduces every orbit.** The harvested
-generating set `gens` contains, at every level `T ⊇ S`, a **path-fixing residual realizer** for every genuine
-`Aut_T`-orbit pair (`OrbitPartition adj P T b w → ∃ g ∈ gens, ResidualAut adj P T g ∧ g b = w`). This is the
-orbit-realizer (not visible-cell) coverage, so it carries **no** recovery / refinement-visibility hypothesis:
-it asserts the defer-all-reals harvest *found* the full `Aut_S`, independent of whether 1-WL *sees* it. The
-single substrate-conditional witness of the no-fusion track, validated by the adversarial battery
-(`docs/chain-descent-fusion-battery-plan.md`). Soundness of the harvest that supplies it is `real_stays_real`. -/
-def NoFusion (adj : AdjMatrix n) (P : PMatrix n)
-    (gens : Set (Equiv.Perm (Fin n))) (S : Finset (Fin n)) : Prop :=
-  ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
-    OrbitPartition adj P T b w → ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w
-
-/-- **PP3 — largeness traceable from the no-fusion harvest, no recovery hypothesis.** Under `NoFusion` (the
-symmetry-only harvest reproduces every orbit) with a terminal base, the folded path-fixing generators are
-**exactly** the residual `Aut_S^P` *and* their order is the basic-orbit-size product. So the largeness
-predicate (this product super-poly) is **read off the harvest** via the landed order identity
-(`card_closure_gensAt_eq_prod_of_coversOrbits`), citing neither Babai nor the WL-dimension boundary — the
-orthogonal claim to the visible-realizer capstone, whose `hreal` is satisfiable only on the recoverable class. -/
-theorem reproducesResidual_of_noFusion {gens : Set (Equiv.Perm (Fin n))}
-    (bs : List (Fin n)) {S : Finset (Fin n)}
-    (hnf : NoFusion adj P gens S)
-    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
-    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S
-      ∧ Nat.card (Subgroup.closure (gensAt adj P gens S)) = orbitSizeProd adj P bs S := by
-  have hcov := coversOrbits_of_realizers bs hnf hbase
-  exact ⟨stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov,
-    card_closure_gensAt_eq_prod_of_coversOrbits bs hcov⟩
-
-/-- **PP3, root headline — `Aut(G)^P` and its order from the no-fusion harvest.** The `S = ∅` case of
-`reproducesResidual_of_noFusion` (via `gensAt_empty_eq`): under `NoFusion` at the root, the folded harvested
-generators generate **exactly** `Aut(G)^P`, and `|Aut(G)^P| = ∏ basic-orbit sizes`. Largeness is then the
-single number `orbitSizeProd adj P bs ∅` being super-polynomial — derived from the harvest, not hypothesized.
-The no-fusion analogue of `autP_reproduced_of_visibleRealizers`, but keyed on orbit (not visible-cell)
-realizers, so it needs **no** recovery: largeness from `NoFusion`, not from the WL-dimension boundary. -/
-theorem autP_reproduced_of_noFusion {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
-    (hsound : ∀ g ∈ gens, g ∈ StabilizerAt adj P ∅)
-    (hnf : NoFusion adj P gens ∅)
-    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅)) :
-    Subgroup.closure gens = StabilizerAt adj P ∅
-      ∧ Nat.card (Subgroup.closure gens) = orbitSizeProd adj P bs ∅ := by
-  have hcov := coversOrbits_of_realizers bs hnf hbase
-  refine ⟨closure_eq_stabilizerAt_empty_of_coversOrbits bs hsound hcov, ?_⟩
-  rw [← gensAt_empty_eq hsound]
-  exact card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
-
-/-- **PP2 (provable core) — recovery ⟹ no fusion.** The separable case in its unconditional, recoverable
-form: where orbits are recovered at every level (`CellsAreOrbits T`) and the leaf-collision harvest collected
-a path-fixing realizer for every *visible cell-mate*, `NoFusion` holds — a visible cell-mate is then a genuine
-orbit-mate (`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`), so the orbit coverage is supplied. This
-is why the metric / CFI (refinement-visible) symmetry never fuses; the genuinely-open completeness gap is the
-*non*-recoverable regime the battery probes. (The fully-general Tier-0 disjoint-decoupling separable case is
-deferred — it needs the component-decomposition gap, strategy §15 gap 4.) -/
-theorem noFusion_of_visibleRecovery {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)}
-    (hrec : ∀ T : Finset (Fin n), S ⊆ T → CellsAreOrbits adj P T)
-    (hvis : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
-        warmRefine adj P (individualizedColouring n T) b
-          = warmRefine adj P (individualizedColouring n T) w →
-        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w) :
-    NoFusion adj P gens S :=
-  fun T hT =>
-    (orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits (hrec T hT)).mpr (hvis T hT)
-
-/-- **No-fusion decomposes along a 1-WL-separated partition (PP2 — the separable case, class-agnostic).**
-If a partition of the vertices `β : Fin n → ι` is **1-WL-separated** — at every level `T ⊇ S`, sharing a
-`warmRefine` cell forces the same block (`hsep`) — then no orbit pair can cross a block boundary (orbits
-refine cells, `OrbitPartition.subset_warmRefine`), so `NoFusion` follows from **per-block coverage** alone
-(`hcov`: every orbit pair *within a block* is realized by a harvested generator). This is the honest
-mechanical core of the Tier-0 / separable case: the global no-fusion obligation is split into the
-distinguishing witness `hsep` (the parts are 1-WL-told-apart — what canonizing distinct components supplies)
-and the per-component obligation `hcov` (the recursion / base case — itself dischargeable by
-`noFusion_of_visibleRecovery` where a block recovers).
-
-Strictly more general than `noFusion_of_visibleRecovery` on the separation axis: it needs only **block-level**
-1-WL separation, not full `CellsAreOrbits` recovery (a block may hold many cells/orbits). **Scope (honest):**
-this is the case where the parts are *1-WL-distinguished* — the **non-isomorphic** separable case (a disjoint
-union of distinguishable components; `β` = the component id, `hsep` = 1-WL separates the degree/colour regimes).
-The **isomorphic-copy** separable case (blocks 1-WL-*indistinguishable*, realized only by copy-swaps) is **not**
-covered here — those orbit pairs *do* cross `β`-blocks, so `hsep` fails; they route through recovery
-(`noFusion_of_visibleRecovery` at the matched-copy level) and the sort-key completeness gap (strategy §15 gap 4),
-correctly left as the substrate-conditional remainder. -/
-theorem noFusion_of_warmSeparatedPartition {ι : Type*} (β : Fin n → ι)
-    {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)}
-    (hsep : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
-        warmRefine adj P (individualizedColouring n T) b
-          = warmRefine adj P (individualizedColouring n T) w → β b = β w)
-    (hcov : ∀ T : Finset (Fin n), S ⊆ T → ∀ b w : Fin n,
-        OrbitPartition adj P T b w → β b = β w →
-        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w) :
-    NoFusion adj P gens S :=
-  fun T hT b w hbw =>
-    hcov T hT b w hbw (hsep T hT b w (OrbitPartition.subset_warmRefine hbw))
-
 /-! ### Route B — the swap decomposition of orbit coverage (the imprimitive recursion's core)
 
 For an **imprimitive** residual, `Aut_S` *permutes* a block system, so orbit pairs cross block boundaries —
-the case `noFusion_of_warmSeparatedPartition` (which requires orbits to *respect* the partition) cannot reach.
+the symmetry-respecting (non-block-swapping) case cannot reach it.
 The decomposition uses that `CoversOrbits`'s coverage clause is keyed on `Subgroup.closure (gensAt …)` — a
 group, **closed under composition** — so a cross-block orbit pair is realized by composing a **block-swap**
 (reach the orbit-mate's block) with a **fiber move** (within that block). This is the wreath structure of an
@@ -1321,7 +1203,7 @@ size-induction (Phase 2) discharges them via its IH. Discharging the seal's `hIm
 `b`'s full residual orbit factors, along a partition `β`, into **block-reach** `hreach` and **within-block
 coverage** `hfiber`. The realizer is the composite `h * σ` (block-swap `σ` then fiber move `h`), which lands
 in the closure subgroup — why this needs `closure (gensAt …)` (composition-closed), not single generators.
-Generalizes `noFusion_of_warmSeparatedPartition` to the Aut-**permuted** (block-swapping) case. -/
+Handles the Aut-**permuted** (block-swapping) imprimitive case (orbits crossing block boundaries). -/
 theorem orbitCoverage_of_blockDecomposition {ι : Type*} (β : Fin n → ι)
     {gens : Set (Equiv.Perm (Fin n))} {S : Finset (Fin n)} (b : Fin n)
     (hreach : ∀ w, OrbitPartition adj P S b w →
@@ -1494,9 +1376,9 @@ theorem blockHarvest_of_realizers {ι : Type*} (β : Fin n → ι)
 form: where orbits are recovered at every level (`CellsAreOrbits T`) and the leaf-collision harvest collected a
 path-fixing realizer for every *visible cell-mate*, both `hreach` and `hfiber` hold (for any `β`). A visible
 cell-mate is a genuine orbit-mate under recovery (`orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`), so
-the orbit realizers `blockHarvest_of_realizers` needs are supplied. This is the Route B analogue of
-`noFusion_of_visibleRecovery`: the metric/DRG (`recoverableByDepth_pPolynomial`) and CFI (`recoverableByDepth_cfi`)
-recovery witnesses plug straight in to discharge the imprimitive branch on the whole recoverable class. -/
+the orbit realizers `blockHarvest_of_realizers` needs are supplied. The metric/DRG
+(`recoverableByDepth_pPolynomial`) and CFI (`recoverableByDepth_cfi`) recovery witnesses plug straight in to
+discharge the imprimitive branch on the whole recoverable class. -/
 theorem blockHarvest_of_visibleRecovery {ι : Type*} (β : Fin n → ι)
     {gens : Set (Equiv.Perm (Fin n))}
     (hrec : ∀ T : Finset (Fin n), CellsAreOrbits adj P T)
@@ -1510,52 +1392,6 @@ theorem blockHarvest_of_visibleRecovery {ι : Type*} (β : Fin n → ι)
         ∃ h ∈ Subgroup.closure (gensAt adj P gens T), h u = w) :=
   blockHarvest_of_realizers β
     (fun T => (orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits (hrec T)).mpr (hvis T))
-
-/-! ### The `LargenessBridge` graph core — largeness of `Aut(G)^P` read off the no-fusion harvest
-
-These two theorems are the **class-agnostic** content of "leg C ⟹ large ⟸ `NoFusion`" — the mechanical
-half of `LargenessBridge` (`Scheme.lean §12.1`), discharged at the bare-`AdjMatrix` level with **no** scheme
-structure. The abstract `IsLarge : Nat → Prop` is the asymptotic super-polynomiality citation, carried as a
-parameter and **never concretized** (largeness stays the abstract notion `IsLargeScheme` mirrors).
-
-The split is the honest one (PP3's reword, `docs/chain-descent-fusion-battery-plan.md` §1):
-* `isLargeAutP_of_isLargeProd` — the order identity `|Aut^P| = ∏ orbit-sizes` is **unconditional**
-  (`card_autP_eq_prod_of_base`, true for any graph including `K_n`), so largeness of the product transports
-  to largeness of the group with no `NoFusion`;
-* `isLargeAutP_of_noFusion` — `NoFusion` is what makes the orbit-size product the **harvest's own output**:
-  the symmetry-only harvest reproduces `Aut^P` exactly (`autP_reproduced_of_noFusion`), so largeness
-  *observed on the harvest* (`closure gens`) certifies the true group's largeness. This is the precise sense
-  in which largeness is **derived from the witness** rather than proved — no Babai, no WL-dimension boundary.
-
-The scheme-typed `LargenessBridge` itself is discharged from these below (`largenessBridge_viaHarvest`),
-with `schemeAdj` faithfully encoding a scheme as a labelled graph; the core here owns no scheme. -/
-
-/-- **Order-transport: a large orbit-product ⟹ a large `Aut(G)^P` (unconditional).** Largeness of the
-basic-orbit-size product transports to largeness of the `P`-preserving automorphism group via the landed
-order identity `card_autP_eq_prod_of_base`. No `NoFusion` — the identity holds for every graph. The abstract
-`IsLarge` is the super-polynomiality citation. -/
-theorem isLargeAutP_of_isLargeProd {IsLarge : Nat → Prop} (bs : List (Fin n))
-    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅))
-    (hprod : IsLarge (orbitSizeProd adj P bs ∅)) :
-    IsLarge (Nat.card (StabilizerAt adj P ∅)) := by
-  rw [card_autP_eq_prod_of_base bs hbase]; exact hprod
-
-/-- **Largeness read off the no-fusion harvest (the graph-side `LargenessBridge` core, modulo `NoFusion`).**
-Under `NoFusion` with a terminal base, the symmetry-only / defer-all-reals harvest reproduces `Aut(G)^P`
-exactly (`autP_reproduced_of_noFusion`: `closure gens = StabilizerAt adj P ∅`), so largeness *observed on the
-harvest's own output* `closure gens` certifies largeness of the true group. The mechanical content of the
-no-fusion track: the harvest order is a lower bound that `NoFusion` promotes to the group order — no Babai,
-no WL-dimension boundary. The genuinely substrate-conditional inputs (that `NoFusion` holds and that the
-harvest is large) are the *hypotheses*, exactly as they should be. -/
-theorem isLargeAutP_of_noFusion {IsLarge : Nat → Prop} {gens : Set (Equiv.Perm (Fin n))}
-    (bs : List (Fin n))
-    (hsound : ∀ g ∈ gens, g ∈ StabilizerAt adj P ∅)
-    (hnf : NoFusion adj P gens ∅)
-    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) ∅))
-    (hharvest : IsLarge (Nat.card (Subgroup.closure gens))) :
-    IsLarge (Nat.card (StabilizerAt adj P ∅)) := by
-  obtain ⟨hclo, _⟩ := autP_reproduced_of_noFusion bs hsound hnf hbase
-  rw [← hclo]; exact hharvest
 
 /-- **De-classed coverage — `CoversOrbits` from an exponent-2 residual.** If the residual group at `S` is
 involutive (`ResidualInvolutive`, hence at every deeper node by `residualInvolutive_mono`), the generating set
@@ -3125,25 +2961,22 @@ theorem lockstepExpand_forcedExpand (adj : AdjMatrix n) (P₀ : PMatrix n) (χι
   unfold forcedExpand
   rw [Finset.image_insert, ← movedSet_image hg hgP, Finset.image_insert, hDfix]
 
-/-! ### Discharging the scheme-typed `LargenessBridge` modulo `NoFusion`
+/-! ### The scheme-as-labelled-graph bridge — `SchemeAutGroup` as a graph stabilizer
 
-`LargenessBridge` (`Scheme.lean §12.1`) is stated over bare `SchurianScheme`, which carries no `AdjMatrix`.
-Here it is **discharged** (turned from a carried hypothesis into a proved theorem for concrete,
-descent-observable predicates) by faithfully encoding a scheme as a *labelled* graph and reducing to the
-class-agnostic core `isLargeAutP_of_noFusion`.
+The seal capstones live on bare `SchurianScheme` (no `AdjMatrix`), but the cross-branch harvest and the
+`LargenessBridge` (`Scheme.lean §12.1`) are graph-side. `schemeAdj` faithfully encodes a scheme as a *labelled*
+graph, bridging the two:
 
 * `schemeAdj` encodes `S` as the labelled adjacency `(v, w) ↦ (relOfPair v w).val` — a single graph whose
   edge labels are the relation indices, so `IsAut` on it coincides exactly with `IsSchemeAut`
   (`isAut_schemeAdj_iff`); hence `StabilizerAt (schemeAdj S) ⊥ ∅ = SchemeAutGroup S`
   (`stabilizerAt_schemeAdj_empty_eq`, trivial all-`unknown` `P`).
-* `IsLargeSchemeViaAut`/`NonCascadeViaHarvest` are the concrete instantiations: largeness is
-  super-polynomiality of `|SchemeAutGroup|` (the genuine Cameron driver), and non-cascade is the
-  *descent observable* "the defer-all-reals harvest reproduced a large group under `NoFusion`".
-* `largenessBridge_viaHarvest` proves `LargenessBridge` between them — so the substrate-conditional content
-  (`NoFusion` + a large harvest) sits as an **explicit antecedent**, not a free-floating implication.
-* `exhaustiveObstruction_scheme_of_harvest` reaches the §12 capstone with the bridge **discharged**: only
-  the cited `PrimitiveCCClassification` (Babai/Sun–Wilmes) and the battery-validated `NoFusion` antecedent
-  remain. The abstract `IsLarge : Nat → Prop` (super-polynomiality citation) is never concretized. -/
+* `IsLargeSchemeViaAut` is the concrete largeness predicate: super-polynomiality of `|SchemeAutGroup|` (the
+  genuine Cameron driver). The seal capstones instantiate the abstract `NonCascade`/`IsLargeScheme` at this
+  predicate with the **identity** `LargenessBridge` (`fun _ _ h => h`): largeness is *carried* honestly, not
+  fake-"derived" — `¬ IsLargeSchemeViaAut` = "small" is the cascade branch's antecedent. (The earlier
+  `NoFusion`/`largenessBridge_viaHarvest` "derivation" was orbit-level **vacuous** — seal-handoff §2–§3 — and
+  has been excised; the abstract `IsLarge : Nat → Prop` super-polynomiality citation is never concretized.) -/
 
 /-- **A scheme as a labelled graph.** Encodes `S` into a single `AdjMatrix` whose entry `(v, w)` is the
 index of the relation containing `(v, w)`. The labels make graph automorphisms of `schemeAdj S` coincide
@@ -3184,49 +3017,6 @@ group `SchemeAutGroup` has super-polynomial order, with `IsLarge : Nat → Prop`
 citation. The instantiation of the §12 `IsLargeScheme` parameter the bridge discharges into. -/
 def IsLargeSchemeViaAut (IsLarge : Nat → Prop) : ∀ (m : Nat), SchurianScheme m → Prop :=
   fun _ S => IsLarge (Nat.card S.toAssociationScheme.SchemeAutGroup)
-
-/-- **Concrete non-cascade predicate (the descent observable).** A scheme is non-cascade when the
-defer-all-reals harvest on its labelled encoding reproduced a *large* group under `NoFusion` — i.e. there is
-a sound, no-fusion, base-terminating harvest `gens` whose own order is large. This packages the
-substrate-conditional content (`NoFusion` + a large harvest) as an explicit, battery-validated antecedent. -/
-def NonCascadeViaHarvest (IsLarge : Nat → Prop) : ∀ (m : Nat), SchurianScheme m → Prop :=
-  fun m S => ∃ (gens : Set (Equiv.Perm (Fin m))) (bs : List (Fin m)),
-    (∀ g ∈ gens, g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
-      NoFusion (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens ∅ ∧
-      IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
-        (bs.foldl (fun s b => insert b s) ∅) ∧
-      IsLarge (Nat.card (Subgroup.closure gens))
-
-/-- **The `LargenessBridge` discharged modulo `NoFusion`.** For the concrete predicates above,
-`NonCascade ⟹ IsLargeScheme` is now a *theorem* (no longer a carried hypothesis): the no-fusion harvest
-reproduces `SchemeAutGroup` exactly (`isLargeAutP_of_noFusion` + `stabilizerAt_schemeAdj_empty_eq`), so a
-large harvest certifies a large scheme group. The genuinely-open content is whether `NonCascadeViaHarvest`
-holds (the `NoFusion` witness the battery validates), not the bridge itself. -/
-theorem largenessBridge_viaHarvest (IsLarge : Nat → Prop) :
-    LargenessBridge (NonCascadeViaHarvest IsLarge) (IsLargeSchemeViaAut IsLarge) := by
-  intro m S hnc
-  obtain ⟨gens, bs, hsound, hnf, hbase, hharvest⟩ := hnc
-  have h := isLargeAutP_of_noFusion (IsLarge := IsLarge) bs hsound hnf hbase hharvest
-  rw [stabilizerAt_schemeAdj_empty_eq] at h
-  exact h
-
-/-- **EOL capstone with the largeness bridge discharged.** `exhaustiveObstruction_scheme_of_nonCascade`
-specialised to the concrete descent-observable predicates, with `LargenessBridge` supplied by
-`largenessBridge_viaHarvest` rather than carried. A primitive, CC-rank-≥-3 schurian scheme whose
-defer-all-reals harvest reproduces a large group under `NoFusion` is a Cameron scheme — modulo only the
-cited `PrimitiveCCClassification` and the (explicit, battery-validated) `NoFusion` antecedent inside
-`NonCascadeViaHarvest`. Largeness is no longer a free hypothesis; it is derived from the harvest. -/
-theorem exhaustiveObstruction_scheme_of_harvest {m : Nat} {IsLarge : Nat → Prop}
-    {IsCameronScheme : ∀ (k : Nat), SchurianScheme k → Prop}
-    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
-    (S : SchurianScheme m)
-    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
-    (hprim : S.toAssociationScheme.IsPrimitive)
-    (hrank : 2 ≤ S.rank)
-    (hnc : NonCascadeViaHarvest IsLarge m S) :
-    IsCameronScheme m S :=
-  exhaustiveObstruction_scheme_of_nonCascade hClassify (largenessBridge_viaHarvest IsLarge)
-    S hne hprim hrank hnc
 
 /-! ### The oracle-capability seal, assembled — "reaches a rigid or Cameron residual"
 
@@ -3269,24 +3059,6 @@ theorem reachesRigidOrCameron {n : Nat}
   · exact Or.inl (hImprimitive h)
   · exact Or.inl (hCascade h)
   · exact Or.inr h
-
-/-- **The seal capstone (headline): largeness bridge discharged.** `reachesRigidOrCameron` with the
-`LargenessBridge` supplied by the landed `largenessBridge_viaHarvest` (so largeness is derived from the
-no-fusion harvest, not carried). The remaining free inputs are then **exactly** the honest remainder: the cited
-`PrimitiveCCClassification` (Babai/Sun–Wilmes), the cascade-recovery reduction `hCascade` (leg A, well-supported),
-and the primitivity reduction `hImprimitive` (the one open in-scope gap). `IsLarge : Nat → Prop` stays the
-abstract super-polynomiality citation. -/
-theorem reachesRigidOrCameron_viaHarvest {n : Nat} {IsLarge : Nat → Prop}
-    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
-    {ReachesRigid : ∀ (m : Nat), SchurianScheme m → Prop}
-    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
-    (S : SchurianScheme n)
-    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
-    (hrank : 2 ≤ S.rank)
-    (hCascade : ¬ NonCascadeViaHarvest IsLarge n S → ReachesRigid n S)
-    (hImprimitive : ¬ S.toAssociationScheme.IsPrimitive → ReachesRigid n S) :
-    ReachesRigid n S ∨ IsCameronScheme n S :=
-  reachesRigidOrCameron hClassify (largenessBridge_viaHarvest IsLarge) S hne hrank hCascade hImprimitive
 
 /-! ### The seal's rigid side, concretely — the NON-VACUOUS recovery predicate
 
@@ -3382,7 +3154,7 @@ theorem reachesRigidOrCameron_viaRecovery {n : Nat} {IsLarge : Nat → Prop}
     (S : SchurianScheme n)
     (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
     (hrank : 2 ≤ S.rank)
-    (hCascadeHarvest : ¬ NonCascadeViaHarvest IsLarge n S →
+    (hCascadeHarvest : ¬ IsLargeSchemeViaAut IsLarge n S →
         ∃ (gens : Set (Equiv.Perm (Fin n))) (bs : List (Fin n)),
           (∀ g ∈ gens,
               g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
@@ -3409,8 +3181,8 @@ theorem reachesRigidOrCameron_viaRecovery {n : Nat} {IsLarge : Nat → Prop}
           IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
             (bs.foldl (fun s b => insert b s) ∅)) :
     SchemeRecovered n S ∨ IsCameronScheme n S := by
-  refine reachesRigidOrCameron_viaHarvest (ReachesRigid := SchemeRecovered)
-    hClassify S hne hrank ?_ ?_
+  refine reachesRigidOrCameron (NonCascade := IsLargeSchemeViaAut IsLarge)
+    (ReachesRigid := SchemeRecovered) hClassify (fun _ _ h => h) S hne hrank ?_ ?_
   · intro hnc
     obtain ⟨gens, bs, hsound, hreal, hbase⟩ := hCascadeHarvest hnc
     exact schemeRecovered_of_visibleRealizers S bs hsound hreal hbase
@@ -3490,7 +3262,7 @@ theorem reachesRigidOrCameron_viaRecoveryOrAbelian {n : Nat} {IsLarge : Nat → 
     (S : SchurianScheme n)
     (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
     (hrank : 2 ≤ S.rank)
-    (hCascade : ¬ NonCascadeViaHarvest IsLarge n S →
+    (hCascade : ¬ IsLargeSchemeViaAut IsLarge n S →
         SchemeRecovered n S ∨
         (ResidualAbelian (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅ ∧
           ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅))
@@ -3499,9 +3271,9 @@ theorem reachesRigidOrCameron_viaRecoveryOrAbelian {n : Nat} {IsLarge : Nat → 
         (ResidualAbelian (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅ ∧
           ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅)) :
     (SchemeRecovered n S ∨ AbelianConsumed n S) ∨ IsCameronScheme n S := by
-  refine reachesRigidOrCameron_viaHarvest
+  refine reachesRigidOrCameron (NonCascade := IsLargeSchemeViaAut IsLarge)
     (ReachesRigid := fun m S => SchemeRecovered m S ∨ AbelianConsumed m S)
-    hClassify S hne hrank ?_ ?_
+    hClassify (fun _ _ h => h) S hne hrank ?_ ?_
   · intro hnc
     rcases hCascade hnc with hrec | ⟨hab, hnb⟩
     · exact Or.inl hrec
@@ -3595,11 +3367,11 @@ theorem reachesRigidOrCameron_viaDepthRecovery {n : Nat} {IsLarge : Nat → Prop
     (S : SchurianScheme n)
     (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
     (hrank : 2 ≤ S.rank)
-    (hCascade : ¬ NonCascadeViaHarvest IsLarge n S → SchemeRecoveredByDepth n S bound)
+    (hCascade : ¬ IsLargeSchemeViaAut IsLarge n S → SchemeRecoveredByDepth n S bound)
     (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeRecoveredByDepth n S bound) :
     SchemeRecoveredByDepth n S bound ∨ IsCameronScheme n S :=
-  reachesRigidOrCameron_viaHarvest
+  reachesRigidOrCameron (NonCascade := IsLargeSchemeViaAut IsLarge)
     (ReachesRigid := fun m S => SchemeRecoveredByDepth m S bound)
-    hClassify S hne hrank hCascade hImprim
+    hClassify (fun _ _ h => h) S hne hrank hCascade hImprim
 
 end ChainDescent
