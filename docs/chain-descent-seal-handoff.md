@@ -431,14 +431,40 @@ The engine ("hiding requires external decisions"): to stay concealed through `k`
 B); the non-abelian part has no stackable concealment (→ leg A recovers it); the unstackable residue is asymmetric (→
 IR-core).** That is A4.
 
-**Why this is the payoff: the crux becomes the landed leg-B core, not the open WL-characterization.** "Concealment ⟹
-abelian" has its *group side already proved* — `not_comm_of_orbit_disagree` (non-abelian ⟹ candidates disagree on the
-orbit). The missing half is the **counting realization**: *candidate-disagreement ⟹ a 1-WL-visible intersection-number
-asymmetry*. Two faces, both on landed machinery: **(group)** independently-stackable hidden generators commute;
-**(counting)** disagreement leaves an asymmetric count (subject to the C₇ caution — not algebra-commutativity).
-**Concrete first lemma (the two-vantage step):** take `s = g⁻¹h ∈ Stab(e)` (a non-trivial stabilizer element from a
-non-abelian decision) and prove that `s` having non-trivial support forces an **asymmetric suborbit count from a second
-base point** — the precise "a second vantage detects the disagreement" the cyclotomic `base+2` data hints at.
+**⚠️ CORRECTION (2026-06-07, working the two-vantage step) — the concealment is the separability gap, NOT group
+non-abelianness; do not anchor on `not_comm_of_orbit_disagree`.** Two findings from making the step precise:
+- **The recovery gap reduces to `¬EdgeGenerates`, via landed `vProfile_iff_schemeOrbit`** (`Scheme.lean:576`): for a
+  schurian scheme `relOfPair(e,·)`-classes **are** the `Stab(e)`-orbits, so from an individualized base there is **no
+  orbit-vs-cell gap** — recovery fails *only* because the descent's edge relation `J` cannot reconstruct `relOfPair` by
+  counting (`¬EdgeGenerates` = the separability gap `Ĝ⊋G`).
+- **So `Stab(e)≠1` (the non-abelian decision) is the WRONG object** — it is normal suborbit structure (a suborbit of
+  size > 1), produces no asymmetry, and `not_comm_of_orbit_disagree` proves *non-abelian ⟹ **not leg-B*** (¬D2 / not the
+  unique-candidate case), which is the **consumption** statement, **not** the self-detection statement "non-abelian ⟹
+  leg-A **recovers**." C₇ confirms: `D₇` non-abelian, `Stab(e)=Z₂≠1`, yet it recovers — because its edge *generates*
+  (metric), nothing to do with `Stab(e)`.
+
+**The corrected two-vantage step (multi-vantage isolation).** The step is genuinely **base + O(1)** (cyclotomic depth-4 =
+base-2 + 2), in the `IsoPinned`/`relIsolatedAt_succ` engine: two relations `R_i,R_j` with the same single-base signature
+(the gap) are separated by a second base `e'` iff a **two-base intersection count** distinguishes them
+(`#{z : relOfPair(e,z)=R_i ∧ relOfPair(e',z)∈J} ≠ …=R_j…`). The gap **survives all bases** iff `R_i,R_j` are
+**two-base-twins**. Splits into: **(realization, provable)** a distinguishing two-base count ⟹ `{e,e'}`-individualization
+separates them (the two-base analogue of `Depth2Det`); **(existence, the crux)** a primitive scheme's gap is broken at
+O(1) extra bases.
+
+**Convergence — conservation = Thread T2 = P3 (one crux about the scheme's character structure).** The "concealment is
+abelian" of the conservation route is correct, but **"abelian" means the gap's support is a linear / character
+degeneracy (a block), NOT that the group `G` is abelian.** A gap that survives every base is **base-homogeneous =
+supported by an invariant subspace / block system = imprimitive**; **primitive forbids it.** So the lone crux is:
+> **primitive schurian ⟹ the separability gap is broken at O(1) extra bases** (`EdgeGenerates` at base+O(1) = bounded
+> `s(C)`), because the gap's only base-homogeneous support is a block, which primitivity forbids.
+This is *exactly* Thread T2 (affine: invariant subspace = block) and P3 (deadlock fusion = `ClosedSubset`). The
+conservation route, T2, and P3 are **the same statement**.
+
+**Concrete next lemma (Lean-ready, the sharpest form of P3):** *a relation-pair that is a two-base-twin at **every** base
+pair generates a non-trivial `ClosedSubset`* — i.e. **base-homogeneous gap ⟹ imprimitive**, stated against `IsoPinned` +
+`ClosedSubset` + `IsPrimitive`. Proving it closes the affine floor and the primitive floor together. The supporting
+**realization lemma** (two-base distinguishing count ⟹ pair-individualization separates) is the low-risk warm-up, on the
+`Depth2Det`/`schemePart_at` machinery.
 
 **THE THREAD BOARD (what's worth doing, by tier — regardless of immediacy).**
 - **Tier 1 — bankable slice-closures (provable now, shrink the wall but don't close it):**
@@ -446,12 +472,16 @@ base point** — the precise "a second vantage detects the disagreement" the cyc
     citation-free. Most actionable. The conservation route now shows the abelian-concealable part *is* leg B.
   - **(b) G1a — depth-graded recovery** (`RecoverableByDepth` at base+O(1)). Captures CFI/Shrikhande; now the *same*
     target as the primitive-floor self-detection.
-- **Tier 2 — the G2 attack (the only route that actually closes the seal):**
-  - **(c) The conservation route** — prove "concealment is abelian" via the counting realization of
-    `not_comm_of_orbit_disagree`; **first lemma = the two-vantage step** (above). Project-internal, on landed L3.
-  - **(d) Thread T2** — primitive ⟹ separable via linear-coupling = block; **verify the wreath-characterization
-    literature dependency** (could make affine-primitive ⟹ separable a near-theorem by citation).
-  - **(e) The P1–P4 / Gate-G proof** of "primitive ⟹ separable" (P3 = the crux).
+- **Tier 2 — the G2 attack (the only route that actually closes the seal). The conservation route, Thread T2, and P3
+  CONVERGE to one crux** (the corrected two-vantage analysis above): **base-homogeneous separability gap ⟹ imprimitive;
+  primitive ⟹ gap broken at O(1) extra bases = bounded `s(C)`.** It is about the scheme's character/eigenvalue structure,
+  **not** group commutativity (`not_comm_of_orbit_disagree` is ¬leg-B, a *different* statement — do not anchor on it).
+  - **(c) The sharpest-form P3 lemma (the target):** *a relation-pair that is a two-base-twin at every base pair generates
+    a non-trivial `ClosedSubset`* — base-homogeneous gap ⟹ imprimitive (against `IsoPinned`/`ClosedSubset`/`IsPrimitive`).
+    Warm-up: the **realization lemma** (two-base distinguishing count ⟹ pair-individualization separates, on `Depth2Det`).
+  - **(d) Thread T2** — the affine instance of (c): primitive ⟹ separable via invariant-subspace = block; **verify the
+    wreath-characterization literature dependency** (could make affine-primitive ⟹ separable a near-theorem by citation).
+  - **(e) The P1–P4 / Gate-G proof** of "primitive ⟹ separable" — (c) is its crux P3.
 - **Tier 3 — decisive cheap experiments:**
   - **(f) The E₁₆/E₃₂ test** — are the non-separable schurian S-rings over `F₂⁴/F₂⁵` **imprimitive** (supports
     primitive⟹separable / P3) or **primitive + non-abelian** (a 16/32-vertex G2-B counterexample)? The sharpest
