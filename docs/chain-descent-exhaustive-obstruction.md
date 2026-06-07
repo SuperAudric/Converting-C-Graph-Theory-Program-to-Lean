@@ -916,6 +916,35 @@ future pass: WL-dimension of general *non-abelian* Cayley graphs (the natural ho
 by the corpus), and whether an imprimitive-scheme `s(C)` reduction-to-constituents theorem exists (it was sought
 and *not located*).
 
+**UPDATE (2026-06-07) — the separability deep-research pass: §0.7.6 CONFIRMED and sharpened.** A focused second
+literature pass (99 agents, 24/25 claims confirmed under 3-vote adversarial verification, all primary sources)
+targeted the separability landscape for *homogeneous* schemes — to test a tentative reorientation (that imprimitive
+schemes are citably-recoverable and the leak is purely primitive). **The reorientation was refuted; §0.7.6's "open,
+not citable" verdict stands, now with a finer map:**
+- **Evdokimov–Ponomarenko's `s(C) ≤ 2` is `imprimitive *3/2-homogeneous*`-only** (Thm 5.1, verified verbatim), a
+  narrow proper subclass — *not* all imprimitive homogeneous schemes. So imprimitivity does **not** imply low `s(C)`.
+- **General imprimitive homogeneous *schurian* schemes reach unbounded `s(C)`**: circulants have WL-dim `≥ c√log n`
+  for infinitely many `n` (Wu–Ren–Ponomarenko 2025, arXiv:2507.10116; prime-power order is the bounded exception,
+  `≤3`, Ponomarenko 2206.15028). **But these are abelian** (Cayley over cyclic) ⟹ **leg B**, not a non-abelian leak —
+  answering the "WL-dimension of Cayley graphs" sub-question: the *abelian* Cayley high-WL case is leg B, and the
+  *non-abelian* Cayley case remains the uncovered would-be-leak home.
+- **No citation for the quantitative target.** Babai/Sun–Wilmes/Kivva bound `|Aut|` and **minimal degree**, *not*
+  `s(C)` (RQ3) — the `|Aut| ↔ s(C)` link is heuristic, not theorem-level. "Non-abelian coupling ⟹ bounded WL-dim" is
+  an explicit "almost all known" hedge in Lichter–Rassmann–Schweitzer (2402.11531), **not a theorem** (RQ5). And
+  **multipedes are rigid (trivial Aut) yet have arbitrarily high `s(C)`** — high `s(C)` is fully decoupled from
+  symmetry, so self-detection cannot be a pure group statement.
+- **Separability ⊥ schurity are independent** (Ryabov 2005.13887: nonschurian separable schemes exist); the
+  abelian-`p`-group separability boundary is fully classified (separable iff cyclic, `C₂×C_{2^k}`, `C₃×C_{3^k}`,
+  `C₂³`, or `C₃³` — Ryabov 1709.03937/1812.11313), so `F₂⁴`, `F₂⁵` are non-separable but **multi-fiber** (not a
+  homogeneous primitive witness).
+
+**Net:** after **leg B** removes the abelian slice (where *every* known unbounded-`s(C)` example lives), the residual
+leak funnels to **`hImprimitive`'s non-abelian core = G2-B = primitive non-abelian high-`s(C)`** — open, witnessless,
+uncitable, exactly as this section concluded. The decisive cheap falsifier is now the **Hanaki–Miyamoto
+small-primitive-scheme catalogue** (order 16: 6 primitive, 16 non-Schurian), *not* the `E₁₆/E₃₂` examples (multi-fiber).
+Full decision-mapped synthesis: [`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md) STATUS rev. 3 +
+§G2 attack board.
+
 ---
 
 ## 1. Statement of the lemma (mechanism-pinned)

@@ -1,9 +1,29 @@
 # Chain descent — THE SEAL HANDOFF: current state and the gaps to "consumed-or-Cameron"
 
-> **STATUS (2026-06-07, rev. 2): this is the authoritative handoff for the oracle-capability seal.** It **subsumes**
+> **STATUS (2026-06-07, rev. 3): this is the authoritative handoff for the oracle-capability seal.** It **subsumes**
 > [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) (Route B is now one *partial* attack on
 > one gap, G2-A below, and its capstones were found vacuous — see §3). Read this doc to pick up *any* of the
 > open gaps. The goal is to close all of them, including pushing through the GI-adjacent frontier (G2).
+>
+> **Rev. 3 (the separability deep-research pass, 2026-06-07) RESOLVES the crux-direction question.** A focused
+> literature pass (99 agents, 24/25 claims confirmed under 3-vote adversarial verification, all primary sources;
+> full record in [exhaustive-obstruction §0.7.6](./chain-descent-exhaustive-obstruction.md), and the §G2 attack
+> board below) settles the "is the crux backwards?" caution that headed §G2 in rev. 2:
+> - **The "imprimitive ⟹ recovers" reorientation is REFUTED.** Evdokimov–Ponomarenko's `s(C) ≤ 2` covers **only
+>   imprimitive *3/2-homogeneous* schemes** (a narrow proper subclass), NOT all imprimitive homogeneous schemes.
+>   General imprimitive homogeneous *schurian* schemes reach **unbounded** `s(C)` (circulants, WL-dim `≥ c√log n`,
+>   Wu–Ren–Ponomarenko 2025). So §0.7.6 stands: imprimitive is **not** citably-recoverable.
+> - **The high-`s(C)` region splits three ways** (the refined map): **abelian** — all known unbounded-WL examples
+>   (circulants) live here → **leg B / G1b, citation-free**; **non-abelian primitive** → **G2-B, genuinely open, no
+>   known witness, no citable bound**; **non-abelian imprimitive** → reduces via the block tower → G2-B; **rigid**
+>   (multipede — high `s(C)` with *trivial* Aut) → IR-core, outside the seal.
+> - **There is no citation for the self-detection target.** The Babai/Sun–Wilmes/Kivva structure theory bounds
+>   `|Aut|` and *minimal degree*, **not** `s(C)` (RQ3); "non-abelian coupling ⟹ bounded WL-dim" is an empirical
+>   "almost all known" hedge, **not a theorem** (RQ5). So G2-B is **project-internal-or-carried**, never cite.
+>
+> The net: after G1b removes the abelian slice (where *every known* high-`s(C)` example sits), the entire residual
+> leak funnels to **G2-B (primitive non-abelian high-`s(C)`)** — open, witnessless, uncitable. The seal's honest
+> end-state is a conditional theorem `modulo {G3 cited classification + G2-B}`.
 >
 > **Rev. 2 (the closure-logic pass) folds in three findings — read §4.0 first.** (a) **No re-keying of the rigid
 > predicate closes the seal** — closure is gated on the leaks (G2) under *any* keying (§4.0). (b) The tempting
@@ -228,7 +248,7 @@ not on an unconstrained `∃ gens`. The discretizing-oracle limit (§6) says mul
 *cross-branch* harvest, so leg B's consumption witness for `tw ≥ 2` is the Part-A harvest at the recovery depth,
 not a within-cell read — keep that in scope.
 
-> **⚠️ Do NOT use `Findable`/`FindableWithin` as the leg-B vehicle (rev. 2 finding).** The existing D1/D2 screen
+> **CAUTION — Do NOT use `Findable`/`FindableWithin` as the leg-B vehicle (rev. 2 finding).** The existing D1/D2 screen
 > (`Cascade.lean`, `inductive Findable … | recovered | abelian | step`) looks like the natural object, but it
 > **conflates leg B into leg A**: `FindableWithin`'s `abelian` leg carries a `RecoverableByDepth b` field, which is
 > `∃ S, S.card ≤ b ∧ CellsAreOrbits S` = **visible (1-WL) recovery** at depth `b` — exactly what genuinely-hidden
@@ -267,6 +287,20 @@ which (using `non-Cameron ⟹ ¬primitive ∨ small`, from the classification) s
   (`F_p^d`, `d=O(1)`) and a few classical subset/flag actions. So G2-B's only live family is bounded-dim affine +
   a handful of classical cases. The full anatomy (why it's open, the affine reduction, the one theorem-route) is
   the **§G2 anatomy** subsection below. Genuinely open.
+
+**Research-pass refinement (2026-06-07, the separability deep-research; STATUS rev. 3).** The verified literature
+sharpens both quadrants:
+- **G2-A is not citably-recoverable** (the rev. 2 "imprimitive ⟹ s≤2 ⟹ recovers" hope is refuted: `s(C)≤2` is
+  *3/2-homogeneous*-only; general imprimitive homogeneous schurian schemes reach unbounded `s(C)`). But the unbounded
+  examples are **abelian** (circulants) ⟹ **leg B (G1b)**, not a G2-A leak. So G2-A's genuine residue is *non-abelian*
+  imprimitive, which the block tower reduces to G2-B. G2-A is a real but **derived** gap — closed once leg B + G2-B
+  are.
+- **G2-B has no known witness and no citable bound.** RQ2: no explicit primitive homogeneous schurian scheme with
+  unbounded `s(C)` exists in the literature (so "primitive ⟹ separable" is unrefuted, just unproven). RQ3: the
+  Babai/Sun–Wilmes/Kivva theory bounds `|Aut|` and *minimal degree*, **not** `s(C)` — the candidate-narrowing above
+  (small ⟹ small base ⟹ bounded-dim affine + classical) stands as *heuristic*, but it is **not** a `s(C)` bound.
+  RQ5: the self-detection lemma is uncitable. So G2-B is **project-internal-or-carried**, and the cheap decisive
+  falsifier is the **Hanaki–Miyamoto small-primitive-scheme catalogue** (order 16: 6 primitive, 16 non-Schurian).
 
 **The well-foundedness that bounds G2-A** (do not mistake the recursion for infinite regress): an imprimitive
 scheme decomposes into a **quotient** (`m < n` blocks) + **fiber** (`|B| < n` points), both strictly smaller and
@@ -383,22 +417,36 @@ yet recovers. The target must be **bounded-depth recovery**: **primitive schuria
 — the same statement.
 
 **The clean theorem + piece decomposition.** The counting route's target is **determinacy**, not asymmetry:
-non-recovery ⟺ the structure constants fail to determine the scheme = **non-separable** (high `s(C)`). Literature pins
-it: **separable ⟹ WL-dim ≤ 2 (recovers)** ([1903.00409](https://arxiv.org/pdf/1903.00409)); **non-separability of
-schurian S-rings = generalized-wreath = imprimitive** ([1709.03937](https://arxiv.org/pdf/1709.03937)); the *only*
-bounded-rank elementary-abelian exceptions are **E₁₆=F₂⁴, E₃₂=F₂⁵** (concrete, 16/32 points). So the clean target is
-**primitive schurian ⟹ separable ⟹ `EdgeGenerates` ⟹ recovers**, which **collapses all leaks onto G2-A (the block
-tower)** plus a primitive floor that recovers. Pieces (mapped to `Scheme.lean`):
+non-recovery ⟺ the structure constants fail to determine the scheme = **non-separable** (high `s(C)`). The target
+statement is **primitive schurian ⟹ separable ⟹ `EdgeGenerates` ⟹ recovers**, decomposed into pieces P1–P4 below.
+
+**CORRECTED (2026-06-07, separability deep-research) — the "wreath ⟹ imprimitive" support for P3 is abelian-specific,
+NOT general; "primitive ⟹ separable" is a CONJECTURE, not a citable consequence, and the leaks do NOT collapse onto
+G2-A.** The rev. 3 pass checked the literature this paragraph leaned on:
+- **`non-separability = generalized-wreath = imprimitive` is an abelian-`p`-group result, not general.** Ryabov
+  ([1709.03937](https://arxiv.org/pdf/1709.03937), [1812.11313]) classifies separability for *abelian p-group* S-rings
+  (separable iff cyclic, `C₂×C_{2^k}`, `C₃×C_{3^k}`, `C₂³`, or `C₃³`) — so `F₂⁴`, `F₂⁵` are *non*-separable, but this
+  is about abelian Cayley schemes, which are **leg B**, not the non-abelian primitive floor. There is **no theorem**
+  "non-separable schurian scheme ⟹ imprimitive" at the generality P3 needs (RQ1/RQ2).
+- **`E₁₆=F₂⁴ / E₃₂=F₂⁵` are multi-fiber, not homogeneous** — so they are *not* a homogeneous primitive G2-B witness;
+  they do not falsify "primitive ⟹ separable" for schemes.
+- Consequently **the primitive floor is the genuine leak (G2-B), not a recovered base case** — "collapses all leaks
+  onto G2-A" was the refuted reorientation. The honest collapse is the opposite: G2-A's *non-abelian* residue reduces
+  (via the block tower) onto **G2-B**, which is open.
+
+Pieces (mapped to `Scheme.lean`):
 
 | P | Statement | Status |
 |---|---|---|
 | **P1** | separable ⟺ `EdgeGenerates`/recovery | provable; engine landed (`theorem_2_HOR_of_edgeGenerates`) |
 | **P2** | ¬recovery ⟹ a proper WL-stable fusion `W` (isolation deadlock) | provable (`isolationStep` saturates below `EdgeGenerates`) |
-| **P3** | the deadlock fusion `W` is a `ClosedSubset` (block) ⟹ imprimitive | **CRUX = the project's Gate-G**, now with wreath-literature support + a finite test |
-| **P4** | primitive ⟹ no deadlock ⟹ recovers | follows P2+P3 |
+| **P3** | the deadlock fusion `W` is a `ClosedSubset` (block) ⟹ imprimitive | **CRUX = the project's Gate-G**; **NOT citable** (the wreath support is abelian-`p`-group-only, RQ1/RQ2) — project-internal counting proof, falsifier = the catalogue test |
+| **P4** | primitive ⟹ no deadlock ⟹ recovers | follows P2+P3 (i.e. *conditional on the open P3*) |
 
 **P3 is Gate-G.** The counting route reaches the project's existing Gate-G (exhaustive-obstruction §0.7.2) from the
-structure-constant side, now backed by the wreath literature and a concrete falsification (E₁₆/E₃₂).
+structure-constant side. The rev. 3 research confirms it is **genuinely open** — no general wreath theorem closes it
+(the support is abelian-`p`-group-specific), no known primitive homogeneous schurian counterexample refutes it, and
+the cheap falsifier is the Hanaki–Miyamoto small-primitive-scheme catalogue (not E₁₆, which is multi-fiber).
 
 **The C₇ correction (do NOT reintroduce the naive counting route).** "non-abelian ⟹ asymmetric intersection-number
 count" is **false**: a *symmetric* scheme has a **commutative** Bose–Mesner algebra (`p^k_{ij}=p^k_{ji}`) regardless of
@@ -406,13 +454,15 @@ the group — C₇'s scheme is symmetric/commutative though `D₇` is non-abelia
 So the counting route cannot key on algebra non-commutativity; the asymmetry (when present) is a *specific* count whose
 form varies (metric for C₇), and exhibiting it is the genuine work. Content = determinacy/separability, not commutativity.
 
-**Thread T2 — linear-coupling = block-system (the main provable thread).** A persistent (growing-depth) gap requires an
-**F₂-linear coupling** = a `G₀`-invariant subspace `W ⊆ V` = a **block system** ⟹ **imprimitive**. **Primitive (`G₀`
-irreducible) forbids it.** The cyclotomic case is the proof-of-concept: `Z₅` acts *irreducibly* on `F₂⁴`, so its only gap
-is the *bounded* Galois one (depth 4). This may be a **near-theorem for the affine case via the wreath literature**: if
-"non-separable schurian S-ring ⟹ proper `G₀`-invariant section," then `G₀` irreducible ⟹ separable ⟹ recovers.
-**Dependency to verify:** is the wreath characterization clean at the needed generality (not just order-4p/odd/p-group)?
-T2 generalizes off the affine case to *exactly* P3.
+**Thread T2 — linear-coupling = block-system (the affine instance of P3).** A persistent (growing-depth) gap requires an
+**F₂-linear coupling** = a `G₀`-invariant subspace `W ⊆ V` = a **block system** ⟹ **imprimitive**; **primitive (`G₀`
+irreducible) forbids it**. The cyclotomic case is the proof-of-concept: `Z₅` acts *irreducibly* on `F₂⁴`, so its only gap
+is the *bounded* Galois one (depth 4). The rev. 2 hope was a **near-theorem via the wreath literature** ("non-separable
+schurian S-ring ⟹ proper `G₀`-invariant section" ⟹ `G₀` irreducible ⟹ separable ⟹ recovers).
+**Dependency CHECKED (2026-06-07, negative).** The wreath = imprimitive characterization is **abelian-`p`-group-specific**
+(Ryabov 1709.03937/1812.11313), *not* clean at the schurian generality T2 needs — so there is **no citation** turning
+"affine-primitive ⟹ separable" into a near-theorem. T2 stays a project-internal thread = the affine instance of P3, not a
+citable shortcut.
 
 **The conservation route — the user's accounting instinct, made precise (the most promising attack).** A four-term
 conservation governs recovery depth:
@@ -431,7 +481,7 @@ The engine ("hiding requires external decisions"): to stay concealed through `k`
 B); the non-abelian part has no stackable concealment (→ leg A recovers it); the unstackable residue is asymmetric (→
 IR-core).** That is A4.
 
-**⚠️ CORRECTION (2026-06-07, working the two-vantage step) — the concealment is the separability gap, NOT group
+**CORRECTION (2026-06-07, working the two-vantage step) — the concealment is the separability gap, NOT group
 non-abelianness; do not anchor on `not_comm_of_orbit_disagree`.** Two findings from making the step precise:
 - **The recovery gap reduces to `¬EdgeGenerates`, via landed `vProfile_iff_schemeOrbit`** (`Scheme.lean:576`): for a
   schurian scheme `relOfPair(e,·)`-classes **are** the `Stab(e)`-orbits, so from an individualized base there is **no
@@ -470,22 +520,43 @@ is used only at depth 0) + `iterFrom_refines_schemePartFrom` (`iter[k] χ₀` re
 multi-base counting separation is realized as a warm-refinement split* — the easy half. The **crux remains** the converse
 (primitive ⟹ the gap is broken at base + O(1)).
 
-> **⚠️ MAJOR CAUTION (2026-06-07, citability check) — the crux direction above ("base-homogeneous gap ⟹ imprimitive",
-> "primitive ⟹ separable") is likely BACKWARDS; do NOT implement the point-twin / `ClosedSubset` lemma until this is
-> resolved.** A literature check found **Evdokimov–Ponomarenko (Sep./Schurity numbers of CCs, EJC 2000): an *imprimitive*
-> 3/2-homogeneous scheme has `s(C) ≤ 2`** — i.e. **imprimitive homogeneous schemes are *separable* (recover at depth 2)**.
-> The project's own **Shrikhande** (imprimitive, recovers at depth 2 — A2-iii) is exactly an `s(C)=2` witness. So
-> **non-recovery is a *primitive* phenomenon, not an imprimitive one** — the opposite of P3's "deadlock ⟹ imprimitive".
-> **Tentative reorientation (to confirm via deep-research before rewriting the gaps):** (i) **G2-A (imprimitive) likely
-> RECOVERS** by a *citable* `s(C) ≤ 2` (the block tower was addressing a recoverable case); (ii) **G2-B (primitive) is the
-> genuine and only homogeneous-scheme leak**; (iii) **"primitive ⟹ separable" is likely FALSE in general** (high-`s(C)`
-> lives on primitive schemes), so the real question is the *quantitative* one the program already named — *small / poly-Aut*
-> primitive homogeneous ⟹ bounded `s(C)`? The known non-separable small CCs (16 pts, fiber 4 = E₁₆) are **multi-fiber**
-> (not homogeneous), so they are not yet a G2-B witness. **Decisive next step:** a focused deep-research pass on the
-> separability landscape for *homogeneous* schemes (imprimitive ⟹ `s≤2` scope; primitive separability bounds; can a *small*
-> primitive homogeneous scheme be non-separable?) — this decides what is *citable* (G2-A ⟹ recovers) vs the genuine carried
-> leak, and whether the self-detection target needs re-pointing from "primitive ⟹ separable" to "*small* primitive ⟹
-> bounded `s(C)`". **Until confirmed, the realization lemma (above) stands (direction-agnostic); the crux lemma does not.**
+> **RESOLVED (2026-06-07, the separability deep-research pass).** The rev. 2 caution here — that the crux direction
+> ("base-homogeneous gap ⟹ imprimitive", "primitive ⟹ separable") was likely *backwards* — has been checked against
+> the primary literature (99 agents, 24/25 claims confirmed under 3-vote adversarial verification; full record in
+> [exhaustive-obstruction §0.7.6](./chain-descent-exhaustive-obstruction.md)). **The "imprimitive ⟹ recovers"
+> reorientation is REFUTED, and the prior `imprimitive`/`primitive` framing is replaced by a finer three-way map.**
+>
+> What the literature actually says:
+> - **Evdokimov–Ponomarenko's `s(C) ≤ 2` is `imprimitive *3/2-homogeneous*`-only** (Thm 5.1, verified verbatim — a
+>   narrow proper subclass: any two non-reflexive basis relations have equal degree), **not** all imprimitive
+>   homogeneous schemes. Shrikhande is a 3/2-homogeneous `s(C)=2` witness, *not* evidence that all imprimitive
+>   schemes recover.
+> - **General imprimitive homogeneous *schurian* schemes reach unbounded `s(C)`** — circulants (Cayley over cyclic,
+>   many imprimitive) have WL-dim `≥ c√log n` for infinitely many `n` (Wu–Ren–Ponomarenko 2025; prime-power order is
+>   the bounded exception, `≤3`). So **imprimitive is NOT citably-recoverable; §0.7.6 stands.**
+> - **But those unbounded examples are ABELIAN** (Cayley over cyclic) ⟹ consumed by **leg B**, not a non-abelian
+>   leak. So the high-`s(C)` region splits: **abelian → leg B (G1b)**; **non-abelian primitive → G2-B (open)**;
+>   **non-abelian imprimitive → block tower → G2-B**; **rigid (multipede) → IR-core**.
+> - **No citation exists for the self-detection target.** Babai/Sun–Wilmes/Kivva bound `|Aut|` and *minimal degree*,
+>   **not** `s(C)` (RQ3, high confidence); the link `|Aut| ↔ s(C)` is heuristic, not theorem-level. And "non-abelian
+>   coupling ⟹ bounded WL-dim" is an explicit "almost all known" hedge in Lichter–Rassmann–Schweitzer, **not a
+>   theorem** (RQ5). Multipedes (rigid, *trivial* Aut, arbitrarily high `s(C)`) prove high `s(C)` needs no symmetry
+>   at all — so self-detection cannot be a pure group/Aut statement.
+>
+> **Consequence for the crux lemma.** The P3 direction ("primitive ⟹ separable / recovers") is *not* backwards — it
+> is exactly the conjecture that G2-B is empty — but it is **not citable** and has **no known counterexample either**
+> (RQ2: no explicit primitive homogeneous schurian scheme with unbounded `s(C)` is known). So if pursued it is a
+> **project-internal counting proof with no citation safety net**, and the imprimitive case routes into it via the
+> block tower (do not re-frame it as "imprimitive recovers, cite it" — that was the refuted reorientation). **The
+> realization lemma (above) stands (direction-agnostic); the crux lemma is the genuine open G2-B / self-detection
+> target, project-internal-or-carried.**
+>
+> **The cheap decisive falsifier** (replaces the abandoned point-twin route, and is sharper than the affine probe):
+> the Hanaki–Miyamoto catalogue enumerates all association schemes with Schurian/primitive flags — **order 16 already
+> has 6 primitive + 16 non-Schurian schemes**, computable. Check whether any *small primitive homogeneous* scheme is
+> non-separable with small Aut: a witness is a 16-vertex seal counterexample (statement change); none is empirical
+> support for G2-B emptiness (justifies the internal proof). Note the `E₁₆=F₂⁴ / E₃₂=F₂⁵` examples are **multi-fiber**
+> (confirmed), so they are *not* a homogeneous G2-B witness — the catalogue, not E₁₆, is the falsifier.
 
 **THE THREAD BOARD (what's worth doing, by tier — regardless of immediacy).**
 - **Tier 1 — bankable slice-closures (provable now, shrink the wall but don't close it):**
@@ -497,28 +568,42 @@ multi-base counting separation is realized as a warm-refinement split* — the e
   CONVERGE to one crux** (the corrected two-vantage analysis above): **base-homogeneous separability gap ⟹ imprimitive;
   primitive ⟹ gap broken at O(1) extra bases = bounded `s(C)`.** It is about the scheme's character/eigenvalue structure,
   **not** group commutativity (`not_comm_of_orbit_disagree` is ¬leg-B, a *different* statement — do not anchor on it).
+  **Rev. 3: this crux is NOT citable** (no general wreath theorem; the support is abelian-`p`-group-only — RQ1/RQ2/RQ3),
+  and has **no known counterexample** — so it is a **project-internal counting proof**, the genuine G2-B / self-detection
+  target, with no citation safety net.
   - **(c) The sharpest-form P3 lemma (the target):** *a relation-pair that is a two-base-twin at every base pair generates
     a non-trivial `ClosedSubset`* — base-homogeneous gap ⟹ imprimitive (against `IsoPinned`/`ClosedSubset`/`IsPrimitive`).
     Warm-up **LANDED** (`Scheme.lean §10.3b`: `schemePartFrom` + `iterFrom_refines_schemePartFrom` +
-    `iterSet_refines_schemePartFrom`) — the multi-base counting partition is realized by warm refinement.
-  - **(d) Thread T2** — the affine instance of (c): primitive ⟹ separable via invariant-subspace = block; **verify the
-    wreath-characterization literature dependency** (could make affine-primitive ⟹ separable a near-theorem by citation).
-  - **(e) The P1–P4 / Gate-G proof** of "primitive ⟹ separable" — (c) is its crux P3.
+    `iterSet_refines_schemePartFrom`) — the multi-base counting partition is realized by warm refinement. The converse
+    (the crux) is the open conjecture; gate it behind the catalogue falsifier (f) before heavy Lean investment.
+  - **(d) Thread T2** — the affine instance of (c): primitive ⟹ separable via invariant-subspace = block. **Dependency
+    CHECKED negative (rev. 3):** the wreath = imprimitive characterization is abelian-`p`-group-only (Ryabov), *not* a
+    citable near-theorem at schurian generality. T2 is a project-internal thread, not a citation shortcut.
+  - **(e) The P1–P4 / Gate-G proof** of "primitive ⟹ separable" — (c) is its crux P3; open and uncitable (rev. 3).
 - **Tier 3 — decisive cheap experiments:**
-  - **(f) The E₁₆/E₃₂ test** — are the non-separable schurian S-rings over `F₂⁴/F₂⁵` **imprimitive** (supports
-    primitive⟹separable / P3) or **primitive + non-abelian** (a 16/32-vertex G2-B counterexample)? The sharpest
-    falsification; small and decisive.
+  - **(f) The Hanaki–Miyamoto catalogue test (the decisive falsifier; replaces the E₁₆/E₃₂ test).** RQ4 confirmed
+    `E₁₆=F₂⁴ / E₃₂=F₂⁵` are **multi-fiber, not homogeneous** — so they are *not* a homogeneous G2-B witness. The right
+    falsifier is the catalogue (math.shinshu-u.ac.jp/~hanaki/as/) with Schurian/primitive flags: **order 16 has 6
+    primitive + 16 non-Schurian schemes**. Check whether any *small primitive homogeneous* scheme is non-separable with
+    small Aut — a witness is a 16-vertex seal counterexample (statement change); none is empirical support for G2-B
+    emptiness. Cheaper and sharper than the affine probe.
   - **(g) Extend `AffineSchemeProbe.cs`** to **non-abelian irreducible `G₀`** (the actual A4 mechanism, not the Galois
     gap) and higher `d` — the undertested zone (the existing probe is abelian-`G₀`/Galois only).
 - **Tier 4 — doc-sync / record-keeping (the NoFusion over-claim):**
   - **(h) DONE (2026-06-07).** The NoFusion/largeness-derivation over-claim is **reconciled**: `largenessBridge_viaHarvest`
     is *tautological* (orbit-level vacuity, §2–§3), and the prose that claimed "largeness derived from the harvest" has
-    been corrected with ⚠️ banners in `PublicTheoremIndex.md` (the `NoFusion` family: `NoFusion`, `reproducesResidual_of_noFusion`,
+    been corrected with warning banners in `PublicTheoremIndex.md` (the `NoFusion` family: `NoFusion`, `reproducesResidual_of_noFusion`,
     `autP_reproduced_of_noFusion`, `isLargeAutP_of_noFusion`, `largenessBridge_viaHarvest`, `LargenessBridge`,
     `exhaustiveObstruction_scheme_of_harvest`, `reachesRigidOrCameron_viaHarvest`), in
     [exhaustive-obstruction §0.7.5](./chain-descent-exhaustive-obstruction.md) (top banner), and in
     [`00-START-HERE.md`](./00-START-HERE.md) §2. The Lean is sound (the theorems are true, just vacuous/tautological as
     *evidence*); future readers are now warned not to treat NoFusion as live evidence that G2-B is closeable.
+  - **(h′) PENDING Lean excision (deferred past G1b).** The doc-sync above flags the vacuous `NoFusion`/orbit-level
+    family but does **not** remove it — those lemmas (and their `largenessBridge_viaHarvest` consumer + the
+    `reachesRigidOrCameron_viaHarvest` headline that leans on it) still carry the vacuous orbit-level hypothesis in
+    `Cascade.lean`. The clean end-state is to **retire the NoFusion/largeness-derivation family** (keeping the
+    non-vacuous visible-realizer capstone `reachesRigidOrCameron_viaRecovery` as the headline) so no vacuous
+    hypothesis lingers in the source. Not urgent (the warnings prevent misreading); slated **after G1b**.
 
 ### G3 — the citation
 
