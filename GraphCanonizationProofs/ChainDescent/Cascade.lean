@@ -3511,4 +3511,95 @@ theorem reachesRigidOrCameron_viaRecoveryOrAbelian {n : Nat} {IsLarge : Nat → 
     · exact Or.inl hrec
     · exact Or.inr (abelianConsumed_of_residualAbelian hab hnb)
 
+/-! ### Depth-graded recovery (G1a) — beyond per-level / metric recovery
+
+`SchemeRecovered` (above) demands visible realizers at **every** level `T ⊇ ∅` — that is *per-level* (depth-1 /
+metric) recovery. A **depth-graded** consumable scheme fails it: CFI recovers only after `tw(H)`
+individualizations, Shrikhande only after 2; at shallower levels cells ⊋ orbits, so a same-cell non-orbit pair
+breaks the clause. This section models the depth-graded case honestly by **splitting the base sequence into a
+bounded shallow phase `∅ → S₀` and a deep phase from the recovery set `S₀`**, glued by `coversOrbits_append`:
+
+- **Deep phase** (`T ⊇ S₀`): the visible (refinement-computable) realizer clause — *non-vacuous*, satisfiable
+  exactly where refinement recovers orbits from `S₀` (`CellsAreOrbits`). This is the genuine recovery content;
+  CFI / Shrikhande satisfy it at their bounded depth, where `SchemeRecovered`'s `∀ T ⊇ ∅` could not.
+- **Shallow phase** (`∅ → S₀`): `CoversOrbitsAlong` orbit-coverage — the **carried localisation** (per-level
+  orbit-realization is *intrinsic*: a deep automorphism fixes too much to move a shallow orbit, so deep recovery
+  does not supply shallow coverage for free). It stays substrate-conditional, but is now **localized to a bounded
+  phase** rather than required at every level.
+- **The bound `|S₀| ≤ bound`** is essential for non-vacuity: the *unbounded* form is vacuous (individualize
+  everything ⟹ discrete; mirroring `recoverableByDepth_univ`). So depth-graded recovery is partly a modelling
+  refinement (captures CFI/Shrikhande) and partly the polynomiality boundary (the bound).
+
+`SchemeRecoveredByDepth … 0` recovers `SchemeRecovered` (empty shallow phase, `S₀ = ∅`), so the depth-graded
+predicate **strictly generalizes** the per-level one. -/
+
+/-- **Depth-graded recovery.** `S` is *recovered by depth `bound`* when there is a harvested generating set
+`gens` (path-fixing at the root) and a **two-phase** base sequence `bs₁ ++ bs₂`: a shallow phase `bs₁` building
+the bounded recovery set `S₀ = bs₁.foldl insert ∅` (`|S₀| ≤ bound`), with orbit-coverage along it
+(`CoversOrbitsAlong`, the carried localisation), then a deep phase `bs₂` from `S₀` whose every same-`warmRefine`-cell
+pair is realized by a harvested residual automorphism (visible recovery, satisfiable only where cells = orbits
+from `S₀`), terminating at a base. Generalizes `SchemeRecovered` (which is the `S₀ = ∅` case) to the
+depth-graded family (CFI, Shrikhande). Non-vacuity comes from the deep visible clause **and** the bound: the
+unbounded form is vacuous. -/
+def SchemeRecoveredByDepth : ∀ (m : Nat), SchurianScheme m → Nat → Prop :=
+  fun m S bound => ∃ (gens : Set (Equiv.Perm (Fin m))) (bs₁ bs₂ : List (Fin m)),
+    (∀ g ∈ gens, g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+    (bs₁.foldl (fun s b => insert b s) (∅ : Finset (Fin m))).card ≤ bound ∧
+    CoversOrbitsAlong (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) gens bs₁ ∅ ∧
+    (∀ T : Finset (Fin m), (bs₁.foldl (fun s b => insert b s) ∅) ⊆ T → ∀ b w : Fin m,
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring m T) b
+            = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring m T) w →
+        ∃ g, g ∈ gens
+          ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g b = w) ∧
+    IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+      (bs₂.foldl (fun s b => insert b s) (bs₁.foldl (fun s b => insert b s) ∅))
+
+/-- **Depth-graded recovery ⟹ the group is reproduced.** From `SchemeRecoveredByDepth`, the harvested `gens`
+generate exactly `SchemeAutGroup S`. The deep phase supplies `CoversOrbits bs₂ S₀` from the visible realizers
+(`coversOrbits_of_visibleRealizers`); `coversOrbits_append` glues the carried shallow `CoversOrbitsAlong bs₁ ∅`
+to it for `CoversOrbits (bs₁ ++ bs₂) ∅`; then `closure_eq_stabilizerAt_empty_of_coversOrbits` +
+`stabilizerAt_schemeAdj_empty_eq`. So the depth-graded harvest reproduces the full root group, with the shallow
+∅→S₀ coverage the only carried (localisation) input. -/
+theorem schemeAutGroup_eq_closure_of_recoveredByDepth {n : Nat} {S : SchurianScheme n} {bound : Nat}
+    (h : SchemeRecoveredByDepth n S bound) :
+    ∃ gens : Set (Equiv.Perm (Fin n)),
+      Subgroup.closure gens = S.toAssociationScheme.SchemeAutGroup := by
+  obtain ⟨gens, bs₁, bs₂, hsound, _hbound, hshallow, hdeep, hbase⟩ := h
+  have hdeepcov := coversOrbits_of_visibleRealizers bs₂ hdeep hbase
+  have hcov := coversOrbits_append bs₁ bs₂ hshallow hdeepcov
+  exact ⟨gens, (closure_eq_stabilizerAt_empty_of_coversOrbits (bs₁ ++ bs₂) hsound hcov).trans
+    (stabilizerAt_schemeAdj_empty_eq S)⟩
+
+/-- **Per-level recovery is the depth-0 case — depth-graded strictly generalizes `SchemeRecovered`.** A
+metric/depth-1 recovered scheme is recovered by depth `0`: empty shallow phase (`bs₁ = []`, `S₀ = ∅`, the
+`CoversOrbitsAlong [] ∅` clause is `True`), with the original `∀ T ⊇ ∅` visible realizers as the deep phase. So
+`SchemeRecovered` ⊆ `SchemeRecoveredByDepth … 0`, and the depth-graded predicate captures everything the
+per-level one does plus the depth-graded family (CFI/Shrikhande) it could not. -/
+theorem schemeRecoveredByDepth_of_schemeRecovered {n : Nat} {S : SchurianScheme n}
+    (h : SchemeRecovered n S) : SchemeRecoveredByDepth n S 0 := by
+  obtain ⟨gens, bs, hsound, hreal, hbase⟩ := h
+  exact ⟨gens, [], bs, hsound, by simp, trivial, by simpa using hreal, by simpa using hbase⟩
+
+/-- **The seal capstone, depth-graded (G1a).** `reachesRigidOrCameron_viaRecovery` with the rigid side widened
+from per-level `SchemeRecovered` to `SchemeRecoveredByDepth … bound`: every rank-≥3 schurian scheme residual is
+*recovered by bounded depth* or is a Cameron section. Each non-Cameron branch may now discharge via a
+depth-graded harvest (CFI at `tw`, Shrikhande at 2), where the per-level capstone required depth-1 visibility.
+The carried content is the same `s(C)` leak (G2) plus the localisation (the shallow ∅→S₀ coverage inside
+`SchemeRecoveredByDepth`); subsumes `reachesRigidOrCameron_viaRecovery` via
+`schemeRecoveredByDepth_of_schemeRecovered`. -/
+theorem reachesRigidOrCameron_viaDepthRecovery {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : ¬ NonCascadeViaHarvest IsLarge n S → SchemeRecoveredByDepth n S bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeRecoveredByDepth n S bound) :
+    SchemeRecoveredByDepth n S bound ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaHarvest
+    (ReachesRigid := fun m S => SchemeRecoveredByDepth m S bound)
+    hClassify S hne hrank hCascade hImprim
+
 end ChainDescent

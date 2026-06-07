@@ -191,7 +191,28 @@ the self-detection lemma, which is research, not engineering.
 
 ### G1a — `SchemeRecovered` is depth-1-only; it must become depth-graded (leg A scope)
 
-**The problem.** `SchemeRecovered` demands visible realizers at **every** level (`∀ T`). That is *per-level*
+**LANDED (2026-06-07, axiom-clean `[propext, Classical.choice, Quot.sound]`, `Cascade.lean`).** The depth-graded
+model is built, via the **base-sequence phase split** (`coversOrbits_append`):
+- **`SchemeRecoveredByDepth n S bound`** — splits the base sequence into a **bounded shallow phase** `∅ → S₀`
+  (`|S₀| ≤ bound`, `CoversOrbitsAlong` orbit-coverage — the *carried localisation*) and a **deep phase** from `S₀`
+  (visible realizers, satisfiable only where cells = orbits from `S₀` — the genuine recovery). Captures CFI (`tw`),
+  Shrikhande (2), which `SchemeRecovered` (`∀ T ⊇ ∅`) could not.
+- **`schemeAutGroup_eq_closure_of_recoveredByDepth`** — reproduces the **full root group** `SchemeAutGroup S`:
+  deep `coversOrbits_of_visibleRealizers` + `coversOrbits_append` (glue shallow) + `closure_eq_stabilizerAt_empty_…`.
+  The shallow ∅→S₀ coverage is the only carried input.
+- **`schemeRecoveredByDepth_of_schemeRecovered`** — `SchemeRecovered → SchemeRecoveredByDepth … 0` (empty shallow
+  phase): the depth-graded predicate **strictly generalizes** the per-level one.
+- **`reachesRigidOrCameron_viaDepthRecovery`** — the depth-graded seal capstone
+  `SchemeRecoveredByDepth … bound ∨ IsCameronScheme`, subsuming `reachesRigidOrCameron_viaRecovery`.
+
+**Honest scope (what stays carried).** The split *localizes* but does not eliminate the localisation gap (insight 7):
+the **shallow ∅→S₀ phase** is `CoversOrbitsAlong` orbit-coverage = the substrate-conditional content (shallow
+orbit-realization is intrinsic — deep recovery does not supply it for free). The **bound** is the non-vacuity hinge:
+unbounded ⟹ vacuous (`recoverableByDepth_univ`), so this is partly modelling (captures CFI/Shrikhande), partly the
+polynomiality boundary (the bound = T-C). The full discharge of the shallow phase is the same frontier as G2-A's
+tower (`cascadeComposition`); the phase split is the structural tool that couples them.
+
+**The problem (original).** `SchemeRecovered` demands visible realizers at **every** level (`∀ T`). That is *per-level*
 recovery = essentially **depth-1 / metric** recovery. A **depth-graded** scheme fails it: CFI recovers only at
 depth `tw(H)`, Shrikhande only at depth 2 — at intermediate depths cells ⊋ orbits, so a same-cell non-orbit pair
 breaks the clause. So even canonical *consumable* cases beyond the metric family are not captured.
@@ -578,7 +599,11 @@ multi-base counting separation is realized as a warm-refinement split* — the e
   - **(a) G1b — leg B — LANDED (2026-06-07).** `AbelianConsumed` + `abelianConsumed_of_residualAbelian` (L3-earned,
     citation-free) + `reachesRigidOrCameron_viaRecoveryOrAbelian` (`Cascade.lean`, axiom-clean). Closes the abelian
     wall-slice; the seal is now `(SchemeRecovered ∨ AbelianConsumed) ∨ Cameron`. See §4 G1b.
-  - **(b) G1a — depth-graded recovery** (`RecoverableByDepth` at base+O(1)). Captures CFI/Shrikhande; now the *same*
+  - **(b) G1a — depth-graded recovery — LANDED (2026-06-07).** `SchemeRecoveredByDepth` (two-phase: bounded shallow
+    `CoversOrbitsAlong` + deep visible realizers) + group payoff + `reachesRigidOrCameron_viaDepthRecovery` + strict
+    generalization of `SchemeRecovered` (`Cascade.lean`, axiom-clean). Captures CFI/Shrikhande; shallow ∅→S₀ phase
+    carried (localisation, couples to the G2-A tower). Was (pre-landing):
+    `RecoverableByDepth` at base+O(1); captures CFI/Shrikhande; now the *same*
     target as the primitive-floor self-detection.
 - **Tier 2 — the G2 attack (the only route that actually closes the seal). The conservation route, Thread T2, and P3
   CONVERGE to one crux** (the corrected two-vantage analysis above): **base-homogeneous separability gap ⟹ imprimitive;
@@ -642,6 +667,7 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 | Trichotomy / leg C | `exhaustiveObstruction_scheme(_of_nonCascade)(_nonCascade_trichotomy)`, `PrimitiveCCClassification`, `isPreprimitive_of_isPrimitive` (`Scheme.lean`) |
 | Leg B core | `smul_eq_on_orbit_of_comm` (L3), `aut_agree_on_orbit_of_comm`, `not_comm_of_orbit_disagree`, `not_comm_of_isPreprimitive_card_lt`, L1/L2 (`Group.lean`) |
 | Leg B in the seal (G1b) | `AbelianConsumed`, `abelianConsumed_of_residualAbelian`, `reachesRigidOrCameron_viaRecoveryOrAbelian` (`Cascade.lean`) |
+| Depth-graded recovery (G1a) | `SchemeRecoveredByDepth`, `schemeAutGroup_eq_closure_of_recoveredByDepth`, `schemeRecoveredByDepth_of_schemeRecovered`, `reachesRigidOrCameron_viaDepthRecovery`, `coversOrbits_append`/`CoversOrbitsAlong` (`Cascade.lean`) |
 | Cross-branch harvest (recovery ⟹ group) | `closure_eq_stabilizerAt_of_visibleRealizers`, `crossBranchHarvest_reproduces_residual`, `autP_reproduced_of_visibleRealizers`, `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits` (`Cascade.lean`) |
 | Tower (depths add) | `cascadeComposition`, `cascadeComposition_pathFixing`, `cellsAreOrbits_compose`, `cumulative_card_le`, `LayerStep` (`Cascade.lean`) |
 | Recovery witnesses | `RecoverableByDepth`, `recoverableByDepth_pPolynomial` / `_cfi` / `_scheme`, `cellsAreOrbits_of_discrete` (`CascadeOracle.lean`) |
