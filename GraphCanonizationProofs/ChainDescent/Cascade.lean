@@ -3214,4 +3214,77 @@ theorem reachesRigidOrCameron_viaBlocks {n : Nat} {IsLarge : Nat → Prop}
   obtain ⟨β, gens, bs, hsound, hreach, hfiber, hbase⟩ := hBlockHarvest himp
   exact schemeReproduced_of_blockDecomposition S β bs hsound hreach hfiber hbase
 
+/-! ### Discharging the seal's `hCascade` via the recovery harvest — the leg-A mirror of Route B
+
+Symmetric to the Route B wiring above: where `schemeReproduced_of_blockDecomposition` reduces the *imprimitive*
+branch `hImprimitive` to the two coverage interfaces `hreach`/`hfiber`, the **cascade** branch `hCascade` is
+reduced to the *one* refinement-computable (visible-cell) realizer interface the general polynomiality capstone
+`closure_eq_stabilizerAt_of_visibleRealizers` already consumes. Both legs of the seal's rigid side then bottom
+out at the **same** substrate-conditional recovery interface (visible realizers / `RecoverableByDepth`), so the
+honest remainder collapses to {cited `PrimitiveCCClassification`, per-level recovery, the `NoFusion` witness}. -/
+
+/-- **Leg-A → scheme bridge: `SchemeReproduced` from the refinement-computable (visible-cell) harvest.** The
+cascade/recovery analogue of `schemeReproduced_of_blockDecomposition`. Run the general polynomiality capstone
+`closure_eq_stabilizerAt_of_visibleRealizers` on the labelled encoding `schemeAdj S` (trivial all-`unknown` `P`)
+and carry the result across the `schemeAdj` bridge: `gensAt_empty_eq` (soundness ⟹ `gensAt … ∅ = gens`) and
+`stabilizerAt_schemeAdj_empty_eq` (`StabilizerAt (schemeAdj S) … ∅ = SchemeAutGroup S`) turn
+`closure (gensAt … ∅) = StabilizerAt … ∅` into `closure gens = SchemeAutGroup S`. So leg A's recovery reduces
+`SchemeReproduced` to a **single** visible-realizer interface `hreal`, exactly as Route B reduces the imprimitive
+branch to `hreach`/`hfiber`. `hreal` is satisfiable on the recoverable class (`recoverableByDepth_pPolynomial`
+metric/DRG, `recoverableByDepth_cfi` CFI); the bridge itself is unconditional and axiom-clean. -/
+theorem schemeReproduced_of_visibleRealizers {n : Nat} (S : SchurianScheme n)
+    {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n))
+    (hsound : ∀ g ∈ gens,
+        g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅)
+    (hreal : ∀ T : Finset (Fin n), (∅ : Finset (Fin n)) ⊆ T → ∀ b w : Fin n,
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) b
+            = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) w →
+        ∃ g, g ∈ gens
+          ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g b = w)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (bs.foldl (fun s b => insert b s) ∅)) :
+    SchemeReproduced n S := by
+  refine ⟨gens, ?_⟩
+  have hreaches := closure_eq_stabilizerAt_of_visibleRealizers bs hreal hbase
+  rw [gensAt_empty_eq hsound] at hreaches
+  exact hreaches.trans (stabilizerAt_schemeAdj_empty_eq S)
+
+/-- **The seal capstone with `hCascade` discharged via the recovery harvest.** `reachesRigidOrCameron_viaHarvest`
+specialised to `ReachesRigid := SchemeReproduced`, with the **cascade** branch supplied by
+`schemeReproduced_of_visibleRealizers`: a non-`NonCascade` (recovering) `S` provides the refinement-computable
+harvest (path-fixing generators, the single visible-realizer interface `hCascadeHarvest`, a terminal base) and
+that harvest reproduces `SchemeAutGroup S`. The leg-A mirror of `reachesRigidOrCameron_viaBlocks` — there
+`hImprimitive` is reduced to `hreach`/`hfiber`; here `hCascade` is reduced to the one visible-realizer interface.
+`hImprimitive` stays carried (combine with `_viaBlocks` to discharge both legs at once). Free inputs are then:
+cited `PrimitiveCCClassification`, `hCascadeHarvest` (leg-A recovery, now Route-B-style-reduced), and
+`hImprimitive`. -/
+theorem reachesRigidOrCameron_viaCascadeHarvest {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascadeHarvest : ¬ NonCascadeViaHarvest IsLarge n S →
+        ∃ (gens : Set (Equiv.Perm (Fin n))) (bs : List (Fin n)),
+          (∀ g ∈ gens,
+              g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+          (∀ T : Finset (Fin n), (∅ : Finset (Fin n)) ⊆ T → ∀ b w : Fin n,
+              warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) b
+                  = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+                    (individualizedColouring n T) w →
+              ∃ g, g ∈ gens
+                ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g b = w) ∧
+          IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (bs.foldl (fun s b => insert b s) ∅))
+    (hImprimitive : ¬ S.toAssociationScheme.IsPrimitive → SchemeReproduced n S) :
+    SchemeReproduced n S ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaHarvest (ReachesRigid := SchemeReproduced)
+    hClassify S hne hrank ?_ hImprimitive
+  intro hnc
+  obtain ⟨gens, bs, hsound, hreal, hbase⟩ := hCascadeHarvest hnc
+  exact schemeReproduced_of_visibleRealizers S bs hsound hreal hbase
+
 end ChainDescent
