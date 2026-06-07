@@ -1,5 +1,30 @@
 # Chain descent — Route B handoff: the imprimitive branch, and the open `hreach`/`hfiber` frontier
 
+> **⚠️ CRITICAL CORRECTION (2026-06-07) — read before the rest of this doc.** A wiring-verification pass found
+> that the seal's concrete rigid predicate `SchemeReproduced := ∃ gens, closure gens = SchemeAutGroup S` is
+> **vacuously true** (machine-checked: `⟨↑SchemeAutGroup, Subgroup.closure_eq _⟩` proves it for *every* scheme —
+> every finite group is finitely generated). The same vacuity infects **all orbit-level coverage**
+> (`OrbitPartition b w → ∃ g ∈ gens, g b = w` is satisfiable by `gens = all automorphisms`, since orbit-mates
+> are automorphism-related by definition). So **the Route B → seal capstones that concluded `SchemeReproduced ∨
+> Cameron` were proving a trivially-true disjunction** — `SchemeReproduced`, `schemeReproduced_of_blockDecomposition`,
+> `reachesRigidOrCameron_viaBlocks`/`_viaCascadeHarvest`/`_viaBlocksAndCascade`, and the old `_viaRecovery` /
+> `blockHarvest_of_not_isPrimitive_of_visibleRecovery` are **RETIRED**.
+>
+> **The fix (landed, axiom-clean):** the rigid predicate is now `SchemeRecovered` — keyed on **visible**
+> (same-`warmRefine`-cell) realizers, which are satisfiable *only where cells = orbits* and **false for high
+> `s(C)`**, so it is genuinely non-vacuous (machine-checked the old trivial witness no longer typechecks). The
+> single headline `reachesRigidOrCameron_viaRecovery` now discharges **both** non-Cameron branches *identically*
+> via `schemeRecovered_of_visibleRealizers` — the imprimitivity/cascade split was only *which observation
+> triggers* the recovery obligation, **not a different mechanism**: the orbit-level block decomposition was the
+> vacuous detour. `schemeAutGroup_eq_closure_of_recovered` recovers the "group reproduced" payoff as a *theorem*
+> from the non-vacuous witness. **What stays valid:** the graph-level *conditional* theory
+> (`reachesRigid_of_blockDecomposition`, the `hreach`/`hfiber` suppliers, `coversOrbits_*`, `coversOrbits_append`,
+> and especially **`hfiber_of_fiberVisibleRealizers`** — the *visible* fiber half) — it was the existential
+> *packaging* into "recovers" that was vacuous, not those lemmas. **The genuine open frontier is unchanged but
+> resharpened:** *visible* recovery holding without whole-graph recovery, via **visible** quotient + fiber
+> recovery — the `s(C)` reduction. Sections below that say "`SchemeReproduced`" / "`_viaBlocks`" are **historical
+> record of the (now-retired) orbit-level route**; mentally substitute the `SchemeRecovered` story above.
+>
 > **STATUS (2026-06-06): Route B's mechanical chain is LANDED, axiom-clean, full build green.** The seal's
 > `hImprimitive` branch (imprimitive scheme residual ⟹ reaches rigid) is no longer an opaque hypothesis: it is
 > **mechanically reduced** to two intrinsic coverage interfaces, `hreach` (quotient / block-reach) and `hfiber`

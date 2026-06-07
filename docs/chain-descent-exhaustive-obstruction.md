@@ -850,6 +850,18 @@ imprimitive→primitive recursion (Route b) is *riskier* than hoped: a quotient/
 non-abelian, non-Cameron* — and **no theorem in the corpus bounds `s(C)` for such CCs**. This is the formal handle
 for any future attack (Lean statement, or a targeted paper question).
 
+**⚠️ CORRECTION (2026-06-07) — the Route B → seal capstones below were VACUOUS; now fixed.** A wiring check found
+the concrete rigid predicate `SchemeReproduced := ∃ gens, closure gens = SchemeAutGroup` is trivially true (every
+finite group is finitely generated; `gens = ↑SchemeAutGroup` witnesses it). Orbit-level coverage is vacuous for
+the same reason (orbit-mates are aut-related by definition, so `gens = all auts` covers them). So the
+`SchemeReproduced ∨ Cameron` capstones proved a trivially-true disjunction and are **retired**. The rigid
+predicate is now `SchemeRecovered` keyed on **visible** (same-`warmRefine`-cell) realizers — non-vacuous (false
+for high `s(C)`); the headline `reachesRigidOrCameron_viaRecovery` discharges both non-Cameron branches
+identically via `schemeRecovered_of_visibleRealizers`. The block-decomposition machinery's graph-level
+*conditional* lemmas stay valid; only the existential "recovers" packaging was vacuous. Full record:
+[`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) top. **The paragraph below is the
+historical Route B record (orbit-level route, now superseded).**
+
 **ROUTE B (the intrinsic decomposition) — MECHANICAL CHAIN LANDED axiom-clean (2026-06-06).** *Full handoff
 for a fresh reader (the live `hreach`/`hfiber` frontier):* [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md).
 Despite the "riskier" headline, the user directed an attempt, and it went through at the graph level. Four layers
