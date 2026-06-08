@@ -4047,6 +4047,93 @@ theorem reachesRigidOrCameron_viaDepthOneSeparable {n : Nat} {IsLarge : Nat → 
   reachesRigidOrCameron_viaFusedSeal hClassify S hne hrank
     (selfDetectsStably_of_depthOneSeparable S IsLarge bound hDepthOne) hImprim
 
+/-! ### §13b — the two-round (depth-2) separation engine on `schemeAdj` (E1)
+
+`relOfPair_eq_of_warmRefine_singleton` (§13a) is the **depth-1** separation primitive: a `warmRefine`
+cell refines the depth-1 `relOfPair` profile, and from a *single* base that already recovers
+(`cellsAreOrbits_schemeAdj_singleton`). For the `s(C) ≥ 2` regime (cyclotomic and friends) one round is
+insufficient — the depth-1 *joint* profile of a small base is a coset twin — and from a single base depth-2
+counts collapse to intersection numbers (`AssociationScheme.intersectionCount_via_w`), adding nothing. The
+genuine content is therefore inherently **multi-base, two-round**: this subsection lands the reusable
+two-round count primitive, the `schemeAdj` analogue of the intersection-number separation
+(`IntersectionSeparates`/`depth2Det`). It generalises the single-base depth-`k` count machinery
+(`iter_succ_count_eq` &c. in `Scheme.lean`, keyed on `individualizedColouring n {v}`) to an arbitrary base
+**set** `T`, keyed on the public `signature_eq_card_eq`. It is the brick the affine-cyclic bound proof (and
+any future primitive-floor slice) consumes; the conversion from the one-round colour grouping to the joint
+`(relOfPair t ·)_{t∈T}` profile is the consumer's job (`relOfPair_eq_of_warmRefine_singleton`, depth-1). -/
+
+/-- **Two-round count separation (the depth-2 primitive, E1).** For `w, u` in the same
+`warmRefine (schemeAdj S)`-cell after individualizing a base set `T`, the **depth-2 count profile**
+coincides: for every one-round colour `c` (`refineStep` of the individualised colouring) and every relation
+`b`, the number of `z ≠ w` whose one-round colour is `c` and `relOfPair w z = b` equals the corresponding
+count for `u`. Mechanism: peel `warmRefine = refineStep^[n]` to `refineStep^[2]` (`warmRefine_eq_iter_eq`),
+read off `signature`-equality at the one-round colouring (`refineStep_iff`), and apply the count bridge
+(`signature_eq_card_eq`). The one-round colour `c` refines the joint `(relOfPair t ·)_{t∈T}` profile
+(depth-1, §13a), so grouping by `c` is finer than grouping by the relations-to-`T` — that conversion is the
+consumer's job. -/
+theorem twoRoundCount_eq_of_warmRefine {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {w u : Fin n}
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) u)
+    (c : Nat) (b : Fin (S.rank + 1)) :
+    (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+        refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z = c ∧
+        S.relOfPair w z = b)).card
+    = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+        refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z = c ∧
+        S.relOfPair u z = b)).card := by
+  classical
+  set adj := schemeAdj S with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  set χ := individualizedColouring n T with hχ
+  by_cases hn : 2 ≤ n
+  · -- peel `warmRefine = refineStep^[n]` to `refineStep^[2]`, read `signature` at `refineStep χ`
+    have h2 : ((refineStep adj P)^[2]) χ w = ((refineStep adj P)^[2]) χ u :=
+      warmRefine_eq_iter_eq adj P χ 2 hn h
+    rw [show (2 : ℕ) = 1 + 1 from rfl, Function.iterate_succ_apply', Function.iterate_one] at h2
+    have hsig : signature adj P (refineStep adj P χ) w = signature adj P (refineStep adj P χ) u :=
+      ((refineStep_iff adj P (refineStep adj P χ) w u).mp h2).2
+    have hcard := signature_eq_card_eq adj P (refineStep adj P χ) hsig (c, b.val, POE.unknown)
+    -- the two filter predicates coincide (P is always `unknown`; `adj` reads `relOfPair`)
+    have hpred : ∀ x : Fin n, ∀ z : Fin n,
+        (z ≠ x ∧ refineStep adj P χ z = c ∧ S.relOfPair x z = b)
+          ↔ (z ≠ x ∧ (c, b.val, POE.unknown) = (refineStep adj P χ z, adj.adj x z, P x z)) := by
+      intro x z
+      refine and_congr_right (fun _ => ?_)
+      have hadjval : adj.adj x z = (S.relOfPair x z).val := rfl
+      have hPval : P x z = POE.unknown := rfl
+      rw [hadjval, hPval, Prod.mk.injEq, Prod.mk.injEq]
+      constructor
+      · rintro ⟨hcz, hbz⟩; exact ⟨hcz.symm, by rw [hbz], rfl⟩
+      · rintro ⟨hc, hb, -⟩; exact ⟨hc.symm, (Fin.val_injective hb).symm⟩
+    rw [Finset.filter_congr (fun z _ => hpred w z), Finset.filter_congr (fun z _ => hpred u z)]
+    exact hcard
+  · -- `n ≤ 1`: `Fin n` is subsingleton, `w = u`, the two filters coincide
+    have hsub : Subsingleton (Fin n) := Fin.subsingleton_iff_le_one.mpr (by omega)
+    rw [Subsingleton.elim w u]
+
+/-- **The depth-2 discreteness producer (E1).** If the depth-2 count profile — for every one-round colour
+`c` and relation `b`, the number of `z` at one-round colour `c` with `relOfPair · z = b` — separates all
+vertices, then `warmRefine (schemeAdj S)` from `T` is `Discrete`. The depth-2 analogue of
+`discrete_of_jointProfileSeparates` (which keys on the *depth-1* joint profile, insufficient for `s(C) ≥ 2`):
+same-cell vertices share the depth-2 profile (`twoRoundCount_eq_of_warmRefine`), so an injective profile
+forces singletons. Composes with `stablyRecoverable_of_discrete` → `selfDetectsStably_of_discretizes`, so a
+bounded base `T` with a separating depth-2 profile closes the seal on that family. This is the producer the
+affine-cyclic (`s(C) ≥ 2`) bound proof discharges (exhibit such a `T` of size `base + O(1)`). -/
+theorem discrete_of_twoRoundProfileSeparates {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    (hsep : ∀ u u' : Fin n,
+        (∀ (c : Nat) (b : Fin (S.rank + 1)),
+          (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+            refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z = c ∧
+            S.relOfPair u z = b)).card
+          = (Finset.univ.filter (fun z : Fin n => z ≠ u' ∧
+            refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z = c ∧
+            S.relOfPair u' z = b)).card)
+        → u = u') :
+    Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T)) := by
+  intro u u' hcell
+  exact hsep u u' (fun c b => twoRoundCount_eq_of_warmRefine S hcell c b)
+
 /-! ### Phase 2, M0.3 — the affine instance `V ⋊ G₀` over `F_p^d`
 
 The concrete beachhead family: the orbital scheme of the affine group `V ⋊ G₀` acting on `V = F_p^d`,

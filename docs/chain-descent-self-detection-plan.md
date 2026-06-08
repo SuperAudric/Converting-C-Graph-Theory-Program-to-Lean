@@ -25,7 +25,14 @@
 > WRITTEN — §11 is now the PICK-UP for continuing Phase 2** (the conceptual frame [k≡1, not k-WL], the route-scan
 > verdict [affine-cyclic beachhead], and the implementation plan for the cyclotomic bound proof + wiring). §9 is the
 > earlier affine build plan (M0–M3, M0/M1 landed); §10 is the M1.1/M1.2 + gotchas handoff. A fresh reader continuing
-> Phase 2 should start at **§11**, then §10.3 (gotchas). The oracle-capability seal is a conditional theorem
+> Phase 2 should start at **§11**, then §10.3 (gotchas).
+> **E1 ENGINE FIRST BRICKS LANDED (2026-06-08, axiom-clean, `Cascade.lean §13b`):** `twoRoundCount_eq_of_warmRefine`
+> (the depth-2 separation primitive, the `schemeAdj` analogue of `IntersectionSeparates`) +
+> `discrete_of_twoRoundProfileSeparates` (the depth-2 discreteness producer, feeding `selfDetectsStably_of_discretizes`).
+> Finding: the engine is inherently **multi-base** (single-base depth-2 collapses to intersection numbers,
+> `intersectionCount_via_w`); see §11.5's LANDED box. Remaining for the cyclotomic slice: **E2** (the `cyclotomicScheme`
+> model + the Frobenius/Galois bound = the open `s(C)` content) + **E3** (wiring).
+> The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
 > is `hCascade` (small primitive ⟹ recovers = G2-B). Both empirical falsifiers are clean: the affine
@@ -981,6 +988,33 @@ but budget it as real work, gated behind the (already-clean) probe empirics. **S
    `|T| ≤ base + O(d)`. *The research crux.*
 
 ### 11.5 E1 — the reusable round-propagation lemmas (EXTRACTED from E2, not pre-built)
+
+> **E1 FIRST BRICKS LANDED (2026-06-08, axiom-clean `[propext, Classical.choice, Quot.sound]`, build green,
+> `Cascade.lean §13b`).** The depth-2 separation engine's core pair — the `schemeAdj` analogue of
+> `IntersectionSeparates`/`depth2Det`, the §11.4 E2.3 named consumable:
+> - **`twoRoundCount_eq_of_warmRefine`** — same `warmRefine (schemeAdj S)`-from-`T` cell ⟹ equal depth-2 count
+>   profile: `∀ c b, #{z ≠ w : refineStep·z = c ∧ relOfPair w z = b} = #{z ≠ u : … relOfPair u z = b}`. Peels
+>   `warmRefine = refineStep^[n] → refineStep^[2]` (`warmRefine_eq_iter_eq`), `refineStep_iff`, count bridge
+>   `signature_eq_card_eq`. Generalizes the single-base depth-`k` count machinery (`iter_succ_count_eq`, keyed on
+>   `individualizedColouring n {v}`) to a base **set** `T`.
+> - **`discrete_of_twoRoundProfileSeparates`** — depth-2 profile separates ⟹ `Discrete(warmRefine from T)`; the
+>   depth-2 analogue of `discrete_of_jointProfileSeparates`, feeding `stablyRecoverable_of_discrete` →
+>   `selfDetectsStably_of_discretizes`. The producer the cyclotomic (E2.4) bound discharges.
+>
+> **KEY FINDING (carry to E2 / the general crux): the engine is inherently MULTI-BASE.** From a *single* base,
+> depth-2 counts collapse to intersection numbers (`AssociationScheme.intersectionCount_via_w`:
+> `#{z : relOfPair v z = a ∧ relOfPair w z = b} = intersectionNumber a b (relOfPair v w)`), which `w, u` already
+> share at depth-1 — so single-base depth-2 adds nothing (consistent with `cellsAreOrbits_schemeAdj_singleton`).
+> The genuine `s(C) ≥ 2` content is the JOINT count over `≥ 2` bases (`#{z : relOfPair v z = a ∧ relOfPair x z =
+> a' ∧ relOfPair w z = b}`), which is *not* a single intersection number — exactly where the Frobenius/Galois
+> separation (E2.3) bites. The `twoRoundCount` lemma's one-round-colour grouping `refineStep·z = c` already
+> encodes the joint `(relOfPair t ·)_{t∈T}` profile (depth-1 §13a), so it carries the multi-base information; the
+> consumer converts colour-grouping → relation-grouping via `relOfPair_eq_of_warmRefine_singleton`.
+>
+> **Remaining E1 (extract as E2 needs):** the colour→relation-grouping conversion corollary (sum over one-round
+> colours sharing a joint relation profile) if the Frobenius argument wants relation-indexed counts; and a thin
+> saturation wrapper if depth-2 alone is insufficient (cyclotomic depth-4 = base-2 + 2 rounds). Do NOT pre-build
+> the full `isolationStep` mirror (§11.5 note below).
 
 The `schemeAdj`-native generalization of the landed single-round `relOfPair_eq_of_warmRefine_singleton`. Build
 *only* what E2 consumes; candidates (state generally for any `AssociationScheme`, prove via induction on
