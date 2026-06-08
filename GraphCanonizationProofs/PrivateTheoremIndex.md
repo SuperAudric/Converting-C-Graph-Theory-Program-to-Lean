@@ -103,20 +103,20 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `individualizedColouring_singleton_eq_v_iff` | 840-853 | `χ_v` uniqueness: `individualizedColouring n {v} u = individualizedColouring n {v} v ↔ u = v`. | — |
-| `iter_succ_count_eq` | 1100-1115 | Iter-round count equality: `iter[k+1]` equality forces matching intermediate-vertex counts for every (round-k colour, adj, P) triple. | — |
-| `signature_countP_eq_card` | 1117-1128 | §8.b.2 `countP` form of `signature_count_eq_card`. | — |
-| `signature_eq_countP_eq` | 1130-1140 | Aggregate `countP` equality from signature equality, for any decidable predicate `p`. | — |
-| `iter_succ_countP_eq` | 1142-1158 | Aggregate iter-round count equality: under `iter[k+1]` equality, intermediate-vertex counts for any decidable `p` over (iter[k] colour, adj, P) match between `w` and `u`. | — |
-| `iter_succ_colour_count_eq` | 1160-1179 | Colour-only specialisation of `iter_succ_countP_eq`: under `iter[k+1]` equality, the count of intermediate vertices whose round-k colour satisfies `q` matches between `w` and `u`. | — |
-| `step2_at_depth_zero_of_rank_le_one` | 1578-1611 | Sanity instance: `Step2_at_depth G P v 0` for rank ≤ 1 schurian scheme graphs. | — |
-| `schemePart_at_refl` | 1677-1685 | `schemePart_at G P v k` is reflexive. | — |
-| `schemePart_at_symm` | 1687-1697 | `schemePart_at G P v k` is symmetric. | — |
-| `schemePart_at_trans` | 1699-1711 | `schemePart_at G P v k` is transitive. | — |
-| `step2_converges_at_zero_of_rank_le_one` | 1997-2008 | Sanity check: the convergence framework recovers the rank-≤-1 case at depth 0. | — |
-| `schemePart_at_one_adj_to_v` | 2078-2083 | Depth-1 extraction, adj-only specialisation. | — |
-| `relOfPairDetByAdjP_of_rank_le_one` | 2144-2168 | `rank ≤ 1` schurian scheme graphs trivially satisfy depth-1 separation. | — |
-| `adjSeparates_of_rank_le_one` | 2244-2255 | `rank ≤ 1` ⇒ `AdjSeparatesRelations` (≤ 1 non-diagonal index). | — |
+| `individualizedColouring_singleton_eq_v_iff` | 1011-1024 | `χ_v` uniqueness: `individualizedColouring n {v} u = individualizedColouring n {v} v ↔ u = v`. | — |
+| `iter_succ_count_eq` | 1271-1286 | Iter-round count equality: `iter[k+1]` equality forces matching intermediate-vertex counts for every (round-k colour, adj, P) triple. | — |
+| `signature_countP_eq_card` | 1288-1299 | §8.b.2 `countP` form of `signature_count_eq_card`. | — |
+| `signature_eq_countP_eq` | 1301-1311 | Aggregate `countP` equality from signature equality, for any decidable predicate `p`. | — |
+| `iter_succ_countP_eq` | 1313-1329 | Aggregate iter-round count equality: under `iter[k+1]` equality, intermediate-vertex counts for any decidable `p` over (iter[k] colour, adj, P) match between `w` and `u`. | — |
+| `iter_succ_colour_count_eq` | 1331-1350 | Colour-only specialisation of `iter_succ_countP_eq`: under `iter[k+1]` equality, the count of intermediate vertices whose round-k colour satisfies `q` matches between `w` and `u`. | — |
+| `step2_at_depth_zero_of_rank_le_one` | 1749-1782 | Sanity instance: `Step2_at_depth G P v 0` for rank ≤ 1 schurian scheme graphs. | — |
+| `schemePart_at_refl` | 1848-1856 | `schemePart_at G P v k` is reflexive. | — |
+| `schemePart_at_symm` | 1858-1868 | `schemePart_at G P v k` is symmetric. | — |
+| `schemePart_at_trans` | 1870-1882 | `schemePart_at G P v k` is transitive. | — |
+| `step2_converges_at_zero_of_rank_le_one` | 2168-2179 | Sanity check: the convergence framework recovers the rank-≤-1 case at depth 0. | — |
+| `schemePart_at_one_adj_to_v` | 2249-2254 | Depth-1 extraction, adj-only specialisation. | — |
+| `relOfPairDetByAdjP_of_rank_le_one` | 2315-2339 | `rank ≤ 1` schurian scheme graphs trivially satisfy depth-1 separation. | — |
+| `adjSeparates_of_rank_le_one` | 2415-2426 | `rank ≤ 1` ⇒ `AdjSeparatesRelations` (≤ 1 non-diagonal index). | — |
 ## ChainDescent/Saturation.lean
 
 | Name | Line | Description | Notes |

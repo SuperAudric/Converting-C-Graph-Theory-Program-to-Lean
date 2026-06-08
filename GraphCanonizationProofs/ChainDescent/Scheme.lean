@@ -358,6 +358,177 @@ def trivialSchurianScheme : SchurianScheme 1 where
     · exact Subsingleton.elim _ _
     · exact Subsingleton.elim _ _
 
+/-! ## §3.1 — The orbital scheme of a (generously) transitive permutation group (Phase 2, M0)
+
+The reusable model for the self-detection lemma's Phase 2: from a transitive subgroup
+`G ≤ Perm (Fin n)` that is **generously transitive** (every pair `(v,w)` is `G`-related to its swap
+`(w,v)`, making the orbitals symmetric — the project's `AssociationScheme` is symmetric, so this is
+required; cf. the affine `−1 ∈ G₀` constraint), build its **orbital scheme**: the symmetric
+association scheme whose relations are the `G`-orbits on `Fin n × Fin n` (the *orbitals*). Stays native
+to `Fin n` (no `V ≃ Fin (p^d)` transport). The affine instance `V ⋊ G₀` specializes it; it also serves
+any later Phase-2 family (PSL, classical). See `docs/chain-descent-self-detection-plan.md` §9. -/
+
+section Orbital
+
+variable {n : Nat} (G : Subgroup (Equiv.Perm (Fin n)))
+
+/-- The **orbitals** of `G`: orbits of the diagonal action on ordered pairs. The relations of the
+orbital scheme. -/
+abbrev Orbital : Type := Quotient (MulAction.orbitRel G (Fin n × Fin n))
+
+noncomputable instance : Fintype (Orbital G) := Fintype.ofFinite _
+
+variable {G}
+
+/-- The orbital containing the pair `(v, w)`. -/
+def orbMk (v w : Fin n) : Orbital G := Quotient.mk _ (v, w)
+
+/-- **Orbital-equality bridge.** `orbMk v w = orbMk v' w'` iff some `g ∈ G` carries `(v', w')` to
+`(v, w)` — the defining content of "same orbital." -/
+theorem orbMk_eq_iff {v w v' w' : Fin n} :
+    (orbMk v w : Orbital G) = orbMk v' w' ↔
+      ∃ g : G, (g : Equiv.Perm (Fin n)) v' = v ∧ (g : Equiv.Perm (Fin n)) w' = w := by
+  rw [orbMk, orbMk, Quotient.eq]
+  constructor
+  · rintro ⟨g, hg⟩
+    exact ⟨g, congrArg Prod.fst hg, congrArg Prod.snd hg⟩
+  · rintro ⟨g, h1, h2⟩
+    exact ⟨g, Prod.ext h1 h2⟩
+
+/-- A group element `g ∈ G` fixes every orbital (acts within orbits). -/
+theorem orbMk_smul (g : G) (v w : Fin n) :
+    (orbMk ((g : Equiv.Perm (Fin n)) v) ((g : Equiv.Perm (Fin n)) w) : Orbital G) = orbMk v w :=
+  (orbMk_eq_iff).mpr ⟨g, rfl, rfl⟩
+
+/-- `orbMk` is symmetric in its arguments up to the swap orbital: identity is recorded by `orbMk_comm`
+under generous transitivity (supplied per-instance). -/
+theorem orbMk_diag_iff [Nonempty (Fin n)] (htrans : MulAction.IsPretransitive G (Fin n))
+    {v w v₀ : Fin n} :
+    (orbMk v w : Orbital G) = orbMk v₀ v₀ ↔ v = w := by
+  rw [orbMk_eq_iff]
+  constructor
+  · rintro ⟨g, h1, h2⟩; rw [← h1, ← h2]
+  · rintro rfl
+    obtain ⟨g, hg⟩ := htrans.exists_smul_eq v₀ v
+    exact ⟨g, hg, hg⟩
+
+variable (G)
+
+/-- The **rank** of the orbital scheme: one less than the number of orbitals. -/
+noncomputable def orbitalRank : Nat := Fintype.card (Orbital G) - 1
+
+theorem orbitalRank_succ [Nonempty (Fin n)] :
+    orbitalRank G + 1 = Fintype.card (Orbital G) := by
+  have hpos : 0 < Fintype.card (Orbital G) := Fintype.card_pos_iff.mpr
+    ⟨(orbMk (Classical.arbitrary (Fin n)) (Classical.arbitrary (Fin n)) : Orbital G)⟩
+  unfold orbitalRank; omega
+
+/-- The **orbital indexing**: `Fin (rank+1) ≃ orbitals`, arranged so index `0` is the diagonal
+orbital. Built by casting `Fintype.equivFin` along `orbitalRank_succ`, then swapping `0` with the
+diagonal's index. -/
+noncomputable def orbitalIdx [Nonempty (Fin n)] : Fin (orbitalRank G + 1) ≃ Orbital G :=
+  let e : Fin (orbitalRank G + 1) ≃ Orbital G :=
+    (finCongr (orbitalRank_succ G)).trans (Fintype.equivFin (Orbital G)).symm
+  (Equiv.swap (0 : Fin (orbitalRank G + 1))
+      (e.symm (orbMk (Classical.arbitrary (Fin n)) (Classical.arbitrary (Fin n))))).trans e
+
+theorem orbitalIdx_zero [Nonempty (Fin n)] :
+    orbitalIdx G 0
+      = (orbMk (Classical.arbitrary (Fin n)) (Classical.arbitrary (Fin n)) : Orbital G) := by
+  simp only [orbitalIdx, Equiv.trans_apply, Equiv.swap_apply_left, Equiv.apply_symm_apply]
+
+/-- `Quotient.out` recovers a representative pair of any orbital. -/
+theorem orbMk_out (q : Orbital G) : (orbMk q.out.1 q.out.2 : Orbital G) = q := by
+  show Quotient.mk _ (q.out.1, q.out.2) = q
+  rw [Prod.mk.eta]; exact Quotient.out_eq q
+
+noncomputable instance : DecidableEq (Orbital G) := Classical.decEq _
+
+/-- `↑(g⁻¹)` is `(↑g).symm` as a permutation (the subgroup coercion commutes with inversion, and
+`Equiv.Perm` inversion is `Equiv.symm`). -/
+theorem coe_inv_eq_symm {G' : Subgroup (Equiv.Perm (Fin n))} (g : G') :
+    (↑(g⁻¹) : Equiv.Perm (Fin n)) = (↑g : Equiv.Perm (Fin n)).symm := by
+  rw [Subgroup.coe_inv]; rfl
+
+/-- **The orbital association scheme of a generously-transitive `G ≤ Perm (Fin n)`** (Phase 2, M0.1).
+Relations = the orbitals (`G`-orbits on ordered pairs); `relOfPair v w` is the orbital of `(v,w)`. The
+intersection-number axiom holds because `G` acts transitively on each orbital, so the witness count is
+constant along it (the bijection `u ↦ g·u`). -/
+noncomputable def orbitalAssocScheme [Nonempty (Fin n)]
+    (htrans : MulAction.IsPretransitive G (Fin n))
+    (hsymm : ∀ v w : Fin n, (orbMk v w : Orbital G) = orbMk w v) :
+    AssociationScheme n where
+  rank := orbitalRank G
+  rel := fun i v w => decide (orbitalIdx G i = orbMk v w)
+  rel_zero_iff_eq := fun v w => by
+    simp only [decide_eq_true_eq, orbitalIdx_zero]
+    rw [eq_comm]; exact orbMk_diag_iff htrans
+  rel_symm := fun i v w => by simp only [hsymm v w]
+  rel_partition := fun v w => by
+    refine ⟨(orbitalIdx G).symm (orbMk v w), ?_, ?_⟩
+    · simp only [decide_eq_true_eq, Equiv.apply_symm_apply]
+    · intro i hi
+      simp only [decide_eq_true_eq] at hi
+      have := congrArg (orbitalIdx G).symm hi
+      rwa [Equiv.symm_apply_apply] at this
+  intersectionNumber := fun i j k =>
+    (Finset.univ.filter (fun u : Fin n =>
+      orbitalIdx G i = orbMk (orbitalIdx G k).out.1 u ∧
+      orbitalIdx G j = orbMk u (orbitalIdx G k).out.2)).card
+  intersectionNumber_well_defined := fun i j k v w hvw => by
+    rw [decide_eq_true_eq] at hvw
+    -- `hvw : orbitalIdx G k = orbMk v w`; `pk := (idx k).out` is the chosen representative pair.
+    have hpkeq : (orbMk v w : Orbital G) = orbMk (orbitalIdx G k).out.1 (orbitalIdx G k).out.2 := by
+      rw [orbMk_out, hvw]
+    obtain ⟨g, hg1, hg2⟩ := (orbMk_eq_iff).mp hpkeq
+    -- `hg1 : ↑g pk.1 = v`, `hg2 : ↑g pk.2 = w`. Bijection `u ↦ ↑(g⁻¹) u` : (v,w)-set → pk-set.
+    refine Finset.card_bij'
+      (fun u _ => (↑(g⁻¹) : Equiv.Perm (Fin n)) u)
+      (fun u _ => (↑g : Equiv.Perm (Fin n)) u)
+      ?_ ?_ ?_ ?_
+    · -- forward `↑(g⁻¹) u` lands in the pk-set
+      intro u hu
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and, decide_eq_true_eq] at hu ⊢
+      refine ⟨?_, ?_⟩
+      · rw [hu.1, orbMk_eq_iff]
+        exact ⟨g, hg1, by simp⟩
+      · rw [hu.2, orbMk_eq_iff]
+        exact ⟨g, by simp, hg2⟩
+    · -- inverse `↑g u` lands in the (v,w)-set
+      intro u hu
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and, decide_eq_true_eq] at hu ⊢
+      refine ⟨?_, ?_⟩
+      · rw [hu.1, orbMk_eq_iff]
+        exact ⟨g⁻¹, by rw [coe_inv_eq_symm, ← hg1]; exact Equiv.symm_apply_apply _ _,
+                by simp⟩
+      · rw [hu.2, orbMk_eq_iff]
+        exact ⟨g⁻¹, by simp,
+                by rw [coe_inv_eq_symm, ← hg2]; exact Equiv.symm_apply_apply _ _⟩
+    · intro u _; simp
+    · intro u _; simp
+
+/-- **The orbital scheme of a generously-transitive `G ≤ Perm (Fin n)` is schurian** (Phase 2, M0.2).
+Two pairs in the same orbital are `G`-related by definition, and a `g ∈ G` preserves every orbital
+(`IsSchemeAut`). The witnessing automorphism is `g` itself. -/
+noncomputable def orbitalScheme [Nonempty (Fin n)]
+    (htrans : MulAction.IsPretransitive G (Fin n))
+    (hsymm : ∀ v w : Fin n, (orbMk v w : Orbital G) = orbMk w v) :
+    SchurianScheme n where
+  toAssociationScheme := orbitalAssocScheme G htrans hsymm
+  schurian := by
+    intro i v w v' w' hvw hv'w'
+    -- both `(v,w)` and `(v',w')` are in orbital `idx i`, hence `G`-related
+    simp only [orbitalAssocScheme, decide_eq_true_eq] at hvw hv'w'
+    have hrel : (orbMk v' w' : Orbital G) = orbMk v w := hv'w'.symm.trans hvw
+    obtain ⟨g, hg1, hg2⟩ := (orbMk_eq_iff).mp hrel
+    refine ⟨(↑g : Equiv.Perm (Fin n)), ?_, hg1, hg2⟩
+    -- `g ∈ G` preserves every orbital, so it is a scheme automorphism
+    intro ℓ a b
+    simp only [orbitalAssocScheme]
+    rw [orbMk_smul g a b]
+
+end Orbital
+
 /-! ## §4 — `vProfile` and Step 1 (the algebraic half)
 
 Stage T2.2 of the Tier 2 Lean program: the **v-profile** of a vertex

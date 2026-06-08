@@ -349,6 +349,24 @@ substrate for *every* Phase-2 attack. Phase 2 starts at the affine beachhead (§
 
 ### 9.1 M0 — the model: orbital scheme of a transitive group (the infrastructure)
 
+> **M0 LANDED (2026-06-08, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green, `Scheme.lean
+> §3.1`).** The general orbital-scheme constructor is built — Option A (full `SchurianScheme`), on `Fin n`
+> (so **no `V ≃ Fin(p^d)` transport**, the key simplification). Landed decls:
+> - `Orbital G := Quotient (orbitRel G (Fin n × Fin n))` (the orbitals) + `orbMk v w`; `orbMk_eq_iff`
+>   (same orbital ⟺ `∃ g ∈ G` carrying the pair), `orbMk_smul` (`g ∈ G` fixes orbitals), `orbMk_diag_iff`
+>   (diagonal orbital ⟺ `v=w`, under transitivity), `orbMk_out` (representative pair).
+> - The indexing: `orbitalRank G := #orbitals − 1`, `orbitalRank_succ`, `orbitalIdx : Fin (rank+1) ≃ Orbital G`
+>   with `orbitalIdx_zero` (index `0` = diagonal, via `Equiv.swap`).
+> - **`orbitalAssocScheme G htrans hsymm : AssociationScheme n`** — all 7 fields; the load-bearing
+>   `intersectionNumber_well_defined` via `Finset.card_bij'` with the bijection `u ↦ ↑(g⁻¹) u` (transitivity on
+>   each orbital ⟹ constant witness count).
+> - **`orbitalScheme G htrans hsymm : SchurianScheme n`** — the schurian field (same-orbital pairs are
+>   `G`-related; witness `g ∈ G` is a `IsSchemeAut`). Pluggable into `SelfDetectsStably`/the seal.
+>
+> Hypotheses: `[Nonempty (Fin n)]`, `htrans : MulAction.IsPretransitive G (Fin n)`, `hsymm` = generous
+> transitivity (`orbMk v w = orbMk w v`, the symmetric-scheme constraint 9.0(1) — affine discharges it via
+> `−1 ∈ G₀`). **Next: M0.3** — the affine instance `affineScheme := orbitalScheme (image of V⋊G₀) …`, then M1.
+
 **Goal.** A constructor `orbitalScheme : (G : Subgroup (Equiv.Perm (Fin n))) → (htrans : transitive) →
 SchurianScheme n`, then the affine instance `G = image of V⋊G₀ in Perm(V)` via `V ≃ Fin (p^d)`.
 
