@@ -3752,6 +3752,44 @@ theorem discrete_of_jointProfileSeparates {n : Nat} (S : AssociationScheme n) {T
           (individualizedColouring_refines (Finset.singleton_subset_iff.mpr ht)) u u' hcell
       exact relOfPair_eq_of_warmRefine_singleton S htu htu' href
 
+/-- **The depth-1 separability predicate (`s(C) = 1`) — a NAMED SPECIAL CASE of the open self-detection, not
+the whole thing.** A scheme is *depth-1 separable at depth `bound`* when some base set `T` of size `≤ bound`
+has an **injective depth-1 joint profile**: `(relOfPair t ·)_{t∈T}` separates all vertices. This is *strictly
+stronger* than what `SelfDetectsStably` needs (it demands separation after a *single* refinement round from
+`T`, i.e. `s(C) = 1`), so it is a **sufficient condition** covering the separable / depth-1-recoverable
+primitives (most of the catalogue/affine probe's primitives), **not** the `s(C) ≥ 2` cases.
+
+> **⚠️ THIS IS NOT THE CLOSED CRUX — where the engine slots in.** The genuinely open self-detection content is
+> the `s(C) ≥ 2` regime (cyclotomic, recovering only at depth `base + O(1)` via *iterated* joint-profile
+> separation). The intended next step is a **`selfDetectsStably_of_boundedDepthSeparable`** sitting *beside*
+> `selfDetectsStably_of_depthOneSeparable` below, keyed on a weaker *bounded-depth* (iterated) separation
+> predicate, produced by a `schemeAdj`-level iterated-profile engine (the analogue of the
+> `isolationStep`/`EdgeGenerates` closure machinery, which today exists only for the `J`-binarized graph). That
+> engine — not this predicate — is the open infrastructure. See `docs/chain-descent-self-detection-plan.md` §9.3
+> (M2-B) for the build plan.
+
+> **Bound non-vacuity (the `recoverableByDepth_univ` hinge).** `DepthOneSeparable S n` is *trivially true*
+> (`T = univ`: for `t = u`, `relOfPair u u = 0 = relOfPair u u'` forces `u' = u`). So all content lives in the
+> **small bound** (`base + 0`); the predicate is only meaningful at `bound ≪ n`, exactly like `RecoverableByDepth`. -/
+def DepthOneSeparable {n : Nat} (S : AssociationScheme n) (bound : Nat) : Prop :=
+  ∃ T : Finset (Fin n), T.card ≤ bound ∧
+    ∀ u u' : Fin n, (∀ t ∈ T, S.relOfPair t u = S.relOfPair t u') → u = u'
+
+/-- **Depth-1 separability ⟹ self-detection (the slot).** A primitive small residual that is depth-1 separable
+self-detects stably. This is the depth-1 (`s(C) = 1`) route into `SelfDetectsStably`; the open engine will add a
+sibling `…_of_boundedDepthSeparable` for `s(C) ≥ 2`, **not** replace the seal. Via
+`discrete_of_jointProfileSeparates` (the joint profile separates ⟹ `warmRefine` discrete) +
+`selfDetectsStably_of_discretizes`. -/
+theorem selfDetectsStably_of_depthOneSeparable {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop)
+    (bound : Nat)
+    (h : S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+        DepthOneSeparable S.toAssociationScheme bound) :
+    SelfDetectsStably S IsLarge bound := by
+  apply selfDetectsStably_of_discretizes
+  intro hps
+  obtain ⟨T, hcard, hsep⟩ := h hps
+  exact ⟨T, hcard, discrete_of_jointProfileSeparates S.toAssociationScheme hsep⟩
+
 /-- **The seal capstone, depth-graded (G1a).** `reachesRigidOrCameron_viaRecovery` with the rigid side widened
 from per-level `SchemeRecovered` to `SchemeRecoveredByDepth … bound`: every rank-≥3 schurian scheme residual is
 *recovered by bounded depth* or is a Cameron section. Each non-Cameron branch may now discharge via a
@@ -3981,6 +4019,33 @@ theorem reachesRigidOrCameron_viaFusedSeal {n : Nat} {IsLarge : Nat → Prop}
     hClassify (fun _ _ h => h) S hne hrank
     (fun h => Or.inr (selfDetectsAtDepth_of_selfDetectsStably hSelfDetect h))
     (fun h => Or.inl (hImprim h))
+
+/-- **The seal closed for the depth-1-separable (`s(C) = 1`) slice — A CONDITIONAL CAPSTONE, NOT THE CLOSED
+SEAL.** Specializes the fused seal by discharging its self-detection input via depth-1 separability
+(`selfDetectsStably_of_depthOneSeparable`). It **still carries** three hypotheses — the cited classification
+`hClassify` (G3), the imprimitive block recovery `hImprim`, and **`hDepthOne`** (depth-1 separability) — so it
+is manifestly conditional.
+
+> **⚠️ SCOPE — this closes the seal ONLY for the depth-1-separable class.** `hDepthOne` is *false* for `s(C) ≥ 2`
+> residuals (cyclotomic and friends, which recover only at depth `base + O(1)` via iterated separation). Closing
+> those is the open self-detection content; the engine slots in beside `selfDetectsStably_of_depthOneSeparable`
+> as a bounded-depth (iterated) producer of `SelfDetectsStably`, after which a sibling
+> `reachesRigidOrCameron_viaBoundedDepthSeparable` would carry the weaker hypothesis. Do **not** read this as
+> "the seal is closed for primitives." -/
+theorem reachesRigidOrCameron_viaDepthOneSeparable {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hDepthOne : S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+        DepthOneSeparable S.toAssociationScheme bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaFusedSeal hClassify S hne hrank
+    (selfDetectsStably_of_depthOneSeparable S IsLarge bound hDepthOne) hImprim
 
 /-! ### Phase 2, M0.3 — the affine instance `V ⋊ G₀` over `F_p^d`
 

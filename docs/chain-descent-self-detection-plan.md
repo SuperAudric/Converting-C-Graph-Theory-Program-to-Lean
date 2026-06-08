@@ -560,6 +560,27 @@ is free (translations act transitively). **Mathlib anchors:** `Module (ZMod p)`,
 > infrastructure build. **Did not over-reach on it.** Insight: depth-1-separating = multi-base-`EdgeGenerates`;
 > the iterated case is the multi-base analogue of the `isolationStep`/`EdgeGenerates` closure engine on `schemeAdj`.
 
+> **STEP 1 — DEPTH-1 SLICE CLOSED END-TO-END (2026-06-08, axiom-clean, full build green, `Cascade.lean`).** The
+> depth-1 pieces are now composed into named, *manifestly conditional* capstones that close the seal **for the
+> `s(C)=1` slice only** — designed to **expose the exact slot for the engine** (the anti-"looks-complete" design):
+> - **`DepthOneSeparable S bound`** (predicate): `∃ T, |T| ≤ bound ∧ the depth-1 joint profile separates`. The
+>   named `s(C)=1` object; docstring flags it is a *special case* (not the crux) + the bound-non-vacuity hinge
+>   (`DepthOneSeparable S n` trivially true via `T=univ`, cf. `recoverableByDepth_univ`).
+> - **`selfDetectsStably_of_depthOneSeparable`** : `(primitive ∧ small → DepthOneSeparable S bound) →
+>   SelfDetectsStably`. **THE SLOT** — the engine adds a *sibling* `selfDetectsStably_of_boundedDepthSeparable`
+>   (a weaker bounded-depth/iterated predicate) right here, **not** a replacement of the seal.
+> - **`reachesRigidOrCameron_viaDepthOneSeparable`** : the fused seal with `hSelfDetect` discharged via the above;
+>   still carries `hClassify` (G3) + `hImprim` + **`hDepthOne`**, so visibly conditional. Docstring: "closes the
+>   seal ONLY for `s(C)=1`; do not read as seal-closed-for-primitives."
+>
+> **Net:** the chain M0→M1→M2→M3→fused-seal now composes non-vacuously end-to-end (the §3 vacuity guard), with a
+> genuine stated partial theorem (seal closed for the separable / `s(C)=1` class = most primitives per the probe).
+> **WHERE THE ENGINE SLOTS IN (next agent):** build a `schemeAdj`-level *iterated* joint-profile separation engine;
+> expose it as `BoundedDepthSeparable S bound` (weaker than `DepthOneSeparable`: separation after ≤ `bound` *rounds*,
+> not 1) + `selfDetectsStably_of_boundedDepthSeparable` + `reachesRigidOrCameron_viaBoundedDepthSeparable` carrying
+> the weaker hypothesis. The `s(C)≥2` content = proving `BoundedDepthSeparable` for primitive small (irreducible
+> affine / cyclotomic) — the open WL-dimension math.
+
 **Goal (M2-B, the open iterated affine discreteness — the remaining research content).** `irreducible G₀ ⟹ ∃ S₀,
 |S₀| ≤ bound ∧ Discrete (warmRefine (schemeAdj affineScheme) … (individualizedColouring _ S₀))`, where the
 depth-1 case is the landed `discrete_affineScheme_of_jointSeparates` and the open part is the **iterated**
