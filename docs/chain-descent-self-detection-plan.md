@@ -539,9 +539,32 @@ is free (translations act transitively). **Mathlib anchors:** `Module (ZMod p)`,
 > term is the genuine, citation-free WL-dimension content. The base term (a spanning set ⟹ `Stab = 1`) is the
 > easy half.
 
-**Goal (M2-B, the open affine discreteness — the remaining research content).** `irreducible G₀ ⟹ ∃ S₀,
-|S₀| ≤ bound ∧ Discrete (warmRefine (schemeAdj affineScheme) … (individualizedColouring _ S₀))`. (Was: the
-`CellsAreOrbits`-at-all-`T` form below; `stablyRecoverable_of_discrete` reduces it to this Discrete form.)
+> **M2-B DEPTH-1 PRODUCER LANDED (2026-06-08, axiom-clean, full build green, `Cascade.lean`).** A concrete,
+> finite, checkable *sufficient condition* for the discreteness `stablyRecoverable_of_discrete` needs:
+> - **`discrete_of_jointProfileSeparates`** (general, any scheme): if the depth-1 joint profile
+>   `(relOfPair t ·)_{t∈T}` is **injective**, then `warmRefine (schemeAdj S)` from `T` is `Discrete`. Mechanism:
+>   cells refine the joint profile — the multi-base generalization of A1's `relOfPair_eq_of_warmRefine_singleton`,
+>   which **reduces to the single-base A1 lemma** via `warmRefine_refines_initial` (warmRefine-from-`T` refines
+>   warmRefine-from-`{t}`), no fresh signature argument; pairs meeting `T` collapse by singleton preservation
+>   (`individualizedColouring_mem_sep`).
+> - **`discrete_affineScheme_of_jointSeparates`** (affine `G₀`-orbit form): for `affineScheme`, the condition is
+>   that the `G₀`-orbits of the differences `(u−t)_{t∈T}` jointly separate `V` — the **depth-1 affine
+>   separability** target the probe measures. With `stablyRecoverable_of_discrete` + `selfDetectsStably_of_discretizes`
+>   this discharges the seal for any **depth-1-separating** (`s(C)=1`) primitive small affine residual.
+>
+> **Honest scope:** this is the **depth-1 (`s(C)=1`) producer + the multi-base infrastructure** the iterated case
+> needs. It covers the separable primitives (most of the catalogue/affine probe's primitives recover at depth 1).
+> **OPEN remainder = the iterated (`s(C) ≥ 2`, cyclotomic depth-4) version** of the same joint separation — that is
+> the genuine citation-free WL-dimension content, and it needs a `schemeAdj`-level iterated-profile engine (the
+> `schemePartFrom`/`iterSet` machinery is built for the `J`-binarized graph, not `schemeAdj`), a substantial
+> infrastructure build. **Did not over-reach on it.** Insight: depth-1-separating = multi-base-`EdgeGenerates`;
+> the iterated case is the multi-base analogue of the `isolationStep`/`EdgeGenerates` closure engine on `schemeAdj`.
+
+**Goal (M2-B, the open iterated affine discreteness — the remaining research content).** `irreducible G₀ ⟹ ∃ S₀,
+|S₀| ≤ bound ∧ Discrete (warmRefine (schemeAdj affineScheme) … (individualizedColouring _ S₀))`, where the
+depth-1 case is the landed `discrete_affineScheme_of_jointSeparates` and the open part is the **iterated**
+separation (cyclotomic / `s(C) ≥ 2`). (Was: the `CellsAreOrbits`-at-all-`T` form below;
+`stablyRecoverable_of_discrete` reduces it to this Discrete form.)
 The original `CellsAreOrbits` unfolding, kept for the orbit-level intuition:
 
 **The object, unfolded (affine).** WLOG `0 ∈ T` (translate). For `T = {0, x₁, …, x_k}`: `Stab(T)`-orbits are

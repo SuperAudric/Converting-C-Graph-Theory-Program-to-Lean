@@ -3691,6 +3691,67 @@ theorem selfDetectsStably_of_discretizes {n : Nat} (S : SchurianScheme n) (IsLar
   obtain ⟨S₀, hcard, hd⟩ := h hps
   exact ⟨S₀, hcard, stablyRecoverable_of_discrete hd⟩
 
+/-! ### Phase 2, M2-B — the depth-1 discreteness producer (the joint-profile separation tool)
+
+`stablyRecoverable_of_discrete` reduced the crux to `Discrete (warmRefine from S₀)`. This block gives a
+*concrete, finite, checkable* sufficient condition for that discreteness — **the depth-1 joint profile
+`(relOfPair t ·)_{t ∈ T}` separates all vertices** — together with the multi-base reduction that makes it
+work. The mechanism: `warmRefine` cells from base set `T` **refine** the joint-`T`-profile partition (the
+multi-base generalization of `relOfPair_eq_of_warmRefine_singleton`), and — the clean part — that
+generalization *reduces to the single-base A1 lemma* via `warmRefine_refines_initial` (warmRefine-from-`T`
+refines warmRefine-from-`{t}` for each `t ∈ T`), with no fresh signature argument. So if the joint profile is
+injective, cells are singletons. **Scope (honest):** this is the **depth-1** producer — it covers the
+depth-1-separating sub-class (most primitive schemes in the catalogue/affine probes), the base case of the
+iterated argument. The iterated (cyclotomic / `s(C) ≥ 2`, depth base+O(1)) extension is the remaining open
+content. The affine difference-form (`affineScheme`) is the `G₀`-orbit-of-difference reading. -/
+
+/-- Each individualized point `t ∈ T` carries a colour unique to it under `individualizedColouring n T`
+(the `Finset`-set analogue of `individualizedColouring_singleton_sep`). -/
+theorem individualizedColouring_mem_sep {n : Nat} {T : Finset (Fin n)} {t : Fin n} (ht : t ∈ T) :
+    ∀ u : Fin n, u ≠ t → individualizedColouring n T u ≠ individualizedColouring n T t := by
+  intro u hut
+  have htval : individualizedColouring n T t = t.val + 1 := by
+    simp [individualizedColouring, ht]
+  rw [htval]
+  by_cases hu : u ∈ T
+  · have : individualizedColouring n T u = u.val + 1 := by simp [individualizedColouring, hu]
+    rw [this]
+    intro h
+    exact hut (Fin.val_injective (by omega))
+  · have : individualizedColouring n T u = 0 := by simp [individualizedColouring, hu]
+    rw [this]; omega
+
+/-- **The depth-1 discreteness producer (general).** If the joint profile `(relOfPair t ·)_{t ∈ T}` is
+injective — `∀ u u', (∀ t ∈ T, relOfPair t u = relOfPair t u') → u = u'` — then `warmRefine (schemeAdj S)`
+from `T` is `Discrete`. Cells refine the joint profile: a same-cell pair off `T` agrees on each `relOfPair t ·`
+(via `warmRefine_refines_initial` to the single base `{t}` + `relOfPair_eq_of_warmRefine_singleton`), and a
+pair meeting `T` collapses by singleton preservation. Feeds `stablyRecoverable_of_discrete`. -/
+theorem discrete_of_jointProfileSeparates {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    (hsep : ∀ u u' : Fin n, (∀ t ∈ T, S.relOfPair t u = S.relOfPair t u') → u = u') :
+    Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T)) := by
+  classical
+  have hsingle : ∀ t ∈ T, ∀ x : Fin n,
+      warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) x
+        = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) t → x = t := by
+    intro t ht x hx
+    by_contra hxt
+    exact iterate_refineStep_preserves_singleton (schemeAdj S) (fun _ _ => POE.unknown) t n
+      (individualizedColouring n T) (individualizedColouring_mem_sep ht) x hxt hx
+  intro u u' hcell
+  by_cases hu : u ∈ T
+  · exact (hsingle u hu u' hcell.symm).symm
+  · by_cases hu' : u' ∈ T
+    · exact hsingle u' hu' u hcell
+    · apply hsep
+      intro t ht
+      have htu : u ≠ t := fun h => hu (h ▸ ht)
+      have htu' : u' ≠ t := fun h => hu' (h ▸ ht)
+      have href : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n {t}) u
+          = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n {t}) u' :=
+        warmRefine_refines_initial
+          (individualizedColouring_refines (Finset.singleton_subset_iff.mpr ht)) u u' hcell
+      exact relOfPair_eq_of_warmRefine_singleton S htu htu' href
+
 /-- **The seal capstone, depth-graded (G1a).** `reachesRigidOrCameron_viaRecovery` with the rigid side widened
 from per-level `SchemeRecovered` to `SchemeRecoveredByDepth … bound`: every rank-≥3 schurian scheme residual is
 *recovered by bounded depth* or is a Cameron section. Each non-Cameron branch may now discharge via a
@@ -4269,6 +4330,26 @@ theorem isPrimitive_affineScheme_imp_irreducible (hneg : LinearEquiv.neg (ZMod p
   rcases hprim I hcl with h | h
   · exact hIne0 h
   · exact hInu h
+
+/-- **M2-B, affine depth-1 discreteness (the `G₀`-orbit-of-difference form).** Specializes
+`discrete_of_jointProfileSeparates` to `affineScheme`: if individualizing `T` makes the `G₀`-orbits of the
+differences `(u − t)_{t ∈ T}` jointly separate `V`, then `warmRefine` from `T` is `Discrete`. Concretely the
+**depth-1 affine separability** condition — `∀ u u'`, if for every `t ∈ T` some `g₀ ∈ G₀` carries
+`e⁻¹u′ − e⁻¹t` to `e⁻¹u − e⁻¹t` (same `G₀`-orbit of difference), then `u = u'`. This is the finite,
+checkable target the affine probe measures at depth 1; combined with `stablyRecoverable_of_discrete` +
+`selfDetectsStably_of_discretizes` it discharges the seal for any depth-1-separating primitive small affine
+residual. The open remainder (cyclotomic / `s(C) ≥ 2`) is the *iterated* version of this same separation. -/
+theorem discrete_affineScheme_of_jointSeparates (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    {T : Finset (Fin (p ^ d))}
+    (hsep : ∀ u u' : Fin (p ^ d),
+      (∀ t ∈ T, ∃ g₀ ∈ G₀,
+        g₀ (affineE.symm u' - affineE.symm t) = affineE.symm u - affineE.symm t) → u = u') :
+    Discrete (warmRefine (schemeAdj (affineScheme G₀ hneg).toAssociationScheme)
+      (fun _ _ => POE.unknown) (individualizedColouring (p ^ d) T)) := by
+  apply discrete_of_jointProfileSeparates
+  intro u u' hjp
+  refine hsep u u' (fun t ht => ?_)
+  exact (orbMk_affine_eq_iff G₀).mp ((affineScheme_relOfPair_eq_iff G₀ hneg).mp (hjp t ht))
 
 end AffineScheme
 
