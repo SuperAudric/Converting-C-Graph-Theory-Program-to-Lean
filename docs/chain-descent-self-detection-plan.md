@@ -51,7 +51,7 @@ The single-base recovery engine is complete; the lemma reuses it wholesale.
 | Piece | Where | What it gives |
 |---|---|---|
 | `EdgeGenerates G v j0` | `Scheme.lean:3169` | depth-1 recovery: the isolation closure of `{R₀,R_{j0}}` reaches all relations |
-| `isolationStep`, `IsoPinned`, `relIsolatedAt_succ`, `stage_relIsolatedAt` | `Scheme.lean:2888,3077,3086,3133` | the closure→isolation engine; `IsoPinned` = a relation is the **unique** one with its intersection-count signature into the isolated set |
+| `relIsolatedAt_succ`, `IsoPinned`, `isolationStep`, `stage_relIsolatedAt` | `Scheme.lean:2888,3077,3086,3133` | the closure→isolation engine; `IsoPinned` = a relation is the **unique** one with its intersection-count signature into the isolated set |
 | `theorem_2_HOR_of_edgeGenerates` | `Scheme.lean:3181` | **P1**: `EdgeGenerates ⟹ cells = orbits` (recovery), no rank ladder |
 | `IsoPinned.mono` + saturation (`exists_iterate_isFixed_within`) | `Scheme.lean:3253`, `Saturation.lean` | the "graded pinning saturates the closure in ≤ n rounds" skeleton — **reuse for multi-base** |
 | `vProfile_iff_schemeOrbit` | `Scheme.lean:576` | **the load-bearing bridge**: for a schurian scheme, `relOfPair(v,·)`-classes **are** the `Stab(v)`-orbits |
@@ -59,7 +59,7 @@ The single-base recovery engine is complete; the lemma reuses it wholesale.
 | `IntersectionSeparates`, `depth2Det_of_intersectionSeparates` | `Scheme.lean:2524,2535` | the **two-base** realization instance (depth-2 determinacy from intersection-number separation) |
 | `RecoverableByDepth`, `CellsAreOrbits`, `recoverableByDepth_univ` | `CascadeOracle.lean:804,268,862` | the **recovery target**: `∃ S, |S| ≤ bound ∧ cells-from-S = orbits-from-S`; vacuous at `bound = n` (the non-vacuity hinge) |
 | `SchemeRecoveredByDepth`, `reachesRigidOrCameron_viaDepthRecovery` | `Cascade.lean` (G1a) | the **seal sink**: bounded shallow + deep visible realizers ⟹ the capstone |
-| `ClosedSubset`, `IsPrimitive`, `cell_splits_of_imprimitive`, `BlockRefinementVisible`, `SchemePartSeparatesBlock` | `Scheme.lean:164,212,3990,3916,3963` | the **block side** and the named Gate-G predicate (`SchemePartSeparatesBlock` = "the depth-n counting partition respects the block I") |
+| `ClosedSubset`, `IsPrimitive`, `cell_splits_of_imprimitive`, `BlockRefinementVisible`, `SchemePartSeparatesBlock` | `Scheme.lean:164,212,4014,3940,3987` | the **block side** and the named Gate-G predicate (`SchemePartSeparatesBlock` = "the depth-n counting partition respects the block I") |
 
 **Two insights from this inventory that shape the whole attack:**
 
@@ -126,25 +126,28 @@ everything around it.
   — `hCascade : IsPrimitive ∧ ¬NonCascade → ReachesRigid`. So the cascade obligation is the **primitive floor**.
 
 **4.2 — Name the self-detection proposition + the reduction.**
-- `PrimitiveFloorRecovers (bound) : Prop` — *every small, primitive, rank-≥3 schurian scheme residual is
+- `SelfDetectsAtDepth (bound) : Prop` (**landed**; planned in earlier drafts as `PrimitiveFloorRecovers`, which
+  was never the source name) — *a small, primitive, rank-≥3 schurian scheme residual is
   `SchemeRecoveredByDepth … bound`* (the precise, non-vacuous content: `SchemeRecoveredByDepth` is keyed on
   visible realizers + a bounded shallow phase, false for high `s(C)`; seal-handoff §3). This is exactly the
   sharpened `hCascade`.
-- `reachesRigidOrCameron_viaSelfDetection` — from `PrimitiveFloorRecovers bound` (cascade branch) + the landed
+- `reachesRigidOrCameron_viaSelfDetection` — from `SelfDetectsAtDepth bound` (cascade branch) + the landed
   imprimitive block recovery (`hImprim`), the seal `SchemeRecoveredByDepth ∨ Cameron`. The whole open seal is
-  now the single hypothesis `PrimitiveFloorRecovers` + cited G3.
+  now the single hypothesis `SelfDetectsAtDepth` + cited G3.
 
 **4.3 — The crux statement (the Phase-2 target), on semantic recovery.**
-- **`not_isPrimitive_of_persistentGap`** (THE CRUX, stated, proved in Phase 2): for a bound `≥ base + C`,
-  `¬ RecoverableByDepth adj P bound → ¬ IsPrimitive` (equivalently: primitive ⟹ recovers at `base + C`). The
-  "persistent gap" object (`¬CellsAreOrbits S` for every small `S` = a same-cell-different-orbit pair surviving
-  every small base) is the semantic twin; `vProfile_iff_schemeOrbit` makes it a pure separability statement
-  about intersection numbers. Proving it gives `PrimitiveFloorRecovers`, closing the seal.
+- **`not_isPrimitive_of_persistentGap`** (THE CRUX — **target name, NOT yet in source**; the open Phase-2 goal):
+  for a bound `≥ base + C`, `¬ RecoverableByDepth adj P bound → ¬ IsPrimitive` (equivalently: primitive ⟹
+  recovers at `base + C`). The "persistent gap" object (`¬CellsAreOrbits S` for every small `S` = a
+  same-cell-different-orbit pair surviving every small base) is the semantic twin; `vProfile_iff_schemeOrbit`
+  makes it a pure separability statement about intersection numbers. Proving it gives `SelfDetectsAtDepth`,
+  closing the seal. (The §5 block-side vocabulary names the **same** open statement
+  `not_isPrimitive_of_baseHomogeneousTwin` — two faces of one Phase-2 target; **neither is landed**.)
 
 **Phase-1 outcome (achievable, axiom-clean):** the seal is reduced to the single proposition
-`SelfDetectsAtDepth` (the primitive-floor `hCascade`; = the crux `not_isPrimitive_of_persistentGap`) + the
-cited G3, with `IsPrimitive` honestly carried into the cascade branch and the imprimitive branch on landed
-block recovery. The catalogue probe (`CatalogueSchemeProbe.cs`) *already tests this proposition's emptiness
+`SelfDetectsAtDepth` (the primitive-floor `hCascade`; satisfied by proving the crux
+`not_isPrimitive_of_persistentGap`, the open Phase-2 target) + the cited G3, with `IsPrimitive` honestly
+carried into the cascade branch and the imprimitive branch on landed block recovery. The catalogue probe (`CatalogueSchemeProbe.cs`) *already tests this proposition's emptiness
 empirically* (a persistent-gap primitive scheme would be a non-recovering primitive scheme — none in orders
 5–30). Phase 1 makes the open gap a *precise, falsifiable, single* statement — genuine progress independent of
 whether Phase 2 closes. The algebraic multi-base isolation engine (`EdgeGeneratesFromSet`) is deferred to
@@ -181,6 +184,7 @@ Phase 2, where it makes the crux *checkable* on the affine family (§5.1).
 
 ## 5. Phase 2 — proving the crux (research; sub-case first)
 
+The crux (**target name, NOT yet in source** — the block-side face of §4.3's `not_isPrimitive_of_persistentGap`)
 `not_isPrimitive_of_baseHomogeneousTwin` = "a base-homogeneous twin forces a non-trivial `ClosedSubset`." The
 mechanism (seal-handoff §G2 anatomy, Thread T2 / P3): **a gap that survives every base is base-homogeneous =
 supported by an invariant subspace / block system; primitivity forbids it.** Three attack surfaces, by Lean
@@ -274,10 +278,11 @@ to find than to rule out in Lean.
 
 ## 7. Honest scope — what closes, what stays open
 
-- **Phase 1 closes** (achievable, axiom-clean): the seal reduced to one precise proposition
-  `not_isPrimitive_of_baseHomogeneousTwin`; the multi-base engine; the wiring discharging `hCascade` *given*
-  that proposition. Net: seal = unconditional **modulo {G3 + that one proposition}**, with the proposition
-  empirically gated by the catalogue probe.
+- **Phase 1 is DONE** (axiom-clean, Increments 1+2 landed): the seal reduced to one precise *landed*
+  proposition — `SelfDetectsStably` (semantic) / `SelfDetectsAtDepth` (its harvest-witness form) — via the
+  multi-base engine and the `hCascade` wiring. Net: seal = unconditional **modulo {G3 + `SelfDetectsStably`}**,
+  with the proposition empirically gated by the catalogue probe. (Proving `SelfDetectsStably` is Phase 2; its
+  open crux is `not_isPrimitive_of_baseHomogeneousTwin` = `not_isPrimitive_of_persistentGap`, target-only.)
 - **Phase 2, 5.1 (affine) plausibly closes** the affine slice of the crux (bounded `d`), with new Lean
   infrastructure (translation schemes). 5.2 (rank-3/4) is a sharp finite-flavoured slice. **5.3 (general) is
   open mathematics** — there is no citation, and the full "primitive schurian ⟹ separable" may be a genuine

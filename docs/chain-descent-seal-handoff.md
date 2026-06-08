@@ -44,6 +44,13 @@
 > (recovery + the unified harvest), [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) (Part A,
 > the cross-branch harvest), `Group.lean` (leg B), `Scheme.lean` (primitivity, blocks, the trichotomy),
 > `Cascade.lean` (the harvest, the tower, the seal capstone).
+>
+> **⟶ For the G2-B / `hCascade` gap specifically (the sole irreducible open input), the live working doc is
+> [`chain-descent-self-detection-plan.md`](./chain-descent-self-detection-plan.md):** Phase 1 is DONE — the seal is
+> reduced (axiom-clean, landed) to the **single semantic proposition `SelfDetectsStably`** (`reachesRigidOrCameron_viaStableRecovery`,
+> `Cascade.lean`): *primitive small ⟹ cells = orbits above a bounded base set*. Its **§9 ("PICK UP HERE")** is the
+> detailed affine-multi-base build plan for Phase 2 (proving that proposition). Read it for any G2-B work; the
+> board below (§G2 anatomy / attack board) is the theory it formalizes.
 
 ---
 
@@ -198,7 +205,7 @@ captures hidden-abelian), which shrinks the wall to exactly G2-B but does not el
 end-state is a conditional theorem `modulo {G3 cited classification + G2-B}`; the only thing that discharges G2-B is
 the self-detection lemma, which is research, not engineering.
 
-### G1a — `SchemeRecovered` is depth-1-only; it must become depth-graded (leg A scope)
+### G1a — depth-graded recovery (`SchemeRecovered` was depth-1-only) — LANDED (leg A scope)
 
 **LANDED (2026-06-07, axiom-clean `[propext, Classical.choice, Quot.sound]`, `Cascade.lean`).** The depth-graded
 model is built, via the **base-sequence phase split** (`coversOrbits_append`):
@@ -259,7 +266,7 @@ keyed on a single bounded recovery set must be reconciled with the chain's per-p
 the **tower / `cascadeComposition`** (G2-A's machinery) — recovery composes across layers with *depths add*, and
 each prefix's coverage is a layer. This couples G1a to the tower.
 
-### G1b — leg B (hidden abelian) is missing from the seal — THE most actionable gap
+### G1b — leg B (hidden abelian) — LANDED (was "the most actionable gap")
 
 **The problem.** `SchemeRecovered` is visible-recovery only. An abelian-but-not-visibly-recovering scheme is
 consumed by the **linear oracle** (leg B), not by refinement, so it fails `SchemeRecovered` *and* is not Cameron —
