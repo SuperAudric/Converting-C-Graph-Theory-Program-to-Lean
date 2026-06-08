@@ -3920,20 +3920,58 @@ noncomputable def affinePermFin (g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d
     affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t) := by
   simp only [affinePermFin, Equiv.permCongr_apply, affineEquivV, Equiv.coe_fn_mk]
 
+/-- The identity is the trivial affine perm. -/
+theorem affinePermFin_one :
+    affinePermFin (1 : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) (0 : Fin d → ZMod p) = 1 := by
+  ext i; simp [affinePermFin_apply, LinearEquiv.coe_one]
+
+/-- **Affine perms compose to affine perms** (`x ↦ g₀x+t` ∘ `x ↦ h₀x+s` = `x ↦ (g₀h₀)x + (g₀s+t)`). -/
+theorem affinePermFin_mul (g₀ h₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+    (t s : Fin d → ZMod p) :
+    affinePermFin g₀ t * affinePermFin h₀ s = affinePermFin (g₀ * h₀) (g₀ s + t) := by
+  ext i
+  simp only [Equiv.Perm.mul_apply, affinePermFin_apply, Equiv.symm_apply_apply,
+    LinearEquiv.mul_apply, map_add]
+  congr 1; abel
+
+/-- The inverse of an affine perm is affine. -/
+theorem affinePermFin_inv (g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+    (t : Fin d → ZMod p) :
+    (affinePermFin g₀ t)⁻¹ = affinePermFin g₀⁻¹ (-(g₀⁻¹ t)) := by
+  have h : affinePermFin g₀⁻¹ (-(g₀⁻¹ t)) * affinePermFin g₀ t = 1 := by
+    rw [affinePermFin_mul, inv_mul_cancel, add_neg_cancel, affinePermFin_one]
+  exact inv_eq_of_mul_eq_one_left h
+
 variable (G₀ : Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)))
 
 /-- The affine permutations whose linear part lies in `G₀` — the generating set of `V ⋊ G₀`. -/
 def affineGenSet : Set (Equiv.Perm (Fin (p ^ d))) :=
   { σ | ∃ g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p), g₀ ∈ G₀ ∧ ∃ t, σ = affinePermFin g₀ t }
 
-/-- **The affine group `V ⋊ G₀`** as a subgroup of `Perm (Fin (p^d))`. -/
-noncomputable def affineG : Subgroup (Equiv.Perm (Fin (p ^ d))) :=
-  Subgroup.closure (affineGenSet G₀)
+/-- **The affine group `V ⋊ G₀`** as a subgroup of `Perm (Fin (p^d))`. Defined as the carrier set of
+affine perms (closed under product/inverse/identity by `affinePermFin_mul`/`_inv`/`_one`), so membership
+is *transparently* "is an affine perm with linear part in `G₀`" — what the orbital characterization (M1.0b)
+needs. -/
+noncomputable def affineG : Subgroup (Equiv.Perm (Fin (p ^ d))) where
+  carrier := affineGenSet G₀
+  mul_mem' := by
+    rintro a b ⟨g₀, hg₀, t, rfl⟩ ⟨h₀, hh₀, s, rfl⟩
+    exact ⟨g₀ * h₀, mul_mem hg₀ hh₀, g₀ s + t, affinePermFin_mul g₀ h₀ t s⟩
+  one_mem' := ⟨1, one_mem _, 0, affinePermFin_one.symm⟩
+  inv_mem' := by
+    rintro a ⟨g₀, hg₀, t, rfl⟩
+    exact ⟨g₀⁻¹, inv_mem hg₀, -(g₀⁻¹ t), affinePermFin_inv g₀ t⟩
+
+/-- **Membership in `affineG` is being an affine perm with linear part in `G₀`** (the transparent carrier). -/
+theorem mem_affineG_iff {σ : Equiv.Perm (Fin (p ^ d))} :
+    σ ∈ affineG G₀ ↔ ∃ g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p),
+      g₀ ∈ G₀ ∧ ∃ t, σ = affinePermFin g₀ t :=
+  Iff.rfl
 
 /-- A translation lies in `affineG` (linear part `1 ∈ G₀`). -/
 theorem affinePermFin_one_mem (t : Fin d → ZMod p) :
     affinePermFin (1 : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) t ∈ affineG G₀ :=
-  Subgroup.subset_closure ⟨1, one_mem _, t, rfl⟩
+  ⟨1, one_mem _, t, rfl⟩
 
 /-- **Transitivity** — translations act transitively on `F_p^d`. -/
 theorem affineG_isPretransitive : MulAction.IsPretransitive (affineG G₀) (Fin (p ^ d)) := by
@@ -3953,7 +3991,7 @@ theorem affineG_generous (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) (x y : Fin (
     (orbMk x y : Orbital (affineG G₀)) = orbMk y x := by
   rw [orbMk_eq_iff]
   refine ⟨⟨affinePermFin (LinearEquiv.neg (ZMod p)) (affineE.symm x + affineE.symm y),
-      Subgroup.subset_closure ⟨_, hneg, _, rfl⟩⟩, ?_, ?_⟩
+      ⟨_, hneg, _, rfl⟩⟩, ?_, ?_⟩
   · show affinePermFin (LinearEquiv.neg (ZMod p)) (affineE.symm x + affineE.symm y) y = x
     rw [affinePermFin_apply]
     have : (LinearEquiv.neg (ZMod p)) (affineE.symm y) + (affineE.symm x + affineE.symm y)
@@ -3976,6 +4014,46 @@ noncomputable def affineScheme (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) : Schu
   haveI : NeZero p := ⟨(Fact.out : p.Prime).pos.ne'⟩
   haveI : Nonempty (Fin (p ^ d)) := ⟨⟨0, Nat.pos_of_ne_zero (pow_ne_zero d (NeZero.ne p))⟩⟩
   orbitalScheme (affineG G₀) (affineG_isPretransitive G₀) (affineG_generous G₀ hneg)
+
+/-! #### M1.0b — the orbital ⟺ `G₀`-orbit-of-difference characterization (the Schur-ring statement)
+
+This is the affine scheme's defining structure made precise: **two pairs lie in the same orbital iff their
+difference vectors are `G₀`-related**. It is exactly the "translation scheme = orbit Schur ring `A(G₀)`"
+identity — relations of `affineScheme` ↔ `G₀`-orbits on `V` (differences). It is the bridge M1's
+block ⟺ invariant-subspace argument runs on. -/
+
+/-- **Orbital ⟺ `G₀`-orbit of the difference.** `(x,y)` and `(x',y')` are in the same orbital of
+`affineG G₀` iff some `g₀ ∈ G₀` carries the difference `e⁻¹y' − e⁻¹x'` to `e⁻¹y − e⁻¹x`. -/
+theorem orbMk_affine_eq_iff {x y x' y' : Fin (p ^ d)} :
+    (orbMk x y : Orbital (affineG G₀)) = orbMk x' y' ↔
+      ∃ g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p), g₀ ∈ G₀ ∧
+        g₀ (affineE.symm y' - affineE.symm x') = affineE.symm y - affineE.symm x := by
+  rw [orbMk_eq_iff]
+  constructor
+  · rintro ⟨a, hax, hay⟩
+    obtain ⟨g₀, hg₀, t, ha⟩ := a.2
+    refine ⟨g₀, hg₀, ?_⟩
+    rw [ha, affinePermFin_apply] at hax hay
+    have hx : g₀ (affineE.symm x') + t = affineE.symm x := by
+      have := congrArg affineE.symm hax; rwa [Equiv.symm_apply_apply] at this
+    have hy : g₀ (affineE.symm y') + t = affineE.symm y := by
+      have := congrArg affineE.symm hay; rwa [Equiv.symm_apply_apply] at this
+    rw [map_sub, ← hx, ← hy]; abel
+  · rintro ⟨g₀, hg₀, hg⟩
+    refine ⟨⟨affinePermFin g₀ (affineE.symm x - g₀ (affineE.symm x')), ⟨g₀, hg₀, _, rfl⟩⟩, ?_, ?_⟩
+    · show affinePermFin g₀ (affineE.symm x - g₀ (affineE.symm x')) x' = x
+      rw [affinePermFin_apply]
+      have : g₀ (affineE.symm x') + (affineE.symm x - g₀ (affineE.symm x')) = affineE.symm x := by abel
+      rw [this, Equiv.apply_symm_apply]
+    · show affinePermFin g₀ (affineE.symm x - g₀ (affineE.symm x')) y' = y
+      rw [affinePermFin_apply]
+      have hg2 : g₀ (affineE.symm y') - g₀ (affineE.symm x') = affineE.symm y - affineE.symm x := by
+        rw [← map_sub]; exact hg
+      have : g₀ (affineE.symm y') + (affineE.symm x - g₀ (affineE.symm x')) = affineE.symm y := by
+        rw [show g₀ (affineE.symm y') + (affineE.symm x - g₀ (affineE.symm x'))
+              = (g₀ (affineE.symm y') - g₀ (affineE.symm x')) + affineE.symm x from by abel, hg2]
+        abel
+      rw [this, Equiv.apply_symm_apply]
 
 end AffineScheme
 

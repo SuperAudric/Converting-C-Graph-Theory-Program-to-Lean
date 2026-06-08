@@ -1158,13 +1158,18 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `affineE` | 3901-3903 | (Phase 2, M0.3) The transport `F_p^d ≃ Fin (p^d)` (the scheme lives on `Fin (p^d)`). | Definition, `noncomputable` |
 | `affineEquivV` | 3905-3911 | (Phase 2, M0.3) The affine permutation `x ↦ g₀ x + t` of `V = F_p^d` (explicit inverse `y ↦ g₀⁻¹(y−t)`). | Definition |
 | `affinePermFin` | 3913-3916 | (Phase 2, M0.3) `affineEquivV` transported to `Perm (Fin (p^d))` via `affineE.permCongr`. | Definition, `noncomputable` |
-| `affinePermFin_apply` | 3918-3923 | (Phase 2, M0.3) `affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t)`. | `@[simp]` |
-| `affineGenSet` | 3925-3927 | (Phase 2, M0.3) The affine permutations whose linear part lies in `G₀` — the generating set of `V ⋊ G₀`. | Definition |
-| `affineG` | 3929-3931 | **(Phase 2, M0.3)** The affine group `V ⋊ G₀` as a `Subgroup (Perm (Fin (p^d)))` (= `closure affineGenSet`). | Definition, `noncomputable` |
-| `affinePermFin_one_mem` | 3933-3936 | (Phase 2, M0.3) A translation (`linear part 1 ∈ G₀`) lies in `affineG`. | — |
-| `affineG_isPretransitive` | 3938-3948 | **(Phase 2, M0.3)** Transitivity — translations act transitively on `F_p^d`. Supplies `orbitalScheme`'s `htrans`. | — |
-| `affineG_generous` | 3950-3968 | **(Phase 2, M0.3)** Generous transitivity — with `-1 ∈ G₀`, `orbMk x y = orbMk y x` (the affine swap `u ↦ -u + (x+y)`), making the scheme symmetric. Supplies `orbitalScheme`'s `hsymm`. | — |
-| `affineScheme` | 3970-3978 | **(Phase 2, M0.3 — THE BEACHHEAD MODEL)** The affine scheme `V ⋊ G₀` over `F_p^d` as a `SchurianScheme (p^d)`, via `orbitalScheme (affineG G₀)`. Relations = `G₀`-orbits on differences; `relOfPair x y` = orbit of `y−x`. Pluggable into `SelfDetectsStably`/the seal. Requires `-1 ∈ G₀`. Next: M1 (`IsPrimitive` ⟺ `G₀` irreducible), M2 (irreducible ⟹ recovers). Axiom-clean. | Definition, `noncomputable` |
+| `affinePermFin_apply` | 3918-3921 | (Phase 2, M0.3) `affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t)`. | `@[simp]` |
+| `affinePermFin_one` | 3923-3926 | (Phase 2, M1.0) The identity is the trivial affine perm (`affinePermFin 1 0 = 1`). | — |
+| `affinePermFin_mul` | 3928-3935 | (Phase 2, M1.0) **Affine perms compose to affine perms**: `affinePermFin g₀ t * affinePermFin h₀ s = affinePermFin (g₀h₀) (g₀s+t)`. | — |
+| `affinePermFin_inv` | 3937-3945 | (Phase 2, M1.0) The inverse of an affine perm is affine (`(affinePermFin g₀ t)⁻¹ = affinePermFin g₀⁻¹ (−g₀⁻¹t)`). | — |
+| `affineGenSet` | 3947-3949 | (Phase 2, M0.3) The affine permutations whose linear part lies in `G₀` — the generating set of `V ⋊ G₀`. | Definition |
+| `affineG` | 3951-3963 | **(Phase 2, M0.3/M1.0)** The affine group `V ⋊ G₀` as a `Subgroup (Perm (Fin (p^d)))` — the *carrier-set* subgroup of affine perms (closed under `*`/`⁻¹`/`1` by `affinePermFin_mul`/`_inv`/`_one`), so membership is transparently "is an affine perm with linear part in `G₀`". | Definition, `noncomputable` |
+| `mem_affineG_iff` | 3965-3969 | **(Phase 2, M1.0)** Membership in `affineG` ⟺ being an affine perm with linear part in `G₀` (`σ = affinePermFin g₀ t`, `g₀ ∈ G₀`). The transparent characterization the orbital argument needs. | — |
+| `affinePermFin_one_mem` | 3971-3974 | (Phase 2, M0.3) A translation (`linear part 1 ∈ G₀`) lies in `affineG`. | — |
+| `affineG_isPretransitive` | 3976-3986 | **(Phase 2, M0.3)** Transitivity — translations act transitively on `F_p^d`. Supplies `orbitalScheme`'s `htrans`. | — |
+| `affineG_generous` | 3988-4006 | **(Phase 2, M0.3)** Generous transitivity — with `-1 ∈ G₀`, `orbMk x y = orbMk y x` (the affine swap `u ↦ -u + (x+y)`), making the scheme symmetric. Supplies `orbitalScheme`'s `hsymm`. | — |
+| `affineScheme` | 4008-4016 | **(Phase 2, M0.3 — THE BEACHHEAD MODEL)** The affine scheme `V ⋊ G₀` over `F_p^d` as a `SchurianScheme (p^d)`, via `orbitalScheme (affineG G₀)`. Relations = `G₀`-orbits on differences; `relOfPair x y` = orbit of `y−x`. Pluggable into `SelfDetectsStably`/the seal. Requires `-1 ∈ G₀`. Next: M1 (`IsPrimitive` ⟺ `G₀` irreducible), M2 (irreducible ⟹ recovers). Axiom-clean. | Definition, `noncomputable` |
+| `orbMk_affine_eq_iff` | 4025-4056 | **(Phase 2, M1.0b — THE SCHUR-RING CHARACTERIZATION)** Two pairs lie in the same orbital of `affineG G₀` ⟺ some `g₀ ∈ G₀` carries the difference `e⁻¹y′−e⁻¹x′` to `e⁻¹y−e⁻¹x`. I.e. relations of `affineScheme` ↔ `G₀`-orbits on `V` (differences) — the "translation scheme = orbit Schur ring `A(G₀)`" identity. The bridge M1's block ⟺ invariant-subspace argument runs on. | — |
 ## ChainDescent/Saturation.lean
 
 | Name | Line | Description | Notes |

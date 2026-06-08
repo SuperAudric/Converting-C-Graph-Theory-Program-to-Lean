@@ -432,6 +432,28 @@ is free (translations act transitively). **Mathlib anchors:** `Module (ZMod p)`,
 
 ### 9.2 M1 — block ⟺ invariant subspace; primitive ⟺ irreducible (the insight, Mathlib-clean)
 
+> **M1.0 + M1.0b LANDED (2026-06-08, axiom-clean, full build green, `Cascade.lean §AffineScheme`).**
+> - **M1.0 (foundational refactor):** `affineG` is now the **carrier-set subgroup** of affine perms (was
+>   `Subgroup.closure`), via algebra helpers `affinePermFin_one`/`affinePermFin_mul` (`affinePermFin g₀ t *
+>   affinePermFin h₀ s = affinePermFin (g₀h₀) (g₀s+t)`)/`affinePermFin_inv`. Gives **`mem_affineG_iff`** :
+>   `σ ∈ affineG ↔ ∃ g₀∈G₀, ∃ t, σ = affinePermFin g₀ t` (`Iff.rfl`) — transparent membership.
+> - **M1.0b (the Schur-ring characterization):** **`orbMk_affine_eq_iff`** : `orbMk x y = orbMk x' y' ↔
+>   ∃ g₀∈G₀, g₀ (e⁻¹y′−e⁻¹x′) = e⁻¹y−e⁻¹x`. I.e. relations of `affineScheme` ↔ `G₀`-orbits on differences =
+>   the orbit Schur ring `A(G₀)`. This is the bridge the block ⟺ invariant-subspace argument runs on.
+>
+> **NEXT (M1.1/M1.2 — the irreducibility bridge, precisely scoped):**
+> 1. `affineScheme_relOfPair_eq_iff` : `relOfPair x y = relOfPair x' y' ↔ ∃ g₀∈G₀, g₀(diff') = diff` (lift
+>    `orbMk_affine_eq_iff` through `relOfPair = orbitalIdx.symm ∘ orbMk`; needs a small
+>    `affineScheme.rel i x y = true ↔ orbitalIdx i = orbMk x y` helper).
+> 2. `def G₀Irreducible := ∀ W : Submodule (ZMod p) V, (G₀-invariant W) → W = ⊥ ∨ W = ⊤` (avoid Mathlib
+>    `IsSimpleModule`/`IsPreprimitive` — self-contained).
+> 3. **The critical bridge `¬ G₀Irreducible → ¬ IsPrimitive (affineScheme)`** (= `IsPrimitive → G₀Irreducible`,
+>    what M3 consumes): from a proper invariant `W`, build `I := {i | orbital-i difference ∈ W}` and prove
+>    `ClosedSubset I` (0∈I: diff 0∈W; closed: `intersectionNumber i j k ≠ 0 → ∃ composable triple` ⟹ diffs
+>    add, W subspace; I≠{0}: W≠0; I≠univ: W≠V). The one general scheme lemma needed:
+>    `intersectionNumber i j k ≠ 0 → ∃ x y z, rel i x y ∧ rel j y z ∧ rel k x z` (R_k nonempty via
+>    `(orbitalIdx k).out`). This is the **"block = sub-structure, primitivity forbids it" template** for §5.3.
+
 **Goal.** Translate the seal's `IsPrimitive` hypothesis into `G₀`-irreducibility, which M2 consumes.
 
 - **M1.1 — `ClosedSubset` ⟺ `G₀`-invariant subspace.** For the affine scheme, a `ClosedSubset I`'s block of
