@@ -92,6 +92,7 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 |------|------|-------------|-------|
 | `refineStep_mono` | 168-174 | One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)`. | — |
 
+| `individualizedColouring_singleton_sep` | 3094-3101 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
 ## ChainDescent/CascadeOracle.lean
 
 | Name | Line | Description | Notes |
@@ -103,8 +104,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `individualizedColouring_singleton_eq_v_iff` | 840-853 | `χ_v` uniqueness: `individualizedColouring n {v} u = individualizedColouring n {v} v ↔ u = v`. | — |
-| `signature_count_eq_card` | 1072-1083 | §8.b.2 Bridge lemma: `Multiset.count t (signature adj P χ w)` equals the cardinality of the matching `u' ≠ w` preimage filter. | — |
-| `signature_eq_card_eq` | 1085-1098 | Count equality from signature equality: equal signatures give equal preimage-filter cardinalities for every tuple `t`. | — |
 | `iter_succ_count_eq` | 1100-1115 | Iter-round count equality: `iter[k+1]` equality forces matching intermediate-vertex counts for every (round-k colour, adj, P) triple. | — |
 | `signature_countP_eq_card` | 1117-1128 | §8.b.2 `countP` form of `signature_count_eq_card`. | — |
 | `signature_eq_countP_eq` | 1130-1140 | Aggregate `countP` equality from signature equality, for any decidable predicate `p`. | — |

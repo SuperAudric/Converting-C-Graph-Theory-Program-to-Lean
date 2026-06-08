@@ -195,6 +195,47 @@ instance — a real but self-contained infrastructure build, and the affine prob
 Predicted to close for bounded `d` (mirrors Ponomarenko's prime-power circulant `WL-dim ≤ 3`). This is the
 sharpest concrete instance of the crux and the recommended first proof.
 
+> **LOAD-BEARING INSIGHT (2026-06-08, from reading the recovery semantics — generalizable to the whole crux).**
+> The seal's recovery predicate is `CellsAreOrbits (schemeAdj S) …`, and **`schemeAdj S` encodes the *full*
+> scheme** (`adj v w = (relOfPair v w).val`, a multi-valued edge label `signature` reads in full). Consequences:
+> 1. **Single-base recovery is FREE for every schurian scheme.** `warmRefine` from `{v}` separates by
+>    `relOfPair(v,·)` (the unique colour of the individualized `v` makes the `v`-neighbour tuple identify the
+>    relation), and for a schurian scheme `relOfPair(v,·)`-classes **are** the `Stab(v)`-orbits
+>    (`vProfile_iff_schemeOrbit`). With `orbits ⊆ cells` (auts preserve `warmRefine`), this forces
+>    `cells = orbits` at `{v}`. So `CellsAreOrbits (schemeAdj S) … {v}` holds **unconditionally** — *no*
+>    `EdgeGenerates`, *no* affine structure. (This is *not* the `theorem_2_HOR`/`EdgeGenerates` setting, which is
+>    the harder *single-relation* graph `J={j0}` — `schemeAdj` is the full colouring, where recovery is free.)
+> 2. **The entire crux is therefore MULTI-BASE** (`|T| ≥ 2`). The `s(C)` gap is that the *joint* profile
+>    `(relOfPair(v,·), relOfPair(x,·))` need not determine the *joint* `Stab(v,x)`-orbit — there iterated 1-WL
+>    can fall short. `StablyRecoverable S₀ = ∀ T ⊇ S₀, CellsAreOrbits T` is genuinely about these multi-base `T`.
+> 3. **This is *why* the reduction is non-vacuous** (resolves the §3 worry concretely): single-base is free but
+>    `StablyRecoverable` quantifies over *all* supersets, and multi-base recovery is the real `s(C)` content.
+> 4. **Generalizable target shape:** the crux = "primitive ⟹ a *bounded* base set makes the *joint* profile
+>    determine the *joint* orbit." For affine, "joint profile determines joint orbit" becomes a linear-algebra
+>    statement about `(G₀)_x`-orbits and invariant subspaces; for the general crux it is the multi-base
+>    separability bound. The single-base theorem is the shared base case.
+>
+> **Modelling note:** the `schemePart_at`/`relIsolatedAt`/`EdgeGenerates` machinery is built for
+> `SchurianSchemeGraph` (a `J`-binarized adjacency), **not** `schemeAdj` (full `relOfPair`). Recovery proofs on
+> the seal's `schemeAdj` need their own `warmRefine`-internals lemmas (or a `schemeAdj`↔`SchurianSchemeGraph`
+> bridge). The single-base theorem (Increment A1) builds the first such lemma.
+
+**Increment A1 — LANDED (2026-06-08, axiom-clean `[propext, Classical.choice, Quot.sound]`, build green).**
+The single-base recovery theorem (general, the insight as a theorem):
+- `cellsAreOrbits_schemeAdj_singleton (S : SchurianScheme n) (v) : CellsAreOrbits (schemeAdj S…) … {v}` — for
+  *every* schurian scheme, `warmRefine` cells at a single base coincide with the `Stab(v)`-orbits.
+- `relOfPair_eq_of_warmRefine_singleton` — `warmRefine` from `{v}` separates by `relOfPair(v,·)` (peel to one
+  round via `iterate_refineStep_colour_refines`, `refineStep_iff`, then the count bridge `signature_eq_card_eq`
+  — the individualized `v`'s unique colour isolates its neighbour-tuple). Combined with `vProfile_iff_schemeOrbit`
+  + `isAut_schemeAdj_iff`. Helpers: `iterate_refineStep_colour_refines`, `individualizedColouring_singleton_sep`;
+  made `signature_count_eq_card`/`signature_eq_card_eq` public.
+
+**Net:** single-base recovery on `schemeAdj` is now a *theorem* (free, general — not affine-specific), confirming
+the insight and giving the reusable base case. **The remaining crux is exactly the multi-base extension**
+(`StablyRecoverable {v}` = `∀ T ⊇ {v}, CellsAreOrbits T`, where `|T| ≥ 2` is the `s(C)` content). Next: the
+affine multi-base argument — model `V⋊G₀` and show irreducible `G₀` ⟹ a bounded base makes the *joint* profile
+determine the *joint* `(G₀)_x`-orbit (twin ⟺ invariant subspace ⟺ block).
+
 **5.2 — Rank-3/4 slice (connects to G3, possibly citation-light).** A primitive **rank-3** scheme is an SRG;
 a base-homogeneous twin can only be between the two non-diagonal relations `R₁,R₂`, forcing equal valency +
 matched intersection numbers = a conference-graph-type degeneracy. Whether *every* primitive rank-3/4

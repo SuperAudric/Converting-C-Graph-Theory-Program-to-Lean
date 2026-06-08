@@ -3066,6 +3066,122 @@ theorem stabilizerAt_schemeAdj_empty_eq {m : Nat} (S : SchurianScheme m) :
   rw [mem_stabilizerAt_empty, isAut_schemeAdj_iff]
   exact ⟨fun h => h.1, fun h => ⟨h, fun _ _ => rfl⟩⟩
 
+/-! ### §13a — Single-base recovery on `schemeAdj` is free (the self-detection base case)
+
+The seal's recovery predicate `CellsAreOrbits (schemeAdj S) …` is keyed on `schemeAdj S`, which encodes the
+**full** scheme (`adj v w = (relOfPair v w).val`, a multi-valued edge label `signature` reads in full — *not*
+the single-relation `SchurianSchemeGraph`/`EdgeGenerates` setting). On `schemeAdj`, **single-base** recovery is
+unconditional for *every* schurian scheme: `warmRefine` from `{v}` separates by `relOfPair(v,·)` (the unique
+colour of the individualized `v` makes the `v`-neighbour tuple identify the relation), and for a schurian
+scheme `relOfPair(v,·)`-classes **are** the `Stab(v)`-orbits (`vProfile_iff_schemeOrbit`). So the entire
+self-detection crux lives at **multi-base** (`|T| ≥ 2`), where the *joint* profile can fall short of the joint
+orbit (the `s(C)` gap). This subsection lands the single-base base case (the affine multi-base argument
+extends it); full account: `docs/chain-descent-self-detection-plan.md` §5.1. -/
+
+/-- **Iterated refinement is split-only** (the general `k`-fold colour-equality form of
+`warmRefine_refines`): equal colour after `k` rounds implies equal colour before. -/
+theorem iterate_refineStep_colour_refines {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
+    ∀ (k : Nat) (χ : Colouring n) {v w : Fin n},
+      ((refineStep adj P)^[k]) χ v = ((refineStep adj P)^[k]) χ w → χ v = χ w := by
+  intro k
+  induction k with
+  | zero => intro χ v w h; exact h
+  | succ k ih =>
+    intro χ v w h
+    rw [Function.iterate_succ, Function.comp_apply] at h
+    exact refineStep_refines adj P χ (ih (refineStep adj P χ) h)
+
+/-- The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v`
+from every other vertex. -/
+private theorem individualizedColouring_singleton_sep {n : Nat} (v : Fin n) :
+    ∀ x : Fin n, x ≠ v → individualizedColouring n {v} x ≠ individualizedColouring n {v} v := by
+  intro x hx
+  have h1 : individualizedColouring n {v} x = 0 := by simp [individualizedColouring, hx]
+  have h2 : individualizedColouring n {v} v = v.val + 1 := by simp [individualizedColouring]
+  rw [h1, h2]; omega
+
+/-- **`warmRefine` from `{v}` separates by the relation to `v`.** For non-`v` vertices `w, u` in the same
+`warmRefine (schemeAdj S) … {v}` cell, `relOfPair v w = relOfPair v u`. Proof: peel `warmRefine` to one
+`refineStep` round (`iterate_refineStep_refines`), read off `signature` equality (`refineStep_iff`), and use
+the count bridge (`signature_eq_card_eq`): the unique-colour entry for the individualized `v` is the only
+tuple with first component `χ v`, so the two `v`-neighbour tuples coincide — i.e. `adj.adj w v = adj.adj u v`,
+which on `schemeAdj` is `(relOfPair v w).val = (relOfPair v u).val`. -/
+theorem relOfPair_eq_of_warmRefine_singleton {n : Nat} (S : AssociationScheme n) {v w u : Fin n}
+    (hwv : w ≠ v) (huv : u ≠ v)
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n {v}) w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n {v}) u) :
+    S.relOfPair v w = S.relOfPair v u := by
+  classical
+  have hpos : 0 < n := Fin.pos v
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  set adj := schemeAdj S
+  set P : PMatrix (m + 1) := fun _ _ => POE.unknown
+  set χ := individualizedColouring (m + 1) {v} with hχ
+  -- peel warmRefine = refineStep^[m+1] to a single refineStep round, then to signature equality
+  simp only [warmRefine] at h
+  rw [Function.iterate_succ_apply] at h
+  have hrs : refineStep adj P χ w = refineStep adj P χ u :=
+    iterate_refineStep_colour_refines adj P m (refineStep adj P χ) h
+  have hsig : signature adj P χ w = signature adj P χ u :=
+    ((refineStep_iff adj P χ w u).mp hrs).2
+  -- χ v is the unique individualized colour
+  have hχv : χ v = v.val + 1 := by rw [hχ]; simp [individualizedColouring]
+  have hχ_eq_v : ∀ x : Fin (m + 1), χ x = v.val + 1 → x = v := by
+    intro x hx
+    by_contra hxv
+    have hx0 : χ x = 0 := by rw [hχ]; simp [individualizedColouring, hxv]
+    omega
+  have hcard := signature_eq_card_eq adj P χ hsig (χ v, adj.adj w v, P w v)
+  -- LHS filter = {v}: the unique-colour `v`-tuple is the only match
+  have hFw : (Finset.univ.filter (fun u' : Fin (m + 1) =>
+      u' ≠ w ∧ (χ v, adj.adj w v, P w v) = (χ u', adj.adj w u', P w u'))) = {v} := by
+    apply Finset.ext; intro x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+    constructor
+    · rintro ⟨_, heq⟩
+      exact hχ_eq_v x ((congrArg Prod.fst heq).symm.trans hχv)
+    · rintro rfl; exact ⟨Ne.symm hwv, rfl⟩
+  rw [hFw, Finset.card_singleton] at hcard
+  -- RHS filter has card 1, hence nonempty; its witness gives the relation equality
+  obtain ⟨x, hx⟩ := Finset.card_pos.mp (hcard ▸ Nat.one_pos)
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx
+  obtain ⟨_, hxeq⟩ := hx
+  have hxv : v = x := (hχ_eq_v x ((congrArg Prod.fst hxeq).symm.trans hχv)).symm
+  subst hxv
+  -- second component: adj.adj w v = adj.adj u v, i.e. (relOfPair v w).val = (relOfPair v u).val
+  have hval : adj.adj w v = adj.adj u v := congrArg (fun p : Nat × Nat × POE => p.2.1) hxeq
+  have hrel : S.relOfPair w v = S.relOfPair u v := Fin.val_injective hval
+  rw [S.relOfPair_symm v w, S.relOfPair_symm v u]; exact hrel
+
+/-- **Single-base recovery is free (the self-detection base case).** For *every* schurian scheme, the
+`warmRefine` cells after individualizing a single vertex `v` coincide with the `Stab(v)`-orbits:
+`CellsAreOrbits (schemeAdj S) … {v}`. Combines `relOfPair_eq_of_warmRefine_singleton` (cells ⊆
+`relOfPair(v,·)`-classes) with `vProfile_iff_schemeOrbit` (`relOfPair(v,·)`-classes = orbits, schurian) and
+`isAut_schemeAdj_iff` (scheme-aut = graph-aut). The entire crux is therefore the *multi-base* extension. -/
+theorem cellsAreOrbits_schemeAdj_singleton {n : Nat} (S : SchurianScheme n) (v : Fin n) :
+    CellsAreOrbits (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) {v} := by
+  classical
+  intro w u hcell
+  by_cases hwv : w = v
+  · by_cases huv : u = v
+    · rw [hwv, huv]; exact OrbitPartition.refl v
+    · rw [hwv] at hcell
+      exact absurd hcell.symm (iterate_refineStep_preserves_singleton
+        (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) v n
+        (individualizedColouring n {v}) (individualizedColouring_singleton_sep v) u huv)
+  · by_cases huv : u = v
+    · rw [huv] at hcell
+      exact absurd hcell (iterate_refineStep_preserves_singleton
+        (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) v n
+        (individualizedColouring n {v}) (individualizedColouring_singleton_sep v) w hwv)
+    · have hrel : S.toAssociationScheme.relOfPair v w = S.toAssociationScheme.relOfPair v u :=
+        relOfPair_eq_of_warmRefine_singleton S.toAssociationScheme hwv huv hcell
+      have hvp : vProfile S.toAssociationScheme v w = vProfile S.toAssociationScheme v u := by
+        unfold vProfile; rw [hrel]
+      obtain ⟨π, hπ, hπv, hπwu⟩ := (S.vProfile_iff_schemeOrbit v w u).mp hvp
+      exact ⟨π, (isAut_schemeAdj_iff _ π).mpr hπ, fun _ _ => rfl,
+        fun x hx => by rw [Finset.mem_singleton] at hx; subst hx; exact hπv, hπwu⟩
+
 /-- **Concrete largeness predicate (the genuine Cameron driver).** A scheme is large when its automorphism
 group `SchemeAutGroup` has super-polynomial order, with `IsLarge : Nat → Prop` the abstract asymptotic
 citation. The instantiation of the §12 `IsLargeScheme` parameter the bridge discharges into. -/

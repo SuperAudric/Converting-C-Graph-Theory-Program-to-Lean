@@ -1071,7 +1071,7 @@ plus the `count` filter) into a single Finset filter. -/
 
 /-- **Bridge lemma.** Multiset count on a signature equals Finset
 cardinality of the matching preimage filter (over `u' ≠ w`). -/
-private theorem signature_count_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+theorem signature_count_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) (w : Fin n) (t : Nat × Nat × POE) :
     Multiset.count t (signature adj P χ w) =
     (Finset.univ.filter (fun u' : Fin n =>
@@ -1086,7 +1086,7 @@ private theorem signature_count_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatr
 signature χ u`, then for any tuple `t`, the count of `u' ≠ w`
 producing `t` from `w` equals the count of `u' ≠ u` producing `t`
 from `u`. Direct corollary of `signature_count_eq_card`. -/
-private theorem signature_eq_card_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+theorem signature_eq_card_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) {w u : Fin n}
     (h : signature adj P χ w = signature adj P χ u)
     (t : Nat × Nat × POE) :
