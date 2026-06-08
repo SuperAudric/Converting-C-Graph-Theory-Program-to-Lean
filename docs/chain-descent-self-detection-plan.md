@@ -1057,13 +1057,28 @@ speculatively — that is the over-build the route-scan warns against. Extract p
 > Frobenius-friendly `G₀Irreducible` form. So the open content everywhere is the *same* discreteness bound; the
 > bridges are landed/definitional.
 >
-> **REMAINING OPEN = `hbound` itself (E2.2–E2.4, the Frobenius `s(C)` bound).** To discharge it via the §13b E1
-> engine (`discrete_of_twoRoundProfileSeparates`), the missing link is the **colour→relation-grouping conversion**:
-> the depth-2 producer's hypothesis is keyed on the opaque one-round colour `refineStep·z = c`; to feed it the
-> Frobenius counting argument (which reasons about `G₀`-orbit-of-difference counts) one needs a *joint-relation* form
-> of `twoRoundCount` — sum the colour-grouped counts over colours sharing a joint `(relOfPair t·)_{t∈T}` profile,
-> using "one-round colour determines relation-to-each-`t∈T`" (the round-1 multi-base analogue of
-> `refineStep_round1_adj_eq`). That conversion + the Frobenius/Galois bound for cyclic `G₀` is the open research.
+> **COLOUR→RELATION CONVERSION LANDED (2026-06-08, axiom-clean, build green, `Cascade.lean §13b`).** The four
+> lemmas that re-key the depth-2 engine from the opaque one-round colour to the **joint relation profile** (the
+> Frobenius-dischargeable object):
+> - **`relOfPair_eq_of_refineStep_base`** (Lemma A): the one-round colour determines `relOfPair t ·` for each
+>   `t ∈ T` (the round-1 multi-base analogue of `refineStep_round1_adj_eq`; isolation via the unique colour of
+>   each individualized `t`, `individualizedColouring_mem_sep`).
+> - **`twoRoundCountP_eq_of_warmRefine`**: the aggregate (countP) form of `twoRoundCount` (un-privated
+>   `signature_eq_countP_eq` in `Scheme.lean` for reuse).
+> - **`twoRoundProfileCount_eq`**: the payoff — same cell ⟹ equal depth-2 counts grouped by `(relOfPair t z)_{t∈T}`
+>   (combines the two above via the colour predicate `q c := ∃ z₀, colour z₀ = c ∧ profile z₀ = ρ`).
+> - **`discrete_of_twoRoundRelationSeparates`**: the relation-form producer — joint relation-profile counts
+>   separate ⟹ `Discrete`. Feeds `stablyRecoverable_of_discrete` → … → `reachesRigidOrCameron_viaAffineIrreducible`.
+>
+> So the depth-2 engine now produces `Discrete` from a **relation-indexed** separation condition. On `affineScheme`
+> the profile/relation conditions are `G₀`-orbit-of-difference conditions (`affineScheme_relOfPair_eq_iff`/
+> `orbMk_affine_eq_iff`), so the Frobenius argument runs natively — **no bespoke affine producer needed**.
+>
+> **REMAINING OPEN = `hbound`/`hsep` itself (E2.2–E2.4, the Frobenius `s(C)` bound).** The sole open content: exhibit
+> a bounded Galois-breaking base `T` (for cyclic irreducible `G₀`, `|T| = base + O(d)`) whose **joint relation-profile
+> counts separate** all vertices — i.e. discharge `discrete_of_twoRoundRelationSeparates`'s `hsep`. That is the
+> Frobenius/Galois counting argument (φ-conjugate cosets distinguished by a two-base intersection count once `T`
+> breaks `Γ`), the genuine uncited `s(C)` research. The engine plumbing to consume it is now all in place.
 
 `selfDetectsStably_of_depthOneSeparable` is the template. The cyclotomic capstone:
 1. `selfDetectsStably_of_discretizes` with the E2 discreteness witness ⟹ `SelfDetectsStably (cyclotomicScheme …)`.

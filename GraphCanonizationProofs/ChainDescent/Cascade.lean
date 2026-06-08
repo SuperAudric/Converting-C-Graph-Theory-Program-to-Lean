@@ -4134,6 +4134,168 @@ theorem discrete_of_twoRoundProfileSeparates {n : Nat} (S : AssociationScheme n)
   intro u u' hcell
   exact hsep u u' (fun c b => twoRoundCount_eq_of_warmRefine S hcell c b)
 
+/-- **Lemma A — the one-round colour determines the relation to each base point (the colour→relation
+bridge).** If `z, z'` share their one-round colour `refineStep (schemeAdj S) … (individualizedColouring n T)`,
+then for every `t ∈ T`, `relOfPair t z = relOfPair t z'`. So the one-round colour *refines* the joint profile
+`(relOfPair t ·)_{t∈T}` — the missing link to re-group the depth-2 counts of
+`twoRoundCount_eq_of_warmRefine` by relation rather than by the opaque colour. Mirrors
+`relOfPair_eq_of_warmRefine_singleton`'s isolation argument, but at **one** `refineStep` round and a base
+**set** `T`: the individualized `t ∈ T` carries a unique colour (`individualizedColouring_mem_sep`), so its
+signature tuple is isolated, forcing `adj z t = adj z' t` i.e. `relOfPair z t = relOfPair z' t`. -/
+theorem relOfPair_eq_of_refineStep_base {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {t : Fin n} (ht : t ∈ T) {z z' : Fin n}
+    (h : refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z
+       = refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z') :
+    S.relOfPair t z = S.relOfPair t z' := by
+  classical
+  set adj := schemeAdj S with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  have hcol : individualizedColouring n T z = individualizedColouring n T z' :=
+    ((refineStep_iff adj P (individualizedColouring n T) z z').mp h).1
+  have hsig : signature adj P (individualizedColouring n T) z
+            = signature adj P (individualizedColouring n T) z' :=
+    ((refineStep_iff adj P (individualizedColouring n T) z z').mp h).2
+  have hχt : individualizedColouring n T t = t.val + 1 := by simp [individualizedColouring, ht]
+  have hχ_eq_t : ∀ x : Fin n, individualizedColouring n T x = t.val + 1 → x = t := by
+    intro x hx
+    by_contra hxt
+    exact (individualizedColouring_mem_sep ht x hxt) (hx.trans hχt.symm)
+  by_cases hzt : z = t
+  · have hz' : z' = t := hχ_eq_t z' (by rw [← hcol, hzt, hχt])
+    rw [hzt, hz']
+  · by_cases hz't : z' = t
+    · exact absurd (hχ_eq_t z (by rw [hcol, hz't, hχt])) hzt
+    · have hcard := signature_eq_card_eq adj P (individualizedColouring n T) hsig
+        (individualizedColouring n T t, adj.adj z t, P z t)
+      have hFz : (Finset.univ.filter (fun u' : Fin n => u' ≠ z ∧
+          (individualizedColouring n T t, adj.adj z t, P z t)
+            = (individualizedColouring n T u', adj.adj z u', P z u'))) = {t} := by
+        apply Finset.ext; intro x
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+        constructor
+        · rintro ⟨_, heq⟩; exact hχ_eq_t x ((congrArg Prod.fst heq).symm.trans hχt)
+        · rintro rfl; exact ⟨Ne.symm hzt, rfl⟩
+      rw [hFz, Finset.card_singleton] at hcard
+      obtain ⟨x, hx⟩ := Finset.card_pos.mp (hcard ▸ Nat.one_pos)
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx
+      obtain ⟨_, hxeq⟩ := hx
+      have hxt : x = t := hχ_eq_t x ((congrArg Prod.fst hxeq).symm.trans hχt)
+      have hval : adj.adj z t = adj.adj z' t := by
+        have hv := congrArg (fun p : Nat × Nat × POE => p.2.1) hxeq
+        rwa [hxt] at hv
+      have hrel : S.relOfPair z t = S.relOfPair z' t := Fin.val_injective hval
+      rw [S.relOfPair_symm t z, S.relOfPair_symm t z']; exact hrel
+
+/-- **Two-round count, aggregate (countP) form (E1).** The predicate-indexed generalization of
+`twoRoundCount_eq_of_warmRefine`: for `w, u` in the same `warmRefine`-from-`T` cell, every count of `z`
+whose one-round colour satisfies a predicate `q` and whose relation to the base point is `b` agrees between
+`w` and `u`. Same peel-and-count proof but via the aggregate `signature_eq_countP_eq`. This lets the colour
+grouping be re-expressed by *any* colour predicate — the vehicle for the colour→relation conversion. -/
+theorem twoRoundCountP_eq_of_warmRefine {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {w u : Fin n}
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) u)
+    (q : Nat → Prop) [DecidablePred q] (b : Fin (S.rank + 1)) :
+    (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+        q (refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z) ∧
+        S.relOfPair w z = b)).card
+    = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+        q (refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z) ∧
+        S.relOfPair u z = b)).card := by
+  classical
+  set adj := schemeAdj S with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  set χ := individualizedColouring n T with hχ
+  by_cases hn : 2 ≤ n
+  · have h2 : ((refineStep adj P)^[2]) χ w = ((refineStep adj P)^[2]) χ u :=
+      warmRefine_eq_iter_eq adj P χ 2 hn h
+    rw [show (2 : ℕ) = 1 + 1 from rfl, Function.iterate_succ_apply', Function.iterate_one] at h2
+    have hsig : signature adj P (refineStep adj P χ) w = signature adj P (refineStep adj P χ) u :=
+      ((refineStep_iff adj P (refineStep adj P χ) w u).mp h2).2
+    have hcard := signature_eq_countP_eq adj P (refineStep adj P χ) hsig
+      (fun tup : Nat × Nat × POE => q tup.1 ∧ tup.2.1 = b.val)
+    have hpred : ∀ x : Fin n, ∀ z : Fin n,
+        (z ≠ x ∧ q (refineStep adj P χ z) ∧ S.relOfPair x z = b)
+          ↔ (z ≠ x ∧ (fun tup : Nat × Nat × POE => q tup.1 ∧ tup.2.1 = b.val)
+                (refineStep adj P χ z, adj.adj x z, P x z)) := by
+      intro x z
+      refine and_congr_right (fun _ => ?_)
+      show (q (refineStep adj P χ z) ∧ S.relOfPair x z = b)
+        ↔ (q (refineStep adj P χ z) ∧ adj.adj x z = b.val)
+      have hadjval : adj.adj x z = (S.relOfPair x z).val := rfl
+      rw [hadjval]
+      exact and_congr_right (fun _ => Fin.ext_iff)
+    rw [Finset.filter_congr (fun z _ => hpred w z), Finset.filter_congr (fun z _ => hpred u z)]
+    exact hcard
+  · have hsub : Subsingleton (Fin n) := Fin.subsingleton_iff_le_one.mpr (by omega)
+    rw [Subsingleton.elim w u]
+
+/-- **Two-round count, joint-relation form (E1 — the colour→relation conversion, the payoff).** Re-groups
+`twoRoundCount` by the **joint relation profile** `(relOfPair t z)_{t∈T}` instead of the opaque one-round
+colour: for `w, u` in the same `warmRefine`-from-`T` cell, every count of `z` whose relations to all base
+points match a target profile `ρ` and whose relation `relOfPair · z = b` agrees between `w` and `u`. Combines
+`twoRoundCountP_eq_of_warmRefine` (aggregate) with `relOfPair_eq_of_refineStep_base` (Lemma A: the one-round
+colour determines the joint profile), so the colour predicate `q c := ∃ z₀, colour z₀ = c ∧ profile z₀ = ρ`
+reads exactly as the profile condition. **This is the relation-indexed depth-2 count the Frobenius / affine
+separability argument consumes** — the object `relOfPair`/`G₀`-orbit counting lives in, not opaque colours. -/
+theorem twoRoundProfileCount_eq {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {w u : Fin n}
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) u)
+    (ρ : Fin n → Fin (S.rank + 1)) (b : Fin (S.rank + 1)) :
+    (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+        (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair w z = b)).card
+    = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+        (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u z = b)).card := by
+  classical
+  set q : Nat → Prop := fun c => ∃ z₀ : Fin n,
+    refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z₀ = c
+      ∧ ∀ t ∈ T, S.relOfPair t z₀ = ρ t with hq_def
+  have hq : ∀ z : Fin n,
+      q (refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z)
+        ↔ ∀ t ∈ T, S.relOfPair t z = ρ t := by
+    intro z
+    constructor
+    · rintro ⟨z₀, hz₀, hprof⟩ t ht
+      exact (relOfPair_eq_of_refineStep_base S ht hz₀).symm.trans (hprof t ht)
+    · intro hprof; exact ⟨z, rfl, hprof⟩
+  rw [show (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+          (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair w z = b))
+        = (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+          q (refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z)
+            ∧ S.relOfPair w z = b))
+      from Finset.filter_congr (fun z _ => by rw [hq z]),
+    show (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+          (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u z = b))
+        = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+          q (refineStep (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z)
+            ∧ S.relOfPair u z = b))
+      from Finset.filter_congr (fun z _ => by rw [hq z])]
+  exact twoRoundCountP_eq_of_warmRefine S h q b
+
+/-- **The relation-indexed depth-2 discreteness producer (E1 — the conversion complete).** If the joint
+relation-profile counts separate all vertices — for every target profile `ρ` and relation `b`, equal counts
+of `z` matching `(relOfPair t z = ρ t)_{t∈T}` together with `relOfPair · z = b` force the two vertices equal
+— then `warmRefine (schemeAdj S)` from `T` is `Discrete`. The relation-form analogue of
+`discrete_of_twoRoundProfileSeparates` (which keyed on the opaque one-round colour), via
+`twoRoundProfileCount_eq`. **This is the producer the Frobenius / affine `s(C)` bound discharges**: exhibit a
+bounded `T` whose joint relation-profile counts separate (the Galois-breaking base), then this gives
+discreteness, feeding `stablyRecoverable_of_discrete` → `selfDetectsStably_of_discretizes` →
+`reachesRigidOrCameron_viaAffineIrreducible`. On `affineScheme`, the `relOfPair`/profile conditions are
+`G₀`-orbit-of-difference conditions (`affineScheme_relOfPair_eq_iff`/`orbMk_affine_eq_iff`), so the consumer
+runs the Frobenius counting natively without a bespoke affine producer. -/
+theorem discrete_of_twoRoundRelationSeparates {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    (hsep : ∀ u u' : Fin n,
+        (∀ (ρ : Fin n → Fin (S.rank + 1)) (b : Fin (S.rank + 1)),
+          (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+            (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u z = b)).card
+          = (Finset.univ.filter (fun z : Fin n => z ≠ u' ∧
+            (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u' z = b)).card)
+        → u = u') :
+    Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T)) := by
+  intro u u' hcell
+  exact hsep u u' (fun ρ b => twoRoundProfileCount_eq S hcell ρ b)
+
 /-! ### Phase 2, M0.3 — the affine instance `V ⋊ G₀` over `F_p^d`
 
 The concrete beachhead family: the orbital scheme of the affine group `V ⋊ G₀` acting on `V = F_p^d`,

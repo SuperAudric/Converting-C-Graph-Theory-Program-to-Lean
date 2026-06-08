@@ -93,8 +93,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `refineStep_mono` | 174-180 | One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)`. | — |
 
 | `individualizedColouring_singleton_sep` | 3100-3107 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
-| `affV_card` | 4154-4157 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
-| `instNonemptyAffV` | 4325-4329 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
+| `affV_card` | 4316-4319 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
+| `instNonemptyAffV` | 4487-4491 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
 ## ChainDescent/CascadeOracle.lean
 
 | Name | Line | Description | Notes |
@@ -107,8 +107,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 |------|------|-------------|-------|
 | `individualizedColouring_singleton_eq_v_iff` | 1031-1044 | `χ_v` uniqueness: `individualizedColouring n {v} u = individualizedColouring n {v} v ↔ u = v`. | — |
 | `iter_succ_count_eq` | 1291-1306 | Iter-round count equality: `iter[k+1]` equality forces matching intermediate-vertex counts for every (round-k colour, adj, P) triple. | — |
-| `signature_countP_eq_card` | 1308-1319 | §8.b.2 `countP` form of `signature_count_eq_card`. | — |
-| `signature_eq_countP_eq` | 1321-1331 | Aggregate `countP` equality from signature equality, for any decidable predicate `p`. | — |
 | `iter_succ_countP_eq` | 1333-1349 | Aggregate iter-round count equality: under `iter[k+1]` equality, intermediate-vertex counts for any decidable `p` over (iter[k] colour, adj, P) match between `w` and `u`. | — |
 | `iter_succ_colour_count_eq` | 1351-1370 | Colour-only specialisation of `iter_succ_countP_eq`: under `iter[k+1]` equality, the count of intermediate vertices whose round-k colour satisfies `q` matches between `w` and `u`. | — |
 | `step2_at_depth_zero_of_rank_le_one` | 1769-1802 | Sanity instance: `Step2_at_depth G P v 0` for rank ≤ 1 schurian scheme graphs. | — |

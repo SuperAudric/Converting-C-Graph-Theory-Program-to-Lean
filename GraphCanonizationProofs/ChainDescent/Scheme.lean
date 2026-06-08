@@ -1307,7 +1307,7 @@ private theorem iter_succ_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 
 /-- **Bridge generalised: `countP` form.** Multiset.countP on a
 signature equals Finset.card of the matching preimage filter. -/
-private theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) (w : Fin n) (p : Nat × Nat × POE → Prop) [DecidablePred p] :
     Multiset.countP p (signature adj P χ w) =
     (Finset.univ.filter (fun u' : Fin n =>
@@ -1319,7 +1319,7 @@ private theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMat
   rw [Finset.filter_filter]
 
 /-- **Aggregate countP equality from signature equality.** -/
-private theorem signature_eq_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+theorem signature_eq_countP_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) {w u : Fin n}
     (h : signature adj P χ w = signature adj P χ u)
     (p : Nat × Nat × POE → Prop) [DecidablePred p] :
