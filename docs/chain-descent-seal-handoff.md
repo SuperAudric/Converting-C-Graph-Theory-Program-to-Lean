@@ -48,9 +48,13 @@
 > **⟶ For the G2-B / `hCascade` gap specifically (the sole irreducible open input), the live working doc is
 > [`chain-descent-self-detection-plan.md`](./chain-descent-self-detection-plan.md):** Phase 1 is DONE — the seal is
 > reduced (axiom-clean, landed) to the **single semantic proposition `SelfDetectsStably`** (`reachesRigidOrCameron_viaStableRecovery`,
-> `Cascade.lean`): *primitive small ⟹ cells = orbits above a bounded base set*. Its **§9 ("PICK UP HERE")** is the
-> detailed affine-multi-base build plan for Phase 2 (proving that proposition). Read it for any G2-B work; the
-> board below (§G2 anatomy / attack board) is the theory it formalizes.
+> `Cascade.lean`): *primitive small ⟹ cells = orbits above a bounded base set*. The M2 reduction further reduces this
+> to **"primitive small ⟹ bounded individualization discretizes"** (`selfDetectsStably_of_discretizes`, landed), and
+> the depth-1 (`s(C)=1`) slice is closed (`reachesRigidOrCameron_viaDepthOneSeparable`). Its **§11 ("PICK UP HERE")**
+> is the current implementation plan for the open `s(C)≥2` content: the route-scan verdict (affine-cyclic beachhead),
+> the conceptual frame (the work is *1-WL over a bounded base*, NOT a k-WL climb), and the cyclotomic bound proof +
+> wiring. (§9 is the earlier affine M0–M3 build plan; §10 the M1.1/M1.2 + gotchas handoff.) Read §11 for any G2-B
+> work; the board below (§G2 anatomy / attack board) is the theory it formalizes.
 
 ---
 
@@ -147,7 +151,7 @@ not self-detection), while the imprimitive branch stays on the earned `SchemeBlo
 exactly two inputs — `hSelfDetect` (the G2-B crux) + `hImprim` (landed/earned, tower-reducible to the same floor) — plus
 cited G3, and subsumes both `reachesRigidOrCameron_viaStableRecovery` and `reachesRigidOrCameron_viaBlockRecovery`. This is
 the conditional seal `modulo {G3 + self-detection}` as ONE object; the entire open content is the single semantic
-proposition `SelfDetectsStably` (= G2-B), which Phase 2 (the affine module argument, self-detection-plan §9) attacks.
+proposition `SelfDetectsStably` (= G2-B), which Phase 2 (the affine-cyclic bound proof, self-detection-plan §11) attacks.
 
 ---
 

@@ -18,11 +18,14 @@
 > orbit-free statement; faithful/lossless). **Remaining Phase 2 = M2-B**: the affine discreteness proof itself
 > (`irreducible G₀ ⟹ ∃ bounded S₀, Discrete(warmRefine affine schemeAdj S₀)`) — base term easy (spanning set ⟹
 > `Stab=1`), `s(C)` stickiness term = the open citation-free WL-dimension content; then M3 (wire) is mechanical.
-> The **detailed,
-> pick-up-and-build plan for the remaining affine multi-base work is §9 below; **§10 is the consolidated
-> pick-up handoff (M0/M0.3/M1.0/M1.0b are LANDED — durable generalization insights for §5.3, the exact M1.1/M1.2
-> build plan, and session Lean gotchas).** A fresh reader continuing Phase 2 should start at §10.** — a fresh reader should start
-> there. See §4 outcome box (Phase 1), §5.1 (Phase 2 overview).** The oracle-capability seal is a conditional theorem
+> **M2-B DEPTH-1 SLICE + STEP-1 SEAL-WIRING LANDED (2026-06-08, axiom-clean):** `discrete_of_jointProfileSeparates`
+> / `discrete_affineScheme_of_jointSeparates` (the depth-1 discreteness producer) + `DepthOneSeparable` /
+> `selfDetectsStably_of_depthOneSeparable` / `reachesRigidOrCameron_viaDepthOneSeparable` (the seal closed for the
+> `s(C)=1` slice, manifestly conditional, exposing the engine slot). **ROUTE-SCAN DONE + REMAINING-PIECES PLAN
+> WRITTEN — §11 is now the PICK-UP for continuing Phase 2** (the conceptual frame [k≡1, not k-WL], the route-scan
+> verdict [affine-cyclic beachhead], and the implementation plan for the cyclotomic bound proof + wiring). §9 is the
+> earlier affine build plan (M0–M3, M0/M1 landed); §10 is the M1.1/M1.2 + gotchas handoff. A fresh reader continuing
+> Phase 2 should start at **§11**, then §10.3 (gotchas). The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
 > is `hCascade` (small primitive ⟹ recovers = G2-B). Both empirical falsifiers are clean: the affine
@@ -830,3 +833,197 @@ clause and translation-invariance; over `F_p` an `AddSubgroup` is automatically 
 - **`Nonempty (Fin (p^d))`** for the M1 lemmas (outside `affineScheme`'s local `haveI`): the section-level
   `private instance instNonemptyAffV` supplies it. `Nonempty` is a `Prop`, so proof-irrelevance makes instances
   interchangeable — that is *not* the source of the ascription trap above (the index-type is).
+
+---
+
+## 11. ROUTE-SCAN VERDICT + the remaining-pieces implementation plan (PICK UP HERE for Phase 2)
+
+> **Read this first to continue Phase 2.** It supersedes §9.3/§9.5's "M2-cyclic" sketch with (a) the conceptual
+> frame that fixes what the work *is* (§11.1 — there is no k-WL climb), (b) the route-scan verdict on *where* to
+> build (§11.2), and (c) an implementation-ready plan for the remaining pieces (§11.3–§11.7). The depth-1 slice
+> is LANDED (`reachesRigidOrCameron_viaDepthOneSeparable`); the open content is the `s(C) ≥ 2` bound, attacked at
+> the affine-cyclic beachhead.
+
+### 11.1 Conceptual frame — what the "engine" is and is NOT (settle this before coding)
+
+Three clarifications that correct earlier loose framing; internalize them or the work goes sideways:
+
+1. **`k` (WL arity) is FIXED at 1 — there is no k-WL climb, ever.** The project uses only ordinary colour
+   refinement (`refineStep`/`warmRefine` = 1-WL to fixpoint). Matching a graph's k-WL dimension by raising `k`
+   would be the super-polynomial trap, and it is **out of scope by design** (calculator §7, strategy §9).
+2. **Three distinct "depths" — only one is the open/bounded quantity:**
+   - *WL arity `k`* — always 1, never tuned.
+   - *Refinement rounds* — `warmRefine = refineStep^[n]`, always run to the 1-WL fixpoint (≤ n rounds,
+     **polynomial**); not a parameter.
+   - *Individualizations* — `|T|` (= the `bound` in `RecoverableByDepth`/`DepthOneSeparable`/`SchemeRecoveredByDepth`).
+     **This is the only open quantity**; polynomial time ⟺ it stays bounded (`base(G) + s(C)`, `< n` or vacuous
+     per `recoverableByDepth_univ`).
+3. **The engine reasons about the (polynomial) 1-WL fixpoint from a BOUNDED number of individualizations.** It is
+   NOT a k-WL implementation. The landed `relOfPair_eq_of_warmRefine_singleton` peels *one* `refineStep` round; the
+   only thing genuinely missing is reasoning about the *full fixpoint* (several rounds, still polynomial) when one
+   round is insufficient (`s(C) ≥ 2`). That is an induction over rounds, not a climb in `k`.
+
+**The unification (carry this — it is why the work matters):** *the algorithm's polynomial-and-no-flag runtime*,
+*the lockstep/harvest completeness*, and *the seal's self-detection content* are **one boundary, three faces**:
+
+| face | "good" condition |
+|---|---|
+| runtime (poly + no flag?) | bounded `s(C)` (+ not IR-core) |
+| harvest/lockstep complete? | bounded `s(C)` |
+| the engine / seal theorem | "primitive small ⟹ bounded `s(C)`" |
+
+**The engine's job is to prove a *uniform bound exists* for the class — NOT to compute a per-scheme formula.** The
+target is the existence/upper-bound theorem "`base + O(1)` individualizations suffice for **every** primitive small
+scheme" (≡ `s(C)` bounded on the class). The exact `s(C)` value of any scheme is a fact the algorithm never needs.
+
+**`selfDetectsStably_of_discretizes` is ALREADY the engine interface** — `∃ T, |T| ≤ bound ∧ Discrete(warmRefine
+from T)`. There is **no new `BoundedDepthSeparable`-by-rounds predicate to build** (an earlier suggestion; it was a
+confusion — rounds are free, individualizations are the bound). The remaining work plugs a *proof of that
+discreteness* into this interface; `DepthOneSeparable` is the already-landed `s(C)=1` plug, and the open work is the
+`s(C) ≥ 2` plug for the affine-cyclic family.
+
+### 11.2 Route-scan verdict — affine-cyclic beachhead (and why)
+
+Candidate slices for the first bound proof: **affine-cyclic** (cyclotomic/Singer), affine-general-irreducible,
+**rank-3/4 SRG**, **§5.3 general**. The decision-driving questions and their answers (from the project's own record —
+exhaustive-obstruction §4 R5 + §0.7.6, the probes — *not* external research, per the design-fit concern):
+
+- **Q1 — Mathlib substrate (dominates feasibility).** Mathlib has **zero** substrate for association schemes /
+  coherent configurations / Bose–Mesner / DRG / scheme spectral theory (R5). So **rank-3/4 SRG and §5.3 would each
+  require building scheme spectral theory from scratch** on top of the open math ("cleaner math ⟹ *more* Lean").
+  **Affine is the only route with substrate** (Mathlib `Submodule`, `IsSimpleModule`, finite-field `Frobenius`/Galois,
+  eigenspaces) — which is exactly why M1 went through cleanly.
+- **Q2 — is there an elementary beachhead?** Affine-**cyclic** is the one slice with a plausibly *elementary* proof:
+  `V ≅ F_{p^d}`, `G₀ = ⟨α⟩`, the gap is the **bounded Galois/cyclotomy gap** (Frobenius), provable by finite-field
+  linear algebra + counting (Mathlib has the Galois machinery). Probes: cyclotomic AND non-abelian `ΓL(1,2^d)` both
+  flat at depth 4. General-irreducible and rank-3/4 have no comparable elementary handle.
+- **Q3 — engine reuse.** The multi-round separation reasoning on `schemeAdj` is genuinely new (`schemePartFrom`/
+  `iterSet` exist only for the `J`-binarized graph), reusable across slices, and seeded by the landed depth-1
+  reduction-to-single-base trick. Affine difference-coordinates do *not* bypass it (warmRefine still runs on
+  `schemeAdj`); they only make the *bound argument* tractable.
+- **Q4 — payoff / non-vacuity.** Cyclotomic is exactly the `s(C) ≥ 2` zone depth-1 misses (genuinely new beyond
+  G1a/G1b). Rank-3/4 has higher strategic payoff (would *complete* rank 3/4 with G3 at its strongest — small→recover,
+  large→Cameron) but Q1 makes it prohibitively expensive; a blocked route has zero realized payoff.
+- **Q5 — design fit (the "don't warp the design" guard).** The faithful engine extends the project's
+  `refineStep`/`warmRefine`/`isolationStep`/`s(C)` idiom (an induction over the 1-WL fixpoint), **not** an
+  off-the-shelf k-WL / coherent-configuration framework. Importing a generic refinement framework is the warp to avoid.
+
+> **VERDICT: build the cyclotomic (affine-cyclic) bound proof first; defer rank-3/4 and §5.3.** Extract reusable
+> multi-round lemmas *from* that proof rather than building a speculative general engine first (the §3 discipline:
+> build what the proof consumes, not a big engine that then hits the open-math wall). Q1 is decisive — substrate, not
+> payoff, picks the slice.
+
+### 11.3 Build order for the remaining pieces
+
+```
+E2 (cyclotomic bound proof)  ──drives──►  E1 (reusable round-propagation lemmas, EXTRACTED, not pre-built)
+        │
+        ▼
+E3 (wire to the seal — mechanical, via selfDetectsStably_of_discretizes → fused seal)
+        │
+        ▼
+[deferred] general-irreducible affine  →  rank-3/4 SRG  →  §5.3 general  (each gated by its substrate cost)
+```
+
+**Do NOT build E1 as a speculative standalone engine.** Start E2; when a multi-round refinement fact is needed,
+prove it as a general `schemeAdj` lemma (E1) and consume it. This keeps the engine exactly as large as the proof
+needs and avoids over-building toward the open wall.
+
+### 11.4 E2 — the cyclotomic bound proof (the research content; model is buildable, the key lemma is open)
+
+**Goal.** For the cyclotomic affine scheme (cyclic irreducible `G₀`), exhibit a **bounded** base `T`
+(`|T| ≤ base(G₀) + C`, `C = O(1)`) with `Discrete(warmRefine (schemeAdj affineScheme) … (individualizedColouring _ T))`.
+Then E3 wires it through `selfDetectsStably_of_discretizes` to the seal on this family.
+
+**The model (buildable now, mechanical–medium).**
+- Reuse `affineScheme G₀ hneg` (landed) with `G₀ = ⟨α⟩` a cyclic Singer subgroup of `GL(d,p)` containing `−1`.
+  *Anchor:* `G₀` is the multiplicative `⟨α⟩ ≤ F_{p^d}^*` acting on `V ≅ F_{p^d}` by multiplication; need `−1 ∈ ⟨α⟩`
+  (true iff `α` has even order / index is odd — Singer normalizers contain `−1`; pick accordingly, cf. §10.3 gotcha).
+- The relations are the `⟨α⟩`-cosets of differences (landed `orbMk_affine_eq_iff`): `relOfPair x y` = coset of `y−x`.
+- **Mathlib anchors:** `Mathlib.FieldTheory.Finite.Basic` (`F_{p^d}` structure), `FiniteField.frobenius`/
+  `frobeniusEquiv`, `Mathlib.FieldTheory.Galois` (Gal(`F_q/F_p`) = `⟨φ⟩` cyclic order `d`), `IsCyclic`,
+  `Subgroup.zpowers`. Modelling `V ≅ F_{p^d}` as a *field* (not just a module) is the new modelling step — the
+  cyclic case wants the multiplicative + Galois structure the generic `affineScheme` (a `Fin d → ZMod p` module)
+  does not expose. Decide: either (i) instantiate `affineScheme` with `G₀` the image of `⟨α⟩` under a fixed
+  `F_{p^d} ≃ₗ (Fin d → ZMod p)`, or (ii) build a parallel `cyclotomicScheme` directly on `F_{p^d}` via
+  `orbitalScheme` of the 1-dim affine group `F_{p^d} ⋊ ⟨α⟩`. **(ii) is likely cleaner** — it keeps the field
+  structure native and avoids the module-transport bureaucracy; `orbitalScheme` (M0, landed) accepts any transitive
+  generously-transitive `G ≤ Perm (Fin q)`, and `F_{p^d} ⋊ ⟨α⟩` is one.
+
+**The separation argument (the open core — `s(C)` bounded by the Galois gap).** The structure, in project terms:
+- *Why depth-1 fails (the gap):* the `r` cosets are permuted by the Galois group `Γ = ⟨φ⟩` (Frobenius), and the
+  scheme's intersection numbers are `Γ`-invariant — so from a single base, 1-WL cannot tell `φ`-conjugate cosets
+  apart by counting. This is the separability gap `Ĝ ⊋ G` (`Ĝ` includes the colour-*permuting* algebraic
+  automorphism `φ`; `G = ⟨α⟩ ⋉ V` is colour-*preserving*). `s(C) > 1` ⟺ this gap is nonempty.
+- *Why bounded extra individualization closes it:* `φ` moves points (it is not a scheme automorphism in `G`), so
+  individualizing points outside the `φ`-fixed field `F_p` breaks `Γ`. Once `T` contains points whose joint
+  `Γ`-stabilizer is trivial — at most `O(d)` points, since `|Γ| = d` is cyclic — the gap closes and warmRefine
+  discretizes. **Target bound: `base(G₀) + O(log d)` (or `+ d`), i.e. `s(C) = O(d) = O(log q)`** — matching
+  Ponomarenko's prime-power circulant `WL-dim ≤ 3` regime and the probe's flat depth 4.
+- *The hard lemma (open, no citation):* "individualizing a `Γ`-breaking set of `O(d)` points makes the 1-WL fixpoint
+  separate `φ`-conjugate cosets, hence (with the base) discretize." This is where E1's multi-round reasoning is
+  consumed: a single round after individualizing `x` distinguishes a coset `C_i` from `φ(C_i)` iff the count
+  `#{z : z−0 ∈ C_i ∧ z−x ∈ J}` differs from the `φ(C_i)` count — the **two-base intersection count** (cf. the
+  landed J-world `IntersectionSeparates`/`depth2Det_of_intersectionSeparates`, Scheme.lean:2524 — to be **re-proved
+  on `schemeAdj`** as an E1 lemma). Iterate over the `O(d)` base points.
+
+**Honest difficulty.** The model (ii) is mechanical–medium. The *bound lemma* is genuine research: even the cyclic
+case needs the Frobenius-breaking counting argument formalized, and there is no citation for `s(C)` bounded. M2-cyclic
+is "plausibly provable with elementary finite-field linear algebra + counting" (the project's standing assessment),
+but budget it as real work, gated behind the (already-clean) probe empirics. **Sub-steps, in order:**
+1. **E2.1** — the cyclotomic model on `F_{p^d}` (option (ii)): `cyclotomicScheme p d α : SchurianScheme q` via
+   `orbitalScheme`, with `relOfPair` = coset-of-difference. *Buildable now.*
+2. **E2.2** — the Frobenius action on relations: `φ` permutes cosets, intersection numbers are `Γ`-invariant
+   (the gap, stated). *Mechanical given Mathlib Galois.*
+3. **E2.3** — the two-base count separates `φ`-conjugate cosets after individualizing a `Γ`-breaking point (the
+   E1 `schemeAdj` two-base lemma + the field counting). *The first genuinely-hard step.*
+4. **E2.4** — iterate (E1 multi-round / saturation over the `O(d)` base) to `Discrete(warmRefine from T)`,
+   `|T| ≤ base + O(d)`. *The research crux.*
+
+### 11.5 E1 — the reusable round-propagation lemmas (EXTRACTED from E2, not pre-built)
+
+The `schemeAdj`-native generalization of the landed single-round `relOfPair_eq_of_warmRefine_singleton`. Build
+*only* what E2 consumes; candidates (state generally for any `AssociationScheme`, prove via induction on
+`refineStep` rounds, reusing `iterate_refineStep_*`, `signature_eq_card_eq`, `warmRefine_refines_initial`):
+- **`twoBaseSeparates`** (the depth-2 `schemeAdj` analogue of `IntersectionSeparates`): if a two-base intersection
+  count distinguishes `u, u'`, then `warmRefine` from `{t, t'}` separates them. (The depth-1 lemma is the one-base
+  case; this is the next round.) *The first E1 lemma E2.3 needs.*
+- **`separationPropagates`** (the inductive step): if some already-separated neighbourhood difference exists for
+  `(u,u')`, one more `refineStep` separates them — the engine of E2.4's iteration. Likely phrased as a saturation
+  (`exists_iterate_isFixed_within`-style) over the "separated-pairs" set, mirroring `isolationStep` at the vertex
+  level on `schemeAdj`.
+- **`discrete_of_separationSaturates`**: if the separated-pairs saturation reaches all pairs, `warmRefine` from `T`
+  is discrete (feeds `stablyRecoverable_of_discrete`). The `schemeAdj` analogue of `theorem_2_HOR_of_edgeGenerates`'s
+  finish, on vertices not relations.
+
+**Note (do not over-reach):** E1 might be just `twoBaseSeparates` + a thin saturation wrapper. Resist building a
+full general "iterated isolation engine" mirroring all of `isolationStep`/`IsoPinned`/`EdgeGenerates` on `schemeAdj`
+speculatively — that is the over-build the route-scan warns against. Extract per E2's actual needs.
+
+### 11.6 E3 — wiring (mechanical, once E2 lands)
+
+`selfDetectsStably_of_depthOneSeparable` is the template. The cyclotomic capstone:
+1. `selfDetectsStably_of_discretizes` with the E2 discreteness witness ⟹ `SelfDetectsStably (cyclotomicScheme …)`.
+2. `reachesRigidOrCameron_viaFusedSeal` (or `…_viaDepthOneSeparable`'s sibling) ⟹ the seal on the cyclotomic family,
+   with `hImprim` discharged (primitive ⟹ no imprimitive branch) and G3 cited.
+3. Thread `bound := base(G₀) + C` (C from E2.4); discharge `|T| ≤ bound` from "small" (`|G₀|` poly ⟹ base `O(log)`).
+**Anti-"looks-complete":** name it `reachesRigidOrCameron_viaCyclotomic` (or `_affineCyclic`) and keep it carrying
+`hClassify` (G3); it closes the seal only for the *cyclotomic* family — the general primitive case stays open.
+
+### 11.7 Deferred routes + the honest open core
+
+- **General-irreducible affine** — after cyclotomic; replaces the Frobenius/Galois gap with a general
+  invariant-subspace argument (M2a: base-homogeneous gap ⟹ `G₀`-invariant subspace ⟹ contradicts irreducibility,
+  M1.2). Heavier (S-ring separability theory); the cyclotomic proof is its rehearsal.
+- **Rank-3/4 SRG** — high strategic payoff (completes rank 3/4 with G3), but blocked by Q1 (no Mathlib scheme/SRG
+  substrate). Revisit only if scheme spectral theory gets built for another reason.
+- **§5.3 general** (`BaseHomogeneousTwin ⟹ ClosedSubset`) — the eventual goal; rehearsed by M1.2's template
+  (swap `Submodule` ↔ `ClosedSubset`). Attack by analogy *after* affine, when value/cost is clear.
+
+> **THE OPEN CORE (state plainly at every handoff).** The `s(C)`-bounded conjecture for primitive small schemes is
+> **uncited open mathematics** (seal-handoff §6 insight 2, exhaustive-obstruction §0.7.6). Even a fully successful
+> E1+E2+E3 closes only the **cyclotomic** slice; the general primitive case may never close from Mathlib. The seal's
+> honest end-state remains a conditional theorem `modulo {G3 + the s(C) bound}`. Every capstone built here MUST carry
+> the open hypothesis visibly (the anti-"looks-complete" discipline) so the slot stays obvious. The engine is *1-WL
+> reasoning over a bounded base* throughout — it never climbs `k`, never goes super-polynomial by design; where the
+> bound is unbounded (the leak), the algorithm flags, it does not raise `k`.
