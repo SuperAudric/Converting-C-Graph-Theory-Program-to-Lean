@@ -2,7 +2,9 @@
 
 > **STATUS (2026-06-08): Phase 1 COMPLETE (Increments 1 + 2 LANDED, axiom-clean, build green) — the seal is
 > reduced end-to-end to the SEMANTIC crux `SelfDetectsStably` (primitive small ⟹ cells = orbits above a
-> bounded set). Phase 2 = the crux proof (research, affine beachhead §5.1). See the §4 outcome box.** The oracle-capability seal is a conditional theorem
+> bounded set). Phase 2 STARTED — affine beachhead Increment A1 LANDED (single-base recovery is free; the crux
+> is multi-base). The **detailed, pick-up-and-build plan for the remaining affine multi-base work is §9
+> below** — a fresh reader should start there. See §4 outcome box (Phase 1), §5.1 (Phase 2 overview).** The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
 > is `hCascade` (small primitive ⟹ recovers = G2-B). Both empirical falsifiers are clean: the affine
@@ -301,3 +303,191 @@ substrate for *every* Phase-2 attack. Phase 2 starts at the affine beachhead (§
 - `Cascade.lean` (G1a `SchemeRecoveredByDepth`, the seal capstones), `CascadeOracle.lean`
   (`RecoverableByDepth`/`CellsAreOrbits`).
 - `GraphCanonizationProject.Tests/CatalogueSchemeProbe.cs`, `AffineSchemeProbe.cs` (the empirical gates).
+
+---
+
+## 9. Affine multi-base — the detailed build plan (PICK UP HERE)
+
+> **For a fresh reader.** Phase 1 is done: the seal closes once you prove `SelfDetectsStably S IsLarge bound`
+> for every primitive small schurian residual `S` (def in `Cascade.lean`; = *primitive ∧ small ⟹ ∃ S₀,
+> |S₀| ≤ bound ∧ `StablyRecoverable (schemeAdj S) … S₀`*, where `StablyRecoverable adj P S₀ := ∀ T ⊇ S₀,
+> CellsAreOrbits adj P T`). **Increment A1** landed the base case: `cellsAreOrbits_schemeAdj_singleton` —
+> single-base recovery (`CellsAreOrbits … {v}`) is **free** for every schurian scheme. The remaining content
+> is **multi-base** recovery (`|T| ≥ 2`), and the affine family `V⋊G₀` over `F_p^d` is the beachhead where
+> Mathlib's linear algebra applies. This section is the build plan: the model (M0), the block↔subspace bridge
+> (M1), the recovery crux (M2), the wiring (M3) — with signatures, Mathlib/project anchors, risks, and the
+> build order. The executable spec for every object below is `AffineSchemeProbe.cs` (it builds exactly these
+> orbital schemes, intersection numbers, primitivity = irreducibility, recovery = `EdgeGenerates`/depth).
+
+### 9.0 Two constraints found while planning (read first — they shape everything)
+
+1. **The project's `AssociationScheme` is SYMMETRIC** (`Scheme.lean:64`, field `rel_symm : ∀ i v w, rel i v w
+   = rel i w v`). So every relation is its own transpose. For a translation scheme the relation of `(x,y)` is
+   the `G₀`-orbit of `y − x`; it is symmetric **iff `G₀`-orbits are closed under negation** (`−v` in the same
+   orbit as `v`), i.e. **iff `−1 ∈ G₀`** (or one symmetrizes by merging `O` with `−O`). **Decision for the
+   beachhead: restrict to `−1 ∈ G₀`.** Many interesting irreducible groups contain `−1` (orthogonal groups,
+   most Singer normalizers); the cyclotomic probe families can be chosen so. (Generalizing the framework to
+   *commutative* non-symmetric schemes is a much larger change — out of scope; flag it but do not do it.)
+2. **There is NO group-orbital `SchurianScheme` constructor yet** — only `trivialScheme`/`trivialSchurianScheme`
+   (rank 1, `Scheme.lean:335/353`). M0 must build one. **Before building from scratch, check** how the Cameron
+   battery built Johnson/Hamming schemes (`CameronGraphGenerator.cs` is C#; the Lean side may only have
+   `SchurianSchemeGraph` via `IsSchurianSchemeGraph'`, the `J`-binarized form — *not* a full `SchurianScheme`).
+   The reusable abstraction to build is **the orbital scheme of a transitive permutation group** (M0 below);
+   affine is then one instance, and it also serves any future Phase-2 family (PSL, classical — §5.2).
+
+### 9.1 M0 — the model: orbital scheme of a transitive group (the infrastructure)
+
+**Goal.** A constructor `orbitalScheme : (G : Subgroup (Equiv.Perm (Fin n))) → (htrans : transitive) →
+SchurianScheme n`, then the affine instance `G = image of V⋊G₀ in Perm(V)` via `V ≃ Fin (p^d)`.
+
+**M0.1 — the general orbital `AssociationScheme`.** Relations = the 2-orbits (orbitals) of `G` on `Fin n ×
+Fin n`. Concretely:
+- `orbitalSetoid : Setoid (Fin n × Fin n)` = `MulAction.orbitRel G (Fin n × Fin n)` under the diagonal action.
+- `rank + 1 = Fintype.card (Quotient orbitalSetoid)`; pick an indexing `Fin (rank+1) ≃ Quotient …` with the
+  diagonal orbital `{(v,v)}` mapped to `0` (it is one orbital because `G` is transitive).
+- `rel i v w := (orbital index of (v,w)) = i`; `relOfPair v w := that index`.
+- `intersectionNumber i j k := |{u : (v,u) ∈ R_i ∧ (u,w) ∈ R_j}|` for a chosen `(v,w) ∈ R_k`.
+- **Axioms:** `rel_zero_iff_eq` (diagonal orbital ↔ `v=w`), `rel_symm` (**needs the orbital closed under
+  swap** — true iff `G` is *generously transitive* / the scheme symmetric; this is exactly constraint 9.0(1),
+  so for affine assume `−1 ∈ G₀`), `rel_partition` (orbitals partition pairs — `Quotient` is a partition),
+  `intersectionNumber_well_defined` (the count is constant on `R_k` — **the load-bearing axiom**, follows from
+  `G`-transitivity on the orbital `R_k`: any two `R_k`-pairs are `G`-related, and `g` bijects the witness
+  sets). The well-definedness proof is the main work; it is the orbital-counting-is-`G`-equivariant argument.
+- **Mathlib anchors:** `MulAction.orbitRel`, `MulAction.orbit`, `Quotient`, `Fintype.card`,
+  `MulAction.IsPretransitive`. Project: mirror `trivialScheme`'s field-filling style.
+
+**M0.2 — schurian.** `IsSchemeAut (orbitalScheme G) g` for `g ∈ G` (G preserves its own orbitals), and the
+schurian property (relations = orbitals of `SchemeAutGroup ⊇ G`). Since orbitals of `Aut ⊇ G` refine the
+`G`-orbitals but `Aut` preserves relations, they coincide — so `orbitalScheme G` is schurian with
+`SchemeAutGroup ⊇ G`. (For affine, `SchemeAutGroup = V⋊G₀` exactly when `G₀` is the full linear stabilizer;
+in general `⊇`, which is fine — schurian only needs *some* transitive group with these orbitals.)
+
+**M0.3 — the affine instance.** `V := Fin d → ZMod p` (a finite `Module (ZMod p)`, `Fintype`, `card = p^d`).
+`G₀ : Subgroup (V ≃ₗ[ZMod p] V)` with `−1 ∈ G₀`. The affine group acts on `V` by `(t, g)·x = g x + t`.
+Transport to `Equiv.Perm (Fin (p^d))` via `e : V ≃ Fin (p^d)` (`Fintype.equivFinOfCardEq`). Define `affineG :
+Subgroup (Equiv.Perm (Fin (p^d)))` as the image; `affineScheme := orbitalScheme affineG htrans`. Transitivity
+is free (translations act transitively). **Mathlib anchors:** `Module (ZMod p)`, `LinearEquiv`,
+`SemidirectProduct` (or hand-roll the action), `Fintype.equivFinOfCardEq`, `MulEquiv`/`Equiv.Perm` transport.
+**Risk:** the `V ≃ Fin (p^d)` transport bureaucracy is annoying but mechanical; budget for it.
+
+> **Decision point (M0).** *Option A — full `SchurianScheme`* (above): heavier, but plugs directly into the
+> seal (`SelfDetectsStably` is stated on `SchurianScheme`). *Option B — direct colored graph*: build the
+> colored Cayley graph on `V` (`adj x y = relOfPair x y`), prove recovery there, bridge to `SchurianScheme`
+> separately. B isolates the *math* (recovery) from the *packaging*, but you still need the packaging for the
+> seal. **Recommend A** via the general `orbitalScheme` constructor — it is reusable for §5.2 and avoids a
+> second bridge. Estimate M0 at the bulk of the affine build.
+
+### 9.2 M1 — block ⟺ invariant subspace; primitive ⟺ irreducible (the insight, Mathlib-clean)
+
+**Goal.** Translate the seal's `IsPrimitive` hypothesis into `G₀`-irreducibility, which M2 consumes.
+
+- **M1.1 — `ClosedSubset` ⟺ `G₀`-invariant subspace.** For the affine scheme, a `ClosedSubset I`'s block of
+  `0` (`{y | schemeEquiv I 0 y}`) is the union `W = ⋃_{i∈I} O_i ⊆ V`. Show `W` is an **`F_p`-subspace**: `0 ∈
+  W` (`R_0`), closed under `+` (the complex-product-closure of `ClosedSubset` ↔ `O_i + O_j ⊆ W`), and
+  `G₀`-invariant (orbits). Conversely a `G₀`-invariant subspace `W` gives `I = {orbits in W}`, a `ClosedSubset`.
+  **Mathlib:** `Submodule (ZMod p) V`, `Submodule.add_mem`, `AddSubgroup` (over `F_p`, subgroup = subspace via
+  `zsmul`). Project: `ClosedSubset`, `schemeEquiv`, `schemeEquiv_class_eq_iff` (`Scheme.lean`).
+- **M1.2 — `IsPrimitive` ⟺ `IsSimpleModule (ZMod p) V` (irreducible `G₀`).** Chain: scheme `IsPrimitive`
+  ⟺ (landed `isPreprimitive_iff_isPrimitive`, `Scheme.lean:3665`) Mathlib `IsPreprimitive (SchemeAutGroup) V`
+  ⟺ (affine: blocks-through-0 = invariant subspaces, M1.1) no proper non-trivial `G₀`-invariant subspace
+  ⟺ `G₀` acts irreducibly. **Mathlib:** `MulAction.IsPreprimitive`, `MulAction.IsBlock`, `IsSimpleModule`,
+  and the affine-primitivity fact (blocks of `V⋊G₀` through 0 ↔ `G₀`-invariant subgroups — may need proving;
+  search Mathlib `IsBlock` + normal-subgroup-of-regular for a shortcut). This is the clean, reusable
+  "block = sub-structure, primitivity forbids it" piece — the generalizable insight made concrete.
+
+### 9.3 M2 — the recovery crux: irreducible `G₀` ⟹ `StablyRecoverable` bounded (THE RESEARCH CONTENT)
+
+**Goal.** `irreducible G₀ ⟹ ∃ S₀, |S₀| ≤ bound ∧ ∀ T ⊇ S₀, CellsAreOrbits (schemeAdj affineScheme) … T`.
+
+**The object, unfolded (affine).** WLOG `0 ∈ T` (translate). For `T = {0, x₁, …, x_k}`: `Stab(T)`-orbits are
+`(G₀)_{x₁,…,x_k}`-orbits (pointwise stabilizer in `G₀`). `warmRefine`-from-`T` first round colours `u` by the
+**joint profile** `(orbit_{G₀}(u), orbit_{G₀}(u−x₁), …, orbit_{G₀}(u−x_k))`, then iterates (1-WL on the
+colored Cayley graph). `CellsAreOrbits T` ⟺ the iterated joint profile **separates exactly** the
+`(G₀)_{x_i}`-orbits. The `s(C)` gap is a `u ≠ u'` with the same iterated joint profile but different
+`(G₀)_{x_i}`-orbit.
+
+**The right vocabulary — Schur rings (matches the literature, Evdokimov–Ponomarenko/Ryabov).** The affine
+orbital scheme is the **orbit Schur ring** `A(G₀)` over `V` (span of the `G₀`-orbit sums in `ℤ[V]`). 1-WL from
+base `T` computes the **`T`-rooted WL Schur ring**. `CellsAreOrbits T` ⟺ the rooted WL ring equals the
+`Stab(T)`-orbit ring. **Separability** `s(A(G₀)) ≤ |T|` ⟺ `A(G₀)` is determined by its `|T|`-dim structure
+constants. The crux is: **irreducible `G₀` ⟹ `s(A(G₀)) ≤ base + O(1)`** (bounded separability).
+
+**The mechanism (M2a — persistent gap ⟹ invariant subspace).** A gap that survives every bounded base is
+**base-homogeneous** = an *algebraic* automorphism `σ` of `A(G₀)` (a permutation of orbits preserving all
+structure constants) **not realized by any `g ∈ G₀`**. For translation rings the support of such a `σ` is a
+`G₀`-invariant subgroup `W ⊊ V` (the "linear coupling" — the only base-homogeneous support; this is the
+S-ring-theoretic heart). `W` is a proper non-trivial `G₀`-invariant subspace ⟹ contradicts irreducibility
+(M1.2). **This is the affine instance of the general "persistent gap ⟹ block" — swap `Submodule` for
+`ClosedSubset` and it is the §5.3 general crux.** Making "base-homogeneous σ ⟹ invariant subspace" rigorous is
+the genuine S-ring research content (Ryabov's wreath/tensor structure theory for S-rings over `F_p^d`).
+
+**The bound (M2b — bounded base suffices).** `irreducible ⟹ a base of size O(d)` (a linear base: `{0}` ∪ a
+generating set making `(G₀)_{base} = 1`) ∪ `O(1)` extra to break the residual WL gap. For `−1 ∈ G₀`
+irreducible the predicted bound is `base(G₀) + O(1)` (cf. Ponomarenko's prime-power circulant `WL-dim ≤ 3`).
+`base(G₀) ≤ log₂|G₀|` is landed-style (`exists_isBase_saturated`); the `O(1)` stickiness is the WL gap M2a
+closes.
+
+**Sub-slices, by tractability (build in this order):**
+- **M2-cyclic (FIRST, most tractable):** `G₀` cyclic (Singer/cyclotomic, the affine probe's flat-depth-4
+  family). The gap is the *Galois* gap (cyclotomy), bounded by `d`. A cyclic `G₀` has a clean
+  invariant-subspace structure (eigenspaces over `F̄_p`), so M2a/M2b may close with elementary linear algebra
+  + a counting argument. This is the recommended first *proof* (the probe confirms the verdict: depth 4 flat).
+- **M2-general-irreducible (the full crux):** open S-ring content. Attempt only after M2-cyclic and M1 are
+  solid; gate behind the catalogue/affine empirics (already clean) and the literature (Ryabov S-ring
+  separability over `F_p^d`).
+
+**Honest difficulty (M2).** M2a (gap ⟹ subspace) in full generality is the **open** part — there is no
+citation (seal-handoff §6 insight 2; exhaustive-obstruction §0.7.6). M2-cyclic is plausibly provable and is the
+right first target. Do **not** expect M2-general to close quickly; its value is also as the *template* for the
+§5.3 general crux.
+
+### 9.4 M3 — wiring to `SelfDetectsStably` (mechanical, once M1+M2 exist)
+
+`SelfDetectsStably (affineScheme) IsLarge bound`:
+1. Intro `⟨hprim, hsmall⟩`. `hprim : IsPrimitive` → (M1.2) `irreducible G₀`.
+2. (M2) → `∃ S₀, |S₀| ≤ bound ∧ StablyRecoverable (schemeAdj affineScheme) … S₀`. Done.
+3. **The "small" hypothesis (`hsmall : ¬ IsLargeSchemeViaAut`).** For affine, `|SchemeAutGroup| = p^d·|G₀|`;
+   "small" = `|G₀|` poly = `d, p` bounded. M2's bound is `base(G₀)+O(1) = O(log|G₀|)+O(1)`, which is `≤ bound`
+   exactly in the small regime. Thread `bound := base(G₀) + C` and discharge `|S₀| ≤ bound` from `hsmall`.
+   Then `selfDetectsAtDepth_of_selfDetectsStably` (Increment 2, landed) + `reachesRigidOrCameron_viaStableRecovery`
+   (landed) give the seal on the affine residual.
+
+### 9.5 Build order, risk, and the reusable-for-the-general-crux payoff
+
+**Order:** M0 (model) → M1 (block↔subspace, primitive↔irreducible) → M2-cyclic (first recovery proof) →
+M3 (wire) → M2-general (the open crux, template for §5.3). M0+M1 are mechanical/Mathlib-clean and **worth
+landing regardless of M2** (they make "affine primitive ⟺ irreducible" a theorem and build the reusable
+orbital-scheme constructor). M2-cyclic is the first genuine recovery proof. M2-general is research.
+
+**Risk map:** M0 = medium (bureaucracy: orbital indexing, `intersectionNumber_well_defined`, `Fin n ≃ V`,
+`rel_symm` ⟹ `−1 ∈ G₀`). M1 = low–medium (Mathlib `Submodule`/`IsPreprimitive`, the landed bridge). M2-cyclic
+= medium–high (a real proof, but bounded and empirically confirmed). M2-general = open research. M3 = low.
+
+**Reusable patterns for the general crux (§5.3), harvested from doing affine right:**
+- The `orbitalScheme` constructor (M0) serves *every* schurian-residual family (PSL, classical — §5.2).
+- M1's "block ⟺ sub-structure, primitivity forbids it" is the *template*: the general crux replaces
+  `Submodule` with `ClosedSubset` and "invariant subspace" with "block system". Prove it concretely on affine
+  first; the shape transfers.
+- M2a's "base-homogeneous gap ⟹ a sub-structure" is the general self-detection mechanism; affine makes it
+  linear (Mathlib-native) so it is the place to learn the argument before abstracting.
+- **The single-base-free insight (A1) is general** (`cellsAreOrbits_schemeAdj_singleton`, every schurian
+  scheme): in any Phase-2 family, only multi-base needs proving.
+
+### 9.6 Anchors a fresh reader needs
+
+- **Landed to build on:** `cellsAreOrbits_schemeAdj_singleton`, `relOfPair_eq_of_warmRefine_singleton`,
+  `iterate_refineStep_colour_refines`, `signature_eq_card_eq` (`Cascade.lean §13a`); `StablyRecoverable`,
+  `schemeRecoveredByDepth_of_stablyRecoverable`, `SelfDetectsStably`, `selfDetectsAtDepth_of_selfDetectsStably`,
+  `reachesRigidOrCameron_viaStableRecovery` (`Cascade.lean`, Increment 2); `vProfile_iff_schemeOrbit`,
+  `isAut_schemeAdj_iff`, `schemeAdj`, `isPreprimitive_iff_isPrimitive`, `ClosedSubset`, `IsPrimitive`,
+  `SchemeAutGroup`, `trivialScheme`/`trivialSchurianScheme` (`Scheme.lean`).
+- **Executable spec:** `GraphCanonizationProject.Tests/AffineSchemeProbe.cs` (the orbital scheme, intersection
+  numbers, primitive = irreducible, recovery = `EdgeGenerates`/greedy depth — mirror it exactly in Lean).
+- **Empirics already in hand:** affine probe (cyclotomic flat depth 4; non-abelian `ΓL(1,2^d)` flat depth 4,
+  0 leaks) and the Hanaki–Miyamoto catalogue (orders 5–30, all primitive recover) — both confirm M2's verdict,
+  so the proof is "establish the known-true," not "discover."
+- **Literature for M2:** Evdokimov–Ponomarenko (separability number `s(C)`), Ryabov
+  (arXiv:1709.03937/1812.11313, S-ring separability over abelian/`F_p^d`), Ponomarenko (arXiv:2206.15028,
+  prime-power circulant `WL-dim ≤ 3`), Wu–Ren–Ponomarenko (arXiv:2507.10116). See exhaustive-obstruction §0.7.6.
+- **Mathlib for M0/M1/M2:** `MulAction.orbitRel`/`IsBlock`/`IsPreprimitive`/`stabilizer`, `Submodule`,
+  `IsSimpleModule`, `Module (ZMod p)`, `LinearEquiv`, `SemidirectProduct`, `Fintype.equivFinOfCardEq`.
