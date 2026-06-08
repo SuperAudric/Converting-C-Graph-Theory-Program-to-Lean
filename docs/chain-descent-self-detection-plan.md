@@ -392,6 +392,29 @@ schurian property (relations = orbitals of `SchemeAutGroup ⊇ G`). Since orbita
 `SchemeAutGroup ⊇ G`. (For affine, `SchemeAutGroup = V⋊G₀` exactly when `G₀` is the full linear stabilizer;
 in general `⊇`, which is fine — schurian only needs *some* transitive group with these orbitals.)
 
+> **M0.3 LANDED (2026-06-08, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green,
+> `Cascade.lean §AffineScheme`).** The affine beachhead model is built — and **simpler than the original M0.3
+> sketch**: rather than `AffineEquiv`/`linearHom`/`permCongrHom`/double-`.map`, the affine group is built
+> directly as `Subgroup.closure` of explicit affine perms, reusing landed `orbitalScheme`. Decls:
+> - `affineE : (Fin d → ZMod p) ≃ Fin (p^d)` (transport, via `affV_card`); `affineEquivV g₀ t : Perm V`
+>   (`x ↦ g₀ x + t`, explicit inverse); `affinePermFin g₀ t := affineE.permCongr (affineEquivV g₀ t)` +
+>   `affinePermFin_apply`.
+> - `affineGenSet G₀` (`{x ↦ g₀ x + t | g₀ ∈ G₀}`), **`affineG G₀ := Subgroup.closure (affineGenSet G₀)`**
+>   (the affine group `V ⋊ G₀` ≤ `Perm (Fin (p^d))`).
+> - `affineG_isPretransitive` (translations, `g₀=1`); `affineG_generous` (`-1 ∈ G₀` ⟹ `orbMk x y = orbMk y x`,
+>   via the swap `u ↦ -u + (x+y)`).
+> - **`affineScheme G₀ (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) : SchurianScheme (p^d)`** :=
+>   `orbitalScheme (affineG G₀) …` — pluggable into `SelfDetectsStably`/the seal.
+>
+> Parameters: `{p d : ℕ} [Fact p.Prime]`, `G₀ : Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))`,
+> `hneg`. The relations are the `G₀`-orbits on differences (`relOfPair x y` = orbit of `y−x`) — *to be
+> characterized in M1*. **Next: M1** (block ⟺ `G₀`-invariant subspace; `IsPrimitive` ⟺ irreducible).
+>
+> **Generalization insight (captured in source).** The construction uses only *regular abelian translations*
+> + a *point-stabilizer closed under negation*; nothing is special to `F_p^d` beyond `V` being a finite
+> module. The same shape models any **translation scheme** (`T ⋊ G₀`, `T` regular abelian = the Schur-ring
+> setting M2 targets). The linear structure of `V` only enters at M1/M2.
+
 **M0.3 — the affine instance.** `V := Fin d → ZMod p` (a finite `Module (ZMod p)`, `Fintype`, `card = p^d`).
 `G₀ : Subgroup (V ≃ₗ[ZMod p] V)` with `−1 ∈ G₀`. The affine group acts on `V` by `(t, g)·x = g x + t`.
 Transport to `Equiv.Perm (Fin (p^d))` via `e : V ≃ Fin (p^d)` (`Fintype.equivFinOfCardEq`). Define `affineG :

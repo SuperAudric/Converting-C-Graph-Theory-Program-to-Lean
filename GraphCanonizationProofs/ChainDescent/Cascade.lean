@@ -6,6 +6,11 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.GroupTheory.Index
 import Mathlib.Algebra.Group.Subgroup.Finite
+import Mathlib.Data.ZMod.Basic
+import Mathlib.Algebra.Module.Equiv.Basic
+import Mathlib.Algebra.Module.Pi
+import Mathlib.Data.Fintype.BigOperators
+import Mathlib.Tactic.Abel
 
 /-!
 # B1 — cascade composition (Theorem 3a), Phases A + C
@@ -3870,5 +3875,108 @@ theorem reachesRigidOrCameron_viaFusedSeal {n : Nat} {IsLarge : Nat → Prop}
     hClassify (fun _ _ h => h) S hne hrank
     (fun h => Or.inr (selfDetectsAtDepth_of_selfDetectsStably hSelfDetect h))
     (fun h => Or.inl (hImprim h))
+
+/-! ### Phase 2, M0.3 — the affine instance `V ⋊ G₀` over `F_p^d`
+
+The concrete beachhead family: the orbital scheme of the affine group `V ⋊ G₀` acting on `V = F_p^d`,
+built by instantiating the general `orbitalScheme` (M0) at the subgroup of `Perm (Fin (p^d))` generated
+by the affine permutations `x ↦ g₀ x + t` (`g₀ ∈ G₀`, `t ∈ V`), transported along `V ≃ Fin (p^d)`.
+
+**Generalization note (the reusable shape).** The construction uses only: a *regular abelian* group of
+translations (giving transitivity) and a point-stabilizer `G₀` *closed under negation* (giving the
+symmetric/generous-transitivity hypothesis — `LinearEquiv.neg ∈ G₀`). Nothing here is special to
+`F_p^d` beyond `V` being a finite module; the same shape models any **translation scheme** (`T ⋊ G₀`,
+`T` regular abelian — the Schur-ring setting of M2). The linear structure of `V` only enters later, at
+M1 (block ⟺ `G₀`-invariant subspace) and M2 (irreducible `G₀` ⟹ recovery). -/
+
+section AffineScheme
+
+variable {p d : ℕ} [Fact p.Prime]
+
+/-- `card (F_p^d) = p^d`. -/
+private theorem affV_card : Fintype.card (Fin d → ZMod p) = p ^ d := by
+  haveI : NeZero p := ⟨(Fact.out : p.Prime).pos.ne'⟩
+  rw [Fintype.card_fun, ZMod.card, Fintype.card_fin]
+
+/-- The transport `F_p^d ≃ Fin (p^d)` (the scheme lives on `Fin (p^d)`). -/
+noncomputable def affineE : (Fin d → ZMod p) ≃ Fin (p ^ d) :=
+  Fintype.equivFinOfCardEq affV_card
+
+/-- The affine permutation `x ↦ g₀ x + t` of `V = F_p^d`. -/
+def affineEquivV (g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) (t : Fin d → ZMod p) :
+    Equiv.Perm (Fin d → ZMod p) where
+  toFun := fun x => g₀ x + t
+  invFun := fun y => g₀.symm (y - t)
+  left_inv := fun x => by simp
+  right_inv := fun y => by simp
+
+/-- The affine permutation transported to `Perm (Fin (p^d))`. -/
+noncomputable def affinePermFin (g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+    (t : Fin d → ZMod p) : Equiv.Perm (Fin (p ^ d)) :=
+  affineE.permCongr (affineEquivV g₀ t)
+
+@[simp] theorem affinePermFin_apply (g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+    (t : Fin d → ZMod p) (i : Fin (p ^ d)) :
+    affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t) := by
+  simp only [affinePermFin, Equiv.permCongr_apply, affineEquivV, Equiv.coe_fn_mk]
+
+variable (G₀ : Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)))
+
+/-- The affine permutations whose linear part lies in `G₀` — the generating set of `V ⋊ G₀`. -/
+def affineGenSet : Set (Equiv.Perm (Fin (p ^ d))) :=
+  { σ | ∃ g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p), g₀ ∈ G₀ ∧ ∃ t, σ = affinePermFin g₀ t }
+
+/-- **The affine group `V ⋊ G₀`** as a subgroup of `Perm (Fin (p^d))`. -/
+noncomputable def affineG : Subgroup (Equiv.Perm (Fin (p ^ d))) :=
+  Subgroup.closure (affineGenSet G₀)
+
+/-- A translation lies in `affineG` (linear part `1 ∈ G₀`). -/
+theorem affinePermFin_one_mem (t : Fin d → ZMod p) :
+    affinePermFin (1 : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) t ∈ affineG G₀ :=
+  Subgroup.subset_closure ⟨1, one_mem _, t, rfl⟩
+
+/-- **Transitivity** — translations act transitively on `F_p^d`. -/
+theorem affineG_isPretransitive : MulAction.IsPretransitive (affineG G₀) (Fin (p ^ d)) := by
+  refine ⟨fun i j => ?_⟩
+  refine ⟨⟨affinePermFin 1 (affineE.symm j - affineE.symm i), affinePermFin_one_mem G₀ _⟩, ?_⟩
+  show affinePermFin (1 : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))
+      (affineE.symm j - affineE.symm i) i = j
+  rw [affinePermFin_apply]
+  have : (1 : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) (affineE.symm i)
+      + (affineE.symm j - affineE.symm i) = affineE.symm j := by
+    rw [LinearEquiv.coe_one, id_eq]; abel
+  rw [this, Equiv.apply_symm_apply]
+
+/-- **Generous transitivity** — with `-1 ∈ G₀`, the orbital of `(x,y)` equals that of `(y,x)` (the
+affine map `u ↦ -u + (x+y)` swaps them), so the orbital scheme is symmetric. -/
+theorem affineG_generous (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) (x y : Fin (p ^ d)) :
+    (orbMk x y : Orbital (affineG G₀)) = orbMk y x := by
+  rw [orbMk_eq_iff]
+  refine ⟨⟨affinePermFin (LinearEquiv.neg (ZMod p)) (affineE.symm x + affineE.symm y),
+      Subgroup.subset_closure ⟨_, hneg, _, rfl⟩⟩, ?_, ?_⟩
+  · show affinePermFin (LinearEquiv.neg (ZMod p)) (affineE.symm x + affineE.symm y) y = x
+    rw [affinePermFin_apply]
+    have : (LinearEquiv.neg (ZMod p)) (affineE.symm y) + (affineE.symm x + affineE.symm y)
+        = affineE.symm x := by
+      simp only [LinearEquiv.coe_neg, Pi.neg_apply, id_eq]; abel
+    rw [this, Equiv.apply_symm_apply]
+  · show affinePermFin (LinearEquiv.neg (ZMod p)) (affineE.symm x + affineE.symm y) x = y
+    rw [affinePermFin_apply]
+    have : (LinearEquiv.neg (ZMod p)) (affineE.symm x) + (affineE.symm x + affineE.symm y)
+        = affineE.symm y := by
+      simp only [LinearEquiv.coe_neg, Pi.neg_apply, id_eq]; abel
+    rw [this, Equiv.apply_symm_apply]
+
+/-- **The affine scheme `V ⋊ G₀` over `F_p^d`** (Phase 2, M0.3) — the concrete beachhead family.
+The orbital scheme of the affine group acting on `Fin (p^d)`: relations are the `G₀`-orbits on
+differences, `relOfPair x y` = the orbit of `y − x`. A `SchurianScheme (p^d)`, pluggable into
+`SelfDetectsStably` and the seal. The hypothesis `-1 ∈ G₀` makes the scheme symmetric (generous
+transitivity). **Next:** M1 (`IsPrimitive` ⟺ `G₀` irreducible), M2 (irreducible ⟹ recovers). -/
+noncomputable def affineScheme (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) : SchurianScheme (p ^ d) :=
+  haveI : NeZero p := ⟨(Fact.out : p.Prime).pos.ne'⟩
+  haveI : Nonempty (Fin (p ^ d)) := ⟨⟨0, Nat.pos_of_ne_zero (pow_ne_zero d (NeZero.ne p))⟩⟩
+  orbitalScheme (affineG G₀) (affineG_isPretransitive G₀) (affineG_generous G₀ hneg)
+
+end AffineScheme
 
 end ChainDescent
