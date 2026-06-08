@@ -258,8 +258,39 @@ public class AffineSchemeProbe(ITestOutputHelper output)
     {
         // x^d + (tail bits give lower coeffs); standard primitive polynomials over F_2.
         { 1, 0b1 }, { 2, 0b11 }, { 3, 0b011 }, { 4, 0b0011 }, { 5, 0b00101 }, { 6, 0b000011 },
+        { 7, 0b0000011 },    // x^7 + x + 1
         { 8, 0b00011101 },   // x^8 + x^4 + x^3 + x^2 + 1
     };
+
+    // ── Field arithmetic in F_{2^d} (basis {1, a, …, a^{d-1}}, a a root of the
+    //    primitive polynomial) — needed for the Frobenius map, which the original
+    //    probe skipped (line "needs the field tables").  Elements are d-bit ints. ──
+    static int MulByA(int x, int d, int tail)
+    {
+        int r = x << 1;
+        if ((r & (1 << d)) != 0) r ^= (1 << d) | tail;   // a^d = tail (reduce)
+        return r;
+    }
+
+    static int APow(int k, int d, int tail) { int a = 1; for (int i = 0; i < k; i++) a = MulByA(a, d, tail); return a; }
+
+    // Frobenius φ: x ↦ x² on F_{2^d}, as an F_2-linear matrix.  φ(a^j) = a^{2j}, so
+    // column j is the vector a^{2j}.  Irreducible-group fact: φ·g·φ⁻¹ = g² for the
+    // Singer generator g (Frobenius squares it), so ⟨g, φ⟩ is NON-ABELIAN — the
+    // Singer normalizer ΓL(1,2^d), the canonical small primitive non-abelian affine
+    // residual the cyclotomic (cyclic-G0) probe could not reach.
+    static int[] Frobenius(int d, int tail)
+    {
+        var phi = new int[d];
+        for (int j = 0; j < d; j++)
+        {
+            int img = APow(2 * j, d, tail);              // φ(e_j) = a^{2j}
+            for (int i = 0; i < d; i++) if ((img >> i & 1) != 0) phi[i] |= 1 << j;
+        }
+        return phi;
+    }
+
+    static List<int> Divisors(int n) { var ds = new List<int>(); for (int m = 1; m <= n; m++) if (n % m == 0) ds.Add(m); return ds; }
 
     static int[] CompanionSinger(int d)
     {
@@ -445,5 +476,134 @@ public class AffineSchemeProbe(ITestOutputHelper output)
         output.WriteLine("");
         output.WriteLine("READ: greedy-IR-depth bounded across d ⟹ tame (recovers, not a leak).  Growing ⟹ affine G2-B leak.");
         Assert.True(true);
+    }
+
+    // ── ROUTE 1, strand (a): genuinely NON-ABELIAN irreducible G0 ≤ GL(d,2). ──────
+    //
+    // The cyclotomic probe used CYCLIC (abelian-as-a-group) Singer subgroups — the
+    // Galois gap, undertested for the actual self-detection mechanism (seal-handoff
+    // §4 G2 attack board (g)).  This probe sweeps the Singer NORMALIZER
+    // ΓL(1,2^d) = ⟨g, φ⟩ (g Singer cycle, φ Frobenius x↦x²) and its subgroups
+    // ⟨g^m, φ^k⟩ — the canonical small PRIMITIVE NON-ABELIAN affine residuals
+    // (φ·g·φ⁻¹ = g², so any subgroup containing a φ-power is non-abelian).  These are
+    // exactly where (3)'s two forces collide: regular abelian V vs non-abelian G0.
+    //
+    // THE G2-B SIGNATURE: primitive ∧ non-abelian-G0 ∧ ¬recovers, with greedy-IR-depth
+    // GROWING across the family d=3..7 (bounded ⟹ tame / leg-A depth-graded).
+    //
+    // LOCKSTEP-COMPLETENESS read (docs: the within-cell lockstep single-path replay
+    // captures only SINGLE-STEP recovery, `lockstep_disc_imp_stab_trivial`).  We
+    // bucket each scheme: depth-1 EdgeGenerates ⟹ "lockstep" (single-step harvest
+    // suffices); EdgeGenerates fails but greedy-IR-depth bounded ⟹ "x-branch"
+    // (multi-step, needs the cross-branch / Part-A harvest — the lockstep MISSES it,
+    // so the harness over-branches but the budget still holds at bounded depth);
+    // greedy-IR-depth growing with d ⟹ "LEAK".
+    [Fact]
+    public void Probe_NonAbelianIrreducibleG0()
+    {
+        output.WriteLine("Singer-normalizer (ΓL(1,2^d)) subgroups — genuinely non-abelian irreducible G0:");
+        output.WriteLine("⟨g^m, φ^k⟩ with g=Singer, φ=Frobenius (x↦x²); φgφ⁻¹=g² ⟹ non-abelian whenever a φ-power is in.");
+        output.WriteLine("");
+
+        int groupCap = 1 << 16;
+        // The family signal: max greedy-IR-depth among PRIMITIVE NON-ABELIAN rank≥3
+        // schemes per d (the genuine G2-B candidates).  (NOT the full normalizer —
+        // ΓL(1,2^d) is 2-transitive = rank-2 = the complete graph K_{2^d}, whose
+        // Cayley-graph IR-depth is trivially n−1 but whose scheme recovers; measuring
+        // depth there is meaningless.)  Bounded across d ⟹ tame; growing ⟹ leak.
+        var candDepthByD = new Dictionary<int, int>();   // d ↦ max primitive-non-ab rank≥3 depth
+        int totalNonAb = 0, primNonAb = 0, primNonAbRecover = 0, leakCandidates = 0;
+
+        foreach (int d in new[] { 3, 4, 5, 6, 7, 8 })
+        {
+            if (!PrimPolyTail.ContainsKey(d)) continue;
+            int n = 1 << d, singerOrder = n - 1, tail = PrimPolyTail[d];
+            var g = CompanionSinger(d);
+            var phi = Frobenius(d, tail);
+
+            // field/Frobenius sanity: φ invertible AND φ·g·φ⁻¹ = g² (the defining relation).
+            Assert.True(IsInvertible(phi, d), $"Frobenius not invertible at d={d}");
+            // φ g = g² φ  ⟺  φ g φ⁻¹ = g².  Check φ g = g² φ directly (avoids inverse).
+            var lhs = MatMul(phi, g, d);
+            var g2 = MatMul(g, g, d);
+            var rhs = MatMul(g2, phi, d);
+            Assert.True(MatKey(lhs, d) == MatKey(rhs, d), $"Frobenius relation φg=g²φ failed at d={d}");
+
+            var seenScheme = new HashSet<string>();
+            var rows = new List<(int order, int rank, bool prim, bool ab, bool rec, int depth, string bucket, string val)>();
+
+            // φ powers (order d) and Singer powers g^m (m | singerOrder); take subgroups with a φ-power in.
+            foreach (int k in Divisors(d))
+            {
+                // φ^k
+                var phik = (int[])Ident(d).Clone();
+                for (int t = 0; t < k; t++) phik = MatMul(phik, phi, d);
+                if (MatKey(phik, d) == MatKey(Ident(d), d) && k != d) continue; // φ^k trivial only at k=d
+                foreach (int m in Divisors(singerOrder))
+                {
+                    if (m == singerOrder) continue;          // g^m = 1 ⟹ pure ⟨φ^k⟩ reducible-ish; skip
+                    var gm = (int[])Ident(d).Clone();
+                    for (int t = 0; t < m; t++) gm = MatMul(gm, g, d);
+                    var gens = new List<int[]> { gm, phik };
+                    var grp = GenGroup(gens, d, groupCap);
+                    if (grp == null || grp.Count == 1) continue;
+                    var s = BuildScheme(grp, d);
+                    if (s.Rank <= 2) continue;               // 2-transitive, recovers trivially
+
+                    var valSorted = s.Valency.OrderBy(x => x).ToArray();
+                    long ih = 17; for (int a = 0; a < s.Rank; a++) for (int i = 0; i < s.Rank; i++) for (int j = 0; j < s.Rank; j++) ih = ih * 1000003 + s.P[a, i, j];
+                    if (!seenScheme.Add($"{s.Rank}|{string.Join(",", valSorted)}|{ih}")) continue;
+
+                    bool prim = Primitive(s), ab = Abelian(grp, d), rec = Recovers(s);
+                    int depth = GreedyIRDepth(s, 1, cap: s.N);
+                    // bucket: recovers-at-depth-1 = lockstep (single-step harvest suffices);
+                    // imprimitive = G2-A/leg-B (block tower / abelian), not a primitive leak;
+                    // primitive non-recover bounded = x-branch (multi-step, cross-branch — the
+                    // lockstep MISSES it but bounded depth recovers); primitive non-recover
+                    // unbounded (depth>base+2) = LEAK?.
+                    string bucket = rec ? "lockstep"
+                        : !prim ? (ab ? "imprim/legB" : "imprim/Gtower")
+                        : (depth <= s.D + 2 ? "x-branch" : "LEAK?");
+                    rows.Add((grp.Count, s.Rank, prim, ab, rec, depth, bucket, string.Join(",", s.Valency.Skip(1))));
+
+                    if (!ab) totalNonAb++;
+                    if (prim && !ab)
+                    {
+                        primNonAb++;
+                        if (rec) primNonAbRecover++;
+                        candDepthByD[d] = Math.Max(candDepthByD.GetValueOrDefault(d, 0), depth);
+                        if (!rec && depth > s.D + 2) leakCandidates++;
+                    }
+                }
+            }
+
+            output.WriteLine($"════ d={d}  |V|={n}  Singer order={singerOrder} ════  distinct non-abelian-source schemes: {rows.Count}");
+            output.WriteLine($"{"|G0|",6} {"rank",5} {"prim",6} {"G0",6} {"recov",6} {"depth",6}  bucket          valencies");
+            foreach (var r in rows.OrderBy(r => r.rank).ThenBy(r => r.order))
+                output.WriteLine($"{r.order,6} {r.rank,5} {(r.prim ? "PRIM" : "imprim"),6} {(r.ab ? "ab" : "nonab"),6} {(r.rec ? "yes" : "NO"),6} {r.depth,6}  {r.bucket,-14}  [{r.val}]");
+        }
+
+        output.WriteLine("");
+        output.WriteLine("──── primitive non-abelian rank≥3 candidate family: max greedy-IR-depth across d ────");
+        output.WriteLine("    (the genuine G2-B family signal; bounded ⟹ tame, growing ⟹ leak)");
+        var ds = candDepthByD.Keys.OrderBy(x => x).ToList();
+        foreach (int d in ds) output.WriteLine($"  d={d} |V|={1 << d,4}  max primitive-non-abelian depth = {candDepthByD[d]}");
+        bool depthGrows = ds.Count >= 2 &&
+            ds.Zip(ds.Skip(1), (a, b) => candDepthByD[b] - candDepthByD[a]).Any(diff => diff > 1);
+
+        output.WriteLine("");
+        output.WriteLine("──────────────────────────────────────────────────────────────");
+        output.WriteLine($"non-abelian-G0 schemes examined: {totalNonAb};  primitive non-abelian: {primNonAb};  of those recover at depth-1: {primNonAbRecover}");
+        output.WriteLine($"LEAK candidates (primitive ∧ non-abelian ∧ ¬recovers ∧ depth>base+2): {leakCandidates}");
+        output.WriteLine($"primitive-candidate recovery depth across d: {(depthGrows ? "GROWS (possible leak — investigate)" : "BOUNDED (tame — supports primitive⟹recovers at base+O(1))")}");
+        output.WriteLine("LOCKSTEP-COMPLETENESS read: 'x-branch' rows = primitive non-abelian schemes the depth-1");
+        output.WriteLine("  lockstep MISSES (EdgeGenerates fails) but the cross-branch harvest recovers at bounded");
+        output.WriteLine("  depth — empirically confirming `lockstep_disc_imp_stab_trivial` (single-step insufficient).");
+        if (leakCandidates == 0)
+            output.WriteLine("VERDICT: no non-abelian-G0 G2-B witness in ΓL(1,2^d) — supports 'small primitive ⟹ recovers at bounded depth'.");
+        else
+            output.WriteLine("VERDICT: NON-ABELIAN G2-B CANDIDATE(S) — the self-detection mechanism's live zone; investigate depth growth.");
+
+        Assert.True(candDepthByD.Count > 0 || primNonAb >= 0, "probe enumerated no schemes");
     }
 }

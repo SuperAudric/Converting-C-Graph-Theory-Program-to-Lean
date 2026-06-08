@@ -264,6 +264,18 @@ It was then **built (M1+M2, 2026-05-28)** as a lockstep per-rep single-path
 recursion and **resolved that starvation**: CFI(K7) collapsed 941 → 1 leaf,
 555 → 0 branching nodes, recursion depth ≈ `tw(H)` (correct + scramble-invariant
 through K7). The Tier-1 polynomial proof now has its constructive code.
+
+> **Where the flag actually lives — lockstep completeness (2026-06-08 code audit).** The lockstep
+> (`HarvestTwists`→`DeepenAnchor`+`ReplayDeepening`) is single-path, bounded-depth (≤ n), poly per node,
+> and **never branches** — class-agnostically. It is a *harvest*: deepen an anchor along an arbitrary
+> path, replay on each sibling, read a candidate, **edge-verify** it. **Sound** (unverified candidates
+> discarded) but **incomplete** — when a true symmetry isn't captured by the single-path replay
+> (multi-step / high `s(C)`; `lockstep_disc_imp_stab_trivial`) the sibling is **not pruned**, so the
+> *outer* `Search` falls back to k-way branching and the **node budget** flags. So "poly per node" is
+> class-agnostic, but "poly total" is class-conditional (poly ⟺ the lockstep prunes every sibling ⟺
+> harvest completeness ⟺ bounded `s(C)`). Full treatment + the empirical confirmation (most primitive
+> non-abelian affine schemes are lockstep-incomplete yet cross-branch-recoverable at bounded depth):
+> [`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md) §6 insight 4a + §G2 board (g).
 The certification predicate is no longer undefined design work: it *is* the recovery/harvest
 (construct a colour-match permutation, verify edge-by-edge, harvest). The one remaining shared
 open construction unit is M-B (the concrete `colourMatchPerm`/`matchOracle`) — see

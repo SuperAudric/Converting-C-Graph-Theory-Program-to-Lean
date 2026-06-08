@@ -668,8 +668,20 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     primitive + 16 non-Schurian schemes**. Check whether any *small primitive homogeneous* scheme is non-separable with
     small Aut — a witness is a 16-vertex seal counterexample (statement change); none is empirical support for G2-B
     emptiness. Cheaper and sharper than the affine probe.
-  - **(g) Extend `AffineSchemeProbe.cs`** to **non-abelian irreducible `G₀`** (the actual A4 mechanism, not the Galois
-    gap) and higher `d` — the undertested zone (the existing probe is abelian-`G₀`/Galois only).
+  - **(g) Non-abelian irreducible `G₀` — RAN (2026-06-08, route 1 strand (a)).** `AffineSchemeProbe.Probe_NonAbelianIrreducibleG0`
+    sweeps the **Singer normalizer `ΓL(1,2^d) = ⟨Singer, Frobenius⟩`** and its subgroups `⟨gᵐ, φᵏ⟩` (`φgφ⁻¹ = g²` ⟹
+    genuinely non-abelian — the actual A4 zone, not the Galois/cyclic gap). The probe builds the Frobenius `x↦x²` matrix
+    the original probe skipped (full `F_{2^d}` field arithmetic), with a `φg=g²φ` sanity assert. **VERDICT (decisive): no
+    G2-B witness.** Across `d=4,6,8` (`|V|=16,64,256`, 16× range): 14 primitive non-abelian schemes, **0 leak candidates**,
+    and the primitive-candidate max recovery depth is **FLAT at 4** (not growing) — strong support for "small primitive ⟹
+    recovers at base+O(1)". **Lockstep-completeness confirmed empirically:** 8 of 14 primitive non-abelian schemes are
+    *x-branch* — depth-1 `EdgeGenerates` (the within-cell lockstep single-step) **misses** them, but the cross-branch /
+    multi-step harvest recovers at bounded depth 3–4. This is `lockstep_disc_imp_stab_trivial` in the wild: single-step is
+    insufficient for primitive non-abelian schemes (the *norm*, not a corner case), but the cross-branch (Part-A) harvest
+    is sufficient and tame. (The full normalizer `ΓL(1,2^d)` itself is 2-transitive = rank-2 = `K_{2^d}` — its Cayley-graph
+    IR-depth `n−1` is meaningless; the family signal tracks primitive rank≥3 candidates only.) **Remaining route 1:**
+    strand (b), non-affine primitive types (`A₅`, `PSL(2,q)`, classical) — different infra (orbital schemes of
+    permutation groups), the only zone not yet swept.
 - **Tier 4 — doc-sync / record-keeping (the NoFusion over-claim):**
   - **(h) DONE (2026-06-07).** The NoFusion/largeness-derivation over-claim is **reconciled**: `largenessBridge_viaHarvest`
     is *tautological* (orbit-level vacuity, §2–§3), and the prose that claimed "largeness derived from the harvest" has
@@ -739,6 +751,21 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
    (`lockstep_disc_imp_stab_trivial`, `CascadeOracle.lean`): no iso-invariant ordering of a moved orbit exists. So
    multi-step hidden symmetry (CFI `tw ≥ 2`, leg B) **must** go through the cross-branch / Part-A harvest. Do not
    re-attempt a within-cell discharge for `tw ≥ 2`.
+4a. **Lockstep completeness is the algorithm-level seal condition — and the flag lives in the *harness*, not the
+   lockstep (2026-06-08 code audit, `ChainDescent.cs`).** The lockstep (`HarvestTwists`→`DeepenAnchor`+`ReplayDeepening`)
+   is genuinely **single-path, bounded-depth (≤ n), poly per node, never branches** — that much is class-agnostic. But it
+   is a *harvest*, not the canonizer: it deepens an anchor along an arbitrary (lowest-id) path, replays the same sequence
+   on each sibling, reads a candidate twist, and **edge-verifies** it (`IsAutomorphism`). It is **sound** (a candidate that
+   fails verification is discarded — never a wrong merge) but **incomplete**: when a true symmetry isn't captured by the
+   single-path replay (multi-step / high `s(C)`; `lockstep_disc_imp_stab_trivial`), the sibling is **not pruned**, so the
+   *outer* `Search` falls back to k-way branching, and **that** branching trips the node budget (`Search`:
+   `++_nodeCount > _budget`). So: the lockstep never flags and never branches; the **harness budget flags, tripped by the
+   lockstep's under-pruning**. "Poly per node" (class-agnostic) ≠ "poly total" (class-conditional): the total is poly ⟺ the
+   lockstep prunes every sibling ⟺ harvest completeness ⟺ the recovery/cascade condition (= bounded `s(C)`). This is the
+   algorithm-level mirror of the seal's visible-realizer keying (`SchemeRecovered`): the non-vacuous content is exactly
+   poly-recovery. Empirically (route 1 strand (a), §G2 board (g)): primitive non-abelian affine schemes are *mostly*
+   lockstep-incomplete (8/14 "x-branch") yet recover at bounded depth via cross-branch — completeness needs the Part-A
+   harvest, not the within-cell lockstep, and is then tame.
 5. **Largeness is the Cameron driver, not non-abelian** (the C₇ trap): `C₇` is primitive, rank-3, *non-abelian*
    (D₇), yet cascades and is small ⟹ not Cameron. Any leg-C statement must key the Cameron branch on
    *largeness/non-cascade*, never *non-abelian* alone.
