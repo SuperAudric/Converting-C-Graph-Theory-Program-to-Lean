@@ -2,9 +2,16 @@
 
 > **STATUS (2026-06-08): Phase 1 COMPLETE (Increments 1 + 2 LANDED, axiom-clean, build green) — the seal is
 > reduced end-to-end to the SEMANTIC crux `SelfDetectsStably` (primitive small ⟹ cells = orbits above a
-> bounded set). Phase 2 STARTED — affine beachhead Increment A1 LANDED (single-base recovery is free; the crux
-> is multi-base). The **detailed, pick-up-and-build plan for the remaining affine multi-base work is §9
-> below** — a fresh reader should start there. See §4 outcome box (Phase 1), §5.1 (Phase 2 overview).** The oracle-capability seal is a conditional theorem
+> bounded set). FUSED SEAL LANDED (2026-06-08, axiom-clean): `reachesRigidOrCameron_viaFusedSeal`
+> (`Cascade.lean`) is the single headline capstone — `((SchemeBlockRecovered ∨ AbelianConsumed) ∨
+> SchemeRecoveredByDepth bound) ∨ IsCameronScheme` — each non-Cameron branch through its strongest form: the
+> **primitive floor (cascade) reduced to the semantic crux `SelfDetectsStably`**, the imprimitive branch on
+> earned `SchemeBlockRecovered ∨ AbelianConsumed` (carried `hImprim`, tower-reducible to the same floor),
+> Cameron = cited G3. Fuses `viaStableRecovery` + `viaBlockRecovery` into ONE statement of the conditional seal
+> `modulo {G3 + self-detection}` (carries exactly two inputs, `hSelfDetect` crux + `hImprim`). Phase 2 STARTED —
+> affine beachhead Increment A1 LANDED (single-base recovery is free; the crux is multi-base). The **detailed,
+> pick-up-and-build plan for the remaining affine multi-base work is §9 below** — a fresh reader should start
+> there. See §4 outcome box (Phase 1), §5.1 (Phase 2 overview).** The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
 > is `hCascade` (small primitive ⟹ recovers = G2-B). Both empirical falsifiers are clean: the affine

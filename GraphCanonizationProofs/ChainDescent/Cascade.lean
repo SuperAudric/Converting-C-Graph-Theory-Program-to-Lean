@@ -3827,4 +3827,48 @@ theorem reachesRigidOrCameron_viaBlockRecovery {n : Nat} {IsLarge : Nat → Prop
     (ReachesRigid := fun m S => SchemeBlockRecovered m S ∨ AbelianConsumed m S)
     hClassify (fun _ _ h => h) S hne hrank hCascade hImprim
 
+/-- **THE FUSED SEAL — the single headline capstone.** Combines the *best* predicate for each branch into one
+statement, fusing `reachesRigidOrCameron_viaStableRecovery` (which reduced the cascade branch to the semantic
+crux but carried the imprimitive branch opaquely) with `reachesRigidOrCameron_viaBlockRecovery` (which earned the
+imprimitive branch but keyed the cascade branch on block recovery, not self-detection). Every rank-≥3 schurian
+scheme residual is
+
+  `((SchemeBlockRecovered ∨ AbelianConsumed) ∨ SchemeRecoveredByDepth bound) ∨ IsCameronScheme`,
+
+with each non-Cameron branch discharged through its **strongest landed/earned form**:
+* **primitive floor** (the cascade branch, `IsPrimitive ∧ ¬IsLarge`): reduced to the **semantic** crux
+  `SelfDetectsStably` via `selfDetectsAtDepth_of_selfDetectsStably` → `SchemeRecoveredByDepth`. This is the
+  genuinely-irreducible **G2-B** core (small primitive non-abelian non-recovering, uncitable), now keyed on
+  `CellsAreOrbits`-separability — the object Phase 2 (the affine module argument) produces and the catalogue
+  probe measures.
+* **imprimitive branch** (`¬IsPrimitive`): the carried `hImprim`, on the *earned* `SchemeBlockRecovered`
+  (block-visible quotient + fiber recovery) ∨ `AbelianConsumed` (leg B, hidden-abelian circulants). Reduces via
+  the imprimitivity block tower (≤ log₂ n layers) to the same primitive floor.
+* **Cameron** (leg C): the cited Babai/Sun–Wilmes classification `hClassify` (G3).
+
+**Honest accounting (do not overclaim).** The theorem carries **two** inputs: `hSelfDetect` (the crux = G2-B)
+and `hImprim` (landed/earned predicates, tower-reducible to the same floor), plus cited G3. The value is
+*concentration*: a single object in which the open content is the semantic self-detection proposition, every
+other branch rests on a landed or earned predicate, and the conditional seal `modulo {G3 + self-detection}` is
+one statement rather than two partial capstones. It subsumes `reachesRigidOrCameron_viaStableRecovery` (the
+`SchemeRecoveredByDepth` disjunct) and `reachesRigidOrCameron_viaBlockRecovery` (the
+`SchemeBlockRecovered ∨ AbelianConsumed` disjunct). Wires the primitivity-carrying `reachesRigidOrCameron'`. -/
+theorem reachesRigidOrCameron_viaFusedSeal {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hSelfDetect : SelfDetectsStably S IsLarge bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron' (NonCascade := IsLargeSchemeViaAut IsLarge)
+    (ReachesRigid := fun m S' =>
+      (SchemeBlockRecovered m S' ∨ AbelianConsumed m S') ∨ SchemeRecoveredByDepth m S' bound)
+    hClassify (fun _ _ h => h) S hne hrank
+    (fun h => Or.inr (selfDetectsAtDepth_of_selfDetectsStably hSelfDetect h))
+    (fun h => Or.inl (hImprim h))
+
 end ChainDescent

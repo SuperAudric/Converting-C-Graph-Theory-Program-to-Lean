@@ -138,6 +138,17 @@ from the fully-visible block decomposition. The **sole irreducible carried input
 **G2-B**) + the cited classification (G3): the honest conditional seal `modulo {G3 + G2-B}`. The three-input table below
 is the *historical* `…_viaRecovery` decomposition; the live form has `hImprimitive` reduced to block recovery.
 
+**Update (2026-06-08) — THE FUSED SEAL is the single headline.** `reachesRigidOrCameron_viaFusedSeal` (`Cascade.lean`,
+axiom-clean) fuses the two partial capstones into one statement:
+`((SchemeBlockRecovered ∨ AbelianConsumed) ∨ SchemeRecoveredByDepth bound) ∨ IsCameronScheme`. Each non-Cameron branch is
+discharged through its *strongest* form — the **primitive floor (cascade branch) is reduced to the SEMANTIC crux
+`SelfDetectsStably`** (via `selfDetectsAtDepth_of_selfDetectsStably`; `viaBlockRecovery` had keyed it on block-recovery,
+not self-detection), while the imprimitive branch stays on the earned `SchemeBlockRecovered ∨ AbelianConsumed`. It carries
+exactly two inputs — `hSelfDetect` (the G2-B crux) + `hImprim` (landed/earned, tower-reducible to the same floor) — plus
+cited G3, and subsumes both `reachesRigidOrCameron_viaStableRecovery` and `reachesRigidOrCameron_viaBlockRecovery`. This is
+the conditional seal `modulo {G3 + self-detection}` as ONE object; the entire open content is the single semantic
+proposition `SelfDetectsStably` (= G2-B), which Phase 2 (the affine module argument, self-detection-plan §9) attacks.
+
 ---
 
 ## 3. The vacuity correction — orbit-level vs visible (READ THIS)
