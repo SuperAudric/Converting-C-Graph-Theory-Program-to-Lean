@@ -10,7 +10,9 @@
 > Cameron = cited G3. Fuses `viaStableRecovery` + `viaBlockRecovery` into ONE statement of the conditional seal
 > `modulo {G3 + self-detection}` (carries exactly two inputs, `hSelfDetect` crux + `hImprim`). Phase 2 STARTED —
 > affine beachhead Increment A1 LANDED (single-base recovery is free; the crux is multi-base). The **detailed,
-> pick-up-and-build plan for the remaining affine multi-base work is §9 below** — a fresh reader should start
+> pick-up-and-build plan for the remaining affine multi-base work is §9 below; **§10 is the consolidated
+> pick-up handoff (M0/M0.3/M1.0/M1.0b are LANDED — durable generalization insights for §5.3, the exact M1.1/M1.2
+> build plan, and session Lean gotchas).** A fresh reader continuing Phase 2 should start at §10.** — a fresh reader should start
 > there. See §4 outcome box (Phase 1), §5.1 (Phase 2 overview).** The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
@@ -263,6 +265,12 @@ build `I` from the twin's "difference support" and verify the complex-product cl
 landed** (`schemePartFrom` + `iterSet_refines_schemePartFrom`); the converse is the open content. This is the
 fully general statement and the eventual goal, but it needs the multi-base fusion-coherence theory (a fusion
 of an association scheme is an association scheme) which Mathlib lacks — heaviest. Pursue only after 5.1.
+
+> **The reusable template for this is now concrete — see §10.1 (I2).** M1 (affine) is the *rehearsal* of exactly
+> this `BaseHomogeneousTwin ⟹ ClosedSubset` shape: it builds a `ClosedSubset` from a `G₀`-invariant `Submodule`
+> and shows primitivity forbids it. The §5.3 general proof swaps `Submodule` ↔ fusion/`ClosedSubset` and
+> "invariant subspace" ↔ "block system." Do the affine one (M1.2) first; the shape transfers. §10.1 (I1, I3)
+> spell out why the content is *separability of the orbit Schur ring* and why primitivity is the lever.
 
 **The logic threading all three:** *a separability gap that is invariant under every base is a linear /
 character degeneracy = a sub-structure (subspace 5.1 / closed subset 5.3) that primitivity rules out.* The
@@ -566,3 +574,132 @@ orbital-scheme constructor). M2-cyclic is the first genuine recovery proof. M2-g
   prime-power circulant `WL-dim ≤ 3`), Wu–Ren–Ponomarenko (arXiv:2507.10116). See exhaustive-obstruction §0.7.6.
 - **Mathlib for M0/M1/M2:** `MulAction.orbitRel`/`IsBlock`/`IsPreprimitive`/`stabilizer`, `Submodule`,
   `IsSimpleModule`, `Module (ZMod p)`, `LinearEquiv`, `SemidirectProduct`, `Fintype.equivFinOfCardEq`.
+
+---
+
+## 10. HANDOFF (2026-06-08) — durable insights, the M1.1/M1.2 build plan, and session gotchas
+
+> **Read this if you are picking up Phase 2.** M0, M0.3, M1.0, M1.0b are LANDED (axiom-clean, build green). This
+> section makes the *non-durable* context durable: (10.1) the generalization insights that must survive to the
+> §5.3 general-crux design (you will likely run out of context before designing it); (10.2) the exact M1.1/M1.2
+> build plan (signatures + proof sketches); (10.3) Lean facts/gotchas learned this session so they are not
+> rediscovered.
+
+### 10.1 The generalization insights (DURABLE — carry these to the §5.3 general crux)
+
+The affine beachhead is not just a special case to grind; it is a **template** whose shape transfers verbatim to
+the general crux (§5.3, `BaseHomogeneousTwin ⟹ ClosedSubset`). Three insights, in increasing depth:
+
+**(I1) A schurian scheme IS an orbit Schur ring; the affine scheme is the translation-Schur-ring `A(G₀)`.**
+`orbMk_affine_eq_iff` (M1.0b) proves: *relations of `affineScheme` ↔ `G₀`-orbits on `V` (differences)*. More
+generally (M0/`orbitalScheme`): *relations of any orbital scheme ↔ orbitals of the group*. So "intersection
+numbers / structure constants" = "orbit-counting data," and **recovery (cells = orbits) ⟺ the structure
+constants determine the scheme = separability** (`vProfile_iff_schemeOrbit` already gives relations = suborbits).
+This is why the crux is a *separability* statement, attackable on scheme machinery with no group detour.
+
+**(I2) The reusable template: "a block is a sub-structure; primitivity forbids it."** M1's whole content is one
+correspondence, instantiated three ways:
+
+| setting | "block" object | "sub-structure" | "primitivity forbids it" |
+|---|---|---|---|
+| **affine (M1, here)** | `ClosedSubset I` of `affineScheme` | `G₀`-invariant `Submodule (ZMod p) V` | irreducible `G₀` ⟹ no proper invariant subspace |
+| **general (§5.3, future)** | `ClosedSubset I` of any schurian scheme | a *fusion / closed sub-configuration* (the "difference support" of a base-homogeneous twin) | scheme `IsPrimitive` ⟹ only trivial `ClosedSubset` |
+
+The affine proof (M1.2) is the *concrete rehearsal*: build the closed subset from the substructure and back. The
+general proof swaps `Submodule (ZMod p) V` ↔ `ClosedSubset`/fusion and "invariant subspace" ↔ "block system." The
+**direction that matters** in both is `¬(no proper substructure) → ¬IsPrimitive` (i.e. `IsPrimitive →
+irreducible/separable`), because the seal's cascade branch *hands you* `IsPrimitive` and you must extract the
+structural consequence that drives recovery (M2).
+
+**(I3) The crux's actual content is base-homogeneity = a coupling that survives every base.** A persistent
+recovery gap (`¬StablyRecoverable`) is a same-cell-different-orbit pair surviving *every* bounded base — a
+**base-homogeneous twin**. The §G2-anatomy mechanism: such a twin is supported by a *linear/character-degenerate
+coupling*, which in the affine world IS a `G₀`-invariant subspace `W ⊊ V` (the "linear room" for the degeneracy),
+and in the general world is a `ClosedSubset`/fusion. **Primitivity (irreducibility) removes the only place the
+coupling can live ⟹ no twin ⟹ recovers at base + O(1).** The bound `O(1)` is the bounded-`s(C)` content
+(Ponomarenko's prime-power circulant `WL-dim ≤ 3` is the affine-cyclic instance; M2-cyclic proves it there).
+This is the ONE conjecture (`SelfDetectsStably`) the whole seal now rests on — see §G2 anatomy in
+[`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md).
+
+> **Single-base-free is general (do not re-derive).** `cellsAreOrbits_schemeAdj_singleton` (Increment A1) proves
+> single-base recovery is FREE for *every* schurian scheme. So in **any** Phase-2 family (affine, PSL, classical,
+> general) only the **multi-base** (`|T| ≥ 2`) gap needs proving. The crux is purely multi-base everywhere.
+
+### 10.2 The M1.1/M1.2 build plan (exact, pick-up-and-build)
+
+Goal: **`IsPrimitive (affineScheme G₀ hneg) → G₀Irreducible G₀`** — what M3 consumes. Prove the contrapositive
+`¬G₀Irreducible → ¬IsPrimitive` (build a nontrivial `ClosedSubset` from a proper invariant subspace). Steps:
+
+**M1.1a — lift M1.0b to `relOfPair`.** Need `affineScheme_relOfPair_eq_iff`:
+`(affineScheme G₀ hneg).relOfPair x y = (affineScheme G₀ hneg).relOfPair x' y' ↔ ∃ g₀∈G₀, g₀(δ') = δ`
+(`δ := affineE.symm y − affineE.symm x`). Route: prove the small helper
+`affineScheme_rel_iff : (affineScheme G₀ hneg).rel i x y = true ↔ orbitalIdx (affineG G₀) i = orbMk x y`
+(unfold `affineScheme`→`orbitalScheme`→`orbitalAssocScheme`; the `.rel` field is `decide (orbitalIdx i = orbMk
+…)`, so `simp only [affineScheme, orbitalScheme, orbitalAssocScheme, decide_eq_true_eq]` or a `show`). Then
+`relOfPair x y = relOfPair x' y' ↔ orbMk x y = orbMk x' y'` (forward: both `rel (relOfPair _) _ _ = true` ⟹ both
+`orbitalIdx (relOfPair _) = orbMk _`; converse: `relOfPair_unique`). Compose with `orbMk_affine_eq_iff` (M1.0b).
+
+**M1.1b — define irreducibility self-contained** (avoid Mathlib `IsSimpleModule`/`IsPreprimitive` — they need the
+group-algebra/`IsBlock` plumbing; a direct predicate is cleaner):
+```
+def G₀Irreducible (G₀ : Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))) : Prop :=
+  ∀ W : Submodule (ZMod p) (Fin d → ZMod p),
+    (∀ g₀ ∈ G₀, ∀ w ∈ W, g₀ w ∈ W) → W = ⊥ ∨ W = ⊤
+```
+
+**M1.1c — a general scheme lemma (the one genuinely new ingredient).** Needed for the `ClosedSubset` closure
+clause:
+`intersectionNumber i j k ≠ 0 → ∃ x y z, rel i x y = true ∧ rel j y z = true ∧ rel k x z = true`.
+For the orbital scheme `R_k` is always nonempty: take `(x,z) := ((orbitalIdx k).out.1, (orbitalIdx k).out.2)`,
+which satisfies `rel k x z` (via `orbMk_out` + `affineScheme_rel_iff`). Then `intersectionNumber_well_defined`
+makes the count for `(x,z)` equal `intersectionNumber i j k ≠ 0`, so the witness filter is nonempty ⟹ `∃ y` with
+`rel i x y ∧ rel j y z`. (State it for `orbitalAssocScheme`/`affineScheme`; or generally for any scheme with
+`R_k` nonempty.)
+
+**M1.2 — the bridge.** `theorem isPrimitive_affineScheme_imp_irreducible (hneg) : IsPrimitive (affineScheme …) →
+G₀Irreducible G₀`, via contrapositive:
+- Take proper invariant `W` (`hW0 : W ≠ ⊥`, `hWT : W ≠ ⊤`, `hWinv`).
+- `I := Finset.univ.filter (fun i => ∃ x y, (affineScheme …).relOfPair x y = i ∧ affineE.symm y − affineE.symm x ∈ W)`.
+- **`ClosedSubset I`:** `0∈I` (any `x=y`, diff `0∈W`); closure (`i,j∈I`, `intersectionNumber i j k ≠ 0`): get the
+  triple `x y z` (M1.1c), diffs `δ_i = e⁻¹y−e⁻¹x ∈ W` and `δ_j = e⁻¹z−e⁻¹y ∈ W` (i,j∈I, with M1.1a giving
+  well-definedness: the diff-in-`W` property is constant on a relation because same relation ⟹ `g₀·δ'=δ`, `W`
+  invariant), so `δ_k = e⁻¹z−e⁻¹x = δ_i + δ_j ∈ W` (`W.add_mem`) ⟹ `k∈I`.
+- **`I ≠ {0}`:** `W≠⊥` ⟹ `∃ 0≠w∈W`; the relation of `(affineE 0, affineE w)` has diff `w≠0` so its index `≠0`
+  (`relOfPair = 0 ↔ diff = 0`) and is in `I`.
+- **`I ≠ univ`:** `W≠⊤` ⟹ `∃ v∉W`; relation of `(affineE 0, affineE v)` has diff `v∉W`, index `∉I`.
+- `IsPrimitive` says `I = {0} ∨ I = univ` — contradiction either way.
+- (For `IsPrimitive → G₀Irreducible` directly: same construction; primitivity forces `I∈{{0},univ}`, pull back to
+  `W∈{⊥,⊤}`.) **Gotcha:** "diff ∈ W constant on a relation" needs `W` `G₀`-invariant + M1.1a — do this as a clean
+  `have` lemma first (`relOfPair x y = relOfPair x' y' → (δ ∈ W ↔ δ' ∈ W)`).
+
+**Converse (`G₀Irreducible → IsPrimitive`, nice-to-have, NOT on the M3 critical path):** from a closed subset
+`I`, set `W := {y | relOfPair (affineE 0) y ∈ I}` as an `AddSubgroup` (0∈W; `+`-closed via the composition/closure
+clause and translation-invariance; over `F_p` an `AddSubgroup` is automatically a `Submodule` — use
+`AddSubgroup.toIntSubmodule` then `ZMod p`-scaling is `ℤ`-scaling, or build `Submodule` directly), `G₀`-invariant
+(orbit). Irreducible ⟹ `W∈{⊥,⊤}` ⟹ `I∈{{0},univ}`.
+
+### 10.3 Session gotchas / Lean facts (so the next agent does not rediscover them)
+
+- **`affineG` is the CARRIER-SET subgroup** (not `closure`) — `mem_affineG_iff` is `Iff.rfl`; destructure
+  membership directly (`obtain ⟨g₀,hg₀,t,ha⟩ := a.2` for `a : ↥(affineG G₀)`). `mem_affineG_iff` has `G₀`
+  **explicit** (it is under `variable (G₀)`): write `mem_affineG_iff G₀` / `(mem_affineG_iff G₀).mp`, or just use
+  `a.2`.
+- **`LinearEquiv.automorphismGroup`**: `mul f g = g.trans f`, so `(f*g) x = f (g x)` (`LinearEquiv.mul_apply`);
+  `coe_one : ⇑(1) = id`; `coe_neg : ⇑(LinearEquiv.neg R) = -id` (so `(neg R) z` needs `simp [Pi.neg_apply, id_eq]`
+  → `-z`). `LinearEquiv.neg (ZMod p)` is the element required `∈ G₀` (the `−1`, for the symmetric scheme).
+- **`Equiv.permCongr_apply` is `rfl`/`@[simp]`**: `e.permCongr p x = e (p (e.symm x))`. Used to compute
+  `affinePermFin_apply`.
+- **`Finset.card_bij'`** signature (Mathlib `Data/Finset/Card.lean`): `(i : ∀ a ∈ s, β) (j : ∀ a ∈ t, α) (hi) (hj)
+  (left_inv) (right_inv)` — dependent maps, this argument ORDER. Used in `orbitalAssocScheme`'s
+  `intersectionNumber_well_defined`.
+- **`abel`** needs `import Mathlib.Tactic.Abel` (added to `Cascade.lean`); the affine arithmetic
+  (`a+(b−a)=b`, `−b+(a+b)=a`, assoc) is all `abel`. For an equality `e A = e B` under a coercion, do `congr 1;
+  abel`.
+- **`Nonempty (Fin (p^d))`** for `orbitalScheme`: `haveI : NeZero p := ⟨(Fact.out : p.Prime).pos.ne'⟩` then
+  `⟨⟨0, Nat.pos_of_ne_zero (pow_ne_zero d (NeZero.ne p))⟩⟩` (see `affineScheme`).
+- **Generous transitivity constraint (9.0.1):** the scheme is symmetric ⟹ need `−1 ∈ G₀`. Carried as the `hneg`
+  hypothesis everywhere. For M2-cyclic, pick the cyclotomic `G₀` containing `−1` (Singer normalizers do).
+- **`card_bij'`/intersection-number proofs are ~40 lines and ~40s to compile** — `orbitalAssocScheme` is the
+  heaviest single decl. Budget build time.
+- **Module split:** M0 (`orbitalScheme`) is in `Scheme.lean §3.1` (no heavy imports); the affine instance + M1/M2/M3
+  are in `Cascade.lean §AffineScheme` (heavy `ZMod`/`Module`/`Abel` imports isolated in the last module).
