@@ -3114,6 +3114,29 @@ theorem reachesRigidOrCameron {n : Nat}
   · exact Or.inl (hCascade h)
   · exact Or.inr h
 
+/-- **The seal capstone, primitivity-carrying form (the self-detection wiring).** Identical to
+`reachesRigidOrCameron` but the cascade reduction is sharpened to the **primitive floor**:
+`hCascade : IsPrimitive ∧ ¬ NonCascade → ReachesRigid`. This is the honest shape of the open content — the
+cascade obligation is *self-detection* (a primitive small residual recovers), not an all-`¬NonCascade`
+claim (imprimitive small residuals are routed through `hImprimitive` first). Wires the strengthened
+`exhaustiveObstruction_scheme_nonCascade_trichotomy'`. -/
+theorem reachesRigidOrCameron' {n : Nat}
+    {NonCascade IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    {ReachesRigid : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
+    (hbridge : LargenessBridge NonCascade IsLargeScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : S.toAssociationScheme.IsPrimitive ∧ ¬ NonCascade n S → ReachesRigid n S)
+    (hImprimitive : ¬ S.toAssociationScheme.IsPrimitive → ReachesRigid n S) :
+    ReachesRigid n S ∨ IsCameronScheme n S := by
+  rcases exhaustiveObstruction_scheme_nonCascade_trichotomy' hClassify hbridge S hne hrank with
+    h | h | h
+  · exact Or.inl (hImprimitive h)
+  · exact Or.inl (hCascade h)
+  · exact Or.inr h
+
 /-! ### The seal's rigid side, concretely — the NON-VACUOUS recovery predicate
 
 `reachesRigidOrCameron` keeps `ReachesRigid` abstract; a concrete capstone must instantiate it with a
@@ -3427,6 +3450,55 @@ theorem reachesRigidOrCameron_viaDepthRecovery {n : Nat} {IsLarge : Nat → Prop
   reachesRigidOrCameron (NonCascade := IsLargeSchemeViaAut IsLarge)
     (ReachesRigid := fun m S => SchemeRecoveredByDepth m S bound)
     hClassify (fun _ _ h => h) S hne hrank hCascade hImprim
+
+/-- **The depth-recovery seal capstone, primitive-floor form (self-detection-ready).** Identical to
+`reachesRigidOrCameron_viaDepthRecovery` but the cascade obligation is sharpened to carry `IsPrimitive`:
+`hCascade : IsPrimitive ∧ ¬ IsLargeSchemeViaAut → SchemeRecoveredByDepth`. So `hCascade` is *exactly* the
+self-detection lemma (a primitive, small residual recovers at bounded depth), and the imprimitive branch
+stays on the landed block recovery. Wires `reachesRigidOrCameron'`. -/
+theorem reachesRigidOrCameron_viaDepthRecovery' {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+        SchemeRecoveredByDepth n S bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeRecoveredByDepth n S bound) :
+    SchemeRecoveredByDepth n S bound ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron' (NonCascade := IsLargeSchemeViaAut IsLarge)
+    (ReachesRigid := fun m S => SchemeRecoveredByDepth m S bound)
+    hClassify (fun _ _ h => h) S hne hrank hCascade hImprim
+
+/-- **The self-detection proposition** — the single open content of the seal's cascade branch, named. A
+schurian scheme residual **self-detects at depth `bound`** when, *if it is primitive and small*
+(`¬ IsLargeSchemeViaAut`), it recovers at bounded depth (`SchemeRecoveredByDepth … bound`). This is the
+primitive-floor `hCascade` of `reachesRigidOrCameron_viaDepthRecovery'`, isolated as a predicate: the seal
+closes (modulo the cited classification + the landed imprimitive block recovery) exactly when this holds.
+Non-vacuous: `SchemeRecoveredByDepth` is keyed on visible (refinement-computable) realizers + a bounded
+shallow phase, *false* for a high-`s(C)` non-recovering scheme (seal-handoff §3). The conjecture that this
+holds for all primitive small residuals (at `bound = base + O(1)`) is the self-detection lemma; the catalogue
+falsifier (`CatalogueSchemeProbe.cs`) tests its emptiness empirically. -/
+def SelfDetectsAtDepth {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop) (bound : Nat) : Prop :=
+  S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+    SchemeRecoveredByDepth n S bound
+
+/-- **The seal, reduced to self-detection.** Given the cited classification (G3), the **self-detection**
+proposition for the primitive floor (`SelfDetectsAtDepth`, the cascade branch), and the landed **imprimitive
+block recovery** (`hImprim`, G2-A), every rank-≥3 schurian scheme residual is `SchemeRecoveredByDepth ∨
+Cameron`. This is the seal with its *entire* open content concentrated into the single hypothesis
+`SelfDetectsAtDepth` — the self-detection lemma — with `IsPrimitive` honestly carried into the cascade branch.
+Proving `SelfDetectsAtDepth` for all primitive small residuals makes the seal unconditional modulo only G3. -/
+theorem reachesRigidOrCameron_viaSelfDetection {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hSelfDetect : SelfDetectsAtDepth S IsLarge bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeRecoveredByDepth n S bound) :
+    SchemeRecoveredByDepth n S bound ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaDepthRecovery' hClassify S hne hrank hSelfDetect hImprim
 
 /-! ### The scheme-seal wiring — the imprimitive branch folded into the visible block decomposition
 

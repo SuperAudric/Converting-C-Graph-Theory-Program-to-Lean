@@ -3898,6 +3898,30 @@ theorem exhaustiveObstruction_scheme_nonCascade_trichotomy {n : Nat}
     · exact Or.inr (Or.inl hnc)
   · exact Or.inl hprim
 
+/-- **EOL trichotomy, primitivity-carrying form (the self-detection wiring).** Identical to
+`exhaustiveObstruction_scheme_nonCascade_trichotomy` except the cascade disjunct carries `IsPrimitive`:
+every rank-≥-3 schurian residual is **imprimitive**, or **primitive ∧ cascades**, or **Cameron**. The
+strengthening is free — the cascade branch of the proof is already inside `by_cases hprim` (true). This is
+what lets the seal's cascade obligation be the *primitive floor* `IsPrimitive ∧ ¬NonCascade ⟹ recovers`
+(the self-detection lemma), rather than an all-`¬NonCascade` obligation self-detection cannot meet on
+imprimitive residuals. -/
+theorem exhaustiveObstruction_scheme_nonCascade_trichotomy' {n : Nat}
+    {NonCascade IsLargeScheme IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification IsLargeScheme IsCameronScheme)
+    (hbridge : LargenessBridge NonCascade IsLargeScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) :
+    ¬ S.toAssociationScheme.IsPrimitive ∨
+      (S.toAssociationScheme.IsPrimitive ∧ ¬ NonCascade n S) ∨
+      IsCameronScheme n S := by
+  by_cases hprim : S.toAssociationScheme.IsPrimitive
+  · by_cases hnc : NonCascade n S
+    · exact Or.inr (Or.inr
+        (exhaustiveObstruction_scheme_of_nonCascade hClassify hbridge S hne hprim hrank hnc))
+    · exact Or.inr (Or.inl ⟨hprim, hnc⟩)
+  · exact Or.inl hprim
+
 /-! ## §13 — Step 3a of the bottom-up EOL: imprimitive ⟹ the cell splits (block-visibility)
 
 The refinement-side half of the seal's Step 3 (`¬D1 ⟹ primitive`), scoped per

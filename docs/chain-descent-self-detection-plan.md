@@ -1,6 +1,7 @@
 # Chain descent — the self-detection lemma: plan to make the seal unconditional
 
-> **STATUS (2026-06-08): PLANNING.** The oracle-capability seal is a conditional theorem
+> **STATUS (2026-06-08): Phase 1 — INCREMENT 1 LANDED (axiom-clean, build green); Increment 2 next; Phase 2
+> = the crux proof (research). See the §4 outcome box for the landed decls.** The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
 > is `hCascade` (small primitive ⟹ recovers = G2-B). Both empirical falsifiers are clean: the affine
@@ -95,45 +96,73 @@ single-base one. This is the source of the entire engineering need in Phase 1.
 
 ---
 
-## 4. Phase 1 — the multi-base engine + the precise crux statement (mechanical, the buildable substrate)
+## 4. Phase 1 — the precise crux statement + the `hCascade` wiring (mechanical, the buildable substrate)
 
-Goal: convert the prose conjecture into **one Lean proposition** `not_isPrimitive_of_baseHomogeneousTwin`
-whose proof discharges `hCascade`, and prove everything around it. Generalizes the single-base engine of §2
-along the `schemePartFrom`/base-set axis that the realization half already opened.
+Goal: convert the prose conjecture into **one Lean proposition** whose proof discharges `hCascade`, and prove
+everything around it.
 
-**4.1 — Multi-base isolation closure (generalize §2's engine from `v` to a base set `S`).**
-- `isolationStepFrom S` / `IsoPinnedFrom S` — pinning by the *multi-base* intersection-count signature
-  (counts of `relOfPair`-from-`S` profiles), the base-set analogue of `IsoPinned`. Reuse `IsoPinned.mono` +
-  the saturation fixpoint verbatim (the skeleton is base-agnostic).
-- `EdgeGeneratesFromSet S : Prop` — the multi-base closure reaches every relation-from-`S`.
-- `theorem_2_HOR_of_edgeGeneratesFromSet` — `EdgeGeneratesFromSet S ⟹ CellsAreOrbits S`. The multi-base
-  analogue of `theorem_2_HOR_of_edgeGenerates`; the realization direction is already supplied by
-  `iterSet_refines_schemePartFrom` + the multi-base `vProfile_iff_schemeOrbit` (relOfPair-from-`S` =
-  `Stab(S)`-orbits). *This is the main mechanical theorem.*
+> **Scope refinement (2026-06-08, from reading the seal source).** The reduction and the crux *statement*
+> work on the **semantic** recovery notion already landed — `CellsAreOrbits S` / `RecoverableByDepth bound`
+> (`CascadeOracle.lean`) and `SchemeRecoveredByDepth` (`Cascade.lean` G1a) — and do **not** need the heavy
+> algebraic multi-base isolation engine (`EdgeGeneratesFromSet`). The reason: `CellsAreOrbits S` (warm cells
+> from base set `S` = `Stab(S)`-orbits) *is* multi-base recovery, semantically; the algebraic
+> `EdgeGenerates`-style closure is only needed to make recovery **checkable** on a concrete family, which is a
+> Phase-2 (crux-proof) concern. So **the multi-base isolation engine (plan §4.1 in the original) defers to
+> Phase 2**; Phase 1 is the lighter, fully-achievable reduction below.
+>
+> **The key wiring fact.** The trichotomy's cascade branch is proved *inside* `by_cases hprim : IsPrimitive`
+> (true) — so it can carry `IsPrimitive`. Strengthening it makes `hCascade`'s obligation exactly the
+> **primitive floor** (`IsPrimitive ∧ ¬NonCascade ⟹ recovers`), which is what self-detection delivers; the
+> imprimitive branch stays on the landed block recovery. This is the honest shape of the open content.
 
-**4.2 — The deadlock / twin object (P2, multi-base).**
-- `BaseHomogeneousTwin G (bound) i j : Prop` — relations `i ≠ j` carry identical multi-base intersection
-  signatures for **every** base set of size `≤ bound` (the gap survives every small base).
-- `twin_of_not_recoverableByDepth` — `¬ RecoverableByDepth adj P bound ⟹ ∃ i j, BaseHomogeneousTwin … i j`.
-  Provable by pigeonhole over the finite relation set + the finite family of size-`≤bound` base sets, using
-  that the multi-base WL-closure is a well-defined coarsening of the orbit partition (a *fusion* fixpoint);
-  non-recovery ⟹ the fixpoint is non-discrete ⟹ a stable twin pair. (Mirror of `stage_relIsolatedAt`'s
-  saturation argument, on the base-set lattice.)
+**4.1 — Strengthen the trichotomy / capstone to carry `IsPrimitive` in the cascade branch.**
+- `exhaustiveObstruction_scheme_nonCascade_trichotomy'` (`Scheme.lean`) — middle disjunct
+  `(IsPrimitive ∧ ¬NonCascade)` instead of `¬NonCascade`. Trivial strengthening (`hprim` is already in scope
+  in that branch of the existing proof).
+- `reachesRigidOrCameron'` (`Cascade.lean`, abstract) and `reachesRigidOrCameron_viaDepthRecovery'` (concrete)
+  — `hCascade : IsPrimitive ∧ ¬NonCascade → ReachesRigid`. So the cascade obligation is the **primitive floor**.
 
-**4.3 — The precise crux + the wiring.**
-- **`not_isPrimitive_of_baseHomogeneousTwin`** (THE CRUX, stated here, proved in Phase 2):
-  `(∃ i j, i ≠ j ∧ BaseHomogeneousTwin G bound i j) → ¬ G.scheme.IsPrimitive`. Contrapositive:
-  **primitive ⟹ no base-homogeneous twin ⟹ `RecoverableByDepth bound`** (via 4.2's contrapositive + 4.1).
-- `selfDetection_dischargesCascade` — `RecoverableByDepth bound ⟹ SchemeRecoveredByDepth … bound` (assemble
-  the G1a witness: `S₀` = the recovering base set, deep phase = visible realizers, which hold because
-  `CellsAreOrbits S₀`). Then `hCascade` is discharged and `reachesRigidOrCameron_viaDepthRecovery` fires
-  unconditionally on the primitive branch.
+**4.2 — Name the self-detection proposition + the reduction.**
+- `PrimitiveFloorRecovers (bound) : Prop` — *every small, primitive, rank-≥3 schurian scheme residual is
+  `SchemeRecoveredByDepth … bound`* (the precise, non-vacuous content: `SchemeRecoveredByDepth` is keyed on
+  visible realizers + a bounded shallow phase, false for high `s(C)`; seal-handoff §3). This is exactly the
+  sharpened `hCascade`.
+- `reachesRigidOrCameron_viaSelfDetection` — from `PrimitiveFloorRecovers bound` (cascade branch) + the landed
+  imprimitive block recovery (`hImprim`), the seal `SchemeRecoveredByDepth ∨ Cameron`. The whole open seal is
+  now the single hypothesis `PrimitiveFloorRecovers` + cited G3.
+
+**4.3 — The crux statement (the Phase-2 target), on semantic recovery.**
+- **`not_isPrimitive_of_persistentGap`** (THE CRUX, stated, proved in Phase 2): for a bound `≥ base + C`,
+  `¬ RecoverableByDepth adj P bound → ¬ IsPrimitive` (equivalently: primitive ⟹ recovers at `base + C`). The
+  "persistent gap" object (`¬CellsAreOrbits S` for every small `S` = a same-cell-different-orbit pair surviving
+  every small base) is the semantic twin; `vProfile_iff_schemeOrbit` makes it a pure separability statement
+  about intersection numbers. Proving it gives `PrimitiveFloorRecovers`, closing the seal.
 
 **Phase-1 outcome (achievable, axiom-clean):** the seal is reduced to the single proposition
-`not_isPrimitive_of_baseHomogeneousTwin` + the cited G3. The catalogue probe (`CatalogueSchemeProbe.cs`)
-*already tests this proposition's emptiness empirically* (a base-homogeneous-twin primitive scheme would be a
-non-recovering primitive scheme — none in orders 5–30). Phase 1 makes the open gap a *precise, falsifiable,
-single* statement — genuine progress independent of whether Phase 2 closes.
+`SelfDetectsAtDepth` (the primitive-floor `hCascade`; = the crux `not_isPrimitive_of_persistentGap`) + the
+cited G3, with `IsPrimitive` honestly carried into the cascade branch and the imprimitive branch on landed
+block recovery. The catalogue probe (`CatalogueSchemeProbe.cs`) *already tests this proposition's emptiness
+empirically* (a persistent-gap primitive scheme would be a non-recovering primitive scheme — none in orders
+5–30). Phase 1 makes the open gap a *precise, falsifiable, single* statement — genuine progress independent of
+whether Phase 2 closes. The algebraic multi-base isolation engine (`EdgeGeneratesFromSet`) is deferred to
+Phase 2, where it makes the crux *checkable* on the affine family (§5.1).
+
+> **INCREMENT 1 LANDED (2026-06-08, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green).**
+> §4.1 + §4.2 are done:
+> - `exhaustiveObstruction_scheme_nonCascade_trichotomy'` (`Scheme.lean`) — middle disjunct carries
+>   `IsPrimitive`.
+> - `reachesRigidOrCameron'` (abstract) + `reachesRigidOrCameron_viaDepthRecovery'` (concrete) (`Cascade.lean`)
+>   — `hCascade : IsPrimitive ∧ ¬NonCascade → ReachesRigid`, the primitive-floor obligation.
+> - `SelfDetectsAtDepth` (`Cascade.lean`) — the named self-detection proposition (primitive ∧ small ⟹
+>   `SchemeRecoveredByDepth`), the seal's single open content.
+> - `reachesRigidOrCameron_viaSelfDetection` (`Cascade.lean`) — the seal from `SelfDetectsAtDepth` + landed
+>   imprimitive block recovery.
+>
+> **Remaining in Phase 1 (Increment 2):** the semantic-recovery bridge `RecoverableByDepth bound →
+> SchemeRecoveredByDepth bound` (assemble the G1a witness — `S₀` = recovering base set, deep visible realizers
+> via `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`, shallow `CoversOrbitsAlong`), so the crux can be
+> *stated* on semantic recovery (`not_isPrimitive_of_persistentGap`) and shown to imply `SelfDetectsAtDepth`.
+> That closes the Phase-1 reduction end-to-end; the crux *proof* is Phase 2.
 
 ---
 
