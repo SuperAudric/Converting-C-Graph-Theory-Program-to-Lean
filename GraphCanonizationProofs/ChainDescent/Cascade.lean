@@ -3431,6 +3431,100 @@ theorem schemeRecoveredByDepth_of_schemeRecovered {n : Nat} {S : SchurianScheme 
   obtain ⟨gens, bs, hsound, hreal, hbase⟩ := h
   exact ⟨gens, [], bs, hsound, by simp, trivial, by simpa using hreal, by simpa using hbase⟩
 
+/-! ### Increment 2 — the semantic recovery bridge (Phase 1 of the self-detection plan)
+
+`SchemeRecoveredByDepth` is the seal's *harvest-witness* recovery predicate (a `gens`/base sequence + per-`T`
+visible realizers). The self-detection lemma (Phase 2) is most naturally stated and attacked on a *semantic*
+recovery predicate — **cells coincide with orbits above a bounded individualization set**. This subsection
+builds that predicate (`StablyRecoverable`) and the clean bridge `StablyRecoverable ⟹ SchemeRecoveredByDepth`,
+so the crux can be stated on the semantic object the catalogue/affine analysis measures.
+
+**Why "above a bounded set", not "at a single set".** `SchemeRecoveredByDepth`'s deep clause quantifies over
+*every* `T ⊇ S₀`; a single `CellsAreOrbits S₀` does **not** give per-`T` realizers fixing `T`'s extra
+individualized points (the "localisation", seal-handoff §6 insight 7). The honest semantic match is
+`StablyRecoverable S₀ := ∀ T ⊇ S₀, CellsAreOrbits T` — recovery is *stable* above `S₀`. This is exactly what
+separability monotonicity yields (more individualization keeps a separable scheme separable), so it is the
+right Phase-2 target; and it is **non-vacuous** (it is cells = orbits, false for high `s(C)`), not orbit-level
+coverage. -/
+
+/-- **A finset is reachable from a sub-finset by a `foldl`-insert over some list.** `S₀.toList`-style helper:
+for any `S U`, some list inserts `U`'s elements into `S`. Used to materialize the shallow set `S₀` and the
+terminal base as `foldl`-insert sequences, the shape `SchemeRecoveredByDepth` demands. -/
+theorem exists_foldl_insert_eq {n : Nat} (S U : Finset (Fin n)) :
+    ∃ l : List (Fin n), l.foldl (fun s b => insert b s) S = S ∪ U := by
+  classical
+  induction U using Finset.induction with
+  | empty => exact ⟨[], by simp⟩
+  | @insert a U' _ ih =>
+    obtain ⟨l, hl⟩ := ih
+    refine ⟨l ++ [a], ?_⟩
+    rw [List.foldl_append, hl]
+    simp only [List.foldl_cons, List.foldl_nil]
+    rw [Finset.union_insert]
+
+/-- **Stable recovery above a set** — the semantic self-detection target. `S₀` is a set above which
+1-WL recovers the orbits: at *every* `T ⊇ S₀`, the `warmRefine` cells coincide with the `Aut_T`-orbits
+(`CellsAreOrbits`). Non-vacuous (cells = orbits is false for high `s(C)`); the honest match to
+`SchemeRecoveredByDepth`'s per-`T` deep clause, with the localisation made explicit (recovery is *stable*,
+not just present at `S₀`). -/
+def StablyRecoverable {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) : Prop :=
+  ∀ T : Finset (Fin n), S₀ ⊆ T → CellsAreOrbits adj P T
+
+/-- **The root group covers every orbit along any base sequence** — `CoversOrbitsAlong` is satisfied by
+`gens = ↑(StabilizerAt … ∅)` (all `P`-preserving automorphisms). This is the (genuinely true, here
+non-load-bearing) *orbit-level* coverage: an orbit-mate at `S` is realized by the residual automorphism
+itself, which lies in `gensAt … S`. The non-vacuous content of recovery is the *visible* deep clause, not
+this. -/
+theorem coversOrbitsAlong_stabilizerAtEmpty {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+    (bs : List (Fin n)) (S : Finset (Fin n)) :
+    CoversOrbitsAlong adj P (↑(StabilizerAt adj P ∅)) bs S := by
+  induction bs generalizing S with
+  | nil => trivial
+  | cons b bs ih =>
+    refine ⟨fun w how => ?_, ih _⟩
+    obtain ⟨π, hres, hπ⟩ := orbitPartition_iff_residualAut.mp how
+    exact ⟨π, Subgroup.subset_closure
+      ⟨mem_stabilizerAt_empty.mpr ⟨hres.1, hres.2.1⟩, mem_stabilizerAt.mpr hres⟩, hπ⟩
+
+/-- **The semantic recovery bridge: `StablyRecoverable ⟹ SchemeRecoveredByDepth`.** From stable recovery above
+a bounded set `S₀` (`|S₀| ≤ bound`), the scheme is recovered by depth `bound`. Witness: `gens` = all residual
+automorphisms at `∅`; shallow `bs₁` materializes `S₀` (orbit coverage by `coversOrbitsAlong_stabilizerAtEmpty`);
+the deep clause at each `T ⊇ S₀` reads a visible realizer off `CellsAreOrbits T` (same cell ⟹ same orbit ⟹ a
+residual automorphism `π` carrying the pair, `π ∈ StabilizerAt ∅` since it is a `P`-preserving aut); the base
+comes from `exists_isBase_saturated`. This converts the seal's harvest-witness recovery into the *semantic*
+object Phase 2 attacks. -/
+theorem schemeRecoveredByDepth_of_stablyRecoverable {n : Nat} (S : SchurianScheme n)
+    {S₀ : Finset (Fin n)} {bound : Nat} (hcard : S₀.card ≤ bound)
+    (hstab : StablyRecoverable (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀) :
+    SchemeRecoveredByDepth n S bound := by
+  classical
+  set adj := schemeAdj S.toAssociationScheme with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  obtain ⟨l₁, hl₁⟩ := exists_foldl_insert_eq (∅ : Finset (Fin n)) S₀
+  rw [Finset.empty_union] at hl₁
+  obtain ⟨k, _, hsub, hbase⟩ := exists_isBase_saturated adj P S₀
+  set Tb := (movedStep adj P)^[k] S₀ with hTb
+  obtain ⟨l₂, hl₂⟩ := exists_foldl_insert_eq S₀ (Tb \ S₀)
+  rw [Finset.union_sdiff_of_subset hsub] at hl₂
+  refine ⟨(↑(StabilizerAt adj P ∅) : Set (Equiv.Perm (Fin n))), l₁, l₂,
+    fun g hg => hg, ?_, coversOrbitsAlong_stabilizerAtEmpty adj P l₁ ∅, ?_, ?_⟩
+  · rw [hl₁]; exact hcard
+  · intro T hT b w hcell
+    rw [hl₁] at hT
+    obtain ⟨π, hres, hπ⟩ := orbitPartition_iff_residualAut.mp (hstab T hT b w hcell)
+    exact ⟨π, mem_stabilizerAt_empty.mpr ⟨hres.1, hres.2.1⟩, hres, hπ⟩
+  · rw [hl₁, hl₂]; exact hbase
+
+/-- **The semantic self-detection proposition** — `SelfDetectsAtDepth` restated on `StablyRecoverable`. A
+schurian residual *self-detects stably at depth `bound`* when, *if primitive and small*, it recovers stably
+above some bounded set (`∃ S₀, |S₀| ≤ bound ∧ StablyRecoverable S₀`). This is the cleanest semantic form of the
+self-detection lemma — the object the affine module-theory argument (Phase 2) produces and the catalogue probe
+measures (cells = orbits above `base + O(1)` individualizations). -/
+def SelfDetectsStably {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop) (bound : Nat) : Prop :=
+  S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+    ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
+      StablyRecoverable (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀
+
 /-- **The seal capstone, depth-graded (G1a).** `reachesRigidOrCameron_viaRecovery` with the rigid side widened
 from per-level `SchemeRecovered` to `SchemeRecoveredByDepth … bound`: every rank-≥3 schurian scheme residual is
 *recovered by bounded depth* or is a Cameron section. Each non-Cameron branch may now discharge via a
@@ -3499,6 +3593,34 @@ theorem reachesRigidOrCameron_viaSelfDetection {n : Nat} {IsLarge : Nat → Prop
     (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeRecoveredByDepth n S bound) :
     SchemeRecoveredByDepth n S bound ∨ IsCameronScheme n S :=
   reachesRigidOrCameron_viaDepthRecovery' hClassify S hne hrank hSelfDetect hImprim
+
+/-- **Semantic self-detection ⟹ the seal's self-detection obligation.** `SelfDetectsStably ⟹ SelfDetectsAtDepth`,
+via `schemeRecoveredByDepth_of_stablyRecoverable`. So the seal's entire open content can be discharged from the
+clean *semantic* recovery predicate (cells = orbits above a bounded set), which is what Phase 2 attacks. -/
+theorem selfDetectsAtDepth_of_selfDetectsStably {n : Nat} {S : SchurianScheme n}
+    {IsLarge : Nat → Prop} {bound : Nat} (h : SelfDetectsStably S IsLarge bound) :
+    SelfDetectsAtDepth S IsLarge bound := by
+  intro hps
+  obtain ⟨S₀, hcard, hstab⟩ := h hps
+  exact schemeRecoveredByDepth_of_stablyRecoverable S hcard hstab
+
+/-- **The seal, reduced to SEMANTIC self-detection (Increment 2 capstone).** The seal with its entire open
+content concentrated into `SelfDetectsStably` — *primitive small residuals recover stably above a bounded set*
+(cells = orbits above `base + O(1)`). This is the form the affine module-theory argument (Phase 2 §5.1)
+produces and the catalogue probe measures: the crux is now a statement about `CellsAreOrbits` (separability),
+not the harvest-witness `SchemeRecoveredByDepth`. Imprimitive branch on landed block recovery; modulo only the
+cited G3. -/
+theorem reachesRigidOrCameron_viaStableRecovery {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hSelfDetect : SelfDetectsStably S IsLarge bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeRecoveredByDepth n S bound) :
+    SchemeRecoveredByDepth n S bound ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaSelfDetection hClassify S hne hrank
+    (selfDetectsAtDepth_of_selfDetectsStably hSelfDetect) hImprim
 
 /-! ### The scheme-seal wiring — the imprimitive branch folded into the visible block decomposition
 

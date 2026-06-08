@@ -1,7 +1,8 @@
 # Chain descent — the self-detection lemma: plan to make the seal unconditional
 
-> **STATUS (2026-06-08): Phase 1 — INCREMENT 1 LANDED (axiom-clean, build green); Increment 2 next; Phase 2
-> = the crux proof (research). See the §4 outcome box for the landed decls.** The oracle-capability seal is a conditional theorem
+> **STATUS (2026-06-08): Phase 1 COMPLETE (Increments 1 + 2 LANDED, axiom-clean, build green) — the seal is
+> reduced end-to-end to the SEMANTIC crux `SelfDetectsStably` (primitive small ⟹ cells = orbits above a
+> bounded set). Phase 2 = the crux proof (research, affine beachhead §5.1). See the §4 outcome box.** The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
 > is `hCascade` (small primitive ⟹ recovers = G2-B). Both empirical falsifiers are clean: the affine
@@ -158,11 +159,21 @@ Phase 2, where it makes the crux *checkable* on the affine family (§5.1).
 > - `reachesRigidOrCameron_viaSelfDetection` (`Cascade.lean`) — the seal from `SelfDetectsAtDepth` + landed
 >   imprimitive block recovery.
 >
-> **Remaining in Phase 1 (Increment 2):** the semantic-recovery bridge `RecoverableByDepth bound →
-> SchemeRecoveredByDepth bound` (assemble the G1a witness — `S₀` = recovering base set, deep visible realizers
-> via `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits`, shallow `CoversOrbitsAlong`), so the crux can be
-> *stated* on semantic recovery (`not_isPrimitive_of_persistentGap`) and shown to imply `SelfDetectsAtDepth`.
-> That closes the Phase-1 reduction end-to-end; the crux *proof* is Phase 2.
+> **INCREMENT 2 LANDED (2026-06-08, axiom-clean, build green) — the semantic-recovery bridge.** A scope
+> finding shaped it: `SchemeRecoveredByDepth`'s deep clause quantifies over **every** `T ⊇ S₀`, so a single
+> `CellsAreOrbits S₀` is *not* enough (the per-`T` realizers must fix `T`'s extra points — the localisation,
+> insight 7). The honest semantic match is **stable** recovery:
+> - `StablyRecoverable adj P S₀ := ∀ T ⊇ S₀, CellsAreOrbits adj P T` (`Cascade.lean`) — cells = orbits *above*
+>   `S₀`; non-vacuous (false for high `s(C)`), exactly what separability monotonicity yields.
+> - `schemeRecoveredByDepth_of_stablyRecoverable` — the clean bridge `StablyRecoverable (|S₀| ≤ bound) ⟹
+>   SchemeRecoveredByDepth bound` (gens = all residual auts at ∅; deep clause from `CellsAreOrbits T` via
+>   `orbitPartition_iff_residualAut` + `mem_stabilizerAt_empty`; base from `exists_isBase_saturated`).
+> - `SelfDetectsStably` + `selfDetectsAtDepth_of_selfDetectsStably` + `reachesRigidOrCameron_viaStableRecovery`
+>   — the seal reduced to the **semantic** crux: *primitive small ⟹ ∃ small `S₀`, cells = orbits above `S₀`*.
+>
+> **Net: the seal's entire open content is now a statement about `CellsAreOrbits` (separability), not the
+> harvest-witness `SchemeRecoveredByDepth`** — the object Phase 2's affine argument produces and the catalogue
+> probe measures. **Phase 1 reduction is complete end-to-end.** Next is Phase 2 (the crux proof, §5).
 
 ---
 
