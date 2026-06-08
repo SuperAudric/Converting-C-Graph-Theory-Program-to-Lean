@@ -4503,6 +4503,44 @@ theorem discrete_affineScheme_of_jointSeparates (hneg : LinearEquiv.neg (ZMod p)
   refine hsep u u' (fun t ht => ?_)
   exact (orbMk_affine_eq_iff G₀).mp ((affineScheme_relOfPair_eq_iff G₀ hneg).mp (hjp t ht))
 
+/-- **E3 — the seal reduced to the affine irreducible-discreteness bound (the affine-cyclic slice).**
+Specializes the fused seal `reachesRigidOrCameron_viaFusedSeal` to the affine model `affineScheme G₀ hneg`,
+discharging its self-detection input through `selfDetectsStably_of_discretizes` and converting the seal's
+`IsPrimitive` antecedent into `G₀Irreducible` via **M1.2** (`isPrimitive_affineScheme_imp_irreducible`). So
+the affine slice's seal is reduced to a **single open hypothesis** `hbound`: *irreducible `G₀` (and small) ⟹
+a bounded individualization warm-refines to a discrete colouring* — exactly the cyclotomic / Schur-ring
+separability target (E2.4: the Frobenius/Galois `s(C)` bound for cyclic irreducible `G₀`). The "cyclotomic
+family" needs **no new model**: it is `affineScheme` with cyclic `G₀`, and `hbound` is the only open content.
+
+**⚠️ CONDITIONAL — not the closed seal.** It still carries `hClassify` (G3), `hImprim` (landed/earned,
+tower-reducible to the primitive floor), and the **open** `hbound`. Closing `hbound` — even for cyclic `G₀`
+— is uncited open `s(C)` mathematics (seal-handoff §6 insight 2). The engine that *discharges* `hbound` is
+§13b (`twoRoundCount_eq_of_warmRefine` / `discrete_of_twoRoundProfileSeparates`) fed by the multi-base
+Frobenius separation (the `O(d)` Γ-breaking base individualizing into a discrete colouring). Do **not** read
+this as "the seal is closed for the affine/cyclotomic family." -/
+theorem reachesRigidOrCameron_viaAffineIrreducible {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    (hne : ∀ i : Fin ((affineScheme G₀ hneg).rank + 1),
+        ∃ v w, (affineScheme G₀ hneg).rel i v w = true)
+    (hrank : 2 ≤ (affineScheme G₀ hneg).rank)
+    (hbound : G₀Irreducible G₀ ∧ ¬ IsLargeSchemeViaAut IsLarge (p ^ d) (affineScheme G₀ hneg) →
+        ∃ T : Finset (Fin (p ^ d)), T.card ≤ bound ∧
+          Discrete (warmRefine (schemeAdj (affineScheme G₀ hneg).toAssociationScheme)
+            (fun _ _ => POE.unknown) (individualizedColouring (p ^ d) T)))
+    (hImprim : ¬ (affineScheme G₀ hneg).toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (p ^ d) (affineScheme G₀ hneg)
+          ∨ AbelianConsumed (p ^ d) (affineScheme G₀ hneg)) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme G₀ hneg)
+        ∨ AbelianConsumed (p ^ d) (affineScheme G₀ hneg))
+      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme G₀ hneg) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme G₀ hneg) := by
+  refine reachesRigidOrCameron_viaFusedSeal hClassify (affineScheme G₀ hneg) hne hrank ?_ hImprim
+  apply selfDetectsStably_of_discretizes
+  rintro ⟨hprim, hsmall⟩
+  exact hbound ⟨isPrimitive_affineScheme_imp_irreducible G₀ hneg hprim, hsmall⟩
+
 end AffineScheme
 
 end ChainDescent

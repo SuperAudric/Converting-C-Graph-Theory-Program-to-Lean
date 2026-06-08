@@ -1036,6 +1036,35 @@ speculatively — that is the over-build the route-scan warns against. Extract p
 
 ### 11.6 E3 — wiring (mechanical, once E2 lands)
 
+> **E3 + E2.1 LANDED (2026-06-08, axiom-clean, build green, `Cascade.lean §AffineScheme`).** Two findings
+> collapsed E2.1 and made E3 buildable now:
+> - **E2.1 needs NO new model.** The "cyclotomic family" is `affineScheme G₀ hneg` (M0.3, landed) with cyclic
+>   `G₀`; the open content is *purely* the discreteness bound, not any construction. (So the `GaloisField`/Frobenius
+>   structure of §11.4 is a PROOF technique for `hbound`, not part of the model/statement — it only enters when
+>   actually proving `hbound`.)
+> - **`reachesRigidOrCameron_viaAffineIrreducible`** — the seal on **all irreducible affine** residuals (more
+>   general than cyclotomic) reduced to ONE open hypothesis `hbound`: *`G₀Irreducible G₀ ∧ small ⟹ ∃ bounded `T`,
+>   `Discrete(warmRefine (schemeAdj (affineScheme G₀ hneg)) T)`*. Built by `reachesRigidOrCameron_viaFusedSeal` +
+>   `selfDetectsStably_of_discretizes`, converting the seal's `IsPrimitive` → `G₀Irreducible` via **M1.2**
+>   (`isPrimitive_affineScheme_imp_irreducible`). Carries `hClassify` (G3) + `hImprim` + the open `hbound`
+>   (anti-"looks-complete").
+>
+> **GENERALIZATION INSIGHT (carry to §5.3).** The wiring pattern is the §5.3 template: *`selfDetectsStably_of_discretizes`
+> + a "primitive ⟹ structural-irreducibility" bridge*. M1.2 is the affine instance of that bridge (`IsPrimitive` →
+> `G₀Irreducible`); the general capstone needs the analogue (`IsPrimitive` → "no nontrivial `ClosedSubset`", which
+> is *definitional*), so the general seal is just `selfDetectsStably_of_discretizes` with the bound keyed on
+> `IsPrimitive` directly. The affine producer's only *extra* job is **reshaping** the bound's hypothesis to the
+> Frobenius-friendly `G₀Irreducible` form. So the open content everywhere is the *same* discreteness bound; the
+> bridges are landed/definitional.
+>
+> **REMAINING OPEN = `hbound` itself (E2.2–E2.4, the Frobenius `s(C)` bound).** To discharge it via the §13b E1
+> engine (`discrete_of_twoRoundProfileSeparates`), the missing link is the **colour→relation-grouping conversion**:
+> the depth-2 producer's hypothesis is keyed on the opaque one-round colour `refineStep·z = c`; to feed it the
+> Frobenius counting argument (which reasons about `G₀`-orbit-of-difference counts) one needs a *joint-relation* form
+> of `twoRoundCount` — sum the colour-grouped counts over colours sharing a joint `(relOfPair t·)_{t∈T}` profile,
+> using "one-round colour determines relation-to-each-`t∈T`" (the round-1 multi-base analogue of
+> `refineStep_round1_adj_eq`). That conversion + the Frobenius/Galois bound for cyclic `G₀` is the open research.
+
 `selfDetectsStably_of_depthOneSeparable` is the template. The cyclotomic capstone:
 1. `selfDetectsStably_of_discretizes` with the E2 discreteness witness ⟹ `SelfDetectsStably (cyclotomicScheme …)`.
 2. `reachesRigidOrCameron_viaFusedSeal` (or `…_viaDepthOneSeparable`'s sibling) ⟹ the seal on the cyclotomic family,
