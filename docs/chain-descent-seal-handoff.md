@@ -662,12 +662,24 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     citable near-theorem at schurian generality. T2 is a project-internal thread, not a citation shortcut.
   - **(e) The P1–P4 / Gate-G proof** of "primitive ⟹ separable" — (c) is its crux P3; open and uncitable (rev. 3).
 - **Tier 3 — decisive cheap experiments:**
-  - **(f) The Hanaki–Miyamoto catalogue test (the decisive falsifier; replaces the E₁₆/E₃₂ test).** RQ4 confirmed
-    `E₁₆=F₂⁴ / E₃₂=F₂⁵` are **multi-fiber, not homogeneous** — so they are *not* a homogeneous G2-B witness. The right
-    falsifier is the catalogue (math.shinshu-u.ac.jp/~hanaki/as/) with Schurian/primitive flags: **order 16 has 6
-    primitive + 16 non-Schurian schemes**. Check whether any *small primitive homogeneous* scheme is non-separable with
-    small Aut — a witness is a 16-vertex seal counterexample (statement change); none is empirical support for G2-B
-    emptiness. Cheaper and sharper than the affine probe.
+  - **(f) The Hanaki–Miyamoto catalogue test — RAN (2026-06-08, the decisive falsifier). VERDICT: NO G2-B WITNESS;
+    G2-B EMPTINESS supported decisively.** `GraphCanonizationProject.Tests/CatalogueSchemeProbe.cs` ingests the catalogue's
+    GAP data files (`data/hanaki/as<N>.gz`, gzipped, committed) and exhaustively analyzes **every** association scheme of
+    orders **5–30** (2363 schemes, all parse-validated as genuine schemes via the homogeneity + well-defined-intersection-number
+    gate). Result: **481 primitive (rank≥3) schemes, ALL 481 recover** (EdgeGenerates or bounded WL-depth ≤ base+O(1)),
+    **0 G2-B candidates** (no primitive non-recovering scheme), **0 validation mismatches** — the probe's computed
+    primitive-count matches the catalogue's *published* per-order primitive count **exactly for every order** (377/377 at order
+    27, 5/5 at order 16, 20/20 at order 23, …; the data files omit only the thin regular-group schemes, which recover at depth 1
+    and cannot be witnesses). Aut/Schurian machinery self-tested on the pentagon C₅ (|Aut|=10, schurian, non-abelian).
+    This is the exhaustive analogue of the affine probe (g): where (g) swept a *constructed* family, (f) checks *all* small
+    schemes directly — much stronger evidence. **Secondary finding:** 5 primitive schemes (order 16 #20/#21 rank-4; order
+    25 #17/#18 rank-4, #39 rank-9) **fail depth-1 `EdgeGenerates` yet recover at bounded WL-depth** — empirical confirmation
+    of the corrected target (bounded-depth recovery base+O(1), NOT depth-1; the Shrikhande/cyclotomic lesson generalizes).
+    Note RQ4: `E₁₆=F₂⁴/E₃₂=F₂⁵` are multi-fiber (not homogeneous), so they are correctly *not* in the homogeneous catalogue
+    as a witness; the catalogue (which IS the exhaustive homogeneous list) is the right object. **A genuine witness would
+    have been a small primitive schurian non-abelian non-recovering scheme = a seal counterexample (statement change); none
+    exists in orders 5–30.** Caveat (honest): the verdict rests on the EdgeGenerates/WL-depth recovery proxy = separability;
+    since 0 candidates arose, the Aut/Schurian classifier ran only on the self-test, not a real candidate.
   - **(g) Non-abelian irreducible `G₀` — RAN (2026-06-08, route 1 strand (a)).** `AffineSchemeProbe.Probe_NonAbelianIrreducibleG0`
     sweeps the **Singer normalizer `ΓL(1,2^d) = ⟨Singer, Frobenius⟩`** and its subgroups `⟨gᵐ, φᵏ⟩` (`φgφ⁻¹ = g²` ⟹
     genuinely non-abelian — the actual A4 zone, not the Galois/cyclic gap). The probe builds the Frobenius `x↦x²` matrix

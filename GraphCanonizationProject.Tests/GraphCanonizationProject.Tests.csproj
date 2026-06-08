@@ -29,4 +29,10 @@
     <None Include="Archive/**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Hanaki–Miyamoto association-scheme catalogue (gzipped GAP data) for the
+         CatalogueSchemeProbe G2-B falsifier; copied next to the test assembly. -->
+    <Content Include="data/hanaki/*.gz" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
