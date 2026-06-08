@@ -12,8 +12,12 @@
 > affine beachhead Increment A1 LANDED (single-base recovery is free; the crux is multi-base); **M0/M0.3/M1.0/M1.0b
 > AND M1.1/M1.2 LANDED (2026-06-08, axiom-clean)** — the orbital-scheme constructor, the affine model `V⋊G₀`,
 > and the bridge `isPrimitive_affineScheme_imp_irreducible` (primitive ⟹ `G₀` irreducible, via the
-> `ClosedSubset`-from-invariant-`Submodule` construction = the §5.3 template). **Remaining Phase 2: M2** (irreducible
-> `G₀` ⟹ `StablyRecoverable` bounded — the research crux; M2-cyclic first) then M3 (wire to `SelfDetectsStably`).
+> `ClosedSubset`-from-invariant-`Submodule` construction = the §5.3 template). **M2 REDUCTION LANDED (2026-06-08,
+> axiom-clean):** `stablyRecoverable_of_discrete` + `selfDetectsStably_of_discretizes` reduce the *entire* crux —
+> for **any** schurian scheme — to **"primitive small ⟹ bounded individualization discretizes"** (a refinement-only,
+> orbit-free statement; faithful/lossless). **Remaining Phase 2 = M2-B**: the affine discreteness proof itself
+> (`irreducible G₀ ⟹ ∃ bounded S₀, Discrete(warmRefine affine schemeAdj S₀)`) — base term easy (spanning set ⟹
+> `Stab=1`), `s(C)` stickiness term = the open citation-free WL-dimension content; then M3 (wire) is mechanical.
 > The **detailed,
 > pick-up-and-build plan for the remaining affine multi-base work is §9 below; **§10 is the consolidated
 > pick-up handoff (M0/M0.3/M1.0/M1.0b are LANDED — durable generalization insights for §5.3, the exact M1.1/M1.2
@@ -513,7 +517,32 @@ is free (translations act transitively). **Mathlib anchors:** `Module (ZMod p)`,
 
 ### 9.3 M2 — the recovery crux: irreducible `G₀` ⟹ `StablyRecoverable` bounded (THE RESEARCH CONTENT)
 
-**Goal.** `irreducible G₀ ⟹ ∃ S₀, |S₀| ≤ bound ∧ ∀ T ⊇ S₀, CellsAreOrbits (schemeAdj affineScheme) … T`.
+> **M2 REDUCTION LANDED (2026-06-08, axiom-clean, full build green, `Cascade.lean`) — the crux is now a
+> refinement-only (orbit-free) statement, FOR ANY SCHURIAN SCHEME.** Two general theorems:
+> - **`stablyRecoverable_of_discrete`** : `Discrete (warmRefine adj P (individualizedColouring n S₀)) →
+>   StablyRecoverable adj P S₀`. Discreteness propagates to every `T ⊇ S₀` (`individualizedColouring_refines`
+>   + `warmRefine_refines_initial`: a finer initial colouring stays discrete), then `cellsAreOrbits_of_discrete`.
+> - **`selfDetectsStably_of_discretizes`** : `SelfDetectsStably` ⟸ *"primitive small ⟹ ∃ bounded `S₀`,
+>   `warmRefine`-from-`S₀` discrete"*.
+>
+> **So the ENTIRE seal crux reduces to: "primitive small ⟹ bounded individualization discretizes."** This is
+> the cleanest form — pure refinement reaching singletons, no orbits — and it holds for *any* schurian scheme
+> (not just affine), so it advances the whole crux, not only the affine slice. **Faithful, not lossy:** at the
+> primitive floor `StablyRecoverable S₀` forces `CellsAreOrbits` at a base above `S₀` where orbits are trivial,
+> hence discreteness there — `Discrete` and `StablyRecoverable` are equivalent for the crux. **GENERALIZATION
+> INSIGHT (carry to §5.3 / §10.1):** discretization depth splits as **base(G)** [group-theoretic: a spanning set
+> of ≤ d points gives trivial stabilizer — easy] **+ s(C)** [WL-dimension stickiness — the OPEN term]; the
+> reduction isolates the open content to exactly `s(C)`. It unifies the crux with CFI's
+> `theorem_1_HOR_cfi_oddDeg` (discreteness at depth `tw`), `isBase_of_discrete_warmRefine`, and the probes
+> (which measure greedy depth-to-discreteness). **What remains open (M2-B, below) is the affine discreteness
+> proof itself** — `irreducible G₀ ⟹ ∃ bounded S₀, Discrete(warmRefine affine schemeAdj S₀)` — whose `s(C)`
+> term is the genuine, citation-free WL-dimension content. The base term (a spanning set ⟹ `Stab = 1`) is the
+> easy half.
+
+**Goal (M2-B, the open affine discreteness — the remaining research content).** `irreducible G₀ ⟹ ∃ S₀,
+|S₀| ≤ bound ∧ Discrete (warmRefine (schemeAdj affineScheme) … (individualizedColouring _ S₀))`. (Was: the
+`CellsAreOrbits`-at-all-`T` form below; `stablyRecoverable_of_discrete` reduces it to this Discrete form.)
+The original `CellsAreOrbits` unfolding, kept for the orbit-level intuition:
 
 **The object, unfolded (affine).** WLOG `0 ∈ T` (translate). For `T = {0, x₁, …, x_k}`: `Stab(T)`-orbits are
 `(G₀)_{x₁,…,x_k}`-orbits (pointwise stabilizer in `G₀`). `warmRefine`-from-`T` first round colours `u` by the
@@ -559,14 +588,18 @@ right first target. Do **not** expect M2-general to close quickly; its value is 
 
 ### 9.4 M3 — wiring to `SelfDetectsStably` (mechanical, once M1+M2 exist)
 
-`SelfDetectsStably (affineScheme) IsLarge bound`:
-1. Intro `⟨hprim, hsmall⟩`. `hprim : IsPrimitive` → (M1.2) `irreducible G₀`.
-2. (M2) → `∃ S₀, |S₀| ≤ bound ∧ StablyRecoverable (schemeAdj affineScheme) … S₀`. Done.
+`SelfDetectsStably (affineScheme) IsLarge bound` — **now via the M2 discreteness reduction (landed):** it
+suffices to supply, for primitive small affine, a **bounded `S₀` with `warmRefine`-from-`S₀` discrete**, then
+`selfDetectsStably_of_discretizes` closes it. So M3 is:
+1. Apply `selfDetectsStably_of_discretizes`; intro `⟨hprim, hsmall⟩`. `hprim : IsPrimitive` → (M1.2)
+   `irreducible G₀`.
+2. (M2-B, the open affine discreteness) → `∃ S₀, |S₀| ≤ bound ∧ Discrete (warmRefine (schemeAdj affineScheme) …
+   (individualizedColouring _ S₀))`. **This is the remaining research content** (the `s(C)` term).
 3. **The "small" hypothesis (`hsmall : ¬ IsLargeSchemeViaAut`).** For affine, `|SchemeAutGroup| = p^d·|G₀|`;
-   "small" = `|G₀|` poly = `d, p` bounded. M2's bound is `base(G₀)+O(1) = O(log|G₀|)+O(1)`, which is `≤ bound`
-   exactly in the small regime. Thread `bound := base(G₀) + C` and discharge `|S₀| ≤ bound` from `hsmall`.
-   Then `selfDetectsAtDepth_of_selfDetectsStably` (Increment 2, landed) + `reachesRigidOrCameron_viaStableRecovery`
-   (landed) give the seal on the affine residual.
+   "small" = `|G₀|` poly = `d, p` bounded. The discretization bound is `base(G₀)+O(1) = O(log|G₀|)+O(1)`, which is
+   `≤ bound` exactly in the small regime. Thread `bound := base(G₀) + C` and discharge `|S₀| ≤ bound` from
+   `hsmall`. (`selfDetectsAtDepth_of_selfDetectsStably` + `reachesRigidOrCameron_viaStableRecovery`/`viaFusedSeal`
+   then give the seal on the affine residual — both landed.)
 
 ### 9.5 Build order, risk, and the reusable-for-the-general-crux payoff
 

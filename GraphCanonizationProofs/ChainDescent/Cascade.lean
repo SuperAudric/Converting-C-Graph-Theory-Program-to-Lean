@@ -3647,6 +3647,50 @@ def SelfDetectsStably {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop) 
     ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
       StablyRecoverable (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀
 
+/-! ### Phase 2, M2 reduction — discreteness ⟹ stable recovery (general; the crux simplification)
+
+The research crux (M2: `irreducible G₀ ⟹ StablyRecoverable bounded`) reduces — **for any schurian scheme,
+not just affine** — to a single refinement-only condition: *individualizing a bounded set warm-refines to a
+**discrete** colouring* (separates all vertices). This is the cleanest form of the self-detection target, and
+it unifies the seal's open content with the existing cascade-to-discreteness machinery (CFI
+`theorem_1_HOR_cfi_oddDeg`, `isBase_of_discrete_warmRefine`) and the empirical probes (which measure greedy
+depth-to-discreteness). It also separates the two budget terms cleanly: discretization depth = base(G)
+[group-theoretic, bounded: a spanning set gives trivial stabilizer] + `s(C)` [the WL-dimension stickiness — the
+open term]. **Faithful, not lossy:** at the primitive floor, `StablyRecoverable S₀` forces `CellsAreOrbits` at
+a base above `S₀` where orbits are trivial, hence discreteness there — so the two are equivalent for the crux,
+but `Discrete` is a single monotone refinement condition. -/
+
+/-- **Discreteness ⟹ stable recovery (general).** If individualizing `S₀` warm-refines to a `Discrete`
+colouring, then `StablyRecoverable adj P S₀` holds. Discreteness propagates to every `T ⊇ S₀`
+(`individualizedColouring_refines` + `warmRefine_refines_initial`: a finer initial colouring stays discrete),
+and `Discrete ⟹ CellsAreOrbits` is `cellsAreOrbits_of_discrete`. Reduces the multi-base recovery crux to a
+pure "reaches singletons at bounded depth" statement. Non-vacuous: `Discrete` is false for any scheme with a
+nontrivial residual symmetry above `S₀`. -/
+theorem stablyRecoverable_of_discrete {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S₀ : Finset (Fin n)}
+    (hd : Discrete (warmRefine adj P (individualizedColouring n S₀))) :
+    StablyRecoverable adj P S₀ := by
+  intro T hsub
+  apply cellsAreOrbits_of_discrete
+  intro v w hvw
+  exact hd v w (warmRefine_refines_initial (individualizedColouring_refines hsub) v w hvw)
+
+/-- **The crux, reduced to bounded discretization.** If a primitive small schurian residual individualizes a
+bounded set to discreteness, it self-detects stably. So `SelfDetectsStably` — the seal's sole open content —
+follows from *"primitive small ⟹ ∃ bounded `S₀` with `warmRefine`-from-`S₀` discrete"*, a refinement-only
+(orbit-free) statement. This is the M2 target the affine module argument (and any Phase-2 family) now produces;
+the catalogue/affine probes measure exactly this discretization depth. -/
+theorem selfDetectsStably_of_discretizes {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop)
+    (bound : Nat)
+    (h : S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+        ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
+          Discrete (warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (individualizedColouring n S₀))) :
+    SelfDetectsStably S IsLarge bound := by
+  intro hps
+  obtain ⟨S₀, hcard, hd⟩ := h hps
+  exact ⟨S₀, hcard, stablyRecoverable_of_discrete hd⟩
+
 /-- **The seal capstone, depth-graded (G1a).** `reachesRigidOrCameron_viaRecovery` with the rigid side widened
 from per-level `SchemeRecovered` to `SchemeRecoveredByDepth … bound`: every rank-≥3 schurian scheme residual is
 *recovered by bounded depth* or is a Cameron section. Each non-Cameron branch may now discharge via a
