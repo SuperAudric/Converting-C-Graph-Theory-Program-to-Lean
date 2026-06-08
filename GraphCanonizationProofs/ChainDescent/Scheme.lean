@@ -244,6 +244,26 @@ theorem schemeEquiv_class_eq_iff {I : Finset (Fin (S.rank + 1))} (hcl : S.Closed
     exact ⟨fun h => S.schemeEquiv_trans hcl (S.schemeEquiv_symm huw) h,
            fun h => S.schemeEquiv_trans hcl huw h⟩
 
+/-- **A nonzero intersection number is realized by a composable triple.** If `R_k` is nonempty and
+`intersectionNumber i j k ≠ 0`, there is a genuine triple `(x, y, z)` with `(x,y) ∈ R_i`, `(y,z) ∈ R_j`,
+`(x,z) ∈ R_k`. The defining axiom counts the intermediate `y`'s for a *chosen* `R_k`-pair; a nonzero count
+means at least one exists. This is the general ingredient the `ClosedSubset`-closure clause needs (and the
+reusable piece for the §5.3 general crux: "the difference of a composite relation is the sum of the
+parts'"). `R_k`-nonemptiness is an explicit hypothesis — the scheme axioms do not force every index to be
+inhabited; for orbital schemes it is discharged from `orbMk_out`. -/
+theorem exists_composable_of_intersectionNumber {i j k : Fin (S.rank + 1)}
+    (hk : ∃ x z : Fin n, S.rel k x z = true)
+    (h : S.intersectionNumber i j k ≠ 0) :
+    ∃ x y z : Fin n, S.rel i x y = true ∧ S.rel j y z = true ∧ S.rel k x z = true := by
+  obtain ⟨x, z, hxz⟩ := hk
+  have hcard := S.intersectionNumber_well_defined i j k x z hxz
+  have hpos : 0 < (Finset.univ.filter
+      (fun u : Fin n => S.rel i x u = true ∧ S.rel j u z = true)).card := by
+    rw [hcard]; exact Nat.pos_of_ne_zero h
+  obtain ⟨y, hy⟩ := Finset.card_pos.mp hpos
+  rw [Finset.mem_filter] at hy
+  exact ⟨x, y, z, hy.2.1, hy.2.2, hxz⟩
+
 end AssociationScheme
 
 /-! ## §2 — Scheme automorphisms and `SchurianScheme`

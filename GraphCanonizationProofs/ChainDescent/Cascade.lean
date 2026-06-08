@@ -9,6 +9,7 @@ import Mathlib.Algebra.Group.Subgroup.Finite
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Algebra.Module.Equiv.Basic
 import Mathlib.Algebra.Module.Pi
+import Mathlib.Algebra.Module.Submodule.Lattice
 import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Tactic.Abel
 
@@ -4054,6 +4055,176 @@ theorem orbMk_affine_eq_iff {x y x' y' : Fin (p ^ d)} :
               = (g₀ (affineE.symm y') - g₀ (affineE.symm x')) + affineE.symm x from by abel, hg2]
         abel
       rw [this, Equiv.apply_symm_apply]
+
+/-! ### Phase 2, M1.1/M1.2 — primitive ⟹ `G₀` irreducible (the block ⟺ invariant-subspace bridge)
+
+The seal's cascade branch hands you `IsPrimitive (affineScheme)`; M2 (recovery) needs `G₀` irreducible.
+This block is the bridge — and it is the **concrete rehearsal of the §5.3 general crux template** ("a block
+is a sub-structure; primitivity forbids it"): here the *block* is a `ClosedSubset I`, the *sub-structure* is
+a `G₀`-invariant `Submodule`, and the proof builds one from the other. The general crux swaps `Submodule` ↔
+fusion / `ClosedSubset` and "invariant subspace" ↔ "block system"; do the affine one first. The direction
+that matters is `¬irreducible → ¬IsPrimitive` (contrapositive of what M3 consumes). -/
+
+/-- `Fin (p^d)` is nonempty (`p^d ≥ 1` since `p` is prime). Needed for the orbital indexing/diagonal facts
+used below outside the `affineScheme` definition. -/
+private instance instNonemptyAffV : Nonempty (Fin (p ^ d)) :=
+  haveI : NeZero p := ⟨(Fact.out : p.Prime).pos.ne'⟩
+  ⟨⟨0, Nat.pos_of_ne_zero (pow_ne_zero d (NeZero.ne p))⟩⟩
+
+/-- **M1.1a (rel characterization).** A pair `(x,y)` lies in relation `i` of `affineScheme` iff its orbital
+is the one indexed by `i`. Unfolds the orbital-scheme `rel` field (a `decide` of orbital equality). -/
+theorem affineScheme_rel_iff (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    {i : Fin ((affineScheme G₀ hneg).rank + 1)} {x y : Fin (p ^ d)} :
+    (affineScheme G₀ hneg).rel i x y = true ↔ orbitalIdx (affineG G₀) i = orbMk x y := by
+  simp only [affineScheme, orbitalScheme, orbitalAssocScheme, decide_eq_true_eq]
+
+/-- `relOfPair` for `affineScheme` is the index of the pair's orbital. -/
+theorem affineScheme_relOfPair (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) (x y : Fin (p ^ d)) :
+    (affineScheme G₀ hneg).relOfPair x y = (orbitalIdx (affineG G₀)).symm (orbMk x y) := by
+  have h : (affineScheme G₀ hneg).rel ((orbitalIdx (affineG G₀)).symm (orbMk x y)) x y = true := by
+    rw [affineScheme_rel_iff]; exact Equiv.apply_symm_apply _ _
+  exact ((affineScheme G₀ hneg).relOfPair_unique h).symm
+
+/-- **M1.1a (relOfPair characterization).** Two pairs have the same relation iff they have the same orbital.
+The `relOfPair`-level form of `orbMk_affine_eq_iff`, used to transport difference-membership across a
+relation. -/
+theorem affineScheme_relOfPair_eq_iff (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    {x y x' y' : Fin (p ^ d)} :
+    (affineScheme G₀ hneg).relOfPair x y = (affineScheme G₀ hneg).relOfPair x' y' ↔
+      (orbMk x y : Orbital (affineG G₀)) = orbMk x' y' := by
+  rw [affineScheme_relOfPair, affineScheme_relOfPair]
+  exact (orbitalIdx (affineG G₀)).symm.injective.eq_iff
+
+/-- **M1.1b — `G₀` acts irreducibly** (self-contained, no `IsSimpleModule`): the only `G₀`-invariant
+subspaces are `⊥` and `⊤`. The hypothesis M2's recovery argument consumes; primitivity of `affineScheme`
+delivers it (M1.2). -/
+def G₀Irreducible : Prop :=
+  ∀ W : Submodule (ZMod p) (Fin d → ZMod p),
+    (∀ g ∈ G₀, ∀ w ∈ W, g w ∈ W) → W = ⊥ ∨ W = ⊤
+
+/-- The **difference of a relation**: the difference `y₀ − x₀` of `i`'s chosen representative pair
+`(x₀,y₀)`. Well-defined as a `G₀`-orbit (different representatives give `G₀`-translates, so membership in a
+`G₀`-invariant subspace is rep-independent — `affineRelDiff_mem_iff`). -/
+noncomputable def affineRelDiff (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    (i : Fin ((affineScheme G₀ hneg).rank + 1)) : Fin d → ZMod p :=
+  affineE.symm (orbitalIdx (affineG G₀) i).out.2 - affineE.symm (orbitalIdx (affineG G₀) i).out.1
+
+/-- The diagonal relation `R_0` has difference `0` (its representative pair is `(v,v)`). -/
+theorem affineRelDiff_zero (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) :
+    affineRelDiff G₀ hneg 0 = 0 := by
+  -- The representative pair of the diagonal relation `R₀` is `(v, v)`, so its difference is `0`.
+  -- Work at the diagonal index `(0 : Fin ((affineScheme ...).rank + 1))` throughout (`rel_zero_iff_eq`
+  -- lives at this rank type, avoiding the `orbitalRank` vs `affineScheme.rank` ascription mismatch).
+  have hr : (affineScheme G₀ hneg).rel 0
+      (orbitalIdx (affineG G₀) (0 : Fin ((affineScheme G₀ hneg).rank + 1))).out.1
+      (orbitalIdx (affineG G₀) (0 : Fin ((affineScheme G₀ hneg).rank + 1))).out.2 = true := by
+    rw [affineScheme_rel_iff]
+    exact (orbMk_out (affineG G₀)
+      (orbitalIdx (affineG G₀) (0 : Fin ((affineScheme G₀ hneg).rank + 1)))).symm
+  have heq := ((affineScheme G₀ hneg).rel_zero_iff_eq _ _).mp hr
+  unfold affineRelDiff
+  rw [← heq, sub_self]
+
+/-- **Difference-membership is constant along a relation.** If `(x,y) ∈ R_i` then `affineRelDiff i ∈ W`
+iff `(e⁻¹y − e⁻¹x) ∈ W`, for any `G₀`-invariant `W`. This is where invariance does the work: any two pairs
+of `R_i` differ by a `G₀`-translate (`orbMk_affine_eq_iff`), so a `G₀`-invariant subspace cannot tell them
+apart. The key well-definedness lemma for the `ClosedSubset` construction. -/
+theorem affineRelDiff_mem_iff (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    {W : Submodule (ZMod p) (Fin d → ZMod p)}
+    (hWinv : ∀ g ∈ G₀, ∀ w ∈ W, g w ∈ W)
+    {i : Fin ((affineScheme G₀ hneg).rank + 1)} {x y : Fin (p ^ d)}
+    (hrel : (affineScheme G₀ hneg).rel i x y = true) :
+    affineRelDiff G₀ hneg i ∈ W ↔ affineE.symm y - affineE.symm x ∈ W := by
+  have hidx : orbitalIdx (affineG G₀) i = orbMk x y := (affineScheme_rel_iff G₀ hneg).mp hrel
+  have hout : (orbMk (orbitalIdx (affineG G₀) i).out.1 (orbitalIdx (affineG G₀) i).out.2
+      : Orbital (affineG G₀)) = orbMk x y := by rw [orbMk_out, hidx]
+  obtain ⟨g, hg₀, hgeq⟩ := (orbMk_affine_eq_iff G₀).mp hout
+  -- `hgeq : g (e⁻¹y − e⁻¹x) = e⁻¹ out.2 − e⁻¹ out.1`, which is `affineRelDiff i` by definition.
+  have hgeq' : g (affineE.symm y - affineE.symm x) = affineRelDiff G₀ hneg i := hgeq
+  have hgg : (g⁻¹ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) (affineRelDiff G₀ hneg i)
+      = affineE.symm y - affineE.symm x := by
+    rw [← hgeq', ← LinearEquiv.mul_apply, inv_mul_cancel, LinearEquiv.coe_one, id_eq]
+  constructor
+  · intro hmem
+    rw [← hgg]
+    exact hWinv _ (inv_mem hg₀) _ hmem
+  · intro hmem
+    rw [← hgeq']
+    exact hWinv _ hg₀ _ hmem
+
+/-- **M1.2 — primitive ⟹ `G₀` irreducible.** The bridge M3 consumes, by contrapositive: from a proper
+`G₀`-invariant subspace `W`, build the closed subset `I := {i | affineRelDiff i ∈ W}` — a genuine block
+system, contradicting primitivity. `0 ∈ I` (diagonal diff `0 ∈ W`); closure follows because a composable
+triple's differences add (`exists_composable_of_intersectionNumber` + `W.add_mem`); `I ≠ {0}` from a
+nonzero `w ∈ W`; `I ≠ univ` from a `v ∉ W`. **This is the §5.3 template instantiated** (`Submodule` for the
+sub-structure, `ClosedSubset` for the block). -/
+theorem isPrimitive_affineScheme_imp_irreducible (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    (hprim : (affineScheme G₀ hneg).toAssociationScheme.IsPrimitive) :
+    G₀Irreducible G₀ := by
+  intro W hWinv
+  by_contra hcon
+  push_neg at hcon
+  obtain ⟨hW0, hWT⟩ := hcon
+  classical
+  set I : Finset (Fin ((affineScheme G₀ hneg).rank + 1)) :=
+    Finset.univ.filter (fun i => affineRelDiff G₀ hneg i ∈ W) with hIdef
+  have hmemI : ∀ i, i ∈ I ↔ affineRelDiff G₀ hneg i ∈ W := by
+    intro i; rw [hIdef, Finset.mem_filter]; simp only [Finset.mem_univ, true_and]
+  -- `I` is a closed subset (a block system).
+  have hcl : (affineScheme G₀ hneg).toAssociationScheme.ClosedSubset I := by
+    refine ⟨?_, ?_⟩
+    · rw [hmemI, affineRelDiff_zero]; exact W.zero_mem
+    · intro i hi j hj k hk
+      have hkne : ∃ x z, (affineScheme G₀ hneg).rel k x z = true :=
+        ⟨_, _, (affineScheme_rel_iff G₀ hneg).mpr
+          (orbMk_out (affineG G₀) (orbitalIdx (affineG G₀) k)).symm⟩
+      obtain ⟨x, y, z, hxy, hyz, hxz⟩ :=
+        (affineScheme G₀ hneg).toAssociationScheme.exists_composable_of_intersectionNumber hkne hk
+      have hi' : affineE.symm y - affineE.symm x ∈ W :=
+        (affineRelDiff_mem_iff G₀ hneg hWinv hxy).mp ((hmemI i).mp hi)
+      have hj' : affineE.symm z - affineE.symm y ∈ W :=
+        (affineRelDiff_mem_iff G₀ hneg hWinv hyz).mp ((hmemI j).mp hj)
+      rw [hmemI, affineRelDiff_mem_iff G₀ hneg hWinv hxz,
+        show affineE.symm z - affineE.symm x
+          = (affineE.symm y - affineE.symm x) + (affineE.symm z - affineE.symm y) from by abel]
+      exact W.add_mem hi' hj'
+  -- `I ≠ {0}`: a nonzero `w ∈ W` gives a nondiagonal relation in `I`.
+  have hIne0 : I ≠ {0} := by
+    obtain ⟨w, hwW, hwne⟩ := (Submodule.ne_bot_iff W).mp hW0
+    have hrel : (affineScheme G₀ hneg).rel
+        ((affineScheme G₀ hneg).relOfPair (affineE 0) (affineE w)) (affineE 0) (affineE w) = true :=
+      (affineScheme G₀ hneg).rel_relOfPair _ _
+    have hdiff : affineE.symm (affineE w) - affineE.symm (affineE (0 : Fin d → ZMod p)) = w := by
+      simp only [Equiv.symm_apply_apply, sub_zero]
+    have hi₀I : (affineScheme G₀ hneg).relOfPair (affineE 0) (affineE w) ∈ I := by
+      rw [hmemI, affineRelDiff_mem_iff G₀ hneg hWinv hrel, hdiff]; exact hwW
+    have hi₀ne : (affineScheme G₀ hneg).relOfPair (affineE 0) (affineE w) ≠ 0 := by
+      intro hzero
+      rw [(affineScheme G₀ hneg).relOfPair_eq_zero_iff] at hzero
+      exact hwne (affineE.injective hzero).symm
+    intro hI0
+    rw [hI0, Finset.mem_singleton] at hi₀I
+    exact hi₀ne hi₀I
+  -- `I ≠ univ`: a `v ∉ W` gives a relation outside `I`.
+  have hInu : I ≠ Finset.univ := by
+    have hexv : ∃ v, v ∉ W := by
+      by_contra h
+      push_neg at h
+      exact hWT (Submodule.eq_top_iff'.mpr h)
+    obtain ⟨v, hvnotW⟩ := hexv
+    have hrel : (affineScheme G₀ hneg).rel
+        ((affineScheme G₀ hneg).relOfPair (affineE 0) (affineE v)) (affineE 0) (affineE v) = true :=
+      (affineScheme G₀ hneg).rel_relOfPair _ _
+    have hdiff : affineE.symm (affineE v) - affineE.symm (affineE (0 : Fin d → ZMod p)) = v := by
+      simp only [Equiv.symm_apply_apply, sub_zero]
+    have hi₁notI : (affineScheme G₀ hneg).relOfPair (affineE 0) (affineE v) ∉ I := by
+      rw [hmemI, affineRelDiff_mem_iff G₀ hneg hWinv hrel, hdiff]; exact hvnotW
+    intro hIu
+    rw [hIu] at hi₁notI
+    exact hi₁notI (Finset.mem_univ _)
+  rcases hprim I hcl with h | h
+  · exact hIne0 h
+  · exact hInu h
 
 end AffineScheme
 

@@ -9,7 +9,12 @@
 > earned `SchemeBlockRecovered ∨ AbelianConsumed` (carried `hImprim`, tower-reducible to the same floor),
 > Cameron = cited G3. Fuses `viaStableRecovery` + `viaBlockRecovery` into ONE statement of the conditional seal
 > `modulo {G3 + self-detection}` (carries exactly two inputs, `hSelfDetect` crux + `hImprim`). Phase 2 STARTED —
-> affine beachhead Increment A1 LANDED (single-base recovery is free; the crux is multi-base). The **detailed,
+> affine beachhead Increment A1 LANDED (single-base recovery is free; the crux is multi-base); **M0/M0.3/M1.0/M1.0b
+> AND M1.1/M1.2 LANDED (2026-06-08, axiom-clean)** — the orbital-scheme constructor, the affine model `V⋊G₀`,
+> and the bridge `isPrimitive_affineScheme_imp_irreducible` (primitive ⟹ `G₀` irreducible, via the
+> `ClosedSubset`-from-invariant-`Submodule` construction = the §5.3 template). **Remaining Phase 2: M2** (irreducible
+> `G₀` ⟹ `StablyRecoverable` bounded — the research crux; M2-cyclic first) then M3 (wire to `SelfDetectsStably`).
+> The **detailed,
 > pick-up-and-build plan for the remaining affine multi-base work is §9 below; **§10 is the consolidated
 > pick-up handoff (M0/M0.3/M1.0/M1.0b are LANDED — durable generalization insights for §5.3, the exact M1.1/M1.2
 > build plan, and session Lean gotchas).** A fresh reader continuing Phase 2 should start at §10.** — a fresh reader should start
@@ -449,18 +454,46 @@ is free (translations act transitively). **Mathlib anchors:** `Module (ZMod p)`,
 >   ∃ g₀∈G₀, g₀ (e⁻¹y′−e⁻¹x′) = e⁻¹y−e⁻¹x`. I.e. relations of `affineScheme` ↔ `G₀`-orbits on differences =
 >   the orbit Schur ring `A(G₀)`. This is the bridge the block ⟺ invariant-subspace argument runs on.
 >
-> **NEXT (M1.1/M1.2 — the irreducibility bridge, precisely scoped):**
-> 1. `affineScheme_relOfPair_eq_iff` : `relOfPair x y = relOfPair x' y' ↔ ∃ g₀∈G₀, g₀(diff') = diff` (lift
->    `orbMk_affine_eq_iff` through `relOfPair = orbitalIdx.symm ∘ orbMk`; needs a small
->    `affineScheme.rel i x y = true ↔ orbitalIdx i = orbMk x y` helper).
-> 2. `def G₀Irreducible := ∀ W : Submodule (ZMod p) V, (G₀-invariant W) → W = ⊥ ∨ W = ⊤` (avoid Mathlib
->    `IsSimpleModule`/`IsPreprimitive` — self-contained).
-> 3. **The critical bridge `¬ G₀Irreducible → ¬ IsPrimitive (affineScheme)`** (= `IsPrimitive → G₀Irreducible`,
->    what M3 consumes): from a proper invariant `W`, build `I := {i | orbital-i difference ∈ W}` and prove
->    `ClosedSubset I` (0∈I: diff 0∈W; closed: `intersectionNumber i j k ≠ 0 → ∃ composable triple` ⟹ diffs
->    add, W subspace; I≠{0}: W≠0; I≠univ: W≠V). The one general scheme lemma needed:
->    `intersectionNumber i j k ≠ 0 → ∃ x y z, rel i x y ∧ rel j y z ∧ rel k x z` (R_k nonempty via
->    `(orbitalIdx k).out`). This is the **"block = sub-structure, primitivity forbids it" template** for §5.3.
+> **M1.1 + M1.2 LANDED (2026-06-08, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green,
+> `Cascade.lean §AffineScheme` + `Scheme.lean §1.2`).** The irreducibility bridge is built — `primitive ⟹ G₀
+> irreducible`, the §5.3 template instantiated. Decls:
+> - **M1.1c (general, `Scheme.lean`):** `AssociationScheme.exists_composable_of_intersectionNumber` —
+>   `R_k` nonempty ∧ `intersectionNumber i j k ≠ 0 ⟹ ∃ x y z, rel i x y ∧ rel j y z ∧ rel k x z`. **Stated
+>   generally** (the §5.3-reusable ingredient; `R_k`-nonemptiness is an explicit hypothesis since the scheme
+>   axioms do not force every index inhabited).
+> - **M1.1a:** `affineScheme_rel_iff` (`rel i x y = true ↔ orbitalIdx i = orbMk x y`), `affineScheme_relOfPair`
+>   (`relOfPair = orbitalIdx.symm ∘ orbMk`), `affineScheme_relOfPair_eq_iff` (same relation ⟺ same orbital).
+> - **M1.1b:** `def G₀Irreducible` = `∀ W : Submodule (ZMod p) (Fin d → ZMod p), G₀-invariant W → W = ⊥ ∨ W = ⊤`
+>   (self-contained, **no** `IsSimpleModule`/`IsPreprimitive` — see gotcha below for why this is cleaner).
+> - **Well-definedness:** `affineRelDiff` (a relation's representative difference) + `affineRelDiff_zero`
+>   (diagonal → `0`) + **`affineRelDiff_mem_iff`** (`affineRelDiff i ∈ W ⟺ (e⁻¹y−e⁻¹x) ∈ W` for any pair in
+>   `R_i`, `W` invariant) — where invariance does the work (all `R_i`-pairs are `G₀`-translates).
+> - **M1.2 (THE BRIDGE):** **`isPrimitive_affineScheme_imp_irreducible`** : `IsPrimitive (affineScheme) →
+>   G₀Irreducible`, by contrapositive — from a proper invariant `W`, build `I := {i | affineRelDiff i ∈ W}`,
+>   prove `ClosedSubset I` (`0 ∈ I` via `affineRelDiff_zero` + `W.zero_mem`; closure via the composable triple's
+>   differences adding + `W.add_mem`), `I ≠ {0}` (a nonzero `w ∈ W`), `I ≠ univ` (a `v ∉ W`) — contradicting
+>   primitivity. **The §5.3 "block = sub-structure; primitivity forbids it" template, concretely realized.**
+>
+> **DECISION (corrected from the §9.2 prose below): M1.2 is proved DIRECTLY, not through Mathlib
+> `isPreprimitive_iff_isPrimitive`.** The prose route (scheme `IsPrimitive` ⟺ `IsPreprimitive (SchemeAutGroup)`
+> ⟺ no invariant subspace) needs the Mathlib fact "blocks of `V⋊G₀` through 0 ↔ `G₀`-invariant subgroups,"
+> which is *not* in Mathlib and would itself need proving. The direct `ClosedSubset`-from-`Submodule`
+> construction sidesteps that entirely and is the §5.3-faithful shape. The `isPreprimitive_iff_isPrimitive`
+> bridge stays available for G3 but is **not** on M1.2's path. The converse (`G₀Irreducible → IsPrimitive`,
+> §10.2 nice-to-have) is **not** built — M3 only consumes the forward direction.
+>
+> **GENERALIZATION INSIGHT (carry to §5.3 — see §10.1 I2 augmented).** The §5.3 general crux needs exactly the
+> same proof skeleton with two substitutions: (a) `affineRelDiff_mem_iff`'s role — "a relation-invariant
+> quantity that a sub-structure can't separate" — becomes "the difference support of a base-homogeneous twin";
+> (b) `exists_composable_of_intersectionNumber` is **already general** (lives in `Scheme.lean`), so the
+> closure clause of the general `ClosedSubset` reuses it verbatim. The *additive* structure (`δ_k = δ_i + δ_j`
+> on a composable triple ⟹ `W.add_mem`) is what makes "a relation-subset closed under the complex product"
+> into "a subspace" — the precise reason primitivity (no proper invariant sub-structure) forces recovery. In
+> the general scheme this `+` is replaced by the fusion/complex-product itself, so the general `ClosedSubset`
+> *is* the closure object with no module needed — the affine `Submodule` is just the linear shadow.
+>
+> **NEXT: M2** (irreducible `G₀` ⟹ `StablyRecoverable` bounded; M2-cyclic first) then M3 (wire to
+> `SelfDetectsStably`). M0+M1 are now a complete, reusable "affine primitive ⟺ irreducible" theorem.
 
 **Goal.** Translate the seal's `IsPrimitive` hypothesis into `G₀`-irreducibility, which M2 consumes.
 
@@ -703,3 +736,20 @@ clause and translation-invariance; over `F_p` an `AddSubgroup` is automatically 
   heaviest single decl. Budget build time.
 - **Module split:** M0 (`orbitalScheme`) is in `Scheme.lean §3.1` (no heavy imports); the affine instance + M1/M2/M3
   are in `Cascade.lean §AffineScheme` (heavy `ZMod`/`Module`/`Abel` imports isolated in the last module).
+- **`orbMk_out` / `orbitalIdx` / `orbitalIdx_zero` / `orbMk_diag_iff` take `G` EXPLICITLY** (they are under
+  `variable (G)` in `Scheme.lean §3.1`, not `{G}`). Write `orbMk_out (affineG G₀) q`, not `orbMk_out q`
+  (the latter parses `q` as `G`). Cost an iteration in M1.1.
+- **The `Fin (orbitalRank G + 1)` vs `Fin ((affineScheme …).rank + 1)` ascription trap (load-bearing for M2).**
+  These two index types are **defeq but NOT syntactically equal** (`affineScheme.rank` only *reduces* to
+  `orbitalRank (affineG G₀)`). So a bare `0`/`i` re-elaborated at one type does **not** `rw`-match a term carrying
+  the other — `rw [heq]` fails with "did not find pattern" even when the goal visibly contains it (the printer
+  suppresses the type ascription on `OfNat`). **Rule:** keep every index at the `affineScheme.rank` type (what
+  `rel`/`ClosedSubset`/`IsPrimitive` use); prove diagonal facts via `rel_zero_iff_eq` (affineScheme-typed),
+  **not** `orbitalIdx_zero` (orbitalRank-typed); ascribe explicitly (`(0 : Fin ((affineScheme G₀ hneg).rank+1))`)
+  when a bare literal would re-elaborate at the wrong type. `affineRelDiff_zero` is the worked example.
+- **M1.2 needs `import Mathlib.Algebra.Module.Submodule.Lattice`** (added to `Cascade.lean`) — gives `Submodule`,
+  `⊥`/`⊤`, `Submodule.ne_bot_iff`, `Submodule.eq_top_iff'`, `add_mem`/`zero_mem`. `Equiv.Module.Equiv.Basic`
+  (already imported for `≃ₗ`) does **not** pull `Submodule`.
+- **`Nonempty (Fin (p^d))`** for the M1 lemmas (outside `affineScheme`'s local `haveI`): the section-level
+  `private instance instNonemptyAffV` supplies it. `Nonempty` is a `Prop`, so proof-irrelevance makes instances
+  interchangeable — that is *not* the source of the ascription trap above (the index-type is).
