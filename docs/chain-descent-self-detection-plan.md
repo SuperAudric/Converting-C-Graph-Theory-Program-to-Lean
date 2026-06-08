@@ -25,13 +25,18 @@
 > WRITTEN — §11 is now the PICK-UP for continuing Phase 2** (the conceptual frame [k≡1, not k-WL], the route-scan
 > verdict [affine-cyclic beachhead], and the implementation plan for the cyclotomic bound proof + wiring). §9 is the
 > earlier affine build plan (M0–M3, M0/M1 landed); §10 is the M1.1/M1.2 + gotchas handoff. A fresh reader continuing
-> Phase 2 should start at **§11**, then §10.3 (gotchas).
-> **E1 ENGINE FIRST BRICKS LANDED (2026-06-08, axiom-clean, `Cascade.lean §13b`):** `twoRoundCount_eq_of_warmRefine`
-> (the depth-2 separation primitive, the `schemeAdj` analogue of `IntersectionSeparates`) +
-> `discrete_of_twoRoundProfileSeparates` (the depth-2 discreteness producer, feeding `selfDetectsStably_of_discretizes`).
-> Finding: the engine is inherently **multi-base** (single-base depth-2 collapses to intersection numbers,
-> `intersectionCount_via_w`); see §11.5's LANDED box. Remaining for the cyclotomic slice: **E2** (the `cyclotomicScheme`
-> model + the Frobenius/Galois bound = the open `s(C)` content) + **E3** (wiring).
+> Phase 2 should start at **§11**, then §10.3 (gotchas). **→ The current pickup is §11.8** (the F0–F2
+> implementation plan for the one remaining open piece, the Frobenius `s(C)` bound).
+> **E1 ENGINE + COLOUR→RELATION CONVERSION LANDED (2026-06-08, axiom-clean, `Cascade.lean §13b`):**
+> `twoRoundCount_eq_of_warmRefine` + `discrete_of_twoRoundProfileSeparates` (depth-2 primitive + colour-keyed
+> producer); then the conversion — `relOfPair_eq_of_refineStep_base` (Lemma A), `twoRoundCountP_eq_of_warmRefine`
+> (aggregate), `twoRoundProfileCount_eq` (re-grouped by joint relation profile), `discrete_of_twoRoundRelationSeparates`
+> (relation-form producer). **E3 LANDED:** `reachesRigidOrCameron_viaAffineIrreducible` reduces the seal on all
+> irreducible affine residuals to one open hyp `hbound` (via M1.2). Finding: the engine is inherently **multi-base**
+> (single-base depth-2 collapses to intersection numbers); the affine depth-2 profile = the **multi-coset
+> intersection count** (§11.8). **REMAINING = the Frobenius `s(C)` bound** (`discrete_of_twoRoundRelationSeparates`'s
+> `hsep` for cyclic irreducible `G₀`): all engine plumbing to consume it is landed; only the counting (F2b, §11.8) is
+> open. E2-model needs **no new construction** ("cyclotomic" = `affineScheme` with cyclic `G₀`).
 > The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
@@ -1011,10 +1016,13 @@ but budget it as real work, gated behind the (already-clean) probe empirics. **S
 > encodes the joint `(relOfPair t ·)_{t∈T}` profile (depth-1 §13a), so it carries the multi-base information; the
 > consumer converts colour-grouping → relation-grouping via `relOfPair_eq_of_warmRefine_singleton`.
 >
-> **Remaining E1 (extract as E2 needs):** the colour→relation-grouping conversion corollary (sum over one-round
-> colours sharing a joint relation profile) if the Frobenius argument wants relation-indexed counts; and a thin
-> saturation wrapper if depth-2 alone is insufficient (cyclotomic depth-4 = base-2 + 2 rounds). Do NOT pre-build
-> the full `isolationStep` mirror (§11.5 note below).
+> **Remaining E1 — colour→relation conversion LANDED (2026-06-08; see §11.6 box):** the conversion corollary
+> (`relOfPair_eq_of_refineStep_base` + `twoRoundCountP_eq_of_warmRefine` + `twoRoundProfileCount_eq` +
+> `discrete_of_twoRoundRelationSeparates`) is done — the engine now produces `Discrete` from a relation-indexed
+> depth-2 separation. The only possibly-remaining E1 work is the **depth-`k` generalization** *if* the F2-risk
+> de-risking (§11.8) shows 2 rounds insufficient at the target base; that is a mechanical extension
+> (`refineStep^[k+1]` peel + iterated Lemma A), **not** a full `isolationStep` mirror. Do NOT pre-build it —
+> extract only if F2-risk forces it (§11.8).
 
 The `schemeAdj`-native generalization of the landed single-round `relOfPair_eq_of_warmRefine_singleton`. Build
 *only* what E2 consumes; candidates (state generally for any `AssociationScheme`, prove via induction on
@@ -1105,3 +1113,92 @@ speculatively — that is the over-build the route-scan warns against. Extract p
 > the open hypothesis visibly (the anti-"looks-complete" discipline) so the slot stays obvious. The engine is *1-WL
 > reasoning over a bounded base* throughout — it never climbs `k`, never goes super-polynomial by design; where the
 > bound is unbounded (the leak), the algorithm flags, it does not raise `k`.
+
+### 11.8 The remaining piece — the Frobenius `s(C)` bound (F0–F2): implementation plan (PICK UP HERE)
+
+> The colour→relation conversion (§11.6 LANDED) reduced the affine slice's `hbound`
+> (`reachesRigidOrCameron_viaAffineIrreducible`) to discharging **`discrete_of_twoRoundRelationSeparates`'s
+> `hsep`** for cyclic irreducible `G₀`. This section plans that discharge to implementation level. **F0 (cyclic
+> model) + F1 (Frobenius) + F2a (interface) are mechanical and bankable; F2b (the separation counting) is the
+> genuine uncited open core.** All engine plumbing to *consume* a proof of `hsep` is already in place (§13b).
+
+**The object (load-bearing — derived from the conversion, verified against the relation chars).** For the
+affine scheme, the depth-2 profile of a vertex `u` that `twoRoundProfileCount_eq` computes is exactly the
+**multi-coset intersection count**:
+> `depth2profile(u) : (ρ, b) ↦ |⋂_{t∈T}(t + C_{ρ t}) ∩ (u − C_b)|`,
+where `C_i` is the `i`-th `⟨α⟩`-coset (= relation `i`, via `orbMk_affine_eq_iff`: `relOfPair x y` = coset of
+`y−x`). *Derivation:* round-1 colour of `z'` = its joint coset-profile `(coset(z'−t))_{t∈T}` (Lemma A
+`relOfPair_eq_of_refineStep_base`); round-2 counts `z'` by `(profile(z'), coset(u−z'))`; the count for
+`(ρ,b)` is `|{z' : profile(z')=ρ} ∩ {z' : u−z'∈C_b}| = |⋂_t(t+C_{ρt}) ∩ (u−C_b)|`. **So `hsep` ⟺ this
+multi-coset-intersection profile is injective in `u`.** It is captured in **exactly 2 rounds for *any* `|T|`**
+— rounds free, `|T|` the budget (confirms §11.1). [See **F2-risk** for the 2-rounds-suffice caveat + the
+depth-`k` fallback.]
+
+**F0 — the cyclic model (mechanical, medium bureaucracy).** Instantiate the LANDED `affineScheme` at a cyclic
+irreducible `G₀` carrying field structure, so it plugs into `reachesRigidOrCameron_viaAffineIrreducible`:
+- `Fq := GaloisField p d`; `Fintype.card Fq = p^d`.
+- `efield : Fq ≃ₗ[ZMod p] (Fin d → ZMod p)` from `GaloisField.finrank` (= `d`) + `Module.finBasis` +
+  `Basis.equivFun` (transport the basis index `Fin (finrank) ≃ Fin d`).
+- `α : Fqˣ` a generator of `Fqˣ` (finite-field units are cyclic, `IsCyclic Fqˣ`) ⟹ `F_p[α] = Fq`
+  (field generation — a generator is in particular a field-primitive element).
+- `mulα : Fq ≃ₗ[ZMod p] Fq`, `x ↦ α·x` (`LinearMap.mulLeft` + `LinearEquiv.ofBijective`, bijective as `α≠0`).
+- `σ := efield.symm.trans (mulα.trans efield)` (conjugate to the coordinate space); `G₀ := Subgroup.zpowers σ`.
+- `hneg : LinearEquiv.neg (ZMod p) ∈ G₀`: `-1 ∈ ⟨α⟩` (char 2: `-1=1=α^0`; odd: `α` generates `Fqˣ ∋ -1`) ⟹
+  `σ^k = neg` (transport `mul (α^k) = mul (-1) = neg`).
+- `G₀Irreducible G₀`: a `⟨σ⟩`-invariant `W ⊆ (Fin d→ZMod p)` ↔ (via `efield`) an `F_p[α]`-submodule of `Fq`;
+  `F_p[α]=Fq` ⟹ `W` is an `Fq`-subspace ⟹ `⊥`/`⊤`. **Feeds `reachesRigidOrCameron_viaAffineIrreducible`.**
+- *Mathlib:* `GaloisField`, `FiniteField`, `IsCyclic`, `Module.finBasis` (`LinearAlgebra/Dimension/Free`),
+  `Basis.equivFun`, `LinearMap.mulLeft`, `LinearEquiv.ofBijective`, `Subgroup.zpowers`. *Risk: medium*
+  (field-iso transport, basis-index juggling, the `F_p[α]=Fq` irreducibility).
+- *Decision: reuse `affineScheme` (option i), not a field-native rebuild (option ii).* It connects to the landed
+  seal capstone, and F2's content is *cardinality of coset intersections* — invariant under the additive iso
+  `efield` — so the transport stays at the interface, not pervasive in the heavy counting.
+
+**F1 — the Frobenius structure (mechanical–medium).**
+- `φ := frobeniusEquiv Fq p : Fq ≃+* Fq` (`x ↦ x^p`), `FieldTheory/Perfect`; `Γ = ⟨φ⟩ = Gal(Fq/F_p)`, order `d`.
+- `φ` permutes the `⟨α⟩`-cosets: `φ(α)=α^p∈⟨α⟩` ⟹ `φ(C_i)=C_{φ̄ i}` (induced relation-permutation `φ̄`).
+- `φ`-equivariance of the count (it is an additive+multiplicative bijection):
+  `|⋂_t(φt+C_{φ̄ρt}) ∩ (φu−C_{φ̄b})| = |⋂_t(t+C_{ρt}) ∩ (u−C_b)|` (apply `φ` to the intersection set). **So if
+  `φ` fixes every `t∈T`, then `depth2profile(φu) = depth2profile(u)∘φ̄` — the degeneracy that defeats a
+  `Γ`-fixed base.** `φ` itself is *not* a scheme automorphism (it permutes relations), it is the algebraic /
+  Cayley automorphism = the `Ĝ⊋G` gap.
+- *Mathlib:* `frobeniusEquiv`/`FiniteField.frobenius`, `RingHom` on cosets. *Risk: medium.*
+
+**F2 — the separation (THE OPEN CORE).** Target: a bounded **Γ-breaking** `T` ⟹ `depth2profile` injective in `u`.
+- **F2a (mechanical — the interface, bankable):** translate `discrete_of_twoRoundRelationSeparates`'s `hsep`
+  on `affineScheme` into the coset-intersection form, via `affineScheme_relOfPair_eq_iff` / `orbMk_affine_eq_iff`
+  (relOfPair = coset). Pure plumbing; lands the statement "`depth2profile` injective ⟹ Discrete ⟹ `hbound`."
+- **F2b (the open counting lemma):** *for `T` whose differences `efield.symm '' (T − t₀)` generate `Fq` as a
+  field (Γ-breaking), `depth2profile` is injective.* Mechanism (F1): the only obstruction is a `Γ`-element
+  fixing `T` (`φ`-fixed `T` ⟹ `u, φu` share the profile); Γ-breaking `T` (no nontrivial `φ^j` fixes the
+  `T`-differences ⟺ they generate `Fq`, since `φ^j` fixes exactly the subfield `F_{p^{gcd(j,d)}}`) removes it.
+  The hard direction — "profile-degeneracy ⟹ an actual `Γ`-element (not merely an abstract twin)" — is the
+  uncited content: the cyclic instance of M2a ("base-homogeneous gap ⟹ invariant sub-structure"; for cyclic
+  `G₀` the sub-structure is a subfield / `Γ`-eigenspace). This is where the project's `s(C)` conjecture lives.
+- **Base-size bound:** Γ-breaking needs `O(d)` points (one field-generator difference breaks *all* `φ^j`);
+  the group base is `2` (`Stab{0,x}=1`); so `|T| = base + O(d) = O(d) = O(log q)` — matching the probe's flat
+  depth 4 at `|V|=16,64,256`.
+- *Risk: F2b is open research* (no citation, seal-handoff §6 insight 2). F2a is plumbing.
+
+**F2-risk — the "2 rounds suffice" question (de-risk BEFORE heavy F2b).** `discrete_of_twoRoundRelationSeparates`
+uses exactly **2** `refineStep` rounds. "`depth2profile` injective at a Γ-breaking `T`" presumes 2 rounds
+discretize. The affine/catalogue probes measured discreteness with the FULL `warmRefine` fixpoint at `|T|≈4`;
+they did *not* isolate 2 rounds. **First** (cheap): check (extend `AffineSchemeProbe.cs`, or a small Lean
+example) whether 2 rounds discretize the cyclotomic family at the Γ-breaking `T`.
+- If **yes** → target the depth-2 `hsep`/F2b above.
+- If **no** → generalize the engine to a **depth-`k` producer**: `kRoundCount_eq_of_warmRefine` (peel
+  `warmRefine` to `refineStep^[k+1]` via `warmRefine_eq_iter_eq`, like `twoRoundCount` but `k+1`) + an iterated
+  Lemma A (`refineStep^[k]` colour determines the depth-`k` profile — the single-base `iter_succ_count`/
+  `iter_succ_eq_iff` machinery in `Scheme.lean` is the exact template, generalized to a base set) +
+  `discrete_of_kRoundRelationSeparates`. A *straightforward* (if tedious) extension of §13b; then target the
+  depth-`k` `hsep`. This is the only scenario needing more engine, and it stays fully general (any scheme).
+
+**Build order:** F0 → F1 → **F2a** (lands the interface, bankable) → [de-risk 2-rounds] → F2b (the open
+counting). F0 + F1 + F2a are genuine mechanical progress (the cyclic model + Frobenius + the
+coset-intersection interface to the seal), independent of whether F2b ever closes.
+
+**Reusable-for-§5.3 insight.** F2b is the *cyclic* instance of "base-homogeneous gap ⟹ invariant
+sub-structure"; the multi-coset-intersection profile is the affine shadow of the general "depth-2
+structure-constant profile" of a coherent configuration. The depth-`k` producer (if F2-risk forces it) is
+stated for any `AssociationScheme`, so it serves the §5.3 general crux directly — the engine generalizes even
+though the *bound proof* (F2b) is slice-specific.
