@@ -210,8 +210,18 @@ model is built, via the **base-sequence phase split** (`coversOrbits_append`):
 the **shallow ∅→S₀ phase** is `CoversOrbitsAlong` orbit-coverage = the substrate-conditional content (shallow
 orbit-realization is intrinsic — deep recovery does not supply it for free). The **bound** is the non-vacuity hinge:
 unbounded ⟹ vacuous (`recoverableByDepth_univ`), so this is partly modelling (captures CFI/Shrikhande), partly the
-polynomiality boundary (the bound = T-C). The full discharge of the shallow phase is the same frontier as G2-A's
-tower (`cascadeComposition`); the phase split is the structural tool that couples them.
+polynomiality boundary (the bound = T-C).
+
+**Shallow-phase discharge — IMPRIMITIVE case LANDED (2026-06-08).** When the structure is imprimitive, the shallow
+phase factors through blocks: it is the **quotient** (block-representative) coverage `hreach`, and the deep phase the
+**fiber**. Both are now supplied from **visible (refinement-computable) realizers** — `hreach_of_quotientVisibleRealizers`
+(quotient/shallow, the named G2-A "next step") + `hfiber_of_fiberVisibleRealizers` (fiber/deep) — combined by
+`reachesRigid_of_blockVisibleDecomposition` into a fully-visible, non-vacuous imprimitive recovery (see §4 G2-A). So
+the shallow phase is discharged for imprimitive schemes from visible block recovery; the residual carried unit is the
+block action's own recovery (block-level WL-dimension), localized to the smaller constituents. The **primitive** case
+(no blocks) is the remaining frontier — there the shallow transversals are intrinsically refinement-invisible and
+supplied only by the cross-branch leaf-collision harvest whose polynomial completeness is T-C (the genuine
+localisation, GI-adjacent, out of scope).
 
 **The problem (original).** `SchemeRecovered` demands visible realizers at **every** level (`∀ T`). That is *per-level*
 recovery = essentially **depth-1 / metric** recovery. A **depth-graded** scheme fails it: CFI recovers only at
@@ -309,11 +319,20 @@ which (using `non-Cameron ⟹ ¬primitive ∨ small`, from the classification) s
   `exists_nontrivial_closedSubset_of_not_isPrimitive` + `schemeEquiv_class_eq_iff` (`Scheme.lean`); block-visibility
   `BlockRefinementVisible` + `blockRefinementVisible_of_schemePartSeparates` (A2-ii) + `cell_splits_of_imprimitive`
   (`Scheme.lean §13`); the schurity gate `schemeBlock_fiber_transitive` / `schemeBlocks_transitive` (`Scheme.lean
-  §11.1`); the phase-split `coversOrbits_append` / `CoversOrbitsAlong`. **Open sub-piece (the quotient half):** a
-  **block-level 1-WL** — a `blockCell` colour (block-image of `warmRefine`) with `blockCells = blockOrbits` — to
-  supply the *block-move* (quotient) realizers `hreach` needs. Finding (2026-06-07): block-visibility
-  (`cells ⊆ blocks`) supports the *fiber* (same-cell stays in-block), **not** block-moves; the quotient genuinely
-  needs the block-1-WL.
+  §11.1`); the phase-split `coversOrbits_append` / `CoversOrbitsAlong`. **Quotient half LANDED (2026-06-08, the
+  shallow-phase discharge, imprimitive case):** `hreach_of_quotientVisibleRealizers` supplies `hreach` from a
+  **visible block-move** hypothesis (`warmRefine{T} b = warmRefine{T} w → ∃ σ ∈ gens, ResidualAut T σ ∧ β(σb)=βw`)
+  — the quotient analogue of the fiber half, completing refinement-computable supply for **both** halves.
+  `reachesRigid_of_blockVisibleDecomposition` then reproduces `closure (gensAt … S) = StabilizerAt adj P S` from a
+  **fully visible, non-vacuous** block decomposition (no sub-scheme materialized). Non-vacuity: same-block cell
+  pairs are free (`σ=id`), the content is *cross-block* same-cell pairs = recovery of the **block action**. So the
+  shallow phase (quotient/block-rep coverage) is discharged from visible block recovery, matching `SchemeRecovered`'s
+  non-vacuity. The residual carried content is now just the two visible hypotheses `hqvis`/`hfvis` — whether the
+  quotient + fiber **recover** (their block-level / within-block WL-dimension) — localized to the two smaller
+  constituents (transitive/schurian by §11.1). (The full-`warmRefine`-cell form is a sound over-approximation of the
+  genuine coarser `blockCell` block-1-WL; the block-cell form is a further refinement, not needed for the discharge.)
+  Earlier finding (2026-06-07): block-visibility (`cells ⊆ blocks`) supports the fiber, not block-moves — which is
+  why the quotient needed its own visible supplier, now landed.
 
 - **G2-B — Leak-B: small, primitive, non-abelian, non-recovering, non-Cameron.** The irreducible core (G2-A bottoms
   out here). The bottom-up route claims *non-consumed ⟹ large* (so this quadrant would be empty), but that rests on
@@ -678,7 +697,7 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 | Cross-branch harvest (recovery ⟹ group) | `closure_eq_stabilizerAt_of_visibleRealizers`, `crossBranchHarvest_reproduces_residual`, `autP_reproduced_of_visibleRealizers`, `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits` (`Cascade.lean`) |
 | Tower (depths add) | `cascadeComposition`, `cascadeComposition_pathFixing`, `cellsAreOrbits_compose`, `cumulative_card_le`, `LayerStep` (`Cascade.lean`) |
 | Recovery witnesses | `RecoverableByDepth`, `recoverableByDepth_pPolynomial` / `_cfi` / `_scheme`, `cellsAreOrbits_of_discrete` (`CascadeOracle.lean`) |
-| Block decomposition (conditional) | `reachesRigid_of_blockDecomposition`, `hreach_of_quotientRealizers`, `hfiber_of_fiberRealizers`, **`hfiber_of_fiberVisibleRealizers`**, `blockHarvest_of_realizers`, `blockHarvest_of_visibleRecovery`, `coversOrbits_append`, `CoversOrbitsAlong` (`Cascade.lean`) |
+| Block decomposition (conditional) | `reachesRigid_of_blockDecomposition`, `hreach_of_quotientRealizers`, `hfiber_of_fiberRealizers`, **`hfiber_of_fiberVisibleRealizers`** (fiber, visible), **`hreach_of_quotientVisibleRealizers`** (quotient, visible — the shallow-phase discharge), **`reachesRigid_of_blockVisibleDecomposition`** (both halves visible), `blockHarvest_of_realizers`, `coversOrbits_append`, `CoversOrbitsAlong` (`Cascade.lean`) |
 | Blocks / primitivity | `ClosedSubset`, `schemeEquiv(_equivalence)`, `IsPrimitive`, `exists_nontrivial_closedSubset_of_not_isPrimitive`, `schemeEquiv_class_eq_iff`, `BlockRefinementVisible`, `blockRefinementVisible_of_schemePartSeparates`, `cell_splits_of_imprimitive`, `schemeBlock_fiber_transitive`, `schemeBlocks_transitive` (`Scheme.lean`) |
 | schemeAdj bridge | `schemeAdj`, `isAut_schemeAdj_iff`, `stabilizerAt_schemeAdj_empty_eq`, `gensAt_empty_eq` (`Cascade.lean`) |
 

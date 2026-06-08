@@ -1353,6 +1353,60 @@ theorem hfiber_of_fiberVisibleRealizers {ι : Type*} (β : Fin n → ι)
   obtain ⟨g, hmem, hres, hguw⟩ := hfvis T u w hβ (OrbitPartition.subset_warmRefine huw)
   exact ⟨g, mem_closure_gensAt_of_realizer hmem hres, hguw⟩
 
+/-- **`hreach` from quotient *visible* realizers — the block-move half discharged from refinement-computable
+recovery (Approach A, quotient half; the named next step).** The quotient analogue of
+`hfiber_of_fiberVisibleRealizers`, completing the refinement-computable supply for *both* halves of the block
+decomposition. The harvest need only realize the *block-move* of each same-`warmRefine`-cell pair — a residual
+aut `σ ∈ gens` carrying `b` into the **block** of `w` (`β (σ b) = β w`, not `σ b = w`) — and `hreach` follows:
+since orbits refine cells (`OrbitPartition.subset_warmRefine`), an orbit pair is a cell pair, so the visible
+block-mover applies, and `mem_closure_gensAt_of_realizer` lands it in the path-fixing closure. **Non-vacuity /
+the content:** same-block cell pairs are free (take `σ = id`, `β b = β w`), so the only real obligations are
+*cross-block* same-cell pairs — exactly the recovery of the (coarser) **block action** (a block-level 1-WL),
+satisfiable when blocks are visibly resolved even where globally cells ⊋ orbits. The G2-A finding (2026-06-07)
+pinned this as the missing quotient half: block-visibility (cells ⊆ blocks) supports the *fiber*, not
+block-moves; this supplies the block-moves from the visible block-mover hypothesis. (Stated against the full
+`warmRefine` cell — a sound over-approximation of the genuine coarser `blockCell`; the block-cell form is a
+further refinement.) -/
+theorem hreach_of_quotientVisibleRealizers {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))}
+    (hqvis : ∀ T : Finset (Fin n), ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ σ, σ ∈ gens ∧ ResidualAut adj P T σ ∧ β (σ b) = β w) :
+    ∀ T : Finset (Fin n), ∀ b w, OrbitPartition adj P T b w →
+        ∃ σ ∈ Subgroup.closure (gensAt adj P gens T), β (σ b) = β w := by
+  intro T b w hbw
+  obtain ⟨σ, hmem, hres, hσβ⟩ := hqvis T b w (OrbitPartition.subset_warmRefine hbw)
+  exact ⟨σ, mem_closure_gensAt_of_realizer hmem hres, hσβ⟩
+
+/-- **Imprimitive recovery from a fully refinement-computable block decomposition (the shallow-phase discharge,
+imprimitive case).** Both halves of the block decomposition are now supplied from **visible**
+(refinement-computable) realizers — the quotient/block-move half (`hreach_of_quotientVisibleRealizers`,
+the shallow phase) and the within-block/fiber half (`hfiber_of_fiberVisibleRealizers`, the deep phase) — so the
+path-fixing harvest reproduces the residual group `closure (gensAt … S) = StabilizerAt adj P S` from a
+**non-vacuous, refinement-computable** decomposition, with **no sub-scheme materialized**. This completes
+`reachesRigid_of_blockDecomposition`'s reduction to the two coverage interfaces *with both keyed on visible
+realizers* (matching `SchemeRecovered`'s non-vacuity), rather than raw orbit coverage. The residual carried
+content is exactly the two visible hypotheses `hqvis`/`hfvis` — *whether* the quotient (block action) and fiber
+(within-block action) recover, i.e. their block-level / within-block WL-dimension — the substrate-conditional
+unit, now properly localized to the two smaller constituents (transitive/schurian by the §11.1 gate). -/
+theorem reachesRigid_of_blockVisibleDecomposition {ι : Type*} (β : Fin n → ι)
+    {gens : Set (Equiv.Perm (Fin n))} (bs : List (Fin n)) (S : Finset (Fin n))
+    (hqvis : ∀ T : Finset (Fin n), ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ σ, σ ∈ gens ∧ ResidualAut adj P T σ ∧ β (σ b) = β w)
+    (hfvis : ∀ T : Finset (Fin n), ∀ u w : Fin n, β u = β w →
+        warmRefine adj P (individualizedColouring n T) u
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g u = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    Subgroup.closure (gensAt adj P gens S) = StabilizerAt adj P S :=
+  reachesRigid_of_blockDecomposition β bs S
+    (hreach_of_quotientVisibleRealizers β hqvis)
+    (hfiber_of_fiberVisibleRealizers β hfvis)
+    hbase
+
 /-- **Full orbit realizers supply both interfaces (the subsumption / non-vacuity floor).** If the harvest
 contains an exact realizer (`g b = w`) for every orbit pair at every level, then *both* `hreach` and `hfiber`
 hold — for **any** partition `β`, which is left unused: an exact realizer is a fortiori block-accurate
