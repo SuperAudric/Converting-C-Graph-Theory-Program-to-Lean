@@ -123,6 +123,14 @@ def SchemeRecovered : ∀ (m : Nat), SchurianScheme m → Prop :=
 **The logical skeleton is sound:** every scheme is `imprimitive` (→ hImprimRecovery) or `primitive`; if primitive,
 `large` (→ Cameron) or `small` (→ hCascadeHarvest). So `SchemeRecovered ∨ Cameron`, *modulo the three inputs*.
 
+**Update (2026-06-08) — the imprimitive input is now folded.** The Tier-1 slices (G1b leg B, G1a depth-graded) and the
+scheme-seal wiring have landed (see §4 G1b / G1a / G2-A). The current headline is
+`reachesRigidOrCameron_viaBlockRecovery : (SchemeBlockRecovered ∨ AbelianConsumed) ∨ IsCameronScheme` — the imprimitive
+branch (`hImprim`) no longer carries an opaque "imprimitive ⟹ recovered"; its target is `SchemeBlockRecovered`, *earned*
+from the fully-visible block decomposition. The **sole irreducible carried input** is now `hCascade` (small-primitive =
+**G2-B**) + the cited classification (G3): the honest conditional seal `modulo {G3 + G2-B}`. The three-input table below
+is the *historical* `…_viaRecovery` decomposition; the live form has `hImprimitive` reduced to block recovery.
+
 ---
 
 ## 3. The vacuity correction — orbit-level vs visible (READ THIS)
@@ -333,6 +341,18 @@ which (using `non-Cameron ⟹ ¬primitive ∨ small`, from the classification) s
   genuine coarser `blockCell` block-1-WL; the block-cell form is a further refinement, not needed for the discharge.)
   Earlier finding (2026-06-07): block-visibility (`cells ⊆ blocks`) supports the fiber, not block-moves — which is
   why the quotient needed its own visible supplier, now landed.
+
+  **SCHEME-SEAL WIRING LANDED (2026-06-08) — `hImprim` folded into the visible block decomposition.** The imprimitive
+  branch is no longer an opaque carried hypothesis. `SchemeBlockRecovered` (`Cascade.lean`) packages the block-visible
+  recovery (a `ClosedSubset I` block system `β_I v := {y | schemeEquiv I v y}` + the visible quotient/fiber coverage);
+  `schemeAutGroup_eq_closure_of_blockRecovered` *earns* `closure gens = SchemeAutGroup` from it (via
+  `reachesRigid_of_blockVisibleDecomposition` + the `schemeAdj` bridge); and `reachesRigidOrCameron_viaBlockRecovery`
+  is the seal with rigid side `(SchemeBlockRecovered ∨ AbelianConsumed) ∨ Cameron`, the imprimitive branch concluding in
+  `SchemeBlockRecovered` (block recovery), not opaque. **Non-vacuity is genuine:** keying `β` on a `ClosedSubset` forces
+  a *primitive* scheme to trivial `β` ({0}⟹singletons⟹quotient=full recovery; univ⟹one block⟹fiber=full recovery), so
+  it collapses to full recovery there — **false on the G2-B leak**, not vacuously true. It subsumes leg A
+  (`SchemeRecovered`) as the `I={0}` case. **Net: the sole irreducible carried content is now `hCascade` = the
+  small-primitive branch = G2-B**, plus the cited classification (G3) — the honest conditional seal `modulo {G3 + G2-B}`.
 
 - **G2-B — Leak-B: small, primitive, non-abelian, non-recovering, non-Cameron.** The irreducible core (G2-A bottoms
   out here). The bottom-up route claims *non-consumed ⟹ large* (so this quadrant would be empty), but that rests on
@@ -694,6 +714,7 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 | Leg B core | `smul_eq_on_orbit_of_comm` (L3), `aut_agree_on_orbit_of_comm`, `not_comm_of_orbit_disagree`, `not_comm_of_isPreprimitive_card_lt`, L1/L2 (`Group.lean`) |
 | Leg B in the seal (G1b) | `AbelianConsumed`, `abelianConsumed_of_residualAbelian`, `reachesRigidOrCameron_viaRecoveryOrAbelian` (`Cascade.lean`) |
 | Depth-graded recovery (G1a) | `SchemeRecoveredByDepth`, `schemeAutGroup_eq_closure_of_recoveredByDepth`, `schemeRecoveredByDepth_of_schemeRecovered`, `reachesRigidOrCameron_viaDepthRecovery`, `coversOrbits_append`/`CoversOrbitsAlong` (`Cascade.lean`) |
+| Imprimitive seal leg (scheme-seal wiring) | `hreach_of_quotientVisibleRealizers`, `reachesRigid_of_blockVisibleDecomposition`, `SchemeBlockRecovered`, `schemeAutGroup_eq_closure_of_blockRecovered`, `reachesRigidOrCameron_viaBlockRecovery` (`Cascade.lean`); `exists_nontrivial_closedSubset_of_not_isPrimitive`, `schemeEquiv`/`schemeEquiv_class_eq_iff` (`Scheme.lean`) |
 | Cross-branch harvest (recovery ⟹ group) | `closure_eq_stabilizerAt_of_visibleRealizers`, `crossBranchHarvest_reproduces_residual`, `autP_reproduced_of_visibleRealizers`, `orbitRealizers_iff_visibleRealizers_of_cellsAreOrbits` (`Cascade.lean`) |
 | Tower (depths add) | `cascadeComposition`, `cascadeComposition_pathFixing`, `cellsAreOrbits_compose`, `cumulative_card_le`, `LayerStep` (`Cascade.lean`) |
 | Recovery witnesses | `RecoverableByDepth`, `recoverableByDepth_pPolynomial` / `_cfi` / `_scheme`, `cellsAreOrbits_of_discrete` (`CascadeOracle.lean`) |

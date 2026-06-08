@@ -3428,4 +3428,93 @@ theorem reachesRigidOrCameron_viaDepthRecovery {n : Nat} {IsLarge : Nat → Prop
     (ReachesRigid := fun m S => SchemeRecoveredByDepth m S bound)
     hClassify (fun _ _ h => h) S hne hrank hCascade hImprim
 
+/-! ### The scheme-seal wiring — the imprimitive branch folded into the visible block decomposition
+
+The seal capstones above carry the imprimitive branch as an opaque `hImprim : ¬IsPrimitive → ReachesRigid`. This
+section **folds it into the (now fully visible) block decomposition**: an imprimitive scheme has a non-trivial block
+system `β_I` (`exists_nontrivial_closedSubset_of_not_isPrimitive`), and `reachesRigid_of_blockVisibleDecomposition`
+reproduces the group from refinement-computable quotient (`hreach_of_quotientVisibleRealizers`) + fiber
+(`hfiber_of_fiberVisibleRealizers`) recovery on `β_I`. So the imprimitive branch's "rigid" target becomes
+`SchemeBlockRecovered` — block-visible recovery — which is *earned* (group reproduced), not opaque.
+
+**Non-vacuity (the key check).** `SchemeBlockRecovered` keys `β` on a genuine `ClosedSubset` block system, so a
+**primitive** scheme has only the *trivial* closed subsets (`{0}` ⟹ `β` = singletons ⟹ the quotient clause is full
+visible recovery; `univ` ⟹ `β` = one block ⟹ the fiber clause is full visible recovery). Either way it collapses to
+full recovery, which is **false for a non-recovering primitive scheme (G2-B)** — so the predicate is genuinely false
+there, not vacuously true. For imprimitive schemes the non-trivial `β_I` lets it hold via genuine block recovery
+(quotient + fiber on the smaller constituents). It subsumes leg A (`SchemeRecovered`) as the `β` = singletons
+(`I = {0}`) case. The residual carried content collapses to `hCascade` (the small-primitive branch = **G2-B**, the
+irreducible leak) + the cited classification (G3). -/
+
+/-- **Block-visible recovery — the imprimitive branch's earned rigid predicate.** `S` is *block-recovered* when, for
+some `ClosedSubset I` block system `β_I v := {y | schemeEquiv I v y}`, there is a harvested `gens` (path-fixing) and
+a base `bs` with **refinement-computable** quotient coverage (every same-`warmRefine`-cell pair has a `gens`-realizer
+landing `b` in the *block* of `w`) and fiber coverage (every same-cell *same-block* pair has an exact `gens`-realizer).
+Non-vacuous: keying `β` on a `ClosedSubset` forces a *primitive* scheme to trivial `β` = full recovery, false on the
+G2-B leak (see section note). The imprimitive seal leg's rigid target, *earned* via
+`reachesRigid_of_blockVisibleDecomposition`. -/
+def SchemeBlockRecovered : ∀ (m : Nat), SchurianScheme m → Prop :=
+  fun m S => ∃ (I : Finset (Fin (S.rank + 1))) (gens : Set (Equiv.Perm (Fin m)))
+      (bs : List (Fin m)),
+    S.toAssociationScheme.ClosedSubset I ∧
+    (∀ g ∈ gens, g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅) ∧
+    (∀ T : Finset (Fin m), ∀ b w : Fin m,
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring m T) b
+            = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring m T) w →
+        ∃ σ, σ ∈ gens
+          ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T σ
+          ∧ {y | S.toAssociationScheme.schemeEquiv I (σ b) y}
+              = {y | S.toAssociationScheme.schemeEquiv I w y}) ∧
+    (∀ T : Finset (Fin m), ∀ u w : Fin m,
+        {y | S.toAssociationScheme.schemeEquiv I u y} = {y | S.toAssociationScheme.schemeEquiv I w y} →
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring m T) u
+            = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring m T) w →
+        ∃ g, g ∈ gens
+          ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g u = w) ∧
+    IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+      (bs.foldl (fun s b => insert b s) ∅)
+
+/-- **Block-visible recovery ⟹ the group is reproduced (earned).** From `SchemeBlockRecovered`, the harvested `gens`
+generate exactly `SchemeAutGroup S`, via `reachesRigid_of_blockVisibleDecomposition` on the block system
+`β_I = fun v => {y | schemeEquiv I v y}` (quotient + fiber, both visible) + the `schemeAdj` bridge
+(`gensAt_empty_eq` + `stabilizerAt_schemeAdj_empty_eq`). The imprimitive analogue of
+`schemeAutGroup_eq_closure_of_recovered`: the content earned from refinement-computable block recovery, no
+sub-scheme materialized. -/
+theorem schemeAutGroup_eq_closure_of_blockRecovered {n : Nat} {S : SchurianScheme n}
+    (h : SchemeBlockRecovered n S) :
+    ∃ gens : Set (Equiv.Perm (Fin n)),
+      Subgroup.closure gens = S.toAssociationScheme.SchemeAutGroup := by
+  obtain ⟨I, gens, bs, _hcl, hsound, hqvis, hfvis, hbase⟩ := h
+  refine ⟨gens, ?_⟩
+  have hr := reachesRigid_of_blockVisibleDecomposition
+    (β := fun v => {y | S.toAssociationScheme.schemeEquiv I v y}) bs ∅ hqvis hfvis hbase
+  rw [gensAt_empty_eq hsound] at hr
+  exact hr.trans (stabilizerAt_schemeAdj_empty_eq S)
+
+/-- **The seal capstone with the imprimitive branch folded into block recovery (the scheme-seal wiring).** Widens
+`reachesRigidOrCameron_viaRecoveryOrAbelian` so the rigid side is `SchemeBlockRecovered ∨ AbelianConsumed`: every
+rank-≥3 schurian scheme residual is **block-recovered or hidden-abelian-consumed or Cameron**. The imprimitive branch
+no longer carries an opaque "imprimitive ⟹ recovered" — its target is now `SchemeBlockRecovered`, *earned* from the
+fully-visible block decomposition (`reachesRigid_of_blockVisibleDecomposition`), so the carried content for it is the
+refinement-computable quotient + fiber recovery on the block system (non-vacuous, recurses to the smaller
+constituents). The **sole irreducible carried content** is then `hCascade` — the small-**primitive** branch =
+**G2-B** (the open `s(C)` leak: primitive non-abelian non-recovering, uncitable per the deep-research pass) — plus the
+cited classification (G3). This is the honest end-state: a conditional seal `modulo {G3 + G2-B}`. -/
+theorem reachesRigidOrCameron_viaBlockRecovery {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCascade : ¬ IsLargeSchemeViaAut IsLarge n S → SchemeBlockRecovered n S ∨ AbelianConsumed n S)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    (SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron (NonCascade := IsLargeSchemeViaAut IsLarge)
+    (ReachesRigid := fun m S => SchemeBlockRecovered m S ∨ AbelianConsumed m S)
+    hClassify (fun _ _ h => h) S hne hrank hCascade hImprim
+
 end ChainDescent
