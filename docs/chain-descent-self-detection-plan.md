@@ -7,10 +7,14 @@
 > equation (`recovery_depth = base + s(C) + IR_core`) and the viable step-2 plan. The blocks below are the prior
 > (still-valid) Phase-1/Phase-2 record.
 >
-> **STEP 2.1 LANDED (2026-06-10, axiom-clean, build green).** The `base(G)` term is banked: `exists_greedy_base`
-> / `exists_greedy_base_le_log` / `exists_greedy_base_scheme` (`Cascade.lean §"Part A (Stage A3.6)"`) prove
-> `∃ IsBase S₀, 2^|S₀| ≤ |Aut|`, hence `base(G) ≤ log₂|Aut| = O(log n)`. See §12.4 step 2.1. **Next: step 2.2**
-> (the layer-step reduction — wire the base term + localize `RecoversWhileSymmetric` to a per-layer condition).
+> **STEPS 2.1 + 2.2 LANDED (2026-06-10, axiom-clean, build green).** **2.1:** the `base(G)` term banked —
+> `exists_greedy_base`/`_le_log`/`_scheme` (`Cascade.lean §A3.6`) prove `∃ IsBase S₀, 2^|S₀| ≤ |Aut|`, hence
+> `base(G) ≤ log₂|Aut| = O(log n)`. **2.2:** the layer-step reduction — `LayerRecovers` +
+> `recoversWhileSymmetric_of_layerRecovers` (+ scheme wrappers) reduce `RecoversWhileSymmetric` to base-case +
+> a per-layer transfer; `selfDetectsWhileSymmetric_of_layerRecovers` localizes the seal's whole open content to
+> "primitive small ⟹ ∃ bounded `S₀` with base case + `LayerRecovers`". See §12.4 steps 2.1/2.2. **Next: step 2.3**
+> (the genuine open `s(C)` core — discharge `LayerRecovers` via the multi-base forward `JointProfileRecoversAt
+> {T,x}`: a `T`-twin not a `(T∪{x})`-twin is split by a differing two-base intersection count; counting route 2.3(a)).
 >
 > **STATUS (2026-06-08): Phase 1 COMPLETE (Increments 1 + 2 LANDED, axiom-clean, build green) — the seal is
 > reduced end-to-end to the SEMANTIC crux `SelfDetectsStably` (primitive small ⟹ cells = orbits above a
@@ -1578,15 +1582,24 @@ build green, `Cascade.lean §"Part A (Stage A3.6)"`).** Proved `∃ IsBase S₀,
   O(log n) + s(C)`; the only quantity left to bound is the additive `s(C)` stickiness (step 2.2/2.3). Wiring
   `exists_greedy_base_scheme` into the seal's `bound` is step 2.2's job (the layer-step reduction).
 
-**Step 2.2 — the layer-step reduction (structural; reduces `s(C)` to a per-layer condition).**
-Reduce `RecoversWhileSymmetric` (cells = orbits at *every* non-base prefix) to a **single per-layer transfer**:
-*cells = orbits at `T` ⟹ cells = orbits at `T ∪ {x}`*, for `x` in a non-base cell.
-- *Landed handles:* `LayerStep` (`Cascade.lean`: `CellsAreOrbits T → CellsAreOrbits (T ∪ S)`), `cascadeComposition` /
-  `cascadeComposition_pathFixing` (depths add across layers), `cellsAreOrbits_schemeAdj_singleton` (the `|T|=1` base
-  case, free). The induction is: base case free (single base), then `LayerStep` up the base sequence.
-- *Payoff:* "`s(C)` bounded" becomes "**each layer recovers**" — the per-layer two-base forward bridge — turning a
-  global WL-dimension claim into a local, finite, per-step condition. This is where `JointProfileRecoversAt` at
-  `{T, x}` (the `§S1.c` object) plugs in.
+**Step 2.2 — the layer-step reduction — LANDED (2026-06-10, axiom-clean, build green, `Cascade.lean §"Step 2.2"`).**
+Reduced `RecoversWhileSymmetric S₀` (cells = orbits at *every* non-base prefix) to a **base case** + a **single
+per-layer transfer** *cells = orbits at `T` ⟹ cells = orbits at `insert x T`*.
+- *What landed:* `isBase_of_subset_of_isBase` (base upward-closed ⟹ non-base downward-closed, the engine) +
+  **`LayerRecovers`** (the per-layer predicate: `∀ T x, S₀⊆T → x∉T → ¬IsBase(insert x T) → CellsAreOrbits T →
+  CellsAreOrbits(insert x T)`) + **`recoversWhileSymmetric_of_layerRecovers`** (`(¬IsBase S₀ → CellsAreOrbits S₀)
+  ∧ LayerRecovers S₀ ⟹ RecoversWhileSymmetric S₀`, strong induction on `T.card` erasing `T \ S₀` one point at a
+  time, every prefix staying non-base) + scheme wrappers **`schemeRecoveredWhileSymmetric_of_layerRecovers`** /
+  **`selfDetectsWhileSymmetric_of_layerRecovers`** (the seal's rigid side / `SelfDetectsWhileSymmetric` reduced to
+  "primitive small ⟹ ∃ bounded `S₀` with base case + `LayerRecovers`").
+- *Note (deviation from the sketch):* did **not** route through `cascadeComposition`/`LayerStep` (the depths-add
+  tower, which is for *recovery-to-discreteness* depth, a different axis); the direct erase-induction is cleaner
+  and gives the exact `∀ non-base T` shape `RecoversWhileSymmetric` needs. `cellsAreOrbits_schemeAdj_singleton`
+  is *not* consumed here — it discharges the `S₀ = {v}` base case at the call site (the depth-1-separable slice),
+  not inside the reduction.
+- *Payoff (delivered):* "`s(C)` bounded" is now "**each layer recovers**" (`LayerRecovers`) — a local, finite,
+  per-step condition. This is exactly where `JointProfileRecoversAt {T, x}` (the `§S1.c` object) plugs in
+  (step 2.3, the genuine open `s(C)` core).
 
 **Step 2.3 — the per-layer separability (the genuine open core; three concrete attack routes).**
 Prove the per-layer bridge: cells = orbits at `T` ⟹ cells = orbits at `T ∪ {x}`, for non-abelian primitive small.

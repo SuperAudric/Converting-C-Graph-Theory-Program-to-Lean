@@ -3803,6 +3803,76 @@ theorem discretizesAtBases_iff {n : Nat} {adj : AdjMatrix n} {P : PMatrix n} {S�
     exact orbitRecoverableAt_iff_cellsAreOrbits.mp
       ((recoverableAt_base_iff_discrete T hbase).mpr (h T hT hbase))
 
+/-! #### Step 2.2 — the layer-step reduction: `RecoversWhileSymmetric` from base-case + per-layer transfer
+
+`RecoversWhileSymmetric S₀` is a global statement — `CellsAreOrbits` at *every* non-base `T ⊇ S₀`. This block
+reduces it to a **base case** (`CellsAreOrbits S₀`) plus a **per-layer transfer** (`LayerRecovers`: one further
+individualization keeps cells = orbits), turning the global WL-dimension claim into a local, finite, per-step
+condition. The per-step bridge is exactly where the multi-base forward `JointProfileRecoversAt {T, x}`
+(`Scheme.lean §S1.c`) plugs in (step 2.3, the open `s(C)` core). The engine is the downward-closure of
+non-base sets (`isBase_of_subset_of_isBase`): a non-base `T ⊇ S₀` is built from `S₀` by inserting `T \ S₀`
+one point at a time, every prefix staying non-base, so the transfer applies at each step. -/
+
+/-- **Base sets are upward-closed.** A base stays a base under any superset: `S ⊆ S'` and `IsBase S` ⟹
+`IsBase S'` (the residual `StabilizerAt` only shrinks under `stabilizerAt_mono`, so trivial stays trivial). The
+contrapositive — **non-base is downward-closed** — is what the layer-step reduction needs to keep every prefix
+below a non-base `T` non-base. -/
+theorem isBase_of_subset_of_isBase {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S S' : Finset (Fin n)} (hsub : S ⊆ S') (h : IsBase adj P S) : IsBase adj P S' := by
+  rw [← stabilizerAt_eq_bot_iff_isBase] at h ⊢
+  exact le_bot_iff.mp (le_trans (stabilizerAt_mono hsub) (le_of_eq h))
+
+/-- **Per-layer recovery transfer (step 2.2).** The local form of the `s(C)` content: at a prefix `T ⊇ S₀`, if
+cells already coincide with `Aut_T`-orbits, then individualizing one further point `x` (keeping the result
+non-base) brings cells down to `Aut_{insert x T}`-orbits. The single-insertion, non-base-guarded `LayerStep` —
+the per-step bridge `JointProfileRecoversAt {T, x}` (`Scheme.lean §S1.c`) discharges (step 2.3). -/
+def LayerRecovers {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) : Prop :=
+  ∀ (T : Finset (Fin n)) (x : Fin n), S₀ ⊆ T → x ∉ T → ¬ IsBase adj P (insert x T) →
+    CellsAreOrbits adj P T → CellsAreOrbits adj P (insert x T)
+
+/-- **The layer-step reduction (step 2.2): `RecoversWhileSymmetric` from base-case + per-layer transfer.**
+Reduces the global `s(C)` obligation (`CellsAreOrbits` at *every* non-base `T ⊇ S₀`) to a **base case**
+(`CellsAreOrbits S₀`, needed only when `S₀` is itself non-base) plus a **per-layer transfer** (`LayerRecovers`).
+Proof: strong induction on `T.card`; a non-base `T ⊋ S₀` erases a point `x ∈ T \ S₀` to a strictly smaller
+non-base prefix `T.erase x` (non-base downward-closed via `isBase_of_subset_of_isBase`), the IH recovers it,
+and the transfer at `(T.erase x, x)` lifts recovery to `T = insert x (T.erase x)`. Localizes the global
+WL-dimension claim to a per-step condition — the form step 2.3 attacks. -/
+theorem recoversWhileSymmetric_of_layerRecovers {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S₀ : Finset (Fin n)}
+    (hbase : ¬ IsBase adj P S₀ → CellsAreOrbits adj P S₀)
+    (hlayer : LayerRecovers adj P S₀) :
+    RecoversWhileSymmetric adj P S₀ := by
+  have key : ∀ (N : Nat) (T : Finset (Fin n)), T.card ≤ N → S₀ ⊆ T → ¬ IsBase adj P T →
+      CellsAreOrbits adj P T := by
+    intro N
+    induction N with
+    | zero =>
+        intro T hcard hsub hnb
+        have hT0 : T = ∅ := Finset.card_eq_zero.mp (Nat.le_zero.mp hcard)
+        have hS0 : S₀ = ∅ := Finset.subset_empty.mp (hT0 ▸ hsub)
+        have hTS₀ : T = S₀ := by rw [hT0, hS0]
+        rw [hTS₀]; exact hbase (hTS₀ ▸ hnb)
+    | succ N ih =>
+        intro T hcard hsub hnb
+        by_cases hTS₀ : T = S₀
+        · rw [hTS₀]; exact hbase (hTS₀ ▸ hnb)
+        · have hssub : S₀ ⊂ T := lt_of_le_of_ne hsub (Ne.symm hTS₀)
+          obtain ⟨x, hxT, hxS₀⟩ := Finset.exists_of_ssubset hssub
+          have hesub : T.erase x ⊆ T := Finset.erase_subset _ _
+          have hsubT' : S₀ ⊆ T.erase x := Finset.subset_erase.mpr ⟨hsub, hxS₀⟩
+          have hcard' : (T.erase x).card ≤ N := by
+            have hce := Finset.card_erase_of_mem hxT
+            omega
+          have hins : insert x (T.erase x) = T := Finset.insert_erase hxT
+          have hnbT' : ¬ IsBase adj P (T.erase x) :=
+            fun hbT' => hnb (isBase_of_subset_of_isBase hesub hbT')
+          have hco' : CellsAreOrbits adj P (T.erase x) := ih (T.erase x) hcard' hsubT' hnbT'
+          have hnbins : ¬ IsBase adj P (insert x (T.erase x)) := by rw [hins]; exact hnb
+          have hres := hlayer (T.erase x) x hsubT' (Finset.notMem_erase _ _) hnbins hco'
+          rwa [hins] at hres
+  intro T hsub hnb
+  exact key T.card T le_rfl hsub hnb
+
 /-- **The root group covers every orbit along any base sequence** — `CoversOrbitsAlong` is satisfied by
 `gens = ↑(StabilizerAt … ∅)` (all `P`-preserving automorphisms). This is the (genuinely true, here
 non-load-bearing) *orbit-level* coverage: an orbit-mate at `S` is realized by the residual automorphism
@@ -4178,6 +4248,32 @@ Weaker than `SelfDetectsStably` (no IR-core discretization) — the genuine open
 def SelfDetectsWhileSymmetric {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop) (bound : Nat) : Prop :=
   S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
     SchemeRecoveredWhileSymmetric n S bound
+
+/-- **Scheme layer-step reduction (step 2.2).** `SchemeRecoveredWhileSymmetric` from a bounded start `S₀`, its
+base case, and per-layer recovery (`recoversWhileSymmetric_of_layerRecovers` over `schemeAdj`). The seal's
+rigid side reduced to the local per-step condition. -/
+theorem schemeRecoveredWhileSymmetric_of_layerRecovers {n : Nat} (S : SchurianScheme n)
+    {S₀ : Finset (Fin n)} {bound : Nat} (hcard : S₀.card ≤ bound)
+    (hbase : ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀ →
+        CellsAreOrbits (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀)
+    (hlayer : LayerRecovers (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀) :
+    SchemeRecoveredWhileSymmetric n S bound :=
+  ⟨S₀, hcard, recoversWhileSymmetric_of_layerRecovers hbase hlayer⟩
+
+/-- **Self-detection reduced to per-layer recovery (step 2.2).** `SelfDetectsWhileSymmetric` from "primitive
+small ⟹ ∃ bounded `S₀` with base case + per-layer recovery" — the seal's entire open content localized to the
+per-step bridge (`JointProfileRecoversAt`, step 2.3), with `base(G)` banked (step 2.1) into the `bound`. -/
+theorem selfDetectsWhileSymmetric_of_layerRecovers {n : Nat} (S : SchurianScheme n)
+    {IsLarge : Nat → Prop} {bound : Nat}
+    (h : S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+      ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
+        (¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀ →
+          CellsAreOrbits (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀) ∧
+        LayerRecovers (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀) :
+    SelfDetectsWhileSymmetric S IsLarge bound := by
+  intro hps
+  obtain ⟨S₀, hcard, hbase, hlayer⟩ := h hps
+  exact schemeRecoveredWhileSymmetric_of_layerRecovers S hcard hbase hlayer
 
 /-- **The rewired seal — keyed on symmetry-phase recovery, IR-core dropped (CONDITIONAL).** Instantiates the
 abstract `reachesRigidOrCameron'` with the IR-core-free rigid predicate `SchemeRecoveredWhileSymmetric`. Carries
