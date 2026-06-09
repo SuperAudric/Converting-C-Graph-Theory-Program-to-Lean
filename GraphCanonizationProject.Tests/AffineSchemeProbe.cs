@@ -59,6 +59,22 @@ public class AffineSchemeProbe(ITestOutputHelper output)
 
     static long MatKey(int[] M, int d) { long k = 0; for (int i = 0; i < d; i++) k = (k << d) | (uint)M[i]; return k; }
 
+    // ── The F₂ "deleted permutation module" of a permutation σ of {0..d} (n = d+1
+    //    points): the d-dimensional GL(d,2) matrix of σ acting on F₂^{d+1}/⟨all-ones⟩.
+    //    Basis b_0..b_{d-1} = images of e_0..e_{d-1}; e_d ≡ b_0+…+b_{d-1} in the quotient.
+    //    For n = d+1 ODD this module is irreducible (S_{d+1}/A_{d+1} are 2-transitive,
+    //    char 2 ∤ n), so V ⋊ G₀ is PRIMITIVE — a non-solvable simple G₀ when G₀ = A_{d+1}.
+    //    The genuinely-non-abelian zone the metacyclic ΓL(1,2^d) sweep does not reach. ──
+    static int[] PermToDeletedGL(int[] sigma, int d)
+    {
+        int full = (1 << d) - 1;                       // all-ones vector of F₂^d
+        var col = new int[d];                          // col[j] = image of basis vector b_j
+        for (int j = 0; j < d; j++) col[j] = sigma[j] < d ? (1 << sigma[j]) : full;
+        var M = new int[d];                            // transpose columns → rows (Apply uses rows)
+        for (int i = 0; i < d; i++) { int row = 0; for (int j = 0; j < d; j++) if (((col[j] >> i) & 1) != 0) row |= 1 << j; M[i] = row; }
+        return M;
+    }
+
     static bool IsInvertible(int[] M, int d)
     {
         // Gaussian elimination on the rows over F_2: full rank ⟺ invertible.
@@ -860,5 +876,77 @@ public class AffineSchemeProbe(ITestOutputHelper output)
         else output.WriteLine("VERDICT: too few data points (need ≥2 d-values with primitive non-abelian schemes).");
 
         Assert.True(pts.Count > 0, "no primitive non-abelian schemes enumerated");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  STEP 2.4 — THE NON-SOLVABLE GATE.  The branched-agent depth-growth caveat:
+    //  the flat-residue result rests on the affine ΓL(1,2^d) family, whose G₀ are
+    //  METACYCLIC (Singer ⋊ Frobenius — SOLVABLE).  The self-detection mechanism is
+    //  predicted to fire on genuinely-non-abelian G₀; the decisive untested zone is
+    //  NON-SOLVABLE simple G₀.  Here G₀ = A_{d+1} (and S_{d+1}) via the F₂ deleted
+    //  module (n = d+1 odd ⟹ irreducible ⟹ primitive), reusing the affine machinery.
+    //  Signal: does the translation scheme RECOVER (EdgeGenerates, the s(C)/separability
+    //  notion), and is FULL-scheme 1-WL depth (base + s(C), the seal's `warmRefine`)
+    //  bounded/small?  Recovers ∧ small depth ⟹ the non-solvable residue is tame, the
+    //  `RelCountsDetermineOrbit` conjecture (step 2.3) holds on simple G₀.  A primitive
+    //  non-recoverer would be a small G2-B witness.  Cap |G₀| ≤ 2^16 (A₉+ excluded).
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Fact]
+    public void Probe_NonSolvableG0_AffineResidue()
+    {
+        int groupCap = 1 << 19;   // fits A₉ (181440) and S₉ (362880); A₁₁+ excluded
+        output.WriteLine("STEP 2.4 — NON-SOLVABLE affine G₀ = A_{d+1} / S_{d+1} (F₂ deleted module) — the genuine non-abelian zone.");
+        output.WriteLine("(The ΓL(1,2^d) sweep covered only METACYCLIC/solvable G₀; A_{d+1} is simple non-solvable.)");
+        output.WriteLine("");
+        output.WriteLine($"{"G₀",6} {"d",3} {"|V|",5} {"|G₀|",8} {"rank",5} {"prim",6} {"abel",6} {"recov",6} {"fullDepth",10} {"singleDepth",12}");
+
+        int candidates = 0, recovered = 0, primCount = 0;
+        var leaks = new List<string>();
+
+        void Run(string name, List<int[]> perms, int d)
+        {
+            var gens = perms.Select(p => PermToDeletedGL(p, d)).ToList();
+            foreach (var g in gens) Assert.True(IsInvertible(g, d), $"{name}: generator not in GL({d},2)");
+            var grp = GenGroup(gens, d, groupCap);
+            if (grp == null) { output.WriteLine($"{name,6} {d,3} {1 << d,5}   (|G₀| > {groupCap}, skipped)"); return; }
+            var s = BuildScheme(grp, d);
+            bool prim = Primitive(s), abel = Abelian(gens, d), recov = Recovers(s);
+            int fullDepth = FullSchemeIRDepth(s, cap: s.N);
+            int singleDepth = s.Rank > 1 ? GreedyIRDepth(s, 1, cap: s.N) : 0;
+            output.WriteLine($"{name,6} {d,3} {1 << d,5} {grp.Count,8} {s.Rank,5} {prim,6} {abel,6} {recov,6} {fullDepth,10} {singleDepth,12}");
+            if (prim && !abel && s.Rank > 2)
+            {
+                candidates++;
+                if (prim) primCount++;
+                // A "leak" = primitive non-abelian rank≥3 that neither EdgeGenerates nor
+                // discretizes at base + O(1) (= ⌈log₂|V|⌉ + 4, generous) — a G2-B witness.
+                int bound = (int)Math.Ceiling(Math.Log2(s.N)) + 4;
+                if (recov || fullDepth <= bound) recovered++;
+                else leaks.Add($"{name} (d={d}, rank={s.Rank}, fullDepth={fullDepth} > {bound})");
+            }
+        }
+
+        int[] Cycle3(int d) { var p = Enumerable.Range(0, d + 1).ToArray(); p[0] = 1; p[1] = 2; p[2] = 0; return p; }
+        int[] CycleN(int d) { var p = new int[d + 1]; for (int i = 0; i <= d; i++) p[i] = (i + 1) % (d + 1); return p; }
+        int[] Transp(int d) { var p = Enumerable.Range(0, d + 1).ToArray(); p[0] = 1; p[1] = 0; return p; }
+
+        // d even ⟹ n = d+1 odd ⟹ deleted module irreducible.  A₅(d4)/A₇(d6)/A₉(d8) fit the cap.
+        foreach (int d in new[] { 4, 6, 8 })
+        {
+            Run($"A{d + 1}", new List<int[]> { Cycle3(d), CycleN(d) }, d);   // A_{d+1} = ⟨3-cycle, (d+1)-cycle⟩
+            Run($"S{d + 1}", new List<int[]> { Transp(d), CycleN(d) }, d);   // S_{d+1} = ⟨transposition, (d+1)-cycle⟩
+        }
+
+        output.WriteLine("");
+        output.WriteLine($"primitive non-abelian rank≥3 candidates: {candidates};  recovered (EdgeGenerates or depth ≤ ⌈log₂n⌉+4): {recovered};  G2-B leaks: {leaks.Count}");
+        if (leaks.Count > 0) foreach (var l in leaks) output.WriteLine($"  ⚠ LEAK: {l}");
+        string verdict = candidates == 0
+            ? "NO primitive non-abelian rank≥3 candidate constructed (the deleted modules collapsed to low rank / 2-transitive)."
+            : leaks.Count == 0
+                ? $"NO G2-B WITNESS among non-solvable G₀ — all {candidates} primitive non-abelian candidates recover at bounded depth. Hardens RelCountsDetermineOrbit beyond the solvable ΓL family."
+                : $"⚠ {leaks.Count} POTENTIAL G2-B WITNESS(es) among non-solvable G₀ — investigate (a primitive non-recoverer would be a seal counterexample).";
+        output.WriteLine($"VERDICT: {verdict}");
+
+        Assert.True(leaks.Count == 0, $"non-solvable G₀ produced {leaks.Count} G2-B leak candidate(s): {string.Join("; ", leaks)}");
     }
 }

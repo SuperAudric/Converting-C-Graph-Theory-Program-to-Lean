@@ -1641,10 +1641,24 @@ now landed (axiom-clean, build green, `CascadeAffine.lean §"Step 2.3"`): the se
 - *(c) The S-ring route (affine).* affine-`G₂B` ⟺ separability of the schurian Schur ring of `G₀` over bounded
   `F_p^d`. Build/cite Schur-ring separability theory. Heaviest (no Mathlib substrate — the Q1 wall).
 
-**Step 2.4 — empirical gating (cheap; do before 2.3's heavy investment).** Extend the depth-growth probe beyond
-the affine `ΓL(1,2^d)` family to **non-affine primitive residues** (`A₅`-on-`F₂⁴`, `PSL(2,q)`, classical) — the
-branched agent's caveat is that the flat-residue result rests on one affine family. Confirming the residue stays
-flat there hardens the conjecture before committing to 2.3.
+**Step 2.4 — empirical gating — NON-SOLVABLE GATE RAN (2026-06-10, `AffineSchemeProbe.Probe_NonSolvableG0_AffineResidue`).
+VERDICT: NO G2-B WITNESS; the residue stays flat on simple non-solvable `G₀`.** The branched agent's caveat was
+that the flat-residue result rests on the affine `ΓL(1,2^d)` family, whose `G₀` are **metacyclic (solvable)**. This
+probe tests genuinely-non-abelian **simple non-solvable** `G₀ = A_{d+1} / S_{d+1}` via the F₂ **deleted module**
+(`n = d+1` odd ⟹ irreducible ⟹ primitive), reusing the existing affine machinery (`BuildScheme` / `FullSchemeIRDepth`
+/ `Recovers`). Results — **all 6 candidates primitive, non-abelian, recover (EdgeGenerates), 0 leaks:**
+| `G₀` | `\|V\|` | rank | fullDepth |
+|---|---|---|---|
+| A₅, S₅ | 16 | 3 | 4 |
+| A₇, S₇ | 64 | **4** | 4 |
+| A₉, S₉ | 256 | **5** | 5 |
+Depth grows by just **1** (4→4→5) over a **16×** range in `n` (the tiny `base(G)` term, not a leak); rank reaches
+**4 (A₇)** and **5 (A₉)** — the rank-4 amorphic being the *smallest* `s(C)≥2` candidate, so this directly probes
+the open zone. **Hardens `RelCountsDetermineOrbit` (step 2.3) on the non-solvable family**, complementing the
+solvable ΓL sweep (g) and the exhaustive catalogue (f). **Still untested (the heavier follow-up):** genuinely
+*non-affine* primitives (PSL(2,q)/classical orbital schemes of permutation groups — needs the general 2D-orbital
+infra, ~150 lines, not the cheap gate). The A_n schemes are still affine (translation schemes); they test the
+non-solvable `G₀` axis, not the non-affine action axis.
 
 **Honest scope.** Step 2.1 is provable now. Step 2.2 is structural (reduces, doesn't close). Step 2.3 is the
 genuine open `s(C)` bound — uncited, no counterexample known, empirically supported. The realistic near-term

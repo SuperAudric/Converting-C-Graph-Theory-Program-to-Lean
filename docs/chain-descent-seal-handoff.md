@@ -775,9 +775,19 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     multi-step harvest recovers at bounded depth 3–4. This is `lockstep_disc_imp_stab_trivial` in the wild: single-step is
     insufficient for primitive non-abelian schemes (the *norm*, not a corner case), but the cross-branch (Part-A) harvest
     is sufficient and tame. (The full normalizer `ΓL(1,2^d)` itself is 2-transitive = rank-2 = `K_{2^d}` — its Cayley-graph
-    IR-depth `n−1` is meaningless; the family signal tracks primitive rank≥3 candidates only.) **Remaining route 1:**
-    strand (b), non-affine primitive types (`A₅`, `PSL(2,q)`, classical) — different infra (orbital schemes of
-    permutation groups), the only zone not yet swept.
+    IR-depth `n−1` is meaningless; the family signal tracks primitive rank≥3 candidates only.) **CAVEAT (the gap (h) closes):**
+    the ΓL `G₀` are **metacyclic = SOLVABLE**; the genuinely-non-abelian *non-solvable* zone was undertested.
+  - **(h) Non-solvable `G₀` — RAN (2026-06-10, the step-2.4 cheap gate, `AffineSchemeProbe.Probe_NonSolvableG0_AffineResidue`).
+    VERDICT: NO G2-B WITNESS.** Closes the (g) caveat — tests **simple non-solvable** `G₀ = A_{d+1}/S_{d+1}` via the F₂
+    **deleted module** (`n=d+1` odd ⟹ irreducible ⟹ primitive), the zone the metacyclic ΓL sweep missed. Reuses the affine
+    machinery. All **6** candidates (A₅/S₅ `|V|=16` rank 3; A₇/S₇ `|V|=64` **rank 4**; A₉/S₉ `|V|=256` **rank 5**) are
+    primitive, non-abelian, and **recover** (EdgeGenerates), **0 leaks**; `FullSchemeIRDepth` is `4,4,5` — grows by **1**
+    over a 16× `n`-range (the `base(G)` term, not a leak). The **rank-4 (A₇)** and **rank-5 (A₉)** cases directly probe the
+    `s(C)≥2` zone (rank-4 amorphic = the smallest such candidate) and recover. Hardens `RelCountsDetermineOrbit` (the
+    step-2.3 counting-reduction hypothesis) on the non-solvable family. **Remaining route 1:** strand (b), genuinely
+    *non-affine* primitive actions (`PSL(2,q)`, classical orbital schemes of permutation groups — needs the general 2D-orbital
+    infra, the heavier follow-up; the A_n schemes above are still *affine* translation schemes, testing the `G₀`-non-solvable
+    axis, not the non-affine-action axis).
 - **Tier 4 — doc-sync / record-keeping (the NoFusion over-claim):**
   - **(h) DONE (2026-06-07).** The NoFusion/largeness-derivation over-claim is **reconciled**: `largenessBridge_viaHarvest`
     is *tautological* (orbit-level vacuity, §2–§3), and the prose that claimed "largeness derived from the harvest" has
