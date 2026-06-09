@@ -278,7 +278,8 @@ direction-invariance and spine invariants that everything imports.
 | `ChainDescent.lean` (top level) | direction-invariance `warm_6_2`, the descent **spine** |
 | `ChainDescent/Saturation.lean` | the generic saturation engine (`exists_iterate_isFixed_within`) |
 | `ChainDescent/Scheme.lean` | the de-classed metric/DRG family (`theorem_2_HOR_of_pPolynomial`) |
-| `ChainDescent/Cascade.lean` | Leg A recovery; **Part A** stabilizer-chain object |
+| `ChainDescent/Cascade.lean` | Leg A recovery; **Part A** stabilizer-chain object; the seal capstones + leg B + block/depth-graded recovery + §13a single-base recovery |
+| `ChainDescent/CascadeAffine.lean` | the depth-`k` scheme-separation engine (§13b/§13c) + the Phase-2 affine beachhead (`affineScheme`, Frobenius, the cyclotomic `s(C)` machinery + the conditional affine-family seal capstones) — split out of `Cascade.lean` (leaf; carries the finite-field imports) |
 | `ChainDescent/CascadeOracle.lean` | the unified `matchOracle` / `matchOracleSeq` |
 | `ChainDescent/LinearOracle.lean` | the linear (abelian/CFI) oracle |
 | `ChainDescent/CFI.lean` | CFI gadgets, gauge flips, the `Z₂^β` cycle space, CFI-cov |

@@ -93,8 +93,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `refineStep_mono` | 179-185 | One refinement round preserves refinement: `Refines χ₁ χ₂ → Refines (refineStep χ₁) (refineStep χ₂)`. | — |
 
 | `individualizedColouring_singleton_sep` | 3105-3112 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
-| `affV_card` | 4517-4520 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
-| `instNonemptyAffV` | 4688-4692 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
+| `affV_card` | 478-481 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
+| `instNonemptyAffV` | 649-653 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
 ## ChainDescent/CascadeOracle.lean
 
 | Name | Line | Description | Notes |
@@ -122,3 +122,17 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `Saturation.card_add_le_of_strict` | 83-95 | — | — |
+## ChainDescent/CascadeAffine.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `affinePermFin_apply` | 500-503 | (Phase 2, M0.3) `affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t)`. | `@[simp]` |
+| `mulUnitHom_apply` | 968-970 | F0: `mulUnitHom u x = ↑u * x`. | `@[simp]` |
+| `conjHom_apply` | 980-982 | F0: `conjHom hd e u = efield hd (e (efield⁻¹ u))`. | `@[simp]` |
+| `sigmaCyc_zpow_apply` | 999-1007 | F0 (load-bearing): `σ^k` acts as multiplication by `α^k` through the field iso (`σ^k u = efield (α^k · efield⁻¹ u)`) — the `σ^k ↦ α^k` reduction both deliverables turn on. | — |
+| `exists_npow_fqGen` | 1009-1017 | F0: every nonzero `z ∈ F_q` is a natural power of `α` (the multiplicative-orbit fact, for the irreducibility argument). | — |
+| `frobLinear_apply` | 1095-1096 | F1: `frobLinear x = x ^ p`. | `@[simp]` |
+| `frobLinear_mul` | 1098-1102 | F1: the **twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius (a ring hom) carries mult-by-`α` to mult-by-`α^p`; the algebraic core of the gap. | — |
+| `frobLinear_conj_mulUnit` | 1104-1113 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
+| `sigmaPow_zpow_apply` | 1219-1225 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
+| `frobLinear_conj_mulUnit'` | 1447-1454 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |

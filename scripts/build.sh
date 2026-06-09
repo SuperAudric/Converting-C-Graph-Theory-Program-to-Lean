@@ -41,6 +41,7 @@ MODULES=(
   ChainDescent.LinearOracle # ← CascadeOracle
   ChainDescent.Group        # ← CascadeOracle
   ChainDescent.Cascade      # ← CascadeOracle, Group
+  ChainDescent.CascadeAffine # ← Cascade, Scheme (§13b/§13c engine + Phase-2 affine beachhead)
 )
 
 start=$(date +%s)
