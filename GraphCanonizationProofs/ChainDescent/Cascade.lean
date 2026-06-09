@@ -4301,6 +4301,202 @@ theorem discrete_of_twoRoundRelationSeparates {n : Nat} (S : AssociationScheme n
   intro u u' hcell
   exact hsep u u' (fun ρ b => twoRoundProfileCount_eq S hcell ρ b)
 
+/-! ### §13c — the depth-`k` separation engine on `schemeAdj` (general, for §5.3)
+
+The depth-2 engine (§13b) reads the count profile after a **single** `refineStep` round (the colour
+`refineStep χ`). For families where two rounds do not separate, the depth-`k` engine reads the profile after
+`k` rounds (the colour `(refineStep)^[k] χ`); `discrete_of_twoRoundProfileSeparates` is the `k = 1` instance.
+It is stated for **any** `AssociationScheme`, so it serves the general primitive-floor / §5.3 crux directly —
+the *engine* generalizes even though any *bound proof* that discharges it is slice-specific. (For the
+affine-cyclic slice depth-2 sufficed empirically — `Probe_RoundsToDiscrete_Cyclotomic` — so this is
+build-for-generality, not necessity.) The only extra hypothesis over §13b is `k + 1 ≤ n` (the meaningful
+regime: there is "one more round" beyond the `k`-round colour to do the counting; consumers use `k = O(1)`
+or `O(log n) ≪ n`). Same peel-and-count proof, with `(refineStep)^[k]` in place of `refineStep^[1]`. -/
+
+/-- **Depth-`k` count separation (the general primitive).** For `w, u` in the same `warmRefine (schemeAdj S)`
+cell after individualizing a base set `T`, the **depth-`(k+1)` count profile** coincides: for every
+`k`-round colour `c` (`(refineStep)^[k]` of the individualised colouring) and every relation `b`, the number
+of `z ≠ w` whose `k`-round colour is `c` and `relOfPair w z = b` equals the corresponding count for `u`.
+Mechanism: peel `warmRefine = refineStep^[n]` to `refineStep^[k+1]` (`warmRefine_eq_iter_eq`, needs
+`k + 1 ≤ n`), read `signature`-equality at `(refineStep)^[k] χ` (`refineStep_iff`), apply the count bridge
+(`signature_eq_card_eq`). Generalises `twoRoundCount_eq_of_warmRefine` (the `k = 1` case). -/
+theorem kRoundCount_eq_of_warmRefine {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {w u : Fin n}
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) u)
+    (k : Nat) (hk : k + 1 ≤ n) (c : Nat) (b : Fin (S.rank + 1)) :
+    (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+        ((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k] (individualizedColouring n T)) z = c ∧
+        S.relOfPair w z = b)).card
+    = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+        ((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k] (individualizedColouring n T)) z = c ∧
+        S.relOfPair u z = b)).card := by
+  classical
+  set adj := schemeAdj S with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  set χ := individualizedColouring n T with hχ
+  -- peel `warmRefine = refineStep^[n]` to `refineStep^[k+1]`, read `signature` at `(refineStep)^[k] χ`
+  have h2 : ((refineStep adj P)^[k + 1]) χ w = ((refineStep adj P)^[k + 1]) χ u :=
+    warmRefine_eq_iter_eq adj P χ (k + 1) hk h
+  rw [Function.iterate_succ_apply'] at h2
+  have hsig : signature adj P (((refineStep adj P)^[k]) χ) w
+            = signature adj P (((refineStep adj P)^[k]) χ) u :=
+    ((refineStep_iff adj P (((refineStep adj P)^[k]) χ) w u).mp h2).2
+  have hcard := signature_eq_card_eq adj P (((refineStep adj P)^[k]) χ) hsig (c, b.val, POE.unknown)
+  have hpred : ∀ x : Fin n, ∀ z : Fin n,
+      (z ≠ x ∧ ((refineStep adj P)^[k]) χ z = c ∧ S.relOfPair x z = b)
+        ↔ (z ≠ x ∧ (c, b.val, POE.unknown) = (((refineStep adj P)^[k]) χ z, adj.adj x z, P x z)) := by
+    intro x z
+    refine and_congr_right (fun _ => ?_)
+    have hadjval : adj.adj x z = (S.relOfPair x z).val := rfl
+    have hPval : P x z = POE.unknown := rfl
+    rw [hadjval, hPval, Prod.mk.injEq, Prod.mk.injEq]
+    constructor
+    · rintro ⟨hcz, hbz⟩; exact ⟨hcz.symm, by rw [hbz], rfl⟩
+    · rintro ⟨hc, hb, -⟩; exact ⟨hc.symm, (Fin.val_injective hb).symm⟩
+  rw [Finset.filter_congr (fun z _ => hpred w z), Finset.filter_congr (fun z _ => hpred u z)]
+  exact hcard
+
+/-- **The depth-`k` discreteness producer (general).** If the depth-`(k+1)` count profile — for every
+`k`-round colour `c` and relation `b`, the number of `z` at `k`-round colour `c` with `relOfPair · z = b` —
+separates all vertices, then `warmRefine (schemeAdj S)` from `T` is `Discrete`. Generalises
+`discrete_of_twoRoundProfileSeparates` (`k = 1`). Composes with `stablyRecoverable_of_discrete` →
+`selfDetectsStably_of_discretizes`, so a bounded base `T` with a separating depth-`k` profile closes the seal
+on that family. The producer a general primitive-floor / §5.3 bound proof discharges (exhibit such a `T`). -/
+theorem discrete_of_kRoundProfileSeparates {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    (k : Nat) (hk : k + 1 ≤ n)
+    (hsep : ∀ u u' : Fin n,
+        (∀ (c : Nat) (b : Fin (S.rank + 1)),
+          (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+            ((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k] (individualizedColouring n T)) z = c ∧
+            S.relOfPair u z = b)).card
+          = (Finset.univ.filter (fun z : Fin n => z ≠ u' ∧
+            ((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k] (individualizedColouring n T)) z = c ∧
+            S.relOfPair u' z = b)).card)
+        → u = u') :
+    Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T)) := by
+  intro u u' hcell
+  exact hsep u u' (fun c b => kRoundCount_eq_of_warmRefine S hcell k hk c b)
+
+/-- **Iterated Lemma A — the `k`-round colour determines the relation to each base point.** Generalises
+`relOfPair_eq_of_refineStep_base` (one round): if `z, z'` share their `k`-round colour `(refineStep)^[k] χ`
+(`k ≥ 1`), then `relOfPair t z = relOfPair t z'` for every `t ∈ T`. Proof: a finer colouring refines a
+coarser one (`refineStep_iter_le_eq`: `^[k]`-eq ⟹ `^[1]`-eq), then apply the one-round Lemma A. The bridge
+that re-groups the depth-`k` counts by the joint relation profile. -/
+theorem relOfPair_eq_of_iterateRefineStep_base {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {t : Fin n} (ht : t ∈ T) {k : Nat} (hk : 1 ≤ k) {z z' : Fin n}
+    (h : ((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z
+       = ((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z') :
+    S.relOfPair t z = S.relOfPair t z' := by
+  set adj := schemeAdj S with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  set χ := individualizedColouring n T with hχ
+  have h1 : ((refineStep adj P)^[1]) χ z = ((refineStep adj P)^[1]) χ z' := by
+    have hkeq : k = 1 + (k - 1) := by omega
+    rw [hkeq] at h
+    exact refineStep_iter_le_eq adj P χ 1 (k - 1) h
+  rw [Function.iterate_one] at h1
+  exact relOfPair_eq_of_refineStep_base S ht h1
+
+/-- **Depth-`k` count, aggregate (countP) form.** The predicate-indexed generalization of
+`kRoundCount_eq_of_warmRefine` (and depth-`k` analogue of `twoRoundCountP_eq_of_warmRefine`): for `w, u` in
+the same `warmRefine`-from-`T` cell, every count of `z` whose `k`-round colour satisfies a predicate `q` and
+whose relation to the base point is `b` agrees. Vehicle for the colour→relation conversion. -/
+theorem kRoundCountP_eq_of_warmRefine {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {w u : Fin n}
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) u)
+    (k : Nat) (hk : k + 1 ≤ n) (q : Nat → Prop) [DecidablePred q] (b : Fin (S.rank + 1)) :
+    (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+        q (((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z) ∧
+        S.relOfPair w z = b)).card
+    = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+        q (((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z) ∧
+        S.relOfPair u z = b)).card := by
+  classical
+  set adj := schemeAdj S with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  set χ := individualizedColouring n T with hχ
+  have h2 : ((refineStep adj P)^[k + 1]) χ w = ((refineStep adj P)^[k + 1]) χ u :=
+    warmRefine_eq_iter_eq adj P χ (k + 1) hk h
+  rw [Function.iterate_succ_apply'] at h2
+  have hsig : signature adj P (((refineStep adj P)^[k]) χ) w
+            = signature adj P (((refineStep adj P)^[k]) χ) u :=
+    ((refineStep_iff adj P (((refineStep adj P)^[k]) χ) w u).mp h2).2
+  have hcard := signature_eq_countP_eq adj P (((refineStep adj P)^[k]) χ) hsig
+    (fun tup : Nat × Nat × POE => q tup.1 ∧ tup.2.1 = b.val)
+  have hpred : ∀ x : Fin n, ∀ z : Fin n,
+      (z ≠ x ∧ q (((refineStep adj P)^[k]) χ z) ∧ S.relOfPair x z = b)
+        ↔ (z ≠ x ∧ (fun tup : Nat × Nat × POE => q tup.1 ∧ tup.2.1 = b.val)
+              (((refineStep adj P)^[k]) χ z, adj.adj x z, P x z)) := by
+    intro x z
+    refine and_congr_right (fun _ => ?_)
+    show (q (((refineStep adj P)^[k]) χ z) ∧ S.relOfPair x z = b)
+      ↔ (q (((refineStep adj P)^[k]) χ z) ∧ adj.adj x z = b.val)
+    have hadjval : adj.adj x z = (S.relOfPair x z).val := rfl
+    rw [hadjval]
+    exact and_congr_right (fun _ => Fin.ext_iff)
+  rw [Finset.filter_congr (fun z _ => hpred w z), Finset.filter_congr (fun z _ => hpred u z)]
+  exact hcard
+
+/-- **Depth-`k` count, joint-relation form (the colour→relation conversion).** Re-groups `kRoundCount` by the
+joint relation profile `(relOfPair t z)_{t∈T}` instead of the opaque `k`-round colour. Depth-`k` analogue of
+`twoRoundProfileCount_eq`, combining `kRoundCountP_eq_of_warmRefine` with the iterated Lemma A
+(`relOfPair_eq_of_iterateRefineStep_base`). The relation-indexed depth-`k` count a general separability
+argument consumes. -/
+theorem kRoundProfileCount_eq {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    {w u : Fin n}
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) u)
+    (k : Nat) (hk1 : 1 ≤ k) (hk : k + 1 ≤ n) (ρ : Fin n → Fin (S.rank + 1)) (b : Fin (S.rank + 1)) :
+    (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+        (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair w z = b)).card
+    = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+        (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u z = b)).card := by
+  classical
+  set q : Nat → Prop := fun c => ∃ z₀ : Fin n,
+    ((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z₀ = c
+      ∧ ∀ t ∈ T, S.relOfPair t z₀ = ρ t with hq_def
+  have hq : ∀ z : Fin n,
+      q (((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z)
+        ↔ ∀ t ∈ T, S.relOfPair t z = ρ t := by
+    intro z
+    constructor
+    · rintro ⟨z₀, hz₀, hprof⟩ t ht
+      exact (relOfPair_eq_of_iterateRefineStep_base S ht hk1 hz₀).symm.trans (hprof t ht)
+    · intro hprof; exact ⟨z, rfl, hprof⟩
+  rw [show (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+          (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair w z = b))
+        = (Finset.univ.filter (fun z : Fin n => z ≠ w ∧
+          q (((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z)
+            ∧ S.relOfPair w z = b))
+      from Finset.filter_congr (fun z _ => by rw [hq z]),
+    show (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+          (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u z = b))
+        = (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+          q (((refineStep (schemeAdj S) (fun _ _ => POE.unknown))^[k]) (individualizedColouring n T) z)
+            ∧ S.relOfPair u z = b))
+      from Finset.filter_congr (fun z _ => by rw [hq z])]
+  exact kRoundCountP_eq_of_warmRefine S h k hk q b
+
+/-- **The relation-indexed depth-`k` discreteness producer (general engine).** If the joint relation-profile
+counts separate all vertices, then `warmRefine (schemeAdj S)` from `T` is `Discrete`. Depth-`k` analogue of
+`discrete_of_twoRoundRelationSeparates` (`k = 1` instance). Stated for any `AssociationScheme`; the producer a
+general primitive-floor / §5.3 bound proof discharges (exhibit a bounded `T` with separating depth-`k`
+relation profile). -/
+theorem discrete_of_kRoundRelationSeparates {n : Nat} (S : AssociationScheme n) {T : Finset (Fin n)}
+    (k : Nat) (hk1 : 1 ≤ k) (hk : k + 1 ≤ n)
+    (hsep : ∀ u u' : Fin n,
+        (∀ (ρ : Fin n → Fin (S.rank + 1)) (b : Fin (S.rank + 1)),
+          (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+            (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u z = b)).card
+          = (Finset.univ.filter (fun z : Fin n => z ≠ u' ∧
+            (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u' z = b)).card)
+        → u = u') :
+    Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T)) := by
+  intro u u' hcell
+  exact hsep u u' (fun ρ b => kRoundProfileCount_eq S hcell k hk1 hk ρ b)
+
 /-! ### Phase 2, M0.3 — the affine instance `V ⋊ G₀` over `F_p^d`
 
 The concrete beachhead family: the orbital scheme of the affine group `V ⋊ G₀` acting on `V = F_p^d`,
@@ -5276,10 +5472,13 @@ theorem G0pow_pow_irreducible (hd : d ≠ 0) (m r : ℕ)
 
 The Frobenius permutation `frobPerm` of `V` (additive, the transported `frobCoord`) **preserves the scheme's
 relation partition** (`relOfPair_frobPerm_hom`): it is an automorphism of the coherent configuration that the
-group `V ⋊ G0pow β` does **not** realize. This is the concrete `Ĝ ⊋ G` separability gap — the obstruction the
-`s(C)` leak would exploit — and the first step of the separation proof (a profile-twin can only be a Frobenius
-image; a Γ-breaking base removes Frobenius symmetry; the remaining "all twins are Frobenius twins" is the open
-crux, self-detection-plan §11.8). The mechanism: `frobCoord` **normalizes** `G0pow β`
+group `V ⋊ G0pow β` does **not** realize. This is **part of** the concrete `Ĝ ⊋ G` separability gap — a
+**Galois** member of the WL-closure symmetry group the actual group misses. **⚠️ It is not the whole gap:** for
+the index-3 / Clebsch witness `Ĝ/G` is an `S₃`-on-relations and Frobenius realizes only a `Z₂` of it (the
+amorphic remainder is not Galois; seal-handoff §G2 board). So `frobPerm` witnesses the gap is non-trivial (a
+lower bound on `Ĝ/G`), but the gap's mechanism is *not* Frobenius in general — the honest open kernel is the
+mechanism-agnostic `PowAffineSeparates`, and the general crux is the relation-level P3. The mechanism:
+`frobCoord` **normalizes** `G0pow β`
 (`frobCoord_conj_sigmaPow`: `frobCoord·σ·frobCoord⁻¹ = σ^p ∈ ⟨σ⟩`), and Frobenius is additive, so it carries
 `G0pow β`-orbits of differences to `G0pow β`-orbits of differences. **General-theorem shadow:** "a normalizing
 algebraic automorphism is a configuration automorphism," the exact shape of the general `s(C)` obstruction. -/
@@ -5340,14 +5539,22 @@ theorem relOfPair_frobPerm_hom (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
     ← map_sub (frobCoord hd), ← map_sub (frobCoord hd), LinearEquiv.mul_apply, LinearEquiv.mul_apply,
     hinv, hg]
 
-/-! #### Separation step 2 — a Frobenius power fixing a field-generating base is the identity
+/-! #### Frobenius is killed by a field-generating base — the Galois sub-part of the gap
 
-"Γ-breaking kills Frobenius symmetry." The separation argument (`PowAffineSeparates`) needs: a profile-twin
-`u, u'` forces a Frobenius power `φ^j` (the only source of profile-degeneracy, step 3 — open) with
-`u' = φ^j(u)` *fixing the base*; if the base `T` **field-generates** `F_q` (Γ-breaking), then any `φ^j`
-fixing `T` is the identity, so `u' = u`. This subsection proves that field-theory core: a power of the
-Frobenius `φ : x ↦ x^p` fixing a generating set is `1`. It is the bankable, citation-clean half of the
-remaining separation proof (step 3, "every twin is a Frobenius twin", is the uncited `s(C)` crux). -/
+A power of Frobenius `φ : x ↦ x^p` fixing a field-generating set is `1`. Concretely: individualizing a
+Γ-breaking (field-generating) base removes the Galois symmetry `φ` from the gap.
+
+> **⚠️ SCOPE CORRECTION (2026-06-10).** An earlier framing treated this as "step 2 of 4" of a *Frobenius*
+> separation proof whose open crux was "every profile-twin is a Frobenius image" (`TwinsAreFrobenius`, since
+> **removed**). That premise is **false**: the cyclotomic separability gap `Ĝ/G` is the full WL-closure
+> relation-symmetry group — for the index-3 / Clebsch witness it is an **`S₃`-on-relations**, of which the
+> Galois `φ` realizes only a `Z₂` (`φ` acts as `i ↦ 2i mod 3`, a transposition; seal-handoff §G2 board). So
+> killing Frobenius kills only the Galois `Z₂` *sub-part* of the gap, **not** the amorphic remainder. These
+> lemmas are correct and characterize that Galois sub-part (a genuine lower bound on `Ĝ/G`), but they are
+> **insufficient for separation** — the honest, mechanism-agnostic open kernel is `PowAffineSeparates`
+> itself, and the right *general* crux is the relation-level P3 (`persistent twin ⟹ ClosedSubset ⟹
+> imprimitive`), agnostic to whether the gap is Galois or amorphic. Do not rebuild a Frobenius-only
+> separation route. -/
 
 /-- `frobLinear^j` acts as `x ↦ x^(p^j)` (iterating Frobenius `x ↦ x^p`). -/
 theorem frobLinear_pow_apply (j : ℕ) (x : GaloisField p d) :
@@ -5401,8 +5608,9 @@ Step 2 above is a clean *field* statement (`frobLinear^j = 1` on `F_q`). The sep
 **scheme points** (`frobPerm^j = 1` on `Fin (p^d)`). The model uses two isos — `affineE : F_p^d ≃ Fin(p^d)`
 (scheme points) and `efield : F_q ≃ F_p^d` (the field). Their composite `x ↦ efield⁻¹(affineE⁻¹ x)` is the
 **field coordinate** of a scheme point, and under it `frobPerm` acts as `frobLinear` (both are "raise to the
-`p`-th power"). These lemmas make that alignment explicit and lift step 2 to a directly-usable
-`frobPerm^j = 1` — resolving the iso-alignment the separation wiring needs (gated only on the open step 3). -/
+`p`-th power"). These lemmas make that alignment explicit and lift the field statement to a directly-usable
+`frobPerm^j = 1` (the scheme-point form of "a field-generating base kills Galois"). See the ⚠️ scope
+correction above: this removes only the Galois `Z₂` sub-part of the gap, not the full amorphic remainder. -/
 
 /-- `frobCoord^j` is `frobLinear^j` conjugated through `efield` (`frobCoord = conjHom frobLinear`, `conjHom`
 a monoid hom). The field-coordinate alignment of the linear part. -/
@@ -5420,11 +5628,11 @@ theorem affineE_symm_frobPerm_pow (hd : d ≠ 0) (j : ℕ) (x : Fin (p ^ d)) :
     rw [pow_succ' (frobPerm hd) k, Equiv.Perm.mul_apply, affineE_symm_frobPerm, ih,
       ← LinearEquiv.mul_apply, ← pow_succ']
 
-/-- **Separation step 2, on scheme points — a Frobenius power fixing a field-generating base is the identity
-permutation.** If the field coordinates `efield⁻¹(affineE⁻¹ t)` of the base `T` generate `F_q` (Γ-breaking)
-and `frobPerm^j` fixes `T` pointwise, then `frobPerm^j = 1`. Lifts `frobLinear_pow_eq_one_of_adjoin` to
-`Fin (p^d)` via the alignment lemmas. This is the form the separation wiring (step 4) consumes once the open
-crux (step 3, "every profile-twin is a Frobenius twin") supplies the fixing `φ^j`. -/
+/-- **A Frobenius power fixing a field-generating base is the identity permutation (scheme-point form).** If
+the field coordinates `efield⁻¹(affineE⁻¹ t)` of the base `T` generate `F_q` (Γ-breaking) and `frobPerm^j`
+fixes `T` pointwise, then `frobPerm^j = 1`. Lifts `frobLinear_pow_eq_one_of_adjoin` to `Fin (p^d)` via the
+alignment lemmas. Removes the **Galois `Z₂` sub-part** of the separability gap; insufficient for separation on
+its own (the full gap `Ĝ/G` is amorphic, larger than Galois — see the ⚠️ scope correction above). -/
 theorem frobPerm_pow_eq_one_of_adjoin (hd : d ≠ 0) {j : ℕ} {T : Finset (Fin (p ^ d))}
     (hgen : Algebra.adjoin (ZMod p)
         ((fun t : Fin (p ^ d) => (efield hd).symm (affineE.symm t)) '' (↑T)) = ⊤)
@@ -5445,90 +5653,6 @@ theorem frobPerm_pow_eq_one_of_adjoin (hd : d ≠ 0) {j : ℕ} {T : Finset (Fin 
   rw [affineE_symm_frobPerm_pow, frobCoord_pow_apply, hfl]
   show efield hd ((efield hd).symm (affineE.symm x)) = affineE.symm x
   rw [LinearEquiv.apply_symm_apply]
-
-/-! #### Separation step 3 — the open kernel (`TwinsAreFrobenius`) + the reduction banking step 2
-
-Step 3 — *a depth-2 profile-twin is only ever a Frobenius image* — is the genuine **uncited `s(C)` crux**
-(seal-handoff §6 insight 2; equivalently "the cyclotomic scheme's WL-cells are exactly the `ΓL(1,q)`-orbits",
-the separability of the Galois normalizer). It does **not** close from Mathlib. What *is* bankable is to name
-that crux as one clean falsifiable proposition and discharge the rest of the separation onto it via the landed
-step 2. So:
-
-- **`TwinsAreFrobenius`** states the crux structurally: every profile-twin pair is related by a Frobenius power
-  fixing the base. It is *cleaner and more fundamental* than `PowAffineSeparates` — base-robust (it holds at a
-  non-Γ-breaking base where `PowAffineSeparates` fails) and structural ("the gap is Galois"), isolating the pure
-  `s(C)` content from the discreteness packaging.
-- **`powAffineSeparates_of_twinsAreFrobenius`** reduces `PowAffineSeparates` (for a **Γ-breaking** `T`) to
-  `TwinsAreFrobenius`, consuming the landed step 2 (`frobPerm_pow_eq_one_of_adjoin`): a twin is a Frobenius
-  image `u' = φ^j u` with `φ^j` fixing the field-generating `T`, so step 2 gives `φ^j = 1`, hence `u' = u`.
-
-**Generalization insight (§5.3 template).** This is the affine-cyclic instance of the general separability
-reduction: *Discrete ⟸ (WL-cells ⊆ algebraic-automorphism-orbits = schurity/separability kernel) + (the group
-stabilizer of a base is trivial)*. `TwinsAreFrobenius` is the concrete "twins are algebraic-aut images" kernel;
-step 2 is the concrete "individualizing a field-generating base kills the stabilizer." For the general crux,
-swap Frobenius ↦ the scheme's algebraic automorphism group and field-generating ↦ a base; the kernel becomes the
-P3 "two-base-twin ⟹ `ClosedSubset`" statement. The *reduction* is reusable; only the kernel is slice-specific. -/
-
-/-- **Separation step 3, as the open kernel.** Every depth-2 profile-twin pair `u, u'` over
-`affineScheme (G0pow hd β)` (equal `affineDepth2Count` for all `ρ, b` at base `T`) is related by a **Frobenius
-power fixing `T`**: `∃ j, (∀ t ∈ T, frobPerm^j t = t) ∧ u' = frobPerm^j u`. This is the genuine uncited `s(C)`
-crux — "the only profile-degeneracies are Galois (Frobenius) twins" — equivalently that the scheme's
-configuration-automorphism group is `ΓL(1,q)` and its WL-cells are the `ΓL`-orbits. Carried as a hypothesis;
-`relOfPair_frobPerm_hom` (step 1) is the "Frobenius is a configuration automorphism" half that makes the
-statement type-correct, and `frobPerm_pow_eq_one_of_adjoin` (step 2) converts it into separation. -/
-def TwinsAreFrobenius (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
-    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) (T : Finset (Fin (p ^ d))) : Prop :=
-  ∀ u u' : Fin (p ^ d),
-    (∀ ρ b, affineDepth2Count hd β hβneg T u ρ b = affineDepth2Count hd β hβneg T u' ρ b) →
-    ∃ j : ℕ, (∀ t ∈ T, (frobPerm (p := p) hd ^ j) t = t) ∧ u' = (frobPerm (p := p) hd ^ j) u
-
-/-- **The separation reduction (step 3 ⟹ separation, banking step 2).** For a **Γ-breaking** base `T` (field
-coordinates generate `F_q`) of size `≤ bound`, the open kernel `TwinsAreFrobenius` implies the separation crux
-`PowAffineSeparates`. Proof: a profile-twin `u, u'` is a Frobenius image `u' = φ^j u` with `φ^j` fixing `T`
-(`htf`); since `T` field-generates, step 2 (`frobPerm_pow_eq_one_of_adjoin`) gives `φ^j = 1`, so `u' = u`. This
-factors the field theory (step 2, landed) out of the separation, leaving `TwinsAreFrobenius` as the sole open
-content — the pure `s(C)` / "gap is Galois" statement. -/
-theorem powAffineSeparates_of_twinsAreFrobenius (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
-    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) {bound : Nat} {T : Finset (Fin (p ^ d))}
-    (hcard : T.card ≤ bound)
-    (hgen : Algebra.adjoin (ZMod p)
-        ((fun t : Fin (p ^ d) => (efield hd).symm (affineE.symm t)) '' (↑T)) = ⊤)
-    (htf : TwinsAreFrobenius hd β hβneg T) :
-    PowAffineSeparates hd β hβneg bound := by
-  refine ⟨T, hcard, fun u u' htwin => ?_⟩
-  obtain ⟨j, hfix, hu'⟩ := htf u u' htwin
-  rw [hu', frobPerm_pow_eq_one_of_adjoin hd hgen hfix]
-  rfl
-
-/-- **The seal on the genuine cyclotomic family, reduced to the open kernel `TwinsAreFrobenius`** (the
-step-3 form). Composes `powAffineSeparates_of_twinsAreFrobenius` (step 3 + step 2) into
-`reachesRigidOrCameron_viaPowSeparation`. So the seal on `affineScheme (G0pow hd β)` is reduced to the single
-structural crux `TwinsAreFrobenius` (+ a Γ-breaking base) — the cleanest, most fundamental open statement,
-with the Γ-breaking field theory (step 2) discharged.
-
-**⚠️ CONDITIONAL — NOT the closed seal.** Carries `hClassify` (G3), `hne`/`hrank`, `hImprim` (earned), the
-Γ-breaking base (`hgen`/`hcard`), and the **open kernel** `htf : TwinsAreFrobenius` (the uncited `s(C)` crux). -/
-theorem reachesRigidOrCameron_viaTwinsAreFrobenius (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
-    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β)
-    {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
-    {bound : Nat} {T : Finset (Fin (p ^ d))}
-    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
-    (hne : ∀ i : Fin ((affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank + 1),
-        ∃ v w, (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rel i v w = true)
-    (hrank : 2 ≤ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank)
-    (hcard : T.card ≤ bound)
-    (hgen : Algebra.adjoin (ZMod p)
-        ((fun t : Fin (p ^ d) => (efield hd).symm (affineE.symm t)) '' (↑T)) = ⊤)
-    (htf : TwinsAreFrobenius hd β hβneg T)
-    (hImprim : ¬ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).toAssociationScheme.IsPrimitive →
-        SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
-          ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))) :
-    ((SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
-        ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)))
-      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) bound)
-      ∨ IsCameronScheme (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) :=
-  reachesRigidOrCameron_viaPowSeparation hd β hβneg hClassify hne hrank
-    (powAffineSeparates_of_twinsAreFrobenius hd β hβneg hcard hgen htf) hImprim
 
 end CyclicAffine
 

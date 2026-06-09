@@ -80,20 +80,31 @@
 > (`Algebra.adjoin (ZMod p) S = ⊤`) is the identity, via the fixed-point subalgebra `{x | x^(p^j)=x}`
 > (`add_pow_char_pow` for `+`-closure, `ZMod.pow_card_pow` for the prime field). Lifted to scheme points by
 > **`frobPerm_pow_eq_one_of_adjoin`** (the directly-usable form) via the alignment helpers `frobCoord_pow_apply`
-> + `affineE_symm_frobPerm_pow`. **(3) the crux — KERNEL + REDUCTION LANDED (2026-06-10, axiom-clean), full proof
-> OPEN (uncited).** The crux "a profile-twin is only ever a Frobenius image" is named as the kernel
-> **`TwinsAreFrobenius`** (every depth-2-profile-twin `u,u'` is `u' = frobPerm^j u` for some `frobPerm^j` fixing
-> `T`) — cleaner/more-fundamental than `PowAffineSeparates` (base-robust, structural; = "the gap is Galois" /
-> WL-cells = `ΓL(1,q)`-orbits). The **reduction `powAffineSeparates_of_twinsAreFrobenius`** discharges the rest of
-> the separation onto it via the landed step 2: for a Γ-breaking `T`, `TwinsAreFrobenius ⟹ PowAffineSeparates`.
-> **(4) wire** is then DONE (`reachesRigidOrCameron_viaTwinsAreFrobenius` composes to the seal); the depth-2 count
-> is factored into the shared `affineDepth2Count`. The **sole remaining open content is `TwinsAreFrobenius`** —
-> the uncited `s(C)` crux (no Mathlib citation; seal-handoff §6 insight 2).
-> **GENERALIZATION INSIGHT (§5.3 template):** the reduction is the general separability shape — *Discrete ⟸
-> (WL-cells ⊆ algebraic-aut-orbits = schurity kernel) + (the group stabilizer of a base is trivial)*.
-> `TwinsAreFrobenius` is the concrete kernel; step 2 is the concrete "base kills the stabilizer." For the general
-> crux, swap Frobenius ↦ the scheme's algebraic-automorphism group, field-generating ↦ a base — the kernel
-> becomes P3's "two-base-twin ⟹ `ClosedSubset`". The reduction is reusable; only the kernel is slice-specific.
+> + `affineE_symm_frobPerm_pow`. **(3)/(4) FROBENIUS SEPARATION STRATEGY RETRACTED (2026-06-10) — the gap is
+> NOT Galois.** A step-3 kernel `TwinsAreFrobenius` ("every profile-twin is a Frobenius image") + reduction were
+> briefly landed, then **removed**: the premise is **false**. The cyclotomic separability gap `Ĝ/G` is the full
+> WL-closure relation-symmetry group — for the index-3 / Clebsch witness it is an **`S₃`-on-relations** (seal-handoff
+> §G2 board, lines 499–500/574), of which the Galois `φ` (`i ↦ 2i mod 3`, a transposition) realizes only a **`Z₂`**.
+> So Frobenius is only a `Z₂` sub-part of the gap; the amorphic remainder is **not** Galois, and killing Frobenius
+> (steps 1–2) cannot close separation. The reduction also *collapsed* (`TwinsAreFrobenius` at the Γ-breaking base it
+> used `⟺ PowAffineSeparates` — a repackaging, not a weakening). **Steps 1–2 are kept, re-scoped honestly** as "the
+> Galois sub-part of the gap" (a lower bound on `Ĝ/G`, insufficient for separation). The honest, mechanism-agnostic
+> open kernel is **`PowAffineSeparates`** itself (still wired via `reachesRigidOrCameron_viaPowSeparation`, c1).
+> **CORRECTED GENERALIZATION INSIGHT:** the `Ĝ⊋G` gap is **not** Galois in general — it is the full WL-closure
+> relation-symmetry group (amorphic fusions). Any crux must be **mechanism-agnostic** ("primitive ⟹ separates at
+> base+O(1)"), never keyed on Frobenius. The right general crux is the relation-level **P3** ("persistent two-base-twin
+> ⟹ `ClosedSubset` ⟹ imprimitive"), which is unharmed (Clebsch is primitive and *does* separate at depth 4).
+> **DEPTH-`k` PRODUCER LANDED (2026-06-10, axiom-clean, build green, `Cascade.lean §13c`).** The general
+> separation engine, generalizing §13b (depth-2) to arbitrary depth — stated for **any** `AssociationScheme`, so
+> it serves the general primitive-floor / §5.3 crux directly. Colour form: `kRoundCount_eq_of_warmRefine`
+> (count primitive; peel `warmRefine` to `refineStep^[k+1]`, read `signature` at `(refineStep)^[k]`, needs
+> `k+1≤n`) + `discrete_of_kRoundProfileSeparates` (producer). Relation form: `relOfPair_eq_of_iterateRefineStep_base`
+> (iterated Lemma A, via `refineStep_iter_le_eq` ⟹ one-round Lemma A) + `kRoundCountP_eq_of_warmRefine` +
+> `kRoundProfileCount_eq` + `discrete_of_kRoundRelationSeparates`. The depth-2 engine (§13b) is the `k=1`
+> instance. Build-for-generality (affine-cyclic empirically needed only `k=1`); enabling infrastructure for the
+> general-P3 attack, NOT a closure. **The unconditional seal will not close from Mathlib alone** — it needs new
+> pieces / a known pattern; the right general crux remains the mechanism-agnostic relation-level P3
+> ("persistent two-base-twin ⟹ `ClosedSubset` ⟹ imprimitive"), which the depth-`k` relation producer feeds.
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
 > **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)
