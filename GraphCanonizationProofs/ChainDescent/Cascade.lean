@@ -1081,6 +1081,46 @@ theorem coversOrbits_of_realizers {gens : Set (Equiv.Perm (Fin n))}
             hreal T (Finset.Subset.trans (Finset.subset_insert b S) hT) b' w' hw')
           (by simpa using hbase)
 
+/-- **Coverage from realizers at the NON-BASE prefixes only (the budget-split builder).** The same coverage
+witness as `coversOrbits_of_realizers`, but the realizer hypothesis is required *only at prefixes that are not
+yet a base* (`¬ IsBase T`). At a base prefix the per-head clause is **free**: orbit-mates are singletons
+(`IsBase`), so the identity `1 ∈ closure` realizes them. This is the engine of the conservation split — it lets
+the group be reproduced from the **symmetry phase** (`RecoversWhileSymmetric`) alone, without demanding recovery
+at the IR-core (the post-base levels `StablyRecoverable` over-required). -/
+theorem coversOrbits_of_realizers_symmetric {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hreal : ∀ T : Finset (Fin n), S ⊆ T → ¬ IsBase adj P T → ∀ b w : Fin n,
+        OrbitPartition adj P T b w → ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    CoversOrbits adj P gens bs S := by
+  induction bs generalizing S with
+  | nil => exact hbase
+  | cons b bs ih =>
+      refine ⟨fun w hw => ?_, ?_⟩
+      · by_cases hb : IsBase adj P S
+        · exact ⟨1, one_mem _, by have h := hb b w hw; subst h; simp⟩
+        · obtain ⟨g, hgmem, hgres, hgbw⟩ := hreal S (Finset.Subset.refl S) hb b w hw
+          exact ⟨g, Subgroup.subset_closure ⟨hgmem, mem_stabilizerAt.mpr hgres⟩, hgbw⟩
+      · refine ih (S := insert b S)
+          (fun T hT hnb b' w' hw' =>
+            hreal T (Finset.Subset.trans (Finset.subset_insert b S) hT) hnb b' w' hw')
+          (by simpa using hbase)
+
+/-- **Visible-realizer form of the budget-split builder.** Coverage from same-`warmRefine`-cell realizers at the
+**non-base** prefixes only (`coversOrbits_of_realizers_symmetric` + orbits-refine-cells). This is what
+`RecoversWhileSymmetric` supplies (cells = orbits at non-base prefixes, with `gens` the residual automorphisms),
+yielding the group reproduction with no IR-core obligation. -/
+theorem coversOrbits_of_visibleRealizers_symmetric {gens : Set (Equiv.Perm (Fin n))}
+    (bs : List (Fin n)) {S : Finset (Fin n)}
+    (hreal : ∀ T : Finset (Fin n), S ⊆ T → ¬ IsBase adj P T → ∀ b w : Fin n,
+        warmRefine adj P (individualizedColouring n T) b
+          = warmRefine adj P (individualizedColouring n T) w →
+        ∃ g, g ∈ gens ∧ ResidualAut adj P T g ∧ g b = w)
+    (hbase : IsBase adj P (bs.foldl (fun s b => insert b s) S)) :
+    CoversOrbits adj P gens bs S :=
+  coversOrbits_of_realizers_symmetric bs
+    (fun T hT hnb b w hw => hreal T hT hnb b w (OrbitPartition.subset_warmRefine hw)) hbase
+
 /-- **Harvest-facing form — realizers keyed on the refinement-visible cell relation.** The same general
 coverage, but the realizer hypothesis ranges over *same-`warmRefine`-cell* pairs (polynomially computable)
 rather than over `OrbitPartition` pairs: since orbits refine cells (`OrbitPartition.subset_warmRefine`), a
@@ -3708,6 +3748,42 @@ theorem schemeRecoveredByDepth_of_stablyRecoverable {n : Nat} (S : SchurianSchem
     exact ⟨π, mem_stabilizerAt_empty.mpr ⟨hres.1, hres.2.1⟩, hres, hπ⟩
   · rw [hl₁, hl₂]; exact hbase
 
+/-- **The rewiring: the group is reproduced from `RecoversWhileSymmetric` alone — the IR-core is NOT needed.**
+This is the genuine weakening the conservation split enables. `StablyRecoverable`/`SchemeRecoveredByDepth`
+required `CellsAreOrbits` (visible realizers) at **every** `T ⊇ S₀`, *including past the base* — folding the
+IR-core (the post-base discretization, possibly unbounded multipede) into the seal. Here the deep phase uses the
+**budget-split builder** `coversOrbits_of_visibleRealizers_symmetric`, which needs realizers only at the
+**non-base** prefixes (free at the base: orbits are singletons, `1 ∈ closure` covers). So the symmetry-phase
+recovery `RecoversWhileSymmetric` — exactly "the symmetry is consumed", empirically the `O(1)` G2-B residue —
+suffices to reproduce the full root group, with the (unbounded, flag-allowed) IR-core obligation dropped
+entirely. The shallow `∅ → S₀` phase is the carried orbit coverage (`coversOrbitsAlong_stabilizerAtEmpty`), as
+before. -/
+theorem schemeAutGroup_eq_closure_of_recoversWhileSymmetric {n : Nat} (S : SchurianScheme n)
+    {S₀ : Finset (Fin n)}
+    (hsym : RecoversWhileSymmetric (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀) :
+    ∃ gens : Set (Equiv.Perm (Fin n)),
+      Subgroup.closure gens = S.toAssociationScheme.SchemeAutGroup := by
+  classical
+  set adj := schemeAdj S.toAssociationScheme with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  obtain ⟨l₁, hl₁⟩ := exists_foldl_insert_eq (∅ : Finset (Fin n)) S₀
+  rw [Finset.empty_union] at hl₁
+  obtain ⟨k, _, hsub, hbase⟩ := exists_isBase_saturated adj P S₀
+  set Tb := (movedStep adj P)^[k] S₀ with hTb
+  obtain ⟨l₂, hl₂⟩ := exists_foldl_insert_eq S₀ (Tb \ S₀)
+  rw [Finset.union_sdiff_of_subset hsub] at hl₂
+  have hdeep : CoversOrbits adj P (↑(StabilizerAt adj P ∅)) l₂ S₀ := by
+    refine coversOrbits_of_visibleRealizers_symmetric (gens := ↑(StabilizerAt adj P ∅)) l₂
+      (fun T hT hnb b w hcell => ?_) (by rw [hl₂]; exact hbase)
+    obtain ⟨π, hres, hπ⟩ := orbitPartition_iff_residualAut.mp (hsym T hT hnb b w hcell)
+    exact ⟨π, mem_stabilizerAt_empty.mpr ⟨hres.1, hres.2.1⟩, hres, hπ⟩
+  have hcov : CoversOrbits adj P (↑(StabilizerAt adj P ∅)) (l₁ ++ l₂) ∅ :=
+    coversOrbits_append l₁ l₂ (coversOrbitsAlong_stabilizerAtEmpty adj P l₁ ∅)
+      (by rw [hl₁]; exact hdeep)
+  exact ⟨↑(StabilizerAt adj P ∅),
+    (closure_eq_stabilizerAt_empty_of_coversOrbits (l₁ ++ l₂) (fun g hg => hg) hcov).trans
+      (stabilizerAt_schemeAdj_empty_eq S)⟩
+
 /-- **The semantic self-detection proposition** — `SelfDetectsAtDepth` restated on `StablyRecoverable`. A
 schurian residual *self-detects stably at depth `bound`* when, *if primitive and small*, it recovers stably
 above some bounded set (`∃ S₀, |S₀| ≤ bound ∧ StablyRecoverable S₀`). This is the cleanest semantic form of the
@@ -3958,6 +4034,70 @@ theorem reachesRigidOrCameron_viaStableRecovery {n : Nat} {IsLarge : Nat → Pro
     SchemeRecoveredByDepth n S bound ∨ IsCameronScheme n S :=
   reachesRigidOrCameron_viaSelfDetection hClassify S hne hrank
     (selfDetectsAtDepth_of_selfDetectsStably hSelfDetect) hImprim
+
+/-! ### The rewiring — the seal keyed on symmetry-phase recovery (the IR-core dropped)
+
+The conservation split showed `StablyRecoverable`/`SchemeRecoveredByDepth` **over-require**: they fold the
+IR-core (post-base discretization, the unbounded multipede term) into the seal, though symmetry-completeness only
+needs the symmetry *consumed*. This block re-keys the seal on the IR-core-free rigid predicate. The group is still
+reproduced (`schemeAutGroup_eq_closure_of_recoversWhileSymmetric`: the symmetry phase suffices, the IR-core is not
+needed), so the new seal is *strictly weaker* in its open obligation — and `schemeRecoveredWhileSymmetric_of_stablyRecoverable`
+shows it subsumes the old one. The open content is now exactly the bounded, empirically-`O(1)` G2-B residue
+(`RecoversWhileSymmetric`); the IR-core moves to the second guarantee (flag-allowed). -/
+
+/-- **The IR-core-free rigid predicate.** Recovery throughout the **symmetry phase** from a bounded start
+(`RecoversWhileSymmetric` above a set of size `≤ bound`). The group is reproduced from it
+(`schemeAutGroup_eq_closure_of_schemeRecoveredWhileSymmetric`) with **no** IR-core discretization obligation —
+the weakening the budget split enables. Non-vacuous at small `bound` (recovery from a small start is genuine;
+at `bound ≥ base size` the symmetry phase is empty and it holds vacuously — like every recovery predicate it is
+meaningful only at `bound ≪ n`). -/
+def SchemeRecoveredWhileSymmetric (n : Nat) (S : SchurianScheme n) (bound : Nat) : Prop :=
+  ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
+    RecoversWhileSymmetric (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀
+
+/-- **The group is reproduced from IR-core-free recovery.** Unpacks `SchemeRecoveredWhileSymmetric` and applies
+`schemeAutGroup_eq_closure_of_recoversWhileSymmetric` — the symmetry phase reproduces the full root group. -/
+theorem schemeAutGroup_eq_closure_of_schemeRecoveredWhileSymmetric {n : Nat} {S : SchurianScheme n}
+    {bound : Nat} (h : SchemeRecoveredWhileSymmetric n S bound) :
+    ∃ gens : Set (Equiv.Perm (Fin n)),
+      Subgroup.closure gens = S.toAssociationScheme.SchemeAutGroup :=
+  let ⟨_, _, hsym⟩ := h
+  schemeAutGroup_eq_closure_of_recoversWhileSymmetric S hsym
+
+/-- **The symmetric seal subsumes the stable one.** `StablyRecoverable` (the old over-requiring recovery) gives
+`SchemeRecoveredWhileSymmetric` (drop the `DiscretizesAtBases` conjunct via the budget split). So any scheme the
+`SchemeRecoveredByDepth` seal placed is placed here too — the rewiring only *weakens* the obligation. -/
+theorem schemeRecoveredWhileSymmetric_of_stablyRecoverable {n : Nat} (S : SchurianScheme n)
+    {S₀ : Finset (Fin n)} {bound : Nat} (hcard : S₀.card ≤ bound)
+    (hstab : StablyRecoverable (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀) :
+    SchemeRecoveredWhileSymmetric n S bound :=
+  ⟨S₀, hcard, (stablyRecoverable_iff_symmetric_and_bases.mp hstab).2⟩
+
+/-- **The self-detection input, IR-core-free.** Primitive small ⟹ symmetry-phase recovery from a bounded start.
+Weaker than `SelfDetectsStably` (no IR-core discretization) — the genuine open content after the split. -/
+def SelfDetectsWhileSymmetric {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop) (bound : Nat) : Prop :=
+  S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+    SchemeRecoveredWhileSymmetric n S bound
+
+/-- **The rewired seal — keyed on symmetry-phase recovery, IR-core dropped (CONDITIONAL).** Instantiates the
+abstract `reachesRigidOrCameron'` with the IR-core-free rigid predicate `SchemeRecoveredWhileSymmetric`. Carries
+`hClassify` (G3), `hImprim`, and the open `hSelfDetect` — now the **bounded, empirically-`O(1)` G2-B residue**
+(`RecoversWhileSymmetric`), with the (potentially-unbounded) IR-core obligation moved to the second guarantee.
+The group is still reproduced (`schemeAutGroup_eq_closure_of_schemeRecoveredWhileSymmetric`), so this is a
+strictly weaker seal than `reachesRigidOrCameron_viaStableRecovery` (which it subsumes via
+`schemeRecoveredWhileSymmetric_of_stablyRecoverable`). -/
+theorem reachesRigidOrCameron_viaSymmetricRecovery {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hSelfDetect : SelfDetectsWhileSymmetric S IsLarge bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive → SchemeRecoveredWhileSymmetric n S bound) :
+    SchemeRecoveredWhileSymmetric n S bound ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron' (NonCascade := IsLargeSchemeViaAut IsLarge)
+    (ReachesRigid := fun m S' => SchemeRecoveredWhileSymmetric m S' bound)
+    hClassify (fun _ _ h => h) S hne hrank hSelfDetect hImprim
 
 /-! ### The scheme-seal wiring — the imprimitive branch folded into the visible block decomposition
 

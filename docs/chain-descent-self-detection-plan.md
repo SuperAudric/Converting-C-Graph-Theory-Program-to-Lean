@@ -187,6 +187,21 @@
 > because at an `IsBase` level the orbit *coverage* the harvest needs is free (orbits singletons, `σ=id` covers), so
 > the harvest does not truly need the IR-core. Re-deriving the group-reproduction chain from non-base coverage is the
 > heavier follow-on.
+> **THE REWIRING LANDED (2026-06-10, axiom-clean, build green) — the seal re-keyed on symmetry-phase recovery, IR-core
+> dropped.** The follow-on above is done. Chain (`Cascade.lean`): **`coversOrbits_of_realizers_symmetric`** +
+> **`coversOrbits_of_visibleRealizers_symmetric`** (coverage from realizers at NON-base prefixes only; free at the base
+> via `1 ∈ closure`) → **`schemeAutGroup_eq_closure_of_recoversWhileSymmetric`** (the heart: the full root group is
+> reproduced from `RecoversWhileSymmetric` *alone* — deep phase by the symmetric builder, shallow `∅→S₀` by free orbit
+> coverage; the IR-core discretization `StablyRecoverable` over-required is GONE) → **`SchemeRecoveredWhileSymmetric`**
+> (the IR-core-free rigid predicate) + **`schemeAutGroup_eq_closure_of_schemeRecoveredWhileSymmetric`** (group payoff) +
+> **`schemeRecoveredWhileSymmetric_of_stablyRecoverable`** (the new seal subsumes the old) + **`SelfDetectsWhileSymmetric`**
+> (the IR-core-free crux) + **`reachesRigidOrCameron_viaSymmetricRecovery`** (the rewired seal capstone: instantiates the
+> abstract `reachesRigidOrCameron'` with `SchemeRecoveredWhileSymmetric`, concluding `SchemeRecoveredWhileSymmetric ∨
+> IsCameronScheme`, carrying `hClassify`/`hImprim` + the open `hSelfDetect`). **NET: the seal's open content is now the
+> bounded, empirically-`O(1)` G2-B residue (`RecoversWhileSymmetric` = symmetry consumed), with the (potentially-unbounded)
+> IR-core discretization moved to the second guarantee — a strictly weaker open obligation, the genuine payoff of the
+> conservation split.** The open crux that remains is the same `RecoversWhileSymmetric` bound (the multi-base
+> `JointProfileRecoversAt`), but now uncontaminated by the IR-core / leg-B / Cameron `O(log n)` growth.
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
 > **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)
