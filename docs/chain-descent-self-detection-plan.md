@@ -7,14 +7,19 @@
 > equation (`recovery_depth = base + s(C) + IR_core`) and the viable step-2 plan. The blocks below are the prior
 > (still-valid) Phase-1/Phase-2 record.
 >
-> **STEPS 2.1 + 2.2 LANDED (2026-06-10, axiom-clean, build green).** **2.1:** the `base(G)` term banked —
-> `exists_greedy_base`/`_le_log`/`_scheme` (`Cascade.lean §A3.6`) prove `∃ IsBase S₀, 2^|S₀| ≤ |Aut|`, hence
-> `base(G) ≤ log₂|Aut| = O(log n)`. **2.2:** the layer-step reduction — `LayerRecovers` +
-> `recoversWhileSymmetric_of_layerRecovers` (+ scheme wrappers) reduce `RecoversWhileSymmetric` to base-case +
-> a per-layer transfer; `selfDetectsWhileSymmetric_of_layerRecovers` localizes the seal's whole open content to
-> "primitive small ⟹ ∃ bounded `S₀` with base case + `LayerRecovers`". See §12.4 steps 2.1/2.2. **Next: step 2.3**
-> (the genuine open `s(C)` core — discharge `LayerRecovers` via the multi-base forward `JointProfileRecoversAt
-> {T,x}`: a `T`-twin not a `(T∪{x})`-twin is split by a differing two-base intersection count; counting route 2.3(a)).
+> **STEPS 2.1 + 2.2 + 2.3-REDUCTION LANDED (2026-06-10, axiom-clean, build green).** **2.1:** `base(G)` banked —
+> `exists_greedy_base`/`_le_log`/`_scheme` (`Cascade.lean §A3.6`), `base(G) ≤ log₂|Aut| = O(log n)`. **2.2:** the
+> layer-step reduction — `LayerRecovers` + `recoversWhileSymmetric_of_layerRecovers` + scheme wrappers. **2.3
+> (the counting reduction — route (a)):** `RelCountsDetermineOrbit` (the open `s(C)` hypothesis as a finite
+> counting condition) + `cellsAreOrbits_of_relCountsDetermineOrbit` (the orbit-analogue of
+> `discrete_of_kRoundRelationSeparates`) + `recoversWhileSymmetric_of_relCountsDetermineOrbit` /
+> `selfDetectsWhileSymmetric_of_relCountsDetermineOrbit` (`CascadeAffine.lean §"Step 2.3"`). **The seal's entire
+> open content is now a concrete, finite counting non-existence** — the sharpest *provable* form. See §12.4 step 2.3.
+> **⚠️ This is a REDUCTION, not a closure:** `RelCountsDetermineOrbit` is FALSE for high-`s(C)` schemes; whether it
+> holds for all primitive small schemes is the GI-adjacent open core (G2-B), uncited. **Genuine next math** = a
+> counting non-existence proof for primitive small (needs scheme/S-ring theory from scratch) or a counterexample;
+> the block-construction route to prove it is dead (vacuity boundary). Cheap gate first: extend the probe to
+> non-affine primitives (step 2.4).
 >
 > **STATUS (2026-06-08): Phase 1 COMPLETE (Increments 1 + 2 LANDED, axiom-clean, build green) — the seal is
 > reduced end-to-end to the SEMANTIC crux `SelfDetectsStably` (primitive small ⟹ cells = orbits above a
@@ -1601,15 +1606,33 @@ per-layer transfer** *cells = orbits at `T` ⟹ cells = orbits at `insert x T`*.
   per-step condition. This is exactly where `JointProfileRecoversAt {T, x}` (the `§S1.c` object) plugs in
   (step 2.3, the genuine open `s(C)` core).
 
-**Step 2.3 — the per-layer separability (the genuine open core; three concrete attack routes).**
-Prove the per-layer bridge: cells = orbits at `T` ⟹ cells = orbits at `T ∪ {x}`, for non-abelian primitive small.
-Equivalently `JointProfileRecoversAt` at `|T|+1`: the gap `⋂ Stab(t)-orbit ⊋ Stab(T,x)-orbit` is closed by the
-two-base intersection counts after individualizing `x`. **Routes (try in this order):**
-- *(a) The counting route (most native).* The two-base count `#{z : relOfPair t z = a ∧ relOfPair t' z = a'}` is a
-  single structure constant (`intersectionCount_via_w` = `intersectionNumber a a' (relOfPair t t')`). The per-layer
-  separation is whether the *joint* profile (these counts over `T ∪ {x}`) refines the `⋂Stab`-orbit down to the
-  `Stab(T,x)`-orbit. Concrete target: *a relation that is a `T`-twin but not a `T∪{x}`-twin is detected by a
-  differing two-base count.* This is finite, per-relation, and uses only landed intersection-number machinery.
+**Step 2.3 — the per-layer separability (the genuine open core) — REDUCTION LANDED (2026-06-10, route (a), the
+counting route), the open math itself NOT closed.** The sharpest *provable* form of the open `s(C)` content is
+now landed (axiom-clean, build green, `CascadeAffine.lean §"Step 2.3"`): the seal's entire open content is a
+**concrete, finite counting non-existence**.
+- *What landed (the reduction):* **`RelCountsDetermineOrbit S T`** (the open hypothesis, counting form: equal
+  relation-profile counts ⟹ same `Stab(T)`-orbit — the orbit-analogue of `discrete_of_kRoundRelationSeparates`'s
+  separation hypothesis, `=u'` weakened to "same orbit" for the non-base symmetric phase) → **`cellsAreOrbits_of_relCountsDetermineOrbit`**
+  (the `CellsAreOrbits` producer, mirrors the discreteness producer verbatim via `kRoundProfileCount_eq` at `k=1`)
+  → **`recoversWhileSymmetric_of_relCountsDetermineOrbit`** / **`selfDetectsWhileSymmetric_of_relCountsDetermineOrbit`**
+  (seal-facing: `SelfDetectsWhileSymmetric` ⟸ "primitive small ⟹ ∃ bounded `S₀`, every non-base `T ⊇ S₀` has its
+  `Stab(T)`-orbits determined by relation counts").
+- *Finding (refines the sketch):* the relation count `#{z : (T`-profile of `z) = ρ ∧ relOfPair u z = b}` is
+  **`k`-independent** (the `k` in `kRoundProfileCount_eq`/`discrete_of_kRoundRelationSeparates` drives only the
+  proof's peeling, not the count value) — it is the *fixed bounded-depth* invariant of the engine. So
+  `RelCountsDetermineOrbit` captures the depth-bounded-recoverable class (incl. cyclotomic, which fails depth-1
+  `JointProfileRecoversAt` but recovers via this count); a scheme needing a *strictly deeper* invariant would need
+  a deeper count engine. It is exactly what the catalogue/affine probes measure (`SeparatesAtBoundedBase`).
+- **HONEST SCOPE — this is a *reduction*, not a closure.** `RelCountsDetermineOrbit` is **FALSE** for high-`s(C)`
+  schemes; whether it holds for all primitive small schemes is the GI-adjacent open core (G2-B), uncited, no known
+  counterexample, empirically supported (both falsifiers 0 witnesses). The block-construction converse to *prove*
+  it is dead on the primitive floor (the vacuity boundary). **What remains genuinely open** = exhibiting a
+  primitive small scheme where `RelCountsDetermineOrbit` *fails* from a bounded base (a seal counterexample), or
+  proving it never does (a counting non-existence proof, which would need scheme/S-ring theory built from scratch).
+- *Original sketch (routes b/c, not pursued — require building scheme theory):* the rank-4 amorphic slice; the
+  S-ring separability route. Route (a)'s counting target — *a `T`-twin not a `T∪{x}`-twin is split by a differing
+  two-base count* (`intersectionCount_via_w` = `intersectionNumber a a' (relOfPair t t')`) — is the content of
+  `RelCountsDetermineOrbit`'s failure; proving its *non-existence* for primitive small is the open math.
 - *(b) The rank-4 amorphic slice (smallest concrete instance).* Prove the per-layer bridge for `S.rank = 3`
   (4 relations, the amorphic equal-valency case — order-16 #20/#21, the cyclotomic Clebsch). Caveat: the
   Frobenius/Galois route was **retracted** (the gap is the amorphic `S₃`, not Galois); the bridge must be

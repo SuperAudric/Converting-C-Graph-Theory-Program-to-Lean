@@ -458,6 +458,80 @@ theorem discrete_of_kRoundRelationSeparates {n : Nat} (S : AssociationScheme n) 
   intro u u' hcell
   exact hsep u u' (fun ρ b => kRoundProfileCount_eq S hcell k hk1 hk ρ b)
 
+/-! ### Step 2.3 — the counting reduction of the seal's open content (`s(C)`)
+
+Steps 2.1 + 2.2 reduced the seal's open content to `RecoversWhileSymmetric S₀` = `CellsAreOrbits (schemeAdj S)`
+at every **non-base** prefix `T ⊇ S₀` (warmRefine-cells = `Stab(T)`-orbits, the symmetric phase). This block
+performs the **counting reduction** (the `s(C)` route): it produces `CellsAreOrbits` — the *orbits* (non-base)
+analogue of `discrete_of_kRoundRelationSeparates`, which produces *singletons* (base) — from the landed
+relation-profile counting engine (`kRoundProfileCount_eq`). The resulting open hypothesis
+(`RelCountsDetermineOrbit`) is a **concrete, finite counting non-existence**: no two vertices with equal
+relation-profile counts (the same bounded-depth invariant `discrete_of_kRoundRelationSeparates` uses — `u`'s
+neighbours `z` histogrammed by `(T`-profile of `z`, `u`–`z` relation`)`) lie in different `Stab(T)`-orbits — no
+*persistent count-twin across orbits*. This is exactly what the catalogue / affine probes measure
+(`SeparatesAtBoundedBase`). It is the sharpest *provable* form of the open `s(C)` conjecture — the GI-adjacent
+core (G2-B) stays open, but is now a finite counting statement in the existing machinery, not a warmRefine-fixpoint
+claim. **Honest scope:** this is a *reduction*, not a closure; `RelCountsDetermineOrbit` is FALSE for high-`s(C)`
+schemes (the block-construction converse is proven dead on the primitive floor — a persistent twin is a
+non-congruence amorphic fusion). The count is the fixed bounded-depth invariant of the engine (`k`-independent —
+`k` drives only the peeling in `kRoundProfileCount_eq`), so this captures the depth-bounded-recoverable class. -/
+
+/-- **Relation counts determine the `Stab(T)`-orbit (the open `s(C)` hypothesis, counting form).** Two vertices
+with equal relation-profile counts (relative to base `T`: the histogram of neighbours `z` by `(T`-profile of `z`,
+relation to the vertex`)` — the bounded-depth invariant of `discrete_of_kRoundRelationSeparates`) lie in the same
+`Stab(T)`-orbit (`OrbitPartition (schemeAdj S) … T`). The orbit-analogue of that engine's separation hypothesis
+(`= u'` weakened to "same orbit", for the non-base symmetric phase). For a primitive small scheme the conjecture
+is that this holds from a base + `O(1)` set; it is genuinely open (G2-B). -/
+def RelCountsDetermineOrbit {n : Nat} (S : AssociationScheme n) (T : Finset (Fin n)) : Prop :=
+  ∀ u u' : Fin n,
+    (∀ (ρ : Fin n → Fin (S.rank + 1)) (b : Fin (S.rank + 1)),
+      (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+        (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u z = b)).card
+      = (Finset.univ.filter (fun z : Fin n => z ≠ u' ∧
+        (∀ t ∈ T, S.relOfPair t z = ρ t) ∧ S.relOfPair u' z = b)).card)
+    → OrbitPartition (schemeAdj S) (fun _ _ => POE.unknown) T u u'
+
+/-- **`CellsAreOrbits` from the counting condition (step 2.3 — the counting producer).** The orbits (non-base)
+analogue of `discrete_of_kRoundRelationSeparates`: if relation counts determine the `Stab(T)`-orbit
+(`RelCountsDetermineOrbit`), then warmRefine-from-`T` cells coincide with `Stab(T)`-orbits. Proof mirrors the
+discreteness producer verbatim — a same-cell pair shares its relation-count profile (`kRoundProfileCount_eq` at
+`k = 1`), and the hypothesis lifts that to an orbit relation. Axiom-clean. -/
+theorem cellsAreOrbits_of_relCountsDetermineOrbit {n : Nat} (S : AssociationScheme n)
+    {T : Finset (Fin n)} (hn : 2 ≤ n) (hdet : RelCountsDetermineOrbit S T) :
+    CellsAreOrbits (schemeAdj S) (fun _ _ => POE.unknown) T := by
+  intro u u' hcell
+  exact hdet u u' (fun ρ b => kRoundProfileCount_eq S hcell 1 le_rfl (by omega) ρ b)
+
+/-- **`RecoversWhileSymmetric` from per-prefix orbit determination (step 2.3).** The seal's symmetric-phase
+recovery from `S₀` reduces to: at every non-base prefix `T ⊇ S₀`, relation counts determine the `Stab(T)`-orbit.
+Each prefix's `CellsAreOrbits` is produced by `cellsAreOrbits_of_relCountsDetermineOrbit`. Axiom-clean. -/
+theorem recoversWhileSymmetric_of_relCountsDetermineOrbit {n : Nat} (S : SchurianScheme n) (hn : 2 ≤ n)
+    {S₀ : Finset (Fin n)}
+    (h : ∀ T : Finset (Fin n), S₀ ⊆ T →
+        ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T →
+        RelCountsDetermineOrbit S.toAssociationScheme T) :
+    RecoversWhileSymmetric (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) S₀ := by
+  intro T hsub hnb
+  exact cellsAreOrbits_of_relCountsDetermineOrbit S.toAssociationScheme hn (h T hsub hnb)
+
+/-- **Self-detection reduced to the counting condition (step 2.3 — the seal-facing reduction).**
+`SelfDetectsWhileSymmetric` from "primitive small ⟹ ∃ bounded `S₀`, every non-base `T ⊇ S₀` has its
+`Stab(T)`-orbits determined by relation counts". This is the **entire open content of the seal** as a concrete,
+finite counting non-existence — the sharpest provable form of the `s(C)` conjecture (`base(G)` banked by step 2.1
+into `bound`; the layer reduction by step 2.2; the counting engine here). The GI-adjacent core (whether the
+hypothesis holds for all primitive small schemes) stays open. Axiom-clean. -/
+theorem selfDetectsWhileSymmetric_of_relCountsDetermineOrbit {n : Nat} (S : SchurianScheme n) (hn : 2 ≤ n)
+    {IsLarge : Nat → Prop} {bound : Nat}
+    (h : S.toAssociationScheme.IsPrimitive ∧ ¬ IsLargeSchemeViaAut IsLarge n S →
+      ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
+        ∀ T : Finset (Fin n), S₀ ⊆ T →
+          ¬ IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T →
+          RelCountsDetermineOrbit S.toAssociationScheme T) :
+    SelfDetectsWhileSymmetric S IsLarge bound := by
+  intro hps
+  obtain ⟨S₀, hcard, hrec⟩ := h hps
+  exact ⟨S₀, hcard, recoversWhileSymmetric_of_relCountsDetermineOrbit S hn hrec⟩
+
 /-! ### Phase 2, M0.3 — the affine instance `V ⋊ G₀` over `F_p^d`
 
 The concrete beachhead family: the orbital scheme of the affine group `V ⋊ G₀` acting on `V = F_p^d`,
