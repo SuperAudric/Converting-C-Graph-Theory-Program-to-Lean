@@ -61,6 +61,22 @@
 > **REMAINING = F2b: proving separation for `G0pow β`** (the uncited `s(C)` counting; F1 is the tool). Optionally
 > the **depth-`k` producer** (general §5.3 engine). E2-model needs **no new construction** (proper-`β` cyclotomic =
 > `affineScheme` at `G0pow`).
+>
+> **SEPARATION PROOF — decomposition + STEP 1 LANDED (2026-06-09, axiom-clean, build green).** The open separation
+> (`CyclicAffineSeparates` for `G0pow β`) decomposes into: **(1) Frobenius is a configuration automorphism**
+> [LANDED] — `relOfPair_frobPerm_hom`: the Frobenius permutation `frobPerm` of `V` preserves the relation
+> partition, because `frobCoord` **normalizes** `G0pow β` (`frobCoord_conj_sigmaPow`: `σ ↦ σ^p`,
+> `frobCoord_conj_mem_G0pow`) and is additive. This is the concrete `Ĝ ⊋ G` gap — an algebraic automorphism the
+> group doesn't realize, the obstruction the leak exploits. **(2) Γ-breaking kills Frobenius symmetry** [OPEN,
+> provable] — a Frobenius power fixing a field-generating `T` is the identity (field theory). **(3) the crux**
+> [OPEN, uncited] — a profile-twin is only ever a Frobenius image. **(4) wire** (1)+(2)+(3) ⟹ separation.
+> **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
+> `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
+> **IMPLEMENTATION FINDING for step 2+:** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, the scheme's
+> points) and `efield` (`F_q ≃ F_p^d`, the field/Frobenius). Step 1 was iso-agnostic (only used `frobCoord` linear
+> on differences), but step 2's "T field-generates" is a FIELD condition (via `efield`) on scheme points (via
+> `affineE`), so it needs the two isos aligned (or `affineE := efield`-compatible). Resolve the alignment before
+> step 2.
 > The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**

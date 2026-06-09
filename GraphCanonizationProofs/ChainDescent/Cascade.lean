@@ -5195,6 +5195,74 @@ theorem G0pow_pow_irreducible (hd : d ≠ 0) (m r : ℕ)
     G₀Irreducible (G0pow hd ((fqGen : (GaloisField p d)ˣ) ^ m)) :=
   G0pow_irreducible_of_adjoin hd _ (adjoin_eq_top_of_orderOf hd _ r hr hcop)
 
+/-! #### Separation obstruction — Frobenius is a configuration automorphism (the `Ĝ ⊋ G` gap, separation step 1)
+
+The Frobenius permutation `frobPerm` of `V` (additive, the transported `frobCoord`) **preserves the scheme's
+relation partition** (`relOfPair_frobPerm_hom`): it is an automorphism of the coherent configuration that the
+group `V ⋊ G0pow β` does **not** realize. This is the concrete `Ĝ ⊋ G` separability gap — the obstruction the
+`s(C)` leak would exploit — and the first step of the separation proof (a profile-twin can only be a Frobenius
+image; a Γ-breaking base removes Frobenius symmetry; the remaining "all twins are Frobenius twins" is the open
+crux, self-detection-plan §11.8). The mechanism: `frobCoord` **normalizes** `G0pow β`
+(`frobCoord_conj_sigmaPow`: `frobCoord·σ·frobCoord⁻¹ = σ^p ∈ ⟨σ⟩`), and Frobenius is additive, so it carries
+`G0pow β`-orbits of differences to `G0pow β`-orbits of differences. **General-theorem shadow:** "a normalizing
+algebraic automorphism is a configuration automorphism," the exact shape of the general `s(C)` obstruction. -/
+
+/-- `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for an arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). -/
+theorem frobLinear_conj_mulUnit' (β : (GaloisField p d)ˣ) :
+    frobLinear (p := p) (d := d) * mulUnitHom β * (frobLinear)⁻¹ = (mulUnitHom β) ^ p := by
+  ext x
+  have hinv : frobLinear (p := p) (d := d) ((frobLinear (p := p) (d := d))⁻¹ x) = x := by
+    rw [← LinearEquiv.mul_apply, mul_inv_cancel]; exact (LinearEquiv.eq_symm_apply 1).mp rfl
+  rw [← map_pow, mulUnitHom_apply, Units.val_pow_eq_pow_val, LinearEquiv.mul_apply,
+    LinearEquiv.mul_apply, mulUnitHom_apply, frobLinear_mul, hinv]
+
+/-- **`frobCoord` conjugates `σ_β` to `σ_β^p`** (generalizes `frobCoord_conj_sigmaCyc`) — so `frobCoord`
+normalizes `G0pow β = ⟨σ_β⟩`. -/
+theorem frobCoord_conj_sigmaPow (hd : d ≠ 0) (β : (GaloisField p d)ˣ) :
+    frobCoord (p := p) hd * sigmaPow hd β * (frobCoord hd)⁻¹ = (sigmaPow hd β) ^ p := by
+  rw [frobCoord, sigmaPow, ← map_inv, ← map_mul, ← map_mul, frobLinear_conj_mulUnit', map_pow]
+
+/-- **`frobCoord` normalizes `G0pow β`** (forward inclusion): `g ∈ G0pow β ⟹ frobCoord·g·frobCoord⁻¹ ∈ G0pow β`.
+From `frobCoord_conj_sigmaPow` (`σ ↦ σ^p`) and conjugation distributing over `zpow`. -/
+theorem frobCoord_conj_mem_G0pow (hd : d ≠ 0) (β : (GaloisField p d)ˣ) {g}
+    (hg : g ∈ G0pow hd β) : frobCoord hd * g * (frobCoord hd)⁻¹ ∈ G0pow hd β := by
+  obtain ⟨k, hk⟩ := Subgroup.mem_zpowers_iff.1 hg
+  have hconj : frobCoord hd * g * (frobCoord hd)⁻¹
+      = (frobCoord hd * sigmaPow hd β * (frobCoord hd)⁻¹) ^ k := by
+    rw [← hk, ← MulAut.conj_apply, ← MulAut.conj_apply, ← map_zpow]
+  rw [hconj, frobCoord_conj_sigmaPow]
+  exact Subgroup.zpow_mem _ (pow_mem (Subgroup.mem_zpowers _) p) k
+
+/-- The **Frobenius permutation** of `V = F_p^d` — the additive automorphism `frobCoord` transported to
+`Fin (p^d)` (linear part `frobCoord`, zero translation). -/
+noncomputable def frobPerm (hd : d ≠ 0) : Equiv.Perm (Fin (p ^ d)) :=
+  affinePermFin (frobCoord hd) 0
+
+/-- The difference-coordinate of `frobPerm` is `frobCoord` of the coordinate (additive on differences). -/
+theorem affineE_symm_frobPerm (hd : d ≠ 0) (x : Fin (p ^ d)) :
+    affineE.symm (frobPerm hd x) = frobCoord hd (affineE.symm x) := by
+  rw [frobPerm, affinePermFin_apply, add_zero, Equiv.symm_apply_apply]
+
+/-- **The Frobenius permutation preserves the relation partition** (separation step 1, the configuration
+automorphism). If `(x,y)` and `(x',y')` lie in the same relation, so do their `frobPerm`-images — because
+`frobCoord` normalizes `G0pow β` and is additive. So `frobPerm` is an automorphism of the coherent
+configuration not realized by `V ⋊ G0pow β` — the concrete `Ĝ ⊋ G` separability gap. -/
+theorem relOfPair_frobPerm_hom (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G0pow hd β) {x y x' y' : Fin (p ^ d)}
+    (h : (affineScheme (G0pow hd β) hneg).relOfPair x y
+        = (affineScheme (G0pow hd β) hneg).relOfPair x' y') :
+    (affineScheme (G0pow hd β) hneg).relOfPair (frobPerm hd x) (frobPerm hd y)
+      = (affineScheme (G0pow hd β) hneg).relOfPair (frobPerm hd x') (frobPerm hd y') := by
+  rw [affineScheme_relOfPair_eq_iff, orbMk_affine_eq_iff] at h ⊢
+  obtain ⟨g₀, hg₀, hg⟩ := h
+  refine ⟨frobCoord hd * g₀ * (frobCoord hd)⁻¹, frobCoord_conj_mem_G0pow hd β hg₀, ?_⟩
+  have hinv : (frobCoord hd)⁻¹ (frobCoord hd (affineE.symm y' - affineE.symm x'))
+      = affineE.symm y' - affineE.symm x' := by
+    rw [← LinearEquiv.mul_apply, inv_mul_cancel]; exact (LinearEquiv.eq_symm_apply 1).mp rfl
+  rw [affineE_symm_frobPerm, affineE_symm_frobPerm, affineE_symm_frobPerm, affineE_symm_frobPerm,
+    ← map_sub (frobCoord hd), ← map_sub (frobCoord hd), LinearEquiv.mul_apply, LinearEquiv.mul_apply,
+    hinv, hg]
+
 end CyclicAffine
 
 /-! #### The concrete cyclotomic witness — `F₁₆`, the index-3 Clebsch family
