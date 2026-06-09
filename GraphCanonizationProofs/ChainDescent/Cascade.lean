@@ -12,6 +12,11 @@ import Mathlib.Algebra.Module.Pi
 import Mathlib.Algebra.Module.Submodule.Lattice
 import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Tactic.Abel
+import Mathlib.FieldTheory.Finite.GaloisField
+import Mathlib.FieldTheory.Finite.Basic
+import Mathlib.LinearAlgebra.Basis.Basic
+import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.GroupTheory.SpecificGroups.Cyclic
 
 /-!
 # B1 — cascade composition (Theorem 3a), Phases A + C
@@ -4704,5 +4709,145 @@ theorem reachesRigidOrCameron_viaAffineIrreducible {IsLarge : Nat → Prop}
   exact hbound ⟨isPrimitive_affineScheme_imp_irreducible G₀ hneg hprim, hsmall⟩
 
 end AffineScheme
+
+/-! ### Phase 2 / F0 — the cyclic (cyclotomic) affine instance
+
+`affineScheme` instantiated at a **cyclic irreducible** `G₀ = ⟨σ⟩`, where `σ` is multiplication by a
+generator of `F_qˣ` (`q = p^d`) transported to the coordinate space `F_p^d = Fin d → ZMod p` along a field
+basis `efield : F_q ≃ₗ F_p^d`. This delivers the two model inputs the seal capstone
+`reachesRigidOrCameron_viaAffineIrreducible` is stated against on the cyclic floor:
+- `G0cyc_irreducible : G₀Irreducible (G0cyc hd)` — EARNED, via the multiplicative-orbit argument (a
+  `mul·α`-invariant nonzero subspace contains a full `F_qˣ`-orbit = all nonzero elements ⟹ is `⊤`); no
+  `IsSimpleModule` / `F_p[α]=F_q` algebra needed, just that `α` generates `F_qˣ`.
+- `neg_mem_G0cyc : neg ∈ G0cyc hd` — the symmetry hypothesis `hneg` (`-1 = α^k` for some `k`, so
+  `neg = σ^k`).
+The Frobenius `s(C)` bound (F1/F2, self-detection-plan §11.8) targets the remaining `hbound` (discreteness)
+on this instance. The two transport homs `mulUnitHom` (mult-by-unit) and `conjHom` (conjugation by `efield`)
+make `σ^k` reduce to `α^k` for free (`MonoidHom.map_zpow`), which is what both deliverables turn on. -/
+
+section CyclicAffine
+
+variable {p d : ℕ} [Fact p.Prime]
+
+/-- `GaloisField p d` is finite; equip it with a `Fintype` (no direct instance exists). -/
+noncomputable local instance instFintypeGaloisField : Fintype (GaloisField p d) :=
+  Fintype.ofFinite _
+
+/-- The field basis isomorphism `F_q ≃ₗ F_p^d` (`q = p^d`), from `finrank = d`. -/
+noncomputable def efield (hd : d ≠ 0) : GaloisField p d ≃ₗ[ZMod p] (Fin d → ZMod p) :=
+  ((Module.finBasis (ZMod p) (GaloisField p d)).reindex
+    (finCongr (GaloisField.finrank p hd))).equivFun
+
+/-- Multiplication-by-a-unit as an `F_p`-linear automorphism of `F_q` — a monoid hom from `F_qˣ`. The
+engine for `σ` (mult by a multiplicative generator); being a monoid hom is what lets `σ^k` reduce to `α^k`. -/
+noncomputable def mulUnitHom :
+    (GaloisField p d)ˣ →* (GaloisField p d ≃ₗ[ZMod p] GaloisField p d) where
+  toFun u := LinearEquiv.ofBijective (LinearMap.mulLeft (ZMod p) (u : GaloisField p d))
+    ⟨fun x y h => mul_left_cancel₀ u.ne_zero (by simpa [LinearMap.mulLeft_apply] using h),
+     fun y => ⟨(↑u⁻¹ : GaloisField p d) * y, by
+        rw [LinearMap.mulLeft_apply, Units.val_inv_eq_inv_val, mul_inv_cancel_left₀ u.ne_zero]⟩⟩
+  map_one' := by ext x; simp [LinearMap.mulLeft_apply]
+  map_mul' a b := by ext x; simp [LinearMap.mulLeft_apply, LinearEquiv.mul_apply, Units.val_mul]
+
+@[simp] theorem mulUnitHom_apply (u : (GaloisField p d)ˣ) (x : GaloisField p d) :
+    mulUnitHom u x = (u : GaloisField p d) * x := by
+  simp [mulUnitHom]
+
+/-- Conjugation by `efield`: a monoid hom `(F_q ≃ₗ F_q) →* (F_p^d ≃ₗ F_p^d)`. -/
+noncomputable def conjHom (hd : d ≠ 0) :
+    (GaloisField p d ≃ₗ[ZMod p] GaloisField p d) →*
+      ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) where
+  toFun e := (efield hd).symm.trans (e.trans (efield hd))
+  map_one' := by ext u; simp
+  map_mul' a b := by ext u; simp [LinearEquiv.mul_apply]
+
+@[simp] theorem conjHom_apply (hd : d ≠ 0) (e : GaloisField p d ≃ₗ[ZMod p] GaloisField p d)
+    (u : Fin d → ZMod p) : conjHom hd e u = efield hd (e ((efield hd).symm u)) := by
+  simp [conjHom]
+
+/-- A multiplicative generator of `F_qˣ` (cyclic). -/
+noncomputable def fqGen : (GaloisField p d)ˣ :=
+  (IsCyclic.exists_generator (α := (GaloisField p d)ˣ)).choose
+
+theorem fqGen_spec (x : (GaloisField p d)ˣ) : x ∈ Subgroup.zpowers (fqGen (p := p) (d := d)) :=
+  (IsCyclic.exists_generator (α := (GaloisField p d)ˣ)).choose_spec x
+
+/-- `σ` — multiplication by `fqGen`, transported to the coordinate space; the generator of `G₀`. -/
+noncomputable def sigmaCyc (hd : d ≠ 0) : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p) :=
+  conjHom hd (mulUnitHom (fqGen (p := p) (d := d)))
+
+/-- The cyclic affine group `G₀ = ⟨σ⟩ ≤ GL(F_p^d)`. -/
+noncomputable def G0cyc (hd : d ≠ 0) : Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) :=
+  Subgroup.zpowers (sigmaCyc hd)
+
+/-- `σ^k` acts as multiplication by `α^k` through the field iso — the load-bearing reduction
+(`σ^k` ↦ `α^k` for free, since `σ = conjHom (mulUnitHom α)` and both are monoid homs). -/
+theorem sigmaCyc_zpow_apply (hd : d ≠ 0) (k : ℤ) (u : Fin d → ZMod p) :
+    (sigmaCyc hd ^ k) u
+      = efield hd (((fqGen (p := p) (d := d) ^ k : (GaloisField p d)ˣ) : GaloisField p d)
+          * (efield hd).symm u) := by
+  have hpow : sigmaCyc hd ^ k = conjHom hd (mulUnitHom (fqGen (p := p) (d := d) ^ k)) := by
+    rw [sigmaCyc, ← MonoidHom.map_zpow, ← MonoidHom.map_zpow]
+  rw [hpow, conjHom_apply, mulUnitHom_apply]
+
+/-- Every nonzero `z ∈ F_q` is a natural power of the generator `α` (the multiplicative-orbit fact). -/
+theorem exists_npow_fqGen (z : GaloisField p d) (hz : z ≠ 0) :
+    ∃ k : ℕ, ((fqGen (p := p) (d := d)) : GaloisField p d) ^ k = z := by
+  have hmem : (Units.mk0 z hz) ∈ Submonoid.powers (fqGen (p := p) (d := d)) :=
+    mem_powers_iff_mem_zpowers.2 (fqGen_spec _)
+  obtain ⟨k, hk⟩ := hmem
+  refine ⟨k, ?_⟩
+  have hv := congrArg (Units.val) hk
+  rwa [Units.val_pow_eq_pow_val, Units.val_mk0] at hv
+
+/-- **`hneg` for the cyclic instance** — `neg ∈ G0cyc` (since `-1 = α^k`, `neg = σ^k`). -/
+theorem neg_mem_G0cyc (hd : d ≠ 0) : LinearEquiv.neg (ZMod p) ∈ G0cyc hd := by
+  obtain ⟨k, hk⟩ := Subgroup.mem_zpowers_iff.1 (fqGen_spec (-1 : (GaloisField p d)ˣ))
+  refine Subgroup.mem_zpowers_iff.2 ⟨k, ?_⟩
+  ext u
+  rw [sigmaCyc_zpow_apply, hk]
+  have h1 : ((-1 : (GaloisField p d)ˣ) : GaloisField p d) = -1 := by simp
+  rw [h1, neg_one_mul, map_neg, LinearEquiv.apply_symm_apply, LinearEquiv.neg_apply]
+
+/-- **`G₀Irreducible` for the cyclic instance** — EARNED via the multiplicative-orbit argument:
+a `σ`-invariant nonzero subspace `W` contains, for `0 ≠ w₀ ∈ W`, the full orbit `{α^k · w₀}`, which
+(since `α` generates `F_qˣ`) is every nonzero element ⟹ `W = ⊤`. -/
+theorem G0cyc_irreducible (hd : d ≠ 0) : G₀Irreducible (G0cyc (p := p) hd) := by
+  intro W hWinv
+  by_cases hWbot : W = ⊥
+  · exact Or.inl hWbot
+  refine Or.inr ?_
+  have hσmem : sigmaCyc (p := p) hd ∈ G0cyc (p := p) hd := Subgroup.mem_zpowers _
+  obtain ⟨w₀, hw₀W, hw₀0⟩ := (Submodule.ne_bot_iff W).1 hWbot
+  set x₀ : GaloisField p d := (efield hd).symm w₀ with hx₀def
+  have hx₀0 : x₀ ≠ 0 := by
+    rw [hx₀def, ne_eq, LinearEquiv.map_eq_zero_iff]; exact hw₀0
+  rw [eq_top_iff]
+  intro v _
+  by_cases hv0 : (efield hd).symm v = 0
+  · have hvz : v = 0 := by
+      have hcong := congrArg (efield hd) hv0
+      rwa [LinearEquiv.apply_symm_apply, map_zero] at hcong
+    rw [hvz]; exact W.zero_mem
+  · set y : GaloisField p d := (efield hd).symm v with hydef
+    obtain ⟨k, hk⟩ := exists_npow_fqGen (y * x₀⁻¹) (mul_ne_zero hv0 (inv_ne_zero hx₀0))
+    have hmemk : (sigmaCyc hd ^ (k : ℤ)) w₀ ∈ W :=
+      hWinv _ (Subgroup.zpow_mem _ hσmem k) w₀ hw₀W
+    have hval : (sigmaCyc hd ^ (k : ℤ)) w₀ = v := by
+      rw [sigmaCyc_zpow_apply,
+        show ((fqGen (p := p) (d := d) ^ (k : ℤ) : (GaloisField p d)ˣ) : GaloisField p d)
+            = ((fqGen (p := p) (d := d)) : GaloisField p d) ^ k from by
+          rw [zpow_natCast, Units.val_pow_eq_pow_val],
+        hk, ← hx₀def, mul_assoc, inv_mul_cancel₀ hx₀0, mul_one, hydef,
+        LinearEquiv.apply_symm_apply]
+    rwa [hval] at hmemk
+
+/-- The **cyclic affine scheme** — `affineScheme` at `G0cyc`, the cyclotomic beachhead. A genuinely
+primitive (`G0cyc_irreducible`) small affine instance, symmetric (`neg_mem_G0cyc`); the family the
+Frobenius `s(C)` bound (F2b) and the affine probe target. -/
+noncomputable def cyclicAffineScheme (hd : d ≠ 0) : SchurianScheme (p ^ d) :=
+  affineScheme (G0cyc hd) (neg_mem_G0cyc hd)
+
+end CyclicAffine
 
 end ChainDescent

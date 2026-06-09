@@ -606,4 +606,96 @@ public class AffineSchemeProbe(ITestOutputHelper output)
 
         Assert.True(candDepthByD.Count > 0 || primNonAb >= 0, "probe enumerated no schemes");
     }
+
+    // ── F2-RISK DE-RISK: does the depth-2 producer actually discretize? ───────────
+    //
+    // `discrete_of_twoRoundRelationSeparates` (Cascade.lean §13b) uses EXACTLY 2
+    // `refineStep` rounds on the relation-labelled complete graph `schemeAdj`, from
+    // an individualized base T (each t∈T a distinct singleton colour, others 0).
+    // refineStep: colour'(v) = (colour v, sorted multiset over ALL w of
+    //   (relOfPair(v,w), colour w)).  For the affine scheme relOfPair(x,y)=orbit(x⊕y).
+    //
+    // The earlier probes measured recovery via EdgeGenerates (depth-1 signature) or
+    // GreedyIRDepth (single-relation Cayley refinement to FIXPOINT) — neither isolates
+    // "exactly 2 rounds on schemeAdj".  This fact measures rounds-to-discrete under the
+    // producer's exact refinement, at a Γ-breaking T (differences field-generate F_q),
+    // to settle whether depth-2 suffices or the depth-k producer is strictly necessary.
+    //
+    //   rounds-to-discrete ≤ 2 at bounded |T|  ⟹  depth-2 producer suffices.
+    //   rounds-to-discrete  > 2                ⟹  depth-k producer is necessary.
+
+    // Relation-1-WL on the complete labelled graph schemeAdj, from individualized T.
+    // Returns the round at which the partition becomes discrete (all colours distinct),
+    // 0 if T alone discretizes, or -1 if the 1-WL fixpoint is reached WITHOUT discreteness.
+    static int RoundsToDiscrete(Scheme s, List<int> T, int capRounds)
+    {
+        int n = s.N;
+        var color = new long[n];
+        for (int i = 0; i < T.Count; i++) color[T[i]] = i + 1;   // individualized: distinct; others 0
+        int distinct = color.Distinct().Count();
+        if (distinct == n) return 0;
+        for (int round = 1; round <= capRounds; round++)
+        {
+            var sig = new (long, string)[n];
+            for (int v = 0; v < n; v++)
+            {
+                var ms = new List<(int, long)>(n);
+                for (int w = 0; w < n; w++) ms.Add((s.Oid[v ^ w], color[w]));
+                ms.Sort();
+                sig[v] = (color[v], string.Join(";", ms.Select(t => t.Item1 + "," + t.Item2)));
+            }
+            var map = new Dictionary<(long, string), long>(); long next = 0; var nc = new long[n];
+            foreach (var v in Enumerable.Range(0, n).OrderBy(v => sig[v].Item1).ThenBy(v => sig[v].Item2))
+            { if (!map.TryGetValue(sig[v], out long c)) { c = next++; map[sig[v]] = c; } nc[v] = c; }
+            int nd = nc.Distinct().Count();
+            color = nc;
+            if (nd == n) return round;
+            if (nd == distinct) return -1;       // 1-WL only refines; stable distinct-count ⟹ fixpoint, not discrete
+            distinct = nd;
+        }
+        return -1;
+    }
+
+    [Fact]
+    public void Probe_RoundsToDiscrete_Cyclotomic()
+    {
+        output.WriteLine("F2-RISK DE-RISK — rounds-to-discrete under the producer's exact refinement");
+        output.WriteLine("(relation-1-WL on schemeAdj, from individualized Γ-breaking base T):");
+        output.WriteLine("T = {0, a^0, a^1, …} (field powers; differences field-generate F_q once |T|≥2 with a primitive elt).");
+        output.WriteLine("rounds ≤ 2 at bounded |T| ⟹ depth-2 suffices; rounds > 2 ⟹ depth-k producer necessary.");
+        output.WriteLine("");
+        int minRoundsForDiscrete = int.MaxValue, witnessTsize = -1, witnessD = -1;
+        foreach (int d in new[] { 4, 6, 8 })
+        {
+            if (!PrimPolyTail.ContainsKey(d)) continue;
+            int tail = PrimPolyTail[d];
+            var g = CompanionSinger(d);
+            var g3 = MatMul(MatMul(g, g, d), g, d);          // index-3 cyclotomic generator
+            var grp = GenGroup(new List<int[]> { g3 }, d, 1 << 20);
+            if (grp == null) { output.WriteLine($"  d={d}: G0 too large, skip"); continue; }
+            var s = BuildScheme(grp, d);
+            output.WriteLine($"  ── d={d} |V|={s.N} rank={s.Rank} ──");
+            int bestRoundsThisD = int.MaxValue, bestTsizeThisD = -1;
+            for (int tsize = 2; tsize <= d + 2; tsize++)
+            {
+                var T = new List<int> { 0 };
+                for (int j = 1; j < tsize; j++) T.Add(APow(j - 1, d, tail));   // a^0=1, a^1, a^2, …
+                int rounds = RoundsToDiscrete(s, T, capRounds: 12);
+                string tag = rounds < 0 ? "FIXPOINT-not-discrete" : $"discrete@round {rounds}" + (rounds <= 2 ? "  ✓≤2" : "");
+                output.WriteLine($"     |T|={T.Count,2}  {tag}");
+                if (rounds >= 0 && rounds < bestRoundsThisD) { bestRoundsThisD = rounds; bestTsizeThisD = T.Count; }
+            }
+            if (bestRoundsThisD < minRoundsForDiscrete) { minRoundsForDiscrete = bestRoundsThisD; witnessTsize = bestTsizeThisD; witnessD = d; }
+            output.WriteLine($"     → min rounds-to-discrete over |T|≤{d + 2}: {(bestRoundsThisD == int.MaxValue ? "none" : bestRoundsThisD.ToString())} (at |T|={bestTsizeThisD})");
+        }
+        output.WriteLine("");
+        output.WriteLine("──────────────────────────────────────────────────────────────");
+        if (minRoundsForDiscrete == int.MaxValue)
+            output.WriteLine("VERDICT: no bounded T discretized within the round cap — depth-k producer needed (and a larger base/round budget).");
+        else if (minRoundsForDiscrete <= 2)
+            output.WriteLine($"VERDICT: depth-2 SUFFICES (min {minRoundsForDiscrete} rounds at |T|={witnessTsize}, d={witnessD}) — depth-k not strictly necessary for this slice, but built for generality.");
+        else
+            output.WriteLine($"VERDICT: depth-2 INSUFFICIENT (best {minRoundsForDiscrete} rounds at |T|={witnessTsize}, d={witnessD}) — depth-k producer is NECESSARY.");
+        Assert.True(true);
+    }
 }
