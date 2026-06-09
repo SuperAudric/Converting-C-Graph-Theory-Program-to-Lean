@@ -4901,9 +4901,12 @@ theorem G0cyc_irreducible (hd : d ≠ 0) : G₀Irreducible (G0cyc (p := p) hd) :
         LinearEquiv.apply_symm_apply]
     rwa [hval] at hmemk
 
-/-- The **cyclic affine scheme** — `affineScheme` at `G0cyc`, the cyclotomic beachhead. A genuinely
-primitive (`G0cyc_irreducible`) small affine instance, symmetric (`neg_mem_G0cyc`); the family the
-Frobenius `s(C)` bound (F2b) and the affine probe target. -/
+/-- The **cyclic affine scheme** — `affineScheme` at `G0cyc`. Irreducible (`G0cyc_irreducible`) and symmetric
+(`neg_mem_G0cyc`). **⚠️ NOTE (2026-06-09): this is the rank-2 complete graph `K_{p^d}`** — `G0cyc` uses a
+*full* multiplicative generator, so `⟨mul fqGen⟩` is transitive on `V ∖ {0}` (one nonzero orbit). It is the
+degenerate *large* case (routed to Cameron), **not** the cyclotomic leak candidate. The genuine F2b target is
+`G0pow β` for a **proper** `β = α^m` (see the "F2b target correction" subsection below); use
+`G0pow_irreducible` there, not this. -/
 noncomputable def cyclicAffineScheme (hd : d ≠ 0) : SchurianScheme (p ^ d) :=
   affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)
 
@@ -5023,6 +5026,91 @@ theorem reachesRigidOrCameron_viaCyclicSeparation (hd : d ≠ 0)
   rintro ⟨-, -⟩
   obtain ⟨T, hcard, hTsep⟩ := hsep
   exact ⟨T, hcard, discrete_affineScheme_of_twoRoundDiffSeparates (G0cyc hd) (neg_mem_G0cyc hd) hTsep⟩
+
+/-! #### F2b target correction — proper cyclic subgroups (the genuine cyclotomic schemes)
+
+**Gap (found 2026-06-09).** `G0cyc` uses a *full* multiplicative generator `fqGen`, so `⟨mul fqGen⟩` is
+transitive on `V ∖ {0}` ⟹ `cyclicAffineScheme` is the **rank-2 complete graph `K_{p^d}`** — the *large* case
+(`|Aut| = (p^d)!`, routed to Cameron), NOT the cyclotomic leak candidate (for which `CyclicAffineSeparates`
+is in fact false: no bounded base discretizes `K_q`). The genuine F2b target is a **proper** cyclic subgroup
+`G0pow β = ⟨mul β⟩` (`β = α^m`, e.g. the index-3 Clebsch family on `F_16`), `rank ≥ 3`, where irreducibility
+comes from `β` **field-generating** `F_q` — NOT from the orbit being everything. `G0pow_irreducible` is the
+§5.3 "invariant subspace ⟺ subfield" template: a `mul·β`-invariant subspace closed under `mul·β` is closed
+under `mul·F_p[β] = mul·F_q`, hence `⊥` or `⊤`. F1's `Ĝ ⊋ G` Frobenius gap is the Galois action permuting
+these (subfield-free) cosets. **Open:** proving separation (`CyclicAffineSeparates`-analogue) for `G0pow β`
+is the uncited `s(C)` crux. -/
+
+/-- `σ_β` — multiplication by an arbitrary unit `β`, transported to `F_p^d`. Generalizes `sigmaCyc`
+(`= sigmaPow fqGen`). -/
+noncomputable def sigmaPow (hd : d ≠ 0) (β : (GaloisField p d)ˣ) :
+    (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p) :=
+  conjHom hd (mulUnitHom β)
+
+/-- The cyclic affine group `G₀ = ⟨mul β⟩` for an arbitrary unit `β` (the proper-subgroup / cyclotomic case
+when `β = α^m`). Generalizes `G0cyc` (`= G0pow fqGen`). -/
+noncomputable def G0pow (hd : d ≠ 0) (β : (GaloisField p d)ˣ) :
+    Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) :=
+  Subgroup.zpowers (sigmaPow hd β)
+
+/-- `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. -/
+theorem sigmaPow_zpow_apply (hd : d ≠ 0) (β : (GaloisField p d)ˣ) (k : ℤ) (u : Fin d → ZMod p) :
+    (sigmaPow hd β ^ k) u
+      = efield hd (((β ^ k : (GaloisField p d)ˣ) : GaloisField p d) * (efield hd).symm u) := by
+  have hpow : sigmaPow hd β ^ k = conjHom hd (mulUnitHom (β ^ k)) := by
+    rw [sigmaPow, ← MonoidHom.map_zpow, ← MonoidHom.map_zpow]
+  rw [hpow, conjHom_apply, mulUnitHom_apply]
+
+/-- **`hneg` for the proper cyclic instance** — `neg ∈ G0pow β` when `-1 ∈ ⟨β⟩`. Generalizes `neg_mem_G0cyc`. -/
+theorem neg_mem_G0pow (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) :
+    LinearEquiv.neg (ZMod p) ∈ G0pow hd β := by
+  obtain ⟨k, hk⟩ := Subgroup.mem_zpowers_iff.1 hβneg
+  refine Subgroup.mem_zpowers_iff.2 ⟨k, ?_⟩
+  ext u
+  rw [sigmaPow_zpow_apply, hk]
+  have h1 : ((-1 : (GaloisField p d)ˣ) : GaloisField p d) = -1 := by simp
+  rw [h1, neg_one_mul, map_neg, LinearEquiv.apply_symm_apply, LinearEquiv.neg_apply]
+
+/-- **`G₀Irreducible (G0pow β)` via field-generation** (the §5.3 subfield template). If the `F_p`-span of the
+powers of `β` is all of `F_q` (`β` field-generates), then `⟨mul β⟩` acts irreducibly: a `mul·β`-invariant
+nonzero subspace `W` contains, for `0 ≠ w₀ ∈ W`, the image `f '' {β^k}` where `f : c ↦ efield (x₀ · c)`
+(`x₀ = e⁻¹w₀`); since `span {β^k} = ⊤` and `f` is surjective, that image spans `⊤`, so `W = ⊤`. This is the
+proper-subgroup irreducibility the orbit argument (`G0cyc_irreducible`) could not give — the genuine
+cyclotomic case. -/
+theorem G0pow_irreducible (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβspan : Submodule.span (ZMod p)
+        (Set.range (fun k : ℕ => ((β : GaloisField p d)) ^ k)) = ⊤) :
+    G₀Irreducible (G0pow hd β) := by
+  intro W hWinv
+  by_cases hWbot : W = ⊥
+  · exact Or.inl hWbot
+  refine Or.inr ?_
+  obtain ⟨w₀, hw₀W, hw₀0⟩ := (Submodule.ne_bot_iff W).1 hWbot
+  have hx₀0 : (efield hd).symm w₀ ≠ 0 := by
+    rw [ne_eq, LinearEquiv.map_eq_zero_iff]; exact hw₀0
+  set f : GaloisField p d →ₗ[ZMod p] (Fin d → ZMod p) :=
+    (efield hd).toLinearMap ∘ₗ LinearMap.mulLeft (ZMod p) ((efield hd).symm w₀) with hfdef
+  have hf_surj : Function.Surjective f := by
+    intro z
+    refine ⟨((efield hd).symm w₀)⁻¹ * (efield hd).symm z, ?_⟩
+    simp only [hfdef, LinearMap.comp_apply, LinearMap.mulLeft_apply, LinearEquiv.coe_coe]
+    rw [mul_inv_cancel_left₀ hx₀0, LinearEquiv.apply_symm_apply]
+  have hfmem : ∀ y ∈ (f '' Set.range (fun k : ℕ => (β : GaloisField p d) ^ k)), y ∈ W := by
+    rintro y ⟨c, ⟨k, rfl⟩, rfl⟩
+    have hmem := hWinv (sigmaPow hd β ^ (k : ℤ))
+      (Subgroup.zpow_mem _ (Subgroup.mem_zpowers _) k) w₀ hw₀W
+    rw [sigmaPow_zpow_apply, zpow_natCast, Units.val_pow_eq_pow_val] at hmem
+    rw [hfdef]
+    simp only [LinearMap.comp_apply, LinearMap.mulLeft_apply, LinearEquiv.coe_coe]
+    rwa [mul_comm] at hmem
+  rw [eq_top_iff]
+  calc (⊤ : Submodule (ZMod p) (Fin d → ZMod p))
+      = Submodule.map f ⊤ := by rw [Submodule.map_top, LinearMap.range_eq_top.2 hf_surj]
+    _ = Submodule.map f (Submodule.span (ZMod p)
+          (Set.range (fun k : ℕ => (β : GaloisField p d) ^ k))) := by rw [hβspan]
+    _ = Submodule.span (ZMod p) (f '' Set.range (fun k : ℕ => (β : GaloisField p d) ^ k)) :=
+        Submodule.map_span f _
+    _ ≤ W := Submodule.span_le.2 hfmem
 
 end CyclicAffine
 
