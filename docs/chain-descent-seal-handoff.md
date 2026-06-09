@@ -696,6 +696,15 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     whose **only** open content is now **nontriviality** `≠ {0}` (a persistent twin ⟹ a *whole* intra-cell non-diagonal
     relation = a scheme congruence, not one same-cell pair). The closed-subset construction + properness are banked; the
     residue is the isolated nontriviality kernel = exactly where imprimitivity lives.
+    **VACUITY BOUNDARY (2026-06-10, `intraCellRelations_eq_singleton_zero_of_primitive`).** Attacking nontriviality
+    proved a decisive boundary: since `intraCellRelations` is always a `ClosedSubset`, a **primitive** scheme forces it to
+    `{0}` (`≠ univ` is free for any nonempty base) — so the intra-cell block **identically vanishes on the primitive
+    floor** and can never witness nontriviality there. It discharges only the *imprimitive* case (already handled by
+    `hImprim`). **The open primitive floor (G2-B) is a WL-stable fusion that is NOT a scheme congruence** (the amorphic
+    Clebsch `S₃`); no closed-subset/block object captures it. Attack routes scoped (self-detection-plan §11 tail): (A)
+    base/s(C) split (`small ⟹ ∃ IsBase ≤ log₂|G|` then `recoverableAt_base_iff_discrete`) — provable group term + open
+    s(C) term, but the base-size bound is a heavy from-scratch build and the reduction is otherwise redundant; (B)/(C)/(D)
+    blocked (amorphic / Q1 wall / leg-A-covered). The hard core stays open — catalogue falsifier is the right next gate.
   - **(d) Thread T2** — the affine instance of (c): primitive ⟹ separable via invariant-subspace = block. **Dependency
     CHECKED negative (rev. 3):** the wreath = imprimitive characterization is abelian-`p`-group-only (Ryabov), *not* a
     citable near-theorem at schurian generality. T2 is a project-internal thread, not a citation shortcut.

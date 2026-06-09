@@ -4239,6 +4239,24 @@ theorem intraCellRelations_ne_univ_of_sep {n : Nat} (S : SchurianScheme n) {S₀
     (individualizedColouring n S₀) heq
   exact individualizedColouring_mem_sep ht w (Ne.symm htw) hinit.symm
 
+/-- **The intra-cell block is vacuous on the primitive floor (the route's boundary).** `intraCellRelations` is
+always a `ClosedSubset` (`intraCellRelations_isClosed`), so a *primitive* scheme forces it to `{0}` or `univ`
+(`IsPrimitive`); and any base individualizing a point makes it `≠ univ` (`intraCellRelations_ne_univ_of_sep`).
+Hence for a primitive scheme and any base containing `t` with some other vertex `w ≠ t`,
+`intraCellRelations S S₀ = {0}` — *identically*. So the intra-cell block can **never** witness the nontriviality
+kernel for a primitive scheme: `PersistentTwinGivesIntraCellBlock`'s existential disjunct is unsatisfiable on the
+primitive floor and it collapses to its `large` disjunct (the bare "primitive small ⟹ separates"). This records
+that the intra-cell/fusion-closure route discharges only the **imprimitive** case (already handled by `hImprim`);
+the open primitive floor (G2-B) is a WL-stable fusion that is *not* a scheme congruence (the amorphic gap), so no
+closed-subset/block object captures it — a different attack is needed there. -/
+theorem intraCellRelations_eq_singleton_zero_of_primitive {n : Nat} (S : SchurianScheme n)
+    (hprim : S.toAssociationScheme.IsPrimitive) {S₀ : Finset (Fin n)} {t w : Fin n}
+    (ht : t ∈ S₀) (htw : t ≠ w) :
+    intraCellRelations S S₀ = {0} := by
+  rcases hprim (intraCellRelations S S₀) (intraCellRelations_isClosed S S₀) with h | h
+  · exact h
+  · exact absurd h (intraCellRelations_ne_univ_of_sep S ht htw)
+
 /-- **The sharpened open kernel — nontriviality of the intra-cell block (G2-B, isolated).** A persistent twin
 (`¬ SeparatesAtBoundedBase`) yields a bounded base `S₀` whose intra-cell relations form a **non-trivial proper**
 closed subset — neither the diagonal `{R₀}` nor everything — or the scheme is large (→ Cameron). Two of the three

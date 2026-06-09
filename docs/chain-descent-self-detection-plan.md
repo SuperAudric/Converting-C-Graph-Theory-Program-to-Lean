@@ -134,6 +134,24 @@
 > scheme congruence), not just a single same-cell pair. The closure (the hard-looking part) and properness are
 > proved; the open residue is exactly where imprimitivity lives. Realization tool to attack nontriviality =
 > landed `discrete_of_kRoundRelationSeparates`.
+> **NONTRIVIALITY-ATTACK PLANNING + THE VACUITY BOUNDARY (2026-06-10, `intraCellRelations_eq_singleton_zero_of_primitive`
+> landed, axiom-clean).** Attacking the nontriviality kernel surfaced a decisive structural fact: since
+> `intraCellRelations` is *always* a `ClosedSubset`, a **primitive** scheme forces it to `{0}` or `univ`, and
+> `≠ univ` is free for any base individualizing a point — so **for a primitive scheme and any nonempty base,
+> `intraCellRelations = {0}` identically**. Hence the intra-cell/fusion-closure block can **never** witness
+> nontriviality on the *primitive floor* (G2-B): there it collapses to the bare "primitive small ⟹ separates."
+> The intra-cell route discharges only the *imprimitive* case (already handled by `hImprim`). **Consequence: the
+> primitive floor needs a non-closed-subset object** — the WL-stable fusion that is *not* a scheme congruence (the
+> amorphic Clebsch `S₃`); no block captures it. Route-scan of attacks on the primitive floor: **(A) base/s(C)
+> split** — `small ⟹ ∃ IsBase S₀, |S₀| ≤ log₂|G|` (provable in principle via `card_autP_eq_prod_of_base` +
+> `orbitSizeProd ≥ 2^len` for an *irredundant* base) then `recoverableAt_base_iff_discrete` reduces to "cells =
+> orbits at a log-size base"; isolates the provable group term, leaves the s(C) term open. **Heavy/deferred:** the
+> base-size bound is a standalone ~100-line build (no existing irredundant-base machinery; needs greedy base +
+> well-founded recursion), and the reduction *without* the bound is logically redundant (`Discrete ⟹ IsBase` via
+> `isBase_of_discrete_warmRefine`). **(B) realization + explicit base** — dead general / retracted for affine
+> (amorphic). **(C) the non-congruence WL-fusion** — the uncited open math (needs scheme spectral theory, the Q1
+> wall). **(D) structured sub-cases** — metric already covered by leg A; rank-3 blocked by Q1. Net: the hard core
+> (s(C) bounded for primitive small) is irreducibly open; the catalogue falsifier is the right next gate.
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
 > **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)
