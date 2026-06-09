@@ -87,7 +87,7 @@ contribution is to *isolate* that hard problem in one component, not to close it
 
 ---
 
-## 2. Where the project is now (2026-06-04)
+## 2. Where the project is now (2026-06-10)
 
 > This section is a map; the authoritative current state is the STATUS block at
 > the top of each linked doc plus [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md).
@@ -175,19 +175,37 @@ to *primitivity* was refuted (Shrikhande, depth-graded). Tracked in
 [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9, and
 [`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
 
-**The goal is now a single theorem (2026-06-06, axiom-clean, `Cascade.lean` Part A).** The oracle-capability
-seal is **assembled**: `reachesRigidOrCameron` (abstract) → `reachesRigidOrCameron_viaRecovery` (concrete,
-non-vacuous headline) — every rank-≥3 schurian scheme residual `ReachesRigid ∨ IsCameronScheme` (reaches a rigid
-residual via the cascade/abelian oracles, or is a Cameron section), wiring the landed
-`exhaustiveObstruction_scheme_nonCascade_trichotomy`. The free inputs are the cited `PrimitiveCCClassification`
-(Babai/Sun–Wilmes), the cascade-recovery reduction (leg A, well-supported), and the primitivity reduction
-(`¬IsPrimitive ⟹ ReachesRigid` — an open in-scope gap). Crystallizing the goal this way surfaces the to-do list
-as a typed hypothesis set. **Note — two caveats the later handoff sharpens**
-([`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md), the authoritative state): (1) the largeness
-bridge is **carried, not derived** — the old vacuous "derivation" was excised (orbit-level vacuity,
-§2–§3 there) — the real "¬consumed ⟹ large" is open; (2) the open frontier is **G2** (non-recovering ∧
-non-Cameron, the `s(C)` boundary), of which the primitivity reduction is one face — and **no re-keying of the
-rigid predicate closes the seal** (§4.0 there).
+**The goal is a single theorem — a conditional seal `modulo {G3 + G2-B}` (2026-06-10, axiom-clean, build green).**
+The oracle-capability seal is **assembled and reduced to one open proposition.** The abstract capstone
+`reachesRigidOrCameron` (`Cascade.lean`) wires the landed trichotomy `¬IsPrimitive ∨ ¬NonCascade ∨ Cameron`; the
+concrete capstones instantiate the rigid predicate and discharge the three branches. Every rank-≥3 schurian scheme
+residual is `ReachesRigid ∨ IsCameronScheme` (consumed by the cascade/abelian oracles, or a Cameron section). The
+remaining open content is **one proposition** — **G2-B**: a *primitive, small, non-abelian, non-recovering* residual
+— plus the cited `PrimitiveCCClassification` (G3, Babai/Sun–Wilmes, solid rank 3/4). Everything else is landed,
+axiom-clean: leg B (`AbelianConsumed`, L3-earned, citation-free), depth-graded recovery (G1a), and the imprimitive
+block leg (G2-A, earned `SchemeBlockRecovered` — *not* an opaque carried hypothesis). Both empirical falsifiers
+(the Hanaki–Miyamoto catalogue + the affine `ΓL(1,2^d)` sweep) returned **0 G2-B witnesses**, so G2-B emptiness is
+empirically strong but uncited.
+
+**The live frontier (2026-06-10) — the rewiring + the conservation split.** A conceptual step-back (recovery depth
+is `O(log n)`, not `O(1)`) + two depth-growth probes (the `O(log n)` growth lives entirely in the *handled* legs —
+leg C/Cameron, leg B/abelian — while the **G2-B residue is flat, depth ≤ 4**) exposed that the old recovery
+predicate over-required: it folded the unbounded **IR-core** (post-base discretization, the multipede term) into the
+seal. The **conservation budget split** `recovery_depth = base(G) + s(C)(G) + IR_core(G)`
+(`stablyRecoverable_iff_symmetric_and_bases`) and the **rewiring** (`reachesRigidOrCameron_viaSymmetricRecovery`,
+keyed on the IR-core-free `SchemeRecoveredWhileSymmetric`, with the full root group reproduced from the symmetry
+phase *alone*) move the IR-core to the **second guarantee** (flag-allowed). So the seal's open content is now the
+bounded, empirically-`O(1)` **`s(C)` term** (`SelfDetectsWhileSymmetric`), strictly weaker than the old obligation.
+
+**What NOT to do (a proven boundary, 2026-06-10).** Do not attack G2-B by exhibiting it as a **block / scheme
+congruence**: `intraCellRelations_eq_singleton_zero_of_primitive` proves the intra-cell block route *identically
+vanishes on the primitive floor* (a primitive scheme forces it to `{0}`), so it discharges **only** the imprimitive
+case (already handled by `hImprim`). The genuine G2-B is a *non-congruence amorphic WL-fusion* (the Clebsch `S₃`)
+that no closed-subset object captures; the live route is the **forward / counting** crux (a base-homogeneous
+separability gap broken at base+O(1) extra individualizations), not a block construction. **Note — caveats the
+handoff sharpens** ([`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md), the authoritative state):
+(1) the largeness bridge is **carried, not derived** (the old vacuous "derivation" was excised, §2–§3 there); (2)
+**no re-keying of the rigid predicate closes the seal** (§4.0 there) — closure ⟺ G2-B empty.
 
 ---
 
@@ -212,7 +230,12 @@ Read in this sequence; each doc has a STATUS block (its current state) at the to
    the cross-branch stabilizer-chain object and the current work thread.
 6. [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) —
    the theorem index; densest file, the ground truth for *what is proved*. Read in
-   full.
+   full. **It is well over 1000 lines — too large for one `Read` call (and even
+   300-line pages can exceed the token cap, the rows are dense). Page through it
+   with `Read` `offset`/`limit` in ~150-line chunks. Do NOT substitute a `grep`
+   during onboarding: a prior summary or this onboarding's prose is exactly the lossy
+   compression this file is the ground truth for — confirming a few names with
+   `grep` is not reading it, and the gap is invisible unless you read it.**
 
 **Side reading, pulled in as the core docs point to it** (each is a deep-dive or
 witness layer, not onboarding):

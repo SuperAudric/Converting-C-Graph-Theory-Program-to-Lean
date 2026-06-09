@@ -834,6 +834,92 @@ theorem card_autP_eq_prod_of_base (bs : List (Fin n))
     Nat.card (StabilizerAt adj P ∅) = orbitSizeProd adj P bs ∅ :=
   card_stabilizerAt_eq_prod_of_base bs ∅ hbase
 
+/-! ### Part A (Stage A3.6) — the greedy irredundant base: `base(G) ≤ log₂ |G|`
+
+The descent's **base size** `base(G)` is the additive term of the conservation budget
+`recovery_depth = base(G) + s(C) + IR_core` ([self-detection-plan §12.1](../../docs/chain-descent-self-detection-plan.md)).
+Banking it (step 2.1): a *greedy irredundant* base — repeatedly individualize a point the current residual
+still moves — has every basic orbit of size `≥ 2`, so by `order = ∏ basic-orbit sizes` (A3.5) the base
+length is `≤ log₂ |Aut_∅^P|`. For a *small* (poly-order) residual this is `O(log n)`, making the `bound`
+in `SchemeRecoveredWhileSymmetric` concretely `O(log n) + s(C)` and leaving the additive `s(C)` stickiness
+as the only quantity still to bound (step 2.2/2.3). -/
+
+/-- **Greedy-base existence (strong-induction core).** For every bound `N` on `|Aut_S^P|`, there is a base
+sequence `bs` from `S` with `2 ^ bs.length ≤ |Aut_S^P|`. Built greedily: while `¬ IsBase`, a residual
+automorphism moves some point `b`, whose basic orbit has size `≥ 2`; inserting `b` strictly shrinks the
+residual order (`card_stabilizerAt_eq_orbit_mul`), so the recursion terminates and each layer doubles the
+lower bound. -/
+theorem exists_greedy_base_aux :
+    ∀ (N : Nat) (S : Finset (Fin n)), Nat.card (StabilizerAt adj P S) ≤ N →
+      ∃ bs : List (Fin n),
+        IsBase adj P (bs.foldl (fun s b => insert b s) S) ∧
+        2 ^ bs.length ≤ Nat.card (StabilizerAt adj P S) := by
+  intro N
+  induction N with
+  | zero =>
+      intro S hS
+      exact absurd hS (by have := @card_stabilizerAt_pos n adj P S; omega)
+  | succ N ih =>
+      intro S hS
+      by_cases hbase : IsBase adj P S
+      · -- already a base: the empty extension works
+        refine ⟨[], by simpa using hbase, ?_⟩
+        have hp := @card_stabilizerAt_pos n adj P S
+        simp only [List.length_nil, pow_zero]
+        omega
+      · -- ¬ IsBase: a residual automorphism moves a point `b`
+        have hnb : ∃ v w, OrbitPartition adj P S v w ∧ v ≠ w := by
+          unfold IsBase at hbase
+          push_neg at hbase
+          exact hbase
+        obtain ⟨b, w, ⟨g, hg_aut, hg_P, hg_fix, hg_bw⟩, hbwne⟩ := hnb
+        have hgbne : g b ≠ b := by rw [hg_bw]; exact hbwne.symm
+        -- `b`'s basic orbit has ≥ 2 elements (contains `b` and `g b ≠ b`)
+        have hgb_mem : g b ∈ MulAction.orbit (StabilizerAt adj P S) b :=
+          mem_orbit_stabilizerAt_iff.mpr ⟨g, hg_aut, hg_P, hg_fix, rfl⟩
+        have hsub : ({b, g b} : Set (Fin n)) ⊆ MulAction.orbit (StabilizerAt adj P S) b := by
+          rw [Set.insert_subset_iff, Set.singleton_subset_iff]
+          exact ⟨MulAction.mem_orbit_self b, hgb_mem⟩
+        have horb2 : 2 ≤ (MulAction.orbit (StabilizerAt adj P S) b).ncard := by
+          rw [← Set.ncard_pair (Ne.symm hgbne)]
+          exact Set.ncard_le_ncard hsub (Set.toFinite _)
+        -- inserting `b` strictly shrinks the residual order
+        have hmul := card_stabilizerAt_eq_orbit_mul (adj := adj) (P := P) b (S := S)
+        have hlt : Nat.card (StabilizerAt adj P (insert b S)) < Nat.card (StabilizerAt adj P S) := by
+          have hp := @card_stabilizerAt_pos n adj P (insert b S)
+          have h2 : 2 * Nat.card (StabilizerAt adj P (insert b S))
+              ≤ (MulAction.orbit (StabilizerAt adj P S) b).ncard
+                * Nat.card (StabilizerAt adj P (insert b S)) := Nat.mul_le_mul horb2 le_rfl
+          rw [hmul]; omega
+        -- recurse on `insert b S`
+        obtain ⟨bs', hbase', hpow'⟩ := ih (insert b S) (by omega)
+        refine ⟨b :: bs', ?_, ?_⟩
+        · rw [List.foldl_cons]; exact hbase'
+        · calc 2 ^ (b :: bs').length
+              = 2 * 2 ^ bs'.length := by rw [List.length_cons, pow_succ']
+            _ ≤ (MulAction.orbit (StabilizerAt adj P S) b).ncard
+                  * Nat.card (StabilizerAt adj P (insert b S)) := Nat.mul_le_mul horb2 hpow'
+            _ = Nat.card (StabilizerAt adj P S) := hmul.symm
+
+/-- **Greedy base from the root — `2 ^ |base| ≤ |Aut(G)^P|`.** The `S = ∅` headline of
+`exists_greedy_base_aux`: there is a base sequence from `∅` whose length is logarithmic in the residual
+order. -/
+theorem exists_greedy_base :
+    ∃ bs : List (Fin n),
+      IsBase adj P (bs.foldl (fun s b => insert b s) ∅) ∧
+      2 ^ bs.length ≤ Nat.card (StabilizerAt adj P ∅) :=
+  exists_greedy_base_aux (Nat.card (StabilizerAt adj P ∅)) ∅ le_rfl
+
+/-- **`base(G) ≤ log₂ |Aut(G)^P|`.** The conservation budget's `base(G)` term, banked: the greedy base
+length is at most `Nat.log 2 |Aut(G)^P|`. For a *small* (poly-order) residual `|Aut| ≤ poly(n)`, this is
+`O(log n)` — the `bound` becomes `O(log n) + s(C)`. -/
+theorem exists_greedy_base_le_log :
+    ∃ bs : List (Fin n),
+      IsBase adj P (bs.foldl (fun s b => insert b s) ∅) ∧
+      bs.length ≤ Nat.log 2 (Nat.card (StabilizerAt adj P ∅)) := by
+  obtain ⟨bs, hbase, hpow⟩ := exists_greedy_base
+  exact ⟨bs, hbase, Nat.le_log_of_pow_le (by norm_num) hpow⟩
+
 /-! ### Part A (Stage A2-complete) — the cross-branch harvest *completeness* seam
 
 Stage A2 proved harvest **soundness** (`closure_le_stabilizerAt`: the folded chain stays `⊆ StabilizerAt`).
@@ -3116,6 +3202,20 @@ theorem stabilizerAt_schemeAdj_empty_eq {m : Nat} (S : SchurianScheme m) :
   ext π
   rw [mem_stabilizerAt_empty, isAut_schemeAdj_iff]
   exact ⟨fun h => h.1, fun h => ⟨h, fun _ _ => rfl⟩⟩
+
+/-- **Greedy base for a scheme residual — `2 ^ |base| ≤ |SchemeAutGroup S|` (step 2.1).** Transports
+`exists_greedy_base` across the `schemeAdj` bridge (`stabilizerAt_schemeAdj_empty_eq`): the scheme's root
+residual order is `|SchemeAutGroup S|`, so the greedy base over `schemeAdj S` has length `≤ log₂` of it.
+Banks the `base(G)` term for the scheme floor — for a *small* (poly-`|SchemeAutGroup|`) residual the base
+is `O(log n)`, so the seal's `bound` is `O(log n) + s(C)` with only the `s(C)` stickiness left open. -/
+theorem exists_greedy_base_scheme {m : Nat} (S : SchurianScheme m) :
+    ∃ bs : List (Fin m),
+      IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (bs.foldl (fun s b => insert b s) ∅) ∧
+      2 ^ bs.length ≤ Nat.card S.toAssociationScheme.SchemeAutGroup := by
+  obtain ⟨bs, hbase, hpow⟩ :=
+    exists_greedy_base (adj := schemeAdj S.toAssociationScheme) (P := fun _ _ => POE.unknown)
+  exact ⟨bs, hbase, by rwa [stabilizerAt_schemeAdj_empty_eq] at hpow⟩
 
 /-! ### §13a — Single-base recovery on `schemeAdj` is free (the self-detection base case)
 

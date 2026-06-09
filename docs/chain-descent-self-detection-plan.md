@@ -7,6 +7,11 @@
 > equation (`recovery_depth = base + s(C) + IR_core`) and the viable step-2 plan. The blocks below are the prior
 > (still-valid) Phase-1/Phase-2 record.
 >
+> **STEP 2.1 LANDED (2026-06-10, axiom-clean, build green).** The `base(G)` term is banked: `exists_greedy_base`
+> / `exists_greedy_base_le_log` / `exists_greedy_base_scheme` (`Cascade.lean §"Part A (Stage A3.6)"`) prove
+> `∃ IsBase S₀, 2^|S₀| ≤ |Aut|`, hence `base(G) ≤ log₂|Aut| = O(log n)`. See §12.4 step 2.1. **Next: step 2.2**
+> (the layer-step reduction — wire the base term + localize `RecoversWhileSymmetric` to a per-layer condition).
+>
 > **STATUS (2026-06-08): Phase 1 COMPLETE (Increments 1 + 2 LANDED, axiom-clean, build green) — the seal is
 > reduced end-to-end to the SEMANTIC crux `SelfDetectsStably` (primitive small ⟹ cells = orbits above a
 > bounded set). FUSED SEAL LANDED (2026-06-08, axiom-clean): `reachesRigidOrCameron_viaFusedSeal`
@@ -1556,16 +1561,22 @@ The remaining open is `s(C)(G)` bounded for the **non-abelian primitive residue*
 `SelfDetectsWhileSymmetric`. This is uncited open math, but it now has a clean, staged, *viable* attack with the
 IR-core out of the way. Do the steps in order; each is independently valuable.
 
-**Step 2.1 — bank the `base(G)` term (provable now; ~100 lines, the only fully-provable piece).**
-Prove `small ⟹ ∃ IsBase S₀, 2^|S₀| ≤ |G|`, hence `base(G) ≤ log₂|G| = O(log n)`.
-- *Route:* a **greedy irredundant base** — iterate "pick a point moved by `StabilizerAt(S)`, insert it" until
-  `Stab = 1`. Each step's basic orbit has size `≥ 2` (the point is moved), so `orbitSizeProd ≥ 2^(length)`.
-- *Landed handles:* `card_autP_eq_prod_of_base` (`|Stab ∅| = orbitSizeProd`), `orbitSizeProd` (list-fold of
-  `(MulAction.orbit (StabilizerAt S) b).ncard`), `exists_isBase_saturated` (∃ base, any size). **Gap to build:**
-  the greedy one-point-at-a-time base (well-founded recursion on `|Stab|` ↓ or `n − |S|`) + `orbitSizeProd ≥
-  2^len` for it. No existing irredundant-base machinery — this is the from-scratch part.
-- *Payoff:* makes the `bound` in `SchemeRecoveredWhileSymmetric` concretely `base(G) + s(C) = O(log n) + s(C)`,
-  so the only quantity left to bound is the additive `s(C)` stickiness.
+**Step 2.1 — bank the `base(G)` term — LANDED (2026-06-10, axiom-clean `[propext, Classical.choice, Quot.sound]`,
+build green, `Cascade.lean §"Part A (Stage A3.6)"`).** Proved `∃ IsBase S₀, 2^|S₀| ≤ |Aut_S^P|`, hence
+`base(G) ≤ log₂|Aut| = O(log n)` for small (poly-order) residuals.
+- *What landed:* **`exists_greedy_base_aux`** (strong-induction core: `∀ N S, |Aut_S^P| ≤ N → ∃ bs, IsBase(bs.foldl
+  insert S) ∧ 2^bs.length ≤ |Aut_S^P|`) → **`exists_greedy_base`** (`S=∅` headline) → **`exists_greedy_base_le_log`**
+  (`bs.length ≤ Nat.log 2 |Aut(G)^P|`) → **`exists_greedy_base_scheme`** (`2^|base| ≤ |SchemeAutGroup S|`, via the
+  `stabilizerAt_schemeAdj_empty_eq` bridge).
+- *Proof (as planned):* greedy irredundant base — `¬IsBase` ⟹ a residual aut moves a point `b` (from the
+  non-trivial `OrbitPartition` pair), whose basic orbit is `≥ 2` (contains `b` and `g b ≠ b`), so
+  `card_stabilizerAt_eq_orbit_mul` makes `|Aut_{insert b S}^P| < |Aut_S^P|` (terminates the strong induction on the
+  residual order) and each layer doubles `2^len`. **No `orbitSizeProd`/`card_autP_eq_prod_of_base` needed** — the
+  one-level recursion `card_stabilizerAt_eq_orbit_mul` + `Nat.mul_le_mul` suffices; cleaner than the planned
+  product route. No from-scratch irredundant-base machinery (the strong induction replaces well-founded recursion).
+- *Payoff (delivered):* the `bound` in `SchemeRecoveredWhileSymmetric` is now concretely `base(G) + s(C) =
+  O(log n) + s(C)`; the only quantity left to bound is the additive `s(C)` stickiness (step 2.2/2.3). Wiring
+  `exists_greedy_base_scheme` into the seal's `bound` is step 2.2's job (the layer-step reduction).
 
 **Step 2.2 — the layer-step reduction (structural; reduces `s(C)` to a per-layer condition).**
 Reduce `RecoversWhileSymmetric` (cells = orbits at *every* non-base prefix) to a **single per-layer transfer**:

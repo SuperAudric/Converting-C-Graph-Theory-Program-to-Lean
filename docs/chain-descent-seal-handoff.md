@@ -234,6 +234,17 @@ captures hidden-abelian), which shrinks the wall to exactly G2-B but does not el
 end-state is a conditional theorem `modulo {G3 cited classification + G2-B}`; the only thing that discharges G2-B is
 the self-detection lemma, which is research, not engineering.
 
+> **And the discharge cannot be a block construction (PROVEN, 2026-06-10 — `intraCellRelations_eq_singleton_zero_of_primitive`).**
+> The natural converse route — exhibit the persistent leak as a non-trivial `ClosedSubset` (block / scheme
+> congruence) ⟹ imprimitive ⟹ contradiction — **identically vanishes on the primitive floor.** The intra-cell
+> fusion `intraCellRelations` is *always* a `ClosedSubset` (`intraCellRelations_isClosed`), so on a **primitive**
+> scheme it is forced to `{0}` (`≠ univ` is free); its nontriviality kernel is therefore *unsatisfiable* exactly
+> where G2-B lives. So the block converse (`PersistentTwinYieldsBlock` / `PersistentTwinGivesIntraCellBlock`)
+> discharges **only the imprimitive case** — already handled by `hImprim`. The genuine G2-B is a **non-congruence
+> amorphic WL-fusion** (the Clebsch `S₃`) that no closed-subset object captures. **G2-B closure must go through the
+> forward / counting route** (a base-homogeneous separability gap broken at base+O(1) extra individualizations =
+> `SelfDetectsWhileSymmetric` / the `s(C)` term), NOT a block construction. See §G2 board (c) and §7.
+
 ### G1a — depth-graded recovery (`SchemeRecovered` was depth-1-only) — LANDED (leg A scope)
 
 **LANDED (2026-06-07, axiom-clean `[propext, Classical.choice, Quot.sound]`, `Cascade.lean`).** The depth-graded
@@ -807,6 +818,8 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
 |---|---|
 | Abstract seal | `reachesRigidOrCameron` (parametric in `NonCascade`/`LargenessBridge`), `IsLargeSchemeViaAut`, `schemeAdj`/`isAut_schemeAdj_iff`/`stabilizerAt_schemeAdj_empty_eq` (`Cascade.lean`) |
 | Concrete seal | `SchemeRecovered`, `schemeRecovered_of_visibleRealizers`, `schemeAutGroup_eq_closure_of_recovered`, `reachesRigidOrCameron_viaRecovery` (`Cascade.lean`) |
+| **Live frontier — budget split + rewiring (2026-06-10)** | `RecoversWhileSymmetric` (the `s(C)` residue), `DiscretizesAtBases` (IR-core, → 2nd guarantee), `stablyRecoverable_iff_symmetric_and_bases` (the split), `coversOrbits_of_visibleRealizers_symmetric`, `schemeAutGroup_eq_closure_of_recoversWhileSymmetric` (group from symmetry phase alone), `SchemeRecoveredWhileSymmetric`, `SelfDetectsWhileSymmetric` (the open crux), **`reachesRigidOrCameron_viaSymmetricRecovery`** (THE current headline) (`Cascade.lean`); base-set bridge `JointProfileRecoversAt`/`jointProfileRecoversAt_singleton` (`Scheme.lean §S1.c`) |
+| P3-converse crux + vacuity boundary | `PersistentTwinYieldsBlock`, `intraCellRelations`(`_isClosed`/`_ne_univ_of_sep`/`_eq_singleton_zero_of_primitive` = **block route dead on primitive floor**), `PersistentTwinGivesIntraCellBlock`, `reachesRigidOrCameron_viaPersistentTwinBlock`/`_viaIntraCellBlock` (`Cascade.lean`); `clebschScheme`/`reachesRigidOrCameron_clebsch_viaPersistentTwinBlock` (`CascadeAffine.lean`) |
 | Trichotomy / leg C | `exhaustiveObstruction_scheme(_of_nonCascade)(_nonCascade_trichotomy)`, `PrimitiveCCClassification`, `isPreprimitive_of_isPrimitive` (`Scheme.lean`) |
 | Leg B core | `smul_eq_on_orbit_of_comm` (L3), `aut_agree_on_orbit_of_comm`, `not_comm_of_orbit_disagree`, `not_comm_of_isPreprimitive_card_lt`, L1/L2 (`Group.lean`) |
 | Leg B in the seal (G1b) | `AbelianConsumed`, `abelianConsumed_of_residualAbelian`, `reachesRigidOrCameron_viaRecoveryOrAbelian` (`Cascade.lean`) |
@@ -893,6 +906,13 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
   form (A2-ii, `blockRefinementVisible_of_schemePartSeparates`) is available.
 - **Do not try to discharge the leaks (G2) by citation** — the deep research established the
   imprimitive/small-primitive non-abelian high-`s(C)` quadrant is genuinely open, not citably impossible.
+- **Do not attack G2-B as a block / scheme congruence (PROVEN dead on the primitive floor, 2026-06-10).**
+  `intraCellRelations_eq_singleton_zero_of_primitive`: the intra-cell fusion is always a `ClosedSubset`, so a
+  **primitive** scheme forces it to `{0}` — the nontriviality kernel is unsatisfiable exactly where G2-B lives. The
+  block converse (`PersistentTwinYieldsBlock`/`PersistentTwinGivesIntraCellBlock`) discharges **only the imprimitive
+  case** (already `hImprim`). The genuine G2-B is a **non-congruence amorphic WL-fusion** (Clebsch `S₃`); attack it
+  via the **forward / counting** route (`SelfDetectsWhileSymmetric` = the `s(C)` term, broken at base+O(1)), not by
+  constructing a block. See §4.0 and §G2 board (c).
 - **Do not key the counting route on algebra non-commutativity** ("non-abelian group ⟹ asymmetric intersection
   numbers") — false: symmetric schemes have *commutative* Bose–Mesner algebras regardless of the group (C₇/D₇ recovers
   via metric structure, not commutativity). The counting content is **determinacy/separability**, not commutativity
