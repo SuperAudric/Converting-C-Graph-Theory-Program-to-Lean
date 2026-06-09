@@ -501,4 +501,211 @@ public class CatalogueSchemeProbe(ITestOutputHelper output)
     }
 
     static bool IsPrime(int x) { if (x < 2) return false; for (int d = 2; d * d <= x; d++) if (x % d == 0) return false; return true; }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  FALSIFIER #2 — the FORMALIZATION-FAITHFUL probe (the intra-cell fusion objects).
+    //
+    //  Probe #1 (above) tests recovery via the EdgeGenerates / WLDepth *proxies*.  This
+    //  probe tests the EXACT objects the Lean converse proof now formalizes
+    //  (Cascade.lean §"converse proof, layer 1"), cross-checking the C# and Lean models:
+    //
+    //   • intraCellRelations(S₀) — the relations entirely inside the warmRefine-from-S₀
+    //     cells.  Lean: `intraCellRelations`.  ALWAYS a ClosedSubset (`intraCellRelations_isClosed`).
+    //   • the VACUITY finding — for a PRIMITIVE scheme and any nonempty base,
+    //     intraCellRelations = {0} identically (Lean: `intraCellRelations_eq_singleton_zero_of_primitive`).
+    //     A violation would mean the C# warmRefine model disagrees with Lean's — a strong
+    //     consistency check (the Lean statement is a THEOREM, so 0 violations is expected).
+    //   • SeparatesAtBoundedBase — warmRefine from a bounded base reaches discrete (Lean:
+    //     `SeparatesAtBoundedBase`).  Primitive ⟹ separates at base+O(1) is the open G2-B
+    //     kernel; a primitive scheme that does NOT separate (and is schurian, small-Aut,
+    //     non-abelian) is a seal counterexample.
+    //
+    //  The three assertions validate the two landed Lean theorems empirically and gate the
+    //  one open conjecture (G2-B emptiness) on the exact formal object, not a proxy.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    // intraCellRelations(S₀): mirrors Cascade.lean `intraCellRelations` — the relations
+    // R_k whose every pair shares a warmRefine-from-S₀ cell colour.  0 ∈ always (rel-0
+    // pairs are the diagonal (x,x)).
+    static HashSet<int> IntraCellRelations(Scheme s, List<int> ind)
+    {
+        var color = Refine(s, ind);
+        var crosses = new bool[s.Rank];
+        for (int x = 0; x < s.N; x++)
+            for (int y = 0; y < s.N; y++)
+                if (color[x] != color[y]) crosses[s.Rel[x, y]] = true;
+        var I = new HashSet<int>();
+        for (int k = 0; k < s.Rank; k++) if (!crosses[k]) I.Add(k);
+        return I;
+    }
+
+    // ClosedSubset test — mirrors Cascade.lean `ClosedSubset`: 0 ∈ I, and closed under
+    // the complex product (p^k_{ij} ≠ 0 with i,j ∈ I ⟹ k ∈ I).
+    static bool IsClosedSubset(Scheme s, HashSet<int> I)
+    {
+        if (!I.Contains(0)) return false;
+        foreach (int i in I) foreach (int j in I)
+            for (int k = 0; k < s.Rank; k++)
+                if (s.P[k, i, j] != 0 && !I.Contains(k)) return false;
+        return true;
+    }
+
+    // The smallest ClosedSubset containing {0, k} — the complex-product closure of the
+    // seed (BFS to fixpoint).  ⟨0,k⟩ proper (≠ univ) ⟺ R_k generates a block system.
+    static HashSet<int> GeneratedClosedSubset(Scheme s, int k)
+    {
+        var I = new HashSet<int> { 0, k };
+        bool grew = true;
+        while (grew)
+        {
+            grew = false;
+            var add = new List<int>();
+            foreach (int i in I) foreach (int j in I)
+                for (int m = 0; m < s.Rank; m++)
+                    if (s.P[m, i, j] != 0 && !I.Contains(m)) add.Add(m);
+            foreach (int m in add) if (I.Add(m)) grew = true;
+        }
+        return I;
+    }
+
+    // ClosedSubset-primitivity (the Lean `IsPrimitive`): the only closed subsets are {0}
+    // and univ ⟺ no relation generates a proper block ⟺ every R_k (k≠0) generates univ.
+    static bool HasProperBlock(Scheme s)
+    {
+        for (int k = 1; k < s.Rank; k++)
+            if (GeneratedClosedSubset(s, k).Count < s.Rank) return true;
+        return false;
+    }
+
+    // Greedy discretization path: the list of bases visited (∅ first, then lex-min vertex
+    // of the largest non-singleton cell each round) and the depth at which warmRefine
+    // becomes discrete (= SeparatesAtBoundedBase's witness), or cap+1.
+    static (int depth, List<List<int>> bases) DiscretizePath(Scheme s, int cap)
+    {
+        int n = s.N; var ind = new List<int>(); var bases = new List<List<int>>();
+        for (int depth = 0; depth <= cap; depth++)
+        {
+            bases.Add(new List<int>(ind));
+            var color = Refine(s, ind);
+            if (color.Distinct().Count() == n) return (depth, bases);
+            var byColor = new Dictionary<int, List<int>>();
+            for (int v = 0; v < n; v++) { if (!byColor.TryGetValue(color[v], out var lst)) { lst = new(); byColor[color[v]] = lst; } lst.Add(v); }
+            int target = -1, best = 1;
+            foreach (var kv in byColor) if (kv.Value.Count > best) { best = kv.Value.Count; target = kv.Value.Min(); }
+            if (target < 0) return (depth, bases);
+            ind.Add(target);
+        }
+        return (cap + 1, bases);
+    }
+
+    [Fact]
+    public void Probe_IntraCellFusion_Falsifier()
+    {
+        var orders = Enumerable.Range(5, 26).ToArray();   // 5..30
+        int autCap = 200_000;
+
+        int totalValid = 0, totalPrimitive = 0, totalImprim = 0;
+        int closedChecks = 0, closedViolations = 0;       // validates intraCellRelations_isClosed
+        int vacuityChecks = 0, vacuityViolations = 0;     // validates intraCellRelations_eq_singleton_zero_of_primitive
+        int primSeparate = 0;                             // SeparatesAtBoundedBase holds
+        int primCorrespondenceViolations = 0;             // Primitive() (connectivity) vs IsPrimitive (no proper closed subset)
+        int imprimWithBlock = 0;                          // imprimitive schemes with a genuine generated proper block
+        var nonSeparating = new List<(int n, int idx, Scheme s, int depth)>();
+        var vacuityWitnesses = new List<(int n, int idx, int baseSize, int rank, string I)>();
+        var closedWitnesses = new List<(int n, int idx, string I)>();
+
+        foreach (int n in orders)
+        {
+            var path = DataPath(n);
+            if (path == "") { output.WriteLine($"order {n}: data file missing — skip"); continue; }
+            var raw = ParseCatalogue(path, n);
+            int bound = (int)Math.Ceiling(Math.Log2(n)) + 2;   // the "base + O(1)" separation bound
+
+            for (int idx = 0; idx < raw.Count; idx++)
+            {
+                var s = BuildScheme(raw[idx], n);
+                if (s is null) continue;
+                totalValid++;
+                if (s.Rank <= 2) continue;
+                bool prim = Primitive(s);
+                if (prim) totalPrimitive++; else totalImprim++;
+
+                var (depth, bases) = DiscretizePath(s, n);
+
+                foreach (var b in bases)
+                {
+                    var I = IntraCellRelations(s, b);
+
+                    // (1) intraCellRelations is ALWAYS a ClosedSubset.
+                    closedChecks++;
+                    if (!IsClosedSubset(s, I)) { closedViolations++; if (closedWitnesses.Count < 12) closedWitnesses.Add((n, idx + 1, "{" + string.Join(",", I.OrderBy(x => x)) + "}")); }
+
+                    // (2) VACUITY: primitive ∧ nonempty base ⟹ intraCellRelations = {0}.
+                    if (prim && b.Count > 0)
+                    {
+                        vacuityChecks++;
+                        if (!(I.Count == 1 && I.Contains(0)))
+                        { vacuityViolations++; if (vacuityWitnesses.Count < 12) vacuityWitnesses.Add((n, idx + 1, b.Count, s.Rank, "{" + string.Join(",", I.OrderBy(x => x)) + "}")); }
+                    }
+                }
+
+                // (3) the non-vacuous side: the C# `Primitive()` (relation-graph connectivity)
+                //     must agree with the Lean `IsPrimitive` (no nontrivial proper ClosedSubset),
+                //     and imprimitive schemes must genuinely carry a generated proper block.
+                bool hasBlock = HasProperBlock(s);
+                if (hasBlock == prim) primCorrespondenceViolations++;   // disagreement: prim ⟺ ¬hasBlock expected
+                if (!prim && hasBlock) imprimWithBlock++;
+
+                if (prim)
+                {
+                    if (depth <= bound) primSeparate++;
+                    else nonSeparating.Add((n, idx + 1, s, depth));
+                }
+            }
+        }
+
+        output.WriteLine("══════ FALSIFIER #2 — intra-cell fusion objects (Lean-faithful) ══════");
+        output.WriteLine($"valid schemes: {totalValid}   primitive(rank≥3): {totalPrimitive}   imprimitive(rank≥3): {totalImprim}");
+        output.WriteLine("");
+        output.WriteLine($"(1) intraCellRelations is a ClosedSubset: {closedChecks - closedViolations}/{closedChecks} checks pass  [validates `intraCellRelations_isClosed`]");
+        if (closedViolations > 0) foreach (var w in closedWitnesses) output.WriteLine($"      ‼ order {w.n} #{w.idx}: NON-closed intraCell {w.I}");
+        output.WriteLine($"(2) primitive ∧ nonempty base ⟹ intraCellRelations = {{0}}: {vacuityChecks - vacuityViolations}/{vacuityChecks} checks pass  [validates `intraCellRelations_eq_singleton_zero_of_primitive`]");
+        if (vacuityViolations > 0) foreach (var w in vacuityWitnesses) output.WriteLine($"      ‼ order {w.n} #{w.idx} (|base|={w.baseSize}, rank={w.rank}): intraCell = {w.I} ≠ {{0}} — C#/Lean MODEL MISMATCH");
+        output.WriteLine($"(3) Primitive() ⟺ no proper ClosedSubset (Lean `IsPrimitive`): {(totalPrimitive + totalImprim) - primCorrespondenceViolations}/{totalPrimitive + totalImprim} agree;  imprimitive-with-generated-block: {imprimWithBlock}/{totalImprim}  [non-vacuous side: imprimitive ⟺ a block exists]");
+        output.WriteLine("");
+        output.WriteLine($"SeparatesAtBoundedBase (primitive ⟹ discretize at base+O(1) = ⌈log₂n⌉+2): {primSeparate}/{totalPrimitive} separate");
+        output.WriteLine($"  primitive schemes that do NOT separate at the bound: {nonSeparating.Count}");
+
+        // classify any non-separating primitive (a potential G2-B witness) by its Aut group.
+        int genuineWitness = 0;
+        foreach (var (n, idx, s, depth) in nonSeparating)
+        {
+            var autos = AutGroup(s, autCap);
+            if (autos is null) { output.WriteLine($"  ★ order {n} #{idx} depth={depth}: |Aut|>{autCap} (LARGE ⟹ Cameron-side)"); continue; }
+            var (trans, orb, schurian, abelian, ord) = Analyze(s, autos);
+            int basebound = (int)Math.Floor(Math.Log2(Math.Max(1, ord))) + 2;
+            bool genuine = schurian && !abelian && depth > basebound;
+            if (genuine) genuineWitness++;
+            output.WriteLine($"  ★ order {n} #{idx} depth={depth}: |Aut|={ord} {(schurian ? "SCHURIAN" : "non-Schurian")} {(abelian ? "abelian" : "non-abelian")} ⟹ {(genuine ? "‼ GENUINE G2-B WITNESS" : "not a witness")}");
+        }
+
+        output.WriteLine("");
+        if (vacuityViolations == 0 && closedViolations == 0)
+            output.WriteLine("VERDICT (model cross-check): the C# warmRefine model AGREES with the Lean intra-cell theorems on every catalogue scheme (orders 5..30) — `intraCellRelations_isClosed` and `intraCellRelations_eq_singleton_zero_of_primitive` hold empirically.");
+        else
+            output.WriteLine("VERDICT (model cross-check): ‼ DISCREPANCY between the C# model and the Lean theorems — investigate (probe bug or a model-fidelity gap).");
+        if (nonSeparating.Count == 0)
+            output.WriteLine("VERDICT (G2-B): every primitive scheme SEPARATES at base+O(1) — SeparatesAtBoundedBase holds throughout; G2-B emptiness supported on the exact formal object.");
+        else if (genuineWitness == 0)
+            output.WriteLine("VERDICT (G2-B): non-separating primitives exist but NONE is a genuine witness (large-Aut / non-schurian / abelian) — seal stands.");
+        else
+            output.WriteLine($"VERDICT (G2-B): {genuineWitness} GENUINE WITNESS(ES) — seal counterexample; STATEMENT CHANGE REQUIRED.");
+
+        // ── headline assertions ──
+        Assert.True(totalValid > 0, "no schemes parsed");
+        Assert.Equal(0, closedViolations);                // intraCellRelations_isClosed holds empirically
+        Assert.Equal(0, vacuityViolations);               // the vacuity theorem holds empirically (C#/Lean model agreement)
+        Assert.Equal(0, primCorrespondenceViolations);    // Primitive() ⟺ Lean IsPrimitive (no proper ClosedSubset)
+        Assert.Equal(0, genuineWitness);                  // no G2-B witness on the exact formal object
+    }
 }

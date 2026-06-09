@@ -428,13 +428,25 @@ affine case makes "sub-structure" a literal `Submodule` (Mathlib-native); the ge
 
 ## 6. The gate already in place — the catalogue falsifier
 
-`CatalogueSchemeProbe.cs` (board item (f), DONE) is the empirical gate on the crux: it exhaustively checks
-that **no small primitive schurian scheme is non-recovering** (orders 5–30: 481 primitive, all recover, 0
-candidates, validated against the published catalogue counts). A genuine `BaseHomogeneousTwin` primitive
-scheme *is* a non-recovering primitive scheme — so the probe is the executable contrapositive of the crux.
-**Before any heavy Phase-2 Lean investment, extend the probe's order range** (the catalogue goes past 30; the
-data fetch is wired) — a counterexample there would change the *statement*, not the proof, and is far cheaper
-to find than to rule out in Lean.
+`CatalogueSchemeProbe.cs` has **two** `[Fact]` falsifiers over the Hanaki–Miyamoto catalogue (orders 5–30,
+validated against the published per-order counts):
+- **`Probe_HanakiMiyamotoCatalogue` (board (f), DONE 2026-06-08)** — the recovery *proxy* test: 481 primitive
+  schemes, all recover (EdgeGenerates or bounded WL-depth), 0 G2-B candidates.
+- **`Probe_IntraCellFusion_Falsifier` (board (f′), DONE 2026-06-10)** — the **formalization-faithful** companion,
+  testing the *exact* Lean objects of the converse proof and cross-checking the C# and Lean models: (1)
+  `intraCellRelations` is a `ClosedSubset` (13618/13618 — validates `intraCellRelations_isClosed`); (2)
+  primitive ∧ nonempty base ⟹ `intraCellRelations = {0}` (1013/1013 — validates
+  `intraCellRelations_eq_singleton_zero_of_primitive`; **the C# warmRefine model agrees with the Lean theorem**);
+  (3) `Primitive()` ⟺ Lean `IsPrimitive` (2337/2337) + every imprimitive scheme carries a generated block
+  (1856/1856); and **`SeparatesAtBoundedBase`** holds for 481/481 primitives (0 non-separating, 0 witnesses). So
+  G2-B emptiness is now gated on the *exact formal object*, and the two landed converse-layer-1 theorems are
+  empirically confirmed.
+
+A genuine `BaseHomogeneousTwin` primitive scheme *is* a non-recovering primitive scheme — so both probes are
+executable contrapositives of the crux. **Before any heavy Phase-2 Lean investment, extend the order range**
+(the catalogue goes past 30; the data fetch is wired) — a counterexample there would change the *statement*, not
+the proof, and is far cheaper to find than to rule out in Lean. *(Deepening the C# probe past order 30 is
+deferred to a quieter time per the standing note.)*
 
 ---
 

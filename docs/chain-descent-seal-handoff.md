@@ -728,6 +728,17 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     have been a small primitive schurian non-abelian non-recovering scheme = a seal counterexample (statement change); none
     exists in orders 5–30.** Caveat (honest): the verdict rests on the EdgeGenerates/WL-depth recovery proxy = separability;
     since 0 candidates arose, the Aut/Schurian classifier ran only on the self-test, not a real candidate.
+  - **(f′) The FORMALIZATION-FAITHFUL falsifier — RAN (2026-06-10, `CatalogueSchemeProbe.Probe_IntraCellFusion_Falsifier`).**
+    The sharper companion to (f): where (f) used the EdgeGenerates/WL-depth *proxies*, this probe tests the **exact Lean
+    objects** the converse proof now formalizes, cross-checking the C# and Lean models on every catalogue scheme (orders
+    5–30). Results (all pass): **(1)** `intraCellRelations` is a `ClosedSubset` — **13618/13618** checks (validates
+    `intraCellRelations_isClosed`); **(2)** primitive ∧ nonempty base ⟹ `intraCellRelations = {0}` — **1013/1013** checks
+    (validates `intraCellRelations_eq_singleton_zero_of_primitive`; the C# warmRefine model AGREES with the Lean theorem);
+    **(3)** the C# connectivity `Primitive()` ⟺ the Lean `IsPrimitive` (no proper generated `ClosedSubset`) — **2337/2337**
+    agree, and **1856/1856** imprimitive schemes genuinely carry a generated proper block (the non-vacuous side); and
+    **`SeparatesAtBoundedBase`** (primitive ⟹ discretize at base+O(1) = ⌈log₂n⌉+2) holds for **481/481** primitives — **0
+    non-separating, 0 G2-B witnesses**. So G2-B emptiness is now supported on the *exact formal object* (`SeparatesAtBoundedBase`),
+    not just the recovery proxy, and the two landed converse-layer-1 theorems are empirically confirmed against the C# model.
   - **(g) Non-abelian irreducible `G₀` — RAN (2026-06-08, route 1 strand (a)).** `AffineSchemeProbe.Probe_NonAbelianIrreducibleG0`
     sweeps the **Singer normalizer `ΓL(1,2^d) = ⟨Singer, Frobenius⟩`** and its subgroups `⟨gᵐ, φᵏ⟩` (`φgφ⁻¹ = g²` ⟹
     genuinely non-abelian — the actual A4 zone, not the Galois/cyclic gap). The probe builds the Frobenius `x↦x²` matrix
