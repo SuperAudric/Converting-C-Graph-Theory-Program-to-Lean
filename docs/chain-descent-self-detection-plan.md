@@ -40,9 +40,14 @@
 > **depth-`k` producer** is to be built anyway for §5.3 generality (necessity for this slice = no). **F0 = the cyclic
 > affine instance LANDED** (`Cascade.lean §"Phase 2 / F0"`): `cyclicAffineScheme := affineScheme G0cyc neg_mem_G0cyc`
 > with `G0cyc_irreducible` (EARNED, multiplicative-orbit argument) + `neg_mem_G0cyc` — plugs into
-> `reachesRigidOrCameron_viaAffineIrreducible`. **REMAINING = F1 (Frobenius) → F2a (interface) → F2b (the open
-> `s(C)` counting)** (§11.8); all depth-2 engine plumbing to consume it is landed. E2-model needs **no new
-> construction** ("cyclotomic" = `affineScheme` with cyclic `G₀`).
+> `reachesRigidOrCameron_viaAffineIrreducible`. **F1 + F2a + F2b-FRAME LANDED (2026-06-09, axiom-clean, build
+> green):** F1 = the Frobenius `Ĝ⊋G` structure (`frobLinear`, `frobCoord_conj_sigmaCyc`: `frobCoord·σ·frobCoord⁻¹
+> = σ^p`); F2a = the depth-2→coset interface (`affineScheme_relOfPair_translation`,
+> `discrete_affineScheme_of_twoRoundDiffSeparates`); F2b-frame = the crux as ONE named proposition
+> (`CyclicAffineSeparates`) wired to the seal (`reachesRigidOrCameron_viaCyclicSeparation`, manifestly
+> CONDITIONAL). **REMAINING = F2b: proving `CyclicAffineSeparates`** (the uncited `s(C)` counting; F1 is the tool).
+> Optionally the **depth-`k` producer** (general §5.3 engine). E2-model needs **no new construction**
+> ("cyclotomic" = `affineScheme` with cyclic `G₀`).
 > The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
@@ -1225,11 +1230,32 @@ machinery in `Scheme.lean` is the exact template, generalized to a base set) + `
 A *straightforward* (if tedious) extension of §13b, fully general. `discrete_of_twoRoundRelationSeparates` is then
 the `k=2` instance.
 
-**Build order:** ~~F0~~ (LANDED) → **F1** → **F2a** (lands the interface, bankable) → F2b (the open counting).
-[De-risk 2-rounds RESOLVED: depth-2 suffices for the cyclic slice.] F0 + F1 + F2a are genuine mechanical progress
-(the cyclic model + Frobenius + the coset-intersection interface to the seal), independent of whether F2b ever
-closes. **Depth-`k` producer** (the §11.5/F2-risk general engine) is to be built for §5.3 reuse regardless —
-necessity for *this* slice is "no" (depth-2 works), justification is generality.
+**Build order:** ~~F0~~ → ~~F1~~ → ~~F2a~~ → **F2b** (all but F2b LANDED 2026-06-09; F2b = the open counting, now
+framed as the single named proposition `CyclicAffineSeparates`). [De-risk 2-rounds RESOLVED: depth-2 suffices.]
+F0 + F1 + F2a are mechanical progress (the cyclic model + Frobenius + the coset-intersection interface), banked.
+**Depth-`k` producer** (the §11.5/F2-risk general engine) is to be built for §5.3 reuse regardless — necessity
+for *this* slice is "no" (depth-2 works), justification is generality.
+
+> **F1 + F2a + F2b-FRAME LANDED (2026-06-09, axiom-clean `[propext, Classical.choice, Quot.sound]`, build green,
+> `Cascade.lean §"Phase 2 / F0"` cont'd).**
+> - **F1 (Frobenius, the `Ĝ ⊋ G` gap concretely):** `frobLinear` (φ: x↦x^p as a `ZMod p`-**linear** equiv, since
+>   `c^p=c` on the prime field ⟹ φ ∈ `GL(d,p)`), `frobLinear_mul` (the twist `φ(α·x)=α^p·φ(x)`),
+>   `frobCoord` (transported to `F_p^d`), **`frobCoord_conj_sigmaCyc`** (`frobCoord·σ·frobCoord⁻¹ = σ^p` — φ
+>   normalizes `G0cyc=⟨σ⟩` but isn't in it: `⟨σ,frobCoord⟩=ΓL(1,q)⊋⟨σ⟩`). **General-theorem insight:** this
+>   conjugation relation IS "an algebraic automorphism not in the group" = what the `s(C)` leak is in general,
+>   here finite/explicit. Built via the two F0 monoid homs (`map_zpow`/`map_pow`).
+> - **F2a (the depth-2 → coset interface):** **`affineScheme_relOfPair_translation`** (`relOfPair t z` depends
+>   only on the difference `e⁻¹z−e⁻¹t` ⟹ depth-2 profile = multi-coset membership — the §11.8 load-bearing object,
+>   now a lemma) + **`discrete_affineScheme_of_twoRoundDiffSeparates`** (the depth-2 affine producer in
+>   difference/coset form, wrapping the general `discrete_of_twoRoundRelationSeparates`). Gives F2b a clean target.
+> - **F2b FRAME (the crux as ONE named proposition):** **`CyclicAffineSeparates`** (∃ bounded `T`, depth-2
+>   difference profile injective = the multi-coset-intersection injectivity = the Frobenius `s(C)` bound) +
+>   **`reachesRigidOrCameron_viaCyclicSeparation`** (the seal on the cyclic-affine family reduced to that ONE
+>   proposition; manifestly CONDITIONAL — carries `hClassify`/`hne`/`hrank`/`hImprim` + the open `hsep`). The prose
+>   conjecture is now one falsifiable Lean statement wired to the seal. **F2b itself (proving `CyclicAffineSeparates`)
+>   stays OPEN** — the uncited `s(C)` counting; F1's Frobenius structure is the tool (a Γ-fixed base ⟹ φ-twins;
+>   Γ-breaking conjectured to separate, probe-confirmed). *Gotcha:* `def`/`theorem` with `p` only in the body need
+>   `(p := p)` on every scheme occurrence (else `Fact (Nat.Prime ?m)` stuck).
 
 **Reusable-for-§5.3 insight.** F2b is the *cyclic* instance of "base-homogeneous gap ⟹ invariant
 sub-structure"; the multi-coset-intersection profile is the affine shadow of the general "depth-2

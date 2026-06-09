@@ -4670,6 +4670,65 @@ theorem discrete_affineScheme_of_jointSeparates (hneg : LinearEquiv.neg (ZMod p)
   refine hsep u u' (fun t ht => ?_)
   exact (orbMk_affine_eq_iff G₀).mp ((affineScheme_relOfPair_eq_iff G₀ hneg).mp (hjp t ht))
 
+/-- **F2a — translation-invariance of the affine relation (the load-bearing depth-2 → coset bridge).**
+`relOfPair t z` depends only on the difference `e⁻¹z − e⁻¹t`: it equals the relation of that difference
+measured from the origin (`g₀ = 1` carries one orbital representative to the other). So the depth-2 profile
+`(relOfPair t z)_{t ∈ T}` is exactly the **multi-coset membership** `(e⁻¹z − e⁻¹t ∈ C_·)_{t ∈ T}` — the
+object the Frobenius `s(C)` count (F2b, self-detection-plan §11.8) lives in. -/
+theorem affineScheme_relOfPair_translation (hneg : LinearEquiv.neg (ZMod p) ∈ G₀) (t z : Fin (p ^ d)) :
+    (affineScheme G₀ hneg).relOfPair t z
+      = (affineScheme G₀ hneg).relOfPair (affineE 0)
+          (affineE (affineE.symm z - affineE.symm t)) := by
+  rw [affineScheme_relOfPair_eq_iff, orbMk_affine_eq_iff]
+  refine ⟨1, one_mem _, ?_⟩
+  simp only [Equiv.symm_apply_apply, sub_zero, LinearEquiv.coe_one, id_eq]
+
+/-- **F2a — the depth-2 affine discreteness producer, difference (coset) form.** Specializes the general
+depth-2 engine `discrete_of_twoRoundRelationSeparates` to `affineScheme`, with the relation conditions
+rewritten — via `affineScheme_relOfPair_translation` — as **difference-relation** conditions: the depth-2
+profile of `z` is `(relation of e⁻¹z − e⁻¹t from the origin)_{t ∈ T}` together with `(relation of
+e⁻¹z − e⁻¹u)`. So if, for every difference-relation profile `ρ` and tail relation `b`, the counts of such
+`z` agree between `u` and `u'` only when `u = u'`, then `warmRefine` from `T` is `Discrete`. This is the
+**multi-coset-intersection injectivity** the Frobenius `s(C)` bound (F2b) discharges — the clean affine target
+the probe `Probe_RoundsToDiscrete_Cyclotomic` measures. -/
+theorem discrete_affineScheme_of_twoRoundDiffSeparates (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    {T : Finset (Fin (p ^ d))}
+    (hsep : ∀ u u' : Fin (p ^ d),
+      (∀ (ρ : Fin (p ^ d) → Fin ((affineScheme G₀ hneg).rank + 1))
+          (b : Fin ((affineScheme G₀ hneg).rank + 1)),
+        (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+          (∀ t ∈ T, (affineScheme G₀ hneg).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+          ∧ (affineScheme G₀ hneg).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm u)) = b)).card
+        = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u' ∧
+          (∀ t ∈ T, (affineScheme G₀ hneg).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+          ∧ (affineScheme G₀ hneg).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm u')) = b)).card) → u = u') :
+    Discrete (warmRefine (schemeAdj (affineScheme G₀ hneg).toAssociationScheme)
+      (fun _ _ => POE.unknown) (individualizedColouring (p ^ d) T)) := by
+  apply discrete_of_twoRoundRelationSeparates
+  intro u u' hcounts
+  refine hsep u u' (fun ρ b => ?_)
+  have key : ∀ w : Fin (p ^ d),
+      (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ w ∧
+          (∀ t ∈ T, (affineScheme G₀ hneg).relOfPair t z = ρ t)
+          ∧ (affineScheme G₀ hneg).relOfPair w z = b))
+        = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ w ∧
+          (∀ t ∈ T, (affineScheme G₀ hneg).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+          ∧ (affineScheme G₀ hneg).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm w)) = b)) := by
+    intro w
+    apply Finset.filter_congr
+    intro z _
+    refine and_congr Iff.rfl (and_congr ?_ ?_)
+    · exact forall₂_congr fun t _ => by rw [affineScheme_relOfPair_translation G₀ hneg t z]
+    · rw [affineScheme_relOfPair_translation G₀ hneg w z]
+  rw [← key u, ← key u']
+  exact hcounts ρ b
+
 /-- **E3 — the seal reduced to the affine irreducible-discreteness bound (the affine-cyclic slice).**
 Specializes the fused seal `reachesRigidOrCameron_viaFusedSeal` to the affine model `affineScheme G₀ hneg`,
 discharging its self-detection input through `selfDetectsStably_of_discretizes` and converting the seal's
@@ -4746,7 +4805,7 @@ noncomputable def mulUnitHom :
     ⟨fun x y h => mul_left_cancel₀ u.ne_zero (by simpa [LinearMap.mulLeft_apply] using h),
      fun y => ⟨(↑u⁻¹ : GaloisField p d) * y, by
         rw [LinearMap.mulLeft_apply, Units.val_inv_eq_inv_val, mul_inv_cancel_left₀ u.ne_zero]⟩⟩
-  map_one' := by ext x; simp [LinearMap.mulLeft_apply]
+  map_one' := by ext x; simp
   map_mul' a b := by ext x; simp [LinearMap.mulLeft_apply, LinearEquiv.mul_apply, Units.val_mul]
 
 @[simp] theorem mulUnitHom_apply (u : (GaloisField p d)ˣ) (x : GaloisField p d) :
@@ -4846,7 +4905,124 @@ theorem G0cyc_irreducible (hd : d ≠ 0) : G₀Irreducible (G0cyc (p := p) hd) :
 primitive (`G0cyc_irreducible`) small affine instance, symmetric (`neg_mem_G0cyc`); the family the
 Frobenius `s(C)` bound (F2b) and the affine probe target. -/
 noncomputable def cyclicAffineScheme (hd : d ≠ 0) : SchurianScheme (p ^ d) :=
-  affineScheme (G0cyc hd) (neg_mem_G0cyc hd)
+  affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)
+
+/-! #### F1 — the Frobenius structure (the `Ĝ ⊋ G` separability gap, made concrete)
+
+The Frobenius `φ : x ↦ x^p` is `ZMod p`-**linear** (because `c^p = c` on the prime field), so it sits in
+`GL(d,p)`, and it conjugates `σ` (mult by the generator `α`) to `σ^p` (`φ(α·x) = α^p·φ(x)`). Hence `φ`
+**normalizes** `G0cyc = ⟨σ⟩` but generally is **not in it**: `⟨σ, φ⟩ = ΓL(1,q) ⊋ ⟨σ⟩`. That extra Galois
+symmetry is an *algebraic* automorphism of the scheme the group does not realize — the `Ĝ ⊋ G` gap, and the
+degeneracy a `Γ`-fixed base would suffer (F2). **General-theorem shadow:** this conjugation relation
+`φσφ⁻¹ = σ^p` is exactly "an algebraic automorphism not in the group", which is what the `s(C)` leak is in
+general — here it is finite-dimensional and explicit. -/
+
+/-- Frobenius `x ↦ x^p` as a `ZMod p`-**linear** automorphism of `F_q` (linear since `c^p = c` on the prime
+field, `ZMod.pow_card`). The algebraic automorphism witnessing the `Ĝ ⊋ G` gap. -/
+noncomputable def frobLinear : GaloisField p d ≃ₗ[ZMod p] GaloisField p d where
+  toFun := frobeniusEquiv (GaloisField p d) p
+  map_add' := map_add _
+  map_smul' c x := by
+    show frobeniusEquiv (GaloisField p d) p (c • x)
+        = (RingHom.id (ZMod p)) c • frobeniusEquiv (GaloisField p d) p x
+    rw [RingHom.id_apply, Algebra.smul_def, Algebra.smul_def, map_mul]
+    congr 1
+    rw [frobeniusEquiv_def, ← map_pow, ZMod.pow_card]
+  invFun := (frobeniusEquiv (GaloisField p d) p).symm
+  left_inv := (frobeniusEquiv (GaloisField p d) p).left_inv
+  right_inv := (frobeniusEquiv (GaloisField p d) p).right_inv
+
+@[simp] theorem frobLinear_apply (x : GaloisField p d) :
+    frobLinear (p := p) (d := d) x = x ^ p := frobeniusEquiv_def (GaloisField p d) p x
+
+/-- **The twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius is a ring hom, so it carries multiplication by
+`α` to multiplication by `α^p`. The algebraic core of the gap. -/
+theorem frobLinear_mul (α x : GaloisField p d) :
+    frobLinear (α * x) = α ^ p * frobLinear x := by
+  simp only [frobLinear_apply, mul_pow]
+
+/-- `φ` carries `mul·α` to `(mul·α)^p` under conjugation, as an identity of linear automorphisms
+(`φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p`). -/
+theorem frobLinear_conj_mulUnit :
+    frobLinear (p := p) (d := d) * mulUnitHom (fqGen) * (frobLinear)⁻¹
+      = (mulUnitHom (fqGen (p := p) (d := d))) ^ p := by
+  ext x
+  have hinv : frobLinear (p := p) (d := d) ((frobLinear (p := p) (d := d))⁻¹ x) = x := by
+    rw [← LinearEquiv.mul_apply, mul_inv_cancel]; exact (LinearEquiv.eq_symm_apply 1).mp rfl
+  rw [← map_pow, mulUnitHom_apply, Units.val_pow_eq_pow_val, LinearEquiv.mul_apply,
+    LinearEquiv.mul_apply, mulUnitHom_apply, frobLinear_mul, hinv]
+
+/-- Frobenius transported to the coordinate space `F_p^d` — an element of `GL(d,p)` (the linear part of a
+Galois twist of the affine group). -/
+noncomputable def frobCoord (hd : d ≠ 0) : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p) :=
+  conjHom hd frobLinear
+
+/-- **The normalizing relation** `frobCoord · σ · frobCoord⁻¹ = σ^p` — Frobenius conjugates the cyclic
+generator to its `p`-th power. So `frobCoord` normalizes `G0cyc = ⟨σ⟩` but lies in it only when `φ ∈ ⟨σ⟩`;
+in general `⟨σ, frobCoord⟩ = ΓL(1,q) ⊋ ⟨σ⟩` — the algebraic-automorphism gap (`Ĝ ⊋ G`) the cyclotomic
+`s(C)` leak would exploit, here finite and explicit. -/
+theorem frobCoord_conj_sigmaCyc (hd : d ≠ 0) :
+    frobCoord (p := p) hd * sigmaCyc hd * (frobCoord hd)⁻¹ = sigmaCyc hd ^ p := by
+  rw [frobCoord, sigmaCyc, ← map_inv, ← map_mul, ← map_mul, frobLinear_conj_mulUnit, map_pow]
+
+/-! #### F2b frame — the cyclic separation crux as a single named proposition
+
+This packages the entire open content of the affine-cyclic slice into ONE Lean proposition
+(`CyclicAffineSeparates`) and wires it to the seal (`reachesRigidOrCameron_viaCyclicSeparation`). It does
+**not** prove the crux — `CyclicAffineSeparates` is carried as a hypothesis, exactly the uncited open `s(C)`
+counting (self-detection-plan §11.8 F2b). Its value is turning the prose conjecture into one falsifiable
+statement about **multi-coset-intersection counts**, the object F1's Frobenius structure acts on (a `Γ`-fixed
+base produces `φ`-twins; a Γ-breaking base is conjectured to separate — the de-risk probe
+`Probe_RoundsToDiscrete_Cyclotomic` confirms this empirically at `|T| = O(d)`, depth 2). -/
+
+/-- **The cyclic-affine separation crux (the single open proposition).** A bounded individualization set `T`
+whose depth-2 **difference profile** is injective: for every difference-relation profile `ρ` and tail
+relation `b`, the multi-coset-intersection counts of matching `z` separate every pair of vertices. This is
+the Frobenius `s(C)` bound; `discrete_affineScheme_of_twoRoundDiffSeparates` consumes it to discharge
+`hbound`. **Open** — the empirically-confirmed (probe) but uncited counting core. -/
+def CyclicAffineSeparates (hd : d ≠ 0) (bound : Nat) : Prop :=
+  ∃ T : Finset (Fin (p ^ d)), T.card ≤ bound ∧
+    ∀ u u' : Fin (p ^ d),
+      (∀ (ρ : Fin (p ^ d) → Fin ((affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).rank + 1))
+          (b : Fin ((affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).rank + 1)),
+        (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+          (∀ t ∈ T, (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+          ∧ (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm u)) = b)).card
+        = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u' ∧
+          (∀ t ∈ T, (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+          ∧ (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).relOfPair (affineE 0)
+              (affineE (affineE.symm z - affineE.symm u')) = b)).card) → u = u'
+
+/-- **The seal on the cyclic-affine family, reduced to the single crux `CyclicAffineSeparates`.** Instantiates
+`reachesRigidOrCameron_viaAffineIrreducible` at the cyclic `G₀ = G0cyc`, discharging `hbound` from
+`CyclicAffineSeparates` via the F2a producer `discrete_affineScheme_of_twoRoundDiffSeparates`.
+
+**⚠️ CONDITIONAL — NOT the closed seal.** It carries `hClassify` (G3, cited), `hne`/`hrank` (the scheme is a
+genuine rank-≥2 association scheme — discharged per instance), `hImprim` (landed/earned, tower-reducible), and
+the **open** `hsep : CyclicAffineSeparates` (the Frobenius `s(C)` counting, F2b — uncited). Closing the seal on
+this family ⟺ proving `CyclicAffineSeparates`, which is open `s(C)` mathematics. -/
+theorem reachesRigidOrCameron_viaCyclicSeparation (hd : d ≠ 0)
+    {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hne : ∀ i : Fin ((affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).rank + 1),
+        ∃ v w, (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).rel i v w = true)
+    (hrank : 2 ≤ (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).rank)
+    (hsep : CyclicAffineSeparates (p := p) hd bound)
+    (hImprim : ¬ (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)).toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (p ^ d) (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd))
+          ∨ AbelianConsumed (p ^ d) (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd))) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)))
+      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (G0cyc (p := p) hd) (neg_mem_G0cyc hd)) := by
+  refine reachesRigidOrCameron_viaAffineIrreducible (G₀ := G0cyc hd) hClassify (neg_mem_G0cyc hd)
+    hne hrank ?_ hImprim
+  rintro ⟨-, -⟩
+  obtain ⟨T, hcard, hTsep⟩ := hsep
+  exact ⟨T, hcard, discrete_affineScheme_of_twoRoundDiffSeparates (G0cyc hd) (neg_mem_G0cyc hd) hTsep⟩
 
 end CyclicAffine
 
