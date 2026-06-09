@@ -1,5 +1,12 @@
 # Chain descent — the self-detection lemma: plan to make the seal unconditional
 
+> **⟶ CURRENT STATE + STEP-2 PLAN: read §12 (HANDOFF, 2026-06-10).** This session re-targeted the seal's open
+> content onto the **bounded `O(1)` symmetry-phase residue** via the conservation budget split + the rewiring
+> (`reachesRigidOrCameron_viaSymmetricRecovery`): the open content is now `SelfDetectsWhileSymmetric` (the `s(C)`
+> term alone), with the potentially-unbounded IR-core moved to the second guarantee. §12 has the crux decomposition
+> equation (`recovery_depth = base + s(C) + IR_core`) and the viable step-2 plan. The blocks below are the prior
+> (still-valid) Phase-1/Phase-2 record.
+>
 > **STATUS (2026-06-08): Phase 1 COMPLETE (Increments 1 + 2 LANDED, axiom-clean, build green) — the seal is
 > reduced end-to-end to the SEMANTIC crux `SelfDetectsStably` (primitive small ⟹ cells = orbits above a
 > bounded set). FUSED SEAL LANDED (2026-06-08, axiom-clean): `reachesRigidOrCameron_viaFusedSeal`
@@ -1466,3 +1473,134 @@ sub-structure"; the multi-coset-intersection profile is the affine shadow of the
 structure-constant profile" of a coherent configuration. The depth-`k` producer (if F2-risk forces it) is
 stated for any `AssociationScheme`, so it serves the §5.3 general crux directly — the engine generalizes even
 though the *bound proof* (F2b) is slice-specific.
+
+---
+
+## 12. HANDOFF (2026-06-10) — the conservation decomposition, the rewiring, and the step-2 plan
+
+> **Read this section for the current state.** This session re-targeted the seal's open content from a single
+> conflated recovery predicate (`StablyRecoverable`) onto the **bounded `O(1)` symmetry-phase residue**, by (i) a
+> conceptual step-back (the bound is `O(log n)`, not `O(1)`), (ii) two depth-growth probes confirming the residue is
+> flat while the growth is in the handled legs, (iii) the **conservation budget split**, and (iv) the **rewiring** of
+> the seal onto the IR-core-free predicate. All Lean axiom-clean, build green. The open crux is unchanged in essence
+> but is now *isolated* — uncontaminated by the IR-core / leg-B / Cameron growth.
+
+### 12.1 The crux decomposition equation
+
+The recovery depth of a residual `G` (individualizations for `warmRefine` on `schemeAdj` to discretize)
+decomposes into **three separately-budgeted terms** (the conservation route, now formalized):
+
+```
+    recovery_depth(G)  =  base(G)  +  s(C)(G)  +  IR_core(G)
+```
+
+| term | meaning | bound | landed handle | seal disposition |
+|---|---|---|---|---|
+| **base(G)** | individualizations to exhaust the symmetry (`Stab = 1`, `IsBase`) | `≤ log₂\|G\| = O(log n)` for small `G` | `card_autP_eq_prod_of_base`; `exists_isBase_saturated` | provable (step 2.1) |
+| **s(C)(G)** | WL-dimension stickiness *while symmetry remains* — cells must equal orbits at the non-base prefixes | open; **empirically `O(1)`** for non-abelian primitive (both probes) | `RecoversWhileSymmetric` / `SelfDetectsWhileSymmetric` | **the seal's sole open content** |
+| **IR_core(G)** | discretization of the *rigid* post-symmetry residue (genuine decisions, `real_stays_real`) | can be **unbounded** (multipede) | `DiscretizesAtBases` (`= Discrete` at bases) | **moved to the second guarantee** (flag-allowed) |
+
+The predicate-level statement of the split (`Cascade.lean`, `stablyRecoverable_iff_symmetric_and_bases`):
+
+```
+    StablyRecoverable S₀  ⟺  RecoversWhileSymmetric S₀  ∧  DiscretizesAtBases S₀
+                              └── s(C) term (seal) ──┘     └── IR_core term (2nd guar.) ──┘
+```
+
+**The leg cross-cut (empirical, the depth-growth probes).** The *overall* recovery depth is `O(log n)`, but the
+growth lives **entirely in the handled legs**:
+
+```
+    overall_depth  =  base  +  legB(√log n, abelian → consumed)  +  Cameron(grows → flagged)  +  G2B_residue(O(1))
+```
+
+so a uniform `O(1)` bound over *all* primitive schemes is **false** (Johnson `T(m)` / almost-simple grow), but the
+**G2-B residue** (small non-abelian primitive) is flat at depth ≤ 4 (Route 1 `ΓL(1,2^d)` `n=16…1024`; Route 2
+catalogue 5–30, residue slope 0.26). The depth-4 "hope" is therefore defensible **for the residue specifically**,
+not as a uniform constant. *(Caveat: the slope is over-extrapolated — Route 1 is one affine family, Route 2's
+residue range is short; the structural cut, not the slope, is the result.)*
+
+### 12.2 What this session landed (all axiom-clean, build green)
+
+1. **The rank-4 base-set bridge** (`Scheme.lean §S1.c`): `JointSchemeOrbit`, `jointProfile_eq_of_jointSchemeOrbit`
+   (reverse — `Stab(T)`-orbits refine the joint profile, provable any `T`), `JointProfileRecoversAt` (the forward —
+   recovery-at-`T`), `jointProfileRecoversAt_singleton` (`|T|=1` free). **Verdict: the forward is provable at
+   `|T|=1`, open at `|T|≥2`** — the joint profile sees `⋂ₜ Stab(t)`-orbits ⊋ `Stab(T)`-orbit (per-base
+   automorphisms need not share a common fixor). That strict coarsening *is* `s(C) ≥ 2`, smallest at rank-4.
+2. **The conservation budget split** (`Cascade.lean`): `RecoversWhileSymmetric`, `DiscretizesAtBases`,
+   `stablyRecoverable_iff_symmetric_and_bases`, `discretizesAtBases_iff`. Revealed `StablyRecoverable`
+   **over-requires** (folds the unbounded IR-core into the seal).
+3. **The rewiring** (`Cascade.lean`): `coversOrbits_of_realizers_symmetric` + `…_visibleRealizers_symmetric`
+   (coverage from non-base realizers only; free at the base) → `schemeAutGroup_eq_closure_of_recoversWhileSymmetric`
+   (**the heart: the full root group is reproduced from `RecoversWhileSymmetric` alone — the IR-core is not needed**)
+   → `SchemeRecoveredWhileSymmetric` + `schemeAutGroup_eq_closure_of_schemeRecoveredWhileSymmetric` +
+   `schemeRecoveredWhileSymmetric_of_stablyRecoverable` (subsumes the old seal) + `SelfDetectsWhileSymmetric` +
+   **`reachesRigidOrCameron_viaSymmetricRecovery`** (the rewired seal capstone, `SchemeRecoveredWhileSymmetric ∨
+   IsCameronScheme`). The seal's open obligation is now **strictly weaker** (IR-core dropped).
+4. **The Lean-faithful catalogue falsifier** (`CatalogueSchemeProbe.Probe_IntraCellFusion_Falsifier`) + the
+   **depth-growth probes** (`AffineSchemeProbe.Probe_DepthGrowth_NonAbelianPrimitive`,
+   `CatalogueSchemeProbe.Probe_CatalogueDepthVsN`).
+
+### 12.3 Current seal state (after the rewiring)
+
+The seal's open content is **`SelfDetectsWhileSymmetric`** = *primitive small ⟹ `∃ bounded S₀,
+RecoversWhileSymmetric S₀`* = *the WL-cells equal the orbits at every non-base prefix above a bounded `S₀`* (the
+`s(C)` term alone). The capstone `reachesRigidOrCameron_viaSymmetricRecovery` concludes
+`SchemeRecoveredWhileSymmetric ∨ IsCameronScheme`, carrying `hClassify` (G3, cited), `hImprim` (landed/earned),
+and the open `hSelfDetect`. The IR-core (`DiscretizesAtBases`, potentially unbounded) is **no longer a seal
+obligation** — it is the second guarantee's blind-spot (flagged). G3 unchanged.
+
+### 12.4 Step 2 — the prospective plan (bounding the `s(C)` residue)
+
+The remaining open is `s(C)(G)` bounded for the **non-abelian primitive residue** — i.e. proving
+`SelfDetectsWhileSymmetric`. This is uncited open math, but it now has a clean, staged, *viable* attack with the
+IR-core out of the way. Do the steps in order; each is independently valuable.
+
+**Step 2.1 — bank the `base(G)` term (provable now; ~100 lines, the only fully-provable piece).**
+Prove `small ⟹ ∃ IsBase S₀, 2^|S₀| ≤ |G|`, hence `base(G) ≤ log₂|G| = O(log n)`.
+- *Route:* a **greedy irredundant base** — iterate "pick a point moved by `StabilizerAt(S)`, insert it" until
+  `Stab = 1`. Each step's basic orbit has size `≥ 2` (the point is moved), so `orbitSizeProd ≥ 2^(length)`.
+- *Landed handles:* `card_autP_eq_prod_of_base` (`|Stab ∅| = orbitSizeProd`), `orbitSizeProd` (list-fold of
+  `(MulAction.orbit (StabilizerAt S) b).ncard`), `exists_isBase_saturated` (∃ base, any size). **Gap to build:**
+  the greedy one-point-at-a-time base (well-founded recursion on `|Stab|` ↓ or `n − |S|`) + `orbitSizeProd ≥
+  2^len` for it. No existing irredundant-base machinery — this is the from-scratch part.
+- *Payoff:* makes the `bound` in `SchemeRecoveredWhileSymmetric` concretely `base(G) + s(C) = O(log n) + s(C)`,
+  so the only quantity left to bound is the additive `s(C)` stickiness.
+
+**Step 2.2 — the layer-step reduction (structural; reduces `s(C)` to a per-layer condition).**
+Reduce `RecoversWhileSymmetric` (cells = orbits at *every* non-base prefix) to a **single per-layer transfer**:
+*cells = orbits at `T` ⟹ cells = orbits at `T ∪ {x}`*, for `x` in a non-base cell.
+- *Landed handles:* `LayerStep` (`Cascade.lean`: `CellsAreOrbits T → CellsAreOrbits (T ∪ S)`), `cascadeComposition` /
+  `cascadeComposition_pathFixing` (depths add across layers), `cellsAreOrbits_schemeAdj_singleton` (the `|T|=1` base
+  case, free). The induction is: base case free (single base), then `LayerStep` up the base sequence.
+- *Payoff:* "`s(C)` bounded" becomes "**each layer recovers**" — the per-layer two-base forward bridge — turning a
+  global WL-dimension claim into a local, finite, per-step condition. This is where `JointProfileRecoversAt` at
+  `{T, x}` (the `§S1.c` object) plugs in.
+
+**Step 2.3 — the per-layer separability (the genuine open core; three concrete attack routes).**
+Prove the per-layer bridge: cells = orbits at `T` ⟹ cells = orbits at `T ∪ {x}`, for non-abelian primitive small.
+Equivalently `JointProfileRecoversAt` at `|T|+1`: the gap `⋂ Stab(t)-orbit ⊋ Stab(T,x)-orbit` is closed by the
+two-base intersection counts after individualizing `x`. **Routes (try in this order):**
+- *(a) The counting route (most native).* The two-base count `#{z : relOfPair t z = a ∧ relOfPair t' z = a'}` is a
+  single structure constant (`intersectionCount_via_w` = `intersectionNumber a a' (relOfPair t t')`). The per-layer
+  separation is whether the *joint* profile (these counts over `T ∪ {x}`) refines the `⋂Stab`-orbit down to the
+  `Stab(T,x)`-orbit. Concrete target: *a relation that is a `T`-twin but not a `T∪{x}`-twin is detected by a
+  differing two-base count.* This is finite, per-relation, and uses only landed intersection-number machinery.
+- *(b) The rank-4 amorphic slice (smallest concrete instance).* Prove the per-layer bridge for `S.rank = 3`
+  (4 relations, the amorphic equal-valency case — order-16 #20/#21, the cyclotomic Clebsch). Caveat: the
+  Frobenius/Galois route was **retracted** (the gap is the amorphic `S₃`, not Galois); the bridge must be
+  mechanism-agnostic. The Clebsch instance is finite (`F₁₆`) — a computable-model + `decide` proof is possible if
+  the `noncomputable affineScheme` is mirrored by a computable relation matrix (heavy but bounded).
+- *(c) The S-ring route (affine).* affine-`G₂B` ⟺ separability of the schurian Schur ring of `G₀` over bounded
+  `F_p^d`. Build/cite Schur-ring separability theory. Heaviest (no Mathlib substrate — the Q1 wall).
+
+**Step 2.4 — empirical gating (cheap; do before 2.3's heavy investment).** Extend the depth-growth probe beyond
+the affine `ΓL(1,2^d)` family to **non-affine primitive residues** (`A₅`-on-`F₂⁴`, `PSL(2,q)`, classical) — the
+branched agent's caveat is that the flat-residue result rests on one affine family. Confirming the residue stays
+flat there hardens the conjecture before committing to 2.3.
+
+**Honest scope.** Step 2.1 is provable now. Step 2.2 is structural (reduces, doesn't close). Step 2.3 is the
+genuine open `s(C)` bound — uncited, no counterexample known, empirically supported. The realistic near-term
+deliverable is **2.1 + 2.2**, which would reduce the seal's open content to a single *per-layer* separability
+statement (`base(G)` banked, the global WL claim localized) — the sharpest the crux can be made without closing
+the open math. Then 2.3(a) is the most native first attack on that residue.

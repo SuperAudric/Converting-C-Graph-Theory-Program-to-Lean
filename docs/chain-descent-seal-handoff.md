@@ -153,6 +153,20 @@ cited G3, and subsumes both `reachesRigidOrCameron_viaStableRecovery` and `reach
 the conditional seal `modulo {G3 + self-detection}` as ONE object; the entire open content is the single semantic
 proposition `SelfDetectsStably` (= G2-B), which Phase 2 (the affine-cyclic bound proof, self-detection-plan §11) attacks.
 
+**Update (2026-06-10) — THE REWIRING: the open content is now the IR-core-free `SelfDetectsWhileSymmetric`.** A
+conceptual step-back (the recovery bound is `O(log n)`, not `O(1)`) + two depth-growth probes (the `O(log n)` growth
+lives entirely in the handled legs — leg C/Cameron Johnson `T(m)`, leg B abelian — while the small-non-abelian-primitive
+**G2-B residue is flat, depth ≤ 4**) exposed that `SelfDetectsStably`/`StablyRecoverable` **over-require**: they fold
+the IR-core (post-base discretization, the unbounded multipede term) into the seal, though symmetry-completeness only
+needs the symmetry *consumed*. The **conservation budget split** (`stablyRecoverable_iff_symmetric_and_bases`:
+`StablyRecoverable ⟺ RecoversWhileSymmetric ∧ DiscretizesAtBases`) and the **rewiring**
+(`reachesRigidOrCameron_viaSymmetricRecovery`, keyed on the IR-core-free `SchemeRecoveredWhileSymmetric`, with
+`schemeAutGroup_eq_closure_of_recoversWhileSymmetric` proving the group reproduces from the symmetry phase alone)
+move the IR-core to the **second guarantee** (flag-allowed). **Net: the seal's open content is now the bounded,
+empirically-`O(1)` G2-B residue `SelfDetectsWhileSymmetric` (= `RecoversWhileSymmetric` = the `s(C)` term), strictly
+weaker than `SelfDetectsStably` (which it subsumes via `schemeRecoveredWhileSymmetric_of_stablyRecoverable`).** The
+crux decomposition equation and the staged step-2 plan are in **self-detection-plan §12** (the current handoff).
+
 ---
 
 ## 3. The vacuity correction — orbit-level vs visible (READ THIS)
