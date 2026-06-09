@@ -3597,6 +3597,72 @@ not just present at `S₀`). -/
 def StablyRecoverable {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) : Prop :=
   ∀ T : Finset (Fin n), S₀ ⊆ T → CellsAreOrbits adj P T
 
+/-! #### The conservation budget split — isolating the G2-B residue from the IR-core
+
+The depth-growth probes (2026-06-10, two independent routes) confirmed the recovery depth is `O(log n)` overall
+but the growth lives **entirely in the handled legs** — leg C / Cameron (Johnson `T(m)`, almost-simple; flagged)
+and leg B (abelian; consumed) — while the **G2-B residue** (small non-abelian primitive) stays **flat (depth ≤ 4)**.
+This block formalizes the matching split of the recovery predicate.
+
+`StablyRecoverable` demands `CellsAreOrbits` at **every** `T ⊇ S₀`. Splitting on whether `T` is already a base
+(`IsBase` — residual symmetry exhausted, orbits trivial):
+
+- **`RecoversWhileSymmetric`** — recovery at the **non-base** prefixes (`¬IsBase`, symmetry still present to
+  consume). This is the **G2-B residue** (empirically `O(1)`). For schurian schemes the single-base case is free
+  (`cellsAreOrbits_schemeAdj_singleton`); the open content is the multi-base forward (`JointProfileRecoversAt`).
+- **`DiscretizesAtBases`** — recovery at the **base** prefixes (`IsBase`). By `recoverableAt_base_iff_discrete`
+  this is exactly *discretization of the rigid post-base residual* — the **IR-core** term, which can be unbounded
+  (multipede) and belongs to the **second guarantee** (flag-allowed), *not* to symmetry-completeness.
+
+So `StablyRecoverable = DiscretizesAtBases ∧ RecoversWhileSymmetric` (`stablyRecoverable_iff_symmetric_and_bases`)
+separates the seal's bounded open residue from the potentially-unbounded IR-core. The takeaway: `StablyRecoverable`
+**over-requires** — it folds IR-core discretization into the seal; symmetry-completeness only needs
+`RecoversWhileSymmetric`. Re-keying the seal on `RecoversWhileSymmetric` alone (moving `DiscretizesAtBases` to the
+second guarantee) is the genuine weakening this split enables — the next step. -/
+
+/-- **The G2-B residue** — recovery (`CellsAreOrbits`) at the **non-base** prefixes above `S₀`, i.e. while there
+is residual symmetry to consume. Empirically `O(1)` (the depth-growth probes: small non-abelian primitive flat at
+depth ≤ 4). For schurian schemes single-base recovery is free; the open content is the multi-base forward bridge
+(`JointProfileRecoversAt`, `Scheme.lean §S1.c`). -/
+def RecoversWhileSymmetric {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) : Prop :=
+  ∀ T : Finset (Fin n), S₀ ⊆ T → ¬ IsBase adj P T → CellsAreOrbits adj P T
+
+/-- **The IR-core term** — recovery at the **base** prefixes above `S₀`. By `discretizesAtBases_iff` this is
+discretization of the rigid post-base residual: the multipede / IR-blind-spot quantity (can be unbounded), the
+**second guarantee**'s concern, *not* a symmetry-completeness obligation. -/
+def DiscretizesAtBases {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) (S₀ : Finset (Fin n)) : Prop :=
+  ∀ T : Finset (Fin n), S₀ ⊆ T → IsBase adj P T → CellsAreOrbits adj P T
+
+/-- **The budget split:** `StablyRecoverable = DiscretizesAtBases ∧ RecoversWhileSymmetric` — the IR-core term and
+the G2-B residue, separated. Trivial case-split on `IsBase`; the *content* is the separation it names (the seal's
+open `StablyRecoverable` is the bounded residue **plus** the flag-allowed IR-core, not one conflated quantity). -/
+theorem stablyRecoverable_iff_symmetric_and_bases {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+    {S₀ : Finset (Fin n)} :
+    StablyRecoverable adj P S₀ ↔ DiscretizesAtBases adj P S₀ ∧ RecoversWhileSymmetric adj P S₀ := by
+  constructor
+  · intro h
+    exact ⟨fun T hT _ => h T hT, fun T hT _ => h T hT⟩
+  · rintro ⟨hb, hs⟩ T hT
+    by_cases hbase : IsBase adj P T
+    · exact hb T hT hbase
+    · exact hs T hT hbase
+
+/-- **The IR-core term is exactly discretization at the bases.** For an `IsBase T`, `CellsAreOrbits T` coincides
+with `Discrete (warmRefine … T)` (`recoverableAt_base_iff_discrete` + `orbitRecoverableAt_iff_cellsAreOrbits`). So
+`DiscretizesAtBases` is the IR-core / multipede quantity — the second guarantee's blind-spot, allowed to be
+unbounded and to flag — confirming it is not part of the seal's symmetry-completeness obligation. -/
+theorem discretizesAtBases_iff {n : Nat} {adj : AdjMatrix n} {P : PMatrix n} {S₀ : Finset (Fin n)} :
+    DiscretizesAtBases adj P S₀ ↔
+      ∀ T : Finset (Fin n), S₀ ⊆ T → IsBase adj P T →
+        Discrete (warmRefine adj P (individualizedColouring n T)) := by
+  constructor
+  · intro h T hT hbase
+    exact (recoverableAt_base_iff_discrete T hbase).mp
+      (orbitRecoverableAt_iff_cellsAreOrbits.mpr (h T hT hbase))
+  · intro h T hT hbase
+    exact orbitRecoverableAt_iff_cellsAreOrbits.mp
+      ((recoverableAt_base_iff_discrete T hbase).mpr (h T hT hbase))
+
 /-- **The root group covers every orbit along any base sequence** — `CoversOrbitsAlong` is satisfied by
 `gens = ↑(StabilizerAt … ∅)` (all `P`-preserving automorphisms). This is the (genuinely true, here
 non-load-bearing) *orbit-level* coverage: an orbit-mate at `S` is realized by the residual automorphism

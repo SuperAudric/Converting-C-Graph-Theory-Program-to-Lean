@@ -167,6 +167,26 @@
 > two-base forward gap). The amorphic core stays open research; the retraction-confirmed Frobenius insufficiency is
 > the same wall. This is the honest result of "attempt rank-4": the gap is now located and named at the two-base
 > level, with the free half banked.
+> **DEPTH-GROWTH PROBES + THE CONSERVATION BUDGET SPLIT LANDED (2026-06-10, axiom-clean, `Cascade.lean`).** A
+> branched agent built two depth-growth probes (full-scheme warmRefine recovery depth vs `n`): **Route 1** (affine
+> `ΓL(1,2^d)` Singer-normalizer, `d=4..10`, `n=16..1024`) — the **G2-B residue is FLAT, depth 3–4, slope ≈ 0**;
+> **Route 2** (catalogue 5–30, depth-driver classified by Aut) — **overall `O(log n)` (slope 0.83), but the growth
+> is ENTIRELY in the handled legs**: leg C / Cameron (Johnson `T(m)` = `|Aut|=m!`, almost-simple — flagged) + leg B
+> (abelian — consumed, low depth); the **small non-abelian primitive residue is FLAT** (slope 0.26, depth ≤ 4),
+> matching Route 1. (Caveats: Route 1 = one affine family; Route 2's residue range short `log₂n ≤ 5`; greedy = upper
+> bound — so the *slope* is over-extrapolated, but the **structural cut** — growth in the legs, residue flat — is the
+> result.) **Motivated the budget split (`Cascade.lean`):** `StablyRecoverable` requires `CellsAreOrbits` at *every*
+> `T ⊇ S₀`, **including the base**, where (`recoverableAt_base_iff_discrete`) it = full discretization — silently
+> folding the **IR-core** (rigid post-base residual, multipede term, *unbounded*) into the seal's open content, though
+> symmetry-completeness only needs the symmetry *consumed*. Landed: **`RecoversWhileSymmetric`** (G2-B residue,
+> non-base prefixes, `O(1)`), **`DiscretizesAtBases`** (IR-core, base prefixes = second-guarantee/multipede term),
+> **`stablyRecoverable_iff_symmetric_and_bases`** (`StablyRecoverable ↔ DiscretizesAtBases ∧ RecoversWhileSymmetric`),
+> **`discretizesAtBases_iff`** (IR-core = discretization-at-bases). **NET: the seal's open `StablyRecoverable` is now
+> provably the bounded G2-B residue PLUS the flag-allowed IR-core — it over-requires.** Next (the genuine weakening):
+> re-key the seal on `RecoversWhileSymmetric` alone, moving `DiscretizesAtBases` to the second guarantee — sound
+> because at an `IsBase` level the orbit *coverage* the harvest needs is free (orbits singletons, `σ=id` covers), so
+> the harvest does not truly need the IR-core. Re-deriving the group-reproduction chain from non-base coverage is the
+> heavier follow-on.
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
 > **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)

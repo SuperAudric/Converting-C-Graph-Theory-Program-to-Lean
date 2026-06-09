@@ -502,6 +502,107 @@ public class CatalogueSchemeProbe(ITestOutputHelper output)
 
     static bool IsPrime(int x) { if (x < 2) return false; for (int d = 2; d * d <= x; d++) if (x % d == 0) return false; return true; }
 
+    // Triangular/Johnson scheme T(m) = J(m,2): n = m(m−1)/2 and |Aut| = m! (a Cameron
+    // section — large primitive group, leg C).
+    static bool IsJohnson(int n, long ord)
+    {
+        for (int m = 3; m <= 12; m++)
+        {
+            if (m * (m - 1) / 2 != n) continue;
+            long fact = 1; for (int i = 2; i <= m; i++) fact *= i;
+            return ord == fact;
+        }
+        return false;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  DEPTH-vs-n cross-family check (companion to AffineSchemeProbe.Probe_DepthGrowth).
+    //  Max primitive recovery depth (WLDepth, full-scheme 1-WL) per order vs log₂(n),
+    //  over the WHOLE catalogue (every primitive scheme, all families).  Orders 5–30 ⟹
+    //  log₂(n) ≤ ~5, a SHORT range — so a flat profile is consistent with O(1) and only
+    //  strong growth would flag.  Cross-family (unlike the single affine family).
+    // ─────────────────────────────────────────────────────────────────────────────
+    [Fact]
+    public void Probe_CatalogueDepthVsN()
+    {
+        var orders = Enumerable.Range(5, 26).ToArray();   // 5..30
+        int autCap = 200_000;
+        output.WriteLine("Catalogue depth-vs-n: max PRIMITIVE recovery depth per order, with the depth-DRIVER classified:");
+        output.WriteLine($"{"n",4} {"#prim",6} {"maxDepth",9} {"depth/log2n",12}  driver: rank |Aut| sym? abelian-Aut?");
+        var pts = new List<(double logn, int maxDepth)>();
+        // per-leg max-depth profile: residue = SMALL non-abelian primitive (the genuine G2-B).
+        var residuePts = new List<(double logn, int depth)>();
+        int legB = 0, legC = 0, residue = 0;
+        foreach (int n in orders)
+        {
+            var path = DataPath(n);
+            if (path == "") continue;
+            var raw = ParseCatalogue(path, n);
+            int maxDepth = -1, cnt = 0, residueMax = -1;
+            Scheme? driver = null;
+            foreach (var M in raw)
+            {
+                var s = BuildScheme(M, n);
+                if (s is null) continue;
+                if (s.Rank <= 2 || !Primitive(s)) continue;
+                cnt++;
+                int wl = WLDepth(s, cap: n);
+                if (wl > maxDepth) { maxDepth = wl; driver = s; }
+                // track the genuine residue: SMALL (|Aut| ≤ n^3, not Johnson) non-abelian primitive
+                var au = AutGroup(s, autCap);
+                if (au is not null)
+                {
+                    var (_, _, _, ab, ord) = Analyze(s, au);
+                    bool large = IsJohnson(n, ord) || ord >= (long)Math.Pow(n, 3);
+                    if (!ab && !large) residueMax = Math.Max(residueMax, wl);   // small non-abelian primitive
+                }
+            }
+            if (cnt == 0 || driver is null) continue;
+            double logn = Math.Log2(n);
+            pts.Add((logn, maxDepth));
+            if (residueMax >= 0) residuePts.Add((logn, residueMax));
+            // classify the DEPTH-DRIVER's seal-leg
+            string cls;
+            var autos = AutGroup(driver, autCap);
+            if (autos is null) { cls = $"rank{driver.Rank} |Aut|>{autCap} → legC/Cameron(large)"; legC++; }
+            else
+            {
+                var (_, _, schurian, abelian, ord) = Analyze(driver, autos);
+                bool large = IsJohnson(n, ord) || ord >= (long)Math.Pow(n, 3);
+                string leg = abelian ? "legB(abelian,consumed)"
+                    : large ? (IsJohnson(n, ord) ? "legC/Cameron(JOHNSON T(m))" : "legC/Cameron(large)")
+                    : "G2B-residue(SMALL non-ab)";
+                if (abelian) legB++; else if (large) legC++; else residue++;
+                cls = $"rank{driver.Rank} |Aut|={ord} {(driver.Symmetric ? "sym" : "asym")} → {leg}";
+            }
+            output.WriteLine($"{n,4} {cnt,6} {maxDepth,9} {(double)maxDepth / logn,12:F2}  {cls}");
+        }
+        output.WriteLine("");
+        output.WriteLine($"depth-DRIVERS by seal-leg: legB(abelian)={legB}  legC/Cameron(large,incl Johnson)={legC}  G2B-residue(small non-ab)={residue}");
+        // the decisive cut: does the SMALL non-abelian primitive residue depth grow?
+        if (residuePts.Count >= 2)
+        {
+            double rx = residuePts.Average(p => p.logn), ry = residuePts.Average(p => p.depth);
+            double rcov = residuePts.Sum(p => (p.logn - rx) * (p.depth - ry));
+            double rvar = residuePts.Sum(p => (p.logn - rx) * (p.logn - rx));
+            double rslope = rvar > 0 ? rcov / rvar : 0;
+            int rmax = residuePts.Max(p => p.depth);
+            output.WriteLine($"  G2B-RESIDUE (small non-abelian primitive) max depth across orders: {rmax};  slope vs log₂n = {rslope:F3}  ⟹ {(rslope < 0.5 ? "FLAT (residue does NOT grow — matches the affine probe)" : "GROWS (tension with affine — investigate)")}");
+        }
+        else output.WriteLine("  G2B-RESIDUE: too few small-non-abelian primitive schemes in 5–30 to fit a slope.");
+        if (pts.Count >= 2)
+        {
+            double mx = pts.Average(p => p.logn), my = pts.Average(p => p.maxDepth);
+            double cov = pts.Sum(p => (p.logn - mx) * (p.maxDepth - my));
+            double varr = pts.Sum(p => (p.logn - mx) * (p.logn - mx));
+            double slope = varr > 0 ? cov / varr : 0;
+            output.WriteLine($"max primitive depth vs log₂(n): least-squares SLOPE = {slope:F3}  (depth/log₂n stays ~constant ⟹ O(log n); → 0 ⟹ O(1))");
+            output.WriteLine("  NOTE: catalogue mixes ALL families incl. abelian (leg-B) — so this is an UPPER profile; the affine probe isolates the non-abelian-primitive residue.");
+            output.WriteLine($"VERDICT: {(slope < 0.5 ? "no strong growth over orders 5–30 (consistent with O(1)–O(log n); short range)" : "growth present — investigate which family drives it")}.");
+        }
+        Assert.True(pts.Count > 0, "no primitive schemes found");
+    }
+
     // ─────────────────────────────────────────────────────────────────────────────
     //  FALSIFIER #2 — the FORMALIZATION-FAITHFUL probe (the intra-cell fusion objects).
     //

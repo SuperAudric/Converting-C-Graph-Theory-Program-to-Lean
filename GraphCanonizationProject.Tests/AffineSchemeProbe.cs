@@ -260,7 +260,19 @@ public class AffineSchemeProbe(ITestOutputHelper output)
         { 1, 0b1 }, { 2, 0b11 }, { 3, 0b011 }, { 4, 0b0011 }, { 5, 0b00101 }, { 6, 0b000011 },
         { 7, 0b0000011 },    // x^7 + x + 1
         { 8, 0b00011101 },   // x^8 + x^4 + x^3 + x^2 + 1
+        { 9, 0b000010001 },  // x^9 + x^4 + 1
+        { 10, 0b0000001001 },// x^10 + x^3 + 1
+        { 11, 0b00000000101 },// x^11 + x^2 + 1
     };
+
+    // Order of the companion-Singer matrix (sanity that the registered polynomial is
+    // primitive: order must be 2^d − 1, the full Singer cycle).
+    static int SingerOrder(int[] g, int d)
+    {
+        var id = Ident(d); var cur = (int[])g.Clone(); int ord = 1;
+        while (MatKey(cur, d) != MatKey(id, d)) { cur = MatMul(cur, g, d); ord++; if (ord > (1 << d)) return -1; }
+        return ord;
+    }
 
     // ── Field arithmetic in F_{2^d} (basis {1, a, …, a^{d-1}}, a a root of the
     //    primitive polynomial) — needed for the Frobenius map, which the original
@@ -697,5 +709,156 @@ public class AffineSchemeProbe(ITestOutputHelper output)
         else
             output.WriteLine($"VERDICT: depth-2 INSUFFICIENT (best {minRoundsForDiscrete} rounds at |T|={witnessTsize}, d={witnessD}) — depth-k producer is NECESSARY.");
         Assert.True(true);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  DEPTH-GROWTH PROBE — the O(1) vs O(log n) test ON THE G2-B RESIDUE.
+    //
+    //  The conceptual reframe (this conversation): overall recovery depth is O(log n),
+    //  but the growth lives in leg-B (abelian circulants, √log n — consumed) and the
+    //  IR-core (rigid multipedes, unbounded — flagged), BOTH excluded from the seal's
+    //  open content.  The genuine G2-B residue is the *non-abelian primitive* case,
+    //  where those survivors are excluded by definition.  Earlier probes measured its
+    //  depth only on the SINGLE-relation Cayley graph (GreedyIRDepth) and at a fixed
+    //  d; this probe measures the seal's actual object — FULL-scheme 1-WL recovery
+    //  (warmRefine on schemeAdj, all relations) — and tracks how max depth scales with
+    //  d = log₂(n), computing the slope:
+    //     slope ≈ 0  ⟹ O(1)      (the depth-4 hope holds for the residue)
+    //     slope ≈ 1  ⟹ O(log n)  (the conjectured surviving construction; still poly)
+    //  Exact (string) signatures throughout — a hash collision would *undercount* depth
+    //  and falsely flatten the slope, so no hashing.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    // Full-scheme 1-WL refinement (all relations, relOfPair(x,y) = Oid[x⊕y]) from an
+    // individualized base, to the 1-WL fixpoint.  The seal's `warmRefine (schemeAdj)`.
+    static int[] FullRefine(Scheme s, List<int> ind)
+    {
+        int n = s.N;
+        var color = new int[n];
+        for (int i = 0; i < ind.Count; i++) color[ind[i]] = i + 1;
+        int prevDistinct = color.Distinct().Count();
+        while (true)
+        {
+            var sig = new (int, string)[n];
+            for (int v = 0; v < n; v++)
+            {
+                var ms = new List<long>(n);
+                for (int w = 0; w < n; w++) ms.Add(((long)s.Oid[v ^ w] << 32) | (uint)color[w]);
+                ms.Sort();
+                sig[v] = (color[v], string.Join(";", ms));
+            }
+            var map = new Dictionary<(int, string), int>(); int next = 0; var nc = new int[n];
+            foreach (var v in Enumerable.Range(0, n).OrderBy(v => sig[v].Item1).ThenBy(v => sig[v].Item2))
+            { if (!map.TryGetValue(sig[v], out int c)) { c = next++; map[sig[v]] = c; } nc[v] = c; }
+            int d2 = nc.Distinct().Count();
+            color = nc;
+            if (d2 == prevDistinct) break;
+            prevDistinct = d2;
+        }
+        return color;
+    }
+
+    // Full-scheme recovery depth: greedy individualization (vertex-transitive ⟹ start
+    // at 0; lex-min of the largest non-singleton cell each round) to discreteness.
+    static int FullSchemeIRDepth(Scheme s, int cap)
+    {
+        int n = s.N;
+        var ind = new List<int> { 0 };
+        for (int depth = 1; depth <= cap; depth++)
+        {
+            var color = FullRefine(s, ind);
+            if (color.Distinct().Count() == n) return depth;
+            var byColor = new Dictionary<int, List<int>>();
+            for (int v = 0; v < n; v++) { if (!byColor.TryGetValue(color[v], out var lst)) { lst = new(); byColor[color[v]] = lst; } lst.Add(v); }
+            int target = -1, best = 1;
+            foreach (var kv in byColor) if (kv.Value.Count > best) { best = kv.Value.Count; target = kv.Value.Min(); }
+            if (target < 0) return depth;
+            ind.Add(target);
+        }
+        return cap + 1;
+    }
+
+    // Distinct primitive non-abelian rank≥3 affine schemes from ΓL(1,2^d) subgroups
+    // ⟨g^m, φ^k⟩ (the G2-B residue family; leg-B/IR-core excluded by primitive∧non-abelian).
+    static List<Scheme> EnumNonAbelianPrimitiveSchemes(int d, int tail, int groupCap)
+    {
+        var result = new List<Scheme>();
+        int n = 1 << d, singerOrder = n - 1;
+        var g = CompanionSinger(d);
+        var phi = Frobenius(d, tail);
+        var seen = new HashSet<string>();
+        foreach (int k in Divisors(d))
+        {
+            var phik = (int[])Ident(d).Clone();
+            for (int t = 0; t < k; t++) phik = MatMul(phik, phi, d);
+            if (MatKey(phik, d) == MatKey(Ident(d), d) && k != d) continue;
+            foreach (int m in Divisors(singerOrder))
+            {
+                if (m == singerOrder) continue;
+                var gm = (int[])Ident(d).Clone();
+                for (int t = 0; t < m; t++) gm = MatMul(gm, g, d);
+                var grp = GenGroup(new List<int[]> { gm, phik }, d, groupCap);
+                if (grp == null || grp.Count == 1) continue;
+                var s = BuildScheme(grp, d);
+                if (s.Rank <= 2) continue;
+                var valSorted = s.Valency.OrderBy(x => x).ToArray();
+                long ih = 17;
+                for (int a = 0; a < s.Rank; a++) for (int i = 0; i < s.Rank; i++) for (int j = 0; j < s.Rank; j++) ih = ih * 1000003 + s.P[a, i, j];
+                if (!seen.Add($"{s.Rank}|{string.Join(",", valSorted)}|{ih}")) continue;
+                if (Primitive(s) && !Abelian(grp, d)) result.Add(s);
+            }
+        }
+        return result;
+    }
+
+    [Fact]
+    public void Probe_DepthGrowth_NonAbelianPrimitive()
+    {
+        int groupCap = 1 << 16, nCap = 1 << 10;   // n ≤ 1024 (d ≤ 10) to bound runtime
+        output.WriteLine("DEPTH-GROWTH on the G2-B residue — primitive NON-ABELIAN affine schemes (ΓL(1,2^d) subgroups).");
+        output.WriteLine("FULL-scheme 1-WL recovery depth (the seal's `warmRefine (schemeAdj)`), vs d = log₂(n).");
+        output.WriteLine("Leg-B (abelian) and IR-core (rigid) are excluded by the primitive∧non-abelian filter.");
+        output.WriteLine("");
+        output.WriteLine($"{"d",3} {"|V|",6} {"#schemes",9} {"maxFull",8} {"medFull",8} {"maxSingle",10}  full/d");
+        var pts = new List<(int d, int maxFull)>();
+
+        foreach (int d in new[] { 3, 4, 5, 6, 7, 8, 9, 10 })
+        {
+            if (!PrimPolyTail.ContainsKey(d)) continue;
+            int n = 1 << d;
+            if (n > nCap) { output.WriteLine($"{d,3} {n,6}   (skipped — n > {nCap})"); continue; }
+            int tail = PrimPolyTail[d];
+            var g = CompanionSinger(d);
+            Assert.True(SingerOrder(g, d) == n - 1, $"registered polynomial for d={d} is NOT primitive (Singer order ≠ 2^d−1)");
+
+            var schemes = EnumNonAbelianPrimitiveSchemes(d, tail, groupCap);
+            if (schemes.Count == 0) { output.WriteLine($"{d,3} {n,6} {0,9}   (no primitive non-abelian rank≥3)"); continue; }
+
+            var fulls = schemes.Select(s => FullSchemeIRDepth(s, cap: n)).OrderBy(x => x).ToList();
+            var singles = schemes.Select(s => GreedyIRDepth(s, 1, cap: s.N)).ToList();
+            int maxFull = fulls.Max(), medFull = fulls[fulls.Count / 2], maxSingle = singles.Max();
+            pts.Add((d, maxFull));
+            output.WriteLine($"{d,3} {n,6} {schemes.Count,9} {maxFull,8} {medFull,8} {maxSingle,10}  {(double)maxFull / d:F2}");
+        }
+
+        output.WriteLine("");
+        if (pts.Count >= 2)
+        {
+            double md = pts.Average(p => p.d), mD = pts.Average(p => p.maxFull);
+            double cov = pts.Sum(p => (p.d - md) * (p.maxFull - mD));
+            double varr = pts.Sum(p => (p.d - md) * (p.d - md));
+            double slope = varr > 0 ? cov / varr : 0;
+            int spanD = pts.Last().d - pts.First().d, spanDepth = pts.Last().maxFull - pts.First().maxFull;
+            output.WriteLine($"max FULL-scheme depth vs d (= log₂ n): least-squares SLOPE = {slope:F3}" +
+                             $"   (endpoint Δdepth/Δd = {(spanD > 0 ? (double)spanDepth / spanD : 0):F2}; d {pts.First().d}→{pts.Last().d}, depth {pts.First().maxFull}→{pts.Last().maxFull})");
+            output.WriteLine("  slope ≈ 0 ⟹ O(1) [depth-4 hope holds for the G2-B residue];  slope ≈ 1 ⟹ O(log n) [surviving construction, still poly].");
+            string verdict = slope < 0.34 ? "FLAT — O(1): residue depth does NOT grow with log n (depth-4 hope holds for the non-abelian primitive residue)."
+                : slope < 0.67 ? "MILD GROWTH — between O(1) and O(log n); inconclusive on this range, widen d."
+                : "LINEAR-IN-log n — O(log n): residue depth grows with log n (supports the surviving-construction hypothesis; seal needs O(log n), still poly).";
+            output.WriteLine($"VERDICT: {verdict}");
+        }
+        else output.WriteLine("VERDICT: too few data points (need ≥2 d-values with primitive non-abelian schemes).");
+
+        Assert.True(pts.Count > 0, "no primitive non-abelian schemes enumerated");
     }
 }
