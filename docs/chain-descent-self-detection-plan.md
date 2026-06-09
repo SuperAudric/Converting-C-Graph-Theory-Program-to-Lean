@@ -121,6 +121,19 @@
 > a forwards non-existence bound. The route-scan verdict (§11.2) is rerouted accordingly (Q2's "elementary Galois
 > beachhead" premise died with the amorphic finding; affine-cyclic is now a *concrete instance* of this general
 > crux, not a special case).
+> **CONVERSE PROOF — LAYER 1 (the fusion closure) LANDED (2026-06-10, axiom-clean, build green, `Cascade.lean`).**
+> The provable substance of the P3 converse, via the **intra-cell fusion closure** (the standard
+> WL-stable-congruence ⟹ closed-subset fact): **`intraCellRelations S S₀`** (the relations entirely inside the
+> `warmRefine`-from-`S₀` cells) + **`intraCellRelations_isClosed`** (it is a `ClosedSubset` — the real content,
+> generalizing `schemeEquiv_trans` via `intersectionNumber_well_defined` + cell-equality transitivity; any
+> `AssociationScheme`, no schurity/Frobenius) + **`intraCellRelations_ne_univ_of_sep`** (properness `≠ univ` is
+> FREE for any base individualizing a point, via `warmRefine_refines` + `individualizedColouring_mem_sep`). This
+> reduces the converse to the **sharper kernel `PersistentTwinGivesIntraCellBlock`** (`persistentTwinYieldsBlock_of_intraCellBlock`
+> + capstone `reachesRigidOrCameron_viaIntraCellBlock`), whose *only* open content is now **nontriviality** of the
+> intra-cell block (`≠ {0}`): that a persistent twin manifests as a **whole** intra-cell non-diagonal relation (a
+> scheme congruence), not just a single same-cell pair. The closure (the hard-looking part) and properness are
+> proved; the open residue is exactly where imprimitivity lives. Realization tool to attack nontriviality =
+> landed `discrete_of_kRoundRelationSeparates`.
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
 > **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)

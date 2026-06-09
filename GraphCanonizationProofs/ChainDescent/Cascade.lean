@@ -4165,4 +4165,126 @@ theorem reachesRigidOrCameron_viaPersistentTwinBlock {n : Nat} {IsLarge : Nat �
   reachesRigidOrCameron_viaFusedSeal hClassify S hne hrank
     (selfDetectsStably_of_persistentTwinYieldsBlock S IsLarge bound hCrux) hImprim
 
+/-! ### Phase 2 — the converse proof, layer 1: the intra-cell fusion closure
+
+The provable substance of the P3 converse (`PersistentTwinYieldsBlock`). The full converse is open G2-B, but the
+intended **fusion / closed-subset closure** argument has a genuinely-provable algebraic core: *the scheme
+relations that lie entirely inside the warm-refinement cells of a fixed base form a `ClosedSubset`* (a block
+candidate). This block does the work `schemeEquiv_trans` does, lifted from a single relation to the whole
+intra-cell set, and it is the standard coherent-configuration fact that a WL-stable congruence is a closed
+subset. It reduces the converse to one **isolated open residue** — *nontriviality* (a persistent twin produces a
+*whole* non-diagonal relation inside cells, not just one same-cell pair) — which is exactly where imprimitivity
+lives. The closure (the hard-looking part) is proved here; only nontriviality+properness stays carried. -/
+
+open Classical in
+/-- **The intra-cell relations of a base.** The scheme relations `R_k` *entirely contained in the warm-refinement
+cells* of the base `S₀`: every `R_k`-pair shares a `warmRefine (schemeAdj S)`-from-`S₀` colour. Discrete base ⟹
+this is `{R₀}`; one-cell base ⟹ this is everything; in between it is the block candidate. -/
+noncomputable def intraCellRelations {n : Nat} (S : SchurianScheme n) (S₀ : Finset (Fin n)) :
+    Finset (Fin (S.rank + 1)) :=
+  Finset.univ.filter (fun k => ∀ x y : Fin n, S.rel k x y = true →
+    warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (individualizedColouring n S₀) x
+      = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (individualizedColouring n S₀) y)
+
+theorem mem_intraCellRelations {n : Nat} (S : SchurianScheme n) (S₀ : Finset (Fin n))
+    (k : Fin (S.rank + 1)) :
+    k ∈ intraCellRelations S S₀ ↔
+      ∀ x y : Fin n, S.rel k x y = true →
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (individualizedColouring n S₀) x
+          = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+            (individualizedColouring n S₀) y := by
+  classical
+  simp only [intraCellRelations, Finset.mem_filter, Finset.mem_univ, true_and]
+
+/-- **The intra-cell relations form a `ClosedSubset` (the converse's provable core).** Generalizes
+`schemeEquiv_trans` from one relation to the whole intra-cell set: `R₀` is intra-cell (diagonal pairs are
+reflexively same-cell); and if `R_i, R_j` are intra-cell and `R_k` is a composite (`intersectionNumber i j k ≠
+0`), then any `R_k`-pair `(x,z)` has an intermediate `y` with `(x,y) ∈ R_i`, `(y,z) ∈ R_j`
+(`intersectionNumber_well_defined`), so `x`, `y` share a cell and `y`, `z` share a cell, hence `x`, `z` share a
+cell by transitivity of colour-equality — i.e. `R_k` is intra-cell. This is the WL-stable-congruence ⟹ closed
+subset fact of coherent-configuration theory. Holds for any `AssociationScheme` (no schurity, no Frobenius). -/
+theorem intraCellRelations_isClosed {n : Nat} (S : SchurianScheme n) (S₀ : Finset (Fin n)) :
+    S.toAssociationScheme.ClosedSubset (intraCellRelations S S₀) := by
+  classical
+  refine ⟨(mem_intraCellRelations S S₀ 0).mpr ?_, ?_⟩
+  · intro x y hxy
+    rw [(S.rel_zero_iff_eq x y).mp hxy]
+  · intro i hi j hj k hk
+    rw [mem_intraCellRelations] at hi hj ⊢
+    intro x z hxz
+    have hcard := S.toAssociationScheme.intersectionNumber_well_defined i j k x z hxz
+    have hpos : 0 < (Finset.univ.filter
+        (fun u : Fin n => S.rel i x u = true ∧ S.rel j u z = true)).card := by
+      rw [hcard]; exact Nat.pos_of_ne_zero hk
+    obtain ⟨y, hy⟩ := Finset.card_pos.mp hpos
+    rw [Finset.mem_filter] at hy
+    exact (hi x y hy.2.1).trans (hj y z hy.2.2)
+
+/-- **Properness is free for any base individualizing a point.** If the base `S₀` contains a point `t` and there
+is any other vertex `w ≠ t`, the intra-cell relations are *not* everything (`≠ univ`): `relOfPair t w` is a
+non-diagonal relation whose pair `(t, w)` crosses cells, because `t` keeps a unique individualized colour
+(`individualizedColouring_mem_sep`) that `warmRefine` only refines (`warmRefine_refines`). So the `≠ univ`
+half of the block is automatic, and the genuine open residue of `PersistentTwinGivesIntraCellBlock` is the
+**nontriviality** (`≠ {0}`) alone. -/
+theorem intraCellRelations_ne_univ_of_sep {n : Nat} (S : SchurianScheme n) {S₀ : Finset (Fin n)}
+    {t w : Fin n} (ht : t ∈ S₀) (htw : t ≠ w) :
+    intraCellRelations S S₀ ≠ Finset.univ := by
+  intro hcon
+  have hmem : S.relOfPair t w ∈ intraCellRelations S S₀ := hcon ▸ Finset.mem_univ _
+  have heq := (mem_intraCellRelations S S₀ (S.relOfPair t w)).mp hmem t w (S.rel_relOfPair t w)
+  have hinit := warmRefine_refines (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+    (individualizedColouring n S₀) heq
+  exact individualizedColouring_mem_sep ht w (Ne.symm htw) hinit.symm
+
+/-- **The sharpened open kernel — nontriviality of the intra-cell block (G2-B, isolated).** A persistent twin
+(`¬ SeparatesAtBoundedBase`) yields a bounded base `S₀` whose intra-cell relations form a **non-trivial proper**
+closed subset — neither the diagonal `{R₀}` nor everything — or the scheme is large (→ Cameron). Two of the three
+conditions are now discharged: the `ClosedSubset` construction (`intraCellRelations_isClosed`) and properness
+`≠ univ` (`intraCellRelations_ne_univ_of_sep`, free for any base individualizing a point). So the *only* genuinely
+open content is the **nontriviality** `≠ {0}`: that a persistent twin manifests as a **whole intra-cell
+non-diagonal relation** (a scheme congruence), not just a single same-cell pair. Carried visibly; the realization
+tool to attack it is `discrete_of_kRoundRelationSeparates`.
+The intended discharge: at the critical base size `≈ s(C)`, the surviving twin is uniform across its relation. -/
+def PersistentTwinGivesIntraCellBlock {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop)
+    (bound : Nat) : Prop :=
+  ¬ SeparatesAtBoundedBase S bound →
+    IsLargeSchemeViaAut IsLarge n S ∨
+      ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
+        intraCellRelations S S₀ ≠ {0} ∧ intraCellRelations S S₀ ≠ Finset.univ
+
+/-- **Intra-cell nontriviality ⟹ the P3 converse (the reduction; provable).** The block is `intraCellRelations
+S S₀` itself: closed by `intraCellRelations_isClosed`, non-trivial and proper by the kernel. So
+`PersistentTwinGivesIntraCellBlock` (the sharper, closure-discharged kernel) implies `PersistentTwinYieldsBlock`,
+banking the fusion-closure core of the converse and isolating its open residue to nontriviality. -/
+theorem persistentTwinYieldsBlock_of_intraCellBlock {n : Nat} (S : SchurianScheme n)
+    (IsLarge : Nat → Prop) (bound : Nat)
+    (h : PersistentTwinGivesIntraCellBlock S IsLarge bound) :
+    PersistentTwinYieldsBlock S IsLarge bound := by
+  intro hns
+  rcases h hns with hlarge | ⟨S₀, _, hne0, hneU⟩
+  · exact Or.inl hlarge
+  · exact Or.inr ⟨intraCellRelations S S₀, intraCellRelations_isClosed S S₀, hne0, hneU⟩
+
+/-- **The seal capstone via the intra-cell kernel — CONDITIONAL.** `reachesRigidOrCameron_viaPersistentTwinBlock`
+with the crux discharged down to the sharper `PersistentTwinGivesIntraCellBlock` (the `ClosedSubset` construction
+proven, only nontriviality open). Carries `hClassify` (G3), `hImprim`, and the open `hCrux`. The current deepest
+reduction of the primitive-floor seal: the converse's algebraic core (the fusion closure) is landed; the residue
+is the isolated nontriviality kernel. -/
+theorem reachesRigidOrCameron_viaIntraCellBlock {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCrux : PersistentTwinGivesIntraCellBlock S IsLarge bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaPersistentTwinBlock hClassify S hne hrank
+    (persistentTwinYieldsBlock_of_intraCellBlock S IsLarge bound hCrux) hImprim
+
 end ChainDescent

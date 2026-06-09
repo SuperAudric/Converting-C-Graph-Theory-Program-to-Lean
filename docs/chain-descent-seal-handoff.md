@@ -688,6 +688,14 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     Realization half (`no twin ⟹ separates`) = landed `discrete_of_kRoundRelationSeparates`, so this is the **only open
     half** of P3. **Only the converse *proof* remains open** (uncited G2-B); the intended route is the fusion/closed-subset
     closure (`schemeEquiv_trans`), not a forwards bound. Still gate heavy proof investment behind the catalogue (f).
+    **CONVERSE PROOF LAYER 1 LANDED (2026-06-10, axiom-clean, `Cascade.lean`).** The fusion closure is **proved**:
+    `intraCellRelations` (relations inside `warmRefine`-from-`S₀` cells) + **`intraCellRelations_isClosed`** (it is a
+    `ClosedSubset` — generalizes `schemeEquiv_trans` via `intersectionNumber_well_defined` + cell-transitivity; any
+    `AssociationScheme`) + `intraCellRelations_ne_univ_of_sep` (properness FREE for a base individualizing a point).
+    Reduces the converse to the sharper kernel **`PersistentTwinGivesIntraCellBlock`** (`reachesRigidOrCameron_viaIntraCellBlock`),
+    whose **only** open content is now **nontriviality** `≠ {0}` (a persistent twin ⟹ a *whole* intra-cell non-diagonal
+    relation = a scheme congruence, not one same-cell pair). The closed-subset construction + properness are banked; the
+    residue is the isolated nontriviality kernel = exactly where imprimitivity lives.
   - **(d) Thread T2** — the affine instance of (c): primitive ⟹ separable via invariant-subspace = block. **Dependency
     CHECKED negative (rev. 3):** the wreath = imprimitive characterization is abelian-`p`-group-only (Ryabov), *not* a
     citable near-theorem at schurian generality. T2 is a project-internal thread, not a citation shortcut.
