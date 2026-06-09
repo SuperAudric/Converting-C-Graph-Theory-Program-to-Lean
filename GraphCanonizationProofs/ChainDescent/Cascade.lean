@@ -5006,7 +5006,14 @@ def CyclicAffineSeparates (hd : d ≠ 0) (bound : Nat) : Prop :=
 **⚠️ CONDITIONAL — NOT the closed seal.** It carries `hClassify` (G3, cited), `hne`/`hrank` (the scheme is a
 genuine rank-≥2 association scheme — discharged per instance), `hImprim` (landed/earned, tower-reducible), and
 the **open** `hsep : CyclicAffineSeparates` (the Frobenius `s(C)` counting, F2b — uncited). Closing the seal on
-this family ⟺ proving `CyclicAffineSeparates`, which is open `s(C)` mathematics. -/
+this family ⟺ proving `CyclicAffineSeparates`, which is open `s(C)` mathematics.
+
+**⚠️ DEGENERATE TARGET — prefer `reachesRigidOrCameron_viaPowSeparation`.** `G0cyc` is a *full* multiplicative
+generator, so this scheme is the rank-2 `K_{p^d}` and `CyclicAffineSeparates` is *false* (unsatisfiable: no
+bounded base discretizes `K_q`). The genuine rank-≥3 leak candidate is `affineScheme (G0pow hd β)` (proper
+`β = α^m`); use `reachesRigidOrCameron_viaPowSeparation` / `PowAffineSeparates` (below) — that is where the
+Frobenius step-1 work and `clebschWitness_irreducible` live. This cyclic version is kept as the documented
+degenerate reference. -/
 theorem reachesRigidOrCameron_viaCyclicSeparation (hd : d ≠ 0)
     {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
@@ -5126,6 +5133,76 @@ theorem G0pow_irreducible_of_adjoin (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
   congr 1
   ext x
   simp [Submonoid.mem_closure_singleton, Set.mem_range, eq_comm]
+
+/-! #### The genuine F2b separation crux + seal capstone, over `G0pow β` (the rank-≥3 leak candidate)
+
+`CyclicAffineSeparates` / `reachesRigidOrCameron_viaCyclicSeparation` (above) are stated over
+`cyclicAffineScheme = affineScheme (G0cyc …)`, which is the **degenerate rank-2 `K_{p^d}`** (full
+multiplicative generator ⟹ transitive ⟹ complete graph; `CyclicAffineSeparates` is *false* there — no
+bounded base discretizes `K_q`). The genuine rank-≥3 cyclotomic leak candidate — the one on which the
+Frobenius step-1 work (`relOfPair_frobPerm_hom`) and the concrete `clebschWitness_irreducible` actually
+live — is `affineScheme (G0pow hd β)` for a **proper** `β = α^m`. These re-target the conditional seal
+capstone to that scheme, so a proof of the separation closes the seal over the genuine leak family, not
+over the degenerate `K_q`. Pure re-instantiation of `reachesRigidOrCameron_viaAffineIrreducible` at
+`G₀ := G0pow hd β` (mirroring the cyclic version verbatim, scheme swapped). -/
+
+/-- The **depth-2 difference (multi-coset-intersection) count** for vertex `u` over `affineScheme (G0pow hd β)`,
+at relation-profile `ρ` and relation `b`: the number of `z ≠ u` whose difference-relation to every base point
+`t ∈ T` is `ρ t` and to `u` is `b`. (= `|⋂_{t∈T}(t + C_{ρt}) ∩ (u − C_b)|` in the coset notation.)
+`PowAffineSeparates` is its injectivity in `u`; `discrete_affineScheme_of_twoRoundDiffSeparates` consumes it. -/
+noncomputable def affineDepth2Count (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) (T : Finset (Fin (p ^ d)))
+    (u : Fin (p ^ d))
+    (ρ : Fin (p ^ d) → Fin ((affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank + 1))
+    (b : Fin ((affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank + 1)) : ℕ :=
+  (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+    (∀ t ∈ T, (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).relOfPair (affineE 0)
+        (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+    ∧ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).relOfPair (affineE 0)
+        (affineE (affineE.symm z - affineE.symm u)) = b)).card
+
+/-- **The genuine F2b separation crux, over the proper cyclic subgroup `G0pow β`.** The depth-2
+difference (multi-coset-intersection) profile `affineDepth2Count` is injective over `affineScheme (G0pow hd β)`
+from some bounded base `T`. Mirrors `CyclicAffineSeparates` but over the rank-≥3 leak candidate (`G0pow`), not
+the degenerate rank-2 `K_q` (`G0cyc`). This is the Frobenius `s(C)` bound for the proper-subgroup cyclotomic
+scheme — the genuine uncited open core (F2b). -/
+def PowAffineSeparates (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) (bound : Nat) : Prop :=
+  ∃ T : Finset (Fin (p ^ d)), T.card ≤ bound ∧
+    ∀ u u' : Fin (p ^ d),
+      (∀ ρ b, affineDepth2Count hd β hβneg T u ρ b = affineDepth2Count hd β hβneg T u' ρ b) → u = u'
+
+/-- **The seal on the genuine cyclotomic family `G0pow β`, reduced to the single crux `PowAffineSeparates`.**
+The `G0pow` analogue of `reachesRigidOrCameron_viaCyclicSeparation`, re-targeted from the degenerate rank-2
+`cyclicAffineScheme` (`G0cyc`) to the rank-≥3 leak candidate `affineScheme (G0pow hd β)` — the scheme on
+which the Frobenius step-1 work and the `clebschWitness_irreducible` actually live.
+
+**⚠️ CONDITIONAL — NOT the closed seal.** Carries `hClassify` (G3, cited), `hne`/`hrank` (genuine rank-≥2,
+discharged per instance — e.g. via `G0pow_irreducible_of_adjoin`/`clebschWitness_irreducible`), `hImprim`
+(landed/earned, tower-reducible), and the **open** `hsep : PowAffineSeparates` (the Frobenius `s(C)`
+counting, F2b — uncited; `relOfPair_frobPerm_hom` is its step 1). Closing the seal on this genuine family
+⟺ proving `PowAffineSeparates`, which is open `s(C)` mathematics. -/
+theorem reachesRigidOrCameron_viaPowSeparation (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β)
+    {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hne : ∀ i : Fin ((affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank + 1),
+        ∃ v w, (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rel i v w = true)
+    (hrank : 2 ≤ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank)
+    (hsep : PowAffineSeparates hd β hβneg bound)
+    (hImprim : ¬ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+          ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)))
+      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) := by
+  refine reachesRigidOrCameron_viaAffineIrreducible (G₀ := G0pow hd β) hClassify
+    (neg_mem_G0pow hd β hβneg) hne hrank ?_ hImprim
+  rintro ⟨-, -⟩
+  obtain ⟨T, hcard, hTsep⟩ := hsep
+  exact ⟨T, hcard, discrete_affineScheme_of_twoRoundDiffSeparates (G0pow hd β)
+    (neg_mem_G0pow hd β hβneg) hTsep⟩
 
 /-- **Field-generation from element order** (the finite-field core for cyclotomic witnesses). If `β ∈ F_qˣ`
 has multiplicative order `r` and **no proper divisor** `e ∣ d` has `r ∣ p^e − 1`, then `β` generates `F_q`
@@ -5262,6 +5339,196 @@ theorem relOfPair_frobPerm_hom (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
   rw [affineE_symm_frobPerm, affineE_symm_frobPerm, affineE_symm_frobPerm, affineE_symm_frobPerm,
     ← map_sub (frobCoord hd), ← map_sub (frobCoord hd), LinearEquiv.mul_apply, LinearEquiv.mul_apply,
     hinv, hg]
+
+/-! #### Separation step 2 — a Frobenius power fixing a field-generating base is the identity
+
+"Γ-breaking kills Frobenius symmetry." The separation argument (`PowAffineSeparates`) needs: a profile-twin
+`u, u'` forces a Frobenius power `φ^j` (the only source of profile-degeneracy, step 3 — open) with
+`u' = φ^j(u)` *fixing the base*; if the base `T` **field-generates** `F_q` (Γ-breaking), then any `φ^j`
+fixing `T` is the identity, so `u' = u`. This subsection proves that field-theory core: a power of the
+Frobenius `φ : x ↦ x^p` fixing a generating set is `1`. It is the bankable, citation-clean half of the
+remaining separation proof (step 3, "every twin is a Frobenius twin", is the uncited `s(C)` crux). -/
+
+/-- `frobLinear^j` acts as `x ↦ x^(p^j)` (iterating Frobenius `x ↦ x^p`). -/
+theorem frobLinear_pow_apply (j : ℕ) (x : GaloisField p d) :
+    (frobLinear (p := p) (d := d) ^ j) x = x ^ p ^ j := by
+  induction j with
+  | zero => simp
+  | succ k ih =>
+    rw [pow_succ', LinearEquiv.mul_apply, ih, frobLinear_apply, ← pow_mul, ← pow_succ]
+
+/-- **Separation step 2 — a Frobenius power fixing a field-generating set is the identity.** If
+`frobLinear^j` (`= x ↦ x^(p^j)`) fixes every element of `S` and `S` generates `F_q` as an `F_p`-algebra
+(`Algebra.adjoin (ZMod p) S = ⊤`), then `frobLinear^j = 1`. The fixed points `{x | x^(p^j) = x}` form a
+subalgebra (closed under `+` by the freshman's dream `add_pow_char_pow`, containing `F_p` by
+`ZMod.pow_card_pow`), so if it contains a generating `S` it is all of `F_q`. This is the precise sense in
+which a **Γ-breaking** (field-generating) base removes the Galois degeneracy: no nontrivial Frobenius power
+survives it. (The cyclic instance of "base-homogeneous gap ⟹ invariant sub-structure"; for cyclic `G₀` the
+sub-structure is a subfield / `Γ`-eigenspace.) -/
+theorem frobLinear_pow_eq_one_of_adjoin {j : ℕ} {S : Set (GaloisField p d)}
+    (hgen : Algebra.adjoin (ZMod p) S = ⊤)
+    (hfix : ∀ s ∈ S, (frobLinear (p := p) (d := d) ^ j) s = s) :
+    frobLinear (p := p) (d := d) ^ j = 1 := by
+  -- The fixed points `x^(p^j) = x` form a subalgebra `K`.
+  set K : Subalgebra (ZMod p) (GaloisField p d) :=
+    { carrier := {x : GaloisField p d | x ^ p ^ j = x}
+      mul_mem' := fun {a b} ha hb => by
+        simp only [Set.mem_setOf_eq, mul_pow] at *; rw [ha, hb]
+      one_mem' := by simp only [Set.mem_setOf_eq, one_pow]
+      add_mem' := fun {a b} ha hb => by
+        simp only [Set.mem_setOf_eq, add_pow_char_pow] at *; rw [ha, hb]
+      zero_mem' := by
+        simp only [Set.mem_setOf_eq]
+        exact zero_pow (pow_ne_zero j (Fact.out : p.Prime).pos.ne')
+      algebraMap_mem' := fun c => by
+        simp only [Set.mem_setOf_eq, ← map_pow, ZMod.pow_card_pow] } with hKdef
+  have hSK : S ⊆ (K : Set (GaloisField p d)) := by
+    intro s hs
+    have hs' := hfix s hs
+    rw [frobLinear_pow_apply] at hs'
+    exact hs'
+  have hKtop : K = ⊤ := by
+    rw [eq_top_iff, ← hgen]; exact Algebra.adjoin_le hSK
+  ext x
+  have hx : x ∈ K := by rw [hKtop]; exact Algebra.mem_top
+  have hxfix : x ^ p ^ j = x := hx
+  rw [frobLinear_pow_apply, hxfix]
+  rfl
+
+/-! ##### Step 2 — lifting the field statement to `frobPerm` on scheme points (the iso alignment)
+
+Step 2 above is a clean *field* statement (`frobLinear^j = 1` on `F_q`). The separation argument needs it on
+**scheme points** (`frobPerm^j = 1` on `Fin (p^d)`). The model uses two isos — `affineE : F_p^d ≃ Fin(p^d)`
+(scheme points) and `efield : F_q ≃ F_p^d` (the field). Their composite `x ↦ efield⁻¹(affineE⁻¹ x)` is the
+**field coordinate** of a scheme point, and under it `frobPerm` acts as `frobLinear` (both are "raise to the
+`p`-th power"). These lemmas make that alignment explicit and lift step 2 to a directly-usable
+`frobPerm^j = 1` — resolving the iso-alignment the separation wiring needs (gated only on the open step 3). -/
+
+/-- `frobCoord^j` is `frobLinear^j` conjugated through `efield` (`frobCoord = conjHom frobLinear`, `conjHom`
+a monoid hom). The field-coordinate alignment of the linear part. -/
+theorem frobCoord_pow_apply (hd : d ≠ 0) (j : ℕ) (u : Fin d → ZMod p) :
+    (frobCoord hd ^ j) u = efield hd ((frobLinear (p := p) (d := d) ^ j) ((efield hd).symm u)) := by
+  rw [frobCoord, ← map_pow, conjHom_apply]
+
+/-- `affineE.symm (frobPerm^j x) = (frobCoord^j) (affineE.symm x)` — the `j`-fold iterate of
+`affineE_symm_frobPerm` (`frobPerm` is the additive `frobCoord` transported, zero translation). -/
+theorem affineE_symm_frobPerm_pow (hd : d ≠ 0) (j : ℕ) (x : Fin (p ^ d)) :
+    affineE.symm ((frobPerm hd ^ j) x) = (frobCoord hd ^ j) (affineE.symm x) := by
+  induction j with
+  | zero => simp
+  | succ k ih =>
+    rw [pow_succ' (frobPerm hd) k, Equiv.Perm.mul_apply, affineE_symm_frobPerm, ih,
+      ← LinearEquiv.mul_apply, ← pow_succ']
+
+/-- **Separation step 2, on scheme points — a Frobenius power fixing a field-generating base is the identity
+permutation.** If the field coordinates `efield⁻¹(affineE⁻¹ t)` of the base `T` generate `F_q` (Γ-breaking)
+and `frobPerm^j` fixes `T` pointwise, then `frobPerm^j = 1`. Lifts `frobLinear_pow_eq_one_of_adjoin` to
+`Fin (p^d)` via the alignment lemmas. This is the form the separation wiring (step 4) consumes once the open
+crux (step 3, "every profile-twin is a Frobenius twin") supplies the fixing `φ^j`. -/
+theorem frobPerm_pow_eq_one_of_adjoin (hd : d ≠ 0) {j : ℕ} {T : Finset (Fin (p ^ d))}
+    (hgen : Algebra.adjoin (ZMod p)
+        ((fun t : Fin (p ^ d) => (efield hd).symm (affineE.symm t)) '' (↑T)) = ⊤)
+    (hfix : ∀ t ∈ T, (frobPerm (p := p) hd ^ j) t = t) :
+    frobPerm (p := p) hd ^ j = 1 := by
+  have hfl : frobLinear (p := p) (d := d) ^ j = 1 := by
+    refine frobLinear_pow_eq_one_of_adjoin hgen ?_
+    rintro s ⟨t, ht, rfl⟩
+    have h1 : (frobCoord hd ^ j) (affineE.symm t) = affineE.symm t := by
+      rw [← affineE_symm_frobPerm_pow, hfix t ht]
+    have h2 := frobCoord_pow_apply hd j (affineE.symm t)
+    rw [h1] at h2
+    have h3 := congrArg (efield hd).symm h2
+    rw [LinearEquiv.symm_apply_apply] at h3
+    exact h3.symm
+  refine Equiv.Perm.ext (fun x => ?_)
+  apply affineE.symm.injective
+  rw [affineE_symm_frobPerm_pow, frobCoord_pow_apply, hfl]
+  show efield hd ((efield hd).symm (affineE.symm x)) = affineE.symm x
+  rw [LinearEquiv.apply_symm_apply]
+
+/-! #### Separation step 3 — the open kernel (`TwinsAreFrobenius`) + the reduction banking step 2
+
+Step 3 — *a depth-2 profile-twin is only ever a Frobenius image* — is the genuine **uncited `s(C)` crux**
+(seal-handoff §6 insight 2; equivalently "the cyclotomic scheme's WL-cells are exactly the `ΓL(1,q)`-orbits",
+the separability of the Galois normalizer). It does **not** close from Mathlib. What *is* bankable is to name
+that crux as one clean falsifiable proposition and discharge the rest of the separation onto it via the landed
+step 2. So:
+
+- **`TwinsAreFrobenius`** states the crux structurally: every profile-twin pair is related by a Frobenius power
+  fixing the base. It is *cleaner and more fundamental* than `PowAffineSeparates` — base-robust (it holds at a
+  non-Γ-breaking base where `PowAffineSeparates` fails) and structural ("the gap is Galois"), isolating the pure
+  `s(C)` content from the discreteness packaging.
+- **`powAffineSeparates_of_twinsAreFrobenius`** reduces `PowAffineSeparates` (for a **Γ-breaking** `T`) to
+  `TwinsAreFrobenius`, consuming the landed step 2 (`frobPerm_pow_eq_one_of_adjoin`): a twin is a Frobenius
+  image `u' = φ^j u` with `φ^j` fixing the field-generating `T`, so step 2 gives `φ^j = 1`, hence `u' = u`.
+
+**Generalization insight (§5.3 template).** This is the affine-cyclic instance of the general separability
+reduction: *Discrete ⟸ (WL-cells ⊆ algebraic-automorphism-orbits = schurity/separability kernel) + (the group
+stabilizer of a base is trivial)*. `TwinsAreFrobenius` is the concrete "twins are algebraic-aut images" kernel;
+step 2 is the concrete "individualizing a field-generating base kills the stabilizer." For the general crux,
+swap Frobenius ↦ the scheme's algebraic automorphism group and field-generating ↦ a base; the kernel becomes the
+P3 "two-base-twin ⟹ `ClosedSubset`" statement. The *reduction* is reusable; only the kernel is slice-specific. -/
+
+/-- **Separation step 3, as the open kernel.** Every depth-2 profile-twin pair `u, u'` over
+`affineScheme (G0pow hd β)` (equal `affineDepth2Count` for all `ρ, b` at base `T`) is related by a **Frobenius
+power fixing `T`**: `∃ j, (∀ t ∈ T, frobPerm^j t = t) ∧ u' = frobPerm^j u`. This is the genuine uncited `s(C)`
+crux — "the only profile-degeneracies are Galois (Frobenius) twins" — equivalently that the scheme's
+configuration-automorphism group is `ΓL(1,q)` and its WL-cells are the `ΓL`-orbits. Carried as a hypothesis;
+`relOfPair_frobPerm_hom` (step 1) is the "Frobenius is a configuration automorphism" half that makes the
+statement type-correct, and `frobPerm_pow_eq_one_of_adjoin` (step 2) converts it into separation. -/
+def TwinsAreFrobenius (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) (T : Finset (Fin (p ^ d))) : Prop :=
+  ∀ u u' : Fin (p ^ d),
+    (∀ ρ b, affineDepth2Count hd β hβneg T u ρ b = affineDepth2Count hd β hβneg T u' ρ b) →
+    ∃ j : ℕ, (∀ t ∈ T, (frobPerm (p := p) hd ^ j) t = t) ∧ u' = (frobPerm (p := p) hd ^ j) u
+
+/-- **The separation reduction (step 3 ⟹ separation, banking step 2).** For a **Γ-breaking** base `T` (field
+coordinates generate `F_q`) of size `≤ bound`, the open kernel `TwinsAreFrobenius` implies the separation crux
+`PowAffineSeparates`. Proof: a profile-twin `u, u'` is a Frobenius image `u' = φ^j u` with `φ^j` fixing `T`
+(`htf`); since `T` field-generates, step 2 (`frobPerm_pow_eq_one_of_adjoin`) gives `φ^j = 1`, so `u' = u`. This
+factors the field theory (step 2, landed) out of the separation, leaving `TwinsAreFrobenius` as the sole open
+content — the pure `s(C)` / "gap is Galois" statement. -/
+theorem powAffineSeparates_of_twinsAreFrobenius (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) {bound : Nat} {T : Finset (Fin (p ^ d))}
+    (hcard : T.card ≤ bound)
+    (hgen : Algebra.adjoin (ZMod p)
+        ((fun t : Fin (p ^ d) => (efield hd).symm (affineE.symm t)) '' (↑T)) = ⊤)
+    (htf : TwinsAreFrobenius hd β hβneg T) :
+    PowAffineSeparates hd β hβneg bound := by
+  refine ⟨T, hcard, fun u u' htwin => ?_⟩
+  obtain ⟨j, hfix, hu'⟩ := htf u u' htwin
+  rw [hu', frobPerm_pow_eq_one_of_adjoin hd hgen hfix]
+  rfl
+
+/-- **The seal on the genuine cyclotomic family, reduced to the open kernel `TwinsAreFrobenius`** (the
+step-3 form). Composes `powAffineSeparates_of_twinsAreFrobenius` (step 3 + step 2) into
+`reachesRigidOrCameron_viaPowSeparation`. So the seal on `affineScheme (G0pow hd β)` is reduced to the single
+structural crux `TwinsAreFrobenius` (+ a Γ-breaking base) — the cleanest, most fundamental open statement,
+with the Γ-breaking field theory (step 2) discharged.
+
+**⚠️ CONDITIONAL — NOT the closed seal.** Carries `hClassify` (G3), `hne`/`hrank`, `hImprim` (earned), the
+Γ-breaking base (`hgen`/`hcard`), and the **open kernel** `htf : TwinsAreFrobenius` (the uncited `s(C)` crux). -/
+theorem reachesRigidOrCameron_viaTwinsAreFrobenius (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β)
+    {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    {bound : Nat} {T : Finset (Fin (p ^ d))}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hne : ∀ i : Fin ((affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank + 1),
+        ∃ v w, (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rel i v w = true)
+    (hrank : 2 ≤ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank)
+    (hcard : T.card ≤ bound)
+    (hgen : Algebra.adjoin (ZMod p)
+        ((fun t : Fin (p ^ d) => (efield hd).symm (affineE.symm t)) '' (↑T)) = ⊤)
+    (htf : TwinsAreFrobenius hd β hβneg T)
+    (hImprim : ¬ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+          ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)))
+      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) :=
+  reachesRigidOrCameron_viaPowSeparation hd β hβneg hClassify hne hrank
+    (powAffineSeparates_of_twinsAreFrobenius hd β hβneg hcard hgen htf) hImprim
 
 end CyclicAffine
 

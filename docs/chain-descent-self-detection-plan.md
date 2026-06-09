@@ -62,21 +62,46 @@
 > the **depth-`k` producer** (general §5.3 engine). E2-model needs **no new construction** (proper-`β` cyclotomic =
 > `affineScheme` at `G0pow`).
 >
-> **SEPARATION PROOF — decomposition + STEP 1 LANDED (2026-06-09, axiom-clean, build green).** The open separation
-> (`CyclicAffineSeparates` for `G0pow β`) decomposes into: **(1) Frobenius is a configuration automorphism**
+> **CAPSTONE RE-TARGETED TO `G0pow β` (c1) LANDED (2026-06-10, axiom-clean, build green).** The seal-wired
+> `CyclicAffineSeparates`/`reachesRigidOrCameron_viaCyclicSeparation` target the *degenerate* rank-2 `K_{p^d}`
+> (`G0cyc`, where `CyclicAffineSeparates` is false). Added **`PowAffineSeparates`** + **`reachesRigidOrCameron_viaPowSeparation`**
+> (`Cascade.lean`) — the genuine F2b crux + conditional seal capstone over `affineScheme (G0pow hd β)`, the
+> rank-≥3 leak candidate on which the Frobenius step-1 work and `clebschWitness_irreducible` live. Pure
+> re-instantiation of `reachesRigidOrCameron_viaAffineIrreducible` at `G₀ := G0pow hd β`; the cyclic versions
+> are kept as the documented degenerate reference (docstring now points to the pow versions).
+>
+> **SEPARATION PROOF — decomposition + STEPS 1 & 2 LANDED (2026-06-09/10, axiom-clean, build green).** The open separation
+> (`PowAffineSeparates` for `G0pow β`) decomposes into: **(1) Frobenius is a configuration automorphism**
 > [LANDED] — `relOfPair_frobPerm_hom`: the Frobenius permutation `frobPerm` of `V` preserves the relation
 > partition, because `frobCoord` **normalizes** `G0pow β` (`frobCoord_conj_sigmaPow`: `σ ↦ σ^p`,
 > `frobCoord_conj_mem_G0pow`) and is additive. This is the concrete `Ĝ ⊋ G` gap — an algebraic automorphism the
-> group doesn't realize, the obstruction the leak exploits. **(2) Γ-breaking kills Frobenius symmetry** [OPEN,
-> provable] — a Frobenius power fixing a field-generating `T` is the identity (field theory). **(3) the crux**
-> [OPEN, uncited] — a profile-twin is only ever a Frobenius image. **(4) wire** (1)+(2)+(3) ⟹ separation.
+> group doesn't realize, the obstruction the leak exploits. **(2) Γ-breaking kills Frobenius symmetry** [LANDED] —
+> `frobLinear_pow_eq_one_of_adjoin`: a Frobenius power `frobLinear^j` fixing a field-generating set
+> (`Algebra.adjoin (ZMod p) S = ⊤`) is the identity, via the fixed-point subalgebra `{x | x^(p^j)=x}`
+> (`add_pow_char_pow` for `+`-closure, `ZMod.pow_card_pow` for the prime field). Lifted to scheme points by
+> **`frobPerm_pow_eq_one_of_adjoin`** (the directly-usable form) via the alignment helpers `frobCoord_pow_apply`
+> + `affineE_symm_frobPerm_pow`. **(3) the crux — KERNEL + REDUCTION LANDED (2026-06-10, axiom-clean), full proof
+> OPEN (uncited).** The crux "a profile-twin is only ever a Frobenius image" is named as the kernel
+> **`TwinsAreFrobenius`** (every depth-2-profile-twin `u,u'` is `u' = frobPerm^j u` for some `frobPerm^j` fixing
+> `T`) — cleaner/more-fundamental than `PowAffineSeparates` (base-robust, structural; = "the gap is Galois" /
+> WL-cells = `ΓL(1,q)`-orbits). The **reduction `powAffineSeparates_of_twinsAreFrobenius`** discharges the rest of
+> the separation onto it via the landed step 2: for a Γ-breaking `T`, `TwinsAreFrobenius ⟹ PowAffineSeparates`.
+> **(4) wire** is then DONE (`reachesRigidOrCameron_viaTwinsAreFrobenius` composes to the seal); the depth-2 count
+> is factored into the shared `affineDepth2Count`. The **sole remaining open content is `TwinsAreFrobenius`** —
+> the uncited `s(C)` crux (no Mathlib citation; seal-handoff §6 insight 2).
+> **GENERALIZATION INSIGHT (§5.3 template):** the reduction is the general separability shape — *Discrete ⟸
+> (WL-cells ⊆ algebraic-aut-orbits = schurity kernel) + (the group stabilizer of a base is trivial)*.
+> `TwinsAreFrobenius` is the concrete kernel; step 2 is the concrete "base kills the stabilizer." For the general
+> crux, swap Frobenius ↦ the scheme's algebraic-automorphism group, field-generating ↦ a base — the kernel
+> becomes P3's "two-base-twin ⟹ `ClosedSubset`". The reduction is reusable; only the kernel is slice-specific.
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
-> **IMPLEMENTATION FINDING for step 2+:** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, the scheme's
-> points) and `efield` (`F_q ≃ F_p^d`, the field/Frobenius). Step 1 was iso-agnostic (only used `frobCoord` linear
-> on differences), but step 2's "T field-generates" is a FIELD condition (via `efield`) on scheme points (via
-> `affineE`), so it needs the two isos aligned (or `affineE := efield`-compatible). Resolve the alignment before
-> step 2.
+> **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)
+> and `efield` (`F_q ≃ F_p^d`, the field/Frobenius). The composite `x ↦ efield⁻¹(affineE⁻¹ x)` is the **field
+> coordinate** of a scheme point; under it `frobPerm` acts as `frobLinear` (`affineE_symm_frobPerm_pow` +
+> `frobCoord_pow_apply`), so step 2's field statement lifts cleanly to `frobPerm_pow_eq_one_of_adjoin`. The
+> remaining open content is **step 3** (every profile-twin is a Frobenius twin — the uncited `s(C)` crux); step 4
+> (wire) is then mechanical.
 > The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
