@@ -773,6 +773,65 @@ theorem vProfile_iff_schemeOrbit (v w u : Fin n) :
 
 end SchurianScheme
 
+/-! ### §S1.c — The multi-base (base-set) profile/orbit bridge: the rank-4 / `s(C)` gap, located
+
+The single-base bridge `vProfile_iff_schemeOrbit` says profile-equality at one base `v` is *exactly*
+`Stab(v)`-orbit equivalence (for schurian schemes). The **multi-base** generalization — over a base **set**
+`T` — is where the `s(C) ≥ 2` content lives, and it splits cleanly into a *provable* half and the *open crux*:
+
+- **Reverse (always, any `T`):** a `T`-fixing scheme automorphism sending `w ↦ u` forces the joint profile
+  `(relOfPair t ·)_{t ∈ T}` to agree on `w, u` — i.e. the `Stab(T)`-orbits **refine** the joint profile
+  partition (`jointProfile_eq_of_jointSchemeOrbit`).
+- **Forward (`JointProfileRecoversAt`, the crux):** joint-profile agreement ⟹ a *single* `T`-fixing
+  automorphism `w ↦ u`. For `|T| = 1` this is the landed schurian forward
+  (`jointProfileRecoversAt_singleton`, from `vProfile_iff_schemeOrbit`); for `|T| ≥ 2` it is **open** — the
+  joint profile only sees `⋂_{t ∈ T} Stab(t)`-orbits, generally **strictly coarser** than the `Stab(T)`-orbit
+  (the per-base automorphisms the schurian axiom supplies need *not* share a common fixor). That strict
+  coarsening *is* `s(C) ≥ 2`, and the **smallest scheme where it bites is rank-4** (`S.rank = 3`: three
+  equal-valency relations, the amorphic case — catalogue order-16 #20/#21, the cyclotomic Clebsch family:
+  primitive, fails depth-1, recovers only at base + O(1)).
+
+So `JointProfileRecoversAt S T` is the precise *structural* form of the seal's open content at base `T`
+(recovery = cells coincide with `Stab(T)`-orbits). This block establishes exactly what is free — the reverse,
+and the `|T| = 1` base case — and isolates the `|T| ≥ 2` forward as the named rank-4 / `s(C)` crux. -/
+
+/-- **The `Stab(T)`-orbit relation:** a scheme automorphism fixing every base point in `T` and sending
+`w ↦ u`. The base-set generalization of `SchemeOrbitPartition` (the `T = {v}` case). -/
+def JointSchemeOrbit {n : Nat} (S : AssociationScheme n) (T : Finset (Fin n)) (w u : Fin n) : Prop :=
+  ∃ π : Equiv.Perm (Fin n), IsSchemeAut S π ∧ (∀ t ∈ T, π t = t) ∧ π w = u
+
+/-- **Reverse bridge (provable, any base set): `Stab(T)`-orbits refine the joint profile.** A `T`-fixing
+scheme automorphism `w ↦ u` makes `relOfPair t w = relOfPair t u` for every `t ∈ T`. Immediate from
+`IsSchemeAut.relOfPair_eq` at each fixed base. This is the half that *always* holds; the converse is the
+open crux for `|T| ≥ 2`. -/
+theorem jointProfile_eq_of_jointSchemeOrbit {n : Nat} {S : AssociationScheme n}
+    {T : Finset (Fin n)} {w u : Fin n} (h : JointSchemeOrbit S T w u) :
+    ∀ t ∈ T, S.relOfPair t w = S.relOfPair t u := by
+  obtain ⟨π, hπ, hfix, hwu⟩ := h
+  intro t ht
+  have key := hπ.relOfPair_eq t w
+  rw [hfix t ht, hwu] at key
+  exact key.symm
+
+/-- **The forward bridge — the recovery-at-`T` proposition (the open crux for `|T| ≥ 2`).** Joint-profile
+agreement over `T` implies a *single* `T`-fixing automorphism `w ↦ u`. This is the structural form of "cells
+coincide with `Stab(T)`-orbits" — recovery at base `T`. Free at `|T| = 1` (`jointProfileRecoversAt_singleton`);
+**open** at `|T| ≥ 2` = the `s(C) ≥ 2` content, smallest at rank-4. -/
+def JointProfileRecoversAt {n : Nat} (S : AssociationScheme n) (T : Finset (Fin n)) : Prop :=
+  ∀ w u : Fin n, (∀ t ∈ T, S.relOfPair t w = S.relOfPair t u) → JointSchemeOrbit S T w u
+
+/-- **The `|T| = 1` base case is free (schurian).** Single-base recovery: profile-agreement at one base
+gives the `Stab(v)`-orbit map, packaged into the base-set `JointProfileRecoversAt`. Direct from the landed
+`vProfile_eq_imp_schemeOrbit` (the schurian forward). The first base where the converse can *fail* is
+`|T| ≥ 2` — the open rank-4 / `s(C)` crux. -/
+theorem jointProfileRecoversAt_singleton {n : Nat} (S : SchurianScheme n) (v : Fin n) :
+    JointProfileRecoversAt S.toAssociationScheme {v} := by
+  intro w u h
+  have hv : S.relOfPair v w = S.relOfPair v u := h v (Finset.mem_singleton_self v)
+  obtain ⟨π, hπ, hπv, hπw⟩ :=
+    S.vProfile_eq_imp_schemeOrbit v w u ((S.toAssociationScheme.vProfile_eq_iff v w u).mpr hv)
+  exact ⟨π, hπ, fun t ht => by rw [Finset.mem_singleton.mp ht]; exact hπv, hπw⟩
+
 /-! ## §5 — `SchemeGraph`: a scheme + a designated edge-relation set
 
 A **scheme graph** is an `AssociationScheme` together with a subset

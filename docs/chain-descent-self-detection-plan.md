@@ -152,6 +152,21 @@
 > (amorphic). **(C) the non-congruence WL-fusion** — the uncited open math (needs scheme spectral theory, the Q1
 > wall). **(D) structured sub-cases** — metric already covered by leg A; rank-3 blocked by Q1. Net: the hard core
 > (s(C) bounded for primitive small) is irreducibly open; the catalogue falsifier is the right next gate.
+> **RANK-4 SLICE ATTEMPT — the base-set profile/orbit bridge LANDED (2026-06-10, axiom-clean, `Scheme.lean §S1.c`).**
+> Attacking the rank-4 (`S.rank = 3`, smallest open) slice surfaced the precise locus of the difficulty: the
+> **multi-base** generalization of the single-base bridge `vProfile_iff_schemeOrbit`. Landed: `JointSchemeOrbit`
+> (the `Stab(T)`-orbit relation over a base *set*), **`jointProfile_eq_of_jointSchemeOrbit`** (the *reverse* —
+> `Stab(T)`-orbits refine the joint profile — provable for any `T`), `JointProfileRecoversAt` (the *forward* =
+> recovery-at-`T`), and **`jointProfileRecoversAt_singleton`** (the `|T| = 1` forward is free, from the schurian
+> `vProfile_eq_imp_schemeOrbit`). **The verdict:** the forward bridge is provable at `|T| = 1` and **open at
+> `|T| ≥ 2`** — the joint profile only sees `⋂ₜ Stab(t)`-orbits, generally strictly coarser than the `Stab(T)`-
+> orbit (the per-base schurian automorphisms need not share a common fixor). That strict coarsening *is* `s(C) ≥ 2`,
+> smallest at rank-4 (the amorphic equal-valency case: order-16 #20/#21, the cyclotomic Clebsch family). So the
+> rank-4 attempt **structures** the crux precisely (single-base free, two-base forward open) but does **not** close
+> it — no closing argument exists from the group / counting / intra-cell angles (all three bottom out at this same
+> two-base forward gap). The amorphic core stays open research; the retraction-confirmed Frobenius insufficiency is
+> the same wall. This is the honest result of "attempt rank-4": the gap is now located and named at the two-base
+> level, with the free half banked.
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
 > **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)
