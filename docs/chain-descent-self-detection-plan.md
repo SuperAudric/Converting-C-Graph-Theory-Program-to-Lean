@@ -48,12 +48,19 @@
 > CONDITIONAL). **GAP FOUND + F2b TARGET CORRECTED (2026-06-09):** `G0cyc` uses a *full* multiplicative
 > generator ⟹ `cyclicAffineScheme` is the **rank-2 complete graph `K_{p^d}`** (the *large* case, not the leak
 > candidate; `CyclicAffineSeparates` is vacuous/false there). The genuine F2b target is a **proper** cyclic
-> subgroup `G0pow β = ⟨mul β⟩` (`β = α^m`), built this turn (axiom-clean): `sigmaPow`/`G0pow`, `neg_mem_G0pow`
+> subgroup `G0pow β = ⟨mul β⟩` (`β = α^m`), built (axiom-clean): `sigmaPow`/`G0pow`, `neg_mem_G0pow`
 > (`-1∈⟨β⟩`), and **`G0pow_irreducible`** via FIELD-GENERATION (`span_{F_p}{β^k}=⊤` ⟹ irreducible — the §5.3
 > "invariant subspace ⟺ subfield" template, NOT the orbit-is-everything argument). Seal entry = the existing
-> parametric `reachesRigidOrCameron_viaAffineIrreducible (G₀ := G0pow hd β)`. **REMAINING = F2b: proving
-> separation for `G0pow β`** (the uncited `s(C)` counting; F1 is the tool). Optionally the **depth-`k` producer**
-> (general §5.3 engine). E2-model needs **no new construction** (proper-`β` cyclotomic = `affineScheme` at `G0pow`).
+> parametric `reachesRigidOrCameron_viaAffineIrreducible (G₀ := G0pow hd β)`.
+> **CONCRETE WITNESS LANDED (2026-06-09, axiom-clean, build green):** `G0pow_irreducible_of_adjoin` (bridge to
+> `Algebra.adjoin=⊤`) + **`adjoin_eq_top_of_orderOf`** (reusable finite-field core: order-`r` `β` with no proper
+> `e∣d` having `r∣p^e−1` ⟹ field-generates; via `K'=F_p⟮β⟯` subfield of size `p^e`, `β^(p^e)=β`) +
+> `orderOf_fqGen` (`= p^d−1`) + `G0pow_pow_irreducible` (witness family) + **`clebschWitness_irreducible`** (the
+> index-3 Clebsch scheme on `F₁₆`, `β=fqGen³` order 5, IS primitive — `5∤2^e−1` for `e∈{1,2}` by `decide`) +
+> `clebschWitness_neg_mem`. So the F2b target machinery is **non-vacuous on a genuine rank-≥3 cyclotomic scheme**.
+> **REMAINING = F2b: proving separation for `G0pow β`** (the uncited `s(C)` counting; F1 is the tool). Optionally
+> the **depth-`k` producer** (general §5.3 engine). E2-model needs **no new construction** (proper-`β` cyclotomic =
+> `affineScheme` at `G0pow`).
 > The oracle-capability seal is a conditional theorem
 > `modulo {G3 cited classification + G2-B}` (seal-handoff §2, §4.0). Every provable-now slice is banked
 > (G1a depth-graded, G1b leg B, G2-A imprimitive block recovery). The **sole irreducible carried input**
