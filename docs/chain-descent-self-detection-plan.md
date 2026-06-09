@@ -105,6 +105,22 @@
 > general-P3 attack, NOT a closure. **The unconditional seal will not close from Mathlib alone** — it needs new
 > pieces / a known pattern; the right general crux remains the mechanism-agnostic relation-level P3
 > ("persistent two-base-twin ⟹ `ClosedSubset` ⟹ imprimitive"), which the depth-`k` relation producer feeds.
+> **GENERAL P3-CONVERSE CRUX NAMED + WIRED (2026-06-10, axiom-clean, build green) — the Phase-2 headline.** The open
+> content is now stated as the *mechanism-agnostic* P3 converse, replacing the retracted Frobenius-specific
+> `PowAffineSeparates` as the carried kernel (`Cascade.lean`, end): **`PersistentTwinYieldsBlock`** (`¬
+> SeparatesAtBoundedBase → large ∨ ∃ nontrivial `ClosedSubset`` — base-homogeneous twin ⟹ block, general over any
+> `SchurianScheme`, `Discrete`/`ClosedSubset`-only, NO Frobenius/spectral substrate) + the provable reduction
+> `selfDetectsStably_of_persistentTwinYieldsBlock` (crux ⟹ `SelfDetectsStably`, via
+> `selfDetectsStably_of_discretizes` + the trivial `not_isPrimitive_of_nontrivial_closedSubset`) + the seal capstone
+> **`reachesRigidOrCameron_viaPersistentTwinBlock`** (fused seal carrying `hClassify`/`hImprim` + the open `hCrux`).
+> Clebsch wired as the test instance (`CascadeAffine.lean`: `clebschScheme` + `reachesRigidOrCameron_clebsch_viaPersistentTwinBlock`
+> = the general capstone applied *verbatim* to the primitive index-3 affine scheme — no affine-specific engine,
+> demonstrating the crux subsumes the slice). The realization half (`no twin ⟹ separates`) is the landed
+> `discrete_of_kRoundRelationSeparates`, so `PersistentTwinYieldsBlock` is genuinely the **only open half of the
+> full P3**. The intended discharge is the **fusion / closed-subset closure** pattern (`schemeEquiv_trans`), NOT
+> a forwards non-existence bound. The route-scan verdict (§11.2) is rerouted accordingly (Q2's "elementary Galois
+> beachhead" premise died with the amorphic finding; affine-cyclic is now a *concrete instance* of this general
+> crux, not a special case).
 > **GENERAL-THEOREM INSIGHT:** "a normalizing algebraic automorphism is a configuration automorphism" = the general
 > `s(C)` obstruction shape, now concretely realized on the cyclic affine scheme.
 > **ISO-ALIGNMENT RESOLVED (step 2):** the model uses TWO isos — `affineE` (`F_p^d ≃ Fin(p^d)`, scheme points)
@@ -972,6 +988,17 @@ discreteness* into this interface; `DepthOneSeparable` is the already-landed `s(
 
 ### 11.2 Route-scan verdict — affine-cyclic beachhead (and why)
 
+> **⚠️ CORRECTION (2026-06-10) — Q2's premise is DEAD; the verdict is rerouted, not reversed.** The Frobenius
+> separation strategy this verdict pointed at was **retracted** (§11.8 tail; memory `project_f0_cyclic_affine`):
+> the affine-cyclic gap `Ĝ/G` is **not** the bounded Galois/cyclotomy gap. For the index-3/Clebsch witness it is an
+> **amorphic `S₃`-on-relations**, of which Frobenius (Galois) realizes only a `Z₂` sub-part. So **Q2 below is false**
+> — affine-cyclic is *not* an "elementary Galois special case"; it is the *general* crux in miniature (the full
+> WL-closure color-automorphism gap, just small and computable). The slice is **kept** for Q1 (substrate) + Q3
+> (engine reuse) + as a **concrete computable instance of the general P3**, but the *target* shifts from "a Frobenius
+> `s(C)` bound on the cyclic slice" to **the general relation-level P3 converse** (`base-homogeneous twin ⟹
+> `ClosedSubset` ⟹ imprimitive`), with Clebsch as its unit test. Read Q2 as struck; read the VERDICT box as
+> superseded by the rerouted verdict at the end of this subsection.
+
 Candidate slices for the first bound proof: **affine-cyclic** (cyclotomic/Singer), affine-general-irreducible,
 **rank-3/4 SRG**, **§5.3 general**. The decision-driving questions and their answers (from the project's own record —
 exhaustive-obstruction §4 R5 + §0.7.6, the probes — *not* external research, per the design-fit concern):
@@ -981,10 +1008,14 @@ exhaustive-obstruction §4 R5 + §0.7.6, the probes — *not* external research,
   require building scheme spectral theory from scratch** on top of the open math ("cleaner math ⟹ *more* Lean").
   **Affine is the only route with substrate** (Mathlib `Submodule`, `IsSimpleModule`, finite-field `Frobenius`/Galois,
   eigenspaces) — which is exactly why M1 went through cleanly.
-- **Q2 — is there an elementary beachhead?** Affine-**cyclic** is the one slice with a plausibly *elementary* proof:
-  `V ≅ F_{p^d}`, `G₀ = ⟨α⟩`, the gap is the **bounded Galois/cyclotomy gap** (Frobenius), provable by finite-field
-  linear algebra + counting (Mathlib has the Galois machinery). Probes: cyclotomic AND non-abelian `ΓL(1,2^d)` both
-  flat at depth 4. General-irreducible and rank-3/4 have no comparable elementary handle.
+- **Q2 — is there an elementary beachhead? ~~Yes~~ NO (struck 2026-06-10, see banner).** This was the load-bearing
+  claim and it is **false**. The hoped-for "the gap is the bounded Galois/cyclotomy gap (Frobenius)" was retracted:
+  the affine-cyclic gap is the amorphic `S₃`-on-relations (the WL-closure color-automorphism group), which Frobenius
+  only *partly* realizes. So affine-cyclic has **no** elementary-Galois handle that the general crux lacks — killing
+  Frobenius (steps 1–2) leaves the amorphic remainder uncovered. The probes' flat depth-4 recovery is still real
+  evidence that the cyclic slice *recovers*, but it is **not** evidence of an elementary *proof route*; it is evidence
+  that the general P3 converse holds on this instance. Net: Q2 no longer distinguishes affine-cyclic from the general
+  crux — the slice is justified by Q1 + Q3 + concreteness, not by elementariness.
 - **Q3 — engine reuse.** The multi-round separation reasoning on `schemeAdj` is genuinely new (`schemePartFrom`/
   `iterSet` exist only for the `J`-binarized graph), reusable across slices, and seeded by the landed depth-1
   reduction-to-single-base trick. Affine difference-coordinates do *not* bypass it (warmRefine still runs on
@@ -996,10 +1027,25 @@ exhaustive-obstruction §4 R5 + §0.7.6, the probes — *not* external research,
   `refineStep`/`warmRefine`/`isolationStep`/`s(C)` idiom (an induction over the 1-WL fixpoint), **not** an
   off-the-shelf k-WL / coherent-configuration framework. Importing a generic refinement framework is the warp to avoid.
 
-> **VERDICT: build the cyclotomic (affine-cyclic) bound proof first; defer rank-3/4 and §5.3.** Extract reusable
-> multi-round lemmas *from* that proof rather than building a speculative general engine first (the §3 discipline:
-> build what the proof consumes, not a big engine that then hits the open-math wall). Q1 is decisive — substrate, not
-> payoff, picks the slice.
+> **VERDICT (original, SUPERSEDED): build the cyclotomic (affine-cyclic) bound proof first; defer rank-3/4 and
+> §5.3.** Extract reusable multi-round lemmas *from* that proof rather than building a speculative general engine
+> first (the §3 discipline: build what the proof consumes, not a big engine that then hits the open-math wall). Q1 is
+> decisive — substrate, not payoff, picks the slice.
+
+> **VERDICT (rerouted 2026-06-10, current): build the general relation-level P3 converse — `base-homogeneous twin ⟹
+> `ClosedSubset` ⟹ imprimitive` — directly on `schemeAdj`, with Clebsch as the unit test.** Rationale: (i) Q2 is
+> dead, so there is no longer an elementary cyclic shortcut to build *first*; the affine-cyclic gap is the general
+> amorphic gap in miniature. (ii) The forwards bound (*primitive ⟹ separable*) is an uncited non-existence proof; the
+> converse is a positive **construction** (given an everywhere-indistinguishable relation pair, build a block) whose
+> realization half is already landed (`schemePartFrom` / `iterSet_refines_schemePartFrom` / the depth-`k` relation
+> producer `discrete_of_kRoundRelationSeparates`) and whose target machinery (`ClosedSubset` / `IsPrimitive` /
+> `schemeEquiv`) is already in `Scheme.lean` — **no Mathlib scheme-spectral-theory dependency** (this is also why it
+> dodges Q1's wall, unlike rank-3/4). (iii) Clebsch is a *positive* instance: primitive ⟹ no nontrivial
+> `ClosedSubset` ⟹ its `S₃` twins must break at O(1) bases (probe: depth 4) — the ideal computable test fixture.
+> Q1 still defers rank-3/4 and §5.3 (no substrate); affine-cyclic stays the concrete test, but the *deliverable* is
+> the general converse, not a slice-specific Frobenius bound. The "known pattern" to work off (design-fit): the
+> converse is a **fusion / closed-subset closure** argument — "twins at every base" generate a WL-stable fusion, and
+> a WL-stable fusion of a primitive scheme is trivial — provable internally on the existing `ClosedSubset` machinery.
 
 ### 11.3 Build order for the remaining pieces
 

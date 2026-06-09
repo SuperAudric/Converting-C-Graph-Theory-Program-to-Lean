@@ -4054,4 +4054,115 @@ theorem reachesRigidOrCameron_viaDepthOneSeparable {n : Nat} {IsLarge : Nat → 
   reachesRigidOrCameron_viaFusedSeal hClassify S hne hrank
     (selfDetectsStably_of_depthOneSeparable S IsLarge bound hDepthOne) hImprim
 
+/-! ### Phase 2 — the mechanism-agnostic P3 converse (the general primitive-floor crux)
+
+This block reframes the seal's sole open content (`SelfDetectsStably` = G2-B = "primitive small ⟹ recovers")
+into the form the project actually intends to **prove**: the **relation-level P3 converse**,
+`base-homogeneous twin ⟹ ClosedSubset ⟹ imprimitive`, stated mechanism-agnostically against the existing
+`ClosedSubset`/`IsPrimitive` machinery — **no Frobenius, no Mathlib scheme-spectral theory**.
+
+**Why this shape (vs. `DepthOneSeparable` / a forwards bound).** `selfDetectsStably_of_discretizes` already
+reduced the open content to *"primitive ∧ ¬large ⟹ ∃ bounded `S₀` warm-refining to `Discrete`"* — i.e.
+`SeparatesAtBoundedBase`. The **contrapositive** is the structural statement worth attacking: a
+*base-homogeneous twin* — a same-cell pair surviving **every** bounded individualization (`¬SeparatesAtBoundedBase`)
+— forces a non-trivial block (`ClosedSubset`), unless the scheme is large (→ Cameron). That is a **positive
+construction** ("here is the block"), not an uncited non-existence proof, and it is exactly the project's
+"sharpest-form P3 lemma" (seal-handoff §G2 board (c)).
+
+**The two halves of the full P3, and which is open.** *Realization* (already landed): the depth-`k` relation
+producer `discrete_of_kRoundRelationSeparates` (`CascadeAffine.lean §13c`) discharges *"no twin ⟹ separates"*
+on a concrete instance from a finite relation-profile separation. *Converse* (the named open crux below):
+*"persistent twin ⟹ block"* — `PersistentTwinYieldsBlock`. Together they are the full P3; only the converse is
+open, and it is uncited open mathematics (seal-handoff §6 insight 2). It is carried **visibly** (the
+anti-"looks-complete" discipline), like `DepthOneSeparable`/`PowAffineSeparates` before it — but, unlike those,
+it is **general** (any `SchurianScheme`) and so serves the whole primitive floor, not just the affine slice.
+
+**The "known pattern" to discharge it (design-fit).** The intended proof is a **fusion / closed-subset closure**
+argument: the relations that are everywhere-twins generate (under the complex product, `schemeEquiv_trans`) a
+`ClosedSubset`; a non-trivial one is a block; a primitive scheme has none — contradiction. The closure engine is
+already `schemeEquiv_trans` / `exists_composable_of_intersectionNumber`; this block supplies the statement those
+would prove into. -/
+
+/-- **Block ⟹ imprimitive (the trivial direction).** A non-trivial closed subset (neither the diagonal `{R₀}`
+nor the whole relation set) immediately refutes `IsPrimitive`, whose only two closed subsets are exactly those.
+The easy half of the P3 converse; the content is constructing the closed subset (`PersistentTwinYieldsBlock`). -/
+theorem not_isPrimitive_of_nontrivial_closedSubset {n : Nat} {S : AssociationScheme n}
+    {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset I)
+    (h0 : I ≠ {0}) (huniv : I ≠ Finset.univ) :
+    ¬ S.IsPrimitive := by
+  intro hp
+  rcases hp I hcl with h | h
+  · exact h0 h
+  · exact huniv h
+
+/-- **The engine interface — separation at a bounded base.** There is a base set `S₀` of size `≤ bound` whose
+warm-refinement (1-WL on `schemeAdj`) is `Discrete` (all singletons). This is the positive form of the existential
+that `selfDetectsStably_of_discretizes` consumes; its negation is a **base-homogeneous twin** (a same-cell pair at
+*every* bounded base). -/
+def SeparatesAtBoundedBase {n : Nat} (S : SchurianScheme n) (bound : Nat) : Prop :=
+  ∃ S₀ : Finset (Fin n), S₀.card ≤ bound ∧
+    Discrete (warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+      (individualizedColouring n S₀))
+
+/-- **THE OPEN CRUX — the mechanism-agnostic P3 converse (`base-homogeneous twin ⟹ block`).** If no bounded base
+separates the scheme (`¬ SeparatesAtBoundedBase` — a same-cell pair persists through every bounded
+individualization), then either the scheme is large (→ Cameron via the classification) **or** there is a
+non-trivial `ClosedSubset` (a block ⟹ imprimitive). This is the seal's sole irreducible open content (G2-B),
+restated as a positive block-construction. It is **uncited open mathematics**, carried visibly. It is `Discrete`-
+and `ClosedSubset`-only — no Frobenius, no group commutativity (the C₇/amorphic lessons), no scheme-spectral
+substrate — so it is the *general* primitive-floor crux, attackable by the fusion/closed-subset closure pattern
+(`schemeEquiv_trans`). The depth-`k` relation producer (`CascadeAffine.lean §13c`) is the **already-landed**
+other half (`no twin ⟹ separates`), so this is genuinely the only open half of the full P3. -/
+def PersistentTwinYieldsBlock {n : Nat} (S : SchurianScheme n) (IsLarge : Nat → Prop) (bound : Nat) : Prop :=
+  ¬ SeparatesAtBoundedBase S bound →
+    IsLargeSchemeViaAut IsLarge n S ∨
+      ∃ I : Finset (Fin (S.rank + 1)),
+        S.toAssociationScheme.ClosedSubset I ∧ I ≠ {0} ∧ I ≠ Finset.univ
+
+/-- **The P3 converse ⟹ self-detection (the reduction; provable).** `PersistentTwinYieldsBlock` discharges the
+seal's open `SelfDetectsStably` content. Logic: for a primitive small residual, suppose no bounded base separates
+(`¬ SeparatesAtBoundedBase`); the crux yields *large* (contradicts small) or *a non-trivial block* (contradicts
+primitive via `not_isPrimitive_of_nontrivial_closedSubset`) — both impossible, so some bounded base separates,
+which is exactly the discreteness witness `selfDetectsStably_of_discretizes` needs. Mirror of
+`selfDetectsStably_of_depthOneSeparable`, with the P3-converse crux in the slot. -/
+theorem selfDetectsStably_of_persistentTwinYieldsBlock {n : Nat} (S : SchurianScheme n)
+    (IsLarge : Nat → Prop) (bound : Nat)
+    (hCrux : PersistentTwinYieldsBlock S IsLarge bound) :
+    SelfDetectsStably S IsLarge bound := by
+  apply selfDetectsStably_of_discretizes
+  intro hps
+  by_contra hcon
+  -- `hcon : ¬ ∃ S₀, … Discrete …` is defeq `¬ SeparatesAtBoundedBase S bound`.
+  rcases hCrux hcon with hlarge | ⟨I, hcl, h0, huniv⟩
+  · exact hps.2 hlarge
+  · exact not_isPrimitive_of_nontrivial_closedSubset hcl h0 huniv hps.1
+
+/-- **The seal capstone, via the mechanism-agnostic P3 converse — A CONDITIONAL CAPSTONE, NOT THE CLOSED SEAL.**
+The fused seal with its self-detection input discharged by `PersistentTwinYieldsBlock`. It carries exactly three
+hypotheses — the cited classification `hClassify` (G3), the imprimitive block recovery `hImprim`, and the **open
+crux `hCrux`** (the P3 converse / G2-B) — so it is manifestly conditional.
+
+This is the **current Phase-2 headline**: it routes the primitive floor through the *general*, mechanism-agnostic
+crux (`base-homogeneous twin ⟹ block`), replacing the retracted Frobenius-specific `PowAffineSeparates` path. The
+affine-cyclic family (Clebsch et al.) is one primitive instance to which it applies directly — see
+`CascadeAffine.lean`.
+
+> **⚠️ SCOPE — `hCrux` is OPEN (uncited).** This does *not* close the seal; it reframes the open content into the
+> block-construction form the project intends to prove. The realization half (`discrete_of_kRoundRelationSeparates`)
+> is landed; the converse `hCrux` is the genuine G2-B research, with no citation and no known counterexample (both
+> empirical falsifiers — catalogue + affine probes — came back clean). -/
+theorem reachesRigidOrCameron_viaPersistentTwinBlock {n : Nat} {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hCrux : PersistentTwinYieldsBlock S IsLarge bound)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaFusedSeal hClassify S hne hrank
+    (selfDetectsStably_of_persistentTwinYieldsBlock S IsLarge bound hCrux) hImprim
+
 end ChainDescent

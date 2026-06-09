@@ -1641,4 +1641,45 @@ theorem clebschWitness_neg_mem :
     rw [eq_comm, ← Units.val_inj]; simp [CharTwo.neg_eq]
   rw [h]; exact one_mem _
 
+/-! #### Clebsch as the test instance for the general P3-converse crux
+
+The retracted Frobenius route (`PowAffineSeparates` / `TwinsAreFrobenius`) targeted *this* scheme with a
+slice-specific, Galois-keyed separation argument — which failed because the gap `Ĝ/G` here is the amorphic
+`S₃`-on-relations, not Galois. The **mechanism-agnostic** `reachesRigidOrCameron_viaPersistentTwinBlock`
+(`Cascade.lean`) routes the same primitive instance through the *general* crux
+(`PersistentTwinYieldsBlock` = `base-homogeneous twin ⟹ block`) with **no affine/Frobenius machinery** — the
+general theorem applies to `clebschScheme` verbatim because it is just a `SchurianScheme`. This is the concrete
+demonstration of the reroute (self-detection-plan §11.2): the affine-cyclic slice is *one primitive instance*
+of the general P3 converse, not a special case needing its own engine.
+
+**Probe evidence (positive, not a proof).** `clebschScheme` is primitive (`clebschWitness_irreducible`); the
+affine probe (seal-handoff §G2 board (g)) measured it recovering at **flat depth 4** — consistent with "no
+persistent twin," i.e. the crux's conclusion holding on this instance. Discharging the crux *in Lean* (here or
+in general) is the open G2-B research; the realization tool that would prove "no twin ⟹ separates" on it is the
+landed `discrete_of_kRoundRelationSeparates`. -/
+
+/-- **The Clebsch index-3 affine scheme on `F₁₆`** — the concrete primitive (rank-≥3), small, non-abelian-residual
+instance (`clebschWitness_irreducible`). The test fixture for the general P3 converse. -/
+noncomputable def clebschScheme : SchurianScheme (2 ^ 4) :=
+  affineScheme (G0pow (p := 2) (d := 4) (by norm_num) ((fqGen : (GaloisField 2 4)ˣ) ^ 3))
+    clebschWitness_neg_mem
+
+/-- **The general P3-converse seal capstone, instantiated at the Clebsch scheme.** A *verbatim* specialization
+of `reachesRigidOrCameron_viaPersistentTwinBlock` to `clebschScheme` — no affine-specific separation engine, no
+Frobenius. It demonstrates that the mechanism-agnostic crux `PersistentTwinYieldsBlock` subsumes the
+affine-cyclic slice the retracted `PowAffineSeparates` targeted. Carries the same four inputs (cited `hClassify`,
+genuine `hne`/`hrank`, the **open** crux `hCrux`, and `hImprim`); conditional, like its general parent. -/
+theorem reachesRigidOrCameron_clebsch_viaPersistentTwinBlock
+    {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hne : ∀ i : Fin (clebschScheme.rank + 1), ∃ v w, clebschScheme.rel i v w = true)
+    (hrank : 2 ≤ clebschScheme.rank)
+    (hCrux : PersistentTwinYieldsBlock clebschScheme IsLarge bound)
+    (hImprim : ¬ clebschScheme.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (2 ^ 4) clebschScheme ∨ AbelianConsumed (2 ^ 4) clebschScheme) :
+    ((SchemeBlockRecovered (2 ^ 4) clebschScheme ∨ AbelianConsumed (2 ^ 4) clebschScheme)
+        ∨ SchemeRecoveredByDepth (2 ^ 4) clebschScheme bound)
+      ∨ IsCameronScheme (2 ^ 4) clebschScheme :=
+  reachesRigidOrCameron_viaPersistentTwinBlock hClassify clebschScheme hne hrank hCrux hImprim
+
 end ChainDescent

@@ -679,6 +679,15 @@ multi-base counting separation is realized as a warm-refinement split* — the e
     Warm-up **LANDED** (`Scheme.lean §10.3b`: `schemePartFrom` + `iterFrom_refines_schemePartFrom` +
     `iterSet_refines_schemePartFrom`) — the multi-base counting partition is realized by warm refinement. The converse
     (the crux) is the open conjecture; gate it behind the catalogue falsifier (f) before heavy Lean investment.
+    **STATEMENT + SEAL-WIRING NOW LANDED (2026-06-10, axiom-clean, `Cascade.lean`).** The crux is named
+    mechanism-agnostically (Frobenius-free, replacing the retracted `PowAffineSeparates`): **`PersistentTwinYieldsBlock`**
+    (`¬ SeparatesAtBoundedBase → IsLarge ∨ ∃ nontrivial `ClosedSubset`` = base-homogeneous twin ⟹ block, general over any
+    `SchurianScheme`), with the provable reduction `selfDetectsStably_of_persistentTwinYieldsBlock` (⟹ `SelfDetectsStably`)
+    and the seal capstone `reachesRigidOrCameron_viaPersistentTwinBlock` (carries `hClassify`/`hImprim` + the open
+    `hCrux`). Clebsch wired as the test (`CascadeAffine.lean`: `reachesRigidOrCameron_clebsch_viaPersistentTwinBlock`).
+    Realization half (`no twin ⟹ separates`) = landed `discrete_of_kRoundRelationSeparates`, so this is the **only open
+    half** of P3. **Only the converse *proof* remains open** (uncited G2-B); the intended route is the fusion/closed-subset
+    closure (`schemeEquiv_trans`), not a forwards bound. Still gate heavy proof investment behind the catalogue (f).
   - **(d) Thread T2** — the affine instance of (c): primitive ⟹ separable via invariant-subspace = block. **Dependency
     CHECKED negative (rev. 3):** the wreath = imprimitive characterization is abelian-`p`-group-only (Ryabov), *not* a
     citable near-theorem at schurian generality. T2 is a project-internal thread, not a citation shortcut.
