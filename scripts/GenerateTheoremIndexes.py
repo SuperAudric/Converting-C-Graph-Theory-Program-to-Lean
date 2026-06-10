@@ -48,7 +48,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -357,6 +357,56 @@ def parse_all_lean() -> dict[str, dict]:
 
 
 # ---------------------------------------------------------------------------
+# Cross-file usage (opt-in `--with-usage` scaffolding for the cleanup passes)
+#
+# A temporary signal driving the privatization / archive review: how often a
+# decl is referenced in its own file (InternalUseCount) and whether it is
+# referenced anywhere else (HasExternalUses). Surfaced as a Notes token and an
+# end-of-run candidate report. Off by default; intended to be removed once the
+# cleanup is done. Approximate + conservative, matching the privatization rule
+# in `scripts/theorem-index-maintenance.md` §4.1: a bare-name token appearing in
+# any *other* active file — even in a comment, even via a name collision —
+# counts as external ⇒ the decl stays public. Archived files are themselves
+# removal candidates and do not keep an active decl public, so scope is active
+# source only.
+# ---------------------------------------------------------------------------
+# Identifier-continuation characters: `\w` (unicode letters/digits/underscore)
+# plus Lean's `'`/`!`/`?` and sub/superscripts. Maximal runs are the bare name
+# segments, so a use of `bar`, `.bar`, or `Foo.bar` all yield the token `bar`.
+_USAGE_IDENT = r"\w'!?ₐ-ₜ₀-₉⁰-ⁱⁿ"
+_USAGE_TOKEN_RE = re.compile(rf"[{_USAGE_IDENT}]+", re.UNICODE)
+
+
+def compute_usage(source: dict) -> dict[str, dict]:
+    """`{qualified: {"internal": int, "external": bool}}` over active source."""
+    active = {q: d for q, d in source.items()
+              if not is_archived_path(str(d["path"]))}
+    files = sorted({str(d["path"]) for d in active.values()})
+    file_tokens: dict[str, Counter] = {}
+    for f in files:
+        file_tokens[f] = Counter(_USAGE_TOKEN_RE.findall((ROOT / f).read_text()))
+    # How many decls in a file share a bare name (each contributes 1 definition
+    # occurrence of its own name — subtract those from the internal count).
+    defs_in_file: dict[tuple[str, str], int] = defaultdict(int)
+    for d in active.values():
+        defs_in_file[(d["name"], str(d["path"]))] += 1
+    usage: dict[str, dict] = {}
+    for q, d in active.items():
+        n, f = d["name"], str(d["path"])
+        internal = max(0, file_tokens[f].get(n, 0) - defs_in_file[(n, f)])
+        external = any(of != f and file_tokens[of].get(n, 0) > 0 for of in files)
+        usage[q] = {"internal": internal, "external": external}
+    return usage
+
+
+def usage_token(u: dict) -> str:
+    """The Notes signifier for one decl's usage record."""
+    if u["external"]:
+        return "ext"
+    return f"local·{u['internal']}" if u["internal"] > 0 else "**unused**"
+
+
+# ---------------------------------------------------------------------------
 # Source-name resolution
 #
 # Source decls are keyed by qualified name; an index row may *display* a name
@@ -441,7 +491,14 @@ def compute_notes(decl: dict) -> str:
     if decl.get("is_noncomputable"):
         parts.append("`noncomputable`")
     parts += [f"`{a}`" for a in decl.get("attrs", [])]
-    return ", ".join(parts) if parts else "—"
+    base = ", ".join(parts) if parts else "—"
+    # Opt-in usage signifier (`--with-usage`): attached onto the decl in
+    # cmd_rewrite. Temporary scaffolding for the cleanup passes.
+    u = decl.get("_usage")
+    if u is not None:
+        tok = usage_token(u)
+        return tok if base == "—" else f"{base}, {tok}"
+    return base
 
 
 # ---------------------------------------------------------------------------
@@ -742,6 +799,13 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
     source = parse_all_lean()
     by_last = build_last_segment_index(source)
 
+    # Opt-in usage scaffolding: attach a usage record onto each active decl so
+    # compute_notes emits its signifier; the candidate report is printed at the
+    # end (after global_desc is available for headline-marker detection).
+    usage = compute_usage(source) if getattr(args, "with_usage", False) else {}
+    for q, u in usage.items():
+        source[q]["_usage"] = u
+
     # Optional description overrides: a JSON `{decl_name: description}` (keyed by
     # the source decl name) that supersedes the hand-written Description column.
     # Used to bulk-apply regenerated descriptions; names absent from it keep
@@ -821,6 +885,65 @@ def cmd_rewrite(args: argparse.Namespace) -> None:
         for rel, ln, decl in sorted(new_rows):
             print(f"    {rel}:{ln}  {decl}")
 
+    if usage:
+        _print_usage_report(source, usage, global_desc)
+
+
+def _has_headline_marker(desc: str | None) -> bool:
+    """A description carrying a bold conceptual anchor (`**Key theorem.**`,
+    `**Support backbone.**`, …) is labelled as a headline ⇒ keep public."""
+    return bool(desc) and "**" in desc
+
+
+def _print_usage_report(source: dict, usage: dict, global_desc: dict) -> None:
+    """Candidate report for the privatization / archive passes (errs public).
+
+    Per active file: privatization candidates = public, non-`@[simp]`, no
+    external use, NO headline marker (review each — privatize genuine helpers, or
+    add a marker + keep if actually important = a labelling gap). `local`-but-
+    marked and `unused` decls are reported separately (default: keep)."""
+    by_file: dict[str, list[str]] = defaultdict(list)
+    for q in usage:
+        by_file[str(source[q]["path"])].append(q)
+    print("\n" + "=" * 72)
+    print("USAGE REPORT (--with-usage scaffolding) — privatization/archive candidates")
+    print("  errs PUBLIC: only public + non-simp + no-external + no-headline-marker are flagged.")
+    print("=" * 72)
+    tot = defaultdict(int)
+    unused_all: list[str] = []
+    for f in sorted(by_file):
+        cands, marked_local, already_priv = [], 0, 0
+        for q in by_file[f]:
+            d, u = source[q], usage[q]
+            if u["external"]:
+                continue
+            if u["internal"] == 0 and not d["is_private"]:
+                unused_all.append(q)
+            if d["is_private"]:
+                already_priv += 1
+                continue
+            if d["is_simp"]:
+                continue
+            if _has_headline_marker(global_desc.get(q)):
+                marked_local += 1
+                continue
+            cands.append(q)
+        tot["cand"] += len(cands); tot["marked"] += marked_local
+        if not cands and not marked_local:
+            continue
+        print(f"\n## {f}  —  {len(cands)} privatize-candidate(s); "
+              f"{marked_local} local+marked (keep); {already_priv} already private")
+        for q in sorted(cands):
+            d = source[q]
+            print(f"    {usage_token(usage[q]):<10} {d['kind']:<9} {index_name(q)}")
+    print(f"\nTOTAL privatize-candidates (review, err public): {tot['cand']}  "
+          f"| local+marked kept: {tot['marked']}")
+    print(f"\n{len(unused_all)} decl(s) with ZERO references anywhere (archive cross-check —"
+          f" most are terminal capstones / demonstrative; keep unless superseded):")
+    for q in sorted(unused_all):
+        mk = "marked" if _has_headline_marker(global_desc.get(q)) else "no-marker"
+        print(f"    [{mk:<9}] {index_name(q)}")
+
 
 # ---------------------------------------------------------------------------
 # Entry point
@@ -835,6 +958,12 @@ def main() -> None:
     p_rw.add_argument("--descriptions", metavar="JSON",
                       help="Path to a JSON `{decl_name: description}` map whose "
                            "entries override the Description column.")
+    p_rw.add_argument("--with-usage", action="store_true",
+                      help="TEMPORARY cleanup scaffolding (off by default; remove "
+                           "when the privatization/archive passes are done): append "
+                           "a usage signifier to Notes (`ext` / `local·N` / "
+                           "`**unused**`) and print a per-file privatization/archive "
+                           "candidate report.")
     p_rw.set_defaults(func=cmd_rewrite)
     args = parser.parse_args()
     args.func(args)
