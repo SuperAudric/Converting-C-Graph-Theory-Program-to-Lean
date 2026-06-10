@@ -80,7 +80,12 @@
       "WebFetch(domain:webcache.googleusercontent.com)",
       "WebFetch(domain:eudml.org)",
       "WebFetch(domain:drops.dagstuhl.de)",
-      "WebFetch(domain:www.emergentmind.com)"
+      "WebFetch(domain:www.emergentmind.com)",
+      "WebFetch(domain:www.degruyterbrill.com)",
+      "WebFetch(domain:www.researchgate.net)",
+      "WebFetch(domain:research.tilburguniversity.edu)",
+      "WebFetch(domain:papers.ssrn.com)",
+      "WebFetch(domain:www.alphaxiv.org)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",
