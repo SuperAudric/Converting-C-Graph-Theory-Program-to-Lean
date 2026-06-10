@@ -131,7 +131,7 @@ theorem relOfPair_symm (v w : Fin n) :
   exact S.rel_relOfPair v w
 
 /-- `relOfPair v v = 0`: the diagonal sits in `R_0`. -/
-theorem relOfPair_self (v : Fin n) : S.relOfPair v v = 0 := by
+private theorem relOfPair_self (v : Fin n) : S.relOfPair v v = 0 := by
   symm
   apply S.relOfPair_unique
   exact (S.rel_zero_iff_eq v v).mpr rfl
@@ -170,11 +170,11 @@ def ClosedSubset (I : Finset (Fin (S.rank + 1))) : Prop :=
 def schemeEquiv (I : Finset (Fin (S.rank + 1))) (v w : Fin n) : Prop :=
   S.relOfPair v w ∈ I
 
-theorem schemeEquiv_refl {I : Finset (Fin (S.rank + 1))} (hI : (0 : Fin (S.rank + 1)) ∈ I)
+private theorem schemeEquiv_refl {I : Finset (Fin (S.rank + 1))} (hI : (0 : Fin (S.rank + 1)) ∈ I)
     (v : Fin n) : S.schemeEquiv I v v := by
   unfold schemeEquiv; rw [S.relOfPair_self]; exact hI
 
-theorem schemeEquiv_symm {I : Finset (Fin (S.rank + 1))} {v w : Fin n}
+private theorem schemeEquiv_symm {I : Finset (Fin (S.rank + 1))} {v w : Fin n}
     (h : S.schemeEquiv I v w) : S.schemeEquiv I w v := by
   unfold schemeEquiv at *; rwa [S.relOfPair_symm]
 
@@ -198,7 +198,7 @@ theorem schemeEquiv_trans {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset 
   exact hcl.2 (S.relOfPair v w) h1 (S.relOfPair w x) h2 (S.relOfPair v x) hk
 
 /-- A closed subset's induced relation is a genuine **equivalence relation** — the block system. -/
-theorem schemeEquiv_equivalence {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset I) :
+private theorem schemeEquiv_equivalence {I : Finset (Fin (S.rank + 1))} (hcl : S.ClosedSubset I) :
     Equivalence (S.schemeEquiv I) :=
   ⟨S.schemeEquiv_refl hcl.1, S.schemeEquiv_symm, fun h1 h2 => S.schemeEquiv_trans hcl h1 h2⟩
 
@@ -466,7 +466,7 @@ noncomputable instance : DecidableEq (Orbital G) := Classical.decEq _
 
 /-- `↑(g⁻¹)` is `(↑g).symm` as a permutation (the subgroup coercion commutes with inversion, and
 `Equiv.Perm` inversion is `Equiv.symm`). -/
-theorem coe_inv_eq_symm {G' : Subgroup (Equiv.Perm (Fin n))} (g : G') :
+private theorem coe_inv_eq_symm {G' : Subgroup (Equiv.Perm (Fin n))} (g : G') :
     (↑(g⁻¹) : Equiv.Perm (Fin n)) = (↑g : Equiv.Perm (Fin n)).symm := by
   rw [Subgroup.coe_inv]; rfl
 
@@ -582,19 +582,19 @@ namespace AssociationScheme
 variable {n : Nat} (S : AssociationScheme n)
 
 /-- `vProfile S v v = 0`. -/
-theorem vProfile_self (v : Fin n) : vProfile S v v = 0 := by
+private theorem vProfile_self (v : Fin n) : vProfile S v v = 0 := by
   unfold vProfile
   rw [S.relOfPair_self]
   rfl
 
 /-- `vProfile S v w = vProfile S v u ↔ relOfPair v w = relOfPair v u`. -/
-theorem vProfile_eq_iff (v w u : Fin n) :
+private theorem vProfile_eq_iff (v w u : Fin n) :
     vProfile S v w = vProfile S v u ↔ S.relOfPair v w = S.relOfPair v u :=
   ⟨Fin.ext, fun h => congrArg Fin.val h⟩
 
 /-- `vProfile S v w = 0 ↔ w = v`: the diagonal-relation form of
 `relOfPair_eq_zero_iff`. -/
-theorem vProfile_eq_zero_iff (v w : Fin n) :
+private theorem vProfile_eq_zero_iff (v w : Fin n) :
     vProfile S v w = 0 ↔ w = v := by
   unfold vProfile
   constructor
@@ -609,7 +609,7 @@ theorem vProfile_eq_zero_iff (v w : Fin n) :
 /-- **v is a singleton in `vProfile S v ·`.** Direct consequence of
 `vProfile_eq_zero_iff`: for `w ≠ v`, `vProfile S v w ≠ vProfile S v v
 = 0`. Matches the `SchemeProfile.v_singleton` field. -/
-theorem vProfile_ne_self_of_ne {v w : Fin n} (h : w ≠ v) :
+private theorem vProfile_ne_self_of_ne {v w : Fin n} (h : w ≠ v) :
     vProfile S v w ≠ vProfile S v v := by
   rw [S.vProfile_self]
   intro h_eq
@@ -686,7 +686,7 @@ variable {n : Nat} (S : AssociationScheme n)
 /-- **S1.a — `vProfile` is invariant under v-stabilizing scheme
 automorphisms.** If `π v = v` and `π` is a scheme automorphism,
 then `vProfile S v (π w) = vProfile S v w` for every `w`. -/
-theorem vProfile_aut_invariant (v : Fin n) {π : Equiv.Perm (Fin n)}
+private theorem vProfile_aut_invariant (v : Fin n) {π : Equiv.Perm (Fin n)}
     (hπ : IsSchemeAut S π) (hπv : π v = v) (w : Fin n) :
     vProfile S v (π w) = vProfile S v w := by
   unfold vProfile
@@ -699,7 +699,7 @@ end AssociationScheme
 
 /-- **Trivial direction (S1.a packaged): `SchemeOrbitPartition`
 refines `vProfile`-equality.** -/
-theorem vProfile_eq_of_schemeOrbit {n : Nat} {S : AssociationScheme n}
+private theorem vProfile_eq_of_schemeOrbit {n : Nat} {S : AssociationScheme n}
     {v w u : Fin n} (h : SchemeOrbitPartition S v w u) :
     vProfile S v w = vProfile S v u := by
   obtain ⟨π, hπ, hπv, hπw⟩ := h
@@ -868,19 +868,19 @@ noncomputable def adj : AdjMatrix n :=
   ⟨fun v w => if G.scheme.relOfPair v w ∈ G.J then 1 else 0⟩
 
 /-- Adjacency characterisation. -/
-theorem adj_eq_one_iff (v w : Fin n) :
+private theorem adj_eq_one_iff (v w : Fin n) :
     G.adj.adj v w = 1 ↔ G.scheme.relOfPair v w ∈ G.J := by
   show (if G.scheme.relOfPair v w ∈ G.J then 1 else 0) = 1 ↔ _
   by_cases h : G.scheme.relOfPair v w ∈ G.J <;> simp [h]
 
 /-- Non-adjacency characterisation. -/
-theorem adj_eq_zero_iff (v w : Fin n) :
+private theorem adj_eq_zero_iff (v w : Fin n) :
     G.adj.adj v w = 0 ↔ G.scheme.relOfPair v w ∉ G.J := by
   show (if G.scheme.relOfPair v w ∈ G.J then 1 else 0) = 0 ↔ _
   by_cases h : G.scheme.relOfPair v w ∈ G.J <;> simp [h]
 
 /-- Loopless: `adj v v = 0`. -/
-theorem adj_self (v : Fin n) : G.adj.adj v v = 0 := by
+private theorem adj_self (v : Fin n) : G.adj.adj v v = 0 := by
   rw [G.adj_eq_zero_iff, G.scheme.relOfPair_self]
   exact G.zero_notMem_J
 
@@ -891,7 +891,7 @@ theorem adj_symm (v w : Fin n) : G.adj.adj v w = G.adj.adj w v := by
   rw [G.scheme.relOfPair_symm]
 
 /-- Adjacency takes values in `{0, 1}`. -/
-theorem adj_eq_zero_or_one (v w : Fin n) :
+private theorem adj_eq_zero_or_one (v w : Fin n) :
     G.adj.adj v w = 0 ∨ G.adj.adj v w = 1 := by
   show (if G.scheme.relOfPair v w ∈ G.J then 1 else 0) = 0
        ∨ (if G.scheme.relOfPair v w ∈ G.J then 1 else 0) = 1
@@ -941,14 +941,14 @@ variable {n : Nat} (G : SchurianSchemeGraph n)
 
 /-- Graph automorphisms preserve `relOfPair`. Direct consequence of
 `isAut_imp_isSchemeAut`. -/
-theorem relOfPair_aut_eq {π : Equiv.Perm (Fin n)}
+private theorem relOfPair_aut_eq {π : Equiv.Perm (Fin n)}
     (hπ : IsAut π G.toSchemeGraph.adj) (v w : Fin n) :
     G.scheme.relOfPair (π v) (π w) = G.scheme.relOfPair v w :=
   (G.isAut_imp_isSchemeAut hπ).relOfPair_eq v w
 
 /-- Graph automorphisms preserve `vProfile`: if `π v = v` and
 `π` is a graph automorphism, then `vProfile S v (π w) = vProfile S v w`. -/
-theorem vProfile_aut_invariant (v : Fin n) {π : Equiv.Perm (Fin n)}
+private theorem vProfile_aut_invariant (v : Fin n) {π : Equiv.Perm (Fin n)}
     (hπ : IsAut π G.toSchemeGraph.adj) (hπv : π v = v) (w : Fin n) :
     vProfile G.scheme v (π w) = vProfile G.scheme v w :=
   G.scheme.vProfile_aut_invariant v (G.isAut_imp_isSchemeAut hπ) hπv w
@@ -1007,7 +1007,7 @@ variable {n : Nat} (G : SchurianSchemeGraph n)
 
 /-- **Step 1 (forward, graph-Aut terms): vProfile-equality implies
 graph-orbit equivalence.** Uses `schurian_transitive`. -/
-theorem vProfile_eq_imp_graphOrbit (v w u : Fin n)
+private theorem vProfile_eq_imp_graphOrbit (v w u : Fin n)
     (h : vProfile G.scheme v w = vProfile G.scheme v u) :
     GraphOrbitFixing G.toSchemeGraph.adj v w u := by
   have hrel : G.scheme.relOfPair v w = G.scheme.relOfPair v u := Fin.ext h
@@ -1018,7 +1018,7 @@ theorem vProfile_eq_imp_graphOrbit (v w u : Fin n)
 
 /-- **Step 1 (reverse, graph-Aut terms): graph-orbit equivalence
 implies vProfile-equality.** Uses `isAut_imp_isSchemeAut`. -/
-theorem graphOrbit_imp_vProfile_eq {v w u : Fin n}
+private theorem graphOrbit_imp_vProfile_eq {v w u : Fin n}
     (h : GraphOrbitFixing G.toSchemeGraph.adj v w u) :
     vProfile G.scheme v w = vProfile G.scheme v u := by
   obtain ⟨π, hπ, hπv, hπw⟩ := h
@@ -1030,7 +1030,7 @@ theorem graphOrbit_imp_vProfile_eq {v w u : Fin n}
 graph-Aut-orbit equivalence (fixing `v`).** This is the graph-Aut
 form of `SchurianScheme.vProfile_iff_schemeOrbit`, and the version
 that directly bridges to `OrbitPartition adj P {v}` in T2.M4. -/
-theorem vProfile_iff_graphOrbit (v w u : Fin n) :
+private theorem vProfile_iff_graphOrbit (v w u : Fin n) :
     vProfile G.scheme v w = vProfile G.scheme v u ↔
     GraphOrbitFixing G.toSchemeGraph.adj v w u :=
   ⟨G.vProfile_eq_imp_graphOrbit v w u,
@@ -1167,7 +1167,7 @@ graph, round-1 equality implies the two vertices share the J-class
 of `relOfPair v ·` (i.e., either both `(v, ·) ∈ ⋃ R_j (j ∈ J)` or
 both `(v, ·) ∉ ⋃ R_j (j ∈ J)`). The scheme-internal form of
 `refineStep_round1_adj_eq`. -/
-theorem SchemeGraph.refineStep_round1_J_eq {n : Nat} (G : SchemeGraph n)
+private theorem SchemeGraph.refineStep_round1_J_eq {n : Nat} (G : SchemeGraph n)
     (P : PMatrix n) {v w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
     (h : refineStep G.adj P (individualizedColouring n {v}) w =
          refineStep G.adj P (individualizedColouring n {v}) u) :
@@ -1271,7 +1271,7 @@ intersection counts coincide. Trivial corollary of
 `intersectionCount_via_w`; included because Step 2's converse
 direction (count matches imply vProfile matches) is the actual
 content needed. -/
-theorem AssociationScheme.intersectionCount_eq_of_vProfile_eq {n : Nat}
+private theorem AssociationScheme.intersectionCount_eq_of_vProfile_eq {n : Nat}
     (S : AssociationScheme n) {v w u : Fin n}
     (h : S.relOfPair v w = S.relOfPair v u) (i l : Fin (S.rank + 1)) :
     (Finset.univ.filter
@@ -1366,7 +1366,7 @@ private theorem iter_succ_count_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 
 /-- **Bridge generalised: `countP` form.** Multiset.countP on a
 signature equals Finset.card of the matching preimage filter. -/
-theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem signature_countP_eq_card {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) (w : Fin n) (p : Nat × Nat × POE → Prop) [DecidablePred p] :
     Multiset.countP p (signature adj P χ w) =
     (Finset.univ.filter (fun u' : Fin n =>
@@ -1442,7 +1442,7 @@ warmRefine equality ≥ iter[1] equality. -/
 
 /-- **S2.a lifted to any depth ≥ 1.** Iter[k+1] equality between two
 non-v vertices forces matching adj-to-v. -/
-theorem iter_succ_adj_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem iter_succ_adj_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     {v : Fin n} (k : Nat) {w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
     (h : ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) w =
          ((refineStep adj P)^[k + 1]) (individualizedColouring n {v}) u) :
@@ -1458,7 +1458,7 @@ theorem iter_succ_adj_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 
 /-- **warmRefine version of S2.a.** Two non-v vertices in the same
 warmRefine cell share adjacency to v. -/
-theorem warmRefine_adj_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem warmRefine_adj_eq {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     {v : Fin n} {w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
     (h : warmRefine adj P (individualizedColouring n {v}) w =
          warmRefine adj P (individualizedColouring n {v}) u) :
@@ -1478,7 +1478,7 @@ Two non-v vertices in the same warmRefine cell share the J-class
 membership of `relOfPair v ·`. Proper Step 2 partial result: this
 gives the coarsest non-trivial refinement (J vs not-J), one of the
 "layers" that the full Step 2 induction would peel off. -/
-theorem SchurianSchemeGraph.warmRefine_J_eq {n : Nat} (G : SchurianSchemeGraph n)
+private theorem SchurianSchemeGraph.warmRefine_J_eq {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) {v : Fin n} {w u : Fin n} (hwv : w ≠ v) (huv : u ≠ v)
     (h : warmRefine G.toSchemeGraph.adj P (individualizedColouring n {v}) w =
          warmRefine G.toSchemeGraph.adj P (individualizedColouring n {v}) u) :
@@ -1565,7 +1565,7 @@ noncomputable def toSchemeProfile (P : PMatrix n) (v : Fin n)
 result is the concrete, axiom-free replacement for the retired
 `schurian_scheme_profile_exists` placeholder axiom (formerly in
 `ChainDescent.lean §18`). -/
-theorem schurian_scheme_profile_exists_of_step2 (P : PMatrix n) (v : Fin n)
+private theorem schurian_scheme_profile_exists_of_step2 (P : PMatrix n) (v : Fin n)
     (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
       IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
     (hStep2 : Step2_target G P v) :
@@ -1585,7 +1585,7 @@ fully unconditional (modulo `Step2_target`). -/
 def trivialPMatrix (n : Nat) : PMatrix n := fun _ _ => POE.unknown
 
 /-- Every permutation preserves the trivial `PMatrix`. -/
-theorem trivialPMatrix_invariant {n : Nat} {adj : AdjMatrix n}
+private theorem trivialPMatrix_invariant {n : Nat} {adj : AdjMatrix n}
     {π : Equiv.Perm (Fin n)} (_ : IsAut π adj) :
     ∀ x u, trivialPMatrix n (π x) (π u) = trivialPMatrix n x u :=
   fun _ _ => rfl
@@ -1656,7 +1656,7 @@ theorem theorem_2_HOR_concrete {n : Nat} {adj : AdjMatrix n}
 /-- **Theorem 2 specialised to trivial P (most readable form).**
 With the trivial all-`unknown` P matrix, the P-invariance hypothesis
 is automatic; the only remaining open piece is `Step2_target`. -/
-theorem theorem_2_HOR_concrete_trivialP {n : Nat} {adj : AdjMatrix n}
+private theorem theorem_2_HOR_concrete_trivialP {n : Nat} {adj : AdjMatrix n}
     (h : IsSchurianSchemeGraph' adj) (v : Fin n)
     (hStep2 : Step2_target h.G (trivialPMatrix n) v) :
     ∀ w u : Fin n,
@@ -1696,7 +1696,7 @@ def trivialSchurianSchemeGraph : SchurianSchemeGraph 1 where
 
 /-- Step 2 holds trivially on the 1-vertex scheme: any two vertices
 in `Fin 1` are equal, so `vProfile` equality is automatic. -/
-theorem trivialSchurianSchemeGraph_step2 (P : PMatrix 1) (v : Fin 1) :
+private theorem trivialSchurianSchemeGraph_step2 (P : PMatrix 1) (v : Fin 1) :
     Step2_target trivialSchurianSchemeGraph P v := by
   intro w u _
   have hwu : w = u := Fin.ext (by have := w.isLt; have := u.isLt; omega)
@@ -1737,7 +1737,7 @@ rank-1 schurian scheme graph, modulo construction (not done here). -/
 /-- **Step 2 for rank ≤ 1 schurian scheme graphs.** Direct case
 analysis: vertices are either `v` (vProfile 0) or not (vProfile 1
 when rank = 1; rank = 0 forces n ≤ 1 with only one vertex). -/
-theorem step2_of_rank_le_one {n : Nat} (G : SchurianSchemeGraph n)
+private theorem step2_of_rank_le_one {n : Nat} (G : SchurianSchemeGraph n)
     (hrank : G.scheme.rank ≤ 1)
     (P : PMatrix n) (v : Fin n) :
     Step2_target G P v := by
@@ -1817,7 +1817,7 @@ def Step2_at_depth {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
 
 /-- **Step2_at_depth lifts to Step2_target.** For any `k ≤ n`,
 discharge at depth `k` implies the warmRefine-form. -/
-theorem step2_of_step2_at_depth {n : Nat} (G : SchurianSchemeGraph n)
+private theorem step2_of_step2_at_depth {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) (v : Fin n) (k : Nat) (hk : k ≤ n)
     (h : Step2_at_depth G P v k) : Step2_target G P v := by
   intro w u hwu
@@ -1887,7 +1887,7 @@ content; classical but non-trivial. -/
 `Set.ncard {x | p x} = (Finset.univ.filter p).card`. The classical
 choice in `Set.ncard` is invisible because we have a `DecidablePred`,
 and the set-builder collapses to `Finset.univ.filter`. -/
-theorem ncard_setOf_eq_filter_card {n : Nat} (p : Fin n → Prop)
+private theorem ncard_setOf_eq_filter_card {n : Nat} (p : Fin n → Prop)
     [DecidablePred p] :
     {x : Fin n | p x}.ncard = (Finset.univ.filter p).card := by
   rw [Set.ncard_eq_toFinset_card', Set.toFinset_setOf]
@@ -2092,14 +2092,14 @@ def schemePartFrom {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
                     adj.adj u u' = a ∧ P u u' = p}.ncard
 
 /-- `schemePartFrom` is reflexive. -/
-theorem schemePartFrom_refl {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem schemePartFrom_refl {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ₀ : Colouring n) (k : Nat) (w : Fin n) : schemePartFrom adj P χ₀ k w w := by
   induction k with
   | zero => exact rfl
   | succ k ih => exact ⟨ih, fun _ _ _ => rfl⟩
 
 /-- `schemePartFrom` is symmetric. -/
-theorem schemePartFrom_symm {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem schemePartFrom_symm {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ₀ : Colouring n) (k : Nat) {w u : Fin n}
     (h : schemePartFrom adj P χ₀ k w u) : schemePartFrom adj P χ₀ k u w := by
   induction k generalizing w u with
@@ -2109,7 +2109,7 @@ theorem schemePartFrom_symm {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     exact ⟨ih hk, fun a p w' => (hc a p w').symm⟩
 
 /-- `schemePartFrom` is transitive. -/
-theorem schemePartFrom_trans {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem schemePartFrom_trans {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ₀ : Colouring n) (k : Nat) {w u t : Fin n}
     (h1 : schemePartFrom adj P χ₀ k w u) (h2 : schemePartFrom adj P χ₀ k u t) :
     schemePartFrom adj P χ₀ k w t := by
@@ -2234,7 +2234,7 @@ def Step2_converges_at {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
 /-- **Step 2 from convergence + the inductive step.** Given
 `Step2_converges_at G P v k` for some `k ≤ n`, the full
 `Step2_target` holds. -/
-theorem step2_of_converges_at {n : Nat} (G : SchurianSchemeGraph n)
+private theorem step2_of_converges_at {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) (v : Fin n) (k : Nat) (hk : k ≤ n)
     (hconv : Step2_converges_at G P v k) :
     Step2_target G P v := by
@@ -2425,7 +2425,7 @@ to get `Step2_target`, then plug into `theorem_2_HOR_concrete`. -/
 /-- **Step 2 from depth-1 separation.** For any schurian scheme graph
 on `n ≥ 1` vertices satisfying `RelOfPairDetByAdjP`,
 `Step2_target G P v` holds — unconditionally. -/
-theorem step2_of_det {n : Nat} (G : SchurianSchemeGraph n)
+private theorem step2_of_det {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) (v : Fin n)
     (hdet : RelOfPairDetByAdjP G P v) :
     Step2_target G P v :=
@@ -2474,7 +2474,7 @@ def AdjSeparatesRelations {n : Nat} (G : SchemeGraph n) : Prop :=
     ((i ∈ G.J) ↔ (j ∈ G.J)) → i = j
 
 /-- **`AdjSeparatesRelations` implies depth-1 separation.** -/
-theorem relOfPairDetByAdjP_of_adjSeparates {n : Nat}
+private theorem relOfPairDetByAdjP_of_adjSeparates {n : Nat}
     (G : SchurianSchemeGraph n) (hsep : AdjSeparatesRelations G.toSchemeGraph)
     (P : PMatrix n) (v : Fin n) :
     RelOfPairDetByAdjP G P v := by
@@ -2551,7 +2551,7 @@ theorem adjSeparates_of_rank_two_J_singleton {n : Nat}
     omega
 
 /-- **Combined: `rank = 2` + `|J| = 1` ⇒ depth-1 separation.** -/
-theorem relOfPairDetByAdjP_of_rank_two_J_singleton {n : Nat}
+private theorem relOfPairDetByAdjP_of_rank_two_J_singleton {n : Nat}
     (G : SchurianSchemeGraph n) (hrank : G.scheme.rank = 2)
     (hJ : G.toSchemeGraph.J.card = 1)
     (P : PMatrix n) (v : Fin n) :
@@ -2622,7 +2622,7 @@ def Depth2Det {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
 /-- **Depth-1 separation is a special case of depth-2 separation.**
 `RelOfPairDetByAdjP` ignores the block-degree counts, so it trivially
 implies `Depth2Det`. Confirms depth-2 subsumes the depth-1 coverage. -/
-theorem det2_of_det {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem det2_of_det {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) (hdet : RelOfPairDetByAdjP G P v) :
     Depth2Det G P v := by
   intro w u hwv huv hadj hP _hcount
@@ -2663,7 +2663,7 @@ theorem step2_converges_at_two_of_det2 {n : Nat}
 to `Step2_target` via `step2_of_converges_at` (depth `2 ≤ n`). The
 `n < 2` case is vacuous: `v : Fin n` forces `n = 1`, where `Fin n` is a
 subsingleton and `vProfile` is constant. -/
-theorem step2_of_det2 {n : Nat} (G : SchurianSchemeGraph n)
+private theorem step2_of_det2 {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) (v : Fin n) (hdet2 : Depth2Det G P v) :
     Step2_target G P v := by
   by_cases hn : 2 ≤ n
@@ -2725,7 +2725,7 @@ there is at most one non-edge relation and the hypothesis is vacuous. -/
 automorphism mapping `w` to `u` puts them in the same `schemePart_at k`
 class (`k ≤ n`): orbit ⟹ equal `warmRefine` (`subset_warmRefine`) ⟹
 equal iter[k] ⟹ `schemePart_at k`. -/
-theorem schemePart_at_of_orbit {n : Nat} (G : SchurianSchemeGraph n)
+private theorem schemePart_at_of_orbit {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) (v : Fin n) {k : Nat} (hk : k ≤ n) {w u : Fin n}
     (h : OrbitPartition G.toSchemeGraph.adj P {v} w u) :
     schemePart_at G P v k w u :=
@@ -2736,7 +2736,7 @@ theorem schemePart_at_of_orbit {n : Nat} (G : SchurianSchemeGraph n)
 /-- **vProfile equality ⟹ OrbitPartition** (given `P`-invariance).
 Schurian Step 1 supplies a v-fixing graph automorphism; `P`-invariance
 upgrades it to a `P`-preserving one. -/
-theorem orbit_of_vProfile_eq {n : Nat} (G : SchurianSchemeGraph n)
+private theorem orbit_of_vProfile_eq {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) (v : Fin n)
     (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
       IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
@@ -2753,7 +2753,7 @@ theorem orbit_of_vProfile_eq {n : Nat} (G : SchurianSchemeGraph n)
 finitely-many `POE` values of `P x ·`. Used to drop the `P`-component
 from a depth-2 block-degree count, recovering a pure intersection
 number. -/
-theorem ncard_eq_sum_POE {n : Nat} (P : PMatrix n) (x : Fin n)
+private theorem ncard_eq_sum_POE {n : Nat} (P : PMatrix n) (x : Fin n)
     (q : Fin n → Prop) [DecidablePred q] :
     {u' : Fin n | q u'}.ncard
       = ∑ p : POE, {u' : Fin n | q u' ∧ P x u' = p}.ncard := by
@@ -2962,7 +2962,7 @@ def RelIsolatedAt {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
 
 /-- **The ⊇ direction, general and free.** Same relation with `v` ⟹
 same `schemePart_at k` class (via the orbit chain). -/
-theorem vProfile_imp_schemePart_at {n : Nat} (G : SchurianSchemeGraph n)
+private theorem vProfile_imp_schemePart_at {n : Nat} (G : SchurianSchemeGraph n)
     (P : PMatrix n) (v : Fin n)
     (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
       IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
@@ -2972,7 +2972,7 @@ theorem vProfile_imp_schemePart_at {n : Nat} (G : SchurianSchemeGraph n)
   schemePart_at_of_orbit G P v hk (orbit_of_vProfile_eq G P v hP_invariant h)
 
 /-- `schemePart_at` is downward-monotone in the depth. -/
-theorem schemePart_at_le {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem schemePart_at_le {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) {j k : Nat} (hjk : j ≤ k) {w u : Fin n}
     (h : schemePart_at G P v k w u) : schemePart_at G P v j w u := by
   induction k with
@@ -2988,7 +2988,7 @@ theorem schemePart_at_le {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
 `#{u' : (v,u') ∈ R_l ∧ (z,u') ∈ R_m}` is the structure constant
 `p^{relOfPair v z}_{l,m}`. Generalises the `hcommon` step of
 `depth2Det_of_intersectionSeparates`. -/
-theorem AssociationScheme.relCommon_eq_intersectionNumber {n : Nat}
+private theorem AssociationScheme.relCommon_eq_intersectionNumber {n : Nat}
     (S : AssociationScheme n) (v z : Fin n) (l m : Fin (S.rank + 1)) :
     {u' : Fin n | S.relOfPair v u' = l ∧ S.relOfPair z u' = m}.ncard
       = S.intersectionNumber l m (S.relOfPair v z) := by
@@ -3099,7 +3099,7 @@ theorem relIsolatedAt_one_j0 {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix 
 
 /-- **The diagonal relation is isolated at every depth.** `R_0` is the
 singleton `{v}`, which is always its own `schemePart_at k` class. -/
-theorem relIsolatedAt_zero {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem relIsolatedAt_zero {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n) (k : Nat) : RelIsolatedAt G P v k 0 := by
   intro w u hw0
   have hwv : w = v := ((G.scheme.relOfPair_eq_zero_iff v w).mp hw0).symm
@@ -3115,7 +3115,7 @@ theorem relIsolatedAt_zero {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
 
 /-- **Isolation is upward-closed in depth.** A relation isolated at
 depth `k` stays isolated at every depth `k ≤ j ≤ n`. -/
-theorem relIsolatedAt_mono {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
+private theorem relIsolatedAt_mono {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n)
     (v : Fin n)
     (hP_invariant : ∀ {π : Equiv.Perm (Fin n)},
       IsAut π G.toSchemeGraph.adj → ∀ x u, P (π x) (π u) = P x u)
@@ -3307,16 +3307,16 @@ noncomputable def occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) 
     Finset (Fin (G.scheme.rank + 1)) :=
   Finset.univ.image (fun w => G.scheme.relOfPair v w)
 
-theorem mem_occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+private theorem mem_occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
     {l : Fin (G.scheme.rank + 1)} :
     l ∈ occursFromV G v ↔ ∃ w, G.scheme.relOfPair v w = l := by
   simp only [occursFromV, Finset.mem_image, Finset.mem_univ, true_and]
 
-theorem zero_mem_occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) :
+private theorem zero_mem_occursFromV {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) :
     (0 : Fin (G.scheme.rank + 1)) ∈ occursFromV G v :=
   (mem_occursFromV G v).mpr ⟨v, G.scheme.relOfPair_self v⟩
 
-theorem occursFromV_card_le {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) :
+private theorem occursFromV_card_le {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n) :
     (occursFromV G v).card ≤ n := by
   refine le_trans Finset.card_image_le ?_
   rw [Finset.card_univ, Fintype.card_fin]
@@ -3340,7 +3340,7 @@ noncomputable def isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n
     (Classical.decPred _) (occursFromV G v)
 
 /-- Membership in one closure round: already isolated, or newly pinned. -/
-theorem mem_isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+private theorem mem_isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
     (j0 : Fin (G.scheme.rank + 1)) {Iso : Finset (Fin (G.scheme.rank + 1))}
     {i : Fin (G.scheme.rank + 1)} :
     i ∈ isolationStep G v j0 Iso ↔
@@ -3349,14 +3349,14 @@ theorem mem_isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
   rw [isolationStep, Finset.mem_union, Finset.mem_filter]
 
 /-- The closure round is **extensive** — the input drives the engine. -/
-theorem subset_isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
+private theorem subset_isolationStep {n : Nat} (G : SchurianSchemeGraph n) (v : Fin n)
     (j0 : Fin (G.scheme.rank + 1)) (Iso : Finset (Fin (G.scheme.rank + 1))) :
     Iso ⊆ isolationStep G v j0 Iso :=
   Finset.subset_union_left
 
 /-- The closure round **preserves the `occursFromV` bound** — so the generic
 engine saturates within `occursFromV.card ≤ n` steps. -/
-theorem isolationStep_subset_occursFromV {n : Nat} (G : SchurianSchemeGraph n)
+private theorem isolationStep_subset_occursFromV {n : Nat} (G : SchurianSchemeGraph n)
     (v : Fin n) (j0 : Fin (G.scheme.rank + 1))
     {Iso : Finset (Fin (G.scheme.rank + 1))} (h : Iso ⊆ occursFromV G v) :
     isolationStep G v j0 Iso ⊆ occursFromV G v := by
@@ -3500,7 +3500,7 @@ Leg A's support induction. -/
 matching constraints, so it can only *shrink* the set of rival relations — if
 `i` was uniquely pinned by `Iso1`, it stays uniquely pinned by any `Iso2 ⊇
 Iso1`. The lemma that lets a graded chain feed the closure's growing fixpoint. -/
-theorem IsoPinned.mono {n : Nat} {G : SchurianSchemeGraph n}
+private theorem IsoPinned.mono {n : Nat} {G : SchurianSchemeGraph n}
     {j0 i : Fin (G.scheme.rank + 1)} {Iso1 Iso2 : Finset (Fin (G.scheme.rank + 1))}
     (h : IsoPinned G j0 i Iso1) (hsub : Iso1 ⊆ Iso2) : IsoPinned G j0 i Iso2 := by
   obtain ⟨hne, hsep⟩ := h
@@ -3718,7 +3718,7 @@ def SchemeAutGroup : Subgroup (Equiv.Perm (Fin n)) where
 /-- The `schemeEquiv I`-class of `a` moves under `g ∈ SchemeAutGroup` to the class of `g • a`:
 `g • {y | schemeEquiv I a y} = {y | schemeEquiv I (g • a) y}`. The key step is
 `schemeEquiv_isSchemeAut` (the block system is Aut-invariant). -/
-theorem smul_schemeEquiv_class {I : Finset (Fin (S.rank + 1))} (g : S.SchemeAutGroup) (a : Fin n) :
+private theorem smul_schemeEquiv_class {I : Finset (Fin (S.rank + 1))} (g : S.SchemeAutGroup) (a : Fin n) :
     g • {y | S.schemeEquiv I a y} = {y | S.schemeEquiv I (g • a) y} := by
   ext y
   simp only [Set.mem_smul_set, Set.mem_setOf_eq]
