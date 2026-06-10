@@ -178,15 +178,15 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | `iterate_refineStep_refines` | 187-195 | warm refinement monotone in the initial colouring's partition order. | — |
 | `ResidualAut.mul` | 500-510 | The residual group is closed under composition: composing two `P`-preserving automorphisms fixing `S` pointwise yields another. | — |
-| `visiblyRecoverable_bound_mono` | 2355-2359 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
-| `symmetryOnlyStep_of_cellsAreOrbits` | 2420-2430 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
-| `findable_of_findableWithin` | 2527-2536 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
-| `soStep_extensive` | 2620-2624 | The symmetry-only closure round is extensive — it only ever adds the chosen vertex. | — |
-| `soStep_pos` | 2637-2640 | When a symmetry-only step exists, the closure round takes it (inserts the chosen vertex). | — |
-| `movedAt_not_mem` | 2677-2679 | A moved vertex is not committed (`v ∉ S`), since a residual automorphism fixes `S` pointwise. | — |
-| `movedStep_extensive` | 2698-2701 | The moved-vertex closure round is extensive. | — |
-| `movedStep_pos` | 2703-2705 | When a moved vertex exists, the closure round takes it. | — |
-| `individualizedColouring_singleton_sep` | 3245-3252 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
+| `visiblyRecoverable_bound_mono` | 2288-2292 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
+| `symmetryOnlyStep_of_cellsAreOrbits` | 2353-2363 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
+| `findable_of_findableWithin` | 2460-2469 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
+| `soStep_extensive` | 2553-2557 | The symmetry-only closure round is extensive — it only ever adds the chosen vertex. | — |
+| `soStep_pos` | 2570-2573 | When a symmetry-only step exists, the closure round takes it (inserts the chosen vertex). | — |
+| `movedAt_not_mem` | 2610-2612 | A moved vertex is not committed (`v ∉ S`), since a residual automorphism fixes `S` pointwise. | — |
+| `movedStep_extensive` | 2631-2634 | The moved-vertex closure round is extensive. | — |
+| `movedStep_pos` | 2636-2638 | When a moved vertex exists, the closure round takes it. | — |
+| `individualizedColouring_singleton_sep` | 3178-3185 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
 | `affV_card` | 552-555 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
 | `instNonemptyAffV` | 723-727 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
 ## ChainDescent/CascadeOracle.lean

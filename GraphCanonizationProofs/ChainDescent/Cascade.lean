@@ -1842,7 +1842,7 @@ theorem cfi_card_stabilizerAt_eq_prod (h : IsCFI' adj) (h_odd : h.OddDegree)
   rw [hge] at hcard
   rwa [cfi_closure_eq_stabilizerAt h hP hgen] at hcard
 
-/-! ### Part A (Stage A2-complete) — CFI-cov.4 (the gauge nut): `ResidualInvolutive` via P-separation
+/-! ### Part A (Stage A2-complete) — CFI-cov.4 (the gauge nut): `ResidualInvolutive` via gadget-separation
 
 The de-classed coverage (`coversOrbits_of_residualInvolutive`) reduced the CFI harvest to the **faithful**
 hypothesis `ResidualInvolutive adj P S` (the residual is exponent-2), *strictly weaker* than gauge-generation
@@ -1852,44 +1852,22 @@ distinguishes gadgets (the `Aut(H)` factor killed). That regime is exactly the d
 (calculator §7): resolve the cascading base layer first, leaving the gauge `Z₂^β` as a clean exponent-2
 residual.
 
-**The key move (Lemma A): gadget-preservation comes from `P`-preservation, not from a structural recovery
-argument.** A residual automorphism fixes the committed set `S` pointwise *and* preserves `P`, so it
-preserves each vertex's `P`-relations to `S` (`P (g x) s = P (g x)(g s) = P x s`). If those relations
-determine the gadget (`PSeparatesGadgets`), `g` fixes gadgets — sidestepping the subtle "every CFI
-automorphism preserves gadgets" (which would need a graph-recovery proof). Full plan:
+**The key move (Lemma A): gadget-preservation comes from refinement-cell separation, not from a structural
+recovery argument.** A residual automorphism fixes the committed set `S` pointwise *and* preserves `(adj, P)`,
+so it preserves the `warmRefine` partition of the `S`-individualized colouring. If the cells determine the
+gadget (`CellSeparatesGadgets`), `g` fixes gadgets — sidestepping the subtle "every CFI automorphism
+preserves gadgets" (which would need a graph-recovery proof). Full plan:
 [`docs/chain-descent-cfi-gauge-discharge-plan.md`](../../../docs/chain-descent-cfi-gauge-discharge-plan.md). -/
 
 /-- The **gadget (base vertex) of a CFI vertex** `x : Fin n`, through the CFI labelling `h.e`. -/
 def gadgetOf (h : IsCFI' adj) (x : Fin n) : Fin h.m := h.H.gadget (h.e x)
 
-/-- **`P` separates gadgets** — the honest "base layer resolved" hypothesis. The committed set `S`, through
-the partial order `P` it induces, distinguishes gadgets: if two vertices have the same `P`-relations to every
-committed vertex, they live in the same gadget. This is what makes a residual automorphism (which preserves
-those relations) fix gadgets, with no structural gadget-recovery argument. -/
-def PSeparatesGadgets (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (h : IsCFI' adj) : Prop :=
-  ∀ x y : Fin n, (∀ s ∈ S, P x s = P y s) → gadgetOf h x = gadgetOf h y
-
-/-- **Lemma A — gadget-preservation from `P`-separation.** A residual automorphism `g` (fixing the committed
-set `S` pointwise and preserving `P`) preserves each vertex's `P`-relations to `S`
-(`P (g x) s = P (g x)(g s) = P x s`), so under `PSeparatesGadgets` it fixes every gadget:
-`gadgetOf (g x) = gadgetOf x`. The reduction that replaces the subtle structural "CFI automorphisms preserve
-gadgets" with an honest hypothesis on `P` (the base-resolved regime). -/
-theorem gadgetPreserving_of_pSeparates (h : IsCFI' adj) {S : Finset (Fin n)}
-    {g : Equiv.Perm (Fin n)} (hg : ResidualAut adj P S g)
-    (hsep : PSeparatesGadgets adj P S h) :
-    ∀ x, gadgetOf h (g x) = gadgetOf h x := by
-  intro x
-  refine hsep (g x) x (fun s hs => ?_)
-  have hgs : g s = s := hg.2.2 s hs
-  have hP : P (g x) (g s) = P x s := hg.2.1 x s
-  rwa [hgs] at hP
-
 /-- **`warmRefine` separates gadgets** — the colour-model "base layer resolved" hypothesis, matching the
-recovery framework (fresh-colour individualization of `S`) rather than the `P`-relation form
-`PSeparatesGadgets`. Two vertices in the same `warmRefine` cell (after individualizing `S`) live in the
-same gadget. This is the form the descent's actual mechanism can discharge: with the recovery framework's
-trivial `P`, `PSeparatesGadgets` is vacuously *false* (no `P`-relation distinguishes anything), but the
-`warmRefine` colouring does the separating — and the cascade discretizes it at a gadget-resolving `S`. -/
+recovery framework (fresh-colour individualization of `S`). Two vertices in the same `warmRefine` cell (after
+individualizing `S`) live in the same gadget. This is the form the descent's actual mechanism can discharge:
+with the recovery framework's trivial `P`, a `P`-relation form of this hypothesis would be vacuously *false*
+(no `P`-relation distinguishes anything), but the `warmRefine` colouring does the separating — and the
+cascade discretizes it at a gadget-resolving `S`. -/
 def CellSeparatesGadgets (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (h : IsCFI' adj) : Prop :=
   ∀ x y : Fin n,
     warmRefine adj P (individualizedColouring n S) x
@@ -1899,10 +1877,9 @@ def CellSeparatesGadgets (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)
 /-- **Lemma A, colour model — gadget-preservation from cell-separation.** A residual automorphism `g`
 preserves `(adj, P)` and fixes `S` pointwise, so it preserves the `warmRefine` partition of the
 `S`-individualized colouring (`warmRefine (g x) = warmRefine x`, via `warmRefine_invariant_of_isAut` +
-`individualizedColouring_invariant`); under `CellSeparatesGadgets` it therefore fixes every gadget. The
-colour-model counterpart of `gadgetPreserving_of_pSeparates`, dischargeable by the cascade (`warmRefine`
-discreteness at a gadget-resolving `S`) where the `P`-relation form is not (trivial `P` ⟹ that form
-vacuously false). -/
+`individualizedColouring_invariant`); under `CellSeparatesGadgets` it therefore fixes every gadget. Lemma A
+of the gauge-nut discharge, dischargeable by the cascade (`warmRefine` discreteness at a gadget-resolving
+`S`) where a `P`-relation form is not (trivial `P` ⟹ that form vacuously false). -/
 theorem gadgetPreserving_of_cellSeparates (h : IsCFI' adj) {S : Finset (Fin n)}
     {g : Equiv.Perm (Fin n)} (hg : ResidualAut adj P S g)
     (hsep : CellSeparatesGadgets adj P S h) :
@@ -2113,8 +2090,8 @@ theorem mulSelf_subset (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
 
 /-- **Lemma B — a gadget-fixing CFI automorphism is an involution.** `IsAut g adj` together with
 gadget-preservation (`hfix`) forces `g * g = 1`: by the destructor every vertex is a subset (B3) or endpoint
-(B2) vertex, and `g²` fixes both. Combined with Lemma A (`gadgetPreserving_of_pSeparates`), this discharges
-`ResidualInvolutive` for CFI in the base-resolved (`PSeparatesGadgets`) regime. -/
+(B2) vertex, and `g²` fixes both. Combined with Lemma A (`gadgetPreserving_of_cellSeparates`), this discharges
+`ResidualInvolutive` for CFI in the base-resolved (gadget-separating) regime. -/
 theorem cfiAut_gadgetFixing_mul_self (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
     (hAut : IsAut g adj) (hfix : ∀ x, gadgetOf h (g x) = gadgetOf h x) :
     g * g = 1 := by
@@ -2124,23 +2101,12 @@ theorem cfiAut_gadgetFixing_mul_self (h : IsCFI' adj) {g : Equiv.Perm (Fin n)}
   · exact mulSelf_subset h hAut hfix hS
   · exact mulSelf_endpoint h hAut hfix hw b
 
-/-- **CFI-cov.4 capstone — `ResidualInvolutive` for CFI in the base-resolved regime (Lemma A + Lemma B).**
-Where the committed `P` separates gadgets (`PSeparatesGadgets`, the `Aut(H)` factor killed), every residual
-automorphism fixes gadgets (Lemma A, `gadgetPreserving_of_pSeparates`) and a gadget-fixing CFI automorphism
-is an involution (Lemma B, `cfiAut_gadgetFixing_mul_self`), so the residual is exponent-2. This is the CFI
-witness the de-classed `coversOrbits_of_residualInvolutive` consumes — discharged with **no** structure
-theorem, no `Φ(σ)` lift, no gauge-flip identification. (The remaining input is a base sequence from `S`, which
-feeds the harvest completeness + order.) -/
-theorem cfi_residualInvolutive (h : IsCFI' adj) {S : Finset (Fin n)}
-    (hsep : PSeparatesGadgets adj P S h) : ResidualInvolutive adj P S :=
-  fun _g hg => cfiAut_gadgetFixing_mul_self h hg.1 (gadgetPreserving_of_pSeparates h hg hsep)
-
 /-! #### CFI-cov.4 — the harvest wiring at a base-resolved `S`
 
-With `cfi_residualInvolutive` supplying the exponent-2 hypothesis, the de-classed coverage discharges the
+With the exponent-2 hypothesis supplied (`cfi_residualInvolutive_cell`), the de-classed coverage discharges the
 cross-branch harvest at any base-resolved `S` — *provided a base sequence from `S`*. The cascade gives a base
 at `allSeeds` (`theorem_1_HOR_cfi_oddDeg`); since `IsBase` is upward-closed, `(allSeeds \ S).toList` is a base
-sequence from `S`. The headline is at a **nonempty** `S` (`PSeparatesGadgets` at `∅` is vacuously false), so
+sequence from `S`. The headline is at a **nonempty** `S` (gadget-separation at `∅` is vacuously false), so
 the order is the gauge-layer residual order, matching the decomposability picture. -/
 
 /-- **`IsBase` is upward-closed.** Individualizing more can only shrink the residual, so a base stays a base:
@@ -2165,53 +2131,21 @@ theorem cfi_exists_base_seq_from (h : IsCFI' adj) (h_odd : h.OddDegree) (S : Fin
   · exact Finset.mem_union_left _ hxS
   · exact Finset.mem_union_right _ (Finset.mem_sdiff.mpr ⟨hx, hxS⟩)
 
-/-- **CFI cross-branch harvest completeness in the base-resolved regime.** Where `P` separates gadgets at a
-committed set `S` (`PSeparatesGadgets`, so the residual is the exponent-2 gauge group), the closure of the
-harvested involutive residual automorphisms *is* the residual: `closure {g | ResidualAut adj P S g ∧ g²=1} =
-StabilizerAt adj P S`. Via `cfi_residualInvolutive` + the de-classed `closure_eq_stabilizerAt_of_residualInvolutive`
-over the base sequence `cfi_exists_base_seq_from` — **no** structure theorem, no `Φ(σ)` lift. -/
-theorem cfi_closure_eq_stabilizerAt_of_pSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
-    {S : Finset (Fin n)} (hsep : PSeparatesGadgets adj P S h) :
-    Subgroup.closure {g | ResidualAut adj P S g ∧ g * g = 1} = StabilizerAt adj P S := by
-  obtain ⟨bs, hbase⟩ := cfi_exists_base_seq_from (P := P) h h_odd S
-  have hgensAt : gensAt adj P {g | ResidualAut adj P S g ∧ g * g = 1} S
-               = {g | ResidualAut adj P S g ∧ g * g = 1} :=
-    Set.Subset.antisymm (fun g hg => hg.1) (fun g hg => ⟨hg, mem_stabilizerAt.mpr hg.1⟩)
-  have hmain := stabilizerAt_eq_closure_gensAt_of_coversOrbits (gens := {g | ResidualAut adj P S g ∧ g * g = 1})
-    bs (coversOrbits_of_residualInvolutive bs (cfi_residualInvolutive h hsep)
-      (fun g hg hginv => ⟨hg, hginv⟩) hbase)
-  rwa [hgensAt] at hmain
-
-/-- **`|Aut_S^P| = ∏ basic-orbit sizes` in the base-resolved regime.** Where `P` separates gadgets at `S`,
-the order of the residual group is the basic-orbit-size product along the CFI base sequence — the gauge-layer
-`Order = ∏ OrbitSize` of `PermutationGroup.cs`, computed from the folded involutive generators. The genuine
-de-classed payoff (needs the full coverage chain). -/
-theorem cfi_card_stabilizerAt_of_pSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
-    {S : Finset (Fin n)} (hsep : PSeparatesGadgets adj P S h) :
-    ∃ bs : List (Fin n), Nat.card (StabilizerAt adj P S) = orbitSizeProd adj P bs S := by
-  obtain ⟨bs, hbase⟩ := cfi_exists_base_seq_from (P := P) h h_odd S
-  refine ⟨bs, ?_⟩
-  have hcov := coversOrbits_of_residualInvolutive (gens := {g | ResidualAut adj P S g ∧ g * g = 1})
-    bs (cfi_residualInvolutive h hsep) (fun g hg hginv => ⟨hg, hginv⟩) hbase
-  have hcard := card_closure_gensAt_eq_prod_of_coversOrbits bs hcov
-  rwa [stabilizerAt_eq_closure_gensAt_of_coversOrbits bs hcov] at hcard
-
 /-! #### CFI-cov.4 — the harvest wiring on the colour model (`CellSeparatesGadgets`)
 
-The `PSeparatesGadgets` versions above are stated over `P`-relations, but the descent's CFI recovery runs on
-trivial `P` + colour individualization, where `PSeparatesGadgets` is **vacuously false** (no `P`-relation
-distinguishes anything, and it is vacuous at `S=∅`). The colour-model `CellSeparatesGadgets` is the
-dischargeable form — separation lives in the `warmRefine` colouring, which the cascade discretizes. These
-re-wire `cfi_residualInvolutive` / `cfi_closure_eq_stabilizerAt` / `cfi_card_stabilizerAt` onto it, via the
-colour-model Lemma A (`gadgetPreserving_of_cellSeparates`); the existing Lemma B
-(`cfiAut_gadgetFixing_mul_self`) is reused verbatim (it is independent of how gadget-preservation is obtained).
-They **supersede** the `pSeparates` versions for consuming the descent's actual mechanism. -/
+The descent's CFI recovery runs on trivial `P` + colour individualization, where a `P`-relation form of
+gadget-separation would be **vacuously false** (no `P`-relation distinguishes anything, and vacuous at `S=∅`).
+The colour-model `CellSeparatesGadgets` is the dischargeable form — separation lives in the `warmRefine`
+colouring, which the cascade discretizes — via the colour-model Lemma A (`gadgetPreserving_of_cellSeparates`);
+Lemma B (`cfiAut_gadgetFixing_mul_self`) is reused verbatim (it is independent of how gadget-preservation is
+obtained). The capstones below (`cfi_residualInvolutive_cell` / `cfi_closure_eq_stabilizerAt_of_cellSeparates`
+/ `cfi_card_stabilizerAt_of_cellSeparates`) consume the descent's actual mechanism. -/
 
 /-- **CFI-cov.4 capstone, colour model — `ResidualInvolutive` from cell-separation (Lemma A colour + Lemma B).**
 Where `warmRefine` separates gadgets at `S` (`CellSeparatesGadgets`), every residual automorphism fixes gadgets
 (`gadgetPreserving_of_cellSeparates`) and a gadget-fixing CFI automorphism is an involution
-(`cfiAut_gadgetFixing_mul_self`), so the residual is exponent-2. The dischargeable counterpart of
-`cfi_residualInvolutive` (which keys on the vacuous-on-trivial-`P` `PSeparatesGadgets`). -/
+(`cfiAut_gadgetFixing_mul_self`), so the residual is exponent-2. The dischargeable form keyed on the
+`warmRefine` colouring (a `P`-relation form would be vacuously false on the descent's trivial `P`). -/
 theorem cfi_residualInvolutive_cell (h : IsCFI' adj) {S : Finset (Fin n)}
     (hsep : CellSeparatesGadgets adj P S h) : ResidualInvolutive adj P S :=
   fun _g hg => cfiAut_gadgetFixing_mul_self h hg.1 (gadgetPreserving_of_cellSeparates h hg hsep)
@@ -2227,8 +2161,8 @@ theorem cellSeparatesGadgets_of_discrete (h : IsCFI' adj) {S : Finset (Fin n)}
 
 /-- **CFI cross-branch harvest completeness, colour model.** Where `warmRefine` separates gadgets at `S`, the
 closure of the harvested involutive residual automorphisms *is* the residual:
-`closure {g | ResidualAut adj P S g ∧ g²=1} = StabilizerAt adj P S`. Colour-model counterpart of
-`cfi_closure_eq_stabilizerAt_of_pSeparates`, dischargeable by the cascade (`cellSeparatesGadgets_of_discrete`). -/
+`closure {g | ResidualAut adj P S g ∧ g²=1} = StabilizerAt adj P S`. Dischargeable by the cascade
+(`cellSeparatesGadgets_of_discrete`). -/
 theorem cfi_closure_eq_stabilizerAt_of_cellSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
     {S : Finset (Fin n)} (hsep : CellSeparatesGadgets adj P S h) :
     Subgroup.closure {g | ResidualAut adj P S g ∧ g * g = 1} = StabilizerAt adj P S := by
@@ -2242,8 +2176,7 @@ theorem cfi_closure_eq_stabilizerAt_of_cellSeparates (h : IsCFI' adj) (h_odd : h
   rwa [hgensAt] at hmain
 
 /-- **`|Aut_S^P| = ∏ basic-orbit sizes`, colour model.** Where `warmRefine` separates gadgets at `S`, the
-residual order is the basic-orbit-size product along the CFI base sequence. Colour-model counterpart of
-`cfi_card_stabilizerAt_of_pSeparates`. -/
+residual order is the basic-orbit-size product along the CFI base sequence. -/
 theorem cfi_card_stabilizerAt_of_cellSeparates (h : IsCFI' adj) (h_odd : h.OddDegree)
     {S : Finset (Fin n)} (hsep : CellSeparatesGadgets adj P S h) :
     ∃ bs : List (Fin n), Nat.card (StabilizerAt adj P S) = orbitSizeProd adj P bs S := by
