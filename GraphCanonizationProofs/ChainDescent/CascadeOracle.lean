@@ -236,7 +236,7 @@ theorem orbitRecoverable_of_cascade {n : Nat} {adj : AdjMatrix n} {P : PMatrix n
 
 /-- **CFI instance** (axiom-free, OddDegree). Orbits are recoverable at depth
 `≤ cfi_depth_bound h`, via `theorem_1_HOR_cfi_oddDeg`. -/
-theorem orbitRecoverable_cfi {n : Nat} {adj : AdjMatrix n}
+private theorem orbitRecoverable_cfi {n : Nat} {adj : AdjMatrix n}
     (h : IsCFI' adj) (h_odd : h.OddDegree) (P : PMatrix n) :
     ∃ S : Finset (Fin n), S.card ≤ cfi_depth_bound h ∧
       Discrete (warmRefine adj P (individualizedColouring n S)) ∧
@@ -808,7 +808,7 @@ def RecoverableByDepth {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 /-- **Cascade-class foundation.** A graph cascading at depth `k` is orbit-recoverable
 by depth `k`: refinement computes orbits at a set of size `≤ k`. Re-export of
 `theorem_1_HOR_at_depth` through the `CellsAreOrbits` decomposition. -/
-theorem recoverableByDepth_of_cascade {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+private theorem recoverableByDepth_of_cascade {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
     {k : Nat} (h : CascadesAt adj P k) : RecoverableByDepth adj P k := by
   obtain ⟨S, hcard, _, hrec⟩ := orbitRecoverable_of_cascade h
   exact ⟨S, hcard, orbitRecoverableAt_iff_cellsAreOrbits.mp hrec⟩
@@ -1112,7 +1112,7 @@ noncomputable def matchOracle {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
 /-- **The oracle fires once the constructed perm passes the checks.** A reusable evaluation lemma:
 given the discreteness proofs and the four verification facts about `colourMatchPerm`, `matchOracle`
 returns `some`. The engine of the completeness proof. -/
-theorem matchOracle_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+private theorem matchOracle_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
     {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
     {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
     (hv : Discrete (warmRefine adj chain.P (indivWithRep n chain.D v)))
@@ -1452,7 +1452,7 @@ noncomputable def matchOracleSet {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n
 
 /-- Evaluation lemma: given discreteness + the four verification facts about `colourMatchPermSet`,
 `matchOracleSet` fires. The engine of the completeness proof. -/
-theorem matchOracleSet_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+private theorem matchOracleSet_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
     {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
     {expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → Finset (Fin n)}
     {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
@@ -1699,7 +1699,7 @@ def indivWithSeq (n : Nat) (S : Finset (Fin n)) (rs : List (Fin n)) : Colouring 
   fun v => if v ∈ rs then n + 1 + rs.idxOf v else individualizedColouring n S v
 
 /-- `indivWithRep` (M-B) is the singleton-sequence case (`n+1+0 = n+1`). -/
-theorem indivWithRep_eq_indivWithSeq_singleton {n : Nat} (S : Finset (Fin n)) (r : Fin n) :
+private theorem indivWithRep_eq_indivWithSeq_singleton {n : Nat} (S : Finset (Fin n)) (r : Fin n) :
     indivWithRep n S r = indivWithSeq n S [r] := by
   funext v
   simp only [indivWithRep, indivWithSeq, List.mem_singleton]
@@ -1865,7 +1865,7 @@ noncomputable def colourMatchPermSeq {n : Nat} (adj : AdjMatrix n) (P : PMatrix 
 /-- **`colourMatchPermSeq` is the orbit automorphism, at a recoverable level-coloured footprint.** Same
 shape as `colourMatchPermSet_eq_of_orbit` (`rankPerm_inv_mul_eq_of_match` ← `vertexRank_comp` +
 `colourMatchSeq_complete`), now over a level-coloured sequence whose discreteness is A1-reducible. -/
-theorem colourMatchPermSeq_eq_of_orbit {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+private theorem colourMatchPermSeq_eq_of_orbit {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
     {S : Finset (Fin n)} {rs₁ rs₂ : List (Fin n)} {g : Equiv.Perm (Fin n)}
     (h₁ : Discrete (warmRefine adj P (indivWithSeq n S rs₁)))
     (h₂ : Discrete (warmRefine adj P (indivWithSeq n S rs₂)))
@@ -1923,7 +1923,7 @@ noncomputable def matchOracleSeq {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n
     else none
 
 /-- Evaluation lemma: discreteness + the four checks on `colourMatchPermSeq` ⟹ `matchOracleSeq` fires. -/
-theorem matchOracleSeq_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
+private theorem matchOracleSeq_fires {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
     {χι₀ : Colouring n} {sel : Colouring n → Finset (Fin n)}
     {expand : ∀ {k : Nat}, SpineChain adj P₀ χι₀ sel k → Fin n → List (Fin n)}
     {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) {v w : Fin n}
@@ -2063,7 +2063,7 @@ harvest. This bounds the discretizing oracle's reach to exactly the single-rep /
 position) being stuck. -/
 
 /-- A list equal to its own image under `g` is fixed pointwise by `g`. -/
-theorem fixedPointwise_of_map_self {n : Nat} {g : Equiv.Perm (Fin n)} :
+private theorem fixedPointwise_of_map_self {n : Nat} {g : Equiv.Perm (Fin n)} :
     ∀ (l : List (Fin n)), l.map g = l → ∀ x ∈ l, g x = x
   | [], _, x, hx => by simp at hx
   | y :: ys, h, x, hx => by

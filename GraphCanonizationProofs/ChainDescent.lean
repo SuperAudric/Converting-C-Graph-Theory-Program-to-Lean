@@ -156,7 +156,7 @@ def applyGuess {n : Nat} (P : PMatrix n) (a b : Fin n) (dir : POE) : PMatrix n :
 after applying `(a, b, dir)` to the original. The key structural fact
 linking the two guess directions through σ. Requires `a ≠ b` so the two
 guess-position branches don't collide on the diagonal. -/
-theorem applyGuess_swap {n : Nat} (P : PMatrix n) (a b : Fin n) (hab : a ≠ b)
+private theorem applyGuess_swap {n : Nat} (P : PMatrix n) (a b : Fin n) (hab : a ≠ b)
     (dir : POE) :
     PMatrix.swap (applyGuess P a b dir) =
       applyGuess (PMatrix.swap P) a b (POE.swap dir) := by
@@ -498,7 +498,7 @@ singleton-restricted lemma is left as follow-up.
 -/
 
 /-- Iterating `closeStep` from one of its fixpoints stays at that fixpoint. -/
-theorem iterate_closeStep_fix {n : Nat} (M : PMatrix n)
+private theorem iterate_closeStep_fix {n : Nat} (M : PMatrix n)
     (hM : closeStep M = M) : ∀ k, (closeStep^[k]) M = M := by
   intro k
   induction k with
@@ -617,7 +617,7 @@ direction are `a` and `b` — and those are quarantined as singletons.
 
 /-- One refinement round preserves a singleton: if no vertex shares `a`'s
 colour, none shares it after `refineStep` either — refinement only splits. -/
-theorem refineStep_preserves_singleton {n : Nat} (adj : AdjMatrix n)
+private theorem refineStep_preserves_singleton {n : Nat} (adj : AdjMatrix n)
     (P : PMatrix n) (χ : Colouring n) (a : Fin n)
     (hsing : ∀ u, u ≠ a → χ u ≠ χ a) :
     ∀ u, u ≠ a → refineStep adj P χ u ≠ refineStep adj P χ a := by
@@ -643,7 +643,7 @@ theorem iterate_refineStep_preserves_singleton {n : Nat} (adj : AdjMatrix n)
 signature under `applyGuess P₀ a b dir` equals the signature under `P₀` —
 `applyGuess` only touches the `(a,b)` / `(b,a)` entries, none of which sits
 in `x`'s row. -/
-theorem signature_applyGuess_off {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
+private theorem signature_applyGuess_off {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
     (a b : Fin n) (d : POE) (χ : Colouring n) (x : Fin n)
     (hxa : x ≠ a) (hxb : x ≠ b) :
     signature adj (applyGuess P₀ a b d) χ x = signature adj P₀ χ x := by
@@ -767,7 +767,7 @@ theorem warm_6_2 {n : Nat} (adj : AdjMatrix n) (P₀ : PMatrix n)
 
 /-- σ-swapping `P` relabels each signature's `POE` component by the involution
 `POE.swap`; the colour and adjacency components are untouched. -/
-theorem signature_swap {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem signature_swap {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     (χ : Colouring n) (v : Fin n) :
     signature adj (PMatrix.swap P) χ v
       = (signature adj P χ v).map (fun t : Nat × Nat × POE => (t.1, t.2.1, POE.swap t.2.2)) := by
@@ -824,7 +824,7 @@ theorem warmRefine_swap {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
 /-- The guess and its `< ↔ >` mirror made explicit: warm refinement after
 `a < b` on `P₀` and after `b < a` on the σ-swapped `P₀` induce the same
 partition (`applyGuess_swap` + `warmRefine_swap`). -/
-theorem warmRefine_applyGuess_swap {n : Nat} (adj : AdjMatrix n)
+private theorem warmRefine_applyGuess_swap {n : Nat} (adj : AdjMatrix n)
     (P₀ : PMatrix n) (a b : Fin n) (hab : a ≠ b) (χ : Colouring n) :
     samePartition
       (warmRefine adj (applyGuess P₀ a b .less) χ)
@@ -862,7 +862,7 @@ them at once, and is the precise cross-branch-sharing statement: see
 /-- If `P` and `Q` agree on every entry with an endpoint outside `D`, then off
 `D` they give the same signature — a signature row of `x ∉ D` only reads
 `x`'s entries, all of which agree. -/
-theorem signature_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
+private theorem signature_agree_off {n : Nat} (adj : AdjMatrix n) (P Q : PMatrix n)
     (χ : Colouring n) {D : Finset (Fin n)}
     (hPQ : ∀ x y : Fin n, (x ∉ D ∨ y ∉ D) → P x y = Q x y)
     (x : Fin n) (hx : x ∉ D) :
@@ -1034,10 +1034,10 @@ definitions and statements; proofs in progress.
 /-- The canonical ground set: ordered pairs `(i, j)` with `i < j`. -/
 def Egnd (n : Nat) : Set (Fin n × Fin n) := { p | p.1 < p.2 }
 
-theorem mem_Egnd {n : Nat} {p : Fin n × Fin n} : p ∈ Egnd n ↔ p.1 < p.2 :=
+private theorem mem_Egnd {n : Nat} {p : Fin n × Fin n} : p ∈ Egnd n ↔ p.1 < p.2 :=
   Iff.rfl
 
-theorem Egnd_ne {n : Nat} {p : Fin n × Fin n} (hp : p ∈ Egnd n) : p.1 ≠ p.2 :=
+private theorem Egnd_ne {n : Nat} {p : Fin n × Fin n} (hp : p ∈ Egnd n) : p.1 ≠ p.2 :=
   Fin.ne_of_lt hp
 
 /-- Commit a set `S ⊆ Egnd n` of pair-guesses to a P-matrix: for each
@@ -1125,7 +1125,7 @@ all-unknown starting `P₀`, `S ⊆ T` (with `T` canonical) gives
 fact about `Pof` — does *not* extend to a `cl` monotonicity result, since the
 warm refinement step is not monotone in `P` without the fresh-colour
 hypothesis above. -/
-theorem Pof_mono_entry_of_unknown {n : Nat}
+private theorem Pof_mono_entry_of_unknown {n : Nat}
     {S T : Set (Fin n × Fin n)} (hST : S ⊆ T) (hTcanon : T ⊆ Egnd n)
     (i j : Fin n) :
     Pof (fun _ _ => POE.unknown) S i j = .unknown ∨
@@ -1425,18 +1425,18 @@ def cl_prov {n : Nat} (S : Finset (Fin n × Fin n)) : Finset (Fin n × Fin n) :=
 /-! ### Helper lemmas for the closure axioms -/
 
 /-- `closeStep` returns `.unknown` on the all-unknown matrix at every entry. -/
-theorem closeStep_unknown {n : Nat} (i j : Fin n) :
+private theorem closeStep_unknown {n : Nat} (i j : Fin n) :
     closeStep (fun _ _ : Fin n => POE.unknown) i j = POE.unknown := by
   unfold closeStep
   simp
 
 /-- The all-unknown matrix is a fixpoint of `closeStep`. -/
-theorem closeStep_unknown_fixpoint {n : Nat} :
+private theorem closeStep_unknown_fixpoint {n : Nat} :
     closeStep (fun _ _ : Fin n => POE.unknown) = fun _ _ => POE.unknown := by
   funext i j; exact closeStep_unknown i j
 
 /-- `transitiveClose` of the all-unknown matrix is the all-unknown matrix. -/
-theorem transitiveClose_unknown {n : Nat} :
+private theorem transitiveClose_unknown {n : Nat} :
     transitiveClose (fun _ _ : Fin n => POE.unknown) = fun _ _ => POE.unknown := by
   unfold transitiveClose
   -- iterate^[n*n] of identity-on-unknown = identity-on-unknown
@@ -1541,7 +1541,7 @@ def LessMono {n : Nat} (P Q : PMatrix n) : Prop :=
 /-- Under canonical-consistency, no pair has both a `.less`-chain and a
 `.greater`-chain (the chain endpoints' canonical ordering constraints
 conflict). -/
-theorem canConsistent_no_conflict {n : Nat} {P : PMatrix n}
+private theorem canConsistent_no_conflict {n : Nat} {P : PMatrix n}
     (hP : CanConsistent P) (i j : Fin n)
     (hL : hasLessChain P i j) (hG : hasGreaterChain P i j) : False := by
   obtain ⟨k, hik, hkj⟩ := hL
@@ -1552,7 +1552,7 @@ theorem canConsistent_no_conflict {n : Nat} {P : PMatrix n}
 
 /-- **Classification of `commitsToP S i j`** based on `S`-membership.
 Three mutually exclusive cases under canonical `S`. -/
-theorem commitsToP_classify {n : Nat} (S : Finset (Fin n × Fin n))
+private theorem commitsToP_classify {n : Nat} (S : Finset (Fin n × Fin n))
     (i j : Fin n) :
     (commitsToP S i j = .less ∧ (i, j) ∈ S) ∨
     (commitsToP S i j = .greater ∧ (i, j) ∉ S ∧ (j, i) ∈ S) ∨
@@ -1570,7 +1570,7 @@ theorem commitsToP_classify {n : Nat} (S : Finset (Fin n × Fin n))
       simp [commitsToP, Pof_fs, h1, h2]
 
 /-- `commitsToP` of a canonical `S` is canonical-consistent. -/
-theorem commitsToP_canConsistent {n : Nat} (S : Finset (Fin n × Fin n))
+private theorem commitsToP_canConsistent {n : Nat} (S : Finset (Fin n × Fin n))
     (hScanon : ∀ p ∈ S, p.1.val < p.2.val) :
     CanConsistent (commitsToP S) := by
   refine ⟨?_, ?_⟩
@@ -1588,12 +1588,12 @@ theorem commitsToP_canConsistent {n : Nat} (S : Finset (Fin n × Fin n))
 /-! ### closeStep helpers -/
 
 /-- `closeStep` never demotes a decided `.greater` entry. -/
-theorem closeStep_keeps_greater {n : Nat} (Q : PMatrix n) {i j : Fin n}
+private theorem closeStep_keeps_greater {n : Nat} (Q : PMatrix n) {i j : Fin n}
     (h : Q i j = .greater) : closeStep Q i j = .greater := by
   simp only [closeStep, h]
 
 /-- Iterating `closeStep` preserves a `.greater` entry — once decided, frozen. -/
-theorem iterate_closeStep_keeps_greater {n : Nat} (i j : Fin n) :
+private theorem iterate_closeStep_keeps_greater {n : Nat} (i j : Fin n) :
     ∀ (k : Nat) (Q : PMatrix n), Q i j = .greater →
       ((closeStep^[k]) Q) i j = .greater := by
   intro k
@@ -1605,7 +1605,7 @@ theorem iterate_closeStep_keeps_greater {n : Nat} (i j : Fin n) :
     exact ih (closeStep Q) (closeStep_keeps_greater Q h)
 
 /-- `closeStep` preserves any decided entry. -/
-theorem closeStep_decided {n : Nat} (P : PMatrix n) (i j : Fin n)
+private theorem closeStep_decided {n : Nat} (P : PMatrix n) (i j : Fin n)
     (hP : P i j ≠ .unknown) : closeStep P i j = P i j := by
   cases hPij : P i j with
   | less    => exact closeStep_keeps_less P hPij
@@ -1627,7 +1627,7 @@ private theorem closeStep_unknown_eq {n : Nat} (P : PMatrix n) (i j : Fin n)
   rw [hP]
 
 /-- **Classification of `closeStep P i j`'s output for `.less` case.** -/
-theorem closeStep_eq_less_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
+private theorem closeStep_eq_less_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
     closeStep P i j = .less ↔
       P i j = .less ∨ (P i j = .unknown ∧ hasLessChain P i j) := by
   constructor
@@ -1665,7 +1665,7 @@ theorem closeStep_eq_less_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
 /-- A direction for `closeStep` outputs: if it's `.less` (or `.greater`),
 the `.less`-chain (or `.greater`-chain) plus underlying `.less`/`.greater`
 entries determine it. The `.greater` case below mirrors. -/
-theorem closeStep_eq_greater_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
+private theorem closeStep_eq_greater_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
     closeStep P i j = .greater ↔
       P i j = .greater ∨
         (P i j = .unknown ∧ ¬ hasLessChain P i j ∧ hasGreaterChain P i j) := by
@@ -1717,7 +1717,7 @@ theorem closeStep_eq_greater_iff {n : Nat} (P : PMatrix n) (i j : Fin n) :
       rw [if_pos h_greater]
 
 /-- `closeStep` preserves canonical-consistency. -/
-theorem closeStep_canConsistent {n : Nat} {P : PMatrix n}
+private theorem closeStep_canConsistent {n : Nat} {P : PMatrix n}
     (hP : CanConsistent P) : CanConsistent (closeStep P) := by
   refine ⟨?_, ?_⟩
   · intro i j hij
@@ -1730,7 +1730,7 @@ theorem closeStep_canConsistent {n : Nat} {P : PMatrix n}
     · exact Nat.lt_trans (hP.2 k j hkj) (hP.2 i k hik)
 
 /-- Iterating `closeStep` preserves canonical-consistency. -/
-theorem iterate_closeStep_canConsistent {n : Nat} (P : PMatrix n)
+private theorem iterate_closeStep_canConsistent {n : Nat} (P : PMatrix n)
     (hP : CanConsistent P) : ∀ k, CanConsistent ((closeStep^[k]) P) := by
   intro k
   induction k with
@@ -1740,7 +1740,7 @@ theorem iterate_closeStep_canConsistent {n : Nat} (P : PMatrix n)
     exact closeStep_canConsistent ih
 
 /-- `transitiveClose` preserves canonical-consistency. -/
-theorem transitiveClose_canConsistent {n : Nat} (P : PMatrix n)
+private theorem transitiveClose_canConsistent {n : Nat} (P : PMatrix n)
     (hP : CanConsistent P) : CanConsistent (transitiveClose P) :=
   iterate_closeStep_canConsistent P hP (n * n)
 
@@ -1751,7 +1751,7 @@ both matrices and `.less`-mono between them, `closeStep` preserves
 Threats to the `.less`-chain case: `Q i j = .greater` (ruled out by chain
 + canonical-consistency of `Q`) or a `Q .greater`-chain pre-empting the
 tie-break (irrelevant — the if-chain prioritizes `.less`). -/
-theorem closeStep_lessMono {n : Nat} {P Q : PMatrix n}
+private theorem closeStep_lessMono {n : Nat} {P Q : PMatrix n}
     (hQ : CanConsistent Q) (hPQ : LessMono P Q) :
     LessMono (closeStep P) (closeStep Q) := by
   intro i j hLess
@@ -1773,7 +1773,7 @@ theorem closeStep_lessMono {n : Nat} {P Q : PMatrix n}
       exact (closeStep_eq_less_iff Q i j).mpr (Or.inr ⟨hQij, k, hQik, hQkj⟩)
 
 /-- Iterating `closeStep` preserves `.less`-mono. -/
-theorem iterate_closeStep_lessMono {n : Nat} {P Q : PMatrix n}
+private theorem iterate_closeStep_lessMono {n : Nat} {P Q : PMatrix n}
     (_ : CanConsistent P) (hQ : CanConsistent Q) (hPQ : LessMono P Q) :
     ∀ k, LessMono ((closeStep^[k]) P) ((closeStep^[k]) Q) := by
   intro k
@@ -1784,14 +1784,14 @@ theorem iterate_closeStep_lessMono {n : Nat} {P Q : PMatrix n}
     exact closeStep_lessMono (iterate_closeStep_canConsistent Q hQ k) ih
 
 /-- `transitiveClose` preserves `.less`-mono. -/
-theorem transitiveClose_lessMono {n : Nat} {P Q : PMatrix n}
+private theorem transitiveClose_lessMono {n : Nat} {P Q : PMatrix n}
     (hP : CanConsistent P) (hQ : CanConsistent Q) (hPQ : LessMono P Q) :
     LessMono (transitiveClose P) (transitiveClose Q) :=
   iterate_closeStep_lessMono hP hQ hPQ (n * n)
 
 /-- Base case for CL3: under `S ⊆ T` both canonical,
 `commitsToP S → commitsToP T` is `.less`-mono. -/
-theorem commitsToP_lessMono {n : Nat} {S T : Finset (Fin n × Fin n)}
+private theorem commitsToP_lessMono {n : Nat} {S T : Finset (Fin n × Fin n)}
     (hST : S ⊆ T) :
     LessMono (commitsToP S) (commitsToP T) := by
   intro i j h
@@ -1846,7 +1846,7 @@ def numUnknown {n : Nat} (P : PMatrix n) : Nat :=
     (fun p => P p.1 p.2 = .unknown)).card
 
 /-- `numUnknown ≤ n * n`. -/
-theorem numUnknown_le {n : Nat} (P : PMatrix n) : numUnknown P ≤ n * n := by
+private theorem numUnknown_le {n : Nat} (P : PMatrix n) : numUnknown P ≤ n * n := by
   unfold numUnknown
   calc _ ≤ (Finset.univ : Finset (Fin n × Fin n)).card :=
             Finset.card_filter_le _ _
@@ -1864,7 +1864,7 @@ private theorem closeStep_unknown_subset {n : Nat} (P : PMatrix n) :
   exact hPp (by rw [← closeStep_decided P p.1 p.2 hPp]; exact hp)
 
 /-- If `closeStep P ≠ P`, then `numUnknown` strictly drops. -/
-theorem closeStep_numUnknown_lt {n : Nat} {P : PMatrix n}
+private theorem closeStep_numUnknown_lt {n : Nat} {P : PMatrix n}
     (hne : closeStep P ≠ P) : numUnknown (closeStep P) < numUnknown P := by
   -- Some pair where closeStep P differs from P
   have hExists : ∃ (p : Fin n × Fin n), closeStep P p.1 p.2 ≠ P p.1 p.2 := by
@@ -1892,7 +1892,7 @@ theorem closeStep_numUnknown_lt {n : Nat} {P : PMatrix n}
 
 /-- After `k` iterations of `closeStep`, either a fixed point has been
 reached at some step `≤ k`, or `numUnknown` has dropped by at least `k`. -/
-theorem iterate_closeStep_progress {n : Nat} (P : PMatrix n) :
+private theorem iterate_closeStep_progress {n : Nat} (P : PMatrix n) :
     ∀ k, (∃ j ≤ k, (closeStep^[j+1]) P = (closeStep^[j]) P) ∨
          numUnknown ((closeStep^[k]) P) + k ≤ numUnknown P := by
   intro k
@@ -1920,7 +1920,7 @@ theorem iterate_closeStep_progress {n : Nat} (P : PMatrix n) :
         omega
 
 /-- After `n*n` iterations, `closeStep` has reached a fixed point. -/
-theorem transitiveClose_is_fixpoint {n : Nat} (P : PMatrix n) :
+private theorem transitiveClose_is_fixpoint {n : Nat} (P : PMatrix n) :
     closeStep (transitiveClose P) = transitiveClose P := by
   unfold transitiveClose
   rcases iterate_closeStep_progress P (n * n) with ⟨j, hj_le, hFix⟩ | hDrop
@@ -2185,7 +2185,7 @@ given the IH `samePartition π_k¹ π_k²` and two individualisation
 witnesses at level `k+1`, the level-`k+1` colourings still induce the
 same partition, so `warmRefine_agree_off'` (which only needs
 `samePartition` start colourings) chains. -/
-theorem samePartition_of_samePartition {n : Nat}
+private theorem samePartition_of_samePartition {n : Nat}
     {χ₁ χ₂ : Colouring n} {T : Finset (Fin n)}
     (hpart : samePartition χ₁ χ₂)
     (step₁ : IndivStep χ₁ T) (step₂ : IndivStep χ₂ T) :
@@ -2375,7 +2375,7 @@ two targets are `sel (warmRefine adj P_prev₁ χι_prev₁)` and
 `sel (warmRefine adj P_prev₂ χι_prev₂)` — equal by partition-invariance
 of `sel` against the inductive hypothesis, but not literally equal.
 The `subst` discharges the dependency. -/
-theorem IndivStep.samePartition_het {n : Nat}
+private theorem IndivStep.samePartition_het {n : Nat}
     {χ₁ χ₂ : Colouring n} {T₁ T₂ : Finset (Fin n)}
     (hpart : samePartition χ₁ χ₂) (hT : T₁ = T₂)
     (step₁ : IndivStep χ₁ T₁) (step₂ : IndivStep χ₂ T₂) :
@@ -2588,7 +2588,7 @@ theorem of_samePartition {n : Nat} {χ₁ χ₂ : Colouring n}
 /-- Warm refinement preserves discreteness: if `χ` is injective, so is
 `warmRefine adj P χ`. Lifted from per-vertex singleton preservation
 (`iterate_refineStep_preserves_singleton`). -/
-theorem warmRefine_preserves {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
+private theorem warmRefine_preserves {n : Nat} (adj : AdjMatrix n) (P : PMatrix n)
     {χ : Colouring n} (hd : Discrete χ) :
     Discrete (warmRefine adj P χ) := by
   intro i j hij
@@ -2609,7 +2609,7 @@ def SpineChain.IsLeaf {n : Nat} {adj : AdjMatrix n} {P₀ : PMatrix n}
 /-- `IsLeaf` is *spine-invariant*: a chain is a leaf iff the canonical
 `defaultSpineChain` at the same level is. Direct corollary of
 `spine_branch_independent` via `Discrete.of_samePartition`. -/
-theorem SpineChain.isLeaf_iff_default {n : Nat} {adj : AdjMatrix n}
+private theorem SpineChain.isLeaf_iff_default {n : Nat} {adj : AdjMatrix n}
     {P₀ : PMatrix n} {χι₀ : Colouring n}
     {sel : Colouring n → Finset (Fin n)} (hsel : PartitionInvariant sel)
     {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k) :
@@ -2857,7 +2857,7 @@ and `agrees_off` are propositional and so subsumed by proof
 irrelevance. Stated in per-entry form so `ext i j` chains into the
 function-level equality directly. -/
 @[ext]
-theorem eq_of_σ_eq {σ₁ σ₂ : DirAssignment P₀ D}
+private theorem eq_of_σ_eq {σ₁ σ₂ : DirAssignment P₀ D}
     (h : ∀ i j, σ₁.σ i j = σ₂.σ i j) : σ₁ = σ₂ := by
   cases σ₁; cases σ₂
   congr 1
@@ -3040,7 +3040,7 @@ def vertexRank (χ : Colouring n) (v : Fin n) : Fin n :=
 
 /-- Vertex rank is strictly monotonic in the colour value: `χ v < χ w`
 implies `vertexRank χ v < vertexRank χ w`. -/
-theorem vertexRank_strict_mono (χ : Colouring n) {v w : Fin n}
+private theorem vertexRank_strict_mono (χ : Colouring n) {v w : Fin n}
     (hvw : χ v < χ w) : vertexRank χ v < vertexRank χ w := by
   show vertexRankNat χ v < vertexRankNat χ w
   unfold vertexRankNat
@@ -3062,7 +3062,7 @@ theorem vertexRank_strict_mono (χ : Colouring n) {v w : Fin n}
 /-- On a `Discrete` colouring, `vertexRank` is injective. Equal ranks
 force equal colour values (via strict monotonicity in both directions),
 which forces equal vertices (by `Discrete`). -/
-theorem vertexRank_injective (χ : Colouring n) (h : Discrete χ) :
+private theorem vertexRank_injective (χ : Colouring n) (h : Discrete χ) :
     Function.Injective (vertexRank χ) := by
   intro v w hvw
   by_contra hne
@@ -3072,7 +3072,7 @@ theorem vertexRank_injective (χ : Colouring n) (h : Discrete χ) :
   · exact absurd hvw (ne_of_gt (vertexRank_strict_mono χ hgt))
 
 /-- Injective ⇒ bijective on `Fin n → Fin n` (pigeonhole). -/
-theorem vertexRank_bijective (χ : Colouring n) (h : Discrete χ) :
+private theorem vertexRank_bijective (χ : Colouring n) (h : Discrete χ) :
     Function.Bijective (vertexRank χ) :=
   Finite.injective_iff_bijective.mp (vertexRank_injective χ h)
 
@@ -3184,12 +3184,12 @@ def matrixLT {n : Nat} (M₁ M₂ : Fin n → Fin n → Nat) : Prop :=
     M₁ i j < M₂ i j
 
 /-- `matrixLT` is irreflexive: no matrix is `<` itself. -/
-theorem matrixLT_irrefl {n : Nat} (M : Fin n → Fin n → Nat) : ¬ matrixLT M M := by
+private theorem matrixLT_irrefl {n : Nat} (M : Fin n → Fin n → Nat) : ¬ matrixLT M M := by
   rintro ⟨_, _, _, _, hlt⟩
   exact lt_irrefl _ hlt
 
 /-- `matrixLT` is asymmetric: `M₁ < M₂ → ¬ M₂ < M₁`. (Strict order.) -/
-theorem matrixLT_asymm {n : Nat} {M₁ M₂ : Fin n → Fin n → Nat}
+private theorem matrixLT_asymm {n : Nat} {M₁ M₂ : Fin n → Fin n → Nat}
     (h₁ : matrixLT M₁ M₂) : ¬ matrixLT M₂ M₁ := by
   rintro h₂
   obtain ⟨i₁, j₁, hpre_i₁, hpre_j₁, hlt₁⟩ := h₁
@@ -3269,7 +3269,7 @@ def ofMatrixLex {n : Nat} (M : MatrixLex n) : Fin n → Fin n → Nat :=
 @[simp] theorem toMatrixLex_ofMatrixLex {n : Nat} (M : MatrixLex n) :
     toMatrixLex (ofMatrixLex M) = M := rfl
 
-theorem toMatrixLex_injective {n : Nat} :
+private theorem toMatrixLex_injective {n : Nat} :
     Function.Injective (@toMatrixLex n) := by
   intro M₁ M₂ h
   have := congrArg ofMatrixLex h
@@ -3286,7 +3286,7 @@ noncomputable def canonFormImages {n : Nat} {adj : AdjMatrix n}
   (Finset.univ : Finset (DirAssignment P₀ chain.D)).image (fun σ =>
     toMatrixLex (chain.canonAdj isLeaf σ))
 
-theorem canonFormImages_nonempty {n : Nat} {adj : AdjMatrix n}
+private theorem canonFormImages_nonempty {n : Nat} {adj : AdjMatrix n}
     {P₀ : PMatrix n} {χι₀ : Colouring n}
     {sel : Colouring n → Finset (Fin n)} {k : Nat}
     (chain : SpineChain adj P₀ χι₀ sel k) (isLeaf : chain.IsLeaf)
@@ -3493,7 +3493,7 @@ multiset over `u ≠ π v` of `(χ u, adj (π v) u, P (π v) u)` equals the
 multiset over `u' ≠ v` of `(χ (π u'), adj (π v) (π u'), P (π v) (π u'))`,
 which by the three invariance hypotheses equals the multiset over
 `u' ≠ v` of `(χ u', adj v u', P v u')` = `signature adj P χ v`. -/
-theorem signature_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
+private theorem signature_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
     {P : PMatrix n} {χ : Colouring n} {π : Equiv.Perm (Fin n)}
     (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u)
     (hχ : ∀ v, χ (π v) = χ v) (v : Fin n) :
@@ -3526,7 +3526,7 @@ theorem signature_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
 
 /-- An automorphism that preserves `(adj, P, χ)` pointwise preserves
 `refineStep`. Follows from signature invariance via `refineStep_iff`. -/
-theorem refineStep_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
+private theorem refineStep_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
     {P : PMatrix n} {χ : Colouring n} {π : Equiv.Perm (Fin n)}
     (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u)
     (hχ : ∀ v, χ (π v) = χ v) (v : Fin n) :
@@ -3541,7 +3541,7 @@ theorem refineStep_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
 
 /-- Iterating refinement preserves the invariance: `(refineStep)^[k] χ` is
 also `π`-invariant when the inputs are. -/
-theorem iterate_refineStep_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
+private theorem iterate_refineStep_invariant_of_isAut {n : Nat} {adj : AdjMatrix n}
     {P : PMatrix n} {π : Equiv.Perm (Fin n)}
     (hπ : IsAut π adj) (hP : ∀ v u, P (π v) (π u) = P v u) :
     ∀ (k : Nat) {χ : Colouring n}, (∀ v, χ (π v) = χ v) →
@@ -3905,7 +3905,7 @@ theorem cascadesAt_univ {n : Nat} (adj : AdjMatrix n) (P : PMatrix n) :
     exact Fin.ext (Nat.succ_injective hij)
 
 /-- Monotonicity: a cascade at depth `k` is a cascade at every depth `≥ k`. -/
-theorem CascadesAt.mono {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+private theorem CascadesAt.mono {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
     {k₁ k₂ : Nat} (hle : k₁ ≤ k₂) (h : CascadesAt adj P k₁) :
     CascadesAt adj P k₂ := by
   obtain ⟨S, hcard, hd⟩ := h

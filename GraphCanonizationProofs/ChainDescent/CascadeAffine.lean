@@ -625,7 +625,7 @@ theorem mem_affineG_iff {σ : Equiv.Perm (Fin (p ^ d))} :
   Iff.rfl
 
 /-- A translation lies in `affineG` (linear part `1 ∈ G₀`). -/
-theorem affinePermFin_one_mem (t : Fin d → ZMod p) :
+private theorem affinePermFin_one_mem (t : Fin d → ZMod p) :
     affinePermFin (1 : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) t ∈ affineG G₀ :=
   ⟨1, one_mem _, t, rfl⟩
 

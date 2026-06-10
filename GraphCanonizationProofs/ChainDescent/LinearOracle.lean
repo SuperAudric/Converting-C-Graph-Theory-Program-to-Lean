@@ -140,7 +140,7 @@ flip-back is the inverse) + `flipPair_comm` (disjoint decisions commute). -/
 
 /-- **Relabelling composes.** Relabelling a labelled adjacency by `t` is labelling by the
 product `t * s` — the `Equiv.Perm` group action on labelled matrices. -/
-theorem relabelMatrix_labelledAdj (t s : Equiv.Perm (Fin n)) :
+private theorem relabelMatrix_labelledAdj (t s : Equiv.Perm (Fin n)) :
     relabelMatrix t (labelledAdj s adj) = labelledAdj (t * s) adj := by
   funext i j
   simp only [relabelMatrix, labelledAdj]
@@ -151,7 +151,7 @@ theorem relabelMatrix_labelledAdj (t s : Equiv.Perm (Fin n)) :
 
 /-- `canonAdj` is `labelledAdj` of the rank permutation. Holds for *any* discreteness
 proof (the rank permutation is proof-irrelevant), so `rfl`. -/
-theorem canonAdj_eq_labelledAdj {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+private theorem canonAdj_eq_labelledAdj {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
     (hd : Discrete (warmRefine adj σ.σ chain.χι)) :
     chain.canonAdj isLeaf σ = labelledAdj (Colouring.rankPerm _ hd) adj := rfl
@@ -175,7 +175,7 @@ theorem canonAdj_rebase {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
 
 /-- The discreteness proof for a branch's warm-refined colouring at a leaf, derived
 exactly as `canonAdj` derives it (so the rank permutations match definitionally). -/
-theorem branch_discrete {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+private theorem branch_discrete {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D) :
     Discrete (warmRefine adj σ.σ chain.χι) :=
   Discrete.of_samePartition
@@ -318,7 +318,7 @@ abelian decisions, via the `warm_6_2` rank machinery — is the abelian-sufficie
 
 /-- The forced candidate satisfies the rank-alignment equation `candidate · π_σ = π_flip`
 (definitional; the inverse cancels). The algebraic heart of the determinacy. -/
-theorem candidateTwist_mul_rankPerm {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+private theorem candidateTwist_mul_rankPerm {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
     (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D) :
     candidateTwist chain isLeaf σ a b ha hb
@@ -435,7 +435,7 @@ theorem candidateTwist_eq_one_of_rankPerm_eq {k : Nat} (chain : SpineChain adj P
   rw [candidateTwist, h, mul_inv_cancel]
 
 /-- The absorbed decision fires: the forced candidate (the identity) is an automorphism. -/
-theorem isAut_candidateTwist_of_rankPerm_eq {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+private theorem isAut_candidateTwist_of_rankPerm_eq {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
     (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
     (h : Colouring.rankPerm _ (branch_discrete chain isLeaf (σ.flipPair a b ha hb))
@@ -616,7 +616,7 @@ theorem configSwap_rankPerm {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k
   exact vertexRank_comp _ cs.g v
 
 /-- `π_flip = π_σ · g⁻¹` — the rearrangement of `configSwap_rankPerm`. -/
-theorem configSwap_rankPerm_flip {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
+private theorem configSwap_rankPerm_flip {k : Nat} (chain : SpineChain adj P₀ χι₀ sel k)
     (isLeaf : chain.IsLeaf) (σ : DirAssignment P₀ chain.D)
     (a b : Fin n) (ha : a ∈ chain.D) (hb : b ∈ chain.D)
     (cs : ConfigSwap chain σ a b ha hb) :

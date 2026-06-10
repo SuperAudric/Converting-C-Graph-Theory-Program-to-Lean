@@ -185,7 +185,7 @@ private theorem refineStep_mono {χ₁ χ₂ : Colouring n} (href : Refines χ�
   exact ⟨href _ _ hab.1, signature_refines href hab.2⟩
 
 /-- Iterating refinement preserves refinement. -/
-theorem iterate_refineStep_refines {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
+private theorem iterate_refineStep_refines {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
     ∀ k, Refines ((refineStep adj P)^[k] χ₁) ((refineStep adj P)^[k] χ₂) := by
   intro k
   induction k with
@@ -499,7 +499,7 @@ order-model `ConfigSwap`'s remaining coherence — `fixesχι` + off-pair σ-pre
 
 /-- **The residual group is closed under composition.** Composition of `P`-preserving
 automorphisms fixing `S` pointwise is again one. -/
-theorem ResidualAut.mul {S : Finset (Fin n)} {π₁ π₂ : Equiv.Perm (Fin n)}
+private theorem ResidualAut.mul {S : Finset (Fin n)} {π₁ π₂ : Equiv.Perm (Fin n)}
     (h₁ : ResidualAut adj P S π₁) (h₂ : ResidualAut adj P S π₂) :
     ResidualAut adj P S (π₁ * π₂) := by
   obtain ⟨hA₁, hP₁, hF₁⟩ := h₁
@@ -2353,7 +2353,7 @@ theorem recoverableByDepth_of_visiblyRecoverable {S₀ : Finset (Fin n)} {bound 
   exact ⟨T k, hcard, hcells⟩
 
 /-- **D1 is monotone in the depth bound** (a looser bound is easier). -/
-theorem visiblyRecoverable_bound_mono {S₀ : Finset (Fin n)} {b b' : Nat}
+private theorem visiblyRecoverable_bound_mono {S₀ : Finset (Fin n)} {b b' : Nat}
     (h : VisiblyRecoverable adj P S₀ b) (hbb' : b ≤ b') : VisiblyRecoverable adj P S₀ b' := by
   obtain ⟨k, T, hk, hT0, hinc, hcells, hcard⟩ := h
   exact ⟨k, T, hk, hT0, hinc, hcells, le_trans hcard hbb'⟩
@@ -2422,7 +2422,7 @@ with orbits at `S`, a vertex `v` whose cell is non-singleton has every cell-mate
 step `S → insert v S` is symmetry-only. The bridge from the recovery predicate to the screen's D1
 primitive (and the route by which a `CellsAreOrbits` non-discrete node always offers a `SymmetryOnlyStep`
 to recurse on — the §6.11 soundness of using `Discrete`, not bare `CellsAreOrbits`, as the stop). -/
-theorem symmetryOnlyStep_of_cellsAreOrbits {S : Finset (Fin n)} {v : Fin n}
+private theorem symmetryOnlyStep_of_cellsAreOrbits {S : Finset (Fin n)} {v : Fin n}
     (hco : CellsAreOrbits adj P S)
     (hns : ∃ u, u ≠ v ∧ warmRefine adj P (individualizedColouring n S) u
                        = warmRefine adj P (individualizedColouring n S) v) :
@@ -2528,7 +2528,7 @@ theorem recoverableByDepth_of_findableWithin {S : Finset (Fin n)} {b : Nat}
 leg's recoverability witness) collapses `FindableWithin` to the bound-free screen `Findable`. The reverse
 fails in general — recovering the bound requires the D2 bridge — so `FindableWithin` is the strictly
 stronger object, exactly because it carries it. -/
-theorem findable_of_findableWithin {S : Finset (Fin n)} {b : Nat}
+private theorem findable_of_findableWithin {S : Finset (Fin n)} {b : Nat}
     (h : FindableWithin adj P S b) : Findable adj P S := by
   induction h with
   | recovered hd => exact Findable.recovered hd
@@ -2618,7 +2618,7 @@ noncomputable def soStep (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)
   if h : ∃ v, SymmetryOnlyStep adj P S v then insert h.choose S else S
 
 /-- The closure round is **extensive** — it only ever adds the chosen vertex. -/
-theorem soStep_extensive (S : Finset (Fin n)) : S ⊆ soStep adj P S := by
+private theorem soStep_extensive (S : Finset (Fin n)) : S ⊆ soStep adj P S := by
   unfold soStep; split_ifs with h
   · exact Finset.subset_insert _ _
   · exact Finset.Subset.refl _
@@ -2635,7 +2635,7 @@ theorem symmetryOnlyStep_not_mem {S : Finset (Fin n)} {v : Fin n}
     (warmRefine_refines adj P (individualizedColouring n S) hcol))
 
 /-- When a symmetry-only step exists, the closure round takes it. -/
-theorem soStep_pos {S : Finset (Fin n)} (hex : ∃ v, SymmetryOnlyStep adj P S v) :
+private theorem soStep_pos {S : Finset (Fin n)} (hex : ∃ v, SymmetryOnlyStep adj P S v) :
     soStep adj P S = insert hex.choose S := by
   unfold soStep; rw [dif_pos hex]
 
@@ -2674,7 +2674,7 @@ auto fixes `S` pointwise). -/
 def MovedAt (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin n)) (v : Fin n) : Prop :=
   ∃ π, ResidualAut adj P S π ∧ π v ≠ v
 
-theorem movedAt_not_mem {S : Finset (Fin n)} {v : Fin n} (h : MovedAt adj P S v) : v ∉ S := by
+private theorem movedAt_not_mem {S : Finset (Fin n)} {v : Fin n} (h : MovedAt adj P S v) : v ∉ S := by
   obtain ⟨π, hπ, hπv⟩ := h
   exact fun hvS => hπv (hπ.2.2 v hvS)
 
@@ -2695,12 +2695,12 @@ noncomputable def movedStep (adj : AdjMatrix n) (P : PMatrix n) (S : Finset (Fin
     Finset (Fin n) :=
   if h : ∃ v, MovedAt adj P S v then insert h.choose S else S
 
-theorem movedStep_extensive (S : Finset (Fin n)) : S ⊆ movedStep adj P S := by
+private theorem movedStep_extensive (S : Finset (Fin n)) : S ⊆ movedStep adj P S := by
   unfold movedStep; split_ifs with h
   · exact Finset.subset_insert _ _
   · exact Finset.Subset.refl _
 
-theorem movedStep_pos {S : Finset (Fin n)} (hex : ∃ v, MovedAt adj P S v) :
+private theorem movedStep_pos {S : Finset (Fin n)} (hex : ∃ v, MovedAt adj P S v) :
     movedStep adj P S = insert hex.choose S := by
   unfold movedStep; rw [dif_pos hex]
 

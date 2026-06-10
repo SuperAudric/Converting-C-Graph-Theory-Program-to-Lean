@@ -86,7 +86,7 @@ def degree (v : Fin m) : Nat := (H.neighbors v).card
   simp [neighbors]
 
 /-- Degree is at least 2 (structural CFI requirement). -/
-theorem degree_ge_two (v : Fin m) : 2 ≤ H.degree v := H.deg_ge_two v
+private theorem degree_ge_two (v : Fin m) : 2 ≤ H.degree v := H.deg_ge_two v
 
 /-- Loops are not neighbours. -/
 theorem not_self_mem_neighbors (v : Fin m) : v ∉ H.neighbors v := by
@@ -123,7 +123,7 @@ def cfiVertexCount : Nat :=
   Finset.univ.sum H.gadgetSize
 
 /-- Gadget size is at least 6 (since `degree ≥ 2` gives `2^1 + 4 = 6`). -/
-theorem gadgetSize_ge_six (v : Fin m) : 6 ≤ H.gadgetSize v := by
+private theorem gadgetSize_ge_six (v : Fin m) : 6 ≤ H.gadgetSize v := by
   unfold gadgetSize
   have h := H.degree_ge_two v
   -- 2^(d-1) ≥ 2 when d-1 ≥ 1; 2*d ≥ 4 when d ≥ 2.
@@ -156,7 +156,7 @@ def evenSubsetsOfNeighbors (v : Fin m) : Finset (Finset (Fin m)) :=
   (H.neighbors v).powerset.filter (fun S => S.card % 2 = 0)
 
 /-- The empty set is an even subset of `N(v)`. -/
-theorem empty_mem_evenSubsetsOfNeighbors (v : Fin m) :
+private theorem empty_mem_evenSubsetsOfNeighbors (v : Fin m) :
     (∅ : Finset (Fin m)) ∈ H.evenSubsetsOfNeighbors v := by
   simp [evenSubsetsOfNeighbors]
 
@@ -188,11 +188,11 @@ def triangleBase : CFIBase 3 where
   deg_ge_two := by decide
 
 /-- Every vertex of `triangleBase` has degree 2. -/
-theorem triangleBase_degree : ∀ v : Fin 3, triangleBase.degree v = 2 := by
+private theorem triangleBase_degree : ∀ v : Fin 3, triangleBase.degree v = 2 := by
   decide
 
 /-- `triangleBase`'s CFI has 18 vertices: `3 × (2^1 + 2*2)`. -/
-theorem triangleBase_cfiVertexCount : triangleBase.cfiVertexCount = 18 := by
+private theorem triangleBase_cfiVertexCount : triangleBase.cfiVertexCount = 18 := by
   decide
 
 /-! ## §6 — CFI vertex type (Stage 2.1)
@@ -333,7 +333,7 @@ def cfiAdj : H.CFIVertex → H.CFIVertex → Nat
 /-- **Symmetry**: `cfiAdj x y = cfiAdj y x`. The subset-endpoint and
 endpoint-subset clauses use identical formulae; subset-subset is
 trivially 0; endpoint-endpoint requires `Eq.comm` on each conjunct. -/
-theorem cfiAdj_symm (x y : H.CFIVertex) : H.cfiAdj x y = H.cfiAdj y x := by
+private theorem cfiAdj_symm (x y : H.CFIVertex) : H.cfiAdj x y = H.cfiAdj y x := by
   match x, y with
   | .inl _, .inl _ => rfl
   | .inl _, .inr _ => rfl
@@ -355,7 +355,7 @@ theorem cfiAdj_symm (x y : H.CFIVertex) : H.cfiAdj x y = H.cfiAdj y x := by
 endpoint-endpoint requires that `w ≠ v` (the neighbour can't equal
 the base vertex by `not_self_mem_neighbors`), which falsifies the
 `v = w` conjunct. -/
-theorem cfiAdj_loopless (x : H.CFIVertex) : H.cfiAdj x x = 0 := by
+private theorem cfiAdj_loopless (x : H.CFIVertex) : H.cfiAdj x x = 0 := by
   match x with
   | .inl _ => rfl
   | .inr ⟨v, w_pair, b⟩ =>
@@ -443,13 +443,13 @@ noncomputable def cfiAdjMatrix : AdjMatrix (Fintype.card H.CFIVertex) :=
   ⟨fun i j => H.cfiAdj (e i) (e j)⟩
 
 /-- The CFI adjacency matrix is symmetric. -/
-theorem cfiAdjMatrix_symm (i j : Fin (Fintype.card H.CFIVertex)) :
+private theorem cfiAdjMatrix_symm (i j : Fin (Fintype.card H.CFIVertex)) :
     H.cfiAdjMatrix.adj i j = H.cfiAdjMatrix.adj j i := by
   show H.cfiAdj _ _ = H.cfiAdj _ _
   exact H.cfiAdj_symm _ _
 
 /-- The CFI adjacency matrix is loopless. -/
-theorem cfiAdjMatrix_loopless (i : Fin (Fintype.card H.CFIVertex)) :
+private theorem cfiAdjMatrix_loopless (i : Fin (Fintype.card H.CFIVertex)) :
     H.cfiAdjMatrix.adj i i = 0 := by
   show H.cfiAdj _ _ = 0
   exact H.cfiAdj_loopless _
@@ -791,21 +791,21 @@ adjacency. -/
 
 /-- `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=0 endpoint is NOT
 adjacent to the empty-subset seed. -/
-theorem cfiAdj_aEmpty_endpoint_false {v w : Fin m} (hw : w ∈ H.neighbors v) :
+private theorem cfiAdj_aEmpty_endpoint_false {v w : Fin m} (hw : w ∈ H.neighbors v) :
     H.cfiAdj (H.aEmpty v) (H.endpoint hw false) = 0 := by
   show (if v = v ∧ decide (w ∈ (∅ : Finset (Fin m))) ≠ false then 1 else 0) = 0
   simp [Finset.notMem_empty]
 
 /-- `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=1 endpoint IS adjacent
 to the empty-subset seed. -/
-theorem cfiAdj_aEmpty_endpoint_true {v w : Fin m} (hw : w ∈ H.neighbors v) :
+private theorem cfiAdj_aEmpty_endpoint_true {v w : Fin m} (hw : w ∈ H.neighbors v) :
     H.cfiAdj (H.aEmpty v) (H.endpoint hw true) = 1 := by
   show (if v = v ∧ decide (w ∈ (∅ : Finset (Fin m))) ≠ true then 1 else 0) = 1
   simp [Finset.notMem_empty]
 
 /-- `aEmpty v` and `endpoint hw b` are distinct CFI vertices (one is
 `Sum.inl`, the other `Sum.inr`). -/
-theorem aEmpty_ne_endpoint {v w : Fin m} (hw : w ∈ H.neighbors v) (b : Bool) :
+private theorem aEmpty_ne_endpoint {v w : Fin m} (hw : w ∈ H.neighbors v) (b : Bool) :
     H.aEmpty v ≠ H.endpoint hw b := by
   intro heq
   unfold aEmpty endpoint at heq
@@ -887,7 +887,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 
 /-- Seed vertices and endpoint vertices are distinct in `Fin n` (since
 their abstract counterparts have different `Sum` tags). -/
-theorem seedVertex_ne_endpointVertex (h : IsCFI' adj) {v w : Fin h.m}
+private theorem seedVertex_ne_endpointVertex (h : IsCFI' adj) {v w : Fin h.m}
     (hw : w ∈ h.H.neighbors v) (b : Bool) :
     h.seedVertex v ≠ h.endpointVertex hw b := by
   intro heq
@@ -912,7 +912,7 @@ variable {n : Nat} {adj : AdjMatrix n}
 
 /-- `adj (seedVertex v) (endpointVertex v w false) = 0` — the b=0
 endpoint is NOT adjacent to the seed. -/
-theorem adj_seed_endpoint_false (h : IsCFI' adj) {v w : Fin h.m}
+private theorem adj_seed_endpoint_false (h : IsCFI' adj) {v w : Fin h.m}
     (hw : w ∈ h.H.neighbors v) :
     adj.adj (h.seedVertex v) (h.endpointVertex hw false) = 0 := by
   rw [h.matching, e_seedVertex, e_endpointVertex]
@@ -920,14 +920,14 @@ theorem adj_seed_endpoint_false (h : IsCFI' adj) {v w : Fin h.m}
 
 /-- `adj (seedVertex v) (endpointVertex v w true) = 1` — the b=1
 endpoint IS adjacent to the seed. -/
-theorem adj_seed_endpoint_true (h : IsCFI' adj) {v w : Fin h.m}
+private theorem adj_seed_endpoint_true (h : IsCFI' adj) {v w : Fin h.m}
     (hw : w ∈ h.H.neighbors v) :
     adj.adj (h.seedVertex v) (h.endpointVertex hw true) = 1 := by
   rw [h.matching, e_seedVertex, e_endpointVertex]
   exact h.H.cfiAdj_aEmpty_endpoint_true hw
 
 /-- Symmetric form: `adj (endpointVertex v w false) (seedVertex v) = 0`. -/
-theorem adj_endpoint_seed_false (h : IsCFI' adj) {v w : Fin h.m}
+private theorem adj_endpoint_seed_false (h : IsCFI' adj) {v w : Fin h.m}
     (hw : w ∈ h.H.neighbors v) :
     adj.adj (h.endpointVertex hw false) (h.seedVertex v) = 0 := by
   rw [h.matching, e_seedVertex, e_endpointVertex]
@@ -935,7 +935,7 @@ theorem adj_endpoint_seed_false (h : IsCFI' adj) {v w : Fin h.m}
   exact h.H.cfiAdj_aEmpty_endpoint_false hw
 
 /-- Symmetric form: `adj (endpointVertex v w true) (seedVertex v) = 1`. -/
-theorem adj_endpoint_seed_true (h : IsCFI' adj) {v w : Fin h.m}
+private theorem adj_endpoint_seed_true (h : IsCFI' adj) {v w : Fin h.m}
     (hw : w ∈ h.H.neighbors v) :
     adj.adj (h.endpointVertex hw true) (h.seedVertex v) = 1 := by
   rw [h.matching, e_seedVertex, e_endpointVertex]
@@ -1180,7 +1180,7 @@ Proof: `aEmpty v` has its base index `v` recoverable from the `Sigma`
 first component, so `aEmpty` is injective on `v`. Combined with
 `h.e.symm` (an `Equiv`) being injective, `seedVertex v := h.e.symm (aEmpty v)`
 is injective in `v`. -/
-theorem seedVertex_injective (h : IsCFI' adj) :
+private theorem seedVertex_injective (h : IsCFI' adj) :
     Function.Injective h.seedVertex := by
   intro v v' hvv
   -- Apply h.e to both sides; the bijection round-trip exposes h.H.aEmpty equality.
@@ -1194,7 +1194,7 @@ theorem seedVertex_injective (h : IsCFI' adj) :
   exact congrArg Sigma.fst hSig
 
 /-- `seedVertex v ∈ h.allSeeds` for every base vertex `v`. -/
-theorem seedVertex_mem_allSeeds (h : IsCFI' adj) (v : Fin h.m) :
+private theorem seedVertex_mem_allSeeds (h : IsCFI' adj) (v : Fin h.m) :
     h.seedVertex v ∈ h.allSeeds :=
   Finset.mem_image.mpr ⟨v, Finset.mem_univ _, rfl⟩
 
@@ -1539,7 +1539,7 @@ S = ∅).
 This is the key structural fact for Phase 2's (P2) verifications:
 the only CFI vertices that "see" a specific seed's fresh colour with
 adj=1 are the b=true endpoints in that seed's gadget. -/
-theorem adj_seedVertex_eq_one_iff (h : IsCFI' adj) (w : Fin h.m) (u : Fin n) :
+private theorem adj_seedVertex_eq_one_iff (h : IsCFI' adj) (w : Fin h.m) (u : Fin n) :
     adj.adj u (h.seedVertex w) = 1 ↔
     ∃ (x : Fin h.m) (hx : x ∈ h.H.neighbors w), u = h.endpointVertex hx true := by
   constructor
@@ -2639,7 +2639,7 @@ def OddDegree (h : IsCFI' adj) : Prop :=
 non-element `y ∈ N(v) \ S` — the Phase-2.3-style witness. Used by
 Phase 2.X / 2.4 / M4 to construct subset distinction witnesses
 automatically. -/
-theorem exists_witness_of_oddDegree (h : IsCFI' adj) (h_odd : h.OddDegree)
+private theorem exists_witness_of_oddDegree (h : IsCFI' adj) (h_odd : h.OddDegree)
     (v : Fin h.m) {S : Finset (Fin h.m)}
     (hS : S ∈ h.H.evenSubsetsOfNeighbors v) :
     ∃ y, y ∈ h.H.neighbors v ∧ y ∉ S := by
@@ -3255,7 +3255,7 @@ def flipSet (F : Fin m → Fin m → Bool) (v : Fin m) : Finset (Fin m) :=
   (H.neighbors v).filter (fun w => F v w = true)
 
 /-- `flipSet F v ⊆ N(v)`. -/
-theorem flipSet_subset (F : Fin m → Fin m → Bool) (v : Fin m) :
+private theorem flipSet_subset (F : Fin m → Fin m → Bool) (v : Fin m) :
     H.flipSet F v ⊆ H.neighbors v :=
   Finset.filter_subset _ _
 
@@ -3343,7 +3343,7 @@ def cfiFlip (F : Fin m → Fin m → Bool)
 
 /-- **The gadget flip is an involution.** Flipping along `F` twice restores every vertex:
 `(S ∆ F) ∆ F = S` on subsets, `(b ⊕ c) ⊕ c = b` on endpoint parities. -/
-theorem cfiFlip_involutive (F : Fin m → Fin m → Bool)
+private theorem cfiFlip_involutive (F : Fin m → Fin m → Bool)
     (hEven : ∀ v, (H.flipSet F v).card % 2 = 0) :
     Function.Involutive (H.cfiFlip F hEven) := by
   rintro (⟨v, S, hS⟩ | ⟨v, ⟨w, hw⟩, b⟩)
@@ -3523,7 +3523,7 @@ def triEdge (v w u : Fin m) : Fin m → Fin m → Bool :=
   fun p q => isEdgeOf v w p q || isEdgeOf w u p q || isEdgeOf u v p q
 
 /-- Membership characterisation of the triangle indicator. -/
-theorem triEdge_eq_true {v w u p q : Fin m} :
+private theorem triEdge_eq_true {v w u p q : Fin m} :
     triEdge v w u p q = true ↔
       ((p = v ∧ q = w) ∨ (p = w ∧ q = v)) ∨
       ((p = w ∧ q = u) ∨ (p = u ∧ q = w)) ∨
@@ -3531,25 +3531,25 @@ theorem triEdge_eq_true {v w u p q : Fin m} :
   simp only [triEdge, isEdgeOf, Bool.or_eq_true, Bool.and_eq_true, beq_iff_eq]; tauto
 
 /-- The triangle indicator is symmetric (undirected). -/
-theorem triEdge_symm (v w u p q : Fin m) : triEdge v w u p q = triEdge v w u q p := by
+private theorem triEdge_symm (v w u p q : Fin m) : triEdge v w u p q = triEdge v w u q p := by
   rw [Bool.eq_iff_iff, triEdge_eq_true, triEdge_eq_true]; tauto
 
 /-- The triangle contains its base edge `{v, w}`. -/
-theorem triEdge_apex (v w u : Fin m) : triEdge v w u v w = true := by
+private theorem triEdge_apex (v w u : Fin m) : triEdge v w u v w = true := by
   rw [triEdge_eq_true]; exact Or.inl (Or.inl ⟨rfl, rfl⟩)
 
 /-- The triangle indicator is cyclically invariant: `{v,w,u}` and `{w,u,v}` are the same triangle. -/
-theorem triEdge_cyclic (v w u : Fin m) : triEdge v w u = triEdge w u v := by
+private theorem triEdge_cyclic (v w u : Fin m) : triEdge v w u = triEdge w u v := by
   funext p q; rw [Bool.eq_iff_iff, triEdge_eq_true, triEdge_eq_true]; tauto
 
 /-- F-neighbour characterisation grouped by source vertex. -/
-theorem triEdge_iff {v w u x q : Fin m} :
+private theorem triEdge_iff {v w u x q : Fin m} :
     triEdge v w u x q = true ↔
       (x = v ∧ (q = w ∨ q = u)) ∨ (x = w ∧ (q = v ∨ q = u)) ∨ (x = u ∧ (q = v ∨ q = w)) := by
   rw [triEdge_eq_true]; tauto
 
 /-- **The triangle's flip set at its base vertex** is the other two vertices. -/
-theorem flipSet_triEdge (v w u : Fin m) (hvw : v ≠ w) (hvu : v ≠ u)
+private theorem flipSet_triEdge (v w u : Fin m) (hvw : v ≠ w) (hvu : v ≠ u)
     (hwN : w ∈ H.neighbors v) (huN : u ∈ H.neighbors v) :
     H.flipSet (triEdge v w u) v = {w, u} := by
   ext q
@@ -3579,7 +3579,7 @@ theorem flipSet_triEdge_other {v w u x : Fin m} (hxv : x ≠ v) (hxw : x ≠ w) 
 
 /-- **The triangle is an even subgraph.** Every vertex has F-degree `2` (on the triangle) or `0`
 (off it) — both even. Needs the three triangle edges to be `H`-edges (`u` a common neighbour). -/
-theorem triEdge_even {v w u : Fin m} (hvw : v ≠ w) (hvu : v ≠ u) (hwu : w ≠ u)
+private theorem triEdge_even {v w u : Fin m} (hvw : v ≠ w) (hvu : v ≠ u) (hwu : w ≠ u)
     (hwN : w ∈ H.neighbors v) (huNv : u ∈ H.neighbors v) (huNw : u ∈ H.neighbors w) :
     ∀ x, (H.flipSet (triEdge v w u) x).card % 2 = 0 := by
   intro x
@@ -3624,18 +3624,18 @@ def evenPermEdge (σ : Equiv.Perm (Fin m)) : Fin m → Fin m → Bool :=
   fun p q => (decide (σ p = q) && decide (¬ σ p = p)) || (decide (σ q = p) && decide (¬ σ q = q))
 
 /-- Membership characterisation of the permutation-cycle indicator. -/
-theorem evenPermEdge_eq_true {σ : Equiv.Perm (Fin m)} {p q : Fin m} :
+private theorem evenPermEdge_eq_true {σ : Equiv.Perm (Fin m)} {p q : Fin m} :
     evenPermEdge σ p q = true ↔ (σ p = q ∧ σ p ≠ p) ∨ (σ q = p ∧ σ q ≠ q) := by
   simp [evenPermEdge]
 
 /-- The permutation-cycle indicator is symmetric (undirected). -/
-theorem evenPermEdge_symm (σ : Equiv.Perm (Fin m)) (p q : Fin m) :
+private theorem evenPermEdge_symm (σ : Equiv.Perm (Fin m)) (p q : Fin m) :
     evenPermEdge σ p q = evenPermEdge σ q p := by
   rw [Bool.eq_iff_iff, evenPermEdge_eq_true, evenPermEdge_eq_true]; tauto
 
 /-- At a moved vertex `p` (`σ p ≠ p`), the F-neighbours are exactly the successor `σ p` and
 predecessor `σ⁻¹ p`. -/
-theorem evenPermEdge_iff_of_mem {σ : Equiv.Perm (Fin m)} {p : Fin m} (hp : σ p ≠ p) (q : Fin m) :
+private theorem evenPermEdge_iff_of_mem {σ : Equiv.Perm (Fin m)} {p : Fin m} (hp : σ p ≠ p) (q : Fin m) :
     evenPermEdge σ p q = true ↔ q = σ p ∨ q = σ.symm p := by
   rw [evenPermEdge_eq_true]
   constructor
@@ -3650,7 +3650,7 @@ theorem evenPermEdge_iff_of_mem {σ : Equiv.Perm (Fin m)} {p : Fin m} (hp : σ p
       exact hp ((congrArg σ h).trans (Equiv.apply_symm_apply σ p))
 
 /-- **The cycle's flip set at a moved vertex** is `{σ p, σ⁻¹ p}` (degree 2). -/
-theorem flipSet_evenPermEdge_of_mem (σ : Equiv.Perm (Fin m)) {p : Fin m} (hp : σ p ≠ p)
+private theorem flipSet_evenPermEdge_of_mem (σ : Equiv.Perm (Fin m)) {p : Fin m} (hp : σ p ≠ p)
     (hN : σ p ∈ H.neighbors p) (hN' : σ.symm p ∈ H.neighbors p) :
     H.flipSet (evenPermEdge σ) p = {σ p, σ.symm p} := by
   ext q
@@ -3674,7 +3674,7 @@ theorem flipSet_evenPermEdge_of_fixed (σ : Equiv.Perm (Fin m)) {x : Fin m} (hx 
 
 /-- **The permutation-cycle indicator is an even subgraph.** Each moved vertex has F-degree 2
 (`{σ p, σ⁻¹ p}`, distinct by the no-2-cycle hypothesis); fixed points have degree 0. -/
-theorem evenPermEdge_even (σ : Equiv.Perm (Fin m))
+private theorem evenPermEdge_even (σ : Equiv.Perm (Fin m))
     (hEdge : ∀ p, σ p ≠ p → σ p ∈ H.neighbors p)
     (hNo2 : ∀ p, σ p ≠ p → σ (σ p) ≠ p) :
     ∀ x, (H.flipSet (evenPermEdge σ) x).card % 2 = 0 := by
@@ -3881,7 +3881,7 @@ cheap de-risking we want before the general Phase 2 proof.) -/
 def triFlipEdges : Fin 3 → Fin 3 → Bool := fun i j => decide (i ≠ j)
 
 /-- The triangle's flip set at every vertex is its 2-element neighbourhood — even. -/
-theorem triFlip_even : ∀ v, (triangleBase.flipSet triFlipEdges v).card % 2 = 0 := by decide
+private theorem triFlip_even : ∀ v, (triangleBase.flipSet triFlipEdges v).card % 2 = 0 := by decide
 
 /-- **Phase-0 smoke test (involution).** The triangle gadget flip is an involution
 (decidable pointwise form). -/

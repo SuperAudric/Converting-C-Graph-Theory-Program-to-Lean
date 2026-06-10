@@ -27,7 +27,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `Antisymmetric` | 130-132 | A `PMatrix` is antisymmetric when `P i j = POE.neg (P j i)` for all `i, j`. | Definition |
 | `AdjMatrix` | 141-142 | Self-contained adjacency matrix on `Fin n`, wrapping a `Fin n → Fin n → Nat` field. | Structure |
 | `applyGuess` | 146-153 | Apply a single guess `(a, b, dir)` to `P`: set `P a b := dir`, `P b a := neg dir`, leaving every other entry unchanged. Does not transitively close. | Definition |
-| `applyGuess_swap` | 155-176 | Applying `(a, b, swap dir)` to the σ-swapped matrix equals σ-swapping after `applyGuess P a b dir` (needs `a ≠ b`); links the two guess directions through σ. | — |
 | `closeStep` | 180-193 | Single-step transitive closure: derive `P i j` from a uniform chain `i → k → j`, with `less`-chains taking priority over `greater`-chains at ties. | Definition |
 | `transitiveClose` | 195-199 | Transitive closure of a `PMatrix` by iterating `closeStep` `n*n` times — enough rounds to reach fixpoint. | Definition |
 | `conflictMatrix` | 230-243 | Concrete 4-vertex witness with a conflicted pair `(0,1)` carrying both a `less`-chain and a `greater`-chain; refutes σ-swap commutation. | Definition |
@@ -47,31 +46,22 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `samePartition.trans` | 427-429 | `samePartition` is transitive. | — |
 | `refineStep_refines` | 435-440 | **Refinement is split-only (one round).** Equal refined colour implies equal old colour. | — |
 | `warmRefine_refines` | 442-468 | Warm refinement is split-only: equal warm-refined colour implies equal starting colour. | — |
-| `iterate_closeStep_fix` | 500-506 | Iterating `closeStep` from a fixpoint of itself stays at that fixpoint. | — |
 | `cell_split_uniform_false` | 571-596 | **Refutation:** cell-mates do not in general keep equal signatures after a guess plus TC (witnessed by `witnessP0`, the gap fixed only by singleton-cell `a`, `b`). | — |
-| `refineStep_preserves_singleton` | 618-625 | One refinement round preserves a singleton: if no vertex shares `a`'s colour, none does after `refineStep`. | — |
 | `iterate_refineStep_preserves_singleton` | 627-640 | Iterating refinement preserves a singleton for any number of rounds. | — |
-| `signature_applyGuess_off` | 642-656 | Off the guessed pair, the guess is invisible: for `x ∉ {a,b}` the signature under `applyGuess P₀ a b dir` equals the signature under `P₀`. | — |
 | `signature_eq_of_samePartition` | 658-685 | **Signature equality is a partition invariant of the colouring:** partition-equal colourings induce the same signature-equality relation between vertices. | — |
 | `warm_6_2` | 687-764 | **§6.2 direction invariance.** With `a, b` `χι`-singletons, warm refinement after `a < b` and after `b < a` induce the same partition. | — |
-| `signature_swap` | 768-778 | σ-swapping `P` relabels each signature's `POE` component by `POE.swap`, leaving colour and adjacency components untouched. | — |
 | `warmRefine_swap` | 780-822 | **Direction-blindness (Q1).** Warm refinement on `P` and on its σ-swap induce the same partition. | — |
-| `warmRefine_applyGuess_swap` | 824-834 | Warm refinement after `a < b` on `P₀` and after `b < a` on the σ-swapped `P₀` induce the same partition. | — |
 | `applyGuess_comm` | 836-854 | **Q2 — guesses commute.** Guessing on `{a,b}` then `{b,c}` (pairwise-distinct vertices) gives the same `(adj, P)` as the reverse order, since the writes touch disjoint matrix entries. | — |
-| `signature_agree_off` | 862-873 | If `P` and `Q` agree on every entry with an endpoint outside `D`, then off `D` they yield the same signature. | — |
 | `warmRefine_agree_off'` | 875-922 | **§6.2 — composable cross-branch sharing.** Matrices agreeing off `D` and `samePartition`-equal starting colourings (with `D` all `χ`-singletons) yield the same warm-refined partition; the cross-level form that chains across descent levels. | — |
 | `warmRefine_agree_off` | 924-958 | **§6.2 — the cell partition depends only on the matrix off the decision set `D`.** Matrices agreeing off `D` (its vertices `χι`-singletoned) yield the same partition; the same-`χι` specialisation of `warmRefine_agree_off'`. | — |
 | `PartitionInvariant` | 975-979 | A target-cell selector is partition-invariant when it depends only on the partition a colouring induces, not on raw colour values. | Definition |
 | `target_direction_blind` | 981-990 | **§6.2 spine — base case.** For a partition-invariant selector, the target cell chosen after `a < b` equals the one after `b < a`. | — |
 | `target_agree_off` | 992-1005 | **§6.2 spine — inductive step.** For a partition-invariant selector and matrices agreeing off a singletoned decision set `D`, the target cell is the same even when the start colourings only agree up to partition. | — |
 | `Egnd` | 1034-1035 | **§13.** The canonical ground set on `Fin n`: ordered pairs `(i, j)` with `i < j`. | Definition |
-| `mem_Egnd` | 1037-1038 | Membership in `Egnd n` is exactly `p.1 < p.2`. | — |
-| `Egnd_ne` | 1040-1041 | Pairs in `Egnd n` have distinct endpoints: `p.1 ≠ p.2`. | — |
 | `Pof` | 1043-1056 | **§13.** Commit a set `S ⊆ Egnd n` of pair-guesses into a P-matrix: write `less` at `(u,v) ∈ S`, `greater` at `(v,u)`, leaving other entries unchanged. | Definition, `noncomputable` |
 | `cl` | 1058-1063 | **§13.** Propagation closure on pair-guesses: the canonical pairs whose endpoints get separated by warm refinement after committing `S`. | Definition |
 | `SingletonAt` | 1073-1075 | The fresh-colour hypothesis at a pair `p`: both `p.1` and `p.2` are `χι`-singletons. | Definition |
 | `cl_extensive` | 1077-1092 | **§13 M1 — extensiveness of `cl`.** For canonical `S` whose vertices are all `χι`-singletons, every pair in `S` lies in `cl S`. | — |
-| `Pof_mono_entry_of_unknown` | 1122-1146 | Entry-wise monotonicity of `Pof` from the all-unknown base: for canonical `S ⊆ T`, each entry of `Pof _ S` is either `unknown` or equal to the corresponding `Pof _ T` entry (does not lift to a `cl` monotonicity result). | — |
 | `FullyDiscrete` | 1158-1160 | A colouring is fully discrete when every vertex is its own `χι`-singleton. | Definition |
 | `cl_monotone_discrete` | 1162-1179 | **§13 M0, vacuous case.** Under `FullyDiscrete`, every canonical pair lies in every `cl S`, so `cl S = Egnd n` and monotonicity carries no structural information. | — |
 | `TVerticesSingletons` | 1192-1194 | Every endpoint of every pair in `T` is a `χι`-singleton. | Definition |
@@ -81,9 +71,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `Pof_fs` | 1406-1412 | **§14.** Finset-based computable analogue of `Pof`, enabling `decide`-checkable refutations. | Definition |
 | `commitsToP` | 1414-1416 | **§14.** All-unknown-base commits-to-matrix shortcut: `Pof_fs (fun _ _ => .unknown) S`. | Definition |
 | `cl_prov` | 1418-1423 | **§14.** Provenance closure (TC-based): the canonical pair-guesses whose direction is decided by `transitiveClose` of `commitsToP S`. | Definition |
-| `closeStep_unknown` | 1427-1431 | `closeStep` returns `.unknown` at every entry of the all-unknown matrix. | — |
-| `closeStep_unknown_fixpoint` | 1433-1436 | The all-unknown matrix is a fixpoint of `closeStep`. | — |
-| `transitiveClose_unknown` | 1438-1450 | `transitiveClose` of the all-unknown matrix is the all-unknown matrix. | — |
 | `cl_prov_empty` | 1454-1463 | **§14 CL0 for `cl_prov`:** `cl_prov ∅ = ∅`. | — |
 | `cl_prov_extensive` | 1465-1479 | **§14 CL1 for `cl_prov`:** for canonical `S`, every commit's direct `less` write survives transitive closure, so `S ⊆ cl_prov S`. | — |
 | `cl_prov_M3_false` | 1497-1507 | **§14 — refutes matroid M3 exchange for `cl_prov`.** A concrete `n=5, S={(1,2),(3,4)}, x=(2,3), y=(1,4)` counterexample where the M3 premise holds but the conclusion fails; machine-checked by `decide`. | — |
@@ -91,39 +78,18 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `hasGreaterChain` | 1526-1528 | Existence of a `.greater`-chain in `P` from `i` to `j` via some intermediate `k`. | Definition |
 | `CanConsistent` | 1530-1534 | A `PMatrix` is canonical-consistent when every `.less` entry sits at `i.val < j.val` and every `.greater` entry at `i.val > j.val`. | Definition |
 | `LessMono` | 1536-1539 | One-sided `.less`-direction entry-wise monotonicity between two matrices: `P i j = .less → Q i j = .less`. | Definition |
-| `canConsistent_no_conflict` | 1541-1551 | Under canonical-consistency, no pair simultaneously hosts both a `.less`-chain and a `.greater`-chain. | — |
-| `commitsToP_classify` | 1553-1570 | Three-way classification of `commitsToP S i j` by `S`-membership of `(i,j)` and `(j,i)`. | — |
-| `commitsToP_canConsistent` | 1572-1586 | `commitsToP` of a canonical `S` is canonical-consistent. | — |
-| `closeStep_keeps_greater` | 1590-1593 | `closeStep` never demotes a decided `.greater` entry. | — |
-| `iterate_closeStep_keeps_greater` | 1595-1605 | Iterating `closeStep` preserves any `.greater` entry — once decided, frozen. | — |
-| `closeStep_decided` | 1607-1613 | `closeStep` preserves any decided entry (`.less` or `.greater`). | — |
-| `closeStep_eq_less_iff` | 1629-1663 | `closeStep P i j = .less` iff `P i j` was already `.less`, or it was `.unknown` with a `.less`-chain through some intermediate vertex. | — |
-| `closeStep_eq_greater_iff` | 1665-1717 | `closeStep P i j = .greater` iff `P i j` was already `.greater`, or it was `.unknown` with no `.less`-chain but a `.greater`-chain. | — |
-| `closeStep_canConsistent` | 1719-1730 | `closeStep` preserves canonical-consistency. | — |
-| `iterate_closeStep_canConsistent` | 1732-1740 | Iterating `closeStep` preserves canonical-consistency. | — |
-| `transitiveClose_canConsistent` | 1742-1745 | `transitiveClose` preserves canonical-consistency. | — |
-| `closeStep_lessMono` | 1747-1773 | Joint inductive step: under canonical-consistency of `Q` and `LessMono P Q`, `closeStep` preserves `.less`-mono. | — |
-| `iterate_closeStep_lessMono` | 1775-1784 | Iterating `closeStep` preserves `.less`-mono under joint canonical-consistency. | — |
-| `transitiveClose_lessMono` | 1786-1790 | `transitiveClose` preserves `.less`-mono under joint canonical-consistency. | — |
-| `commitsToP_lessMono` | 1792-1805 | Base case for CL3: canonical `S ⊆ T` gives `LessMono (commitsToP S) (commitsToP T)`. | — |
 | `cl_prov_monotone` | 1809-1834 | **§14 CL3 — monotonicity for `cl_prov`:** canonical `S ⊆ T` implies `cl_prov S ⊆ cl_prov T`. | — |
 | `numUnknown` | 1843-1846 | Number of `.unknown` entries in a `PMatrix` — the strictly-decreasing potential bounding TC iteration. | Definition |
-| `numUnknown_le` | 1848-1853 | `numUnknown P ≤ n * n`. | — |
-| `closeStep_numUnknown_lt` | 1866-1891 | If `closeStep P ≠ P`, then `numUnknown` strictly drops under one closure round. | — |
-| `iterate_closeStep_progress` | 1893-1920 | After `k` `closeStep` iterations, either a fixpoint has been reached at some step `≤ k`, or `numUnknown` has dropped by at least `k`. | — |
-| `transitiveClose_is_fixpoint` | 1922-1972 | After `n*n` iterations of `closeStep`, the result is a fixpoint: `closeStep (transitiveClose P) = transitiveClose P`. | — |
 | `transitiveClose_idempotent` | 1974-1980 | **TC idempotence.** `transitiveClose (transitiveClose M) = transitiveClose M`. | — |
 | `cl_prov_idempotent` | 2011-2041 | **CL2 — idempotence.** `cl_prov (cl_prov S) = cl_prov S` for canonical `S`. | — |
 | `IndivStep` | 2128-2152 | Existential witness of one descent-step individualisation: a colouring `χ'` that singletons every vertex in target `T` and refines `χ` outside `T`. Data, not a function — the trace carries one per step. | Structure |
 | `singletons_union` | 2156-2177 | **D-singletons preserved.** If `χ` singletons every `v ∈ D`, an `IndivStep` with target `T` singletons every `v ∈ D ∪ T`. | — |
-| `samePartition_of_samePartition` | 2179-2209 | Two `IndivStep`s applied to `samePartition`-equal colourings with the same target `T` produce `samePartition`-equal results — the inductive engine of the spine theorem. | — |
 | `IndivStep.default` | 2211-2262 | **Concrete `IndivStep` witness.** A constructive individualisation step (parity-tagged base-`n` encoding), proving traces exist at every level so the spine theorem is non-vacuous. | Definition |
 | `DescentTrace` | 2271-2309 | Inductive predicate: `(D, P, χι)` is reachable by `k` descent steps from `(P₀, χι₀)` under selector `sel`, each step carrying an `IndivStep` witness and a matrix agreeing with `P₀` off the enlarged decision set. | Inductive |
 | `singletons` | 2313-2330 | **Trace invariant.** A trace's colouring singletons its whole decision set `D`. | — |
 | `P_agrees` | 2332-2342 | **Trace invariant.** A trace's matrix agrees with `P₀` on every entry with an endpoint outside `D`. | — |
 | `SpineChain` | 2346-2354 | Bundle of a `DescentTrace` with its derived state `(D, P, χι)`. The spine theorem is branch-independence of two such chains. | Structure |
 | `partition` | 2361-2365 | The chain's level-`k` partition: warm refinement of its accumulated `(P, χι)`. | Definition |
-| `IndivStep.samePartition_het` | 2371-2384 | Heterogeneous `samePartition_of_samePartition`: accepts separate targets `T₁, T₂` with an equality hypothesis. Used at the spine induction's level-`k+1` step. | — |
 | `spine_branch_independent` | 2386-2460 | **The spine theorem (branch independence).** Any two `DescentTrace`s through `k` levels agree on the accumulated `D` (literal) and the level-`k` partition (`samePartition`) — handing the oracle one fixed partition instead of `2^d` refinement worlds. | — |
 | `SpineChain.branch_independent` | 2462-2471 | **The spine theorem, `SpineChain` wrapper.** Two chains at level `k` share `D` and level-`k` partition. | — |
 | `defaultColouring` | 2492-2502 | The level-`k` colouring of the default reference chain: iterate refine-then-individualise (via `IndivStep.default`) from `χι₀`, with the matrix held fixed at `P₀`. | Definition |
@@ -133,9 +99,7 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `SpineChain.eq_default` | 2540-2551 | **Reference corollary.** Every `SpineChain` at level `k` shares `D` and level-`k` partition with `defaultSpineChain` — there is a canonical level-`k` partition, computable by one deterministic descent. | — |
 | `Discrete` | 2575-2578 | A colouring is discrete when every cell is a singleton — equivalently, `χ : Fin n → Nat` is injective. | Definition |
 | `of_samePartition` | 2582-2586 | Discreteness is `samePartition`-invariant: equal partitions transport `Discrete`. | — |
-| `warmRefine_preserves` | 2588-2597 | Warm refinement preserves discreteness: if `χ` is injective, so is `warmRefine adj P χ`. | — |
 | `SpineChain.IsLeaf` | 2601-2607 | A `SpineChain` reaches a leaf when its level-`k` partition is discrete (every vertex a singleton). | Definition |
-| `SpineChain.isLeaf_iff_default` | 2609-2618 | `IsLeaf` is spine-invariant: a chain is a leaf iff `defaultSpineChain` at the same level is. | — |
 | `TargetsNonsingletonCell` | 2622-2628 | Selector hypothesis: every returned vertex has a same-colour partner (`sel` only picks from non-singleton cells). | Definition |
 | `NonemptyOnNonDiscrete` | 2630-2635 | Selector hypothesis: `sel χ` is non-empty whenever `χ` is not yet discrete. | Definition |
 | `defaultD_univ_isLeaf` | 2637-2652 | **`D` covers all vertices ⇒ leaf.** When the accumulated decision set is the full vertex set, the default chain's spine partition is discrete. | — |
@@ -146,7 +110,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `samePartition_pair` | 2778-2790 | Any two `DirAssignment`s over the same `(P₀, D)`, refined against a `D`-singletoning colouring, induce the same partition. | — |
 | `samePartition_chain` | 2792-2805 | **Spine equivalence.** A `DirAssignment` over a chain's `D`, refined against the chain's colouring, induces the chain's partition — the residual is exactly the choice of `DirAssignment`, partition fixed. | — |
 | `flipPair` | 2809-2853 | **Single-pair direction flip.** Negate the `(a, b)` and `(b, a)` entries of a `DirAssignment` via `POE.neg`. The generator of the `Z₂` group action on direction choices. | Definition |
-| `eq_of_σ_eq` | 2855-2865 | `DirAssignment` equality is determined by the matrix field — propositional fields subsumed by proof irrelevance. | — |
 | `flipPair_idempotent` | 2867-2876 | **Flip is an involution.** Two applications of `flipPair` to the same pair return the original `DirAssignment` — the `Z₂` generator squares to identity. | — |
 | `flipPair_partition_invariant` | 2878-2888 | **Flipping preserves the partition.** `σ` and `σ.flipPair a b` share the spine partition — the order labels move, the partition doesn't. | — |
 | `flipPair_comm` | 2890-2914 | **Flips on disjoint pairs commute** — the abelian-ness of the `Z₂^d` action: distinct decisions don't interfere. | — |
@@ -159,17 +122,12 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `isAut_of_labelledAdj_eq` | 2994-3004 | **Converse.** A permutation preserving the labelled adjacency is an automorphism. | — |
 | `vertexRankNat` | 3017-3019 | Strict rank of vertex `v`: the count of vertices `u` with `χ u < χ v`. | Definition |
 | `vertexRank` | 3037-3039 | Vertex rank packaged as `Fin n` via `vertexRankNat_lt_n`. | Definition |
-| `vertexRank_strict_mono` | 3041-3060 | `vertexRank` is strictly monotonic in the colour value: `χ v < χ w` implies `vertexRank χ v < vertexRank χ w`. | — |
-| `vertexRank_injective` | 3062-3072 | On a `Discrete` colouring, `vertexRank` is injective. | — |
-| `vertexRank_bijective` | 3074-3077 | On a `Discrete` colouring, `vertexRank` is bijective. | — |
 | `rankPerm` | 3079-3083 | **The rank permutation.** Bijection `Fin n ≃ Fin n` mapping each vertex to its colour-rank on a `Discrete` colouring. | Definition, `noncomputable` |
 | `rankPerm_apply` | 3085-3086 | Unfolding lemma: `rankPerm χ h v = vertexRank χ v`. | `@[simp]` |
 | `vertexRank_comp` | 3090-3109 | `vertexRank (χ ∘ g) v = vertexRank χ (g v)` — a pure `Finset.card` reindex along `g`. *(Relocated from `LinearOracle.lean` for the cascade oracle's `colourMatchPerm` (M-B).)* | — |
 | `rankPerm_comp` | 3111-3131 | **Rank reindexing.** `rankPerm (χ ∘ e) = rankPerm χ · e` — relabelling conjugate-shifts the rank permutation (the §L.5 conjugation gap). *(Relocated from `LinearOracle.lean`.)* | — |
 | `SpineChain.canonAdj` | 3147-3173 | **Leaf canonical adjacency.** Given a leaf `SpineChain` and a `DirAssignment σ` over its `D`, relabel `adj` by the rank permutation of the warm-refined partition. | Definition, `noncomputable` |
 | `matrixLT` | 3177-3184 | **Row-major lex strict less-than on `n × n` matrices.** The first disagreeing cell `(i, j)` (row-then-column order) has `M₁ i j < M₂ i j`. | Definition |
-| `matrixLT_irrefl` | 3186-3189 | `matrixLT` is irreflexive: no matrix is `<` itself. | — |
-| `matrixLT_asymm` | 3191-3212 | `matrixLT` is asymmetric: `M₁ < M₂` implies `¬ M₂ < M₁` (strict-order fact). | — |
 | `PMatrix.fintype` | 3216-3221 | `Fintype` instance for `PMatrix n`, stated explicitly since `PMatrix` is a `def` and so does not inherit the `Pi` instance transparently. | Instance |
 | `DirAssignment.fintype` | 3227-3237 | **`Fintype` on `DirAssignment P₀ D`.** Obtained by injecting the σ-field into the `Fintype` `PMatrix n`. | Instance, `noncomputable` |
 | `relabelMatrix` | 3241-3248 | **Relabel a bare matrix** `Fin n → Fin n → Nat` by a permutation `π`: entry `(i,j)` becomes `M (π⁻¹ i) (π⁻¹ j)`. Lets `LeafTwistSpec` state the leaf-relabelling property without re-wrapping as an `AdjMatrix`. | Definition |
@@ -178,9 +136,7 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `ofMatrixLex` | 3262-3264 | Unwrap a Lex'd matrix back to a plain `Fin n → Fin n → Nat`. | Definition |
 | `ofMatrixLex_toMatrixLex` | 3266-3267 | `ofMatrixLex (toMatrixLex M) = M`. | `@[simp]` |
 | `toMatrixLex_ofMatrixLex` | 3269-3270 | `toMatrixLex (ofMatrixLex M) = M`. | `@[simp]` |
-| `toMatrixLex_injective` | 3272-3276 | `toMatrixLex` is injective. | — |
 | `canonFormImages` | 3278-3287 | The Finset of Lex-wrapped `canonAdj` images over all `DirAssignment`s for a leaf chain — the candidate set `canonForm` minimises over. | Definition, `noncomputable` |
-| `canonFormImages_nonempty` | 3289-3295 | `canonFormImages chain isLeaf` is non-empty when `DirAssignment P₀ chain.D` is. | — |
 | `canonForm` | 3297-3317 | **The canonical leaf adjacency matrix:** the lex-min `canonAdj` over all `DirAssignment`s (row-major lex). Requires `Nonempty (DirAssignment P₀ chain.D)`. | Definition, `noncomputable` |
 | `canonForm_mem_image` | 3319-3334 | **`canonForm` comes from some `DirAssignment`:** it equals `canonAdj σ` for some `σ`. | — |
 | `canonForm_le_canonAdj` | 3336-3352 | **`canonForm` is the lex-minimum:** `toMatrixLex (canonForm) ≤ toMatrixLex (canonAdj σ)` for every `DirAssignment σ`. | — |
@@ -191,9 +147,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `FixesPointwise` | 3454-3457 | Predicate: permutation `π` fixes every vertex in `S` pointwise (`π v = v` for `v ∈ S`). | Definition |
 | `complement` | 3463-3471 | A pointwise-fixing permutation stabilises the complement setwise: `v ∉ S` implies `π v ∉ S`. | — |
 | `individualizedColouring_invariant` | 3475-3484 | An automorphism fixing `S` pointwise preserves the individualised colouring: `χ_S (π v) = χ_S v` for every `v`. | — |
-| `signature_invariant_of_isAut` | 3488-3525 | An automorphism preserving `(adj, P, χ)` pointwise preserves the signature multiset at every vertex. | — |
-| `refineStep_invariant_of_isAut` | 3527-3540 | An automorphism preserving `(adj, P, χ)` pointwise preserves one round of `refineStep`. | — |
-| `iterate_refineStep_invariant_of_isAut` | 3542-3558 | Iterated refinement preserves automorphism invariance for any number of rounds. | — |
 | `warmRefine_invariant_of_isAut` | 3560-3569 | Warm refinement preserves automorphism invariance: if `(adj, P, χ_init)` are all `π`-invariant, so is `warmRefine adj P χ_init`. | — |
 | `signature_transport` | 3583-3608 | **Signature transport.** An automorphism `g` carrying `(P₁, χ₁)` to `(P₂, χ₂)` maps the `(P₂, χ₂)`-signature at `g v` to the `(P₁, χ₁)`-signature at `v`. Cross-config form of `signature_invariant_of_isAut`. | — |
 | `sigKey_transport` | 3610-3617 | **`sigKey` transport** — cross-config: `sigKey adj P₂ χ₂ (g v) = sigKey adj P₁ χ₁ v`. | — |
@@ -212,7 +165,6 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `orbit_iff_eq_of_discrete_warmRefine` | 3837-3855 | **Fact B (partition):** at discrete depth, `OrbitPartition adj P S v w ↔ v = w`. | — |
 | `CascadesAt` | 3877-3884 | **Cascade-at-depth-`k` predicate:** some `S` with `S.card ≤ k` makes `warmRefine adj P (individualizedColouring n S)` discrete. | Definition |
 | `cascadesAt_univ` | 3886-3905 | **Trivial cascade at depth `n`:** taking `S = univ` gives a discrete starting colouring preserved by warm refinement — the every-graph fallback. | — |
-| `CascadesAt.mono` | 3907-3912 | Monotonicity: a cascade at depth `k₁` is a cascade at every depth `k₂ ≥ k₁`. | — |
 | `theorem_1_HOR_at_depth` | 3925-3948 | **Key theorem (Tier 1 HOR).** If `adj` cascades at depth `k`, some `S` with `S.card ≤ k` makes `warmRefine` discrete and the `Aut_S`-orbit partition equal to the `warmRefine` partition. | — |
 | `theorem_1_HOR_at_n` | 3970-3981 | **Theorem 1, trivial-bound corollary:** every graph admits orbit recovery at depth `n`. Axiom-free specialisation to `cascadesAt_univ`. | — |
 | `theorem_1_HOR` | 3983-3994 | **Theorem 1 (legacy existential form):** some `S` makes `warmRefine` discrete and orbits equal cells. | — |
@@ -229,29 +181,20 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `neighbors` | 76-78 | The neighbour set of `v` in the base graph, as a `Finset (Fin m)`. | Definition |
 | `degree` | 80-81 | The degree of `v` in the base graph: `(H.neighbors v).card`. | Definition |
 | `mem_neighbors` | 83-86 | Membership characterisation: `w ∈ H.neighbors v ↔ H.adj.adj v w ≠ 0`. | `@[simp]` |
-| `degree_ge_two` | 88-89 | The structural CFI invariant: every base vertex has degree at least 2. | — |
 | `not_self_mem_neighbors` | 91-95 | No vertex is its own neighbour (looplessness): `v ∉ H.neighbors v`. | — |
 | `mem_neighbors_symm` | 97-100 | The neighbour relation is symmetric: `w ∈ H.neighbors v ↔ v ∈ H.neighbors w`. | — |
 | `gadgetSize` | 117-119 | §3 Size of the CFI gadget at base vertex `v`: `2^(degree v − 1) + 2 * degree v` — even-subset vertices plus endpoint vertices. | Definition |
 | `cfiVertexCount` | 121-123 | Total vertex count of `CFI(H)`: `∑ v, H.gadgetSize v`. | Definition |
-| `gadgetSize_ge_six` | 125-136 | Every CFI gadget contains at least 6 vertices (`degree v ≥ 2` gives `2^1 + 2*2 = 6`). | — |
 | `evenSubsetsOfNeighbors` | 153-156 | §4 The `Finset` of even-cardinality subsets of `N(v)`; indexes the subset vertices `a_S^v` of `CFI(H)`. | Definition |
-| `empty_mem_evenSubsetsOfNeighbors` | 158-161 | The empty set belongs to `evenSubsetsOfNeighbors v` (cardinality 0 is even) — supplies the `a_∅^v` seed witness. | — |
 | `mem_evenSubsetsOfNeighbors` | 163-167 | Membership: `S ∈ evenSubsetsOfNeighbors v ↔ S ⊆ N(v) ∧ S.card % 2 = 0`. | `@[simp]` |
 | `triangleBase` | 177-188 | §5 The triangle `K_3` as a `CFIBase 3`: the smallest base graph satisfying the degree-≥-2 invariant; the running smoke-test base. | Definition |
-| `triangleBase_degree` | 190-192 | Every vertex of `triangleBase` has degree 2. | — |
-| `triangleBase_cfiVertexCount` | 194-196 | `triangleBase.cfiVertexCount = 18` — three gadgets of size 6. | — |
 | `SubsetVertex` | 219-221 | §6 Type-level encoding of subset vertices of `CFI(H)`: pairs `(v, S)` with `S ∈ evenSubsetsOfNeighbors v`. | `abbrev` |
 | `EndpointVertex` | 223-226 | §6 Type-level encoding of endpoint vertices of `CFI(H)`: triples `(v, w, b)` with `w ∈ N(v)` and `b : Bool`. | `abbrev` |
 | `CFIVertex` | 228-236 | §6 The vertex type of `CFI(H)`: the sum `SubsetVertex ⊕ EndpointVertex`. | `abbrev` |
 | `triangleBase_cfiVertex_card` | 290-292 | §7 Smoke test: `Fintype.card triangleBase.CFIVertex = 18`, matching `cfiVertexCount`. | — |
 | `cfiAdj` | 318-331 | §8 **The CFI adjacency function** on `CFIVertex H`, returning 0/1 per the subset/endpoint clauses and the untwisted inter-gadget bridge formula. | Definition |
-| `cfiAdj_symm` | 333-352 | `cfiAdj` is symmetric: `H.cfiAdj x y = H.cfiAdj y x`. | — |
-| `cfiAdj_loopless` | 354-371 | `cfiAdj` is loopless: `H.cfiAdj x x = 0` for every CFI vertex `x`. | — |
 | `cfi_triangle_no_twins` | 403-406 | §8.1 `CFI(triangle)` has no twin pairs: any two distinct vertices are separated by some third vertex. Confirms CFI's `Z₂` is a global gadget-flip, not a transposition — so the twin slice and CFI are complementary abelian classes. | — |
 | `cfiAdjMatrix` | 433-443 | §9 **The CFI adjacency matrix** on `Fin (Fintype.card H.CFIVertex)`, lifting `cfiAdj` through `Fintype.equivFin`. | Definition, `noncomputable` |
-| `cfiAdjMatrix_symm` | 445-449 | `cfiAdjMatrix` is symmetric. | — |
-| `cfiAdjMatrix_loopless` | 451-455 | `cfiAdjMatrix` is loopless. | — |
 | `IsCFI'` | 459-479 | §9 **Concrete `IsCFI` predicate.** A witness that `adj : AdjMatrix n` is the CFI of some base `H : CFIBase m`, exposing the base graph and bijection `Fin n ≃ H.CFIVertex` as addressable data. | Structure |
 | `IsCFI'.baseSize` | 481-486 | The base graph's vertex count `h.m` for a CFI witness `h`; the depth-bound API ties `cfi_depth_bound h` to `h.baseSize`. | `abbrev` |
 | `cfiAdjMatrix_is_cfi` | 488-519 | **Self-witness**: every `H.cfiAdjMatrix` satisfies `IsCFI'`, with `H` itself as the base. | Definition, `noncomputable` |
@@ -261,36 +204,24 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: t
 | `IsCFI'.six_baseSize_le` | 720-754 | §12 **Connector**: a CFI graph has at least `6 * baseSize` vertices (each gadget contributes ≥ 6) — yields the `n/6` depth bound. | — |
 | `aEmpty` | 773-778 | §13.1 The canonical seed vertex `a_∅^v` of `CFI(H)`: the subset vertex at gadget `v` with the empty subset, individualized by the M2-M4 cascade. | Definition |
 | `endpoint` | 780-783 | §13.1 The endpoint vertex `e^b_{v→w}` of `CFI(H)` at gadget `v`, pointing toward `w ∈ N(v)` with parity bit `b`. | Definition |
-| `cfiAdj_aEmpty_endpoint_false` | 792-797 | §13.2 `cfiAdj (a_∅^v) (e^0_{v→w}) = 0` — the b=false endpoint is not adjacent to the empty-subset seed. | — |
-| `cfiAdj_aEmpty_endpoint_true` | 799-804 | §13.2 `cfiAdj (a_∅^v) (e^1_{v→w}) = 1` — the b=true endpoint is adjacent to the empty-subset seed. | — |
-| `aEmpty_ne_endpoint` | 806-813 | `H.aEmpty v ≠ H.endpoint hw b`: subset and endpoint vertices are distinct (different `Sum` tags). | — |
 | `cfiAdj_aEmpty_endpoint_diff_gadget` | 815-828 | **Cross-gadget non-adjacency**: `cfiAdj (a_∅^v) (e^b_{v'→w}) = 0` when `v ≠ v'`. | — |
 | `cfiAdj_bridge` | 830-846 | **The bridge edge**: `cfiAdj (e^b_{v→w}) (e^b_{w→v}) = 1` — same-parity endpoints at neighbouring gadgets pointing toward each other. | — |
 | `IsCFI'.seedVertex` | 859-863 | §13.3 The `Fin n` vertex corresponding to the seed `a_∅^v` for an `IsCFI'` witness — what the cascade individualizes. | Definition |
 | `IsCFI'.endpointVertex` | 865-869 | §13.3 The `Fin n` vertex corresponding to `e^b_{v→w}` for an `IsCFI'` witness — the endpoints the cascade probes. | Definition |
 | `e_seedVertex` | 875-879 | Bijection round-trip: `h.e (h.seedVertex v) = h.H.aEmpty v`. | `@[simp]` |
 | `e_endpointVertex` | 881-886 | Bijection round-trip: `h.e (h.endpointVertex hw b) = h.H.endpoint hw b`. | `@[simp]` |
-| `seedVertex_ne_endpointVertex` | 888-898 | Seed and endpoint vertices are distinct in `Fin n` (their abstract counterparts have different `Sum` tags). | — |
-| `adj_seed_endpoint_false` | 913-919 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w false) = 0`. | — |
-| `adj_seed_endpoint_true` | 921-927 | §13.4 Fin-n: `adj (seedVertex v) (endpointVertex v w true) = 1`. | — |
-| `adj_endpoint_seed_false` | 929-935 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w false) (seedVertex v) = 0`. | — |
-| `adj_endpoint_seed_true` | 937-943 | §13.4 Symmetric Fin-n form: `adj (endpointVertex v w true) (seedVertex v) = 1`. | — |
 | `individualizedColouring_singleton_self` | 1009-1012 | Individualizing a single seed gives it colour `seed.val + 1`. | `@[simp]` |
 | `individualizedColouring_singleton_other` | 1014-1018 | Under a singleton individualization, every non-seed vertex gets colour `0`. | `@[simp]` |
 | `individualizedColouring_eq_iff_of_mem` | 1145-1161 | Multi-seed uniqueness: under `individualizedColouring n S`, for `v ∈ S` a vertex shares v's colour iff it equals v. Generalises the singleton form to arbitrary S. | — |
 | `allSeeds` | 1167-1174 | §13.8 The cascade individualization set `{seedVertex v : v ∈ Fin m}` — one seed per base vertex; the witness used in `cfi_cascades_polynomially`. | Definition |
-| `seedVertex_injective` | 1176-1194 | `seedVertex` is injective: distinct base vertices map to distinct `Fin n` indices. | — |
-| `seedVertex_mem_allSeeds` | 1196-1199 | Every `seedVertex v` lies in `allSeeds`. | — |
 | `allSeeds_card` | 1201-1207 | `|allSeeds| = h.baseSize`; with `six_baseSize_le` the cascade individualization has at most n/6 vertices. | `@[simp]` |
 | `adj_endpointVertex_eq_one_iff` | 1506-1528 | §13.12 Endpoint-endpoint adjacency characterisation: two endpoints are adjacent iff they form a bridge pair (`v_a = w_b ∧ w_a = v_b ∧ b_a = b_b`). | — |
-| `adj_seedVertex_eq_one_iff` | 1530-1605 | §13.12 Seed-adjacency characterisation: a vertex is adjacent to `seedVertex w` iff it is a b=true endpoint in gadget w. Key structural fact for the cascade's no-match preconditions. | — |
 | `subset` | 1727-1732 | §13.14 The CFI vertex `a_S^v`: the subset vertex at gadget v with even subset S ⊆ N(v). Generalises `aEmpty v` (the S = ∅ case). | Definition |
 | `IsCFI'.subsetVertex` | 1785-1791 | §13.14 The `Fin n` vertex for `a_S^v`. Generalises `seedVertex v` (the empty-subset case). | Definition |
 | `e_subsetVertex` | 1797-1803 | Bijection round-trip: `h.e (subsetVertex hS) = subset hS`. | `@[simp]` |
 | `adj_subsetVertex_eq_one_iff` | 1851-1904 | §13.14 Subset-adjacency characterisation: `adj u (subsetVertex_{v'} hS') = 1` iff u is an endpoint at v' whose parity satisfies `(w' ∈ S') ⊕ b`. Generalises `adj_seedVertex_eq_one_iff` (S' = ∅). | — |
 | `IsCFI'.adj_symm` | 2103-2107 | §13.16.5 CFI adjacency is symmetric at the `Fin n` level: `adj.adj i j = adj.adj j i`. | — |
 | `OddDegree` | 2633-2636 | §13.21 Odd-degree CFI base: every base vertex has odd degree, ensuring no even subset of N(v) is saturated. Hypothesis for the axiom-free cascade (covers K₄, K₃,₃, Petersen). | Definition |
-| `exists_witness_of_oddDegree` | 2638-2659 | §13.21 Under `OddDegree`, every even subset of N(v) has a strict non-element y ∈ N(v) \ S — the subset-distinction witness. | — |
 | `cfi_cascades_polynomially_oddDeg` | 2971-3175 | §13.24 M4 — for OddDegree CFI graphs, `warmRefine adj P χ_{allSeeds}` is `Discrete`; discharges `CascadesAt` (the cascade axiom) axiom-free at depth `cfi_depth_bound h`. | — |
 | `theorem_1_HOR_cfi_oddDeg` | 3177-3196 | **Tier-1 CFI orbit recovery.** Theorem 1 for OddDegree CFI graphs, axiom-free: orbit partition coincides with the warm-refined colouring at depth ≤ baseSize, conditional only on `OddDegree`. | — |
 
@@ -341,7 +272,6 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `triFlip_isAut_check` | **Phase-0 crux:** the triangle gadget flip preserves `cfiAdj` on all 18×18 pairs (`decide`) — validates cycle-flip-is-automorphism on the smallest case before the general Phase-2 proof. | — |
 | `triFlip_nontrivial` | Phase-0 smoke test: the triangle gadget flip moves some vertex — a nontrivial `CFI(triangle)` automorphism. | — |
 
-| `CFIBase.flipSet_subset` | 3257-3260 | The flip set is a set of neighbours: `flipSet F v ⊆ N(v)`. | — |
 | `CFIBase.mem_flipSet` | 3262-3265 | Membership in the flip set: `w ∈ flipSet F v ↔ w ∈ N(v) ∧ F v w`. | `@[simp]` |
 | `CFIBase.xorF` | 3293-3295 | **(CFI-cov.2)** Pointwise XOR of two flip-edge indicators — the cycle-space `Z₂` sum. | Definition |
 | `CFIBase.flipSet_xorF` | 3297-3305 | **(CFI-cov.2)** The flip-set of an XOR is the symmetric difference of the flip-sets: `flipSet (xorF F F') v = flipSet F v ∆ flipSet F' v`. The reusable core of the cycle-space sum. | — |
@@ -352,13 +282,7 @@ preservation, `Fin n` lift, support/locality, `P`-preservation, consumer wiring)
 | `CFIBase.cfiFlip_endpoint_swap` | 3451-3460 | **C1b.0.** The flip swaps the parity-pair `e^0_{v→w}/e^1_{v→w}` iff `F v w = true` (the swap companion of `cfiFlip_endpoint`). | — |
 | `CFIBase.cfiFlip_xorF` | 3478-3493 | **(CFI-cov.3) Gauge flip is a homomorphism on the cycle space:** `cfiFlip (xorF F F') = cfiFlip F ∘ cfiFlip F'` (endpoint: Bool-xor assoc/comm; subset: symmDiff assoc/comm via `flipSet_xorF`). The `Z₂^β`-factor group structure. | — |
 | `CFIBase.cfiFlip_const_false` | 3495-3506 | **(CFI-cov.3)** The zero subgraph is the identity flip: `cfiFlip (fun _ _ => false) = id` (cycle-space zero ↦ identity). | — |
-| `CFIBase.triEdge_symm` | 3533-3535 | The triangle even-subgraph indicator is symmetric in its edge endpoints: `triEdge v w u p q = triEdge v w u q p`. | — |
-| `CFIBase.triEdge_apex` | 3537-3539 | The decision edge lies in its triangle: `triEdge v w u v w = true`. | — |
-| `CFIBase.triEdge_cyclic` | 3541-3543 | Cyclic invariance of the triangle even-subgraph: `triEdge v w u = triEdge w u v` (so `{v,w,u}` is unordered). | — |
-| `CFIBase.triEdge_iff` | 3545-3549 | Membership characterisation of the triangle even-subgraph indicator `triEdge v w u`. | — |
 | `CFIBase.flipSet_triEdge_other` | 3568-3578 | **D-locality.** Off the triangle `{v,w,u}` the triangle's flip set is empty, so the triangle flip fixes every other gadget. | — |
-| `CFIBase.evenPermEdge_symm` | 3631-3634 | The permutation-cycle even-subgraph indicator is symmetric: `evenPermEdge σ p q = evenPermEdge σ q p`. | — |
-| `CFIBase.evenPermEdge_iff_of_mem` | 3636-3650 | At a moved vertex (`σ p ≠ p`), the cycle's F-neighbours are exactly `{σ p, σ⁻¹ p}` — degree 2, no list arithmetic. | — |
 | `CFIBase.flipSet_evenPermEdge_of_fixed` | 3664-3673 | **D-locality (triangle-free bases).** At a `σ`-fixed vertex the permutation-cycle flip set is empty, so the cycle flip avoids every fixed gadget. | — |
 | `IsCFI'.cfiFlipAut_swaps_endpointVertex` | 3837-3849 | **C1b.0 (lifted to `Fin n`).** `cfiFlipAut F` swaps `endpointVertex hw false ↔ true` iff `F v w = true` — the foundational decision-pair swap C1b.1 keys on. | — |
 | `IsCFI'.cfiFlipAut_xorF` | 3853-3861 | **(CFI-cov.3) The lifted gauge-flip homomorphism:** `cfiFlipAut (xorF F F') = cfiFlipAut F * cfiFlipAut F'` (the `Fin n` form of `cfiFlip_xorF` via `e_cfiFlipAut`). So `F ↦ cfiFlipAut F` is a group homomorphism `(Z₂^β, xorF) → Equiv.Perm (Fin n)`, image the gauge group. | — |
@@ -521,7 +445,6 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `merged_sameCell` | 183-194 | A sound oracle only ever merges vertices that 1-WL already left in the same cell, so it never collapses across cells. | — |
 | `OrbitRecoverableAt` | 216-225 | The orbit-recovery target at `S`: the `Aut_S`-orbit relation equals the 1-WL cell relation, so refinement computes orbits and a complete oracle exists. | Definition |
 | `orbitRecoverable_of_cascade` | 227-235 | On the cascade class, orbits are recoverable at some set of size ≤ `k` — the general foundation behind every cascade-class oracle instance. | — |
-| `orbitRecoverable_cfi` | 237-245 | Odd-degree CFI graphs are orbit-recoverable at depth ≤ `cfi_depth_bound h` (axiom-free). | — |
 | `orbitRecoverable_scheme` | 247-257 | Rank-2, single-edge-class schurian scheme graphs are orbit-recoverable at depth 1 (axiom-free). | — |
 | `CellsAreOrbits` | 259-272 | The genuinely-open half of orbit recovery: every same-cell pair is a real `Aut_S`-orbit pair. Holds at cascade and discretizing depth, fails at generic intermediate nodes — this predicate names the open localisation content. | Definition |
 | `orbitRecoverableAt_iff_cellsAreOrbits` | 274-283 | Orbit recoverability is exactly `CellsAreOrbits` (the other half is unconditional), pinning localisation to a single implication. | — |
@@ -542,7 +465,6 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `cellsAreOrbits_of_twin_cells` | 718-774 | `CellsAreOrbits` at **arbitrary** support whenever every same-cell pair is an order-undecided twin — the genuine-twin / module abelian regime (not CFI, which has no twins). The twin-reconstructible slice of the open localisation obligation. | — |
 | `orbitRecoverableAt_of_twin_cells` | 776-795 | Oracle-vocabulary form of `cellsAreOrbits_of_twin_cells`: on the twin regime refinement computes the orbit partition at any node, with no depth bound. | — |
 | `RecoverableByDepth` | 797-806 | Cascade-class membership for the oracle contract: there is a polynomially-bounded depth at which cells = orbits (the bound carries all the content). | Definition |
-| `recoverableByDepth_of_cascade` | 808-814 | Cascading at depth `k` gives `RecoverableByDepth … k` — the cascade-class foundation in oracle-contract form. | — |
 | `recoverableByDepth_cfi` | 816-822 | **(1a), proved for CFI** (axiom-free, odd-degree): recoverable by depth `cfi_depth_bound h` (≤ baseSize ≤ n/6). | — |
 | `recoverableByDepth_scheme` | 824-836 | **(1a), proved for schemes** (axiom-free, rank 2 / `|J| = 1`): recoverable by depth 1, at the very node the oracle acts on. | — |
 | `recoverableByDepth_pPolynomial` | 838-855 | **(1a), proved for the whole metric/DRG family** (axiom-free, P-polynomial / `|J|=1`): recoverable by depth 1, via `theorem_2_HOR_of_pPolynomial`. Generalizes `recoverableByDepth_scheme` (rank-2 only) to every P-polynomial schurian scheme graph — cycles, Johnson, Hamming, all DRGs — in one oracle-vocabulary export; depth-1 cells non-singleton (genuine recovery at the structural oracle's node). | — |
@@ -561,7 +483,6 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `colourMatchPerm` | 1066-1076 | §C.4 **M-B — the colour-match permutation.** The explicit `Equiv.Perm` from the two *discrete* branch colourings, as the rank composition `(rankPerm χ_w)⁻¹ * (rankPerm χ_v)` (`χ_r = warmRefine adj P (indivWithRep n D r)`). Always well-defined given discreteness; `= g` at a recoverable node. | Definition, `noncomputable` |
 | `colourMatchPerm_eq_of_orbit` | 1078-1091 | §C.4 **M-B completeness linchpin.** An `Aut_D` witness `g` (`g v = w`, `w ∉ D`) value-matches the two branch colourings (`colourMatch_complete`), so `colourMatchPerm = g` — built from the colours, not assumed. | — |
 | `matchOracle` | 1092-1110 | §C.4 **M-B — the colour-match cascade oracle.** Constructs `colourMatchPerm` (when both footprints discrete) and returns it **iff** it verifies as an `Aut_D` orbit map (`IsAut ∧ P-preserving ∧ fixes D ∧ v ↦ w`). Construct-and-check, not the existential shortcut. | Definition, `noncomputable` |
-| `matchOracle_fires` | 1112-1133 | §C.4 Evaluation lemma: given discreteness + the four verification facts about `colourMatchPerm`, `matchOracle` returns `some`. The engine of the completeness proof. | — |
 | `matchOracle_orbitMapSpec` | 1135-1145 | §C.4 **M-B soundness — `OrbitMapSpec`, unconditional.** When `matchOracle` fires, its four checks *are* the `OrbitPartition` witness conditions, so the returned perm certifies a genuine `Aut_D` orbit pair. No discreteness/recoverability hypothesis. | — |
 | `matchOracle_cellComplete` | 1147-1183 | §C.4 **M-B completeness — `CellComplete`.** Conditional on every node one-step-discretizing (`hdisc`, = the exposure-depth witness / M-C / "B's core") and `CellsAreOrbits` everywhere (`hco`, = localisation): at a same-cell pair the orbit automorphism exists, `colourMatchPerm = g`, so the oracle fires. | — |
 | `matchOracle_cascadeComplete` | 1185-1196 | §C.4 **M-B capstone — `CascadeComplete`.** `matchOracle` computes the orbit relation exactly, reduced to the two named-open hypotheses (discretizing depth + `CellsAreOrbits`); soundness is already unconditional. | — |
@@ -581,7 +502,6 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `colourMatchPermSet_eq_of_orbit` | 1393-1403 | §C.5 `colourMatchPermSet = g` at a recoverable set-footprint (`rankPerm_inv_mul_eq_of_match` ← `vertexRank_comp` + `colourMatchSet_complete`); the multi-step `colourMatchPerm_eq_of_orbit`. | — |
 | `colourMatchSet_exists_of_cellsAreOrbits` | 1405-1418 | §C.5 **The multi-step firing certificate exists.** From `CellsAreOrbits` at a same-cell pair, for *any* exploration set `R₁` the orbit aut `g`, partner `R₂ = R₁.image g`, and the colour-match all exist. The open piece (M-D) is that the oracle's branch-`w` set *is* `R₁.image g` (lockstep). | — |
 | `matchOracleSet` | 1431-1451 | §C.6 **M-D — the multi-step colour-match oracle.** Like `matchOracle` but individualizes a whole explored *set* `expand chain r` (per an exploration selector) on top of the committed path; constructs `colourMatchPermSet`, returns it **iff** it verifies `IsAut ∧ P-preserving ∧ fixes D ∧ v ↦ w`. | Definition, `noncomputable` |
-| `matchOracleSet_fires` | 1453-1478 | §C.6 Evaluation lemma: discreteness + the four checks on `colourMatchPermSet` ⟹ `matchOracleSet` fires. | — |
 | `matchOracleSet_orbitMapSpec` | 1480-1490 | §C.6 **M-D soundness — `OrbitMapSpec`, unconditional.** When it fires the four checks *are* the `OrbitPartition` witness; no discreteness/recoverability/lockstep hypothesis. | — |
 | `LockstepExpand` | 1492-1502 | §C.6 **The lockstep correspondence** as equivariance of the exploration rule: any `P`-preserving automorphism fixing the committed path carries one branch's exploration set onto the other's (`expand chain (g v) = (expand chain v).image g`). Discharged for `forcedExpand` (`Cascade.lean`). | Definition |
 | `matchOracleSet_cellComplete` | 1504-1544 | §C.6 **M-D completeness — `CellComplete`.** Reduced to set-footprint discreteness (the multi-step depth witness) + `CellsAreOrbits` + `LockstepExpand`: the lockstep supplies `R₂ = R₁.image g`, so `colourMatchPermSet = g` and the oracle fires. | — |
@@ -591,7 +511,6 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `matchOracle_orbit_of_fire_mono` | 1631-1645 | §C.7 **Propagate via `mono`.** A merge certified at a node holds at every shallower committed set `S ⊆ chain.D` (`OrbitPartition.mono`) — the "fire deep, prune shallow" step. | — |
 | `matchOracle_certifies_iff_orbit_of_insertDiscrete` | 1647-1673 | §C.7 **Exact orbit decider at the discretizing depth.** At a footprint-discretizing node, `matchOracle` fires on `(v,w)` **iff** they are a genuine `Aut_D` orbit pair (`hco`-free). Limits: holds only under the discreteness hypotheses (cascade depth), and decides the *path-fixing* `Aut_D`, not global `Aut`. | — |
 | `indivWithSeq` | 1694-1699 | §C.8 **Level-coloured exploration sequence (Leg 1).** Committed `S` by index plus the `i`-th element of `rs` by its *position* colour `n+1+i`; the position colouring (not vertex index) is what transports under an orbit automorphism. | Definition |
-| `indivWithRep_eq_indivWithSeq_singleton` | 1701-1708 | §C.8 `indivWithRep n S r = indivWithSeq n S [r]` — the singleton-sequence case (`n+1+0 = n+1`). | — |
 | `samePartition_indivWithSeq` | 1710-1778 | §C.8 **A1: level-coloured sequence = indexed union.** `indivWithSeq n S rs` and the indexed `individualizedColouring n (S ∪ rs.toFinset)` induce the same partition (each `rs`-vertex globally unique); unconditional. | — |
 | `discrete_indivWithSeq_of_discrete_union` | 1780-1791 | §C.8 **The Leg-1 depth-witness bridge (sequence).** Sequence-footprint discreteness follows from discreteness of the indexed `individualizedColouring n (S ∪ rs.toFinset)`, so `hdiscSeq ⟸ recoverableByDepth`. Sequence generalization of `discrete_indivWithRep_of_discrete_insert`. | — |
 | `idxOf_map_of_injective` | 1805-1817 | §C.8 **Position preserved by `map`.** `(l.map g).idxOf (g a) = l.idxOf a` for a permutation `g` — the pure-list core of sequence transport. | — |
@@ -599,16 +518,13 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `IsColourMatchSeq` | 1842-1845 | §C.8 The sequence colour-match relation (`IsColourMatchSet` analogue): `t` matches branch-`rs₂`'s refined colours to branch-`rs₁`'s. | Definition |
 | `colourMatchSeq_complete` | 1847-1854 | §C.8 **Sequence completeness brick.** The orbit aut `g` (fixing `S`, `rs₂ = rs₁.map g`) *is* a colour-match (`warmRefine_transport ∘ indivWithSeq_transport`). | — |
 | `colourMatchPermSeq` | 1856-1863 | §C.8 **The sequence colour-match permutation.** Rank composition `(rankPerm χ_{rs₂})⁻¹ * rankPerm χ_{rs₁}` for level-coloured footprints; `colourMatchPermSet` with the uniform set replaced by the sequence. | Definition, `noncomputable` |
-| `colourMatchPermSeq_eq_of_orbit` | 1865-1875 | §C.8 `colourMatchPermSeq = g` at a recoverable level-coloured footprint (`rankPerm_inv_mul_eq_of_match` + `colourMatchSeq_complete`). | — |
 | `colourMatchSeq_exists_of_cellsAreOrbits` | 1877-1890 | §C.8 **The level-coloured firing certificate exists.** From `CellsAreOrbits`, for any sequence `rs₁` the orbit aut `g`, partner `rs₂ = rs₁.map g`, and the colour-match exist. The open piece is the ordered lockstep (A2b). | — |
 | `matchOracleSeq` | 1903-1923 | §C.8 **The multi-step sequence colour-match oracle.** Like `matchOracleSet` but individualizes the ordered sequence `expand chain r` via `indivWithSeq` (so its depth witness is A1-reducible); construct-and-check on `colourMatchPermSeq`. | Definition, `noncomputable` |
-| `matchOracleSeq_fires` | 1925-1949 | §C.8 Evaluation lemma: discreteness + the four checks on `colourMatchPermSeq` ⟹ `matchOracleSeq` fires. | — |
 | `matchOracleSeq_orbitMapSpec` | 1951-1960 | §C.8 **Sequence soundness — `OrbitMapSpec`, unconditional.** When it fires the four checks *are* the `OrbitPartition` witness. | — |
 | `LockstepExpandSeq` | 1962-1973 | §C.8 **The sequence lockstep.** The ordered (`map`, not `image`) `LockstepExpand` analogue: `expand chain (g v) = (expand chain v).map g`. Strictly stronger than the set lockstep; provably false in the multi-step regime (`lockstep_disc_imp_stab_trivial`). | Definition |
 | `matchOracleSeq_cellComplete` | 1975-2014 | §C.8 **Sequence completeness — `CellComplete`.** Reduced to `hdiscSeq` (A1-reducible) + `hco` + `LockstepExpandSeq`. | — |
 | `matchOracleSeq_cascadeComplete` | 2016-2028 | §C.8 **Sequence capstone — `CascadeComplete`**, reduced to the same three hypotheses (the last jointly unsatisfiable with `hdiscSeq` for multi-step — see `lockstep_disc_imp_stab_trivial`). | — |
 | `matchOracleSeq_verdictIsoInvariant` | 2030-2043 | §C.8 **Sequence flag iso-invariance, free** (via `verdictIsoInvariant_of_complete`). | — |
-| `fixedPointwise_of_map_self` | 2065-2073 | §C.8 A list equal to its own image under `g` is fixed pointwise by `g`: `l.map g = l → ∀ x ∈ l, g x = x`. | — |
 | `lockstep_disc_imp_stab_trivial` | 2075-2109 | §C.8 **The discretizing-oracle limit (conservation of obstruction).** `LockstepExpandSeq ∧ hdiscSeq ⟹ stab_{Aut_D}(v) = 1`: the sequence oracle's completeness hypotheses hold jointly only in the single-rep regime, so the discretizing colour-match cannot harvest a multi-step moved orbit (→ cross-branch / Schreier–Sims). | — |
 ## ChainDescent/LinearOracle.lean
 
@@ -627,10 +543,7 @@ The linear-oracle / abelian-stripping work (tractable-buildout B2; plan + status
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `relabelMatrix_labelledAdj` | 141-150 | Relabelling composes: `relabelMatrix t (labelledAdj s adj) = labelledAdj (t * s) adj` — the `Equiv.Perm` group action on labelled matrices. | — |
-| `canonAdj_eq_labelledAdj` | 152-157 | `canonAdj σ = labelledAdj (rankPerm π_σ) adj` for any discreteness proof; holds by `rfl`. | — |
 | `canonAdj_rebase` | 159-174 | **The rebasing bridge.** Relabelling `σ`'s canonical leaf by the rank rebasing `rankPerm π_{σ'} * (rankPerm π_σ)⁻¹` yields `σ'`'s leaf; the flip is the `σ' = flipPair σ` instance. | — |
-| `branch_discrete` | 176-182 | A branch's warm-refined colouring is discrete at a leaf, derived exactly as `canonAdj` derives it so the rank permutations match definitionally. | — |
 | `candidateTwist` | 184-192 | **The forced candidate twist** for decision `(a,b)`: the rank rebasing `rankPerm π_flip * (rankPerm π_σ)⁻¹`. Always realises the flip; the twist is determined, not searched. | Definition, `noncomputable` |
 | `candidateTwist_realizesFlip` | 194-201 | The forced candidate always realises the flip — the construction is forced, with no ambiguity. | — |
 | `candidateTwist_unique` | 203-215 | **Determinacy.** The candidate is the unique permutation rank-aligning `σ` to the flipped branch — the leaf-level iso-invariance gate, making twist discovery deterministic in iso-invariant rank data. | — |
@@ -654,7 +567,6 @@ abelian-sufficiency lemma (forced candidate IsAut for genuine abelian flips, via
 
 | Name | Description | Notes |
 |------|-------------|-------|
-| `candidateTwist_mul_rankPerm` | 319-327 | The forced candidate satisfies the rank-alignment equation `candidate · π_σ = π_flip` (the inverse cancels). | — |
 | `isAut_candidateTwist_iff_aligned` | 329-344 | **Firing characterisation.** The forced candidate is an automorphism iff some automorphism is rank-aligned (`g · π_σ = π_flip`) — so the whole completeness question is "does a rank-aligned automorphism exist?" | — |
 | `RealizableFlip` | 346-352 | The decision is a genuine `Aut(adj)` symmetry: some automorphism realises the flip (the two branches are isomorphic) — what pruning should require. | Definition |
 | `realizableFlip_of_isAut_candidateTwist` | 354-365 | **Firing is semantically justified.** When the forced candidate verifies, the branches are genuinely `Aut(adj)`-equivalent (the candidate is the witness) — pruning reflects a real symmetry. | — |
@@ -670,7 +582,6 @@ partition equality is vacuous; the content is in the rank order). Provable progr
 | Name | Description | Notes |
 |------|-------------|-------|
 | `candidateTwist_eq_one_of_rankPerm_eq` | 424-435 | **Absorbed decision.** Equal leaf rank permutations force the candidate to be the identity — the degenerate end of the abelian regime. | — |
-| `isAut_candidateTwist_of_rankPerm_eq` | 437-445 | The absorbed decision fires: the forced candidate (the identity) is an automorphism. | — |
 
 ### §L.7 — The CFI bridge (M1b): candidate as a conjugate of a graph automorphism
 
@@ -685,7 +596,6 @@ exists, (2) its `π_σ`-conjugate is an automorphism.
 |------|-------------|-------|
 | `ConfigSwap` | 587-599 | A config-swap for decision `(a,b)`: a graph automorphism carrying the σ-branch configuration onto the flip-branch configuration (fixes `χι`, sends `σ.σ` to `(flipPair σ).σ`). For CFI, the gadget twist swapping the decided pair. | Structure |
 | `configSwap_rankPerm` / `_flip` | The leaf rank perms differ by `g`: `π_σ = π_flip · g` (resp. `π_flip = π_σ · g⁻¹`), from transport + `vertexRank_comp`. | axiom-light |
-| `configSwap_rankPerm_flip` | 618-625 | `π_flip = π_σ · g⁻¹` — the rearrangement of `configSwap_rankPerm`. | — |
 | `candidateTwist_eq_conjugate` | 627-637 | **The rank-space reduction.** Given a config-swap `g`, the forced candidate is the `π_σ`-conjugate of `g⁻¹` (`candidateTwist = π_σ · g⁻¹ · π_σ⁻¹`) — the opaque rebasing exposed as a conjugate of a genuine automorphism. | — |
 | `isAut_candidateTwist_iff_conjugate` | 639-650 | **The reduction.** `IsAut candidate adj ↔ IsAut (π_σ · g⁻¹ · π_σ⁻¹) adj` — the rank-space firing obligation is exactly the gadget rank-alignment, the concrete nut shared with Tier-3a B1. | — |
 
@@ -898,7 +808,6 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `ResidualAut` | 461-467 | **Residual automorphism.** A `P`-preserving automorphism of `adj` fixing `S` pointwise — an element of the residual group `Aut_S^P`; the building block of the screen predicates. `OrbitPartition adj P S v w ↔ ∃ π, ResidualAut π ∧ π v = w`. | Definition |
 | `ResidualAbelian` | 469-474 | **D2 — abelian residual.** The residual group `Aut_S^P` is abelian (any two residual automorphisms commute) — the screen's hidden-abelian / linear leg (calculator §6); the `¬IsBase`-guarded form is the D2 disjunct. | Definition |
 | `orbitPartition_iff_residualAut` | 476-482 | `OrbitPartition adj P S v w` unfolds to a `ResidualAut` carrying `v ↦ w`. | — |
-| `ResidualAut.mul` | 500-510 | The residual group is closed under composition: composing two `P`-preserving automorphisms fixing `S` pointwise yields another. | — |
 | `ResidualInvolutive` | 512-518 | **D2, the exponent-2 form.** Every residual automorphism is an involution — `Aut_S^P` has exponent ≤ 2 (an elementary-abelian `Z₂^d`, CFI's gauge group). The precise form of D2 the swap content needs; strictly stronger than `ResidualAbelian`. | Definition |
 | `residualAbelian_of_involutive` | 520-529 | **Exponent-2 ⟹ abelian.** A residual group of involutions commutes — wiring the abstract `ResidualAbelian` predicate to the precise `ResidualInvolutive`. | — |
 | `orbitPartition_swap_of_involutive` | 531-544 | **An involutive orbit witness is a swap.** With an exponent-2 residual, an `Aut_S`-orbit pair `a, b` has a residual automorphism with `g a = b` *and* `g b = a` — closing the map-vs-swap gap class-agnostically (the content the CFI route obtains from gadget involutions). | — |
@@ -1020,31 +929,23 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `endpoint_crossGadget_gadget` | 2293-2307 | **(CFI base-graph projection, Brick 1 sharpened)** A cross-gadget neighbour of `e^b_{v→w}` lands in gadget `w` *exactly* (the bridge target), not merely some `H`-neighbour gadget — each endpoint has a single cross-gadget (bridge) neighbour, in gadget `w`. Pins the projection's multiplicity (cross-gadget neighbourhood distributed over `N_H(gadget)`, one per outgoing endpoint direction). | — |
 | `VisiblyRecoverable` | 2330-2346 | **D1 (explicit-chain form).** A single-vertex, per-step symmetry-only chain from `S₀` reaching `CellsAreOrbits` within a depth bound — the unconditional/cascade leg's structural witness, retained alongside the inductive `Findable`. | Definition |
 | `recoverableByDepth_of_visiblyRecoverable` | 2348-2353 | **D1 leg (free).** `VisiblyRecoverable ⟹ RecoverableByDepth` — the chain ends on a `CellsAreOrbits` set within the bound. | — |
-| `visiblyRecoverable_bound_mono` | 2355-2359 | `VisiblyRecoverable` is monotone in the depth bound (a looser bound is easier). | — |
 | `cellsAreOrbits_empty_of_schurian` | 2361-2374 | **Schurian scheme graphs are vertex-transitive: `CellsAreOrbits adj P ∅`.** The `Aut`-orbit relation at `∅` is total (witness from `schurian_transitive` at the diagonal `R₀`), unblocking the symmetry-only first step. | — |
 | `visiblyRecoverable_of_cellsAreOrbits_singleton` | 2376-2389 | **`CellsAreOrbits` at a singleton + vertex-transitivity ⟹ D1 at depth 1.** The one-step chain `∅ → {v}` is symmetry-only with `CellsAreOrbits {v}` as endpoint recovery. | — |
 | `visiblyRecoverable_scheme` | 2391-2401 | **D1 instance — rank-2, `|J|=1` schurian scheme is visibly recoverable.** Validates `VisiblyRecoverable` against the proved depth-1 scheme orbit recovery (`orbitRecoverable_scheme`). | — |
 | `SymmetryOnlyStep` | 2405-2418 | **D1 per-decision primitive (§6.10).** Individualizing `v` commits no real decision: `v`'s 1-WL cell is non-singleton and a single `Aut_S`-orbit. The non-singleton conjunct is load-bearing (forces `v ∉ S`); lifted out of `VisiblyRecoverable`. | Definition |
-| `symmetryOnlyStep_of_cellsAreOrbits` | 2420-2430 | `CellsAreOrbits` upgrades any non-singleton cell to a `SymmetryOnlyStep` — the bridge from the recovery predicate to the screen primitive, and why `Discrete` (not bare `CellsAreOrbits`) is a non-false-walling stop (§6.11 F1). | — |
 | `symmetryOnlyStep_empty_scheme` | 2432-2453 | **Scheme validation of the primitive.** A vertex-transitive schurian scheme is one orbit at `∅`, so individualizing any `v` (with `n ≥ 2`) is a `SymmetryOnlyStep`. | — |
 | `Findable` | 2472-2484 | **The harvest-window screen (sequential D1/D2, §6.10+§6.11).** Least-fixed-point inductive: `recovered` (`Discrete` — the F1-correct stop), `abelian` (`ResidualAbelian ∧ ¬IsBase` — guarded D2), `step` (`SymmetryOnlyStep` + recurse). Bound-free classification; `¬Findable` is the seal's wall (IR-blind-spot / Cameron by residual order). | Inductive |
 | `FindableWithin` | 2495-2513 | **`Findable` with its recovery depth (Phase 0).** Bound-indexed companion: `recovered`→`b=S.card`, `step` propagates `b`, `abelian` carries `RecoverableByDepth adj P b` as a field (the D2-bridge interface). De-vacuates the `∃ b` conclusion (`recoverableByDepth_univ`). | Inductive |
 | `recoverableByDepth_of_findableWithin` | 2515-2525 | **Screen soundness — non-vacuous.** `FindableWithin adj P S b ⟹ RecoverableByDepth adj P b` at the carried bound: `recovered`/`step` free, `abelian` returns its carried recoverability field. | — |
-| `findable_of_findableWithin` | 2527-2536 | Forgetting the bound (and the abelian recoverability witness) collapses `FindableWithin` to the bound-free `Findable` classification; the reverse needs the D2 bridge, so `FindableWithin` is strictly stronger. | — |
 | `findableWithin_cfi_gauge` | 2564-2574 | **D2-bridge anchor (CFI gauge).** For an odd-degree CFI graph, a hidden non-trivial abelian residual (`ResidualAbelian ∧ ¬ IsBase`, the screen's D2 predicate) discharges `FindableWithin` at `cfi_depth_bound h` via the axiom-free `recoverableByDepth_cfi` — the D2 analogue of `visiblyRecoverable_scheme`. | — |
 | `recoverableByDepth_of_cfi_gauge` | 2576-2584 | **The CFI gauge is `RecoverableByDepth`.** Bound-carrying soundness applied to `findableWithin_cfi_gauge`: a hidden non-trivial abelian CFI residual recovers by depth `cfi_depth_bound h`, routed through the screen so the D2 leg is certified non-vacuous end-to-end. | — |
 | `findable_cfi_gauge` | 2586-2594 | **The CFI gauge is `Findable`** (bound-free classification): a hidden non-trivial abelian CFI residual lands in the screen's D2 leg — the abelian disjunct populated by the central recoverable, non-Cameron example. | — |
 | `soStep` | 2614-2618 | Leg A — one round of the symmetry-only closure: individualize a symmetry-only vertex if one exists, else stay put. Extensive; strictly grows until no symmetry-only step remains. | Definition, `noncomputable` |
-| `soStep_extensive` | 2620-2624 | The symmetry-only closure round is extensive — it only ever adds the chosen vertex. | — |
 | `symmetryOnlyStep_not_mem` | 2626-2635 | A symmetry-only step's vertex is not yet committed (`v ∉ S`): a committed vertex is a warm-refinement-preserved singleton, so its cell could not be non-singleton. This is what makes `soStep` strictly grow until stuck. | — |
-| `soStep_pos` | 2637-2640 | When a symmetry-only step exists, the closure round takes it (inserts the chosen vertex). | — |
 | `exists_symmetryOnly_saturated` | 2642-2659 | **Leg A — bounded termination of the symmetry-only process.** Iterating the symmetry-only closure from any `S₀` reaches a saturated node `S* ⊇ S₀` with no symmetry-only step available, within `≤ n − |S₀|` rounds — the engine-powered, class-agnostic half of the harvest-window trichotomy's termination. | — |
 | `MovedAt` | 2670-2675 | Leg A — a vertex moved by some residual automorphism at `S`; weaker than a symmetry-only step (its cell may be coarser than its orbit), so the right object for the general support induction. | Definition |
-| `movedAt_not_mem` | 2677-2679 | A moved vertex is not committed (`v ∉ S`), since a residual automorphism fixes `S` pointwise. | — |
 | `isBase_of_no_moved` | 2681-2691 | A node with no moved vertex is a base (trivial residual). | — |
 | `movedStep` | 2692-2696 | Leg A — one round of the moved-vertex closure: individualize a moved vertex if one exists, else stay. Extensive; strictly grows until the residual is trivial (a base). | Definition, `noncomputable` |
-| `movedStep_extensive` | 2698-2701 | The moved-vertex closure round is extensive. | — |
-| `movedStep_pos` | 2703-2705 | When a moved vertex exists, the closure round takes it. | — |
 | `exists_isBase_saturated` | 2707-2724 | **Leg A — the general support induction (every graph reaches a base).** Individualizing moved vertices from any `S₀` reaches a base `S* ⊇ S₀` (trivial residual) within `≤ n − |S₀|` rounds, via the `Saturation` engine — holding for every graph (CFI, schemes, rigid alike). | — |
 | `MovedAt.anti` | 2737-2746 | **Moved-set anti-monotonicity.** A residual automorphism fixing `S` also fixes any `S₀ ⊆ S`, so a vertex moved at `S` is already moved at `S₀` — the moved-set shrinks as the individualized set grows, which makes it a saturation bound. | — |
 | `movedSet` | 2747-2752 | **The residual support at `S₀`:** the vertices moved by some residual automorphism fixing `S₀` (the support of `Aut_{S₀}^P`). Disjoint from `S₀`; its cardinality is the harvest-window depth `|support(g)|`. | Definition, `noncomputable` |
@@ -1152,7 +1053,6 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `affineGenSet` | 603-605 | (Phase 2, M0.3) The affine permutations whose linear part lies in `G₀` — the generating set of `V ⋊ G₀`. | Definition |
 | `affineG` | 607-619 | **(Phase 2, M0.3/M1.0)** The affine group `V ⋊ G₀` as a `Subgroup (Perm (Fin (p^d)))` — the *carrier-set* subgroup of affine perms (closed under `*`/`⁻¹`/`1` by `affinePermFin_mul`/`_inv`/`_one`), so membership is transparently "is an affine perm with linear part in `G₀`". | Definition, `noncomputable` |
 | `mem_affineG_iff` | 621-625 | **(Phase 2, M1.0)** Membership in `affineG` ⟺ being an affine perm with linear part in `G₀` (`σ = affinePermFin g₀ t`, `g₀ ∈ G₀`). The transparent characterization the orbital argument needs. | — |
-| `affinePermFin_one_mem` | 627-630 | (Phase 2, M0.3) A translation (`linear part 1 ∈ G₀`) lies in `affineG`. | — |
 | `affineG_isPretransitive` | 632-642 | **(Phase 2, M0.3)** Transitivity — translations act transitively on `F_p^d`. Supplies `orbitalScheme`'s `htrans`. | — |
 | `affineG_generous` | 644-662 | **(Phase 2, M0.3)** Generous transitivity — with `-1 ∈ G₀`, `orbMk x y = orbMk y x` (the affine swap `u ↦ -u + (x+y)`), making the scheme symmetric. Supplies `orbitalScheme`'s `hsymm`. | — |
 | `affineScheme` | 664-672 | **(Phase 2, M0.3 — THE BEACHHEAD MODEL)** The affine scheme `V ⋊ G₀` over `F_p^d` as a `SchurianScheme (p^d)`, via `orbitalScheme (affineG G₀)`. Relations = `G₀`-orbits on differences; `relOfPair x y` = orbit of `y−x`. Pluggable into `SelfDetectsStably`/the seal. Requires `-1 ∈ G₀`. Next: M1 (`IsPrimitive` ⟺ `G₀` irreducible), M2 (irreducible ⟹ recovers). Axiom-clean. | Definition, `noncomputable` |
