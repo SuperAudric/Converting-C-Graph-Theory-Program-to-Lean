@@ -136,66 +136,51 @@ discretizing oracle was *proven unable* to harvest a multi-step moved orbit
 twists, `tw ≥ 2`) **must** be harvested **cross-branch** — which is why Part A (a
 group object to fold automorphisms into) exists.
 
-**The live frontier (2026-06-06).** The cross-branch harvest is now **general**:
-`coversOrbits_of_realizers` reproduces *any* residual group (abelian or non-abelian)
-from harvested realizers, with the CFI exponent-2 case as a corollary (CFI-cov.4
-complete in the base-resolved regime; C# canonizes CFI(K₄–K₇)). The **general
-polynomiality capstone** now ties this off: `crossBranchHarvest_reproduces_residual` /
-`autP_reproduced_of_visibleRealizers` (`Cascade.lean` Part A) — the descent reproduces
-the residual **group and order** from the refinement-computable harvest, modulo a single
-recovery witness; the polynomiality-layer analogue of `exhaustiveObstruction_scheme`.
-**Localisation** — the gap between this and full polynomiality — is scoped as the
-*polynomiality* layer: coverage *correctness* is unconditional; recovery only makes the
-harvest refinement-computable (`recoverableByDepth_pPolynomial` exports the whole
-metric/DRG family), and *per-level* recovery is the substrate-conditional cascade/WL-dimension
-discriminator. The broader project target is *"correctly reaches a rigid or Cameron
-residual on all graph classes."* That goal's two outcomes are now both being worked:
-**rigid** (cascade/abelian — the recovery + cross-branch mechanism above) and
-**Cameron** (the flag region). The "or Cameron" half is the **Exhaustive-Obstruction
-Lemma** — and the two claims under "the wall" must be kept apart: *whether* a
-non-abelian obstruction arises (≡ **GI ∈ P**, out of scope) versus *classifying* one
-that does as a Cameron section (**Cameron-hard, NOT GI-hard** — a finite target,
-**now an active thread**: Approach 3, the Cameron-free *scheme leg*, with scheme
-primitivity, the imprimitive ⟹ refinement-visible bridge, and the group-side bridge
-(`isPreprimitive_iff_isPrimitive`: scheme `IsPrimitive` ⟺ Mathlib `IsPreprimitive`) landed in
-`Scheme.lean`; the refinement-side decomposition is deferred as substrate-conditional, capstone cited).
-The capstone's **largeness** antecedent was once routed through a *no-fusion* track (`NoFusion`/
-`largenessBridge_viaHarvest`), but that "derivation" rested on the orbit-level-**vacuous** `NoFusion` predicate
-(it was `IsLarge ⟹ IsLarge` once the vacuous coverage is stripped). **That whole family has been EXCISED from
-Lean (2026-06-07, seal-handoff Tier-4 h′);** the seal capstones now carry largeness honestly as the
-**identity** `LargenessBridge` at `IsLargeSchemeViaAut` (`¬IsLarge` = "small" the cascade antecedent). The
-genuine "¬consumed ⟹ large" is still open (G2-B). The adversarial battery has
-**run, all three tiers** ([`chain-descent-fusion-battery-plan.md`](./chain-descent-fusion-battery-plan.md),
-`FusionBatteryExperiment.cs`): **no genuine fusion is constructible** — "fusion" splits into a *separable*
-case (Tier-0-handled, where all constructible hidden non-abelian symmetry lives) and a *non-decomposable*
-case that is empirically unwitnessable = a genuine Cameron section (no third species), with consumption
-governed by candidate-pinning/recovery (orthogonal to abelian-ness). The unconditional block-visibility route
-to *primitivity* was refuted (Shrikhande, depth-graded). Tracked in
-[`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) (§0.7.5),
-[`chain-descent-declassing.md`](./chain-descent-declassing.md) §9, and
-[`chain-descent-hidden-johnson.md`](./chain-descent-hidden-johnson.md).
+**The mechanism (cross-branch harvest).** `coversOrbits_of_realizers` reproduces
+*any* residual group — abelian or non-abelian — from the refinement-computable
+harvest, with the CFI exponent-2 case a corollary (CFI-cov.4 complete in the
+base-resolved regime; C# canonizes CFI(K₄–K₇)). The general polynomiality capstone
+`crossBranchHarvest_reproduces_residual` / `autP_reproduced_of_visibleRealizers`
+(`Cascade.lean` Part A) reproduces the residual **group and order**, modulo a single
+recovery witness. **Localisation** — the gap to full polynomiality — is the
+*polynomiality* layer: coverage correctness is unconditional; recovery makes the
+harvest refinement-computable (`recoverableByDepth_pPolynomial` exports the metric/DRG
+family); per-level recovery is the substrate-conditional WL-dimension discriminator.
 
-**The goal is a single theorem — a conditional seal `modulo {G3 + G2-B}` (2026-06-10, axiom-clean, build green).**
-The oracle-capability seal is **assembled and reduced to one open proposition.** The abstract capstone
-`reachesRigidOrCameron` (`Cascade.lean`) wires the landed trichotomy `¬IsPrimitive ∨ ¬NonCascade ∨ Cameron`; the
-concrete capstones instantiate the rigid predicate and discharge the three branches. Every rank-≥3 schurian scheme
-residual is `ReachesRigid ∨ IsCameronScheme` (consumed by the cascade/abelian oracles, or a Cameron section). The
-remaining open content is **one proposition** — **G2-B**: a *primitive, small, non-abelian, non-recovering* residual
-— plus the cited `PrimitiveCCClassification` (G3, Babai/Sun–Wilmes, solid rank 3/4). Everything else is landed,
-axiom-clean: leg B (`AbelianConsumed`, L3-earned, citation-free), depth-graded recovery (G1a), and the imprimitive
-block leg (G2-A, earned `SchemeBlockRecovered` — *not* an opaque carried hypothesis). Both empirical falsifiers
-(the Hanaki–Miyamoto catalogue + the affine `ΓL(1,2^d)` sweep) returned **0 G2-B witnesses**, so G2-B emptiness is
-empirically strong but uncited.
+**The goal is one theorem — "reaches a rigid or Cameron residual" — now a conditional
+seal `modulo {G3 + G2-B}`.** The abstract capstone `reachesRigidOrCameron`
+(`Cascade.lean`) wires the trichotomy `¬IsPrimitive ∨ ¬NonCascade ∨ Cameron`; every
+rank-≥3 schurian residual is `ReachesRigid ∨ IsCameronScheme`. Landed axiom-clean: leg B
+(`AbelianConsumed`, citation-free), depth-graded recovery (G1a), the imprimitive block
+leg (G2-A, *earned* `SchemeBlockRecovered`), and the primitivity bridge
+`isPreprimitive_iff_isPrimitive`. The **largeness** antecedent is now carried honestly
+(`LargenessBridge` identity); the earlier vacuous *no-fusion* "derivation" was excised
+(2026-06-07). The "or Cameron" half is **Cameron-hard, not GI-hard** — *whether* a
+non-abelian obstruction arises is ≡ **GI ∈ P** (out of scope); *classifying* one as a
+Cameron section is the in-scope, finite target. The adversarial fusion battery ran all
+three tiers: **no genuine fusion is constructible** — it splits into a separable case
+(Tier-0-handled) and a non-decomposable case that is empirically a genuine Cameron
+section (no third species). The unconditional block-visibility route to primitivity was
+refuted (Shrikhande, depth-graded).
 
-**The live frontier (2026-06-10) — the rewiring + the conservation split.** A conceptual step-back (recovery depth
-is `O(log n)`, not `O(1)`) + two depth-growth probes (the `O(log n)` growth lives entirely in the *handled* legs —
-leg C/Cameron, leg B/abelian — while the **G2-B residue is flat, depth ≤ 4**) exposed that the old recovery
-predicate over-required: it folded the unbounded **IR-core** (post-base discretization, the multipede term) into the
-seal. The **conservation budget split** `recovery_depth = base(G) + s(C)(G) + IR_core(G)`
-(`stablyRecoverable_iff_symmetric_and_bases`) and the **rewiring** (`reachesRigidOrCameron_viaSymmetricRecovery`,
-keyed on the IR-core-free `SchemeRecoveredWhileSymmetric`, with the full root group reproduced from the symmetry
-phase *alone*) move the IR-core to the **second guarantee** (flag-allowed). So the seal's open content is now the
-bounded, empirically-`O(1)` **`s(C)` term** (`SelfDetectsWhileSymmetric`), strictly weaker than the old obligation.
+**The single open proposition — G2-B** (2026-06-10, axiom-clean, build green): a
+*primitive, small, non-abelian, non-recovering* residual, plus the cited
+`PrimitiveCCClassification` (G3, Babai/Sun–Wilmes, solid rank 3/4). Both empirical
+falsifiers — the Hanaki–Miyamoto catalogue and the affine `ΓL(1,2^d)` sweep — returned
+**0 G2-B witnesses** (empirically strong, uncited). The **2026-06-10 rewiring** sharpened
+what G2-B requires: a step-back (recovery depth is `O(log n)`, not `O(1)`, with the
+growth living entirely in the *handled* legs while the G2-B residue stays flat, depth ≤ 4)
+showed the old recovery predicate over-required — it folded the unbounded **IR-core**
+(the multipede term) into the seal. The conservation split
+`recovery_depth = base(G) + s(C)(G) + IR_core(G)` (`stablyRecoverable_iff_symmetric_and_bases`)
++ `reachesRigidOrCameron_viaSymmetricRecovery` (keyed on the IR-core-free
+`SchemeRecoveredWhileSymmetric`, root group reproduced from the symmetry phase *alone*)
+move the IR-core to the **second guarantee** (flag-allowed). The seal's open content is
+now the bounded, empirically-`O(1)` **`s(C)` term** (`SelfDetectsWhileSymmetric`) —
+strictly weaker than the old obligation. Full chronology and every gap:
+[`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md) (authoritative),
+[`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) §0.7.5,
+[`chain-descent-declassing.md`](./chain-descent-declassing.md) §9.
 
 **What NOT to do (a proven boundary, 2026-06-10).** Do not attack G2-B by exhibiting it as a **block / scheme
 congruence**: `intraCellRelations_eq_singleton_zero_of_primitive` proves the intra-cell block route *identically
@@ -259,7 +244,7 @@ witness layer, not onboarding):
   leg B (abelian) missing — the most actionable**, G2 the leaks (open `s(C)` frontier), G3 the citation. Start here
   for *any* gap. **Subsumes** the Route B handoff below.
 - **Route B — the imprimitive branch (SUPERSEDED by the seal handoff; read for the G2-A blow-by-blow only)** →
-  [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) — its capstones were found vacuous (see its
+  [`chain-descent-routeB-handoff.md`](./Archive/ChainDescent/chain-descent-routeB-handoff.md) (archived) — its capstones were found vacuous (see its
   top correction note); the genuine, kept pieces (`hfiber_of_fiberVisibleRealizers`, the conditional chain) are
   catalogued in the seal handoff §4 G2-A / §5.
 
@@ -267,7 +252,7 @@ witness layer, not onboarding):
 only if working that thread): `chain-descent-tier3-decomposability.md`,
 `chain-descent-tier3-tractable-buildout.md` (its Part A landed → schreier-sims;
 Part B is the open roadmap), `chain-descent-tier3a-cascade-composition.md`
-(+ `-tier3a-b1-build-plan.md`), `chain-descent-tier2-lean-plan.md`,
+(+ `-tier3a-b1-build-plan.md`),
 `chain-descent-extended-twist-viability.md`,
 `chain-descent-abelian-sufficiency-handoff.md`,
 `chain-descent-cfi-gauge-discharge-plan.md` (the CFI-cov.4 gauge-nut build plan; CFI harvest landed; the
@@ -279,6 +264,11 @@ base-resolved hypothesis re-wired 2026-06-06 from the vacuous `PSeparatesGadgets
 `chain-descent-partA-handoff.md`. **Its §4 "next target" is obsolete** (that thread — de-classing →
 CFI-cov.4 — is done; see [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) §7). Read it
 only for §1 (build/verify/doc-sync conventions) and §2 (Lean gotchas).
+
+**Archived (consumed / superseded / historical — moved to [`Archive/ChainDescent/`](./Archive/ChainDescent/), not in the live `docs/` listing):**
+`chain-descent-a2iii-plan.md` (A2-iii resolved negatively — Shrikhande refutes unconditional block-visibility),
+`chain-descent-routeB-handoff.md` (superseded by the seal handoff; G2-A blow-by-blow only),
+`chain-descent-tier2-lean-plan.md` (goal achieved — the Tier-2 axioms it set out to discharge are landed).
 
 ---
 

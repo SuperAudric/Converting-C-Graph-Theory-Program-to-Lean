@@ -1,7 +1,7 @@
 # Chain descent — THE SEAL HANDOFF: current state and the gaps to "consumed-or-Cameron"
 
 > **STATUS (2026-06-07, rev. 3): this is the authoritative handoff for the oracle-capability seal.** It **subsumes**
-> [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) (Route B is now one *partial* attack on
+> [`chain-descent-routeB-handoff.md`](./Archive/ChainDescent/chain-descent-routeB-handoff.md) (archived; Route B is now one *partial* attack on
 > one gap, G2-A below, and its capstones were found vacuous — see §3). Read this doc to pick up *any* of the
 > open gaps. The goal is to close all of them, including pushing through the GI-adjacent frontier (G2).
 >
@@ -947,5 +947,5 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
    [`chain-descent-schreier-sims.md`](./chain-descent-schreier-sims.md) (Part A cross-branch harvest).
 4. [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md) — ground truth for what is proved;
    grep the decl names in §5.
-5. [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) — **superseded by this doc**; read only
+5. [`chain-descent-routeB-handoff.md`](./Archive/ChainDescent/chain-descent-routeB-handoff.md) (archived) — **superseded by this doc**; read only
    for the Route B (G2-A) blow-by-blow and the vacuity-correction note at its top.

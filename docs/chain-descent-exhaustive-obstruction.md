@@ -616,7 +616,7 @@ by orbit).
      is small and decisive: *can a closed subset be counting-symmetric from `v`?* If closure forbids it →
      A2-iii closes Step 3a unconditionally; if not → that scheme is the exact object to build. **Moderate
      optimism A2-iii closes**, pessimism only on the narrow counting-symmetric escape. Scratch plan:
-     [`chain-descent-a2iii-plan.md`](./chain-descent-a2iii-plan.md) (short-lived; this block is the durable
+     [`chain-descent-a2iii-plan.md`](./Archive/ChainDescent/chain-descent-a2iii-plan.md) (archived; short-lived; this block is the durable
      record).
 
    **A2 status — the three sub-approaches and where each stands (durable handoff record, 2026-06-05).**
@@ -880,11 +880,11 @@ predicate is now `SchemeRecovered` keyed on **visible** (same-`warmRefine`-cell)
 for high `s(C)`); the headline `reachesRigidOrCameron_viaRecovery` discharges both non-Cameron branches
 identically via `schemeRecovered_of_visibleRealizers`. The block-decomposition machinery's graph-level
 *conditional* lemmas stay valid; only the existential "recovers" packaging was vacuous. Full record:
-[`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md) top. **The paragraph below is the
+[`chain-descent-routeB-handoff.md`](./Archive/ChainDescent/chain-descent-routeB-handoff.md) top (archived). **The paragraph below is the
 historical Route B record (orbit-level route, now superseded).**
 
 **ROUTE B (the intrinsic decomposition) — MECHANICAL CHAIN LANDED axiom-clean (2026-06-06).** *Full handoff
-for a fresh reader (the live `hreach`/`hfiber` frontier):* [`chain-descent-routeB-handoff.md`](./chain-descent-routeB-handoff.md).
+for a fresh reader (the live `hreach`/`hfiber` frontier):* [`chain-descent-routeB-handoff.md`](./Archive/ChainDescent/chain-descent-routeB-handoff.md) (archived).
 Despite the "riskier" headline, the user directed an attempt, and it went through at the graph level. Four layers
 (the fourth wires it to the seal capstone):
 **Phase 0 gate** (`Scheme.lean §11.1`: `schemeBlock_fiber_transitive` + `schemeBlocks_transitive`) — the

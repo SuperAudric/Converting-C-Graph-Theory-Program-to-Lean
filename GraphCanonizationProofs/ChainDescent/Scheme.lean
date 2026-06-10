@@ -35,7 +35,7 @@ representation used by `ChainDescent.lean`.
 
 References:
 - `docs/chain-descent-orbit-recovery.md §14.1, §14.3` — paper proofs.
-- `docs/chain-descent-tier2-lean-plan.md` — phase plan and parallels
+- `docs/Archive/ChainDescent/chain-descent-tier2-lean-plan.md` (archived) — phase plan and parallels
   to Tier 1's OddDegree discharge.
 - Bannai-Ito (1984) "Algebraic Combinatorics I" — classical reference.
 -/
@@ -1058,7 +1058,7 @@ with Step 1's `vProfile = graph-Aut-orbit-fixing-v` and the trivial
 `OrbitPartition.subset_warmRefine`, this gives the equality
 `warmRefine partition = vProfile partition = OrbitPartition`.
 
-**Phased proof** (see `docs/chain-descent-tier2-lean-plan.md` for
+**Phased proof** (see `docs/Archive/ChainDescent/chain-descent-tier2-lean-plan.md` (archived) for
 the full plan):
 
 - **§8.a — S2.a (this revision)**: round-1 lemma. `iter[1] χ_v w
@@ -4233,7 +4233,7 @@ block-visibility — and it is **strictly weaker than `EdgeGenerates`** (it asks
 fusion `W` respect the I-boundary, not that the edge generate the whole scheme). The open A2-iii question
 is exactly whether *every* `ClosedSubset` satisfies it (does every closed subset respect `W`?); the
 candidate obstruction is a relation-algebra counting-twin pair split by `I`
-([`chain-descent-a2iii-plan.md`](../../docs/chain-descent-a2iii-plan.md) §1.1). -/
+([`chain-descent-a2iii-plan.md`](../../docs/Archive/ChainDescent/chain-descent-a2iii-plan.md) §1.1, archived). -/
 def SchemePartSeparatesBlock {n : Nat} (G : SchurianSchemeGraph n) (P : PMatrix n) (v : Fin n)
     (I : Finset (Fin (G.scheme.rank + 1))) : Prop :=
   ∀ w u : Fin n, schemePart_at G P v n w u →
