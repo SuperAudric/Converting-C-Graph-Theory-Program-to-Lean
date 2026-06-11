@@ -8,10 +8,174 @@ scheme/seal substrate they build on lives in `Cascade.lean` (imported below).
 -/
 import ChainDescent.Cascade
 import ChainDescent.Scheme
+import ChainDescent.Separability
 
 namespace ChainDescent
 
 open scoped BigOperators
+
+/-! ### §S-stab — warm-refinement stabilization (the multi-round propagation prerequisite)
+
+The PV-Thm-3.1 *bridge* (`connectivity ⟹ {α,β} base ⟹ SeparatesAtBoundedBase`) re-expresses PV's
+fiber-singleton propagation (Lemmas 3.2–3.3) on `warmRefine`. That propagation pins a vertex `z'` from a
+*determined* (singleton-cell) neighbour, which needs to compare signatures one round past the stable
+colouring — i.e. it needs `warmRefine` to be a `refineStep`-fixpoint **up to partition**. Every prior
+discreteness result in the project goes through the depth-`k` *count* route (`kRoundProfileCount_eq`)
+precisely to avoid this fixpoint fact; the bridge cannot, so we prove it here.
+
+`warmRefine = (refineStep)^[n]`. The chain `χ, refineStep χ, …` refines monotonically, the cell count
+(`numCells`) is non-decreasing and bounded by `n`, so a *plateau* (`samePartition` between consecutive
+rounds) is reached within `n` steps; once reached it is stable forever (`refineStep` respects
+`samePartition`). Hence the `n`-th round is already stable: `samePartition (warmRefine χ) (refineStep …
+(warmRefine χ))`. This whole block is generic in `(adj, P)` — no scheme structure. -/
+section Stabilization
+
+variable {n : Nat} {adj : AdjMatrix n} {P : PMatrix n}
+
+/-- Number of cells (distinct colours) of a colouring. -/
+def numCells (χ : Colouring n) : Nat := (Finset.univ.image χ).card
+
+/-- `refineStep` preserves `samePartition`: the next round depends only on the current partition. -/
+theorem refineStep_samePartition {χ₁ χ₂ : Colouring n}
+    (h : samePartition χ₁ χ₂) :
+    samePartition (refineStep adj P χ₁) (refineStep adj P χ₂) := by
+  have hr12 : Refines χ₁ χ₂ := fun a b hab => (h a b).mp hab
+  have hr21 : Refines χ₂ χ₁ := fun a b hab => (h a b).mpr hab
+  intro i j
+  rw [refineStep_iff, refineStep_iff]
+  constructor
+  · rintro ⟨hc, hs⟩
+    exact ⟨hr12 _ _ hc, signature_refines hr12 hs⟩
+  · rintro ⟨hc, hs⟩
+    exact ⟨hr21 _ _ hc, signature_refines hr21 hs⟩
+
+/-- The coarsening map on colours induced by `Refines χ₁ χ₂`. -/
+private noncomputable def coarsen (χ₁ χ₂ : Colouring n) : Nat → Nat :=
+  fun c => if h : ∃ v, χ₁ v = c then χ₂ h.choose else 0
+
+private theorem coarsen_apply {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) (v : Fin n) :
+    coarsen χ₁ χ₂ (χ₁ v) = χ₂ v := by
+  have hex : ∃ u, χ₁ u = χ₁ v := ⟨v, rfl⟩
+  simp only [coarsen, dif_pos hex]
+  exact href _ _ hex.choose_spec
+
+/-- Refinement does not increase the number of cells: `Refines χ₁ χ₂ → numCells χ₂ ≤ numCells χ₁`. -/
+theorem numCells_le_of_refines {χ₁ χ₂ : Colouring n} (href : Refines χ₁ χ₂) :
+    numCells χ₂ ≤ numCells χ₁ := by
+  classical
+  unfold numCells
+  apply Finset.card_le_card_of_surjOn (coarsen χ₁ χ₂)
+  intro d hd
+  simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe, Finset.mem_univ, true_and] at hd ⊢
+  obtain ⟨v, rfl⟩ := hd
+  exact ⟨χ₁ v, ⟨v, rfl⟩, coarsen_apply href v⟩
+
+/-- If a refinement does not strictly increase the cell count, it is partition-trivial. -/
+theorem samePartition_of_refines_of_numCells_le {χ₁ χ₂ : Colouring n}
+    (href : Refines χ₁ χ₂) (hcard : numCells χ₁ ≤ numCells χ₂) :
+    samePartition χ₁ χ₂ := by
+  classical
+  have hmaps : ∀ c ∈ Finset.univ.image χ₁, coarsen χ₁ χ₂ c ∈ Finset.univ.image χ₂ := by
+    intro c hc
+    simp only [Finset.mem_image, Finset.mem_univ, true_and] at hc ⊢
+    obtain ⟨v, rfl⟩ := hc
+    exact ⟨v, (coarsen_apply href v).symm⟩
+  have hsurj : ∀ d ∈ Finset.univ.image χ₂, ∃ c ∈ Finset.univ.image χ₁, coarsen χ₁ χ₂ c = d := by
+    intro d hd
+    simp only [Finset.mem_image, Finset.mem_univ, true_and] at hd ⊢
+    obtain ⟨v, rfl⟩ := hd
+    exact ⟨χ₁ v, ⟨v, rfl⟩, coarsen_apply href v⟩
+  have hinj := Finset.injOn_of_surjOn_of_card_le (coarsen χ₁ χ₂)
+    (s := Finset.univ.image χ₁) (t := Finset.univ.image χ₂) hmaps hsurj hcard
+  intro i j
+  constructor
+  · exact href i j
+  · intro hij
+    have hi : χ₁ i ∈ Finset.univ.image χ₁ := Finset.mem_image.2 ⟨i, Finset.mem_univ _, rfl⟩
+    have hj : χ₁ j ∈ Finset.univ.image χ₁ := Finset.mem_image.2 ⟨j, Finset.mem_univ _, rfl⟩
+    apply hinj hi hj
+    rw [coarsen_apply href i, coarsen_apply href j, hij]
+
+/-- A non-trivial refinement strictly increases the cell count. -/
+theorem numCells_lt_of_not_samePartition {χ₁ χ₂ : Colouring n}
+    (href : Refines χ₁ χ₂) (hns : ¬ samePartition χ₁ χ₂) :
+    numCells χ₂ < numCells χ₁ := by
+  by_contra hle
+  push Not at hle
+  exact hns (samePartition_of_refines_of_numCells_le href hle)
+
+/-- The cell count is at most `n`. -/
+theorem numCells_le (ψ : Colouring n) : numCells ψ ≤ n := by
+  unfold numCells
+  calc (Finset.univ.image ψ).card ≤ (Finset.univ : Finset (Fin n)).card := Finset.card_image_le
+    _ = n := by rw [Finset.card_univ, Fintype.card_fin]
+
+/-- With at least one vertex, every colouring has at least one cell. -/
+theorem numCells_pos (hn : 0 < n) (ψ : Colouring n) : 0 < numCells ψ := by
+  haveI : Nonempty (Fin n) := ⟨⟨0, hn⟩⟩
+  unfold numCells
+  exact Finset.card_pos.2 (Finset.univ_nonempty.image ψ)
+
+/-- **Cell-count growth bound.** If the refinement chain strictly refines at every step below `k`, the
+cell count grows by at least `k`. -/
+theorem numCells_iter_bound (χ : Colouring n) :
+    ∀ k, (∀ j < k, ¬ samePartition ((refineStep adj P)^[j] χ) ((refineStep adj P)^[j+1] χ)) →
+      numCells χ + k ≤ numCells ((refineStep adj P)^[k] χ) := by
+  intro k
+  induction k with
+  | zero => intro _; simp
+  | succ m ih =>
+    intro hns
+    have hm : numCells χ + m ≤ numCells ((refineStep adj P)^[m] χ) :=
+      ih (fun j hj => hns j (Nat.lt_succ_of_lt hj))
+    have hstep : ¬ samePartition ((refineStep adj P)^[m] χ) ((refineStep adj P)^[m+1] χ) :=
+      hns m (Nat.lt_succ_self m)
+    have href : Refines ((refineStep adj P)^[m+1] χ) ((refineStep adj P)^[m] χ) := by
+      rw [Function.iterate_succ_apply']
+      exact fun a b h => refineStep_refines adj P _ h
+    have hlt : numCells ((refineStep adj P)^[m] χ) < numCells ((refineStep adj P)^[m+1] χ) :=
+      numCells_lt_of_not_samePartition href (fun h => hstep h.symm)
+    omega
+
+/-- **A plateau occurs within the first `n` steps.** -/
+theorem exists_samePartition_step (hn : 0 < n) (χ : Colouring n) :
+    ∃ k < n, samePartition ((refineStep adj P)^[k] χ) ((refineStep adj P)^[k+1] χ) := by
+  by_contra hcon
+  push Not at hcon
+  have hb := numCells_iter_bound (adj := adj) (P := P) χ n (fun j hj => hcon j hj)
+  have h1 := numCells_pos hn χ
+  have h2 := numCells_le ((refineStep adj P)^[n] χ)
+  omega
+
+/-- **Once the chain plateaus, it stays put** (a fixpoint up to partition is stable forever). -/
+theorem samePartition_step_stable {χ : Colouring n} {k₀ : Nat}
+    (h : samePartition ((refineStep adj P)^[k₀] χ) ((refineStep adj P)^[k₀+1] χ)) :
+    ∀ m, k₀ ≤ m → samePartition ((refineStep adj P)^[m] χ) ((refineStep adj P)^[m+1] χ) := by
+  intro m hm
+  induction m, hm using Nat.le_induction with
+  | base => exact h
+  | succ p _ ih =>
+    have hnext := refineStep_samePartition (adj := adj) (P := P) ih
+    have e1 : (refineStep adj P)^[p + 1] χ = refineStep adj P ((refineStep adj P)^[p] χ) :=
+      Function.iterate_succ_apply' _ _ _
+    have e2 : (refineStep adj P)^[p + 1 + 1] χ = refineStep adj P ((refineStep adj P)^[p + 1] χ) :=
+      Function.iterate_succ_apply' _ _ _
+    rw [e1, e2]; exact hnext
+
+/-- **Warm refinement is a `refineStep`-fixpoint up to partition** — the stabilization lemma the
+multi-round propagation bridge needs. `n` iterations reach a stable partition, so one more round of
+`refineStep` does not split any cell: `samePartition (warmRefine χ) (refineStep (warmRefine χ))`. -/
+theorem warmRefine_refineStep_samePartition (χ : Colouring n) :
+    samePartition (warmRefine adj P χ) (refineStep adj P (warmRefine adj P χ)) := by
+  rcases Nat.eq_zero_or_pos n with hn | hn
+  · subst hn; intro i; exact i.elim0
+  · obtain ⟨k₀, hk₀, hsp⟩ := exists_samePartition_step (adj := adj) (P := P) hn χ
+    have hstab := samePartition_step_stable hsp n (Nat.le_of_lt hk₀)
+    rw [Function.iterate_succ_apply'] at hstab
+    unfold warmRefine
+    exact hstab
+
+end Stabilization
 
 /-! ### §13b — the two-round (depth-2) separation engine on `schemeAdj` (E1)
 

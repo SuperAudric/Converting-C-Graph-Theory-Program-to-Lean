@@ -506,21 +506,27 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 >   `import ChainDescent.Separability` there (Separability builds before CascadeAffine, no cycle).
 > - The bridge takes `SmaxConnected` + `∀α SaConnected α` as **hypotheses** — so it is independent of, and built before,
 >   the sα counting grind (pieces 2–5) that later discharges `SaConnected`.
-> - **B1's one missing prerequisite — warmRefine STABILIZATION (a new substrate piece).** B1 compares level-`(n−1)`
->   signatures and needs `x` to be unique at level `n−1`, given `Determined x` (unique at level `n`). That requires
->   `samePartition ((refineStep)^[n−1] χ) ((refineStep)^[n] χ)` (refinement stabilises within `n−1` steps: cell-count
->   is non-decreasing, bounded by `n`, and once a step fails to refine it is stable forever). **This lemma does NOT
->   exist** in the project — confirmed by grep. Telling: every existing discreteness result goes through the *count*
->   route (`kRoundProfileCount_eq`, fixed level `k`) precisely to AVOID fixpoint reasoning; the peel lemmas
->   (`warmRefine_eq_iter_eq`, `iterate_refineStep_colour_refines`, `refineStep_iter_le_eq`) give only the *monotone*
->   half. So the **first concrete bridge sub-task is the stabilization lemma** (cell-count-monotone-until-stable), then
->   B1 on top of it. (Alternative to weigh: a count-route reformulation of PV's propagation that sidesteps stabilization,
->   if one exists — not yet found.)
+> - **B1's prerequisite — warmRefine STABILIZATION — ✅ LANDED (2026-06-11, axiom-clean, full build green).** This is the
+>   piece that was previously avoided as "likely unviable"; it works. New generic block `CascadeAffine.lean §S-stab`
+>   (`section Stabilization`, generic in `(adj,P)`): **`warmRefine_refineStep_samePartition`** —
+>   `samePartition (warmRefine adj P χ) (refineStep adj P (warmRefine adj P χ))`, i.e. `warmRefine` is a `refineStep`-
+>   fixpoint **up to partition** (the `(b)` form: stable at level `n`, so B1 can use `Determined`-at-`n` *directly*, no
+>   `n−1` bookkeeping). Supporting lemmas all axiom-clean: `numCells` (= #distinct colours), `refineStep_samePartition`
+>   (refineStep respects partitions), `numCells_le_of_refines` / `samePartition_of_refines_of_numCells_le` /
+>   `numCells_lt_of_not_samePartition` (cell-count monotone, strict iff non-trivial — via the coarsening surjection +
+>   `Finset.injOn_of_surjOn_of_card_le`), `numCells_le` (`≤ n`), `numCells_pos`, `numCells_iter_bound` (grows ≥ `k` if no
+>   plateau), `exists_samePartition_step` (plateau within `n` steps — pigeonhole), `samePartition_step_stable` (plateau is
+>   forever, `Nat.le_induction`). Telling context (still true): every *prior* discreteness result used the count route
+>   (`kRoundProfileCount_eq`) precisely to AVOID this fixpoint fact; the bridge needed it, and now has it.
 >
-> **NEXT CONCRETE PASS (bridge B1 prerequisite):** build the warmRefine stabilization lemma
-> `samePartition ((refineStep adj P)^[n−1] χ) ((refineStep adj P)^[n] χ)` (or the form B1 consumes: `Determined`-at-`n`
-> ⟹ unique-at-`(n−1)`), then `relOfPair_eq_of_warmRefine_determined` (B1). Landed this pass: **`saAdj_symm`** (piece 1.5,
-> axiom-clean) + the full dependency analysis above.
+> **NEXT CONCRETE PASS (bridge B1):** build `relOfPair_eq_of_warmRefine_determined` — `Determined x` (singleton warmRefine
+>   cell) ∧ same-cell `w,u` ⟹ `relOfPair x w = relOfPair x u`. Skeleton (now unblocked by stabilization): from
+>   `warmRefine w = warmRefine u` and `warmRefine_refineStep_samePartition` get `refineStep(warmRefine) w =
+>   refineStep(warmRefine) u`; `refineStep_iff` ⟹ same level-`n` signature; `x` is the unique colour of its cell
+>   (`Determined`), so the neighbour-count for that colour reads off `rel(w,x)` vs `rel(u,x)` — mirror
+>   `relOfPair_eq_of_warmRefine_singleton` (Cascade.lean:3193) with the refined-singleton in the individualised point's slot.
+>   Then B2 (`Determined` base case), B3 (forced-triangle propagation), B4 (connectivity spread), B5 (package).
+> Landed this pass: **`saAdj_symm`** (piece 1.5) + **the full §S-stab stabilization block** + the dependency analysis above.
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.
