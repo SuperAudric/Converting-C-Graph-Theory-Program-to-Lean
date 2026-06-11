@@ -24,10 +24,15 @@
 > finitely many explicit exceptions** (Table 1); the object is exactly `affineScheme G0pow`. F₁₆ Clebsch `(2,4)` and
 > F₂₅ `(5,2)` are **not** exceptions. **Consequence:** half (a) is a *citation, not open math*; the module-adjoin (b)
 > is no longer needed to *close* the slice (it is demoted to the "build-instead-of-cite" future, very low priority —
-> §6/§8). The only remaining work on the affine slice is **pure formalization wiring**: connect the cited
-> 2-separability (≡ 1-regular 1-point extension, Cartan Thm 2.5 ≡ base-discreteness) to the project's `PowAffineSeparates`
-> form. That is bounded formalization, **not research**. The genuinely hard residue (non-affine NLS / Davis–Xiang) is
-> unchanged and deferred (§7).
+> §6/§8).
+>
+> **WIRING + FULLY-REDUCED SLICE LANDED (2026-06-11, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build
+> green).** `CascadeAffine.lean` now carries: `affinePermFin_eq_one_of_span` (linear kill lemma), `TwinsAreSemilinear`
+> (cited `s(C)`-half), `powAffineSeparates_of_twinsAreSemilinear` (reduction), `reachesRigidOrCameron_viaTwinsAreSemilinear`
+> (seal capstone, spanning base as hyp), `exists_spanning_base` (basis image), and **`reachesRigidOrCameron_affineSlice`**
+> — the seal on `affineScheme (G0pow β)` with the **only** affine-specific input being `hcite : ∀ T, TwinsAreSemilinear`
+> (= cited cyclotomic 2-separability) + `d ≤ bound`. **The open counting crux `PowAffineSeparates` and the spanning-base
+> hypothesis are both gone.** The genuinely hard residue (non-affine NLS / Davis–Xiang) is unchanged and deferred (§7).
 
 ---
 
@@ -243,16 +248,29 @@ residue* (LS-type only — graphs easy, nets imprimitive).
 
 1. **Resolve §6 — DONE (2026-06-11, §6.1).** Cyclotomic `s(C) ≤ 2` is citable (Ponomarenko 2020 Thm 1.1) and covers
    both witnesses. Outcome = **CLOSE** (cite, don't build). So (a) is a citation; (b) is demoted.
-2. **The wiring (the actual next step) — connect the cited 2-separability to `PowAffineSeparates`.** Introduce the
-   citation as a hypothesis `CyclotomicTwoSeparable` (theorem-statement hypothesis, not an `axiom`), covering the
-   non-Table-1 `(p,d)`. Then build the **bridge lemma** `CyclotomicTwoSeparable → PowAffineSeparates` (via `m`-separable
-   ⟺ 1-regular `(m−1)`-extension ⟺ base-discreteness; or via the WL-dim ≤ 3 corollary, Thm 1.3). Feed it through
-   `discrete_affineScheme_of_twoRoundDiffSeparates` to discharge `hbound` and close
-   `reachesRigidOrCameron_viaPowSeparation` on the non-exceptional witnesses. **First, scope the bridge:** confirm whether
-   `affineDepth2Count`-injectivity matches the literature's 2-dim intersection numbers definitionally, or needs a
-   translation lemma — this is the one remaining (bounded) kink. **Working step before coding: re-read
-   `discrete_affineScheme_of_twoRoundDiffSeparates` + `affineDepth2Count` and the literature's 2-separability defn side
-   by side, and decide the exact hypothesis shape to cite.**
+2. **The wiring — LANDED (2026-06-11, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green).**
+   Bridge scoped first: `discrete_affineScheme_of_twoRoundDiffSeparates`'s `hsep` is *literally* `PowAffineSeparates`'s
+   body, so `PowAffineSeparates ⟹ Discrete ⟹ seal` was already wired; the only gap was citation → `PowAffineSeparates`.
+   Landed in `CascadeAffine.lean` (end of §CyclicAffine):
+   - **`affinePermFin_eq_one_of_span`** (the kill lemma, b) — any `F_p`-linear automorphism fixing a *spanning* base is
+     the identity perm. Pure linear algebra; covers all of `ΓL₁`.
+   - **`TwinsAreSemilinear`** — the cited `s(C)`-half as a theorem-statement hypothesis (every depth-2 profile-twin from
+     `T` is realised by an `F_p`-linear automorphism fixing `T`); justified by Ponomarenko arXiv:2006.13592 Thm 1.1.
+   - **`powAffineSeparates_of_twinsAreSemilinear`** — the reduction: `TwinsAreSemilinear` on a *spanning* base ⟹
+     `PowAffineSeparates` (a twin's realiser fixes the spanning base ⟹ identity ⟹ `u=u'`).
+   - **`reachesRigidOrCameron_viaTwinsAreSemilinear`** — the seal capstone: composes the reduction into
+     `reachesRigidOrCameron_viaPowSeparation`, so the seal on `affineScheme (G0pow β)` follows from the cited
+     `TwinsAreSemilinear` + a spanning base + (G3, `hne`/`hrank`, `hImprim`). **The raw counting `PowAffineSeparates` is
+     gone, replaced by the cited statement.**
+2a. **The fully-reduced affine slice — LANDED (2026-06-11, axiom-clean, full build green).** The spanning-base
+   hypotheses are now discharged internally:
+   - **`exists_spanning_base`** — `∃ T, card ≤ d ∧ affineE.symm '' T` spans `F_p^d` (the standard basis `Pi.basisFun`
+     transported through `affineE`; basis image + `Basis.span_eq`).
+   - **`reachesRigidOrCameron_affineSlice`** — the bundled capstone: picks that base internally, so the **only**
+     affine-specific open input is `hcite : ∀ T, TwinsAreSemilinear …` (the *global* form of cyclotomic 2-separability,
+     Ponomarenko Thm 1.1) plus `d ≤ bound`. With {G3 cited, this citation, `hne`/`hrank`, `hImprim`} it yields the seal
+     on `affineScheme (G0pow β)` — **no counting crux, no spanning-base hypothesis carried.** That is the affine
+     cyclotomic slice fully reduced to the cited 2-separability + G3.
 3. **Build (b), the module-adjoin lemma — LANDED (2026-06-11, axiom-clean `[propext, Classical.choice, Quot.sound]`,
    full build green).** `affinePermFin_eq_one_of_span` (`CascadeAffine.lean`, end of §CyclicAffine): *any `F_p`-linear
    automorphism `g₀` whose affine perm (zero translation) fixes a base `T` pointwise, with `affineE.symm '' T` spanning

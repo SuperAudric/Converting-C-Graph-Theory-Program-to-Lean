@@ -1725,6 +1725,129 @@ theorem affinePermFin_eq_one_of_span
     simpa using hv
   rw [hg1]; exact affinePermFin_one
 
+/-! #### The reduction — `PowAffineSeparates` from "twins are semilinear" (cited) + the kill lemma
+
+With the linear "kill" lemma `affinePermFin_eq_one_of_span`, the open counting crux `PowAffineSeparates`
+reduces to the **cited `s(C)`-content**: *every depth-2 profile-twin is realised by an `F_p`-linear automorphism
+fixing the base*. That is the operational form of **cyclotomic 2-separability** — Ponomarenko, *On the
+separability of cyclotomic schemes over finite field* (arXiv:2006.13592), Theorem 1.1: every cyclotomic scheme
+over a finite field is 2-separable, with finitely many explicit exceptions (F₁₆ Clebsch `(2,4)` and F₂₅ `(5,2)`
+are NOT exceptions). Carried as a theorem-statement **hypothesis** (axiom hygiene — cited results are hypotheses,
+never fresh `axiom`s). The net: the raw counting `PowAffineSeparates` is replaced by the cleaner, cited
+`TwinsAreSemilinear`. -/
+
+/-- **"Twins are semilinear" — the cited `s(C)`-half (cyclotomic 2-separability), operational form.** Every
+depth-2 profile-twin `(u, u')` from the base `T` is realised by an `F_p`-linear automorphism `g₀` (zero
+translation — faithful when the base pins the origin, as a `T`-fixing automorphism of a translation scheme does)
+that fixes `T` pointwise and maps `u` to `u'`. Justified by cyclotomic 2-separability (Ponomarenko,
+arXiv:2006.13592, Thm 1.1); the realiser is stated `F_p`-linear because that is exactly what the kill lemma
+`affinePermFin_eq_one_of_span` consumes (and `ΓL₁ ⊆ GL_{F_p}`, so the cited `ΓL₁` realiser is a fortiori one). -/
+def TwinsAreSemilinear (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) (T : Finset (Fin (p ^ d))) : Prop :=
+  ∀ u u' : Fin (p ^ d),
+    (∀ ρ b, affineDepth2Count hd β hβneg T u ρ b = affineDepth2Count hd β hβneg T u' ρ b) →
+    ∃ g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p),
+      (∀ t ∈ T, affinePermFin g₀ (0 : Fin d → ZMod p) t = t) ∧
+      affinePermFin g₀ (0 : Fin d → ZMod p) u = u'
+
+/-- **The reduction — `PowAffineSeparates` from `TwinsAreSemilinear` on a SPANNING base.** If `T` is spanning
+(`affineE.symm '' T` linearly spans `F_p^d`) and twins from `T` are semilinear, then `T` separates: a twin's
+realiser `g₀` fixes the spanning `T`, so by `affinePermFin_eq_one_of_span` its affine perm is the identity,
+forcing `u = u'`. This reduces the open counting crux `PowAffineSeparates` to the cited `TwinsAreSemilinear`
+(cyclotomic 2-separability) — the "close" half of the module-adjoin route, modulo exhibiting a bounded spanning
+base (a basis image, `card = d ≤ bound`). -/
+theorem powAffineSeparates_of_twinsAreSemilinear (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β) {bound : Nat}
+    {T : Finset (Fin (p ^ d))} (hcard : T.card ≤ bound)
+    (hspan : Submodule.span (ZMod p)
+        ((fun t : Fin (p ^ d) => affineE.symm t) '' (↑T : Set (Fin (p ^ d)))) = ⊤)
+    (htwin : TwinsAreSemilinear hd β hβneg T) :
+    PowAffineSeparates hd β hβneg bound := by
+  refine ⟨T, hcard, fun u u' hprof => ?_⟩
+  obtain ⟨g₀, hfix, hmap⟩ := htwin u u' hprof
+  rw [affinePermFin_eq_one_of_span hspan hfix] at hmap
+  simpa using hmap
+
+/-- **The seal on the cyclotomic family, reduced to the cited `TwinsAreSemilinear` + a spanning base.**
+Composes `powAffineSeparates_of_twinsAreSemilinear` (the kill-lemma reduction) into
+`reachesRigidOrCameron_viaPowSeparation`. So the seal on `affineScheme (G0pow β)` follows from: `hClassify`
+(G3, cited), `hne`/`hrank` (per-instance, e.g. `clebschWitness_irreducible`), `hImprim` (landed/earned), a
+**spanning** base `T` (`card ≤ bound`), and **`TwinsAreSemilinear`** — the latter being the cited cyclotomic
+2-separability (Ponomarenko arXiv:2006.13592 Thm 1.1, which covers F₁₆/F₂₅). The open counting `PowAffineSeparates`
+is gone, replaced by the cited statement; the only remaining build step to a fully unconditional affine slice is
+exhibiting the spanning base as a basis image (`card = d ≤ bound`) — mechanical. -/
+theorem reachesRigidOrCameron_viaTwinsAreSemilinear (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β)
+    {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hne : ∀ i : Fin ((affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank + 1),
+        ∃ v w, (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rel i v w = true)
+    (hrank : 2 ≤ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank)
+    {T : Finset (Fin (p ^ d))} (hcard : T.card ≤ bound)
+    (hspan : Submodule.span (ZMod p)
+        ((fun t : Fin (p ^ d) => affineE.symm t) '' (↑T : Set (Fin (p ^ d)))) = ⊤)
+    (htwin : TwinsAreSemilinear hd β hβneg T)
+    (hImprim : ¬ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+          ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)))
+      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) :=
+  reachesRigidOrCameron_viaPowSeparation hd β hβneg hClassify hne hrank
+    (powAffineSeparates_of_twinsAreSemilinear hd β hβneg hcard hspan htwin) hImprim
+
+/-- **A bounded spanning base exists** — the standard basis `Pi.basisFun` of `F_p^d`, transported through
+`affineE`: `∃ T`, `card ≤ d`, with `affineE.symm '' T` spanning `F_p^d`. Discharges the `hspan`/`hcard`
+hypotheses of `powAffineSeparates_of_twinsAreSemilinear` / `…viaTwinsAreSemilinear` for any `bound ≥ d`. Pure
+linear algebra (basis image + `Basis.span_eq`). -/
+theorem exists_spanning_base :
+    ∃ T : Finset (Fin (p ^ d)), T.card ≤ d ∧
+      Submodule.span (ZMod p)
+        ((fun t : Fin (p ^ d) => affineE.symm t) '' (↑T : Set (Fin (p ^ d)))) = ⊤ := by
+  classical
+  refine ⟨Finset.univ.image (fun i : Fin d => affineE ((Pi.basisFun (ZMod p) (Fin d)) i)), ?_, ?_⟩
+  · calc (Finset.univ.image (fun i : Fin d => affineE ((Pi.basisFun (ZMod p) (Fin d)) i))).card
+        ≤ Finset.univ.card := Finset.card_image_le
+      _ = d := by rw [Finset.card_univ, Fintype.card_fin]
+  · have hrw : (fun t : Fin (p ^ d) => affineE.symm t) ''
+        (↑(Finset.univ.image (fun i : Fin d => affineE ((Pi.basisFun (ZMod p) (Fin d)) i)))
+          : Set (Fin (p ^ d)))
+        = Set.range ⇑(Pi.basisFun (ZMod p) (Fin d)) := by
+      rw [Finset.coe_image, Finset.coe_univ, Set.image_univ, ← Set.range_comp]
+      congr 1
+      funext i
+      simp only [Function.comp_apply, Equiv.symm_apply_apply]
+    rw [hrw]
+    exact (Pi.basisFun (ZMod p) (Fin d)).span_eq
+
+/-- **The affine cyclotomic slice of the seal, fully reduced to the cited cyclotomic 2-separability.** Picks the
+canonical bounded spanning base (`exists_spanning_base`) internally, so the **only** affine-specific open input
+is `hcite : ∀ T, TwinsAreSemilinear …` — the *global* form of cyclotomic 2-separability (Ponomarenko
+arXiv:2006.13592 Thm 1.1: every profile-twin from *any* base is realised ≡ the scheme is 2-separable; covers
+F₁₆/F₂₅). With `d ≤ bound`, the seal on `affineScheme (G0pow β)` follows from {G3 (cited), this citation,
+`hne`/`hrank`, `hImprim`} — **no carried counting crux, no spanning-base hypothesis.** The fully-reduced affine
+slice. -/
+theorem reachesRigidOrCameron_affineSlice (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
+    (hβneg : (-1 : (GaloisField p d)ˣ) ∈ Subgroup.zpowers β)
+    {IsLarge : Nat → Prop} {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hne : ∀ i : Fin ((affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank + 1),
+        ∃ v w, (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rel i v w = true)
+    (hrank : 2 ≤ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).rank)
+    (hdb : d ≤ bound)
+    (hcite : ∀ T : Finset (Fin (p ^ d)), TwinsAreSemilinear hd β hβneg T)
+    (hImprim : ¬ (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)).toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+          ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)))
+      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (G0pow hd β) (neg_mem_G0pow hd β hβneg)) := by
+  obtain ⟨T, hcard, hspan⟩ := exists_spanning_base (p := p) (d := d)
+  exact reachesRigidOrCameron_viaTwinsAreSemilinear hd β hβneg hClassify hne hrank
+    (le_trans hcard hdb) hspan (hcite T) hImprim
+
 end CyclicAffine
 
 /-! #### The concrete cyclotomic witness — `F₁₆`, the index-3 Clebsch family
@@ -1793,3 +1916,5 @@ theorem reachesRigidOrCameron_clebsch_viaPersistentTwinBlock
   reachesRigidOrCameron_viaPersistentTwinBlock hClassify clebschScheme hne hrank hCrux hImprim
 
 end ChainDescent
+
+
