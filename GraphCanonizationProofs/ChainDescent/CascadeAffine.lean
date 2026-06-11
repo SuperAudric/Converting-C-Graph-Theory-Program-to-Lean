@@ -177,6 +177,182 @@ theorem warmRefine_refineStep_samePartition (χ : Colouring n) :
 
 end Stabilization
 
+/-! ### §S-bridge — the PV-Thm-3.1 connectivity→base bridge (B1: relation to a determined point)
+
+The bridge re-expresses PV Lemmas 3.2–3.3 on `warmRefine`: from connectivity of `smax`/`sα`
+(`Separability.lean`) deduce that individualising a maximal-valency edge `{α,β}` discretises the
+scheme (`SeparatesAtBoundedBase S 2`). Its core primitive (B1) is the *determined-point* analogue of
+`relOfPair_eq_of_warmRefine_singleton`: a vertex sitting in a singleton `warmRefine` cell pins the
+relation of any same-cell pair to it — the WL fact that lets a determined vertex propagate
+determinacy to its forced-triangle neighbours. -/
+
+/-- **B1 — relation to a *determined* point is cell-determined.** If `x` lies in a singleton
+`warmRefine` cell (`hx`: its cell is `{x}`) and `w, u` share a `warmRefine` cell, then they have the
+same relation to `x`. The determined-point analogue of `relOfPair_eq_of_warmRefine_singleton`, with the
+refined colour-singleton `x` in the individualised point's slot — unblocked by the stabilization lemma
+(`warmRefine_refineStep_samePartition`), which lets us read the signature one round past `warmRefine`
+where `x`'s colour is already unique. -/
+theorem relOfPair_eq_of_warmRefine_determined {n : Nat} (S : AssociationScheme n)
+    {χ : Colouring n} {x w u : Fin n}
+    (hx : ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+            = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ x → z = x)
+    (h : warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ w
+       = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ u) :
+    S.relOfPair x w = S.relOfPair x u := by
+  classical
+  set adj := schemeAdj S with hadj
+  set P : PMatrix n := fun _ _ => POE.unknown with hP
+  set χn := warmRefine adj P χ with hχn
+  by_cases hxw : x = w
+  · have hux : u = x := hx u (by rw [← h, ← hxw])
+    rw [← hxw, hux]
+  · by_cases hxu : x = u
+    · have hwx : w = x := hx w (by rw [h, ← hxu])
+      rw [← hxu, hwx]
+    · -- main case: x ≠ w, x ≠ u
+      have hstab := warmRefine_refineStep_samePartition (adj := adj) (P := P) χ
+      have hrs : refineStep adj P χn w = refineStep adj P χn u := (hstab w u).mp h
+      have hsig : signature adj P χn w = signature adj P χn u :=
+        ((refineStep_iff adj P χn w u).mp hrs).2
+      have hcard := signature_eq_card_eq adj P χn hsig (χn x, adj.adj w x, P w x)
+      -- the `w`-side filter is exactly `{x}` (only `x` has colour `χn x`)
+      have hFw : (Finset.univ.filter (fun z : Fin n =>
+          z ≠ w ∧ (χn x, adj.adj w x, P w x) = (χn z, adj.adj w z, P w z))) = {x} := by
+        apply Finset.ext; intro z
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+        constructor
+        · rintro ⟨_, heq⟩
+          exact hx z (congrArg Prod.fst heq).symm
+        · rintro rfl; exact ⟨hxw, rfl⟩
+      rw [hFw, Finset.card_singleton] at hcard
+      -- the `u`-side filter then has a witness `z = x` with `adj w x = adj u x`
+      obtain ⟨z, hz⟩ := Finset.card_pos.mp (hcard ▸ Nat.one_pos)
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hz
+      obtain ⟨_, hzeq⟩ := hz
+      have hzx : z = x := hx z (congrArg Prod.fst hzeq).symm
+      have hval : adj.adj w x = adj.adj u x := by
+        have hv := congrArg (fun p : Nat × Nat × POE => p.2.1) hzeq
+        rw [hzx] at hv; exact hv
+      have hrel : S.relOfPair w x = S.relOfPair u x := Fin.val_injective hval
+      rw [S.relOfPair_symm x w, S.relOfPair_symm x u]; exact hrel
+
+/-- **B2 — the base case: an individualised point is determined.** Every `t ∈ T` sits in a singleton
+`warmRefine` cell after individualising `T` (its unique initial colour is preserved by refinement).
+The seed of the propagation: `α, β ∈ {α,β}` are determined. -/
+theorem determined_of_mem_individualized {n : Nat} (S : AssociationScheme n)
+    {T : Finset (Fin n)} {α : Fin n} (hα : α ∈ T) :
+    ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) z
+          = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T) α
+        → z = α := by
+  intro z hz
+  by_contra hzα
+  exact iterate_refineStep_preserves_singleton (schemeAdj S) (fun _ _ => POE.unknown) α n
+    (individualizedColouring n T) (individualizedColouring_mem_sep hα) z hzα hz
+
+/-- **B3 — the forced-triangle propagation step (PV Lemma 3.2 core).** If the apex `α` and a point `β`
+are both determined and `(β,γ)` is an `sα`-edge (the triangle `{α,β,γ}` is colour-rigid,
+`c^{r(α,γ)}_{r(α,β),r(β,γ)} = 1`), then `γ` is determined: any same-`warmRefine`-cell vertex `z` shares
+`γ`'s relations to `α` and `β` (B1), and the rigid triangle has a unique such vertex. -/
+theorem determined_of_saAdj {n : Nat} (S : AssociationScheme n) {χ : Colouring n} {α β γ : Fin n}
+    (hα : ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+            = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ α → z = α)
+    (hβ : ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+            = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ β → z = β)
+    (hsa : S.saAdj α β γ) :
+    ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+          = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ γ → z = γ := by
+  intro z hz
+  have hαz : S.relOfPair α z = S.relOfPair α γ := relOfPair_eq_of_warmRefine_determined S hα hz
+  have hβz : S.relOfPair β z = S.relOfPair β γ := relOfPair_eq_of_warmRefine_determined S hβ hz
+  obtain ⟨_, _, hone⟩ := S.saAdj_symm α hsa
+  set i := S.relOfPair α γ with hi
+  set j := S.relOfPair γ β with hj
+  have hcard := S.intersectionNumber_well_defined i j (S.relOfPair α β) α β (S.rel_relOfPair α β)
+  rw [hone] at hcard
+  set Sset := Finset.univ.filter (fun u : Fin n => S.rel i α u = true ∧ S.rel j u β = true) with hSset
+  have hle1 : Sset.card ≤ 1 := le_of_eq hcard
+  have hγmem : γ ∈ Sset := by
+    rw [hSset]; simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨by rw [hi]; exact S.rel_relOfPair α γ, by rw [hj]; exact S.rel_relOfPair γ β⟩
+  have hzmem : z ∈ Sset := by
+    rw [hSset]; simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    refine ⟨?_, ?_⟩
+    · rw [hi]; have h2 := S.rel_relOfPair α z; rwa [hαz] at h2
+    · rw [hj]
+      have hzβ : S.relOfPair z β = S.relOfPair γ β := by
+        rw [S.relOfPair_symm z β, hβz, ← S.relOfPair_symm γ β]
+      have h2 := S.rel_relOfPair z β; rwa [hzβ] at h2
+  exact Finset.card_le_one.mp hle1 z hzmem γ hγmem
+
+section Bridge
+
+variable {n : Nat}
+
+/-- A vertex sits in a singleton `warmRefine` cell — PV's `Γ`: a singleton fiber of the point
+extension `X_{base}`. The propagation predicate of the bridge. -/
+abbrev DeterminedAt (S : AssociationScheme n) (χ : Colouring n) (x : Fin n) : Prop :=
+  ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+        = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ x → z = x
+
+/-- **B4a — determinacy propagates along an `sα`-path** (iterate B3 along `ReflTransGen (saAdj α)`). -/
+theorem determinedAt_of_reflTransGen (S : AssociationScheme n) {χ : Colouring n} {α : Fin n}
+    (hα : DeterminedAt S χ α) {β γ : Fin n} (hβ : DeterminedAt S χ β)
+    (hpath : Relation.ReflTransGen (S.saAdj α) β γ) : DeterminedAt S χ γ := by
+  induction hpath with
+  | refl => exact hβ
+  | tail _ hstep ih => exact determined_of_saAdj S hα ih hstep
+
+/-- **B4b — if some `αsmax`-neighbour is determined, all of `αsmax` is** (PV claim (17), via
+`SaConnected`). -/
+theorem determinedAt_of_smaxAdj (S : AssociationScheme n) {χ : Colouring n} {α β : Fin n}
+    (hα : DeterminedAt S χ α) (hβ : DeterminedAt S χ β) (hsmβ : S.smaxAdj α β)
+    (hconn : S.SaConnected α) {γ : Fin n} (hsmγ : S.smaxAdj α γ) : DeterminedAt S χ γ :=
+  determinedAt_of_reflTransGen S hα hβ (hconn β γ hsmβ hsmγ)
+
+/-- **B4 — connectivity discretises a maximal-valency base.** If `smax` and every `sα` are connected
+and `{α,β}` is a maximal-valency edge, individualising `{α,β}` makes `warmRefine` discrete (PV Lemmas
+3.2–3.3 = the `Γ = Ω` propagation): seed `{α,β}` determined (B2), spread across `αsmax` (B4b), then to
+all of Ω by the `smax`-component closure (PV's `Γ₀`), using `SmaxConnected`. -/
+theorem discrete_of_connectivity (S : AssociationScheme n) {α β : Fin n}
+    (hαβ : S.smaxAdj α β) (hsmax : S.SmaxConnected) (hsa : ∀ a, S.SaConnected a) :
+    Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown)
+      (individualizedColouring n {α, β})) := by
+  set χ := individualizedColouring n ({α, β} : Finset (Fin n)) with hχ
+  have hα : DeterminedAt S χ α :=
+    determined_of_mem_individualized S (Finset.mem_insert_self α {β})
+  have hβ : DeterminedAt S χ β :=
+    determined_of_mem_individualized S (Finset.mem_insert_of_mem (Finset.mem_singleton_self β))
+  -- PV's `Γ₀`: determined, with all `smax`-neighbours determined.
+  let Clo : Fin n → Prop := fun v => DeterminedAt S χ v ∧ ∀ w, S.smaxAdj v w → DeterminedAt S χ w
+  have hCloα : Clo α := ⟨hα, fun w hw => determinedAt_of_smaxAdj S hα hβ hαβ (hsa α) hw⟩
+  have hclo_step : ∀ v w, Clo v → S.smaxAdj v w → Clo w := by
+    intro v w hv hvw
+    have hw : DeterminedAt S χ w := hv.2 w hvw
+    exact ⟨hw, fun w' hw' => determinedAt_of_smaxAdj S hw hv.1 (S.smaxAdj_symm hvw) (hsa w) hw'⟩
+  have hclo_rtg : ∀ v, Relation.ReflTransGen S.smaxAdj α v → Clo v := by
+    intro v hrtg
+    induction hrtg with
+    | refl => exact hCloα
+    | tail _ hstep ih => exact hclo_step _ _ ih hstep
+  have hall : ∀ v, DeterminedAt S χ v := fun v => (hclo_rtg v (hsmax α v)).1
+  intro i j hij
+  exact hall j i hij
+
+/-- **B5 — the bridge, packaged for the consumer.** `smax`/`sα` connectivity at a maximal-valency edge
+`{α,β}` yields `SeparatesAtBoundedBase S 2` — exactly the seal's `PersistentTwinYieldsBlock` /
+`reachesRigidOrCameron` consumer. This is PV-Thm-3.1's conclusion `b(X) ≤ 2`, in the project's terms;
+the remaining open content is the connectivity hypotheses (the smax half is landed in `Separability.lean`,
+the `sα` half is the §3 counting grind / pieces 2–5). -/
+theorem separatesAtBoundedBase_of_connectivity (S : SchurianScheme n) {α β : Fin n}
+    (hαβ : S.toAssociationScheme.smaxAdj α β)
+    (hsmax : S.toAssociationScheme.SmaxConnected)
+    (hsa : ∀ a, S.toAssociationScheme.SaConnected a) :
+    SeparatesAtBoundedBase S 2 := by
+  refine ⟨{α, β}, ?_, discrete_of_connectivity S.toAssociationScheme hαβ hsmax hsa⟩
+  exact (Finset.card_insert_le _ _).trans (by simp)
+
+end Bridge
+
 /-! ### §13b — the two-round (depth-2) separation engine on `schemeAdj` (E1)
 
 `relOfPair_eq_of_warmRefine_singleton` (§13a) is the **depth-1** separation primitive: a `warmRefine`
@@ -752,7 +928,7 @@ theorem affinePermFin_mul (g₀ h₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d 
   ext i
   simp only [Equiv.Perm.mul_apply, affinePermFin_apply, Equiv.symm_apply_apply,
     LinearEquiv.mul_apply, map_add]
-  congr 1; abel
+  congr 1; abel_nf
 
 /-- The inverse of an affine perm is affine. -/
 theorem affinePermFin_inv (g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p))

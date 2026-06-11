@@ -519,14 +519,33 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 >   forever, `Nat.le_induction`). Telling context (still true): every *prior* discreteness result used the count route
 >   (`kRoundProfileCount_eq`) precisely to AVOID this fixpoint fact; the bridge needed it, and now has it.
 >
-> **NEXT CONCRETE PASS (bridge B1):** build `relOfPair_eq_of_warmRefine_determined` — `Determined x` (singleton warmRefine
->   cell) ∧ same-cell `w,u` ⟹ `relOfPair x w = relOfPair x u`. Skeleton (now unblocked by stabilization): from
->   `warmRefine w = warmRefine u` and `warmRefine_refineStep_samePartition` get `refineStep(warmRefine) w =
->   refineStep(warmRefine) u`; `refineStep_iff` ⟹ same level-`n` signature; `x` is the unique colour of its cell
->   (`Determined`), so the neighbour-count for that colour reads off `rel(w,x)` vs `rel(u,x)` — mirror
->   `relOfPair_eq_of_warmRefine_singleton` (Cascade.lean:3193) with the refined-singleton in the individualised point's slot.
->   Then B2 (`Determined` base case), B3 (forced-triangle propagation), B4 (connectivity spread), B5 (package).
-> Landed this pass: **`saAdj_symm`** (piece 1.5) + **the full §S-stab stabilization block** + the dependency analysis above.
+> **✅✅ THE WHOLE BRIDGE (B1–B5) IS LANDED (2026-06-11, all axiom-clean `[propext, Classical.choice, Quot.sound]`, full
+> build green). The KEY MODELING RISK is RESOLVED.** New section `CascadeAffine.lean §S-bridge` + `section Bridge`:
+> - **B1 `relOfPair_eq_of_warmRefine_determined`** — `Determined x` (singleton warmRefine cell) ∧ same-cell `w,u` ⟹
+>   `relOfPair x w = relOfPair x u`. The determined-point analogue of `relOfPair_eq_of_warmRefine_singleton`, reading the
+>   signature one round past `warmRefine` via the stabilization lemma (where `x`'s colour is already unique).
+> - **B2 `determined_of_mem_individualized`** — every `t ∈ T` is determined after individualising `T` (the seed).
+> - **B3 `determined_of_saAdj`** — forced-triangle propagation (PV Lemma 3.2): `Determined α ∧ Determined β ∧ saAdj α β γ
+>   ⟹ Determined γ` (via B1 twice + the `c=1` uniqueness through `saAdj_symm` + `intersectionNumber_well_defined`).
+> - **B4a/B4b/B4 `determinedAt_of_reflTransGen` / `determinedAt_of_smaxAdj` / `discrete_of_connectivity`** — PV Lemma 3.3
+>   (`Γ=Ω`): path-propagate along `sα` (ReflTransGen over B3), spread across `αsmax` (`SaConnected`), then to all of Ω by
+>   the `smax`-component closure (PV's `Γ₀`, `SmaxConnected`). Yields `Discrete (warmRefine … individualized {α,β})`.
+> - **B5 `separatesAtBoundedBase_of_connectivity`** — packages to the seal consumer:
+>   `smaxAdj α β → SmaxConnected → (∀a SaConnected a) → SeparatesAtBoundedBase S 2`. **This is PV-Thm-3.1's `b(X) ≤ 2`
+>   in the project's terms, wired straight into `PersistentTwinYieldsBlock` / `reachesRigidOrCameron`.**
+>
+> **What this means.** The bridge-first gamble paid off: the connectivity→base→consumer chain is proven end-to-end,
+> axiom-clean, so the §3 connectivity grind is now known to connect to the seal. The ONLY remaining open content of
+> PV-Thm-3.1 is its two connectivity hypotheses: **`SmaxConnected` — LANDED** (`smaxConnected_of_sparseSeparable`,
+> `Separability.lean`); **`∀a SaConnected a` — the sα grind (pieces 2–5)**, the last open leg.
+>
+> **NEXT CONCRETE PASS — the `sα` grind (pieces 2–5), to discharge `SaConnected`:** 2 component set `Cα(u)`; 3 *weakened*
+> Lemma 3.4 (set-equality via path-transport existence — the bijection is §6-only, not needed); 4 Lemma 3.5(2); 5 Lemma
+> 3.6 `sα` half ((23) `|C(u)|=1` + small-component contradiction, reusing `exists_small_closed`). Then a small B5+ assembly
+> (derive the `smaxAdj` edge from `k≥2`, combine the two connectivity legs) completes the full Thm 3.1.
+>
+> Landed this pass: **`saAdj_symm`** + **§S-stab stabilization block** (`warmRefine_refineStep_samePartition` et al.) +
+> **the entire §S-bridge B1–B5** + the dependency analysis above — all axiom-clean, full build green.
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.
