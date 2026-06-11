@@ -657,11 +657,33 @@ seal is false (statement change), redirect.
 > scheme over `ℤ₄ᵐ` is **imprimitive**. So the genuine Davis–Xiang PDS (route 1) is necessarily *non-linear*; there is no cheap
 > cyclotomic-over-Galois-ring analogue of the affine probe. This is *why* route (1) is the heavy one.
 >
-> **SCOPE / what's still open (honest).** The PSL-coset schemes are **not equal-valency amorphic** (`eqVal=n`): the exact
-> **rank-4 amorphic-NLS Clebsch bullseye** (3 interchangeable equal-valency relations = the largest separability gap = the
-> *most likely* witness shape) is **not realised by a coset action**. It still needs **route (1), the Davis–Xiang non-linear
-> PDS** in a non-elementary-abelian 2-group (order ≥ 64) — the remaining, heavier probe. The `CosetSchemeProbe` measurement
-> core is reusable for it; the missing piece is the explicit PDS construction.
+> **SCOPE (superseded by route (1) below).** The PSL-coset schemes are not equal-valency amorphic; the rank-4 amorphic-NLS
+> Clebsch bullseye is realised by route (1), not by a coset action.
+
+> **ROUTE (1) RAN — the Davis–Xiang amorphic-NLS bullseye, by exhaustive verified search at order 16. VERDICT: NO G2-B
+> WITNESS; the residue exists at order 16 and RECOVERS (2026-06-11).** `GraphCanonizationProject.Tests/PdsAmorphicSchemeProbe.cs`
+> (`Probe_AmorphicNLS_Order16`, green; self-test `Probe_PdsSearch_SelfTest_Z2_4` validates the search by recovering the known
+> affine Clebsch on `ℤ₂⁴`). New machinery: mixed-radix finite-abelian-group arithmetic + a **PDS difference-distribution check**
+> (`count_D(t)=λ` on `D`, `μ` off) + exhaustive **symmetric-subset enumeration** → **search all rank-4 equal-valency amorphic
+> partitions** (three interchangeable Clebsch SRG(16,5,0,2)=NL₁(4), the amorphic-`S₃` gap) on every group of order 16, each
+> **fully verified** (PDS + `BuildScheme` + `FullyCoherent` + Lean primitivity). Result:
+> - **`ℤ₄²` (non-elementary-abelian) carries the primitive rank-4 amorphic-NLS scheme** (8 partitions) — the *exact predicted
+>   G2-B witness shape, non-affine* — and it **fails depth-1 `EdgeGenerates` (the amorphic gap, as predicted) but RECOVERS at
+>   WL-depth 2 ≪ `sepBound`=6.** 0 witnesses.
+> - `ℤ₂⁴` (affine anchor) recovers at depth 3 (= the affine probe's F₁₆ index-3); `ℤ₄×ℤ₂²` and `ℤ₈×ℤ₂` carry **no** such
+>   amorphic partition at all. So the non-affine amorphic-NLS recovers, and *faster* than its affine twin.
+>
+> **CORRECTION to the prior "smallest non-elementary-abelian amorphic NLS is order ≥ 64".** FALSE — `ℤ₄²` at **order 16**
+> carries a *primitive* one (the `2·ℤ₄²` involution subgroup is scattered across the three PDS classes, not a block ⟹ genuinely
+> primitive, not the linear-multiplier imprimitive case). It may also be Hanaki–Miyamoto-catalogue-covered (a translation scheme),
+> but this is the *direct* construction + measurement of the exact residue shape — the single most on-target G2-B data point: the
+> predicted worst-case witness shape, on a non-affine group, **recovers at base+O(1)**.
+>
+> **STILL OPEN (the genuine tail).** Equal-valency rank-4 NLS needs `v=n²` with `n=2^t` and `3∣n−1`, so the next case after `v=16`
+> is `v=256` (n=16, g=5) — exhaustive search there is infeasible, and `v=64` has **no** equal-valency rank-4 NLS (`3∤7`); an
+> *unequal*-valency rank-4 amorphic (e.g. `g=(2,2,3)` on `v=64`, two interchangeable `NL₂(8)` classes) is the cheapest
+> beyond-catalogue extension but needs an explicit (non-exhaustive) Davis–Xiang construction. The `PdsAmorphicSchemeProbe` core
+> (PDS check, amorphic search, measurement) is the reusable substrate for it.
 
 **Citations (with extraction):**
 - Ponomarenko, *On the separability of cyclotomic schemes over finite field*, **arXiv:2006.13592** — Thm 1.1 (cyclotomic
