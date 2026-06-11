@@ -28,6 +28,16 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../GraphCanonizationProofs"
 
+# Kill any stray batch-build workers from a previous or overlapping run, so two
+# concurrent builds never thrash swap fighting over the same modules (a common
+# foot-gun: a backgrounded build left running, then a second build launched).
+# We target ONLY the batch `lake build` driver and its `lean … .lean -o …` compile
+# workers — the VS Code Lean server (`lake serve`, `lean --server`, `lean --worker
+# file://…`, none of which carry a `.lean -o` output flag) is left untouched.
+pkill -f 'lake build' 2>/dev/null || true
+pkill -f '\.lean -o' 2>/dev/null || true
+sleep 1   # let killed workers release Lake's build lock before we start
+
 VERBOSE=0
 [[ "${1:-}" == "--verbose" || "${1:-}" == "-v" ]] && VERBOSE=1
 

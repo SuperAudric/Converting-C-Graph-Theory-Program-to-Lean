@@ -350,6 +350,16 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > (bridging to the project's landed consumer `discrete_of_kRoundRelationSeparates`). Then increment 3 = the Cartan Thm 2.5
 > `m`-separability ⟺ 1-regular `(m−1)`-extension bridge (general), increment 4 = Thm 4.1 (the dense crux). PublicTheoremIndex
 > not yet regenerated for the new file.
+>
+> **Increment 2 (PV §3) is decomposed into sub-increments 2a–2f:** 2a substrate (Smax/smax graph, sα local-rigidity,
+> pᵤ(δ), the identity Σ_w cᵛ_uw = nᵤ); 2b global estimate (19) k(k−1)c ≥ Σ_δ pᵤ(δ); 2c Lemmas 3.4–3.5 (component
+> bijections + pᵤ(δ)≥k / ≥k/2 bounds); 2d Lemma 3.6 (2c(k−1)<n ∧ k≥2 ⟹ smax,sα connected); **2e Lemma 3.3 + the
+> warmRefine bridge = THE KEY MODELING RISK** (paper reasons over the 2-point-extension's fibers; project uses
+> warmRefine/Discrete — re-derive the propagation in the project's cells, landing Discrete(warmRefine from {α,β}) =
+> SeparatesAtBoundedBase S 2, feeding the landed `discrete_of_kRoundRelationSeparates`); 2f Thm 3.1 assembly + degenerate
+> k<2 case. **2a LANDED (2026-06-11, axiom-clean, build green):** `Smax`/`InSmax`/`mem_Smax_iff`/`card_relNeighbors_of_inSmax`,
+> `smaxAdj`(`_symm`)/`SmaxConnected`, `saAdj`/`SaConnected`, `pu`, and **`sum_intersectionNumber_eq_valency`**. PV §3 fully
+> extracted to /tmp/cartan.pdf.
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.

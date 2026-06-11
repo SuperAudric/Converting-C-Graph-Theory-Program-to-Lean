@@ -144,6 +144,82 @@ scheme is `2`-separable with base number `≤ 2` (recovery depth `≤ 4`) — th
 separability spectrum, provable by elementary connectivity counting (the next increment). -/
 def SparseSeparable : Prop := 2 * S.indistinguishingNumber * (S.maxValency - 1) < n
 
+/-! ### §S.4 — The maximum-valency graph `smax`, the local-rigidity relation `sα`, and `pᵤ(δ)`
+
+The combinatorial substrate of Ponomarenko–Vasil'ev §3 (increment 2a). `Smax` is the set of basis
+relations of maximum valency `k`; `smax = ⋃ Smax` is the corresponding (symmetric) graph on the points.
+For a base point `α`, `sα` is the local-rigidity relation on `αsmax`: pairs `(β,γ)` whose colored
+triangle `{α,β,γ}` is forced (`cᵗ_{rs}=1`). The pair-count `pᵤ(δ)` counts the `(β,γ) ∈ αu×αu` that
+`δ` fails to distinguish. The whole §3 argument shows: under `2c(k−1)<n` both graphs are connected,
+which forces a two-point base, i.e. `b(X) ≤ 2`. -/
+
+/-- **`Smax` — the basis relations of maximum valency.** -/
+def Smax : Finset (Fin (S.rank + 1)) := Finset.univ.filter (fun s => S.valency s = S.maxValency)
+
+/-- Membership in `Smax`: a relation of maximum valency `k`. -/
+def InSmax (s : Fin (S.rank + 1)) : Prop := S.valency s = S.maxValency
+
+theorem mem_Smax_iff {s : Fin (S.rank + 1)} : s ∈ S.Smax ↔ S.InSmax s := by
+  simp only [Smax, Finset.mem_filter, Finset.mem_univ, true_and, InSmax]
+
+/-- A maximum-valency relation has out-degree exactly `k = maxValency` from any vertex. -/
+theorem card_relNeighbors_of_inSmax {s : Fin (S.rank + 1)} (hs : S.InSmax s) (v : Fin n) :
+    (Finset.univ.filter (fun w => S.rel s v w = true)).card = S.maxValency := by
+  rw [← S.valency_eq_card s v]; exact hs
+
+/-- **The `smax` graph adjacency** — `(a, b) ∈ smax` iff some maximum-valency relation joins them. -/
+def smaxAdj (a b : Fin n) : Prop := ∃ s, S.InSmax s ∧ S.rel s a b = true
+
+/-- `smax` is symmetric (each relation is symmetric, and valency is fixed). -/
+theorem smaxAdj_symm {a b : Fin n} (h : S.smaxAdj a b) : S.smaxAdj b a := by
+  obtain ⟨s, hs, hrel⟩ := h
+  exact ⟨s, hs, by rw [S.rel_symm s b a]; exact hrel⟩
+
+/-- **Connectedness of the `smax` graph** — every two points are joined by an `smax`-path. -/
+def SmaxConnected : Prop := ∀ a b : Fin n, Relation.ReflTransGen S.smaxAdj a b
+
+/-- **The local-rigidity relation `sα`** — for `β, γ ∈ αsmax`, the colored triangle `{α,β,γ}` is forced
+by its side colors: `c^{r(α,γ)}_{r(α,β),r(β,γ)} = 1`. (Ponomarenko–Vasil'ev §3.2.) -/
+def saAdj (α β γ : Fin n) : Prop :=
+  S.smaxAdj α β ∧ S.smaxAdj α γ ∧
+    S.intersectionNumber (S.relOfPair α β) (S.relOfPair β γ) (S.relOfPair α γ) = 1
+
+/-- **Connectedness of `sα` on `αsmax`** — every two `smax`-neighbours of `α` are joined by an
+`sα`-path. (Ponomarenko–Vasil'ev §3.2; the form used by Lemma 3.3.) -/
+def SaConnected (α : Fin n) : Prop :=
+  ∀ β γ : Fin n, S.smaxAdj α β → S.smaxAdj α γ → Relation.ReflTransGen (S.saAdj α) β γ
+
+/-- **The pair-count `pᵤ(δ)`** — the number of ordered pairs `(β, γ) ∈ αu × αu` with `β ≠ γ` that the
+point `δ` fails to distinguish (`r(β, δ) = r(γ, δ)`). The workhorse of the §3 counting estimates. -/
+noncomputable def pu (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n) : Nat :=
+  (Finset.univ.filter (fun bg : Fin n × Fin n =>
+      S.rel u α bg.1 = true ∧ S.rel u α bg.2 = true ∧ bg.1 ≠ bg.2 ∧
+      S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).card
+
+/-! ### §S.5 — The homogeneous summation identity
+
+`Σ_w c^v_{uw} = n_u`: fixing the source relation `u` and target relation `v`, summing the intersection
+number over the middle relation `w` recovers the valency `n_u`. (Used implicitly throughout §3, e.g. in
+the penultimate equality of the Lemma 3.5(1) bound.) Each `β ∈ αu` lands in exactly one fiber by its
+relation `w = r(β, δ)` to a fixed `δ ∈ αv`. -/
+theorem sum_intersectionNumber_eq_valency (u v : Fin (S.rank + 1)) (α δ : Fin n)
+    (hv : S.rel v α δ = true) :
+    (Finset.univ.sum (fun w : Fin (S.rank + 1) => S.intersectionNumber u w v)) = S.valency u := by
+  rw [S.valency_eq_card u α,
+    Finset.card_eq_sum_card_fiberwise (f := fun β => S.relOfPair β δ) (t := Finset.univ)
+      (fun β _ => Finset.mem_univ _)]
+  refine Finset.sum_congr rfl (fun w _ => ?_)
+  rw [← S.intersectionNumber_well_defined u w v α δ hv]
+  congr 1
+  ext β
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨hu, hw⟩
+    exact ⟨hu, (S.relOfPair_unique hw).symm⟩
+  · rintro ⟨hu, hw⟩
+    refine ⟨hu, ?_⟩
+    have h := S.rel_relOfPair β δ; rw [hw] at h; exact h
+
 end AssociationScheme
 
 end ChainDescent
