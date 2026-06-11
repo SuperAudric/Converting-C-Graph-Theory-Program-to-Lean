@@ -546,11 +546,13 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 >   + `mem_saComp` / `self_mem_saComp` / `saComp_eq_of_mem`; **`compsOf α u` = `C(u)`** (components meeting `αu`) + `saComp_mem_compsOf`;
 >   **`sum_card_fiber_saComp`** — the `αu`-partition `|αu| = Σ_{c∈C(u)} |{β∈αu : saComp α β = c}|` (foundation of the
 >   min-component bound).
-> - **Piece 3 — Lemma 3.4 set-equality (NEXT).** `C(u) ∩ C(v) ≠ ∅ ⟹ C(u) = C(v)` (as sets of components). Only the
->   set-equality is needed (the cardinality bijection is §6-only). Reduces to **path-transport existence**: a fixed
->   `sα`-path `β₀→γ₀` (from the shared component, with each edge's `c=1` forcing the next vertex) transports any `β'∈αu`
->   along the *same* colour-sequence `(uᵢ,vᵢ)` to a `γ'∈αv` in `β'`'s component — so every component meeting `αu` meets
->   `αv`. The nastiest single proof (induction on the reference path with `c=1` uniqueness at each step).
+> - **Piece 3 — Lemma 3.4 set-equality — ✅ LANDED (2026-06-11, axiom-clean, full build green).** `Separability.lean §S.13`,
+>   the nastiest proof of §3, done. **`transport_step`** (the core: `saAdj α b c ∧ r(α,γ'')=r(α,b) ⟹ ∃γ', r(α,γ')=r(α,c)
+>   ∧ saAdj α γ'' γ'` — forward determinacy from the SAME `c=1` via the triangle identity, both relations in `Smax`) →
+>   **`transport`** (ReflTransGen induction: a reference `sα`-path transports any `β'` of matching `r(α,·)` to a matching
+>   endpoint along an `sα`-path) → **`compsOf_subset_of_path`** → **`compsOf_eq_of_inter_nonempty`** (`C(u)∩C(v)≠∅ ⟹
+>   C(u)=C(v)`). All four axiom-clean. The whole thing came together cleanly once the transport step's triangle-identity
+>   forward-uniqueness was pinned.
 > - **Piece 4 — Lemma 3.5(2)** `pᵤ(δ) ≥ k/2` (when `nu=nv`, `C(u)=C(v)`, `|C(u)|>1`). Clean lower bound found:
 >   `B := αu \ saComp(δ) ⊆ (pu-pairs).image fst`, so `pᵤ(δ) ≥ |B|` via `card_image_le`; for `β∈B`, `c^v_{u,r(β,δ)}≥2`
 >   (refine the bridge to `saAdj_of_intersectionNumber_eq_one_of_mem`: `β∈αu ∧ c^v=1 ⟹ saAdj α β δ`, contrapositive);

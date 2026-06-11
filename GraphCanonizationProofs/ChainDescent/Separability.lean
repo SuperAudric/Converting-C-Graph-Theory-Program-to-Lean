@@ -705,6 +705,100 @@ theorem sum_card_fiber_saComp (α : Fin n) (u : Fin (S.rank + 1)) :
   Finset.card_eq_sum_card_fiberwise (fun β hβ =>
     Finset.mem_image_of_mem _ hβ)
 
+/-! ### §S.13 — Lemma 3.4 (set-equality): the `sα`-path transport (piece 3)
+
+The combinatorial heart of Ponomarenko–Vasil'ev §3.3 (the hardest proof of the section). A reference
+`sα`-path `β0 → γ0` from `αu` to `αv` lets us **transport** any other `β' ∈ αu` along the same colour
+sequence to a `γ' ∈ αv` in `β'`'s component — so every component meeting `αu` also meets `αv`, giving
+`C(u) = C(v)` (Lemma 3.4, set-equality form; the cardinality bijection is §6-only, not needed here).
+The transport step's forward determinacy comes from the *same* `c^t_{rs} = 1` condition carried by the
+triangle identity (`valency_mul_intersectionNumber`): both `r(α,b), r(α,c) ∈ Smax` have valency `k`,
+so `c^{uc}_{ub w} = c^{ub}_{uc w} = 1`. -/
+
+/-- **The transport step.** Given an `sα`-edge `b → c` (apex `α`) and a vertex `γ''` with the same
+relation to `α` as `b`, there is a `γ'` with the same relation to `α` as `c` and `saAdj α γ'' γ'`. -/
+theorem transport_step {α b c γ'' : Fin n} (hbc : S.saAdj α b c)
+    (hγ : S.relOfPair α γ'' = S.relOfPair α b) :
+    ∃ γ', S.relOfPair α γ' = S.relOfPair α c ∧ S.saAdj α γ'' γ' := by
+  classical
+  obtain ⟨hsmb, hsmc, hone⟩ := hbc
+  set ub := S.relOfPair α b with hub
+  set uc := S.relOfPair α c with huc
+  set w := S.relOfPair b c with hw
+  obtain ⟨sb, hsb, hrelb⟩ := hsmb
+  obtain ⟨sc, hsc, hrelc⟩ := hsmc
+  have hInub : S.InSmax ub := by rw [hub, ← S.relOfPair_unique hrelb]; exact hsb
+  have hInuc : S.InSmax uc := by rw [huc, ← S.relOfPair_unique hrelc]; exact hsc
+  have hrelγ : S.rel ub α γ'' = true := by have h := S.rel_relOfPair α γ''; rwa [hγ] at h
+  have hid := S.valency_mul_intersectionNumber uc w ub α
+  rw [hone, Nat.mul_one] at hid
+  have hpos : 0 < S.valency ub := by
+    rw [S.valency_eq_card ub α]; apply Finset.card_pos.2
+    exact ⟨b, by simp only [Finset.mem_filter, Finset.mem_univ, true_and]; rw [hub]; exact S.rel_relOfPair α b⟩
+  have hX : S.intersectionNumber uc w ub = 1 := by
+    have heq : S.valency ub * S.intersectionNumber uc w ub = S.valency ub * 1 := by
+      rw [Nat.mul_one, hid, hInub, hInuc]
+    exact Nat.eq_of_mul_eq_mul_left hpos heq
+  have hwd := S.intersectionNumber_well_defined uc w ub α γ'' hrelγ
+  rw [hX] at hwd
+  obtain ⟨γ', hγ'⟩ := Finset.card_pos.mp (by rw [hwd]; exact Nat.one_pos)
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hγ'
+  obtain ⟨hreluc, hrelw⟩ := hγ'
+  refine ⟨γ', (S.relOfPair_unique hreluc).symm, ?_⟩
+  refine ⟨⟨ub, hInub, hrelγ⟩, ⟨uc, hInuc, hreluc⟩, ?_⟩
+  have e2 : S.relOfPair γ'' γ' = w := by
+    have hrelw' : S.rel w γ'' γ' = true := by rw [S.rel_symm w γ'' γ']; exact hrelw
+    exact (S.relOfPair_unique hrelw').symm
+  rw [hγ, e2, (S.relOfPair_unique hreluc).symm]; exact hone
+
+/-- **The path transport.** A reference `sα`-path `β0 → γ0` transports any `β'` with the same relation to
+`α` as `β0` to a `γ'` with the same relation to `α` as `γ0`, along an `sα`-path. -/
+theorem transport {α β0 γ0 : Fin n} (hpath : Relation.ReflTransGen (S.saAdj α) β0 γ0)
+    {β' : Fin n} (hβ' : S.relOfPair α β' = S.relOfPair α β0) :
+    ∃ γ', S.relOfPair α γ' = S.relOfPair α γ0 ∧ Relation.ReflTransGen (S.saAdj α) β' γ' := by
+  induction hpath with
+  | refl => exact ⟨β', hβ', .refl⟩
+  | tail _ hstep ih =>
+    obtain ⟨γ'', hγ''rel, hγ''path⟩ := ih
+    obtain ⟨γ', hγ'rel, hγ'step⟩ := S.transport_step hstep hγ''rel
+    exact ⟨γ', hγ'rel, hγ''path.tail hγ'step⟩
+
+/-- **Lemma 3.4 (set-equality), subset form.** If a component meeting `αu` is `sα`-path-joined to a
+vertex of `αv`, then every component meeting `αu` also meets `αv`. -/
+theorem compsOf_subset_of_path {α : Fin n} {u v : Fin (S.rank + 1)} {β0 γ0 : Fin n}
+    (hβ0 : S.rel u α β0 = true) (hγ0 : S.rel v α γ0 = true)
+    (hpath : Relation.ReflTransGen (S.saAdj α) β0 γ0) :
+    S.compsOf α u ⊆ S.compsOf α v := by
+  intro c hc
+  rw [compsOf, Finset.mem_image] at hc
+  obtain ⟨β', hβ'mem, hβ'eq⟩ := hc
+  rw [Finset.mem_filter] at hβ'mem
+  have hβ'rel : S.relOfPair α β' = S.relOfPair α β0 := by
+    rw [← S.relOfPair_unique hβ'mem.2, ← S.relOfPair_unique hβ0]
+  obtain ⟨γ', hγ'rel, hγ'path⟩ := S.transport hpath hβ'rel
+  have hγ'v : S.rel v α γ' = true := by
+    have hv : S.relOfPair α γ' = v := by rw [hγ'rel, ← S.relOfPair_unique hγ0]
+    rw [← hv]; exact S.rel_relOfPair α γ'
+  have hcomp : S.saComp α γ' = S.saComp α β' := S.saComp_eq_of_mem (S.mem_saComp.mpr hγ'path)
+  rw [← hβ'eq, ← hcomp]
+  exact S.saComp_mem_compsOf hγ'v
+
+/-- **Lemma 3.4 (set-equality).** Two component sets sharing a component are equal:
+`C(u) ∩ C(v) ≠ ∅ ⟹ C(u) = C(v)`. -/
+theorem compsOf_eq_of_inter_nonempty {α : Fin n} {u v : Fin (S.rank + 1)}
+    (hne : (S.compsOf α u ∩ S.compsOf α v).Nonempty) :
+    S.compsOf α u = S.compsOf α v := by
+  obtain ⟨c, hc⟩ := hne
+  rw [Finset.mem_inter, compsOf, Finset.mem_image, compsOf, Finset.mem_image] at hc
+  obtain ⟨⟨β0, hβ0mem, hβ0eq⟩, ⟨γ0, hγ0mem, hγ0eq⟩⟩ := hc
+  rw [Finset.mem_filter] at hβ0mem hγ0mem
+  have hpath : Relation.ReflTransGen (S.saAdj α) β0 γ0 := by
+    apply S.mem_saComp.mp
+    rw [hβ0eq, ← hγ0eq]; exact S.self_mem_saComp α γ0
+  exact Finset.Subset.antisymm
+    (S.compsOf_subset_of_path hβ0mem.2 hγ0mem.2 hpath)
+    (S.compsOf_subset_of_path hγ0mem.2 hβ0mem.2 (S.reflTransGen_saAdj_symm α hpath))
+
 end AssociationScheme
 
 end ChainDescent
