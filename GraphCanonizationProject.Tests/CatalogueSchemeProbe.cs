@@ -970,4 +970,166 @@ public class CatalogueSchemeProbe(ITestOutputHelper output)
         Assert.Equal(0, thm31HoldsNonTame);    // Theorem 3.1 holds empirically: 2c(k-1)<n ⟹ recovers (in fact WL-depth ≤ 2)
         Assert.Equal(0, genuineWitness);       // no small-Aut schurian non-abelian non-recovering primitive (the standing falsifier)
     }
+
+    // ── Non-affine amorphic residue: Latin-square-type SRG schemes ──────────────
+    // Gol'fand–Ivanov–Klin: an amorphic scheme (≥3 classes) is all-SRG of Latin-square or
+    // negative-Latin-square type.  Latin-square GRAPHS from RANDOM (non-group) Latin squares are
+    // primitive SRGs with SMALL Aut and NON-affine origin — exactly the residue the affine
+    // module-adjoin cannot reach (no F_p-module).  This probe builds them across growing m and asks:
+    // does the non-affine residue still recover at bounded depth (falsifier), and does depth stay
+    // flat or grow ~log n (the poly-vs-quasipoly fork)?
+    //   SCOPE: reaches the LATIN-SQUARE-type non-affine residue.  The negative-Latin-square
+    //   (Clebsch-family) non-affine residue needs the heavier Davis–Xiang PDS construction in
+    //   non-elementary-abelian groups and stays deferred.
+
+    static int[,] CyclicLatinSquare(int m)
+    {
+        var L = new int[m, m];
+        for (int i = 0; i < m; i++) for (int j = 0; j < m; j++) L[i, j] = (i + j) % m;
+        return L;
+    }
+
+    // Intercalate-switch randomization: random 2×2 symbol swaps, each preserving the Latin property.
+    // For m ≥ 5, enough switches leave the cyclic-group main class ⟹ a small-Aut (non-affine) square.
+    static int[,] RandomizedLatinSquare(int m, int steps, Random rng)
+    {
+        var L = (int[,])CyclicLatinSquare(m).Clone();
+        for (int s = 0; s < steps; s++)
+        {
+            int r1 = rng.Next(m), r2 = rng.Next(m), c1 = rng.Next(m);
+            if (r1 == r2) continue;
+            int a = L[r1, c1], b = L[r2, c1];
+            if (a == b) continue;
+            int c2 = -1;
+            for (int c = 0; c < m; c++) if (L[r1, c] == b) { c2 = c; break; }   // an intercalate {a,b}
+            if (c2 < 0 || L[r2, c2] != a) continue;
+            L[r1, c1] = b; L[r2, c1] = a; L[r1, c2] = a; L[r2, c2] = b;
+        }
+        return L;
+    }
+
+    // Latin-square graph as a rank-3 scheme on m² cells: 0=id, 1=collinear (row|col|symbol), 2=else.
+    static int[,] LatinSquareGraphRel(int[,] L, int m)
+    {
+        int n = m * m;
+        var M = new int[n, n];
+        for (int i1 = 0; i1 < m; i1++) for (int j1 = 0; j1 < m; j1++)
+            for (int i2 = 0; i2 < m; i2++) for (int j2 = 0; j2 < m; j2++)
+            {
+                int x = i1 * m + j1, y = i2 * m + j2;
+                if (x == y) { M[x, y] = 0; continue; }
+                bool coll = i1 == i2 || j1 == j2 || L[i1, j1] == L[i2, j2];
+                M[x, y] = coll ? 1 : 2;
+            }
+        return M;
+    }
+
+    // Latin-square NET scheme on m² cells, parallel classes kept SEPARATE (the rank-≥4 amorphic object):
+    //   0=id, 1=same row, 2=same column, 3=same symbol, 4=non-collinear.  This is where depth-1 EdgeGenerates
+    //   can FAIL (the Clebsch-type behaviour), unlike the rank-3 graph.  BuildScheme gates coherence.
+    static int[,] LatinSquareNetRel(int[,] L, int m)
+    {
+        int n = m * m;
+        var M = new int[n, n];
+        for (int i1 = 0; i1 < m; i1++) for (int j1 = 0; j1 < m; j1++)
+            for (int i2 = 0; i2 < m; i2++) for (int j2 = 0; j2 < m; j2++)
+            {
+                int x = i1 * m + j1, y = i2 * m + j2;
+                if (x == y) { M[x, y] = 0; continue; }
+                if (i1 == i2) M[x, y] = 1;
+                else if (j1 == j2) M[x, y] = 2;
+                else if (L[i1, j1] == L[i2, j2]) M[x, y] = 3;
+                else M[x, y] = 4;
+            }
+        return M;
+    }
+
+    [Fact]
+    public void Probe_AmorphicResidue_LatinSquare()
+    {
+        const int autCap = 200_000;
+        int primCount = 0, validNonAffinePrim = 0, genuineWitness = 0;
+        var witnessRows = new List<string>();
+        var growth = new List<(int n, int wl)>();   // non-affine primitive depth vs n
+
+        output.WriteLine("Non-affine amorphic residue — Latin-square-type SRG schemes (Gol'fand–Ivanov–Klin).");
+        output.WriteLine("Cyclic square = affine/group control (large Aut); randomized = non-group ⟹ small Aut, NON-affine.");
+        output.WriteLine("Recovery = EdgeGenerates ∨ WL-depth ≤ ⌈log2 n⌉+2.   |Aut| computed ONLY for non-recoverers (witness check).\n");
+        output.WriteLine("   m  n   origin      rank prim  k   c  thm31 edgeGen WLdepth  |Aut|     recover?");
+
+        for (int m = 4; m <= 10; m++)
+        {
+            int n = m * m;
+            int tameBound = (int)Math.Ceiling(Math.Log2(n)) + 2;
+            var squares = new List<(string origin, int[,] L)> { ("cyclic", CyclicLatinSquare(m)) };
+            for (int t = 0; t < 4; t++) squares.Add(($"rand#{t}", RandomizedLatinSquare(m, 50 * n, new Random(1000 * m + t))));
+
+            void Measure(string tag, int[,] M)
+            {
+                var s = BuildScheme(M, n);
+                if (s is null) { output.WriteLine($"  {m,2} {n,4}  {tag,-12} INVALID (not a CC) — skip"); return; }
+                bool prim = Primitive(s);
+                if (prim) primCount++;
+                var adj = Adjoint(s);
+                int k = MaxValency(s), c = Indistinguishing(s, adj);
+                bool thm31 = 2 * c * (k - 1) < n;
+                bool edge = Recovers(s);
+                int wl = WLDepth(s, n);
+                bool tame = edge || wl <= tameBound;
+                bool nonAffine = !tag.StartsWith("cyclic") && m >= 5;   // order-≤4 Latin squares are all group-isotopic (affine)
+                if (prim && nonAffine) { validNonAffinePrim++; growth.Add((n, wl)); }
+
+                // |Aut| computed ONLY for a NON-recoverer — to tell a small-Aut witness from a large/Cameron case.
+                // (A recovering scheme cannot be a witness, so its |Aut| is irrelevant and AutGroup is skipped.)
+                string autStr = "—";
+                if (!tame)
+                {
+                    var autos = AutGroup(s, autCap);
+                    if (autos is null) autStr = $">{autCap} (large/Cameron)";
+                    else
+                    {
+                        var (_, _, schurian, abelian, o) = Analyze(s, autos);
+                        autStr = o.ToString();
+                        if (prim && schurian && !abelian && wl > (int)Math.Floor(Math.Log2(Math.Max(1, o))) + 2)
+                        {
+                            genuineWitness++;
+                            witnessRows.Add($"    ‼ m={m} {tag} n={n} rank={s.Rank} WLdepth={wl} |Aut|={o} — GENUINE non-affine witness");
+                        }
+                    }
+                }
+                output.WriteLine($"  {m,2} {n,4}  {tag,-12} {s.Rank,3} {(prim ? "yes" : "no "),4} {k,3} {c,3}  {(thm31 ? "yes" : "no "),-4} {(edge ? "yes" : "NO "),-5} {wl,4}    {autStr,-9} {(tame ? "recover" : "★NON-RECOVER")}");
+            }
+
+            foreach (var (origin, L) in squares)
+            {
+                Measure(origin, LatinSquareGraphRel(L, m));        // rank-3 SRG (depth-1-easy)
+                Measure(origin + "/net", LatinSquareNetRel(L, m)); // rank-≥4 net scheme (reaches the depth-1-failure zone)
+            }
+        }
+
+        output.WriteLine("");
+        output.WriteLine($"primitive schemes built: {primCount};  non-affine (non-group, randomized m≥5) primitive: {validNonAffinePrim}");
+        if (growth.Count > 0)
+        {
+            var byN = growth.GroupBy(g => g.n).OrderBy(g => g.Key).Select(g => $"n={g.Key}:maxWL={g.Max(x => x.wl)}");
+            output.WriteLine($"  non-affine recovery depth vs n: {string.Join("  ", byN)}");
+        }
+        foreach (var r in witnessRows) output.WriteLine(r);
+
+        output.WriteLine("");
+        output.WriteLine(validNonAffinePrim > 0
+            ? $"VERDICT (construction): reached the non-affine zone — {validNonAffinePrim} non-group (m≥5) primitive Latin-square SRG schemes built."
+            : "VERDICT (construction): ‼ stayed in the large-Aut zone (m too small / randomization insufficient) — probe INCONCLUSIVE on the non-affine residue.");
+        output.WriteLine(genuineWitness == 0
+            ? "VERDICT (falsifier): 0 genuine non-affine witnesses — every small-Aut Latin-square-type amorphic scheme recovers at bounded depth."
+            : $"VERDICT (falsifier): ‼ {genuineWitness} GENUINE non-affine WITNESS(ES) — the non-affine residue is non-recovering; module-adjoin scope INSUFFICIENT, statement-relevant.");
+        output.WriteLine("VERDICT (scope): Latin-square GRAPHS are primitive but rank-3 (depth-1-easy); Latin-square NET schemes are " +
+                         "rank-≥4 but IMPRIMITIVE (parallel classes = block systems ⟹ the handled case, not G2-B). The genuine PRIMITIVE " +
+                         "rank-4 amorphic residue is NEGATIVE-Latin-square type (Clebsch family), which Latin-square constructions cannot " +
+                         "produce — it needs the Davis–Xiang partial-difference-set construction in non-elementary-abelian groups (the heavier deferred route).");
+
+        // ── assertions ──
+        Assert.True(primCount > 0, "no primitive Latin-square schemes constructed");
+        Assert.Equal(0, genuineWitness);   // no non-affine non-recovering small-Aut primitive (falsifier extends to non-affine)
+    }
 }
