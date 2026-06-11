@@ -337,6 +337,20 @@ This is the **one known path that discharges the general crux** (`SelfDetectsWhi
 citation dependency) **and** the non-affine residue. Research-scale and uncertain: it either closes G2-B or surfaces a
 counterexample (statement change). It is the heaviest, highest-value item on the to-do.
 
+> **PROGRESS — Increment 1 LANDED (2026-06-11, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green).**
+> New file **`ChainDescent/Separability.lean`** (imports only `Scheme`; registered in `scripts/build.sh`) lays the
+> **parameter substrate** of Ponomarenko–Vasil'ev Thm 3.1 — the sparse special case / on-ramp to Thm 4.1 (step 4 below).
+> Landed decls (all on `AssociationScheme`, computed from the existing intersection numbers, no new axioms):
+> `valency i := intersectionNumber i i 0` + **`valency_eq_card`** (valency = literal out-degree from any vertex) +
+> `valency_zero`; `maxValency` (= `k(X)`) + `valency_le_maxValency`; `indistinguishingNumberOf r := Σ_s p^r_{ss}` +
+> **`indistinguishingNumberOf_eq_card`** (the geometric form `c(r) = |{γ : r(γ,α)=r(γ,β)}|`, PV eq. (7) — the counting
+> shape Thm 3.1's connectivity argument consumes) + `indistinguishingNumber` (= `c(X)`) + `indistinguishingNumberOf_le`;
+> and the hypothesis predicate **`SparseSeparable := 2*c*(k−1) < n`**. **Next increment (2):** the connectivity argument
+> (PV §3, Lemmas 3.3–3.6) proving `SparseSeparable ⟹` one-point extension 1-regular `⟹ SeparatesAtBoundedBase S 2`
+> (bridging to the project's landed consumer `discrete_of_kRoundRelationSeparates`). Then increment 3 = the Cartan Thm 2.5
+> `m`-separability ⟺ 1-regular `(m−1)`-extension bridge (general), increment 4 = Thm 4.1 (the dense crux). PublicTheoremIndex
+> not yet regenerated for the new file.
+
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.
 1. **The `m`-extension / `m`-dimensional intersection numbers** of a CC — the smallest CC on `Ωᵐ` containing the Cartesian
