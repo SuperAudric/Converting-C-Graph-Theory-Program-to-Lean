@@ -334,6 +334,134 @@ theorem pu_eq_sum (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n) :
       exact ⟨h1, (S.relOfPair_unique hw).symm⟩
   rw [hcard, nat_kk_sub_self]
 
+/-! ### §S.8 — The homogeneous triangle identity `n_k·cᵏ_{ij} = n_i·cⁱ_{kj}`
+
+Increment 2c-ii. Double-count the colored triangles `x–y–z` (colors `i` on `x→y`, `j` on `y→z`, `k` on
+`x→z`) through a fixed apex `x`: counting by the `z`-leg gives `n_k·cᵏ_{ij}`, by the `y`-leg gives
+`n_i·cⁱ_{kj}`. Fixing the apex avoids the global `n`-factor. (Ponomarenko–Vasil'ev eq. (4), symmetric
+case.) This alone discharges the `nᵤ>nᵥ` subcase of Lemma 3.5(1): if `cᵏ_{ij} ≥ 1` then this identity
+forces `cⱽ_{uw}` up whenever `nᵤ > nᵥ`. -/
+theorem valency_mul_intersectionNumber (i j k : Fin (S.rank + 1)) (x : Fin n) :
+    S.valency k * S.intersectionNumber i j k = S.valency i * S.intersectionNumber k j i := by
+  classical
+  -- `D` = the (y, z) legs of triangles `x–y–z` with the prescribed colors.
+  -- Count `D` by the `z`-coordinate ⟹ `n_k · cᵏ_{ij}`.
+  have hA : (Finset.univ.filter (fun p : Fin n × Fin n =>
+        S.rel i x p.1 = true ∧ S.rel j p.1 p.2 = true ∧ S.rel k x p.2 = true)).card
+      = S.valency k * S.intersectionNumber i j k := by
+    rw [Finset.card_eq_sum_card_fiberwise (f := fun p : Fin n × Fin n => p.2)
+          (t := Finset.univ) (fun _ _ => Finset.mem_univ _)]
+    have hfz : ∀ z : Fin n,
+        ((Finset.univ.filter (fun p : Fin n × Fin n =>
+            S.rel i x p.1 = true ∧ S.rel j p.1 p.2 = true ∧ S.rel k x p.2 = true)).filter
+              (fun p => p.2 = z)).card
+        = if S.rel k x z = true then S.intersectionNumber i j k else 0 := by
+      intro z
+      by_cases hk : S.rel k x z = true
+      · rw [if_pos hk, ← S.intersectionNumber_well_defined i j k x z hk]
+        apply Finset.card_bij (fun p _ => p.1)
+        · intro p hp
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+          obtain ⟨⟨hi1, hj1, _⟩, hz⟩ := hp
+          exact ⟨hi1, hz ▸ hj1⟩
+        · intro p hp q hq hpq
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp hq
+          exact Prod.ext hpq (hp.2.trans hq.2.symm)
+        · intro y hy
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hy
+          refine ⟨(y, z), ?_, rfl⟩
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+          refine ⟨⟨hy.1, hy.2, hk⟩, ?_⟩
+          trivial
+      · rw [if_neg hk, Finset.card_eq_zero]
+        apply Finset.eq_empty_of_forall_notMem
+        intro p hp
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp
+        obtain ⟨⟨_, _, hk1⟩, hz⟩ := hp
+        exact hk (hz ▸ hk1)
+    rw [Finset.sum_congr rfl (fun z _ => hfz z), ← Finset.sum_filter, Finset.sum_const,
+      smul_eq_mul, ← S.valency_eq_card k x]
+  -- Count `D` by the `y`-coordinate ⟹ `n_i · cⁱ_{kj}`.
+  have hB : (Finset.univ.filter (fun p : Fin n × Fin n =>
+        S.rel i x p.1 = true ∧ S.rel j p.1 p.2 = true ∧ S.rel k x p.2 = true)).card
+      = S.valency i * S.intersectionNumber k j i := by
+    rw [Finset.card_eq_sum_card_fiberwise (f := fun p : Fin n × Fin n => p.1)
+          (t := Finset.univ) (fun _ _ => Finset.mem_univ _)]
+    have hfy : ∀ y : Fin n,
+        ((Finset.univ.filter (fun p : Fin n × Fin n =>
+            S.rel i x p.1 = true ∧ S.rel j p.1 p.2 = true ∧ S.rel k x p.2 = true)).filter
+              (fun p => p.1 = y)).card
+        = if S.rel i x y = true then S.intersectionNumber k j i else 0 := by
+      intro y
+      by_cases hi' : S.rel i x y = true
+      · rw [if_pos hi', ← S.intersectionNumber_well_defined k j i x y hi']
+        apply Finset.card_bij (fun p _ => p.2)
+        · intro p hp
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+          obtain ⟨⟨_, hj1, hk1⟩, hy⟩ := hp
+          refine ⟨hk1, ?_⟩
+          rw [S.rel_symm j p.2 y]; exact hy ▸ hj1
+        · intro p hp q hq hpq
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp hq
+          exact Prod.ext (hp.2.trans hq.2.symm) hpq
+        · intro z hz
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hz
+          refine ⟨(y, z), ?_, rfl⟩
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+          refine ⟨⟨hi', ?_, hz.1⟩, ?_⟩
+          · rw [S.rel_symm j y z]; exact hz.2
+          · trivial
+      · rw [if_neg hi', Finset.card_eq_zero]
+        apply Finset.eq_empty_of_forall_notMem
+        intro p hp
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hp
+        obtain ⟨⟨hi1, _, _⟩, hy⟩ := hp
+        exact hi' (hy ▸ hi1)
+    rw [Finset.sum_congr rfl (fun y _ => hfy y), ← Finset.sum_filter, Finset.sum_const,
+      smul_eq_mul, ← S.valency_eq_card i x]
+  exact hA.symm.trans hB
+
+/-! ### §S.9 — Lemma 3.5(1), the `nᵤ > nᵥ` half: `pᵤ(δ) ≥ nᵤ`
+
+Increment 2c-iv (the component-free half). When the test relation `v = r(α,δ)` has strictly smaller
+valency than `u`, every `cᵛ_{uw}` that occurs is `≥ 2` (a `cᵛ_{uw}=1` would force, via the triangle
+identity, `nᵥ = nᵤ·cᵛ′ ≥ nᵤ > nᵥ`, or `nᵥ = 0`, both impossible). Hence each term
+`cᵛ_{uw}(cᵛ_{uw}−1) ≥ cᵛ_{uw}` and summing (identity (20) + the valency identity) gives `pᵤ(δ) ≥ nᵤ`.
+This is the half of Lemma 3.5(1) that needs no `sα`-component analysis; it powers Lemma 3.6's
+*smax*-connectedness directly. -/
+theorem valency_le_pu_of_valency_lt (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n)
+    (hlt : S.valency (S.relOfPair α δ) < S.valency u) :
+    S.valency u ≤ S.pu α u δ := by
+  rw [S.pu_eq_sum α u δ]
+  set v := S.relOfPair α δ with hv
+  have hrv : S.rel v α δ = true := by rw [hv]; exact S.rel_relOfPair α δ
+  rw [← S.sum_intersectionNumber_eq_valency u v α δ hrv]
+  apply Finset.sum_le_sum
+  intro w _
+  -- `cᵛ_{uw} ≠ 1`: a `1` would contradict `nᵥ < nᵤ` via the triangle identity.
+  have hne1 : S.intersectionNumber u w v ≠ 1 := by
+    intro h1
+    have hid : S.valency v * S.intersectionNumber u w v
+        = S.valency u * S.intersectionNumber v w u := S.valency_mul_intersectionNumber u w v α
+    rw [h1, Nat.mul_one] at hid
+    have hvpos : 1 ≤ S.valency v := by
+      rw [S.valency_eq_card v α]
+      apply Finset.card_pos.2
+      exact ⟨δ, by simp only [Finset.mem_filter, Finset.mem_univ, true_and]; exact hrv⟩
+    rcases Nat.eq_zero_or_pos (S.intersectionNumber v w u) with hm | hm
+    · rw [hm, Nat.mul_zero] at hid; omega
+    · have hle : S.valency u ≤ S.valency v :=
+        calc S.valency u = S.valency u * 1 := (Nat.mul_one _).symm
+          _ ≤ S.valency u * S.intersectionNumber v w u := Nat.mul_le_mul (le_refl _) hm
+          _ = S.valency v := hid.symm
+      omega
+  -- so `cᵛ_{uw} = 0` or `≥ 2`, giving `cᵛ_{uw} ≤ cᵛ_{uw}(cᵛ_{uw}−1)`.
+  rcases Nat.eq_zero_or_pos (S.intersectionNumber u w v) with hc0 | hc0
+  · simp [hc0]
+  · calc S.intersectionNumber u w v = S.intersectionNumber u w v * 1 := (Nat.mul_one _).symm
+      _ ≤ S.intersectionNumber u w v * (S.intersectionNumber u w v - 1) :=
+          Nat.mul_le_mul (le_refl _) (by omega)
+
 end AssociationScheme
 
 end ChainDescent

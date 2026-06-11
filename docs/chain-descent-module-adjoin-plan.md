@@ -368,8 +368,16 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > *smax*-connected half of 3.6 — no components); 2c-iii the sα-component machinery (`Cα(u)`, the αu↔αv bijection) +
 > Lemma 3.4 (the heavy graph part); 2c-iv Lemmas 3.5(1)+(2). **2c-i LANDED (2026-06-11, axiom-clean, build green):**
 > **`pu_eq_sum`** (`pᵤ(δ) = Σ_w cᵛ_{uw}(cᵛ_{uw}−1)`, v=relOfPair α δ — fiber the offDiag pairs by their common
-> relation `w` to δ). Next: 2c-ii (triangle identity — a triple double-count with an `n`-cancellation) then 2c-iii
-> (components, the hardest piece before the 2e warmRefine bridge).
+> relation `w` to δ).
+> **2c-ii LANDED (2026-06-11, axiom-clean, build green):** **`valency_mul_intersectionNumber`** (the triangle identity
+> `n_k·cᵏ_{ij} = n_i·cⁱ_{kj}`, proved by double-counting triangles through a fixed apex — counting by the z-leg vs the
+> y-leg, no `n`-cancellation).
+> **3.5(1) `nᵤ>nᵥ` half LANDED (2026-06-11, axiom-clean, build green):** **`valency_le_pu_of_valency_lt`** (`nᵥ<nᵤ ⟹
+> pᵤ(δ) ≥ nᵤ`) — the component-free half of Lemma 3.5(1), composing identity (20) + the triangle identity + the valency
+> identity. It drives Lemma 3.6's *smax*-connected branch directly. **Remaining 2c = the hard graph core:** 2c-iii the
+> `sα`-component machinery (`Cα(u)`, the αu↔αv bijection via `ReflTransGen`) + Lemma 3.4, and the `nᵤ=nᵥ` subcases of
+> 3.5(1)/(2). That is the genuinely hard piece (connected components in Lean) before 2d (Lemma 3.6) and the 2e warmRefine
+> bridge.
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.
