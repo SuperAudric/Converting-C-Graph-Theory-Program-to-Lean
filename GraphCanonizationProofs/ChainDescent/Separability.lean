@@ -649,6 +649,62 @@ theorem valency_le_pu_of_no_saAdj (α : Fin n) {u : Fin (S.rank + 1)} (δ : Fin 
   obtain ⟨β, huβ, hsa⟩ := S.exists_saAdj_of_intersectionNumber_eq_one α δ hu hv h1
   exact hno β huβ hsa
 
+/-! ### §S.12 — `sα`-components and the component set `C(u)` (piece 2)
+
+The combinatorial substrate of Ponomarenko–Vasil'ev §3.3. The `sα`-graph (on `αsmax`, edges `saAdj α`)
+has connected components; since `saAdj α` is symmetric (`saAdj_symm`), the component relation is
+`Relation.ReflTransGen (S.saAdj α)`, an equivalence. `saComp α β` is `β`'s component (as a `Finset`);
+`compsOf α u = C(u)` is the set of components meeting `αu` (the `u`-neighbours of `α`). The headline of
+this piece is the **`αu`-partition** `Σ_{c ∈ C(u)} |{β ∈ αu : saComp α β = c}| = |αu|`, the foundation
+of the minimum-component bound in Lemma 3.5(2). -/
+
+/-- `saAdj α` is symmetric (`saAdj_symm`), so its reflexive-transitive closure — the `sα`-component
+relation — is too. -/
+theorem reflTransGen_saAdj_symm (α : Fin n) {β γ : Fin n}
+    (h : Relation.ReflTransGen (S.saAdj α) β γ) : Relation.ReflTransGen (S.saAdj α) γ β :=
+  (Relation.ReflTransGen.symmetric (fun _ _ h => S.saAdj_symm α h)) h
+
+/-- **The `sα`-component of `β`** (within `αsmax`): the reflexive-transitive `saAdj α`-closure of `β`
+(`ReflTransGen` is undecidable, so this is `Classical`/noncomputable — only its partition behaviour is
+used). -/
+noncomputable def saComp (α β : Fin n) : Finset (Fin n) :=
+  open Classical in
+  Finset.univ.filter (fun γ => Relation.ReflTransGen (S.saAdj α) β γ)
+
+theorem mem_saComp {α β γ : Fin n} :
+    γ ∈ S.saComp α β ↔ Relation.ReflTransGen (S.saAdj α) β γ := by
+  classical
+  simp only [saComp, Finset.mem_filter, Finset.mem_univ, true_and]
+
+theorem self_mem_saComp (α β : Fin n) : β ∈ S.saComp α β :=
+  S.mem_saComp.mpr Relation.ReflTransGen.refl
+
+/-- Two vertices in the same component have the same component `Finset`. -/
+theorem saComp_eq_of_mem {α β γ : Fin n} (h : γ ∈ S.saComp α β) :
+    S.saComp α γ = S.saComp α β := by
+  rw [mem_saComp] at h
+  ext δ
+  rw [mem_saComp, mem_saComp]
+  exact ⟨fun hγδ => h.trans hγδ, fun hβδ => (S.reflTransGen_saAdj_symm α h).trans hβδ⟩
+
+/-- **The component set `C(u)`** — the `sα`-components that meet `αu` (the `u`-neighbours of `α`). -/
+noncomputable def compsOf (α : Fin n) (u : Fin (S.rank + 1)) : Finset (Finset (Fin n)) :=
+  (Finset.univ.filter (fun β => S.rel u α β = true)).image (S.saComp α)
+
+theorem saComp_mem_compsOf {α : Fin n} {u : Fin (S.rank + 1)} {β : Fin n}
+    (hβ : S.rel u α β = true) : S.saComp α β ∈ S.compsOf α u :=
+  Finset.mem_image_of_mem _ (Finset.mem_filter.2 ⟨Finset.mem_univ _, hβ⟩)
+
+/-- **The `αu`-partition by component** — `|αu| = Σ_{c ∈ C(u)} |{β ∈ αu : saComp α β = c}|`. The
+foundation of the minimum-component argument (Lemma 3.5(2)): `αu` splits into its component-pieces. -/
+theorem sum_card_fiber_saComp (α : Fin n) (u : Fin (S.rank + 1)) :
+    (Finset.univ.filter (fun β => S.rel u α β = true)).card
+      = (S.compsOf α u).sum (fun c =>
+          ((Finset.univ.filter (fun β => S.rel u α β = true)).filter
+            (fun β => S.saComp α β = c)).card) :=
+  Finset.card_eq_sum_card_fiberwise (fun β hβ =>
+    Finset.mem_image_of_mem _ hβ)
+
 end AssociationScheme
 
 end ChainDescent

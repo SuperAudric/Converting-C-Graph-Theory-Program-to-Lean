@@ -539,10 +539,27 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > PV-Thm-3.1 is its two connectivity hypotheses: **`SmaxConnected` — LANDED** (`smaxConnected_of_sparseSeparable`,
 > `Separability.lean`); **`∀a SaConnected a` — the sα grind (pieces 2–5)**, the last open leg.
 >
-> **NEXT CONCRETE PASS — the `sα` grind (pieces 2–5), to discharge `SaConnected`:** 2 component set `Cα(u)`; 3 *weakened*
-> Lemma 3.4 (set-equality via path-transport existence — the bijection is §6-only, not needed); 4 Lemma 3.5(2); 5 Lemma
-> 3.6 `sα` half ((23) `|C(u)|=1` + small-component contradiction, reusing `exists_small_closed`). Then a small B5+ assembly
-> (derive the `smaxAdj` edge from `k≥2`, combine the two connectivity legs) completes the full Thm 3.1.
+> **THE `sα` grind (pieces 2–5), to discharge `SaConnected` — the last open leg.**
+> - **Piece 2 — component infrastructure — ✅ LANDED (2026-06-11, axiom-clean, full build green).** `Separability.lean §S.12`:
+>   `reflTransGen_saAdj_symm` (the component relation `ReflTransGen (saAdj α)` is symmetric, hence an equivalence);
+>   **`saComp α β`** (the `sα`-component of `β`, as a `Finset`; `Classical`/noncomputable since `ReflTransGen` is undecidable)
+>   + `mem_saComp` / `self_mem_saComp` / `saComp_eq_of_mem`; **`compsOf α u` = `C(u)`** (components meeting `αu`) + `saComp_mem_compsOf`;
+>   **`sum_card_fiber_saComp`** — the `αu`-partition `|αu| = Σ_{c∈C(u)} |{β∈αu : saComp α β = c}|` (foundation of the
+>   min-component bound).
+> - **Piece 3 — Lemma 3.4 set-equality (NEXT).** `C(u) ∩ C(v) ≠ ∅ ⟹ C(u) = C(v)` (as sets of components). Only the
+>   set-equality is needed (the cardinality bijection is §6-only). Reduces to **path-transport existence**: a fixed
+>   `sα`-path `β₀→γ₀` (from the shared component, with each edge's `c=1` forcing the next vertex) transports any `β'∈αu`
+>   along the *same* colour-sequence `(uᵢ,vᵢ)` to a `γ'∈αv` in `β'`'s component — so every component meeting `αu` meets
+>   `αv`. The nastiest single proof (induction on the reference path with `c=1` uniqueness at each step).
+> - **Piece 4 — Lemma 3.5(2)** `pᵤ(δ) ≥ k/2` (when `nu=nv`, `C(u)=C(v)`, `|C(u)|>1`). Clean lower bound found:
+>   `B := αu \ saComp(δ) ⊆ (pu-pairs).image fst`, so `pᵤ(δ) ≥ |B|` via `card_image_le`; for `β∈B`, `c^v_{u,r(β,δ)}≥2`
+>   (refine the bridge to `saAdj_of_intersectionNumber_eq_one_of_mem`: `β∈αu ∧ c^v=1 ⟹ saAdj α β δ`, contrapositive);
+>   `|B|≥k/2` from the min-component (`sum_card_fiber_saComp` + `|C(u)|≥2` ⟹ min fiber `≤k/2`), choosing `δ` in the min
+>   component (`pᵤ` depends only on `v`, via `pu_eq_sum`).
+> - **Piece 5 — Lemma 3.6 `sα` half:** (23) `|C(u)|=1` (from 3.5(2) + estimate (19), the `Σ pᵤ(δ)≥nk/2` contradiction),
+>   then `sα` connected (from (23) + 3.5(1)[landed], the small-`sα`-component contradiction, reusing the (19) estimate).
+> Then a small **B5+ assembly** (derive the `smaxAdj` edge from `k≥2`; combine `smaxConnected_of_sparseSeparable` + the
+> piece-5 `SaConnected` into `separatesAtBoundedBase_of_connectivity`) completes the full PV-Thm-3.1.
 >
 > Landed this pass: **`saAdj_symm`** + **§S-stab stabilization block** (`warmRefine_refineStep_samePartition` et al.) +
 > **the entire §S-bridge B1–B5** + the dependency analysis above — all axiom-clean, full build green.
