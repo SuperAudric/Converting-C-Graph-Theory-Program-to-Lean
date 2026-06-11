@@ -1132,4 +1132,105 @@ public class CatalogueSchemeProbe(ITestOutputHelper output)
         Assert.True(primCount > 0, "no primitive Latin-square schemes constructed");
         Assert.Equal(0, genuineWitness);   // no non-affine non-recovering small-Aut primitive (falsifier extends to non-affine)
     }
+
+    // ── Plan-A validation: is the cyclotomic amorphic gap fully SEMILINEAR? (module-adjoin premise) ──
+    // The seal residue is the cyclotomic affine amorphic scheme (Clebsch = F₁₆ index-3; order-25 = F₂₅ index-3).
+    // Plan A (module-adjoin) needs: every algebraic automorphism (intersection-number-preserving colour
+    // permutation, Ĝ) is realised by a SEMILINEAR point map (ΓL₁ = ⟨mult-by-α, Frobenius⟩), so individualising a
+    // field-generating set kills it (depth = dim = O(log n)).  The Frobenius retraction warned the amorphic S₃ is
+    // "not Galois"; this checks the sharper claim that it is nonetheless LINEAR + Galois (i.e. semilinear), with the
+    // non-Galois 3-cycle realised by mult-by-α ∈ GL (fixed-point-free ⟹ killed by ONE individualisation).
+
+    sealed class GFq { public int p, d, q; public int[] exp = []; public int[] log = []; public int[] pPow = []; }
+    static int GfDigit(GFq f, int x, int i) => (x / f.pPow[i]) % f.p;
+    static int GfSub(GFq f, int x, int y) { int r = 0; for (int i = 0; i < f.d; i++) r += ((GfDigit(f, x, i) - GfDigit(f, y, i) + f.p) % f.p) * f.pPow[i]; return r; }
+    static int GfMulX(GFq f, int x, int[] red) { int top = GfDigit(f, x, f.d - 1), r = 0; for (int i = 0; i < f.d; i++) r += (((i == 0 ? 0 : GfDigit(f, x, i - 1)) + top * red[i]) % f.p) * f.pPow[i]; return r; }
+    static int GfMul(GFq f, int a, int b) => (a == 0 || b == 0) ? 0 : f.exp[(f.log[a] + f.log[b]) % (f.q - 1)];
+    static int GfFrob(GFq f, int x, int j) => x == 0 ? 0 : f.exp[(f.pPow[j] * f.log[x]) % (f.q - 1)];
+
+    static GFq? BuildGF(int p, int d)
+    {
+        var f = new GFq { p = p, d = d, q = 1 };
+        for (int i = 0; i < d; i++) f.q *= p;
+        f.pPow = new int[d + 1]; f.pPow[0] = 1; for (int i = 1; i <= d; i++) f.pPow[i] = f.pPow[i - 1] * p;
+        var red = new int[d];
+        for (int code = 0; code < f.pPow[d]; code++)
+        {
+            for (int i = 0; i < d; i++) red[i] = (code / f.pPow[i]) % p;
+            var exp = new int[f.q - 1]; var seen = new HashSet<int>();
+            int cur = 1; bool ok = true;                      // α = x; exp[i] = α^i
+            for (int i = 0; i < f.q - 1; i++) { if (cur == 0 || !seen.Add(cur)) { ok = false; break; } exp[i] = cur; cur = GfMulX(f, cur, red); }
+            if (ok && cur == 1) { f.exp = exp; f.log = new int[f.q]; Array.Fill(f.log, -1); for (int i = 0; i < f.q - 1; i++) f.log[exp[i]] = i; return f; }
+        }
+        return null;
+    }
+
+    static List<int[]> ColourPerms(int e)
+    {
+        var res = new List<int[]>(); var a = Enumerable.Range(1, e).ToArray();
+        void rec(int k) { if (k == e) { var pm = new int[e + 1]; for (int i = 0; i < e; i++) pm[i + 1] = a[i]; res.Add(pm); return; } for (int i = k; i < e; i++) { (a[k], a[i]) = (a[i], a[k]); rec(k + 1); (a[k], a[i]) = (a[i], a[k]); } }
+        rec(0); return res;
+    }
+    static bool IntersectionPreserving(Scheme s, int[] σ, int e) { for (int i = 0; i <= e; i++) for (int j = 0; j <= e; j++) for (int k = 0; k <= e; k++) if (s.P[σ[k], σ[i], σ[j]] != s.P[k, i, j]) return false; return true; }
+    static int[]? InducedColourPerm(int[,] rel, int q, Func<int, int> A, int e)
+    {
+        var τ = new int[e + 1]; Array.Fill(τ, -1);
+        for (int x = 0; x < q; x++) for (int y = 0; y < q; y++) { int k = rel[x, y], kk = rel[A(x), A(y)]; if (τ[k] == -1) τ[k] = kk; else if (τ[k] != kk) return null; }
+        var seen = new bool[e + 1]; for (int i = 0; i <= e; i++) { if (τ[i] < 0 || τ[i] > e || seen[τ[i]]) return null; seen[τ[i]] = true; }
+        return τ;
+    }
+    static int FixedCount(int[] τ, int e) { int c = 0; for (int i = 1; i <= e; i++) if (τ[i] == i) c++; return c; }
+
+    [Fact]
+    public void Probe_ModuleAdjoin_AmorphicGapIsSemilinear()
+    {
+        const int e = 3;   // cyclotomic index ⟹ rank e+1 amorphic scheme (e=3 ⟹ S₃ gap)
+        var cases = new[] { (p: 2, d: 4), (p: 5, d: 2) };   // Clebsch (n=16) and the order-25 amorphic
+        output.WriteLine("Plan-A validation: is the cyclotomic amorphic gap Ĝ fully SEMILINEAR (module-adjoin premise)?");
+        output.WriteLine("Ĝ = intersection-preserving colour perms;  ΓL-realised = induced by x ↦ mult(c)∘Frob^j, verified on all pairs.\n");
+
+        foreach (var (p, d) in cases)
+        {
+            var f = BuildGF(p, d)!;
+            int q = f.q;
+            if ((q - 1) % e != 0) { output.WriteLine($"GF({p}^{d}): {q - 1} not divisible by {e} — skip"); continue; }
+
+            int Col(int delta) => delta == 0 ? 0 : 1 + (f.log[delta] % e);
+            var M = new int[q, q];
+            for (int x = 0; x < q; x++) for (int y = 0; y < q; y++) M[x, y] = Col(GfSub(f, x, y));
+            var s = BuildScheme(M, q)!;
+            bool prim = Primitive(s);
+            output.WriteLine($"GF({p}^{d})  n={q}  rank={s.Rank}  primitive={prim}  valency={MaxValency(s)}  WLdepth={WLDepth(s, q)}");
+
+            var gHat = ColourPerms(e).Where(σ => IntersectionPreserving(s, σ, e)).ToList();
+            var realised = new HashSet<string>();
+            string? threeCycleBy = null, transBy = null;
+            for (int j = 0; j < d; j++)
+                for (int c = 1; c < q; c++)
+                {
+                    int cc = c, jj = j;
+                    var τ = InducedColourPerm(s.Rel, q, x => GfMul(f, cc, GfFrob(f, x, jj)), e);
+                    if (τ == null) continue;
+                    realised.Add(string.Join(",", τ));
+                    int fix = FixedCount(τ, e);
+                    if (fix == 0 && threeCycleBy == null) threeCycleBy = $"x ↦ α^{f.log[cc]}·x^({p}^{jj})";   // no fixed colour ⟹ 3-cycle
+                    if (fix == 1 && transBy == null) transBy = $"x ↦ α^{f.log[cc]}·x^({p}^{jj})";              // one fixed colour ⟹ transposition
+                }
+
+            bool full = gHat.Select(σ => string.Join(",", σ)).ToHashSet().SetEquals(realised);
+            output.WriteLine($"  |Ĝ| (algebraic gap on colours) = {gHat.Count}  (full S_{e} = {6})   |ΓL-realised| = {realised.Count}");
+            output.WriteLine($"  non-Galois 3-cycle realised by: {threeCycleBy ?? "— (NOT realised)"}");
+            output.WriteLine($"  Galois transposition realised by: {transBy ?? "— (NOT realised)"}");
+            output.WriteLine(full
+                ? $"  VERDICT: Ĝ == ΓL-realised ⟹ the amorphic gap is ENTIRELY SEMILINEAR — module-adjoin premise HOLDS on GF({p}^{d})."
+                : $"  ‼ VERDICT: Ĝ ⊋ ΓL-realised — an algebraic automorphism is NOT semilinear; module-adjoin scope INSUFFICIENT.");
+            output.WriteLine("");
+
+            Assert.True(prim, $"GF({p}^{d}) cyclotomic scheme not primitive");
+            Assert.Equal(e + 1, s.Rank);
+            Assert.Equal(6, gHat.Count);                 // amorphic: the full S₃ algebraic gap is present
+            Assert.True(full, $"GF({p}^{d}): amorphic gap not fully semilinear — module-adjoin premise FAILS");
+            Assert.NotNull(threeCycleBy);                // the non-Galois remainder IS realised (by mult-by-α ∈ GL)
+        }
+    }
 }
