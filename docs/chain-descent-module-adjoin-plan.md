@@ -578,6 +578,36 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > Landed this pass: **`saAdj_symm`** + **§S-stab stabilization block** (`warmRefine_refineStep_samePartition` et al.) +
 > **the entire §S-bridge B1–B5** + the dependency analysis above — all axiom-clean, full build green.
 
+> ## ▶ THM 4.1 PROGRAM — source secured + scope-and-state begun (2026-06-11)
+> **Source secured:** arXiv:2006.13592 (Ponomarenko, *On the separability of cyclotomic schemes over finite field*)
+> fetched + `pdf2txt`-extracted to `/tmp/p4paper.txt` (persisted). **Thm 4.1 DOES exist** (the doc §6.1 was right; an
+> earlier "it doesn't" was a locale-broken `grep` choking on UTF-8 — re-verify greps with `LC_ALL=C` or python).
+> - **Thm 4.1 (general):** `X=(Ω,S)` CC, `µ∈Ω`; if (i) every `Δ⊆Ω,|Δ|≤4` is dominated (`Δ←λ`) and (ii) every triple
+>   `α,β,γ` has an `m∈S` with `µm≠∅` and the couple `Qµ(α,β,γ)` `m`-extending ⟹ **`Separable X`**.
+> - **Thm 5.1 (parameter form):** `n > 3c(k−1)k ⟹ Separable X`.
+> **Three strategic findings (from reading the source):**
+> 1. **Thm 5.1's `n>3ck(k−1)` is STRICTER than the landed Thm 3.1 `n>2c(k−1)`** — the parameter form does NOT extend
+>    reach; the dense-case power is ONLY the **m-extension route** (apply Thm 4.1 to the 2-extension ⟹ 2-separability,
+>    as the paper's Thm 1.2 does).
+> 2. **Thm 4.1 is for GENERAL coherent configurations**; its m-extension lives on `Ωᵐ` (non-homogeneous CC). The project
+>    has only homogeneous single-fiber `AssociationScheme` — **no general-CC/`Ωᵐ` substrate at all.** This is a ground-up
+>    layer, plausibly larger than everything built so far.
+> 3. **THE SEAL-BRIDGE is the gating open question:** Thm 4.1 proves `Separable`/`m-separable` (the `s(C)` notion); the
+>    seal consumes `SeparatesAtBoundedBase` (base/WL-dim notion). Related via `b(X)↔s(C)↔dimWL` (Chen–Ponomarenko
+>    [3,§4.2]; `dimWL(X)≤dimWL(Xα)+1`) but NOT identical. **Validate this bridge before investing in the m-extension build.**
+>
+> **DECISION (user, 2026-06-11): scope-and-state first** (lowest-regret entry; the Davis–Xiang probe stays on the to-do
+> list, and scope-and-state may refine it / hand it new pieces to check).
+> **LANDED (scope-and-state, axiom-clean, full build green): `Separability.lean §S.17`** — the Thm 4.1 *target* notion:
+> **`AlgIso X Y`** (algebraic isomorphism: relation-`Equiv` preserving `0` + all intersection numbers, P–V §2.5 eq. (14));
+> **`AlgIso.InducedBy φ f`** (realised by a vertex permutation); **`Separable X`** (`∀ Y φ, ∃ f, InducedBy`); `idAlgIso`
+> + `idAlgIso_inducedBy_refl` (inhabited/sanity); **`SeparableParam X`** (Thm 5.1 hypothesis `3c(k−1)k<n`). No `sorry`s
+> (deferred theorems documented in prose in the §S.17 docstring). Modeling note: algebraic iso preserves valencies hence
+> `n`, so `Y` is on the same `Fin n` (no loss).
+> **NEXT scope-and-state steps:** (a) **scope the seal-bridge** (finding 3 — the gate): can `Separable`/2-separable be
+> related to `SeparatesAtBoundedBase` in the project's terms? (b) the **m-dimensional intersection numbers / m-extension**
+> definition (heavy — the `Ωᵐ` CC); (c) state Thm 4.1's (i)/(ii) conditions (`←` order, couples `Qµ`).
+
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.
 1. **The `m`-extension / `m`-dimensional intersection numbers** of a CC — the smallest CC on `Ωᵐ` containing the Cartesian

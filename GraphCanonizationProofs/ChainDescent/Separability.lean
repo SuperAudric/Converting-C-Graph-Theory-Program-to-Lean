@@ -1110,6 +1110,65 @@ theorem saConnected_of_sparseSeparable (hsep : S.SparseSeparable) (hk : 2 ≤ S.
       (fun β' hβ' => S.mem_saComp_of_card_one (S.card_compsOf_eq_one hsep hk hu) hrelu hβ')
       (by omega)
 
+/-! ### §S.17 — Separability and algebraic isomorphisms (the Thm 4.1 *target*; scope-and-state)
+
+The conclusion of Ponomarenko Theorem 4.1 (arXiv:2006.13592 §4) is that a coherent configuration is
+**separable**: its intersection numbers determine it up to isomorphism — equivalently, every *algebraic*
+isomorphism (a relation-bijection preserving intersection numbers, P–V §2.5 eq. (14)) is **induced** by an
+actual vertex isomorphism. This block pins that target notion in Lean (definitions only — the Thm 4.1/5.1
+*proofs* are the deferred research program). Since an algebraic isomorphism preserves all valencies
+`n_i = c^0_{i,i}` and `n = Σ_i n_i`, algebraically isomorphic schemes share the point count `n`, so we model
+the partner `Y` on the same `Fin n` with no loss.
+
+**The deferred targets (stated here in prose; no `sorry`s land in the build):**
+- **Thm 4.1** (general): given `µ`, conditions (i) every `Δ⊆Ω, |Δ|≤4` is dominated (`Δ←λ`) and (ii) every
+  triple has an `m`-extending couple `Qµ` ⟹ `Separable X`. Needs the `←` order, couples `Qµ`, and the
+  **m-extension** (a CC on `Ωᵐ` — substrate the project lacks; the heavy next layer).
+- **Thm 5.1** (parameter form): `3c(k−1)k < n` ⟹ `Separable X` (`SeparableParam` below). *Stricter* than
+  the landed Thm 3.1 bound `2c(k−1)<n`, so it does not extend reach by parameters alone; the dense-case power
+  is the m-extension route (apply Thm 4.1 to the 2-extension ⟹ 2-separability).
+- **THE SEAL-BRIDGE (the gating open question):** how does `Separable` / `m-separable` (the `s(C)` notion)
+  connect to the seal's `SeparatesAtBoundedBase` (the base / WL-dimension notion)? They are related via the
+  `b(X) ↔ s(C) ↔ dimWL` theory (Chen–Ponomarenko [3, §4.2]; the paper's `dimWL(X) ≤ dimWL(Xα)+1`) but NOT
+  identical. Validating/closing this bridge is the prerequisite for Thm 4.1 to feed the seal at all. -/
+
+/-- An **algebraic isomorphism** `X → Y`: a bijection of basis relations preserving the identity relation
+and all intersection numbers `c^t_{rs}` (Ponomarenko–Vasil'ev §2.5, eq. (14)). The `Equiv` forces equal
+rank; intersection-number preservation forces equal valencies, hence equal `n`. -/
+structure AlgIso (X Y : AssociationScheme n) where
+  /-- the relation bijection `S → S'`. -/
+  relEquiv : Fin (X.rank + 1) ≃ Fin (Y.rank + 1)
+  /-- the identity (diagonal) relation is preserved. -/
+  map_zero : relEquiv 0 = 0
+  /-- intersection numbers are preserved: `c^t_{rs}(X) = c^{φt}_{φr,φs}(Y)`. -/
+  pres_intersection : ∀ r s t, X.intersectionNumber r s t
+    = Y.intersectionNumber (relEquiv r) (relEquiv s) (relEquiv t)
+
+/-- An algebraic isomorphism `φ : X → Y` is **induced** by a vertex permutation `f` if `f` carries each
+relation `R_r` of `X` onto `R'_{φ r}` of `Y` — i.e. `f` is an honest isomorphism realising `φ`. -/
+def AlgIso.InducedBy {X Y : AssociationScheme n} (φ : AlgIso X Y) (f : Equiv.Perm (Fin n)) : Prop :=
+  ∀ r v w, X.rel r v w = Y.rel (φ.relEquiv r) (f v) (f w)
+
+/-- **Separability** (`s(X) = 1`): every algebraic isomorphism out of `X` is induced by an isomorphism —
+the intersection numbers determine `X` up to isomorphism. This is exactly the conclusion of Thm 4.1. -/
+def Separable (X : AssociationScheme n) : Prop :=
+  ∀ (Y : AssociationScheme n) (φ : AlgIso X Y), ∃ f : Equiv.Perm (Fin n), φ.InducedBy f
+
+/-- The identity algebraic isomorphism (sanity: the defs are inhabited and `idAlgIso` is induced by `id`). -/
+def idAlgIso (X : AssociationScheme n) : AlgIso X X where
+  relEquiv := Equiv.refl _
+  map_zero := rfl
+  pres_intersection := fun _ _ _ => rfl
+
+theorem idAlgIso_inducedBy_refl (X : AssociationScheme n) :
+    (idAlgIso X).InducedBy (Equiv.refl (Fin n)) := fun _ _ _ => rfl
+
+/-- **Theorem 5.1's hypothesis** — the parameter inequality `3c(k−1)k < n` guaranteeing `Separable X`. Named
+for the deferred `separable_of_separableParam` target. Note `SeparableParam X → SparseSeparable X` (it is the
+*stricter* condition), so where it holds, the landed Thm 3.1 already applies. -/
+def SeparableParam (X : AssociationScheme n) : Prop :=
+  3 * X.indistinguishingNumber * (X.maxValency - 1) * X.maxValency < n
+
 end AssociationScheme
 
 end ChainDescent
