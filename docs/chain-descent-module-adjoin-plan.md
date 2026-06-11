@@ -337,6 +337,60 @@ This is the **one known path that discharges the general crux** (`SelfDetectsWhi
 citation dependency) **and** the non-affine residue. Research-scale and uncertain: it either closes G2-B or surfaces a
 counterexample (statement change). It is the heaviest, highest-value item on the to-do.
 
+### 9.0 — HANDOFF: `Separability.lean` build state (2026-06-11) — read this first
+
+> **The build is underway as the on-ramp: formalizing Ponomarenko–Vasil'ev *Cartan coherent configurations*
+> (arXiv:1602.07132) Theorem 3.1** — `SparseSeparable (2c(k−1)<n) ⟹` one-point ext 1-regular `⟹ b(X)≤2 ∧ s(C)≤2`,
+> the *sparse* special case of the Thm 4.1 prize, whose proof is elementary connectivity-counting (no classification)
+> and which forces building the reusable `valency`/`c(X)`/base substrate Thm 4.1 needs.
+>
+> **File:** [`ChainDescent/Separability.lean`](../GraphCanonizationProofs/ChainDescent/Separability.lean) — imports only
+> `ChainDescent.Scheme`; registered in `scripts/build.sh` MODULES. Every decl axiom-clean
+> `[propext, Classical.choice, Quot.sound]`, full build green. Decl-by-decl descriptions are in `PublicTheoremIndex.md`
+> (§ `ChainDescent/Separability.lean`). The paper is extracted to `/tmp/cartan.pdf` (re-fetch: `curl -sL
+> https://arxiv.org/pdf/1602.07132 -o /tmp/cartan.pdf`; read with `pdf2txt`). §2.2–2.4 + §3 (Lemmas 3.2–3.6, Thm 3.1)
+> are the relevant pages (~5–12).
+>
+> **Target chain (the project-facing goal):** `SparseSeparable S → SeparatesAtBoundedBase S 2` (`Cascade.lean`'s
+> consumer predicate = ∃ base of size ≤2 whose `warmRefine` is `Discrete`). The landed engine
+> `discrete_of_kRoundRelationSeparates` (`CascadeAffine.lean §13c`) is the bridge from a separating profile to
+> `Discrete`; the §3 argument supplies the separation.
+>
+> **LANDED (the full counting/algebra core of §3 + the *smax* half of Lemma 3.6 + the `sα`↔counting bridge):**
+> `valency`/`maxValency`/`indistinguishingNumber`/`SparseSeparable` (§S.1–3); `Smax`/`smaxAdj`/`SmaxConnected`,
+> `saAdj`/`SaConnected`, `pu` (§S.4); `sum_intersectionNumber_eq_valency` (§S.5); `sum_pu_le` = **(19)** (§S.6);
+> `pu_eq_sum` = **(20)** (§S.7); `valency_mul_intersectionNumber` = the **triangle identity (4)** (§S.8); the **Lemma
+> 3.5(1)** core+both halves `valency_le_pu_of_forall_ne_one` / `…_of_valency_lt` / `…_of_no_saAdj` (§S.9, §S.11);
+> `exists_small_closed_of_not_connected` + `exists_inSmax` + **`smaxConnected_of_sparseSeparable`** (§S.10); and the
+> bridge **`exists_saAdj_of_intersectionNumber_eq_one`** (§S.11).
+>
+> **OPEN — the remaining `sα`-component-SET machinery (the hard multi-pass core), in dependency order:**
+> 1. **Piece 2 — the component set `Cα(u)`:** the `sα`-components meeting `αu` (suggest: `saReach α β γ :=
+>    ReflTransGen (saAdj α) β γ`; component = reachable Finset; `|C(u)|` = #distinct components met by `αu`; the
+>    partition `αu = ⊔_C (αu∩C)`). Build the *partition + cardinality* lemmas first.
+> 2. **Piece 3 — Lemma 3.4** (`C(u)∩C(v)≠∅ ⟹ C(u)=C(v) ∧ |αu∩C|=|αv∩C|`): the `αu↔αv` `sα`-path-transport bijection.
+>    **The nastiest single proof in §3** — induction on `sα`-path length, each step forced-unique via `c^{u_{i+1}}_{u_i
+>    v_i}=1`. The `exists_saAdj…` bridge is its workhorse.
+> 3. **Piece 4 — Lemma 3.5(2)** (`pᵤ(δ) ≥ k/2`): pick the min-`|αu∩C|` component; `|C(u)|>1 ⟹ |αu\C| ≥ k/2`; for
+>    `β∈αu\C`, `δ∈αv∩C` are in different components ⟹ no `sα`-edge ⟹ (via the bridge) `c^v_{u,r(β,δ)}>1`; sum to
+>    `pᵤ(δ) ≥ |αu\C|`. Uses `pu_eq_sum` + the bridge, NOT the full `valency_le_pu_…` core (it's a `≥ k/2`, not `≥ k`).
+> 4. **Piece 5 — Lemma 3.6, `sα` half** (`SparseSeparable ∧ k≥2 ⟹ ∀α, SaConnected α`): claim (23) `|C(u)|=1 ∀u∈Smax`
+>    (else 3.5(2) ⟹ `pᵤ(δ)≥k/2 ∀δ` ⟹ (19) contradiction); then disconnected ⟹ small `sα`-component `C` (reuse
+>    `exists_small_closed`, but on the **subgraph restricted to `αsmax`** — note `saAdj` only links `αsmax` vertices, so
+>    take care extracting a component ⊊ `αsmax`); for `δ∉C`, 3.5(1) (n_v<k OR diff component ⟹ no edge) ⟹ `pᵤ(δ)≥k`;
+>    (19) contradiction.
+>
+> **Then (separate increments, after §3 is fully closed):**
+> - **2e — Lemma 3.3 + the warmRefine bridge (THE KEY MODELING RISK):** `smax ∧ all sα connected ⟹ {α,β} is a base`
+>   for `(α,β)∈smax` ⟹ `Discrete (warmRefine from {α,β})` = `SeparatesAtBoundedBase S 2`. The paper argues over the
+>   2-point-extension's *fibers*; the project uses `warmRefine`/`Discrete` cells. Resolving this equivalence (likely
+>   re-deriving Lemma 3.3's `Γ/Γ₀` propagation directly in `warmRefine` cells, or via
+>   `discrete_of_kRoundRelationSeparates`) is the genuine risk — do it before assuming the §3 work "lands a project result."
+> - **2f — Theorem 3.1 assembly** + the degenerate `k<2` case (thin/regular scheme: every relation valency 1 ⟹
+>   handled separately; `smaxConnected_of_sparseSeparable`/the bounds assume `k≥2`).
+>
+> **The scattered increment-by-increment notes below are detailed history; this 9.0 block is the authoritative current state.**
+
 > **PROGRESS — Increment 1 LANDED (2026-06-11, axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green).**
 > New file **`ChainDescent/Separability.lean`** (imports only `Scheme`; registered in `scripts/build.sh`) lays the
 > **parameter substrate** of Ponomarenko–Vasil'ev Thm 3.1 — the sparse special case / on-ramp to Thm 4.1 (step 4 below).
