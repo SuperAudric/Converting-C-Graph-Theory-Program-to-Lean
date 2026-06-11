@@ -386,6 +386,16 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > half of Lemma 3.6 needing only the `nᵤ>nᵥ` bound + the (19) estimate, no component-set machinery. **Remaining hard core
 > (next pass):** the `sα`-component *set* `Cα(u)`, Lemma 3.4 (αu↔αv bijection), Lemma 3.5(2) (`pᵤ(δ)≥k/2`), and the
 > `sα`-connected half of 3.6 — the genuinely hard counting-over-components. Then 2e (warmRefine bridge) + 2f (Thm 3.1).
+>
+> **sα machinery — piece 1 (the graph↔counting bridge + Lemma 3.5(1) refactor) LANDED (2026-06-11, axiom-clean, build
+> green).** Refactored the `nᵤ>nᵥ` bound into a reusable core **`valency_le_pu_of_forall_ne_one`** (`∀w cᵛ_{uw}≠1 ⟹
+> pᵤ(δ)≥nᵤ`) + **`intersectionNumber_ne_one_of_valency_lt`** (triangle-id supplier), keeping `valency_le_pu_of_valency_lt`
+> as a corollary. New foundation: **`exists_saAdj_of_intersectionNumber_eq_one`** (`cᵛ_{uw}=1 ⟹ ∃ αu-vertex sα-adjacent to
+> δ` — THE bridge linking `saAdj` to the intersection numbers) ⟹ **`valency_le_pu_of_no_saAdj`** (Lemma 3.5(1)'s `nᵤ=nᵥ`
+> half: no `sα`-edge to δ ⟹ pᵤ(δ)≥nᵤ). So Lemma 3.5(1) is complete in BOTH subcases, expressed via the graph.
+> **Remaining sα pieces (the hard component-SET core, next passes):** 2 the component set `Cα(u)`/`|C(u)|` + αu-partition;
+> 3 Lemma 3.4 (αu↔αv `sα`-path-transport bijection — nastiest); 4 Lemma 3.5(2) (`pᵤ(δ)≥k/2`, min-component); 5 Lemma 3.6
+> `sα` half ((23) `|C(u)|=1` + small-component contradiction, reusing `exists_small_closed`).
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.

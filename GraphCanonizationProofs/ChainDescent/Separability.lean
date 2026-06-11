@@ -429,8 +429,11 @@ identity, `nᵥ = nᵤ·cᵛ′ ≥ nᵤ > nᵥ`, or `nᵥ = 0`, both impossible
 `cᵛ_{uw}(cᵛ_{uw}−1) ≥ cᵛ_{uw}` and summing (identity (20) + the valency identity) gives `pᵤ(δ) ≥ nᵤ`.
 This is the half of Lemma 3.5(1) that needs no `sα`-component analysis; it powers Lemma 3.6's
 *smax*-connectedness directly. -/
-theorem valency_le_pu_of_valency_lt (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n)
-    (hlt : S.valency (S.relOfPair α δ) < S.valency u) :
+/-- **The core of Lemma 3.5(1).** If every relation `w` has `cᵛ_{uw} ≠ 1` (`v = r(α,δ)`), then each term
+`cᵛ_{uw}(cᵛ_{uw}−1) ≥ cᵛ_{uw}`, and summing (identity (20) + the valency identity) gives `pᵤ(δ) ≥ nᵤ`.
+Both halves of Lemma 3.5(1) (the `nᵤ>nᵥ` case and the no-`sα`-edge case) feed `≠1` into this. -/
+theorem valency_le_pu_of_forall_ne_one (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n)
+    (h : ∀ w, S.intersectionNumber u w (S.relOfPair α δ) ≠ 1) :
     S.valency u ≤ S.pu α u δ := by
   rw [S.pu_eq_sum α u δ]
   set v := S.relOfPair α δ with hv
@@ -438,29 +441,41 @@ theorem valency_le_pu_of_valency_lt (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fi
   rw [← S.sum_intersectionNumber_eq_valency u v α δ hrv]
   apply Finset.sum_le_sum
   intro w _
-  -- `cᵛ_{uw} ≠ 1`: a `1` would contradict `nᵥ < nᵤ` via the triangle identity.
-  have hne1 : S.intersectionNumber u w v ≠ 1 := by
-    intro h1
-    have hid : S.valency v * S.intersectionNumber u w v
-        = S.valency u * S.intersectionNumber v w u := S.valency_mul_intersectionNumber u w v α
-    rw [h1, Nat.mul_one] at hid
-    have hvpos : 1 ≤ S.valency v := by
-      rw [S.valency_eq_card v α]
-      apply Finset.card_pos.2
-      exact ⟨δ, by simp only [Finset.mem_filter, Finset.mem_univ, true_and]; exact hrv⟩
-    rcases Nat.eq_zero_or_pos (S.intersectionNumber v w u) with hm | hm
-    · rw [hm, Nat.mul_zero] at hid; omega
-    · have hle : S.valency u ≤ S.valency v :=
-        calc S.valency u = S.valency u * 1 := (Nat.mul_one _).symm
-          _ ≤ S.valency u * S.intersectionNumber v w u := Nat.mul_le_mul (le_refl _) hm
-          _ = S.valency v := hid.symm
-      omega
-  -- so `cᵛ_{uw} = 0` or `≥ 2`, giving `cᵛ_{uw} ≤ cᵛ_{uw}(cᵛ_{uw}−1)`.
   rcases Nat.eq_zero_or_pos (S.intersectionNumber u w v) with hc0 | hc0
   · simp [hc0]
-  · calc S.intersectionNumber u w v = S.intersectionNumber u w v * 1 := (Nat.mul_one _).symm
+  · have hne1 := h w
+    calc S.intersectionNumber u w v = S.intersectionNumber u w v * 1 := (Nat.mul_one _).symm
       _ ≤ S.intersectionNumber u w v * (S.intersectionNumber u w v - 1) :=
           Nat.mul_le_mul (le_refl _) (by omega)
+
+/-- A `cᵛ_{uw} = 1` would force (triangle identity) `nᵤ ≤ nᵥ`, so `nᵥ < nᵤ ⟹ cᵛ_{uw} ≠ 1`. -/
+theorem intersectionNumber_ne_one_of_valency_lt (α : Fin n) (u w : Fin (S.rank + 1)) (δ : Fin n)
+    (hlt : S.valency (S.relOfPair α δ) < S.valency u) :
+    S.intersectionNumber u w (S.relOfPair α δ) ≠ 1 := by
+  set v := S.relOfPair α δ with hv
+  have hrv : S.rel v α δ = true := by rw [hv]; exact S.rel_relOfPair α δ
+  intro h1
+  have hid : S.valency v * S.intersectionNumber u w v
+      = S.valency u * S.intersectionNumber v w u := S.valency_mul_intersectionNumber u w v α
+  rw [h1, Nat.mul_one] at hid
+  have hvpos : 1 ≤ S.valency v := by
+    rw [S.valency_eq_card v α]
+    apply Finset.card_pos.2
+    exact ⟨δ, by simp only [Finset.mem_filter, Finset.mem_univ, true_and]; exact hrv⟩
+  rcases Nat.eq_zero_or_pos (S.intersectionNumber v w u) with hm | hm
+  · rw [hm, Nat.mul_zero] at hid; omega
+  · have hle : S.valency u ≤ S.valency v :=
+      calc S.valency u = S.valency u * 1 := (Nat.mul_one _).symm
+        _ ≤ S.valency u * S.intersectionNumber v w u := Nat.mul_le_mul (le_refl _) hm
+        _ = S.valency v := hid.symm
+    omega
+
+/-- **Lemma 3.5(1), the `nᵤ > nᵥ` half** (now a corollary of the `≠1` core + the triangle identity). -/
+theorem valency_le_pu_of_valency_lt (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n)
+    (hlt : S.valency (S.relOfPair α δ) < S.valency u) :
+    S.valency u ≤ S.pu α u δ :=
+  S.valency_le_pu_of_forall_ne_one α u δ
+    (fun w => S.intersectionNumber_ne_one_of_valency_lt α u w δ hlt)
 
 /-! ### §S.10 — Connectivity infrastructure + Lemma 3.6 (the *smax* half)
 
@@ -563,6 +578,41 @@ theorem smaxConnected_of_sparseSeparable (hsep : S.SparseSeparable) (hk : 2 ≤ 
   have hn : n ≤ 2 * (k - 1) * c := Nat.le_of_mul_le_mul_left key2 (by omega)
   have heq : 2 * (k - 1) * c = 2 * c * (k - 1) := by ring
   omega
+
+/-! ### §S.11 — The `sα`↔counting bridge, and Lemma 3.5(1)'s `nᵤ=nᵥ` half
+
+Increment 2c-iii (the graph↔counting bridge — the foundation for the `sα`-component analysis). The
+crucial link: for `u, v = r(α,δ) ∈ Smax`, `cᵛ_{uw} = 1` exactly forces an `αu`-vertex `sα`-adjacent to
+`δ`. Hence "no `αu`-vertex is `sα`-adjacent to `δ`" gives `∀w, cᵛ_{uw} ≠ 1`, i.e. `pᵤ(δ) ≥ nᵤ` — the
+`nᵤ=nᵥ` half of Lemma 3.5(1) (the "disjoint `sα`-components" case, stated directly via no-edge). -/
+
+/-- **The `sα`-edge bridge.** If `cᵛ_{uw} = 1` for `v = r(α,δ)` with `u, v ∈ Smax`, then some `αu`-vertex
+`β` (with `r(β,δ) = w`) is `sα`-adjacent to `δ`. -/
+theorem exists_saAdj_of_intersectionNumber_eq_one (α : Fin n) {u : Fin (S.rank + 1)} (δ : Fin n)
+    (hu : S.InSmax u) (hv : S.InSmax (S.relOfPair α δ)) {w : Fin (S.rank + 1)}
+    (h1 : S.intersectionNumber u w (S.relOfPair α δ) = 1) :
+    ∃ β, S.rel u α β = true ∧ S.saAdj α β δ := by
+  have hrv : S.rel (S.relOfPair α δ) α δ = true := S.rel_relOfPair α δ
+  have hwd := S.intersectionNumber_well_defined u w (S.relOfPair α δ) α δ hrv
+  rw [h1] at hwd
+  have hne : (Finset.univ.filter (fun β => S.rel u α β = true ∧ S.rel w β δ = true)).Nonempty := by
+    rw [← Finset.card_pos, hwd]; omega
+  obtain ⟨β, hβ⟩ := hne
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hβ
+  obtain ⟨huβ, hwβ⟩ := hβ
+  refine ⟨β, huβ, ⟨u, hu, huβ⟩, ⟨S.relOfPair α δ, hv, hrv⟩, ?_⟩
+  rw [(S.relOfPair_unique huβ).symm, (S.relOfPair_unique hwβ).symm]; exact h1
+
+/-- **Lemma 3.5(1), the `nᵤ=nᵥ` half (no `sα`-edge to `δ`).** If `u, v = r(α,δ) ∈ Smax` and no
+`αu`-vertex is `sα`-adjacent to `δ`, then `pᵤ(δ) ≥ nᵤ`. -/
+theorem valency_le_pu_of_no_saAdj (α : Fin n) {u : Fin (S.rank + 1)} (δ : Fin n)
+    (hu : S.InSmax u) (hv : S.InSmax (S.relOfPair α δ))
+    (hno : ∀ β, S.rel u α β = true → ¬ S.saAdj α β δ) :
+    S.valency u ≤ S.pu α u δ := by
+  apply S.valency_le_pu_of_forall_ne_one
+  intro w h1
+  obtain ⟨β, huβ, hsa⟩ := S.exists_saAdj_of_intersectionNumber_eq_one α δ hu hv h1
+  exact hno β huβ hsa
 
 end AssociationScheme
 
