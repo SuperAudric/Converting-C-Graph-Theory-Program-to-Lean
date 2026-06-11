@@ -818,7 +818,7 @@ theorem isPrimitive_affineScheme_imp_irreducible (hneg : LinearEquiv.neg (ZMod p
     G₀Irreducible G₀ := by
   intro W hWinv
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   obtain ⟨hW0, hWT⟩ := hcon
   classical
   set I : Finset (Fin ((affineScheme G₀ hneg).rank + 1)) :=
@@ -864,7 +864,7 @@ theorem isPrimitive_affineScheme_imp_irreducible (hneg : LinearEquiv.neg (ZMod p
   have hInu : I ≠ Finset.univ := by
     have hexv : ∃ v, v ∉ W := by
       by_contra h
-      push_neg at h
+      push Not at h
       exact hWT (Submodule.eq_top_iff'.mpr h)
     obtain ⟨v, hvnotW⟩ := hexv
     have hrel : (affineScheme G₀ hneg).rel

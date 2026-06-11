@@ -89,7 +89,7 @@ private theorem calculatePathRankings_body_preserves_inv
     intros d s e
     by_cases hd : d < n
     · exact betweenRankFn_σ_inv_from_cells σ cb h_cb_inv d hd s e
-    · push_neg at hd
+    · push Not at hd
       have h : cb.getD d #[] = #[] := by
         rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_cb_size]; exact hd),
             Option.getD_none]
@@ -151,7 +151,7 @@ private theorem calculatePathRankings_body_preserves_inv
     intros d s e
     by_cases hd : d < n
     · exact betweenRankFn_σ_inv_from_cells σ updatedBetween h_ub_inv d hd s e
-    · push_neg at hd
+    · push Not at hd
       have h : updatedBetween.getD d #[] = #[] := by
         rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_ub_size]; exact hd),
             Option.getD_none]

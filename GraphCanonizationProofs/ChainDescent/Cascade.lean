@@ -870,7 +870,7 @@ theorem exists_greedy_base_aux :
       · -- ¬ IsBase: a residual automorphism moves a point `b`
         have hnb : ∃ v w, OrbitPartition adj P S v w ∧ v ≠ w := by
           unfold IsBase at hbase
-          push_neg at hbase
+          push Not at hbase
           exact hbase
         obtain ⟨b, w, ⟨g, hg_aut, hg_P, hg_fix, hg_bw⟩, hbwne⟩ := hnb
         have hgbne : g b ≠ b := by rw [hg_bw]; exact hbwne.symm

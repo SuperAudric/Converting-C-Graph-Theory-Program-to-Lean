@@ -175,7 +175,7 @@ private theorem pathsAtDepth_two_states_perm
   -- depth < state₁.pathsOfLength.size.
   have h_depth₁_arr : depth < state₁.pathsOfLength.size := by
     by_contra h_not
-    push_neg at h_not
+    push Not at h_not
     have h_arr_empty : state₁.pathsOfLength.getD depth #[] = #[] := by
       rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none h_not, Option.getD_none]
     rw [h_arr_empty] at h_outer_len
@@ -970,7 +970,7 @@ private theorem calculatePathRankings_body_preserves_general
     intros d s e
     by_cases hd : d < n
     · exact betweenRankFn_σ_rel_from_cells σ cb₁ cb₂ h_cb_rel d hd s e
-    · push_neg at hd
+    · push Not at hd
       have h_lhs_empty : cb₂.getD d #[] = #[] := by
         rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_cb₂_size]; exact hd),
             Option.getD_none]
@@ -1086,7 +1086,7 @@ private theorem calculatePathRankings_body_preserves_general
     intros d s e
     by_cases hd : d < n
     · exact betweenRankFn_σ_rel_from_cells σ updatedBetween₁ updatedBetween₂ h_ub_rel d hd s e
-    · push_neg at hd
+    · push Not at hd
       have h_lhs_empty : updatedBetween₂.getD d #[] = #[] := by
         rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none (by rw [h_ub₂_size]; exact hd),
             Option.getD_none]

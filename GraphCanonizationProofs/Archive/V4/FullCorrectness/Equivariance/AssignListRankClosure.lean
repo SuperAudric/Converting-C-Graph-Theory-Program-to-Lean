@@ -478,7 +478,7 @@ theorem from_assignList_σ_rank_closure
   -- We reason by cases on `n` only when needed; here we extract via classical reasoning.
   have h_depth_arr : depth < state.pathsOfLength.size := by
     by_contra h_not
-    push_neg at h_not
+    push Not at h_not
     have : state.pathsOfLength.getD depth #[] = #[] := by
       rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none h_not, Option.getD_none]
     rw [this] at h_outer_len
@@ -689,7 +689,7 @@ theorem between_assignList_σ_rank_closure
     rw [← Array.length_toList]; exact h_outer_len
   have h_depth_arr : depth < state.pathsOfLength.size := by
     by_contra h_not
-    push_neg at h_not
+    push Not at h_not
     have : state.pathsOfLength.getD depth #[] = #[] := by
       rw [Array.getD_eq_getD_getElem?, Array.getElem?_eq_none h_not, Option.getD_none]
     rw [this] at h_outer_len

@@ -46,7 +46,7 @@ theorem shiftAbove_VtsInvariant_eq
     rw [shiftAbove_getD_below t vts₂ h_lt, shiftAbove_getD_below t vts₁ h_lt']
     exact h_rel w
   · -- vts₂[w] > t: vts₁[τ⁻¹ w] > t too.
-    push_neg at h_lt
+    push Not at h_lt
     have h_gt' : vts₁.getD (τ⁻¹ w).val 0 > t := by rw [← h_rel w]; exact h_lt
     rw [shiftAbove_getD_above t vts₂ h_lt, shiftAbove_getD_above t vts₁ h_gt']
     rw [h_rel w]

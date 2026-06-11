@@ -378,6 +378,14 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > `sα`-component machinery (`Cα(u)`, the αu↔αv bijection via `ReflTransGen`) + Lemma 3.4, and the `nᵤ=nᵥ` subcases of
 > 3.5(1)/(2). That is the genuinely hard piece (connected components in Lean) before 2d (Lemma 3.6) and the 2e warmRefine
 > bridge.
+>
+> **2c-iii PARTIAL + the *smax* half of Lemma 3.6 LANDED (2026-06-11, axiom-clean, build green).** Reusable connectivity
+> infrastructure: **`exists_small_closed_of_not_connected`** (a symmetric relation that is `ReflTransGen`-disconnected has
+> a nonempty adjacency-closed set of size `≤ n/2` — reused for both the smax and sα graphs) + **`exists_inSmax`** (the
+> `k(X)` sup is attained). Applied: **`smaxConnected_of_sparseSeparable`** (`SparseSeparable ∧ k≥2 ⟹ SmaxConnected`) — the
+> half of Lemma 3.6 needing only the `nᵤ>nᵥ` bound + the (19) estimate, no component-set machinery. **Remaining hard core
+> (next pass):** the `sα`-component *set* `Cα(u)`, Lemma 3.4 (αu↔αv bijection), Lemma 3.5(2) (`pᵤ(δ)≥k/2`), and the
+> `sα`-connected half of 3.6 — the genuinely hard counting-over-components. Then 2e (warmRefine bridge) + 2f (Thm 3.1).
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.

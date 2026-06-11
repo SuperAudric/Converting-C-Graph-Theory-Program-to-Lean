@@ -462,6 +462,108 @@ theorem valency_le_pu_of_valency_lt (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fi
       _ ≤ S.intersectionNumber u w v * (S.intersectionNumber u w v - 1) :=
           Nat.mul_le_mul (le_refl _) (by omega)
 
+/-! ### §S.10 — Connectivity infrastructure + Lemma 3.6 (the *smax* half)
+
+Increment 2c-iii (the reachability foundation + the easier half of Lemma 3.6). For a symmetric relation
+`r` on the points, a disconnected graph has a *closed* (adjacency-stable) vertex set of size `≤ n/2`.
+Applied to the `smax` graph (with the `nᵤ>nᵥ` bound `valency_le_pu_of_valency_lt` and the (19) estimate
+`sum_pu_le`), this proves `smax` is connected under `2c(k−1)<n` — the half of Lemma 3.6 that needs no
+`sα`-component analysis. The same infrastructure is reused later for the `sα` graph. -/
+
+/-- **Disconnected ⟹ a small closed set.** If a symmetric relation `r` is not reflexive-transitively
+connected, there is a nonempty vertex set closed under `r`-adjacency of size `≤ n/2`. -/
+theorem exists_small_closed_of_not_connected (r : Fin n → Fin n → Prop)
+    (hsymm : ∀ a b, r a b → r b a)
+    (hcon : ¬ ∀ a b : Fin n, Relation.ReflTransGen r a b) :
+    ∃ C : Finset (Fin n), (∀ a ∈ C, ∀ b, r a b → b ∈ C) ∧ C.Nonempty ∧ 2 * C.card ≤ n := by
+  classical
+  push Not at hcon
+  obtain ⟨x, y, hxy⟩ := hcon
+  set R : Finset (Fin n) := Finset.univ.filter (fun z => Relation.ReflTransGen r x z) with hR
+  have hxR : x ∈ R := by
+    rw [hR]; simp only [Finset.mem_filter, Finset.mem_univ, true_and]; exact Relation.ReflTransGen.refl
+  have hyR : y ∉ R := by
+    rw [hR]; simp only [Finset.mem_filter, Finset.mem_univ, true_and]; exact hxy
+  have hRclosed : ∀ a ∈ R, ∀ b, r a b → b ∈ R := by
+    intro a ha b hab
+    rw [hR, Finset.mem_filter] at ha ⊢
+    exact ⟨Finset.mem_univ _, ha.2.tail hab⟩
+  have hRcclosed : ∀ a ∈ Finset.univ \ R, ∀ b, r a b → b ∈ Finset.univ \ R := by
+    intro a ha b hab
+    rw [Finset.mem_sdiff] at ha ⊢
+    refine ⟨Finset.mem_univ _, fun hbR => ha.2 ?_⟩
+    rw [hR, Finset.mem_filter] at hbR ⊢
+    exact ⟨Finset.mem_univ _, hbR.2.tail (hsymm a b hab)⟩
+  have hRle : R.card ≤ n := by
+    have h := Finset.card_le_card (Finset.subset_univ R)
+    rwa [Finset.card_univ, Fintype.card_fin] at h
+  have hcompl : (Finset.univ \ R).card = n - R.card := by
+    rw [Finset.card_univ_diff, Fintype.card_fin]
+  by_cases hsz : 2 * R.card ≤ n
+  · exact ⟨R, hRclosed, ⟨x, hxR⟩, hsz⟩
+  · refine ⟨Finset.univ \ R, hRcclosed, ⟨y, ?_⟩, ?_⟩
+    · rw [Finset.mem_sdiff]; exact ⟨Finset.mem_univ _, hyR⟩
+    · rw [hcompl]; omega
+
+/-- **A maximum-valency relation exists** (`Smax` is nonempty): the `Finset.sup` defining `k(X)` is
+attained. -/
+theorem exists_inSmax : ∃ u : Fin (S.rank + 1), S.InSmax u := by
+  obtain ⟨u, _, hu⟩ := Finset.exists_mem_eq_sup Finset.univ ⟨0, Finset.mem_univ 0⟩ S.valency
+  exact ⟨u, hu.symm⟩
+
+/-- **Lemma 3.6, the *smax* half.** Under `2c(k−1) < n` (and `k ≥ 2`) the maximum-valency graph `smax`
+is connected. If it were disconnected, a small closed set `C` (`2|C| ≤ n`) would have every outside point
+`δ` satisfy `n_{r(α,δ)} < k` (else `δ` is `smax`-adjacent to `α ∈ C`, so `δ ∈ C`), giving `pᵤ(δ) ≥ k`
+(`valency_le_pu_of_valency_lt`); summing over the `≥ n/2` outside points against the (19) estimate
+(`sum_pu_le`) forces `n ≤ 2c(k−1)`, contradicting the hypothesis. -/
+theorem smaxConnected_of_sparseSeparable (hsep : S.SparseSeparable) (hk : 2 ≤ S.maxValency) :
+    S.SmaxConnected := by
+  by_contra hcon
+  obtain ⟨C, hClosed, ⟨α, hα⟩, hCsize⟩ :=
+    exists_small_closed_of_not_connected S.smaxAdj (fun a b h => S.smaxAdj_symm h) hcon
+  obtain ⟨u, hu⟩ := S.exists_inSmax
+  have huk : S.valency u = S.maxValency := hu
+  -- Each outside point gives `pᵤ(δ) ≥ k`.
+  have hbound : ∀ δ ∈ Finset.univ \ C, S.valency u ≤ S.pu α u δ := by
+    intro δ hδ
+    rw [Finset.mem_sdiff] at hδ
+    apply S.valency_le_pu_of_valency_lt
+    rw [huk]
+    have hnotmax : ¬ S.InSmax (S.relOfPair α δ) := fun hin =>
+      hδ.2 (hClosed α hα δ ⟨S.relOfPair α δ, hin, S.rel_relOfPair α δ⟩)
+    have hnotmax' : ¬ (S.valency (S.relOfPair α δ) = S.maxValency) := hnotmax
+    have hle := S.valency_le_maxValency (S.relOfPair α δ)
+    omega
+  have hlow : (Finset.univ \ C).card * S.valency u
+      ≤ (Finset.univ \ C).sum (fun δ => S.pu α u δ) := by
+    have h := Finset.card_nsmul_le_sum (Finset.univ \ C) (fun δ => S.pu α u δ) (S.valency u) hbound
+    rwa [smul_eq_mul] at h
+  have hhigh := S.sum_pu_le α hu (Finset.univ \ C)
+  rw [huk] at hlow
+  have hcomb : (Finset.univ \ C).card * S.maxValency
+      ≤ S.maxValency * (S.maxValency - 1) * S.indistinguishingNumber := le_trans hlow hhigh
+  have hCle : C.card ≤ n := by
+    have h := Finset.card_le_card (Finset.subset_univ C)
+    rwa [Finset.card_univ, Fintype.card_fin] at h
+  have hcompl : (Finset.univ \ C).card = n - C.card := by
+    rw [Finset.card_univ_diff, Fintype.card_fin]
+  set k := S.maxValency with hkdef
+  set c := S.indistinguishingNumber with hcdef
+  set m := (Finset.univ \ C).card with hmdef
+  have hsep' : 2 * c * (k - 1) < n := hsep
+  have h2m : n ≤ 2 * m := by rw [hcompl]; omega
+  have key : n * k ≤ 2 * (k * (k - 1) * c) :=
+    calc n * k ≤ (2 * m) * k := mul_le_mul_left h2m k
+      _ = 2 * (m * k) := by ring
+      _ ≤ 2 * (k * (k - 1) * c) := mul_le_mul_right hcomb 2
+  have key2 : k * n ≤ k * (2 * (k - 1) * c) :=
+    calc k * n = n * k := Nat.mul_comm k n
+      _ ≤ 2 * (k * (k - 1) * c) := key
+      _ = k * (2 * (k - 1) * c) := by ring
+  have hn : n ≤ 2 * (k - 1) * c := Nat.le_of_mul_le_mul_left key2 (by omega)
+  have heq : 2 * (k - 1) * c = 2 * c * (k - 1) := by ring
+  omega
+
 end AssociationScheme
 
 end ChainDescent

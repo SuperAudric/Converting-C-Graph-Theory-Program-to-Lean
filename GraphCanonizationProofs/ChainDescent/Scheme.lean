@@ -220,7 +220,7 @@ system. This is the entry point that lets the Route B imprimitive discharge cons
 theorem exists_nontrivial_closedSubset_of_not_isPrimitive (hnp : ¬ S.IsPrimitive) :
     ∃ I : Finset (Fin (S.rank + 1)), S.ClosedSubset I ∧ I ≠ {0} ∧ I ≠ Finset.univ := by
   unfold IsPrimitive at hnp
-  push_neg at hnp
+  push Not at hnp
   obtain ⟨I, hcl, h1, h2⟩ := hnp
   exact ⟨I, hcl, h1, h2⟩
 
