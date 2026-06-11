@@ -1589,7 +1589,8 @@ A power of Frobenius `φ : x ↦ x^p` fixing a field-generating set is `1`. Conc
 > **insufficient for separation** — the honest, mechanism-agnostic open kernel is `PowAffineSeparates`
 > itself, and the right *general* crux is the relation-level P3 (`persistent twin ⟹ ClosedSubset ⟹
 > imprimitive`), agnostic to whether the gap is Galois or amorphic. Do not rebuild a Frobenius-only
-> separation route. -/
+> separation route.
+-/
 
 /-- `frobLinear^j` acts as `x ↦ x^(p^j)` (iterating Frobenius `x ↦ x^p`). -/
 theorem frobLinear_pow_apply (j : ℕ) (x : GaloisField p d) :
@@ -1916,5 +1917,3 @@ theorem reachesRigidOrCameron_clebsch_viaPersistentTwinBlock
   reachesRigidOrCameron_viaPersistentTwinBlock hClassify clebschScheme hne hrank hCrux hImprim
 
 end ChainDescent
-
-

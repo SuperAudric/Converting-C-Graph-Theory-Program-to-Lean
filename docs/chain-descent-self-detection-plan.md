@@ -1,5 +1,12 @@
 # Chain descent — the self-detection lemma: plan to make the seal unconditional
 
+> **⟶ SUPERSEDED FOR THE FRONTIER (2026-06-11): the live frontier is now [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md).**
+> Since §12: the seal's open content (`SelfDetectsWhileSymmetric` / the `s(C)` term) on the **affine cyclotomic slice is
+> CLOSED in Lean** modulo {G3 + cited cyclotomic 2-separability}; the *non-affine* residue is covered by the general
+> capstones with the crux open (G2-B), and the destination is the **S-ring / CC-separability theory** (module-adjoin-plan
+> §9). This doc remains valid as the Phase-1/Phase-2 record + the conservation split (§12); read it for that, then the
+> module-adjoin-plan for the current state.
+>
 > **⟶ CURRENT STATE + STEP-2 PLAN: read §12 (HANDOFF, 2026-06-10).** This session re-targeted the seal's open
 > content onto the **bounded `O(1)` symmetry-phase residue** via the conservation budget split + the rewiring
 > (`reachesRigidOrCameron_viaSymmetricRecovery`): the open content is now `SelfDetectsWhileSymmetric` (the `s(C)`

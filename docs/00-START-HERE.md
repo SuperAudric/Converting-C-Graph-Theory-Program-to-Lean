@@ -93,6 +93,16 @@ contribution is to *isolate* that hard problem in one component, not to close it
 > the top of each linked doc plus [`PublicTheoremIndex.md`](../GraphCanonizationProofs/PublicTheoremIndex.md).
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
+>
+> **UPDATE (2026-06-11) — the live frontier moved; read [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md).**
+> The seal's open `s(C)` content (G2-B) on the **affine cyclotomic slice is now CLOSED in Lean** modulo {G3 + a cited
+> cyclotomic 2-separability result, Ponomarenko arXiv:2006.13592 Thm 1.1} — `reachesRigidOrCameron_affineSlice` &c.,
+> axiom-clean, build green. **Key correction:** the *non-affine* residue needs **no new Lean infrastructure** — a
+> non-affine residue scheme is `orbitalScheme H` (general constructor) and plugs straight into the already-general seal
+> capstones; the lone remaining gap is the *discharge* = the open crux (G2-B, uncited for non-affine). **The destination
+> is now the S-ring / coherent-configuration separability theory** (the general sufficient condition that closes the
+> crux for affine *and* non-affine) — see [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md)
+> §9 (★high-priority to-do, with the build guide). The prose below predates this and is the pre-affine-closure map.
 
 **The architecture pivot — "de-classing."** Orbit recovery and oracle firing were
 being proved *class by class* (CFI odd-degree, then even; schemes rank 2, 3, 4…).

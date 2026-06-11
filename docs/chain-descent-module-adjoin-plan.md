@@ -1,4 +1,8 @@
-# Chain descent — the MODULE-ADJOIN plan: the adjusted Phase-2 proof route for the affine residue
+# Chain descent — the MODULE-ADJOIN plan + post-affine handoff: the closed affine slice, and the S-ring destination
+
+> **If you read one thing: the STATUS "HANDOFF" paragraph below, then §7 (non-affine = no new infra) and §9 (the S-ring
+> destination, the high-priority to-do).** The module-adjoin route (this doc's original subject) closed the *affine*
+> slice; the live frontier is now the S-ring / CC-separability theory of §9.
 
 > **STATUS (2026-06-11): this is the current point of reference for the seal's open `s(C)` content (G2-B) and
 > the adjusted proof plan.** It continues [`chain-descent-self-detection-plan.md`](./chain-descent-self-detection-plan.md)
@@ -32,7 +36,28 @@
 > (seal capstone, spanning base as hyp), `exists_spanning_base` (basis image), and **`reachesRigidOrCameron_affineSlice`**
 > — the seal on `affineScheme (G0pow β)` with the **only** affine-specific input being `hcite : ∀ T, TwinsAreSemilinear`
 > (= cited cyclotomic 2-separability) + `d ≤ bound`. **The open counting crux `PowAffineSeparates` and the spanning-base
-> hypothesis are both gone.** The genuinely hard residue (non-affine NLS / Davis–Xiang) is unchanged and deferred (§7).
+> hypothesis are both gone.**
+>
+> **HANDOFF — CURRENT STATE + THE DESTINATION (2026-06-11). Read this paragraph first.** Three facts orient everything
+> below:
+> 1. **The affine cyclotomic slice is CLOSED in Lean** modulo {G3 + cited cyclotomic 2-separability} (the decls above,
+>    axiom-clean, build green). The module-adjoin route has served its purpose; it is essentially complete.
+> 2. **CORRECTION (supersedes §7's earlier framing): the non-affine residue needs NO new Lean infrastructure.** A
+>    non-affine residue scheme is `orbitalScheme H` for a non-affine group `H ≤ Perm Ω` ([CascadeAffine.lean §M0](../GraphCanonizationProofs/ChainDescent/CascadeAffine.lean), the *general* constructor `affineScheme` itself instantiates) —
+>    and `orbitalScheme H` is a `SchurianScheme`, which plugs **directly** into the already-general seal capstones
+>    `reachesRigidOrCameron_viaPersistentTwinBlock` / `reachesRigidOrCameron_viaSymmetricRecovery` (`Cascade.lean`, both
+>    `{n} (S : SchurianScheme n)` with the crux as a hypothesis). So the non-affine **reduction already exists**; there is
+>    no "Cayley model" or "relation-algebra module-adjoin" to build. The affine work was the *discharge* of the crux for
+>    the affine instance, not a reduction unique to it.
+> 3. **THE ONE REMAINING GAP IS THE DISCHARGE = the open general crux (G2-B).** The affine instance was dischargeable
+>    because its crux was citable (cyclotomic 2-separability). The non-affine instance's crux has **no citation** (thrice
+>    confirmed). The single thing that closes it — affine *and* non-affine at once — is **the S-ring / coherent-configuration
+>    separability theory** (Ponomarenko's *general* sufficient condition for separability, Thm 4.1, which subsumes both the
+>    cyclotomic and Cartan results). **That is the destination — see §9, marked as the high-priority to-do.** It is
+>    research-scale and uncertain (it could close G2-B, or surface a counterexample = a statement change), but it is the
+>    only path that *closes* rather than *carries* the crux. The cheap step that *directs* it is the Davis–Xiang non-affine
+>    probe (§7/§9). **There is no medium-sized Lean plumbing left between here and that build** — the plumbing (general
+>    capstone) is done; the next genuine step is the math.
 
 ---
 
@@ -221,26 +246,43 @@ research**. This is now the actual next implementation step (§8), replacing "bu
 
 ---
 
-## 7. Honest scope — the affine slice vs the genuine residue (do NOT confuse them)
+## 7. The non-affine residue — what it is, and why it needs NO new Lean infrastructure
 
-- **Affine cyclotomic (the beachhead, this doc's target)** is a *translation* scheme over `(F_q,+)`. It is the
-  **easy / likely-citable** end of G2-B. The module-adjoin route addresses *this*.
-- **The genuine hard residue is negative-Latin-square (NLS) type** — the *non-affine* Clebsch-family amorphic schemes,
+- **Affine cyclotomic (closed)** is a *translation* scheme over `(F_q,+)` — the easy, citable end of G2-B. CLOSED (§8).
+- **The genuine hard residue is negative-Latin-square (NLS) type** — *non-affine* Clebsch-family amorphic schemes,
   constructible only via **Davis–Xiang partial-difference-sets in non-elementary-abelian 2-groups** (or PSL(2,q) on
-  `A₅/S₄` cosets / classical rank-3/4 geometries). The Latin-square probe proved the cheap constructions cannot reach
-  it. This remains **deferred**, gated behind the heavier PDS construction; tackle only after the affine slice is
-  resolved and if the non-affine existence question becomes the blocker.
-- **A live tension to resolve while doing §6:** memory classifies cyclotomic `s(C) ≤ 2` as the *abelian/affine* family
-  ("does not populate the non-abelian-primitive class"), yet the docs wire affine cyclotomic as the G2-B *cascade*
-  beachhead. Reconcile: most likely the affine cyclotomic is a *genuine primitive cascade target whose `s(C)` is
-  citably small* — the easy slice — with the non-abelian-primitive *hard* core being the non-affine NLS. Confirm this
-  framing as part of §6.
+  `A₅/S₄` cosets / classical rank-3/4 geometries; smallest are order ≥ 64, beyond the Hanaki–Miyamoto catalogue, which
+  is why the cheap Latin-square probe could not reach them — LS-type only: graphs are rank-3-easy, nets are imprimitive).
+- **CORRECTION (this is the load-bearing handoff fact — the prior version of this section was wrong).** Closing the
+  non-affine residue does **NOT** require a new "Cayley model" or a "relation-algebra generalization of the
+  module-adjoin." Such a scheme is `orbitalScheme H` (general constructor, `CascadeAffine.lean §M0`), a `SchurianScheme`,
+  which plugs straight into the *already-general* seal capstones `reachesRigidOrCameron_viaPersistentTwinBlock` /
+  `reachesRigidOrCameron_viaSymmetricRecovery` (`Cascade.lean`). **The Lean reduction for non-affine is therefore already
+  complete and general.** What the affine slice added was not a reduction — it was the *discharge* of the crux for the
+  affine instance (module-adjoin kill + cited cyclotomic 2-separability). For non-affine there is no discharge, because:
+- **The crux has no citation (the open G2-B).** The general crux is `PersistentTwinYieldsBlock` / `SelfDetectsWhileSymmetric`
+  (= "primitive small ⟹ recovers / `s(C)` bounded"). Cyclotomic 2-separability (Ponomarenko Thm 1.1) is *field-specific*
+  (relations = cosets of `F_q×`); the non-affine NLS schemes are Cayley schemes over **non-field groups**, outside its
+  scope. No general "amorphic ⟹ bounded `s(C)`" or "NLS ⟹ bounded `s(C)`" result exists (three independent literature
+  passes). So the non-affine crux is open research, **not** a missing piece of plumbing.
+
+**Consequence for a fresh reader: do not look for an intermediate Lean increment on the non-affine side — there isn't
+one.** The plumbing (general capstone) is done; the only thing that advances closure is the math (§9). The two genuine
+ways through, both research-scale:
+1. **Discharge the general crux** by building the S-ring / CC-separability theory (§9) — the one path that closes
+   affine *and* non-affine together.
+2. **A counterexample** — a primitive small non-abelian scheme that does *not* recover (would make the seal false =
+   statement change). Equally a real result.
+The cheap step that *directs* (1) vs (2): the **Davis–Xiang non-affine probe** — the first probe to reach the NLS zone
+(needs the explicit PDS construction implemented; the measurement core in `CatalogueSchemeProbe.cs` is ready). 0 witnesses
+⟹ closure is plausible, build (1); a witness ⟹ (2).
 
 **Banked as non-viable (do not re-attempt):** the Galois/Frobenius-only separation (retracted — only `Z₂` of `S₃`);
 the closed-subset / intra-cell block route on the primitive floor (vacuity boundary,
 `intraCellRelations_eq_singleton_zero_of_primitive`); the orbit-level harvest re-key (vacuity trap); Theorem 3.1's
 one-point inequality *for the residue* (it is dense, violates it); the cheap Latin-square construction *for the NLS
-residue* (LS-type only — graphs easy, nets imprimitive).
+residue* (LS-type only); **a bespoke non-affine "Cayley model" / "relation-algebra module-adjoin"** (redundant — the
+general `orbitalScheme` + general capstone already cover it; see the correction above).
 
 ---
 
@@ -280,16 +322,81 @@ residue* (LS-type only — graphs easy, nets imprimitive).
    the cited "twins are `ΓL₁`" (a) it gives `PowAffineSeparates` (a spanning base, fixed by a twin's realiser, forces
    the twin trivial). The connecting reduction `powAffineSeparates_of_twinsAreSemilinear` (define `TwinsAreSemilinear`
    + a bounded spanning base exists) is the next increment.
-4. **Only then** the non-affine NLS residue (§7) — the Davis–Xiang PDS probe + the relation-algebra generalization of
-   the module-adjoin — if it becomes the blocker. This is the genuine remaining open frontier.
+4. **The non-affine residue (the genuine remaining frontier) — NOT a new Lean reduction.** Per §7's correction, it is
+   already covered by the general capstone; the only gap is the discharge = the open crux. So the forward work is the
+   **destination in §9 (the S-ring / CC-separability theory)**, directed by the **Davis–Xiang non-affine probe**. Do
+   *not* build a bespoke non-affine model. The probe is the cheap next action; the S-ring build is the real (research-scale)
+   destination.
 
 ---
 
-## 9. Pointers
+## 9. THE DESTINATION — the S-ring / coherent-configuration separability theory (build guide) ★HIGH PRIORITY★
+
+This is the **one known path that discharges the general crux** (`SelfDetectsWhileSymmetric` / `PersistentTwinYieldsBlock`,
+`Cascade.lean`) for *every* schurian scheme — closing **both** the affine slice (removing its cyclotomic-2-separability
+citation dependency) **and** the non-affine residue. Research-scale and uncertain: it either closes G2-B or surfaces a
+counterexample (statement change). It is the heaviest, highest-value item on the to-do.
+
+**What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
+numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.
+1. **The `m`-extension / `m`-dimensional intersection numbers** of a CC — the smallest CC on `Ωᵐ` containing the Cartesian
+   `m`-power with `Diag(Ωᵐ)` a union of fibers (Ponomarenko arXiv:2006.13592 §2; `m=1` = ordinary intersection numbers).
+2. **`m`-separability**: a CC is `m`-separable iff determined up to iso by its `m`-dim intersection numbers (`s(C) ≤ m`).
+3. **The base/extension bridge — Cartan Thm 2.5 (arXiv:1602.07132):** `X` is `m`-separable ⟺ `X` admits a *1-regular
+   extension w.r.t. `m−1` points*. This is the link from separability (algebraic) to **base-discreteness** (what the
+   project's recovery needs). Build it generally. NB the project already has the *consumer* half: "separation ⟹ discreteness"
+   is landed and general (`discrete_of_kRoundRelationSeparates`, `Cascade.lean §13c`; the affine `discrete_affineScheme_of_twoRoundDiffSeparates`
+   is its instance). The S-ring theory supplies the *other* half — that the separation/`m`-separability actually holds.
+4. **The general sufficient condition — Ponomarenko arXiv:2006.13592 Thm 4.1 (§§3–4):** the heart. A checkable condition
+   for an *arbitrary* CC to be separable, generalizing Babai/Cartan (its refs [2,9,12]); §5 gives a parameter inequality
+   guaranteeing it. This is what proves the crux. (Cartan Thm 3.1, `2c(k−1)<n`, is the *sparse* special case — already
+   probed; the residue violates it, so Thm 4.1's full strength is needed.)
+5. **The finite exceptional-case check** (Table 1 of Thm 1.1) — reproduce in the C# bed (catalogue/affine infra) and feed
+   as `decide`-checked facts for the small exceptional `(p,d)`.
+
+**Mathlib has / lacks.** HAS: modules, `Basis`, `Submodule.span`, finite groups, `MonoidHom`, `Equiv.Perm`. LACKS: *any*
+coherent-configuration / association-scheme / S-ring **separability** theory — none of §§1–4 above exists in Mathlib. The
+project's `Scheme.lean` is the only CC substrate; the `m`-extension + separability layer is a from-scratch build on it.
+
+**How it plugs in (the template is the affine slice).** The affine slice did
+`TwinsAreSemilinear` (cited) `→ powAffineSeparates_of_twinsAreSemilinear → reachesRigidOrCameron_viaTwinsAreSemilinear`.
+The S-ring theory replaces the *cited* `TwinsAreSemilinear` with a *proven* general separability, instantiable at **any**
+`orbitalScheme H` — discharging the general crux directly, no per-family wiring. The general capstones
+(`reachesRigidOrCameron_viaPersistentTwinBlock` / `…viaSymmetricRecovery`) are the sinks; they already exist and are general.
+
+**The cheap directing step before the big build: the Davis–Xiang non-affine probe.** Construct NLS-type amorphic schemes
+from PDS in non-elementary-abelian 2-groups (the only construction that reaches the residue — Latin squares cannot, §7),
+measure recovery / `s(C)` / witnesses with the `CatalogueSchemeProbe.cs` core. 0 witnesses ⟹ closure plausible, commit to
+the S-ring build; a witness ⟹ the seal is false (statement change), redirect. Missing piece for the probe: the explicit
+PDS construction (specialized but bounded; the measurement infra is ready).
+
+**Citations (with extraction):**
+- Ponomarenko, *On the separability of cyclotomic schemes over finite field*, **arXiv:2006.13592** — Thm 1.1 (cyclotomic
+  2-separable, the affine citation), **Thm 4.1 (the general sufficient condition — the build target)**, §2 (`m`-extension).
+- Ponomarenko–Vasil'ev, *Cartan coherent configurations*, **arXiv:1602.07132** — Thm 2.5 (`m`-sep ⟺ 1-regular extension,
+  the base bridge), Thm 3.1 (the sparse sufficient condition + `c`,`k` parameters).
+- Evdokimov–Ponomarenko, *Separability number and Schurity number of coherent configurations*, EJC 2000 — the `s(C)`/`t(C)`
+  foundations (ref [4]/[12] above).
+- Extraction tool: `pdf2txt <file.pdf>` on PATH (`~/.local/bin`, user-site PyMuPDF); arXiv ids are stable, re-fetch with curl.
+
+**Honest scope.** Heaviest to-do; genuinely research-scale; may not close (the residue could be unbounded-`s(C)`). But it
+is THE route to an unconditional seal past the affine slice, and it also *removes* the affine citation. Multi-increment.
+
+---
+
+## 10. Pointers
 
 - Prior handoff (conservation split + rewiring): [`chain-descent-self-detection-plan.md`](./chain-descent-self-detection-plan.md) §12.
 - Authoritative seal state + all gaps: [`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md).
-- The affine model + landed Frobenius/adjoin machinery + the crux: `ChainDescent/CascadeAffine.lean`.
-- The seal capstones + the trichotomy/largeness interface: `ChainDescent/Cascade.lean`.
-- Probes + the catalogue measurement core: `GraphCanonizationProject.Tests/CatalogueSchemeProbe.cs`.
+- The affine model + landed Frobenius/adjoin machinery + the **closed affine slice** (`affinePermFin_eq_one_of_span`,
+  `TwinsAreSemilinear`, `powAffineSeparates_of_twinsAreSemilinear`, `reachesRigidOrCameron_viaTwinsAreSemilinear`,
+  `exists_spanning_base`, `reachesRigidOrCameron_affineSlice`): `ChainDescent/CascadeAffine.lean` (§CyclicAffine, end).
+- The **general orbital-scheme constructor** (`orbitalScheme`, used for *any* group action incl. non-affine): `CascadeAffine.lean §M0`.
+- The **general crux + seal capstones** (the sinks the S-ring theory discharges): `PersistentTwinYieldsBlock`,
+  `SelfDetectsWhileSymmetric`, `reachesRigidOrCameron_viaPersistentTwinBlock` / `…viaSymmetricRecovery`: `ChainDescent/Cascade.lean`.
+- The **general "separation ⟹ discreteness" engine** (the consumer half, already landed): `discrete_of_kRoundRelationSeparates`,
+  `Cascade.lean §13c` (affine instance: `discrete_affineScheme_of_twoRoundDiffSeparates`).
+- Authoritative seal state + all gaps: [`chain-descent-seal-handoff.md`](./chain-descent-seal-handoff.md).
+- Probes + the catalogue measurement core (ready for the Davis–Xiang probe): `GraphCanonizationProject.Tests/CatalogueSchemeProbe.cs`.
 - Memory topic file (lossy, routes here): `memory/project_cartan_2separability_lead_2026-06-11.md`.
+- Citations for §9: arXiv:2006.13592 (Thm 1.1 + **Thm 4.1**), arXiv:1602.07132 (Thm 2.5 + 3.1), Evdokimov–Ponomarenko EJC 2000. Extract with `pdf2txt`.

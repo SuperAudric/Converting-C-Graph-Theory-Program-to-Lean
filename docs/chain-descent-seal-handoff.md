@@ -1,5 +1,17 @@
 # Chain descent — THE SEAL HANDOFF: current state and the gaps to "consumed-or-Cameron"
 
+> **UPDATE (2026-06-11) — the live frontier has moved past this doc; read [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md)
+> (its STATUS "HANDOFF" paragraph, then §7 + §9).** Since rev. 3: the seal's open `s(C)` content (G2-B) on the **affine
+> cyclotomic slice is CLOSED in Lean** modulo {G3 + a *cited* cyclotomic 2-separability, Ponomarenko arXiv:2006.13592
+> Thm 1.1} — `reachesRigidOrCameron_affineSlice` and the supporting chain in `CascadeAffine.lean`, axiom-clean, build
+> green. **Correction to any "build a per-class object" reading below:** the *non-affine* residue needs **no new
+> infrastructure** — `orbitalScheme H` (general) feeds the already-general capstones `reachesRigidOrCameron_viaPersistentTwinBlock`
+> / `…viaSymmetricRecovery`; the only gap is the *discharge* = the open crux (G2-B, **uncited** for non-affine, thrice
+> confirmed). **The destination is the S-ring / coherent-configuration separability theory** (Ponomarenko's general
+> sufficient condition, Thm 4.1 — closes the crux for affine *and* non-affine, and removes the affine citation too) —
+> build guide in `chain-descent-module-adjoin-plan.md` §9 (★high-priority). The G1a/G1b/G2-A/G3 gap anatomy below stands;
+> the **G2-B** gap is where the affine-closed / non-affine-open split now lives.
+>
 > **STATUS (2026-06-07, rev. 3): this is the authoritative handoff for the oracle-capability seal.** It **subsumes**
 > [`chain-descent-routeB-handoff.md`](./Archive/ChainDescent/chain-descent-routeB-handoff.md) (archived; Route B is now one *partial* attack on
 > one gap, G2-A below, and its capstones were found vacuous — see §3). Read this doc to pick up *any* of the

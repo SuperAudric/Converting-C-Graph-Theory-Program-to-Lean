@@ -4485,7 +4485,8 @@ affine-cyclic family (Clebsch et al.) is one primitive instance to which it appl
 > **⚠️ SCOPE — `hCrux` is OPEN (uncited).** This does *not* close the seal; it reframes the open content into the
 > block-construction form the project intends to prove. The realization half (`discrete_of_kRoundRelationSeparates`)
 > is landed; the converse `hCrux` is the genuine G2-B research, with no citation and no known counterexample (both
-> empirical falsifiers — catalogue + affine probes — came back clean). -/
+> empirical falsifiers — catalogue + affine probes — came back clean).
+-/
 theorem reachesRigidOrCameron_viaPersistentTwinBlock {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
