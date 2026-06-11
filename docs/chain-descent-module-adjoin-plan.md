@@ -553,11 +553,12 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 >   endpoint along an `sα`-path) → **`compsOf_subset_of_path`** → **`compsOf_eq_of_inter_nonempty`** (`C(u)∩C(v)≠∅ ⟹
 >   C(u)=C(v)`). All four axiom-clean. The whole thing came together cleanly once the transport step's triangle-identity
 >   forward-uniqueness was pinned.
-> - **Piece 4 — Lemma 3.5(2)** `pᵤ(δ) ≥ k/2` (when `nu=nv`, `C(u)=C(v)`, `|C(u)|>1`). Clean lower bound found:
->   `B := αu \ saComp(δ) ⊆ (pu-pairs).image fst`, so `pᵤ(δ) ≥ |B|` via `card_image_le`; for `β∈B`, `c^v_{u,r(β,δ)}≥2`
->   (refine the bridge to `saAdj_of_intersectionNumber_eq_one_of_mem`: `β∈αu ∧ c^v=1 ⟹ saAdj α β δ`, contrapositive);
->   `|B|≥k/2` from the min-component (`sum_card_fiber_saComp` + `|C(u)|≥2` ⟹ min fiber `≤k/2`), choosing `δ` in the min
->   component (`pᵤ` depends only on `v`, via `pu_eq_sum`).
+> - **Piece 4 — Lemma 3.5(2) — ✅ LANDED (2026-06-11, axiom-clean, full build green).** `Separability.lean §S.14`:
+>   `saAdj_of_mem_of_intersectionNumber_eq_one` (the bridge refinement — *trivial*: `saAdj`'s `c=1` condition IS the
+>   hypothesis once `r(α,β)=u`); **`pu_ge_card_notComp`** (the crux: `|{β∈αu : saComp α β ≠ saComp α δ}| ≤ pᵤ(δ)`, via
+>   `B ⊆ (pu-pairs).image fst` + `card_image_le`, each `β` getting a partner from `c^v≥2`); `pu_eq_of_relOfPair_eq`
+>   (`pᵤ` depends only on `r(α,δ)`); **`exists_minComp_card`** (`|C(u)|≥2 ⟹` a component with `2·|αu∩C₀| ≤ |αu|`, via
+>   `sum_card_fiber_saComp` + min-image + `sum_pair`); **`lemma35_2`** (`nu ≤ 2·pᵤ(δ)` for `δ∈αv`). All axiom-clean.
 > - **Piece 5 — Lemma 3.6 `sα` half:** (23) `|C(u)|=1` (from 3.5(2) + estimate (19), the `Σ pᵤ(δ)≥nk/2` contradiction),
 >   then `sα` connected (from (23) + 3.5(1)[landed], the small-`sα`-component contradiction, reusing the (19) estimate).
 > Then a small **B5+ assembly** (derive the `smaxAdj` edge from `k≥2`; combine `smaxConnected_of_sparseSeparable` + the

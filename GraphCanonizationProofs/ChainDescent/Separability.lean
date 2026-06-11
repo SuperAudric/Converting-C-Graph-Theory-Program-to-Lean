@@ -702,7 +702,7 @@ theorem sum_card_fiber_saComp (α : Fin n) (u : Fin (S.rank + 1)) :
       = (S.compsOf α u).sum (fun c =>
           ((Finset.univ.filter (fun β => S.rel u α β = true)).filter
             (fun β => S.saComp α β = c)).card) :=
-  Finset.card_eq_sum_card_fiberwise (fun β hβ =>
+  Finset.card_eq_sum_card_fiberwise (fun _ hβ =>
     Finset.mem_image_of_mem _ hβ)
 
 /-! ### §S.13 — Lemma 3.4 (set-equality): the `sα`-path transport (piece 3)
@@ -798,6 +798,145 @@ theorem compsOf_eq_of_inter_nonempty {α : Fin n} {u v : Fin (S.rank + 1)}
   exact Finset.Subset.antisymm
     (S.compsOf_subset_of_path hβ0mem.2 hγ0mem.2 hpath)
     (S.compsOf_subset_of_path hγ0mem.2 hβ0mem.2 (S.reflTransGen_saAdj_symm α hpath))
+
+/-! ### §S.14 — Lemma 3.5(2): `pᵤ(δ) ≥ k/2` via the minimum component (piece 4)
+
+The second half of Ponomarenko–Vasil'ev Lemma 3.5. When `αu` splits into `≥ 2` `sα`-components and
+`C(u) = C(v)`, every `β ∈ αu` outside `δ`'s component has `c^v_{u,r(β,δ)} ≥ 2` (it is not `sα`-adjacent
+to `δ`), so it pairs with a partner in `αu` — giving `pᵤ(δ) ≥ |αu \ C(δ)|`. Choosing `δ` in the
+*minimum* component (reachable via `C(u)=C(v)`) makes `|αu \ C(δ)| ≥ k/2`. The bridge refinement
+`saAdj_of_mem_of_intersectionNumber_eq_one` is trivial: `saAdj`'s defining `c=1` condition *is* the
+hypothesis once `r(α,β)=u`. -/
+
+/-- The bridge refinement: for `β ∈ αu`, `c^v_{u,r(β,δ)} = 1` *is* the `saAdj`-condition (trivial once
+`relOfPair α β = u`). -/
+theorem saAdj_of_mem_of_intersectionNumber_eq_one {α : Fin n} {u : Fin (S.rank + 1)} {δ β : Fin n}
+    (hu : S.InSmax u) (hv : S.InSmax (S.relOfPair α δ)) (hβ : S.rel u α β = true)
+    (h1 : S.intersectionNumber u (S.relOfPair β δ) (S.relOfPair α δ) = 1) :
+    S.saAdj α β δ := by
+  refine ⟨⟨u, hu, hβ⟩, ⟨S.relOfPair α δ, hv, S.rel_relOfPair α δ⟩, ?_⟩
+  rw [← S.relOfPair_unique hβ]; exact h1
+
+/-- **Lemma 3.5(2) core — the `pu` lower bound by the non-`δ`-component part of `αu`.** Every `β ∈ αu`
+outside `δ`'s `sα`-component has a `pu`-partner, so
+`|{β∈αu : saComp α β ≠ saComp α δ}| ≤ pu α u δ`. -/
+theorem pu_ge_card_notComp {α : Fin n} {u : Fin (S.rank + 1)} {δ : Fin n}
+    (hu : S.InSmax u) (hv : S.InSmax (S.relOfPair α δ)) :
+    (Finset.univ.filter (fun β => S.rel u α β = true ∧ S.saComp α β ≠ S.saComp α δ)).card
+      ≤ S.pu α u δ := by
+  classical
+  set B := Finset.univ.filter (fun β => S.rel u α β = true ∧ S.saComp α β ≠ S.saComp α δ) with hB
+  set pairs := Finset.univ.filter (fun bg : Fin n × Fin n =>
+      S.rel u α bg.1 = true ∧ S.rel u α bg.2 = true ∧ bg.1 ≠ bg.2 ∧
+      S.relOfPair bg.1 δ = S.relOfPair bg.2 δ) with hpairs
+  have hpu : S.pu α u δ = pairs.card := rfl
+  rw [hpu]
+  have hsub : B ⊆ pairs.image Prod.fst := by
+    intro β hβ
+    rw [hB, Finset.mem_filter] at hβ
+    obtain ⟨_, huβ, hcomp⟩ := hβ
+    have hnotsa : ¬ S.saAdj α β δ := by
+      intro hsa
+      apply hcomp
+      have hδβ : Relation.ReflTransGen (S.saAdj α) δ β :=
+        Relation.ReflTransGen.single (S.saAdj_symm α hsa)
+      exact S.saComp_eq_of_mem (S.mem_saComp.mpr hδβ)
+    have hne1 : S.intersectionNumber u (S.relOfPair β δ) (S.relOfPair α δ) ≠ 1 := fun h1 =>
+      hnotsa (S.saAdj_of_mem_of_intersectionNumber_eq_one hu hv huβ h1)
+    set w := S.relOfPair β δ with hw
+    set F := Finset.univ.filter (fun γ => S.rel u α γ = true ∧ S.rel w γ δ = true) with hF
+    have hcard : F.card = S.intersectionNumber u w (S.relOfPair α δ) :=
+      S.intersectionNumber_well_defined u w (S.relOfPair α δ) α δ (S.rel_relOfPair α δ)
+    have hβF : β ∈ F := by
+      rw [hF]; simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+      exact ⟨huβ, by rw [hw]; exact S.rel_relOfPair β δ⟩
+    have h2 : 1 < F.card := by
+      rw [hcard]
+      have hpos : 1 ≤ S.intersectionNumber u w (S.relOfPair α δ) := by
+        rw [← hcard]; exact Finset.card_pos.2 ⟨β, hβF⟩
+      omega
+    have hne : (F.erase β).Nonempty := by
+      rw [← Finset.card_pos, Finset.card_erase_of_mem hβF]; omega
+    obtain ⟨γ, hγ⟩ := hne
+    rw [Finset.mem_erase] at hγ
+    obtain ⟨hγβ, hγF⟩ := hγ
+    rw [hF, Finset.mem_filter] at hγF
+    obtain ⟨_, huγ, hwγ⟩ := hγF
+    rw [Finset.mem_image]
+    refine ⟨(β, γ), ?_, rfl⟩
+    rw [hpairs, Finset.mem_filter]
+    refine ⟨Finset.mem_univ _, huβ, huγ, Ne.symm hγβ, ?_⟩
+    exact (S.relOfPair_unique hwγ)
+  calc B.card ≤ (pairs.image Prod.fst).card := Finset.card_le_card hsub
+    _ ≤ pairs.card := Finset.card_image_le
+
+/-- `pu α u δ` depends on `δ` only through `relOfPair α δ` (PV's remark after (20)). -/
+theorem pu_eq_of_relOfPair_eq {α : Fin n} {u : Fin (S.rank + 1)} {δ δ' : Fin n}
+    (h : S.relOfPair α δ = S.relOfPair α δ') : S.pu α u δ = S.pu α u δ' := by
+  rw [S.pu_eq_sum α u δ, S.pu_eq_sum α u δ', h]
+
+/-- **The minimum-component bound.** When `αu` splits into `≥ 2` components, the smallest takes at most
+half of `αu`: there is a component `C₀` of `C(u)` with `2·|αu ∩ C₀| ≤ |αu|`. -/
+theorem exists_minComp_card {α : Fin n} {u : Fin (S.rank + 1)}
+    (hcard : 1 < (S.compsOf α u).card) :
+    ∃ C₀ ∈ S.compsOf α u,
+      2 * ((Finset.univ.filter (fun β => S.rel u α β = true)).filter
+            (fun β => S.saComp α β = C₀)).card
+        ≤ (Finset.univ.filter (fun β => S.rel u α β = true)).card := by
+  classical
+  set αu := Finset.univ.filter (fun β => S.rel u α β = true) with hαu
+  set f : Finset (Fin n) → Nat := fun c => (αu.filter (fun β => S.saComp α β = c)).card with hf
+  have hne : (S.compsOf α u).Nonempty := Finset.card_pos.mp (by omega)
+  obtain ⟨C₀, hC₀mem, hC₀min⟩ := Finset.exists_min_image (S.compsOf α u) f hne
+  obtain ⟨C₁, hC₁⟩ : ((S.compsOf α u).erase C₀).Nonempty :=
+    Finset.card_pos.mp (by rw [Finset.card_erase_of_mem hC₀mem]; omega)
+  rw [Finset.mem_erase] at hC₁
+  obtain ⟨hC₁ne, hC₁mem⟩ := hC₁
+  have hsum : (S.compsOf α u).sum f = αu.card := (S.sum_card_fiber_saComp α u).symm
+  have hle : f C₀ + f C₁ ≤ (S.compsOf α u).sum f := by
+    rw [← Finset.sum_pair (Ne.symm hC₁ne)]
+    apply Finset.sum_le_sum_of_subset
+    intro x hx
+    rcases Finset.mem_insert.mp hx with h | h
+    · rw [h]; exact hC₀mem
+    · rw [Finset.mem_singleton.mp h]; exact hC₁mem
+  have hf01 : f C₀ ≤ f C₁ := hC₀min C₁ hC₁mem
+  have hgoal : (αu.filter (fun β => S.saComp α β = C₀)).card = f C₀ := rfl
+  refine ⟨C₀, hC₀mem, ?_⟩
+  rw [hgoal]
+  omega
+
+/-- **Lemma 3.5(2).** If `nu = nv`, `C(u) = C(v)`, and `αu` splits into `≥ 2` components, then
+`pu(δ) ≥ nu/2` for every `δ ∈ αv` (stated `nu ≤ 2·pu(δ)`). Choose `δ₀` in the minimum component `C₀`
+(reachable since `C(u)=C(v)`); then `B = αu \ C₀` has `|B| ≥ nu/2` and `pu(δ₀) ≥ |B|`; transfer to any
+`δ ∈ αv` since `pu` depends only on `r(α,δ)`. -/
+theorem lemma35_2 {α : Fin n} {u v : Fin (S.rank + 1)} (hu : S.InSmax u)
+    (huv : S.valency u = S.valency v) (hCeq : S.compsOf α u = S.compsOf α v)
+    (hcard : 1 < (S.compsOf α u).card) {δ : Fin n} (hδ : S.rel v α δ = true) :
+    S.valency u ≤ 2 * S.pu α u δ := by
+  classical
+  have hv : S.InSmax v := by rw [InSmax, ← huv]; exact hu
+  obtain ⟨C₀, hC₀mem, hC₀min⟩ := S.exists_minComp_card hcard
+  rw [hCeq, compsOf, Finset.mem_image] at hC₀mem
+  obtain ⟨δ₀, hδ₀mem, hδ₀eq⟩ := hC₀mem
+  rw [Finset.mem_filter] at hδ₀mem
+  have hpueq : S.pu α u δ = S.pu α u δ₀ := by
+    apply S.pu_eq_of_relOfPair_eq
+    rw [← S.relOfPair_unique hδ, ← S.relOfPair_unique hδ₀mem.2]
+  rw [hpueq]
+  have hv' : S.InSmax (S.relOfPair α δ₀) := by rw [← S.relOfPair_unique hδ₀mem.2]; exact hv
+  have hbound := S.pu_ge_card_notComp hu hv'
+  rw [hδ₀eq] at hbound
+  set αu := Finset.univ.filter (fun β => S.rel u α β = true) with hαu
+  have hBconv : αu.filter (fun β => S.saComp α β ≠ C₀)
+              = Finset.univ.filter (fun β => S.rel u α β = true ∧ S.saComp α β ≠ C₀) := by
+    rw [hαu, Finset.filter_filter]
+  rw [← hBconv] at hbound
+  have hpart : (αu.filter (fun β => S.saComp α β = C₀)).card
+             + (αu.filter (fun β => S.saComp α β ≠ C₀)).card = αu.card :=
+    Finset.card_filter_add_card_filter_not _
+  have hval : S.valency u = αu.card := S.valency_eq_card u α
+  omega
 
 end AssociationScheme
 
