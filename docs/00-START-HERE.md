@@ -182,6 +182,14 @@ strictly weaker than the old obligation. Full chronology and every gap:
 [`chain-descent-exhaustive-obstruction.md`](./chain-descent-exhaustive-obstruction.md) §0.7.5,
 [`chain-descent-declassing.md`](./chain-descent-declassing.md) §9.
 
+> **⟶ LIVE FRONTIER (2026-06-11): [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md).**
+> On the affine cyclotomic beachhead the open content reduces to the crux `PowAffineSeparates`. The Frobenius
+> separation route was retracted (the gap `Ĝ⊋G` is the amorphic `S₃`, not Galois), but this session **validated the
+> gap is entirely semilinear (`ΓL₁`)** — reviving a corrected **module-adjoin** route that splits into an easy
+> linear-algebra half and a possibly-citable `s(C) ≤ 2` half. Three probes built (Theorem-3.1 density, non-affine
+> Latin-square, module-adjoin validation); the genuine hard residue is the **non-affine NLS** family (deferred). Read
+> that doc for the current target and ordered next steps.
+
 **What NOT to do (a proven boundary, 2026-06-10).** Do not attack G2-B by exhibiting it as a **block / scheme
 congruence**: `intraCellRelations_eq_singleton_zero_of_primitive` proves the intra-cell block route *identically
 vanishes on the primitive floor* (a primitive scheme forces it to `{0}`), so it discharges **only** the imprimitive

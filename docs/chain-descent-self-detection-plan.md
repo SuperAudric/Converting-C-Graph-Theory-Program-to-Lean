@@ -1492,6 +1492,13 @@ though the *bound proof* (F2b) is slice-specific.
 
 ## 12. HANDOFF (2026-06-10) — the conservation decomposition, the rewiring, and the step-2 plan
 
+> **⟶ SUPERSEDED FOR THE LIVE FRONTIER (2026-06-11): the current point of reference is
+> [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md).** §12 below is still valid (the
+> conservation split + rewiring are landed), but the Phase-2 *proof route* moved on: the Frobenius separation was
+> retracted, the gap was validated to be entirely semilinear (`ΓL₁`), and the adjusted plan is the **module-adjoin**
+> decomposition with a citability check (cyclotomic `s(C) ≤ 2`) gating close-vs-sharpen. Read the module-adjoin doc
+> for the current target, the three probes built, and the ordered next steps.
+
 > **Read this section for the current state.** This session re-targeted the seal's open content from a single
 > conflated recovery predicate (`StablyRecoverable`) onto the **bounded `O(1)` symmetry-phase residue**, by (i) a
 > conceptual step-back (the bound is `O(log n)`, not `O(1)`), (ii) two depth-growth probes confirming the residue is
