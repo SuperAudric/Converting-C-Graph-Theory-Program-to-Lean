@@ -450,6 +450,77 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > **Remaining sα pieces (the hard component-SET core, next passes):** 2 the component set `Cα(u)`/`|C(u)|` + αu-partition;
 > 3 Lemma 3.4 (αu↔αv `sα`-path-transport bijection — nastiest); 4 Lemma 3.5(2) (`pᵤ(δ)≥k/2`, min-component); 5 Lemma 3.6
 > `sα` half ((23) `|C(u)|=1` + small-component contradiction, reusing `exists_small_closed`).
+>
+> **sα machinery — piece 1.5 (`saAdj` symmetry) LANDED (2026-06-11, axiom-clean, build green).** **`saAdj_symm`** —
+> `sα` is symmetric, via the triangle identity (PV's identity (4)): both side relations `r(α,β)`, `r(α,γ)` are in `Smax`
+> (valency `k`), so `n_t·c^t_{rs} = n_r·c^r_{ts}` with `n_t=n_r` turns `c^t_{rs}=1` into `c^r_{ts}=1`. Reuses
+> `valency_mul_intersectionNumber`; makes the `sα`-components (RTG closure of `saAdj α`) a genuine equivalence —
+> prerequisite for ALL of pieces 2–5.
+>
+> **⟵ DEPENDENCY-RESTRUCTURE FINDING (2026-06-11) — re-orders the remaining arc; the heavy combinatorial grind is NOT the
+> highest-value next step.** Reading PV §3 (Lemmas 3.2–3.6) against the project consumer (`SeparatesAtBoundedBase S 2` =
+> `∃ S₀, |S₀|≤2 ∧ Discrete (warmRefine … individualized S₀)`) shows a cleaner modular split than "grind pieces 2–5 next":
+> - **Lemma 3.3 takes connectivity as a HYPOTHESIS** (`smax ∧ all sα connected ⟹ {α,β} base`) — it does NOT use the
+>   sparsity counting. So the chain factors as three independent theorems:
+>     (i) **smax half** `SparseSeparable → SmaxConnected` — ALREADY LANDED (`smaxConnected_of_sparseSeparable`).
+>     (ii) **sα half** `SparseSeparable → ∀α SaConnected α` — the heavy grind (pieces 2–5).
+>     (iii) **the bridge** `SmaxConnected → (∀α SaConnected α) → … → SeparatesAtBoundedBase S 2` — PV Lemma 3.2 + 3.3,
+>           re-expressed in warmRefine terms (forced-triangle + one discretized endpoint ⟹ other discretized; propagated
+>           by sγ + smax connectivity). Independent of the counting.
+> - **The bridge (iii) is BOTH the flagged KEY MODELING RISK *and* the piece Thm 4.1 reuses verbatim** (Thm 4.1 also
+>   concludes "base"; its sufficient condition differs but its connectivity→base→consumer tail is identical). Pieces 2–5,
+>   by contrast, are Thm-3.1-SPECIFIC (the `2c(k−1)<n` counting) and the slice they prove is the sparse end the probes
+>   already show recovers. ⟹ **Building the bridge first de-risks the one part that could invalidate the whole approach,
+>   and yields reusable substrate; grinding 3.4 first risks sinking multi-session effort into a sparse special case before
+>   knowing it connects to the consumer.**
+> - **Bonus simplification found:** Thm 3.1's use of Lemma 3.4 needs only the **set-equality** `C(u)=C(v)` (to get
+>   `|C(v)|>1` and pick `δ∈αv∩C`); the finer **cardinality bijection** `|αu∩C|=|αv∩C|` is used only in §6 (the q-specific
+>   Cartan part), NOT in the general Thm 3.1. So piece 3 can be the *weaker* set-equality (path-transport EXISTENCE, not a
+>   bijection) — materially easier.
+> - **Bridge scoping — CRITICAL FINDING (the KEY risk materialised; decision = "both, bridge-first").** The existing
+>   consumer `discrete_of_kRoundRelationSeparates` is **NOT** the right target for PV Thm 3.1. Reading
+>   `kRoundProfileCount_eq`: its `hsep` is effectively a **1-round** separation — the `(rel-to-α, rel-to-β, rel-to-z)`
+>   histogram over all `z` must be injective on vertices. PV's "base" is the **full WL refinement** discretising (PV's
+>   Γ=Ω propagation, possibly many rounds), which is **strictly weaker** as a hypothesis / harder to deliver in 1 round.
+>   So the bridge must target **`Discrete (warmRefine … individualized {α,β})` DIRECTLY** via PV's multi-round
+>   propagation, NOT route through the 1-round count consumer.
+> - **What the direct bridge needs (the build plan, all on warmRefine):**
+>     (B1) **The new primitive** `relOfPair_eq_of_warmRefine_determined`: if `x` is in a *singleton* warmRefine cell
+>          (`Determined x`) and `w,u` share a cell, then `relOfPair x w = relOfPair x u`. Adapts the existing
+>          `relOfPair_eq_of_warmRefine_singleton` (Cascade.lean:3193) — but keyed on `x` being a **refined** colour-singleton
+>          (in the stable colouring `χ* = warmRefine …`) instead of an *individualised* point. Needs the stability fact
+>          "x singleton at level `n` ⟹ singleton at level `n−1`" (refinement stabilises ≤ `n−1` steps; `warmRefine_eq_iter_eq`
+>          gives the monotone half). Proof skeleton verified feasible: same cell ⟹ same level-`(n−1)` signature ⟹ the
+>          neighbour-count for the unique colour of `x` agrees ⟹ `rel(w,x)=rel(u,x)`. **← load-bearing; build FIRST.**
+>     (B2) **`Determined`** predicate + **base case**: `Determined α`, `Determined β` after individualising `{α,β}`
+>          (singleton-preservation; `iterate_refineStep_preserves_singleton` + a 2-point analogue of
+>          `individualizedColouring_singleton_sep`).
+>     (B3) **The propagation step** (PV Lemma 3.2 core, re-expressed): `Determined γ` ∧ `Determined z` ∧ `saAdj γ z z'`
+>          (forced triangle `c^{r(γ,z')}_{r(γ,z) r(z,z')}=1` ⟹ `z'` is the unique vertex with those two relations) ⟹
+>          `Determined z'`. Uses (B1) twice (relation to `γ` and to `z` is cell-determined) + the `c=1` uniqueness.
+>     (B4) **The connectivity spread** (PV Lemma 3.3): from `Determined α`/`Determined β` propagate via `SaConnected`
+>          (along `αsmax`) + `SmaxConnected` (vertex-to-vertex) to `∀z, Determined z` = `Discrete`. PV's Γ/Γ₀ argument as
+>          a `Relation.ReflTransGen` induction.
+>     (B5) **Package** `SeparatesAtBoundedBase S 2`: `{α,β}` with `β∈αsmax` (exists since `SmaxConnected` ∧ `n≥2`), card ≤ 2.
+> - **Home module:** new section in `CascadeAffine.lean` (already carries the warmRefine count substrate); add
+>   `import ChainDescent.Separability` there (Separability builds before CascadeAffine, no cycle).
+> - The bridge takes `SmaxConnected` + `∀α SaConnected α` as **hypotheses** — so it is independent of, and built before,
+>   the sα counting grind (pieces 2–5) that later discharges `SaConnected`.
+> - **B1's one missing prerequisite — warmRefine STABILIZATION (a new substrate piece).** B1 compares level-`(n−1)`
+>   signatures and needs `x` to be unique at level `n−1`, given `Determined x` (unique at level `n`). That requires
+>   `samePartition ((refineStep)^[n−1] χ) ((refineStep)^[n] χ)` (refinement stabilises within `n−1` steps: cell-count
+>   is non-decreasing, bounded by `n`, and once a step fails to refine it is stable forever). **This lemma does NOT
+>   exist** in the project — confirmed by grep. Telling: every existing discreteness result goes through the *count*
+>   route (`kRoundProfileCount_eq`, fixed level `k`) precisely to AVOID fixpoint reasoning; the peel lemmas
+>   (`warmRefine_eq_iter_eq`, `iterate_refineStep_colour_refines`, `refineStep_iter_le_eq`) give only the *monotone*
+>   half. So the **first concrete bridge sub-task is the stabilization lemma** (cell-count-monotone-until-stable), then
+>   B1 on top of it. (Alternative to weigh: a count-route reformulation of PV's propagation that sidesteps stabilization,
+>   if one exists — not yet found.)
+>
+> **NEXT CONCRETE PASS (bridge B1 prerequisite):** build the warmRefine stabilization lemma
+> `samePartition ((refineStep adj P)^[n−1] χ) ((refineStep adj P)^[n] χ)` (or the form B1 consumes: `Determined`-at-`n`
+> ⟹ unique-at-`(n−1)`), then `relOfPair_eq_of_warmRefine_determined` (B1). Landed this pass: **`saAdj_symm`** (piece 1.5,
+> axiom-clean) + the full dependency analysis above.
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.

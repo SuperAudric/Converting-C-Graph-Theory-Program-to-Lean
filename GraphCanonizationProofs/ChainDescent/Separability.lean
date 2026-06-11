@@ -185,7 +185,9 @@ def saAdj (α β γ : Fin n) : Prop :=
     S.intersectionNumber (S.relOfPair α β) (S.relOfPair β γ) (S.relOfPair α γ) = 1
 
 /-- **Connectedness of `sα` on `αsmax`** — every two `smax`-neighbours of `α` are joined by an
-`sα`-path. (Ponomarenko–Vasil'ev §3.2; the form used by Lemma 3.3.) -/
+`sα`-path. (Ponomarenko–Vasil'ev §3.2; the form used by Lemma 3.3.) `saAdj` is symmetric
+(`saAdj_symm`, proved in §S.8 once the triangle identity is available), so this closure is an
+equivalence and the `sα`-components are well-defined. -/
 def SaConnected (α : Fin n) : Prop :=
   ∀ β γ : Fin n, S.smaxAdj α β → S.smaxAdj α γ → Relation.ReflTransGen (S.saAdj α) β γ
 
@@ -420,6 +422,39 @@ theorem valency_mul_intersectionNumber (i j k : Fin (S.rank + 1)) (x : Fin n) :
     rw [Finset.sum_congr rfl (fun y _ => hfy y), ← Finset.sum_filter, Finset.sum_const,
       smul_eq_mul, ← S.valency_eq_card i x]
   exact hA.symm.trans hB
+
+/-- **`sα` is symmetric** (deferred from §S.4, now that the triangle identity is available).
+Ponomarenko–Vasil'ev derive this from the homogeneous identity (4): since both side relations
+`r = r(α,β)` and `t = r(α,γ)` have maximal valency `k` (`β, γ ∈ αsmax`), the triangle identity
+`n_t·c^t_{rs} = n_r·c^r_{ts}` with `n_t = n_r = k` turns `c^t_{rs} = 1` into `c^r_{ts} = 1`. This makes
+the `sα`-components (the reflexive-transitive closure of `saAdj α`) well-defined as an equivalence. -/
+theorem saAdj_symm (α : Fin n) {β γ : Fin n} (h : S.saAdj α β γ) : S.saAdj α γ β := by
+  obtain ⟨hβ, hγ, htri⟩ := h
+  refine ⟨hγ, hβ, ?_⟩
+  have hsβγ : S.relOfPair γ β = S.relOfPair β γ := S.relOfPair_symm γ β
+  rw [hsβγ]
+  set r := S.relOfPair α β with hr
+  set s := S.relOfPair β γ with hs
+  set t := S.relOfPair α γ with ht
+  -- `htri : c^t_{rs} = 1`; goal `c^r_{ts} = 1`.
+  obtain ⟨sr, hsr, hrelr⟩ := hβ
+  obtain ⟨st', hst', hrelt⟩ := hγ
+  have hvr : S.valency r = S.maxValency := by
+    have hsr_r : sr = r := (S.relOfPair_unique hrelr).trans hr.symm
+    rw [← hsr_r]; exact hsr
+  have hvt : S.valency t = S.maxValency := by
+    have hst_t : st' = t := (S.relOfPair_unique hrelt).trans ht.symm
+    rw [← hst_t]; exact hst'
+  have hpos : 0 < S.valency r := by
+    rw [S.valency_eq_card r α]
+    apply Finset.card_pos.2
+    exact ⟨β, by simp only [Finset.mem_filter, Finset.mem_univ, true_and]; rw [hr]; exact S.rel_relOfPair α β⟩
+  have hid := S.valency_mul_intersectionNumber r s t α
+  rw [htri, Nat.mul_one, hvr, hvt] at hid
+  -- `hid : maxValency = maxValency * c^r_{ts}`.
+  have hpos' : 0 < S.maxValency := hvr ▸ hpos
+  have hmul : S.maxValency * 1 = S.maxValency * S.intersectionNumber t s r := by rw [Nat.mul_one]; exact hid
+  exact (Nat.eq_of_mul_eq_mul_left hpos' hmul).symm
 
 /-! ### §S.9 — Lemma 3.5(1), the `nᵤ > nᵥ` half: `pᵤ(δ) ≥ nᵤ`
 
