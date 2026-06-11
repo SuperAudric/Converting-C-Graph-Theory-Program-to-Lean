@@ -635,11 +635,33 @@ The S-ring theory replaces the *cited* `TwinsAreSemilinear` with a *proven* gene
 `orbitalScheme H` — discharging the general crux directly, no per-family wiring. The general capstones
 (`reachesRigidOrCameron_viaPersistentTwinBlock` / `…viaSymmetricRecovery`) are the sinks; they already exist and are general.
 
-**The cheap directing step before the big build: the Davis–Xiang non-affine probe.** Construct NLS-type amorphic schemes
-from PDS in non-elementary-abelian 2-groups (the only construction that reaches the residue — Latin squares cannot, §7),
-measure recovery / `s(C)` / witnesses with the `CatalogueSchemeProbe.cs` core. 0 witnesses ⟹ closure plausible, commit to
-the S-ring build; a witness ⟹ the seal is false (statement change), redirect. Missing piece for the probe: the explicit
-PDS construction (specialized but bounded; the measurement infra is ready).
+**The cheap directing step before the big build: the non-affine residue probes.** Of the three residue routes (§7) —
+(1) Davis–Xiang PDS Cayley, (2) PSL(2,q) on A₅/S₄ cosets, (3) classical rank-3/4 geometries — measure recovery / `s(C)` /
+witnesses with the shared measurement core. 0 witnesses ⟹ closure plausible, commit to the S-ring build; a witness ⟹ the
+seal is false (statement change), redirect.
+
+> **ROUTE (2) RAN — the PSL(2,q) coset-action axis. VERDICT: NO G2-B WITNESS (2026-06-11).**
+> `GraphCanonizationProject.Tests/CosetSchemeProbe.cs` (`Probe_PSL2_ExceptionalCosets`, green; self-test
+> `Probe_CosetBuilder_SelfTest` validates the coset machinery against the rank-2 Borel/line action). New construction-safe
+> machinery: enumerate `PSL(2,q)`, **search+verify** an exceptional maximal subgroup `K∈{A₄,S₄,A₅}` (gate on `|K|` and Lean
+> primitivity of the coset action — wrong generators are caught), build the **directed orbital CC** `orbitalScheme(PSL/K)`
+> (coherent by Higman; symmetrising can break coherence so the directed CC is the object), measure `EdgeGenerates`/`WLDepth`/
+> `SeparatesAtBoundedBase` (`sepBound=⌈log₂n⌉+2`). Result across `q∈{11..31}`: **7 primitive non-affine schemes, rank 4–9,
+> index 57–620 (all beyond the catalogue's ≤30, and LOWER-rank + smaller-Aut than the PGL-on-pairs probe), 0 witnesses —
+> every one recovers at WL-depth 2–3 ≪ `sepBound`.** The lone rank-2 case (`PSL(2,11)/A₅` = the 2-transitive 11-point action)
+> is correctly classified Cameron/large (leg C), not G2-B. This **closes the almost-simple coset-action axis** — the one the
+> prior four probes structurally missed (catalogue ≤30; affine = translation/abelian-color; PGL-on-pairs = high-rank-easy).
+>
+> **Probe-design finding (banks a §7 fact concretely): no linear-multiplier Cayley shortcut to a *primitive* residue.** For
+> any `M ≤ GL(m,ℤ₄)`, the subgroup `2·ℤ₄ᵐ` is `M`-invariant (`A(2u)=2(Au)`), hence a block ⟹ every linear-multiplier Cayley
+> scheme over `ℤ₄ᵐ` is **imprimitive**. So the genuine Davis–Xiang PDS (route 1) is necessarily *non-linear*; there is no cheap
+> cyclotomic-over-Galois-ring analogue of the affine probe. This is *why* route (1) is the heavy one.
+>
+> **SCOPE / what's still open (honest).** The PSL-coset schemes are **not equal-valency amorphic** (`eqVal=n`): the exact
+> **rank-4 amorphic-NLS Clebsch bullseye** (3 interchangeable equal-valency relations = the largest separability gap = the
+> *most likely* witness shape) is **not realised by a coset action**. It still needs **route (1), the Davis–Xiang non-linear
+> PDS** in a non-elementary-abelian 2-group (order ≥ 64) — the remaining, heavier probe. The `CosetSchemeProbe` measurement
+> core is reusable for it; the missing piece is the explicit PDS construction.
 
 **Citations (with extraction):**
 - Ponomarenko, *On the separability of cyclotomic schemes over finite field*, **arXiv:2006.13592** — Thm 1.1 (cyclotomic
