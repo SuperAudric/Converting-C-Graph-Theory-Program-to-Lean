@@ -351,6 +351,34 @@ theorem separatesAtBoundedBase_of_connectivity (S : SchurianScheme n) {α β : F
   refine ⟨{α, β}, ?_, discrete_of_connectivity S.toAssociationScheme hαβ hsmax hsa⟩
   exact (Finset.card_insert_le _ _).trans (by simp)
 
+/-- **Ponomarenko–Vasil'ev Theorem 3.1 (the sparse on-ramp), in the project's terms.** A schurian scheme
+whose indistinguishing number `c` and maximum valency `k ≥ 2` satisfy the sparsity bound `2c(k−1) < n`
+has a 2-element base that discretises it: `SeparatesAtBoundedBase S 2`. This is the **full theorem** — the
+bridge (`separatesAtBoundedBase_of_connectivity`) with *both* connectivity legs now discharged from
+sparsity (`smaxConnected_of_sparseSeparable` + `saConnected_of_sparseSeparable`, `Separability.lean`). It
+feeds the seal's `PersistentTwinYieldsBlock` / `reachesRigidOrCameron` consumer on the sparse end of the
+separability spectrum (the dense amorphic residue needs Thm 4.1's full strength — the on-going program). -/
+theorem separatesAtBoundedBase_of_sparseSeparable (S : SchurianScheme n)
+    (hsep : S.toAssociationScheme.SparseSeparable)
+    (hk : 2 ≤ S.toAssociationScheme.maxValency) :
+    SeparatesAtBoundedBase S 2 := by
+  classical
+  have hn1 : 0 < n := by
+    have h : 2 * S.toAssociationScheme.indistinguishingNumber
+        * (S.toAssociationScheme.maxValency - 1) < n := hsep
+    omega
+  obtain ⟨u, hu⟩ := S.toAssociationScheme.exists_inSmax
+  let α : Fin n := ⟨0, hn1⟩
+  have hval : 0 < S.toAssociationScheme.valency u := by rw [hu]; omega
+  have hαu : (Finset.univ.filter (fun β => S.toAssociationScheme.rel u α β = true)).Nonempty := by
+    rw [← Finset.card_pos, ← S.toAssociationScheme.valency_eq_card u α]; exact hval
+  obtain ⟨β, hβ⟩ := hαu
+  rw [Finset.mem_filter] at hβ
+  have hαβ : S.toAssociationScheme.smaxAdj α β := ⟨u, hu, hβ.2⟩
+  exact separatesAtBoundedBase_of_connectivity S hαβ
+    (S.toAssociationScheme.smaxConnected_of_sparseSeparable hsep hk)
+    (fun a => S.toAssociationScheme.saConnected_of_sparseSeparable hsep hk a)
+
 end Bridge
 
 /-! ### §13b — the two-round (depth-2) separation engine on `schemeAdj` (E1)

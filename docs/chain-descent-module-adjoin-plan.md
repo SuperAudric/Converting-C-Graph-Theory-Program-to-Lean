@@ -559,10 +559,21 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 >   `B ⊆ (pu-pairs).image fst` + `card_image_le`, each `β` getting a partner from `c^v≥2`); `pu_eq_of_relOfPair_eq`
 >   (`pᵤ` depends only on `r(α,δ)`); **`exists_minComp_card`** (`|C(u)|≥2 ⟹` a component with `2·|αu∩C₀| ≤ |αu|`, via
 >   `sum_card_fiber_saComp` + min-image + `sum_pair`); **`lemma35_2`** (`nu ≤ 2·pᵤ(δ)` for `δ∈αv`). All axiom-clean.
-> - **Piece 5 — Lemma 3.6 `sα` half:** (23) `|C(u)|=1` (from 3.5(2) + estimate (19), the `Σ pᵤ(δ)≥nk/2` contradiction),
->   then `sα` connected (from (23) + 3.5(1)[landed], the small-`sα`-component contradiction, reusing the (19) estimate).
-> Then a small **B5+ assembly** (derive the `smaxAdj` edge from `k≥2`; combine `smaxConnected_of_sparseSeparable` + the
-> piece-5 `SaConnected` into `separatesAtBoundedBase_of_connectivity`) completes the full PV-Thm-3.1.
+> - **Piece 5 — Lemma 3.6 `sα` half — ✅ LANDED (axiom-clean, full build green).** `§S.15–§S.16`: **5a**
+>   `valency_le_two_pu_of_card_compsOf` + **`card_compsOf_eq_one`** ((23), from 3.5 + estimate (19) + sparsity); **5b**
+>   `saComp_closed` / `mem_saComp_of_card_one` / `valency_le_pu_of_closed_notMem` / `false_of_closed_subset` →
+>   **`saConnected_of_sparseSeparable`** (`SparseSeparable ∧ k≥2 ⟹ ∀α SaConnected α`).
+>
+> ## ✅✅✅ PV-THEOREM 3.1 COMPLETE (2026-06-11, all axiom-clean `[propext, Classical.choice, Quot.sound]`, build green)
+> **`separatesAtBoundedBase_of_sparseSeparable`** (`CascadeAffine.lean §S-bridge`): for a schurian scheme,
+> `SparseSeparable S.toAssociationScheme → 2 ≤ maxValency → SeparatesAtBoundedBase S 2`. End to end: sparsity `2c(k−1)<n`
+> ⟹ both connectivity legs (smax + all sα) ⟹ the bridge ⟹ a 2-element base discretises the scheme ⟹ the seal's
+> `PersistentTwinYieldsBlock` / `reachesRigidOrCameron` consumer. The B5+ assembly derives the `smaxAdj` edge from `k≥2`
+> and `n≥1` (from sparsity), combining `smaxConnected_of_sparseSeparable` + `saConnected_of_sparseSeparable`.
+>
+> **Scope (unchanged):** Thm 3.1 is the *sparse* slice — the dense amorphic residue (genuine G2-B) violates `2c(k−1)<n`
+> and needs **Thm 4.1**'s full strength (the destination). But all reusable substrate Thm 4.1 needs — the warmRefine
+> bridge, stabilization, valency/indistinguishing/component theory — is now built and validated to reach the consumer.
 >
 > Landed this pass: **`saAdj_symm`** + **§S-stab stabilization block** (`warmRefine_refineStep_samePartition` et al.) +
 > **the entire §S-bridge B1–B5** + the dependency analysis above — all axiom-clean, full build green.

@@ -938,6 +938,178 @@ theorem lemma35_2 {α : Fin n} {u v : Fin (S.rank + 1)} (hu : S.InSmax u)
   have hval : S.valency u = αu.card := S.valency_eq_card u α
   omega
 
+/-! ### §S.15 — (23) `|C(u)| = 1` (piece 5a)
+
+The claim (23) of Ponomarenko–Vasil'ev Lemma 3.6: under sparsity `2c(k−1) < n` and `k ≥ 2`, every
+`u ∈ Smax` has `αu` confined to a single `sα`-component. The per-point `≥ k/2` bound
+(`valency_le_two_pu_of_card_compsOf`, combining both halves of Lemma 3.5) summed over `Ω` against
+estimate (19) forces it. This is the engine for `sα`-connectivity (piece 5b). -/
+
+/-- **The `≥ k/2` per-point bound (Lemma 3.5(1)+(2) combined).** For `u ∈ Smax` with `|C(u)| ≥ 2`, every
+`δ` has `nu ≤ 2·pu(δ)`. -/
+theorem valency_le_two_pu_of_card_compsOf {α : Fin n} {u : Fin (S.rank + 1)}
+    (hu : S.InSmax u) (hcard : 1 < (S.compsOf α u).card) (δ : Fin n) :
+    S.valency u ≤ 2 * S.pu α u δ := by
+  classical
+  set v := S.relOfPair α δ with hv
+  have hrv : S.rel v α δ = true := S.rel_relOfPair α δ
+  by_cases hlt : S.valency v < S.valency u
+  · have h := S.valency_le_pu_of_valency_lt α u δ hlt
+    omega
+  · have hvle : S.valency v ≤ S.valency u := by rw [hu]; exact S.valency_le_maxValency v
+    have heq : S.valency u = S.valency v := le_antisymm (Nat.not_lt.mp hlt) hvle
+    have hInv : S.InSmax v := by rw [InSmax, ← heq]; exact hu
+    by_cases hC : S.compsOf α u = S.compsOf α v
+    · exact S.lemma35_2 hu heq hC hcard hrv
+    · have hdisj : ∀ β, S.rel u α β = true → ¬ S.saAdj α β δ := by
+        intro β hβ hsa
+        apply hC
+        apply S.compsOf_eq_of_inter_nonempty
+        refine ⟨S.saComp α β, Finset.mem_inter.2 ⟨S.saComp_mem_compsOf hβ, ?_⟩⟩
+        have hsc : S.saComp α β = S.saComp α δ :=
+          S.saComp_eq_of_mem (S.mem_saComp.mpr (Relation.ReflTransGen.single (S.saAdj_symm α hsa)))
+        rw [hsc]; exact S.saComp_mem_compsOf hrv
+      have h := S.valency_le_pu_of_no_saAdj α δ hu hInv hdisj
+      omega
+
+/-- **(23) `|C(u)| = 1`.** Under sparsity `2c(k−1) < n` and `k ≥ 2`, every `u ∈ Smax` has its `αu` in a
+single `sα`-component. -/
+theorem card_compsOf_eq_one {α : Fin n} {u : Fin (S.rank + 1)}
+    (hsep : S.SparseSeparable) (hk : 2 ≤ S.maxValency) (hu : S.InSmax u) :
+    (S.compsOf α u).card = 1 := by
+  classical
+  have hαunon : (Finset.univ.filter (fun β => S.rel u α β = true)).Nonempty := by
+    rw [← Finset.card_pos, ← S.valency_eq_card u α, hu]; omega
+  have hpos : 0 < (S.compsOf α u).card := by
+    rw [compsOf, Finset.card_pos]; exact hαunon.image _
+  by_contra hne1
+  have hcard2 : 1 < (S.compsOf α u).card := by omega
+  have hper : ∀ δ, S.valency u ≤ 2 * S.pu α u δ := fun δ =>
+    S.valency_le_two_pu_of_card_compsOf hu hcard2 δ
+  have hlow : n * S.valency u ≤ 2 * (Finset.univ.sum (fun δ => S.pu α u δ)) := by
+    have h1 : (Finset.univ.sum fun _ : Fin n => S.valency u)
+        ≤ Finset.univ.sum (fun δ => 2 * S.pu α u δ) := Finset.sum_le_sum (fun δ _ => hper δ)
+    rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul, ← Finset.mul_sum] at h1
+    exact h1
+  have hhigh := S.sum_pu_le α hu Finset.univ
+  rw [hu] at hlow
+  set k := S.maxValency with hkdef
+  set c := S.indistinguishingNumber with hcdef
+  have hsep' : 2 * c * (k - 1) < n := hsep
+  have key : n * k ≤ 2 * (k * (k - 1) * c) := le_trans hlow (mul_le_mul_right hhigh 2)
+  have key2 : k * n ≤ k * (2 * (k - 1) * c) :=
+    calc k * n = n * k := Nat.mul_comm k n
+      _ ≤ 2 * (k * (k - 1) * c) := key
+      _ = k * (2 * (k - 1) * c) := by ring
+  have hn : n ≤ 2 * (k - 1) * c := Nat.le_of_mul_le_mul_left key2 (by omega)
+  have heq : 2 * (k - 1) * c = 2 * c * (k - 1) := by ring
+  omega
+
+/-! ### §S.16 — Lemma 3.6, the `sα` half: `SaConnected` (piece 5b)
+
+The connectivity conclusion of Ponomarenko–Vasil'ev Lemma 3.6. If `sα` is disconnected at `α`, two
+`smax`-neighbours lie in different `sα`-components; the smaller component (closed under `saAdj`, and
+— by (23) — containing some `αu`) has `2|C| ≤ n`, so summing the `pu(δ) ≥ k` bound (Lemma 3.5(1), valid
+for `δ ∉ C` since `C` is closed) over `Ω \ C` against estimate (19) contradicts sparsity. This discharges
+the last open hypothesis of the PV-Thm-3.1 bridge (`∀ α, SaConnected α`). -/
+
+/-- `sα`-components are closed under `saAdj`. -/
+theorem saComp_closed {α β x y : Fin n} (hx : x ∈ S.saComp α β) (hxy : S.saAdj α x y) :
+    y ∈ S.saComp α β := by
+  rw [mem_saComp] at hx ⊢
+  exact hx.tail hxy
+
+/-- With `|C(u)| = 1`, the whole `αu` lies in the component of any `w ∈ αu`. -/
+theorem mem_saComp_of_card_one {α : Fin n} {u : Fin (S.rank + 1)} {w β' : Fin n}
+    (h1 : (S.compsOf α u).card = 1) (hw : S.rel u α w = true) (hβ' : S.rel u α β' = true) :
+    β' ∈ S.saComp α w := by
+  have heq : S.saComp α β' = S.saComp α w :=
+    (Finset.card_le_one.mp (le_of_eq h1)) (S.saComp α β') (S.saComp_mem_compsOf hβ')
+      (S.saComp α w) (S.saComp_mem_compsOf hw)
+  rw [← heq]; exact S.self_mem_saComp α β'
+
+/-- For `u ∈ Smax` and a closed set `C ⊇ αu`, any `δ ∉ C` has `pu(δ) ≥ nu` (Lemma 3.5(1): either smaller
+valency, or — `C` closed — no `sα`-edge into `δ`). -/
+theorem valency_le_pu_of_closed_notMem {α : Fin n} {u : Fin (S.rank + 1)} (hu : S.InSmax u)
+    {C : Finset (Fin n)} (hClosed : ∀ x ∈ C, ∀ y, S.saAdj α x y → y ∈ C)
+    (hαuC : ∀ β, S.rel u α β = true → β ∈ C) {δ : Fin n} (hδ : δ ∉ C) :
+    S.valency u ≤ S.pu α u δ := by
+  by_cases hlt : S.valency (S.relOfPair α δ) < S.valency u
+  · exact S.valency_le_pu_of_valency_lt α u δ hlt
+  · have hvle : S.valency (S.relOfPair α δ) ≤ S.valency u := by
+      rw [hu]; exact S.valency_le_maxValency _
+    have heq : S.valency u = S.valency (S.relOfPair α δ) := le_antisymm (Nat.not_lt.mp hlt) hvle
+    have hInv : S.InSmax (S.relOfPair α δ) := by rw [InSmax, ← heq]; exact hu
+    apply S.valency_le_pu_of_no_saAdj α δ hu hInv
+    intro β hβ hsa
+    exact hδ (hClosed β (hαuC β hβ) δ hsa)
+
+/-- The contradiction engine: a closed set `C ⊇ αu` with `2|C| ≤ n` is impossible under sparsity. -/
+theorem false_of_closed_subset {α : Fin n} {u : Fin (S.rank + 1)} (hsep : S.SparseSeparable)
+    (hk : 2 ≤ S.maxValency) (hu : S.InSmax u) {C : Finset (Fin n)}
+    (hClosed : ∀ x ∈ C, ∀ y, S.saAdj α x y → y ∈ C)
+    (hαuC : ∀ β, S.rel u α β = true → β ∈ C) (hsize : 2 * C.card ≤ n) : False := by
+  classical
+  have hbound : ∀ δ ∈ Finset.univ \ C, S.valency u ≤ S.pu α u δ := by
+    intro δ hδ
+    rw [Finset.mem_sdiff] at hδ
+    exact S.valency_le_pu_of_closed_notMem hu hClosed hαuC hδ.2
+  have hlow : (Finset.univ \ C).card * S.valency u
+      ≤ (Finset.univ \ C).sum (fun δ => S.pu α u δ) := by
+    have h := Finset.card_nsmul_le_sum (Finset.univ \ C) (fun δ => S.pu α u δ) (S.valency u) hbound
+    rwa [smul_eq_mul] at h
+  have hhigh := S.sum_pu_le α hu (Finset.univ \ C)
+  rw [hu] at hlow
+  have hcomb : (Finset.univ \ C).card * S.maxValency
+      ≤ S.maxValency * (S.maxValency - 1) * S.indistinguishingNumber := le_trans hlow hhigh
+  have hcompl : (Finset.univ \ C).card = n - C.card := by
+    rw [Finset.card_univ_diff, Fintype.card_fin]
+  set k := S.maxValency with hkdef
+  set c := S.indistinguishingNumber with hcdef
+  set m := (Finset.univ \ C).card with hmdef
+  have hsep' : 2 * c * (k - 1) < n := hsep
+  have h2m : n ≤ 2 * m := by rw [hcompl]; omega
+  have key : n * k ≤ 2 * (k * (k - 1) * c) :=
+    calc n * k ≤ (2 * m) * k := mul_le_mul_left h2m k
+      _ = 2 * (m * k) := by ring
+      _ ≤ 2 * (k * (k - 1) * c) := mul_le_mul_right hcomb 2
+  have key2 : k * n ≤ k * (2 * (k - 1) * c) :=
+    calc k * n = n * k := Nat.mul_comm k n
+      _ ≤ 2 * (k * (k - 1) * c) := key
+      _ = k * (2 * (k - 1) * c) := by ring
+  have hn : n ≤ 2 * (k - 1) * c := Nat.le_of_mul_le_mul_left key2 (by omega)
+  have heqr : 2 * (k - 1) * c = 2 * c * (k - 1) := by ring
+  omega
+
+/-- **Lemma 3.6, the `sα` half.** Under sparsity `2c(k−1) < n` and `k ≥ 2`, every `sα` graph is connected
+(`SaConnected α`) — the last open hypothesis of the PV-Thm-3.1 bridge. -/
+theorem saConnected_of_sparseSeparable (hsep : S.SparseSeparable) (hk : 2 ≤ S.maxValency)
+    (α : Fin n) : S.SaConnected α := by
+  classical
+  by_contra hcon
+  rw [SaConnected] at hcon
+  push Not at hcon
+  obtain ⟨β, γ, hsmβ, hsmγ, hnpath⟩ := hcon
+  have hdisj : Disjoint (S.saComp α β) (S.saComp α γ) := by
+    rw [Finset.disjoint_left]
+    intro x hxβ hxγ
+    rw [mem_saComp] at hxβ hxγ
+    exact hnpath (hxβ.trans (S.reflTransGen_saAdj_symm α hxγ))
+  have hsum : (S.saComp α β).card + (S.saComp α γ).card ≤ n := by
+    rw [← Finset.card_union_of_disjoint hdisj]
+    calc (S.saComp α β ∪ S.saComp α γ).card
+        ≤ (Finset.univ : Finset (Fin n)).card := Finset.card_le_card (Finset.subset_univ _)
+      _ = n := by rw [Finset.card_univ, Fintype.card_fin]
+  rcases le_total (S.saComp α β).card (S.saComp α γ).card with hle | hle
+  · obtain ⟨u, hu, hrelu⟩ := hsmβ
+    exact S.false_of_closed_subset hsep hk hu (fun x hx y hxy => S.saComp_closed hx hxy)
+      (fun β' hβ' => S.mem_saComp_of_card_one (S.card_compsOf_eq_one hsep hk hu) hrelu hβ')
+      (by omega)
+  · obtain ⟨u, hu, hrelu⟩ := hsmγ
+    exact S.false_of_closed_subset hsep hk hu (fun x hx y hxy => S.saComp_closed hx hxy)
+      (fun β' hβ' => S.mem_saComp_of_card_one (S.card_compsOf_eq_one hsep hk hu) hrelu hβ')
+      (by omega)
+
 end AssociationScheme
 
 end ChainDescent
