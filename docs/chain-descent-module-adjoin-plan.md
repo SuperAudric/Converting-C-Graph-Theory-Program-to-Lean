@@ -17,9 +17,17 @@
 > F₁₆ Clebsch and F₂₅ witnesses) that the full `Ĝ` gap is nonetheless entirely *semilinear* (`ΓL₁`)** — the
 > non-Galois remainder is `mult-by-α ∈ GL`, not a non-linear mystery. That revives a *corrected* module-adjoin route.
 > The route splits into **(b) an easy linear-algebra lemma** (a `ΓL₁` map fixing a spanning base is the identity) and
-> **(a) the genuinely-`s(C)` half** ("twins are semilinear"), which **may be citable** (cyclotomic `s(C) ≤ 2`). The
-> immediate next action is the citability check (§6), which decides whether this thread *closes* the affine slice or
-> only *sharpens* it. The genuinely hard residue (non-affine NLS / Davis–Xiang) is unchanged and deferred (§7).
+> **(a) the genuinely-`s(C)` half** ("twins are semilinear"), which is **cyclotomic `s(C) ≤ 2`**.
+>
+> **§6 RESOLVED (2026-06-11): (a) IS CITABLE and covers both witnesses — so this thread CLOSES the affine slice.**
+> Ponomarenko 2020 (arXiv:2006.13592) Thm 1.1: every cyclotomic scheme over a finite field is **2-separable with
+> finitely many explicit exceptions** (Table 1); the object is exactly `affineScheme G0pow`. F₁₆ Clebsch `(2,4)` and
+> F₂₅ `(5,2)` are **not** exceptions. **Consequence:** half (a) is a *citation, not open math*; the module-adjoin (b)
+> is no longer needed to *close* the slice (it is demoted to the "build-instead-of-cite" future, very low priority —
+> §6/§8). The only remaining work on the affine slice is **pure formalization wiring**: connect the cited
+> 2-separability (≡ 1-regular 1-point extension, Cartan Thm 2.5 ≡ base-discreteness) to the project's `PowAffineSeparates`
+> form. That is bounded formalization, **not research**. The genuinely hard residue (non-affine NLS / Davis–Xiang) is
+> unchanged and deferred (§7).
 
 ---
 
@@ -175,6 +183,37 @@ Outcomes:
 
 This is a ~20-minute literature check (pdf tooling available) and it gates the whole build.
 
+### 6.1 RESOLUTION (2026-06-11) — cyclotomic `s(C) ≤ 2` IS citable; the affine slice closes
+
+**Ponomarenko, *On the separability of cyclotomic schemes over finite field* (arXiv:2006.13592).** Extracted via
+`pdf2txt`:
+- **Theorem 1.1:** *with finitely many possible exceptions, every cyclotomic scheme over a finite field is
+  2-separable.* The exceptional degrees are **explicit (Table 1):** `p=2: d∈{6,7,8,9,10,11,12,14,15,16,18,20}`;
+  `p=3: d∈{4,5,6,8,10}`; `p=5: d∈{4,5,6}`. (Even the exceptions are 3-separable — ref [5].)
+- **Object match:** the paper's cyclotomic scheme = relations `{(x,y) : y−x ∈ M_a}`, `M ≤ F×` — *exactly*
+  `affineScheme (G0pow ⟨β⟩)`.
+- **Both witnesses are NON-exceptions** ⟹ citably 2-separable: F₁₆ Clebsch `(p,d)=(2,4)` (∉ the `p=2` list);
+  F₂₅ `(5,2)` (∉ the `p=5` list).
+- **Answers question 2 (on-target):** Thm 1.1 covers the general cyclotomic family (incl. the primitive proper-subgroup
+  `G0pow`), minus the explicit finite Table-1 set. So the affine cyclotomic is the *citably-closeable* slice (Kink 3
+  confirmed: easy/affine end of G2-B; hard core = non-affine NLS, §7).
+
+**Buildability (per the low-priority "build > cite" note).** Thm 1.1's proof: reduce (via ref [5]) 2-separability to
+separability of a *fission* of an auxiliary scheme `C(F)`, prove via a **general sufficient condition for separability
+(Thm 4.1, §§3–4)** + a **parameter inequality (§5)** + **computer calculations to prune the exceptional cases (§6,
+Table 1)**. Verdict: **buildable but heavy** — needs CC-separability theory (no Mathlib substrate) *and* a finite
+computer-check; Thm 4.1 would subsume the Cartan Thm 3.1 family. **Cite now; full build = substantial future project,
+very low priority.** Axiom hygiene: cite as a theorem-statement **hypothesis** (`CyclotomicTwoSeparable …`), not a fresh
+`axiom`.
+
+**The remaining work (the new, bounded kink): the WIRING.** The citation gives *2-separability* (iso-determination by
+2-dim intersection numbers); the project's `PowAffineSeparates` is *depth-2 difference-count injectivity from a bounded
+base* (a discreteness/base statement). The bridge is the standard equivalence **`m`-separable ⟺ 1-regular `(m−1)`-point
+extension** (Cartan Thm 2.5) ⟹ base-discreteness, with the base-number ingredient (cyclotomic base number is small). So
+the connection is a **definitional/formalization bridge** matching the literature's 2-separability (or the WL-dim ≤ 3
+corollary, Thm 1.3, closer to base-discreteness) to `affineDepth2Count` injectivity — **bounded formalization, not
+research**. This is now the actual next implementation step (§8), replacing "build (b)".
+
 ---
 
 ## 7. Honest scope — the affine slice vs the genuine residue (do NOT confuse them)
@@ -202,15 +241,23 @@ residue* (LS-type only — graphs easy, nets imprimitive).
 
 ## 8. The plan, ordered
 
-1. **Resolve §6 (the cyclotomic `s(C) ≤ 2` citability + on-target check).** Decides close-vs-sharpen. *Do first.*
-2. **Build (b), the module-adjoin lemma** regardless (cheap, correct, banks a piece): assemble a `ΓL₁` point-perm from
-   the existing `mulUnitHom` / `frobCoord` / `affineE` machinery; prove "fixes an `F_p`-spanning base ⟹ identity" by
-   linear algebra. Mirrors `frobPerm_pow_eq_one_of_adjoin` but simpler (no field theory).
-3. **Wire per the §6 outcome:** either compose (b) + (a-cited) to discharge `PowAffineSeparates` via
-   `discrete_affineScheme_of_twoRoundDiffSeparates` (close the slice), or land (b) + state `TwinsAreSemilinear` as the
-   carried open kernel and re-key `viaPowSeparation` onto it (sharpen).
-4. **Only then** consider the non-affine NLS residue (§7) — the Davis–Xiang PDS probe + the relation-algebra
-   generalization of the module-adjoin — if it becomes the blocker.
+1. **Resolve §6 — DONE (2026-06-11, §6.1).** Cyclotomic `s(C) ≤ 2` is citable (Ponomarenko 2020 Thm 1.1) and covers
+   both witnesses. Outcome = **CLOSE** (cite, don't build). So (a) is a citation; (b) is demoted.
+2. **The wiring (the actual next step) — connect the cited 2-separability to `PowAffineSeparates`.** Introduce the
+   citation as a hypothesis `CyclotomicTwoSeparable` (theorem-statement hypothesis, not an `axiom`), covering the
+   non-Table-1 `(p,d)`. Then build the **bridge lemma** `CyclotomicTwoSeparable → PowAffineSeparates` (via `m`-separable
+   ⟺ 1-regular `(m−1)`-extension ⟺ base-discreteness; or via the WL-dim ≤ 3 corollary, Thm 1.3). Feed it through
+   `discrete_affineScheme_of_twoRoundDiffSeparates` to discharge `hbound` and close
+   `reachesRigidOrCameron_viaPowSeparation` on the non-exceptional witnesses. **First, scope the bridge:** confirm whether
+   `affineDepth2Count`-injectivity matches the literature's 2-dim intersection numbers definitionally, or needs a
+   translation lemma — this is the one remaining (bounded) kink. **Working step before coding: re-read
+   `discrete_affineScheme_of_twoRoundDiffSeparates` + `affineDepth2Count` and the literature's 2-separability defn side
+   by side, and decide the exact hypothesis shape to cite.**
+3. **(Deprioritized) Build (b), the module-adjoin lemma** — only for the "build-instead-of-cite" future (a `ΓL₁` map
+   fixing an `F_p`-spanning base is the identity, pure linear algebra). Banks the build path against the citation; very
+   low priority since (a) is now cited.
+4. **Only then** the non-affine NLS residue (§7) — the Davis–Xiang PDS probe + the relation-algebra generalization of
+   the module-adjoin — if it becomes the blocker. This is the genuine remaining open frontier.
 
 ---
 
