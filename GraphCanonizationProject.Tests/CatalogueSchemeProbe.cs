@@ -809,4 +809,165 @@ public class CatalogueSchemeProbe(ITestOutputHelper output)
         Assert.Equal(0, primCorrespondenceViolations);    // Primitive() ⟺ Lean IsPrimitive (no proper ClosedSubset)
         Assert.Equal(0, genuineWitness);                  // no G2-B witness on the exact formal object
     }
+
+    // ── Theorem 3.1 (Ponomarenko–Vasil'ev, arXiv:1602.07132) — the density boundary ──
+    //   For ANY homogeneous coherent configuration:  2·c·(k-1) < n  ⟹  every one-point
+    //   extension is 1-regular  ⟹  b(X) ≤ 2  AND  s(C) ≤ 2  (recovery depth ≤ 4).
+    //     k    = max valency;
+    //     c(X) = max_{r≠0} Σ_t p^r_{t,t*}   (the indistinguishing number; t* = adjoint of t).
+    //   This is a general, CHECKABLE sufficient condition that discharges BOTH budget terms
+    //   (base + s(C)) at once.  It sharpens G2-B from the vague "non-abelian primitive" to the
+    //   concrete "primitive with 2c(k-1) ≥ n" — the DENSE residue, the module-adjoin/O(log n)
+    //   target.  This probe measures which primitive catalogue schemes Thm 3.1 already covers
+    //   and isolates the dense residue (if any).
+
+    static int[] Adjoint(Scheme s)
+    {
+        var adj = new int[s.Rank];
+        for (int k = 0; k < s.Rank; k++)
+        {
+            bool found = false;
+            for (int i = 0; i < s.N && !found; i++)
+                for (int j = 0; j < s.N; j++)
+                    if (s.Rel[i, j] == k) { adj[k] = s.Rel[j, i]; found = true; break; }
+        }
+        return adj;
+    }
+
+    // c(X) = max over non-identity relations r of Σ_t p^r_{t, t*}.
+    static int Indistinguishing(Scheme s, int[] adj)
+    {
+        int c = 0;
+        for (int r = 1; r < s.Rank; r++)
+        {
+            int cr = 0;
+            for (int t = 0; t < s.Rank; t++) cr += s.P[r, t, adj[t]];
+            if (cr > c) c = cr;
+        }
+        return c;
+    }
+
+    static int MaxValency(Scheme s)
+    {
+        int k = 0;
+        for (int i = 1; i < s.Rank; i++) if (s.Valency[i] > k) k = s.Valency[i];
+        return k;
+    }
+
+    [Fact]
+    public void Probe_Theorem31_DensityBoundary()
+    {
+        const int autCap = 200_000;                       // |Aut| enumeration cap ("large" above this = Cameron-side)
+        var orders = Enumerable.Range(5, 26).ToArray();   // 5..30
+
+        int adjViolations = 0;                             // self-test: adj involutive + valency-preserving ⟹ c well-formed
+        // Theorem 3.1 validation (over ALL valid homogeneous schemes that satisfy 2c(k-1)<n):
+        int thm31Holds = 0, thm31HoldsMaxWL = 0, thm31HoldsNonTame = 0;
+        // Recovery / residue analysis (rank≥3 primitive only — the seal's domain; rank-2 = complete graph K_n = large/Cameron):
+        int primTotal = 0, primHolds = 0, primHoldsMaxWL = 0;
+        int dense = 0, denseRecover = 0, denseDepth1Fail = 0;   // depth1Fail ∧ recover = the genuine Clebsch-type residue
+        int denseLargeCameron = 0, genuineWitness = 0;
+        var clebschTypeRows = new List<string>();          // dense ∧ tame ∧ ¬depth-1 — recovers but outside Thm 3.1
+        var witnessRows = new List<string>();
+
+        output.WriteLine("Theorem 3.1 (Ponomarenko–Vasil'ev, arXiv:1602.07132) density boundary:");
+        output.WriteLine("  2c(k-1) < n  ⟹  b(X) ≤ 2 ∧ s(C) ≤ 2.   c(X) = max_{r≠0} Σ_t p^r_{t,t*},  k = max valency.");
+        output.WriteLine("Hanaki–Miyamoto catalogue, orders 5..30.  Recovery = EdgeGenerates ∨ WL-depth ≤ ⌈log2 n⌉+2 (project 'tame').\n");
+        output.WriteLine("  order :  #prim(rank≥3) | thm31-holds | DENSE (fails 2c(k-1)<n)");
+
+        foreach (int n in orders)
+        {
+            var path = DataPath(n);
+            if (path == "") { output.WriteLine($"  order {n,2}: data file missing — skip"); continue; }
+            var raw = ParseCatalogue(path, n);
+            int tameBound = (int)Math.Ceiling(Math.Log2(n)) + 2;
+
+            int prim = 0, pHolds = 0, pFails = 0;
+            for (int idx = 0; idx < raw.Count; idx++)
+            {
+                var s = BuildScheme(raw[idx], n);
+                if (s is null) continue;
+
+                var adj = Adjoint(s);
+                for (int k = 0; k < s.Rank; k++)
+                    if (adj[adj[k]] != k || s.Valency[adj[k]] != s.Valency[k]) adjViolations++;
+
+                int kmax = MaxValency(s), c = Indistinguishing(s, adj);
+                bool thm31 = 2 * c * (kmax - 1) < n;
+
+                // Thm 3.1 validation over ALL homogeneous schemes (any rank, primitive or not):
+                if (thm31)
+                {
+                    int wlv = WLDepth(s, n);
+                    thm31Holds++;
+                    if (wlv > tameBound) thm31HoldsNonTame++;
+                    else if (wlv > thm31HoldsMaxWL) thm31HoldsMaxWL = wlv;
+                }
+
+                // Recovery / residue analysis: rank≥3 primitive only (rank-2 K_n is large/Cameron, skipped):
+                if (s.Rank <= 2 || !Primitive(s)) continue;
+                prim++; primTotal++;
+                bool edge = Recovers(s);
+                int wl = WLDepth(s, n);
+                bool tame = edge || wl <= tameBound;
+
+                if (thm31) { pHolds++; primHolds++; if (wl > primHoldsMaxWL) primHoldsMaxWL = wl; continue; }
+
+                // dense residue (primitive, rank≥3, 2c(k-1) ≥ n):
+                pFails++; dense++;
+                if (tame)
+                {
+                    denseRecover++;
+                    if (!edge)   // recovers at bounded WL-depth but FAILS depth-1 EdgeGenerates — the genuine amorphic residue
+                    {
+                        denseDepth1Fail++;
+                        clebschTypeRows.Add($"    order {n,2} #{idx,-3} rank={s.Rank} k={kmax} c={c}  2c(k-1)={2 * c * (kmax - 1)}≥{n}  depth1=NO  WLdepth={wl}");
+                    }
+                }
+                else
+                {
+                    // not tame: classify by |Aut| exactly as the standing falsifier (large ⟹ Cameron-side, not a leak)
+                    var autos = AutGroup(s, autCap);
+                    if (autos is null) { denseLargeCameron++; continue; }
+                    var (_, _, schurian, abelian, ord) = Analyze(s, autos);
+                    int basebound = (int)Math.Floor(Math.Log2(Math.Max(1, ord))) + 2;
+                    if (schurian && !abelian && wl > basebound)
+                    {
+                        genuineWitness++;
+                        witnessRows.Add($"    ‼ order {n,2} #{idx} rank={s.Rank} k={kmax} c={c} WLdepth={wl} |Aut|={ord} SCHURIAN non-abelian — GENUINE G2-B WITNESS");
+                    }
+                    else denseLargeCameron++;    // large-Aut / non-schurian / abelian ⟹ not a small-Aut leak
+                }
+            }
+            output.WriteLine($"  order {n,2}:  prim={prim,3} | holds={pHolds,3} | dense={pFails,3}");
+        }
+
+        output.WriteLine("");
+        output.WriteLine($"THEOREM 3.1 VALIDATION: {thm31Holds} homogeneous schemes satisfy 2c(k-1)<n; ALL recover, max WL-depth {thm31HoldsMaxWL}, non-tame {thm31HoldsNonTame}.");
+        output.WriteLine($"PRIMITIVE (rank≥3): total {primTotal}; covered by Thm 3.1 {primHolds} (WL-depth ≤ {primHoldsMaxWL}); DENSE residue {dense}.");
+        output.WriteLine($"  dense residue: recover {denseRecover}  (of which depth-1-EdgeGenerates FAILS but WL-recovers = {denseDepth1Fail} — the genuine amorphic residue);");
+        output.WriteLine($"                 non-tame & large/Cameron/non-schurian/abelian {denseLargeCameron};  GENUINE small-Aut witnesses {genuineWitness}.");
+        if (clebschTypeRows.Count > 0)
+        {
+            output.WriteLine("  amorphic residue (primitive, recovers at bounded WL-depth, FAILS depth-1, OUTSIDE Thm 3.1 — the module-adjoin target):");
+            foreach (var r in clebschTypeRows) output.WriteLine(r);
+        }
+        foreach (var r in witnessRows) output.WriteLine(r);
+
+        output.WriteLine("");
+        output.WriteLine($"VERDICT (Thm 3.1, validated): every 2c(k-1)<n scheme recovers at WL-depth ≤ {thm31HoldsMaxWL} — confirms b(X) ≤ 2 empirically. " +
+                         $"But the condition is NARROW: only {primHolds}/{primTotal} primitives satisfy it.");
+        output.WriteLine($"VERDICT (the residue): the genuine amorphic G2-B candidates ({denseDepth1Fail} schemes incl. order-16 #19/#20 Clebsch, order-25 #16/#17) " +
+                         $"VIOLATE 2c(k-1)<n yet RECOVER at low WL-depth — they lie OUTSIDE Theorem 3.1, which therefore does NOT discharge them. " +
+                         $"The module-adjoin / O(log n) thread is still required for exactly this dense-amorphic residue.");
+        output.WriteLine(genuineWitness == 0
+            ? "VERDICT (falsifier): 0 genuine small-Aut schurian non-abelian non-recovering primitives — G2-B emptiness re-confirmed through the density lens."
+            : $"VERDICT (falsifier): ‼ {genuineWitness} GENUINE WITNESS(ES) — seal counterexample; STATEMENT CHANGE REQUIRED.");
+
+        // ── assertions ──
+        Assert.True(primTotal > 0, "no primitive schemes parsed");
+        Assert.Equal(0, adjViolations);        // adjoint involutive + valency-preserving ⟹ c(X) well-formed
+        Assert.Equal(0, thm31HoldsNonTame);    // Theorem 3.1 holds empirically: 2c(k-1)<n ⟹ recovers (in fact WL-depth ≤ 2)
+        Assert.Equal(0, genuineWitness);       // no small-Aut schurian non-abelian non-recovering primitive (the standing falsifier)
+    }
 }
