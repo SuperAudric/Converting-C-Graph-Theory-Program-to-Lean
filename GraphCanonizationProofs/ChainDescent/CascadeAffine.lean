@@ -1689,6 +1689,42 @@ theorem frobPerm_pow_eq_one_of_adjoin (hd : d ≠ 0) {j : ℕ} {T : Finset (Fin 
   show efield hd ((efield hd).symm (affineE.symm x)) = affineE.symm x
   rw [LinearEquiv.apply_symm_apply]
 
+/-! #### The module-adjoin "kill" lemma — the `ΓL` generalization (linear-algebra half)
+
+`frobPerm_pow_eq_one_of_adjoin` kills only the **Galois** (Frobenius) sub-part of the `Ĝ⊋G` gap. The
+`Probe_ModuleAdjoin_AmorphicGapIsSemilinear` validation showed the *full* gap is semilinear (`ΓL₁`), with the
+non-Galois remainder being `mult-by-α ∈ GL`. Both `mult-by-c` and Frobenius are `F_p`-**linear**, so the whole
+gap lives in `GL_{F_p}(F_q)`, and the clean unified "kill" statement is purely linear: an `F_p`-linear
+automorphism fixing a **spanning** base is the identity. (The landed Frobenius lemma trades this spanning
+hypothesis for the weaker field-generation `Algebra.adjoin = ⊤`, valid only because Frobenius is
+*multiplicative*; `mult-by-c` is not, so for the whole gap the spanning/linear form is the right one.) -/
+
+/-- **Module-adjoin (linear "kill" half, the `ΓL₁` generalization of `frobPerm_pow_eq_one_of_adjoin`).** ANY
+`F_p`-linear automorphism `g₀` whose induced affine permutation (zero translation) fixes a base `T` pointwise,
+where the coordinate vectors `affineE.symm '' T` **span** `F_p^d`, is the identity permutation. Since
+`ΓL₁ ⊆ GL_{F_p}`, individualizing a spanning (`O(d) = O(log n)`) base kills the entire `ΓL₁` separability gap —
+the linear-algebra half of the corrected module-adjoin route. -/
+theorem affinePermFin_eq_one_of_span
+    {g₀ : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)} {T : Finset (Fin (p ^ d))}
+    (hspan : Submodule.span (ZMod p)
+        ((fun t : Fin (p ^ d) => affineE.symm t) '' (↑T : Set (Fin (p ^ d)))) = ⊤)
+    (hfix : ∀ t ∈ T, affinePermFin g₀ (0 : Fin d → ZMod p) t = t) :
+    affinePermFin g₀ (0 : Fin d → ZMod p) = 1 := by
+  have hg0 : (g₀ : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p)) = LinearMap.id := by
+    refine LinearMap.ext_on hspan ?_
+    intro x hx
+    obtain ⟨t, ht, rfl⟩ := hx
+    have h := hfix t (Finset.mem_coe.mp ht)
+    rw [affinePermFin_apply, add_zero] at h
+    have h2 := congrArg affineE.symm h
+    rw [Equiv.symm_apply_apply] at h2
+    simpa using h2
+  have hg1 : g₀ = 1 := by
+    refine LinearEquiv.ext (fun v => ?_)
+    have hv := LinearMap.congr_fun hg0 v
+    simpa using hv
+  rw [hg1]; exact affinePermFin_one
+
 end CyclicAffine
 
 /-! #### The concrete cyclotomic witness — `F₁₆`, the index-3 Clebsch family

@@ -253,9 +253,15 @@ residue* (LS-type only — graphs easy, nets imprimitive).
    translation lemma — this is the one remaining (bounded) kink. **Working step before coding: re-read
    `discrete_affineScheme_of_twoRoundDiffSeparates` + `affineDepth2Count` and the literature's 2-separability defn side
    by side, and decide the exact hypothesis shape to cite.**
-3. **(Deprioritized) Build (b), the module-adjoin lemma** — only for the "build-instead-of-cite" future (a `ΓL₁` map
-   fixing an `F_p`-spanning base is the identity, pure linear algebra). Banks the build path against the citation; very
-   low priority since (a) is now cited.
+3. **Build (b), the module-adjoin lemma — LANDED (2026-06-11, axiom-clean `[propext, Classical.choice, Quot.sound]`,
+   full build green).** `affinePermFin_eq_one_of_span` (`CascadeAffine.lean`, end of §CyclicAffine): *any `F_p`-linear
+   automorphism `g₀` whose affine perm (zero translation) fixes a base `T` pointwise, with `affineE.symm '' T` spanning
+   `F_p^d`, is the identity perm.* Pure linear algebra (`LinearMap.ext_on` on the span + `LinearEquiv.ext`); covers the
+   **whole** `ΓL₁` gap at once (both `mult` and Frobenius are `F_p`-linear), depth `= d = O(log n)`. The first grounded
+   piece of the route; companion to the Frobenius-only `frobPerm_pow_eq_one_of_adjoin`. **Use:** the "kill" half — with
+   the cited "twins are `ΓL₁`" (a) it gives `PowAffineSeparates` (a spanning base, fixed by a twin's realiser, forces
+   the twin trivial). The connecting reduction `powAffineSeparates_of_twinsAreSemilinear` (define `TwinsAreSemilinear`
+   + a bounded spanning base exists) is the next increment.
 4. **Only then** the non-affine NLS residue (§7) — the Davis–Xiang PDS probe + the relation-algebra generalization of
    the module-adjoin — if it becomes the blocker. This is the genuine remaining open frontier.
 
