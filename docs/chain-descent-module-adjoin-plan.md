@@ -360,6 +360,16 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > k<2 case. **2a LANDED (2026-06-11, axiom-clean, build green):** `Smax`/`InSmax`/`mem_Smax_iff`/`card_relNeighbors_of_inSmax`,
 > `smaxAdj`(`_symm`)/`SmaxConnected`, `saAdj`/`SaConnected`, `pu`, and **`sum_intersectionNumber_eq_valency`**. PV §3 fully
 > extracted to /tmp/cartan.pdf.
+> **2b LANDED (2026-06-11, axiom-clean, build green):** `pu_eq` (pᵤ over `Finset.offDiag` of αu) + **`sum_pu_le`** = the
+> global estimate (19) `Σ_{δ∈Δ} pᵤ(δ) ≤ k(k−1)·c` (double-count swap via `Finset.sum_comm` + per-pair `c(r)≤c(X)` from
+> increment 1's `indistinguishingNumberOf_eq_card`, with the exact `k(k−1)` count from `Finset.offDiag_card`).
+> **Increment 2c (Lemmas 3.4–3.5) decomposes further:** 2c-i identity (20) `pᵤ(δ)=Σ_w cᵛ_{uw}(cᵛ_{uw}−1)`; 2c-ii the
+> homogeneous triangle identity `n_k cᵏ_{ij} = n_i cⁱ_{kj}` (alone gives the `nᵤ>nᵥ` subcase of 3.5(1), hence the
+> *smax*-connected half of 3.6 — no components); 2c-iii the sα-component machinery (`Cα(u)`, the αu↔αv bijection) +
+> Lemma 3.4 (the heavy graph part); 2c-iv Lemmas 3.5(1)+(2). **2c-i LANDED (2026-06-11, axiom-clean, build green):**
+> **`pu_eq_sum`** (`pᵤ(δ) = Σ_w cᵛ_{uw}(cᵛ_{uw}−1)`, v=relOfPair α δ — fiber the offDiag pairs by their common
+> relation `w` to δ). Next: 2c-ii (triangle identity — a triple double-count with an `n`-cancellation) then 2c-iii
+> (components, the hardest piece before the 2e warmRefine bridge).
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.

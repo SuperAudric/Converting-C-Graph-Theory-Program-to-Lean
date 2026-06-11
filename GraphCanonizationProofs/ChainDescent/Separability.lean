@@ -220,6 +220,120 @@ theorem sum_intersectionNumber_eq_valency (u v : Fin (S.rank + 1)) (α δ : Fin 
     refine ⟨hu, ?_⟩
     have h := S.rel_relOfPair β δ; rw [hw] at h; exact h
 
+/-! ### §S.6 — The global estimate (19): `Σ_{δ∈Δ} pᵤ(δ) ≤ k(k−1)·c`
+
+The workhorse upper bound (Ponomarenko–Vasil'ev (19), increment 2b). For a maximum-valency relation `u`
+and any vertex set `Δ`, the total `Σ_{δ∈Δ} pᵤ(δ)` is bounded by `k(k−1)·c`. The proof swaps the order of
+summation — `Σ_δ Σ_{(β,γ)} [δ fails to split β,γ] = Σ_{(β,γ)} Σ_δ [⋯] = Σ_{(β,γ)} |{δ∈Δ : ⋯}|` — bounds
+each inner term by the indistinguishing number `c(r(β,γ)) ≤ c(X)` (increment 1's
+`indistinguishingNumberOf_eq_card`), and counts the `k(k−1)` ordered distinct pairs of `αu` via
+`Finset.offDiag`. -/
+
+/-- Reformulation of `pᵤ(δ)` over the off-diagonal of the neighbour set `αu`. -/
+theorem pu_eq (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n) :
+    S.pu α u δ
+      = ((Finset.univ.filter (fun w => S.rel u α w = true)).offDiag.filter
+          (fun bg => S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).card := by
+  unfold pu
+  congr 1
+  ext bg
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_offDiag]
+  constructor
+  · rintro ⟨h1, h2, h3, h4⟩; exact ⟨⟨h1, h2, h3⟩, h4⟩
+  · rintro ⟨⟨h1, h2, h3⟩, h4⟩; exact ⟨h1, h2, h3, h4⟩
+
+private theorem nat_kk_sub_self (k : ℕ) : k * k - k = k * (k - 1) := by
+  cases k with
+  | zero => rfl
+  | succ m => simp only [Nat.succ_sub_one, Nat.mul_succ, Nat.add_sub_cancel]
+
+/-- **The global estimate (19)** — `Σ_{δ∈Δ} pᵤ(δ) ≤ k(k−1)·c` for a maximum-valency relation `u` and any
+vertex set `Δ`. The upper half of Ponomarenko–Vasil'ev (19); the workhorse of the Lemma 3.6 contradiction. -/
+theorem sum_pu_le (α : Fin n) {u : Fin (S.rank + 1)} (hu : S.InSmax u) (Δ : Finset (Fin n)) :
+    (Δ.sum (fun δ => S.pu α u δ))
+      ≤ S.maxValency * (S.maxValency - 1) * S.indistinguishingNumber := by
+  set A := Finset.univ.filter (fun w => S.rel u α w = true) with hA
+  have hAcard : A.card = S.maxValency := S.card_relNeighbors_of_inSmax hu α
+  -- Swap the order of summation: `Σ_δ pᵤ(δ) = Σ_{(β,γ)∈A.offDiag} |{δ∈Δ : δ fails to split β,γ}|`.
+  have hstep : (Δ.sum (fun δ => S.pu α u δ))
+      = A.offDiag.sum (fun bg => (Δ.filter
+          (fun δ => S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).card) := by
+    simp_rw [S.pu_eq α u, Finset.card_filter]
+    rw [Finset.sum_comm]
+  -- Each inner term is bounded by `c(X)`.
+  have hbound : ∀ bg ∈ A.offDiag,
+      (Δ.filter (fun δ => S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).card
+        ≤ S.indistinguishingNumber := by
+    intro bg hbg
+    rw [Finset.mem_offDiag] at hbg
+    obtain ⟨_, _, hne⟩ := hbg
+    calc (Δ.filter (fun δ => S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).card
+        ≤ (Finset.univ.filter (fun δ => S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).card :=
+          Finset.card_le_card (Finset.filter_subset_filter _ (Finset.subset_univ Δ))
+      _ = (Finset.univ.filter (fun δ => S.relOfPair δ bg.1 = S.relOfPair δ bg.2)).card := by
+          congr 1; ext δ
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+          rw [S.relOfPair_symm bg.1 δ, S.relOfPair_symm bg.2 δ]
+      _ = S.indistinguishingNumberOf (S.relOfPair bg.1 bg.2) :=
+          (S.indistinguishingNumberOf_eq_card (S.rel_relOfPair bg.1 bg.2)).symm
+      _ ≤ S.indistinguishingNumber :=
+          S.indistinguishingNumberOf_le (by rw [Ne, S.relOfPair_eq_zero_iff]; exact hne)
+  -- Assemble: `Σ ≤ |A.offDiag|·c = (k²−k)·c = k(k−1)·c`.
+  rw [hstep]
+  calc A.offDiag.sum (fun bg => (Δ.filter
+          (fun δ => S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).card)
+      ≤ A.offDiag.sum (fun _ => S.indistinguishingNumber) := Finset.sum_le_sum hbound
+    _ = A.offDiag.card * S.indistinguishingNumber := by rw [Finset.sum_const, smul_eq_mul]
+    _ = (S.maxValency * S.maxValency - S.maxValency) * S.indistinguishingNumber := by
+        rw [Finset.offDiag_card, hAcard]
+    _ = S.maxValency * (S.maxValency - 1) * S.indistinguishingNumber := by
+        rw [nat_kk_sub_self]
+
+/-! ### §S.7 — Identity (20): `pᵤ(δ) = Σ_w cᵛ_{uw}(cᵛ_{uw}−1)`
+
+Ponomarenko–Vasil'ev (20) (increment 2c-i). Grouping the `(β,γ) ∈ αu×αu` counted by `pᵤ(δ)` by their
+common relation `w = r(β,δ) = r(γ,δ)` to the test point `δ` (with `v = r(α,δ)`): each `w` contributes
+the `cᵛ_{uw}(cᵛ_{uw}−1)` ordered distinct pairs from the `cᵛ_{uw}`-element set `{β ∈ αu : r(β,δ)=w}`.
+This is the bridge from the geometric pair-count to the intersection numbers, used by both halves of
+Lemma 3.5. -/
+theorem pu_eq_sum (α : Fin n) (u : Fin (S.rank + 1)) (δ : Fin n) :
+    S.pu α u δ
+      = Finset.univ.sum (fun w : Fin (S.rank + 1) =>
+          S.intersectionNumber u w (S.relOfPair α δ)
+            * (S.intersectionNumber u w (S.relOfPair α δ) - 1)) := by
+  unfold pu
+  rw [Finset.card_eq_sum_card_fiberwise (f := fun bg : Fin n × Fin n => S.relOfPair bg.1 δ)
+        (t := Finset.univ) (fun _ _ => Finset.mem_univ _)]
+  refine Finset.sum_congr rfl (fun w _ => ?_)
+  -- The `w`-fiber is the off-diagonal of `{β ∈ αu : r(β,δ) = w}`.
+  have hfib : ((Finset.univ.filter (fun bg : Fin n × Fin n =>
+          S.rel u α bg.1 = true ∧ S.rel u α bg.2 = true ∧ bg.1 ≠ bg.2 ∧
+          S.relOfPair bg.1 δ = S.relOfPair bg.2 δ)).filter
+            (fun bg => S.relOfPair bg.1 δ = w))
+        = (Finset.univ.filter (fun β => S.rel u α β = true ∧ S.relOfPair β δ = w)).offDiag := by
+    ext bg
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_offDiag]
+    constructor
+    · rintro ⟨⟨h1, h2, hne, heq⟩, hw⟩
+      exact ⟨⟨h1, hw⟩, ⟨h2, heq ▸ hw⟩, hne⟩
+    · rintro ⟨⟨h1, hw1⟩, ⟨h2, hw2⟩, hne⟩
+      exact ⟨⟨h1, h2, hne, hw1.trans hw2.symm⟩, hw1⟩
+  rw [hfib, Finset.offDiag_card]
+  -- The fiber's vertex set has `cᵛ_{uw}` elements.
+  have hcard : (Finset.univ.filter (fun β => S.rel u α β = true ∧ S.relOfPair β δ = w)).card
+      = S.intersectionNumber u w (S.relOfPair α δ) := by
+    rw [← S.intersectionNumber_well_defined u w (S.relOfPair α δ) α δ (S.rel_relOfPair α δ)]
+    congr 1
+    ext β
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    constructor
+    · rintro ⟨h1, hw⟩
+      refine ⟨h1, ?_⟩
+      have h := S.rel_relOfPair β δ; rw [hw] at h; exact h
+    · rintro ⟨h1, hw⟩
+      exact ⟨h1, (S.relOfPair_unique hw).symm⟩
+  rw [hcard, nat_kk_sub_self]
+
 end AssociationScheme
 
 end ChainDescent
