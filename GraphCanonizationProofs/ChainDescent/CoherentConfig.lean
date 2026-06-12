@@ -849,6 +849,74 @@ theorem isPointExtension_unique {Y Y' : CoherentConfig n}
 
 end PointExtensionConstruction
 
+/-! ### §CC.9 — The pointed transport core (Stage 2: extension separability realizes fiber-twins)
+
+The Stage-2 transport's provable heart, **citation-free**: apply `SeparablePointed` of a point
+extension `E` to the **identity** algebraic isomorphism. A same-fiber pair `(u, u')` of `E`
+satisfies exactly the pointed condition (`E.relOf u' u' = E.relOf u u`), so pointedness hands back a
+vertex permutation `f` inducing the identity — an automorphism of `E` — with `f u = u'`. Such an `f`
+fixes every `t ∈ T` (singleton fibers) and descends to an automorphism of the base configuration
+(`Refines`). Net: **pointed separability of the extension realizes every fiber-twin by a `T`-fixing
+automorphism of `X`** — the object the seal's sink consumes. The 1-WL keying gap (`warmRefine` twins
+need not be fiber-twins at arbitrary `T` — the 2026-06-12 direction-check refutation) is NOT bridged
+here; it is isolated downstream as `WarmTwinsAreFiberTwins` (`CascadeAffine.lean §S-gate2`). -/
+
+section PointedTransport
+
+/-- **The pointed conclusion at the identity algebraic isomorphism**: pointed separability of `Y` at
+`u` realizes every same-fiber `u'` by a class-preserving vertex automorphism. -/
+theorem SeparablePointed.exists_aut_of_fiber_eq {Y : CoherentConfig n} {u : Fin n}
+    (hsep : Y.SeparablePointed u) {u' : Fin n} (hfib : Y.relOf u' u' = Y.relOf u u) :
+    ∃ f : Equiv.Perm (Fin n), (∀ v w, Y.relOf (f v) (f w) = Y.relOf v w) ∧ f u = u' := by
+  obtain ⟨f, hind, hu⟩ := hsep Y (idAlgIso Y) u' hfib
+  exact ⟨f, fun v w => hind v w, hu⟩
+
+/-- An automorphism of a point extension fixes the individualized points (singleton fibers). -/
+theorem IsPointExtension.aut_fixes {X E : CoherentConfig n} {T : Finset (Fin n)}
+    (hext : IsPointExtension X T E) {f : Equiv.Perm (Fin n)}
+    (hf : ∀ v w, E.relOf (f v) (f w) = E.relOf v w) : ∀ t ∈ T, f t = t :=
+  fun t ht => hext.2.1 t ht (f t) (hf t t)
+
+/-- An automorphism of a fission descends to the base configuration. -/
+theorem Refines.aut_descends {E X : CoherentConfig n} (href : Refines E X)
+    {f : Equiv.Perm (Fin n)} (hf : ∀ v w, E.relOf (f v) (f w) = E.relOf v w) :
+    ∀ v w, X.relOf (f v) (f w) = X.relOf v w :=
+  fun v w => href _ _ _ _ (hf v w)
+
+/-- **THE STAGE-2 TRANSPORT CORE (citation-free).** Pointed separability of a point extension
+realizes every same-fiber pair by a `T`-fixing automorphism of the base configuration. -/
+theorem fiberTwin_realized_of_separablePointed {X E : CoherentConfig n} {T : Finset (Fin n)}
+    (hext : IsPointExtension X T E) {u u' : Fin n}
+    (hsep : E.SeparablePointed u) (hfib : E.relOf u' u' = E.relOf u u) :
+    ∃ f : Equiv.Perm (Fin n),
+      (∀ v w, X.relOf (f v) (f w) = X.relOf v w) ∧ (∀ t ∈ T, f t = t) ∧ f u = u' := by
+  obtain ⟨f, hf, hu⟩ := hsep.exists_aut_of_fiber_eq hfib
+  exact ⟨f, hext.1.aut_descends hf, hext.aut_fixes hf, hu⟩
+
+/-- At a rigid base — only the identity `T`-fixing automorphism of `X` — pointed separability of the
+extension (at every non-singleton fiber: the singleton fibers, e.g. the points of `T` themselves,
+need no realizing and are exactly where the probe saw the conditions fail) forces the extension
+**complete**: every fiber a singleton. The fiber-level `b(X) ≤ b(G)` collapse. -/
+theorem extension_complete_of_separablePointed {X E : CoherentConfig n} {T : Finset (Fin n)}
+    (hext : IsPointExtension X T E)
+    (hsep : ∀ u : Fin n, ¬ E.SingletonFiber u → E.SeparablePointed u)
+    (hbase : ∀ f : Equiv.Perm (Fin n),
+      (∀ v w, X.relOf (f v) (f w) = X.relOf v w) → (∀ t ∈ T, f t = t) → f = 1) :
+    ∀ u : Fin n, E.SingletonFiber u := by
+  intro u
+  by_contra hns
+  have hex : ∃ u', E.relOf u' u' = E.relOf u u ∧ u' ≠ u := by
+    by_contra hc
+    push Not at hc
+    exact hns fun s hs => hc s hs
+  obtain ⟨u', hfib, hne⟩ := hex
+  obtain ⟨f, hfX, hfT, hu⟩ :=
+    fiberTwin_realized_of_separablePointed hext (hsep u hns) hfib
+  rw [hbase f hfX hfT] at hu
+  exact hne (by simpa using hu.symm)
+
+end PointedTransport
+
 end CoherentConfig
 
 end ChainDescent

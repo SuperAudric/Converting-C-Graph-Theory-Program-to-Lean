@@ -39,7 +39,12 @@
   and **the construction `pointExtension X T` discharging it constructively** (`isPointExtension_pointExtension` /
   `exists_isPointExtension` / `isPointExtension_unique` — the `ExtensionSeparable` family is never empty).
   Both gate probes RAN: Stage-3 conditions (Route β viable — Stage 3.2) and the Stage-2.1 direction check
-  (1-WL-twin keying refuted at arbitrary `T`; bases clean; route (c) favoured — item 2 below).
+  (1-WL-twin keying refuted at arbitrary `T`; bases clean — item 2 below). **PLUS (2026-06-12, same day):
+  STAGE 2 LANDED MODULO THE CATCH-UP and THE CITATION CHECKPOINT ASSEMBLED** — the pointed-conclusion transport
+  (§CC.9, citation-free core) wired into the seal (§S-gate2), with the general conditional capstone
+  **`reachesRigidOrCameron_viaExtensionSeparability`** standing modulo {G3 + cited `Theorem41Statement` +
+  conditions-on-the-extension + the catch-up `WarmTwinsAreFiberTwins` + a base}; the homogeneous (A)/Lemma-2.6/Ωᵐ
+  obligations DISSOLVED (items 3–4 below).
   **REMAINING, in order (the handoff list):**
   1. ~~**Stage 1.2(a)+(b)**~~ — **LANDED 2026-06-12 (`CoherentConfig.lean §CC.8`, axiom-clean, build green):
      the point-extension *construction* `pointExtension X T` (pair-refinement saturation on
@@ -57,13 +62,29 @@
      the gate decls need it **at bases only**, and the +1 pattern in the data is exactly the Chen–Ponomarenko
      `dimWL(X) ≤ dimWL(X_α)+1` exchange ⟹ **sub-route (c) is now favoured; sourcing the monograph §4.2 is the
      Stage-2 gating action.** Full verdict in §5 Stage 2.1.
-  3. **Stage 2** — the transport, stated against the landed `ExtensionSeparable`/`SeparablePointed` (**route per
-     the direction check: (c) the Chen–Ponomarenko `dimWL` recursion — source its §4.2 statement FIRST; (b)
-     pointed-conclusion remains the fallback, but any 1-WL-twin-keyed statement must be restricted to bases**).
-  4. **The citation-checkpoint assembly** — wire {`Theorem41Statement` (cited) + Thm-4.1-conditions-for-the-residue
-     (probe-confirmed, to be stated per-instance or carried) + the transport} into `SeparatesAtBoundedBase` ⟹ a
-     general conditional seal capstone (the affine-slice pattern, `reachesRigidOrCameron_affineSlice`).
-  5. **Stage 3** — prove what item 4 cites (Route β: conditions (i)/(ii) for the residue family's extensions —
+  3. ~~**Stage 2 — the transport**~~ — **LANDED MODULO THE CATCH-UP (2026-06-12, `CoherentConfig.lean §CC.9` +
+     `CascadeAffine.lean §S-gate2`, axiom-clean).** The sourcing pass settled the route: the recursion (41) is
+     CFI-1992 Thm 5.2 + FKV-2020 Thm 2.1, *graph-dimWL* currency — and **sub-route (b) won outright, with a
+     citation-free core**: `SeparablePointed` of the extension applied to the **identity** alg-iso realizes every
+     *fiber*-twin by a `T`-fixing automorphism that descends to the scheme
+     (`fiberTwin_realized_of_separablePointed` → `twinsRealized_of_extensionPointed`). **Consequence: the
+     homogeneous (A)-obligation DISSOLVES** — bare `Separable X`, Lemma 2.6, m-extensions, and the `Ωᵐ`/`m=2`
+     substrate are all bypassed; the build's open content is now {Thm 4.1 on the extension (Stage 3) + the
+     catch-up (item 5)}.
+  4. ~~**The citation-checkpoint assembly**~~ — **LANDED (2026-06-12): `reachesRigidOrCameron_viaExtensionSeparability`**
+     (`§S-gate2`) — the general conditional seal capstone, conditional on exactly {G3 `hClassify` + cited
+     `Theorem41Statement` + its conditions on the extension at non-singleton fibers (probe-confirmed) + the
+     catch-up `hcatch` + a bounded base (free for small) + landed `hImprim`}. The affine-slice pattern,
+     generalized; plus the gate pair `separatesAtBoundedBase_of_extensionPointed`(`_of_small`) — which also
+     **resolves the §5 Stage-4 keying note** (the chain consumes the general-CC predicates directly).
+  5. **The catch-up discharge — `WarmTwinsAreFiberTwins` at the assembly's bases (THE isolated model gap).**
+     Honest accounting: at a base with a complete extension the catch-up is equivalent in strength to the
+     discreteness conclusion itself — its value is that it carries **no separability/group content**, only the
+     1-WL↔pair-WL model comparison, so it is attackable by the refinement engines alone. Intended route: the
+     §S-bridge B1–B5 forced-triangle propagation powered by **condition (i) domination** (every dominator is a
+     `c=1` triangle = `saAdj`-shaped) on the extension; probe-gate first (extend the direction probe: cells =
+     fibers at *bases*, and does (i) ⟹ catch-up empirically?).
+  6. **Stage 3** — prove what item 4 cites (Route β: conditions (i)/(ii) for the residue family's extensions —
      witness-constructive per the probe; the genuine open mathematics).
   Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
   threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier; strategy-§15 gaps tracking note.
@@ -282,14 +303,15 @@ condition to the 2-extension ⟹ 2-separability, as p4paper Thm 1.2 does via Lem
   bases / via the `dimWL` +1 exchange (cells=fibers at arbitrary `T` is FALSE on the bullseye).
 - ~~**General-CC `AlgIso` / `Separable`**~~ — **LANDED** (`CoherentConfig.AlgIso`/`Separable`/`SeparablePointed`;
   partner quantifies over all `CoherentConfig n`, resolving the §2 soundness gate by widening).
-- The **m-extension on `Ωᵐ`** + m-dim intersection numbers + m-separability — still lacking; needed only for
-  *m-separability statements* (Lemma 2.6's conclusion), NOT for Thm 4.1's statement (landed without it).
-- **Lemma 2.6** (one-point-extension separable ⟹ 2-separable) and the inheritance facts — still lacking (and
-  possibly avoidable: the transport can target `ExtensionSeparable` directly).
+- ~~The **m-extension on `Ωᵐ`** + m-dim intersection numbers + m-separability~~ — **OBSOLETE (2026-06-12)**: the
+  pointed transport (§CC.9/§S-gate2) consumes `SeparablePointed` of the extension directly; no `m=2`, no Ωᵐ.
+- ~~**Lemma 2.6**~~ — **OBSOLETE (2026-06-12)** for the same reason (it served only the 2-separability packaging).
 - **Theorem 4.1**: ~~statement~~ — **LANDED as the cited `Theorem41Statement`** (hypotheses `Theorem41Hypotheses`
-  = exactly the probe's checks; staging-fallback carry). The *proof* (Stage 3, Route α/β) is the open mathematics.
-- The **transport** `Separable ⟹ TwinsRealizedByResidualAut` proof — still lacking (Stage 2; target predicate
-  `ExtensionSeparable` is landed).
+  = exactly the probe's checks; staging-fallback carry). The *proof* (Stage 3, Route β on the extension) is the
+  open mathematics.
+- ~~The **transport** proof~~ — **LANDED MODULO THE CATCH-UP (2026-06-12, §CC.9 + §S-gate2)**: the citation-free
+  pointed core + the seal wiring; the sole carried remainder is `WarmTwinsAreFiberTwins` (the 1-WL↔fiber model
+  gap, STATUS item 5).
 
 ### Mathlib
 HAS: modules, `Basis`, `Submodule.span`, finite groups, `MonoidHom`, `Equiv.Perm`, `Finset`/`Fintype` combinatorics.
@@ -415,13 +437,11 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
 ### Stage 4 — assembly + exceptional cases
 1. **Wire (A)+(B) ⟹ seal** · Stages 2,3 + §2 table · mechanical. Instantiate
    `separatesAtBoundedBase_of_separable_of_small` at `orbitalScheme H`, feed `reachesRigidOrCameron_viaPersistentTwinBlock`.
-   **⚠️ Keying mismatch to plan for (noted 2026-06-12):** the landed §S-gate decls (`SeparabilityTransports`,
-   `separatesAtBoundedBase_of_separable`, `…_of_small`, `CascadeAffine.lean`) are keyed on the **homogeneous** §S.17
-   `S.toAssociationScheme.Separable`, while Stages 1.3/2 deliberately target the **general** predicates
-   (`CoherentConfig.Separable` / `ExtensionSeparable` / `SeparablePointed`). The assembly therefore needs either
-   general-keyed variants of the gate decls (likely: restate `SeparabilityTransports` against `ExtensionSeparable`
-   and re-prove the two `separatesAtBoundedBase_of_separable*` wrappers — both are thin) or an adapter lemma from the
-   general form to the homogeneous one at the point of use. Cheap, but do not let Stage 4 discover it cold.
+   ~~**⚠️ Keying mismatch to plan for (noted 2026-06-12)**~~ — **RESOLVED (2026-06-12, §S-gate2):** the general-keyed
+   gate variants exist (`separatesAtBoundedBase_of_extensionPointed` / `…_of_small` /
+   `reachesRigidOrCameron_viaExtensionSeparability`), consuming `SeparablePointed`-of-the-extension directly; the
+   homogeneous-keyed `SeparabilityTransports` chain is bypassed entirely (retained for the historical (A)+(B)
+   framing, no longer on the critical path).
 2. **Exceptional `(p,d)` table** (Thm 1.1, only if the residue includes the cyclotomic/affine instances) · the C# bed
    (`AffineSchemeProbe`/`CatalogueSchemeProbe`) · mechanical. Reproduce the finite exceptions as `decide`-checked
    facts. **The non-affine NLS residue is outside the cyclotomic family, so likely N/A** — confirm per instance.
@@ -582,6 +602,31 @@ bullseye) says closure is the likely outcome and the build is worth it.
   **NEXT (the handoff list): Stage 2 — the transport.** Gating action: source Chen–Ponomarenko §4.2
   (`dimWL(X) ≤ dimWL(X_α)+1`) and decide sub-route (c) vs (b); any 1-WL-twin-keyed statement must be at bases
   only (the direction-check verdict). Then the citation-checkpoint assembly (mind the §5 Stage-4 keying note).
+- **2026-06-12 — STAGE 2 LANDED MODULO THE CATCH-UP + THE CITATION CHECKPOINT ASSEMBLED (`CoherentConfig.lean
+  §CC.9` + `CascadeAffine.lean §S-gate2`, all axiom-clean `[propext, Classical.choice, Quot.sound]`, full serial
+  build green 43s; index regenerated, 11 new rows described).** **Sourcing verdict first:** the recursion (41)
+  `dimWL(X) ≤ dimWL(X_α)+1` is Cai–Fürer–Immerman 1992 Thm 5.2, and `separable ⟹ dimWL ≤ 2` is
+  Fuhlbrück–Köbler–Verbitsky 2020 Thm 2.1 — both *graph-dimWL* currency (they serve the paper's Thm 1.3), not the
+  seal's; so sub-route (c) is an anchor, not a transport. **Sub-route (b) then won outright, citation-free:**
+  apply `SeparablePointed` of the extension `E` to the **identity** algebraic isomorphism — a same-fiber pair
+  `(u,u')` satisfies exactly the pointed condition, the returned `f` is an automorphism of `E` with `f u = u'`,
+  it fixes `T` (singleton fibers) and descends to the scheme (`Refines`). Decls: §CC.9
+  `SeparablePointed.exists_aut_of_fiber_eq` / `IsPointExtension.aut_fixes` / `Refines.aut_descends` /
+  **`fiberTwin_realized_of_separablePointed`** (the core) / `extension_complete_of_separablePointed` (at a rigid
+  base, pointedness on non-singleton fibers forces the extension complete — the fiber-level `b(X) ≤ b(G)`);
+  §S-gate2 **`WarmTwinsAreFiberTwins`** (the catch-up, carried per-base) / `isSchemeAut_of_relOfPair_eq` /
+  **`twinsRealized_of_extensionPointed`** (the transport into the sink) /
+  `separatesAtBoundedBase_of_extensionPointed`(`_of_small`) (the general-keyed gates — Stage-4 keying note
+  RESOLVED) / **`reachesRigidOrCameron_viaExtensionSeparability`** (the citation checkpoint: the general
+  conditional seal modulo {G3 + `Theorem41Statement` + conditions-on-E at non-singleton fibers + the catch-up +
+  a base}). **Two structural consequences:** (1) the homogeneous (A)-obligation DISSOLVES — bare `Separable`,
+  Lemma 2.6, m-extensions, and the `Ωᵐ` tower are off the critical path entirely; (2) the non-singleton-fiber
+  guard on `hhyp` matches the probe exactly (ℤ₂⁴'s X_α fails conditions only at α — a singleton fiber, exempt).
+  **Honest accounting:** at a base with a complete extension the catch-up is equivalent in strength to the
+  discreteness conclusion — its value is isolation: it carries no separability/group content, only the
+  1-WL↔pair-WL comparison, attackable by the refinement engines (intended: B1–B5 forced-triangle propagation
+  from condition (i)'s `c=1` dominators). NEXT: the catch-up discharge (STATUS item 5, probe-gate first), then
+  Stage 3 (the genuine open math).
 
 ---
 
@@ -609,6 +654,12 @@ bullseye) says closure is the likely outcome and the build is worth it.
 `pairCount_swap` / `pairCount_eq_of_zrel` (the counting heart) / `zrel_le_pairIter` / `stableEquiv`(`_eq_iff`) /
 **`pointExtension`** / `pointExtension_relOf_eq_iff` / **`isPointExtension_pointExtension`** /
 **`exists_isPointExtension`** / `isPointExtension_unique` (`CoherentConfig.lean §CC.8`).
+**The Stage-2 transport (LANDED 2026-06-12, modulo the catch-up):** `SeparablePointed.exists_aut_of_fiber_eq` /
+`IsPointExtension.aut_fixes` / `Refines.aut_descends` / **`fiberTwin_realized_of_separablePointed`** /
+`extension_complete_of_separablePointed` (`CoherentConfig.lean §CC.9`); **`WarmTwinsAreFiberTwins`** (the
+isolated catch-up) / `isSchemeAut_of_relOfPair_eq` / **`twinsRealized_of_extensionPointed`** /
+`separatesAtBoundedBase_of_extensionPointed`(`_of_small`) /
+**`reachesRigidOrCameron_viaExtensionSeparability`** (the citation checkpoint) (`CascadeAffine.lean §S-gate2`).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

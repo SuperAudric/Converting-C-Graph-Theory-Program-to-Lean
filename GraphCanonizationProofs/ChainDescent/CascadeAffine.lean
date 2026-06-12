@@ -9,6 +9,7 @@ scheme/seal substrate they build on lives in `Cascade.lean` (imported below).
 import ChainDescent.Cascade
 import ChainDescent.Scheme
 import ChainDescent.Separability
+import ChainDescent.CoherentConfig
 
 namespace ChainDescent
 
@@ -462,6 +463,158 @@ theorem separatesAtBoundedBase_of_separable_of_small (S : SchurianScheme n) {bou
     _ ≤ bound := hbound
 
 end Bridge
+
+/-! ### §S-gate2 — the pointed transport into the seal (Stage 2 of the general-CC build)
+
+The Stage-2 wiring (`docs/chain-descent-general-cc-separability.md` §5 Stage 2, 2026-06-12): the
+§CC.9 transport core (`fiberTwin_realized_of_separablePointed` — pointed separability of a point
+extension realizes fiber-twins by `T`-fixing automorphisms, citation-free) composed into the seal's
+sink (`separatesAtBoundedBase_of_twinsRealized`). The **single carried model gap** is
+`WarmTwinsAreFiberTwins` — the 1-WL↔fiber catch-up the 2026-06-12 direction check isolated — and the
+**cited inputs** are `Theorem41Statement` + its probe-confirmed hypotheses on the extension, entering
+exactly as the affine slice's citations did (the G3 pattern). This section also resolves the Stage-4
+keying note: the chain below consumes the *general-CC* predicates directly, bypassing the
+homogeneous-`Separable`-keyed `SeparabilityTransports` gate entirely. -/
+
+section SGate2
+
+open CoherentConfig
+
+variable {n : Nat}
+
+/-- **The Stage-2 catch-up predicate — THE isolated open model gap.** Every same-`warmRefine`-cell
+pair from `T` lies in one fiber of the extension `E` ("1-WL twins are pair-WL twins" at `T`). The
+2026-06-12 direction check (`Probe_Stage21_DirectionCheck_CellsVsFibers`) proved this **false at
+arbitrary `T`** (ℤ₄² bullseye, `T = {0}`: 4 cells vs 10 fibers) and **true at every tested
+`|T| ≥ 2`** — so it is carried per-base, never assumed globally. It is the project-model half of the
+`dimWL(X) ≤ dimWL(X_α) + 1` individualization exchange (Cai–Fürer–Immerman 1992, Thm 5.2; quoted as
+(41) in Ponomarenko arXiv:2006.13592). The converse inclusion (fiber-twins are warm twins, "2-WL
+refines 1-WL") is provable and not needed here. -/
+def WarmTwinsAreFiberTwins (S : SchurianScheme n) (T : Finset (Fin n))
+    (E : CoherentConfig n) : Prop :=
+  ∀ u u' : Fin n,
+    warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (individualizedColouring n T) u
+      = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (individualizedColouring n T) u'
+    → E.relOf u u = E.relOf u' u'
+
+/-- `relOfPair` preservation is a scheme automorphism — the Bool-level converse of
+`IsSchemeAut.relOfPair_eq`. -/
+theorem isSchemeAut_of_relOfPair_eq {S : AssociationScheme n} {f : Equiv.Perm (Fin n)}
+    (h : ∀ v w, S.relOfPair (f v) (f w) = S.relOfPair v w) : IsSchemeAut S f := by
+  intro i v w
+  have hiff : (S.rel i (f v) (f w) = true) ↔ (S.rel i v w = true) := by
+    rw [S.rel_iff_relOfPair, S.rel_iff_relOfPair, h]
+  cases hb : S.rel i v w
+  · cases hb' : S.rel i (f v) (f w)
+    · rfl
+    · exact absurd (hiff.mp hb') (by simp [hb])
+  · exact hiff.mpr hb
+
+/-- **STAGE 2, THE TRANSPORT — landed modulo the catch-up.** Pointed separability of a point
+extension of the (coerced) scheme at `T`, on every non-singleton fiber (singleton fibers — e.g. the
+points of `T` themselves, exactly where the probe saw the Thm-4.1 conditions fail — need no
+realizing), plus the catch-up `WarmTwinsAreFiberTwins`, yields the separability sink
+`TwinsRealizedByResidualAut S T`: every warm twin is a fiber-twin (catch-up), every fiber-twin is
+realized by a `T`-fixing automorphism of the extension (§CC.9, the pointed conclusion at the
+identity algebraic isomorphism), and that automorphism descends to a `T`-fixing scheme automorphism
+(`Refines` + `isSchemeAut_of_relOfPair_eq`). -/
+theorem twinsRealized_of_extensionPointed (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    {T : Finset (Fin n)} {E : CoherentConfig n}
+    (hext : IsPointExtension (S.toAssociationScheme.toCoherentConfig hne) T E)
+    (hsep : ∀ u : Fin n, ¬ E.SingletonFiber u → E.SeparablePointed u)
+    (hcatch : WarmTwinsAreFiberTwins S T E) :
+    TwinsRealizedByResidualAut S T := by
+  intro u u' hcell
+  by_cases hequ : u' = u
+  · subst hequ
+    exact ⟨1, ⟨fun _ _ => rfl, fun _ _ => rfl, fun _ _ => rfl⟩, rfl⟩
+  · have hfib : E.relOf u' u' = E.relOf u u := (hcatch u u' hcell).symm
+    have hns : ¬ E.SingletonFiber u := fun hsing => hequ (hsing u' hfib)
+    obtain ⟨f, hfX, hfT, hu⟩ :=
+      fiberTwin_realized_of_separablePointed hext (hsep u hns) hfib
+    have hrel : ∀ v w, S.toAssociationScheme.relOfPair (f v) (f w)
+        = S.toAssociationScheme.relOfPair v w := hfX
+    refine ⟨f, ⟨?_, fun _ _ => rfl, hfT⟩, hu⟩
+    rw [isAut_schemeAdj_iff]
+    exact isSchemeAut_of_relOfPair_eq hrel
+
+/-- The pointed gate: catch-up + pointed extension separability + a bounded base ⟹ the seal
+consumer `SeparatesAtBoundedBase`. The general-CC-keyed sibling of
+`separatesAtBoundedBase_of_separable` (resolving the Stage-4 keying note: no homogeneous
+`Separable`/`SeparabilityTransports` in the chain). -/
+theorem separatesAtBoundedBase_of_extensionPointed (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    {T : Finset (Fin n)} {bound : Nat} (hcard : T.card ≤ bound)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T)
+    {E : CoherentConfig n}
+    (hext : IsPointExtension (S.toAssociationScheme.toCoherentConfig hne) T E)
+    (hsep : ∀ u : Fin n, ¬ E.SingletonFiber u → E.SeparablePointed u)
+    (hcatch : WarmTwinsAreFiberTwins S T E) :
+    SeparatesAtBoundedBase S bound :=
+  separatesAtBoundedBase_of_twinsRealized S hcard hbase
+    (twinsRealized_of_extensionPointed S hne hext hsep hcatch)
+
+/-- The pointed gate with the group base picked internally (the (C)-free form, mirroring
+`separatesAtBoundedBase_of_separable_of_small`): pointedness + catch-up at every base of the
+**constructed** extension (`pointExtension`, §CC.8) + the "small" bound ⟹ `SeparatesAtBoundedBase`. -/
+theorem separatesAtBoundedBase_of_extensionPointed_of_small (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    {bound : Nat}
+    (hbound : Nat.log 2 (Nat.card (StabilizerAt (schemeAdj S.toAssociationScheme)
+        (fun _ _ => POE.unknown) ∅)) ≤ bound)
+    (hsep : ∀ (T : Finset (Fin n)) (u : Fin n),
+      ¬ (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).SingletonFiber u →
+      (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).SeparablePointed u)
+    (hcatch : ∀ T : Finset (Fin n),
+      WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T)) :
+    SeparatesAtBoundedBase S bound := by
+  obtain ⟨bs, hbase, hlen⟩ := exists_greedy_base_le_log
+    (adj := schemeAdj S.toAssociationScheme) (P := fun _ _ => POE.unknown)
+  refine separatesAtBoundedBase_of_extensionPointed S hne ?_ hbase
+    (isPointExtension_pointExtension _ _) (hsep _) (hcatch _)
+  calc (bs.foldl (fun s b => insert b s) (∅ : Finset (Fin n))).card
+      ≤ (∅ : Finset (Fin n)).card + bs.length := card_foldl_insert_le bs ∅
+    _ = bs.length := by simp
+    _ ≤ _ := hlen
+    _ ≤ bound := hbound
+
+/-- **THE CITATION CHECKPOINT — the general conditional seal capstone of the general-CC build
+(handoff item 4; the affine-slice pattern `reachesRigidOrCameron_affineSlice`, generalized).**
+Every rank-≥3 schurian residual reaches the rigid side or is a Cameron section, conditional on
+exactly: the cited classification `hClassify` (G3), the cited **`Theorem41Statement`** (`hcite`) with
+its **probe-confirmed hypotheses on the extension** (`hhyp` — `Theorem41ConditionsProbe.cs` verified
+them on the residue's one-point extension at every non-singleton fiber), the **catch-up** `hcatch`
+(the isolated 1-WL↔fiber model gap, direction-check-shaped), a bounded base (`hbase`/`hcard` — free
+for small schemes via `exists_greedy_base_le_log`), and the landed `hImprim`. Stage 3 proves `hcite`
+restricted to the residue family (Route β) and discharges `hhyp` witness-constructively; `hcatch` is
+the remaining model content. -/
+theorem reachesRigidOrCameron_viaExtensionSeparability {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    {T : Finset (Fin n)} (hcard : T.card ≤ bound)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T)
+    {E : CoherentConfig n}
+    (hext : IsPointExtension (S.toAssociationScheme.toCoherentConfig hne) T E)
+    (hcite : Theorem41Statement)
+    (hhyp : ∀ u : Fin n, ¬ E.SingletonFiber u → E.Theorem41Hypotheses u)
+    (hcatch : WarmTwinsAreFiberTwins S T E)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaPersistentTwinBlock hClassify S hne hrank ?_ hImprim
+  intro hn
+  exact absurd (separatesAtBoundedBase_of_extensionPointed S hne hcard hbase hext
+    (fun u hns => hcite n E u (hhyp u hns)) hcatch) hn
+
+end SGate2
+
 
 /-! ### §13b — the two-round (depth-2) separation engine on `schemeAdj` (E1)
 
