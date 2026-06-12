@@ -316,11 +316,19 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
    load-bearing. Port the p4paper §2.6 calculus (`x ←r y`, Lemma 2.7) onto the general CC — much may transfer from
    the PV Thm 3.1 substrate.
 2. **Thm 4.1 conditions (i) domination + (ii) `m`-extending couples** · 1 · **load-bearing.** State and (for the
-   residue / 2-extension) discharge. This is the genuine new mathematics. **Gate it empirically first (added
-   2026-06-12):** the seven falsifiers all tested the *conclusion* (separates at bounded base), never these
-   *premises*. A cheap C# probe (the `PdsAmorphicSchemeProbe`/`CatalogueSchemeProbe` substrate already computes
-   intersection numbers) checking (i) domination and (ii) on the ℤ₄² Clebsch scheme + the catalogue primitives /
-   their 2-extensions decides Route β's viability for ~a day's work, before any Stage-3 Lean.
+   residue / 2-extension) discharge. This is the genuine new mathematics. **The empirical gate RAN
+   (2026-06-12, `Theorem41ConditionsProbe.cs`, green) — ROUTE β VIABLE on the residue.** Checker validated on the
+   positive control (cycle schemes under `3ck(k−1) < n`, where §5 *proves* the conditions — PASS, all witnesses
+   geometric). On the rank-4 amorphic-NLS Clebsch residue (ℤ₄² bullseye + ℤ₂⁴ anchor): **X itself FAILS both
+   conditions** (µ=0; `Δ={0,1,2,3}` undominated — confirms §3.6, the dense scheme is out of direct reach) but the
+   **one-point extension `X_α` PASSES both conditions at every µ** (ℤ₄²: all 16 µ; ℤ₂⁴: all µ ≠ α — pick µ in the
+   big fiber, or use `X0` where **all** µ pass) and the Lemma-2.5 object `X0 = X_α∖{α}` **passes at every µ on
+   both**. Two proof-shaping bonuses: (a) **every (ii)-witness is geometric** (the λ-triangle
+   `(r(λ,α),r(λ,β),r(λ,γ))`, `m = r(µ,λ)` — Lemma 5.3's shape; the abstract fallback was never needed), so the
+   Lean discharge can *construct* the witness rather than prove bare existence; (b) rank(`X_α`) = 136 (ℤ₄²) / 34
+   (ℤ₂⁴) of 256 — the extension is where the dense scheme turns sparse-ish, which is *why* the conditions
+   activate. Caveat: this confirms the order-16 instances, not the family — the family-level discharge is still
+   Stage 3's mathematics, but it is now probe-backed, not speculative.
 3. **Assemble (A)** · 2 + Lemma 2.6 · load-bearing. Either prove `Separable` directly for the residue, or
    `2-separable` via Lemma 2.6 and feed the transport at `m=2`.
 
@@ -411,6 +419,17 @@ bullseye) says closure is the likely outcome and the build is worth it.
   `IsLarge` instantiation — the G3 citations (Babai/Sun–Wilmes) kick in at sub-exponential thresholds
   (≈`exp(n^{1/3})`), not super-poly, so "small" in the crux is wider than the `O(log n)`-base prose suggests
   (verify the exact threshold against the sources before relying). Stage 0 remains the next Lean action.
+- **2026-06-12 — THE STAGE-3 GATE RAN: Thm 4.1's hypotheses HOLD on the residue's one-point extension — Route β
+  VIABLE.** New probe `GraphCanonizationProject.Tests/Theorem41ConditionsProbe.cs` (2 facts, green): a general-CC
+  engine (coherent closure on pairs = the point extension; fully-verified intersection numbers; transpose/products)
+  + faithful checkers for condition (i) (domination, exhaustive `|Δ|=4`) and condition (ii) (m-extending couples:
+  geometric λ-scan per Lemma 5.3 + exhaustive abstract fallback, so FAIL is genuine). **Control:** cycle schemes
+  under `3ck(k−1)<n` PASS (the paper proves they must — checker faithful). **Residue (ℤ₄² Clebsch bullseye + ℤ₂⁴
+  anchor):** X fails both conditions (dense, as §3.6 says) — but `X_α` and `X0` **pass both conditions at every
+  (non-α) µ, with every witness geometric**. Full detail folded into Stage 3.2. Consequences for the plan:
+  Stage 0's recommended hypothesis (Option H, Route β) is now *evidence-backed*; the Stage-3 Lean target can be
+  stated witness-constructively (the λ-triangle); and the transport (B) should target the *pointed* conclusion at
+  the extension (Stage 2.2(b)/(c)) since that is the form the probe-confirmed conditions feed. NEXT: Stage 0.
 
 ---
 
