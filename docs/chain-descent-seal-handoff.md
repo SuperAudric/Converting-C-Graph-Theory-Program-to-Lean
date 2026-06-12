@@ -1,5 +1,20 @@
 # Chain descent — THE SEAL HANDOFF: current state and the gaps to "consumed-or-Cameron"
 
+> **UPDATE (2026-06-12) — THE LIVE BUILD DOC IS NOW
+> [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); read its STATUS block
+> for the current state of G2-B.** The 2026-06-11 pointer below to `chain-descent-module-adjoin-plan.md` is itself
+> superseded: that doc's content (the affine slice + the seal-bridge gate findings) was consolidated into the
+> general-CC build doc, which is the durable home of the one remaining open thread. Since this doc's rev. 3: the
+> **seal-bridge gate** reduced G2-B to exactly {(A) extension separability + (B) the transport}, the **general-CC
+> substrate landed in Lean** (`ChainDescent/CoherentConfig.lean`: the `CoherentConfig` type, the *constructed*
+> point extension §CC.8, the pointed transport §CC.9), and the **general citation checkpoint is assembled**
+> (`reachesRigidOrCameron_viaExtensionSeparability`, `CascadeAffine.lean §S-gate2`): the seal conditional on
+> exactly {G3 + cited `Theorem41Statement` + its probe-confirmed conditions on the extension + the catch-up
+> `WarmTwinsAreFiberTwins` + a bounded base (free for small)}. Open content = {the catch-up (a pure 1-WL↔pair-WL
+> model statement) + Stage 3 (prove the cited Thm 4.1 conditions for the residue family)}. The gap anatomy below
+> (G1a/G1b/G2-A/G2-B/G3) remains the correct map of *what was closed and why*; for what is *open*, trust the build
+> doc's STATUS over anything below.
+>
 > **UPDATE (2026-06-11) — the live frontier has moved past this doc; read [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md)
 > (its STATUS "HANDOFF" paragraph, then §7 + §9).** Since rev. 3: the seal's open `s(C)` content (G2-B) on the **affine
 > cyclotomic slice is CLOSED in Lean** modulo {G3 + a *cited* cyclotomic 2-separability, Ponomarenko arXiv:2006.13592

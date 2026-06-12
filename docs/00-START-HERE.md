@@ -316,7 +316,9 @@ direction-invariance and spine invariants that everything imports.
 | `ChainDescent/Saturation.lean` | the generic saturation engine (`exists_iterate_isFixed_within`) |
 | `ChainDescent/Scheme.lean` | the de-classed metric/DRG family (`theorem_2_HOR_of_pPolynomial`) |
 | `ChainDescent/Cascade.lean` | Leg A recovery; **Part A** stabilizer-chain object; the seal capstones + leg B + block/depth-graded recovery + §13a single-base recovery |
-| `ChainDescent/CascadeAffine.lean` | the depth-`k` scheme-separation engine (§13b/§13c) + the Phase-2 affine beachhead (`affineScheme`, Frobenius, the cyclotomic `s(C)` machinery + the conditional affine-family seal capstones) — split out of `Cascade.lean` (leaf; carries the finite-field imports) |
+| `ChainDescent/CascadeAffine.lean` | the depth-`k` scheme-separation engine (§13b/§13c) + the Phase-2 affine beachhead (`affineScheme`, Frobenius, the cyclotomic `s(C)` machinery + the conditional affine-family seal capstones) + the **§S-bridge/§S-gate/§S-gate2** seal wiring of the separability theory (the PV-Thm-3.1 warmRefine bridge B1–B5; the general-CC pointed transport + the citation checkpoint `reachesRigidOrCameron_viaExtensionSeparability`) — split out of `Cascade.lean` (leaf; carries the finite-field imports) |
+| `ChainDescent/Separability.lean` | the homogeneous separability substrate: the PV-Thm-3.1 `c=1` forced-triangle calculus (§S.1–§S.16: valencies, indistinguishing number, `saAdj`/`transport`, the sparse theorem's counting lemmas) + the §S.17 `AlgIso`/`Separable` layer |
+| `ChainDescent/CoherentConfig.lean` | the **general (multi-fiber) coherent-configuration substrate** (the live build's Stage 0–2): the `CoherentConfig` type, general `AlgIso`/`Separable`/`SeparablePointed`, the Thm-4.1 predicates + cited `Theorem41Statement`, the **constructed point extension** (§CC.8) and the pointed transport core (§CC.9) |
 | `ChainDescent/CascadeOracle.lean` | the unified `matchOracle` / `matchOracleSeq` |
 | `ChainDescent/LinearOracle.lean` | the linear (abelian/CFI) oracle |
 | `ChainDescent/CFI.lean` | CFI gadgets, gauge flips, the `Z₂^β` cycle space, CFI-cov |

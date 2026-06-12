@@ -38,8 +38,10 @@
   staging-fallback carry, G3 pattern), `IsPointExtension` as a universal property (+ `discreteCC` non-vacuity),
   and **the construction `pointExtension X T` discharging it constructively** (`isPointExtension_pointExtension` /
   `exists_isPointExtension` / `isPointExtension_unique` — the `ExtensionSeparable` family is never empty).
-  Both gate probes RAN: Stage-3 conditions (Route β viable — Stage 3.2) and the Stage-2.1 direction check
-  (1-WL-twin keying refuted at arbitrary `T`; bases clean — item 2 below). **PLUS (2026-06-12, same day):
+  All three gate probes RAN: Stage-3 conditions (Route β viable — Stage 3.2), the Stage-2.1 direction check
+  (1-WL-twin keying refuted at arbitrary `T`; bases clean — item 2 below), and **the catch-up probe-gate
+  (2026-06-12, item 5: GATE GREEN at every minimal base, `b(X) = b(G)` on both instances, the `c=1` dominator
+  closure discretizes from every base at SCHEME level — Route δ's engine confirmed incidentally)**. **PLUS (2026-06-12, same day):
   STAGE 2 LANDED MODULO THE CATCH-UP and THE CITATION CHECKPOINT ASSEMBLED** — the pointed-conclusion transport
   (§CC.9, citation-free core) wired into the seal (§S-gate2), with the general conditional capstone
   **`reachesRigidOrCameron_viaExtensionSeparability`** standing modulo {G3 + cited `Theorem41Statement` +
@@ -80,10 +82,21 @@
   5. **The catch-up discharge — `WarmTwinsAreFiberTwins` at the assembly's bases (THE isolated model gap).**
      Honest accounting: at a base with a complete extension the catch-up is equivalent in strength to the
      discreteness conclusion itself — its value is that it carries **no separability/group content**, only the
-     1-WL↔pair-WL model comparison, so it is attackable by the refinement engines alone. Intended route: the
-     §S-bridge B1–B5 forced-triangle propagation powered by **condition (i) domination** (every dominator is a
-     `c=1` triangle = `saAdj`-shaped) on the extension; probe-gate first (extend the direction probe: cells =
-     fibers at *bases*, and does (i) ⟹ catch-up empirically?).
+     1-WL↔pair-WL model comparison, so it is attackable by the refinement engines alone.
+     **THE PROBE-GATE RAN (2026-06-12, `Probe_CatchUpGate_BasesAndDominators`, green) — GATE GREEN + the engine
+     confirmed, at scheme level (full verdict in §8):** the catch-up holds at **every** minimal group base of both
+     residue instances (ℤ₄²: all 96 of 96; ℤ₂⁴: all 480 of 480 — exhaustive sweeps against exactly-computed
+     `Aut(X)`), indeed at every swept `|T| ≥ 2`; every minimal base is 1-WL-discrete and extension-complete, so
+     **`b(X) = b(G)` on both instances** (2 resp. 3) and the catch-up at minimal bases *is* the discreteness
+     statement (the honest accounting, now exhibited). The `c=1` two-endpoint dominator closure (the B3 `saAdj`
+     pinning shape) **discretizes from every tested minimal base using only X's own rank-4 classes** — no
+     extension classes needed — and is 1-WL-sound there (0 violations); off bases it is provably 1-WL-unsound
+     (ℤ₄² `T={0}`: 3 violations), so any B3-style lemma stays base-keyed. **Remaining = the Lean discharge**, now
+     with two interchangeable shapes: (α) keep the citation checkpoint's keying and prove the catch-up per-base, or
+     (δ′) formalize the *two-endpoint dominator closure* on the landed homogeneous substrate (B3
+     `determined_of_saAdj` is the step; wrap it in a `Saturation`-style closure ⟹ `Discrete` ⟹
+     `SeparatesAtBoundedBase` directly, a citation-free sibling of the checkpoint) and carry "closure exhausts Ω
+     from the base" as the named structural hypothesis the family-level math (Stage 3) discharges.
   6. **Stage 3** — prove what item 4 cites (Route β: conditions (i)/(ii) for the residue family's extensions —
      witness-constructive per the probe; the genuine open mathematics).
   Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
@@ -433,6 +446,12 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
    Stage 3's mathematics, but it is now probe-backed, not speculative.
 3. **Assemble (A)** · 2 + Lemma 2.6 · load-bearing. Either prove `Separable` directly for the residue, or
    `2-separable` via Lemma 2.6 and feed the transport at `m=2`.
+4. **Scope note (2026-06-12) — a FAMILY-RESTRICTED Stage 3 suffices; the full general Thm 4.1 is NOT owed.**
+   `Theorem41Statement` is carried as a global `∀ n X μ` statement, but the citation checkpoint consumes it only
+   at `hcite n E u` for the *specific* extension `E` of the residue at hand. So Stage 3 may land as
+   "`Theorem41Hypotheses ⟹ SeparablePointed` *for the residue family's extensions*" (or even per-instance), feed
+   the checkpoint through a thin wrapper, and the global cited carry simply retires unused — no statement change
+   anywhere in the chain. Plan Stage 3 at the family level, not the full generality of the paper.
 
 ### Stage 4 — assembly + exceptional cases
 1. **Wire (A)+(B) ⟹ seal** · Stages 2,3 + §2 table · mechanical. Instantiate
@@ -445,6 +464,13 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
 2. **Exceptional `(p,d)` table** (Thm 1.1, only if the residue includes the cyclotomic/affine instances) · the C# bed
    (`AffineSchemeProbe`/`CatalogueSchemeProbe`) · mechanical. Reproduce the finite exceptions as `decide`-checked
    facts. **The non-affine NLS residue is outside the cyclotomic family, so likely N/A** — confirm per instance.
+3. **Assembly-shape note (2026-06-12) — the `_of_small` gate quantifies over ALL `T`; plan a chosen-base variant.**
+   `separatesAtBoundedBase_of_extensionPointed_of_small` takes `hsep`/`hcatch` at *every* `T` because the greedy
+   base it picks internally (`exists_greedy_base_le_log`) is *some* base, not a chosen one. When the catch-up is
+   discharged at specific (probe-validated) bases, assemble through the per-`T` gate
+   `separatesAtBoundedBase_of_extensionPointed` with the chosen `T` instead — or land a thin `_of_small` variant
+   that accepts a base-selection function. Do not let the ∀-`T` form drive the catch-up discharge wider than the
+   assembly needs.
 
 ---
 
@@ -469,6 +495,12 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
   reduction is exactly what Thm 4.1's (i)/(ii) buys for α/β), so its math risk is the full G2-B; its value is that
   a probe-confirmed partial result lands on already-built homogeneous machinery. Worth a *probe first* (does the
   `c=1` calculus propagate to discreteness on the ℤ₄² Clebsch extension at 2–3 points?) before choosing it over β.
+  **THE PROBE RAN (2026-06-12, incidentally to the catch-up gate — `Probe_CatchUpGate_BasesAndDominators`): δ's
+  engine is POSITIVE on both residue instances, and stronger than asked** — the `c=1` two-endpoint dominator
+  closure discretizes from *every* minimal group base on ℤ₄² and ℤ₂⁴ **at the scheme level** (X's own rank-4
+  classes; the extension's classes are not even needed at bases). δ is therefore a live instance-level discharge
+  shape (see STATUS item 5 (δ′)); its open content — proving the closure exhausts Ω from a base for the *family* —
+  is the same crux as Stage 3's, in citation-free clothing.
 
 **Recommended path:** Stage 0 → **Option H** (minimal general-CC to `m=2`) → Stage 1 → **Route β** for (A) and the
 Lemma-2.6 inheritance for (B) Stage 2.2(a) → Stage 4. Bite off the full `Ωᵐ`/Route α only if a concrete obstruction
@@ -627,6 +659,39 @@ bullseye) says closure is the likely outcome and the build is worth it.
   1-WL↔pair-WL comparison, attackable by the refinement engines (intended: B1–B5 forced-triangle propagation
   from condition (i)'s `c=1` dominators). NEXT: the catch-up discharge (STATUS item 5, probe-gate first), then
   Stage 3 (the genuine open math).
+- **2026-06-12 — DOC HYGIENE LANDED + THE CATCH-UP PROBE-GATE RAN: GATE GREEN, ENGINE CONFIRMED AT SCHEME LEVEL,
+  `b(X) = b(G)` ON BOTH INSTANCES (`Probe_CatchUpGate_BasesAndDominators`, `Theorem41ConditionsProbe.cs`, all 4
+  facts green; no Lean touched, build re-verified green 29s + capstones re-checked axiom-clean).**
+  *Hygiene:* 00-START-HERE §4 module table gained `Separability.lean` + `CoherentConfig.lean` rows (+ the
+  CascadeAffine §S-gate2 mention); the seal-handoff got a 2026-06-12 banner routing to THIS doc (the 06-11
+  module-adjoin pointer was itself stale); §5 gained the **family-restricted-Stage-3-suffices** scope note
+  (Stage 3.4: `Theorem41Statement` is consumed only at `hcite n E u` — a family-level proof feeds the checkpoint
+  through a thin wrapper, the global carry retires unused) and the **assembly-shape** note (Stage 4.3: the
+  `_of_small` gate quantifies `hsep`/`hcatch` over ALL `T` because its greedy base is unchosen — assemble through
+  the per-`T` gate at probe-validated bases instead).
+  *The probe-gate* (control C₁₇ asserted: |Aut|=34, all 136 pairs are bases, catch-up + discreteness everywhere,
+  scheme-closure 17/17): **(a) THE GATE IS GREEN** — exhaustive sweeps against exactly-computed `Aut(X)`
+  (backtracking; ℤ₄²: |Aut|=32 = translations×{±1}; ℤ₂⁴: |Aut|=160): catch-up holds at **every** swept `|T| ≥ 2`
+  (ℤ₄²: all 120 pairs; ℤ₂⁴: all 120 pairs + all 560 triples), in particular at every minimal base (96/96 resp.
+  480/480). ℤ₄²: b(G)=2, the 24 non-base pairs are exactly the involution-difference pairs (`x ↦ −x + 2u`
+  stabilizer), and base ⟺ 1-WL-discrete ⟺ extension-complete (32/40 per class, all three); ℤ₂⁴: no size-2 base,
+  b(G)=3, all 480 bases discrete + complete. So **`b(X) = b(G)`** (2 resp. 3) and at minimal bases the catch-up
+  is *exactly* the discreteness conclusion — the honest-accounting equivalence exhibited, not just argued.
+  **(b) THE ENGINE EXISTS, ONE LEVEL CHEAPER THAN PLANNED** — the `c=1` two-endpoint dominator closure (seed
+  `Determined = T`; pin δ when some determined pair (µ,λ) has `#{w : r(µ,w)=r(µ,δ) ∧ r(w,λ)=r(δ,λ)} = 1` — the
+  landed B3 `determined_of_saAdj` pinning shape) **discretizes from every tested minimal base on BOTH instances
+  using only X's own rank-4 classes** (scheme level; E-level closure agrees), with **0 one-WL-soundness
+  violations at bases**; at non-bases it stalls (1/16 from `{0}`) and is 1-WL-**un**sound (ℤ₄² `T={0}`: E-closure
+  pins 4, of which 3 sit in non-singleton warm cells) — so B3-style lemmas must stay base-keyed, consistent with
+  the direction check. **Consequences:** (1) state `WarmTwinsAreFiberTwins` at `IsBase T`; no base+O(1)
+  escalation needed on the instances; (2) **Route δ's parked feasibility probe effectively ran POSITIVE** (§6 δ
+  updated) — a citation-free discharge shape on the landed homogeneous substrate is live: formalize the
+  two-endpoint dominator *closure* (a `Saturation`-pattern wrapper over B3) ⟹ `Discrete` ⟹
+  `SeparatesAtBoundedBase`, carrying "closure exhausts Ω from the base" as the named hypothesis; (3) the
+  family-level "closure completes" proof is the same open crux as Stage 3's conditions — two interchangeable
+  consumption shapes, both probe-backed. NEXT: the Lean increment for item 5 — either (α) the per-base catch-up
+  against the checkpoint's keying, or (δ′) the dominator-closure engine (recommended: it is citation-free,
+  lands on `Separability.lean`/`CascadeAffine.lean` machinery, and its hypothesis is what Stage 3 proves anyway).
 
 ---
 

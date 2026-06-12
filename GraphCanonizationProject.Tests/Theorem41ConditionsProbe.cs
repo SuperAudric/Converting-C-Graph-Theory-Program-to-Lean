@@ -737,4 +737,283 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         output.WriteLine($"   (a) cells = fibers on the residue: {(allEq ? "EVERYWHERE — the bridge is an equality; keep the warmRefine keying" : "NOT everywhere — fibers strictly finer somewhere; the twin keying caution (Stage 2.1 ⚠️) is LIVE")}");
         output.WriteLine($"   (b) twin ⟹ WL-equivalent extensions: {(allTwin ? "HOLDS on all tested pairs — Stage 2.1's statement is empirically sound as keyed" : "FAILS somewhere — re-key the seal-side twin on fibers before Lean investment")}");
     }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // THE CATCH-UP PROBE-GATE (build doc STATUS item 5, added 2026-06-12).
+    //
+    // Stage 2 landed modulo ONE model statement, the catch-up `WarmTwinsAreFiberTwins
+    // S T E`: same-warmRefine-cell pair (u,u') from T ⟹ same fiber of E = X_T.  The
+    // direction check refuted it at arbitrary T (ℤ₄², T={0}: 4 cells vs 10 fibers)
+    // and confirmed it at the few |T| ≥ 2 sets it sampled — but the assembly consumes
+    // it at GROUP BASES T (`IsBase`: trivial pointwise stabilizer of Aut(X)), which
+    // no probe has measured.  Two questions:
+    //
+    //   (a) THE GATE — does the catch-up hold at the assembly's actual bases?
+    //       Compute Aut(X) exactly (backtracking), then sweep ALL subsets of sizes
+    //       1..b(G): per T record base-ness, catch-up violations (same-cell pair
+    //       split by fibers), 1-WL discreteness, extension completeness.  This also
+    //       measures b(G) vs b(X) (the honest-accounting note: at a complete-
+    //       extension base, catch-up ⟺ 1-WL discreteness — the conclusion itself).
+    //   (b) THE ENGINE — does condition-(i)-style domination PROPAGATE?  The intended
+    //       Lean discharge is B1–B5-shaped: δ pinned by a c=1 triangle against two
+    //       determined points (`Dominates`, on the EXTENSION's classes) becomes
+    //       determined.  Run that closure from T (i) on X's own classes (the landed
+    //       scheme-level saAdj engine — expected to stall on the dense residue) and
+    //       (ii) on E = X_T's pair-closure classes (the route's hope: the extension
+    //       is where the dense scheme turns sparse-ish; Theorem41ConditionsProbe
+    //       found its (i)-dominators there).  1-WL-SOUNDNESS is also measured: a
+    //       B3-on-E lemma keyed on warm cells needs every E-closure-determined
+    //       vertex to sit in a SINGLETON warm cell — violations refute that keying.
+    //
+    // Control: C₁₇ (sparse, PV-Thm-3.1 territory) — every pair is a base; catch-up,
+    // discreteness, and both closures must succeed there (asserted).  Residue
+    // outcomes (ℤ₄² bullseye, ℤ₂⁴ anchor) are findings, reported either way.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    // scheme automorphisms = Rel-preserving permutations, by pruned backtracking.
+    static List<int[]> SchemeAut(CC x)
+    {
+        int n = x.N;
+        var perms = new List<int[]>();
+        var img = new int[n]; var used = new bool[n];
+        void Rec(int v)
+        {
+            if (v == n) { perms.Add((int[])img.Clone()); return; }
+            for (int w = 0; w < n; w++)
+            {
+                if (used[w] || x.Rel[v, v] != x.Rel[w, w]) continue;
+                bool ok = true;
+                for (int u = 0; u < v && ok; u++)
+                    ok = x.Rel[u, v] == x.Rel[img[u], w] && x.Rel[v, u] == x.Rel[w, img[u]];
+                if (!ok) continue;
+                used[w] = true; img[v] = w;
+                Rec(v + 1);
+                used[w] = false;
+            }
+        }
+        Rec(0);
+        return perms;
+    }
+
+    // IsBase: no non-identity automorphism fixes T pointwise.
+    static bool IsBaseSet(List<int[]> auts, int[] t)
+    {
+        foreach (var g in auts)
+        {
+            bool fixesT = true;
+            foreach (int p in t) if (g[p] != p) { fixesT = false; break; }
+            if (!fixesT) continue;
+            for (int v = 0; v < g.Length; v++) if (g[v] != v) return false;
+        }
+        return true;
+    }
+
+    // fibers + the full stable pair colouring of X_T (the closure E's classes).
+    static (int[] fibers, int[,] pairColour) ExtFibers(CC x, int[] t)
+    {
+        var (colour, _) = CanonicalPairWL(x.N, (u, v) => ExtInit(x, t, u, v));
+        var diag = new int[x.N];
+        for (int v = 0; v < x.N; v++) diag[v] = colour[v, v];
+        return (diag, colour);
+    }
+
+    // The c=1 dominator closure (the B3/`Dominates` propagation shape): starting
+    // from T determined, δ becomes determined when some determined (µ,λ) pins it —
+    // #{w : col(µ,w) = col(µ,δ) ∧ col(w,λ) = col(δ,λ)} = 1.  `col` = X.Rel gives
+    // the scheme-level (landed saAdj) engine; `col` = the pair-closure colouring
+    // gives the extension-level engine the route hopes for.
+    static bool[] DominatorClosure(int n, int[,] col, int[] t)
+    {
+        var det = new bool[n];
+        foreach (int p in t) det[p] = true;
+        bool changed = true;
+        while (changed)
+        {
+            changed = false;
+            for (int d = 0; d < n; d++)
+            {
+                if (det[d]) continue;
+                bool pinned = false;
+                for (int mu = 0; mu < n && !pinned; mu++)
+                {
+                    if (!det[mu]) continue;
+                    for (int lam = 0; lam < n && !pinned; lam++)
+                    {
+                        if (!det[lam]) continue;
+                        int cnt = 0;
+                        for (int w = 0; w < n && cnt < 2; w++)
+                            if (col[mu, w] == col[mu, d] && col[w, lam] == col[d, lam]) cnt++;
+                        pinned = cnt == 1;
+                    }
+                }
+                if (pinned) { det[d] = true; changed = true; }
+            }
+        }
+        return det;
+    }
+
+    sealed class GateRow
+    {
+        public required int[] T; public required bool IsBase;
+        public required int Cells, Fibers, CatchUpViol, N;
+        public bool CatchUp => CatchUpViol == 0;
+        public bool Discrete => Cells == N;
+        public bool Complete => Fibers == N;
+    }
+
+    GateRow GateCheck(CC x, List<int[]> auts, int[] t)
+    {
+        var cells = WarmRefineCells(x, t);
+        var (fibers, _) = ExtFibers(x, t);
+        int viol = 0;
+        for (int u = 0; u < x.N; u++)
+            for (int v = u + 1; v < x.N; v++)
+                if (cells[u] == cells[v] && fibers[u] != fibers[v]) viol++;
+        return new GateRow
+        {
+            T = t, IsBase = IsBaseSet(auts, t), N = x.N,
+            Cells = NumCells(cells), Fibers = NumCells(fibers), CatchUpViol = viol
+        };
+    }
+
+    void MechanismCheck(string label, CC x, int[] t, bool isBase)
+    {
+        var cells = WarmRefineCells(x, t);
+        var (_, pairColour) = ExtFibers(x, t);
+        var detS = DominatorClosure(x.N, x.Rel, t);
+        var detE = DominatorClosure(x.N, pairColour, t);
+        var cellSize = new Dictionary<int, int>();
+        foreach (int c in cells) cellSize[c] = cellSize.TryGetValue(c, out int k) ? k + 1 : 1;
+        int viol = 0;
+        for (int v = 0; v < x.N; v++) if (detE[v] && cellSize[cells[v]] > 1) viol++;
+        output.WriteLine($"    {label} T={{{string.Join(",", t)}}}{(isBase ? " (base)" : " (NOT a base)")}: " +
+                         $"scheme-c=1 closure {detS.Count(b => b)}/{x.N}; E-c=1 closure {detE.Count(b => b)}/{x.N}; " +
+                         $"1-WL-soundness violations {viol}{(viol > 0 ? " ⚠️ (E-determined vertex in a non-singleton warm cell)" : "")}");
+    }
+
+    [Fact]
+    public void Probe_CatchUpGate_BasesAndDominators()
+    {
+        output.WriteLine("── The catch-up probe-gate — WarmTwinsAreFiberTwins at the assembly's bases ──");
+        output.WriteLine("   (a) gate: catch-up (same warm cell ⟹ same X_T fiber) at ALL group bases of size b(G);");
+        output.WriteLine("   (b) engine: does the c=1 dominator closure (B3 shape) discretize — on X vs on E = X_T?");
+        output.WriteLine("");
+
+        // ── control: C₁₇ — sparse, every pair a base, everything must work ──
+        {
+            var x = CycleScheme(17);
+            var auts = SchemeAut(x);
+            output.WriteLine($"   C_17 (control): |Aut| = {auts.Count} (D₁₇ = 34 expected)");
+            Assert.Equal(34, auts.Count);
+            int bases = 0, catchUpOk = 0, discrete = 0;
+            for (int a = 0; a < 17; a++)
+                for (int b = a + 1; b < 17; b++)
+                {
+                    var row = GateCheck(x, auts, new[] { a, b });
+                    if (row.IsBase) bases++;
+                    if (row.CatchUp) catchUpOk++;
+                    if (row.Discrete) discrete++;
+                }
+            output.WriteLine($"      size-2 sweep: {bases}/136 bases, catch-up {catchUpOk}/136, 1-WL discrete {discrete}/136");
+            Assert.Equal(136, bases);     // every pair is a base (n odd: a reflection fixes one point)
+            Assert.Equal(136, catchUpOk); // catch-up everywhere
+            Assert.Equal(136, discrete);  // PV-sparse: every pair discretizes
+            MechanismCheck("C_17", x, new[] { 0, 1 }, isBase: true);
+            var detS = DominatorClosure(17, x.Rel, new[] { 0, 1 });
+            Assert.Equal(17, detS.Count(b => b)); // the landed scheme-level engine succeeds on the sparse control
+            output.WriteLine("");
+        }
+
+        // ── the residue ──
+        var verdicts = new List<(string grp, int bG, int basesN, int basesCatchUp, int basesDiscrete,
+                                 int basesComplete, bool engineAtBases, bool soundAtBases)>();
+        foreach (var g in new[] { MakeGroup("Z4^2", 4, 4), MakeGroup("Z2^4", 2, 2, 2, 2) })
+        {
+            var x = ClebschScheme(g);
+            Assert.NotNull(x);
+            int n = x!.N;
+            var auts = SchemeAut(x);
+            output.WriteLine($"   {g.Name} (rank-4 amorphic-NLS Clebsch, primitive={(PrimitiveScheme(x) ? "y" : "n")}): |Aut| = {auts.Count}");
+
+            // sweep sizes 1, 2, … until bases appear (b(G) = first size with a base)
+            var rows = new List<GateRow>();
+            int bG = -1;
+            for (int size = 1; size <= 4 && bG < 0; size++)
+            {
+                var sizeRows = new List<GateRow>();
+                foreach (var idx in Choose(n, size))
+                    sizeRows.Add(GateCheck(x, auts, idx));
+                rows.AddRange(sizeRows);
+                if (sizeRows.Any(r => r.IsBase)) bG = size;
+
+                // aggregate this size, keyed by the difference class for pairs
+                if (size == 1)
+                {
+                    int cu = sizeRows.Count(r => r.CatchUp);
+                    output.WriteLine($"    |T|=1 sweep ({sizeRows.Count} sets, {sizeRows.Count(r => r.IsBase)} bases): " +
+                                     $"catch-up holds at {cu}/{sizeRows.Count}" +
+                                     (cu < sizeRows.Count ? "  (the direction-check refutation, reproduced)" : ""));
+                }
+                else if (size == 2)
+                {
+                    output.WriteLine($"    |T|=2 sweep ({sizeRows.Count} sets) by difference class:");
+                    foreach (var grp2 in sizeRows.GroupBy(r => x.Rel[r.T[0], r.T[1]]).OrderBy(q => q.Key))
+                        output.WriteLine($"      class {grp2.Key}: {grp2.Count(),3} pairs | bases {grp2.Count(r => r.IsBase),3} | " +
+                                         $"catch-up {grp2.Count(r => r.CatchUp),3} | 1-WL discrete {grp2.Count(r => r.Discrete),3} | " +
+                                         $"ext complete {grp2.Count(r => r.Complete),3}");
+                }
+                else
+                {
+                    output.WriteLine($"    |T|={size} sweep ({sizeRows.Count} sets, {sizeRows.Count(r => r.IsBase)} bases): " +
+                                     $"catch-up {sizeRows.Count(r => r.CatchUp)}, discrete {sizeRows.Count(r => r.Discrete)}");
+                }
+            }
+            Assert.True(bG > 0, $"{g.Name}: no base of size ≤ 4 — unexpected for a small residual");
+
+            var minBases = rows.Where(r => r.IsBase && r.T.Length == bG).ToList();
+            int cuB = minBases.Count(r => r.CatchUp), dB = minBases.Count(r => r.Discrete), cB = minBases.Count(r => r.Complete);
+            output.WriteLine($"    b(G) = {bG}; minimal bases: {minBases.Count}  →  catch-up {cuB}/{minBases.Count}, " +
+                             $"1-WL discrete {dB}/{minBases.Count}, ext complete {cB}/{minBases.Count}");
+            foreach (var r in minBases.Where(r => !r.CatchUp).Take(5))
+                output.WriteLine($"      ⚠️ catch-up FAILS at base T={{{string.Join(",", r.T)}}}: cells={r.Cells}, fibers={r.Fibers}, {r.CatchUpViol} split pairs");
+
+            // mechanism: the singleton anchor + up to 3 minimal bases spread across difference
+            // classes + (if any) the first catch-up-failing base
+            output.WriteLine($"    engine (c=1 dominator closures):");
+            MechanismCheck(g.Name, x, new[] { 0 }, isBase: IsBaseSet(auts, new[] { 0 }));
+            var mechBases = minBases.GroupBy(r => x.Rel[r.T[0], r.T[r.T.Length - 1]])
+                                    .Select(q => q.First()).Take(3).ToList();
+            var failing = minBases.FirstOrDefault(r => !r.CatchUp);
+            if (failing != null && !mechBases.Contains(failing)) mechBases.Add(failing);
+            bool engineOk = true, soundOk = true;
+            foreach (var r in mechBases)
+            {
+                var (_, pc) = ExtFibers(x, r.T);
+                var detE = DominatorClosure(n, pc, r.T);
+                var cells = WarmRefineCells(x, r.T);
+                var cellSize = new Dictionary<int, int>();
+                foreach (int c in cells) cellSize[c] = cellSize.TryGetValue(c, out int k) ? k + 1 : 1;
+                engineOk &= detE.Count(b => b) == n;
+                for (int v = 0; v < n; v++) if (detE[v] && cellSize[cells[v]] > 1) soundOk = false;
+                MechanismCheck(g.Name, x, r.T, isBase: true);
+            }
+            verdicts.Add((g.Name, bG, minBases.Count, cuB, dB, cB, engineOk, soundOk));
+            output.WriteLine("");
+        }
+
+        output.WriteLine("── VERDICT (the catch-up gate, build doc STATUS item 5) ──");
+        foreach (var v in verdicts)
+        {
+            output.WriteLine($"   {v.grp,-6}: b(G)={v.bG}, {v.basesN} minimal bases | catch-up {v.basesCatchUp}/{v.basesN}" +
+                             $" | discrete {v.basesDiscrete}/{v.basesN} | complete {v.basesComplete}/{v.basesN}" +
+                             $" | E-engine discretizes at tested bases: {(v.engineAtBases ? "YES" : "NO")}" +
+                             $" | 1-WL-sound: {(v.soundAtBases ? "YES" : "NO")}");
+        }
+        bool gateGreen = verdicts.All(v => v.basesCatchUp == v.basesN);
+        bool engineGreen = verdicts.All(v => v.engineAtBases && v.soundAtBases);
+        output.WriteLine($"   (a) {(gateGreen ? "catch-up HOLDS at every minimal base — state `WarmTwinsAreFiberTwins` at `IsBase T` and the gate is green"
+                                             : "catch-up FAILS at some minimal base — the assembly must move to base+O(1) (or re-key); see the failing T above")}");
+        output.WriteLine($"   (b) {(engineGreen ? "the extension-level c=1 dominator closure discretizes from the tested bases with no 1-WL-soundness violations — the B3-on-E propagation is a viable discharge engine"
+                                               : "the dominator engine stalls or is 1-WL-unsound at some base — the discharge needs the pair-WL model, not warm-cell-keyed B3-on-E")}");
+    }
 }
