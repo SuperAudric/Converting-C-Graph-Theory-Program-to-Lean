@@ -29,21 +29,37 @@
 - **Quality bar (non-negotiable):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; full build
   green (`bash scripts/build.sh`, serial ~60–120 s); **no `sorry`, no fresh `axiom`** (cited classifications are
   theorem-statement *hypotheses*); **do not commit** (the user commits between messages).
-- **CURRENT STATE (2026-06-12): Stage 0 DECIDED + the Stage-1 skeleton LANDED** (`ChainDescent/CoherentConfig.lean`,
-  axiom-clean, full build green) — the general `CoherentConfig` type (colour-function presentation, fibers *derived*),
-  the homogeneous coercion `AssociationScheme.toCoherentConfig` (conditional on the seal's `hne`), general-CC
+- **CURRENT STATE (2026-06-12): Stage 0 DECIDED + Stage 1 LANDED — skeleton AND the §CC.8 point-extension
+  construction** (`ChainDescent/CoherentConfig.lean`, axiom-clean, full build green) — the general `CoherentConfig`
+  type (colour-function presentation, fibers *derived*), the homogeneous coercion
+  `AssociationScheme.toCoherentConfig` (conditional on the seal's `hne`), general-CC
   `AlgIso`/`Separable`/`SeparablePointed` (the §2 soundness gate resolved by *widening*), the probe-validated
   **Thm 4.1 hypothesis predicates** (no `Ωᵐ` needed to state them), the **cited `Theorem41Statement`** (the
-  staging-fallback carry, G3 pattern), and `IsPointExtension` as a universal property (+ `discreteCC` non-vacuity).
-  The Stage-3 gate probe RAN (Route β viable — see Stage 3.2). **REMAINING, in order (the handoff list):**
-  1. **Stage 1.2(a)** — the point-extension *construction*: a pair-refinement saturation producing a witness for
-     the landed `IsPointExtension` (plan in §5 Stage 1.2; pattern = `CascadeAffine §S-stab` stabilization on pairs).
-  2. **Stage 2.1's direction check** (cheap C# first): are 1-WL `warmRefine` cells = `X_T` fibers on the residue's
-     extensions? (`Theorem41ConditionsProbe.cs` already computes the coherent closure — compare against `Refine`.)
-     This pins the twin⟹alg-iso step's model bridge before Lean investment (§5 Stage 2.1 ⚠️).
-  3. **Stage 2** — the transport, stated against the landed `ExtensionSeparable`/`SeparablePointed` (sub-route
-     (b) pointed-conclusion first; (c) Chen–Ponomarenko `dimWL` recursion as the citable alternative — source its
-     §4.2 statement before choosing).
+  staging-fallback carry, G3 pattern), `IsPointExtension` as a universal property (+ `discreteCC` non-vacuity),
+  and **the construction `pointExtension X T` discharging it constructively** (`isPointExtension_pointExtension` /
+  `exists_isPointExtension` / `isPointExtension_unique` — the `ExtensionSeparable` family is never empty).
+  Both gate probes RAN: Stage-3 conditions (Route β viable — Stage 3.2) and the Stage-2.1 direction check
+  (1-WL-twin keying refuted at arbitrary `T`; bases clean; route (c) favoured — item 2 below).
+  **REMAINING, in order (the handoff list):**
+  1. ~~**Stage 1.2(a)+(b)**~~ — **LANDED 2026-06-12 (`CoherentConfig.lean §CC.8`, axiom-clean, build green):
+     the point-extension *construction* `pointExtension X T` (pair-refinement saturation on
+     `Setoid (Fin n × Fin n)`, representative-indexed counts, `n²`-round pigeonhole) with
+     `isPointExtension_pointExtension` discharging the universal property constructively +
+     `exists_isPointExtension` (the family is never empty — `ExtensionSeparable` non-vacuous) +
+     `isPointExtension_unique` (uniqueness up to mutual refinement).** Open from old 1.2: only the
+     warmRefine↔fiber *bridge* — now reshaped by the direction check (item 2): state it at bases / via the
+     `dimWL` +1 exchange, NOT as cells=fibers at arbitrary `T` (refuted on the bullseye).
+  2. ~~**Stage 2.1's direction check**~~ — **RAN 2026-06-12 (`Probe_Stage21_DirectionCheck_CellsVsFibers`, green):
+     the naive twin⟹alg-iso step is REFUTED at arbitrary `T`** — on the ℤ₄² bullseye at `T={0}`, 1-WL has 4 cells
+     vs **10 fibers** (strictly finer), and 24/30 same-cell pairs have WL-INEQUIVALENT extensions (cells ⊋ orbits
+     at depth 1 — the amorphic gap, live). At every tested `|T| ≥ 2`: cells = fibers and all twins
+     extension-equivalent. **Consequence:** the transport must NOT be stated as "∀T, same-cell ⟹ ext alg-iso";
+     the gate decls need it **at bases only**, and the +1 pattern in the data is exactly the Chen–Ponomarenko
+     `dimWL(X) ≤ dimWL(X_α)+1` exchange ⟹ **sub-route (c) is now favoured; sourcing the monograph §4.2 is the
+     Stage-2 gating action.** Full verdict in §5 Stage 2.1.
+  3. **Stage 2** — the transport, stated against the landed `ExtensionSeparable`/`SeparablePointed` (**route per
+     the direction check: (c) the Chen–Ponomarenko `dimWL` recursion — source its §4.2 statement FIRST; (b)
+     pointed-conclusion remains the fallback, but any 1-WL-twin-keyed statement must be restricted to bases**).
   4. **The citation-checkpoint assembly** — wire {`Theorem41Statement` (cited) + Thm-4.1-conditions-for-the-residue
      (probe-confirmed, to be stated per-instance or carried) + the transport} into `SeparatesAtBoundedBase` ⟹ a
      general conditional seal capstone (the affine-slice pattern, `reachesRigidOrCameron_affineSlice`).
@@ -259,10 +275,11 @@ condition to the 2-extension ⟹ 2-separability, as p4paper Thm 1.2 does via Lem
 ### LACKS (the build creates these) — ledger updated 2026-06-12
 - ~~A **general (multi-fiber) coherent configuration** type~~ — **LANDED** (`CoherentConfig`,
   `ChainDescent/CoherentConfig.lean`, with the homogeneous coercion `AssociationScheme.toCoherentConfig`).
-- The **point extension as a CC** object — **predicate LANDED** (`IsPointExtension`, universal property, complete
-  via the derived fiber coherence `relOf_diag_left_eq`); the *construction* (pair-refinement saturation producing
-  a witness, + uniqueness-up-to-relabelling) is the open Stage-1.2 piece, along with the **warmRefine↔fiber
-  bridge** (`X_T`'s fibers vs `warmRefine` cells — the §S-bridge template).
+- ~~The **point extension as a CC** object~~ — **LANDED IN FULL**: the predicate (`IsPointExtension`, universal
+  property, complete via the derived fiber coherence `relOf_diag_left_eq`) **and the construction**
+  (`pointExtension` + `isPointExtension_pointExtension` + `exists_isPointExtension` + `isPointExtension_unique`,
+  `§CC.8`, 2026-06-12). Still open: the **warmRefine↔fiber bridge** — per the direction check, to be stated at
+  bases / via the `dimWL` +1 exchange (cells=fibers at arbitrary `T` is FALSE on the bullseye).
 - ~~**General-CC `AlgIso` / `Separable`**~~ — **LANDED** (`CoherentConfig.AlgIso`/`Separable`/`SeparablePointed`;
   partner quantifies over all `CoherentConfig n`, resolving the §2 soundness gate by widening).
 - The **m-extension on `Ωᵐ`** + m-dim intersection numbers + m-separability — still lacking; needed only for
@@ -312,19 +329,21 @@ Mathlib. `Scheme.lean` is the only CC substrate.
    **✓ DONE (2026-06-12)** — `CoherentConfig` + `interNum`/`transposeRel` API + derived fiber coherence
    (`relOf_diag_left_eq`) + `AssociationScheme.toCoherentConfig` (on the seal's `hne`).
 2. **The point extension `X_µ` / `X_T` as a `CoherentConfig`** · 1 · **load-bearing.** The smallest CC ≥ X with `T`
-   singleton fibers. Connect to the warmRefine model: `X_T`'s fibers = `warmRefine … (individualizedColouring n T)`
-   cells (the §S-bridge `relOfPair_eq_of_warmRefine_determined` is the template).
-   **◐ PREDICATE DONE, CONSTRUCTION + BRIDGE OPEN (the current frontier).** Landed: `IsPointExtension` (universal
-   property, complete via fiber coherence) + `discreteCC` non-vacuity. Open (the next increment, in order):
-   (a) the **construction** — a pair-refinement saturation producing a witness `Y` with `IsPointExtension X T Y`
-   (pattern: pair-analogue of `refineStep`/`numCells` stabilization, `CascadeAffine.lean §S-stab` + the engine's
-   pigeonhole; the §CC.2 fiber-coherence argument generalizes to prove the stable colouring's axioms — the WL-stable
-   partition's counts ARE the `inter_card_eq` witness); (b) **uniqueness up to relabelling** (two universal objects
-   mutually refine ⟹ same partition) — cheap from the predicate; (c) the **warmRefine↔fiber bridge** — relate
-   `X_T`'s fibers to `warmRefine (schemeAdj S) … (individualizedColouring n T)` cells. ⚠️ Honest caution: fibers
-   (pair-coherent closure, 2-WL-flavoured) may be *finer* than 1-WL `warmRefine` cells in general; the bridge the
-   transport needs is direction-aware — see Stage 2.1's note. The §S-bridge (B1–B5) resolved exactly this for the
-   sparse slice; reuse its shape.
+   singleton fibers.
+   **✓ (a)+(b) DONE (2026-06-12, `§CC.8`)** — (a) the **construction**: `pointExtension X T` = the coherent
+   closure as a pair-refinement saturation (`pairStep` on `Setoid (Fin n × Fin n)` with *representative-indexed*
+   counts `pairCount` — no quotient/encoding in the iteration; stabilization by the `numClasses` pigeonhole
+   within `n²` rounds, the §S-stab pattern on pairs); the four CC axioms read off the fixpoint
+   (`stableSetoid_pairCount` = coherence; `pairIter_swap` = transpose; `pairIter_le_init` = diagonal + flags);
+   the universal property discharged constructively (`isPointExtension_pointExtension`, via the counting heart
+   `pairCount_eq_of_zrel` — `Z.inter_card_eq` summed fiberwise over `Z`'s class pairs, exactly the predicted
+   generalization of the §CC.2 argument) ⟹ `exists_isPointExtension` (the `ExtensionSeparable` family is never
+   empty). (b) **uniqueness up to relabelling**: `isPointExtension_unique` (mutual refinement from the predicate).
+   **OPEN: (c) the warmRefine↔fiber bridge — reshaped by the Stage-2.1 direction check (2026-06-12):** fibers are
+   *strictly finer* than 1-WL cells on the ℤ₄² bullseye at `|T|=1` (10 vs 4), so the bridge must NOT be stated as
+   cells=fibers at arbitrary `T`. State it at bases, or as the +1 exchange (1-WL at `T`+pt vs fibers at `T` — the
+   Chen–Ponomarenko `dimWL` recursion, Stage 2.2(c)). The §S-bridge (B1–B5) remains the template for the
+   fiber→1-WL direction where needed.
 3. **General `AlgIso` / `Separable` / `m-separable`** · 1 · **load-bearing.** Generalise §S.17 to `CoherentConfig`;
    prove the homogeneous `Separable` (§S.17) is the single-fiber case (reconciliation lemma).
    **◐ DONE except the reconciliation lemma** — `AlgIso`/`InducedBy`/`Separable`/`SeparablePointed` landed (partner
@@ -341,17 +360,19 @@ Target: `∀ T, SeparabilityTransports S T`. Route (the affine slice `powAffineS
 concrete template; here general). **Status note (2026-06-12): the separability-level input predicate is landed —
 `ExtensionSeparable X T` (`CoherentConfig.lean §CC.6`); state the transport against it (and `SeparablePointed`),
 not against the homogeneous §S.17 form.**
-1. **Twins ⟹ extensions algebraically isomorphic** · Stage 1.2/1.3 · **load-bearing.** A same-`warmRefine`-cell pair
-   `u,u'` from `T` ⟹ `X_{T∪{u}} ≅_alg X_{T∪{u'}}` (equal intersection numbers from equal profiles). The WL-local /
-   counting step — the B1–B5 analogue *on extensions* (reuse `relOfPair_eq_of_warmRefine_determined` /
-   `warmRefine_refineStep_samePartition`). ⚠️ **Direction caution (sharpened by the Stage-1 build):** this step
-   needs same-1-WL-cell ⟹ alg-iso of the (2-WL-flavoured, possibly finer) extensions — i.e. a *twin in the weak
-   model is a twin in the strong one*. That is genuinely stronger than the realization direction already landed
-   (`iterSet_refines_schemePartFrom`). If it fails as stated, the honest fix is to key the seal-side twin on the
-   *fiber* partition (strengthening `SeparatesAtBoundedBase`'s warmRefine to the extension's fibers would need the
-   discreteness consumers re-bridged — the B1–B5 / `discrete_of_kRoundRelationSeparates` engines are the tools).
-   Pin this with a tiny C# check (are 1-WL cells = `X_T` fibers on the residue's extensions? the probe's coherent
-   closure already computes both) before investing.
+1. **Twins ⟹ extensions algebraically isomorphic** · Stage 1.2/1.3 · **load-bearing — NOW PROBE-SHAPED
+   (2026-06-12, `Probe_Stage21_DirectionCheck_CellsVsFibers`, green; control C₁₇ asserted).** The naive statement
+   — ∀T, same-`warmRefine`-cell pair `u,u'` ⟹ `X_{T∪{u}} ≅_alg X_{T∪{u'}}` — is **REFUTED on the residue**:
+   on ℤ₄² at `T={0}`, 1-WL cells = 4 but `X_T` fibers = 10 (strictly finer; witness: cell-mates (1,7) are
+   fiber-split), and **24/30 same-cell pairs have WL-inequivalent extensions** — i.e. `CellsAreOrbits {0}` is
+   genuinely FALSE on the bullseye (the amorphic depth-1 gap, now exhibited rather than inferred). ℤ₂⁴ at
+   `T={0}`: cells = fibers (4=4), 30/30 twins equivalent — the gap is specific to the non-elementary-abelian
+   bullseye. At every tested `|T| ≥ 2` (both groups, one base per relation class + a size-3): cells = fibers AND
+   all same-cell twins extension-WL-equivalent. **What survives:** the gate decls (§2) consume the transport at
+   *bases* only, where the data is clean; and the +1 pattern (fibers at `T` ≈ cells at `T`+one point) is exactly
+   the Chen–Ponomarenko `dimWL(X) ≤ dimWL(X_α)+1` exchange — state the twin⟹alg-iso step **at bases or via the
+   recursion (sub-route (c))**, never at arbitrary `T`. The fiber→1-WL re-bridging tools, if needed, remain the
+   B1–B5 / `discrete_of_kRoundRelationSeparates` engines.
 2. **Separability of the extension** · Stage 1.3 + Lemma 2.6 · **load-bearing, the crux.** From `Separable X` (the
    §S.17/general predicate) derive separability of the relevant extension. Four sub-routes: (a) prove the inheritance
    `s(X_µ) ≤ s(X)` directly (EP [4]); or (b) use Thm 4.1's **pointed** conclusion (induced `f` controllable on `µ`)
@@ -394,6 +415,13 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
 ### Stage 4 — assembly + exceptional cases
 1. **Wire (A)+(B) ⟹ seal** · Stages 2,3 + §2 table · mechanical. Instantiate
    `separatesAtBoundedBase_of_separable_of_small` at `orbitalScheme H`, feed `reachesRigidOrCameron_viaPersistentTwinBlock`.
+   **⚠️ Keying mismatch to plan for (noted 2026-06-12):** the landed §S-gate decls (`SeparabilityTransports`,
+   `separatesAtBoundedBase_of_separable`, `…_of_small`, `CascadeAffine.lean`) are keyed on the **homogeneous** §S.17
+   `S.toAssociationScheme.Separable`, while Stages 1.3/2 deliberately target the **general** predicates
+   (`CoherentConfig.Separable` / `ExtensionSeparable` / `SeparablePointed`). The assembly therefore needs either
+   general-keyed variants of the gate decls (likely: restate `SeparabilityTransports` against `ExtensionSeparable`
+   and re-prove the two `separatesAtBoundedBase_of_separable*` wrappers — both are thin) or an adapter lemma from the
+   general form to the homogeneous one at the point of use. Cheap, but do not let Stage 4 discover it cold.
 2. **Exceptional `(p,d)` table** (Thm 1.1, only if the residue includes the cyclotomic/affine instances) · the C# bed
    (`AffineSchemeProbe`/`CatalogueSchemeProbe`) · mechanical. Reproduce the finite exceptions as `decide`-checked
    facts. **The non-affine NLS residue is outside the cyclotomic family, so likely N/A** — confirm per instance.
@@ -512,6 +540,48 @@ bullseye) says closure is the likely outcome and the build is worth it.
   `_singletonFiber`). **NEXT (Stage 1.2): the point-extension construction + the warmRefine↔fiber bridge**, then
   Stage 2 (the transport against `ExtensionSeparable`, sub-route (b)/(c) per the probe's pointed-geometric shape).
   Lean gotcha for the log: the micro-sign `µ` (U+00B5) is not a Lean identifier character — use Greek `μ` (U+03BC).
+- **2026-06-12 — THE STAGE-2.1 DIRECTION CHECK RAN: the naive twin⟹alg-iso keying is REFUTED at arbitrary `T`;
+  bases are clean; transport sub-route (c) favoured.** New fact `Probe_Stage21_DirectionCheck_CellsVsFibers`
+  (`Theorem41ConditionsProbe.cs`, green; C₁₇ control asserted — cells=fibers and all reflection twins
+  extension-equivalent). Adds a faithful 1-WL vertex refinement (the Lean `warmRefine (schemeAdj S)` mirror) and a
+  **canonical** pair-WL (round-wise sorted renaming ⟹ cross-run-comparable stable fingerprints = WL-equivalence of
+  extensions). **Findings:** (1) ℤ₄² bullseye, `T={0}`: 4 cells vs **10 fibers** — fibers strictly finer; 24/30
+  same-cell pairs give WL-inequivalent one-point-further extensions (first concrete exhibit that `CellsAreOrbits`
+  fails at depth 1 on the bullseye — cells ⊋ orbits, the amorphic gap live, consistent with "fails depth-1
+  EdgeGenerates, recovers at depth 2"). (2) ℤ₂⁴ anchor, `T={0}`: cells=fibers, 30/30 equivalent (the gap is
+  bullseye-specific). (3) ALL tested `|T|≥2` (one 2-base per relation class + a 3-base, both groups): cells=fibers,
+  every same-cell twin extension-equivalent. **Consequences:** Stage 2.1 must not be stated over arbitrary `T`
+  (false); the gate needs the transport at bases only (clean); the +1 pattern = the Chen–Ponomarenko
+  `dimWL(X) ≤ dimWL(X_α)+1` exchange ⟹ **sub-route (c) promoted to favoured — sourcing the monograph §4.2 is now
+  the Stage-2 gating action**. Also this turn: the Stage-4 keying-mismatch note added to §5 (the §S-gate decls are
+  homogeneous-`Separable`-keyed; Stage 2 targets the general predicates — plan thin general-keyed gate variants).
+  NEXT: Stage 1.2(a), the point-extension construction in Lean (route-independent — needed under every transport).
+- **2026-06-12 — STAGE 1.2(a)+(b) LANDED: THE POINT-EXTENSION CONSTRUCTION (`CoherentConfig.lean §CC.8`,
+  axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full serial build green 26s; index regenerated,
+  32 new rows described).** The coherent closure is computed as a saturation on `Setoid (Fin n × Fin n)`:
+  `extInitSetoid` (X's classes split by `extFlag` individualization flags) → `pairStep` (split each class by all
+  **representative-indexed** intersection counts `pairCount` — reference *pairs* name their classes, so the
+  iteration touches no quotient, no multiset encoding) → stabilization by the `numClasses` (= `Nat.card` of the
+  quotient) pigeonhole within `n²` rounds (`numClasses_growth` strict monovariant + `numClasses_le_sq` bound +
+  the `le_of_numClasses_le` rigidity half ⟹ `exists_pairIter_fixed`; `pairStep_stableSetoid` via
+  `Function.iterate_fixed`). The four CC axioms read off the chain: coherence IS the fixpoint property
+  (`stableSetoid_pairCount`); transpose = the swap invariant carried through every round (`pairIter_swap` via the
+  `pairCount_swap` reindexing); diagonal + `T`-singletons = split-only facts of the start (`pairIter_le_init` +
+  `extFlag_eq_of_mem`). **The universal property is discharged constructively** (`isPointExtension_pointExtension`):
+  base case reads the flags off a fission `Z`'s classes via the derived fiber coherence (`relOf_diag_left_eq` +
+  the singleton hypothesis); the inductive step is the counting heart `pairCount_eq_of_zrel` (`Z.inter_card_eq`
+  summed fiberwise over `Z`'s class pairs via `card_eq_sum_card_fiberwise`, with the `s`-conditions constant on
+  each fiber — exactly the predicted generalization of the §CC.2 argument). Headlines:
+  **`exists_isPointExtension`** (the family `ExtensionSeparable` quantifies over is inhabited for every `(X,T)` —
+  the predicate is never vacuous) and **`isPointExtension_unique`** (Stage 1.2(b), mutual refinement). Lean
+  gotchas for the log: `open scoped Classical` must be SECTION-wide (an `open … in` on one def leaves later
+  lemma sites unable to synthesize `DecidablePred` for setoid filters); `Prod.mk.injEq` is an `=` of Props, use
+  `Prod.ext_iff` where an `Iff` is needed; prefer `refine congrArg Finset.card (Finset.filter_congr ?_)` over
+  `congr 1` on filter cards (instance-stable); a doc-comment must directly precede its decl (no `open … in`
+  between); `simpa [Nat.card_eq_fintype_card]` can rewrite BOTH sides of a `Nat.card` inequality (use `calc`).
+  **NEXT (the handoff list): Stage 2 — the transport.** Gating action: source Chen–Ponomarenko §4.2
+  (`dimWL(X) ≤ dimWL(X_α)+1`) and decide sub-route (c) vs (b); any 1-WL-twin-keyed statement must be at bases
+  only (the direction-check verdict). Then the citation-checkpoint assembly (mind the §5 Stage-4 keying note).
 
 ---
 
@@ -533,6 +603,12 @@ bullseye) says closure is the likely outcome and the build is worth it.
 `Separable` / `SeparablePointed` / `Dominates` / `DominationCondition` / `IsCoupleExtension` /
 `CoupleExtensionCondition` / `Theorem41Hypotheses` / **`Theorem41Statement`** (the cited carry) / `Refines` /
 `SingletonFiber` / `IsPointExtension` / `ExtensionSeparable` / `discreteCC` (`CoherentConfig.lean`).
+**The §CC.8 construction (LANDED 2026-06-12):** `extFlag` / `extInitSetoid` / `pairCount` / `pairStep` /
+`pairIter` (+ `_zero`/`_succ`/`_le_init`/`_swap`) / `numClasses` (+ `_le_of_le`/`le_of_numClasses_le`/`_le_sq`/
+`_growth`) / `exists_pairIter_fixed` / `stableSetoid` / `pairStep_stableSetoid` / `stableSetoid_pairCount` /
+`pairCount_swap` / `pairCount_eq_of_zrel` (the counting heart) / `zrel_le_pairIter` / `stableEquiv`(`_eq_iff`) /
+**`pointExtension`** / `pointExtension_relOf_eq_iff` / **`isPointExtension_pointExtension`** /
+**`exists_isPointExtension`** / `isPointExtension_unique` (`CoherentConfig.lean §CC.8`).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

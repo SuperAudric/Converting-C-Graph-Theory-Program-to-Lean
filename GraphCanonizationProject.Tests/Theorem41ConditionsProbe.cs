@@ -528,4 +528,213 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         output.WriteLine("   (Outcomes are findings, not assertions: a FAIL here means the m=1 sufficient");
         output.WriteLine("    condition does not reach the residue — discovered for ~a day's probe instead of mid-Stage-3.)");
     }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // STAGE-2.1 DIRECTION CHECK (build doc §5 Stage 1.2(c)/2.1 ⚠️, added 2026-06-12).
+    //
+    // The transport's load-bearing model bridge: the seal's twin lives in the 1-WL
+    // vertex refinement (`warmRefine (schemeAdj S) … (individualizedColouring n T)`,
+    // the SeparatesAtBoundedBase keying), while the substrate's objects are the
+    // point extension X_T's FIBERS (pair-coherent closure, 2-WL-flavoured — never
+    // coarser than 1-WL cells).  Two questions, checked on the exact residue:
+    //
+    //   (a) cells = fibers?   Are the 1-WL cells from T exactly X_T's fibers?
+    //       (fibers ⊆ cells always; the content is the converse.)
+    //   (b) twin ⟹ alg-iso?  For every same-1-WL-cell pair (u,u') off T, are the
+    //       extensions X_{T∪{u}} and X_{T∪{u'}} WL-on-pairs-EQUIVALENT (canonical
+    //       stable-colouring fingerprints equal)?  This is Stage 2.1's actual step
+    //       — equivalence here is exactly what the Lean lemma must produce.
+    //
+    // Control: C_17 with T={0} (orbits = distance classes = cells = fibers; the ±d
+    // reflection twins must give equivalent extensions) — asserted.  Residue
+    // outcomes are findings, reported either way.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    // 1-WL vertex refinement mirroring the Lean model: edge labels = relation
+    // indices (schemeAdj), trivial P, initial colours = individualizedColouring.
+    static int[] WarmRefineCells(CC x, int[] t)
+    {
+        int n = x.N;
+        var col = new int[n];
+        for (int i = 0; i < t.Length; i++) col[t[i]] = i + 1;
+        int classes = col.Distinct().Count();
+        var sb = new StringBuilder();
+        while (true)
+        {
+            var sigMap = new Dictionary<string, int>();
+            var nc = new int[n];
+            var arr = new (int cu, int rel)[n - 1];
+            for (int v = 0; v < n; v++)
+            {
+                int j = 0;
+                for (int u = 0; u < n; u++) if (u != v) arr[j++] = (col[u], x.Rel[v, u]);
+                Array.Sort(arr);
+                sb.Clear(); sb.Append(col[v]);
+                foreach (var (cu, rel) in arr) { sb.Append('|'); sb.Append(cu); sb.Append(','); sb.Append(rel); }
+                string s = sb.ToString();
+                if (!sigMap.TryGetValue(s, out int cc)) { cc = sigMap.Count; sigMap[s] = cc; }
+                nc[v] = cc;
+            }
+            if (sigMap.Count == classes) return col;   // split-only ⟹ same count = stable
+            col = nc; classes = sigMap.Count;
+        }
+    }
+
+    // Canonical WL-on-pairs: colour ids renamed each round by sorted signature
+    // order, so the stable colouring's fingerprint is comparable ACROSS runs
+    // (two initial configurations get equal fingerprints iff pair-WL cannot
+    // distinguish them).  Returns the stable colour matrix + the fingerprint.
+    static (int[,] colour, string fingerprint) CanonicalPairWL(int n, Func<int, int, long> init)
+    {
+        var colour = new int[n, n];
+        {
+            var keys = new SortedSet<long>();
+            for (int u = 0; u < n; u++) for (int v = 0; v < n; v++) keys.Add(init(u, v));
+            var map0 = new Dictionary<long, int>(); int id = 0;
+            foreach (long k in keys) map0[k] = id++;
+            for (int u = 0; u < n; u++) for (int v = 0; v < n; v++) colour[u, v] = map0[init(u, v)];
+        }
+        int classes = 0; { var s = new HashSet<int>(); foreach (int c in colour) s.Add(c); classes = s.Count; }
+        var sb = new StringBuilder();
+        var arr = new (int a, int b)[n];
+        while (true)
+        {
+            var sigs = new string[n, n];
+            var distinct = new SortedSet<string>(StringComparer.Ordinal);
+            for (int u = 0; u < n; u++)
+                for (int v = 0; v < n; v++)
+                {
+                    for (int w = 0; w < n; w++) arr[w] = (colour[u, w], colour[w, v]);
+                    Array.Sort(arr);
+                    sb.Clear(); sb.Append(colour[u, v]);
+                    foreach (var (a, b) in arr) { sb.Append('|'); sb.Append(a); sb.Append(','); sb.Append(b); }
+                    sigs[u, v] = sb.ToString();
+                    distinct.Add(sigs[u, v]);
+                }
+            if (distinct.Count == classes)
+            {
+                // stable: fingerprint = sorted final signatures with multiplicities
+                var counts = new SortedDictionary<string, int>(StringComparer.Ordinal);
+                foreach (string s in sigs) counts[s] = counts.TryGetValue(s, out int k) ? k + 1 : 1;
+                var fp = new StringBuilder();
+                foreach (var kv in counts) { fp.Append(kv.Value); fp.Append('×'); fp.Append(kv.Key); fp.Append('\n'); }
+                return (colour, fp.ToString());
+            }
+            var rename = new Dictionary<string, int>(StringComparer.Ordinal); int id = 0;
+            foreach (string s in distinct) rename[s] = id++;
+            for (int u = 0; u < n; u++) for (int v = 0; v < n; v++) colour[u, v] = rename[sigs[u, v]];
+            classes = distinct.Count;
+        }
+    }
+
+    static long ExtInit(CC x, int[] pts, int u, int v)
+    {
+        long pu = 0, pv = 0;
+        for (int i = 0; i < pts.Length; i++) { if (pts[i] == u) pu = i + 1; if (pts[i] == v) pv = i + 1; }
+        return ((long)x.Rel[u, v] * 64 + pu) * 64 + pv;
+    }
+
+    // fibers of X_T: the diagonal classes of the pair-coherent closure
+    static int[] FibersOf(CC x, int[] t)
+    {
+        var (colour, _) = CanonicalPairWL(x.N, (u, v) => ExtInit(x, t, u, v));
+        var diag = new int[x.N];
+        for (int v = 0; v < x.N; v++) diag[v] = colour[v, v];
+        return diag;
+    }
+
+    static bool SamePartition(int[] a, int[] b)
+    {
+        for (int u = 0; u < a.Length; u++)
+            for (int v = u + 1; v < a.Length; v++)
+                if ((a[u] == a[v]) != (b[u] == b[v])) return false;
+        return true;
+    }
+
+    static int NumCells(int[] a) => a.Distinct().Count();
+
+    // (a) + (b) for one scheme and one base T; returns (cellsEqFibers, twinPairs, twinMismatches)
+    (bool eq, int pairs, int mismatches) DirectionCheck(string label, CC x, int[] t)
+    {
+        var cells = WarmRefineCells(x, t);
+        var fibers = FibersOf(x, t);
+        bool eq = SamePartition(cells, fibers);
+        string witness = "";
+        if (!eq)
+        {
+            for (int u = 0; u < x.N && witness == ""; u++)
+                for (int v = u + 1; v < x.N; v++)
+                    if (cells[u] == cells[v] && fibers[u] != fibers[v]) { witness = $"  witness: cell-mates ({u},{v}) split by fibers"; break; }
+        }
+        output.WriteLine($"    {label} T={{{string.Join(",", t)}}}:  1-WL cells={NumCells(cells),3}  X_T fibers={NumCells(fibers),3}  " +
+                         $"cells=fibers: {(eq ? "YES" : "NO")}{witness}");
+
+        // (b) per same-cell pair off T: extension fingerprints must match
+        var inT = new bool[x.N]; foreach (int p in t) inT[p] = true;
+        var fp = new Dictionary<int, string>();
+        int pairs = 0, mismatches = 0; string firstBad = "";
+        for (int u = 0; u < x.N; u++)
+            for (int v = u + 1; v < x.N; v++)
+            {
+                if (inT[u] || inT[v] || cells[u] != cells[v]) continue;
+                foreach (int w in new[] { u, v })
+                    if (!fp.ContainsKey(w))
+                    {
+                        var ext = t.Append(w).ToArray();
+                        fp[w] = CanonicalPairWL(x.N, (a, b) => ExtInit(x, ext, a, b)).fingerprint;
+                    }
+                pairs++;
+                if (fp[u] != fp[v]) { mismatches++; if (firstBad == "") firstBad = $"  FIRST MISMATCH: ({u},{v})"; }
+            }
+        output.WriteLine($"      twin⟹alg-iso: {pairs} same-cell pairs off T, extension-WL-equivalent: {pairs - mismatches}/{pairs}" +
+                         $"{(mismatches > 0 ? $"  ⚠️ {mismatches} MISMATCHES{firstBad}" : "  — all twins give WL-equivalent extensions")}");
+        return (eq, pairs, mismatches);
+    }
+
+    [Fact]
+    public void Probe_Stage21_DirectionCheck_CellsVsFibers()
+    {
+        output.WriteLine("── Stage-2.1 direction check — 1-WL cells vs X_T fibers, twin ⟹ alg-iso ──");
+        output.WriteLine("   (a) are warmRefine cells = point-extension fibers on the residue?");
+        output.WriteLine("   (b) do same-cell twins give WL-equivalent one-point-further extensions?");
+        output.WriteLine("");
+
+        // control: C_17 — orbits = distance classes; cells, fibers, and twins all behave
+        var c17 = CycleScheme(17);
+        var (eqC, pairsC, misC) = DirectionCheck("C_17 (control)", c17, new[] { 0 });
+        Assert.True(eqC, "C_17 control: 1-WL cells from {0} must equal X_{0} fibers");
+        Assert.True(pairsC > 0 && misC == 0, "C_17 control: reflection twins must give WL-equivalent extensions");
+        output.WriteLine("");
+
+        // the residue
+        var results = new List<(string grp, string t, bool eq, int pairs, int mis)>();
+        foreach (var g in new[] { MakeGroup("Z4^2", 4, 4), MakeGroup("Z2^4", 2, 2, 2, 2) })
+        {
+            var x = ClebschScheme(g);
+            Assert.NotNull(x);
+            output.WriteLine($"   {g.Name} (rank-4 amorphic-NLS Clebsch, primitive={(PrimitiveScheme(x!) ? "y" : "n")}):");
+
+            // representatives: z_i = first vertex with Rel[0,z]=i (one per non-diagonal class)
+            var z = new int[4];
+            for (int i = 1; i <= 3; i++) { for (int v = 1; v < x!.N; v++) if (x.Rel[0, v] == i) { z[i] = v; break; } }
+
+            var bases = new List<int[]> { new[] { 0 } };
+            for (int i = 1; i <= 3; i++) bases.Add(new[] { 0, z[i] });
+            bases.Add(new[] { 0, z[1], z[2] });
+
+            foreach (var t in bases)
+            {
+                var (eq, pairs, mis) = DirectionCheck(g.Name, x!, t);
+                results.Add((g.Name, $"{{{string.Join(",", t)}}}", eq, pairs, mis));
+            }
+            output.WriteLine("");
+        }
+
+        output.WriteLine("── VERDICT (Stage 2.1 model bridge) ──");
+        bool allEq = results.All(r => r.eq), allTwin = results.All(r => r.mis == 0);
+        foreach (var r in results)
+            output.WriteLine($"   {r.grp,-6} T={r.t,-12}: cells=fibers {(r.eq ? "YES" : "NO ")}  twins equiv {r.pairs - r.mis}/{r.pairs}");
+        output.WriteLine($"   (a) cells = fibers on the residue: {(allEq ? "EVERYWHERE — the bridge is an equality; keep the warmRefine keying" : "NOT everywhere — fibers strictly finer somewhere; the twin keying caution (Stage 2.1 ⚠️) is LIVE")}");
+        output.WriteLine($"   (b) twin ⟹ WL-equivalent extensions: {(allTwin ? "HOLDS on all tested pairs — Stage 2.1's statement is empirically sound as keyed" : "FAILS somewhere — re-key the seal-side twin on fibers before Lean investment")}");
+    }
 }

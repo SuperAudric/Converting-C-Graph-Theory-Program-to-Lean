@@ -31,8 +31,13 @@ plus the Stage-1.1/1.3 skeleton:
   geometric) and FAIL on the residue itself — the conditions activate exactly on the extension.
 * **`Refines` / `SingletonFiber` / `IsPointExtension`** — the point extension `X_T` as a universal
   property (coarsest coherent fission of `X` with `T` singled out), with the discrete configuration
-  `discreteCC` witnessing that the fission family is nonempty. The *construction* of the closure (the
-  pair-refinement saturation) is a later increment; consumers should key on the predicate.
+  `discreteCC` witnessing that the fission family is nonempty.
+* **§CC.8 — the construction (Stage 1.2(a), landed 2026-06-12)**: `pointExtension X T`, the coherent
+  closure computed by a pair-refinement saturation (`pairStep` on `Setoid (Fin n × Fin n)`, stabilized
+  within `n²` rounds by the class-count pigeonhole), with `isPointExtension_pointExtension` discharging
+  the universal property — so `IsPointExtension` is inhabited for every `(X, T)`
+  (`exists_isPointExtension`), and unique up to mutual refinement (`isPointExtension_unique`).
+  Consumers should still key on the predicate; the construction is the witness.
 
 Quality bar: axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`;
 cited results enter as theorem-statement hypotheses (`Theorem41Statement`), never `axiom`s.
@@ -297,8 +302,8 @@ variable {n : Nat}
 singleton fiber**. We model it as a predicate; the §CC.2 fiber-coherence lemma is what makes this
 universal property equivalent to the classical "coarsest CC finer than the `T`-individualized
 starting partition" (a CC with `T`-singleton fibers cannot merge pairs across the `T`-flags: the
-source/target fibers are class-determined). The closure's *construction* (pair-refinement saturation)
-is a later increment; consumers key on the predicate. -/
+source/target fibers are class-determined). The closure's *construction* is §CC.8 (`pointExtension`
++ `isPointExtension_pointExtension`); consumers key on the predicate. -/
 
 /-- `Y` **refines** `X`: `Y`'s pair partition is finer (each `Y`-class lies inside an `X`-class). -/
 def Refines (Y X : CoherentConfig n) : Prop :=
@@ -365,6 +370,484 @@ theorem discreteCC_singletonFiber (t : Fin n) : SingletonFiber (discreteCC n) t 
   have h' : (u, u) = (t, t) := finProdFinEquiv.injective h
   rw [Prod.mk.injEq] at h'
   exact h'.1
+
+/-! ### §CC.8 — The point-extension construction (pair-refinement saturation; Stage 1.2(a))
+
+The actual witness for `IsPointExtension X T`: the coherent closure, computed as a saturation on
+`Setoid (Fin n × Fin n)`. Starting from `X`'s classes split by the `T`-individualization flags
+(`extInitSetoid`), one `pairStep` splits each class by all **representative-indexed intersection
+counts** (`pairCount` — counts are indexed by reference *pairs*, not class indices, so no quotient
+or encoding machinery enters the iteration). The class count `numClasses` (= `Nat.card` of the
+quotient) strictly increases at every non-fixed step and is bounded by `n²`, so the chain stabilizes
+within `n²` rounds (`pairStep_stableSetoid` — the `CascadeAffine §S-stab` pigeonhole, on pairs). At
+the fixpoint the count conditions ARE the coherence axiom `inter_card_eq`; the transpose, diagonal,
+and flag facts are split-only invariants carried from the start (`pairIter_swap`, `pairIter_le_init`).
+The universal property is the standard closure-is-minimum induction: a coherent fission `Z` of `X`
+with `T`-singleton fibers refines the start (fiber coherence `relOf_diag_left_eq` reads the flags off
+`Z`'s classes) and refines each successive stage (`Z`'s own `inter_card_eq`, summed fiberwise over
+`Z`'s class pairs — `pairCount_eq_of_zrel`). -/
+
+section PointExtensionConstruction
+
+open scoped Classical
+
+variable (X : CoherentConfig n) (T : Finset (Fin n))
+
+/-- The `T`-individualization flag: `t ∈ T` carries the unique flag `t.val + 1`, everything else `0`
+(the `individualizedColouring` pattern — distinct `T`-points get distinct flags). -/
+def extFlag (u : Fin n) : Nat := if u ∈ T then u.val + 1 else 0
+
+theorem extFlag_eq_of_mem {t u : Fin n} (ht : t ∈ T) (h : extFlag T u = extFlag T t) : u = t := by
+  unfold extFlag at h
+  rw [if_pos ht] at h
+  by_cases hu : u ∈ T
+  · rw [if_pos hu] at h
+    exact Fin.ext (Nat.succ_injective h)
+  · rw [if_neg hu] at h
+    exact absurd h.symm (Nat.succ_ne_zero _)
+
+/-- The initial pair partition: `X`'s classes, split by the endpoint flags. -/
+def extInitSetoid : Setoid (Fin n × Fin n) where
+  r p q := X.relOf p.1 p.2 = X.relOf q.1 q.2 ∧
+    extFlag T p.1 = extFlag T q.1 ∧ extFlag T p.2 = extFlag T q.2
+  iseqv := ⟨fun _ => ⟨rfl, rfl, rfl⟩,
+            fun h => ⟨h.1.symm, h.2.1.symm, h.2.2.symm⟩,
+            fun h h' => ⟨h.1.trans h'.1, h.2.1.trans h'.2.1, h.2.2.trans h'.2.2⟩⟩
+
+/-- The intersection count of `(u, v)` against the classes of the reference pairs `x`, `y` under the
+pair partition `s` — the quantity one refinement round splits by. Representative-indexed: `x`, `y`
+name their classes, so the iteration never materializes a quotient. -/
+noncomputable def pairCount (s : Setoid (Fin n × Fin n)) (u v : Fin n)
+    (x y : Fin n × Fin n) : Nat :=
+  (Finset.univ.filter fun w => s (u, w) x ∧ s (w, v) y).card
+
+/-- One pair-refinement round: split each class by all the intersection counts. -/
+def pairStep (s : Setoid (Fin n × Fin n)) : Setoid (Fin n × Fin n) where
+  r p q := s p q ∧ ∀ x y : Fin n × Fin n,
+    pairCount s p.1 p.2 x y = pairCount s q.1 q.2 x y
+  iseqv := ⟨fun p => ⟨s.iseqv.refl p, fun _ _ => rfl⟩,
+            fun h => ⟨s.iseqv.symm h.1, fun x y => (h.2 x y).symm⟩,
+            fun h h' => ⟨s.iseqv.trans h.1 h'.1, fun x y => (h.2 x y).trans (h'.2 x y)⟩⟩
+
+/-- The saturation chain from the `T`-individualized start. -/
+def pairIter (k : Nat) : Setoid (Fin n × Fin n) := pairStep^[k] (extInitSetoid X T)
+
+theorem pairIter_zero : pairIter X T 0 = extInitSetoid X T := rfl
+
+theorem pairIter_succ (k : Nat) : pairIter X T (k + 1) = pairStep (pairIter X T k) :=
+  Function.iterate_succ_apply' _ _ _
+
+theorem pairStep_le {s : Setoid (Fin n × Fin n)} {p q : Fin n × Fin n}
+    (h : pairStep s p q) : s p q := h.1
+
+/-- Every stage refines the start (split-only). -/
+theorem pairIter_le_init (k : Nat) {p q : Fin n × Fin n}
+    (h : pairIter X T k p q) : extInitSetoid X T p q := by
+  induction k with
+  | zero => exact h
+  | succ k ih =>
+    rw [pairIter_succ] at h
+    exact ih (pairStep_le h)
+
+/-! #### Stabilization (the pigeonhole on the class count) -/
+
+/-- The number of classes of a pair partition. -/
+noncomputable def numClasses (s : Setoid (Fin n × Fin n)) : Nat := Nat.card (Quotient s)
+
+/-- The canonical map between quotients of comparable partitions. -/
+def quotMap {s s' : Setoid (Fin n × Fin n)}
+    (h : ∀ p q : Fin n × Fin n, s' p q → s p q) : Quotient s' → Quotient s :=
+  Quotient.lift (fun p => Quotient.mk s p) (fun a b hab => Quotient.sound (h a b hab))
+
+theorem quotMap_surjective {s s' : Setoid (Fin n × Fin n)}
+    (h : ∀ p q : Fin n × Fin n, s' p q → s p q) : Function.Surjective (quotMap h) := by
+  intro qs
+  obtain ⟨p, rfl⟩ := Quotient.exists_rep qs
+  exact ⟨Quotient.mk s' p, rfl⟩
+
+/-- Refining cannot lose classes: the coarser partition's quotient receives a surjection. -/
+theorem numClasses_le_of_le {s s' : Setoid (Fin n × Fin n)}
+    (h : ∀ p q : Fin n × Fin n, s' p q → s p q) : numClasses s ≤ numClasses s' :=
+  Nat.card_le_card_of_surjective _ (quotMap_surjective h)
+
+/-- The rigidity half of the pigeonhole: a refinement with no more classes is no refinement. -/
+theorem le_of_numClasses_le {s s' : Setoid (Fin n × Fin n)}
+    (hle : ∀ p q : Fin n × Fin n, s' p q → s p q)
+    (hcard : numClasses s' ≤ numClasses s) :
+    ∀ p q : Fin n × Fin n, s p q → s' p q := by
+  have hbij : Function.Bijective (quotMap hle) :=
+    (Nat.bijective_iff_surjective_and_card _).mpr
+      ⟨quotMap_surjective hle, le_antisymm hcard (numClasses_le_of_le hle)⟩
+  intro p q hpq
+  have hmk : quotMap hle (Quotient.mk s' p) = quotMap hle (Quotient.mk s' q) := by
+    show (Quotient.mk s p : Quotient s) = Quotient.mk s q
+    exact Quotient.sound hpq
+  exact Quotient.exact (hbij.injective hmk)
+
+theorem numClasses_le_sq (s : Setoid (Fin n × Fin n)) : numClasses s ≤ n * n := by
+  have hsurj : Function.Surjective (Quotient.mk s) := fun q => ⟨q.out, Quotient.out_eq q⟩
+  calc numClasses s ≤ Nat.card (Fin n × Fin n) := Nat.card_le_card_of_surjective _ hsurj
+    _ = n * n := by simp
+
+/-- Strict growth before the fixpoint: `k` non-fixed rounds force `≥ k` extra classes. -/
+theorem numClasses_growth (k : Nat)
+    (h : ∀ j < k, pairStep (pairIter X T j) ≠ pairIter X T j) :
+    numClasses (pairIter X T 0) + k ≤ numClasses (pairIter X T k) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have ih' := ih (fun j hj => h j (Nat.lt_succ_of_lt hj))
+    have hle : numClasses (pairIter X T k) ≤ numClasses (pairIter X T (k + 1)) := by
+      rw [pairIter_succ]
+      exact numClasses_le_of_le (fun _ _ h => pairStep_le h)
+    have hne : numClasses (pairIter X T k) ≠ numClasses (pairIter X T (k + 1)) := by
+      intro heq
+      refine h k (Nat.lt_succ_self k) (Setoid.ext fun p q => ?_)
+      constructor
+      · exact pairStep_le
+      · intro hpq
+        refine le_of_numClasses_le (fun _ _ h => pairStep_le h) ?_ p q hpq
+        rw [← pairIter_succ]
+        exact le_of_eq heq.symm
+    omega
+
+/-- The chain reaches a fixpoint within `n²` rounds. -/
+theorem exists_pairIter_fixed :
+    ∃ k ≤ n * n, pairStep (pairIter X T k) = pairIter X T k := by
+  rcases Nat.eq_zero_or_pos n with hn | hn
+  · refine ⟨0, Nat.zero_le _, Setoid.ext fun p _ => ?_⟩
+    subst hn
+    exact p.1.elim0
+  · by_contra hcon
+    push Not at hcon
+    have hgrow := numClasses_growth X T (n * n + 1)
+      (fun j hj => hcon j (by omega))
+    have h1 : 1 ≤ numClasses (pairIter X T 0) := by
+      haveI : Nonempty (Fin n × Fin n) := ⟨⟨⟨0, hn⟩, ⟨0, hn⟩⟩⟩
+      haveI : Nonempty (Quotient (pairIter X T 0)) := Nonempty.map (Quotient.mk _) ‹_›
+      exact Nat.card_pos
+    have hb := numClasses_le_sq (pairIter X T (n * n + 1))
+    omega
+
+/-- The stable pair partition — the coherent closure of the `T`-individualized start. -/
+def stableSetoid : Setoid (Fin n × Fin n) := pairIter X T (n * n)
+
+/-- The stable partition is a `pairStep` fixpoint. -/
+theorem pairStep_stableSetoid : pairStep (stableSetoid X T) = stableSetoid X T := by
+  obtain ⟨k, hk, hfix⟩ := exists_pairIter_fixed X T
+  have hstab : stableSetoid X T = pairIter X T k := by
+    show pairStep^[n * n] (extInitSetoid X T) = pairIter X T k
+    have hsplit : n * n = (n * n - k) + k := by omega
+    rw [hsplit, Function.iterate_add_apply]
+    exact Function.iterate_fixed hfix (n * n - k)
+  rw [hstab, hfix]
+
+/-- The fixpoint property, extracted: same stable class ⟹ all intersection counts agree. -/
+theorem stableSetoid_pairCount {p q : Fin n × Fin n} (h : stableSetoid X T p q) :
+    ∀ x y : Fin n × Fin n,
+      pairCount (stableSetoid X T) p.1 p.2 x y = pairCount (stableSetoid X T) q.1 q.2 x y := by
+  have h' : pairStep (stableSetoid X T) p q := by
+    rw [pairStep_stableSetoid]
+    exact h
+  exact h'.2
+
+/-! #### Split-only invariants: transpose and the swap -/
+
+/-- Counts of the swapped pair, for a swap-stable partition: a pure reindexing. -/
+theorem pairCount_swap {s : Setoid (Fin n × Fin n)}
+    (hsw : ∀ p q : Fin n × Fin n, s p q → s p.swap q.swap)
+    (u v : Fin n) (x y : Fin n × Fin n) :
+    pairCount s v u x y = pairCount s u v y.swap x.swap := by
+  have hiff : ∀ (p z : Fin n × Fin n), s p z ↔ s p.swap z.swap := by
+    intro p z
+    exact ⟨fun h => hsw _ _ h, fun h => by simpa using hsw _ _ h⟩
+  unfold pairCount
+  refine congrArg Finset.card (Finset.filter_congr ?_)
+  intro w _
+  constructor
+  · rintro ⟨h1, h2⟩
+    exact ⟨(hiff (w, u) y).mp h2, (hiff (v, w) x).mp h1⟩
+  · rintro ⟨h1, h2⟩
+    refine ⟨?_, ?_⟩
+    · have := (hiff (w, v) x.swap).mp h2
+      simpa using this
+    · have := (hiff (u, w) y.swap).mp h1
+      simpa using this
+
+/-- Every stage is swap-stable (the transpose invariant). -/
+theorem pairIter_swap (k : Nat) :
+    ∀ p q : Fin n × Fin n, pairIter X T k p q → pairIter X T k p.swap q.swap := by
+  induction k with
+  | zero =>
+    rintro p q ⟨hrel, h1, h2⟩
+    exact ⟨X.transpose_eq hrel, h2, h1⟩
+  | succ k ih =>
+    intro p q h
+    rw [pairIter_succ] at h ⊢
+    refine ⟨ih p q h.1, ?_⟩
+    intro x y
+    have hp : pairCount (pairIter X T k) p.2 p.1 x y =
+        pairCount (pairIter X T k) p.1 p.2 y.swap x.swap := pairCount_swap ih _ _ _ _
+    have hq : pairCount (pairIter X T k) q.2 q.1 x y =
+        pairCount (pairIter X T k) q.1 q.2 y.swap x.swap := pairCount_swap ih _ _ _ _
+    calc pairCount (pairIter X T k) p.swap.1 p.swap.2 x y
+        = pairCount (pairIter X T k) p.1 p.2 y.swap x.swap := hp
+      _ = pairCount (pairIter X T k) q.1 q.2 y.swap x.swap := h.2 y.swap x.swap
+      _ = pairCount (pairIter X T k) q.swap.1 q.swap.2 x y := hq.symm
+
+/-! #### The universal-property induction -/
+
+/-- **The counting heart of the universal property**: a coherent fission `Z` whose classes refine the
+pair partition `s` has `s`-counts constant on `Z`-classes — `Z.inter_card_eq` summed fiberwise over
+`Z`'s class pairs. -/
+theorem pairCount_eq_of_zrel {Z : CoherentConfig n} {s : Setoid (Fin n × Fin n)}
+    (hle : ∀ p q : Fin n × Fin n, Z.relOf p.1 p.2 = Z.relOf q.1 q.2 → s p q)
+    {u v u' v' : Fin n} (h : Z.relOf u v = Z.relOf u' v') (x y : Fin n × Fin n) :
+    pairCount s u v x y = pairCount s u' v' x y := by
+  unfold pairCount
+  rw [Finset.card_eq_sum_card_fiberwise
+        (f := fun w => (Z.relOf u w, Z.relOf w v)) (t := Finset.univ)
+        (fun w _ => Finset.mem_univ _),
+      Finset.card_eq_sum_card_fiberwise
+        (f := fun w => (Z.relOf u' w, Z.relOf w v')) (t := Finset.univ)
+        (fun w _ => Finset.mem_univ _)]
+  refine Finset.sum_congr rfl fun ab _ => ?_
+  rw [Finset.filter_filter, Finset.filter_filter]
+  -- the bare Z-fibers have equal cardinality (Z's coherence axiom)
+  have hZfib : (Finset.univ.filter fun w => (Z.relOf u w, Z.relOf w v) = ab).card =
+      (Finset.univ.filter fun w => (Z.relOf u' w, Z.relOf w v') = ab).card := by
+    have e1 : (Finset.univ.filter fun w => (Z.relOf u w, Z.relOf w v) = ab) =
+        Finset.univ.filter fun w => Z.relOf u w = ab.1 ∧ Z.relOf w v = ab.2 :=
+      Finset.filter_congr fun w _ => Prod.ext_iff
+    have e2 : (Finset.univ.filter fun w => (Z.relOf u' w, Z.relOf w v') = ab) =
+        Finset.univ.filter fun w => Z.relOf u' w = ab.1 ∧ Z.relOf w v' = ab.2 :=
+      Finset.filter_congr fun w _ => Prod.ext_iff
+    rw [e1, e2]
+    exact Z.inter_card_eq h ab.1 ab.2
+  by_cases hrep : ∃ w₀ : Fin n, Z.relOf u w₀ = ab.1 ∧ Z.relOf w₀ v = ab.2
+  · obtain ⟨w₀, hw1, hw2⟩ := hrep
+    -- a matching representative on the (u', v') side
+    have hpos : 0 < (Finset.univ.filter fun w => (Z.relOf u' w, Z.relOf w v') = ab).card := by
+      rw [← hZfib]
+      refine Finset.card_pos.mpr ⟨w₀, ?_⟩
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and, Prod.ext_iff]
+      exact ⟨hw1, hw2⟩
+    obtain ⟨w₀', hw₀'⟩ := Finset.card_pos.mp hpos
+    rw [Finset.mem_filter, Prod.ext_iff] at hw₀'
+    obtain ⟨-, hw1', hw2'⟩ := hw₀'
+    -- the s-conditions are constant on each fiber, with the same value on both sides
+    have htrans : ∀ {w : Fin n}, Z.relOf u w = ab.1 → Z.relOf w v = ab.2 →
+        ((s (u, w) x ∧ s (w, v) y) ↔ (s (u, w₀) x ∧ s (w₀, v) y)) := by
+      intro w hwa hwb
+      have h1 : s (u, w) (u, w₀) := hle _ _ (by simp [hwa, hw1])
+      have h2 : s (w, v) (w₀, v) := hle _ _ (by simp [hwb, hw2])
+      constructor
+      · rintro ⟨ha, hb⟩
+        exact ⟨s.iseqv.trans (s.iseqv.symm h1) ha, s.iseqv.trans (s.iseqv.symm h2) hb⟩
+      · rintro ⟨ha, hb⟩
+        exact ⟨s.iseqv.trans h1 ha, s.iseqv.trans h2 hb⟩
+    have htrans' : ∀ {w : Fin n}, Z.relOf u' w = ab.1 → Z.relOf w v' = ab.2 →
+        ((s (u', w) x ∧ s (w, v') y) ↔ (s (u, w₀) x ∧ s (w₀, v) y)) := by
+      intro w hwa hwb
+      have h1 : s (u', w) (u, w₀) := hle _ _ (by simp [hwa, hw1])
+      have h2 : s (w, v') (w₀, v) := hle _ _ (by simp [hwb, hw2])
+      constructor
+      · rintro ⟨ha, hb⟩
+        exact ⟨s.iseqv.trans (s.iseqv.symm h1) ha, s.iseqv.trans (s.iseqv.symm h2) hb⟩
+      · rintro ⟨ha, hb⟩
+        exact ⟨s.iseqv.trans h1 ha, s.iseqv.trans h2 hb⟩
+    by_cases hC : s (u, w₀) x ∧ s (w₀, v) y
+    · -- the s-conditions hold on both fibers: counts reduce to the bare fibers
+      have hu : (Finset.univ.filter fun w =>
+          (s (u, w) x ∧ s (w, v) y) ∧ (Z.relOf u w, Z.relOf w v) = ab) =
+          Finset.univ.filter fun w => (Z.relOf u w, Z.relOf w v) = ab := by
+        refine Finset.filter_congr fun w _ => ?_
+        constructor
+        · exact And.right
+        · intro hfib
+          rw [Prod.ext_iff] at hfib
+          refine ⟨(htrans hfib.1 hfib.2).mpr hC, ?_⟩
+          rw [Prod.ext_iff]
+          exact hfib
+      have hu' : (Finset.univ.filter fun w =>
+          (s (u', w) x ∧ s (w, v') y) ∧ (Z.relOf u' w, Z.relOf w v') = ab) =
+          Finset.univ.filter fun w => (Z.relOf u' w, Z.relOf w v') = ab := by
+        refine Finset.filter_congr fun w _ => ?_
+        constructor
+        · exact And.right
+        · intro hfib
+          rw [Prod.ext_iff] at hfib
+          refine ⟨(htrans' hfib.1 hfib.2).mpr hC, ?_⟩
+          rw [Prod.ext_iff]
+          exact hfib
+      rw [hu, hu']
+      exact hZfib
+    · -- the s-conditions fail on both fibers: both counts are zero
+      have hu : (Finset.univ.filter fun w =>
+          (s (u, w) x ∧ s (w, v) y) ∧ (Z.relOf u w, Z.relOf w v) = ab) = ∅ := by
+        refine Finset.filter_eq_empty_iff.mpr fun w _ hw => ?_
+        obtain ⟨hs, hfib⟩ := hw
+        rw [Prod.ext_iff] at hfib
+        exact hC ((htrans hfib.1 hfib.2).mp hs)
+      have hu' : (Finset.univ.filter fun w =>
+          (s (u', w) x ∧ s (w, v') y) ∧ (Z.relOf u' w, Z.relOf w v') = ab) = ∅ := by
+        refine Finset.filter_eq_empty_iff.mpr fun w _ hw => ?_
+        obtain ⟨hs, hfib⟩ := hw
+        rw [Prod.ext_iff] at hfib
+        exact hC ((htrans' hfib.1 hfib.2).mp hs)
+      rw [hu, hu']
+  · -- the fiber is empty on both sides
+    push Not at hrep
+    have hemptyU : (Finset.univ.filter fun w => (Z.relOf u w, Z.relOf w v) = ab) = ∅ := by
+      refine Finset.filter_eq_empty_iff.mpr fun w _ hfib => ?_
+      rw [Prod.ext_iff] at hfib
+      exact hrep w hfib.1 hfib.2
+    have hemptyU' : (Finset.univ.filter fun w => (Z.relOf u' w, Z.relOf w v') = ab) = ∅ := by
+      rw [← Finset.card_eq_zero, ← hZfib, Finset.card_eq_zero]
+      exact hemptyU
+    have h1 : (Finset.univ.filter fun w =>
+        (s (u, w) x ∧ s (w, v) y) ∧ (Z.relOf u w, Z.relOf w v) = ab) = ∅ := by
+      refine Finset.filter_eq_empty_iff.mpr fun w _ hw => ?_
+      exact Finset.filter_eq_empty_iff.mp hemptyU (Finset.mem_univ w) hw.2
+    have h2 : (Finset.univ.filter fun w =>
+        (s (u', w) x ∧ s (w, v') y) ∧ (Z.relOf u' w, Z.relOf w v') = ab) = ∅ := by
+      refine Finset.filter_eq_empty_iff.mpr fun w _ hw => ?_
+      exact Finset.filter_eq_empty_iff.mp hemptyU' (Finset.mem_univ w) hw.2
+    rw [h1, h2]
+
+/-- A coherent fission of `X` with `T`-singleton fibers refines every stage of the chain. -/
+theorem zrel_le_pairIter (Z : CoherentConfig n) (hZX : Refines Z X)
+    (hT : ∀ t ∈ T, SingletonFiber Z t) (k : Nat) :
+    ∀ p q : Fin n × Fin n, Z.relOf p.1 p.2 = Z.relOf q.1 q.2 → pairIter X T k p q := by
+  induction k with
+  | zero =>
+    intro p q h
+    refine ⟨hZX _ _ _ _ h, ?_, ?_⟩
+    · -- source flags, from fiber coherence + the singleton hypothesis
+      have hd := Z.relOf_diag_left_eq h
+      by_cases h1 : p.1 ∈ T
+      · rw [(hT p.1 h1) q.1 hd.symm]
+      · by_cases h2 : q.1 ∈ T
+        · have heq := (hT q.1 h2) p.1 hd
+          rw [heq] at h1
+          exact absurd h2 h1
+        · unfold extFlag
+          rw [if_neg h1, if_neg h2]
+    · have hd := Z.relOf_diag_right_eq h
+      by_cases h1 : p.2 ∈ T
+      · rw [(hT p.2 h1) q.2 hd.symm]
+      · by_cases h2 : q.2 ∈ T
+        · have heq := (hT q.2 h2) p.2 hd
+          rw [heq] at h1
+          exact absurd h2 h1
+        · unfold extFlag
+          rw [if_neg h1, if_neg h2]
+  | succ k ih =>
+    intro p q h
+    rw [pairIter_succ]
+    exact ⟨ih p q h, fun x y => pairCount_eq_of_zrel (fun p q h => ih p q h) h x y⟩
+
+/-! #### The closure as a `CoherentConfig`, and the headline -/
+
+/-- The class indexing of the stable partition. -/
+noncomputable def stableEquiv :
+    Quotient (stableSetoid X T) ≃ Fin (Nat.card (Quotient (stableSetoid X T))) :=
+  Finite.equivFin _
+
+theorem stableEquiv_eq_iff {p q : Fin n × Fin n} :
+    stableEquiv X T (Quotient.mk _ p) = stableEquiv X T (Quotient.mk _ q) ↔
+      stableSetoid X T p q := by
+  rw [Equiv.apply_eq_iff_eq]
+  exact ⟨Quotient.exact, Quotient.sound⟩
+
+/-- **The point extension, constructed**: the stable pair partition as a `CoherentConfig`. The four
+axioms are the §CC.8 invariants — surjectivity from the quotient, transpose from `pairIter_swap`,
+diagonal and flags from `pairIter_le_init`, coherence from the fixpoint counts. -/
+noncomputable def pointExtension : CoherentConfig n where
+  rank := Nat.card (Quotient (stableSetoid X T))
+  relOf := fun u v => stableEquiv X T (Quotient.mk _ (u, v))
+  relOf_surj := fun t => by
+    obtain ⟨⟨p1, p2⟩, hp⟩ := Quotient.exists_rep ((stableEquiv X T).symm t)
+    refine ⟨p1, p2, ?_⟩
+    rw [hp, Equiv.apply_symm_apply]
+  transpose_eq := fun {u v u' v'} h => by
+    rw [stableEquiv_eq_iff] at h ⊢
+    exact pairIter_swap X T (n * n) (u, v) (u', v') h
+  diag_eq := fun {u v w} h => by
+    rw [stableEquiv_eq_iff] at h
+    have h0 := pairIter_le_init X T (n * n) h
+    exact X.diag_eq h0.1
+  inter_card_eq := fun {u v u' v'} h a b => by
+    rw [stableEquiv_eq_iff] at h
+    have hconv : ∀ (w₁ w₂ : Fin n) (c : Fin (Nat.card (Quotient (stableSetoid X T)))),
+        stableEquiv X T (Quotient.mk _ (w₁, w₂)) = c ↔
+          stableSetoid X T (w₁, w₂) ((stableEquiv X T).symm c).out := by
+      intro w₁ w₂ c
+      constructor
+      · intro hc
+        have hmk : (Quotient.mk (stableSetoid X T) (w₁, w₂)) = (stableEquiv X T).symm c :=
+          (Equiv.eq_symm_apply _).mpr hc
+        exact Quotient.exact (hmk.trans (Quotient.out_eq _).symm)
+      · intro hr
+        have hmk : (Quotient.mk (stableSetoid X T) (w₁, w₂)) =
+            Quotient.mk (stableSetoid X T) ((stableEquiv X T).symm c).out :=
+          Quotient.sound hr
+        rw [Quotient.out_eq] at hmk
+        exact (Equiv.eq_symm_apply _).mp hmk
+    have hcnt := stableSetoid_pairCount X T h
+      ((stableEquiv X T).symm a).out ((stableEquiv X T).symm b).out
+    calc (Finset.univ.filter fun w =>
+          stableEquiv X T (Quotient.mk _ (u, w)) = a ∧
+          stableEquiv X T (Quotient.mk _ (w, v)) = b).card
+        = pairCount (stableSetoid X T) u v
+            ((stableEquiv X T).symm a).out ((stableEquiv X T).symm b).out := by
+          unfold pairCount
+          refine congrArg Finset.card (Finset.filter_congr ?_)
+          intro w _
+          exact and_congr (hconv u w a) (hconv w v b)
+      _ = pairCount (stableSetoid X T) u' v'
+            ((stableEquiv X T).symm a).out ((stableEquiv X T).symm b).out := hcnt
+      _ = (Finset.univ.filter fun w =>
+            stableEquiv X T (Quotient.mk _ (u', w)) = a ∧
+            stableEquiv X T (Quotient.mk _ (w, v')) = b).card := by
+          unfold pairCount
+          refine (congrArg Finset.card (Finset.filter_congr ?_)).symm
+          intro w _
+          exact and_congr (hconv u' w a) (hconv w v' b)
+
+theorem pointExtension_relOf_eq_iff {u v u' v' : Fin n} :
+    (pointExtension X T).relOf u v = (pointExtension X T).relOf u' v' ↔
+      stableSetoid X T (u, v) (u', v') :=
+  stableEquiv_eq_iff X T
+
+/-- **Stage 1.2(a) headline: the construction satisfies the universal property.** The point
+extension exists for every `(X, T)` — `IsPointExtension` is inhabited by `pointExtension`. -/
+theorem isPointExtension_pointExtension : IsPointExtension X T (pointExtension X T) := by
+  refine ⟨?_, ?_, ?_⟩
+  · -- refines X
+    intro u v u' v' h
+    rw [pointExtension_relOf_eq_iff] at h
+    exact (pairIter_le_init X T (n * n) h).1
+  · -- T-singleton fibers
+    intro t ht u h
+    rw [pointExtension_relOf_eq_iff] at h
+    exact extFlag_eq_of_mem T ht (pairIter_le_init X T (n * n) h).2.1
+  · -- coarsest: any coherent fission with T-singletons refines it
+    intro Z hZX hT u v u' v' h
+    rw [pointExtension_relOf_eq_iff]
+    exact zrel_le_pairIter X T Z hZX hT (n * n) (u, v) (u', v') h
+
+/-- The fission family `IsPointExtension` quantifies over is inhabited for every `(X, T)`. -/
+theorem exists_isPointExtension : ∃ Y : CoherentConfig n, IsPointExtension X T Y :=
+  ⟨pointExtension X T, isPointExtension_pointExtension X T⟩
+
+/-- Stage 1.2(b): the point extension is unique up to mutual refinement (same pair partition). -/
+theorem isPointExtension_unique {Y Y' : CoherentConfig n}
+    (h : IsPointExtension X T Y) (h' : IsPointExtension X T Y') :
+    Refines Y Y' ∧ Refines Y' Y :=
+  ⟨h'.2.2 Y h.1 h.2.1, h.2.2 Y' h'.1 h'.2.1⟩
+
+end PointExtensionConstruction
 
 end CoherentConfig
 
