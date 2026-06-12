@@ -4439,6 +4439,59 @@ def SeparatesAtBoundedBase {n : Nat} (S : SchurianScheme n) (bound : Nat) : Prop
     Discrete (warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
       (individualizedColouring n S₀))
 
+/-- **The separability sink (warmRefine-local form) — the general Thm-4.1 deliverable.** Every pair `(u, u')`
+sharing a `warmRefine` cell after individualising `T` is realised by a **residual automorphism** (`ResidualAut`
+— a scheme automorphism fixing `T` pointwise) carrying `u ↦ u'`. This is `AssociationScheme.Separable`
+(`Separability.lean §S.17`) transported into the project's `warmRefine` model and localised at the base `T`: a
+same-cell pair is WL-indistinguishable from `T`, so in a separable scheme it is *induced* by an honest `T`-fixing
+automorphism. The scheme-level analogue of the affine `TwinsAreSemilinear` (`CascadeAffine.lean`, whose realiser
+was the explicit `F_p`-linear `affinePermFin g₀ 0`); the S-ring / Thm-4.1 build is what discharges it for an
+arbitrary `orbitalScheme H`. Note it is *definitionally* `CellsAreOrbits (schemeAdj …) T` unfolded through
+`orbitPartition_iff_residualAut` — the same recovery content, named for the separability sink. -/
+def TwinsRealizedByResidualAut {n : Nat} (S : SchurianScheme n) (T : Finset (Fin n)) : Prop :=
+  ∀ u u' : Fin n,
+    warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (individualizedColouring n T) u
+      = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+        (individualizedColouring n T) u'
+    → ∃ g, ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g u = u'
+
+/-- **THE SEAL-BRIDGE (Thm-4.1-program finding 3): separability sink + bounded group base ⟹ the seal consumer.**
+If `T` (`card ≤ bound`) is a **group base** (`IsBase` — the only residual automorphism fixing `T` pointwise is the
+identity = `b(G) ≤ |T|`) and every same-cell twin from `T` is **realised by a residual automorphism**
+(`TwinsRealizedByResidualAut` — the WL-local form of separability), then individualising `T` discretises the
+scheme: `SeparatesAtBoundedBase S bound`. A twin `(i, j)` produces a `T`-fixing automorphism `g` with `g i = j`
+(separability), an `OrbitPartition` pair, which the base kills to `i = j` (discreteness). The general form of the
+affine `powAffineSeparates_of_twinsAreSemilinear`: the group-base half there was `affinePermFin_eq_one_of_span`
+(a spanning base kills the `ΓL₁` realiser), here it is the abstract `IsBase`. **Verdict on finding 3:** the
+bridge is sound and cheap; its two inputs are (a) the separability sink — the open S-ring / Thm-4.1 build — and
+(b) a bounded `IsBase` — a project asset for small schemes (`exists_isBase_saturated`). Pure `s(X)` is *not*
+sufficient without (b). -/
+theorem separatesAtBoundedBase_of_twinsRealized {n : Nat} (S : SchurianScheme n)
+    {T : Finset (Fin n)} {bound : Nat} (hcard : T.card ≤ bound)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T)
+    (htwin : TwinsRealizedByResidualAut S T) :
+    SeparatesAtBoundedBase S bound :=
+  ⟨T, hcard, fun i j hij => hbase i j (orbitPartition_iff_residualAut.mpr (htwin i j hij))⟩
+
+/-- **The separability sink IS the project's recovery predicate.** `TwinsRealizedByResidualAut S T ↔
+CellsAreOrbits (schemeAdj …) T` — the two are *definitionally* the same content (a same-`warmRefine`-cell twin
+realised by a `T`-fixing automorphism ⟺ that cell pair is an `OrbitPartition` pair), via
+`orbitPartition_iff_residualAut`. This wires the Thm-4.1 sink into **all** existing recovery infrastructure
+(`RelCountsDetermineOrbit`, the depth-graded `cellsAreOrbits_*` family, `cellsAreOrbits_of_discrete`, …) and
+pins what the transport obligation `SeparabilityTransports` actually asks: `Separable ⟹ CellsAreOrbits at T`
+(WL cells coincide with `Aut`-orbits at the base) — the combinatorial recovery the project already targets
+directly via `RelCountsDetermineOrbit`. -/
+theorem twinsRealizedByResidualAut_iff_cellsAreOrbits {n : Nat} (S : SchurianScheme n)
+    (T : Finset (Fin n)) :
+    TwinsRealizedByResidualAut S T ↔
+      CellsAreOrbits (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T := by
+  constructor
+  · intro h v w hcell
+    exact orbitPartition_iff_residualAut.mpr (h v w hcell)
+  · intro h u u' hcell
+    exact orbitPartition_iff_residualAut.mp (h u u' hcell)
+
 /-- **THE OPEN CRUX — the mechanism-agnostic P3 converse (`base-homogeneous twin ⟹ block`).** If no bounded base
 separates the scheme (`¬ SeparatesAtBoundedBase` — a same-cell pair persists through every bounded
 individualization), then either the scheme is large (→ Cameron via the classification) **or** there is a

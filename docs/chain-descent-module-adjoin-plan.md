@@ -604,9 +604,112 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > + `idAlgIso_inducedBy_refl` (inhabited/sanity); **`SeparableParam X`** (Thm 5.1 hypothesis `3c(k−1)k<n`). No `sorry`s
 > (deferred theorems documented in prose in the §S.17 docstring). Modeling note: algebraic iso preserves valencies hence
 > `n`, so `Y` is on the same `Fin n` (no loss).
-> **NEXT scope-and-state steps:** (a) **scope the seal-bridge** (finding 3 — the gate): can `Separable`/2-separable be
-> related to `SeparatesAtBoundedBase` in the project's terms? (b) the **m-dimensional intersection numbers / m-extension**
-> definition (heavy — the `Ωᵐ` CC); (c) state Thm 4.1's (i)/(ii) conditions (`←` order, couples `Qµ`).
+> **NEXT scope-and-state steps:** (a) **scope the seal-bridge** (finding 3 — the gate) — ✅ DONE, see the SEAL-BRIDGE
+> GATE block below; the answer reframes the destination (Thm 4.1 is necessary-not-sufficient; the cheap parts (B)+(C)
+> gate the heavy (A)). (b) the **m-dimensional intersection numbers / m-extension** definition (heavy — the `Ωᵐ` CC) —
+> **now DE-PRIORITISED** by the gate: do not open it until (B) is shown tractable; (c) state Thm 4.1's (i)/(ii) conditions.
+> **REVISED next move (post-gate):** state/test bridge **(B)** `Separable ⟹ CellsAreOrbits at bounded base` (the cheapest
+> test of whether Thm 4.1's output reaches the seal target) + survey **(C)** `b(G)` bounds for the residue — OR consolidate
+> the conditional seal (G2-B empirically empty incl. the ℤ₄² bullseye). The `Ωᵐ` build (A) earns its cost only if (B) is cheap.
+
+> ## ▶▶ SEAL-BRIDGE GATE — SCOPED (2026-06-11, step (a); the answer reframes the destination)
+> **Verdict: Thm 4.1 (`Separable`) is NECESSARY-BUT-NOT-SUFFICIENT for the seal; closing the seal via it pulls in a
+> 3-part chain, of which Thm 4.1 is only one part.** Grounded against the Cartan/EP source (`/tmp/cartan.txt`) and the
+> project's *own* predicates (so it is not a literature paraphrase — the two base numbers are already distinct objects
+> in the Lean).
+>
+> **What the seal actually consumes — the two distinct base numbers, both already in the Lean.** The Cartan source
+> (§2.2) defines the point extension `X_{α,…}` as *exactly WL-refinement with α,… individualised* ("can be efficiently
+> constructed by Weisfeiler–Leman", line 207), and a **base** as a set whose extension is *complete* (all singletons);
+> `b(X)` = min base size. So **the seal consumer `SeparatesAtBoundedBase S bound`** (`∃ T, |T|≤bound ∧
+> Discrete(warmRefine … T)`) **IS literally `b(X) ≤ bound`.** Crucially the project ALSO already has the *group* base
+> number as a SEPARATE object: **`IsBase adj P T := ∀ v w, OrbitPartition adj P T v w → v = w`** (`Cascade.lean:70`) =
+> "`Stab(T)`-orbits are trivial" = `b(G) ≤ |T|`. The Cartan inequality (2) `b(G) ≤ b(X)` (with "b(G) can be much
+> smaller than b(X)") is therefore a relation *between two predicates the project already distinguishes* — and the gap
+> `b(X) > b(G)` is exactly the recovery/`s(C)` gap (WL under-approximating the orbit partition of `G_T`).
+>
+> **The seal consumer factors (in the project's predicates) as:**
+> ```
+> SeparatesAtBoundedBase S bound   ( = b(X) ≤ bound )
+>    ⟸  CellsAreOrbits (schemeAdj S) T   -- WL cells coincide with Aut-orbits at T  = the s(C)/recovery content
+>     ∧  IsBase     (schemeAdj S) T       -- a bounded GROUP base, |T| ≤ bound        = b(G) ≤ bound
+> ```
+> and **this tail is already LANDED**: `discrete_of_cellsAreOrbits_base` (`Cascade.lean:87`) +
+> `recoverableAt_base_iff_discrete` (`Cascade.lean:2867`) prove `CellsAreOrbits T ∧ IsBase T ⟹ Discrete(warmRefine T)`.
+> So the project *already* has "`b(X) ≤ b(G)` **when** cells = orbits at the group base."
+>
+> **Where Thm 4.1 fits — and the gap it does NOT close.** Thm 4.1 outputs **`Separable`** (`s(X)=1`, the §S.17
+> *algebraic-isomorphism-is-induced* notion). The seal's open factor above is **`CellsAreOrbits` at a bounded base**
+> (the *combinatorial* "WL cells = Aut-orbits" notion). **These are different**, and bridging them is the genuine open
+> work, in TWO independent pieces neither of which is Thm 4.1's m-extension build:
+> - **(B) the separability→recovery bridge** `Separable X ⟹ CellsAreOrbits at a bounded base` (for schurian X, this is
+>   the EP-dimension fact `s(X)=1 ⟹ b(X) ≤ b(G)` — separability collapses the CC base onto the group base). NOT
+>   automatic; couples the algebraic notion to the combinatorial orbit notion. **This is the part to state/test FIRST**
+>   — it is the cheapest check of whether Thm 4.1's output even reaches the project's target, and if it is hard or needs
+>   schurity-coupling the project can't express, the whole `Ωᵐ` build (A) is wasted.
+> - **(C) a bounded group base** `∃ T, |T| ≤ bound ∧ IsBase T` (= `b(G) ≤ bound`). A SEPARATE, group-theoretic input
+>   Thm 4.1 does not supply — but a far more tractable / likely-citable one (primitive groups have small base number,
+>   Pyber/Liebeck–Shalev: `b(G) = O(log n)`, often `O(1)` for the bounded-affine/amorphic residue).
+>
+> So the destination is a **3-part chain (A) `Separable` [the heavy `Ωᵐ` build] · (B) `Separable ⟹ CellsAreOrbits`
+> [EP-dimension bridge] · (C) bounded `b(G)` [group base]**, with only the `b(X)`-tail `(B-output ∧ C) ⟹ seal` LANDED.
+>
+> **The affine slice is the existence proof that the chain works** — and a map of the three parts: `TwinsAreSemilinear`
+> (cited 2-separability, operationalised = part A's output) + `exists_spanning_base` (a spanning set = part C, a group
+> base) + `affinePermFin_eq_one_of_span` (the linear kill = part B, the bridge from "twin is an algebraic/linear map
+> fixing the base" to "twin is trivial"). The general chain replaces the *linear* kill with the general
+> separability⟹recovery step (B).
+>
+> **STRATEGIC CONSEQUENCE (the reframe).** Two things change vs "just prove Thm 4.1":
+> 1. **The project already has the minimal COMBINATORIAL open target, bypassing `Separable` entirely:**
+>    `RelCountsDetermineOrbit` (`CascadeAffine.lean:479`) + `selfDetectsWhileSymmetric_of_relCountsDetermineOrbit`
+>    reduce the seal's whole open content to "primitive small ⟹ relation counts determine the `Stab(T)`-orbit at a
+>    bounded base" = `CellsAreOrbits` at bounded base, stated *combinatorially*. Thm 4.1's `Separable` does **not** hit
+>    this directly (needs bridge B). So **routing through `Separable` is a detour unless (B) is cheap** — the direct
+>    target is the counting condition the project already isolated.
+> 2. **The first real increment is (B), not (A).** State `Separable ⟹ CellsAreOrbits at bounded base` and see what it
+>    needs; only if it is tractable does the `Ωᵐ` m-extension substrate (A) earn its (large) cost. Pair with a survey
+>    of (C) `b(G)` bounds for the residue family (cheap, likely citable).
+>
+> This is the gate doing its job: it says **do not open the `Ωᵐ` substrate next.** Either (i) state/test bridge (B) +
+> survey (C) — the cheap parts that decide whether (A) is worth it — or (ii) consolidate the conditional seal (G2-B is
+> empirically empty incl. the bullseye, §5) and write up, treating the 3-part chain as the explicitly-scoped open
+> frontier rather than a committed build.
+>
+> **LANDED (step (a), axiom-clean, full build green) — MERGED form (two independent gate runs reconciled).** Both runs
+> reached the *identical* verdict (necessary-but-not-sufficient + the `b(G)` second obligation) and produced the *same*
+> bridge (`TwinsRealizedByResidualAut S T` ≡ `CellsAreOrbits (schemeAdj …) T` via `orbitPartition_iff_residualAut`). The
+> merged decls:
+> - **`Cascade.lean`** (next to `SeparatesAtBoundedBase`): **`TwinsRealizedByResidualAut S T`** — the separability *sink*
+>   (every same-`warmRefine`-cell twin from `T` is realised by a `T`-fixing residual automorphism; the general analogue
+>   of the affine `TwinsAreSemilinear`, the concrete thing Thm 4.1 discharges per `orbitalScheme H`) +
+>   **`separatesAtBoundedBase_of_twinsRealized`** (PROVED: sink + bounded `IsBase` ⟹ `SeparatesAtBoundedBase`, 1-line via
+>   `orbitPartition_iff_residualAut` + the base kill).
+> - **`CascadeAffine.lean §S-gate`** (anchors on the literal §S.17 `Separable`): **`SeparabilityTransports S T`** =
+>   `Separable → TwinsRealizedByResidualAut` — the **named transport obligation (B)**, the step BOTH runs deferred (and
+>   which is *not* free: a bare fiber-collision is not obviously an algebraic automorphism — the affine slice needed the
+>   *specific* `TwinsAreSemilinear`, not abstract `Separable`); + **`separatesAtBoundedBase_of_separable`** (the assembled
+>   chain (A)`Separable` + (B)`SeparabilityTransports` + (C) bounded `IsBase` ⟹ seal consumer).
+> So the seal ⟸ `separatesAtBoundedBase_of_separable` ⟸ {(A) `Separable` [Thm 4.1] + (B) `SeparabilityTransports` [the
+> transport, next increment] + (C) bounded `IsBase` [likely-citable]}, the `b(X)`-tail (sink+base ⟹ seal) PROVED.
+> **Source-grounded (verified via python, the locale-broken `grep` fails silently here):** arXiv:2006.13592 has **0**
+> "1-regular"/"base number"/"b(X)", **55** "separab", **10** "2-separable" — *purely* a separability result, so the base
+> bound is the project's OWN work, never the citation's. (Earlier `RecoversAtBoundedBase`/`SeparableYieldsRecovery` from
+> run 1 were dropped — they duplicated `recoverableAt_base_iff_discrete`.)
+> **TRANSPORT (B) WORKED (2026-06-11) — the result sharpens the gate (and partly defeats the "do B cheaply first" hope).**
+> Landed `twinsRealizedByResidualAut_iff_cellsAreOrbits` (`Cascade.lean`, axiom-clean): the sink **is** `CellsAreOrbits
+> (schemeAdj …) T` (via `orbitPartition_iff_residualAut`), wiring it to all existing recovery infra. So the transport (B)
+> `SeparabilityTransports` = **`Separable ⟹ CellsAreOrbits at T`** = the EP fact `s(X)=1 ⟹ b(X) ≤ b(G)`. **Finding: this
+> is TRUE but its proof is COUPLED to the general-CC substrate, NOT a cheap independent de-risk** (correcting run-2's
+> optimistic "B1–B5-bounded" read). The obstruction is rigorous: §S.17 `Separable X` is *relation-level on the homogeneous
+> X*; the twin lives in the *multi-fiber extension* `X_T`; the only bridge runs through `s(X_T) ≤ s(X)` (separability
+> inherited by a point extension), and `X_T` is a general CC the homogeneous `AssociationScheme`/`AlgIso` **cannot
+> express**. The affine slice escaped this only because its realiser was the *explicit linear* `affinePermFin` (never
+> abstract `Separable`). **Consequence:** (B) and (A) share the `Ωᵐ`/general-CC build — there is no cheap pre-`Ωᵐ`
+> formalisation of (B). The realistic options collapse to **(i) commit to the general-CC substrate** (it serves (A) and
+> (B) together — the only path that closes) **or (ii) consolidate the conditional seal** (G2-B empirically empty incl. the
+> ℤ₄² bullseye; carry the 3-part chain as the explicitly-scoped open frontier). The "do B cheaply first" middle option is
+> mostly closed. (C) `b(G)` for the residue remains a cheap, independent, likely-citable survey either way.
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.

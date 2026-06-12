@@ -379,6 +379,53 @@ theorem separatesAtBoundedBase_of_sparseSeparable (S : SchurianScheme n)
     (S.toAssociationScheme.smaxConnected_of_sparseSeparable hsep hk)
     (fun a => S.toAssociationScheme.saConnected_of_sparseSeparable hsep hk a)
 
+/-! ### §S-gate — the seal-bridge anchor: §S.17 `Separable` → the sink (the named transport obligation)
+
+**Scope-and-state step (a) of the Thm 4.1 program — the gate, resolved.** The sink + bridge live in `Cascade.lean`
+(`TwinsRealizedByResidualAut` / `separatesAtBoundedBase_of_twinsRealized`): a separability sink + a bounded group
+base (`IsBase`) ⟹ the seal consumer `SeparatesAtBoundedBase`. **Verdict:** Thm 4.1's `Separable` is
+*necessary-but-not-sufficient* — it feeds the seal only through a 3-part chain. Source-grounded: the cyclotomic
+paper (arXiv:2006.13592) is *purely* a separability result — 0 occurrences of "1-regular"/"base number"/"b(X)",
+55 of "separab" — so the base bound is the project's OWN work (`affinePermFin_eq_one_of_span` + a spanning base),
+never the citation's. The three inputs:
+- **(A) `Separable`** (`Separability.lean §S.17`) — Thm 4.1's output (the heavy S-ring / `Ωᵐ` build).
+- **(B) the transport** `Separable → TwinsRealizedByResidualAut` (`SeparabilityTransports` below). By
+  `twinsRealizedByResidualAut_iff_cellsAreOrbits` (`Cascade.lean`) this **is** `Separable ⟹ CellsAreOrbits at T`
+  = the EP fact `s(X)=1 ⟹ b(X) ≤ b(G)` (separable schurian recovers orbits at a group base). **TRUE, but its
+  proof is NOT cheap/independent (worked 2026-06-11 — corrects the earlier "B1–B5-bounded" read):** §S.17
+  `Separable X` is *relation-level on the homogeneous X*, while `CellsAreOrbits at T` is about the *extension*
+  `X_T`'s vertex-cells; the only bridge (individualise `u` vs `u'` ⟹ algebraically-isomorphic extensions ⟹
+  separable extension ⟹ induced aut) runs through `s(X_T) ≤ s(X)` (separability inherited by point extensions),
+  and `X_T` is a multi-fiber **general CC** the project's homogeneous `AssociationScheme`/`AlgIso` **cannot
+  express**. So **(B) couples to the general-CC substrate that (A) builds** — it is not a cheap pre-`Ωᵐ` de-risk.
+- **(C) a bounded group base** `IsBase … T, card ≤ bound` (= `b(G) ≤ bound`) — a separate, likely-citable input
+  (primitive ⟹ small base; `exists_isBase_saturated` for small schemes). Thm 4.1 does NOT supply it.
+See `docs/chain-descent-module-adjoin-plan.md §9` (SEAL-BRIDGE GATE). -/
+
+/-- **The transport obligation (B) — `Separable ⟹ recovery at `T`; the step the gate runs deferred.** From the
+§S.17 *algebraic* `Separable`, every same-`warmRefine`-cell twin from `T` is realised by a `T`-fixing residual
+automorphism. By `twinsRealizedByResidualAut_iff_cellsAreOrbits` this is exactly `Separable ⟹ CellsAreOrbits at
+T` = the EP fact `s(X)=1 ⟹ b(X) ≤ b(G)`. **Worked (2026-06-11):** TRUE, but its proof is *coupled to the
+general-CC substrate*, not a cheap independent de-risk — §S.17 `Separable` is relation-level on the homogeneous
+`X`, while the twin lives in the multi-fiber extension `X_T`; bridging needs `s(X_T) ≤ s(X)` (separability of a
+point extension), inexpressible in the project's homogeneous `AssociationScheme`/`AlgIso`. So (B) and (A) share
+the `Ωᵐ`/general-CC build. The affine instance `powAffineSeparates_of_twinsAreSemilinear` sidesteps this only
+because there the realiser is the *explicit* linear `affinePermFin` (it never invokes abstract `Separable`). -/
+def SeparabilityTransports (S : SchurianScheme n) (T : Finset (Fin n)) : Prop :=
+  S.toAssociationScheme.Separable → TwinsRealizedByResidualAut S T
+
+/-- **The seal-bridge, anchored on Thm 4.1's actual output.** (A) `Separable` + (B) the transport
+`SeparabilityTransports` + (C) a bounded group base `IsBase` ⟹ the seal consumer `SeparatesAtBoundedBase`.
+Composes the transport into the `Cascade.lean` bridge `separatesAtBoundedBase_of_twinsRealized`. Records the full
+chain from the literal §S.17 `Separable` to the seal: Thm 4.1 discharges (A); (B) and (C) are the residual gate
+content (the transport = the next increment, the group base = likely-citable). -/
+theorem separatesAtBoundedBase_of_separable (S : SchurianScheme n)
+    {T : Finset (Fin n)} {bound : Nat} (hcard : T.card ≤ bound)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T)
+    (htrans : SeparabilityTransports S T) (hsep : S.toAssociationScheme.Separable) :
+    SeparatesAtBoundedBase S bound :=
+  separatesAtBoundedBase_of_twinsRealized S hcard hbase (htrans hsep)
+
 end Bridge
 
 /-! ### §13b — the two-round (depth-2) separation engine on `schemeAdj` (E1)
