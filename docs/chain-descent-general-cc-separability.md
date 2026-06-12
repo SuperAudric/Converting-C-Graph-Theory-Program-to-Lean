@@ -35,9 +35,23 @@
   `AlgIso`/`Separable`/`SeparablePointed` (the §2 soundness gate resolved by *widening*), the probe-validated
   **Thm 4.1 hypothesis predicates** (no `Ωᵐ` needed to state them), the **cited `Theorem41Statement`** (the
   staging-fallback carry, G3 pattern), and `IsPointExtension` as a universal property (+ `discreteCC` non-vacuity).
-  The Stage-3 gate probe RAN (Route β viable — see Stage 3.2). **NEXT ACTION:** Stage 1.2 — the point-extension
-  *construction* (pair-refinement saturation discharging `IsPointExtension`'s existence) + the warmRefine↔fiber
-  bridge; then Stage 2 (the transport) against `ExtensionSeparable`. The increment log is §8 — append to it.
+  The Stage-3 gate probe RAN (Route β viable — see Stage 3.2). **REMAINING, in order (the handoff list):**
+  1. **Stage 1.2(a)** — the point-extension *construction*: a pair-refinement saturation producing a witness for
+     the landed `IsPointExtension` (plan in §5 Stage 1.2; pattern = `CascadeAffine §S-stab` stabilization on pairs).
+  2. **Stage 2.1's direction check** (cheap C# first): are 1-WL `warmRefine` cells = `X_T` fibers on the residue's
+     extensions? (`Theorem41ConditionsProbe.cs` already computes the coherent closure — compare against `Refine`.)
+     This pins the twin⟹alg-iso step's model bridge before Lean investment (§5 Stage 2.1 ⚠️).
+  3. **Stage 2** — the transport, stated against the landed `ExtensionSeparable`/`SeparablePointed` (sub-route
+     (b) pointed-conclusion first; (c) Chen–Ponomarenko `dimWL` recursion as the citable alternative — source its
+     §4.2 statement before choosing).
+  4. **The citation-checkpoint assembly** — wire {`Theorem41Statement` (cited) + Thm-4.1-conditions-for-the-residue
+     (probe-confirmed, to be stated per-instance or carried) + the transport} into `SeparatesAtBoundedBase` ⟹ a
+     general conditional seal capstone (the affine-slice pattern, `reachesRigidOrCameron_affineSlice`).
+  5. **Stage 3** — prove what item 4 cites (Route β: conditions (i)/(ii) for the residue family's extensions —
+     witness-constructive per the probe; the genuine open mathematics).
+  Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
+  threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier; strategy-§15 gaps tracking note.
+  The increment log is §8 — append to it.
 
 ---
 
@@ -289,25 +303,55 @@ Mathlib. `Scheme.lean` is the only CC substrate.
   *2-separability* (Lemma 2.6 / Thm 1.2 are about 2-separability); `m = 2` may suffice, sparing the general `Ωᵐ`.
 - **Deliverable of Stage 0:** a short written decision (append to §8) fixing P/Q/H and the `CoherentConfig`/extension
   representation, *with a typechecking skeleton* (the type + a trivial inhabitant) so Stage 1 has a target.
+  **✓ DONE (2026-06-12)** — Option H sharpened to the colour-function presentation; decision + rationale in §8;
+  skeleton = `ChainDescent/CoherentConfig.lean`.
 
 ### Stage 1 — the general-CC substrate (shared prerequisite for A and B)
 1. **`CoherentConfig` type** (or the chosen representation) · Stage 0 · **load-bearing.** Fibers, basis relations,
    intersection numbers, the coherence axiom. Provide the homogeneous `AssociationScheme → CoherentConfig` coercion.
+   **✓ DONE (2026-06-12)** — `CoherentConfig` + `interNum`/`transposeRel` API + derived fiber coherence
+   (`relOf_diag_left_eq`) + `AssociationScheme.toCoherentConfig` (on the seal's `hne`).
 2. **The point extension `X_µ` / `X_T` as a `CoherentConfig`** · 1 · **load-bearing.** The smallest CC ≥ X with `T`
    singleton fibers. Connect to the warmRefine model: `X_T`'s fibers = `warmRefine … (individualizedColouring n T)`
    cells (the §S-bridge `relOfPair_eq_of_warmRefine_determined` is the template).
+   **◐ PREDICATE DONE, CONSTRUCTION + BRIDGE OPEN (the current frontier).** Landed: `IsPointExtension` (universal
+   property, complete via fiber coherence) + `discreteCC` non-vacuity. Open (the next increment, in order):
+   (a) the **construction** — a pair-refinement saturation producing a witness `Y` with `IsPointExtension X T Y`
+   (pattern: pair-analogue of `refineStep`/`numCells` stabilization, `CascadeAffine.lean §S-stab` + the engine's
+   pigeonhole; the §CC.2 fiber-coherence argument generalizes to prove the stable colouring's axioms — the WL-stable
+   partition's counts ARE the `inter_card_eq` witness); (b) **uniqueness up to relabelling** (two universal objects
+   mutually refine ⟹ same partition) — cheap from the predicate; (c) the **warmRefine↔fiber bridge** — relate
+   `X_T`'s fibers to `warmRefine (schemeAdj S) … (individualizedColouring n T)` cells. ⚠️ Honest caution: fibers
+   (pair-coherent closure, 2-WL-flavoured) may be *finer* than 1-WL `warmRefine` cells in general; the bridge the
+   transport needs is direction-aware — see Stage 2.1's note. The §S-bridge (B1–B5) resolved exactly this for the
+   sparse slice; reuse its shape.
 3. **General `AlgIso` / `Separable` / `m-separable`** · 1 · **load-bearing.** Generalise §S.17 to `CoherentConfig`;
    prove the homogeneous `Separable` (§S.17) is the single-fiber case (reconciliation lemma).
+   **◐ DONE except the reconciliation lemma** — `AlgIso`/`InducedBy`/`Separable`/`SeparablePointed` landed (partner
+   widened to all `CoherentConfig n`, resolving the §2 soundness gate). The §S.17 reconciliation lemma is now
+   **likely unnecessary** (the build targets `ExtensionSeparable` directly, not the homogeneous predicate) — do it
+   only if a consumer genuinely needs the §S.17 form; `m`-separable still unstated (needs Stage 1.4).
 4. **The m-dim intersection numbers / 2-extension** · 1 · load-bearing *iff* the chosen route needs `m=2` (it does —
-   Lemma 2.6 / Thm 1.2). Build `Ω×Ω` only; defer general `Ωᵐ`.
+   Lemma 2.6 / Thm 1.2). Build `Ω×Ω` only; defer general `Ωᵐ`. **DEFERRED, and possibly avoidable:** Thm 4.1's
+   *statement* landed without it (`Theorem41Statement`), and if Stage 2 targets `ExtensionSeparable` directly the
+   Lemma-2.6 packaging (the only consumer of `m=2`) may never be needed. Build only when a stage demands it.
 
 ### Stage 2 — the transport (B): `Separable ⟹ CellsAreOrbits at T`
 Target: `∀ T, SeparabilityTransports S T`. Route (the affine slice `powAffineSeparates_of_twinsAreSemilinear` is the
-concrete template; here general):
+concrete template; here general). **Status note (2026-06-12): the separability-level input predicate is landed —
+`ExtensionSeparable X T` (`CoherentConfig.lean §CC.6`); state the transport against it (and `SeparablePointed`),
+not against the homogeneous §S.17 form.**
 1. **Twins ⟹ extensions algebraically isomorphic** · Stage 1.2/1.3 · **load-bearing.** A same-`warmRefine`-cell pair
    `u,u'` from `T` ⟹ `X_{T∪{u}} ≅_alg X_{T∪{u'}}` (equal intersection numbers from equal profiles). The WL-local /
    counting step — the B1–B5 analogue *on extensions* (reuse `relOfPair_eq_of_warmRefine_determined` /
-   `warmRefine_refineStep_samePartition`).
+   `warmRefine_refineStep_samePartition`). ⚠️ **Direction caution (sharpened by the Stage-1 build):** this step
+   needs same-1-WL-cell ⟹ alg-iso of the (2-WL-flavoured, possibly finer) extensions — i.e. a *twin in the weak
+   model is a twin in the strong one*. That is genuinely stronger than the realization direction already landed
+   (`iterSet_refines_schemePartFrom`). If it fails as stated, the honest fix is to key the seal-side twin on the
+   *fiber* partition (strengthening `SeparatesAtBoundedBase`'s warmRefine to the extension's fibers would need the
+   discreteness consumers re-bridged — the B1–B5 / `discrete_of_kRoundRelationSeparates` engines are the tools).
+   Pin this with a tiny C# check (are 1-WL cells = `X_T` fibers on the residue's extensions? the probe's coherent
+   closure already computes both) before investing.
 2. **Separability of the extension** · Stage 1.3 + Lemma 2.6 · **load-bearing, the crux.** From `Separable X` (the
    §S.17/general predicate) derive separability of the relevant extension. Four sub-routes: (a) prove the inheritance
    `s(X_µ) ≤ s(X)` directly (EP [4]); or (b) use Thm 4.1's **pointed** conclusion (induced `f` controllable on `µ`)
