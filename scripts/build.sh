@@ -48,6 +48,7 @@ MODULES=(
   ChainDescent.CFI          # ← base
   ChainDescent.Scheme       # ← base
   ChainDescent.Separability # ← base, Scheme (S-ring/CC separability layer; Ponomarenko–Vasil'ev parameters)
+  ChainDescent.CoherentConfig # ← base, Scheme (general multi-fiber CC substrate; Thm 4.1 statement layer)
   ChainDescent.CascadeOracle # ← base, CFI, Scheme
   ChainDescent.LinearOracle # ← CascadeOracle
   ChainDescent.Group        # ← CascadeOracle

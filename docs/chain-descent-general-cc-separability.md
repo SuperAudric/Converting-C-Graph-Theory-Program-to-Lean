@@ -29,8 +29,15 @@
 - **Quality bar (non-negotiable):** every theorem axiom-clean `[propext, Classical.choice, Quot.sound]`; full build
   green (`bash scripts/build.sh`, serial ~60–120 s); **no `sorry`, no fresh `axiom`** (cited classifications are
   theorem-statement *hypotheses*); **do not commit** (the user commits between messages).
-- **CURRENT STATE: nothing of the general-CC substrate is built yet.** This doc is the plan. **NEXT ACTION:**
-  Stage 0 (the modeling decision, §5) then Stage 1 (the general-CC type). The increment log is §8 — append to it.
+- **CURRENT STATE (2026-06-12): Stage 0 DECIDED + the Stage-1 skeleton LANDED** (`ChainDescent/CoherentConfig.lean`,
+  axiom-clean, full build green) — the general `CoherentConfig` type (colour-function presentation, fibers *derived*),
+  the homogeneous coercion `AssociationScheme.toCoherentConfig` (conditional on the seal's `hne`), general-CC
+  `AlgIso`/`Separable`/`SeparablePointed` (the §2 soundness gate resolved by *widening*), the probe-validated
+  **Thm 4.1 hypothesis predicates** (no `Ωᵐ` needed to state them), the **cited `Theorem41Statement`** (the
+  staging-fallback carry, G3 pattern), and `IsPointExtension` as a universal property (+ `discreteCC` non-vacuity).
+  The Stage-3 gate probe RAN (Route β viable — see Stage 3.2). **NEXT ACTION:** Stage 1.2 — the point-extension
+  *construction* (pair-refinement saturation discharging `IsPointExtension`'s existence) + the warmRefine↔fiber
+  bridge; then Stage 2 (the transport) against `ExtensionSeparable`. The increment log is §8 — append to it.
 
 ---
 
@@ -235,15 +242,23 @@ condition to the 2-extension ⟹ 2-separability, as p4paper Thm 1.2 does via Lem
   `warmRefine_refineStep_samePartition`. **This is the template for the warmRefine↔CC-model bridge Stage 2 needs.**
 - **The seal-bridge gate + sink + (C)** (the §2 table): the consumers (A)/(B) feed.
 
-### LACKS (the build creates these)
-- A **general (multi-fiber) coherent configuration** type — the central missing object.
-- The **point extension as a CC** object (the project models it only as a `warmRefine` *colouring*, not a CC with
-  intersection numbers / fibers / algebraic isos).
-- **General-CC `AlgIso` / `Separable`** (the §S.17 versions are homogeneous-only).
-- The **m-extension on `Ωᵐ`** + m-dim intersection numbers + m-separability.
-- **Lemma 2.6** (one-point-extension separable ⟹ 2-separable) and the inheritance facts.
-- **Theorem 4.1** itself (conditions (i)/(ii), the couple `Qµ`, the `m`-extending notion) — the sufficient condition.
-- The **transport** `Separable ⟹ TwinsRealizedByResidualAut` proof.
+### LACKS (the build creates these) — ledger updated 2026-06-12
+- ~~A **general (multi-fiber) coherent configuration** type~~ — **LANDED** (`CoherentConfig`,
+  `ChainDescent/CoherentConfig.lean`, with the homogeneous coercion `AssociationScheme.toCoherentConfig`).
+- The **point extension as a CC** object — **predicate LANDED** (`IsPointExtension`, universal property, complete
+  via the derived fiber coherence `relOf_diag_left_eq`); the *construction* (pair-refinement saturation producing
+  a witness, + uniqueness-up-to-relabelling) is the open Stage-1.2 piece, along with the **warmRefine↔fiber
+  bridge** (`X_T`'s fibers vs `warmRefine` cells — the §S-bridge template).
+- ~~**General-CC `AlgIso` / `Separable`**~~ — **LANDED** (`CoherentConfig.AlgIso`/`Separable`/`SeparablePointed`;
+  partner quantifies over all `CoherentConfig n`, resolving the §2 soundness gate by widening).
+- The **m-extension on `Ωᵐ`** + m-dim intersection numbers + m-separability — still lacking; needed only for
+  *m-separability statements* (Lemma 2.6's conclusion), NOT for Thm 4.1's statement (landed without it).
+- **Lemma 2.6** (one-point-extension separable ⟹ 2-separable) and the inheritance facts — still lacking (and
+  possibly avoidable: the transport can target `ExtensionSeparable` directly).
+- **Theorem 4.1**: ~~statement~~ — **LANDED as the cited `Theorem41Statement`** (hypotheses `Theorem41Hypotheses`
+  = exactly the probe's checks; staging-fallback carry). The *proof* (Stage 3, Route α/β) is the open mathematics.
+- The **transport** `Separable ⟹ TwinsRealizedByResidualAut` proof — still lacking (Stage 2; target predicate
+  `ExtensionSeparable` is landed).
 
 ### Mathlib
 HAS: modules, `Basis`, `Submodule.span`, finite groups, `MonoidHom`, `Equiv.Perm`, `Finset`/`Fintype` combinatorics.
@@ -430,6 +445,29 @@ bullseye) says closure is the likely outcome and the build is worth it.
   Stage 0's recommended hypothesis (Option H, Route β) is now *evidence-backed*; the Stage-3 Lean target can be
   stated witness-constructively (the λ-triangle); and the transport (B) should target the *pointed* conclusion at
   the extension (Stage 2.2(b)/(c)) since that is the form the probe-confirmed conditions feed. NEXT: Stage 0.
+- **2026-06-12 — STAGE 0 DECIDED + STAGE-1 SKELETON LANDED (`ChainDescent/CoherentConfig.lean`, axiom-clean
+  `[propext, Classical.choice, Quot.sound]`, no `sorry`, full build green ~24s; index regenerated).**
+  **The Stage-0 decision (Option H, sharpened by the probe):** model the general CC by its **colour function**
+  (`relOf : Fin n → Fin n → Fin rank` + four axioms: classes nonempty / transpose well-defined / reflexive classes
+  purely diagonal / intersection numbers constant) — the minimal faithful presentation and *exactly* the object
+  `Theorem41ConditionsProbe.cs` computes with, so every predicate has a machine-checked finite mirror. Fiber
+  coherence is **derived, not axiomatized** (`relOf_diag_left_eq`: a class determines its source fiber — from
+  `diag_eq` + `inter_card_eq` alone). The **point extension is a predicate** (`IsPointExtension`, the
+  coarsest-coherent-fission universal property — made complete by the derived fiber coherence; `discreteCC`
+  witnesses the family nonempty); its construction is deferred to Stage 1.2 (pair-refinement saturation — the
+  `Saturation.lean`/`numCells` stabilization pattern, on pairs). **No `Ωᵐ` tower built**: Thm 4.1's hypotheses are
+  first-order in intersection numbers (the "m-extension of a couple" is product-membership + uniqueness), so the
+  **cited `Theorem41Statement` landed now** — the staging-fallback carry in the G3 pattern. The §2 quantification
+  soundness gate is resolved by **widening**: `CoherentConfig.Separable`'s partner ranges over all
+  `CoherentConfig n` (multi-fiber), not homogeneous schemes; `SeparablePointed` is Thm 4.1's actual (pointed)
+  conclusion, the form the transport wants. Decls: `CoherentConfig` + `repPair`/`interNum`(`_eq`)/`transposeRel`
+  (`relOf_swap_eq`, involution) / `relOf_diag_left_eq`/`_right_eq` / `AssociationScheme.toCoherentConfig` (on the
+  seal's `hne`) / `AlgIso`/`InducedBy`/`idAlgIso` / `Separable`/`SeparablePointed` / `InComplexProduct`/`Dominates`/
+  `DominationCondition`/`IsCoupleExtension`/`CoupleExtensionCondition`/`Theorem41Hypotheses`/`Theorem41Statement` /
+  `Refines`(`refl`/`trans`)/`SingletonFiber`/`IsPointExtension`/`ExtensionSeparable` / `discreteCC`(`_refines`/
+  `_singletonFiber`). **NEXT (Stage 1.2): the point-extension construction + the warmRefine↔fiber bridge**, then
+  Stage 2 (the transport against `ExtensionSeparable`, sub-route (b)/(c) per the probe's pointed-geometric shape).
+  Lean gotcha for the log: the micro-sign `µ` (U+00B5) is not a Lean identifier character — use Greek `μ` (U+03BC).
 
 ---
 
@@ -445,6 +483,12 @@ bullseye) says closure is the likely outcome and the build is worth it.
 
 **Homogeneous separability (extend these):** `AlgIso` / `Separable` / `SeparableParam` / `idAlgIso`
 (`Separability.lean §S.17`).
+
+**General-CC substrate (LANDED 2026-06-12, build on these):** `CoherentConfig` / `interNum` / `transposeRel` /
+`relOf_diag_left_eq` (derived fiber coherence) / `AssociationScheme.toCoherentConfig` / general `AlgIso` /
+`Separable` / `SeparablePointed` / `Dominates` / `DominationCondition` / `IsCoupleExtension` /
+`CoupleExtensionCondition` / `Theorem41Hypotheses` / **`Theorem41Statement`** (the cited carry) / `Refines` /
+`SingletonFiber` / `IsPointExtension` / `ExtensionSeparable` / `discreteCC` (`CoherentConfig.lean`).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`
