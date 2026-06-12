@@ -581,7 +581,9 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > ## ▶ THM 4.1 PROGRAM — source secured + scope-and-state begun (2026-06-11)
 > **Source secured:** arXiv:2006.13592 (Ponomarenko, *On the separability of cyclotomic schemes over finite field*)
 > fetched + `pdf2txt`-extracted to `/tmp/p4paper.txt` (persisted). **Thm 4.1 DOES exist** (the doc §6.1 was right; an
-> earlier "it doesn't" was a locale-broken `grep` choking on UTF-8 — re-verify greps with `LC_ALL=C` or python).
+> earlier "it doesn't" was `grep` finding nothing on the raw extraction — re-verify via python, or after running
+> `scripts/clean-extracted-text.py` on the file. (CORRECTED diagnosis: the cause is **NUL bytes**, not the locale;
+> `LC_ALL=C grep` fails too.)
 > - **Thm 4.1 (general):** `X=(Ω,S)` CC, `µ∈Ω`; if (i) every `Δ⊆Ω,|Δ|≤4` is dominated (`Δ←λ`) and (ii) every triple
 >   `α,β,γ` has an `m∈S` with `µm≠∅` and the couple `Qµ(α,β,γ)` `m`-extending ⟹ **`Separable X`**.
 > - **Thm 5.1 (parameter form):** `n > 3c(k−1)k ⟹ Separable X`.
@@ -692,7 +694,8 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 >   chain (A)`Separable` + (B)`SeparabilityTransports` + (C) bounded `IsBase` ⟹ seal consumer).
 > So the seal ⟸ `separatesAtBoundedBase_of_separable` ⟸ {(A) `Separable` [Thm 4.1] + (B) `SeparabilityTransports` [the
 > transport, next increment] + (C) bounded `IsBase` [likely-citable]}, the `b(X)`-tail (sink+base ⟹ seal) PROVED.
-> **Source-grounded (verified via python, the locale-broken `grep` fails silently here):** arXiv:2006.13592 has **0**
+> **Source-grounded (verified via python; raw-extraction `grep` finds nothing — NUL bytes, not the locale; fixed by
+> `scripts/clean-extracted-text.py`):** arXiv:2006.13592 has **0**
 > "1-regular"/"base number"/"b(X)", **55** "separab", **10** "2-separable" — *purely* a separability result, so the base
 > bound is the project's OWN work, never the citation's. (Earlier `RecoversAtBoundedBase`/`SeparableYieldsRecovery` from
 > run 1 were dropped — they duplicated `recoverableAt_base_iff_discrete`.)

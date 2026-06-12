@@ -42,11 +42,18 @@
   modules to `scripts/build.sh` `MODULES=(…)` in topological order. Verify axioms with
   `lake env lean /tmp/check.lean` containing `#print axioms <decl>` (run from `GraphCanonizationProofs/`).
 - **Papers / extraction:** `pdf2txt <file.pdf> [first] [last]` is on PATH (`~/.local/bin`, user-site PyMuPDF).
-  arXiv ids are stable; re-fetch with `curl -sL https://arxiv.org/pdf/<id> -o /tmp/x.pdf`. **Extracted already:**
-  `/tmp/p4paper.txt` = arXiv:2006.13592 (the Thm-4.1 paper), `/tmp/cartan.txt` = arXiv:1602.07132 (Cartan/Thm 3.1).
-- **GOTCHA (will bite you):** `grep` **fails silently** on these extracted files — the locale is broken
-  (`setlocale: LC_ALL` warnings) and UTF-8 ligatures (ﬁ, ﬀ, ←, ̸=) make `grep` return *nothing* with no error.
-  Use **python** (`open(...,encoding='utf-8',errors='replace').read()` + `.count`/`.find`) or `LC_ALL=C grep`.
+  arXiv ids are stable; re-fetch with `curl -sL https://arxiv.org/pdf/<id> -o /tmp/x.pdf`. **Extracted already
+  AND cleaned:** `/tmp/p4paper.txt` = arXiv:2006.13592 (the Thm-4.1 paper), `/tmp/cartan.txt` = arXiv:1602.07132
+  (Cartan/Thm 3.1). These two are greppable now.
+- **GOTCHA — `grep`/`rg` find NOTHING on a *fresh* `pdf2txt` extraction. Run the cleaner first.** The cause is **NUL
+  bytes** in the pdf2txt output: `grep` treats any file containing a NUL as *binary* and silently refuses to print
+  matches (`LC_ALL=C grep` fails for the same reason — it is NOT a locale problem; the `setlocale: LC_ALL` warnings are
+  noise). Secondary: pdf2txt uses ligatures *inside words* — "conﬁguration" (ﬁ), "diﬀerent" (ﬀ) — so even after NUL
+  stripping `grep configuration` would miss them. **FIX (do this on every new extraction):**
+  `python3 scripts/clean-extracted-text.py /tmp/x.txt` — strips NUL + NFKC-normalizes ligatures to ASCII, in place.
+  Then plain `grep`/`rg` works (math symbols like `←` are preserved for reading; they don't break grep). The two
+  papers above are already cleaned; `python` (`open(...,encoding='utf-8',errors='replace').read()`) also always works
+  as a fallback.
 - **Index:** after landing decls, regen `PublicTheoremIndex.md` via
   `python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers` then hand-fill Descriptions and delete
   stale rows by hand.
@@ -388,7 +395,8 @@ bullseye) says closure is the likely outcome and the build is worth it.
 (cyclotomic). Ponomarenko–Vasil'ev, arXiv:1602.07132 (`/tmp/cartan.txt`) — **Thm 2.5** (1-regular `(m−1)`-ext ⟹
 `m`-separable), base defs (§2.2), **Thm 3.1** (the sparse condition, already formalised). Evdokimov–Ponomarenko,
 *Separability number and Schurity number of coherent configurations*, EJC 2000 (ref **[4]**) — `s(X)`/`t(X)`
-foundations, Thm 4.6(1) (source of Lemma 2.6). Extraction: `pdf2txt`; read with **python, not grep** (§0 gotcha).
+foundations, Thm 4.6(1) (source of Lemma 2.6). Extraction: `pdf2txt`, then **`scripts/clean-extracted-text.py`** or
+grep finds nothing (NUL bytes; §0 gotcha). The two papers above are already extracted + cleaned.
 
 **Provenance (do not need to read, but for the curious):** the seal-bridge gate / transport / (C) findings are in
 `chain-descent-module-adjoin-plan.md §9`; the seal state in `chain-descent-seal-handoff.md`; the project overview in
