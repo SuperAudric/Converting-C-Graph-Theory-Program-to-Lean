@@ -41,10 +41,12 @@
 - **Build:** `bash scripts/build.sh` (serial, ~60–120 s; parallel `lake build` thrashes swap — don't). Add new
   modules to `scripts/build.sh` `MODULES=(…)` in topological order. Verify axioms with
   `lake env lean /tmp/check.lean` containing `#print axioms <decl>` (run from `GraphCanonizationProofs/`).
-- **Papers / extraction:** `pdf2txt <file.pdf> [first] [last]` is on PATH (`~/.local/bin`, user-site PyMuPDF).
-  arXiv ids are stable; re-fetch with `curl -sL https://arxiv.org/pdf/<id> -o /tmp/x.pdf`. **Extracted already
-  AND cleaned:** `/tmp/p4paper.txt` = arXiv:2006.13592 (the Thm-4.1 paper), `/tmp/cartan.txt` = arXiv:1602.07132
-  (Cartan/Thm 3.1). These two are greppable now.
+- **Papers / extraction:** the two load-bearing extracts are **version-controlled in
+  [`docs/papers/`](./papers/README.md)** (2026-06-12; `/tmp` copies do not survive a reboot):
+  `docs/papers/p4paper-arxiv-2006.13592.txt` (the Thm-4.1 paper) and `docs/papers/cartan-arxiv-1602.07132.txt`
+  (Cartan/Thm 3.1). Both cleaned + greppable. For anything else: `pdf2txt <file.pdf> [first] [last]` is on PATH
+  (`~/.local/bin`, user-site PyMuPDF); arXiv ids are stable, re-fetch with
+  `curl -sL https://arxiv.org/pdf/<id> -o /tmp/x.pdf`.
 - **GOTCHA — `grep`/`rg` find NOTHING on a *fresh* `pdf2txt` extraction. Run the cleaner first.** The cause is **NUL
   bytes** in the pdf2txt output: `grep` treats any file containing a NUL as *binary* and silently refuses to print
   matches (`LC_ALL=C grep` fails for the same reason — it is NOT a locale problem; the `setlocale: LC_ALL` warnings are
@@ -137,14 +139,19 @@ def SeparableParam (X : AssociationScheme n) : Prop := 3 * X.indistinguishingNum
 ```
 Note `Separable` here quantifies `Y` over *homogeneous `AssociationScheme n`*. Thm 4.1 quantifies over *general
 CCs* `X'`; whether the homogeneous quantification suffices, or must widen to general CC, is a Stage-1 decision (§5).
+**Treat this as a soundness gate, not a taste choice (sharpened 2026-06-12):** the homogeneous `Separable` is the
+*weaker* predicate (fewer partners `Y`), and the transport (B) consumes separability against *extension* alg-isos —
+which are exactly the partners the homogeneous quantification omits. Reconcile (prove the homogeneous form equal to /
+sufficient for Thm 4.1's conclusion at the point of use, or widen the predicate) **before** Stage 3 invests in proving
+it, or the heaviest stage can land a predicate too weak to feed (B).
 
 ---
 
 ## 3. The mathematics (self-contained)
 
 All from Ponomarenko, *On the separability of cyclotomic schemes over finite field*, **arXiv:2006.13592**
-(`/tmp/p4paper.txt`), and Ponomarenko–Vasil'ev, *Cartan coherent configurations*, **arXiv:1602.07132**
-(`/tmp/cartan.txt`); foundations in Evdokimov–Ponomarenko, *Separability number and Schurity number of coherent
+(`docs/papers/p4paper-arxiv-2006.13592.txt`), and Ponomarenko–Vasil'ev, *Cartan coherent configurations*,
+**arXiv:1602.07132** (`docs/papers/cartan-arxiv-1602.07132.txt`); foundations in Evdokimov–Ponomarenko, *Separability number and Schurity number of coherent
 configurations*, EJC 2000 (their ref **[4]**). Statements below are quoted/paraphrased faithfully; verify against
 the source before relying on a subtlety.
 
@@ -192,7 +199,9 @@ see §4. Thm 4.1's whole proof is built on this calculus; **expect heavy reuse o
   transport (B) and the lighter route to (A) (§6).
 - **Theorem 2.5 (Cartan, base ⟹ separability).** A CC admitting a **1-regular** extension w.r.t. `m−1` points is
   `m`-separable. (Direction: extension/base ⟹ separability. The seal needs the *other* direction, base from
-  separability — supplied by the transport (B), not by Thm 2.5.)
+  separability — supplied by the transport (B), not by Thm 2.5. **But note (2026-06-12):** Thm 2.5's *premise* —
+  1-regularity of the extension — feeds the seal *directly* through the landed B1–B5 bridge, no transport needed;
+  that is Route δ in §6.)
 - **Theorem 1.1 / 1.2 (the cyclotomic instance, already cited).** Every cyclotomic scheme over a finite field is
   2-separable with finitely many exceptions (`(p,d)` table: `p=2, 2≤d≤20`; `p=3, 2≤d≤10`; `p=5, 2≤d≤6`, minus a
   short list). This is the **affine slice**, already closed in Lean by *citation* (`TwinsAreSemilinear` /
@@ -285,10 +294,17 @@ concrete template; here general):
    counting step — the B1–B5 analogue *on extensions* (reuse `relOfPair_eq_of_warmRefine_determined` /
    `warmRefine_refineStep_samePartition`).
 2. **Separability of the extension** · Stage 1.3 + Lemma 2.6 · **load-bearing, the crux.** From `Separable X` (the
-   §S.17/general predicate) derive separability of the relevant extension. Two sub-routes: (a) prove the inheritance
+   §S.17/general predicate) derive separability of the relevant extension. Four sub-routes: (a) prove the inheritance
    `s(X_µ) ≤ s(X)` directly (EP [4]); or (b) use Thm 4.1's **pointed** conclusion (induced `f` controllable on `µ`)
-   to skip an explicit inheritance lemma. **Pin which before investing** — this is the load-bearing uncertainty the
-   transport surfaced.
+   to skip an explicit inheritance lemma; or (c) **the Chen–Ponomarenko WL-dimension recursion** —
+   `dimWL(X) ≤ dimWL(X_α) + 1` (Chen–Ponomarenko, *Coherent Configurations* §4.2 = p4paper ref [3]; already named
+   as *the* `b(X) ↔ s(C) ↔ dimWL` bridge theory in `Separability.lean §S.17`'s doc-comment, lines ~1130–1133, but
+   absent from this doc until 2026-06-12) — the recursion is stated in the project's native idiom (extension depth),
+   so it may be the cheapest *citable* path from `m`-separability to the bounded-base consumer; or (d) prove
+   `Separable ⟹` the **joint relation-count separation** the landed `discrete_of_kRoundRelationSeparates` consumes
+   directly (the consumer is already built; the doubt — recorded in §7 — is that deriving the count separation from
+   a twin still routes through the extension alg-iso, i.e. (d) may be (a)/(b) in disguise). **Pin which before
+   investing** — this is the load-bearing uncertainty the transport surfaced.
 3. **Separable extension + alg-iso ⟹ induced iso ⟹ residual aut** · 2.1+2.2 · mechanical-ish. The induced `f` fixes
    `T` (matching singleton fibers) and maps `u ↦ u'`; it is a scheme automorphism ⟹ a `ResidualAut` realising the
    twin ⟹ `TwinsRealizedByResidualAut`.
@@ -300,7 +316,11 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
    load-bearing. Port the p4paper §2.6 calculus (`x ←r y`, Lemma 2.7) onto the general CC — much may transfer from
    the PV Thm 3.1 substrate.
 2. **Thm 4.1 conditions (i) domination + (ii) `m`-extending couples** · 1 · **load-bearing.** State and (for the
-   residue / 2-extension) discharge. This is the genuine new mathematics.
+   residue / 2-extension) discharge. This is the genuine new mathematics. **Gate it empirically first (added
+   2026-06-12):** the seven falsifiers all tested the *conclusion* (separates at bounded base), never these
+   *premises*. A cheap C# probe (the `PdsAmorphicSchemeProbe`/`CatalogueSchemeProbe` substrate already computes
+   intersection numbers) checking (i) domination and (ii) on the ℤ₄² Clebsch scheme + the catalogue primitives /
+   their 2-extensions decides Route β's viability for ~a day's work, before any Stage-3 Lean.
 3. **Assemble (A)** · 2 + Lemma 2.6 · load-bearing. Either prove `Separable` directly for the residue, or
    `2-separable` via Lemma 2.6 and feed the transport at `m=2`.
 
@@ -323,6 +343,17 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
   `m = 2` (Stage 1.4 builds only `Ω×Ω`). Aligns with p4paper's own Thm 1.2 proof structure.
 - **Route γ — parameter (Thm 5.1, `n > 3c(k−1)k`).** RULED OUT for the residue (stricter than the sparse Thm 3.1
   already done; the dense residue violates it). Do not attempt.
+- **Route δ — direct 1-regularity at `base+O(1)` points (substrate-cheap, math-risk-identical; added 2026-06-12).**
+  Cartan Thm 2.5's *premise* — a 1-regular extension w.r.t. `k` points — feeds the seal **directly**: 1-regularity
+  of `X_T` is exactly what the landed B1–B5 bridge (`determined_of_saAdj` / `discrete_of_connectivity` /
+  `separatesAtBoundedBase_of_sparseSeparable`) turns into `Discrete`-at-`T` for the sparse case, with **no AlgIso /
+  multi-fiber / m-extension substrate at all** (and `m`-separability falls out free via cited Thm 2.5 if wanted).
+  The dense-side generalisation is "1-regular w.r.t. `base+O(1)` points" — iterate the `c=1` forced-triangle
+  calculus on the extension *after* individualizing the base, where the dense scheme's relations have split.
+  **Honest trade-off:** δ is a *direct* attack on the crux (no reduction to checkable local conditions — that
+  reduction is exactly what Thm 4.1's (i)/(ii) buys for α/β), so its math risk is the full G2-B; its value is that
+  a probe-confirmed partial result lands on already-built homogeneous machinery. Worth a *probe first* (does the
+  `c=1` calculus propagate to discreteness on the ℤ₄² Clebsch extension at 2–3 points?) before choosing it over β.
 
 **Recommended path:** Stage 0 → **Option H** (minimal general-CC to `m=2`) → Stage 1 → **Route β** for (A) and the
 Lemma-2.6 inheritance for (B) Stage 2.2(a) → Stage 4. Bite off the full `Ωᵐ`/Route α only if a concrete obstruction
@@ -368,6 +399,18 @@ bullseye) says closure is the likely outcome and the build is worth it.
   (C)-discharge, PV Thm 3.1 substrate, §S.17 homogeneous separability) all landed and listed in §2/§4.
   **NEXT: Stage 0 — the modeling decision (Option P/Q/H), with a typechecking `CoherentConfig` (or extension)
   skeleton.** Recommended starting hypothesis: Option H (minimal general-CC to `m=2`), Route β for (A).
+- **2026-06-12 — onboarding review pass (docs only, no Lean).** Two independent fresh-eyes reviews of the project,
+  cross-checked against the Lean source and the paper extracts; the plan survives, with these doc deltas: (1) paper
+  extracts **version-controlled** at `docs/papers/` (were `/tmp`-only — reboot-fragile); (2) Stage 2.2's sub-route
+  menu widened with **(c) the Chen–Ponomarenko `dimWL(X) ≤ dimWL(X_α)+1` recursion** (named in `Separability.lean
+  §S.17`'s doc-comment all along but missing here) and (d) the direct relation-count form; (3) **Route δ** added to
+  §6 (direct 1-regularity at `base+O(1)` via the landed B1–B5 bridge — substrate-free, math-risk-identical, probe
+  first); (4) Stage 3.2 gated behind a **conditions-(i)/(ii) probe** (the falsifiers only ever tested the
+  conclusion); (5) the §2 homogeneous-`Separable` quantification note sharpened to a **soundness gate** (reconcile
+  before Stage 3 proves a possibly-too-weak predicate). Also flagged upstream, not in this doc: pin the intended
+  `IsLarge` instantiation — the G3 citations (Babai/Sun–Wilmes) kick in at sub-exponential thresholds
+  (≈`exp(n^{1/3})`), not super-poly, so "small" in the crux is wider than the `O(log n)`-base prose suggests
+  (verify the exact threshold against the sources before relying). Stage 0 remains the next Lean action.
 
 ---
 
@@ -390,13 +433,16 @@ bullseye) says closure is the likely outcome and the build is worth it.
 `determined_of_saAdj` / `discrete_of_connectivity` / `separatesAtBoundedBase_of_connectivity` /
 `warmRefine_refineStep_samePartition` (`CascadeAffine.lean §S-bridge/§S-stab`).
 
-**Papers:** Ponomarenko, arXiv:2006.13592 (`/tmp/p4paper.txt`) — **Thm 4.1** (§4, the target; statement at offset
-~20137 in the extract), **Lemma 2.6** (one-pt ext separable ⟹ 2-separable), **m-extension** (§2), Thm 1.1/1.2
-(cyclotomic). Ponomarenko–Vasil'ev, arXiv:1602.07132 (`/tmp/cartan.txt`) — **Thm 2.5** (1-regular `(m−1)`-ext ⟹
-`m`-separable), base defs (§2.2), **Thm 3.1** (the sparse condition, already formalised). Evdokimov–Ponomarenko,
+**Papers:** Ponomarenko, arXiv:2006.13592 (**`docs/papers/p4paper-arxiv-2006.13592.txt`**, version-controlled) —
+**Thm 4.1** (§4, the target; statement at line ~552 in the extract), **Lemma 2.6** (one-pt ext separable ⟹
+2-separable, line ~299), **m-extension** (§2), Thm 1.1/1.2 (cyclotomic). Ponomarenko–Vasil'ev, arXiv:1602.07132
+(**`docs/papers/cartan-arxiv-1602.07132.txt`**, version-controlled) — **Thm 2.5** (1-regular `(m−1)`-ext ⟹
+`m`-separable, line ~388), base defs (§2.2), **Thm 3.1** (the sparse condition, already formalised). Chen–Ponomarenko,
+*Coherent Configurations* (the monograph, p4paper ref **[3]**) — the `b(X) ↔ s(C) ↔ dimWL` theory incl.
+`dimWL(X) ≤ dimWL(X_α) + 1` (§4.2; the transport lead, Stage 2.2(c)). Evdokimov–Ponomarenko,
 *Separability number and Schurity number of coherent configurations*, EJC 2000 (ref **[4]**) — `s(X)`/`t(X)`
 foundations, Thm 4.6(1) (source of Lemma 2.6). Extraction: `pdf2txt`, then **`scripts/clean-extracted-text.py`** or
-grep finds nothing (NUL bytes; §0 gotcha). The two papers above are already extracted + cleaned.
+grep finds nothing (NUL bytes; §0 gotcha). The two papers above are committed cleaned (`docs/papers/README.md`).
 
 **Provenance (do not need to read, but for the curious):** the seal-bridge gate / transport / (C) findings are in
 `chain-descent-module-adjoin-plan.md §9`; the seal state in `chain-descent-seal-handoff.md`; the project overview in

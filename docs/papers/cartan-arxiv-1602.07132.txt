@@ -1,0 +1,1578 @@
+arXiv:1602.07132v1  [math.CO]  23 Feb 2016
+CARTAN COHERENT CONFIGURATIONS
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+Abstract. The Cartan scheme X of a finite group G with a (B, N)-pair is
+defined to be the coherent configuration associated with the action of G on
+the right cosets of the Cartan subgroup B ∩N by the right multiplications.
+It is proved that if G is a simple group of Lie type, then asymptotically,
+the coherent configuration X is 2-separable, i.e., the array of 2-dimensional
+intersection numbers determines X up to isomorphism. It is also proved that
+in this case, the base number of X equals 2. This enables us to construct a
+polynomial-time algorithm for recognizing the Cartan schemes when the rank
+of G and order of the underlying field are sufficiently large. One of the key
+points in the proof of the main results is a new sufficient condition for an
+arbitrary homogeneous coherent configuration to be 2-separable.
+1. Introduction
+A well-known general problem in algebraic combinatorics is to characterize an
+association scheme X up to isomorphism by a certain set of parameters [3]. A lot
+of such characterizations are known when X is the association scheme of a classical
+distance regular graph [4]. In most cases, the parameters can be chosen as a part
+of the intersection number array of X. However in general, even the whole array
+does not determine the scheme X up to isomorphism. Therefore, it makes sense to
+consider the m-dimensional intersection numbers, m ≥1, introduced in [11] for an
+arbitrary coherent configuration (for m = 1, these numbers are ordinary intersection
+numbers; the exact definitions can be found in Section 2). It was proved in [11] that
+every Johnson, Hamming or Grassmann scheme is 2-separable, i.e., is determined
+up to isomorphism by the array of 2-dimensional intersection numbers.
+In a recent paper [1], a generalized notion of distance regularity in buildings was
+introduced. According to [24], there is a natural 1-1 correspondence between the
+class of all buildings and the class of special homogeneous coherent configurations
+called the Coxeter schemes (see also [23, Chapter 12]). In this language, the Tits
+theorem on spherical buildings says that if X is a finite Coxeter scheme of rank at
+least 3, then there exists a group G acting on a set Ωsuch that
+(1)
+X = Inv(G, Ω)
+where Inv(G, Ω) is the coherent configuration of G, i.e., the pair (Ω, S) with S =
+Orb(G, Ω× Ω). Moreover, in this case, G is a group with a (B, N)-pair. Thus,
+a characterization of the coherent configuration (1) with such G by the m-dim
+intersection numbers with small m could be consider as a generalization of the
+above mentioned results on the association schemes of classical distance regular
+graphs to the noncommutative case.
+The work of the first and the second authors was partially supported respectively, by the grant
+RFBR No. 14-01-00156 and RFFI Grant No. 13-01-00505.
+1
+2
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+In the present paper, we are interested in coherent configurations (1) in the case
+when G is a finite group with a (B, N)-pair and X is a Cartan scheme of G in the
+following sense.
+Definition 1.1. The Cartan scheme of G with respect to (B, N) is defined to be
+the coherent configuration (1), where Ω= G/H consists of the right cosets of the
+Cartan subgroup H = B ∩N and G acts on Ωby right multiplications.
+Note that the permutation group induced by the action of G is transitive and
+the stabilizer of the point {H} coincides with H. In a Coxeter scheme of rank at
+least 3, the point stabilizer equals B. Therefore, every Coxeter scheme is a quotient
+of a suitable Cartan scheme.
+The separability problem [12] consists in finding the smallest m, for which a
+coherent configuration is m-separable. The separability problem (in particular, for
+a Cartan scheme) is easy to solve if the group H is trivial. Indeed, in this case,
+the permutation group induced by G is regular and the corresponding coherent
+configuration is 1-separable. The following theorem gives a partial solution to the
+separability problem for Cartan schemes when G is a finite simple group of Lie
+type, and hence with a (B,N)-pair. In what follows, we denote by L the class of all
+simple groups of Lie type including all exceptional groups and all classical groups
+Φ(l, q), for which l ≥l0 and q ≥al, where the values of l0 and a are given in the
+last two columns of Table 2 at page 17.
+Theorem 1.2. The Cartan scheme X of every finite simple group G ∈L is 2-
+separable.
+As a byproduct of the proof of Theorem 1.2, we are able to estimate the base
+number of a Cartan scheme satisying the hypothesis of this theorem (as to the
+exact definition, we refer to Subsection 2.2; see also [12] and [2, Sec. 5], where the
+base number was called the EP-dimension). The base number b(X) of a coherent
+configuration X can be thought as a combinatorial analog of the base number of a
+permutation group, which is the minimal number of points such that only identity
+of the group leave each of them fixed. In fact, for the coherent configuration (1),
+we have
+(2)
+b(G) ≤b(X),
+where b(G) is the base number of the permutation group induced by G. Moreover,
+in this case, obviously, b(G) = 1 if and only if b(X) = 1. In general, b(G) can be
+much smaller than b(X). The following theorem shows that this does not happen
+for the Cartan schemes in question.
+Theorem 1.3. Let X be the Cartan scheme of a group G ∈L. Then b(X) ≤2
+and b(X) = 1 if and only if the group H is trivial.
+Let us deduce Theorems 1.2 and 1.3 from the results, which proofs occupy the
+most part of the paper. Let X be the Cartan scheme of a group G ∈L. Denote
+by c and k the indistinguishing number and the maximum valency of X, respec-
+tively.1 Translating these invariants into the group-theoretic language, we prove in
+1In the complete colored graph representing X, k is the maximum number of the monochrome
+arcs incident to a vertex, and c is the maximum number of triangles with fixed base, the other
+two sides of which are monochrome arcs.
+CARTAN COHERENT CONFIGURATIONS
+3
+Theorem 4.1 that in our case
+(3)
+2c(k −1) < n
+where n = |Ω|. The proof of this inequality forms the group-theoretic part of the
+whole proof. The combinatorial part of the proof is to analyze one point extension
+of a homogeneous coherent configuration, for which inequality (3) holds; here the
+point extension can be thought as a combinatorial analog of the point stabilizer of
+a permutation group. In this way, we prove Theorem 3.1, which implies that the
+one point extension of X is 1-regular (see Subsection 2.2). It immediately follows
+that b(X) ≤2, which proves Theorem 1.3. Finally, in view of Theorem 3.1, the 2-
+separability of X is a direct consequence of Theorem 2.5 obtained by a combination
+of two results in [12], so Theorem 1.2 holds.
+When the rank of a simple group G of Lie type is small, inequality (3) does not
+generally hold, but the statements of Theorems 1.2 and 1.3 may still be true. For
+example, this happens in the following case.
+Theorem 1.4. Let X be the Cartan scheme of the group PSL(2, q), where q > 3.
+Then X is 2-separable and b(X) = 2.
+We believe that the Cartan scheme of every simple group of Lie type is 2-
+separable. Moreover, as in the case of classical distance regular graphs, it might
+be that in most cases such a scheme is 1-separable, i.e., is determined up to iso-
+morphism by the intersection numbers. In this way, one could probably use more
+subtle results on the structure of finite simple groups and a combinatorial technique
+in spirit of [15].
+From the computational point of view, Theorems 1.2 and 1.3 can be used for
+testing isomorphism and recognizing the Cartan schemes satisfying the hypothesis
+of Theorem 1.2. For this aim, it is convenient to represent a coherent configuration
+(Ω, S) as a complete colored graph with vertex set Ω, in which the color classes of
+arcs coincide with relations of the set S (the vertex colors match the colors of the
+loops). It is assumed that isomorphisms of such colored graphs preserve the colors.
+Theorem 1.5. Let Gn (resp.
+Kn) be the class of all colored graphs (resp.
+the
+colored graphs of Cartan schemes of the groups in L) with n vertices. Then the
+following problems can be solved in polynomial time in n:
+(1) given D ∈Gn, test whether D ∈Kn, and (if so) find the corresponding
+groups G, B, and N;
+(2) given D ∈Kn and D′ ∈Gn, find the set Iso(D, D′).
+To make the paper possibly self-contained, we cite the basics of coherent con-
+figurations in Section 2. Theorems 3.1 and 4.1, from which we have deduced The-
+orems 1.2 and 1.3, are proved in Section 3 and Sections 4,5, respectively. Finally,
+Theorems 1.4 and 1.5 are proved in Sections 6 and 7, respectively.
+Notation. Throughout the paper, Ωdenotes a finite set.
+The diagonal of the Cartesian product Ω× Ωis denoted by 1Ω; for any α ∈Ω
+we set 1α = 1{α}.
+For a relation r ⊂Ω× Ω, we set r∗= {(β, α) : (α, β) ∈r} and αr = {β ∈Ω:
+(α, β) ∈r} for all α ∈Ω.
+4
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+For S ∈2Ω2, we denote by S∪the set of all unions of the elements of S, and put
+S∗= {s∗: s ∈S} and αS = ∪s∈Sαs, where α ∈Ω.
+For g ∈Sym(Ω), we set Fix(g) = {α ∈Ω: αg = α}; in particular, if χ is the
+permutation character of a group G ≤Sym(Ω), then χ(g) = | Fix(g)| for all g ∈G.
+The identity of a group G is denoted by e; the set of non-identity elements in G
+is denoted by G#.
+2. Coherent configurations
+2.1. Main definitions. Let Ωbe a finite set, and let S be a partition of Ω× Ω.
+The pair X = (Ω, S) is called a coherent configuration on Ωif 1Ω∈S∪, S∗= S,
+and given r, s, t ∈S, the number
+ct
+rs = |αr ∩βs∗|
+does not depend on the choice of (α, β) ∈t. The elements of Ω, S, and S∪are
+called the points, basis relations, and relations of X, respectively. The numbers |Ω|,
+|S|, and ct
+rs are called the degree, rank, and intersection numbers of X. The basis
+relation containing the pair (α, β) ∈Ω× Ωis denoted by r(α, β).
+The point set Ωis a disjoint union of fibers, i.e., the sets Γ ⊆Ω, for which 1Γ ∈S
+For any basis relation r ∈S, there exist uniquely determined fibers Γ and ∆such
+that r ⊆Γ × ∆. Moreover, the number |γr| = ct
+rr∗with t = 1Γ, does not depend on
+the choice of γ ∈Γ. This number is called the valency of r and denoted nr. The
+maximum of all valences is denoted by k = k(X).
+A point α ∈Ωof the coherent conguration X is called regular if
+|αr| ≤1
+for all r ∈S.
+One can see that the set of all regular points is the union of fibers. If this set is not
+empty, then the coherent conguration X is said to be 1-regular.
+The coherent configuration X is said to be homogeneous if 1Ω∈S. In this case,
+nr = nr∗= |αr| for all r ∈S and α ∈Ω. Moreover, the relations
+(4)
+ct∗
+r∗s∗= ct
+sr
+and
+ntct∗
+rs = nrcr∗
+st = nscs∗
+tr
+hold for all r, s, t ∈S.
+We observe that in the homogeneous case, a coherent
+configuration is 1-regular if and only if it is a thin scheme in the sense of [23].
+2.2. Point extensions and the base number. There is a natural partial order
+≤on the set of all coherent configurations on the same set. Namely, given two
+coherent configurations X = (Ω, S) and X ′ = (Ω, S′), we set
+X ≤X ′ ⇔S∪⊆(S′)∪.
+The minimal and maximal elements with respect to this ordering are the trivial
+and complete coherent configurations: the basis relations of the former one are the
+reflexive relation 1Ωand (if n > 1) its complement in Ω× Ω, whereas the basis
+relations of the latter one are singletons.
+Given two coherent configurations X1 and X2 on Ω, there is a uniquely de-
+termined coherent configuration X1 ∩X2 also on Ω, the relation set of which is
+(S1)∪∩(S2)∪, where Si is the set of basis relations of Xi, i = 1, 2. This enables us
+CARTAN COHERENT CONFIGURATIONS
+5
+to define the point extension Xα,β,... of a coherent configuration X = (Ω, S) with
+respect to the points α, β, . . . ∈Ωas follows:
+Xα,β,... =
+\
+Y: S⊆T ∪,1α,1β,...∈T ∪
+Y,
+where Y is the coherent configuration (Ω, T ). In other words, Xα,β,... can be defined
+as the smallest coherent configuration on Ωthat is larger than or equal to X and has
+singletons {α}, {β}, . . . as fibers. This configuration can also be considered as the
+refinement of the color graph associated with X, in which the points of α, β, . . . are
+colored in distinguished new colors. In particular, the extension can be efficiently
+constructed by the Weisfeiler-Leman algorithm (see Section 7).
+Definition 2.1. A set {α, β, . . .} ⊆Ωis a base of the coherent configuration X
+if the extension Xα,β,... with respect to the points α, β, . . . is complete; the smallest
+cardinality of a base is called the base number of X and denoted by b(X).
+It is easily seen that 0 ≤b(X) ≤n −1, where n = |Ω|, and the equalities are
+attained for the complete and trivial coherent configurations on Ω, respectively. It
+is also obvious that b(X) ≤1, whenever the coherent configuration X is 1-regular.
+2.3. Coherent configurations and permutation groups. Two coherent con-
+figurations X = (Ω, S) and X ′ = (Ω′, S′) are called isomorphic if there exists a
+bijection f : Ω→Ω′ such that the relation sf = {(αf, βf) : (α, β) ∈s} belongs
+to S′ for all s ∈S. The bijection f is called an isomorphism from X onto X ′; the
+set of all of them is denoted by Iso(X, X ′). The group Iso(X, X) contains a normal
+subgroup
+Aut(X) = {f ∈Sym(Ω) : sf = s, s ∈S}
+called the automorphism group of X.
+Let G ≤Sym(Ω) be a permutation group, and let S be the set of orbits of the
+coordinatewise action of G on Ω× Ω. Then
+Inv(G) = Inv(G, Ω) = (Ω, S)
+is a coherent configuration called the coherent configuration of G. It is homogeneous
+if and only if the group G is transitive. From [12, Corollary 3.4], it follows that
+a coherent configuration X is 1-regular if and only if X = Inv(G), where G is a
+permutation group having a faithful regular orbit.
+Let G ≤Sym(Ω) be a transitive group, H = Gα the stabilizer of a point α in G,
+and X = Inv(G) the coherent configuration of G. Then given a basis relation s ∈S,
+one can form the set
+(5)
+Ds = {g ∈G : (α, αg) ∈s},
+which is, in fact, a double H-coset. It is well known that the mapping s 7→Ds is
+a bijection from the set S of basis relations of X onto the set of double H-cosets
+in G. Moreover, the intersection number ct
+rs is equal to the multiplicity, with which
+an element of Dt enters the product Dr Ds, divided by |H|. It follows that
+(6)
+ns = |Ds|
+|H| =
+|H|
+|H ∩Hg|
+for all s ∈S and g ∈Ds (the second equality follows from the first one, because
+|Ds| = |HgH| = |g−1HgH| = |HgH|). In particular, k = k(X) is the ratio between
+the order of H and the minimal size of the intersection of H with its conjugate.
+6
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+Lemma 2.2. Let G be a transitive permutation group and X = Inv(G). If b(X) ≤
+2, then G = Aut(X).
+Proof. Inequality (2) yields b(G) ≤b(X) ≤2. It follows that H ∩Hg = 1 for some
+g ∈G, where H = Gα. If s is the basis relation of X with Ds = HgH, then (6)
+implies that αs is a faithful regular orbit of H. Hence
+|G| = nk,
+where n is the cardinality of underlying set of G. Since X = Inv(G) = Inv(Aut(X)),
+the above equality holds also for G replaced by Aut(X). Thus,
+| Aut(X)| = nk = |G|,
+and we are done, because G ≤Aut(X).
+2.4. Indistinguishing number. Following [15], the sum of all intersection num-
+bers cr
+ss∗with fixed r is called the indistinguishing number of r ∈S and denoted
+by c(r). It is easily seen that for all pairs (α, β) ∈r, we have
+(7)
+c(r) = |Ωα,β|, where Ωα,β = {γ ∈Ω: r(γ, α) = r(γ, β)}.
+The maximum of the numbers c(r), r ̸= 1Ω, is called the indistinguishing number
+of the coherent configuration X and denoted by c(X).
+The following lemma gives a formula for the indistinguishing number of the
+coherent configuration of a transitive permutation group. Recall that the fixity
+fix(G) of a permutation group G is the maximum number of elements fixed by
+non-identity permutations [18].
+Lemma 2.3. Let G ≤Sym(Ω) be a transitive group, H a point stabilizer of G, and
+X = Inv(G). Then
+(8)
+c(X) = max
+x∈G\H |
+[
+h∈H
+Fix(hx)|.
+In particular,
+(9)
+c(X) ≤max
+x∈G\H
+X
+h∈H
+χ(hx) ≤fix(G) · |H|.
+Proof. Let r ∈S and (α, β) ∈r. Then a point γ belongs to the set Ωα,β defined
+in (7) if and only if the pairs (γ, α) and (γ, β) belong to the same orbit of the
+group G acting on Ω× Ω, and the latter happens if and only if γ is a fixed point
+of a permutation x ∈G moving α to β. Assuming without loss of generality that
+H = Gα, we conclude that the set of all such x forms an H-coset C. Therefore,
+(10)
+c(r) = |Ωα,β| = |
+[
+h∈H
+Fix(hx)|
+for any x ∈C.
+Moreover, if r ̸= 1Ω, then C ̸= H.
+This proves equality (8).
+Furthermore, | Fix(x)| = χ(x) ≤fix(G) for any non-identity element x ∈G. This
+implies that
+|
+[
+h∈H
+Fix(hx)| ≤
+X
+h∈H
+χ(hx) ≤fix(G) · |H|.
+Thus the second statement of the lemma follows from the first one.
+We complete this subsection by a statement that helps to count the values of
+the permutation character of a transitive group.
+CARTAN COHERENT CONFIGURATIONS
+7
+Lemma 2.4. Let G ≤Sym(Ω) be a transitive group, α ∈Ω, and H = Gα the point
+stabilizer of α in G. Then for every x ∈G
+(11)
+Fix(x) ̸= ∅
+⇐⇒
+xG ∩H ̸= ∅.
+Suppose, additionally, that there is a subgroup N with H ≤N ≤NG(H) such that
+every two elements of H conjugated in G are conjugated in N. If x = hg0
+0 , where
+h0 ∈H and g0 ∈G, then
+(12)
+Fix(x) = {αg | g ∈NCg0},
+where C = CG(h0). Furthermore,
+(13)
+χ(x) = |N : (C ∩N)| |C|
+|H|
+= |N : (C ∩N)| |Ω|
+|xG|
+.
+Proof. Clearly, αg ∈Fix(x) if and only if Hgx = Hg, which holds if and only if
+there is h ∈H satisfying x = hg. In particular, this yields (11).
+To prove that the left-hand side of (12) is contained in the right-hand side,
+let x = hg0
+0 , that is the set Fix(x) is nonempty. Suppose that g is an arbitrary
+element of G with αg ∈Fix(x). Then there is h ∈H such that hg = x = hg0
+0 .
+Put y = gg−1
+0 . Since the elements h0 and h = hy−1
+0
+are conjugated in G, they are
+conjugated in N, so there is n ∈N with hy−1
+0
+= hn−1
+0
+. It follows that y = nc, where
+c ∈C. Therefore, g = ncg0, so αg ∈Fix(x) implies that g ∈NCg0. To establish
+the converse inclusion, for every n ∈N, set h = hn−1
+0
+. Then hncg0 = hcg0
+0
+= x for
+every c ∈C. By the argument of the first paragraph, this proves αNCg0 ⊆Fix(X).
+Obviously, |NCg0| = |N : (C ∩N)||C|. Now, the first equality in (13) is the
+direct consequence of (12), because αg = αg′ if and only if g′g−1 ∈H.
+Since
+|C| = |G|/|xG| and |G|/|H| = |Ω|, the second equality follows.
+2.5. Algebraic isomorphisms and m-dimensional intersection numbers.
+Let X = (Ω, S) and X ′ = (Ω′, S′) be coherent configurations. A bijection φ : S →
+S′, r 7→r′ is called an algebraic isomorphism from X to X ′ if
+(14)
+ct
+rs = ct′
+r′s′,
+r, s, t ∈S.
+In this case, we say that X and X ′ are algebraically isomorphic. Each isomorphism f
+from X to X ′ naturally induces an algebraic isomorphism between these coherent
+configurations. The set of all isomorphisms inducing the algebraic isomorphism φ
+is denoted by Iso(X, X ′, φ). In particular,
+Iso(X, X, idS) = Aut(X)
+where idS is the identity on S. A coherent configuration X is called separable if,
+for any algebraic isomorphism φ : X →X ′, the set Iso(X, X ′, φ) is nonempty.
+Saying that coherent configurations X and X ′ have the same intersection num-
+bers, we mean that formula (14) holds for a certain algebraic isomorphism. Thus,
+the exact meaning of the phrase ”the coherent configuration X is determined up to
+isomorphism by the intersection numbers” consists in the fact that X is separable.
+Let m ≥1 be an integer. According to [12], the m-extension of a coherent con-
+figuration X with point set Ωis defined to be the smallest coherent configuration on
+Ωm, which contains the Cartesian m-power of X and for which the set Diag(Ωm)
+is a union of fibers. The intersection numbers of the m-extension are called the
+8
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+m-dimensional numbers of the configuration X. Now, m-separable coherent config-
+urations for m > 1 are defined essentially in the same way as for m = 1. The exact
+definition can be found in survey [12], whereas in the present paper, we need only
+the following result, which immediately follows from [12, Theorems 3.3 and 5.10].
+Theorem 2.5. Let X be a coherent configuration admitting a 1-regular extension
+with respect to m −1 points, m ≥1. Then X is m-separable.
+3. A sufficient condition for 1-regularity of a point extension
+3.1. Main theorem. The aim of this section is to prove the following statement
+underlying the combinatorial part in the proof of the main results of this paper.
+Theorem 3.1. Let X be a homogeneous coherent configuration on n points with
+indistinguishing number c and maximum valency k. Suppose that 2c(k −1) < n,
+i.e., inequality (3) holds. Then every one point extension of X is 1-regular. In
+particular, b(X) ≤2.
+The proof of Theorem 3.1 will be given in the end of this section. The idea is
+to deduce the 1-regularity of the point extension Xα from Lemma 3.6 stating that
+inequality (3) implies the connectedness of the binary relations smax and sα defined
+in Subsection 3.2. Note that this condition itself implies that any pair from smax
+forms a base of X (Lemma 3.3).
+3.2. Relations smax and sα. Let X = (Ω, S).
+Recall that k = k(X) is the
+maximal valency of X. Denote by smax the union of all relations in the set
+Smax = {s ∈S : ns = k}.
+Then, obviously, Smax ⊂S and smax ∈S∪. Moreover, since X is homogeneous,
+we have ns∗= ns for all s ∈S, and hence, the relation smax is symmetric. We
+are interested in the connectedness of it, i.e., the connectedness of the graph with
+vertex set Ωand edge set smax. Note that, in general, this graph is not connected:
+take X to be the homogeneous coherent configuration of rank 4 that is associated
+with a finite projective plane.
+With any point α ∈Ω, we associate a binary relation sα ⊆αsmax × αsmax
+that consists of all pairs (β, γ) such that the colored triangle {α, β, γ} is uniquely
+determined by the side colors r = r(α, β), s = r(β, γ) and t = r(α, γ), and one of
+the sides {α, β} or {α, γ}, see Fig. 1. More precisely,
+sα = {(β, γ) ∈αsmax × αsmax : ct
+rs = 1},
+This relation is symmetric. Indeed, we have nt = nr = k. Since also nr∗= nr, it
+follows from (4) that ntct
+rs = nr∗cr∗
+st∗= nrcr
+ts∗. This implies that cr
+ts∗= ct
+rs = 1,
+and hence, (γ, β) ∈sα.
+β
+•
+s
+· · ·
+•
+s
+αr
+α•
+t
+)❚
+❚
+❚
+❚
+❚
+r
+4❥
+❥
+❥
+❥
+❥
+•
+· · ·
+•
+αt
+γ
+Figure 1. A part of the relation sα.
+CARTAN COHERENT CONFIGURATIONS
+9
+Lemma 3.2. Suppose that the graph sα is connected. Denote by Tα the set of all
+basis relations of the coherent configuration Xα that are contained in αsmax×αsmax.
+Then
+(15)
+|βt| = 1
+for all t ∈Tα, β ∈αsmax.
+Proof. One can see that the set αsmax is the union of fibers of Xα (see [17,
+Lemma 2.2]). Therefore,
+(16)
+αsmax × αsmax =
+[
+t∈Tα
+t.
+Let t ∈Tα and β ∈αsmax. Then β ∈αr for some r ∈Smax. In view of (16), there
+exists a point β′ ∈αsmax contained in βt. By the connectedness of sα, there exists
+a path P in sα connecting β and β′. If this path has length l = 1, then by the
+definition of sα, we have cs
+rt′ = 1, where t′ ∈S and s ∈Smax are unique relations
+such that t ⊂t′ and β′ ∈αs, respectively. Then, obviously, {β′} = βt, as required.
+Suppose that l ≥2. Note that if β1, β2, and β3 are successive vertices of P, then
+they belong to αsmax and
+{β2} = β1t1, {β3} = β2t2,
+where t1 and t2 are the basis relations of Xα that contain (β1, β2) and (β2, β3),
+respectively. In particular, t1, t2 ∈Tα and
+{β3} = β1t3,
+where t3 is a unique relation of Tα containing the pair (β1, β3). This proves the
+required statement for l = 2, and, hence, for all positive integers l by induction.
+Lemma 3.3. If smax and all sα, α ∈Ω, are connected relations, then {α, β} is a
+base of the coherent configuration X for each β ∈Ωsuch that (α, β) ∈smax.
+Proof. Let α ∈Ωand β ∈αsmax.
+Denote by Γ the set of all points γ ∈Ω
+for which the singleton {γ} is a fiber of the coherent configuration Xα,β. Then
+obviously α, β ∈Γ. We claim that
+(17)
+γsmax ⊆Γ
+or
+γsmax ∩Γ = ∅
+for all γ ∈Γ. Indeed, suppose on the contrary that there exist points γ ∈Γ and
+γ1, γ2 ∈γsmax such that γ1 ∈Γ and γ2 ̸∈Γ. Since sγ is a connected relation, there
+is an sγ-path connecting γ1 and γ2. Moreover, the definition of sγ implies that if
+some point in this path is inside Γ, then the next point in this path must be also
+inside Γ. Therefore γ2 ∈Γ, a contradiction.
+Denote by Γ0 the set of all points γ ∈Γ with γsmax ⊆Γ. Then α ∈Γ0, because,
+as it follows from (17), the set αsmax contains β ∈Γ. Therefore, Γ0 contains the
+connected component of smax that contains α. Since smax is connected, this implies
+that Γ0 = Ω, and hence Γ = Ω. By the definition of Γ, this means that any fiber of
+the coherent configuration Xα,β is a singleton. Thus, {α, β} is a base of X.
+10
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+3.3. Connected components of sα. One can treat sα also as the graph with
+vertex set αsmax and edge set sα. The set of all connected components of this
+graph that contain a vertex in αu for fixed u ∈Smax is denoted by Cα(u) = C(u).
+Lemma 3.4. Let u, v ∈Smax. Suppose that C(u) ∩C(v) ̸= ∅. Then C(u) = C(v)
+and |αu ∩C| = |αv ∩C| for all C ∈C(u).
+Proof. Let C0 ∈C(u) ∩C(v). Then C0 contains vertices β ∈αu and γ ∈αv
+connected by an sα-path, say
+β = β0, β1, . . . , βm = γ,
+where (βi, βi+1) ∈sα for i = 0, . . . , m −1. By the definition of sα, this implies that
+(18)
+cui+1
+uivi = 1
+for all i, where ui = r(α, βi) and vi = r(βi, βi+1). Therefore, it is easily seen that
+for every C ∈C(u) given a vertex β′ ∈C, there is a unique sα-path
+β′ = β′
+0, β′
+1, . . . , β′
+m = γ′
+such that γ′ ∈αv and r(α, β′
+i) = ui and r(β′
+i, β′
+i+1) = vi for all i. In view of (18),
+no vertices βi and β′
+i coincide whenever β ̸= β′. Thus, the mapping
+αu →αv, β′ 7→γ′
+is a bijection. Obviously, the vertex γ′ belongs to the component C of the graph
+sα that contains β′. Since this is true for all β′ ∈C and all C ∈C(u), the required
+statement follows.
+For a relation u ∈Smax and a point δ ∈Ω, denote by pu(δ) the number of pairs
+(β, γ) ∈αu × αu such that β ̸= γ and r(β, δ) = r(γ, δ). Here, |αu| = nu = k.
+Therefore, αu contains exactly k(k −1) pairs of distinct elements. Now we are able
+to estimate from above the sum of pu(δ) in terms of the indistinguishing numbers of
+the corresponding basis relations c(r(β, γ)) as well as the indistinguishing number
+c of X. Indeed,
+(19)
+k(k −1)c ≥
+X
+β,γ
+c(r(β, γ)) ≥
+X
+δ∈∆
+pu(δ)
+for any set ∆⊆Ω. On the other hand, the number pu(δ) can be computed by
+means of the intersection numbers. Namely, if v = r(α, δ), then, obviously,
+(20)
+pu(δ) =
+X
+w∈Tu,v
+cv
+uw(cv
+uw −1)
+where Tu,v = {w ∈u∗v : cv
+uw > 1} (see Fig 2). In particular, the number pu(δ)
+does not depend on δ ∈αv.
+Lemma 3.5. In the above notation, the following statements hold:
+(1) if either nu > nv, or nu = nv and C(u) ̸= C(v), then pu(δ) ≥k,
+(2) if nu = nv, C(u) = C(v), and |C(u)| > 1, then pu(δ) ≥k/2.
+Proof. To prove statement (1), suppose that either nu > nv, or nu = nv and
+C(u) ̸= C(v). Then
+(21)
+Tu,v = u∗v.
+CARTAN COHERENT CONFIGURATIONS
+11
+7654
+0123
+β
+w
+)❚
+❚
+❚
+❚
+❚
+❚
+❚
+❚
+❚
+❚
+❚
+❚
+7654
+0123
+γ
+w
+/7654
+0123
+δ
+7654
+0123
+α
+u
+b❊❊❊❊❊❊❊❊❊❊❊❊❊
+u
+W✳✳✳✳✳✳✳✳✳✳✳✳✳
+v
+C✟✟✟✟✟✟✟✟✟
+Figure 2. A relation w ∈Tu,v with cw
+uv > 1.
+Indeed, obviously, Tu,v ⊆u∗v. The converse inclusion is true if nu > nv, because
+in this case, cv
+uw = nucw∗
+v∗u/nv > 1 for all w ∈u∗v. Let now C(u) ̸= C(v). Then
+the sets C(u) and C(v) are disjoint (Lemma 3.4). This implies that if β ∈αu
+and γ ∈αv, then (β, γ) ̸∈sα. Therefore, cv
+uw > 1 for all w ∈u∗v, whence again
+u∗v ⊆Tu,v. Thus relation (21) is completely proved. Together with (20), this shows
+that
+pu(δ) =
+X
+w∈Tu,v
+cv
+uw(cv
+uw −1) ≥
+X
+w∈Tu,v
+cv
+uw =
+X
+w∈u∗v
+cv
+uw = nu = k,
+as required. Observe that the penultimate equality is the well-known identity for
+homogenous coherent configurations.
+To prove statement (2), suppose that nu = nv, C(u) = C(v), and |C(u)| > 1.
+Let us choose C ∈C(u) so that the number |αu ∩C| is minimum possible. Then
+(22)
+|αu \ C| ≥k/2,
+because |C(u)| > 1 and |αu| = nu = k. Next, since C(u) = C(v), we have C ∈C(v).
+Moreover, αv is not contained in C, because |C(v)| = |C(u)| > 1. Since pu(δ) does
+not depend on the choice of δ ∈αv, we may assume that δ ∈αv ∩C. Then no
+point β ∈αu \ C belongs to the component of sα that contains δ. In particular,
+(δ, β) is not an edge of sα. Therefore,
+cv
+uw > 1
+for all w ∈T,
+where T is the set of all w = r(β, δ) with β ∈αu \ C. By (20) and (22), we obtain
+pu(δ) =
+X
+w∈Tu,v
+cv
+uw(cv
+uw −1) ≥
+X
+w∈T
+cv
+uw = |αu ∩δT ∗| ≥|αu \ C| ≥k/2,
+as required.
+3.4. The connectedness of smax and sα. Using Lemmas 3.4 and 3.5, we will
+prove that the hypothesis of Theorem 3.1 gives a sufficient condition for the graphs
+sα and smax to be connected. Note that by Lemma 3.3, this establishes the second
+statement of Theorem 3.1.
+Lemma 3.6. Suppose that 2c(k −1) < n and k ≥2. Then the graphs sα and smax
+are connected. Moreover, |αsmax| > n/2.
+Proof. To prove the first statement, we claim that
+(23)
+|C(u)| = 1
+for all u ∈Smax.
+12
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+Indeed, if this is not true, then there exists u ∈Smax such that |C(u)| ≥2.
+Lemma 3.5 yields that pu(δ) ≥k/2 for all points δ ∈Ω. By (19) with ∆= Ω,
+this implies that
+c ≥
+1
+k(k −1)
+X
+δ∈Ω
+pu(δ) ≥
+1
+k(k −1)
+|Ω|k
+2
+=
+n
+2(k −1),
+which contradicts the lemma hypothesis. Thus, formula (23) is proved.
+Suppose on the contrary that the graph sα is not connected for some α ∈Ω.
+Then it has a component C containing at most half of the vertices, that is
+(24)
+2|C| ≤|αsmax| < n.
+By (23), one can find a relation u ∈Smax such that C(u) = C. Then for any point
+δ ∈Ω\C, we have nv < nu or C(v) ̸= C(u), where v = r(α, δ) (if C(v) = C(u) = C,
+then δ ∈C). By statement (1) of Lemma 3.5, this implies that pu(δ) ≥k. On the
+other hand, 2|Ω\ C| ≥n by (24). From (19) with ∆= Ω\ C, we obtain that
+(25)
+c ≥
+1
+k(k −1)
+X
+δ∈Ω\C
+pu(δ) ≥
+1
+k(k −1)|Ω\ C|k ≥
+n
+2(k −1),
+which contradicts the lemma hypothesis. Thus, the graph sα is connected.
+To prove that the graph smax is also connected, suppose on the contrary that
+one of its components, say C, has at most n/2 points. Let α ∈C and u ∈Smax.
+Then αu ⊆C and nu > nv for all v = r(α, δ) with δ ∈Ω\ C. By statement (1) of
+Lemma 3.5, this implies that pu(δ) ≥k for all such δ. Again inequality (25) hold,
+which contradicts the lemma hypothesis.
+To prove the second statement, denote by V the union of all v ∈S with nv < k,
+and fix u ∈Smax. Then by statement (1) of Lemma 3.5, we have pu(δ) ≥k for all
+δ ∈Ωsuch that r(α, δ) ∈V . This implies that
+X
+δ∈αV
+pu(δ) ≥k|αV |.
+Since there are k(k−1) pairs of different points in αu, at least for one of such pairs,
+say (α, β), we obtain
+c ≥c(u) = |Ωα,β| ≥
+1
+k(k −1)
+X
+δ∈αV
+pu(δ) ≥
+k |αV |
+k(k −1) = |αV |
+k −1.
+By the lemma hypothesis, this implies that 2 |αV |
+k−1 (k −1) < n, whence |αV | < n/2.
+Since |αV | + |αsmax| = n, we are done.
+3.5. Proof of Theorem 3.1. Obviously, we may assume that k ≥2. Let α ∈
+Ω.
+It suffices to prove that each β ∈αsmax is a regular point of the coherent
+configuration Xα. Suppose on the contrary that β is not a regular point of Xα. Then
+this coherent configuration has a basis relation v such that |βv| ≥2. Therefore,
+there exist distinct points γ1 and γ2 such that
+(26)
+r(β, γ1) = v = r(β, γ2).
+Let Tα be the set defined in Lemma 3.2. Then in view of (15), v ̸∈Tα. Therefore,
+neither γ1 nor γ2 belongs to αsmax.
+CARTAN COHERENT CONFIGURATIONS
+13
+Let us verify that formula (26) holds with β replaced by arbitrary β′ ∈αsmax
+and suitable distinct points γ1 and γ2.
+By virtue of (15), the relation u ∈Tα
+containing the pair (β, β′) is of the form
+u = {(δ, δg) : δ ∈∆}
+for some bijection g : ∆→∆′, where ∆and ∆′ are the fibers of Xα containing β
+and β′, respectively. Define a permutation f ∈Sym(Ω) by
+ωf =
+
+
+
+
+
+ωg
+if ω ∈∆,
+ωg−1
+if ω ∈∆′,
+ω
+otherwise.
+Then the graph of f is the union of basis relations of Xα, each of which is of
+valency 1.
+One can see that in this case, f takes any basis relation of Xα to
+another basis relation.
+This implies that f is an isomorphism of the coherent
+configuration Xα to itself. Therefore, by equality (26), we have
+r(β′, γ1) = r(βf, γf
+1 ) = r(βf, γf
+2 ) = r(β′, γ2),
+and the claim is proved. Thus, the set Ωγ1,γ2 contains αsmax. By the theorem
+hypothesis and second statement of Lemma 3.6, this implies that
+c ≥|Ωγ1,γ2| ≥|αSmax| > n/2.
+However, then n > 2c(k −1) > n(k −1), which is impossible for k > 1.
+4. Inequality (3) in simple groups of Lie type
+The main purpose of the following two sections is to prove Theorem 4.1 below,
+from which Theorems 1.2 and 1.3 were deduced in Introduction. In this section, we
+reduce the proof to Lemma 4.3, which will be proved in the next section.
+Theorem 4.1. For the Cartan scheme X of every group G ∈L, inequality (3)
+holds.
+We generally follow the notation of well-known Carter’s book [6] with some
+exceptions that we explain below inside parentheses. If Φl is a simple Lie algebra
+of rank l, then Φl(q) is the simple Chevalley group of rank l over a field of order q.
+Let B, N, and H = B ∩N be a Borel, monomial, and Cartan subgroups of a
+simple Chevalley group Φl(q) as in [6], while W = N/H be the corresponding Weil
+group. Then [6, Proposition 8.2.1] implies that the subgroups B and N form a
+(B, N)-pair of Φl(q). If τ is a symmetry of the Dynkin diagram of Φl of order t
+(and the corresponding automorphism of Φl(qt)), then tΦl(q) is the simple twisted
+group of Lie type (in [6] such a group is denoted as tΦl(qt)). Again B, N, and
+H = B ∩N stand for Borel, monomial, and Cartan subgroups of a simple twisted
+group of Lie type, and W = N/H is the Weil group (in [6] they are denoted by B1,
+N 1 and so on). It follows from [6, Theorem 13.5.4] that in this case B and N form
+a (B, N)-pair of tΦl(q) again. In the sake of brevity we will use notation tΦl(q)
+for all simple groups of Lie type, assuming that t is the empty symbol in the case
+of untwisted groups. Recall also that the order w of the Weil group W does not
+depend on the order of the underlying field.
+Let G be a finite simple group of Lie type, and let X = (Ω, S) be the Cartan
+scheme of G, where the corresponding (B, N)-pair is as in the previous paragraph
+14
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+(see Definition 1.1). In particular, Ω= G/H and S = Orb(G, Ω2). Put n = |Ω|,
+k = k(X), and c = c(X).
+Lemma 4.2. There exists an element g0 ∈G such that H ∩Hg0 = 1. In particular,
+(27)
+k = max
+s∈S ns = |H|.
+Proof. It is well known that B = U ⋊H is the semidirect product of U and
+H, where U is the unipotent radical of B. By [7, Propositions 5.1.5 and 5.1.7],
+there exists an unipotent element u ∈U such that CG(u) ≤U (in fact, u can be
+chosen as a regular unipotent element fixed by an appropriate Frobenius map of
+the corresponding algebraic group), it follows that [h, u] ̸= 1 for every h ∈H#. On
+the other hand, if h ∈H ∩Hu, then [h, u] ∈H ∩U = 1, so h = 1 and g0 = u is the
+desired element of G.2 Now, in view of (6),
+k = max
+s∈S ns = max
+g∈G
+|H|
+|H ∩Hg| =
+|H|
+|H ∩Hg0| = |H|.
+Observe that G satisfies the hypothesises of Lemmas 2.3 and 2.4. Indeed, the
+transitivity of the action of G on Ωis evident, while the monomial subgroup N of
+G satisfies the additional condition from Lemma 2.4 due to [6, Proposition 8.4.5].
+This enables us to estimate the indistinguishing number c and prove the required
+inequality (3). We need the following lemma whose strictly group-theoretic proof
+is postponed to the next section.
+Below, for a coset y = Hy, set My = {u ∈y :
+uG ∩H ̸= ∅}. Note that all
+elements of My are semisimple. For an integer m, set
+My,m = {u ∈My : |uG| ≥m},
+and
+M ′
+y,m = My \ My,m.
+Put
+rm = max
+y∈G\H |M ′
+y,m|
+and
+m0 =
+min
+∅̸=yG∩H̸=yG |yG|.
+Lemma 4.3. In the above notation, there exists a positive integer m such that
+(28)
+k
+m + rm
+m0
+≤
+1
+2wk
+for all groups G ∈L and every coset y ̸= H.
+Proof of Theorem 4.1. Immediately follows from Lemma 4.3 and Lemma 4.4
+below.
+Lemma 4.4. Let G be a simple group of Lie type. Suppose that there exists an
+integer m such that inequality (28) holds. Then for the Cartan scheme X of G,
+inequality (3) is satisfied.
+Proof. It follows from Lemma 2.3 that
+(29)
+c ≤max
+y∈G\H
+X
+h∈H
+χ(hy) ≤max
+y∈G\H
+X
+x∈My
+χ(x).
+Let x ∈My. Then by Lemma 2.4, Fix(x) ̸= ∅, i.e. there are h0 ∈H and g0 ∈G
+with x = hg0
+0 .
+In the notation of that lemma χ(x) = |N : (C ∩N)| |Ω|/|xG|.
+2The alternative way to establish the same is to apply Zenkov’s theorem [22]. It yields that
+since H is abelian, there is an element g0 ∈G such that H ∩Hg0 lies in the Fitting subgroup of
+G, which is trivial in the case of a simple group G.
+CARTAN COHERENT CONFIGURATIONS
+15
+Furthermore, |N : (C ∩N)| ≤|N/H| = |W| = w, because H ≤C ∩N.
+We
+conclude that
+(30)
+χ(x) ≤w n
+|xG|.
+Let m be a positive integer from Lemma 4.3. Our definitions imply that |xG| ≥m
+for all x ∈My,m and |xG| ≥m0 for all x ∈My. Taking into account |My| ≤|H| = k
+and formula (30), we obtain
+X
+x∈My
+χ(x) ≤w n
+X
+x∈My
+1
+|xG| ≤w n
+
+X
+x∈My,m
+1
+|xG| +
+X
+x∈M′
+y,m
+1
+|xG|
+
+≤
+w n
+|My,m|
+m
++ |M ′
+y,m|
+m0
+
+≤w n
+ k
+m + rm
+m0
+
+.
+By inequality (28), this implies
+X
+x∈My
+χ(x) ≤wn ·
+1
+2wk = n
+2k
+for any y ∈G \ H. In view of (29), this immediately shows that 2ck ≤n, as
+required.
+5. Proof of Lemma 4.3
+We begin with a simple remark. Suppose that G is a central cover of G, i.e.,
+G ∼= G/Z(G), and subgroups B and N, whose images in G are B and N, form the
+(B, N)-pair of G. If Z(G) ≤H = B ∩N, then we may exploit the action of G on
+its Cartan subgroup H instead of the action of G on H, because
+Inv(G, G/H) = Inv(G, G/H).
+Observe that the values of n, w, the sizes of conjugacy classes remain the same,
+and k = |H| does not exceed the order of |H|. In particular, we may take as G
+the universal cover bG of G or, in the case of classical groups, the group of linear
+transformation eG of vector space with an appropriate form, whose quotient by its
+central subgroup isomorphic to G.
+First, suppose that G is a simple exceptional group. We prove that relation (28)
+holds for m = m0.
+Note that the size of the conjugacy class of a semisimple
+element of G can be estimated from below by means of results in [8, 9] (for all
+exceptional groups other than the Ree and Suzuki groups, this was done in [20]).
+The corresponding low bounds for m0 are listed in the second column of Table 1.
+The values from the third and forth columns are well-known. Using this table, one
+can easily check that m0 ≥2w| bH|2, whence
+(31)
+m0 ≥2wk2,
+which is equivalent to inequality (28) for m = m0, because rm0 = 0 in this case.
+16
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+Table 1.
+tΦl
+m0
+| bH|
+|W|
+E8
+q112
+(q −1)8
+214 · 35 · 52 · 7
+E7
+(1/2)q64
+(q −1)7
+210 · 34 · 5 · 7
+E6
+(1/3)q30
+(q −1)6
+27 · 34 · 5
+2E6
+(1/3)q30
+(q −1)4(q + 1)2
+27 · 32
+F4
+q16
+(q −1)4
+27 · 32
+G2
+q4(q3 −1)
+(q −1)2
+22 · 3
+3D4
+q16
+(q −1)(q3 −1)
+22 · 3
+2F4
+q6(q −1)(q3 + 1)
+(q −1)2
+24
+2G2
+q2(q2 + q + 1)
+q −1
+2
+2B2
+q2(q −1)
+q −1
+2
+Now G is a simple classical group. Our main source to estimate the size of a
+conjugacy class of G is [5].3 Let V be a natural module over a field Fqv, where
+v = 2 in the case of unitary groups and v = 1 otherwise, such that G ≤PSL(V ),
+and let eG be preimage of G in SL(V ). If x ∈G and X ≤G, then ex and e
+X are
+preimages of x and X in eG. We also agree to fix the base of V in such a way that
+the preimage eH of the Cartan subgroup H consists of diagonal matrices. Following
+[5, Definition 3.16], for an element x ∈G we denote by ν(x) the codimension of
+largest eigenspace of ex on V = V ⊗K, where K is algebraic closure of Fq. For
+elements x conjugated to elements of H, which are of the prime interest for our
+purposes, ν(x) is just equal to the difference between the dimension of V and the
+maximum eigenvalue multiplicity of the diagonal matrix eh with x = hg. We gather
+in Table 2 the lower bounds m0 on the sizes of conjugacy classes from [5, Table
+3.7-3.9] as well as the numbers |W| and upper bounds for | eH|.4 This table also
+contains the numbers l0 and a defining the class L. We also suppose that q is odd
+in the case of the groups Bl(q) due to the well-known isomorphism Bl(q) ∼= Cl(q)
+for even q.
+Now we are ready to define the number m for simple classical groups. Denote
+by m1 the low bound for |xG| with ν(x) ≥2 that was found in [5, Tables 3.7-3.9];
+the relevant values of m1 are collected in the third column of Table 3. Set
+(32)
+m =
+(
+m0,
+if ν(h) ≥2 for all h ∈H#,
+m1,
+otherwise.
+Note that for any coset y = Hy distinct from H, My,m = {x ∈My | ν(x) ≥2}
+and M ′
+y,m consist of all elements x ∈My such that ν(x) = 1. Recall that rm =
+maxy∈G\H |M ′
+y,m|.
+Lemma 5.1. In the above notation the following statements hold.
+3It is worth noting that in ‘an asymptotical sense’ the required lower bounds can be taken
+from [14, Lemma 3.4]. We chose to use results from the later paper [5] in order to obtain the
+numerical values of l0 and a.
+4It is worth mentioning that despite [5, Tables 3.7-3.9] contain the bounds on the sizes of
+conjugacy classes in the group Inndiag(G) rather than G itself, we get the correct bounds, because
+for h ∈H we obviously have |G : CG(h)| = | Inndiag(G) : CInndiag(G)(h)|.
+CARTAN COHERENT CONFIGURATIONS
+17
+Table 2.
+tΦl
+conditions
+m0
+| eH|
+|W|
+l0
+a
+Al
+q2l/2
+(q −1)l
+(l + 1)!
+7
+4
+2Al
+l odd
+q4l−3
+2(q+1)
+(q −1)⌊l+1
+2 ⌋(q + 1)⌊l
+2 ⌋
+2⌊l+1
+2 ⌋⌊l+1
+2 ⌋!
+6
+4
+2Al
+l even
+q2l+1
+2(q+1)
+(q −1)⌊l+1
+2 ⌋(q + 1)⌊l
+2 ⌋
+2⌊l+1
+2 ⌋⌊l+1
+2 ⌋!
+6
+4
+Bl
+l(q−1)
+2
+odd
+q4l−1
+4(q+1)
+(q−1)l
+2
+2ll!
+4
+4
+Bl
+l(q−1)
+2
+even
+q2l+1
+4(q+1)
+(q−1)l
+2
+2ll!
+4
+4
+Cl
+q4l−4
+2
+(q −1)l
+2ll!
+3
+4
+Dl
+q4l−3
+4(q+1)
+(q −1)l
+2l−1l!
+4
+2
+2Dl
+q4l−3
+4(q+1)
+(q −1)l−1(q + 1)
+2l−1l!
+4
+2
+Table 3.
+tΦl
+conditions
+m1
+rm
+Al
+q4(l−1)
+2
+l(l+1)(q−1)2
+2
+−1
+2Al
+l even
+q4l−3
+2(q+1)
+(l+1)(q+1)2
+2
++ q
+Bl
+l(q−1)
+2
+even
+q4l−1
+4(q+1)
+l(q−3)
+2
++ 1
+(1) If G is one of the groups Al, 2Al with l even, and Bl with l(q −1)/2 even,
+then the number rm does not exceed the number in the fourth column of the
+corresponding row of Table 3.
+(2) If G is one of the other simple classical groups, then ν(h) ≥2 for every
+h ∈H#.
+Proof. It is well known and easily verified that the diagonal subgroup of a classical
+matrix group contains an element h with ν(h) = 1 only if G is one of the groups in
+statement (1). Therefore, we need only to estimate rm in these cases.
+We claim that in any case
+(33)
+rm ≤|{h ∈H# : ν(h) ≤2}| =: u.
+Indeed, let y and z = hy be distinct elements of M ′
+y,m. Then ν(y) = ν(z) = 1.
+Therefore, each of the matrices ey and ez has an eigenvalue of multiplicity dim(V )−1.
+Since these matrices are conjugated to diagonal matrices, this implies that the
+matrix eh = ey(ez)−1 has an eigenvalue of multiplicity at least dim(V )−2. Therefore,
+ν(h) ≤2. Since this is true for all z ∈M ′
+x,m, we are done.
+Let G = Al. Then the required statement immediately follows from (33) by a
+direct calculation of the number u, which is equal the number of diagonal matrices
+in SL(l + 1, q) with at most 2 distinct diagonal enties.
+Suppose that G = 2Al and l is even. To check the required upper bound on the
+number u, we observe that a base of V can be chosen so that any matrix eh ∈eH is
+of the form
+eh = diag(λ1, . . . , λr, λ0, λ−q
+1 , . . . , λ−q
+r ),
+18
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+where r = l/2, λi ∈Fq2 for all i, (λ0)q+1 = 1, and λ0(λ1)1−q · · · (λr)1−q = 1. If, in
+addition, ν(h) ≤2 and l ≥6, then either
+eh = diag(λ, . . . , λ, λ0, λ, . . . , λ),
+where λq+1 = 1 and λ0λl = 1, or
+eh = diag(λ, . . . , λ, μ, λ, . . . , λ, λ0, λ, . . . , λ, μ−q, λ, . . . , λ),
+where λ = λ0, λl−1μ1−q = 1, and μ takes an arbitrary j-th of the first r positions
+(so μ−q takes the (r + 1 + j)-th position). The rest is routine.
+Let G = Bl and l(q −1)/2 even. Then G = eG = Ω2l+1(q). To estimate u from
+above, choose a base of V so that any matrix h ∈H is of the form
+h = diag(ξk1, . . . , ξkl, ξ−k1, . . . , ξ−kl, 1),
+where ξ is a primitive element of the field Fq, and the number k1 + . . . + kl is even.
+If, in addition, ν(h) ≤2 and l ≥3, then either
+h = diag(−1, . . . , −1, 1)
+(recall that l(q −1)/2 is even), or
+h = diag(1, . . . , 1, μ, 1, . . ., 1, μ−1, 1, . . . , 1),
+where μ is a nonzero square in Fq and takes an arbitrary j-th of the first l positions
+(so μ−1 takes the (l + j)-th position). Thus, u ≤l(q −3)/2 + 1.
+To complete the proof, we verify inequality (28) for the number m defined
+by (32). Observe that, due to (32) and Lemma 5.1, the number rm equals 0 in
+all cases when m = m0. In the latter case, it suffices to verify inequality (31). We
+proceed further case by case.
+Let G = Cl(q). Here m = m0 and we need to prove that m0 ≥2wk2. According
+to Table 2, it means that for l ≥3 and q ≥4l, the following inequality have to be
+true:
+q4l−4
+2
+≥2l+1l!(q −1)2l.
+For l = 3, this inequality is straightforward. If l ≥4, then q2l−4 ≥4(2l)l ≥2l+2l!,
+and we are done.
+Let G = Dε
+l (q). Then m = m0 and to verify (31), we check that
+q4l−3
+4(q + 1) ≥2ll!(q −1)2l−2(q + 1)2
+for l ≥4 and q ≥2l. Since (q −1)2l−2(q + 1)3 < q2l+1 for all these l and q, it
+suffices to check that q2l−4 ≥2l+2l!. For l = 4 it can be verified directly, while for
+l > 4 we have q2l−4 ≥4(2l)l ≥2l+2l!.
+Let G = Al(q) and suppose that l ≥7 and q ≥4l. By Lemma 5.1, we obtain
+that
+rm ≤l(l + 1)(q −1)2
+2
+−1 ≤q4
+32.
+Thus, the left-hand side of (28) can be estimated as follows:
+(34)
+k
+m + rm
+m0
+≤2(q −1)l
+q4l−1
++ 2q4
+32q2l ≤
+2
+q4l−3 +
+1
+16q2l−4 ≤
+1
+8q2l−4 .
+CARTAN COHERENT CONFIGURATIONS
+19
+On the other hand, (l + 1)! ≤4l−3ll−4 for l ≥7: this is verified directly for
+7 ≤l ≤9, and follows from the obvious inequalities (l + 1)! < ll < 4l−3ll−4 for
+l ≥10. Therefore, in our case, we get the following low bound for the right-hand
+side of (28):
+(35)
+1
+2wk =
+1
+2(q −1)l(l + 1)! ≥
+1
+2ql4l−3ll−4 ≥
+1
+2ql4ql−4 =
+1
+8q2l−4 .
+Thus, the required statement follows from (34) and (35).
+For each of the remaining two series of classical groups the expression on the
+left-hand side of (28) for m = m0 ≤m1 does not exceed the same expression for
+m = m1 (see Tables 2 and 3). Since the expression on the right-hand side in both
+cases does not depend on whether m = m0 or not, it suffices to verify (28) for
+G = 2Al(q) (resp., G = Bl(q)) independently of the oddness of l (resp., l(q −1)/2),
+taking m0 and m as in case of even l (resp. even l(q −1)/2).
+Let G = 2Al(q). Suppose that l ≥6 and q ≥4l. Lemma 5.1 yields that
+rm ≤(l + 1)(q + 1)2
+2
++ q ≤q3
+6 .
+Put b = ⌊l + 1/2⌋. Now, the left-hand side and right-hand side of (28) can be
+estimated as follows:
+(36)
+k
+m + rm
+m0
+≤2(q −1)b(q + 1)⌊l
+2 ⌋+1
+q4l−3
++ 2q3(q + 1)
+6q2l+1
+≤2ql(q + 1)
+q4l−3
++ q3(q + 1)
+3q2l+1
+and
+(37)
+1
+2wk ≥
+1
+2(q −1)b(q + 1)
+l
+2 2bb!
+≥
+1
+2ql2bb!.
+By (36) and (37), it suffices to verify that
+(38)
+2bb! ≤
+3q2l−3
+2(q + 1)(ql−1 + 6).
+However, one can easily check that 2(q + 1)(ql−1 + 6) ≤3ql and 2bb! ≤ql−3 for all
+q ≥4l ≥25. Therefore, (38) holds, and we are done.
+Let G = Bl(q). Suppose that l ≥4 and q ≥4l. By Lemma 5.1, it follows that
+rm ≤l(q −3)
+2
++ 1 ≤q2
+8 .
+Now, the left-hand side and right-hand side of (28) can be estimated as follows:
+k
+m + rm
+m0
+≤4ql(q + 1)
+2q4l−1
++ 4q2(q + 1)
+8q2l+1
+= (q + 1)(ql + 4)
+2q3l−1
+and
+1
+2wk ≥
+1
+2ll!(q −1)l ≥
+1
+2ll!ql−1(q −1).
+Thus, it suffices to verify that
+(ql + 4)2ll! ≤2q2l−2.
+This is straightforward for l = 4.
+Since q ≥4l, the required inequality holds
+whenever l! ≤2l−4ll−2, which can be directly checked for 5 ≤l ≤10. Finally, if
+l ≥11, then l! ≤ll ≤2l−4ll−2. This completes the proof of the lemma.
+20
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+6. Proof of Theorem 1.4
+Note that the actions of PSL(2, q) and G = SL(2, q) on the cosets of the cor-
+responding Cartan subgroups are equivalent. Thus, without loss of generality, we
+may assume that X = Inv(G, Ω), where Ω= G/H with H being the subgroup of
+diagonal matrices of G. Thus,
+(39)
+|G| = q(q + 1)(q −1),
+|H| = q −1,
+|Ω| = |G : H| = q2 + q.
+First, we study a structure of X in terms of double H-cosets (see Subsection 2.3).
+One can see that the group N = NG(H) is the disjoint union of two double
+H-cosets, namely, H and HiH = Hi, where
+i =
+
+0
+−1
+1
+0
+
+Denote by s1 and si the basis relations of X, for which Ds1 = H and Dsi = HiH
+(see (5)). Clearly, s1 = 1Ω.
+Lemma 6.1. Let S be the set of basis relations of the coherent configuration X.
+Then given s ∈S, we have
+ns =
+(
+1
+if s ∈{s1, si},
+q −1
+otherwise.
+In particular, |S| = q + 4 and |Smax| = q + 2.
+Proof. It is easy to verify that Hx ∩H = 1 for all x ∈G \ N and N = H ∪Hi.
+Thus, the required statements follow from formula (6).
+Denote by U and V the subgroups (in G) of unipotent upper triangular and
+low triangular matrices, respectively. Since, obviously, H ≤NG(U) ∩NG(V ), we
+conclude that
+(40)
+HuH = HU # = U #H
+and
+HvH = HV # = V #H
+for all u ∈U # and v ∈V #. Denote by su and sv the basis relations of X, for which
+Dsu = HuH and Dsv = HvH, respectively. In view of (40), these relations do not
+depend on the choice the matrices
+u =
+1
+x
+0
+1
+
+,
+and
+v =
+1
+0
+y
+1
+
+,
+where x and y are nonzero elements of the field Fq. Clearly, from (40), it follows
+that (su)∗= su and (sv)∗= sv.
+Lemma 6.2. In the above notation, let s ∈S. Then
+(1) csv
+sus = 0 if s = s1 or si, and csv
+sus = 1 otherwise,
+(2) if s ̸∈{s1, si, su, sv}, then cs
+susv = 1 or cs
+svsu = 1.
+Proof. It is straightforward to check that csv
+sus1 = csv
+susi = 0. Due to Lemma 6.1,
+we may assume that s ∈Smax. Then by this lemma, nsu = q −1 = nsv. Therefore,
+csv
+sus = cs
+susv. The number |H| cs
+susv is equal to the multiplicity, with which an
+element w ∈Ds enters the product
+Dsu Dsv = HuH HvH = HU # HV # = HH(U #V #)
+(see (40)). Thus, to prove statement (1), it suffices to verify that no two elements
+in UV belong to the same H-coset. For this aim, suppose that u1v1h = u2v2 for
+CARTAN COHERENT CONFIGURATIONS
+21
+some u1, u2 ∈U, h ∈H, and v1, v2 ∈V . Then the group U of unipotent upper
+triangular matrices contains the element
+u−1
+2 u1
+= v2 h−1v−1
+1 ,
+which is a low triangular matrix. It follows that u1 = u2, v1 = v2, h = 1, and we
+are done.
+To prove statement (2), it suffices to verify that the complement to the set
+DsuDsv ∪DsvDsu in G is equal to Ds1 ∪Dsi ∪Dsu ∪Dsv. In view of equalities (40),
+this is equivalent to
+(41)
+G \ (HU #V # ∪HV #U #) = N ∪HU # ∪HV #.
+To prove this relation, we observe that general elements of the sets U #V # and
+V #U # are, respectively,
+1 + xy
+x
+y
+1
+
+and
+1
+x
+y
+1 + xy
+
+,
+where x and y are nonzero elements in Fq.
+Therefore, there are at least q −1
+elements in V #U #, which do not belong to U #V # (they correspond to nonzero
+elements xy). By the statement proved in the previous paragraph, it follows that
+the set HU #V # ∪HV #U # is the disjoint union of (q −1)2 distinct cosets of H
+contained in HU #V # and at least q −1 distinct cosets of H contained in HV #U #.
+Since none of all these cosets is contained in N ∪HU # ∪HV #, we have
+(q −1)2q = q(q + 1)(q −1) −2(q −1) −2(q −1)2 =
+|G \ (N ∪HU # ∪HV #)| ≥|HU #V # ∪HV #U #| ≥
+(q −1)2(q −1) + (q −1)(q −1) = (q −1)2q,
+which proves formula (41).
+Let us verify that the coherent configuration Xα with α = H, is 1-regular.
+Indeed, in this case the first statement of Theorem 1.4 follows from Theorem 2.5
+for m = 2, whereas the second statement is obvious.
+To prove the 1-regularity of Xα, it suffices to check that every point β ∈αsmax
+is regular. However, if t is a basis relation of Xα, then t is contained in a basis
+relation s of X. If s ∈{s1, si}, then by Lemma 6.1, we have
+|βt| ≤|βs| = ns = 1.
+Thus, by the same lemma, we may assume that s ∈Smax and hence t belongs
+to the set Tα defined in Lemma 3.2. By this lemma, all we need is to verify the
+connectedness of the graph sα.
+Let us prove the connectedness of sα. Suppose that the pair (γ, δ) ∈αu × αv,
+belongs to the basis relation s. Then, obviously, csv
+sus ̸= 0. Thus, by statement (1)
+of Lemma 6.2 and the definition of sα, the points γ and δ are adjacent in sα. From
+statement (2) of Lemma 6.2, it follows that any other vertex β ∈αs with s ∈Smax,
+has at least one neighbor in the set αsu ∪αsv, i.e.,
+βsα ∩(αsu ∪αsv) ̸= ∅.
+Thus, sα is connected, and we are done.
+22
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+7. Proof of Theorem 1.5
+We make use of the well-known Weisfeiler-Leman algorithm described in detail
+in [21, Section B]. The input of it is a set S of binary relations on a set Ω, and the
+output is the smallest coherent configuration
+WL(S) = (Ω, S)
+such that S ⊂S∪. The running time of the algorithm is polynomial in the cardi-
+nalities of S and Ω. The proof of the following statement is based on the Weisfeiler-
+Leman algorithm and can be found in [17, Theorem 3.5].
+Theorem 7.1. Let X and X ′ be coherent configurations on n points. Then given
+an algebraic isomorphism φ : X →X ′ all the elements of the set Iso(X, X ′, φ) can
+be listed in time (bn)O(b) where b = b(X).
+To solve the recognition problem, at first, we recognize the colored graphs D of
+Cartan schemes of G with respect to (B, N)-pair of rank at least 2. In this case,
+from the corollary of the main theorem in [16], it follows that B is the normalizer
+NG(P) of a group P ∈Sylp(G) such that
+(42)
+H ∩P = 1,
+H ≤NG(P),
+|NG(P)| = |H| |P|,
+where p is the characteristic of the ground field. By [19], one can also see that
+apart for a finite number of exceptional groups, N = NG(H) for every group from L.
+Thus, the correctness of the following algorithm follows from Theorems 1.3 and 7.1.
+In what follows, we denote by Ωthe vertex set of the graph D ∈Gn, by S the
+set of its color classes, and by Sα,β the union of S and the set of two one-element
+relations {(α, α)} and {(β, β)}.
+Recognizing Cartan schemes (the rank of (B, N) is at least 2)
+Step 1. Find the coherent configuration X = WL(S).
+Step 2. If there are no distinct points α, β such that the coherent configuration
+Xα,β = WL(Sα,β) is complete, then b(X) > 2 and D ̸∈Kn.
+Step 3. Find all the elements of the group G = Iso(X, X, id) by the algorithm of
+Theorem 7.1. If G is not simple, then D ̸∈Kn.
+Step 4.
+Analyzing the number |G|, check that G ∈L. If not, then D ̸∈Kn;
+otherwise set p to be the characteristic of the ground field associated with G.
+Step 5. Fix a point stabilizer H of G and find P ∈Sylp(G), for which relations (42)
+hold. If there is no such P, then D ̸∈Kn.
+Step 6. Now D ∈Kn and X is the Cartan scheme of G with respect to (B, N),
+where B = NG(P) and N = NG(H).
+Let us estimate the running time of the algorithm. At Steps 1 and 2, we apply the
+Weisfeler-Leman algorithm n(n −1) + 1 times. Thus, the complexity of these steps
+is at most nO(1). At Step 3, the time is polynomially bounded by Theorem 7.1
+and the fact that a group is simple if and only if no nontrivial conjugacy class
+of it generates a proper subgroup (given the elements of G the conjugacy classes
+of it can be found efficiently). Step 4 requires polynomially many of arithmetic
+operations involving the number |G| written in unary system. Here, we use the fact
+based on CFSG that except for known cases, any finite simple group is uniquely
+determined by its order (see Theorem 5.1 and Lemma 2.5 in [13]). Since Steps 5
+CARTAN COHERENT CONFIGURATIONS
+23
+and 6 can obviously be implemented in polynomial time for the group G given by
+the multiplication table, we conclude that the running time of the algorithm is at
+most nO(1).
+The first four steps of the algorithm remain the same as before if if we do not
+assume that the rank of (B, N) is at least 2.
+But in this case, one can find a
+2-transitive representation of the group G; here, a complete classification of all 2-
+transitive groups is useful (see, e.g., [10]). This enables to find the group B and N.
+To solve the isomorphism problem, let D ∈Kn and D′ ∈Gn. Denote by S and
+S′ the sets of color classes of D and D′, respectively. Without loss of generality,
+we may assume that there is a color preserving bijection ψ : S →S′. Then one
+can apply the canonical version of the Weisfeiler-Leman algorithm presented in [21,
+Section M], where, in fact, the following statement was proved.
+Theorem 7.2. Let S and S′ be m-sets of binary relations on an n-element set.
+Then given a bijection ψ : S →S′ one can check in time mnO(1) whether or not
+there exists an algebraic isomorphism φ : WL(S) →WL(S′) such that φ|S = ψ.
+Moreover, if φ does exist, then it can be found within the same time.
+Clearly, the original graphs D and D′ are not isomorphic if there is no algebraic
+isomorphism φ from Theorem 7.2. Assuming the existence of φ, we can find the
+set
+Iso(D, D′) = Iso(X, X ′, φ)
+in time (bn)O(b) by Theorem 7.1, where X = WL(S), X ′ = WL(S′), and b = b(X).
+Since b ≤2 (Theorem 1.3), we are done.
+References
+[1] P. Abramenko, J. Parkinson, and H. Van Maldeghem, Distance regularity in buildings and
+structure constants in Hecke algebras, arXiv:1508.03912 [math.CO], 2015, 1–23.
+[2] R. F. Bailey and P. J. Cameron, Base size, metric dimension, and other invariants of groups
+and graphs, Bull. London Math. Soc., 43 (2011), 209–242
+[3] E. Bannai and T. Ito, Algebraic combinatorics. I, Benjamin/Cummings, Menlo Park, CA
+(1984).
+[4] A. E. Brouwer, A. M. Cohen, and A. Neumaier, Distance-regular graphs, Ergebnisse der
+Mathematik und ihrer Grenzgebiete, 3. Folge, 18. Berlin etc.: Springer-Verlag (1989).
+[5] T. C. Burness, Fixed point ratios in actions of finite classical groups, II, J. Algebra, 309
+(2007), 80-138.
+[6] R. W. Carter, Simple groups of Lie type, John Wiley and Sons, London (1972).
+[7] R. W. Carter, Finite groups of Lie type. Conjugacy classes and complex characters, John
+Wiley and Sons, London (1985).
+[8] D. Deriziotis, The centralizers of semisimple elements of the Chevalley groups E7 and E8,
+Tokyo J. Math., 6, No. 1 (1983), 191-216.
+[9] D. Deriziotis, Conjugacy classes and centralizers of semisimple elements in finite groups of
+Lie type, Vorlesungen aus dem Fachbereich Mathematic der Universit ̈at Essen, 1984, Heft 11.
+[10] J. D. Dixon and B. Mortimer, Permutation groups, Graduate Texts in Mathematics, No. 163,
+Springer-Verlag, New York (1996).
+[11] S. Evdokimov and I. Ponomarenko, Separability Number and Schurity Number of Coherent
+Configurations, Electronic J. Combin., 7 (2000), #R31.
+[12] S. Evdokimov and I. Ponomarenko, Permutation group approach to association schemes,
+Eur. J. Comb., 30 (2009), 1456–1476.
+[13] W. Kimmerle, R. Lyons, R. Sandling, and D. N. Teague, Composition factors from the group
+ring and Artins theorem on orders of simple groups, Proc. Lond. Math. Soc., III. Ser. 60,
+No. 1 (1990), 89–122.
+24
+ILIA PONOMARENKO AND ANDREY VASIL’EV
+[14] M. W. Liebeck and A. Shalev, Simple groups, permutation groups, and probability, J. Amer.
+Math. Soc., 12, No. 2 (1999), 497–520.
+[15] M. Muzychuk and I. Ponomarenko, On Pseudocyclic Association Schemes, Ars Math. Con-
+temporanea, 5, No. 1 (2012), 1–25.
+[16] T. De Medts, F. Haot, K. Tent, and H. Van Maldeghem, Split BN-pairs of rank at least 2
+and the uniqueness of splittings, J. Group Theory, 8, No. 1 (2005), 1–10.
+[17] I. Ponomarenko, Bases of schurian antisymmetric coherent configurations and isomorphism
+test for schurian tournaments, Journal of Mathematical Sciences, 192, No. 3 (2013), 316–338.
+[18] J. Saxl and A. Shalev, The fixity of permutation groups, J. Algebra, 174 (1995), 1122–1140.
+[19] F. D. Veldkamp, Roots and maximal tori in finite forms of semisimple algebraic groups,
+Math. Ann., 207 (1974), 301–314.
+[20] E. P. Vdovin, On Intersections of Solvable Hall Subgroups in Finite Simple Exceptional
+Groups of Lie Type, Proc. Steklov Institute Math., 285, No. 1 (2014), S1–S8.
+[21] B. Weisfeiler (editor), On construction and identification of graphs, Springer Lecture Notes,
+558, 1976.
+[22] V. I. Zenkov, Intersection of abelian subgroups in finite groups, Math. Notes, 56, No. 2
+(1994), 869–871.
+[23] P.-H. Zieschang, Theory of Association Schemes, Springer, Berlin & Heidelberg (2005).
+[24] P.-H. Zieschang, Trends and lines of development in scheme theory, Eur. J. Comb., 30 (2009),
+1540–1563.
+St.Petersburg Department of the Steklov Mathematical Institute, St.Petersburg,
+Russia
+E-mail address: inp@pdmi.ras.ru
+Sobolev Institute of Mathematics, Novosibirsk, Russia
+Novosibirsk State University, Novosibirsk, Russia
+E-mail address: vasand@math.nsc.ru

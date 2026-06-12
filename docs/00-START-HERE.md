@@ -94,15 +94,19 @@ contribution is to *isolate* that hard problem in one component, not to close it
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
-> **UPDATE (2026-06-11) — the live frontier moved; read [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md).**
+> **UPDATE (2026-06-11) — the live frontier moved; the build home is now
+> [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md)** (see the boxed
+> "THE LIVE BUILD" pointer at the end of this section; the module-adjoin doc referenced below is its *history*).
 > The seal's open `s(C)` content (G2-B) on the **affine cyclotomic slice is now CLOSED in Lean** modulo {G3 + a cited
 > cyclotomic 2-separability result, Ponomarenko arXiv:2006.13592 Thm 1.1} — `reachesRigidOrCameron_affineSlice` &c.,
 > axiom-clean, build green. **Key correction:** the *non-affine* residue needs **no new Lean infrastructure** — a
 > non-affine residue scheme is `orbitalScheme H` (general constructor) and plugs straight into the already-general seal
 > capstones; the lone remaining gap is the *discharge* = the open crux (G2-B, uncited for non-affine). **The destination
-> is now the S-ring / coherent-configuration separability theory** (the general sufficient condition that closes the
-> crux for affine *and* non-affine) — see [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md)
-> §9 (★high-priority to-do, with the build guide). The prose below predates this and is the pre-affine-closure map.
+> is the S-ring / coherent-configuration separability theory** (the general sufficient condition that closes the
+> crux for affine *and* non-affine) — the durable build doc is
+> [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); the affine-slice /
+> probe history is [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md) §9.
+> The prose below predates this and is the pre-affine-closure map.
 
 **The architecture pivot — "de-classing."** Orbit recovery and oracle firing were
 being proved *class by class* (CFI odd-degree, then even; schemes rank 2, 3, 4…).

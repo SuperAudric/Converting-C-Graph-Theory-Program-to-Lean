@@ -1,0 +1,1029 @@
+arXiv:2006.13592v1  [math.CO]  24 Jun 2020
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER
+FINITE FIELD
+ILIA PONOMARENKO
+Abstract. It is proved that with finitely many possible exceptions, each cy-
+clotomic scheme over finite field is determined up to isomorphism by the tensor
+of 2-dimensional intersection numbers; for infinitely many schemes, this result
+cannot be improved.
+As a consequence, the Weisfeiler-Leman dimension of
+a Paley graph or tournament is at most 3 with possible exception of several
+small graphs.
+1. Introduction
+Let F be a finite field. A cyclotomic scheme over F can be thought as a set of
+binary relations of the form
+(1)
+{(x, y) ∈F × F : y −x ∈Ma},
+a ∈F,
+where M is a subgroup of the multiplicative group F× of F. This set defines an
+association scheme or, in other words, a homogeneous coherent configuration (for
+the exact definitions, see Section 2); the intersection numbers of this scheme are
+the well-known cyclotomic numbers of the field F. The cyclotomic schemes were
+introduced by Delsarte (1975) in his famous monograph on coding theory. Since
+then, these schemes have been studied in various fields of algebra and combinatorics,
+including algebraic graph theory, design theory, and permutation groups.
+The problem considered in the present paper as applied to cyclotomic schemes
+can be formulated as follows: by which natural parameters a given combinatorial ob-
+ject can be characterized up to isomorphism. In the category of association schemes,
+the natural parameters are represented by the tensor of intersection numbers of the
+scheme in question, and if an association scheme is separable (see Subsection 2.5),
+then this tensor identifies it up to isomorphism. In this connection, a result proved
+in [12] shows that a cyclotomic scheme X over F is separable if the rank of X is
+enough small compared to the order of F.
+In general, a cyclotomic scheme X over F is not separable. Indeed, if q is a prime
+power, |F| = q2, and |M| = (q−1)m for integer m ≥1, then there are exponentially
+many association schemes having the same intersection numbers as the scheme X,
+see [3, Example 2.6.15]. A similar situation arises for other classes of associative
+schemes. To deal with this problem, the m-dimensional intersection numbers of an
+association scheme have been introduced and studied in [4] for all integers m ≥1.
+For m = 1, they are just the intersection numbers, but for m ≥2 they form a
+stronger invariant of the scheme in question. An association scheme is said to be
+m-separable if it is determined up to isomorphism by the tensor of m-dimensional
+The work is supported by Mathematical Center in Akademgorodok, the agreement with Min-
+istry of Science and High Education of the Russian Federation number 075-15-2019-1613.
+1
+2
+ILIA PONOMARENKO
+No.
+p
+d
+1.
+5
+4,5,6
+2.
+3
+4,5,6,8,10
+3.
+2
+6,7,8,9,10,11,12,14,15,16,18,20
+Table 1. Possible degrees of cyclotomic schemes that are not 2-separable.
+intersection numbers; for details of the corresponding theory, we refer the reader
+to [3, Section 4.2].
+Let us return back to cyclotomic schemes. It was proved in [5] that every cyclo-
+tomic scheme is 3-separable. The authors of that paper have also mentioned that
+they do not know whether this result can be improved. In the present paper, we
+prove that, in general, the 3-separability can be replaced by the 2-separability; the
+above example shows that there are infinitely many 2-separable cyclotomic schemes
+which are not separable.
+Theorem 1.1. With finitely many possible exceptions, every cyclotomic scheme
+over a finite field is 2-separable.
+Let q = pd, where p is a prime and d is a positive integer. The proof of Theo-
+rem 1.1 shows that non-2-separable cyclotomic schemes over a field of order q can
+exist only if
+(2)
+p = 2, 2 ≤d ≤20
+or
+p = 3, 2 ≤d ≤10
+or
+p = 5, 2 ≤d ≤6,
+and also
+(3)
+(p, d) ̸= (2, 13), (2, 17), (2, 19), (3, 7), (3, 9), (5, 5).
+Computer calculations enable us to reduce the number of exceptional prime powers
+(Theorem 6.2(ii)); the results are presented in Table 1.1
+The proof of Theorem 1.1 (Section 6) is carried out in the category of all (not
+necessarily homogeneous) coherent configurations. Using an observation from [5],
+we reduce the question about the 2-separability of a cyclotomic scheme over F to
+the question whether a fission of a certain scheme C(F) is separable. This scheme
+is defined by the binary relations of the form
+(4)
+{(axσ, ayσ) ∈F× × F× : a ∈F×, σ ∈Aut(F)},
+x, y ∈F×.
+The separability of every fission of this scheme is established in the theorem below,
+where we set C(pd) = C(F) if the field F is of order pd.
+Theorem 1.2. Every fission of the scheme C(pd) is separable with possible excep-
+tions of p and d satisfying relations (2) and (3).
+The proof of Theorem 1.2 (given in Section 6) is based on a sufficient condi-
+tion for a coherent configuration to be separable (Theorem 4.1). This condition
+generalizes to arbitrary coherent configurations several results at once, obtained
+1It should be mentioned that even for the exceptional q one can find 2-separable cyclotomic
+schemes, see [5, Theorem 1.1].
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+3
+for the homogeneous case, see [2, 9, 12]. The proof of this condition occupies Sec-
+tions 3 and 4. In Section 5, we establish an inequality in terms of parameters of
+the coherent configuration, guaranteeing the fulfillment of this condition.
+To formulate the last result, we recall that the WL-dimension of a graph X is
+defined to be the smallest positive integer k, for which X is identified by the k-
+dimensional Weisfeiler-Leman algorithm, see [7, Definition 18.4.2]. As a corollary
+of Theorems 1.2 and 6.2(ii), we establish an upper bound for the WL-dimension of
+the Paley graphs and tournaments.
+Theorem 1.3. The WL-dimension of the Paley graph (respectively, tournament)
+on q vertices is less than or equal to 3, unless q = 34, 36, 38, 310, 54, 56 (respectively,
+q = 35).
+It is known that if q = p2d is greater than 9, then there exists a strongly regular
+graph on q vertices, with the same parameters as the Paley graph, but not isomor-
+phic to it. A similar statement is true for the Paley tournaments with q = p3d
+vertices, see [11]. Thus for all such q, the estimate of the WL-dimension in Theo-
+rem 1.3 cannot be reduced to 2. Apparently, this is true for all sufficiently large q.
+Notation.
+Throughout the paper, Ωdenotes a finite set.
+The diagonal of the Cartesian product Ω× Ωis denoted by 1Ω; if Ω= {α}, we
+set 1α = 1{α}.
+For r ⊆Ω× Ω, we set r∗= {(β, α) : (α, β) ∈r}, αr = {β ∈Ω: (α, β) ∈r} for
+all α ∈Ω, and rf = {(αf, βf) : (α, β) ∈r} for all bijections f from Ωto another
+set.
+For r, s ⊆Ω× Ω, we set r · s = {(α, β) : (α, γ) ∈r, (γ, β) ∈s for some γ ∈Ω}.
+For a set S of relations on Ω, we denote by S∪the set of all unions of the elements
+of S, put S∗= {s∗: s ∈S}, and Sf = {sf : s ∈S} for all bijections f from Ωto
+another set.
+2. Coherent configurations
+In this section, we give some relevant definitions and basic facts from theory
+of coherent configurations.
+The proofs, details, and examples can be found in
+monograph [3].
+2.1. Definitions. Let Ωbe a finite set and S a partition of Ω×Ω. A pair X = (Ω, S)
+is called a coherent configuration on Ωif 1Ω∈S∪, S∗= S, and if given r, s, t ∈S,
+the number
+ct
+rs := |αr ∩βs∗|
+does not depend on (α, β) ∈t.
+If, in addition, 1Ω∈S, then X is called an
+association scheme or scheme.
+The elements of Ω, S, and the numbers ct
+rs are
+called the points, basis relations, and intersection numbers of X, respectively. The
+numbers |Ω| and |S| are called the degree and the rank of X.
+A unique basic relation containing a pair (α, β) ∈Ω× Ωis denoted by rX (α, β).
+The subscript X is usually omitted wherever it does not lead to misunderstanding.
+Let s ∈S and ∆= {α ∈Ω: αs ̸= ∅}. Given α ∈∆, the number |αs| equals the
+intersection number c1
+ss∗. In particular, |αs| does not depend on α ∈∆. It is called
+4
+ILIA PONOMARENKO
+7654
+0123
+β
+s
+✼✼✼✼✼✼✼✼✼✼✼✼
+7654
+0123
+α
+r
+C✞✞✞✞✞✞✞✞✞✞✞✞
+t
+/7654
+0123
+γ
+Figure 1. A graphical interpretation of the inequality ct
+rs ̸= 0 .
+the valency of s and denoted by ns. The maximum of the numbers ns, s ∈S, is
+called the maximal valency of X.
+The indistinguishing number of s ∈S is defined to be the sum c(s) = cX (s) of
+the intersection numbers cs
+rr∗, r ∈S. It is equal to the cardinality of the set
+(5)
+c(α, β) = cX (α, β) = {γ ∈Ω: r(γ, α) = r(γ, β)}
+for any (α, β) ∈s. The maximum c(X) of the numbers cX (s), where s runs over
+the set of all irreflexive basis relations of X, is called the indistinguishing number
+of X.
+2.2. Complex product. Let r, s ∈S∪. Then the set S∪contains the relation r·s.
+It follows that r · s equals the union (possibly empty) of relations belonging to S;
+the set rs of all these relations is called a complex product of r and s. Thus,
+rs ⊆S,
+r, s ∈S.
+In the following statement we list some properties of the complex product, to be
+used throughout the paper.
+Lemma 2.1. In the above notation,
+(i) t ∈rs ⇔r ∈ts∗⇔s ∈r∗t,
+(ii) |rs| ≤min{nr, ns},
+(iii) if t ∈r∗s, μ ∈Ω, and β ∈μs, then there is α ∈μr such that r(α, β) = t.
+Proof. Clearly, t ∈rs if and only if ct
+rs ̸= 0 if and only if there exist α, β, γ ∈Ω
+such that
+(6)
+r(α, β) = r,
+r(β, γ) = s,
+r(α, γ) = t,
+see Fig. 1. Therefore the first equivalence in (i) follows from the obvious equality
+r(β, γ)∗= r(γ, β). The second equivalence is proved similarly.
+To prove statement (ii), assume that rs = {t1, . . . , tk}, where k ≥1 and ti ∈S
+for all i. Then, as before, there are points α and βi, γi for which equality (6) holds
+for β = βi, γ = γi, and t = ti, i = 1, . . . , k. In particular, the γi are pairwise
+distinct. This implies that k ≤nr. Similarly, k ≤ns.
+To prove statement (iii), let t ∈r∗s. Then by (ii) we have s ∈rt. In particular,
+cs
+rt ̸= 0. Now if β ∈μs, then there is α for which r(μ, α) = r and r(α, β) = t. Thus,
+α ∈μr, and we are done.
+□
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+5
+2.3. Fissions. A coherent configuration Y = (Ω, T ) is called a fission of the coher-
+ent configuration X if S ⊆T ∪; in this case, we write Y ≥X.
+Lemma 2.2. Assume that Y ≥X. Then
+max
+t∈T nt ≤max
+s∈S ns
+and
+c(Y) ≤c(X).
+Proof. Let t ∈T . By the assumption, t ⊆r for some r ∈S. To prove the first
+inequality, let α ∈Ωbe such that αt ̸= ∅. Then
+nt = |αt| ≤|αr| = nr ≤max
+s∈S ns.
+To prove the second inequality, assume that t is irreflexive and (α, β) ∈t. Then
+given γ ∈Ω, we have
+rY(γ, α) = rY(γ, β)
+⇒
+rX (γ, α) = rX (γ, β).
+It follows that cY(α, β) ⊆cX (α, β), whence cY(t) ≤cX (r) ≤maxs cX (s) = c(X),
+as required.
+□
+The relation ≥defines a partial order on the set of all coherent configurations
+on Ω. The minimal and maximal elements with respect to this ordering are the
+trivial and discrete coherent configurations: the basis relations of the former one are
+the reflexive relation 1Ωand its complement in Ω× Ω, whereas the basis relations
+of the latter one are singletons.
+An extension Xα of the coherent configuration X with respect to the point α ∈Ω
+is defined to be the minimal fission of X, containing the singleton {(α, α)} as a
+basis relation. The coherent configuration WL(X) of a graph X, mentioned in the
+Introduction, is just the minimal coherent configuration on the vertex set of X,
+that contains the arc set of X as the union of basis relations.
+2.4. Isomorphisms and schurity. Let X ′ = (Ω′, S′) be a coherent configuration.
+A bijection f : Ω→Ω′ is called an isomorphism from X to X ′ if Sf = S′. When
+X = X ′, the set of all isomorphisms is a permutation group on Ω. This group has
+a normal subgroup
+Aut(X) = {f ∈Sym(Ω) : sf = s for all s ∈S}
+called the automorphism group of X.
+Let K be a permutation group on Ω. Denote by (α, β)K the orbit of the induced
+action of K on Ω× Ω, that contains the pair (α, β). Then
+Inv(K) = Inv(K, Ω) = (Ω, {(α, β)K : α, β ∈Ω})
+is a coherent configuration. The functor K 7→Inv(K) is antimonotonic,
+(7)
+L ≤K
+⇒
+Inv(L) ≥Inv(K).
+A coherent configuration X is said to be schurian if X = Inv(Aut(X)).
+Note
+that any cyclotomic scheme is schurian. The lemma below is a consequence of [5,
+Theorem 1.2(2)].
+Lemma 2.3. Any point extension of a cyclotomic scheme is schurian.
+6
+ILIA PONOMARENKO
+2.5. Algebraic isomorphisms and separability. A bijection φ : S →S′, r 7→r′
+is called an algebraic isomorphism from X onto the coherent configuration X ′ if
+(8)
+ct
+rs = ct′
+r′s′,
+r, s, t ∈S.
+The algebraic isomorphisms preserve the complex product. Using this fact, the
+following properties of algebraic isomorphisms are easy to verify.
+Lemma 2.4. Let r, s ∈S. Then
+(i) φ(r∗) = φ(r)∗,
+(ii) φ(rs) = φ(r)φ(s),
+(iii) φ(rs ∩uv) = φ(rs) ∩φ(uv) for all u, v ∈S.
+Each isomorphism f induces an algebraic isomorphism φ : r 7→rf of the cor-
+responding coherent configurations. We say that X is separable if every algebraic
+isomorphism from X is induced by an isomorphism.
+Lemma 2.5. Assume that 1α ∈S for some α ∈Ω. Set X0 = (Ω0, S0), where
+Ω0 = Ω\ {α}
+and
+S0 = {s ∈S : s ⊆Ω0 × Ω0}.
+Then X0 is a coherent configuration. Moreover, X0 is separable (respectively, schu-
+rian) if and only if X is separable (respectively, schurian).
+Proof. The first statement is obvious. Next, the coherent configuration X is the
+direct sum (see [3, Section 3.2]) of the coherent configurations D1 and X0, where D1
+is the coherent configuration on {α}. Thus the second statement follows from [3,
+Corollaries 3.2.8, 3.2.6].
+□
+Let m ≥1 be an integer and Diag(Ωm) the diagonal of the Cartesian power Ωm.
+The m-extension of X is defined to be the minimal fission of the tensor m-power
+of X, for which 1Diag(Ωm) is the union of reflexive basis relations. The intersection
+numbers of the m-extension are called the m-dimensional intersection numbers of
+the coherent configuration X; the one-dimensional intersection numbers coincide
+with the usual ones.
+Now, using the m-dimensional intersection numbers, m-separable coherent con-
+figurations for m > 1 are defined essentially in the same way as for m = 1. The only
+result about them, which is used in the present paper, is the following consequence
+of [4, Theorem 4.6(1)].
+Lemma 2.6. Assume that a one point extension of a coherent configuration X is
+separable. Then X is 2-separable.
+2.6. Intersection numbers equal to 1. Let x, y, r ∈S. We use the following
+notations:
+(9)
+x
+r
+←y if cy
+xr = 1,
+and
+(10)
+x
+r↔y if x
+r
+←y or y
+r∗
+←x.
+The following statement is obvious.
+Lemma 2.7. Let x, y, r ∈S. Then
+(a) if x
+r
+←y, then for any μ ∈Ωand β ∈μy, there is a unique α ∈μx such
+that r(α, β) = r,
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+7
+7654
+0123
+y
+s
+✸✸✸✸✸✸✸✸✸✸✸✸✸✸
+7654
+0123
+β
+s
+✸✸✸✸✸✸✸✸✸✸✸✸✸✸
+7654
+0123
+μ
+y
+O
+x
+|222222222
+z
+"❊
+❊
+❊
+❊
+❊
+❊
+❊
+❊
+❊
+7654
+0123
+x
+r
+E☛☛☛☛☛☛☛☛☛☛☛☛☛☛
+7654
+0123
+z
+t
+o
+7654
+0123
+α
+r
+E☛☛☛☛☛☛☛☛☛☛☛☛☛☛
+7654
+0123
+γ
+t
+o
+Figure 2. A couple Q and its μ-representation.
+(b) x
+r
+←y ⇔x′
+r′
+←y′, where x′, y′, and r′ are the images of x, y, and r with
+respect to an algebraic isomorphism.
+For a fixed point μ and any two points α, β ∈Ω, we write α ←β or α ⇆β if,
+respectively, the left-hand sides of formulas (9) or (10) hold for
+(11)
+x = r(μ, α),
+r = r(α, β),
+y = r(μ, β).
+When ∆⊆Ωand δ ←β for all δ ∈∆, we write ∆←β.
+Lemma 2.8. In the above notation, nx ≤ny. Moreover, if nx equals the maximal
+valency of X, then α ←β implies β ←α.
+Proof. Denote by X a bipartite graph with parts μx and μy, in which the vertices
+α ∈μx and β ∈μy are adjacent if and only if (α, β) ∈r. Counting the edges of X
+in two way and taking into account that cy
+xr = 1, we see that
+(12)
+cx
+yr∗|μx| = cy
+xr |μy| = |μy|.
+Since nx = |μx|, ny = |μy|, and the number cx
+yr∗is a positive integer, the first
+statement follows. If, in addition, nx is the maximal valency of X, then nx = ny
+and hence |μx| = |μy|. In view of (12), we have cx
+yr∗= 1, i. e., β ←α.
+□
+3. Couples and their extensions
+Let X = (Ω, S) be a coherent configuration.
+Any element of the Cartesian
+product S × S × S is called an X-triangle. We say that the pair of X-triangles
+(x, y, z) and (r, s, t) forms an X-couple
+(13)
+Q = (x, y, z; r, s, t)
+if the following conditions are satisfied:
+(14)
+r ∈x∗y,
+s ∈y∗z,
+t ∈z∗x,
+see the first picture in Fig. 2. When the coherent configuration is clear from the
+context, we speak about triangles and couples, omitting the prefix X.
+Let us fix a point μ ∈Ω.
+A triple (α, β, γ) ∈μx × μy × μz is called a μ-
+representation of the couple Q if
+(15)
+r(α, β) = r,
+r(β, γ) = s,
+r(γ, α) = t,
+see the second picture in Fig. 2. It should be noted that not every couple has a
+μ-representation for at least one μ. On the other hand, for arbitrary points μ, α,
+β, and γ one can always define a couple Q = Cμ(α, β, γ) with
+x = r(μ, α),
+y = r(μ, β),
+z = r(μ, γ),
+8
+ILIA PONOMARENKO
+7654
+0123
+y
+s
+✹✹✹✹✹✹✹✹✹✹✹✹✹✹✹✹✹
+7654
+0123
+m
+y
+O
+x
+yttttttttttt
+z
+%❏
+❏
+❏
+❏
+❏
+❏
+❏
+❏
+❏
+❏
+❏
+7654
+0123
+x
+r
+D✡✡✡✡✡✡✡✡✡✡✡✡✡✡✡✡✡
+7654
+0123
+z
+t
+o
+Figure 3. An extension of the couple Q with respect to the relation m.
+and r, s, t defined by condition (15).
+In this case, the triple (α, β, γ) is a μ-
+representation of Q.
+The extension of the couple Q with respect to a relation m ∈S, or briefly, the
+m-extension of Q, is defined to be an X-triangle (x, y, z) such that
+(16)
+x ∈m∗x,
+y ∈m∗y,
+z ∈m∗z,
+(17)
+x∗y ∩x∗y = {r},
+y∗z ∩y∗z = {s},
+z∗x ∩z∗x = {t},
+see Fig. 3.
+The couple Q is said to be extendable if there exists the extension
+of Q with respect to at least one relation. The following lemma is an immediate
+consequence of Lemma 2.4.
+Lemma 3.1. Let s 7→s′, s ∈S, be an algebraic isomorphism from X to a coherent
+configuration X ′, and let Q be the X-couple (13). Then
+(a) Q′ = (x′, y′, z′; r′, s′, t′) is an X ′-couple,
+(b) (x, y, z) is the m-extension of Q ⇔(x′, y′, z′) is the m′-extension of Q′.
+In the following lemma we establish a sufficient condition for a given couple to
+have a μ-representation for a given point μ. This condition is expressed in terms of
+the intersection numbers of the underlying coherent configuration, see the notation
+introduced in Subsection 2.6
+Lemma 3.2. Assume that the X-couple Q has m-extension for some m ∈S, and
+(18)
+x
+r
+←y
+and
+y
+s↔z.
+Then given μ ∈Ωwith μm ̸= ∅and all (α, β, γ) ∈μx × μy × μz,
+(19)
+r(α, β) = r ∧r(β, γ) = s
+⇒
+r(γ, α) = t.
+In particular, (α, β, γ) is the μ-representation of Q.
+Proof. Let (x, y, z) be the m-extension of Q, μ ∈Ω, and (α, β, γ) ∈μx × μy × μz
+is such that the left-hand side of implication (19) holds. We claim that
+(20)
+λ ∈μm
+⇒
+r(λ, α) = x.
+Indeed, x ∈m∗x and hence m ∈xx∗(Lemma 2.1(i)). Since (μ, λ) ∈m, there exists
+a point α′ ∈μx ∩λx. By the first equality in (17), this yields
+(α′, β) ∈(μx × μy) ∩(r(α′, λ) · r(λ, β)) ⊆(x∗· y) ∩(x∗· y) = r.
+Consequently, r(α′, β) = r. It follows that α′ ∈βr∗∩μx. However, the latter set
+contains α, and is a singleton, because x
+r
+←y. Thus, α′ = α, which proves (20).
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+9
+First, we assume that z
+s∗
+←y.
+Since y ∈m∗y and μm ̸= ∅, one can find
+λ ∈μm such that r(λ, β) = y (Lemma 2.1(iii)). The argument used above (with
+the replacement of x, r, and α by, respectively, z, s∗, and γ, and the first of
+equalities (17) by the second) shows that r(λ, γ) = z. By formula (20), this yields
+(21)
+r(γ, α) ∈r(γ, λ) r(λ, α) = z∗x.
+On the other hand, since γ ∈μz and α ∈μx, we have r(γ, α) ∈z∗x. Thus by the
+third equality in (17), we obtain
+(22)
+r(γ, α) ∈z∗x ∩z∗x = {t},
+as required.
+Now let y
+s
+←z. Since z ∈m∗z, y ∈m∗y, and μm ̸= ∅, there exist points λ ∈μm
+and β′ ∈μy such that r(λ, γ) = z and r(λ, β′) = y (Lemma 2.1(iii)). By the second
+equality in (17), we have
+(β′, γ) ∈(μy × μz) ∩(r(β′, λ) · r(λ, γ)) ⊆(y∗· z) ∩(y∗· z) = s.
+Consequently, r(β′, γ) = s and hence β′ ∈μy ∩γs∗. However, the latter set also
+contains β, and is a singleton, because y
+s
+←z.
+Thus, β′ = β.
+It follows that
+r(λ, β) = y. By formula (20), r(λ, α) = x. Thus formula (21) holds. Now the
+required statement is obtained from the third equality in (17) and formula (22). □
+4. A sufficient condition for separability: general statement
+The following theorem improves a sufficient condition for the separability of a
+scheme, proved in [2]. Indeed, firstly, our condition can be applied to arbitrary
+coherent configurations, not just to schemes. Secondly, our statement contains no
+a priori restrictions to the valencies of the scheme under consideration.
+Theorem 4.1. Let X = (Ω, S) be a coherent configuration, and let μ ∈Ω. Assume
+that the following two conditions are satisfied:
+(i) given ∆⊆Ω, |∆| ≤4, there is λ ∈Ωsuch that ∆←λ,2
+(ii) for all α, β, γ ∈Ω, there is m ∈S such that μm ̸= ∅and the couple
+Qμ(α, β, γ) has m-extension.
+Then every algebraic isomorphism φ : X →X ′ is induced by an isomorphism f
+taking μ to any given point μ′ for which φ(rX (μ, μ)) = rX ′(μ′, μ′). In particular,
+the coherent configuration X is separable.
+Proof. Fix an arbitrary ρ ∈Ωsuch that the number nr(μ,ρ) equals the maximal
+valency of X. Then there exists a mapping h : Ω→Ωsatisfying the following
+condition for each α ∈Ω:
+(23)
+(
+h(α) = ρ
+if α = ρ or α ←ρ,
+α ←h(α) ←ρ
+otherwise.
+Indeed, it suffices to verify that for every α ̸= ρ and such that α ̸←ρ, there exists
+λ for which α ←λ ←ρ. But this immediately follows from the condition (i) for
+∆= {α, ρ}, the maximality of nr(μ,ρ), and Lemma 2.8.
+2Here, the relation ←is defined for the fixed point μ.
+10
+ILIA PONOMARENKO
+Let Ω′ be the set of points of the coherent configuration X ′. Denote φ(x) by x′
+for all x ∈S. The condition rX (μ, μ)′ = rX ′(μ′, μ′) implies that
+(24)
+μx ̸= ∅
+⇔
+μ′x′ ̸= ∅.
+From now on, we omit subscripts X and X ′ at r(·, ·), because they are uniquely
+determined by the arguments of r.
+Fix an arbitrary point ρ′ ∈Ω′ for which
+(25)
+r(μ, ρ)′ = r(μ′, ρ′).
+Then nr(μ′,ρ′) equals the maximal valency of X ′.
+Claim. There exist a mapping h′ : Ω′ →Ω′ satisfying condition (23)3 and a
+bijection f : Ω→Ω′ such that μf = μ′, ρf = ρ′, and
+(26)
+h(α)f = h′(αf)
+and
+r(α, h(α))′ = r(αf, h′(αf))
+for all α ∈Ω.
+Proof. We define the mappings f and h′ simultaneously.
+Moreover, the deter-
+mination process goes in three stages, at each of which formulas (26) are verified
+for the already constructed partial mappings.
+To simplify the notation, we set
+xα := r(μ, α), α ∈Ω, and xα′ := r(μ′, α′), α′ ∈Ω′. Then formula (25) implies that
+(27)
+(xρ)′ = xρ′.
+First we put h′(ρ′) := ρ′ and ρf := ρ′. Then
+h(ρ)f = ρf = ρ′ = h′(ρf)
+and in view of (27),
+r(ρ, h(ρ))′ = ((xρ · x∗
+ρ) ∩1Ω)′ = ((xρ′ · x∗
+ρ′) ∩1Ω′ = r(ρf, h′(ρf)).
+Thus, formulas (26) are valid for α = ρ.
+Now let α ∈Ωbe such that h(α) = ρ. Then the definition of h and Lemma 2.7(b)
+imply, respectively, that
+xα
+r(α,ρ)
+←
+xρ
+and
+x′
+r(α,ρ)′
+←
+y′,
+where x′ = x′
+α and y′ = x′
+ρ = xρ′, see (27). In addition, by Lemma 2.7(a) there
+exists a unique point α′ ∈μ′x′ for which r(α′, ρ′) = r(α, ρ)′. Therefore, α′ ←ρ′.
+Thus we obtain the mapping
+(28)
+f1 : {α ∈Ω: α ←ρ} →{α′ ∈Ω′ : α′ ←ρ′}, α 7→α′.
+Constructing the point α′ from the point α is reversible and hence the mapping f1
+is a bijection. Now we set h′(α′) = ρ′ for all α ∈Dom(f1). Then formulas (26)
+with f replaced by f1 are obvious. Finally, μ ∈Dom(f1), and μf1 = μ′ by the
+definition of f1.
+Finally let α ∈Ωbe such that the point β := h(α) is different from ρ. Then the
+definition of h and Lemma 2.7(b) imply, respectively, that
+(29)
+xα
+r(α,β)
+←
+xβ
+and
+x′
+α
+r(α,β)′
+←
+x′
+β
+3Here, the relation ←is defined for the point μ′, and h, α, and ρ are replaced by h′, α′, and ρ′,
+respectively.
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+11
+where x′
+α = (xα)′ and x′
+β = (xβ)′. However, the point β′ = h(α)′ has already been
+defined above, and also
+x′
+β = r(μ, β)′ = r(μ′, β′) = xβ′.
+Thus, β′ ∈μ′x′
+β. By Lemma 2.7(a), there exists a unique α′ ∈μ′x′
+α such that
+r(α′, β′) = r(α, β)′. This defines a composition
+(30)
+f2 : Γ →Γ′,
+α 7→(xα, h(α)) 7→(x′
+α, h(α)′) 7→α′,
+where
+Γ = {α ∈Ω: α ̸←ρ}
+and
+Γ′ = {α′ ∈Ω′ : α′ ̸←ρ′}.
+Note that α is the only point in μxα whose image with respect to h coincides
+with h(α). Thus by virtue of formulas (29), the first and third mappings in (30)
+are injective. Consequently, the mapping f2 is also injective. And since
+|Γ| = |Ω\ Dom(f1)| = |Ω′ \ Dom(f1)| = |Γ′|,
+it is a bijection.
+Thus, the mapping f : Ω→Ω′, α 7→α′ ”glued” from the
+mappings f1 and f2, is also a bijection.
+To complete the proof of the claim, we extend the already defined mapping h′
+to Ωby setting
+h′(α′) := h(α)′,
+α ∈Γ.
+Then the first equality in (26) is obvious, whereas the second one follows from the
+definition of α′.
+□
+In what follows, the mapping h′ and bijection f are as in the Claim, and we set
+αf := α′ for all α ∈Ω. In the lemma below, we establish some properties of these
+mappings.
+Lemma 4.2. For any α, β, γ ∈Ω, the following statements hold:
+(a) h(α)′ = h′(α′) and r(α, h(α))′ = r(α′, h(α)′),
+(b) r(α, β)′ = r(α′, β′) ⇒r(β, α)′ = r(β′, α′),
+(c) α ←β ↔γ, r(α, β)′ = r(α′, β′), r(β, γ)′ = r(β′, γ′) ⇒r(α, γ)′ = r(α′, γ′).
+Proof. Statement (a) is just a reformulation of formula (26).
+Statement (b) is
+deduced as follows:
+r(β, α)′ = (r(α, β)∗)′ = (r(α, β)′)∗= r(α′, β′)∗= r(β′, α′).
+To prove statement (c), let Q = Qμ(α, β, γ) be an X-couple of the form (13), and
+let Q′ be as in Lemma 3.1(a). By the condition (ii) of Theorem 4.1 the couple Q
+has an m-extension for which μm ̸= ∅. Then by Lemma 3.1(b) the couple Q′ has
+an m′-extension for which μ′m′ ̸= ∅, see (24). Furthermore,
+x
+r
+←y ⇒x′
+r′
+←y′
+and
+z
+s↔y ⇒z′
+s′↔y′,
+see Lemma 2.7(b). Therefore the couple Q′ satisfies the hypothesis of Lemma 3.2.
+Applying this lemma for μ′ and (α′, β′, γ′), we conclude that r(γ′, α′) = t′. Thus,
+r(α, γ)′ = (t∗)′ = (t′)∗= r(α′, γ′),
+as required.
+□
+To complete the proof, it suffices to verify that the bijection f induces the alge-
+braic isomorphism φ, or equivalently, that for all α, β ∈Ω,
+(31)
+r(α, β)′ = r(α′, β′).
+12
+ILIA PONOMARENKO
+To this end, we consider several cases depending on the points h(α) and h(β).
+Case 1: α = ρ or β = ρ. By Lemma 4.2(b), we may assume that β = ρ. Then
+α ←h(α) ←h(h(α)) = ρ = β.
+By Lemma 4.2(a), this implies that
+r(h(α), β)′ = r(h(α), h(h(α)))′ = r(h(α)′, h(h(α))′) = r(h(α)′, β′).
+By the same reason, r(α, h(α))′ = r(α′, h(α)′). Thus, equality (31) follows from Lemma 4.2(c)
+for β = h(α) and γ = β.
+Case 2: α ̸= ρ ̸= β and h(α) = h(β) = ρ. In this case,
+α ←ρ →β,
+and again we are done by Lemma 4.2(c) for β = ρ and γ = β.
+Case 3: h(α) ̸= ρ = h(β) or h(α) = ρ ̸= h(β). By Lemma 4.2(b), we may
+assume that the first relation holds. By the condition (i), there exist λ ∈Ωsuch
+that
+{ρ, α, h(α), β} ←λ.
+In particular, λ ←ρ by Lemma 2.8. It follows that h(λ) = ρ. Since also h(h(α))
+equals ρ, we obtain
+r(h(α), λ)′ = r(h(α)′, λ′),
+see Cases 1 and 2. On the other hand, r(α, h(α))′ = r(α′, h(α)′) by Lemma 4.2(a)
+and α ←h(α) ←λ. Thus by Lemma 4.2(c) for β = h(α) and γ = λ, we have
+r(α, λ)′ = r(α′, λ′).
+Together with r(λ, β)′ = r(λ′, β′), which holds true by Case 2, this proves equal-
+ity (31) in this case again by Lemma 4.2(c) for β = λ and γ = β.
+Case 4: h(α) ̸= ρ ̸= h(β). By the condition (i), there exists λ ∈Ωsuch that
+{α, β, ρ} ←λ.
+In particular, ρ ←λ. It follows as before that h(λ) = ρ. Therefore,
+r(α, λ)′ = r(α′, λ′)
+and
+r(β, λ)′ = r(β′, λ′),
+see Case 3. This proves equality (31) in this case by Lemma 4.2(c) for β = λ and
+γ = β.
+□
+5. A sufficient condition for separability: in terms of parameters
+In general, conditions (i) and (ii) of Theorem 4.1 are hard to verify. In this sec-
+tion, we prove an inequality between some parameters of a coherent configuration,
+guaranteeing the fulfillment of these conditions.
+Theorem 5.1. Let X be a coherent configuration of degree n, maximal valency k,
+and indistinguishing number c. Then for every point μ, the conclusion of Theo-
+rem 4.1 holds, whenever
+(32)
+n > 3c(k −1)k.
+Proof. Let Ωbe the point set of X, and let μ ∈Ω. First, we prove two auxiliary
+lemmas.
+Lemma 5.2. For any ∆⊆Ω, |∆| ≤6, there is λ ∈Ωsuch that ∆←λ.
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+13
+Proof. Given α ∈Ωdenote by Λ(α) the set of all β ∈Ωsuch that α ̸←β. Then it
+suffices to verify that for all α,
+(33)
+|Λ(α)| ≤1
+2ck(k −1).
+Indeed, then in view of |∆| ≤6, the cardinality of the union of Λ(δ), δ ∈∆, is less
+than or equal to 3ck(k −1). By virtue of inequality (32), this means that any point
+of the complement to this union can be taken as the desired point λ.
+To prove (33), set s = r(μ, α) and Λ = Λ(α). Then for each λ ∈Λ, we have
+cr
+st ≥2, where r = r(μ, λ) and t = r(α, λ). Therefore, μs contains a point β ̸= α
+such that r(α, λ) = r(β, λ). It follows that λ adds to the set
+T = {(α, β, λ) ∈μs × μs × Λ : α ̸= β, λ ∈c(α, β)}
+two distinct triples (α, β, λ) and (β, α, λ). Consequently, |T | ≥2|Λ|.
+On the other hand, since |μs| = ns ≤k, the number of all (α, β) ∈μs × μs
+with α ̸= β, is less than or equal to k(k −1). Therefore, there exists a pair (α, β)
+contained as the first two components in at least
+2|Λ|
+k(k−1) triples of the set T . Thus,
+2|Λ|
+k(k −1) ≤|c(α, β)| ≤c,
+which proves inequality (33).
+□
+Lemma 5.3. Given α, β, γ ∈Ω, there exists m ∈S such that μm ̸= ∅and the
+couple Qμ(α, β, γ) has m-extension.
+Proof. Denote by Λ the set of all λ ∈Ω, for which the triangle (xλ, yλ, zλ) with
+components
+xλ = r(λ, α),
+yλ = r(λ, β),
+zλ = r(λ, γ)
+is not the extension of the couple Q = Qμ(α, β, γ) with respect to mλ = r(μ, λ).
+To estimate |Λ| from above, let λ ∈Λ. Then there exists aλ ∈S such that
+(34)
+r ̸= aλ ∈x∗y ∩x∗y
+or
+s ̸= aλ ∈y∗z ∩y∗z
+or
+t ̸= aλ ∈z∗x ∩z∗x,
+where x = xλ, y = yλ, and z = zλ. By Lemma 2.1(ii), each complex product
+in (34) consists of at most k relations. Therefore, aλ is one of at most 3(k −1) basis
+relations belonging to the union
+(x∗y ∪y∗z ∪z∗x) \ {r, s, t}.
+This set does not depend on λ, but only on α, β, and γ, see (11). It follows that
+there exists a ∈S, for which the same of the three relations in (34) holds true with
+aλ = a for at least
+|Λ|
+3(k−1) points λ. Denoting the set of these points by Λa, we have
+|Λa| ≥
+|Λ|
+3(k −1).
+For definiteness, we assume that a ∈x∗y for all λ ∈Λa.
+Let λ ∈Λa. Then a ∈x∗y and hence x ∈ya∗(Lemma 2.1(i)). Since r(λ, β) = y,
+this implies that there is νλ ∈βa∗such that
+(35)
+r(λ, νλ) = x = r(λ, α).
+14
+ILIA PONOMARENKO
+We note that νλ is different from α, because α ∈βr∗and r ̸= a. Since |βa∗| ≤k,
+there exists ν ∈βa∗, for which equality (35) holds true with νλ = ν for at least
+|Λa|
+k
+points λ ∈Λa. Consequently,
+(36)
+c ≥|c(α, ν)| ≥|Λa|
+k
+≥
+|Λ|
+3k(k −1).
+By inequality (32), this implies that n > 3ck(k −1) ≥|Λ|. Hence there exists a
+point λ ∈Ω\Λ. This means that the triangle (xλ, yλ, zλ) is the mλ-extension of Q.
+It remains to note that the set μmλ is not empty, because contains λ.
+□
+Now the conditions (i) and (ii) of Theorem 4.1 immediately follow from Lem-
+mas 5.2 and 5.3, respectively. Thus the required statement is a direct consequence
+of that theorem.
+□
+Corollary 5.4. Any fission of a coherent configuration satisfying condition (32).
+is separable.
+Proof. Let Y be a fission of a coherent configuration satisfying the hypothesis
+of Theorem 5.1. Then the degree of Y equals n, whereas its maximal valency and
+indistinguishing number are less than or equal to k and c, respectively (Lemma 2.2).
+Therefore inequality (32) holds for Y. Thus, Y is separable by Theorem 5.1.
+□
+6. Proofs of Theorems 1.1, 1.2, and 1.3
+Throughout this section, F is a finite field of order q = pd, where p is a prime
+and d a positive integer.
+Proof of Theorem 1.2. Let d = 1. Then the group Aut(F) is trivial. So the
+maximal valency of the scheme X = C(q) and hence of any of its fission is equal
+to 1. Every coherent configuration with maximal valency equal to 1 is known to be
+separable [3, Theorem 3.3.19]. Thus from now on, we may assume that d ≥2.
+In the following lemma, we denote by k and c the maximal valency and indistin-
+guishing number of the scheme X, respectively.
+Lemma 6.1. k = d and c ≤
+d−1
+P
+i=1
+pGCD(i,d) −1
+
+.
+Proof. Let ∆be a normal base of the field F. Then ∆⊆F× is an orbit of the
+group Aut(F). However, Aut(F) is the stabilizer of the point 1F in the group
+K := F× ⋊Aut(F) ≤Sym(F),
+where the action of F× is defined by multiplication. It follows that the scheme X
+has a basis relation s such that 1Fs = ∆[3, Proposition 2.2.5(3)]. In particular,
+ns = |∆| = d.
+By formula (4), no basis relation of X has valency greater than | Aut(F)| = d. Thus,
+k = d.
+Let α, β ∈F× be arbitrary points of X, for which r(1F, β) = r(α, β). Then α
+belongs to the orbit of the stabilizer Kβ of β in K, containing 1F. Since
+Kβ = {x 7→β1−pixpi, x ∈F× : i = 0, . . . , d −1},
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+15
+it follows that α = β1−pi for some i. Therefore,
+c(1F, α) ⊆{β ∈F× : α = β1−pi for some 1 ≤i ≤d −1}.
+Let ξ be a primitive element of the field F. Then α = ξa for some integer a.
+Therefore for a fixed i, the number of those β = ξb for which α = β1−pi, is equal
+to the number of solutions of the linear congruence a = (1 −pi)b (mod pd −1) with
+respect to unknown b. Since this number is less than or equal to
+GCD(pi −1, pd −1) = pGCD(i,d) −1,
+we conclude that
+(37)
+|c(1F, α)| ≤
+d−1
+X
+i=1
+
+pGCD(i,d) −1
+
+.
+When the point α runs through all nonzero elements of F, the relation s = r(1F, α)
+runs through all irreflexive basis relations of X. Therefore, the maximum c of the
+c(s) is not greater than the number on the right-hand side of (37). This prove the
+required inequality.
+□
+Let us return to the proof of Theorem 1.2. Denote by m the maximal divisor
+of d other than d. Then m ≤d/2. By Lemma 6.1, we have k = d and c ≤d(pm−1).
+Therefore,
+c (k −1) k ≤d (pm −1) (d −1) d < d3 pd/2.
+Consequently,
+3d3 + 1 ≤pd/2
+⇒
+3 c (k −1) k < 3 d3 pd/2 < pd −1.
+On the other hand,
+3d3 + 1 <
+(
+2d/2 ≤pd/2
+if p ≥2 and d ≥34,
+29d/2 ≤pd/2
+if p ≥29 and d ≥2.
+Thus inequality (32) for n = pd −1 is valid in all cases, with the possible exception
+of those primes p and integers d for which
+(38)
+2 ≤p ≤23
+and
+2 ≤d ≤33.
+At this point, we make use of a more exact upper bound for c, established in
+Lemma 6.1. A direct computer calculation shows that condition (38) implies the
+inequality
+(39)
+3
+d−1
+X
+i=1
+
+pGCD(i,d) −1
+
+(d −1) d < pd −1
+in all cases except for those, where p and d satisfy relations (2) and (3). Thus if
+these relations do not hold, then inequality (32) is valid for the scheme X. This
+proves the required statement by Corollary 5.4.
+□
+Proof of Theorem 1.1. Let X be a cyclotomic scheme over the field F. Then X
+is 2-separable if its extension Xα with respect to the point α = 0F is separable
+(Lemma 2.6).
+Hence by Lemma 2.5 for X = Xα, it suffices to verify that the
+coherent configuration X0 defined in this lemma is separable.
+16
+ILIA PONOMARENKO
+By Lemma 2.3, the coherent configuration Xα is schurian. This implies that so
+is the coherent configuration X0 (Lemma 2.5). Consequently,
+X0 = Inv(Aut(X0)).
+Without loss of generality, we may assume that X0 is of rank at least 3. Then by
+[5, Theorem 4.8(1)],
+Aut(X0) ≤F× ⋊Aut(F).
+By formula (7), this shows that
+X0 = Inv(Aut(X0)) ≥Inv(F× ⋊Aut(F)) = C(F),
+i. e., X0 is the fission of the scheme C(F). Assume that relations (2) and (3) do
+not hold. Then the coherent configuration X0 is separable by Theorem 1.2.
+□
+Computations. The following refinement of Theorem 1.2 for small primes p
+and integers d is obtained by computer calculations using the package COCO2p [10]
+and Hanaki–Miyamoto list of small association schemes [8].
+Theorem 6.2. Let (p, d) = (2, 2), (2, 3), (2, 4), (2, 5), (3, 2), (3, 3), or (5, 2).
+Then
+(i) the scheme C(pd) is separable,
+(ii) any cyclotomic scheme of degree pd is 2-separable.
+Proof. First, we construct the scheme X = C(pd) on computer and verify that no
+other scheme of degree pd is algebraically isomorphic to X. A direct calculation
+shows that
+(40)
+| Iso(X)/ Aut(X)| = | Isoalg(X)|,
+where Iso(X) and Isoalg(X) are the groups of all isomorphisms of X to itself and
+all algebraic automorphisms of X, respectively. It follows that every element of
+Isoalg(X) is induced by an isomorphism. Thus the scheme X is separable. This
+proves statement (i).
+Let X be a cyclotomic scheme over the field F of order pd, and let m = |M|,
+where M ≤F× is as in (1). As in the previous paragraph, we check that X is
+separable (and hence 2-separable) unless
+(p, d, m) = (2, 4, 5), (3, 3, 13), (5, 2, 8), or (5, 2, 12).
+In these four cases, the number of schemes Y ̸= X of degree pd, algebraically
+isomorphic to X, is equal to 2, 377, 2, and 8, respectively.
+For every such Y,
+we verify that the coherent configurations Xα and Yα, where α = 0F, are not
+algebraically isomorphic. This implies that no algebraic isomorphism from X to Y
+can be extended to an algebraic isomorphism from Xα to Yα, that takes 1α to itself.
+By [4, Lemma 8.3(2)], this implies that the scheme X is 2-separable.
+□
+Proof of Theorem 1.3. Let X be a Paley graph or tournament with q = pd
+vertices. The arc set of X is an irreflexive relation of form (1) and also |F× : M| = 2.
+In particular, q −1 is even and hence the prime p is odd; in fact, q = 1 (mod 4)
+if X is a Paley graph, and q = 3 (mod 4) if X is a Paley tournament. In any case,
+the coherent configuration X = WL(X) of the graph X is a cyclotomic scheme of
+rank 3.
+Denote by dimWL(X) the WL-dimension of X and set Xα to be the graph ob-
+tained from X by the individualization of the vertex α = 0F. By the definition of
+ON THE SEPARABILITY OF CYCLOTOMIC SCHEMES OVER FINITE FIELD
+17
+the functor WL [3, Definition 2.6.5], we have WL(Xα) = Xα. Moreover, it easily
+follows from [1, Theorem 5.2] that
+(41)
+dimWL(X) ≤dimWL(Xα) + 1.
+Now if the coherent configuration Xα is separable, then dimWL(Xα) ≤2 [6, Theo-
+rem 2.1]. Thus the required inequality dimWL(X) ≤3 follows from (41).
+Assume that Xα is not separable. Then relations (2) and (3) hold, see the proof
+of Theorem 1.1. Since p is odd, all possible p and d are the following:
+p = 3, 2 ≤d ≤10, d ̸= 7, 9
+or
+p = 5, d = 2, 3, 4, 6.
+It remains to note that if (p, d) = (3, 2), (3, 3), or (5, 2) then Xα is separable (this
+follows from Theorem 6.2 by the argument used in the proof of Theorem 1.1).
+□
+References
+[1] J.-Y. Cai, M. F ̈urer, and N. Immerman, An optimal lower bound on the number of variables
+for graph identification, Combinatorica, 12, no. 4, 389–410 (1992).
+[2] G. Chen and I. Ponomarenko, Coherent configurations associated with TI-subgroups, J. Alge-
+bra, 488, 201–229 (2017).
+[3] G. Chen and I. Ponomarenko, Coherent Configurations, Central China Normal University
+Press (2019).
+[4] S. Evdokimov and I. Ponomarenko, Separability number and Schurity number of coherent
+configurations, Electron. J. Combin., 7, Research Paper 31 (2000).
+[5] S. Evdokimov and I. Ponomarenko, Characterization of cyclotomic schemes and normal Schur
+rings over a cyclic group, St. Petersburg Math J., 14, no. 2, 189–221 (2002).
+[6] F. Fuhlbr ̈uck, J K ̈obler, and O. Verbitsky, Identiability of graphs with small color classes by the
+Weisfeiler-Leman algorithm, in: Proc. 37th International Symposium on Theoretical Aspects
+of Computer Science, Dagst ̈uhl Publishing, Germany (2020), pp. 43:1–43:18.
+[7] M. Grohe, Descriptive complexity, canonisation, and definable graph structure theory, Cam-
+bridge University Press, Cambridge (2017).
+[8] A. Hanaki and I. Miyamoto, Classification of association schemes with small number of ver-
+tices, http://math.shinshu-u.ac.jp/~hanaki/as/ (2016).
+[9] M. Hirasaka, K. Kim, and I. Ponomarenko, Two-valenced association schemes and the Desar-
+gues theorem, Arab. J. Math. (2019), https://doi.org/10.1007/s40065-019-00274-w.
+[10] M. Klin, C. Pech, and S. Reichard, COCO2P – a GAP4 package, ver. 0.18 (2020);
+https://github.com/chpech/COCO2P/archive/coco2p-0.18.tar.gz.
+[11] M. Muzychuk, On Skew Hadamard difference sets, arXiv:1012.2089 (2010).
+[12] M. Muzychuk and I. Ponomarenko, On pseudocyclic association schemes, Ars Math. Con-
+temporanea, 5, No. 1, 1–25 (2012).
+Steklov Institute of Mathematics at St. Petersburg;, Sobolev Institute of Mathe-
+matics, Novosibirsk 630090, Russia
+E-mail address: inp@pdmi.ras.ru
