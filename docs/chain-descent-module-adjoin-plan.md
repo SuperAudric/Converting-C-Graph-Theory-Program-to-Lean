@@ -710,6 +710,18 @@ counterexample (statement change). It is the heaviest, highest-value item on the
 > (B) together — the only path that closes) **or (ii) consolidate the conditional seal** (G2-B empirically empty incl. the
 > ℤ₄² bullseye; carry the 3-part chain as the explicitly-scoped open frontier). The "do B cheaply first" middle option is
 > mostly closed. (C) `b(G)` for the residue remains a cheap, independent, likely-citable survey either way.
+>
+> **(C) `b(G)` SURVEY — DONE (2026-06-11): (C) is FREE, already proven in the project.** The survey asked whether a
+> bounded group base is an obstacle; the answer is **no** — `exists_greedy_base_le_log` (`Cascade.lean`, axiom-clean,
+> landed long ago) proves **`b(G) ≤ log₂|Aut(X)|`** unconditionally (greedy irredundant base + `|Aut| = ∏ basic-orbit
+> sizes`, each `≥ 2`). The seal's *existing* "small" antecedent (`¬IsLargeSchemeViaAut` = `|Aut(X)| ≤ poly(n)`) then
+> makes `log₂|Aut| = O(log n)`. So (C) needs neither new math nor a citation nor an empirical probe — it is a landed
+> theorem composed with an antecedent the seal already carries. **Wired (axiom-clean, build green):**
+> `separatesAtBoundedBase_of_separable_of_small` (`CascadeAffine.lean §S-gate`): given (A) `Separable` + (B) the
+> transport at every base + the "small" bound `log₂|Aut| ≤ bound`, the scheme discretises at a bounded base — the group
+> base is picked internally from `exists_greedy_base_le_log`. **Net: the seal-bridge's residual open content is now
+> EXACTLY {(A) `Separable` + (B) the transport}, both supplied together by the general-CC build (option (i)); (C) is
+> closed.** This sharpens the (i)-commitment: the general-CC substrate is the *whole* remaining job — nothing else gates.
 
 **What to build (dependency order).** Sits on `Scheme.lean`'s existing CC substrate (`AssociationScheme`, intersection
 numbers, `ClosedSubset`, `IsPrimitive`); adds the separability layer on top.

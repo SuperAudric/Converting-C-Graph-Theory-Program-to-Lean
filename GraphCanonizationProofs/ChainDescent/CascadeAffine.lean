@@ -426,6 +426,41 @@ theorem separatesAtBoundedBase_of_separable (S : SchurianScheme n)
     SeparatesAtBoundedBase S bound :=
   separatesAtBoundedBase_of_twinsRealized S hcard hbase (htrans hsep)
 
+/-- Helper: folding `insert` over a list grows a `Finset` by at most the list length. -/
+theorem card_foldl_insert_le (bs : List (Fin n)) (T : Finset (Fin n)) :
+    (bs.foldl (fun s b => insert b s) T).card ≤ T.card + bs.length := by
+  induction bs generalizing T with
+  | nil => simp
+  | cons b bs ih =>
+    simp only [List.foldl_cons, List.length_cons]
+    calc (bs.foldl (fun s b => insert b s) (insert b T)).card
+        ≤ (insert b T).card + bs.length := ih (insert b T)
+      _ ≤ (T.card + 1) + bs.length := by gcongr; exact Finset.card_insert_le b T
+      _ = T.card + (bs.length + 1) := by ring
+
+/-- **The seal-bridge with the group base (C) DISCHARGED — `b(G)` is FREE for small schemes.** The `b(G)`
+survey verdict, in Lean: input (C) (a bounded group base) is *not* an obstacle — it is supplied internally by
+the landed `exists_greedy_base_le_log` (`Cascade.lean`, `b(G) ≤ log₂|Aut(X)|` via the greedy irredundant base +
+`|Aut| = ∏ basic-orbit sizes`). So given only **(A) `Separable`** (Thm 4.1) + **(B) the transport at every base**
+(`∀ T, SeparabilityTransports S T`) + the **"small" bound** `log₂|Aut(X)| ≤ bound` (exactly the seal's existing
+`¬IsLargeSchemeViaAut` antecedent — small ⟹ `|Aut| ≤ poly` ⟹ `log₂|Aut| = O(log n)`), the scheme discretises at
+a bounded base: `SeparatesAtBoundedBase S bound`. **Net: the seal-bridge's residual open content is exactly
+{(A) `Separable` + (B) the transport}, both of which the general-CC build supplies together; (C) is closed.** -/
+theorem separatesAtBoundedBase_of_separable_of_small (S : SchurianScheme n) {bound : Nat}
+    (hbound : Nat.log 2 (Nat.card (StabilizerAt (schemeAdj S.toAssociationScheme)
+        (fun _ _ => POE.unknown) ∅)) ≤ bound)
+    (htrans : ∀ T : Finset (Fin n), SeparabilityTransports S T)
+    (hsep : S.toAssociationScheme.Separable) :
+    SeparatesAtBoundedBase S bound := by
+  obtain ⟨bs, hbase, hlen⟩ := exists_greedy_base_le_log
+    (adj := schemeAdj S.toAssociationScheme) (P := fun _ _ => POE.unknown)
+  refine separatesAtBoundedBase_of_separable S ?_ hbase (htrans _) hsep
+  calc (bs.foldl (fun s b => insert b s) (∅ : Finset (Fin n))).card
+      ≤ (∅ : Finset (Fin n)).card + bs.length := card_foldl_insert_le bs ∅
+    _ = bs.length := by simp
+    _ ≤ _ := hlen
+    _ ≤ bound := hbound
+
 end Bridge
 
 /-! ### §13b — the two-round (depth-2) separation engine on `schemeAdj` (E1)
