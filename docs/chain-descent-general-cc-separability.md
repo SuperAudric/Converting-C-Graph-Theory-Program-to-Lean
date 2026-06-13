@@ -159,7 +159,16 @@
      points ⟹ `∀ v, DominatorReachable S T v` (strong induction on rank). **Net: the open content is reduced to the
      concrete, checkable "exhibit a pinning rank" — the clean sufficient condition the endpoint targets.** Remaining
      (the genuine `s(C)` math): define the rank + verify the pinning per level for the residue family (the cyclic
-     arithmetic core, char-2 midpoints excluded). NEXT = increment 4b: the affine cyclic arithmetic reduction.
+     arithmetic core, char-2 midpoints excluded).
+     **STAGE-3 INCREMENT 4b LANDED 2026-06-13 (`CascadeAffine.lean §S-stage3-δ`, `fieldOf` / `G0pow_orbit_iff` /
+     `dominatorReachable_G0pow_step`, axiom-clean, build green 121s): the affine cyclic arithmetic reduction.**
+     Translates the cyclotomic family's orbit-of-difference pinning into pure `F_q`-power arithmetic. `G0pow_orbit_iff`:
+     a `G0pow g`-orbit relation is multiplication by `g^k` through the field iso (`∃ g₀ ∈ G0pow g, g₀ v = w ↔
+     ∃ k, g^k·efield.symm v = efield.symm w`, from `sigmaPow_zpow_apply`). `dominatorReachable_G0pow_step`: the
+     forced-triangle step builder with `huniq` in `F_q` powers (`g^k·(fieldOf u−fieldOf α)=fieldOf γ−fieldOf α`,
+     etc.). So the δ′ cyclotomic closure now runs on `F_q` arithmetic with no orbital bookkeeping. NEXT = incr 4c:
+     the ratio form (`(r+1−r·h) ∈ ⟨g⟩ → h=1`, `r=(c−a)/(b−c)`) — field-division packaging of 4b that exposes the
+     char-2-midpoint obstruction; then the rank witness (the open `s(C)` content).
   Parked smaller items (see the 2026-06-12 review entry in §8): ~~Route δ feasibility probe~~ (RAN + the engine
   LANDED — items 5/6 above); pin the `IsLarge` threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier;
   strategy-§15 gaps tracking note.
@@ -886,6 +895,23 @@ bullseye) says closure is the likely outcome and the build is worth it.
   provable, axiom-clean interface. NEXT (increment 4b, the genuine open math): the affine cyclic arithmetic reduction
   (`affineScheme` pinning ⟺ `∀ h ∈ H, (r+1−r·h) ∈ H → h = 1`) to translate the rank's pinning obligation into pure
   `F_q^×`-coset arithmetic, then exhibit a propagating rank/base for the residue family.
+- **2026-06-13 — STAGE 3 INCREMENT 4b: THE AFFINE CYCLIC ARITHMETIC REDUCTION (`CascadeAffine.lean §S-stage3-δ`,
+  `fieldOf` / `G0pow_orbit_iff` / `dominatorReachable_G0pow_step`, axiom-clean `[propext, Classical.choice,
+  Quot.sound]`, no `sorry`, full serial build green 121s first try; index regenerated, 3 rows described).**
+  Translates the cyclotomic family's forced-triangle pinning from `G₀`-orbit-of-difference language into pure
+  `F_q`-power arithmetic. (1) **`fieldOf hd x := (efield hd).symm (affineE.symm x)`** — the point→`F_q` coordinate.
+  (2) **`G0pow_orbit_iff`** — the core: a `G0pow g = ⟨mul g⟩`-orbit relation between coordinate vectors is exactly
+  multiplication by a power of `g` through the field iso (`∃ g₀ ∈ G0pow g, g₀ v = w ↔ ∃ k:ℤ, ↑(g^k)·efield.symm v =
+  efield.symm w`); proof = `Subgroup.mem_zpowers_iff` + `sigmaPow_zpow_apply` (`σ_g^k` = `·g^k` through `efield`) +
+  `efield` injectivity. (3) **`dominatorReachable_G0pow_step`** — the forced-triangle step builder with `huniq` in
+  `F_q` powers (`g^k·(fieldOf u−fieldOf α)=fieldOf γ−fieldOf α`, the symmetric one for `β`), obtained from
+  `dominatorReachable_affine_step` by feeding each orbit hypothesis through `G0pow_orbit_iff.mp` + `map_sub`
+  (`efield.symm` is linear over the difference). **Net:** the δ′ cyclotomic single-base closure now reasons in pure
+  `F_q` arithmetic — define a rank, and for each positive-rank `γ` discharge `huniq` as an `F_q`-power uniqueness — with
+  no orbital / intersection-number bookkeeping. **NEXT = increment 4c (the field-division packaging):** the ratio form
+  `∀ h ∈ ⟨g⟩, (r+1−r·h) ∈ ⟨g⟩ → h = 1` with `r = (fieldOf γ − fieldOf α)/(fieldOf β − fieldOf γ)` (needs `b ≠ c` and
+  unit/nonzero handling) — it divides out the field differences and makes the char-2-midpoint obstruction (`r=1` never
+  pins) explicit; then the genuine open piece, the pinning-rank witness for the residue family.
 
 ---
 
@@ -934,8 +960,11 @@ handle); the affine specialisation **`affineScheme_interNum_eq_one_of_unique`** 
 **`dominatorReachable_map`** / **`dominatorReachable_univ_image`** (complete closure transports across `Aut(S)`-images
 of the base — prove at one representative); the **iteration engine `dominatorReachable_of_rank`** (a well-founded
 pinning rank ⟹ `∀ v, DominatorReachable S T v` — the brick turning the step builders into a global closure)
-(`CascadeAffine.lean §S-bridge-δ`). Open: the **pinning-rank witness** for the residue family — define `rank` and
-verify the per-level forced-triangle pinning (the genuine `s(C)` arithmetic, cyclic `(r+1−r·h)∈H→h=1` core).
+(`CascadeAffine.lean §S-bridge-δ`); the **cyclotomic arithmetic reduction** **`fieldOf`** (point→`F_q`) /
+**`G0pow_orbit_iff`** (a `G0pow g`-orbit relation ⟺ multiplication by `g^k` through the field iso) /
+**`dominatorReachable_G0pow_step`** (the forced-triangle step builder with `huniq` in pure `F_q` powers)
+(`CascadeAffine.lean §S-stage3-δ`). Open: the **pinning-rank witness** for the residue family — define `rank` and
+verify the per-level `F_q`-power pinning (the genuine `s(C)` arithmetic, cyclic `(r+1−r·h)∈⟨g⟩→h=1` core).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

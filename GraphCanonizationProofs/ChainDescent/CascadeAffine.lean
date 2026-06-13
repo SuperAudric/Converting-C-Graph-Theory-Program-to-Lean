@@ -2277,6 +2277,73 @@ theorem G0pow_irreducible_of_adjoin (hd : d ≠ 0) (β : (GaloisField p d)ˣ)
   ext x
   simp [Submonoid.mem_closure_singleton, Set.mem_range, eq_comm]
 
+/-! #### §S-stage3-δ — the affine cyclic arithmetic reduction (G0pow forced-triangle in `F_q` powers)
+
+Increment 4b of the δ′ Stage 3 (`docs/chain-descent-general-cc-separability.md` §5 "Stage 3 (δ′ route)").
+The affine forced-triangle criterion (`affineScheme_interNum_eq_one_of_unique`) states pinning via
+`G₀`-orbit-of-difference uniqueness; for the **cyclotomic family** `G₀ = G0pow g = ⟨mul g⟩` that orbit is a
+multiplicative `⟨g⟩`-orbit in `F_q`. This block translates the orbit condition into pure `F_q`-power
+arithmetic: a `G0pow g`-orbit relation is multiplication by `g^k` through the field iso (`G0pow_orbit_iff`,
+from `sigmaPow_zpow_apply`), so the pinning of `γ` by `α, β` reads as "the only `u` with
+`g^k·(fieldOf u − fieldOf α) = fieldOf γ − fieldOf α` and `g^k·(fieldOf β − fieldOf u) = fieldOf β −
+fieldOf γ` is `γ`" (`dominatorReachable_G0pow_step`). This is the idiom the cyclotomic `s(C)` closure
+argument reasons in — the `(r+1 − r·h) ∈ ⟨g⟩ → h = 1` reduction of §5 is this with the field difference
+ratios divided out (the further packaging, deferred to incr 4c). -/
+
+/-- The **field coordinate** of a point: `Fin (p^d) → F_p^d → F_q` (`(efield).symm ∘ affineE.symm`). The
+bijection carrying the affine point set into the field, in which the cyclotomic orbit-of-difference becomes a
+multiplicative `⟨g⟩`-orbit. -/
+noncomputable def fieldOf (hd : d ≠ 0) (x : Fin (p ^ d)) : GaloisField p d :=
+  (efield hd).symm (affineE.symm x)
+
+/-- **The cyclotomic orbit reduction (the core arithmetic translation).** A `G0pow g`-orbit relation between
+coordinate vectors `v, w` is exactly multiplication by a power of `g` through the field iso:
+`∃ g₀ ∈ G0pow g, g₀ v = w` ↔ `∃ k : ℤ, g^k · (efield.symm v) = efield.symm w`. From `sigmaPow_zpow_apply`
+(`σ_g^k` acts as `·g^k` through `efield`) and injectivity of `efield`. The brick converting the cyclic
+affine action into `F_q` multiplication — the foundation of the δ′ cyclotomic family argument. -/
+theorem G0pow_orbit_iff (hd : d ≠ 0) (g : (GaloisField p d)ˣ) (v w : Fin d → ZMod p) :
+    (∃ g₀ ∈ G0pow hd g, g₀ v = w) ↔
+      ∃ k : ℤ, ((g ^ k : (GaloisField p d)ˣ) : GaloisField p d) * (efield hd).symm v
+        = (efield hd).symm w := by
+  constructor
+  · rintro ⟨g₀, hg₀, hgw⟩
+    obtain ⟨k, rfl⟩ := Subgroup.mem_zpowers_iff.1 hg₀
+    refine ⟨k, ?_⟩
+    rw [sigmaPow_zpow_apply] at hgw
+    have hcong := congrArg (efield hd).symm hgw
+    rwa [LinearEquiv.symm_apply_apply] at hcong
+  · rintro ⟨k, hk⟩
+    refine ⟨sigmaPow hd g ^ k, Subgroup.mem_zpowers_iff.2 ⟨k, rfl⟩, ?_⟩
+    rw [sigmaPow_zpow_apply, hk, LinearEquiv.apply_symm_apply]
+
+/-- **The cyclotomic `DominatorReachable` step builder (`F_q`-power form).** The forced-triangle step for the
+cyclotomic family `affineScheme (G0pow g)`, with the pinning condition in pure `F_q` powers: from two
+dominator-reachable points `α, β`, if the only `u` with
+`g^k·(fieldOf u − fieldOf α) = fieldOf γ − fieldOf α` (for some `k`) and
+`g^k·(fieldOf β − fieldOf u) = fieldOf β − fieldOf γ` (for some `k`) is `γ`, then `γ` is dominator-reachable.
+Obtained from `dominatorReachable_affine_step` by `G0pow_orbit_iff` (orbit ⟹ power form on each hypothesis,
+`efield.symm` linear over the difference). The toolkit the cyclotomic single-base closure (incr 4c) builds
+its `DominatorReachable` derivations with — pure `F_q` arithmetic, no orbital/intersection-number bookkeeping. -/
+theorem dominatorReachable_G0pow_step (hd : d ≠ 0) (g : (GaloisField p d)ˣ)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G0pow hd g)
+    {T : Finset (Fin (p ^ d))} {α β γ : Fin (p ^ d)}
+    (hα : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T α)
+    (hβ : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T β)
+    (huniq : ∀ u : Fin (p ^ d),
+      (∃ k : ℤ, ((g ^ k : (GaloisField p d)ˣ) : GaloisField p d)
+          * (fieldOf hd u - fieldOf hd α) = fieldOf hd γ - fieldOf hd α) →
+      (∃ k : ℤ, ((g ^ k : (GaloisField p d)ˣ) : GaloisField p d)
+          * (fieldOf hd β - fieldOf hd u) = fieldOf hd β - fieldOf hd γ) →
+      u = γ) :
+    DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T γ := by
+  refine dominatorReachable_affine_step (G0pow hd g) hneg hα hβ (fun u h1 h2 => huniq u ?_ ?_)
+  · obtain ⟨k, hk⟩ := (G0pow_orbit_iff hd g _ _).mp h1
+    rw [map_sub, map_sub] at hk
+    exact ⟨k, hk⟩
+  · obtain ⟨k, hk⟩ := (G0pow_orbit_iff hd g _ _).mp h2
+    rw [map_sub, map_sub] at hk
+    exact ⟨k, hk⟩
+
 /-! #### The genuine F2b separation crux + seal capstone, over `G0pow β` (the rank-≥3 leak candidate)
 
 `CyclicAffineSeparates` / `reachesRigidOrCameron_viaCyclicSeparation` (above) are stated over
