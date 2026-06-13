@@ -991,6 +991,35 @@ theorem discrete_warmRefine_of_extensionComplete (S : SchurianScheme n)
   intro u u' hcell
   exact hcomplete u' u (hcatch u u' hcell)
 
+/-- **The catch-up is free once `warmRefine` is discrete** (the converse of
+`discrete_warmRefine_of_extensionComplete`'s use of it, for *any* `E`): same-cell points are equal, so
+they trivially share every reflexive `E`-relation. **The honest accounting in Lean:** taken together
+with `discrete_warmRefine_of_extensionComplete`, this says that **at a complete extension `E`,
+`WarmTwinsAreFiberTwins S T E ↔ Discrete (warmRefine …)`** — the catch-up carries *no information beyond
+the 1-WL discreteness the seal concludes*. So for the `n ≥ 25` residue, where the δ′ closure delivers
+only the *2-WL* (`X_T`) completeness, discharging `hcatch` is **equivalent to** establishing 1-WL
+discreteness directly — it is genuine content (the dimWL 1-WL↔2-WL exchange / the `c(X_T)` layer), not
+plumbing. It is *free* exactly where 1-WL already discretises (next lemma). -/
+theorem warmTwinsAreFiberTwins_of_warmDiscrete (S : SchurianScheme n)
+    {T : Finset (Fin n)} {E : CoherentConfig n}
+    (hdisc : Discrete (warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+      (individualizedColouring n T))) :
+    WarmTwinsAreFiberTwins S T E := by
+  intro u u' hcell
+  rw [hdisc u u' hcell]
+
+/-- **The catch-up holds wherever the *scheme-level* δ′ closure does** — in particular on the order-16
+residue (`clebschZ4_closure`, n=16), where the forced triangles live in `S`'s own colours and 1-WL
+discretises outright. So the extension capstone `reachesRigidOrCameron_viaExtensionDominatorClosure` is
+non-vacuous: on the schemes the scheme-level engine already closes, `hcatch` is discharged for free (and
+the two routes agree). It does **not** extend to `n ≥ 25` — there 1-WL discreteness is exactly the open
+content (see `warmTwinsAreFiberTwins_of_warmDiscrete`'s note). -/
+theorem warmTwinsAreFiberTwins_of_dominatorClosure (S : SchurianScheme n)
+    {T : Finset (Fin n)} {E : CoherentConfig n}
+    (hclo : ∀ v, DominatorReachable S.toAssociationScheme T v) :
+    WarmTwinsAreFiberTwins S T E :=
+  warmTwinsAreFiberTwins_of_warmDiscrete S (discrete_of_dominatorClosure S.toAssociationScheme hclo)
+
 /-- **δ′-on-the-extension, packaged for the seal consumer.** A bounded base `T` whose forced-triangle closure
 exhausts Ω **on the point extension `X_T`** (`hclo`), with the catch-up at `T`, discretises the scheme:
 `SeparatesAtBoundedBase S bound`. `Sharp` is discharged internally (`sharp_pointExtension`), so the open input

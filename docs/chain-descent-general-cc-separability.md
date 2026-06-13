@@ -1415,6 +1415,26 @@ bullseye) says closure is the likely outcome and the build is worth it.
   theorem) and `hcatch` (probe-green at the family's bases — formalise via the B1–B5 forced-triangle engine, or cite the
   direction-check fact). **NEXT:** the open `c(X_T)` pinning rank on `X_T` for the amorphic-NLS family (general, not
   enumerated) + the `hcatch` discharge; then (deferred) `SchurianScheme`/capstone wiring + hImprim.
+- **2026-06-13 — `hcatch` ANALYSIS + the free cases (`CascadeAffine.lean §S-gate2`;
+  `warmTwinsAreFiberTwins_of_warmDiscrete`, `warmTwinsAreFiberTwins_of_dominatorClosure`; axiom-clean
+  `[propext, Classical.choice, Quot.sound]`, full build green 101s; index regenerated, 2 rows).** Set out to discharge
+  the catch-up and found an **important correction to the prior framing** (the "probe-green, formalize via B1–B5" note
+  was too optimistic). `warmTwinsAreFiberTwins_of_warmDiscrete` (warm-discrete ⟹ `hcatch`, any `E`) is the converse of
+  `discrete_warmRefine_of_extensionComplete`'s use of `hcatch`, so together: **at a complete extension,
+  `WarmTwinsAreFiberTwins S T E ↔ Discrete (warmRefine …)`**. **Consequence (the honest finding):** for `n ≥ 25` the
+  δ′-on-`X_T` closure delivers only **2-WL** (`X_T`) completeness, while `hcatch` *is* the **1-WL** discreteness the seal
+  concludes — and 2-WL-complete does not give 1-WL-discrete for free. So discharging `hcatch` there is **equivalent to**
+  establishing 1-WL discreteness directly: genuine content (the dimWL 1-WL↔2-WL exchange / the `c(X_T)` layer), **not
+  plumbing**. The B1–B3 two-endpoint engine — the tool the optimistic note named — is *exactly* what stalls at `n ≥ 25`
+  (probe). **What IS free:** `warmTwinsAreFiberTwins_of_dominatorClosure` discharges `hcatch` wherever the *scheme-level*
+  δ′ closes (the order-16 residue), so `reachesRigidOrCameron_viaExtensionDominatorClosure` is non-vacuous and the two
+  routes agree there — but it does not extend coverage (where scheme-level δ′ closes, the scheme-level capstone already
+  applies). **Net (revised honest status of the wiring):** the δ′-on-`X_T` capstone is correct, but its `hcatch` is
+  *not* an independent cheap step for `n ≥ 25` — it is coupled to `c(X_T)`. The clean resolutions: (a) **cite the dimWL
+  exchange** (2-WL base ⟹ 1-WL base + O(1); probe shows the residue's blowup is 0) — adds a standard citation, makes
+  `hcatch` follow from `hclo`+completeness; or (b) keep `hcatch` carried (probe-validated) and discharge it *together
+  with* `c(X_T)`. **No free lunch (§1B) reaching the model layer.** NEXT unchanged: the open `c(X_T)`/`hclo` math
+  (general, per the decision), now understood to subsume the `n ≥ 25` `hcatch`.
 
 ---
 
@@ -1464,6 +1484,10 @@ and its unconditional-on-`X_T` corollary **`allSingletonFiber_of_dominatorClosur
 discrete) / **`separatesAtBoundedBase_of_extensionDominatorClosure`** (`hclo`-on-`X_T` + `hcatch` + bound ⟹ the seal
 consumer; `Sharp` discharged internally) / the capstone **`reachesRigidOrCameron_viaExtensionDominatorClosure`**
 (carries {G3 + `hImprim` + `hclo`-on-`X_T` + `hcatch`} — the citation-free `n ≥ 25` checkpoint).
+**The catch-up analysis:** **`warmTwinsAreFiberTwins_of_warmDiscrete`** (warm-discrete ⟹ `hcatch`; with the bridge ⟹
+`hcatch ↔ warmRefine-discrete` at a complete `E` — so `n ≥ 25` `hcatch` ≡ the 1-WL discreteness = open content, NOT
+plumbing) / **`warmTwinsAreFiberTwins_of_dominatorClosure`** (`hcatch` free where the scheme-level δ′ closes — n=16
+non-vacuity; does not extend to `n ≥ 25`).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /
