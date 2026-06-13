@@ -82,10 +82,21 @@ exhausts the budget and **flags** — no wrong answer, no exponential run.
 iso-invariant, complete canonical form or an honest flag — never wrong) and
 **budget-bounded** (cannot run exponentially). Open: whether the oracle certifies
 orbits cheaply enough that the graphs we *want* canonized fit the budget rather
-than flagging — equivalent in full generality to **GI ∈ P**. The project's
-contribution is to *isolate* that hard problem in one component, not to close it.
-Outside of the budget, this isolation strategy is used to separate complexity
-from apparent difficulty.
+than flagging — in full generality this *is* **GI ∈ P**, still open.
+
+**Isolation is the method, not a surrender — read this before concluding any piece
+is hopeless.** The project's recurring move is to wall an apparently-GI-hard step
+into a single named component, which makes *everything around it* unconditional, and
+*then* to attack that component. Time and again the apparent hardness has turned out
+to be an artifact of lumping together cases that are in fact handled separately, and
+it dissolves once those cases are carved off — so "isolate, don't close" describes
+**where a piece currently sits, never a verdict that it cannot be closed.** The
+remaining hardness has been narrowed, by exactly this carving, down to one residual
+wall (the hidden-Johnson / Cameron case), which is why the seal's last leg is the
+explicit *"or Cameron"* escape. Closing the isolated core is the live target. (Why
+the core is *not* GI ∈ P despite first appearances — the carve-out, and the angle to
+close it — is set out in
+[`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md) §1A.)
 
 ---
 

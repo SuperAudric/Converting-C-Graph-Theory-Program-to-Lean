@@ -266,6 +266,58 @@ established that this consumer factors into a 3-part chain, and located exactly 
 
 ---
 
+## 1A. Why the crux is NOT "GI ∈ P, give up" — the carve-out (read before pattern-matching to hopelessness)
+
+It is easy to glance at the crux — *"a primitive small scheme recovers at a bounded base"* — and conclude
+"bounded base = bounded WL-dimension = **GI ∈ P**, therefore hopeless, just isolate it." **That inference is
+wrong, and it has already misled an onboarding pass. The reasoning is recorded here so it does not recur.**
+
+**The scare, step by step (every step true):** (1) bounded base ⟺ bounded WL-dimension, and bounded WL-dim
+canonizes in poly time; (2) WL-dimension is unbounded in general (CFI); (3) ∴ "prove bounded base" *smells like*
+"prove GI ∈ P."
+
+**The error is in step (3):** it conflates *bounded base for **the residue*** with *bounded base for **all
+schemes***. Only the latter is GI ∈ P. The residue has already had **every known source of unbounded WL carved
+out by a separate leg of the seal:**
+
+| Unbounded-WL family | Carved out by |
+|---|---|
+| CFI / gauge twists | imprimitive gadget structure → **hImprim** (G2-A), or simply not primitive |
+| abelian Cayley / circulants (unbounded WL — Wu–Ren–Ponomarenko 2025) | abelian → **leg B** (`AbelianConsumed`) |
+| Johnson / Hamming / product action / large almost-simple | *large* → **Cameron** (G3) |
+| **hidden Johnson (the genuine wall)** | **Cameron** — this is *precisely why* the seal's last leg is *"or Cameron"* |
+
+After all four carves the residue is **primitive, small, non-abelian, non-Cameron** — and **no known
+unbounded-WL scheme lives there**: seven empirical falsifiers returned **0 witnesses**, and the on-target ℤ₄²
+amorphic-NLS bullseye *recovers* (WL-depth 2). So the crux is **not GI ∈ P; it is the tame remainder left
+after the hardness was quarantined into Cameron.**
+
+**Isolation is the method, applied recursively.** Each row above was *itself* once an "apparent GI ∈ P" that
+was dissolved by identifying and walling a sub-case. The crux is the **last** such residue, and the same move
+is expected to close it. It is hard *open* math, **not** a proven impossibility — and it was deemed the
+*most likely* route to the unconditional seal, which is incompatible with treating it as unclosable.
+
+**The closure angle (what is actually owed).** The route is **separability**: primitive-small-non-Cameron ⟹
+bounded `s(C)` ⟹ recovery. This reduces to *"the residue's point extension satisfies Ponomarenko Thm 4.1's
+conditions (domination + couple-extensions),"* which the C# probe has already **verified holds** on the
+extension (`Theorem41ConditionsProbe`; bare dense `X` fails, the one-point extension `X_α` passes at every µ).
+The structural reason to expect it in general is **Cameron's dichotomy** (a primitive group is either
+large/classifiable or small/restricted): the *smallness* hypothesis together with *non-Cameron* forces the
+bounded-structure regime, where domination holds by counting and separability converts it to recovery. The δ′
+forced-triangle closure is the citation-free form of the same content.
+
+**What would mean we are OFF track (the honest falsifier).** A primitive, small, non-abelian, **non-Cameron**
+scheme with *unbounded* base — a genuine G2-B witness. That would show the hardness is *not* fully captured by
+Cameron, i.e. *"or Cameron"* is the wrong carve and the seal is **false** (a statement change — itself a real
+result). The 0-witness record is the standing evidence we are *on* track; equally, Thm 4.1's conditions
+*failing* on the residue would be a warning — but the probe shows they hold.
+
+**Discipline that prevents the misperception.** Before invoking "GI ∈ P" about any recovery claim, ask
+**"what is still IN the residue?"** If the hard families are already carved into other legs, the claim is about
+the tame remainder and GI ∈ P does not apply. The scare comes from forgetting the carve, not from the math.
+
+---
+
 ## 2. The exact target (in Lean terms) — what "done" means
 
 The build delivers two theorems for the residue family `S = orbitalScheme H` (a `SchurianScheme n`):
