@@ -380,6 +380,68 @@ the tame remainder and GI ∈ P does not apply. The scare comes from forgetting 
 
 ---
 
+## 1B. Does Cameron's dichotomy actually deliver domination? — the option-1 derivation (2026-06-13)
+
+> **The load-bearing question §1A leaves asserted:** *"primitive + small + non-Cameron ⟹ Thm 4.1 domination,
+> because Cameron's dichotomy forces the bounded-structure regime."* This section works it out against the paper
+> (Ponomarenko §§4–5) rather than asserting it. **Verdict: Cameron's dichotomy does NOT deliver domination by
+> itself — it delivers an *order* bound; domination is a *sparsity* property the dichotomy does not control. The
+> two meet at one concrete open quantity, and that quantity is exactly the δ′ route's content. So the general
+> route is not a shortcut around δ′ — it IS δ′, and this pins the single lemma both need.**
+
+**What domination actually is (paper §5, made precise).** Thm 4.1 condition (i) — *every `Δ`, `|Δ|≤4`, has a `λ`
+with `Δ ← λ`* — is delivered by the paper through ONE sufficient bound, the **parameter inequality (32)**:
+`n > 3·c·(k−1)·k`, where `k = maxValency(X)` and `c = indistinguishingNumber(X)`. The mechanism (Lemma 5.2): the
+set `Λ(α)` of points that *fail* to dominate `α` has `|Λ(α)| ≤ ½·c·k(k−1)` — because a non-dominator `λ` (with
+`cʳₛₜ ≥ 2`) forces a same-`λ`-relation twin `β` in the `k`-bounded sphere `μs`, and double-counting the triples
+`(α,β,λ)` against `|c(α,β)| ≤ c` and the `≤ k(k−1)` sphere-pairs caps `|Λ(α)|`. Union over `|Δ|≤4` (really ≤6)
+points stays `< n` exactly when (32) holds, leaving a dominator outside it. **Domination is governed by `c` and
+`k` — the local sparsity parameters — not by `|Aut|`.**
+
+**What Cameron's dichotomy controls — and what it does not.** The cited classification (G3) is about *order /
+largeness*: a primitive, rank-≥3, **large** CC is a Cameron scheme. Its contrapositive — *non-Cameron + primitive
+⟹ not large ⟹ `|Aut|` bounded* — is the ONLY thing the dichotomy hands us, and it is an **order** fact. It says
+nothing directly about `c` or `k`. So "Cameron's dichotomy ⟹ domination" is a non-sequitur as stated: the
+dichotomy bounds `|Aut|`, (32) needs `c·k²`.
+
+**Why the gap is real and not bridgeable for free.** On the *bare* residue, (32) FAILS (it is dense: `k ≈ n/4`,
+`c` large — `3ck² ≫ n`), which is exactly what the probe saw (`X` undominated, §3.6). Domination only switches on
+after individualizing points (the probe: `X_α`/`X_T` dominated). The orbit–stabiliser bound makes the `k` half of
+the switch-on *free*: the relations of `X_T` from a point are `Aut_T`-orbits, so
+**`maxValency(X_T) ≤ |Aut_T|`**, and the greedy base (landed `exists_greedy_base_le_log`) shrinks `|Aut_T|`
+geometrically — each genuine individualisation at least halves it. So `k(X_T)` is driven down by base
+individualisation with no new math. **But the `c` half is NOT free:** the crude bound `c ≤ n` forces (32) only at
+`|Aut_T| < 1` = a *full* base (where `X_T` is already discrete and the statement is vacuous). To get domination at
+**base + O(1)** rather than needing more, you must bound the **post-base indistinguishing number `c(X_T)`** — how
+many points fail to separate a pair after individualising the base. *That* is the open quantity, and Cameron's
+dichotomy says nothing about it.
+
+**Where this lands — the convergence.** The post-base indistinguishing number being `O(1)` is precisely
+*"forced (`c=1`) triangles are abundant after base-individualisation"* — which is the δ′ route's
+`DominatorReachable`-closure content, and exactly the **rainbow-rigidity** the probe extracted (rank-4 rainbow
+triangles are rigid ⟹ `c=1`; §8 2026-06-13). Domination's `Λ(α)` (Lemma 5.2) is the *same forced-triangle
+calculus* (`cʳₛₜ=1`) the project calls `saAdj`/`determined_of_forcedTriangle` (build doc §3.4). So:
+
+| Ingredient | Status |
+|---|---|
+| non-Cameron + primitive ⟹ `|Aut|` bounded (order) | **free** — Cameron's dichotomy (G3, cited) |
+| `maxValency(X_T) ≤ |Aut_T|`, shrinks geometrically along a base | **free** — orbit–stabiliser + greedy base (landed) |
+| `indistinguishingNumber(X_T) = O(1)` after a base (the `c` half) | **OPEN** — *the* single quantity; = δ′ forced-triangle abundance / rainbow-rigidity |
+
+**Conclusion (actionable).** (1) Option 1, literally "Cameron's dichotomy ⟹ domination," is **false as a free
+implication** — the dichotomy is an order bound; domination needs a `c·k²` sparsity bound it does not supply.
+(2) The route is *not vacuous either*: it reduces — cleanly, via orbit–stabiliser — to **one** open quantity, the
+post-base indistinguishing number `c(X_T)`. (3) That quantity is **identical** to the δ′ route's "forced-triangle
+closure exhausts Ω from a base," so the general route and the recent δ′ work are the *same open content*, and the
+δ′ (constructive, citation-free) formulation is the better target — the general framing does not buy a shortcut,
+it confirms δ′ is correctly aimed and supplies the parameter (`c(X_T)`) to bound. (4) **Calibration caveat
+(still open, flagged §8 2026-06-12):** "small" at the Babai/Sun–Wilmes threshold is *sub-exponential*
+(`≈exp(n^{1/3})`), not poly; under that threshold `|Aut_T|` — and hence the number of individualisations to drive
+`k` down — is `n^{O(1)}`-scale, so a *polynomial* (not merely "bounded") base needs `|Aut|` genuinely
+poly-bounded. Pin which `IsLarge` the seal instantiates before claiming *polynomial* canonisation from this route.
+
+---
+
 ## 2. The exact target (in Lean terms) — what "done" means
 
 The build delivers two theorems for the residue family `S = orbitalScheme H` (a `SchurianScheme n`):
