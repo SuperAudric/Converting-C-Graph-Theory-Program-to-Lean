@@ -1021,7 +1021,22 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
                 for (int u = 0; u < x.N && disc; u++) if (!diag.Add(col[u, u])) disc = false;
                 if (disc) bX = sz;
             }
+            // b₁(X): smallest consecutive base whose VERTEX 1-WL refinement (WarmRefineCells —
+            // the actual seal model `warmRefine (schemeAdj S)`) discretizes.  THE WIRING SCOPE
+            // QUESTION: is the seal's 1-WL recovery base the same as the 2-WL coherent base b(X)?
+            //   b₁ == b(X)  ⟹ 1-WL reaches the 2-WL fiber partition at the base ⟹ the
+            //                 `X_T-complete ⟹ warmRefine-discrete` wiring is residue-keyed, citation-free.
+            //   b₁ >  b(X)  ⟹ the gap bites: 1-WL needs extra individualizations ⟹ the wiring must
+            //                 carry the dimWL ±1 exchange (Chen–Ponomarenko / CFI Thm 5.2), a citation.
+            int b1 = -1;
+            for (int sz = 1; sz <= 8 && b1 < 0; sz++)
+            {
+                var cells = WarmRefineCells(x, Enumerable.Range(0, sz).ToArray());
+                if (cells.Distinct().Count() == x.N) b1 = sz;
+            }
             output.WriteLine($"   {g.Name} (n={x.N}, rank={x.Rank}, primitive={(prim ? "y" : "n")}): valencies={{{string.Join(",", val)}}}");
+            output.WriteLine($"      WIRING-SCOPE: 2-WL base b(X)={(bX < 0 ? ">6" : bX.ToString())} vs 1-WL(warmRefine) base b₁={(b1 < 0 ? ">8" : b1.ToString())} ⟹ " +
+                $"{(bX > 0 && b1 == bX ? "EQUAL — wiring residue-keyed/citation-free" : bX > 0 && b1 > bX ? "GAP BITES — wiring needs dimWL ±1 exchange (citation)" : "inconclusive")}");
             output.WriteLine($"      RAINBOW-RIGID={(rigid ? "YES" : "NO")} (max common-nbr over distinct-colour triples = {maxRainbow}); " +
                 $"b(X)={(bX < 0 ? ">6" : bX.ToString())} (full WL recovers); " +
                 $"scheme-level δ′ base = {(baseSize < 0 ? ">8 (does NOT close)" : baseSize.ToString())}; pins rainbow = {rainbowPins}/{pinCount}");

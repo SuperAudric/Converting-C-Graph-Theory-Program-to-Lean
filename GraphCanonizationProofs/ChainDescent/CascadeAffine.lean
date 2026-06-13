@@ -963,6 +963,72 @@ theorem reachesRigidOrCameron_viaDominatorClosure {IsLarge : Nat → Prop}
   intro hn
   exact absurd (separatesAtBoundedBase_of_dominatorClosure S hcard hclo) hn
 
+/-! #### The δ′ engine ON THE EXTENSION → the seal (for the `n ≥ 25` residue)
+
+The scheme-level δ′ (`separatesAtBoundedBase_of_dominatorClosure`, above) is **citation- and catch-up-free**,
+but its forced triangles live in `S`'s own colours — which the `Probe_RainbowRigidFamily` finding showed
+**vanish for `n ≥ 25`** (`Z5²`: `c = 1` triangles gone, scheme-level closure fails from any base). The closure
+there lives in the **point extension `X_T`'s finer colours** (`CoherentConfig.DominatorReachable` on
+`pointExtension`, `Sharp` discharged by `sharp_pointExtension`). Wiring that back to the `warmRefine` seal
+consumer needs one model bridge: the warm cell of a point must sit inside its `X_T` fiber — which is **exactly
+the catch-up `WarmTwinsAreFiberTwins`**. So lifting δ′ to the extension (necessary for `n ≥ 25`) **re-incurs the
+catch-up** the scheme-level δ′ avoided — but nothing heavier: when the extension is *complete* the catch-up
+*alone* discretises `warmRefine` (no separability / Thm 4.1 / group content). `Probe_RainbowRigidFamily` also
+settled the scope question: the 1-WL (`warmRefine`) base equals the 2-WL base `b(X)` on every residue instance
+incl. `Z5²`, so **no dimWL-exchange citation is needed** — the bridge is residue-keyed. -/
+
+/-- **Bridge: a complete extension + the catch-up ⟹ `warmRefine` is discrete.** If every point is a singleton
+fiber of `E` (the extension is complete) and warm-twins are fiber-twins (`hcatch`), then same-`warmRefine`-cell
+points coincide: the catch-up sends them to one `E`-fiber, completeness makes that fiber a point. The δ′-route
+analogue of `twinsRealized_of_extensionPointed` — but consuming *completeness* (from the forced-triangle closure)
+instead of *separability*, so the catch-up is the **only** carried hypothesis. -/
+theorem discrete_warmRefine_of_extensionComplete (S : SchurianScheme n)
+    {T : Finset (Fin n)} {E : CoherentConfig n}
+    (hcomplete : ∀ u, E.SingletonFiber u)
+    (hcatch : WarmTwinsAreFiberTwins S T E) :
+    Discrete (warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+      (individualizedColouring n T)) := by
+  intro u u' hcell
+  exact hcomplete u' u (hcatch u u' hcell)
+
+/-- **δ′-on-the-extension, packaged for the seal consumer.** A bounded base `T` whose forced-triangle closure
+exhausts Ω **on the point extension `X_T`** (`hclo`), with the catch-up at `T`, discretises the scheme:
+`SeparatesAtBoundedBase S bound`. `Sharp` is discharged internally (`sharp_pointExtension`), so the open input
+is exactly `hclo` (the `c(X_T)` content) plus the probe-green catch-up. The `n ≥ 25` sibling of
+`separatesAtBoundedBase_of_dominatorClosure` (which only reaches `n = 16`). -/
+theorem separatesAtBoundedBase_of_extensionDominatorClosure (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    {T : Finset (Fin n)} {bound : Nat} (hcard : T.card ≤ bound)
+    (hclo : ∀ v, (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).DominatorReachable T v)
+    (hcatch : WarmTwinsAreFiberTwins S T
+        (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T)) :
+    SeparatesAtBoundedBase S bound :=
+  ⟨T, hcard, discrete_warmRefine_of_extensionComplete S
+    (CoherentConfig.allSingletonFiber_of_dominatorClosure_pointExtension
+      (S.toAssociationScheme.toCoherentConfig hne) T hclo) hcatch⟩
+
+/-- **THE δ′-ON-THE-EXTENSION SEAL CHECKPOINT (the `n ≥ 25` citation-free path).** Identical plumbing to
+`reachesRigidOrCameron_viaDominatorClosure`, but fed by the **extension** closure + catch-up, so it covers the
+residue where `S`'s own colours have no `c = 1` triangles. Carries exactly {G3 `hClassify` + `hImprim` +
+`hclo` (the open `c(X_T)` content on `X_T`) + `hcatch` (the probe-green 1-WL↔fiber catch-up at `T`)}. -/
+theorem reachesRigidOrCameron_viaExtensionDominatorClosure {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    {T : Finset (Fin n)} (hcard : T.card ≤ bound)
+    (hclo : ∀ v, (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).DominatorReachable T v)
+    (hcatch : WarmTwinsAreFiberTwins S T
+        (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaPersistentTwinBlock hClassify S hne hrank ?_ hImprim
+  intro hn
+  exact absurd (separatesAtBoundedBase_of_extensionDominatorClosure S hne hcard hclo hcatch) hn
+
 end SGate2
 
 

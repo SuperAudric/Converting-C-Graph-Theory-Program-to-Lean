@@ -74,14 +74,21 @@
   (`Probe_RainbowRigidFamily`) showed the *scheme-level* δ′ and rainbow-rigidity are **order-16 artifacts** (the
   `n=25` amorphic-NLS residue recovers at `b(X)=2` but only via `X_T`'s finer colours). The citation-free chain is now
   `DominatorReachable`-closure-on-`X_T` ⟹ `X_T` complete ⟹ `T` a base ⟹ `b(X) ≤ |T|`.
-  **`Sharp (pointExtension X T)` is now PROVED (2026-06-13, `CoherentConfig.lean §CC.10`, axiom-clean)** —
-  `sharp_pointExtension`, via the `a`-isolating count + `stableSetoid_pairCount` fixpoint coherence — so the engine's
-  discreteness payoff is **unconditional on the extension**: `allSingletonFiber_of_dominatorClosure_pointExtension`
-  carries **only `hclo`** (`Sharp` discharged by the proof, `T`-singleton-fibers by `isPointExtension_pointExtension`).
-  **THE LIVE NEXT STEP = wire `X_T`-complete ⟹ `SeparatesAtBoundedBase`** (the warmRefine↔fiber bridge *at bases* —
-  the genuine modeling risk, see Stage 1.2(c) / the Stage-2.1 direction check; cells=fibers holds at `|T|≥2`), **then**
-  an extension-level pinning rank for the amorphic-NLS family (the open `c(X_T)` content). The engine decls are in §8's
-  last three entries + §9.
+  **`Sharp (pointExtension X T)` is PROVED + THE WIRING TO THE SEAL IS LANDED (2026-06-13, axiom-clean).**
+  `sharp_pointExtension` (`CoherentConfig.lean §CC.10`, via the `a`-isolating count + `stableSetoid_pairCount`) makes
+  the discreteness payoff unconditional on the extension; then `discrete_warmRefine_of_extensionComplete` /
+  `separatesAtBoundedBase_of_extensionDominatorClosure` / **`reachesRigidOrCameron_viaExtensionDominatorClosure`**
+  (`CascadeAffine.lean §S-gate2`) carry the δ′-on-`X_T` closure all the way to the seal. **So the citation-free
+  `n ≥ 25` path now EXISTS end-to-end**, carrying exactly {G3 + `hImprim` + `hclo` (the open `c(X_T)` content) +
+  `hcatch` (the catch-up)}. **Two findings settled the wiring** (`Probe_RainbowRigidFamily`, extended): (i) the 1-WL
+  (`warmRefine`) base **equals** the 2-WL base `b(X)` on every residue instance incl. `Z5²` (2-vs-2) ⟹ **no
+  dimWL-exchange citation needed**; (ii) lifting δ′ to `X_T` (necessary for `n ≥ 25`) **re-incurs the catch-up**
+  `WarmTwinsAreFiberTwins` that scheme-level δ′ avoided — because the warm-cell⊆fiber bridge IS the catch-up — but
+  nothing heavier (a *complete* extension + catch-up discretises `warmRefine` with no separability/Thm-4.1 content).
+  **THE LIVE NEXT STEP = the open `c(X_T)` math: a bounded-base δ′ pinning rank for the amorphic-NLS family ON `X_T`**
+  (`hclo`), plus discharging `hcatch` at the family's bases (probe-green). Per the 2026-06-13 decision (§8), this is
+  the GENERAL theorem, not a family enumeration (G2-B = primitive-small-non-Cameron = infinitely many families); supply
+  it via the δ′ closure on `X_T` or via cited Thm 4.1 ((A)+(B)). Engine decls in §8's last entries + §9.
 - **CURRENT FRONTIER (2026-06-13) — the δ′ Stage-3 toolkit is COMPLETE; the target is now the NON-AFFINE residue,
   and its closure CONSTRUCTION has been extracted.** Since the 2026-06-12 state above: the full δ′ closure toolkit
   landed (the iteration engine `dominatorReachable_of_rank`, the cyclotomic `F_q`-power and ratio step builders, the
@@ -1374,6 +1381,40 @@ bullseye) says closure is the likely outcome and the build is worth it.
   reuse the §S-bridge B1–B5 template); (2) a bounded-base pinning rank for the amorphic-NLS family **on `X_T`** (the
   genuinely open `c(X_T)` math, now on the right object); then (3, deferred) the `SchurianScheme`/seal-capstone wiring +
   the hImprim `G₀Irreducible → IsPrimitive` bridge.
+- **2026-06-13 — DECISION: the δ′ FAMILY-BY-FAMILY plan DRIES UP (it is an infinite ladder) ⟹ the input must be GENERAL
+  (the (A)+(B) / cited-Thm-4.1 shape).** G2-B = primitive + small + non-Cameron; by Cameron's dichotomy "small
+  non-Cameron" is just "small primitive", and small primitive schemes do **not** finitely classify (SRG / amorphic
+  families are unbounded). `Probe_RainbowRigidFamily` already showed the n=16 mechanism (rainbow-rigidity, `c=1` in `S`'s
+  own colours) **does not survive to n=25** — so enumerating δ′ closures is the de-classing anti-pattern the project
+  abandoned once. **The project's own precedent is decisive:** the *affine* slice (itself infinite — cyclotomic schemes
+  over every `F_q`) was closed by **citing the general 2-separability theorem + a finite `(p,d)` exception table by
+  `decide`**, not by enumeration. Mirror that for the non-affine residue: **cite Ponomarenko Thm 4.1** for uniform
+  coverage (seal `modulo {G3 + Thm 4.1}`), reducing the owed work to discharging Thm 4.1's conditions on the residue's
+  extension (finite, structural, probe-backed Stage 3.2) + finite exceptions Clebsch-style. **Caveat (no free lunch,
+  §1B):** even citing Thm 4.1 still owes condition (i) = domination = the *same* `c(X_T)` quantity the δ′ route bounds,
+  so the δ′ engine on `X_T` stays the natural Lean vehicle for the domination half; what (A)+(B) buys is *uniform
+  coverage in one theorem* instead of a per-family ladder.
+- **2026-06-13 — THE WIRING TO THE SEAL LANDED — the δ′-on-`X_T` closure now reaches `reachesRigidOrCameron`
+  (`CascadeAffine.lean §S-gate2`; `discrete_warmRefine_of_extensionComplete`,
+  `separatesAtBoundedBase_of_extensionDominatorClosure`, `reachesRigidOrCameron_viaExtensionDominatorClosure`; all
+  axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full serial build green 70s; index regenerated, 3
+  rows described).** Two probe findings scoped it first (`Probe_RainbowRigidFamily`, extended with a 1-WL-base
+  measurement). **(i) NO dimWL-exchange citation needed:** the 1-WL (`warmRefine`, the seal model) base **equals** the
+  2-WL coherent base `b(X)` on every residue instance — `Z4²` 2=2, `Z2⁴` 3=3, **`Z5²` 2=2** — so even where scheme-level
+  δ′ fails and rainbow-rigidity is gone, plain 1-WL discretises at the same bounded base; the `X_T` machinery is a proof
+  *device*, the conclusion holds in the seal's own currency. **(ii) the bridge IS the catch-up:** "warm cell ⊆ `X_T`
+  fiber" is *exactly* `WarmTwinsAreFiberTwins`, so lifting δ′ to `X_T` (necessary for `n ≥ 25`) **re-incurs the catch-up
+  the scheme-level δ′ avoided** — but nothing heavier. The decls: `discrete_warmRefine_of_extensionComplete` (a *complete*
+  `E` + catch-up ⟹ `warmRefine` discrete — a 2-liner `hcomplete u' u (hcatch u u' hcell)`; the δ′ analogue of
+  `twinsRealized_of_extensionPointed` consuming **completeness** not **separability**, so the catch-up is the *only*
+  carried model hypothesis); `separatesAtBoundedBase_of_extensionDominatorClosure` (discharges `Sharp` internally via
+  `sharp_pointExtension` + `allSingletonFiber_of_dominatorClosure_pointExtension`, so its open input is just `hclo` +
+  `hcatch`, **no `IsBase`**); and the capstone `reachesRigidOrCameron_viaExtensionDominatorClosure` (mirror of
+  `…viaDominatorClosure`, carrying {G3 + `hImprim` + `hclo`-on-`X_T` + `hcatch`}). **Net:** the citation-free `n ≥ 25`
+  seal path is end-to-end; the lone open inputs are `hclo` (the `c(X_T)` math, per the decision above = the general
+  theorem) and `hcatch` (probe-green at the family's bases — formalise via the B1–B5 forced-triangle engine, or cite the
+  direction-check fact). **NEXT:** the open `c(X_T)` pinning rank on `X_T` for the amorphic-NLS family (general, not
+  enumerated) + the `hcatch` discharge; then (deferred) `SchurianScheme`/capstone wiring + hImprim.
 
 ---
 
@@ -1418,6 +1459,11 @@ refinement hypothesis **`Sharp`** — **now PROVED for the extension (2026-06-13
 **`allSingletonFiber_of_dominatorClosure`** (closure + `Sharp` + `T`-singletons ⟹ `X` discrete = `T` a base)
 and its unconditional-on-`X_T` corollary **`allSingletonFiber_of_dominatorClosure_pointExtension`**
 (carries **only `hclo`** — `Sharp` and `T`-singletons both discharged for `pointExtension X T`).
+**The wiring to the seal (LANDED 2026-06-13, `CascadeAffine.lean §S-gate2` — the δ′-on-`X_T` path reaches
+`reachesRigidOrCameron`):** **`discrete_warmRefine_of_extensionComplete`** (complete `E` + catch-up ⟹ `warmRefine`
+discrete) / **`separatesAtBoundedBase_of_extensionDominatorClosure`** (`hclo`-on-`X_T` + `hcatch` + bound ⟹ the seal
+consumer; `Sharp` discharged internally) / the capstone **`reachesRigidOrCameron_viaExtensionDominatorClosure`**
+(carries {G3 + `hImprim` + `hclo`-on-`X_T` + `hcatch`} — the citation-free `n ≥ 25` checkpoint).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /
