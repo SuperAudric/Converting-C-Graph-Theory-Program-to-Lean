@@ -424,6 +424,43 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         return null;
     }
 
+    // PARAMETRIC generalisation of ClebschScheme: the first coherent rank-4 amorphic
+    // 3-class scheme on g with EQUAL valency (V−1)/3 — auto-detecting the SRG params
+    // (any λ,μ), not the hard-coded (5,0,2).  Builds the family the δ′ rainbow lemma
+    // wants to bite on beyond order 16 (Z5^2 = 25, …).  Returns null if no coherent
+    // equal-valency 3-class amorphic partition exists.
+    static CC? AmorphicNLS3Scheme(Grp g)
+    {
+        int V = g.V;
+        if (V < 4 || (V - 1) % 3 != 0) return null;
+        int k = (V - 1) / 3;
+        var pds = new List<int[]>(); var keys = new List<long>();
+        foreach (var d in SymmetricSubsets(g, k))
+        {
+            if (PdsParams(g, d) is null) continue;
+            long mask = 0; foreach (int x in d) mask |= 1L << x;
+            pds.Add(d); keys.Add(mask);
+        }
+        long full = 0; for (int x = 1; x < V; x++) full |= 1L << x;
+        for (int i = 0; i < pds.Count; i++)
+            for (int j = i + 1; j < pds.Count; j++)
+            {
+                if ((keys[i] & keys[j]) != 0) continue;
+                for (int kk = j + 1; kk < pds.Count; kk++)
+                {
+                    if (((keys[i] | keys[j]) & keys[kk]) != 0 || (keys[i] | keys[j] | keys[kk]) != full) continue;
+                    var classOf = new int[V];
+                    foreach (int d in pds[i]) classOf[d] = 1;
+                    foreach (int d in pds[j]) classOf[d] = 2;
+                    foreach (int d in pds[kk]) classOf[d] = 3;
+                    var rel = new int[V, V];
+                    for (int u = 0; u < V; u++) for (int v = 0; v < V; v++) rel[u, v] = (u == v) ? 0 : classOf[Sub(g, u, v)];
+                    try { return BuildCC(V, rel); } catch { /* not coherent — keep searching */ }
+                }
+            }
+        return null;
+    }
+
     static bool PrimitiveScheme(CC s)
     {
         // connectivity of every non-diagonal class (homogeneous symmetric case)
@@ -915,6 +952,84 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         output.WriteLine($"-- complete? {rank.All(r => r >= 0)}; pinners:");
         for (int d = 0; d < n; d++)
             if (rank[d] > 0) output.WriteLine($"--   {d}: rank {rank[d]} pinned by ({pinner[d].mu},{pinner[d].lam})");
+    }
+
+    // ── IS RAINBOW-RIGIDITY PARAMETRIC? ────────────────────────────────────────────
+    // The δ′ family lemma `dominatorReachable_of_rainbowRank` needs (a) the scheme is
+    // `RainbowRigid` (distinct non-diagonal colours ⟹ ≤1 common neighbour) and (b) a
+    // bounded base admits a rainbow rank.  Both are `decide`-checked on the order-16
+    // bullseye; this probe asks whether they are a PARAMETRIC pattern by testing the
+    // analogous amorphic-NLS 3-class scheme on n=25 (Z5^2) — the first prime-power
+    // square beyond 16 — alongside the two order-16 instances.  RainbowRigid ⟺ for all
+    // distinct nonzero i,j,k the intersection number C[k,i,j] ≤ 1.
+    [Fact]
+    public void Probe_RainbowRigidFamily()
+    {
+        output.WriteLine("── δ′ rainbow-rigidity: PARAMETRIC? (amorphic-NLS 3-class schemes, incl. n=25 beyond 16) ──");
+        var groups = new[]
+        {
+            MakeGroup("Z4^2", 4, 4),          // n=16, the bullseye
+            MakeGroup("Z2^4", 2, 2, 2, 2),    // n=16, char-2 anchor
+            MakeGroup("Z5^2", 5, 5),          // n=25, BEYOND order 16
+        };
+        foreach (var g in groups)
+        {
+            var x = AmorphicNLS3Scheme(g);
+            if (x is null)
+            { output.WriteLine($"   {g.Name} (n={g.V}): no coherent equal-valency amorphic 3-class scheme found"); continue; }
+            bool prim = PrimitiveScheme(x);
+            // (a) rainbow rigidity: max common-neighbour count over distinct-colour triples
+            int maxRainbow = 0; bool rigid = true;
+            for (int i = 1; i < x.Rank; i++)
+                for (int j = 1; j < x.Rank; j++)
+                    for (int kk = 1; kk < x.Rank; kk++)
+                        if (i != j && j != kk && i != kk)
+                        { int c = x.C[kk, i, j]; maxRainbow = Math.Max(maxRainbow, c); if (c > 1) rigid = false; }
+            var val = new int[x.Rank];
+            for (int w = 0; w < x.N; w++) val[x.Rel[0, w]]++;
+            // (b) smallest base {0,…,sz−1} whose forced-triangle closure exhausts Ω,
+            //     and whether every pinning triangle is rainbow (distinct nonzero colours).
+            int baseSize = -1; int[]? chosen = null;
+            for (int sz = 2; sz <= 8 && baseSize < 0; sz++)
+            {
+                var bt = Enumerable.Range(0, sz).ToArray();
+                var (rk, _) = DominatorRank(x.N, x.Rel, bt);
+                if (rk.All(r => r >= 0)) { baseSize = sz; chosen = bt; }
+            }
+            int pinCount = 0, rainbowPins = 0;
+            if (chosen != null)
+            {
+                var (rk, pn) = DominatorRank(x.N, x.Rel, chosen);
+                for (int d = 0; d < x.N; d++)
+                    if (rk[d] > 0)
+                    {
+                        pinCount++;
+                        int a = x.Rel[pn[d].mu, d], b = x.Rel[d, pn[d].lam], cc = x.Rel[pn[d].mu, pn[d].lam];
+                        if (a != 0 && b != 0 && cc != 0 && a != b && b != cc && a != cc) rainbowPins++;
+                    }
+            }
+            // b(X): smallest consecutive base whose FULL coherent-closure (1-WL on pairs,
+            // the actual recovery) discretizes — does it recover at all, even where the
+            // scheme-level two-endpoint δ′ shortcut does not?
+            int bX = -1;
+            for (int sz = 1; sz <= 6 && bX < 0; sz++)
+            {
+                var T = Enumerable.Range(0, sz).ToHashSet();
+                var col = CoherentClosure(x.N, (u, v) =>
+                    (long)x.Rel[u, v] * 1000 + (T.Contains(u) ? u + 1 : 0) * 30 + (T.Contains(v) ? v + 1 : 0));
+                var diag = new HashSet<int>(); bool disc = true;
+                for (int u = 0; u < x.N && disc; u++) if (!diag.Add(col[u, u])) disc = false;
+                if (disc) bX = sz;
+            }
+            output.WriteLine($"   {g.Name} (n={x.N}, rank={x.Rank}, primitive={(prim ? "y" : "n")}): valencies={{{string.Join(",", val)}}}");
+            output.WriteLine($"      RAINBOW-RIGID={(rigid ? "YES" : "NO")} (max common-nbr over distinct-colour triples = {maxRainbow}); " +
+                $"b(X)={(bX < 0 ? ">6" : bX.ToString())} (full WL recovers); " +
+                $"scheme-level δ′ base = {(baseSize < 0 ? ">8 (does NOT close)" : baseSize.ToString())}; pins rainbow = {rainbowPins}/{pinCount}");
+        }
+        output.WriteLine("   ⟹ FINDING (2026-06-13): rainbow-rigidity is NOT parametric — YES at n=16 (cn=1), NO at n=25");
+        output.WriteLine("      (cn=4); scheme-level δ′ likewise closes n=16 but NOT n=25. Yet n=25 RECOVERS at b(X)=2 via");
+        output.WriteLine("      full WL ⟹ its recovery lives in the EXTENSION X_T's finer colours, not X's rank-4 colours.");
+        output.WriteLine("      Redirect: lift the forced-triangle closure to the general-CC extension (the §1B c(X_T) route).");
     }
 
     // THE EXTRACTION PROBE: pull the explicit pinning-rank construction out of the

@@ -1275,6 +1275,28 @@ bullseye) says closure is the likely outcome and the build is worth it.
   a rainbow rank for a *parametric* amorphic-NLS family (not just the order-16 instance) to make the family lemma bite
   beyond one scheme; (2) the post-base `c(X_T)` bound for non-rainbow primitives (the genuinely general open core);
   (3) the deferred `SchurianScheme`/seal-capstone wiring and the hImprim `G₀Irreducible → IsPrimitive` bridge.
+- **2026-06-13 — PROBE: IS RAINBOW-RIGIDITY PARAMETRIC? — NO; rainbow-rigidity AND scheme-level δ′ are both order-16
+  artifacts (`Theorem41ConditionsProbe.Probe_RainbowRigidFamily` + generalized `AmorphicNLS3Scheme`, green; no
+  production/Lean touched).** Following discipline (probe before formalizing a *parametric* family), generalized
+  `ClebschScheme` to `AmorphicNLS3Scheme(g)` (any group, equal valency `(V−1)/3`, auto-detected SRG params, coherence
+  by `BuildCC`) and tested the rainbow-rigid family lemma's hypotheses on the first prime-power square beyond 16
+  alongside the two order-16 instances. **Findings (n, rainbow-rigid via max common-nbr over distinct-colour triples,
+  full-WL `b(X)`, scheme-level two-endpoint δ′ closure):** `Z4²` (16, **YES** cn=1, b=2, δ′ closes @2 — the bullseye);
+  `Z2⁴` (16, **YES** cn=1, b=3, δ′ closes @3 — char-2 base-level obstruction visible); **`Z5²` (25, NO cn=4, b=2, δ′
+  does NOT close even from an 8-base).** **Three conclusions:** (1) **rainbow-rigidity is NOT parametric** — the
+  `(16,5,0,2)` `c=1`-for-distinct-colours is a small-`q` coincidence; at `q=5` the distinct-colour intersection
+  number is already `4`. So `dominatorReachable_of_rainbowRank` genuinely covers only the order-16 parameter point
+  (two schemes), not an infinite NLS family — option (i) is **refuted**, do not formalize a parametric rainbow family.
+  (2) **The scheme-level δ′ `DominatorReachable` closure is ALSO order-16-only** — it relies on `c=1` forced triangles
+  in `X`'s *own* rank-4 colours, which vanish by `n=25`. (3) **But `Z5²` still recovers at `b(X)=2` via full 1-WL** —
+  the residue is tame (§1A on track), the recovery just lives in the **extension `X_T`'s finer colours**, NOT in the
+  bare scheme. **Redirect (the genuine parametric δ′ path):** lift the `DominatorReachable` forced-triangle closure
+  from `AssociationScheme` (`X`'s colours) to the **general-CC extension `X_T`** (`CoherentConfig.lean`, LANDED) —
+  where the `c=1` triangles reappear (that is *why* `b(X)=2`). This **unifies the citation-free δ′ route with the
+  extension-separability route** for `n ≥ 25` (the δ′-at-scheme-level advantage was an order-16 artifact), and is the
+  operational `c(X_T)` content of §1B. NEXT: state `DominatorReachable` / the forced-triangle closure on
+  `CoherentConfig` (the point extension), and prove a bounded-base extension closure for the amorphic-NLS family —
+  the parametric δ′ target, now correctly aimed at the extension.
 
 ---
 
