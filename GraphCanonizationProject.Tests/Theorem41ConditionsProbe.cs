@@ -888,6 +888,35 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         return (rank, pinner);
     }
 
+    // Dump the ℤ₄² Clebsch colour matrix as a Lean literal (for the concrete-route
+    // feasibility spike: a hard-coded `AssociationScheme 16`).
+    [Fact]
+    public void Probe_DumpClebschMatrix()
+    {
+        var g = MakeGroup("Z4^2", 4, 4);
+        var x = ClebschScheme(g)!;
+        int n = x.N;
+        output.WriteLine($"-- Z4^2 Clebsch colour matrix, n={n}, rank-4 (colours 0..3); col[v][w]");
+        output.WriteLine("#eval -- rows:");
+        for (int v = 0; v < n; v++)
+        {
+            var row = new int[n];
+            for (int w = 0; w < n; w++) row[w] = x.Rel[v, w];
+            output.WriteLine($"  ![{string.Join(",", row)}],");
+        }
+        // sanity: symmetric, diagonal=0, 4 colours
+        bool sym = true, diag = true; var cols = new HashSet<int>();
+        for (int v = 0; v < n; v++) for (int w = 0; w < n; w++)
+        { if (x.Rel[v, w] != x.Rel[w, v]) sym = false; if (v == w && x.Rel[v, w] != 0) diag = false; cols.Add(x.Rel[v, w]); }
+        output.WriteLine($"-- symmetric={sym}, diag0={diag}, colours={{{string.Join(",", cols.OrderBy(c => c))}}}");
+        // dominator-closure rank for base {0,1} (the concrete-route pinning rank)
+        var (rank, pinner) = DominatorRank(n, x.Rel, new[] { 0, 1 });
+        output.WriteLine($"-- rank (base {{0,1}}): ![{string.Join(",", rank)}]");
+        output.WriteLine($"-- complete? {rank.All(r => r >= 0)}; pinners:");
+        for (int d = 0; d < n; d++)
+            if (rank[d] > 0) output.WriteLine($"--   {d}: rank {rank[d]} pinned by ({pinner[d].mu},{pinner[d].lam})");
+    }
+
     // THE EXTRACTION PROBE: pull the explicit pinning-rank construction out of the
     // non-affine residue's forced-triangle closure.  Goal — reveal whether the
     // construction is UNIFORM/structural (⟹ a clean abstract Lean lemma exists) or

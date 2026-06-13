@@ -12,8 +12,15 @@
 ## STATUS (read first)
 
 - **Goal of the whole project:** a polynomial-time graph canonizer / the **unconditional oracle-capability seal**
-  `reachesRigidOrCameron` (currently conditional `modulo {G3 cited + G2-B open}`). Closing **G2-B** is the only
-  open mathematical content; **this build is the one known route that closes it.**
+  `reachesRigidOrCameron` (currently conditional `modulo {G3 cited + G2-B open}`; every capstone *also* carries
+  `hImprim`/G2-A undischarged — a separate, deferred Lean-infra piece). Closing **G2-B** is the open mathematical
+  content; **this build is the one known route that closes it.**
+- **G2-B is NOT "GI ∈ P, give up" — read §1A (below) before concluding any piece is hopeless.** "bounded base = bounded WL = GI∈P"
+  conflates the *residue* with *all* schemes; every unbounded-WL family is carved into a separate leg (CFI→hImprim,
+  abelian→leg B, large/hidden-Johnson→Cameron — this is *why* the last leg is "or Cameron"). The residue (primitive,
+  small, non-abelian, non-Cameron) is the **tame remainder** — 0 empirical witnesses; isolation is the *method*
+  (applied recursively), not a surrender. §1A has the full carve-out, the closure angle (separability / amorphic
+  rainbow-rigidity), and the off-track falsifier.
 - **What this build owns:** the two — and *only* two — remaining obligations of the seal-bridge (see §1–§2):
   - **(A)** `Separable (orbitalScheme H)` for the residue family — the Ponomarenko Thm-4.1 separability result.
   - **(B)** the transport `Separable ⟹ CellsAreOrbits at a bounded base` (`SeparabilityTransports`).
@@ -55,9 +62,27 @@
   family) is the lone open mathematical content, and increments 1–3 have reframed it: the forced-triangle criterion
   is now general (any scheme) and reads group-theoretically as **`Stab(α)·γ ∩ Stab(β)·γ = {γ}`**
   (`dominatorReachable_step_of_stab`), and complete closure is `Aut(S)`-equivariant (`dominatorReachable_univ_image`,
-  so prove at one representative base). **THE ONE REMAINING OPEN PIECE = the single-base closure** (item 6 /
-  increment 4 below): exhibit a base `T₀` and prove the stabiliser-orbit-intersection propagation exhausts `V`.
-  **REMAINING, in order (the handoff list):**
+  so prove at one representative base).
+- **CURRENT FRONTIER (2026-06-13) — the δ′ Stage-3 toolkit is COMPLETE; the target is now the NON-AFFINE residue,
+  and its closure CONSTRUCTION has been extracted.** Since the 2026-06-12 state above: the full δ′ closure toolkit
+  landed (the iteration engine `dominatorReachable_of_rank`, the cyclotomic `F_q`-power and ratio step builders, the
+  one-round criterion `dominatorReachable_of_basePinsAll`), and the **first end-to-end family closures** discharged
+  `hclo` *outright*: `reachesRigidOrCameron_viaG0powNeg` (the `H={±1}` odd-char family — primitive at `d=1`; seal with
+  `hclo` **proved, not carried**) and `dominatorReachable_G0pow_subfield` (the multi-round subfield `H=K^×` family —
+  but **imprimitive**, i.e. hImprim's job, so engine-validation not new coverage). **Reframing (read §1A):** G2-B is
+  the carved *tame* residue, not GI∈P; the affine cyclotomic slice is already citation-closed, so all the affine work
+  removes a citation / validates the engine — **the genuine open target is the NON-AFFINE residue (ℤ₄² amorphic-NLS,
+  `orbitalScheme`, no field coordinates).** Its forced-triangle closure construction is now **EXTRACTED by probe**
+  (`Probe_ExtractPinningRank`, §8 entry 2026-06-13): **uniform, genuinely multi-round (depth 3, layers `[2,2,6,6]`),
+  driven by RAINBOW-TRIANGLE RIGIDITY** — a triangle pins ⟺ its three edges are three distinct non-diagonal colours
+  (the amorphic `S₃` made operational); ℤ₄² closes from a 2-base (96/120 pairs), ℤ₂⁴ needs ≥3 (char-2 obstruction).
+  **NEXT STEP (in progress): the CONCRETE route** — hard-code the ℤ₄² 16×16 colour matrix as a Lean
+  `AssociationScheme`, prove its axioms + the rainbow-pinning derivations by **plain `decide`** (NOT `native_decide`,
+  which adds `ofReduceBool` and breaks the axiom bar), and feed `reachesRigidOrCameron_viaDominatorClosure` → the
+  first non-affine `hclo` discharged in Lean. Risk: `decide` performance on 16³ intersection counts (a feasibility
+  spike). Caveat: rainbow-`c=1` is special to the Clebsch parameters `(16,5,0,2)`, so the result is parameter-scoped,
+  not "all amorphic rank-4". **Per-increment history is in §8 (not here).**
+  **REMAINING — the original Stage-1/2/3 handoff list (now HISTORY; the current frontier is the line above):**
   1. ~~**Stage 1.2(a)+(b)**~~ — **LANDED 2026-06-12 (`CoherentConfig.lean §CC.8`, axiom-clean, build green):
      the point-extension *construction* `pointExtension X T` (pair-refinement saturation on
      `Setoid (Fin n × Fin n)`, representative-indexed counts, `n²`-round pigeonhole) with
@@ -600,6 +625,14 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
    anywhere in the chain. Plan Stage 3 at the family level, not the full generality of the paper.
 
 ### Stage 3 (δ′ route) — the single-base dominator closure (THE recommended route; increment 4 is the open piece)
+> **CURRENCY BANNER (2026-06-13): increments 1–4c + the first family closures have LANDED since this section was
+> written; the open frontier has moved to the NON-AFFINE residue (concrete route).** Read the STATUS block's
+> "CURRENT FRONTIER (2026-06-13)" line and the §8 entries from 2026-06-13 first. The planning insights below
+> (cyclic arithmetic, char-2 midpoint, affine-vs-non-affine, "clean sufficient condition" endpoint) are still
+> valid and were borne out — but "increment 4 = the single-base closure" now reads as *the affine closure, which
+> turned out to be citable / partly imprimitive; the genuine target is the non-affine ℤ₄² amorphic-NLS residue,
+> whose closure construction (rainbow-triangle rigidity, depth 3) was extracted by probe (§8).*
+
 **This is the lighter, citation-free Stage 3 and the recommended target** (feeds `reachesRigidOrCameron_viaDominatorClosure`,
 not the Thm-4.1 checkpoint). **Landed (increments 1–3, all axiom-clean):** the forced-triangle criterion at three
 levels — affine orbit-difference (`affineScheme_interNum_eq_one_of_unique` / `dominatorReachable_affine_step`,
