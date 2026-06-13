@@ -119,10 +119,17 @@
      pinned by `α, β` iff it is the *unique* `u` with `u−α ∼ γ−α` and `β−u ∼ β−γ` (proof: the forced-triangle
      filter is the singleton `{γ}`); `dominatorReachable_affine_step` is the matching `DominatorReachable` builder.
      So the δ′ family argument now runs entirely on `G₀`-orbit-of-difference combinatorics (no scheme-level
-     intersection-number bookkeeping). **Remaining (the genuine open math): the family closure** — exhibit a bounded
-     base `T` and show every `v ∈ V` is `DominatorReachable` via iterated `dominatorReachable_affine_step` for the
-     residue family (`G0pow β` cyclotomic / amorphic-NLS). The probe confirms it holds; the proof is the orbit
-     combinatorics.
+     intersection-number bookkeeping).
+     **STAGE-3 INCREMENT 2 LANDED 2026-06-12 (`CascadeAffine.lean §S-bridge-δ`, axiom-clean, build green 63s): the
+     closure equivariance.** `dominatorReachable_map` proves the dominator closure is scheme-automorphism-equivariant
+     (a `π ∈ Aut(S)` mapping `T` into `T'` maps `T`-reachable to `T'`-reachable — the forced-triangle premise is
+     `π`-invariant via `IsSchemeAut.relOfPair_eq`); `dominatorReachable_univ_image` is the payoff: **complete closure
+     transports across automorphic base images**, so for a vertex-transitive residue, proving the closure for ONE
+     base discharges the whole `Aut(S)`-orbit of bases. **Remaining (the genuine open math): the single-base
+     closure** — exhibit ONE bounded base `T₀` and show every `v ∈ V` is `DominatorReachable` via iterated
+     `dominatorReachable_affine_step`, for the residue family (`G0pow β` cyclotomic / amorphic-NLS). The probe
+     confirms it holds; the proof is the orbit combinatorics. The equivariance means this need only be done at one
+     representative base.
   Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
   threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier; strategy-§15 gaps tracking note.
   The increment log is §8 — append to it.
@@ -757,6 +764,21 @@ bullseye) says closure is the likely outcome and the build is worth it.
   family closure** — pick a bounded base `T` (per the probe, the minimal group base) and prove every `v` is
   `DominatorReachable` by iterated `dominatorReachable_affine_step`, for the residue family (`G0pow β`). This is the
   orbit-combinatorics core: showing the rigid-triangle reachability fills `V` from `T`.
+- **2026-06-12 — STAGE 3 INCREMENT 2: THE DOMINATOR-CLOSURE EQUIVARIANCE (`CascadeAffine.lean §S-bridge-δ`,
+  axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full serial build green 63s; index regenerated,
+  2 rows described).** Structural infrastructure for the δ′ family closure. `dominatorReachable_map`: the dominator
+  closure is **scheme-automorphism-equivariant** — for `π` a scheme automorphism mapping base `T` into `T'`,
+  `DominatorReachable S T v → DominatorReachable S T' (π v)` (induction over `DominatorReachable`; base = `hT`, step
+  invariant because `IsSchemeAut.relOfPair_eq` preserves the forced-triangle intersection-number premise — the same
+  one-line `relOfPair`-preservation the seal uses throughout). `dominatorReachable_univ_image`: the payoff —
+  **complete closure transports across automorphic base images** (`∀ v, DominatorReachable S T v ⟹ ∀ v,
+  DominatorReachable S (T.image π) v`, via `π.symm` + `apply_symm_apply`). **Why it matters:** the residue is
+  vertex-transitive (schurian), so `Aut(S)` acts transitively on points and richly on bases; the open single-base
+  closure now needs proving at only ONE representative base per `Aut(S)`-orbit, not all bases — exactly the
+  reduction the probe's "every minimal base closes" suggested was available. General over any `AssociationScheme`
+  (not affine-specific), so it composes with the whole scheme substrate. NEXT (Stage 3 increment 3, the genuine
+  open math): the single-base closure for `affineScheme (G0pow β)` — pick `T₀` and prove `∀ v, DominatorReachable`
+  by the orbit-of-difference combinatorics, the `s(C)` core.
 
 ---
 
@@ -799,7 +821,10 @@ isolated catch-up) / `isSchemeAut_of_relOfPair_eq` / **`twinsRealized_of_extensi
 **Stage 3 substrate — the affine forced-triangle criterion (LANDED 2026-06-12, the δ′ family argument runs on
 these):** **`affineScheme_interNum_eq_one_of_unique`** (the dominator premise ⟺ `G₀`-orbit-of-difference
 uniqueness) / **`dominatorReachable_affine_step`** (the `DominatorReachable` builder from orbit-uniqueness)
-(`CascadeAffine.lean §S-stage3`). Open: the family closure `∀ v, DominatorReachable (affineScheme (G0pow β)) T v`.
+(`CascadeAffine.lean §S-stage3`); the closure-equivariance reduction **`dominatorReachable_map`** /
+**`dominatorReachable_univ_image`** (complete closure transports across `Aut(S)`-images of the base — prove at one
+representative; `CascadeAffine.lean §S-bridge-δ`). Open: the single-base closure
+`∀ v, DominatorReachable (affineScheme (G0pow β)) T₀ v`.
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

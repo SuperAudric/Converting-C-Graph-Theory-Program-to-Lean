@@ -479,6 +479,34 @@ theorem separatesAtBoundedBase_of_dominatorClosure (S : SchurianScheme n) {T : F
     SeparatesAtBoundedBase S bound :=
   ⟨T, hcard, discrete_of_dominatorClosure S.toAssociationScheme hclo⟩
 
+/-- **The dominator closure is scheme-automorphism-equivariant.** A scheme automorphism `π` mapping the base
+`T` into `T'` maps `T`-reachable points to `T'`-reachable points. Induction over `DominatorReachable`: the base
+case is `hT`; the step survives because a scheme automorphism preserves `relOfPair`
+(`IsSchemeAut.relOfPair_eq`), so the forced-triangle intersection-number premise is `π`-invariant. The
+structural fact letting the δ′ family argument reduce "closure exhausts Ω" to one base per
+automorphism-orbit. -/
+theorem dominatorReachable_map {S : AssociationScheme n} {T T' : Finset (Fin n)}
+    {π : Equiv.Perm (Fin n)} (hπ : IsSchemeAut S π) (hT : ∀ t ∈ T, π t ∈ T')
+    {v : Fin n} (h : DominatorReachable S T v) : DominatorReachable S T' (π v) := by
+  induction h with
+  | base ht => exact DominatorReachable.base (hT _ ht)
+  | step _ _ hone ihα ihβ =>
+      refine DominatorReachable.step ihα ihβ ?_
+      rw [hπ.relOfPair_eq, hπ.relOfPair_eq, hπ.relOfPair_eq]; exact hone
+
+/-- **Complete dominator closure transports across automorphic base images.** If base `T`'s closure exhausts
+`Ω` and `π` is a scheme automorphism, then the image base `T.image π` also has complete closure. So for a
+vertex-transitive residue, proving `∀ v, DominatorReachable S T v` for ONE base discharges it for the entire
+`Aut(S)`-orbit of bases — the family-argument leverage `dominatorReachable_map` buys. -/
+theorem dominatorReachable_univ_image {S : AssociationScheme n} {T : Finset (Fin n)}
+    {π : Equiv.Perm (Fin n)} (hπ : IsSchemeAut S π)
+    (h : ∀ v, DominatorReachable S T v) :
+    ∀ v, DominatorReachable S (T.image π) v := by
+  intro v
+  have hmap := dominatorReachable_map hπ (T' := T.image π)
+    (fun t ht => Finset.mem_image_of_mem π ht) (h (π.symm v))
+  rwa [Equiv.apply_symm_apply] at hmap
+
 /-! ### §S-gate — the seal-bridge anchor: §S.17 `Separable` → the sink (the named transport obligation)
 
 **Scope-and-state step (a) of the Thm 4.1 program — the gate, resolved.** The sink + bridge live in `Cascade.lean`
