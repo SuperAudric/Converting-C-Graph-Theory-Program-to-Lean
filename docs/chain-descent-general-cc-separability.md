@@ -21,11 +21,16 @@
   small, non-abelian, non-Cameron) is the **tame remainder** — 0 empirical witnesses; isolation is the *method*
   (applied recursively), not a surrender. §1A has the full carve-out, the closure angle (separability / amorphic
   rainbow-rigidity), and the off-track falsifier.
-- **What this build owns:** the two — and *only* two — remaining obligations of the seal-bridge (see §1–§2):
-  - **(A)** `Separable (orbitalScheme H)` for the residue family — the Ponomarenko Thm-4.1 separability result.
-  - **(B)** the transport `Separable ⟹ CellsAreOrbits at a bounded base` (`SeparabilityTransports`).
-  Both are **coupled** — they share the *same* general-CC substrate (point-extension-as-CC, general algebraic
-  isomorphism, separability of an extension). Building that substrate is the whole job.
+- **What this build owns — two routes to the same open content** (both feed the seal; pick per task):
+  - **(A)+(B) — the separability route** (heavier, citation-bearing): `(A) Separable (orbitalScheme H)` (Ponomarenko
+    Thm 4.1) + `(B)` the transport `Separable ⟹ CellsAreOrbits at a bounded base` — coupled, both needing the
+    general-CC substrate (LANDED Stage 0–2: `CoherentConfig.lean`); checkpoint `reachesRigidOrCameron_viaExtensionSeparability`.
+  - **(δ′) — the dominator-closure route** (lighter, **citation-free**, the PRIMARY path since 2026-06-12): a bounded
+    base whose `c=1` forced-triangle closure exhausts Ω (`hclo`); checkpoint `reachesRigidOrCameron_viaDominatorClosure`,
+    carrying only {G3 + `hImprim` + `hclo`}. **All recent work and the concrete ℤ₄² closure use this route.**
+  Both reduce to the *same* open content: **the carve-out residue (primitive/small/non-abelian/non-Cameron) recovers
+  at a bounded base** (§1A). The δ′ route is where the leverage is; (A)+(B) is retained as the citation-bearing
+  alternative. The general-CC substrate and the seal-bridge gate/sink/`b(X)`-tail are LANDED (see §2/§4/§8).
 - **What is already done and feeding in** (all axiom-clean, build green): the seal-bridge gate, the sink, the
   `b(X)`-tail, and **(C) the group base is FREE** (`exists_greedy_base_le_log` + the seal's "small" antecedent).
   So nothing peripheral remains — see §2.
@@ -83,8 +88,22 @@
   (`clebschZ4_discrete`: `b(X) ≤ 2`) — the seal's `hclo` **discharged concretely for a real non-affine primitive G2-B
   residue**. Scope: one scheme, parameter-scoped to Clebsch `(16,5,0,2)`; at `AssociationScheme` level (`Discrete`),
   does NOT feed the seal capstone (needs `SchurianScheme` = auts, deferred); `decide`-checked, not a family proof.
-  **NEXT:** abstract the rainbow-rigidity closure into a parameter-scoped family lemma, OR wire a `SchurianScheme`
-  instance to feed the seal capstone, OR return to the general/primitive open core. **Per-increment history is in §8.**
+  **NEXT — HANDOFF RECOMMENDATION (ranked, honest):**
+  1. **The real frontier = the GENERAL argument** (close G2-B for the *family*, not one scheme). The load-bearing
+     open question, per §1A: does *primitive + small + non-Cameron ⟹ Thm 4.1 domination* — i.e. does Cameron's
+     dichotomy actually deliver domination on the small side? This is currently **asserted, not worked out**;
+     resolving it rigorously (a written derivation, before more Lean) tells us whether the general route is viable
+     and surfaces the precise missing structural lemma. **Highest value; this is where progress toward the
+     unconditional seal lives.**
+  2. ⚠️ **Upgrading ℤ₄² to a full *seal* discharge (build a `SchurianScheme` instance + feed the capstone) is
+     `decide`-INFEASIBLE** — the schurian axiom is `∃`-over-auts `∀`-over-pairs ≈ `4·16⁴·32` ≈ 8M checks, ~32× the
+     already-heavy coherence `decide` (which was borderline-OOM). Do **not** attempt it via `decide`; `orbitalScheme`
+     is `noncomputable` so that path is closed too. Recorded as a dead end (§7).
+  3. Abstracting the rainbow-rigidity closure into a family lemma is possible but **narrow** — rainbow-`c=1` is
+     special to Clebsch `(16,5,0,2)`, so it is parameter-scoped, not "all amorphic rank-4".
+  The concrete line (just landed) has delivered its value — a validation witness that the δ′ route reaches the real
+  non-affine bullseye — so further single-scheme concrete work has diminishing returns; the leverage is option 1.
+  **Per-increment history is in §8; the carve-out / why-not-GI∈P reasoning is §1A.**
   **REMAINING — the original Stage-1/2/3 handoff list (now HISTORY; the current frontier is the line above):**
   1. ~~**Stage 1.2(a)+(b)**~~ — **LANDED 2026-06-12 (`CoherentConfig.lean §CC.8`, axiom-clean, build green):
      the point-extension *construction* `pointExtension X T` (pair-refinement saturation on
@@ -251,7 +270,22 @@
   as a fallback.
 - **Index:** after landing decls, regen `PublicTheoremIndex.md` via
   `python3 scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers` then hand-fill Descriptions and delete
-  stale rows by hand.
+  stale rows by hand. (New `private` decls land in `PrivateTheoremIndex.md`; fill those too.)
+- **Probes (C#, the empirical bed):** the project's discipline is *probe before Lean* — extract the concrete
+  construction (matrices, ranks, witnesses) with a C# probe, then formalize. Probes live in
+  `GraphCanonizationProject.Tests/` (self-contained, touch no production code); run one with
+  `dotnet test GraphCanonizationProject.Tests/ --filter "FullyQualifiedName~<ProbeName>" --logger "console;verbosity=detailed"`
+  (from the repo root). Key ones for this build: `Theorem41ConditionsProbe` —
+  `Probe_DumpClebschMatrix` (dumps the ℤ₄² Clebsch colour matrix + dominator rank/pinners as Lean literals — the
+  source of `ClebschConcrete.lean`'s data), `Probe_ExtractPinningRank` (the rainbow-rigidity construction extraction),
+  `Probe_CatchUpGate_BasesAndDominators` (closure completes from every minimal base). To target a *different*
+  residue, copy the dump/extract pattern.
+- **`decide`-in-Lean limits (hard-won, see ClebschConcrete + §7):** plain `decide` only (NEVER `native_decide` — it
+  adds `ofReduceBool`, breaking the axiom bar); it has **no `Decidable (p → q → r)`** for nested implications (single
+  `p → q` is fine) — key a `decide`-fed lemma on a Nat-equality (e.g. `interNum = 1`), not a `relOfPair`-uniqueness
+  `∀u, … → … → u = γ`; `∃!` has no synthesizable `Decidable` (give the term); **split big `decide`s with `fin_cases`**
+  to bound kernel memory (a monolithic 16k-case coherence `decide` OOM-killed the box). `relOfPair` is
+  `noncomputable`, so bridge it to a computable colour function before `decide`.
 
 ---
 
@@ -741,6 +775,14 @@ bullseye) says closure is the likely outcome and the build is worth it.
   to (A). Do not look for a homogeneous-only proof of `Separable ⟹ CellsAreOrbits`; it does not exist (the twin lives
   in the multi-fiber extension).
 - **Thm 5.1 parameter route (γ) is ruled out** (stricter than the done sparse Thm 3.1; residue is denser).
+- **`decide`-checking a hard-coded `SchurianScheme` is INFEASIBLE — do not attempt.** Promoting the concrete
+  `clebschZ4Scheme` (`AssociationScheme`, `decide`-checked) to a `SchurianScheme` (to feed the *seal* capstone, not
+  just `Discrete`) requires the `schurian` axiom `∀ i v w v' w', rel i v w → rel i v' w' → ∃ π ∈ auts, π v=v' ∧ π w=w'`
+  — `∃`-over-auts `∀`-over-pairs ≈ `4·16⁴·32` ≈ 8M kernel checks, ~32× the coherence `decide` that was already
+  borderline-OOM. Splitting helps a constant factor, not enough. And `orbitalScheme` (schurian by construction) is
+  `noncomputable`, so it cannot be `decide`d either. Net: the concrete witness stays at `AssociationScheme`/`Discrete`
+  level; feeding the seal for a concrete non-affine residue needs a *non-`decide`* schurity argument (research effort,
+  not mechanical). Recorded 2026-06-13.
 - **The orbit-level harvest re-key is a vacuity trap** (`coversOrbits_of_realizers` keyed on `OrbitPartition` is
   trivially true — orbit-mates are aut-related by definition). Keep all recovery content on *visible* (warmRefine)
   realizers. The sink `TwinsRealizedByResidualAut` is correctly keyed (≡ `CellsAreOrbits`).
