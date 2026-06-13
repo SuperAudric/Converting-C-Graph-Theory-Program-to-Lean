@@ -76,12 +76,15 @@
   (`Probe_ExtractPinningRank`, §8 entry 2026-06-13): **uniform, genuinely multi-round (depth 3, layers `[2,2,6,6]`),
   driven by RAINBOW-TRIANGLE RIGIDITY** — a triangle pins ⟺ its three edges are three distinct non-diagonal colours
   (the amorphic `S₃` made operational); ℤ₄² closes from a 2-base (96/120 pairs), ℤ₂⁴ needs ≥3 (char-2 obstruction).
-  **NEXT STEP (in progress): the CONCRETE route** — hard-code the ℤ₄² 16×16 colour matrix as a Lean
-  `AssociationScheme`, prove its axioms + the rainbow-pinning derivations by **plain `decide`** (NOT `native_decide`,
-  which adds `ofReduceBool` and breaks the axiom bar), and feed `reachesRigidOrCameron_viaDominatorClosure` → the
-  first non-affine `hclo` discharged in Lean. Risk: `decide` performance on 16³ intersection counts (a feasibility
-  spike). Caveat: rainbow-`c=1` is special to the Clebsch parameters `(16,5,0,2)`, so the result is parameter-scoped,
-  not "all amorphic rank-4". **Per-increment history is in §8 (not here).**
+  **THE CONCRETE ROUTE LANDED (2026-06-13): the FIRST NON-AFFINE δ′ CLOSURE IN LEAN**
+  (`ChainDescent/ClebschConcrete.lean`, axiom-clean, no `native_decide`, in the serial build ~56s). The ℤ₄²
+  amorphic-NLS Clebsch scheme is hard-coded as `clebschZ4Scheme : AssociationScheme 16` (axioms by `decide`, coherence
+  split per-colour to dodge OOM), and `clebschZ4_closure` proves its forced-triangle closure exhausts Ω from `{0,1}`
+  (`clebschZ4_discrete`: `b(X) ≤ 2`) — the seal's `hclo` **discharged concretely for a real non-affine primitive G2-B
+  residue**. Scope: one scheme, parameter-scoped to Clebsch `(16,5,0,2)`; at `AssociationScheme` level (`Discrete`),
+  does NOT feed the seal capstone (needs `SchurianScheme` = auts, deferred); `decide`-checked, not a family proof.
+  **NEXT:** abstract the rainbow-rigidity closure into a parameter-scoped family lemma, OR wire a `SchurianScheme`
+  instance to feed the seal capstone, OR return to the general/primitive open core. **Per-increment history is in §8.**
   **REMAINING — the original Stage-1/2/3 handoff list (now HISTORY; the current frontier is the line above):**
   1. ~~**Stage 1.2(a)+(b)**~~ — **LANDED 2026-06-12 (`CoherentConfig.lean §CC.8`, axiom-clean, build green):
      the point-extension *construction* `pointExtension X T` (pair-refinement saturation on
@@ -1100,6 +1103,29 @@ bullseye) says closure is the likely outcome and the build is worth it.
   the 16 rainbow-pinning derivations — feasible only with plain `decide`, since `native_decide` violates the axiom
   bar). **CAVEAT:** rainbow-c=1 is special to the Clebsch parameters `(16,5,0,2)`, not automatic for all amorphic
   rank-4, so the abstraction is parameter-scoped, not "all amorphic."
+- **2026-06-13 — THE CONCRETE ROUTE LANDED: THE FIRST NON-AFFINE δ′ CLOSURE IN LEAN (`ChainDescent/ClebschConcrete.lean`,
+  axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, no `native_decide`; in the serial build, the
+  module compiles in ~56s; index regenerated, 11 rows).** Took the concrete route from the extraction probe. **Spike
+  first:** confirmed plain `decide` can verify the scheme-coherence axiom on the 16×16 matrix (feasible but heavy
+  ~66s user, swap-prone under full Mathlib). **Then built it, OOM-managed:** `clebschZ4Scheme : AssociationScheme 16`
+  from the hard-coded colour matrix (`clebschZ4ColF`), all four axioms by `decide` — coherence **split per-colour**
+  (`fin_cases k`) to quarter the kernel working-set (one giant `decide` OOM-killed the machine; the split + VSCode
+  closed fixed it). The closure `clebschZ4_closure : ∀ v, DominatorReachable clebschZ4Scheme {0,1} v` via a local
+  **`interNum`-keyed** rank engine `domReach_of_rank_pin` (the Nat-equality `c=1` premise is `decide`-friendly; the
+  `relOfPair`-uniqueness form's nested implications have no synthesizable `Decidable`), fed the probe rank
+  (`clebschZ4Rank`) + explicit rainbow pinners (`clebschZ4Pin`), with the `relOfPair`→matrix bridge
+  (`clebschZ4_relOfPair`) so `decide` checks each rainbow triangle is rigid. Payoff `clebschZ4_discrete`: the ℤ₄²
+  Clebsch scheme is **`Discrete` after individualizing `{0,1}`** = `b(X) ≤ 2`, a non-affine
+  `SeparatesAtBoundedBase`-grade recovery, fully in Lean. **Significance:** the seal's open `hclo` content is now
+  *discharged concretely for a real non-affine primitive G2-B residue* — an existence witness that the δ′ route
+  reaches the genuine bullseye, not just the affine/citable corner. **Scope (honest):** one scheme, parameter-scoped
+  to Clebsch `(16,5,0,2)`; stays at `AssociationScheme` level (`Discrete`), does **not** feed the seal capstone
+  (that needs `SchurianScheme` = the automorphism data, deferred); and it is `decide`-checked, not a general family
+  proof. **Lean lessons:** `decide` has no `Decidable (p→q→r)` for nested implications (single `p→q` is fine — that
+  is why the `interNum`-form engine was needed); `∃!` has no synthesizable `Decidable` (give the term); split big
+  `decide`s with `fin_cases` to bound kernel memory; `native_decide` is BANNED (adds `ofReduceBool`). NEXT = either
+  abstract the rainbow-rigidity closure (parameter-scoped family lemma), wire a `SchurianScheme` instance to feed the
+  seal, or return to the general/primitive open core.
 
 ---
 
@@ -1164,6 +1190,15 @@ private `ratio_not_mem_num_out`/`_denom_out`
 (`CascadeAffine.lean §S-stage3-δ`). Open (the genuine `s(C)` core): the **pinning-rank witness** for the
 **primitive irreducible** larger `H` (no subfield shortcut), char-2 (Clebsch), and the **non-affine** residue
 (new-coverage target) — define `rank` and verify per-level pinning via the general/schurian/`F_q`-power builders.
+
+**The concrete non-affine closure (LANDED 2026-06-13, `ChainDescent/ClebschConcrete.lean` — the FIRST non-affine
+δ′ closure in Lean):** **`clebschZ4Scheme`** (the ℤ₄² amorphic-NLS Clebsch scheme as a hard-coded
+`AssociationScheme 16`, axioms by `decide`) / **`clebschZ4_closure`** (`∀ v, DominatorReachable clebschZ4Scheme
+{0,1} v` — the `hclo` discharged for the real non-affine bullseye) / **`clebschZ4_discrete`** (`b(X) ≤ 2`); built
+on `clebschZ4ColF` (the colour matrix) / `clebschZ4_relOfPair` (the bridge) / `clebschZ4Rank` + `clebschZ4Pin` (the
+probe rank/pinners) / private `domReach_of_rank_pin` (the `interNum`-keyed rank engine). Axiom-clean, no
+`native_decide`. Scope: parameter-scoped to Clebsch `(16,5,0,2)`, `AssociationScheme`-level (does not feed the seal
+capstone — needs `SchurianScheme`).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

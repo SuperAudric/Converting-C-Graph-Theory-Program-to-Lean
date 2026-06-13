@@ -299,8 +299,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `frobLinear_conj_mulUnit` | 2119-2128 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
 | `sigmaPow_zpow_apply` | 2234-2240 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
 | `exists_zpow_neg_one_iff` | 2436-2447 | §S-stage3-δ In a field, the powers of `-1` are exactly `±1`: `(∃ k:ℤ, (-1)^k = h) ↔ h = 1 ∨ h = -1` (via `Int.even_or_odd` + `Even/Odd.neg_one_zpow`). The `⟨-1⟩={1,-1}` fact in `zpow` form for the `H={±1}` family closure. Axiom-clean. | — |
-| `ratio_not_mem_num_out` | 2552-2567 | §S-stage3-δ Subfield ratio fact (numerator out of `K`): `a,b∈K`, `c∉K`, `a≠b` ⟹ `(c−a)/(b−c)∉K`. The round-1 pinning datum (non-`K` point pinned by two `K`-base points). | private |
-| `ratio_not_mem_denom_out` | 2569-2586 | §S-stage3-δ Subfield ratio fact (denominator out of `K`): `a,c∈K`, `b∉K`, `c≠a` ⟹ `(c−a)/(b−c)∉K`. The round-2 pinning datum (`K` point pinned by a `K`-base point and a reached non-`K` point). | private |
+| `ratio_not_mem_num_out` | 2552-2567 | §S-stage3-δ Subfield ratio fact (numerator out of `K`): `a,b∈K`, `c∉K`, `a≠b` ⟹ `(c−a)/(b−c)∉K`. The round-1 pinning datum (non-`K` point pinned by two `K`-base points). | — |
+| `ratio_not_mem_denom_out` | 2569-2586 | §S-stage3-δ Subfield ratio fact (denominator out of `K`): `a,c∈K`, `b∉K`, `c≠a` ⟹ `(c−a)/(b−c)∉K`. The round-2 pinning datum (`K` point pinned by a `K`-base point and a reached non-`K` point). | — |
 | `frobLinear_conj_mulUnit'` | 2815-2822 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |
 ## ChainDescent/LinearOracle.lean
 
@@ -317,3 +317,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `AssociationScheme.nat_kk_sub_self` | 247-250 | — | — |
+## ChainDescent/ClebschConcrete.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `domReach_of_rank_pin` | 92-115 | §S-stage3-δ (ClebschConcrete) A rank engine keyed on the **`interNum = 1`** premise (a Nat equality — `decide`-friendly, unlike the nested-implication `relOfPair`-uniqueness form), with an explicit pinner function. Strong induction on rank; the local engine the concrete ℤ₄² closure (`clebschZ4_closure`) uses. | private |

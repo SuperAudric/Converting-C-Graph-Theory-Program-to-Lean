@@ -1354,3 +1354,17 @@ Axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`.
 | `CoherentConfig.Refines.aut_descends` | 880-884 | An automorphism of a fission is an automorphism of the base configuration (coarser classes are unions of finer ones). | — |
 | `CoherentConfig.fiberTwin_realized_of_separablePointed` | 886-894 | §CC.9 **THE STAGE-2 TRANSPORT CORE (citation-free).** Pointed separability of a point extension realizes every same-fiber pair `(u,u')` by a `T`-fixing automorphism of the BASE configuration carrying `u ↦ u'` — `exists_aut_of_fiber_eq` + `aut_fixes` + `aut_descends` composed. What the seal's sink consumes, at the fiber keying. | — |
 | `CoherentConfig.extension_complete_of_separablePointed` | 896-916 | §CC.9 At a rigid base (only the identity `T`-fixing automorphism), pointed separability of the extension at every non-singleton fiber forces the extension **complete** (all fibers singleton) — the fiber-level `b(X) ≤ b(G)` collapse. Singleton fibers (e.g. the `T`-points, exactly where the probe saw the Thm-4.1 conditions fail) are exempt by construction. | — |
+## ChainDescent/ClebschConcrete.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `clebschZ4ColF` | 28-45 | The ℤ₄² Clebsch colour matrix (16×16, rank-4, colours 0..3, 0=diagonal), extracted by `Theorem41ConditionsProbe.Probe_DumpClebschMatrix`. The concrete non-affine residue's relation data. | Definition |
+| `clebschZ4Rel` | 47-48 | Relation `i` at `(v,w)` iff `clebschZ4ColF v w == i` (the colour-function `rel` for the concrete scheme). | Definition |
+| `clebschZ4Rep` | 50-51 | A representative pair in each colour class `R_k` (`(0,0),(0,2),(0,1),(0,6)`), used to define the intersection numbers. | Definition |
+| `clebschZ4IN` | 53-56 | The intersection numbers of the ℤ₄² Clebsch scheme, read off the representative pair per colour. | Definition |
+| `clebschZ4Scheme` | 58-73 | **The concrete ℤ₄² amorphic-NLS Clebsch scheme as an `AssociationScheme 16`** (the primitive G2-B bullseye), all four axioms by `decide` (coherence split per-colour for low kernel memory). Distinct from the *affine* F₁₆ `clebschScheme` (CascadeAffine). Axiom-clean. | Definition |
+| `clebschZ4_relOfPair` | 75-80 | `relOfPair v w = clebschZ4ColF v w` — the computable bridge letting `decide` evaluate the otherwise-`noncomputable` `relOfPair` in the closure proof. | — |
+| `clebschZ4Rank` | 82-83 | The probe-extracted BFS pinning rank for base `{0,1}` (layers `[2,2,6,6]`, depth 3). | Definition |
+| `clebschZ4Pin` | 85-90 | The probe-extracted explicit rainbow-triangle pinning pair `(µ,λ)` for each point. | Definition |
+| `clebschZ4_closure` | 117-125 | §S-stage3-δ **THE FIRST NON-AFFINE δ′ CLOSURE IN LEAN.** Every point of the ℤ₄² amorphic-NLS Clebsch scheme is forced-triangle dominator-reachable from the 2-base `{0,1}` — the seal's `hclo` content discharged for a real non-affine primitive residue, by `decide` (NOT `native_decide`: axiom-clean). Via a local `interNum`-keyed rank engine (`domReach_of_rank_pin`) + the probe rank/pinners; the rainbow triangles' `c=1` checked by `decide`. Axiom-clean. | — |
+| `clebschZ4_discrete` | 127-132 | §S-stage3-δ **The payoff: the ℤ₄² Clebsch scheme is `Discrete` after individualizing `{0,1}`** — `b(X) ≤ 2`, a non-affine `SeparatesAtBoundedBase`-grade recovery fully in Lean. `discrete_of_dominatorClosure` ∘ `clebschZ4_closure`. Axiom-clean. | — |
