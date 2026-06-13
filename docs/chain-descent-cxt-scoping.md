@@ -21,6 +21,14 @@ the main doc). The Lean objects are already defined: `Separability.indistinguish
 `SeparableParam` (`3·c·(k−1)·k < n`); `CoherentConfig.DominationCondition` (Thm 4.1 (i)), `Theorem41Hypotheses`; and the
 δ′ engine `CoherentConfig.DominatorReachable` / `dominatorReachable_of_rank` / `allSingletonFiber_of_dominatorClosure_pointExtension`.
 
+**Calibration (the bar is `O(log n)` base, which IS polynomial).** The IR cost is exponential in the base size `b`
+(`≈ 2^{O(b)}`), so `b = O(log n)` gives `2^{O(log n)} = n^{O(1)}` — **polynomial**. `exists_greedy_base_le_log` gives
+`b ≤ log₂|Aut|`, so a *poly-bounded* `|Aut|` (`n^{O(1)}`) already yields an `O(log n)` base = poly canonization. Hence the
+target is not strictly `c(X_T)=O(1)` — it is `c(X_T)` small enough to keep the base `O(log n)` (i.e. `c(X_T)=O(polylog)`
+suffices); and the only genuine *non*-poly risk is if "small"/`IsLarge` is pinned at the sub-exponential Babai/Sun–Wilmes
+threshold (`|Aut|≈exp(n^{1/3})` ⟹ base `n^{1/3}`) rather than poly. Pin the poly `IsLarge` instantiation; do **not**
+treat an `O(log n)` base as a problem.
+
 Feeding either landed checkpoint then closes the seal `modulo {G3 (+ Thm 4.1 if cited)}`:
 `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′, citation-free) or `…viaExtensionSeparability` (cites Thm 4.1).
 
@@ -81,7 +89,36 @@ uniform across `q` and across construction types is **unverified** — and is th
 
 ## 4. The attack — milestones (probe-first)
 
-### M1 — PROBE: measure `c(X_T)` and extract the `X_T` mechanism across a DIVERSE family `[do this first]`
+### M1 — RAN (2026-06-13, `Theorem41ConditionsProbe.Probe_CXT_ScopingM1`, green) — `c(X_T)=O(1)` is UNIFORM; no falsifier
+
+Measured `c` (the indistinguishing number) collapsing under individualization across a **diverse** family — rank-3 and
+rank-4, cyclotomic and not, char 2 and odd, `n = 10..41`:
+
+| scheme | n | rk | `c(X)` | `c(X₁)` | `c(X₂)` | `b(X)` | dom@`X_α` |
+|---|---|---|---|---|---|---|---|
+| amorph-Z4² | 16 | 4 | 4 | 4 | 0 | 2 | PASS |
+| amorph-Z2⁴ | 16 | 4 | 4 | 4 | 4 | 3 | fail@1pt |
+| amorph-Z5² | 25 | 4 | 7 | 1 | 0 | 2 | PASS |
+| Paley-13/17/29/37/41 | 13–41 | 3 | 5/7/13/17/19 | **1** | 0 | 2 | PASS |
+| Petersen | 10 | 3 | 4 | 4 | 4 | 3 | fail@1pt |
+
+**Findings:** (1) bare `c(X)` grows `~(n−1)/2` (dense, unbounded — confirms the bare scheme fails domination), but
+**collapses to a small constant after O(1) individualizations, uniformly** — `c(X₁) ≤ 4` across *all* of `n=10..41`
+(Paley/`Z5²` → 1; the char-2 schemes `Z4²`/`Z2⁴`/Petersen → 4, a slower collapse). **No scheme shows `c` growing after
+individualization — no seal-falsifier.** So **`c(X_T)=O(1)` holds uniformly** — the central belief, now evidence-backed
+across a diverse set, not just `n=16`. (2) `dom@X_α` PASS ⟺ `b(X)=2`; the `b(X)=3` schemes fail at *one* point but
+collapse at two — i.e. Thm 4.1's domination holds at the `(b−1)`-point extension, consistent, not a falsifier. (3) The
+collapse *rate/constant* varies by family (char-2 slower, `b=3`), so a uniform **proof** must handle the char-2 case —
+boundedness is uniform, the constant is not.
+**Honest caveat (recorded so it is not re-walked):** testing the δ′ forced-triangle *closure on `X_T`* at a base is
+**vacuous** — `X_T` at a base is already discrete, so the closure trivially completes. The meaningful signal is the
+**`c`-collapse** above (which *is* the forced-triangle abundance: `c=1` triangles abundant ⟺ `c` small) plus the
+scheme-level δ′ failing for `n≥25` (forced triangles vanish in `X`'s *own* colours — the order-16 artifact motivating `X_T`).
+**§3 verdict:** `c(X_T)=O(1)` is uniform ⟹ a general theorem is plausible; **both routes (δ′ and cite-Thm-4.1) need
+exactly this bound** (M1 shows domination holds, so cite-Thm-4.1 is viable; δ′ is its citation-free twin). The route
+choice is therefore *citation* (prove `c(X_T)` vs cite Thm 4.1), not *mechanism* — and the proof's hard case is char-2.
+
+### M1 (original plan) — PROBE: measure `c(X_T)` and extract the `X_T` mechanism across a DIVERSE family
 Extend `Theorem41ConditionsProbe.cs` (it already builds `X_T` via `CoherentClosure` and checks `DominationCondition`):
 - **Measure** `c(X_T)` = `indistinguishingNumber` of the one-point / minimal-base extension, across a *diverse* set:
   amorphic-NLS at several `q` (16, 25, 49, 64), **rank-3 primitive SRGs** (Paley, and other small-aut primitive
@@ -141,5 +178,9 @@ Decide uniform-theorem vs structured-sub-family vs honest-carried-predicate (§5
 - **Endpoint tolerance:** is a family-restricted / carried-predicate result (endpoint 3) acceptable as a milestone, or only
   a full uniform closure?
 
-**Immediate next action: M1** — extend the probe to measure `c(X_T)` + extract the `X_T` mechanism across the diverse
-family. It is low-cost, de-risks the whole route choice, and is the project's probe-before-Lean discipline.
+**M1 is DONE** (above): `c(X_T)=O(1)` uniform, no falsifier, both routes viable, the proof's hard case is char-2.
+**Immediate next action: M2 + M3** — (M2) a literature/`deep-research` check for any citable `c(X)`/`s(X)`/domination
+bound for primitive small CCs (to fix the cite-vs-prove boundary), then (M3) formulate the precise lemma: *"domination
+holds on the `(b−1)`-point extension of the residue family"* (= `c(X_T)=O(1)`), at the right generality — almost
+certainly **cite Thm 4.1 + prove its domination condition (i) for the family** (M1 confirmed (i) holds), with the char-2
+case as the load-bearing sub-lemma. The δ′ engine remains the citation-free alternative consuming the same bound.

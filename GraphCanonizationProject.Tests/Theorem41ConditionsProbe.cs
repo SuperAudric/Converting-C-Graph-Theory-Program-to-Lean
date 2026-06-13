@@ -1268,4 +1268,121 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         output.WriteLine($"   (b) {(engineGreen ? "the extension-level c=1 dominator closure discretizes from the tested bases with no 1-WL-soundness violations — the B3-on-E propagation is a viable discharge engine"
                                                : "the dominator engine stalls or is 1-WL-unsound at some base — the discharge needs the pair-WL model, not warm-cell-keyed B3-on-E")}");
     }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    //  M1 (c(X_T) scoping) — measure the indistinguishing number across a DIVERSE
+    //  residue family and test whether the X_T forced-triangle mechanism is uniform.
+    //  See docs/chain-descent-cxt-scoping.md §3–§4.
+    // ════════════════════════════════════════════════════════════════════════════
+
+    //  c(X) = indistinguishing number = max over α≠β of #{γ : r(α,γ) = r(β,γ)}
+    //  (the counting form of `Separability.indistinguishingNumber`; constant on each
+    //  relation class, so the max over ordered pairs is c(X)).
+    static int IndistinguishingNumber(int n, int[,] col)
+    {
+        int best = 0;
+        for (int a = 0; a < n; a++)
+            for (int b = 0; b < n; b++)
+            {
+                if (a == b) continue;
+                int c = 0;
+                for (int g = 0; g < n; g++) if (col[a, g] == col[b, g]) c++;
+                if (c > best) best = c;
+            }
+        return best;
+    }
+
+    //  X_T colour matrix = coherent closure with the points of T individualized.
+    static int[,] ExtensionColours(CC x, int[] T)
+    {
+        var inT = new bool[x.N]; foreach (int t in T) inT[t] = true;
+        long B = x.N + 1;
+        return CoherentClosure(x.N, (u, v) =>
+            ((long)x.Rel[u, v] * B + (inT[u] ? u + 1 : 0)) * B + (inT[v] ? v + 1 : 0));
+    }
+
+    //  smallest consecutive base {0..sz-1} whose 2-WL coherent closure is discrete.
+    static int MinBase(CC x, int maxSz)
+    {
+        for (int sz = 1; sz <= maxSz; sz++)
+        {
+            var col = ExtensionColours(x, Enumerable.Range(0, sz).ToArray());
+            var diag = new HashSet<int>(); bool disc = true;
+            for (int u = 0; u < x.N && disc; u++) if (!diag.Add(col[u, u])) disc = false;
+            if (disc) return sz;
+        }
+        return -1;
+    }
+
+    //  Paley scheme on F_p (p prime, p ≡ 1 mod 4) — a rank-3 cyclotomic SRG; a
+    //  small-aut primitive test point of a different rank/construction than amorphic-NLS.
+    static CC PaleyScheme(int q)
+    {
+        var isQR = new bool[q];
+        for (int x = 1; x < q; x++) isQR[(x * x) % q] = true;
+        var rel = new int[q, q];
+        for (int u = 0; u < q; u++)
+            for (int v = 0; v < q; v++)
+                rel[u, v] = (u == v) ? 0 : (isQR[((u - v) % q + q) % q] ? 1 : 2);
+        return BuildCC(q, rel);
+    }
+
+    //  Petersen = Kneser K(5,2): a rank-3 primitive SRG(10,3,0,1) with |Aut| = S₅ —
+    //  a genuinely NON-cyclotomic small primitive scheme (diversity beyond the field families).
+    static CC PetersenScheme()
+    {
+        var subs = new List<(int a, int b)>();
+        for (int a = 0; a < 5; a++) for (int b = a + 1; b < 5; b++) subs.Add((a, b));
+        int n = subs.Count;
+        var rel = new int[n, n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+            {
+                if (i == j) { rel[i, j] = 0; continue; }
+                var (a, b) = subs[i]; var (c, d) = subs[j];
+                bool disjoint = a != c && a != d && b != c && b != d;
+                rel[i, j] = disjoint ? 1 : 2;
+            }
+        return BuildCC(n, rel);
+    }
+
+    [Fact]
+    public void Probe_CXT_ScopingM1()
+    {
+        output.WriteLine("── M1: c(X_T) across a DIVERSE residue family + the X_T mechanism (scoping the general c(X_T) work) ──");
+        output.WriteLine("   does individualizing O(1) points drive the indistinguishing number c down to a SMALL value, uniformly?");
+        var schemes = new List<(string tag, CC x)>();
+        foreach (var (nm, mods) in new[] { ("Z4^2", new[] { 4, 4 }), ("Z2^4", new[] { 2, 2, 2, 2 }), ("Z5^2", new[] { 5, 5 }) })
+        {
+            var xx = AmorphicNLS3Scheme(MakeGroup(nm, mods));
+            if (xx != null) schemes.Add(($"amorph-{nm}", xx));   // rank-4 amorphic-NLS (V≤25: PDS search feasible)
+        }
+        foreach (int q in new[] { 13, 17, 29, 37, 41 }) schemes.Add(($"Paley-{q}", PaleyScheme(q)));  // rank-3 cyclotomic
+        schemes.Add(("Petersen", PetersenScheme()));                                                  // rank-3 non-cyclotomic
+
+        foreach (var (tag, x) in schemes)
+        {
+            int n = x.N;
+            int cX = IndistinguishingNumber(n, x.Rel);
+            int c1 = IndistinguishingNumber(n, ExtensionColours(x, new[] { 0 }));
+            int c2 = n > 2 ? IndistinguishingNumber(n, ExtensionColours(x, new[] { 0, 1 })) : 0;
+            int bX = MinBase(x, 6);
+            // Scheme-level δ′ at the min base {0..b(X)-1}: does the forced-triangle (c=1)
+            // closure on X's OWN colours reach discreteness?  (NB: testing it on X_T's
+            // colours is vacuous — X_T at a base is already discrete — so the meaningful
+            // signal is this scheme-level test + the c-collapse, NOT a closure on X_T.)
+            var bBase = bX > 0 ? Enumerable.Range(0, bX).ToArray() : new[] { 0, 1 };
+            var (rkScheme, _) = DominatorRank(n, x.Rel, bBase);
+            bool schemeCloses = rkScheme.All(r => r >= 0);
+            string dom = n <= 26 ? (CondI(OnePointExtension(x, 0), 0).ok ? "PASS" : "fail") : "—(skip)";
+            output.WriteLine(
+                $"   {tag,-12} n={n,2} rk={x.Rank,3} {(PrimitiveScheme(x) ? "prim" : "imp ")} | " +
+                $"c(X)={cX,3} → c(X₁)={c1,3} → c(X₂)={c2,3} | b(X)={(bX < 0 ? ">6" : bX.ToString()),2} | " +
+                $"dom@Xα={dom,7} | scheme-δ′@b(X)={(schemeCloses ? "✓" : "✗")}");
+        }
+        output.WriteLine("   ⟹ READ (the §3 uniformity question — the c-collapse IS the forced-triangle abundance / domination precondition):");
+        output.WriteLine("     • c(X) grows ~n/2 (dense, unbounded) but COLLAPSES to a small constant after O(1) points (c(X₁)/c(X₂)) — uniformly?");
+        output.WriteLine("     • scheme-level δ′ fails for n≥25 (forced triangles vanish in X's own colours — the order-16 artifact ⟹ need X_T);");
+        output.WriteLine("     • any scheme with c(X₁)/c(X₂) GROWING in n is a candidate seal-falsifier (unbounded-base residue).");
+    }
 }
