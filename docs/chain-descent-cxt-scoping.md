@@ -137,13 +137,49 @@ Evdokimov–Ponomarenko (*Separability number and Schurity number*, EJC 2000 —
 must be proved** before investing in a from-scratch proof. (A `/deep-research` run on "separability number / base number
 bounds for primitive coherent configurations" is the efficient form.)
 
-### M3 — formulate the precise lemma (the math)
-From M1/M2, state the load-bearing lemma at the right generality:
-- Route δ′: *"for the residue family, `X_T` (at a bounded base) is forced-triangle-rigid"* — the uniform pinning rule M1
-  extracts, fed to `dominatorReachable_of_rank`.
-- Route (A)+(B): *"the residue's `X_T` satisfies `DominationCondition`"* — via the parameter bound (needs the `c(X_T)`
-  bound) or a direct geometric domination argument (the probe found (ii)-witnesses geometric — check (i) likewise).
-Decide uniform-theorem vs structured-sub-family vs honest-carried-predicate (§5).
+### M3 — the lemma statements (DRAFTED 2026-06-13) — and a CITATION-FREE candidate
+
+M1 (extended to measure `k` and the parameter bound) sharpened the target: **both `c(X_T)` and `k(X_T)` collapse to
+`O(1)` after `O(1)` individualizations**, so the landed sparse bound `2c(k−1)<n` holds *on the extension* for the whole
+diverse family. That reorganises M3 into one shared open core + two downstream routes, one **citation-free**.
+
+**The shared open core (both routes — the genuine `s(X)` math):**
+> **`ParamBoundOnExtension`.** For the residue family `S`, there is a bounded `m` such that the `m`-point extension
+> `E = X_{T'}` satisfies `2·c(E)·(k(E)−1) < n` — i.e. `c(E)=O(1)` **and** `k(E)=O(1)` after `O(1)` individualizations.
+> *M1 evidence:* holds with `m=2` across `n=10–41`, rank 3/4, cyclotomic/amorphic, char 2/odd — including the char-2
+> `b=3` schemes where `X₂` is genuinely non-discrete (`c=4,k=2`, `2·4·1<n`). A *parameter* statement (two small numbers),
+> sharper than "domination" and now carrying the `k`-bound M1 added. **This is the one piece neither route avoids (§2).**
+
+**Option A — CITATION-FREE (the discovery): apply the LANDED sparse theorem to the extension.**
+The project already has, citation-free + axiom-clean, `separatesAtBoundedBase_of_sparseSeparable`:
+`2c(X)(k(X)−1)<n ⟹ b(X)≤2` (the saAdj forced-triangle connectivity closure completes). "Ruled out" only because the
+*bare* residue is dense — but M1 shows the *extension* meets its hypothesis. So:
+> - **A1 `SparseClosesCC`** — port `separatesAtBoundedBase_of_sparseSeparable` from homogeneous `AssociationScheme` to the
+>   extension `E` (general CC / the warmRefine-refined structure post-`T'`): `2c(E)(k(E)−1)<n ⟹ E discretizes in ≤2 more`.
+>   Reuses the landed `saAdj`/`transport`/`saComp` connectivity argument + the **CC δ′ engine `dominatorReachable_of_rank`
+>   (§CC.10)** which already consumes a pinning rank — A1 is exactly *"sparse ⟹ a pinning rank exists"*.
+> - **A2 = `ParamBoundOnExtension`** (the shared open core above).
+> - **A3 the `hcatch` 1-WL↔2-WL bridge** — coupled as always (the homogeneous sparse theorem lands in 1-WL/warmRefine
+>   directly; on the CC `E` the conclusion is 2-WL, so the warmRefine descent is still owed — main doc §5.1 + `hcatch` finding).
+>
+> **A1 + A2 ⟹ `b(X) ≤ m+2` ⟹ `SeparatesAtBoundedBase`, with NO Thm 4.1 citation** (seal `modulo {G3}` only); finite
+> small-`n` exceptions (where `2c(k−1)<n` fails for tiny `n` — e.g. `Z2⁴` at one point) by `decide` / one extra base point.
+
+**Option B — cite Thm 4.1 (the fallback).** `ParamBoundOnExtension` (the `3c·k(k−1)<n` form) ⟹ `DominationCondition`
+(Lemma 5.2 — a provable double-counting of non-dominators, itself citation-free) ⟹ **[cite `Theorem41Statement`]**
+`Separable E` ⟹ [landed pointed transport §CC.9] recovery ⟹ `…viaExtensionSeparability`. Strictly heavier than A (adds
+the Thm 4.1 citation *and* still needs `ParamBoundOnExtension`), so **B is the fallback** only if A1 (the CC sparse port)
+or A3 turns out harder than the citation.
+
+**Verdict (the user's question — what's possible):**
+- **A citation-free path is PLAUSIBLE** (Option A): the M1-confirmed parameter bound on the extension + the *landed*
+  sparse theorem ported to the CC. No external citation — `modulo {G3}` only.
+- **The irreducible shared open core is `ParamBoundOnExtension`** (`c,k=O(1)` on the `O(1)`-extension) — the `s(X)`
+  content of §2, now sharpened to a 2-parameter bound (both M1-evidenced) feeding a *landed* consumer.
+- **Char-2 is the load-bearing sub-case** (`k(X₁)` doesn't shrink, `k(X₂)` does ⟹ needs `m=2`).
+- **M2 is now targeted:** (1) is `ParamBoundOnExtension` (a `c(X_µ)`/`k(X_µ)` bound for primitive small CCs) citable?
+  (2) is the CC sparse theorem (A1) in the literature (Cartan Thm 3.1 at CC generality)? — these decide whether A1/A2 can
+  be *cited* vs *proved*; a citation-free *proof* of both looks within reach (A1 reuses landed machinery; A2 is the research core).
 
 ### M4 — Lean decomposition (once M3 is pinned)
 - **`k`-half** (infrastructure): `maxValency(X_T) ≤ |Aut_T|` and its geometric decay along the greedy base — mostly
@@ -178,9 +214,14 @@ Decide uniform-theorem vs structured-sub-family vs honest-carried-predicate (§5
 - **Endpoint tolerance:** is a family-restricted / carried-predicate result (endpoint 3) acceptable as a milestone, or only
   a full uniform closure?
 
-**M1 is DONE** (above): `c(X_T)=O(1)` uniform, no falsifier, both routes viable, the proof's hard case is char-2.
-**Immediate next action: M2 + M3** — (M2) a literature/`deep-research` check for any citable `c(X)`/`s(X)`/domination
-bound for primitive small CCs (to fix the cite-vs-prove boundary), then (M3) formulate the precise lemma: *"domination
-holds on the `(b−1)`-point extension of the residue family"* (= `c(X_T)=O(1)`), at the right generality — almost
-certainly **cite Thm 4.1 + prove its domination condition (i) for the family** (M1 confirmed (i) holds), with the char-2
-case as the load-bearing sub-lemma. The δ′ engine remains the citation-free alternative consuming the same bound.
+**M1 + M3 are DONE** (above): `c(X_T)` **and** `k(X_T)` collapse to `O(1)`, the landed sparse bound `2c(k−1)<n` holds on
+the 2-point extension uniformly, and M3 drafted a **citation-free candidate (Option A)** — port the landed sparse theorem
+to the CC + the shared open core `ParamBoundOnExtension`, no Thm 4.1.
+**Immediate next action — pick one:**
+- **(A1) start the citation-free core in Lean:** port `separatesAtBoundedBase_of_sparseSeparable` to the CC `E` / the
+  warmRefine-refined structure (reuses the §CC.10 δ′ rank engine — A1 = "sparse ⟹ a pinning rank exists"). Highest-value,
+  citation-free, mostly reuses landed machinery; makes the path concrete before the hard `A2`.
+- **(M2) targeted literature/`deep-research`:** is `ParamBoundOnExtension` (a `c`/`k` bound for primitive small CC
+  extensions) or the CC sparse theorem citable? — fixes how much of A1/A2 must be proved vs cited.
+- **(A2) the research core:** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue family —
+  the genuine `s(X)` math, char-2 load-bearing. Hardest; do after A1 makes the consumer concrete.

@@ -1275,6 +1275,26 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
     //  See docs/chain-descent-cxt-scoping.md §3–§4.
     // ════════════════════════════════════════════════════════════════════════════
 
+    //  k(X) = max valency = max over u of the largest monochromatic out-neighbourhood
+    //  #{v : r(u,v) = c} over colours c≠r(u,u).  The `k` in the parameter bound 2c(k−1)<n.
+    static int MaxValency(int n, int[,] col)
+    {
+        int best = 0;
+        var cnt = new Dictionary<int, int>();
+        for (int u = 0; u < n; u++)
+        {
+            cnt.Clear();
+            int diag = col[u, u];
+            for (int v = 0; v < n; v++)
+            {
+                if (col[u, v] == diag) continue;        // skip the (refined) diagonal/reflexive colour
+                cnt.TryGetValue(col[u, v], out int c); cnt[col[u, v]] = c + 1;
+            }
+            foreach (var kv in cnt) if (kv.Value > best) best = kv.Value;
+        }
+        return best;
+    }
+
     //  c(X) = indistinguishing number = max over α≠β of #{γ : r(α,γ) = r(β,γ)}
     //  (the counting form of `Separability.indistinguishingNumber`; constant on each
     //  relation class, so the max over ordered pairs is c(X)).
@@ -1363,9 +1383,16 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         foreach (var (tag, x) in schemes)
         {
             int n = x.N;
+            var e1 = ExtensionColours(x, new[] { 0 });
+            var e2 = ExtensionColours(x, new[] { 0, 1 });
             int cX = IndistinguishingNumber(n, x.Rel);
-            int c1 = IndistinguishingNumber(n, ExtensionColours(x, new[] { 0 }));
-            int c2 = n > 2 ? IndistinguishingNumber(n, ExtensionColours(x, new[] { 0, 1 })) : 0;
+            int c1 = IndistinguishingNumber(n, e1);
+            int c2 = n > 2 ? IndistinguishingNumber(n, e2) : 0;
+            int k1 = MaxValency(n, e1);
+            int k2 = MaxValency(n, e2);
+            // the LANDED sparse theorem's bound on the extension: 2·c·(k−1) < n ⟹ b(E)≤2 (discrete in +2 points).
+            bool sparse1 = 2 * c1 * (k1 - 1) < n;
+            bool sparse2 = 2 * c2 * (k2 - 1) < n;
             int bX = MinBase(x, 6);
             // Scheme-level δ′ at the min base {0..b(X)-1}: does the forced-triangle (c=1)
             // closure on X's OWN colours reach discreteness?  (NB: testing it on X_T's
@@ -1377,12 +1404,14 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
             string dom = n <= 26 ? (CondI(OnePointExtension(x, 0), 0).ok ? "PASS" : "fail") : "—(skip)";
             output.WriteLine(
                 $"   {tag,-12} n={n,2} rk={x.Rank,3} {(PrimitiveScheme(x) ? "prim" : "imp ")} | " +
-                $"c(X)={cX,3} → c(X₁)={c1,3} → c(X₂)={c2,3} | b(X)={(bX < 0 ? ">6" : bX.ToString()),2} | " +
-                $"dom@Xα={dom,7} | scheme-δ′@b(X)={(schemeCloses ? "✓" : "✗")}");
+                $"c:{cX,3}→{c1,3}→{c2,3} k:{k1,3}→{k2,3} | 2c(k-1)<n @X₁:{(sparse1 ? "Y" : "n")} @X₂:{(sparse2 ? "Y" : "n")} | " +
+                $"b(X)={(bX < 0 ? ">6" : bX.ToString()),2} dom@Xα={dom,7} sch-δ′={(schemeCloses ? "✓" : "✗")}");
         }
-        output.WriteLine("   ⟹ READ (the §3 uniformity question — the c-collapse IS the forced-triangle abundance / domination precondition):");
-        output.WriteLine("     • c(X) grows ~n/2 (dense, unbounded) but COLLAPSES to a small constant after O(1) points (c(X₁)/c(X₂)) — uniformly?");
-        output.WriteLine("     • scheme-level δ′ fails for n≥25 (forced triangles vanish in X's own colours — the order-16 artifact ⟹ need X_T);");
-        output.WriteLine("     • any scheme with c(X₁)/c(X₂) GROWING in n is a candidate seal-falsifier (unbounded-base residue).");
+        output.WriteLine("   ⟹ READ:");
+        output.WriteLine("     • c(X)~n/2 (dense) but BOTH c AND k COLLAPSE to O(1) after 2 points — uniformly across rank/construction/char;");
+        output.WriteLine("     • ⟹ the LANDED sparse bound 2c(k-1)<n HOLDS on the 2-point extension for EVERY scheme (@X₂:Y) — incl the");
+        output.WriteLine("       harder char-2 b=3 schemes where X₂ is genuinely non-discrete (c=4,k=2): a CITATION-FREE path candidate");
+        output.WriteLine("       (apply the landed sparse theorem to the extension), no Thm 4.1 needed — see docs/chain-descent-cxt-scoping.md M3;");
+        output.WriteLine("     • scheme-level δ′ fails for n≥25 (order-16 artifact); no scheme shows c/k growing post-individualization (no falsifier).");
     }
 }
