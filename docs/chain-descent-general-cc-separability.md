@@ -47,6 +47,16 @@
   **`reachesRigidOrCameron_viaExtensionSeparability`** standing modulo {G3 + cited `Theorem41Statement` +
   conditions-on-the-extension + the catch-up `WarmTwinsAreFiberTwins` + a base}; the homogeneous (A)/Lemma-2.6/Ωᵐ
   obligations DISSOLVED (items 3–4 below).
+  **PLUS (2026-06-12, later): THE CITATION-FREE δ′ CHECKPOINT + STAGE-3 INCREMENTS 1–3 LANDED** (`CascadeAffine.lean
+  §S-bridge`/`§S-bridge-δ`/`§S-stage3`/`§S-gate2`, all axiom-clean, build green). The δ′ **dominator-closure engine**
+  gives a *second, lighter, citation-free* seal checkpoint **`reachesRigidOrCameron_viaDominatorClosure`** carrying
+  only {G3 + `hImprim` + `hclo : ∀ v, DominatorReachable S T v`} — **this bypasses the catch-up
+  `WarmTwinsAreFiberTwins` entirely** (it is now off every critical path). Stage 3 (proving `hclo` for the residue
+  family) is the lone open mathematical content, and increments 1–3 have reframed it: the forced-triangle criterion
+  is now general (any scheme) and reads group-theoretically as **`Stab(α)·γ ∩ Stab(β)·γ = {γ}`**
+  (`dominatorReachable_step_of_stab`), and complete closure is `Aut(S)`-equivariant (`dominatorReachable_univ_image`,
+  so prove at one representative base). **THE ONE REMAINING OPEN PIECE = the single-base closure** (item 6 /
+  increment 4 below): exhibit a base `T₀` and prove the stabiliser-orbit-intersection propagation exhausts `V`.
   **REMAINING, in order (the handoff list):**
   1. ~~**Stage 1.2(a)+(b)**~~ — **LANDED 2026-06-12 (`CoherentConfig.lean §CC.8`, axiom-clean, build green):
      the point-extension *construction* `pointExtension X T` (pair-refinement saturation on
@@ -138,9 +148,13 @@
      orbits) — the geometric form the closure argument wants, since a base has `⋂ Stab(t) = 1`. **Remaining (the
      genuine open math): the single-base closure** — exhibit ONE base `T₀` and show the stabiliser-orbit-intersection
      condition propagates from `T₀` to all of `V`, for the residue family. The probe confirms it; the proof is the
-     orbit/stabiliser combinatorics, now framed group-theoretically.
-  Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
-  threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier; strategy-§15 gaps tracking note.
+     orbit/stabiliser combinatorics, now framed group-theoretically. **⟶ Read §5 "Stage 3 (δ′ route)" before
+     attempting increment 4** — it carries the worked-by-hand planning insights (the cyclic `(r+1−rh)∈H→h=1`
+     arithmetic reduction, the affine-vs-non-affine strategic choice, and the realistic "clean sufficient condition"
+     endpoint).
+  Parked smaller items (see the 2026-06-12 review entry in §8): ~~Route δ feasibility probe~~ (RAN + the engine
+  LANDED — items 5/6 above); pin the `IsLarge` threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier;
+  strategy-§15 gaps tracking note.
   The increment log is §8 — append to it.
 
 ---
@@ -492,6 +506,38 @@ reusing the landed `c=1` machinery, rather than full general Thm 4.1.
    "`Theorem41Hypotheses ⟹ SeparablePointed` *for the residue family's extensions*" (or even per-instance), feed
    the checkpoint through a thin wrapper, and the global cited carry simply retires unused — no statement change
    anywhere in the chain. Plan Stage 3 at the family level, not the full generality of the paper.
+
+### Stage 3 (δ′ route) — the single-base dominator closure (THE recommended route; increment 4 is the open piece)
+**This is the lighter, citation-free Stage 3 and the recommended target** (feeds `reachesRigidOrCameron_viaDominatorClosure`,
+not the Thm-4.1 checkpoint). **Landed (increments 1–3, all axiom-clean):** the forced-triangle criterion at three
+levels — affine orbit-difference (`affineScheme_interNum_eq_one_of_unique` / `dominatorReachable_affine_step`,
+`§S-stage3`), **general any-scheme** (`interNum_eq_one_of_forcedUnique` / `dominatorReachable_step_of_unique`,
+`§S-bridge-δ`), and **schurian stabiliser-orbit** (`dominatorReachable_step_of_stab`: pinning ⟺ `Stab(α)·γ ∩
+Stab(β)·γ = {γ}`); plus the **closure equivariance** (`dominatorReachable_map` / `dominatorReachable_univ_image`:
+complete closure transports across `Aut(S)`-images of the base, so prove at ONE representative).
+**OPEN (increment 4, the genuine `s(C)` core): the single-base closure** — exhibit a bounded base `T₀` and prove
+`∀ v, DominatorReachable S T₀ v`, i.e. the stabiliser-orbit-intersection condition propagates from `T₀` to all of `V`.
+Planning insights for that attack (worked by hand 2026-06-12; **verify before relying**):
+- **The cyclic/affine arithmetic reduction.** For `affineScheme (G0pow β)` (so `G₀ = ⟨mul β⟩`, `H := ⟨β⟩ ≤ F_q^×`,
+  points `= F_q`): γ is pinned by α, β **iff `∀ h ∈ H, (r + 1 − r·h) ∈ H → h = 1`**, where `r := (γ−α)/(β−γ) ∈ F_q^×`.
+  (Derivation: `u−α ∈ H·(γ−α)` ⟹ `u−α = h₁(γ−α)`; the second condition forces `h₂ = 1 + r(1−h₁) ∈ H`; uniqueness
+  is `h₁ = 1` only.) This is the **concrete Frobenius/cyclotomic `s(C)` core** — the same arithmetic the retracted
+  `PowAffineSeparates` targeted, so closing it is the known-open cyclotomic-separability problem, NOT a quick win.
+- **The stabiliser-orbit form is the right general tool** (`dominatorReachable_step_of_stab`). A base `T₀` has
+  `⋂_{t∈T₀} Stab(t) = 1`, so its point-stabiliser orbits must intersect down toward points; the closure question is
+  whether the *pairwise* intersections `Stab(t)·γ ∩ Stab(t')·γ = {γ}` cover enough γ to propagate. This is the
+  cleanest framing and works for **non-affine** residues too.
+- **Strategic — affine vs non-affine (pick deliberately in increment 4).** The affine cyclotomic case is *already
+  closed by citation* (`reachesRigidOrCameron_affineSlice`), so an affine δ′ closure only **removes that citation**
+  (worthwhile but it re-derives the hard Frobenius arithmetic above). The genuinely-**new** coverage is the
+  **non-affine** residue (e.g. the ℤ₄² amorphic-NLS bullseye = `orbitalScheme G`, not `affineScheme`), which the
+  **general** step builder (`dominatorReachable_step_of_unique` / `_of_stab`) now reaches — there is no
+  `translationScheme`-over-ℤ₄² object needed, just `orbitalScheme` of the right group. **Recommendation:** because
+  the full closure is the open `s(C)` research either way, increment 4 should aim for a **clean sufficient
+  condition** on the stabiliser-orbit structure (or a family-restricted / structured-base partial result), not a
+  full family closure in one step — mirroring how the affine slice landed via the cited `TwinsAreSemilinear`
+  predicate. A named clean predicate `DominatorClosesFrom S T₀` carried into a per-family capstone is a legitimate
+  honest endpoint if the arithmetic resists.
 
 ### Stage 4 — assembly + exceptional cases
 1. **Wire (A)+(B) ⟹ seal** · Stages 2,3 + §2 table · mechanical. Instantiate

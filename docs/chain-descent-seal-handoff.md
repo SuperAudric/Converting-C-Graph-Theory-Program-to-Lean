@@ -10,8 +10,13 @@
 > point extension §CC.8, the pointed transport §CC.9), and the **general citation checkpoint is assembled**
 > (`reachesRigidOrCameron_viaExtensionSeparability`, `CascadeAffine.lean §S-gate2`): the seal conditional on
 > exactly {G3 + cited `Theorem41Statement` + its probe-confirmed conditions on the extension + the catch-up
-> `WarmTwinsAreFiberTwins` + a bounded base (free for small)}. Open content = {the catch-up (a pure 1-WL↔pair-WL
-> model statement) + Stage 3 (prove the cited Thm 4.1 conditions for the residue family)}. The gap anatomy below
+> `WarmTwinsAreFiberTwins` + a bounded base (free for small)}. **A SECOND, citation-free checkpoint then superseded
+> it** (`reachesRigidOrCameron_viaDominatorClosure`, `CascadeAffine.lean §S-gate2`): the δ′ forced-triangle
+> *dominator-closure* engine carries only {G3 + `hImprim` + `hclo : ∀ v, DominatorReachable S T v`} — **the catch-up
+> and the Thm 4.1 citation are both off this critical path**. So the **single open mathematical content is now
+> exactly `hclo` for the residue family** (the `c=1` forced-triangle closure of a bounded base exhausts Ω), which
+> the probe verified at every minimal base and which reads group-theoretically as a stabiliser-orbit-intersection
+> propagation (`Stab(α)·γ ∩ Stab(β)·γ = {γ}`, `dominatorReachable_step_of_stab`). The gap anatomy below
 > (G1a/G1b/G2-A/G2-B/G3) remains the correct map of *what was closed and why*; for what is *open*, trust the build
 > doc's STATUS over anything below.
 >
