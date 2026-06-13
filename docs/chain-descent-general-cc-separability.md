@@ -152,6 +152,14 @@
      attempting increment 4** — it carries the worked-by-hand planning insights (the cyclic `(r+1−rh)∈H→h=1`
      arithmetic reduction, the affine-vs-non-affine strategic choice, and the realistic "clean sufficient condition"
      endpoint).
+     **STAGE-3 INCREMENT 4a LANDED 2026-06-13 (`CascadeAffine.lean §S-bridge-δ`, `dominatorReachable_of_rank`,
+     axiom-clean, build green 198s): the iteration engine.** The δ′ toolkit had step builders + equivariance but no
+     way to *iterate* the step to exhaust Ω. `dominatorReachable_of_rank` supplies it: a rank function `rank : Ω → ℕ`
+     with every rank-`0` point in `T` and every positive-rank `γ` forced-triangle-pinned by two strictly-lower-rank
+     points ⟹ `∀ v, DominatorReachable S T v` (strong induction on rank). **Net: the open content is reduced to the
+     concrete, checkable "exhibit a pinning rank" — the clean sufficient condition the endpoint targets.** Remaining
+     (the genuine `s(C)` math): define the rank + verify the pinning per level for the residue family (the cyclic
+     arithmetic core, char-2 midpoints excluded). NEXT = increment 4b: the affine cyclic arithmetic reduction.
   Parked smaller items (see the 2026-06-12 review entry in §8): ~~Route δ feasibility probe~~ (RAN + the engine
   LANDED — items 5/6 above); pin the `IsLarge` threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier;
   strategy-§15 gaps tracking note.
@@ -859,6 +867,25 @@ bullseye) says closure is the likely outcome and the build is worth it.
   just affine). NEXT (Stage 3 increment 4, the genuine open math): the single-base closure — exhibit `T₀` and prove
   the stabiliser-orbit-intersection propagation for the residue family. Note: `affineScheme_interNum_eq_one_of_unique`
   is now a special case of (1), left in place (orbit-difference convenience form; non-load-bearing to refactor).
+- **2026-06-13 — STAGE 3 INCREMENT 4a: THE ITERATION ENGINE — single-base closure from a pinning rank
+  (`CascadeAffine.lean §S-bridge-δ`, `dominatorReachable_of_rank`, axiom-clean `[propext, Classical.choice,
+  Quot.sound]`, no `sorry`, full serial build green 198s; index regenerated, 1 row described).** The δ′ toolkit had
+  step builders (`dominatorReachable_step_of_unique`/`_of_stab`/`_affine_step`) and the equivariance reduction, but
+  **nothing that iterates the step to exhaust Ω** — the actual single-base closure had no engine. `dominatorReachable_of_rank`
+  is that brick: given a rank function `rank : Fin n → ℕ` with (i) every rank-`0` point in `T` and (ii) every
+  positive-rank `γ` forced-triangle-pinned (the `relOfPair`-profile uniqueness of `interNum_eq_one_of_forcedUnique`)
+  by two **strictly-lower-rank** points, strong induction on the rank yields `∀ v, DominatorReachable S T v`. Proof:
+  auxiliary `∀ k v, rank v = k → reachable` by `Nat.strong_induction_on` on `k`; rank-0 ⟹ `base`, positive ⟹ obtain
+  the two lower-rank pinners, apply the IH to each (their rank `< k` via `hv ▸ hα`), feed `dominatorReachable_step_of_unique`.
+  **What it buys:** the family-level open content is now reduced from the global, hard-to-attack "the `c=1` closure
+  exhausts Ω" to the **concrete, checkable** "exhibit a pinning rank" — exactly the *clean sufficient condition* the
+  δ′ Stage-3 endpoint targets (the rank = number of pinning rounds the stabiliser-orbit intersections take to reach
+  each point; a base has `⋂ Stab(t) = 1`). **Net (the open piece is now purely the rank witness):** to close the
+  residue family it remains to *define the rank and verify the pinning at each level* — the genuine `s(C)` arithmetic
+  (the cyclic `(r+1−r·h) ∈ H → h = 1` core, char-2 midpoints excluded), now cleanly isolated behind a general,
+  provable, axiom-clean interface. NEXT (increment 4b, the genuine open math): the affine cyclic arithmetic reduction
+  (`affineScheme` pinning ⟺ `∀ h ∈ H, (r+1−r·h) ∈ H → h = 1`) to translate the rank's pinning obligation into pure
+  `F_q^×`-coset arithmetic, then exhibit a propagating rank/base for the residue family.
 
 ---
 
@@ -905,8 +932,10 @@ these):** the general (any-scheme) criterion **`interNum_eq_one_of_forcedUnique`
 handle); the affine specialisation **`affineScheme_interNum_eq_one_of_unique`** (orbit-of-difference uniqueness) /
 **`dominatorReachable_affine_step`** (`CascadeAffine.lean §S-stage3`); the closure-equivariance reduction
 **`dominatorReachable_map`** / **`dominatorReachable_univ_image`** (complete closure transports across `Aut(S)`-images
-of the base — prove at one representative) (`CascadeAffine.lean §S-bridge-δ`). Open: the single-base closure
-`∀ v, DominatorReachable S T₀ v` (the stabiliser-orbit-intersection propagation for the residue family).
+of the base — prove at one representative); the **iteration engine `dominatorReachable_of_rank`** (a well-founded
+pinning rank ⟹ `∀ v, DominatorReachable S T v` — the brick turning the step builders into a global closure)
+(`CascadeAffine.lean §S-bridge-δ`). Open: the **pinning-rank witness** for the residue family — define `rank` and
+verify the per-level forced-triangle pinning (the genuine `s(C)` arithmetic, cyclic `(r+1−r·h)∈H→h=1` core).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

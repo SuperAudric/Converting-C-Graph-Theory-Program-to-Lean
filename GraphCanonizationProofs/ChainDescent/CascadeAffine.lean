@@ -505,6 +505,38 @@ theorem dominatorReachable_step_of_stab {n : Nat} {S : SchurianScheme n} {T : Fi
       (S.rel_relOfPair γ β) (by rw [S.rel_iff_relOfPair, h2])
     exact ⟨g, hg, hgβ, hgγ⟩
 
+/-- **The single-base closure from a well-founded pinning rank (the iteration engine).** To prove the
+forced-triangle closure of a base `T` exhausts `Ω` it suffices to exhibit a rank function
+`rank : Ω → ℕ` such that (i) every rank-`0` point lies in `T`, and (ii) every positive-rank `γ` is
+forced-triangle-pinned by two points of *strictly smaller* rank (the `relOfPair`-profile uniqueness of
+`interNum_eq_one_of_forcedUnique`). Strong induction on the rank then makes every point
+`DominatorReachable`. This is the missing iteration brick between the step builders
+(`dominatorReachable_step_of_unique` / `_of_stab` / `dominatorReachable_affine_step`) and the closure
+consumer (`separatesAtBoundedBase_of_dominatorClosure`): it reduces the family-level open content from
+the global "the closure exhausts `Ω`" to the concrete, checkable "exhibit a pinning rank" — the clean
+sufficient condition the δ′ Stage-3 endpoint targets (a base has `⋂ Stab(t) = 1`, so the rank is the
+number of pinning rounds the stabiliser-orbit intersections take to reach each point). -/
+theorem dominatorReachable_of_rank {n : Nat} {S : AssociationScheme n} {T : Finset (Fin n)}
+    (rank : Fin n → Nat)
+    (hbase : ∀ v : Fin n, rank v = 0 → v ∈ T)
+    (hstep : ∀ γ : Fin n, 0 < rank γ → ∃ α β : Fin n,
+        rank α < rank γ ∧ rank β < rank γ ∧
+        ∀ u : Fin n, S.relOfPair α u = S.relOfPair α γ →
+          S.relOfPair u β = S.relOfPair γ β → u = γ) :
+    ∀ v : Fin n, DominatorReachable S T v := by
+  have key : ∀ k : Nat, ∀ v : Fin n, rank v = k → DominatorReachable S T v := by
+    intro k
+    induction k using Nat.strong_induction_on with
+    | _ k ih =>
+      intro v hv
+      rcases Nat.eq_zero_or_pos (rank v) with hr0 | hrpos
+      · exact DominatorReachable.base (hbase v hr0)
+      · obtain ⟨α, β, hα, hβ, huniq⟩ := hstep v hrpos
+        exact dominatorReachable_step_of_unique
+          (ih (rank α) (hv ▸ hα) α rfl) (ih (rank β) (hv ▸ hβ) β rfl) huniq
+  intro v
+  exact key (rank v) v rfl
+
 /-- **Every dominator-reachable point is determined.** Induction over `DominatorReachable`: the base
 case is B2 (`determined_of_mem_individualized`), the step is B3′ (`determined_of_forcedTriangle`). The
 bridge from the combinatorial reachability predicate to the WL-singleton-cell fact. -/
