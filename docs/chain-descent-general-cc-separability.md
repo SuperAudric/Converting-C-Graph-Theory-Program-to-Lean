@@ -424,6 +424,13 @@ scheme-level δ′ already closes (n=16, `warmTwinsAreFiberTwins_of_dominatorClo
 
 ### 5.2 The open problem: `c(X_T)` — a bounded-base forced-triangle closure on `X_T`
 
+> **Scoped in depth in [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md)** (2026-06-13): the precise
+> target, why both routes converge on `c(X_T)`, why it is *not* free-citable (it is the `s(X)` content; group base-size
+> theory bounds `b(G)≤b(X)` only), the **central probe-first question** (is the `X_T`-level forced-triangle mechanism
+> uniform across the family, or family-dependent? — this chooses Route δ′ vs cite-Thm-4.1), milestones M1–M4, and honest
+> endpoints/risks. The immediate next action is **M1** (probe `c(X_T)` + extract the `X_T` mechanism across a diverse
+> residue family). The insights below are the standing planning notes it builds on.
+
 **Target:** for the residue family, exhibit a bounded base `T` and prove `∀ v, (pointExtension X T).DominatorReachable T v`
 — equivalently a well-founded **pinning rank** (the iteration engine `dominatorReachable_of_rank` turns "exhibit a rank
 whose every positive level is forced-triangle-pinned by two lower-rank points" into the closure). **Per the STATUS
