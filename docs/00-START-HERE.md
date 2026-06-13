@@ -205,6 +205,14 @@ strictly weaker than the old obligation. Full chronology and every gap:
 > affine-slice / module-adjoin history (the crux `PowAffineSeparates`, the semilinear `ΓL₁` gap, the probes, the
 > non-affine NLS residue) is in [`chain-descent-module-adjoin-plan.md`](./chain-descent-module-adjoin-plan.md) — now
 > background, superseded as the build home.
+>
+> **UPDATE (2026-06-12) — a SECOND, citation-free checkpoint now bypasses (A)+(B).** The δ′ dominator-closure engine
+> (`reachesRigidOrCameron_viaDominatorClosure`, `CascadeAffine.lean §S-gate2`) reduces the seal to a single
+> combinatorial hypothesis `hclo : ∀ v, DominatorReachable S T v` (the `c=1` forced-triangle closure of a bounded
+> base exhausts Ω) — **carrying only {G3 + `hImprim` + `hclo`}, no Thm 4.1 citation and no catch-up**. So (A)+(B) is
+> now *one* of two paths, and the lighter one. The lone open math is the **single-base closure** (`hclo` for the
+> residue family), reframed group-theoretically as `Stab(α)·γ ∩ Stab(β)·γ = {γ}` propagating from a base
+> (`dominatorReachable_step_of_stab`). See the live build doc's STATUS block + §5 Stage 3 (δ′ route) for the plan.
 
 **What NOT to do (a proven boundary, 2026-06-10).** Do not attack G2-B by exhibiting it as a **block / scheme
 congruence**: `intraCellRelations_eq_singleton_zero_of_primitive` proves the intra-cell block route *identically

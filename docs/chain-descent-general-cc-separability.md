@@ -523,6 +523,12 @@ Planning insights for that attack (worked by hand 2026-06-12; **verify before re
   (Derivation: `u−α ∈ H·(γ−α)` ⟹ `u−α = h₁(γ−α)`; the second condition forces `h₂ = 1 + r(1−h₁) ∈ H`; uniqueness
   is `h₁ = 1` only.) This is the **concrete Frobenius/cyclotomic `s(C)` core** — the same arithmetic the retracted
   `PowAffineSeparates` targeted, so closing it is the known-open cyclotomic-separability problem, NOT a quick win.
+  - **Char-2 obstruction (carry into any base-selection — verify):** in characteristic 2 (e.g. `F_16`, the Clebsch
+    residue) the **midpoint** triangles (`r = 1`, i.e. γ the midpoint of α,β) are **never rigid**: the condition
+    `(r+1 − r·h) ∈ H → h = 1` at `r=1` reads `(2 − h) ∈ H → h = 1`, but `2 − h = −h = h ∈ H` always holds, so every
+    `h` is admitted and γ is *not* pinned. ⟹ a propagating base over a char-2 residue must be built from
+    **non-midpoint (`r ≠ 1`)** triangles; do not expect midpoint-symmetric bases to discretize. (This is exactly why
+    the ℤ₂⁴/`F_16` residues sit at WL-depth ≥ 2 empirically — depth-1 midpoint pinning is structurally unavailable.)
 - **The stabiliser-orbit form is the right general tool** (`dominatorReachable_step_of_stab`). A base `T₀` has
   `⋂_{t∈T₀} Stab(t) = 1`, so its point-stabiliser orbits must intersect down toward points; the closure question is
   whether the *pairwise* intersections `Stab(t)·γ ∩ Stab(t')·γ = {γ}` cover enough γ to propagate. This is the
