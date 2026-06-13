@@ -68,6 +68,15 @@
   is now general (any scheme) and reads group-theoretically as **`Stab(α)·γ ∩ Stab(β)·γ = {γ}`**
   (`dominatorReachable_step_of_stab`), and complete closure is `Aut(S)`-equivariant (`dominatorReachable_univ_image`,
   so prove at one representative base).
+- **★ LIVE STATE (2026-06-13, newest — start here; the bullets below this one are history that led to it).**
+  The δ′ forced-triangle closure has been **lifted to the general coherent configuration** (`CoherentConfig.lean
+  §CC.10`, axiom-clean) so it runs on the **point extension `X_T`**, not the bare scheme — because a probe
+  (`Probe_RainbowRigidFamily`) showed the *scheme-level* δ′ and rainbow-rigidity are **order-16 artifacts** (the
+  `n=25` amorphic-NLS residue recovers at `b(X)=2` but only via `X_T`'s finer colours). The citation-free chain is now
+  `DominatorReachable`-closure-on-`X_T` ⟹ (modulo the one carried hypothesis **`Sharp`**, true for `X_T`) `X_T`
+  complete ⟹ `T` a base ⟹ `b(X) ≤ |T|`. **THE LIVE NEXT STEP = prove `Sharp (pointExtension X T)`** (then wire
+  `X_T`-complete ⟹ `SeparatesAtBoundedBase`, then an extension-level pinning rank for the family). Full ranked NEXT in
+  the "UPDATE (2026-06-13, latest)" block below; the engine decls are in §8's last two entries + §9.
 - **CURRENT FRONTIER (2026-06-13) — the δ′ Stage-3 toolkit is COMPLETE; the target is now the NON-AFFINE residue,
   and its closure CONSTRUCTION has been extracted.** Since the 2026-06-12 state above: the full δ′ closure toolkit
   landed (the iteration engine `dominatorReachable_of_rank`, the cyclotomic `F_q`-power and ratio step builders, the
@@ -102,11 +111,27 @@
     rainbow-rigid family; `clebschZ4_rainbowRigid` (`decide`) confirms non-vacuity on the genuine bullseye. The
     family's `hclo` now reduces to {(a) `RainbowRigid`, (b) a rainbow rank from a bounded base} — clean checkable
     conditions. Still `AssociationScheme`-level + parameter-scoped to `(16,5,0,2)`-type amorphic rank-4.
-  **REMAINING NEXT (ranked):** (i) exhibit `RainbowRigid` + a rainbow rank for a *parametric* amorphic-NLS family
-  (beyond order-16) so the family lemma bites on more than one scheme; (ii) the post-base `c(X_T)` bound for
-  *non-rainbow* primitives (the genuinely general open core, §1B); (iii) the deferred `SchurianScheme`/seal-capstone
-  wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
-  **(2) remains a dead end** (SchurianScheme via `decide` infeasible — §7). Original ranked recommendation kept below
+  **UPDATE (2026-06-13, latest — (i) REFUTED + the δ′ ENGINE LIFTED TO THE EXTENSION; THIS IS THE LIVE FRONTIER):**
+  - **(i) "parametric rainbow family" is REFUTED** (`Probe_RainbowRigidFamily`, §8): rainbow-rigidity is NOT
+    parametric — it (and the *scheme-level* δ′ closure) are **order-16 artifacts**. At `n=25` (`Z5²`) the
+    distinct-colour intersection number is already `4` (not `≤1`), and scheme-level δ′ does not close even from an
+    8-base — *yet `Z5²` recovers at `b(X)=2` via full WL*, so the recovery lives in the **extension `X_T`'s finer
+    colours**, not `X`'s rank-4 ones. So `dominatorReachable_of_rainbowRank` covers only the order-16 point; do not
+    formalise a parametric rainbow family.
+  - **The δ′ engine is now LIFTED to the general CC** (`CoherentConfig.lean §CC.10`, §8): `DominatorReachable` +
+    criterion + rank engine + the discreteness payoff `allSingletonFiber_of_dominatorClosure` all run on a
+    `CoherentConfig`, i.e. on `X_T = pointExtension X T` — the level where the `n≥25` `c=1` triangles live. The chain
+    is `DominatorReachable`-closure-on-`X_T` ⟹ (modulo the carried `Sharp`) `X_T` complete ⟹ `T` a base ⟹
+    `b(X) ≤ |T|`. `Sharp` ("a singleton fiber sees the whole fiber structure") is FALSE for a general CC, TRUE for
+    `X_T` — the lone carried hypothesis.
+  - **THE LIVE NEXT (ranked, the handoff target):** **(1) prove `Sharp (pointExtension X T)`** — the coherent
+    closure's fibers are WL-stable, so a singleton fiber's relations are constant on fibers; this makes
+    `allSingletonFiber_of_dominatorClosure` unconditional on `X_T`. **(2) wire `X_T`-complete ⟹
+    `SeparatesAtBoundedBase`** through the §CC.9 / `IsPointExtension` bridge (the extension-to-scheme descent already
+    has `IsPointExtension.aut_fixes` / `Refines.aut_descends`). **(3) supply a bounded-base pinning rank for the
+    amorphic-NLS family ON `X_T`** — the genuinely open `c(X_T)` content (§1B), now on the right object. Then
+    (4, deferred) the `SchurianScheme`/seal-capstone wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
+  **(2-old) the SchurianScheme-via-`decide` route remains a dead end** (§7). Original ranked recommendation kept below
   for provenance.
   1. **The real frontier = the GENERAL argument** (close G2-B for the *family*, not one scheme). The load-bearing
      open question, per §1A: does *primitive + small + non-Cameron ⟹ Thm 4.1 domination* — i.e. does Cameron's
