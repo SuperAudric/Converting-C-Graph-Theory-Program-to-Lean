@@ -166,9 +166,15 @@
      a `G0pow g`-orbit relation is multiplication by `g^k` through the field iso (`∃ g₀ ∈ G0pow g, g₀ v = w ↔
      ∃ k, g^k·efield.symm v = efield.symm w`, from `sigmaPow_zpow_apply`). `dominatorReachable_G0pow_step`: the
      forced-triangle step builder with `huniq` in `F_q` powers (`g^k·(fieldOf u−fieldOf α)=fieldOf γ−fieldOf α`,
-     etc.). So the δ′ cyclotomic closure now runs on `F_q` arithmetic with no orbital bookkeeping. NEXT = incr 4c:
-     the ratio form (`(r+1−r·h) ∈ ⟨g⟩ → h=1`, `r=(c−a)/(b−c)`) — field-division packaging of 4b that exposes the
-     char-2-midpoint obstruction; then the rank witness (the open `s(C)` content).
+     etc.). So the δ′ cyclotomic closure now runs on `F_q` arithmetic with no orbital bookkeeping.
+     **STAGE-3 INCREMENT 4c LANDED 2026-06-13 (`CascadeAffine.lean §S-stage3-δ`, `dominatorReachable_G0pow_ratio_step`,
+     axiom-clean, build green 115s first try): the ratio-form step builder.** Field-division packaging of 4b: for
+     distinct field coords, `γ` is pinned once the only `h` with `h ∈ ⟨g⟩` and `1 + r·(1−h) ∈ ⟨g⟩` (`r=(c−a)/(b−c)`)
+     is `h=1` — the `(r+1−r·h) ∈ ⟨g⟩ → h=1` reduction, making the **char-2-midpoint obstruction** explicit in Lean
+     (`r=1 ⟹ 2−h=h` in char 2 ⟹ nothing pins). **The δ′ cyclotomic toolkit is now COMPLETE** (4a iteration engine +
+     4b `F_q`-power step + 4c ratio step). The lone open piece is the **pinning-rank witness**: exhibit `T₀` + a rank
+     whose per-level pinning these builders discharge — the genuine open `s(C)` math (affine slice cited-closed, so the
+     new-coverage target is the non-affine residue via the general/schurian step builders). NEXT = the rank witness.
   Parked smaller items (see the 2026-06-12 review entry in §8): ~~Route δ feasibility probe~~ (RAN + the engine
   LANDED — items 5/6 above); pin the `IsLarge` threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier;
   strategy-§15 gaps tracking note.
@@ -912,6 +918,24 @@ bullseye) says closure is the likely outcome and the build is worth it.
   `∀ h ∈ ⟨g⟩, (r+1−r·h) ∈ ⟨g⟩ → h = 1` with `r = (fieldOf γ − fieldOf α)/(fieldOf β − fieldOf γ)` (needs `b ≠ c` and
   unit/nonzero handling) — it divides out the field differences and makes the char-2-midpoint obstruction (`r=1` never
   pins) explicit; then the genuine open piece, the pinning-rank witness for the residue family.
+- **2026-06-13 — STAGE 3 INCREMENT 4c: THE RATIO-FORM STEP BUILDER (`CascadeAffine.lean §S-stage3-δ`,
+  `dominatorReachable_G0pow_ratio_step`, axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full
+  serial build green 115s first try; index regenerated, 1 row described).** The field-division packaging of 4b: the
+  cyclotomic forced-triangle step with the two `F_q`-difference equations *divided through*. For distinct field
+  coordinates (`fieldOf γ ≠ fieldOf α`, `fieldOf β ≠ fieldOf γ`), `γ` is pinned by `α, β` once the only `h ∈ F_q`
+  that is **both** a power of `g` and has `1 + r·(1−h)` a power of `g` — cross-ratio `r = (fieldOf γ − fieldOf α)/
+  (fieldOf β − fieldOf γ)` — is `h = 1`. Proof: from `dominatorReachable_G0pow_step`, set `h = (x−a)/(c−a)` for the
+  variable `x = fieldOf u` (cond 1 ⟺ `h ∈ ⟨g⟩`, via `eq_div_iff` + `zpow_neg`), compute `(b−x)/(b−c) = 1 + r(1−h)`
+  (`field_simp; ring`) so cond 2 ⟺ `1 + r(1−h) ∈ ⟨g⟩`, then `hpin` gives `h = 1 ⟺ x = c ⟺ u = γ` (`fieldOf`
+  injective). **This is the `(r+1 − r·h) ∈ ⟨g⟩ → h = 1` reduction of §5 — the closest Lean form to the open
+  cyclotomic `s(C)` arithmetic, and it makes the char-2-midpoint obstruction explicit in the Lean statement**
+  (`r = 1` ⟹ `1 + (1−h) = 2 − h = h` in char 2 ⟹ every `h` admitted ⟹ nothing pins; char-2 residues need
+  non-midpoint triangles). **Net: the δ′ cyclotomic toolkit is complete** — iteration engine (4a) + `F_q`-power
+  step (4b) + ratio-arithmetic step (4c). The lone open piece is the **pinning-rank witness**: exhibit a base `T₀`
+  and a rank function whose per-level pinning is discharged by `dominatorReachable_G0pow_ratio_step` (the genuine
+  open `s(C)` mathematics; the affine slice is cited-closed, so the new coverage target is the non-affine residue,
+  where the general/schurian step builders apply instead). NEXT = the rank witness (open math) — or, lower-priority,
+  the post-Stage-3 full `hImprim` discharge.
 
 ---
 
@@ -962,7 +986,9 @@ of the base — prove at one representative); the **iteration engine `dominatorR
 pinning rank ⟹ `∀ v, DominatorReachable S T v` — the brick turning the step builders into a global closure)
 (`CascadeAffine.lean §S-bridge-δ`); the **cyclotomic arithmetic reduction** **`fieldOf`** (point→`F_q`) /
 **`G0pow_orbit_iff`** (a `G0pow g`-orbit relation ⟺ multiplication by `g^k` through the field iso) /
-**`dominatorReachable_G0pow_step`** (the forced-triangle step builder with `huniq` in pure `F_q` powers)
+**`dominatorReachable_G0pow_step`** (the forced-triangle step builder with `huniq` in pure `F_q` powers) /
+**`dominatorReachable_G0pow_ratio_step`** (the ratio form `(r+1−r·h)∈⟨g⟩→h=1`, `r=(c−a)/(b−c)` — divides out the
+field differences, exposes the char-2-midpoint obstruction)
 (`CascadeAffine.lean §S-stage3-δ`). Open: the **pinning-rank witness** for the residue family — define `rank` and
 verify the per-level `F_q`-power pinning (the genuine `s(C)` arithmetic, cyclic `(r+1−r·h)∈⟨g⟩→h=1` core).
 

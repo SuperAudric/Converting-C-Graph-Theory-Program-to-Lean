@@ -2344,6 +2344,59 @@ theorem dominatorReachable_G0pow_step (hd : d ≠ 0) (g : (GaloisField p d)ˣ)
     rw [map_sub, map_sub] at hk
     exact ⟨k, hk⟩
 
+/-- **The cyclotomic ratio-form step builder (incr 4c — the `s(C)` arithmetic boundary).** The
+forced-triangle step with the two field-difference equations *divided through*: for distinct field
+coordinates (`c ≠ a`, `b ≠ c`), `γ` is pinned by `α, β` once the only field element `h` that is **both** a
+power of `g` and has `1 + r·(1 − h)` a power of `g` (with the cross-ratio `r = (c−a)/(b−c)`,
+`a = fieldOf α`, etc.) is `h = 1`. Obtained from `dominatorReachable_G0pow_step` by setting
+`h = (x−a)/(c−a)` for the variable point `x = fieldOf u` (so cond 1 ⟺ `h ∈ ⟨g⟩`) and computing
+`(b−x)/(b−c) = 1 + r(1−h)` (so cond 2 ⟺ `1 + r(1−h) ∈ ⟨g⟩`); `h = 1 ⟺ x = c ⟺ u = γ`. This is the
+`(r+1 − r·h) ∈ ⟨g⟩ → h = 1` reduction of §5 — the closest Lean form to the open cyclotomic `s(C)`
+arithmetic, and the one exposing the **char-2-midpoint obstruction**: when `r = 1` (γ the midpoint),
+`1 + (1 − h) = 2 − h = h` in characteristic 2, so *every* `h` satisfies the antecedent and nothing is
+pinned — char-2 residues need non-midpoint triangles (`docs/chain-descent-general-cc-separability.md`
+§5 "Stage 3 (δ′ route)"). -/
+theorem dominatorReachable_G0pow_ratio_step (hd : d ≠ 0) (g : (GaloisField p d)ˣ)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G0pow hd g)
+    {T : Finset (Fin (p ^ d))} {α β γ : Fin (p ^ d)}
+    (hca : fieldOf hd γ ≠ fieldOf hd α) (hbc : fieldOf hd β ≠ fieldOf hd γ)
+    (hα : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T α)
+    (hβ : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T β)
+    (hpin : ∀ h : GaloisField p d,
+        (∃ k : ℤ, (g : GaloisField p d) ^ k = h) →
+        (∃ k : ℤ, (g : GaloisField p d) ^ k
+          = 1 + (fieldOf hd γ - fieldOf hd α) / (fieldOf hd β - fieldOf hd γ) * (1 - h)) →
+        h = 1) :
+    DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T γ := by
+  refine dominatorReachable_G0pow_step hd g hneg hα hβ (fun u hc1 hc2 => ?_)
+  obtain ⟨k1, hk1⟩ := hc1
+  obtain ⟨k2, hk2⟩ := hc2
+  rw [Units.val_zpow_eq_zpow_val] at hk1 hk2
+  set a := fieldOf hd α with ha
+  set b := fieldOf hd β with hb
+  set c := fieldOf hd γ with hc
+  set x := fieldOf hd u with hxdef
+  have hca' : c - a ≠ 0 := sub_ne_zero.mpr hca
+  have hbc' : b - c ≠ 0 := sub_ne_zero.mpr hbc
+  have hxa : x - a ≠ 0 := fun h0 => hca' (by rw [h0, mul_zero] at hk1; exact hk1.symm)
+  have hbx : b - x ≠ 0 := fun h0 => hbc' (by rw [h0, mul_zero] at hk2; exact hk2.symm)
+  set h := (x - a) / (c - a) with hh
+  have hg1 : (g : GaloisField p d) ^ k1 = (c - a) / (x - a) := (eq_div_iff hxa).2 hk1
+  have hg2 : (g : GaloisField p d) ^ k2 = (b - c) / (b - x) := (eq_div_iff hbx).2 hk2
+  have halg : (b - x) / (b - c) = 1 + (c - a) / (b - c) * (1 - h) := by
+    rw [hh]; field_simp; ring
+  have hph : ∃ k : ℤ, (g : GaloisField p d) ^ k = h := by
+    refine ⟨-k1, ?_⟩; rw [zpow_neg, hg1, hh, inv_div]
+  have hpw : ∃ k : ℤ, (g : GaloisField p d) ^ k = 1 + (c - a) / (b - c) * (1 - h) := by
+    refine ⟨-k2, ?_⟩; rw [zpow_neg, hg2, inv_div, halg]
+  have hh1 : h = 1 := hpin h hph hpw
+  have hxc : x = c := by
+    have he : x - a = c - a := (div_eq_one_iff_eq hca').1 (by rw [← hh]; exact hh1)
+    exact sub_left_inj.1 he
+  have hfin : fieldOf hd u = fieldOf hd γ := by rw [← hxdef, ← hc]; exact hxc
+  simp only [fieldOf] at hfin
+  exact affineE.symm.injective ((efield hd).symm.injective hfin)
+
 /-! #### The genuine F2b separation crux + seal capstone, over `G0pow β` (the rank-≥3 leak candidate)
 
 `CyclicAffineSeparates` / `reachesRigidOrCameron_viaCyclicSeparation` (above) are stated over
