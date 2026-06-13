@@ -537,6 +537,35 @@ theorem dominatorReachable_of_rank {n : Nat} {S : AssociationScheme n} {T : Fins
   intro v
   exact key (rank v) v rfl
 
+/-- **One-round closure (the cleanest checkable sufficient condition).** If every non-base point `γ` is
+forced-triangle-pinned (the `relOfPair`-profile uniqueness) by *two base points* `α, β ∈ T`, then the
+dominator closure of `T` already exhausts `Ω` in a single round: `∀ v, DominatorReachable S T v`. The
+`rank ∈ {0,1}` instance of `dominatorReachable_of_rank` — the simplest discharge of the seal's `hclo`,
+applicable whenever the base alone pins everything (the odd-characteristic / non-midpoint regime; char-2
+residues genuinely need multi-round and use the full rank engine). -/
+theorem dominatorReachable_of_basePinsAll {n : Nat} {S : AssociationScheme n} {T : Finset (Fin n)}
+    (hpin : ∀ γ : Fin n, γ ∉ T → ∃ α ∈ T, ∃ β ∈ T,
+        ∀ u : Fin n, S.relOfPair α u = S.relOfPair α γ →
+          S.relOfPair u β = S.relOfPair γ β → u = γ) :
+    ∀ v : Fin n, DominatorReachable S T v := by
+  refine dominatorReachable_of_rank (fun v => if v ∈ T then 0 else 1) (fun v hv => ?_)
+    (fun γ hγ => ?_)
+  · by_contra hvT
+    have hv' : (if v ∈ T then (0:ℕ) else 1) = 0 := hv
+    rw [if_neg hvT] at hv'
+    exact one_ne_zero hv'
+  · have hγT : γ ∉ T := by
+      intro h
+      have hγ' : 0 < (if γ ∈ T then (0:ℕ) else 1) := hγ
+      rw [if_pos h] at hγ'
+      exact lt_irrefl 0 hγ'
+    obtain ⟨α, hαT, β, hβT, hu⟩ := hpin γ hγT
+    refine ⟨α, β, ?_, ?_, hu⟩
+    · show (if α ∈ T then (0:ℕ) else 1) < (if γ ∈ T then (0:ℕ) else 1)
+      rw [if_pos hαT, if_neg hγT]; exact one_pos
+    · show (if β ∈ T then (0:ℕ) else 1) < (if γ ∈ T then (0:ℕ) else 1)
+      rw [if_pos hβT, if_neg hγT]; exact one_pos
+
 /-- **Every dominator-reachable point is determined.** Induction over `DominatorReachable`: the base
 case is B2 (`determined_of_mem_individualized`), the step is B3′ (`determined_of_forcedTriangle`). The
 bridge from the combinatorial reachability predicate to the WL-singleton-cell fact. -/
@@ -2296,6 +2325,13 @@ multiplicative `⟨g⟩`-orbit. -/
 noncomputable def fieldOf (hd : d ≠ 0) (x : Fin (p ^ d)) : GaloisField p d :=
   (efield hd).symm (affineE.symm x)
 
+/-- `fieldOf` is injective (it is the composite of two injective `Equiv.symm` maps). The distinctness
+transport: distinct affine points have distinct field coordinates. -/
+theorem fieldOf_injective (hd : d ≠ 0) : Function.Injective (fieldOf (p := p) (d := d) hd) := by
+  intro x y h
+  simp only [fieldOf] at h
+  exact affineE.symm.injective ((efield hd).symm.injective h)
+
 /-- **The cyclotomic orbit reduction (the core arithmetic translation).** A `G0pow g`-orbit relation between
 coordinate vectors `v, w` is exactly multiplication by a power of `g` through the field iso:
 `∃ g₀ ∈ G0pow g, g₀ v = w` ↔ `∃ k : ℤ, g^k · (efield.symm v) = efield.symm w`. From `sigmaPow_zpow_apply`
@@ -2396,6 +2432,110 @@ theorem dominatorReachable_G0pow_ratio_step (hd : d ≠ 0) (g : (GaloisField p d
   have hfin : fieldOf hd u = fieldOf hd γ := by rw [← hxdef, ← hc]; exact hxc
   simp only [fieldOf] at hfin
   exact affineE.symm.injective ((efield hd).symm.injective hfin)
+
+/-- In a field, the powers of `-1` are exactly `±1`: `(∃ k:ℤ, (-1)^k = h) ↔ h = 1 ∨ h = -1`. The
+multiplicative-group `⟨-1⟩ = {1, -1}` fact, in `zpow` form for the `H = {±1}` family. -/
+private theorem exists_zpow_neg_one_iff {F : Type*} [Field F] {h : F} :
+    (∃ k : ℤ, (-1 : F) ^ k = h) ↔ h = 1 ∨ h = -1 := by
+  constructor
+  · rintro ⟨k, rfl⟩
+    rcases Int.even_or_odd k with he | ho
+    · exact Or.inl he.neg_one_zpow
+    · exact Or.inr ho.neg_one_zpow
+  · rintro (rfl | rfl)
+    · exact ⟨0, zpow_zero _⟩
+    · exact ⟨1, zpow_one _⟩
+
+/-- **The `H = {±1}` cyclotomic family closes from any 2-base (odd characteristic) — the first end-to-end
+discharge of the δ′ seal's closure hypothesis on a real `affineScheme` family.** For `g = -1` (so
+`G₀ = ⟨mul (-1)⟩`, `⟨g⟩ = {1, -1}`) over odd characteristic (`p ≠ 2`), **every** point is
+dominator-reachable from any 2-element base `{α, β}` (`α ≠ β`): each `γ ∉ {α,β}` is forced-triangle-pinned
+by `α, β` in one round. Arithmetic (via `dominatorReachable_G0pow_ratio_step`): the cross-ratio
+`r = (c−a)/(b−c)` of pairwise-distinct points satisfies `r ∉ {0, -1}`, so for the only nontrivial
+`h = -1 ∈ ⟨g⟩` the value `1 + r·(1 − (-1)) = 1 + 2r ∉ {1, -1} = ⟨g⟩` (uses `2 ≠ 0`), the pinning
+antecedent fails, and only `h = 1` survives. This proves `∀ v, DominatorReachable … {α,β} v`, the seal's
+`hclo`, for the whole `g = -1` family — removing the cyclotomic citation for it and showing the δ′ route
+is not vacuous. (Char ≠ 2 is essential: it is exactly the char-2-midpoint obstruction — at `p = 2`,
+`⟨g⟩ = {1}` and the argument collapses.) -/
+theorem dominatorReachable_G0pow_neg (hd : d ≠ 0) (hp2 : p ≠ 2)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G0pow hd (-1))
+    {α β : Fin (p ^ d)} (hαβ : α ≠ β) :
+    ∀ v : Fin (p ^ d),
+      DominatorReachable (affineScheme (G0pow hd (-1)) hneg).toAssociationScheme {α, β} v := by
+  have h2 : (2 : GaloisField p d) ≠ 0 := by
+    rw [show (2 : GaloisField p d) = ((2 : ℕ) : GaloisField p d) by push_cast; ring,
+      Ne, CharP.cast_eq_zero_iff (GaloisField p d) p 2]
+    intro hdvd
+    rcases (Nat.prime_two.eq_one_or_self_of_dvd p hdvd) with h | h
+    · exact (Fact.out : p.Prime).ne_one h
+    · exact hp2 h
+  have hinj := fieldOf_injective (p := p) (d := d) hd
+  intro v
+  by_cases hv : v = α ∨ v = β
+  · rcases hv with h | h
+    · rw [h]; exact DominatorReachable.base (Finset.mem_insert_self α {β})
+    · rw [h]; exact DominatorReachable.base (Finset.mem_insert_of_mem (Finset.mem_singleton_self β))
+  · push Not at hv
+    obtain ⟨hvα, hvβ⟩ := hv
+    have hca : fieldOf hd v ≠ fieldOf hd α := fun h => hvα (hinj h)
+    have hbc : fieldOf hd β ≠ fieldOf hd v := fun h => hvβ (hinj h).symm
+    have hab : fieldOf hd α ≠ fieldOf hd β := fun h => hαβ (hinj h)
+    refine dominatorReachable_G0pow_ratio_step hd (-1) hneg hca hbc
+      (DominatorReachable.base (Finset.mem_insert_self α {β}))
+      (DominatorReachable.base (Finset.mem_insert_of_mem (Finset.mem_singleton_self β)))
+      (fun h hh hw => ?_)
+    simp only [Units.val_neg, Units.val_one] at hh hw
+    rw [exists_zpow_neg_one_iff] at hh hw
+    rcases hh with rfl | rfl
+    · rfl
+    · exfalso
+      set r := (fieldOf hd v - fieldOf hd α) / (fieldOf hd β - fieldOf hd v) with hr
+      have hr0 : r ≠ 0 := by
+        rw [hr]; exact div_ne_zero (sub_ne_zero.mpr hca) (sub_ne_zero.mpr hbc)
+      have hrm1 : r ≠ -1 := by
+        rw [hr]; intro heq
+        rw [div_eq_iff (sub_ne_zero.mpr hbc)] at heq
+        exact hab (by linear_combination -heq)
+      rcases hw with hw1 | hw1
+      · rcases mul_eq_zero.mp (show (2 : GaloisField p d) * r = 0 by linear_combination hw1) with h | h
+        · exact h2 h
+        · exact hr0 h
+      · rcases mul_eq_zero.mp
+          (show (2 : GaloisField p d) * (r + 1) = 0 by linear_combination hw1) with h | h
+        · exact h2 h
+        · exact hrm1 (by linear_combination h)
+
+/-- **The seal on the `H = {±1}` cyclotomic family, with the δ′ closure DISCHARGED (not assumed).**
+Instantiates the citation-free checkpoint `reachesRigidOrCameron_viaDominatorClosure` at
+`affineScheme (G0pow (-1))` (odd characteristic), feeding its closure hypothesis `hclo` from
+`dominatorReachable_G0pow_neg` (any 2-base closes). So the seal holds for this whole family carrying only
+the *standard* {G3 `hClassify` + `hne` + `hrank` + `hImprim`} — **the open `hclo` is gone, proved rather
+than carried.** The first family on which the δ′ route discharges the seal's open mathematical content
+outright; concrete evidence the route is not vacuous. (rank ≥ 3 — i.e. `q ≥ 5` — is carried as `hrank`,
+the only restriction beyond odd characteristic.) -/
+theorem reachesRigidOrCameron_viaG0powNeg {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat} (hbd : 2 ≤ bound)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (hd : d ≠ 0) (hp2 : p ≠ 2)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G0pow hd (-1))
+    (hne : ∀ i : Fin ((affineScheme (G0pow hd (-1)) hneg).rank + 1),
+        ∃ v w, (affineScheme (G0pow hd (-1)) hneg).rel i v w = true)
+    (hrank : 2 ≤ (affineScheme (G0pow hd (-1)) hneg).rank)
+    {α β : Fin (p ^ d)} (hαβ : α ≠ β)
+    (hImprim : ¬ (affineScheme (G0pow hd (-1)) hneg).toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd (-1)) hneg)
+          ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd (-1)) hneg)) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (G0pow hd (-1)) hneg)
+        ∨ AbelianConsumed (p ^ d) (affineScheme (G0pow hd (-1)) hneg))
+      ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (G0pow hd (-1)) hneg) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (G0pow hd (-1)) hneg) := by
+  refine reachesRigidOrCameron_viaDominatorClosure hClassify
+    (affineScheme (G0pow hd (-1)) hneg) hne hrank (T := {α, β}) ?_ ?_ hImprim
+  · calc ({α, β} : Finset (Fin (p ^ d))).card
+        ≤ ({β} : Finset (Fin (p ^ d))).card + 1 := Finset.card_insert_le _ _
+      _ = 2 := by simp
+      _ ≤ bound := hbd
+  · exact dominatorReachable_G0pow_neg hd hp2 hneg hαβ
 
 /-! #### The genuine F2b separation crux + seal capstone, over `G0pow β` (the rank-≥3 leak candidate)
 

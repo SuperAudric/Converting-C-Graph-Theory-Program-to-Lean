@@ -174,7 +174,17 @@
      (`r=1 ⟹ 2−h=h` in char 2 ⟹ nothing pins). **The δ′ cyclotomic toolkit is now COMPLETE** (4a iteration engine +
      4b `F_q`-power step + 4c ratio step). The lone open piece is the **pinning-rank witness**: exhibit `T₀` + a rank
      whose per-level pinning these builders discharge — the genuine open `s(C)` math (affine slice cited-closed, so the
-     new-coverage target is the non-affine residue via the general/schurian step builders). NEXT = the rank witness.
+     new-coverage target is the non-affine residue via the general/schurian step builders).
+     **STAGE-3 — FIRST END-TO-END FAMILY CLOSURE LANDED 2026-06-13 (`§S-bridge-δ` + `§S-stage3-δ`;
+     `dominatorReachable_of_basePinsAll`, `dominatorReachable_G0pow_neg`, `reachesRigidOrCameron_viaG0powNeg`,
+     all axiom-clean, build green, all first try).** The first **actual discharge** of the open `hclo` on a real
+     `affineScheme` family: for `g = -1` (`⟨g⟩ = {±1}`), **odd characteristic**, every point is dominator-reachable
+     from any 2-base (one round) — `dominatorReachable_G0pow_neg` — because the cross-ratio of distinct points avoids
+     `{0,-1}`, so `1+2r ∉ {±1}` and only `h=1` survives. `reachesRigidOrCameron_viaG0powNeg` feeds it into the δ′
+     checkpoint: **the seal on the whole `g=-1` family (q ≥ 5) with `hclo` PROVED, not carried** (only standard
+     {G3+hne+hrank+hImprim} remain). Proves the δ′ route is non-vacuous; char≠2 is exactly the char-2-midpoint
+     obstruction. **Still open (the genuine `s(C)` core):** larger `H` (multi-round), char-2 (Clebsch), and the
+     **non-affine** residue (the new-coverage target). NEXT = larger `H` / multi-round rank witness, or non-affine.
   Parked smaller items (see the 2026-06-12 review entry in §8): ~~Route δ feasibility probe~~ (RAN + the engine
   LANDED — items 5/6 above); pin the `IsLarge` threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier;
   strategy-§15 gaps tracking note.
@@ -936,6 +946,28 @@ bullseye) says closure is the likely outcome and the build is worth it.
   open `s(C)` mathematics; the affine slice is cited-closed, so the new coverage target is the non-affine residue,
   where the general/schurian step builders apply instead). NEXT = the rank witness (open math) — or, lower-priority,
   the post-Stage-3 full `hImprim` discharge.
+- **2026-06-13 — STAGE 3, THE MATH: FIRST END-TO-END CLOSURE OF A REAL FAMILY (`CascadeAffine.lean §S-bridge-δ` +
+  `§S-stage3-δ`; `dominatorReachable_of_basePinsAll`, `fieldOf_injective`, `exists_zpow_neg_one_iff` (private),
+  `dominatorReachable_G0pow_neg`, `reachesRigidOrCameron_viaG0powNeg`; all axiom-clean `[propext, Classical.choice,
+  Quot.sound]`, no `sorry`, full serial build green ~94–128s, all first try; index regenerated, rows described).**
+  The first **actual discharge** of the δ′ seal's open `hclo` for a real `affineScheme` family — not more
+  infrastructure, a closure. (1) **`dominatorReachable_of_basePinsAll`** — the clean checkable one-round criterion
+  (every non-base point pinned by two base points ⟹ closure; the `rank∈{0,1}` instance of 4a). (2) The genuine
+  result **`dominatorReachable_G0pow_neg`**: for `g = -1` (so `⟨g⟩ = {1,-1}`) over **odd characteristic** (`p ≠ 2`),
+  *every* point is dominator-reachable from *any* 2-element base `{α,β}`, `α≠β`. Math: the cross-ratio
+  `r = (c−a)/(b−c)` of pairwise-distinct points satisfies `r ∉ {0,-1}`, so for the only nontrivial `h = -1 ∈ ⟨g⟩`
+  the value `1 + 2r ∉ {1,-1} = ⟨g⟩` (uses `2 ≠ 0`), the pinning antecedent fails, only `h = 1` survives —
+  discharged through `dominatorReachable_G0pow_ratio_step`; `fieldOf_injective` carries distinctness, `2 ≠ 0` via
+  `CharP.cast_eq_zero_iff`, the field algebra via `linear_combination`. **Char ≠ 2 is essential — exactly the
+  documented char-2-midpoint obstruction** (`p = 2` ⟹ `⟨g⟩ = {1}`, the argument collapses). (3)
+  **`reachesRigidOrCameron_viaG0powNeg`** feeds (2) into `reachesRigidOrCameron_viaDominatorClosure`: the seal on the
+  whole `g = -1` family (rank ≥ 3, i.e. `q ≥ 5`) **with the open `hclo` GONE — proved, not carried**; only the
+  standard {G3 + `hne` + `hrank` + `hImprim`} remain. **Significance:** the δ′ route is *not vacuous* — it discharges
+  the seal's open mathematical content outright on a genuine family, and removes the cyclotomic citation for the
+  `H={±1}` sub-family. **Honest scope:** this is the odd-char `|H|=2` slice (one-round; no multi-round arithmetic);
+  the *general* cyclotomic family (larger `H`, and char-2 — the Clebsch residue) and the **non-affine** residue (the
+  genuine new-coverage target, via the general/schurian builders) remain the open `s(C)` core. NEXT = larger `H` /
+  a multi-round rank witness, or the non-affine residue.
 
 ---
 
@@ -983,14 +1015,20 @@ handle); the affine specialisation **`affineScheme_interNum_eq_one_of_unique`** 
 **`dominatorReachable_affine_step`** (`CascadeAffine.lean §S-stage3`); the closure-equivariance reduction
 **`dominatorReachable_map`** / **`dominatorReachable_univ_image`** (complete closure transports across `Aut(S)`-images
 of the base — prove at one representative); the **iteration engine `dominatorReachable_of_rank`** (a well-founded
-pinning rank ⟹ `∀ v, DominatorReachable S T v` — the brick turning the step builders into a global closure)
+pinning rank ⟹ `∀ v, DominatorReachable S T v` — the brick turning the step builders into a global closure) and the
+**one-round criterion `dominatorReachable_of_basePinsAll`** (every non-base point pinned by two base points ⟹ closure)
 (`CascadeAffine.lean §S-bridge-δ`); the **cyclotomic arithmetic reduction** **`fieldOf`** (point→`F_q`) /
+**`fieldOf_injective`** /
 **`G0pow_orbit_iff`** (a `G0pow g`-orbit relation ⟺ multiplication by `g^k` through the field iso) /
 **`dominatorReachable_G0pow_step`** (the forced-triangle step builder with `huniq` in pure `F_q` powers) /
 **`dominatorReachable_G0pow_ratio_step`** (the ratio form `(r+1−r·h)∈⟨g⟩→h=1`, `r=(c−a)/(b−c)` — divides out the
-field differences, exposes the char-2-midpoint obstruction)
-(`CascadeAffine.lean §S-stage3-δ`). Open: the **pinning-rank witness** for the residue family — define `rank` and
-verify the per-level `F_q`-power pinning (the genuine `s(C)` arithmetic, cyclic `(r+1−r·h)∈⟨g⟩→h=1` core).
+field differences, exposes the char-2-midpoint obstruction); **the FIRST family closure** —
+**`dominatorReachable_G0pow_neg`** (`g=-1`, odd char: any 2-base closes in one round) and the seal capstone
+**`reachesRigidOrCameron_viaG0powNeg`** (the seal on the `g=-1` family with `hclo` PROVED, not carried — only
+{G3+hne+hrank+hImprim} remain)
+(`CascadeAffine.lean §S-stage3-δ`). Open (the genuine `s(C)` core): the **pinning-rank witness** for larger `H`
+(multi-round), char-2 (Clebsch), and the **non-affine** residue (new-coverage target) — define `rank` and verify
+the per-level pinning via the general/schurian/`F_q`-power builders.
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`
