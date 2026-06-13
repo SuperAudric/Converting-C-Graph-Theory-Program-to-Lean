@@ -2537,6 +2537,128 @@ theorem reachesRigidOrCameron_viaG0powNeg {IsLarge : Nat → Prop}
       _ ≤ bound := hbd
   · exact dominatorReachable_G0pow_neg hd hp2 hneg hαβ
 
+/-! #### §S-stage3-δ (multi-round) — the subfield family `H = K^×` and its 2-round closure
+
+The genuine multi-round content (`docs/chain-descent-general-cc-separability.md` §5 "Stage 3 (δ′ route)"):
+for `|H| > 2`, one round from a 2-base no longer pins every point, so the closure must iterate. The clean
+tractable larger-`H` family is `H = K^×` for a subfield `K ⊊ F_q` (canonically `K = F_p ⊆ F_{p^d}`,
+`d ≥ 2`). The pinning sufficient condition is **size-free**: if the cross-ratio `r = (c−a)/(b−c) ∉ K`
+then `γ` is pinned by `α, β` (for `h ∈ K^×∖{1}`, `1−h ∈ K^×` so `r(1−h) ∉ K`, hence `1+r(1−h) ∉ K ⊇ H`,
+the antecedent fails). The base `{α,β}` of `K`-points closes `F_q` in **two rounds**: round 1 pins every
+non-`K` point (ratio `(nonK−K)/(K−nonK) ∉ K`), round 2 pins every `K` point via `α` and a reached non-`K`
+point (ratio `(K−K)/(nonK−K) ∉ K`). The field facts `⟨g⟩ = K^×` (`hHK`) and a non-`K` witness are carried
+hypotheses; the instantiation (`K = F_p`, `g = fqGen^{(p^d−1)/(p−1)}`) is the field-theory follow-on. -/
+
+/-- Subfield ratio fact (numerator out of `K`): `a, b ∈ K`, `c ∉ K`, `a ≠ b` ⟹ `(c−a)/(b−c) ∉ K`. The
+round-1 pinning datum (pin a non-`K` point by two `K`-base points). -/
+private theorem ratio_not_mem_num_out {F : Type*} [Field F] {K : Subfield F} {a b c : F}
+    (ha : a ∈ K) (hb : b ∈ K) (hc : c ∉ K) (hab : a ≠ b) : (c - a) / (b - c) ∉ K := by
+  have hbc : b - c ≠ 0 := fun h => hc (by rw [← sub_eq_zero.mp h]; exact hb)
+  intro hmem
+  set r := (c - a) / (b - c) with hr
+  have key : r * (b - c) = c - a := by rw [hr]; field_simp
+  by_cases h1 : (1 : F) + r = 0
+  · have hr1 : r = -1 := by linear_combination h1
+    rw [hr1] at key
+    exact hab (by linear_combination key)
+  · apply hc
+    have hceq : c = (a + r * b) / (1 + r) := by rw [eq_div_iff h1]; linear_combination -key
+    rw [hceq]
+    exact K.div_mem (K.add_mem ha (K.mul_mem hmem hb)) (K.add_mem K.one_mem hmem)
+
+/-- Subfield ratio fact (denominator out of `K`): `a, c ∈ K`, `b ∉ K`, `c ≠ a` ⟹ `(c−a)/(b−c) ∉ K`. The
+round-2 pinning datum (pin a `K` point by a `K`-base point and a reached non-`K` point). -/
+private theorem ratio_not_mem_denom_out {F : Type*} [Field F] {K : Subfield F} {a b c : F}
+    (ha : a ∈ K) (hb : b ∉ K) (hc : c ∈ K) (hca : c ≠ a) : (c - a) / (b - c) ∉ K := by
+  have hbc : b - c ≠ 0 := fun h => hb (by rw [sub_eq_zero.mp h]; exact hc)
+  intro hmem
+  set r := (c - a) / (b - c) with hr
+  have key : r * (b - c) = c - a := by rw [hr]; field_simp
+  by_cases h0 : r = 0
+  · apply hca
+    rw [h0, zero_mul] at key
+    linear_combination -key
+  · apply hb
+    have hbc_mem : b - c ∈ K := by
+      have he : b - c = (c - a) / r := by rw [eq_div_iff h0]; linear_combination key
+      rw [he]; exact K.div_mem (K.sub_mem hc ha) hmem
+    have he2 : b = (b - c) + c := by ring
+    rw [he2]; exact K.add_mem hbc_mem hc
+
+/-- **The subfield pinning step (`r ∉ K ⟹ pinned`) — the genuine multi-round content.** For the family
+`affineScheme (G0pow g)` with `⟨g⟩ = K^×` (the carried hypothesis `hHK`, `K` a subfield), if the
+cross-ratio `r = (c−a)/(b−c) ∉ K` then `γ` is forced-triangle-pinned by `α, β` (two reachable points). The
+arithmetic: from the ratio step's `hh : h ∈ K^×` and `hw : 1+r(1−h) ∈ K^×`, if `h ≠ 1` then `1−h ∈ K^×`
+and `r = (r(1−h))/(1−h) ∈ K` — contradicting `r ∉ K`; so `h = 1`. Size-free (works for any `|K| ≥ 2`),
+unlike the one-round `H={±1}` case. -/
+theorem dominatorReachable_G0pow_subfield_step (hd : d ≠ 0) (g : (GaloisField p d)ˣ)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G0pow hd g)
+    (K : Subfield (GaloisField p d))
+    (hHK : ∀ h : GaloisField p d, (∃ k : ℤ, (g : GaloisField p d) ^ k = h) ↔ (h ∈ K ∧ h ≠ 0))
+    {T : Finset (Fin (p ^ d))} {α β γ : Fin (p ^ d)}
+    (hca : fieldOf hd γ ≠ fieldOf hd α) (hbc : fieldOf hd β ≠ fieldOf hd γ)
+    (hr : (fieldOf hd γ - fieldOf hd α) / (fieldOf hd β - fieldOf hd γ) ∉ K)
+    (hα : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T α)
+    (hβ : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T β) :
+    DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme T γ := by
+  refine dominatorReachable_G0pow_ratio_step hd g hneg hca hbc hα hβ (fun h hh hw => ?_)
+  rw [hHK] at hh hw
+  obtain ⟨hhK, _⟩ := hh
+  obtain ⟨hwK, _⟩ := hw
+  by_contra hne1
+  apply hr
+  set r := (fieldOf hd γ - fieldOf hd α) / (fieldOf hd β - fieldOf hd γ) with hrdef
+  have h1h : (1 : GaloisField p d) - h ∈ K := K.sub_mem K.one_mem hhK
+  have h1h0 : (1 : GaloisField p d) - h ≠ 0 := sub_ne_zero.mpr (fun he => hne1 he.symm)
+  have hrh : r * (1 - h) ∈ K := by
+    have he : r * (1 - h) = (1 + r * (1 - h)) - 1 := by ring
+    rw [he]; exact K.sub_mem hwK K.one_mem
+  have hrr : r = r * (1 - h) / (1 - h) := by rw [mul_div_assoc, div_self h1h0, mul_one]
+  rw [hrr]; exact K.div_mem hrh h1h
+
+/-- **The 2-round closure for the subfield family `H = K^×` — a genuine MULTI-ROUND closure of a
+larger-`H` cyclotomic scheme.** For `affineScheme (G0pow g)` with `⟨g⟩ = K^×` (`hHK`, `K` a subfield),
+a base `{α, β}` of two distinct `K`-points closes all of `F_q` from a non-`K` witness (`hext`, present
+whenever `K ⊊ F_q`, i.e. `d ≥ 2` for `K = F_p`): **round 1** pins every non-`K` point by `α, β`
+(`ratio_not_mem_num_out`), **round 2** pins every `K` point by `α` and a round-1 non-`K` point
+(`ratio_not_mem_denom_out`). This discharges the seal's `hclo` for the whole `K^×` family — the first
+genuinely multi-round (`|H| > 2`) closure, contrasting the one-round `H={±1}` case. The carried `hHK` and
+`hext` are field facts; the instantiation (`K = F_p`, `g` a generator of `F_p^×`, `θ` any non-prime-field
+element) is the field-theory follow-on. -/
+theorem dominatorReachable_G0pow_subfield (hd : d ≠ 0) (g : (GaloisField p d)ˣ)
+    (hneg : LinearEquiv.neg (ZMod p) ∈ G0pow hd g)
+    (K : Subfield (GaloisField p d))
+    (hHK : ∀ h : GaloisField p d, (∃ k : ℤ, (g : GaloisField p d) ^ k = h) ↔ (h ∈ K ∧ h ≠ 0))
+    {α β : Fin (p ^ d)} (hαK : fieldOf hd α ∈ K) (hβK : fieldOf hd β ∈ K) (hαβ : α ≠ β)
+    (hext : ∃ w : Fin (p ^ d), fieldOf hd w ∉ K) :
+    ∀ v : Fin (p ^ d),
+      DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme {α, β} v := by
+  have hinj := fieldOf_injective (p := p) (d := d) hd
+  have hαr : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme {α, β} α :=
+    DominatorReachable.base (Finset.mem_insert_self α {β})
+  have hβr : DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme {α, β} β :=
+    DominatorReachable.base (Finset.mem_insert_of_mem (Finset.mem_singleton_self β))
+  have round1 : ∀ w : Fin (p ^ d), fieldOf hd w ∉ K →
+      DominatorReachable (affineScheme (G0pow hd g) hneg).toAssociationScheme {α, β} w := by
+    intro w hwK
+    have hwα : fieldOf hd w ≠ fieldOf hd α := fun h => hwK (by rw [h]; exact hαK)
+    have hwβ : fieldOf hd β ≠ fieldOf hd w := fun h => hwK (by rw [← h]; exact hβK)
+    exact dominatorReachable_G0pow_subfield_step hd g hneg K hHK hwα hwβ
+      (ratio_not_mem_num_out hαK hβK hwK (fun h => hαβ (hinj h))) hαr hβr
+  obtain ⟨θ, hθK⟩ := hext
+  have hθr := round1 θ hθK
+  intro v
+  by_cases hvK : fieldOf hd v ∈ K
+  · by_cases hvα : v = α
+    · rw [hvα]; exact hαr
+    by_cases hvβ : v = β
+    · rw [hvβ]; exact hβr
+    have hvα' : fieldOf hd v ≠ fieldOf hd α := fun h => hvα (hinj h)
+    have hθv : fieldOf hd θ ≠ fieldOf hd v := fun h => hθK (by rw [h]; exact hvK)
+    exact dominatorReachable_G0pow_subfield_step hd g hneg K hHK hvα' hθv
+      (ratio_not_mem_denom_out hαK hθK hvK hvα') hαr hθr
+  · exact round1 v hvK
+
 /-! #### The genuine F2b separation crux + seal capstone, over `G0pow β` (the rank-≥3 leak candidate)
 
 `CyclicAffineSeparates` / `reachesRigidOrCameron_viaCyclicSeparation` (above) are stated over

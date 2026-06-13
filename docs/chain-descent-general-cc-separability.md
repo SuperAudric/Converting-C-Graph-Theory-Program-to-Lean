@@ -185,6 +185,13 @@
      {G3+hne+hrank+hImprim} remain). Proves the δ′ route is non-vacuous; char≠2 is exactly the char-2-midpoint
      obstruction. **Still open (the genuine `s(C)` core):** larger `H` (multi-round), char-2 (Clebsch), and the
      **non-affine** residue (the new-coverage target). NEXT = larger `H` / multi-round rank witness, or non-affine.
+     **STAGE-3 MULTI-ROUND LANDED 2026-06-13 (`§S-stage3-δ`; `dominatorReachable_G0pow_subfield`(`_step`),
+     `ratio_not_mem_num_out`/`_denom_out`, all axiom-clean, build green):** the first `|H|>2` closure. One-round
+     works iff `|H|≤2`, so `|H|>2` needs iteration; the **subfield family `H=K^×`** (`K⊊F_q`) closes in **2 rounds**
+     from a 2-`K`-point base, via the size-free pinning rule `r=(c−a)/(b−c)∉K ⟹ pinned`. **CAVEAT: `K^×` is
+     IMPRIMITIVE** (scalars preserve every `F_p`-subspace) — the hImprim/G2-A case, not primitive G2-B; this validates
+     the multi-round engine + gives a reusable subfield pinning lemma, but the **primitive irreducible** larger-`H`
+     case (no subfield shortcut) remains the open core. Carries `⟨g⟩=K^×` + non-`K` witness (field-theory plumbing).
   Parked smaller items (see the 2026-06-12 review entry in §8): ~~Route δ feasibility probe~~ (RAN + the engine
   LANDED — items 5/6 above); pin the `IsLarge` threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier;
   strategy-§15 gaps tracking note.
@@ -968,6 +975,25 @@ bullseye) says closure is the likely outcome and the build is worth it.
   the *general* cyclotomic family (larger `H`, and char-2 — the Clebsch residue) and the **non-affine** residue (the
   genuine new-coverage target, via the general/schurian builders) remain the open `s(C)` core. NEXT = larger `H` /
   a multi-round rank witness, or the non-affine residue.
+- **2026-06-13 — STAGE 3, MULTI-ROUND: THE SUBFIELD FAMILY `H=K^×` CLOSES IN TWO ROUNDS (`CascadeAffine.lean
+  §S-stage3-δ`; `ratio_not_mem_num_out`, `ratio_not_mem_denom_out` (private), `dominatorReachable_G0pow_subfield_step`,
+  `dominatorReachable_G0pow_subfield`; all axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full
+  serial build green 108s; index regenerated, rows described).** The first genuinely **multi-round** (`|H|>2`)
+  closure. First the necessity check: one-round-from-a-2-base works **iff `|H|≤2`** (as `r` ranges over `F_q∖{0,-1}`,
+  `1+r(1-h)` ranges over `F_q∖{1,h}`, so "no triangle blocked" forces `H⊆{1,h}`) — so `|H|>2` genuinely needs
+  iteration. The tractable larger-`H` family is **`H=K^×` for a subfield `K⊊F_q`**, with a **size-free** pinning
+  rule: `r=(c−a)/(b−c)∉K ⟹ γ pinned` (`dominatorReachable_G0pow_subfield_step`; for `h∈K^×∖{1}`, `1−h∈K^×` ⟹
+  `r(1−h)∉K` ⟹ `1+r(1−h)∉K⊇H`). The 2-round closure (`dominatorReachable_G0pow_subfield`) from a base of two
+  `K`-points: round 1 pins all non-`K` points by `α,β` (`ratio_not_mem_num_out`), round 2 pins all `K` points by `α`
+  and a reached non-`K` point (`ratio_not_mem_denom_out`). Carries `⟨g⟩=K^×` (`hHK`) + a non-`K` witness as field
+  facts; instantiation (`K=F_p`, `g=fqGen^{(p^d−1)/(p−1)}`) is field-theory plumbing, no new open math.
+  **IMPORTANT HONEST CAVEAT:** the `K^×` family is **IMPRIMITIVE** (`F_p^×` acts as scalars, preserving every
+  `F_p`-subspace ⟹ reducible `G₀` ⟹ not primitive) — so it is the **hImprim/G2-A** case, *not* the primitive G2-B
+  residue. This is a real multi-round closure that **validates the iteration engine for `|H|>2` and gives a reusable
+  size-free subfield pinning lemma**, but the **primitive** larger-`H` case (irreducible `G₀`, field-generating `g` —
+  the Clebsch-type / char-2 residue) has no subfield shortcut and remains the genuine open `s(C)` core. NEXT = the
+  primitive irreducible multi-round case (no `K` structure — the hard Frobenius/cyclotomic arithmetic), or the
+  non-affine residue.
 
 ---
 
@@ -1025,10 +1051,13 @@ pinning rank ⟹ `∀ v, DominatorReachable S T v` — the brick turning the ste
 field differences, exposes the char-2-midpoint obstruction); **the FIRST family closure** —
 **`dominatorReachable_G0pow_neg`** (`g=-1`, odd char: any 2-base closes in one round) and the seal capstone
 **`reachesRigidOrCameron_viaG0powNeg`** (the seal on the `g=-1` family with `hclo` PROVED, not carried — only
-{G3+hne+hrank+hImprim} remain)
-(`CascadeAffine.lean §S-stage3-δ`). Open (the genuine `s(C)` core): the **pinning-rank witness** for larger `H`
-(multi-round), char-2 (Clebsch), and the **non-affine** residue (new-coverage target) — define `rank` and verify
-the per-level pinning via the general/schurian/`F_q`-power builders.
+{G3+hne+hrank+hImprim} remain); the **multi-round subfield closure** —
+**`dominatorReachable_G0pow_subfield_step`** (size-free `r∉K ⟹ pinned`) / **`dominatorReachable_G0pow_subfield`**
+(the `H=K^×` family closes in 2 rounds; **imprimitive — validates the engine, not the primitive residue**) +
+private `ratio_not_mem_num_out`/`_denom_out`
+(`CascadeAffine.lean §S-stage3-δ`). Open (the genuine `s(C)` core): the **pinning-rank witness** for the
+**primitive irreducible** larger `H` (no subfield shortcut), char-2 (Clebsch), and the **non-affine** residue
+(new-coverage target) — define `rank` and verify per-level pinning via the general/schurian/`F_q`-power builders.
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

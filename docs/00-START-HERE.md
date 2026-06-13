@@ -84,6 +84,8 @@ iso-invariant, complete canonical form or an honest flag — never wrong) and
 orbits cheaply enough that the graphs we *want* canonized fit the budget rather
 than flagging — equivalent in full generality to **GI ∈ P**. The project's
 contribution is to *isolate* that hard problem in one component, not to close it.
+Outside of the budget, this isolation strategy is used to separate complexity
+from apparent difficulty.
 
 ---
 
