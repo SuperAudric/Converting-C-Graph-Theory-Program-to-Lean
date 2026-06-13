@@ -852,6 +852,99 @@ public class Theorem41ConditionsProbe(ITestOutputHelper output)
         return det;
     }
 
+    // Rank-EXTRACTING dominator closure: returns, per point, the BFS round it is
+    // pinned at (0 = base, -1 = never) and the pinning pair (µ,λ) that did it.  A
+    // point is pinned at round k+1 by two points of round ≤ k.  This is the explicit
+    // construction a Lean closure proof must formalize (the "pinning rank" of
+    // `dominatorReachable_of_rank`).
+    static (int[] rank, (int mu, int lam)[] pinner) DominatorRank(int n, int[,] col, int[] t)
+    {
+        var rank = Enumerable.Repeat(-1, n).ToArray();
+        var pinner = new (int, int)[n];
+        foreach (int p in t) { rank[p] = 0; pinner[p] = (-1, -1); }
+        int round = 0;
+        bool changed = true;
+        while (changed)
+        {
+            changed = false; round++;
+            for (int d = 0; d < n; d++)
+            {
+                if (rank[d] >= 0) continue;
+                bool found = false;
+                for (int mu = 0; mu < n && !found; mu++)
+                {
+                    if (rank[mu] < 0 || rank[mu] >= round) continue;   // strictly-earlier round
+                    for (int lam = 0; lam < n && !found; lam++)
+                    {
+                        if (rank[lam] < 0 || rank[lam] >= round) continue;
+                        int cnt = 0;
+                        for (int w = 0; w < n && cnt < 2; w++)
+                            if (col[mu, w] == col[mu, d] && col[w, lam] == col[d, lam]) cnt++;
+                        if (cnt == 1) { rank[d] = round; pinner[d] = (mu, lam); changed = true; found = true; }
+                    }
+                }
+            }
+        }
+        return (rank, pinner);
+    }
+
+    // THE EXTRACTION PROBE: pull the explicit pinning-rank construction out of the
+    // non-affine residue's forced-triangle closure.  Goal — reveal whether the
+    // construction is UNIFORM/structural (⟹ a clean abstract Lean lemma exists) or
+    // ad hoc, by reporting depth, layer sizes, whether intermediate points are
+    // needed, and the distribution of pinning-triangle relation-types.
+    [Fact]
+    public void Probe_ExtractPinningRank()
+    {
+        output.WriteLine("── δ′ pinning-rank extraction — the non-affine residue's closure construction ──");
+        foreach (var g in new[] { MakeGroup("Z4^2", 4, 4), MakeGroup("Z2^4", 2, 2, 2, 2) })
+        {
+            var x = ClebschScheme(g);
+            if (x == null) { output.WriteLine($"   {g.Name}: no Clebsch scheme"); continue; }
+            int n = x.N;
+            output.WriteLine($"   {g.Name} (rank-4 amorphic-NLS, primitive={(PrimitiveScheme(x) ? "y" : "n")}, n={n}):");
+
+            // every 2-point base {a,b} whose scheme-level c=1 closure completes
+            var completingBases = new List<int[]>();
+            for (int a = 0; a < n; a++)
+                for (int b = a + 1; b < n; b++)
+                    if (DominatorClosure(n, x.Rel, new[] { a, b }).All(z => z))
+                        completingBases.Add(new[] { a, b });
+            output.WriteLine($"      completing 2-bases: {completingBases.Count} of {n * (n - 1) / 2} pairs");
+            if (completingBases.Count == 0) { output.WriteLine("      (no 2-base completes; needs larger base)"); continue; }
+
+            // extract the construction from the first completing base, and aggregate
+            // pinning-triangle types over ALL completing bases (uniformity test)
+            var first = completingBases[0];
+            var (rank, pinner) = DominatorRank(n, x.Rel, first);
+            int depth = rank.Max();
+            var layer = new int[depth + 1];
+            foreach (int rk in rank) if (rk >= 0) layer[rk]++;
+            output.WriteLine($"      sample base {{{string.Join(",", first)}}}: depth {depth} rounds, layers [{string.Join(",", layer)}]");
+
+            int depthMax = 0; bool everNeedsIntermediate = false;
+            var triples = new Dictionary<string, int>();
+            foreach (var bt in completingBases)
+            {
+                var (rk, pn) = DominatorRank(n, x.Rel, bt);
+                depthMax = Math.Max(depthMax, rk.Max());
+                for (int d = 0; d < n; d++)
+                {
+                    if (rk[d] <= 0) continue;
+                    var (mu, lam) = pn[d];
+                    if (rk[mu] != 0 || rk[lam] != 0) everNeedsIntermediate = true;
+                    string tri = $"({x.Rel[mu, d]},{x.Rel[d, lam]},{x.Rel[mu, lam]})";
+                    triples[tri] = triples.TryGetValue(tri, out int c) ? c + 1 : 1;
+                }
+            }
+            output.WriteLine($"      over all completing bases: max depth {depthMax}; " +
+                             $"intermediate (non-base) pinners ever needed? {(everNeedsIntermediate ? "YES (genuine multi-round)" : "no (one-round in disguise)")}");
+            output.WriteLine($"      pinning-triangle types (rel(µ,d),rel(d,λ),rel(µ,λ)) → count [uniformity signal]:");
+            foreach (var kv in triples.OrderByDescending(kv => kv.Value))
+                output.WriteLine($"         {kv.Key}: {kv.Value}");
+        }
+    }
+
     sealed class GateRow
     {
         public required int[] T; public required bool IsBase;

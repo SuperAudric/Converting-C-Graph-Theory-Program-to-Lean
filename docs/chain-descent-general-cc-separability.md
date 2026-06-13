@@ -1046,6 +1046,27 @@ bullseye) says closure is the likely outcome and the build is worth it.
   the Clebsch-type / char-2 residue) has no subfield shortcut and remains the genuine open `s(C)` core. NEXT = the
   primitive irreducible multi-round case (no `K` structure — the hard Frobenius/cyclotomic arithmetic), or the
   non-affine residue.
+- **2026-06-13 — PROBE: THE NON-AFFINE RESIDUE'S CLOSURE CONSTRUCTION EXTRACTED — it is UNIFORM, MULTI-ROUND,
+  and AMORPHIC (`Theorem41ConditionsProbe.Probe_ExtractPinningRank`, green; no production/Lean touched).** Following
+  the §1A analysis (the load-bearing claim is the separability content itself, not elementary smallness ⟹ a blind
+  general Lean push stalls; extract the concrete construction first), added `DominatorRank` (rank-extracting closure:
+  BFS round + pinning pair per point) and the extraction probe. **Findings on the primitive ℤ₄² amorphic-NLS bullseye
+  (the genuine G2-B target, n=16):** (1) **96/120 pairs are completing 2-bases**; sample base `{0,1}` closes in
+  **depth 3 rounds**, layers `[2,2,6,6]`. (2) **Genuinely multi-round** — intermediate (non-base) pinners are
+  required (not one-round-in-disguise). (3) **THE CONSTRUCTION IS UNIFORM AND STRUCTURAL:** every pinning triangle's
+  edge-triple `(rel(µ,d),rel(d,λ),rel(µ,λ))` is a **permutation of {1,2,3}** — a **rainbow triangle** (three distinct
+  non-diagonal colours) — and all six orderings occur ≈evenly (248/241/225/222/206/202 over all bases); **no triangle
+  with a repeated or diagonal colour ever pins.** So the pinning rule is exactly *"rainbow triangle ⟹ rigid (c=1)"* —
+  the **amorphic S₃ structure made operational**, which is precisely the mechanism §1A's carve-out predicted would
+  drive recovery on the non-Cameron residue. **The char-2 anchor ℤ₂⁴:** **0/120** completing 2-bases (needs a
+  ≥3-base) — the midpoint obstruction at the base-size level. **Strategic read:** on-track (clean uniform mechanism,
+  no falsifier; the bullseye recovers exactly as predicted). The abstract lemma the construction points to is
+  *"rainbow-rigidity (rank-4, rainbow c=1) + a 2-base ⟹ closure in O(1) rounds."* NEXT (the abstraction step):
+  formalize the rainbow-rigidity closure — either abstractly (carry rainbow-c=1 + the round-3 geometry as
+  hypotheses) or concretely (hard-code the 16×16 colour matrix as a Lean `AssociationScheme`, `decide` the axioms +
+  the 16 rainbow-pinning derivations — feasible only with plain `decide`, since `native_decide` violates the axiom
+  bar). **CAVEAT:** rainbow-c=1 is special to the Clebsch parameters `(16,5,0,2)`, not automatic for all amorphic
+  rank-4, so the abstraction is parameter-scoped, not "all amorphic."
 
 ---
 
