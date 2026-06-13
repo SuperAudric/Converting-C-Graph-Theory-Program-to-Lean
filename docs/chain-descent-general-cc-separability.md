@@ -91,14 +91,28 @@
      statement (the honest accounting, now exhibited). The `c=1` two-endpoint dominator closure (the B3 `saAdj`
      pinning shape) **discretizes from every tested minimal base using only X's own rank-4 classes** — no
      extension classes needed — and is 1-WL-sound there (0 violations); off bases it is provably 1-WL-unsound
-     (ℤ₄² `T={0}`: 3 violations), so any B3-style lemma stays base-keyed. **Remaining = the Lean discharge**, now
-     with two interchangeable shapes: (α) keep the citation checkpoint's keying and prove the catch-up per-base, or
-     (δ′) formalize the *two-endpoint dominator closure* on the landed homogeneous substrate (B3
-     `determined_of_saAdj` is the step; wrap it in a `Saturation`-style closure ⟹ `Discrete` ⟹
-     `SeparatesAtBoundedBase` directly, a citation-free sibling of the checkpoint) and carry "closure exhausts Ω
-     from the base" as the named structural hypothesis the family-level math (Stage 3) discharges.
-  6. **Stage 3** — prove what item 4 cites (Route β: conditions (i)/(ii) for the residue family's extensions —
-     witness-constructive per the probe; the genuine open mathematics).
+     (ℤ₄² `T={0}`: 3 violations), so any B3-style lemma stays base-keyed.
+     **THE δ′ ENGINE LANDED 2026-06-12 (`CascadeAffine.lean §S-bridge-δ` + `§S-gate2`, axiom-clean, build green
+     49s):** the *two-endpoint forced-triangle closure* is now a citation-free Lean path to the seal, sibling to
+     the extension-separability checkpoint and **strictly lighter** (no CC-extension, no `Separable`, no catch-up,
+     no group base). Decls: **B3′** `determined_of_forcedTriangle` (the smax-free generalisation of
+     `determined_of_saAdj` — the `saAdj` proof never used its two `smaxAdj` conjuncts, so the `c=1` pinning works
+     off the maximal-valency locus); the inductive closure **`DominatorReachable S T`** (base = `t∈T`, step = a
+     rigid triangle pins `γ` from two reachable points); `determinedAt_of_dominatorReachable` (B2 seed + B3′
+     step); **`discrete_of_dominatorClosure`** (closure exhausts Ω ⟹ `Discrete`); **`separatesAtBoundedBase_of_
+     dominatorClosure`** (⟹ the seal consumer directly); and the capstone **`reachesRigidOrCameron_viaDominator
+     Closure`** carrying exactly {G3 + `hImprim` + the single structural hypothesis `hclo : ∀ v, DominatorReachable
+     S T v`}. **So item 5's Lean obligation is DISCHARGED as plumbing** — the catch-up is no longer on any critical
+     path (the δ′ capstone bypasses it). What is now open is purely **item 6 / Stage 3** (below), in the
+     citation-free form "prove `hclo` for the residue family: the `c=1` forced-triangle closure of a bounded base
+     exhausts Ω" — the probe-confirmed, family-level open mathematics.
+  6. **Stage 3 — the genuine open mathematics, now with TWO interchangeable target forms** (prove either; both are
+     probe-backed and family-level): **(β)** Thm 4.1's conditions (i)/(ii) for the residue family's extensions
+     (feeds `reachesRigidOrCameron_viaExtensionSeparability`; witness-constructive per `Theorem41ConditionsProbe`);
+     or **(δ′, recommended — citation-free)** `∀ v, DominatorReachable S T v` for a bounded base `T` of the residue
+     family (feeds `reachesRigidOrCameron_viaDominatorClosure`; probe-confirmed at every minimal base). δ′ is the
+     lighter target — it asks only that the landed `c=1` forced-triangle closure completes from a base, with no
+     separability/CC machinery — and is the same open content as β in citation-free clothing.
   Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
   threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier; strategy-§15 gaps tracking note.
   The increment log is §8 — append to it.
@@ -692,6 +706,29 @@ bullseye) says closure is the likely outcome and the build is worth it.
   consumption shapes, both probe-backed. NEXT: the Lean increment for item 5 — either (α) the per-base catch-up
   against the checkpoint's keying, or (δ′) the dominator-closure engine (recommended: it is citation-free,
   lands on `Separability.lean`/`CascadeAffine.lean` machinery, and its hypothesis is what Stage 3 proves anyway).
+- **2026-06-12 — THE δ′ DOMINATOR-CLOSURE ENGINE LANDED (item 5 discharged as plumbing): a citation-free Lean
+  path to the seal (`CascadeAffine.lean §S-bridge-δ` + `§S-gate2`, axiom-clean `[propext, Classical.choice,
+  Quot.sound]`, no `sorry`, full serial build green 49s; index regenerated, 6 new rows described).** Following the
+  probe-gate's positive verdict, formalized the recommended (δ′) shape. Decls, in dependency order: **B3′
+  `determined_of_forcedTriangle`** — the smax-free generalisation of `determined_of_saAdj`, taking the
+  intersection-number-`=1` fact directly (the `saAdj` proof always discarded its two `smaxAdj` conjuncts via
+  `obtain ⟨_, _, hone⟩`, so the body transfers verbatim); the inductive closure **`DominatorReachable S T`**
+  (`base : t ∈ T`; `step : reachable α → reachable β → c^{r(α,β)}_{r(α,γ),r(γ,β)} = 1 → reachable γ`);
+  **`determinedAt_of_dominatorReachable`** (induction: base = B2 `determined_of_mem_individualized`, step = B3′);
+  **`discrete_of_dominatorClosure`** (`(∀ v, DominatorReachable S T v) ⟹ Discrete (warmRefine … T)`, by reading
+  `DeterminedAt` at the target of each pair); **`separatesAtBoundedBase_of_dominatorClosure`** (`+ |T| ≤ bound ⟹
+  SeparatesAtBoundedBase` — note **no `IsBase` hypothesis**: discreteness is produced outright, lighter than the
+  separability route); and the capstone **`reachesRigidOrCameron_viaDominatorClosure`** (same
+  `reachesRigidOrCameron_viaPersistentTwinBlock` plumbing as the extension checkpoint, fed by the dominator
+  separation). **Net:** the seal now has *two* conditional checkpoints — the extension-separability one
+  (`…viaExtensionSeparability`, carries {G3 + `Theorem41Statement` + conditions-on-E + catch-up + base}) and the
+  **citation-free δ′ one** (`…viaDominatorClosure`, carries {G3 + `hImprim` + the single `hclo : ∀ v,
+  DominatorReachable S T v`}). The catch-up `WarmTwinsAreFiberTwins` is **off every critical path** — δ′ bypasses
+  it. The lone remaining open content is **Stage 3** in its lightest form: prove `hclo` for the residue family
+  (the `c=1` forced-triangle closure of a bounded base exhausts Ω — probe-confirmed at every minimal base, the
+  genuine family-level mathematics). Lean note for the log: B3′ is a *strict* generalisation, so
+  `determined_of_saAdj` could be refactored to call it (deferred — non-load-bearing, and the `saAdj_symm`
+  extraction is one line). NEXT: Stage 3 (δ′ target recommended), the genuine open math.
 
 ---
 
@@ -725,6 +762,12 @@ bullseye) says closure is the likely outcome and the build is worth it.
 isolated catch-up) / `isSchemeAut_of_relOfPair_eq` / **`twinsRealized_of_extensionPointed`** /
 `separatesAtBoundedBase_of_extensionPointed`(`_of_small`) /
 **`reachesRigidOrCameron_viaExtensionSeparability`** (the citation checkpoint) (`CascadeAffine.lean §S-gate2`).
+**The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
+**`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
+`determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /
+**`separatesAtBoundedBase_of_dominatorClosure`** (`CascadeAffine.lean §S-bridge-δ`) /
+**`reachesRigidOrCameron_viaDominatorClosure`** (the citation-free checkpoint, carries only
+{G3 + `hImprim` + `hclo : ∀ v, DominatorReachable S T v`}) (`CascadeAffine.lean §S-gate2`).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

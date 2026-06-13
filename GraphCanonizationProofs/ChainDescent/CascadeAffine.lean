@@ -285,6 +285,46 @@ theorem determined_of_saAdj {n : Nat} (S : AssociationScheme n) {χ : Colouring 
       have h2 := S.rel_relOfPair z β; rwa [hzβ] at h2
   exact Finset.card_le_one.mp hle1 z hzmem γ hγmem
 
+/-- **B3′ — the forced-triangle propagation step, smax-free (the δ′ engine's primitive).** The content
+of `determined_of_saAdj` with the `smax`-membership requirement of `saAdj` stripped away: if `α` and `β`
+are both determined and the coloured triangle `{α,β,γ}` is rigid
+(`c^{r(α,β)}_{r(α,γ),r(γ,β)} = 1` — a `c = 1` two-endpoint dominator pinning `γ`), then `γ` is
+determined. The `saAdj` proof never used the two `smaxAdj` conjuncts — it discarded them
+(`obtain ⟨_, _, hone⟩`) and consumed only the intersection-number-`= 1` fact — so this is the genuine
+general step. It is exactly the `Dominates`/B3 condition the catch-up probe-gate
+(`Probe_CatchUpGate_BasesAndDominators`) found discretizes from every minimal base of the rank-4
+amorphic-NLS residue *at scheme level* (no extension classes needed). -/
+theorem determined_of_forcedTriangle {n : Nat} (S : AssociationScheme n) {χ : Colouring n}
+    {α β γ : Fin n}
+    (hα : ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+            = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ α → z = α)
+    (hβ : ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+            = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ β → z = β)
+    (hone : S.intersectionNumber (S.relOfPair α γ) (S.relOfPair γ β) (S.relOfPair α β) = 1) :
+    ∀ z, warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ z
+          = warmRefine (schemeAdj S) (fun _ _ => POE.unknown) χ γ → z = γ := by
+  intro z hz
+  have hαz : S.relOfPair α z = S.relOfPair α γ := relOfPair_eq_of_warmRefine_determined S hα hz
+  have hβz : S.relOfPair β z = S.relOfPair β γ := relOfPair_eq_of_warmRefine_determined S hβ hz
+  set i := S.relOfPair α γ with hi
+  set j := S.relOfPair γ β with hj
+  have hcard := S.intersectionNumber_well_defined i j (S.relOfPair α β) α β (S.rel_relOfPair α β)
+  rw [hone] at hcard
+  set Sset := Finset.univ.filter (fun u : Fin n => S.rel i α u = true ∧ S.rel j u β = true) with hSset
+  have hle1 : Sset.card ≤ 1 := le_of_eq hcard
+  have hγmem : γ ∈ Sset := by
+    rw [hSset]; simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨by rw [hi]; exact S.rel_relOfPair α γ, by rw [hj]; exact S.rel_relOfPair γ β⟩
+  have hzmem : z ∈ Sset := by
+    rw [hSset]; simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    refine ⟨?_, ?_⟩
+    · rw [hi]; have h2 := S.rel_relOfPair α z; rwa [hαz] at h2
+    · rw [hj]
+      have hzβ : S.relOfPair z β = S.relOfPair γ β := by
+        rw [S.relOfPair_symm z β, hβz, ← S.relOfPair_symm γ β]
+      have h2 := S.rel_relOfPair z β; rwa [hzβ] at h2
+  exact Finset.card_le_one.mp hle1 z hzmem γ hγmem
+
 section Bridge
 
 variable {n : Nat}
@@ -379,6 +419,65 @@ theorem separatesAtBoundedBase_of_sparseSeparable (S : SchurianScheme n)
   exact separatesAtBoundedBase_of_connectivity S hαβ
     (S.toAssociationScheme.smaxConnected_of_sparseSeparable hsep hk)
     (fun a => S.toAssociationScheme.saConnected_of_sparseSeparable hsep hk a)
+
+/-! ### §S-bridge-δ — the forced-triangle dominator-closure engine (Route δ′, citation-free)
+
+The dense-side sibling of the connectivity bridge above. `discrete_of_connectivity` derives that *every*
+vertex becomes determined from `smax`/`sα` connectivity — a hypothesis that only holds on the **sparse**
+end (PV-Thm-3.1, `2c(k−1) < n`). The dense amorphic residue violates it, but the catch-up probe-gate
+(`Probe_CatchUpGate_BasesAndDominators`, 2026-06-12) found the *raw forced-triangle closure* — iterate
+the `c = 1` two-endpoint dominator step from the base — discretizes from **every minimal base** of the
+ℤ₄²/ℤ₂⁴ rank-4 amorphic-NLS residue, using only the scheme's own classes. This engine packages that:
+the closure is an inductive reachability predicate (`DominatorReachable`), each reached vertex is
+`DeterminedAt` (B2 seed + B3′ step), and "the closure exhausts Ω" — the single structural hypothesis the
+family-level math (Stage 3) discharges — gives `Discrete` ⟹ `SeparatesAtBoundedBase` directly, with **no
+CC-extension, no `Separable`, no catch-up, no citation**. It feeds the seal capstone
+(`reachesRigidOrCameron_viaDominatorClosure`, §S-gate2) as a citation-free alternative to the
+extension-separability checkpoint. -/
+
+/-- **The forced-triangle closure of a base `T`** — the least set of points reachable from `T` by
+iterating the `c = 1` two-endpoint dominator step. `base`: every base point is reachable; `step`: a
+point `γ` pinned by a rigid coloured triangle (`c^{r(α,β)}_{r(α,γ),r(γ,β)} = 1`) against two
+already-reachable points `α, β` is reachable. The smax-free, dense-side generalisation of PV's `sα`-path
+reachability (`ReflTransGen (saAdj α)`); `DominatorReachable S T = Ω` is exactly what the probe-gate
+verified at every minimal base of the residue. -/
+inductive DominatorReachable {n : Nat} (S : AssociationScheme n) (T : Finset (Fin n)) : Fin n → Prop
+  | base {t : Fin n} (ht : t ∈ T) : DominatorReachable S T t
+  | step {α β γ : Fin n} (hα : DominatorReachable S T α) (hβ : DominatorReachable S T β)
+      (hone : S.intersectionNumber (S.relOfPair α γ) (S.relOfPair γ β) (S.relOfPair α β) = 1) :
+      DominatorReachable S T γ
+
+/-- **Every dominator-reachable point is determined.** Induction over `DominatorReachable`: the base
+case is B2 (`determined_of_mem_individualized`), the step is B3′ (`determined_of_forcedTriangle`). The
+bridge from the combinatorial reachability predicate to the WL-singleton-cell fact. -/
+theorem determinedAt_of_dominatorReachable (S : AssociationScheme n) {T : Finset (Fin n)} {v : Fin n}
+    (h : DominatorReachable S T v) :
+    DeterminedAt S (individualizedColouring n T) v := by
+  induction h with
+  | base ht => exact determined_of_mem_individualized S ht
+  | step _ _ hone ihα ihβ => exact determined_of_forcedTriangle S ihα ihβ hone
+
+/-- **The δ′ engine — the forced-triangle closure exhausts Ω ⟹ discrete.** If every vertex is
+dominator-reachable from `T`, individualising `T` discretises the scheme. The citation-free, dense-side
+analogue of `discrete_of_connectivity`: there the universal determinacy came from `smax`/`sα`
+connectivity, here it is the named structural hypothesis the family-level math discharges. -/
+theorem discrete_of_dominatorClosure (S : AssociationScheme n) {T : Finset (Fin n)}
+    (hclo : ∀ v, DominatorReachable S T v) :
+    Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown)
+      (individualizedColouring n T)) := by
+  intro i j hij
+  exact determinedAt_of_dominatorReachable S (hclo j) i hij
+
+/-- **δ′ packaged for the seal consumer.** A base `T` of size `≤ bound` whose forced-triangle closure
+exhausts Ω discretises the scheme: `SeparatesAtBoundedBase S bound`. The citation-free sibling of
+`separatesAtBoundedBase_of_connectivity` and `separatesAtBoundedBase_of_extensionPointed` — it lands
+directly on the seal consumer with **no** group-base hypothesis (discreteness is supplied outright, not
+via a separability transport), no CC-extension, and no catch-up. -/
+theorem separatesAtBoundedBase_of_dominatorClosure (S : SchurianScheme n) {T : Finset (Fin n)}
+    {bound : Nat} (hcard : T.card ≤ bound)
+    (hclo : ∀ v, DominatorReachable S.toAssociationScheme T v) :
+    SeparatesAtBoundedBase S bound :=
+  ⟨T, hcard, discrete_of_dominatorClosure S.toAssociationScheme hclo⟩
 
 /-! ### §S-gate — the seal-bridge anchor: §S.17 `Separable` → the sink (the named transport obligation)
 
@@ -612,6 +711,31 @@ theorem reachesRigidOrCameron_viaExtensionSeparability {IsLarge : Nat → Prop}
   intro hn
   exact absurd (separatesAtBoundedBase_of_extensionPointed S hne hcard hbase hext
     (fun u hns => hcite n E u (hhyp u hns)) hcatch) hn
+
+/-- **THE CITATION-FREE CHECKPOINT (Route δ′) — the seal via the forced-triangle dominator closure.**
+The same conditional seal as `reachesRigidOrCameron_viaExtensionSeparability`, but its separation input
+is the **citation-free** dominator closure: a bounded base `T` whose forced-triangle closure exhausts Ω
+(`hclo`). Carries exactly {G3 `hClassify` + `hImprim` + the single structural hypothesis `hclo`} — no
+`Theorem41Statement`, no conditions-on-the-extension, no catch-up, no group base. The probe-gate
+(`Probe_CatchUpGate_BasesAndDominators`) verified `hclo` at every minimal base of both residue instances;
+Stage 3's family-level math proves it for the residue family ("the `c = 1` closure completes from a
+bounded base"), which is the same open content as the extension-separability route in a citation-free
+form. -/
+theorem reachesRigidOrCameron_viaDominatorClosure {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    {T : Finset (Fin n)} (hcard : T.card ≤ bound)
+    (hclo : ∀ v, DominatorReachable S.toAssociationScheme T v)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S := by
+  refine reachesRigidOrCameron_viaPersistentTwinBlock hClassify S hne hrank ?_ hImprim
+  intro hn
+  exact absurd (separatesAtBoundedBase_of_dominatorClosure S hcard hclo) hn
 
 end SGate2
 
