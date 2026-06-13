@@ -73,10 +73,15 @@
   §CC.10`, axiom-clean) so it runs on the **point extension `X_T`**, not the bare scheme — because a probe
   (`Probe_RainbowRigidFamily`) showed the *scheme-level* δ′ and rainbow-rigidity are **order-16 artifacts** (the
   `n=25` amorphic-NLS residue recovers at `b(X)=2` but only via `X_T`'s finer colours). The citation-free chain is now
-  `DominatorReachable`-closure-on-`X_T` ⟹ (modulo the one carried hypothesis **`Sharp`**, true for `X_T`) `X_T`
-  complete ⟹ `T` a base ⟹ `b(X) ≤ |T|`. **THE LIVE NEXT STEP = prove `Sharp (pointExtension X T)`** (then wire
-  `X_T`-complete ⟹ `SeparatesAtBoundedBase`, then an extension-level pinning rank for the family). Full ranked NEXT in
-  the "UPDATE (2026-06-13, latest)" block below; the engine decls are in §8's last two entries + §9.
+  `DominatorReachable`-closure-on-`X_T` ⟹ `X_T` complete ⟹ `T` a base ⟹ `b(X) ≤ |T|`.
+  **`Sharp (pointExtension X T)` is now PROVED (2026-06-13, `CoherentConfig.lean §CC.10`, axiom-clean)** —
+  `sharp_pointExtension`, via the `a`-isolating count + `stableSetoid_pairCount` fixpoint coherence — so the engine's
+  discreteness payoff is **unconditional on the extension**: `allSingletonFiber_of_dominatorClosure_pointExtension`
+  carries **only `hclo`** (`Sharp` discharged by the proof, `T`-singleton-fibers by `isPointExtension_pointExtension`).
+  **THE LIVE NEXT STEP = wire `X_T`-complete ⟹ `SeparatesAtBoundedBase`** (the warmRefine↔fiber bridge *at bases* —
+  the genuine modeling risk, see Stage 1.2(c) / the Stage-2.1 direction check; cells=fibers holds at `|T|≥2`), **then**
+  an extension-level pinning rank for the amorphic-NLS family (the open `c(X_T)` content). The engine decls are in §8's
+  last three entries + §9.
 - **CURRENT FRONTIER (2026-06-13) — the δ′ Stage-3 toolkit is COMPLETE; the target is now the NON-AFFINE residue,
   and its closure CONSTRUCTION has been extracted.** Since the 2026-06-12 state above: the full δ′ closure toolkit
   landed (the iteration engine `dominatorReachable_of_rank`, the cyclotomic `F_q`-power and ratio step builders, the
@@ -1344,6 +1349,31 @@ bullseye) says closure is the likely outcome and the build is worth it.
   `SeparatesAtBoundedBase`, via the §CC.9 / `IsPointExtension` bridge); (3) supply a bounded-base pinning rank for the
   amorphic-NLS family *on the extension* (the genuinely open `c(X_T)` content, now on the right object). The
   order-16 `RainbowRigid` lemma stays as the special case where the scheme-level engine already sufficed.
+- **2026-06-13 — `Sharp (pointExtension X T)` PROVED — the δ′ engine's lone carried hypothesis is discharged on the
+  extension (`CoherentConfig.lean §CC.10`; `sharp_pointExtension`, `allSingletonFiber_of_dominatorClosure_pointExtension`;
+  both axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full serial build green 95s; index regenerated,
+  2 rows described).** The previous increment lifted the engine to `CoherentConfig` but left `Sharp` carried; this proves
+  it for the actual construction. **`sharp_pointExtension`:** a singleton fiber `a` of `pointExtension X T` and a
+  same-fiber pair `u,u'` (`relOf u u = relOf u' u'`) have equal relations to `a` (`relOf a u = relOf a u'`). The proof is
+  the one sketched at handoff, verified end-to-end: the count `#{w : r(u,w)=r(u,a) ∧ r(w,u)=r(a,u)}` is exactly **1** —
+  the only qualifying `w` is `a`, because `r(u,w)=r(u,a)` forces `w` into `a`'s fiber (`relOf_diag_right_eq`, the §CC.2
+  derived fiber coherence) and that fiber is the singleton `{a}` — and the **fixpoint coherence `stableSetoid_pairCount`**
+  transports `=1` to the `u'` row, producing a witness that must again be `a`, pinning `r(a,u')=r(a,u)`. One refinement
+  over the hand-sketch: the witness-uniqueness sublemma (`iso_imp`) is stated with *independent* source components
+  (`stableSetoid (p,w) (q,a) → w=a`) because the transported witness sits at `(u',w)` against `(u,a)` — `relOf_diag_right_eq`
+  only inspects targets, so this is free. **`allSingletonFiber_of_dominatorClosure_pointExtension`:** the unconditional
+  discreteness payoff on `X_T` — `(∀ v, DominatorReachable T v) ⟹ X_T discrete = T a base`, carrying **only `hclo`**
+  (`Sharp` discharged by `sharp_pointExtension`, `T`-singleton-fibers by `(isPointExtension_pointExtension …).2.1`).
+  **Net:** the citation-free δ′ chain on the extension is now `hclo` ⟹ `b(X) ≤ |T|` with no carried model hypothesis;
+  the only inputs left are the two genuinely-open pieces below. **Lean note for the log:** §CC.10 is past
+  `end PointExtensionConstruction`, so its section-wide `open scoped Classical` is gone — the `Finset.filter` exposed by
+  `unfold pairCount` needs a `classical` tactic at proof start to synthesize `DecidablePred` (the §CC.8 gotcha, recurring
+  one section later). **NEXT (ranked):** (1) wire `allSingletonFiber_of_dominatorClosure_pointExtension` to the seal
+  consumer — `X_T`-complete ⟹ `SeparatesAtBoundedBase`, the **warmRefine↔fiber bridge at bases** (the load-bearing
+  modeling risk: cells=fibers holds at `|T|≥2` per the Stage-2.1 direction check, refuted at `|T|=1`; state it base-keyed,
+  reuse the §S-bridge B1–B5 template); (2) a bounded-base pinning rank for the amorphic-NLS family **on `X_T`** (the
+  genuinely open `c(X_T)` math, now on the right object); then (3, deferred) the `SchurianScheme`/seal-capstone wiring +
+  the hImprim `G₀Irreducible → IsPrimitive` bridge.
 
 ---
 
@@ -1381,10 +1411,13 @@ isolated catch-up) / `isSchemeAut_of_relOfPair_eq` / **`twinsRealized_of_extensi
 extension `X_T`, for the n≥25 residue the scheme-level engine can't reach):** the forced-triangle criterion
 both directions **`CoherentConfig.interNum_eq_one_of_forcedUnique`** / **`forcedUnique_of_interNum_eq_one`** /
 the inductive closure **`CoherentConfig.DominatorReachable`** / step builder
-**`dominatorReachable_step_of_unique`** / the rank engine **`dominatorReachable_of_rank`** / the carried
-refinement hypothesis **`Sharp`** (true for `X_T`, the next discharge) / the propagation
+**`dominatorReachable_step_of_unique`** / the rank engine **`dominatorReachable_of_rank`** / the
+refinement hypothesis **`Sharp`** — **now PROVED for the extension (2026-06-13): `sharp_pointExtension`**
+(via the `a`-isolating count + `stableSetoid_pairCount` fixpoint coherence) / the propagation
 **`singletonFiber_of_dominatorReachable`** / the discreteness payoff
-**`allSingletonFiber_of_dominatorClosure`** (closure + `Sharp` + `T`-singletons ⟹ `X` discrete = `T` a base).
+**`allSingletonFiber_of_dominatorClosure`** (closure + `Sharp` + `T`-singletons ⟹ `X` discrete = `T` a base)
+and its unconditional-on-`X_T` corollary **`allSingletonFiber_of_dominatorClosure_pointExtension`**
+(carries **only `hclo`** — `Sharp` and `T`-singletons both discharged for `pointExtension X T`).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /

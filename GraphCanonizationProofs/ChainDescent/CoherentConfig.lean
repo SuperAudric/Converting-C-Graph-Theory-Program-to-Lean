@@ -1034,6 +1034,66 @@ theorem allSingletonFiber_of_dominatorClosure {T : Finset (Fin n)} (hsharp : X.S
     ∀ v : Fin n, X.SingletonFiber v :=
   fun v => X.singletonFiber_of_dominatorReachable hsharp hT (hclo v)
 
+/-- **`Sharp` holds for the point extension** — the isolated next discharge, now proved. The coherent
+closure refines vertices by their relations to every singleton fiber: if `a` is a singleton fiber of
+`pointExtension X T` and `u, u'` lie in one fiber (`relOf u u = relOf u' u'`), then they have equal
+relations to `a` (`relOf a u = relOf a u'`). This is FALSE for a general CC but TRUE here because the
+construction is a `pairStep` fixpoint. **Proof:** the count `#{w : r(u,w)=r(u,a) ∧ r(w,u)=r(a,u)}` is
+exactly `1` — only `w = a` qualifies, since `r(u,w)=r(u,a)` forces `w` into `a`'s fiber
+(`relOf_diag_right_eq`), which is the singleton `{a}` — and the fixpoint coherence
+(`stableSetoid_pairCount`) transports that `= 1` to `u'`, producing a witness `w'` that must again be
+`a` and so pins `r(a,u') = r(a,u)`. -/
+theorem sharp_pointExtension (T : Finset (Fin n)) : (pointExtension X T).Sharp := by
+  classical
+  intro a u u' hsingle hfib
+  -- A pair whose target is in `a`'s (singleton) fiber must have target `a` — regardless of its source.
+  have iso_imp : ∀ p q w : Fin n, stableSetoid X T (p, w) (q, a) → w = a := by
+    intro p q w h
+    have hr : (pointExtension X T).relOf p w = (pointExtension X T).relOf q a :=
+      (pointExtension_relOf_eq_iff X T).mpr h
+    exact hsingle w ((pointExtension X T).relOf_diag_right_eq hr)
+  have hfib' : stableSetoid X T (u, u) (u', u') :=
+    (pointExtension_relOf_eq_iff X T).mp hfib
+  -- The `a`-isolating count is exactly 1 (only `w = a`).
+  have hcount : pairCount (stableSetoid X T) u u (u, a) (a, u) = 1 := by
+    unfold pairCount
+    rw [Finset.card_eq_one]
+    refine ⟨a, ?_⟩
+    ext w
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+    constructor
+    · rintro ⟨h1, -⟩
+      exact iso_imp u u w h1
+    · rintro rfl
+      exact ⟨(stableSetoid X T).iseqv.refl _, (stableSetoid X T).iseqv.refl _⟩
+  -- Fixpoint coherence transports the count to `u'`, so the `u'` filter is nonempty.
+  have hpc : pairCount (stableSetoid X T) u u (u, a) (a, u)
+      = pairCount (stableSetoid X T) u' u' (u, a) (a, u) :=
+    stableSetoid_pairCount X T hfib' (u, a) (a, u)
+  have hpos : 0 < pairCount (stableSetoid X T) u' u' (u, a) (a, u) := by
+    rw [← hpc, hcount]; exact Nat.one_pos
+  unfold pairCount at hpos
+  rw [Finset.card_pos] at hpos
+  obtain ⟨w, hw⟩ := hpos
+  rw [Finset.mem_filter] at hw
+  obtain ⟨-, hw1, hw2⟩ := hw
+  have hwa : w = a := iso_imp u' u w hw1
+  rw [hwa] at hw2
+  exact ((pointExtension_relOf_eq_iff X T).mpr hw2).symm
+
+/-- **The δ′ closure is complete on the point extension, unconditionally.** If every point is
+`DominatorReachable` from `T` in `pointExtension X T`, then `pointExtension X T` is discrete (every
+point a singleton fiber) — i.e. `T` is a base. Both auxiliary hypotheses of
+`allSingletonFiber_of_dominatorClosure` are now discharged for the extension: `Sharp` by
+`sharp_pointExtension`, and the `T`-singleton-fiber property by the universal property
+(`isPointExtension_pointExtension`). The sole remaining input is the closure `hclo` itself — the
+genuine open `c(X_T)` content (a bounded-base pinning rank for the residue family on the extension). -/
+theorem allSingletonFiber_of_dominatorClosure_pointExtension (T : Finset (Fin n))
+    (hclo : ∀ v, (pointExtension X T).DominatorReachable T v) :
+    ∀ v, (pointExtension X T).SingletonFiber v :=
+  (pointExtension X T).allSingletonFiber_of_dominatorClosure (sharp_pointExtension X T)
+    (isPointExtension_pointExtension X T).2.1 hclo
+
 end CoherentConfig
 
 end ChainDescent
