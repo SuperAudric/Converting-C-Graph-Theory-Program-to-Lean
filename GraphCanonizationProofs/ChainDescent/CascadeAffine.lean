@@ -447,6 +447,64 @@ inductive DominatorReachable {n : Nat} (S : AssociationScheme n) (T : Finset (Fi
       (hone : S.intersectionNumber (S.relOfPair α γ) (S.relOfPair γ β) (S.relOfPair α β) = 1) :
       DominatorReachable S T γ
 
+/-- **The general forced-triangle criterion (any scheme).** The dominator intersection number
+`c^{r(α,β)}_{r(α,γ),r(γ,β)} = 1` exactly when `γ` is the **unique** point `u` sharing `γ`'s
+`relOfPair`-profile to both `α` (`r(α,u) = r(α,γ)`) and `β` (`r(u,β) = r(γ,β)`). The forced-triangle
+filter `{u : r(α,u)=r(α,γ) ∧ r(u,β)=r(γ,β)}` always contains `γ` (`rel_relOfPair`); `= 1` collapses it to
+`{γ}`. The scheme-agnostic core that `affineScheme_interNum_eq_one_of_unique` specialises to orbit
+differences — and, via the schurian axiom, reads as `Stab(α)·γ ∩ Stab(β)·γ = {γ}`. -/
+theorem interNum_eq_one_of_forcedUnique {n : Nat} (S : AssociationScheme n) {α β γ : Fin n}
+    (huniq : ∀ u : Fin n, S.relOfPair α u = S.relOfPair α γ →
+      S.relOfPair u β = S.relOfPair γ β → u = γ) :
+    S.intersectionNumber (S.relOfPair α γ) (S.relOfPair γ β) (S.relOfPair α β) = 1 := by
+  classical
+  have hk := S.intersectionNumber_well_defined (S.relOfPair α γ) (S.relOfPair γ β)
+      (S.relOfPair α β) α β (S.rel_relOfPair α β)
+  rw [← hk, Finset.card_eq_one]
+  refine ⟨γ, Finset.ext (fun u => ?_)⟩
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+  constructor
+  · rintro ⟨h1, h2⟩
+    rw [S.rel_iff_relOfPair] at h1 h2
+    exact huniq u h1.symm h2.symm
+  · intro hu; rw [hu]
+    exact ⟨S.rel_relOfPair α γ, S.rel_relOfPair γ β⟩
+
+/-- **The general `DominatorReachable` step builder (any scheme).** From two reachable points `α, β` and
+the forced-triangle uniqueness on `relOfPair`-profiles pinning `γ`, `γ` is reachable. Subsumes
+`dominatorReachable_affine_step` (its orbit-difference `huniq` is this `relOfPair` one unfolded through
+`affineScheme_relOfPair_eq_iff`) and covers non-affine residues directly. With `DominatorReachable.base`,
+the scheme-agnostic toolkit for building closure derivations. -/
+theorem dominatorReachable_step_of_unique {n : Nat} {S : AssociationScheme n} {T : Finset (Fin n)}
+    {α β γ : Fin n} (hα : DominatorReachable S T α) (hβ : DominatorReachable S T β)
+    (huniq : ∀ u : Fin n, S.relOfPair α u = S.relOfPair α γ →
+      S.relOfPair u β = S.relOfPair γ β → u = γ) :
+    DominatorReachable S T γ :=
+  DominatorReachable.step hα hβ (interNum_eq_one_of_forcedUnique S huniq)
+
+/-- **The schurian forced-triangle criterion — the `Stab(α)·γ ∩ Stab(β)·γ = {γ}` reading.** On a schurian
+scheme, `relOfPair`-profile equality is a stabiliser-orbit relation (`r(α,u) = r(α,γ) ↔ u ∈ Stab(α)·γ`,
+the schurian axiom), so the forced-triangle uniqueness is *geometric*: `γ` is pinned by `α, β` exactly when
+the only point fixed-relative to both `α` and `β` like `γ` is `γ` itself. This builds a `DominatorReachable`
+step from the **point-stabiliser-orbit** form `huniq` — the conceptual handle for the single-base closure
+argument (a base has `⋂ Stab(t) = 1`, so its stabiliser orbits intersect down to points). -/
+theorem dominatorReachable_step_of_stab {n : Nat} {S : SchurianScheme n} {T : Finset (Fin n)}
+    {α β γ : Fin n}
+    (hα : DominatorReachable S.toAssociationScheme T α)
+    (hβ : DominatorReachable S.toAssociationScheme T β)
+    (huniq : ∀ u : Fin n,
+      (∃ g : Equiv.Perm (Fin n), IsSchemeAut S.toAssociationScheme g ∧ g α = α ∧ g γ = u) →
+      (∃ g : Equiv.Perm (Fin n), IsSchemeAut S.toAssociationScheme g ∧ g β = β ∧ g γ = u) →
+      u = γ) :
+    DominatorReachable S.toAssociationScheme T γ := by
+  refine dominatorReachable_step_of_unique hα hβ (fun u h1 h2 => huniq u ?_ ?_)
+  · obtain ⟨g, hg, hgα, hgγ⟩ := S.schurian (S.relOfPair α γ) α γ α u
+      (S.rel_relOfPair α γ) (by rw [S.rel_iff_relOfPair, h1])
+    exact ⟨g, hg, hgα, hgγ⟩
+  · obtain ⟨g, hg, hgγ, hgβ⟩ := S.schurian (S.relOfPair γ β) γ β u β
+      (S.rel_relOfPair γ β) (by rw [S.rel_iff_relOfPair, h2])
+    exact ⟨g, hg, hgβ, hgγ⟩
+
 /-- **Every dominator-reachable point is determined.** Induction over `DominatorReachable`: the base
 case is B2 (`determined_of_mem_individualized`), the step is B3′ (`determined_of_forcedTriangle`). The
 bridge from the combinatorial reachability predicate to the WL-singleton-cell fact. -/

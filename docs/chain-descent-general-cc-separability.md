@@ -130,6 +130,15 @@
      `dominatorReachable_affine_step`, for the residue family (`G0pow β` cyclotomic / amorphic-NLS). The probe
      confirms it holds; the proof is the orbit combinatorics. The equivariance means this need only be done at one
      representative base.
+     **STAGE-3 INCREMENT 3 LANDED 2026-06-12 (`CascadeAffine.lean §S-bridge-δ`, axiom-clean, build green 94s): the
+     general + schurian forced-triangle criterion.** `interNum_eq_one_of_forcedUnique` lifts the affine criterion to
+     **any scheme** (`c=1` ⟺ the forced-triangle filter is `{γ}`), `dominatorReachable_step_of_unique` its step
+     builder (subsumes the affine one + reaches non-affine residues), and **`dominatorReachable_step_of_stab`** the
+     conceptual key: on a schurian scheme the criterion reads **`Stab(α)·γ ∩ Stab(β)·γ = {γ}`** (point-stabiliser
+     orbits) — the geometric form the closure argument wants, since a base has `⋂ Stab(t) = 1`. **Remaining (the
+     genuine open math): the single-base closure** — exhibit ONE base `T₀` and show the stabiliser-orbit-intersection
+     condition propagates from `T₀` to all of `V`, for the residue family. The probe confirms it; the proof is the
+     orbit/stabiliser combinatorics, now framed group-theoretically.
   Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
   threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier; strategy-§15 gaps tracking note.
   The increment log is §8 — append to it.
@@ -779,6 +788,25 @@ bullseye) says closure is the likely outcome and the build is worth it.
   (not affine-specific), so it composes with the whole scheme substrate. NEXT (Stage 3 increment 3, the genuine
   open math): the single-base closure for `affineScheme (G0pow β)` — pick `T₀` and prove `∀ v, DominatorReachable`
   by the orbit-of-difference combinatorics, the `s(C)` core.
+- **2026-06-12 — STAGE 3 INCREMENT 3: THE GENERAL + SCHURIAN FORCED-TRIANGLE CRITERION (`CascadeAffine.lean
+  §S-bridge-δ`, axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full serial build green 94s;
+  index regenerated, 3 rows described).** Lifted the affine criterion to its natural generality and surfaced the
+  group-theoretic form of the open content. (1) **`interNum_eq_one_of_forcedUnique`** — for ANY `AssociationScheme`,
+  `c^{r(α,β)}_{r(α,γ),r(γ,β)} = 1` ⟺ `γ` is the unique `u` sharing `γ`'s `relOfPair`-profile to `α` and `β`
+  (forced-triangle filter `= {γ}`; same singleton proof as the affine lemma but with no orbit machinery — pure
+  `intersectionNumber_well_defined` + `rel_iff_relOfPair`). (2) **`dominatorReachable_step_of_unique`** — its
+  `DominatorReachable` step builder; subsumes `dominatorReachable_affine_step` (the orbit-difference `huniq` is this
+  `relOfPair` one unfolded) AND covers non-affine residues (e.g. the ℤ₄² amorphic NLS = `orbitalScheme`, not
+  `affineScheme`) the affine lemma could not reach. (3) **`dominatorReachable_step_of_stab`** — the schurian reading:
+  `relOfPair`-profile equality is a point-stabiliser-orbit relation (schurian axiom `S.schurian`), so the criterion
+  is **`Stab(α)·γ ∩ Stab(β)·γ = {γ}`** — `γ` is pinned exactly when the two point-stabiliser orbits of `γ` meet only
+  at `γ`. This is the geometric handle the single-base closure wants: a base `T₀` has `⋂_{t∈T₀} Stab(t) = 1`, so its
+  stabiliser orbits must intersect down toward points, and the closure question becomes "do the pairwise
+  stabiliser-orbit intersections propagate reachability from `T₀` to all of `V`". **Net:** the open content is now
+  framed group-theoretically (stabiliser-orbit intersections), at the right generality (any schurian residue, not
+  just affine). NEXT (Stage 3 increment 4, the genuine open math): the single-base closure — exhibit `T₀` and prove
+  the stabiliser-orbit-intersection propagation for the residue family. Note: `affineScheme_interNum_eq_one_of_unique`
+  is now a special case of (1), left in place (orbit-difference convenience form; non-load-bearing to refactor).
 
 ---
 
@@ -819,12 +847,14 @@ isolated catch-up) / `isSchemeAut_of_relOfPair_eq` / **`twinsRealized_of_extensi
 **`reachesRigidOrCameron_viaDominatorClosure`** (the citation-free checkpoint, carries only
 {G3 + `hImprim` + `hclo : ∀ v, DominatorReachable S T v`}) (`CascadeAffine.lean §S-gate2`).
 **Stage 3 substrate — the affine forced-triangle criterion (LANDED 2026-06-12, the δ′ family argument runs on
-these):** **`affineScheme_interNum_eq_one_of_unique`** (the dominator premise ⟺ `G₀`-orbit-of-difference
-uniqueness) / **`dominatorReachable_affine_step`** (the `DominatorReachable` builder from orbit-uniqueness)
-(`CascadeAffine.lean §S-stage3`); the closure-equivariance reduction **`dominatorReachable_map`** /
-**`dominatorReachable_univ_image`** (complete closure transports across `Aut(S)`-images of the base — prove at one
-representative; `CascadeAffine.lean §S-bridge-δ`). Open: the single-base closure
-`∀ v, DominatorReachable (affineScheme (G0pow β)) T₀ v`.
+these):** the general (any-scheme) criterion **`interNum_eq_one_of_forcedUnique`** (`c=1` ⟺ filter `={γ}`) /
+**`dominatorReachable_step_of_unique`** (the general step builder, subsumes the affine one + non-affine residues) /
+**`dominatorReachable_step_of_stab`** (the schurian `Stab(α)·γ ∩ Stab(β)·γ = {γ}` reading — the closure's geometric
+handle); the affine specialisation **`affineScheme_interNum_eq_one_of_unique`** (orbit-of-difference uniqueness) /
+**`dominatorReachable_affine_step`** (`CascadeAffine.lean §S-stage3`); the closure-equivariance reduction
+**`dominatorReachable_map`** / **`dominatorReachable_univ_image`** (complete closure transports across `Aut(S)`-images
+of the base — prove at one representative) (`CascadeAffine.lean §S-bridge-δ`). Open: the single-base closure
+`∀ v, DominatorReachable S T₀ v` (the stabiliser-orbit-intersection propagation for the residue family).
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`
