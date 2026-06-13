@@ -290,15 +290,15 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `coarsen_apply` | 57-61 | §S-stab `coarsen χ₁ χ₂ (χ₁ v) = χ₂ v`. | — |
 | `affinePermFin_apply` | 1301-1304 | (Phase 2, M0.3) `affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t)`. | `@[simp]` |
 | `affinePermFin_one_mem` | 1354-1357 | (Phase 2, M0.3) A translation (`linear part 1 ∈ G₀`) lies in `affineG`. | — |
-| `mulUnitHom_apply` | 1769-1771 | F0: `mulUnitHom u x = ↑u * x`. | `@[simp]` |
-| `conjHom_apply` | 1781-1783 | F0: `conjHom hd e u = efield hd (e (efield⁻¹ u))`. | `@[simp]` |
-| `sigmaCyc_zpow_apply` | 1800-1808 | F0 (load-bearing): `σ^k` acts as multiplication by `α^k` through the field iso (`σ^k u = efield (α^k · efield⁻¹ u)`) — the `σ^k ↦ α^k` reduction both deliverables turn on. | — |
-| `exists_npow_fqGen` | 1810-1818 | F0: every nonzero `z ∈ F_q` is a natural power of `α` (the multiplicative-orbit fact, for the irreducibility argument). | — |
-| `frobLinear_apply` | 1896-1897 | F1: `frobLinear x = x ^ p`. | `@[simp]` |
-| `frobLinear_mul` | 1899-1903 | F1: the **twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius (a ring hom) carries mult-by-`α` to mult-by-`α^p`; the algebraic core of the gap. | — |
-| `frobLinear_conj_mulUnit` | 1905-1914 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
-| `sigmaPow_zpow_apply` | 2020-2026 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
-| `frobLinear_conj_mulUnit'` | 2248-2255 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |
+| `mulUnitHom_apply` | 1836-1838 | F0: `mulUnitHom u x = ↑u * x`. | `@[simp]` |
+| `conjHom_apply` | 1848-1850 | F0: `conjHom hd e u = efield hd (e (efield⁻¹ u))`. | `@[simp]` |
+| `sigmaCyc_zpow_apply` | 1867-1875 | F0 (load-bearing): `σ^k` acts as multiplication by `α^k` through the field iso (`σ^k u = efield (α^k · efield⁻¹ u)`) — the `σ^k ↦ α^k` reduction both deliverables turn on. | — |
+| `exists_npow_fqGen` | 1877-1885 | F0: every nonzero `z ∈ F_q` is a natural power of `α` (the multiplicative-orbit fact, for the irreducibility argument). | — |
+| `frobLinear_apply` | 1963-1964 | F1: `frobLinear x = x ^ p`. | `@[simp]` |
+| `frobLinear_mul` | 1966-1970 | F1: the **twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius (a ring hom) carries mult-by-`α` to mult-by-`α^p`; the algebraic core of the gap. | — |
+| `frobLinear_conj_mulUnit` | 1972-1981 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
+| `sigmaPow_zpow_apply` | 2087-2093 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
+| `frobLinear_conj_mulUnit'` | 2315-2322 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |
 ## ChainDescent/LinearOracle.lean
 
 | Name | Line | Description | Notes |

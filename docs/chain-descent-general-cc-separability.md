@@ -113,6 +113,16 @@
      family (feeds `reachesRigidOrCameron_viaDominatorClosure`; probe-confirmed at every minimal base). δ′ is the
      lighter target — it asks only that the landed `c=1` forced-triangle closure completes from a base, with no
      separability/CC machinery — and is the same open content as β in citation-free clothing.
+     **STAGE-3 INCREMENT 1 LANDED 2026-06-12 (`CascadeAffine.lean §S-stage3`, axiom-clean, build green 36s): the
+     affine forced-triangle criterion.** `affineScheme_interNum_eq_one_of_unique` translates the abstract dominator
+     premise (`intersectionNumber … = 1`) into the affine model's **`G₀`-orbit uniqueness on differences** — `γ` is
+     pinned by `α, β` iff it is the *unique* `u` with `u−α ∼ γ−α` and `β−u ∼ β−γ` (proof: the forced-triangle
+     filter is the singleton `{γ}`); `dominatorReachable_affine_step` is the matching `DominatorReachable` builder.
+     So the δ′ family argument now runs entirely on `G₀`-orbit-of-difference combinatorics (no scheme-level
+     intersection-number bookkeeping). **Remaining (the genuine open math): the family closure** — exhibit a bounded
+     base `T` and show every `v ∈ V` is `DominatorReachable` via iterated `dominatorReachable_affine_step` for the
+     residue family (`G0pow β` cyclotomic / amorphic-NLS). The probe confirms it holds; the proof is the orbit
+     combinatorics.
   Parked smaller items (see the 2026-06-12 review entry in §8): Route δ feasibility probe; pin the `IsLarge`
   threshold vs Sun–Wilmes; v=64 Davis–Xiang NLS falsifier; strategy-§15 gaps tracking note.
   The increment log is §8 — append to it.
@@ -729,6 +739,24 @@ bullseye) says closure is the likely outcome and the build is worth it.
   genuine family-level mathematics). Lean note for the log: B3′ is a *strict* generalisation, so
   `determined_of_saAdj` could be refactored to call it (deferred — non-load-bearing, and the `saAdj_symm`
   extraction is one line). NEXT: Stage 3 (δ′ target recommended), the genuine open math.
+- **2026-06-12 — STAGE 3 INCREMENT 1: THE AFFINE FORCED-TRIANGLE CRITERION (`CascadeAffine.lean §S-stage3`,
+  axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`, full serial build green 36s; index regenerated,
+  2 rows described).** Began the δ′ Stage-3 frontier (`hclo : ∀ v, DominatorReachable S T v` for the residue
+  family). The first brick is the **coordinate translation**: `affineScheme_interNum_eq_one_of_unique` proves, for
+  `affineScheme G₀`, that the dominator premise `intersectionNumber (relOfPair α γ)(relOfPair γ β)(relOfPair α β)
+  = 1` holds **exactly when `γ` is the unique point `u` with `u−α` in `G₀·(γ−α)` and `β−u` in `G₀·(β−γ)`** — i.e.
+  the `c=1` forced-triangle pins `γ` iff the orbit-of-difference triangle is rigid. Proof is clean (no `card_bij`):
+  the forced-triangle filter `{u : r(α,u)=r(α,γ) ∧ r(u,β)=r(γ,β)}` is exhibited as the singleton `{γ}` via
+  `intersectionNumber_well_defined` + `affineScheme_rel_iff` + `orbMk_affine_eq_iff` (each membership clause
+  unfolds to a `G₀`-orbit-of-difference equation, and `huniq` collapses it). `dominatorReachable_affine_step` is
+  the matching builder: two reachable points + the orbit-uniqueness ⟹ `DominatorReachable … γ`, via
+  `DominatorReachable.step`. **Net:** the δ′ family argument is now stated purely in `G₀`-orbit-of-difference
+  terms — the same idiom as `affineScheme_relOfPair_translation` / `discrete_affineScheme_of_jointSeparates`, so it
+  composes with the landed affine machinery. Lean note: `rintro rfl` on `u = γ` (γ a parameter) substitutes γ
+  *away*; use `intro hu; rw [hu]` to keep γ in scope. **NEXT (Stage 3 increment 2, the genuine open math): the
+  family closure** — pick a bounded base `T` (per the probe, the minimal group base) and prove every `v` is
+  `DominatorReachable` by iterated `dominatorReachable_affine_step`, for the residue family (`G0pow β`). This is the
+  orbit-combinatorics core: showing the rigid-triangle reachability fills `V` from `T`.
 
 ---
 
@@ -768,6 +796,10 @@ isolated catch-up) / `isSchemeAut_of_relOfPair_eq` / **`twinsRealized_of_extensi
 **`separatesAtBoundedBase_of_dominatorClosure`** (`CascadeAffine.lean §S-bridge-δ`) /
 **`reachesRigidOrCameron_viaDominatorClosure`** (the citation-free checkpoint, carries only
 {G3 + `hImprim` + `hclo : ∀ v, DominatorReachable S T v`}) (`CascadeAffine.lean §S-gate2`).
+**Stage 3 substrate — the affine forced-triangle criterion (LANDED 2026-06-12, the δ′ family argument runs on
+these):** **`affineScheme_interNum_eq_one_of_unique`** (the dominator premise ⟺ `G₀`-orbit-of-difference
+uniqueness) / **`dominatorReachable_affine_step`** (the `DominatorReachable` builder from orbit-uniqueness)
+(`CascadeAffine.lean §S-stage3`). Open: the family closure `∀ v, DominatorReachable (affineScheme (G0pow β)) T v`.
 
 **PV Thm 3.1 `c=1` substrate (reuse heavily):** `saAdj` / `saAdj_symm` / `valency_mul_intersectionNumber` /
 `transport` / `transport_step` / `saComp` / `compsOf` / `separatesAtBoundedBase_of_sparseSeparable`

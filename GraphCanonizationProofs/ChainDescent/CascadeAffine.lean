@@ -1725,6 +1725,73 @@ theorem reachesRigidOrCameron_viaAffineIrreducible {IsLarge : Nat → Prop}
   rintro ⟨hprim, hsmall⟩
   exact hbound ⟨isPrimitive_affineScheme_imp_irreducible G₀ hneg hprim, hsmall⟩
 
+/-! ### §S-stage3 — the affine forced-triangle criterion (the δ′ family target, difference-coordinates)
+
+Stage 3 of the general-CC build, δ′ branch (`docs/chain-descent-general-cc-separability.md` §5 Stage 3): the
+open content is `∀ v, DominatorReachable S T v` for the residue family. This block translates the abstract
+dominator step (`DominatorReachable.step`'s `intersectionNumber … = 1` premise) into the affine model's
+**`G₀`-orbit uniqueness on differences** — the form the family combinatorics (and the probe-gate
+`Probe_CatchUpGate_BasesAndDominators`) actually reason in. It is the dominator-engine analogue of
+`affineScheme_relOfPair_translation` / `discrete_affineScheme_of_jointSeparates`: the forced-triangle filter
+is exhibited as the singleton `{γ}`, so the `= 1` premise reduces to "the only point sharing `γ`'s
+orbit-relations to `α` and `β` is `γ`". -/
+
+/-- **The affine forced-triangle criterion.** For `affineScheme G₀`, the dominator intersection number
+`c^{r(α,β)}_{r(α,γ),r(γ,β)}` equals `1` exactly when `γ` is the **unique** point `u` sharing `γ`'s
+`G₀`-orbit-of-difference both to `α` (`u − α ∼ γ − α`) and from `β` (`β − u ∼ β − γ`). Proof: the
+forced-triangle filter `{u : r(α,u) = r(α,γ) ∧ r(u,β) = r(γ,β)}` is exactly `{γ}` — `γ` lies in it
+(`rel_relOfPair`), and the uniqueness hypothesis collapses it (each membership clause unfolds to a
+`G₀`-orbit-of-difference equation via `affineScheme_rel_iff` + `orbMk_affine_eq_iff`). The criterion that
+feeds `DominatorReachable.step` from affine data, with no scheme-level intersection-number bookkeeping. -/
+theorem affineScheme_interNum_eq_one_of_unique (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    {α β γ : Fin (p ^ d)}
+    (huniq : ∀ u : Fin (p ^ d),
+      (∃ g₀ ∈ G₀, g₀ (affineE.symm u - affineE.symm α) = affineE.symm γ - affineE.symm α) →
+      (∃ g₀ ∈ G₀, g₀ (affineE.symm β - affineE.symm u) = affineE.symm β - affineE.symm γ) →
+      u = γ) :
+    (affineScheme G₀ hneg).intersectionNumber
+        ((affineScheme G₀ hneg).relOfPair α γ)
+        ((affineScheme G₀ hneg).relOfPair γ β)
+        ((affineScheme G₀ hneg).relOfPair α β) = 1 := by
+  classical
+  have hidx : ∀ x y : Fin (p ^ d),
+      orbitalIdx (affineG G₀) ((affineScheme G₀ hneg).relOfPair x y) = orbMk x y := by
+    intro x y; rw [affineScheme_relOfPair G₀ hneg]; exact Equiv.apply_symm_apply _ _
+  have hmem : ∀ u : Fin (p ^ d),
+      ((affineScheme G₀ hneg).rel ((affineScheme G₀ hneg).relOfPair α γ) α u = true ∧
+       (affineScheme G₀ hneg).rel ((affineScheme G₀ hneg).relOfPair γ β) u β = true) ↔ u = γ := by
+    intro u
+    constructor
+    · rintro ⟨h1, h2⟩
+      rw [affineScheme_rel_iff G₀ hneg, hidx] at h1 h2
+      exact huniq u ((orbMk_affine_eq_iff G₀).mp h1) ((orbMk_affine_eq_iff G₀).mp h2)
+    · intro hu; rw [hu]
+      exact ⟨(affineScheme G₀ hneg).rel_relOfPair α γ, (affineScheme G₀ hneg).rel_relOfPair γ β⟩
+  have hk := (affineScheme G₀ hneg).intersectionNumber_well_defined
+      ((affineScheme G₀ hneg).relOfPair α γ) ((affineScheme G₀ hneg).relOfPair γ β)
+      ((affineScheme G₀ hneg).relOfPair α β) α β ((affineScheme G₀ hneg).rel_relOfPair α β)
+  rw [← hk, Finset.card_eq_one]
+  refine ⟨γ, Finset.ext (fun u => ?_)⟩
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+  exact hmem u
+
+/-- **The affine `DominatorReachable` step builder.** From two dominator-reachable points `α, β` and the
+affine forced-triangle uniqueness condition pinning `γ`, `γ` is dominator-reachable. The bridge that lets the
+δ′ family argument construct `DominatorReachable (affineScheme G₀ hneg) T` derivations purely from
+`G₀`-orbit-of-difference uniqueness facts — no abstract intersection numbers. `DominatorReachable.base`
+(`t ∈ T`) and this step are the complete toolkit; "the closure exhausts Ω" (`∀ v, DominatorReachable … v`)
+for a residue family — the lone open content of the δ′ seal capstone — is built from them. -/
+theorem dominatorReachable_affine_step (hneg : LinearEquiv.neg (ZMod p) ∈ G₀)
+    {T : Finset (Fin (p ^ d))} {α β γ : Fin (p ^ d)}
+    (hα : DominatorReachable (affineScheme G₀ hneg).toAssociationScheme T α)
+    (hβ : DominatorReachable (affineScheme G₀ hneg).toAssociationScheme T β)
+    (huniq : ∀ u : Fin (p ^ d),
+      (∃ g₀ ∈ G₀, g₀ (affineE.symm u - affineE.symm α) = affineE.symm γ - affineE.symm α) →
+      (∃ g₀ ∈ G₀, g₀ (affineE.symm β - affineE.symm u) = affineE.symm β - affineE.symm γ) →
+      u = γ) :
+    DominatorReachable (affineScheme G₀ hneg).toAssociationScheme T γ :=
+  DominatorReachable.step hα hβ (affineScheme_interNum_eq_one_of_unique G₀ hneg huniq)
+
 end AffineScheme
 
 /-! ### Phase 2 / F0 — the cyclic (cyclotomic) affine instance
