@@ -88,22 +88,39 @@
   (`clebschZ4_discrete`: `b(X) ≤ 2`) — the seal's `hclo` **discharged concretely for a real non-affine primitive G2-B
   residue**. Scope: one scheme, parameter-scoped to Clebsch `(16,5,0,2)`; at `AssociationScheme` level (`Discrete`),
   does NOT feed the seal capstone (needs `SchurianScheme` = auts, deferred); `decide`-checked, not a family proof.
-  **NEXT — HANDOFF RECOMMENDATION (ranked, honest):**
+  **UPDATE (2026-06-13, later — recommendation (1) WORKED OUT + (3) DELIVERED; see §1B and §8):**
+  - **(1) The general-argument question is now resolved on paper (§1B).** Verdict: *Cameron's dichotomy does NOT
+    deliver domination by itself* — domination is the *sparsity* bound `n > 3c(k−1)k` (Lemma 5.2, in the
+    indistinguishing number `c` and max valency `k`); the dichotomy controls only *order*. The reduction is clean:
+    the `k`-half is **free** (`maxValency(X_T) ≤ |Aut_T|`, shrinks along the greedy base), leaving **one** open
+    quantity, the post-base indistinguishing number **`c(X_T)`** — which is *identical* to the δ′ forced-triangle
+    abundance. **So the general route IS the δ′ route, not a shortcut around it.** Plus a calibration caveat
+    (poly vs sub-exponential "small"). Read §1B before any general-route work.
+  - **(3) The rainbow-rigidity family lemma LANDED (no longer "narrow-and-skipped" — it is the operational `c(X_T)`
+    content).** `dominatorReachable_of_rainbowRank` (+ `RainbowRigid`, `interNum_eq_one_of_rainbow`, the public engine
+    `dominatorReachable_of_rank_interNum`) lifts `clebschZ4_closure` from the single hard-coded scheme to the whole
+    rainbow-rigid family; `clebschZ4_rainbowRigid` (`decide`) confirms non-vacuity on the genuine bullseye. The
+    family's `hclo` now reduces to {(a) `RainbowRigid`, (b) a rainbow rank from a bounded base} — clean checkable
+    conditions. Still `AssociationScheme`-level + parameter-scoped to `(16,5,0,2)`-type amorphic rank-4.
+  **REMAINING NEXT (ranked):** (i) exhibit `RainbowRigid` + a rainbow rank for a *parametric* amorphic-NLS family
+  (beyond order-16) so the family lemma bites on more than one scheme; (ii) the post-base `c(X_T)` bound for
+  *non-rainbow* primitives (the genuinely general open core, §1B); (iii) the deferred `SchurianScheme`/seal-capstone
+  wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
+  **(2) remains a dead end** (SchurianScheme via `decide` infeasible — §7). Original ranked recommendation kept below
+  for provenance.
   1. **The real frontier = the GENERAL argument** (close G2-B for the *family*, not one scheme). The load-bearing
      open question, per §1A: does *primitive + small + non-Cameron ⟹ Thm 4.1 domination* — i.e. does Cameron's
-     dichotomy actually deliver domination on the small side? This is currently **asserted, not worked out**;
-     resolving it rigorously (a written derivation, before more Lean) tells us whether the general route is viable
-     and surfaces the precise missing structural lemma. **Highest value; this is where progress toward the
-     unconditional seal lives.**
+     dichotomy actually deliver domination on the small side? ~~This is currently **asserted, not worked out**~~
+     **(WORKED OUT 2026-06-13 — see §1B and the UPDATE above: no, it is a sparsity not an order property; reduces to
+     the `c(X_T)` bound = the δ′ content).**
   2. ⚠️ **Upgrading ℤ₄² to a full *seal* discharge (build a `SchurianScheme` instance + feed the capstone) is
      `decide`-INFEASIBLE** — the schurian axiom is `∃`-over-auts `∀`-over-pairs ≈ `4·16⁴·32` ≈ 8M checks, ~32× the
      already-heavy coherence `decide` (which was borderline-OOM). Do **not** attempt it via `decide`; `orbitalScheme`
      is `noncomputable` so that path is closed too. Recorded as a dead end (§7).
-  3. Abstracting the rainbow-rigidity closure into a family lemma is possible but **narrow** — rainbow-`c=1` is
-     special to Clebsch `(16,5,0,2)`, so it is parameter-scoped, not "all amorphic rank-4".
-  The concrete line (just landed) has delivered its value — a validation witness that the δ′ route reaches the real
-  non-affine bullseye — so further single-scheme concrete work has diminishing returns; the leverage is option 1.
-  **Per-increment history is in §8; the carve-out / why-not-GI∈P reasoning is §1A.**
+  3. ~~Abstracting the rainbow-rigidity closure into a family lemma is possible but **narrow**~~ **(DONE 2026-06-13 —
+     `dominatorReachable_of_rainbowRank`; it is the operational form of the §1B `c(X_T)` quantity, so more central
+     than "narrow" suggested, though still parameter-scoped to `(16,5,0,2)`).**
+  **Per-increment history is in §8; the carve-out / why-not-GI∈P reasoning is §1A; the option-1 derivation is §1B.**
   **REMAINING — the original Stage-1/2/3 handoff list (now HISTORY; the current frontier is the line above):**
   1. ~~**Stage 1.2(a)+(b)**~~ — **LANDED 2026-06-12 (`CoherentConfig.lean §CC.8`, axiom-clean, build green):
      the point-extension *construction* `pointExtension X T` (pair-refinement saturation on
@@ -1230,6 +1247,34 @@ bullseye) says closure is the likely outcome and the build is worth it.
   `decide`s with `fin_cases` to bound kernel memory; `native_decide` is BANNED (adds `ofReduceBool`). NEXT = either
   abstract the rainbow-rigidity closure (parameter-scoped family lemma), wire a `SchurianScheme` instance to feed the
   seal, or return to the general/primitive open core.
+- **2026-06-13 — OPTION-1 DERIVATION (§1B) + THE δ′ RAINBOW-RIGID FAMILY LEMMA LANDED (`CascadeAffine.lean §S-bridge-δ`
+  + `ClebschConcrete.lean`; `dominatorReachable_of_rank_interNum`, `RainbowRigid`, `interNum_eq_one_of_rainbow`,
+  `dominatorReachable_of_rainbowRank`, `clebschZ4_rainbowRigid`; all axiom-clean `[propext, Classical.choice,
+  Quot.sound]`, no `native_decide`, full serial build green 19s; index regenerated, 5 rows described).** Two halves.
+  **(A) The written derivation (§1B, this doc):** worked out "does Cameron's dichotomy deliver Thm 4.1 domination?"
+  against Ponomarenko §§4–5. **Verdict: NO as a free implication** — domination is the *sparsity* bound
+  `n > 3c(k−1)k` (Lemma 5.2, in `c` = indistinguishing number and `k` = max valency); Cameron's dichotomy controls
+  only *order* (`|Aut|`). The reduction is clean though: the `k`-half is **free** (`maxValency(X_T) ≤ |Aut_T|` by
+  orbit–stabiliser, shrinks geometrically along the landed greedy base), leaving **one** open quantity — the
+  **post-base indistinguishing number `c(X_T)`** — which is *identical* to the δ′ forced-triangle abundance /
+  rainbow-rigidity. So the general route is not a shortcut around δ′; it IS δ′, and supplies the parameter to bound.
+  Plus a flagged calibration caveat (poly vs sub-exponential "small"). **(B) The Lean increment (δ′):** turned the
+  §1B `c(X_T)` content into a **family lemma**. `dominatorReachable_of_rank_interNum` = the general public
+  `interNum`-keyed rank engine (the form `ClebschConcrete`'s private `domReach_of_rank_pin` had locally — nested
+  `huniq` has no `Decidable`, the Nat-equality does). `RainbowRigid` = the structural pinning hypothesis the probe
+  extracted (rainbow triangle ⟹ `c=1`), the operational form of "small `c(X_T)`". `interNum_eq_one_of_rainbow`
+  (rigidity `≤1` + `γ`-realises `≥1` ⟹ `=1`) feeds `dominatorReachable_of_rainbowRank`: **a `RainbowRigid` scheme
+  with a rainbow rank closes — lifting `clebschZ4_closure` from the single hard-coded scheme to the whole
+  rainbow-rigid family**, with per-point pinning now a purely combinatorial colour condition. `clebschZ4_rainbowRigid`
+  (`decide`) confirms the genuine bullseye satisfies the hypothesis — the family lemma is non-vacuous on the real
+  non-affine residue. **Net:** the seal's open `hclo` is now reduced, for the rainbow-rigid family, to {(a) the scheme
+  is `RainbowRigid`, (b) it has a rainbow rank from a bounded base} — both clean checkable conditions, the §1B
+  `c(X_T)`-boundedness made operational. **Scope caveat (unchanged):** rainbow-rigidity is special to `(16,5,0,2)`-type
+  amorphic rank-4, so the family is parameter-scoped, not "all amorphic"; and the lemma is `AssociationScheme`-level
+  (does not yet feed the seal capstone — still needs `SchurianScheme`, deferred). **NEXT:** (1) exhibit `RainbowRigid` +
+  a rainbow rank for a *parametric* amorphic-NLS family (not just the order-16 instance) to make the family lemma bite
+  beyond one scheme; (2) the post-base `c(X_T)` bound for non-rainbow primitives (the genuinely general open core);
+  (3) the deferred `SchurianScheme`/seal-capstone wiring and the hImprim `G₀Irreducible → IsPrimitive` bridge.
 
 ---
 
@@ -1278,7 +1323,13 @@ handle); the affine specialisation **`affineScheme_interNum_eq_one_of_unique`** 
 **`dominatorReachable_map`** / **`dominatorReachable_univ_image`** (complete closure transports across `Aut(S)`-images
 of the base — prove at one representative); the **iteration engine `dominatorReachable_of_rank`** (a well-founded
 pinning rank ⟹ `∀ v, DominatorReachable S T v` — the brick turning the step builders into a global closure) and the
-**one-round criterion `dominatorReachable_of_basePinsAll`** (every non-base point pinned by two base points ⟹ closure)
+**one-round criterion `dominatorReachable_of_basePinsAll`** (every non-base point pinned by two base points ⟹ closure);
+the **rainbow-rigid family lemma (2026-06-13, the §1B `c(X_T)` content operationalised)** —
+**`dominatorReachable_of_rank_interNum`** (the general public `interNum`-keyed rank engine, `ClebschConcrete`'s private
+`domReach_of_rank_pin` lifted) / **`RainbowRigid`** (rainbow triangle ⟹ `c=1`, the small-`c(X_T)` hypothesis) /
+**`interNum_eq_one_of_rainbow`** (rigidity ⟹ pinning) / **`dominatorReachable_of_rainbowRank`** (a `RainbowRigid`
+scheme with a rainbow rank closes — lifts `clebschZ4_closure` to the rainbow-rigid family) + the non-vacuity witness
+**`clebschZ4_rainbowRigid`** (`ClebschConcrete.lean`, `decide`)
 (`CascadeAffine.lean §S-bridge-δ`); the **cyclotomic arithmetic reduction** **`fieldOf`** (point→`F_q`) /
 **`fieldOf_injective`** /
 **`G0pow_orbit_iff`** (a `G0pow g`-orbit relation ⟺ multiplication by `g^k` through the field iso) /

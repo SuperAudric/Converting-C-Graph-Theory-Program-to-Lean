@@ -566,6 +566,85 @@ theorem dominatorReachable_of_basePinsAll {n : Nat} {S : AssociationScheme n} {T
     · show (if β ∈ T then (0:ℕ) else 1) < (if γ ∈ T then (0:ℕ) else 1)
       rw [if_pos hβT, if_neg hγT]; exact one_pos
 
+/-- **The single-base closure from an `interNum`-keyed pinning rank (the engine `ClebschConcrete` needed
+privately, now general).** Identical to `dominatorReachable_of_rank` but the per-level pinning is the
+`decide`-friendly intersection-number equation `c^{r(α,β)}_{r(α,γ),r(γ,β)} = 1` directly, rather than the
+`relOfPair`-profile uniqueness (`huniq`) form. This is the public form of `ClebschConcrete`'s local
+`domReach_of_rank_pin`: the nested-implication `huniq` form has no synthesizable `Decidable`, but the
+Nat-equality `interNum = 1` does, so concrete schemes (`decide`) and the rainbow-rigid family (counting,
+via `interNum_eq_one_of_rainbow`) discharge their pinning through this. -/
+theorem dominatorReachable_of_rank_interNum {n : Nat} {S : AssociationScheme n} {T : Finset (Fin n)}
+    (rank : Fin n → Nat)
+    (hbase : ∀ v : Fin n, rank v = 0 → v ∈ T)
+    (hstep : ∀ γ : Fin n, 0 < rank γ → ∃ α β : Fin n,
+        rank α < rank γ ∧ rank β < rank γ ∧
+        S.intersectionNumber (S.relOfPair α γ) (S.relOfPair γ β) (S.relOfPair α β) = 1) :
+    ∀ v : Fin n, DominatorReachable S T v := by
+  have key : ∀ k : Nat, ∀ v : Fin n, rank v = k → DominatorReachable S T v := by
+    intro k
+    induction k using Nat.strong_induction_on with
+    | _ k ih =>
+      intro v hv
+      rcases Nat.eq_zero_or_pos (rank v) with hr0 | hrpos
+      · exact DominatorReachable.base (hbase v hr0)
+      · obtain ⟨α, β, hα, hβ, hone⟩ := hstep v hrpos
+        exact DominatorReachable.step
+          (ih (rank α) (hv ▸ hα) α rfl) (ih (rank β) (hv ▸ hβ) β rfl) hone
+  intro v
+  exact key (rank v) v rfl
+
+/-- **Rainbow rigidity** — the structural pinning mechanism the ℤ₄² Clebsch probe extracted
+(`Theorem41ConditionsProbe.Probe_ExtractPinningRank`): every *rainbow* triangle (three pairwise-distinct
+non-diagonal edge colours) has at most one common neighbour, so it is forced (`c = 1`). This is the
+operational form of "the indistinguishing number `c(X)` is small / forced triangles are abundant" (build
+doc §1B): for amorphic rank-4 schemes with the Clebsch parameters `(16,5,0,2)` it holds (`decide`-checked
+in `ClebschConcrete`), and it is what drives the δ′ closure on the non-affine residue. Carried as a
+hypothesis (a structural property of the parameter family, like the cited classifications), never an `axiom`. -/
+def RainbowRigid {n : Nat} (S : AssociationScheme n) : Prop :=
+  ∀ i j k : Fin (S.rank + 1), i ≠ 0 → j ≠ 0 → k ≠ 0 → i ≠ j → j ≠ k → i ≠ k →
+    S.intersectionNumber i j k ≤ 1
+
+/-- **A rainbow triangle is forced.** Under rainbow rigidity, a triangle `(α, γ, β)` whose three edge
+colours `r(α,γ), r(γ,β), r(α,β)` are pairwise distinct and non-diagonal pins `γ`: the intersection number
+is exactly `1` — `≤ 1` from rigidity, and `≥ 1` because `γ` itself realises the triangle (it lies in the
+forced-triangle filter). The bridge from the purely combinatorial "rainbow" colour condition to the δ′
+`interNum = 1` pinning premise. -/
+theorem interNum_eq_one_of_rainbow {n : Nat} {S : AssociationScheme n} (hrig : RainbowRigid S)
+    {α β γ : Fin n}
+    (h0i : S.relOfPair α γ ≠ 0) (h0j : S.relOfPair γ β ≠ 0) (h0k : S.relOfPair α β ≠ 0)
+    (hij : S.relOfPair α γ ≠ S.relOfPair γ β) (hjk : S.relOfPair γ β ≠ S.relOfPair α β)
+    (hik : S.relOfPair α γ ≠ S.relOfPair α β) :
+    S.intersectionNumber (S.relOfPair α γ) (S.relOfPair γ β) (S.relOfPair α β) = 1 := by
+  have hle := hrig _ _ _ h0i h0j h0k hij hjk hik
+  have hcard := S.intersectionNumber_well_defined (S.relOfPair α γ) (S.relOfPair γ β)
+      (S.relOfPair α β) α β (S.rel_relOfPair α β)
+  have hge : 0 < S.intersectionNumber (S.relOfPair α γ) (S.relOfPair γ β) (S.relOfPair α β) := by
+    rw [← hcard]
+    exact Finset.card_pos.mpr
+      ⟨γ, Finset.mem_filter.mpr ⟨Finset.mem_univ γ, S.rel_relOfPair α γ, S.rel_relOfPair γ β⟩⟩
+  omega
+
+/-- **The rainbow-rigid family closure (δ′).** A rainbow-rigid scheme whose base `T` admits a *rainbow rank*
+— `rank : Ω → ℕ` with rank-`0` points in `T` and every positive-rank `γ` reached by a rainbow triangle
+(three pairwise-distinct non-diagonal colours) against two strictly-lower-rank points — has its
+forced-triangle closure exhaust `Ω`: `∀ v, DominatorReachable S T v`. This **lifts the single-scheme
+`clebschZ4_closure` to the whole rainbow-rigid family**: the per-point pinning is now a purely combinatorial
+colour condition (no `interNum` computation per point), with the `c = 1` arithmetic supplied once by
+`interNum_eq_one_of_rainbow`. The remaining open content for a family is exactly (a) it is `RainbowRigid` and
+(b) it has a rainbow rank from a bounded base — the operational `c(X_T)`-boundedness of build doc §1B. -/
+theorem dominatorReachable_of_rainbowRank {n : Nat} {S : AssociationScheme n} {T : Finset (Fin n)}
+    (hrig : RainbowRigid S) (rank : Fin n → Nat)
+    (hbase : ∀ v : Fin n, rank v = 0 → v ∈ T)
+    (hstep : ∀ γ : Fin n, 0 < rank γ → ∃ α β : Fin n,
+        rank α < rank γ ∧ rank β < rank γ ∧
+        S.relOfPair α γ ≠ 0 ∧ S.relOfPair γ β ≠ 0 ∧ S.relOfPair α β ≠ 0 ∧
+        S.relOfPair α γ ≠ S.relOfPair γ β ∧ S.relOfPair γ β ≠ S.relOfPair α β ∧
+        S.relOfPair α γ ≠ S.relOfPair α β) :
+    ∀ v : Fin n, DominatorReachable S T v := by
+  refine dominatorReachable_of_rank_interNum rank hbase (fun γ hγ => ?_)
+  obtain ⟨α, β, hα, hβ, h0i, h0j, h0k, hij, hjk, hik⟩ := hstep γ hγ
+  exact ⟨α, β, hα, hβ, interNum_eq_one_of_rainbow hrig h0i h0j h0k hij hjk hik⟩
+
 /-- **Every dominator-reachable point is determined.** Induction over `DominatorReachable`: the base
 case is B2 (`determined_of_mem_individualized`), the step is B3′ (`determined_of_forcedTriangle`). The
 bridge from the combinatorial reachability predicate to the WL-singleton-cell fact. -/

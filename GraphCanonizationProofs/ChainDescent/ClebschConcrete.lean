@@ -131,4 +131,12 @@ theorem clebschZ4_discrete :
       (individualizedColouring 16 {0, 1})) :=
   discrete_of_dominatorClosure clebschZ4Scheme clebschZ4_closure
 
+/-- **The bullseye is rainbow-rigid (non-vacuity of the family lemma).** `RainbowRigid clebschZ4Scheme` by
+`decide`: every rainbow triangle (three pairwise-distinct non-diagonal colours) of the ℤ₄² Clebsch scheme has
+`≤ 1` common neighbour — the amorphic `(16,5,0,2)` structure the probe extracted, now a checked fact. Witnesses
+that `dominatorReachable_of_rainbowRank`'s hypothesis is satisfiable on the genuine non-affine residue, so the
+δ′ family closure is not vacuous; `clebschZ4_closure` is its concrete instance. Axiom-clean (plain `decide`). -/
+theorem clebschZ4_rainbowRigid : RainbowRigid clebschZ4Scheme := by
+  unfold RainbowRigid; decide
+
 end ChainDescent
