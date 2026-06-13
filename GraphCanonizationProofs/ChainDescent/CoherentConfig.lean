@@ -917,6 +917,123 @@ theorem extension_complete_of_separablePointed {X E : CoherentConfig n} {T : Fin
 
 end PointedTransport
 
+variable (X : CoherentConfig n)
+
+/-! ### §CC.10 — The forced-triangle dominator closure on a general CC (the δ′ engine, lifted)
+
+The δ′ closure (`CascadeAffine §S-bridge-δ`) lives on the homogeneous `AssociationScheme` and pins
+points using `X`'s **own** rank-`r` relations. The 2026-06-13 probe (`Probe_RainbowRigidFamily`) showed
+that for the amorphic-NLS residue at `n ≥ 25` those scheme-level forced triangles **vanish** (`b(X) = 2`
+recovery lives in the *extension* `X_T`'s finer colours, not `X`'s rank-4 ones). This section lifts the
+forced-triangle closure to a general `CoherentConfig`, so it can run on the point extension `X_T`
+(`pointExtension X T`) where the `c = 1` triangles reappear. The criterion is pure counting (mirrors the
+scheme version); the discreteness payoff carries one named hypothesis `Sharp` — the coherent-closure
+refinement "a singleton fiber sees the whole fiber structure" — which holds for `X_T` and is the
+clearly-isolated next discharge. -/
+
+/-- **The forced-triangle criterion on a general CC** (forward). `c^{r(α,β)}_{r(α,γ),r(γ,β)} = 1` when
+`γ` is the unique `u` sharing `γ`'s relation-profile to both `α` and `β`. Pure counting via
+`inter_card_eq`; the CC mirror of `interNum_eq_one_of_forcedUnique`. -/
+theorem interNum_eq_one_of_forcedUnique {α β γ : Fin n}
+    (huniq : ∀ u : Fin n, X.relOf α u = X.relOf α γ → X.relOf u β = X.relOf γ β → u = γ) :
+    X.interNum (X.relOf α γ) (X.relOf γ β) (X.relOf α β) = 1 := by
+  classical
+  rw [← X.interNum_eq (rfl : X.relOf α β = X.relOf α β) (X.relOf α γ) (X.relOf γ β),
+      Finset.card_eq_one]
+  refine ⟨γ, Finset.ext (fun u => ?_)⟩
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+  exact ⟨fun ⟨h1, h2⟩ => huniq u h1 h2, fun hu => hu ▸ ⟨rfl, rfl⟩⟩
+
+/-- **The forced-triangle criterion, reverse direction.** `c = 1 ⟹` the profile-uniqueness pinning `γ`.
+The half the singleton-fiber propagation consumes. -/
+theorem forcedUnique_of_interNum_eq_one {α β γ : Fin n}
+    (hone : X.interNum (X.relOf α γ) (X.relOf γ β) (X.relOf α β) = 1) :
+    ∀ u : Fin n, X.relOf α u = X.relOf α γ → X.relOf u β = X.relOf γ β → u = γ := by
+  classical
+  intro u h1 h2
+  have hcard := X.interNum_eq (rfl : X.relOf α β = X.relOf α β) (X.relOf α γ) (X.relOf γ β)
+  rw [hone, Finset.card_eq_one] at hcard
+  obtain ⟨x, hx⟩ := hcard
+  have hγ : γ ∈ (Finset.univ.filter
+      fun w => X.relOf α w = X.relOf α γ ∧ X.relOf w β = X.relOf γ β) := by simp
+  have hu : u ∈ (Finset.univ.filter
+      fun w => X.relOf α w = X.relOf α γ ∧ X.relOf w β = X.relOf γ β) := by
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]; exact ⟨h1, h2⟩
+  rw [hx, Finset.mem_singleton] at hγ hu
+  exact hu.trans hγ.symm
+
+/-- **The forced-triangle closure of `T` in a general CC** — the δ′ `DominatorReachable`, lifted from
+`AssociationScheme` to `CoherentConfig` so it runs on the point extension `X_T`. -/
+inductive DominatorReachable (T : Finset (Fin n)) : Fin n → Prop
+  | base {t : Fin n} (ht : t ∈ T) : DominatorReachable T t
+  | step {α β γ : Fin n} (hα : DominatorReachable T α) (hβ : DominatorReachable T β)
+      (hone : X.interNum (X.relOf α γ) (X.relOf γ β) (X.relOf α β) = 1) :
+      DominatorReachable T γ
+
+/-- **The CC `DominatorReachable` step builder** from the profile-uniqueness pinning `γ`. -/
+theorem dominatorReachable_step_of_unique {T : Finset (Fin n)} {α β γ : Fin n}
+    (hα : X.DominatorReachable T α) (hβ : X.DominatorReachable T β)
+    (huniq : ∀ u : Fin n, X.relOf α u = X.relOf α γ → X.relOf u β = X.relOf γ β → u = γ) :
+    X.DominatorReachable T γ :=
+  DominatorReachable.step hα hβ (X.interNum_eq_one_of_forcedUnique huniq)
+
+/-- **The single-base closure from a pinning rank, on a general CC** (mirror of the scheme engine). -/
+theorem dominatorReachable_of_rank {T : Finset (Fin n)} (rk : Fin n → Nat)
+    (hbase : ∀ v : Fin n, rk v = 0 → v ∈ T)
+    (hstep : ∀ γ : Fin n, 0 < rk γ → ∃ α β : Fin n, rk α < rk γ ∧ rk β < rk γ ∧
+        ∀ u : Fin n, X.relOf α u = X.relOf α γ → X.relOf u β = X.relOf γ β → u = γ) :
+    ∀ v : Fin n, X.DominatorReachable T v := by
+  have key : ∀ k : Nat, ∀ v : Fin n, rk v = k → X.DominatorReachable T v := by
+    intro k
+    induction k using Nat.strong_induction_on with
+    | _ k ih =>
+      intro v hv
+      rcases Nat.eq_zero_or_pos (rk v) with h0 | hpos
+      · exact DominatorReachable.base (hbase v h0)
+      · obtain ⟨α, β, hα, hβ, huniq⟩ := hstep v hpos
+        exact X.dominatorReachable_step_of_unique
+          (ih (rk α) (hv ▸ hα) α rfl) (ih (rk β) (hv ▸ hβ) β rfl) huniq
+  exact fun v => key (rk v) v rfl
+
+/-- **`Sharp`** — the coherent-closure refinement property: a singleton fiber "sees" the whole fiber
+structure (two points in one fiber have the same relation to any singleton fiber). FALSE for a general
+CC, TRUE for the point extension `X_T` (its fibers are refined by relation to every individualized /
+determined point). Carried here as the named hypothesis the discreteness payoff needs — the isolated
+next discharge (prove `Sharp (pointExtension X T)`). -/
+def Sharp : Prop :=
+  ∀ (a u u' : Fin n), X.SingletonFiber a → X.relOf u u = X.relOf u' u' → X.relOf a u = X.relOf a u'
+
+/-- **Forced-triangle reachability propagates the singleton-fiber property** (modulo `Sharp`). A point
+dominator-reachable from a set of singleton fibers is itself a singleton fiber: at each step the two
+pinning points `α, β` are singleton fibers (IH), `Sharp` makes a same-fiber twin `γ'` of `γ` share `γ`'s
+relations to `α, β`, and the `c = 1` uniqueness then forces `γ' = γ`. -/
+theorem singletonFiber_of_dominatorReachable {T : Finset (Fin n)} (hsharp : X.Sharp)
+    (hT : ∀ t ∈ T, X.SingletonFiber t) :
+    ∀ {v : Fin n}, X.DominatorReachable T v → X.SingletonFiber v := by
+  intro v h
+  induction h with
+  | base ht => exact hT _ ht
+  | @step α β γ _ _ hone ihα ihβ =>
+    intro γ' hfib
+    have h1 : X.relOf α γ' = X.relOf α γ := hsharp α γ' γ ihα hfib
+    have hβfib : X.relOf β γ' = X.relOf β γ := hsharp β γ' γ ihβ hfib
+    have h2 : X.relOf γ' β = X.relOf γ β := by
+      have e1 : X.relOf γ' β = X.transposeRel (X.relOf β γ') := X.relOf_swap_eq rfl
+      have e2 : X.relOf γ β = X.transposeRel (X.relOf β γ) := X.relOf_swap_eq rfl
+      rw [e1, e2, hβfib]
+    exact X.forcedUnique_of_interNum_eq_one hone γ' h1 h2
+
+/-- **The δ′ engine on the extension: the forced-triangle closure ⟹ all fibers singleton.** If every
+point is dominator-reachable from `T`, the `T`-points are singleton fibers, and `X` is `Sharp`, then `X`
+is discrete (every point a singleton fiber) — the point extension is complete, i.e. `T` is a base. The
+general-CC analogue of `CascadeAffine`'s `discrete_of_dominatorClosure`, the citation-free path the
+`n ≥ 25` residue needs (the closure runs on `X_T`, not the bare scheme). The lone carried hypothesis is
+`Sharp` (true for `X_T`; the isolated next discharge). -/
+theorem allSingletonFiber_of_dominatorClosure {T : Finset (Fin n)} (hsharp : X.Sharp)
+    (hT : ∀ t ∈ T, X.SingletonFiber t) (hclo : ∀ v, X.DominatorReachable T v) :
+    ∀ v : Fin n, X.SingletonFiber v :=
+  fun v => X.singletonFiber_of_dominatorReachable hsharp hT (hclo v)
+
 end CoherentConfig
 
 end ChainDescent

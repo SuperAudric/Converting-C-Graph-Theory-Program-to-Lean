@@ -1297,6 +1297,28 @@ bullseye) says closure is the likely outcome and the build is worth it.
   operational `c(X_T)` content of §1B. NEXT: state `DominatorReachable` / the forced-triangle closure on
   `CoherentConfig` (the point extension), and prove a bounded-base extension closure for the amorphic-NLS family —
   the parametric δ′ target, now correctly aimed at the extension.
+- **2026-06-13 — THE δ′ ENGINE LIFTED TO THE GENERAL CC (`CoherentConfig.lean §CC.10`, axiom-clean `[propext,
+  Classical.choice, Quot.sound]`, full serial build green 94s; index regenerated, 8 rows described).** Acting on the
+  rainbow-probe redirect, ported the forced-triangle dominator closure from the homogeneous `AssociationScheme`
+  (`X`'s own rank-4 colours, which vanish at n≥25) to a general `CoherentConfig` — so it runs on the point extension
+  `X_T` (`pointExtension X T`), where the `c=1` triangles reappear (that is *why* `b(X)=2` for `Z5²`). Decls: the
+  forced-triangle criterion **both directions** (`interNum_eq_one_of_forcedUnique` / `forcedUnique_of_interNum_eq_one`,
+  pure counting via `inter_card_eq`); the inductive closure **`DominatorReachable`** (`base`: `t∈T`; `step`: `c=1`
+  triangle against two reachable points); the step builder + the **rank engine `dominatorReachable_of_rank`** (mirrors
+  of the scheme versions); and the **discreteness payoff** — `singletonFiber_of_dominatorReachable` /
+  **`allSingletonFiber_of_dominatorClosure`**: closure exhausts Ω + `T`-points singleton fibers + **`Sharp`** ⟹ every
+  point a singleton fiber (the extension complete = `T` a base). **`Sharp`** is the one carried hypothesis — the
+  coherent-closure refinement "a singleton fiber sees the whole fiber structure" (same-fiber points share their
+  relation to any singleton fiber). It is **FALSE for a general CC but TRUE for `X_T`** (whose fibers are refined by
+  relation to each determined point), so it is the clearly-isolated next discharge, not a gap in the engine. **Net:**
+  the citation-free δ′ path now exists at the right level (the extension) for the `n≥25` residue the scheme-level
+  engine could not reach; the chain is `DominatorReachable`-closure-on-`X_T` ⟹ (modulo `Sharp`) `X_T` complete ⟹ `T`
+  a base ⟹ `b(X) ≤ |T|`. **NEXT (the isolated discharges, in order):** (1) **`Sharp (pointExtension X T)`** — prove
+  the coherent closure satisfies `Sharp` (its fibers are WL-stable, so a singleton fiber's relations are constant on
+  fibers); (2) wire `allSingletonFiber_of_dominatorClosure` on `X_T` to the seal consumer (extension complete ⟹
+  `SeparatesAtBoundedBase`, via the §CC.9 / `IsPointExtension` bridge); (3) supply a bounded-base pinning rank for the
+  amorphic-NLS family *on the extension* (the genuinely open `c(X_T)` content, now on the right object). The
+  order-16 `RainbowRigid` lemma stays as the special case where the scheme-level engine already sufficed.
 
 ---
 
@@ -1330,6 +1352,14 @@ bullseye) says closure is the likely outcome and the build is worth it.
 isolated catch-up) / `isSchemeAut_of_relOfPair_eq` / **`twinsRealized_of_extensionPointed`** /
 `separatesAtBoundedBase_of_extensionPointed`(`_of_small`) /
 **`reachesRigidOrCameron_viaExtensionSeparability`** (the citation checkpoint) (`CascadeAffine.lean §S-gate2`).
+**The δ′ engine on the general CC (LANDED 2026-06-13, `CoherentConfig.lean §CC.10` — the δ′ closure on the
+extension `X_T`, for the n≥25 residue the scheme-level engine can't reach):** the forced-triangle criterion
+both directions **`CoherentConfig.interNum_eq_one_of_forcedUnique`** / **`forcedUnique_of_interNum_eq_one`** /
+the inductive closure **`CoherentConfig.DominatorReachable`** / step builder
+**`dominatorReachable_step_of_unique`** / the rank engine **`dominatorReachable_of_rank`** / the carried
+refinement hypothesis **`Sharp`** (true for `X_T`, the next discharge) / the propagation
+**`singletonFiber_of_dominatorReachable`** / the discreteness payoff
+**`allSingletonFiber_of_dominatorClosure`** (closure + `Sharp` + `T`-singletons ⟹ `X` discrete = `T` a base).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /
