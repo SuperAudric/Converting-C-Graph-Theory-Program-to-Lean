@@ -113,8 +113,9 @@
 > witness is **recoverable at depth 2** (small WL-dimension) — so a Gate-G failure is **NOT** an
 > `(O*)`-existence witness, correcting the earlier binary. Full record + redirect in §0.7 "A2-iii RESULT".
 > **THE OPEN FRONTIER now:** close Step 3 via the top-down §12 capstone (no A2-iii needed) or a
-> depth-graded block-visibility tied to `RecoverableByDepth`; plus (3b), the heavy unbuilt quotient/fiber
-> recursion.
+> depth-graded block-visibility tied to `RecoverableByDepth`; plus (3b), the quotient/fiber recursion —
+> **deferred but re-attemptable** (the `hImprim` discharge for the clean unconditional seal; see §0.7.2
+> "(3b) RE-CLASSIFIED 2026-06-13").
 >
 > **~~ACTIVE TRACK~~ ABANDONED (2026-06-06 attempt; ⚠️ retracted 2026-06-07) — the largeness "derivation" is
 > TAUTOLOGICAL.** The route `leg C ⟹ large ⟸ small ⟹ consumed ⟸ completeness of deferral ⟸ no fusion`, with
@@ -508,7 +509,9 @@ by orbit).
    Step 3a unconditionally. (3b) and the A2 probe are the remaining open content of this step.
 
    **(3b) SCOPING PASS — RESULT (2026-06-05): do NOT build it. It does not de-risk Step 3, and it is not
-   needed.** Four grounded findings:
+   needed.** ⚠️ **SUPERSEDED 2026-06-13 — see "(3b) RE-CLASSIFIED" below: now DEFERRED/re-attemptable, as the
+   goal moved to the clean unconditional seal where `hImprim` must be discharged.** The 2026-06-05 findings
+   (correct for the *conditional* seal) follow:
    - **(i) The closed-subset quotient is mathematically cleaner than the orbit-graph quotient — but that
      does not help in Lean.** For a `ClosedSubset I`, the *scheme* quotient `S//I` on the blocks
      (`schemeEquiv I` classes) is **always** a well-defined association scheme (classical; relations = the
@@ -536,7 +539,8 @@ by orbit).
      C modulo the cited classification **without** 3a or 3b — it carries `IsPrimitive`, `IsLargeScheme`, and
      the classification as hypotheses. 3a+3b are the *bottom-up* attempt to **derive** primitive ∧ large
      from `¬D1` — precisely the substrate-conditional content the project routes around.
-   **Recommendation:** leave 3b unbuilt. The productive paths are (1) bank the §12 capstone (Tier-3 success,
+   **Recommendation (2026-06-05, superseded for the clean seal — see "(3b) RE-CLASSIFIED" below):** leave 3b
+   unbuilt *for now*. The productive paths are (1) bank the §12 capstone (Tier-3 success,
    modulo cited classification); (2) add a **stated** `non-cascade-at-poly-depth ⟹ IsLargeScheme` bridge so
    the capstone's antecedent is traceable rather than free-floating (cheaper than 3b, avoids the WL-dim
    wall) — **DONE 2026-06-06, axiom-clean** (`Scheme.lean §12.1`: `LargenessBridge` /
@@ -544,6 +548,42 @@ by orbit).
    §0.7.5 "stated bridge LANDED"); (3) treat the bottom-up route's value as banked (leg-B citation-free L1–L3 + the "no non-consumed
    abelian species" clarity) — it was never going to close leg C unconditionally (the classification is
    cited either way).
+
+   **(3b) RE-CLASSIFIED (2026-06-13): DEFERRED, TO BE RE-ATTEMPTED — no longer "do not build."** The
+   2026-06-05 "do not build" verdict was correct *for its goal then* (the **conditional** seal, where carrying
+   `hImprim` is acceptable — finding (iv): "3b is not needed"). The goal has since moved to a **clean
+   unconditional seal**, where `hImprim` (`¬IsPrimitive → SchemeBlockRecovered ∨ AbelianConsumed`) is the lone
+   *non-crux* carried hypothesis in **every** seal capstone (`reachesRigidOrCameron_viaBlockRecovery` /
+   `…viaExtensionSeparability` / `…viaDominatorClosure`). Discharging `hImprim` **is** building (3b). So it
+   is now an intended target — to attempt **after the primitive crux (G2-B) is more closed**, since the
+   recursion bottoms out at that crux and there is no point wiring the induction before its base case is solid.
+   **Two of the 2026-06-05 blockers are now stale or removed:**
+   - **`refineStep` is CONCRETE since 2026-05-30** (`ChainDescent.lean`, no longer an axiom) — the cited
+     "`refineStep` cross-size API gap… high risk, likely intractable" (finding (ii)) is **partly obsolete**:
+     the cross-size warmRefine transport can now be stated through concrete signatures, not an opaque axiom.
+   - **The §11.1 schurity gate LANDED** (`Scheme.lean`: `schemeBlock_fiber_transitive` / `schemeBlocks_transitive`)
+     — both constituents of the block decomposition (quotient on blocks, fiber within a block) are proved to
+     **stay schurian and are strictly smaller**, so the induction hypothesis is applicable to both (finding (iii)'s
+     "non-schurity risk" is closed; it "is about abstract S-ring wreaths, not group block systems").
+   **The build path (how to do it):**
+   1. **Materialize the constituents as `SchurianScheme` objects.** The quotient `S//I` on the `schemeEquiv I`
+      blocks (a `SchurianScheme m`, `m` = #blocks; relations = the `I`-`I` double cosets — always well-defined,
+      finding (i)) and the fiber scheme on a block (`SchurianScheme |B|`). Both schurian by §11.1, both `< n`.
+      This is the `Fin n/~ → Fin m` re-indexing the project deferred — heavier than the `Fin n` route, but now
+      on much more substrate (`Scheme.lean`/`Separability.lean`/`CoherentConfig.lean`) than the "zero Mathlib
+      substrate" era.
+   2. **Strong induction on scheme size.** The seal capstone for an imprimitive `S` follows from the capstone
+      applied to the (strictly smaller) quotient and fiber, fed through the **already-landed** block
+      decomposition `reachesRigid_of_blockVisibleDecomposition` (which reduces `hImprim`'s content to the
+      constituents' recovery hypotheses `hqvis`/`hfiber`). The induction discharges those from the IH.
+   3. **Net:** `hImprim` becomes a theorem, not a carried hypothesis — the seal's open content collapses to
+      `{G3 + the primitive crux}` for **all** residuals (not just the primitive family).
+   **Cheaper near-term alternative (residue family only, no materialization):** prove
+   `G₀Irreducible ⟹ IsPrimitive` (the reverse of the landed M1.2 `isPrimitive_affineScheme_imp_irreducible`;
+   standard primitive-affine-group theory). That makes `hImprim` **vacuous** on the primitive residue family
+   (`clebschScheme`/`affineScheme`), giving a clean seal `modulo {G3 + family crux}` *there* — but it does
+   **not** cover imprimitive residuals, so it is not a substitute for (3b) at full generality. Land it first
+   (it is small and known); attempt (3b) proper once G2-B is closed.
 
    **A2-i de-risking gate — RESULT (2026-06-05, `Tier2DecompositionExperiment.A2i_BlockVisibility_Probe`):
    INCONCLUSIVE for the hard regime, no counterexample, positive confirmation on examples.**

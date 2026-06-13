@@ -936,9 +936,15 @@ as it gets" without formalizing Cameron from scratch (years of work); leave it c
   regardless of keying and are false on the leaks; closure ⟺ G2 empty. In particular **do not use
   `Findable`/`FindableWithin` as the leg-B vehicle** — its `abelian` leg requires `RecoverableByDepth` (visible
   recovery), conflating leg B into leg A; build a new L3-keyed `AbelianConsumed` instead (§4 G1b).
-- **Do not materialize the quotient/fiber as `AssociationScheme`/`AdjMatrix` on a smaller `Fin m`** — re-indexing +
-  re-establishing all 5 scheme axioms is intractable (exhaustive-obstruction §0.7.2 (ii); tier3a-b1-build-plan §4
-  Approach A). Stay intrinsic on `Fin n`.
+- **Materializing the quotient/fiber as `AssociationScheme`/`AdjMatrix` on a smaller `Fin m` — DEFERRED, NOW
+  RE-ATTEMPTABLE (re-classified 2026-06-13), not "intractable."** It was deferred while the goal was the
+  *conditional* seal (where `hImprim` may be carried); for the **clean unconditional seal** it is the intended way
+  to discharge `hImprim` (the imprimitive branch). Two old blockers are stale: `refineStep` is concrete since
+  2026-05-30, and the §11.1 schurity gate (`schemeBlock_fiber_transitive`/`schemeBlocks_transitive`) proves both
+  constituents stay schurian + smaller. Re-attempt **after G2-B is more closed** (the induction bottoms out at that
+  crux); near-term, the cheaper `G₀Irreducible ⟹ IsPrimitive` vacates `hImprim` on the primitive residue family.
+  Build path + rationale: **exhaustive-obstruction §0.7.2 "(3b) RE-CLASSIFIED"**. For everything *not* aimed at the
+  full imprimitive discharge, still stay intrinsic on `Fin n`.
 - **Do not pursue unconditional depth-1 block-visibility (A2-iii)** — refuted by Shrikhande. Only the **graded**
   form (A2-ii, `blockRefinementVisible_of_schemePartSeparates`) is available.
 - **Do not try to discharge the leaks (G2) by citation** — the deep research established the
