@@ -274,14 +274,21 @@ or A3 turns out harder than the citation.
   set-equality transport + `|C(u)|=1`, §S.16 `saConnected_of_sparseSeparable`). Each must be ported to the CC. The §S.8
   triangle identity is itself *homogeneous* (uses single-fiber valency), so the non-symmetry bites in **more than one place**,
   not only §S.16. Plan the port as one §S section at a time.
-- **A1 NEXT (the next port unit):** §S.8 the **triangle identity** `valency_mul_intersectionNumber`
-  (`n_k·c^k_{ij} = n_i·c^i_{kj}`, a double-count of coloured triangles through a fixed apex) + **`saAdj_symm`** — the source
-  of the valency symmetry the connectivity later leans on; **port it transpose-aware now to defuse §S.16.** The CC also still
-  needs `smaxAdj`/`saAdj`/`SaConnected` defined (§S.4 analogues, not yet on the CC — `Smax`/`InSmax`/`smaxAdj` were not part of
-  incr 3/4, which work for an arbitrary non-reflexive `u`). Then §S.9–§S.16 connectivity culminates in `SaConnected` ⟹
-  "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`. **⚠ M2-Q1 WARNING (the real risk, still
-  ahead):** the homogeneous PV proof makes `s_max` *symmetric* via `n_{s*}=n_s` (homogeneity), which **fails on the
-  multi-fiber `X_T`** — re-argue connectivity transpose-aware.
+- **A1 incr 5 (§S.8 triangle identity) LANDED 2026-06-14** (`CoherentConfig.lean §CC.14`, axiom-clean):
+  **`outDeg_mul_interNum`** (the unconditional out-degree double-count `(deg_k x)·c^k_{i,j} = (deg_i x)·c^i_{k,j*}`) +
+  **`valency_mul_interNum`** (valency form `n_k·c^k_{i,j} = n_i·c^i_{k,j*}`, given an apex realizing both source fibers).
+  **⚠ TRANSPOSE-AWARE STATEMENT (first place M2-Q1 changes the *theorem*, not just the proof):** homogeneous
+  `valency_mul_intersectionNumber` is `n_k·c^k_{ij} = n_i·c^i_{kj}`; on the non-symmetric CC the `y`-leg flip introduces a
+  transpose, so it is `c^i_{k,j*}` (`j* = transposeRel j`). Verified the `j*` lands exactly right for the downstream
+  `saAdj_symm` (the reflected triangle's `relOf γ β = s*` matches). `saAdj_symm` deferred to the graph-layer increment (next).
+- **A1 NEXT (the graph layer + the HARD non-symmetry):** the §S.4 graph defs on the CC — `Smax`/`InSmax`/`smaxAdj`/`saAdj`/
+  `SaConnected` — and **`saAdj_symm`** (now reachable via `valency_mul_interNum`). **⚠ NEW FINDING (the load-bearing M2-Q1
+  risk, now precise): `smaxAdj` is NOT symmetric on a general CC.** `smaxAdj a b` (a max-valency relation joins them) does
+  *not* give `smaxAdj b a`, because the out-valency `n_s` and the transpose out-valency `n_{s*}` (= in-valency of `s`) can
+  **differ when fibers have different sizes** — homogeneous `smaxAdj_symm` used `rel_symm` (relations symmetric), false here.
+  So the max-valency graph layer needs genuine rethinking (symmetrize, work with a transpose-closed max-valency set, or
+  restrict to the single-fiber locus the closure actually runs on). This is the crux of the connectivity port. Then §S.9–§S.16
+  ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`.
 - **A2 (the open core, after A1):** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue —
   M2 confirmed not citable; char-2 load-bearing.
 - **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
@@ -325,15 +332,14 @@ or A3 turns out harder than the citation.
 waiting on the single input `hclo`. The CC sparse substrate **A1 incr 1–2** (`§CC.11`: `c(X)`, `k(X)`, `SparseSeparable`)
 is landed. The open content is `hclo` = `ParamBoundOnExtension` (A2), reached via the A1 sparse theorem.
 
-**▶ PICK UP HERE (the exact next Lean step):** A1 incr 3 (§S.6 **(19)-estimate** `sum_pu_le`, `§CC.12`) and incr 4 (§S.7
-**(20)** `pu_eq_sum`, `§CC.13`) are **LANDED** (axiom-clean, 2026-06-14). Continue the §S-chain port, **one §S section at a
-time** (the full §S.5→§S.16 chain is the source, not just (19)+connectivity — see the scope correction in §4-M4): **next =
-§S.8 triangle identity** `valency_mul_intersectionNumber` (`n_k·c^k_{ij}=n_i·c^i_{kj}`) + `saAdj_symm` — port it
-transpose-aware now, it is the homogeneous symmetry the connectivity later leans on; the CC also needs the §S.4 graph defs
-`smaxAdj`/`saAdj`/`SaConnected` (not yet ported) → §S.9–§S.16 connectivity ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed the
-landed §CC.10 `dominatorReachable_of_rank`. **Carry the M2-Q1 warning into §S.8/§S.16:** the homogeneous PV proof used `s_max`
-symmetric (`n_{s*}=n_s`); on the multi-fiber `X_T` that fails, so re-argue transpose-aware. After A1: **A2** (prove
-`ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing), then assembly is automatic.
+**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.8: incr 3 (§S.6 (19)-estimate `sum_pu_le`,
+`§CC.12`), incr 4 (§S.7 (20) `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity `outDeg_mul_interNum`/`valency_mul_interNum`,
+`§CC.14`) — all axiom-clean, 2026-06-14, all transpose-aware (the §S.8 identity is `c^i_{k,j*}`, M2-Q1's first *statement*
+change). **Next = the §S.4 graph layer + `saAdj_symm`** (`Smax`/`InSmax`/`smaxAdj`/`saAdj`/`SaConnected`). **⚠ HARD: `smaxAdj`
+is not symmetric on a general CC** (`n_s ≠ n_{s*}` across fibers — homogeneous `smaxAdj_symm` used `rel_symm`); the max-valency
+graph layer needs rethinking (symmetrize / transpose-closed max set / single-fiber-locus restriction). This is the crux of the
+connectivity port. Then §S.9–§S.16 ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed the landed §CC.10 `dominatorReachable_of_rank`.
+After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing), then assembly is automatic.
 
 **Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?

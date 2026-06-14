@@ -1352,6 +1352,103 @@ theorem pu_eq_sum (α : Fin n) (u : Fin X.rank) (δ : Fin n) :
     X.interNum_eq (rfl : X.relOf α δ = X.relOf α δ) u w
   rw [hcard, nat_kk_sub_self]
 
+/-! ### §CC.14 — The triangle identity `n_k·c^k_{i,j} = n_i·c^i_{k,j*}` (A1, transpose-aware §S.8)
+
+The CC port of `Separability.lean §S.8` (`valency_mul_intersectionNumber`). Double-count the coloured triangles
+`x →ᵢ y →ⱼ z` with `x →ₖ z` through a fixed apex `x`: by the `z`-leg ⟹ `(out-degree to k)·c^k_{ij}`, by the `y`-leg ⟹
+`(out-degree to i)·c^i_{k,j*}`. **The homogeneous proof used scheme symmetry (`rel_symm`) to flip the `j`-leg; on the
+non-symmetric CC that flip introduces a transpose — `c^i_{k,j}` becomes `c^i_{k,j*}` (`j* = transposeRel j`).** This is the
+first place M2-Q1's non-symmetry changes the *statement* (not just the proof). The core `outDeg_mul_interNum` is
+hypothesis-free (out-degrees, not valencies); the valency form needs an apex realizing both source fibers (in the downstream
+`saAdj`-triangle the apex `α` realizes them by construction). The graph layer (`smaxAdj`/`saAdj`/`saAdj_symm`) is the next
+increment — `smaxAdj` is *not* symmetric on a general CC (`n_s ≠ n_{s*}` across fibers), so it needs separate care. -/
+
+/-- **The triangle double-count (out-degree form, unconditional)** — `(deg_k x)·c^k_{i,j} = (deg_i x)·c^i_{k,j*}`,
+where `deg_r x = #{w : relOf x w = r}`. Counting the triangles `x →ᵢ y →ⱼ z`, `x →ₖ z` by the `z`-leg vs the `y`-leg.
+The transpose `j*` on the right is the non-symmetric CC's correction to the homogeneous identity. Axiom-clean. -/
+theorem outDeg_mul_interNum (i j k : Fin X.rank) (x : Fin n) :
+    (Finset.univ.filter (fun z => X.relOf x z = k)).card * X.interNum i j k
+      = (Finset.univ.filter (fun y => X.relOf x y = i)).card
+          * X.interNum k (X.transposeRel j) i := by
+  classical
+  set D := Finset.univ.filter (fun p : Fin n × Fin n =>
+      X.relOf x p.1 = i ∧ X.relOf p.1 p.2 = j ∧ X.relOf x p.2 = k) with hD
+  -- Count `D` by the `z`-coordinate ⟹ `(deg_k x)·c^k_{ij}`.
+  have hA : D.card = (Finset.univ.filter (fun z => X.relOf x z = k)).card * X.interNum i j k := by
+    rw [Finset.card_eq_sum_card_fiberwise (f := fun p : Fin n × Fin n => p.2)
+          (t := Finset.univ) (fun _ _ => Finset.mem_univ _)]
+    have hfz : ∀ z : Fin n,
+        (D.filter (fun p => p.2 = z)).card
+        = if X.relOf x z = k then X.interNum i j k else 0 := by
+      intro z
+      by_cases hk : X.relOf x z = k
+      · rw [if_pos hk, ← X.interNum_eq hk i j]
+        apply Finset.card_bij (fun p _ => p.1)
+        · intro p hp
+          simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+          obtain ⟨⟨hi1, hj1, _⟩, hz⟩ := hp
+          exact ⟨hi1, hz ▸ hj1⟩
+        · intro p hp q hq hpq
+          simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and] at hp hq
+          exact Prod.ext hpq (hp.2.trans hq.2.symm)
+        · intro y hy
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hy
+          refine ⟨(y, z), ?_, rfl⟩
+          simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and]
+          exact ⟨⟨hy.1, hy.2, hk⟩, trivial⟩
+      · rw [if_neg hk, Finset.card_eq_zero]
+        apply Finset.eq_empty_of_forall_notMem
+        intro p hp
+        simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and] at hp
+        obtain ⟨⟨_, _, hk1⟩, hz⟩ := hp
+        exact hk (hz ▸ hk1)
+    rw [Finset.sum_congr rfl (fun z _ => hfz z), ← Finset.sum_filter, Finset.sum_const, smul_eq_mul]
+  -- Count `D` by the `y`-coordinate ⟹ `(deg_i x)·c^i_{k,j*}`.
+  have hB : D.card = (Finset.univ.filter (fun y => X.relOf x y = i)).card
+      * X.interNum k (X.transposeRel j) i := by
+    rw [Finset.card_eq_sum_card_fiberwise (f := fun p : Fin n × Fin n => p.1)
+          (t := Finset.univ) (fun _ _ => Finset.mem_univ _)]
+    have hfy : ∀ y : Fin n,
+        (D.filter (fun p => p.1 = y)).card
+        = if X.relOf x y = i then X.interNum k (X.transposeRel j) i else 0 := by
+      intro y
+      by_cases hi' : X.relOf x y = i
+      · rw [if_pos hi', ← X.interNum_eq hi' k (X.transposeRel j)]
+        apply Finset.card_bij (fun p _ => p.2)
+        · intro p hp
+          simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and] at hp ⊢
+          obtain ⟨⟨_, hj1, hk1⟩, hy⟩ := hp
+          exact ⟨hk1, X.relOf_swap_eq (hy ▸ hj1)⟩
+        · intro p hp q hq hpq
+          simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and] at hp hq
+          exact Prod.ext (hp.2.trans hq.2.symm) hpq
+        · intro z hz
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hz
+          refine ⟨(y, z), ?_, rfl⟩
+          simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and]
+          have hyz : X.relOf y z = j := by
+            have h := X.relOf_swap_eq hz.2
+            rwa [transposeRel_transposeRel] at h
+          exact ⟨⟨hi', hyz, hz.1⟩, trivial⟩
+      · rw [if_neg hi', Finset.card_eq_zero]
+        apply Finset.eq_empty_of_forall_notMem
+        intro p hp
+        simp only [hD, Finset.mem_filter, Finset.mem_univ, true_and] at hp
+        obtain ⟨⟨hi1, _, _⟩, hy⟩ := hp
+        exact hi' (hy ▸ hi1)
+    rw [Finset.sum_congr rfl (fun y _ => hfy y), ← Finset.sum_filter, Finset.sum_const, smul_eq_mul]
+  exact hA.symm.trans hB
+
+/-- **The triangle identity (valency form), transpose-aware** — `n_k·c^k_{i,j} = n_i·c^i_{k,j*}`, given an apex `x`
+realizing both source fibers (`relOf x y₀ = i`, `relOf x z₀ = k`, so `valency_eq_card` reads each out-degree as the
+valency). The CC analogue of `Separability.valency_mul_intersectionNumber`; the `j*` is the non-symmetric correction.
+Axiom-clean. -/
+theorem valency_mul_interNum (i j k : Fin X.rank) {x y₀ z₀ : Fin n}
+    (hi : X.relOf x y₀ = i) (hk : X.relOf x z₀ = k) :
+    X.valency k * X.interNum i j k = X.valency i * X.interNum k (X.transposeRel j) i := by
+  rw [X.valency_eq_card hk, X.valency_eq_card hi]
+  exact X.outDeg_mul_interNum i j k x
+
 end CoherentConfig
 
 end ChainDescent
