@@ -63,6 +63,8 @@
       "Bash(python3 ../scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers)",
       "WebSearch",
       "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:www.arxiv.org)",
+      "WebFetch(domain:ar5iv.arxiv.org)",
       "WebFetch(domain:ar5iv.labs.arxiv.org)",
       "Skill(deep-research)",
       "Skill(deep-research:*)",
@@ -85,7 +87,12 @@
       "WebFetch(domain:www.researchgate.net)",
       "WebFetch(domain:research.tilburguniversity.edu)",
       "WebFetch(domain:papers.ssrn.com)",
-      "WebFetch(domain:www.alphaxiv.org)"
+      "WebFetch(domain:www.alphaxiv.org)",
+      "WebFetch(domain:www.renyi.hu)",
+      "WebFetch(domain:www.ma.imperial.ac.uk)",
+      "WebFetch(domain:cameroncounts.github.io)",
+      "WebFetch(domain:seis.bristol.ac.uk)",
+      "WebFetch(domain:math.uchicago.edu)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",

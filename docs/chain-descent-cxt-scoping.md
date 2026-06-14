@@ -25,9 +25,12 @@ the main doc). The Lean objects are already defined: `Separability.indistinguish
 (`≈ 2^{O(b)}`), so `b = O(log n)` gives `2^{O(log n)} = n^{O(1)}` — **polynomial**. `exists_greedy_base_le_log` gives
 `b ≤ log₂|Aut|`, so a *poly-bounded* `|Aut|` (`n^{O(1)}`) already yields an `O(log n)` base = poly canonization. Hence the
 target is not strictly `c(X_T)=O(1)` — it is `c(X_T)` small enough to keep the base `O(log n)` (i.e. `c(X_T)=O(polylog)`
-suffices); and the only genuine *non*-poly risk is if "small"/`IsLarge` is pinned at the sub-exponential Babai/Sun–Wilmes
-threshold (`|Aut|≈exp(n^{1/3})` ⟹ base `n^{1/3}`) rather than poly. Pin the poly `IsLarge` instantiation; do **not**
-treat an `O(log n)` base as a problem.
+suffices); and the only genuine *non*-poly risk is the largeness threshold. **M2 pinned this (Q4):** for *bounded-rank*
+primitive non-Cameron CCs `|Aut|` is **polynomially** bounded (Babai rank-3, Kivva rank-4 ⟹ `O(log n)` base ⟹ genuinely
+polynomial) — and the project's residue IS rank 3–4 (amorphic-NLS is rank 4), so this is the relevant regime; but in
+*unbounded* rank only a **sub-exponential** `|Aut| ≤ exp(Õ(n^{1/3}))` is proved (Sun–Wilmes; Babai's poly conjecture is
+open), giving an `~n^{1/3}` base. **So: claim *polynomial* only on the bounded-rank residue (cite Babai/Kivva); the
+general statement is sub-exponential-base.** Do **not** treat an `O(log n)` base as a problem.
 
 Feeding either landed checkpoint then closes the seal `modulo {G3 (+ Thm 4.1 if cited)}`:
 `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′, citation-free) or `…viaExtensionSeparability` (cites Thm 4.1).
@@ -169,6 +172,42 @@ IS poly); sub-exp ⟹ pin it before claiming *polynomial*. Source: Sun–Wilmes 
 Cartan coherent configurations; primitive small CC indistinguishing number; primitive group base-size / valency decay").
 **Outcome that matters:** for each of Q1/Q2/Q3, *cite (carry as hypothesis)* or *prove* — and a YES on Q1 alone already
 makes A1 free, leaving only A2 (the genuine core) and A3.
+
+### M2 — RESULTS (RAN 2026-06-13, deep-research, 17 sources, 23/25 claims 3-vote-verified)
+
+Net: **build over cite is confirmed** — the two pieces the project actually needs (A1 at CC generality, A2) are *not*
+citable; the citable results (Q3, Q4) are about the *group* side / *order*, not the scheme-level `c`/`s`/`b`.
+
+- **Q1 (A1) — the sparse theorem is HOMOGENEOUS-ONLY; no CC version; homogeneity is LOAD-BEARING.** PV Thm 3.1
+  (arXiv:1602.07132, JACO 2017) verbatim: *"Let X be a **homogeneous** coherent configuration … `2c(k−1)<n` … then every
+  one-point extension is 1-regular, in particular `b(X)≤2`."* The proof uses `n_{s*}=n_s` (homogeneity) to make `s_max`
+  **symmetric** for the connectivity argument; no multi-fiber generalization exists (verified in-source). **⟹ A1 is a
+  genuine port, not a citation — and the load-bearing risk is precisely the connectivity step (§S.16): the multi-fiber
+  `X_T` is non-symmetric, so the `s_max`-symmetry the original leans on must be replaced by a transpose-aware argument.**
+  (The §CC.11 definitions already ported are fine; the counting/connectivity body is where homogeneity bit, and is the
+  real work.) The Chen–Ponomarenko 2022 book was *not* independently confirmed to lack a broader version — a direct check
+  is the one residual citation hope, but expectation is "homogeneous-only".
+- **Q2 (A2) — OPEN; the crux must be proved from scratch.** No surviving citable theorem bounds `c(X)` or `s(X)` for a
+  primitive (small/non-Cameron) CC, nor "becomes sparse / bounded `c`,`b` after `O(1)` individualizations". Confirms
+  `ParamBoundOnExtension` is the genuine open core. *Caveat (medium confidence):* Evdokimov–Ponomarenko (EJC 2000) and the
+  CP book were named but produced no surviving quote — a direct read of those two is the one place a partial citation
+  might still hide.
+- **Q3 (A2 `k`-half + (C)) — base size is citable, but only TOTAL and only `b(G)`, not the scheme.** Halasi–Liebeck–Maróti:
+  `b(G) ≤ 2·log|G|/log n + 24` (so `|G|≤n^{O(1)} ⟹ b(G)=O(1)`); non-standard almost simple `b(G)≤7` (Burness, `=7` iff M24);
+  `|G|≤n^5` except M23/M24 (Liebeck–Saxl). **But:** (i) these bound the *group* base `b(G)`, and `b(G) ≤ b(X)` — they do
+  **not** bound the *scheme* base (the `s(X)` gap is the open part, scoping §2); (ii) the finer **valency-decay** profile
+  Q3 asked for (do orbits shrink to `O(1)` after `O(1)` points?) is **not** addressed by any source. So the `k`-half of A2
+  is also open — not rescued by base-size theory. (The group base (C) being free is re-confirmed.)
+- **Q4 (calibration) — the residue's `|Aut|` is only SUB-EXPONENTIAL in general; POLYNOMIAL is citable only for bounded
+  rank.** Sun–Wilmes: a primitive CC not triangular/lattice has `|Aut| ≤ exp(Õ(n^{1/3}))` (Babai 1981: `exp(Õ(n^{1/2}))`).
+  Babai's **poly-`|Aut|`-or-Cameron conjecture is OPEN**, proved only for **rank 3 (Babai 2014)** and **rank 4 (Kivva —
+  a rank-4 non-Cameron PCC has minimal degree `≥ γ₄·n`, only exceptions Johnson/Hamming)**. The dichotomy is framed as
+  *"Cameron scheme vs. high minimal degree (`motion ≥ γ_r·n`)"*, **not** an `|Aut|`-order threshold. **Two consequences:**
+  (1) **good news for the actual residue** — it is rank 3–4 (amorphic-NLS is rank 4), so **Kivva/Babai give a citable
+  *polynomial* `|Aut|` bound ⟹ `O(log n)` base ⟹ genuinely polynomial canonisation for the bounded-rank residue**;
+  (2) **honest limit** — for *unbounded-rank* primitive small non-Cameron CCs only a *sub-exponential* base (`~n^{1/3}`) is
+  citable (polynomial would need Babai's open conjecture). So pin the seal's `IsLarge`/G3 to the **bounded-rank** regime
+  (Babai rank-3 / Kivva rank-4) to claim *polynomial*; the general statement is sub-exponential-base.
 
 ### M3 — the lemma statements (DRAFTED 2026-06-13) — and a CITATION-FREE candidate
 
