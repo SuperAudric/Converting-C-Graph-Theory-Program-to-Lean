@@ -35,7 +35,8 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   {G3 + hImprim + `hclo`-on-`X_T` + `hcatch`}.
 - **Real discharges (non-vacuity, not the family theorem):** the `g = -1` odd-char family (`…viaG0powNeg`, `hclo`
   PROVED not carried) and the concrete ℤ₄² Clebsch closure (`b(X) ≤ 2`, `AssociationScheme`-level).
-- **The CC sparse substrate — A1 ported through §S.9 (`CoherentConfig.lean §CC.11`–`§CC.16`, all axiom-clean):** `c(X)`+its
+- **The CC sparse substrate — A1 is DONE (`CoherentConfig.lean §CC.11`–`§CC.19`, all axiom-clean; full build history +
+  the route-not-taken in [`chain-descent-a1-cc-substrate.md`](./chain-descent-a1-cc-substrate.md)):** `c(X)`+its
   geometric lemma `indistinguishingNumberOf_eq_card`, `k(X)`, `SparseSeparable` (`§CC.11`); the (19) estimate `sum_pu_le` +
   transpose bridge (`§CC.12`); the (20) identity `pu_eq_sum` (`§CC.13`); the transpose-aware triangle identity
   `valency_mul_interNum` = `n_k·c^k_{i,j}=n_i·c^i_{k,j*}` (`§CC.14`); the §S.4 smax/sα graph layer + `saAdj_symm` (`§CC.15`); the
@@ -52,7 +53,8 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
 A bounded-base δ′ pinning rank / forced-triangle closure for the residue family **on the extension `X_T`**
 (`hclo : ∀ v, (pointExtension …).DominatorReachable T v`). Everything reduces to it: §1B — the general (A)+(B) *domination*
 condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at a complete extension (the `hcatch` finding)
-— so `c(X_T)` subsumes `hcatch`. **Scoped + probed + drafted in `chain-descent-cxt-scoping.md` (M1/M2/M3, 2026-06-13):**
+— so `c(X_T)` subsumes `hcatch`. **A1 is now DONE (the substrate that consumes this); the open piece is A2 — scoped in
+`chain-descent-cxt-scoping.md` (§4 probe + research, §5 routes to the unconditional seal):**
 - **M1 (probe):** `c(X_T)` **and** `k(X_T)` collapse to `O(1)` after `O(1)` points, uniformly across a diverse family
   (rank 3/4, cyclotomic/amorphic, char 2/odd, n=10–41) — **no falsifier**; so the sparse bound `2c(k−1)<n` holds on the
   extension. This is the evidence the target is true.
