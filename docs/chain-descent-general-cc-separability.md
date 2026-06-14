@@ -35,10 +35,13 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   {G3 + hImprim + `hclo`-on-`X_T` + `hcatch`}.
 - **Real discharges (non-vacuity, not the family theorem):** the `g = -1` odd-char family (`…viaG0powNeg`, `hclo`
   PROVED not carried) and the concrete ℤ₄² Clebsch closure (`b(X) ≤ 2`, `AssociationScheme`-level).
-- **The CC sparse substrate — A1 incr 1–2 (`CoherentConfig.lean §CC.11`):** the indistinguishing number `c(X)` + its
-  geometric counting lemma (`indistinguishingNumberOf_eq_card`), the max valency `k(X)`, and `SparseSeparable` (`2c(k−1)<n`)
-  all defined on the general CC — the foundation of the citation-free `c(X_T)` route (the live build, **see
-  `docs/chain-descent-cxt-scoping.md`** — its own self-contained home).
+- **The CC sparse substrate — A1 ported through §S.9 (`CoherentConfig.lean §CC.11`–`§CC.16`, all axiom-clean):** `c(X)`+its
+  geometric lemma `indistinguishingNumberOf_eq_card`, `k(X)`, `SparseSeparable` (`§CC.11`); the (19) estimate `sum_pu_le` +
+  transpose bridge (`§CC.12`); the (20) identity `pu_eq_sum` (`§CC.13`); the transpose-aware triangle identity
+  `valency_mul_interNum` = `n_k·c^k_{i,j}=n_i·c^i_{k,j*}` (`§CC.14`); the §S.4 smax/sα graph layer + `saAdj_symm` (`§CC.15`); the
+  §S.5 summation identity `sum_interNum_eq_outDeg` + the §S.9 Lemma-3.5(1) `n_u>n_v` half `valency_le_pu_of_valency_lt` (`§CC.16`).
+  The **remaining** A1 content = §S.10–§S.16 connectivity (single-fiber) + the δ′ bridge — roadmap + concrete §S.10 plan in
+  **`docs/chain-descent-cxt-scoping.md` §6.1/§6.2** (the live build's self-contained home).
 
 ### The open frontier — ONE quantity: `c(X_T)` (live work: `chain-descent-cxt-scoping.md`)
 A bounded-base δ′ pinning rank / forced-triangle closure for the residue family **on the extension `X_T`**
@@ -603,7 +606,7 @@ route, live work in `chain-descent-cxt-scoping.md`):** the indistinguishing numb
 **`indistinguishingNumberOf_eq_card`** (the geometric form `c(r)=|{γ:relOf γ α=relOf γ β}|`) / `IsReflexive` /
 **`indistinguishingNumber`** (`c(X)`) / `indistinguishingNumberOf_le`; the valency **`sourceFiber`** / **`valency`** /
 **`valency_eq_card`** / **`maxValency`** (`k(X)`) / `valency_le_maxValency`; and **`SparseSeparable`** (`2c(k−1)<n`).
-**A1 incr 3–5 — (19)+(20)+triangle identity (LANDED 2026-06-14, `CoherentConfig.lean §CC.12`/`§CC.13`/`§CC.14`, axiom-clean):**
+**A1 incr 3–7 — the §S.4–§S.9 substrate (LANDED 2026-06-14, `CoherentConfig.lean §CC.12`–`§CC.16`, axiom-clean):**
 the CC pair-count **`pu`**/**`pu_eq`**, the transpose bridge **`relOf_right_eq_iff_left`** (CC substitute for `relOfPair_symm`),
 **`not_isReflexive_relOf_of_ne`**, **`card_relNeighbors_le_maxValency`** (`A.card ≤ k(X)` for non-reflexive `u`, replacing
 homogeneity's exact `= k`), **`sum_pu_le`** (`Σ_δ pᵤ(δ) ≤ k(k−1)·c`, §S.6), **`pu_eq_sum`** (`pᵤ(δ) = Σ_w c^v_{uw}(c^v_{uw}−1)`,

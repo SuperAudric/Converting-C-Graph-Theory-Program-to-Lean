@@ -337,8 +337,11 @@ or A3 turns out harder than the citation.
 
 **Current Lean state (all axiom-clean `[propext, Classical.choice, Quot.sound]`):** the δ′ engine on `X_T` (§CC.10),
 `Sharp (pointExtension X T)`, and the seal wiring `reachesRigidOrCameron_viaExtensionDominatorClosure` are LANDED and
-waiting on the single input `hclo`. The CC sparse substrate **A1 incr 1–2** (`§CC.11`: `c(X)`, `k(X)`, `SparseSeparable`)
-is landed. The open content is `hclo` = `ParamBoundOnExtension` (A2), reached via the A1 sparse theorem.
+waiting on the single input `hclo`. The CC sparse substrate **A1 is ported through §S.9** (`§CC.11`–`§CC.16`: `c(X)`, `k(X)`,
+`SparseSeparable`, the (19)/(20) estimates, the transpose-aware triangle identity, the §S.4 smax/sα graph layer with
+`saAdj_symm`, the §S.5 summation identity, and the §S.9 Lemma-3.5(1) `n_u>n_v` half). The remaining A1 content is the §S.10–§S.16
+connectivity (the roadmap + concrete §S.10 plan are §6.1/§6.2 below); the eventual open content is `hclo` =
+`ParamBoundOnExtension` (A2), reached once A1's "sparse ⟹ pinning rank" lands.
 
 **▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.9: incr 3 (§S.6 `sum_pu_le`, `§CC.12`), incr 4
 (§S.7 `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity, `§CC.14`), incr 6 (§S.4 graph defs + `saAdj_symm`, `§CC.15`),
@@ -355,5 +358,89 @@ load-bearing), then assembly is automatic.
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?
 
 **Reading order for a fresh reader:** the general-CC build doc STATUS → its §1A (why not GI∈P) / §1B (both routes ⟹
-`c(X_T)`) → THIS doc §0–§4 (the reduction + M1/M2/M3 results) → `CoherentConfig.lean` §CC.10 (the landed δ′ engine + `Sharp`)
-and §CC.11 (the A1 sparse substrate) → resume at **A1 increment 3** above.
+`c(X_T)`) → THIS doc §0–§4 (the reduction + M1/M2/M3 results) → `CoherentConfig.lean` §CC.10 (the landed δ′ engine + `Sharp`),
+§CC.11–§CC.16 (the A1 substrate ported through §S.9), and `Separability.lean §S.1–§S.16` (the homogeneous source being ported)
+→ resume at **§6.1/§6.2 below (the §S.10 plan)**.
+
+---
+
+### 6.1 — The remaining A1 port roadmap (§S.10 → §S.16 → the δ′ bridge)
+
+Each row is a homogeneous source lemma in `Separability.lean` to port to `CoherentConfig`, with its CC subtlety. Port one
+row (or §S section) per increment, mirroring the proven pattern of §CC.12–§CC.16. **The governing fact (proven this session):
+the connectivity argument is intrinsically single-fiber** — `smaxAdj` is symmetric only intra-fiber, and the counting needs the
+apex in the relevant source fiber. So every row below is "on a fiber `F`".
+
+| Homogeneous source | CC subtlety to handle |
+|---|---|
+| **prereq: fiber-size identity** (new, no homogeneous analogue — homogeneity made it trivial) | `\|F_src(r)\|·n_r = \|F_tgt(r)\|·n_{r*}`; intra-fiber ⟹ `n_r = n_{r*}` ⟹ within-fiber `smaxAdj_symm`. Concrete plan in §6.2. |
+| §S.10 `exists_small_closed_of_not_connected` | generic; needs a **symmetric** relation — feed it the intra-fiber smax graph (globally symmetric via the prereq). |
+| §S.10 `exists_inSmax` | `Smax` nonempty — but on a multi-fiber CC, `maxValency` is a global sup; need a max-valency relation **emanating from `F`**. Likely restate `maxValency`/`InSmax` relative to a fiber, or argue the global max is attained from `F` for the fiber under attack. **Open design point.** |
+| §S.10 `smaxConnected_of_sparseSeparable` | the smax-half; uses `valency_le_pu_of_valency_lt` (§CC.16, needs the source witness `relOf α β₀ = u` — holds when `α ∈ F` and `u` emanates from `F`). |
+| §S.11 `exists_saAdj_of_intersectionNumber_eq_one`, `valency_le_pu_of_no_saAdj` | the sα↔counting bridge + Lemma 3.5(1) `n_u=n_v` half (no-edge case). |
+| §S.12 `saComp`, `compsOf`, `sum_card_fiber_saComp` | sα-components — uses `saAdj_symm` (LANDED §CC.15) for well-definedness; otherwise structural. |
+| §S.13 `transport`(`_step`), `compsOf_eq_of_inter_nonempty` (Lemma 3.4) | the sα-path transport — uses the `c=1` forced-determinacy; check the transpose orientation on the transported relation. |
+| §S.14 `pu_ge_card_notComp`, `lemma35_2`, `exists_minComp_card` | Lemma 3.5(2) (the `≥k/2` bound via the minimum component). |
+| §S.15 `valency_le_two_pu_of_card_compsOf`, `card_compsOf_eq_one` (claim 23) | combines 3.5(1)+(2) ⟹ `\|C(u)\|=1`. |
+| §S.16 `saConnected_of_sparseSeparable` | the sα-half; with §S.10 gives `SmaxConnected ∧ ∀α SaConnected α` on `F`. |
+| **the δ′ bridge** (CC-specific glue, not a §S port) | convert `SmaxConnected ∧ SaConnected` into a **pinning rank** (BFS layering of the forced-triangle reachability) and feed §CC.10 `dominatorReachable_of_rank` ⟹ `∀ v, DominatorReachable T v`. The homogeneous analogue is `CascadeAffine §S-bridge` B4 `discrete_of_connectivity`. |
+
+**⚠ THE OPEN DESIGN QUESTION for §S.10+ (be honest, not yet resolved):** the smax graph is *intra-fiber* (the prereq makes it
+symmetric only within a fiber), so `SmaxConnected` connects only *within* a fiber. But the dominator closure must reach **all**
+of Ω (every fiber of `X_T`). The likely resolution: cross-fiber pinning comes from **forced triangles against the already-
+determined base/`T`-points** (a point in a big fiber is pinned by a `c=1` triangle to two `T`-singletons or to determined
+points in another fiber), i.e. the cross-fiber spread is the *dominator* step, while the intra-fiber smax/sα connectivity is
+what discretizes *within* each fiber. **Working this out — how the per-fiber connectivity composes into a global pinning rank —
+is the genuine design content of the rest of A1, and it is not yet settled.** Resolve it before/while porting §S.10.
+
+### 6.2 — Concrete start: the fiber-size identity + within-fiber `smaxAdj_symm`
+
+The clean, clearly-correct first sub-piece (do this next). Two new defs + two lemmas in a new `§CC.17`:
+
+```
+-- the fiber of a point, as a vertex set
+def fiberSet (f : Fin X.rank) : Finset (Fin n) := univ.filter (fun u => relOf u u = f)
+
+-- KEY reusable lemma: the out-degree depends only on the source fiber
+-- (generalises valency_eq_card; for ANY u, not just sources of r)
+theorem outDeg_eq_interNum (u : Fin n) (r : Fin X.rank) :
+    (univ.filter (fun w => relOf u w = r)).card = interNum r (transposeRel r) (relOf u u)
+-- proof: interNum_eq at the loop (u,u) ∈ (relOf u u); the second filter clause
+--   `relOf w u = transposeRel r` is automatic from `relOf u w = r` (relOf_swap_eq), so it's redundant.
+
+-- the fiber-size identity (double-count the class {(u,v) : relOf u v = r})
+theorem fiberSize_mul_valency (r : Fin X.rank) :
+    (fiberSet (sourceFiber r)).card * valency r
+      = (fiberSet (sourceFiber (transposeRel r))).card * valency (transposeRel r)
+-- proof: |class r| = Σ_u (#{v : relOf u v = r}) = Σ_u interNum r r* (relOf u u)  [outDeg_eq_interNum]
+--   group by fiber relOf u u; the term is `valency r` on fiberSet (sourceFiber r) and 0 elsewhere
+--   (interNum r r* f = 0 unless f = sourceFiber r, since relOf u w = r ⟹ relOf u u = sourceFiber r
+--    by relOf_diag_left_eq). Symmetric count by target gives the r* side.
+
+-- within-fiber smaxAdj is symmetric (the payoff)
+theorem smaxAdj_symm_of_sameFiber {a b : Fin n} (hf : relOf a a = relOf b b)
+    (h : smaxAdj a b) : smaxAdj b a
+-- proof: relOf b a = transposeRel (relOf a b) (relOf_swap_eq); same fiber ⟹ sourceFiber (relOf a b) =
+--   sourceFiber (relOf b a) (both = relOf a a = relOf b b), so fiberSize_mul_valency cancels |F| (>0,
+--   a ∈ it) to give valency (relOf a b) = valency (transposeRel (relOf a b)) = valency (relOf b a);
+--   h : valency (relOf a b) = maxValency ⟹ valency (relOf b a) = maxValency = smaxAdj b a.
+```
+
+`fiberSet (sourceFiber r)` is nonempty (contains `(repPair r).1`), so the cancellation is valid. `outDeg_eq_interNum` is the
+reusable brick (it also re-proves `valency_eq_card` as the `relOf u u = sourceFiber r` case). After §CC.17, the connectivity
+infra can be fed the globally-symmetric intra-fiber smax graph `fun a b => relOf a a = relOf b b ∧ smaxAdj a b`.
+
+### 6.3 — Porting playbook (reusable patterns confirmed this session)
+
+- **Transpose-aware statements (M2-Q1).** When the homogeneous proof uses `rel_symm` to flip a leg, the CC analogue gains a
+  `transposeRel` on that leg. Confirmed: §S.8 triangle identity is `c^i_{k,j*}` (not `c^i_{kj}`) — a genuine *statement* change.
+  Where the flipped quantity is only tested for `=1`/`0`/`≥1` (e.g. §S.9), the transpose is *harmless*. Where two relations
+  must literally match (e.g. the inner bound of §S.6), insert the **transpose bridge** `relOf_right_eq_iff_left` (§CC.12).
+- **Out-degree form over valency.** State counting lemmas with `#{w : relOf α w = u}` (hypothesis-free), not `valency u`; the
+  `= valency u` step needs `α` a source of `u`. This avoids threading fiber hypotheses through every lemma (§S.5/§CC.16).
+- **Source witnesses.** Where valency *must* appear (triangle identity, Lemma 3.5), carry an explicit witness `relOf α β₀ = u`
+  (= "`α` is in `u`'s source fiber"). This is the apex-in-fiber requirement made into a hypothesis (§CC.16).
+- **Lean gotchas (this session).** (1) `Finset.card_bij` surjectivity: a simp-collapsed `z = z` membership conjunct becomes
+  `True`, so close it with `trivial`, **not** `rfl` (bit twice in §CC.14). (2) `interNum_eq` is stated in colour-function form
+  (`relOf u w = a ∧ relOf w v = b`), so CC fiber-card steps are often *more direct* than homogeneous (no `rel`↔`relOfPair`
+  conversion) — e.g. §CC.13's `hcard` is a one-liner. (3) build/axiom-check commands + the cwd-reset caveat are in §0.
