@@ -263,20 +263,25 @@ or A3 turns out harder than the citation.
   `relOfPair_symm`), **`not_isReflexive_relOf_of_ne`**, **`card_relNeighbors_le_maxValency`** (`A.card ≤ k(X)` for
   non-reflexive `u` — the CC replacement for homogeneity's exact `= k`), and **`sum_pu_le`** (`Σ_δ pᵤ(δ) ≤ k(k−1)·c`). A
   direct port of `Separability.lean §S.6`; the first place M2-Q1's non-symmetry bit (the transpose bridge + the `≤ k` vs `= k`
-  weakening) and it was *clean* — the load-bearing non-symmetry is still ahead at §S.16.
+  weakening) and it was *clean* — the load-bearing non-symmetry is still ahead at §S.8/§S.16.
+- **A1 incr 4 (§S.7 identity (20)) LANDED 2026-06-14** (`CoherentConfig.lean §CC.13`, axiom-clean): **`pu_eq_sum`**
+  (`pᵤ(δ) = Σ_w c^v_{uw}(c^v_{uw}−1)`, `v = relOf α δ`) — the bridge from the pair-count to intersection numbers. *Cleaner*
+  than homogeneous: the CC's colour-function `interNum_eq` matches the fiber filter directly (no `rel`↔`relOfPair` conversion,
+  no transpose subtlety — the orientation `relOf α β = u`, `relOf β δ = w` is exactly `interNum u w (relOf α δ)`).
 - **SCOPE CORRECTION (from reading the full `PublicTheoremIndex.md`, 2026-06-14):** A1 is **not** "(19) + connectivity" — the
   homogeneous source is the **whole §S.5→§S.16 chain** (§S.5 summation identity, §S.6 (19), §S.7 (20) `pu_eq_sum`, §S.8
   triangle identity `valency_mul_intersectionNumber` + `saAdj_symm`, §S.9–§S.15 both Lemma-3.5/3.6 halves + components +
   set-equality transport + `|C(u)|=1`, §S.16 `saConnected_of_sparseSeparable`). Each must be ported to the CC. The §S.8
   triangle identity is itself *homogeneous* (uses single-fiber valency), so the non-symmetry bites in **more than one place**,
   not only §S.16. Plan the port as one §S section at a time.
-- **A1 NEXT (the next port unit):** §S.7 (20) **`pu_eq_sum`** (`pᵤ(δ) = Σ_w cᵛ_{uw}(cᵛ_{uw}−1)`, the bridge from the
-  pair-count to intersection numbers — transpose-aware grouping by `relOf β δ`) **then** §S.8 the triangle identity
-  (`valency_mul_intersectionNumber`, the source of the symmetry the connectivity later leans on — port it transpose-aware
-  *now* to defuse §S.16). The connectivity (§S.9–§S.16) culminates in `SaConnected` ⟹ "sparse ⟹ a pinning rank exists" ⟹
-  feed §CC.10 `dominatorReachable_of_rank`. **⚠ M2-Q1 WARNING (the real risk, still ahead):** the homogeneous PV proof makes
-  `s_max` *symmetric* via `n_{s*}=n_s` (homogeneity), which **fails on the multi-fiber `X_T`** — re-argue connectivity
-  transpose-aware.
+- **A1 NEXT (the next port unit):** §S.8 the **triangle identity** `valency_mul_intersectionNumber`
+  (`n_k·c^k_{ij} = n_i·c^i_{kj}`, a double-count of coloured triangles through a fixed apex) + **`saAdj_symm`** — the source
+  of the valency symmetry the connectivity later leans on; **port it transpose-aware now to defuse §S.16.** The CC also still
+  needs `smaxAdj`/`saAdj`/`SaConnected` defined (§S.4 analogues, not yet on the CC — `Smax`/`InSmax`/`smaxAdj` were not part of
+  incr 3/4, which work for an arbitrary non-reflexive `u`). Then §S.9–§S.16 connectivity culminates in `SaConnected` ⟹
+  "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`. **⚠ M2-Q1 WARNING (the real risk, still
+  ahead):** the homogeneous PV proof makes `s_max` *symmetric* via `n_{s*}=n_s` (homogeneity), which **fails on the
+  multi-fiber `X_T`** — re-argue connectivity transpose-aware.
 - **A2 (the open core, after A1):** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue —
   M2 confirmed not citable; char-2 load-bearing.
 - **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
@@ -320,15 +325,15 @@ or A3 turns out harder than the citation.
 waiting on the single input `hclo`. The CC sparse substrate **A1 incr 1–2** (`§CC.11`: `c(X)`, `k(X)`, `SparseSeparable`)
 is landed. The open content is `hclo` = `ParamBoundOnExtension` (A2), reached via the A1 sparse theorem.
 
-**▶ PICK UP HERE (the exact next Lean step):** A1 incr 3 (the §S.6 **(19)-estimate** `sum_pu_le`) is **LANDED**
-(`CoherentConfig.lean §CC.12`, axiom-clean, 2026-06-14). Continue the §S-chain port, **one §S section at a time** (the full
-§S.5→§S.16 chain is the source, not just (19)+connectivity — see the scope correction in §4-M4): **next = §S.7 (20)
-`pu_eq_sum`** (pair-count → intersection numbers, transpose-aware grouping by `relOf β δ`) → **§S.8 triangle identity**
-`valency_mul_intersectionNumber` (port it transpose-aware now — it is the homogeneous symmetry the connectivity later leans
-on) → §S.9–§S.16 connectivity ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed the landed §CC.10 `dominatorReachable_of_rank`.
-**Carry the M2-Q1 warning into §S.8/§S.16:** the homogeneous PV proof used `s_max` symmetric (`n_{s*}=n_s`); on the
-multi-fiber `X_T` that fails, so re-argue transpose-aware. After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)`
-core, char-2 load-bearing), then assembly is automatic.
+**▶ PICK UP HERE (the exact next Lean step):** A1 incr 3 (§S.6 **(19)-estimate** `sum_pu_le`, `§CC.12`) and incr 4 (§S.7
+**(20)** `pu_eq_sum`, `§CC.13`) are **LANDED** (axiom-clean, 2026-06-14). Continue the §S-chain port, **one §S section at a
+time** (the full §S.5→§S.16 chain is the source, not just (19)+connectivity — see the scope correction in §4-M4): **next =
+§S.8 triangle identity** `valency_mul_intersectionNumber` (`n_k·c^k_{ij}=n_i·c^i_{kj}`) + `saAdj_symm` — port it
+transpose-aware now, it is the homogeneous symmetry the connectivity later leans on; the CC also needs the §S.4 graph defs
+`smaxAdj`/`saAdj`/`SaConnected` (not yet ported) → §S.9–§S.16 connectivity ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed the
+landed §CC.10 `dominatorReachable_of_rank`. **Carry the M2-Q1 warning into §S.8/§S.16:** the homogeneous PV proof used `s_max`
+symmetric (`n_{s*}=n_s`); on the multi-fiber `X_T` that fails, so re-argue transpose-aware. After A1: **A2** (prove
+`ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing), then assembly is automatic.
 
 **Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?

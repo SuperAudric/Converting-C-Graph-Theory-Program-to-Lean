@@ -54,13 +54,14 @@ condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at
   is open (Q2); citable results are group-side only (Q3). **Calibration (Q4): polynomial canonisation is citable for the
   rank-3/4 residue (Babai/Kivva); only sub-exponential in unbounded rank — and the residue IS rank 3–4.**
 
-**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** continue the **A1 §S-chain port** (the §S.6 `(19)`-estimate
-`sum_pu_le` LANDED 2026-06-14 in `CoherentConfig.lean §CC.12`, axiom-clean). **Scope correction (2026-06-14):** A1 is the
-*whole* §S.5→§S.16 chain, not "(19)+connectivity" — next units are §S.7 `(20)` (`pu_eq_sum`) → §S.8 triangle identity
-(`valency_mul_intersectionNumber`, the homogeneous symmetry source) → §S.9–§S.16 connectivity ⟹ "sparse ⟹ a pinning rank
-exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`. **⚠ §S.8/§S.16 must be re-argued transpose-aware** (M2-Q1: the
-homogeneous PV proof leaned on `s_max` symmetry, which fails on multi-fiber `X_T`). Then A2 (prove `c(X_T)=O(1)`, the open
-core); then (deferred, §7) `SchurianScheme`→seal wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
+**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** continue the **A1 §S-chain port** (§S.6 `(19)`-estimate
+`sum_pu_le` `§CC.12` + §S.7 `(20)` `pu_eq_sum` `§CC.13` both LANDED 2026-06-14, axiom-clean). **Scope correction
+(2026-06-14):** A1 is the *whole* §S.5→§S.16 chain, not "(19)+connectivity" — **next unit = §S.8 triangle identity**
+(`valency_mul_intersectionNumber` + `saAdj_symm`, the homogeneous symmetry source — port transpose-aware) + the §S.4 CC graph
+defs `smaxAdj`/`saAdj`/`SaConnected` → §S.9–§S.16 connectivity ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10
+`dominatorReachable_of_rank`. **⚠ §S.8/§S.16 must be re-argued transpose-aware** (M2-Q1: the homogeneous PV proof leaned on
+`s_max` symmetry, which fails on multi-fiber `X_T`). Then A2 (prove `c(X_T)=O(1)`, the open core); then (deferred, §7)
+`SchurianScheme`→seal wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
 
 **Orientation:** §1A why-not-GI∈P · §1B the `c(X_T)` reduction · §5.1 the build map · §5.2 the open problem + planning
 insights · §7 do-not-re-walk · §8 condensed timeline + the changelog for full history.
@@ -601,13 +602,14 @@ route, live work in `chain-descent-cxt-scoping.md`):** the indistinguishing numb
 **`indistinguishingNumberOf_eq_card`** (the geometric form `c(r)=|{γ:relOf γ α=relOf γ β}|`) / `IsReflexive` /
 **`indistinguishingNumber`** (`c(X)`) / `indistinguishingNumberOf_le`; the valency **`sourceFiber`** / **`valency`** /
 **`valency_eq_card`** / **`maxValency`** (`k(X)`) / `valency_le_maxValency`; and **`SparseSeparable`** (`2c(k−1)<n`).
-**A1 incr 3 — the (19) estimate (LANDED 2026-06-14, `CoherentConfig.lean §CC.12`, axiom-clean):** the CC pair-count
+**A1 incr 3–4 — (19)+(20) (LANDED 2026-06-14, `CoherentConfig.lean §CC.12`/`§CC.13`, axiom-clean):** the CC pair-count
 **`pu`**/**`pu_eq`**, the transpose bridge **`relOf_right_eq_iff_left`** (CC substitute for `relOfPair_symm`),
 **`not_isReflexive_relOf_of_ne`**, **`card_relNeighbors_le_maxValency`** (`A.card ≤ k(X)` for non-reflexive `u`, replacing
-homogeneity's exact `= k`), and **`sum_pu_le`** (`Σ_δ pᵤ(δ) ≤ k(k−1)·c`) — a direct port of `Separability.lean §S.6`.
-**OPEN (A1, the rest of the §S-chain):** §S.7 `(20)` `pu_eq_sum` → §S.8 triangle identity → §S.9–§S.16 connectivity
-(re-argued transpose-aware, M2-Q1) ⟹ "sparse ⟹ pinning rank exists" ⟹ §CC.10 `dominatorReachable_of_rank`; then A2
-(`c(X_T)=O(1)`, the open core).
+homogeneity's exact `= k`), **`sum_pu_le`** (`Σ_δ pᵤ(δ) ≤ k(k−1)·c`, §S.6), and **`pu_eq_sum`** (`pᵤ(δ) = Σ_w c^v_{uw}(c^v_{uw}−1)`,
+§S.7) — direct ports of `Separability.lean §S.6/§S.7`.
+**OPEN (A1, the rest of the §S-chain):** §S.8 triangle identity (`valency_mul_intersectionNumber`+`saAdj_symm`) + the §S.4
+graph defs (`smaxAdj`/`saAdj`/`SaConnected`) → §S.9–§S.16 connectivity (re-argued transpose-aware, M2-Q1) ⟹ "sparse ⟹
+pinning rank exists" ⟹ §CC.10 `dominatorReachable_of_rank`; then A2 (`c(X_T)=O(1)`, the open core).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /

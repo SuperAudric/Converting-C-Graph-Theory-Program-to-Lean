@@ -1310,6 +1310,48 @@ theorem sum_pu_le (α : Fin n) {u : Fin X.rank} (hu : ¬ X.IsReflexive u) (Δ : 
     _ ≤ X.maxValency * (X.maxValency - 1) * X.indistinguishingNumber :=
         Nat.mul_le_mul (Nat.mul_le_mul hAcard (Nat.sub_le_sub_right hAcard 1)) (Nat.le_refl _)
 
+/-! ### §CC.13 — Identity (20): `pᵤ(δ) = Σ_w cᵛ_{uw}(cᵛ_{uw}−1)` (A1, the pair-count ↔ intersection-number bridge)
+
+The CC port of `Separability.lean §S.7` (`pu_eq_sum`). Group the `(β,γ)` counted by `pᵤ(δ)` by their common class
+`w = relOf β δ = relOf γ δ` to the test point `δ` (with `v = relOf α δ`): each `w`-fiber is the off-diagonal of the
+`interNum u w v`-element set `{β : relOf α β = u ∧ relOf β δ = w}`, contributing `c·(c−1)` ordered distinct pairs. The
+bridge from the geometric pair-count to the intersection numbers, used by both halves of Lemma 3.5. The fiber-card step is
+*more direct* than the homogeneous one — the CC's colour-function `interNum_eq` already matches the filter shape, with no
+`rel`↔`relOfPair` conversion and no transpose subtlety (the orientation `relOf α β = u`, `relOf β δ = w` is exactly
+`interNum u w (relOf α δ)`). -/
+
+/-- **Identity (20), CC form** — `pᵤ(δ) = Σ_w c^v_{uw}(c^v_{uw}−1)` with `v = relOf α δ`. Fiber `pᵤ(δ)` by the common
+class `w = relOf β δ`; each fiber is the off-diagonal of the `interNum u w v`-element set `{β : relOf α β = u ∧ relOf β δ
+= w}`. The bridge from the pair-count to intersection numbers. Axiom-clean. -/
+theorem pu_eq_sum (α : Fin n) (u : Fin X.rank) (δ : Fin n) :
+    X.pu α u δ
+      = Finset.univ.sum (fun w : Fin X.rank =>
+          X.interNum u w (X.relOf α δ) * (X.interNum u w (X.relOf α δ) - 1)) := by
+  classical
+  unfold pu
+  rw [Finset.card_eq_sum_card_fiberwise (f := fun bg : Fin n × Fin n => X.relOf bg.1 δ)
+        (t := Finset.univ) (fun _ _ => Finset.mem_univ _)]
+  refine Finset.sum_congr rfl (fun w _ => ?_)
+  -- The `w`-fiber is the off-diagonal of `{β ∈ αu : relOf β δ = w}`.
+  have hfib : ((Finset.univ.filter (fun bg : Fin n × Fin n =>
+          X.relOf α bg.1 = u ∧ X.relOf α bg.2 = u ∧ bg.1 ≠ bg.2 ∧
+          X.relOf bg.1 δ = X.relOf bg.2 δ)).filter
+            (fun bg => X.relOf bg.1 δ = w))
+        = (Finset.univ.filter (fun β => X.relOf α β = u ∧ X.relOf β δ = w)).offDiag := by
+    ext bg
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_offDiag]
+    constructor
+    · rintro ⟨⟨h1, h2, hne, heq⟩, hw⟩
+      exact ⟨⟨h1, hw⟩, ⟨h2, heq ▸ hw⟩, hne⟩
+    · rintro ⟨⟨h1, hw1⟩, ⟨h2, hw2⟩, hne⟩
+      exact ⟨⟨h1, h2, hne, hw1.trans hw2.symm⟩, hw1⟩
+  rw [hfib, Finset.offDiag_card]
+  -- The fiber's vertex set has `interNum u w (relOf α δ)` elements (directly, by `interNum_eq`).
+  have hcard : (Finset.univ.filter (fun β => X.relOf α β = u ∧ X.relOf β δ = w)).card
+      = X.interNum u w (X.relOf α δ) :=
+    X.interNum_eq (rfl : X.relOf α δ = X.relOf α δ) u w
+  rw [hcard, nat_kk_sub_self]
+
 end CoherentConfig
 
 end ChainDescent
