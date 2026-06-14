@@ -309,11 +309,37 @@ or A3 turns out harder than the citation.
   `≤c` via `indistinguishingNumberOf_eq_card` + `relOf_right_eq_iff_left`; `|T|>(k−1)c` leaves a good `β`). Cross-fiber is
   automatic (`α,β` range over all of `T`; the forced triangle is `interNum`-level — no smax). The fiber-size/smax substrate
   (§CC.15–§CC.17) is **not on the critical path** (kept as landed infra; the global-`SmaxConnected`-is-false finding stands).
-- **A1 → A2 interface (crisp):** A1 reduces `hclo` to the single `O(1)` threshold **`(k(X_T)−1)·c(X_T) < |T|`** on the
-  extension's own parameters (`allSingletonFiber_of_card_gt`). The remaining open content is **purely A2**: exhibit a base `T`
-  meeting it (M1: `c(X_T), k(X_T) = O(1)` ⟹ a base of size just above the `O(1)` threshold suffices).
-- **A2 (the open core, the genuine `s(X)` crux):** prove `c(X_T), k(X_T) = O(1)` after `O(1)` individualizations, so a base
-  with `|T| > (k(X_T)−1)·c(X_T)` exists for the residue — M2 confirmed not citable; char-2 load-bearing.
+- **A1 → A2 interface (crisp; Phase 0 LANDED §CC.19 2026-06-14).** The threshold `(k(X_T)−1)·c(X_T) < |T|` can never be checked
+  at a *non-discrete* `X_T` (its contrapositive forces `(k−1)c ≥ |T|`). It is consumed via **padding**: `allSingletonFiber_of_card_gt_subset`
+  (§CC.19) takes `T₀ ⊆ T` and `(k(X_{T₀})−1)·c(X_{T₀}) < |T|`, transports the `X_{T₀}` bounds to `X_T` by monotonicity
+  (`indistinguishingNumber_mono` / `maxValency_mono` / `refines_pointExtension_of_subset`), and concludes `X_T` complete. **So
+  A2's deliverable is: bound `c(X_{T₀}), k(X_{T₀}) = O(1)` at ONE `O(1)` base `T₀`; then any `T ⊇ T₀` with `|T| > (k(X_{T₀})−1)·c(X_{T₀})`
+  is a base of `X`.**
+- **★ A2 (the open core, the genuine `s(X)` crux = bounded WL-dimension of the residue):** prove `c(X_{T₀}), k(X_{T₀}) = O(1)`
+  at an `O(1)` base for the residue (rank 3–4, primitive, small-Aut, non-Cameron) — M2 confirmed not citable in general; char-2
+  load-bearing. **Attack plan (2026-06-14):** Phase 0 = monotonicity bridge (DONE, §CC.19). Phase 1 = probe (extend M1 to larger
+  `n`; measure the actual `C,K` at minimal base + the `(K−1)C+1` vs `n` race; isolate the hard case). Phase 2 = deep-research
+  (RUNNING): is bounded WL-dim / `c(X_T)=O(1)` CITABLE for rank-3 (SRG) / rank-4 (amorphic) primitive small schemes, and are the
+  *unbounded*-WL-dim SRGs necessarily large (→Cameron) or imprimitive (→hImprim)? Phase 3 = prove (structural, rank-3 then rank-4)
+  OR carry the citation per Phase 2. Phase 4 = assemble via §CC.19 + the seal wiring.
+- **★ A2-RESEARCH RESULTS (Phase 2, RAN 2026-06-14, deep-research, 19 primary sources, 20/25 claims verified):** **A2 is OPEN /
+  NOT CITABLE** as an absolute constant for BOTH rank-3 SRG and rank-4 amorphic — confirming M2/G2-B from the distinct SRG-WL-dim
+  literature. (1) Babai rank-3 (I/II, FOCS'13) and Kivva rank-4 (JCTB'23, arXiv:2110.13861) bound **|Aut| / minimal-degree /
+  thickness / fixity** under a Cameron dichotomy, **NOT WL-dim / b(X) / s(X) / c(X)**. (2) **The carve-out is VALIDATED:** Babai's
+  SRG structure theorem (n≥29) ⟹ either motion ≥ n/8 (the small-Aut residue) OR `X` is triangular/Johnson `T(m)` / lattice/Hamming
+  `L₂(m)` / disjoint-cliques — and those hard families all have **thickness ≥ √n = LARGE |Aut|** (→Cameron) or are imprimitive;
+  conference/Paley (the O(log n)-base primitive obstruction, Babai'80, unimproved 40 yrs) is **cyclotomic = abelian → leg B / the
+  cited affine slice**. So the known unbounded/large-WL SRGs are ALL already carved out. (3) **POSITIVE (decoupling):** the
+  Fon-Der-Flaass / Cai-Guo-Gavrilyuk-Ponomarenko family (Combinatorica 2025, arXiv:2312.00460) — `n^Ω(n^{2/3})` same-parameter
+  primitive SRGs with **trivial automorphism groups** (small-Aut, non-Cameron = the residue!) — ALL have **WL-dim ≤ 4**, via
+  `base ≤ 2 ⟹ WL-dim ≤ 4` (affine-plane geometry, BCN Thm 3.3.8). So bounded WL-dim is **decoupled from |Aut|-largeness** — the
+  residue CAN have bounded WL-dim. (4) **NO falsifier found** (no primitive small-Aut SRG with provably unbounded WL-dim located —
+  nor formally excluded). (5) Only general ceiling is **linear** 0.15n (Schneider-Schweitzer ICALP'25; 0.05n even for fiber ≤ 7).
+  **VERDICT: Phase 3 cannot be "carry a uniform citation" — it must be a STRUCTURAL proof (per-family) or a CARRIED PREDICATE
+  (endpoint §5.2/§5.3).** The closest published positive mechanism is the CGGP `base ≤ 2 ⟹ WL-dim ≤ 4` argument (family-specific).
+- **A2-WIRING LANDED (2026-06-14):** the honest conditional seal `reachesRigidOrCameron_viaBoundedExtensionParams` (`§S-gate2`) +
+  `dominatorReachable_of_card_gt_subset` (`§CC.19`) — the seal now stands **`modulo {G3 + the A2 inequality `(k(X_{T₀})−1)·c(X_{T₀})
+  < |T|` + hcatch + hImprim}`**, with A2 a checkable parameter bound (the bounded-WL-dim frontier) rather than the abstract `hclo`.
 - **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
   finding) — landed and waiting on `hclo`.
 
@@ -363,9 +389,12 @@ paid off: **§CC.18 (`dominatorReachable_of_card_gt` / `allSingletonFiber_of_car
 counting lemma, skipping §S.10–§S.16 entirely.** Key insight: the δ′ engine accepts *any* bounded base, so PV's sharp `b≤2` is
 overkill; a crude `b ≤ (k−1)c+1` falls out of `basePinsAll_of_card_gt` (`(k−1)c < |T| ⟹` every `γ∉T` pinned by two base points,
 via the indistinguishing-number union bound). Cross-fiber is automatic (no smax). §CC.15–§CC.17 (smax/fiber-size) are landed infra
-but **not on the critical path**; the §S.10–§S.16 sα port is **abandoned as unnecessary**. **Next = A2:** prove the residue meets
-the threshold — `c(X_T), k(X_T) = O(1)` after `O(1)` individualizations (M1-evidenced, M2-confirmed not citable, char-2 load-bearing)
-— then `allSingletonFiber_of_card_gt` + the seal wiring closes `hclo` and the seal `modulo {G3}`.
+but **not on the critical path**; the §S.10–§S.16 sα port is **abandoned as unnecessary**. **A2 Phase 0 (the monotonicity/padding
+bridge) LANDED §CC.19 2026-06-14** (`indistinguishingNumber_mono` / `maxValency_mono` / `refines_pointExtension_of_subset` /
+`allSingletonFiber_of_card_gt_subset`): A2's deliverable is now crisply **"bound `c(X_{T₀}), k(X_{T₀}) = O(1)` at one `O(1)` base
+`T₀`"** (then any larger base is a base of `X`). **NOW = A2 core:** Phase 2 deep-research RUNNING (cite-vs-prove for rank-3/4
+bounded WL-dim); Phase 1 probe (validate `C,K` at scale) + Phase 3 (prove/carry) follow per the research. Then §CC.19 + seal wiring
+closes `hclo` and the seal `modulo {G3}`. **The full A2 attack plan is in §4-M4 above.**
 
 **Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?

@@ -1058,6 +1058,36 @@ theorem reachesRigidOrCameron_viaExtensionDominatorClosure {IsLarge : Nat → Pr
   intro hn
   exact absurd (separatesAtBoundedBase_of_extensionDominatorClosure S hne hcard hclo hcatch) hn
 
+/-- **THE SEAL VIA BOUNDED EXTENSION PARAMETERS (the A2 content as a clean parameter predicate).** Same
+conclusion as `reachesRigidOrCameron_viaExtensionDominatorClosure`, but the open input `hclo` (the abstract
+forced-triangle closure) is replaced by the concrete **A2 inequality** `hparam`: at *some* `O(1)` base `T₀`,
+`(k(X_{T₀})−1)·c(X_{T₀}) < |T|` for the padded base `T ⊇ T₀`. This is the residue's **bounded WL-dimension**
+content (`c(X_{T₀}), k(X_{T₀}) = O(1)` at a small base) — the genuine G2-B frontier, confirmed *open / not
+citable* by the rank-3/4 SRG WL-dimension research (2026-06-14): the carve-out is validated (the unbounded-WL
+SRG families — triangular/Johnson, lattice/Hamming, conference/Paley — are all large→Cameron, imprimitive, or
+abelian→leg B), and the known small-automorphism primitive family (Fon-Der-Flaass/CGGP) has WL-dim ≤ 4, but no
+uniform theorem covers the residue. So the seal stands **conditional `modulo {G3 + bounded-extension-params +
+hcatch + hImprim}`**, with the A2 piece now a checkable parameter inequality (`§CC.18`/`§CC.19`). Axiom-clean. -/
+theorem reachesRigidOrCameron_viaBoundedExtensionParams {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    {T₀ T : Finset (Fin n)} (hsub : T₀ ⊆ T) (hcard : T.card ≤ bound)
+    (hparam : ((pointExtension (S.toAssociationScheme.toCoherentConfig hne) T₀).maxValency - 1)
+        * (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T₀).indistinguishingNumber
+        < T.card)
+    (hcatch : WarmTwinsAreFiberTwins S T
+        (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaExtensionDominatorClosure hClassify S hne hrank hcard
+    ((S.toAssociationScheme.toCoherentConfig hne).dominatorReachable_of_card_gt_subset hsub hparam)
+    hcatch hImprim
+
 end SGate2
 
 

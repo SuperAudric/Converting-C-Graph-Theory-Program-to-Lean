@@ -627,8 +627,12 @@ only intra-fiber ⟹ global `SmaxConnected` FALSE on the multi-fiber CC. (Landed
 **`dominatorReachable_of_card_gt`** (`⟹ ∀v DominatorReachable T v`) / **`allSingletonFiber_of_card_gt`** (capstone: `(k(X_T)−1)·c(X_T)
 < |T| ⟹ X_T complete`). **The abundance route — ONE counting lemma, skips §S.10–§S.16** (the δ′ engine takes any bounded base, so
 crude `b ≤ (k−1)c+1` ≫ enough; cross-fiber automatic, no smax). The §S.10–§S.16 sα port is abandoned as unnecessary.
-**OPEN (the rest) = A2 only:** prove the residue meets the threshold `(k(X_T)−1)·c(X_T) < |T|` (`c(X_T), k(X_T) = O(1)`); then
-`allSingletonFiber_of_card_gt` + seal wiring closes `hclo`.
+**A2 Phase 0 — §CC.19 (LANDED 2026-06-14, axiom-clean — the monotonicity/padding bridge):** **`indistinguishingNumber_mono`** /
+**`maxValency_mono`** (`Refines Y Z ⟹ c(Y) ≤ c(Z)`, `k(Y) ≤ k(Z)`) / **`refines_pointExtension_of_subset`** (`T₀ ⊆ T ⟹ X_T`
+refines `X_{T₀}`) / **`allSingletonFiber_of_card_gt_subset`** (padding capstone: `T₀ ⊆ T ∧ (k(X_{T₀})−1)·c(X_{T₀}) < |T| ⟹ X_T`
+complete). Reduces A2 to the crisp **"bound `c(X_{T₀}), k(X_{T₀}) = O(1)` at one `O(1)` base"**.
+**OPEN (the rest) = A2 core:** bound `c(X_{T₀}), k(X_{T₀}) = O(1)` for the residue (rank 3–4, bounded WL-dim). Attack: Phase 2
+deep-research (cite-vs-prove, RUNNING), Phase 1 probe, Phase 3 prove/carry; then §CC.19 + seal wiring closes `hclo`.
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /

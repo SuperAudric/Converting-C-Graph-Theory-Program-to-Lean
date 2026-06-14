@@ -1788,6 +1788,105 @@ theorem allSingletonFiber_of_card_gt (T : Finset (Fin n))
   X.allSingletonFiber_of_dominatorClosure_pointExtension T
     ((pointExtension X T).dominatorReachable_of_card_gt hT)
 
+/-! ### §CC.19 — Monotonicity of `c`, `k` under refinement + the padding bridge (A2 interface)
+
+The abundance threshold `(k(X_T)−1)·c(X_T) < |T|` can never be checked at a *non-discrete* `X_T` (its contrapositive
+forces `(k−1)c ≥ |T|` there). It is used via **padding**: A2 bounds `c, k` at a *small* base `T₀`, then any superset
+`T ⊇ T₀` inherits the bounds (more individualization only refines), and once `|T|` overtakes `(k(X_{T₀})−1)·c(X_{T₀})`
+the abundance lemma fires. This section supplies the monotonicity (`c, k` non-increasing under `Refines`) and the
+padding capstone `allSingletonFiber_of_card_gt_subset` — **the crisp A2 interface: bound `c(X_{T₀}), k(X_{T₀}) = O(1)`
+at one `O(1)` base, and every larger base is a base of `X`.** -/
+
+/-- **The indistinguishing number is monotone under refinement** — `Refines Y Z ⟹ c(Y) ≤ c(Z)`. A finer config
+distinguishes more pairs, so each `{γ : relOf γ α = relOf γ β}` can only shrink. Axiom-clean. -/
+theorem indistinguishingNumber_mono {Y Z : CoherentConfig n} (h : Refines Y Z) :
+    Y.indistinguishingNumber ≤ Z.indistinguishingNumber := by
+  classical
+  apply Finset.sup_le
+  intro r hr
+  rw [Finset.mem_filter] at hr
+  have hrep : Y.relOf (Y.repPair r).1 (Y.repPair r).2 = r := Y.relOf_repPair r
+  have hαβ : (Y.repPair r).1 ≠ (Y.repPair r).2 := by
+    intro he
+    rw [he] at hrep
+    exact hr.2 ⟨(Y.repPair r).2, hrep⟩
+  rw [Y.indistinguishingNumberOf_eq_card hrep]
+  have hsub : (Finset.univ.filter (fun γ => Y.relOf γ (Y.repPair r).1 = Y.relOf γ (Y.repPair r).2))
+      ⊆ (Finset.univ.filter (fun γ => Z.relOf γ (Y.repPair r).1 = Z.relOf γ (Y.repPair r).2)) := by
+    intro γ hγ
+    rw [Finset.mem_filter] at hγ ⊢
+    exact ⟨Finset.mem_univ _, h _ _ _ _ hγ.2⟩
+  calc (Finset.univ.filter
+          (fun γ => Y.relOf γ (Y.repPair r).1 = Y.relOf γ (Y.repPair r).2)).card
+      ≤ _ := Finset.card_le_card hsub
+    _ = Z.indistinguishingNumberOf (Z.relOf (Y.repPair r).1 (Y.repPair r).2) :=
+        (Z.indistinguishingNumberOf_eq_card rfl).symm
+    _ ≤ Z.indistinguishingNumber :=
+        Z.indistinguishingNumberOf_le (Z.not_isReflexive_relOf_of_ne hαβ)
+
+/-- **The max valency is monotone under refinement** — `Refines Y Z ⟹ k(Y) ≤ k(Z)`. A finer class has a smaller
+out-neighbour set, so each valency can only shrink. Axiom-clean. -/
+theorem maxValency_mono {Y Z : CoherentConfig n} (h : Refines Y Z) :
+    Y.maxValency ≤ Z.maxValency := by
+  classical
+  apply Finset.sup_le
+  intro r hr
+  rw [Finset.mem_filter] at hr
+  have hrep : Y.relOf (Y.repPair r).1 (Y.repPair r).2 = r := Y.relOf_repPair r
+  have hαβ : (Y.repPair r).1 ≠ (Y.repPair r).2 := by
+    intro he
+    rw [he] at hrep
+    exact hr.2 ⟨(Y.repPair r).2, hrep⟩
+  rw [Y.valency_eq_card hrep]
+  have hsub : (Finset.univ.filter (fun w => Y.relOf (Y.repPair r).1 w = r))
+      ⊆ (Finset.univ.filter
+          (fun w => Z.relOf (Y.repPair r).1 w = Z.relOf (Y.repPair r).1 (Y.repPair r).2)) := by
+    intro w hw
+    rw [Finset.mem_filter] at hw ⊢
+    exact ⟨Finset.mem_univ _, h _ _ _ _ (by rw [hw.2, hrep])⟩
+  calc (Finset.univ.filter (fun w => Y.relOf (Y.repPair r).1 w = r)).card
+      ≤ _ := Finset.card_le_card hsub
+    _ = Z.valency (Z.relOf (Y.repPair r).1 (Y.repPair r).2) := (Z.valency_eq_card rfl).symm
+    _ ≤ Z.maxValency := Z.valency_le_maxValency (Z.not_isReflexive_relOf_of_ne hαβ)
+
+/-- **Extending the base refines the point extension** — `T₀ ⊆ T ⟹ pointExtension X T` refines
+`pointExtension X T₀`. Immediate from the universal property: `X_T` is a coherent fission of `X` with all
+`T₀`-points singleton fibers (since `T₀ ⊆ T`), so the coarsest-such `X_{T₀}` is refined by it. Axiom-clean. -/
+theorem refines_pointExtension_of_subset {T₀ T : Finset (Fin n)} (hsub : T₀ ⊆ T) :
+    Refines (pointExtension X T) (pointExtension X T₀) :=
+  (isPointExtension_pointExtension X T₀).2.2 (pointExtension X T)
+    (isPointExtension_pointExtension X T).1
+    (fun t ht => (isPointExtension_pointExtension X T).2.1 t (hsub ht))
+
+/-- **The padding capstone — A1+A2 interface.** If `T₀ ⊆ T` and `|T|` exceeds the *small base's* threshold
+`(k(X_{T₀})−1)·c(X_{T₀})`, then `pointExtension X T` is complete (`T` a base of `X`). The bounds on `X_{T₀}`
+transport to `X_T` by monotonicity (`refines_pointExtension_of_subset` + `*_mono`), so the abundance lemma
+`allSingletonFiber_of_card_gt` fires on `X_T`. **This is exactly the A2 deliverable: bound `c(X_{T₀}), k(X_{T₀}) =
+O(1)` at one `O(1)` base `T₀`; then any `T ⊇ T₀` with `|T| > (k(X_{T₀})−1)·c(X_{T₀})` is a base of `X` — citation-
+free, no smax/sα, no `SparseSeparable`.** Axiom-clean. -/
+theorem allSingletonFiber_of_card_gt_subset {T₀ T : Finset (Fin n)} (hsub : T₀ ⊆ T)
+    (hT : ((pointExtension X T₀).maxValency - 1) * (pointExtension X T₀).indistinguishingNumber
+        < T.card) :
+    ∀ v : Fin n, (pointExtension X T).SingletonFiber v := by
+  have href := X.refines_pointExtension_of_subset hsub
+  have hk := maxValency_mono href
+  have hc := indistinguishingNumber_mono href
+  refine X.allSingletonFiber_of_card_gt T (lt_of_le_of_lt ?_ hT)
+  exact Nat.mul_le_mul (Nat.sub_le_sub_right hk 1) hc
+
+/-- **The padded `DominatorReachable` closure — feeds the seal's `hclo` directly.** Same hypothesis as
+`allSingletonFiber_of_card_gt_subset` but lands on the forced-triangle closure `∀ v, DominatorReachable T v`
+(what `reachesRigidOrCameron_viaExtensionDominatorClosure` consumes), via the monotone transport of the
+`X_{T₀}` bounds + `dominatorReachable_of_card_gt`. Axiom-clean. -/
+theorem dominatorReachable_of_card_gt_subset {T₀ T : Finset (Fin n)} (hsub : T₀ ⊆ T)
+    (hT : ((pointExtension X T₀).maxValency - 1) * (pointExtension X T₀).indistinguishingNumber
+        < T.card) :
+    ∀ v : Fin n, (pointExtension X T).DominatorReachable T v := by
+  have href := X.refines_pointExtension_of_subset hsub
+  exact (pointExtension X T).dominatorReachable_of_card_gt
+    (lt_of_le_of_lt (Nat.mul_le_mul (Nat.sub_le_sub_right (maxValency_mono href) 1)
+      (indistinguishingNumber_mono href)) hT)
+
 end CoherentConfig
 
 end ChainDescent

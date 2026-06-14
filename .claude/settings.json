@@ -92,7 +92,13 @@
       "WebFetch(domain:www.ma.imperial.ac.uk)",
       "WebFetch(domain:cameroncounts.github.io)",
       "WebFetch(domain:seis.bristol.ac.uk)",
-      "WebFetch(domain:math.uchicago.edu)"
+      "Bash(*)",
+      "WebFetch(domain:math.uchicago.edu)",
+      "WebFetch(domain:ajc.maths.uq.edu.au)",
+      "WebFetch(domain:dl.acm.org)",
+      "WebFetch(domain:emis.dsd.sztaki.hu)",
+      "WebFetch(domain:www.cs.yale.edu)",
+      "WebFetch(domain:lucatrevisan.wordpress.com)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",
