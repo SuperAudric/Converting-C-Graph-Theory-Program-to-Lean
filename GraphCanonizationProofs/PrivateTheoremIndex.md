@@ -316,9 +316,14 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `AssociationScheme.nat_kk_sub_self` | 247-250 | — | — |
+| `AssociationScheme.nat_kk_sub_self` | 247-250 | §S.6 arithmetic helper: `k*k - k = k*(k-1)` (Nat), for the (19)-estimate assembly. | — |
 ## ChainDescent/ClebschConcrete.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `domReach_of_rank_pin` | 92-115 | §S-stage3-δ (ClebschConcrete) A rank engine keyed on the **`interNum = 1`** premise (a Nat equality — `decide`-friendly, unlike the nested-implication `relOfPair`-uniqueness form), with an explicit pinner function. Strong induction on rank; the local engine the concrete ℤ₄² closure (`clebschZ4_closure`) uses. | — |
+## ChainDescent/CoherentConfig.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `CoherentConfig.nat_kk_sub_self` | 1262-1265 | §CC.12 arithmetic helper: `k*k - k = k*(k-1)` (Nat), for the CC (19)-estimate assembly (CC copy of the homogeneous `Separability` helper). | — |

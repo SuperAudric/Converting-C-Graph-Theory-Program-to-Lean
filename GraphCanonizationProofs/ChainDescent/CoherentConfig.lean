@@ -1190,6 +1190,126 @@ extension `X_T` (M1: `c(X_T), k(X_T) = O(1)` ⟹ this holds for large `n`), the 
 content discretizes `X_T` in `≤ 2` further points — the citation-free `c(X_T)` route (scoping §4-M3 Option A). -/
 def SparseSeparable : Prop := 2 * X.indistinguishingNumber * (X.maxValency - 1) < n
 
+/-! ### §CC.12 — The global estimate (19): `Σ_{δ∈Δ} pᵤ(δ) ≤ k(k−1)·c` (A1, the connectivity workhorse)
+
+The CC port of `Separability.lean §S.6` (`sum_pu_le`), the counting workhorse the §S.16 connectivity
+argument consumes. The proof is the same double-count swap + per-pair `c(r) ≤ c(X)` bound, but the
+non-symmetric CC needs two pieces of transpose bookkeeping the homogeneous version got for free:
+(a) the neighbour count is bounded by `k(X)` only for *non-reflexive* `u` (`card_relNeighbors_le_maxValency`,
+in place of homogeneity's exact `= k` — on a multi-fiber CC `α` need not lie in `u`'s source fiber, in
+which case the set is empty); and (b) the inner indistinguishing bound goes through the **transpose
+bridge** `relOf_right_eq_iff_left` (the CC substitute for `relOfPair_symm`) so the pair-count
+`#{δ : relOf β δ = relOf γ δ}` meets `indistinguishingNumberOf_eq_card`'s left-argument form. -/
+
+/-- The transpose bridge: `δ` relates the same way to `a` and `b` on the *right* iff on the *left*.
+The non-symmetric CC's substitute for `AssociationScheme.relOfPair_symm` in the (19) estimate. -/
+theorem relOf_right_eq_iff_left (a b δ : Fin n) :
+    X.relOf a δ = X.relOf b δ ↔ X.relOf δ a = X.relOf δ b := by
+  constructor
+  · intro h
+    rw [X.relOf_swap_eq (rfl : X.relOf a δ = X.relOf a δ),
+        X.relOf_swap_eq (rfl : X.relOf b δ = X.relOf b δ), h]
+  · intro h
+    rw [X.relOf_swap_eq (rfl : X.relOf δ a = X.relOf δ a),
+        X.relOf_swap_eq (rfl : X.relOf δ b = X.relOf δ b), h]
+
+/-- A non-diagonal pair lies in a non-reflexive class: `a ≠ b → ¬ IsReflexive (relOf a b)` (a
+reflexive class is purely diagonal, `diag_eq`). -/
+theorem not_isReflexive_relOf_of_ne {a b : Fin n} (hab : a ≠ b) :
+    ¬ X.IsReflexive (X.relOf a b) := by
+  rintro ⟨u, hu⟩
+  exact hab (X.diag_eq hu)
+
+/-- The `u`-out-neighbour set of `α` has at most `k(X)` elements when `u` is non-reflexive — the CC
+replacement for homogeneity's exact `card = k`. (When `α` does not lie in `u`'s source fiber the set
+is empty; otherwise it has size `valency u ≤ maxValency`.) -/
+theorem card_relNeighbors_le_maxValency (α : Fin n) {u : Fin X.rank}
+    (hu : ¬ X.IsReflexive u) :
+    (Finset.univ.filter (fun w => X.relOf α w = u)).card ≤ X.maxValency := by
+  classical
+  by_cases h : ∃ v, X.relOf α v = u
+  · obtain ⟨v, hv⟩ := h
+    rw [← X.valency_eq_card hv]
+    exact X.valency_le_maxValency hu
+  · have he : (Finset.univ.filter (fun w => X.relOf α w = u)) = ∅ := by
+      rw [Finset.filter_eq_empty_iff]
+      intro w _ hw
+      exact h ⟨w, hw⟩
+    rw [he, Finset.card_empty]
+    exact Nat.zero_le _
+
+/-- **The pair-count `pᵤ(δ)`** (CC form) — the number of ordered distinct pairs `(β, γ)` of
+`u`-out-neighbours of `α` that `δ` fails to distinguish (`relOf β δ = relOf γ δ`). The §3 counting
+workhorse, on a general CC. -/
+noncomputable def pu (α : Fin n) (u : Fin X.rank) (δ : Fin n) : Nat :=
+  (Finset.univ.filter (fun bg : Fin n × Fin n =>
+      X.relOf α bg.1 = u ∧ X.relOf α bg.2 = u ∧ bg.1 ≠ bg.2 ∧
+      X.relOf bg.1 δ = X.relOf bg.2 δ)).card
+
+/-- Reformulation of `pᵤ(δ)` over the off-diagonal of the `u`-neighbour set `αu`. -/
+theorem pu_eq (α : Fin n) (u : Fin X.rank) (δ : Fin n) :
+    X.pu α u δ
+      = ((Finset.univ.filter (fun w => X.relOf α w = u)).offDiag.filter
+          (fun bg => X.relOf bg.1 δ = X.relOf bg.2 δ)).card := by
+  unfold pu
+  congr 1
+  ext bg
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_offDiag]
+  constructor
+  · rintro ⟨h1, h2, h3, h4⟩; exact ⟨⟨h1, h2, h3⟩, h4⟩
+  · rintro ⟨⟨h1, h2, h3⟩, h4⟩; exact ⟨h1, h2, h3, h4⟩
+
+private theorem nat_kk_sub_self (k : ℕ) : k * k - k = k * (k - 1) := by
+  cases k with
+  | zero => rfl
+  | succ m => simp only [Nat.succ_sub_one, Nat.mul_succ, Nat.add_sub_cancel]
+
+/-- **The global estimate (19), CC form** — `Σ_{δ∈Δ} pᵤ(δ) ≤ k(k−1)·c` for a non-reflexive class `u`
+and any vertex set `Δ`. The double-count swap (`Finset.sum_comm`) bounds each `(β,γ)`-fiber by
+`c(relOf β γ) ≤ c(X)` (through the transpose bridge `relOf_right_eq_iff_left` into
+`indistinguishingNumberOf_eq_card`) and counts the `≤ k(k−1)` off-diagonal neighbour pairs. The
+workhorse of the §S.16 connectivity port. Axiom-clean. -/
+theorem sum_pu_le (α : Fin n) {u : Fin X.rank} (hu : ¬ X.IsReflexive u) (Δ : Finset (Fin n)) :
+    (Δ.sum (fun δ => X.pu α u δ))
+      ≤ X.maxValency * (X.maxValency - 1) * X.indistinguishingNumber := by
+  classical
+  set A := Finset.univ.filter (fun w => X.relOf α w = u) with hA
+  have hAcard : A.card ≤ X.maxValency := X.card_relNeighbors_le_maxValency α hu
+  -- Swap summation: `Σ_δ pᵤ(δ) = Σ_{(β,γ)∈A.offDiag} |{δ∈Δ : δ fails to split β,γ}|`.
+  have hstep : (Δ.sum (fun δ => X.pu α u δ))
+      = A.offDiag.sum (fun bg => (Δ.filter
+          (fun δ => X.relOf bg.1 δ = X.relOf bg.2 δ)).card) := by
+    simp_rw [X.pu_eq α u, Finset.card_filter]
+    rw [Finset.sum_comm]
+  -- Each inner term is bounded by `c(X)`, through the transpose bridge.
+  have hbound : ∀ bg ∈ A.offDiag,
+      (Δ.filter (fun δ => X.relOf bg.1 δ = X.relOf bg.2 δ)).card
+        ≤ X.indistinguishingNumber := by
+    intro bg hbg
+    rw [Finset.mem_offDiag] at hbg
+    obtain ⟨_, _, hne⟩ := hbg
+    calc (Δ.filter (fun δ => X.relOf bg.1 δ = X.relOf bg.2 δ)).card
+        ≤ (Finset.univ.filter (fun δ => X.relOf bg.1 δ = X.relOf bg.2 δ)).card :=
+          Finset.card_le_card (Finset.filter_subset_filter _ (Finset.subset_univ Δ))
+      _ = (Finset.univ.filter (fun δ => X.relOf δ bg.1 = X.relOf δ bg.2)).card := by
+          congr 1; ext δ
+          simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+          exact X.relOf_right_eq_iff_left bg.1 bg.2 δ
+      _ = X.indistinguishingNumberOf (X.relOf bg.1 bg.2) :=
+          (X.indistinguishingNumberOf_eq_card rfl).symm
+      _ ≤ X.indistinguishingNumber :=
+          X.indistinguishingNumberOf_le (X.not_isReflexive_relOf_of_ne hne)
+  -- Assemble: `Σ ≤ |A.offDiag|·c = (k²−k)·c = k(k−1)·c`.
+  rw [hstep]
+  calc A.offDiag.sum (fun bg => (Δ.filter
+          (fun δ => X.relOf bg.1 δ = X.relOf bg.2 δ)).card)
+      ≤ A.offDiag.sum (fun _ => X.indistinguishingNumber) := Finset.sum_le_sum hbound
+    _ = A.offDiag.card * X.indistinguishingNumber := by rw [Finset.sum_const, smul_eq_mul]
+    _ = (A.card * A.card - A.card) * X.indistinguishingNumber := by rw [Finset.offDiag_card]
+    _ = A.card * (A.card - 1) * X.indistinguishingNumber := by rw [nat_kk_sub_self]
+    _ ≤ X.maxValency * (X.maxValency - 1) * X.indistinguishingNumber :=
+        Nat.mul_le_mul (Nat.mul_le_mul hAcard (Nat.sub_le_sub_right hAcard 1)) (Nat.le_refl _)
+
 end CoherentConfig
 
 end ChainDescent
