@@ -130,12 +130,45 @@ Extend `Theorem41ConditionsProbe.cs` (it already builds `X_T` via `CoherentClosu
 - **De-risk bonus:** any scheme with `c(X_T)` growing with `n` is a *candidate seal-falsifier* (a G2-B witness with
   unbounded base) — flag loudly; that would be a statement change (§5 risk a).
 
-### M2 — literature check (citable bounds) `[parallel to M1; deep-research-able]`
-Search the CC/separability literature for any citable `c(X)` / `s(X)` / domination bound for primitive small CCs:
-Evdokimov–Ponomarenko (*Separability number and Schurity number*, EJC 2000 — ref [4]); the Chen–Ponomarenko monograph
-(*Coherent Configurations*, ref [3]); Ponomarenko's later separability papers. Goal: know precisely **what is citable vs
-must be proved** before investing in a from-scratch proof. (A `/deep-research` run on "separability number / base number
-bounds for primitive coherent configurations" is the efficient form.)
+### M2 — the research pass: EXACTLY what to find (the cite-vs-prove boundary for Option A)
+
+> **Purpose.** M3 reduced the citation-free path to three pieces — A1 (port the sparse theorem to the CC), A2
+> (`ParamBoundOnExtension`: `c,k = O(1)` on the `O(1)`-extension), A3 (`hcatch`). A1 reuses landed machinery and A3 is
+> project-internal; **A2 is the research core.** M2 decides how much of A1/A2 can be *cited* rather than *proved*. Each
+> question below is binary-actionable: a YES changes a "prove" into a "cite (hypothesis, G3-pattern)".
+
+**Q1 — Is the sparse/Cartan theorem stated at COHERENT-CONFIGURATION generality? (governs A1)**
+The project formalized Cartan **Thm 3.1** (`2c(k−1)<n ⟹ b(X)≤2 ∧ 2-separable`) only for homogeneous `AssociationScheme`.
+*Find:* does Ponomarenko–Vasil'ev *Cartan coherent configurations* (arXiv:1602.07132) — or Chen–Ponomarenko's monograph —
+state Thm 3.1 (or its `1`-regularity / base-≤2 consequence) for a **general CC / a CC after individualizing points**? If
+yes, A1 is a *citation* (carry the statement, G3-pattern) instead of a port. If no (homogeneous only), A1 is the port
+(feasible — reuses `saAdj`/`transport`/`saComp` + the §CC.10 δ′ rank engine).
+
+**Q2 — Is there a citable bound on the INDISTINGUISHING NUMBER `c(X_µ)` of the extension of a primitive small CC? (governs A2, the `c`-half)**
+*Find:* Evdokimov–Ponomarenko *Separability number and Schurity number of coherent configurations* (EJC 2000, ref [4]) and
+Ponomarenko's later separability papers — any theorem of the form *"a primitive (small / non-Cameron) CC has `c(X) = O(1)`
+after `O(1)` individualizations"*, or any `s(X)`/`t(X)` bound that implies it. This is the genuine open core; a citable
+form would collapse A2 to a citation. **Most likely NOT citable in full** (it is essentially the open content, §2) — but a
+*structured* version (e.g. for rank-3, or for cyclotomic/affine which is already the cited slice) may exist and would cover
+sub-families.
+
+**Q3 — Is there a citable bound on the MAX VALENCY `k(X_µ)` / point-stabiliser orbit sizes of a primitive small group after `O(1)` points? (governs A2, the `k`-half)**
+M1 shows `k(X₂)=O(1)`; `k(X_T) ≤ |Aut_T|` is orbit–stabiliser (free). *Find:* base-size / minimal-degree / distinguishing-
+number results for primitive groups — Babai (*order of uniprimitive groups*), Cameron–Liebeck–Saxl, Liebeck–Shalev
+(base size ≤ 7 for non-standard almost simple), Burness et al. (explicit small bases) — giving *"a primitive small group's
+largest point-stabiliser orbit drops to `O(1)` after `O(1)` individualizations"* (i.e. the **distinguishing/base profile**,
+not just `b(G)`). NB `b(G) ≤ b(X)` does **not** suffice (§2); we need the *valency* (orbit-size) decay, a finer statement.
+
+**Q4 — the calibration cross-check (governs poly vs sub-exp, scoping §0).**
+Confirm which `IsLarge` threshold the seal's `PrimitiveCCClassification` (G3) instantiates — poly (`|Aut| ≤ n^{O(1)}`) vs
+sub-exponential (Babai/Sun–Wilmes `exp(n^{1/3})`). Poly ⟹ `O(log n)` base ⟹ polynomial canonisation (the reminder: that
+IS poly); sub-exp ⟹ pin it before claiming *polynomial*. Source: Sun–Wilmes / Babai's quasipoly-GI line + the project's
+`IsLargeSchemeViaAut` definition.
+
+**Form.** A single `/deep-research` run keyed on Q1–Q3 ("coherent-configuration base number / separability number bounds;
+Cartan coherent configurations; primitive small CC indistinguishing number; primitive group base-size / valency decay").
+**Outcome that matters:** for each of Q1/Q2/Q3, *cite (carry as hypothesis)* or *prove* — and a YES on Q1 alone already
+makes A1 free, leaving only A2 (the genuine core) and A3.
 
 ### M3 — the lemma statements (DRAFTED 2026-06-13) — and a CITATION-FREE candidate
 
@@ -218,9 +251,13 @@ or A3 turns out harder than the citation.
 the 2-point extension uniformly, and M3 drafted a **citation-free candidate (Option A)** — port the landed sparse theorem
 to the CC + the shared open core `ParamBoundOnExtension`, no Thm 4.1.
 **Immediate next action — pick one:**
-- **(A1) start the citation-free core in Lean:** port `separatesAtBoundedBase_of_sparseSeparable` to the CC `E` / the
-  warmRefine-refined structure (reuses the §CC.10 δ′ rank engine — A1 = "sparse ⟹ a pinning rank exists"). Highest-value,
-  citation-free, mostly reuses landed machinery; makes the path concrete before the hard `A2`.
+- **(A1) STARTED in Lean (`CoherentConfig.lean §CC.11`, axiom-clean, build green 94s):** the first increment ports the
+  **indistinguishing number `c(X)`** to the general CC + its geometric counting form (`indistinguishingNumberOf` /
+  **`indistinguishingNumberOf_eq_card`**: `c(r) = |{γ : relOf γ α = relOf γ β}|` — the shape §S.16's connectivity argument
+  consumes) / `IsReflexive` / `indistinguishingNumber` / `indistinguishingNumberOf_le`, with the non-symmetric transpose
+  bookkeeping (`b* = transposeRel b`). **NEXT A1 increments:** the CC max-valency `k(X)` + the `SparseSeparable` predicate
+  (`2c(k−1)<n`); then the §S.6 (19)-estimate `Σ_δ pᵤ(δ) ≤ k(k−1)c` and the §S.16 connectivity
+  (`saConnected`-analogue) ⟹ *"sparse ⟹ a pinning rank exists"* feeding the §CC.10 `dominatorReachable_of_rank`.
 - **(M2) targeted literature/`deep-research`:** is `ParamBoundOnExtension` (a `c`/`k` bound for primitive small CC
   extensions) or the CC sparse theorem citable? — fixes how much of A1/A2 must be proved vs cited.
 - **(A2) the research core:** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue family —

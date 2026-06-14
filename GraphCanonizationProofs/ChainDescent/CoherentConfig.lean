@@ -1094,6 +1094,63 @@ theorem allSingletonFiber_of_dominatorClosure_pointExtension (T : Finset (Fin n)
   (pointExtension X T).allSingletonFiber_of_dominatorClosure (sharp_pointExtension X T)
     (isPointExtension_pointExtension X T).2.1 hclo
 
+/-! ### §CC.11 — The sparse separability substrate on the general CC (A1, the citation-free `c(X_T)` route)
+
+The CC-level port of `Separability.lean §S.1–S.16` (the PV-Thm-3.1 sparse machinery), begun so that the landed
+sparse theorem `2c(k−1) < n ⟹ b(X) ≤ 2` can be applied to the **point extension `X_T`** — where M1
+(`Probe_CXT_ScopingM1`) showed `c(X_T)` and `k(X_T)` both collapse to `O(1)`, so the sparse hypothesis holds.
+This makes the seal closable **citation-free** (no Thm 4.1) — see `docs/chain-descent-cxt-scoping.md` §4-M3 (Option A).
+
+This first increment ports the **indistinguishing number `c(X)`** and its geometric counting form (the shape the
+§S.16 connectivity argument consumes), with the transpose bookkeeping the non-symmetric CC needs (the homogeneous
+`AssociationScheme` had `s* = s`; here `s* = transposeRel s`). -/
+
+/-- **Indistinguishing number of the class `r`** — `c(r) = Σ_b c^r_{b*,b}` (the CC form of
+`Separability.indistinguishingNumberOf`; `b* = transposeRel b`, recovering `Σ_b c^r_{b,b}` when symmetric). -/
+noncomputable def indistinguishingNumberOf (r : Fin X.rank) : Nat :=
+  Finset.univ.sum (fun b : Fin X.rank => X.interNum (X.transposeRel b) b r)
+
+/-- **The geometric meaning of `c(r)` (PV (7), CC form).** For a pair `(α, β) ∈ r`, `c(r)` counts the vertices
+`γ` that relate to `α` and to `β` by the *same* class (`relOf γ α = relOf γ β`) — the `γ` that cannot tell `α`
+from `β`. Proof: partition that set by the common value `b = relOf γ α`; each fiber is the forced-triangle count
+`c^r_{b*,b}` (the path `α →_{b*} γ →_b β`, via `relOf_swap_eq`), summing to `indistinguishingNumberOf r`. -/
+theorem indistinguishingNumberOf_eq_card {r : Fin X.rank} {α β : Fin n}
+    (hr : X.relOf α β = r) :
+    X.indistinguishingNumberOf r
+      = (Finset.univ.filter (fun γ => X.relOf γ α = X.relOf γ β)).card := by
+  classical
+  rw [indistinguishingNumberOf,
+    Finset.card_eq_sum_card_fiberwise (f := fun γ => X.relOf γ α) (t := Finset.univ)
+      (fun γ _ => Finset.mem_univ _)]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [← X.interNum_eq hr (X.transposeRel b) b]
+  congr 1
+  ext γ
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨h1, h2⟩
+    have hγα : X.relOf γ α = b := by
+      have h := X.relOf_swap_eq h1
+      rwa [transposeRel_transposeRel] at h
+    exact ⟨hγα.trans h2.symm, hγα⟩
+  · rintro ⟨heq, hb⟩
+    exact ⟨X.relOf_swap_eq hb, heq.symm.trans hb⟩
+
+/-- A class is **reflexive** (diagonal) if some loop lies in it. The indistinguishing number maxes over the
+*non*-reflexive classes (a diagonal class has every off-pair distinguishing it). -/
+def IsReflexive (r : Fin X.rank) : Prop := ∃ u : Fin n, X.relOf u u = r
+
+open scoped Classical
+
+/-- **The indistinguishing number `c(X)`** — `max_{r non-reflexive} c(r)`. -/
+noncomputable def indistinguishingNumber : Nat :=
+  (Finset.univ.filter (fun r : Fin X.rank => ¬ X.IsReflexive r)).sup X.indistinguishingNumberOf
+
+/-- `c(r) ≤ c(X)` for every non-reflexive class `r`. -/
+theorem indistinguishingNumberOf_le {r : Fin X.rank} (hr : ¬ X.IsReflexive r) :
+    X.indistinguishingNumberOf r ≤ X.indistinguishingNumber :=
+  Finset.le_sup (Finset.mem_filter.2 ⟨Finset.mem_univ r, hr⟩)
+
 end CoherentConfig
 
 end ChainDescent
