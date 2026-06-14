@@ -1652,6 +1652,142 @@ theorem smaxAdj_symm_of_sameFiber {a b : Fin n} (hf : X.relOf a a = X.relOf b b)
   show X.valency (X.relOf b a) = X.maxValency
   rw [hba, ← hval, hr]
 
+/-! ### §CC.18 — The abundance route: `(k−1)·c < |T| ⟹ T pins everything in one round` (A1, the direct discharge)
+
+**The scouting payoff (2026-06-14).** The δ′ engine `dominatorReachable_of_rank` accepts *any* bounded base, so we
+do **not** need PV Thm 3.1's sharp `b(X) ≤ 2` — a crude `b(X) ≤ (k−1)·c + 1` suffices, and it has a one-round
+`basePinsAll` proof that skips the entire §S.10–§S.16 connectivity apparatus (smax/sα/components). The argument is
+pure counting: for `γ ∉ T` and any `α ∈ T`, a base point `β` *fails* to pin `γ` (against `α`) only if `β` confuses
+`γ` with one of the `≤ k−1` other `α`-out-neighbours in `γ`'s class — and each confusion set has size `≤ c` (it is
+an indistinguishing-number count, `indistinguishingNumberOf_eq_card` + the transpose bridge). So at most `(k−1)·c`
+base points fail; if `|T| > (k−1)·c` some `β ∈ T` pins `γ`. Cross-fiber is automatic (no smax needed): `α, β` range
+over all of `T`, the forced triangle is `interNum`-level. **This is A1, citation-free, in `c`/`k` vocabulary (so it
+composes directly with A2's `c(X_T), k(X_T) = O(1)`).** The only remaining A1→`hclo` step is A2 exhibiting a base
+with `|T| > (k(X_T)−1)·c(X_T)` (an `O(1)` threshold). -/
+
+/-- **One-round closure from base pinning (CC form).** If every non-base `γ` is forced-triangle-pinned (profile
+uniqueness) by two base points `α, β ∈ T`, the dominator closure of `T` exhausts `Ω` in one round. The `rank∈{0,1}`
+instance of `dominatorReachable_of_rank`; the CC mirror of `CascadeAffine.dominatorReachable_of_basePinsAll`. -/
+theorem dominatorReachable_of_basePinsAll {T : Finset (Fin n)}
+    (hpin : ∀ γ : Fin n, γ ∉ T → ∃ α ∈ T, ∃ β ∈ T,
+        ∀ u : Fin n, X.relOf α u = X.relOf α γ → X.relOf u β = X.relOf γ β → u = γ) :
+    ∀ v : Fin n, X.DominatorReachable T v := by
+  classical
+  refine X.dominatorReachable_of_rank (fun v => if v ∈ T then 0 else 1) (fun v hv => ?_)
+    (fun γ hγ => ?_)
+  · by_contra hvT
+    have hv' : (if v ∈ T then (0:ℕ) else 1) = 0 := hv
+    rw [if_neg hvT] at hv'
+    exact one_ne_zero hv'
+  · have hγT : γ ∉ T := by
+      intro h
+      have hγ' : 0 < (if γ ∈ T then (0:ℕ) else 1) := hγ
+      rw [if_pos h] at hγ'
+      exact lt_irrefl 0 hγ'
+    obtain ⟨α, hαT, β, hβT, hu⟩ := hpin γ hγT
+    refine ⟨α, β, ?_, ?_, hu⟩
+    · show (if α ∈ T then (0:ℕ) else 1) < (if γ ∈ T then (0:ℕ) else 1)
+      rw [if_pos hαT, if_neg hγT]; exact one_pos
+    · show (if β ∈ T then (0:ℕ) else 1) < (if γ ∈ T then (0:ℕ) else 1)
+      rw [if_pos hβT, if_neg hγT]; exact one_pos
+
+/-- **The abundance estimate: `(k−1)·c < |T|` ⟹ `T` pins every non-base point in one round.** For `γ ∉ T`, fix any
+`α ∈ T`; the "bad" base points (those confusing `γ` with another `α`-out-neighbour in `γ`'s class) number
+`≤ (k−1)·c` (union bound over the `≤ k−1` other neighbours, each confusion set an indistinguishing-number count
+`≤ c`). With `|T| > (k−1)·c` a good `β ∈ T` survives and pins `γ` by profile uniqueness. Axiom-clean. -/
+theorem basePinsAll_of_card_gt {T : Finset (Fin n)}
+    (hT : (X.maxValency - 1) * X.indistinguishingNumber < T.card) :
+    ∀ γ : Fin n, γ ∉ T → ∃ α ∈ T, ∃ β ∈ T,
+      ∀ u : Fin n, X.relOf α u = X.relOf α γ → X.relOf u β = X.relOf γ β → u = γ := by
+  classical
+  intro γ hγ
+  obtain ⟨α, hα⟩ : T.Nonempty := Finset.card_pos.1 (by omega)
+  have hαγ : α ≠ γ := fun h => hγ (h ▸ hα)
+  refine ⟨α, hα, ?_⟩
+  -- the base points that FAIL to separate γ (against α)
+  set Bad : Finset (Fin n) :=
+    T.filter (fun β => ∃ u', u' ≠ γ ∧ X.relOf α u' = X.relOf α γ ∧ X.relOf u' β = X.relOf γ β)
+    with hBad
+  -- |Bad| ≤ (k−1)·c
+  have hBadle : Bad.card ≤ (X.maxValency - 1) * X.indistinguishingNumber := by
+    set Vf : Finset (Fin n) := Finset.univ.filter (fun u' => X.relOf α u' = X.relOf α γ) with hVf
+    have hsub : Bad ⊆ (Vf.erase γ).biUnion
+        (fun u' => Finset.univ.filter (fun β => X.relOf u' β = X.relOf γ β)) := by
+      intro β hβ
+      rw [hBad, Finset.mem_filter] at hβ
+      obtain ⟨_, u', hu'ne, hu'v, hu'β⟩ := hβ
+      rw [Finset.mem_biUnion]
+      refine ⟨u', ?_, ?_⟩
+      · rw [Finset.mem_erase]
+        exact ⟨hu'ne, by rw [hVf, Finset.mem_filter]; exact ⟨Finset.mem_univ _, hu'v⟩⟩
+      · rw [Finset.mem_filter]; exact ⟨Finset.mem_univ _, hu'β⟩
+    calc Bad.card
+        ≤ ((Vf.erase γ).biUnion
+            (fun u' => Finset.univ.filter (fun β => X.relOf u' β = X.relOf γ β))).card :=
+          Finset.card_le_card hsub
+      _ ≤ ∑ u' ∈ Vf.erase γ,
+            (Finset.univ.filter (fun β => X.relOf u' β = X.relOf γ β)).card :=
+          Finset.card_biUnion_le
+      _ ≤ ∑ _u' ∈ Vf.erase γ, X.indistinguishingNumber := by
+          apply Finset.sum_le_sum
+          intro u' hu'
+          rw [Finset.mem_erase] at hu'
+          have hcard : (Finset.univ.filter (fun β => X.relOf u' β = X.relOf γ β)).card
+              = X.indistinguishingNumberOf (X.relOf u' γ) := by
+            rw [X.indistinguishingNumberOf_eq_card (rfl : X.relOf u' γ = X.relOf u' γ)]
+            congr 1
+            ext β
+            simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+            exact X.relOf_right_eq_iff_left u' γ β
+          rw [hcard]
+          exact X.indistinguishingNumberOf_le (X.not_isReflexive_relOf_of_ne hu'.1)
+      _ = (Vf.erase γ).card * X.indistinguishingNumber := by
+          rw [Finset.sum_const, smul_eq_mul]
+      _ ≤ (X.maxValency - 1) * X.indistinguishingNumber := by
+          refine Nat.mul_le_mul ?_ (le_refl _)
+          have hγVf : γ ∈ Vf := by
+            rw [hVf, Finset.mem_filter]; exact ⟨Finset.mem_univ _, rfl⟩
+          have hVfcard : Vf.card = X.valency (X.relOf α γ) := by
+            rw [hVf, X.valency_eq_card (rfl : X.relOf α γ = X.relOf α γ)]
+          have hkv : X.valency (X.relOf α γ) ≤ X.maxValency :=
+            X.valency_le_maxValency (X.not_isReflexive_relOf_of_ne hαγ)
+          rw [Finset.card_erase_of_mem hγVf, hVfcard]
+          omega
+  -- a good β survives in T
+  obtain ⟨β, hβ⟩ : (T \ Bad).Nonempty := by
+    rw [Finset.sdiff_nonempty]
+    intro hsub
+    have hle := Finset.card_le_card hsub
+    omega
+  rw [Finset.mem_sdiff] at hβ
+  refine ⟨β, hβ.1, ?_⟩
+  intro u h1 h2
+  by_contra hune
+  exact hβ.2 (by rw [hBad, Finset.mem_filter]; exact ⟨hβ.1, u, hune, h1, h2⟩)
+
+/-- **A1, the abundance discharge: a base with `(k−1)·c < |T|` is a δ′ base.** Composes `basePinsAll_of_card_gt`
+with `dominatorReachable_of_basePinsAll`: if `|T| > (k(X)−1)·c(X)`, every point is forced-triangle dominator-
+reachable from `T`. The citation-free "sparse ⟹ pinning rank" for the multi-fiber CC, skipping §S.10–§S.16; on
+`X_T = pointExtension X T` it feeds `allSingletonFiber_of_dominatorClosure_pointExtension` (the open `hclo`). The
+remaining content is A2: exhibit such a `T` (`c(X_T), k(X_T) = O(1)` ⟹ the threshold is `O(1)`). Axiom-clean. -/
+theorem dominatorReachable_of_card_gt {T : Finset (Fin n)}
+    (hT : (X.maxValency - 1) * X.indistinguishingNumber < T.card) :
+    ∀ v : Fin n, X.DominatorReachable T v :=
+  X.dominatorReachable_of_basePinsAll (X.basePinsAll_of_card_gt hT)
+
+/-- **A1 capstone on the extension: a base above the extension's threshold makes `X_T` complete.** If
+`(k(X_T)−1)·c(X_T) < |T|` then every point of `pointExtension X T` is a singleton fiber — i.e. `T` is a base of `X`.
+Composes `dominatorReachable_of_card_gt` (on `X_T`) with `allSingletonFiber_of_dominatorClosure_pointExtension`
+(`Sharp` and the `T`-singleton fibers discharged in §CC.10). **This is the entire A1 content reduced to a single
+`O(1)` threshold on `X_T`'s own parameters — the crisp interface A2 must meet (`c(X_T), k(X_T) = O(1)` ⟹ a base of
+size just above the threshold exists).** No smax/sα connectivity, no `SparseSeparable`, citation-free. Axiom-clean. -/
+theorem allSingletonFiber_of_card_gt (T : Finset (Fin n))
+    (hT : ((pointExtension X T).maxValency - 1) * (pointExtension X T).indistinguishingNumber
+        < T.card) :
+    ∀ v : Fin n, (pointExtension X T).SingletonFiber v :=
+  X.allSingletonFiber_of_dominatorClosure_pointExtension T
+    ((pointExtension X T).dominatorReachable_of_card_gt hT)
+
 end CoherentConfig
 
 end ChainDescent

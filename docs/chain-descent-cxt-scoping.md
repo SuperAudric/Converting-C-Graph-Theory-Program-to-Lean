@@ -299,14 +299,21 @@ or A3 turns out harder than the citation.
   coincide (`relOf a a = relOf b b`). So **global `SmaxConnected` is genuinely UNAVAILABLE** on the multi-fiber CC (the §6.1
   cross-fiber wall, now a proven fact). Consequence: cross-fiber pinning **cannot** come from smax — it must come from the
   **dominator step against `T`** (the "direct route" mechanism), regardless of which route handles the within-fiber step.
-- **A1 NEXT — fork resolved by the §CC.17 evidence (see §6.1 update):** the cross-fiber spread is the δ′ dominator step against the
-  base/determined points (not smax); the open sub-question is whether the *within-fiber* discretization needs the full §S.11–§S.16
-  sα port or a direct `c(X_T)=O(1)`-abundance argument (`Σ pu ≤ k(k−1)c = O(1)` ⟹ all but O(1) points pinned). `smaxConnected_of_sparseSeparable`
-  is only provable **on a single fiber** (apex `α` and closed set `C` fiber-aligned, using `smaxAdj_symm_of_sameFiber`); a *global*
-  smax-connectivity port is now known to be FALSE. The pinning rank fed to §CC.10 `dominatorReachable_of_rank` is therefore a
-  hybrid: intra-fiber smax/sα (or a direct abundance argument) + cross-fiber dominator steps from `T`.
-- **A2 (the open core, after A1):** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue —
-  M2 confirmed not citable; char-2 load-bearing.
+- **★ A1 incr 9 (§CC.18 — the abundance discharge) LANDED 2026-06-14** (`CoherentConfig.lean §CC.18`, axiom-clean): **A1 IS
+  ESSENTIALLY DONE.** **`dominatorReachable_of_basePinsAll`** (CC mirror) / **`basePinsAll_of_card_gt`** (the abundance estimate
+  `(k−1)·c < |T| ⟹` every `γ∉T` pinned by two base points) / **`dominatorReachable_of_card_gt`** (`(k−1)c < |T| ⟹ ∀v
+  DominatorReachable T v`) / **`allSingletonFiber_of_card_gt`** (A1 capstone: `(k(X_T)−1)·c(X_T) < |T| ⟹ X_T complete`).
+  **THE SCOUT PAID OFF — §S.10–§S.16 ARE NOW UNNECESSARY:** the δ′ engine accepts *any* bounded base, so PV's sharp `b≤2` is
+  overkill; a crude `b ≤ (k−1)c+1` suffices and falls out of **one counting lemma** (for fixed `α∈T`, the base points failing to
+  separate `γ` number `≤ (k−1)·c` — union bound over `≤k−1` other `α`-neighbours, each confusion set an indistinguishing count
+  `≤c` via `indistinguishingNumberOf_eq_card` + `relOf_right_eq_iff_left`; `|T|>(k−1)c` leaves a good `β`). Cross-fiber is
+  automatic (`α,β` range over all of `T`; the forced triangle is `interNum`-level — no smax). The fiber-size/smax substrate
+  (§CC.15–§CC.17) is **not on the critical path** (kept as landed infra; the global-`SmaxConnected`-is-false finding stands).
+- **A1 → A2 interface (crisp):** A1 reduces `hclo` to the single `O(1)` threshold **`(k(X_T)−1)·c(X_T) < |T|`** on the
+  extension's own parameters (`allSingletonFiber_of_card_gt`). The remaining open content is **purely A2**: exhibit a base `T`
+  meeting it (M1: `c(X_T), k(X_T) = O(1)` ⟹ a base of size just above the `O(1)` threshold suffices).
+- **A2 (the open core, the genuine `s(X)` crux):** prove `c(X_T), k(X_T) = O(1)` after `O(1)` individualizations, so a base
+  with `|T| > (k(X_T)−1)·c(X_T)` exists for the residue — M2 confirmed not citable; char-2 load-bearing.
 - **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
   finding) — landed and waiting on `hclo`.
 
@@ -346,34 +353,36 @@ or A3 turns out harder than the citation.
 **Current Lean state (all axiom-clean `[propext, Classical.choice, Quot.sound]`):** the δ′ engine on `X_T` (§CC.10),
 `Sharp (pointExtension X T)`, and the seal wiring `reachesRigidOrCameron_viaExtensionDominatorClosure` are LANDED and
 waiting on the single input `hclo`. The CC sparse substrate **A1 is ported through §S.9 + the §CC.17 fiber-size identity**
-(`§CC.11`–`§CC.17`: `c(X)`, `k(X)`, `SparseSeparable`, the (19)/(20) estimates, the transpose-aware triangle identity, the §S.4
-smax/sα graph layer with `saAdj_symm`, the §S.5 summation identity, the §S.9 Lemma-3.5(1) `n_u>n_v` half, and the fiber-size
-identity with within-fiber `smaxAdj_symm`). The remaining A1 content is the §S.10–§S.16 connectivity (the roadmap is §6.1 below);
-the eventual open content is `hclo` = `ParamBoundOnExtension` (A2), reached once A1's "sparse ⟹ pinning rank" lands.
+(`§CC.11`–`§CC.18`: `c(X)`, `k(X)`, `SparseSeparable`, the (19)/(20) estimates, the transpose-aware triangle identity, the §S.4
+smax/sα graph layer with `saAdj_symm`, the §S.5 summation identity, the §S.9 Lemma-3.5(1) `n_u>n_v` half, the fiber-size identity,
+**and §CC.18 the abundance discharge — A1's "sparse ⟹ closure"**). **A1 IS ESSENTIALLY DONE:** `allSingletonFiber_of_card_gt`
+reduces `hclo` to a single `O(1)` threshold `(k(X_T)−1)·c(X_T) < |T|`. The remaining open content is purely A2 (meet the threshold).
 
-**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.9 + §CC.17: incr 3 (§S.6 `sum_pu_le`, `§CC.12`),
-incr 4 (§S.7 `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity, `§CC.14`), incr 6 (§S.4 graph defs + `saAdj_symm`, `§CC.15`),
-incr 7 (§S.5 `sum_interNum_eq_outDeg` + §S.9 `valency_le_pu_of_valency_lt`, `§CC.16`), incr 8 (fiber-size identity + within-fiber
-`smaxAdj_symm`, `§CC.17`) — all axiom-clean, 2026-06-14. **§CC.17 RESOLVED THE ROUTE FORK (scouting outcome):** `smaxAdj` is
-symmetric **only intra-fiber**, so **global `SmaxConnected` is FALSE** on the multi-fiber CC — the cross-fiber spread MUST come
-from the **δ′ dominator step against `T`/determined points** (the "direct route" mechanism), not smax. **Next = build the
-cross-fiber pinning rank for `dominatorReachable_of_rank` directly**: rank-0 = `T`; spread by `dominatorReachable_step_of_unique`
-against already-reached points. The within-fiber discretization is the remaining sub-fork — port §S.10 (single-fiber, using
-`smaxAdj_symm_of_sameFiber`) + §S.11–§S.16, OR a direct `c(X_T)=O(1)`-abundance argument (`Σ pu ≤ k(k−1)c = O(1)` ⟹ all but
-O(1) points pinned). The abundance argument is preferred (lighter, and in A2's vocabulary), but unproven; decide after a scout of
-the equal-valency case. After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing).
+**▶ PICK UP HERE (the exact next Lean step):** **A1 LANDED (incr 3–9, §CC.12–§CC.18, all axiom-clean, 2026-06-14).** The scout
+paid off: **§CC.18 (`dominatorReachable_of_card_gt` / `allSingletonFiber_of_card_gt`) closes A1 via the abundance route — ONE
+counting lemma, skipping §S.10–§S.16 entirely.** Key insight: the δ′ engine accepts *any* bounded base, so PV's sharp `b≤2` is
+overkill; a crude `b ≤ (k−1)c+1` falls out of `basePinsAll_of_card_gt` (`(k−1)c < |T| ⟹` every `γ∉T` pinned by two base points,
+via the indistinguishing-number union bound). Cross-fiber is automatic (no smax). §CC.15–§CC.17 (smax/fiber-size) are landed infra
+but **not on the critical path**; the §S.10–§S.16 sα port is **abandoned as unnecessary**. **Next = A2:** prove the residue meets
+the threshold — `c(X_T), k(X_T) = O(1)` after `O(1)` individualizations (M1-evidenced, M2-confirmed not citable, char-2 load-bearing)
+— then `allSingletonFiber_of_card_gt` + the seal wiring closes `hclo` and the seal `modulo {G3}`.
 
 **Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?
 
 **Reading order for a fresh reader:** the general-CC build doc STATUS → its §1A (why not GI∈P) / §1B (both routes ⟹
 `c(X_T)`) → THIS doc §0–§4 (the reduction + M1/M2/M3 results) → `CoherentConfig.lean` §CC.10 (the landed δ′ engine + `Sharp`),
-§CC.11–§CC.16 (the A1 substrate ported through §S.9), and `Separability.lean §S.1–§S.16` (the homogeneous source being ported)
-→ resume at **§6.1/§6.2 below (the §S.10 plan)**.
+§CC.11–§CC.18 (the A1 substrate; **§CC.18 = the abundance discharge that closes A1**) → resume at **A2** (meet the
+`(k(X_T)−1)·c(X_T) < |T|` threshold). §6.1 (the §S.10–§S.16 port roadmap) is SUPERSEDED/abandoned — read only for the route-not-taken.
 
 ---
 
-### 6.1 — The remaining A1 port roadmap (§S.10 → §S.16 → the δ′ bridge)
+### 6.1 — [SUPERSEDED 2026-06-14] The §S.10 → §S.16 port roadmap — ABANDONED, A1 closed via §CC.18 instead
+
+> **This roadmap is HISTORICAL. A1's "sparse ⟹ closure" landed via the §CC.18 abundance route (`dominatorReachable_of_card_gt`
+> / `allSingletonFiber_of_card_gt`) — ONE counting lemma, no smax/sα connectivity.** The δ′ engine accepts any bounded base, so
+> PV's sharp `b≤2` (which the §S.10–§S.16 port targets) is unnecessary; the crude `b ≤ (k−1)c+1` suffices and avoids the
+> intra-fiber/cross-fiber tangle below entirely. The table is kept only as a record of the route not taken. **Do not port §S.10–§S.16.**
 
 Each row is a homogeneous source lemma in `Separability.lean` to port to `CoherentConfig`, with its CC subtlety. Port one
 row (or §S section) per increment, mirroring the proven pattern of §CC.12–§CC.16. **The governing fact (proven this session):

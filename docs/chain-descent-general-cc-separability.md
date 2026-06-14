@@ -41,10 +41,12 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   `valency_mul_interNum` = `n_k·c^k_{i,j}=n_i·c^i_{k,j*}` (`§CC.14`); the §S.4 smax/sα graph layer + `saAdj_symm` (`§CC.15`); the
   §S.5 summation identity `sum_interNum_eq_outDeg` + the §S.9 Lemma-3.5(1) `n_u>n_v` half `valency_le_pu_of_valency_lt` (`§CC.16`);
   the **fiber-size identity** `fiberSize_mul_valency` + within-fiber `smaxAdj_symm_of_sameFiber` + reusable `outDeg_eq_interNum` (`§CC.17`).
-  **§CC.17 resolved the route fork (scouting outcome): `smaxAdj` is symmetric ONLY intra-fiber ⟹ global `SmaxConnected` is FALSE on
-  the multi-fiber CC; cross-fiber pinning must come from the δ′ dominator step against `T`, not smax.** The **remaining** A1 content =
-  a hybrid pinning rank (cross-fiber δ′ steps from `T` + an intra-fiber discharge: single-fiber §S.10–§S.16 OR a direct
-  `c(X_T)=O(1)`-abundance argument) feeding §CC.10 — roadmap in **`docs/chain-descent-cxt-scoping.md` §6.1** (the live build's self-contained home).
+  **★ A1 IS ESSENTIALLY DONE (`§CC.18`, the abundance discharge):** `basePinsAll_of_card_gt` (`(k−1)·c < |T| ⟹` every `γ∉T` pinned by
+  two base points, via an indistinguishing-number union bound) / `dominatorReachable_of_card_gt` (`⟹ ∀v DominatorReachable T v`) /
+  `allSingletonFiber_of_card_gt` (the A1 capstone: `(k(X_T)−1)·c(X_T) < |T| ⟹ X_T complete`). **The scout paid off — §S.10–§S.16 are
+  UNNECESSARY:** the δ′ engine accepts *any* bounded base, so PV's sharp `b≤2` is overkill; a crude `b ≤ (k−1)c+1` falls out of ONE
+  counting lemma, cross-fiber automatic (no smax). §CC.15–§CC.17 (smax/fiber-size) are landed infra, off the critical path; the
+  §S.10–§S.16 sα port is abandoned. A1 now reduces `hclo` to a single `O(1)` threshold `(k(X_T)−1)·c(X_T) < |T|` — the crisp A2 interface.
 
 ### The open frontier — ONE quantity: `c(X_T)` (live work: `chain-descent-cxt-scoping.md`)
 A bounded-base δ′ pinning rank / forced-triangle closure for the residue family **on the extension `X_T`**
@@ -60,15 +62,13 @@ condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at
   is open (Q2); citable results are group-side only (Q3). **Calibration (Q4): polynomial canonisation is citable for the
   rank-3/4 residue (Babai/Kivva); only sub-exponential in unbounded rank — and the residue IS rank 3–4.**
 
-**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** the A1 §S-chain port + the §CC.17 fiber-size identity are LANDED
-(§CC.11–§CC.17, all axiom-clean, 2026-06-14). **§CC.17 resolved the route fork:** `smaxAdj_symm_of_sameFiber` proves `smaxAdj` is
-symmetric only intra-fiber, so **global `SmaxConnected` is FALSE** — a global smax-connectivity port is not a theorem. **Next =
-build the hybrid pinning rank for §CC.10 `dominatorReachable_of_rank` directly**: `rank 0 = T`, spread by
-`dominatorReachable_step_of_unique` (cross-fiber δ′ steps against `T`/determined points). The intra-fiber discharge is the
-remaining sub-fork — single-fiber §S.10–§S.16 (using `smaxAdj_symm_of_sameFiber`) OR a direct `c(X_T)=O(1)`-abundance argument
-(`Σ pu ≤ k(k−1)c = O(1)` ⟹ all but O(1) points pinned; lighter and in A2's vocabulary, but unproven — scout the equal-valency
-case to decide). Then A2 (prove `c(X_T)=O(1)`, the open core); then (deferred, §7) `SchurianScheme`→seal wiring + the hImprim
-`G₀Irreducible → IsPrimitive` bridge.
+**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** **A1 is LANDED (§CC.11–§CC.18, all axiom-clean, 2026-06-14)** — the
+abundance discharge `allSingletonFiber_of_card_gt` (§CC.18) closes A1 via ONE counting lemma, skipping §S.10–§S.16 (the δ′ engine
+accepts any bounded base, so the crude `b ≤ (k−1)c+1` suffices). **A1 now reduces `hclo` to the single `O(1)` threshold
+`(k(X_T)−1)·c(X_T) < |T|`. Next = A2:** prove the residue meets it — `c(X_T), k(X_T) = O(1)` after `O(1)` individualizations
+(M1-evidenced, M2-confirmed not citable, char-2 load-bearing). Then `allSingletonFiber_of_card_gt` + the landed seal wiring
+(`reachesRigidOrCameron_viaExtensionDominatorClosure`) closes the seal `modulo {G3}`; then (deferred, §7) `SchurianScheme`→seal
+wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
 
 **Orientation:** §1A why-not-GI∈P · §1B the `c(X_T)` reduction · §5.1 the build map · §5.2 the open problem + planning
 insights · §7 do-not-re-walk · §8 condensed timeline + the changelog for full history.
@@ -620,12 +620,15 @@ transpose-aware: `j* = transposeRel j`, the first §S statement M2-Q1 changes), 
 half of Lemma 3.5(1), carrying the source witness `relOf α β₀ = u`). Direct ports of `Separability.lean §S.4–§S.9`.
 **A1 incr 8 — §CC.17 (LANDED 2026-06-14, axiom-clean):** **`fiberSet`** / **`outDeg_eq_interNum`** (`#{w:relOf u w=r} =
 c^{relOf u u}_{r,r*}`, generalises `valency_eq_card`) / **`fiberSize_mul_valency`** (`|F_src(r)|·n_r = |F_tgt(r)|·n_{r*}`, the
-class double-count) / **`smaxAdj_symm_of_sameFiber`** (within-fiber smax symmetry). **Resolved the route fork: `smaxAdj`
-symmetric only intra-fiber ⟹ global `SmaxConnected` FALSE on the multi-fiber CC.**
-**OPEN (A1, the rest):** a **hybrid pinning rank** for §CC.10 `dominatorReachable_of_rank` — `rank 0 = T`, cross-fiber spread by
-the δ′ dominator step against `T`/determined points (smax cannot span fibers), plus an intra-fiber discharge: single-fiber
-§S.10–§S.16 (using `smaxAdj_symm_of_sameFiber`) OR a direct `c(X_T)=O(1)`-abundance argument (preferred — lighter, A2-vocabulary).
-Then A2 (`c(X_T)=O(1)`).
+class double-count) / **`smaxAdj_symm_of_sameFiber`** (within-fiber smax symmetry). Resolved the route fork: `smaxAdj` symmetric
+only intra-fiber ⟹ global `SmaxConnected` FALSE on the multi-fiber CC. (Landed infra; off the critical path after §CC.18.)
+**★ A1 incr 9 — §CC.18 (LANDED 2026-06-14, axiom-clean — A1 ESSENTIALLY DONE):** **`dominatorReachable_of_basePinsAll`** (CC mirror)
+/ **`basePinsAll_of_card_gt`** (`(k−1)·c < |T| ⟹` every `γ∉T` pinned by two base points; indistinguishing-number union bound) /
+**`dominatorReachable_of_card_gt`** (`⟹ ∀v DominatorReachable T v`) / **`allSingletonFiber_of_card_gt`** (capstone: `(k(X_T)−1)·c(X_T)
+< |T| ⟹ X_T complete`). **The abundance route — ONE counting lemma, skips §S.10–§S.16** (the δ′ engine takes any bounded base, so
+crude `b ≤ (k−1)c+1` ≫ enough; cross-fiber automatic, no smax). The §S.10–§S.16 sα port is abandoned as unnecessary.
+**OPEN (the rest) = A2 only:** prove the residue meets the threshold `(k(X_T)−1)·c(X_T) < |T|` (`c(X_T), k(X_T) = O(1)`); then
+`allSingletonFiber_of_card_gt` + seal wiring closes `hclo`.
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /
