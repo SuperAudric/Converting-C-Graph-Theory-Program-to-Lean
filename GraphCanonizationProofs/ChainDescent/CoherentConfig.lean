@@ -1499,6 +1499,73 @@ theorem saAdj_symm (α : Fin n) {β γ : Fin n} (h : X.saAdj α β γ) : X.saAdj
   rw [X.relOf_swap_eq (rfl : X.relOf β γ = X.relOf β γ)]
   exact (Nat.eq_of_mul_eq_mul_left hpos (by rw [Nat.mul_one]; exact hid)).symm
 
+/-! ### §CC.16 — The summation identity (§S.5) + Lemma 3.5(1)'s `n_u>n_v` half (§S.9) (A1)
+
+The CC ports of `Separability.lean §S.5` (`sum_intersectionNumber_eq_valency`) and §S.9 (the `n_u>n_v` half of Lemma 3.5(1)).
+**§S.5** is stated in *out-degree* form (`Σ_w c^v_{uw} = deg_u α`, no fiber hypothesis); the homogeneous `= valency u` is the
+special case where `α` is a source of `u`. **§S.9** is the first connectivity-counting lemma, and it carries an explicit
+**source witness** `relOf α β₀ = u` (the apex `α` lies in `u`'s source fiber) — required because `valency_mul_interNum`
+(§CC.14) needs the apex to realize the fiber (M2-Q1's single-fiber localization). The transpose `w*` the triangle identity
+introduces is harmless here (the argument only case-splits on a multiplicand being `0` or `≥1`). -/
+
+/-- **The summation identity (§S.5), out-degree form** — `Σ_w c^v_{uw} = deg_u α` (`= #{z : relOf α z = u}`), for any
+`(α,δ) ∈ v`. Fixing the source `u` and the test pair `v = relOf α δ`, summing the intersection number over the middle
+class `w` recovers the out-degree of `α` into `u`. (Equals `valency u` when `α` is a source of `u`.) Axiom-clean. -/
+theorem sum_interNum_eq_outDeg (u v : Fin X.rank) (α δ : Fin n) (hv : X.relOf α δ = v) :
+    (Finset.univ.sum (fun w => X.interNum u w v))
+      = (Finset.univ.filter (fun z => X.relOf α z = u)).card := by
+  classical
+  rw [Finset.card_eq_sum_card_fiberwise (f := fun z => X.relOf z δ) (t := Finset.univ)
+        (fun _ _ => Finset.mem_univ _)]
+  exact Finset.sum_congr rfl (fun w _ => by rw [← X.interNum_eq hv u w, Finset.filter_filter])
+
+/-- **The core of Lemma 3.5(1) (§S.9).** If every middle class `w` has `c^v_{uw} ≠ 1` (`v = relOf α δ`), then each term
+`c^v_{uw}(c^v_{uw}−1) ≥ c^v_{uw}`, and summing (identity (20) `pu_eq_sum` + the summation identity §S.5) gives
+`n_u ≤ pᵤ(δ)`. Carries the source witness `relOf α β₀ = u`. Axiom-clean. -/
+theorem valency_le_pu_of_forall_ne_one {α : Fin n} (u : Fin X.rank) (δ : Fin n) {β₀ : Fin n}
+    (hu : X.relOf α β₀ = u) (h : ∀ w, X.interNum u w (X.relOf α δ) ≠ 1) :
+    X.valency u ≤ X.pu α u δ := by
+  rw [X.pu_eq_sum α u δ, X.valency_eq_card hu,
+    ← X.sum_interNum_eq_outDeg u (X.relOf α δ) α δ rfl]
+  apply Finset.sum_le_sum
+  intro w _
+  rcases Nat.eq_zero_or_pos (X.interNum u w (X.relOf α δ)) with hc0 | hc0
+  · simp [hc0]
+  · calc X.interNum u w (X.relOf α δ)
+        = X.interNum u w (X.relOf α δ) * 1 := (Nat.mul_one _).symm
+      _ ≤ X.interNum u w (X.relOf α δ) * (X.interNum u w (X.relOf α δ) - 1) :=
+          Nat.mul_le_mul (le_refl _) (by have := h w; omega)
+
+/-- A `c^v_{uw} = 1` would force (triangle identity §CC.14) `n_u ≤ n_v`, so `n_v < n_u ⟹ c^v_{uw} ≠ 1` (`v = relOf α δ`).
+Carries the source witness `relOf α β₀ = u`. The transpose `w*` from the identity is harmless (only `0`-vs-`≥1` is used).
+Axiom-clean. -/
+theorem interNum_ne_one_of_valency_lt {α : Fin n} (u w : Fin X.rank) (δ : Fin n) {β₀ : Fin n}
+    (hu : X.relOf α β₀ = u) (hlt : X.valency (X.relOf α δ) < X.valency u) :
+    X.interNum u w (X.relOf α δ) ≠ 1 := by
+  intro h1
+  have hid := X.valency_mul_interNum u w (X.relOf α δ) hu (rfl : X.relOf α δ = X.relOf α δ)
+  rw [h1, Nat.mul_one] at hid
+  rcases Nat.eq_zero_or_pos (X.interNum (X.relOf α δ) (X.transposeRel w) u) with hm | hm
+  · rw [hm, Nat.mul_zero] at hid
+    have hvpos : 0 < X.valency (X.relOf α δ) := by
+      rw [X.valency_eq_card (rfl : X.relOf α δ = X.relOf α δ)]
+      exact Finset.card_pos.2 ⟨δ, by simp⟩
+    omega
+  · have hle : X.valency u ≤ X.valency (X.relOf α δ) :=
+      calc X.valency u = X.valency u * 1 := (Nat.mul_one _).symm
+        _ ≤ X.valency u * X.interNum (X.relOf α δ) (X.transposeRel w) u :=
+            Nat.mul_le_mul (le_refl _) hm
+        _ = X.valency (X.relOf α δ) := hid.symm
+    omega
+
+/-- **Lemma 3.5(1), the `n_u > n_v` half** — `n_v < n_u ⟹ n_u ≤ pᵤ(δ)` (`v = relOf α δ`), the `≠1` core fed by the
+triangle identity. Carries the source witness `relOf α β₀ = u`. Powers Lemma 3.6's `smax` branch. Axiom-clean. -/
+theorem valency_le_pu_of_valency_lt {α : Fin n} (u : Fin X.rank) (δ : Fin n) {β₀ : Fin n}
+    (hu : X.relOf α β₀ = u) (hlt : X.valency (X.relOf α δ) < X.valency u) :
+    X.valency u ≤ X.pu α u δ :=
+  X.valency_le_pu_of_forall_ne_one u δ hu
+    (fun w => X.interNum_ne_one_of_valency_lt u w δ hu hlt)
+
 end CoherentConfig
 
 end ChainDescent

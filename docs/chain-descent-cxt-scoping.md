@@ -286,15 +286,17 @@ or A3 turns out harder than the citation.
   is symmetric, via the transpose-aware §CC.14 identity — the `j*` lands exactly on `relOf γ β = (relOf β γ)*`). `saAdj_symm`
   does *not* need a symmetric `smaxAdj` (the two legs are out-going from `α`, so `InSmax` gives equal valency directly). So the
   sα-components are now a genuine equivalence.
-- **A1 NEXT (connectivity — the SINGLE-FIBER localization):** the connectivity theorems `smaxConnected_of_sparseSeparable`
-  (§S.10) and `saConnected_of_sparseSeparable` (§S.16) + the §S.9/§S.11–§S.15 counting in between. **Two findings pin how to
-  do it:** (1) the connectivity infra (`exists_small_closed_of_not_connected`) needs a **symmetric** relation, and `smaxAdj` is
-  symmetric only **within a fiber** (`n_s = n_{s*}` for intra-fiber `s`, from the pair-count identity `|F|·n_s = |F|·n_{s*}`);
-  (2) the PV counting `valency_le_pu_of_valency_lt` (§S.9, via §CC.14) needs the **apex `α` in `u`'s source fiber** (else
-  `valency_mul_interNum`'s witness fails). **Both say the same thing: the connectivity argument is intrinsically single-fiber.**
-  So the next sub-pieces are: (a) the **pair-count / fiber-size identity** `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹ within-fiber
-  `smaxAdj_symm`; (b) §S.9 `valency_le_pu_of_valency_lt` (CC, apex-in-fiber); (c) §S.10/§S.16 connectivity restricted to a
-  fiber. Then "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`.
+- **A1 incr 7 (§S.5 summation identity + §S.9 Lemma 3.5(1) `n_u>n_v` half) LANDED 2026-06-14** (`CoherentConfig.lean §CC.16`,
+  axiom-clean): **`sum_interNum_eq_outDeg`** (§S.5, out-degree form `Σ_w c^v_{uw} = #{z : relOf α z = u}`, hypothesis-free) +
+  **`valency_le_pu_of_forall_ne_one`** / **`interNum_ne_one_of_valency_lt`** / **`valency_le_pu_of_valency_lt`** (§S.9). The §S.9
+  lemmas carry an explicit **source witness `relOf α β₀ = u`** (the apex-in-fiber requirement made concrete); the transpose `w*`
+  from §CC.14 is harmless (only `0`-vs-`≥1` is used).
+- **A1 NEXT (§S.10 smax connectivity — needs the fiber-size identity):** `smaxConnected_of_sparseSeparable` (§S.10). It uses the
+  connectivity infra `exists_small_closed_of_not_connected`, which needs a **symmetric** relation — so the prerequisite is
+  **(a) the pair-count / fiber-size identity** `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹ within-fiber `smaxAdj_symm` (intra-fiber
+  `n_s = n_{s*}`). Then §S.10 runs **on a single fiber** (the closed set `C` and the apex `α` must be fiber-aligned, so that
+  `valency_le_pu_of_valency_lt`'s source witness holds). After §S.10: §S.11–§S.15 (the sα-component analysis) → §S.16
+  `saConnected_of_sparseSeparable` → "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`.
 - **A2 (the open core, after A1):** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue —
   M2 confirmed not citable; char-2 load-bearing.
 - **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
@@ -338,15 +340,16 @@ or A3 turns out harder than the citation.
 waiting on the single input `hclo`. The CC sparse substrate **A1 incr 1–2** (`§CC.11`: `c(X)`, `k(X)`, `SparseSeparable`)
 is landed. The open content is `hclo` = `ParamBoundOnExtension` (A2), reached via the A1 sparse theorem.
 
-**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.8 + the §S.4 graph layer: incr 3 (§S.6
-`sum_pu_le`, `§CC.12`), incr 4 (§S.7 `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity, `§CC.14`), incr 6 (§S.4 graph defs
-+ `saAdj_symm`, `§CC.15`) — all axiom-clean, 2026-06-14, all transpose-aware. **Next = the connectivity theorems
-(§S.9–§S.16), localized to a SINGLE FIBER.** Two findings force this: the connectivity infra needs a *symmetric* relation and
-`smaxAdj` is symmetric only within a fiber (`n_s = n_{s*}` intra-fiber); and the PV counting `valency_le_pu_of_valency_lt`
-needs the apex in `u`'s source fiber. Sub-pieces: (a) the pair-count/fiber-size identity `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹
-within-fiber `smaxAdj_symm`; (b) §S.9 `valency_le_pu_of_valency_lt` (apex-in-fiber, via §CC.14); (c) §S.10/§S.16 connectivity
-on a fiber ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed the landed §CC.10 `dominatorReachable_of_rank`. After A1: **A2** (prove
-`ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing), then assembly is automatic.
+**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.9: incr 3 (§S.6 `sum_pu_le`, `§CC.12`), incr 4
+(§S.7 `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity, `§CC.14`), incr 6 (§S.4 graph defs + `saAdj_symm`, `§CC.15`),
+incr 7 (§S.5 `sum_interNum_eq_outDeg` + §S.9 `valency_le_pu_of_valency_lt`, `§CC.16`) — all axiom-clean, 2026-06-14,
+transpose-aware, §S.9 carrying the source witness `relOf α β₀ = u`. **Next = §S.10 `smaxConnected_of_sparseSeparable`.** Its
+prerequisite is **(a) the pair-count / fiber-size identity** `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹ within-fiber `smaxAdj_symm`
+(`n_s = n_{s*}` intra-fiber), because the connectivity infra `exists_small_closed_of_not_connected` needs a *symmetric*
+relation; then §S.10 runs **on a single fiber** (`C` and apex `α` fiber-aligned, so §S.9's source witness holds). After §S.10:
+§S.11–§S.15 (sα-components) → §S.16 `saConnected_of_sparseSeparable` → "sparse ⟹ a pinning rank exists" ⟹ feed the landed
+§CC.10 `dominatorReachable_of_rank`. After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)` core, char-2
+load-bearing), then assembly is automatic.
 
 **Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?
