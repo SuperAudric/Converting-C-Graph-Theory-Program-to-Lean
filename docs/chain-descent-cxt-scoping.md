@@ -291,12 +291,20 @@ or A3 turns out harder than the citation.
   **`valency_le_pu_of_forall_ne_one`** / **`interNum_ne_one_of_valency_lt`** / **`valency_le_pu_of_valency_lt`** (§S.9). The §S.9
   lemmas carry an explicit **source witness `relOf α β₀ = u`** (the apex-in-fiber requirement made concrete); the transpose `w*`
   from §CC.14 is harmless (only `0`-vs-`≥1` is used).
-- **A1 NEXT (§S.10 smax connectivity — needs the fiber-size identity):** `smaxConnected_of_sparseSeparable` (§S.10). It uses the
-  connectivity infra `exists_small_closed_of_not_connected`, which needs a **symmetric** relation — so the prerequisite is
-  **(a) the pair-count / fiber-size identity** `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹ within-fiber `smaxAdj_symm` (intra-fiber
-  `n_s = n_{s*}`). Then §S.10 runs **on a single fiber** (the closed set `C` and the apex `α` must be fiber-aligned, so that
-  `valency_le_pu_of_valency_lt`'s source witness holds). After §S.10: §S.11–§S.15 (the sα-component analysis) → §S.16
-  `saConnected_of_sparseSeparable` → "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`.
+- **A1 incr 8 (§CC.17 — the fiber-size identity + within-fiber `smaxAdj_symm`) LANDED 2026-06-14** (`CoherentConfig.lean §CC.17`,
+  axiom-clean): **`fiberSet`** / **`outDeg_eq_interNum`** (`#{w:relOf u w=r} = c^{relOf u u}_{r,r*}`, generalises `valency_eq_card`)
+  / **`fiberSize_mul_valency`** (`|F_src(r)|·n_r = |F_tgt(r)|·n_{r*}`, double-count the class by source vs. target) /
+  **`smaxAdj_symm_of_sameFiber`** (`relOf a a = relOf b b ∧ smaxAdj a b → smaxAdj b a`). **DECISIVE SCOUTING FINDING (the route
+  fork): `smaxAdj` is symmetric ONLY intra-fiber** — the fiber-size identity cancels `|F|` only when source & target fibers
+  coincide (`relOf a a = relOf b b`). So **global `SmaxConnected` is genuinely UNAVAILABLE** on the multi-fiber CC (the §6.1
+  cross-fiber wall, now a proven fact). Consequence: cross-fiber pinning **cannot** come from smax — it must come from the
+  **dominator step against `T`** (the "direct route" mechanism), regardless of which route handles the within-fiber step.
+- **A1 NEXT — fork resolved by the §CC.17 evidence (see §6.1 update):** the cross-fiber spread is the δ′ dominator step against the
+  base/determined points (not smax); the open sub-question is whether the *within-fiber* discretization needs the full §S.11–§S.16
+  sα port or a direct `c(X_T)=O(1)`-abundance argument (`Σ pu ≤ k(k−1)c = O(1)` ⟹ all but O(1) points pinned). `smaxConnected_of_sparseSeparable`
+  is only provable **on a single fiber** (apex `α` and closed set `C` fiber-aligned, using `smaxAdj_symm_of_sameFiber`); a *global*
+  smax-connectivity port is now known to be FALSE. The pinning rank fed to §CC.10 `dominatorReachable_of_rank` is therefore a
+  hybrid: intra-fiber smax/sα (or a direct abundance argument) + cross-fiber dominator steps from `T`.
 - **A2 (the open core, after A1):** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue —
   M2 confirmed not citable; char-2 load-bearing.
 - **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
@@ -337,22 +345,23 @@ or A3 turns out harder than the citation.
 
 **Current Lean state (all axiom-clean `[propext, Classical.choice, Quot.sound]`):** the δ′ engine on `X_T` (§CC.10),
 `Sharp (pointExtension X T)`, and the seal wiring `reachesRigidOrCameron_viaExtensionDominatorClosure` are LANDED and
-waiting on the single input `hclo`. The CC sparse substrate **A1 is ported through §S.9** (`§CC.11`–`§CC.16`: `c(X)`, `k(X)`,
-`SparseSeparable`, the (19)/(20) estimates, the transpose-aware triangle identity, the §S.4 smax/sα graph layer with
-`saAdj_symm`, the §S.5 summation identity, and the §S.9 Lemma-3.5(1) `n_u>n_v` half). The remaining A1 content is the §S.10–§S.16
-connectivity (the roadmap + concrete §S.10 plan are §6.1/§6.2 below); the eventual open content is `hclo` =
-`ParamBoundOnExtension` (A2), reached once A1's "sparse ⟹ pinning rank" lands.
+waiting on the single input `hclo`. The CC sparse substrate **A1 is ported through §S.9 + the §CC.17 fiber-size identity**
+(`§CC.11`–`§CC.17`: `c(X)`, `k(X)`, `SparseSeparable`, the (19)/(20) estimates, the transpose-aware triangle identity, the §S.4
+smax/sα graph layer with `saAdj_symm`, the §S.5 summation identity, the §S.9 Lemma-3.5(1) `n_u>n_v` half, and the fiber-size
+identity with within-fiber `smaxAdj_symm`). The remaining A1 content is the §S.10–§S.16 connectivity (the roadmap is §6.1 below);
+the eventual open content is `hclo` = `ParamBoundOnExtension` (A2), reached once A1's "sparse ⟹ pinning rank" lands.
 
-**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.9: incr 3 (§S.6 `sum_pu_le`, `§CC.12`), incr 4
-(§S.7 `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity, `§CC.14`), incr 6 (§S.4 graph defs + `saAdj_symm`, `§CC.15`),
-incr 7 (§S.5 `sum_interNum_eq_outDeg` + §S.9 `valency_le_pu_of_valency_lt`, `§CC.16`) — all axiom-clean, 2026-06-14,
-transpose-aware, §S.9 carrying the source witness `relOf α β₀ = u`. **Next = §S.10 `smaxConnected_of_sparseSeparable`.** Its
-prerequisite is **(a) the pair-count / fiber-size identity** `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹ within-fiber `smaxAdj_symm`
-(`n_s = n_{s*}` intra-fiber), because the connectivity infra `exists_small_closed_of_not_connected` needs a *symmetric*
-relation; then §S.10 runs **on a single fiber** (`C` and apex `α` fiber-aligned, so §S.9's source witness holds). After §S.10:
-§S.11–§S.15 (sα-components) → §S.16 `saConnected_of_sparseSeparable` → "sparse ⟹ a pinning rank exists" ⟹ feed the landed
-§CC.10 `dominatorReachable_of_rank`. After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)` core, char-2
-load-bearing), then assembly is automatic.
+**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.9 + §CC.17: incr 3 (§S.6 `sum_pu_le`, `§CC.12`),
+incr 4 (§S.7 `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity, `§CC.14`), incr 6 (§S.4 graph defs + `saAdj_symm`, `§CC.15`),
+incr 7 (§S.5 `sum_interNum_eq_outDeg` + §S.9 `valency_le_pu_of_valency_lt`, `§CC.16`), incr 8 (fiber-size identity + within-fiber
+`smaxAdj_symm`, `§CC.17`) — all axiom-clean, 2026-06-14. **§CC.17 RESOLVED THE ROUTE FORK (scouting outcome):** `smaxAdj` is
+symmetric **only intra-fiber**, so **global `SmaxConnected` is FALSE** on the multi-fiber CC — the cross-fiber spread MUST come
+from the **δ′ dominator step against `T`/determined points** (the "direct route" mechanism), not smax. **Next = build the
+cross-fiber pinning rank for `dominatorReachable_of_rank` directly**: rank-0 = `T`; spread by `dominatorReachable_step_of_unique`
+against already-reached points. The within-fiber discretization is the remaining sub-fork — port §S.10 (single-fiber, using
+`smaxAdj_symm_of_sameFiber`) + §S.11–§S.16, OR a direct `c(X_T)=O(1)`-abundance argument (`Σ pu ≤ k(k−1)c = O(1)` ⟹ all but
+O(1) points pinned). The abundance argument is preferred (lighter, and in A2's vocabulary), but unproven; decide after a scout of
+the equal-valency case. After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing).
 
 **Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?
@@ -385,13 +394,17 @@ apex in the relevant source fiber. So every row below is "on a fiber `F`".
 | §S.16 `saConnected_of_sparseSeparable` | the sα-half; with §S.10 gives `SmaxConnected ∧ ∀α SaConnected α` on `F`. |
 | **the δ′ bridge** (CC-specific glue, not a §S port) | convert `SmaxConnected ∧ SaConnected` into a **pinning rank** (BFS layering of the forced-triangle reachability) and feed §CC.10 `dominatorReachable_of_rank` ⟹ `∀ v, DominatorReachable T v`. The homogeneous analogue is `CascadeAffine §S-bridge` B4 `discrete_of_connectivity`. |
 
-**⚠ THE OPEN DESIGN QUESTION for §S.10+ (be honest, not yet resolved):** the smax graph is *intra-fiber* (the prereq makes it
-symmetric only within a fiber), so `SmaxConnected` connects only *within* a fiber. But the dominator closure must reach **all**
-of Ω (every fiber of `X_T`). The likely resolution: cross-fiber pinning comes from **forced triangles against the already-
-determined base/`T`-points** (a point in a big fiber is pinned by a `c=1` triangle to two `T`-singletons or to determined
-points in another fiber), i.e. the cross-fiber spread is the *dominator* step, while the intra-fiber smax/sα connectivity is
-what discretizes *within* each fiber. **Working this out — how the per-fiber connectivity composes into a global pinning rank —
-is the genuine design content of the rest of A1, and it is not yet settled.** Resolve it before/while porting §S.10.
+**✅ THE DESIGN QUESTION for §S.10+ — RESOLVED by §CC.17 (2026-06-14).** `smaxAdj_symm_of_sameFiber` proves `smaxAdj` is
+symmetric **only intra-fiber** (the fiber-size identity cancels `|F|` only when `relOf a a = relOf b b`), so **global
+`SmaxConnected` is FALSE** on the multi-fiber `X_T` — a global smax-connectivity port is not merely hard, it is *not a theorem*.
+The composition is therefore settled in shape: **cross-fiber spread = the δ′ dominator step against the already-determined
+`T`/determined points** (a point in a big fiber is pinned by a `c=1` triangle to two determined points — `T`-singletons or
+points reached in another fiber), and **intra-fiber discretization** is what (if anything) needs smax/sα. So the global pinning
+rank fed to §CC.10 is a **hybrid**: `rank 0 = T`; each γ pinned by two strictly-lower-rank reached points via
+`dominatorReachable_step_of_unique`, with the *intra-fiber* sub-step supplied either by the single-fiber §S.10–§S.16 port
+(using `smaxAdj_symm_of_sameFiber`) or — preferred — by a direct `c(X_T)=O(1)`-abundance argument (`Σ pu ≤ k(k−1)c = O(1)`
+⟹ all but O(1) points are pinned, so a bounded-round rank exists). The remaining open work is *which* intra-fiber discharge,
+decided by a scout of the equal-valency case — **not** a global connectivity proof, which is now ruled out.
 
 ### 6.2 — Concrete start: the fiber-size identity + within-fiber `smaxAdj_symm`
 

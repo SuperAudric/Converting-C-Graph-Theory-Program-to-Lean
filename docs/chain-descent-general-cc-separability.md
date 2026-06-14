@@ -39,9 +39,12 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   geometric lemma `indistinguishingNumberOf_eq_card`, `k(X)`, `SparseSeparable` (`§CC.11`); the (19) estimate `sum_pu_le` +
   transpose bridge (`§CC.12`); the (20) identity `pu_eq_sum` (`§CC.13`); the transpose-aware triangle identity
   `valency_mul_interNum` = `n_k·c^k_{i,j}=n_i·c^i_{k,j*}` (`§CC.14`); the §S.4 smax/sα graph layer + `saAdj_symm` (`§CC.15`); the
-  §S.5 summation identity `sum_interNum_eq_outDeg` + the §S.9 Lemma-3.5(1) `n_u>n_v` half `valency_le_pu_of_valency_lt` (`§CC.16`).
-  The **remaining** A1 content = §S.10–§S.16 connectivity (single-fiber) + the δ′ bridge — roadmap + concrete §S.10 plan in
-  **`docs/chain-descent-cxt-scoping.md` §6.1/§6.2** (the live build's self-contained home).
+  §S.5 summation identity `sum_interNum_eq_outDeg` + the §S.9 Lemma-3.5(1) `n_u>n_v` half `valency_le_pu_of_valency_lt` (`§CC.16`);
+  the **fiber-size identity** `fiberSize_mul_valency` + within-fiber `smaxAdj_symm_of_sameFiber` + reusable `outDeg_eq_interNum` (`§CC.17`).
+  **§CC.17 resolved the route fork (scouting outcome): `smaxAdj` is symmetric ONLY intra-fiber ⟹ global `SmaxConnected` is FALSE on
+  the multi-fiber CC; cross-fiber pinning must come from the δ′ dominator step against `T`, not smax.** The **remaining** A1 content =
+  a hybrid pinning rank (cross-fiber δ′ steps from `T` + an intra-fiber discharge: single-fiber §S.10–§S.16 OR a direct
+  `c(X_T)=O(1)`-abundance argument) feeding §CC.10 — roadmap in **`docs/chain-descent-cxt-scoping.md` §6.1** (the live build's self-contained home).
 
 ### The open frontier — ONE quantity: `c(X_T)` (live work: `chain-descent-cxt-scoping.md`)
 A bounded-base δ′ pinning rank / forced-triangle closure for the residue family **on the extension `X_T`**
@@ -57,15 +60,15 @@ condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at
   is open (Q2); citable results are group-side only (Q3). **Calibration (Q4): polynomial canonisation is citable for the
   rank-3/4 residue (Babai/Kivva); only sub-exponential in unbounded rank — and the residue IS rank 3–4.**
 
-**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** continue the **A1 §S-chain port** (§S.6 `sum_pu_le` `§CC.12` +
-§S.7 `pu_eq_sum` `§CC.13` + §S.8 triangle identity `§CC.14` + §S.4 graph layer + `saAdj_symm` `§CC.15` + §S.5 summation identity
-`sum_interNum_eq_outDeg` + §S.9 `valency_le_pu_of_valency_lt` `§CC.16`, all LANDED 2026-06-14, axiom-clean, all transpose-aware;
-§S.9 carries the source witness `relOf α β₀ = u`). **Next = §S.10 `smaxConnected_of_sparseSeparable`, then §S.11–§S.16 — all
-localized to a SINGLE FIBER.** §S.10's prerequisite is **(a) the pair-count/fiber-size identity** `|F_src|·n_r = |F_tgt|·n_{r*}`
-⟹ within-fiber `smaxAdj_symm` (the connectivity infra needs a symmetric relation; `smaxAdj` is symmetric only intra-fiber). Then
-§S.11–§S.15 (sα-components) → §S.16 `saConnected_of_sparseSeparable` ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10
-`dominatorReachable_of_rank`. Then A2 (prove `c(X_T)=O(1)`, the open core); then (deferred, §7) `SchurianScheme`→seal wiring +
-the hImprim `G₀Irreducible → IsPrimitive` bridge.
+**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** the A1 §S-chain port + the §CC.17 fiber-size identity are LANDED
+(§CC.11–§CC.17, all axiom-clean, 2026-06-14). **§CC.17 resolved the route fork:** `smaxAdj_symm_of_sameFiber` proves `smaxAdj` is
+symmetric only intra-fiber, so **global `SmaxConnected` is FALSE** — a global smax-connectivity port is not a theorem. **Next =
+build the hybrid pinning rank for §CC.10 `dominatorReachable_of_rank` directly**: `rank 0 = T`, spread by
+`dominatorReachable_step_of_unique` (cross-fiber δ′ steps against `T`/determined points). The intra-fiber discharge is the
+remaining sub-fork — single-fiber §S.10–§S.16 (using `smaxAdj_symm_of_sameFiber`) OR a direct `c(X_T)=O(1)`-abundance argument
+(`Σ pu ≤ k(k−1)c = O(1)` ⟹ all but O(1) points pinned; lighter and in A2's vocabulary, but unproven — scout the equal-valency
+case to decide). Then A2 (prove `c(X_T)=O(1)`, the open core); then (deferred, §7) `SchurianScheme`→seal wiring + the hImprim
+`G₀Irreducible → IsPrimitive` bridge.
 
 **Orientation:** §1A why-not-GI∈P · §1B the `c(X_T)` reduction · §5.1 the build map · §5.2 the open problem + planning
 insights · §7 do-not-re-walk · §8 condensed timeline + the changelog for full history.
@@ -615,10 +618,14 @@ transpose-aware: `j* = transposeRel j`, the first §S statement M2-Q1 changes), 
 `InSmax`/`smaxAdj`/`SmaxConnected`/`saAdj`/`SaConnected` + **`saAdj_symm`** (`§CC.15`; forced-triangle relation symmetric —
 `s*` lands on `relOf γ β`), and §S.5 `sum_interNum_eq_outDeg` + §S.9 `valency_le_pu_of_valency_lt` (`§CC.16`, the `n_u>n_v`
 half of Lemma 3.5(1), carrying the source witness `relOf α β₀ = u`). Direct ports of `Separability.lean §S.4–§S.9`.
-**OPEN (A1, the rest):** §S.10 `smaxConnected` then §S.11–§S.16, **localized to a single fiber** (the infra needs a symmetric
-relation, `smaxAdj` symmetric only intra-fiber). Sub-pieces: (a) pair-count/fiber-size identity ⟹ within-fiber `smaxAdj_symm`;
-(b) §S.10 smax connectivity on a fiber; (c) §S.11–§S.16 sα-components + `saConnected` ⟹ "sparse ⟹ pinning rank exists" ⟹
-§CC.10 `dominatorReachable_of_rank`; then A2 (`c(X_T)=O(1)`).
+**A1 incr 8 — §CC.17 (LANDED 2026-06-14, axiom-clean):** **`fiberSet`** / **`outDeg_eq_interNum`** (`#{w:relOf u w=r} =
+c^{relOf u u}_{r,r*}`, generalises `valency_eq_card`) / **`fiberSize_mul_valency`** (`|F_src(r)|·n_r = |F_tgt(r)|·n_{r*}`, the
+class double-count) / **`smaxAdj_symm_of_sameFiber`** (within-fiber smax symmetry). **Resolved the route fork: `smaxAdj`
+symmetric only intra-fiber ⟹ global `SmaxConnected` FALSE on the multi-fiber CC.**
+**OPEN (A1, the rest):** a **hybrid pinning rank** for §CC.10 `dominatorReachable_of_rank` — `rank 0 = T`, cross-fiber spread by
+the δ′ dominator step against `T`/determined points (smax cannot span fibers), plus an intra-fiber discharge: single-fiber
+§S.10–§S.16 (using `smaxAdj_symm_of_sameFiber`) OR a direct `c(X_T)=O(1)`-abundance argument (preferred — lighter, A2-vocabulary).
+Then A2 (`c(X_T)=O(1)`).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /

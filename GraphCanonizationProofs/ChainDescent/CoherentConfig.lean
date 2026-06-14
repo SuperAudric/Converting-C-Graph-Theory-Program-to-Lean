@@ -1566,6 +1566,92 @@ theorem valency_le_pu_of_valency_lt {α : Fin n} (u : Fin X.rank) (δ : Fin n) {
   X.valency_le_pu_of_forall_ne_one u δ hu
     (fun w => X.interNum_ne_one_of_valency_lt u w δ hu hlt)
 
+/-! ### §CC.17 — The fiber-size identity + within-fiber `smaxAdj` symmetry (A1, §S.10 prerequisite)
+
+The PV §S.10 `smaxConnected_of_sparseSeparable` runs the generic `exists_small_closed_of_not_connected`, which
+needs a **symmetric** relation. On a homogeneous scheme `smaxAdj` is symmetric for free (`n_{s*} = n_s`); on the
+multi-fiber CC it is **not** — a max-valency class in one fiber need not have a max-valency transpose into another
+(`n_s ≠ n_{s*}` across fibers). This section establishes the one piece that survives: `smaxAdj` is symmetric
+**within a fiber** (`relOf a a = relOf b b`), via the **fiber-size identity** `|F_src(r)|·n_r = |F_tgt(r)|·n_{r*}`
+(double-count the class `{(u,v) : relOf u v = r}` by source vs. target). When `a,b` share a fiber the two source
+fibers coincide and cancel, giving `n_r = n_{r*}`. `outDeg_eq_interNum` is the reusable brick (it also re-proves
+`valency_eq_card` as the `relOf u u = sourceFiber r` case). **This is exactly the cross-fiber wall §6.1 predicted:
+global `SmaxConnected` is unavailable; smax connectivity localizes to a single fiber.** -/
+
+/-- **The fiber of a reflexive class `f`**, as a vertex set: the points whose loop lies in `f`. -/
+def fiberSet (f : Fin X.rank) : Finset (Fin n) := Finset.univ.filter (fun u => X.relOf u u = f)
+
+/-- **The out-degree depends only on the source fiber.** For any point `u` and class `r`,
+`#{w : relOf u w = r} = c^{relOf u u}_{r, r*}`. Generalises `valency_eq_card` (the `relOf u u = sourceFiber r`
+case): the second leg `relOf w u = r*` is automatic from `relOf u w = r` (`relOf_swap_eq`), so the filter against
+the loop `(u,u)` is just the `u`-out-neighbours of `r`. Axiom-clean. -/
+theorem outDeg_eq_interNum (u : Fin n) (r : Fin X.rank) :
+    (Finset.univ.filter (fun w => X.relOf u w = r)).card
+      = X.interNum r (X.transposeRel r) (X.relOf u u) := by
+  rw [← X.interNum_eq (u := u) (v := u) rfl r (X.transposeRel r)]
+  congr 1
+  ext w
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  exact ⟨fun hw => ⟨hw, X.relOf_swap_eq hw⟩, fun hw => hw.1⟩
+
+/-- **The fiber-size identity** — `|F_src(r)|·n_r = |F_tgt(r)|·n_{r*}`. Double-count the class
+`{(u,v) : relOf u v = r}`: by source `u` it is `Σ_u #{v : relOf u v = r}`, where each term is `n_r` on the source
+fiber `F_src(r) = fiberSet (sourceFiber r)` and `0` elsewhere (`outDeg_eq_interNum` + `relOf_diag_left_eq`); by
+target `v` (Fubini + `relOf_swap_eq`) it is `|F_tgt(r)|·n_{r*}` with `F_tgt(r) = fiberSet (sourceFiber r*)`. The new
+content (homogeneity made this trivial, `F_src = F_tgt = Ω`). Axiom-clean. -/
+theorem fiberSize_mul_valency (r : Fin X.rank) :
+    (X.fiberSet (X.sourceFiber r)).card * X.valency r
+      = (X.fiberSet (X.sourceFiber (X.transposeRel r))).card * X.valency (X.transposeRel r) := by
+  classical
+  -- the "out-degree sum = fiberSize · valency" building block
+  have step : ∀ s : Fin X.rank,
+      (Finset.univ.sum (fun u => (Finset.univ.filter (fun w => X.relOf u w = s)).card))
+        = (X.fiberSet (X.sourceFiber s)).card * X.valency s := by
+    intro s
+    have hterm : ∀ u : Fin n, (Finset.univ.filter (fun w => X.relOf u w = s)).card
+        = if X.relOf u u = X.sourceFiber s then X.valency s else 0 := by
+      intro u
+      by_cases h : X.relOf u u = X.sourceFiber s
+      · rw [if_pos h, X.outDeg_eq_interNum u s, h]; rfl
+      · rw [if_neg h, Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+        intro w _ hw
+        exact h (X.relOf_diag_left_eq (hw.trans (X.relOf_repPair s).symm))
+    rw [Finset.sum_congr rfl (fun u _ => hterm u), ← Finset.sum_filter, Finset.sum_const,
+      smul_eq_mul]
+    rfl
+  rw [← step r, ← step (X.transposeRel r)]
+  simp_rw [Finset.card_filter]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+  by_cases hc : X.relOf b a = r
+  · rw [if_pos hc, if_pos (X.relOf_swap_eq hc)]
+  · rw [if_neg hc, if_neg ?_]
+    intro hc2
+    exact hc (by have h := X.relOf_swap_eq hc2; rwa [X.transposeRel_transposeRel] at h)
+
+/-- **`smaxAdj` is symmetric within a fiber.** If `a, b` lie in one fiber (`relOf a a = relOf b b`) and
+`relOf a b` is max-valency, so is `relOf b a`. The two share a source fiber, so the fiber-size identity cancels
+`|F|` (`> 0`, `a ∈ F`) to give `n_{relOf a b} = n_{relOf b a}`. This is the only symmetry of `smaxAdj` available
+on a multi-fiber CC — connectivity infrastructure must be fed the *intra-fiber* smax graph (§6.1's localization).
+Axiom-clean. -/
+theorem smaxAdj_symm_of_sameFiber {a b : Fin n} (hf : X.relOf a a = X.relOf b b)
+    (h : X.smaxAdj a b) : X.smaxAdj b a := by
+  have hr : X.valency (X.relOf a b) = X.maxValency := h
+  have hba : X.relOf b a = X.transposeRel (X.relOf a b) := X.relOf_swap_eq rfl
+  have hsrc1 : X.relOf a a = X.sourceFiber (X.relOf a b) :=
+    X.relOf_diag_left_eq ((rfl : X.relOf a b = X.relOf a b).trans (X.relOf_repPair _).symm)
+  have hsrc2 : X.relOf b b = X.sourceFiber (X.transposeRel (X.relOf a b)) :=
+    X.relOf_diag_left_eq (hba.trans (X.relOf_repPair _).symm)
+  have hfib := X.fiberSize_mul_valency (X.relOf a b)
+  rw [← hsrc1, ← hsrc2, ← hf] at hfib
+  have hpos : 0 < (X.fiberSet (X.relOf a a)).card := by
+    apply Finset.card_pos.2
+    exact ⟨a, by simp only [fiberSet, Finset.mem_filter, Finset.mem_univ, true_and]⟩
+  have hval : X.valency (X.relOf a b) = X.valency (X.transposeRel (X.relOf a b)) :=
+    Nat.eq_of_mul_eq_mul_left hpos hfib
+  show X.valency (X.relOf b a) = X.maxValency
+  rw [hba, ← hval, hr]
+
 end CoherentConfig
 
 end ChainDescent
