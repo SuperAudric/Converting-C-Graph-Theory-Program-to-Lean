@@ -253,12 +253,21 @@ or A3 turns out harder than the citation.
   (2) is the CC sparse theorem (A1) in the literature (Cartan Thm 3.1 at CC generality)? — these decide whether A1/A2 can
   be *cited* vs *proved*; a citation-free *proof* of both looks within reach (A1 reuses landed machinery; A2 is the research core).
 
-### M4 — Lean decomposition (once M3 is pinned)
-- **`k`-half** (infrastructure): `maxValency(X_T) ≤ |Aut_T|` and its geometric decay along the greedy base — mostly
-  landed-adjacent (`exists_greedy_base_le_log` + orbit–stabiliser).
-- **`c`-half** (the M3 crux lemma) — the new mathematics.
-- **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along with the closure, per
-  the 2026-06-13 `hcatch` finding) or `…viaExtensionSeparability` (cite Thm 4.1). Both landed and waiting.
+### M4 — Lean decomposition + STATE (A1 in progress)
+- **A1 incr 1–2 LANDED** (`CoherentConfig.lean §CC.11`, axiom-clean): the CC indistinguishing number `c(X)`
+  (`indistinguishingNumberOf` / **`indistinguishingNumberOf_eq_card`** / `IsReflexive` / `indistinguishingNumber` / `_le`),
+  the max valency `k(X)` (`sourceFiber` / `valency` / **`valency_eq_card`** / `maxValency` / `valency_le_maxValency`), and
+  **`SparseSeparable`** (`2c(k−1)<n`) — all on the general CC.
+- **A1 NEXT (the bulk — the load-bearing port):** the §S.6 (19)-estimate `Σ_δ pᵤ(δ) ≤ k(k−1)·c` (the workhorse counting,
+  consumes `indistinguishingNumberOf_eq_card`) ⟹ the §S.16 connectivity (`SaConnected`-analogue) ⟹ **"sparse ⟹ a pinning
+  rank exists"** ⟹ feed §CC.10 `dominatorReachable_of_rank`. **⚠ M2-Q1 WARNING (the real risk):** the homogeneous PV proof
+  makes the max-valency graph `s_max` *symmetric* via `n_{s*}=n_s` (homogeneity), which **fails on the multi-fiber `X_T`** —
+  the connectivity step must be re-argued *transpose-aware* (this is where homogeneity was load-bearing; the §CC.11 *defs*
+  ported cleanly, the connectivity body is the genuine effort).
+- **A2 (the open core, after A1):** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue —
+  M2 confirmed not citable; char-2 load-bearing.
+- **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
+  finding) — landed and waiting on `hclo`.
 
 ---
 
@@ -271,8 +280,10 @@ or A3 turns out harder than the citation.
    genuine instances (Clebsch n=16 landed; more by probe) — an honest partial result, not a full closure.
 
 **Risks (state plainly):**
-- **(a) `c(X_T)` is NOT uniformly `O(1)`** — M1 finds a residue with unbounded post-base indistinguishing number. That is a
-  **G2-B witness ⟹ the seal is false** (a statement change — itself a real result). This is the falsifier §1A names.
+- **(a) `c(X_T)` is NOT uniformly `O(1)`** — would be a residue with unbounded post-base indistinguishing number =
+  a **G2-B witness ⟹ the seal is false** (a statement change — itself a real result; the falsifier §1A names).
+  **M1 found NO such witness** across the diverse family (rank 3/4, cyclotomic/amorphic, char 2/odd, n=10–41), so this
+  risk is empirically pushed back, though not formally excluded.
 - **(b) uniform mechanism exists but the proof is genuinely hard** — the realistic case; fall to endpoint 2 or 3.
 - **(c) no uniform mechanism AND no citation** — the route choice (§3) returns NO and Thm 4.1's conditions also resist
   uniformly; then endpoint 3 (carried predicate + decidable instances) is the honest floor, and the "general theorem, not
@@ -280,28 +291,33 @@ or A3 turns out harder than the citation.
 
 ---
 
-## 6. Decision points for the user
-- **After M1:** Route δ′ (if the mechanism is uniform) vs Route (A)+(B)/cite-Thm-4.1 (if family-dependent).
-- **M2 timing:** run the literature/deep-research check before committing to a from-scratch `c(X_T)` proof?
-- **Endpoint tolerance:** is a family-restricted / carried-predicate result (endpoint 3) acceptable as a milestone, or only
-  a full uniform closure?
+## 6. HANDOFF — current state + pick up here
 
-**M1 + M3 are DONE** (above): `c(X_T)` **and** `k(X_T)` collapse to `O(1)`, the landed sparse bound `2c(k−1)<n` holds on
-the 2-point extension uniformly, and M3 drafted a **citation-free candidate (Option A)** — port the landed sparse theorem
-to the CC + the shared open core `ParamBoundOnExtension`, no Thm 4.1.
-**Immediate next action — pick one:**
-- **(A1) STARTED in Lean (`CoherentConfig.lean §CC.11`, axiom-clean, build green 94s):** the first increment ports the
-  **indistinguishing number `c(X)`** to the general CC + its geometric counting form (`indistinguishingNumberOf` /
-  **`indistinguishingNumberOf_eq_card`**: `c(r) = |{γ : relOf γ α = relOf γ β}|` — the shape §S.16's connectivity argument
-  consumes) / `IsReflexive` / `indistinguishingNumber` / `indistinguishingNumberOf_le`, with the non-symmetric transpose
-  bookkeeping (`b* = transposeRel b`). **Increment 2 LANDED (`§CC.11`, axiom-clean): the max-valency `k(X)` + sparse
-  predicate** — `sourceFiber` / `valency` (via `interNum r r* (sourceFiber r)`, the multi-fiber non-symmetric form) /
-  **`valency_eq_card`** (valency = out-degree `|{w:relOf u w=r}|`) / `maxValency` / `valency_le_maxValency` /
-  **`SparseSeparable`** (`2c(k−1)<n` on the CC). So `c(X)`, `k(X)`, and the sparse hypothesis are all now defined on the
-  general CC. **NEXT A1 increment:** the §S.6 (19)-estimate `Σ_δ pᵤ(δ) ≤ k(k−1)c` (the workhorse counting, via
-  `indistinguishingNumberOf_eq_card`) ⟹ the §S.16 connectivity (`saConnected`-analogue) ⟹ *"sparse ⟹ a pinning rank
-  exists"* feeding the §CC.10 `dominatorReachable_of_rank`. That counting+connectivity body is the bulk of the remaining port.
-- **(M2) targeted literature/`deep-research`:** is `ParamBoundOnExtension` (a `c`/`k` bound for primitive small CC
-  extensions) or the CC sparse theorem citable? — fixes how much of A1/A2 must be proved vs cited.
-- **(A2) the research core:** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue family —
-  the genuine `s(X)` math, char-2 load-bearing. Hardest; do after A1 makes the consumer concrete.
+**Decisions RESOLVED this session** (so a fresh reader does not re-litigate them):
+1. **Family-by-family δ′ dries up ⟹ the input must be a GENERAL theorem** (G2-B = primitive-small-non-Cameron = infinitely
+   many families). (build doc STATUS decision.)
+2. **M2 ran ⟹ build over cite** — the two pieces the project needs (A1 at CC generality, A2) are *not* citable (§4-M2:
+   Q1 sparse-thm homogeneous-only, Q2 crux open); the citable results are group-side/order only.
+3. **Route = δ′ Option A** (citation-free: port the sparse theorem to the CC), with cite-Thm-4.1 (Option B) as fallback.
+4. **Calibration pinned (Q4):** polynomial canonisation is citable for the **rank-3/4 residue** (Babai/Kivva); only
+   sub-exponential in unbounded rank. The project's residue is rank 3–4, so the polynomiality claim holds there.
+
+**Current Lean state (all axiom-clean `[propext, Classical.choice, Quot.sound]`):** the δ′ engine on `X_T` (§CC.10),
+`Sharp (pointExtension X T)`, and the seal wiring `reachesRigidOrCameron_viaExtensionDominatorClosure` are LANDED and
+waiting on the single input `hclo`. The CC sparse substrate **A1 incr 1–2** (`§CC.11`: `c(X)`, `k(X)`, `SparseSeparable`)
+is landed. The open content is `hclo` = `ParamBoundOnExtension` (A2), reached via the A1 sparse theorem.
+
+**▶ PICK UP HERE (the exact next Lean step):** **A1 increment 3** — port the §S.6 **(19)-estimate** `Σ_δ pᵤ(δ) ≤ k(k−1)·c`
+to the CC (define the pair-count `pᵤ(δ)`, swap summation, bound each inner term by `indistinguishingNumberOf_eq_card` =
+the landed geometric lemma, count the `k(k−1)` off-diagonal pairs) — then the §S.16 **connectivity** (`SaConnected`-analogue)
+⟹ **"sparse ⟹ a pinning rank exists"** ⟹ feed the landed §CC.10 `dominatorReachable_of_rank`. **Carry the M2-Q1 warning
+into the connectivity step:** the homogeneous PV proof used `s_max` symmetric (`n_{s*}=n_s`); on the multi-fiber `X_T` that
+fails, so re-argue connectivity transpose-aware. After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)` core,
+char-2 load-bearing), then assembly is automatic.
+
+**Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
+result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?
+
+**Reading order for a fresh reader:** the general-CC build doc STATUS → its §1A (why not GI∈P) / §1B (both routes ⟹
+`c(X_T)`) → THIS doc §0–§4 (the reduction + M1/M2/M3 results) → `CoherentConfig.lean` §CC.10 (the landed δ′ engine + `Sharp`)
+and §CC.11 (the A1 sparse substrate) → resume at **A1 increment 3** above.

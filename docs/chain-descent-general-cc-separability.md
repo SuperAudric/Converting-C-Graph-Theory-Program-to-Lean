@@ -35,22 +35,30 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   {G3 + hImprim + `hclo`-on-`X_T` + `hcatch`}.
 - **Real discharges (non-vacuity, not the family theorem):** the `g = -1` odd-char family (`…viaG0powNeg`, `hclo`
   PROVED not carried) and the concrete ℤ₄² Clebsch closure (`b(X) ≤ 2`, `AssociationScheme`-level).
+- **The CC sparse substrate — A1 incr 1–2 (`CoherentConfig.lean §CC.11`):** the indistinguishing number `c(X)` + its
+  geometric counting lemma (`indistinguishingNumberOf_eq_card`), the max valency `k(X)`, and `SparseSeparable` (`2c(k−1)<n`)
+  all defined on the general CC — the foundation of the citation-free `c(X_T)` route (the live build, **see
+  `docs/chain-descent-cxt-scoping.md`** — its own self-contained home).
 
-### The open frontier — ONE quantity: `c(X_T)`
+### The open frontier — ONE quantity: `c(X_T)` (live work: `chain-descent-cxt-scoping.md`)
 A bounded-base δ′ pinning rank / forced-triangle closure for the residue family **on the extension `X_T`**
-(`hclo : ∀ v, (pointExtension …).DominatorReachable T v`). Everything else reduces to it: §1B proved the general
-(A)+(B) route's *domination* condition IS this same quantity, and the `n ≥ 25` **`hcatch`** (the 1-WL↔2-WL catch-up) is
-*equivalent to it* at a complete extension (the 2026-06-13 `hcatch` finding) — so `c(X_T)` subsumes `hcatch`.
+(`hclo : ∀ v, (pointExtension …).DominatorReachable T v`). Everything reduces to it: §1B — the general (A)+(B) *domination*
+condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at a complete extension (the `hcatch` finding)
+— so `c(X_T)` subsumes `hcatch`. **Scoped + probed + drafted in `chain-descent-cxt-scoping.md` (M1/M2/M3, 2026-06-13):**
+- **M1 (probe):** `c(X_T)` **and** `k(X_T)` collapse to `O(1)` after `O(1)` points, uniformly across a diverse family
+  (rank 3/4, cyclotomic/amorphic, char 2/odd, n=10–41) — **no falsifier**; so the sparse bound `2c(k−1)<n` holds on the
+  extension. This is the evidence the target is true.
+- **DECISION:** supply `c(X_T)` as a GENERAL theorem, not a family ladder (G2-B = infinitely many families). The route is
+  **δ′ Option A — citation-free:** apply the (project-landed) sparse theorem to `X_T`. cite-Thm-4.1 is the fallback.
+- **M2 (deep-research):** **build over cite is confirmed** — the sparse theorem is homogeneous-only (Q1) and the crux
+  is open (Q2); citable results are group-side only (Q3). **Calibration (Q4): polynomial canonisation is citable for the
+  rank-3/4 residue (Babai/Kivva); only sub-exponential in unbounded rank — and the residue IS rank 3–4.**
 
-**DECISION (2026-06-13): supply `c(X_T)` as a GENERAL theorem, not a family enumeration.** G2-B = primitive + small +
-non-Cameron = infinitely many families (the n=16 rainbow mechanism dies by n=25 — probe), so enumerating δ′ closures is
-the de-classing anti-pattern the project already abandoned. Mirror the affine-slice precedent (cite the general
-separability theorem + a finite `decide` exception table): **cite Ponomarenko Thm 4.1** (seal `modulo {G3 + Thm 4.1}`),
-reducing the owed work to discharging Thm 4.1's conditions on the extension (probe-backed, §5.2) — OR prove the general
-δ′ `c(X_T)` bound (citation-free, heavier). Either way the δ′ engine on `X_T` is the Lean vehicle (§5.1).
-
-**NEXT:** the general `c(X_T)` argument (subsumes `n ≥ 25` `hcatch`); then (deferred, §7) the `SchurianScheme`→seal
-wiring for a concrete residue + the hImprim `G₀Irreducible → IsPrimitive` bridge.
+**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** **A1 increment 3** — port the §S.6 `(19)`-estimate
+`Σ_δ pᵤ(δ) ≤ k(k−1)·c` then the §S.16 connectivity ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10
+`dominatorReachable_of_rank`. **⚠ the connectivity step must be re-argued transpose-aware** (M2-Q1: the homogeneous PV
+proof leaned on `s_max` symmetry, which fails on multi-fiber `X_T`). Then A2 (prove `c(X_T)=O(1)`, the open core); then
+(deferred, §7) `SchurianScheme`→seal wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
 
 **Orientation:** §1A why-not-GI∈P · §1B the `c(X_T)` reduction · §5.1 the build map · §5.2 the open problem + planning
 insights · §7 do-not-re-walk · §8 condensed timeline + the changelog for full history.
@@ -586,6 +594,13 @@ consumer; `Sharp` discharged internally) / the capstone **`reachesRigidOrCameron
 `hcatch ↔ warmRefine-discrete` at a complete `E` — so `n ≥ 25` `hcatch` ≡ the 1-WL discreteness = open content, NOT
 plumbing) / **`warmTwinsAreFiberTwins_of_dominatorClosure`** (`hcatch` free where the scheme-level δ′ closes — n=16
 non-vacuity; does not extend to `n ≥ 25`).
+**The CC sparse substrate — A1 incr 1–2 (LANDED 2026-06-13, `CoherentConfig.lean §CC.11`; the citation-free `c(X_T)`
+route, live work in `chain-descent-cxt-scoping.md`):** the indistinguishing number **`indistinguishingNumberOf`** /
+**`indistinguishingNumberOf_eq_card`** (the geometric form `c(r)=|{γ:relOf γ α=relOf γ β}|`) / `IsReflexive` /
+**`indistinguishingNumber`** (`c(X)`) / `indistinguishingNumberOf_le`; the valency **`sourceFiber`** / **`valency`** /
+**`valency_eq_card`** / **`maxValency`** (`k(X)`) / `valency_le_maxValency`; and **`SparseSeparable`** (`2c(k−1)<n`).
+**OPEN (A1 incr 3, the bulk):** the §S.6 `(19)`-estimate + §S.16 connectivity (re-argued transpose-aware, M2-Q1) ⟹
+"sparse ⟹ pinning rank exists" ⟹ §CC.10 `dominatorReachable_of_rank`; then A2 (`c(X_T)=O(1)`, the open core).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /
