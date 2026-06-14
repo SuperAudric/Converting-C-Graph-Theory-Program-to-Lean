@@ -1449,6 +1449,56 @@ theorem valency_mul_interNum (i j k : Fin X.rank) {x y₀ z₀ : Fin n}
   rw [X.valency_eq_card hk, X.valency_eq_card hi]
   exact X.outDeg_mul_interNum i j k x
 
+/-! ### §CC.15 — The max-valency / local-rigidity graph layer (A1, §S.4 + `saAdj_symm`)
+
+The CC port of `Separability.lean §S.4` (the `smax`/`sα` graph defs) and the `saAdj_symm` half of §S.8. `InSmax` is the
+max-valency predicate; `smaxAdj` the (out-going) max-valency graph; `saAdj α` the local-rigidity relation on `α`'s
+max-valency neighbourhood (the forced `c=1` triangle). **`smaxAdj` is NOT symmetric on a general CC** (`n_s ≠ n_{s*}` when
+fibers differ in size — symmetric only *within* a fiber, where the pair-count identity gives `n_s = n_{s*}`; the homogeneous
+`smaxAdj_symm` used `rel_symm`). The within-fiber `smaxAdj`-symmetry and the connectivity theorems (`smaxConnected`/
+`saConnected_of_sparseSeparable`) — which are intrinsically *single-fiber* (the PV counting `valency_le_pu_of_valency_lt`
+needs the apex in `u`'s source fiber) — are the next increment. **`saAdj_symm` is landed here** because it does *not* need a
+symmetric `smaxAdj`: the two triangle legs are both out-going from `α` (so `InSmax` gives them *equal* valency directly), and
+the §CC.14 transpose-aware identity supplies the cancellation — the `j*` it produces lands exactly on `relOf γ β =
+(relOf β γ)*`, which is the reflected triangle's leg. -/
+
+/-- A class is **max-valency** (`InSmax`): its out-degree equals `k(X)`. The `Smax`-membership predicate. -/
+def InSmax (r : Fin X.rank) : Prop := X.valency r = X.maxValency
+
+/-- The **`smax` graph** adjacency (out-going form): `relOf a b` is a max-valency class. *Not* symmetric on a general CC
+(`n_s ≠ n_{s*}` across fibers); the connectivity treatment is the next increment. -/
+def smaxAdj (a b : Fin n) : Prop := X.InSmax (X.relOf a b)
+
+/-- Connectedness of the `smax` graph. -/
+def SmaxConnected : Prop := ∀ a b : Fin n, Relation.ReflTransGen X.smaxAdj a b
+
+/-- The **local-rigidity relation `sα`** on `αsmax`: for `β, γ` max-valency neighbours of `α`, the coloured triangle
+`{α,β,γ}` is forced — `c^{r(α,γ)}_{r(α,β),r(β,γ)} = 1`. The CC port of `Separability.saAdj`. -/
+def saAdj (α β γ : Fin n) : Prop :=
+  X.smaxAdj α β ∧ X.smaxAdj α γ ∧
+    X.interNum (X.relOf α β) (X.relOf β γ) (X.relOf α γ) = 1
+
+/-- Connectedness of `sα` on `αsmax`: every two max-valency neighbours of `α` are joined by an `sα`-path. -/
+def SaConnected (α : Fin n) : Prop :=
+  ∀ β γ : Fin n, X.smaxAdj α β → X.smaxAdj α γ → Relation.ReflTransGen (X.saAdj α) β γ
+
+/-- **`sα` is symmetric** (the CC port of `Separability.saAdj_symm`, via the transpose-aware triangle identity §CC.14).
+Both legs `r = relOf α β`, `t = relOf α γ` have valency `k` (max), so `valency_mul_interNum` turns `c^t_{r,s} = 1` into
+`c^r_{t,s*} = 1` — and `s* = relOf γ β`, so `c^r_{t,s*}` is exactly the reflected triangle `c^{r(α,β)}_{r(α,γ),r(γ,β)}`. This
+makes the `sα`-components (`ReflTransGen (saAdj α)`) a genuine equivalence. Axiom-clean. -/
+theorem saAdj_symm (α : Fin n) {β γ : Fin n} (h : X.saAdj α β γ) : X.saAdj α γ β := by
+  obtain ⟨hβ, hγ, htri⟩ := h
+  refine ⟨hγ, hβ, ?_⟩
+  have hvβ : X.valency (X.relOf α β) = X.maxValency := hβ
+  have hvγ : X.valency (X.relOf α γ) = X.maxValency := hγ
+  have hpos : 0 < X.maxValency := by
+    rw [← hvβ, X.valency_eq_card (rfl : X.relOf α β = X.relOf α β)]
+    exact Finset.card_pos.2 ⟨β, by simp⟩
+  have hid := X.valency_mul_interNum (X.relOf α β) (X.relOf β γ) (X.relOf α γ) rfl rfl
+  rw [htri, Nat.mul_one, hvβ, hvγ] at hid
+  rw [X.relOf_swap_eq (rfl : X.relOf β γ = X.relOf β γ)]
+  exact (Nat.eq_of_mul_eq_mul_left hpos (by rw [Nat.mul_one]; exact hid)).symm
+
 end CoherentConfig
 
 end ChainDescent

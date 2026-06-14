@@ -54,15 +54,16 @@ condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at
   is open (Q2); citable results are group-side only (Q3). **Calibration (Q4): polynomial canonisation is citable for the
   rank-3/4 residue (Babai/Kivva); only sub-exponential in unbounded rank — and the residue IS rank 3–4.**
 
-**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** continue the **A1 §S-chain port** (§S.6 `(19)` `sum_pu_le`
-`§CC.12` + §S.7 `(20)` `pu_eq_sum` `§CC.13` + §S.8 triangle identity `outDeg_mul_interNum`/`valency_mul_interNum` `§CC.14`, all
-LANDED 2026-06-14, axiom-clean, all transpose-aware). **Scope correction (2026-06-14):** A1 is the *whole* §S.5→§S.16 chain.
-**Next unit = the §S.4 graph layer** (`Smax`/`InSmax`/`smaxAdj`/`saAdj`/`SaConnected`) + **`saAdj_symm`** (now reachable via
-`valency_mul_interNum`). **⚠ HARD non-symmetry:** `smaxAdj` is *not* symmetric on a general CC (`n_s ≠ n_{s*}` across fibers —
-homogeneous `smaxAdj_symm` used `rel_symm`); the max-valency graph layer needs rethinking (symmetrize / transpose-closed max
-set / single-fiber-locus restriction) — the crux of the connectivity port. Then §S.9–§S.16 ⟹ "sparse ⟹ a pinning rank exists"
-⟹ feed §CC.10 `dominatorReachable_of_rank`. Then A2 (prove `c(X_T)=O(1)`, the open core); then (deferred, §7)
-`SchurianScheme`→seal wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
+**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** continue the **A1 §S-chain port** (§S.6 `sum_pu_le` `§CC.12` +
+§S.7 `pu_eq_sum` `§CC.13` + §S.8 triangle identity `§CC.14` + §S.4 graph layer `InSmax`/`smaxAdj`/`saAdj`/`SaConnected` +
+`saAdj_symm` `§CC.15`, all LANDED 2026-06-14, axiom-clean, all transpose-aware). **Next unit = the connectivity theorems
+(§S.9–§S.16), localized to a SINGLE FIBER.** The connectivity infra needs a *symmetric* relation and `smaxAdj` is symmetric
+only within a fiber (`n_s = n_{s*}` intra-fiber); the PV counting `valency_le_pu_of_valency_lt` needs the apex in `u`'s source
+fiber — **both say the connectivity argument is intrinsically single-fiber.** Sub-pieces: (a) the pair-count/fiber-size
+identity `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹ within-fiber `smaxAdj_symm`; (b) §S.9 `valency_le_pu_of_valency_lt` (apex-in-fiber,
+via §CC.14); (c) §S.10/§S.16 connectivity on a fiber ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10
+`dominatorReachable_of_rank`. Then A2 (prove `c(X_T)=O(1)`, the open core); then (deferred, §7) `SchurianScheme`→seal wiring +
+the hImprim `G₀Irreducible → IsPrimitive` bridge.
 
 **Orientation:** §1A why-not-GI∈P · §1B the `c(X_T)` reduction · §5.1 the build map · §5.2 the open problem + planning
 insights · §7 do-not-re-walk · §8 condensed timeline + the changelog for full history.
@@ -607,11 +608,14 @@ route, live work in `chain-descent-cxt-scoping.md`):** the indistinguishing numb
 the CC pair-count **`pu`**/**`pu_eq`**, the transpose bridge **`relOf_right_eq_iff_left`** (CC substitute for `relOfPair_symm`),
 **`not_isReflexive_relOf_of_ne`**, **`card_relNeighbors_le_maxValency`** (`A.card ≤ k(X)` for non-reflexive `u`, replacing
 homogeneity's exact `= k`), **`sum_pu_le`** (`Σ_δ pᵤ(δ) ≤ k(k−1)·c`, §S.6), **`pu_eq_sum`** (`pᵤ(δ) = Σ_w c^v_{uw}(c^v_{uw}−1)`,
-§S.7), and **`outDeg_mul_interNum`**/**`valency_mul_interNum`** (the triangle identity `n_k·c^k_{i,j} = n_i·c^i_{k,j*}`, §S.8 —
-transpose-aware: `j* = transposeRel j`, the first §S statement M2-Q1 changes). Direct ports of `Separability.lean §S.6–§S.8`.
-**OPEN (A1, the rest of the §S-chain):** the §S.4 graph layer (`Smax`/`InSmax`/`smaxAdj`/`saAdj`/`SaConnected`) + `saAdj_symm`
-(**⚠ `smaxAdj` non-symmetric on a general CC — `n_s ≠ n_{s*}`; needs rethinking**) → §S.9–§S.16 connectivity (transpose-aware,
-M2-Q1) ⟹ "sparse ⟹ pinning rank exists" ⟹ §CC.10 `dominatorReachable_of_rank`; then A2 (`c(X_T)=O(1)`, the open core).
+§S.7), **`outDeg_mul_interNum`**/**`valency_mul_interNum`** (the triangle identity `n_k·c^k_{i,j} = n_i·c^i_{k,j*}`, §S.8 —
+transpose-aware: `j* = transposeRel j`, the first §S statement M2-Q1 changes), and the §S.4 graph layer
+`InSmax`/`smaxAdj`/`SmaxConnected`/`saAdj`/`SaConnected` + **`saAdj_symm`** (`§CC.15`; the forced-triangle relation is
+symmetric — `s*` lands on `relOf γ β`). Direct ports of `Separability.lean §S.4–§S.8`.
+**OPEN (A1, the rest):** the §S.9–§S.16 connectivity, **localized to a single fiber** (the infra needs a symmetric relation,
+`smaxAdj` is symmetric only intra-fiber `n_s = n_{s*}`; the counting needs the apex in `u`'s source fiber). Sub-pieces: (a)
+pair-count/fiber-size identity ⟹ within-fiber `smaxAdj_symm`; (b) §S.9 `valency_le_pu_of_valency_lt`; (c) §S.10/§S.16
+connectivity on a fiber ⟹ "sparse ⟹ pinning rank exists" ⟹ §CC.10 `dominatorReachable_of_rank`; then A2 (`c(X_T)=O(1)`).
 **The δ′ dominator-closure engine (LANDED 2026-06-12, CITATION-FREE — the lighter seal path):**
 **`determined_of_forcedTriangle`** (B3′, smax-free) (`CascadeAffine.lean §S-bridge`) / **`DominatorReachable`** /
 `determinedAt_of_dominatorReachable` / **`discrete_of_dominatorClosure`** /

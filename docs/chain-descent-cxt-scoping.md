@@ -281,14 +281,20 @@ or A3 turns out harder than the citation.
   `valency_mul_intersectionNumber` is `n_k·c^k_{ij} = n_i·c^i_{kj}`; on the non-symmetric CC the `y`-leg flip introduces a
   transpose, so it is `c^i_{k,j*}` (`j* = transposeRel j`). Verified the `j*` lands exactly right for the downstream
   `saAdj_symm` (the reflected triangle's `relOf γ β = s*` matches). `saAdj_symm` deferred to the graph-layer increment (next).
-- **A1 NEXT (the graph layer + the HARD non-symmetry):** the §S.4 graph defs on the CC — `Smax`/`InSmax`/`smaxAdj`/`saAdj`/
-  `SaConnected` — and **`saAdj_symm`** (now reachable via `valency_mul_interNum`). **⚠ NEW FINDING (the load-bearing M2-Q1
-  risk, now precise): `smaxAdj` is NOT symmetric on a general CC.** `smaxAdj a b` (a max-valency relation joins them) does
-  *not* give `smaxAdj b a`, because the out-valency `n_s` and the transpose out-valency `n_{s*}` (= in-valency of `s`) can
-  **differ when fibers have different sizes** — homogeneous `smaxAdj_symm` used `rel_symm` (relations symmetric), false here.
-  So the max-valency graph layer needs genuine rethinking (symmetrize, work with a transpose-closed max-valency set, or
-  restrict to the single-fiber locus the closure actually runs on). This is the crux of the connectivity port. Then §S.9–§S.16
-  ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`.
+- **A1 incr 6 (§S.4 graph layer + `saAdj_symm`) LANDED 2026-06-14** (`CoherentConfig.lean §CC.15`, axiom-clean): the defs
+  **`InSmax`**/**`smaxAdj`**/**`SmaxConnected`**/**`saAdj`**/**`SaConnected`** + **`saAdj_symm`** (the forced-triangle relation
+  is symmetric, via the transpose-aware §CC.14 identity — the `j*` lands exactly on `relOf γ β = (relOf β γ)*`). `saAdj_symm`
+  does *not* need a symmetric `smaxAdj` (the two legs are out-going from `α`, so `InSmax` gives equal valency directly). So the
+  sα-components are now a genuine equivalence.
+- **A1 NEXT (connectivity — the SINGLE-FIBER localization):** the connectivity theorems `smaxConnected_of_sparseSeparable`
+  (§S.10) and `saConnected_of_sparseSeparable` (§S.16) + the §S.9/§S.11–§S.15 counting in between. **Two findings pin how to
+  do it:** (1) the connectivity infra (`exists_small_closed_of_not_connected`) needs a **symmetric** relation, and `smaxAdj` is
+  symmetric only **within a fiber** (`n_s = n_{s*}` for intra-fiber `s`, from the pair-count identity `|F|·n_s = |F|·n_{s*}`);
+  (2) the PV counting `valency_le_pu_of_valency_lt` (§S.9, via §CC.14) needs the **apex `α` in `u`'s source fiber** (else
+  `valency_mul_interNum`'s witness fails). **Both say the same thing: the connectivity argument is intrinsically single-fiber.**
+  So the next sub-pieces are: (a) the **pair-count / fiber-size identity** `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹ within-fiber
+  `smaxAdj_symm`; (b) §S.9 `valency_le_pu_of_valency_lt` (CC, apex-in-fiber); (c) §S.10/§S.16 connectivity restricted to a
+  fiber. Then "sparse ⟹ a pinning rank exists" ⟹ feed §CC.10 `dominatorReachable_of_rank`.
 - **A2 (the open core, after A1):** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue —
   M2 confirmed not citable; char-2 load-bearing.
 - **Assembly:** feed `reachesRigidOrCameron_viaExtensionDominatorClosure` (δ′; `hcatch` rides along, per the `hcatch`
@@ -332,14 +338,15 @@ or A3 turns out harder than the citation.
 waiting on the single input `hclo`. The CC sparse substrate **A1 incr 1–2** (`§CC.11`: `c(X)`, `k(X)`, `SparseSeparable`)
 is landed. The open content is `hclo` = `ParamBoundOnExtension` (A2), reached via the A1 sparse theorem.
 
-**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.8: incr 3 (§S.6 (19)-estimate `sum_pu_le`,
-`§CC.12`), incr 4 (§S.7 (20) `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity `outDeg_mul_interNum`/`valency_mul_interNum`,
-`§CC.14`) — all axiom-clean, 2026-06-14, all transpose-aware (the §S.8 identity is `c^i_{k,j*}`, M2-Q1's first *statement*
-change). **Next = the §S.4 graph layer + `saAdj_symm`** (`Smax`/`InSmax`/`smaxAdj`/`saAdj`/`SaConnected`). **⚠ HARD: `smaxAdj`
-is not symmetric on a general CC** (`n_s ≠ n_{s*}` across fibers — homogeneous `smaxAdj_symm` used `rel_symm`); the max-valency
-graph layer needs rethinking (symmetrize / transpose-closed max set / single-fiber-locus restriction). This is the crux of the
-connectivity port. Then §S.9–§S.16 ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed the landed §CC.10 `dominatorReachable_of_rank`.
-After A1: **A2** (prove `ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing), then assembly is automatic.
+**▶ PICK UP HERE (the exact next Lean step):** A1 §S-chain port LANDED through §S.8 + the §S.4 graph layer: incr 3 (§S.6
+`sum_pu_le`, `§CC.12`), incr 4 (§S.7 `pu_eq_sum`, `§CC.13`), incr 5 (§S.8 triangle identity, `§CC.14`), incr 6 (§S.4 graph defs
++ `saAdj_symm`, `§CC.15`) — all axiom-clean, 2026-06-14, all transpose-aware. **Next = the connectivity theorems
+(§S.9–§S.16), localized to a SINGLE FIBER.** Two findings force this: the connectivity infra needs a *symmetric* relation and
+`smaxAdj` is symmetric only within a fiber (`n_s = n_{s*}` intra-fiber); and the PV counting `valency_le_pu_of_valency_lt`
+needs the apex in `u`'s source fiber. Sub-pieces: (a) the pair-count/fiber-size identity `|F_src|·n_r = |F_tgt|·n_{r*}` ⟹
+within-fiber `smaxAdj_symm`; (b) §S.9 `valency_le_pu_of_valency_lt` (apex-in-fiber, via §CC.14); (c) §S.10/§S.16 connectivity
+on a fiber ⟹ "sparse ⟹ a pinning rank exists" ⟹ feed the landed §CC.10 `dominatorReachable_of_rank`. After A1: **A2** (prove
+`ParamBoundOnExtension`, the open `s(X)` core, char-2 load-bearing), then assembly is automatic.
 
 **Still-open decision (for the user, not blocking):** endpoint tolerance — is a family-restricted / carried-predicate
 result (endpoint 3, §5) an acceptable milestone, or only a full uniform closure?
