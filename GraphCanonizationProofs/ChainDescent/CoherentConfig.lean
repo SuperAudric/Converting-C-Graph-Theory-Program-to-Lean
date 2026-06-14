@@ -1151,6 +1151,45 @@ theorem indistinguishingNumberOf_le {r : Fin X.rank} (hr : ¬ X.IsReflexive r) :
     X.indistinguishingNumberOf r ≤ X.indistinguishingNumber :=
   Finset.le_sup (Finset.mem_filter.2 ⟨Finset.mem_univ r, hr⟩)
 
+/-- The **source fiber** of a class `r` — the reflexive class `relOf u u` of any `u` with `(u, ·) ∈ r`
+(well-defined: `relOf_diag_left_eq`). On a homogeneous scheme this is always `R₀`; on a multi-fiber CC it
+is the fiber `r` emanates from. -/
+noncomputable def sourceFiber (r : Fin X.rank) : Fin X.rank :=
+  X.relOf (X.repPair r).1 (X.repPair r).1
+
+/-- **Valency of the class `r`** — its out-degree `#{w : relOf u w = r}` from a source point `u`. The CC
+form of `Separability.valency`; expressed via `interNum` against the source fiber (`relOf u w = r` already
+forces `relOf w u = transposeRel r`, so the second leg is free). -/
+noncomputable def valency (r : Fin X.rank) : Nat :=
+  X.interNum r (X.transposeRel r) (X.sourceFiber r)
+
+/-- **Valency is the out-degree.** For any `(u, v) ∈ r`, `valency r = #{w : relOf u w = r}` (constant on the
+source fiber, by coherence). -/
+theorem valency_eq_card {u v : Fin n} {r : Fin X.rank} (h : X.relOf u v = r) :
+    X.valency r = (Finset.univ.filter (fun w => X.relOf u w = r)).card := by
+  have hfib : X.relOf u u = X.sourceFiber r :=
+    X.relOf_diag_left_eq (h.trans (X.relOf_repPair r).symm)
+  unfold valency
+  rw [← hfib, ← X.interNum_eq (u := u) (v := u) rfl r (X.transposeRel r)]
+  congr 1
+  ext w
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  exact ⟨fun hw => hw.1, fun hw => ⟨hw, X.relOf_swap_eq hw⟩⟩
+
+/-- **The maximum valency `k(X)`** — the largest out-degree over all non-reflexive classes. -/
+noncomputable def maxValency : Nat :=
+  (Finset.univ.filter (fun r : Fin X.rank => ¬ X.IsReflexive r)).sup X.valency
+
+/-- Every non-reflexive valency is `≤ k(X)`. -/
+theorem valency_le_maxValency {r : Fin X.rank} (hr : ¬ X.IsReflexive r) :
+    X.valency r ≤ X.maxValency :=
+  Finset.le_sup (Finset.mem_filter.2 ⟨Finset.mem_univ r, hr⟩)
+
+/-- **The PV-Thm-3.1 sparsity hypothesis `2c(k−1) < n`, on a general CC.** When it holds on the point
+extension `X_T` (M1: `c(X_T), k(X_T) = O(1)` ⟹ this holds for large `n`), the landed sparse theorem's
+content discretizes `X_T` in `≤ 2` further points — the citation-free `c(X_T)` route (scoping §4-M3 Option A). -/
+def SparseSeparable : Prop := 2 * X.indistinguishingNumber * (X.maxValency - 1) < n
+
 end CoherentConfig
 
 end ChainDescent

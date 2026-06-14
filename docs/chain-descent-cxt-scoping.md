@@ -255,9 +255,13 @@ to the CC + the shared open core `ParamBoundOnExtension`, no Thm 4.1.
   **indistinguishing number `c(X)`** to the general CC + its geometric counting form (`indistinguishingNumberOf` /
   **`indistinguishingNumberOf_eq_card`**: `c(r) = |{γ : relOf γ α = relOf γ β}|` — the shape §S.16's connectivity argument
   consumes) / `IsReflexive` / `indistinguishingNumber` / `indistinguishingNumberOf_le`, with the non-symmetric transpose
-  bookkeeping (`b* = transposeRel b`). **NEXT A1 increments:** the CC max-valency `k(X)` + the `SparseSeparable` predicate
-  (`2c(k−1)<n`); then the §S.6 (19)-estimate `Σ_δ pᵤ(δ) ≤ k(k−1)c` and the §S.16 connectivity
-  (`saConnected`-analogue) ⟹ *"sparse ⟹ a pinning rank exists"* feeding the §CC.10 `dominatorReachable_of_rank`.
+  bookkeeping (`b* = transposeRel b`). **Increment 2 LANDED (`§CC.11`, axiom-clean): the max-valency `k(X)` + sparse
+  predicate** — `sourceFiber` / `valency` (via `interNum r r* (sourceFiber r)`, the multi-fiber non-symmetric form) /
+  **`valency_eq_card`** (valency = out-degree `|{w:relOf u w=r}|`) / `maxValency` / `valency_le_maxValency` /
+  **`SparseSeparable`** (`2c(k−1)<n` on the CC). So `c(X)`, `k(X)`, and the sparse hypothesis are all now defined on the
+  general CC. **NEXT A1 increment:** the §S.6 (19)-estimate `Σ_δ pᵤ(δ) ≤ k(k−1)c` (the workhorse counting, via
+  `indistinguishingNumberOf_eq_card`) ⟹ the §S.16 connectivity (`saConnected`-analogue) ⟹ *"sparse ⟹ a pinning rank
+  exists"* feeding the §CC.10 `dominatorReachable_of_rank`. That counting+connectivity body is the bulk of the remaining port.
 - **(M2) targeted literature/`deep-research`:** is `ParamBoundOnExtension` (a `c`/`k` bound for primitive small CC
   extensions) or the CC sparse theorem citable? — fixes how much of A1/A2 must be proved vs cited.
 - **(A2) the research core:** prove `ParamBoundOnExtension` (`c,k=O(1)` on the `O(1)`-extension) for the residue family —

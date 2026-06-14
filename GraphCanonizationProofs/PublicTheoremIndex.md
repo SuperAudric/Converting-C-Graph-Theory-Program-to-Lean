@@ -1378,6 +1378,12 @@ Axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`.
 | `CoherentConfig.IsReflexive` | 1139-1143 | §CC.11 (A1) a class is reflexive/diagonal iff some loop lies in it (`∃u, relOf u u = r`); `c(X)` maxes over non-reflexive classes. | Definition |
 | `CoherentConfig.indistinguishingNumber` | 1145-1147 | §CC.11 (A1) **The indistinguishing number `c(X)`** of a general CC — `max_{r non-reflexive} c(r)`. The `c` of the sparse bound `2c(k−1)<n` applied to the extension `X_T`. | Definition, `noncomputable` |
 | `CoherentConfig.indistinguishingNumberOf_le` | 1149-1152 | §CC.11 (A1) `c(r) ≤ c(X)` for every non-reflexive class `r`. Axiom-clean. | — |
+| `CoherentConfig.sourceFiber` | 1154-1158 | §CC.11 (A1) the reflexive class `relOf u u` a class `r` emanates from (well-defined by `relOf_diag_left_eq`); `R₀` on a homogeneous scheme, the source fiber on a multi-fiber CC. | Definition, `noncomputable` |
+| `CoherentConfig.valency` | 1160-1164 | §CC.11 (A1) **Valency `n_r`** of a class on a general CC — its out-degree, `interNum r r* (sourceFiber r)` (the `relOf w u = r*` leg is free given `relOf u w = r`). | Definition, `noncomputable` |
+| `CoherentConfig.valency_eq_card` | 1166-1177 | §CC.11 (A1) **Valency is the out-degree**: for `(u,v)∈r`, `valency r = |{w : relOf u w = r}|` (constant on the source fiber, by coherence). The CC form of `Separability.valency_eq_card`. Axiom-clean. | — |
+| `CoherentConfig.maxValency` | 1179-1181 | §CC.11 (A1) **Max valency `k(X)`** of a general CC — the largest out-degree over non-reflexive classes. The `k` of the sparse bound `2c(k−1)<n` on the extension. | Definition, `noncomputable` |
+| `CoherentConfig.valency_le_maxValency` | 1183-1186 | §CC.11 (A1) `n_r ≤ k(X)` for every non-reflexive class `r`. Axiom-clean. | — |
+| `CoherentConfig.SparseSeparable` | 1188-1191 | §CC.11 (A1) **The PV-Thm-3.1 sparsity hypothesis `2c(k−1)<n` on a general CC** — satisfied on `X_T` (M1: `c,k=O(1)`), the citation-free `c(X_T)` route's input predicate. | Definition |
 ## ChainDescent/ClebschConcrete.lean
 
 | Name | Line | Description | Notes |
