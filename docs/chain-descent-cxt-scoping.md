@@ -168,10 +168,13 @@ Unconditional closes *iff* route 2 yields; that's the single point of risk. **Ne
 **▶ PICK UP HERE (next concrete step):** **A1 + the A2 interface are LANDED** (`§CC.11`–`§CC.19` + `§S-gate2`
 `reachesRigidOrCameron_viaBoundedExtensionParams`, all axiom-clean; build history in `chain-descent-a1-cc-substrate.md`).
 The seal stands `modulo {G3 + the A2 inequality `(k(X_{T₀})−1)·c(X_{T₀}) < |T|` + hcatch + hImprim}`. **A2 is OPEN / not
-citable** (§2). **Route = discharge the unconditional seal** (user decision 2026-06-14), via §5: **run the probe (route
-1)** — extend `Theorem41ConditionsProbe` to sweep primitive non-conference SRGs + rank-4 amorphic at larger `n`, measure
-`b/c/k` vs spectral / p-rank / geometricity invariants, and test whether a single invariant cleanly predicts the base
-(⟹ the rank-3 base-case attack, route 2). Carry route 3 (one-conjecture conditional) as the floor.
+citable** (§2). **Route = discharge the unconditional seal** (user decision 2026-06-14). **PROBE RUN + ROUTE CHOSEN
+(2026-06-15):** the monovariant probe (`A2MonovariantProbe.cs`) found a clean signal — a potential (max-cell-size / `c`)
+drops by a bounded factor on the residue but climbs to 1 on geometric SRGs (rook `((m−1)/m)²→1`), so **"bounded drop" =
+"non-geometric", and "geometric" = the Cameron carve.** The live route is now the **potential-drop attack**, planned in
+**`chain-descent-a2-potential-route.md`** (the drop lemma + Neumaier/CGGP dichotomy routing geometric→Cameron; the
+conditional-predicate floor is route 3, retained). That doc supersedes the old probe plan
+(archived: `Archive/ChainDescent/chain-descent-a2-monovariant-probe.md`).
 
 **Reading order for a fresh reader:** build doc STATUS → its §1A (why not GI∈P) / §1B (everything ⟹ `c(X_T)`) → THIS
 doc §0–§5 (the A2 target, evidence, and the route to the unconditional seal) → `CoherentConfig.lean §CC.10`–`§CC.19` (the

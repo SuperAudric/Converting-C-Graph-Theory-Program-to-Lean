@@ -7,7 +7,9 @@ using Xunit.Abstractions;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A2 MONOVARIANT probe — does a potential drop GEOMETRICALLY per seed?
-// (docs/chain-descent-a2-monovariant-probe.md, added 2026-06-15.)
+// Route doc: docs/chain-descent-a2-potential-route.md (this probe is its evidence).
+// Probe plan/findings (archived): docs/Archive/ChainDescent/chain-descent-a2-monovariant-probe.md.
+// Added 2026-06-15.
 //
 // CONTEXT.  A1 reduced the seal's open input to "bound (k(X_T)−1)·c(X_T) at a small
 // base".  Reframed dynamically (cxt-scoping §5): individualize a few SEED vertices,
