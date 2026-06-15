@@ -76,9 +76,13 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   IndistinguishingHalves`, pure arithmetic at `M=c/2`). **Step 4 — the `BigConfusionCover` obstruction — LANDED (2026-06-15, `§CC.22`,
   axiom-clean):** `BigConfusionCover` (`>c/2` confusion sets cover `Fin n`) + `exists_avoiding_of_not_cover` (`¬cover ⟹ ∃ v avoiding`) +
   the capstone-facing `indistinguishingHalves_of_not_bigConfusionCover` (`∀T over-B, ¬cover(X_T) ⟹ IndistinguishingHalves B`). §CC.21
-  balanced-splitter defs parked (left in place) as the 1-WL-cell model. **So the entire open content of A2 is now ONE predicate on the
-  extension: `¬ BigConfusionCover (X_T)`. NEXT (route doc §4c build-order): step 5 (the research core, G-cite)** — carry
-  `BigConfusionCover ⟹ Cameron ∨ finite` (Neumaier+G3) + capstone `…viaNoConfusionCover`.
+  balanced-splitter defs parked (left in place) as the 1-WL-cell model. **Step 5 (G-cite) — LANDED (2026-06-15, the conditional
+  capstone + non-vacuity, axiom-clean):** the capstone `reachesRigidOrCameron_viaNoConfusionCover` (`CascadeAffine.lean §S-gate2`;
+  carries the cited dichotomy `hcite : (∃T over-B, BigConfusionCover (X_T)) → IsCameronScheme S`, case-split into the seal's
+  Cameron / recovered legs) + the non-vacuity `card_bigClasses_mul_ge_of_cover` (`cover ⟹ n ≤ #bigClasses·c`, the explicit
+  near-pencil structure). **The §4c build-order is COMPLETE (steps 1–5).** The whole seal stands `modulo {G3 + hcite + hcatch +
+  hImprim}` — open content sharpened from "prove `IndistinguishingHalves`" (open conjecture) to **`hcite` = the cited Neumaier +
+  primitive-CC dichotomy**; residual risk = `hcite`'s row-4 faithfulness (open research; probe reframe: row 4 has no line system ⟹ no cover).
 
 ### The open frontier — ONE hypothesis: `IndistinguishingHalves` (live work: `chain-descent-a2-potential-route.md`)
 **The seal now stands `modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**, and the entire open mathematical content is the single

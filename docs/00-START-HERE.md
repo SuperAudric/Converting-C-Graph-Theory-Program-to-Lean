@@ -117,12 +117,13 @@ close it — is set out in
 > `IndistinguishingHalves`** (some individualization halves the indistinguishing number `c(X_T)`; `k` rides free). **Its
 > discharge is underway:** the geometric-obstruction framework (`§CC.21`) and **★ the G-mech kill lemma (`§CC.22`:
 > `confusionSet_eq_empty_of_relOf_v_ne` — a `v` distinguishing `α,β` annihilates `C(α,β)`)** are landed, and **★ the
-> §4c build-order steps 2–4 — the bound, the halving wiring, and the `BigConfusionCover` obstruction
-> (`indistinguishingNumber_pointExtension_insert_le` / `indistinguishingHalves_of_exists_avoiding_v` /
-> `BigConfusionCover` + `exists_avoiding_of_not_cover` + `indistinguishingHalves_of_not_bigConfusionCover`) — are LANDED
-> (`§CC.22`, axiom-clean), dissolving the G-sim gap. The entire open content of A2 is now ONE predicate on the extension:
-> `¬ BigConfusionCover (X_T)`**; **NEXT = §4c build-order step 5 (the research core, G-cite)** — carry
-> `BigConfusionCover ⟹ Cameron ∨ finite` (Neumaier + G3) + capstone `…viaNoConfusionCover`. **Live frontier doc:
+> the §4c build-order is COMPLETE (steps 1–5, all `§CC.22` + the capstone, axiom-clean): the kill lemma, the bound, the
+> halving wiring, the `BigConfusionCover` obstruction, and **the G-cite capstone `reachesRigidOrCameron_viaNoConfusionCover`**
+> (carries the cited dichotomy `hcite : cover ⟹ Cameron`, case-split into the seal's Cameron / recovered legs) + the
+> non-vacuity `card_bigClasses_mul_ge_of_cover` (`cover ⟹ ≥n/c near-maximal confusion classes`). **The whole seal now
+> stands `modulo {G3 + hcite + hcatch + hImprim}`, with the open content sharpened from "prove `IndistinguishingHalves`"
+> (an open conjecture) to `hcite` = the cited Neumaier + primitive-CC dichotomy** — the honest floor; residual risk is
+> `hcite`'s row-4 faithfulness (open research). **Live frontier doc:
 > [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md)** — read its STATUS + **§4c** (the
 > discharge build-order) first; the honest "row 4" gap is now reframed as the *partial-geometry line system* (not the
 > eigenvalue magnitude). Evidence: the monovariant probe (`A2MonovariantProbe.cs`). Forward payoff: closing it also

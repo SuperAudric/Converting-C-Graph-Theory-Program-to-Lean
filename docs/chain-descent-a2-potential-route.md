@@ -60,11 +60,15 @@ hypothesis on `v` replaces the per-class splitter). **Step 3 (the halving wiring
 IndistinguishingHalves`) ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean)** — pure arithmetic instantiating the bound at
 `M = c(X_T)/2`. **Step 4 (the `BigConfusionCover` obstruction: `BigConfusionCover` predicate +
 `exists_avoiding_of_not_cover` + the capstone-facing `indistinguishingHalves_of_not_bigConfusionCover`) ✅ LANDED
-(2026-06-15, `§CC.22`, axiom-clean).** **So the entire open content of A2 is now packaged as ONE predicate on the
-extension: `¬ BigConfusionCover (X_T)` at every over-`B` base. NEXT = §4c build-order step 5 (the research core,
-G-cite):** carry `BigConfusionCover ⟹ Cameron ∨ finite` (Neumaier + primitive-CC classification G3) + capstone
-`reachesRigidOrCameron_viaNoConfusionCover`. The §CC.21 balanced-splitter defs are parked (left in place) as the
-1-WL-cell model.
+(2026-06-15, `§CC.22`, axiom-clean).** **Step 5 (G-cite) ✅ LANDED (2026-06-15, the conditional capstone + non-vacuity,
+axiom-clean):** the capstone `reachesRigidOrCameron_viaNoConfusionCover` (carries the cited dichotomy `hcite : (∃ T
+over-B, BigConfusionCover (X_T)) → IsCameronScheme S`, case-splits into the seal's Cameron / recovered legs) + the
+non-vacuity counting `card_bigClasses_mul_ge_of_cover` (`cover ⟹ n ≤ #bigClasses·c`, the explicit near-pencil
+structure). **The §4c build-order is COMPLETE (steps 1–5).** The whole seal stands `modulo {G3 + hcite + hcatch +
+hImprim}`, with the open content sharpened from "prove `IndistinguishingHalves`" (open conjecture) to **`hcite` = the
+cited Neumaier + primitive-CC dichotomy** (`cover ⟹ Cameron`). Residual risk = `hcite`'s row-4 faithfulness (open
+research; the probe reframe says row 4 has no line system ⟹ no cover ⟹ shatters). The §CC.21 balanced-splitter defs
+are parked (left in place) as the 1-WL-cell model.
 
 ---
 
@@ -315,14 +319,25 @@ transfer; the covering count replaces it.)
    composing it with step 3). `confusionSet` kept; the §CC.21 balanced-splitter primitives parked as the 1-WL-cell model
    (left in place, documented as superseded — not deleted). **This packages the entire open content of A2 as one
    predicate on the extension: `¬ BigConfusionCover (X_T)`.**
-5. **G-cite + capstone.** *Next (the research core).* Carry `BigConfusionCover ⟹ IsCameron ∨ finite` (Neumaier + the
-   primitive-CC classification G3) as theorem-statement hypotheses and land `reachesRigidOrCameron_viaNoConfusionCover`
-   discharging `IndistinguishingHalves` (via `indistinguishingHalves_of_not_bigConfusionCover`) modulo the cited
-   dichotomy: a cover forces `n ≤ (#big)·c` ⟹ `≥ n/c` near-maximal confusion sets = near-pencil line system ⟹
-   Cameron/finite; the residue (non-Cameron, non-finite) therefore has no cover.
+5. **G-cite + capstone — ✅ LANDED (2026-06-15, the conditional capstone + non-vacuity, axiom-clean).** Two parts:
+   - **The capstone `reachesRigidOrCameron_viaNoConfusionCover`** (`CascadeAffine.lean §S-gate2`): carries the faithful
+     cited dichotomy `hcite : (∃ T over-B, BigConfusionCover (X_T)) → IsCameronScheme S` and case-splits — cover →
+     `hcite` → the seal's own Cameron disjunct; no cover → `indistinguishingHalves_of_not_bigConfusionCover` →
+     `…viaShattering`. Seal **`modulo {G3 + hcite + hcatch + hImprim}`** — the entire open content concentrated in the
+     single predicate `hcite`, routed into the seal's existing "or Cameron" leg.
+   - **The non-vacuity counting `card_bigClasses_mul_ge_of_cover`** (`CoherentConfig.lean §CC.22`): `BigConfusionCover X
+     ⟹ n ≤ (bigClasses X).card · c(X)`, i.e. a cover forces `≥ n/c` near-maximal confusion classes — the explicit
+     near-pencil / partial-geometry line system, proving `BigConfusionCover` is a genuine geometric condition (not the
+     conclusion in disguise; the vacuity-trap guard).
 
-Steps 1–4 are the now-complete provable mechanics; **the sole remaining open content is the research core G-cite (step 5)**
-— covering ⟹ geometric ⟹ Cameron/finite, the cited dichotomy attached to the single predicate `BigConfusionCover (X_T)`.
+**The §4c build-order is COMPLETE (steps 1–5 landed, axiom-clean).** The whole seal now stands `modulo {G3 + hcite +
+hcatch + hImprim}`, where **`hcite` is the cited Neumaier + primitive-CC dichotomy** (`cover ⟹ Cameron`) — *not* an
+open project conjecture but an external citation, attached to the explicit near-pencil structure (5b). **The sole
+remaining mathematical risk is `hcite`'s faithfulness on row 4** (generic non-geometric, unbounded `s`), where the
+cited geometric step is non-portable (CGGP only) — but the probe reframe (§5 Run 3) says row 4 has no line system,
+hence no cover (it shatters into the `¬cover` branch). Closing that unconditionally is the open research; the
+conditional capstone is the honest floor (cxt-scoping §5 route 3), with the open content sharpened from "prove
+`IndistinguishingHalves`" (an open conjecture) to "cite Neumaier + G3" (established theorems).
 
 ## 5. Evidence (the probe — full detail archived)
 

@@ -2257,6 +2257,48 @@ theorem indistinguishingHalves_of_not_bigConfusionCover (B : Nat)
   X.indistinguishingHalves_of_exists_avoiding_v B
     (fun T hT => (pointExtension X T).exists_avoiding_of_not_cover (h T hT))
 
+/-- §CC.22 (Stage 1b, route doc §4c step 5, G-cite **non-vacuity**) **The distinct big confusion classes** — the
+confusion sets `C(α,β)` (`α ≠ β`) of size `> c(X)/2`, as a `Finset (Finset (Fin n))` (the image of the big pairs
+under `C`). The geometric object the cited Neumaier / primitive-CC dichotomy attaches to: a cover by these is a
+near-pencil / partial-geometry line system. -/
+noncomputable def bigClasses : Finset (Finset (Fin n)) :=
+  ((Finset.univ : Finset (Fin n × Fin n)).filter
+      (fun p => p.1 ≠ p.2 ∧ X.indistinguishingNumber < 2 * (X.confusionSet p.1 p.2).card)).image
+    (fun p => X.confusionSet p.1 p.2)
+
+/-- §CC.22 (Stage 1b, route doc §4c step 5, G-cite **non-vacuity**) **A big-confusion cover forces `≥ n/c` distinct
+near-maximal confusion classes — the near-pencil count.** If the big (`>c(X)/2`) confusion sets cover `Fin n`, then
+`n ≤ (bigClasses X).card · c(X)`. So a cover is a genuine *geometric* condition (it forces `≥ n/c` confusion classes
+each of size in `(c/2, c]`) — the partial-geometry / near-pencil line system the cited Neumaier + primitive-CC
+classification (G-cite) routes to `Cameron ∨ finite`, and the explicit witness that `BigConfusionCover` is **not** the
+conclusion in disguise. Each big class has size `≤ c(X)` (non-reflexive, `indistinguishingNumberOf_le`) and they cover
+`Fin n`, so `n = |Fin n| ≤ Σ_{class} |class| ≤ #classes · c`. Axiom-clean. -/
+theorem card_bigClasses_mul_ge_of_cover (h : X.BigConfusionCover) :
+    n ≤ X.bigClasses.card * X.indistinguishingNumber := by
+  classical
+  have hsize : ∀ S ∈ X.bigClasses, S.card ≤ X.indistinguishingNumber := by
+    intro S hS
+    rw [bigClasses, Finset.mem_image] at hS
+    obtain ⟨p, hp, rfl⟩ := hS
+    rw [Finset.mem_filter] at hp
+    have heq : (X.confusionSet p.1 p.2).card = X.indistinguishingNumberOf (X.relOf p.1 p.2) :=
+      (X.indistinguishingNumberOf_eq_card rfl).symm
+    rw [heq]
+    exact X.indistinguishingNumberOf_le (X.not_isReflexive_relOf_of_ne hp.2.1)
+  have hcover : (Finset.univ : Finset (Fin n)) ⊆ X.bigClasses.biUnion id := by
+    intro v _
+    obtain ⟨α, β, hαβ, hbig, hmem⟩ := h v
+    refine Finset.mem_biUnion.2 ⟨X.confusionSet α β, ?_, hmem⟩
+    rw [bigClasses, Finset.mem_image]
+    exact ⟨(α, β), Finset.mem_filter.2 ⟨Finset.mem_univ _, hαβ, hbig⟩, rfl⟩
+  calc n = (Finset.univ : Finset (Fin n)).card := by rw [Finset.card_univ, Fintype.card_fin]
+    _ ≤ (X.bigClasses.biUnion id).card := Finset.card_le_card hcover
+    _ ≤ ∑ S ∈ X.bigClasses, S.card := by
+        simpa [id_eq] using Finset.card_biUnion_le (s := X.bigClasses) (t := (id : _ → Finset (Fin n)))
+    _ ≤ X.bigClasses.card * X.indistinguishingNumber := by
+        simpa [smul_eq_mul] using
+          Finset.sum_le_card_nsmul X.bigClasses (fun S => S.card) X.indistinguishingNumber hsize
+
 end CoherentConfig
 
 end ChainDescent
