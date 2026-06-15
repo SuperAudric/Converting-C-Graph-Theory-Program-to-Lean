@@ -165,16 +165,17 @@ Unconditional closes *iff* route 2 yields; that's the single point of risk. **Ne
   endpoint 3.
 - **(c) no clean invariant emerges** — route 1 returns nothing portable; endpoint 3 (carried predicate) is the floor.
 
-**▶ PICK UP HERE (next concrete step):** **A1 + the A2 interface are LANDED** (`§CC.11`–`§CC.19` + `§S-gate2`
-`reachesRigidOrCameron_viaBoundedExtensionParams`, all axiom-clean; build history in `chain-descent-a1-cc-substrate.md`).
-The seal stands `modulo {G3 + the A2 inequality `(k(X_{T₀})−1)·c(X_{T₀}) < |T|` + hcatch + hImprim}`. **A2 is OPEN / not
-citable** (§2). **Route = discharge the unconditional seal** (user decision 2026-06-14). **PROBE RUN + ROUTE CHOSEN
-(2026-06-15):** the monovariant probe (`A2MonovariantProbe.cs`) found a clean signal — a potential (max-cell-size / `c`)
-drops by a bounded factor on the residue but climbs to 1 on geometric SRGs (rook `((m−1)/m)²→1`), so **"bounded drop" =
-"non-geometric", and "geometric" = the Cameron carve.** The live route is now the **potential-drop attack**, planned in
-**`chain-descent-a2-potential-route.md`** (the drop lemma + Neumaier/CGGP dichotomy routing geometric→Cameron; the
-conditional-predicate floor is route 3, retained). That doc supersedes the old probe plan
-(archived: `Archive/ChainDescent/chain-descent-a2-monovariant-probe.md`).
+**▶ PICK UP HERE (Stage 1b — the drop lemma proper):** **A1 + the A2 interface + the potential-drop ITERATION ENGINE
+are all LANDED** (`§CC.11`–`§CC.20` + `§S-gate2`, all axiom-clean, build green). The probe (`A2MonovariantProbe.cs`,
+2026-06-15) found the monovariant: a potential (max-cell / `c`) drops by a bounded factor on the residue but climbs to 1
+on geometric SRGs (rook `((m−1)/m)²→1`) — so **"bounded drop" = "non-geometric" = the Cameron carve (dual)**. Stage 1a
+landed that as Lean: `exists_potential_descent` (engine) + `potential` + `PotentialDrops` + `exists_small_base_of_potentialDrops`
+(`§CC.20`) + capstone `reachesRigidOrCameron_viaPotentialDrop`. **So the seal now stands `modulo {G3 + PotentialDrops +
+hcatch + hImprim}` — the ENTIRE open math is the single hypothesis `PotentialDrops` (the per-step drop). NEXT = prove
+`PotentialDrops` for the residue (Stage 1b):** state `Shatters` + show the halving, discharging geometric→Cameron via
+Neumaier/CGGP **or** the parallel bounded-constraint-width route. **Live plan + the two discharge languages + the honest
+row-4 gap: `chain-descent-a2-potential-route.md` (read its STATUS first).** The conditional-predicate floor is route 3,
+retained. Old probe plan archived: `Archive/ChainDescent/chain-descent-a2-monovariant-probe.md`.
 
 **Reading order for a fresh reader:** build doc STATUS → its §1A (why not GI∈P) / §1B (everything ⟹ `c(X_T)`) → THIS
 doc §0–§5 (the A2 target, evidence, and the route to the unconditional seal) → `CoherentConfig.lean §CC.10`–`§CC.19` (the

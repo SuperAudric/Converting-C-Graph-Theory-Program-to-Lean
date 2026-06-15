@@ -107,6 +107,19 @@ close it — is set out in
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
+> **★ CURRENT FRONTIER (2026-06-15) — read this first; the boxes below are older history.** The seal
+> `reachesRigidOrCameron` is assembled and axiom-clean, conditional **`modulo {G3 cited + PotentialDrops + hcatch +
+> hImprim}`**. **A1 is DONE** (the CC sparse substrate, `CoherentConfig.lean §CC.11`–`§CC.19`) and the **A2
+> potential-drop iteration engine is LANDED** (`§CC.20`: `exists_potential_descent` / `potential` / `PotentialDrops` /
+> `exists_small_base_of_potentialDrops`; capstone `reachesRigidOrCameron_viaPotentialDrop`, `CascadeAffine.lean
+> §S-gate2`). **The lone open mathematical content is now ONE hypothesis — `PotentialDrops`** (the per-step "shattering"
+> drop on the residue). **Live frontier doc: [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md)**
+> (the drop lemma, the Neumaier/spectral + bounded-constraint-width discharge routes, the honest "row 4" gap; read its
+> STATUS first). Evidence: the monovariant probe (`A2MonovariantProbe.cs`). Forward payoff: closing `PotentialDrops`
+> also yields the poly rigid-residue canonizer ([`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md)).
+> Substrate/build home: [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md);
+> A2 scoping: [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md). The boxes below predate all of this.
+>
 > **UPDATE (2026-06-11) — the live frontier moved; the build home is now
 > [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md)** (see the boxed
 > "THE LIVE BUILD" pointer at the end of this section; the module-adjoin doc referenced below is its *history*).

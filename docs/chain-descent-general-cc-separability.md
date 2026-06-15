@@ -48,13 +48,23 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   UNNECESSARY:** the δ′ engine accepts *any* bounded base, so PV's sharp `b≤2` is overkill; a crude `b ≤ (k−1)c+1` falls out of ONE
   counting lemma, cross-fiber automatic (no smax). §CC.15–§CC.17 (smax/fiber-size) are landed infra, off the critical path; the
   §S.10–§S.16 sα port is abandoned. A1 now reduces `hclo` to a single `O(1)` threshold `(k(X_T)−1)·c(X_T) < |T|` — the crisp A2 interface.
+- **§CC.19 (A1+A2 interface — padding/monotonicity) + the A2-inequality capstone:** `indistinguishingNumber_mono` / `maxValency_mono` /
+  `refines_pointExtension_of_subset` / `allSingletonFiber_of_card_gt_subset` / `dominatorReachable_of_card_gt_subset` (`CoherentConfig.lean §CC.19`)
+  + the seal capstone `reachesRigidOrCameron_viaBoundedExtensionParams` (`CascadeAffine.lean §S-gate2`) — A2 as a checkable parameter inequality
+  `(k(X_{T₀})−1)·c(X_{T₀}) < |T|` at a small base `T₀`, padded to any `T ⊇ T₀`.
+- **★ §CC.20 (the potential-drop route — Stage 1a, 2026-06-15, all axiom-clean):** `exists_potential_descent` (abstract halving→`O(log n)`
+  descent, the `Φ`-analogue of `exists_greedy_base_aux`) / `potential` (`Φ = (k−1)c`) / `PotentialDrops` (the per-step-drop predicate) /
+  `exists_small_base_of_potentialDrops`, + the seal capstone `reachesRigidOrCameron_viaPotentialDrop` (`CascadeAffine.lean §S-gate2`).
+  **This is the LIVE attack** — it reduces the seal to the *single* open hypothesis `PotentialDrops` (the per-step drop / "shattering").
 
-### The open frontier — ONE quantity: `c(X_T)` (live work: `chain-descent-cxt-scoping.md`)
-A bounded-base δ′ pinning rank / forced-triangle closure for the residue family **on the extension `X_T`**
-(`hclo : ∀ v, (pointExtension …).DominatorReachable T v`). Everything reduces to it: §1B — the general (A)+(B) *domination*
-condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at a complete extension (the `hcatch` finding)
-— so `c(X_T)` subsumes `hcatch`. **A1 is now DONE (the substrate that consumes this); the open piece is A2 — scoped in
-`chain-descent-cxt-scoping.md` (§4 probe + research, §5 routes to the unconditional seal):**
+### The open frontier — ONE hypothesis: `PotentialDrops` (live work: `chain-descent-a2-potential-route.md`)
+**The seal now stands `modulo {G3 + PotentialDrops + hcatch + hImprim}`**, and the entire open mathematical content is the single
+per-step-drop hypothesis `PotentialDrops B := ∀ T, B < (k(X_T)−1)·c(X_T) → ∃ v, the pin v halves it` (`§CC.20`). The iteration that
+turns it into an `O(log n)` base is LANDED (`exists_potential_descent`); **the drop lemma proper — `PotentialDrops` for the residue — is
+Stage 1b, the genuine open core.** The live attack + the two discharge languages (Neumaier/spectral · bounded constraint-width) + the
+honest gap (the unbounded-eigenvalue generic "row 4") are in **`chain-descent-a2-potential-route.md`** (read its STATUS first). The
+older `c(X_T)`/`hclo` framing below is the equivalent substrate view (everything still reduces to `c(X_T)`; `PotentialDrops` is how it's
+*attacked*). **A1 is DONE (the substrate that consumes this); A2 evidence/scoping in `chain-descent-cxt-scoping.md` §4-§5:**
 - **M1 (probe):** `c(X_T)` **and** `k(X_T)` collapse to `O(1)` after `O(1)` points, uniformly across a diverse family
   (rank 3/4, cyclotomic/amorphic, char 2/odd, n=10–41) — **no falsifier**; so the sparse bound `2c(k−1)<n` holds on the
   extension. This is the evidence the target is true.
@@ -64,13 +74,14 @@ condition IS this quantity; the `n ≥ 25` **`hcatch`** is *equivalent to it* at
   is open (Q2); citable results are group-side only (Q3). **Calibration (Q4): polynomial canonisation is citable for the
   rank-3/4 residue (Babai/Kivva); only sub-exponential in unbounded rank — and the residue IS rank 3–4.**
 
-**NEXT (the handoff target, detail in `cxt-scoping.md` §6):** **A1 is LANDED (§CC.11–§CC.18, all axiom-clean, 2026-06-14)** — the
-abundance discharge `allSingletonFiber_of_card_gt` (§CC.18) closes A1 via ONE counting lemma, skipping §S.10–§S.16 (the δ′ engine
-accepts any bounded base, so the crude `b ≤ (k−1)c+1` suffices). **A1 now reduces `hclo` to the single `O(1)` threshold
-`(k(X_T)−1)·c(X_T) < |T|`. Next = A2:** prove the residue meets it — `c(X_T), k(X_T) = O(1)` after `O(1)` individualizations
-(M1-evidenced, M2-confirmed not citable, char-2 load-bearing). Then `allSingletonFiber_of_card_gt` + the landed seal wiring
-(`reachesRigidOrCameron_viaExtensionDominatorClosure`) closes the seal `modulo {G3}`; then (deferred, §7) `SchurianScheme`→seal
-wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge.
+**NEXT (the handoff target — live plan in `chain-descent-a2-potential-route.md`, Stage 1b):** A1 + the A2 interface + the
+potential-drop **iteration engine** are all LANDED axiom-clean (`§CC.11`–`§CC.20`, build green). **The lone open piece is the
+drop lemma proper: prove `PotentialDrops` for the residue** — state `Shatters` (a `Φ`-class that resists *every* individualization
+is a regular/geometric sub-object) and show it forces the halving, discharging geometric→Cameron via the Neumaier/CGGP dichotomy
+(or the parallel bounded-constraint-width route). Closing it fires `reachesRigidOrCameron_viaPotentialDrop` ⟹ seal `modulo {G3}`;
+then (deferred, §7) `SchurianScheme`→seal wiring + the hImprim `G₀Irreducible → IsPrimitive` bridge. Probe evidence (the monovariant
+exists; residue/carved split) + the honest row-4 gap: `chain-descent-a2-potential-route.md` §3-§6. **Downstream payoff:** closing
+`PotentialDrops` also yields the poly rigid-residue/IR-blind-spot canonizer (`chain-descent-ir-blindspot-solver.md`) — same object.
 
 **Orientation:** §1A why-not-GI∈P · §1B the `c(X_T)` reduction · §5.1 the build map · §5.2 the open problem + planning
 insights · §7 do-not-re-walk · §8 condensed timeline + the changelog for full history.
