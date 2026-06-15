@@ -31,16 +31,23 @@ exists; its driver is geometricity; and geometricity is *already* a handled leg.
 > **non-geometric residue ⟹ a potential drops by a factor `ρ<1` per seed ⟹ `O(log n)` base ⟹ A1 fires ⟹ seal**,
 > with **geometric** routed to **Cameron** (cited classification, G3-style) so it never reaches the drop lemma.
 
-**State (Stage 1a LANDED, 2026-06-15).** The consumer (A1 → seal) and now the **iteration engine** are landed,
-axiom-clean: `CoherentConfig.lean §CC.20` (`exists_potential_descent` — the abstract halving→`O(log n)` descent;
-`potential` Φ; `PotentialDrops` predicate; `exists_small_base_of_potentialDrops`) + the seal capstone
-`reachesRigidOrCameron_viaPotentialDrop` (`CascadeAffine.lean §S-gate2`). **The seal now stands conditional
-`modulo {G3 + PotentialDrops + hcatch + hImprim}`** — the *entire* open mathematical content is the single
-per-step-drop hypothesis `PotentialDrops` (the drop lemma proper). The "geometric ⟹ Cameron" / "non-geometric"
-dichotomy is carried as cited classification hypotheses (Neumaier + the primitive-CC classification), never fresh
-axioms. **Honest scope:** research-scale, may not close; the residual math gap is the unbounded-smallest-
-eigenvalue generic case (§3). Quality bar held: axiom-clean `[propext, Classical.choice, Quot.sound]`, no
-`sorry`, no fresh `axiom`, `native_decide` banned. **NEXT = discharge `PotentialDrops` on the residue (§2-§3).**
+**State (Stage 1a + the Stage 1b *reduction* LANDED, 2026-06-15).** The consumer (A1 → seal), the **iteration
+engine**, and now the **Stage 1b `c`-halving reduction** are landed, axiom-clean: `CoherentConfig.lean §CC.20`
+(`exists_potential_descent` — the abstract halving→`O(log n)` descent; `potential` Φ; `PotentialDrops`;
+`exists_small_base_of_potentialDrops`; **`IndistinguishingHalves` + `potentialDrops_of_indistinguishingHalves`**)
++ the seal capstones `reachesRigidOrCameron_viaPotentialDrop` and **`reachesRigidOrCameron_viaShattering`**
+(`CascadeAffine.lean §S-gate2`). **The seal now stands conditional `modulo {G3 + IndistinguishingHalves + hcatch +
+hImprim}`** — sharpened from `PotentialDrops` (the product `(k−1)c` halves) to **`IndistinguishingHalves`** (the
+indistinguishing number `c(X_T)` alone halves): `k` rides free by `maxValency_mono` (build doc §1B), and the
+reduction `potentialDrops_of_indistinguishingHalves` makes that rigorous. So the *entire* open mathematical content
+is now the single hypothesis **`IndistinguishingHalves`** (the drop lemma proper, `c`-form). The "geometric ⟹
+Cameron" / "non-geometric" dichotomy that discharges it is carried as cited classification hypotheses (Neumaier +
+the primitive-CC classification), never fresh axioms. **Honest scope:** research-scale, may not close; the residual
+math gap is the generic (row-4) case — and the probe (§5 Run 3) refined it: the drop-obstruction is the
+*partial-geometry line system*, not the smallest-eigenvalue magnitude. Quality bar held: axiom-clean `[propext,
+Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`, `native_decide` banned. **NEXT = discharge
+`IndistinguishingHalves` on the residue — i.e. exhibit, for any over-`B` base, a `v` that halves `c(X_T)`, with
+"no surviving `c`-class" = "no partial-geometry line system" the structural condition (§2-§3).**
 
 ---
 
@@ -167,17 +174,27 @@ solver bolt-on; if it closes, the bounded-width network *is* the poly rigid-resi
   predicate), `exists_small_base_of_potentialDrops` (→ small base, `2^|T₀| ≤ max 1 (Φ ∅)`), and the seal capstone
   `reachesRigidOrCameron_viaPotentialDrop` (pads via `§CC.18/19`). All axiom-clean (`§CC.20` / `§S-gate2`). The
   seal's open content is now exactly `PotentialDrops`.
-- **Stage 1b — the drop lemma proper (the heart, OPEN).** Prove `PotentialDrops` for the residue: state `Shatters`
-  precisely (the "no surviving class" predicate — a `Φ`-class that resists *every* individualization is a
-  regular/geometric sub-object) and show it forces a halving. **Reuses:** `indistinguishingNumber`(`_mono`),
-  `pointExtension`, the forced-triangle `interNum_eq_one_of_forcedUnique` (a split *is* a `c`-drop). *Risk:
-  medium* — the per-step split-counting is the genuine new combinatorics.
+- **Stage 1b, the *reduction* — LANDED (2026-06-15).** The drop lemma is split into (a) a *reduction* and (b) a
+  *discharge*. **(a) is done:** `IndistinguishingHalves B` (some `v` halves `c(X_T)` alone) `⟹ PotentialDrops B`,
+  via `potentialDrops_of_indistinguishingHalves` — `k` rides free by `maxValency_mono`, so `2(k'−1)c' =
+  (k'−1)(2c') ≤ (k−1)c`. Plus the seal capstone `reachesRigidOrCameron_viaShattering` carrying
+  `IndistinguishingHalves`. All axiom-clean (`§CC.20` / `§S-gate2`). **This sharpens the open content from "the
+  product halves" to "`c` halves"** (build doc §1B: `k` free, `c` the crux).
+- **Stage 1b, the *discharge* (the heart, OPEN).** Prove `IndistinguishingHalves` for the residue: for any over-`B`
+  base `T`, exhibit a `v` that halves `c(X_T)`. State `Shatters` as the structural condition — **"no surviving
+  `c`-class" = "no partial-geometry line system"** (the probe's §5-Run-3 refinement: the obstruction is the
+  line/grid geometry, not the smallest-eigenvalue magnitude). **Reuses:** `indistinguishingNumber`(`_mono`),
+  `pointExtension`, the forced-triangle `interNum_eq_one_of_forcedUnique` (it *counts* the would-be line
+  incidences). *Risk: medium-high* — the per-step split-counting is the genuine new combinatorics; row 4 (§3) is
+  where it's hardest, though the line-system framing now suggests row 4 (non-geometric ⟹ no lines) *should* halve.
 - **Stage 2 — discharge `Shatters` on the residue.** Carry Neumaier (geometric dichotomy) + the existing
-  primitive-CC classification as hypotheses; prove `¬Shatters ⟹ geometric`, route geometric→Cameron, finite→
-  trivial, conference→leg B. *Risk: high on row 4* (§3) — the uniform generic case.
-- **Stage 3 — assemble.** `Shatters (residue) → potential_drop* → O(log n) base → A1 → seal`, modulo the cited
-  Neumaier/CGGP + G3 + the carried `hcatch`/`hImprim`. Yields a seal capstone
-  `reachesRigidOrCameron_viaShattering` parallel to `…viaBoundedExtensionParams`.
+  primitive-CC classification as hypotheses; prove `¬Shatters ⟹ geometric` (a `c`-class resisting every split is a
+  partial-geometry line system), route geometric→Cameron, finite→trivial, conference→leg B. *Risk: high on row 4*
+  (§3) — the uniform generic case (but see the line-system reframe above).
+- **Stage 3 — assemble.** `Shatters (residue) → IndistinguishingHalves → PotentialDrops → O(log n) base → A1 →
+  seal`, modulo the cited Neumaier/CGGP + G3 + carried `hcatch`/`hImprim`. The capstone
+  `reachesRigidOrCameron_viaShattering` is the landed Stage-1b-reduction endpoint; Stage 2/3 discharge its
+  `IndistinguishingHalves` hypothesis.
 
 ## 5. Evidence (the probe — full detail archived)
 

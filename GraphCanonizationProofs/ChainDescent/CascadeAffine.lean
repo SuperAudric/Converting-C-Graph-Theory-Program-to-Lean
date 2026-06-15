@@ -1122,6 +1122,35 @@ theorem reachesRigidOrCameron_viaPotentialDrop {IsLarge : Nat → Prop}
   exact ⟨m, reachesRigidOrCameron_viaBoundedExtensionParams hClassify S hne hrank hsub hTcard.le
     (lt_of_le_of_lt hpot hBT) (hcatch T) hImprim⟩
 
+/-- **THE SEAL VIA THE SHATTERING HYPOTHESIS (Stage 1b — the open content sharpened to `c`-halving).** The same
+conclusion as `reachesRigidOrCameron_viaPotentialDrop`, but the per-step drop on the *product* `(k−1)c` is
+replaced by its *cleaner generator* `hshatter : IndistinguishingHalves B`: from any base whose potential exceeds
+`B`, some individualization at least **halves the indistinguishing number `c(X_T)`** alone. The max valency `k`
+rides along free (`maxValency_mono` — build doc §1B), so `c`-halving generates the potential-halving
+(`potentialDrops_of_indistinguishingHalves`), which the `§CC.20` engine turns into the seal. **So the seal's lone
+open mathematical content is now exactly `IndistinguishingHalves`** — and a `c`-class that resists halving under
+every individualization is a partial-geometry line system (probe `A2MonovariantProbe.Probe_SmallestEigenvalueAxis`,
+`docs/chain-descent-a2-potential-route.md` §3/§5: the drop-obstruction is the line/grid geometry, not the
+smallest-eigenvalue magnitude). Seal conditional **`modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**.
+Axiom-clean. -/
+theorem reachesRigidOrCameron_viaShattering {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B : Nat} (hB : 1 ≤ B)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
+    (hshatter : (S.toAssociationScheme.toCoherentConfig hne).IndistinguishingHalves B)
+    (hcatch : ∀ T : Finset (Fin n),
+        WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ∃ bound : Nat,
+      ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+        ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaPotentialDrop hB hClassify S hne hrank hroom
+    ((S.toAssociationScheme.toCoherentConfig hne).potentialDrops_of_indistinguishingHalves hshatter)
+    hcatch hImprim
+
 end SGate2
 
 

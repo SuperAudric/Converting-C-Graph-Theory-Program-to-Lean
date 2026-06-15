@@ -1966,6 +1966,43 @@ theorem exists_small_base_of_potentialDrops {B : Nat} (hB : 1 ≤ B) (hdrop : X.
     simpa using card_foldl_insert_le bs (∅ : Finset (Fin n))
   exact le_trans (Nat.pow_le_pow_right (by norm_num) hcard) hpow
 
+/-- **The indistinguishing-number "shattering" hypothesis (Stage 1b).** From any base `T` whose potential exceeds
+`B`, *some* individualization at least **halves the indistinguishing number** `c(X_T)` of the point extension.
+This is the genuine open core of A2, *sharpened*: the max valency `k(X_T)` need not be controlled directly — it
+rides along free, monotone non-increasing under individualization (`maxValency_mono`, the build-doc §1B split:
+`k` free, `c` the crux). A `c`-class that resists halving under *every* `v` is a **partial-geometry line system**
+(the probe `A2MonovariantProbe.Probe_SmallestEigenvalueAxis` found the drop-obstruction is the line/grid geometry,
+*not* the magnitude of the smallest eigenvalue — `chain-descent-a2-potential-route.md` §3/§5). Carried as a
+hypothesis, never an `axiom`. -/
+def IndistinguishingHalves (B : Nat) : Prop :=
+  ∀ T : Finset (Fin n), B < X.potential T →
+    ∃ v : Fin n,
+      2 * (pointExtension X (insert v T)).indistinguishingNumber
+        ≤ (pointExtension X T).indistinguishingNumber
+
+/-- **The drop-lemma reduction (Stage 1b) — `c`-halving ⟹ `PotentialDrops`.** Halving the indistinguishing number
+suffices for the *potential* `(k−1)·c` to halve: individualizing `v` refines `X_T`
+(`refines_pointExtension_of_subset`), so `k(X_{T∪v}) ≤ k(X_T)` rides along free (`maxValency_mono`), and
+`2·(k'−1)·c' = (k'−1)·(2c') ≤ (k−1)·c` from `2c' ≤ c`. **Reduces A2's open content from "the product `(k−1)c`
+halves" to "`c` halves"** — the build-doc §1B split (`k` free, `c` the crux) made rigorous, and the form the
+forced-triangle / `interNum_eq_one` calculus is the right language for (it counts the would-be line incidences).
+Axiom-clean. -/
+theorem potentialDrops_of_indistinguishingHalves {B : Nat}
+    (h : X.IndistinguishingHalves B) : X.PotentialDrops B := by
+  intro T hbig
+  obtain ⟨v, hc⟩ := h T hbig
+  refine ⟨v, ?_⟩
+  have hk : (pointExtension X (insert v T)).maxValency ≤ (pointExtension X T).maxValency :=
+    maxValency_mono (X.refines_pointExtension_of_subset (Finset.subset_insert v T))
+  show 2 * X.potential (insert v T) ≤ X.potential T
+  unfold potential
+  calc 2 * (((pointExtension X (insert v T)).maxValency - 1)
+              * (pointExtension X (insert v T)).indistinguishingNumber)
+      = ((pointExtension X (insert v T)).maxValency - 1)
+          * (2 * (pointExtension X (insert v T)).indistinguishingNumber) := by ring
+    _ ≤ ((pointExtension X T).maxValency - 1) * (pointExtension X T).indistinguishingNumber :=
+        Nat.mul_le_mul (by omega) hc
+
 end CoherentConfig
 
 end ChainDescent
