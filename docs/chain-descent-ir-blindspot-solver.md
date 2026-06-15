@@ -31,11 +31,15 @@ and are consumed or flagged in Phase 1; what reaches this solver is genuinely ri
 it degrades to the current exhaustive Phase-2 branching (sound, budget-bounded, may flag). This doc is the
 plan to *shrink the flag set to exactly A2's open core* the moment A2 is available.
 
-**State.** *Nothing built.* The prerequisites are landed: the deferral architecture (C#, `EnableDeferral`,
+**State.** *Solver not built.* The prerequisites are landed: the deferral architecture (C#, `EnableDeferral`,
 default on; `real_stays_real` proved), the direction-blind canonizer substrate (`warm_6_2`,
 `spine_branch_independent`, `canonForm`), the iso-invariant-node template (`forcedNode` + its equivariance
-lemmas), and A2's *consumer* chain (`allSingletonFiber_of_card_gt_subset` etc.). The **new content** is the
-canonical greedy selection rule for the IR phase (§4) and its wiring to a single-path canonizer.
+lemmas), and A2's *consumer* chain (`allSingletonFiber_of_card_gt_subset` etc.). **NEW (2026-06-15 — A2 Stage 1a
+landed):** the **potential-descent engine the solver reuses is now built and axiom-clean** —
+`exists_potential_descent` (the greedy `log`-bound iteration, `§CC.20`), the potential `Φ = (k−1)c`, the
+seed-selection predicate `PotentialDrops`, and `exists_small_base_of_potentialDrops`; so the §8 Stage-4 port is
+*done* (reuse directly, do not re-port). The **remaining new content** is the canonical greedy selection rule for
+the IR phase (§4 — the *witness* of `PotentialDrops`, made iso-invariant) and its wiring to a single-path canonizer.
 
 **Quality bar (unchanged).** Lean side axiom-clean `[propext, Classical.choice, Quot.sound]`, full build
 green, no `sorry`, no fresh `axiom`, `native_decide` banned. C# side: sound + iso-invariant (the existing
@@ -273,9 +277,10 @@ poly solver (bounded-width constraint networks solve in poly time), so the two u
   (`canonForm` / `canonForm_le_canonAdj`); confirm independent greedy resolution (§4 sub-question). *Risk:
   low-medium.*
 - **Stage 4 — leaf-count / polynomiality theorem.** Prove "branch on splitter ⟹ leaf count `n^{O(1)}`"
-  (§5), with the flag set = tie-multiplicity = A2 row 4 (§6). Reuse the `exists_greedy_base_le_log` /
-  `exists_greedy_base_aux` `log`-bound induction skeleton (port from `|Aut|` to the cell-size potential —
-  the **same port** A2's `potential_drop` does). *Risk: medium*, shared with A2.
+  (§5), with the flag set = tie-multiplicity = A2 row 4 (§6). **The `log`-bound induction skeleton is already
+  landed** — `exists_potential_descent` (`§CC.20`, the port from `|Aut|` to the potential `Φ = (k−1)c` that A2
+  Stage 1a did); reuse it directly. The Stage-4 work is the *leaf-count* bound (tie-multiplicity product) on top
+  of that single-path descent. *Risk: medium*, shared with A2's drop lemma.
 - **Stage 5 — C# integration + cross-checks.** Replace the exhaustive Phase-2 branch with the
   single-path canonical solver behind the existing `ITransversalOracle`/Phase-2 seam; keep the exhaustive
   branch as the tie/flag fallback. Re-run the Phase-2 cross-checks (exhaustive size-5/6 unique-canonical
@@ -304,18 +309,22 @@ sharing their hard core with A2's drop lemma.
 `forcedNode_image`, `forcedNode_relabel`, `movedSet_relabel`, `movedSet_eq_nonsingletonCells_of_recoverable`
 (`Cascade.lean`).
 
-**A2 output / potential (the engine):** `allSingletonFiber_of_card_gt_subset`,
-`dominatorReachable_of_card_gt_subset` (`CoherentConfig.lean §CC.19`),
-`reachesRigidOrCameron_viaBoundedExtensionParams` (`CascadeAffine.lean §S-gate2`); the potential
+**A2 output / potential / engine (Stage 1a LANDED):** the engine the solver reuses —
+`exists_potential_descent`, `potential` (`Φ = (k−1)c`), `PotentialDrops` (the seed-selection predicate),
+`exists_small_base_of_potentialDrops` (`CoherentConfig.lean §CC.20`), and the seal capstone
+`reachesRigidOrCameron_viaPotentialDrop` (`CascadeAffine.lean §S-gate2`); the A1 consumer
+`allSingletonFiber_of_card_gt_subset` / `dominatorReachable_of_card_gt_subset` /
+`reachesRigidOrCameron_viaBoundedExtensionParams` (`§CC.19` / `§S-gate2`); the potential pieces
 `indistinguishingNumber`(`_mono`) / `maxValency`(`_mono`) / `pointExtension` /
-`interNum_eq_one_of_forcedUnique` (`CoherentConfig.lean §CC.10/11/19`); the drop-lemma plan
-`chain-descent-a2-potential-route.md` §2–§3.
+`interNum_eq_one_of_forcedUnique` (`§CC.10/11/19`); the drop-lemma plan `chain-descent-a2-potential-route.md`
+§2–§3 (the IR-selection rule = the witness of `PotentialDrops`).
 
 **Direction-blind canonizer substrate:** `warm_6_2`, `warmRefine_swap`, `flipPair`,
 `flipPair_partition_invariant`, `spine_branch_independent`, `DirAssignment`, `canonForm`,
 `canonForm_le_canonAdj`, `rankPerm` (top-level `ChainDescent.lean`).
 
-**`log`-bound engine to port:** `exists_greedy_base_aux` / `exists_greedy_base_le_log` (`Cascade.lean`).
+**`log`-bound engine (port DONE — reuse, don't re-port):** `exists_potential_descent` (`CoherentConfig.lean
+§CC.20`), the `Φ`-analogue of `exists_greedy_base_aux` / `exists_greedy_base_le_log` (`Cascade.lean`).
 
 **Probe (the evidence, reuse the harness):** `A2MonovariantProbe.cs` (`Probe_CellSizeDropAcrossSRGs`,
 `Probe_ScalingResidueVsCarved`) — `Φ` = max cell size drop, residue vs carved.

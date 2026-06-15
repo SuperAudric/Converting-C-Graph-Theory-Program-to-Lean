@@ -75,11 +75,30 @@ theorem potential_drop (hsh : Shatters X) {T} (hbig : B₀ < Φ X T) :
     ∃ v, Φ X (insert v T) ≤ ρ * Φ X T          -- ρ < 1 a fixed rational
 ```
 
-**The engine (reuse the landed template).** Iterating a per-step constant-factor drop to a `log` bound is exactly
-what `exists_greedy_base_le_log` already does for `|Aut|` (each genuine seed at least halves it). The drop lemma
-is the **`c`-analogue**: `Φ(T_t) ≤ ρ^t · Φ(∅) = ρ^t · n`, so `Φ(T_t) ≤ B₀` at `t = ⌈log_{1/ρ}(n/B₀)⌉ = O(log n)`.
-Then the residual classes are `≤ B₀ = O(1)`, i.e. `c(X_{T₀}) = O(1)` — A1's input. The greedy-base induction
-(`exists_greedy_base_aux`) is the literal proof skeleton to port from `|Aut|` to `Φ`.
+**The engine — LANDED (Stage 1a, `§CC.20`).** Iterating a per-step constant-factor drop to a `log` bound is what
+`exists_greedy_base_le_log` does for `|Aut|`; the **`c`-analogue is now landed** as `exists_potential_descent`
+(the abstract halving→`O(log n)` descent), with the per-step drop carried as the predicate
+`PotentialDrops B := ∀ T, B < Φ T → ∃ v, 2·Φ(insert v T) ≤ Φ T` and `exists_small_base_of_potentialDrops`
+producing the small base (`Φ(T_t) ≤ ρ^t·Φ(∅)` ⟹ base size `O(log n)`, since `Φ ∅ ≤ n²`). The potential is
+`Φ X T = (k(X_T)−1)·c(X_T)` — the **threshold-matched product**, not `c` alone: A1 needs *both* `c` and `k`
+bounded (the threshold is `(k−1)c < |T|`), and the product captures both. **So the drop lemma proper —
+`PotentialDrops` for the residue — is the entire remaining content.**
+
+**`∃ v` (single splitter), not "branch on the cell" — and why (from the IR-solver unification,
+[`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §5).** The predicate pins
+*one* vertex per step (`∃ v`), and that is load-bearing, not cosmetic. As an **existence** statement (the seal:
+"a bounded base exists") the single-vertex form already suffices — `exists_potential_descent` walks one
+canonical path. But the *algorithmic* reading (the rigid-residue solver) exposes why it must be a **bounded
+splitter**: if instead one branched on the *largest cell* at each level, the leaf product is
+`∏_{i<b} Φ(T_i) ≈ ∏ ρ^i n ≈ n^{(b+1)/2}` — **quasipoly even with a short base**. Pinning a bounded splitter (which
+`Shatters` provides) and letting refinement *propagate* keeps per-step branching `O(1)`, giving `2^{O(log n)} =
+n^{O(1)}` leaves. **Takeaway for the drop lemma:** `Shatters`/`PotentialDrops` must furnish a splitter that is not
+just halving but *itself bounded* (`c, k = O(1)` at the pin) — the single-vertex `∃ v` form encodes exactly this.
+
+**Downstream payoff (free once `PotentialDrops` closes).** A2's `PotentialDrops` *is* the seed-selection rule of
+the **poly-time rigid-residue (IR-blind-spot/multipede) canonizer** (the deferral Phase-2 hand-off,
+[`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §2): closing the drop lemma
+delivers both the seal *and* that solver, and the solver's flag set = A2's open row 4 (§3). They are one object.
 
 **Why a constant-factor drop is the right shape (probe-anchored).** The geometric obstruction has worst-drop
 `((m−1)/m)² → 1`; that is the *only* way to defeat a constant `ρ`. The drop lemma's job is to show the obstruction
@@ -113,6 +132,20 @@ for one construction). Whether a *uniform* counting proof of `potential_drop` co
 question this route stakes out. The probe's residue (Shrikhande/Chang/Clebsch) all sit in rows 2 (bounded `s`), so
 the **empirical evidence is strongest exactly where Neumaier already gives finiteness** — the scalable row-4
 evidence is the construction-bottlenecked gap the probe flagged.
+
+**A parallel proof language for row 4 — bounded constraint-width (from
+[`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §7).** The Neumaier/spectral
+route above is *one* way to discharge `PotentialDrops`; there is a second, structurally different one worth
+keeping open because it *need not be equally hard*. The residue's recovery constraints are not a generic SAT
+instance — they are **coherent-configuration-structured**: `interNum_eq_one_of_forcedUnique` is literally a
+forced-triangle *uniqueness* constraint, and `DominatorReachable` is their propagation closure. A theorem of the
+form **"the residue's forced-triangle constraint network has bounded treewidth / clique-width"** is *equivalent
+to* `c(X_T) = O(1)` (bounded-width constraint networks both propagate-to-discrete cheaply and bound the
+indistinguishing classes), so it discharges `PotentialDrops` in a **combinatorial-constraint** language rather
+than the spectral/geometric one. **Caveat (do not misread):** a *generic* SAT/treewidth solver bolted on is
+circular — it is poly *iff* the instance is in a tractable fragment, and proving it lands there *is* the bound.
+The non-circular content is the structural width theorem itself. Keep this as a sibling attack on row 4, not a
+solver bolt-on; if it closes, the bounded-width network *is* the poly rigid-residue canonizer (they unify).
 
 ## 4. Formalization plan (stages, reuse, risk)
 
