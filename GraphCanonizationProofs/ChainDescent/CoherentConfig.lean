@@ -2207,6 +2207,56 @@ theorem indistinguishingHalves_of_exists_avoiding_v (B : Nat)
       (fun α β hαβ hund => by have := hv α β hαβ hund; omega)
   omega
 
+/-! ### §CC.22 (cont.) — the `BigConfusionCover` obstruction (Stage 1b discharge, route doc §4c step 4)
+
+The step-3 wiring reduced the whole open content to *the existence of an avoiding `v`* — a vertex outside every
+confusion set of size `> c(X_T)/2`. Its negation is a clean covering statement: the big (`>c/2`) confusion sets
+**cover `Fin n`**. This section names that obstruction and proves `¬cover ⟹ ∃ avoiding v` (feeding step 3), pulling
+the entire open content into the single predicate the cited Neumaier / primitive-CC dichotomy (G-cite, step 5)
+attaches to: a cover forces `n ≤ (#big sets)·c(X_T)`, i.e. `≥ n/c` near-maximal confusion sets — a partial-geometry
+/ near-pencil line system, routed to `Cameron ∨ finite`. The §CC.21 balanced-splitter primitives
+(`BalancedSplits` / `MajorityRelation` / `majority_fibers_inter` / `GeometricObstruction`) model the 1-WL *cell* split
+the probe measured, not this 2-WL `c` covering — they are parked as that cell model. -/
+
+/-- §CC.22 (Stage 1b, route doc §4c step 4) **The big-confusion-set covering obstruction.** The confusion sets of
+size `> c(X)/2` (`c(X) < 2·|C(α,β)|`, `α ≠ β`) **cover `Fin n`**: every vertex fails to distinguish some pair whose
+confusion class is over-half. This is the exact negation of "an avoiding `v` exists" (step 3's hypothesis); a `v`
+*outside* the cover halves `c` by the kill-lemma bound. A cover forces `n ≤ (#big sets)·c(X)`, hence `≥ n/c`
+near-maximal confusion sets — the partial-geometry / near-pencil line system the cited Neumaier + primitive-CC
+classification (G-cite, step 5) routes to `Cameron ∨ finite-exceptional`. The residue, being neither, has no cover. -/
+def BigConfusionCover : Prop :=
+  ∀ v : Fin n, ∃ α β : Fin n,
+    α ≠ β ∧ X.indistinguishingNumber < 2 * (X.confusionSet α β).card ∧ v ∈ X.confusionSet α β
+
+/-- §CC.22 (Stage 1b, route doc §4c step 4) **No cover ⟹ an avoiding `v` exists.** If the big (`>c/2`) confusion
+sets do *not* cover `Fin n`, some `v` lies outside all of them — i.e. every pair `(α,β)` (`α ≠ β`) that `v` fails to
+distinguish (`relOf v α = relOf v β`, `v ∈ C(α,β)`) has `2·|C(α,β)| ≤ c(X)`. Exactly the "avoiding `v`" hypothesis
+of `indistinguishingHalves_of_exists_avoiding_v` (step 3). Axiom-clean. -/
+theorem exists_avoiding_of_not_cover (h : ¬ X.BigConfusionCover) :
+    ∃ v : Fin n, ∀ α β : Fin n, α ≠ β → X.relOf v α = X.relOf v β →
+      2 * (X.confusionSet α β).card ≤ X.indistinguishingNumber := by
+  unfold BigConfusionCover at h
+  rw [not_forall] at h
+  obtain ⟨v, hv⟩ := h
+  refine ⟨v, fun α β hαβ hund => ?_⟩
+  by_contra hlt
+  push_neg at hlt
+  refine hv ⟨α, β, hαβ, hlt, ?_⟩
+  simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and]
+  exact hund
+
+/-- §CC.22 (Stage 1b, route doc §4c step 4) **`IndistinguishingHalves` from no cover at every over-`B` base — the
+capstone-facing wiring.** If for every base `T` with `Φ T > B` the point extension `X_T` has **no** big-confusion-set
+cover, then `X.IndistinguishingHalves B`. Composes `exists_avoiding_of_not_cover` (per base) with the step-3 halving
+wiring `indistinguishingHalves_of_exists_avoiding_v`. **This packages the entire open content of A2 as one predicate
+on the extension:** G-cite (step 5) discharges `¬ BigConfusionCover (X_T)` for the residue (non-Cameron, non-finite)
+via the cited near-pencil dichotomy. Axiom-clean. -/
+theorem indistinguishingHalves_of_not_bigConfusionCover (B : Nat)
+    (h : ∀ T : Finset (Fin n), B < X.potential T → ¬ (pointExtension X T).BigConfusionCover) :
+    X.IndistinguishingHalves B :=
+  X.indistinguishingHalves_of_exists_avoiding_v B
+    (fun T hT => (pointExtension X T).exists_avoiding_of_not_cover (h T hT))
+
 end CoherentConfig
 
 end ChainDescent

@@ -205,9 +205,13 @@ the route-doc **§4c build-order**:
 - **Step 3 ✅ LANDED** (2026-06-15, `§CC.22`) — halving wiring `indistinguishingHalves_of_exists_avoiding_v`
   (`∃v` avoiding all big confusion sets per over-`B` base `⟹ IndistinguishingHalves`, pure arithmetic at `M=c/2`).
   **The entire open content is now exactly the existence of an avoiding `v`.**
-- **Step 4 (NEXT)** — the `BigConfusionCover B` obstruction predicate (`>c/2` confusion sets cover `Fin n`) +
-  `exists_avoiding_of_not_cover` (`¬cover ⟹ ∃ v avoiding`, feeding step 3); retire/park §CC.21's balanced-splitter defs.
-- **Step 5** — **G-cite** (carry Neumaier + G3, the research core) + capstone `…viaNoConfusionCover`.
+- **Step 4 ✅ LANDED** (2026-06-15, `§CC.22`) — the `BigConfusionCover` obstruction predicate (`>c/2` confusion sets
+  cover `Fin n`) + `exists_avoiding_of_not_cover` (`¬cover ⟹ ∃ v avoiding`) + the capstone-facing wiring
+  `indistinguishingHalves_of_not_bigConfusionCover` (`∀T over-B, ¬cover(X_T) ⟹ IndistinguishingHalves`). §CC.21
+  balanced-splitter defs parked (left in place) as the 1-WL-cell model. **The entire open content of A2 is now packaged
+  as one predicate: `¬ BigConfusionCover (X_T)`.**
+- **Step 5 (NEXT — the research core)** — **G-cite**: carry `BigConfusionCover ⟹ Cameron ∨ finite` (Neumaier + G3) +
+  capstone `…viaNoConfusionCover`.
 
 **Read `chain-descent-a2-potential-route.md` STATUS + §4c first.** The probe (`A2MonovariantProbe.cs`, 2026-06-15)
 reframed the row-4 gap: the drop-obstruction is the **partial-geometry line system**, not the smallest-eigenvalue

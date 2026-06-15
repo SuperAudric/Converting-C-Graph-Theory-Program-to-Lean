@@ -58,10 +58,13 @@ proved via `Finset.sup_le` over non-reflexive `W`-classes, and it **dissolved th
 hypothesis on `v` replaces the per-class splitter). **Step 3 (the halving wiring
 `indistinguishingHalves_of_exists_avoiding_v`: `∃ v` avoiding all big confusion sets per over-`B` base `⟹
 IndistinguishingHalves`) ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean)** — pure arithmetic instantiating the bound at
-`M = c(X_T)/2`. **So the entire open content is now exactly the existence of an avoiding `v`. NEXT = §4c build-order
-step 4:** the `BigConfusionCover B` obstruction predicate (`>c/2` confusion sets cover `Fin n`) + `exists_avoiding_of_not_cover`
-(`¬cover ⟹ ∃ v avoiding`, feeding step 3); retire/park §CC.21's balanced-splitter defs. Then step 5 (G-cite = carry
-Neumaier + G3, + capstone `…viaNoConfusionCover`). The research core remains **G-cite**.
+`M = c(X_T)/2`. **Step 4 (the `BigConfusionCover` obstruction: `BigConfusionCover` predicate +
+`exists_avoiding_of_not_cover` + the capstone-facing `indistinguishingHalves_of_not_bigConfusionCover`) ✅ LANDED
+(2026-06-15, `§CC.22`, axiom-clean).** **So the entire open content of A2 is now packaged as ONE predicate on the
+extension: `¬ BigConfusionCover (X_T)` at every over-`B` base. NEXT = §4c build-order step 5 (the research core,
+G-cite):** carry `BigConfusionCover ⟹ Cameron ∨ finite` (Neumaier + primitive-CC classification G3) + capstone
+`reachesRigidOrCameron_viaNoConfusionCover`. The §CC.21 balanced-splitter defs are parked (left in place) as the
+1-WL-cell model.
 
 ---
 
@@ -305,16 +308,21 @@ transfer; the covering count replaces it.)
    `M = c(X_T)/2` (the avoiding hypothesis gives `|C| ≤ c/2` per undistinguished pair), giving `c(W) ≤ c(X_T)/2`, i.e.
    `2·c(W) ≤ c(X_T)`; `omega` closes it. **The whole open content is now exactly the existence of the avoiding `v`** —
    its negation is the covering obstruction (step 4).
-4. **Revise §CC.21 — the `BigConfusionCover` obstruction.** *Next.* Define `BigConfusionCover B` (the `>c/2` confusion
-   sets cover `Fin n`) and `exists_avoiding_of_not_cover` (`¬BigConfusionCover ⟹ ∃ v avoiding`, feeding step 3's
-   hypothesis); keep `confusionSet`, park the balanced-splitter primitives (`BalancedSplits`/`MajorityRelation`/
-   `majority_fibers_inter`/`GeometricObstruction`) as the 1-WL-cell model. *Note:* the "avoiding" condition is now
-   stable as `2·|C_{X_T}(α,β)| ≤ c(X_T)` for every `v`-undistinguished pair (`§CC.22` step 3's hypothesis shape).
-5. **G-cite + capstone**: carry `BigConfusionCover ⟹ IsCameron ∨ finite` (Neumaier + G3) and land
-   `reachesRigidOrCameron_viaNoConfusionCover` discharging `IndistinguishingHalves` modulo the cited dichotomy.
+4. **The `BigConfusionCover` obstruction — ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean).** `BigConfusionCover`
+   (the `>c/2` confusion sets cover `Fin n`: `∀ v, ∃ α≠β, c(X) < 2·|C(α,β)| ∧ v∈C(α,β)`); `exists_avoiding_of_not_cover`
+   (`¬BigConfusionCover ⟹ ∃ v avoiding`, via `not_forall` + `not_le`, feeding step 3); and the capstone-facing wiring
+   `indistinguishingHalves_of_not_bigConfusionCover` (`∀T over-B, ¬BigConfusionCover (X_T) ⟹ IndistinguishingHalves B`,
+   composing it with step 3). `confusionSet` kept; the §CC.21 balanced-splitter primitives parked as the 1-WL-cell model
+   (left in place, documented as superseded — not deleted). **This packages the entire open content of A2 as one
+   predicate on the extension: `¬ BigConfusionCover (X_T)`.**
+5. **G-cite + capstone.** *Next (the research core).* Carry `BigConfusionCover ⟹ IsCameron ∨ finite` (Neumaier + the
+   primitive-CC classification G3) as theorem-statement hypotheses and land `reachesRigidOrCameron_viaNoConfusionCover`
+   discharging `IndistinguishingHalves` (via `indistinguishingHalves_of_not_bigConfusionCover`) modulo the cited
+   dichotomy: a cover forces `n ≤ (#big)·c` ⟹ `≥ n/c` near-maximal confusion sets = near-pencil line system ⟹
+   Cameron/finite; the residue (non-Cameron, non-finite) therefore has no cover.
 
-The research core is still **G-cite** (covering ⟹ geometric ⟹ Cameron/finite); steps 2–4 are the now-clear provable
-mechanics following the landed step-1 kill lemma.
+Steps 1–4 are the now-complete provable mechanics; **the sole remaining open content is the research core G-cite (step 5)**
+— covering ⟹ geometric ⟹ Cameron/finite, the cited dichotomy attached to the single predicate `BigConfusionCover (X_T)`.
 
 ## 5. Evidence (the probe — full detail archived)
 

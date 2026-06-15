@@ -117,10 +117,12 @@ close it — is set out in
 > `IndistinguishingHalves`** (some individualization halves the indistinguishing number `c(X_T)`; `k` rides free). **Its
 > discharge is underway:** the geometric-obstruction framework (`§CC.21`) and **★ the G-mech kill lemma (`§CC.22`:
 > `confusionSet_eq_empty_of_relOf_v_ne` — a `v` distinguishing `α,β` annihilates `C(α,β)`)** are landed, and **★ the
-> §4c build-order steps 2–3 — the bound `indistinguishingNumber_pointExtension_insert_le` and the halving wiring
-> `indistinguishingHalves_of_exists_avoiding_v` — are LANDED (`§CC.22`, axiom-clean), dissolving the G-sim gap; the entire
-> open content is now exactly the existence of an avoiding `v`**; **NEXT = §4c build-order step 4** (the `BigConfusionCover`
-> obstruction predicate + `¬cover ⟹ ∃ v avoiding`). **Live frontier doc:
+> §4c build-order steps 2–4 — the bound, the halving wiring, and the `BigConfusionCover` obstruction
+> (`indistinguishingNumber_pointExtension_insert_le` / `indistinguishingHalves_of_exists_avoiding_v` /
+> `BigConfusionCover` + `exists_avoiding_of_not_cover` + `indistinguishingHalves_of_not_bigConfusionCover`) — are LANDED
+> (`§CC.22`, axiom-clean), dissolving the G-sim gap. The entire open content of A2 is now ONE predicate on the extension:
+> `¬ BigConfusionCover (X_T)`**; **NEXT = §4c build-order step 5 (the research core, G-cite)** — carry
+> `BigConfusionCover ⟹ Cameron ∨ finite` (Neumaier + G3) + capstone `…viaNoConfusionCover`. **Live frontier doc:
 > [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md)** — read its STATUS + **§4c** (the
 > discharge build-order) first; the honest "row 4" gap is now reframed as the *partial-geometry line system* (not the
 > eigenvalue magnitude). Evidence: the monovariant probe (`A2MonovariantProbe.cs`). Forward payoff: closing it also

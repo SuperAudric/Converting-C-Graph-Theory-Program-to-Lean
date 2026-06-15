@@ -73,9 +73,12 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   `≤ M`; via `Finset.sup_le` over non-reflexive `W`-classes + the kill lemma + `Refines`-monotonicity). **It dissolved the G-sim gap**
   (one covering hypothesis on `v` replaces the per-class splitter). **Step 3 — the halving wiring — LANDED (2026-06-15, `§CC.22`,
   axiom-clean):** `indistinguishingHalves_of_exists_avoiding_v` (`∃ v` avoiding all big confusion sets per over-`B` base `⟹
-  IndistinguishingHalves`, pure arithmetic at `M=c/2`). **So the entire open content is now exactly the existence of an avoiding `v`.**
-  **NEXT (route doc §4c build-order):** step 4 `BigConfusionCover` obstruction predicate + `exists_avoiding_of_not_cover` (feeds step 3),
-  step 5 G-cite (Neumaier+G3) + capstone `…viaNoConfusionCover`.
+  IndistinguishingHalves`, pure arithmetic at `M=c/2`). **Step 4 — the `BigConfusionCover` obstruction — LANDED (2026-06-15, `§CC.22`,
+  axiom-clean):** `BigConfusionCover` (`>c/2` confusion sets cover `Fin n`) + `exists_avoiding_of_not_cover` (`¬cover ⟹ ∃ v avoiding`) +
+  the capstone-facing `indistinguishingHalves_of_not_bigConfusionCover` (`∀T over-B, ¬cover(X_T) ⟹ IndistinguishingHalves B`). §CC.21
+  balanced-splitter defs parked (left in place) as the 1-WL-cell model. **So the entire open content of A2 is now ONE predicate on the
+  extension: `¬ BigConfusionCover (X_T)`. NEXT (route doc §4c build-order): step 5 (the research core, G-cite)** — carry
+  `BigConfusionCover ⟹ Cameron ∨ finite` (Neumaier+G3) + capstone `…viaNoConfusionCover`.
 
 ### The open frontier — ONE hypothesis: `IndistinguishingHalves` (live work: `chain-descent-a2-potential-route.md`)
 **The seal now stands `modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**, and the entire open mathematical content is the single
