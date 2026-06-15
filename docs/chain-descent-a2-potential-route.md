@@ -232,10 +232,62 @@ combinatorial heart), `GeometricObstruction` (the obstruction predicate at scale
 combinatorics that says "the drop-obstruction is a line system" and gives the predicate the cited Neumaier/Cameron
 dichotomy (G-cite) attaches to.
 
-**What remains (clearly isolated):** (i) **G-mech** — the closure-halving mechanics (the δ′ forced-triangle bridge
-from `BalancedSplits` to `2·c(X_{T∪v}) ≤ c(X_T)`); (ii) **G-sim** — the simultaneous splitter for all near-max
-classes; (iii) **G-cite** — carry Neumaier + G3 and route the residue out. Closing (i)+(ii)+(iii) wires
-`§CC.21 → IndistinguishingHalves → reachesRigidOrCameron_viaShattering ⟹ seal modulo {G3}`. (i) is the research core.
+**What remains (clearly isolated):** (i) **G-mech** — the closure-halving mechanics; (ii) **G-sim** — simultaneity;
+(iii) **G-cite** — carry Neumaier + G3 and route the residue out.
+
+> **⚠ CORRECTION (2026-06-15, from planning G-mech — supersedes the §CC.21 "balanced-splitter" framing above).**
+> Working out the *coherent-closure* mechanism (§4c) showed the §CC.21 primitives (`BalancedSplits` /
+> `MajorityRelation` / `majority_fibers_inter`) model the wrong object for the **2-WL** indistinguishing number `c`:
+> individualizing `v` does **not** split `C(α,β)` into relation-to-`v` fibers. Those primitives correctly model the
+> **1-WL cell** split (what the *probe* measured) — keep them for a future cell-potential, but the `c`-route's G-mech
+> is the **kill lemma** of §4c, not balanced-splitting. §CC.21 is to be repurposed/replaced accordingly.
+
+## 4c. G-mech, corrected: the kill lemma (the clean, provable heart)
+
+**The actual closure mechanism.** Let `W = pointExtension X (insert v T)` (so `v` is a singleton fiber of `W`, and
+`W` refines `X_T`). For a pair `(α,β)`, the `W`-confusion is `{γ : relOf_W γ α = relOf_W γ β}`. The key fact:
+
+> **Kill lemma.** If `v` is a singleton fiber of a CC `W` and `relOf_W v α ≠ relOf_W v β`, then the `W`-confusion of
+> `(α,β)` is **empty**.
+
+*Proof (interNum coherence + singleton isolation; no construction internals, no tower lemma).* Suppose `γ` is
+`W`-confused: `relOf_W γ α = relOf_W γ β =: c'`. For the first-coordinate class `a := relOf_W γ v`, the filter
+`{z : relOf_W γ z = a ∧ relOf_W z α = b}` forces `z = v` (since `relOf_W γ z = relOf_W γ v ⟹` (by
+`relOf_diag_right_eq`) `z, v` share a reflexive class `⟹` (SingletonFiber `v`) `z = v`), so its card is `[b = relOf_W
+v α]`; by `interNum_eq` this card is `interNum a b c'`. The same computation on `(γ,β) ∈ c'` gives `interNum a b c' =
+[b = relOf_W v β]`. Hence `[b = relOf_W v α] = [b = relOf_W v β]` for all `b`, so `relOf_W v α = relOf_W v β` —
+contradiction. ∎ (Provable with `inter_card_eq` / `interNum_eq` / `relOf_diag_right_eq` / `SingletonFiber`, the
+`sharp_pointExtension` toolkit; ~30–40 lines.)
+
+**The corrected G-mech chain.** `v` distinguishing `(α,β)` (`relOf v α ≠ relOf v β`, i.e. `v ∉ C_{X_T}(α,β)`) **kills**
+that pair's confusion in `W`. Every surviving `W`-class came from a pair `v` does *not* distinguish, whose `W`-confusion
+`⊆ C_{X_T}(α,β)` (monotone). So
+> `c(W) ≤ max { |C_{X_T}(α,β)| : (α,β) non-reflexive, v ∈ C_{X_T}(α,β) }`.
+Hence **`IndistinguishingHalves` at `T` follows from: ∃ `v` lying in NO confusion set of size `> c(X_T)/2`** — then every
+surviving pair has `|C| ≤ c/2`, so `c(W) ≤ c/2`, i.e. `2·c(W) ≤ c(X_T)`.
+
+**The corrected obstruction (G-cite).** No such `v` ⟺ the *big* confusion sets (`|C(α,β)| > c/2`) **cover `Fin n`**.
+A cover forces `n ≤ (#big pairs)·c`, i.e. ≥ `n/c` near-maximal confusion sets — a partial-geometry / near-pencil
+structure, which Neumaier + the primitive-CC classification (cited) route to `Cameron ∨ finite-exceptional`. The residue
+(non-Cameron, not finite) therefore admits a good `v` and shatters. (Note: big confusion sets need *not* pairwise
+intersect — they live in `Fin n`, not a size-`c` universe — so the `majority_fibers_inter` pigeonhole does **not**
+transfer; the covering count replaces it.)
+
+**Build order (G-mech implementation, when green-lit):**
+1. **Kill lemma** `confusion_empty_of_relOf_ne` (the heart, above) — singleton-fiber isolation + `interNum_eq`. *Medium
+   risk, high confidence.*
+2. **The bound** `indistinguishingNumber_pointExtension_insert_le`: `c(W) ≤ max over v-undistinguished pairs of
+   |C_{X_T}|`. From the kill lemma + per-class monotonicity (`confusionSet_W ⊆ confusionSet_{X_T}` via `Refines`).
+3. **The halving wiring** `indistinguishingHalves_of_exists_avoiding_v`: `(∃ v ∉ ⋃ big confusion sets) ⟹
+   IndistinguishingHalves`. Pure arithmetic on the bound.
+4. **Revise §CC.21**: replace `BalancedSplits`/`majority_fibers_inter` with the confusion-set **covering** predicate
+   `BigConfusionCover B` and `exists_avoiding_of_not_cover`; keep `confusionSet`. (Park the balanced-splitter
+   primitives as the 1-WL-cell model.)
+5. **G-cite + capstone**: carry `BigConfusionCover ⟹ IsCameron ∨ finite` (Neumaier + G3) and land
+   `reachesRigidOrCameron_viaNoConfusionCover` discharging `IndistinguishingHalves` modulo the cited dichotomy.
+
+The research core is still **G-cite** (covering ⟹ geometric ⟹ Cameron/finite); steps 1–4 are the now-clear provable
+mechanics, with step 1 (the kill lemma) the genuine new content.
 
 ## 5. Evidence (the probe — full detail archived)
 
