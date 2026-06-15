@@ -68,8 +68,11 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   **`confusionSet_eq_empty_of_relOf_v_ne`** (THE KILL LEMMA: `v` a singleton fiber distinguishing `α,β` ⟹ `C(α,β)=∅` — individualizing
   `v` annihilates the confusion of every pair it distinguishes). Proved purely from `interNum` coherence + singleton isolation (the
   `sharp_pointExtension` toolkit; no tower, no construction internals). ⟹ `c(X_{T∪v}) ≤ max{|C_{X_T}(α,β)| : v∈C(α,β)}`, so **a `v`
-  outside all over-half confusion sets halves `c`** — the corrected G-mech. **NEXT (route doc §4c build-order):** step 2 the bound
-  `c(W)≤max-undistinguished`, step 3 halving wiring, step 4 `BigConfusionCover` predicate, step 5 G-cite (Neumaier+G3) + capstone.
+  outside all over-half confusion sets halves `c`** — the corrected G-mech. **Step 2 — the bound — LANDED (2026-06-15, `§CC.22`,
+  axiom-clean):** `indistinguishingNumber_pointExtension_insert_le` (`c(W) ≤ M` if every `v`-undistinguished `X_T`-pair has confusion
+  `≤ M`; via `Finset.sup_le` over non-reflexive `W`-classes + the kill lemma + `Refines`-monotonicity). **It dissolved the G-sim gap**
+  (one covering hypothesis on `v` replaces the per-class splitter). **NEXT (route doc §4c build-order):** step 3 halving wiring
+  (`∃ v ∉ ⋃ big sets ⟹ IndistinguishingHalves`, the bound at `M=c/2`), step 4 `BigConfusionCover` predicate, step 5 G-cite (Neumaier+G3) + capstone.
 
 ### The open frontier — ONE hypothesis: `IndistinguishingHalves` (live work: `chain-descent-a2-potential-route.md`)
 **The seal now stands `modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**, and the entire open mathematical content is the single

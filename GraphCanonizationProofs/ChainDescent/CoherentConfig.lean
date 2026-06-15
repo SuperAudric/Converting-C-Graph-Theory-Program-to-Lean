@@ -2136,6 +2136,50 @@ theorem confusionSet_eq_empty_of_relOf_v_ne {v α β : Fin n} (hv : X.SingletonF
   intro γ _ hγ
   exact h (X.relOf_v_eq_of_confused hv hγ)
 
+/-- §CC.22 (G-mech, **the bound** — route doc §4c step 2). **The kill-lemma bound on `c(X_{T∪v})`.**
+Individualizing `v` bounds the indistinguishing number of the extension `W = pointExtension X (insert v T)` by the
+largest `X_T`-confusion among the pairs `v` does *not* distinguish: if every pair `(α,β)` with `α ≠ β` and
+`relOf_{X_T} v α = relOf_{X_T} v β` has `|C_{X_T}(α,β)| ≤ M`, then `c(X_{T∪v}) ≤ M`. Each non-reflexive `W`-class
+has a representative pair `(α,β)` (`α ≠ β`, else the class is reflexive); the kill lemma
+(`confusionSet_eq_empty_of_relOf_v_ne`, `v` a singleton fiber of `W` by `isPointExtension_pointExtension`) zeroes
+its `W`-confusion when `v` *distinguishes* it, and otherwise the `W`-confusion is `⊆ C_{X_T}(α,β)` (monotone via
+`Refines W X_T`, `refines_pointExtension_of_subset`) while `v` fails to distinguish `(α,β)` in `X_T` too — landing
+in the `≤ M` hypothesis. This dissolves the old G-sim (simultaneity) gap: the single covering hypothesis on `v`
+replaces a per-class splitter. The brick step 3 (`indistinguishingHalves_of_exists_avoiding_v`) consumes with
+`M = c(X_T)/2`. Axiom-clean. -/
+theorem indistinguishingNumber_pointExtension_insert_le (v : Fin n) (T : Finset (Fin n)) (M : Nat)
+    (hM : ∀ α β : Fin n, α ≠ β →
+        (pointExtension X T).relOf v α = (pointExtension X T).relOf v β →
+        ((pointExtension X T).confusionSet α β).card ≤ M) :
+    (pointExtension X (insert v T)).indistinguishingNumber ≤ M := by
+  classical
+  set W := pointExtension X (insert v T) with hWdef
+  set Y := pointExtension X T with hYdef
+  have hrefW : Refines W Y := X.refines_pointExtension_of_subset (Finset.subset_insert v T)
+  have hvsing : W.SingletonFiber v :=
+    (isPointExtension_pointExtension X (insert v T)).2.1 v (Finset.mem_insert_self v T)
+  unfold indistinguishingNumber
+  apply Finset.sup_le
+  intro r hr
+  rw [Finset.mem_filter] at hr
+  set α := (W.repPair r).1 with hαdef
+  set β := (W.repPair r).2 with hβdef
+  have hrep : W.relOf α β = r := W.relOf_repPair r
+  have hαβ : α ≠ β := fun he => hr.2 ⟨β, by rw [← hrep, he]⟩
+  have hcard : W.indistinguishingNumberOf r = (W.confusionSet α β).card :=
+    W.indistinguishingNumberOf_eq_card hrep
+  rw [hcard]
+  by_cases hvd : W.relOf v α = W.relOf v β
+  · -- `v` does not distinguish `(α,β)` in `W`: confusion `⊆ C_{X_T}`, and `v` fails to distinguish in `X_T` too.
+    have hsub : W.confusionSet α β ⊆ Y.confusionSet α β := by
+      intro γ hγ
+      simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and] at hγ ⊢
+      exact hrefW γ α γ β hγ
+    exact le_trans (Finset.card_le_card hsub) (hM α β hαβ (hrefW v α v β hvd))
+  · -- `v` distinguishes `(α,β)` in `W`: the kill lemma empties its confusion class.
+    rw [W.confusionSet_eq_empty_of_relOf_v_ne hvsing hvd, Finset.card_empty]
+    exact Nat.zero_le M
+
 end CoherentConfig
 
 end ChainDescent

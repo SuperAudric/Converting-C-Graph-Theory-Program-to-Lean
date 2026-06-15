@@ -199,11 +199,13 @@ the route-doc **§4c build-order**:
 - **Step 1 ✅ LANDED** — the **G-mech kill lemma** (`§CC.22`: `relOf_v_eq_of_confused` + `confusionSet_eq_empty_of_relOf_v_ne`):
   a `v` that *distinguishes* `α,β` annihilates `C(α,β)` in `X_{T∪v}`. ⟹ `c(X_{T∪v}) ≤ max{|C_{X_T}(α,β)| : v∈C(α,β)}`,
   so a `v` outside all over-half confusion sets halves `c`.
-- **Step 2 (NEXT)** — the bound `c(X_{T∪v}) ≤ max over v-undistinguished pairs` (`v` singleton-fiber-of-`W` from
-  `isPointExtension_pointExtension`, per-class confusion monotonicity via `Refines`, a `2·Finset.sup ≤ M` helper).
-- **Steps 3–5** — halving wiring `∃v∉⋃big ⟹ IndistinguishingHalves`; the `BigConfusionCover` obstruction predicate
-  (retire/park §CC.21's balanced-splitter defs = the 1-WL-cell model, not the 2-WL `c`); **G-cite** (carry Neumaier +
-  G3, the research core) + capstone `…viaNoConfusionCover`.
+- **Step 2 ✅ LANDED** (2026-06-15, `§CC.22`) — the bound `indistinguishingNumber_pointExtension_insert_le`: `c(W) ≤ M`
+  if every `v`-undistinguished `X_T`-pair has confusion `≤ M` (via `Finset.sup_le` over non-reflexive `W`-classes + the
+  kill lemma + `Refines`-monotonicity). **Dissolved the G-sim gap** (one covering hypothesis on `v` replaces the per-class splitter).
+- **Step 3 (NEXT)** — halving wiring `indistinguishingHalves_of_exists_avoiding_v` (`∃v∉⋃big ⟹ IndistinguishingHalves`,
+  pure arithmetic instantiating the bound at `M=c/2`).
+- **Steps 4–5** — the `BigConfusionCover` obstruction predicate (retire/park §CC.21's balanced-splitter defs = the
+  1-WL-cell model, not the 2-WL `c`); **G-cite** (carry Neumaier + G3, the research core) + capstone `…viaNoConfusionCover`.
 
 **Read `chain-descent-a2-potential-route.md` STATUS + §4c first.** The probe (`A2MonovariantProbe.cs`, 2026-06-15)
 reframed the row-4 gap: the drop-obstruction is the **partial-geometry line system**, not the smallest-eigenvalue

@@ -52,11 +52,14 @@ geometric-obstruction framework (`§CC.21`: `confusionSet`, the balanced/majorit
 balanced-splitter framing models the **1-WL cell**, the probe's object, not the 2-WL `c`; superseded by §CC.22), and
 **★ the G-mech kill lemma (`§CC.22`: `relOf_v_eq_of_confused` + `confusionSet_eq_empty_of_relOf_v_ne`)** — a `v` that
 *distinguishes* `α,β` annihilates `C(α,β)` in `X_{T∪v}`. So `c(X_{T∪v}) ≤ max{|C_{X_T}(α,β)| : v ∈ C(α,β)}`, and a
-`v` outside all over-half confusion sets halves `c`. **NEXT = §4c build-order step 2:** the bound
-`c(X_{T∪v}) ≤ max over v-undistinguished pairs` (needs `v` singleton-fiber-of-`W` from
-`isPointExtension_pointExtension`, per-class confusion monotonicity via `Refines`, and a `2·Finset.sup ≤ M` helper);
-then step 3 (halving wiring), step 4 (`BigConfusionCover` predicate, retire/park §CC.21's balanced-splitter defs),
-step 5 (G-cite = carry Neumaier + G3, + capstone `…viaNoConfusionCover`). The research core remains **G-cite**.
+`v` outside all over-half confusion sets halves `c`. **Step 2 (the bound `indistinguishingNumber_pointExtension_insert_le`:
+`c(W) ≤ M` if every `v`-undistinguished pair has `|C_{X_T}| ≤ M`) ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean)** —
+proved via `Finset.sup_le` over non-reflexive `W`-classes, and it **dissolved the G-sim gap** (the single covering
+hypothesis on `v` replaces the per-class splitter). **NEXT = §4c build-order step 3:** the halving wiring
+`indistinguishingHalves_of_exists_avoiding_v` (`∃ v ∉ ⋃ big confusion sets ⟹ IndistinguishingHalves`, pure arithmetic
+instantiating the bound at `M = c(X_T)/2`); then step 4 (`BigConfusionCover` predicate, retire/park §CC.21's
+balanced-splitter defs), step 5 (G-cite = carry Neumaier + G3, + capstone `…viaNoConfusionCover`). The research core
+remains **G-cite**.
 
 ---
 
@@ -286,12 +289,18 @@ transfer; the covering count replaces it.)
 1. **Kill lemma — ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean).** `relOf_v_eq_of_confused` (the core, singleton-fiber
    isolation + `interNum_eq`) and `confusionSet_eq_empty_of_relOf_v_ne` (the kill lemma: `v` distinguishes `(α,β)` ⟹
    `C(α,β)=∅`). The genuine new content; built first.
-2. **The bound** `indistinguishingNumber_pointExtension_insert_le`: `c(W) ≤ max over v-undistinguished pairs of
-   |C_{X_T}|`. From the kill lemma + per-class monotonicity (`confusionSet_W ⊆ confusionSet_{X_T}` via `Refines`).
-   *Next.* Needs: `v` a singleton fiber of `W` (from `isPointExtension_pointExtension`); per-class confusion
-   monotonicity; the `2 * Finset.sup ≤ M` helper (`Finset.exists_mem_eq_sup` on the non-reflexive `W`-classes).
+2. **The bound — ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean).** `indistinguishingNumber_pointExtension_insert_le`:
+   if every pair `(α,β)` (`α≠β`) that `v` fails to distinguish in `X_T` has `|C_{X_T}(α,β)| ≤ M`, then `c(W) ≤ M`.
+   Proved via `Finset.sup_le` over the non-reflexive `W`-classes (cleaner than the planned `Finset.exists_mem_eq_sup`
+   extraction — bounds every class directly): per class, the kill lemma (`v` a singleton fiber of `W` from
+   `isPointExtension_pointExtension`) empties the confusion of pairs `v` distinguishes, else `confusionSet_W ⊆
+   confusionSet_{X_T}` (monotone via `refines_pointExtension_of_subset`) lands it in the `≤ M` hypothesis.
+   **This dissolved the G-sim (simultaneity) gap:** the single covering hypothesis on `v` (`∀` undistinguished pair
+   `≤ M`) replaces the per-class splitter, so the old §4b "one `v` balance-splits all near-max classes" worry is gone.
 3. **The halving wiring** `indistinguishingHalves_of_exists_avoiding_v`: `(∃ v ∉ ⋃ big confusion sets) ⟹
-   IndistinguishingHalves`. Pure arithmetic on the bound.
+   IndistinguishingHalves`. *Next.* Pure arithmetic: instantiate the bound at `M = c(X_T)/2` — "`v` avoids all `>c/2`
+   confusion sets" is exactly the bound's hypothesis (contrapositive: a big set's pair is distinguished by `v`), giving
+   `c(W) ≤ c(X_T)/2`, i.e. `2·c(W) ≤ c(X_T)`. Then quantify over `T` with `Φ T > B` to produce `IndistinguishingHalves B`.
 4. **Revise §CC.21**: replace `BalancedSplits`/`majority_fibers_inter` with the confusion-set **covering** predicate
    `BigConfusionCover B` and `exists_avoiding_of_not_cover`; keep `confusionSet`. (Park the balanced-splitter
    primitives as the 1-WL-cell model.)
