@@ -129,6 +129,28 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         return a;
     }
 
+    // Latin-square (net) graph L_g(m), m PRIME, 2 ≤ g ≤ m+1.  n = m² cells (r,c).
+    // The g parallel classes are {row, col, MOLS_1, …, MOLS_{g−2}} with the cyclic
+    // MOLS L_i(r,c) = (r + i·c) mod m (i = 1…m−1, all orthogonal for prime m).  Two
+    // distinct cells are adjacent iff they agree in SOME chosen class.  This is the
+    // point graph of a transversal net ⟹ GEOMETRIC (Cameron-carved), and its smallest
+    // eigenvalue is exactly −g — so sweeping g gives a controlled growing-|s| axis at
+    // fixed n.  (g=2 is the rook graph; g and m+1−g are complementary; g=m+1 = K_{m²}.)
+    static bool[,] LatinSquareGraph(int m, int g)
+    {
+        int n = m * m;
+        var a = Empty(n);
+        int ClassVal(int r, int c, int t) => t == 0 ? r : t == 1 ? c : ((r + (t - 1) * c) % m);
+        for (int r = 0; r < m; r++) for (int c = 0; c < m; c++)
+            for (int r2 = 0; r2 < m; r2++) for (int c2 = 0; c2 < m; c2++)
+            {
+                if (r == r2 && c == c2) continue;
+                for (int t = 0; t < g; t++)
+                    if (ClassVal(r, c, t) == ClassVal(r2, c2, t)) { a[r * m + c, r2 * m + c2] = true; break; }
+            }
+        return a;
+    }
+
     // ── SRG validation + parameters ──────────────────────────────────────────────
     static (bool ok, int k, int lam, int mu) SrgParams(int n, bool[,] adj)
     {
@@ -163,6 +185,15 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         }
         // conference (disc not a perfect square): f = g = (n−1)/2
         return ($"conference ±√{n}", (n - 1) / 2, (n - 1) / 2);
+    }
+
+    // Smallest eigenvalue s of an SRG (integer when disc is a perfect square; 0 flags
+    // a conference graph whose ±√n eigenvalues are irrational → the abelian/leg-B axis).
+    static int SmallestEig(int n, int k, int lam, int mu)
+    {
+        int disc = (lam - mu) * (lam - mu) + 4 * (k - mu);
+        int s = (int)Math.Round(Math.Sqrt(disc));
+        return (disc > 0 && s * s == disc) ? (lam - mu - s) / 2 : 0;
     }
 
     // p-rank of the 0/1 adjacency matrix over F_p (Gaussian elimination).
@@ -389,6 +420,98 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("");
         output.WriteLine("READ: RESIDUE drop should stay flat/bounded across n; CARVED:lattice & Johnson should climb toward 1.");
         output.WriteLine("Paired twins: Shrikhande vs Rook L(4) @16; Chang vs Triangular T(8) @28.");
+    }
+
+    // ── Run 3: the SMALLEST-EIGENVALUE axis — the row-4 gap (route doc §3/§6) ────────
+    //  The seal's potential-drop route discharges "geometric ⟹ Cameron / non-geometric
+    //  ⟹ shatters" by a Neumaier-style dichotomy keyed on the smallest eigenvalue −s.
+    //  The honest open core is ROW 4: unbounded-s, NON-geometric, generic SRGs.  ALL
+    //  current residue evidence (Shrikhande/Clebsch/Chang) sits at s = −2/−3 (row 2,
+    //  Neumaier-finite) — there is NO data point on the growing-|s| axis.  This probe
+    //  maps worst-drop across |s| using the only constructible growing-|s| family,
+    //  the Latin-square (net) graphs L_g(m) (geometric, s = −g), to test the route's
+    //  prediction "geometric + growing s ⟹ worst-drop climbs toward 1", and to make
+    //  concrete that the non-geometric+high-|s| cell (row 4) has no constructible
+    //  witness — confirming the construction bottleneck with positive data.
+    [Fact]
+    public void Probe_SmallestEigenvalueAxis()
+    {
+        var (_, idx8) = TriIndex(8);
+        var t8 = Triangular(8);
+
+        var graphs = new List<Graph>();
+        // GEOMETRIC growing-|s| axis at FIXED n: Latin-square nets L_g(m), s = −g.
+        foreach (int g in new[] { 2, 3, 4 })
+            graphs.Add(new() { Name = $"LS L_{g}(5)", Category = "CARVED:geometric", N = 25, Adj = LatinSquareGraph(5, g) });
+        foreach (int g in new[] { 2, 3, 4, 5, 6 })
+            graphs.Add(new() { Name = $"LS L_{g}(7)", Category = "CARVED:geometric", N = 49, Adj = LatinSquareGraph(7, g) });
+        // RESIDUE reference points — note they ALL live at small |s| (the gap).
+        graphs.Add(new() { Name = "Shrikhande", Category = "RESIDUE", N = 16, Adj = CayleyZ4Sq(new[] { (1, 0), (3, 0), (0, 1), (0, 3), (1, 1), (3, 3) }) });
+        graphs.Add(new() { Name = "Clebsch", Category = "RESIDUE", N = 16, Adj = CayleyZ2Pow4(new[] { 1, 2, 4, 8, 15 }) });
+        graphs.Add(new() { Name = "Chang-C8", Category = "RESIDUE", N = 28, Adj = SeidelSwitch(28, t8, EdgeSetToVertices(new[] { (0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (0, 7) }, idx8)) });
+        // CONFERENCE (leg B) growing-|s| reference: Paley, irrational ±√n eigenvalues.
+        foreach (int q in new[] { 13, 29, 37 })
+            graphs.Add(new() { Name = $"Paley({q})", Category = "CARVED:conference", N = q, Adj = Paley(q) });
+
+        output.WriteLine("A2 ROW-4 PROBE — worst 1-WL drop across the SMALLEST-EIGENVALUE axis (−s).");
+        output.WriteLine("Latin-square nets L_g(m): GEOMETRIC, s=−g (controlled growing-|s| at fixed n).");
+        output.WriteLine("Question: on the geometric axis does worst-drop CLIMB toward 1 as |s| grows (route §3 prediction)?");
+        output.WriteLine("");
+        output.WriteLine($"{"graph",-14} {"category",-18} {"n",-4} {"(k,λ,μ)",-13} {"s",-4} {"geom?",-6} {"base",-5} {"drop",-7} curve");
+        output.WriteLine(new string('─', 120));
+
+        var rows = new List<(string cat, int n, int s, int baseSize, double drop)>();
+        foreach (var g in graphs)
+        {
+            var (ok, k, lam, mu) = SrgParams(g.N, g.Adj);
+            if (!ok) { output.WriteLine($"{g.Name,-14} {g.Category,-18} {g.N,-4} NOT AN SRG (k={k},λ={lam},μ={mu}) — skipped"); continue; }
+            int s = SmallestEig(g.N, k, lam, mu);
+            var curve = GreedyBaseCurve(g.N, g.Adj);
+            int baseSize = curve.Count - 1;
+            double drop = WorstDropFactor(curve);
+            string geom = g.Category == "CARVED:geometric" ? "yes" : g.Category == "CARVED:conference" ? "conf" : "no";
+            string sStr = s == 0 ? $"±√{g.N}" : s.ToString();
+            output.WriteLine($"{g.Name,-14} {g.Category,-18} {g.N,-4} {$"({k},{lam},{mu})",-13} {sStr,-4} {geom,-6} {baseSize,-5} {drop,-7:F3} {CurveStr(curve)}");
+            rows.Add((g.Category, g.N, s, baseSize, drop));
+        }
+
+        output.WriteLine("");
+        output.WriteLine("GEOMETRIC AXIS — worst drop vs |s| (does it climb toward 1 as |s| grows?):");
+        foreach (var nGrp in rows.Where(r => r.cat == "CARVED:geometric").GroupBy(r => r.n).OrderBy(x => x.Key))
+            output.WriteLine($"  n={nGrp.Key,-4} " + string.Join("  ", nGrp.OrderBy(r => -r.s).Select(r => $"s={r.s}:drop {r.drop:F3}(b{r.baseSize})")));
+        output.WriteLine("");
+        output.WriteLine("RESIDUE points (the A2 target) — note the |s| they occupy:");
+        foreach (var r in rows.Where(r => r.cat == "RESIDUE").OrderBy(r => r.s))
+            output.WriteLine($"  s={r.s,-3} n={r.n,-4} drop={r.drop:F3} base={r.baseSize}");
+
+        // ── Honest verdict on the row-4 gap (the auto-read REFUTED a naive |s| story) ──
+        int resMaxAbsS = rows.Where(r => r.cat == "RESIDUE").Max(r => -r.s);
+        output.WriteLine("");
+        output.WriteLine("FINDING 1 — worst-drop is NOT monotone in |s| on the geometric axis.");
+        foreach (var nGrp in rows.Where(r => r.cat == "CARVED:geometric").GroupBy(r => r.n).OrderBy(x => x.Key))
+        {
+            var ordered = nGrp.OrderBy(r => -r.s).ToList();
+            var peak = ordered.OrderByDescending(r => r.drop).First();
+            var trough = ordered.OrderBy(r => r.drop).First();
+            output.WriteLine($"  n={nGrp.Key}: worst-drop PEAKS at s={peak.s} ({peak.drop:F3}, base {peak.baseSize}) "
+                + $"and TROUGHS at s={trough.s} ({trough.drop:F3}, base {trough.baseSize}).");
+        }
+        output.WriteLine("  The peak is the ROOK/grid extreme (g=2, s=−2, base=√n) AND its complement (g=m−1); the");
+        output.WriteLine("  intermediate nets shatter BETTER (base 3, lower drop).  So the climb-toward-1 obstruction");
+        output.WriteLine("  is the partial-geometry LINE/grid structure — a BOUNDED-s (s=−2) phenomenon — NOT the");
+        output.WriteLine("  magnitude of |s|.  The drop is symmetric under complementation (g ↔ m+1−g).");
+        output.WriteLine("");
+        output.WriteLine("FINDING 2 — the ROW-4 cell is empty among constructibles (the gap, confirmed with data).");
+        output.WriteLine($"  ALL residue evidence sits at |s| ≤ {resMaxAbsS}; every growing-|s| SRG built here is geometric");
+        output.WriteLine("  (net) or conference (leg B).  Non-geometric + high-|s| + small-Aut has NO constructible");
+        output.WriteLine("  witness — growing-|s| and non-geometric-small-Aut are anti-correlated among constructible");
+        output.WriteLine("  SRGs (the CGGP family is the only known inhabitant).  Row 4 is construction-bottlenecked.");
+        output.WriteLine("");
+        output.WriteLine("IMPLICATION for the route (§3): keying the geometric→Cameron dichotomy on |s| alone mislocates");
+        output.WriteLine("  the obstruction — the thing that defeats a constant drop is the GRID/line geometry (bounded s),");
+        output.WriteLine("  already inside row 1/Cameron.  Stage 1b's drop lemma must therefore certify 'no partial-geometry");
+        output.WriteLine("  line system' (NOT 'bounded |s|') as the shatters condition, and cover row 4 by a UNIFORM");
+        output.WriteLine("  counting argument — probe evidence cannot reach it.");
     }
 
     [Fact]

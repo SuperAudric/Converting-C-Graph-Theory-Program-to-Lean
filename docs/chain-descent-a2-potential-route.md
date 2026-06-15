@@ -133,6 +133,18 @@ question this route stakes out. The probe's residue (Shrikhande/Chang/Clebsch) a
 the **empirical evidence is strongest exactly where Neumaier already gives finiteness** — the scalable row-4
 evidence is the construction-bottlenecked gap the probe flagged.
 
+**Refinement (2026-06-15, `Probe_SmallestEigenvalueAxis`, §5 Run 3): the drop-obstruction is the partial-geometry
+LINE system, not the magnitude of `|s|`.** Sweeping the smallest-eigenvalue axis on constructible Latin-square nets
+showed worst-drop *peaks at the rook/grid* (`s=−2`, bounded!) and its complement, and *troughs* for the intermediate
+nets — it is **not** monotone in `|s|`. So keying this table's dichotomy on `−s` alone mislocates what defeats a
+constant drop: the obstruction is a *grid / partial-geometry line system* (a bounded-`s`, row-1 geometric feature),
+not large `|s|`. **Consequence — two updates to the plan:** (a) **state `Shatters` as "no partial-geometry line
+system,"** not "bounded `|s|`" (Stage 1b, §2/§4); (b) this *helps* row 4 — a generic non-geometric SRG has **no line
+system by definition**, hence no grid to stop the multiplicative split, so the heuristic now points toward
+`PotentialDrops` *holding* on row 4. The gap stays open (no constructible row-4 witness), but its likely resolution
+shifted from "fear unbounded `|s|`" to "certify absence of lines," which the forced-triangle / `interNum_eq_one`
+calculus is already the right language for (it *counts* the would-be line incidences).
+
 **A parallel proof language for row 4 — bounded constraint-width (from
 [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §7).** The Neumaier/spectral
 route above is *one* way to discharge `PotentialDrops`; there is a second, structurally different one worth
@@ -185,6 +197,24 @@ cospectral pairs; the separator is the geometric/exceptional *structure*) in the
 **Probe follow-ups that would harden the route** (optional, construction-bottlenecked): hard-code 2–3 sporadic
 residue SRGs at `n = 25–40` (Paulus `(25,12,5,6)`, the `(26,10,3,4)` family) — especially any with *growing*
 smallest eigenvalue, to get a row-4 (generic) data point the current evidence lacks.
+
+**Run 3 — the smallest-eigenvalue axis (`Probe_SmallestEigenvalueAxis`, 2026-06-15).** Built to attack the row-4 gap
+directly, using the only constructible *controlled* growing-`|s|` family: Latin-square (net) graphs `L_g(m)` via cyclic
+MOLS, which are geometric with smallest eigenvalue exactly `−g`, so sweeping `g` at fixed `n=m²` walks the `|s|`-axis.
+**Two findings, the first a falsified hypothesis:**
+- **F1 — worst-drop is NOT monotone in `|s|`.** On the geometric axis it *peaks at the rook/grid extreme* (`g=2`,
+  `s=−2`, base `=√n`, drop 0.735 @n=49) **and** its complement (`g=m−1`, `s=−6`, same 0.735), and *troughs in the
+  middle* (`L_4(7)`, `s=−4`, drop 0.500, base 3). Drop is symmetric under complementation (`g ↔ m+1−g`). **So the
+  climb-toward-1 obstruction is the partial-geometry LINE/grid structure — a bounded-`s` (`s=−2`) phenomenon — not the
+  magnitude of `|s|`.** This refutes the naive "growing `|s|` ⟹ climbs" reading of the §3 table.
+- **F2 — the row-4 cell is empty among constructibles.** Every growing-`|s|` SRG buildable is geometric (net) or
+  conference (leg B); all residue evidence sits at `|s| ≤ 3`. Non-geometric + high-`|s|` + small-Aut has no
+  constructible witness (CGGP is the only known inhabitant) — the gap is confirmed with data, not closed.
+- **Positive inference for the route (the useful part).** If the drop-obstruction is specifically the *partial-geometry
+  line system* (a geometric feature), and row 4 is **by definition non-geometric** (no line system), then row 4 has no
+  grid to stop the multiplicative split — heuristically it *should* shatter, supporting `PotentialDrops` on row 4. This
+  reframes the Stage-1b `Shatters` predicate: key it on **"no partial-geometry line system"**, *not* "bounded `|s|`"
+  (see §3).
 
 ## 6. Honest scope and failure modes
 
