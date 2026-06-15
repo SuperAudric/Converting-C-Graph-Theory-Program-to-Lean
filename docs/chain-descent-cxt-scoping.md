@@ -167,8 +167,10 @@ hard theorem, not a cheap pattern. The routes, ranked by tractability-toward-unc
    Not unconditional, but the sharpest honest end-state — and essentially the wiring already landed (§S-gate2).
 
 **Recommendation (toward the stated unconditional goal):** route 1 → route 2, with route 3 as the guaranteed floor.
-Unconditional closes *iff* route 2 yields; that's the single point of risk. **Next concrete step = run the probe (route
-1)** to test whether the base case is attackable via a clean invariant.
+Unconditional closes *iff* route 2 yields; that's the single point of risk. **Update (2026-06-15): the probe (route 1)
+ran** (`A2MonovariantProbe`, incl. `Probe_SmallestEigenvalueAxis`) and reframed the obstruction as the *partial-geometry
+line system* (not the eigenvalue magnitude); the attack is now the **potential-drop / G-mech build-order** — see §6
+PICK-UP and `chain-descent-a2-potential-route.md` §4c.
 
 ---
 
@@ -188,17 +190,25 @@ Unconditional closes *iff* route 2 yields; that's the single point of risk. **Ne
   endpoint 3.
 - **(c) no clean invariant emerges** — route 1 returns nothing portable; endpoint 3 (carried predicate) is the floor.
 
-**▶ PICK UP HERE (Stage 1b — the drop lemma proper):** **A1 + the A2 interface + the potential-drop ITERATION ENGINE
-are all LANDED** (`§CC.11`–`§CC.20` + `§S-gate2`, all axiom-clean, build green). The probe (`A2MonovariantProbe.cs`,
-2026-06-15) found the monovariant: a potential (max-cell / `c`) drops by a bounded factor on the residue but climbs to 1
-on geometric SRGs (rook `((m−1)/m)²→1`) — so **"bounded drop" = "non-geometric" = the Cameron carve (dual)**. Stage 1a
-landed that as Lean: `exists_potential_descent` (engine) + `potential` + `PotentialDrops` + `exists_small_base_of_potentialDrops`
-(`§CC.20`) + capstone `reachesRigidOrCameron_viaPotentialDrop`. **So the seal now stands `modulo {G3 + PotentialDrops +
-hcatch + hImprim}` — the ENTIRE open math is the single hypothesis `PotentialDrops` (the per-step drop). NEXT = prove
-`PotentialDrops` for the residue (Stage 1b):** state `Shatters` + show the halving, discharging geometric→Cameron via
-Neumaier/CGGP **or** the parallel bounded-constraint-width route. **Live plan + the two discharge languages + the honest
-row-4 gap: `chain-descent-a2-potential-route.md` (read its STATUS first).** The conditional-predicate floor is route 3,
-retained. Old probe plan archived: `Archive/ChainDescent/chain-descent-a2-monovariant-probe.md`.
+**▶ PICK UP HERE (Stage 1b discharge — the G-mech build-order, route-doc §4c):** **A1 + the A2 interface + the
+potential-drop engine + the Stage-1b `c`-halving reduction + the discharge framework are all LANDED** (`§CC.11`–`§CC.22`
++ `§S-gate2`, axiom-clean, build green). The seal is sharpened to **`modulo {G3 + IndistinguishingHalves + hcatch +
+hImprim}`** (`IndistinguishingHalves` = some individualization halves `c(X_T)` alone; `k` rides free —
+`potentialDrops_of_indistinguishingHalves`). The discharge of `IndistinguishingHalves` is the open heart, and its plan is
+the route-doc **§4c build-order**:
+- **Step 1 ✅ LANDED** — the **G-mech kill lemma** (`§CC.22`: `relOf_v_eq_of_confused` + `confusionSet_eq_empty_of_relOf_v_ne`):
+  a `v` that *distinguishes* `α,β` annihilates `C(α,β)` in `X_{T∪v}`. ⟹ `c(X_{T∪v}) ≤ max{|C_{X_T}(α,β)| : v∈C(α,β)}`,
+  so a `v` outside all over-half confusion sets halves `c`.
+- **Step 2 (NEXT)** — the bound `c(X_{T∪v}) ≤ max over v-undistinguished pairs` (`v` singleton-fiber-of-`W` from
+  `isPointExtension_pointExtension`, per-class confusion monotonicity via `Refines`, a `2·Finset.sup ≤ M` helper).
+- **Steps 3–5** — halving wiring `∃v∉⋃big ⟹ IndistinguishingHalves`; the `BigConfusionCover` obstruction predicate
+  (retire/park §CC.21's balanced-splitter defs = the 1-WL-cell model, not the 2-WL `c`); **G-cite** (carry Neumaier +
+  G3, the research core) + capstone `…viaNoConfusionCover`.
+
+**Read `chain-descent-a2-potential-route.md` STATUS + §4c first.** The probe (`A2MonovariantProbe.cs`, 2026-06-15)
+reframed the row-4 gap: the drop-obstruction is the **partial-geometry line system**, not the smallest-eigenvalue
+magnitude (§4 there). The conditional-predicate floor is route 3, retained. Old probe plan archived:
+`Archive/ChainDescent/chain-descent-a2-monovariant-probe.md`.
 
 **Reading order for a fresh reader:** build doc STATUS → its §1A (why not GI∈P) / §1B (everything ⟹ `c(X_T)`) → THIS
 doc §0–§5 (the A2 target, evidence, and the route to the unconditional seal) → `CoherentConfig.lean §CC.10`–`§CC.19` (the

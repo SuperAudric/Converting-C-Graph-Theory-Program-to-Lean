@@ -45,9 +45,18 @@ Cameron" / "non-geometric" dichotomy that discharges it is carried as cited clas
 the primitive-CC classification), never fresh axioms. **Honest scope:** research-scale, may not close; the residual
 math gap is the generic (row-4) case — and the probe (§5 Run 3) refined it: the drop-obstruction is the
 *partial-geometry line system*, not the smallest-eigenvalue magnitude. Quality bar held: axiom-clean `[propext,
-Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`, `native_decide` banned. **NEXT = discharge
-`IndistinguishingHalves` on the residue — i.e. exhibit, for any over-`B` base, a `v` that halves `c(X_T)`, with
-"no surviving `c`-class" = "no partial-geometry line system" the structural condition (§2-§3).**
+Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`, `native_decide` banned.
+
+**The discharge is underway (the plan + build-order is §4c; READ IT to continue).** Landed axiom-clean: the
+geometric-obstruction framework (`§CC.21`: `confusionSet`, the balanced/majority pigeonhole — *note*: that
+balanced-splitter framing models the **1-WL cell**, the probe's object, not the 2-WL `c`; superseded by §CC.22), and
+**★ the G-mech kill lemma (`§CC.22`: `relOf_v_eq_of_confused` + `confusionSet_eq_empty_of_relOf_v_ne`)** — a `v` that
+*distinguishes* `α,β` annihilates `C(α,β)` in `X_{T∪v}`. So `c(X_{T∪v}) ≤ max{|C_{X_T}(α,β)| : v ∈ C(α,β)}`, and a
+`v` outside all over-half confusion sets halves `c`. **NEXT = §4c build-order step 2:** the bound
+`c(X_{T∪v}) ≤ max over v-undistinguished pairs` (needs `v` singleton-fiber-of-`W` from
+`isPointExtension_pointExtension`, per-class confusion monotonicity via `Refines`, and a `2·Finset.sup ≤ M` helper);
+then step 3 (halving wiring), step 4 (`BigConfusionCover` predicate, retire/park §CC.21's balanced-splitter defs),
+step 5 (G-cite = carry Neumaier + G3, + capstone `…viaNoConfusionCover`). The research core remains **G-cite**.
 
 ---
 
