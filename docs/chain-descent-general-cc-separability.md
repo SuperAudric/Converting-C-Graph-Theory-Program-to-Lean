@@ -62,9 +62,14 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
 - **§CC.21 (Stage 1b discharge framework — the geometric obstruction, 2026-06-15, all axiom-clean):** `confusionSet` / `BalancedSplits` /
   `MajorityRelation` / `balancedSplits_or_majority` (dichotomy) / **`majority_fibers_inter`** (the intersecting-majority pigeonhole = the
   near-pencil = the CC-intrinsic partial-geometry line system) / `GeometricObstruction` / `exists_balancedSplits_of_not_forall_majority`.
-  Proves the combinatorial core of "the drop-obstruction is a line system" and supplies the predicate the cited Neumaier/Cameron dichotomy
-  attaches to. **Open remainder (isolated, route doc §4b):** G-mech (the closure-halving δ′ bridge `BalancedSplits ⟹ 2c(X_{T∪v})≤c(X_T)`),
-  G-sim (simultaneous splitter for all near-max classes), G-cite (carry Neumaier + G3).
+  Proves the combinatorial core of "the drop-obstruction is a line system." **Superseded for the 2-WL `c` by §CC.22 (route doc §4c):**
+  `BalancedSplits`/`majority_fibers_inter` model the 1-WL CELL split (the probe), not `c` — parked as the cell model.
+- **★ §CC.22 (G-mech, the kill lemma — Stage 1b discharge core, 2026-06-15, axiom-clean):** `relOf_v_eq_of_confused` +
+  **`confusionSet_eq_empty_of_relOf_v_ne`** (THE KILL LEMMA: `v` a singleton fiber distinguishing `α,β` ⟹ `C(α,β)=∅` — individualizing
+  `v` annihilates the confusion of every pair it distinguishes). Proved purely from `interNum` coherence + singleton isolation (the
+  `sharp_pointExtension` toolkit; no tower, no construction internals). ⟹ `c(X_{T∪v}) ≤ max{|C_{X_T}(α,β)| : v∈C(α,β)}`, so **a `v`
+  outside all over-half confusion sets halves `c`** — the corrected G-mech. **NEXT (route doc §4c build-order):** step 2 the bound
+  `c(W)≤max-undistinguished`, step 3 halving wiring, step 4 `BigConfusionCover` predicate, step 5 G-cite (Neumaier+G3) + capstone.
 
 ### The open frontier — ONE hypothesis: `IndistinguishingHalves` (live work: `chain-descent-a2-potential-route.md`)
 **The seal now stands `modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**, and the entire open mathematical content is the single

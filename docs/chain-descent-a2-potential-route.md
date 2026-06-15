@@ -273,11 +273,14 @@ structure, which Neumaier + the primitive-CC classification (cited) route to `Ca
 intersect — they live in `Fin n`, not a size-`c` universe — so the `majority_fibers_inter` pigeonhole does **not**
 transfer; the covering count replaces it.)
 
-**Build order (G-mech implementation, when green-lit):**
-1. **Kill lemma** `confusion_empty_of_relOf_ne` (the heart, above) — singleton-fiber isolation + `interNum_eq`. *Medium
-   risk, high confidence.*
+**Build order (G-mech implementation):**
+1. **Kill lemma — ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean).** `relOf_v_eq_of_confused` (the core, singleton-fiber
+   isolation + `interNum_eq`) and `confusionSet_eq_empty_of_relOf_v_ne` (the kill lemma: `v` distinguishes `(α,β)` ⟹
+   `C(α,β)=∅`). The genuine new content; built first.
 2. **The bound** `indistinguishingNumber_pointExtension_insert_le`: `c(W) ≤ max over v-undistinguished pairs of
    |C_{X_T}|`. From the kill lemma + per-class monotonicity (`confusionSet_W ⊆ confusionSet_{X_T}` via `Refines`).
+   *Next.* Needs: `v` a singleton fiber of `W` (from `isPointExtension_pointExtension`); per-class confusion
+   monotonicity; the `2 * Finset.sup ≤ M` helper (`Finset.exists_mem_eq_sup` on the non-reflexive `W`-classes).
 3. **The halving wiring** `indistinguishingHalves_of_exists_avoiding_v`: `(∃ v ∉ ⋃ big confusion sets) ⟹
    IndistinguishingHalves`. Pure arithmetic on the bound.
 4. **Revise §CC.21**: replace `BalancedSplits`/`majority_fibers_inter` with the confusion-set **covering** predicate
@@ -286,8 +289,8 @@ transfer; the covering count replaces it.)
 5. **G-cite + capstone**: carry `BigConfusionCover ⟹ IsCameron ∨ finite` (Neumaier + G3) and land
    `reachesRigidOrCameron_viaNoConfusionCover` discharging `IndistinguishingHalves` modulo the cited dichotomy.
 
-The research core is still **G-cite** (covering ⟹ geometric ⟹ Cameron/finite); steps 1–4 are the now-clear provable
-mechanics, with step 1 (the kill lemma) the genuine new content.
+The research core is still **G-cite** (covering ⟹ geometric ⟹ Cameron/finite); steps 2–4 are the now-clear provable
+mechanics following the landed step-1 kill lemma.
 
 ## 5. Evidence (the probe — full detail archived)
 

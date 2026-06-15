@@ -2085,6 +2085,57 @@ theorem exists_balancedSplits_of_not_forall_majority (α β : Fin n)
   · exact ⟨v, hb⟩
   · exact absurd hm hv
 
+/-! ### §CC.22 — G-mech: the kill lemma (Stage 1b discharge, the closure mechanics)
+
+The corrected G-mech (route doc §4c): individualizing `v` does NOT split a confusion set into relation-to-`v`
+fibers (that 1-WL "balanced splitter" picture, §CC.21, is the cell model the probe measured). In the coherent
+closure `W = pointExtension X (insert v T)` where `v` is a **singleton fiber**, individualizing `v` instead
+*annihilates* the confusion of every pair it distinguishes — the **kill lemma**. So `c(W)` is bounded by the
+largest confusion among pairs `v` does *not* distinguish, and a `v` outside all over-half confusion sets halves `c`
+(the `IndistinguishingHalves` target). Proven purely from `interNum` coherence + singleton isolation (the
+`sharp_pointExtension` toolkit); no construction internals, no point-extension tower. -/
+
+/-- §CC.22 (G-mech, kill-lemma core). On a CC with `v` a **singleton fiber**, any `γ` failing to distinguish `α`
+from `β` forces `v` not to distinguish them either: `relOf γ α = relOf γ β → relOf v α = relOf v β`. The singleton
+fiber isolates the triangle count through `v` to the single point `z = v` (`relOf_diag_right_eq` + `SingletonFiber`),
+so `interNum (relOf γ v) b (relOf γ α)` is `1` exactly at `b = relOf v α`; the *same* `interNum` computed against
+`β` (same class, since `γ` is confused) is `1` exactly at `b = relOf v β`, forcing `relOf v α = relOf v β`.
+Axiom-clean. -/
+theorem relOf_v_eq_of_confused {v α β γ : Fin n} (hv : X.SingletonFiber v)
+    (h : X.relOf γ α = X.relOf γ β) : X.relOf v α = X.relOf v β := by
+  classical
+  set a := X.relOf γ v with ha
+  have hiso : ∀ z, X.relOf γ z = a → z = v := fun z hz =>
+    hv z (X.relOf_diag_right_eq (hz.trans ha))
+  have hαfilter :
+      (Finset.univ.filter fun z => X.relOf γ z = a ∧ X.relOf z α = X.relOf v α) = {v} := by
+    rw [Finset.eq_singleton_iff_unique_mem]
+    exact ⟨Finset.mem_filter.2 ⟨Finset.mem_univ v, ha.symm, rfl⟩,
+      fun z hz => hiso z (Finset.mem_filter.1 hz).2.1⟩
+  have hα1 : X.interNum a (X.relOf v α) (X.relOf γ α) = 1 := by
+    rw [← X.interNum_eq (rfl : X.relOf γ α = X.relOf γ α) a (X.relOf v α), hαfilter,
+      Finset.card_singleton]
+  have hβcard :
+      (Finset.univ.filter fun z => X.relOf γ z = a ∧ X.relOf z β = X.relOf v α).card = 1 := by
+    rw [X.interNum_eq (rfl : X.relOf γ β = X.relOf γ β) a (X.relOf v α), ← h, hα1]
+  have hβsub :
+      (Finset.univ.filter fun z => X.relOf γ z = a ∧ X.relOf z β = X.relOf v α) ⊆ {v} :=
+    fun z hz => Finset.mem_singleton.2 (hiso z (Finset.mem_filter.1 hz).2.1)
+  have hvmem : v ∈ (Finset.univ.filter fun z => X.relOf γ z = a ∧ X.relOf z β = X.relOf v α) := by
+    rw [Finset.eq_of_subset_of_card_le hβsub (by rw [Finset.card_singleton]; exact hβcard.ge)]
+    exact Finset.mem_singleton_self v
+  exact ((Finset.mem_filter.1 hvmem).2.2).symm
+
+/-- §CC.22 (G-mech) **THE KILL LEMMA.** If `v` is a singleton fiber and *distinguishes* `α, β`
+(`relOf v α ≠ relOf v β`), the confusion set `C(α,β)` is **empty** — individualizing `v` destroys that pair's
+indistinguishing class outright. Contrapositive of `relOf_v_eq_of_confused`. The closure mechanism behind A2's
+per-step `c`-drop (route doc §4c). Axiom-clean. -/
+theorem confusionSet_eq_empty_of_relOf_v_ne {v α β : Fin n} (hv : X.SingletonFiber v)
+    (h : X.relOf v α ≠ X.relOf v β) : X.confusionSet α β = ∅ := by
+  rw [confusionSet, Finset.filter_eq_empty_iff]
+  intro γ _ hγ
+  exact h (X.relOf_v_eq_of_confused hv hγ)
+
 end CoherentConfig
 
 end ChainDescent
