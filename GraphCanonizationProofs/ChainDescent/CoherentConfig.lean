@@ -2003,6 +2003,88 @@ theorem potentialDrops_of_indistinguishingHalves {B : Nat}
     _ ≤ ((pointExtension X T).maxValency - 1) * (pointExtension X T).indistinguishingNumber :=
         Nat.mul_le_mul (by omega) hc
 
+/-! ### §CC.21 — the geometric-obstruction framework (Stage 1b discharge, the CC-intrinsic core)
+
+The Stage-1b open content is `IndistinguishingHalves`: from any over-`B` base, some individualization halves the
+indistinguishing number `c(X_T)`. `c(X_T)` is the size of the largest **confusion set** `C(α,β) = {γ : relOf γ α =
+relOf γ β}`. Individualizing `v` partitions `C` by the relation profile `γ ↦ relOf γ v`; the partition either
+**balance-splits** `C` (every fiber `≤ |C|/2`) or has a **unique majority** fiber (`> |C|/2`). A class that *no*
+external point can balance-split is seen monochromatically from everywhere — a **partial-geometry line system** (the
+`Probe_SmallestEigenvalueAxis` finding: the drop-obstruction is the line/grid geometry, not the smallest-eigenvalue
+magnitude). This section lands that framework on a general CC, with the genuine combinatorics proven: the
+balanced/majority dichotomy and the intersecting-majority pigeonhole (majority fibers for different points pairwise
+meet — the near-pencil structure the cited Neumaier/Cameron dichotomy attaches to). The bridge from a *relation-profile*
+balanced splitter to the *coherent-closure* halving (`X_{T∪v}`) is the isolated open mechanics (route doc §4 G-mech). -/
+
+/-- §CC.21 (Stage 1b) **The confusion set of a pair** — the vertices relating identically to `α` and `β`. Its card
+is the geometric form of `indistinguishingNumberOf (relOf α β)` (PV eq. (7), `indistinguishingNumberOf_eq_card`). -/
+def confusionSet (α β : Fin n) : Finset (Fin n) :=
+  Finset.univ.filter (fun γ => X.relOf γ α = X.relOf γ β)
+
+/-- §CC.21 (Stage 1b) **`v` balance-splits the `(α,β)`-confusion** — every relation-`j` fiber of `C(α,β)` under the
+profile `γ ↦ relOf γ v` has `≤ |C|/2` vertices. The relation-profile precondition of a `c`-halving (the closure
+mechanics, route doc §4 G-mech, then upgrades it to an actual halving of `c` in `X_{T∪v}`). -/
+def BalancedSplits (v α β : Fin n) : Prop :=
+  ∀ j : Fin X.rank,
+    2 * ((X.confusionSet α β).filter (fun γ => X.relOf γ v = j)).card ≤ (X.confusionSet α β).card
+
+/-- §CC.21 (Stage 1b) **`v` sees a majority of the `(α,β)`-confusion in one relation** — the negation of a balanced
+split: some relation-`j` fiber holds `> |C|/2` of `C(α,β)`. The local "monochromatic view" whose universality (over
+all `v`) is the geometric (line-system) obstruction. -/
+def MajorityRelation (v α β : Fin n) : Prop :=
+  ∃ j : Fin X.rank,
+    (X.confusionSet α β).card < 2 * ((X.confusionSet α β).filter (fun γ => X.relOf γ v = j)).card
+
+/-- §CC.21 (Stage 1b) **The balanced/majority dichotomy** — every external point either balance-splits the
+confusion class or sees a majority of it in one relation. Pure case-split. Axiom-clean. -/
+theorem balancedSplits_or_majority (v α β : Fin n) :
+    X.BalancedSplits v α β ∨ X.MajorityRelation v α β := by
+  by_cases h : X.BalancedSplits v α β
+  · exact Or.inl h
+  · refine Or.inr ?_
+    unfold BalancedSplits at h
+    push_neg at h
+    exact h
+
+/-- §CC.21 (Stage 1b) **The intersecting-majority pigeonhole — the near-pencil structure.** Majority fibers for two
+external points `v, w` (each `> |C|/2`) necessarily **overlap**: a vertex of `C` lies in both. This is the
+combinatorial heart of "a class no point can balance-split is a partial-geometry line system" — every pair of
+monochromatic views shares a witness, so the views form a pencil of lines through common points. Via
+`card_union_add_card_inter` (`|A∪B| + |A∩B| = |A| + |B|`) against `|A∪B| ≤ |C|`. Axiom-clean. -/
+theorem majority_fibers_inter (α β v w : Fin n) (j k : Fin X.rank)
+    (hv : (X.confusionSet α β).card
+            < 2 * ((X.confusionSet α β).filter (fun γ => X.relOf γ v = j)).card)
+    (hw : (X.confusionSet α β).card
+            < 2 * ((X.confusionSet α β).filter (fun γ => X.relOf γ w = k)).card) :
+    (((X.confusionSet α β).filter (fun γ => X.relOf γ v = j)) ∩
+      ((X.confusionSet α β).filter (fun γ => X.relOf γ w = k))).Nonempty := by
+  set C := X.confusionSet α β with hC
+  set A := C.filter (fun γ => X.relOf γ v = j) with hA
+  set Bs := C.filter (fun γ => X.relOf γ w = k) with hBs
+  rw [← Finset.card_pos]
+  have hunion : (A ∪ Bs).card ≤ C.card :=
+    Finset.card_le_card (Finset.union_subset (Finset.filter_subset _ _) (Finset.filter_subset _ _))
+  have hid : (A ∪ Bs).card + (A ∩ Bs).card = A.card + Bs.card := Finset.card_union_add_card_inter A Bs
+  omega
+
+/-- §CC.21 (Stage 1b) **The geometric (line-system) obstruction at scale `B`.** A confusion class larger than `B`
+that *every* external point sees monochromatically (a majority in one relation) — i.e. no individualization can
+balance-split it. By `majority_fibers_inter` its monochromatic views pairwise overlap (a near-pencil): the
+CC-intrinsic partial-geometry line system the cited Neumaier/Cameron dichotomy routes to `Cameron ∨ finite`. -/
+def GeometricObstruction (B : Nat) : Prop :=
+  ∃ α β : Fin n, α ≠ β ∧ B < (X.confusionSet α β).card ∧ ∀ v, X.MajorityRelation v α β
+
+/-- §CC.21 (Stage 1b) **No obstruction on a class ⟹ a balanced splitter exists for it.** If some external point
+fails to see `(α,β)`'s confusion monochromatically, that point balance-splits it (dichotomy). The trivial-but-needed
+bridge from "no geometric obstruction" to "the splitter the closure mechanics consumes." Axiom-clean. -/
+theorem exists_balancedSplits_of_not_forall_majority (α β : Fin n)
+    (h : ¬ ∀ v, X.MajorityRelation v α β) : ∃ v, X.BalancedSplits v α β := by
+  push_neg at h
+  obtain ⟨v, hv⟩ := h
+  rcases X.balancedSplits_or_majority v α β with hb | hm
+  · exact ⟨v, hb⟩
+  · exact absurd hm hv
+
 end CoherentConfig
 
 end ChainDescent

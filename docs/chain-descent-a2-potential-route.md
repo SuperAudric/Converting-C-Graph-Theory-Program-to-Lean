@@ -196,6 +196,47 @@ solver bolt-on; if it closes, the bounded-width network *is* the poly rigid-resi
   `reachesRigidOrCameron_viaShattering` is the landed Stage-1b-reduction endpoint; Stage 2/3 discharge its
   `IndistinguishingHalves` hypothesis.
 
+## 4b. The discharge — approaches, exact gaps, and the landed §CC.21 framework (2026-06-15)
+
+Discharging `IndistinguishingHalves` for the residue is the genuine open heart. The mechanism, worked out: `c(X_T)`
+is the size of the largest **confusion set** `C(α,β) = {γ : relOf γ α = relOf γ β}`; individualizing `v` partitions
+`C` by the relation profile `γ ↦ relOf γ v`, and the question is whether some `v` brings the global-max confusion
+down to `≤ |C|/2`.
+
+**Three approaches:**
+1. **Geometric dichotomy (main, matches the G3 pattern).** A class that *no* `v` can balance-split is seen
+   monochromatically from everywhere — a partial-geometry **line system** (the `Probe_SmallestEigenvalueAxis`
+   finding: the drop-obstruction is the line/grid geometry, *not* `|s|`). So `¬shatter ⟹ line system ⟹ geometric ⟹
+   Cameron(large) ∨ finite-exceptional`; the residue (non-Cameron, not finite-exceptional) shatters.
+2. **Balanced-splitter mechanics** — prove the bridge from a relation-profile balanced splitter to the actual
+   `c`-halving in the coherent closure `X_{T∪v}`.
+3. **Cited-bound floor** — cite `c(X_{T₀}),k(X_{T₀})=O(1)` for the rank-3/4 residue, use `…viaBoundedExtensionParams`.
+   Not a discharge (cxt-scoping: not directly citable); the conditional floor.
+
+**The exact gaps (Approach 1):**
+- **G-mech (the open Lean core).** "balanced relation-splitter at `v` ⟹ the class's confusion halves in `X_{T∪v}`."
+  Confirmed there is **no monotonicity shortcut**: `c(X_{T∪v})` has no upper bound but `c(X_T)`; beating `c/2` *must*
+  use the coherent closure's forced-triangle propagation (the δ′ machinery — `interNum_eq_one_of_forcedUnique`,
+  `Sharp`). This is the genuine new combinatorics and the hardest piece.
+- **G-sim (simultaneity).** One `v` must balance-split *all* near-max classes at once (classes already `≤ c/2` ride
+  free by per-class monotonicity). The pigeonhole gives per-class splitters; simultaneity is extra structure.
+- **G-cite (cited).** "near-pencil line system ⟹ Cameron ∨ finite-exceptional" — Neumaier + the primitive-CC
+  classification (G3), carried as theorem-statement hypotheses, never `axiom`s.
+
+**Landed this session — the §CC.21 framework (the CC-intrinsic core of Approach 1, all axiom-clean):**
+`confusionSet`, `BalancedSplits` / `MajorityRelation` (the relation-profile split vs monochromatic view),
+`balancedSplits_or_majority` (the dichotomy), **`majority_fibers_inter`** (the intersecting-majority pigeonhole —
+two monochromatic views overlap, the **near-pencil** structure that *is* the partial-geometry line system, the
+combinatorial heart), `GeometricObstruction` (the obstruction predicate at scale `B`), and
+`exists_balancedSplits_of_not_forall_majority` (no obstruction ⟹ a balanced splitter exists). This proves the
+combinatorics that says "the drop-obstruction is a line system" and gives the predicate the cited Neumaier/Cameron
+dichotomy (G-cite) attaches to.
+
+**What remains (clearly isolated):** (i) **G-mech** — the closure-halving mechanics (the δ′ forced-triangle bridge
+from `BalancedSplits` to `2·c(X_{T∪v}) ≤ c(X_T)`); (ii) **G-sim** — the simultaneous splitter for all near-max
+classes; (iii) **G-cite** — carry Neumaier + G3 and route the residue out. Closing (i)+(ii)+(iii) wires
+`§CC.21 → IndistinguishingHalves → reachesRigidOrCameron_viaShattering ⟹ seal modulo {G3}`. (i) is the research core.
+
 ## 5. Evidence (the probe — full detail archived)
 
 `A2MonovariantProbe.cs` (`Probe_CellSizeDropAcrossSRGs`, `Probe_ScalingResidueVsCarved`). Headline data:
