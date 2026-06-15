@@ -173,7 +173,7 @@ Live-doc homes referenced below: **build doc** = `chain-descent-general-cc-separ
   `VertexTypes` into the descent `P`).
 
 - **SEVEN empirical falsifiers returned 0 G2-B witnesses** (the standing evidence the carve-out is right; a witness =
-  statement-change):
+  statement-change). **Primary home: cxt-scoping §4.3** (the enumerated roster lives there now; this is the backup copy):
   1. the Hanaki–Miyamoto catalogue (2363 schemes, all 481 primitive recover);
   2. the affine `ΓL(1,2^d)` sweep;
   3. the non-solvable `A_n` sweep;

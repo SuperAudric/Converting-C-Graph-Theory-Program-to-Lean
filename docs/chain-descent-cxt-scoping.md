@@ -117,6 +117,29 @@ constant varies by family but boundedness is uniform. (Caveat: testing the δ′
 Net: the conjecture (residue has bounded WL-dim) is well-supported, and the hard cases are carved out — but no uniform
 theorem covers the residue.
 
+### 4.3 — The recovery-witness roster: seven empirical falsifiers, 0 G2-B witnesses
+
+The "no falsifier" claim above (and the build/route docs' "seven empirical falsifiers returned 0 witnesses") is this
+roster — every targeted hunt for a primitive-small-non-Cameron scheme that *fails* to recover at a bounded base. All
+recovered; a witness would be a statement-change (the seal false). This is the standing evidence the carve is right;
+the **row-4 probe (route 3 / route-doc §5) extends exactly this roster** toward the one gap with no scalable data.
+
+1. **Hanaki–Miyamoto catalogue** — 2363 schemes, all 481 primitive recover.
+2. **affine `ΓL(1,2^d)` sweep** + **3. non-solvable `A_n` sweep**.
+4. **non-affine `PGL(2,p)`-on-2-subsets** (`NonAffinePrimitiveProbe.cs`, 2026-06-10): 6 almost-simple poly-order
+   schemes, orders 28–276, depth 2.
+5. **Theorem-3.1 density** (`CatalogueSchemeProbe.Probe_Theorem31_DensityBoundary`, 2026-06-11).
+6. **non-affine Latin-square** (`CatalogueSchemeProbe.Probe_AmorphicResidue_LatinSquare`, 2026-06-11): non-group
+   LS-graphs n≤100, flat depth 2–3.
+7. **PSL(2,q) exceptional-coset** (`CosetSchemeProbe.Probe_PSL2_ExceptionalCosets`, 2026-06-11): 7 primitive non-affine
+   `orbitalScheme(PSL(2,q)/{A₅,S₄})`, rank 4–9, index 57–620, all recover WL-depth 2–3.
+
+Plus **the amorphic-NLS bullseye** (`PdsAmorphicSchemeProbe.Probe_AmorphicNLS_Order16`, 2026-06-11): the on-target
+primitive G2-B data point — `ℤ₄²` carries the rank-4 equal-valency amorphic-NLS Clebsch SRG(16,5,0,2) and **recovers at
+WL-depth 2** (fails depth-1 `EdgeGenerates` = the amorphic-`S₃` gap, separates at base+O(1)); `ℤ₂⁴` depth 3. Probe
+methodology gotchas (use Aut's OWN orbital scheme; prune+node-cap brute force) + the full record:
+[`Archive/ChainDescent/chain-descent-steers-archive.md`](./Archive/ChainDescent/chain-descent-steers-archive.md) §6.
+
 ---
 
 ## 5. The attack on the unconditional seal (routes, ranked)
