@@ -77,12 +77,15 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   axiom-clean):** `BigConfusionCover` (`>c/2` confusion sets cover `Fin n`) + `exists_avoiding_of_not_cover` (`¬cover ⟹ ∃ v avoiding`) +
   the capstone-facing `indistinguishingHalves_of_not_bigConfusionCover` (`∀T over-B, ¬cover(X_T) ⟹ IndistinguishingHalves B`). §CC.21
   balanced-splitter defs parked (left in place) as the 1-WL-cell model. **Step 5 (G-cite) — LANDED (2026-06-15, the conditional
-  capstone + non-vacuity, axiom-clean):** the capstone `reachesRigidOrCameron_viaNoConfusionCover` (`CascadeAffine.lean §S-gate2`;
-  carries the cited dichotomy `hcite : (∃T over-B, BigConfusionCover (X_T)) → IsCameronScheme S`, case-split into the seal's
-  Cameron / recovered legs) + the non-vacuity `card_bigClasses_mul_ge_of_cover` (`cover ⟹ n ≤ #bigClasses·c`, the explicit
-  near-pencil structure). **The §4c build-order is COMPLETE (steps 1–5).** The whole seal stands `modulo {G3 + hcite + hcatch +
-  hImprim}` — open content sharpened from "prove `IndistinguishingHalves`" (open conjecture) to **`hcite` = the cited Neumaier +
-  primitive-CC dichotomy**; residual risk = `hcite`'s row-4 faithfulness (open research; probe reframe: row 4 has no line system ⟹ no cover).
+  capstone + non-vacuity, axiom-clean; citations then SEPARATED to isolated literals):** the capstone
+  `reachesRigidOrCameron_viaNoConfusionCover` (`CascadeAffine.lean §S-gate2`) factors the dichotomy `cover ⟹ Cameron` — the
+  **Cameron step reuses the canonical G3** `hClassify` (via `exhaustiveObstruction_scheme`, no new carry); the only **new** citation
+  is the **Neumaier direction** `hNeumaier : (∃T over-B, BigConfusionCover (X_T)) → IsLarge` (case-split: cover → IsLarge → primitive
+  → G3 → Cameron / imprimitive → `hImprim`; no cover → `…viaShattering`) + the non-vacuity `card_bigClasses_mul_ge_of_cover`
+  (`cover ⟹ n ≤ #bigClasses·c`, the explicit near-pencil structure). **The §4c build-order is COMPLETE (steps 1–5), and the
+  citation is sealed up.** The whole seal stands **`modulo {G3 (hClassify) + Neumaier (hNeumaier) + hcatch + hImprim}` — each a
+  single isolated literal external theorem** (the target shape for replacing each citation with its Lean proof); residual risk =
+  `hNeumaier`'s row-4 faithfulness (open research; probe reframe: row 4 has no line system ⟹ no cover).
 
 ### The open frontier — ONE hypothesis: `IndistinguishingHalves` (live work: `chain-descent-a2-potential-route.md`)
 **The seal now stands `modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**, and the entire open mathematical content is the single

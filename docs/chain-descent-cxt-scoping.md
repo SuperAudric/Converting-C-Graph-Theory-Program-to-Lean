@@ -210,13 +210,16 @@ the route-doc **§4c build-order**:
   `indistinguishingHalves_of_not_bigConfusionCover` (`∀T over-B, ¬cover(X_T) ⟹ IndistinguishingHalves`). §CC.21
   balanced-splitter defs parked (left in place) as the 1-WL-cell model. **The entire open content of A2 is now packaged
   as one predicate: `¬ BigConfusionCover (X_T)`.**
-- **Step 5 (G-cite) ✅ LANDED** (2026-06-15, the conditional capstone + non-vacuity) — the capstone
-  `reachesRigidOrCameron_viaNoConfusionCover` (carries `hcite : (∃ T over-B, BigConfusionCover (X_T)) → IsCameronScheme S`,
-  the cited Neumaier + primitive-CC dichotomy, case-split into the seal's Cameron / recovered legs) + the non-vacuity
-  counting `card_bigClasses_mul_ge_of_cover` (`cover ⟹ n ≤ #bigClasses·c` — the explicit near-pencil structure).
-  **The §4c build-order is COMPLETE.** Seal `modulo {G3 + hcite + hcatch + hImprim}`; the open content is now `hcite` (a
-  cited dichotomy, not an open project conjecture). Residual risk = row-4 faithfulness of `hcite` (open research; the
-  probe reframe says row 4 has no line system ⟹ no cover ⟹ shatters) — i.e. exactly **route 3, the honest floor (§5)**.
+- **Step 5 (G-cite) ✅ LANDED** (2026-06-15, the conditional capstone + non-vacuity, then citations SEPARATED) — the
+  capstone `reachesRigidOrCameron_viaNoConfusionCover` factors the dichotomy `cover ⟹ Cameron`: the **Cameron step
+  reuses the canonical G3** `hClassify` (via `exhaustiveObstruction_scheme`), the only **new** citation is the **Neumaier
+  direction** `hNeumaier : (∃ T over-B, BigConfusionCover (X_T)) → IsLarge` (case-split: cover → IsLarge → primitive → G3
+  → Cameron / imprimitive → `hImprim`; no cover → `…viaShattering`) + the non-vacuity counting
+  `card_bigClasses_mul_ge_of_cover` (`cover ⟹ n ≤ #bigClasses·c`, the explicit near-pencil structure).
+  **The §4c build-order is COMPLETE, and the citation is sealed up.** Seal **`modulo {G3 (hClassify) + Neumaier
+  (hNeumaier) + hcatch + hImprim}` — each a single isolated literal external theorem** (the target shape for replacing
+  each with its Lean proof). Residual risk = row-4 faithfulness of `hNeumaier` (open research; probe reframe: row 4 has
+  no line system ⟹ no cover ⟹ shatters) — i.e. exactly **route 3, the honest floor (§5)**.
 
 **Read `chain-descent-a2-potential-route.md` STATUS + §4c first.** The probe (`A2MonovariantProbe.cs`, 2026-06-15)
 reframed the row-4 gap: the drop-obstruction is the **partial-geometry line system**, not the smallest-eigenvalue

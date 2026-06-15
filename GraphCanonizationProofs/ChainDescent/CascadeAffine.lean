@@ -1151,30 +1151,36 @@ theorem reachesRigidOrCameron_viaShattering {IsLarge : Nat → Prop}
     ((S.toAssociationScheme.toCoherentConfig hne).potentialDrops_of_indistinguishingHalves hshatter)
     hcatch hImprim
 
-/-- **THE SEAL VIA NO BIG-CONFUSION COVER (Stage 1b, G-cite — the open content as the single cited dichotomy).**
-The A2 open content, fully packaged: the seal closes given the **cited geometric dichotomy** `hcite` — *if some
-over-`B` point extension `X_T` has a big-confusion-set cover, the scheme is Cameron.* This is the faithful composite
-of Neumaier (a near-pencil / partial-geometry line system ⟹ geometric/large) + the primitive-CC classification (G3,
-large ⟹ Cameron); a cover forces `≥ n/c` near-maximal confusion classes (`card_bigClasses_mul_ge_of_cover`), the
-explicit line system the dichotomy attaches to. The proof case-splits on the cover: **with** a cover, `hcite` lands
-the seal's own Cameron disjunct; **without** one, every over-`B` base has `¬ BigConfusionCover (X_T)`, so
-`indistinguishingHalves_of_not_bigConfusionCover` feeds `reachesRigidOrCameron_viaShattering`. So the seal stands
-**conditional `modulo {G3 + hcite + hcatch + hImprim}`**, with the entire open mathematical content concentrated in
-the single predicate `hcite` — the probe-identified obstruction (`A2MonovariantProbe`: the drop-obstruction *is* the
-partial-geometry line system). **Honest scope:** `hcite` is the cited dichotomy, *not* proved here; the generic
-"row-4" case (unbounded smallest eigenvalue, non-geometric) is where the cited geometric step is non-portable — but
-the probe reframe says row 4 has no line system, hence no cover (it shatters, landing in the `¬cover` branch). The
-residue (non-Cameron, non-finite) therefore has no cover and recovers. Axiom-clean. -/
+/-- **THE SEAL VIA NO BIG-CONFUSION COVER (Stage 1b, G-cite — the two citations SEPARATED to isolated literals).**
+The A2 open content packaged so each carried citation is **one literal external theorem** (toward replacing each
+with its Lean proof). The cover dichotomy `cover ⟹ Cameron` is *factored* into its two genuine pieces, instead of
+carried as a single composite:
+* the **Cameron step reuses the project's canonical G3** `hClassify` (`PrimitiveCCClassification`, Babai 1981 /
+  Sun–Wilmes 2015: large primitive ⟹ Cameron) — via `exhaustiveObstruction_scheme`, no new carry;
+* the only **new** carried citation is the **Neumaier direction** `hNeumaier : (∃ over-`B` cover) ⟹ IsLarge` — a
+  big-confusion cover is a near-pencil / partial-geometry line system (`card_bigClasses_mul_ge_of_cover`: it forces
+  `≥ n/c` near-maximal confusion classes), and a geometric configuration has a large automorphism group (thickness
+  `≥ √n`); the automorphism group only grows when the base `T` is un-individualized, so `Aut(X_T)` large `⟹ Aut(S)`
+  large `= IsLarge`.
+
+The proof case-splits on the cover: **no cover** ⟹ every over-`B` base shatters, so
+`indistinguishingHalves_of_not_bigConfusionCover` feeds `reachesRigidOrCameron_viaShattering` (recovered); **cover**
+⟹ `hNeumaier` gives `IsLarge`, then **primitive** ⟹ the cited G3 (`exhaustiveObstruction_scheme`) gives Cameron,
+**imprimitive** ⟹ `hImprim` recovers. So the seal stands **conditional `modulo {G3 (hClassify) + Neumaier
+(hNeumaier) + hcatch + hImprim}`** — each a single isolated literal theorem rather than a project-specific composite.
+**Honest scope:** `hNeumaier` is the *Neumaier-direction* citation, not proved here; the generic "row-4" case
+(unbounded smallest eigenvalue, non-geometric) is where it is non-portable — but the probe reframe says row 4 has no
+line system, hence no cover (it shatters, landing in the `¬cover` branch). Axiom-clean. -/
 theorem reachesRigidOrCameron_viaNoConfusionCover {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B : Nat} (hB : 1 ≤ B)
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
     (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
     (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
-    (hcite : (∃ T : Finset (Fin n),
+    (hNeumaier : (∃ T : Finset (Fin n),
           B < (S.toAssociationScheme.toCoherentConfig hne).potential T
             ∧ (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).BigConfusionCover)
-        → IsCameronScheme n S)
+        → IsLargeSchemeViaAut IsLarge n S)
     (hcatch : ∀ T : Finset (Fin n),
         WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
     (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
@@ -1185,8 +1191,13 @@ theorem reachesRigidOrCameron_viaNoConfusionCover {IsLarge : Nat → Prop}
   by_cases hcov : ∃ T : Finset (Fin n),
       B < (S.toAssociationScheme.toCoherentConfig hne).potential T
         ∧ (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).BigConfusionCover
-  · exact ⟨0, Or.inr (hcite hcov)⟩
-  · push_neg at hcov
+  · -- A cover ⟹ (Neumaier) large; then the cited G3 gives Cameron on the primitive floor, else `hImprim` recovers.
+    have hlarge : IsLargeSchemeViaAut IsLarge n S := hNeumaier hcov
+    by_cases hprim : S.toAssociationScheme.IsPrimitive
+    · exact ⟨0, Or.inr (exhaustiveObstruction_scheme hClassify S hne hprim hrank hlarge)⟩
+    · exact ⟨0, Or.inl (Or.inl (hImprim hprim))⟩
+  · -- No cover ⟹ every over-`B` base shatters ⟹ recovered.
+    push_neg at hcov
     exact reachesRigidOrCameron_viaShattering hB hClassify S hne hrank hroom
       ((S.toAssociationScheme.toCoherentConfig hne).indistinguishingHalves_of_not_bigConfusionCover B hcov)
       hcatch hImprim

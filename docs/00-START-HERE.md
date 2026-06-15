@@ -118,12 +118,14 @@ close it — is set out in
 > discharge is underway:** the geometric-obstruction framework (`§CC.21`) and **★ the G-mech kill lemma (`§CC.22`:
 > `confusionSet_eq_empty_of_relOf_v_ne` — a `v` distinguishing `α,β` annihilates `C(α,β)`)** are landed, and **★ the
 > the §4c build-order is COMPLETE (steps 1–5, all `§CC.22` + the capstone, axiom-clean): the kill lemma, the bound, the
-> halving wiring, the `BigConfusionCover` obstruction, and **the G-cite capstone `reachesRigidOrCameron_viaNoConfusionCover`**
-> (carries the cited dichotomy `hcite : cover ⟹ Cameron`, case-split into the seal's Cameron / recovered legs) + the
+> halving wiring, the `BigConfusionCover` obstruction, and **the G-cite capstone `reachesRigidOrCameron_viaNoConfusionCover`
+> with the two citations SEPARATED to isolated literals** — the Cameron step reuses the canonical G3 `hClassify` (via
+> `exhaustiveObstruction_scheme`), the only new citation is the **Neumaier direction** `hNeumaier : cover ⟹ IsLarge`
+> (case-split: cover → IsLarge → primitive → G3 → Cameron / imprimitive → recovered; no cover → recovered) + the
 > non-vacuity `card_bigClasses_mul_ge_of_cover` (`cover ⟹ ≥n/c near-maximal confusion classes`). **The whole seal now
-> stands `modulo {G3 + hcite + hcatch + hImprim}`, with the open content sharpened from "prove `IndistinguishingHalves`"
-> (an open conjecture) to `hcite` = the cited Neumaier + primitive-CC dichotomy** — the honest floor; residual risk is
-> `hcite`'s row-4 faithfulness (open research). **Live frontier doc:
+> stands `modulo {G3 (hClassify) + Neumaier (hNeumaier) + hcatch + hImprim}` — each a single isolated literal external
+> theorem** (the target shape for replacing each citation with its Lean proof); residual risk is `hNeumaier`'s row-4
+> faithfulness (open research). **Live frontier doc:
 > [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md)** — read its STATUS + **§4c** (the
 > discharge build-order) first; the honest "row 4" gap is now reframed as the *partial-geometry line system* (not the
 > eigenvalue magnitude). Evidence: the monovariant probe (`A2MonovariantProbe.cs`). Forward payoff: closing it also

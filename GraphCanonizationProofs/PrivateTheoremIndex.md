@@ -187,8 +187,8 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `movedStep_extensive` | 2631-2634 | The moved-vertex closure round is extensive. | — |
 | `movedStep_pos` | 2636-2638 | When a moved vertex exists, the closure round takes it. | — |
 | `individualizedColouring_singleton_sep` | 3178-3185 | The individualized vertex `v` carries a unique colour: `individualizedColouring n {v}` separates `v` from every other vertex. Used in `cellsAreOrbits_schemeAdj_singleton`'s `w=v`/`u=v` cases. | — |
-| `affV_card` | 1733-1736 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
-| `instNonemptyAffV` | 1904-1908 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
+| `affV_card` | 1744-1747 | (Phase 2, M0.3) `card (F_p^d) = p^d` (via `Fintype.card_fun` + `ZMod.card`). | — |
+| `instNonemptyAffV` | 1915-1919 | (Phase 2, M1.1 helper) `Nonempty (Fin (p^d))` (`p` prime ⟹ `p^d ≥ 1`). Needed for `orbitalIdx`/diagonal facts used outside the `affineScheme` definition. | Instance |
 ## ChainDescent/CascadeOracle.lean
 
 | Name | Line | Description | Notes |
@@ -288,20 +288,20 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 |------|------|-------------|-------|
 | `coarsen` | 53-55 | §S-stab The coarsening map on colours induced by `Refines χ₁ χ₂` (each `χ₁`-colour ↦ the `χ₂`-colour of a representative). | Definition, `noncomputable` |
 | `coarsen_apply` | 57-61 | §S-stab `coarsen χ₁ χ₂ (χ₁ v) = χ₂ v`. | — |
-| `affinePermFin_apply` | 1755-1758 | (Phase 2, M0.3) `affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t)`. | `@[simp]` |
-| `affinePermFin_one_mem` | 1808-1811 | (Phase 2, M0.3) A translation (`linear part 1 ∈ G₀`) lies in `affineG`. | — |
-| `mulUnitHom_apply` | 2290-2292 | F0: `mulUnitHom u x = ↑u * x`. | `@[simp]` |
-| `conjHom_apply` | 2302-2304 | F0: `conjHom hd e u = efield hd (e (efield⁻¹ u))`. | `@[simp]` |
-| `sigmaCyc_zpow_apply` | 2321-2329 | F0 (load-bearing): `σ^k` acts as multiplication by `α^k` through the field iso (`σ^k u = efield (α^k · efield⁻¹ u)`) — the `σ^k ↦ α^k` reduction both deliverables turn on. | — |
-| `exists_npow_fqGen` | 2331-2339 | F0: every nonzero `z ∈ F_q` is a natural power of `α` (the multiplicative-orbit fact, for the irreducibility argument). | — |
-| `frobLinear_apply` | 2417-2418 | F1: `frobLinear x = x ^ p`. | `@[simp]` |
-| `frobLinear_mul` | 2420-2424 | F1: the **twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius (a ring hom) carries mult-by-`α` to mult-by-`α^p`; the algebraic core of the gap. | — |
-| `frobLinear_conj_mulUnit` | 2426-2435 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
-| `sigmaPow_zpow_apply` | 2541-2547 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
-| `exists_zpow_neg_one_iff` | 2743-2754 | §S-stage3-δ In a field, the powers of `-1` are exactly `±1`: `(∃ k:ℤ, (-1)^k = h) ↔ h = 1 ∨ h = -1` (via `Int.even_or_odd` + `Even/Odd.neg_one_zpow`). The `⟨-1⟩={1,-1}` fact in `zpow` form for the `H={±1}` family closure. Axiom-clean. | — |
-| `ratio_not_mem_num_out` | 2859-2874 | §S-stage3-δ Subfield ratio fact (numerator out of `K`): `a,b∈K`, `c∉K`, `a≠b` ⟹ `(c−a)/(b−c)∉K`. The round-1 pinning datum (non-`K` point pinned by two `K`-base points). | — |
-| `ratio_not_mem_denom_out` | 2876-2893 | §S-stage3-δ Subfield ratio fact (denominator out of `K`): `a,c∈K`, `b∉K`, `c≠a` ⟹ `(c−a)/(b−c)∉K`. The round-2 pinning datum (`K` point pinned by a `K`-base point and a reached non-`K` point). | — |
-| `frobLinear_conj_mulUnit'` | 3122-3129 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |
+| `affinePermFin_apply` | 1766-1769 | (Phase 2, M0.3) `affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t)`. | `@[simp]` |
+| `affinePermFin_one_mem` | 1819-1822 | (Phase 2, M0.3) A translation (`linear part 1 ∈ G₀`) lies in `affineG`. | — |
+| `mulUnitHom_apply` | 2301-2303 | F0: `mulUnitHom u x = ↑u * x`. | `@[simp]` |
+| `conjHom_apply` | 2313-2315 | F0: `conjHom hd e u = efield hd (e (efield⁻¹ u))`. | `@[simp]` |
+| `sigmaCyc_zpow_apply` | 2332-2340 | F0 (load-bearing): `σ^k` acts as multiplication by `α^k` through the field iso (`σ^k u = efield (α^k · efield⁻¹ u)`) — the `σ^k ↦ α^k` reduction both deliverables turn on. | — |
+| `exists_npow_fqGen` | 2342-2350 | F0: every nonzero `z ∈ F_q` is a natural power of `α` (the multiplicative-orbit fact, for the irreducibility argument). | — |
+| `frobLinear_apply` | 2428-2429 | F1: `frobLinear x = x ^ p`. | `@[simp]` |
+| `frobLinear_mul` | 2431-2435 | F1: the **twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius (a ring hom) carries mult-by-`α` to mult-by-`α^p`; the algebraic core of the gap. | — |
+| `frobLinear_conj_mulUnit` | 2437-2446 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
+| `sigmaPow_zpow_apply` | 2552-2558 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
+| `exists_zpow_neg_one_iff` | 2754-2765 | §S-stage3-δ In a field, the powers of `-1` are exactly `±1`: `(∃ k:ℤ, (-1)^k = h) ↔ h = 1 ∨ h = -1` (via `Int.even_or_odd` + `Even/Odd.neg_one_zpow`). The `⟨-1⟩={1,-1}` fact in `zpow` form for the `H={±1}` family closure. Axiom-clean. | — |
+| `ratio_not_mem_num_out` | 2870-2885 | §S-stage3-δ Subfield ratio fact (numerator out of `K`): `a,b∈K`, `c∉K`, `a≠b` ⟹ `(c−a)/(b−c)∉K`. The round-1 pinning datum (non-`K` point pinned by two `K`-base points). | — |
+| `ratio_not_mem_denom_out` | 2887-2904 | §S-stage3-δ Subfield ratio fact (denominator out of `K`): `a,c∈K`, `b∉K`, `c≠a` ⟹ `(c−a)/(b−c)∉K`. The round-2 pinning datum (`K` point pinned by a `K`-base point and a reached non-`K` point). | — |
+| `frobLinear_conj_mulUnit'` | 3133-3140 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |
 ## ChainDescent/LinearOracle.lean
 
 | Name | Line | Description | Notes |
