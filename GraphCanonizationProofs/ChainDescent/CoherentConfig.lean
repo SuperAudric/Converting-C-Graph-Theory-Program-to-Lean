@@ -1887,6 +1887,85 @@ theorem dominatorReachable_of_card_gt_subset {T₀ T : Finset (Fin n)} (hsub : T
     (lt_of_le_of_lt (Nat.mul_le_mul (Nat.sub_le_sub_right (maxValency_mono href) 1)
       (indistinguishingNumber_mono href)) hT)
 
+/-! ### §CC.20 — The potential-drop route (the uniform attack on A2; `chain-descent-a2-potential-route.md`)
+
+A1 reduced A2 to *bound `(k(X_{T₀})−1)·c(X_{T₀})` at one small base `T₀`* (`allSingletonFiber_of_card_gt_subset`).
+The probe (`A2MonovariantProbe.cs`) found the route to that bound: a **potential drops by a bounded factor per
+individualization** on the non-geometric residue (it climbs to 1 only on the geometric/Cameron-carved families).
+This section lands the *iteration* half — the abstract engine that turns a per-step halving into an `O(log n)`
+base — carrying the per-step drop (the genuine open combinatorial core) as the single hypothesis `PotentialDrops`.
+The engine is the `Φ`-analogue of the greedy-base `Cascade.exists_greedy_base_aux` (which halves `|Aut|`). -/
+
+/-- Folding `insert` over a list grows a `Finset` by at most the list length. (Local copy — the build places
+this module before `CascadeAffine`'s `card_foldl_insert_le`.) -/
+theorem card_foldl_insert_le {α : Type*} [DecidableEq α] (bs : List α) (s : Finset α) :
+    (bs.foldl (fun s b => insert b s) s).card ≤ s.card + bs.length := by
+  induction bs generalizing s with
+  | nil => simp
+  | cons b bs ih =>
+      rw [List.foldl_cons, List.length_cons]
+      exact le_trans (ih (insert b s)) (by have := Finset.card_insert_le b s; omega)
+
+/-- **Abstract potential-descent engine.** A `Nat`-valued potential `Φ` with a per-step *halving* — from any `T`
+with `Φ T > B`, some insertion at least halves `Φ` — reaches `Φ ≤ B` after a list of insertions whose length is
+`≤ log₂(max 1 (Φ S))`. Pure `Finset`/`Nat` strong induction on a bound `N`; the `Φ`-analogue of
+`exists_greedy_base_aux`. (`hB : 1 ≤ B` keeps the `2^len ≤ max 1 (Φ)` invariant clean across a drop to `0`.) -/
+theorem exists_potential_descent {α : Type*} [DecidableEq α]
+    (Φ : Finset α → Nat) (B : Nat) (hB : 1 ≤ B)
+    (hdrop : ∀ T : Finset α, B < Φ T → ∃ v : α, 2 * Φ (insert v T) ≤ Φ T) :
+    ∀ (N : Nat) (S : Finset α), Φ S ≤ N →
+      ∃ bs : List α, Φ (bs.foldl (fun s b => insert b s) S) ≤ B ∧
+        2 ^ bs.length ≤ max 1 (Φ S) := by
+  intro N
+  induction N with
+  | zero =>
+      intro S hS
+      have h0 : Φ S = 0 := Nat.le_zero.1 hS
+      exact ⟨[], by simp only [List.foldl_nil]; omega, by simp only [List.length_nil, pow_zero]; exact le_max_left 1 (Φ S)⟩
+  | succ N ih =>
+      intro S hS
+      by_cases hbig : B < Φ S
+      · obtain ⟨v, hv⟩ := hdrop S hbig
+        have hins : Φ (insert v S) ≤ N := by omega
+        obtain ⟨bs', hbs'B, hbs'pow⟩ := ih (insert v S) hins
+        refine ⟨v :: bs', ?_, ?_⟩
+        · rw [List.foldl_cons]; exact hbs'B
+        · rw [List.length_cons]
+          calc 2 ^ (bs'.length + 1)
+              = 2 * 2 ^ bs'.length := by rw [pow_succ, Nat.mul_comm]
+            _ ≤ 2 * max 1 (Φ (insert v S)) := Nat.mul_le_mul (le_refl 2) hbs'pow
+            _ ≤ max 1 (Φ S) := by omega
+      · exact ⟨[], by simp only [List.foldl_nil]; omega,
+          by simp only [List.length_nil, pow_zero]; exact le_max_left 1 (Φ S)⟩
+
+/-- **The A2 potential** `Φ(T) = (k(X_T) − 1)·c(X_T)` — the exact threshold quantity of
+`allSingletonFiber_of_card_gt_subset` (a base `T ⊇ T₀` with `|T| > Φ(T₀)` is a base of `X`). -/
+noncomputable def potential (T : Finset (Fin n)) : Nat :=
+  ((pointExtension X T).maxValency - 1) * (pointExtension X T).indistinguishingNumber
+
+/-- **The per-step drop hypothesis — the genuine open combinatorial core of A2.** From any base `T` whose
+potential exceeds `B`, *some* individualization at least halves it. This is the "shattering" content the probe
+found holds on the non-geometric residue (`chain-descent-a2-potential-route.md` §2-§3); proving it for the
+residue (via the Neumaier/CGGP dichotomy that routes geometric→Cameron) closes A2. Carried as a hypothesis,
+never an `axiom`. -/
+def PotentialDrops (B : Nat) : Prop :=
+  ∀ T : Finset (Fin n), B < X.potential T → ∃ v : Fin n, 2 * X.potential (insert v T) ≤ X.potential T
+
+/-- **A2's small-base deliverable, from the per-step drop (the iteration half — LANDED).** If the potential
+halves per seed down to `B`, there is a base `T₀` with `(k(X_{T₀})−1)·c(X_{T₀}) ≤ B` and a *logarithmic* size
+certificate `2^|T₀| ≤ max 1 (Φ ∅)` (so `|T₀| ≤ log₂(Φ ∅) = O(log n)`, since `Φ ∅ ≤ n²`). Feeds
+`allSingletonFiber_of_card_gt_subset` (pad `T₀` to `|T| > B`). The whole open content is now the single
+hypothesis `PotentialDrops`. Axiom-clean. -/
+theorem exists_small_base_of_potentialDrops {B : Nat} (hB : 1 ≤ B) (hdrop : X.PotentialDrops B) :
+    ∃ T₀ : Finset (Fin n),
+      X.potential T₀ ≤ B ∧ 2 ^ T₀.card ≤ max 1 (X.potential ∅) := by
+  obtain ⟨bs, hle, hpow⟩ :=
+    exists_potential_descent X.potential B hB hdrop (X.potential ∅) ∅ le_rfl
+  refine ⟨bs.foldl (fun s b => insert b s) (∅ : Finset (Fin n)), hle, ?_⟩
+  have hcard : (bs.foldl (fun s b => insert b s) (∅ : Finset (Fin n))).card ≤ bs.length := by
+    simpa using card_foldl_insert_le bs (∅ : Finset (Fin n))
+  exact le_trans (Nat.pow_le_pow_right (by norm_num) hcard) hpow
+
 end CoherentConfig
 
 end ChainDescent

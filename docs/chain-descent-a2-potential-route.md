@@ -31,11 +31,16 @@ exists; its driver is geometricity; and geometricity is *already* a handled leg.
 > **non-geometric residue ⟹ a potential drops by a factor `ρ<1` per seed ⟹ `O(log n)` base ⟹ A1 fires ⟹ seal**,
 > with **geometric** routed to **Cameron** (cited classification, G3-style) so it never reaches the drop lemma.
 
-**State:** the consumer (A1 → seal) is **landed**; the **drop lemma is the new Lean content to build**; the
-"geometric ⟹ Cameron" / "non-geometric" dichotomy is carried as cited classification hypotheses (Neumaier + the
-primitive-CC classification), never fresh axioms. **Honest scope:** research-scale, may not close; the residual
-math gap is the unbounded-smallest-eigenvalue generic case (§3). Quality bar unchanged: axiom-clean
-`[propext, Classical.choice, Quot.sound]`, no `sorry`, no fresh `axiom`, `native_decide` banned.
+**State (Stage 1a LANDED, 2026-06-15).** The consumer (A1 → seal) and now the **iteration engine** are landed,
+axiom-clean: `CoherentConfig.lean §CC.20` (`exists_potential_descent` — the abstract halving→`O(log n)` descent;
+`potential` Φ; `PotentialDrops` predicate; `exists_small_base_of_potentialDrops`) + the seal capstone
+`reachesRigidOrCameron_viaPotentialDrop` (`CascadeAffine.lean §S-gate2`). **The seal now stands conditional
+`modulo {G3 + PotentialDrops + hcatch + hImprim}`** — the *entire* open mathematical content is the single
+per-step-drop hypothesis `PotentialDrops` (the drop lemma proper). The "geometric ⟹ Cameron" / "non-geometric"
+dichotomy is carried as cited classification hypotheses (Neumaier + the primitive-CC classification), never fresh
+axioms. **Honest scope:** research-scale, may not close; the residual math gap is the unbounded-smallest-
+eigenvalue generic case (§3). Quality bar held: axiom-clean `[propext, Classical.choice, Quot.sound]`, no
+`sorry`, no fresh `axiom`, `native_decide` banned. **NEXT = discharge `PotentialDrops` on the residue (§2-§3).**
 
 ---
 
@@ -112,12 +117,16 @@ evidence is the construction-bottlenecked gap the probe flagged.
 ## 4. Formalization plan (stages, reuse, risk)
 
 - **Stage 0 — LANDED.** A1 → seal (§1). Nothing to do.
-- **Stage 1 — the drop lemma (new, the heart).** State `Shatters` precisely (the "no surviving class" predicate on
-  `CoherentConfig` / its point extension); prove `potential_drop`; port `exists_greedy_base_aux`'s `log`-bound
-  induction from `|Aut|` to `Φ = indistinguishingNumber`. **Reuses:** `indistinguishingNumber`(`_mono`),
-  `pointExtension`, `refines_pointExtension_of_subset`, the forced-triangle `interNum_eq_one_of_forcedUnique`
-  (a split *is* a `c`-drop), and the greedy-base induction skeleton. *Risk: medium* — the per-step split-counting
-  is the genuine new combinatorics; the iteration is a port.
+- **Stage 1a — the iteration engine — LANDED (2026-06-15).** `exists_potential_descent` (the abstract halving
+  descent, ported from `exists_greedy_base_aux`), `potential` Φ = `(k−1)c`, `PotentialDrops` (the per-step drop
+  predicate), `exists_small_base_of_potentialDrops` (→ small base, `2^|T₀| ≤ max 1 (Φ ∅)`), and the seal capstone
+  `reachesRigidOrCameron_viaPotentialDrop` (pads via `§CC.18/19`). All axiom-clean (`§CC.20` / `§S-gate2`). The
+  seal's open content is now exactly `PotentialDrops`.
+- **Stage 1b — the drop lemma proper (the heart, OPEN).** Prove `PotentialDrops` for the residue: state `Shatters`
+  precisely (the "no surviving class" predicate — a `Φ`-class that resists *every* individualization is a
+  regular/geometric sub-object) and show it forces a halving. **Reuses:** `indistinguishingNumber`(`_mono`),
+  `pointExtension`, the forced-triangle `interNum_eq_one_of_forcedUnique` (a split *is* a `c`-drop). *Risk:
+  medium* — the per-step split-counting is the genuine new combinatorics.
 - **Stage 2 — discharge `Shatters` on the residue.** Carry Neumaier (geometric dichotomy) + the existing
   primitive-CC classification as hypotheses; prove `¬Shatters ⟹ geometric`, route geometric→Cameron, finite→
   trivial, conference→leg B. *Risk: high on row 4* (§3) — the uniform generic case.
@@ -158,6 +167,9 @@ smallest eigenvalue, to get a row-4 (generic) data point the current evidence la
 
 ## 7. Pointers
 
+- **Stage 1a (LANDED):** `CoherentConfig.exists_potential_descent`, `potential`, `PotentialDrops`,
+  `exists_small_base_of_potentialDrops`, `card_foldl_insert_le` (`CoherentConfig.lean §CC.20`);
+  `reachesRigidOrCameron_viaPotentialDrop` (`CascadeAffine.lean §S-gate2`).
 - Consumer / A1: `allSingletonFiber_of_card_gt_subset`, `dominatorReachable_of_card_gt_subset`,
   `reachesRigidOrCameron_viaBoundedExtensionParams` (`CoherentConfig.lean §CC.18/19`, `CascadeAffine.lean §S-gate2`).
 - Potential ingredients: `CoherentConfig.indistinguishingNumber`(`_mono`), `maxValency`(`_mono`), `pointExtension`,

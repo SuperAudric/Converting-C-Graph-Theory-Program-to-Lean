@@ -1088,6 +1088,40 @@ theorem reachesRigidOrCameron_viaBoundedExtensionParams {IsLarge : Nat → Prop}
     ((S.toAssociationScheme.toCoherentConfig hne).dominatorReachable_of_card_gt_subset hsub hparam)
     hcatch hImprim
 
+/-- **THE SEAL VIA THE POTENTIAL-DROP HYPOTHESIS (the A2 open content as a per-step drop — the uniform route).**
+The same conclusion as `reachesRigidOrCameron_viaBoundedExtensionParams`, but the A2 inequality `hparam` is
+replaced by its *uniform* generator `hdrop : PotentialDrops B`: from any base whose potential
+`(k(X_T)−1)·c(X_T)` exceeds `B`, *some* individualization at least halves it. The iteration engine
+(`§CC.20 exists_small_base_of_potentialDrops`) turns that into a small base `T₀` with potential `≤ B`, which is
+then padded (`§CC.18/19`) to a base `T` of size `B+1`. **`PotentialDrops` is the single open mathematical
+content** — the "shattering" the probe (`A2MonovariantProbe.cs`) found holds on the non-geometric residue and
+fails (climbs to 1) only on the geometric/Cameron-carved families; discharging it via the Neumaier/CGGP
+dichotomy (`docs/chain-descent-a2-potential-route.md` §3) closes A2. So the seal stands **conditional
+`modulo {G3 + PotentialDrops + hcatch + hImprim}`**, with the A2 piece now the per-step drop. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaPotentialDrop {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B : Nat} (hB : 1 ≤ B)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
+    (hdrop : (S.toAssociationScheme.toCoherentConfig hne).PotentialDrops B)
+    (hcatch : ∀ T : Finset (Fin n),
+        WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ∃ bound : Nat,
+      ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+        ∨ IsCameronScheme n S := by
+  obtain ⟨T₀, hpot, _⟩ :=
+    (S.toAssociationScheme.toCoherentConfig hne).exists_small_base_of_potentialDrops hB hdrop
+  set m := max T₀.card (B + 1)
+  obtain ⟨T, hsub, hTcard⟩ :=
+    Finset.exists_superset_card_eq (s := T₀) (n := m) (le_max_left _ _)
+      (by rw [Fintype.card_fin]; exact max_le ((Finset.card_le_univ T₀).trans_eq (Fintype.card_fin n)) hroom)
+  have hBT : B < T.card := by rw [hTcard]; exact lt_of_lt_of_le (Nat.lt_succ_self B) (le_max_right _ _)
+  exact ⟨m, reachesRigidOrCameron_viaBoundedExtensionParams hClassify S hne hrank hsub hTcard.le
+    (lt_of_le_of_lt hpot hBT) (hcatch T) hImprim⟩
+
 end SGate2
 
 
