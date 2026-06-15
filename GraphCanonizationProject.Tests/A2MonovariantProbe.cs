@@ -270,6 +270,125 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         return worst;
     }
 
+    // Seidel switching: flip adjacency across the (S, V∖S) cut. Preserves SRG-ness
+    // only for special "regular" sets S — the probe validates the result.
+    static bool[,] SeidelSwitch(int n, bool[,] adj, HashSet<int> S)
+    {
+        var b = (bool[,])adj.Clone();
+        for (int u = 0; u < n; u++) for (int v = u + 1; v < n; v++)
+            if (S.Contains(u) != S.Contains(v)) { b[u, v] = !adj[u, v]; b[v, u] = !adj[u, v]; }
+        return b;
+    }
+
+    // Index map for T(m) vertices (2-subsets of [m]) — to build switching sets from
+    // edge sets of subgraphs of K_m (the Chang-graph construction at m=8).
+    static (List<(int, int)> pairs, Dictionary<(int, int), int> idx) TriIndex(int m)
+    {
+        var pairs = new List<(int, int)>();
+        var idx = new Dictionary<(int, int), int>();
+        for (int i = 0; i < m; i++) for (int j = i + 1; j < m; j++) { idx[(i, j)] = pairs.Count; pairs.Add((i, j)); }
+        return (pairs, idx);
+    }
+    static HashSet<int> EdgeSetToVertices((int, int)[] edges, Dictionary<(int, int), int> idx)
+    {
+        var s = new HashSet<int>();
+        foreach (var (a, b) in edges) s.Add(idx[(Math.Min(a, b), Math.Max(a, b))]);
+        return s;
+    }
+
+    // One measurement row.
+    (bool ok, int k, int lam, int mu, string spec, int minMult, int r2, int r3, int baseSize, double drop, string curve)
+        Measure(Graph g)
+    {
+        var (ok, k, lam, mu) = SrgParams(g.N, g.Adj);
+        if (!ok) return (false, k, lam, mu, "", 0, 0, 0, 0, 0, "");
+        var (spec, minMult, _) = Spectrum(g.N, k, lam, mu);
+        int r2 = PRank(g.N, g.Adj, 2), r3 = PRank(g.N, g.Adj, 3);
+        var curve = GreedyBaseCurve(g.N, g.Adj);
+        return (true, k, lam, mu, spec, minMult, r2, r3, curve.Count - 1, WorstDropFactor(curve), CurveStr(curve));
+    }
+
+    // ── Run 2: scaling — does the residue drop factor stay bounded < 1 while the
+    //    carved (geometric) families' factor climbs toward 1 as n grows? ──────────
+    [Fact]
+    public void Probe_ScalingResidueVsCarved()
+    {
+        var (_, idx8) = TriIndex(8);
+        // Chang switching sets (edge sets of subgraphs of K_8): perfect matching,
+        // C_8, and C_3 ∪ C_5 — the classical three (28,12,6,4) Chang graphs.
+        var changSets = new (string tag, (int, int)[] edges)[]
+        {
+            ("Chang-4K2", new[]{(0,1),(2,3),(4,5),(6,7)}),
+            ("Chang-C8",  new[]{(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(0,7)}),
+            ("Chang-C3C5",new[]{(0,1),(1,2),(0,2),(3,4),(4,5),(5,6),(6,7),(3,7)}),
+        };
+
+        var graphs = new List<Graph>
+        {
+            // RESIDUE, n=16
+            new() { Name = "Shrikhande",  Category = "RESIDUE", N = 16, Adj = CayleyZ4Sq(new[]{(1,0),(3,0),(0,1),(0,3),(1,1),(3,3)}) },
+            new() { Name = "Clebsch",     Category = "RESIDUE", N = 16, Adj = CayleyZ2Pow4(new[]{1,2,4,8,15}) },
+            // CARVED twin / scaling
+            new() { Name = "Rook L(4)",   Category = "CARVED:lattice", N = 16, Adj = Rook(4) },
+            new() { Name = "Rook L(5)",   Category = "CARVED:lattice", N = 25, Adj = Rook(5) },
+            new() { Name = "Rook L(6)",   Category = "CARVED:lattice", N = 36, Adj = Rook(6) },
+            new() { Name = "Rook L(7)",   Category = "CARVED:lattice", N = 49, Adj = Rook(7) },
+            new() { Name = "Rook L(8)",   Category = "CARVED:lattice", N = 64, Adj = Rook(8) },
+            new() { Name = "Triangular T(6)", Category = "CARVED:Johnson", N = 15, Adj = Triangular(6) },
+            new() { Name = "Triangular T(7)", Category = "CARVED:Johnson", N = 21, Adj = Triangular(7) },
+            new() { Name = "Triangular T(8)", Category = "CARVED:Johnson", N = 28, Adj = Triangular(8) },
+            new() { Name = "Paley(13)",   Category = "CARVED:conference", N = 13, Adj = Paley(13) },
+            new() { Name = "Paley(29)",   Category = "CARVED:conference", N = 29, Adj = Paley(29) },
+            new() { Name = "Paley(37)",   Category = "CARVED:conference", N = 37, Adj = Paley(37) },
+        };
+        // RESIDUE at n=28: Chang graphs by switching T(8); validated below.
+        var t8 = Triangular(8);
+        foreach (var (tag, edges) in changSets)
+            graphs.Add(new() { Name = tag, Category = "RESIDUE", N = 28, Adj = SeidelSwitch(28, t8, EdgeSetToVertices(edges, idx8)) });
+
+        // RESIDUE attempt at n=36: switch T(9) by edge sets of K_9 subgraphs (only
+        // the ones that validate as (36,14,7,4) SRGs are genuine residue, reported).
+        var (_, idx9) = TriIndex(9);
+        var t9 = Triangular(9);
+        var t9Sets = new (string, (int, int)[])[]
+        {
+            ("T9sw-C9",   new[]{(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(7,8),(0,8)}),
+            ("T9sw-4K2",  new[]{(0,1),(2,3),(4,5),(6,7)}),
+            ("T9sw-C4C5", new[]{(0,1),(1,2),(2,3),(0,3),(4,5),(5,6),(6,7),(7,8),(4,8)}),
+        };
+        foreach (var (tag, edges) in t9Sets)
+            graphs.Add(new() { Name = tag, Category = "RESIDUE", N = 36, Adj = SeidelSwitch(36, t9, EdgeSetToVertices(edges, idx9)) });
+
+        output.WriteLine("A2 MONOVARIANT — SCALING: does residue drop-factor stay bounded <1 while carved → 1?");
+        output.WriteLine("");
+        output.WriteLine($"{"graph",-18} {"category",-18} {"n",-4} {"(k,λ,μ)",-12} {"2rk",-4} {"3rk",-4} {"base",-5} {"drop",-7} curve");
+        output.WriteLine(new string('─', 120));
+
+        var t8row = Measure(graphs.First(x => x.Name == "Triangular T(8)"));
+        foreach (var g in graphs)
+        {
+            var m = Measure(g);
+            if (!m.ok) { output.WriteLine($"{g.Name,-18} {g.Category,-18} {g.N,-4} NOT AN SRG (k={m.k},λ={m.lam},μ={m.mu}) — skipped"); continue; }
+            string nonIso = g.Category == "RESIDUE" && g.N == 28
+                ? (m.r2 != t8row.r2 ? $"  [2rk≠T8={t8row.r2} ⇒ ≇ T(8): genuine residue]" : "  [2rk=T8 ⇒ possibly ≅ T(8)]")
+                : "";
+            output.WriteLine($"{g.Name,-18} {g.Category,-18} {g.N,-4} {$"({m.k},{m.lam},{m.mu})",-12} {m.r2,-4} {m.r3,-4} {m.baseSize,-5} {m.drop,-7:F3} {m.curve}{nonIso}");
+        }
+
+        output.WriteLine("");
+        output.WriteLine("SCALING TREND — worst drop factor vs n (climb toward 1 = √n/large-base signature):");
+        foreach (var grp in graphs.GroupBy(g => g.Category))
+        {
+            var pts = grp.Select(g => (g.N, m: Measure(g))).Where(x => x.m.ok)
+                         .OrderBy(x => x.N)
+                         .Select(x => $"n{x.N}:{x.m.drop:F3}(b{x.m.baseSize})");
+            output.WriteLine($"  {grp.Key,-18} {string.Join("  ", pts)}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READ: RESIDUE drop should stay flat/bounded across n; CARVED:lattice & Johnson should climb toward 1.");
+        output.WriteLine("Paired twins: Shrikhande vs Rook L(4) @16; Chang vs Triangular T(8) @28.");
+    }
+
     [Fact]
     public void Probe_CellSizeDropAcrossSRGs()
     {

@@ -137,8 +137,49 @@ Run green. Three confirmations, two falsified predictions, one decisive gap.
 
 **The decisive gap:** the residue set is **entirely `n=16`** (Shrikhande, Clebsch, complement), so we have no
 **scaling trend** for it. The real monovariant signal is *how the drop factor scales with `n`* — does the residue
-stay bounded `< 1` while rook's `→ 1`? That cannot be read off one `n`. **Run 2 must add non-carved residue SRGs
-at `n = 25, 36, 49`** — the natural choice is **Latin-square graphs from non-cyclic (non-isotopic) Latin squares**
-(the residue analogue of "Shrikhande, not rook": same parameters as `L(m)`, different structure), reusing the
-order-`m` Latin-square construction already in `CatalogueSchemeProbe`. Then plot worst-drop and base against `n`
-for residue vs rook on the *same parameter series* — that comparison is what decides monovariant-vs-ladder.
+stay bounded `< 1` while rook's `→ 1`? That cannot be read off one `n`.
+
+## 9. Findings (run 2 — `Probe_ScalingResidueVsCarved`, scaling + Chang residue at n=28)
+
+Added a second residue size via **Seidel switching of `T(8)` → the three Chang graphs** (genuine residue:
+2-rank 8 ≠ `T(8)`'s 6, so provably `≇ T(8)`), and extended the carved series. **Verdict: the monovariant signal
+is POSITIVE and clean.**
+
+- **Carved lattice (rook `L(m)`) drop factor climbs toward 1, with a closed form.** Worst-drop is **exactly
+  `((m−1)/m)²`** — measured `0.562, 0.640, 0.694, 0.735, 0.766` for `m=4..8` (`n=16..64`) — and base `= m = √n`.
+  So the √n-base/large-base signature is real, provable, and `→ 1`. (Johnson `T(m)`: `0.667, 0.667, 1.000`,
+  `T(8)` fully stalled `…→4→4→1`.)
+- **Residue drop factor stays bounded `< 1` and does *not* climb** across the two sizes: `n=16` {Shrikhande
+  0.562, Clebsch 0.667}, `n=28` {three Chang graphs all 0.536}. Bases are **small and non-√n**: Chang `2,3,4`
+  at `n=28` (where `√28 ≈ 5.3`); **Chang-`C8` discretizes in 2 seeds** (`28→15→1`) while its carved twin `T(8)`
+  *stalls* (base 5, drop 1.000).
+- **The paired twins are decisive** — same parameters, residue strictly tamer than the carved geometric one, at
+  *both* sizes: Shrikhande (b3) < rook `L(4)` (b4) `@16`; Chang (b2–4, drop 0.536) ≪ `T(8)` (b5, drop 1.000) `@28`.
+- **Conference (Paley) is base-2 at every `n`** (the non-geometric "easy" extreme, drop ≈ 0.47).
+
+**The structural driver (the theory the probe surfaced).** The carved families whose drop `→ 1` are exactly the
+**geometric** SRGs (rook = lattice geometry, Johnson = triangular geometry; both smallest eigenvalue `−2`): their
+√n base comes from a rigid geometric core that individualization only chips at *linearly*. The residue
+(Shrikhande, Chang) are the **Neumaier *exceptions*** to those geometries — *identical* smallest eigenvalue and
+parameters, but **not geometric**, so no rigid core ⟹ cells shatter *multiplicatively* ⟹ bounded drop. So the
+monovariant and the existing **Cameron/geometric carve are dual**:
+
+> **geometric ⟹ √n base (drop → 1) — but Cameron-carved;  non-geometric / exceptional ⟹ bounded drop = residue.**
+
+The candidate **lemma to chase** is therefore *"non-geometric SRG ⟹ `Φ_cell` drops by a bounded factor"*, with
+**Neumaier's theorem** (bounded smallest eigenvalue ⟺ geometric or one of finitely many exceptions) as the
+structural input — and geometricity discharged by the Cameron leg. No *single number* separates residue from
+carved (smallest eigenvalue is `−2` for both Shrikhande and rook; bare 2-rank is `6` for both) — the separator is
+the geometric-vs-exceptional *structure*, exactly what Neumaier classifies.
+
+**Honest gaps remaining.** (1) Only **two residue sizes** (`n=16, 28`); the direction is right (drop did not
+climb; Chang is lower) but two points is not a trend. (2) **Larger genuine residue is construction-bottlenecked**
+— Chang is special to `n=28` (the `T(9)` switches correctly *failed* SRG-validation), and residue SRGs at
+`n ≥ 35` are sporadic (Paulus `(25,12,5,6)`, the `(26,10,3,4)` family, `(36,…)` exceptions) needing
+catalogue/hard-coded adjacency. (3) Greedy = upper bound on base (right for "a fast sequence exists").
+
+**Next.** Either (a) hard-code 2–3 sporadic residue SRGs at `n = 25–40` to add scaling points, or — the higher
+value — (b) **pivot to the theory**: draft the *"non-geometric ⟹ bounded drop"* lemma routed through Neumaier,
+since the probe has done its job (the monovariant exists, and its driver is geometricity, which ties it to the
+Cameron carve already in the seal). The Lean potential-route doc (the one this probe informs) should be framed
+around that lemma.
