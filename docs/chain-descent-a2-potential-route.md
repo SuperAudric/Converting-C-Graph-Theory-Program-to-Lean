@@ -55,11 +55,13 @@ balanced-splitter framing models the **1-WL cell**, the probe's object, not the 
 `v` outside all over-half confusion sets halves `c`. **Step 2 (the bound `indistinguishingNumber_pointExtension_insert_le`:
 `c(W) ≤ M` if every `v`-undistinguished pair has `|C_{X_T}| ≤ M`) ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean)** —
 proved via `Finset.sup_le` over non-reflexive `W`-classes, and it **dissolved the G-sim gap** (the single covering
-hypothesis on `v` replaces the per-class splitter). **NEXT = §4c build-order step 3:** the halving wiring
-`indistinguishingHalves_of_exists_avoiding_v` (`∃ v ∉ ⋃ big confusion sets ⟹ IndistinguishingHalves`, pure arithmetic
-instantiating the bound at `M = c(X_T)/2`); then step 4 (`BigConfusionCover` predicate, retire/park §CC.21's
-balanced-splitter defs), step 5 (G-cite = carry Neumaier + G3, + capstone `…viaNoConfusionCover`). The research core
-remains **G-cite**.
+hypothesis on `v` replaces the per-class splitter). **Step 3 (the halving wiring
+`indistinguishingHalves_of_exists_avoiding_v`: `∃ v` avoiding all big confusion sets per over-`B` base `⟹
+IndistinguishingHalves`) ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean)** — pure arithmetic instantiating the bound at
+`M = c(X_T)/2`. **So the entire open content is now exactly the existence of an avoiding `v`. NEXT = §4c build-order
+step 4:** the `BigConfusionCover B` obstruction predicate (`>c/2` confusion sets cover `Fin n`) + `exists_avoiding_of_not_cover`
+(`¬cover ⟹ ∃ v avoiding`, feeding step 3); retire/park §CC.21's balanced-splitter defs. Then step 5 (G-cite = carry
+Neumaier + G3, + capstone `…viaNoConfusionCover`). The research core remains **G-cite**.
 
 ---
 
@@ -297,13 +299,17 @@ transfer; the covering count replaces it.)
    confusionSet_{X_T}` (monotone via `refines_pointExtension_of_subset`) lands it in the `≤ M` hypothesis.
    **This dissolved the G-sim (simultaneity) gap:** the single covering hypothesis on `v` (`∀` undistinguished pair
    `≤ M`) replaces the per-class splitter, so the old §4b "one `v` balance-splits all near-max classes" worry is gone.
-3. **The halving wiring** `indistinguishingHalves_of_exists_avoiding_v`: `(∃ v ∉ ⋃ big confusion sets) ⟹
-   IndistinguishingHalves`. *Next.* Pure arithmetic: instantiate the bound at `M = c(X_T)/2` — "`v` avoids all `>c/2`
-   confusion sets" is exactly the bound's hypothesis (contrapositive: a big set's pair is distinguished by `v`), giving
-   `c(W) ≤ c(X_T)/2`, i.e. `2·c(W) ≤ c(X_T)`. Then quantify over `T` with `Φ T > B` to produce `IndistinguishingHalves B`.
-4. **Revise §CC.21**: replace `BalancedSplits`/`majority_fibers_inter` with the confusion-set **covering** predicate
-   `BigConfusionCover B` and `exists_avoiding_of_not_cover`; keep `confusionSet`. (Park the balanced-splitter
-   primitives as the 1-WL-cell model.)
+3. **The halving wiring — ✅ LANDED (2026-06-15, `§CC.22`, axiom-clean).** `indistinguishingHalves_of_exists_avoiding_v`:
+   if every over-`B` base `T` admits a `v` avoiding all big confusion sets (every `v`-undistinguished pair has
+   `2·|C_{X_T}| ≤ c(X_T)`), then `IndistinguishingHalves B`. Pure arithmetic: instantiate the step-2 bound at
+   `M = c(X_T)/2` (the avoiding hypothesis gives `|C| ≤ c/2` per undistinguished pair), giving `c(W) ≤ c(X_T)/2`, i.e.
+   `2·c(W) ≤ c(X_T)`; `omega` closes it. **The whole open content is now exactly the existence of the avoiding `v`** —
+   its negation is the covering obstruction (step 4).
+4. **Revise §CC.21 — the `BigConfusionCover` obstruction.** *Next.* Define `BigConfusionCover B` (the `>c/2` confusion
+   sets cover `Fin n`) and `exists_avoiding_of_not_cover` (`¬BigConfusionCover ⟹ ∃ v avoiding`, feeding step 3's
+   hypothesis); keep `confusionSet`, park the balanced-splitter primitives (`BalancedSplits`/`MajorityRelation`/
+   `majority_fibers_inter`/`GeometricObstruction`) as the 1-WL-cell model. *Note:* the "avoiding" condition is now
+   stable as `2·|C_{X_T}(α,β)| ≤ c(X_T)` for every `v`-undistinguished pair (`§CC.22` step 3's hypothesis shape).
 5. **G-cite + capstone**: carry `BigConfusionCover ⟹ IsCameron ∨ finite` (Neumaier + G3) and land
    `reachesRigidOrCameron_viaNoConfusionCover` discharging `IndistinguishingHalves` modulo the cited dichotomy.
 

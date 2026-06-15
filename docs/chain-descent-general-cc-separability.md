@@ -71,8 +71,11 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   outside all over-half confusion sets halves `c`** — the corrected G-mech. **Step 2 — the bound — LANDED (2026-06-15, `§CC.22`,
   axiom-clean):** `indistinguishingNumber_pointExtension_insert_le` (`c(W) ≤ M` if every `v`-undistinguished `X_T`-pair has confusion
   `≤ M`; via `Finset.sup_le` over non-reflexive `W`-classes + the kill lemma + `Refines`-monotonicity). **It dissolved the G-sim gap**
-  (one covering hypothesis on `v` replaces the per-class splitter). **NEXT (route doc §4c build-order):** step 3 halving wiring
-  (`∃ v ∉ ⋃ big sets ⟹ IndistinguishingHalves`, the bound at `M=c/2`), step 4 `BigConfusionCover` predicate, step 5 G-cite (Neumaier+G3) + capstone.
+  (one covering hypothesis on `v` replaces the per-class splitter). **Step 3 — the halving wiring — LANDED (2026-06-15, `§CC.22`,
+  axiom-clean):** `indistinguishingHalves_of_exists_avoiding_v` (`∃ v` avoiding all big confusion sets per over-`B` base `⟹
+  IndistinguishingHalves`, pure arithmetic at `M=c/2`). **So the entire open content is now exactly the existence of an avoiding `v`.**
+  **NEXT (route doc §4c build-order):** step 4 `BigConfusionCover` obstruction predicate + `exists_avoiding_of_not_cover` (feeds step 3),
+  step 5 G-cite (Neumaier+G3) + capstone `…viaNoConfusionCover`.
 
 ### The open frontier — ONE hypothesis: `IndistinguishingHalves` (live work: `chain-descent-a2-potential-route.md`)
 **The seal now stands `modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**, and the entire open mathematical content is the single

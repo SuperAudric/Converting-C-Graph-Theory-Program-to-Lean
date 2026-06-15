@@ -2180,6 +2180,33 @@ theorem indistinguishingNumber_pointExtension_insert_le (v : Fin n) (T : Finset 
     rw [W.confusionSet_eq_empty_of_relOf_v_ne hvsing hvd, Finset.card_empty]
     exact Nat.zero_le M
 
+/-- §CC.22 (G-mech, **the halving wiring** — route doc §4c step 3). **`IndistinguishingHalves` from an avoiding `v`
+per over-`B` base.** If for every base `T` with `Φ T > B` there is a `v` that **avoids every big confusion set** —
+i.e. every pair `(α,β)` (`α ≠ β`) that `v` fails to distinguish in `X_T` has `2·|C_{X_T}(α,β)| ≤ c(X_T)` — then
+`X.IndistinguishingHalves B`. Pure arithmetic on the step-2 bound: instantiate
+`indistinguishingNumber_pointExtension_insert_le` at `M = c(X_T)/2` (the avoiding hypothesis gives `|C| ≤ c/2` for
+every undistinguished pair), yielding `c(X_{T∪v}) ≤ c(X_T)/2`, hence `2·c(X_{T∪v}) ≤ c(X_T)`. The remaining open
+content is **the existence of an avoiding `v`** — its negation is the `BigConfusionCover` obstruction (step 4: the
+`>c/2` confusion sets cover `Fin n`), routed to `Cameron ∨ finite` by the cited dichotomy (step 5, G-cite).
+Axiom-clean. -/
+theorem indistinguishingHalves_of_exists_avoiding_v (B : Nat)
+    (h : ∀ T : Finset (Fin n), B < X.potential T →
+        ∃ v : Fin n, ∀ α β : Fin n, α ≠ β →
+          (pointExtension X T).relOf v α = (pointExtension X T).relOf v β →
+          2 * ((pointExtension X T).confusionSet α β).card
+            ≤ (pointExtension X T).indistinguishingNumber) :
+    X.IndistinguishingHalves B := by
+  intro T hbig
+  obtain ⟨v, hv⟩ := h T hbig
+  refine ⟨v, ?_⟩
+  have hbound :
+      (pointExtension X (insert v T)).indistinguishingNumber
+        ≤ (pointExtension X T).indistinguishingNumber / 2 :=
+    X.indistinguishingNumber_pointExtension_insert_le v T
+      ((pointExtension X T).indistinguishingNumber / 2)
+      (fun α β hαβ hund => by have := hv α β hαβ hund; omega)
+  omega
+
 end CoherentConfig
 
 end ChainDescent

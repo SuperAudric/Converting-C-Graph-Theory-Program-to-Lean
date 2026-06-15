@@ -202,10 +202,12 @@ the route-doc **§4c build-order**:
 - **Step 2 ✅ LANDED** (2026-06-15, `§CC.22`) — the bound `indistinguishingNumber_pointExtension_insert_le`: `c(W) ≤ M`
   if every `v`-undistinguished `X_T`-pair has confusion `≤ M` (via `Finset.sup_le` over non-reflexive `W`-classes + the
   kill lemma + `Refines`-monotonicity). **Dissolved the G-sim gap** (one covering hypothesis on `v` replaces the per-class splitter).
-- **Step 3 (NEXT)** — halving wiring `indistinguishingHalves_of_exists_avoiding_v` (`∃v∉⋃big ⟹ IndistinguishingHalves`,
-  pure arithmetic instantiating the bound at `M=c/2`).
-- **Steps 4–5** — the `BigConfusionCover` obstruction predicate (retire/park §CC.21's balanced-splitter defs = the
-  1-WL-cell model, not the 2-WL `c`); **G-cite** (carry Neumaier + G3, the research core) + capstone `…viaNoConfusionCover`.
+- **Step 3 ✅ LANDED** (2026-06-15, `§CC.22`) — halving wiring `indistinguishingHalves_of_exists_avoiding_v`
+  (`∃v` avoiding all big confusion sets per over-`B` base `⟹ IndistinguishingHalves`, pure arithmetic at `M=c/2`).
+  **The entire open content is now exactly the existence of an avoiding `v`.**
+- **Step 4 (NEXT)** — the `BigConfusionCover B` obstruction predicate (`>c/2` confusion sets cover `Fin n`) +
+  `exists_avoiding_of_not_cover` (`¬cover ⟹ ∃ v avoiding`, feeding step 3); retire/park §CC.21's balanced-splitter defs.
+- **Step 5** — **G-cite** (carry Neumaier + G3, the research core) + capstone `…viaNoConfusionCover`.
 
 **Read `chain-descent-a2-potential-route.md` STATUS + §4c first.** The probe (`A2MonovariantProbe.cs`, 2026-06-15)
 reframed the row-4 gap: the drop-obstruction is the **partial-geometry line system**, not the smallest-eigenvalue
