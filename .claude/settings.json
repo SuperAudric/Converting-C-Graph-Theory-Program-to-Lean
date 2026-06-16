@@ -98,7 +98,10 @@
       "WebFetch(domain:dl.acm.org)",
       "WebFetch(domain:emis.dsd.sztaki.hu)",
       "WebFetch(domain:www.cs.yale.edu)",
-      "WebFetch(domain:lucatrevisan.wordpress.com)"
+      "WebFetch(domain:lucatrevisan.wordpress.com)",
+      "WebFetch(domain:dblp.org)",
+      "WebFetch(domain:cameroncounts.wordpress.com)",
+      "WebFetch(domain:ar5iv.org)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",

@@ -545,3 +545,56 @@ It separates the *provable* project content from the citation:
 **Outcome.** `hNeumaier` replaced by {Babai SRG structure + Kivva + a proved cover→base bridge}; seal
 `modulo {G3 + Babai-SRG-structure + Kivva + CFI-exchange + hImprim}`, every carry a literal theorem — the "exactly
 citable" target reached for the geometric leg, honestly at the sub-exponential threshold.
+
+### 8.6 Research pass (2026-06-16): `B(n)` pinned + corrected citations + the threshold ladder
+
+A 3-angle web-grounded deep-research pass (structure/motion · individualization bounds · WL-dimension) + an Eberhard
+verification ran the sub-task-1 gate. **Verdict: `B(n)` is pinned, and it confirms the seal is sub-exponential, with the
+polynomial version genuinely OPEN (no citation, no conjecture).**
+
+**The threshold ladder (the headline — `B(n)` is not one number, it is three regimes):**
+| Base budget `B` | What discretizes the residue at `\|T\| ≤ B` | Status / citation |
+|---|---|---|
+| **Polynomial** `O(log n)` (the GI∈P target) | the WL-realization of the `O(log n)` group base | **OPEN — the rank-3 base case.** No theorem, *no conjecture even exists* (CGGP: community had no such expectation; CFI/FDF make it false in general). |
+| **Quasipolynomial** (`O(log n)` *group* base) | Babai/Kivva motion ⟹ large-motion ⟹ `b(Aut)=O(log n)`; but `X_T` **complete** needs WL-realization | group base proven; the WL step is the **same open gap**. |
+| **Sub-exponential** `Õ(n^{1/3})` | **Spielman**: every primitive SRG individualizes-and-refines to discrete at `Õ(n^{1/3})` | **PROVEN & citable** (Spielman, STOC 1996). |
+
+**The reframing that matters for next steps.** At `B = Õ(n^{1/3})` Spielman discretizes *every* primitive SRG, so
+`hSmallAutDiscretizes` holds **unconditionally** (the cover branch is vacuous, everything shatters) — the seal is honestly
+sub-exponential **but then subsumed by Spielman**, and the whole "or Cameron" / largeness machinery is unnecessary. The
+Cameron carve-out is **load-bearing only at the polynomial threshold**, where the citation *is* the open rank-3 base case.
+**So no citation makes the seal polynomial — that is the open frontier; `hSmallAutDiscretizes`/`hNeumaier` at sub-exp = carry
+Spielman (Cameron-trivial); at poly = open.** Phase 3 ("carry a named citation") therefore changes the seal's *honesty*,
+not its *scope*: the citation is now exactly scoped, and building it is optional.
+
+**Pinned citations (corrected — apply these):**
+- **Babai SRG structure theorem (rank 3):** *motion ≥ n/8, OR X / X̄ is triangular `J(s,2)` / lattice `H(2,s)` / disjoint
+  equal cliques*; `n ≥ 29`, threshold **exactly n/8**. **L. Babai, "On the automorphism groups of strongly regular graphs
+  I", ITCS 2014** (DOI 10.1145/2554797.2554830) + Part II, J. Algebra 421 (2015) 560–578. **NOT STOC.** Clean restatement:
+  Kivva arXiv:1912.11427 Thm 1.2.
+- **Kivva (rank 4):** *motion ≥ γ₄·n, OR Johnson scheme, OR Hamming scheme* — a **MOTION bound, NOT a WL-dim bound and NOT
+  an amorphic classification** (correcting the old "rank-4 amorphic" gloss). **JCTB 164 (2024) 245–298**, DOI
+  10.1016/j.jctb.2023.09.006, arXiv:2110.13861. **Print year 2024, not 2023.**
+- **"geometric ⟹ large Aut" is FALSE — fully vindicates the Phase-2 direction-flip.** Large Aut comes from the **named-family
+  identification** (Johnson/Hamming, thickness `Ω(√n)`, routed via Cameron/Maróti), *not* from generic geometricity; Neumaier
+  is only the geometric-classification ingredient. Fon-Der-Flaass (Adv. Geom. 2002, trivial Aut) + CGGP confirm.
+- **CGGP:** authors are **Cai, Guo, Gavrilyuk, Ponomarenko** (arXiv:2312.00460, Combinatorica 2025) — WL-dim ≤ 4 for the
+  Fon-Der-Flaass *affine* family (**SPECIFIC, not universal**; the base-≤2 step cites BCN Thm 3.3.8). The "trivial Aut" is
+  the Fon-Der-Flaass family's, not a stated CGGP property (CGGP's `Aut` use = the 2-point extension is discrete).
+- **Spielman**, STOC 1996, `exp(Õ(n^{1/3}))`, base `Õ(n^{1/3})`; **Babai 1980** (SIAM J. Comput.) `exp(Õ(√n))`;
+  **BCSTW**, FOCS 2013, `exp(Õ(n^{1/5}))` canonical forms. **Motion–base lemma** `b(G) ≤ (n/m)·log n` (Babai 1981 / Maróti
+  survey, Arch. Math. 2023): large-motion ⟹ group base `O(log n)`. **Schneider–Schweitzer**, ICALP 2025: WL-dim `≤ 0.15n`
+  universal — linear, useless for polynomiality (confirms the only universal bound is linear).
+
+**Eberhard risk — DISMISSED for the schurian seal (but sharpens the threshold).** Sean Eberhard, "Hamming sandwiches"
+(arXiv:2203.03687, Combinatorica 2023) refutes Babai's combinatorial Cameron conjecture with primitive PCCs of rank 28,
+`|Aut| ≥ exp(n^{1/8})`, small motion — but they are **explicitly NON-SCHURIAN** (imprimitive Aut). The project's residue is
+schurian (`orbitalScheme H`), and `hClassify` (G3) is stated over `SchurianScheme`, so Eberhard does **not** touch the seal.
+It *does* confirm the largeness threshold must be the **Sun–Wilmes `exp(n^{1/3})`** level AND schurian: the combinatorial
+version is false at `exp(n^{1/8})` even with large Aut counts.
+
+**Impact on next steps (see the reply / STATUS):** the citation is now *exactly scoped*; the genuine remaining frontier is
+the **open rank-3 base case** (polynomial WL-realization of the `O(log n)` motion base — GI-adjacent, uncited, unconjectured).
+Phase 3 options: **(a)** carry Spielman → a fully-citable sub-exp "honest floor" capstone (Cameron-free, subsumed by known
+results); **(b)** carry Babai/Kivva motion + leave the WL-realization as the open gap (poly-aspirational, the gap = the open
+case); **(c)** hold — the citation is scoped, redirect to `hImprim` discharge or the open rank-3 research.
