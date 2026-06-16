@@ -822,3 +822,94 @@ Both open questions from §9.7.1 resolved (green, test passes):
 **Next Lean target = the loose-cover bound (b)**, stated on multiplicity: *primitive non-geometric ⟹ `minMult(X_T)` (or `L`)
 bounded ⟹ shatter via the `(1+L)`-cleanup*. **2a (`§9.3-2a`, §9.5 sub-target 1) is dropped.** Faithful-scheme caveat for any
 future probe: measure the residue on its **amorphic/orbital** scheme, never the rank-2 graph (which conflates with Cameron).
+
+## 9.8 Endgame scoping — where the (b) redirect leads (does it reach unconditional-modulo-citations?)
+
+> **The question.** If the (b) loose-cover/multiplicity route is carried to completion, is an unconditional (modulo
+> citations) seal within reach, or does it hit a wall later? **Answer (corrected 2026-06-16): polynomial-unconditional-
+> modulo-`{G3 + hcatch}` IS the target of this route and is reachable *in principle* — it reduces to ONE open theorem
+> ("the carved residue cascades / has `O(log n)` base"). That theorem is open and hard (a chunk of GI∈P-for-SRGs) but
+> NOT barred — no proven obstruction, and the evidence (CGGP, 0 falsifiers) leans toward it. What §8.6 actually shows is
+> narrower: no *citation* reaches polynomial — which is exactly why the largeness/citation route was set aside in favour
+> of this DIRECT-proof route.**
+>
+> **⚠ Correction.** An earlier draft of this section called polynomial "the wall / unreachable." That was wrong — it
+> imported the *citation* route's sub-exponential ceiling (§8.6) onto this *direct-proof* route, which does not rely on a
+> citation. "Open / unconjectured-in-the-literature" ≠ "barred": it means unproven, not unprovable. The project's whole
+> premise (00-START-HERE "isolation is the method, not a surrender"; cxt-scoping §5 route 2) is that the carved residue is
+> the *tame remainder* and proving it cascades is the live target — not a foreclosed one. Worked chain below.
+
+### 9.8.1 The seal's full dependency chain
+
+The seal stands `modulo {G3 (hClassify) + hcatch + hImprim + hShatter}`. Classifying each:
+| Carried | Status toward "unconditional modulo citations" |
+|---|---|
+| **G3** (`hClassify`, Babai/Sun–Wilmes large-primitive⟹Cameron) | **Citation** (CFSG-based) — legitimately carried, never proved in-project. |
+| **hcatch** (`WarmTwinsAreFiberTwins`, CFI-1992 Thm 5.2) | **Citation or small proof** — `dimWL(X)≤dimWL(X_α)+1`. |
+| **hImprim** (block tower) | **Provable in-project** — deferred infra (~80% landed, recursion unbuilt), NOT a wall. |
+| **hShatter** (node 4 = A2 open core) | **What (b) targets.** Decomposes below. |
+
+So "unconditional modulo citations" = discharge `hImprim` (infra) and `hShatter` (the math), leaving only {G3 + hcatch}.
+
+### 9.8.2 hShatter decomposes into TWO parts (not three — "part 2" was a phantom)
+
+The seal's genuine case split (as wired in `_viaSmallAutShatters` / `_viaNoCover`) is **large-Aut vs small-Aut**, NOT
+tight/thick vs loose:
+> imprimitive → `hImprim` · primitive **large-Aut** → G3/Cameron (the legitimate cited "or Cameron") · primitive
+> **small-Aut** → must cascade (`hShatter`).
+
+So `hShatter` (the carved residue cascades) = exactly two pieces:
+1. **Cleanup engine: bounded `minMult`/`L` (cascade rate) ⟹ `O(log n)` base.** **PROVABLE in-project** — the `(1+L)`
+   generalization of the landed `§CC.20` halving engine (`exists_potential_descent`) + the `§CC.22` kill lemma: a best
+   vertex leaves `≤ minMult` big sets, cleaned by `≤ minMult` further pins ⟹ base `O(L·log n)`. No citation. *Buildable now.*
+2. **The carved residue actually cascades: primitive ∧ small-Aut ∧ non-geometric ∧ non-conference (schurian) ⟹ bounded
+   cascade rate.** This is the open **rank-3 base case** — the single open theorem the seal reduces to. **Open and hard,
+   but NOT barred:** no proven obstruction; CFI/FDF break the *general* (un-carved) statement, but the residue is exactly
+   the remainder after those families are carved off (large→G3, conference→leg B, imprimitive→`hImprim`). Positive evidence:
+   CGGP (`n^Ω(n^{2/3})` small-Aut SRGs, all base ≤ 2), 0 falsifiers, the amorphic-shatter probe (§9.7.2 Q1).
+
+**Why there is NO "part 2 = thick⟹Cameron citation" (the earlier draft's error).** Multiplicity was a *measurement* of
+cascade-ability (the probe), not a case split the theorem needs. The large/small-Aut dichotomy is the real one, and the
+large-Aut branch is the *legitimate, always-kept* G3 citation (the "or Cameron" escape). The small-Aut branch — even when
+the residue is geometric/thick (cf. CGGP, which is thick-ish yet small-Aut **and** cascades at base 2) — must be PROVED to
+cascade; it is not routed to a citation. So discharging `hShatter` needs **no SRG-structure citation** beyond the G3 we
+already keep for the large branch. The thick⟹Cameron framing conflated the multiplicity proxy with a needed case split.
+
+### 9.8.3 What is, and isn't, within reach
+
+- **Polynomial, unconditional modulo `{G3 + hcatch}` — the TARGET, reachable in principle.** It reduces to the *single*
+  open theorem of §9.8.2 part 2 ("carved residue cascades"), discharged via the part-1 engine. `hImprim` is infra. No
+  citation beyond G3 (large-Aut→Cameron) and `hcatch`. **This is the route's purpose** — open and hard, not foreclosed.
+- **What §8.6 actually rules out:** no *citation* makes the seal polynomial — the largeness theorems (Babai/Kivva/Spielman)
+  are sub-exponential. That is the **citation route's** ceiling, and the reason it was set aside: e.g. carrying **Spielman**
+  gives `hShatter` unconditionally at `B=Õ(n^{1/3})` (cover branch vacuous, G3 even unneeded) — but Spielman alone already
+  canonizes in sub-exp time, so the seal adds nothing there. **The direct cascade proof, not a citation, is how this route
+  goes for polynomial.**
+- **The realistic, genuine win (partial unconditionality + de-risking).** The `(1+L)` engine (part 1) is unconditional, and
+  multiplicity is a *computable* handle, so the redirect lets us **peel off structural sub-classes of the residue with
+  combinatorial (citation-free) bounds**, shrinking the open core: e.g. the landed PV sparse `2c(k−1)<n ⟹ b≤2`
+  (`separatesAtBoundedBase_of_sparseSeparable`, low-degree residue) already does this; a coherence/counting bound on
+  `minMult` for further sub-classes (bounded fiber-degree, specific intersection-number regimes) would extend it. The
+  honest end-state is **cxt-scoping route 3**: seal `modulo {G3 + hcatch + (the rank-3-base-case predicate)}`, with as much
+  of the residue as possible carved into *proved* sub-cases and the irreducible generic core carried as one named predicate.
+
+### 9.8.4 Verdict + recommended build order
+
+The redirect is the **right reformulation** (computable, combinatorial, aligns the carve with the seal's existing legs)
+**and it is a legitimate direct attack on the polynomial bound** — the one piece of GI∈P-for-SRGs the project deliberately
+isolates. It is **not blocked**; it is **unproven**. Polynomial-unconditional-modulo-`{G3 + hcatch}` is reachable iff the
+§9.8.2-part-2 cascade theorem is proved — open, hard, but with positive evidence and no obstruction. Recommended order:
+1. **Build part 1 (the `(1+L)`/cascade-rate engine), unconditional.** Generalize `§CC.20` `IndistinguishingHalves`/
+   `exists_potential_descent` from `1/2`-halving to "bounded-cascade-rate": `BoundedConfusionMultiplicity B M ⟹
+   PotentialDrops`-style descent at base `O(M·log n)`. Citation-free; makes "residue cascades ⟹ polynomial" a theorem,
+   collapsing the *entire* open content to the single discharge "the residue cascades."
+2. **Attack the cascade discharge — first the sub-classes, then the generic core.** Re-activate PV sparse
+   (`separatesAtBoundedBase_of_sparseSeparable`, low-degree) and seek further combinatorial cascade-rate bounds (bounded
+   fiber-degree, intersection-number regimes); each proved sub-class shrinks the open core. The generic primitive-small-Aut
+   non-geometric residue is the hard heart — the genuine open research, attacked directly (no citation, the route's purpose).
+3. **Honest floor if the generic core resists:** carry it as ONE named predicate (`BoundedConfusionMultiplicity` on the
+   residue = the rank-3 base case), seal `modulo {G3 + hcatch + that predicate}` (cxt-scoping route 3). This is the
+   *fallback*, not the target — the target (step 2) is the direct proof.
+This converts "node 4" into {one proved engine + a shrinking carved frontier + the directly-attacked generic core}.
+**Polynomial-unconditional is gated on proving the cascade theorem — open and hard, but unbarred; it is the route's
+intended endpoint, not a wall (cxt-scoping risk (a): a falsifier would change the seal statement; 0 found).**
