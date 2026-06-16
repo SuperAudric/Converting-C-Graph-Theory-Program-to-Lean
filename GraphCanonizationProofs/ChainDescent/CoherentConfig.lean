@@ -2421,6 +2421,130 @@ theorem not_bigConfusionCover_of_allSingletonFiber
   rw [X.confusionSet_eq_empty_of_allSingletonFiber hcomplete hαβ] at hmem
   exact Finset.notMem_empty _ hmem
 
+/-! ### §CC.22b — the load-bridge (route doc §9.6: the `(1+L)`-cleanup, set form)
+
+Part 1 (`§CC.20b`) consumes `BoundedConfusionMultiplicity B M` ("a `≤ M`-set halves `c`") abstractly. This section
+lands the **mechanism that produces it** — the §9.6 multiplicity / cleanup argument — in Lean: a size-`≤ M` set that
+*distinguishes every big confusion pair* halves `c` (the set generalization of the kill-lemma bound), so the open
+content of A2 is re-expressed as the **computable confusion-cover load** the `A2MonovariantProbe` `minMult` measures,
+rather than the opaque "a set halves `c`". Closes with the every-graph non-vacuity anchor (the cascade hypothesis is
+satisfiable at `M = n`), guarding the vacuity trap. -/
+
+/-- §CC.22b (route doc §9.6 — the `(1+L)`-cleanup, set form). **The kill-lemma bound for a SET of individualizations.**
+The set generalization of `indistinguishingNumber_pointExtension_insert_le`: if every pair `(α,β)` with `α ≠ β` that
+*no* `s ∈ S` distinguishes in `X_T` (`∀ s ∈ S, relOf_{X_T} s α = relOf_{X_T} s β`) has `|C_{X_T}(α,β)| ≤ M`, then
+`c(X_{T∪S}) ≤ M`. Each non-reflexive class of `W = X_{T∪S}` has a rep `(α,β)`, `α ≠ β`; if *some* `s ∈ S`
+distinguishes it (`relOf_W s α ≠ relOf_W s β`) the kill lemma empties its `W`-confusion (`s` a singleton fiber of `W`,
+`s ∈ T ∪ S`), else every `s ∈ S` fails to distinguish in `X_T` too (refinement `W ⊑ X_T`) so the pair lands in the
+`≤ M` hypothesis with `C_W ⊆ C_{X_T}` (monotone). The `S = {v}` case is
+`indistinguishingNumber_pointExtension_insert_le`. Axiom-clean. -/
+theorem indistinguishingNumber_pointExtension_biUnion_le (S T : Finset (Fin n)) (M : Nat)
+    (hM : ∀ α β : Fin n, α ≠ β →
+        (∀ s ∈ S, (pointExtension X T).relOf s α = (pointExtension X T).relOf s β) →
+        ((pointExtension X T).confusionSet α β).card ≤ M) :
+    (pointExtension X (T ∪ S)).indistinguishingNumber ≤ M := by
+  classical
+  set W := pointExtension X (T ∪ S) with hWdef
+  set Y := pointExtension X T with hYdef
+  have hrefW : Refines W Y := X.refines_pointExtension_of_subset Finset.subset_union_left
+  unfold indistinguishingNumber
+  apply Finset.sup_le
+  intro r hr
+  rw [Finset.mem_filter] at hr
+  set α := (W.repPair r).1 with hαdef
+  set β := (W.repPair r).2 with hβdef
+  have hrep : W.relOf α β = r := W.relOf_repPair r
+  have hαβ : α ≠ β := fun he => hr.2 ⟨β, by rw [← hrep, he]⟩
+  have hcard : W.indistinguishingNumberOf r = (W.confusionSet α β).card :=
+    W.indistinguishingNumberOf_eq_card hrep
+  rw [hcard]
+  by_cases hkill : ∃ s ∈ S, W.relOf s α ≠ W.relOf s β
+  · -- some `s ∈ S` distinguishes the pair: the kill lemma empties its `W`-confusion.
+    obtain ⟨s, hsS, hsd⟩ := hkill
+    have hsing : W.SingletonFiber s :=
+      (isPointExtension_pointExtension X (T ∪ S)).2.1 s (Finset.mem_union_right T hsS)
+    rw [W.confusionSet_eq_empty_of_relOf_v_ne hsing hsd, Finset.card_empty]
+    exact Nat.zero_le M
+  · -- no `s ∈ S` distinguishes it: the confusion is `⊆ C_{X_T}`, and the pair lands in `hM`.
+    push_neg at hkill
+    have hsub : W.confusionSet α β ⊆ Y.confusionSet α β := by
+      intro γ hγ
+      simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and] at hγ ⊢
+      exact hrefW γ α γ β hγ
+    exact le_trans (Finset.card_le_card hsub)
+      (hM α β hαβ (fun s hsS => hrefW s α s β (hkill s hsS)))
+
+/-- §CC.22b (route doc §9.6) **The confusion-cover load predicate — the `(1+L)`-cleanup target.** From any over-`B`
+base `T`, a *bounded set* `S` (`|S| ≤ M`) **distinguishes every big confusion pair**: every `(α,β)` (`α ≠ β`) that no
+`s ∈ S` distinguishes has `2·|C_{X_T}(α,β)| ≤ c(X_T)` (i.e. `S` hits every `> c/2` confusion set). The §9.6 multiplicity
+reframe in Lean — `M` plays the role of `1 + L` (`L` = average confusion-cover load): pin the least-covered vertex,
+clean up the `≤ L` big sets it lies in. The cascade-rate form of `BigConfusionCover`'s negation, lifted from one
+vertex (`exists_avoiding_of_not_cover`) to a small set. Carried, never an `axiom`. -/
+def BoundedConfusionLoad (B M : Nat) : Prop :=
+  ∀ T : Finset (Fin n), B < X.potential T →
+    ∃ S : Finset (Fin n), S.card ≤ M ∧
+      ∀ α β : Fin n, α ≠ β →
+        (∀ s ∈ S, (pointExtension X T).relOf s α = (pointExtension X T).relOf s β) →
+        2 * ((pointExtension X T).confusionSet α β).card
+          ≤ (pointExtension X T).indistinguishingNumber
+
+/-- §CC.22b (route doc §9.6 — **THE LOAD-BRIDGE**). **Bounded confusion load ⟹ bounded confusion multiplicity.** A
+size-`≤ M` set distinguishing every big confusion pair at each over-`B` base cleans `c(X_T)` to `≤ c/2`: the set-form
+kill bound `indistinguishingNumber_pointExtension_biUnion_le` at `M' = c(X_T)/2` gives `c(X_{T∪S}) ≤ c/2`, hence
+`2·c(X_{T∪S}) ≤ c(X_T)`. So the cascade-rate engine (`exists_small_base_of_boundedConfusionMultiplicity`) runs off the
+**computable confusion-cover load** `L` (route doc §9.6, the `A2MonovariantProbe` `minMult`) rather than the abstract
+"a set halves `c`": A2's open content is now *"the residue's confusion-cover load is `O(1)`/`O(log n)`"*. Generalizes
+the `M = 1` kill-lemma reduction (`indistinguishingHalves_of_not_bigConfusionCover`) to the bounded-multiplicity
+cleanup. Axiom-clean. -/
+theorem boundedConfusionMultiplicity_of_boundedConfusionLoad {B M : Nat}
+    (h : X.BoundedConfusionLoad B M) : X.BoundedConfusionMultiplicity B M := by
+  intro T hbig
+  obtain ⟨S, hScard, hS⟩ := h T hbig
+  refine ⟨S, hScard, ?_⟩
+  have hbound :
+      (pointExtension X (T ∪ S)).indistinguishingNumber
+        ≤ (pointExtension X T).indistinguishingNumber / 2 :=
+    X.indistinguishingNumber_pointExtension_biUnion_le S T
+      ((pointExtension X T).indistinguishingNumber / 2)
+      (fun α β hαβ hund => by have := hS α β hαβ hund; omega)
+  omega
+
+/-- §CC.22b The indistinguishing number of a **complete** CC is `0`: with every point a singleton fiber, every pair
+`α ≠ β` has empty confusion (`confusionSet_eq_empty_of_allSingletonFiber`), so every non-reflexive class contributes
+`0` to the sup. The brick behind the non-vacuity anchor (`pointExtension X univ` is complete). Axiom-clean. -/
+theorem indistinguishingNumber_eq_zero_of_allSingletonFiber
+    (hcomplete : ∀ v : Fin n, X.SingletonFiber v) : X.indistinguishingNumber = 0 := by
+  classical
+  apply Nat.le_zero.1
+  unfold indistinguishingNumber
+  apply Finset.sup_le
+  intro r hr
+  rw [Finset.mem_filter] at hr
+  set α := (X.repPair r).1 with hαdef
+  set β := (X.repPair r).2 with hβdef
+  have hrep : X.relOf α β = r := X.relOf_repPair r
+  have hαβ : α ≠ β := fun he => hr.2 ⟨β, by rw [← hrep, he]⟩
+  have hcard : X.indistinguishingNumberOf r = (X.confusionSet α β).card :=
+    X.indistinguishingNumberOf_eq_card hrep
+  rw [hcard, X.confusionSet_eq_empty_of_allSingletonFiber hcomplete hαβ]
+  simp
+
+/-- §CC.22b (non-vacuity anchor, route doc §9.6) **The cascade hypothesis is satisfiable — the every-graph fallback at
+`M = n`.** `BoundedConfusionMultiplicity B n` holds for *every* CC: individualizing `S = univ` completes the extension
+(`pointExtension X univ` has all singleton fibers, `isPointExtension_pointExtension`), so `c(X_univ) = 0` and
+`2·0 ≤ c(X_T)` trivially. The route's content is `M = O(log n)`; this exhibits an honest inhabitant guarding the
+**vacuity trap** (cf. `SchemeReproduced`), mirroring `cascadesAt_univ` / `recoverableByDepth_univ`. Axiom-clean. -/
+theorem boundedConfusionMultiplicity_univ (B : Nat) :
+    X.BoundedConfusionMultiplicity B (Fintype.card (Fin n)) := by
+  intro T _
+  refine ⟨Finset.univ, Finset.card_univ.le, ?_⟩
+  have hcomplete : ∀ v : Fin n, (pointExtension X (T ∪ Finset.univ)).SingletonFiber v :=
+    fun v => (isPointExtension_pointExtension X (T ∪ Finset.univ)).2.1 v
+      (Finset.mem_union_right T (Finset.mem_univ v))
+  rw [(pointExtension X (T ∪ Finset.univ)).indistinguishingNumber_eq_zero_of_allSingletonFiber
+    hcomplete]
+  simp
+
 end CoherentConfig
 
 end ChainDescent

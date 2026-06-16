@@ -112,11 +112,24 @@ results), §9.8 (endgame), then PICK UP at part 2 below.**
    hImprim}`; the entire open content is the single discharge `BoundedConfusionMultiplicity` (strictly weaker than
    `IndistinguishingHalves` = its `M=1` case).
 
-**▶ PICK UP HERE — NEXT = PART 2 (§9.8.4): DISCHARGE `BoundedConfusionMultiplicity` for the residue.** Sub-classes first
-(re-activate landed PV sparse `separatesAtBoundedBase_of_sparseSeparable` for low-degree; seek combinatorial `minMult`/cascade-
-rate bounds for bounded-fiber-degree / intersection-number regimes — each shrinks the open core, citation-free), then the
-generic primitive-small-Aut non-geometric core (the rank-3 base case, direct). Fallback = carry it as one named predicate.
-**Read §9.7.1–§9.7.2 + §9.8 to continue.**
+**★ LOAD-BRIDGE LANDED (2026-06-16, `§CC.22b`, axiom-clean, build green) — part 1's consumer is now fed by the computable load.**
+The §9.6 `(1+L)`-cleanup mechanism is in Lean: `indistinguishingNumber_pointExtension_biUnion_le` (the SET generalization of the
+single-vertex kill bound — a `≤M`-set distinguishing every big pair bounds `c(X_{T∪S})`), the predicate `BoundedConfusionLoad B M`
+(a size-`≤M` set hits every `>c/2` confusion set per over-`B` base), and **the bridge `boundedConfusionMultiplicity_of_boundedConfusionLoad`**
+(`BoundedConfusionLoad B M ⟹ BoundedConfusionMultiplicity B M`, via the set bound at `M'=c/2`). Plus the **non-vacuity anchor**
+`boundedConfusionMultiplicity_univ` (`BoundedConfusionMultiplicity B n` for *every* CC — `S=univ` completes the extension, `c=0`;
+guards the vacuity trap, mirrors `cascadesAt_univ`) and its brick `indistinguishingNumber_eq_zero_of_allSingletonFiber`. **Effect:**
+A2's open content is re-expressed as **"the residue's confusion-cover load `L`/`minMult` is `O(1)`/`O(log n)`"** — the exact computable
+quantity the `A2MonovariantProbe` measures, not the opaque "a set halves `c`". The `M=1` case is the landed cover route
+(`indistinguishingHalves_of_not_bigConfusionCover`); this is its bounded-multiplicity generalization.
+
+**▶ PICK UP HERE — NEXT = PART 2 (§9.8.4): DISCHARGE `BoundedConfusionLoad` (= bound the load) for the residue.** Now stated on the
+computable load: show a small set hits every big confusion set per over-`B` base. Sub-classes first (re-activate landed PV sparse
+`separatesAtBoundedBase_of_sparseSeparable` for low-degree — **but first pin its entry point**: it is a homogeneous-scheme result, the A1
+route used the crude abundance bound on `X_T`, so using sharp PV on the extension needs a CC port or applies near-vacuously to the bare
+residue; seek combinatorial `minMult`/load bounds for bounded-fiber-degree / intersection-number regimes — each shrinks the open core,
+citation-free), then the generic primitive-small-Aut non-geometric core (the rank-3 base case, direct). Fallback = carry the load
+predicate. **Read §9.7.1–§9.7.2 + §9.8 to continue.**
 
 ---
 
