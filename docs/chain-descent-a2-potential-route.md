@@ -761,3 +761,37 @@ as a function of the size threshold `ρ ∈ (0,1)` and the base `T` (bare, +1, +
 while the geometric families have `L_ρ = ω(1)` / `N_ρ ≥ n/c` (a thick cover). If so: the multiplicity is the provable
 handle, the probe pins the exact `ρ`, and the Lean engine generalizes from `1/2`-halving to the `(1+L)`-cleanup form.
 Extends `A2MonovariantProbe.cs`; reuses the residue/carved SRG fixtures already there.
+
+### 9.7.1 Results — `A2MonovariantProbe.Probe_ConfusionCoverMultiplicity` (2026-06-16, built, run, green)
+
+Built 2-WL-**faithful**: confusion sets on the coherent closure `X_T` (`PairClosure` = WL-on-ordered-pairs of the
+graph adjacency with `T` individualized = `pointExtension` of the rank-2 SRG scheme), `BigConfusionCover` quantified
+over **all** pairs (the first cut took one rep per relation class — a bug: 2–6 sets can't cover `n`; the all-pairs
+metric is the Lean object). Rank-2 is the **conservative** view (an amorphic refinement is finer ⟹ `c` only shrinks,
+`indistinguishingNumber_mono` ⟹ a cover only gets easier to avoid). Three findings:
+
+1. **NO TIGHT COVER ANYWHERE — every cover is loose (`maxMult ≫ 1`, up to `= N`).** Confusion-set covers overlap
+   *intrinsically* (many pairs share confused vertices), so the partition/tight configuration **sub-target 2a**
+   targets does not arise — on residue or geometric, at any base/`ρ` tested. **⟹ 2a is empirically (near-)vacuous:**
+   it would rule out a case that is already empty; the entire live content is the **loose cover (2b)**. *Reprioritize:
+   2a is NOT the high-value Lean target the §9.5 ranking suggested — the loose-cover multiplicity bound is.*
+2. **Geometric multiplicity GROWS with `n`; residue stays small / shatters.** Base `{0}`, ρ=0.5, `minMult`:
+   rook `L(m)` **10→43→117→271** (`n=16,25,36,49`), Johnson `T(m)` **3→9→23** (`n=15,21,28`) — thick, `→ ω(1)`
+   (`L` and mass `Σ|C|²` likewise). Residue: Shrikhande **3**, Chang-C8 **0 (shatters!)**, Chang-4K2 **4** — small/flat.
+   **The cospectral `(16,6,2,2)` pair separates correctly:** Shrikhande shatters by base 2 (`minMult=0`, `c`: 8→6→4),
+   Rook L(4) stays covered (`c`: 8→8→8, `minMult=1` even at `|T|=2`, base only at `√n=4`). Directional support for
+   the reframe — multiplicity tracks the geometric/residue split the way base-size does.
+3. **The rank-2 (conservative) view CONFLATES Clebsch with rook at fixed `n`.** Clebsch `c` is sticky (8→8→8) and
+   `minMult=9 ≈` rook's 10 at `n=16` — because Clebsch's recovery lives in its **amorphic (rank-4) refinement**, which
+   the rank-2 graph closure does not see. The residue also cannot be *scaled* (the construction bottleneck, §5 F2): only
+   `n=16` (Shrikhande/Clebsch) and `n=28` (Chang) exist, so "residue `L=O(1)`" is inferential from a flat 2-point trend.
+
+**Verdict.** The probe is **decisive on 2a (drop it — covers are intrinsically loose)** and on **geometric thickening
+(clean, `ω(1)`)**. The residue-vs-Cameron *separation* — the crux — is clean only on the cospectral pair; Clebsch needs
+the amorphic refinement to beat the obstruction (on rank-2 it looks Cameron-like). **Two honest next moves:**
+(a) **iterate the probe onto the residue's amorphic schemes** (ℤ₄² Clebsch rank-4 `clebschZ4ColF`, Shrikhande rank-3)
+— the decisive test of whether multiplicity *cleanly* separates residue from Cameron once the residue is viewed on its
+own scheme; (b) **skip to the loose-cover Lean content (2b)**: since tight covers don't occur, the open theorem is
+"a loose big-confusion cover of a primitive non-geometric SRG has bounded multiplicity `L` (or `minMult`)", the
+`(1+L)`-cleanup engine. The fixed-`ρ` halving threshold showed no special structure (the ρ-sweep is flat 0.5–0.6 then
+steps), consistent with §9.6's "fixed `ρ` is fragile — use the global mass/multiplicity argument."

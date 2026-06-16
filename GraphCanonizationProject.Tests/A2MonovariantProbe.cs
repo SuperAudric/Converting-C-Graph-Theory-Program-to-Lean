@@ -514,6 +514,242 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("  counting argument — probe evidence cannot reach it.");
     }
 
+    // ── 2-WL coherent closure (WL on ordered pairs) of the graph adjacency with a
+    //    base T individualized — the faithful X_T = pointExtension of the rank-2 SRG
+    //    scheme {diag, edge, non-edge}.  The Lean confusionSet/BigConfusionCover live
+    //    on THIS object (CoherentConfig.relOf of pointExtension), not the 1-WL vertex
+    //    colouring `Refine` above.  Rank-2 (the graph's own coherent closure) is the
+    //    CONSERVATIVE choice: an amorphic refinement is finer, so c only shrinks
+    //    (indistinguishingNumber_mono) and a cover only gets easier to avoid — node 4
+    //    on rank-2 is the hardest case, so a clean signal here is a fortiori on the
+    //    amorphic residue.  Returns the stable pair-colour matrix rel[u,v]. ──────────
+    static int[,] PairClosure(int n, bool[,] adj, IReadOnlyList<int> T)
+    {
+        var flag = new int[n];
+        { int f = 1; foreach (var t in T) flag[t] = f++; }   // a unique tag per base point
+        var colour = new int[n, n];
+        var map0 = new Dictionary<(int, int, int), int>();
+        for (int u = 0; u < n; u++) for (int v = 0; v < n; v++)
+        {
+            var key = (u == v ? 2 : adj[u, v] ? 1 : 0, flag[u], flag[v]);   // (adj/diag, flags)
+            if (!map0.TryGetValue(key, out int cc)) { cc = map0.Count; map0[key] = cc; }
+            colour[u, v] = cc;
+        }
+        int classes = map0.Count;
+        var arr = new (int, int)[n];
+        var sb = new StringBuilder();
+        while (true)
+        {
+            var sig = new Dictionary<string, int>();
+            var nc = new int[n, n];
+            for (int u = 0; u < n; u++) for (int v = 0; v < n; v++)
+            {
+                for (int w = 0; w < n; w++) arr[w] = (colour[u, w], colour[w, v]);
+                Array.Sort(arr);
+                sb.Clear(); sb.Append(colour[u, v]);
+                foreach (var (a, b) in arr) { sb.Append('|'); sb.Append(a); sb.Append(','); sb.Append(b); }
+                string s = sb.ToString();
+                if (!sig.TryGetValue(s, out int cc)) { cc = sig.Count; sig[s] = cc; }
+                nc[u, v] = cc;
+            }
+            if (sig.Count == classes) return colour;   // split-only ⟹ same count = stable
+            colour = nc; classes = sig.Count;
+        }
+    }
+
+    // The confusion-cover multiplicity metrics on the closure `rel` at threshold ρ.
+    //   c           = c(X_T) = max over non-reflexive classes of |C(α,β)|,
+    //                 C(α,β) = {γ : rel[γ,α] = rel[γ,β]} (the indistinguishing number).
+    //   N_ρ         = # DISTINCT confusion sets of size > ρ·c (the bigClasses count).
+    //   L_ρ         = (Σ distinct big set sizes)/n  (the §9.6 average multiplicity/load,
+    //                 the double-count bound on minMult: Σ_v mult_v = Σ_i|C_i| = L·n).
+    //   minMult_ρ   = min_v #{big sets ∋ v} = the per-halving CLEANUP COST (0 ⟺ an
+    //                 avoiding v exists ⟺ ¬BigConfusionCover ⟺ node 4 holds here).
+    //   maxMult_ρ   = max_v #{big sets ∋ v} (=1 ⟺ the cover is a PARTITION = the 2a
+    //                 tight case; ≥2 ⟺ overlapping = the open 2b loose case).
+    //   cover       = minMult ≥ 1 (BigConfusionCover); tight = cover ∧ maxMult = 1.
+    //   mass        = Σ_{big} |C|² (the size-weighted monovariant, §9.6 metric (b)).
+    static (int c, int N, double L, int minMult, int maxMult, bool cover, bool tight, long mass)
+        CoverMetrics(int n, int[,] rel, double rho)
+    {
+        // c(X_T) = max over ALL a≠b of |C(a,b)|; C symmetric ⟹ unordered pairs suffice.
+        // (Off-diagonal ⟹ non-reflexive class automatically, by the CC diag_eq axiom.)
+        int c = 0;
+        var sizes = new int[n, n];
+        for (int a = 0; a < n; a++) for (int b = a + 1; b < n; b++)
+        {
+            int sz = 0; for (int g = 0; g < n; g++) if (rel[g, a] == rel[g, b]) sz++;
+            sizes[a, b] = sz; if (sz > c) c = sz;
+        }
+        if (c == 0) return (0, 0, 0, 0, 0, false, false, 0);
+
+        // The big confusion sets — C(α,β) for EVERY pair (not one rep per class): the
+        // Lean BigConfusionCover/bigClasses quantify over all pairs, and a pair's set
+        // translates across its relation class, so the cover has many distinct sets.
+        double thr = rho * c;
+        var distinct = new Dictionary<string, bool[]>();              // dedupe big sets by content
+        for (int a = 0; a < n; a++) for (int b = a + 1; b < n; b++)
+        {
+            if (sizes[a, b] <= thr) continue;
+            var mem = new bool[n]; var key = new StringBuilder();
+            for (int g = 0; g < n; g++) if (rel[g, a] == rel[g, b]) { mem[g] = true; key.Append(g).Append(','); }
+            distinct[key.ToString()] = mem;
+        }
+        var big = distinct.Values.ToList();
+        int N = big.Count;
+        if (N == 0) return (c, 0, 0, 0, 0, false, false, 0);          // no big set ⟹ no cover, trivially
+
+        long sumSize = 0, mass = 0;
+        var mult = new int[n];
+        foreach (var mem in big)
+        {
+            int sz = 0;
+            for (int g = 0; g < n; g++) if (mem[g]) { sz++; mult[g]++; }
+            sumSize += sz; mass += (long)sz * sz;
+        }
+        int minMult = int.MaxValue, maxMult = 0;
+        for (int g = 0; g < n; g++) { minMult = Math.Min(minMult, mult[g]); maxMult = Math.Max(maxMult, mult[g]); }
+        bool cover = minMult >= 1;
+        return (c, N, (double)sumSize / n, minMult, maxMult, cover, cover && maxMult == 1, mass);
+    }
+
+    // Cheap c(X_T) (one rep per class — for the greedy base search; |C| is constant on a class).
+    static int CofXT(int n, bool[,] adj, IReadOnlyList<int> T)
+    {
+        var rel = PairClosure(n, adj, T);
+        var refl = new HashSet<int>(); for (int u = 0; u < n; u++) refl.Add(rel[u, u]);
+        var seen = new HashSet<int>(); int c = 0;
+        for (int a = 0; a < n; a++) for (int b = 0; b < n; b++)
+        {
+            if (a == b) continue; int t = rel[a, b];
+            if (refl.Contains(t) || !seen.Add(t)) continue;
+            int sz = 0; for (int g = 0; g < n; g++) if (rel[g, a] == rel[g, b]) sz++;
+            c = Math.Max(c, sz);
+        }
+        return c;
+    }
+
+    // The base sequence ∅ ⊆ {0} ⊆ {0,v*}: vertex-transitive ⟹ pin 0 first; v* greedily
+    // minimizes c(X_{0,v}) (the over-B base where the cover question is live).  Greedy
+    // +2 only for n ≤ 28 (cost); larger fixtures report ∅ and {0}.
+    static List<List<int>> BaseSeq(int n, bool[,] adj)
+    {
+        var seq = new List<List<int>> { new(), new() { 0 } };
+        if (n <= 28)
+        {
+            int best = -1, bestC = int.MaxValue;
+            for (int v = 1; v < n; v++)
+            {
+                int c = CofXT(n, adj, new List<int> { 0, v });
+                if (c < bestC) { bestC = c; best = v; }
+            }
+            if (best >= 0) seq.Add(new() { 0, best });
+        }
+        return seq;
+    }
+
+    // ── The N_ρ / multiplicity probe (route doc §9.7) — does (minMult, L, mass) SEPARATE
+    //    the residue (base 2–3) from rook/Johnson (Cameron, base √n) the way base-size
+    //    does?  Built 2-WL-faithful (confusion sets on the coherent closure X_T) and
+    //    shaped around sub-target 2a: the per-base/ρ trichotomy is exactly what 2a
+    //    partitions — no-cover (shatters) / tight (2a, imprimitive) / loose (open 2b).
+    //
+    //    HYPOTHESIS (§9.7): residue keeps minMult_ρ/L_ρ = O(1) (cover absent or cheap)
+    //    at a constant ρ<1, while geometric families develop a thick cover (minMult/L
+    //    GROWING with m).  If instead L stays bounded on rook/Johnson too, "L bounded"
+    //    does NOT discriminate Cameron from residue — the multiplicity reframe fails and
+    //    2a (tight) + a different loose-case handle is the route.  Either way decisive.
+    [Fact]
+    public void Probe_ConfusionCoverMultiplicity()
+    {
+        var (_, idx8) = TriIndex(8);
+        var t8 = Triangular(8);
+        HashSet<int> ChangSet((int, int)[] e) => EdgeSetToVertices(e, idx8);
+
+        var graphs = new List<Graph>
+        {
+            new() { Name = "Shrikhande",  Category = "RESIDUE",          N = 16, Adj = CayleyZ4Sq(new[]{(1,0),(3,0),(0,1),(0,3),(1,1),(3,3)}) },
+            new() { Name = "Clebsch",     Category = "RESIDUE",          N = 16, Adj = CayleyZ2Pow4(new[]{1,2,4,8,15}) },
+            new() { Name = "Rook L(4)",   Category = "CARVED:lattice",   N = 16, Adj = Rook(4) },
+            new() { Name = "Rook L(5)",   Category = "CARVED:lattice",   N = 25, Adj = Rook(5) },
+            new() { Name = "Rook L(6)",   Category = "CARVED:lattice",   N = 36, Adj = Rook(6) },
+            new() { Name = "Rook L(7)",   Category = "CARVED:lattice",   N = 49, Adj = Rook(7) },
+            new() { Name = "Triangular T(6)", Category = "CARVED:Johnson", N = 15, Adj = Triangular(6) },
+            new() { Name = "Triangular T(7)", Category = "CARVED:Johnson", N = 21, Adj = Triangular(7) },
+            new() { Name = "Triangular T(8)", Category = "CARVED:Johnson", N = 28, Adj = Triangular(8) },
+            new() { Name = "Paley(13)",   Category = "CARVED:conference", N = 13, Adj = Paley(13) },
+            new() { Name = "Paley(29)",   Category = "CARVED:conference", N = 29, Adj = Paley(29) },
+        };
+        var changs = new (string, (int, int)[])[]
+        {
+            ("Chang-C8", new[]{(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(0,7)}),
+            ("Chang-4K2", new[]{(0,1),(2,3),(4,5),(6,7)}),
+        };
+        foreach (var (tag, e) in changs)
+            graphs.Add(new() { Name = tag, Category = "RESIDUE", N = 28, Adj = SeidelSwitch(28, t8, ChangSet(e)) });
+
+        output.WriteLine("A2 CONFUSION-COVER MULTIPLICITY probe (route §9.7) — confusion sets on the 2-WL");
+        output.WriteLine("coherent closure X_T (faithful to Lean confusionSet / BigConfusionCover).");
+        output.WriteLine("Trichotomy per (base,ρ=0.5): minMult=0 NO-COVER(shatters) | tight=2a(imprim) | loose=open-2b.");
+        output.WriteLine("Key question: do (minMult,L,mass) separate residue from rook/Johnson like base-size does?");
+        output.WriteLine("");
+        output.WriteLine($"{"graph",-16} {"cat",-16} {"n",-4} {"|T|",-4} {"c(X_T)",-7} {"N",-4} {"L",-7} {"minM",-5} {"maxM",-5} {"verdict",-22} {"massΣ|C|²",-9}");
+        output.WriteLine(new string('─', 130));
+
+        // scaling accumulators: minMult/L at base {0}, ρ=0.5, per category
+        var scale = new List<(string cat, string name, int n, int minM, double L, int c)>();
+
+        foreach (var g in graphs)
+        {
+            var (ok, _, _, _) = SrgParams(g.N, g.Adj);
+            if (!ok) { output.WriteLine($"{g.Name,-16} {g.Category,-16} {g.N,-4} NOT AN SRG — skipped"); continue; }
+            foreach (var T in BaseSeq(g.N, g.Adj))
+            {
+                var rel = PairClosure(g.N, g.Adj, T);
+                var m = CoverMetrics(g.N, rel, 0.5);
+                string verdict = m.c == 0 ? "discrete"
+                    : !m.cover ? "NO-COVER (shatters)"
+                    : m.tight ? "TIGHT (2a/imprim!)"
+                    : "loose (open 2b)";
+                output.WriteLine($"{g.Name,-16} {g.Category,-16} {g.N,-4} {T.Count,-4} {m.c,-7} {m.N,-4} {m.L,-7:F2} {m.minMult,-5} {m.maxMult,-5} {verdict,-22} {m.mass,-9}");
+                if (T.Count == 1) scale.Add((g.Category, g.Name, g.N, m.minMult, m.L, m.c));
+            }
+            output.WriteLine("");
+        }
+
+        // ── Scaling readout: at base {0}, ρ=0.5, does geometric minMult/L grow with n? ──
+        output.WriteLine("SCALING at base {0}, ρ=0.5 — does the cover thicken (minMult/L ↑) with n on the geometric");
+        output.WriteLine("families while staying bounded on the residue?  (the §9.7 discriminating test)");
+        foreach (var grp in scale.GroupBy(x => x.cat))
+            output.WriteLine($"  {grp.Key,-18} " + string.Join("  ", grp.OrderBy(x => x.n)
+                .Select(x => $"n{x.n}:minM={x.minM},L={x.L:F1}(c{x.c})")));
+
+        // ── ρ-sweep on the cospectral headline pair (Shrikhande vs Rook L(4)) at base {0} ──
+        output.WriteLine("");
+        output.WriteLine("ρ-SWEEP at base {0} — cospectral (16,6,2,2) pair Shrikhande vs Rook L(4):");
+        var shrik = graphs.First(x => x.Name == "Shrikhande");
+        var rook4 = graphs.First(x => x.Name == "Rook L(4)");
+        var relS = PairClosure(16, shrik.Adj, new List<int> { 0 });
+        var relR = PairClosure(16, rook4.Adj, new List<int> { 0 });
+        output.WriteLine($"  {"ρ",-6} {"Shrik: N/minM/maxM/L",-30} Rook L(4): N/minM/maxM/L");
+        foreach (double rho in new[] { 0.50, 0.60, 0.70, 0.80, 0.90 })
+        {
+            var ms = CoverMetrics(16, relS, rho);
+            var mr = CoverMetrics(16, relR, rho);
+            output.WriteLine($"  {rho,-6:F2} {$"N={ms.N},minM={ms.minMult},maxM={ms.maxMult},L={ms.L:F2}",-30} N={mr.N},minM={mr.minMult},maxM={mr.maxMult},L={mr.L:F2}");
+        }
+
+        output.WriteLine("");
+        output.WriteLine("READ — (a) minMult=0 anywhere ⟹ node 4 holds at that base (avoiding v / immediate halve);");
+        output.WriteLine("       (b) TIGHT cover on a PRIMITIVE SRG would contradict 2a's premise (flag/investigate);");
+        output.WriteLine("       (c) the multiplicity reframe SURVIVES iff residue minMult/L is bounded while rook/Johnson");
+        output.WriteLine("           minMult/L (or mass) GROWS with n — else 'L bounded' ≠ Cameron and 2a is the route.");
+
+        // SRG-validity is the only assertion (probe convention: all signals reported).
+        foreach (var g in graphs)
+            Assert.True(SrgParams(g.N, g.Adj).ok, $"{g.Name} is not a valid SRG");
+    }
+
     [Fact]
     public void Probe_CellSizeDropAcrossSRGs()
     {
