@@ -1157,20 +1157,27 @@ with its Lean proof). The cover dichotomy `cover ⟹ Cameron` is *factored* into
 carried as a single composite:
 * the **Cameron step reuses the project's canonical G3** `hClassify` (`PrimitiveCCClassification`, Babai 1981 /
   Sun–Wilmes 2015: large primitive ⟹ Cameron) — via `exhaustiveObstruction_scheme`, no new carry;
-* the only **new** carried citation is the **Neumaier direction** `hNeumaier : (∃ over-`B` cover) ⟹ IsLarge` — a
-  big-confusion cover is a near-pencil / partial-geometry line system (`card_bigClasses_mul_ge_of_cover`: it forces
-  `≥ n/c` near-maximal confusion classes), and a geometric configuration has a large automorphism group (thickness
-  `≥ √n`); the automorphism group only grows when the base `T` is un-individualized, so `Aut(X_T)` large `⟹ Aut(S)`
-  large `= IsLarge`.
+* the only **new** carried citation is the geometric/structure direction `hNeumaier : (∃ over-`B` cover) ⟹ IsLarge`
+  — *"a scheme whose extension resists discretization at a bounded base is large."* Its faithful citation is **Babai's
+  SRG structure theorem** (cxt-scoping §4.2): a primitive SRG is *large-motion* (small Aut — the residue) **or** a named
+  geometric family (triangular/Johnson, lattice/Hamming) of thickness `≥ √n`, hence **large Aut**; rank-4 amorphic via
+  Kivva (JCTB'23). Neumaier's claw bound is only the *geometric-classification ingredient* — "geometric ⟹ large Aut"
+  alone is **false** (a generic partial geometry / CGGP construction has trivial Aut). A cover is the
+  *resists-individualization* witness (`card_bigClasses_mul_ge_of_cover`: `≥ n/c` near-maximal confusion classes = a
+  rigid line system) ⟹ `¬large-motion` ⟹ named family ⟹ large. **⚠ Faithful only at the SUB-EXPONENTIAL largeness
+  threshold** where Babai/Kivva (and G3) are proven; at a *polynomial* threshold it is the **open rank-3 base case** (a
+  small-Aut SRG could have base between poly and quasipoly, giving a cover while small — falsifying it). Full scoping +
+  what proving it would take: route-doc `chain-descent-a2-potential-route.md` §8.
 
 The proof case-splits on the cover: **no cover** ⟹ every over-`B` base shatters, so
 `indistinguishingHalves_of_not_bigConfusionCover` feeds `reachesRigidOrCameron_viaShattering` (recovered); **cover**
 ⟹ `hNeumaier` gives `IsLarge`, then **primitive** ⟹ the cited G3 (`exhaustiveObstruction_scheme`) gives Cameron,
-**imprimitive** ⟹ `hImprim` recovers. So the seal stands **conditional `modulo {G3 (hClassify) + Neumaier
+**imprimitive** ⟹ `hImprim` recovers. So the seal stands **conditional `modulo {G3 (hClassify) + Babai-SRG-structure
 (hNeumaier) + hcatch + hImprim}`** — each a single isolated literal theorem rather than a project-specific composite.
-**Honest scope:** `hNeumaier` is the *Neumaier-direction* citation, not proved here; the generic "row-4" case
-(unbounded smallest eigenvalue, non-geometric) is where it is non-portable — but the probe reframe says row 4 has no
-line system, hence no cover (it shatters, landing in the `¬cover` branch). Axiom-clean. -/
+**Honest scope:** `hNeumaier` is faithful as a *sub-exponential-threshold* citation (Babai/Kivva); the *polynomial*
+version is the open rank-3 base case (route-doc §8). CGGP (`n^Ω(n^{2/3})` trivial-Aut SRGs, all WL-dim ≤ 4) is the
+positive anchor that the residue stays tame; row-4 (generic non-geometric) is where it bites — the probe reframe argues
+row 4 has no rigid line system, hence no cover (it shatters, landing in the `¬cover` branch). Axiom-clean. -/
 theorem reachesRigidOrCameron_viaNoConfusionCover {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B : Nat} (hB : 1 ≤ B)
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)

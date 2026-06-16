@@ -216,10 +216,13 @@ the route-doc **§4c build-order**:
   direction** `hNeumaier : (∃ T over-B, BigConfusionCover (X_T)) → IsLarge` (case-split: cover → IsLarge → primitive → G3
   → Cameron / imprimitive → `hImprim`; no cover → `…viaShattering`) + the non-vacuity counting
   `card_bigClasses_mul_ge_of_cover` (`cover ⟹ n ≤ #bigClasses·c`, the explicit near-pencil structure).
-  **The §4c build-order is COMPLETE, and the citation is sealed up.** Seal **`modulo {G3 (hClassify) + Neumaier
-  (hNeumaier) + hcatch + hImprim}` — each a single isolated literal external theorem** (the target shape for replacing
-  each with its Lean proof). Residual risk = row-4 faithfulness of `hNeumaier` (open research; probe reframe: row 4 has
-  no line system ⟹ no cover ⟹ shatters) — i.e. exactly **route 3, the honest floor (§5)**.
+  **The §4c build-order is COMPLETE, and the citation is sealed up.** Seal **`modulo {G3 (hClassify) + hNeumaier +
+  hcatch + hImprim}`**. **★ Faithfulness scoped (2026-06-16, route-doc §8):** `hNeumaier`'s faithful citation is **Babai's
+  SRG structure theorem (rank 3) + Kivva (rank 4), NOT "Neumaier"** ("geometric ⟹ large Aut" alone is false — CGGP), and
+  it is faithful **only at the sub-exponential largeness threshold**; the polynomial version is the open rank-3 base case
+  (this §5 route 2). So the seal is **sub-exponential-base** at its established citation thresholds; polynomial is
+  GI-adjacent open. Residual risk = `hNeumaier`'s row-4 faithfulness — i.e. exactly **route 3, the honest floor (§5)**.
+  Full citation map + what proving each takes: **route-doc §8**.
 
 **Read `chain-descent-a2-potential-route.md` STATUS + §4c first.** The probe (`A2MonovariantProbe.cs`, 2026-06-15)
 reframed the row-4 gap: the drop-obstruction is the **partial-geometry line system**, not the smallest-eigenvalue

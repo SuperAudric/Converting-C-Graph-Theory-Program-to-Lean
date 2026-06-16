@@ -67,11 +67,14 @@ factors the dichotomy `cover ⟹ Cameron` — the **Cameron step reuses the cano
 (∃ T over-B, BigConfusionCover (X_T)) → IsLarge` (case-split: cover → `IsLarge` → primitive → G3 → Cameron / imprimitive
 → `hImprim`; no cover → `…viaShattering`) + the non-vacuity counting `card_bigClasses_mul_ge_of_cover` (`cover ⟹ n ≤
 #bigClasses·c`, the explicit near-pencil structure). **The §4c build-order is COMPLETE (steps 1–5), and the citation is
-sealed up.** The whole seal stands **`modulo {G3 (hClassify) + Neumaier (hNeumaier) + hcatch + hImprim}` — each a single
-isolated literal external theorem** (the target shape for replacing each citation with its Lean proof). Open content
-sharpened from "prove `IndistinguishingHalves`" (open conjecture) to two established citations; residual risk =
-`hNeumaier`'s row-4 faithfulness (open research; the probe reframe says row 4 has no line system ⟹ no cover ⟹ shatters).
-The §CC.21 balanced-splitter defs are parked (left in place) as the 1-WL-cell model.
+sealed up.** The whole seal stands **`modulo {G3 (hClassify) + hNeumaier + hcatch + hImprim}`**. **★ Faithfulness scoped
+(2026-06-16, §8):** `hNeumaier`'s faithful citation is **Babai's SRG structure theorem (rank 3) + Kivva (rank 4), NOT
+"Neumaier"** (Neumaier is only the geometric-classification ingredient; "geometric ⟹ large Aut" alone is false — CGGP).
+It is faithful **only at the sub-exponential largeness threshold** (where G3 + Babai's individualization bound hold); at
+a *polynomial* threshold it is the **open rank-3 base case**. So the seal, at its established (sub-exp) citation
+thresholds, gives **sub-exponential-base** "reaches rigid or Cameron"; polynomial is GI-adjacent open. `hcatch`'s target
+is the `dimWL(X) ≤ dimWL(X_α)+1` exchange (CFI-1992 Thm 5.2); `hImprim` is project block-tower infra, not a citation. The
+full citation map + what proving each takes is **§8**. The §CC.21 balanced-splitter defs are parked as the 1-WL-cell model.
 
 ---
 
@@ -410,3 +413,68 @@ MOLS, which are geometric with smallest eigenvalue exactly `−g`, so sweeping `
   added the same way.
 - Evidence: `GraphCanonizationProject.Tests/A2MonovariantProbe.cs`; archived plan
   `Archive/ChainDescent/chain-descent-a2-monovariant-probe.md`.
+
+## 8. Sealing the citation — `hNeumaier` faithfulness + what proving it would take (2026-06-16)
+
+> **Why this section exists.** Step 5 carries `hNeumaier : (∃ T over-B, BigConfusionCover (X_T)) → IsLarge`. The
+> "seal up the citation" pass asked whether this is a *faithful literal* external theorem. **Verdict: it is — but
+> only at the sub-exponential largeness threshold, and it is NOT "Neumaier."** This pins what the citation actually
+> is, the genuine threshold ambiguity, and the work each resolution would take.
+
+### 8.1 The full map of what the seal carries (all four, with their citation targets)
+| Carried | What it is | Citation target / status |
+|---|---|---|
+| `hClassify` (G3) | large primitive ⟹ Cameron | **Babai 1981 / Sun–Wilmes 2015** — the project's canonical carry (sub-exp threshold). |
+| `hNeumaier` | cover ⟹ `IsLarge` | **Babai's SRG structure theorem (rank 3) + Kivva JCTB'23 (rank 4)** — §8.2 (NOT Neumaier alone). |
+| `hcatch` | `WarmTwinsAreFiberTwins` (1-WL↔2-WL) | **`dimWL(X) ≤ dimWL(X_α)+1`, Cai–Fürer–Immerman 1992 Thm 5.2** (= eq. (41) in Ponomarenko arXiv:2006.13592; Chen–Ponomarenko CC monograph §4.2). Citable or provable; *free* at n=16 (`warmTwinsAreFiberTwins_of_dominatorClosure`). |
+| `hImprim` (G2-A) | imprimitive ⟹ recovered | **Not a citation** — project block-tower infra (reduces to the primitive case via ≤ log n layers; machinery ~80% landed, recursion unbuilt). |
+
+### 8.2 What `hNeumaier` actually is (not Neumaier alone)
+`hNeumaier` reads *"a scheme whose extension resists discretization at a bounded base is large."* Its faithful
+citation is **not** Neumaier's theorem — Neumaier classifies geometric SRG *parameters* into partial geometries and
+says **nothing about Aut**. The honest chain is **Babai's SRG structure theorem** (cxt-scoping §4.2):
+> a primitive SRG (n ≥ 29) is *large-motion* (≥ n/8; small Aut — the residue) **or** a named geometric family
+> (triangular/Johnson `T(m)`, lattice/Hamming `L₂(m)`) of thickness `≥ √n`, hence **large Aut** → Cameron (G3);
+> rank-4 amorphic via **Kivva (JCTB'23)**.
+
+Neumaier's claw bound is only the *ingredient* that makes the named families geometric. **"geometric ⟹ large Aut"
+alone is false** — a generic partial geometry / the CGGP construction has trivial Aut. The "⟹ large Aut" comes from
+the *named families' thickness*, via Babai's structural dichotomy. The bridge the cover supplies (partly landed):
+`cover` ⟹ (`card_bigClasses_mul_ge_of_cover`) `≥ n/c` near-maximal confusion classes = a **rigid line system** ⟹
+the scheme is **not large-motion** ⟹ (Babai) a named family ⟹ large Aut. The first `⟹` (cover ⟹ ¬large-motion) is
+the genuinely-new bridge — spectral SRG theory linking "resists bounded-base individualization" to "small motion."
+
+### 8.3 The faithfulness verdict — threshold-bound (the genuine ambiguity)
+- **At the SUB-EXPONENTIAL largeness threshold** (`IsLarge` = `|Aut| > exp(Õ(n^{1/3}))`, where Babai/Sun–Wilmes G3
+  *and* Babai's individualization bound hold): `hNeumaier` is a **faithful CFSG-based citation**. Large-motion ⟹
+  base ≤ quasipoly ≤ B ⟹ no cover; so cover ⟹ named family ⟹ large. The seal then gives **sub-exponential-base**
+  "reaches rigid or Cameron."
+- **At a POLYNOMIAL threshold** (what GI ∈ P needs): `hNeumaier` is **not established**. A large-motion (small-Aut)
+  SRG could have base between poly and quasipoly — a cover while small-Aut — falsifying it. This is the **open rank-3
+  base case** (cxt-scoping §5 route 2): *"primitive large-motion non-conference SRG ⟹ b(X) = O(log n)."* **CGGP**
+  (arXiv:2312.00460: `n^Ω(n^{2/3})` trivial-Aut SRGs, all WL-dim ≤ 4) is the strongest positive evidence (small Aut →
+  bounded WL-dim for *that family*), but a universal theorem is unproven.
+
+So the **ambiguity is real and is exactly the sub-exp-vs-poly threshold** — the build-doc §1B(4) calibration caveat,
+now localized to `hNeumaier`. At the citable (sub-exp) threshold the seal is honest and faithful; the polynomial
+version's faithfulness *is* the open conjecture. **This also means the whole seal is sub-exponential, not polynomial,
+at the established citation thresholds** (G3 is itself sub-exp); polynomial canonisation needs the poly thresholds of
+*both* G3 and `hNeumaier`, which are GI-adjacent open.
+
+### 8.4 What proving `hNeumaier` would take
+1. **As a faithful citation (sub-exp; the realistic next "seal up the citation" step).** Carry **Babai's SRG
+   structure theorem** (rank 3) + **Kivva** (rank 4) as named hypotheses (the G3 pattern — they rest on CFSG, so
+   formalizing them from scratch is infeasible but citing them is legitimate). Then **prove the bridge**
+   `cover ⟹ ¬large-motion` — the new content: connect the `bigClasses` confusion-cover count to the graph's
+   motion / spectral gap (the cover's `≥ n/c` rigid lines force a small-support automorphism, i.e. ¬large-motion).
+   Bounded Lean work on SRG spectral theory. Outcome: `hNeumaier` becomes `{Babai-SRG-structure + Kivva + a proved
+   bridge}`; the seal is sub-exponential, `modulo {G3 + Babai-SRG + Kivva + CFI-exchange}` — every carry a literal
+   theorem, the user's "exactly citable" target reached for this leg.
+2. **As an unconditional (poly) theorem.** Prove the rank-3 base case — *"primitive small-Aut / large-motion SRG has
+   poly WL-dim / base."* **Open research** (resolving it is a chunk of GI ∈ P for SRGs); Babai's bound is quasipoly,
+   no portable poly proof exists. CGGP is the positive anchor; row-4 (generic non-geometric) is hardest. This is the
+   long-horizon goal, not a near-term build.
+
+**Recommendation.** Target (1): correctly attribute and factor `hNeumaier` into Babai's SRG structure theorem + Kivva
++ a *provable* `cover ⟹ ¬large-motion` bridge. It makes the citation honest (it is not "Neumaier"), isolates a real
+Lean target (the bridge), and matches the project's established sub-exponential scope. (2) is the open rank-3 math.
