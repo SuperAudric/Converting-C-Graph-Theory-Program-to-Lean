@@ -229,6 +229,14 @@ reframed the row-4 gap: the drop-obstruction is the **partial-geometry line syst
 magnitude (§4 there). The conditional-predicate floor is route 3, retained. Old probe plan archived:
 `Archive/ChainDescent/chain-descent-a2-monovariant-probe.md`.
 
+**▶ FRONTIER MOVED (2026-06-16) — the live work is now route-doc §8–§9, not §4c.** Citation adjustment Phases 1–2 landed
+(the faithful-direction capstone `reachesRigidOrCameron_viaSmallAutShatters`; §8.5). The `B(n)` research (§8.6) confirmed
+route 1/route 3's verdict: **polynomial is the OPEN rank-3 base case — no citation reaches it** (sub-exp `Õ(n^{1/3})` = Spielman
+is the citable floor). The poly side was decomposed into **five nodes by line-system structure (§9.0)**; the open crux is
+**node 4** (primitive non-geometric non-conference SRG), anchored by `reachesRigidOrCameron_viaNoCover` (node-4 ⟹ poly seal, no
+largeness citation). Best handle = the **multiplicity reframe (§9.6):** node 4 ⟺ confusion-cover multiplicity `L` bounded
+(computable). **NEXT = the `N_ρ`/multiplicity probe (route-doc §9.7).** This §5 route-2 (the rank-3 base case) = node 4.
+
 **Reading order for a fresh reader:** build doc STATUS → its §1A (why not GI∈P) / §1B (everything ⟹ `c(X_T)`) → THIS
 doc §0–§5 (the A2 target, evidence, and the route to the unconditional seal) → `CoherentConfig.lean §CC.10`–`§CC.19` (the
 δ′ engine + the A1 abundance substrate + the A2 monotonicity interface) → `chain-descent-a1-cc-substrate.md` only if the

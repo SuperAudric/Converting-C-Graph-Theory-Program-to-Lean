@@ -107,29 +107,37 @@ close it — is set out in
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
-> **★ CURRENT FRONTIER (2026-06-16) — read this first; the boxes below are older history.** The seal
-> `reachesRigidOrCameron` is assembled and axiom-clean, conditional **`modulo {G3 + hNeumaier + hcatch + hImprim}`**.
-> **A1 is DONE** (`CoherentConfig.lean §CC.11`–`§CC.19`); the **A2 potential-drop attack is COMPLETE (§4c build-order
-> steps 1–5, all axiom-clean):** the iteration engine + Stage-1b `c`-halving reduction (`§CC.20`), the G-mech kill lemma /
-> bound / halving wiring / `BigConfusionCover` obstruction (`§CC.22`), and the **G-cite capstone
-> `reachesRigidOrCameron_viaNoConfusionCover`** (`CascadeAffine.lean §S-gate2`) which factors `cover ⟹ Cameron`: the
-> Cameron step reuses the canonical **G3** (`exhaustiveObstruction_scheme`, no new carry), the only new citation is
-> **`hNeumaier : (∃ T over-B, BigConfusionCover (X_T)) → IsLarge`** (case-split: cover → IsLarge → primitive → G3 →
-> Cameron / imprimitive → recovered; no cover → `…viaShattering` recovered), plus the non-vacuity
-> `card_bigClasses_mul_ge_of_cover` (`cover ⟹ ≥n/c near-maximal confusion classes`).
-> **★ Citation faithfulness scoped (2026-06-16, route-doc §8):** `hNeumaier`'s faithful citation is **Babai's SRG
-> structure theorem (rank 3) + Kivva (rank 4), NOT "Neumaier"** ("geometric ⟹ large Aut" alone is *false* — CGGP gives
-> geometric-ish SRGs with trivial Aut), and it is faithful **only at the sub-exponential largeness threshold** (polynomial
-> = the open rank-3 base case). So the seal is **sub-exponential-base** at its established citation thresholds; polynomial
-> is GI-adjacent open. **NEXT = Step 1 (route-doc §8.5):** factor `hNeumaier` into carried Babai-SRG-structure + Kivva +
-> a *provable* `cover ⟹ b(X) > B` bridge (gating sub-task: pin the exact Babai SRG individualization bound). `hcatch` →
-> the `dimWL(X) ≤ dimWL(X_α)+1` exchange (CFI-1992); `hImprim` → project block-tower infra (not a citation). **Live frontier doc:
-> [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md)** — read its STATUS + **§4c** (the
-> discharge build-order) first; the honest "row 4" gap is now reframed as the *partial-geometry line system* (not the
-> eigenvalue magnitude). Evidence: the monovariant probe (`A2MonovariantProbe.cs`). Forward payoff: closing it also
-> yields the poly rigid-residue canonizer ([`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md)).
-> Substrate/build home: [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md);
-> A2 scoping: [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md). The boxes below predate all of this.
+> **★ CURRENT FRONTIER (2026-06-16, handoff) — read this first; the boxes below are older history.** The seal
+> `reachesRigidOrCameron` is assembled and axiom-clean. **A1 is DONE** (`CoherentConfig.lean §CC.11`–`§CC.19`); the **A2
+> §4c build-order is COMPLETE** (steps 1–5: kill lemma / bound / halving / `BigConfusionCover` obstruction, `§CC.22`).
+> Three things landed *this session* on top of that — **read the live frontier doc
+> [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md) STATUS + §8 + §9 first:**
+> 1. **Citation adjustment, Phases 1–2 (route-doc §8.5):** the faithful-direction capstone
+>    **`reachesRigidOrCameron_viaSmallAutShatters`** carries `hSmallAutDiscretizes : ¬IsLarge → ∀ over-`B`, ¬BigConfusionCover`
+>    (the *literature-true* Babai/Kivva direction) instead of the CGGP-false `hNeumaier : cover ⟹ large`; fed by the
+>    citation-free bridge **`not_bigConfusionCover_of_allSingletonFiber`** (`complete ⟹ ¬cover`, `§CC.22`). Old
+>    `…viaNoConfusionCover` kept, superseded.
+> 2. **Research pass DONE (route-doc §8.6):** `B(n)` is a **threshold ladder** — *polynomial = OPEN* (the rank-3 base case,
+>    not even conjectured); *quasipoly* = Babai/Kivva motion (`O(log n)` group base, WL-realization open); *sub-exp `Õ(n^{1/3})`*
+>    = Spielman (citable). **No citation makes the seal polynomial.** Corrected cites: Babai **ITCS 2014** (not STOC), motion
+>    **n/8**; Kivva **JCTB 164 (2024)**, a *motion* bound not WL-dim; CGGP = **Cai-Guo-Gavrilyuk-Ponomarenko**. **Eberhard
+>    "Hamming sandwiches" (arXiv:2203.03687) DISMISSED** — non-Schurian, can't touch the schurian seal.
+> 3. **★ THE LIVE FRONTIER = NODE 4 (route-doc §9).** The poly side decomposes by *line-system structure* into five nodes
+>    (§9.0); four are carved/foreseeable, the open crux is **node 4 = a primitive, non-geometric, non-conference SRG**.
+>    Anchor **`reachesRigidOrCameron_viaNoCover`** (axiom-clean) proves **node 4 (`hShatter` = `∀ over-`B`, ¬BigConfusionCover`)
+>    ⟹ polynomial seal, NO largeness citation.** Node 4's best handle is the **multiplicity reframe (§9.6, user's idea):** node
+>    4 ⟺ the confusion-cover *multiplicity* `L = (Σ_{|C|>ρc}|C|)/n` is bounded (`O(1)`) — a *computable* quantity (high `L` =
+>    thick line system = Cameron, carved; low `L` = poly via a `1+L`-pin cleanup).
+>
+> **▶ PICK UP HERE — NEXT STEP: implement + run the `N_ρ`/multiplicity probe (route-doc §9.7).** Measure `N_ρ` (distinct big
+> confusion sets), `L_ρ` (load/multiplicity), `minMult_ρ` (cleanup cost), mass-weighted `Σ|C|²` on the residue (Shrikhande,
+> Clebsch, Chang) vs carved families (rook, Johnson) across threshold `ρ` and base size. **Test:** residue `L_ρ = O(1)` at
+> constant `ρ<1` while geometric families go thick. Extends `A2MonovariantProbe.cs`. If confirmed → the Lean engine generalizes
+> from `1/2`-halving to the `(1+L)`-cleanup form, and node 4 has a measurable provable handle. `hcatch` → CFI-1992 exchange;
+> `hImprim` → block-tower infra (not a citation). Substrate/build home:
+> [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); A2 scoping:
+> [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md); forward payoff (post-node-4):
+> [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md). The boxes below predate all of this.
 >
 > **UPDATE (2026-06-11) — the live frontier moved; the build home is now
 > [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md)** (see the boxed

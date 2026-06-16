@@ -81,8 +81,18 @@ full citation map + what proving each takes is **§8**. The §CC.21 balanced-spl
 capstone `reachesRigidOrCameron_viaSmallAutShatters` now carries `hSmallAutDiscretizes : ¬IsLarge → ∀ over-`B` base,
 ¬BigConfusionCover` (= "small Aut ⟹ shatters", the literature-true Babai/Kivva direction) instead of the CGGP-false
 `hNeumaier : cover ⟹ large`; fed by the citation-free bridge `not_bigConfusionCover_of_allSingletonFiber` (`complete ⟹
-¬cover`, `§CC.22`). `…viaNoConfusionCover` (the `hNeumaier` form) kept, superseded. **Remaining = Phase 3:** carry the
-named `hBabaiBase` citation + lift the bridge to `cover ⟹ b(X)>B`, gated on pinning Babai's individualization bound `B(n)`.
+¬cover`, `§CC.22`). `…viaNoConfusionCover` (the `hNeumaier` form) kept, superseded. (Phase 3 — carry named `hBabaiBase` +
+lift bridge to `cover ⟹ b(X)>B` — is now *deprioritized*: §8.6's research showed it only yields a sub-exp citation, not poly.)
+**★★ RESEARCH PASS DONE + LIVE FRONTIER MOVED TO NODE 4 (2026-06-16; §8.6, §9).** The `B(n)` research (§8.6) pinned the
+**threshold ladder**: polynomial is OPEN (rank-3 base case, not even conjectured), sub-exp `Õ(n^{1/3})` = Spielman (citable);
+**no citation makes the seal polynomial.** So the poly side was decomposed by line-system structure into **five nodes (§9.0)** —
+four carved/foreseeable, the open crux is **node 4** (a primitive, non-geometric, non-conference SRG). Anchor
+**`reachesRigidOrCameron_viaNoCover`** (axiom-clean): **node 4 (`hShatter`) ⟹ polynomial seal, no largeness citation.** Best
+handle = the **multiplicity reframe (§9.6):** node 4 ⟺ confusion-cover multiplicity `L=(Σ_{|C|>ρc}|C|)/n` bounded (computable;
+high `L`=thick=Cameron carved, low `L`=poly via `1+L`-cleanup). **▶ PICK UP HERE — NEXT = the `N_ρ`/multiplicity PROBE (§9.7):**
+measure `N_ρ`/`L_ρ`/`minMult_ρ`/mass-`Σ|C|²` on residue vs rook/Johnson across `ρ`+base; test "residue `L_ρ=O(1)` at constant
+`ρ<1` while geometric families thick". Extends `A2MonovariantProbe.cs`. **Read §9 (esp. §9.0 nodes, §9.6 multiplicity, §9.7
+probe) to continue.**
 
 ---
 
