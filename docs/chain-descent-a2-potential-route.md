@@ -123,13 +123,14 @@ A2's open content is re-expressed as **"the residue's confusion-cover load `L`/`
 quantity the `A2MonovariantProbe` measures, not the opaque "a set halves `c`". The `M=1` case is the landed cover route
 (`indistinguishingHalves_of_not_bigConfusionCover`); this is its bounded-multiplicity generalization.
 
-**▶ PICK UP HERE — NEXT = PART 2 (§9.8.4): DISCHARGE `BoundedConfusionLoad` (= bound the load) for the residue.** Now stated on the
-computable load: show a size-`≤M` set hits every big (`>c/2`) confusion set per over-`B` base. **PV-sparse caveat RESOLVED (§9.5a): PV
-sparse is a DEAD lead — vacuous on the bare scheme, cross-fiber-wall-blocked on `X_T`; dropped.** Sub-class progress instead bounds the
-load/`minMult` *directly* on `X_T` with the **ported** CC counting toolkit (§CC.12–17: `sum_pu_le`, `pu_eq_sum`, `valency_mul_interNum`,
-`fiberSize_mul_valency`, within-fiber smax symmetry) for a specific intersection-number / bounded-fiber-degree regime — citation-free,
-avoids the blocked homogeneous PV connectivity. Then the generic primitive-small-Aut non-geometric core (the rank-3 base case, direct).
-Fallback = carry the load predicate. **Read §9.5a + §9.7.1–§9.7.2 + §9.8 to continue.**
+**▶ PICK UP HERE — PART 2: the easy sub-classes are EXHAUSTED (resolved 2026-06-16). Two genuine options remain.** Both
+counting-based sub-class leads are now closed: **PV-sparse is dead (§9.5a)** (vacuous on the bare scheme, cross-fiber-wall-blocked on
+`X_T`) and **raw `sum_pu_le` counting is trivial (§9.5b)** (`mult ≤ 2·rank·k²` but `rank·k ≥ n`; the structured forced-triangle case is
+already landed as δ′/`RainbowRigid`). Beyond the landed δ′ regime, `BoundedConfusionLoad` ≡ the **thin-cover/low-`L` geometric core**
+(§9.6). So the remaining moves are exactly: **(i)** the direct geometric argument — a primitive *non-geometric* residue has a thin cover
+(the hard heart, §9.3-2b / node 4, no current technique); or **(ii)** carry `BoundedConfusionLoad` / `BoundedConfusionMultiplicity` as the
+named predicate (cxt-scoping route 3, the honest floor — wiring already landed via `…viaBoundedMultiplicity`). **Read §9.5a + §9.5b +
+§9.6 + §9.8 to continue.**
 
 ---
 
@@ -786,9 +787,37 @@ Its own docstring concedes *"the dense amorphic residue needs Thm 4.1's full str
 
 **Verdict.** Drop PV sparse from the part-2 sub-class plan. The one PV-flavoured handle that survives on `X_T` is the
 *within-fiber* smax localization (§CC.17) — a per-fiber connectivity argument — but that is a research direction, not a
-quick wire. Concrete sub-class progress should instead bound the **load / `minMult`** (`BoundedConfusionLoad`, §CC.22b)
-directly with the *ported* CC counting toolkit (§CC.12–17), which is available on `X_T` and avoids the blocked
-connectivity entirely.
+quick wire. The natural next idea — bound the load/`minMult` directly with the *ported* CC counting toolkit (§CC.12–17)
+— was then scoped: **§9.5b shows raw counting is also trivial.** The honest conclusion is in §9.5b.
+
+### 9.5b Scoping the counting redirect — RESOLVED (2026-06-16): raw counting is trivial; the tractable structured case is already landed
+
+§9.5a redirected sub-class effort to bounding the load/`minMult` directly with the ported CC counting toolkit
+(`sum_pu_le` et al., §CC.12–17). **Scoping verdict: raw counting yields only a trivial bound — no new tractable load
+sub-class exists.** The chain, source-verified against `sum_pu_le` (`Σ_{δ} pu(α,u,δ) ≤ k(k−1)·c`, per non-reflexive
+relation, no rank factor):
+
+- **The multiplicity bound it gives is trivial.** Summing `sum_pu_le` over the `≤ rank` non-reflexive relations `u`
+  (using `pu(z,u,δ)` = `u`-neighbour pairs of `z` confused by `δ`, and `z∈C(β,γ) ⟺ relOf z β = relOf z γ`) gives, for
+  every `z`, `Σ_{(β,γ): β≠γ, z∈C(β,γ)} |C(β,γ)| ≤ rank(X_T)·k(X_T)(k(X_T)−1)·c(X_T)`. Each big pair through `z`
+  contributes `>c/2`, so `mult(z) = #{big sets ∋ z} < 2·rank(X_T)·k(X_T)(k(X_T)−1)`. **But `rank·k ≥ n`** (from any
+  vertex the `n` targets split into `≤ rank` classes of size `≤ k`), so `2·rank·k² ≥ 2nk ≥ 2n` — never beats the trivial
+  `mult ≤ n`. This is §9.3-2b's obstruction, pinned at the load level: the `rank` factor (≥ `n/k`) is fatal.
+- **The sharp per-relation version is vacuous for SRGs.** `minMult ≤ Σ_{r: c(r)>c/2} valency(r)·c(r)/n` (each relation's
+  confusion is constant `= c(r)`, `indistinguishingNumberOf_eq_card`). Bounded only if `Σ_{big r} valency(r) = O(n/c)` —
+  but an SRG's big relations are adjacency / non-adjacency with valency `Ω(n)`, forcing `c = O(1)` (already near-discrete).
+  No primitive-SRG/amorphic sub-class.
+- **The one structured tractable case is already discharged.** The bounded/forced-intersection-number regime
+  (`c^i_{jk} = 1` triangles) is the δ′/`RainbowRigid` family — landed (`dominatorReachable_of_rainbowRank`, `clebschZ4`),
+  independent of the load argument. Counting adds nothing on top of it.
+
+**Net.** Beyond the already-landed forced-triangle (δ′/rainbow) regime, `BoundedConfusionLoad B (1+minMult)` reduces to
+the **thin-cover / low-`L` condition** (`#distinct big sets = O(n/c)`, equivalently `minMult = O(1)`) — which is exactly
+the §9.6 geometric open core, NOT a raw-counting consequence. **So part 2 has no remaining low-hanging counting
+sub-class.** The genuine options are now just two: **(i)** the direct geometric argument that a primitive *non-geometric*
+residue has a thin cover (the hard heart, §9.3-2b / node 4), or **(ii)** carry `BoundedConfusionLoad`/`BoundedConfusionMultiplicity`
+as the named predicate (cxt-scoping route 3, the honest floor). (Optional artifact: the trivial `mult ≤ 2·rank·k²` bound
+could be formalized to turn §9.3-2b from a note into a theorem — low value, demarcates where counting stops.)
 
 ### 9.6 The multiplicity reframe — from "halve the max" to a global mass argument (the better-posed handle)
 
@@ -979,14 +1008,108 @@ isolates. It is **not blocked**; it is **unproven**. Polynomial-unconditional-mo
    (`CascadeAffine §S-gate2`). **"Residue cascades (bounded `M`) ⟹ polynomial seal" is now a theorem** — the entire open
    content collapses to the single discharge `BoundedConfusionMultiplicity` (strictly weaker than `IndistinguishingHalves`,
    its `M=1` case). Seal `modulo {G3 + BoundedConfusionMultiplicity + hcatch + hImprim}`.
-2. **Attack the cascade discharge — first the sub-classes, then the generic core.** ~~Re-activate PV sparse~~ (**dropped
-   — §9.5a:** vacuous on the bare residue, cross-fiber-wall-blocked on `X_T`); instead bound the load/`minMult` directly with
-   the ported CC counting toolkit (§CC.12–17) for bounded-fiber-degree / intersection-number regimes; each proved sub-class
-   shrinks the open core. The generic primitive-small-Aut non-geometric residue is the hard heart — the genuine open research,
-   attacked directly (no citation, the route's purpose).
+2. **Attack the cascade discharge.** ~~Sub-classes first~~ — **both counting sub-class leads are now closed (§9.5a PV-sparse
+   dead; §9.5b raw counting trivial, the forced-triangle case already landed as δ′/`RainbowRigid`).** What remains is the
+   generic primitive-small-Aut non-geometric residue = the thin-cover/low-`L` geometric core (§9.6) — the hard heart, attacked
+   directly (no citation, the route's purpose), with no current technique.
 3. **Honest floor if the generic core resists:** carry it as ONE named predicate (`BoundedConfusionMultiplicity` on the
    residue = the rank-3 base case), seal `modulo {G3 + hcatch + that predicate}` (cxt-scoping route 3). This is the
    *fallback*, not the target — the target (step 2) is the direct proof.
 This converts "node 4" into {one proved engine + a shrinking carved frontier + the directly-attacked generic core}.
 **Polynomial-unconditional is gated on proving the cascade theorem — open and hard, but unbarred; it is the route's
 intended endpoint, not a wall (cxt-scoping risk (a): a falsifier would change the seal statement; 0 found).**
+
+## 9.9 Option (i) — the direct thin-cover attack on node 4 (research plan, 2026-06-16)
+
+> **What this is.** With both counting sub-class leads closed (§9.5a/§9.5b), the only path to *polynomial-unconditional*
+> is the **direct geometric argument**: prove `¬ BigConfusionCover (X_T)` for the primitive non-Cameron residue at a
+> bounded base, feeding `reachesRigidOrCameron_viaNoCover`. This section is the plan — the precise target, the
+> decomposition, the gaps, the approaches, and the ranked near-term actions. Honest scope: node 4 is open research; this
+> lays out where the provable scaffolding ends and the genuine frontier begins.
+
+### 9.9.1 The target and the key reframing (resolves the CGGP block)
+
+**Target (Lean):** for the residue at every over-`B` base `T`, `¬ BigConfusionCover (pointExtension X T)` — i.e. some
+vertex `v` lies outside every confusion set of size `> c(X_T)/2`. Then `reachesRigidOrCameron_viaNoCover` (landed,
+axiom-clean) gives the **polynomial** seal `modulo {G3 + hcatch + hImprim}`, G3 unused on the shattering path.
+
+**The reframing that dissolves the earlier CGGP objection.** Recall the apparent wall (route-doc §8.2): "geometric ⟹
+large Aut" is FALSE — the Fon-Der-Flaass / CGGP family is geometric (partial geometry from an affine plane) yet has
+*trivial* Aut (non-Cameron). That looked fatal to "non-Cameron ⟹ no line system." **It is not, because the target is
+the EXTENSION `X_T`, not the bare scheme `S`.** CGGP's own theorem says those geometric small-Aut SRGs have `base ≤ 2`
+(`WL-dim ≤ 4`): individualizing 2 points + WL refinement **discretizes** them — so their line system *does not survive*
+to `X_T`, and `¬ BigConfusionCover (X_T)` holds for them too. The bare-scheme geometry is a red herring; the question is
+whether a confusion line system **survives individualization to a bounded base**. So:
+
+> **Unified claim.** A primitive non-Cameron SRG has *no big-confusion cover surviving to a bounded base* — either because
+> it has no line system (genuinely non-geometric, node 4) or because the line system **collapses under individualization**
+> (geometric small-Aut, à la CGGP forced triangles, node 2). The collapse mechanism is the δ′ / forced-triangle engine.
+
+This unifies the thin-cover route (option i) with the landed δ′/`RainbowRigid` route: a big confusion set survives
+individualization *only if* it is rigid against forced triangles, which the probe (§9.7.2) + CGGP say happens only for
+the **thick** (large-Aut/Cameron) line systems.
+
+### 9.9.2 The decomposition (contrapositive: a persistent cover forces a contradiction)
+
+Assume `BigConfusionCover (X_T)` persists at every base `T` with `|T| ≤ b` (a *stable cover* up to depth `b`). Derive a
+contradiction with "primitive, non-Cameron, non-conference":
+
+- **D1 — persistence ⟹ a rigid invariant line system.** The big confusion sets are `Aut(X_T)`-equivariant
+  (`C(gα,gβ) = g·C(α,β)`); a cover stable across the stabiliser chain is an `Aut`-invariant family of near-maximal
+  "confusion lines" (`card_bigClasses_mul_ge_of_cover`: `≥ n/c` of them). *[Provable scaffold — new Lean, from
+  `IsSchemeAut.relOfPair_eq` + `dominatorReachable_map`; the foundation D2/D3 attach to.]*
+- **D2 — rigid line system ⟹ a partial geometry on `S`.** The stable confusion lines organise into a partial-geometry /
+  spread (grand cliques) on the bare scheme. *[The extraction; genuinely novel combinatorics — the probe found covers
+  intrinsically LOOSE (§9.7.1), so the bet is that the **stable** (persistent-across-bases) sub-covers are regular where
+  arbitrary ones are not. This is the tractable-novel piece worth attempting.]*
+- **D3 — partial geometry on a primitive SRG ⟹ Cameron OR collapse.** A partial geometry is **thick** (grand cliques of
+  size `→∞` ⟹ Johnson/Hamming ⟹ Cameron, carved by **G3** — contradicts non-Cameron) **or thin** (bounded thickness ⟹
+  the affine-plane / BCN forced-triangle mechanism discretises at base `≤ O(1)`, so the cover does **not** persist —
+  contradicts D1). *[Thick→Cameron = citable G3. Thin→collapse = CGGP — proven for the affine/FDF family, open in general.]*
+
+The contradiction: persistence (D1) forces a line system (D2) that is either Cameron (excluded) or collapses
+(contradicting persistence). So no stable cover exists ⟹ at some base `≤ b`, `¬ BigConfusionCover` ⟹ (cascade engine)
+polynomial.
+
+### 9.9.3 The gaps (where provable scaffolding ends)
+
+- **G-equivariance (D1):** confusion-set / `bigClasses` equivariance + stability across the stabiliser chain. *Provable,
+  low-risk, foundational; not yet in Lean.*
+- **G-extract (D2):** loose stable cover ⟹ clean partial geometry. *The novel combinatorial heart; tractable-uncertain.
+  The bet (stable ⟹ regular) is testable on the probe data before committing.*
+- **G-thin (D3-thin):** thin partial geometry on a primitive non-Cameron SRG ⟹ forced-triangle collapse at bounded base.
+  *The genuine open frontier (node 4 ∩ the affine-classification gap). CGGP gives the affine instance; no uniform proof.*
+- **G-construct:** no parametric non-geometric residue family exists (§5 F2) ⟹ the row-4 case cannot be scale-probed.
+
+### 9.9.4 Approaches
+
+1. **Native forced-triangle / rainbow (the project's lane, best Lean-fit).** Show "thin or no line system ⟹ a *rainbow
+   rank* from a bounded base," feeding the landed `dominatorReachable_of_rainbowRank`. Connects D3 directly to the
+   `clebschZ4` machinery; the open piece is the *uniform* rank (clebsch has only a probe-extracted one). This is the most
+   portable attack and the one that reuses the most landed infrastructure.
+2. **Node-2 buildout (the citable rung).** Generalise `clebschZ4_closure` from sporadic `n=16` to the **affine / FDF
+   family** via `dominatorReachable_of_rainbowRank` — formalises CGGP's `base ≤ 2 ⟹ WL-dim ≤ 4` (node 2). *Discharges a
+   real sub-class, shrinking the seal to node 4.* Concrete, medium risk, real progress — but a rung, not the crux.
+3. **Spectral / Neumaier (understanding only, NOT Lean-portable).** The smallest-eigenvalue structure (Neumaier
+   geometricity, the partial-geometry parameters) to guide the combinatorial D2/D3 argument and the predicate — kept
+   off the formal path (no spectral theory in Lean).
+4. **Probe the row-4 cell.** Build sporadic non-geometric residues (Paulus `(25,12,5,6)`, the `(26,10,3,4)` family) and
+   measure cover/`minMult`/rainbow-rank survival — de-risks the unified claim and sharpens the predicate where there is
+   no scalable data.
+
+### 9.9.5 Ranked near-term actions
+
+1. **[provable, foundational] G-equivariance (D1).** Land confusion-set / `bigClasses` `Aut`-equivariance + stability
+   (from `IsSchemeAut.relOfPair_eq`). The scaffold every structural argument needs; sharpens the predicate; reusable.
+   *Recommended first step.*
+2. **[provable, real rung] Node-2 buildout (approach 2).** Extend `clebschZ4` to the affine family — visible
+   seal-shrinking, reuses `dominatorReachable_of_rainbowRank`.
+3. **[research, the heart] G-extract (D2) on the D1 scaffold.** Attempt the line-system extraction from a stable cover;
+   the genuine node-4 attack. Probe-test the "stable ⟹ regular" bet (action 4) first.
+4. **[de-risk] Probe row-4 sporadics (approach 4).**
+
+**Honest verdict.** D1 is provable scaffolding; node-2 (D3-thin for affine) is a citable rung that shrinks the seal;
+**G-extract (D2) + G-thin (D3 general) are the open heart of node 4 — no current technique, the GI-adjacent frontier.**
+The plan makes node 4 *attackable in pieces* (scaffold → rung → extraction) rather than monolithic, and pins exactly
+which piece is the irreducible research gap. If D2/D3-general resist, the floor is cxt-scoping route 3 (carry the
+predicate) — but the target is the direct proof.
