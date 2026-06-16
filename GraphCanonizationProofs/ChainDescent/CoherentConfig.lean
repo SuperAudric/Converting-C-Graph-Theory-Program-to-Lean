@@ -2003,6 +2003,98 @@ theorem potentialDrops_of_indistinguishingHalves {B : Nat}
     _ ≤ ((pointExtension X T).maxValency - 1) * (pointExtension X T).indistinguishingNumber :=
         Nat.mul_le_mul (by omega) hc
 
+/-! ### §CC.20b — the bounded-cleanup (cascade-rate) engine (route §9.8 part 1)
+
+`IndistinguishingHalves`/`exists_potential_descent` require a *single* vertex to halve the potential. The
+multiplicity reframe (`chain-descent-a2-potential-route.md` §9.6) replaces that with a **bounded cleanup**: pin the
+least-covered vertex and clean up the `≤ M` big confusion sets it lies in — a *set* `S` of size `≤ M` that halves
+`c`. This sub-section generalizes the engine to set-steps: `BoundedConfusionMultiplicity B M ⟹` a base `T₀` of size
+`O(M·log n)`. It makes **"the residue cascades (bounded multiplicity) ⟹ polynomial base"** a theorem, collapsing
+A2's entire open content to the single discharge "the residue has bounded confusion multiplicity." The `M = 1`
+single-element case recovers §CC.20. -/
+
+/-- **Abstract potential-descent engine, bounded-cardinality steps** (the cascade-rate generalization of
+`exists_potential_descent`). Each step may individualize a *set* `S` of size `≤ M` that halves `Φ`; reaches
+`Φ ≤ B` at a base `T₀ ⊇ S₀` of size `≤ S₀.card + M·r` with `2^r ≤ max 1 (Φ S₀)` — i.e. `O(M·log)` insertions.
+Pure `Finset`/`Nat` strong induction on a bound `N`; `M = 1` (singleton `S`) recovers `exists_potential_descent`. -/
+theorem exists_potential_descent_bounded {α : Type*} [DecidableEq α]
+    (Φ : Finset α → Nat) (B M : Nat) (hB : 1 ≤ B)
+    (hdrop : ∀ T : Finset α, B < Φ T → ∃ S : Finset α, S.card ≤ M ∧ 2 * Φ (T ∪ S) ≤ Φ T) :
+    ∀ (N : Nat) (S₀ : Finset α), Φ S₀ ≤ N →
+      ∃ T₀ : Finset α, S₀ ⊆ T₀ ∧ Φ T₀ ≤ B ∧
+        ∃ r : Nat, 2 ^ r ≤ max 1 (Φ S₀) ∧ T₀.card ≤ S₀.card + M * r := by
+  intro N
+  induction N with
+  | zero =>
+      intro S₀ hS
+      have h0 : Φ S₀ = 0 := Nat.le_zero.1 hS
+      exact ⟨S₀, Finset.Subset.refl _, by omega, 0,
+        (by simp only [pow_zero]; exact le_max_left 1 (Φ S₀)), by simp⟩
+  | succ N ih =>
+      intro S₀ hS
+      by_cases hbig : B < Φ S₀
+      · obtain ⟨S, hScard, hSdrop⟩ := hdrop S₀ hbig
+        have hins : Φ (S₀ ∪ S) ≤ N := by omega
+        obtain ⟨T₀, hsub, hT₀B, r, hpow, hcard⟩ := ih (S₀ ∪ S) hins
+        refine ⟨T₀, Finset.subset_union_left.trans hsub, hT₀B, r + 1, ?_, ?_⟩
+        · calc 2 ^ (r + 1) = 2 * 2 ^ r := by rw [pow_succ, Nat.mul_comm]
+            _ ≤ 2 * max 1 (Φ (S₀ ∪ S)) := Nat.mul_le_mul (le_refl 2) hpow
+            _ ≤ max 1 (Φ S₀) := by omega
+        · have hunion : (S₀ ∪ S).card ≤ S₀.card + M :=
+            le_trans (Finset.card_union_le S₀ S) (by omega)
+          calc T₀.card ≤ (S₀ ∪ S).card + M * r := hcard
+            _ ≤ (S₀.card + M) + M * r := by omega
+            _ = S₀.card + M * (r + 1) := by ring
+      · exact ⟨S₀, Finset.Subset.refl _, by omega, 0,
+          (by simp only [pow_zero]; exact le_max_left 1 (Φ S₀)), by simp⟩
+
+/-- **The bounded-cleanup confusion hypothesis (the cascade-rate form of `IndistinguishingHalves`).** From any
+over-`B` base, individualizing a *bounded set* `S` (`|S| ≤ M`) halves the indistinguishing number `c(X_T)`. The
+`M = 1` (singleton) case is implied by `IndistinguishingHalves`; the bounded form is what the multiplicity reframe
+(`chain-descent-a2-potential-route.md` §9.6) and the probe's `minMult` measure — pin the least-covered vertex,
+clean up the `≤ M` confusion sets it lies in. Carried as a hypothesis, never an `axiom`. -/
+def BoundedConfusionMultiplicity (B M : Nat) : Prop :=
+  ∀ T : Finset (Fin n), B < X.potential T →
+    ∃ S : Finset (Fin n), S.card ≤ M ∧
+      2 * (pointExtension X (T ∪ S)).indistinguishingNumber
+        ≤ (pointExtension X T).indistinguishingNumber
+
+/-- **The cascade-rate reduction — bounded `c`-cleanup ⟹ bounded potential-cleanup.** As
+`potentialDrops_of_indistinguishingHalves` but for a set `S`: `k(X_{T∪S})` rides free (`maxValency_mono` under
+`T ⊆ T ∪ S`), so halving `c` halves the potential `(k−1)c`. Axiom-clean. -/
+theorem potentialCleanup_of_boundedConfusionMultiplicity {B M : Nat}
+    (h : X.BoundedConfusionMultiplicity B M) :
+    ∀ T : Finset (Fin n), B < X.potential T →
+      ∃ S : Finset (Fin n), S.card ≤ M ∧ 2 * X.potential (T ∪ S) ≤ X.potential T := by
+  intro T hbig
+  obtain ⟨S, hScard, hc⟩ := h T hbig
+  refine ⟨S, hScard, ?_⟩
+  have hk : (pointExtension X (T ∪ S)).maxValency ≤ (pointExtension X T).maxValency :=
+    maxValency_mono (X.refines_pointExtension_of_subset Finset.subset_union_left)
+  show 2 * X.potential (T ∪ S) ≤ X.potential T
+  unfold potential
+  calc 2 * (((pointExtension X (T ∪ S)).maxValency - 1)
+              * (pointExtension X (T ∪ S)).indistinguishingNumber)
+      = ((pointExtension X (T ∪ S)).maxValency - 1)
+          * (2 * (pointExtension X (T ∪ S)).indistinguishingNumber) := by ring
+    _ ≤ ((pointExtension X T).maxValency - 1) * (pointExtension X T).indistinguishingNumber :=
+        Nat.mul_le_mul (by omega) hc
+
+/-- **A2's small-base deliverable from the cascade-rate hypothesis — "residue cascades ⟹ polynomial."** If `c`
+halves per round by individualizing `≤ M` vertices, there is a base `T₀` with `(k(X_{T₀})−1)·c(X_{T₀}) ≤ B` and
+`T₀.card ≤ M·r` for some `r` with `2^r ≤ max 1 (Φ ∅)` (so `|T₀| ≤ M·log₂(Φ ∅) = O(M·log n)`, since `Φ ∅ ≤ n²`).
+`M = O(1)`/`O(log n)` ⟹ polynomial base. Feeds `allSingletonFiber_of_card_gt_subset` (pad `T₀` to `|T| > B`).
+**Collapses A2's open content to the single discharge "the residue has bounded confusion multiplicity `M`".**
+Generalizes `exists_small_base_of_potentialDrops` (its `M = 1` case). Axiom-clean. -/
+theorem exists_small_base_of_boundedConfusionMultiplicity {B M : Nat} (hB : 1 ≤ B)
+    (h : X.BoundedConfusionMultiplicity B M) :
+    ∃ T₀ : Finset (Fin n), X.potential T₀ ≤ B ∧
+      ∃ r : Nat, 2 ^ r ≤ max 1 (X.potential ∅) ∧ T₀.card ≤ M * r := by
+  obtain ⟨T₀, _, hle, r, hpow, hcard⟩ :=
+    exists_potential_descent_bounded X.potential B M hB
+      (X.potentialCleanup_of_boundedConfusionMultiplicity h) (X.potential ∅) ∅ le_rfl
+  exact ⟨T₀, hle, r, hpow, by simpa using hcard⟩
+
 /-! ### §CC.21 — the geometric-obstruction framework (Stage 1b discharge, the CC-intrinsic core)
 
 The Stage-1b open content is `IndistinguishingHalves`: from any over-`B` base, some individualization halves the
@@ -2332,4 +2424,5 @@ theorem not_bigConfusionCover_of_allSingletonFiber
 end CoherentConfig
 
 end ChainDescent
+
 

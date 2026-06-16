@@ -899,10 +899,14 @@ The redirect is the **right reformulation** (computable, combinatorial, aligns t
 **and it is a legitimate direct attack on the polynomial bound** — the one piece of GI∈P-for-SRGs the project deliberately
 isolates. It is **not blocked**; it is **unproven**. Polynomial-unconditional-modulo-`{G3 + hcatch}` is reachable iff the
 §9.8.2-part-2 cascade theorem is proved — open, hard, but with positive evidence and no obstruction. Recommended order:
-1. **Build part 1 (the `(1+L)`/cascade-rate engine), unconditional.** Generalize `§CC.20` `IndistinguishingHalves`/
-   `exists_potential_descent` from `1/2`-halving to "bounded-cascade-rate": `BoundedConfusionMultiplicity B M ⟹
-   PotentialDrops`-style descent at base `O(M·log n)`. Citation-free; makes "residue cascades ⟹ polynomial" a theorem,
-   collapsing the *entire* open content to the single discharge "the residue cascades."
+1. **Part 1 (the cascade-rate engine), unconditional — ✅ LANDED (2026-06-16, `§CC.20b`, axiom-clean, build green).**
+   `exists_potential_descent_bounded` (bounded-cardinality-step generalization of `exists_potential_descent`, pure
+   `Finset`/`Nat`), `BoundedConfusionMultiplicity B M` (the cascade-rate hypothesis — a `≤ M`-set halves `c`),
+   `potentialCleanup_of_boundedConfusionMultiplicity` (`k` rides free), `exists_small_base_of_boundedConfusionMultiplicity`
+   (→ base `T₀`, `card ≤ M·r`, `2^r ≤ max 1 (Φ ∅)` = `O(M·log n)`); seal capstone `reachesRigidOrCameron_viaBoundedMultiplicity`
+   (`CascadeAffine §S-gate2`). **"Residue cascades (bounded `M`) ⟹ polynomial seal" is now a theorem** — the entire open
+   content collapses to the single discharge `BoundedConfusionMultiplicity` (strictly weaker than `IndistinguishingHalves`,
+   its `M=1` case). Seal `modulo {G3 + BoundedConfusionMultiplicity + hcatch + hImprim}`.
 2. **Attack the cascade discharge — first the sub-classes, then the generic core.** Re-activate PV sparse
    (`separatesAtBoundedBase_of_sparseSeparable`, low-degree) and seek further combinatorial cascade-rate bounds (bounded
    fiber-degree, intersection-number regimes); each proved sub-class shrinks the open core. The generic primitive-small-Aut

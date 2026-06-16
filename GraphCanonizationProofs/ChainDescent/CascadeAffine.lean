@@ -1151,6 +1151,41 @@ theorem reachesRigidOrCameron_viaShattering {IsLarge : Nat → Prop}
     ((S.toAssociationScheme.toCoherentConfig hne).potentialDrops_of_indistinguishingHalves hshatter)
     hcatch hImprim
 
+/-- **THE SEAL VIA BOUNDED CONFUSION MULTIPLICITY (route §9.8 part 1 — "the residue cascades ⟹ polynomial").**
+The same conclusion as `reachesRigidOrCameron_viaShattering`, but the single-vertex `c`-halving is replaced by the
+*cascade-rate* hypothesis `hmult : BoundedConfusionMultiplicity B M`: from any over-`B` base, individualizing a
+**bounded set of `≤ M` vertices** halves `c(X_T)` (pin the least-covered vertex, clean up the `≤ M` confusion sets
+it lies in — the multiplicity reframe, `docs/chain-descent-a2-potential-route.md` §9.6, measured by the probe's
+`minMult`). The `§CC.20b` engine (`exists_small_base_of_boundedConfusionMultiplicity`) turns it into a base `T₀`
+with potential `≤ B` of size `O(M·log n)`, padded to a base `T` as in `viaPotentialDrop`. **Strictly weaker
+hypothesis than `IndistinguishingHalves`** (which is the `M = 1`, single-vertex special case), so this is the
+sharpest open form: the seal stands `modulo {G3 + BoundedConfusionMultiplicity + hcatch + hImprim}`, and the entire
+open mathematical content is now the single discharge **"the residue has bounded confusion multiplicity `M`"** (the
+rank-3 base case, §9.8.2 part 2 — attacked directly, no citation). Axiom-clean. -/
+theorem reachesRigidOrCameron_viaBoundedMultiplicity {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B M : Nat} (hB : 1 ≤ B)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
+    (hmult : (S.toAssociationScheme.toCoherentConfig hne).BoundedConfusionMultiplicity B M)
+    (hcatch : ∀ T : Finset (Fin n),
+        WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ∃ bound : Nat,
+      ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+        ∨ IsCameronScheme n S := by
+  obtain ⟨T₀, hpot, _⟩ :=
+    (S.toAssociationScheme.toCoherentConfig hne).exists_small_base_of_boundedConfusionMultiplicity hB hmult
+  set m := max T₀.card (B + 1)
+  obtain ⟨T, hsub, hTcard⟩ :=
+    Finset.exists_superset_card_eq (s := T₀) (n := m) (le_max_left _ _)
+      (by rw [Fintype.card_fin]; exact max_le ((Finset.card_le_univ T₀).trans_eq (Fintype.card_fin n)) hroom)
+  have hBT : B < T.card := by rw [hTcard]; exact lt_of_lt_of_le (Nat.lt_succ_self B) (le_max_right _ _)
+  exact ⟨m, reachesRigidOrCameron_viaBoundedExtensionParams hClassify S hne hrank hsub hTcard.le
+    (lt_of_le_of_lt hpot hBT) (hcatch T) hImprim⟩
+
 /-- **THE SEAL VIA NO BIG-CONFUSION COVER (Stage 1b, G-cite — the two citations SEPARATED to isolated literals).**
 The A2 open content packaged so each carried citation is **one literal external theorem** (toward replacing each
 with its Lean proof). The cover dichotomy `cover ⟹ Cameron` is *factored* into its two genuine pieces, instead of
@@ -3619,3 +3654,4 @@ theorem reachesRigidOrCameron_clebsch_viaPersistentTwinBlock
   reachesRigidOrCameron_viaPersistentTwinBlock hClassify clebschScheme hne hrank hCrux hImprim
 
 end ChainDescent
+
