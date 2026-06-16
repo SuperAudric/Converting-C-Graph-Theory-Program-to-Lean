@@ -124,12 +124,12 @@ quantity the `A2MonovariantProbe` measures, not the opaque "a set halves `c`". T
 (`indistinguishingHalves_of_not_bigConfusionCover`); this is its bounded-multiplicity generalization.
 
 **▶ PICK UP HERE — NEXT = PART 2 (§9.8.4): DISCHARGE `BoundedConfusionLoad` (= bound the load) for the residue.** Now stated on the
-computable load: show a small set hits every big confusion set per over-`B` base. Sub-classes first (re-activate landed PV sparse
-`separatesAtBoundedBase_of_sparseSeparable` for low-degree — **but first pin its entry point**: it is a homogeneous-scheme result, the A1
-route used the crude abundance bound on `X_T`, so using sharp PV on the extension needs a CC port or applies near-vacuously to the bare
-residue; seek combinatorial `minMult`/load bounds for bounded-fiber-degree / intersection-number regimes — each shrinks the open core,
-citation-free), then the generic primitive-small-Aut non-geometric core (the rank-3 base case, direct). Fallback = carry the load
-predicate. **Read §9.7.1–§9.7.2 + §9.8 to continue.**
+computable load: show a size-`≤M` set hits every big (`>c/2`) confusion set per over-`B` base. **PV-sparse caveat RESOLVED (§9.5a): PV
+sparse is a DEAD lead — vacuous on the bare scheme, cross-fiber-wall-blocked on `X_T`; dropped.** Sub-class progress instead bounds the
+load/`minMult` *directly* on `X_T` with the **ported** CC counting toolkit (§CC.12–17: `sum_pu_le`, `pu_eq_sum`, `valency_mul_interNum`,
+`fiberSize_mul_valency`, within-fiber smax symmetry) for a specific intersection-number / bounded-fiber-degree regime — citation-free,
+avoids the blocked homogeneous PV connectivity. Then the generic primitive-small-Aut non-geometric core (the rank-3 base case, direct).
+Fallback = carry the load predicate. **Read §9.5a + §9.7.1–§9.7.2 + §9.8 to continue.**
 
 ---
 
@@ -730,10 +730,11 @@ citation** — the honest poly target.
 2. **Primitivity kills the extremal cover (2a)** — the tight/partition case is a system of imprimitivity. *Buildable*
    (a real lemma): formalize "Aut-invariant confusion partition ⟹ ¬IsPrimitive" via the landed block/`schemeEquiv`
    correspondence (`isBlock_schemeEquiv`, `isPreprimitive_iff_isPrimitive`). Shrinks node 4 to non-tight covers.
-3. **The landed-but-UNUSED PV connectivity machinery closes the SPARSE sub-case.** `separatesAtBoundedBase_of_sparseSeparable`
-   (Separability.lean / `§S-bridge`): `2c(k−1) < n ∧ k≥2 ⟹ b(X) ≤ 2`. For a **low-degree** residue (small `k`),
-   `2c(X_T)(k−1) < n` holds at a bounded base ⟹ b≤2 directly, *no cover argument*. The **dense** (high-`k`) residue is
-   the residual (there `2c(k−1)<n` ≈ discreteness, no free lunch). Re-activating this PV machinery is a concrete leg.
+3. **~~PV connectivity closes the SPARSE sub-case~~ — DEAD LEAD (resolved 2026-06-16, see §9.5a).** The hoped-for
+   "low-degree residue" sub-case via `separatesAtBoundedBase_of_sparseSeparable` (`2c(k−1)<n ⟹ b≤2`) **does not exist**:
+   the residue is dense (`k=maxValency=Ω(n)`, `c=Ω(n)` on every primitive SRG/amorphic ⟹ `2c(k−1)=Ω(n²)≫n`, vacuous on the
+   bare scheme), and on the extension `X_T` — where the inequality *does* hold — the homogeneous PV Thm 3.1 is proven
+   **blocked at the cross-fiber wall** (§CC.17). Do NOT re-activate PV sparse for the residue. Full verdict + evidence: §9.5a.
 4. **The intersection-number coherence toolkit** (`fiberSize_mul_valency`, `valency_mul_interNum`, `sum_pu_le`,
    `interNum_eq_one_of_forcedUnique`, `RainbowRigid`/`dominatorReachable_of_rainbowRank`) — the project's lane for any
    *direct* counting/forced-triangle argument on the cover. (But §9.3-2b: simple double-counting is insufficient.)
@@ -750,10 +751,44 @@ and open.** But it is now a *single sharp predicate* (`hShatter`) with two carve
 Buildable sub-targets, in order of tractability:
 1. **(2a) Primitivity kills the tight cover** — formalize "Aut-invariant confusion partition ⟹ ¬primitive". Real lemma,
    reuses landed block machinery; carves the extremal case. *Low-medium risk.*
-2. **(handle 3) Re-activate PV for the sparse residue** — wire `separatesAtBoundedBase_of_sparseSeparable` to the
-   low-degree residue; closes node 4 there. *Low risk, partial coverage.*
+2. **~~(handle 3) Re-activate PV for the sparse residue~~ — DROPPED (resolved 2026-06-16, §9.5a).** No low-degree
+   primitive-SRG sub-case exists for PV sparse to bite (vacuous on the bare scheme; wall-blocked on `X_T`). Replaced by:
+   bound the load/`minMult` *directly* on `X_T` with the **ported** CC counting toolkit (§CC.12–17: `sum_pu_le`,
+   `pu_eq_sum`, `valency_mul_interNum`, `fiberSize_mul_valency`, within-fiber smax symmetry) for a specific
+   intersection-number / bounded-fiber-degree regime — NOT through the (blocked) homogeneous PV connectivity.
 3. **(2b) The dense loose-cover heart** — the genuine open research: show an overlapping near-maximal confusion cover
    forces a structure (partial geometry) a primitive non-geometric scheme lacks. *No current technique; the frontier.*
+
+### 9.5a PV-sparse caveat — RESOLVED (2026-06-16): it is a dead lead for the residue; drop it
+
+The part-2 plan listed "re-activate PV sparse `separatesAtBoundedBase_of_sparseSeparable` for the low-degree residue" as
+a cheap sub-class. Investigation (source-verified) shows **it is not viable** — both at the bare scheme and the
+extension. Recorded here so no effort is spent on it.
+
+**The consumer** (`CascadeAffine.separatesAtBoundedBase_of_sparseSeparable`, CascadeAffine.lean:402) needs a
+**homogeneous** `SchurianScheme` with `SparseSeparable := 2·c·(k−1) < n` (`c = indistinguishingNumber`, `k = maxValency`).
+Its own docstring concedes *"the dense amorphic residue needs Thm 4.1's full strength."*
+
+- **Bare scheme — vacuous.** A primitive SRG`(n,d,λ,μ)` has relation valencies `{1, d, n−1−d}`, so `k = maxValency =
+  max(d, n−1−d) = Ω(n)`; rank-4 amorphic relations are `~n/rank`. And `c = Ω(n)` (most γ fail to distinguish a pair).
+  So `2c(k−1) = Ω(n²) ≫ n` — `SparseSeparable` fails on every primitive SRG/amorphic. Checked even on Clebsch
+  (`k=5, c=4, n=16`: `2·4·4 = 32 > 16`). PV sparse fires only when `c` AND `k` are *both* small — a genuinely sparse CC,
+  which a dense primitive SRG never is.
+- **Extension `X_T` — proven blocked.** The inequality `2·c(X_T)·(k(X_T)−1) < n` *does* hold at a bounded base (M1:
+  `c(X₁)≤4`, `k(X₂)=O(1)`), but `X_T = pointExtension X T` is multi-fiber for `T≠∅`, and the homogeneous PV theorem does
+  not apply. The CC port of PV Thm 3.1 is **proven blocked at the cross-fiber wall** (`CoherentConfig.lean §CC.17`,
+  `smaxAdj_symm_of_sameFiber`): PV §S.10's `smaxConnected_of_sparseSeparable` runs `exists_small_closed_of_not_connected`,
+  which needs a *symmetric* `smaxAdj`; on a multi-fiber CC `n_s ≠ n_{s*}` across fibers, so global `SmaxConnected` is
+  unavailable — symmetry survives only *within a fiber*. A1 (`§CC.18`) deliberately routed around this with the crude
+  abundance bound `dominatorReachable_of_card_gt` (*"No smax/sα connectivity, no SparseSeparable, citation-free"*).
+- **No essential gain even hypothetically.** PV's sharp `b≤2` vs A1's crude `b ≤ (k−1)c+1` are both polynomial when `c,k`
+  are bounded, and the seal only needs polynomial. PV sparse offers a sharper *constant*, not a different *scope*.
+
+**Verdict.** Drop PV sparse from the part-2 sub-class plan. The one PV-flavoured handle that survives on `X_T` is the
+*within-fiber* smax localization (§CC.17) — a per-fiber connectivity argument — but that is a research direction, not a
+quick wire. Concrete sub-class progress should instead bound the **load / `minMult`** (`BoundedConfusionLoad`, §CC.22b)
+directly with the *ported* CC counting toolkit (§CC.12–17), which is available on `X_T` and avoids the blocked
+connectivity entirely.
 
 ### 9.6 The multiplicity reframe — from "halve the max" to a global mass argument (the better-posed handle)
 
@@ -944,10 +979,11 @@ isolates. It is **not blocked**; it is **unproven**. Polynomial-unconditional-mo
    (`CascadeAffine §S-gate2`). **"Residue cascades (bounded `M`) ⟹ polynomial seal" is now a theorem** — the entire open
    content collapses to the single discharge `BoundedConfusionMultiplicity` (strictly weaker than `IndistinguishingHalves`,
    its `M=1` case). Seal `modulo {G3 + BoundedConfusionMultiplicity + hcatch + hImprim}`.
-2. **Attack the cascade discharge — first the sub-classes, then the generic core.** Re-activate PV sparse
-   (`separatesAtBoundedBase_of_sparseSeparable`, low-degree) and seek further combinatorial cascade-rate bounds (bounded
-   fiber-degree, intersection-number regimes); each proved sub-class shrinks the open core. The generic primitive-small-Aut
-   non-geometric residue is the hard heart — the genuine open research, attacked directly (no citation, the route's purpose).
+2. **Attack the cascade discharge — first the sub-classes, then the generic core.** ~~Re-activate PV sparse~~ (**dropped
+   — §9.5a:** vacuous on the bare residue, cross-fiber-wall-blocked on `X_T`); instead bound the load/`minMult` directly with
+   the ported CC counting toolkit (§CC.12–17) for bounded-fiber-degree / intersection-number regimes; each proved sub-class
+   shrinks the open core. The generic primitive-small-Aut non-geometric residue is the hard heart — the genuine open research,
+   attacked directly (no citation, the route's purpose).
 3. **Honest floor if the generic core resists:** carry it as ONE named predicate (`BoundedConfusionMultiplicity` on the
    residue = the rank-3 base case), seal `modulo {G3 + hcatch + that predicate}` (cxt-scoping route 3). This is the
    *fallback*, not the target — the target (step 2) is the direct proof.
