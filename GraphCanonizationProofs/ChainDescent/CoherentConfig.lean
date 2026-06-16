@@ -2545,6 +2545,63 @@ theorem boundedConfusionMultiplicity_univ (B : Nat) :
     hcomplete]
   simp
 
+/-! ### §CC.22c — confusion-set equivariance (route §9.9 step D1: the cover is an `Aut`-invariant structure)
+
+Toward the direct thin-cover attack on node 4 (route doc §9.9): a big-confusion cover, if it persists, must be a
+**rigid `Aut`-invariant line system** — the object the D2 extraction and D3 dichotomy classify. The foundation: an
+automorphism of the coherent configuration (a `relOf`-preserving permutation `π`, the `aut_descends`/`aut_fixes`
+convention of §CC.9) carries confusion sets to confusion sets *preserving size*, so "big" is an `Aut`-invariant and the
+cover is `Aut`-equivariant. (NB the *1-WL cell-count* potential — "two vertices share a colour" — is the parked §CC.21
+`BalancedSplits` model, a coarser layer bridged to this 2-WL `c` by `hcatch`; D1 works with the 2-WL `confusionSet`
+A1 consumes, not the cell count.) -/
+
+/-- §CC.22c (D1) **Confusion sets are equivariant under a CC automorphism.** For a `relOf`-preserving permutation `π`
+(the `Refines.aut_descends` convention), `C(π α, π β) = π '' C(α,β)` — `π` carries the vertices confusing `(α,β)` exactly
+onto those confusing `(π α, π β)`. The structural core of "the cover is `Aut`-invariant". Axiom-clean. -/
+theorem confusionSet_perm {π : Equiv.Perm (Fin n)}
+    (hπ : ∀ v w : Fin n, X.relOf (π v) (π w) = X.relOf v w) (α β : Fin n) :
+    X.confusionSet (π α) (π β) = (X.confusionSet α β).image π := by
+  classical
+  ext γ
+  simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image]
+  constructor
+  · intro h
+    refine ⟨π.symm γ, ?_, π.apply_symm_apply γ⟩
+    have hα := hπ (π.symm γ) α
+    have hβ := hπ (π.symm γ) β
+    rw [π.apply_symm_apply] at hα hβ
+    rw [← hα, ← hβ]; exact h
+  · rintro ⟨δ, hδ, rfl⟩
+    rw [hπ δ α, hπ δ β]; exact hδ
+
+/-- §CC.22c (D1) **Confusion size is a CC-automorphism invariant.** `|C(π α, π β)| = |C(α,β)|` — `π` permutes the
+confusion sets, so their cardinalities (hence the indistinguishing number `c(X)` and the "big" threshold) are `Aut`-
+invariant. The load-bearing D1 fact: big-ness travels with the automorphism group. Axiom-clean. -/
+theorem card_confusionSet_perm {π : Equiv.Perm (Fin n)}
+    (hπ : ∀ v w : Fin n, X.relOf (π v) (π w) = X.relOf v w) (α β : Fin n) :
+    (X.confusionSet (π α) (π β)).card = (X.confusionSet α β).card := by
+  rw [X.confusionSet_perm hπ α β, Finset.card_image_of_injective _ π.injective]
+
+/-- §CC.22c (D1) **Incidence equivariance.** `π v ∈ C(π α, π β) ↔ v ∈ C(α,β)` — the (vertex, confusion-set) incidence
+is `Aut`-equivariant, so an automorphism carries a cover to a cover and preserves each vertex's multiplicity profile.
+The atom the cover-rigidity / multiplicity-invariance arguments consume. Axiom-clean. -/
+theorem mem_confusionSet_perm {π : Equiv.Perm (Fin n)}
+    (hπ : ∀ v w : Fin n, X.relOf (π v) (π w) = X.relOf v w) (α β v : Fin n) :
+    π v ∈ X.confusionSet (π α) (π β) ↔ v ∈ X.confusionSet α β := by
+  rw [X.confusionSet_perm hπ α β, Finset.mem_image]
+  constructor
+  · rintro ⟨w, hw, hwv⟩; rwa [π.injective hwv] at hw
+  · intro hv; exact ⟨v, hv, rfl⟩
+
+/-- §CC.22c (D1) **"Big" is a CC-automorphism invariant.** A pair `(α,β)` has an over-half confusion set iff its
+`π`-image does (`card_confusionSet_perm`). So `π` permutes the *big* confusion pairs among themselves — the big-class
+line system is `Aut`-stable, as the D2/D3 classification requires. Axiom-clean. -/
+theorem big_confusion_perm {π : Equiv.Perm (Fin n)}
+    (hπ : ∀ v w : Fin n, X.relOf (π v) (π w) = X.relOf v w) (α β : Fin n) :
+    X.indistinguishingNumber < 2 * (X.confusionSet (π α) (π β)).card
+      ↔ X.indistinguishingNumber < 2 * (X.confusionSet α β).card := by
+  rw [X.card_confusionSet_perm hπ α β]
+
 end CoherentConfig
 
 end ChainDescent
