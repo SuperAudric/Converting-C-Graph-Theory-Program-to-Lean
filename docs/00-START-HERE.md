@@ -129,12 +129,25 @@ close it — is set out in
 >    4 ⟺ the confusion-cover *multiplicity* `L = (Σ_{|C|>ρc}|C|)/n` is bounded (`O(1)`) — a *computable* quantity (high `L` =
 >    thick line system = Cameron, carved; low `L` = poly via a `1+L`-pin cleanup).
 >
-> **▶ PICK UP HERE — NEXT STEP: implement + run the `N_ρ`/multiplicity probe (route-doc §9.7).** Measure `N_ρ` (distinct big
-> confusion sets), `L_ρ` (load/multiplicity), `minMult_ρ` (cleanup cost), mass-weighted `Σ|C|²` on the residue (Shrikhande,
-> Clebsch, Chang) vs carved families (rook, Johnson) across threshold `ρ` and base size. **Test:** residue `L_ρ = O(1)` at
-> constant `ρ<1` while geometric families go thick. Extends `A2MonovariantProbe.cs`. If confirmed → the Lean engine generalizes
-> from `1/2`-halving to the `(1+L)`-cleanup form, and node 4 has a measurable provable handle. `hcatch` → CFI-1992 exchange;
-> `hImprim` → block-tower infra (not a citation). Substrate/build home:
+> 4. **★ THIS SESSION (probe → endgame → PART 1 LANDED; route-doc §9.7.1–§9.7.2, §9.8).** The multiplicity **probe ran**
+>    (`A2MonovariantProbe.{Probe_ConfusionCoverMultiplicity, Probe_ConfusionCover_Amorphic}`): **2a is dead** (covers are
+>    intrinsically loose — the axis is multiplicity *magnitude*, not tight/loose); on the **faithful amorphic scheme** the
+>    residue cleanly separates from Cameron (Clebsch shatters at base 1, rook stays thick). The **endgame** was scoped (§9.8)
+>    and a **correction** made: "polynomial unreachable" was WRONG (it imported the *citation* route's sub-exp ceiling onto this
+>    *direct-proof* route). The seal's real split is large-Aut→G3 / small-Aut→cascade, needing **no SRG citation beyond G3**;
+>    **polynomial-unconditional-`modulo {G3 + hcatch}` IS the target and is reachable in principle** (open & hard, but unbarred).
+>    **PART 1 — the cascade-rate engine — LANDED, axiom-clean** (`§CC.20b` + `§S-gate2`): `exists_potential_descent_bounded`,
+>    `BoundedConfusionMultiplicity`, `potentialCleanup_of_boundedConfusionMultiplicity`,
+>    `exists_small_base_of_boundedConfusionMultiplicity`, capstone `reachesRigidOrCameron_viaBoundedMultiplicity`. **"Residue
+>    cascades (bounded `M`) ⟹ polynomial seal" is now a THEOREM**; the entire open content is the single discharge
+>    `BoundedConfusionMultiplicity` (strictly weaker than `IndistinguishingHalves` = its `M=1` case).
+>
+> **▶ PICK UP HERE — NEXT STEP: PART 2 (route-doc §9.8.4) — discharge `BoundedConfusionMultiplicity` for the residue.**
+> Sub-classes first (re-activate the landed PV sparse `separatesAtBoundedBase_of_sparseSeparable` for low-degree; seek
+> combinatorial `minMult`/cascade-rate bounds for bounded-fiber-degree / intersection-number regimes — each shrinks the open
+> core, citation-free), then the generic primitive-small-Aut non-geometric core (the rank-3 base case, direct). Fallback = carry
+> it as one named predicate (cxt-scoping route 3). `hcatch` → CFI-1992 exchange; `hImprim` → block-tower infra (not a citation).
+> Substrate/build home:
 > [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); A2 scoping:
 > [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md); forward payoff (post-node-4):
 > [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md). The boxes below predate all of this.

@@ -235,7 +235,18 @@ route 1/route 3's verdict: **polynomial is the OPEN rank-3 base case — no cita
 is the citable floor). The poly side was decomposed into **five nodes by line-system structure (§9.0)**; the open crux is
 **node 4** (primitive non-geometric non-conference SRG), anchored by `reachesRigidOrCameron_viaNoCover` (node-4 ⟹ poly seal, no
 largeness citation). Best handle = the **multiplicity reframe (§9.6):** node 4 ⟺ confusion-cover multiplicity `L` bounded
-(computable). **NEXT = the `N_ρ`/multiplicity probe (route-doc §9.7).** This §5 route-2 (the rank-3 base case) = node 4.
+(computable). This §5 route-2 (the rank-3 base case) = node 4.
+
+**▶ FRONTIER (2026-06-16, HANDOFF) — multiplicity probe DONE, endgame scoped, PART 1 LANDED (route-doc §9.7.1–§9.7.2, §9.8).**
+The probe killed the tight/loose (2a) framing (covers are intrinsically loose; the axis is multiplicity *magnitude*) and showed
+the residue separates from Cameron cleanly **on its amorphic scheme** (not the rank-2 graph). **Endgame correction:** polynomial
+is NOT "unreachable" — that earlier claim wrongly imported the *citation* route's sub-exp ceiling; the seal's split is
+large-Aut→G3 / small-Aut→cascade (no SRG citation beyond G3), so **polynomial-unconditional-`modulo {G3+hcatch}` is the target,
+reachable in principle** (= this §5 route 2, open & hard but unbarred; route 3 = fallback). **PART 1 (cascade-rate engine)
+LANDED, axiom-clean** (`§CC.20b`/`§S-gate2`): `BoundedConfusionMultiplicity B M ⟹` `O(M·log n)` base, capstone
+`reachesRigidOrCameron_viaBoundedMultiplicity` — "residue cascades ⟹ polynomial seal" is now a theorem; the lone open content is
+the discharge `BoundedConfusionMultiplicity`. **NEXT = PART 2: discharge it** (sub-classes first — PV sparse re-activation, then
+the generic rank-3 core). Read route-doc §9.7.1–§9.7.2 + §9.8.
 
 **Reading order for a fresh reader:** build doc STATUS → its §1A (why not GI∈P) / §1B (everything ⟹ `c(X_T)`) → THIS
 doc §0–§5 (the A2 target, evidence, and the route to the unconditional seal) → `CoherentConfig.lean §CC.10`–`§CC.19` (the

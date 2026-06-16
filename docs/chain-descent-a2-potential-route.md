@@ -89,10 +89,34 @@ lift bridge to `cover ⟹ b(X)>B` — is now *deprioritized*: §8.6's research s
 four carved/foreseeable, the open crux is **node 4** (a primitive, non-geometric, non-conference SRG). Anchor
 **`reachesRigidOrCameron_viaNoCover`** (axiom-clean): **node 4 (`hShatter`) ⟹ polynomial seal, no largeness citation.** Best
 handle = the **multiplicity reframe (§9.6):** node 4 ⟺ confusion-cover multiplicity `L=(Σ_{|C|>ρc}|C|)/n` bounded (computable;
-high `L`=thick=Cameron carved, low `L`=poly via `1+L`-cleanup). **▶ PICK UP HERE — NEXT = the `N_ρ`/multiplicity PROBE (§9.7):**
-measure `N_ρ`/`L_ρ`/`minMult_ρ`/mass-`Σ|C|²` on residue vs rook/Johnson across `ρ`+base; test "residue `L_ρ=O(1)` at constant
-`ρ<1` while geometric families thick". Extends `A2MonovariantProbe.cs`. **Read §9 (esp. §9.0 nodes, §9.6 multiplicity, §9.7
-probe) to continue.**
+high `L`=thick=Cameron carved, low `L`=poly via `1+L`-cleanup).
+
+**★★★ THIS SESSION (2026-06-16, HANDOFF) — probe run, endgame scoped + corrected, PART 1 LANDED. Read §9.7.1–§9.7.2 (probe
+results), §9.8 (endgame), then PICK UP at part 2 below.**
+1. **Multiplicity probe — built, run, green (§9.7.1–§9.7.2; `A2MonovariantProbe.{Probe_ConfusionCoverMultiplicity,
+   Probe_ConfusionCover_Amorphic}`).** Findings: (a) **2a is DEAD** — confusion covers are *intrinsically loose* (no tight/
+   partition cover on ANY scheme, primitive or imprimitive), so the tight/loose split is excised; the axis is **multiplicity
+   magnitude**. (b) **Clean separation on the FAITHFUL (amorphic) scheme** — Clebsch on its rank-4 scheme shatters at base 1
+   (`minMult`→0), rook stays thick; the rank-2 graph view conflated them. (c) geometric `minMult`/`L` grows with `n`, residue
+   small/shatters. **Faithful-scheme lesson: measure the residue on its amorphic/orbital scheme, never the rank-2 graph.**
+2. **Endgame scoped + a correction (§9.8).** `hShatter` = TWO parts (the "thick⟹Cameron" 3rd part was a phantom — multiplicity
+   is a *measurement*, not a case split): (1) cascade-rate engine [now LANDED]; (2) the carved residue cascades = the open
+   **rank-3 base case**. The seal's real split is large-Aut→G3 / small-Aut→cascade — **no SRG-structure citation needed beyond
+   G3.** ⚠ **Correction:** earlier "polynomial unreachable" was WRONG — it imported the *citation* route's sub-exp ceiling onto
+   this *direct-proof* route. **Polynomial-unconditional-`modulo {G3+hcatch}` IS the target and is reachable in principle**
+   (open & hard, but unbarred — CGGP + 0 falsifiers lean toward it). cxt-scoping route 3 = fallback, not target.
+3. **PART 1 — the cascade-rate engine — ✅ LANDED, axiom-clean (`§CC.20b` + `§S-gate2`).** `exists_potential_descent_bounded`,
+   `BoundedConfusionMultiplicity B M`, `potentialCleanup_of_boundedConfusionMultiplicity`,
+   `exists_small_base_of_boundedConfusionMultiplicity`, capstone `reachesRigidOrCameron_viaBoundedMultiplicity`. **"Residue
+   cascades (bounded `M`) ⟹ polynomial seal" is now a THEOREM.** Seal `modulo {G3 + BoundedConfusionMultiplicity + hcatch +
+   hImprim}`; the entire open content is the single discharge `BoundedConfusionMultiplicity` (strictly weaker than
+   `IndistinguishingHalves` = its `M=1` case).
+
+**▶ PICK UP HERE — NEXT = PART 2 (§9.8.4): DISCHARGE `BoundedConfusionMultiplicity` for the residue.** Sub-classes first
+(re-activate landed PV sparse `separatesAtBoundedBase_of_sparseSeparable` for low-degree; seek combinatorial `minMult`/cascade-
+rate bounds for bounded-fiber-degree / intersection-number regimes — each shrinks the open core, citation-free), then the
+generic primitive-small-Aut non-geometric core (the rank-3 base case, direct). Fallback = carry it as one named predicate.
+**Read §9.7.1–§9.7.2 + §9.8 to continue.**
 
 ---
 
