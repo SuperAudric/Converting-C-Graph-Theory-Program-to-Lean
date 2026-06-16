@@ -36,8 +36,10 @@ engine**, and now the **Stage 1b `c`-halving reduction** are landed, axiom-clean
 (`exists_potential_descent` — the abstract halving→`O(log n)` descent; `potential` Φ; `PotentialDrops`;
 `exists_small_base_of_potentialDrops`; **`IndistinguishingHalves` + `potentialDrops_of_indistinguishingHalves`**)
 + the seal capstones `reachesRigidOrCameron_viaPotentialDrop` and **`reachesRigidOrCameron_viaShattering`**
-(`CascadeAffine.lean §S-gate2`). **The seal now stands conditional `modulo {G3 + IndistinguishingHalves + hcatch +
-hImprim}`** — sharpened from `PotentialDrops` (the product `(k−1)c` halves) to **`IndistinguishingHalves`** (the
+(`CascadeAffine.lean §S-gate2`). **[Historical — this paragraph is the Stage-1a/1b state; the §4c build-order is now
+COMPLETE and the current state is the build-order paragraph below + §8.]** At that point the seal stood conditional
+`modulo {G3 + IndistinguishingHalves + hcatch + hImprim}` — sharpened from `PotentialDrops` (the product `(k−1)c`
+halves) to **`IndistinguishingHalves`** (the
 indistinguishing number `c(X_T)` alone halves): `k` rides free by `maxValency_mono` (build doc §1B), and the
 reduction `potentialDrops_of_indistinguishingHalves` makes that rigorous. So the *entire* open mathematical content
 is now the single hypothesis **`IndistinguishingHalves`** (the drop lemma proper, `c`-form). The "geometric ⟹
@@ -478,3 +480,49 @@ at the established citation thresholds** (G3 is itself sub-exp); polynomial cano
 **Recommendation.** Target (1): correctly attribute and factor `hNeumaier` into Babai's SRG structure theorem + Kivva
 + a *provable* `cover ⟹ ¬large-motion` bridge. It makes the citation honest (it is not "Neumaier"), isolates a real
 Lean target (the bridge), and matches the project's established sub-exponential scope. (2) is the open rank-3 math.
+
+### 8.5 Step 1 build plan — factor `hNeumaier` into faithful citations (the recommended next build)
+
+**Goal.** Replace the monolithic `hNeumaier : (∃ T over-B, BigConfusionCover (X_T)) → IsLarge` with {named Babai/Kivva
+citations} + {a provable project bridge}, so **every carried piece is one literal external theorem** (the "exactly
+citable" target) — honestly at the **sub-exponential** largeness threshold.
+
+**The recommended factoring — via the base number `b(X)`.** The cleanest pivot is the base number (a WL/combinatorial
+quantity Babai's individualization bound directly controls, and one the project already has: `IsBase` / "X_T complete").
+It separates the *provable* project content from the citation:
+- **Citation (Babai SRG structure + Kivva), in pure base/Aut terms:**
+  `hBabaiBase : ¬ IsLarge n S → S primitive → S.rank ≤ 4 → ∃ T, |T| ≤ B(n) ∧ (X_T complete)`
+  — *"a primitive small-Aut SRG (rank-3 Babai / rank-4 Kivva) has a bounded base."* This is the contrapositive of
+  `large base ⟹ large Aut`, and the faithful restatement of {Babai's SRG structure theorem (small Aut ⟹ large-motion,
+  since the named geometric families are large-Aut) + Babai/Spielman SRG individualization (large-motion ⟹ `b(X) ≤ B(n)`)}.
+- **Provable bridge (project — the genuine new Lean content):**
+  `cover ⟹ b(X) > B` — a `BigConfusionCover (X_T)` means a `>c/2` confusion class survives ⟹ `X_T` not discrete ⟹ `T`
+  not a base; lifted over all `|T| ≤ B` ⟹ no `≤B` base exists ⟹ `b(X) > B`. Built **contrapositively from the landed A1
+  machinery** (`allSingletonFiber_of_card_gt_subset` / `DominatorReachable`): a complete `X_T` has no surviving confusion
+  class, so `cover ⟹ ¬complete`.
+- **Compose:** `cover ⟹ b(X) > B ⟹` (contrapositive of `hBabaiBase`) `IsLarge` `= hNeumaier`.
+
+**Concrete sub-tasks (in order).**
+1. **[VERIFY FIRST — gating] Pin the exact Babai SRG individualization bound + threshold `B(n)`.** Is it `Õ(√n)`?
+   quasipoly `exp(Õ(n^{1/3}))`? (Babai SRG iso / Spielman / Babai–Wilmes; Kivva JCTB'23 for rank 4.) This sets the
+   seal's actual base/cost regime and `hBabaiBase`'s faithful statement. **Do NOT build until pinned** — candidate for a
+   focused deep-research pass (the project's A2-research established the *structure* theorem but not the exact individualization bound).
+2. **State the citations** as named `Prop`s (the G3 pattern; `Scheme.lean` or `CascadeAffine.lean`), parametrized by the
+   largeness predicate + threshold. Never a fresh `axiom`.
+3. **Prove the bridge** `BigConfusionCover (X_T) ⟹ ¬ (X_T complete)` (then the `b(X) > B` lift) from the landed A1
+   machinery. The genuine new content; moderate.
+4. **Re-assemble** `reachesRigidOrCameron_viaNoConfusionCover` to carry `hBabaiBase` instead of `hNeumaier`, routing
+   cover → `b(X) > B` → `IsLarge` → G3 → Cameron. Axiom-clean.
+5. **Verify** axiom-clean + build green; regen `PublicTheoremIndex.md`; update STATUS + this doc.
+
+**Risks / honesty.**
+- **Fallback (Option B) if the base-number bridge is awkward:** carry the single renamed citation
+  `hSmallAutDiscretizes : ¬IsLarge → (∀ T over-B, ¬ BigConfusionCover (X_T))` (= "small Aut ⟹ shatters"), documented as
+  the Babai composite. Cleaner than `cover → IsLarge`, still one honest citation, **no base-number infra** — a strictly
+  smaller build than the full factoring, and a safe first landing.
+- Even fully done, the seal stays **sub-exponential** (B(n) is sub-exp); polynomial is Target 2 (the open rank-3 base case).
+- Sub-task 1 (the exact bound) is the gating unknown — verify before building.
+
+**Outcome.** `hNeumaier` replaced by {Babai SRG structure + Kivva + a proved cover→base bridge}; seal
+`modulo {G3 + Babai-SRG-structure + Kivva + CFI-exchange + hImprim}`, every carry a literal theorem — the "exactly
+citable" target reached for the geometric leg, honestly at the sub-exponential threshold.

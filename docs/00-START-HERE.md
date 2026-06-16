@@ -107,25 +107,23 @@ close it — is set out in
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
-> **★ CURRENT FRONTIER (2026-06-15) — read this first; the boxes below are older history.** The seal
-> `reachesRigidOrCameron` is assembled and axiom-clean, conditional **`modulo {G3 cited + IndistinguishingHalves +
-> hcatch + hImprim}`**. **A1 is DONE** (the CC sparse substrate, `CoherentConfig.lean §CC.11`–`§CC.19`); the **A2
-> potential-drop engine + the Stage-1b `c`-halving reduction are LANDED** (`§CC.20`: `exists_potential_descent` /
-> `potential` / `PotentialDrops` / `exists_small_base_of_potentialDrops` / `IndistinguishingHalves` +
-> `potentialDrops_of_indistinguishingHalves`; capstones `reachesRigidOrCameron_viaPotentialDrop` /
-> `…_viaShattering`, `CascadeAffine.lean §S-gate2`). **The lone open content is now ONE hypothesis —
-> `IndistinguishingHalves`** (some individualization halves the indistinguishing number `c(X_T)`; `k` rides free). **Its
-> discharge is underway:** the geometric-obstruction framework (`§CC.21`) and **★ the G-mech kill lemma (`§CC.22`:
-> `confusionSet_eq_empty_of_relOf_v_ne` — a `v` distinguishing `α,β` annihilates `C(α,β)`)** are landed, and **★ the
-> the §4c build-order is COMPLETE (steps 1–5, all `§CC.22` + the capstone, axiom-clean): the kill lemma, the bound, the
-> halving wiring, the `BigConfusionCover` obstruction, and **the G-cite capstone `reachesRigidOrCameron_viaNoConfusionCover`
-> with the two citations SEPARATED to isolated literals** — the Cameron step reuses the canonical G3 `hClassify` (via
-> `exhaustiveObstruction_scheme`), the only new citation is the **Neumaier direction** `hNeumaier : cover ⟹ IsLarge`
-> (case-split: cover → IsLarge → primitive → G3 → Cameron / imprimitive → recovered; no cover → recovered) + the
-> non-vacuity `card_bigClasses_mul_ge_of_cover` (`cover ⟹ ≥n/c near-maximal confusion classes`). **The whole seal now
-> stands `modulo {G3 (hClassify) + Neumaier (hNeumaier) + hcatch + hImprim}` — each a single isolated literal external
-> theorem** (the target shape for replacing each citation with its Lean proof); residual risk is `hNeumaier`'s row-4
-> faithfulness (open research). **Live frontier doc:
+> **★ CURRENT FRONTIER (2026-06-16) — read this first; the boxes below are older history.** The seal
+> `reachesRigidOrCameron` is assembled and axiom-clean, conditional **`modulo {G3 + hNeumaier + hcatch + hImprim}`**.
+> **A1 is DONE** (`CoherentConfig.lean §CC.11`–`§CC.19`); the **A2 potential-drop attack is COMPLETE (§4c build-order
+> steps 1–5, all axiom-clean):** the iteration engine + Stage-1b `c`-halving reduction (`§CC.20`), the G-mech kill lemma /
+> bound / halving wiring / `BigConfusionCover` obstruction (`§CC.22`), and the **G-cite capstone
+> `reachesRigidOrCameron_viaNoConfusionCover`** (`CascadeAffine.lean §S-gate2`) which factors `cover ⟹ Cameron`: the
+> Cameron step reuses the canonical **G3** (`exhaustiveObstruction_scheme`, no new carry), the only new citation is
+> **`hNeumaier : (∃ T over-B, BigConfusionCover (X_T)) → IsLarge`** (case-split: cover → IsLarge → primitive → G3 →
+> Cameron / imprimitive → recovered; no cover → `…viaShattering` recovered), plus the non-vacuity
+> `card_bigClasses_mul_ge_of_cover` (`cover ⟹ ≥n/c near-maximal confusion classes`).
+> **★ Citation faithfulness scoped (2026-06-16, route-doc §8):** `hNeumaier`'s faithful citation is **Babai's SRG
+> structure theorem (rank 3) + Kivva (rank 4), NOT "Neumaier"** ("geometric ⟹ large Aut" alone is *false* — CGGP gives
+> geometric-ish SRGs with trivial Aut), and it is faithful **only at the sub-exponential largeness threshold** (polynomial
+> = the open rank-3 base case). So the seal is **sub-exponential-base** at its established citation thresholds; polynomial
+> is GI-adjacent open. **NEXT = Step 1 (route-doc §8.5):** factor `hNeumaier` into carried Babai-SRG-structure + Kivva +
+> a *provable* `cover ⟹ b(X) > B` bridge (gating sub-task: pin the exact Babai SRG individualization bound). `hcatch` →
+> the `dimWL(X) ≤ dimWL(X_α)+1` exchange (CFI-1992); `hImprim` → project block-tower infra (not a citation). **Live frontier doc:
 > [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md)** — read its STATUS + **§4c** (the
 > discharge build-order) first; the honest "row 4" gap is now reframed as the *partial-geometry line system* (not the
 > eigenvalue magnitude). Evidence: the monovariant probe (`A2MonovariantProbe.cs`). Forward payoff: closing it also

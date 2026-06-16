@@ -83,9 +83,12 @@ hypotheses, the G3 pattern); **do not commit** (the user commits between message
   is the **Neumaier direction** `hNeumaier : (∃T over-B, BigConfusionCover (X_T)) → IsLarge` (case-split: cover → IsLarge → primitive
   → G3 → Cameron / imprimitive → `hImprim`; no cover → `…viaShattering`) + the non-vacuity `card_bigClasses_mul_ge_of_cover`
   (`cover ⟹ n ≤ #bigClasses·c`, the explicit near-pencil structure). **The §4c build-order is COMPLETE (steps 1–5), and the
-  citation is sealed up.** The whole seal stands **`modulo {G3 (hClassify) + Neumaier (hNeumaier) + hcatch + hImprim}` — each a
-  single isolated literal external theorem** (the target shape for replacing each citation with its Lean proof); residual risk =
-  `hNeumaier`'s row-4 faithfulness (open research; probe reframe: row 4 has no line system ⟹ no cover).
+  citation is sealed up.** The whole seal stands **`modulo {G3 (hClassify) + hNeumaier + hcatch + hImprim}`**. **★ Faithfulness
+  scoped (2026-06-16, route-doc §8):** `hNeumaier`'s faithful citation is **Babai's SRG structure theorem (rank 3) + Kivva (rank 4),
+  NOT "Neumaier"** ("geometric ⟹ large Aut" alone is false — CGGP), faithful **only at the sub-exponential largeness threshold**
+  (polynomial = the open rank-3 base case) — so the seal is sub-exp-base at its established thresholds. **NEXT = Step 1
+  (route-doc §8.5):** factor `hNeumaier` into carried Babai-SRG + Kivva + a provable `cover ⟹ b(X) > B` bridge. `hcatch` → the
+  CFI-1992 `dimWL(X) ≤ dimWL(X_α)+1` exchange; `hImprim` → block-tower infra (not a citation). Full map: route-doc §8.
 
 ### The open frontier — ONE hypothesis: `IndistinguishingHalves` (live work: `chain-descent-a2-potential-route.md`)
 **The seal now stands `modulo {G3 + IndistinguishingHalves + hcatch + hImprim}`**, and the entire open mathematical content is the single
