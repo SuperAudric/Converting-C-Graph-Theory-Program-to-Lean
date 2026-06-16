@@ -1259,6 +1259,39 @@ theorem reachesRigidOrCameron_viaSmallAutShatters {IsLarge : Nat → Prop}
         (hSmallAutDiscretizes hlarge))
       hcatch hImprim
 
+/-- **THE SEAL VIA DIRECT SHATTERING — the polynomial target (node 4), no largeness citation.** This is the
+*unconditional* form of `…viaSmallAutShatters`/`…viaNoConfusionCover`: it carries the single hypothesis
+`hShatter : ∀ over-`B` base `T`, ¬BigConfusionCover (X_T)` **with no `¬IsLarge` guard and no Cameron routing**.
+Discharging `hShatter` for the residue makes the seal **polynomial** — the residue always shatters (a `c(X_T)/2`-
+avoiding vertex exists at every over-`B` base, so `c` halves per individualization), giving an `O(log n)` base with
+`c(X_{T₀}) = O(1)`; the Cameron disjunct is never taken on the shattering path. So **`hShatter` is exactly node 4**
+(`docs/chain-descent-a2-potential-route.md` §9): the open rank-3 base case stated in the project's own language —
+*a primitive, non-geometric, non-conference SRG never develops a big-confusion cover under individualization.* Its
+negation (a cover) is, by `card_bigClasses_mul_ge_of_cover`, a covering of `Fin n` by `≥ n/c` near-maximal confusion
+classes = a partial-geometry / near-pencil line system, which a non-geometric residue lacks (probe `Probe_Smallest
+EigenvalueAxis`: the obstruction is the line/grid geometry). Carries only `{G3 (hClassify, unused on the shattering
+path) + hShatter (node 4) + hcatch + hImprim}` — no Babai/Spielman/Neumaier citation, poly-capable. Pure composition
+of `indistinguishingHalves_of_not_bigConfusionCover` + `reachesRigidOrCameron_viaShattering`. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaNoCover {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B : Nat} (hB : 1 ≤ B)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
+    (hShatter : ∀ T : Finset (Fin n),
+        B < (S.toAssociationScheme.toCoherentConfig hne).potential T →
+        ¬ (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).BigConfusionCover)
+    (hcatch : ∀ T : Finset (Fin n),
+        WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ∃ bound : Nat,
+      ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+        ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaShattering hB hClassify S hne hrank hroom
+    ((S.toAssociationScheme.toCoherentConfig hne).indistinguishingHalves_of_not_bigConfusionCover B hShatter)
+    hcatch hImprim
+
 end SGate2
 
 

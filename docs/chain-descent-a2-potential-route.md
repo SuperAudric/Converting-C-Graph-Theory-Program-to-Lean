@@ -598,3 +598,91 @@ the **open rank-3 base case** (polynomial WL-realization of the `O(log n)` motio
 Phase 3 options: **(a)** carry Spielman → a fully-citable sub-exp "honest floor" capstone (Cameron-free, subsumed by known
 results); **(b)** carry Babai/Kivva motion + leave the WL-realization as the open gap (poly-aspirational, the gap = the open
 case); **(c)** hold — the citation is scoped, redirect to `hImprim` discharge or the open rank-3 research.
+
+---
+
+## 9. Node 4 — anatomy of the open polynomial crux (the forced-triangle frontier)
+
+> **What this is.** §8.6's decomposition isolated the polynomial side to **node 4**: a *primitive, non-geometric
+> (no line system), non-conference* SRG. This section dissects node 4 — in simple terms, then precisely, then the
+> gaps and the handles — so it can be worked. The seal-level anchor is `reachesRigidOrCameron_viaNoCover`
+> (`CascadeAffine §S-gate2`, axiom-clean): the poly seal carrying node 4 as a single hypothesis, **no largeness citation.**
+
+### 9.1 The problem in simple terms
+
+Pin a few vertices of the graph, run colour refinement, hope every vertex ends up uniquely coloured (rigid). The
+**confusion number** `c(X_T)` = how many vertices still look identical after pinning `T` and refining. We want it to
+drop to a *constant* after pinning a *constant* number of vertices (then A1 finishes).
+
+The mechanism is a **chain reaction.** Pin two vertices `α, β`. A third vertex `γ` that relates *differently* to them
+gets distinguished. A `γ` that relates *identically* is "confused" — it lies in the confusion set `C(α,β)`. The **kill
+lemma** (`§CC.22`) says: pinning a vertex `v` that *distinguishes* a confused pair wipes out their whole confusion set.
+So if we can find a vertex `v` that distinguishes *every* near-maximally-confused pair (a "**`c/2`-avoiding `v`**"),
+pinning it **halves** `c`. Repeat ⟹ rigid in `O(log n)` pins ⟹ polynomial.
+
+The **obstruction**: maybe *no* single vertex distinguishes all big confused pairs — the big confusion sets **cover**
+all vertices (every vertex is confused about some near-maximal pair). That is a `BigConfusionCover`. **Node 4 claims a
+non-geometric primitive SRG never develops such a cover** (an avoiding `v` always exists). The intuition: a cover is a
+*tiling of the graph by near-maximal confusion sets* — and that tiling **is** a geometric "line system" (a grid /
+partial geometry). A non-geometric graph has no line system, so no cover. The probe (`Probe_SmallestEigenvalueAxis`)
+confirmed the obstruction is exactly the line/grid geometry, peaking at the rook graph, not at large `|s|`.
+
+### 9.2 Node 4, precisely (the project's language)
+
+> **Node 4 (`hShatter`):** for the residue, `∀ T` with `Φ(T) > B`, `¬ BigConfusionCover (X_T)` — equivalently, every
+> over-`B` base admits a `v` outside all confusion sets of size `> c(X_T)/2`.
+
+`reachesRigidOrCameron_viaNoCover` proves **node 4 ⟹ polynomial seal** (modulo `{G3 + hcatch + hImprim}`, G3 unused on
+the shattering path). So node 4 is the *entire* open polynomial content, stated with **no largeness/Cameron/Babai/Spielman
+citation** — the honest poly target.
+
+### 9.3 The gaps node 4 carries
+
+- **Gap 1 — the propagation: ✅ LANDED.** avoiding `v` ⟹ `c` halves (`indistinguishingHalves_of_exists_avoiding_v`) ⟹
+  `O(log n)` base, `c=O(1)` (`exists_potential_descent`) ⟹ poly (A1). Nothing open here.
+- **Gap 2 — the crux: prove `¬BigConfusionCover` for the residue.** Its negation, by `card_bigClasses_mul_ge_of_cover`,
+  is a covering of `Fin n` by `≥ n/c` near-maximal confusion classes (each of size in `(c/2, c]`) — a partial-geometry /
+  near-pencil **line system**. So Gap 2 = *"a primitive non-geometric non-conference SRG has no such covering."* This is
+  the irreducible open content (the rank-3 base case), and it splits:
+  - **2a — the extremal/tight cover (partition case): a HANDLE, scoped.** If the cover is *tight* (`#bigClasses·c ≤ n`,
+    forcing equality with the landed `≥`), the big classes **partition** `Fin n` into equal Aut-invariant blocks. Since
+    `Aut` permutes confusion sets (`C(gα,gβ) = g·C(α,β)`), a partition of them is a **system of imprimitivity** ⟹
+    **¬primitive** — contradiction. *So primitivity rules out the extremal cover.* (Logic verified, not yet Lean; needs
+    the vertex-partition→block bridge. The residual is **non-tight (overlapping)** covers.)
+  - **2b — the loose/overlapping cover (the open heart): no current technique.** Overlapping near-maximal confusion
+    classes covering `Fin n` = a genuine partial-geometry line system that is *not* a block system (e.g. Johnson is
+    primitive yet line-system'd). Classifying it loops toward the geometric/Neumaier theory. **Elementary
+    double-counting does NOT kill it** (checked: each `v` lies in `≤ rank·k²` big classes, giving `#bigClasses ≤
+    2n·rank·k²/c`, which is *consistent* with the cover — no contradiction). The content is genuinely geometric.
+
+### 9.4 What there is to work with (the handles)
+
+1. **The landed reduction** — kill lemma, halving, `BigConfusionCover`, `card_bigClasses_mul_ge_of_cover` (the cover
+   count `n ≤ #bigClasses·c`). Node 4 is one clean predicate (`hShatter`) feeding `reachesRigidOrCameron_viaNoCover`.
+2. **Primitivity kills the extremal cover (2a)** — the tight/partition case is a system of imprimitivity. *Buildable*
+   (a real lemma): formalize "Aut-invariant confusion partition ⟹ ¬IsPrimitive" via the landed block/`schemeEquiv`
+   correspondence (`isBlock_schemeEquiv`, `isPreprimitive_iff_isPrimitive`). Shrinks node 4 to non-tight covers.
+3. **The landed-but-UNUSED PV connectivity machinery closes the SPARSE sub-case.** `separatesAtBoundedBase_of_sparseSeparable`
+   (Separability.lean / `§S-bridge`): `2c(k−1) < n ∧ k≥2 ⟹ b(X) ≤ 2`. For a **low-degree** residue (small `k`),
+   `2c(X_T)(k−1) < n` holds at a bounded base ⟹ b≤2 directly, *no cover argument*. The **dense** (high-`k`) residue is
+   the residual (there `2c(k−1)<n` ≈ discreteness, no free lunch). Re-activating this PV machinery is a concrete leg.
+4. **The intersection-number coherence toolkit** (`fiberSize_mul_valency`, `valency_mul_interNum`, `sum_pu_le`,
+   `interNum_eq_one_of_forcedUnique`, `RainbowRigid`/`dominatorReachable_of_rainbowRank`) — the project's lane for any
+   *direct* counting/forced-triangle argument on the cover. (But §9.3-2b: simple double-counting is insufficient.)
+5. **The probe evidence + CGGP** — the obstruction is the line/grid (geometric); non-geometric ⟹ no grid ⟹ should
+   shatter. CGGP's `base ≤ 2 ⟹ WL-dim ≤ 4` is a *direct* (non-largeness) poly proof, but **for the geometric/affine
+   case (node 2)** — node 4 is non-geometric, where CGGP's geometry does not apply, so node 4 *should* be easier yet has
+   **no template**.
+
+### 9.5 Honest verdict + concrete sub-targets
+
+Node 4 = "a primitive non-geometric non-conference SRG has no big-confusion cover under individualization" — the rank-3
+base case in the project's own forced-triangle language. **No elementary counting kills it; it is genuinely geometric
+and open.** But it is now a *single sharp predicate* (`hShatter`) with two carved-off sub-cases and a clean anchor.
+Buildable sub-targets, in order of tractability:
+1. **(2a) Primitivity kills the tight cover** — formalize "Aut-invariant confusion partition ⟹ ¬primitive". Real lemma,
+   reuses landed block machinery; carves the extremal case. *Low-medium risk.*
+2. **(handle 3) Re-activate PV for the sparse residue** — wire `separatesAtBoundedBase_of_sparseSeparable` to the
+   low-degree residue; closes node 4 there. *Low risk, partial coverage.*
+3. **(2b) The dense loose-cover heart** — the genuine open research: show an overlapping near-maximal confusion cover
+   forces a structure (partial geometry) a primitive non-geometric scheme lacks. *No current technique; the frontier.*
