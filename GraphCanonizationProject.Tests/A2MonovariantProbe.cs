@@ -523,7 +523,13 @@ public class A2MonovariantProbe(ITestOutputHelper output)
     //    (indistinguishingNumber_mono) and a cover only gets easier to avoid — node 4
     //    on rank-2 is the hardest case, so a clean signal here is a fortiori on the
     //    amorphic residue.  Returns the stable pair-colour matrix rel[u,v]. ──────────
-    static int[,] PairClosure(int n, bool[,] adj, IReadOnlyList<int> T)
+    // General form: the base colouring is ANY pair-colour function `baseCol` (the
+    // graph's rank-2 {diag,edge,non-edge}, or a residue's amorphic rank-3/4 scheme
+    // colour matrix).  The carved geometric SRGs ARE rank-2 schemes; the residue
+    // (ℤ₄² Clebsch rank-4, …) has a FINER amorphic refinement — and X = orbitalScheme H
+    // in the Lean seal is that amorphic scheme, so measuring the residue on its own
+    // scheme (not the coarse rank-2 graph closure) is the faithful comparison.
+    static int[,] PairClosureBase(int n, Func<int, int, int> baseCol, IReadOnlyList<int> T)
     {
         var flag = new int[n];
         { int f = 1; foreach (var t in T) flag[t] = f++; }   // a unique tag per base point
@@ -531,7 +537,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         var map0 = new Dictionary<(int, int, int), int>();
         for (int u = 0; u < n; u++) for (int v = 0; v < n; v++)
         {
-            var key = (u == v ? 2 : adj[u, v] ? 1 : 0, flag[u], flag[v]);   // (adj/diag, flags)
+            var key = (baseCol(u, v), flag[u], flag[v]);
             if (!map0.TryGetValue(key, out int cc)) { cc = map0.Count; map0[key] = cc; }
             colour[u, v] = cc;
         }
@@ -556,6 +562,10 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             colour = nc; classes = sig.Count;
         }
     }
+
+    // The graph's rank-2 base colouring {diag=2, edge=1, non-edge=0}.
+    static Func<int, int, int> GraphCol(bool[,] adj) => (u, v) => u == v ? 2 : adj[u, v] ? 1 : 0;
+    static int[,] PairClosure(int n, bool[,] adj, IReadOnlyList<int> T) => PairClosureBase(n, GraphCol(adj), T);
 
     // The confusion-cover multiplicity metrics on the closure `rel` at threshold ρ.
     //   c           = c(X_T) = max over non-reflexive classes of |C(α,β)|,
@@ -614,9 +624,9 @@ public class A2MonovariantProbe(ITestOutputHelper output)
     }
 
     // Cheap c(X_T) (one rep per class — for the greedy base search; |C| is constant on a class).
-    static int CofXT(int n, bool[,] adj, IReadOnlyList<int> T)
+    static int CofBase(int n, Func<int, int, int> baseCol, IReadOnlyList<int> T)
     {
-        var rel = PairClosure(n, adj, T);
+        var rel = PairClosureBase(n, baseCol, T);
         var refl = new HashSet<int>(); for (int u = 0; u < n; u++) refl.Add(rel[u, u]);
         var seen = new HashSet<int>(); int c = 0;
         for (int a = 0; a < n; a++) for (int b = 0; b < n; b++)
@@ -628,11 +638,12 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         }
         return c;
     }
+    static int CofXT(int n, bool[,] adj, IReadOnlyList<int> T) => CofBase(n, GraphCol(adj), T);
 
     // The base sequence ∅ ⊆ {0} ⊆ {0,v*}: vertex-transitive ⟹ pin 0 first; v* greedily
     // minimizes c(X_{0,v}) (the over-B base where the cover question is live).  Greedy
     // +2 only for n ≤ 28 (cost); larger fixtures report ∅ and {0}.
-    static List<List<int>> BaseSeq(int n, bool[,] adj)
+    static List<List<int>> BaseSeqBase(int n, Func<int, int, int> baseCol)
     {
         var seq = new List<List<int>> { new(), new() { 0 } };
         if (n <= 28)
@@ -640,12 +651,102 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             int best = -1, bestC = int.MaxValue;
             for (int v = 1; v < n; v++)
             {
-                int c = CofXT(n, adj, new List<int> { 0, v });
+                int c = CofBase(n, baseCol, new List<int> { 0, v });
                 if (c < bestC) { bestC = c; best = v; }
             }
             if (best >= 0) seq.Add(new() { 0, best });
         }
         return seq;
+    }
+    static List<List<int>> BaseSeq(int n, bool[,] adj) => BaseSeqBase(n, GraphCol(adj));
+
+    // Imprimitive controls (to settle whether a TIGHT/partition cover ever forms — the
+    // 2a premise; all the primitive fixtures are loose, so 2a's status hinges on these).
+    static bool[,] DisjointCliques(int m, int a)   // m·K_a: adjacent iff same block
+    {
+        int n = m * a; var g = Empty(n);
+        for (int u = 0; u < n; u++) for (int v = u + 1; v < n; v++) if (u / a == v / a) Edge(g, u, v);
+        return g;
+    }
+    static bool[,] CompleteMultipartite(int m, int a)   // K_{m×a}: adjacent iff DIFFERENT block
+    {
+        int n = m * a; var g = Empty(n);
+        for (int u = 0; u < n; u++) for (int v = u + 1; v < n; v++) if (u / a != v / a) Edge(g, u, v);
+        return g;
+    }
+
+    // The ℤ₄² amorphic-NLS Clebsch scheme colour matrix (rank-4: 0=diagonal), the project's
+    // primitive G2-B bullseye (= GraphCanonizationProofs ClebschConcrete.clebschZ4ColF).  Its
+    // own (amorphic) scheme — NOT the rank-2 graph closure — is the faithful X for the residue.
+    static readonly int[,] ClebschZ4Amorphic = new int[16, 16]
+    {
+        {0,2,1,2,1,1,3,2,2,3,3,3,1,2,3,1},
+        {2,0,2,1,2,1,1,3,3,2,3,3,1,1,2,3},
+        {1,2,0,2,3,2,1,1,3,3,2,3,3,1,1,2},
+        {2,1,2,0,1,3,2,1,3,3,3,2,2,3,1,1},
+        {1,2,3,1,0,2,1,2,1,1,3,2,2,3,3,3},
+        {1,1,2,3,2,0,2,1,2,1,1,3,3,2,3,3},
+        {3,1,1,2,1,2,0,2,3,2,1,1,3,3,2,3},
+        {2,3,1,1,2,1,2,0,1,3,2,1,3,3,3,2},
+        {2,3,3,3,1,2,3,1,0,2,1,2,1,1,3,2},
+        {3,2,3,3,1,1,2,3,2,0,2,1,2,1,1,3},
+        {3,3,2,3,3,1,1,2,1,2,0,2,3,2,1,1},
+        {3,3,3,2,2,3,1,1,2,1,2,0,1,3,2,1},
+        {1,1,3,2,2,3,3,3,1,2,3,1,0,2,1,2},
+        {2,1,1,3,3,2,3,3,1,1,2,3,2,0,2,1},
+        {3,2,1,1,3,3,2,3,3,1,1,2,1,2,0,2},
+        {1,3,2,1,3,3,3,2,2,3,1,1,2,1,2,0},
+    };
+
+    // ── (a) AMORPHIC + IMPRIMITIVE iteration (route §9.7.1 next-move a).  Two questions
+    //    the rank-2 main probe left open: (1) does the residue's OWN (amorphic, finer)
+    //    scheme make Clebsch SHATTER where its rank-2 graph closure was sticky/Cameron-
+    //    looking — i.e. does multiplicity CLEANLY separate residue from Cameron once each
+    //    is on its faithful scheme?  (2) does any IMPRIMITIVE scheme admit a TIGHT cover
+    //    (the 2a premise), or is loose-ness intrinsic (⟹ excise the tight/loose framing)?
+    [Fact]
+    public void Probe_ConfusionCover_Amorphic()
+    {
+        Func<int, int, int> Scheme(int[,] r) => (u, v) => r[u, v];
+
+        var items = new List<(string name, string cat, int n, Func<int, int, int> bc)>
+        {
+            ("Clebsch rank-2",   "RESIDUE:rk2",      16, GraphCol(CayleyZ2Pow4(new[]{1,2,4,8,15}))),
+            ("Clebsch ℤ4² rk-4", "RESIDUE:amorphic", 16, Scheme(ClebschZ4Amorphic)),
+            ("Shrikhande rk-2",  "RESIDUE:rk2",      16, GraphCol(CayleyZ4Sq(new[]{(1,0),(3,0),(0,1),(0,3),(1,1),(3,3)}))),
+            ("Rook L(4) rk-2",   "CARVED:lattice",   16, GraphCol(Rook(4))),
+            ("4·K_4 (imprim)",   "IMPRIM",           16, GraphCol(DisjointCliques(4,4))),
+            ("K_{4×4} (imprim)", "IMPRIM",           16, GraphCol(CompleteMultipartite(4,4))),
+            ("2·K_8 (imprim)",   "IMPRIM",           16, GraphCol(DisjointCliques(2,8))),
+        };
+
+        output.WriteLine("A2 CONFUSION-COVER — AMORPHIC residue scheme + IMPRIMITIVE controls (route §9.7.1 move a).");
+        output.WriteLine("Q1: does Clebsch on its rank-4 amorphic scheme SHATTER where rank-2 was sticky (clean separation)?");
+        output.WriteLine("Q2: does any IMPRIMITIVE scheme admit a TIGHT (partition) cover — the 2a premise — or is loose intrinsic?");
+        output.WriteLine("");
+        output.WriteLine($"{"scheme",-18} {"cat",-18} {"n",-4} {"|T|",-4} {"c(X_T)",-7} {"N",-4} {"L",-7} {"minM",-5} {"maxM",-5} {"verdict",-22} massΣ|C|²");
+        output.WriteLine(new string('─', 128));
+
+        foreach (var it in items)
+        {
+            foreach (var T in BaseSeqBase(it.n, it.bc))
+            {
+                var rel = PairClosureBase(it.n, it.bc, T);
+                var m = CoverMetrics(it.n, rel, 0.5);
+                string verdict = m.c == 0 ? "discrete"
+                    : !m.cover ? "NO-COVER (shatters)"
+                    : m.tight ? "TIGHT (partition!)"
+                    : "loose";
+                output.WriteLine($"{it.name,-18} {it.cat,-18} {it.n,-4} {T.Count,-4} {m.c,-7} {m.N,-4} {m.L,-7:F2} {m.minMult,-5} {m.maxMult,-5} {verdict,-22} {m.mass}");
+            }
+            output.WriteLine("");
+        }
+
+        output.WriteLine("READ — Q1: compare 'Clebsch rank-2' (sticky c, Cameron-looking) vs 'Clebsch ℤ4² rk-4' (its own");
+        output.WriteLine("       scheme): if the amorphic c collapses / minMult→0 where rank-2 stayed covered, multiplicity");
+        output.WriteLine("       CLEANLY separates residue from Cameron once each is on its faithful scheme.");
+        output.WriteLine("       Q2: a TIGHT row on any IMPRIM scheme ⟹ 2a is a real (if unused) theorem; NO tight row");
+        output.WriteLine("       anywhere ⟹ loose-ness is intrinsic to confusion covers ⟹ excise the tight/loose framing.");
     }
 
     // ── The N_ρ / multiplicity probe (route doc §9.7) — does (minMult, L, mass) SEPARATE

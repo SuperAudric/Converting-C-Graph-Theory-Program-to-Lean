@@ -795,3 +795,30 @@ own scheme; (b) **skip to the loose-cover Lean content (2b)**: since tight cover
 "a loose big-confusion cover of a primitive non-geometric SRG has bounded multiplicity `L` (or `minMult`)", the
 `(1+L)`-cleanup engine. The fixed-`ρ` halving threshold showed no special structure (the ρ-sweep is flat 0.5–0.6 then
 steps), consistent with §9.6's "fixed `ρ` is fragile — use the global mass/multiplicity argument."
+
+### 9.7.2 Move (a) done — amorphic residue + imprimitive controls (`Probe_ConfusionCover_Amorphic`, 2026-06-16)
+
+Both open questions from §9.7.1 resolved (green, test passes):
+
+- **Q1 — multiplicity CLEANLY separates residue from Cameron on the FAITHFUL scheme.** Measured Clebsch on its own
+  **rank-4 amorphic** scheme (`ClebschZ4Amorphic` = `ClebschConcrete.clebschZ4ColF`) vs the coarse rank-2 graph closure
+  vs rook L(4). On rank-4 Clebsch **shatters at base 1** (`minMult`: 25→**0**; `c`: 4→4→discrete at base 2); on rank-2 it
+  was sticky (`c`: 8→8→8, `minMult` 25→9→3, never shatters in 2). Rook L(4) stays thick (`minMult=10` at base 1, covered
+  to base √n=4). **The rank-2 conflation (§9.7.1 finding 3) was an artifact of the coarse scheme** — `X = orbitalScheme H`
+  in the seal IS the amorphic scheme, and on it the residue shatters fast while Cameron stays thick. *Multiplicity is the
+  right discriminator; the (b) loose-cover bound is well-motivated.* (NB the amorphic shatter is `minMult→0`, stronger than
+  the bounded-`L` the bound needs.)
+- **Q2 — loose-ness is INTRINSIC; 2a is UNIVERSALLY vacuous (excise the tight/loose framing).** No TIGHT (partition,
+  `maxMult=1`) cover on **any** scheme — primitive *or* imprimitive. The imprimitive controls (`4·K₄`, `K_{4×4}`, `2·K₈`)
+  all have **thick loose** covers (`maxMult` 24/24/49, `minMult` 17–49) that never shatter — i.e. imprimitive looks like
+  the *thick/Cameron* case in the multiplicity picture, not a tight case. So loose-ness is intrinsic to confusion covers,
+  **not** a primitivity consequence: the partition configuration 2a (`§9.3-2a`, "tight ⟹ imprimitive") rules out **never
+  arises for any scheme**. ⟹ **2a is dead content** (true-but-vacuous-premise); delete the tight/loose split from §9.3.
+
+**Consolidated picture (the redirect, confirmed).** The productive axis is **multiplicity magnitude**, not tight/loose:
+- **High `minMult`/`L` (thick cover) ⟸ does NOT shatter** — and this captures *both* carved legs: geometric → Cameron
+  (G3, `minMult` grows with `n`, §9.7.1) **and** imprimitive (`hImprim`, thick by Q2). Aligns with the existing seal split.
+- **Low `minMult`/`L` (→ 0 on the amorphic residue) ⟹ shatters** — the primitive non-geometric residue (Q1).
+**Next Lean target = the loose-cover bound (b)**, stated on multiplicity: *primitive non-geometric ⟹ `minMult(X_T)` (or `L`)
+bounded ⟹ shatter via the `(1+L)`-cleanup*. **2a (`§9.3-2a`, §9.5 sub-target 1) is dropped.** Faithful-scheme caveat for any
+future probe: measure the residue on its **amorphic/orbital** scheme, never the rank-2 graph (which conflates with Cameron).
