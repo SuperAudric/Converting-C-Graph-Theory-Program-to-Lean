@@ -603,10 +603,31 @@ case); **(c)** hold — the citation is scoped, redirect to `hImprim` discharge 
 
 ## 9. Node 4 — anatomy of the open polynomial crux (the forced-triangle frontier)
 
-> **What this is.** §8.6's decomposition isolated the polynomial side to **node 4**: a *primitive, non-geometric
-> (no line system), non-conference* SRG. This section dissects node 4 — in simple terms, then precisely, then the
-> gaps and the handles — so it can be worked. The seal-level anchor is `reachesRigidOrCameron_viaNoCover`
-> (`CascadeAffine §S-gate2`, axiom-clean): the poly seal carrying node 4 as a single hypothesis, **no largeness citation.**
+> **What this is.** The forced-triangle scope (§9.0) decomposes the polynomial side by **line-system structure**
+> into five nodes; four are carved or template-able and the open crux is **node 4**. This section lists the nodes
+> (§9.0), then dissects node 4 — in simple terms, precisely, the gaps, the handles — so it can be worked. The
+> seal-level anchor is `reachesRigidOrCameron_viaNoCover` (`CascadeAffine §S-gate2`, axiom-clean): the poly seal
+> carrying node 4 as a single hypothesis, **no largeness citation.**
+
+### 9.0 The five nodes (the poly-side decomposition by line-system structure)
+
+The probe's reframe (the obstruction is the *partial-geometry line system*, not `|s|`) splits the residue along
+Neumaier's smallest-eigenvalue classification. `c(X_{T₀})` stays large iff a **line system** (a "grid" of confusion
+classes) survives individualization. The crucial structural win: **non-Cameron ⟹ not a *thick* line system ⟹
+thin-or-no line system ⟹ poly-capable** — the only non-poly leg (thick) is exactly Cameron, which the residue
+excludes by hypothesis. The five nodes:
+
+| # | Residue structure | `c(X_{T₀})` bounded? | Status / route |
+|---|---|---|---|
+| **1** | **Thick line system** (Johnson/Hamming, lines of size →∞) | no — base √n | **Cameron** → landed **G3** (`exhaustiveObstruction_scheme`). *Excluded from the residue by hypothesis.* |
+| **2** | **Thin line system** (geometric, bounded thickness — FDF/affine) | yes, base `O(1)` | **CGGP/BCN template** (`base ≤ 2 ⟹ WL-dim ≤ 4`, BCN Thm 3.3.8). FORESEEABLE; landed vehicle = `RainbowRigid` / `dominatorReachable_of_rainbowRank` (`clebschZ4_closure` is the proof-of-concept). *Ladder risk* (per geometry type). |
+| **3** | **No line system, bounded `m`** (Neumaier-exceptional) | yes (finite list) | **Neumaier finiteness** ⟹ max `c` over a finite set = const. FORESEEABLE/citable. |
+| **4** | **No line system, unbounded `m`, non-conference** ("row 4") | probe: yes; **no proof** | **THE OPEN POLY CRUX.** No template, no witness, not even a conjecture. §9.1–§9.6 below. |
+| **5** | **Conference** (irrational `m`) | — | **abelian / leg B** (`AbelianConsumed`). Landed. |
+
+Nodes 1, 5 are landed/carved; nodes 2, 3 are foreseeable buildable legs that would shrink the seal to node 4 (the
+bounded-`m` cases); **node 4 is the irreducible frontier.** Closing nodes 2+3 lands the seal `modulo {G3-for-Cameron +
+leg B + node-4 crux + hImprim}`. Full foreseeability discussion: the §8.6 / scope reply; this §9 dissects node 4.
 
 ### 9.1 The problem in simple terms
 
@@ -686,3 +707,47 @@ Buildable sub-targets, in order of tractability:
    low-degree residue; closes node 4 there. *Low risk, partial coverage.*
 3. **(2b) The dense loose-cover heart** — the genuine open research: show an overlapping near-maximal confusion cover
    forces a structure (partial geometry) a primitive non-geometric scheme lacks. *No current technique; the frontier.*
+
+### 9.6 The multiplicity reframe — from "halve the max" to a global mass argument (the better-posed handle)
+
+The fixed-threshold halving (kill all `>c/2` sets at once with one avoiding `v`) is *fragile*: its obstruction is a
+cover, and tuning the constant `ρ` (call a set big if `|C|>ρc`) likely does not save it — if the largest avoidable
+threshold is `c(1−o(1))`, the per-step drop is too slow (`~n` steps, not `O(log n)`). **The robust replacement is a
+global multiplicity / mass argument** (the productive reframe):
+
+- For a family of confusion sets `C₁,…,C_N` (the big ones), pinning a vertex `v` **kills exactly the sets `v`
+  distinguishes** (`v ∉ Cᵢ`) and **leaves the ones it lies in** (`v ∈ Cᵢ`, since pinning a member never breaks a
+  confusion — `v` relates identically to that pair). So pinning `v` kills `N − #{i : v ∈ Cᵢ}` sets.
+- **Double-count:** `Σᵥ #{i : v∈Cᵢ} = Σᵢ |Cᵢ|`, so the **least-covered vertex lies in `≤ L := (Σᵢ|Cᵢ|)/n` big sets**
+  (the average **multiplicity / load**). Pinning it leaves `≤ L` big sets; clean them up with `≤ L` more distinguishing
+  pins. **So one halving costs `1 + L` pins, and `c → O(1)` in `O(L·log n)` base — polynomial iff `L = O(1)`.**
+- **This defeats the cover when `L = O(1)`** even though no single avoiding `v` exists: a *minimal* cover (`N ≈ n/c`,
+  each vertex in `~1` big set) has `L = O(1)` ⟹ `O(1)` cleanup ⟹ `c` halves. The cover only genuinely obstructs when
+  `L = ω(1)` — **a high-multiplicity cover, where every vertex lies in *many* big confusion sets**.
+
+**The payoff — the refined node-4 crux:** high multiplicity `L` = each point on many "lines" = a **thick** line system
+= the Johnson/Hamming **Cameron** case (carved by G3). Low multiplicity = thin/net (defeated by the mass argument or
+by primitivity, §9.3-2a). **So node 4 sharpens to: the residue's confusion-cover multiplicity `L = (Σ_{|C|>ρc}|C|)/n`
+is bounded (`O(1)` / `O(log n)`).** `L` is a *concrete, computable* quantity (unlike "is it Cameron"), so the gap
+becomes measurable. (User's two metrics: (a) count form `N − Σ|Cᵢ|/n` = sets removed by the best pin; (b) a
+**size-weighted** form — weight by `|Cᵢ|` so the argument prioritises shattering a *large* set over many small ones,
+since reducing `c` needs killing the biggest. The size-weighted potential `Σ|Cᵢ|²` or "mass above `ρc`" is the right
+monovariant when the stacked region is all small covers.)
+
+**Caveat (honest):** "`L` bounded for non-Cameron" is still morally the thick⟹Cameron classification — but as a
+*measured quantity* it may admit a direct combinatorial/coherence bound the abstract "Cameron" predicate does not, and
+it is exactly what the probe below can settle.
+
+### 9.7 The `N_ρ` / multiplicity probe (the agreed next target)
+
+Measure, on the residue (Shrikhande, Clebsch, Chang) vs the carved geometric families (rook `L(m)`, Johnson `T(m)`),
+as a function of the size threshold `ρ ∈ (0,1)` and the base `T` (bare, +1, +2 individualizations):
+- **`N_ρ`** = number of *distinct* confusion sets of size `> ρ·c(X_T)` (the cover-count; `card_bigClasses` analogue).
+- **`L_ρ`** = `(Σ_{|C|>ρc} |C|) / n` = the average **multiplicity / load** (the §9.6 monovariant).
+- **`minMult_ρ`** = `min_v #{big sets containing v}` = the per-halving cleanup cost (the operational quantity).
+- **mass-weighted potential** `Σ_{|C|>ρc}|C|²` and its drop per individualization (the size-weighted monovariant).
+
+**The hypothesis to test:** the residue has `L_ρ`/`minMult_ρ = O(1)` (and `N_ρ < n/c`) at some constant `ρ < 1`,
+while the geometric families have `L_ρ = ω(1)` / `N_ρ ≥ n/c` (a thick cover). If so: the multiplicity is the provable
+handle, the probe pins the exact `ρ`, and the Lean engine generalizes from `1/2`-halving to the `(1+L)`-cleanup form.
+Extends `A2MonovariantProbe.cs`; reuses the residue/carved SRG fixtures already there.
