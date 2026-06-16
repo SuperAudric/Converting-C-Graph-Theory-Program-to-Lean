@@ -2602,6 +2602,113 @@ theorem big_confusion_perm {π : Equiv.Perm (Fin n)}
       ↔ X.indistinguishingNumber < 2 * (X.confusionSet α β).card := by
   rw [X.card_confusionSet_perm hπ α β]
 
+/-- §CC.22c (D1) **The confusion multiplicity (load) of a vertex** — the number of big confusion *pairs* `(α,β)`
+(`α ≠ β`, `c(X) < 2·|C(α,β)|`) that `v` fails to distinguish (`v ∈ C(α,β)`). The §9.6 cover-load quantity (its
+`min` over `v` is `minMult`, the cleanup cost of one halving); pinning the least-loaded `v` is the cascade step. Pair
+form (`≥` the distinct-set count `bigClasses`); bounding it bounds the cleanup `M`. -/
+noncomputable def confusionMultiplicity (v : Fin n) : Nat :=
+  ((Finset.univ : Finset (Fin n × Fin n)).filter
+    (fun p => p.1 ≠ p.2 ∧ X.indistinguishingNumber < 2 * (X.confusionSet p.1 p.2).card
+      ∧ v ∈ X.confusionSet p.1 p.2)).card
+
+/-- §CC.22c (D1, the multiplicity punchline) **Confusion multiplicity is a CC-automorphism invariant.**
+`confusionMultiplicity (π v) = confusionMultiplicity v` for a `relOf`-preserving `π`: the product map
+`(α,β) ↦ (π α, π β)` bijects the big pairs `v` lies in onto those `π v` lies in (`big_confusion_perm` +
+`mem_confusionSet_perm` + `π` injective). So a vertex's cover-load is **constant on automorphism orbits** — hence
+`minMult` is `Aut`-invariant, and on a *vertex-transitive* scheme (bare residue, schurian) it is literally constant,
+`= L = (Σ_{big}|C|)/n`, with no min-vs-average slack. The D1 deliverable: the cover's load profile is rigid. Axiom-clean. -/
+theorem confusionMultiplicity_perm {π : Equiv.Perm (Fin n)}
+    (hπ : ∀ a b : Fin n, X.relOf (π a) (π b) = X.relOf a b) (v : Fin n) :
+    X.confusionMultiplicity (π v) = X.confusionMultiplicity v := by
+  classical
+  have hσinj : Function.Injective (fun p : Fin n × Fin n => (π p.1, π p.2)) := by
+    intro p q h
+    simp only [Prod.mk.injEq] at h
+    exact Prod.ext (π.injective h.1) (π.injective h.2)
+  unfold confusionMultiplicity
+  have hset : ((Finset.univ : Finset (Fin n × Fin n)).filter
+        (fun p => p.1 ≠ p.2 ∧ X.indistinguishingNumber < 2 * (X.confusionSet p.1 p.2).card
+          ∧ π v ∈ X.confusionSet p.1 p.2))
+      = ((Finset.univ : Finset (Fin n × Fin n)).filter
+          (fun p => p.1 ≠ p.2 ∧ X.indistinguishingNumber < 2 * (X.confusionSet p.1 p.2).card
+            ∧ v ∈ X.confusionSet p.1 p.2)).image (fun p => (π p.1, π p.2)) := by
+    ext ⟨a, b⟩
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image, Prod.mk.injEq]
+    constructor
+    · rintro ⟨hne, hbig, hmem⟩
+      refine ⟨(π.symm a, π.symm b), ⟨?_, ?_, ?_⟩, π.apply_symm_apply a, π.apply_symm_apply b⟩
+      · show π.symm a ≠ π.symm b
+        intro he; exact hne (by rw [← π.apply_symm_apply a, ← π.apply_symm_apply b, he])
+      · show X.indistinguishingNumber < 2 * (X.confusionSet (π.symm a) (π.symm b)).card
+        rw [← X.card_confusionSet_perm hπ (π.symm a) (π.symm b), π.apply_symm_apply,
+          π.apply_symm_apply]; exact hbig
+      · show v ∈ X.confusionSet (π.symm a) (π.symm b)
+        rw [← X.mem_confusionSet_perm hπ (π.symm a) (π.symm b) v, π.apply_symm_apply,
+          π.apply_symm_apply]; exact hmem
+    · rintro ⟨⟨p1, p2⟩, ⟨hne, hbig, hmem⟩, ha, hb⟩
+      subst ha; subst hb
+      refine ⟨fun he => hne (π.injective he), ?_, ?_⟩
+      · rwa [X.card_confusionSet_perm hπ p1 p2]
+      · rw [X.mem_confusionSet_perm hπ p1 p2 v]; exact hmem
+  rw [hset, Finset.card_image_of_injective _ hσinj]
+
+/-! ### §CC.22d — the thin side of D2 (route §9.9): bounded `minMult` ⟹ bounded load (the `(1+L)`-cleanup)
+
+D1 (`§CC.22c`) made cover-load an `Aut`-invariant. The decomposition (§9.9) then splits on `minMult` *directly*: a
+vertex of bounded load yields a small hitting set that distinguishes every big pair (so `c` halves — cascade), while
+*unbounded* `minMult` is the thick case routed to Cameron (D3, the cited side, **not** CGGP-blocked — CGGP is thin).
+This section lands the **thin side**, the §9.6 `(1+L)`-cleanup made rigorous, reducing the cascade's open content to the
+*computable* `minMult` the probe measures. The partial-geometry extraction is now needed only for D3's thick→Cameron leg. -/
+
+/-- §CC.22d (route §9.6/§9.9) **Bounded minimum multiplicity** — at every over-`B` base, *some* vertex lies in at most
+`M` big confusion pairs (`confusionMultiplicity ≤ M`), i.e. `minMult ≤ M`. The sharpest computable form of the §9.6
+cover-load hypothesis (the probe's `minMult`). Carried, never an `axiom`. -/
+def BoundedMinMult (B M : Nat) : Prop :=
+  ∀ T : Finset (Fin n), B < X.potential T →
+    ∃ v : Fin n, (pointExtension X T).confusionMultiplicity v ≤ M
+
+/-- §CC.22d (route §9.6 — **the `(1+L)`-cleanup, formalized**) **Bounded minimum multiplicity ⟹ bounded confusion load.**
+A least-loaded vertex `v` (in `≤ M` big pairs) builds the hitting set `S = {v} ∪ {α : (α,β) a big pair through v}`,
+`|S| ≤ M+1`, that distinguishes *every* big pair: `v` distinguishes every big pair it avoids (kill lemma), and for a big
+pair `(α,β)` *through* `v`, the endpoint `α ∈ S` distinguishes it (`relOf α α ≠ relOf α β`, as `α ≠ β`). So
+`BoundedMinMult B M ⟹ BoundedConfusionLoad B (M+1)` — the §9.6 cleanup made rigorous, reducing the cascade's open content
+to the computable `minMult`. Composes to the seal via `boundedConfusionMultiplicity_of_boundedConfusionLoad`. Axiom-clean. -/
+theorem boundedConfusionLoad_of_boundedMinMult {B M : Nat} (h : X.BoundedMinMult B M) :
+    X.BoundedConfusionLoad B (M + 1) := by
+  classical
+  intro T hT
+  obtain ⟨v, hv⟩ := h T hT
+  set Y := pointExtension X T with hY
+  unfold confusionMultiplicity at hv
+  set bigf := (Finset.univ : Finset (Fin n × Fin n)).filter
+    (fun p => p.1 ≠ p.2 ∧ Y.indistinguishingNumber < 2 * (Y.confusionSet p.1 p.2).card
+      ∧ v ∈ Y.confusionSet p.1 p.2) with hbigf
+  refine ⟨insert v (bigf.image Prod.fst), ?_, ?_⟩
+  · exact le_trans (Finset.card_insert_le _ _)
+      (Nat.add_le_add_right (le_trans Finset.card_image_le hv) 1)
+  · intro α β hαβ hdist
+    by_contra hlt
+    push_neg at hlt
+    have hvmem : v ∈ Y.confusionSet α β := by
+      simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and]
+      exact hdist v (Finset.mem_insert_self v _)
+    have hαβbig : (α, β) ∈ bigf := by
+      simp only [hbigf, Finset.mem_filter, Finset.mem_univ, true_and]
+      exact ⟨hαβ, hlt, hvmem⟩
+    have hαS : α ∈ insert v (bigf.image Prod.fst) :=
+      Finset.mem_insert_of_mem (Finset.mem_image.2 ⟨(α, β), hαβbig, rfl⟩)
+    exact (Y.not_isReflexive_relOf_of_ne hαβ) ⟨α, hdist α hαS⟩
+
+/-- §CC.22d **Bounded `minMult` ⟹ the cascade-rate hypothesis** — `BoundedMinMult B M ⟹
+BoundedConfusionMultiplicity B (M+1)`, composing the cleanup `boundedConfusionLoad_of_boundedMinMult` with the
+load-bridge `boundedConfusionMultiplicity_of_boundedConfusionLoad`. So the whole open content of the cascade reduces to
+**"the residue has bounded `minMult`"** (the probe quantity); feeds `reachesRigidOrCameron_viaBoundedMultiplicity` →
+the polynomial seal. Axiom-clean. -/
+theorem boundedConfusionMultiplicity_of_boundedMinMult {B M : Nat} (h : X.BoundedMinMult B M) :
+    X.BoundedConfusionMultiplicity B (M + 1) :=
+  X.boundedConfusionMultiplicity_of_boundedConfusionLoad
+    (X.boundedConfusionLoad_of_boundedMinMult h)
+
 end CoherentConfig
 
 end ChainDescent

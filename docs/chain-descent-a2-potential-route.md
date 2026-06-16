@@ -1113,3 +1113,31 @@ polynomial.
 The plan makes node 4 *attackable in pieces* (scaffold → rung → extraction) rather than monolithic, and pins exactly
 which piece is the irreducible research gap. If D2/D3-general resist, the floor is cxt-scoping route 3 (carry the
 predicate) — but the target is the direct proof.
+
+### 9.9.6 Progress (2026-06-16) — D1 done; D2 reframed onto `minMult` and the thin side landed
+
+**D1 LANDED, axiom-clean (`§CC.22c`).** Confusion-set equivariance (`confusionSet_perm`, `card_…`, `mem_…`,
+`big_confusion_perm`) + the punchline **`confusionMultiplicity_perm`** (`mult(π v) = mult(v)` for a CC automorphism,
+where `confusionMultiplicity v` = #big pairs through `v`). So **cover-load is `Aut`-invariant**: `minMult` is constant on
+automorphism orbits, and on the *vertex-transitive* bare scheme it is literally constant `= L = (Σ_{big}|C|)/n` (no
+min-vs-average slack).
+
+**D1's invariance reframed D2 — the dichotomy is on `minMult` directly, not via abstract extraction.** Because `minMult`
+is now a rigid invariant, the clean split is: **bounded `minMult` (thin) ⟹ cascade** (provable) vs **unbounded `minMult`
+(thick) ⟹ Cameron** (D3, cited; **not** CGGP-blocked — CGGP is thin). The abstract "partial-geometry extraction" is needed
+*only* on the thick→Cameron leg (D3), not for the thin side.
+
+**The thin side LANDED, axiom-clean (`§CC.22d`) — the §9.6 `(1+L)`-cleanup, finally formalized.** `BoundedMinMult B M`
+(some vertex in `≤ M` big pairs per over-`B` base) ⟹ `BoundedConfusionLoad B (M+1)` (`boundedConfusionLoad_of_boundedMinMult`:
+the hitting set `{v} ∪ {α : (α,β) big through v}` distinguishes every big pair — `v` kills those it avoids, the endpoint
+`α` kills those through `v`) ⟹ `BoundedConfusionMultiplicity B (M+1)` (`boundedConfusionMultiplicity_of_boundedMinMult`)
+⟹ the polynomial seal. **So the entire cascade open content is now the single computable statement "the residue has
+bounded `minMult`"** — the exact quantity the probe measures.
+
+**Updated gap map.** The open content of node 4 is now precisely: **`BoundedMinMult` for the residue** = "non-Cameron
+primitive ⟹ bounded `minMult` at every over-`B` base." Its complement (unbounded `minMult` = thick) is the D3 thick→Cameron
+leg (cited Babai-thickness, the partial-geometry extraction lives here). **NEXT:** either (a) D3 — connect "unbounded
+`minMult`" to "thick partial geometry ⟹ named family ⟹ Cameron" (the cited dichotomy, isolating the carried predicate);
+or (b) the node-2 rung (affine/FDF via `dominatorReachable_of_rainbowRank`), which discharges a concrete thin sub-family.
+The irreducible research gap is unchanged (a primitive non-geometric SRG keeps `minMult` bounded — no current technique),
+but it is now a single *computable* predicate with the entire thin-side machinery proved beneath it.
