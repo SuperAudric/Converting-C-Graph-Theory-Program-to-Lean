@@ -1186,6 +1186,44 @@ theorem reachesRigidOrCameron_viaBoundedMultiplicity {IsLarge : Nat → Prop}
   exact ⟨m, reachesRigidOrCameron_viaBoundedExtensionParams hClassify S hne hrank hsub hTcard.le
     (lt_of_le_of_lt hpot hBT) (hcatch T) hImprim⟩
 
+/-- **THE SEAL VIA SMALL-AUT BOUNDED MULTIPLICITY (the sharp `minMult`-form dichotomy — route §9.9 D3).** The faithful
+large/small dichotomy stated in the *achievable* quantity. Carry `hSmallAutThin : ¬IsLarge → BoundedMinMult B M`
+("small Aut ⟹ some vertex lies in `≤ M` big confusion pairs at every over-`B` base", i.e. bounded `minMult`), and
+`by_cases` on largeness: **large** ⟹ the cited **G3** (`exhaustiveObstruction_scheme`) gives Cameron on the primitive
+floor, else `hImprim`; **small** ⟹ `hSmallAutThin` feeds `boundedConfusionMultiplicity_of_boundedMinMult` (the §CC.22d
+`(1+L)`-cleanup) ⟹ `…viaBoundedMultiplicity` (the §CC.20b cascade engine). **Strictly sharper than
+`…viaSmallAutShatters`:** it asks only for *bounded* load (`minMult ≤ M`), not the stronger *zero* load
+(`¬BigConfusionCover` = an avoiding vertex) — which the probe (§9.7) showed rarely holds, since confusion covers are
+intrinsically loose. So the carried citation `hSmallAutThin` is the **`minMult`-form of Babai's SRG structure theorem**
+(small Aut ⟹ not a thick named family ⟹ bounded confusion multiplicity) — the exact computable quantity the probe
+measures, and the entire open content of node 4 (route §9.9: "primitive non-Cameron ⟹ thin"). Seal `modulo
+{G3 (hClassify) + hSmallAutThin (small-Aut⟹thin) + hcatch + hImprim}`. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaBoundedMinMult {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B M : Nat} (hB : 1 ≤ B)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
+    (hSmallAutThin : ¬ IsLargeSchemeViaAut IsLarge n S →
+        (S.toAssociationScheme.toCoherentConfig hne).BoundedMinMult B M)
+    (hcatch : ∀ T : Finset (Fin n),
+        WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ∃ bound : Nat,
+      ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+        ∨ IsCameronScheme n S := by
+  by_cases hlarge : IsLargeSchemeViaAut IsLarge n S
+  · -- Large ⟹ the cited G3 gives Cameron on the primitive floor, else `hImprim` recovers.
+    by_cases hprim : S.toAssociationScheme.IsPrimitive
+    · exact ⟨0, Or.inr (exhaustiveObstruction_scheme hClassify S hne hprim hrank hlarge)⟩
+    · exact ⟨0, Or.inl (Or.inl (hImprim hprim))⟩
+  · -- Small Aut ⟹ bounded `minMult` ⟹ cascade (the §CC.22d cleanup + §CC.20b engine).
+    exact reachesRigidOrCameron_viaBoundedMultiplicity hB hClassify S hne hrank hroom
+      ((S.toAssociationScheme.toCoherentConfig hne).boundedConfusionMultiplicity_of_boundedMinMult
+        (hSmallAutThin hlarge))
+      hcatch hImprim
+
 /-- **THE SEAL VIA NO BIG-CONFUSION COVER (Stage 1b, G-cite — the two citations SEPARATED to isolated literals).**
 The A2 open content packaged so each carried citation is **one literal external theorem** (toward replacing each
 with its Lean proof). The cover dichotomy `cover ⟹ Cameron` is *factored* into its two genuine pieces, instead of

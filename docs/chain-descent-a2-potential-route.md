@@ -1141,3 +1141,52 @@ leg (cited Babai-thickness, the partial-geometry extraction lives here). **NEXT:
 or (b) the node-2 rung (affine/FDF via `dominatorReachable_of_rainbowRank`), which discharges a concrete thin sub-family.
 The irreducible research gap is unchanged (a primitive non-geometric SRG keeps `minMult` bounded — no current technique),
 but it is now a single *computable* predicate with the entire thin-side machinery proved beneath it.
+
+### 9.9.7 D3 — the dichotomy capstone landed; the wall analyzed; the method of attack
+
+**D3 wiring LANDED, axiom-clean (`reachesRigidOrCameron_viaBoundedMinMult`, `§S-gate2`).** The faithful large/small
+dichotomy in the *achievable* quantity: carry `hSmallAutThin : ¬IsLarge → BoundedMinMult B M` ("small Aut ⟹ bounded
+`minMult`"), `by_cases` largeness: large → cited **G3** → Cameron / `hImprim`; small → `boundedConfusionMultiplicity_of_
+boundedMinMult` (§CC.22d) → `…viaBoundedMultiplicity` (cascade). **Strictly sharper than `…viaSmallAutShatters`** — asks
+only *bounded* load, not *zero* load (`¬cover`), which the probe showed rarely holds (covers are loose). Seal `modulo
+{G3 + hSmallAutThin + hcatch + hImprim}`.
+
+**The wall (precise).** Discharging `hSmallAutThin` = **thick (`minMult` unbounded) ⟹ large Aut**. This is irreducible:
+the **rook** graph is thick, needs `√n` base, and is saved *only* by its large Aut (it is Cameron) — δ′/forced triangles
+give `√n` there, so thick **cannot** route to cascade. So "thick ⟹ large Aut" is unavoidable, and it is Babai's
+individualization–refinement / SRG-structure theorem (CFSG-based) — a slice of GI∈P-for-SRGs. **No full portable proof
+exists.** The wall is real and located exactly at `hSmallAutThin`.
+
+**Method of attack (the realistic decomposition of `hSmallAutThin`):**
+1. **Carried-citation sharpening — DONE.** `hSmallAutThin` is the sharpest faithful form: the `minMult`-form of Babai's
+   structure theorem, in the computable quantity the probe measures, and *weaker* than the old `¬cover` carry.
+2. **Threshold ladder (pick the honest endpoint):**
+   - **Sub-exponential, citable, Cameron-free:** carry **Spielman** (every primitive SRG individualizes to discrete at
+     `Õ(n^{1/3})`) ⟹ at `B = Õ(n^{1/3})` every over-`B` base is discrete (`minMult = 0`), so `hSmallAutThin` holds
+     *unconditionally* — the seal is honestly sub-exponential and the largeness/Cameron machinery is unneeded. A clean
+     `…viaSpielman` capstone is buildable (one carried literal, no G3). This is the **fully-citable floor**.
+   - **Polynomial (the target):** `hSmallAutThin` at a poly threshold = the **open rank-3 base case**. No citation.
+3. **Shrink the open scope — node-2 rung (the concrete next build).** Discharge `BoundedMinMult` for the **affine/FDF
+   thin family** via the landed δ′/`RainbowRigid` (`dominatorReachable_of_rainbowRank`): δ′ closure gives *discrete* at a
+   bounded base ⟹ `minMult = 0` ⟹ `BoundedMinMult` outright (no `¬IsLarge` guard needed). `clebschZ4` is the `n=16`
+   instance; the gap is a *uniform* rainbow rank for the parametric family (real work, landed template). **This is NOT a
+   node-4 ladder:** node 2 is the part CGGP *proved portable* (`base≤2⟹WL-dim≤4`), and the δ′/rainbow engine is uniform
+   over rainbow-rigid families (a few rungs, not infinite). It does **not** extend to node 4 — the mechanism relies on the
+   geometric forced-triangle structure node 4 lacks. Companion: **node 3** (bounded-eigenvalue Neumaier-exceptional = the
+   *constructible* residue, Shrikhande/Chang) is a finite list, handled by Neumaier finiteness. So node 2 (this rung) +
+   node 3 (finiteness) cover everything constructible, leaving **only node 4 — which has no known witness at all.**
+4. **The CFSG-free Neumaier route — NOT a way through (record only, do not pursue).** The tempting chain thick ⟹ (Neumaier
+   claw bound) Johnson/Hamming *parameters* ⟹ (identification) the named family ⟹ (group computation) large Aut **breaks at
+   the identification step**: cospectral mates have equal parameters but different Aut — Shrikhande vs the 4×4 rook
+   (SRG(16,6,2,2)), the Chang graphs vs `T(8)` (SRG(28,12,6,4)) — and these are *exactly* residue-vs-Cameron. So
+   "named-family parameters ⟹ is the named family / large Aut" is false, and separating the cospectral mates needs the
+   **dynamic** individualization behaviour (rook stays thick, Shrikhande shatters) = Babai's individualization–refinement =
+   the CFSG content (the probe confirmed 2-rank does not separate them). Neumaier buys **node 3** (bounded eigenvalue:
+   finite exceptions + named families), **not node 4** (unbounded eigenvalue, where finiteness fails). So option 4 is a
+   large spectral-theory build that arrives at the *same node-4 wall* by a costlier road, plus an extra identification gap.
+   Value = a map of what spectral tools buy (node 3) and don't (node 4), not a path to the goal.
+
+**Recommended continuation: build the node-2 rung (step 3)** — it is the one concrete, provable, scope-shrinking move,
+it validates the whole `viaBoundedMinMult` pipeline on a real family (as `clebschZ4` did for δ′), and it incrementally
+peels the residue down to the genuine node-4 core. The poly discharge of `hSmallAutThin` for the non-geometric core
+(step 2-poly) is the long-horizon open frontier; the Spielman floor (step 2-subexp) is the honest fully-citable fallback.
