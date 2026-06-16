@@ -77,6 +77,12 @@ a *polynomial* threshold it is the **open rank-3 base case**. So the seal, at it
 thresholds, gives **sub-exponential-base** "reaches rigid or Cameron"; polynomial is GI-adjacent open. `hcatch`'s target
 is the `dimWL(X) ≤ dimWL(X_α)+1` exchange (CFI-1992 Thm 5.2); `hImprim` is project block-tower infra, not a citation. The
 full citation map + what proving each takes is **§8**. The §CC.21 balanced-splitter defs are parked as the 1-WL-cell model.
+**★ CITATION ADJUSTMENT — Phases 1–2 LANDED (2026-06-16, axiom-clean, build green; §8.5):** the **faithful-direction**
+capstone `reachesRigidOrCameron_viaSmallAutShatters` now carries `hSmallAutDiscretizes : ¬IsLarge → ∀ over-`B` base,
+¬BigConfusionCover` (= "small Aut ⟹ shatters", the literature-true Babai/Kivva direction) instead of the CGGP-false
+`hNeumaier : cover ⟹ large`; fed by the citation-free bridge `not_bigConfusionCover_of_allSingletonFiber` (`complete ⟹
+¬cover`, `§CC.22`). `…viaNoConfusionCover` (the `hNeumaier` form) kept, superseded. **Remaining = Phase 3:** carry the
+named `hBabaiBase` citation + lift the bridge to `cover ⟹ b(X)>B`, gated on pinning Babai's individualization bound `B(n)`.
 
 ---
 
@@ -501,6 +507,19 @@ It separates the *provable* project content from the citation:
   machinery** (`allSingletonFiber_of_card_gt_subset` / `DominatorReachable`): a complete `X_T` has no surviving confusion
   class, so `cover ⟹ ¬complete`.
 - **Compose:** `cover ⟹ b(X) > B ⟹` (contrapositive of `hBabaiBase`) `IsLarge` `= hNeumaier`.
+
+**★ PHASES 1–2 LANDED (2026-06-16, axiom-clean, build green) — the citation-independent half is done.**
+- **Phase 1 (sub-task 3 — the provable bridge) ✅** `CoherentConfig.confusionSet_eq_empty_of_allSingletonFiber`
+  (`complete ⟹ empty confusion sets`, via `relOf_diag_right_eq` + `SingletonFiber`) + **`not_bigConfusionCover_of_allSingletonFiber`**
+  (`complete ⟹ ¬BigConfusionCover` = `cover ⟹ ¬complete`), both `§CC.22`. The load-bearing, citation-free heart of the
+  factoring — no `B(n)` needed.
+- **Phase 2 (the faithful-direction capstone) ✅** `reachesRigidOrCameron_viaSmallAutShatters` (`CascadeAffine.lean §S-gate2`)
+  carries `hSmallAutDiscretizes : ¬IsLarge → ∀ over-`B` base, ¬BigConfusionCover(X_T)` (= "small Aut ⟹ shatters", the
+  **literature-true** Babai/Kivva direction) and `by_cases` on the genuine `IsLarge` dichotomy. Contrapositive of `hNeumaier`
+  so no weaker; the gain is a faithfully-stated, *derivable* citation (the old "cover ⟹ large" direction is CGGP-false and
+  not derivable from Babai). This is the **Fallback Option B landed as a sibling** — `…viaNoConfusionCover` kept, marked superseded.
+- **Phase 3 (REMAINING, gated on sub-task 1):** factor `hSmallAutDiscretizes` further into {`hBabaiBase` named citation + the
+  Phase-1 bridge + the base-number lift}. Blocked on pinning `B(n)` (sub-task 1 below).
 
 **Concrete sub-tasks (in order).**
 1. **[VERIFY FIRST — gating] Pin the exact Babai SRG individualization bound + threshold `B(n)`.** Is it `Õ(√n)`?

@@ -1209,6 +1209,56 @@ theorem reachesRigidOrCameron_viaNoConfusionCover {IsLarge : Nat → Prop}
       ((S.toAssociationScheme.toCoherentConfig hne).indistinguishingHalves_of_not_bigConfusionCover B hcov)
       hcatch hImprim
 
+/-- **THE SEAL VIA SMALL-AUT SHATTERING (Stage 1b, G-cite — the FAITHFUL-direction citation; route-doc §8.5).**
+The citation-faithful sibling of `reachesRigidOrCameron_viaNoConfusionCover`: it carries the geometric/structure
+citation in the **direction the literature actually proves** and case-splits on the **genuine largeness dichotomy**
+(`IsLarge`?), not on "a cover exists."
+
+* `…viaNoConfusionCover` carries `hNeumaier : (∃ over-`B` cover) ⟹ IsLarge` — the "high WL-dim ⟹ large Aut" reading,
+  which is the **CGGP-false** direction ("geometric ⟹ large Aut" is false; a generic partial geometry / CGGP
+  construction has trivial Aut). It states the citation *backwards* from what Babai's structure theorem gives.
+* This capstone instead carries `hSmallAutDiscretizes : ¬IsLarge ⟹ ∀ over-`B` base, ¬BigConfusionCover` — *"a
+  small-Aut primitive SRG shatters: a bounded base discretizes its extension, leaving no surviving confusion cover."*
+  This is the **true** direction of **Babai's SRG structure theorem + Kivva** (small Aut ⟹ large-motion ⟹ bounded
+  base ⟹ discretizes), and — unlike `hNeumaier`'s direction — it is *derivable from honest sources*: Phase 3 factors
+  it as {Babai's cited `¬IsLarge ⟹ bounded complete base` + the provable bridge
+  `not_bigConfusionCover_of_allSingletonFiber` (`complete ⟹ ¬cover`, §CC.22)}. Logically `hSmallAutDiscretizes` is the
+  contrapositive of `hNeumaier`, so this is **no weaker**; the gain is faithfulness of statement + a derivation path.
+
+Proof: `by_cases` on `IsLarge`. **Large** ⟹ primitive → the cited G3 (`exhaustiveObstruction_scheme`) → Cameron;
+imprimitive → `hImprim` recovers. **¬Large** ⟹ `hSmallAutDiscretizes` gives no over-`B` cover, so
+`indistinguishingHalves_of_not_bigConfusionCover` feeds `reachesRigidOrCameron_viaShattering` (recovered). Seal
+**`modulo {G3 (hClassify) + Babai-SRG-structure (hSmallAutDiscretizes) + hcatch + hImprim}`**. **Honest scope
+unchanged:** faithful at the *sub-exponential* threshold (Babai/Kivva/G3); the polynomial version is the open rank-3
+base case (route-doc §8). Axiom-clean. -/
+theorem reachesRigidOrCameron_viaSmallAutShatters {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B : Nat} (hB : 1 ≤ B)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
+    (hSmallAutDiscretizes : ¬ IsLargeSchemeViaAut IsLarge n S →
+        ∀ T : Finset (Fin n),
+          B < (S.toAssociationScheme.toCoherentConfig hne).potential T →
+          ¬ (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T).BigConfusionCover)
+    (hcatch : ∀ T : Finset (Fin n),
+        WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ∃ bound : Nat,
+      ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+        ∨ IsCameronScheme n S := by
+  by_cases hlarge : IsLargeSchemeViaAut IsLarge n S
+  · -- Large ⟹ the cited G3 gives Cameron on the primitive floor, else `hImprim` recovers.
+    by_cases hprim : S.toAssociationScheme.IsPrimitive
+    · exact ⟨0, Or.inr (exhaustiveObstruction_scheme hClassify S hne hprim hrank hlarge)⟩
+    · exact ⟨0, Or.inl (Or.inl (hImprim hprim))⟩
+  · -- Small Aut ⟹ shatters (no over-`B` cover) ⟹ recovered.
+    exact reachesRigidOrCameron_viaShattering hB hClassify S hne hrank hroom
+      ((S.toAssociationScheme.toCoherentConfig hne).indistinguishingHalves_of_not_bigConfusionCover B
+        (hSmallAutDiscretizes hlarge))
+      hcatch hImprim
+
 end SGate2
 
 

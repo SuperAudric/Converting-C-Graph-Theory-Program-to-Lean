@@ -2299,6 +2299,37 @@ theorem card_bigClasses_mul_ge_of_cover (h : X.BigConfusionCover) :
         simpa [smul_eq_mul] using
           Finset.sum_le_card_nsmul X.bigClasses (fun S => S.card) X.indistinguishingNumber hsize
 
+/-- §CC.22 (Stage 1b, route doc §8.5 — the citation-side bridge) **A complete extension has no surviving
+confusion class.** When every point of `X` is a singleton fiber (`X` complete / discrete — the conclusion of
+`allSingletonFiber_of_card_gt_subset`), any pair `α ≠ β` has an **empty** confusion set: a `γ` relating identically
+to `α` and `β` would force `α, β` into one reflexive class (`relOf_diag_right_eq`), which a singleton fiber forbids.
+Pure fiber coherence — no construction internals. The combinatorial half of the *faithful* `hNeumaier` citation
+("small Aut ⟹ a bounded base discretizes ⟹ no confusion cover"): completeness kills confusion. Axiom-clean. -/
+theorem confusionSet_eq_empty_of_allSingletonFiber
+    (hcomplete : ∀ v : Fin n, X.SingletonFiber v) {α β : Fin n} (hαβ : α ≠ β) :
+    X.confusionSet α β = ∅ := by
+  rw [Finset.eq_empty_iff_forall_notMem]
+  intro γ hγ
+  simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and] at hγ
+  exact hαβ (hcomplete α β (X.relOf_diag_right_eq hγ).symm).symm
+
+/-- §CC.22 (Stage 1b, route doc §8.5 — **the citation-side bridge, `cover ⟹ ¬ complete`**) **Completeness rules out
+a big-confusion cover.** If every point of `X` is a singleton fiber (`X` discrete) then `X` has no `BigConfusionCover`:
+the big confusion sets are all empty (`confusionSet_eq_empty_of_allSingletonFiber`), so they cover nothing. The
+contrapositive — *a `BigConfusionCover` on `X_T` forces `X_T` non-discrete, i.e. `T` not a base of `X`* — is the
+**provable, citation-free heart** of factoring `hNeumaier` into {Babai's SRG structure bound `¬IsLarge ⟹ bounded
+complete base` (cited, Phase 3) + this bridge}: a cover survives only *above* the base number, so a small-Aut scheme
+(bounded base by Babai) shatters. The honest replacement for the CGGP-false "cover ⟹ large Aut" reading. Needs
+`n ≥ 1`. Axiom-clean. -/
+theorem not_bigConfusionCover_of_allSingletonFiber
+    (hcomplete : ∀ v : Fin n, X.SingletonFiber v) (hn : 0 < n) :
+    ¬ X.BigConfusionCover := by
+  intro hcover
+  obtain ⟨α, β, hαβ, _, hmem⟩ := hcover ⟨0, hn⟩
+  rw [X.confusionSet_eq_empty_of_allSingletonFiber hcomplete hαβ] at hmem
+  exact Finset.notMem_empty _ hmem
+
 end CoherentConfig
 
 end ChainDescent
+
