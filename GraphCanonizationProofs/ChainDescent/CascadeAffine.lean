@@ -808,7 +808,8 @@ homogeneous-`Separable`-keyed `SeparabilityTransports` gate entirely. -/
   LIVE siblings (distinct results, kept):  `…_viaNoCover` (poly node-4 anchor, no largeness cite),
        `…_viaSmallAutShatters` (sub-exp citation), `…_viaG0powNeg` (closure discharged),
        `…_affineSlice` (cited 2-sep), `…_viaCompleteBase` (node-2 rung bridge).
-  ⊘ SUPERSEDED in this file:  `…_viaNoConfusionCover` (→ `…_viaSmallAutShatters`),
+  ⊘ SUPERSEDED in this file (now `private` ⟹ archived to `PrivateTheoremIndex.md`):
+       `…_viaNoConfusionCover` (→ `…_viaSmallAutShatters`),
        `…_viaExtensionSeparability` (cited Thm-4.1; live route is citation-free δ′).
   Every other `…_via*` here is a load-bearing INTERMEDIATE of the live chain.
   Full classification of all ~33 capstones: see the "SEAL CAPSTONE MAP" block in `Cascade.lean`. -/
@@ -928,7 +929,7 @@ them on the residue's one-point extension at every non-singleton fiber), the **c
 for small schemes via `exists_greedy_base_le_log`), and the landed `hImprim`. Stage 3 proves `hcite`
 restricted to the residue family (Route β) and discharges `hhyp` witness-constructively; `hcatch` is
 the remaining model content. -/
-theorem reachesRigidOrCameron_viaExtensionSeparability {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaExtensionSeparability {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -1296,7 +1297,7 @@ The proof case-splits on the cover: **no cover** ⟹ every over-`B` base shatter
 version is the open rank-3 base case (route-doc §8). CGGP (`n^Ω(n^{2/3})` trivial-Aut SRGs, all WL-dim ≤ 4) is the
 positive anchor that the residue stays tame; row-4 (generic non-geometric) is where it bites — the probe reframe argues
 row 4 has no rigid line system, hence no cover (it shatters, landing in the `¬cover` branch). Axiom-clean. -/
-theorem reachesRigidOrCameron_viaNoConfusionCover {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaNoConfusionCover {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B : Nat} (hB : 1 ≤ B)
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -3737,4 +3738,3 @@ theorem reachesRigidOrCameron_clebsch_viaPersistentTwinBlock
   reachesRigidOrCameron_viaPersistentTwinBlock hClassify clebschScheme hne hrank hCrux hImprim
 
 end ChainDescent
-

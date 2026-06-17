@@ -3362,7 +3362,8 @@ authoritative classification; the `PublicTheoremIndex.md` Description column car
     affine `…_viaAffineIrreducible`, `…_viaPowSeparation`, `…_viaTwinsAreSemilinear`,
            `…_viaCyclicSeparation`, `…_viaDominatorClosure`
 
-  ⊘ SUPERSEDED — historical formulations, kept for provenance only (tagged ⊘ at each decl):
+  ⊘ SUPERSEDED — historical formulations, now ARCHIVED (marked `private` ⟹ in `PrivateTheoremIndex.md`,
+  not the public index; provenance preserved, still compiled):
     old self-detection waterfall:  `…_viaRecovery`, `…_viaRecoveryOrAbelian`, `…_viaDepthRecovery`,
        `…_viaDepthRecovery'`, `…_viaSelfDetection`, `…_viaStableRecovery`,
        `…_viaSymmetricRecovery`, `…_viaBlockRecovery`
@@ -3370,9 +3371,8 @@ authoritative classification; the `PublicTheoremIndex.md` Description column car
     cover/citation variants:       `…_viaNoConfusionCover` (→ use `…_viaSmallAutShatters`),
        `…_viaExtensionSeparability` (cited Thm-4.1; the live route is citation-free δ′)
   These 12 capstone THEOREMS are a self-contained superseded subtree — nothing live depends on their
-  proof terms — so they are deletable as a follow-up. (Their shared *predicates*
-  `SchemeRecovered`/`SelfDetectsStably`/`SchemeRecoveredByDepth`/… ARE still live via `…_viaFusedSeal`,
-  so a delete pass removes only the theorems, not those defs.) Left in place for now. -/
+  proof terms — so privatizing them was safe (build green). Their shared *predicates*
+  `SchemeRecovered`/`SelfDetectsStably`/`SchemeRecoveredByDepth`/… stay PUBLIC and live via `…_viaFusedSeal`. -/
 
 /-! ### The seal's rigid side, concretely — the NON-VACUOUS recovery predicate
 
@@ -3462,7 +3462,7 @@ block decomposition that previously distinguished them was the vacuous detour; s
 genuinely false for a non-recovering scheme, so this disjunction is **not** trivially true — proving it for an
 arbitrary residual needs the open "non-recovering ⟹ Cameron" leak (the `s(C)` frontier), which is exactly why
 those hypotheses are carried. -/
-theorem reachesRigidOrCameron_viaRecovery {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaRecovery {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -3570,7 +3570,7 @@ abelian disjunct, where `reachesRigidOrCameron_viaRecovery` could not. Conclusio
 dichotomy on the symmetric case. The residual open content is the same `s(C)` leak (G2): a
 *non-abelian, non-recovering, non-Cameron* residual still cannot be placed, which is why the branch
 hypotheses are carried. -/
-theorem reachesRigidOrCameron_viaRecoveryOrAbelian {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaRecoveryOrAbelian {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4085,7 +4085,7 @@ depth-graded harvest (CFI at `tw`, Shrikhande at 2), where the per-level capston
 The carried content is the same `s(C)` leak (G2) plus the localisation (the shallow ∅→S₀ coverage inside
 `SchemeRecoveredByDepth`); subsumes `reachesRigidOrCameron_viaRecovery` via
 `schemeRecoveredByDepth_of_schemeRecovered`. -/
-theorem reachesRigidOrCameron_viaDepthRecovery {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaDepthRecovery {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4103,7 +4103,7 @@ theorem reachesRigidOrCameron_viaDepthRecovery {n : Nat} {IsLarge : Nat → Prop
 `hCascade : IsPrimitive ∧ ¬ IsLargeSchemeViaAut → SchemeRecoveredByDepth`. So `hCascade` is *exactly* the
 self-detection lemma (a primitive, small residual recovers at bounded depth), and the imprimitive branch
 stays on the landed block recovery. Wires `reachesRigidOrCameron'`. -/
-theorem reachesRigidOrCameron_viaDepthRecovery' {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaDepthRecovery' {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4136,7 +4136,7 @@ block recovery** (`hImprim`, G2-A), every rank-≥3 schurian scheme residual is 
 Cameron`. This is the seal with its *entire* open content concentrated into the single hypothesis
 `SelfDetectsAtDepth` — the self-detection lemma — with `IsPrimitive` honestly carried into the cascade branch.
 Proving `SelfDetectsAtDepth` for all primitive small residuals makes the seal unconditional modulo only G3. -/
-theorem reachesRigidOrCameron_viaSelfDetection {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaSelfDetection {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4163,7 +4163,7 @@ content concentrated into `SelfDetectsStably` — *primitive small residuals rec
 produces and the catalogue probe measures: the crux is now a statement about `CellsAreOrbits` (separability),
 not the harvest-witness `SchemeRecoveredByDepth`. Imprimitive branch on landed block recovery; modulo only the
 cited G3. -/
-theorem reachesRigidOrCameron_viaStableRecovery {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaStableRecovery {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4252,7 +4252,7 @@ abstract `reachesRigidOrCameron'` with the IR-core-free rigid predicate `SchemeR
 The group is still reproduced (`schemeAutGroup_eq_closure_of_schemeRecoveredWhileSymmetric`), so this is a
 strictly weaker seal than `reachesRigidOrCameron_viaStableRecovery` (which it subsumes via
 `schemeRecoveredWhileSymmetric_of_stablyRecoverable`). -/
-theorem reachesRigidOrCameron_viaSymmetricRecovery {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaSymmetricRecovery {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4341,7 +4341,7 @@ refinement-computable quotient + fiber recovery on the block system (non-vacuous
 constituents). The **sole irreducible carried content** is then `hCascade` — the small-**primitive** branch =
 **G2-B** (the open `s(C)` leak: primitive non-abelian non-recovering, uncitable per the deep-research pass) — plus the
 cited classification (G3). This is the honest end-state: a conditional seal `modulo {G3 + G2-B}`. -/
-theorem reachesRigidOrCameron_viaBlockRecovery {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaBlockRecovery {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4411,7 +4411,7 @@ is manifestly conditional.
 > `reachesRigidOrCameron_viaBoundedDepthSeparable` would carry the weaker hypothesis. Do **not** read this as
 > "the seal is closed for primitives."
 -/
-theorem reachesRigidOrCameron_viaDepthOneSeparable {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaDepthOneSeparable {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
@@ -4717,7 +4717,7 @@ with the crux discharged down to the sharper `PersistentTwinGivesIntraCellBlock`
 proven, only nontriviality open). Carries `hClassify` (G3), `hImprim`, and the open `hCrux`. The current deepest
 reduction of the primitive-floor seal: the converse's algebraic core (the fusion closure) is landed; the residue
 is the isolated nontriviality kernel. -/
-theorem reachesRigidOrCameron_viaIntraCellBlock {n : Nat} {IsLarge : Nat → Prop}
+private theorem reachesRigidOrCameron_viaIntraCellBlock {n : Nat} {IsLarge : Nat → Prop}
     {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
     (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
     (S : SchurianScheme n)
