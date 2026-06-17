@@ -143,12 +143,17 @@ all axiom-clean, build green, nothing committed (user commits):
 = "small-Aut primitive residue ⟹ `BoundedMinMult`"**, i.e. its contrapositive **thick (`minMult` unbounded) ⟹ large Aut**.
 This is *irreducible* (rook is thick, needs √n base, saved only by large Aut; δ′ gives √n there) = Babai SRG-structure / CFSG =
 a slice of GI∈P-for-SRGs = **node 4, no known witness, not known to mathematics.** **Method of attack = §9.9.7** (1 sharpen
-[done] · 2 threshold ladder: Spielman→sub-exp floor / poly→open · 3 node-2 rung [the concrete next build] · 4 Neumaier — NOT a
-way through). **Recommended next builds:** (a) **node-2 rung** — discharge `BoundedMinMult` for the affine/FDF thin family via
-`dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4` is the n=16 instance; gap = a uniform rainbow rank),
-shrinking the residue to node 4; (b) **Spielman floor** — a `…viaSpielman` capstone making the seal unconditional-modulo-citations
-at the sub-exponential threshold (Cameron-free). The poly discharge of `hSmallAutThin` for the non-geometric core is the
-long-horizon open frontier. **Read §9.9 (esp. §9.9.6 + §9.9.7) to continue.**
+[done] · 2 threshold ladder: Spielman→sub-exp floor / poly→open · 3 node-2 rung [bridge DONE §9.9.9, uniform-rank piece open] ·
+4 Neumaier — NOT a way through). **What's been done since (read §9.9.8 + §9.9.9):** the **row-4 falsifier probe** (§9.9.8 —
+42 small-Aut non-geometric SRGs, many `|Aut|=1`, all shatter, 0 falsifiers; node 3 only, node 4 unreached) and the
+**node-2 rung bridge** (§9.9.9 — `boundedConfusionMultiplicity_of_completeBase` + `reachesRigidOrCameron_viaCompleteBase`,
+δ′-discrete base ⟹ poly seal via the multiplicity pipeline, axiom-clean). **Recommended next builds:** (a) **the remaining
+node-2 work — a *uniform* rainbow rank** for a parametric affine/FDF family via `dominatorReachable_of_rainbowRank`
+(δ′→discrete→`minMult=0`; `clebschZ4` is the n=16 instance; the landed `reachesRigidOrCameron_viaCompleteBase` is its seal
+consumer; gap = generalizing the rainbow rank off n=16), shrinking the residue to node 4; (b) **Spielman floor** — a
+`…viaSpielman` capstone making the seal unconditional-modulo-citations at the sub-exponential threshold (Cameron-free). The
+poly discharge of `hSmallAutThin` for the non-geometric core is the long-horizon open frontier. **Read §9.9 (esp. §9.9.6 +
+§9.9.7, then §9.9.8 + §9.9.9) to continue.**
 
 **▶ ROW-4 SPORADICS PROBE DONE (2026-06-17, §9.9.8) — `hSmallAutThin` confirmed at TRIVIAL Aut, 0 falsifiers.**
 `A2MonovariantProbe.Probe_Row4Sporadics` loads the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang(28) + conference(29)
@@ -1222,10 +1227,14 @@ exists.** The wall is real and located exactly at `hSmallAutThin`.
    large spectral-theory build that arrives at the *same node-4 wall* by a costlier road, plus an extra identification gap.
    Value = a map of what spectral tools buy (node 3) and don't (node 4), not a path to the goal.
 
-**Recommended continuation: build the node-2 rung (step 3)** — it is the one concrete, provable, scope-shrinking move,
-it validates the whole `viaBoundedMinMult` pipeline on a real family (as `clebschZ4` did for δ′), and it incrementally
-peels the residue down to the genuine node-4 core. The poly discharge of `hSmallAutThin` for the non-geometric core
-(step 2-poly) is the long-horizon open frontier; the Spielman floor (step 2-subexp) is the honest fully-citable fallback.
+**Recommended continuation: the node-2 rung (step 3) — its pipeline-validation half is now LANDED (§9.9.9); the live
+piece is a *uniform* rainbow rank.** The bridge + capstone (`boundedConfusionMultiplicity_of_completeBase` /
+`reachesRigidOrCameron_viaCompleteBase`) route a δ′-discretizing thin family through the `…viaBoundedMultiplicity`
+pipeline, validating it on a real discreteness witness (as `clebschZ4` did for δ′). **The remaining, harder node-2 work
+is the family-level discharge: a uniform rainbow rank for a parametric affine/FDF family** (`dominatorReachable_of_rainbowRank`,
+generalizing `clebschZ4_closure` off the n=16 sporadic), which feeds `reachesRigidOrCameron_viaCompleteBase`. The poly
+discharge of `hSmallAutThin` for the non-geometric core (step 2-poly) is the long-horizon open frontier; the Spielman
+floor (step 2-subexp) is the honest fully-citable fallback.
 
 ### 9.9.8 Row-4 sporadics probe — DONE (2026-06-17): hSmallAutThin holds on trivial-Aut data, 0 falsifiers
 

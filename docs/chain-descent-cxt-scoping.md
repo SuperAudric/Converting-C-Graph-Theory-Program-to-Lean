@@ -14,7 +14,11 @@
 > and the D3 dichotomy capstone `reachesRigidOrCameron_viaBoundedMinMult` reduces the seal to **one computable predicate
 > `hSmallAutThin` = "small-Aut residue ⟹ bounded `minMult`"** = thick⟹large-Aut = node 4 = the wall (route-doc §9.9.7).
 > The "route 3 = carry the predicate" floor below now means carrying `hSmallAutThin`; the route-2 (poly) target = discharging
-> it for the non-geometric core. Next builds: node-2 rung (affine via `dominatorReachable_of_rainbowRank`) / Spielman floor.
+> it for the non-geometric core. **Latest (2026-06-17, route-doc §9.9.8 + §9.9.9):** the row-4 falsifier probe ran (42
+> small-Aut non-geometric SRGs from the Hanaki catalogue all shatter, 0 falsifiers — node 3 only) and the node-2 rung *bridge*
+> landed (`boundedConfusionMultiplicity_of_completeBase` + `reachesRigidOrCameron_viaCompleteBase`: δ′-discrete base ⟹ poly
+> seal via the multiplicity pipeline). Next builds: the remaining node-2 work = a *uniform* rainbow rank for a parametric
+> affine/FDF family (`dominatorReachable_of_rainbowRank`, generalizing `clebschZ4` off n=16) / Spielman floor.
 
 ---
 
@@ -256,6 +260,10 @@ LANDED, axiom-clean** (`§CC.20b`/`§S-gate2`): `BoundedConfusionMultiplicity B 
 `reachesRigidOrCameron_viaBoundedMultiplicity` — "residue cascades ⟹ polynomial seal" is now a theorem; the lone open content is
 the discharge `BoundedConfusionMultiplicity`. **NEXT = PART 2: discharge it** (sub-classes first — PV sparse re-activation, then
 the generic rank-3 core). Read route-doc §9.7.1–§9.7.2 + §9.8.
+> **⚠ SUPERSEDED (2026-06-17) — see the top banner + route-doc §9.9.** "PV sparse re-activation" is a **DEAD lead**
+> (route-doc §9.5a), and raw counting is trivial (§9.5b). The discharge reduced to `BoundedMinMult` (thin side proved,
+> §CC.22d) and then to `hSmallAutThin` (= node 4, the wall). Done since: the row-4 falsifier probe (§9.9.8, 0 falsifiers)
+> and the node-2 rung bridge (§9.9.9). Do **not** pursue PV sparse; the live next step is the uniform rainbow rank (node-2).
 
 **Reading order for a fresh reader:** build doc STATUS → its §1A (why not GI∈P) / §1B (everything ⟹ `c(X_T)`) → THIS
 doc §0–§5 (the A2 target, evidence, and the route to the unconditional seal) → `CoherentConfig.lean §CC.10`–`§CC.19` (the

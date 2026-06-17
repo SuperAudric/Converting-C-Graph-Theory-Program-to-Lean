@@ -139,14 +139,24 @@ close it — is set out in
 >    showed rarely holds). Non-vacuity anchor `boundedConfusionMultiplicity_univ` (M=n). Seal `modulo {G3 + hSmallAutThin +
 >    hcatch + hImprim}`.
 >
+> 5. **★ ROW-4 PROBE + NODE-2 BRIDGE — LANDED (2026-06-17, route-doc §9.9.8 + §9.9.9).** (a) The **falsifier hunt**
+>    (`A2MonovariantProbe.Probe_Row4Sporadics`): the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang + conference SRGs from the
+>    verified Hanaki catalogue, measured for the Lean `BigConfusionCover`/`minMult` on the 2-WL closure — **42 small-Aut
+>    non-geometric SRGs (many `|Aut|=1`) ALL shatter at base ≪ √n; 0 falsifiers**, the sharpest support yet for `hSmallAutThin`.
+>    (b) The **node-2 rung bridge** (axiom-clean): `boundedConfusionMultiplicity_of_completeBase` (`§CC.22e` — a bounded *discrete*
+>    base ⟹ `BoundedConfusionMultiplicity B M`, sharpening the trivial `M=n` anchor to `M=|T₀|`) + `reachesRigidOrCameron_viaCompleteBase`
+>    (`§S-gate2` — a δ′-discretizing thin family seals via `…viaBoundedMultiplicity`, no largeness guard). Honest scope: both are
+>    **node 3 / pipeline-validation; node 4 (unbounded `s`) is untouched** — no probe reaches it, no constructible witness exists.
+>
 > **▶ PICK UP HERE — the open content is now ONE predicate: `hSmallAutThin` = "small-Aut primitive residue ⟹ `BoundedMinMult`",
 > i.e. thick (`minMult` unbounded) ⟹ large Aut.** This is the WALL: irreducible (rook is thick, needs √n base, saved only by
 > large Aut; δ′ gives √n there) = Babai SRG-structure/CFSG = node 4, no known witness. **Method of attack = route-doc §9.9.7.**
-> **Recommended next builds:** (a) **node-2 rung** — discharge `BoundedMinMult` for the affine/FDF thin family via
-> `dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4` = n=16 instance; gap = uniform rainbow rank), shrinking
-> the residue to node 4; (b) **Spielman floor** — a `…viaSpielman` capstone making the seal unconditional-modulo-citations at the
-> sub-exponential threshold (Cameron-free). Poly discharge of `hSmallAutThin` for the non-geometric core = long-horizon open
-> frontier. `hcatch` → CFI-1992 exchange; `hImprim` → block-tower infra (not a citation).
+> **Recommended next builds:** (a) **the remaining node-2 work — a *uniform* rainbow rank** for a parametric affine/FDF family
+> via `dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4` = the n=16 instance; the just-landed
+> `reachesRigidOrCameron_viaCompleteBase` is its seal-level consumer — generalize `clebschZ4_closure` off n=16); (b) **Spielman
+> floor** — a `…viaSpielman` capstone making the seal unconditional-modulo-citations at the sub-exponential threshold (Cameron-free).
+> Poly discharge of `hSmallAutThin` for the non-geometric core = long-horizon open frontier. `hcatch` → CFI-1992 exchange;
+> `hImprim` → block-tower infra (not a citation).
 > Substrate/build home:
 > [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); A2 scoping:
 > [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md); forward payoff (post-node-4):
