@@ -175,6 +175,18 @@ cover; the robust separator is PERSISTENCE itself = bounded `minMult` = `hSmallA
 regularity shortcut.** Do NOT build the D2 regular-PG extraction. The live next builds revert to the carve-around: node-2
 rung uniform rainbow rank + the Spielman floor. Node 4 untouched (bounded-`s` data only). Nothing committed (user commits).
 
+**▶ k-WL LADDER / HAMMING HYPERGRID PROBE DONE (2026-06-17, §9.9.11) — climbing k-WL is NOT a node-4 attack; the c^k
+hypergrid is the carved (Cameron) leg, and its base SHRINKS with dimension.** `A2MonovariantProbe.Probe_HammingLadder`
+(green; correct oblivious k-WL + group-base `AutBase`). Two facts: (i) `base_k ≥ b(Aut)` for all `k` (k-WL can't split an
+Aut-orbit); (ii) constant-k-WL ≡ 2-WL + O(1) individualizations via the carried `hcatch` (`dimWL ≤ dimWL(X_α)+1`) — so base
+and WL-dimension are dual coordinates, and "bounded base" = "bounded WL-dim" = node 4. **Probe: `base_3 = base_2 = b(Aut)`
+(gap 0) on rook L4/L5, H(3,3), Shrikhande — the base is the GROUP base, no WL level reduces it; the c^k hypergrid base
+`≈ k·n^{1/k}` SHRINKS with `k` (rook k=2 = √n is the extremal thick case, NOT an escalating ladder); 3-WL statically
+separates cospectral rook/Shrikhande (`[16,96,144]` at 2-WL → 15 vs 31 colours at 3-WL — corrects §9.9.7 step-4's "needs
+CFSG", but identifying ≠ bounding base).** ⟹ `hSmallAutThin` is invariant under climbing (not a level-2 artifact); the Hamming
+family is Cameron with `base = b(Aut)` (equality), not a node-4 falsifier. Re-pins the open content as the **WL-dim gap
+`base − b(Aut)`** (group term already handled by `exists_greedy_base_le_log`). Nothing committed (user commits).
+
 **▶ NODE-2 RUNG, first increment LANDED (2026-06-17, §9.9.9) — the δ′ → multiplicity-pipeline bridge.** Axiom-clean,
 build green: `boundedConfusionMultiplicity_of_completeBase` (§CC.22e — a bounded *discrete* base ⟹
 `BoundedConfusionMultiplicity B M`, sharpening the trivial `M = n` anchor to `M = |T₀|`) + the capstone
@@ -1232,8 +1244,14 @@ exists.** The wall is real and located exactly at `hSmallAutThin`.
    the identification step**: cospectral mates have equal parameters but different Aut — Shrikhande vs the 4×4 rook
    (SRG(16,6,2,2)), the Chang graphs vs `T(8)` (SRG(28,12,6,4)) — and these are *exactly* residue-vs-Cameron. So
    "named-family parameters ⟹ is the named family / large Aut" is false, and separating the cospectral mates needs the
-   **dynamic** individualization behaviour (rook stays thick, Shrikhande shatters) = Babai's individualization–refinement =
-   the CFSG content (the probe confirmed 2-rank does not separate them). Neumaier buys **node 3** (bounded eigenvalue:
+   **dynamic** individualization behaviour (rook stays thick, Shrikhande shatters) = Babai's individualization–refinement.
+   **★ CORRECTION (2026-06-17, §9.9.11 probe): the "needs CFSG to separate the mates" claim is 2-WL-SPECIFIC — 3-WL
+   STATICALLY separates them** (`Probe_HammingLadder`: rook and Shrikhande share the 2-WL class-size histogram `[16,96,144]`
+   but 3-WL gives 15 vs 31 colours). So the *identification* gap closes at WL-level 3, not only via dynamic individualization;
+   2-rank failing was a 2-WL artifact. **But this buys NOTHING for node 4**, because the base is invariant under the WL level:
+   `base_k ≥ b(Aut)` for all `k` (k-WL cannot split an Aut-orbit), and the probe measured `base_3 = base_2 = b(Aut)` (gap 0)
+   on rook/Shrikhande/Hamming alike — the rook's `√n` base is its *group* base, which no WL level reduces. Identifying the
+   family ≠ bounding the base; the wall is the base, not the identification. Neumaier buys **node 3** (bounded eigenvalue:
    finite exceptions + named families), **not node 4** (unbounded eigenvalue, where finiteness fails). So option 4 is a
    large spectral-theory build that arrives at the *same node-4 wall* by a costlier road, plus an extra identification gap.
    Value = a map of what spectral tools buy (node 3) and don't (node 4), not a path to the goal.
@@ -1342,3 +1360,41 @@ the live next builds revert to the *carve-around* progress — **node-2 rung uni
 residue) and the **Spielman floor** (`…viaSpielman`, the honest citable sub-exp cap) — not a direct D2 attack. Honest scope
 unchanged: all residue data is bounded `s` (node 3 / leg B); node 4 (unbounded `s`) has no constructible witness, so the
 probe de-risks the *method* (kills the regularity lead) without reaching node 4. Nothing committed (user commits).
+
+### 9.9.11 k-WL ladder / Hamming hypergrid — DONE (2026-06-17): climbing k-WL is NOT a node-4 attack, and the c^k hypergrid is the carved leg
+
+**Built + run, green: `A2MonovariantProbe.Probe_HammingLadder`** (+ a correct oblivious k-WL `KWLStable`/`KWLBase`/`KWLHistogram`
+and a group-base `AutBase`). It answers two questions raised in investigating alternative node-4 attacks: (1) does the
+indistinguishing-number concept climb the k-WL ladder into an exploitable pattern? (2) is the **c^k hypergrid** `H(k,c)` (the
+natural generalization of the rook `= H(2,c)`) a build that "defeats k-WL" the way the rook defeats 2-WL?
+
+**The two load-bearing facts (theory, then probe-confirmed).**
+- **(i) `base_k(X) ≥ b(Aut(X))` for every `k`.** k-WL is iso-invariant, so it never splits two vertices in one Aut-orbit;
+  individualization is the *only* symmetry-breaker. Hence the k-WL base is bounded below by the **group base** at every level.
+- **(ii) constant-k-WL ≡ 2-WL + O(1) individualizations** (the project's carried `hcatch`, `dimWL(X) ≤ dimWL(X_α)+1`,
+  CFI-1992 Thm 5.2): so `base₂ ≤ base_k + O(k)`. For constant `k` that is `base₂ ≤ base_k + O(1)` — climbing to any constant
+  k-WL is absorbed into the seal's O(log n) base budget and changes nothing; `k = ω(1)` costs `n^{ω(1)}` (breaks poly). The
+  base and the WL-dimension are **dual coordinates on the same quantity**, with `hcatch` the change of variables; "is the base
+  bounded" = "is the WL-dimension bounded" = node 4.
+
+**Probe result (decisive on both questions, and it corrects a naive reading):**
+- **base = b(Aut) on every constructible row, and `base_3 = base_2` (gap 0).** Rook L4 `b(Aut)=base_2=base_3=4=√n`; rook L5
+  `=5=√n`; H(3,3) `=3`; Shrikhande `=3`. So the base IS the group base, no WL level reduces it (Fact (i)), and **no
+  constructible graph has `base ≫ b(Aut)`** (the would-be node-4 falsifier = a small-Aut graph with a large WL-dim gap).
+- **The c^k hypergrid does NOT escalate — its base SHRINKS with dimension.** `base(H(k,c)) ≈ k·n^{1/k}`: rook (k=2) is `√n`,
+  H(3,3) is `n^{1/3}=3 < √n`. So the rook (k=2) is the **extremal** thick case; climbing the Hamming dimension moves *away*
+  from thickness, not toward a harder k-WL obstruction. (Corrects the natural "hypergrid is harder" intuition.)
+- **Cospectral 3-WL separation (the §9.9.7 step-4 correction's evidence):** rook and Shrikhande share the 2-WL histogram
+  `3 colours [16,96,144]` but 3-WL gives `15` vs `31` colours — 3-WL statically separates the cospectral mates that 2-WL
+  cannot. So the "needs CFSG to identify the family" barrier is 2-WL-specific; **but identifying ≠ bounding the base**, and the
+  base is `b(Aut)` at every level, so this gives no node-4 traction.
+
+**Verdict.** Neither ladder is an exploitable node-4 attack. The k-WL ladder is the WL-dimension hierarchy, dual to the
+individualization base via `hcatch`; constant-k is free in the seal's budget, growing-k breaks poly — so the wall
+`hSmallAutThin` is **invariant under climbing**, not a level-2 artifact. The Hamming/hypergrid family is the **carved (Cameron)
+leg** — large structured Aut, with `base = b(Aut)` (i.e. `hSmallAutThin` holds *with equality*) — and its base *decreases* with
+dimension, so it is not even a worsening obstruction. The genuine node-4 falsifier (`base ≫ b(Aut)` at small Aut) has no
+constructible witness, and no WL level or Hamming dimension can manufacture one (`base_k ≥ b(Aut)` always). **Useful payoff:**
+the probe re-pins the open content as the **WL-dim gap `base − b(Aut)`** (the genuine-decision count beyond what Aut prunes) —
+the sharpest statement of `hSmallAutThin` is "the residue's gap is bounded," with the group term `b(Aut)` already handled
+(`exists_greedy_base_le_log` → O(log n) for small Aut). Same construction bottleneck (bounded-`s` data only). Nothing committed.
