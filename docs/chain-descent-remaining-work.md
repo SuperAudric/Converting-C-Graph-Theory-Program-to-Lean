@@ -33,7 +33,7 @@ The live capstone is `reachesRigidOrCameron_viaBoundedMinMult` (CascadeAffine §
 | Hypothesis | What it is | True status | Collapses to |
 |---|---|---|---|
 | **G3** (`hClassify`, `PrimitiveCCClassification`) | "large primitive ⟹ Cameron section" — the cited classification | **Citation** (Babai/Sun–Wilmes/Kivva). The one citation that *may stay cited* (CFSG-based). | — (kept) |
-| **hSmallAutThin** | "small-Aut primitive residue ⟹ bounded `minMult`" = thick⟹large-Aut | **The research core** (node 4). Sub-exp: citable (Spielman). Poly: open, GI-adjacent, no witness. | the core |
+| **hSmallAutThin** | "small-Aut primitive residue ⟹ bounded `minMult`" = thick⟹large-Aut | **REDUCED to AFFINE this session (§9.9.18–18b):** for the SCHURIAN residue, Cameron+Liebeck+Skresanov ⟹ the residue is **affine** = `{1-dim cyclotomic — CITED (Ponomarenko-2-sep) + forms-graphs (c)–(f) — UNCITED, bounded-WL-dim OPEN}`. So **not** fully closed-mod-citations; the forms-graph part `{affine-polar, alternating, half-spin, Suzuki–Tits}` is the precise open residue — but now **explicit & CONSTRUCTIBLE** (refuting "no witness"). Sub-exp floor `n^{1/5}` (§2). | the affine slice; open residue = forms-graphs (c)–(f), PROBABLE (probe next). Non-schurian wall → IR-solver row 4 (§4). |
 | **hcatch** | "1-WL cell ⟹ 2-WL fiber" = CFI-1992 Thm 5.2 (dimWL exchange) | At a complete extension `⟺ warmRefine discrete`. Free where 1-WL discretizes; residual = the `s(C)` certificate. | the core (§9.9.14–15) |
 | **hImprim** | "imprimitive ⟹ block-recovered ∨ abelian-consumed" | Block-tower infra **built**; content = constituent WL-recovery (A2-ii), one tower-layer down. | the core (§9.9.16) |
 
@@ -42,6 +42,21 @@ landed machinery, to the same content as `hSmallAutThin`: *does the bounded-dept
 residue's orbits at a bounded base?* — the `s(C)` self-detection certificate (`RelCountsDetermineOrbit` /
 `PersistentTwinYieldsBlock`). Deep-dives: [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md)
 §9.9.14 (hcatch), §9.9.15 (the engine), §9.9.16 (hImprim).
+
+**The 2026-06-17 reframe of that core (§9.9.17–18a).** The `s(C)` core, **for the seal's scope**, is the *schurian*
+residue (the seal is typed on `SchurianScheme`; the non-schurian / high-WL-dim term `DiscretizesAtBases` is
+provably split off to the IR-solver — §4, route §9.9.18a). Closure-angle work (§9.9.17) showed the "⟹ block" escape is
+*vacuous on the primitive floor* (lemma `persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive`), so the crux is the
+2-closure deficiency `G^(2)_T/G_T`; Skresanov's rank-3 2-closure theory (§9.9.18) then shows **every small-Aut
+non-geometric schurian rank-3 residue is affine** (Cameron kills almost-simple/grid; only affine survives). **C1
+(§9.9.18b) then splits the affine target:** `{1-dim cyclotomic — CITED (Ponomarenko-2-sep / δ′) + forms-graphs (c)–(f):
+affine-polar / alternating / half-spin / Suzuki–Tits — UNCITED, bounded-WL-dim OPEN}` ((b) bilinear forms is excluded as
+geometric). So the schurian `s(C)` core is **mostly** reduced to citations, with the **forms-graph residue (c)–(f) still
+open** — but now **explicit and constructible** (refuting "no witness"; the probe-record's 0 falsifiers were bounded-`s`
+node-3 catalogue data, never these growing-`q` families). They are *probable* (small-Aut ⟹ group base `O(log n)`); the
+open question is bounded-WL-dim for these 4 named classical schemes — far more tractable than "all SRGs". The
+genuinely-open *uncited non-schurian* wall is the IR-solver row 4 (§4) — never the seal's obligation. Caveat (separate):
+`SchurianScheme` is a carried model assumption (`orbitalScheme H`), not discharged.
 
 **Citation-free / lighter endpoints already landed** (use these where the family fits — they carry *less*):
 - `…viaRainbowRank` — rank-≥4 amorphic (rainbow-rigid) families, `modulo {G3 + hImprim}`, **no hcatch/largeness**.
@@ -136,11 +151,17 @@ citation-reduction on the affine amorphic slice, **not** new territory and **can
 ## 4. The IR-blind-spot solver (the forward payoff)
 **Doc:** [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) (STATUS first).
 Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL cannot discretize) in polynomial time.
-- **Gating:** its polynomiality is delivered by A2 (bounded WL-dim of the residue) — and the IR-solver's polynomiality
-  and A2's last open quantity are **the same object in two languages**, so it is gated on the **same `s(C)` core** as §3a.
+- **Gating:** its polynomiality is delivered by A2 (bounded WL-dim of the residue: `c(X_T), k(X_T) = O(1)` at an
+  `O(1)` base) — the IR-solver's polynomiality and A2's last open quantity are **the same object in two languages**.
+- **★ POST-SKRESANOV SPLIT (2026-06-17, §9.9.18a) — this is where the genuine wall now lives.** A2 is one predicate
+  (bounded WL-dim) over two residue classes. On the **schurian** residue (the seal's scope, §3a) A2 is delivered by
+  the Skresanov reduction (residue is affine ⟹ affine slice, mod citations). On the **non-schurian** residue — the
+  IR-solver's "row 4" (generic unbounded-`s` SRG, multipede) — A2 may **fail**, and that is exactly where the canonizer
+  **flags** ("polynomial-or-flag"). So §3a's reduction does **not** cover the IR-solver's case; the genuinely-uncited
+  open research is **this non-schurian row 4**, which was never the seal's obligation (it is `DiscretizesAtBases`, split
+  off by `stablyRecoverable_iff_symmetric_and_bases`). Closing it = closing the *overall*-canonizer poly wall.
 - **Status:** *solver not built;* prerequisites landed (deferral architecture, direction-blind canonizer substrate,
-  the potential-descent engine `exists_potential_descent`, A2's consumer chain). Pick up once the core lands.
-- It is the **downstream** of the seal: closing §3a unblocks both the unconditional seal *and* the IR solver.
+  the potential-descent engine `exists_potential_descent`, A2's consumer chain). Pick up once row 4 lands.
 
 ---
 
@@ -149,19 +170,30 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
 ```
 SEAL  reachesRigidOrCameron_viaBoundedMinMult   modulo {G3 + hSmallAutThin + hcatch + hImprim}
                                                   └──────────── collapses to ───────────┘
-                                                  modulo {G3 (Babai, may stay cited) + ONE s(C) core}
+                                                  modulo {G3 + the SCHURIAN s(C) core}
+                                                          └── Skresanov (§9.9.18) ──┘
+                                                          = the AFFINE slice, mod {G3+Liebeck+Skresanov+2-sep+C1}
 
 REMAINING:
-  3a  the s(C) / node-4 core .............. RESEARCH (open, GI-adjacent; sub-exp floor citable now)
-  3b  EdgeGeneratesFromSet ................ BUILDABLE infra (checkability; off critical path)
-  3c  citation formalization ............. OPTIONAL (Spielman / affine 2-sep / CFI dimWL; off path)
-  3d  node-2 uniform rainbow rank ........ OPTIONAL (affine/leg-B; can't reach node 4)
-  4   IR-blind-spot solver ............... FORWARD payoff, gated on the SAME core as 3a
+  3a  the schurian s(C) core ............. REDUCED to AFFINE (Skresanov). Splits (C1, §9.9.18b):
+                                            • 1-dim cyclotomic ... CITED (Ponomarenko-2-sep / δ′)
+                                            • forms-graphs (c)-(f) ... UNCITED, bounded-WL-dim OPEN, but
+                                              EXPLICIT & CONSTRUCTIBLE (affine-polar/alternating/half-spin/Suzuki).
+                                              PROBABLE (small-Aut ⟹ group base O(log n)). PROBE next.
+  3b  EdgeGeneratesFromSet ............... BUILDABLE infra (checkability; off critical path)
+  3c  citation formalization ............ OPTIONAL (Spielman n^{1/5} / affine 2-sep / CFI dimWL; off path)
+  3d  node-2 uniform rainbow rank ....... OPTIONAL (affine/leg-B; can't reach node 4)
+  4   IR-solver row 4 (NON-schurian) ..... THE GENUINE UNCITED WALL — generic unbounded-s SRG where A2 may
+                                            fail ⟹ flag. Outside the seal by design; the canonizer's poly wall.
 ```
 
-**Bottom line:** the seal is one research core away from unconditional-modulo-Babai, with the IR solver as its
-downstream — every other "gap" has been shown (this session) to be that same core in disguise, a built floor, or
-optional off-path work.
+**Bottom line.** The seal's open content reduces to the *schurian* `s(C)` core; this session's Skresanov reduction
+shows that core is **affine**, and C1 sharpens the residue to **four explicit constructible forms-graph families**
+(affine-polar / alternating / half-spin / Suzuki–Tits) whose bounded-WL-dimension is *open but uncited* — the
+cyclotomic part is already cited. So the SEAL is *mostly* citations-away, with one precisely-characterized,
+probable, *probable-by-experiment* open residue (no longer a mysterious wall). The **genuine uncited research wall is
+the non-schurian IR-solver row 4** (the forward payoff), never the seal's obligation; the canonizer stays
+"polynomial-or-flag" with the flag set = exactly that row 4.
 
 ---
 

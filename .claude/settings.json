@@ -104,7 +104,9 @@
       "WebFetch(domain:amc-journal.eu)",
       "WebFetch(domain:www.iti.zcu.cz)",
       "WebFetch(domain:webspace.maths.qmul.ac.uk)",
-      "WebFetch(domain:homepages.cwi.nl)"
+      "WebFetch(domain:homepages.cwi.nl)",
+      "WebFetch(domain:doc.sagemath.org)",
+      "WebFetch(domain:www.distanceregular.org)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",

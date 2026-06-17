@@ -170,8 +170,19 @@ touches the open node-4 core. **Read §9.9.6 + §9.9.7 (the wall + its method) f
 §9.9.17): closure-angle reduction + literature SOTA pass.** Literature confirms the wall is open both ways (0 falsifiers,
 no citable bound); two deltas (sub-exp floor is `n^{1/5}` not `n^{1/3}`; NEW cite Skresanov rank-3 2-closure). The
 closure-angle reduction's "⟹ block" is VACUOUS on the primitive floor (lemma `persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive`,
-axiom-clean) — the crux is the 2-closure deficiency `G^(2)_T/G_T`, which MERGES with the Skresanov lead. **Live next = the
-Skresanov affine-rank-3 carve.** Read §9.9.17.
+axiom-clean) — the crux is the 2-closure deficiency `G^(2)_T/G_T`, which MERGES with the Skresanov lead (§9.9.18).
+**★ HEADLINE (2026-06-17, §9.9.18 + §9.9.18a + §9.9.18b): node-4-FOR-THE-SEAL is AFFINE — and the open residue is now
+4 NAMED, CONSTRUCTIBLE families, not a mysterious wall.** Skresanov's rank-3 2-closure + Cameron/Liebeck ⟹ every
+small-Aut non-geometric *schurian* rank-3 residue is affine; C3 RESOLVED (§9.9.18a, verdict A — seal deliberately
+scoped to schurian, `StablyRecoverable ↔ DiscretizesAtBases ∧ RecoversWhileSymmetric`, keyed IR-core-free), so the
+non-schurian wall is relocated to the IR-solver row 4 (never the seal's job). **BUT C1 (§9.9.18b) shows the affine
+target is only PARTLY cited:** node-4-schurian = `{1-dim cyclotomic — CITED (Ponomarenko 2-sep) + forms-graphs (c)–(f):
+affine-polar / alternating / half-spin / Suzuki–Tits — UNCITED, bounded-WL-dim OPEN}`. So the seal's node-4 is **not**
+closed-modulo-citations; the forms-graph part is open. **The upside (a real correction):** these 4 families are
+*explicit, constructible* node-4 witnesses (growing `q`) — refuting the "no constructible witness" framing — and being
+small-Aut schurian (group base `O(log n)`) they are *probable*. **Live next = PROBE (c)–(f)** (extend
+`A2MonovariantProbe` at growing `q`): do they shatter at `O(log n)` base (confirm `hSmallAutThin`) or stay thick
+(falsify it)? Read §9.9.18 + §9.9.18a + §9.9.18b first.
 
 **▶ ROW-4 SPORADICS PROBE DONE (2026-06-17, §9.9.8) — `hSmallAutThin` confirmed at TRIVIAL Aut, 0 falsifiers.**
 `A2MonovariantProbe.Probe_Row4Sporadics` loads the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang(28) + conference(29)
@@ -1882,3 +1893,48 @@ schurian is documented INFEASIBLE, general-cc-separability.md:554-558). So the s
 `orbitalScheme H` model; faithfulness of that model to the canonizer's output is its own modeling gap, orthogonal to the
 Skresanov reduction. **Net: C3 confirms the Skresanov reduction is a real reduction of the seal's node 4 (mod citations +
 C1), with the genuine open wall relocated — correctly, by design — to the non-schurian IR-solver row 4.** Nothing committed.
+
+#### 9.9.18b (C1) RESOLVED — node-4-schurian = {1-dim cyclotomic (cited) + forms-graphs (c)–(f) (uncited, OPEN, but CONSTRUCTIBLE); (b) excluded as geometric}
+
+**C1 (the §9.9.18 main hole) is resolved — and it partially walks back §9.9.18's "reduces to citations": the affine
+reduction is correct, but the affine target is NOT fully cited.** Checking Skresanov's affine forms-graph classes (b)–(f)
+at the small-Aut regime (fixed dimension, `q→∞`), against Brouwer–Van Maldeghem *Strongly Regular Graphs* (2022) + BCN:
+
+- **(b) bilinear forms `H_q(2,m)` — EXCLUDED (geometric).** Smallest eigenvalue `s = −(q+1)` (verbatim BVM §3.4.1,
+  double-derived) — it is the **q-analog of the rook's/Hamming graph `H(2,m)`**, the collinearity graph of a net
+  `pg(q^m, q+1, q)`. Geometric ⟹ Neumaier-excluded. (The `−q^{m−1}` eigenvalue I had flagged was **wrong**.)
+- **(c) affine polar `VO^ε_{2m}(q)`, (d) alternating forms on `F_q^5`, (e) half-spin `VD_{5,5}(q)`, (f) Suzuki–Tits
+  `VSz(q)` — SURVIVE: small-Aut AND non-geometric.** All four have poly `|Aut|` (fixed dim / `q→∞`; e.g. (c)
+  `|Aut|=n^{Θ(m)}`, (e) `~n^{3.9}`) and smallest eigenvalue `→ −∞` (`−q^{m−1}` / `−(q²+1)` / `−(q³+1)` / `−(q²−q+1)`),
+  with no partial-geometry structure. So **node-4-schurian ⊋ 1-dim cyclotomic** — it includes these four forms-graph
+  families. (Caveat: (c)/(d)/(f) parameters corroborated via Sage + arXiv + numeric checks but not fetched verbatim
+  from BVM — worth a verbatim confirm before any formal citation; (b)/(e) are verbatim, high confidence.)
+- **No citation covers (c)–(f).** All published bounded-WL-dim / poly-iso / separability results are for *other*
+  families (cyclotomic/Paley WL-dim ≤3, Evdokimov–Ponomarenko/Ponomarenko arXiv:2006.13592; prime-power circulants ≤3;
+  Fon-Der-Flaass ≤4, arXiv:2312.00460; abelian Cayley schemes). **Bounded WL-dim for the affine-polar / alternating /
+  half-spin / Suzuki–Tits rank-3 families is OPEN** — an uncited residue, not closeable by citation.
+
+**Net — the honest, sharper picture (corrects §9.9.18 and the "no witness" framing).**
+1. **The Skresanov reduction is correct but incomplete as a citation-closure.** Node-4-schurian = affine =
+   `{1-dim cyclotomic — CITED (Ponomarenko 2-sep / δ′) + forms-graphs (c)–(f) — UNCITED, OPEN}`. The forms-graph part
+   is the genuine remaining open core *within the seal's schurian scope* — so §9.9.18a's "completes the seal's node-4
+   obligation modulo citations" is **too strong**: it completes it modulo citations **only on the cyclotomic part**;
+   the forms-graph part is open.
+2. **MAJOR CORRECTION to the node-4 framing: the witnesses ARE constructible.** The project's "node 4 has no
+   constructible witness / construction-bottlenecked" (§5 F2, §9.9.3, MEMORY) is **wrong** — the four forms-graph
+   families (c)–(f) are explicit parametric small-Aut non-geometric primitive schurian rank-3 SRGs, the precise
+   node-4-schurian witnesses, at growing `q`. The 0-falsifier probe record used the Hanaki catalogue (small `n`,
+   bounded-`s` = node 3) and **never constructed these families at the unbounded-`s` (growing-`q`) regime.**
+3. **They are PROBABLE and likely CONFIRMERS (not falsifiers) — the concrete next step.** Being schurian with poly
+   `|Aut|`, their *group* base `b(G^(2)) = O(log n)` is free (greedy base); the open question is only whether 2-WL
+   *achieves* discreteness at that base (the deficiency / `hSmallAutThin`), i.e. **bounded WL-dim for these specific
+   classical schemes** — a far more tractable, concrete target than "all SRGs." Unlike the rook (thick because
+   *large*-Aut, group base `√n`), these are small-Aut so cannot be thick *for group reasons*; a large WL-deficiency
+   would be required, which a primitive classical scheme is not expected to have. **Recommended next: extend
+   `A2MonovariantProbe` to (c)–(f) at growing `q`** — measure `minMult`/`c(X_T)` to test whether they shatter at
+   `O(log n)` base (confirming `hSmallAutThin`, strong evidence) or stay thick (a falsifier ⟹ the seal would need
+   restating — a real result either way).
+
+**Updated modulo picture.** Seal node-4-schurian `modulo {G3 + Liebeck + Skresanov + [1-dim: Ponomarenko-2-sep] +
+[forms-graphs (c)–(f): an OPEN bounded-WL-dim, no citation]}`. The open content is no longer a vague thick wall — it is
+the bounded-WL-dim of four named, constructible classical-group families. Nothing committed (user commits).
