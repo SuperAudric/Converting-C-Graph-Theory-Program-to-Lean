@@ -139,4 +139,36 @@ that `dominatorReachable_of_rainbowRank`'s hypothesis is satisfiable on the genu
 theorem clebschZ4_rainbowRigid : RainbowRigid clebschZ4Scheme := by
   unfold RainbowRigid; decide
 
+/-- **The family engine fires on the real residue.** The ℤ₄² Clebsch closure, re-derived through the *family*
+lemma `dominatorReachable_of_rainbowRank` (rather than the bespoke `interNum`-keyed `domReach_of_rank_pin` of
+`clebschZ4_closure`): every point is dominator-reachable from `{0,1}` using only `clebschZ4_rainbowRigid` and a
+**rainbow rank** — the probe rank `clebschZ4Rank` with the explicit rainbow triangles `clebschZ4Pin` (each a triple
+of pairwise-distinct non-diagonal colours, checked by `decide` after the `relOfPair`→matrix bridge). This is the
+**non-vacuity witness for `dominatorReachable_of_rainbowRank`** on a genuine non-affine residue — and hence for the
+seal capstone `reachesRigidOrCameron_viaRainbowRank` built on it: the rainbow `hbase`/`hstep` data it requires is
+satisfiable on real amorphic-NLS data (the `n = 16` instance of the uniform rainbow rank the node-2 rung needs).
+The remaining gap to a *sealed* instance is the `SchurianScheme` (automorphism) structure on `clebschZ4Scheme`,
+deferred. Axiom-clean (`decide`, not `native_decide`). -/
+theorem clebschZ4_closure_viaRainbow :
+    ∀ v, DominatorReachable clebschZ4Scheme {0, 1} v := by
+  -- The rainbow data in the *matrix* colours (computable), decided directly as in `clebschZ4_closure`.
+  have hstep : ∀ γ : Fin 16, 0 < clebschZ4Rank γ →
+      clebschZ4Rank (clebschZ4Pin γ).1 < clebschZ4Rank γ ∧
+      clebschZ4Rank (clebschZ4Pin γ).2 < clebschZ4Rank γ ∧
+      clebschZ4ColF (clebschZ4Pin γ).1 γ ≠ 0 ∧ clebschZ4ColF γ (clebschZ4Pin γ).2 ≠ 0 ∧
+      clebschZ4ColF (clebschZ4Pin γ).1 (clebschZ4Pin γ).2 ≠ 0 ∧
+      clebschZ4ColF (clebschZ4Pin γ).1 γ ≠ clebschZ4ColF γ (clebschZ4Pin γ).2 ∧
+      clebschZ4ColF γ (clebschZ4Pin γ).2 ≠ clebschZ4ColF (clebschZ4Pin γ).1 (clebschZ4Pin γ).2 ∧
+      clebschZ4ColF (clebschZ4Pin γ).1 γ ≠ clebschZ4ColF (clebschZ4Pin γ).1 (clebschZ4Pin γ).2 := by
+    decide
+  refine dominatorReachable_of_rainbowRank clebschZ4_rainbowRigid clebschZ4Rank (by decide) ?_
+  intro γ hγ
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩ := hstep γ hγ
+  exact ⟨(clebschZ4Pin γ).1, (clebschZ4Pin γ).2, h1, h2,
+    by rw [clebschZ4_relOfPair]; exact h3, by rw [clebschZ4_relOfPair]; exact h4,
+    by rw [clebschZ4_relOfPair]; exact h5,
+    by rw [clebschZ4_relOfPair, clebschZ4_relOfPair]; exact h6,
+    by rw [clebschZ4_relOfPair, clebschZ4_relOfPair]; exact h7,
+    by rw [clebschZ4_relOfPair, clebschZ4_relOfPair]; exact h8⟩
+
 end ChainDescent

@@ -976,6 +976,45 @@ theorem reachesRigidOrCameron_viaDominatorClosure {IsLarge : Nat → Prop}
   intro hn
   exact absurd (separatesAtBoundedBase_of_dominatorClosure S hcard hclo) hn
 
+/-- **THE SEAL VIA A UNIFORM RAINBOW RANK (route §9.9.7 step 3 — the node-2 rung, lifted to the whole family).**
+The seal-level lift of `clebschZ4`'s mechanism from the single `n = 16` scheme to the **entire rainbow-rigid
+family**. Any schurian scheme that is `RainbowRigid` (every rainbow triangle — three pairwise-distinct non-diagonal
+colours — has `≤ 1` common neighbour: the amorphic-NLS `(16,5,0,2)`-grade pinning structure) and carries a
+**rainbow rank** from a bounded base `T` (`rank : Ω → ℕ` with rank-`0` points in `T`, and every positive-rank `γ`
+reached by a rainbow triangle against two strictly-lower-rank points) seals. Composes
+`dominatorReachable_of_rainbowRank` (its forced-triangle closure exhausts Ω, in `S`'s **own** colours) into the
+**citation-free, catch-up-free** scheme-level checkpoint `reachesRigidOrCameron_viaDominatorClosure`. So it
+**carries only the standard {G3 `hClassify` + `hne` + `hrank` + `hImprim`}** — the open `hclo` is discharged by the
+combinatorial rainbow data, with **no `hSmallAutThin`/largeness/Cameron citation and no `hcatch`** (the
+forced triangles live in the scheme's own colours, so 1-WL discretises and the 1-WL↔2-WL slack never arises).
+**This is the previously-missing connective tissue:** the rainbow lift `dominatorReachable_of_rainbowRank` stopped at
+`DominatorReachable`; no seal capstone consumed it. The per-family residual is now purely combinatorial — exhibit
+`RainbowRigid` + a rainbow rank (for `clebschZ4`, both by `decide`); generalizing those off the `n = 16` sporadic to
+a *uniform* parametric amorphic family is the genuine remaining node-2 combinatorial work. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaRainbowRank {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank)
+    (hrig : RainbowRigid S.toAssociationScheme)
+    {T : Finset (Fin n)} (hcard : T.card ≤ bound)
+    (rank : Fin n → Nat)
+    (hbase : ∀ v : Fin n, rank v = 0 → v ∈ T)
+    (hstep : ∀ γ : Fin n, 0 < rank γ → ∃ α β : Fin n,
+        rank α < rank γ ∧ rank β < rank γ ∧
+        S.toAssociationScheme.relOfPair α γ ≠ 0 ∧ S.toAssociationScheme.relOfPair γ β ≠ 0 ∧
+        S.toAssociationScheme.relOfPair α β ≠ 0 ∧
+        S.toAssociationScheme.relOfPair α γ ≠ S.toAssociationScheme.relOfPair γ β ∧
+        S.toAssociationScheme.relOfPair γ β ≠ S.toAssociationScheme.relOfPair α β ∧
+        S.toAssociationScheme.relOfPair α γ ≠ S.toAssociationScheme.relOfPair α β)
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaDominatorClosure hClassify S hne hrank hcard
+    (dominatorReachable_of_rainbowRank hrig rank hbase hstep) hImprim
+
 /-! #### The δ′ engine ON THE EXTENSION → the seal (for the `n ≥ 25` residue)
 
 The scheme-level δ′ (`separatesAtBoundedBase_of_dominatorClosure`, above) is **citation- and catch-up-free**,

@@ -218,6 +218,17 @@ no largeness guard, seal `modulo {G3 + hcatch + hImprim}`). **The pipeline-valid
 uniform rainbow rank via `dominatorReachable_of_rainbowRank`, generalizing `clebschZ4` off n=16 — the genuine
 combinatorial work). Nothing committed (user commits).
 
+**▶ NODE-2 RUNG, second increment LANDED (2026-06-17, §9.9.9a) — the seal-level rainbow lift + the rank-counting node-4
+boundary.** Axiom-clean, build green: `reachesRigidOrCameron_viaRainbowRank` (CascadeAffine — any `RainbowRigid` schurian
+scheme with a bounded rainbow rank seals, composing `dominatorReachable_of_rainbowRank` into the catch-up-free
+`viaDominatorClosure`; carries only {G3 + `hne` + `hrank` + `hImprim`}, **no `hcatch`/largeness/`hSmallAutThin`** — the
+previously-missing seal capstone that consumes the rainbow lift) + `clebschZ4_closure_viaRainbow` (ClebschConcrete —
+non-vacuity: the family engine fires on the real n=16 residue; gap to a *sealed* instance = the deferred `SchurianScheme`
+structure on `clebschZ4Scheme`). **★ Node-4 insight:** the rainbow carve needs **rank ≥ 4** (a rainbow triangle = 3 distinct
+non-diagonal colours); node 4's core is a primitive **rank-3 SRG** with no rainbow triangles, so the scheme-level engine is
+**structurally inapplicable** there (colour-counting, not difficulty) — node-2 carving provably cannot leak into node 4, and
+any node-4 progress must work in the 2-WL extension arena (D1/D2/D3). Nothing committed (user commits).
+
 ---
 
 ## 1. The target and how it plugs in (this half is LANDED)
@@ -1339,6 +1350,38 @@ for a parametric affine/FDF family** — i.e. a uniform rainbow rank via `domina
 combinatorial work, §9.9.7 step 3). That generalizes `clebschZ4` from the n=16 sporadic to an infinite family; the bridge
 landed here is what such a family would plug into. Node 4 (the wall, `hSmallAutThin` for unbounded-`s` non-geometric) is
 untouched, as expected.
+
+#### 9.9.9a Node-2 rung — second increment LANDED (2026-06-17): the seal-level rainbow lift + the rank-counting node-4 boundary
+
+**Two theorems, axiom-clean `[propext, Classical.choice, Quot.sound]`, build green, nothing committed.** The first increment
+(§9.9.9) wired the δ′ *discrete-base* world into the new multiplicity pipeline; this increment lifts the **rainbow-rigid
+δ′ engine itself** to the seal level, as a *uniform family* capstone (the catch-up-free scheme-level route, not the
+extension route), and validates that engine on the real non-affine residue:
+
+- **`reachesRigidOrCameron_viaRainbowRank` (CascadeAffine §S-gate2, generic `n`).** The seal-level lift of `clebschZ4`'s
+  mechanism to the **whole rainbow-rigid family**: any `SchurianScheme` that is `RainbowRigid` and carries a **rainbow rank**
+  from a bounded base seals, by composing `dominatorReachable_of_rainbowRank` (forced-triangle closure in `S`'s **own**
+  colours) into the citation-/catch-up-free `reachesRigidOrCameron_viaDominatorClosure`. **Carries only the standard
+  {G3 + `hne` + `hrank` + `hImprim`}** — no `hSmallAutThin`/largeness/Cameron citation and **no `hcatch`**. This is the
+  previously-missing connective tissue: the rainbow lift `dominatorReachable_of_rainbowRank` stopped at `DominatorReachable`;
+  no seal capstone consumed it. The per-family residual is now purely combinatorial (`RainbowRigid` + a rainbow rank).
+- **`clebschZ4_closure_viaRainbow` (ClebschConcrete).** Non-vacuity witness: the ℤ₄² Clebsch closure re-derived through the
+  *family* lemma (vs the bespoke `domReach_of_rank_pin` of `clebschZ4_closure`), confirming the rainbow `hbase`/`hstep` data
+  the capstone needs is satisfiable on genuine non-affine amorphic-NLS data (the `n=16` instance). The gap to a *sealed*
+  instance is the deferred `SchurianScheme` (automorphism) structure on `clebschZ4Scheme` — the concrete next step (either a
+  schurian promotion, or an iso-transport from the schurian affine `clebschScheme`).
+
+**★ NODE-4 INSIGHT (rank-counting boundary — surfaced while building this).** `viaRainbowRank` is catch-up-free *because*
+rainbow rigidity supplies forced triangles in the scheme's **own** colours, and a rainbow triangle needs **three distinct
+non-diagonal colours ⟹ rank ≥ 4**. Node 4's core is a primitive **rank-3 SRG** (only two non-diagonal colours,
+adjacency / non-adjacency) — so it has **no rainbow triangles at all**; the scheme-level δ′/rainbow engine is
+**structurally inapplicable** there (a colour-counting obstruction, not mere difficulty). This sharply re-confirms the
+node-2 / node-4 boundary and that node-2 carving **cannot leak into node 4**: node 2 = rank-≥4 amorphic (forced triangles
+in own colours ⟹ 1-WL closes, the wall bypassed); node 4 = rank-3 SRG (forced structure, if any, lives only in the finer
+**2-WL extension** colours ⟹ re-incurs `hcatch` + the `minMult` multiplicity wall). Corollary for strategy: any node-4
+progress **must** work in the 2-WL extension arena (the existing D1/D2/D3 machinery); the scheme-level rainbow engine is a
+rank-counting dead end there, so no amount of node-2 (rainbow) generalization approaches the wall — consistent with
+"node 2 + node 3 cover everything constructible, node 4 untouched."
 
 ### 9.9.10 D2 stable-cover regularity probe — DONE (2026-06-17): the "stable ⟹ regular" extraction is REFUTED as a proof route
 
