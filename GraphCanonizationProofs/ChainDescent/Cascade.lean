@@ -4332,6 +4332,44 @@ theorem schemeAutGroup_eq_closure_of_blockRecovered {n : Nat} {S : SchurianSchem
   rw [gensAt_empty_eq hsound] at hr
   exact hr.trans (stabilizerAt_schemeAdj_empty_eq S)
 
+/-- **The block-recovery PRODUCER — `hImprim` localized to the two visible constituent-recovery interfaces.**
+The seal-facing counterpart of `schemeAutGroup_eq_closure_of_blockRecovered` (the consumer): given a block system
+`I` (`ClosedSubset`), a sound harvest `gens`, a terminal base `bs`, and the **block-visible** quotient (`hqvis`,
+block-move) + fiber (`hfvis`, within-block) realizers keyed on `β_I = schemeEquiv I`, the scheme is
+`SchemeBlockRecovered`. Composed with `exists_nontrivial_closedSubset_of_not_isPrimitive`, this shows the seal's
+carried `hImprim : ¬IsPrimitive → SchemeBlockRecovered ∨ AbelianConsumed` reduces to **exactly** the two
+constituent-recovery interfaces on the extracted block system — `hqvis`/`hfvis` = "the quotient (block action) and
+fiber (within-block action) recover", the substrate-conditional **A2-ii** content (`reachesRigid_of_blockDecomposition`'s
+honest frontier). So `hImprim` is **not** an independent gap: like `hcatch`, it collapses onto the same WL-recovery
+core as the primitive floor — here on the *smaller* constituents (transitive/schurian by the §11.1 gate), reached
+through the Route B block tower (`≤ log₂ n` layers) with no sub-scheme materialized. Axiom-clean. -/
+theorem schemeBlockRecovered_of_visibleRealizers {n : Nat} {S : SchurianScheme n}
+    {I : Finset (Fin (S.rank + 1))} {gens : Set (Equiv.Perm (Fin n))} {bs : List (Fin n)}
+    (hcl : S.toAssociationScheme.ClosedSubset I)
+    (hsound : ∀ g ∈ gens,
+      g ∈ StabilizerAt (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) ∅)
+    (hqvis : ∀ T : Finset (Fin n), ∀ b w : Fin n,
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) b
+            = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) w →
+        ∃ σ, σ ∈ gens
+          ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T σ
+          ∧ {y | S.toAssociationScheme.schemeEquiv I (σ b) y}
+              = {y | S.toAssociationScheme.schemeEquiv I w y})
+    (hfvis : ∀ T : Finset (Fin n), ∀ u w : Fin n,
+        {y | S.toAssociationScheme.schemeEquiv I u y} = {y | S.toAssociationScheme.schemeEquiv I w y} →
+        warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) u
+            = warmRefine (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+              (individualizedColouring n T) w →
+        ∃ g, g ∈ gens
+          ∧ ResidualAut (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T g ∧ g u = w)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown)
+      (bs.foldl (fun s b => insert b s) ∅)) :
+    SchemeBlockRecovered n S :=
+  ⟨I, gens, bs, hcl, hsound, hqvis, hfvis, hbase⟩
+
 /-- **The seal capstone with the imprimitive branch folded into block recovery (the scheme-seal wiring).** Widens
 `reachesRigidOrCameron_viaRecoveryOrAbelian` so the rigid side is `SchemeBlockRecovered ∨ AbelianConsumed`: every
 rank-≥3 schurian scheme residual is **block-recovered or hidden-abelian-consumed or Cameron**. The imprimitive branch

@@ -1666,3 +1666,49 @@ cyclotomic `s(C)=2` families (via the affine discharge). The residual biting cas
 **Recommendation.** The engine is complete; do NOT rebuild it. `hcatch` is now ridden on it (pieces 1, done). The only
 genuine remaining work here is piece 3 = the seal's main open crux (research), with piece 2 as optional checkability
 infra. So `hcatch` is effectively discharged-modulo-the-same-crux — it is no longer an independent line item.
+
+### 9.9.16 SCOPE — hImprim (the imprimitive branch): infra built, content = constituent recovery
+
+**Headline finding (verified against source): `hImprim`'s block-tower INFRASTRUCTURE is fully built; its open content
+is `hqvis`/`hfvis` = the constituents' WL-recovery — the substrate-conditional A2-ii frontier, which (by the project's
+no-sub-scheme-materialization design) is carried, not recursively reduced. So `hImprim`, exactly like `hcatch`,
+collapses onto the same WL-recovery core as the primitive floor — it is NOT an independent cleanup item.**
+
+`hImprim : ¬IsPrimitive → SchemeBlockRecovered ∨ AbelianConsumed` (carried by every seal capstone).
+
+**What is landed (axiom-clean), the block-tower inventory:**
+- **closed-subset extractor:** `exists_nontrivial_closedSubset_of_not_isPrimitive` (imprimitive ⟹ a nontrivial block
+  system `I`, `ClosedSubset I`, `I ≠ {0}, univ`).
+- **§11.1 gate** (`Scheme.lean`): the constituents stay transitive/schurian — `schemeBlocks_transitive` (quotient),
+  `schemeBlock_fiber_transitive` (fiber). So the recursion's constituents remain in the schurian class.
+- **Route B chain** (`Cascade.lean`): `orbitCoverage_of_blockDecomposition` (the wreath swap-decomposition — a
+  cross-block orbit pair = block-swap `σ` ∘ fiber-move `h`, needing the *composition-closed* `closure (gensAt …)`) →
+  `coversOrbits_of_blockDecomposition` (Phase-2: assemble full coverage from per-level block-reach + within-block
+  coverage; induction stays **entirely on `Fin n`** — no sub-scheme materialized) → `reachesRigid_of_blockVisibleDecomposition`
+  → `SchemeBlockRecovered`, with the consumer `schemeAutGroup_eq_closure_of_blockRecovered`.
+- **leg B:** the abelian constituents route to `AbelianConsumed` (`abelianConsumed_of_residualAbelian`, citation-free).
+- **producer (this session):** `schemeBlockRecovered_of_visibleRealizers` — the seal-facing PRODUCER naming the
+  reduction: `ClosedSubset I` + sound `gens` + base + block-visible `hqvis`/`hfvis` ⟹ `SchemeBlockRecovered`.
+
+**The open content = constituent recovery (NOT the tower).** The Route B chain's carried inputs are `hqvis` (the
+**quotient**/block-action recovers — block-move realizers) and `hfvis` (the **fiber**/within-block action recovers —
+within-block realizers). The doc's own verdict (`reachesRigid_of_blockDecomposition`): *"the remaining open content is
+discharging `hreach`/`hfiber` from the constituents' recovery (the substrate-conditional depth-graded block-visibility,
+A2-ii) — the honest frontier."* The "s(C) reduction-to-constituents" (exhaustive-obstruction §0.7.6) is
+**sought-and-not-located**.
+
+**Why it is not cheap cleanup.** The constituents live on the **same `Fin n`** via the block partition `β_I`
+(deliberately — the project rejected materializing quotient/fiber sub-`AdjMatrix`es), so there is no clean
+"smaller-`n`" IH to invoke the seal recursively. Discharging `hqvis`/`hfvis` is therefore a *direct* argument that the
+block-level and within-block 1-WL recover — substrate-conditional content of the **same character as the primitive
+floor / `hcatch` / the s(C) self-detection core**, reached one block-tower layer down. The two honest routes to close it
+are (a) materialize the constituents + a genuine size-recursion (the rejected route, large), or (b) the direct
+constituent-WL-recovery argument (= the open core). Neither is routine.
+
+**Consequence for the seal's `modulo` set.** Combined with §9.9.14–§9.9.15: the live capstone's `modulo {G3 +
+hSmallAutThin + hcatch + hImprim}` is, in honest substance, `modulo {G3 + [one WL-recovery / s(C) core]}` — the three
+non-G3 hypotheses (`hSmallAutThin` on the primitive residue, `hcatch` on the 1-WL↔2-WL exchange, `hImprim` on the
+constituents) are **facets of the same open object**, not four independent gaps. `hImprim` is now reduced (via the
+landed producer) to the constituent-recovery interfaces; closing it = closing that shared core (one tower-layer down),
+not a separable task. Buildable non-research residue: only the `EdgeGeneratesFromSet`-style checkable closure (§9.9.15
+piece 2), shared with the engine.
