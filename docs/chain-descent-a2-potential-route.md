@@ -1845,3 +1845,40 @@ the carried citation is faithful (not silently assuming cyclotomic). Cites: [Skr
 structure, not open math. Node-4-schurian reduces to the affine slice modulo a citation stack; the open uncited wall is
 non-schurian and outside the seal's residue class. **Subject to the (C1) forms-graph check + (C3) schurian confirmation.**
 Nothing committed (user commits).
+
+#### 9.9.18a (C3) RESOLVED — the seal IS deliberately scoped to schurian; the non-schurian wall is the IR-solver's, not the seal's
+
+**Verdict (A), well-sourced from the project's own architecture.** The seal `reachesRigidOrCameron` is *deliberately,
+provably* scoped to schurian residues; the non-schurian / high-WL-dimension term is split out by design and handled by
+the honest flag + the (forward) IR-blind-spot solver — it is **not** an unacknowledged seal gap.
+
+**The architectural separation (Lean-grounded).** `StablyRecoverable ↔ DiscretizesAtBases ∧ RecoversWhileSymmetric`
+(`stablyRecoverable_iff_symmetric_and_bases`, Cascade.lean:3749). The two conjuncts are exactly the two terms:
+- **`RecoversWhileSymmetric` = the `s(C)` self-detection term = the SCHURIAN part** (`CellsAreOrbits` at non-base
+  prefixes; the seal's open content). The seal is keyed on the IR-core-FREE `SchemeRecoveredWhileSymmetric`
+  (`reachesRigidOrCameron_viaSymmetricRecovery`, Cascade.lean:4255) — it **drops `DiscretizesAtBases` entirely.**
+- **`DiscretizesAtBases` = the `IR_core` / multipede term = the NON-schurian / high-WL-dim part** = the *second
+  guarantee* (flag-allowed), explicitly "*not a symmetry-completeness obligation*" (Cascade.lean:3740-3744, 3762).
+The project maps these to the WL-dim axis directly (seal-handoff.md:502-504: "*rigidified full-rank linear coupling =
+multipede (IR-core)*"; :50-51: "*rigid (multipede — high s(C) with trivial Aut) → IR-core, outside the seal*"). The
+IR-solver owns "1-WL/2-WL does NOT discretize" (ir-blindspot-solver.md:74-76, the multipede target), gated on A2.
+
+**Consequence for the Skresanov reduction — it genuinely reduces the SEAL's node 4.** Since the seal's obligation IS
+the schurian (`s(C)`) part, and §9.9.18 shows the schurian small-Aut non-geometric residue is affine, the Skresanov
+reduction **completes the seal's primitive-floor obligation modulo citations** (+ the C1 forms-graph check) — it is
+*not* merely "advancing the schurian scope while node 4 stays open." Node-4-*for-the-seal* reduces to the affine slice.
+
+**Where the genuine wall actually lives (the honest relocation).** The canonizer = seal (schurian; now affine-mod-citations)
++ IR-solver (non-schurian; **still flags** on its "row 4" = generic unbounded-`s` SRG residue where A2 / bounded-WL-dim
+may FAIL; ir-blindspot-solver.md:102). So the genuine poly-GI wall is **not in the seal** — it is the IR-solver's row 4
+(non-schurian, A2-may-fail ⟹ flag). The canonizer stays "polynomial-or-flag," flag set = exactly A2's row 4. The
+Skresanov reduction resolves the seal's node 4 and **relocates** the open wall to the IR-solver (the forward payoff,
+A2-gated) — it does not make the overall canonizer unconditionally polynomial.
+
+**The remaining nuance (a separate, acknowledged gap — NOT closed by C3).** `SchurianScheme` is a **carried typing
+assumption**, never discharged: the residue is *modeled* as `orbitalScheme H` (schurian by construction); there is no
+theorem equating the canonizer's actual 2-WL-closure output to an `orbitalScheme H` (promoting a *computed* scheme to
+schurian is documented INFEASIBLE, general-cc-separability.md:554-558). So the seal's completeness is relative to the
+`orbitalScheme H` model; faithfulness of that model to the canonizer's output is its own modeling gap, orthogonal to the
+Skresanov reduction. **Net: C3 confirms the Skresanov reduction is a real reduction of the seal's node 4 (mod citations +
+C1), with the genuine open wall relocated — correctly, by design — to the non-schurian IR-solver row 4.** Nothing committed.

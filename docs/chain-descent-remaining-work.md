@@ -82,10 +82,15 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > hence in the domain of the affine slice. This moves node-4-schurian from "uncited open" to the citation stack
 > `{G3 + Liebeck + Skresanov + Ponomarenko-cyclotomic-2-sep + finite exceptions}` — the "conditional on citations" goal,
 > at the cost of citations beyond G3. The genuinely-uncited "thick wall, no witness" is a **non-schurian** abstract-SRG
-> phenomenon that **cannot be a WL-closure residue**. **PENDING:** (C1) the forms-graph affine classes (e.g. bilinear
-> `H_q(2,m)`, small-Aut + non-geometric + affine-but-not-cyclotomic) need a non-cyclotomic separability citation — the
-> main open hole; (C3) confirm the seal residue is the WL-closure `Inv(G^(2))`. Until (C1)/(C3) clear, treat node 4 as
-> "reduced-to-affine modulo verification," not closed.
+> phenomenon that **cannot be a WL-closure residue**. **(C3) RESOLVED (route §9.9.18a, verdict A):** the seal is
+> *deliberately* scoped to schurian residues — `StablyRecoverable ↔ DiscretizesAtBases ∧ RecoversWhileSymmetric`, and
+> the seal is keyed IR-core-free (`reachesRigidOrCameron_viaSymmetricRecovery` drops `DiscretizesAtBases`). So the
+> Skresanov reduction genuinely **completes the SEAL's node-4 obligation modulo citations** — node-4-*for-the-seal* =
+> affine. The genuine wall is **relocated** to the IR-solver's row 4 (non-schurian, generic unbounded-`s`, where A2 may
+> fail ⟹ flag) — by design, not a seal gap. **PENDING:** (C1) the forms-graph affine classes (e.g. bilinear `H_q(2,m)`,
+> small-Aut + non-geometric + affine-but-not-cyclotomic) need a non-cyclotomic separability citation — the main open
+> hole. Separate acknowledged gap: `SchurianScheme` is a carried model assumption (`orbitalScheme H`), not discharged
+> from the canonizer's output.
 
 **One object, three faces** (the residue, the 1-WL↔2-WL exchange, the imprimitive constituents). The open question:
 *does the bounded-depth relation-count profile separate the small-Aut primitive residue's orbits at a bounded base?*
