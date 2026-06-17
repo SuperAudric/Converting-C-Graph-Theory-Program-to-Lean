@@ -240,6 +240,18 @@ non-affine territory is **empty here**; its achievable instance is `clebschSchem
 amorphic slice* (cost = a noncomputable cyclotomic `RainbowRigid` proof), not a non-affine breakthrough. Recorded, not
 auto-pursued (an affine rung; cannot approach node 4). ClebschConcrete docstrings corrected. Nothing committed.
 
+**▶ SPIELMAN FLOOR LANDED (2026-06-17, §9.9.13) — the fully-citable, Cameron-free sub-exponential end-state (§9.9.7
+step 2-subexp).** Axiom-clean, build green: `reachesRigidOrCameron_viaSpielman` (Cascade.lean) carries the **single**
+hypothesis `hSpielman : SeparatesAtBoundedBase S bound` (the residue individualizes a `≤bound` base to `Discrete`) and
+concludes the seal via the **rigid branch outright** — **carries ONLY `hSpielman`: no G3, no `hImprim`, no
+largeness/Cameron** (the Cameron disjunct is never taken; discretization ⟹ reaches rigid, so the whole "or Cameron"
+machinery is unneeded at this threshold). Faithful citation: **Spielman STOC 1996** (every primitive SRG
+individualizes to discrete at `Õ(n^{1/3})`) ⟹ `hSpielman` at `bound = Õ(n^{1/3})` unconditionally (imprimitive = block
+tower, conference = leg B). Plus the reusable positive bridge `schemeRecoveredByDepth_of_separatesAtBoundedBase`
+(separation supplied outright ⟹ depth-graded recovery, via `stablyRecoverable_of_discrete`). The sub-exp-vs-poly
+split = the scaling of `bound`: `Õ(n^{1/3})` proven (here), `O(log n)` = node 4 (no citation). **This is the sharpest
+fully-citable end-state; it does NOT close the polynomial seal** (node 4 untouched). Nothing committed (user commits).
+
 ---
 
 ## 1. The target and how it plugs in (this half is LANDED)
@@ -1534,3 +1546,35 @@ off the two most natural "engineer a thick small-Aut graph" routes: climbing WL 
 fixed `n ≤ 64` (no scalable small-Aut thick family, §9.9.3 G-construct), so this confirms the gap is `O(1)` at the constructible
 sizes — it cannot rule out a gap *growing* with `n` (which would need an unconstructible witness = the open node 4). Nothing
 committed (user commits).
+### 9.9.13 Spielman floor — LANDED (2026-06-17): the fully-citable, Cameron-free sub-exponential end-state
+
+**Two theorems, axiom-clean `[propext, Classical.choice, Quot.sound]`, build green, nothing committed.** This is the
+§9.9.7 **step 2-subexp** endpoint — the honest *floor* of the threshold ladder (§8.6): a seal that stands on a single,
+concrete, replaceable citation (Spielman), with the entire largeness/Cameron machinery dropped.
+
+- **`reachesRigidOrCameron_viaSpielman` (Cascade.lean).** Carries the **single** hypothesis
+  `hSpielman : SeparatesAtBoundedBase S bound` — the residue individualizes a base of size `≤ bound` to `Discrete`
+  warm refinement — and concludes the seal disjunction via the **rigid branch outright**
+  (`Or.inl (Or.inr …)`). **It carries ONLY `hSpielman`: no `hClassify` (G3), no `hImprim`, no largeness/Cameron
+  routing.** The Cameron disjunct is never taken — the residue discretizes, hence reaches rigid — so the whole "or
+  Cameron" / largeness apparatus is *unneeded* at this threshold. That is the precise sense in which the floor is
+  Cameron-free (contrast the live `…viaBoundedMinMult`, which carries the open `hSmallAutThin`, and
+  `…viaSmallAutShatters`, which carries the Babai/Kivva largeness direction).
+- **`schemeRecoveredByDepth_of_separatesAtBoundedBase` (Cascade.lean).** The reusable *positive* bridge:
+  `SeparatesAtBoundedBase S bound ⟹ SchemeRecoveredByDepth n S bound`, via `stablyRecoverable_of_discrete`
+  (discrete base ⟹ every cell a singleton ⟹ orbit at every `T ⊇ S₀`) then `schemeRecoveredByDepth_of_stablyRecoverable`.
+  Where `PersistentTwinYieldsBlock` *derives* separation by refuting a persistent twin (the open crux), this consumes
+  separation supplied **outright** — exactly what a discretization citation or the δ′ engine delivers
+  (`separatesAtBoundedBase_of_dominatorClosure` already produces the hypothesis on real residues, so the capstone is
+  non-vacuous).
+
+**The citation and the threshold (what `hSpielman` faithfully is).** Spielman (STOC 1996): every **primitive strongly
+regular graph individualizes-and-refines to discrete at a base of size `Õ(n^{1/3})`** — so for the primitive residue
+`hSpielman` holds with `bound = Õ(n^{1/3})` *unconditionally* (no smallness/largeness guard; the cover branch of the
+multiplicity route is vacuous because everything shatters). Imprimitive = the block tower (`hImprim` infra), conference
+= leg B; folded into the one `SeparatesAtBoundedBase` deliverable. The **sub-exponential-vs-polynomial** distinction
+lives entirely in how `bound` scales with `n`: `Õ(n^{1/3})` is the proven Spielman floor (here); a *polynomial*
+`O(log n)` is the open rank-3 base case = node 4 (`hSmallAutThin`), which **no citation reaches**. So this is the
+sharpest *fully-citable* (Cameron-free, G3-free) end-state of the seal, honestly sub-exponential and subsumed by
+Spielman — it does **not** close the polynomial seal, which remains node 4. The remaining non-Spielman cleanup
+(`hImprim` block-tower discharge, `hcatch` 1-WL↔2-WL exchange) is orthogonal and still open.

@@ -4591,6 +4591,46 @@ theorem reachesRigidOrCameron_viaPersistentTwinBlock {n : Nat} {IsLarge : Nat �
   reachesRigidOrCameron_viaFusedSeal hClassify S hne hrank
     (selfDetectsStably_of_persistentTwinYieldsBlock S IsLarge bound hCrux) hImprim
 
+/-- **Separation at a bounded base ⟹ depth-graded recovery (the positive bridge).** A bounded base whose warm
+refinement is `Discrete` recovers the scheme at that depth: a discrete base is `StablyRecoverable`
+(`stablyRecoverable_of_discrete`, every cell a singleton ⟹ trivially an orbit at every `T ⊇ S₀`), which
+`schemeRecoveredByDepth_of_stablyRecoverable` upgrades to `SchemeRecoveredByDepth`. This is the *positive* form of
+the seal's recovery content: where `PersistentTwinYieldsBlock` derives separation by *refuting* a persistent twin
+(the open crux), this consumes separation supplied **outright** — exactly what a discretization citation (Spielman)
+or the δ′ engine delivers. Axiom-clean. -/
+theorem schemeRecoveredByDepth_of_separatesAtBoundedBase {n : Nat} (S : SchurianScheme n) {bound : Nat}
+    (hsep : SeparatesAtBoundedBase S bound) :
+    SchemeRecoveredByDepth n S bound := by
+  obtain ⟨S₀, hcard, hd⟩ := hsep
+  exact schemeRecoveredByDepth_of_stablyRecoverable S hcard (stablyRecoverable_of_discrete hd)
+
+/-- **THE SEAL VIA SPIELMAN — the fully-citable, Cameron-free sub-exponential floor.** The honest floor of the
+seal's threshold ladder (`docs/chain-descent-a2-potential-route.md` §8.6 / §9.9.7 step 2). Carry the single
+hypothesis `hSpielman : SeparatesAtBoundedBase S bound` — the residue individualizes a base of size `≤ bound` to
+`Discrete` warm refinement — and the seal holds via the **rigid branch outright**: `Or.inl (Or.inr …)` of
+`schemeRecoveredByDepth_of_separatesAtBoundedBase`. **Carries ONLY `hSpielman` — no `hClassify` (G3), no
+`hImprim`, no largeness/Cameron routing.** The Cameron disjunct is never taken (the residue discretizes, hence
+reaches rigid), so the entire "or Cameron" / largeness machinery is *unneeded* at this threshold — this is the
+precise sense in which the floor is Cameron-free.
+
+**The citation (`hSpielman`'s faithful source) and the threshold.** Spielman (STOC 1996): **every primitive
+strongly regular graph individualizes-and-refines to discrete at a base of size `Õ(n^{1/3})`** — so for the
+primitive residue `hSpielman` holds with `bound = Õ(n^{1/3})` *unconditionally* (no smallness/largeness guard,
+the cover branch of the multiplicity route is vacuous because everything shatters). The imprimitive case is the
+block tower (`hImprim` infra) and the conference case is leg B; folded into the single `SeparatesAtBoundedBase`
+deliverable, this gives an **honestly sub-exponential** "reaches rigid or Cameron". The sub-exp-vs-polynomial
+distinction lives entirely in how `bound` scales with `n`: `bound = Õ(n^{1/3})` is the proven Spielman floor
+(here); a *polynomial* `bound = O(log n)` is the open rank-3 base case = node 4 (`hSmallAutThin`), which **no
+citation reaches**. So this capstone is the sharpest *fully-citable* (Cameron-free, G3-free) end-state, subsumed
+by Spielman; it does not close the polynomial seal, which remains node 4. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaSpielman {n : Nat}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (S : SchurianScheme n)
+    (hSpielman : SeparatesAtBoundedBase S bound) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  Or.inl (Or.inr (schemeRecoveredByDepth_of_separatesAtBoundedBase S hSpielman))
+
 /-! ### Phase 2 — the converse proof, layer 1: the intra-cell fusion closure
 
 The provable substance of the P3 converse (`PersistentTwinYieldsBlock`). The full converse is open G2-B, but the
