@@ -15,8 +15,18 @@ pinning rank, layers `[2,2,6,6]`, depth 3); `dominatorReachable_of_rank`'s `deci
 pairs itself, so only the rank function is supplied. **Scope:** this is one concrete scheme (parameter-scoped
 to the Clebsch `(16,5,0,2)`), an existence witness that the δ′ route reaches a real non-affine residue — not
 the general family theorem. It deliberately stays at the `AssociationScheme` level (the `Discrete` /
-`SeparatesAtBoundedBase` content); feeding the *seal* capstone additionally needs `SchurianScheme`
-(the automorphism data), deferred.
+`SeparatesAtBoundedBase` content); feeding the *seal* capstone would additionally need `SchurianScheme`
+(the automorphism data). **★ This `ℤ₄²` scheme is NOT schurian — so it cannot be promoted (2026-06-17 probe).**
+Its full automorphism group is order **32** (16 translations of the `ℤ₄²` ring `⋊` an order-2 point stabiliser):
+the linear/point stabiliser at `0` is order 2, NOT transitive on the size-5 colour classes, so each rank-3
+orbital splits into 5 `Aut`-orbits — the schurian axiom (one `Aut`-orbit per orbital) fails. It is a genuine
+*non-schurian* amorphic mate of the Clebsch parameters. **The schurian, rainbow-rigid Clebsch is the AFFINE
+cyclotomic `clebschScheme` (`CascadeAffine`, on `F₁₆ = Z2⁴`, order-5 multiplier, `|Aut| = 160`, rainbow-rigid)**
+— that, not this `ℤ₄²` matrix, is the object that feeds `reachesRigidOrCameron_viaRainbowRank` (an affine /
+leg-B-adjacent seal, removing the cyclotomic-separability citation; the `RainbowRigid` obligation there is a
+*noncomputable* cyclotomic intersection-number computation). So at `n = 16` the schurian rainbow-rigid amorphic
+Clebsch is affine, and the non-affine amorphic Clebsch (this scheme) is non-schurian — the δ′/rainbow ENGINE is
+validated here at the `AssociationScheme` level, but a *non-affine* sealed residue is not available at `n = 16`.
 
 `#print axioms clebschZ4_closure` ⟹ `[propext, Classical.choice, Quot.sound]`.
 -/
@@ -147,8 +157,10 @@ of pairwise-distinct non-diagonal colours, checked by `decide` after the `relOfP
 **non-vacuity witness for `dominatorReachable_of_rainbowRank`** on a genuine non-affine residue — and hence for the
 seal capstone `reachesRigidOrCameron_viaRainbowRank` built on it: the rainbow `hbase`/`hstep` data it requires is
 satisfiable on real amorphic-NLS data (the `n = 16` instance of the uniform rainbow rank the node-2 rung needs).
-The remaining gap to a *sealed* instance is the `SchurianScheme` (automorphism) structure on `clebschZ4Scheme`,
-deferred. Axiom-clean (`decide`, not `native_decide`). -/
+**This scheme itself cannot be *sealed* — it is non-schurian (module docstring, `|Aut| = 32`);** the schurian
+rainbow-rigid Clebsch that `viaRainbowRank` consumes is the affine cyclotomic `clebschScheme`. So this validates the
+δ′/rainbow ENGINE end-to-end at the `AssociationScheme` level, not the seal. Axiom-clean (`decide`, not
+`native_decide`). -/
 theorem clebschZ4_closure_viaRainbow :
     ∀ v, DominatorReachable clebschZ4Scheme {0, 1} v := by
   -- The rainbow data in the *matrix* colours (computable), decided directly as in `clebschZ4_closure`.

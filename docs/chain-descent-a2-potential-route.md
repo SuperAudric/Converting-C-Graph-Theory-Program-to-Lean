@@ -229,6 +229,17 @@ non-diagonal colours); node 4's core is a primitive **rank-3 SRG** with no rainb
 **structurally inapplicable** there (colour-counting, not difficulty) — node-2 carving provably cannot leak into node 4, and
 any node-4 progress must work in the 2-WL extension arena (D1/D2/D3). Nothing committed (user commits).
 
+**▶ SCHURIAN-TRANSPORT FINDING (2026-06-17, §9.9.9b) — `clebschZ4` is NON-schurian; the schurian rainbow-rigid Clebsch is
+AFFINE.** Investigating a *sealed* clebsch instance for `viaRainbowRank`: the extracted `clebschZ4Scheme` (on `ℤ₄²`,
+non-affine) has **`|Aut| = 32`** (translations `⋊` order-2 stab), the stabiliser **not transitive** on the size-5 colour
+classes ⟹ each orbital splits 5-fold ⟹ **non-schurian** (cannot be sealed; corrects the "deferred schurian" note — it is
+impossible, not pending). The schurian rainbow-rigid Clebsch is the **affine cyclotomic `clebschScheme`** (`F₁₆ = Z2⁴`,
+order-5 multiplier, `|Aut| = 160`, rainbow-rigid — verified). **Consequence:** at `n = 16` the schurian rainbow-rigid
+amorphic is *affine* (leg-B-adjacent), the non-affine amorphic is *non-schurian* (not a residue) ⟹ `viaRainbowRank`'s new
+non-affine territory is **empty here**; its achievable instance is `clebschScheme` = a *citation-free reproof of the affine
+amorphic slice* (cost = a noncomputable cyclotomic `RainbowRigid` proof), not a non-affine breakthrough. Recorded, not
+auto-pursued (an affine rung; cannot approach node 4). ClebschConcrete docstrings corrected. Nothing committed.
+
 ---
 
 ## 1. The target and how it plugs in (this half is LANDED)
@@ -765,7 +776,7 @@ excludes by hypothesis. The five nodes:
 | # | Residue structure | `c(X_{T₀})` bounded? | Status / route |
 |---|---|---|---|
 | **1** | **Thick line system** (Johnson/Hamming, lines of size →∞) | no — base √n | **Cameron** → landed **G3** (`exhaustiveObstruction_scheme`). *Excluded from the residue by hypothesis.* |
-| **2** | **Thin line system** (geometric, bounded thickness — FDF/affine) | yes, base `O(1)` | **CGGP/BCN template** (`base ≤ 2 ⟹ WL-dim ≤ 4`, BCN Thm 3.3.8). FORESEEABLE; landed vehicle = `RainbowRigid` / `dominatorReachable_of_rainbowRank` (`clebschZ4_closure` is the proof-of-concept). *Ladder risk* (per geometry type). |
+| **2** | **Thin line system** (geometric, bounded thickness — FDF/affine) | yes, base `O(1)` | **CGGP/BCN template** (`base ≤ 2 ⟹ WL-dim ≤ 4`, BCN Thm 3.3.8). **Seal vehicle LANDED & citation-free** (`reachesRigidOrCameron_viaRainbowRank`, §9.9.9a — any `RainbowRigid` schurian scheme w/ a bounded rainbow rank seals, no `hcatch`/largeness); affine instances fully sealed (`viaG0powNeg`, `…affineSlice`). **Ladder risk largely DEFUSED** (§9.9.9b): the genuinely-novel *non-affine* schurian node-2 instances appear empty — the non-affine amorphic schemes are *non-schurian* (not `orbitalScheme H` residues), the schurian rainbow-rigid amorphic ones are *affine* (leg-B). So node-2's real content = {landed affine seals} + {the cited CGGP template}; no open math, no infinite per-geometry ladder. *(Cannot reach node 4 — rank-counting, §9.9.9a.)* |
 | **3** | **No line system, bounded `m`** (Neumaier-exceptional) | yes (finite list) | **Neumaier finiteness** ⟹ max `c` over a finite set = const. FORESEEABLE/citable. |
 | **4** | **No line system, unbounded `m`, non-conference** ("row 4") | probe: yes; **no proof** | **THE OPEN POLY CRUX.** No template, no witness, not even a conjecture. §9.1–§9.6 below. |
 | **5** | **Conference** (irrational `m`) | — | **abelian / leg B** (`AbelianConsumed`). Landed. |
@@ -1382,6 +1393,34 @@ in own colours ⟹ 1-WL closes, the wall bypassed); node 4 = rank-3 SRG (forced 
 progress **must** work in the 2-WL extension arena (the existing D1/D2/D3 machinery); the scheme-level rainbow engine is a
 rank-counting dead end there, so no amount of node-2 (rainbow) generalization approaches the wall — consistent with
 "node 2 + node 3 cover everything constructible, node 4 untouched."
+
+#### 9.9.9b Schurian-transport investigation (2026-06-17): `clebschZ4` is NON-schurian; the schurian rainbow-rigid Clebsch is AFFINE
+
+**Goal:** promote `clebschZ4Scheme` to a `SchurianScheme` so it feeds `reachesRigidOrCameron_viaRainbowRank` (the first
+*sealed* concrete non-affine residue). **Result: impossible for `clebschZ4` — it is non-schurian — and the finding
+reshapes the node-2 value.** Computations (Python, on the extracted matrix + the F₁₆ cyclotomic scheme):
+
+- **`clebschZ4Scheme` (on `ℤ₄²`) is a translation scheme** (colour depends only on `w−v` over the `ℤ/4 × ℤ/4` ring,
+  natural id `k ↦ (k%4, k//4)`) — so translations are automorphisms (regular on vertices). **But its full `|Aut| = 32`
+  only** (16 translations `⋊` an order-2 point stabiliser): the stabiliser of `0` is order 2 and is **not transitive on
+  the size-5 colour classes**, so each rank-3 orbital (80 pairs) splits into **5 `Aut`-orbits** of 16 — the schurian
+  axiom (one `Aut`-orbit per orbital) **fails**. It is a genuine *non-schurian* amorphic mate of the Clebsch parameters.
+  `ℤ/4` is **not a field**, so this `ℤ₄²` scheme is non-affine in the project's sense (confirming clebsch's "non-affine
+  residue" billing) — and the non-affine amorphic Clebsch is exactly the one that is non-schurian.
+- **The cyclotomic `F₁₆` scheme (order-5 multiplier) = the affine `clebschScheme`** is **schurian** (`|Aut| = 160` =
+  16 translations of `Z2⁴` `⋊` an order-10 stabiliser, the order-5 multiplier transitive on each class) **and
+  `RainbowRigid`** (max rainbow `interNum = 1`, verified). It is on `Z2⁴` (elementary abelian = `affineScheme` form).
+
+**Consequence (the node-2 value, sharpened).** At `n = 16` the schurian rainbow-rigid amorphic Clebsch is **affine**
+(`clebschScheme`, leg-B-adjacent — its residual is the abelian translation group), and the non-affine amorphic Clebsch
+is **non-schurian** (so it is *not* an `orbitalScheme H` residue at all — it never arises as a seal obligation). So the
+genuinely-*new* (non-affine, schurian) territory `viaRainbowRank` could carve is **empty at `n = 16`**: the capstone's
+real instances here are the affine cyclotomic family, where it gives a **citation-free** seal (removing the cyclotomic
+2-separability citation of `…affineSlice`) but **no non-affine breakthrough**. The achievable instantiation is therefore
+`viaRainbowRank` on `clebschScheme` — value = *citation reduction on the affine amorphic slice*, cost = a **noncomputable**
+cyclotomic intersection-number proof of `RainbowRigid` (schurian is free; affineScheme is schurian by construction). This
+is recorded as the concrete next option, **not** auto-pursued — it is an affine rung, and by §9.9.9a's rank-counting it
+cannot approach node 4. The `clebschZ4` ClebschConcrete docstrings were corrected to state the non-schurian fact.
 
 ### 9.9.10 D2 stable-cover regularity probe — DONE (2026-06-17): the "stable ⟹ regular" extraction is REFUTED as a proof route
 
