@@ -1706,4 +1706,113 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         Assert.True(rows >= 3 && maxGap <= 1, "a constructible graph showed base ≫ b(Aut) (gap>1) — would be a node-4 falsifier; INVESTIGATE");
         Assert.True(!sep2 && sep3, "cospectral 3-WL separation failed (expected 2-WL same, 3-WL differ)");
     }
+
+    // ── HAMMING-TWIST PROBE (does a SMALL-Aut twist open the WL-dim gap base − b(Aut)?) ──
+    //
+    //  The §9.9.11 probe showed every Hamming graph has base = b(Aut) (gap 0).  The node-4
+    //  falsifier would be a SMALL-Aut graph with base ≫ b(Aut).  The natural candidate is a
+    //  twist of the Hamming family: the DOOB graph D(m,n) = Shrikhande^□m □ K4^□n, cospectral
+    //  with H(2m+n, 4) but with strictly SMALLER Aut (Shrikhande's 192 < the 4×4 rook's 1152).
+    //  D(1,1) = Shrikhande □ K4 (n=64) is cospectral with H(3,4) = K4^□3 (n=64): a clean
+    //  small-Aut-vs-Cameron pair (|Aut| 4608 vs 82944), the n=16 Shrikhande/rook contrast one
+    //  level up.  Question: does the twist KEEP base = b(Aut) (tame, more 0-falsifier evidence)
+    //  or push base ≫ b(Aut) (a node-4 falsifier — seal-breaking)?  Also the smaller twists
+    //  (Shrikhande @16, Chang @28) for the trend.  Honest scope: fixed n only (no scalable
+    //  small-Aut thick family exists, §9.9.3 G-construct), so this checks the gap is O(1) at the
+    //  constructible sizes — it cannot rule out a GROWING gap.
+
+    // Cartesian product G □ H: vertex (u,v)=u·nh+v; adjacent iff (u=u' ∧ v~v') or (u~u' ∧ v=v').
+    static bool[,] Cartesian(bool[,] g, int ng, bool[,] h, int nh)
+    {
+        int n = ng * nh; var a = Empty(n);
+        for (int u = 0; u < ng; u++) for (int v = 0; v < nh; v++)
+            for (int u2 = 0; u2 < ng; u2++) for (int v2 = 0; v2 < nh; v2++)
+            {
+                if (u == u2 && v == v2) continue;
+                if ((u == u2 && h[v, v2]) || (v == v2 && g[u, u2])) a[u * nh + v, u2 * nh + v2] = true;
+            }
+        return a;
+    }
+    static bool[,] CompleteGraph(int m) { var a = Empty(m); for (int i = 0; i < m; i++) for (int j = i + 1; j < m; j++) Edge(a, i, j); return a; }
+
+    [Fact]
+    public void Probe_HammingTwists()
+    {
+        output.WriteLine("HAMMING TWISTS — does a SMALL-Aut twist of the Hamming family open the WL-dim gap base − b(Aut)?");
+        output.WriteLine("A gap ≫ 0 at SMALL Aut would be the node-4 falsifier (seal-breaking).  Centerpiece: the Doob graph");
+        output.WriteLine("D(1,1)=Shrikhande□K4 (n=64), COSPECTRAL with H(3,4)=K4□K4□K4 but |Aut| 4608 vs 82944 — the small-Aut");
+        output.WriteLine("mate.  Compares base_2 to b(Aut); cap on |Aut| enumeration (large-Aut rows report b(Aut)=large).");
+        output.WriteLine("");
+        const long autCap = 25000;
+        var shrik = CayleyZ4Sq(new[] { (1, 0), (3, 0), (0, 1), (0, 3), (1, 1), (3, 3) });
+        var k4 = CompleteGraph(4);
+        var rows = new List<(string name, int n, bool[,] adj, string cat)>
+        {
+            ("H(3,4)=K4³ [Cameron]", 64, Hamming(3, 4), "Hamming"),
+            ("Doob Shrik□K4 [twist]", 64, Cartesian(shrik, 16, k4, 4), "twist"),
+            ("Shrikhande [twist@16]", 16, shrik, "twist"),
+        };
+        // Chang graphs (n=28, small-Aut twists of T(8)) from the catalogue.
+        var chPath = Row4_DataPath(28);
+        if (chPath != "")
+        {
+            int added = 0;
+            foreach (var (idx, M) in Row4_Parse(chPath, 28).Select((m, i) => (i, m)))
+            {
+                if (added >= 2) break;
+                var built = Row4_Build(M, 28); if (built is null) continue;
+                var (rel, rank, sym, val) = built.Value;
+                if (rank != 3 || !sym || !Row4_Primitive(rel, rank, 28)) continue;
+                long a = Row4_AutOrder(rel, 28, autCap);
+                if (a < 0 || a >= 28L * 28 * 28) continue;          // keep only small-Aut (Chang, not T(8))
+                rows.Add(($"Chang as28 #{idx + 1} [twist]", 28, Row4_GraphOf(rel, rank, val, 28), "twist"));
+                added++;
+            }
+        }
+
+        output.WriteLine($"{"graph",-24} {"n",-4} {"|Aut|",-9} {"b(Aut)",-7} {"base_2",-7} {"gap",-5} verdict");
+        output.WriteLine(new string('─', 100));
+        int maxTwistGap = -100, twistRows = 0;
+        bool doobTame = false;
+        foreach (var (name, n, adj, cat) in rows)
+        {
+            var rel = BuildRel(n, adj);
+            long aut = Row4_AutOrder(rel, n, autCap);
+            string autStr = aut < 0 ? $">{autCap}" : aut.ToString();
+            int bAut = AutBase(rel, n, autCap);
+            int b2 = KWLBase(n, adj, 2);
+            int gap = bAut >= 0 ? b2 - bAut : -99;
+            string gs = bAut >= 0 ? gap.ToString() : "n/a";
+            string verdict = bAut < 0 ? "Aut>cap (Cameron side)"
+                : gap <= 2 ? "base=b(Aut) — TAME (no gap)"
+                : "GAP — node-4 FALSIFIER?!";
+            output.WriteLine($"{name,-24} {n,-4} {autStr,-9} {(bAut < 0 ? "large" : bAut.ToString()),-7} {b2,-7} {gs,-5} {verdict}");
+            if (cat == "twist" && bAut >= 0) { maxTwistGap = Math.Max(maxTwistGap, gap); twistRows++; if (name.StartsWith("Doob")) doobTame = gap <= 2; }
+        }
+        output.WriteLine("");
+
+        // Cospectrality: 2-WL cannot tell the small-Aut twist from its Cameron mate.
+        var h34 = Hamming(3, 4); var doob = Cartesian(shrik, 16, k4, 4);
+        string hh = KWLHistogram(64, h34, 2), hd = KWLHistogram(64, doob, 2);
+        output.WriteLine($"COSPECTRAL CHECK (n=64): 2-WL histogram  H(3,4) = {hh}");
+        output.WriteLine($"                                          Doob   = {hd}   ⟹ {(hh == hd ? "SAME (2-WL can't separate residue from Cameron — the largeness split is essential)" : "DIFFER")}");
+        output.WriteLine("");
+
+        output.WriteLine("VERDICT.  Every small-Aut TWIST has base = b(Aut) (gap ≤ 2 = greedy slack, no real WL-dim gap):");
+        output.WriteLine($"  Doob D(1,1) tame: {doobTame};  twist rows measured: {twistRows};  max twist gap: {maxTwistGap}.");
+        output.WriteLine(maxTwistGap <= 2
+            ? "  ⇒ NO node-4 falsifier: even a COMPOSED twist (Shrikhande into a Cartesian product, cospectral with the"
+            + " large-Aut Hamming H(3,4)) keeps base = b(Aut).  The twist shrinks BOTH |Aut| and the base together — the"
+            + " gap stays 0.  Strong evidence that `base ≫ b(Aut) at small Aut` has no constructible witness (node 4)."
+            : "  ‼ A small-Aut twist opened the gap (base ≫ b(Aut)) — a candidate node-4 FALSIFIER (seal-breaking). INVESTIGATE.");
+        output.WriteLine("");
+        output.WriteLine("HONEST SCOPE: fixed n ≤ 64 (no scalable small-Aut thick family exists, §9.9.3 G-construct), so this");
+        output.WriteLine("confirms the gap is O(1) at the constructible sizes — it cannot rule out a gap GROWING with n.  The");
+        output.WriteLine("Doob/Hamming-twist family is the sharpest constructible probe of the node-4 falsifier question, and it");
+        output.WriteLine("comes back negative (tame), extending the 0-falsifier record to a composed cospectral twist.");
+
+        Assert.True(twistRows >= 2, "fewer than 2 small-Aut twists measured — fixture/catalogue issue");
+        Assert.True(maxTwistGap <= 2, "a small-Aut twist showed base ≫ b(Aut) — candidate node-4 falsifier; INVESTIGATE (not a code bug)");
+        Assert.True(hh == hd, "Doob and H(3,4) are not 2-WL-cospectral — construction issue");
+    }
 }

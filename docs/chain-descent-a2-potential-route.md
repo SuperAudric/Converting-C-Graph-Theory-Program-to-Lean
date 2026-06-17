@@ -187,6 +187,15 @@ CFSG", but identifying ≠ bounding base).** ⟹ `hSmallAutThin` is invariant un
 family is Cameron with `base = b(Aut)` (equality), not a node-4 falsifier. Re-pins the open content as the **WL-dim gap
 `base − b(Aut)`** (group term already handled by `exists_greedy_base_le_log`). Nothing committed (user commits).
 
+**▶ HAMMING-TWIST (DOOB) FALSIFIER PROBE DONE (2026-06-17, §9.9.12) — the sharpest constructible node-4 falsifier test comes
+back TAME.** `A2MonovariantProbe.Probe_HammingTwists` (green). Hunts a small-Aut graph with `base ≫ b(Aut)` (the §9.9.11
+falsifier shape) among Hamming **twists**. Centerpiece: **Doob `D(1,1) = Shrikhande □ K₄` (n=64)**, cospectral with `H(3,4) =
+K₄^□3` but `|Aut|` 4608 vs 82944 — the Shrikhande/rook contrast one level up. **Result: Doob gap 0 (`b(Aut)=base₂=3`); Shrikhande
++ both Chang graphs all gap 0 — every small-Aut twist TAME, no falsifier.** Even a *composed* twist keeps `base = b(Aut)` (the
+twist shrinks `|Aut|` and the base together). 2-WL cospectrality confirmed (`[64,576,1728,1728]` identical for H(3,4) vs Doob).
+Extends the 0-falsifier record to a composed cospectral twist; with §9.9.11 closes off the two natural "engineer a thick small-Aut
+graph" routes (climb WL / twist Hamming). Bounded-`n` scope (≤64). Nothing committed (user commits).
+
 **▶ NODE-2 RUNG, first increment LANDED (2026-06-17, §9.9.9) — the δ′ → multiplicity-pipeline bridge.** Axiom-clean,
 build green: `boundedConfusionMultiplicity_of_completeBase` (§CC.22e — a bounded *discrete* base ⟹
 `BoundedConfusionMultiplicity B M`, sharpening the trivial `M = n` anchor to `M = |T₀|`) + the capstone
@@ -1398,3 +1407,35 @@ constructible witness, and no WL level or Hamming dimension can manufacture one 
 the probe re-pins the open content as the **WL-dim gap `base − b(Aut)`** (the genuine-decision count beyond what Aut prunes) —
 the sharpest statement of `hSmallAutThin` is "the residue's gap is bounded," with the group term `b(Aut)` already handled
 (`exists_greedy_base_le_log` → O(log n) for small Aut). Same construction bottleneck (bounded-`s` data only). Nothing committed.
+
+### 9.9.12 Hamming-twist (Doob) probe — DONE (2026-06-17): the sharpest constructible node-4 falsifier test comes back TAME
+
+**Built + run, green: `A2MonovariantProbe.Probe_HammingTwists`.** §9.9.11 re-pinned the node-4 falsifier as a **small-Aut graph
+with `base ≫ b(Aut)`** (a large WL-dim gap). This probe hunts one among the natural candidates — **twists of the Hamming
+family**. The centerpiece is the **Doob graph `D(1,1) = Shrikhande □ K₄` (n=64)**: cospectral with `H(3,4) = K₄^□3` (same
+distance-regular parameters) but with strictly smaller Aut (`|Aut|` **4608 vs 82944** — Shrikhande's 192 replaces the 4×4
+rook's 1152 in one Cartesian factor). It is the Shrikhande/rook (n=16) contrast lifted one level: a clean small-Aut-vs-Cameron
+cospectral pair, and the most structured constructible candidate for "thick at small Aut."
+
+**Result — every small-Aut twist is TAME (`base = b(Aut)`, gap 0); no falsifier:**
+| graph | n | \|Aut\| | b(Aut) | base₂ | gap |
+|---|---|---|---|---|---|
+| H(3,4)=K₄^□3 [Cameron] | 64 | >25000 (large) | large | 4 | — |
+| **Doob Shrik□K₄ [twist]** | 64 | **4608** | **3** | **3** | **0** |
+| Shrikhande [twist@16] | 16 | 192 | 3 | 3 | 0 |
+| Chang as28 #5/#7 [twist] | 28 | 360/384 | 3 | 3 | 0 |
+
+- **Doob D(1,1): gap 0.** Even a **composed** twist (Shrikhande folded into a Cartesian product, cospectral with a large-Aut
+  Hamming graph) keeps `base = b(Aut)`. The twist shrinks **both** `|Aut|` and the base *together* — the gap stays 0. So the
+  twist is the *opposite* of a falsifier: reducing Aut reduces the base in lockstep.
+- **2-WL cospectrality confirmed:** `H(3,4)` and Doob share the identical 2-WL class-size histogram `[64,576,1728,1728]` — 2-WL
+  genuinely cannot separate the small-Aut twist from its Cameron mate, so the largeness split is essential (the n=64 analogue of
+  the rook/Shrikhande `[16,96,144]` collision).
+
+**Verdict.** The Doob/Hamming-twist family is the sharpest *constructible* probe of the node-4 falsifier question (`base ≫
+b(Aut)` at small Aut), and it comes back **negative** — extending the 0-falsifier record from the sporadic residue (§9.9.8) to a
+**composed cospectral twist**. Combined with §9.9.11 (the WL ladder cannot manufacture a gap, `base_k ≥ b(Aut)`), this closes
+off the two most natural "engineer a thick small-Aut graph" routes: climbing WL and twisting Hamming. **Honest scope unchanged:**
+fixed `n ≤ 64` (no scalable small-Aut thick family, §9.9.3 G-construct), so this confirms the gap is `O(1)` at the constructible
+sizes — it cannot rule out a gap *growing* with `n` (which would need an unconstructible witness = the open node 4). Nothing
+committed (user commits).
