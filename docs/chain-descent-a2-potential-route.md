@@ -1781,3 +1781,67 @@ closure-angle's crux IS the Skresanov question. **Next:** the Skresanov path —
 make the deficiency `G^(2)_T / G_T` trivial-or-affine at a bounded base for the residue (a concrete affine-rank-3
 carve capstone, sibling to the cyclotomic slice)? Node 4 (unbounded-`s`, the true wall) remains untouched. Nothing
 else committed (user commits).
+
+### 9.9.18 Skresanov reduction — DONE (2026-06-17): node-4-SCHURIAN is AFFINE; the genuine thick wall is non-schurian (a citation-factoring of `hSmallAutThin`)
+
+**The Skresanov lead (§9.9.17 next-step) resolved into a structural reduction of the seal's open content, with caveats.
+Headline: restricted to the SCHURIAN residues the seal actually handles, node 4 is AFFINE — it is not uncited open
+math, it is a CFSG citation stack reducing to the affine slice. The genuinely-uncited "thick wall, no witness" is a
+NON-schurian phenomenon that cannot be a seal residue.** This is a citation-factoring of `hSmallAutThin` (the analogue
+of §8.5's `hNeumaier` factoring), NOT a closure: it trades open math for named citations.
+
+**The chain (each step its citation).** A schurian rank-3 SRG residue has `Aut(X) = G^(2)` (the Wielandt 2-closure), a
+primitive rank-3 *group*. Then:
+1. **Cameron's rank-3 trichotomy** (CFSG): `G^(2)` is affine / almost-simple / grid-product.
+2. **small-Aut (`¬IsLarge`) kills almost-simple and grid** — both are large-Aut Cameron families (grid `Aut = Sym(m)≀Sym(2)` ~ `(m!)²`, almost-simple socle large). So the **only small-Aut survivor is AFFINE** (`G^(2) ≤ AΓL_a(q)`). [= the seal's existing G3/Cameron carve, used contrapositively.]
+3. **Skresanov [Skr21] (arXiv:2007.14696) Thm 1+2** pins `G^(2)` *explicitly affine*; for the 1-dimensional case `G^(2) ≤ AΓL₁(q)` (cyclotomic) **except a finite explicit list** (Table 7: degrees `2^4,2^6,…,89^2`; degree 64 = `2^6` has a nonsolvable `G^(2)`). [Skr23] (arXiv:2202.03746) computes `G^(2)` in poly time.
+4. **Liebeck (1987) affine rank-3 classification** splits the affine survivors into (i) **1-dim cyclotomic** (Paley/Peisert/Van Lint–Schrijver) and (ii) the **forms-graph classes** (bilinear/alternating/affine-polar/half-spin/Suzuki–Tits).
+5. **All survivors are `affineScheme`-shaped** (`orbitalScheme (affineG G₀)`, `G₀ ≤ ΓL_d`), hence in the structural domain of the project's affine-slice machinery. The 1-dim cyclotomic family seals via `reachesRigidOrCameron_affineSlice` (carries the **Ponomarenko cyclotomic 2-sep** citation `TwinsAreSemilinear`) or citation-free `viaG0powNeg` for the `H={±1}` sub-family.
+
+**The merge with §9.9.9b — the unifying statement.** §9.9.9b found the non-affine amorphic (rank-≥4) residue is
+**non-schurian** (clebschZ4, `|Aut|=32`, orbital splits 5-fold). Combined with the rank-3 result here:
+> **Every small-Aut primitive SCHURIAN residue is affine** (rank-3 via Cameron+Skresanov; rank-≥4 non-affine amorphic
+> is non-schurian, not a residue). The seal's primitive floor is entirely affine-structured. The "thick wall with no
+> constructible witness" (`hSmallAutThin` at its hardest) is a **non-schurian abstract-SRG** phenomenon — and a
+> non-schurian scheme cannot be the WL-closure `Inv(G^(2))` of an automorphism group, so it **cannot arise as a seal
+> residue.** This reads the project's own 0-falsifier probe record correctly: catalogue SRGs that stay thick are
+> large-Aut (rook, T(8)) = Cameron; every small-Aut one shatters — *because the small-Aut schurian ones are affine.*
+
+**What it buys / costs.** Moves node-4-schurian from "uncited open, GI-adjacent" to the **citation stack
+`{G3/Cameron + Liebeck + Skresanov + Ponomarenko-cyclotomic-2-sep + finite Table-7 exceptions}`** — exactly the
+"conditional only on citations" target, but it ADDS citations beyond G3 (Liebeck, Skresanov) that a later pass would
+want to discharge. The bounded-WL/separation itself still comes from the affine-slice machinery (Ponomarenko/δ′), NOT
+from Skresanov (which gives only the *group* structure `G^(2)` affine, no WL-dim/base bound) — so Skresanov is the
+*structural identification* (residue IS affine), the affine slice is the *recovery*.
+
+**Caveats (do NOT paper over).**
+- **(C1) The forms-graph classes are affine but NOT 1-dim-cyclotomic, and CAN be small-Aut + non-geometric.** Bilinear
+  forms `H_q(2,m)` at fixed `m≥3`, growing `q`: `n=q^{2m}`, `|G^(2)|=poly(q)=n^{O(1)}` (small), smallest eigenvalue
+  `~ -q^{m-1}` (unbounded ⟹ non-geometric). So node-4-schurian ⊋ cyclotomic — it includes forms-graph affine schemes.
+  These are `affineScheme`-shaped (so structurally in domain) but their separability needs a citation OTHER than
+  Ponomarenko's cyclotomic 2-sep. **VERIFICATION OWED:** confirm each Liebeck forms-graph class is either large-Aut
+  (→Cameron, fixed-`m`/growing-`q` may NOT be) or has an available separability/WL-dim citation. This is the main hole.
+- **(C2) CFSG-heavy:** Cameron/Liebeck/Skresanov are formalizable only as carried citations (like G3).
+- **(C3) THE LOAD-BEARING ONE — is the residue schurian at all?** A canonizer residue is the **WL-closure** (a
+  coherent configuration) of the individualized graph. A coherent config is schurian iff it equals `Inv(G^(2))` —
+  which holds only when WL-dimension is low enough; a genuinely high-WL-dimension residue is a **non-schurian**
+  coherent config. The seal is typed on `SchurianScheme`, so the reduction here covers exactly the schurian residues
+  (= affine, handled). **If non-schurian residues can arise from the canonizer, they are precisely the open thick wall
+  and sit OUTSIDE the seal's scope — the reduction is then a genuine advance for the schurian scope but NOT a closure
+  of node 4.** Conversely, if the architecture guarantees schurian residues (or carries schurian-ness as a deliberate
+  scoping assumption), node-4-schurian = affine = handled-mod-citations is the whole story. **This is the decisive
+  check** — confirm against the canonizer's residue construction and the seal's scope discipline. (The project knows
+  non-schurian schemes exist, §9.9.9b; whether they arise as *residues* is the open question.)
+- **(C4) Skresanov Table-7 exceptions:** finite explicit degrees, handled by finiteness (like node-3 Neumaier exceptions).
+
+**Lean direction (next, if pursued).** A conditional capstone `reachesRigidOrCameron_viaSchurianRank3Affine` carrying
+the reduction "small-Aut ∧ primitive ∧ non-geometric ∧ schurian rank-3 ⟹ ∃ iso to an `affineScheme` satisfying the
+slice's separability hypothesis" as a single named citation, routing through `reachesRigidOrCameron_affineSlice`. This
+makes the citation-factoring a real (conditional) capstone — but it should wait on the (C1) forms-graph verification so
+the carried citation is faithful (not silently assuming cyclotomic). Cites: [Skr21]/[Skr23], Liebeck 1987, Cameron 1981.
+
+**Net.** The closure-angle (§9.9.17) said the primitive crux is the 2-closure deficiency; Skresanov says that for the
+*schurian* residue the 2-closure `G^(2)` is affine and classified — so the deficiency is governed by known affine
+structure, not open math. Node-4-schurian reduces to the affine slice modulo a citation stack; the open uncited wall is
+non-schurian and outside the seal's residue class. **Subject to the (C1) forms-graph check + (C3) schurian confirmation.**
+Nothing committed (user commits).

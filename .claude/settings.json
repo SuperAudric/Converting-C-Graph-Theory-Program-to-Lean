@@ -100,7 +100,11 @@
       "WebFetch(domain:lucatrevisan.wordpress.com)",
       "WebFetch(domain:dblp.org)",
       "WebFetch(domain:cameroncounts.wordpress.com)",
-      "WebFetch(domain:ar5iv.org)"
+      "WebFetch(domain:ar5iv.org)",
+      "WebFetch(domain:amc-journal.eu)",
+      "WebFetch(domain:www.iti.zcu.cz)",
+      "WebFetch(domain:webspace.maths.qmul.ac.uk)",
+      "WebFetch(domain:homepages.cwi.nl)"
     ],
     "additionalDirectories": [
       "*/FullCorrectness",

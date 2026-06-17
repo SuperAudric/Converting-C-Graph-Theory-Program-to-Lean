@@ -74,6 +74,19 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 ## 3. The remaining work items (categorized)
 
 ### 3a. The research core — `hSmallAutThin` / the `s(C)` certificate (node 4)
+
+> **★ MAJOR REFRAME (2026-06-17, route §9.9.18, Skresanov): node-4-SCHURIAN is AFFINE, not uncited open math.**
+> A schurian rank-3 residue has `Aut(X)=G^(2)` = a primitive rank-3 group; Cameron's trichotomy + small-Aut (kills
+> almost-simple/grid as large) ⟹ **only affine survives**; Skresanov [arXiv:2007.14696/2202.03746] pins `G^(2)` affine.
+> Merged with §9.9.9b (non-affine amorphic = non-schurian): **every small-Aut primitive *schurian* residue is affine**,
+> hence in the domain of the affine slice. This moves node-4-schurian from "uncited open" to the citation stack
+> `{G3 + Liebeck + Skresanov + Ponomarenko-cyclotomic-2-sep + finite exceptions}` — the "conditional on citations" goal,
+> at the cost of citations beyond G3. The genuinely-uncited "thick wall, no witness" is a **non-schurian** abstract-SRG
+> phenomenon that **cannot be a WL-closure residue**. **PENDING:** (C1) the forms-graph affine classes (e.g. bilinear
+> `H_q(2,m)`, small-Aut + non-geometric + affine-but-not-cyclotomic) need a non-cyclotomic separability citation — the
+> main open hole; (C3) confirm the seal residue is the WL-closure `Inv(G^(2))`. Until (C1)/(C3) clear, treat node 4 as
+> "reduced-to-affine modulo verification," not closed.
+
 **One object, three faces** (the residue, the 1-WL↔2-WL exchange, the imprimitive constituents). The open question:
 *does the bounded-depth relation-count profile separate the small-Aut primitive residue's orbits at a bounded base?*
 - **Status:** open, GI-adjacent. No constructible falsifier across every probe (sporadics, trivial-Aut, cospectral
