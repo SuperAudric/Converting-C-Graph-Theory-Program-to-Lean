@@ -151,6 +151,13 @@ close it — is set out in
 > **▶ PICK UP HERE — the open content is now ONE predicate: `hSmallAutThin` = "small-Aut primitive residue ⟹ `BoundedMinMult`",
 > i.e. thick (`minMult` unbounded) ⟹ large Aut.** This is the WALL: irreducible (rook is thick, needs √n base, saved only by
 > large Aut; δ′ gives √n there) = Babai SRG-structure/CFSG = node 4, no known witness. **Method of attack = route-doc §9.9.7.**
+> **★ The DIRECT node-4 attack leads are now ALL CLOSED (2026-06-17; route-doc §9.9.10–§9.9.12) — a fresh reader should NOT
+> re-attempt these:** the D2 "stable⟹regular partial-geometry" extraction is refuted as a proof route (§9.9.10), climbing the
+> k-WL ladder cannot manufacture a gap (`base_k ≥ b(Aut)` ∀k; the c^k Hamming hypergrid's base shrinks with k, §9.9.11), and the
+> Hamming-twist/Doob falsifier hunt is negative (§9.9.12) — so the falsifier record is **0 across every constructible probe** and
+> the "engineer a thick small-Aut graph" routes (climb WL / twist Hamming) are exhausted. The wall is now sharply "is the WL-dim
+> gap `base − b(Aut)` bounded for the small-Aut residue?", with no constructible falsifier and no current technique. The **live
+> work is the carve-around**, not a direct node-4 attack:
 > **Recommended next builds:** (a) **the remaining node-2 work — a *uniform* rainbow rank** for a parametric affine/FDF family
 > via `dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4` = the n=16 instance; the just-landed
 > `reachesRigidOrCameron_viaCompleteBase` is its seal-level consumer — generalize `clebschZ4_closure` off n=16); (b) **Spielman

@@ -144,16 +144,29 @@ all axiom-clean, build green, nothing committed (user commits):
 This is *irreducible* (rook is thick, needs √n base, saved only by large Aut; δ′ gives √n there) = Babai SRG-structure / CFSG =
 a slice of GI∈P-for-SRGs = **node 4, no known witness, not known to mathematics.** **Method of attack = §9.9.7** (1 sharpen
 [done] · 2 threshold ladder: Spielman→sub-exp floor / poly→open · 3 node-2 rung [bridge DONE §9.9.9, uniform-rank piece open] ·
-4 Neumaier — NOT a way through). **What's been done since (read §9.9.8 + §9.9.9):** the **row-4 falsifier probe** (§9.9.8 —
-42 small-Aut non-geometric SRGs, many `|Aut|=1`, all shatter, 0 falsifiers; node 3 only, node 4 unreached) and the
-**node-2 rung bridge** (§9.9.9 — `boundedConfusionMultiplicity_of_completeBase` + `reachesRigidOrCameron_viaCompleteBase`,
-δ′-discrete base ⟹ poly seal via the multiplicity pipeline, axiom-clean). **Recommended next builds:** (a) **the remaining
-node-2 work — a *uniform* rainbow rank** for a parametric affine/FDF family via `dominatorReachable_of_rainbowRank`
-(δ′→discrete→`minMult=0`; `clebschZ4` is the n=16 instance; the landed `reachesRigidOrCameron_viaCompleteBase` is its seal
-consumer; gap = generalizing the rainbow rank off n=16), shrinking the residue to node 4; (b) **Spielman floor** — a
-`…viaSpielman` capstone making the seal unconditional-modulo-citations at the sub-exponential threshold (Cameron-free). The
-poly discharge of `hSmallAutThin` for the non-geometric core is the long-horizon open frontier. **Read §9.9 (esp. §9.9.6 +
-§9.9.7, then §9.9.8 + §9.9.9) to continue.**
+4 Neumaier — NOT a way through).
+
+**▶▶ THE DIRECT NODE-4 ATTACK LEADS ARE NOW ALL CLOSED (this session, 2026-06-17 — do NOT re-walk them; see the dated pointers
+below + §9.9.10–§9.9.12):** (i) the **D2 "stable ⟹ regular partial geometry" extraction** is REFUTED as a proof route (§9.9.10
+— persistent carved covers go irregular under individualization; the only robust separator is persistence = `hSmallAutThin`
+itself, no regularity shortcut); (ii) **climbing the k-WL ladder cannot manufacture a gap** (§9.9.11 — `base_k ≥ b(Aut)` for
+every `k`, and the user's c^k hypergrid `H(k,c)` has base that SHRINKS with `k`; the wall lives in the group-base term, invariant
+under WL level); (iii) the **Hamming-twist (Doob) falsifier hunt is negative** (§9.9.12 — every small-Aut twist, incl. the
+composed Doob `Shrikhande□K₄` cospectral with `H(3,4)`, keeps `base = b(Aut)`, gap 0). **With §9.9.8 (trivial-Aut sporadics) the
+falsifier record is 0 across EVERY constructible probe**, and the two natural "engineer a thick small-Aut graph" routes (climb
+WL / twist Hamming) are closed. **Net characterization of the wall:** the open question is exactly *"is the WL-dim gap `base −
+b(Aut)` bounded for the small-Aut residue?"* — the group term `b(Aut)` is handled (`exists_greedy_base_le_log` → O(log n) for
+small Aut), there is **no constructible falsifier and no current proof technique**, so node 4 is the long-horizon open frontier,
+**not directly attackable by these means**. A fresh reader should NOT re-attempt a direct node-4 attack via covers/regularity/
+WL-level/Hamming-twists; those are exhausted.
+
+**Recommended next builds (the carve-around — these remain the live work):** (a) **the remaining node-2 work — a *uniform*
+rainbow rank** for a parametric affine/FDF family via `dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4`
+is the n=16 instance; the landed `reachesRigidOrCameron_viaCompleteBase` is its seal consumer; gap = generalizing the rainbow
+rank off n=16), shrinking the residue to node 4; (b) **Spielman floor** — a `…viaSpielman` capstone making the seal
+unconditional-modulo-citations at the sub-exponential threshold (Cameron-free). Both reuse landed infrastructure; neither
+touches the open node-4 core. **Read §9.9.6 + §9.9.7 (the wall + its method) first, then the probe record §9.9.8 + §9.9.10 +
+§9.9.11 + §9.9.12 (the falsifier hunts, all negative) + §9.9.9 (the node-2 bridge) to continue.**
 
 **▶ ROW-4 SPORADICS PROBE DONE (2026-06-17, §9.9.8) — `hSmallAutThin` confirmed at TRIVIAL Aut, 0 falsifiers.**
 `A2MonovariantProbe.Probe_Row4Sporadics` loads the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang(28) + conference(29)
