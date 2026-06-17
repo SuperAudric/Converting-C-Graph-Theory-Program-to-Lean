@@ -1615,3 +1615,54 @@ the 1-WL self-detection content.**
 forced-triangle `…_of_dominatorClosure` (δ′ is one way to separate the profile), closing `hcatch` on the entire
 **depth-1-separable** sub-class with no WL-dim citation. **Remaining:** the `s(C)≥2` iterated engine = the shared open
 content (self-detection), the genuine direct-close target. Nothing committed (user commits).
+
+### 9.9.15 SCOPE — the bounded-depth separation engine (closes hcatch's residual + the seal's s(C))
+
+**Headline finding (verified against source): the "iterated separation engine" is ALREADY BUILT; what remains is
+not infrastructure but the separation CERTIFICATE — which is the seal's own G2-B / `s(C)` crux. `hcatch`'s residual
+and the seal's open self-detection are the SAME object.** So there is no separate engine to build for `hcatch`.
+
+**What is landed (axiom-clean), the engine inventory:**
+- **depth-1:** `discrete_of_jointProfileSeparates` (joint `(relOfPair t ·)_{t∈T}` profile injective ⟹ warmRefine
+  discrete). The `s(C)=1` slice.
+- **depth-2:** `twoRoundCount_eq_of_warmRefine`, `discrete_of_twoRoundProfileSeparates`, Lemma A
+  `relOfPair_eq_of_refineStep_base`, `discrete_of_twoRoundRelationSeparates` (§13b).
+- **general depth-`k`:** `kRoundCount_eq_of_warmRefine`, iterated Lemma A `relOfPair_eq_of_iterateRefineStep_base`,
+  `kRoundProfileCount_eq`, `discrete_of_kRoundRelationSeparates` (§13c) — stated for any `AssociationScheme`.
+- **orbit (non-base) analogue:** `RelCountsDetermineOrbit` + `cellsAreOrbits_of_relCountsDetermineOrbit`.
+- **affine discharge:** `discrete_affineScheme_of_twoRoundDiffSeparates` (depth-2 engine on `affineScheme`).
+- **hcatch bridges (this session):** `warmTwinsAreFiberTwins_of_jointProfileSeparates` (depth-1) +
+  `warmTwinsAreFiberTwins_of_kRoundRelationSeparates` (depth-`k`, full strength) — `hcatch ⟸ the engine certificate`.
+
+**The ceiling (why "more rounds" is not the lever).** The relation-count profile is the **k-independent** bounded-depth
+invariant — `k` drives only the peeling in `kRoundProfileCount_eq`, so deeper rounds add **no** separating power. The
+lever is **multi-base** (a larger `T`, base + `O(1)`), not deeper `k`: single-base depth-2 collapses to intersection
+numbers (adds nothing); the cyclotomic separation is the *multi-coset* count at a Γ-breaking base of size `O(d)`.
+
+**The open content = the certificate (NOT the engine).** Discharging the producers requires the separation hypothesis
+`hsep`: *the count profile is injective across vertices* (base) / *determines the `Stab(T)`-orbit* (non-base,
+`RelCountsDetermineOrbit`). This is the seal's open `s(C)` crux, in its mechanism-agnostic form
+`PersistentTwinYieldsBlock` ("persistent count-twin ⟹ `ClosedSubset` ⟹ imprimitive"). It is **FALSE for high `s(C)`**
+(a persistent twin is a non-congruence amorphic fusion), so it holds only for structured families; it is the GI-adjacent
+G2-B wall. The project's own verdict: *the unconditional seal will not close from Mathlib alone.* The intended discharge
+is the **fusion / closed-subset closure** (`schemeEquiv_trans`) — not yet built.
+
+**Consequence for `hcatch`.** Since `hcatch ⟺ warmRefine discrete at the base`, and the engine produces exactly that
+from the certificate, **`hcatch` is discharged on precisely the certificate-dischargeable class**: δ′ forced-triangle
+families (rainbow-rigid, `…_of_dominatorClosure`), the `s(C)=1` joint-profile-separable primitives, and the affine
+cyclotomic `s(C)=2` families (via the affine discharge). The residual biting case (general non-affine `s(C)≥2`) is the
+**same** open certificate — closing it closes the seal's main crux, not a separate cleanup.
+
+**Buildable (non-research) next pieces, ranked:**
+1. **(DONE this session)** the depth-1 + depth-`k` `hcatch` bridges — `hcatch` now rides the full engine.
+2. **`EdgeGeneratesFromSet`** — the *checkable* multi-base isolation closure (the relation-count analogue of
+   `dominatorReachable_of_rainbowRank`): a structural sufficient condition that PRODUCES the certificate for a family,
+   making recovery checkable. The single-base `EdgeGenerates` exists (`Scheme.lean`) but fails on cyclotomic/catalogue
+   schemes (depth-1); the multi-base version is **deferred** by the self-detection plan (§9.3, "only needed to make
+   recovery checkable on a concrete family — a Phase-2 concern"). Real infra, moderate; not on the seal's critical path.
+3. **The certificate discharge** (`PersistentTwinYieldsBlock` via fusion/closed-subset closure) — the research wall =
+   G2-B. Not routine.
+
+**Recommendation.** The engine is complete; do NOT rebuild it. `hcatch` is now ridden on it (pieces 1, done). The only
+genuine remaining work here is piece 3 = the seal's main open crux (research), with piece 2 as optional checkability
+infra. So `hcatch` is effectively discharged-modulo-the-same-crux — it is no longer an independent line item.

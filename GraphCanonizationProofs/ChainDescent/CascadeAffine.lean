@@ -1095,6 +1095,8 @@ theorem warmTwinsAreFiberTwins_of_jointProfileSeparates (S : SchurianScheme n)
     WarmTwinsAreFiberTwins S T E :=
   warmTwinsAreFiberTwins_of_warmDiscrete S
     (discrete_of_jointProfileSeparates S.toAssociationScheme hsep)
+-- (The depth-`k` / relation-count strengthening `warmTwinsAreFiberTwins_of_kRoundRelationSeparates`
+-- lives in §13c, right after `discrete_of_kRoundRelationSeparates`, the producer it composes with.)
 
 /-- **δ′-on-the-extension, packaged for the seal consumer.** A bounded base `T` whose forced-triangle closure
 exhausts Ω **on the point extension `X_T`** (`hclo`), with the catch-up at `T`, discretises the scheme:
@@ -1921,6 +1923,34 @@ theorem discrete_of_kRoundRelationSeparates {n : Nat} (S : AssociationScheme n) 
     Discrete (warmRefine (schemeAdj S) (fun _ _ => POE.unknown) (individualizedColouring n T)) := by
   intro u u' hcell
   exact hsep u u' (fun ρ b => kRoundProfileCount_eq S hcell k hk1 hk ρ b)
+
+/-- **The catch-up at FULL ENGINE STRENGTH — `hcatch` from the depth-`k` relation-count separation certificate**
+(covers the `s(C) ≥ 2` count-separable class, incl. the cyclotomic affine families the depth-1 joint profile
+misses). If the **joint relation-profile counts** separate all vertices (the certificate of
+`discrete_of_kRoundRelationSeparates` — for every `T`-profile `ρ` and relation `b`, the histogram of neighbours `z`
+at `T`-profile `ρ` with `relOfPair · z = b` is injective across vertices), then `hcatch` holds. Composes the
+landed depth-`k` discreteness producer with `warmTwinsAreFiberTwins_of_warmDiscrete`. **Strictly stronger** than
+`…_of_jointProfileSeparates`: the count profile is the inherently *multi-base, two-round* invariant separating the
+cyclotomic/affine residues where the depth-1 joint profile is a coset twin, and it is **k-independent** (k drives
+only the peeling), so it is the strongest separation the engine provides. **It is exactly the same certificate as
+the seal's open self-detection content** (`RelCountsDetermineOrbit` / `PersistentTwinYieldsBlock`): wherever that is
+dischargeable (δ′ forced triangles, affine cyclotomic via `discrete_affineScheme_of_twoRoundDiffSeparates`),
+`hcatch` is free — **`hcatch` and `s(C)` are one object.** Axiom-clean. -/
+theorem warmTwinsAreFiberTwins_of_kRoundRelationSeparates (S : SchurianScheme n)
+    {T : Finset (Fin n)} {E : CoherentConfig n}
+    (k : Nat) (hk1 : 1 ≤ k) (hk : k + 1 ≤ n)
+    (hsep : ∀ u u' : Fin n,
+        (∀ (ρ : Fin n → Fin (S.rank + 1)) (b : Fin (S.rank + 1)),
+          (Finset.univ.filter (fun z : Fin n => z ≠ u ∧
+            (∀ t ∈ T, S.toAssociationScheme.relOfPair t z = ρ t) ∧
+              S.toAssociationScheme.relOfPair u z = b)).card
+          = (Finset.univ.filter (fun z : Fin n => z ≠ u' ∧
+            (∀ t ∈ T, S.toAssociationScheme.relOfPair t z = ρ t) ∧
+              S.toAssociationScheme.relOfPair u' z = b)).card)
+        → u = u') :
+    WarmTwinsAreFiberTwins S T E :=
+  warmTwinsAreFiberTwins_of_warmDiscrete S
+    (discrete_of_kRoundRelationSeparates S.toAssociationScheme k hk1 hk hsep)
 
 /-! ### Step 2.3 — the counting reduction of the seal's open content (`s(C)`)
 
