@@ -107,6 +107,11 @@ close it — is set out in
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
+> **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
+> the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there
+> for "what's left"; the live finding is that the seal's `modulo {G3 + hSmallAutThin + hcatch + hImprim}` collapses to
+> **`modulo {G3 + one s(C)/WL-recovery core}`** — the non-G3 hypotheses are facets of one open object, not four gaps.
+>
 > **★ CURRENT FRONTIER (2026-06-17, handoff) — read this first; the boxes below are older history.** The seal
 > `reachesRigidOrCameron` is assembled and axiom-clean. **A1 is DONE** (`CoherentConfig.lean §CC.11`–`§CC.19`); the **A2
 > §4c build-order is COMPLETE** (steps 1–5: kill lemma / bound / halving / `BigConfusionCover` obstruction, `§CC.22`).
