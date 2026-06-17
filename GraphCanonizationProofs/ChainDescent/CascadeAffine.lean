@@ -1072,6 +1072,30 @@ theorem warmTwinsAreFiberTwins_of_dominatorClosure (S : SchurianScheme n)
     WarmTwinsAreFiberTwins S T E :=
   warmTwinsAreFiberTwins_of_warmDiscrete S (discrete_of_dominatorClosure S.toAssociationScheme hclo)
 
+/-- **The catch-up holds wherever the base's depth-1 joint profile separates — `hcatch` is the 1-WL
+discretization content, dischargeable from the existing depth-1 (`s(C) = 1`) machinery.** If the joint profile
+`(relOfPair t ·)_{t ∈ T}` is **injective** (the base `T` separates all vertices after one 1-WL round —
+`discrete_of_jointProfileSeparates`, the `DepthOneSeparable` condition), then `hcatch` holds. This is the
+**direct-close handle (route B / "the weaker version that suffices with existing pieces")** stated in the
+*checkable 1-WL* quantity: by the honest accounting (`warmTwinsAreFiberTwins_of_warmDiscrete` +
+`discrete_warmRefine_of_extensionComplete`), at a complete extension `hcatch ⟺ Discrete (warmRefine …)`, so
+discharging `hcatch` **is** establishing 1-WL discreteness — and that is exactly what the project's joint-profile
+separation engine produces. Strictly generalizes the forced-triangle `warmTwinsAreFiberTwins_of_dominatorClosure`
+(δ′ closure is one way to make the joint profile separate). **Scope:** this closes `hcatch` on the **depth-1
+separable** sub-class (`s(C) = 1`, most of the catalogue/affine primitives); the residual biting case (`s(C) ≥ 2`,
+the iterated / cyclotomic separation at base + `O(1)`) is *the same open content as the seal's self-detection
+`s(C)` layer* — discharged by the not-yet-built bounded-depth-separation engine (`docs/chain-descent-self-detection-plan.md`
+§9.3), **not** by a separate WL-dimension citation. So `hcatch` is not an independent gap: it collapses onto the
+project's own 1-WL self-detection content (and onto CFI-1992 Thm 5.2 only for the general WL-dimension statement,
+which this sidesteps for the residue). Axiom-clean. -/
+theorem warmTwinsAreFiberTwins_of_jointProfileSeparates (S : SchurianScheme n)
+    {T : Finset (Fin n)} {E : CoherentConfig n}
+    (hsep : ∀ u u' : Fin n,
+        (∀ t ∈ T, S.toAssociationScheme.relOfPair t u = S.toAssociationScheme.relOfPair t u') → u = u') :
+    WarmTwinsAreFiberTwins S T E :=
+  warmTwinsAreFiberTwins_of_warmDiscrete S
+    (discrete_of_jointProfileSeparates S.toAssociationScheme hsep)
+
 /-- **δ′-on-the-extension, packaged for the seal consumer.** A bounded base `T` whose forced-triangle closure
 exhausts Ω **on the point extension `X_T`** (`hclo`), with the catch-up at `T`, discretises the scheme:
 `SeparatesAtBoundedBase S bound`. `Sharp` is discharged internally (`sharp_pointExtension`), so the open input

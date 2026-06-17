@@ -1578,3 +1578,40 @@ lives entirely in how `bound` scales with `n`: `Õ(n^{1/3})` is the proven Spiel
 sharpest *fully-citable* (Cameron-free, G3-free) end-state of the seal, honestly sub-exponential and subsumed by
 Spielman — it does **not** close the polynomial seal, which remains node 4. The remaining non-Spielman cleanup
 (`hImprim` block-tower discharge, `hcatch` 1-WL↔2-WL exchange) is orthogonal and still open.
+
+### 9.9.14 hcatch (the 1-WL↔2-WL catch-up) — analysis + the two discharge targets, route-B first increment LANDED
+
+**`hcatch = WarmTwinsAreFiberTwins S T (X_T)`** ("same 1-WL `warmRefine` cell ⟹ same 2-WL `pointExtension` fiber") is
+the project-model half of the **CFI-1992 individualization exchange `dimWL(X) ≤ dimWL(X_α)+1`** (Thm 5.2; Ponomarenko
+arXiv:2006.13592 eq. (41)). It is carried by the 2-WL-extension capstones (the live `…viaBoundedMinMult`,
+`…viaCompleteBase`, `…viaBoundedMultiplicity`); the scheme-level routes (`…viaRainbowRank`, `…viaG0powNeg`,
+`…viaSpielman`) **do not carry it**.
+
+**Key structural facts (verified against source).** `warmRefine` is genuine plain **1-WL** (recolour `v` by the
+multiset of `(neighbour-colour, scheme-edge-colour)`); `pointExtension` is **2-WL** (finer). So `hcatch` is the
+coarse⟹fine direction — **false in general** (probe: false at `T={0}`, true at `|T|≥2` for the residue). The honest
+accounting (`warmTwinsAreFiberTwins_of_warmDiscrete` + `discrete_warmRefine_of_extensionComplete`) gives the decisive
+reduction: **at a complete extension, `hcatch ⟺ Discrete (warmRefine …)`** — discharging `hcatch` *is* establishing
+**1-WL discreteness at the base**, nothing more. So `hcatch` is **free wherever 1-WL discretizes** (scheme-level δ′,
+rainbow, joint-profile separation) and **bites only at `n ≥ 25`** where 2-WL discretizes but 1-WL does not (the genuine
+WL-dimension gap).
+
+**Target A — reduce to an exact citation (CFI-1992 Thm 5.2).** `hcatch` is *already* annotated as exactly this
+theorem. A faithful *formal* citation (stating (41) verbatim and deriving `hcatch`) needs a **`dimWL` framework**
+(k-WL refinement, WL-dimension, the exchange's base-padding mechanics) the project lacks — real infrastructure
+(~hundreds of lines), and it does **not** close anything. Lower ROI; the honest accounting below makes it largely
+unnecessary for the residue.
+
+**Target B — close directly (the better target), via the weaker version that suffices.** Because `hcatch ⟺ 1-WL
+discrete at the base`, closing it is **the project's own open self-detection (`s(C)`) content**, not a separate WL-dim
+theorem: the depth-1 (`s(C)=1`) case is already a landed piece (`discrete_of_jointProfileSeparates`), and the residual
+`s(C)≥2` (iterated/cyclotomic, base + `O(1)`) case is the *same* open bounded-depth-separation engine the seal already
+needs (`docs/chain-descent-self-detection-plan.md` §9.3). **So `hcatch` is not an independent gap — it collapses onto
+the 1-WL self-detection content.**
+
+**First increment LANDED (2026-06-17, axiom-clean, build green):** `warmTwinsAreFiberTwins_of_jointProfileSeparates`
+(CascadeAffine) — discharges `hcatch` from the **checkable depth-1 joint-profile separation** (existing pieces:
+`discrete_of_jointProfileSeparates` → `warmTwinsAreFiberTwins_of_warmDiscrete`). Strictly generalizes the
+forced-triangle `…_of_dominatorClosure` (δ′ is one way to separate the profile), closing `hcatch` on the entire
+**depth-1-separable** sub-class with no WL-dim citation. **Remaining:** the `s(C)≥2` iterated engine = the shared open
+content (self-detection), the genuine direct-close target. Nothing committed (user commits).
