@@ -107,7 +107,7 @@ close it — is set out in
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
-> **★ CURRENT FRONTIER (2026-06-16, handoff) — read this first; the boxes below are older history.** The seal
+> **★ CURRENT FRONTIER (2026-06-17, handoff) — read this first; the boxes below are older history.** The seal
 > `reachesRigidOrCameron` is assembled and axiom-clean. **A1 is DONE** (`CoherentConfig.lean §CC.11`–`§CC.19`); the **A2
 > §4c build-order is COMPLETE** (steps 1–5: kill lemma / bound / halving / `BigConfusionCover` obstruction, `§CC.22`).
 > Three things landed *this session* on top of that — **read the live frontier doc
@@ -129,24 +129,24 @@ close it — is set out in
 >    4 ⟺ the confusion-cover *multiplicity* `L = (Σ_{|C|>ρc}|C|)/n` is bounded (`O(1)`) — a *computable* quantity (high `L` =
 >    thick line system = Cameron, carved; low `L` = poly via a `1+L`-pin cleanup).
 >
-> 4. **★ THIS SESSION (probe → endgame → PART 1 LANDED; route-doc §9.7.1–§9.7.2, §9.8).** The multiplicity **probe ran**
->    (`A2MonovariantProbe.{Probe_ConfusionCoverMultiplicity, Probe_ConfusionCover_Amorphic}`): **2a is dead** (covers are
->    intrinsically loose — the axis is multiplicity *magnitude*, not tight/loose); on the **faithful amorphic scheme** the
->    residue cleanly separates from Cameron (Clebsch shatters at base 1, rook stays thick). The **endgame** was scoped (§9.8)
->    and a **correction** made: "polynomial unreachable" was WRONG (it imported the *citation* route's sub-exp ceiling onto this
->    *direct-proof* route). The seal's real split is large-Aut→G3 / small-Aut→cascade, needing **no SRG citation beyond G3**;
->    **polynomial-unconditional-`modulo {G3 + hcatch}` IS the target and is reachable in principle** (open & hard, but unbarred).
->    **PART 1 — the cascade-rate engine — LANDED, axiom-clean** (`§CC.20b` + `§S-gate2`): `exists_potential_descent_bounded`,
->    `BoundedConfusionMultiplicity`, `potentialCleanup_of_boundedConfusionMultiplicity`,
->    `exists_small_base_of_boundedConfusionMultiplicity`, capstone `reachesRigidOrCameron_viaBoundedMultiplicity`. **"Residue
->    cascades (bounded `M`) ⟹ polynomial seal" is now a THEOREM**; the entire open content is the single discharge
->    `BoundedConfusionMultiplicity` (strictly weaker than `IndistinguishingHalves` = its `M=1` case).
+> 4. **★ THE THIN-SIDE MACHINE + D1/D2/D3 ATTACK ON NODE 4 — LANDED, axiom-clean (route-doc §9.9.6 + §9.9.7; read those).**
+>    The cascade is now PROVED end-to-end down to one computable predicate. Chain (`§CC.20b`, `§CC.22b–d`, `§S-gate2`):
+>    **`BoundedMinMult`** (bounded `minMult` per over-`B` base) → `boundedConfusionLoad_of_boundedMinMult` (the §9.6 `(1+L)`-cleanup)
+>    → `boundedConfusionMultiplicity_of_boundedMinMult` → `…viaBoundedMultiplicity` → **polynomial seal**. **D1 (cover rigidity)
+>    DONE** (`§CC.22c`): confusion-set equivariance + `confusionMultiplicity_perm` — cover-load is `Aut`-invariant (`= L` on the
+>    vertex-transitive bare scheme). **D3 dichotomy capstone** `reachesRigidOrCameron_viaBoundedMinMult` carries
+>    `hSmallAutThin : ¬IsLarge → BoundedMinMult B M` (sharper than `…viaSmallAutShatters`'s zero-load `¬cover`, which the probe
+>    showed rarely holds). Non-vacuity anchor `boundedConfusionMultiplicity_univ` (M=n). Seal `modulo {G3 + hSmallAutThin +
+>    hcatch + hImprim}`.
 >
-> **▶ PICK UP HERE — NEXT STEP: PART 2 (route-doc §9.8.4) — discharge `BoundedConfusionMultiplicity` for the residue.**
-> Sub-classes first (re-activate the landed PV sparse `separatesAtBoundedBase_of_sparseSeparable` for low-degree; seek
-> combinatorial `minMult`/cascade-rate bounds for bounded-fiber-degree / intersection-number regimes — each shrinks the open
-> core, citation-free), then the generic primitive-small-Aut non-geometric core (the rank-3 base case, direct). Fallback = carry
-> it as one named predicate (cxt-scoping route 3). `hcatch` → CFI-1992 exchange; `hImprim` → block-tower infra (not a citation).
+> **▶ PICK UP HERE — the open content is now ONE predicate: `hSmallAutThin` = "small-Aut primitive residue ⟹ `BoundedMinMult`",
+> i.e. thick (`minMult` unbounded) ⟹ large Aut.** This is the WALL: irreducible (rook is thick, needs √n base, saved only by
+> large Aut; δ′ gives √n there) = Babai SRG-structure/CFSG = node 4, no known witness. **Method of attack = route-doc §9.9.7.**
+> **Recommended next builds:** (a) **node-2 rung** — discharge `BoundedMinMult` for the affine/FDF thin family via
+> `dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4` = n=16 instance; gap = uniform rainbow rank), shrinking
+> the residue to node 4; (b) **Spielman floor** — a `…viaSpielman` capstone making the seal unconditional-modulo-citations at the
+> sub-exponential threshold (Cameron-free). Poly discharge of `hSmallAutThin` for the non-geometric core = long-horizon open
+> frontier. `hcatch` → CFI-1992 exchange; `hImprim` → block-tower infra (not a citation).
 > Substrate/build home:
 > [`chain-descent-general-cc-separability.md`](./chain-descent-general-cc-separability.md); A2 scoping:
 > [`chain-descent-cxt-scoping.md`](./chain-descent-cxt-scoping.md); forward payoff (post-node-4):

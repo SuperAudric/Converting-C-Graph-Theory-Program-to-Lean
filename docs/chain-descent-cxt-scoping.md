@@ -6,6 +6,15 @@
 > attack toward the *unconditional* seal with an honest tractability verdict. **A1 is DONE** — its build history + the
 > abandoned PV-port live in `chain-descent-a1-cc-substrate.md` (split out 2026-06-14 to keep this doc A2-focused). Read
 > the build doc `chain-descent-general-cc-separability.md` STATUS first; this is the deep-dive on its open link.
+>
+> **★ CURRENT FRONTIER POINTER (2026-06-17): this doc is the A2 *scoping*; the live attack + current state is
+> [`chain-descent-a2-potential-route.md`](./chain-descent-a2-potential-route.md) §9.9 (esp. §9.9.6 + §9.9.7).** Since this
+> doc was written, the entire thin-side cascade is PROVED end-to-end (`BoundedMinMult` → cleanup → cascade → poly seal,
+> `§CC.22b–d`, axiom-clean), D1 cover-rigidity is landed (`§CC.22c`: `confusionMultiplicity_perm` — load is `Aut`-invariant),
+> and the D3 dichotomy capstone `reachesRigidOrCameron_viaBoundedMinMult` reduces the seal to **one computable predicate
+> `hSmallAutThin` = "small-Aut residue ⟹ bounded `minMult`"** = thick⟹large-Aut = node 4 = the wall (route-doc §9.9.7).
+> The "route 3 = carry the predicate" floor below now means carrying `hSmallAutThin`; the route-2 (poly) target = discharging
+> it for the non-geometric core. Next builds: node-2 rung (affine via `dominatorReachable_of_rainbowRank`) / Spielman floor.
 
 ---
 

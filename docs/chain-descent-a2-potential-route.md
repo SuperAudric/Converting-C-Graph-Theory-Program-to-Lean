@@ -123,14 +123,32 @@ A2's open content is re-expressed as **"the residue's confusion-cover load `L`/`
 quantity the `A2MonovariantProbe` measures, not the opaque "a set halves `c`". The `M=1` case is the landed cover route
 (`indistinguishingHalves_of_not_bigConfusionCover`); this is its bounded-multiplicity generalization.
 
-**▶ PICK UP HERE — PART 2: the easy sub-classes are EXHAUSTED (resolved 2026-06-16). Two genuine options remain.** Both
-counting-based sub-class leads are now closed: **PV-sparse is dead (§9.5a)** (vacuous on the bare scheme, cross-fiber-wall-blocked on
-`X_T`) and **raw `sum_pu_le` counting is trivial (§9.5b)** (`mult ≤ 2·rank·k²` but `rank·k ≥ n`; the structured forced-triangle case is
-already landed as δ′/`RainbowRigid`). Beyond the landed δ′ regime, `BoundedConfusionLoad` ≡ the **thin-cover/low-`L` geometric core**
-(§9.6). So the remaining moves are exactly: **(i)** the direct geometric argument — a primitive *non-geometric* residue has a thin cover
-(the hard heart, §9.3-2b / node 4, no current technique); or **(ii)** carry `BoundedConfusionLoad` / `BoundedConfusionMultiplicity` as the
-named predicate (cxt-scoping route 3, the honest floor — wiring already landed via `…viaBoundedMultiplicity`). **Read §9.5a + §9.5b +
-§9.6 + §9.8 to continue.**
+**★★★ HANDOFF (2026-06-17) — the full thin-side machine + the D1/D2/D3 attack on node 4 are LANDED; the wall is pinned and
+its method of attack written. The authoritative current state is §9.9.6 + §9.9.7; read those two first.** Arc of this work,
+all axiom-clean, build green, nothing committed (user commits):
+- **PV-sparse + raw-counting sub-class leads CLOSED** (§9.5a/§9.5b): both trivial/dead for the residue; the open content is
+  irreducibly the thin-cover/low-`minMult` geometric core (node 4). So option (i), the direct attack, was taken.
+- **The thin-side cascade machine is now PROVED end-to-end** (§CC.22b–d): `BoundedMinMult` (bounded `minMult` per over-`B` base)
+  → `boundedConfusionLoad_of_boundedMinMult` (the §9.6 `(1+L)`-cleanup) → `boundedConfusionMultiplicity_of_boundedMinMult`
+  → `…viaBoundedMultiplicity` (the §CC.20b engine) → **polynomial seal**. Plus the non-vacuity anchor
+  `boundedConfusionMultiplicity_univ` (M=n every-graph fallback).
+- **D1 (cover rigidity) DONE** (§CC.22c): confusion-set equivariance (`confusionSet_perm`, `card_`, `mem_`, `big_confusion_perm`)
+  + the punchline `confusionMultiplicity_perm` — cover-load is `Aut`-invariant (constant on orbits; `= L` on the vertex-transitive
+  bare scheme). A persistent cover is a rigid invariant line system.
+- **D3 dichotomy capstone LANDED** (`reachesRigidOrCameron_viaBoundedMinMult`, §S-gate2): carries `hSmallAutThin : ¬IsLarge →
+  BoundedMinMult B M`, by_cases largeness (large→G3/Cameron-or-`hImprim`; small→cascade). Seal `modulo {G3 + hSmallAutThin +
+  hcatch + hImprim}`. Strictly sharper than `…viaSmallAutShatters` (bounded load, not the rarely-true zero-load/¬cover).
+
+**▶ THE WALL (where a new reader picks up).** The lone open content is now the single computable predicate **`hSmallAutThin`
+= "small-Aut primitive residue ⟹ `BoundedMinMult`"**, i.e. its contrapositive **thick (`minMult` unbounded) ⟹ large Aut**.
+This is *irreducible* (rook is thick, needs √n base, saved only by large Aut; δ′ gives √n there) = Babai SRG-structure / CFSG =
+a slice of GI∈P-for-SRGs = **node 4, no known witness, not known to mathematics.** **Method of attack = §9.9.7** (1 sharpen
+[done] · 2 threshold ladder: Spielman→sub-exp floor / poly→open · 3 node-2 rung [the concrete next build] · 4 Neumaier — NOT a
+way through). **Recommended next builds:** (a) **node-2 rung** — discharge `BoundedMinMult` for the affine/FDF thin family via
+`dominatorReachable_of_rainbowRank` (δ′→discrete→`minMult=0`; `clebschZ4` is the n=16 instance; gap = a uniform rainbow rank),
+shrinking the residue to node 4; (b) **Spielman floor** — a `…viaSpielman` capstone making the seal unconditional-modulo-citations
+at the sub-exponential threshold (Cameron-free). The poly discharge of `hSmallAutThin` for the non-geometric core is the
+long-horizon open frontier. **Read §9.9 (esp. §9.9.6 + §9.9.7) to continue.**
 
 ---
 
