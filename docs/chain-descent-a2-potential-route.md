@@ -164,6 +164,17 @@ Shrikhande/Clebsch/Chang to genuinely-trivial-Aut residue. **Honest scope unchan
 exceptional / leg B); **node 4 = unbounded `s` is construction-bottlenecked, unreached — `hSmallAutThin` stays the open wall**,
 now with strictly stronger empirical support. Build: green; nothing committed (user commits).
 
+**▶ D2 STABLE-COVER REGULARITY PROBE DONE (2026-06-17, §9.9.10) — the "stable ⟹ regular" extraction is REFUTED as a proof
+route; the one novel node-4 lead is closed.** `A2MonovariantProbe.Probe_StableCoverRegularity` (green) probe-tested the
+§9.9.2/§9.9.4 bet *before* any Lean investment. Reframe: REGULAR ≠ TIGHT (the rook grid cover is loose yet a regular partial
+geometry), so the axis is regular-vs-irregular, which §9.7.1's `minMult`/`maxMult` never isolated. **Result:** (A) carved
+(geom+imprim) covers PERSIST 8/8 but go **IRREGULAR** under individualization (point-degree spreads, 0 regular at the deepest
+base) — so "persistent ⟹ regular partial geometry" is **false**; (B) residue covers shatter 9/10 (the cross-check at base ∅
+*also* fails to separate — Clebsch is more line-regular than rook). **So D2 cannot extract a partial geometry from a stable
+cover; the robust separator is PERSISTENCE itself = bounded `minMult` = `hSmallAutThin` (the existing wall), with no
+regularity shortcut.** Do NOT build the D2 regular-PG extraction. The live next builds revert to the carve-around: node-2
+rung uniform rainbow rank + the Spielman floor. Node 4 untouched (bounded-`s` data only). Nothing committed (user commits).
+
 **▶ NODE-2 RUNG, first increment LANDED (2026-06-17, §9.9.9) — the δ′ → multiplicity-pipeline bridge.** Axiom-clean,
 build green: `boundedConfusionMultiplicity_of_completeBase` (§CC.22e — a bounded *discrete* base ⟹
 `BoundedConfusionMultiplicity B M`, sharpening the trivial `M = n` anchor to `M = |T₀|`) + the capstone
@@ -1288,3 +1299,46 @@ for a parametric affine/FDF family** — i.e. a uniform rainbow rank via `domina
 combinatorial work, §9.9.7 step 3). That generalizes `clebschZ4` from the n=16 sporadic to an infinite family; the bridge
 landed here is what such a family would plug into. Node 4 (the wall, `hSmallAutThin` for unbounded-`s` non-geometric) is
 untouched, as expected.
+
+### 9.9.10 D2 stable-cover regularity probe — DONE (2026-06-17): the "stable ⟹ regular" extraction is REFUTED as a proof route
+
+**Built + run, green: `A2MonovariantProbe.Probe_StableCoverRegularity`** (the §9.9.4 approach-1/action-3 "probe-test the
+`stable ⟹ regular` bet *before* committing the D2 Lean extraction"). It is the one genuinely-novel node-4 lead — the only
+proposed attack on node 4's *open heart* (G-extract D2) rather than a carve-around. The probe settles it negatively, which
+is exactly what a probe-before-commit is for: it saves the cost of a Lean extraction built on a false premise.
+
+**The precise bet tested (§9.9.2).** D2 needs: a *persistent* (stable-across-bases) big-confusion cover is a **regular
+partial geometry**, so "persistent ⟹ regular line system ⟹ (D3) Cameron ∨ block" routes any stable cover to a carved leg,
+and the residue (no stable cover) shatters. **Key reframe the probe isolates:** REGULAR ≠ TIGHT. §9.7.1 killed the
+*tight/loose* (2a) framing (covers are intrinsically loose), but a *regular partial geometry* (the rook grid: every cell on
+2 grid-lines) is **loose yet regular** (constant point-degree, constant line-size, two lines meet in ≤1 point). So the right
+axis is **regular vs irregular**, which §9.7.1's `minMult`/`maxMult` never isolated. The trap it also pins: at base ∅ a
+vertex-transitive scheme has constant point-degree *by D1* (`confusionMultiplicity_perm`) — regular for free, vacuous; the
+genuine discriminators are line-size + the pairwise-**meet** (PG incidence) axiom at base ∅, and point-degree spread (over
+non-base vertices) at a nontrivial base `{0}`/`{0,v*}`. Measured on the **faithful** scheme (§9.7.2), ρ=0.5, across the base
+sequence; reuses `PairClosureBase`/`BaseSeqBase`/the Hanaki loader. New metric `Regularity` returns line-size spread + the
+pairwise-meet distribution alongside the cover-load.
+
+**Result — the bet FAILS on half (A), and the separator collapses back to the wall:**
+- **(A) carved covers PERSIST but go IRREGULAR — 8/8 persist, 0 regular at the deepest base.** Rook L(4)/L(5), Triangular
+  T(6)/T(8), the imprimitive controls (`4·K₄`, `K_{4×4}`), and the catalogue large-Aut references (`as25 #3` pseudo-Latin,
+  `as28 #6 = T(8)`) all keep a thick cover to base `{0,v*}` (`c` never collapses) **but their point-degree spreads** under
+  individualization: e.g. Rook L(4) `deg[33..33] → deg[10..33] → deg[1..4]`. So the *persistent* cover is **not** a regular
+  partial geometry in the confusion-cover incidence sense — "stable ⟹ regular" is **false on the carved side**.
+- **(B) residue covers shatter — 9/10 (the 10th is irregular, not regular); persist-AND-regular = 0.** Clebsch (amorphic),
+  Shrikhande, all Paulus `as25/26 #*` (incl. `|Aut|=1,2`), conference `as29 #*` collapse to `discrete`/`minMult→0` by base
+  `{0}` or `{0,v*}`. The residue-side prediction (no regular persistent cover) holds — but trivially, via shattering.
+- **Negative cross-check at base ∅:** regularity does **not** separate residue from Cameron there either. Clebsch (residue)
+  is `regular` (constant line-size 4) while Rook (geometric) is only `reg-deg` (sizes 6–8, 4 distinct meets) — the residue is
+  *more* line-regular than the carved family. So no base-∅ regularity discriminant exists.
+
+**Verdict — D2 regular-PG extraction is unfounded; do NOT invest Lean effort there.** The robust separator is **persistence
+itself** (thick-cover vs shatter = bounded `minMult`), which is **exactly `hSmallAutThin`** — the existing wall (§9.9.7). The
+regularity refinement adds **no new handle**: it does not let D2 extract a partial geometry from a stable cover (the stable
+cover is irregular), and it does not give a base-∅ residue/Cameron discriminant. So G-extract (D2) via regularity collapses
+back onto "thick ⟹ Cameron ∨ block" = `hSmallAutThin`, with no shortcut. **Consequence for the plan:** the §9.9.4 approach-1
+(native forced-triangle/rainbow on a "thin or no line system") and approach-3 (spectral) lose their D2-regularity premise;
+the live next builds revert to the *carve-around* progress — **node-2 rung uniform rainbow rank** (§9.9.9, shrinks the
+residue) and the **Spielman floor** (`…viaSpielman`, the honest citable sub-exp cap) — not a direct D2 attack. Honest scope
+unchanged: all residue data is bounded `s` (node 3 / leg B); node 4 (unbounded `s`) has no constructible witness, so the
+probe de-risks the *method* (kills the regularity lead) without reaching node 4. Nothing committed (user commits).

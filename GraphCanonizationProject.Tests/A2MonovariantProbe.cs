@@ -1225,6 +1225,242 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         Assert.Equal(0, falsifiers);   // no small-Aut SRG retains a thick cover to base+O(1) (seal stands on this data)
     }
 
+    // ── D2 STABLE-COVER REGULARITY PROBE (route §9.9.2 / §9.9.4 — the one genuinely-novel
+    //    node-4 lead, probe-tested before any Lean commitment) ─────────────────────────
+    //
+    //  THE BET (§9.9.2).  D2 must extract a partial geometry from a PERSISTENT big-confusion
+    //  cover.  §9.7.1 found arbitrary covers INTRINSICALLY LOOSE (maxMult ≫ 1) and killed the
+    //  tight/loose (2a) framing.  But REGULAR ≠ TIGHT: the rook grid's confusion cover is loose
+    //  (every cell on 2 grid-lines, maxMult=2) yet a perfectly REGULAR partial geometry
+    //  (constant point-degree, constant line-size, two lines meet in ≤ 1 point).  The bet: the
+    //  STABLE (persistent-across-bases) cover is a REGULAR partial geometry on the geometric
+    //  (Cameron) / imprimitive families, but IRREGULAR or EMPTY on the primitive non-Cameron
+    //  residue — so "stable ⟹ regular line system ⟹ partial geometry ⟹ Cameron-or-block" is the
+    //  D2/D3 mechanism, and the residue (no regular stable cover) is exactly why it shatters.
+    //
+    //  THE TRAP (why §9.7.1's minMult/maxMult did not already settle it).  At base ∅ a vertex-
+    //  transitive scheme has CONSTANT point-degree by D1 (confusionMultiplicity_perm) — regular
+    //  for free, vacuous.  The genuine discriminators: (a) at base ∅ — LINE-SIZE spread + the
+    //  PAIRWISE-MEET (partial-geometry incidence) axiom, neither forced by transitivity; (b) at a
+    //  NONTRIVIAL base {0},{0,v*} (transitivity broken) — POINT-DEGREE spread over non-base
+    //  vertices.  The bet: the geometric cover stays regular as the base deepens while the
+    //  residue's vanishes (shatters) or fragments (irregular).
+    //
+    //  MEASUREMENT on the FAITHFUL scheme (§9.7.2): residue on its amorphic/rank-3 scheme, rook/
+    //  triangular on their rank-2 graph (they ARE rank-2 schemes that 2-WL-close to rank 3).
+    //  Reuses PairClosureBase / BaseSeqBase / the Hanaki catalogue loader.  ρ = 0.5.
+
+    // Richer confusion-cover metrics for the regularity test: distinct big sets, point-degree
+    // spread (over NON-base vertices, to drop the individualized-base-point artifact), line-size
+    // spread, and the pairwise-MEET (partial-geometry incidence) distribution.  min/maxMult stay
+    // over ALL v (Lean BigConfusionCover-faithful; drives the cover/shatter verdict).
+    readonly record struct RegM(
+        int c, int N, int minMult, int maxMult, int degDistinct,
+        int szMin, int szMax, int meetMax, int meetDistinct, bool meetOk);
+
+    static RegM Regularity(int n, int[,] rel, double rho, HashSet<int> baseT)
+    {
+        int c = 0;
+        var sizes = new int[n, n];
+        for (int a = 0; a < n; a++) for (int b = a + 1; b < n; b++)
+        {
+            int sz = 0; for (int g = 0; g < n; g++) if (rel[g, a] == rel[g, b]) sz++;
+            sizes[a, b] = sz; if (sz > c) c = sz;
+        }
+        if (c == 0) return new RegM(0, 0, 0, 0, 0, 0, 0, 0, 0, false);
+        double thr = rho * c;
+        var distinct = new Dictionary<string, bool[]>();
+        for (int a = 0; a < n; a++) for (int b = a + 1; b < n; b++)
+        {
+            if (sizes[a, b] <= thr) continue;
+            var mem = new bool[n]; var key = new StringBuilder();
+            for (int g = 0; g < n; g++) if (rel[g, a] == rel[g, b]) { mem[g] = true; key.Append(g).Append(','); }
+            distinct[key.ToString()] = mem;
+        }
+        var big = distinct.Values.ToList();
+        int N = big.Count;
+        if (N == 0) return new RegM(c, 0, 0, 0, 0, 0, 0, 0, 0, false);
+        // point multiplicities: min/max over ALL v (cover test); distinct degrees over NON-base v.
+        var mult = new int[n];
+        foreach (var mem in big) for (int g = 0; g < n; g++) if (mem[g]) mult[g]++;
+        int minMult = int.MaxValue, maxMult = 0;
+        var degVals = new HashSet<int>();
+        for (int g = 0; g < n; g++)
+        {
+            minMult = Math.Min(minMult, mult[g]); maxMult = Math.Max(maxMult, mult[g]);
+            if (!baseT.Contains(g)) degVals.Add(mult[g]);
+        }
+        // line-size spread
+        int szMin = int.MaxValue, szMax = 0;
+        for (int i = 0; i < N; i++) { int s = big[i].Count(x => x); szMin = Math.Min(szMin, s); szMax = Math.Max(szMax, s); }
+        // pairwise meets — the partial-geometry incidence axiom: all NONZERO meets equal ⟹ a
+        // regular incidence (≤ 1 ⟹ a near-pencil / generalized quadrangle).  Capped for cost.
+        int meetMax = 0; var meetVals = new HashSet<int>(); bool meetOk = N <= 300;
+        if (meetOk)
+            for (int i = 0; i < N; i++) for (int j = i + 1; j < N; j++)
+            {
+                int m = 0; var bi = big[i]; var bj = big[j];
+                for (int g = 0; g < n; g++) if (bi[g] && bj[g]) m++;
+                if (m > meetMax) meetMax = m;
+                if (m > 0) meetVals.Add(m);
+            }
+        return new RegM(c, N, minMult, maxMult, degVals.Count, szMin, szMax, meetMax, meetVals.Count, meetOk);
+    }
+
+    static string RegVerdict(RegM m)
+    {
+        if (m.c == 0) return "discrete";
+        if (m.N == 0 || m.minMult == 0) return "shatter";   // no big set / an avoiding v exists ⟹ ¬cover
+        bool degReg = m.degDistinct <= 1;                   // constant point-degree (over non-base v)
+        bool szReg = m.szMin == m.szMax;                    // constant line-size
+        if (degReg && szReg) return m.meetOk && m.meetDistinct <= 1 ? "REG-PG" : "regular";
+        if (degReg) return "reg-deg";
+        return "IRREG";
+    }
+
+    static string RegRow(RegM m)
+    {
+        if (m.c == 0) return "discrete";
+        if (m.N == 0) return $"c={m.c} no-big-set [shatter]";
+        string meet = m.meetOk ? $"meet≤{m.meetMax}(#{m.meetDistinct})" : "meet=—";
+        return $"c={m.c} N={m.N} deg[{m.minMult}..{m.maxMult}] sz[{m.szMin}..{m.szMax}] {meet} [{RegVerdict(m)}]";
+    }
+
+    // The regularity trajectory across ∅ ⊆ {0} ⊆ {0,v*} on a faithful pair-colour function.
+    // coverPersists = a big cover survives to the deepest base (final ∉ {shatter,discrete});
+    // finalRegular  = that surviving cover is REGULAR there (the D2 "stable ⟹ regular" predicate).
+    static (string traj, string fin, bool coverPersists, bool finalRegular) Reg_Trajectory(int n, Func<int, int, int> bc)
+    {
+        var sb = new StringBuilder(); bool first = true; string fin = "";
+        foreach (var T in BaseSeqBase(n, bc))
+        {
+            var rel = PairClosureBase(n, bc, T);
+            var m = Regularity(n, rel, 0.5, new HashSet<int>(T));
+            if (!first) sb.Append("  →  ");
+            sb.Append($"|T|{T.Count}: {RegRow(m)}");
+            first = false; fin = RegVerdict(m);
+        }
+        return (sb.ToString(), fin, fin is not ("shatter" or "discrete"), fin is "REG-PG" or "regular");
+    }
+
+    [Fact]
+    public void Probe_StableCoverRegularity()
+    {
+        output.WriteLine("D2 STABLE-COVER REGULARITY (route §9.9.2/§9.9.4) — is a PERSISTENT big-confusion cover a REGULAR");
+        output.WriteLine("partial geometry on the geometric/Cameron + imprimitive families, but IRREGULAR or EMPTY on the");
+        output.WriteLine("primitive non-Cameron residue?  (REGULAR ≠ TIGHT: the rook grid cover is loose maxMult=2 yet a");
+        output.WriteLine("regular partial geometry.)  Discriminators: line-SIZE + pairwise-MEET (PG incidence) at base ∅");
+        output.WriteLine("[point-degree vacuously regular there by D1/transitivity]; point-DEGREE spread (non-base v) at {0},{0,v*}.");
+        output.WriteLine("Faithful scheme (§9.7.2); ρ=0.5.  Verdicts: REG-PG=const deg+size+single line-meet · regular=const deg+size ·");
+        output.WriteLine("reg-deg=const deg only · IRREG=degree spreads · shatter=no/avoidable cover · discrete.");
+        output.WriteLine("");
+        output.WriteLine($"{"scheme",-22} {"cat",-12} {"n",-4} regularity trajectory  ∅ → {{0}} → {{0,v*}}");
+        output.WriteLine(new string('─', 150));
+
+        // Per-scheme classification, accumulated for the two-sided verdict.
+        // carved = geometric ∪ imprimitive (the Cameron / hImprim legs that SHOULD persist);
+        // residue = primitive small-Aut non-Cameron (SHOULD shatter).
+        var carved = new List<(string fin, bool persists, bool reg)>();
+        var residue = new List<(string fin, bool persists, bool reg)>();
+        bool rookHasCover = false;
+
+        void Row(string name, string cat, int n, Func<int, int, int> bc)
+        {
+            var (traj, fin, persists, reg) = Reg_Trajectory(n, bc);
+            string pad = name.Length > 0 ? $"{name,-22} {cat,-12} {n,-4} " : "";
+            output.WriteLine($"{pad}{traj}");
+            if (cat is "geometric" or "imprimitive" or "geom/large") carved.Add((fin, persists, reg));
+            else residue.Add((fin, persists, reg));
+        }
+
+        // ── (1) Carved GEOMETRIC references (rank-2 schemes; the candidate regular partial geometries) ──
+        foreach (var (name, adj) in new (string, bool[,])[]
+        {
+            ("Rook L(4)", Rook(4)), ("Rook L(5)", Rook(5)),
+            ("Triangular T(6)", Triangular(6)), ("Triangular T(8)", Triangular(8)),
+        })
+        {
+            int nn = (int)Math.Round(Math.Sqrt(adj.Length));
+            Row(name, "geometric", nn, GraphCol(adj));
+            if (name == "Rook L(4)")
+                rookHasCover = Regularity(nn, PairClosure(nn, adj, new List<int>()), 0.5, new HashSet<int>()).minMult >= 1;
+        }
+        output.WriteLine("");
+
+        // ── (2) n=16 RESIDUE on its FAITHFUL (amorphic) scheme — the cospectral contrast ──
+        Row("Clebsch (amorphic)", "residue", 16, (u, v) => ClebschZ4Amorphic[u, v]);
+        var shrik = CayleyZ4Sq(new[] { (1, 0), (3, 0), (0, 1), (0, 3), (1, 1), (3, 3) });   // Shrikhande SRG(16,6,2,2)
+        Row("Shrikhande", "residue", 16, GraphCol(shrik));
+        output.WriteLine("");
+
+        // ── (3) IMPRIMITIVE controls (the hImprim leg — a thick cover is EXPECTED to persist here) ──
+        Row("4·K4", "imprimitive", 16, GraphCol(DisjointCliques(4, 4)));
+        Row("K_{4x4}", "imprimitive", 16, GraphCol(CompleteMultipartite(4, 4)));
+        output.WriteLine("");
+
+        // ── (4) Genuinely-small-Aut catalogue RESIDUE (Paulus/Chang) on their rank-3 scheme ──
+        output.WriteLine("Catalogue small-Aut residue (Paulus/Chang/conference) vs a large-Aut geometric reference, rank-3 scheme:");
+        const long autCap = 5000;
+        foreach (int n in new[] { 25, 26, 28, 29 })
+        {
+            var path = Row4_DataPath(n);
+            if (path == "") { output.WriteLine($"  order {n}: data missing — skip"); continue; }
+            int smallShown = 0, largeShown = 0;
+            foreach (var (idx, M) in Row4_Parse(path, n).Select((m, i) => (i, m)))
+            {
+                if (smallShown >= 2 && largeShown >= 1) break;
+                var built = Row4_Build(M, n);
+                if (built is null) continue;
+                var (rel, rank, sym, val) = built.Value;
+                if (rank != 3 || !sym || !Row4_Primitive(rel, rank, n)) continue;
+                long aut = Row4_AutOrder(rel, n, autCap);
+                bool large = aut < 0 || aut >= (long)n * n * n;
+                if (large ? largeShown >= 1 : smallShown >= 2) continue;
+                var adj = Row4_GraphOf(rel, rank, val, n);
+                var (ok, k, lam, mu) = SrgParams(n, adj); if (!ok) continue;
+                int s = SmallestEig(n, k, lam, mu);
+                string tag = large ? "geom/large" : "residue";
+                string autStr = aut < 0 ? $">{autCap}" : aut.ToString();
+                output.WriteLine($"  {$"as{n} #{idx + 1}",-16} {tag,-11} {$"|Aut|={autStr}",-13} s={s,-3} (below)");
+                Row("", tag, n, (u, v) => rel[u, v]);
+                if (large) largeShown++; else smallShown++;
+            }
+        }
+        output.WriteLine("");
+
+        // ── TWO-SIDED VERDICT (the bet needs BOTH halves) ──
+        int carvedPersist = carved.Count(x => x.persists), carvedPersistReg = carved.Count(x => x.persists && x.reg);
+        int residuePersistReg = residue.Count(x => x.persists && x.reg);
+        int residueShatter = residue.Count(x => !x.persists);
+        output.WriteLine("THE BET (§9.9.2): a PERSISTENT (stable) cover is a REGULAR partial geometry — so 'persistent ⟹ regular ⟹");
+        output.WriteLine("Cameron/block' would route a stable cover to a carved leg, and the residue (no stable cover) shatters.");
+        output.WriteLine("It needs BOTH: (A) carved covers PERSIST and are REGULAR there;  (B) residue covers do NOT persist-regular.");
+        output.WriteLine($"  (A) carved (geom+imprim): {carvedPersist}/{carved.Count} persist;  of those REGULAR at the deepest base: {carvedPersistReg}.");
+        output.WriteLine($"  (B) residue (prim small-Aut): {residueShatter}/{residue.Count} shatter;  persist-AND-regular: {residuePersistReg}.");
+        output.WriteLine("");
+        if (residuePersistReg == 0 && carvedPersistReg >= carvedPersist && carvedPersist > 0)
+            output.WriteLine("  ⇒ BET SUPPORTED: carved covers persist regularly; no residue does.");
+        else if (residuePersistReg == 0 && carvedPersist > 0)
+            output.WriteLine("  ⇒ BET REFUTED as a PROOF ROUTE (half A fails): residue covers shatter (B ✓), but the PERSISTENT carved");
+        else
+            output.WriteLine("  ‼ BET STRESSED on the residue side (B): a residue carries a persistent regular cover — inspect.");
+        if (residuePersistReg == 0 && carvedPersistReg < carvedPersist)
+        {
+            output.WriteLine("    covers go IRREGULAR under individualization (point-degree spreads) — NOT regular partial geometries in");
+            output.WriteLine("    the confusion-cover incidence sense. So 'stable ⟹ regular' is FALSE; D2 cannot extract a partial");
+            output.WriteLine("    geometry from a stable cover.  The robust separator is PERSISTENCE itself (thick vs shatter = bounded");
+            output.WriteLine("    minMult), which is exactly `hSmallAutThin` — the existing wall.  The regularity refinement gives NO new");
+            output.WriteLine("    handle; the D2 regular-PG extraction is unfounded — do NOT invest Lean effort there.");
+        }
+        output.WriteLine("");
+        output.WriteLine("HONEST SCOPE: same construction bottleneck as §9.9.8 — all residue data is bounded s (node 3 / leg B);");
+        output.WriteLine("node 4 (unbounded s) has no constructible witness.  This probes the D2 'stable⟹regular' bet on the");
+        output.WriteLine("reachable residue before any Lean investment in the extraction; it does NOT close node 4.");
+
+        Assert.True(rookHasCover, "rook reference has no base-∅ cover — metric/fixture issue");
+        Assert.True(residue.Count > 0, "no small-Aut residue scheme measured — catalogue/Aut classification issue");
+    }
+
     // The {diag=2, edge=1, non-edge=0} rank-2 relation matrix of a graph (for Row4 cover
     // measurement when the source is an algebraic adjacency rather than a catalogue scheme).
     static int[,] BuildRel(int n, bool[,] adj)
