@@ -801,6 +801,18 @@ exactly as the affine slice's citations did (the G3 pattern). This section also 
 keying note: the chain below consumes the *general-CC* predicates directly, bypassing the
 homogeneous-`Separable`-keyed `SeparabilityTransports` gate entirely. -/
 
+/-! ## ★ SEAL CAPSTONE MAP (the live capstones are in this file) — full legend in `Cascade.lean`
+
+  ★ `reachesRigidOrCameron_viaBoundedMinMult` — THE live canonical capstone (below in this section).
+       Seal `modulo {G3 + hSmallAutThin + hcatch + hImprim}`; open content = `hSmallAutThin` (node 4).
+  LIVE siblings (distinct results, kept):  `…_viaNoCover` (poly node-4 anchor, no largeness cite),
+       `…_viaSmallAutShatters` (sub-exp citation), `…_viaG0powNeg` (closure discharged),
+       `…_affineSlice` (cited 2-sep), `…_viaCompleteBase` (node-2 rung bridge).
+  ⊘ SUPERSEDED in this file:  `…_viaNoConfusionCover` (→ `…_viaSmallAutShatters`),
+       `…_viaExtensionSeparability` (cited Thm-4.1; live route is citation-free δ′).
+  Every other `…_via*` here is a load-bearing INTERMEDIATE of the live chain.
+  Full classification of all ~33 capstones: see the "SEAL CAPSTONE MAP" block in `Cascade.lean`. -/
+
 section SGate2
 
 open CoherentConfig

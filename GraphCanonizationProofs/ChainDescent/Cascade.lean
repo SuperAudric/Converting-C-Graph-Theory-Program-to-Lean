@@ -3337,6 +3337,43 @@ theorem reachesRigidOrCameron' {n : Nat}
   · exact Or.inl (hCascade h)
   · exact Or.inr h
 
+/-! ## ★ SEAL CAPSTONE MAP — read this before touching any `reachesRigidOrCameron_*`
+
+There are ~33 `reachesRigidOrCameron_*` capstones across `Cascade.lean` + `CascadeAffine.lean` —
+a historical waterfall of seal formulations. **You almost always want exactly one.** This block is the
+authoritative classification; the `PublicTheoremIndex.md` Description column carries the same `★`/`⊘` marker.
+
+  ★ LIVE CANONICAL — `reachesRigidOrCameron_viaBoundedMinMult`  (in `CascadeAffine.lean`)
+       The current frontier. Seal `modulo {G3 + hSmallAutThin + hcatch + hImprim}`.
+       Open content = `hSmallAutThin` (node 4: small-Aut primitive ⟹ bounded `minMult`).
+
+  LIVE — other endpoints kept on purpose (distinct results, NOT superseded):
+    · `…_viaNoCover`           poly node-4 anchor, NO largeness citation (the polynomial target)
+    · `…_viaSmallAutShatters`  faithful sub-exponential citation form (Babai/Kivva direction)
+    · `…_viaG0powNeg`          H={±1} affine family — closure DISCHARGED (`hclo` proved, not carried)
+    · `…_affineSlice`          affine cyclotomic slice, modulo cited 2-separability
+    · `…_viaCompleteBase`      node-2 rung bridge (δ′ discrete base ⟹ seal)
+
+  LOAD-BEARING INTERMEDIATES — proof-chain steps under the live capstone; do NOT delete:
+    base   `reachesRigidOrCameron`, `reachesRigidOrCameron'`
+    chain  `…_viaBoundedMultiplicity` ← `…_viaShattering` ← `…_viaPotentialDrop`
+           ← `…_viaBoundedExtensionParams` ← `…_viaExtensionDominatorClosure`
+           ← `…_viaPersistentTwinBlock` ← `…_viaFusedSeal` ← `reachesRigidOrCameron'`
+    affine `…_viaAffineIrreducible`, `…_viaPowSeparation`, `…_viaTwinsAreSemilinear`,
+           `…_viaCyclicSeparation`, `…_viaDominatorClosure`
+
+  ⊘ SUPERSEDED — historical formulations, kept for provenance only (tagged ⊘ at each decl):
+    old self-detection waterfall:  `…_viaRecovery`, `…_viaRecoveryOrAbelian`, `…_viaDepthRecovery`,
+       `…_viaDepthRecovery'`, `…_viaSelfDetection`, `…_viaStableRecovery`,
+       `…_viaSymmetricRecovery`, `…_viaBlockRecovery`
+    old s(C) terminals:            `…_viaDepthOneSeparable`, `…_viaIntraCellBlock`
+    cover/citation variants:       `…_viaNoConfusionCover` (→ use `…_viaSmallAutShatters`),
+       `…_viaExtensionSeparability` (cited Thm-4.1; the live route is citation-free δ′)
+  These 12 capstone THEOREMS are a self-contained superseded subtree — nothing live depends on their
+  proof terms — so they are deletable as a follow-up. (Their shared *predicates*
+  `SchemeRecovered`/`SelfDetectsStably`/`SchemeRecoveredByDepth`/… ARE still live via `…_viaFusedSeal`,
+  so a delete pass removes only the theorems, not those defs.) Left in place for now. -/
+
 /-! ### The seal's rigid side, concretely — the NON-VACUOUS recovery predicate
 
 `reachesRigidOrCameron` keeps `ReachesRigid` abstract; a concrete capstone must instantiate it with a
