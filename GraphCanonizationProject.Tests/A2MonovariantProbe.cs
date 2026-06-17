@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -939,5 +942,295 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("base vs correlates (does base track min-eigenvalue-multiplicity or p-rank?):");
         foreach (var x in rows.OrderBy(x => x.baseSize))
             output.WriteLine($"  {x.g.Name,-20} base={x.baseSize,-3} minMult={x.minMult,-4} 2-rank={x.twoRank,-3} drop={x.drop:F3}");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  ROW-4 SPORADICS probe (route doc §9.9.4 approach 4 / §9.9.5 action 4) — the
+    //  confusion-cover multiplicity (the Lean BigConfusionCover / minMult objects) on
+    //  the most RIGID constructible non-geometric SRGs: the PAULUS graphs srg(25,12,5,6)
+    //  and srg(26,10,3,4), loaded from the VERIFIED Hanaki–Miyamoto catalogue
+    //  (data/hanaki/as25.gz, as26.gz — the same source CatalogueSchemeProbe validates).
+    //
+    //  WHY.  §9.7's multiplicity evidence used Shrikhande/Clebsch/Chang, which have a
+    //  BIGGISH automorphism group (ℤ₄²⋊…, etc.).  The seal's open predicate hSmallAutThin
+    //  ("small-Aut primitive residue ⟹ bounded minMult") is sharpest exactly where Aut is
+    //  GENUINELY small/trivial — the Paulus graphs (many trivial-Aut) are that data, and
+    //  the sharpest available FALSIFIER hunt: a small-Aut SRG whose 2-WL cover stays thick
+    //  (minMult ≥ 1, c not collapsing) to base+O(1) would be a seal counterexample.
+    //
+    //  HONEST SCOPE (state plainly, do not overclaim).  These have smallest eigenvalue
+    //  s = −3 ⟹ BOUNDED eigenvalue ⟹ Neumaier-exceptional = NODE 3, not node 4.  Genuine
+    //  NODE 4 (unbounded s, non-geometric, small-Aut) has NO constructible witness (§5 F2 /
+    //  §9.9.3 G-construct) — no probe can reach it.  This probe EXTENDS the node-3 evidence
+    //  to genuinely-trivial Aut and stress-tests hSmallAutThin there; it does not close node 4.
+    //
+    //  MEASUREMENT.  Reuses this file's CoverMetrics on PairClosureBase of the scheme's own
+    //  rank-3 relation matrix (= the 2-WL coherent closure = the canonization-relevant object;
+    //  for an SRG the rank-3 scheme IS its 2-WL closure, and the orbital scheme is only finer,
+    //  so this is the conservative/hardest view, §9.7 note).  Bases ∅ / {0} / {0,v*}.
+    //  Self-contained catalogue loader (probe convention); validates SRG-ness + |Aut| at runtime.
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    static string Row4_DataPath(int n)
+    {
+        string fn = $"as{n:D2}.gz";
+        foreach (var root in new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "data", "hanaki"),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "data", "hanaki"),
+            Path.Combine(Directory.GetCurrentDirectory(), "data", "hanaki"),
+        })
+        {
+            var p = Path.GetFullPath(Path.Combine(root, fn));
+            if (File.Exists(p)) return p;
+        }
+        return "";
+    }
+
+    // GAP parser (mirror of CatalogueSchemeProbe.ParseCatalogue): last n*n ints per
+    // "# No. k" block = the row-major relation matrix.
+    static List<int[,]> Row4_Parse(string gzPath, int n)
+    {
+        string raw;
+        using (var fs = File.OpenRead(gzPath))
+        using (var gz = new GZipStream(fs, CompressionMode.Decompress))
+        using (var sr = new StreamReader(gz))
+            raw = sr.ReadToEnd();
+        var schemes = new List<int[,]>();
+        foreach (var b in Regex.Split(raw, @"#\s*No\.\s*\d+"))
+        {
+            var clean = string.Join("\n", b.Split('\n').Where(l => !l.TrimStart().StartsWith("#")));
+            var ints = Regex.Matches(clean, @"-?\d+").Select(m => int.Parse(m.Value)).ToList();
+            if (ints.Count < n * n) continue;
+            var vals = ints.Skip(ints.Count - n * n).ToArray();
+            var M = new int[n, n];
+            for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) M[i, j] = vals[i * n + j];
+            schemes.Add(M);
+        }
+        return schemes;
+    }
+
+    // Build (rel, rank, symmetric, valency) from a raw matrix; diagonal forced to 0,
+    // valencies validated constant (the correctness gate). Returns null if invalid.
+    static (int[,] rel, int rank, bool sym, int[] val)? Row4_Build(int[,] M, int n)
+    {
+        int diag = M[0, 0];
+        var labels = new SortedSet<int>();
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) labels.Add(M[i, j]);
+        var remap = new Dictionary<int, int> { [diag] = 0 };
+        int next = 1;
+        foreach (var v in labels) if (v != diag) remap[v] = next++;
+        int rank = remap.Count;
+        var rel = new int[n, n];
+        for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) rel[i, j] = remap[M[i, j]];
+        for (int i = 0; i < n; i++)
+        {
+            if (rel[i, i] != 0) return null;
+            for (int j = 0; j < n; j++) if (i != j && rel[i, j] == 0) return null;
+        }
+        var val = new int[rank];
+        for (int j = 0; j < n; j++) val[rel[0, j]]++;
+        for (int i = 1; i < n; i++)
+        {
+            var v = new int[rank];
+            for (int j = 0; j < n; j++) v[rel[i, j]]++;
+            for (int k = 0; k < rank; k++) if (v[k] != val[k]) return null;
+        }
+        bool sym = true;
+        for (int i = 0; i < n && sym; i++) for (int j = 0; j < n; j++) if (rel[i, j] != rel[j, i]) { sym = false; break; }
+        return (rel, rank, sym, val);
+    }
+
+    // Primitive ⟺ every non-diagonal relation graph is connected.
+    static bool Row4_Primitive(int[,] rel, int rank, int n)
+    {
+        for (int k = 1; k < rank; k++)
+        {
+            var seen = new bool[n]; var st = new Stack<int>(); st.Push(0); seen[0] = true; int c = 1;
+            while (st.Count > 0) { int x = st.Pop(); for (int y = 0; y < n; y++) if (!seen[y] && rel[x, y] == k) { seen[y] = true; c++; st.Push(y); } }
+            if (c != n) return false;
+        }
+        return true;
+    }
+
+    // |Aut| of the coloured scheme by backtracking with relation-consistency pruning;
+    // returns the exact order, or −1 if it exceeds `cap` (= "large" / Cameron-side).
+    static long Row4_AutOrder(int[,] rel, int n, long cap)
+    {
+        var img = new int[n]; var used = new bool[n]; long count = 0; bool over = false;
+        bool Extend(int k)
+        {
+            if (over) return false;
+            if (k == n) { count++; if (count > cap) { over = true; return false; } return true; }
+            for (int w = 0; w < n; w++)
+            {
+                if (used[w]) continue;
+                bool ok = rel[k, k] == rel[w, w];
+                for (int a = 0; a < k && ok; a++)
+                    if (rel[k, a] != rel[w, img[a]] || rel[a, k] != rel[img[a], w]) ok = false;
+                if (!ok) continue;
+                img[k] = w; used[w] = true;
+                Extend(k + 1);
+                img[k] = -1; used[w] = false;
+                if (over) return false;
+            }
+            return true;
+        }
+        Extend(0);
+        return over ? -1 : count;
+    }
+
+    // Extract the sparser non-diagonal relation as a 0/1 graph (for SRG params / spectrum).
+    static bool[,] Row4_GraphOf(int[,] rel, int rank, int[] val, int n)
+    {
+        int e = 1; for (int k = 2; k < rank; k++) if (val[k] < val[e]) e = k;
+        var a = Empty(n);
+        for (int u = 0; u < n; u++) for (int v = u + 1; v < n; v++) if (rel[u, v] == e) Edge(a, u, v);
+        return a;
+    }
+
+    // The cover trajectory along the base sequence ∅ ⊆ {0} ⊆ {0,v*}, measured on the
+    // scheme's own rank-3 relation matrix (the 2-WL closure).  Returns the per-base
+    // (c, minMult, cover-verdict) and the final-base shatter flag.
+    static (string traj, bool shattersFinal, int cFinal, int minMultFinal) Row4_CoverTrajectory(int n, int[,] rel)
+    {
+        Func<int, int, int> bc = (u, v) => rel[u, v];
+        var sb = new StringBuilder();
+        bool shatters = false; int cF = 0, mF = 0; bool first = true;
+        foreach (var T in BaseSeqBase(n, bc))
+        {
+            var cl = PairClosureBase(n, bc, T);
+            var m = CoverMetrics(n, cl, 0.5);
+            string verdict = m.c == 0 ? "discrete" : !m.cover ? "shatter" : m.tight ? "tight" : "loose";
+            if (!first) sb.Append("  →  ");
+            sb.Append($"|T|{T.Count}: c={m.c} minM={m.minMult} maxM={m.maxMult} L={m.L:F1} [{verdict}]");
+            first = false;
+            shatters = m.c == 0 || !m.cover; cF = m.c; mF = m.minMult;
+        }
+        return (sb.ToString(), shatters, cF, mF);
+    }
+
+    [Fact]
+    public void Probe_Row4Sporadics()
+    {
+        output.WriteLine("A2 ROW-4 SPORADICS — confusion-cover multiplicity on the most RIGID constructible");
+        output.WriteLine("non-geometric SRGs (Paulus srg(25,12,5,6), srg(26,10,3,4)) from the verified Hanaki catalogue.");
+        output.WriteLine("Tests hSmallAutThin (small-Aut ⟹ bounded minMult / shatters) where Aut is GENUINELY small.");
+        output.WriteLine("HONEST SCOPE: these are s=−3 (bounded eigenvalue) = NODE 3, not node 4. Node 4 (unbounded s,");
+        output.WriteLine("non-geometric, small-Aut) has NO constructible witness — no probe reaches it (§5 F2 / §9.9.3).");
+        output.WriteLine("Measurement = Lean BigConfusionCover/minMult on the 2-WL closure (PairClosure of the scheme).");
+        output.WriteLine("");
+
+        const long autCap = 5000;                          // |Aut| > cap ⟹ "large" (geometric/Cameron-side)
+        var orders = new[] { 25, 26, 28, 29 };
+
+        // ── Carved geometric contrast at n=25 (large-Aut, the thick-cover reference) ──
+        var contrasts = new (string name, bool[,] adj)[]
+        {
+            ("Rook L(5) [geom]", Rook(5)),
+        };
+
+        output.WriteLine($"{"graph",-22} {"src",-10} {"n",-4} {"(k,λ,μ)",-13} {"s",-4} {"2rk",-4} {"|Aut|",-9} {"base",-5} cover trajectory  ∅ → {{0}} → {{0,v*}}");
+        output.WriteLine(new string('─', 150));
+
+        var smallAut = new List<(string name, int n, int s, long aut, bool shatters, int cF, int mF)>();
+        var largeAut = new List<(string name, int n, int s, int mF, int baseSize)>();
+        int targetCount = 0;        // small-Aut non-geometric SRGs found (probe non-vacuity)
+        int falsifiers = 0;         // small-Aut SRG whose cover stays thick to base {0,v*}
+
+        // Algebraic carved contrasts first.
+        foreach (var (name, adj) in contrasts)
+        {
+            int nn = (int)Math.Round(Math.Sqrt(adj.Length));
+            var (ok, k, lam, mu) = SrgParams(nn, adj);
+            if (!ok) { output.WriteLine($"{name,-22} {"algebraic",-10} {nn,-4} not-an-SRG"); continue; }
+            int s = SmallestEig(nn, k, lam, mu); int r2 = PRank(nn, adj, 2);
+            long aut = Row4_AutOrder(BuildRel(nn, adj), nn, autCap);
+            int baseSize = GreedyBaseCurve(nn, adj).Count - 1;
+            var (traj, _, cF, mF) = Row4_CoverTrajectory(nn, BuildRel(nn, adj));
+            string autStr = aut < 0 ? $">{autCap}" : aut.ToString();
+            output.WriteLine($"{name,-22} {"algebraic",-10} {nn,-4} {$"({k},{lam},{mu})",-13} {s,-4} {r2,-4} {autStr,-9} {baseSize,-5} {traj}");
+            largeAut.Add((name, nn, s, mF, baseSize));
+        }
+        output.WriteLine("");
+
+        // ── Catalogue SRGs (rank-3 symmetric primitive) at the target orders ──
+        foreach (int n in orders)
+        {
+            var path = Row4_DataPath(n);
+            if (path == "") { output.WriteLine($"order {n}: data file missing — skip"); continue; }
+            var raw = Row4_Parse(path, n);
+            int srgCount = 0;
+            foreach (var (idx, M) in raw.Select((m, i) => (i, m)))
+            {
+                var built = Row4_Build(M, n);
+                if (built is null) continue;
+                var (rel, rank, sym, val) = built.Value;
+                if (rank != 3 || !sym) continue;                       // SRG = rank-3 symmetric
+                if (!Row4_Primitive(rel, rank, n)) continue;
+                srgCount++;
+
+                var adj = Row4_GraphOf(rel, rank, val, n);
+                var (ok, k, lam, mu) = SrgParams(n, adj);
+                if (!ok) continue;
+                int s = SmallestEig(n, k, lam, mu); int r2 = PRank(n, adj, 2);
+                long aut = Row4_AutOrder(rel, n, autCap);
+                int baseSize = GreedyBaseCurve(n, adj).Count - 1;
+                var (traj, _, cF, mF) = Row4_CoverTrajectory(n, rel);
+                // "shatters" = a SMALL base (≪ √n); geometric/large-Aut needs base ≈ √n.
+                bool sh = baseSize < (int)Math.Ceiling(Math.Sqrt(n));
+                string autStr = aut < 0 ? $">{autCap}" : aut.ToString();
+                bool large = aut < 0 || aut >= (long)n * n * n;         // |Aut| ≥ n³ ⟹ geometric/Cameron-side
+                string name = $"#{idx + 1}";
+                output.WriteLine($"{$"as{n} {name}",-22} {"catalogue",-10} {n,-4} {$"({k},{lam},{mu})",-13} {s,-4} {r2,-4} {autStr,-9} {baseSize,-5} {traj}");
+                if (large) largeAut.Add(($"as{n} {name}", n, s, mF, baseSize));
+                else
+                {
+                    targetCount++;
+                    smallAut.Add(($"as{n} {name}", n, s, aut, sh, cF, mF));
+                    if (!sh) falsifiers++;                              // small-Aut + non-shattering cover at base {0,v*}
+                }
+            }
+            output.WriteLine($"  ── order {n}: {srgCount} rank-3 primitive SRG scheme(s) in catalogue ──");
+            output.WriteLine("");
+        }
+
+        // ── Readouts ───────────────────────────────────────────────────────────────
+        output.WriteLine("SMALL-Aut (Paulus-type, the genuine residue) SRGs — do they shatter (minMult→0 / c collapse)?");
+        foreach (var x in smallAut.OrderBy(x => x.n).ThenBy(x => x.aut))
+            output.WriteLine($"  {x.name,-12} n={x.n} s={x.s} |Aut|={x.aut,-5} ⟹ final base {{0,v*}}: c={x.cF} minMult={x.mF}  {(x.shatters ? "SHATTERS ✓" : "‼ THICK COVER (falsifier?)")}");
+        output.WriteLine("");
+        output.WriteLine("LARGE-Aut / geometric SRGs (the thick-cover Cameron reference):");
+        foreach (var x in largeAut.OrderBy(x => x.n))
+            output.WriteLine($"  {x.name,-12} n={x.n} s={x.s} base={x.baseSize} final minMult={x.mF} ⟹ {(x.mF >= 1 ? "THICK COVER (base ≈ √n, expected on geometric)" : "shatters")}");
+        output.WriteLine("");
+
+        int shatterCount = smallAut.Count(x => x.shatters);
+        output.WriteLine($"VERDICT — small-Aut non-geometric SRGs found: {targetCount};  of those SHATTER (1-WL base < √n): {shatterCount};  falsifiers (base ≥ √n): {falsifiers}.");
+        output.WriteLine(falsifiers == 0 && targetCount > 0
+            ? "  ⇒ Every genuinely-small-Aut non-geometric SRG SHATTERS at base ≪ √n — hSmallAutThin holds on the most rigid"
+            + " constructible data (no falsifier). Extends the §9.7 evidence from biggish-Aut to trivial-Aut residue."
+            : targetCount == 0
+                ? "  ⇒ No small-Aut non-geometric rank-3 SRG isolated at these orders — re-check catalogue/Aut classification."
+                : "  ‼ A small-Aut SRG needs base ≥ √n (geometric-like) — a hSmallAutThin falsifier candidate; INVESTIGATE.");
+        output.WriteLine("");
+        output.WriteLine("CAVEAT (the honest scope): the data spans BOUNDED smallest eigenvalue only — n=25/26 are s=−3 (Paulus,");
+        output.WriteLine("NODE 3 / Neumaier-exceptional), n=28 s=−2 (Chang, exceptional non-line-graph), n=29 s=0 (conference,");
+        output.WriteLine("leg B). Node 4 = UNBOUNDED s, non-geometric, small-Aut remains construction-bottlenecked (CGGP is the");
+        output.WriteLine("only known inhabitant, not codeable at scale) — no probe reaches it. This extends the node-3 evidence");
+        output.WriteLine("to genuinely-trivial Aut (|Aut|=1) and finds NO falsifier; it does not close node 4.");
+
+        // Assertions: probe non-vacuity (target SRGs found) + the falsifier headline.
+        Assert.True(targetCount > 0, "no small-Aut non-geometric rank-3 SRG found at orders 25/26/28/29 — classification or data issue");
+        Assert.Equal(0, falsifiers);   // no small-Aut SRG retains a thick cover to base+O(1) (seal stands on this data)
+    }
+
+    // The {diag=2, edge=1, non-edge=0} rank-2 relation matrix of a graph (for Row4 cover
+    // measurement when the source is an algebraic adjacency rather than a catalogue scheme).
+    static int[,] BuildRel(int n, bool[,] adj)
+    {
+        var rel = new int[n, n];
+        for (int u = 0; u < n; u++) for (int v = 0; v < n; v++) rel[u, v] = u == v ? 0 : adj[u, v] ? 1 : 2;
+        return rel;
     }
 }

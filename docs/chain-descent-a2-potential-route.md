@@ -150,6 +150,15 @@ shrinking the residue to node 4; (b) **Spielman floor** — a `…viaSpielman` c
 at the sub-exponential threshold (Cameron-free). The poly discharge of `hSmallAutThin` for the non-geometric core is the
 long-horizon open frontier. **Read §9.9 (esp. §9.9.6 + §9.9.7) to continue.**
 
+**▶ ROW-4 SPORADICS PROBE DONE (2026-06-17, §9.9.8) — `hSmallAutThin` confirmed at TRIVIAL Aut, 0 falsifiers.**
+`A2MonovariantProbe.Probe_Row4Sporadics` loads the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang(28) + conference(29)
+from the verified Hanaki catalogue and measures the Lean `BigConfusionCover`/`minMult` on the 2-WL closure. **42 small-Aut
+non-geometric SRGs (many `|Aut|=1`) ALL shatter at base ≪ √n (`minMult→0`); the 3 geometric/large-Aut stay thick (base ≈√n,
+`minMult` 7–9). No falsifier.** Sharpest test yet of `hSmallAutThin` — extends the 0-falsifier record from the biggish-Aut
+Shrikhande/Clebsch/Chang to genuinely-trivial-Aut residue. **Honest scope unchanged:** all data is bounded `s` (node 3 /
+exceptional / leg B); **node 4 = unbounded `s` is construction-bottlenecked, unreached — `hSmallAutThin` stays the open wall**,
+now with strictly stronger empirical support. Build: green; nothing committed (user commits).
+
 ---
 
 ## 1. The target and how it plugs in (this half is LANDED)
@@ -1208,3 +1217,32 @@ exists.** The wall is real and located exactly at `hSmallAutThin`.
 it validates the whole `viaBoundedMinMult` pipeline on a real family (as `clebschZ4` did for δ′), and it incrementally
 peels the residue down to the genuine node-4 core. The poly discharge of `hSmallAutThin` for the non-geometric core
 (step 2-poly) is the long-horizon open frontier; the Spielman floor (step 2-subexp) is the honest fully-citable fallback.
+
+### 9.9.8 Row-4 sporadics probe — DONE (2026-06-17): hSmallAutThin holds on trivial-Aut data, 0 falsifiers
+
+**Built + run, green: `A2MonovariantProbe.Probe_Row4Sporadics`** (approach 4 / action 4 of §9.9.4–§9.9.5). It loads
+the genuinely-small-Aut non-geometric SRGs — **Paulus `srg(25,12,5,6)`, `srg(26,10,3,4)`, Chang `srg(28,12,6,4)`,
+and the conference `(29,14,6,7)` family** — from the **verified Hanaki–Miyamoto catalogue** (`data/hanaki/as{25,26,28,29}.gz`,
+the same source `CatalogueSchemeProbe` validates; no hand-transcribed adjacency), and measures the exact Lean objects
+`BigConfusionCover` / `minMult` / `c(X_T)` on the **2-WL coherent closure** (`PairClosure` of the scheme's own rank-3
+relation matrix — the conservative/hardest faithful view, §9.7 note) at bases ∅ / {0} / {0,v*}. `|Aut|` (capped
+backtracking) classifies small-Aut (residue) vs large-Aut (geometric/Cameron); `Rook L(5)` + the catalogue's pseudo-Latin
+`as25 #3` + `T(8)` (`as28 #6`) are the geometric thick-cover reference.
+
+**Result — clean separation, no falsifier:**
+- **42 small-Aut non-geometric SRGs — including many with `|Aut| = 1` (trivial) — ALL shatter:** `c(X_T)` collapses
+  to a constant / 0 and `minMult → 0` at a base ≪ √n (typically {0} or {0,v*}). e.g. `srg(25,12,5,6)` `|Aut|=1`: `c` 15→…→0
+  by base 2; `srg(26,10,3,4)` `|Aut|=1`: `c` 12→0 by base ≤2. **0 falsifiers** (no small-Aut SRG needs base ≥ √n).
+- **The 3 geometric/large-Aut SRGs stay THICK:** `Rook L(5)`, `as25 #3` (pseudo-Latin), `T(8)` all keep `c=15/16` and
+  `minMult = 7/9` through base 2, discretizing only at base ≈ √n = 5. Exactly the Cameron-side behaviour.
+
+**Significance.** This is the **sharpest available test of `hSmallAutThin`**: the prior §9.7 evidence used Shrikhande/
+Clebsch/Chang, which have a *biggish* Aut; this extends the 0-falsifier record to **genuinely-trivial-Aut** residue
+(`|Aut|=1`), where the predicate is most exposed. `hSmallAutThin` holds on every constructible data point.
+
+**Honest scope (unchanged — the probe does NOT close node 4).** All data is **bounded smallest eigenvalue**: n=25/26 are
+`s=−3` (Paulus, **node 3** / Neumaier-exceptional), n=28 `s=−2` (Chang, exceptional non-line-graph), n=29 `s=0`
+(conference, **leg B**). **Node 4 = unbounded `s`, non-geometric, small-Aut remains construction-bottlenecked** (CGGP is
+the only known inhabitant, not codeable at scale) — no probe reaches it (§5 F2 / §9.9.3 G-construct). So the probe
+**de-risks the unified claim and the falsifier question at trivial Aut, but the irreducible node-4 frontier is untouched**:
+`hSmallAutThin` stays the open wall, now with strictly stronger empirical support beneath it.
