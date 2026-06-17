@@ -92,7 +92,6 @@
       "WebFetch(domain:www.ma.imperial.ac.uk)",
       "WebFetch(domain:cameroncounts.github.io)",
       "WebFetch(domain:seis.bristol.ac.uk)",
-      "Bash(*)",
       "WebFetch(domain:math.uchicago.edu)",
       "WebFetch(domain:ajc.maths.uq.edu.au)",
       "WebFetch(domain:dl.acm.org)",

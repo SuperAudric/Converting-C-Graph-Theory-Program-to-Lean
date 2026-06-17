@@ -61,7 +61,7 @@ it in-project and discharging the hypothesis.
 |---|---|---|---|---|
 | **G3 — primitive-CC / Cameron classification** | `hClassify` (all capstones) | Babai ITCS 2014 (rank 3) + J.Algebra 2015 (II); Kivva JCTB 164 (2024) (rank 4); Sun–Wilmes (`exp(n^{1/3})` threshold) | **Maybe not** (CFSG-based — the one allowed to stay cited) | The "or Cameron" escape. |
 | **CFI-1992 Thm 5.2 — dimWL exchange** | `hcatch` | Cai–Fürer–Immerman 1992 Thm 5.2; Ponomarenko arXiv:2006.13592 eq. (41) | **Yes**, but largely **moot for the residue**: collapses onto the `s(C)` core; needs a `dimWL` framework to state verbatim. | Free where 1-WL discretizes. |
-| **Spielman — primitive-SRG discretization** | `hSpielman` (`…viaSpielman`) | Spielman, STOC 1996 (`Õ(n^{1/3})` base) | **Yes** (a genuine but large WL/SRG result) | Gives the honest sub-exp floor, Cameron-free. |
+| **Spielman — primitive-SRG discretization** | `hSpielman` (`…viaSpielman`) | Spielman, STOC 1996 (`Õ(n^{1/3})` base) | **Yes** (a genuine but large WL/SRG result) | Gives the honest sub-exp floor, Cameron-free. **DELTA (2026-06-17, lit. check):** the SRG-iso *floor value* is `exp(Õ(n^{1/5}))` (Babai–Chen–Sun–Teng–Wilmes, FOCS 2013); `n^{1/3}` is the broader-PCC bound. Spielman's *individualize-to-discrete-at-base* form is what `hSpielman` consumes; confirm BCSTW gives a base statement before re-citing. See route §9.9.17 / [[reference_srg_wl_literature_2026-06-17]]. |
 | **Affine cyclotomic 2-separability** | `…affineSlice` | Ponomarenko arXiv:2006.13592 Thm 1.1 | **Yes** — superseded for sub-families by the citation-free δ′/rainbow routes (`viaG0powNeg`, `viaRainbowRank`). | |
 | **Babai SRG structure (node-4 form)** | `hSmallAutThin` | Babai ITCS 2014 + Kivva (the *structure*, at sub-exp threshold) | **= the research core** — at poly threshold it is *open*, not a citation. | The wall. |
 
@@ -79,9 +79,19 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 - **Status:** open, GI-adjacent. No constructible falsifier across every probe (sporadics, trivial-Aut, cospectral
   mates, Doob/Hamming twists, k-WL ladder — all negative). Not directly attackable by covers/regularity/WL-level/twists
   (all closed, §9.9.10–12). The honest characterization: *is the WL-dim gap `base − b(Aut)` bounded for the residue?*
-- **Intended discharge:** the fusion / closed-subset closure (`schemeEquiv_trans`) for `PersistentTwinYieldsBlock`.
-  Project verdict: *the unconditional seal will not close from Mathlib alone.*
-- **Floors available now:** sub-exp via `…viaSpielman` (fully citable, Cameron-free).
+- **Intended discharge:** ~~the fusion / closed-subset closure (`schemeEquiv_trans`) for `PersistentTwinYieldsBlock`~~
+  **— CORRECTED (2026-06-17, route §9.9.17): the block escape is VACUOUS on the primitive floor** (a primitive scheme
+  has no nontrivial proper `ClosedSubset`, so `PersistentTwinYieldsBlock` collapses to `¬Separates → IsLarge`;
+  lemma `persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive`). The fusion-closure block construction discharges
+  only the *imprimitive* case (already `hImprim`). The primitive crux is irreducibly the **2-closure deficiency**
+  `G^(2)_T / G_T` = `s(X)` wall, with no block shortcut. Project verdict unchanged: *won't close from Mathlib alone.*
+- **The closure angle, precisely (route §9.9.17):** the open content factors as (A) `Separable` + (B) the transport
+  + (C) a bounded group base; **(C) is FREE** (`exists_greedy_base_le_log`, `b(G)=O(log n)` for small Aut). The open
+  (A)+(B) = *the point extension recovers Aut-orbits at a bounded base* = no 2-closure deficiency. Its group-theoretic
+  form is **Skresanov's rank-3 2-closure** theory (`G^(2)` structure) — the closure-angle and Skresanov leads merge.
+  **Concrete next:** test whether Skresanov's rank-3 `G^(2)` description trivialises the deficiency at a bounded base
+  for the affine residue (an affine-rank-3 carve capstone, sibling to the cyclotomic slice). See [[reference_srg_wl_literature_2026-06-17]].
+- **Floors available now:** sub-exp via `…viaSpielman` (fully citable, Cameron-free; floor value `exp(Õ(n^{1/5}))`, §2 DELTA).
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:

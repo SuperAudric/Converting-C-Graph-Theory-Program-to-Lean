@@ -4600,6 +4600,32 @@ theorem selfDetectsStably_of_persistentTwinYieldsBlock {n : Nat} (S : SchurianSc
   · exact hps.2 hlarge
   · exact not_isPrimitive_of_nontrivial_closedSubset hcl h0 huniv hps.1
 
+/-- **The block escape is VACUOUS on the primitive floor (closure-angle sharpening, 2026-06-17).** On a
+primitive scheme there is no non-trivial proper `ClosedSubset` (that is the definition of `IsPrimitive`), so the
+block disjunct of `PersistentTwinYieldsBlock` can never fire: the predicate collapses to the *largeness-only*
+form `¬SeparatesAtBoundedBase → IsLarge`. **Consequence for the intended discharge.** The "fusion / closed-subset
+closure" pattern (`schemeEquiv_trans`) that generates a `ClosedSubset` from a persistent twin produces, on a
+*primitive* residue, only the trivial closed subsets `{0}` / `univ` — never a block — so it does **not** close
+the primitive crux. The block construction discharges only the *imprimitive* case (already `hImprim`'s job). The
+genuine open content on the primitive floor is therefore irreducibly `¬Separates → Large`, i.e. the 2-closure
+deficiency / `s(X)` wall (no block shortcut). Records the correction to the `PersistentTwinYieldsBlock` attack
+plan; mirrors `intraCellRelations_eq_singleton_zero_of_primitive` (another route that vanishes on the primitive
+floor). -/
+theorem persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive {n : Nat} (S : SchurianScheme n)
+    (IsLarge : Nat → Prop) (bound : Nat) (hprim : S.toAssociationScheme.IsPrimitive) :
+    PersistentTwinYieldsBlock S IsLarge bound ↔
+      (¬ SeparatesAtBoundedBase S bound → IsLargeSchemeViaAut IsLarge n S) := by
+  unfold PersistentTwinYieldsBlock
+  constructor
+  · intro h hns
+    rcases h hns with hl | ⟨I, hcl, h0, huniv⟩
+    · exact hl
+    · rcases hprim I hcl with h | h
+      · exact absurd h h0
+      · exact absurd h huniv
+  · intro h hns
+    exact Or.inl (h hns)
+
 /-- **The seal capstone, via the mechanism-agnostic P3 converse — A CONDITIONAL CAPSTONE, NOT THE CLOSED SEAL.**
 The fused seal with its self-detection input discharged by `PersistentTwinYieldsBlock`. It carries exactly three
 hypotheses — the cited classification `hClassify` (G3), the imprimitive block recovery `hImprim`, and the **open

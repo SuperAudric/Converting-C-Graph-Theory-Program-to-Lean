@@ -166,7 +166,12 @@ is the n=16 instance; the landed `reachesRigidOrCameron_viaCompleteBase` is its 
 rank off n=16), shrinking the residue to node 4; (b) **Spielman floor** — a `…viaSpielman` capstone making the seal
 unconditional-modulo-citations at the sub-exponential threshold (Cameron-free). Both reuse landed infrastructure; neither
 touches the open node-4 core. **Read §9.9.6 + §9.9.7 (the wall + its method) first, then the probe record §9.9.8 + §9.9.10 +
-§9.9.11 + §9.9.12 (the falsifier hunts, all negative) + §9.9.9 (the node-2 bridge) to continue.**
+§9.9.11 + §9.9.12 (the falsifier hunts, all negative) + §9.9.9 (the node-2 bridge) to continue.** **★ NEWEST (2026-06-17,
+§9.9.17): closure-angle reduction + literature SOTA pass.** Literature confirms the wall is open both ways (0 falsifiers,
+no citable bound); two deltas (sub-exp floor is `n^{1/5}` not `n^{1/3}`; NEW cite Skresanov rank-3 2-closure). The
+closure-angle reduction's "⟹ block" is VACUOUS on the primitive floor (lemma `persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive`,
+axiom-clean) — the crux is the 2-closure deficiency `G^(2)_T/G_T`, which MERGES with the Skresanov lead. **Live next = the
+Skresanov affine-rank-3 carve.** Read §9.9.17.
 
 **▶ ROW-4 SPORADICS PROBE DONE (2026-06-17, §9.9.8) — `hSmallAutThin` confirmed at TRIVIAL Aut, 0 falsifiers.**
 `A2MonovariantProbe.Probe_Row4Sporadics` loads the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang(28) + conference(29)
@@ -1712,3 +1717,67 @@ constituents) are **facets of the same open object**, not four independent gaps.
 landed producer) to the constituent-recovery interfaces; closing it = closing that shared core (one tower-layer down),
 not a separable task. Buildable non-research residue: only the `EdgeGeneratesFromSet`-style checkable closure (§9.9.15
 piece 2), shared with the engine.
+
+### 9.9.17 Closure-angle reduction + literature pass — DONE (2026-06-17): the block escape is vacuous on the primitive floor; the crux is the 2-closure deficiency, which merges with Skresanov's rank-3 2-closure theory
+
+**Two threads landed: (i) a literature SOTA check confirming the wall is open both ways + two deltas to the cited
+record; (ii) the closure-angle reduction, worked against the existing Lean, which sharpens the open content and
+exposes a vacuity in the stated discharge plan. One small axiom-clean lemma committed the finding.**
+
+**(i) Literature SOTA (web-verified, 2026-06-17).** The node-4 wall (`hSmallAutThin`) is genuinely open in
+mathematics — *no* citable theorem in either direction, *no* constructible falsifier. Confirmations: no poly SRG-iso
+result is keyed on small-Aut/rigidity; NO primitive small-Aut non-geometric SRG with large WL-dim is known to exist
+(and no SRG with provably unbounded WL-dim is known at all); every unbounded-WL witness (CFI / multipede / circulant)
+is non-SRG and abelian/affine or imprimitive — i.e. exactly the families the seal already carves (leg B / `hImprim`),
+which is **direct literature support for the closure angle** ("SRG" and "large WL-dim" are opposite ends of one
+construction, Cai–Guo–Gavrilyuk–Ponomarenko 2023/Combinatorica 2025 = the project's CGGP cite). No IR/WL lower bound
+touches primitive SRGs; spectral side-doors (bounded-multiplicity GI) are vacuous on SRGs (two Θ(n) multiplicities).
+**Two deltas to the project's record:**
+- **DELTA 1 — the sub-exp floor is `exp(Õ(n^{1/5}))`** (Babai–Chen–Sun–Teng–Wilmes, FOCS 2013), *not* Spielman's
+  `n^{1/3}` (that survives only for the broader PCC class, Sun–Wilmes 2015). The `viaSpielman` floor / §8.6 / §9.9.13
+  cite `n^{1/3}`. Caveat before re-citing: Spielman gives an *individualize-to-discrete at base Õ(n^{1/3})* statement
+  (what `hSpielman`/`SeparatesAtBoundedBase` consumes); BCSTW is a canonical-form algorithm — confirm it yields a
+  base/individualization statement before swapping the carried predicate. The floor *value* is `n^{1/5}` regardless.
+- **DELTA 2 — a NEW directly-relevant citation: Skresanov on rank-3 2-closures** (2021, Ars Math. Contemp.,
+  arXiv:2007.14696; 2023, J. Algebra 633, arXiv:2202.03746 — poly-time `G^(2)`). The schurian residue is `Inv(G)`,
+  `G` a primitive rank-3 group; the open gap is `s(X)=b(X)−b(G)` = the 2-closure deficiency `G^(2)_T / G_T`.
+  Skresanov 2021 (2-closure of a large-degree affine rank-3 group stays affine 1-dim) is the closest structural
+  handle. Likely outcome: it *identifies* the affine rank-3 residue's 2-WL-closure with an affine scheme (= the
+  already-handled affine slice), confirming/extending that carve rather than cracking node 4 — but it is the precise
+  group-theoretic target of the closure angle and is **not currently used** here. (The carve-around path.)
+
+**(ii) The closure-angle reduction — worked against the Lean, two findings.**
+
+**Finding A — the open content factors, and (C) the group base is FREE.** The separation content
+`SeparatesAtBoundedBase` factors (via `separatesAtBoundedBase_of_separable_of_small`, CascadeAffine §S-gate Bridge)
+into **(A)** `Separable` (Ponomarenko Thm 4.1) + **(B)** the transport `SeparabilityTransports : Separable →
+TwinsRealizedByResidualAut` + **(C)** a bounded group base `IsBase`. **(C) is already discharged** —
+`exists_greedy_base_le_log` gives `b(G) ≤ log₂|Aut|`, and the seal's existing `¬IsLarge` antecedent makes that
+`O(log n)`. So the open content is (A)+(B), which the docstrings show are *coupled through the general-CC substrate*
+(the transport needs `s(X_T) ≤ s(X)`, a multi-fiber-CC fact the homogeneous `AssociationScheme`/`AlgIso` cannot
+express). In one line: the open piece = *the point extension `X_T` recovers Aut-orbits at a bounded base* = no
+2-closure deficiency = the `s(X)` wall. The Stage-2 route (`twinsRealized_of_extensionPointed`) is the live form:
+pointed separability of `X_T` on non-singleton fibers + `hcatch` ⟹ the sink. Both routes' open input is the same
+extension-separability / deficiency content.
+
+**Finding B — the block escape is VACUOUS on the primitive floor (the correction).** `PersistentTwinYieldsBlock`'s
+"⟹ block" disjunct needs a non-trivial proper `ClosedSubset`, which `IsPrimitive` forbids *by definition*. So the
+docs' stated intended discharge — "the fusion / closed-subset closure (`schemeEquiv_trans`) generates a `ClosedSubset`
+from a persistent twin ⟹ block ⟹ contradicts primitivity" — **cannot fire on a genuinely primitive residue**: the
+generated closed subset is always `univ` there, never a block, so it yields no contradiction by itself. The block
+construction discharges only the *imprimitive* case (already `hImprim`'s job). On the primitive floor the crux is
+irreducibly `¬SeparatesAtBoundedBase → IsLarge` = the 2-closure deficiency / `s(X)` wall, with **no block shortcut**.
+Committed as `persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive` (Cascade.lean, axiom-clean
+`[propext, Classical.choice, Quot.sound]`, build green) — a route-vanishes-on-the-primitive-floor guard, the
+analogue of `intraCellRelations_eq_singleton_zero_of_primitive`. **Consequence:** do NOT attempt the fusion-closure
+block construction expecting it to close the primitive crux; it is structurally vacuous there.
+
+**The merge (why "closure-angle first" was right).** Findings A+B show the closure-angle reduction, on the primitive
+floor, is NOT a block construction — its real content is the **deficiency-group trichotomy**: a WL-twin not realized
+by a residual automorphism is an element of `Aut(X_T) \ Aut_T = G^(2)_T \ G_T` (the 2-closure deficiency), and the
+claim "large `s(X)` ⟹ large ∨ abelian ∨ imprimitive (carved)" is a statement about that deficiency. That is **exactly
+Skresanov's rank-3 2-closure structure** (DELTA 2). So the closure-angle and Skresanov paths *converge*: the
+closure-angle's crux IS the Skresanov question. **Next:** the Skresanov path — does the rank-3 `G^(2)` description
+make the deficiency `G^(2)_T / G_T` trivial-or-affine at a bounded base for the residue (a concrete affine-rank-3
+carve capstone, sibling to the cyclotomic slice)? Node 4 (unbounded-`s`, the true wall) remains untouched. Nothing
+else committed (user commits).
