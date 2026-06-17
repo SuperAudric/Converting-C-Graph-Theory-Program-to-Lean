@@ -159,6 +159,15 @@ Shrikhande/Clebsch/Chang to genuinely-trivial-Aut residue. **Honest scope unchan
 exceptional / leg B); **node 4 = unbounded `s` is construction-bottlenecked, unreached — `hSmallAutThin` stays the open wall**,
 now with strictly stronger empirical support. Build: green; nothing committed (user commits).
 
+**▶ NODE-2 RUNG, first increment LANDED (2026-06-17, §9.9.9) — the δ′ → multiplicity-pipeline bridge.** Axiom-clean,
+build green: `boundedConfusionMultiplicity_of_completeBase` (§CC.22e — a bounded *discrete* base ⟹
+`BoundedConfusionMultiplicity B M`, sharpening the trivial `M = n` anchor to `M = |T₀|`) + the capstone
+`reachesRigidOrCameron_viaCompleteBase` (§S-gate2 — routes a discrete-base thin family through `…viaBoundedMultiplicity`,
+no largeness guard, seal `modulo {G3 + hcatch + hImprim}`). **The pipeline-validation half** (connective tissue
+δ′→D1/D2/D3) is done; the **remaining node-2 content is a *uniform* discrete base for a parametric affine/FDF family** (a
+uniform rainbow rank via `dominatorReachable_of_rainbowRank`, generalizing `clebschZ4` off n=16 — the genuine
+combinatorial work). Nothing committed (user commits).
+
 ---
 
 ## 1. The target and how it plugs in (this half is LANDED)
@@ -1246,3 +1255,27 @@ Clebsch/Chang, which have a *biggish* Aut; this extends the 0-falsifier record t
 the only known inhabitant, not codeable at scale) — no probe reaches it (§5 F2 / §9.9.3 G-construct). So the probe
 **de-risks the unified claim and the falsifier question at trivial Aut, but the irreducible node-4 frontier is untouched**:
 `hSmallAutThin` stays the open wall, now with strictly stronger empirical support beneath it.
+
+### 9.9.9 Node-2 rung — first increment LANDED (2026-06-17): the δ′ → multiplicity-pipeline bridge
+
+**The bridge + capstone are landed, axiom-clean, build green** (the step-3 "node-2 rung" of §9.9.7). They route the
+δ′/forced-triangle **discrete-base** world into the new D1/D2/D3 **`…viaBoundedMultiplicity`** pipeline, validating that
+pipeline accepts a real discreteness witness (the multiplicity analogue of how `clebschZ4_closure` validated δ′):
+- **`CoherentConfig.boundedConfusionMultiplicity_of_completeBase` (§CC.22e).** A bounded *discrete* base `T₀` (`|T₀| ≤ M`,
+  every point of `pointExtension X T₀` a singleton fiber — the δ′ deliverable
+  `allSingletonFiber_of_dominatorClosure_pointExtension`) ⟹ `BoundedConfusionMultiplicity B M` for **every** `B`. Proof:
+  `S := T₀` halves `c(X_T)` outright since `X_{T∪T₀}` refines the complete `X_{T₀}` (`indistinguishingNumber_mono`), whose
+  `c = 0` (`indistinguishingNumber_eq_zero_of_allSingletonFiber`). **Sharpens the trivial `boundedConfusionMultiplicity_univ`
+  (`M = n`) to `M = |T₀|`** — a δ′ bounded base becomes a *polynomial-grade* cascade-rate witness.
+- **`reachesRigidOrCameron_viaCompleteBase` (§S-gate2).** Composes the bridge with `reachesRigidOrCameron_viaBoundedMultiplicity`:
+  a thin family discretizing at a bounded base seals in poly time **with no `hSmallAutThin`/largeness guard** (it cascades
+  outright; node 4 never invoked). Seal `modulo {G3 + hcatch + hImprim}`.
+
+**What this is / isn't.** It is the *connective tissue* between the landed δ′ engine and the new multiplicity machine —
+the pipeline-validation half of the node-2 rung, done. It does **not** by itself discharge a new family: feeding it needs
+`hcomplete` (a discrete base), which the δ′ route already produces per-instance (`clebschZ4_discrete` for n=16; `viaG0powNeg`
+for the `H={±1}` affine family). **The remaining node-2 content is the family-level `hcomplete`: a *uniform* discrete base
+for a parametric affine/FDF family** — i.e. a uniform rainbow rank via `dominatorReachable_of_rainbowRank` (the genuine
+combinatorial work, §9.9.7 step 3). That generalizes `clebschZ4` from the n=16 sporadic to an infinite family; the bridge
+landed here is what such a family would plug into. Node 4 (the wall, `hSmallAutThin` for unbounded-`s` non-geometric) is
+untouched, as expected.

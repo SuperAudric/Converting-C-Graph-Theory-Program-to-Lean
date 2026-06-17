@@ -1186,6 +1186,39 @@ theorem reachesRigidOrCameron_viaBoundedMultiplicity {IsLarge : Nat → Prop}
   exact ⟨m, reachesRigidOrCameron_viaBoundedExtensionParams hClassify S hne hrank hsub hTcard.le
     (lt_of_le_of_lt hpot hBT) (hcatch T) hImprim⟩
 
+/-- **THE SEAL VIA A DISCRETE BOUNDED BASE (route §9.9.7 step 3 — the node-2 rung).** The δ′/forced-triangle thin
+family routed through the **`…viaBoundedMultiplicity` (D1/D2/D3) pipeline**, validating it end-to-end on a real
+discreteness witness (as `clebschZ4` validated δ′). Carry `hcomplete : ∀ v, (X_{T₀}).SingletonFiber v` — a *bounded*
+base `T₀` (`|T₀| ≤ M`) discretizes the extension, exactly what the landed δ′ engine produces
+(`allSingletonFiber_of_dominatorClosure_pointExtension` from `hclo`, or `clebschZ4_discrete` for the n=16 instance) —
+feed `boundedConfusionMultiplicity_of_completeBase` (§CC.22e: discrete base ⟹ `BoundedConfusionMultiplicity B M`,
+the polynomial-grade sharpening of the trivial `M = n` anchor) into `reachesRigidOrCameron_viaBoundedMultiplicity`.
+**No `hSmallAutThin`/largeness guard** — a thin family that discretizes at an `O(log n)` base cascades *outright*, so it
+seals in polynomial time with the open node-4 dichotomy never invoked. This is the node-2 leg (`base ≤ 2 ⟹ WL-dim ≤ 4`,
+CGGP-portable) shrinking the residue toward the node-4 core; the family-level open content is a *uniform* discrete base
+(`hcomplete` from a uniform rainbow rank, `dominatorReachable_of_rainbowRank`). Seal `modulo {G3 + hcatch + hImprim}`.
+Axiom-clean. -/
+theorem reachesRigidOrCameron_viaCompleteBase {IsLarge : Nat → Prop}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {B M : Nat} (hB : 1 ≤ B)
+    (hClassify : PrimitiveCCClassification (IsLargeSchemeViaAut IsLarge) IsCameronScheme)
+    (S : SchurianScheme n)
+    (hne : ∀ i : Fin (S.rank + 1), ∃ v w, S.rel i v w = true)
+    (hrank : 2 ≤ S.rank) (hroom : B + 1 ≤ n)
+    {T₀ : Finset (Fin n)} (hcard : T₀.card ≤ M)
+    (hcomplete : ∀ v : Fin n,
+        (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T₀).SingletonFiber v)
+    (hcatch : ∀ T : Finset (Fin n),
+        WarmTwinsAreFiberTwins S T (pointExtension (S.toAssociationScheme.toCoherentConfig hne) T))
+    (hImprim : ¬ S.toAssociationScheme.IsPrimitive →
+        SchemeBlockRecovered n S ∨ AbelianConsumed n S) :
+    ∃ bound : Nat,
+      ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+        ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaBoundedMultiplicity hB hClassify S hne hrank hroom
+    ((S.toAssociationScheme.toCoherentConfig hne).boundedConfusionMultiplicity_of_completeBase
+      hcard hcomplete)
+    hcatch hImprim
+
 /-- **THE SEAL VIA SMALL-AUT BOUNDED MULTIPLICITY (the sharp `minMult`-form dichotomy — route §9.9 D3).** The faithful
 large/small dichotomy stated in the *achievable* quantity. Carry `hSmallAutThin : ¬IsLarge → BoundedMinMult B M`
 ("small Aut ⟹ some vertex lies in `≤ M` big confusion pairs at every over-`B` base", i.e. bounded `minMult`), and

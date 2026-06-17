@@ -2545,6 +2545,28 @@ theorem boundedConfusionMultiplicity_univ (B : Nat) :
     hcomplete]
   simp
 
+/-- §CC.22e (route §9.9.7 step 3 — **the node-2 rung bridge**) **A bounded *discrete* base ⟹ bounded confusion
+multiplicity.** If a base `T₀` of size `≤ M` discretizes `X` — every point of `pointExtension X T₀` a singleton fiber,
+exactly the δ′ engine's deliverable `allSingletonFiber_of_dominatorClosure_pointExtension` — then
+`BoundedConfusionMultiplicity B M` holds for *every* `B`: at any over-`B` base `T`, the bounded set `S := T₀` halves
+`c(X_T)` outright, since `X_{T∪T₀}` refines the **complete** `X_{T₀}` (`indistinguishingNumber_mono`), whose `c = 0`
+(`indistinguishingNumber_eq_zero_of_allSingletonFiber`). This **sharpens the trivial `boundedConfusionMultiplicity_univ`
+(`M = n`) to `M = |T₀|`** — turning a δ′/forced-triangle bounded base into a *polynomial-grade* cascade-rate witness, the
+bridge from the δ′ engine to the `…viaBoundedMultiplicity` (D1/D2/D3) pipeline: a thin family that discretizes at an
+`O(log n)` base cascades, hence seals in polynomial time. Axiom-clean. -/
+theorem boundedConfusionMultiplicity_of_completeBase {B M : Nat} {T₀ : Finset (Fin n)}
+    (hcard : T₀.card ≤ M)
+    (hcomplete : ∀ v : Fin n, (pointExtension X T₀).SingletonFiber v) :
+    X.BoundedConfusionMultiplicity B M := by
+  intro T _
+  refine ⟨T₀, hcard, ?_⟩
+  have hzero : (pointExtension X T₀).indistinguishingNumber = 0 :=
+    (pointExtension X T₀).indistinguishingNumber_eq_zero_of_allSingletonFiber hcomplete
+  have hmono : (pointExtension X (T ∪ T₀)).indistinguishingNumber
+      ≤ (pointExtension X T₀).indistinguishingNumber :=
+    indistinguishingNumber_mono (X.refines_pointExtension_of_subset Finset.subset_union_right)
+  omega
+
 /-! ### §CC.22c — confusion-set equivariance (route §9.9 step D1: the cover is an `Aut`-invariant structure)
 
 Toward the direct thin-cover attack on node 4 (route doc §9.9): a big-confusion cover, if it persists, must be a
