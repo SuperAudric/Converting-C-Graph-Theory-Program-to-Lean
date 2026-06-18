@@ -83,9 +83,14 @@ NEXT (next session) — Brick D, corrected target:
   `sum_addChar_multiQuad_zero` (the `R·Qz` term drops, leaving the linear `polar Q z (−∑r_j•t_j)`) then
   `sum_addChar_linearMap` (`∑_z ψ(φ z) = |V|·[φ=0]`, primitivity boundary engine). So with
   `countk_eq_sum_charsum` the multi-point Q-count `#{z : Q(z−t_j)=c_j ∀j}` is in CLOSED FORM.
-* NEXT engine step: (a) inclusion–exclusion turning isotropy-class counts into these Q-value counts, (b) prove the
-  resulting `A_u` injective in `u` at the symmetry-broken base (`IsotropySeparatesAtBase`). The toolkit
-  (A/A2/Ak/B/C/D1/multiQuad/multiQuad-zero/linearMap) is COMPLETE; remaining is incl–excl + the injectivity argument.
+* DONE (2026-06-18) — the **inclusion–exclusion engine** has LANDED (axiom-clean): `count_pi_setValued`
+  (`#{z : ∀j, h_j z ∈ A_j} = ∑_{c∈∏A_j} #{z : ∀j, h_j z = c_j}`, value-SET counts as a sum of value-POINT counts,
+  pure partition additivity). With `h_j z := Q(z−t_j)` this turns the isotropy-class counts (each class is a
+  value-set: anisotropic ↔ `K∖{0}`, isotropic-or-zero ↔ `{0}`) into the pointwise `Q`-value counts the toolkit
+  closes. The toolkit (A/A2/Ak/B/C/D1/multiQuad/multiQuad-zero/linearMap/setValued) is COMPLETE.
+* NEXT (at PORT into CascadeAffine): (a) the isotropy↔value-set dictionary + the single-point origin correction
+  (class 0 `z=t` vs class 1, needs `isoClass` — lives in CascadeAffine, not this Mathlib-only file); (b) prove the
+  resulting `A_u` injective in `u` at the symmetry-broken base (`IsotropySeparatesAtBase`) for `VO^ε_4(3)`.
 * Brick C-even (independent, short) — `d` even ⟹ `χ(t)^d=1` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}` via
   `AddChar.sum_mulShift` + `gaussSum_sq`. Validates Brick C numerically.
 * Bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` +
@@ -585,3 +590,31 @@ theorem sum_addChar_multiQuad_zero {K : Type*} [Field K] {R' : Type*} [CommRing 
 
 #print axioms sum_addChar_linearMap
 #print axioms sum_addChar_multiQuad_zero
+
+-- ============== inclusion–exclusion: value-SET counts = sum of value-POINT counts ==============
+
+/-- **The value-set / value-point bridge (the inclusion–exclusion engine).** The number of `z` with each
+"coordinate value" `h j z` lying in a prescribed `Finset` `A j` equals the sum, over all selections
+`c ∈ ∏_j A j`, of the pointwise counts `#{z : ∀ j, h j z = c j}`. Pure partition additivity (fiberwise over the
+value tuple). For the forms-graph this turns isotropy-class counts — each class is a value-set of the form
+`Q(z − t_j) ∈ A_j` (anisotropic ↔ `K∖{0}`, isotropic-or-zero ↔ `{0}`) — into the pointwise `Q`-value counts the
+Gauss toolkit (`countk_eq_sum_charsum` + `multiQuad`/`multiQuad_zero`/`linearMap`) puts in closed form. -/
+theorem count_pi_setValued {K : Type*} [DecidableEq K] {V : Type*} [Fintype V] [DecidableEq V]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (h : ι → V → K) (A : ι → Finset K) :
+    (univ.filter (fun z : V => ∀ j, h j z ∈ A j)).card
+      = ∑ c ∈ Fintype.piFinset A, (univ.filter (fun z : V => ∀ j, h j z = c j)).card := by
+  classical
+  have H : ∀ z ∈ (univ.filter (fun z : V => ∀ j, h j z ∈ A j)),
+      (fun j => h j z) ∈ Fintype.piFinset A :=
+    fun z hz => Fintype.mem_piFinset.2 (fun j => (Finset.mem_filter.1 hz).2 j)
+  rw [Finset.card_eq_sum_card_fiberwise H]
+  refine Finset.sum_congr rfl (fun c hc => ?_)
+  congr 1
+  ext z
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨_, hφ⟩ j; exact congrFun hφ j
+  · intro hz
+    exact ⟨fun j => by rw [hz j]; exact Fintype.mem_piFinset.1 hc j, funext hz⟩
+
+#print axioms count_pi_setValued

@@ -32,8 +32,12 @@
 > sum (with `f_j x = Q(x−t_j)`) is `sum_addChar_multiQuad`. **★ quadratic specialization LANDED (2026-06-18, axiom-clean):
 > `sum_addChar_multiQuad_zero` (the `R=∑r_j=0` boundary, reducing to a linear form) + `sum_addChar_linearMap`
 > (`∑_z ψ(φ z)=|V|·[φ=0]`)** — so the inner sum `S(r)` is evaluated for ALL `r` (`R≠0`→`multiQuad`, `R=0`→these two),
-> and with `countk_eq_sum_charsum` the multi-point Q-count is in CLOSED FORM. NEXT (Gauss): inclusion–exclusion
-> (isotropy-class counts → `Q`-value counts) → prove `IsotropySeparatesAtBase` at the chosen `T`.
+> and with `countk_eq_sum_charsum` the multi-point Q-count is in CLOSED FORM. **★ inclusion–exclusion engine LANDED
+> (2026-06-18, axiom-clean): `count_pi_setValued`** (`#{z:∀j, h_jz∈A_j} = ∑_{c∈∏A_j} #{z:∀j, h_jz=c_j}`, value-SET
+> counts = sum of value-POINT counts) — with `h_jz=Q(z−t_j)` it turns isotropy-class counts (each = a `Q`-value-set)
+> into the pointwise counts the toolkit closes. The Mathlib-only Gauss toolkit is now COMPLETE
+> (A/A2/Ak/B/C/D1/multiQuad/multiQuad-zero/linearMap/setValued). NEXT (at PORT into CascadeAffine): the
+> isotropy↔value-set dictionary + origin correction (needs `isoClass`) → prove `IsotropySeparatesAtBase` at the chosen `T`.
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
