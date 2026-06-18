@@ -1942,15 +1942,98 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         return indiv.Count;
     }
 
+    static int[] Dec(int v, int q, int dim) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+    static int Enc(int[] x, int q) { int v = 0; for (int i = x.Length - 1; i >= 0; i--) v = v * q + x[i]; return v; }
+    static int FInv(GFq F, int x) { for (int y = 1; y < F.q; y++) if (F.mul[x, y] == 1) return y; return 0; }
+
+    // Cheap SRG params for VERTEX-TRANSITIVE graphs (all our forms graphs are Cayley): k = deg(0),
+    // λ = |N(0)∩N(nbr)|, μ = |N(0)∩N(non-nbr)|, with a regularity sample.  O(n) vs SrgParams' O(n³).
+    static (bool ok, int k, int lam, int mu) CheapSrgParams(int n, bool[,] adj)
+    {
+        int Deg(int v) { int d = 0; for (int w = 0; w < n; w++) if (adj[v, w]) d++; return d; }
+        int Common(int a, int b) { int c = 0; for (int w = 0; w < n; w++) if (adj[a, w] && adj[b, w]) c++; return c; }
+        int k = Deg(0);
+        if (Deg(1) != k || Deg(n - 1) != k) return (false, k, 0, 0);
+        int nb = -1, nn = -1; for (int w = 1; w < n; w++) { if (adj[0, w] && nb < 0) nb = w; if (!adj[0, w] && nn < 0) nn = w; if (nb >= 0 && nn >= 0) break; }
+        if (nb < 0 || nn < 0) return (false, k, 0, 0);
+        return (true, k, Common(0, nb), Common(0, nn));
+    }
+
+    // Alternating forms graph A(d,q): vertices = alternating d×d matrices over GF(q) (= ∧²F_q^d,
+    // dim = C(d,2)), adjacent iff rank(A−B) = 2.  d=5 ⟹ diameter-2 SRG (Skresanov class (d)).
+    static bool[,] AlternatingForms(int d, int q)
+    {
+        var F = new GFq(q);
+        var pairs = new (int i, int j)[d * (d - 1) / 2]; { int idx = 0; for (int i = 0; i < d; i++) for (int j = i + 1; j < d; j++) pairs[idx++] = (i, j); }
+        int dim = pairs.Length, n = IPow(q, dim);
+        int Rank(int v)
+        {
+            var M = new int[d, d]; var dg = Dec(v, q, dim);
+            for (int t = 0; t < dim; t++) { var (i, j) = pairs[t]; M[i, j] = dg[t]; M[j, i] = F.neg[dg[t]]; }
+            int rank = 0, row = 0;
+            for (int col = 0; col < d && row < d; col++)
+            {
+                int piv = -1; for (int r = row; r < d; r++) if (M[r, col] != 0) { piv = r; break; }
+                if (piv < 0) continue;
+                if (piv != row) for (int c = 0; c < d; c++) (M[row, c], M[piv, c]) = (M[piv, c], M[row, c]);
+                int inv = FInv(F, M[row, col]);
+                for (int r = 0; r < d; r++) if (r != row && M[r, col] != 0) { int f = M[r, col]; for (int c = 0; c < d; c++) M[r, c] = F.add[M[r, c], F.neg[F.mul[F.mul[f, inv], M[row, c]]]]; }
+                row++; rank++;
+            }
+            return rank;
+        }
+        var conn = new HashSet<int>(); for (int v = 1; v < n; v++) if (Rank(v) == 2) conn.Add(v);
+        var adj = Empty(n);
+        for (int u = 0; u < n; u++) for (int w = u + 1; w < n; w++)
+        {
+            var du = Dec(u, q, dim); var dw = Dec(w, q, dim); var dd = new int[dim];
+            for (int i = 0; i < dim; i++) dd[i] = F.add[du[i], F.neg[dw[i]]];
+            if (conn.Contains(Enc(dd, q))) Edge(adj, u, w);
+        }
+        return adj;
+    }
+
+    // Suzuki-Tits ovoid graph VSz(q), q = 2^{2e+1}, e≥1 (q=8): Cayley graph on GF(q)^4 with connection
+    // set = the cone over the Suzuki-Tits ovoid O = {(1,a,b, ab + a^{σ+2} + b^σ)} ∪ {(0,0,0,1)},
+    // σ the Tits automorphism (σ²=Frobenius; q=8 ⟹ σ(x)=x^4).  Cospectral with VO^-_4(q) but with
+    // Sz(q) ⊂ Aut (Skresanov class (f); Sz(q) distinguishes it from the orthogonal VO^-_4(q)).
+    static bool[,] SuzukiTits(int q)
+    {
+        var F = new GFq(q);
+        int lg = 0, tt = q; while (tt > 1) { tt >>= 1; lg++; }          // lg = log2 q = 2e+1
+        if ((lg & 1) == 0 || lg < 3) throw new ArgumentException($"VSz needs q=2^(2e+1), e≥1; got q={q}");
+        int sExp = 1 << ((lg + 1) / 2);                                 // 2^{e+1}; q=8 ⟹ 4
+        int Pow(int x, int ex) { int r = 1; for (int i = 0; i < ex; i++) r = F.mul[r, x]; return r; }
+        int Sig(int x) => Pow(x, sExp);                                 // σ(x) = x^{2^{e+1}}
+        int dim = 4, n = IPow(q, dim);
+        var conn = new HashSet<int>();
+        void AddCone(int[] p) { for (int lam = 1; lam < q; lam++) { var v = new int[4]; for (int i = 0; i < 4; i++) v[i] = F.mul[lam, p[i]]; conn.Add(Enc(v, q)); } }
+        for (int a = 0; a < q; a++) for (int b = 0; b < q; b++)
+        {
+            int aS2 = F.mul[Sig(a), F.mul[a, a]];                       // a^{σ+2} = a^σ·a²
+            int c4 = F.add[F.add[F.mul[a, b], aS2], Sig(b)];            // ab + a^{σ+2} + b^σ
+            AddCone(new[] { 1, a, b, c4 });
+        }
+        AddCone(new[] { 0, 0, 0, 1 });
+        var adj = Empty(n);
+        for (int u = 0; u < n; u++) for (int w = u + 1; w < n; w++)
+        {
+            var du = Dec(u, q, dim); var dw = Dec(w, q, dim); var dd = new int[dim];
+            for (int i = 0; i < dim; i++) dd[i] = F.add[du[i], F.neg[dw[i]]];
+            if (conn.Contains(Enc(dd, q))) Edge(adj, u, w);
+        }
+        return adj;
+    }
+
     [Fact]
     public void Probe_FormsGraphs()
     {
         output.WriteLine("A2 FORMS-GRAPH PROBE (route §9.9.18b) — the FIRST constructible NODE-4 witnesses.");
         output.WriteLine("Affine polar graph VO^ε_{2m}(q): small-Aut (poly), non-geometric (s→−∞ with q), primitive,");
         output.WriteLine("schurian rank-3 SRG — Skresanov's affine forms-graph class (c).  Tests hSmallAutThin");
-        output.WriteLine("(small-Aut ⟹ 1-WL base ≪ √n / shatters) at FIXED m=2, GROWING q (n = q^4 = 16, 81, 256).");
-        output.WriteLine("VO^-_4(2) = Clebsch validates the construction; q=3,4 are NEVER-PROBED genuine node 4.");
-        output.WriteLine("Contrast: geometric Rook(m) (Hamming H(2,m)) at matching n needs base = √n (thick/Cameron).");
+        output.WriteLine("(small-Aut ⟹ 1-WL base ≪ √n / shatters) at FIXED m=2, GROWING q: VO^-_4(q) q=2,3,4,5 (n=16..625),");
+        output.WriteLine("plus BREADTH across classes (d) alternating A(5,2) n=1024, (f) Suzuki-Tits VSz(8) n=4096.  VO^-_4(2)=Clebsch");
+        output.WriteLine("validates; q=3+ and (d),(f) are NEVER-PROBED genuine node 4.  Contrast: geometric Rook(m) needs base = √n.");
         output.WriteLine("");
 
         output.WriteLine($"{"graph",-16} {"n",-5} {"(k,λ,μ)",-15} {"s",-5} {"2rk",-4} {"|Aut|",-9} {"base",-5} {"√n",-4} {"verdict",-9} cover ∅ → {{0}}[→{{0,v*}}]");
@@ -1964,6 +2047,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             ("VO^-_4(3)",         3, 2, -1),
             ("VO^+_4(3)",         3, 2, +1),
             ("VO^-_4(4)",         4, 2, -1),
+            ("VO^-_4(5)",         5, 2, -1),
         };
 
         var rows = new List<(string name, int n, int s, long aut, int baseSize, int sqrtN, bool shatters, bool smallAut, bool nonGeom)>();
@@ -1974,8 +2058,8 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         // annotate the Aut class rather than enumerate.
         void Measure(string name, bool[,] adj, int n, bool isAffinePolar, bool knownSmallAut)
         {
-            var (ok, k, lam, mu) = SrgParams(n, adj);
-            if (!ok) { output.WriteLine($"{name,-16} {n,-5} NOT-AN-SRG (rank≠3 / irregular — report & skip)"); return; }
+            var (ok, k, lam, mu) = n > 256 ? CheapSrgParams(n, adj) : SrgParams(n, adj);   // O(n³) SrgParams too slow at n>256 (Cayley ⟹ vertex-transitive)
+            if (!ok) { output.WriteLine($"{name,-16} {n,-5} NOT-AN-SRG (irregular sample — report & skip)"); return; }
             int s = SmallestEig(n, k, lam, mu);
             int r2 = n <= 256 ? PRank(n, adj, 2) : -1;
             int baseSize = n <= 81 ? GreedyBaseCurve(n, adj).Count - 1 : CheapBaseSize(n, adj);
@@ -2011,6 +2095,24 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         foreach (int mm in new[] { 4, 9 })   // Rook(4)=16, Rook(9)=81
             Measure($"Rook({mm})", Rook(mm), mm * mm, isAffinePolar: false, knownSmallAut: false);
 
+        // ── BREADTH: the other affine forms-graph classes (Skresanov (d),(f); (e) infeasible) ─────────
+        output.WriteLine("");
+        output.WriteLine("BREADTH — other small-Aut non-geometric affine forms-graph classes (single points; growing-q infeasible):");
+        var breadth = new List<(string name, int n, int s, int baseSize, int sqrtN, bool shatters)>();
+        void Breadth(string name, Func<bool[,]> build, int n)
+        {
+            bool[,] adj;
+            try { adj = build(); }
+            catch (Exception ex) { output.WriteLine($"{name,-16} build failed: {ex.Message}"); return; }
+            int before = rows.Count;
+            Measure(name, adj, n, isAffinePolar: true, knownSmallAut: true);
+            if (rows.Count > before) { var r = rows[^1]; breadth.Add((r.name, r.n, r.s, r.baseSize, r.sqrtN, r.shatters)); }
+        }
+        Breadth("Alt(5,2) [d]", () => AlternatingForms(5, 2), IPow(2, 10));   // n=1024, alternating forms graph A(5,q)
+        Breadth("VSz(8) [f]",   () => SuzukiTits(8),          IPow(8, 4));    // n=4096, Suzuki-Tits ovoid graph
+        output.WriteLine("  (e) half-spin VD_{5,5}(q): n = q^16 ≥ 65536 — INFEASIBLE to construct/probe (noted, not built).");
+        int breadthTargets = breadth.Count(b => b.n >= 64), breadthFalsifiers = breadth.Count(b => b.n >= 64 && !b.shatters);
+
         // ── Readout ──────────────────────────────────────────────────────────────────────────────
         output.WriteLine("");
         output.WriteLine("THE GROWING-q LINE (VO^-_4(q), fixed m=2, small-Aut non-geometric — genuine node 4):");
@@ -2028,25 +2130,29 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine($"                                   √n        = [{string.Join(", ", voLine.Select(r => r.sqrtN))}]");
         output.WriteLine($"                                   VO^-_4 base = [{string.Join(", ", voLine.Select(r => r.baseSize))}]  ← bounded/flat (shatters)");
         output.WriteLine($"                                   Rook   base = [{string.Join(", ", rookLine.Select(r => $"{r.baseSize}@n{r.n}"))}]  ← = √n (geometric, thick)");
+        if (breadth.Count > 0)
+            output.WriteLine($"  BREADTH classes (d),(f):  {string.Join(";  ", breadth.Select(b => $"{b.name} n={b.n} s={b.s} base={b.baseSize} (√n={b.sqrtN}) {(b.shatters ? "SHATTER✓" : "THICK‼")}"))}");
         output.WriteLine("");
-        output.WriteLine($"VERDICT — node-4 (small-Aut non-geometric VO^-_4(q), n≥64) targets measured: {targetsMeasured};  falsifiers (base ≥ √n): {falsifiers}.");
-        output.WriteLine(falsifiers == 0 && targetsMeasured >= 2
-            ? "  ⇒ The affine-polar node-4 witnesses SHATTER at base ≪ √n as q (hence s, n) grows — hSmallAutThin holds on the"
-            + " FIRST genuine constructible node-4 (unbounded-s) family, not just bounded-s node-3 catalogue data.  Corrects the"
-            + " 'no constructible witness' framing (§9.9.18b): the witnesses exist, are probable, and confirm the seal's prediction."
+        output.WriteLine($"VERDICT — node-4 small-Aut non-geometric targets (n≥64): affine-polar(c)={targetsMeasured}, breadth(d,f)={breadthTargets};  falsifiers (base ≥ √n): {falsifiers + breadthFalsifiers}.");
+        output.WriteLine(falsifiers + breadthFalsifiers == 0 && targetsMeasured >= 2
+            ? "  ⇒ The forms-graph node-4 witnesses SHATTER at base ≪ √n as q (hence s, n) grows — across MULTIPLE Skresanov classes"
+            + " (affine-polar (c) q=2..5, alternating (d), Suzuki-Tits (f)).  hSmallAutThin holds on the FIRST genuine constructible"
+            + " node-4 (unbounded-s) families, not just bounded-s node-3 catalogue data.  Corrects the 'no constructible witness'"
+            + " framing (§9.9.18b): the witnesses exist across classes, are probable, and confirm the seal's prediction."
             : targetsMeasured < 2
-                ? "  ⇒ Fewer than 2 node-4 targets isolated — check VO construction / GF(q) / SRG-ness."
-                : "  ‼ A small-Aut non-geometric affine-polar graph needs base ≈ √n — a hSmallAutThin FALSIFIER; the seal's"
-                + " node-4 prediction is violated on a constructible family.  INVESTIGATE (a real result, not a code bug).");
+                ? "  ⇒ Fewer than 2 affine-polar node-4 targets isolated — check VO construction / GF(q) / SRG-ness."
+                : "  ‼ A small-Aut non-geometric forms graph needs base ≈ √n — a hSmallAutThin FALSIFIER; the seal's node-4"
+                + " prediction is violated on a constructible family.  INVESTIGATE (a real result, not a code bug).");
         output.WriteLine("");
-        output.WriteLine("HONEST SCOPE: VO^-_4(q) is small-Aut only at FIXED m (growing m at fixed q ⟹ super-poly Aut = large/Cameron).");
-        output.WriteLine("Probed q=2,3,4 (n=16,81,256); the growing-q trend is the unbounded-s axis Neumaier/the catalogue could not reach.");
-        output.WriteLine("These are the affine forms-graph residue (C1, §9.9.18b) — bounded-WL-dim for them is UNCITED/OPEN; this probe");
-        output.WriteLine("is empirical support, not a proof.  (b) bilinear H_q(2,m) is excluded as geometric; (d)-(f) not built (harder).");
-        output.WriteLine("* |Aut| not enumerated (O(|Aut|)≈10^5 too slow at n≥81); annotated analytically — affine-polar fixed-m = poly");
-        output.WriteLine("  (Skresanov, AΓL-type), Rook = large (geometric, S_m≀S_2).  The base-vs-√n trend is the actual measurement.");
+        output.WriteLine("HONEST SCOPE: forms graphs are small-Aut only at FIXED dimension (growing dim ⟹ super-poly Aut = large/Cameron).");
+        output.WriteLine("Affine-polar (c): VO^-_4(q) q=2,3,4,5 (n=16..625), the growing-q unbounded-s axis Neumaier/the catalogue could");
+        output.WriteLine("not reach.  Breadth: alternating (d) A(5,2) n=1024, Suzuki-Tits (f) VSz(8) n=4096 — single points (growing-q");
+        output.WriteLine("infeasible at n=q^10 / q^4·…).  (e) half-spin n=q^16 infeasible.  (b) bilinear H_q(2,m) excluded (geometric).");
+        output.WriteLine("These are the C1 (§9.9.18b) affine forms-graph residue — bounded-WL-dim UNCITED/OPEN; empirical support, not a proof.");
+        output.WriteLine("* |Aut| not enumerated (too slow); annotated analytically — forms graphs fixed-dim = poly (Skresanov), Rook = large.");
+        output.WriteLine("  Base = best-fit 1-WL (n≤81) / first-fit upper bound (n>81); params = cheap vertex-transitive extraction (n>256).");
 
         Assert.True(targetsMeasured >= 2, "fewer than 2 small-Aut non-geometric affine-polar node-4 targets isolated — construction/GF(q)/SRG issue");
-        Assert.Equal(0, falsifiers);   // a small-Aut non-geometric VO graph with base ≥ √n would falsify hSmallAutThin (a real finding, not a code bug)
+        Assert.Equal(0, falsifiers + breadthFalsifiers);   // any small-Aut non-geometric forms graph with base ≥ √n falsifies hSmallAutThin (a real finding, not a code bug)
     }
 }

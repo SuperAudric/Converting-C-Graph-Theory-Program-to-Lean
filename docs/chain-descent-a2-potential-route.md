@@ -1975,3 +1975,38 @@ this is empirical support, a 3-point growing-`q` trend, only class (c) built ((b
 not built). Honest scope: `VO^-_4(q)` is small-Aut only at fixed `m` (growing `m` at fixed `q` ⟹ super-poly Aut =
 Cameron); `|Aut|` annotated analytically (poly, Skresanov), not enumerated (O(|Aut|)≈10⁵ too slow); n=256 base is a
 first-fit upper bound. Nothing committed (user commits).
+
+**▶ BREADTH EXTENSION (2026-06-17, §9.9.18c cont.): hSmallAutThin confirmed across THREE forms-graph classes.**
+`Probe_FormsGraphs` extended (green) — added `GFq`-based builders for the **alternating forms graph `A(5,q)`** (class
+(d): alternating 5×5 matrices, rank-2 adjacency) and the **Suzuki–Tits ovoid graph `VSz(q)`** (class (f): Cayley graph
+on `GF(q)^4` with connection set = cone over the Suzuki–Tits ovoid, Tits automorphism `σ(x)=x^4` on GF(8)), plus a
+cheap vertex-transitive parameter extractor (`SrgParams` is `O(n³)`, infeasible at these `n`), and pushed the (c)
+affine-polar trend to `q=5`. Results:
+- **(f) `VSz(8)` params = `(4096, 455, 6, 56)`, `s = −57` — EXACTLY the known Suzuki–Tits values** `((q²+1)(q−1), q−2,
+  q(q−1), −(q²−q+1))` at `q=8`, validating the construction. This is the cospectral mate of `VO^-_4(q)` (same params)
+  but with `Sz(q) ⊂ Aut` — a particularly sharp test. **Base = 9 ≪ √4096 = 64 ⟹ SHATTERS.**
+- **(d) `A(5,2)` = `(1024, 155, 42, 20)`, `s = −5 = −(q²+1)`** (matches C1). **Base = 8 ≪ √1024 = 32 ⟹ SHATTERS.**
+- **(c) extended:** `VO^-_4(5) = (625,104,3,20)`, `s = −21`. Base trend now **`[5,5,6,7]` for `n=[16,81,256,625]`**
+  (√n = `[4,9,16,25]`) — flat/logarithmic, `≪ √n`.
+- **(e) half-spin `VD_{5,5}(q)`: `n = q^16 ≥ 65536` — INFEASIBLE**, noted not built.
+
+**Net: across 3 Skresanov classes (c affine-polar `q=2..5`, d alternating, f Suzuki–Tits), every small-Aut
+non-geometric forms-graph node-4 witness SHATTERS at base ≪ √n (bases 5–9 vs √n 4–64), 0 falsifiers.** The bases grow
+logarithmically (`O(log n)`), exactly the small-Aut prediction; the geometric Rook needs base = √n. This is
+comprehensive empirical confirmation of `hSmallAutThin` on the **forms-graph residue** — the precise C1 open core —
+across multiple classes and a genuine growing-`q` (unbounded-`s`, `s = −3..−57`) range, decisively refuting the "no
+constructible witness" framing. Honest scope unchanged: empirical (single points for (d),(f); bounded-WL-dim stays
+uncited/open); `|Aut|` analytic; large-`n` base = first-fit upper bound. Nothing committed (user commits).
+
+#### 9.9.19 → Proof plan for the forms-graph families: `docs/chain-descent-formsgraph-wldim-plan.md`
+
+The §9.9.18c empirical shatter is turned into a **proof target** in the dedicated plan doc
+[`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md). One-line summary: the reduction is
+mostly landed — **free group base** (`T = origin+basis`, `(G^(2))_T={1}`, `IsBase` via `exists_greedy_base_le_log`) +
+the **landed depth-`k` engine** (`discrete_of_twoRoundRelationSeparates`) — so the whole proof is **one crux lemma**:
+*the two-round relation-count profile at `T` recovers the form coordinates `B(v,e_i)`* (nondegenerate ⟹ injective ⟹
+`hsep`). Uniform for the form-based families (c) affine-polar / (d) alternating / (e) half-spin (Mathlib `QuadraticForm`/
+`BilinForm` available; `affineScheme G₀` already supports arbitrary `d`); (f) Suzuki–Tits is the outlier (ovoid, not a
+form — separate). Stage A = a conditional capstone `reachesRigidOrCameron_viaAffineFormScheme` carrying the
+probe-validated certificate (wiring now); Stage B = discharge the crux lemma for `VO^ε`. Closes node-4-for-the-seal
+`modulo {G3 + Cameron/Liebeck/Skresanov + the affine-form certificate}`; the non-schurian IR-solver row 4 is untouched.
