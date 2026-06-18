@@ -11,6 +11,19 @@
 
 ## STATUS (read first)
 
+**★ STAGE B.1 STARTED (2026-06-18, axiom-clean, build green) — the similitude group `GO(Q)` + the node-4
+conditional capstone; the count crux isolated.** Landed (CascadeAffine.lean §OrthogonalForm Stage-B.1 block,
+`PublicTheoremIndex.md:1218-1222`): `similitudeGroup` (`GO(Q) = {g | ∃ μ, Q(g x) = μ·Q x}` as a `Subgroup`),
+`neg_mem_similitudeGroup`, `isometry_le_similitude` (`O(Q) ≤ GO(Q)`), `SimilitudeFrameSeparates` (the named
+count crux), and the conditional capstone **`reachesRigidOrCameron_viaSimilitudeForm`** — the affine scheme of
+`GO(Q)` (the genuine rank-3 SRG `VO^ε` residue) seals once `SimilitudeFrameSeparates Q` holds, via
+`discrete_affineScheme_of_twoRoundDiffSeparates` at `frameBase` → `viaSpielman`. **Carries NO `hSmallAutThin`.**
+The open content is now exactly one named predicate. **Remaining = Stage B.1c**, the discharge of
+`SimilitudeFrameSeparates` (the two-round count crux): genuinely hard, **blocked on two Mathlib gaps** —
+(i) **Witt's theorem** (to characterize the `GO(Q)`-orbits = the relations) and (ii) **quadratic Gauss-sum /
+affine-quadric point counts** (the intersection numbers as functions of `B(v,e_i)`); back-half = the landed
+`coords_determine`. This is multi-session research-formalization, not a quick increment. Nothing committed.
+
 **★ STAGE B.0 LANDED (2026-06-18, axiom-clean, build green) — the orthogonal-form infrastructure + a complete
 depth-1 affine-orthogonal seal.** `reachesRigidOrCameron_viaOrthogonalForm` (CascadeAffine.lean §OrthogonalForm,
 `PublicTheoremIndex.md:1217`): for any quadratic form `Q` on `F_p^d` with **nondegenerate polar form**, the affine
@@ -181,12 +194,18 @@ The lemma is **uniform** for the form-based families (c)–(e); (f) is the outli
   depth-1 (`discrete_affineScheme_of_jointSeparates`) — the orbit-of-difference determines `Q(v−t)`, recovering form
   coords. Witt-free. **Caveat:** `O(Q)` is the *finer* orthogonal scheme, **not** the rank-3 SRG `VO^ε`. Lands the shared
   form infrastructure + `coords_determine` (reused by B.1).
-- **Stage B.1 — discharge the certificate for `VO^ε`** (the genuine node-4): swap `O(Q)` → the **similitude** group
-  `ΓO(Q)` (rank-3 SRG; nonzero `Q`-values fuse, depth-1 → isotropy bits only), and prove the **two-round count** crux
-  (§3 Route A: the count `N_{i,b}(v)` recovers `B(v,e_i)`; back-half = the landed `coords_determine`). Start `d=4`,
-  `VO^ε_4(q)` generic in `q` (richest probe data, base `[5,5,6,7]`). Use **Route B** as the picture but the formal proof
-  goes via **Route A** counts (Mathlib lacks Witt, §5 R2); residual = the **non-isotropic shell** (plan a small `k` or
-  1–2 extra base points).
+- **Stage B.1 — the similitude group `GO(Q)` + the node-4 conditional capstone. ✅ DONE (2026-06-18, axiom-clean).**
+  `similitudeGroup` + `neg_mem_similitudeGroup` + `isometry_le_similitude` + `SimilitudeFrameSeparates` (the named
+  count crux) + `reachesRigidOrCameron_viaSimilitudeForm` (CascadeAffine.lean §OrthogonalForm Stage-B.1 block,
+  `PublicTheoremIndex.md:1218-1222`). The genuine rank-3 SRG `VO^ε` residue (`affineScheme (similitudeGroup Q)`)
+  seals once `SimilitudeFrameSeparates Q` holds. Open content isolated to that one predicate. **Carries NO `hSmallAutThin`.**
+- **Stage B.1c — discharge `SimilitudeFrameSeparates` (the two-round count crux). OPEN; the deep research core.** §3
+  Route A: the count `N_{i,b}(v)` recovers `B(v,e_i)`; back-half = the landed `coords_determine`. Start `d=4`,
+  `VO^ε_4(q)` generic in `q` (richest probe data, base `[5,5,6,7]`). Use **Route B** as the picture but the formal
+  proof goes via **Route A** counts; residual = the **non-isotropic shell** (plan a small `k` or 1–2 extra base
+  points). **Two Mathlib blockers (§5 R2):** (i) **Witt's theorem** — needed to characterize the `GO(Q)`-orbits (=
+  the scheme's relations) so the counts can be computed at all; (ii) **quadratic Gauss-sum / affine-quadric point
+  counts** — the intersection numbers as functions of `B(v,e_i)`. Both are substantial Mathlib-level builds.
 - **Stage C — alternating / half-spin** (reuse the skeleton with the symplectic / spinor `B`).
 - **Stage D — Suzuki–Tits** (separate plan needed).
 
@@ -197,13 +216,22 @@ The lemma is **uniform** for the form-based families (c)–(e); (f) is the outli
 - **R1 — the counting lemma is real work.** Computing intersection numbers as functions of `B(v,e_i)` and proving
   injectivity is classical but nontrivial to formalize. *Mitigation:* Stage A lands the wiring regardless; Stage B can
   start from explicit count formulas for `VO^ε_4(q)` (small `d`).
-- **R2 — Witt theory is ABSENT from Mathlib (verified 2026-06-18).** `Mathlib/LinearAlgebra/QuadraticForm/` has
-  `Isometry`/`IsometryEquiv`/`Radical`/`Basis`/`Dual` but **no Witt decomposition and no Witt extension theorem** (the
-  only "Witt" files are `Order/BourbakiWitt`, unrelated, and `RingTheory/WittVector`, ring-theoretic). *Consequence:*
-  **Route B's frame-rigidity is not free** — relying on it means building Witt's extension theorem (substantial). *Mitigation:*
-  prefer **Route A** (elementary counts, Witt-free); and define the scheme directly from a `QuadraticForm`, carrying rank-3 +
-  schurian as **checkable hypotheses** (the probe confirms rank 3) rather than deriving them from similitude-transitivity.
-  So Stage A's capstone carries TWO named hypotheses: the certificate `hFormCert` *and* the rank-3-schurian structure.
+- **R2 — Witt theory is ABSENT from Mathlib (verified 2026-06-18), and it bites Stage B.1c (NOT B.0).**
+  `Mathlib/LinearAlgebra/QuadraticForm/` has `Isometry`/`IsometryEquiv`/`Radical`/`Basis`/`Dual` but **no Witt
+  decomposition and no Witt extension theorem** (the only "Witt" files are `Order/BourbakiWitt`, unrelated, and
+  `RingTheory/WittVector`, ring-theoretic). **Sharpened by the B.0/B.1 split:** B.0 (`O(Q)`, depth-1) is **Witt-free** —
+  it uses only the *easy* direction (orbit ⟹ `Q`-value, by invariance), so it landed. **B.1c is NOT Witt-free**: under
+  `GO(Q)` the relations are the *orbits*, and to compute the two-round counts at all one must **characterize the
+  `GO(Q)`-orbits** = the isotropy classes — which is exactly Witt's transitivity (the *hard* direction). So Route A for
+  the similitude scheme needs Witt for the orbit characterization, on top of the point-counting. Building Witt's
+  extension/transitivity theorem in Mathlib is the first prerequisite for B.1c. (Route B's frame-rigidity needs the same
+  Witt theorem — so there is no Witt-free route to B.1c.)
+- **R2b — quadratic Gauss-sum / affine-quadric point counts (the second B.1c blocker).** The intersection numbers
+  `N_{i,b}(v)` are point counts on affine quadrics over `F_q` (`#{z : Q(z−e_i)=0 ∧ …}`), whose values are governed by
+  the quadratic character / Gauss sums and the form type `ε`. Mathlib has `ZMod.gauss_sum` and quadratic-character
+  pieces but not the assembled affine-quadric point-count formula uniform in `q`. This is the genuine combinatorial-
+  geometry core and a substantial build in its own right. *Mitigation:* start at fixed small `d=4`, `VO^ε_4(q)`, where
+  the count formulas are explicit; the back-half (`coords_determine`) is already landed and Witt-free.
 - **R2′ — characteristic 2.** The probe spans `q = 2,4` (char 2) and `q = 3,5` (char ≠2). In char 2 the bilinear form is
   alternating (`B(x,x)=0`) and `Q` is **not** recoverable from `B` alone — the Route-A/B identities (`Q(x−y)=−B(x,y)`,
   `B(w,x_i)=Q(w)`) still hold but the "recover `Q(w)`" step needs the quadratic form directly, not just `B`. Budget the

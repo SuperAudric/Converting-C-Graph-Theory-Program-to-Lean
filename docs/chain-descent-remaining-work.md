@@ -138,6 +138,15 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   orthogonal scheme, **not yet** the rank-3 SRG `VO^ε`. **Next = Stage B.1**: the **similitude** group `ΓO(Q)` (rank-3
   SRG; depth-1 → isotropy bits only) + the genuine two-round **count** crux (Route A; back-half = `coords_determine`),
   `d=4 VO^ε_4(q)` first. Residual = the non-isotropic shell. Plan: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §3–§5/§7.
+- **★ Stage B.1 LANDED (2026-06-18, axiom-clean):** the **similitude** group + the node-4 conditional capstone —
+  `similitudeGroup` (`GO(Q)`), `neg_mem_similitudeGroup`, `isometry_le_similitude`, `SimilitudeFrameSeparates` (the
+  named count crux), `reachesRigidOrCameron_viaSimilitudeForm` (CascadeAffine.lean §OrthogonalForm,
+  `PublicTheoremIndex.md:1218-1222`). The genuine rank-3 SRG `VO^ε` residue (`affineScheme (similitudeGroup Q)`) seals
+  once `SimilitudeFrameSeparates Q` holds; open content isolated to that one predicate. **Carries NO `hSmallAutThin`.**
+- **Remaining = Stage B.1c (the deep open research core):** discharge `SimilitudeFrameSeparates` — the two-round count
+  crux. **Blocked on two Mathlib gaps:** (i) **Witt's theorem** (characterize the `GO(Q)`-orbits = the relations; B.0
+  was Witt-free, B.1c is NOT) and (ii) **quadratic Gauss-sum / affine-quadric point counts** (the intersection numbers
+  as functions of `B(v,e_i)`). Back-half = the landed `coords_determine`. Multi-session research-formalization.
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:

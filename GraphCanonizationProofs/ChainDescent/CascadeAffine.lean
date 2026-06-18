@@ -2732,6 +2732,88 @@ theorem reachesRigidOrCameron_viaOrthogonalForm
     ⟨frameBase, frameBase_card_le.trans hbound,
       discrete_affineScheme_of_jointSeparates (isometryGroup Q) (neg_mem_isometryGroup Q) hsep⟩
 
+/-! #### Stage B.1 — the similitude group `GO(Q)` and the rank-3 SRG `VO^ε` (the genuine node-4 residue)
+
+The forms-graph node-4 residue is the affine scheme of the **similitude** group `GO(Q)` (not the strict
+isometry group `O(Q)` of B.0). Under `GO(Q)` the nonzero `Q`-values fuse (a similitude scales `Q` by a unit),
+so the relation `rel(t,z)` records only the **isotropy class** of `z̄−t̄` (zero / isotropic / anisotropic) —
+the rank-3 SRG. Depth-1 then sees only isotropy bits and no longer separates; the genuine **two-round count**
+crux (`SimilitudeFrameSeparates`) is required. This block lands the similitude group + the conditional capstone
+isolating that crux; the discharge (the affine-quadric point-count recovering `B(v,e_i)`, back-half
+`coords_determine`) is the deep open content — Stage B.1c — blocked on Mathlib Witt + Gauss-sum infrastructure. -/
+
+/-- The orthogonal **similitude** group `GO(Q) = {g : V ≃ₗ V | ∃ μ ∈ F_p^×, ∀ x, Q (g x) = μ • Q x}`. -/
+def similitudeGroup (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) where
+  carrier := {g | ∃ μ : (ZMod p)ˣ, ∀ x, Q (g x) = (μ : ZMod p) * Q x}
+  one_mem' := ⟨1, fun x => by simp⟩
+  mul_mem' := by
+    rintro a b ⟨μa, ha⟩ ⟨μb, hb⟩
+    refine ⟨μa * μb, fun x => ?_⟩
+    rw [LinearEquiv.mul_apply, ha, hb, Units.val_mul]; ring
+  inv_mem' := by
+    rintro a ⟨μa, ha⟩
+    refine ⟨μa⁻¹, fun x => ?_⟩
+    have hx : a (a⁻¹ x) = x := by
+      have h := LinearEquiv.mul_apply a a⁻¹ x
+      rw [mul_inv_cancel] at h
+      simpa using h.symm
+    have hax := ha (a⁻¹ x)
+    rw [hx] at hax
+    rw [hax, ← mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, one_mul]
+
+/-- `-1` is a similitude (factor `1`) — the `hneg` input for `affineScheme`. -/
+theorem neg_mem_similitudeGroup (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    LinearEquiv.neg (ZMod p) ∈ similitudeGroup Q :=
+  ⟨1, fun x => by rw [LinearEquiv.neg_apply, QuadraticMap.map_neg, Units.val_one, one_mul]⟩
+
+/-- Every isometry is a similitude (factor `1`): `O(Q) ≤ GO(Q)`. -/
+theorem isometry_le_similitude (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    isometryGroup Q ≤ similitudeGroup Q :=
+  fun g hg => ⟨1, fun x => by rw [hg x, Units.val_one, one_mul]⟩
+
+/-- **The genuine node-4 count crux (Stage B.1c), as a named predicate.** The two-round difference-count
+separation certificate for the **similitude** scheme `affineScheme (similitudeGroup Q)` at the basis frame —
+exactly the hypothesis `discrete_affineScheme_of_twoRoundDiffSeparates` consumes (with `T := frameBase`). Under
+the similitude group the relation is only the isotropy class of the difference, so this is the genuine
+two-round count obligation: the count of `z` with a given difference-isotropy profile to the frame and a given
+relation to `u` determines `u`. **OPEN** — its discharge is the affine-quadric point-count (the count recovers
+`B(v,e_i)`; back-half = `coords_determine`), blocked on Mathlib Witt + Gauss-sum infrastructure. -/
+def SimilitudeFrameSeparates (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) : Prop :=
+  ∀ u u' : Fin (p ^ d),
+    (∀ (ρ : Fin (p ^ d) → Fin ((affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).rank + 1))
+        (b : Fin ((affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).rank + 1)),
+      (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+        (∀ t ∈ frameBase, (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+            (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+        ∧ (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+            (affineE (affineE.symm z - affineE.symm u)) = b)).card
+      = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u' ∧
+        (∀ t ∈ frameBase, (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+            (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+        ∧ (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+            (affineE (affineE.symm z - affineE.symm u')) = b)).card) → u = u'
+
+/-- **THE SEAL VIA THE SIMILITUDE FORM (Stage B.1 — the node-4 rank-3 SRG `VO^ε`, conditional capstone).**
+For any quadratic form `Q` on `F_p^d`, the affine scheme of the **similitude** group `GO(Q)` — the genuine
+rank-3 forms-graph residue — seals once the two-round count certificate `SimilitudeFrameSeparates Q` holds.
+The certificate is the **only open content** (Stage B.1c); everything else (the frame, its `O(1)` size, the
+two-round discreteness producer, the seal) is landed. Carries NO `hSmallAutThin` — node 4 is *discharged* for
+this residue once the count crux is proved, not assumed. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaSimilitudeForm
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (hbound : d + 1 ≤ bound)
+    (hsep : SimilitudeFrameSeparates Q) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)))
+        ∨ SchemeRecoveredByDepth (p ^ d)
+            (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) :=
+  reachesRigidOrCameron_viaSpielman _
+    ⟨frameBase, frameBase_card_le.trans hbound,
+      discrete_affineScheme_of_twoRoundDiffSeparates (similitudeGroup Q) (neg_mem_similitudeGroup Q)
+        (T := frameBase) hsep⟩
+
 end OrthogonalForm
 
 /-! ### Phase 2 / F0 — the cyclic (cyclotomic) affine instance
