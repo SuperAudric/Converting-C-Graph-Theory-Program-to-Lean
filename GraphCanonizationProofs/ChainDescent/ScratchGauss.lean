@@ -26,6 +26,10 @@ DONE (this file — the full exponential-sum core + the assembled point count):
 * Brick D1 `sum_addChar_quadForm_linear` — complete-the-square: `∑_w ψ(r·Qw + polar Q w a') =
              ψ(−r⁻¹·Q a')·∑_w ψ(r·Qw)`. The engine for hyperplane-section / joint counts.
 * Brick A2 `count2_eq_charsum`       — two-condition count = double char sum (generalizes Brick A).
+* helpers  `quad_sub` (`Q(a−b)=Qa+Qb−polar Q a b`), `polar_sum_right` (`∑ rⱼ·polar Q z tⱼ = polar Q z (∑rⱼ•tⱼ)`).
+* MULTI-POINT `sum_addChar_multiQuad` — `∑_z ψ(∑ⱼ rⱼ·Q(z−tⱼ)) = ψ(∑rⱼQtⱼ − R⁻¹·Q(∑rⱼ•tⱼ))·∑_z ψ(R·Qz)`
+             (`R=∑rⱼ≠0`). The summand collapses to D1 via `quad_sub`+`polar_sum_right`. THE engine for the
+             multi-point count at a symmetry-broken base — the inner sum of the k-fold count.
 
 ⚠ KEY FINDING (2026-06-18) — the naive PAIRWISE plan for Brick D FAILS; recovery needs the FULL joint
 frame count. Computing the pairwise common-isotropic-neighbour count via A2 + D1 + a Gauss collapse:
@@ -65,9 +69,12 @@ NEXT (next session) — Brick D, corrected target:
   `frameBase ∪ {p}`) on which the one-round relation-count profile separates all vertices" — then
   `discrete_of_kRoundRelationSeparates` gives `Discrete` → `SeparatesAtBoundedBase` → seal directly (no
   coords_determine / Q-profile recovery needed).
-* The PROOF of count-injectivity at `T` is the genuine content: a `(d+2)`-point character-sum count
-  (A2 generalized to the base conditions; each inner sum via D1 = the complete-the-square engine). The
-  Gauss bricks A/A2/B/C/D1 are the tools. Substantial; the symmetry-broken base is what makes it TRUE.
+* The PROOF of count-injectivity at `T` is the genuine content. Remaining engine step: the **k-fold count**
+  `#{z : Q(z−tⱼ)=cⱼ ∀j∈T} · q^|T| = ∑_{r:T→K} (∏ⱼ ψ(−rⱼcⱼ))·∑_z ψ(∑ⱼ rⱼ Q(z−tⱼ))` (generalize `count2_eq_charsum`
+  to a Finset of conditions), whose inner sum is now `sum_addChar_multiQuad` (R=∑rⱼ≠0) or a linear boundary
+  (R=0). That gives the closed-form multi-point Q-count; then (a) inclusion–exclusion turns isotropy counts
+  into Q-counts, (b) prove the resulting `A_u` injective in `u` at the symmetry-broken base. The Gauss toolkit
+  (A/A2/B/C/D1/multiQuad) is COMPLETE; remaining is the k-fold assembly + the injectivity argument.
 * Brick C-even (independent, short) — `d` even ⟹ `χ(t)^d=1` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}` via
   `AddChar.sum_mulShift` + `gaussSum_sq`. Validates Brick C numerically.
 * Bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` +
@@ -370,3 +377,66 @@ theorem count2_eq_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
 #print axioms card_quadForm_eq
 #print axioms sum_addChar_quadForm_linear
 #print axioms count2_eq_charsum
+
+-- ============== multi-point quadratic sum (toward the symmetry-broken-base count) ==============
+
+/-- The quadratic "difference" identity (parallelogram form): `Q(a−b) = Q a + Q b − polar Q a b`. -/
+theorem quad_sub {K : Type*} [Field K] {V : Type*} [AddCommGroup V] [Module K V]
+    (Q : QuadraticForm K V) (a b : V) :
+    Q (a - b) = Q a + Q b - QuadraticMap.polar Q a b := by
+  have h1 : QuadraticMap.polar Q a (-b) = Q (a - b) - Q a - Q b := by
+    simp only [QuadraticMap.polar, ← sub_eq_add_neg, QuadraticMap.map_neg]
+  have h2 : QuadraticMap.polar Q a (-b) = - QuadraticMap.polar Q a b := by
+    rw [← neg_one_smul K b, QuadraticMap.polar_smul_right, neg_one_smul]
+  rw [h2] at h1; linear_combination -h1
+
+/-- `polar Q z ·` is additive over a finite sum in its second argument (via `polarBilin`). -/
+theorem polar_sum_right {K : Type*} [Field K] {V : Type*} [AddCommGroup V] [Module K V]
+    (Q : QuadraticForm K V) (z : V) {ι : Type*} (s : Finset ι) (r : ι → K) (t : ι → V) :
+    (∑ j ∈ s, r j * QuadraticMap.polar Q z (t j))
+      = QuadraticMap.polar Q z (∑ j ∈ s, r j • t j) := by
+  have hb : ∀ y, QuadraticMap.polar Q z y = Q.polarBilin z y :=
+    fun y => (QuadraticMap.polarBilin_apply_apply Q z y).symm
+  rw [hb, map_sum]
+  exact Finset.sum_congr rfl (fun j _ => by rw [hb, map_smul, smul_eq_mul])
+
+/-- **Multi-point quadratic Gauss sum (generalizes D1).** For weights `r` summing to `R ≠ 0`,
+`∑_z ψ(∑ⱼ rⱼ·Q(z−tⱼ)) = ψ(∑ⱼ rⱼ·Q(tⱼ) − R⁻¹·Q(∑ⱼ rⱼ•tⱼ))·∑_z ψ(R·Q z)`. The summand expands to
+`R·Q z − polar Q z (∑rⱼ•tⱼ) + const`, collapsing to D1. THE engine for the multi-point count at a
+symmetry-broken base. -/
+theorem sum_addChar_multiQuad {K : Type*} [Field K] {R' : Type*} [CommRing R'] (ψ : AddChar K R')
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V)
+    {ι : Type*} (s : Finset ι) (r : ι → K) (t : ι → V) (hR : (∑ j ∈ s, r j) ≠ 0) :
+    (∑ z : V, ψ (∑ j ∈ s, r j * Q (z - t j)))
+      = ψ ((∑ j ∈ s, r j * Q (t j)) - (∑ j ∈ s, r j)⁻¹ * Q (∑ j ∈ s, r j • t j))
+        * ∑ z : V, ψ ((∑ j ∈ s, r j) * Q z) := by
+  have key : ∀ z : V, (∑ j ∈ s, r j * Q (z - t j))
+      = (∑ j ∈ s, r j) * Q z + QuadraticMap.polar Q z (-(∑ j ∈ s, r j • t j))
+        + (∑ j ∈ s, r j * Q (t j)) := by
+    intro z
+    have e : ∀ j ∈ s, r j * Q (z - t j)
+        = r j * Q z + r j * Q (t j) - r j * QuadraticMap.polar Q z (t j) := by
+      intro j _; rw [quad_sub]; ring
+    rw [Finset.sum_congr rfl e, Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.sum_mul,
+        polar_sum_right,
+        show QuadraticMap.polar Q z (-(∑ j ∈ s, r j • t j))
+            = - QuadraticMap.polar Q z (∑ j ∈ s, r j • t j) by
+          rw [← neg_one_smul K (∑ j ∈ s, r j • t j), QuadraticMap.polar_smul_right, neg_one_smul]]
+    ring
+  rw [Finset.sum_congr rfl (fun z _ => by rw [key z])]
+  have hD1 := sum_addChar_quadForm_linear ψ Q (Units.mk0 (∑ j ∈ s, r j) hR)
+    (-(∑ j ∈ s, r j • t j))
+  rw [Units.val_mk0] at hD1
+  have hfactor : (∑ z : V, ψ ((∑ j ∈ s, r j) * Q z
+        + QuadraticMap.polar Q z (-(∑ j ∈ s, r j • t j)) + (∑ j ∈ s, r j * Q (t j))))
+      = ψ (∑ j ∈ s, r j * Q (t j))
+        * ∑ z : V, ψ ((∑ j ∈ s, r j) * Q z
+            + QuadraticMap.polar Q z (-(∑ j ∈ s, r j • t j))) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun z _ => by rw [AddChar.map_add_eq_mul]; ring)
+  rw [hfactor, hD1, QuadraticMap.map_neg, ← mul_assoc, ← AddChar.map_add_eq_mul]
+  congr 2; ring
+
+#print axioms quad_sub
+#print axioms polar_sum_right
+#print axioms sum_addChar_multiQuad

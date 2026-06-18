@@ -21,8 +21,11 @@
 > B3 `sum_addChar_quadForm` + basis-explicit `sum_quadForm_eval` (`∑ψ(Qx)=(∏χwᵢ)Gᵈ`, the multivariable core), scaling
 > `sum_addChar_quadForm_smul` (`∑ψ(s·Qx)=χ(s)^d·∑ψ(Qx)`), and **Brick C `card_quadForm_eq`** — THE point count:
 > `#{x:Qx=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_xψ(Qx)`. **ALSO DONE:** D1 `sum_addChar_quadForm_linear`
-> (complete-the-square `∑ψ(r·Qw+polar Q w a')=ψ(−r⁻¹Qa')·∑ψ(r·Qw)`) + A2 `count2_eq_charsum` (two-condition count) —
-> the engines for hyperplane / joint counts.
+> (complete-the-square `∑ψ(r·Qw+polar Q w a')=ψ(−r⁻¹Qa')·∑ψ(r·Qw)`), A2 `count2_eq_charsum` (two-condition count),
+> helpers `quad_sub`/`polar_sum_right`, and **MULTI-POINT `sum_addChar_multiQuad`** (`∑_z ψ(∑ⱼrⱼQ(z−tⱼ)) =
+> ψ(const)·∑_z ψ(R·Qz)`, `R=∑rⱼ≠0`, collapsing to D1) — the engine for the symmetry-broken-base count. **The Gauss
+> toolkit (A/A2/B/C/D1/multiQuad) is now COMPLETE** (15 axiom-clean lemmas); remaining = the k-fold count assembly +
+> the injectivity argument at the symmetry-broken base.
 >
 > **⚠ KEY FINDING (2026-06-18) — the PAIRWISE plan for Brick D FAILS; corrects (ii) below + §3.** Computing the
 > pairwise common-isotropic-neighbour count via A2+D1+Gauss collapse: `#{w:Qw=0 ∧ Q(w−a)=0} = q²+S(1)/q` (d=4),
