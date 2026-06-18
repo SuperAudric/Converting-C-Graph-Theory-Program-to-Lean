@@ -11,21 +11,23 @@
 
 ## STATUS (read first)
 
-> **★ GAUSS BUILD (B.1c-ii) STARTED — core exponential-sum infrastructure LANDED (2026-06-18, axiom-clean).** The
-> Mathlib-absent machinery is being built in **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module;
-> imports ONLY Mathlib so it builds in isolation, cheap — does *not* pull in the heavy project files; verified via
-> `lake env lean ChainDescent/ScratchGauss.lean`, all decls `[propext, Classical.choice, Quot.sound]`). The Mathlib map
-> (this session): the pieces exist (`gaussSum_sq`, `quadraticChar_card_sqrts`, `equivalent_weightedSumSquares`, char
-> orthogonality `AddChar.sum_mulShift`) but the **assembled affine-quadric point-count formula is ABSENT** — that is the
-> build. **DONE:** Brick A `count_eq_charsum` (count = double char sum), B1 `sum_addChar_sq` (`∑ψ(x²)=gaussSum`), B2
-> `sum_addChar_smul_sq` (`∑ψ(a·x²)=χ(a)·gaussSum`), helper `addChar_sum` (`ψ(∑)=∏ψ`), and **B3 `sum_addChar_quadForm`**
-> (`∑_x ψ(Q x)=(∏χ(wᵢ))·Gᵈ` for nondegenerate `Q`, via diagonalize+reindex+factor — the multivariable core, the hard
-> brick). **NEXT (next session, scoped in the file header):** Brick C = the point count `#{x:Q x=c}` (combine A with B3
-> on `t·Q`, split `t=0`); Brick D = reduce `IsotropyFrameCountsAgree` to those counts (at `q=3` = binary square/non-
-> square shell distinction); a small bridge `polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft` (via
-> `two_nsmul_associated` + `Invertible(2:ZMod p)`). Then PORT into CascadeAffine (one heavy build) once C+D land. char-2
-> deferred (§5 R2′). **Note: porting/heavy `CascadeAffine` rebuilds are the memory-intensive step — keep Gauss work in
-> the standalone WIP module until C+D are proven, then port once.**
+> **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
+> **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
+> isolation, cheap; verified via `lake env lean ChainDescent/ScratchGauss.lean`, all decls
+> `[propext, Classical.choice, Quot.sound]`). Mathlib has the pieces (`gaussSum_sq`, `quadraticChar_card_sqrts`,
+> `equivalent_weightedSumSquares`, `AddChar.sum_mulShift`) but NOT the assembled affine-quadric point count — now built.
+> **DONE (the full exponential-sum core + the assembled count):** Brick A `count_eq_charsum` (count = double char sum),
+> B1 `sum_addChar_sq` (`∑ψ(x²)=gaussSum`), B2 `sum_addChar_smul_sq` (`∑ψ(a·x²)=χ(a)·gaussSum`), helper `addChar_sum`,
+> B3 `sum_addChar_quadForm` + basis-explicit `sum_quadForm_eval` (`∑ψ(Qx)=(∏χwᵢ)Gᵈ`, the multivariable core), scaling
+> `sum_addChar_quadForm_smul` (`∑ψ(s·Qx)=χ(s)^d·∑ψ(Qx)`), and **Brick C `card_quadForm_eq`** — THE point count:
+> `#{x:Qx=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_xψ(Qx)`. **NEXT (next session, scoped in file header):** (i) Brick
+> C-even corollary (d even ⟹ `χ(t)^d=1` ⟹ bracket `=q−1`/`−1`; `gaussSum_sq` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}`; short,
+> validates C); (ii) **Brick D** = reduce `IsotropyFrameCountsAgree` to these counts (the common-isotropic-neighbour
+> count of frame `t`,`u` is the isotropic hyperplane-section `#{w:Q(w)=0 ∧ polar(w,a)=Q(a)}`, `a=ū−t̄`, via a 2-char sum
+> / reduce to `Q|_{a^⊥}` dim `d−1`; depends on `χ(Q(a))`, so equal counts ⟹ equal `χ(Q(ū−t̄))` ⟹ at `q=3` equal
+> `Q(ū−t̄)` ⟹ `IsotropyCountsRecoverFrameQ`) — THE remaining substantive step; (iii) bridge
+> `polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft` + an orthogonal basis for `VO^ε_4(3)`. Then PORT
+> A/B/C/D into CascadeAffine (one build). char-2 deferred (§5 R2′).
 
 > **▶▶ HANDOFF — CURRENT STATE IN ONE READ (2026-06-18). The blocks below this are chronological history (newest
 > first); this box is the live state.**

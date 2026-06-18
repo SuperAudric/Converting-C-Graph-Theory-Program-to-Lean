@@ -11,28 +11,38 @@ forms-graph residue, starting at `VO^ε_4(3)`. Mathlib has the machinery (`gauss
 `quadraticChar_card_sqrts`, `equivalent_weightedSumSquares`, char orthogonality) but NOT the assembled
 affine-quadric point-count formula — that is what these bricks build.
 
-DONE (this file):
+DONE (this file — the full exponential-sum core + the assembled point count):
 * Brick A  `count_eq_charsum`        — solution count `#{x | f x = c}` as a double character sum.
 * Brick B1 `sum_addChar_sq`          — `∑_x ψ(x²) = gaussSum χ ψ`.
 * Brick B2 `sum_addChar_smul_sq`     — `∑_x ψ(a·x²) = χ(a)·gaussSum χ ψ` (a a unit).
 * helper   `addChar_sum`             — `ψ(∑ aᵢ) = ∏ ψ(aᵢ)`.
 * Brick B3 `sum_addChar_quadForm`    — `∑_x ψ(Q x) = (∏ᵢ χ(wᵢ))·gaussSum^d` for nondegenerate `Q`
                                        (diagonalize + reindex + factor). THE multivariable core.
+* Brick B3′`sum_quadForm_eval`       — basis-explicit B3 (weights `Q (v i)`; value pinned).
+* scaling  `sum_addChar_quadForm_smul` — `∑_x ψ(s·Q x) = χ(s)^d · ∑_x ψ(Q x)` (change of character).
+* Brick C  `card_quadForm_eq`        — THE affine-quadric point count (Mathlib-absent), character-sum
+                                       form: `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_x ψ(Q x)`.
 
 NEXT (next session):
-* Brick C  — the affine-quadric point count `#{x : Q x = c}`: combine Brick A (`f = Q`) with Brick B3
-             applied to `t·Q` for `t ≠ 0` (split off the `t = 0` term `= q^d`; the `t ≠ 0` terms give
-             `χ(t)^d · χ(disc) · Gᵈ`, summed against `ψ(−tc)`). Yields the standard
-             `q^{d-1} ± (…)q^{d/2-1}` formula. `gaussSum_sq : G² = χ(-1)·q` collapses `Gᵈ` for even `d`.
-* Brick D  — reduce `IsotropyFrameCountsAgree` to these point counts: the common-isotropic-neighbour
-             count of a frame point `t` and `u` is a hyperplane-section count determined by `Q(ū−t̄)`,
-             so equal isotropy counts ⟹ equal `Q`-profile ⟹ `IsotropyCountsRecoverFrameQ`. At `q = 3`
-             this is the binary square/non-square shell distinction (§3 non-isotropic shell).
+* Brick C-even (corollary)  — for `d` even, `χ(t)^d = 1` (t≠0), so the bracket = `q−1` (c=0) / `−1`
+             (c≠0) by `AddChar.sum_mulShift`; with `∑_x ψ(Q x)` via `gaussSum_sq` (`G²=χ(-1)q`) this
+             gives the closed `q^{d-1} ± (q-1)q^{d/2-1}` count. Short; validates Brick C numerically.
+* Brick D  — reduce `IsotropyFrameCountsAgree` to point counts. The common-isotropic-neighbour count of
+             frame point `t` and `u` is `#{w : Q(w)=0 ∧ polar(w,a)=Q(a)}` (`a = ū−t̄`) — an isotropic
+             hyperplane-section count. Compute it via a 2-character sum (one for `Q(w)=0`, one for the
+             hyperplane) — a generalization of Brick C — or reduce to `Q|_{a^⊥}` (dim `d−1`, odd). It
+             depends on `χ(Q(a))`, so equal isotropy counts ⟹ equal `χ(Q(ū−t̄))` ⟹ (with the marginal
+             isotropy class, and at `q=3` where nonzero = `{square=1, nonsquare=2}`) equal `Q(ū−t̄)`
+             ∀ frame `t` ⟹ `IsotropyCountsRecoverFrameQ`. THE remaining substantive step.
 * Bridge   — `(Q.polarBilin).Nondegenerate` (the project's hyp) ⟹ `(associated Q).SeparatingLeft`
-             (B3's hyp), via `two_nsmul_associated` + `Invertible (2 : ZMod p)` (p odd). Small.
+             (eval/scaling hyp), via `two_nsmul_associated` + `Invertible (2 : ZMod p)` (p odd). Small.
+  Also: derive an orthogonal basis `v`+`hv`+`hw` for the concrete `VO^ε_4(3)` form (via
+  `exists_orthogonal_basis` + `not_isOrtho_basis_self_of_separatingLeft`, as in `card_quadForm_eq`'s
+  callers will need).
+Then PORT A/B/C + D into CascadeAffine (one build) and discharge `IsotropyCountsRecoverFrameQ`.
 
-CAVEAT: B3 requires `[Invertible (2:K)]` / `ringChar ≠ 2` — char-2 (`q = 2,4`) is a separate argument
-(§5 R2′); do `q = 3` first.
+CAVEAT: the bricks require `[Invertible (2:K)]` / `ringChar ≠ 2` — char-2 (`q = 2,4`) is a separate
+argument (§5 R2′); do `q = 3` first.
 -/
 import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
 import Mathlib.NumberTheory.GaussSum
@@ -40,8 +50,10 @@ import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.GaussSum
 import Mathlib.FieldTheory.Finite.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.IsometryEquiv
+import Mathlib.LinearAlgebra.Basis.Basic
+import Mathlib.LinearAlgebra.Dimension.Finrank
 
-open Finset
+open Finset Module
 
 /-- **Brick A — solution count as a character sum.** -/
 theorem count_eq_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
@@ -153,8 +165,125 @@ theorem sum_addChar_quadForm {K : Type*} [Field K] [Fintype K] [DecidableEq K] [
     Finset.prod_congr rfl (fun i _ => sum_addChar_smul_sq hF hψ (w i)),
     Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
 
+/-- **Brick B3′ — basis-explicit multivariable Gauss sum.** As `sum_addChar_quadForm` but with an
+explicit orthogonal basis `v` (weights `Q (v i)`), so the value is pinned (no existential). This is
+the form that powers the scaling relation (Brick C). -/
+theorem sum_quadForm_eval {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Invertible (2 : K)]
+    (hF : ringChar K ≠ 2) {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar K R'}
+    (hψ : ψ.IsPrimitive) {V : Type*} [AddCommGroup V] [Module K V] [FiniteDimensional K V]
+    [Fintype V] (Q : QuadraticForm K V) (v : Basis (Fin (Module.finrank K V)) K V)
+    (hv : (QuadraticMap.associated (R := K) Q).IsOrthoᵢ v) (hw : ∀ i, Q (v i) ≠ 0) :
+    (∑ x : V, ψ (Q x))
+      = (∏ i, ((quadraticChar K).ringHomComp (Int.castRingHom R')) (Q (v i)))
+        * gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom R')) ψ ^ Module.finrank K V := by
+  set χ := (quadraticChar K).ringHomComp (Int.castRingHom R') with hχ
+  let e := QuadraticForm.isometryEquivWeightedSumSquares Q v hv
+  have hreindex : (∑ x : V, ψ (Q x))
+      = ∑ y : (Fin (Module.finrank K V) → K),
+          ψ (QuadraticMap.weightedSumSquares K (fun i => Q (v i)) y) := by
+    rw [← Equiv.sum_comp e.toLinearEquiv.toEquiv
+      (fun y => ψ (QuadraticMap.weightedSumSquares K (fun i => Q (v i)) y))]
+    refine Finset.sum_congr rfl (fun x _ => ?_)
+    congr 1
+    exact (e.map_app' x).symm
+  rw [hreindex]
+  have hexp : ∀ y : (Fin (Module.finrank K V) → K),
+      ψ (QuadraticMap.weightedSumSquares K (fun i => Q (v i)) y) = ∏ i, ψ (Q (v i) * (y i) ^ 2) := by
+    intro y
+    rw [QuadraticMap.weightedSumSquares_apply, addChar_sum]
+    exact Finset.prod_congr rfl (fun i _ => by rw [pow_two, smul_eq_mul])
+  have hfac : ∀ i, (∑ t : K, ψ (Q (v i) * t ^ 2)) = χ (Q (v i)) * gaussSum χ ψ := by
+    intro i
+    have h := sum_addChar_smul_sq hF hψ (Units.mk0 (Q (v i)) (hw i))
+    rw [Units.val_mk0] at h
+    rw [← hχ] at h
+    exact h
+  rw [Finset.sum_congr rfl (fun y _ => hexp y),
+    ← Fintype.prod_sum (fun (i : Fin (Module.finrank K V)) (t : K) => ψ (Q (v i) * t ^ 2)),
+    Finset.prod_congr rfl (fun i _ => hfac i),
+    Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+
+/-- **Brick C-scale — the scaling relation.** Scaling the form by a unit `s` scales the Gauss sum by
+`χ(s)^d`: `∑_x ψ(s·Q x) = χ(s)^d · ∑_x ψ(Q x)`. Proved by changing the additive character
+(`ψ(s·Q x) = (mulShift ψ s)(Q x)`) and `gaussSum_mulShift`. (For `d` even, `χ(s)^d = 1`, so the
+quadratic exponential sum is scale-invariant — the fact behind the affine-quadric point count.) -/
+theorem sum_addChar_quadForm_smul {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    [Invertible (2 : K)] (hF : ringChar K ≠ 2) {R' : Type*} [CommRing R'] [IsDomain R']
+    {ψ : AddChar K R'} (hψ : ψ.IsPrimitive) {V : Type*} [AddCommGroup V] [Module K V]
+    [FiniteDimensional K V] [Fintype V] (Q : QuadraticForm K V)
+    (v : Module.Basis (Fin (Module.finrank K V)) K V)
+    (hv : (QuadraticMap.associated (R := K) Q).IsOrthoᵢ v) (hw : ∀ i, Q (v i) ≠ 0) (s : Kˣ) :
+    (∑ x : V, ψ ((s : K) * Q x))
+      = ((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K) ^ Module.finrank K V
+        * ∑ x : V, ψ (Q x) := by
+  have hφ : (AddChar.mulShift ψ (s : K)).IsPrimitive := by
+    intro a ha
+    have hmm : AddChar.mulShift (AddChar.mulShift ψ (s : K)) a = AddChar.mulShift ψ ((s : K) * a) := by
+      ext x; simp only [AddChar.mulShift_apply, mul_assoc]
+    rw [hmm]; exact hψ (mul_ne_zero s.ne_zero ha)
+  have e1 : (∑ x : V, ψ ((s : K) * Q x)) = ∑ x : V, (AddChar.mulShift ψ (s : K)) (Q x) :=
+    Finset.sum_congr rfl (fun x _ => by rw [AddChar.mulShift_apply])
+  have hsq : ((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K)
+      * ((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K) = 1 := by
+    have h := quadraticChar_sq_one (F := K) s.ne_zero
+    have h2 : (((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K)) ^ 2 = ((1 : ℤ) : R') := by
+      rw [MulChar.ringHomComp_apply, ← map_pow]; exact_mod_cast congrArg (Int.cast (R := R')) h
+    rw [pow_two] at h2; simpa using h2
+  have hgss : gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom R'))
+        (AddChar.mulShift ψ (s : K))
+      = ((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K)
+        * gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom R')) ψ := by
+    have hms := gaussSum_mulShift ((quadraticChar K).ringHomComp (Int.castRingHom R')) ψ s
+    have h3 := congrArg
+      (fun z => ((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K) * z) hms
+    simp only at h3
+    rw [← mul_assoc, hsq, one_mul] at h3
+    exact h3
+  rw [e1, sum_quadForm_eval hF hφ Q v hv hw, sum_quadForm_eval hF hψ Q v hv hw, hgss, mul_pow]
+  ring
+
+/-- **Brick C — the affine-quadric point count (character-sum form).** The number of solutions of
+`Q x = c`, scaled by `#K`, equals `#V` plus `(∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_x ψ(Q x)`. This is the
+assembled affine-quadric point-count formula (Mathlib-absent), from Brick A + the scaling relation.
+For `d` even, `χ(t)^d = 1`, so the bracket collapses to `q−1` (if `c=0`) or `−1` (if `c≠0`) by
+additive orthogonality, giving the classical `q^{d-1} ± (q-1)q^{d/2-1}` count once `∑_x ψ(Q x)` is
+evaluated via `gaussSum_sq`. -/
+theorem card_quadForm_eq {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Invertible (2 : K)]
+    (hF : ringChar K ≠ 2) {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar K R'}
+    (hψ : ψ.IsPrimitive) {V : Type*} [AddCommGroup V] [Module K V] [FiniteDimensional K V]
+    [Fintype V] [DecidableEq V] (Q : QuadraticForm K V)
+    (v : Module.Basis (Fin (Module.finrank K V)) K V)
+    (hv : (QuadraticMap.associated (R := K) Q).IsOrthoᵢ v) (hw : ∀ i, Q (v i) ≠ 0) (c : K) :
+    ((univ.filter (fun x : V => Q x = c)).card : R') * (Fintype.card K : R')
+      = (Fintype.card V : R')
+        + (∑ t ∈ univ.erase (0 : K),
+            ψ (-(t * c)) * ((quadraticChar K).ringHomComp (Int.castRingHom R')) t
+              ^ Module.finrank K V) * (∑ x : V, ψ (Q x)) := by
+  have hcount := count_eq_charsum hψ (fun x : V => Q x) c
+  have hsplit_x : ∀ t : K,
+      (∑ x : V, ψ (t * (Q x - c))) = ψ (-(t * c)) * ∑ x : V, ψ (t * Q x) := by
+    intro t
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun x _ => ?_)
+    rw [← AddChar.map_add_eq_mul]; congr 1; ring
+  have hzero : ψ (-((0 : K) * c)) * (∑ x : V, ψ ((0 : K) * Q x)) = (Fintype.card V : R') := by
+    simp [AddChar.map_zero_eq_one, Finset.card_univ]
+  have hLHS : (∑ x : V, ∑ t : K, ψ (t * (Q x - c)))
+      = (Fintype.card V : R')
+        + (∑ t ∈ univ.erase (0 : K),
+            ψ (-(t * c)) * ((quadraticChar K).ringHomComp (Int.castRingHom R')) t
+              ^ Module.finrank K V) * (∑ x : V, ψ (Q x)) := by
+    rw [Finset.sum_comm, Finset.sum_congr rfl (fun t _ => hsplit_x t),
+      ← Finset.add_sum_erase _ _ (Finset.mem_univ (0 : K)), hzero, Finset.sum_mul]
+    congr 1
+    refine Finset.sum_congr rfl (fun t ht => ?_)
+    have htne : t ≠ 0 := Finset.ne_of_mem_erase ht
+    have hsc := sum_addChar_quadForm_smul hF hψ Q v hv hw (Units.mk0 t htne)
+    rw [Units.val_mk0] at hsc
+    rw [hsc]; ring
+  rw [← hcount, hLHS]
+
 #print axioms count_eq_charsum
-#print axioms sum_addChar_sq
-#print axioms sum_addChar_smul_sq
-#print axioms addChar_sum
-#print axioms sum_addChar_quadForm
+#print axioms sum_quadForm_eval
+#print axioms sum_addChar_quadForm_smul
+#print axioms card_quadForm_eq
