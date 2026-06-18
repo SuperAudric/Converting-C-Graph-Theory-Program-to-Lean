@@ -2814,6 +2814,68 @@ theorem reachesRigidOrCameron_viaSimilitudeForm
       discrete_affineScheme_of_twoRoundDiffSeparates (similitudeGroup Q) (neg_mem_similitudeGroup Q)
         (T := frameBase) hsep⟩
 
+/-! #### Stage B.1c — the checkpoint: confirm the research core factors through the landed back-half
+
+Before building the heavy-but-known machinery (Witt's theorem + quadratic Gauss-sum point counts), confirm the
+*logical chain pays off*: re-express the count crux `SimilitudeFrameSeparates` as the Witt+Gauss-shaped
+deliverable `CountsDetermineFrameQ` ("the two-round counts recover the frame `Q`-value profile") and verify it
+composes — via the **landed** back-half `coords_determine` (B.0) — to the certificate and hence the seal. This
+checkpoint confirms the back-half is exactly the right shape and that the only remaining mathematical content is
+the front-half (the count → `Q`-value recovery = Witt + Gauss). -/
+
+/-- The two-round difference-count agreement of `u` and `u'` at the basis frame — the antecedent of
+`SimilitudeFrameSeparates`, named for reuse (defeq to that antecedent). -/
+def FrameCountsAgree (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (u u' : Fin (p ^ d)) : Prop :=
+  ∀ (ρ : Fin (p ^ d) → Fin ((affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).rank + 1))
+      (b : Fin ((affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).rank + 1)),
+    (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+      (∀ t ∈ frameBase, (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+          (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+      ∧ (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+          (affineE (affineE.symm z - affineE.symm u)) = b)).card
+    = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u' ∧
+      (∀ t ∈ frameBase, (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+          (affineE (affineE.symm z - affineE.symm t)) = ρ t)
+      ∧ (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+          (affineE (affineE.symm z - affineE.symm u')) = b)).card
+
+/-- **The Witt+Gauss deliverable, as a named predicate (the front-half of the count crux).** Two vertices with
+agreeing two-round counts have the same `Q`-value profile at the frame: `Q ū = Q ū'` and
+`Q (ū − e_i) = Q (ū' − e_i)` for every basis `e_i`. This is exactly what Witt (orbit = isotropy class) +
+quadratic Gauss-sum affine-quadric point counts deliver. **OPEN** (Stage B.1c front-half). -/
+def CountsDetermineFrameQ (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) : Prop :=
+  ∀ u u' : Fin (p ^ d), FrameCountsAgree Q u u' →
+    Q (affineE.symm u) = Q (affineE.symm u') ∧
+      ∀ i : Fin d, Q (affineE.symm u - Pi.single i 1) = Q (affineE.symm u' - Pi.single i 1)
+
+/-- **CHECKPOINT (the count crux factors through the landed back-half).** The Witt+Gauss deliverable
+`CountsDetermineFrameQ` discharges the count certificate `SimilitudeFrameSeparates`, via the landed
+`coords_determine` (B.0). Confirms the two halves compose: front-half (counts recover the `Q`-profile) +
+back-half (nondegenerate ⟹ profile determines the vector) close the certificate. Axiom-clean. -/
+theorem similitudeFrameSeparates_of_countsDetermineFrameQ
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (hQ : (Q.polarBilin).Nondegenerate)
+    (h : CountsDetermineFrameQ Q) : SimilitudeFrameSeparates Q := by
+  intro u u' hcounts
+  obtain ⟨h0, hi⟩ := h u u' hcounts
+  exact affineE.symm.injective (coords_determine Q hQ h0 hi)
+
+/-- **THE SEAL VIA THE WITT+GAUSS DELIVERABLE (the confirmed research-core checkpoint).** The whole Stage-B.1
+chain end-to-end: `CountsDetermineFrameQ` (= Witt + Gauss) → `SimilitudeFrameSeparates` (via `coords_determine`)
+→ seal. Confirms the heavy-but-known machinery, once built, closes the seal for the rank-3 SRG `VO^ε` residue —
+the research core is sound, with the open content isolated to the single front-half predicate
+`CountsDetermineFrameQ`. Carries NO `hSmallAutThin`. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaCountsDetermineFrameQ
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (hQ : (Q.polarBilin).Nondegenerate)
+    (hbound : d + 1 ≤ bound) (h : CountsDetermineFrameQ Q) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)))
+        ∨ SchemeRecoveredByDepth (p ^ d)
+            (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) :=
+  reachesRigidOrCameron_viaSimilitudeForm Q hbound
+    (similitudeFrameSeparates_of_countsDetermineFrameQ Q hQ h)
+
 end OrthogonalForm
 
 /-! ### Phase 2 / F0 — the cyclic (cyclotomic) affine instance

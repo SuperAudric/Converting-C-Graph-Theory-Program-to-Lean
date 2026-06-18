@@ -11,18 +11,24 @@
 
 ## STATUS (read first)
 
-**★ STAGE B.1 STARTED (2026-06-18, axiom-clean, build green) — the similitude group `GO(Q)` + the node-4
-conditional capstone; the count crux isolated.** Landed (CascadeAffine.lean §OrthogonalForm Stage-B.1 block,
-`PublicTheoremIndex.md:1218-1222`): `similitudeGroup` (`GO(Q) = {g | ∃ μ, Q(g x) = μ·Q x}` as a `Subgroup`),
-`neg_mem_similitudeGroup`, `isometry_le_similitude` (`O(Q) ≤ GO(Q)`), `SimilitudeFrameSeparates` (the named
-count crux), and the conditional capstone **`reachesRigidOrCameron_viaSimilitudeForm`** — the affine scheme of
-`GO(Q)` (the genuine rank-3 SRG `VO^ε` residue) seals once `SimilitudeFrameSeparates Q` holds, via
-`discrete_affineScheme_of_twoRoundDiffSeparates` at `frameBase` → `viaSpielman`. **Carries NO `hSmallAutThin`.**
-The open content is now exactly one named predicate. **Remaining = Stage B.1c**, the discharge of
-`SimilitudeFrameSeparates` (the two-round count crux): genuinely hard, **blocked on two Mathlib gaps** —
-(i) **Witt's theorem** (to characterize the `GO(Q)`-orbits = the relations) and (ii) **quadratic Gauss-sum /
-affine-quadric point counts** (the intersection numbers as functions of `B(v,e_i)`); back-half = the landed
-`coords_determine`. This is multi-session research-formalization, not a quick increment. Nothing committed.
+**★ STAGE B.1 + RESEARCH-CORE CHECKPOINT CONFIRMED (2026-06-18, axiom-clean, build green).** Landed
+(CascadeAffine.lean §OrthogonalForm Stage-B.1 block, `PublicTheoremIndex.md:1218-1226`): `similitudeGroup`
+(`GO(Q) = {g | ∃ μ, Q(g x) = μ·Q x}`), `neg_mem_similitudeGroup`, `isometry_le_similitude`, the named count crux
+`SimilitudeFrameSeparates`, the conditional capstone **`reachesRigidOrCameron_viaSimilitudeForm`**, and — the new
+**checkpoint** — `FrameCountsAgree`, `CountsDetermineFrameQ`, `similitudeFrameSeparates_of_countsDetermineFrameQ`,
+and **`reachesRigidOrCameron_viaCountsDetermineFrameQ`**.
+
+**The chain is now confirmed END-TO-END, modulo one front-half predicate:**
+> `CountsDetermineFrameQ` (= Witt + Gauss) —[`coords_determine`, **LANDED** B.0]→ `SimilitudeFrameSeparates`
+> —[`discrete_affineScheme_of_twoRoundDiffSeparates` + `viaSpielman`, **LANDED**]→ **seal** for the rank-3 SRG
+> `VO^ε` residue.
+
+So the research core is **sound**: the heavy-but-known machinery, once built, *provably closes the seal* — and the
+B.0 back-half `coords_determine` is confirmed to be exactly the right shape and to compose. **The entire open
+content is isolated to the single front-half predicate `CountsDetermineFrameQ`** ("the two-round counts recover the
+frame `Q`-value profile"). **Remaining = Stage B.1c** = discharge `CountsDetermineFrameQ`, blocked on two Mathlib
+builds: (i) **Witt's theorem** (orbit = isotropy class) and (ii) **quadratic Gauss-sum affine-quadric point
+counts**. Detailed scoping in **§8**. Multi-session research-formalization. Nothing committed.
 
 **★ STAGE B.0 LANDED (2026-06-18, axiom-clean, build green) — the orthogonal-form infrastructure + a complete
 depth-1 affine-orthogonal seal.** `reachesRigidOrCameron_viaOrthogonalForm` (CascadeAffine.lean §OrthogonalForm,
@@ -301,5 +307,59 @@ de-risks the wiring before the geometry: **Stage A first** (carry `hFormCert`, p
 
 ---
 
+## 8. Stage B.1c scoping — discharging `CountsDetermineFrameQ` (the one open predicate)
+
+The checkpoint (§ STATUS) confirms everything composes; the *entire* remaining content is one predicate:
+
+> **`CountsDetermineFrameQ Q`** — agreeing two-round difference-counts at the basis frame ⟹ same `Q`-value profile
+> (`Q ū = Q ū'` and `Q(ū−e_i) = Q(ū'−e_i)` ∀ basis `e_i`).
+
+This decomposes into two independent Mathlib-level builds (B.1c-i, B.1c-ii), feeding the landed back-half.
+
+### B.1c-i — Witt's theorem (orbit characterization). The relations ARE the counts' alphabet.
+The counts in `FrameCountsAgree` are phrased via `relOfPair … = the GO(Q)-orbit index of the difference`. To
+reason about them at all, one must know **what the orbits are**: `GO(Q)`-orbit of `w` is determined by, and
+determines, the isotropy class `(w = 0 / Q w = 0 / Q w ≠ 0)`.
+- **Easy direction** (orbit ⟹ isotropy, by `Q`-invariance) is Witt-free — already used in B.0.
+- **Hard direction** (same isotropy class ⟹ same orbit, i.e. `GO(Q)` is transitive on nonzero isotropic vectors
+  and on each `Q ≠ 0` shell up to the similitude scalar) **is Witt's transitivity / extension theorem.**
+- **Deliverable:** `relOfPair (affineE 0) (affineE w) = relOfPair (affineE 0) (affineE w')` ↔ `isoClass w = isoClass w'`,
+  giving exactly **rank 3** (`{0, isotropic, anisotropic}`) — so the scheme is the SRG `VO^ε`.
+- **Mathlib status:** ABSENT (no Witt decomposition/extension; §5 R2). This is the larger of the two builds —
+  Witt's theorem for quadratic forms over finite fields, plus the similitude-scalar fusion. Scope: the
+  hyperbolic-decomposition + extension-of-isometries development (~Mathlib-contribution size).
+- **Checkpoint-able first:** state the orbit characterization as a carried predicate `OrbitIsIsotropyClass Q` and
+  prove `CountsDetermineFrameQ` reduces to an isotropy-only count statement — confirms B.1c-ii's target shape
+  before B.1c-i is built. (Recommended next concrete increment — it is checkpoint work, not heavy build.)
+
+### B.1c-ii — quadratic Gauss-sum / affine-quadric point counts. Counts ⟹ field values.
+With the orbits = isotropy classes, the two-round count `N(u; ρ, b)` becomes a count of `z` by the isotropy
+pattern of `(z̄ − t̄)_{t∈frame}` and `(z̄ − ū)`. The deliverable: these counts **recover the field value** `Q(ū − t̄)`
+(not just its isotropy bit). Mechanism (§3 Route A): the count of common isotropic neighbours of `e_i` and `u`
+is an explicit function of `B(ū, e_i)` (hence of `Q(ū − e_i)` via polarization), via the affine-quadric
+intersection numbers.
+- **Mathlib status:** partial — `ZMod.gauss_sum`, quadratic-character pieces exist; the assembled **affine-quadric
+  point-count formula** (number of solutions of `Q(x) = c` on `F_q^d`, by type `ε` and parity of `d`) is **not**
+  packaged. This is the genuine combinatorial-geometry core.
+- **Scope reducer:** fix `d = 4`, `VO^ε_4(q)` first (explicit count formulas; richest probe data). The **non-isotropic
+  shell** (recovering `Q(ū)` itself, where `B(ū,e_i) = Q(ū)` is known only modulo the unknown `Q(ū)`, §3) is the
+  fiddly residual — budget a small `k` or 1–2 extra frame points.
+- **char-2 caveat (§5 R2′):** do `q = 3` first.
+
+### Recommended order (de-risk shape before heavy build)
+1. **(checkpoint, light)** Carry `OrbitIsIsotropyClass Q` and reduce `CountsDetermineFrameQ` to an isotropy-only
+   count-recovery predicate `IsotropyCountsRecoverFrameQ Q`. Confirms B.1c-ii's exact target and that B.1c-i's
+   output plugs in — *before* building Witt. (Analogous to this session's checkpoint.)
+2. **(heavy)** B.1c-ii for `VO^ε_4(3)`: the affine-quadric point counts ⟹ `IsotropyCountsRecoverFrameQ`.
+3. **(heaviest)** B.1c-i: Witt's theorem ⟹ `OrbitIsIsotropyClass`, discharging the carried predicate.
+4. Generalize `d`, then `q` (incl. char 2), then classes (d)/(e); Suzuki (f) separate (not a form).
+
+**Pragmatic end-state if the heavy builds are deferred:** `reachesRigidOrCameron_viaCountsDetermineFrameQ`
+already makes node-4-for-the-seal `modulo {G3 + Cameron/Liebeck/Skresanov + CountsDetermineFrameQ}`, with
+`CountsDetermineFrameQ` a single, concrete, probe-validated, finitely-checkable predicate — the sharpest honest
+isolation of the node-4 forms-graph residue.
+
+---
+
 *Maintenance: update STATUS as stages land; keep route-doc §9.9.18b/c the empirical anchor and this doc the proof
-target. If Stage A lands, record the capstone in `PublicTheoremIndex.md` + the remaining-work tracker §3a.*
+target. Capstones recorded in `PublicTheoremIndex.md:1207, 1210-1226` + the remaining-work tracker §3a.*

@@ -302,18 +302,18 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | `reachesRigidOrCameron_viaNoConfusionCover` | 1340-1396 | ⊘ **SUPERSEDED** (use `…_viaSmallAutShatters`, the faithful-direction sibling). §S-gate2 (Stage 1b, G-cite) **THE SEAL VIA NO BIG-CONFUSION COVER — the two citations SEPARATED to isolated literals.** The cover dichotomy is factored: the Cameron step **reuses the canonical G3** `hClassify` (via `exhaustiveObstruction_scheme`, no new carry); the only new citation is the **Neumaier direction** `hNeumaier : (∃ over-`B` cover) → IsLarge` (a cover is a near-pencil line system, `card_bigClasses_mul_ge_of_cover`; geometric ⟹ large Aut, monotone under the base). `by_cases` on the cover: cover → `hNeumaier` → `IsLarge`, then primitive → G3 → Cameron / imprimitive → `hImprim` recovers; no cover → `…viaShattering`. Seal `modulo {G3 (hClassify) + Neumaier (hNeumaier) + hcatch + hImprim}` — each a single literal theorem (toward replacing each citation with its proof). Honest scope: `hNeumaier` cited, not proved; row-4 has no line system hence no cover (shatters). Axiom-clean. | — |
 | `affinePermFin_apply` | 2109-2112 | (Phase 2, M0.3) `affinePermFin g₀ t i = affineE (g₀ (affineE.symm i) + t)`. | `@[simp]` |
 | `affinePermFin_one_mem` | 2162-2165 | (Phase 2, M0.3) A translation (`linear part 1 ∈ G₀`) lies in `affineG`. | — |
-| `mulUnitHom_apply` | 2858-2860 | F0: `mulUnitHom u x = ↑u * x`. | `@[simp]` |
-| `conjHom_apply` | 2870-2872 | F0: `conjHom hd e u = efield hd (e (efield⁻¹ u))`. | `@[simp]` |
-| `sigmaCyc_zpow_apply` | 2889-2897 | F0 (load-bearing): `σ^k` acts as multiplication by `α^k` through the field iso (`σ^k u = efield (α^k · efield⁻¹ u)`) — the `σ^k ↦ α^k` reduction both deliverables turn on. | — |
-| `exists_npow_fqGen` | 2899-2907 | F0: every nonzero `z ∈ F_q` is a natural power of `α` (the multiplicative-orbit fact, for the irreducibility argument). | — |
-| `frobLinear_apply` | 2985-2986 | F1: `frobLinear x = x ^ p`. | `@[simp]` |
-| `frobLinear_mul` | 2988-2992 | F1: the **twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius (a ring hom) carries mult-by-`α` to mult-by-`α^p`; the algebraic core of the gap. | — |
-| `frobLinear_conj_mulUnit` | 2994-3003 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
-| `sigmaPow_zpow_apply` | 3109-3115 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
-| `exists_zpow_neg_one_iff` | 3311-3322 | §S-stage3-δ In a field, the powers of `-1` are exactly `±1`: `(∃ k:ℤ, (-1)^k = h) ↔ h = 1 ∨ h = -1` (via `Int.even_or_odd` + `Even/Odd.neg_one_zpow`). The `⟨-1⟩={1,-1}` fact in `zpow` form for the `H={±1}` family closure. Axiom-clean. | — |
-| `ratio_not_mem_num_out` | 3427-3442 | §S-stage3-δ Subfield ratio fact (numerator out of `K`): `a,b∈K`, `c∉K`, `a≠b` ⟹ `(c−a)/(b−c)∉K`. The round-1 pinning datum (non-`K` point pinned by two `K`-base points). | — |
-| `ratio_not_mem_denom_out` | 3444-3461 | §S-stage3-δ Subfield ratio fact (denominator out of `K`): `a,c∈K`, `b∉K`, `c≠a` ⟹ `(c−a)/(b−c)∉K`. The round-2 pinning datum (`K` point pinned by a `K`-base point and a reached non-`K` point). | — |
-| `frobLinear_conj_mulUnit'` | 3690-3697 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |
+| `mulUnitHom_apply` | 2920-2922 | F0: `mulUnitHom u x = ↑u * x`. | `@[simp]` |
+| `conjHom_apply` | 2932-2934 | F0: `conjHom hd e u = efield hd (e (efield⁻¹ u))`. | `@[simp]` |
+| `sigmaCyc_zpow_apply` | 2951-2959 | F0 (load-bearing): `σ^k` acts as multiplication by `α^k` through the field iso (`σ^k u = efield (α^k · efield⁻¹ u)`) — the `σ^k ↦ α^k` reduction both deliverables turn on. | — |
+| `exists_npow_fqGen` | 2961-2969 | F0: every nonzero `z ∈ F_q` is a natural power of `α` (the multiplicative-orbit fact, for the irreducibility argument). | — |
+| `frobLinear_apply` | 3047-3048 | F1: `frobLinear x = x ^ p`. | `@[simp]` |
+| `frobLinear_mul` | 3050-3054 | F1: the **twist relation** `φ(α·x) = α^p · φ(x)` — Frobenius (a ring hom) carries mult-by-`α` to mult-by-`α^p`; the algebraic core of the gap. | — |
+| `frobLinear_conj_mulUnit` | 3056-3065 | F1: `φ ∘ (mul α) ∘ φ⁻¹ = (mul α)^p` as linear automorphisms (conjugation carries the generator to its `p`-th power). | — |
+| `sigmaPow_zpow_apply` | 3171-3177 | F2b: `σ_β^k` acts as multiplication by `β^k` through the field iso. Generalizes `sigmaCyc_zpow_apply`. | — |
+| `exists_zpow_neg_one_iff` | 3373-3384 | §S-stage3-δ In a field, the powers of `-1` are exactly `±1`: `(∃ k:ℤ, (-1)^k = h) ↔ h = 1 ∨ h = -1` (via `Int.even_or_odd` + `Even/Odd.neg_one_zpow`). The `⟨-1⟩={1,-1}` fact in `zpow` form for the `H={±1}` family closure. Axiom-clean. | — |
+| `ratio_not_mem_num_out` | 3489-3504 | §S-stage3-δ Subfield ratio fact (numerator out of `K`): `a,b∈K`, `c∉K`, `a≠b` ⟹ `(c−a)/(b−c)∉K`. The round-1 pinning datum (non-`K` point pinned by two `K`-base points). | — |
+| `ratio_not_mem_denom_out` | 3506-3523 | §S-stage3-δ Subfield ratio fact (denominator out of `K`): `a,c∈K`, `b∉K`, `c≠a` ⟹ `(c−a)/(b−c)∉K`. The round-2 pinning datum (`K` point pinned by a `K`-base point and a reached non-`K` point). | — |
+| `frobLinear_conj_mulUnit'` | 3752-3759 | (separation step 1) `φ ∘ (mul β) ∘ φ⁻¹ = (mul β)^p` for arbitrary unit `β` (generalizes `frobLinear_conj_mulUnit`). | — |
 ## ChainDescent/LinearOracle.lean
 
 | Name | Line | Description | Notes |

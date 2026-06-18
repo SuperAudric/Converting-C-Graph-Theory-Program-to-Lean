@@ -143,10 +143,17 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   named count crux), `reachesRigidOrCameron_viaSimilitudeForm` (CascadeAffine.lean §OrthogonalForm,
   `PublicTheoremIndex.md:1218-1222`). The genuine rank-3 SRG `VO^ε` residue (`affineScheme (similitudeGroup Q)`) seals
   once `SimilitudeFrameSeparates Q` holds; open content isolated to that one predicate. **Carries NO `hSmallAutThin`.**
-- **Remaining = Stage B.1c (the deep open research core):** discharge `SimilitudeFrameSeparates` — the two-round count
-  crux. **Blocked on two Mathlib gaps:** (i) **Witt's theorem** (characterize the `GO(Q)`-orbits = the relations; B.0
-  was Witt-free, B.1c is NOT) and (ii) **quadratic Gauss-sum / affine-quadric point counts** (the intersection numbers
-  as functions of `B(v,e_i)`). Back-half = the landed `coords_determine`. Multi-session research-formalization.
+- **★ RESEARCH-CORE CHECKPOINT CONFIRMED (2026-06-18, axiom-clean):** `reachesRigidOrCameron_viaCountsDetermineFrameQ`
+  + `CountsDetermineFrameQ` + `similitudeFrameSeparates_of_countsDetermineFrameQ` + `FrameCountsAgree`
+  (`PublicTheoremIndex.md:1223-1226`). The chain is now confirmed END-TO-END modulo one front-half predicate:
+  `CountsDetermineFrameQ` (= Witt + Gauss) →[`coords_determine`, landed]→ `SimilitudeFrameSeparates` →[landed]→ seal.
+  So the research core is **sound** (the heavy machinery, once built, provably closes), and the B.0 back-half
+  `coords_determine` is confirmed to compose. The entire open content is isolated to `CountsDetermineFrameQ`.
+- **Remaining = Stage B.1c (the deep open research core):** discharge `CountsDetermineFrameQ`. **Two Mathlib builds**
+  (plan §8): (i) **Witt's theorem** (`GO(Q)`-orbits = isotropy classes ⟹ rank-3; the heaviest, ABSENT in Mathlib) and
+  (ii) **quadratic Gauss-sum / affine-quadric point counts** (isotropy counts ⟹ field values `Q(ū−e_i)`; partial in
+  Mathlib). Recommended next: a *light* checkpoint carrying `OrbitIsIsotropyClass` to reduce to an isotropy-only count
+  predicate (confirms B.1c-ii's target before building Witt). Multi-session research-formalization.
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:
