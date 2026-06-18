@@ -20,14 +20,23 @@
 > B1 `sum_addChar_sq` (`∑ψ(x²)=gaussSum`), B2 `sum_addChar_smul_sq` (`∑ψ(a·x²)=χ(a)·gaussSum`), helper `addChar_sum`,
 > B3 `sum_addChar_quadForm` + basis-explicit `sum_quadForm_eval` (`∑ψ(Qx)=(∏χwᵢ)Gᵈ`, the multivariable core), scaling
 > `sum_addChar_quadForm_smul` (`∑ψ(s·Qx)=χ(s)^d·∑ψ(Qx)`), and **Brick C `card_quadForm_eq`** — THE point count:
-> `#{x:Qx=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_xψ(Qx)`. **NEXT (next session, scoped in file header):** (i) Brick
-> C-even corollary (d even ⟹ `χ(t)^d=1` ⟹ bracket `=q−1`/`−1`; `gaussSum_sq` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}`; short,
-> validates C); (ii) **Brick D** = reduce `IsotropyFrameCountsAgree` to these counts (the common-isotropic-neighbour
-> count of frame `t`,`u` is the isotropic hyperplane-section `#{w:Q(w)=0 ∧ polar(w,a)=Q(a)}`, `a=ū−t̄`, via a 2-char sum
-> / reduce to `Q|_{a^⊥}` dim `d−1`; depends on `χ(Q(a))`, so equal counts ⟹ equal `χ(Q(ū−t̄))` ⟹ at `q=3` equal
-> `Q(ū−t̄)` ⟹ `IsotropyCountsRecoverFrameQ`) — THE remaining substantive step; (iii) bridge
-> `polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft` + an orthogonal basis for `VO^ε_4(3)`. Then PORT
-> A/B/C/D into CascadeAffine (one build). char-2 deferred (§5 R2′).
+> `#{x:Qx=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_xψ(Qx)`. **ALSO DONE:** D1 `sum_addChar_quadForm_linear`
+> (complete-the-square `∑ψ(r·Qw+polar Q w a')=ψ(−r⁻¹Qa')·∑ψ(r·Qw)`) + A2 `count2_eq_charsum` (two-condition count) —
+> the engines for hyperplane / joint counts.
+>
+> **⚠ KEY FINDING (2026-06-18) — the PAIRWISE plan for Brick D FAILS; corrects (ii) below + §3.** Computing the
+> pairwise common-isotropic-neighbour count via A2+D1+Gauss collapse: `#{w:Qw=0 ∧ Q(w−a)=0} = q²+S(1)/q` (d=4),
+> **INDEPENDENT of the anisotropic shell of `a`** (VO^-_4(3): 6 for both Qa=1 and Qa=2). Reason: a similitude of
+> factor μ preserves the cone {Q=0} and maps shell {Q=1}→{Q=μ}, so any count from the cone + a SINGLE point is
+> similitude-invariant ⟹ shell-blind. So the §3 Route-A "hyperplane-section count depends on χ(Qa)" claim is **WRONG**
+> (χ(Qa) cancels). **Recovery MUST use the JOINT count over the WHOLE frame at once** (the fixed frame breaks the
+> similitude symmetry: a `g` moving `a` across shells also moves the `eᵢ`) — a `(d+2)`-fold char sum (A2 generalized;
+> each inner sum via D1). **NEXT:** (i) RESOLVE whether `IsotropyCountsRecoverFrameQ` (a bounded-round joint isotropy
+> count) is true / correctly shaped — probe shows the SCHEME discretizes (full 2-WL), but the predicate is one specific
+> joint count; verify it suffices before the heavy build (plausibly yes: fixed frame + Witt-transitivity-on-shells pins
+> the shell). (ii) build the joint `(d+2)`-fold count = the genuine "non-isotropic shell" content (plan §3, substantial).
+> (iii) Brick C-even (short, validates C). (iv) bridge `polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft` +
+> orthogonal basis for `VO^ε_4(3)`. Then PORT A/B/C/D into CascadeAffine. char-2 deferred (§5 R2′).
 
 > **▶▶ HANDOFF — CURRENT STATE IN ONE READ (2026-06-18). The blocks below this are chronological history (newest
 > first); this box is the live state.**

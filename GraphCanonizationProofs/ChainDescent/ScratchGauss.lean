@@ -23,23 +23,35 @@ DONE (this file — the full exponential-sum core + the assembled point count):
 * Brick C  `card_quadForm_eq`        — THE affine-quadric point count (Mathlib-absent), character-sum
                                        form: `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_x ψ(Q x)`.
 
-NEXT (next session):
-* Brick C-even (corollary)  — for `d` even, `χ(t)^d = 1` (t≠0), so the bracket = `q−1` (c=0) / `−1`
-             (c≠0) by `AddChar.sum_mulShift`; with `∑_x ψ(Q x)` via `gaussSum_sq` (`G²=χ(-1)q`) this
-             gives the closed `q^{d-1} ± (q-1)q^{d/2-1}` count. Short; validates Brick C numerically.
-* Brick D  — reduce `IsotropyFrameCountsAgree` to point counts. The common-isotropic-neighbour count of
-             frame point `t` and `u` is `#{w : Q(w)=0 ∧ polar(w,a)=Q(a)}` (`a = ū−t̄`) — an isotropic
-             hyperplane-section count. Compute it via a 2-character sum (one for `Q(w)=0`, one for the
-             hyperplane) — a generalization of Brick C — or reduce to `Q|_{a^⊥}` (dim `d−1`, odd). It
-             depends on `χ(Q(a))`, so equal isotropy counts ⟹ equal `χ(Q(ū−t̄))` ⟹ (with the marginal
-             isotropy class, and at `q=3` where nonzero = `{square=1, nonsquare=2}`) equal `Q(ū−t̄)`
-             ∀ frame `t` ⟹ `IsotropyCountsRecoverFrameQ`. THE remaining substantive step.
-* Bridge   — `(Q.polarBilin).Nondegenerate` (the project's hyp) ⟹ `(associated Q).SeparatingLeft`
-             (eval/scaling hyp), via `two_nsmul_associated` + `Invertible (2 : ZMod p)` (p odd). Small.
-  Also: derive an orthogonal basis `v`+`hv`+`hw` for the concrete `VO^ε_4(3)` form (via
-  `exists_orthogonal_basis` + `not_isOrtho_basis_self_of_separatingLeft`, as in `card_quadForm_eq`'s
-  callers will need).
-Then PORT A/B/C + D into CascadeAffine (one build) and discharge `IsotropyCountsRecoverFrameQ`.
+* Brick D1 `sum_addChar_quadForm_linear` — complete-the-square: `∑_w ψ(r·Qw + polar Q w a') =
+             ψ(−r⁻¹·Q a')·∑_w ψ(r·Qw)`. The engine for hyperplane-section / joint counts.
+* Brick A2 `count2_eq_charsum`       — two-condition count = double char sum (generalizes Brick A).
+
+⚠ KEY FINDING (2026-06-18) — the naive PAIRWISE plan for Brick D FAILS; recovery needs the FULL joint
+frame count. Computing the pairwise common-isotropic-neighbour count via A2 + D1 + a Gauss collapse:
+    #{w : Q w = 0 ∧ Q (w − a) = 0} = #{w : Q w = 0 ∧ polar Q w a = Q a} = q² + S(1)/q   (d = 4),
+S(1) = ∑_x ψ(Q x) = ±q². This is INDEPENDENT of which anisotropic shell `a` lies in (VO^-_4(3):
+9 + (−9)/3 = 6 for both Q a = 1 and Q a = 2). Reason: a similitude `g` of factor `μ` preserves the cone
+{Q=0} and maps shell {Q=1}→{Q=μ}, so ANY count built from the cone + a SINGLE point `a` is similitude-
+invariant ⟹ shell-blind. So pairwise (one frame point + u) counts CANNOT recover `χ(Q(ū−t))`; the
+earlier "hyperplane-section depends on χ(Q a)" idea is WRONG (the χ(Q a) dependence cancels — confirmed
+by the Gauss collapse AND the similitude symmetry).
+
+NEXT (next session) — Brick D, corrected:
+* Recovery MUST use the JOINT isotropy count over the WHOLE frame {0,e₁,…,e_d} at once (the fixed frame
+  breaks similitude symmetry: a `g` moving `a` across shells also moves the `eᵢ`). Target = the
+  `(d+2)`-fold character sum (A2 generalized to `d+2` conditions; each inner sum evaluated by D1, one
+  quadratic + several fixed linear terms `polar Q z eᵢ`). The χ(Q(ū−t)) dependence survives because the
+  `eᵢ` are fixed. THE genuine "non-isotropic shell" content (plan §3) — substantial.
+* RESOLVE FIRST: is `IsotropyCountsRecoverFrameQ` (a bounded-round joint isotropy count) actually TRUE /
+  correctly shaped? The probe shows the GO(Q) SCHEME discretizes (full 2-WL); the predicate is one
+  specific joint count. Plausibly true (fixed frame breaks similitude symmetry; Witt ⟹ O(Q) transitive
+  on each shell ⟹ frame config pins the shell) — but verify the COUNT suffices, not just orbit existence,
+  before the heavy build.
+* Brick C-even (independent, short) — `d` even ⟹ `χ(t)^d=1` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}` via
+  `AddChar.sum_mulShift` + `gaussSum_sq`. Validates Brick C numerically.
+* Bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` +
+  `Invertible(2:ZMod p)`) + orthogonal basis for `VO^ε_4(3)`. Then PORT A/B/C/D into CascadeAffine.
 
 CAVEAT: the bricks require `[Invertible (2:K)]` / `ringChar ≠ 2` — char-2 (`q = 2,4`) is a separate
 argument (§5 R2′); do `q = 3` first.
@@ -283,7 +295,58 @@ theorem card_quadForm_eq {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Inve
     rw [hsc]; ring
   rw [← hcount, hLHS]
 
+/-- **Brick D1 — the quadratic-plus-linear sum (complete the square).** For a unit `r` and any `a'`,
+`∑_w ψ(r·Q w + polar Q w a') = ψ(−r⁻¹·Q a')·∑_w ψ(r·Q w)`. The linear term is absorbed by the shift
+`w ↦ w + r⁻¹·a'`; the residual constant `−r⁻¹·Q a'` factors out. This is the engine of the
+hyperplane-section counts that Brick D needs (the isotropy joint-count reduces to such sums). Needs no
+diagonalization or primitivity — pure reindexing + additivity of `ψ`. -/
+theorem sum_addChar_quadForm_linear {K : Type*} [Field K] {R' : Type*} [CommRing R']
+    (ψ : AddChar K R') {V : Type*} [AddCommGroup V] [Module K V] [Fintype V]
+    (Q : QuadraticForm K V) (r : Kˣ) (a' : V) :
+    (∑ w : V, ψ ((r : K) * Q w + QuadraticMap.polar Q w a'))
+      = ψ (-((r : K)⁻¹ * Q a')) * ∑ w : V, ψ ((r : K) * Q w) := by
+  have hr : (r : K) ≠ 0 := r.ne_zero
+  have key : ∀ w : V, (r : K) * Q w + QuadraticMap.polar Q w a'
+      = (r : K) * Q (w + (r : K)⁻¹ • a') + (-((r : K)⁻¹ * Q a')) := by
+    intro w
+    have h1 : Q (w + (r : K)⁻¹ • a')
+        = QuadraticMap.polar Q w ((r : K)⁻¹ • a') + Q w + Q ((r : K)⁻¹ • a') := by
+      simp only [QuadraticMap.polar]; ring
+    rw [QuadraticMap.polar_smul_right, QuadraticMap.map_smul, smul_eq_mul, smul_eq_mul] at h1
+    rw [h1]; field_simp; ring
+  calc (∑ w : V, ψ ((r : K) * Q w + QuadraticMap.polar Q w a'))
+      = ∑ w : V, ψ ((r : K) * Q (w + (r : K)⁻¹ • a') + (-((r : K)⁻¹ * Q a'))) :=
+        Finset.sum_congr rfl (fun w _ => by rw [key w])
+    _ = ∑ w : V, ψ (-((r : K)⁻¹ * Q a')) * ψ ((r : K) * Q (w + (r : K)⁻¹ • a')) :=
+        Finset.sum_congr rfl (fun w _ => by rw [AddChar.map_add_eq_mul, mul_comm])
+    _ = ψ (-((r : K)⁻¹ * Q a')) * ∑ w : V, ψ ((r : K) * Q (w + (r : K)⁻¹ • a')) := by
+        rw [Finset.mul_sum]
+    _ = ψ (-((r : K)⁻¹ * Q a')) * ∑ w : V, ψ ((r : K) * Q w) := by
+        congr 1
+        exact Equiv.sum_comp (Equiv.addRight ((r : K)⁻¹ • a')) (fun w => ψ ((r : K) * Q w))
+
+/-- **Brick A2 — two-condition solution count as a character sum.** Generalizes Brick A: the number of
+common solutions of `f x = c` and `g x = d`, scaled by `q²`, equals `∑_x (∑_r ψ(r(f x−c)))·(∑_s ψ(s(g x−d)))`.
+This is the entry point for the hyperplane-section count `#{w : Q w = 0 ∧ polar Q w a = c}` (Brick D),
+whose inner sum then evaluates via Brick D1. -/
+theorem count2_eq_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar F R'} (hψ : ψ.IsPrimitive)
+    {V : Type*} [Fintype V] [DecidableEq V] (f g : V → F) (c d : F) :
+    (∑ x : V, (∑ r : F, ψ (r * (f x - c))) * (∑ s : F, ψ (s * (g x - d))))
+      = ((univ.filter (fun x : V => f x = c ∧ g x = d)).card : R')
+        * ((Fintype.card F : R') * (Fintype.card F : R')) := by
+  have hinner : ∀ x : V, (∑ r : F, ψ (r * (f x - c))) * (∑ s : F, ψ (s * (g x - d)))
+      = if (f x = c ∧ g x = d) then (Fintype.card F : R') * (Fintype.card F : R') else 0 := by
+    intro x
+    rw [AddChar.sum_mulShift (f x - c) hψ, AddChar.sum_mulShift (g x - d) hψ]
+    simp only [sub_eq_zero]
+    split_ifs with h1 h2 h2 <;> simp_all
+  rw [Finset.sum_congr rfl (fun x _ => hinner x), ← Finset.sum_filter, Finset.sum_const,
+    nsmul_eq_mul]
+
 #print axioms count_eq_charsum
 #print axioms sum_quadForm_eval
 #print axioms sum_addChar_quadForm_smul
 #print axioms card_quadForm_eq
+#print axioms sum_addChar_quadForm_linear
+#print axioms count2_eq_charsum
