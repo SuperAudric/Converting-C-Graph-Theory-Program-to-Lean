@@ -67,10 +67,12 @@ need REFORMULATION with a symmetry-broken base. The "recover Q-profile then coor
 also wrong for minus-type (front half false); the correct target is direct count-injectivity at the bigger base.
 
 NEXT (next session) — Brick D, corrected target:
-* In CascadeAffine: replace the standard-frame predicate by "∃ bounded base `T` (size ≤ d+2, e.g.
-  `frameBase ∪ {p}`) on which the one-round relation-count profile separates all vertices" — then
-  `discrete_of_kRoundRelationSeparates` gives `Discrete` → `SeparatesAtBoundedBase` → seal directly (no
-  coords_determine / Q-profile recovery needed).
+* DONE (2026-06-18) — the CascadeAffine reformulation has LANDED: §OrthogonalForm "Stage B.1c (CORRECTED)" now
+  carries `SeparatesAtBase Q T` (arbitrary base) + `reachesRigidOrCameron_viaSymmetryBrokenBase` +
+  `IsotropySeparatesAtBase Q T` (the Gauss endpoint, pure isotropy counts) + `separatesAtBase_of_isotropySeparates`
+  (Witt bridge) + `reachesRigidOrCameron_viaIsotropySeparates`, all axiom-clean. The three frame-locked predicates
+  are ⚠ SUPERSEDED in-source. So the Gauss build's target is now a concrete `IsotropySeparatesAtBase Q T` for a
+  symmetry-broken `T` (≈ d+2, e.g. `frameBase ∪ {p}`); discharging it (+ Witt `OrbitIsIsotropyClass`) seals.
 * The PROOF of count-injectivity at `T` is the genuine content. Remaining engine step: the **k-fold count**
   `#{z : Q(z−tⱼ)=cⱼ ∀j∈T} · q^|T| = ∑_{r:T→K} (∏ⱼ ψ(−rⱼcⱼ))·∑_z ψ(∑ⱼ rⱼ Q(z−tⱼ))` (generalize `count2_eq_charsum`
   to a Finset of conditions), whose inner sum is now `sum_addChar_multiQuad` (R=∑rⱼ≠0) or a linear boundary

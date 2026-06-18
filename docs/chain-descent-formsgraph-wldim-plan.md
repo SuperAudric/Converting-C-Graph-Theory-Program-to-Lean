@@ -11,6 +11,26 @@
 
 ## STATUS (read first)
 
+> **★ REFORMULATION LANDED (2026-06-18, axiom-clean, build green) — the frame-locked predicates are SUPERSEDED;
+> the live target is now count-injectivity at a SYMMETRY-BROKEN base.** New block in **`CascadeAffine.lean`
+> §OrthogonalForm** ("Stage B.1c (CORRECTED)"), all three decls `[propext, Classical.choice, Quot.sound]`:
+> - **`SeparatesAtBase Q T`** — the corrected separation predicate: one-round difference-relation count-injectivity
+>   at an *arbitrary* base `T` (the landed engine `discrete_affineScheme_of_twoRoundDiffSeparates` already accepts
+>   any `T`; nothing was frame-specific). `SimilitudeFrameSeparates Q` = the mis-shaped `T := frameBase` instance.
+> - **`reachesRigidOrCameron_viaSymmetryBrokenBase Q T hcard hsep`** — the seal from any bounded base `T` with
+>   `SeparatesAtBase Q T`. Drops `coords_determine` / `Q`-profile recovery entirely (wrong for minus-type). NO `hSmallAutThin`.
+> - **`IsotropySeparatesAtBase Q T`** (the **Gauss endpoint**) — pure isotropy-class count-injectivity at `T`, NO
+>   opaque relations; **`separatesAtBase_of_isotropySeparates`** (Witt bridge, arbitrary `T`) lifts it to
+>   `SeparatesAtBase`; **`reachesRigidOrCameron_viaIsotropySeparates`** composes to the seal.
+>
+> The three frame-locked predicates (`SimilitudeFrameSeparates`, `CountsDetermineFrameQ`, `IsotropyCountsRecoverFrameQ`)
+> are tagged **⚠ SUPERSEDED** in-source (kept, axiom-clean, compose — but unprovable as stated for `VO^-`). **After
+> this reformulation the open content is exactly two inputs:** `OrbitIsIsotropyClass Q` (Witt, B.1c-i) and a concrete
+> **`IsotropySeparatesAtBase Q T`** for a symmetry-broken `T` (`≈ d+2`, e.g. `frameBase ∪ {p}`) — the Gauss build's
+> target. NEXT (Gauss): the **k-fold count assembly** (generalize `count2_eq_charsum` to a Finset of conditions, inner
+> sum = `sum_addChar_multiQuad`) → inclusion–exclusion (isotropy → `Q`-value counts) → prove `IsotropySeparatesAtBase`
+> at the chosen `T`.
+>
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
 > isolation, cheap; verified via `lake env lean ChainDescent/ScratchGauss.lean`, all decls
