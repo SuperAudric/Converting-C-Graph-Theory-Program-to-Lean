@@ -36,8 +36,13 @@
 > (2026-06-18, axiom-clean): `count_pi_setValued`** (`#{z:∀j, h_jz∈A_j} = ∑_{c∈∏A_j} #{z:∀j, h_jz=c_j}`, value-SET
 > counts = sum of value-POINT counts) — with `h_jz=Q(z−t_j)` it turns isotropy-class counts (each = a `Q`-value-set)
 > into the pointwise counts the toolkit closes. The Mathlib-only Gauss toolkit is now COMPLETE
-> (A/A2/Ak/B/C/D1/multiQuad/multiQuad-zero/linearMap/setValued). NEXT (at PORT into CascadeAffine): the
-> isotropy↔value-set dictionary + origin correction (needs `isoClass`) → prove `IsotropySeparatesAtBase` at the chosen `T`.
+> (A/A2/Ak/B/C/D1/multiQuad/multiQuad-zero/linearMap/setValued). **★ isotropy DICTIONARY LANDED (2026-06-18, axiom-clean, in
+> CascadeAffine §OrthogonalForm): `isoClass_eq_zero_iff` (class 0 ⟺ `w=0`), `isoClass_eq_two_iff` (class 2 ⟺
+> anisotropic `Q w≠0`, pure value condition), `isoClass_eq_one_iff` (class 1 ⟺ `w≠0 ∧ Q w=0`), `isoClass_ne_two_iff`
+> (coarse split ⟺ `Q w=0`).** These characterize each isotropy class as a `Q`-value-set condition (only class 0/1 is
+> origin-refined). NEXT: the PORT — bring the Mathlib-only Gauss toolkit into a module CascadeAffine-side work can
+> import, then the isotropy-count → value-set-count conversion (`count_pi_setValued` + the dictionary, with the
+> origin correction) → prove `IsotropySeparatesAtBase` at the chosen `T` for `VO^ε_4(3)`.
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in

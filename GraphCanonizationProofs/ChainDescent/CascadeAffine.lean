@@ -2896,6 +2896,47 @@ Witt (B.1c-i) is built: the relation counts collapse to isotropy counts once the
 noncomputable def isoClass (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (w : Fin d → ZMod p) : Fin 3 :=
   if w = 0 then 0 else if Q w = 0 then 1 else 2
 
+/-! ##### The isotropy dictionary — `isoClass` as a value-set condition on `Q` (the inclusion–exclusion foundation)
+
+These characterize each isotropy class as a (value-set) condition on `Q w`, possibly refined by the single point
+`w = 0`. They are the bridge that lets the isotropy-class joint counts of `IsotropySeparatesAtBase` be rewritten as
+`Q`-value-set counts — which the Gauss toolkit (`ScratchGauss.count_pi_setValued` + the point-count closed form)
+then evaluates. Only class `0` vs `1` is refined by the origin `w = 0`; the anisotropic class `2` and the coarse
+"isotropic-or-zero" split (`≠ 2`) are *pure* `Q`-value conditions (no origin correction). -/
+
+/-- Class `0` ⟺ the zero vector. -/
+theorem isoClass_eq_zero_iff (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (w : Fin d → ZMod p) :
+    isoClass Q w = 0 ↔ w = 0 := by
+  unfold isoClass
+  split_ifs with h1 h2
+  · exact ⟨fun _ => h1, fun _ => rfl⟩
+  · exact ⟨fun h => absurd h (by decide), fun h => absurd h h1⟩
+  · exact ⟨fun h => absurd h (by decide), fun h => absurd h h1⟩
+
+/-- Class `2` ⟺ anisotropic (`Q w ≠ 0`). A *pure* `Q`-value condition — no origin correction. -/
+theorem isoClass_eq_two_iff (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (w : Fin d → ZMod p) :
+    isoClass Q w = 2 ↔ Q w ≠ 0 := by
+  unfold isoClass
+  split_ifs with h1 h2
+  · subst h1; exact ⟨fun h => absurd h (by decide), fun h => absurd Q.map_zero h⟩
+  · exact ⟨fun h => absurd h (by decide), fun h => absurd h2 h⟩
+  · exact ⟨fun _ => h2, fun _ => rfl⟩
+
+/-- Class `1` ⟺ nonzero isotropic (`w ≠ 0 ∧ Q w = 0`). -/
+theorem isoClass_eq_one_iff (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (w : Fin d → ZMod p) :
+    isoClass Q w = 1 ↔ w ≠ 0 ∧ Q w = 0 := by
+  unfold isoClass
+  split_ifs with h1 h2
+  · exact ⟨fun h => absurd h (by decide), fun h => absurd h1 h.1⟩
+  · exact ⟨fun _ => ⟨h1, h2⟩, fun _ => rfl⟩
+  · exact ⟨fun h => absurd h (by decide), fun h => absurd h.2 h2⟩
+
+/-- The coarse "isotropic-or-zero" split: `isoClass ≠ 2` ⟺ `Q w = 0`. A *pure* `Q`-value condition (this is the
+isotropic/anisotropic SRG dichotomy with the origin folded in — no origin correction needed). -/
+theorem isoClass_ne_two_iff (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (w : Fin d → ZMod p) :
+    isoClass Q w ≠ 2 ↔ Q w = 0 := by
+  rw [ne_eq, isoClass_eq_two_iff, not_not]
+
 /-- **The Witt deliverable (B.1c-i), as a named predicate.** The `GO(Q)`-orbit of a difference (= the scheme
 relation `relOfPair (affineE 0) (affineE w)`) is determined by its isotropy class, via an injection
 `Fin 3 ↪ relations`. The "function of isoClass" direction is Witt's transitivity (orbit fusion); injectivity is
