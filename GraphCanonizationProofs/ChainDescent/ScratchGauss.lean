@@ -37,21 +37,42 @@ invariant ⟹ shell-blind. So pairwise (one frame point + u) counts CANNOT recov
 earlier "hyperplane-section depends on χ(Q a)" idea is WRONG (the χ(Q a) dependence cancels — confirmed
 by the Gauss collapse AND the similitude symmetry).
 
-NEXT (next session) — Brick D, corrected:
-* Recovery MUST use the JOINT isotropy count over the WHOLE frame {0,e₁,…,e_d} at once (the fixed frame
-  breaks similitude symmetry: a `g` moving `a` across shells also moves the `eᵢ`). Target = the
-  `(d+2)`-fold character sum (A2 generalized to `d+2` conditions; each inner sum evaluated by D1, one
-  quadratic + several fixed linear terms `polar Q z eᵢ`). The χ(Q(ū−t)) dependence survives because the
-  `eᵢ` are fixed. THE genuine "non-isotropic shell" content (plan §3) — substantial.
-* RESOLVE FIRST: is `IsotropyCountsRecoverFrameQ` (a bounded-round joint isotropy count) actually TRUE /
-  correctly shaped? The probe shows the GO(Q) SCHEME discretizes (full 2-WL); the predicate is one
-  specific joint count. Plausibly true (fixed frame breaks similitude symmetry; Witt ⟹ O(Q) transitive
-  on each shell ⟹ frame config pins the shell) — but verify the COUNT suffices, not just orbit existence,
-  before the heavy build.
+⚠⚠ OPEN QUESTION RESOLVED (2026-06-18, finite probe over VO^ε_4(3), /tmp/isoprobe*.py) — the standard-frame
+predicates are MIS-SHAPED; fix = a symmetry-broken base. Findings:
+  (1) `IsotropyCountsRecoverFrameQ` / `SimilitudeFrameSeparates` (the one-round count at the standard frame
+      {0,e₀,…,e_d}) are **FALSE for VO^-_4(3)**: u=(0,0,1,2), u'=(0,0,2,1) have IDENTICAL one-round
+      isotropy-counts to the frame but different Q-profiles (Q(u−e₂)=1 vs 2). Cause: Q=x₀x₁+x₂²+x₃² is
+      symmetric in x₂,x₃, and the count (a coarser invariant than orbits) is blind to it at the symmetric
+      frame. (VO^+_4(3) is FINE at the standard frame — issue is minus-type symmetry.)
+  (2) The SCHEME genuinely discretizes: iterated 1-WL from the frame → 81 singletons in 2 rounds, separates
+      u,u'. So bounded WL-dim HOLDS; only the one-round-count-at-symmetric-frame predicate is wrong.
+  (3) THE PROJECT ENGINE `discrete_of_kRoundRelationSeparates` consumes exactly the ONE-ROUND count
+      (CascadeAffine:1918-1924; k-independent — k only proves the count is a warmRefine invariant), so it
+      CANNOT discharge VO^- at the standard frame, though the conclusion (warmRefine Discrete) is true.
+  (4) FIX: the one-round count IS injective at the standard frame PLUS a few similitude-symmetry-breaking
+      points. Base size grows slowly with q (frame-based): VO^-_4(3)→6, VO^-_4(5)→6, VO^+_4(5)→7
+      (VO^+_4(3) already 5); greedy smaller (VO^-_4(3)→4). MATCHES Probe_FormsGraphs [5,5,6,7] for q=2..5
+      ⟹ that probe measured the ONE-ROUND base (≈ d+O(1), slow q-dependence). B.0 (isometry O(Q)) UNAFFECTED
+      (relation = Q-value, depth-1). Uniform-in-q proof needs a q-growing # of extra points; first target
+      q=3,d=4 is just frame+1 (size 6).
+
+CONSEQUENCE — the landed B.1 checkpoint capstones (`reachesRigidOrCameron_via{IsotropyCounts,CountsDetermineFrameQ,
+SimilitudeForm}`) are axiom-clean but have UNPROVABLE hypotheses as stated (tied to the symmetric frame); they
+need REFORMULATION with a symmetry-broken base. The "recover Q-profile then coords_determine" architecture is
+also wrong for minus-type (front half false); the correct target is direct count-injectivity at the bigger base.
+
+NEXT (next session) — Brick D, corrected target:
+* In CascadeAffine: replace the standard-frame predicate by "∃ bounded base `T` (size ≤ d+2, e.g.
+  `frameBase ∪ {p}`) on which the one-round relation-count profile separates all vertices" — then
+  `discrete_of_kRoundRelationSeparates` gives `Discrete` → `SeparatesAtBoundedBase` → seal directly (no
+  coords_determine / Q-profile recovery needed).
+* The PROOF of count-injectivity at `T` is the genuine content: a `(d+2)`-point character-sum count
+  (A2 generalized to the base conditions; each inner sum via D1 = the complete-the-square engine). The
+  Gauss bricks A/A2/B/C/D1 are the tools. Substantial; the symmetry-broken base is what makes it TRUE.
 * Brick C-even (independent, short) — `d` even ⟹ `χ(t)^d=1` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}` via
   `AddChar.sum_mulShift` + `gaussSum_sq`. Validates Brick C numerically.
 * Bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` +
-  `Invertible(2:ZMod p)`) + orthogonal basis for `VO^ε_4(3)`. Then PORT A/B/C/D into CascadeAffine.
+  `Invertible(2:ZMod p)`) + orthogonal basis for `VO^ε_4(3)`. Then PORT into CascadeAffine.
 
 CAVEAT: the bricks require `[Invertible (2:K)]` / `ringChar ≠ 2` — char-2 (`q = 2,4`) is a separate
 argument (§5 R2′); do `q = 3` first.

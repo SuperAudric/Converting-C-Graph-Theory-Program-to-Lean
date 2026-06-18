@@ -33,10 +33,40 @@
 > similitude symmetry: a `g` moving `a` across shells also moves the `eᵢ`) — a `(d+2)`-fold char sum (A2 generalized;
 > each inner sum via D1). **NEXT:** (i) RESOLVE whether `IsotropyCountsRecoverFrameQ` (a bounded-round joint isotropy
 > count) is true / correctly shaped — probe shows the SCHEME discretizes (full 2-WL), but the predicate is one specific
-> joint count; verify it suffices before the heavy build (plausibly yes: fixed frame + Witt-transitivity-on-shells pins
-> the shell). (ii) build the joint `(d+2)`-fold count = the genuine "non-isotropic shell" content (plan §3, substantial).
-> (iii) Brick C-even (short, validates C). (iv) bridge `polarBilin.Nondegenerate ⟹ (associated Q).SeparatingLeft` +
-> orthogonal basis for `VO^ε_4(3)`. Then PORT A/B/C/D into CascadeAffine. char-2 deferred (§5 R2′).
+> joint count; verify it suffices before the heavy build. (ii)–(iv) the joint count, C-even, bridge. **[(i) NOW
+> RESOLVED — see the box immediately below; it changes the plan.]**
+>
+> **⚠⚠ OPEN QUESTION RESOLVED — the standard-frame B.1c predicates are MIS-SHAPED; fix = symmetry-broken base
+> (2026-06-18, finite probe over VO^ε_4(3), `/tmp/isoprobe*.py`).** Four findings:
+> 1. **`IsotropyCountsRecoverFrameQ` / `CountsDetermineFrameQ` / `SimilitudeFrameSeparates` are FALSE for VO^-_4(3)**
+>    at the standard frame `{0,e₀,…,e_d}`: `u=(0,0,1,2)`, `u'=(0,0,2,1)` have IDENTICAL one-round isotropy/relation
+>    counts to the frame but different Q-profiles (`Q(u−e₂)=1` vs `2`). Cause: `Q=x₀x₁+x₂²+x₃²` is symmetric in
+>    `x₂,x₃`; the count (coarser than orbits) is blind to it at the symmetric frame. (VO^+_4(3) is FINE at the
+>    standard frame — the defect is minus-type frame symmetry.)
+> 2. The SCHEME genuinely **discretizes** (iterated 1-WL from the frame → 81 singletons in 2 rounds, separates `u,u'`).
+>    Bounded WL-dim HOLDS; only the one-round-count-at-symmetric-frame predicate is wrong. Probe `Probe_FormsGraphs`'s
+>    base-5 for q=3 was an *iterated*-WL base, not a one-round-count base.
+> 3. **The project engine `discrete_of_kRoundRelationSeparates` consumes exactly the ONE-ROUND count** (CascadeAffine
+>    :1918-1924; k-independent — k only proves the count is a `warmRefine` invariant). So it CANNOT discharge VO^- at
+>    the standard frame even though `warmRefine` IS `Discrete` there — the count route is strictly weaker than iterated WL.
+> 4. **FIX:** the one-round count IS injective at the standard frame **plus a few similitude-symmetry-breaking points**.
+>    Base size grows slowly with `q` (one-round, frame-based): VO^-_4(3) → **6**, VO^-_4(5) → **6**, VO^+_4(5) → **7**
+>    (VO^+_4(3) already 5). Greedy bases are smaller (VO^-_4(3) → **4**). This **matches `Probe_FormsGraphs`'s `[5,5,6,7]`
+>    for q=[2,3,4,5]** — so that probe measured the *one-round-count* base (the engine's base), growing `≈ d+O(1)` with
+>    a slow `q`-dependence (the eventual uniform-in-`q` proof must handle a `q`-growing number of extra points; for the
+>    first target q=3,d=4 it is just frame+1 = size 6).
+>
+> **CONSEQUENCE:** the landed B.1 checkpoint capstones (`reachesRigidOrCameron_via{IsotropyCounts,CountsDetermineFrameQ,
+> SimilitudeForm}`, `PublicTheoremIndex.md:1221-1233`) are axiom-clean but have **unprovable hypotheses as stated**
+> (tied to the symmetric frame) — they need REFORMULATION with a base `T = frameBase ∪ {p}`. The "recover Q-profile then
+> `coords_determine`" architecture is wrong for minus-type (front-half false); the correct target is **direct count-
+> injectivity at the bigger base** → `discrete_of_kRoundRelationSeparates` → `Discrete` → `SeparatesAtBoundedBase` →
+> seal (no `coords_determine`). **B.0 (`reachesRigidOrCameron_viaOrthogonalForm`, isometry `O(Q)`) is UNAFFECTED** —
+> there the relation IS the Q-value (depth-1). **NEXT:** (i) reformulate the B.1c predicate around a symmetry-broken
+> base; (ii) prove count-injectivity there = a `(d+2)`-point character-sum count (A2 generalized + D1 per inner sum) —
+> the genuine content, now TRUE; (iii) Brick C-even (validates C); (iv) bridge + basis for `VO^ε_4(3)`; then PORT.
+> char-2 deferred (§5 R2′). **This also flags §2(ii)/§3's "discreteness at `T` from the count" as needing the
+> symmetry-broken base — update §3.**
 
 > **▶▶ HANDOFF — CURRENT STATE IN ONE READ (2026-06-18). The blocks below this are chronological history (newest
 > first); this box is the live state.**
