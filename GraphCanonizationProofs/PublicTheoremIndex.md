@@ -1530,16 +1530,18 @@ All decls axiom-clean `[propext, Classical.choice, Quot.sound]`.
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `count_eq_charsum` | 101-113 | **Brick A** — the solution count `#{x | f x = c}` as a double character sum `∑ₓ∑ₜ ψ(t(f x−c))` (additive orthogonality). The entry point for all the point counts. | — |
-| `sum_addChar_sq` | 115-143 | **Brick B1** — the 1-D quadratic Gauss sum `∑ₓ ψ(x²) = gaussSum χ ψ` (each `y` hit by `χ(y)+1` roots; the `+1` part vanishes). | — |
-| `sum_addChar_smul_sq` | 145-167 | **Brick B2** — the scaled 1-D sum `∑ₓ ψ(a·x²) = χ(a)·gaussSum χ ψ` for a unit `a` (via `gaussSum_mulShift`, `χ(a)²=1`). | — |
-| `addChar_sum` | 169-175 | **Helper** — an additive character turns a finite sum into a product: `ψ(∑ᵢ aᵢ) = ∏ᵢ ψ(aᵢ)`. | — |
-| `sum_addChar_quadForm` | 177-209 | **Brick B3** — the multivariable quadratic Gauss sum `∑ₓ ψ(Q x) = (∏ᵢ χ(wᵢ))·gaussSum^d` for nondegenerate `Q` (diagonalize via `equivalent_weightedSumSquares`, factor). The multivariable core. | — |
-| `sum_quadForm_eval` | 211-247 | **Brick B3′** — basis-explicit `sum_addChar_quadForm` (weights `Q(v i)` for an orthogonal basis `v`; value pinned, no existential). Powers the scaling relation. | — |
-| `sum_addChar_quadForm_smul` | 249-286 | **Brick C-scale** — scaling the form by a unit `s` scales the Gauss sum by `χ(s)^d`: `∑ₓ ψ(s·Q x) = χ(s)^d·∑ₓ ψ(Q x)` (change of additive character). For `d` even, scale-invariant. | — |
-| `card_quadForm_eq` | 288-327 | **Brick C — THE affine-quadric point count (Mathlib-absent).** `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑ₓ ψ(Q x)`, from Brick A + the scaling relation. The assembled count formula. | — |
-| `sum_addChar_quadForm_linear` | 329-357 | **Brick D1 — complete the square.** `∑_w ψ(r·Q w + polar Q w a') = ψ(−r⁻¹·Q a')·∑_w ψ(r·Q w)` (linear term absorbed by the shift `w ↦ w + r⁻¹a'`). The engine of hyperplane-section / joint counts. | — |
-| `count2_eq_charsum` | 359-385 | **Brick A2** — the two-condition count `#{x:f x=c ∧ g x=d}` as a double-indexed character sum (generalizes Brick A). The entry point for the k-fold count assembly (the Gauss endpoint). | — |
-| `quad_sub` | 387-395 | **Helper** — the parallelogram identity `Q(a−b) = Q a + Q b − polar Q a b`. | — |
-| `polar_sum_right` | 397-405 | **Helper** — `polar Q z ·` is additive over a finite sum in its second argument: `∑ⱼ rⱼ·polar Q z tⱼ = polar Q z (∑ⱼ rⱼ•tⱼ)` (via `polarBilin`). | — |
-| `sum_addChar_multiQuad` | 407-446 | **Multi-point quadratic Gauss sum (generalizes D1) — THE inner sum of the k-fold count.** `∑_z ψ(∑ⱼ rⱼ·Q(z−tⱼ)) = ψ(const)·∑_z ψ(R·Q z)` for `R=∑rⱼ≠0` (summand collapses to D1 via `quad_sub`+`polar_sum_right`). The engine for the count at a symmetry-broken base. | — |
+| `count_eq_charsum` | 104-116 | **Brick A** — the solution count `#{x | f x = c}` as a double character sum `∑ₓ∑ₜ ψ(t(f x−c))` (additive orthogonality). The entry point for all the point counts. | — |
+| `sum_addChar_sq` | 118-146 | **Brick B1** — the 1-D quadratic Gauss sum `∑ₓ ψ(x²) = gaussSum χ ψ` (each `y` hit by `χ(y)+1` roots; the `+1` part vanishes). | — |
+| `sum_addChar_smul_sq` | 148-170 | **Brick B2** — the scaled 1-D sum `∑ₓ ψ(a·x²) = χ(a)·gaussSum χ ψ` for a unit `a` (via `gaussSum_mulShift`, `χ(a)²=1`). | — |
+| `addChar_sum` | 172-178 | **Helper** — an additive character turns a finite sum into a product: `ψ(∑ᵢ aᵢ) = ∏ᵢ ψ(aᵢ)`. | — |
+| `sum_addChar_quadForm` | 180-212 | **Brick B3** — the multivariable quadratic Gauss sum `∑ₓ ψ(Q x) = (∏ᵢ χ(wᵢ))·gaussSum^d` for nondegenerate `Q` (diagonalize via `equivalent_weightedSumSquares`, factor). The multivariable core. | — |
+| `sum_quadForm_eval` | 214-250 | **Brick B3′** — basis-explicit `sum_addChar_quadForm` (weights `Q(v i)` for an orthogonal basis `v`; value pinned, no existential). Powers the scaling relation. | — |
+| `sum_addChar_quadForm_smul` | 252-289 | **Brick C-scale** — scaling the form by a unit `s` scales the Gauss sum by `χ(s)^d`: `∑ₓ ψ(s·Q x) = χ(s)^d·∑ₓ ψ(Q x)` (change of additive character). For `d` even, scale-invariant. | — |
+| `card_quadForm_eq` | 291-330 | **Brick C — THE affine-quadric point count (Mathlib-absent).** `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑ₓ ψ(Q x)`, from Brick A + the scaling relation. The assembled count formula. | — |
+| `sum_addChar_quadForm_linear` | 332-360 | **Brick D1 — complete the square.** `∑_w ψ(r·Q w + polar Q w a') = ψ(−r⁻¹·Q a')·∑_w ψ(r·Q w)` (linear term absorbed by the shift `w ↦ w + r⁻¹a'`). The engine of hyperplane-section / joint counts. | — |
+| `count2_eq_charsum` | 362-388 | **Brick A2** — the two-condition count `#{x:f x=c ∧ g x=d}` as a double-indexed character sum (generalizes Brick A). The entry point for the k-fold count assembly (the Gauss endpoint). | — |
+| `quad_sub` | 390-398 | **Helper** — the parallelogram identity `Q(a−b) = Q a + Q b − polar Q a b`. | — |
+| `polar_sum_right` | 400-408 | **Helper** — `polar Q z ·` is additive over a finite sum in its second argument: `∑ⱼ rⱼ·polar Q z tⱼ = polar Q z (∑ⱼ rⱼ•tⱼ)` (via `polarBilin`). | — |
+| `sum_addChar_multiQuad` | 410-451 | **Multi-point quadratic Gauss sum (generalizes D1) — THE inner sum of the k-fold count.** `∑_z ψ(∑ⱼ rⱼ·Q(z−tⱼ)) = ψ(const)·∑_z ψ(R·Q z)` for `R=∑rⱼ≠0` (summand collapses to D1 via `quad_sub`+`polar_sum_right`). The engine for the count at a symmetry-broken base. | — |
+| `countk_eq_charsum` | 453-483 | **Brick A_k — the k-fold count as a product-of-sums.** Generalizes `count_eq_charsum`/`count2_eq_charsum` to a `Fintype`-indexed family of conditions: `∑_x ∏_j (∑_{r_j} ψ(r_j(f_j x−c_j))) = #{x:∀j, f_j x=c_j}·q^{#ι}` (product of orthogonality indicators). | — |
+| `countk_eq_sum_charsum` | 485-513 | **Brick A_k factored — the k-fold count over dual variables.** `#{x:∀j, f_j x=c_j}·q^{#ι} = ∑_{r:ι→F} ψ(−∑_j r_j c_j)·∑_x ψ(∑_j r_j·f_j x)` (expand via `Fintype.prod_sum`, collapse via `addChar_sum`). With `f_j x = Q(x−t_j)` the inner sum is exactly `sum_addChar_multiQuad` — the closed-form multi-point `Q`-count for the symmetry-broken-base injectivity (the Gauss endpoint). | — |

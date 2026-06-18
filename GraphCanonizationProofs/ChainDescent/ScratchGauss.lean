@@ -73,12 +73,15 @@ NEXT (next session) — Brick D, corrected target:
   (Witt bridge) + `reachesRigidOrCameron_viaIsotropySeparates`, all axiom-clean. The three frame-locked predicates
   are ⚠ SUPERSEDED in-source. So the Gauss build's target is now a concrete `IsotropySeparatesAtBase Q T` for a
   symmetry-broken `T` (≈ d+2, e.g. `frameBase ∪ {p}`); discharging it (+ Witt `OrbitIsIsotropyClass`) seals.
-* The PROOF of count-injectivity at `T` is the genuine content. Remaining engine step: the **k-fold count**
-  `#{z : Q(z−tⱼ)=cⱼ ∀j∈T} · q^|T| = ∑_{r:T→K} (∏ⱼ ψ(−rⱼcⱼ))·∑_z ψ(∑ⱼ rⱼ Q(z−tⱼ))` (generalize `count2_eq_charsum`
-  to a Finset of conditions), whose inner sum is now `sum_addChar_multiQuad` (R=∑rⱼ≠0) or a linear boundary
-  (R=0). That gives the closed-form multi-point Q-count; then (a) inclusion–exclusion turns isotropy counts
-  into Q-counts, (b) prove the resulting `A_u` injective in `u` at the symmetry-broken base. The Gauss toolkit
-  (A/A2/B/C/D1/multiQuad) is COMPLETE; remaining is the k-fold assembly + the injectivity argument.
+* DONE (2026-06-18) — the **k-fold count assembly** has LANDED (axiom-clean): `countk_eq_charsum` (k-fold count =
+  `∑_x ∏_j (∑_{r_j} ψ(r_j(f_j x − c_j)))`, generalizing A/A2 to a `Fintype`-indexed family of conditions) and
+  `countk_eq_sum_charsum` (the factored form `#{x:∀j, f_j x=c_j}·qᵏ = ∑_{r:ι→F} ψ(−∑_j r_j c_j)·∑_x ψ(∑_j r_j·f_j x)`).
+  With `f_j x := Q(x − t_j)` the inner `∑_x ψ(∑_j r_j·Q(x−t_j))` is exactly `sum_addChar_multiQuad` (when `∑_j r_j ≠ 0`).
+* NEXT engine step: the **quadratic specialization** — split the `∑_{r:ι→F}` of `countk_eq_sum_charsum` on `R:=∑_j r_j`
+  (`R≠0` ⟹ `multiQuad`, `R=0` ⟹ the linear boundary `∑_x ψ(linear) = q^{dim}·[linear≡0]`); that gives the
+  closed-form multi-point Q-count. Then (a) inclusion–exclusion turns isotropy counts into Q-counts, (b) prove the
+  resulting `A_u` injective in `u` at the symmetry-broken base. The k-fold assembly + the rest of the toolkit
+  (A/A2/Ak/B/C/D1/multiQuad) is COMPLETE; remaining is the quadratic specialization + the injectivity argument.
 * Brick C-even (independent, short) — `d` even ⟹ `χ(t)^d=1` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}` via
   `AddChar.sum_mulShift` + `gaussSum_sq`. Validates Brick C numerically.
 * Bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` +
@@ -444,3 +447,67 @@ theorem sum_addChar_multiQuad {K : Type*} [Field K] {R' : Type*} [CommRing R'] (
 #print axioms quad_sub
 #print axioms polar_sum_right
 #print axioms sum_addChar_multiQuad
+
+-- ============== the k-fold count (generalizes Brick A2 to a Finset of conditions) ==============
+
+/-- **Brick A_k — k-fold solution count as a product-of-sums character sum.** Generalizes `count_eq_charsum`
+(`A`) and `count2_eq_charsum` (`A2`) to a whole `Fintype`-indexed family of conditions: the number of common
+solutions of `f j x = c j` (over all `j : ι`), scaled by `qᵏ` (`k = #ι`), equals `∑_x ∏_j (∑_{r_j} ψ(r_j(f_j x −
+c_j)))`. Each inner `∑_{r_j}` is `q·[f_j x = c_j]` (additive orthogonality), and the product of these indicators
+is `qᵏ·[∀ j, f_j x = c_j]`. -/
+theorem countk_eq_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar F R'} (hψ : ψ.IsPrimitive)
+    {V : Type*} [Fintype V] [DecidableEq V] {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (f : ι → V → F) (c : ι → F) :
+    (∑ x : V, ∏ j : ι, (∑ r : F, ψ (r * (f j x - c j))))
+      = ((univ.filter (fun x : V => ∀ j, f j x = c j)).card : R')
+        * (Fintype.card F : R') ^ (Fintype.card ι) := by
+  classical
+  have hinner : ∀ x : V, (∏ j : ι, (∑ r : F, ψ (r * (f j x - c j))))
+      = if (∀ j, f j x = c j) then ((Fintype.card F : R') ^ (Fintype.card ι)) else 0 := by
+    intro x
+    have h1 : (∏ j : ι, (∑ r : F, ψ (r * (f j x - c j))))
+        = ∏ j : ι, (if f j x = c j then (Fintype.card F : R') else 0) := by
+      refine Finset.prod_congr rfl (fun j _ => ?_)
+      rw [AddChar.sum_mulShift (f j x - c j) hψ]
+      simp [sub_eq_zero]
+    rw [h1]
+    by_cases h : ∀ j, f j x = c j
+    · rw [if_pos h, Finset.prod_congr rfl (fun j _ => if_pos (h j)), Finset.prod_const,
+        Finset.card_univ]
+    · rw [if_neg h]
+      rw [not_forall] at h
+      obtain ⟨j₀, hj₀⟩ := h
+      exact Finset.prod_eq_zero (Finset.mem_univ j₀) (if_neg hj₀)
+  rw [Finset.sum_congr rfl (fun x _ => hinner x), ← Finset.sum_filter, Finset.sum_const,
+    nsmul_eq_mul]
+
+/-- **Brick A_k factored — the k-fold count as a sum over dual variables.** Expanding the product of sums in
+`countk_eq_charsum` (distributivity `Fintype.prod_sum`, then `addChar_sum` collapses each `∏_j ψ` to `ψ(∑_j)`)
+splits the `x`-dependent part off: `#{x : ∀ j, f_j x = c_j}·qᵏ = ∑_{r:ι→F} ψ(−∑_j r_j c_j)·∑_x ψ(∑_j r_j·f_j x)`.
+With `f_j x := Q(x − t_j)` the inner `∑_x ψ(∑_j r_j·Q(x − t_j))` is exactly `sum_addChar_multiQuad` (when
+`∑_j r_j ≠ 0`) or a linear boundary (`∑_j r_j = 0`) — the closed-form multi-point `Q`-count. -/
+theorem countk_eq_sum_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar F R'} (hψ : ψ.IsPrimitive)
+    {V : Type*} [Fintype V] [DecidableEq V] {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (f : ι → V → F) (c : ι → F) :
+    ((univ.filter (fun x : V => ∀ j, f j x = c j)).card : R')
+        * (Fintype.card F : R') ^ (Fintype.card ι)
+      = ∑ r : ι → F, ψ (-(∑ j : ι, r j * c j)) * ∑ x : V, ψ (∑ j : ι, r j * f j x) := by
+  classical
+  rw [← countk_eq_charsum hψ f c,
+    Finset.sum_congr rfl (fun x _ =>
+      Fintype.prod_sum (fun (j : ι) (rj : F) => ψ (rj * (f j x - c j)))),
+    Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun r _ => ?_)
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun x _ => ?_)
+  rw [← addChar_sum ψ Finset.univ (fun j => r j * (f j x - c j)),
+    ← AddChar.map_add_eq_mul]
+  congr 1
+  rw [Finset.sum_congr rfl (fun j _ => show r j * (f j x - c j) = r j * f j x - r j * c j from by ring),
+    Finset.sum_sub_distrib]
+  ring
+
+#print axioms countk_eq_charsum
+#print axioms countk_eq_sum_charsum
