@@ -49,12 +49,12 @@
 > 3. **The project engine `discrete_of_kRoundRelationSeparates` consumes exactly the ONE-ROUND count** (CascadeAffine
 >    :1918-1924; k-independent — k only proves the count is a `warmRefine` invariant). So it CANNOT discharge VO^- at
 >    the standard frame even though `warmRefine` IS `Discrete` there — the count route is strictly weaker than iterated WL.
-> 4. **FIX:** the one-round count IS injective at the standard frame **plus a few similitude-symmetry-breaking points**.
->    Base size grows slowly with `q` (one-round, frame-based): VO^-_4(3) → **6**, VO^-_4(5) → **6**, VO^+_4(5) → **7**
->    (VO^+_4(3) already 5). Greedy bases are smaller (VO^-_4(3) → **4**). This **matches `Probe_FormsGraphs`'s `[5,5,6,7]`
->    for q=[2,3,4,5]** — so that probe measured the *one-round-count* base (the engine's base), growing `≈ d+O(1)` with
->    a slow `q`-dependence (the eventual uniform-in-`q` proof must handle a `q`-growing number of extra points; for the
->    first target q=3,d=4 it is just frame+1 = size 6).
+> 4. **FIX:** the one-round count IS injective at a slightly larger, symmetry-broken base. A **well-chosen (greedy)**
+>    one-round base is small and grows slowly: VO^ε_4(3) → **4**, VO^±_4(5) → **6** (both types). Frame-based (standard
+>    frame + extra points) is a bit larger: VO^-_4(3) → 6, VO^+_4(5) → 7, matching `Probe_FormsGraphs`'s `[5,5,6,7]`
+>    for q=[2,3,4,5] (so that probe measured the *one-round* base). Net: the one-round base is `≈ d+2` with a slow
+>    `q`-dependence — bounded and small. (Uniform-in-`q` proof: a `q`-growing but `O(d+log q)`-ish base; first target
+>    q=3,d=4 → frame+1 = size 6, or a greedy size-4.)
 >
 > **CONSEQUENCE:** the landed B.1 checkpoint capstones (`reachesRigidOrCameron_via{IsotropyCounts,CountsDetermineFrameQ,
 > SimilitudeForm}`, `PublicTheoremIndex.md:1221-1233`) are axiom-clean but have **unprovable hypotheses as stated**

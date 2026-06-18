@@ -49,12 +49,11 @@ predicates are MIS-SHAPED; fix = a symmetry-broken base. Findings:
   (3) THE PROJECT ENGINE `discrete_of_kRoundRelationSeparates` consumes exactly the ONE-ROUND count
       (CascadeAffine:1918-1924; k-independent — k only proves the count is a warmRefine invariant), so it
       CANNOT discharge VO^- at the standard frame, though the conclusion (warmRefine Discrete) is true.
-  (4) FIX: the one-round count IS injective at the standard frame PLUS a few similitude-symmetry-breaking
-      points. Base size grows slowly with q (frame-based): VO^-_4(3)→6, VO^-_4(5)→6, VO^+_4(5)→7
-      (VO^+_4(3) already 5); greedy smaller (VO^-_4(3)→4). MATCHES Probe_FormsGraphs [5,5,6,7] for q=2..5
-      ⟹ that probe measured the ONE-ROUND base (≈ d+O(1), slow q-dependence). B.0 (isometry O(Q)) UNAFFECTED
-      (relation = Q-value, depth-1). Uniform-in-q proof needs a q-growing # of extra points; first target
-      q=3,d=4 is just frame+1 (size 6).
+  (4) FIX: the one-round count IS injective at a slightly larger, symmetry-broken base. Well-chosen (greedy)
+      one-round base is small + slow-growing: VO^ε_4(3)→4, VO^±_4(5)→6 (both types). Frame-based bigger:
+      VO^-_4(3)→6, VO^+_4(5)→7 — matches Probe_FormsGraphs [5,5,6,7] q=2..5 (so that probe = ONE-ROUND base).
+      Net ≈ d+2, slow q-dep, bounded. B.0 (isometry O(Q)) UNAFFECTED (relation=Q-value, depth-1). First
+      target q=3,d=4 = frame+1 (size 6) or greedy size-4.
 
 CONSEQUENCE — the landed B.1 checkpoint capstones (`reachesRigidOrCameron_via{IsotropyCounts,CountsDetermineFrameQ,
 SimilitudeForm}`) are axiom-clean but have UNPROVABLE hypotheses as stated (tied to the symmetric frame); they
