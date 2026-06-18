@@ -77,11 +77,15 @@ NEXT (next session) — Brick D, corrected target:
   `∑_x ∏_j (∑_{r_j} ψ(r_j(f_j x − c_j)))`, generalizing A/A2 to a `Fintype`-indexed family of conditions) and
   `countk_eq_sum_charsum` (the factored form `#{x:∀j, f_j x=c_j}·qᵏ = ∑_{r:ι→F} ψ(−∑_j r_j c_j)·∑_x ψ(∑_j r_j·f_j x)`).
   With `f_j x := Q(x − t_j)` the inner `∑_x ψ(∑_j r_j·Q(x−t_j))` is exactly `sum_addChar_multiQuad` (when `∑_j r_j ≠ 0`).
-* NEXT engine step: the **quadratic specialization** — split the `∑_{r:ι→F}` of `countk_eq_sum_charsum` on `R:=∑_j r_j`
-  (`R≠0` ⟹ `multiQuad`, `R=0` ⟹ the linear boundary `∑_x ψ(linear) = q^{dim}·[linear≡0]`); that gives the
-  closed-form multi-point Q-count. Then (a) inclusion–exclusion turns isotropy counts into Q-counts, (b) prove the
-  resulting `A_u` injective in `u` at the symmetry-broken base. The k-fold assembly + the rest of the toolkit
-  (A/A2/Ak/B/C/D1/multiQuad) is COMPLETE; remaining is the quadratic specialization + the injectivity argument.
+* DONE (2026-06-18) — the **quadratic specialization** has LANDED (axiom-clean). The inner sum `S(r) :=
+  ∑_z ψ(∑_j r_j·Q(z−t_j))` of `countk_eq_sum_charsum` is now evaluated for ALL `r`, split on `R := ∑_j r_j`:
+  `R ≠ 0` ⟹ `sum_addChar_multiQuad` (quadratic, reduces to the global Gauss sum `∑_z ψ(R·Q z)`); `R = 0` ⟹
+  `sum_addChar_multiQuad_zero` (the `R·Qz` term drops, leaving the linear `polar Q z (−∑r_j•t_j)`) then
+  `sum_addChar_linearMap` (`∑_z ψ(φ z) = |V|·[φ=0]`, primitivity boundary engine). So with
+  `countk_eq_sum_charsum` the multi-point Q-count `#{z : Q(z−t_j)=c_j ∀j}` is in CLOSED FORM.
+* NEXT engine step: (a) inclusion–exclusion turning isotropy-class counts into these Q-value counts, (b) prove the
+  resulting `A_u` injective in `u` at the symmetry-broken base (`IsotropySeparatesAtBase`). The toolkit
+  (A/A2/Ak/B/C/D1/multiQuad/multiQuad-zero/linearMap) is COMPLETE; remaining is incl–excl + the injectivity argument.
 * Brick C-even (independent, short) — `d` even ⟹ `χ(t)^d=1` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}` via
   `AddChar.sum_mulShift` + `gaussSum_sq`. Validates Brick C numerically.
 * Bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` +
@@ -511,3 +515,73 @@ theorem countk_eq_sum_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
 
 #print axioms countk_eq_charsum
 #print axioms countk_eq_sum_charsum
+
+-- ============== the quadratic specialization (the R = ∑r_j = 0 boundary) ==============
+
+open scoped Classical in
+/-- **The linear-functional character sum (the boundary engine).** For a primitive additive character `ψ` and a
+`K`-linear functional `φ : V →ₗ[K] K`, `∑_x ψ(φ x) = |V|` if `φ = 0`, else `0`. (When `φ ≠ 0`, translating by an
+`x₀` with `ψ(φ x₀) ≠ 1` — supplied by primitivity, since `mulShift ψ (φ a) ≠ 1` for `φ a ≠ 0` — gives
+`S = ψ(φ x₀)·S`, forcing `S = 0` in the domain `R'`.) This evaluates the `R = ∑r_j = 0` boundary of the
+multi-point count, where the quadratic part drops and only the linear `polar Q · w` survives. -/
+theorem sum_addChar_linearMap {K : Type*} [Field K] {R' : Type*} [CommRing R'] [IsDomain R']
+    {ψ : AddChar K R'} (hψ : ψ.IsPrimitive) {V : Type*} [AddCommGroup V] [Module K V] [Fintype V]
+    (φ : V →ₗ[K] K) :
+    (∑ x : V, ψ (φ x)) = if φ = 0 then (Fintype.card V : R') else 0 := by
+  by_cases hφ : φ = 0
+  · rw [if_pos hφ]; subst hφ
+    simp [AddChar.map_zero_eq_one, Finset.card_univ]
+  · rw [if_neg hφ]
+    obtain ⟨a, ha⟩ : ∃ a, φ a ≠ 0 := by
+      by_contra h
+      exact hφ (LinearMap.ext fun a => by
+        rw [LinearMap.zero_apply]; exact not_not.1 (fun haa => h ⟨a, haa⟩))
+    have hms : AddChar.mulShift ψ (φ a) ≠ 1 := hψ ha
+    obtain ⟨c, hc⟩ : ∃ c : K, ψ (φ a * c) ≠ 1 := by
+      by_contra h
+      refine hms ?_
+      ext c
+      rw [AddChar.mulShift_apply, AddChar.one_apply]
+      exact not_not.1 (fun hcc => h ⟨c, hcc⟩)
+    have hφx₀ : ψ (φ (c • a)) ≠ 1 := by rw [map_smul, smul_eq_mul, mul_comm]; exact hc
+    have hstep : (∑ x : V, ψ (φ (x + c • a))) = ∑ x : V, ψ (φ x) :=
+      Equiv.sum_comp (Equiv.addRight (c • a)) (fun x => ψ (φ x))
+    have hexp : (∑ x : V, ψ (φ (x + c • a))) = ψ (φ (c • a)) * ∑ x : V, ψ (φ x) := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun x _ => ?_)
+      rw [map_add, AddChar.map_add_eq_mul, mul_comm]
+    have hSS : (∑ x : V, ψ (φ x)) = ψ (φ (c • a)) * ∑ x : V, ψ (φ x) := hstep.symm.trans hexp
+    have hfac : (1 - ψ (φ (c • a))) * (∑ x : V, ψ (φ x)) = 0 := by
+      rw [sub_mul, one_mul, ← hSS, sub_self]
+    rcases mul_eq_zero.1 hfac with h | h
+    · exact absurd (sub_eq_zero.1 h).symm hφx₀
+    · exact h
+
+/-- **Multi-point quadratic Gauss sum, the `R = 0` boundary (companion to `sum_addChar_multiQuad`).** When the
+weights sum to `R = ∑_j r_j = 0`, the `R·Q z` term vanishes and the summand is purely *linear* in `z`:
+`∑_z ψ(∑_j r_j·Q(z−t_j)) = ψ(∑_j r_j·Q(t_j))·∑_z ψ(polar Q z (−∑_j r_j•t_j))`. The surviving factor is a linear
+character sum (`sum_addChar_linearMap` with `φ = (polar Q · (−∑r_j•t_j))`), so it is `|V|` if `∑_j r_j•t_j` is in
+the radical of the polar form (e.g. `= 0` when nondegenerate) and `0` otherwise. -/
+theorem sum_addChar_multiQuad_zero {K : Type*} [Field K] {R' : Type*} [CommRing R'] (ψ : AddChar K R')
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V)
+    {ι : Type*} (s : Finset ι) (r : ι → K) (t : ι → V) (hR : (∑ j ∈ s, r j) = 0) :
+    (∑ z : V, ψ (∑ j ∈ s, r j * Q (z - t j)))
+      = ψ (∑ j ∈ s, r j * Q (t j))
+        * ∑ z : V, ψ (QuadraticMap.polar Q z (-(∑ j ∈ s, r j • t j))) := by
+  have key : ∀ z : V, (∑ j ∈ s, r j * Q (z - t j))
+      = QuadraticMap.polar Q z (-(∑ j ∈ s, r j • t j)) + (∑ j ∈ s, r j * Q (t j)) := by
+    intro z
+    have e : ∀ j ∈ s, r j * Q (z - t j)
+        = r j * Q z + r j * Q (t j) - r j * QuadraticMap.polar Q z (t j) := by
+      intro j _; rw [quad_sub]; ring
+    rw [Finset.sum_congr rfl e, Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.sum_mul,
+        hR, zero_mul, zero_add, polar_sum_right,
+        show QuadraticMap.polar Q z (-(∑ j ∈ s, r j • t j))
+            = - QuadraticMap.polar Q z (∑ j ∈ s, r j • t j) by
+          rw [← neg_one_smul K (∑ j ∈ s, r j • t j), QuadraticMap.polar_smul_right, neg_one_smul]]
+    ring
+  rw [Finset.sum_congr rfl (fun z _ => by rw [key z]), Finset.mul_sum]
+  exact Finset.sum_congr rfl (fun z _ => by rw [AddChar.map_add_eq_mul, mul_comm])
+
+#print axioms sum_addChar_linearMap
+#print axioms sum_addChar_multiQuad_zero

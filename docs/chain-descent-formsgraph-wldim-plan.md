@@ -29,9 +29,11 @@
 > **`IsotropySeparatesAtBase Q T`** for a symmetry-broken `T` (`≈ d+2`, e.g. `frameBase ∪ {p}`) — the Gauss build's
 > target. **★ k-fold count assembly LANDED (2026-06-18, axiom-clean): `countk_eq_charsum` + `countk_eq_sum_charsum`
 > in `ScratchGauss.lean`** — the count `#{x:∀j, f_j x=c_j}·qᵏ = ∑_{r:ι→F} ψ(−∑r_j c_j)·∑_x ψ(∑r_j f_j x)`, whose inner
-> sum (with `f_j x = Q(x−t_j)`) is `sum_addChar_multiQuad`. NEXT (Gauss): the **quadratic specialization** (split the
-> `∑_r` on `R:=∑r_j`: `R≠0`→`multiQuad`, `R=0`→linear boundary) → inclusion–exclusion (isotropy → `Q`-value counts) →
-> prove `IsotropySeparatesAtBase` at the chosen `T`.
+> sum (with `f_j x = Q(x−t_j)`) is `sum_addChar_multiQuad`. **★ quadratic specialization LANDED (2026-06-18, axiom-clean):
+> `sum_addChar_multiQuad_zero` (the `R=∑r_j=0` boundary, reducing to a linear form) + `sum_addChar_linearMap`
+> (`∑_z ψ(φ z)=|V|·[φ=0]`)** — so the inner sum `S(r)` is evaluated for ALL `r` (`R≠0`→`multiQuad`, `R=0`→these two),
+> and with `countk_eq_sum_charsum` the multi-point Q-count is in CLOSED FORM. NEXT (Gauss): inclusion–exclusion
+> (isotropy-class counts → `Q`-value counts) → prove `IsotropySeparatesAtBase` at the chosen `T`.
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
