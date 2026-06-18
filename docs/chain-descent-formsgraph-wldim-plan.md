@@ -11,6 +11,41 @@
 
 ## STATUS (read first)
 
+> **▶▶ HANDOFF — CURRENT STATE IN ONE READ (2026-06-18). The blocks below this are chronological history (newest
+> first); this box is the live state.**
+>
+> **What's done.** All conditional capstones and isolation checkpoints for the node-4 forms-graph residue are LANDED,
+> axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green (`bash scripts/build.sh`, ~82s). They live in
+> **`CascadeAffine.lean` §OrthogonalForm** (`PublicTheoremIndex.md:1207, 1210-1233`). The seal for the rank-3 SRG `VO^ε`
+> residue (`affineScheme (similitudeGroup Q)`) is reduced **end-to-end** to two isolated, named, heavy-build predicates:
+>
+> ```
+> OrbitIsIsotropyClass Q        (B.1c-i, Witt)     ┐
+> IsotropyCountsRecoverFrameQ Q (B.1c-ii, Gauss)   ┘→ CountsDetermineFrameQ → SimilitudeFrameSeparates
+>                                                     →[coords_determine, viaSpielman, LANDED]→ SEAL
+> ```
+>
+> **What's open = exactly two independent heavy Mathlib builds** (everything else is proved and composes; the chain is
+> confirmed):
+> - **B.1c-i — `OrbitIsIsotropyClass Q`** via **Witt's theorem** (the `GO(Q)`-orbits = isotropy classes ⟹ rank-3).
+>   Witt is ABSENT in Mathlib; this is the heaviest piece. §8 B.1c-i.
+> - **B.1c-ii — `IsotropyCountsRecoverFrameQ Q`** via **quadratic Gauss-sum / affine-quadric point counts** (isotropy-
+>   class counts recover the frame `Q`-profile). Mathlib has `ZMod.gauss_sum` + quadratic-character pieces but not the
+>   assembled affine-quadric point-count formula. §8 B.1c-ii.
+>
+> **Next action.** Checkpoint/isolation work is EXHAUSTED — do not add more wrappers. The next increment is a *genuine
+> heavy build*: **recommend B.1c-ii at `VO^ε_4(3)`** (`d=4`, `q=3` prime so `F_q = ZMod q`, char ≠ 2 — the cleanest;
+> richest probe data, base `[5,5,6,7]`). The back-half `coords_determine` (B.0) is landed and reused; the residual
+> subtlety is the **non-isotropic shell** (§3) and **char-2** (§5 R2′, defer). These two builds are independent — they
+> can be done in either order / separate sessions, then composed via the landed `reachesRigidOrCameron_viaIsotropyCounts`.
+>
+> **Orientation pointers.** §3 = the two mathematical routes (A counts / B perp-graph) + the non-isotropic shell;
+> §5 = risks incl. the two Mathlib blockers (R2 Witt, R2b Gauss) + char-2 (R2′); §7 = why this is NOT the open SRG-WL
+> problem (read before doubting tractability); §8 = the B.1c build scoping. Route-doc §9.9.18b/c = the empirical anchor
+> (`Probe_FormsGraphs`). Quality bar: axiom-clean, no `sorry`/`axiom`, `native_decide` banned; develop new Lean in a
+> scratch file (`lake env lean ChainDescent/Scratch*.lean`, seconds) then port into CascadeAffine (~50s build) — that
+> was this work's iteration loop. Nothing committed (user commits).
+
 **★ STAGE B.1 + RESEARCH-CORE CHECKPOINT CONFIRMED (2026-06-18, axiom-clean, build green).** Landed
 (CascadeAffine.lean §OrthogonalForm Stage-B.1 block, `PublicTheoremIndex.md:1218-1226`): `similitudeGroup`
 (`GO(Q) = {g | ∃ μ, Q(g x) = μ·Q x}`), `neg_mem_similitudeGroup`, `isometry_le_similitude`, the named count crux
@@ -62,10 +97,12 @@ and composes the landed engine + base + seal (`cellsAreOrbits_of_relCountsDeterm
 assumed. The route is validated end-to-end; the open content is now exactly the one predicate `hFormCert`. **Next =
 Stage B** (discharge `hFormCert` for `VO^ε_4(q)`; §3, §4). Nothing committed (user commits).
 
+**(Historical framing, pre-Stage-B — superseded by the HANDOFF box above; kept for the calibration argument.)**
 **The target is now extremely concrete** — not "all SRGs", but four explicit affine/classical-group families whose
 automorphism group `G^(2)` is given structurally by Skresanov and whose base the probe measured at `≈ d+1` (flat).
-**The reduction is mostly landed; the open content is ONE crux lemma — `RelCountsDetermineOrbit (affineScheme G₀) T`
-at the group base**, fed into the already-built depth-`k` separation engine. **Calibration (read §7 before starting):
+**The reduction is mostly landed; the open content was framed as ONE crux lemma — `RelCountsDetermineOrbit (affineScheme G₀) T`
+at the group base** (now refined to the two B.1c builds, see HANDOFF), fed into the already-built depth-`k` separation
+engine. **Calibration (read §7 before starting):
 that lemma is UNCITED, genuine content you must prove — but it is NOT the open "WL-dim of SRGs" research problem.** The
 engine has already reduced "bounded WL-dimension" to a finite, geometry-specific separation statement; the structure
 (Skresanov), the base (handed by the group), and the answer+mechanism (the probe) are all known, so what remains is a

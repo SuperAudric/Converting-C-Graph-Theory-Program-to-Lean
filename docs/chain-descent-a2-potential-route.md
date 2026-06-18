@@ -2010,3 +2010,13 @@ the **landed depth-`k` engine** (`discrete_of_twoRoundRelationSeparates`) — so
 form — separate). Stage A = a conditional capstone `reachesRigidOrCameron_viaAffineFormScheme` carrying the
 probe-validated certificate (wiring now); Stage B = discharge the crux lemma for `VO^ε`. Closes node-4-for-the-seal
 `modulo {G3 + Cameron/Liebeck/Skresanov + the affine-form certificate}`; the non-schurian IR-solver row 4 is untouched.
+
+**▶ UPDATE (2026-06-18) — Stages A, B.0, B.1 + both isolation checkpoints all LANDED (axiom-clean, build green);
+read the plan doc's HANDOFF box for the live state.** The above "Stage A wiring / Stage B discharge" framing is
+superseded. The seal for the rank-3 SRG `VO^ε` residue (`affineScheme (similitudeGroup Q)`) is now reduced
+**end-to-end** (`CascadeAffine.lean §OrthogonalForm`, `PublicTheoremIndex.md:1207, 1210-1233`) to **two isolated heavy
+Mathlib builds**: **B.1c-i `OrbitIsIsotropyClass`** (Witt's theorem; ABSENT in Mathlib) + **B.1c-ii
+`IsotropyCountsRecoverFrameQ`** (quadratic Gauss-sum / affine-quadric point counts). Checkpoint work is exhausted; the
+next increment is a genuine heavy build (recommend B.1c-ii at `VO^ε_4(3)`). Full scoping: plan doc §8. The back-half
+(`coords_determine`) and all wiring (`reachesRigidOrCameron_via{AffineFormScheme,OrthogonalForm,SimilitudeForm,CountsDetermineFrameQ,IsotropyCounts}`)
+are landed.
