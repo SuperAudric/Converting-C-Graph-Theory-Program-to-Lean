@@ -129,7 +129,7 @@ The lemma is **uniform** for the form-based families (c)–(e); (f) is the outli
 - **Stage B — discharge the certificate for `VO^ε`** (the crux lemma via Mathlib `QuadraticForm` counting). The genuine
   combinatorial work. Start with a fixed small `d` (e.g. `d=4`, `VO^ε_4(q)`) generic in `q`, then general `d`.
 - **Stage C — alternating / half-spin** (reuse the skeleton with the symplectic / spinor `B`).
-- **Stage D — Suzuki–Tits** (separate; or leave as a flagged residual single family with the probe as evidence).
+- **Stage D — Suzuki–Tits** (separate plan needed).
 
 ---
 
