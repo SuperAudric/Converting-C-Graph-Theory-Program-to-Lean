@@ -6,10 +6,12 @@ C and D land. Everything below is PROVEN and axiom-clean `[propext, Classical.ch
 (verified via `lake env lean ChainDescent/ScratchGauss.lean`). This file imports ONLY Mathlib, so it
 builds in isolation (cheap) — it does NOT pull in the heavy project modules.
 
-Target: discharge `IsotropyCountsRecoverFrameQ Q` (CascadeAffine §OrthogonalForm, B.1c-ii) for the
-forms-graph residue, starting at `VO^ε_4(3)`. Mathlib has the machinery (`gaussSum_sq`,
-`quadraticChar_card_sqrts`, `equivalent_weightedSumSquares`, char orthogonality) but NOT the assembled
-affine-quadric point-count formula — that is what these bricks build.
+Target (CORRECTED — see the ⚠⚠ block below): discharge the seal's node-4 forms-graph residue (B.1c-ii) for
+`VO^ε_4(q)`. NOTE the original target `IsotropyCountsRecoverFrameQ Q` at the standard frame is FALSE/mis-shaped
+(⚠⚠ below); the corrected target is **one-round count-injectivity at a symmetry-broken base** (`≈ d+2`), built
+from these Gauss bricks. Mathlib has the machinery (`gaussSum_sq`, `quadraticChar_card_sqrts`,
+`equivalent_weightedSumSquares`, char orthogonality) but NOT the assembled affine-quadric point-count formula —
+that is what these bricks build.
 
 DONE (this file — the full exponential-sum core + the assembled point count):
 * Brick A  `count_eq_charsum`        — solution count `#{x | f x = c}` as a double character sum.

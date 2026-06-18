@@ -2020,3 +2020,14 @@ Mathlib builds**: **B.1c-i `OrbitIsIsotropyClass`** (Witt's theorem; ABSENT in M
 next increment is a genuine heavy build (recommend B.1c-ii at `VO^ε_4(3)`). Full scoping: plan doc §8. The back-half
 (`coords_determine`) and all wiring (`reachesRigidOrCameron_via{AffineFormScheme,OrthogonalForm,SimilitudeForm,CountsDetermineFrameQ,IsotropyCounts}`)
 are landed.
+
+**▶▶ UPDATE (2026-06-18 later) — the B.1c predicates are MIS-SHAPED; the "checkpoint exhausted / next = heavy build
+B.1c-ii via `IsotropyCountsRecoverFrameQ`" framing just above is SUPERSEDED.** Finite probe over `VO^ε_4(3)`:
+`IsotropyCountsRecoverFrameQ` / `CountsDetermineFrameQ` / `SimilitudeFrameSeparates` are **FALSE at the standard frame**
+for `VO^-` (the one-round count is shell-blind via the frame's `e_i`-swap isometry symmetry). The scheme DOES discretize
+(iterated WL), so bounded-WL-dim holds; the fix is a **symmetry-broken base** (`≈ d+2`, greedy size-4 at q=3) on which
+the one-round count is injective. The landed B.1 capstones (idx 1221-1233) are axiom-clean but have unprovable
+hypotheses as stated → need reformulation; the "recover-Q-profile-then-`coords_determine`" architecture is wrong for
+minus-type. **Correct target = direct count-injectivity at the symmetry-broken base** → `discrete_of_kRoundRelationSeparates`
+→ seal. The Gauss-sum toolkit for it (13 axiom-clean lemmas) is built in `ChainDescent/ScratchGauss.lean`. **B.0
+(`viaOrthogonalForm`, isometry `O(Q)`) is UNAFFECTED.** Authoritative state: plan doc STATUS (the ⚠/⚠⚠ boxes).

@@ -154,11 +154,19 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   `countsDetermineFrameQ_of_orbitIsIsotropyClass` (`PublicTheoremIndex.md:1227-1233`). Splits the open content along
   the Witt | Gauss boundary: `OrbitIsIsotropyClass` + `IsotropyCountsRecoverFrameQ` → `CountsDetermineFrameQ` → seal.
   B.1c-ii's exact target (pure isotropy-class counts ⟹ frame `Q`-profile, no opaque relations) is now confirmed.
-- **Remaining = Stage B.1c (the deep open research core); all checkpoint work exhausted.** Two heavy Mathlib builds
-  (plan §8), each isolated as a clean named predicate: **B.1c-i** = `OrbitIsIsotropyClass` via **Witt's theorem**
-  (`GO(Q)`-orbits = isotropy classes ⟹ rank-3; heaviest, ABSENT in Mathlib); **B.1c-ii** = `IsotropyCountsRecoverFrameQ`
-  via **quadratic Gauss-sum / affine-quadric point counts** (isotropy counts ⟹ field values; partial in Mathlib). Next
-  increment is a genuine heavy build (recommend B.1c-ii at `VO^ε_4(3)`), not further isolation. Multi-session research.
+- **★★ CORRECTION (2026-06-18 later) — the B.1c predicates are MIS-SHAPED; the bullets just above are SUPERSEDED.**
+  Finite probe over `VO^ε_4(3)`: `IsotropyCountsRecoverFrameQ` / `CountsDetermineFrameQ` / `SimilitudeFrameSeparates`
+  are **FALSE at the standard frame** for `VO^-` (one-round count shell-blind via the frame's `e_i`-swap isometry).
+  The scheme still discretizes (iterated WL) ⟹ bounded-WL-dim holds; fix = a **symmetry-broken base** (`≈ d+2`, greedy
+  size-4 at q=3) where the one-round count IS injective. Landed B.1 capstones (`via{IsotropyCounts,CountsDetermineFrameQ,
+  SimilitudeForm}`, idx 1221-1233) axiom-clean but **unprovable as stated → need reformulation** around base
+  `T = frameBase ∪ {p}`; the "recover-Q-profile-then-`coords_determine`" architecture is wrong for minus-type. Correct
+  target = **direct count-injectivity at the symmetry-broken base** → `discrete_of_kRoundRelationSeparates` → seal (no
+  `coords_determine`). **Gauss-sum toolkit BUILT** (13 axiom-clean lemmas, `ChainDescent/ScratchGauss.lean`, WIP/Mathlib-
+  only): A/A2/B1/B2/B3/eval/scaling/`card_quadForm_eq`/D1/`sum_addChar_multiQuad`/helpers. Remaining = k-fold count
+  (generalize `count2_eq_charsum`; inner = `sum_addChar_multiQuad`) + inclusion-exclusion + injectivity at the broken
+  base + bridge + PORT. **B.0 (`viaOrthogonalForm`, isometry `O(Q)`) UNAFFECTED.** Witt (B.1c-i `OrbitIsIsotropyClass`)
+  still needed for orbit=isotropy-class. Authoritative: plan doc STATUS (the ⚠/⚠⚠ boxes).
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:

@@ -24,7 +24,7 @@
 > (complete-the-square `∑ψ(r·Qw+polar Q w a')=ψ(−r⁻¹Qa')·∑ψ(r·Qw)`), A2 `count2_eq_charsum` (two-condition count),
 > helpers `quad_sub`/`polar_sum_right`, and **MULTI-POINT `sum_addChar_multiQuad`** (`∑_z ψ(∑ⱼrⱼQ(z−tⱼ)) =
 > ψ(const)·∑_z ψ(R·Qz)`, `R=∑rⱼ≠0`, collapsing to D1) — the engine for the symmetry-broken-base count. **The Gauss
-> toolkit (A/A2/B/C/D1/multiQuad) is now COMPLETE** (15 axiom-clean lemmas); remaining = the k-fold count assembly +
+> toolkit (A/A2/B/C/D1/multiQuad) is now COMPLETE** (13 axiom-clean lemmas); remaining = the k-fold count assembly +
 > the injectivity argument at the symmetry-broken base.
 >
 > **⚠ KEY FINDING (2026-06-18) — the PAIRWISE plan for Brick D FAILS; corrects (ii) below + §3.** Computing the
@@ -71,8 +71,12 @@
 > char-2 deferred (§5 R2′). **This also flags §2(ii)/§3's "discreteness at `T` from the count" as needing the
 > symmetry-broken base — update §3.**
 
-> **▶▶ HANDOFF — CURRENT STATE IN ONE READ (2026-06-18). The blocks below this are chronological history (newest
-> first); this box is the live state.**
+> **▶▶ HANDOFF box (2026-06-18 morning) — PARTLY SUPERSEDED. Read the two ⚠/⚠⚠ boxes ABOVE first: they are the live
+> state.** This box's "chain confirmed end-to-end / checkpoints EXHAUSTED / next action = heavy build B.1c-ii via
+> `IsotropyCountsRecoverFrameQ`" is WRONG — that predicate (and `CountsDetermineFrameQ`/`SimilitudeFrameSeparates`) was
+> found FALSE at the standard frame (mis-shaped); the corrected target is count-injectivity at a *symmetry-broken* base,
+> and the Gauss toolkit for it is now built (`ScratchGauss.lean`). The decl inventory + Witt/Gauss framing below remain
+> accurate; the "what's open / next action" framing is replaced by the ⚠⚠ box. Kept for the decl map + history.
 >
 > **What's done.** All conditional capstones and isolation checkpoints for the node-4 forms-graph residue are LANDED,
 > axiom-clean `[propext, Classical.choice, Quot.sound]`, full build green (`bash scripts/build.sh`, ~82s). They live in
@@ -462,9 +466,14 @@ intersection numbers.
 3. **(heaviest)** B.1c-i: Witt's theorem ⟹ `OrbitIsIsotropyClass`, discharging the carried predicate.
 4. Generalize `d`, then `q` (incl. char 2), then classes (d)/(e); Suzuki (f) separate (not a form).
 
-**All checkpoint work is now exhausted** — the open content is irreducibly the two heavy builds (B.1c-ii Gauss,
+**[⚠⚠ SUPERSEDED 2026-06-18 — see the ⚠⚠ box in STATUS. This §8 framing — "`IsotropyCountsRecoverFrameQ` is the
+B.1c-ii target, recover Q-profile then `coords_determine`" — is WRONG: that predicate is FALSE at the standard frame
+(`VO^-`, one-round count shell-blind via frame symmetry). The corrected target is direct count-injectivity at a
+symmetry-broken base (`≈ d+2`), via the Gauss toolkit now built in `ScratchGauss.lean`. Witt (step 3, B.1c-i
+`OrbitIsIsotropyClass`) is still needed. Read STATUS, not this paragraph, for the live plan.]**
+~~All checkpoint work is now exhausted — the open content is irreducibly the two heavy builds (B.1c-ii Gauss,
 B.1c-i Witt), each isolated as a clean named predicate. The next increment is a genuine heavy build (recommend
-B.1c-ii at `VO^ε_4(3)`), not further isolation.
+B.1c-ii at `VO^ε_4(3)`), not further isolation.~~
 
 **Pragmatic end-state if the heavy builds are deferred:** `reachesRigidOrCameron_viaCountsDetermineFrameQ`
 already makes node-4-for-the-seal `modulo {G3 + Cameron/Liebeck/Skresanov + CountsDetermineFrameQ}`, with
