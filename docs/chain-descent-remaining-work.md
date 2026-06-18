@@ -125,6 +125,13 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   **Concrete next:** test whether Skresanov's rank-3 `G^(2)` description trivialises the deficiency at a bounded base
   for the affine residue (an affine-rank-3 carve capstone, sibling to the cyclotomic slice). See [[reference_srg_wl_literature_2026-06-17]].
 - **Floors available now:** sub-exp via `…viaSpielman` (fully citable, Cameron-free; floor value `exp(Õ(n^{1/5}))`, §2 DELTA).
+- **★ Stage A LANDED (2026-06-18, axiom-clean):** `reachesRigidOrCameron_viaAffineFormScheme` (CascadeAffine.lean,
+  `PublicTheoremIndex.md:1207`) is the conditional capstone for the schurian node-4 forms-graph residue. It carries the
+  free group base `IsBase … T` + the certificate `hFormCert : RelCountsDetermineOrbit … T` (the **only open content**),
+  composing the landed depth-`k` engine + base + `…viaSpielman`; **no `hSmallAutThin`**. The route is validated
+  end-to-end; the open content is now exactly `hFormCert`. **Next = Stage B** (discharge `hFormCert` for `VO^ε_4(q)`):
+  the crux lemma "count profile recovers form coords `B(v,e_i)`" — Route A (elementary counts, Witt-free; Mathlib lacks
+  Witt theory) + the non-isotropic shell. Plan: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §3–§5.
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:
@@ -184,7 +191,9 @@ REMAINING:
                                               (√n 64) — ALL SHATTER ⟹ hSmallAutThin confirmed, s=−3..−57.
                                               PROOF PLAN: chain-descent-formsgraph-wldim-plan.md — free base +
                                               landed depth-k engine + ONE crux lemma (count profile recovers form
-                                              coords B(v,e_i)); Stage A conditional capstone, Stage B VO^ε.
+                                              coords B(v,e_i)). Stage A capstone reachesRigidOrCameron_viaAffineFormScheme
+                                              LANDED (2026-06-18, axiom-clean) — open content isolated to hFormCert;
+                                              Stage B = discharge hFormCert for VO^ε.
   3b  EdgeGeneratesFromSet ............... BUILDABLE infra (checkability; off critical path)
   3c  citation formalization ............ OPTIONAL (Spielman n^{1/5} / affine 2-sep / CFI dimWL; off path)
   3d  node-2 uniform rainbow rank ....... OPTIONAL (affine/leg-B; can't reach node 4)

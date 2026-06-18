@@ -2026,6 +2026,45 @@ theorem selfDetectsWhileSymmetric_of_relCountsDetermineOrbit {n : Nat} (S : Schu
   obtain ⟨S₀, hcard, hrec⟩ := h hps
   exact ⟨S₀, hcard, recoversWhileSymmetric_of_relCountsDetermineOrbit S hn hrec⟩
 
+/-- **THE SEAL VIA THE AFFINE FORMS-GRAPH CERTIFICATE (Stage A — the node-4 forms-graph wiring; route §9.9.18c,
+`docs/chain-descent-formsgraph-wldim-plan.md`).** The conditional capstone for the seal's remaining schurian node-4
+residue: the affine forms-graph rank-3 families `{VO^ε / alternating / half-spin / Suzuki–Tits}` that the Skresanov
+reduction (route §9.9.18) isolates as the only small-Aut non-geometric *schurian* rank-3 residue beyond the cited
+1-dim cyclotomic slice. It carries exactly the **two pieces the plan's reduction identifies** and nothing else:
+
+* **`hbase : IsBase … T`** — the **free group base** (§2(i) of the plan). For `X = Inv(V ⋊ G₀)` the frame
+  `T = {0, e₁,…,e_d}` is a group base (`(G^(2))_T = {1}`: an affine map fixing the origin and a basis is the
+  identity), so `|T| = d+1 = O(1)` and `IsBase` holds *outright* on the affine instance — here it is carried
+  abstractly, discharged for `affineScheme G₀` by the spanning-basis argument (cf. `affinePermFin_eq_one_of_span`).
+* **`hFormCert : RelCountsDetermineOrbit … T`** — the **separation certificate** (§2(ii)), the *only open content*.
+  This is the probe-validated predicate (`Probe_FormsGraphs`, §9.9.18c: the families shatter at base `≈ d+1`); the
+  crux lemma "the two-round relation-count profile at `T` recovers the form coordinates `B(v,e_i)`, which —
+  nondegenerate — determines `v`" is what discharges it (Stage B, per family). It is carried here as a *named
+  hypothesis*, exactly as `clebschZ4_closure` carried δ′ before its discharge.
+
+The wiring is the **landed depth-`k` engine + free base + seal**: `cellsAreOrbits_of_relCountsDetermineOrbit`
+(certificate ⟹ warm cells are `Stab(T)`-orbits) → `twinsRealizedByResidualAut_iff_cellsAreOrbits` (= the
+separability sink) → `separatesAtBoundedBase_of_twinsRealized` (the group base kills orbits to singletons ⟹
+`SeparatesAtBoundedBase`) → `reachesRigidOrCameron_viaSpielman` (separation ⟹ the rigid branch outright).
+
+**Carries NO `hSmallAutThin`** — node 4 is *discharged* for this residue, not assumed: the dichotomy is never
+invoked (the family discretizes at the bounded base, reaching rigid). Modulo the CFSG identification that the residue
+*is* one of these affine families (Cameron/Liebeck/Skresanov, carried elsewhere) + the certificate `hFormCert`,
+this closes node-4-*for-the-seal*. The genuinely-uncited non-schurian wall (IR-solver row 4) is untouched, by
+design (route §9.9.18a). Axiom-clean. -/
+theorem reachesRigidOrCameron_viaAffineFormScheme {n : Nat}
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (S : SchurianScheme n) (hn : 2 ≤ n)
+    {T : Finset (Fin n)} (hcard : T.card ≤ bound)
+    (hbase : IsBase (schemeAdj S.toAssociationScheme) (fun _ _ => POE.unknown) T)
+    (hFormCert : RelCountsDetermineOrbit S.toAssociationScheme T) :
+    ((SchemeBlockRecovered n S ∨ AbelianConsumed n S) ∨ SchemeRecoveredByDepth n S bound)
+      ∨ IsCameronScheme n S :=
+  reachesRigidOrCameron_viaSpielman S
+    (separatesAtBoundedBase_of_twinsRealized S hcard hbase
+      ((twinsRealizedByResidualAut_iff_cellsAreOrbits S T).mpr
+        (cellsAreOrbits_of_relCountsDetermineOrbit S.toAssociationScheme hn hFormCert)))
+
 /-! ### Phase 2, M0.3 — the affine instance `V ⋊ G₀` over `F_p^d`
 
 The concrete beachhead family: the orbital scheme of the affine group `V ⋊ G₀` acting on `V = F_p^d`,

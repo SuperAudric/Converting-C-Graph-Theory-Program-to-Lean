@@ -11,6 +11,16 @@
 
 ## STATUS (read first)
 
+**★ STAGE A LANDED (2026-06-18, axiom-clean `[propext, Classical.choice, Quot.sound]`, build green).** The conditional
+capstone `reachesRigidOrCameron_viaAffineFormScheme` (CascadeAffine.lean, between the §SGate2 and §AffineScheme
+sections; `PublicTheoremIndex.md:1207`) is built. It carries exactly the two pieces the reduction identifies —
+`hbase : IsBase … T` (the free group base) and `hFormCert : RelCountsDetermineOrbit … T` (the **only open content**) —
+and composes the landed engine + base + seal (`cellsAreOrbits_of_relCountsDetermineOrbit` →
+`twinsRealizedByResidualAut_iff_cellsAreOrbits` → `separatesAtBoundedBase_of_twinsRealized` →
+`reachesRigidOrCameron_viaSpielman`). **Carries NO `hSmallAutThin`** — node 4 is discharged for this residue, not
+assumed. The route is validated end-to-end; the open content is now exactly the one predicate `hFormCert`. **Next =
+Stage B** (discharge `hFormCert` for `VO^ε_4(q)`; §3, §4). Nothing committed (user commits).
+
 **The target is now extremely concrete** — not "all SRGs", but four explicit affine/classical-group families whose
 automorphism group `G^(2)` is given structurally by Skresanov and whose base the probe measured at `≈ d+1` (flat).
 **The reduction is mostly landed; the open content is ONE crux lemma — `RelCountsDetermineOrbit (affineScheme G₀) T`
@@ -148,9 +158,11 @@ The lemma is **uniform** for the form-based families (c)–(e); (f) is the outli
    {G3 + the affine-form structure}; **no `hSmallAutThin`** (it is *discharged* for this family).
 
 **Staging (build order):**
-- **Stage A — the wiring + conditional capstone (cheap, do first).** Land `reachesRigidOrCameron_viaAffineFormScheme`
-  carrying the certificate as a *named hypothesis* `hFormCert : RelCountsDetermineOrbit X T` (probe-validated, like
-  `clebschZ4_closure` carried δ′). Validates the route end-to-end; isolates the open content to one predicate.
+- **Stage A — the wiring + conditional capstone (cheap, do first). ✅ DONE (2026-06-18, axiom-clean, build green).**
+  `reachesRigidOrCameron_viaAffineFormScheme` (CascadeAffine.lean, `PublicTheoremIndex.md:1207`) carries the certificate
+  as a *named hypothesis* `hFormCert : RelCountsDetermineOrbit S.toAssociationScheme T` plus the free group base
+  `hbase : IsBase … T` (probe-validated, like `clebschZ4_closure` carried δ′). Route validated end-to-end; the open
+  content is isolated to the one predicate `hFormCert`.
 - **Stage B — discharge the certificate for `VO^ε`** (the crux lemma, §3). The genuine combinatorial work. Start with a
   fixed small `d` (`d=4`, `VO^ε_4(q)`) generic in `q` — richest probe data (base `[5,5,6,7]` at `q=2..5`) — then general
   `d`. Use **Route B** as the picture (isotropic skeleton = direct perp-graph) but expect the formal proof to go via
