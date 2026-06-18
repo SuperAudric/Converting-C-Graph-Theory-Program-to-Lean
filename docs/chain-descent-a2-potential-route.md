@@ -180,9 +180,10 @@ target is only PARTLY cited:** node-4-schurian = `{1-dim cyclotomic — CITED (P
 affine-polar / alternating / half-spin / Suzuki–Tits — UNCITED, bounded-WL-dim OPEN}`. So the seal's node-4 is **not**
 closed-modulo-citations; the forms-graph part is open. **The upside (a real correction):** these 4 families are
 *explicit, constructible* node-4 witnesses (growing `q`) — refuting the "no constructible witness" framing — and being
-small-Aut schurian (group base `O(log n)`) they are *probable*. **Live next = PROBE (c)–(f)** (extend
-`A2MonovariantProbe` at growing `q`): do they shatter at `O(log n)` base (confirm `hSmallAutThin`) or stay thick
-(falsify it)? Read §9.9.18 + §9.9.18a + §9.9.18b first.
+small-Aut schurian (group base `O(log n)`) they are *probable* — and **PROBE DONE (§9.9.18c, `Probe_FormsGraphs`):
+the affine-polar `VO^-_4(q)` SHATTERS** (base = [5,5,6] FLAT vs √n = [4,9,16] for n=16,81,256; geometric Rook needs
+base = √n) — hSmallAutThin **confirmed** on the first constructible unbounded-`s` witnesses, refuting "no witness".
+Bounded-WL-dim for them stays UNCITED/OPEN (empirical, not a proof). Read §9.9.18 → §9.9.18a → §9.9.18b → §9.9.18c.
 
 **▶ ROW-4 SPORADICS PROBE DONE (2026-06-17, §9.9.8) — `hSmallAutThin` confirmed at TRIVIAL Aut, 0 falsifiers.**
 `A2MonovariantProbe.Probe_Row4Sporadics` loads the Paulus `srg(25,12,5,6)`/`(26,10,3,4)` + Chang(28) + conference(29)
@@ -1938,3 +1939,39 @@ at the small-Aut regime (fixed dimension, `q→∞`), against Brouwer–Van Mald
 **Updated modulo picture.** Seal node-4-schurian `modulo {G3 + Liebeck + Skresanov + [1-dim: Ponomarenko-2-sep] +
 [forms-graphs (c)–(f): an OPEN bounded-WL-dim, no citation]}`. The open content is no longer a vague thick wall — it is
 the bounded-WL-dim of four named, constructible classical-group families. Nothing committed (user commits).
+
+#### 9.9.18c Forms-graph PROBE — DONE (2026-06-17): the affine-polar node-4 witnesses SHATTER; hSmallAutThin holds on the FIRST constructible unbounded-s family
+
+**Built + run, green: `A2MonovariantProbe.Probe_FormsGraphs`** (the C1 §9.9.18b next-step). It constructs the **affine
+polar graph `VO^ε_{2m}(q)`** (Skresanov class (c)) from scratch — a small finite-field arithmetic layer (`GFq`, prime +
+prime-power via hardcoded irreducibles for GF(4)/GF(8)/GF(9)) + the quadratic-form Cayley construction — and measures the
+1-WL individualization base (greedy best-fit for n≤81, first-fit upper bound for n=256) and the 2-WL cover trajectory
+(`minMult`/`c`, n≤81) with the **existing** pipeline (`GreedyBaseCurve`/`Row4_CoverTrajectory`/`SrgParams`/`SmallestEig`).
+This is the FIRST probe to reach genuine **node-4 (unbounded-`s`) witnesses** — every prior probe (catalogue/sporadics,
+§9.9.8) was bounded-`s` = node 3.
+
+**Construction validated:** `VO^-_4(2)` = `(16,5,0,2)` = **Clebsch** (the known residue); `VO^+_4(2)` = `(16,9,4,6)`;
+`Rook(4)` = `(16,6,2,2)` — all match. `VO^-_4(3)`=`(81,20,1,6)`, `VO^-_4(4)`=`(256,51,2,12)` are valid SRGs.
+
+**The result — the base TREND is the discriminator (the money shot):**
+```
+n            =  16    81    256
+√n           =   4     9     16
+VO^-_4 base  =   5     5      6     ← FLAT / bounded  (small-Aut non-geometric, s = −3,−7,−13 unbounded)  → SHATTERS
+Rook(m) base =   4     9     (16)   ← = √n           (geometric, large-Aut)                               → THICK
+```
+So the small-Aut non-geometric affine-polar family — the C1 open residue — **shatters at a bounded base ≪ √n as `q`
+(hence `s`, `n`) grows**, exactly the geometric/non-geometric dichotomy hSmallAutThin predicts: the *geometric* Rook is
+thick (base = √n, its *group* base, large-Aut wreath); the *small-Aut* affine-polar base is flat (~5–6, ≈ O(log n):
+log₂256 = 8 > 6) even as `s` → −∞. **0 falsifiers** (n≥64 targets; n=16 Clebsch is the validation anchor, small-`n` noise).
+
+**Significance.** (1) **Corrects the "no constructible witness" framing** (§5 F2 / §9.9.3 / prior MEMORY): genuine
+node-4 (unbounded-`s`) witnesses ARE constructible — the affine-polar family `VO^-_4(q)` at growing `q` — and they
+**confirm** hSmallAutThin, the strongest empirical support yet (prior evidence was bounded-`s` node-3 catalogue data).
+(2) **Strengthens §9.9.18:** node-4-schurian is affine, and the affine forms-graph residue (the open, uncited part)
+empirically shatters at bounded base — the seal's node-4 prediction holds on constructible unbounded-`s` data, not just
+node-3. (3) It does NOT close the residue: bounded-WL-dim for the forms-graph families stays UNCITED/OPEN (§9.9.18b) —
+this is empirical support, a 3-point growing-`q` trend, only class (c) built ((b) excluded geometric; (d)–(f) harder,
+not built). Honest scope: `VO^-_4(q)` is small-Aut only at fixed `m` (growing `m` at fixed `q` ⟹ super-poly Aut =
+Cameron); `|Aut|` annotated analytically (poly, Skresanov), not enumerated (O(|Aut|)≈10⁵ too slow); n=256 base is a
+first-fit upper bound. Nothing committed (user commits).

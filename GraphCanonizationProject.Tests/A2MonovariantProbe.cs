@@ -1815,4 +1815,238 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         Assert.True(maxTwistGap <= 2, "a small-Aut twist showed base ≫ b(Aut) — candidate node-4 falsifier; INVESTIGATE (not a code bug)");
         Assert.True(hh == hd, "Doob and H(3,4) are not 2-WL-cospectral — construction issue");
     }
+
+    // ── FORMS-GRAPH PROBE (route §9.9.18b — the FIRST constructible node-4 witnesses) ──────────────
+    //
+    //  The Skresanov reduction (§9.9.18) shows every small-Aut non-geometric SCHURIAN rank-3 residue
+    //  is AFFINE; C1 (§9.9.18b) found the affine survivors split into 1-dim cyclotomic (cited) and the
+    //  forms-graph classes (c)-(f) — affine-polar / alternating / half-spin / Suzuki-Tits — for which
+    //  bounded-WL-dim is UNCITED/OPEN.  KEY CORRECTION to the old framing: these are NOT
+    //  "construction-bottlenecked" — the AFFINE POLAR graph VO^ε_{2m}(q) at FIXED m, GROWING q is an
+    //  explicit, parametric, small-Aut (poly |Aut|), non-geometric (smallest eigenvalue →−∞ with q),
+    //  primitive, schurian rank-3 SRG.  This is the FIRST probe to reach genuine node-4 (unbounded-s)
+    //  witnesses — every prior probe (catalogue/sporadics) was bounded-s = node 3.
+    //
+    //  THE TEST.  hSmallAutThin = small-Aut ⟹ shatters at base ≪ √n.  Validate VO^-_4(2) = Clebsch
+    //  (known n=16 residue), then test the never-probed growing-q line VO^-_4(3) [n=81], VO^-_4(4)
+    //  [n=256] — does the 1-WL base stay bounded (shatter) while n grows, vs the geometric Rook(m)
+    //  [base = √n] at matching n?  Shatter ⟹ strongest hSmallAutThin evidence yet (genuine node 4);
+    //  thick ⟹ a FALSIFIER (the seal would need restating — a real result either way).
+
+    static int IPow(int b, int e) { int r = 1; for (int i = 0; i < e; i++) r *= b; return r; }
+
+    // Minimal finite field GF(q), q a prime power, as add/mul/neg tables. Elements 0..q-1; for q=p^e
+    // an element is a degree-<e polynomial over F_p packed in base-p digits, reduced mod a monic
+    // irreducible (small hardcoded table).  Prime q uses direct modular arithmetic.
+    sealed class GFq
+    {
+        public readonly int q;
+        public readonly int[,] add, mul;
+        public readonly int[] neg;
+        public GFq(int q)
+        {
+            this.q = q;
+            add = new int[q, q]; mul = new int[q, q]; neg = new int[q];
+            int p = 2; while (q % p != 0) p++;
+            int e = 0, t = q; while (t > 1) { t /= p; e++; }
+            if (IPow(p, e) != q) throw new ArgumentException($"{q} is not a prime power");
+            if (e == 1)
+            {
+                for (int i = 0; i < q; i++) { neg[i] = (q - i) % q; for (int j = 0; j < q; j++) { add[i, j] = (i + j) % q; mul[i, j] = (i * j) % q; } }
+                return;
+            }
+            int[] irr = e == 2 && p == 2 ? new[] { 1, 1 }        // x^2+x+1   (GF(4))
+                      : e == 3 && p == 2 ? new[] { 1, 1, 0 }     // x^3+x+1   (GF(8))
+                      : e == 2 && p == 3 ? new[] { 1, 0 }        // x^2+1     (GF(9))
+                      : throw new NotImplementedException($"GF({q}) irreducible not tabulated");
+            int[] D(int x) { var d = new int[e]; for (int i = 0; i < e; i++) { d[i] = x % p; x /= p; } return d; }
+            int En(int[] d) { int x = 0; for (int i = e - 1; i >= 0; i--) x = x * p + d[i]; return x; }
+            for (int i = 0; i < q; i++)
+            {
+                var a = D(i);
+                var sn = new int[e]; for (int k = 0; k < e; k++) sn[k] = (p - a[k]) % p; neg[i] = En(sn);
+                for (int j = 0; j < q; j++)
+                {
+                    var b = D(j);
+                    var s = new int[e]; for (int k = 0; k < e; k++) s[k] = (a[k] + b[k]) % p; add[i, j] = En(s);
+                    var prod = new int[2 * e]; for (int x = 0; x < e; x++) for (int y = 0; y < e; y++) prod[x + y] = (prod[x + y] + a[x] * b[y]) % p;
+                    for (int deg = 2 * e - 1; deg >= e; deg--)
+                    {
+                        int co = prod[deg]; if (co == 0) continue; prod[deg] = 0;
+                        for (int k = 0; k < e; k++) prod[deg - e + k] = (prod[deg - e + k] + (p - (co * irr[k]) % p) % p) % p;
+                    }
+                    var r = new int[e]; for (int k = 0; k < e; k++) r[k] = prod[k] % p; mul[i, j] = En(r);
+                }
+            }
+        }
+    }
+
+    // Affine polar graph VO^ε_{2m}(q): vertices = F_q^{2m}, x ~ y iff Q(x−y) = 0 (x≠y), Q a
+    // nondegenerate quadratic form of type ε (+1 hyperbolic, −1 elliptic).  A translation (Cayley)
+    // scheme ⟹ vertex-transitive + schurian; the affine rank-3 forms graph of Skresanov class (c).
+    static bool[,] AffinePolar(int q, int m, int eps)
+    {
+        var F = new GFq(q);
+        int dim = 2 * m, n = IPow(q, dim);
+        int bb = 0, cc = 0;
+        if (eps == -1)   // find an anisotropic binary form g(y,z)=y²+b·yz+c·z² (g=0 only at 0)
+        {
+            bool found = false;
+            for (int b = 0; b < q && !found; b++) for (int c = 0; c < q && !found; c++)
+            {
+                bool aniso = true;
+                for (int y = 0; y < q && aniso; y++) for (int z = 0; z < q; z++)
+                {
+                    if (y == 0 && z == 0) continue;
+                    int g = F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]];
+                    if (g == 0) { aniso = false; break; }
+                }
+                if (aniso) { bb = b; cc = c; found = true; }
+            }
+            if (!found) throw new Exception($"no anisotropic binary form over GF({q})");
+        }
+        int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+        int Q(int[] x)
+        {
+            int s = 0, hyp = eps == -1 ? m - 1 : m;
+            for (int i = 0; i < hyp; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]];
+            if (eps == -1)
+            {
+                int y = x[2 * (m - 1)], z = x[2 * (m - 1) + 1];
+                s = F.add[s, F.add[F.add[F.mul[y, y], F.mul[F.mul[bb, y], z]], F.mul[cc, F.mul[z, z]]]];
+            }
+            return s;
+        }
+        var adj = Empty(n);
+        var vecs = new int[n][]; for (int v = 0; v < n; v++) vecs[v] = Vec(v);
+        var d = new int[dim];
+        for (int u = 0; u < n; u++) for (int v = u + 1; v < n; v++)
+        {
+            for (int i = 0; i < dim; i++) d[i] = F.add[vecs[u][i], F.neg[vecs[v][i]]];
+            if (Q(d) == 0) Edge(adj, u, v);
+        }
+        return adj;
+    }
+
+    // First-fit 1-WL individualization base (cheap upper bound on the base — for large n where the
+    // best-fit GreedyBaseCurve is too costly).  Returns #individualizations to reach a discrete colouring.
+    static int CheapBaseSize(int n, bool[,] adj)
+    {
+        var indiv = new List<int>(); var color = Refine(n, adj, indiv); int guard = 0;
+        while (MaxCell(color, n) > 1 && guard++ < n)
+        {
+            var sz = new Dictionary<int, int>(); foreach (var c in color) sz[c] = sz.GetValueOrDefault(c) + 1;
+            int pick = -1; for (int v = 0; v < n; v++) if (!indiv.Contains(v) && sz[color[v]] > 1) { pick = v; break; }
+            if (pick < 0) break; indiv.Add(pick); color = Refine(n, adj, indiv);
+        }
+        return indiv.Count;
+    }
+
+    [Fact]
+    public void Probe_FormsGraphs()
+    {
+        output.WriteLine("A2 FORMS-GRAPH PROBE (route §9.9.18b) — the FIRST constructible NODE-4 witnesses.");
+        output.WriteLine("Affine polar graph VO^ε_{2m}(q): small-Aut (poly), non-geometric (s→−∞ with q), primitive,");
+        output.WriteLine("schurian rank-3 SRG — Skresanov's affine forms-graph class (c).  Tests hSmallAutThin");
+        output.WriteLine("(small-Aut ⟹ 1-WL base ≪ √n / shatters) at FIXED m=2, GROWING q (n = q^4 = 16, 81, 256).");
+        output.WriteLine("VO^-_4(2) = Clebsch validates the construction; q=3,4 are NEVER-PROBED genuine node 4.");
+        output.WriteLine("Contrast: geometric Rook(m) (Hamming H(2,m)) at matching n needs base = √n (thick/Cameron).");
+        output.WriteLine("");
+
+        output.WriteLine($"{"graph",-16} {"n",-5} {"(k,λ,μ)",-15} {"s",-5} {"2rk",-4} {"|Aut|",-9} {"base",-5} {"√n",-4} {"verdict",-9} cover ∅ → {{0}}[→{{0,v*}}]");
+        output.WriteLine(new string('─', 160));
+
+        // m=2 fixed, growing q: the small-Aut non-geometric node-4 line (q=4 needs GF(4)).
+        var targets = new (string name, int q, int m, int eps)[]
+        {
+            ("VO^-_4(2)=Clebsch", 2, 2, -1),
+            ("VO^+_4(2)",         2, 2, +1),
+            ("VO^-_4(3)",         3, 2, -1),
+            ("VO^+_4(3)",         3, 2, +1),
+            ("VO^-_4(4)",         4, 2, -1),
+        };
+
+        var rows = new List<(string name, int n, int s, long aut, int baseSize, int sqrtN, bool shatters, bool smallAut, bool nonGeom)>();
+        int targetsMeasured = 0, falsifiers = 0;
+
+        // |Aut| is analytic here (affine-polar fixed-m = poly by Skresanov; Rook = large/geometric); the
+        // backtracking enumerator is O(|Aut|) (~10^5 at n=81) and the real metric is base-vs-√n, so we
+        // annotate the Aut class rather than enumerate.
+        void Measure(string name, bool[,] adj, int n, bool isAffinePolar, bool knownSmallAut)
+        {
+            var (ok, k, lam, mu) = SrgParams(n, adj);
+            if (!ok) { output.WriteLine($"{name,-16} {n,-5} NOT-AN-SRG (rank≠3 / irregular — report & skip)"); return; }
+            int s = SmallestEig(n, k, lam, mu);
+            int r2 = n <= 256 ? PRank(n, adj, 2) : -1;
+            int baseSize = n <= 81 ? GreedyBaseCurve(n, adj).Count - 1 : CheapBaseSize(n, adj);
+            int sq = (int)Math.Ceiling(Math.Sqrt(n));
+            var (traj, _, _, _) = n <= 81 ? Row4_CoverTrajectory(n, BuildRel(n, adj)) : ("(2-WL cover skipped: n>81 cost)", false, 0, 0);
+            bool shatters = baseSize < sq;
+            bool nonGeom = s <= -3 || (double)-s >= Math.Sqrt(n) / 4;   // unbounded-s heuristic vs n
+            string autStr = knownSmallAut ? "poly*" : "large*";
+            // n=16 is too small for the base≪√n asymptotics (the validation anchor, Clebsch); judge SHATTER/THICK only at n≥64.
+            string verdict = n < 64 ? "anchor" : shatters ? "SHATTER" : "THICK‼";
+            output.WriteLine($"{name,-16} {n,-5} {$"({k},{lam},{mu})",-15} {s,-5} {r2,-4} {autStr,-9} {baseSize,-5} {sq,-4} {verdict,-9} {traj}");
+            rows.Add((name, n, s, knownSmallAut ? 1L : -1L, baseSize, sq, shatters, knownSmallAut, nonGeom));
+        }
+
+        foreach (var (name, q, m, eps) in targets)
+        {
+            int n = IPow(q, 2 * m);
+            bool[,] adj;
+            try { adj = AffinePolar(q, m, eps); }
+            catch (Exception ex) { output.WriteLine($"{name,-16} build failed: {ex.Message}"); continue; }
+            Measure(name, adj, n, isAffinePolar: true, knownSmallAut: true);   // affine-polar fixed m=2 ⟹ poly |Aut| (Skresanov)
+            // count the small-Aut non-geometric elliptic line (m=2, eps=-1) at ASYMPTOTIC n≥64 as node-4
+            // targets (n=16 = Clebsch validation anchor, excluded from the base≪√n falsifier test).
+            if (eps == -1 && rows.Count > 0)
+            {
+                var r = rows[^1];
+                if (r.name == name && r.nonGeom && r.n >= 64) { targetsMeasured++; if (!r.shatters) falsifiers++; }
+            }
+        }
+
+        output.WriteLine("");
+        output.WriteLine("GEOMETRIC THICK CONTRAST (Rook(m) = Hamming H(2,m), large-Aut, base = √n) at matching n:");
+        foreach (int mm in new[] { 4, 9 })   // Rook(4)=16, Rook(9)=81
+            Measure($"Rook({mm})", Rook(mm), mm * mm, isAffinePolar: false, knownSmallAut: false);
+
+        // ── Readout ──────────────────────────────────────────────────────────────────────────────
+        output.WriteLine("");
+        output.WriteLine("THE GROWING-q LINE (VO^-_4(q), fixed m=2, small-Aut non-geometric — genuine node 4):");
+        foreach (var r in rows.Where(r => r.name.StartsWith("VO^-_4")).OrderBy(r => r.n))
+        {
+            string tag = r.n < 64 ? "anchor (Clebsch; small-n, base≈√n is noise)"
+                       : r.shatters ? "SHATTERS (base ≪ √n) ✓" : "THICK (base ≥ √n) ‼ FALSIFIER";
+            output.WriteLine($"  {r.name,-16} n={r.n,-4} s={r.s,-4} base={r.baseSize} (√n={r.sqrtN})  ⟹ {tag}");
+        }
+        // The money shot: base TREND vs √n vs the geometric Rook base (which tracks √n).
+        var voLine = rows.Where(r => r.name.StartsWith("VO^-_4")).OrderBy(r => r.n).ToList();
+        var rookLine = rows.Where(r => r.name.StartsWith("Rook")).OrderBy(r => r.n).ToList();
+        output.WriteLine("");
+        output.WriteLine($"  BASE TREND (the discriminator):  n         = [{string.Join(", ", voLine.Select(r => r.n))}]");
+        output.WriteLine($"                                   √n        = [{string.Join(", ", voLine.Select(r => r.sqrtN))}]");
+        output.WriteLine($"                                   VO^-_4 base = [{string.Join(", ", voLine.Select(r => r.baseSize))}]  ← bounded/flat (shatters)");
+        output.WriteLine($"                                   Rook   base = [{string.Join(", ", rookLine.Select(r => $"{r.baseSize}@n{r.n}"))}]  ← = √n (geometric, thick)");
+        output.WriteLine("");
+        output.WriteLine($"VERDICT — node-4 (small-Aut non-geometric VO^-_4(q), n≥64) targets measured: {targetsMeasured};  falsifiers (base ≥ √n): {falsifiers}.");
+        output.WriteLine(falsifiers == 0 && targetsMeasured >= 2
+            ? "  ⇒ The affine-polar node-4 witnesses SHATTER at base ≪ √n as q (hence s, n) grows — hSmallAutThin holds on the"
+            + " FIRST genuine constructible node-4 (unbounded-s) family, not just bounded-s node-3 catalogue data.  Corrects the"
+            + " 'no constructible witness' framing (§9.9.18b): the witnesses exist, are probable, and confirm the seal's prediction."
+            : targetsMeasured < 2
+                ? "  ⇒ Fewer than 2 node-4 targets isolated — check VO construction / GF(q) / SRG-ness."
+                : "  ‼ A small-Aut non-geometric affine-polar graph needs base ≈ √n — a hSmallAutThin FALSIFIER; the seal's"
+                + " node-4 prediction is violated on a constructible family.  INVESTIGATE (a real result, not a code bug).");
+        output.WriteLine("");
+        output.WriteLine("HONEST SCOPE: VO^-_4(q) is small-Aut only at FIXED m (growing m at fixed q ⟹ super-poly Aut = large/Cameron).");
+        output.WriteLine("Probed q=2,3,4 (n=16,81,256); the growing-q trend is the unbounded-s axis Neumaier/the catalogue could not reach.");
+        output.WriteLine("These are the affine forms-graph residue (C1, §9.9.18b) — bounded-WL-dim for them is UNCITED/OPEN; this probe");
+        output.WriteLine("is empirical support, not a proof.  (b) bilinear H_q(2,m) is excluded as geometric; (d)-(f) not built (harder).");
+        output.WriteLine("* |Aut| not enumerated (O(|Aut|)≈10^5 too slow at n≥81); annotated analytically — affine-polar fixed-m = poly");
+        output.WriteLine("  (Skresanov, AΓL-type), Rook = large (geometric, S_m≀S_2).  The base-vs-√n trend is the actual measurement.");
+
+        Assert.True(targetsMeasured >= 2, "fewer than 2 small-Aut non-geometric affine-polar node-4 targets isolated — construction/GF(q)/SRG issue");
+        Assert.Equal(0, falsifiers);   // a small-Aut non-geometric VO graph with base ≥ √n would falsify hSmallAutThin (a real finding, not a code bug)
+    }
 }

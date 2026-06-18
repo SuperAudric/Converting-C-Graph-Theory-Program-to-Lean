@@ -33,7 +33,7 @@ The live capstone is `reachesRigidOrCameron_viaBoundedMinMult` (CascadeAffine §
 | Hypothesis | What it is | True status | Collapses to |
 |---|---|---|---|
 | **G3** (`hClassify`, `PrimitiveCCClassification`) | "large primitive ⟹ Cameron section" — the cited classification | **Citation** (Babai/Sun–Wilmes/Kivva). The one citation that *may stay cited* (CFSG-based). | — (kept) |
-| **hSmallAutThin** | "small-Aut primitive residue ⟹ bounded `minMult`" = thick⟹large-Aut | **REDUCED to AFFINE this session (§9.9.18–18b):** for the SCHURIAN residue, Cameron+Liebeck+Skresanov ⟹ the residue is **affine** = `{1-dim cyclotomic — CITED (Ponomarenko-2-sep) + forms-graphs (c)–(f) — UNCITED, bounded-WL-dim OPEN}`. So **not** fully closed-mod-citations; the forms-graph part `{affine-polar, alternating, half-spin, Suzuki–Tits}` is the precise open residue — but now **explicit & CONSTRUCTIBLE** (refuting "no witness"). Sub-exp floor `n^{1/5}` (§2). | the affine slice; open residue = forms-graphs (c)–(f), PROBABLE (probe next). Non-schurian wall → IR-solver row 4 (§4). |
+| **hSmallAutThin** | "small-Aut primitive residue ⟹ bounded `minMult`" = thick⟹large-Aut | **REDUCED to AFFINE this session (§9.9.18–18b):** for the SCHURIAN residue, Cameron+Liebeck+Skresanov ⟹ the residue is **affine** = `{1-dim cyclotomic — CITED (Ponomarenko-2-sep) + forms-graphs (c)–(f) — UNCITED, bounded-WL-dim OPEN}`. So **not** fully closed-mod-citations; the forms-graph part `{affine-polar, alternating, half-spin, Suzuki–Tits}` is the precise open residue — but now **explicit & CONSTRUCTIBLE** (refuting "no witness") and **PROBED: affine-polar `VO^-_4(q)` SHATTERS at bounded base ≪ √n for q=2,3,4** (§9.9.18c, `Probe_FormsGraphs`) — hSmallAutThin confirmed on the first unbounded-`s` witnesses. Sub-exp floor `n^{1/5}` (§2). | the affine slice; open residue = forms-graphs (c)–(f), bounded-WL-dim OPEN but **empirically shatters**. Non-schurian wall → IR-solver row 4 (§4). |
 | **hcatch** | "1-WL cell ⟹ 2-WL fiber" = CFI-1992 Thm 5.2 (dimWL exchange) | At a complete extension `⟺ warmRefine discrete`. Free where 1-WL discretizes; residual = the `s(C)` certificate. | the core (§9.9.14–15) |
 | **hImprim** | "imprimitive ⟹ block-recovered ∨ abelian-consumed" | Block-tower infra **built**; content = constituent WL-recovery (A2-ii), one tower-layer down. | the core (§9.9.16) |
 
@@ -178,8 +178,9 @@ REMAINING:
   3a  the schurian s(C) core ............. REDUCED to AFFINE (Skresanov). Splits (C1, §9.9.18b):
                                             • 1-dim cyclotomic ... CITED (Ponomarenko-2-sep / δ′)
                                             • forms-graphs (c)-(f) ... UNCITED, bounded-WL-dim OPEN, but
-                                              EXPLICIT & CONSTRUCTIBLE (affine-polar/alternating/half-spin/Suzuki).
-                                              PROBABLE (small-Aut ⟹ group base O(log n)). PROBE next.
+                                              EXPLICIT & CONSTRUCTIBLE (affine-polar/alternating/half-spin/Suzuki),
+                                              and PROBED (§9.9.18c): VO^-_4(q) base=[5,5,6] FLAT vs √n=[4,9,16]
+                                              for n=16,81,256 ⟹ SHATTERS (hSmallAutThin confirmed, unbounded-s).
   3b  EdgeGeneratesFromSet ............... BUILDABLE infra (checkability; off critical path)
   3c  citation formalization ............ OPTIONAL (Spielman n^{1/5} / affine 2-sep / CFI dimWL; off path)
   3d  node-2 uniform rainbow rank ....... OPTIONAL (affine/leg-B; can't reach node 4)
