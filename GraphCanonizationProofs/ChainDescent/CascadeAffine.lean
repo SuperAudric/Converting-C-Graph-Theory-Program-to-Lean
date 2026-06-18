@@ -10,6 +10,8 @@ import ChainDescent.Cascade
 import ChainDescent.Scheme
 import ChainDescent.Separability
 import ChainDescent.CoherentConfig
+import Mathlib.LinearAlgebra.QuadraticForm.Basic
+import Mathlib.LinearAlgebra.BilinearForm.Properties
 
 namespace ChainDescent
 
@@ -2599,6 +2601,138 @@ theorem dominatorReachable_affine_step (hneg : LinearEquiv.neg (ZMod p) ∈ G₀
   DominatorReachable.step hα hβ (affineScheme_interNum_eq_one_of_unique G₀ hneg huniq)
 
 end AffineScheme
+
+/-! ### Phase 2 / forms-graph — the affine ORTHOGONAL-form slice (Stage B.0, route §9.9.18c plan §3)
+
+`affineScheme` instantiated at the **isometry group** `O(Q) = {g : V ≃ₗ V | ∀ x, Q (g x) = Q x}` of a
+quadratic form `Q` on `V = F_p^d` with **nondegenerate polar form**. This is the first forms-graph increment
+(`docs/chain-descent-formsgraph-wldim-plan.md` Stage B.0): the orthogonal sibling of the cyclic affine slice
+(`G0cyc`). It establishes the quadratic-form infrastructure (the form, its isometry group, the polar
+coordinate-recovery linear algebra `coords_determine`) and a complete, axiom-clean affine-orthogonal seal,
+sealing at the basis-frame `{0,e₁,…,e_d}` via **depth-1** separation.
+
+**Honest scope (read `docs/chain-descent-formsgraph-wldim-plan.md` §3/§7).** This is `O(Q)` (the strict
+isometry group), under which the orbit-of-difference *determines the field value* `Q(v−t)`, so depth-1 already
+recovers the form coordinates and the scheme is the *finer* orthogonal scheme — **NOT yet the rank-3 SRG**
+`VO^ε`. The genuine node-4 residue is the **similitude** group `ΓO(Q)` (Stage B.1), where nonzero `Q`-values
+fuse, depth-1 collapses to isotropy bits, and the two-round count argument is required. B.0 lands the shared
+infrastructure (`coords_determine` is reused verbatim by B.1's count back-half) and the Witt-free recovery. -/
+
+section OrthogonalForm
+
+open QuadraticMap
+
+variable {p d : ℕ} [Fact p.Prime]
+
+/-- Polar recovery arithmetic: `polar Q v e = Q v + Q e - Q (v - e)`. -/
+theorem polar_eq_of_sub (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (v e : Fin d → ZMod p) :
+    polar Q v e = Q v + Q e - Q (v - e) := by
+  have h2 : polar Q v (-e) = Q (v - e) - Q v - Q e := by
+    unfold QuadraticMap.polar
+    rw [← sub_eq_add_neg, QuadraticMap.map_neg]
+  rw [polar_neg_right] at h2
+  linear_combination -h2
+
+/-- **The crux's reusable back-half — form coordinates determine the vector.** If `Q`'s polar form is
+nondegenerate and the field values `Q v`, `Q (v − e_i)` agree with those of `v'` on the standard basis
+`e_i = Pi.single i 1`, then `v = v'`. (Same profile of `Q`-values ⟹ same polar coordinates `polar Q v e_i`
+⟹ — by nondegeneracy — `v = v'`.) This is shared with Stage B.1 (the similitude/count route's back-half). -/
+theorem coords_determine (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hQ : (Q.polarBilin).Nondegenerate) {v v' : Fin d → ZMod p}
+    (h0 : Q v = Q v')
+    (hi : ∀ i : Fin d, Q (v - Pi.single i 1) = Q (v' - Pi.single i 1)) :
+    v = v' := by
+  have key : ∀ i : Fin d, Q.polarBilin v (Pi.single i 1) = Q.polarBilin v' (Pi.single i 1) := by
+    intro i
+    rw [polarBilin_apply_apply, polarBilin_apply_apply, polar_eq_of_sub, polar_eq_of_sub, h0, hi i]
+  have hzero : Q.polarBilin (v - v') = 0 := by
+    apply (Pi.basisFun (ZMod p) (Fin d)).ext
+    intro i
+    rw [LinearMap.zero_apply, map_sub, LinearMap.sub_apply, Pi.basisFun_apply, key i, sub_self]
+  have hsep := hQ.1 (v - v') (fun y => by rw [hzero, LinearMap.zero_apply])
+  exact sub_eq_zero.mp hsep
+
+/-- The orthogonal (isometry) group of `Q`: the linear automorphisms preserving `Q`. -/
+def isometryGroup (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    Subgroup ((Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)) where
+  carrier := {g | ∀ x, Q (g x) = Q x}
+  one_mem' := by intro x; rfl
+  mul_mem' := by
+    intro a b ha hb x
+    rw [LinearEquiv.mul_apply, ha, hb]
+  inv_mem' := by
+    intro a ha x
+    have h1 : a (a⁻¹ x) = x := by
+      have h := LinearEquiv.mul_apply a a⁻¹ x
+      rw [mul_inv_cancel] at h
+      simpa using h.symm
+    have h2 := ha (a⁻¹ x)
+    rw [h1] at h2
+    exact h2.symm
+
+theorem mem_isometryGroup {Q : QuadraticForm (ZMod p) (Fin d → ZMod p)}
+    {g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)} :
+    g ∈ isometryGroup Q ↔ ∀ x, Q (g x) = Q x := Iff.rfl
+
+/-- `-1` is an isometry of any quadratic form. -/
+theorem neg_mem_isometryGroup (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) :
+    LinearEquiv.neg (ZMod p) ∈ isometryGroup Q := by
+  intro x
+  rw [LinearEquiv.neg_apply, QuadraticMap.map_neg]
+
+/-- The basis-frame base set `{0, e₁, …, e_d}` (origin + standard basis), transported to `Fin (p^d)`. -/
+noncomputable def frameBase : Finset (Fin (p ^ d)) :=
+  insert (affineE (0 : Fin d → ZMod p))
+    (Finset.univ.image (fun i : Fin d => affineE (Pi.single i 1)))
+
+theorem frameBase_card_le : (frameBase (p := p) (d := d)).card ≤ d + 1 := by
+  unfold frameBase
+  refine (Finset.card_insert_le _ _).trans ?_
+  have h := Finset.card_image_le (s := (Finset.univ : Finset (Fin d)))
+    (f := fun i => affineE (Pi.single i (1 : ZMod p)))
+  rw [Finset.card_univ, Fintype.card_fin] at h
+  omega
+
+/-- **THE SEAL VIA THE ORTHOGONAL FORM (Stage B.0 — depth-1 affine-orthogonal slice).**
+For any quadratic form `Q` on `F_p^d` whose polar form is nondegenerate, the affine scheme of the
+**isometry group** `O(Q)` individualizes to discrete at the basis-frame `{0,e₁,…,e_d}` (size `d+1`),
+hence seals. Mechanism (depth-1): under `O(Q)` the orbit-of-difference determines the field value `Q(v−t)`,
+and `Q(v)`, `Q(v−e_i)` recover the form coordinates `polar Q v e_i` (`coords_determine`), which — nondegenerate
+— determine `v`. **Carries NO `hSmallAutThin`** — discretizes outright, reaching the rigid branch via
+`reachesRigidOrCameron_viaSpielman`. Honest scope: this is `O(Q)` (the finer orthogonal scheme), **not** the
+rank-3 SRG `VO^ε` (= the similitude group `ΓO(Q)`, Stage B.1). Axiom-clean. -/
+theorem reachesRigidOrCameron_viaOrthogonalForm
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (hQ : (Q.polarBilin).Nondegenerate)
+    (hbound : d + 1 ≤ bound) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (isometryGroup Q) (neg_mem_isometryGroup Q))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (isometryGroup Q) (neg_mem_isometryGroup Q)))
+        ∨ SchemeRecoveredByDepth (p ^ d) (affineScheme (isometryGroup Q) (neg_mem_isometryGroup Q)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (isometryGroup Q) (neg_mem_isometryGroup Q)) := by
+  have hsep : ∀ u u' : Fin (p ^ d),
+      (∀ t ∈ frameBase, ∃ g₀ ∈ isometryGroup Q,
+        g₀ (affineE.symm u' - affineE.symm t) = affineE.symm u - affineE.symm t) → u = u' := by
+    intro u u' hh
+    have h0 : Q (affineE.symm u) = Q (affineE.symm u') := by
+      obtain ⟨g₀, hg, hgeq⟩ := hh (affineE 0) (Finset.mem_insert_self _ _)
+      rw [Equiv.symm_apply_apply, sub_zero, sub_zero] at hgeq
+      have := hg (affineE.symm u')
+      rw [hgeq] at this
+      exact this
+    have hi : ∀ i : Fin d, Q (affineE.symm u - Pi.single i 1) = Q (affineE.symm u' - Pi.single i 1) := by
+      intro i
+      obtain ⟨g₀, hg, hgeq⟩ := hh (affineE (Pi.single i 1))
+        (Finset.mem_insert_of_mem (Finset.mem_image_of_mem _ (Finset.mem_univ i)))
+      rw [Equiv.symm_apply_apply] at hgeq
+      have := hg (affineE.symm u' - Pi.single i 1)
+      rw [hgeq] at this
+      exact this
+    exact affineE.symm.injective (coords_determine Q hQ h0 hi)
+  exact reachesRigidOrCameron_viaSpielman _
+    ⟨frameBase, frameBase_card_le.trans hbound,
+      discrete_affineScheme_of_jointSeparates (isometryGroup Q) (neg_mem_isometryGroup Q) hsep⟩
+
+end OrthogonalForm
 
 /-! ### Phase 2 / F0 — the cyclic (cyclotomic) affine instance
 

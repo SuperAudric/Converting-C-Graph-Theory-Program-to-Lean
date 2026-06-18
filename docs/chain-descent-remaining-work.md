@@ -129,9 +129,15 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   `PublicTheoremIndex.md:1207`) is the conditional capstone for the schurian node-4 forms-graph residue. It carries the
   free group base `IsBase … T` + the certificate `hFormCert : RelCountsDetermineOrbit … T` (the **only open content**),
   composing the landed depth-`k` engine + base + `…viaSpielman`; **no `hSmallAutThin`**. The route is validated
-  end-to-end; the open content is now exactly `hFormCert`. **Next = Stage B** (discharge `hFormCert` for `VO^ε_4(q)`):
-  the crux lemma "count profile recovers form coords `B(v,e_i)`" — Route A (elementary counts, Witt-free; Mathlib lacks
-  Witt theory) + the non-isotropic shell. Plan: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §3–§5.
+  end-to-end; the open content is now exactly `hFormCert`.
+- **★ Stage B.0 LANDED (2026-06-18, axiom-clean):** `reachesRigidOrCameron_viaOrthogonalForm` + the quadratic-form
+  infrastructure (`isometryGroup`, `coords_determine`, `polar_eq_of_sub`, `frameBase`) (CascadeAffine.lean §OrthogonalForm,
+  `PublicTheoremIndex.md:1210-1217`). For any nondegenerate-polar `Q` on `F_p^d`, the **isometry** group `O(Q)` affine
+  scheme discretizes at the basis-frame (size `d+1`) and seals via **depth-1** — the orbit-of-difference determines
+  `Q(v−t)`, recovering form coords (`coords_determine`, the crux's Witt-free back-half). **Caveat:** `O(Q)` is the *finer*
+  orthogonal scheme, **not yet** the rank-3 SRG `VO^ε`. **Next = Stage B.1**: the **similitude** group `ΓO(Q)` (rank-3
+  SRG; depth-1 → isotropy bits only) + the genuine two-round **count** crux (Route A; back-half = `coords_determine`),
+  `d=4 VO^ε_4(q)` first. Residual = the non-isotropic shell. Plan: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §3–§5/§7.
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:

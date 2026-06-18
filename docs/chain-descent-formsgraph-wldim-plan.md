@@ -11,6 +11,18 @@
 
 ## STATUS (read first)
 
+**★ STAGE B.0 LANDED (2026-06-18, axiom-clean, build green) — the orthogonal-form infrastructure + a complete
+depth-1 affine-orthogonal seal.** `reachesRigidOrCameron_viaOrthogonalForm` (CascadeAffine.lean §OrthogonalForm,
+`PublicTheoremIndex.md:1217`): for any quadratic form `Q` on `F_p^d` with **nondegenerate polar form**, the affine
+scheme of the **isometry group** `O(Q)` discretizes at the basis-frame `{0,e₁,…,e_d}` (size `d+1`) and seals, via
+depth-1 separation — the orbit-of-difference determines `Q(v−t)`, which recovers the form coordinates
+(`coords_determine`, the crux's reusable back-half), nondegenerate ⟹ determines `v`. **Carries NO `hSmallAutThin`.**
+Lands the shared quadratic-form infrastructure (`isometryGroup`, `polar_eq_of_sub`, `coords_determine`, `frameBase`)
+and the **Witt-free** recovery. **Honest scope (§3/§7):** this is `O(Q)` (the *finer* orthogonal scheme), **NOT yet
+the rank-3 SRG `VO^ε`** — that is the **similitude** group `ΓO(Q)` (Stage B.1), where nonzero `Q`-values fuse,
+depth-1 collapses to isotropy bits, and the genuine two-round **count** crux (§3 Route A) is required.
+`coords_determine` is reused verbatim as B.1's count back-half. **Next = Stage B.1.** Nothing committed.
+
 **★ STAGE A LANDED (2026-06-18, axiom-clean `[propext, Classical.choice, Quot.sound]`, build green).** The conditional
 capstone `reachesRigidOrCameron_viaAffineFormScheme` (CascadeAffine.lean, between the §SGate2 and §AffineScheme
 sections; `PublicTheoremIndex.md:1207`) is built. It carries exactly the two pieces the reduction identifies —
@@ -163,11 +175,18 @@ The lemma is **uniform** for the form-based families (c)–(e); (f) is the outli
   as a *named hypothesis* `hFormCert : RelCountsDetermineOrbit S.toAssociationScheme T` plus the free group base
   `hbase : IsBase … T` (probe-validated, like `clebschZ4_closure` carried δ′). Route validated end-to-end; the open
   content is isolated to the one predicate `hFormCert`.
-- **Stage B — discharge the certificate for `VO^ε`** (the crux lemma, §3). The genuine combinatorial work. Start with a
-  fixed small `d` (`d=4`, `VO^ε_4(q)`) generic in `q` — richest probe data (base `[5,5,6,7]` at `q=2..5`) — then general
-  `d`. Use **Route B** as the picture (isotropic skeleton = direct perp-graph) but expect the formal proof to go via
-  **Route A** counts (Mathlib lacks Witt, §5 R2); the residual is the **non-isotropic shell**, plan for a small `k` or
-  1–2 extra base points there.
+- **Stage B.0 — orthogonal-form infrastructure + depth-1 `O(Q)` seal. ✅ DONE (2026-06-18, axiom-clean, build green).**
+  `reachesRigidOrCameron_viaOrthogonalForm` + `coords_determine` + `isometryGroup` + `polar_eq_of_sub` + `frameBase`
+  (CascadeAffine.lean §OrthogonalForm, `PublicTheoremIndex.md:1210-1217`). The **isometry** group `O(Q)`, sealed via
+  depth-1 (`discrete_affineScheme_of_jointSeparates`) — the orbit-of-difference determines `Q(v−t)`, recovering form
+  coords. Witt-free. **Caveat:** `O(Q)` is the *finer* orthogonal scheme, **not** the rank-3 SRG `VO^ε`. Lands the shared
+  form infrastructure + `coords_determine` (reused by B.1).
+- **Stage B.1 — discharge the certificate for `VO^ε`** (the genuine node-4): swap `O(Q)` → the **similitude** group
+  `ΓO(Q)` (rank-3 SRG; nonzero `Q`-values fuse, depth-1 → isotropy bits only), and prove the **two-round count** crux
+  (§3 Route A: the count `N_{i,b}(v)` recovers `B(v,e_i)`; back-half = the landed `coords_determine`). Start `d=4`,
+  `VO^ε_4(q)` generic in `q` (richest probe data, base `[5,5,6,7]`). Use **Route B** as the picture but the formal proof
+  goes via **Route A** counts (Mathlib lacks Witt, §5 R2); residual = the **non-isotropic shell** (plan a small `k` or
+  1–2 extra base points).
 - **Stage C — alternating / half-spin** (reuse the skeleton with the symplectic / spinor `B`).
 - **Stage D — Suzuki–Tits** (separate plan needed).
 
