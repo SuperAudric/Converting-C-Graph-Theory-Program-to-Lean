@@ -2876,6 +2876,108 @@ theorem reachesRigidOrCameron_viaCountsDetermineFrameQ
   reachesRigidOrCameron_viaSimilitudeForm Q hbound
     (similitudeFrameSeparates_of_countsDetermineFrameQ Q hQ h)
 
+/-! #### Stage B.1c — the Witt-boundary checkpoint: split `CountsDetermineFrameQ` along Witt | Gauss
+
+A second light checkpoint, splitting the front-half `CountsDetermineFrameQ` at the natural boundary between its
+two heavy builds: carry the **Witt deliverable** `OrbitIsIsotropyClass` (the `GO(Q)`-orbits = isotropy classes,
+via an injection `Fin 3 ↪ relations`) and reduce `CountsDetermineFrameQ` to the **pure isotropy-only** Gauss
+deliverable `IsotropyCountsRecoverFrameQ` ("isotropy-class counts recover the frame `Q`-profile" — the affine-
+quadric point-count statement, with NO opaque scheme relations). Confirms B.1c-ii's exact target shape *before*
+Witt (B.1c-i) is built: the relation counts collapse to isotropy counts once the orbits are characterized. -/
+
+/-- The isotropy class of a vector: `0` (zero), `1` (nonzero isotropic), `2` (anisotropic). -/
+noncomputable def isoClass (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (w : Fin d → ZMod p) : Fin 3 :=
+  if w = 0 then 0 else if Q w = 0 then 1 else 2
+
+/-- **The Witt deliverable (B.1c-i), as a named predicate.** The `GO(Q)`-orbit of a difference (= the scheme
+relation `relOfPair (affineE 0) (affineE w)`) is determined by its isotropy class, via an injection
+`Fin 3 ↪ relations`. The "function of isoClass" direction is Witt's transitivity (orbit fusion); injectivity is
+`Q`-invariance (the easy direction). **OPEN** (Witt; ABSENT in Mathlib). -/
+def OrbitIsIsotropyClass (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) : Prop :=
+  ∃ relOfIso : Fin 3 → Fin ((affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).rank + 1),
+    Function.Injective relOfIso ∧
+    ∀ w : Fin d → ZMod p,
+      (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0) (affineE w)
+        = relOfIso (isoClass Q w)
+
+open scoped Classical in
+/-- The isotropy-class count agreement of `u,u'` at the frame (the relation conditions of `FrameCountsAgree`
+rewritten as isotropy-class conditions). -/
+noncomputable def IsotropyFrameCountsAgree (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (u u' : Fin (p ^ d)) : Prop :=
+  ∀ (σ : Fin (p ^ d) → Fin 3) (c : Fin 3),
+    (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+      (∀ t ∈ frameBase, isoClass Q (affineE.symm z - affineE.symm t) = σ t)
+      ∧ isoClass Q (affineE.symm z - affineE.symm u) = c)).card
+    = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u' ∧
+      (∀ t ∈ frameBase, isoClass Q (affineE.symm z - affineE.symm t) = σ t)
+      ∧ isoClass Q (affineE.symm z - affineE.symm u') = c)).card
+
+/-- **The Gauss deliverable (B.1c-ii), as a named predicate.** Isotropy-class counts recover the frame `Q`-value
+profile: agreeing isotropy counts ⟹ `Q ū = Q ū'` and `Q (ū − e_i) = Q (ū' − e_i)` ∀ basis `e_i`. This is the
+pure affine-quadric point-count statement (Gauss sums), with NO opaque scheme relations. **OPEN** (B.1c-ii). -/
+def IsotropyCountsRecoverFrameQ (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) : Prop :=
+  ∀ u u' : Fin (p ^ d), IsotropyFrameCountsAgree Q u u' →
+    Q (affineE.symm u) = Q (affineE.symm u') ∧
+      ∀ i : Fin d, Q (affineE.symm u - Pi.single i 1) = Q (affineE.symm u' - Pi.single i 1)
+
+open scoped Classical in
+/-- **The plumbing — relation counts ⟹ isotropy counts (via the Witt deliverable).** Given
+`OrbitIsIsotropyClass` (relation = injective image of isotropy class), the relation-count agreement
+`FrameCountsAgree` implies the isotropy-count agreement `IsotropyFrameCountsAgree`: each isotropy filter equals
+the relation filter at `ρ = relOfIso ∘ σ`, `b = relOfIso c`. -/
+theorem isotropyFrameCountsAgree_of_frameCountsAgree (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hOrbit : OrbitIsIsotropyClass Q) {u u' : Fin (p ^ d)} (h : FrameCountsAgree Q u u') :
+    IsotropyFrameCountsAgree Q u u' := by
+  obtain ⟨relOfIso, hinj, hrel⟩ := hOrbit
+  intro σ c
+  have key : ∀ w : Fin (p ^ d),
+      (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ w ∧
+        (∀ t ∈ frameBase, isoClass Q (affineE.symm z - affineE.symm t) = σ t)
+        ∧ isoClass Q (affineE.symm z - affineE.symm w) = c))
+      = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ w ∧
+        (∀ t ∈ frameBase, (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+            (affineE (affineE.symm z - affineE.symm t)) = relOfIso (σ t))
+        ∧ (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)).relOfPair (affineE 0)
+            (affineE (affineE.symm z - affineE.symm w)) = relOfIso c)) := by
+    intro w
+    apply Finset.filter_congr
+    intro z _
+    refine and_congr Iff.rfl (and_congr ?_ ?_)
+    · refine forall₂_congr fun t _ => ?_
+      rw [hrel (affineE.symm z - affineE.symm t)]
+      exact ⟨fun hh => congrArg relOfIso hh, fun hh => hinj hh⟩
+    · rw [hrel (affineE.symm z - affineE.symm w)]
+      exact ⟨fun hh => congrArg relOfIso hh, fun hh => hinj hh⟩
+  rw [key u, key u']
+  exact h (fun t => relOfIso (σ t)) (relOfIso c)
+
+/-- **CHECKPOINT (B.1c-i ∘ B.1c-ii ⟹ the front-half).** The Witt deliverable `OrbitIsIsotropyClass` plus the
+isotropy-only Gauss deliverable `IsotropyCountsRecoverFrameQ` discharge `CountsDetermineFrameQ`. Confirms the
+isotropy-count predicate is B.1c-ii's exact target and that B.1c-i's output plugs in — before building Witt. -/
+theorem countsDetermineFrameQ_of_orbitIsIsotropyClass (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hOrbit : OrbitIsIsotropyClass Q) (hGauss : IsotropyCountsRecoverFrameQ Q) :
+    CountsDetermineFrameQ Q :=
+  fun u u' hfca => hGauss u u' (isotropyFrameCountsAgree_of_frameCountsAgree Q hOrbit hfca)
+
+/-- **THE SEAL VIA THE ISOTROPY-ONLY DELIVERABLES (the Witt-boundary checkpoint capstone).** End-to-end with the
+two heavy pieces stated at their natural boundary: `OrbitIsIsotropyClass` (Witt) + `IsotropyCountsRecoverFrameQ`
+(Gauss, pure isotropy counts) → `CountsDetermineFrameQ` → `SimilitudeFrameSeparates` (via `coords_determine`) →
+seal. Confirms B.1c's two builds compose to close, with the open content split exactly along the Witt | Gauss
+boundary. Carries NO `hSmallAutThin`. Axiom-clean. -/
+theorem reachesRigidOrCameron_viaIsotropyCounts
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop} {bound : Nat}
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (hQ : (Q.polarBilin).Nondegenerate)
+    (hbound : d + 1 ≤ bound) (hOrbit : OrbitIsIsotropyClass Q)
+    (hGauss : IsotropyCountsRecoverFrameQ Q) :
+    ((SchemeBlockRecovered (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q))
+        ∨ AbelianConsumed (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)))
+        ∨ SchemeRecoveredByDepth (p ^ d)
+            (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) bound)
+      ∨ IsCameronScheme (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) :=
+  reachesRigidOrCameron_viaCountsDetermineFrameQ Q hQ hbound
+    (countsDetermineFrameQ_of_orbitIsIsotropyClass Q hOrbit hGauss)
+
 end OrthogonalForm
 
 /-! ### Phase 2 / F0 — the cyclic (cyclotomic) affine instance

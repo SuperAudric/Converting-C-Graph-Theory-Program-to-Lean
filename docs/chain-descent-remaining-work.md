@@ -149,11 +149,16 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   `CountsDetermineFrameQ` (= Witt + Gauss) →[`coords_determine`, landed]→ `SimilitudeFrameSeparates` →[landed]→ seal.
   So the research core is **sound** (the heavy machinery, once built, provably closes), and the B.0 back-half
   `coords_determine` is confirmed to compose. The entire open content is isolated to `CountsDetermineFrameQ`.
-- **Remaining = Stage B.1c (the deep open research core):** discharge `CountsDetermineFrameQ`. **Two Mathlib builds**
-  (plan §8): (i) **Witt's theorem** (`GO(Q)`-orbits = isotropy classes ⟹ rank-3; the heaviest, ABSENT in Mathlib) and
-  (ii) **quadratic Gauss-sum / affine-quadric point counts** (isotropy counts ⟹ field values `Q(ū−e_i)`; partial in
-  Mathlib). Recommended next: a *light* checkpoint carrying `OrbitIsIsotropyClass` to reduce to an isotropy-only count
-  predicate (confirms B.1c-ii's target before building Witt). Multi-session research-formalization.
+- **★ WITT-BOUNDARY CHECKPOINT CONFIRMED (2026-06-18, axiom-clean):** `reachesRigidOrCameron_viaIsotropyCounts` +
+  `OrbitIsIsotropyClass` (Witt deliverable) + `IsotropyCountsRecoverFrameQ` (Gauss deliverable) +
+  `countsDetermineFrameQ_of_orbitIsIsotropyClass` (`PublicTheoremIndex.md:1227-1233`). Splits the open content along
+  the Witt | Gauss boundary: `OrbitIsIsotropyClass` + `IsotropyCountsRecoverFrameQ` → `CountsDetermineFrameQ` → seal.
+  B.1c-ii's exact target (pure isotropy-class counts ⟹ frame `Q`-profile, no opaque relations) is now confirmed.
+- **Remaining = Stage B.1c (the deep open research core); all checkpoint work exhausted.** Two heavy Mathlib builds
+  (plan §8), each isolated as a clean named predicate: **B.1c-i** = `OrbitIsIsotropyClass` via **Witt's theorem**
+  (`GO(Q)`-orbits = isotropy classes ⟹ rank-3; heaviest, ABSENT in Mathlib); **B.1c-ii** = `IsotropyCountsRecoverFrameQ`
+  via **quadratic Gauss-sum / affine-quadric point counts** (isotropy counts ⟹ field values; partial in Mathlib). Next
+  increment is a genuine heavy build (recommend B.1c-ii at `VO^ε_4(3)`), not further isolation. Multi-session research.
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:

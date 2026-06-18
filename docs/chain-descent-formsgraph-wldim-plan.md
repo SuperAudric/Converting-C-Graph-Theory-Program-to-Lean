@@ -24,11 +24,21 @@ and **`reachesRigidOrCameron_viaCountsDetermineFrameQ`**.
 > `VO^ε` residue.
 
 So the research core is **sound**: the heavy-but-known machinery, once built, *provably closes the seal* — and the
-B.0 back-half `coords_determine` is confirmed to be exactly the right shape and to compose. **The entire open
-content is isolated to the single front-half predicate `CountsDetermineFrameQ`** ("the two-round counts recover the
-frame `Q`-value profile"). **Remaining = Stage B.1c** = discharge `CountsDetermineFrameQ`, blocked on two Mathlib
-builds: (i) **Witt's theorem** (orbit = isotropy class) and (ii) **quadratic Gauss-sum affine-quadric point
-counts**. Detailed scoping in **§8**. Multi-session research-formalization. Nothing committed.
+B.0 back-half `coords_determine` is confirmed to be exactly the right shape and to compose.
+
+**★ WITT-BOUNDARY CHECKPOINT also landed (2026-06-18, axiom-clean) — the open content split along Witt | Gauss.**
+`isoClass`, `OrbitIsIsotropyClass` (Witt deliverable), `IsotropyFrameCountsAgree`, `IsotropyCountsRecoverFrameQ`
+(Gauss deliverable), `isotropyFrameCountsAgree_of_frameCountsAgree` (plumbing), `countsDetermineFrameQ_of_orbitIsIsotropyClass`,
+and the capstone **`reachesRigidOrCameron_viaIsotropyCounts`** (`PublicTheoremIndex.md:1227-1233`). This reduces
+`CountsDetermineFrameQ` to the **pure isotropy-only** Gauss deliverable `IsotropyCountsRecoverFrameQ` ("isotropy-class
+counts recover the frame `Q`-profile" — no opaque scheme relations), carrying the Witt deliverable `OrbitIsIsotropyClass`.
+So B.1c-ii's exact target shape is now **confirmed and isolated** before any heavy build.
+
+**The full confirmed chain:** `OrbitIsIsotropyClass` (Witt) + `IsotropyCountsRecoverFrameQ` (Gauss) →
+`CountsDetermineFrameQ` → `SimilitudeFrameSeparates` (via `coords_determine`) → **seal**. The entire open content is
+now the two heavy builds, each a clean named predicate at its natural boundary. **Remaining = Stage B.1c** = discharge
+**B.1c-i** (`OrbitIsIsotropyClass`, via Witt's theorem) and **B.1c-ii** (`IsotropyCountsRecoverFrameQ`, via Gauss-sum
+point counts). Detailed scoping in **§8**. Multi-session research-formalization. Nothing committed.
 
 **★ STAGE B.0 LANDED (2026-06-18, axiom-clean, build green) — the orthogonal-form infrastructure + a complete
 depth-1 affine-orthogonal seal.** `reachesRigidOrCameron_viaOrthogonalForm` (CascadeAffine.lean §OrthogonalForm,
@@ -347,12 +357,17 @@ intersection numbers.
 - **char-2 caveat (§5 R2′):** do `q = 3` first.
 
 ### Recommended order (de-risk shape before heavy build)
-1. **(checkpoint, light)** Carry `OrbitIsIsotropyClass Q` and reduce `CountsDetermineFrameQ` to an isotropy-only
-   count-recovery predicate `IsotropyCountsRecoverFrameQ Q`. Confirms B.1c-ii's exact target and that B.1c-i's
-   output plugs in — *before* building Witt. (Analogous to this session's checkpoint.)
+1. **(checkpoint, light) ✅ DONE (2026-06-18, axiom-clean).** `OrbitIsIsotropyClass Q` carried; `CountsDetermineFrameQ`
+   reduced to the isotropy-only `IsotropyCountsRecoverFrameQ Q` (`countsDetermineFrameQ_of_orbitIsIsotropyClass`,
+   capstone `reachesRigidOrCameron_viaIsotropyCounts`, `PublicTheoremIndex.md:1227-1233`). B.1c-ii's exact target is
+   confirmed and B.1c-i's output plugs in — before building Witt.
 2. **(heavy)** B.1c-ii for `VO^ε_4(3)`: the affine-quadric point counts ⟹ `IsotropyCountsRecoverFrameQ`.
 3. **(heaviest)** B.1c-i: Witt's theorem ⟹ `OrbitIsIsotropyClass`, discharging the carried predicate.
 4. Generalize `d`, then `q` (incl. char 2), then classes (d)/(e); Suzuki (f) separate (not a form).
+
+**All checkpoint work is now exhausted** — the open content is irreducibly the two heavy builds (B.1c-ii Gauss,
+B.1c-i Witt), each isolated as a clean named predicate. The next increment is a genuine heavy build (recommend
+B.1c-ii at `VO^ε_4(3)`), not further isolation.
 
 **Pragmatic end-state if the heavy builds are deferred:** `reachesRigidOrCameron_viaCountsDetermineFrameQ`
 already makes node-4-for-the-seal `modulo {G3 + Cameron/Liebeck/Skresanov + CountsDetermineFrameQ}`, with
