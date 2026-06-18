@@ -40,9 +40,15 @@
 > CascadeAffine §OrthogonalForm): `isoClass_eq_zero_iff` (class 0 ⟺ `w=0`), `isoClass_eq_two_iff` (class 2 ⟺
 > anisotropic `Q w≠0`, pure value condition), `isoClass_eq_one_iff` (class 1 ⟺ `w≠0 ∧ Q w=0`), `isoClass_ne_two_iff`
 > (coarse split ⟺ `Q w=0`).** These characterize each isotropy class as a `Q`-value-set condition (only class 0/1 is
-> origin-refined). NEXT: the PORT — bring the Mathlib-only Gauss toolkit into a module CascadeAffine-side work can
-> import, then the isotropy-count → value-set-count conversion (`count_pi_setValued` + the dictionary, with the
-> origin correction) → prove `IsotropySeparatesAtBase` at the chosen `T` for `VO^ε_4(3)`.
+> origin-refined). **★ PORT LANDED (2026-06-18, build green): the toolkit is now
+> `ChainDescent/GaussCount.lean`** (a real `namespace ChainDescent` leaf, Mathlib-only, registered in `build.sh` +
+> `lakefile.toml`; the former `ScratchGauss.lean` deleted). 18 axiom-clean lemmas. **★ CONSUMER MODULE CREATED + step (1) LANDED
+> (2026-06-18, build green): `ChainDescent/FormsGraphConcrete.lean`** (imports `GaussCount` + `CascadeAffine`,
+> registered in `build.sh` + `lakefile.toml`) with **`count_transport`** (axiom-clean) — the count transport
+> `Fin (p^d) ↔ V` along `affineE`, moving the `IsotropySeparatesAtBase` counts into the vector space `V = Fin d → ZMod p`
+> where the Gauss point counts live. NEXT in that module: (2) the isotropy-count → value-set-count conversion
+> (`count_pi_setValued` + the dictionary `isoClass_eq_*`, with the origin correction), (3) the injectivity argument →
+> prove `IsotropySeparatesAtBase` at the chosen `T` for `VO^ε_4(3)`.
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in

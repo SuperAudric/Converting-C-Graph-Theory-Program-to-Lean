@@ -45,6 +45,7 @@ VERBOSE=0
 MODULES=(
   ChainDescent              # base (everything imports this)
   ChainDescent.Saturation   # ← Mathlib only (generic; shared by Scheme + Cascade)
+  ChainDescent.GaussCount   # ← Mathlib only (Gauss-sum point-count toolkit for the B.1c-ii forms-graph discharge)
   ChainDescent.CFI          # ← base
   ChainDescent.Scheme       # ← base
   ChainDescent.Separability # ← base, Scheme (S-ring/CC separability layer; Ponomarenko–Vasil'ev parameters)
@@ -55,6 +56,7 @@ MODULES=(
   ChainDescent.Cascade      # ← CascadeOracle, Group
   ChainDescent.CascadeAffine # ← Cascade, Scheme (§13b/§13c engine + Phase-2 affine beachhead)
   ChainDescent.ClebschConcrete # ← CascadeAffine (concrete ℤ₄² Clebsch scheme + first non-affine δ′ closure, by decide)
+  ChainDescent.FormsGraphConcrete # ← CascadeAffine, GaussCount (node-4 forms-graph discharge: IsotropySeparatesAtBase for VO^ε)
 )
 
 start=$(date +%s)

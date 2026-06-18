@@ -1,103 +1,27 @@
 /-
-# Gauss-sum point-count infrastructure for Stage B.1c-ii (the "Gauss build")
+# Gauss-sum point-count toolkit (`GaussCount`) — Stage B.1c-ii infrastructure
 
-WORK IN PROGRESS — develop here, port into `CascadeAffine.lean` (near §OrthogonalForm) once Bricks
-C and D land. Everything below is PROVEN and axiom-clean `[propext, Classical.choice, Quot.sound]`
-(verified via `lake env lean ChainDescent/ScratchGauss.lean`). This file imports ONLY Mathlib, so it
-builds in isolation (cheap) — it does NOT pull in the heavy project modules.
+The finite-field quadratic exponential-sum toolkit for the seal's node-4 forms-graph residue (B.1c-ii): the
+Mathlib-absent affine-quadric point-count formula and its multi-point / k-fold generalizations, used to discharge
+`IsotropySeparatesAtBase Q T` (CascadeAffine §OrthogonalForm) at a symmetry-broken base for `VO^ε_4(q)`.
 
-Target (CORRECTED — see the ⚠⚠ block below): discharge the seal's node-4 forms-graph residue (B.1c-ii) for
-`VO^ε_4(q)`. NOTE the original target `IsotropyCountsRecoverFrameQ Q` at the standard frame is FALSE/mis-shaped
-(⚠⚠ below); the corrected target is **one-round count-injectivity at a symmetry-broken base** (`≈ d+2`), built
-from these Gauss bricks. Mathlib has the machinery (`gaussSum_sq`, `quadraticChar_card_sqrts`,
-`equivalent_weightedSumSquares`, char orthogonality) but NOT the assembled affine-quadric point-count formula —
-that is what these bricks build.
+Imports ONLY Mathlib (no project modules), so it is a cheap leaf. Ported from the former `ScratchGauss.lean`
+development file; all lemmas axiom-clean `[propext, Classical.choice, Quot.sound]`.
 
-DONE (this file — the full exponential-sum core + the assembled point count):
-* Brick A  `count_eq_charsum`        — solution count `#{x | f x = c}` as a double character sum.
-* Brick B1 `sum_addChar_sq`          — `∑_x ψ(x²) = gaussSum χ ψ`.
-* Brick B2 `sum_addChar_smul_sq`     — `∑_x ψ(a·x²) = χ(a)·gaussSum χ ψ` (a a unit).
-* helper   `addChar_sum`             — `ψ(∑ aᵢ) = ∏ ψ(aᵢ)`.
-* Brick B3 `sum_addChar_quadForm`    — `∑_x ψ(Q x) = (∏ᵢ χ(wᵢ))·gaussSum^d` for nondegenerate `Q`
-                                       (diagonalize + reindex + factor). THE multivariable core.
-* Brick B3′`sum_quadForm_eval`       — basis-explicit B3 (weights `Q (v i)`; value pinned).
-* scaling  `sum_addChar_quadForm_smul` — `∑_x ψ(s·Q x) = χ(s)^d · ∑_x ψ(Q x)` (change of character).
-* Brick C  `card_quadForm_eq`        — THE affine-quadric point count (Mathlib-absent), character-sum
-                                       form: `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_x ψ(Q x)`.
+Contents (all in `namespace ChainDescent`):
+* count layer — `count_eq_charsum` (A), `count2_eq_charsum` (A2), `countk_eq_charsum`/`countk_eq_sum_charsum` (Aₖ),
+  `count_pi_setValued` (value-set → value-point inclusion–exclusion).
+* 1-D Gauss — `sum_addChar_sq` (B1), `sum_addChar_smul_sq` (B2); helper `addChar_sum`.
+* multivariable Gauss — `sum_addChar_quadForm` (B3), `sum_quadForm_eval` (B3′), `sum_addChar_quadForm_smul`
+  (scaling), `card_quadForm_eq` (C, THE affine-quadric point count).
+* multi-point — `sum_addChar_quadForm_linear` (D1), `sum_addChar_multiQuad` (R≠0), `sum_addChar_multiQuad_zero`
+  (R=0), `sum_addChar_linearMap` (the linear boundary); helpers `quad_sub`, `polar_sum_right`.
 
-* Brick D1 `sum_addChar_quadForm_linear` — complete-the-square: `∑_w ψ(r·Qw + polar Q w a') =
-             ψ(−r⁻¹·Q a')·∑_w ψ(r·Qw)`. The engine for hyperplane-section / joint counts.
-* Brick A2 `count2_eq_charsum`       — two-condition count = double char sum (generalizes Brick A).
-* helpers  `quad_sub` (`Q(a−b)=Qa+Qb−polar Q a b`), `polar_sum_right` (`∑ rⱼ·polar Q z tⱼ = polar Q z (∑rⱼ•tⱼ)`).
-* MULTI-POINT `sum_addChar_multiQuad` — `∑_z ψ(∑ⱼ rⱼ·Q(z−tⱼ)) = ψ(∑rⱼQtⱼ − R⁻¹·Q(∑rⱼ•tⱼ))·∑_z ψ(R·Qz)`
-             (`R=∑rⱼ≠0`). The summand collapses to D1 via `quad_sub`+`polar_sum_right`. THE engine for the
-             multi-point count at a symmetry-broken base — the inner sum of the k-fold count.
+So the multi-point Q-count `#{z : Q(z−tⱼ)=cⱼ ∀j}` is in CLOSED FORM (`countk_eq_sum_charsum` + the inner-sum
+evaluations `multiQuad`/`multiQuad_zero`/`linearMap`), and isotropy-class counts reduce to it (`count_pi_setValued`
++ the CascadeAffine isotropy dictionary `isoClass_eq_*`).
 
-⚠ KEY FINDING (2026-06-18) — the naive PAIRWISE plan for Brick D FAILS; recovery needs the FULL joint
-frame count. Computing the pairwise common-isotropic-neighbour count via A2 + D1 + a Gauss collapse:
-    #{w : Q w = 0 ∧ Q (w − a) = 0} = #{w : Q w = 0 ∧ polar Q w a = Q a} = q² + S(1)/q   (d = 4),
-S(1) = ∑_x ψ(Q x) = ±q². This is INDEPENDENT of which anisotropic shell `a` lies in (VO^-_4(3):
-9 + (−9)/3 = 6 for both Q a = 1 and Q a = 2). Reason: a similitude `g` of factor `μ` preserves the cone
-{Q=0} and maps shell {Q=1}→{Q=μ}, so ANY count built from the cone + a SINGLE point `a` is similitude-
-invariant ⟹ shell-blind. So pairwise (one frame point + u) counts CANNOT recover `χ(Q(ū−t))`; the
-earlier "hyperplane-section depends on χ(Q a)" idea is WRONG (the χ(Q a) dependence cancels — confirmed
-by the Gauss collapse AND the similitude symmetry).
-
-⚠⚠ OPEN QUESTION RESOLVED (2026-06-18, finite probe over VO^ε_4(3), /tmp/isoprobe*.py) — the standard-frame
-predicates are MIS-SHAPED; fix = a symmetry-broken base. Findings:
-  (1) `IsotropyCountsRecoverFrameQ` / `SimilitudeFrameSeparates` (the one-round count at the standard frame
-      {0,e₀,…,e_d}) are **FALSE for VO^-_4(3)**: u=(0,0,1,2), u'=(0,0,2,1) have IDENTICAL one-round
-      isotropy-counts to the frame but different Q-profiles (Q(u−e₂)=1 vs 2). Cause: Q=x₀x₁+x₂²+x₃² is
-      symmetric in x₂,x₃, and the count (a coarser invariant than orbits) is blind to it at the symmetric
-      frame. (VO^+_4(3) is FINE at the standard frame — issue is minus-type symmetry.)
-  (2) The SCHEME genuinely discretizes: iterated 1-WL from the frame → 81 singletons in 2 rounds, separates
-      u,u'. So bounded WL-dim HOLDS; only the one-round-count-at-symmetric-frame predicate is wrong.
-  (3) THE PROJECT ENGINE `discrete_of_kRoundRelationSeparates` consumes exactly the ONE-ROUND count
-      (CascadeAffine:1918-1924; k-independent — k only proves the count is a warmRefine invariant), so it
-      CANNOT discharge VO^- at the standard frame, though the conclusion (warmRefine Discrete) is true.
-  (4) FIX: the one-round count IS injective at a slightly larger, symmetry-broken base. Well-chosen (greedy)
-      one-round base is small + slow-growing: VO^ε_4(3)→4, VO^±_4(5)→6 (both types). Frame-based bigger:
-      VO^-_4(3)→6, VO^+_4(5)→7 — matches Probe_FormsGraphs [5,5,6,7] q=2..5 (so that probe = ONE-ROUND base).
-      Net ≈ d+2, slow q-dep, bounded. B.0 (isometry O(Q)) UNAFFECTED (relation=Q-value, depth-1). First
-      target q=3,d=4 = frame+1 (size 6) or greedy size-4.
-
-CONSEQUENCE — the landed B.1 checkpoint capstones (`reachesRigidOrCameron_via{IsotropyCounts,CountsDetermineFrameQ,
-SimilitudeForm}`) are axiom-clean but have UNPROVABLE hypotheses as stated (tied to the symmetric frame); they
-need REFORMULATION with a symmetry-broken base. The "recover Q-profile then coords_determine" architecture is
-also wrong for minus-type (front half false); the correct target is direct count-injectivity at the bigger base.
-
-NEXT (next session) — Brick D, corrected target:
-* DONE (2026-06-18) — the CascadeAffine reformulation has LANDED: §OrthogonalForm "Stage B.1c (CORRECTED)" now
-  carries `SeparatesAtBase Q T` (arbitrary base) + `reachesRigidOrCameron_viaSymmetryBrokenBase` +
-  `IsotropySeparatesAtBase Q T` (the Gauss endpoint, pure isotropy counts) + `separatesAtBase_of_isotropySeparates`
-  (Witt bridge) + `reachesRigidOrCameron_viaIsotropySeparates`, all axiom-clean. The three frame-locked predicates
-  are ⚠ SUPERSEDED in-source. So the Gauss build's target is now a concrete `IsotropySeparatesAtBase Q T` for a
-  symmetry-broken `T` (≈ d+2, e.g. `frameBase ∪ {p}`); discharging it (+ Witt `OrbitIsIsotropyClass`) seals.
-* DONE (2026-06-18) — the **k-fold count assembly** has LANDED (axiom-clean): `countk_eq_charsum` (k-fold count =
-  `∑_x ∏_j (∑_{r_j} ψ(r_j(f_j x − c_j)))`, generalizing A/A2 to a `Fintype`-indexed family of conditions) and
-  `countk_eq_sum_charsum` (the factored form `#{x:∀j, f_j x=c_j}·qᵏ = ∑_{r:ι→F} ψ(−∑_j r_j c_j)·∑_x ψ(∑_j r_j·f_j x)`).
-  With `f_j x := Q(x − t_j)` the inner `∑_x ψ(∑_j r_j·Q(x−t_j))` is exactly `sum_addChar_multiQuad` (when `∑_j r_j ≠ 0`).
-* DONE (2026-06-18) — the **quadratic specialization** has LANDED (axiom-clean). The inner sum `S(r) :=
-  ∑_z ψ(∑_j r_j·Q(z−t_j))` of `countk_eq_sum_charsum` is now evaluated for ALL `r`, split on `R := ∑_j r_j`:
-  `R ≠ 0` ⟹ `sum_addChar_multiQuad` (quadratic, reduces to the global Gauss sum `∑_z ψ(R·Q z)`); `R = 0` ⟹
-  `sum_addChar_multiQuad_zero` (the `R·Qz` term drops, leaving the linear `polar Q z (−∑r_j•t_j)`) then
-  `sum_addChar_linearMap` (`∑_z ψ(φ z) = |V|·[φ=0]`, primitivity boundary engine). So with
-  `countk_eq_sum_charsum` the multi-point Q-count `#{z : Q(z−t_j)=c_j ∀j}` is in CLOSED FORM.
-* DONE (2026-06-18) — the **inclusion–exclusion engine** has LANDED (axiom-clean): `count_pi_setValued`
-  (`#{z : ∀j, h_j z ∈ A_j} = ∑_{c∈∏A_j} #{z : ∀j, h_j z = c_j}`, value-SET counts as a sum of value-POINT counts,
-  pure partition additivity). With `h_j z := Q(z−t_j)` this turns the isotropy-class counts (each class is a
-  value-set: anisotropic ↔ `K∖{0}`, isotropic-or-zero ↔ `{0}`) into the pointwise `Q`-value counts the toolkit
-  closes. The toolkit (A/A2/Ak/B/C/D1/multiQuad/multiQuad-zero/linearMap/setValued) is COMPLETE.
-* NEXT (at PORT into CascadeAffine): (a) the isotropy↔value-set dictionary + the single-point origin correction
-  (class 0 `z=t` vs class 1, needs `isoClass` — lives in CascadeAffine, not this Mathlib-only file); (b) prove the
-  resulting `A_u` injective in `u` at the symmetry-broken base (`IsotropySeparatesAtBase`) for `VO^ε_4(3)`.
-* Brick C-even (independent, short) — `d` even ⟹ `χ(t)^d=1` ⟹ closed `q^{d-1}±(q-1)q^{d/2-1}` via
-  `AddChar.sum_mulShift` + `gaussSum_sq`. Validates Brick C numerically.
-* Bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` +
-  `Invertible(2:ZMod p)`) + orthogonal basis for `VO^ε_4(3)`. Then PORT into CascadeAffine.
-
-CAVEAT: the bricks require `[Invertible (2:K)]` / `ringChar ≠ 2` — char-2 (`q = 2,4`) is a separate
-argument (§5 R2′); do `q = 3` first.
+CAVEAT: requires `[Invertible (2:K)]` / `ringChar ≠ 2`; char-2 (`q=2,4`) is a separate argument.
 -/
 import Mathlib.NumberTheory.LegendreSymbol.AddCharacter
 import Mathlib.NumberTheory.GaussSum
@@ -108,7 +32,10 @@ import Mathlib.LinearAlgebra.QuadraticForm.IsometryEquiv
 import Mathlib.LinearAlgebra.Basis.Basic
 import Mathlib.LinearAlgebra.Dimension.Finrank
 
+
 open Finset Module
+
+namespace ChainDescent
 
 /-- **Brick A — solution count as a character sum.** -/
 theorem count_eq_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
@@ -387,12 +314,6 @@ theorem count2_eq_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
   rw [Finset.sum_congr rfl (fun x _ => hinner x), ← Finset.sum_filter, Finset.sum_const,
     nsmul_eq_mul]
 
-#print axioms count_eq_charsum
-#print axioms sum_quadForm_eval
-#print axioms sum_addChar_quadForm_smul
-#print axioms card_quadForm_eq
-#print axioms sum_addChar_quadForm_linear
-#print axioms count2_eq_charsum
 
 -- ============== multi-point quadratic sum (toward the symmetry-broken-base count) ==============
 
@@ -453,9 +374,6 @@ theorem sum_addChar_multiQuad {K : Type*} [Field K] {R' : Type*} [CommRing R'] (
   rw [hfactor, hD1, QuadraticMap.map_neg, ← mul_assoc, ← AddChar.map_add_eq_mul]
   congr 2; ring
 
-#print axioms quad_sub
-#print axioms polar_sum_right
-#print axioms sum_addChar_multiQuad
 
 -- ============== the k-fold count (generalizes Brick A2 to a Finset of conditions) ==============
 
@@ -518,8 +436,6 @@ theorem countk_eq_sum_charsum {F : Type*} [Field F] [Fintype F] [DecidableEq F]
     Finset.sum_sub_distrib]
   ring
 
-#print axioms countk_eq_charsum
-#print axioms countk_eq_sum_charsum
 
 -- ============== the quadratic specialization (the R = ∑r_j = 0 boundary) ==============
 
@@ -588,8 +504,6 @@ theorem sum_addChar_multiQuad_zero {K : Type*} [Field K] {R' : Type*} [CommRing 
   rw [Finset.sum_congr rfl (fun z _ => by rw [key z]), Finset.mul_sum]
   exact Finset.sum_congr rfl (fun z _ => by rw [AddChar.map_add_eq_mul, mul_comm])
 
-#print axioms sum_addChar_linearMap
-#print axioms sum_addChar_multiQuad_zero
 
 -- ============== inclusion–exclusion: value-SET counts = sum of value-POINT counts ==============
 
@@ -617,4 +531,4 @@ theorem count_pi_setValued {K : Type*} [DecidableEq K] {V : Type*} [Fintype V] [
   · intro hz
     exact ⟨fun j => by rw [hz j]; exact Fintype.mem_piFinset.1 hc j, funext hz⟩
 
-#print axioms count_pi_setValued
+end ChainDescent
