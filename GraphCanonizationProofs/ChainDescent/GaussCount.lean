@@ -224,6 +224,31 @@ theorem sum_addChar_quadForm_smul {K : Type*} [Field K] [Fintype K] [DecidableEq
   rw [e1, sum_quadForm_eval hF hφ Q v hv hw, sum_quadForm_eval hF hψ Q v hv hw, hgss, mul_pow]
   ring
 
+/-- **Scaled quadratic Gauss sum is nonzero (M2 — the cancellable constant).** If the base sum `∑_x ψ(Q x)` is
+nonzero, so is the scaled sum `∑_x ψ(s·Q x)` for any unit `s` (the scaling factor `χ(s)^d` is a unit, since
+`χ(s)² = 1`). This is the constant that cancels when comparing the multi-point Gauss sums `S(r)` of two
+configurations: `S(r) = ψ(Gram-expr)·∑_x ψ(R·Q x)` (`sum_addChar_multiQuad`), so `S_u(r) = S_{u'}(r)` and this
+non-vanishing give `ψ(Gram-expr_u) = ψ(Gram-expr_{u'})`. -/
+theorem sum_addChar_quadForm_smul_ne_zero {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    [Invertible (2 : K)] (hF : ringChar K ≠ 2) {R' : Type*} [CommRing R'] [IsDomain R']
+    {ψ : AddChar K R'} (hψ : ψ.IsPrimitive) {V : Type*} [AddCommGroup V] [Module K V]
+    [FiniteDimensional K V] [Fintype V] (Q : QuadraticForm K V)
+    (v : Module.Basis (Fin (Module.finrank K V)) K V)
+    (hv : (QuadraticMap.associated (R := K) Q).IsOrthoᵢ v) (hw : ∀ i, Q (v i) ≠ 0)
+    (hQ0 : (∑ x : V, ψ (Q x)) ≠ 0) (s : Kˣ) :
+    (∑ x : V, ψ ((s : K) * Q x)) ≠ 0 := by
+  rw [sum_addChar_quadForm_smul hF hψ Q v hv hw s]
+  refine mul_ne_zero (pow_ne_zero _ ?_) hQ0
+  intro h
+  have hsq : ((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K)
+      * ((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K) = 1 := by
+    have hone := quadraticChar_sq_one (F := K) s.ne_zero
+    have h2 : (((quadraticChar K).ringHomComp (Int.castRingHom R')) (s : K)) ^ 2 = ((1 : ℤ) : R') := by
+      rw [MulChar.ringHomComp_apply, ← map_pow]; exact_mod_cast congrArg (Int.cast (R := R')) hone
+    rw [pow_two] at h2; simpa using h2
+  rw [h, mul_zero] at hsq
+  exact one_ne_zero hsq.symm
+
 /-- **Brick C — the affine-quadric point count (character-sum form).** The number of solutions of
 `Q x = c`, scaled by `#K`, equals `#V` plus `(∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_x ψ(Q x)`. This is the
 assembled affine-quadric point-count formula (Mathlib-absent), from Brick A + the scaling relation.
@@ -530,5 +555,35 @@ theorem count_pi_setValued {K : Type*} [DecidableEq K] {V : Type*} [Fintype V] [
   · rintro ⟨_, hφ⟩ j; exact congrFun hφ j
   · intro hz
     exact ⟨fun j => by rw [hz j]; exact Fintype.mem_piFinset.1 hc j, funext hz⟩
+
+-- ============== Fourier inversion: multi-point Gauss sum as a linear combination of counts ==============
+
+/-- **Multi-point Gauss sum = linear combination of pointwise counts (Fourier inversion).** Partitioning `x` by its
+value-tuple `(f_j x)_j`, the multi-point exponential sum is a `count`-weighted character sum:
+`∑_x ψ(∑_j r_j·f_j x) = ∑_{c:ι→F} ψ(∑_j r_j·c_j)·#{x : ∀j, f_j x = c_j}`. The KEY consequence (the dual of
+`countk_eq_sum_charsum`): if all pointwise counts `#{x : ∀j, f_j x = c_j}` agree between two configurations, then all
+multi-point Gauss sums `S(r) := ∑_x ψ(∑_j r_j·f_j x)` agree. With `f_j x = Q(x − t_j)` the `S(r)` carry the Gram of
+`{t_j}` (via `sum_addChar_multiQuad`), so count-agreement ⟹ Gram-agreement — the M2 hinge feeding M3. Elementary
+(partition + `ψ` constant on fibers); no primitivity / domain needed. -/
+theorem multiCharSum_eq_sum_count {F : Type*} [CommRing F] [Fintype F] [DecidableEq F]
+    {R' : Type*} [CommRing R'] (ψ : AddChar F R')
+    {V : Type*} [Fintype V] [DecidableEq V] {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (f : ι → V → F) (r : ι → F) :
+    (∑ x : V, ψ (∑ j, r j * f j x))
+      = ∑ c : ι → F, ψ (∑ j, r j * c j)
+          * ((univ.filter (fun x : V => ∀ j, f j x = c j)).card : R') := by
+  classical
+  rw [← Finset.sum_fiberwise (Finset.univ : Finset V) (fun x => (fun j => f j x))
+        (fun x => ψ (∑ j, r j * f j x))]
+  refine Finset.sum_congr rfl (fun c _ => ?_)
+  have hval : ∀ x ∈ Finset.univ.filter (fun x : V => (fun j => f j x) = c),
+      ψ (∑ j, r j * f j x) = ψ (∑ j, r j * c j) := by
+    intro x hx
+    refine congrArg ψ (Finset.sum_congr rfl (fun j _ => ?_))
+    rw [congrFun (Finset.mem_filter.1 hx).2 j]
+  have hfilter : (Finset.univ.filter (fun x : V => (fun j => f j x) = c))
+      = (Finset.univ.filter (fun x : V => ∀ j, f j x = c j)) := by
+    apply Finset.filter_congr; intro x _; exact funext_iff
+  rw [Finset.sum_congr rfl hval, Finset.sum_const, nsmul_eq_mul, hfilter, mul_comm]
 
 end ChainDescent

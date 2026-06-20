@@ -53,8 +53,10 @@
 > SUFFICE (no origin correction needed) + base `T = frameBase ∪ {2e₃}` (size 6) has injective Q-profile ⟹ M3 = "counts
 > recover Q-profile → `coords_determine`".** See §9 (milestone roadmap) for the full M0–M5 plan.
 > **★ M1 DONE (2026-06-18, axiom-clean): conversion core** (`isotropy_count_transport`, `isoSetOf`/`qSetOf` +
-> `mem_isoSetOf_iff`, `coarse_eq_sum_iso`). NEXT = **M2** (the Gauss closed form: `polarBilin-nondeg ⟹ SeparatingLeft`
-> bridge, combined inner sum `S(r)`, global Gauss value, substitute into `countk_eq_sum_charsum`).
+> `mem_isoSetOf_iff`, `coarse_eq_sum_iso`). **★ M2 DONE (2026-06-18, axiom-clean): Fourier hinge** —
+> `multiCharSum_eq_sum_count` (count-agreement ⟹ `S(r)`-agreement) + `sum_addChar_quadForm_smul_ne_zero` (global value
+> cancels); net: count-agreement ⟹ `ψ(Gram-expr)` agreement. NEXT = **M3** (the injectivity crux: M1-fold → M2 hinge →
+> Gram extraction → `coords_determine`).
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
@@ -570,19 +572,24 @@ isotropy value-type: coarse `Q`-value-set count = sum of fine isotropy counts ov
 agreement transfers to coarse). Coarse→pointwise is the landed `qvalue_count_transport`. **Deferred to M3's first step**
 (entangled with the recovery): folding the base `T`(Finset)+`u` into one family and the single `x=ū` count adjustment.
 
-### Milestone 2 — the Gauss closed form (pointwise Q-count → explicit Gram-function), in `GaussCount` + `FormsGraphConcrete`
-Prereq bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` + `Invertible 2`);
-the combined inner sum `S(r)` for all `r` (`multiQuad` for `R≠0`, `multiQuad_zero`+`linearMap` for `R=0`); the global
-Gauss value `∑_z ψ(R·Qz) = χ(R)^d·(∏χ wᵢ)·Gᵈ`; Brick C-even numeric check; substitute into `countk_eq_sum_charsum`
-⟹ pointwise Q-count as an explicit character sum in the Gram entries `B(u,t_j), Q(u)`. *Risk: med (heaviest assembly).*
+### Milestone 2 — the Gauss closed form ✅ DONE (2026-06-18, axiom-clean) — cleaner **Fourier-inversion** architecture
+Instead of inverting the full closed form in M3, the hinge is **`multiCharSum_eq_sum_count`** (`GaussCount`): the dual
+of `countk_eq_sum_charsum`, `∑_x ψ(∑_j r_j·f_j x) = ∑_c ψ(∑_j r_j·c_j)·#{x:∀j, f_j x=c_j}` (partition by value-tuple).
+**Consequence: all pointwise counts agree ⟹ all multi-point Gauss sums `S(r)` agree** — and `S(r)` already carries the
+Gram via the landed `sum_addChar_multiQuad` (`S(r) = ψ(Gram-expr)·∑_x ψ(R·Q x)`). Plus **`sum_addChar_quadForm_smul_ne_zero`**:
+the global value `∑_x ψ(R·Q x) ≠ 0` (from `∑_x ψ(Q x) ≠ 0`, carried), so it cancels. Net M2 output for M3:
+**count-agreement ⟹ `ψ(Gram-expr_u) = ψ(Gram-expr_{u'})` for all `r`.** The `SeparatingLeft` bridge / explicit `∏χ·Gᵈ`
+form turned out OFF the critical path (`∑ψ(Qx)≠0` + the orthogonal basis are carried, discharged concretely in M4).
 
 ### Milestone 3 — the injectivity (THE CRUX), in `FormsGraphConcrete`
-**Refined by M0 (size-6 base, recover-then-`coords_determine`).** Using the M2 closed form: show coarse-count
-agreement ⟹ the `Q`-profile `(Q(u−t))_{t∈T}` agrees (the extra point `2e₃` makes the joint count recover the profile —
-this is where the symmetry-broken base is essential), then the **landed `coords_determine`** (Q-profile over the basis
-frame + nondegeneracy ⟹ `u`) closes `u = u'`. Conclude `IsotropySeparatesAtBase Q T`. The injective-Q-profile blueprint
-(M0.4, 81/81 at size-6) guarantees this route exists. *Risk: HIGH — the recover-the-profile step is the genuine
-uncited content (a joint character-sum inversion); de-risked by M0 + reuse of `coords_determine`.*
+**Refined by M0 + M2.** Chain: (a) **M1-fold** — fold the base `T`+`u` into one family + the single `x=ū` adjustment, so
+fine-count agreement ⟹ pointwise-`Q`-count agreement (∀ value-tuple `c`); (b) **M2** — `multiCharSum_eq_sum_count` ⟹
+`S_u(r)=S_{u'}(r)` ∀r, then `sum_addChar_multiQuad` + `sum_addChar_quadForm_smul_ne_zero` (cancel the nonzero global
+value) ⟹ **`ψ(Gram-expr_u) = ψ(Gram-expr_{u'})` ∀r**; (c) **Gram extraction** — choose `r` (supported on `{⋆=u, one t_j}`)
+so `Gram-expr` isolates `Q(u−t_j)` / `polar Q u t_j`, and `ψ`-injectivity (over `ZMod p`, `p` prime) gives the `Q`-profile
+`(Q(u−t))_{t∈T}` agrees (the extra point `2e₃` is what makes this recover the profile); (d) **landed `coords_determine`**
+(Q-profile over the basis frame + nondegeneracy ⟹ `u`) closes `u=u'`. *Risk: HIGH — (c) the Gram extraction is the genuine
+uncited content; de-risked by M0's injective-Q-profile blueprint (81/81) + M2's clean Fourier hinge + reuse of `coords_determine`.*
 
 ### Milestone 4 — the concrete `VO^-_4(3)` instance + capstone, in `FormsGraphConcrete`
 `Q = x₀x₁+x₂²+x₃²` over `ZMod 3` + polar-nondegeneracy; the concrete base `T = frameBase ∪ {2e₃}` (size 6, M0.3) +
