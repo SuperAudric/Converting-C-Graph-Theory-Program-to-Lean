@@ -249,6 +249,215 @@ public sealed class Option2ExtractionProbe
         return (cls, dimKer);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // D-M3 — the Phase-2 pre-processor: canonize the rigid multipede END-TO-END,
+    // no F2-layer IR. Base order from WarmPartition cell-ids (D-M2); the unique
+    // orientation from the twist solve A_G·o = c ⊕ coset_min(c) (rigid ⟹ ker=0 ⟹
+    // unique o); middles ordered by subset under that orientation. Emits a full
+    // canonical adjacency matrix.
+    //
+    // Deliverable: iso-invariant (scrambles ⟹ byte-identical matrix) AND complete
+    // — the GAUGE twin (isomorphic to untwisted) canonicalises to the SAME matrix,
+    // a SEPARATING twin to a different one. That the gauge twin maps to the same
+    // matrix is the proof the twist-solve canonicalises (not merely classifies).
+    // ─────────────────────────────────────────────────────────────────────────
+    [Fact]
+    public void CanonizeEndToEnd_Invariant_And_Complete()
+    {
+        int[,]? biadj = null;
+        for (int seed = 0; seed < 200; seed++)
+        {
+            var b = RandomRegularBiadjacency(8, 6, 3, seed);
+            if (ColRankF2(b) == 6) { biadj = b; break; }
+        }
+        Assert.NotNull(biadj);
+        int nV = biadj!.GetLength(0), nW = biadj.GetLength(1);
+
+        var colsOrig = new List<ulong>();
+        for (int w = 0; w < nW; w++)
+        {
+            ulong col = 0;
+            for (int v = 0; v < nV; v++) if ((biadj[v, w] & 1) != 0) col |= 1UL << v;
+            colsOrig.Add(col);
+        }
+
+        var untw = BuildMultipedeLocal(biadj, new HashSet<int>());
+        string cf0 = CanonFormRuns(untw.Item1, untw.Item2, out bool inv0);
+        Assert.True(inv0, "untwisted canonical form not scramble-invariant");
+
+        // GAUGE twin (segment-0 flip = twist supp(col_0)) — ISOMORPHIC to untwisted.
+        var Tg = new HashSet<int>();
+        for (int v = 0; v < nV; v++) if ((biadj[v, 0] & 1) != 0) Tg.Add(v);
+        Assert.Equal(0UL, CosetMin(GadgetSetMask(Tg), colsOrig));     // GT: ∈ im
+        var gauge = BuildMultipedeLocal(biadj, Tg);
+        string cfG = CanonFormRuns(gauge.Item1, gauge.Item2, out bool invG);
+        Assert.True(invG);
+        Assert.Equal(cf0, cfG);          // ★ isomorphic ⟹ IDENTICAL canonical matrix
+
+        // SEPARATING twin (some e_g ∉ im) — NON-isomorphic.
+        int sepG = -1;
+        for (int g = 0; g < nV; g++) if (CosetMin(1UL << g, colsOrig) != 0) { sepG = g; break; }
+        Assert.True(sepG >= 0);
+        var sep = BuildMultipedeLocal(biadj, new HashSet<int> { sepG });
+        string cfS = CanonFormRuns(sep.Item1, sep.Item2, out bool invS);
+        Assert.True(invS);
+        Assert.NotEqual(cf0, cfS);       // non-isomorphic ⟹ different canonical matrix
+
+        output.WriteLine(
+            $"CanonizeEndToEnd nV={nV} nW={nW}: untwisted form scramble-invariant; " +
+            $"GAUGE twin (supp col_0) → SAME canonical matrix (twist-solve canonicalises); " +
+            $"SEPARATING twin (gadget {sepG}) → different matrix. Complete + iso-invariant, no F2-layer IR.");
+    }
+
+    // coker=0 regime (square odd circulant): EVERY twist is isomorphic to
+    // untwisted, so all must canonicalise to one identical form — a strong
+    // completeness stress test (m distinct graphs collapse to a single canonical).
+    [Theory]
+    [InlineData(6)]
+    [InlineData(8)]
+    public void CanonizeEndToEnd_Circulant_AllTwistsMerge(int m)
+    {
+        var biadj = MultipedeGenerator.CirculantBiadjacency(m, new[] { 0, 1, 3 });
+        Assert.Equal(m, ColRankF2(biadj));   // square, full rank ⟹ coker = 0
+        var untw = BuildMultipedeLocal(biadj, new HashSet<int>());
+        string cf0 = CanonFormRuns(untw.Item1, untw.Item2, out bool inv0);
+        Assert.True(inv0);
+        for (int g = 0; g < m; g++)
+        {
+            var tw = BuildMultipedeLocal(biadj, new HashSet<int> { g });
+            string cf = CanonFormRuns(tw.Item1, tw.Item2, out bool inv);
+            Assert.True(inv, $"circulant{m} twist{{{g}}} not scramble-invariant");
+            Assert.Equal(cf0, cf);           // coker=0 ⟹ isomorphic ⟹ same canonical form
+        }
+        output.WriteLine($"CanonizeEndToEnd Circulant{m} (coker=0): all {m} single-gadget twists " +
+                         $"canonicalise to the SAME form as untwisted; scramble-invariant.");
+    }
+
+    private static ulong GadgetSetMask(HashSet<int> s)
+    {
+        ulong m = 0; foreach (int v in s) m |= 1UL << v; return m;
+    }
+
+    private string CanonFormRuns(AdjMatrix g0, int[] t0, out bool invariant)
+    {
+        var forms = new List<string>();
+        for (int s = -1; s < 4; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, seed: 6300 + s);
+            forms.Add(CanonicalForm(g, t));
+        }
+        invariant = forms.Distinct().Count() == 1;
+        return forms[0];
+    }
+
+    // The end-to-end canonical labelling → canonical adjacency, as a string.
+    private static string CanonicalForm(AdjMatrix g, int[] types)
+    {
+        int n = g.VertexCount;
+        int[] adj = ExtractAdj(g);
+        sbyte[] p = SeedFromTypes(n, types);
+        var part = new WarmPartition(n);
+        part.Refine(adj, p);
+
+        var byCell = new Dictionary<int, List<int>>();
+        for (int v = 0; v < n; v++)
+        {
+            if (!byCell.TryGetValue(part.CellOf[v], out var l)) byCell[part.CellOf[v]] = l = new List<int>();
+            l.Add(v);
+        }
+        var segCells = byCell.Where(kv => kv.Value.Count == 2)
+                             .OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        var gadCells = byCell.Where(kv => kv.Value.Count > 2)
+                             .OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        int nW = segCells.Count, nV = gadCells.Count;
+
+        var vseg = new Dictionary<int, int>();
+        var desV = new int[nW]; var othV = new int[nW];
+        for (int sr = 0; sr < nW; sr++)
+        {
+            desV[sr] = segCells[sr].Min(); othV[sr] = segCells[sr].Max();
+            foreach (int v in segCells[sr]) vseg[v] = sr;
+        }
+
+        // columns of A_G + raw c over the canonical gadget order (D-M2).
+        var cols = new ulong[nW]; ulong cRaw = 0;
+        for (int gr = 0; gr < nV; gr++)
+        {
+            int m = gadCells[gr].Min(); int hit = 0;
+            for (int u = 0; u < n; u++)
+            {
+                if (adj[m * n + u] == 0 || !vseg.TryGetValue(u, out int sr)) continue;
+                cols[sr] |= 1UL << gr;
+                if (u == desV[sr]) hit ^= 1;
+            }
+            if (hit == 1) cRaw |= 1UL << gr;
+        }
+        ulong cStar = CosetMin(cRaw, cols);
+        ulong o = SolveF2(cols.ToList(), cRaw ^ cStar)
+                  ?? throw new InvalidOperationException("twist target not in im(A_G)");
+
+        // canonical orientation: first[sr] = oriented "0" vertex of segment sr.
+        var first = new int[nW]; var second = new int[nW];
+        for (int sr = 0; sr < nW; sr++)
+        {
+            bool flip = ((o >> sr) & 1) != 0;
+            first[sr] = flip ? othV[sr] : desV[sr];
+            second[sr] = flip ? desV[sr] : othV[sr];
+        }
+
+        // canonical vertex order: segments (first,second) then gadgets' middles
+        // ordered by their subset bitmask under the canonical orientation.
+        var order = new List<int>(n);
+        for (int sr = 0; sr < nW; sr++) { order.Add(first[sr]); order.Add(second[sr]); }
+        for (int gr = 0; gr < nV; gr++)
+        {
+            var mids = gadCells[gr];
+            ulong Key(int m)
+            {
+                ulong k = 0;
+                for (int u = 0; u < n; u++)
+                    if (adj[m * n + u] != 0 && vseg.TryGetValue(u, out int sr) && u == first[sr])
+                        k |= 1UL << sr;
+                return k;
+            }
+            order.AddRange(mids.OrderBy(Key));
+        }
+
+        // canonical adjacency in this order, serialised.
+        var sb = new System.Text.StringBuilder(n * n);
+        for (int i = 0; i < order.Count; i++)
+            for (int j = 0; j < order.Count; j++)
+                sb.Append(adj[order[i] * n + order[j]] != 0 ? '1' : '0');
+        return sb.ToString();
+    }
+
+    // solve  XOR_{sr ∈ S} cols[sr] = target  over F2; return S as a bitmask
+    // (the unique solution when cols have full column rank), or null if no solution.
+    private static ulong? SolveF2(List<ulong> cols, ulong target)
+    {
+        var pivot = new Dictionary<int, (ulong val, ulong tag)>();
+        for (int sr = 0; sr < cols.Count; sr++)
+        {
+            ulong cur = cols[sr], tag = 1UL << sr;
+            while (cur != 0)
+            {
+                int lb = System.Numerics.BitOperations.Log2(cur);
+                if (pivot.TryGetValue(lb, out var b)) { cur ^= b.val; tag ^= b.tag; }
+                else { pivot[lb] = (cur, tag); break; }
+            }
+        }
+        ulong ccur = target, otag = 0;
+        while (ccur != 0)
+        {
+            int lb = System.Numerics.BitOperations.Log2(ccur);
+            if (pivot.TryGetValue(lb, out var b)) { ccur ^= b.val; otag ^= b.tag; }
+            else return null;
+        }
+        return otag;
+    }
+
     private static List<ulong> ReducedBasis(IEnumerable<ulong> vecs)
     {
         var basis = new List<ulong>();

@@ -43,9 +43,12 @@
 > `WarmPartition` refinement (`Option2ExtractionProbe.cs`): extracted `dim ker` = ground truth, scramble-invariant;
 > Layer B (WL==unit-prop) confirmed in the genuine machinery. **D-M2 ✅ DONE (2026-06-20)** — canonical twist-class
 > `coset_min(c, im A_G)` in C#, scramble-invariant + separating (matches ground truth); the canonical base order is
-> free from `WarmPartition`'s cell-ids (no base-canon pass — step removed). **Next = D-M3 (pre-processor integration
-> → canonize the rigid multipede end-to-end).** Pick-up reading order: this STATUS → §11.0–§11.6 (the wall +
-> mechanism) → §11.10 (the build, D-M0/D-M1/D-M2 results + D-M3 onward).**
+> free from `WarmPartition`'s cell-ids (no base-canon pass — step removed). **D-M3 ✅ DONE (2026-06-20)** — the
+> pre-processor canonizes the rigid multipede **end-to-end** (canonical adjacency matrix), iso-invariant AND complete
+> (gauge twin → identical matrix, separating twin differs; coker=0 circulants collapse all twists to one form); the
+> coupled directions are resolved by a single linear solve (no F₂-layer IR), closing §4/§10's direction sub-question.
+> **Next = D-M4 (doubled multipede / `Aut_base` via the harness).** Pick-up reading order: this STATUS → §11.0–§11.6
+> (the wall + mechanism) → §11.10 (the build, D-M0..D-M3 results + D-M4 onward).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -375,7 +378,9 @@ sharing their hard core with A2's drop lemma.
   theorems.
 - **Direction-independence sub-question (Stage 3).** Greedy lex-min over `DirAssignment` bits is poly iff
   the bits resolve independently for a rigid residue; a coupled `k`-bit block would cost a local `2^k`.
-  Expected fine; confirm.
+  Expected fine; confirm. **[RESOLVED for the F₂ residue — §11.10 D-M3: the directions ARE coupled (by the
+  F₂ system) but resolved by a single linear solve `A_G·o = c ⊕ coset_min(c)` (unique for rigid), not greedy
+  bit-by-bit and not `2^k`. The twist-solve is that resolution.]**
 - **1-WL vs coherent (Stage 1).** If Phase 2 stays on 1-WL, the `hcatch` slack (`O(1)` extra pins) must be
   paid per the build doc; cleaner to refine coherently. A wrong choice here silently reintroduces a gap
   between "A2 guarantees discreteness" and "the canonizer's refinement discretizes."
@@ -548,7 +553,10 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   scramble-invariant (Circ 6/8/9→0, m=7→3, RandReg(8,6,3)→0); Layer B holds in the genuine refinement. **D-M2
   (Gaussian solve + canonical twist-class, same probe file):** ✅ twist-class `coset_min(c, im A_G)` scramble-invariant
   + separating (matches ground truth); **the canonical base order is free from `WarmPartition` cell-ids — base-canon
-  pass removed.** Next = D-M3 (pre-processor integration → canonize the rigid multipede end-to-end).
+  pass removed.** **D-M3 (pre-processor integration, end-to-end canonization, same probe file):** ✅ full canonical
+  adjacency matrix, iso-invariant + complete (gauge twin → identical matrix; coker=0 circulants collapse all twists);
+  coupled directions resolved by one linear solve (no F₂-layer IR) — closes §4/§10's direction sub-question. Next =
+  D-M4 (doubled multipede / `Aut_base`).
   Layer D **is** the *deferred, unbuilt* C# `LinearOracle`, generalized: `TwistConstruction.cs` already does the
   `ker H` half (constructs twists = F₂-symmetry); Layer D adds the **row-space** read (forced decisions) the rigid
   case needs. Integrates as a **Phase-2 pre-processor** — decompose `(base (P,L), twist-class)`, canonize the base via
@@ -716,6 +724,17 @@ invariant AND separating:** on a coker-dim-2 base (`nV=8>nW=6`) all 8 single-gad
 canonical base order is **free from `WarmPartition`'s iso-invariant cell-ids** — the fine colouring makes the rigid
 residue's base WL-discrete *at the cell level* (each segment its own 2-cell, each gadget its own cell), so there is
 **no base-canonization pass inside option 2** (D-M0 used a brute IR-lite; the real machinery does not need it). This
-realises scope (b) directly; see the D5 note. **D-M3** pre-processor integration → canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant).
+realises scope (b) directly; see the D5 note. **D-M3 — pre-processor integration, canonize end-to-end. ✅ DONE
+(2026-06-20, same probe file: `CanonizeEndToEnd_Invariant_And_Complete` + `CanonizeEndToEnd_Circulant_AllTwistsMerge`).**
+Full canonical adjacency from: base order (WL cell-ids) + **unique orientation from the twist solve** `A_G·o = c ⊕
+coset_min(c)` (rigid ⟹ `ker=0` ⟹ unique `o`, *no* `2^{nW}` enumeration) + middles ordered by subset under that
+orientation. **Iso-invariant AND complete:** (coker>0 base) scrambles → byte-identical matrix, the **gauge twin
+canonicalises to the SAME matrix** (proof the twist-solve *canonicalises*, not merely classifies) and a separating
+twin differs; (coker=0 circulant m=6,8) **all `m` distinct single-gadget-twisted graphs collapse to one identical
+canonical form**, scramble-invariant. **★ SUB-QUESTION RESOLVED (D-M3 finding):** this closes §4/§10's *direction-
+independence sub-question* (the worry that resolving direction bits could hit a coupled `k`-bit block costing a local
+`2^k`). The directions *are* coupled — by the F₂ system — but they are resolved by a **single linear solve** (unique
+for rigid), not greedy bit-by-bit and not `2^k`. The twist-solve **is** the poly resolution of that deferred sub-question
+for the F₂ residue. **D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed).
 **D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed). **D-M5** fallback/flag
 + full cross-check battery. **D-M6** Lean: L1, then (later) L2.
