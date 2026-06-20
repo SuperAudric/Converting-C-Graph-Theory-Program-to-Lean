@@ -21,6 +21,18 @@ unspecified piece** — the *candidate-twist construction predicate*,
 turning a propagation pattern into a vertex permutation — is the
 subject of §4, and the reason this doc exists.
 
+> **★ FORWARD POINTER — the row-space generalization (option 2 / "Layer D").** This spec builds the **`ker H` half**:
+> it constructs a *twist* (an automorphism) from the footprint, pruning the redundant branch. That handles the F₂
+> **symmetry** (CFI gauge, `dim ker > 0`). It **flags the rigid multipede** (`dim ker = 0`, no twist to construct) —
+> stated in the intro above. **That flag is *partly* removable.** The same footprint (`RefinementFootprint`) reveals
+> not just the kernel but the whole **F₂ constraint system `H`**; running **Gaussian elimination** on it solves the
+> *forced* (non-kernel) decisions that twist-construction cannot, absorbing the canonical **F₂-multipede** into poly
+> (the ring-varying residue stays the flag floor). This is the **generalized LinearOracle**, designed in
+> [`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) **§11.10** (verified mechanism +
+> sound extraction in §11.4/§11.4a; memory [[project_option2_f2_gap_2026-06-20]]). When picking up Layer D, build it
+> as the **row-space extension of `TwistConstruction.cs`**, integrated as a Phase-2 pre-processor — *not* a rewrite of
+> this twist spec, which remains the `ker`-half it composes with.
+
 For the algorithm that calls the oracle:
 [`chain-descent-strategy.md`](./chain-descent-strategy.md). For the
 oracle / cost model framing:

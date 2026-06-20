@@ -34,7 +34,9 @@
 > The wall is now precisely characterized (§11.1: `b(Aut)` vs `b_WL`); the witness is explicit (§11.2: the
 > doubled+matched multipede); the F₂ gap is constructed (§11.4); the honest flag floor moves to the *ring-varying*
 > (Lichter) residue (§11.6). **Live thread = §11; Layers A+B+C DONE (mechanism verified on real multipedes; extraction
-> prototyped descent-only + SOUND, §11.4a); next concrete step = §11.7 Layer D (the generalized oracle, Lean/C#).**
+> prototyped descent-only + SOUND, §11.4a). Next concrete step = Layer D, fully designed in §11.10 (C# first — the
+> row-space generalization of the deferred/unbuilt C# `LinearOracle`, integrated as a Phase-2 pre-processor; start at
+> D-M1). Pick-up reading order for a fresh continuation: this STATUS → §11.0–§11.6 (the wall + mechanism) → §11.10 (the build).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -527,11 +529,13 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   `O(n^D)`), then Gaussian → `dim ker`. **SOUND + CORRECT** on rigid / near-rigid / soundness-trap / doubled
   instances. Three corrections landed (§11.4a): cumulative accumulation, **minimality required for soundness**,
   `dim ker = 0 ≠ rigid`. Scope: bounded arity, WL-easy base, 1-WL probes (§11.4a). Next = port to Lean/C# in Layer D.
-- **Layer D — the generalized oracle (Lean/C#). ⏳, gated on A–C.** Build it against `LinearOracle.lean` / `CFI.lean`:
-  determine what the oracle reads *today* (the harvested twist *group* = `ker`) vs. where the **row-space**
-  generalization attaches; then "run Gaussian elimination on the extracted `H`, branch only on `ker`." Compose with
-  the cascade (which peels permutation symmetry, e.g. the doubled-multipede's `Z₂`). Cross-check on the
-  doubled+matched multipede (§11.2) and the §11.8 instances.
+- **Layer D — the generalized LinearOracle (C# first, Lean follow-on). ⏳ PLANNED, gated on A–C. Full design = §11.10.**
+  Layer D **is** the *deferred, unbuilt* C# `LinearOracle`, generalized: `TwistConstruction.cs` already does the
+  `ker H` half (constructs twists = F₂-symmetry); Layer D adds the **row-space** read (forced decisions) the rigid
+  case needs. Integrates as a **Phase-2 pre-processor** — decompose `(base (P,L), twist-class)`, canonize the base via
+  the harness, **solve the twist-class by F₂ Gaussian** (bypassing IR for the F₂ layer); branch only on `ker`; the
+  cascade handles `Aut_base` (the doubled-multipede `Z₂`). C# pieces D1–D8, Lean L1/L2, risks, milestones D-M1..M6:
+  **§11.10**.
 
 ### 11.8 Probe reproduction specs (the `/tmp/*.py` are ephemeral — rebuild from this)
 - **`wall_probe2.py`** — CFI builder `cfi(base_edges, base_verts, twist_vertex)` (inner vertices = even-subsets of
@@ -556,7 +560,84 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   (`CascadeAffine.lean:1916/1876/1981/1995`).
 - **Witt-free fiberwise technique (reuse for coherent↔relation bridge):** `separatesAtBase_of_isotropySeparates_weak`
   (`ScratchWitt.lean`, ported into `CascadeAffine §OrthogonalForm`); see [[project_witt_free_bridge_lead_2026-06-20]].
-- **Existing F₂-symmetry oracle (generalize this):** `LinearOracle.lean` / `CFI.lean` (the twist/gauge harvest).
+- **C# Layer-D substrate (the build target — see §11.10):** `GraphCanonizationProject/ITransversalOracle.cs` (the
+  seam; the `LinearOracle` is *deferred/unbuilt*, only `CascadeOracle.cs` is wired), `RefinementFootprint.cs` (the
+  descent/forcing observation = the Layer-C oracle), `TwistConstruction.cs` (the `ker`/F₂-symmetry half — generalize
+  this to the row-space), `ChainDescent.cs` (the harness; `Classify` at line 268), `MultipedeGenerator.cs` /
+  `CfiGraphGenerator.cs` (fixtures), `chain-descent-linear-oracle.md` (the oracle's spec — Layer D generalizes it).
 - **Spine / direction-blind substrate:** `spine_branch_independent`, `warm_6_2`, `canonForm` (top-level
   `ChainDescent.lean`) — confluence (§11.4) is `spine_branch_independent` for F₂ forcing.
-- **Memory:** [[project_option2_f2_gap_2026-06-20]] (the verified gap + reframe), [[project_witt_free_bridge_lead_2026-06-20]].
+- **Memory:** [[project_option2_f2_gap_2026-06-20]] (the verified gap + reframe + Layer A/B/C + the Layer-D plan),
+  [[project_witt_free_bridge_lead_2026-06-20]].
+
+### 11.10 Layer D — design: the generalized LinearOracle (the build)
+
+> **Read this to start Layer D.** Layers A–C are done (gap real, matrix model = the real descent, extraction sound).
+> Layer D turns the validated mechanism into a working canonizer component. It **is** the deferred C# `LinearOracle`,
+> generalized from twist-construction (the `ker`/symmetry half, already specced) to row-space reading (forced decisions).
+
+**Grounding — the C# architecture (verified by reading the source, 2026-06-20).** The `LinearOracle` is *designed but
+unbuilt* (`ITransversalOracle.cs`: "the deferred LinearOracle … discovering twists from propagation patterns"; only
+`CascadeOracle` is wired in `CanonGraphOrdererChainDescent.cs`). **Half its mechanism already exists:**
+- **`RefinementFootprint.cs`** = the descent/forcing observation: individualize a target-cell rep, warm-refine, read
+  the cell splits = "the decision's coupling." This **is** the forcing oracle Layer C runs on (`closure(fixed)`).
+- **`TwistConstruction.cs`** = builds a twist (path-fixing automorphism) from the footprint by canonical-colour
+  matching — "for CFI this is the gadget-parity flip." This is the **`ker H` / F₂-symmetry half**.
+- **`ITransversalOracle` / `ChainDescent.cs`** = the seam (`Classify` returns orbit-covering reps) + harness
+  (composes oracles, harvests automorphisms a-posteriori).
+
+So **Layer D = the row-space generalization**: `TwistConstruction` handles `ker H` (symmetry, twist); Layer D adds the
+row-space read (the *forced* decisions) the rigid case needs (`ker = 0` ⟹ no twist to construct ⟹ the existing oracle
+finds nothing ⟹ today the multipede *flags*; cf. `chain-descent-linear-oracle.md` intro).
+
+**Recommendation — C# first.** All infrastructure exists; the remaining risk is integration/empirical (canonize real
+multipedes, scramble-invariantly, compose with the cascade) — a C# question with a ready cross-check harness. **Lean is
+a heavy follow-on:** the multipede is the *non-schurian residue outside the seal's scope* (C3), so its proof is a *new*
+poly-or-flag theorem (F₂-Gaussian canonization), not the landed seal machinery — defer until C# validates and the
+statement is pinned. (One standalone Lean lemma is worth doing early — L1.)
+
+**Architecture decision — a Phase-2 PRE-PROCESSOR, not a per-node oracle.** For a *rigid* multipede the IR leaves are
+all distinct (no automorphism pruning), so a per-node "return one rep" oracle would violate the orbit-covering
+soundness contract (`ITransversalOracle.cs`). Clean framing: **decompose the residue into `(base (P,L), twist-class)`**,
+canonize the base via the existing harness (WL-easy), and **solve the twist-class by F₂ linear algebra** — bypassing IR
+for the F₂ layer entirely. `TwistConstruction` is the `ker`-half; Layer D's solver is the row-space half. IR branching
+remains only for the base and the kernel (small), where the harness + cascade already work.
+
+**The C# pieces:**
+- **D1 — decision/variable identification.** From the Phase-2 entry partition, the non-singleton cells = F₂ variables
+  (binary decisions); recover the `(P,L)` base ↔ F₂-overlay split. *(new; reuse direction-blind framing. Real risk —
+  DQ1.)*
+- **D2 — extraction.** Drive `RefinementFootprint` as the forcing oracle; run the Layer-C algorithm (cumulative
+  **minimal** forcing-circuits up to fixed arity `D`, `O(n^D)`) → `H` over the decisions. *(new; Layer-C port + the
+  minimality soundness guard, §11.4a.)*
+- **D3 — the twist constants `c`.** Read which parity each gadget enforces (the inhomogeneous part), extending
+  `TwistConstruction`'s canonical-colour matching to read a *value*, not just build an automorphism. *(extends
+  `TwistConstruction`; DQ3 = stay recognition-free.)*
+- **D4 — F₂ Gaussian solve.** Rank, a **canonical** `ker` basis (RREF over the WL-colour variable order ⟹ iso-invariant)
+  and the canonical twist-class (lex-min coset rep). *(new; DQ2 = the iso-invariance crux.)*
+- **D5 — pre-processor integration.** Decompose `(base, twist)`, canonize base via harness, solve twist via D4, emit
+  the canonical labelling; IR for the F₂ layer → 0 (rigid) or `2^{dim ker}` (near-rigid). *(new; the wiring.)*
+- **D6 — cascade/kernel composition.** `ker H` (gauge) branches/harvested by the existing twist machinery; **`Aut_base`**
+  (the doubled-multipede `Z₂`) handled when the harness canonizes `(P,L)`. *(wiring; doubled multipede is the test.)*
+- **D7 — fallback/flag.** When extraction fails (unbounded arity / non-WL-easy base / ring-varying, §11.6) or the
+  result fails verification → exhaustive branch (sound, may flag). *(new; the boundary.)*
+- **D8 — iso-invariance + cross-checks.** Scramble-invariance, exhaustive size-5/6, Even≠Odd, + a new rigid/near-rigid/
+  doubled multipede battery. Iso-invariance crux = canonical var-order → canonical `ker` basis → canonical twist-class
+  (the `forcedNode_relabel` analogue). *(new; validation.)*
+
+**Lean follow-on:** **L1 (do early, standalone):** the extraction-soundness lemma — *minimal forcing-circuits generate
+`rowspace(H)`* (the `cl_up ⊊ cl_lin` subtlety, §11.4a). Pure F₂/matroid, no graph; anchors the one non-obvious
+correctness claim. **L2 (deferred, heavy):** the generalized solver's poly-or-flag/soundness theorem (canonical form
+produced; branching `= 2^{dim ker}`; poly for bounded arity). Largely new F₂-Gaussian-canonization formalization,
+outside the seal.
+
+**Open design questions / risks:** **DQ1** — base/twist decomposition recovery from the *raw* graph (the real risk;
+clean for NS multipedes, murkier generally — where "WL-easy base" bites). **DQ2** — iso-invariant canonical `ker` basis
++ twist-class (RREF over the canonical WL-colour order). **DQ3** — reading `c` recognition-free (extend colour-matching).
+**DQ4** — fallback soundness where the F₂ path flags.
+
+**Milestones:** **D-M1** extraction in C# (footprint → Layer-C → `H`; test: `dim ker` on `MultipedeGenerator` = ground
+truth). **D-M2** F₂ Gaussian solve + canonical twist-class (rigid → unique twist). **D-M3** pre-processor integration →
+canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant). **D-M4** near-rigid kernel branching +
+doubled multipede (`Aut_base` via harness). **D-M5** fallback/flag + full cross-check battery. **D-M6** Lean: L1, then
+(later) L2.

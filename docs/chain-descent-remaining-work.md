@@ -225,7 +225,16 @@ Canonizes the **rigid** residue (incl. the multipede / IR-blind-spot that 1-WL c
   open research is **this non-schurian row 4**, which was never the seal's obligation (it is `DiscretizesAtBases`, split
   off by `stablyRecoverable_iff_symmetric_and_bases`). Closing it = closing the *overall*-canonizer poly wall.
 - **Status:** *solver not built;* prerequisites landed (deferral architecture, direction-blind canonizer substrate,
-  the potential-descent engine `exists_potential_descent`, A2's consumer chain). Pick up once row 4 lands.
+  the potential-descent engine `exists_potential_descent`, A2's consumer chain).
+- **★ ROW 4 IS NOW UNDER ACTIVE ATTACK — "option 2" (2026-06-20, IR doc §11).** The flag set is *attackable*, not just
+  acceptable: the multipede is **F₂-linear**, and the descent (WL) = F₂ **unit-propagation**, which stalls where
+  **Gaussian elimination** does not. **Layers A–C DONE** (probe-/prototype-clean): the rigid gap is real & constructible
+  (var-regular meager expander: `dim ker = 0` but descent forcing `Θ(n)`); WL = unit-prop verified on real multipedes;
+  the F₂ system `H` is **soundly extractable from the descent alone** (no gadget recognition). **Layer D PLANNED**
+  (IR doc §11.10, **C# first**) = the row-space generalization of the *deferred/unbuilt* C# `LinearOracle`
+  (`TwistConstruction.cs` is the `ker`-half), a Phase-2 F₂-Gaussian pre-processor. **Scope/flag floor** (honest): option
+  2 absorbs the canonical **F₂-multipede**; the **ring-varying** residue (Lichter, FPC+rank ≠ P) + unbounded-arity +
+  non-WL-easy-base stay the flag floor. Memory: [[project_option2_f2_gap_2026-06-20]].
 
 ---
 
