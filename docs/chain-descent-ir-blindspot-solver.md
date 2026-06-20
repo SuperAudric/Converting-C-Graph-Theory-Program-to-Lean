@@ -33,7 +33,8 @@
 >    descent-extracted F₂ system. **Layer-A viability VERIFIED axiom-/probe-clean (2026-06-20)** — see §11.4.
 > The wall is now precisely characterized (§11.1: `b(Aut)` vs `b_WL`); the witness is explicit (§11.2: the
 > doubled+matched multipede); the F₂ gap is constructed (§11.4); the honest flag floor moves to the *ring-varying*
-> (Lichter) residue (§11.6). **Live thread = §11; Layers A+B DONE (mechanism verified on real multipedes); next concrete step = §11.7 Layer C (extraction without gadget-recognition).**
+> (Lichter) residue (§11.6). **Live thread = §11; Layers A+B+C DONE (mechanism verified on real multipedes; extraction
+> prototyped descent-only + SOUND, §11.4a); next concrete step = §11.7 Layer D (the generalized oracle, Lean/C#).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -421,8 +422,13 @@ independently. (Note the copy-swap is a *permutation* involution, cascade's job,
 
 ### 11.3 The mechanism — F₂ structure is conserved across the symmetry boundary
 The multipede's segments are F₂ variables; the gadgets are F₂ parity constraints (matrix `H`). The relevant objects:
-- **`ker(H)`** = the solutions of the homogeneous system = the **gauge group = automorphisms**. CFI: `dim ker = k`
+- **`ker(H)`** = the solutions of the homogeneous system = the **F₂-gauge group**. CFI: `dim ker = k`
   (abelian, harvested by the **existing linear oracle** in Phase 1). Rigid multipede: `dim ker = 0`.
+  **⚠ `ker(H)` is only the F₂-gauge part of the symmetry, NOT all of it:** `Aut = ker(H) ⋊ Aut_base(P,L)`, where
+  `Aut_base` = the permutation automorphisms of the base incidence. **So `dim ker = 0` does NOT mean rigid** — the
+  **doubled+matched multipede** (§11.2) has `dim ker = 0` (block-diagonal `H_M ⊕ H_M`) yet `Aut = Z₂` (the copy-swap,
+  a base permutation invisible to `ker`). Option 2 (Gaussian on `H`) discharges `ker`; **`Aut_base` is the cascade's
+  job** (Layer D). This corrects the loose "rigid ⟺ `dim ker = 0`" / "`Aut = ker H`" framing.
 - **The descent / WL forcing ≈ F₂ unit-propagation** (fix a constraint's last unknown when all others are known) —
   *myopic*, local, stalls on expanders.
 - **Gaussian elimination** does row operations unit-propagation cannot; it determines `x` up to `ker(H)`.
@@ -454,6 +460,29 @@ At the pure-F₂ level (constraint systems as matrices), all three structural cl
    — gadget rows are local circuits, generating by definition). This is the corrected form of "the descent makes the
    global structure partially visible."
 
+### 11.4a Layer C — extraction, prototyped descent-only and SOUND (2026-06-20, `/tmp/option2_layerC_proto.py`)
+The extraction recovers `rowspace(H)` **from the descent oracle alone** (no gadget recognition, no peeking at `H`),
+then Gaussian → `dim ker`. Validated: rigid (`ker 0`), near-rigid (`ker 1,2`), the soundness trap, the doubled
+multipede — every extracted row genuinely in `rowspace(H)` (**SOUND**) and `dim ker` recovered exactly (**CORRECT**).
+The algorithm has **three corrections** over the naive "forcing-circuits → rows," all *necessary*:
+1. **Cumulative** accumulation up to a **fixed arity bound `D`** (poly `O(n^D)`). Per-size rank is non-monotone
+   (probe: size-3-only → full rank, size-4-only → less), so accumulate over all sizes `≤ D`.
+2. **Minimality is REQUIRED for soundness** (new finding). Add `support(W)` only if `W` is a forcing-circuit **and no
+   proper subset is**. The naive version is UNSOUND: chained size-2 constraints (`x_a=x_b=x_c`) make `{a,b,c}`
+   forcing-dependent, yet `e_a+e_b+e_c ∉ rowspace`. Minimality drops it (`{a,b}` already passes). *Why:* `cl_up ≠
+   cl_lin` — *minimal* `cl_up`-circuits land in `rowspace`, non-minimal ones need not. Prototype: naive → rows not all
+   in `rowspace`; minimal → SOUND across all instances. (For `dim ker`, the rowspace suffices; do **not** try to make
+   the extracted rows reproduce the descent's `cl_up` — that needs the actual rows, not just the rowspace.)
+3. **`dim ker = 0 ≠ rigid`** — the doubled multipede has extracted `ker = 0`, but the copy-swap `Z₂` permutes the
+   constraint set (`Aut_base`) invisibly to `ker` (§11.3 correction). Confirmed in the prototype.
+
+**Scope conditions (state them; they bound the win):** (a) **bounded gadget arity** — `D` is a fixed constant; the
+`O(n^D)` cost is poly only for bounded arity (unbounded-arity F₂ structure → the flag floor, §11.6). (b) **WL-easy
+base** — extraction + Gaussian discharge the F₂ overlay; the underlying base `(P,L)` must itself be WL-canonizable (it
+is for NS multipedes — asymmetric meager graph). A recursively-hard or itself-multipede base is *not* absorbed.
+(c) **1-WL** — extraction uses 1-WL forcing probes, where `WL = unit-prop` holds (Layer B); the canonizer's coherent
+(2-WL) pass is only *stronger* and also stalls, so the gap argument is robust.
+
 ### 11.5 The reframe — option 2's precise marginal value (honest scope)
 The probe sharpened *where* Gaussian beats {WL + existing oracle}:
 - **Random F₂ systems are EASY** — unit-prop already solves them (forcing# 2–3). Not the wall; no Gaussian needed.
@@ -474,8 +503,10 @@ signature). Worse, the ceiling recurs: a linear oracle fixed to **F₂** is itse
 constructions over varying rings** (`Z_{2^k}`) defeat any fixed-field rank operator while staying in P (Lichter,
 LICS 2021; FPC+rank ≠ P). So option 2 (F₂ generalization) **absorbs the canonical F₂-multipede** — a large named
 chunk of the IR-blind-spot, genuinely shrinking the flag set — but the **ring-varying residue remains the honest
-flag floor** (tied to the FPC+rank ≠ P frontier). Cameron is *separately* out of scope: its `O(n)` pins are
-`b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner from the rigid residue.
+flag floor** (tied to the FPC+rank ≠ P frontier). Two further scope edges (from §11.4a) join the floor: **unbounded
+gadget arity** (extraction is `O(n^D)`, poly only for bounded `D`) and a **non-WL-easy / recursively-hard base**
+(option 2 discharges the F₂ overlay, not a hard base under it). Cameron is *separately* out of scope: its `O(n)` pins
+are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner from the rigid residue.
 
 ### 11.7 Milestones (the durable tracker)
 - **Layer A — the F₂ gap + structural facts. ✅ DONE (2026-06-20, probe-clean).** §11.4: gap constructed, confluence
@@ -491,9 +522,11 @@ flag floor** (tied to the FPC+rank ≠ P frontier). Cameron is *separately* out 
   VERIFIED; asymptotic `2^Ω(n)` magnitude CITED (Neuen–Schweitzer; needs good-expander bases). *(memory:
   [[project_option2_f2_gap_2026-06-20]].)* So the matrix model (§11.3–11.4) genuinely describes the descent, and
   the local circuits are graph-visible — grounding extraction.
-- **Layer C — extraction without gadget-recognition. ⏳.** Show `H` is recoverable from descent observations
-  (bounded-subset forcing probes → circuits → rows of `H`), using confluence/reversibility (§11.4) — *not* by
-  recognizing gadget shapes (§11.6). Bounded gadget arity `d` ⟹ `O(n^d)` forcing probes, poly.
+- **Layer C — extraction without gadget-recognition. ✅ DONE (2026-06-20, prototyped, `/tmp/option2_layerC_proto.py`).**
+  `H` recovered from descent observations alone (cumulative **minimal** forcing-circuits up to fixed arity `D`,
+  `O(n^D)`), then Gaussian → `dim ker`. **SOUND + CORRECT** on rigid / near-rigid / soundness-trap / doubled
+  instances. Three corrections landed (§11.4a): cumulative accumulation, **minimality required for soundness**,
+  `dim ker = 0 ≠ rigid`. Scope: bounded arity, WL-easy base, 1-WL probes (§11.4a). Next = port to Lean/C# in Layer D.
 - **Layer D — the generalized oracle (Lean/C#). ⏳, gated on A–C.** Build it against `LinearOracle.lean` / `CFI.lean`:
   determine what the oracle reads *today* (the harvested twist *group* = `ker`) vs. where the **row-space**
   generalization attaches; then "run Gaussian elimination on the extracted `H`, branch only on `ker`." Compose with
@@ -510,6 +543,12 @@ flag floor** (tied to the FPC+rank ≠ P frontier). Cameron is *separately* out 
   expander is the headline**: `dim ker=0`, threshold `Θ(n)`); `tseitin_3reg` (forcing ≈ ker, the symmetry case);
   random 3-uniform (easy). Metric to report: **`dim ker` (Gaussian #free) vs unit-prop percolation threshold
   (descent forcing).** Key numbers: (4,3) → ker 0, threshold ≈0.15n; Tseitin → threshold/ker ≈1.45; random → forcing 2–3.
+- **`option2_layerC_proto.py`** — the extraction prototype. `Descent.closure(fixed)` = the unit-prop oracle (the ONLY
+  graph interface); `passes(oracle, W)` = forcing-circuit test (every member forced by the rest); `extract(oracle, n,
+  D)` = cumulative **minimal** circuits up to `D` → candidate rows; soundness = every extracted row `in_span` of the
+  true `H`. Run over `bipartite_expander` (rigid / near-rigid via `with_kernel`), the `chain trap` (shows minimality
+  is required — naive is unsound), and `doubled` (shows `ker=0 ≠ rigid`, the `Aut_base` `Z₂`). Report: extracted
+  `dim ker` vs true, `SOUND`, `CORRECT`.
 
 ### 11.9 Decl / pointer map
 - **Count-injectivity engine (re-base target):** `discrete_of_kRoundRelationSeparates`,
