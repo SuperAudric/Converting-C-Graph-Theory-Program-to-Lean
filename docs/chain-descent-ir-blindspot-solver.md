@@ -35,9 +35,12 @@
 > doubled+matched multipede); the F₂ gap is constructed (§11.4); the honest flag floor moves to the *ring-varying*
 > (Lichter) residue (§11.6). **Live thread = §11; Layers A+B+C DONE (mechanism verified on real multipedes; extraction
 > prototyped descent-only + SOUND, §11.4a). Next concrete step = Layer D, fully designed in §11.10 (C# first — the
-> row-space generalization of the deferred/unbuilt C# `LinearOracle`, integrated as a Phase-2 pre-processor). **Start at
-> §11.10 D-M0** — a graph-level probe that validates the two seams A/B/C did *not* cover (D1 raw-graph decomposition +
-> iso-invariance) before any C#. Pick-up reading order: this STATUS → §11.0–§11.6 (the wall + mechanism) → §11.10 (the build).**
+> row-space generalization of the deferred/unbuilt C# `LinearOracle`, integrated as a Phase-2 pre-processor). **D-M0
+> ✅ DONE (2026-06-20)** — the graph-level probe validated the two seams A/B/C did *not* cover (D1 raw-graph
+> decomposition + DQ2 iso-invariance): from raw *scrambled* adjacency the recovered base, `dim ker`, and canonical
+> twist-class are all scramble-invariant, and the twist-class **separates** non-isomorphic CFI-twins (matching
+> ground truth) — non-vacuous. **Next = D-M1 (C# port of extraction).** Pick-up reading order: this STATUS →
+> §11.0–§11.6 (the wall + mechanism) → §11.10 (the build, D-M0 results + D-M1 onward).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -530,7 +533,12 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   `O(n^D)`), then Gaussian → `dim ker`. **SOUND + CORRECT** on rigid / near-rigid / soundness-trap / doubled
   instances. Three corrections landed (§11.4a): cumulative accumulation, **minimality required for soundness**,
   `dim ker = 0 ≠ rigid`. Scope: bounded arity, WL-easy base, 1-WL probes (§11.4a). Next = port to Lean/C# in Layer D.
-- **Layer D — the generalized LinearOracle (C# first, Lean follow-on). ⏳ PLANNED, gated on A–C. Full design = §11.10.**
+- **Layer D — the generalized LinearOracle (C# first, Lean follow-on). ⏳ IN PROGRESS — D-M0 ✅ DONE; D-M1 next. Full design = §11.10.**
+  **D-M0 (graph-level end-to-end probe, 2026-06-20, `/tmp/option2_dm0*.py`):** from raw *scrambled* multipede
+  adjacency, D1 (recognition-free variable + base-incidence recovery) → D2 (forcing-oracle extraction) → D3/D4
+  (canonical twist-class `coset_min(c, im A_G)`) all validated — scramble-invariant, **separating** (merges gauge
+  twins, distinguishes genuine ones, matches ground truth), `dim ker` exact, D1/D2 cross-check holds. The two seams
+  A/B/C never touched (DQ1 raw-graph decomposition + DQ2 iso-invariance) are now probe-clean. Next = D-M1 (C# port).
   Layer D **is** the *deferred, unbuilt* C# `LinearOracle`, generalized: `TwistConstruction.cs` already does the
   `ker H` half (constructs twists = F₂-symmetry); Layer D adds the **row-space** read (forced decisions) the rigid
   case needs. Integrates as a **Phase-2 pre-processor** — decompose `(base (P,L), twist-class)`, canonize the base via
@@ -615,9 +623,12 @@ remains only for the base and the kernel (small), where the harness + cascade al
 - **D3 — the twist constants `c`.** Read which parity each gadget enforces (the inhomogeneous part), extending
   `TwistConstruction`'s canonical-colour matching to read a *value*, not just build an automorphism. *(extends
   `TwistConstruction`; DQ3 = stay recognition-free.)*
-- **D4 — F₂ Gaussian solve.** Rank and the canonical twist-class (lex-min coset rep, over the canonical WL-colour
-  variable order); a canonical `ker` basis (RREF) only for standalone mode (`ker = 0` in-pipeline). *(new; soundness =
-  the iso-invariance closure below ≡ scope (b).)*
+- **D4 — F₂ Gaussian solve.** Rank and the canonical twist-class. **The twist-class is the coset `c + im(A_G)` =
+  the `coker(A_G)` class** (D-M0 finding): `c` itself is gauge/orientation-dependent (flipping a segment adds a column
+  of `A_G`), so the iso-invariant content is `c mod im(A_G)`, taken as the lex-min coset rep over the canonical base
+  order. It is nontrivial **iff `nV > nW`** (a square base ⟹ `coker = 0` ⟹ *all* twists isomorphic) — this is what
+  makes the canonical form *separate* non-isomorphic twins rather than be a vacuous constant. A canonical `ker` basis
+  (RREF) only for standalone mode (`ker = 0` in-pipeline). *(new; soundness = the iso-invariance closure below ≡ scope (b).)*
 - **D5 — pre-processor integration.** Decompose `(base, twist)`, canonize base via harness, solve twist via D4, emit
   the canonical labelling; IR for the F₂ layer → 0. **In-pipeline `ker = 0` always** — the F₂-gauge symmetry is
   consumed upstream by the linear oracle (`TwistConstruction`) and permutation symmetry by the cascade, so the Phase-2
@@ -661,13 +672,22 @@ adjacency → identify variables + base split, recognition-free per §11.6). Cle
 **DQ2 = the iso-invariance closure above** (≡ scope (b); base WL-discrete ⟹ canonical order ⟹ deterministic twist).
 **DQ3** — reading `c` recognition-free (extend colour-matching). **DQ4** — fallback soundness where the F₂ path flags.
 
-**Milestones:** **★ D-M0 — graph-level end-to-end PROBE, before any C# (do this first; restores probe-before-commit).**
-Extend the Layer-C prototype to start from the **raw, scrambled multipede adjacency** (`BuildMultipede` output,
-relabelled): run **D1** (non-singleton-cell variable identification + base split, recognition-free) → D2 (extraction) →
-D4 (Gaussian + canonical twist-class) → emit a canonical form. Report: (i) **D1 recovers the variable set
-scramble-invariantly** (the uncovered seam); (ii) **the emitted canonical twist-class is scramble-invariant** (the
-soundness crux above); (iii) `dim ker` matches ground truth. Cheap, in `/tmp`; validates the *two* seams A/B/C did not
-(D1 + iso-invariance) before any C# is written. **D-M1** extraction in C# (footprint → Layer-C → `H`; test: `dim ker`
+**Milestones:** **★ D-M0 — graph-level end-to-end PROBE. ✅ DONE (2026-06-20, `/tmp/option2_dm0.py` + `_dm0v2.py`).**
+Faithful port of `BuildMultipede` (segments, even/odd-subset gadgets, the F₂ matrix `H = A_G`); raw adjacency
+**scrambled** (random vertex relabel + random colour-id relabel, so colour names carry no info) → **D1**
+(recognition-free: 1-WL, size-2 cells = segments, gadget-cell↔segment-cell incidence = recovered `Ĝ`) → **D2**
+(graph-level forcing oracle = individualize + 1-WL; cumulative **minimal** circuits → `H`) → **D3/D4** (read `c` by
+per-gadget parity; **canonical twist-class = `coset_min(c, im A_G)`** over the canonical base order). **Results
+(all PASS):** (i) base incidence recovered scramble-invariantly, #segments exact; (ii) twist-class scramble-invariant
+**and SEPARATING** — on a coker-dim-2 base (`nV=8>nW=6`) it merges the gauge twin (`e₀∈im A_G`, *isomorphic*) and
+distinguishes the genuine twin (`e₁∉im A_G`), **matching base-level ground truth exactly** (non-vacuous: invariance +
+completeness of the F₂ layer's canonical form); (iii) extracted `dim ker` = ground truth (0 on odd/rigid `m=6,8` +
+RandReg(8,6,3); 3 on non-odd `m=7`); (X) D2's `rowspace(H)` = D1's `rowspace(A_G)` (two independent recoveries agree).
+**Scope of the probe:** small bases (`nW≤8`), degree-3 gadgets (segments = size-2 cells; the size-2 rule is the
+arity-3 instance of "non-singleton-cell" D1), base canonized by a brute IR-lite standing in for the harness/cascade
+(scope (b)). Validates the F₂-layer mechanism *and* the iso-invariance/separation soundness crux end-to-end from the
+raw graph — the two seams A/B/C never touched (DQ1 + DQ2). Untested below: C# integration (D-M1+) and a genuinely
+non-WL-easy base. **D-M1** extraction in C# (footprint → Layer-C → `H`; test: `dim ker`
 on `MultipedeGenerator` = ground truth). **D-M2** F₂ Gaussian solve + canonical twist-class (rigid → unique twist).
 **D-M3** pre-processor integration → canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant).
 **D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed). **D-M5** fallback/flag
