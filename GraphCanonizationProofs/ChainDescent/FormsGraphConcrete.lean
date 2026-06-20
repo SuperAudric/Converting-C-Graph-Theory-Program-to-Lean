@@ -59,4 +59,78 @@ theorem qvalue_count_transport (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
   (count_transport (fun x => ∀ j, Q (x - t j) ∈ A j)).trans
     (count_pi_setValued (fun j x => Q (x - t j)) A)
 
+/-! ### Milestone 1 — the isotropy-count → pointwise-Q-count conversion (coarse route, no origin correction)
+
+M0 established that **coarse** counts (`Q=0` vs `Q≠0`) separate exactly when the fine isotropy counts do, so the
+conversion needs no single-point origin correction: fine-count agreement ⟹ coarse(value-set)-count agreement (each
+coarse count is a sum of fine counts over the refining isotropy profiles), and the coarse counts are pure
+`Q`-value-set counts that `qvalue_count_transport` lands on pointwise `Q`-counts. -/
+
+open scoped Classical in
+/-- **Transport the `IsotropySeparatesAtBase` count into `V` (M1, step 1).** The fine isotropy count over the affine
+point set `Fin (p^d)` equals the corresponding count over `V = Fin d → ZMod p` (`z ≠ u ↔ affineE.symm z ≠ affineE.symm u`
++ `count_transport`). So the `IsotropySeparatesAtBase` hypothesis transports to a count agreement in `V`, where the
+isotropy → `Q`-value-set conversion and the Gauss closed form live. -/
+theorem isotropy_count_transport (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (T : Finset (Fin (p ^ d))) (u : Fin (p ^ d)) (σ : Fin (p ^ d) → Fin 3) (c : Fin 3) :
+    (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+        (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = σ t) ∧
+        isoClass Q (affineE.symm z - affineE.symm u) = c)).card
+      = (Finset.univ.filter (fun x : Fin d → ZMod p => x ≠ affineE.symm u ∧
+        (∀ t ∈ T, isoClass Q (x - affineE.symm t) = σ t) ∧
+        isoClass Q (x - affineE.symm u) = c)).card := by
+  classical
+  have hcongr : (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+        (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = σ t) ∧
+        isoClass Q (affineE.symm z - affineE.symm u) = c))
+      = (Finset.univ.filter (fun z : Fin (p ^ d) => affineE.symm z ≠ affineE.symm u ∧
+        (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = σ t) ∧
+        isoClass Q (affineE.symm z - affineE.symm u) = c)) := by
+    apply Finset.filter_congr
+    intro z _
+    simp only [ne_eq, Equiv.apply_eq_iff_eq]
+  rw [hcongr]
+  exact count_transport (fun x => x ≠ affineE.symm u ∧
+    (∀ t ∈ T, isoClass Q (x - affineE.symm t) = σ t) ∧ isoClass Q (x - affineE.symm u) = c)
+
+/-- The isotropy-class value-set for a coarse bit: anisotropic (`true`) ↦ `{2}`, isotropic-or-zero (`false`) ↦ `{0,1}`. -/
+def isoSetOf : Bool → Finset (Fin 3)
+  | true => {2}
+  | false => {0, 1}
+
+/-- The matching `Q`-value-set: anisotropic (`true`) ↦ `{x | x ≠ 0}`, isotropic-or-zero (`false`) ↦ `{0}`. -/
+def qSetOf : Bool → Finset (ZMod p)
+  | true => Finset.univ.erase 0
+  | false => {0}
+
+/-- **The per-coordinate dictionary (M1).** The isotropy class lies in `isoSetOf b` iff the `Q`-value lies in
+`qSetOf b` — i.e. the coarse split is a pure `Q`-value condition. From `isoClass_ne_two_iff` / `isoClass_eq_two_iff`. -/
+theorem mem_isoSetOf_iff (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) (w : Fin d → ZMod p) (b : Bool) :
+    isoClass Q w ∈ isoSetOf b ↔ Q w ∈ qSetOf b := by
+  cases b
+  · have key : ∀ a : Fin 3, a ∈ isoSetOf false ↔ a ≠ 2 := by decide
+    rw [key, isoClass_ne_two_iff]; simp [qSetOf]
+  · have key : ∀ a : Fin 3, a ∈ isoSetOf true ↔ a = 2 := by decide
+    rw [key, isoClass_eq_two_iff]; simp [qSetOf, Finset.mem_erase]
+
+open scoped Classical in
+/-- **Fine → coarse (M1 core).** A coarse `Q`-value-set count `#{x : ∀j, Q(x−t_j) ∈ qSetOf(τ_j)}` equals the sum,
+over all refining isotropy profiles `σ ∈ ∏_j isoSetOf(τ_j)`, of the fine isotropy counts `#{x : ∀j, isoClass(x−t_j)=σ_j}`.
+(`count_pi_setValued` at the isotropy value-type, after the per-coordinate dictionary rewrite.) So fine-count
+agreement ⟹ coarse-count agreement, and the coarse counts are pure `Q`-value-set counts (`count_pi_setValued` at
+`Q` → pointwise `Q`-counts via `qvalue_count_transport`). No origin correction (M0: coarse suffices). -/
+theorem coarse_eq_sum_iso (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (t : ι → (Fin d → ZMod p)) (τ : ι → Bool) :
+    (Finset.univ.filter (fun x : Fin d → ZMod p => ∀ j, Q (x - t j) ∈ qSetOf (τ j))).card
+      = ∑ σ ∈ Fintype.piFinset (fun j => isoSetOf (τ j)),
+          (Finset.univ.filter (fun x : Fin d → ZMod p => ∀ j, isoClass Q (x - t j) = σ j)).card := by
+  classical
+  rw [show (Finset.univ.filter (fun x : Fin d → ZMod p => ∀ j, Q (x - t j) ∈ qSetOf (τ j)))
+        = (Finset.univ.filter (fun x : Fin d → ZMod p => ∀ j, isoClass Q (x - t j) ∈ isoSetOf (τ j)))
+      from ?_]
+  · exact count_pi_setValued (fun j x => isoClass Q (x - t j)) (fun j => isoSetOf (τ j))
+  · apply Finset.filter_congr
+    intro x _
+    exact forall_congr' (fun j => (mem_isoSetOf_iff Q (x - t j) (τ j)).symm)
+
 end ChainDescent

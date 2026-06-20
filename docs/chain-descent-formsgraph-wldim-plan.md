@@ -51,8 +51,10 @@
 > `#{z : ∀j, Q(z̄−t_j)∈A_j} = ∑_{c∈∏A_j} #{x : ∀j, Q(x−t_j)=c_j}`, landing the affine `Q`-value-set count on the
 > pointwise `Q`-counts the Gauss toolkit closes. **★ M0 PROBE DONE (2026-06-18, `/tmp/m0probe.py`): COARSE counts
 > SUFFICE (no origin correction needed) + base `T = frameBase ∪ {2e₃}` (size 6) has injective Q-profile ⟹ M3 = "counts
-> recover Q-profile → `coords_determine`".** See §9 (milestone roadmap) for the full M0–M5 plan. NEXT = **M1** (the
-> conversion: fine→coarse reduction + `qvalue_count_transport`, no origin correction), batched as one milestone.
+> recover Q-profile → `coords_determine`".** See §9 (milestone roadmap) for the full M0–M5 plan.
+> **★ M1 DONE (2026-06-18, axiom-clean): conversion core** (`isotropy_count_transport`, `isoSetOf`/`qSetOf` +
+> `mem_isoSetOf_iff`, `coarse_eq_sum_iso`). NEXT = **M2** (the Gauss closed form: `polarBilin-nondeg ⟹ SeparatingLeft`
+> bridge, combined inner sum `S(r)`, global Gauss value, substitute into `countk_eq_sum_charsum`).
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
@@ -560,13 +562,13 @@ consumer bridges (`count_transport`, `qvalue_count_transport`).
    gives `u`** (the extra point `2e₃` breaks the frame's setwise symmetry so the *counts* recover the profile). This
    reuses `coords_determine` inside the `IsotropySeparatesAtBase` proof (not at the capstone, which stays count-based).
 
-### Milestone 1 — the conversion (isotropy counts → pointwise Q-counts), in `FormsGraphConcrete`
-**Simplified by M0 (coarse suffices — no origin correction).** Steps: (a) the **fine→coarse reduction** — fine-count
-agreement (the `IsotropySeparatesAtBase` hypothesis) ⟹ coarse-count agreement, since each coarse value-set count is a
-sum of fine counts over the refining `σ`-profiles (`isoClass_ne_two_iff`: `Q=0 ⟺ isoClass∈{0,1}`); (b) the coarse
-count is a pure `Q`-value-set count `#{z : ∀t, Q(z̄−t̄) ∈ A_t}` with `A_t ∈ {{0}, {x|x≠0}}`, fed to the landed
-`qvalue_count_transport` → pointwise `Q`-counts. Result: coarse-count agreement ⟺ agreement of pointwise `Q`-counts.
-*Risk: low.*
+### Milestone 1 — the conversion (isotropy counts → pointwise Q-counts) ✅ DONE (2026-06-18, axiom-clean)
+**Conversion core landed in `FormsGraphConcrete`** (M0: coarse suffices, no origin correction): `isotropy_count_transport`
+(transport the fine count `Fin(p^d)→V`); the dictionary `isoSetOf`/`qSetOf` + `mem_isoSetOf_iff` (`isoClass∈isoSetOf b
+↔ Q∈qSetOf b`, the coarse split is a pure `Q`-value condition); **`coarse_eq_sum_iso`** (`count_pi_setValued` at the
+isotropy value-type: coarse `Q`-value-set count = sum of fine isotropy counts over refining `σ`-profiles ⟹ fine-count
+agreement transfers to coarse). Coarse→pointwise is the landed `qvalue_count_transport`. **Deferred to M3's first step**
+(entangled with the recovery): folding the base `T`(Finset)+`u` into one family and the single `x=ū` count adjustment.
 
 ### Milestone 2 — the Gauss closed form (pointwise Q-count → explicit Gram-function), in `GaussCount` + `FormsGraphConcrete`
 Prereq bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` + `Invertible 2`);
