@@ -104,6 +104,225 @@ public sealed class Option2ExtractionProbe
             $"rank={ranks[0]} scramble-inv={kers.Distinct().Count() == 1 && ranks.Distinct().Count() == 1}");
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // D-M2 — F2 Gaussian solve + the canonical twist-class, in C#.
+    //
+    // The iso-invariant twist content is the coker(A_G) class c + im(A_G) (D-M0
+    // finding: c itself is gauge/orientation-dependent), taken as a canonical
+    // coset representative over the canonical base order. The canonical order is
+    // free: WarmPartition assigns iso-invariant canonical cell-ids, and the fine
+    // colouring makes the base WL-discrete at the cell level (each segment its own
+    // 2-cell, each gadget its own cell), so ordering cells by CellOf id IS the
+    // canonical variable order (scope (b), realised directly — no brute base canon).
+    //
+    // Deliverable: the twist-class is scramble-invariant AND SEPARATING — twisted
+    // vs untwisted multipedes get different classes exactly when their coker
+    // classes differ (matching base-level ground truth). Non-vacuous.
+    // ─────────────────────────────────────────────────────────────────────────
+    [Fact]
+    public void TwistClass_Invariant_And_Separating()
+    {
+        // an odd base with nV>nW so coker(A_G) is nontrivial (twins can differ).
+        int[,]? biadj = null;
+        for (int seed = 0; seed < 200; seed++)
+        {
+            var b = RandomRegularBiadjacency(8, 6, 3, seed);
+            if (ColRankF2(b) == 6) { biadj = b; break; }
+        }
+        Assert.NotNull(biadj);
+        int nV = biadj!.GetLength(0), nW = biadj.GetLength(1);
+        int cokerDim = nV - ColRankF2(biadj);
+        Assert.True(cokerDim > 0, "need coker>0 for a meaningful separation test");
+
+        // ground-truth: twist of gadget set T is isomorphic to untwisted iff
+        //   e_T in im(A_G) = col-space. Build the column space in ORIGINAL order.
+        var colsOrig = new List<ulong>();
+        for (int w = 0; w < nW; w++)
+        {
+            ulong col = 0;
+            for (int v = 0; v < nV; v++) if ((biadj[v, w] & 1) != 0) col |= 1UL << v;
+            colsOrig.Add(col);
+        }
+
+        var untw = BuildMultipedeLocal(biadj, new HashSet<int>());
+        var classUntw = CanonicalTwistClassRuns(untw.Item1, untw.Item2);
+        Assert.True(classUntw.inv, "untwisted twist-class not scramble-invariant");
+        Assert.Equal(0, classUntw.dimKer);   // rigid
+
+        // (a) CORRECTNESS — every single-gadget twist: pipeline differs ⟺ e_g ∉ im(A_G).
+        int separated = 0;
+        for (int g = 0; g < nV; g++)
+        {
+            var tw = BuildMultipedeLocal(biadj, new HashSet<int> { g });
+            var classTw = CanonicalTwistClassRuns(tw.Item1, tw.Item2);
+            Assert.True(classTw.inv, $"twist{{{g}}} class not scramble-invariant");
+
+            bool pipelineDiffers = classTw.cls != classUntw.cls;
+            bool gtDiffers = CosetMin(1UL << g, colsOrig) != 0;   // e_g ∉ im(A_G)
+            Assert.Equal(gtDiffers, pipelineDiffers);             // pipeline == ground truth
+            if (pipelineDiffers) separated++;
+        }
+
+        // (b) a GUARANTEED-MERGED twin (non-vacuity, base-robust): twisting the
+        //     gadget-set supp(col_w) = the gauge flip of segment w ⟹ e_T ∈ im(A_G)
+        //     ⟹ ISOMORPHIC to untwisted ⟹ same canonical class.
+        var Tmerged = new HashSet<int>();
+        for (int v = 0; v < nV; v++) if ((biadj[v, 0] & 1) != 0) Tmerged.Add(v);
+        ulong eMerged = 0; foreach (int v in Tmerged) eMerged |= 1UL << v;
+        Assert.Equal(0UL, CosetMin(eMerged, colsOrig));          // GT: gauge ⟹ in im
+        var mClass = CanonicalTwistClassRuns(BuildMultipedeLocal(biadj, Tmerged).Item1,
+                                             BuildMultipedeLocal(biadj, Tmerged).Item2);
+        Assert.True(mClass.inv);
+        Assert.Equal(classUntw.cls, mClass.cls);                 // MERGED with untwisted
+
+        // (c) a GUARANTEED-SEPARATING twin exists since coker>0; pipeline separates it.
+        Assert.True(separated > 0, "coker>0 but no single-gadget separation found");
+
+        output.WriteLine(
+            $"TwistClass nV={nV} nW={nW} cokerDim={cokerDim}: " +
+            $"{separated}/{nV} single-gadget twists give a DISTINCT class (e_g∉im A_G), " +
+            $"the constructed gauge twin (supp col_0) MERGES; all scramble-invariant, all match ground truth.");
+    }
+
+    private (ulong cls, bool inv, int dimKer) CanonicalTwistClassRuns(AdjMatrix g0, int[] t0)
+    {
+        var classes = new List<ulong>();
+        int dimKer = -1;
+        for (int s = -1; s < 4; s++)
+        {
+            AdjMatrix g; int[] t;
+            if (s < 0) { g = g0; t = (int[])t0.Clone(); }
+            else (g, t) = ScrambleWithTypes(g0, t0, seed: 5200 + s);
+            var (cls, dk) = CanonicalTwistClass(g, t);
+            classes.Add(cls); dimKer = dk;
+        }
+        return (classes[0], classes.Distinct().Count() == 1, dimKer);
+    }
+
+    // D3 (read c, recognition-free) + D4 (coset_min over the canonical base order).
+    private static (ulong cls, int dimKer) CanonicalTwistClass(AdjMatrix g, int[] types)
+    {
+        int n = g.VertexCount;
+        int[] adj = ExtractAdj(g);
+        sbyte[] p = SeedFromTypes(n, types);
+        var part = new WarmPartition(n);
+        part.Refine(adj, p);
+
+        var byCell = new Dictionary<int, List<int>>();
+        for (int v = 0; v < n; v++)
+        {
+            if (!byCell.TryGetValue(part.CellOf[v], out var l)) byCell[part.CellOf[v]] = l = new List<int>();
+            l.Add(v);
+        }
+        // canonical order = ascending WarmPartition cell-id (iso-invariant).
+        var segCells = byCell.Where(kv => kv.Value.Count == 2)
+                             .OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        var gadCells = byCell.Where(kv => kv.Value.Count > 2)
+                             .OrderBy(kv => kv.Key).Select(kv => kv.Value).ToList();
+        int nW = segCells.Count, nV = gadCells.Count;
+
+        var des = new int[nW];                 // orientation reference per segment (gauge — modded out)
+        var vseg = new Dictionary<int, int>();
+        for (int sr = 0; sr < nW; sr++)
+        {
+            des[sr] = segCells[sr].Min();
+            foreach (int v in segCells[sr]) vseg[v] = sr;
+        }
+
+        var cols = new ulong[nW];              // A_G columns over canonical gadget-rank bits
+        ulong cvec = 0;
+        for (int gr = 0; gr < nV; gr++)
+        {
+            int m = gadCells[gr].Min();        // any middle: all share the gadget's parity
+            int hit = 0;
+            for (int u = 0; u < n; u++)
+            {
+                if (adj[m * n + u] == 0) continue;
+                if (!vseg.TryGetValue(u, out int sr)) continue;
+                cols[sr] |= 1UL << gr;         // gadget gr incident to segment sr
+                if (u == des[sr]) hit ^= 1;
+            }
+            if (hit == 1) cvec |= 1UL << gr;
+        }
+        ulong cls = CosetMin(cvec, cols);
+        int dimKer = nW - RankF2(cols.ToList());
+        return (cls, dimKer);
+    }
+
+    private static List<ulong> ReducedBasis(IEnumerable<ulong> vecs)
+    {
+        var basis = new List<ulong>();
+        foreach (var v in vecs)
+        {
+            ulong cur = v;
+            foreach (var b in basis) cur = Math.Min(cur, cur ^ b);
+            if (cur != 0)
+            {
+                for (int i = 0; i < basis.Count; i++) basis[i] = Math.Min(basis[i], basis[i] ^ cur);
+                basis.Add(cur);
+            }
+        }
+        return basis;
+    }
+
+    // canonical (lex-min) representative of c + span(cols) over F2.
+    private static ulong CosetMin(ulong c, IEnumerable<ulong> cols)
+    {
+        var basis = ReducedBasis(cols);
+        basis.Sort((a, b) => b.CompareTo(a));   // by leading bit, descending
+        ulong cur = c;
+        bool changed = true;
+        while (changed)
+        {
+            changed = false;
+            foreach (var b in basis)
+                if ((cur ^ b) < cur) { cur ^= b; changed = true; }
+        }
+        return cur;
+    }
+
+    // local twisted-multipede builder (MultipedeGenerator has no twist param):
+    // gadget v in `twist` uses ODD-cardinality subsets (the CFI flip).
+    private static (AdjMatrix, int[]) BuildMultipedeLocal(int[,] biadj, HashSet<int> twist)
+    {
+        int nV = biadj.GetLength(0), nW = biadj.GetLength(1);
+        var nbr = new List<int>[nV];
+        for (int v = 0; v < nV; v++)
+        {
+            nbr[v] = new List<int>();
+            for (int w = 0; w < nW; w++) if (biadj[v, w] != 0) nbr[v].Add(w);
+        }
+        var aIdx = new int[nW]; var bIdx = new int[nW];
+        int idx = 0;
+        for (int w = 0; w < nW; w++) { aIdx[w] = idx++; bIdx[w] = idx++; }
+        var mids = new List<(int v, int bm)>();
+        for (int v = 0; v < nV; v++)
+        {
+            int d = nbr[v].Count, want = twist.Contains(v) ? 1 : 0;
+            for (int bm = 0; bm < (1 << d); bm++)
+                if (System.Numerics.BitOperations.PopCount((uint)bm) % 2 == want)
+                    mids.Add((v, bm));
+        }
+        var midIdx = new int[mids.Count];
+        for (int i = 0; i < mids.Count; i++) midIdx[i] = idx++;
+        int n = idx;
+        var adj = new int[n, n];
+        for (int i = 0; i < mids.Count; i++)
+        {
+            var (v, bm) = mids[i]; int mi = midIdx[i]; int d = nbr[v].Count;
+            for (int k = 0; k < d; k++)
+            {
+                int w = nbr[v][k];
+                int target = ((bm >> k) & 1) != 0 ? aIdx[w] : bIdx[w];
+                adj[mi, target] = 1; adj[target, mi] = 1;
+            }
+        }
+        var types = new int[n];
+        for (int w = 0; w < nW; w++) { types[aIdx[w]] = w; types[bIdx[w]] = w; }
+        for (int i = 0; i < mids.Count; i++) types[midIdx[i]] = nW + mids[i].v;
+        return (new AdjMatrix(adj), types);
+    }
+
     // ── D1: segments = size-2 stable cells of the real refinement ─────────────
     private static List<int[]> RecoverSegments(int n, int[] adj, sbyte[] pBase)
     {

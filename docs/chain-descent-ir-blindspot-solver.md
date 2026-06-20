@@ -41,9 +41,11 @@
 > twist-class are all scramble-invariant, and the twist-class **separates** non-isomorphic CFI-twins (matching
 > ground truth) — non-vacuous. **D-M1 ✅ DONE (2026-06-20)** — extraction ported to C# against the *real*
 > `WarmPartition` refinement (`Option2ExtractionProbe.cs`): extracted `dim ker` = ground truth, scramble-invariant;
-> Layer B (WL==unit-prop) confirmed in the genuine machinery. **Next = D-M2 (Gaussian solve + canonical twist-class
-> in C#).** Pick-up reading order: this STATUS → §11.0–§11.6 (the wall + mechanism) → §11.10 (the build, D-M0/D-M1
-> results + D-M2 onward).**
+> Layer B (WL==unit-prop) confirmed in the genuine machinery. **D-M2 ✅ DONE (2026-06-20)** — canonical twist-class
+> `coset_min(c, im A_G)` in C#, scramble-invariant + separating (matches ground truth); the canonical base order is
+> free from `WarmPartition`'s cell-ids (no base-canon pass — step removed). **Next = D-M3 (pre-processor integration
+> → canonize the rigid multipede end-to-end).** Pick-up reading order: this STATUS → §11.0–§11.6 (the wall +
+> mechanism) → §11.10 (the build, D-M0/D-M1/D-M2 results + D-M3 onward).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -543,8 +545,10 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   twins, distinguishes genuine ones, matches ground truth), `dim ker` exact, D1/D2 cross-check holds. The two seams
   A/B/C never touched (DQ1 raw-graph decomposition + DQ2 iso-invariance) are now probe-clean. **D-M1 (C# extraction
   vs the real `WarmPartition`, 2026-06-20, `Option2ExtractionProbe.cs`):** ✅ extracted `dim ker` = ground truth,
-  scramble-invariant (Circ 6/8/9→0, m=7→3, RandReg(8,6,3)→0); Layer B holds in the genuine refinement. Next = D-M2
-  (Gaussian solve + canonical twist-class in C#).
+  scramble-invariant (Circ 6/8/9→0, m=7→3, RandReg(8,6,3)→0); Layer B holds in the genuine refinement. **D-M2
+  (Gaussian solve + canonical twist-class, same probe file):** ✅ twist-class `coset_min(c, im A_G)` scramble-invariant
+  + separating (matches ground truth); **the canonical base order is free from `WarmPartition` cell-ids — base-canon
+  pass removed.** Next = D-M3 (pre-processor integration → canonize the rigid multipede end-to-end).
   Layer D **is** the *deferred, unbuilt* C# `LinearOracle`, generalized: `TwistConstruction.cs` already does the
   `ker H` half (constructs twists = F₂-symmetry); Layer D adds the **row-space** read (forced decisions) the rigid
   case needs. Integrates as a **Phase-2 pre-processor** — decompose `(base (P,L), twist-class)`, canonize the base via
@@ -635,7 +639,10 @@ remains only for the base and the kernel (small), where the harness + cascade al
   order. It is nontrivial **iff `nV > nW`** (a square base ⟹ `coker = 0` ⟹ *all* twists isomorphic) — this is what
   makes the canonical form *separate* non-isomorphic twins rather than be a vacuous constant. A canonical `ker` basis
   (RREF) only for standalone mode (`ker = 0` in-pipeline). *(new; soundness = the iso-invariance closure below ≡ scope (b).)*
-- **D5 — pre-processor integration.** Decompose `(base, twist)`, canonize base via harness, solve twist via D4, emit
+- **D5 — pre-processor integration.** Decompose `(base, twist)`, ~~canonize base via harness~~ **read the canonical
+  base order off `WarmPartition`'s iso-invariant cell-ids** (D-M2 finding — the fine-coloured rigid residue is
+  WL-discrete at the cell level, so *no* base-canonization pass is needed inside option 2; harness/cascade branching
+  is reserved for genuine `Aut_base`, consumed upstream — see D6), solve twist via D4, emit
   the canonical labelling; IR for the F₂ layer → 0. **In-pipeline `ker = 0` always** — the F₂-gauge symmetry is
   consumed upstream by the linear oracle (`TwistConstruction`) and permutation symmetry by the cascade, so the Phase-2
   residue is genuinely rigid. **So option 2's in-pipeline content is the row-space / *forced* solve ONLY**; the
@@ -700,7 +707,15 @@ F₂ rank. **Extracted `dim ker` = ground truth on every run, scramble-invariant
 non-odd `m=7` → 3, `RandReg(8,6,3)` (nV>nW high-treewidth) → 0; segments recovered recognition-free as the size-2
 stable cells (= nW exactly). **Finding (no surprise = the result):** Layer B (WL == unit-propagation) holds in the
 *real* C# refinement, not just the Python port — the "WL might be stronger" risk did not materialize in the genuine
-machinery. **D-M2** F₂ Gaussian solve + canonical twist-class (rigid → unique twist).
-**D-M3** pre-processor integration → canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant).
+machinery. **D-M2 — Gaussian solve + canonical twist-class in C#. ✅ DONE (2026-06-20, same probe file,
+`TwistClass_Invariant_And_Separating`).** Twist-class `= coset_min(c, im A_G) ∈ coker(A_G)` over the canonical base
+order; `c` read recognition-free (per-gadget parity under an arbitrary orientation, gauge modded out). **Scramble-
+invariant AND separating:** on a coker-dim-2 base (`nV=8>nW=6`) all 8 single-gadget twists give a distinct class
+(matching `e_g ∉ im A_G`) and the **constructed gauge twin** `supp(col_0)` merges with untwisted (matching `e_T ∈ im`)
+— all matching base-level ground truth; `dim ker = 0` ⟹ unique twist. **★ STEP REMOVED (D-M2 finding):** the
+canonical base order is **free from `WarmPartition`'s iso-invariant cell-ids** — the fine colouring makes the rigid
+residue's base WL-discrete *at the cell level* (each segment its own 2-cell, each gadget its own cell), so there is
+**no base-canonization pass inside option 2** (D-M0 used a brute IR-lite; the real machinery does not need it). This
+realises scope (b) directly; see the D5 note. **D-M3** pre-processor integration → canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant).
 **D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed). **D-M5** fallback/flag
 + full cross-check battery. **D-M6** Lean: L1, then (later) L2.
