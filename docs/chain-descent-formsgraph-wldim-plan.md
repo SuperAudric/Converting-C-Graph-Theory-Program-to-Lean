@@ -834,11 +834,19 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
   `{1,2}`, `{0,1,2}` for `|S'|=1,2,3`; cf. the m4anal 31-case `m=2` table).
 
 #### Lemma B — the counts recover `u`
-- **B-M1** — *plumbing: abstract antecedent → `{Z̃(S)}` agreement in `V`.* From `IsotropySeparatesAtBase`'s antecedent
-  (fine isotropy counts over `Fin(p^d)`, `σ` over the full function type): fold `T₉`+`u`-slot into one family (deferred
-  from M1), fine→coarse (`coarse_eq_sum_iso`), transport to `V` (`isotropy_count_transport`/`count_transport`),
-  inclusion–exclusion to the `{Z̃(S)}` over the working sub-collection, with the `z≠u` correction. Tools: all landed
-  (M1) + `count_pi_setValued`. *Flavor: Finset/Fintype bookkeeping.*
+- **B-M1 ✅ MOSTLY DONE** (`ChainDescent/ScratchLemmaB.lean`, all axiom-clean): plumbing antecedent → `V`-side
+  incidence agreement.
+  - `coarse_incidence_agree` — the core: from the fine isotropy-count antecedent, the isotropic-incidence count
+    `Z̃_w(S') = #{z≠w : Q(z̄−w̄)=0 ∧ ∀t∈S', Q(z̄−t̄)=0}` agrees (`u`↔`u'`) for `S'⊆T`. **Fiberwise partition by the
+    isotropy profile** — same technique as `separatesAtBase_of_isotropySeparates_weak`; the "isotropic on `S'∪{⋆}`"
+    consistency test is `w`-independent (bundles fine→coarse AND the incl–excl marginalization in one step).
+  - `incidence_to_V` — transport + translate in ONE bijection `z ↦ z̄−w̄`: `Z̃_w(S')` (over `Fin(p^d)`) `= #{y≠0 :
+    Q y=0 ∧ ∀t∈S', Q(y−(t̄−w̄))=0}` over `V`, with config differences `aₜ = t̄−w̄`.
+  - `incidence_agree_V` — capstone: the `V`-side count agrees `u`↔`u'`. This is Lemma A's count **minus the `y=0`
+    term** (the `z≠u` correction), in Lemma-A coordinates.
+  - **Remaining bridge to B-M2** (small, mechanical): add back the `y=0` term to reach Lemma A's full
+    `#{y : Q y=0 ∧ ∀t∈S', Q(y−aₜ)=0}` (the `y=0` correction `[∀t∈S', Q aₜ=0]`), and reindex `S'`(Finset)→Lemma A's
+    `Fin m` argument.
 - **B-M2** — *Gram parametrization + both-nondeg selection.* Express each config's `Z(S)` (via Lemma A) as `f(θ(u))`;
   the config Gram and its nondegeneracy (`det ≠ 0`) are explicit functions of `θ(u)` and the fixed base. Establish the
   both-nondeg separation property of `T₉` (the §10.6 fact, as a finite check). Output: for both-nondeg `S'`,
