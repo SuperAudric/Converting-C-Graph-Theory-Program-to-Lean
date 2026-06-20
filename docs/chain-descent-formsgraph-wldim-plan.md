@@ -11,6 +11,20 @@
 
 ## STATUS (read first)
 
+> **▶▶▶ WITT REMOVED FROM THE CRITICAL PATH (2026-06-20, axiom-clean, full build green).** The capstone's Witt
+> deliverable `OrbitIsIsotropyClass` ("the heaviest piece", Mathlib-absent) is **off the seal's critical path.**
+> Ported into `CascadeAffine.lean §OrthogonalForm` (`PublicTheoremIndex.md:1243-1248`), all axiom-clean: the easy-half
+> predicate `RelationRefinesIsotropy` is **discharged Witt-free outright** (`relationRefinesIsotropy_similitude`, no
+> hypothesis, via similitude-invariance `isoClass_similitude_invariant` + `affineScheme_relOfPair_eq_iff`); the
+> separation bridge `separatesAtBase_of_isotropySeparates_weak` needs only that easy half (fiberwise partition); and
+> the new capstone **`reachesRigidOrCameron_viaIsotropySeparates_wittFree`** seals the `VO^ε` residue carrying ONLY a
+> bounded base + the Gauss target `IsotropySeparatesAtBase Q T`. The hard Witt direction is needed only for the
+> cosmetic rank-3 identification, which the seal (working at any rank) never uses. **CONSEQUENCE: discharging the M3
+> route-1 kernel `QProfileSeparatesAtBase` seals `VO⁻₄(3)` modulo `{G3}` ALONE.** Everywhere below that says "the
+> capstone also needs `OrbitIsIsotropyClass` (Witt, a separate parallel track)" is SUPERSEDED — Witt is no longer the
+> seal's obligation. (The Witt-carrying `reachesRigidOrCameron_viaIsotropySeparates` / `separatesAtBase_of_isotropySeparates`
+> are kept axiom-clean but superseded.) NEXT = the route-1 de-risk probe (§10.3).
+>
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
 > ENTIRE remaining Gauss-work content is ONE open predicate **`QProfileSeparatesAtBase Q T`** (`FormsGraphConcrete.lean`)

@@ -167,6 +167,15 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   (generalize `count2_eq_charsum`; inner = `sum_addChar_multiQuad`) + inclusion-exclusion + injectivity at the broken
   base + bridge + PORT. **B.0 (`viaOrthogonalForm`, isometry `O(Q)`) UNAFFECTED.** Witt (B.1c-i `OrbitIsIsotropyClass`)
   still needed for orbit=isotropy-class. Authoritative: plan doc STATUS (the ⚠/⚠⚠ boxes).
+- **★ WITT REMOVED FROM THE CRITICAL PATH (2026-06-20, axiom-clean, full build green).** `OrbitIsIsotropyClass`
+  (the Mathlib-absent "heaviest piece") is **off the seal's critical path.** New axiom-clean decls in
+  `CascadeAffine.lean §OrthogonalForm` (`PublicTheoremIndex.md:1243-1248`): the easy-half `RelationRefinesIsotropy` is
+  **discharged Witt-free outright** (`relationRefinesIsotropy_similitude`, via similitude-invariance), the bridge
+  `separatesAtBase_of_isotropySeparates_weak` needs only it, and the capstone
+  **`reachesRigidOrCameron_viaIsotropySeparates_wittFree`** seals the `VO^ε` residue carrying ONLY a bounded base + the
+  Gauss target `IsotropySeparatesAtBase Q T` — NO Witt. Witt is needed only for the cosmetic rank-3 identification the
+  seal never uses. **⟹ discharging the route-1 Gauss kernel `QProfileSeparatesAtBase` seals `VO⁻₄(3)` modulo `{G3}`
+  ALONE.** The "capstone also needs `OrbitIsIsotropyClass` (parallel Witt track)" framing below/above is SUPERSEDED.
 - **★★★ CURRENT (2026-06-18 HANDOFF) — reformulation + M0–M3 LANDED; the bullets above are landed history.** The
   reformulation around a symmetry-broken base is DONE (`SeparatesAtBase` / `IsotropySeparatesAtBase` /
   `reachesRigidOrCameron_via{SymmetryBrokenBase,IsotropySeparates}`, the frame-locked predicates ⚠ SUPERSEDED in-source);
