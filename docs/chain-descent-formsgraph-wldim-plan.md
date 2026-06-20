@@ -54,9 +54,11 @@
 > recover Q-profile → `coords_determine`".** See §9 (milestone roadmap) for the full M0–M5 plan.
 > **★ M1 DONE (2026-06-18, axiom-clean): conversion core** (`isotropy_count_transport`, `isoSetOf`/`qSetOf` +
 > `mem_isoSetOf_iff`, `coarse_eq_sum_iso`). **★ M2 DONE (2026-06-18, axiom-clean): Fourier hinge** —
-> `multiCharSum_eq_sum_count` (count-agreement ⟹ `S(r)`-agreement) + `sum_addChar_quadForm_smul_ne_zero` (global value
-> cancels); net: count-agreement ⟹ `ψ(Gram-expr)` agreement. NEXT = **M3** (the injectivity crux: M1-fold → M2 hinge →
-> Gram extraction → `coords_determine`).
+> `multiCharSum_eq_sum_count` + `sum_addChar_quadForm_smul_ne_zero` (note: M3 found `multiCharSum` needs *pointwise*
+> counts, which `isoClass` doesn't give — shell-blind; reusable but off the kernel path). **★ M3 REDUCTION DONE
+> (2026-06-18, axiom-clean): `isotropySeparates_of_qProfileSeparates`** reduces the seal target to one predicate
+> `QProfileSeparatesAtBase` (counts ⟹ Q-profile) via `coords_determine`. **KERNEL `QProfileSeparatesAtBase` OPEN** = the
+> joint `Z(S)`-incidence extraction (the genuine uncited crux; see §9 M3). NEXT = M3-kernel (heavy) **or** M4 carrying it.
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
@@ -581,15 +583,25 @@ the global value `∑_x ψ(R·Q x) ≠ 0` (from `∑_x ψ(Q x) ≠ 0`, carried),
 **count-agreement ⟹ `ψ(Gram-expr_u) = ψ(Gram-expr_{u'})` for all `r`.** The `SeparatingLeft` bridge / explicit `∏χ·Gᵈ`
 form turned out OFF the critical path (`∑ψ(Qx)≠0` + the orthogonal basis are carried, discharged concretely in M4).
 
-### Milestone 3 — the injectivity (THE CRUX), in `FormsGraphConcrete`
-**Refined by M0 + M2.** Chain: (a) **M1-fold** — fold the base `T`+`u` into one family + the single `x=ū` adjustment, so
-fine-count agreement ⟹ pointwise-`Q`-count agreement (∀ value-tuple `c`); (b) **M2** — `multiCharSum_eq_sum_count` ⟹
-`S_u(r)=S_{u'}(r)` ∀r, then `sum_addChar_multiQuad` + `sum_addChar_quadForm_smul_ne_zero` (cancel the nonzero global
-value) ⟹ **`ψ(Gram-expr_u) = ψ(Gram-expr_{u'})` ∀r**; (c) **Gram extraction** — choose `r` (supported on `{⋆=u, one t_j}`)
-so `Gram-expr` isolates `Q(u−t_j)` / `polar Q u t_j`, and `ψ`-injectivity (over `ZMod p`, `p` prime) gives the `Q`-profile
-`(Q(u−t))_{t∈T}` agrees (the extra point `2e₃` is what makes this recover the profile); (d) **landed `coords_determine`**
-(Q-profile over the basis frame + nondegeneracy ⟹ `u`) closes `u=u'`. *Risk: HIGH — (c) the Gram extraction is the genuine
-uncited content; de-risked by M0's injective-Q-profile blueprint (81/81) + M2's clean Fourier hinge + reuse of `coords_determine`.*
+### Milestone 3 — the injectivity (THE CRUX) — REDUCTION DONE, kernel ISOLATED (2026-06-18)
+**Reduction landed (axiom-clean, `FormsGraphConcrete`):** `isotropySeparates_of_qProfileSeparates` reduces
+`IsotropySeparatesAtBase Q T` to the single predicate **`QProfileSeparatesAtBase Q T`** ("counts recover the
+`Q`-profile over the basis frame"), via the landed `coords_determine` (Q-profile + nondeg ⟹ vector) + `affineE.symm`
+injective. So the entire remaining Gauss-work content is that one predicate, probe-validated at the corrected base.
+
+**⚠ KERNEL `QProfileSeparatesAtBase` NOT RESOLVED — the genuine uncited content; the exact gap (probe-pinned, M3
+probe `/tmp/m3probe.py`):** the counts see only the `Q`-zero pattern — **`isoClass` is shell-blind**: `Q(ū−t)=1` and
+`=2` give *identical* pairwise common-isotropic counts (`Z({u,t})=6` for both). So the recovery is irreducibly the
+**joint** incidence content `Z(S) = #{x : Q(x−t)=0 ∀t∈S}` over all sub-frames `S` (these DO determine `u`, 81/81),
+NOT a pointwise `Q`-count. **Correction to the M2 plan:** the `multiCharSum` Fourier hinge assumed *pointwise* counts,
+which `isoClass` does not provide — so it does not directly discharge the kernel. The right machinery is still the
+multiQuad toolkit, but assembled as **coarse-count ⟹ `Z(S)` agreement (inclusion–exclusion) → `Z(S) = ∑_{s:S→K} S(s)`
+(a sum of `multiQuad`s) → joint extraction ⟹ Q-profile.** That joint extraction is the open kernel.
+
+**Resolution paths (for `QProfileSeparatesAtBase`):** (1) the full Gauss/incidence computation of `Z(S)` over the
+sub-frames + injectivity (heavy, multi-session, the honest discharge); (2) **carry it as a probe-validated certificate**
+in M4 (pragmatic — a real conditional `VO^-_4(3)` capstone now, like Stage A's `hFormCert`); (3) a structural
+intersection-number argument (speculative). *Risk: HIGH (unchanged — the kernel is the crux).*
 
 ### Milestone 4 — the concrete `VO^-_4(3)` instance + capstone, in `FormsGraphConcrete`
 `Q = x₀x₁+x₂²+x₃²` over `ZMod 3` + polar-nondegeneracy; the concrete base `T = frameBase ∪ {2e₃}` (size 6, M0.3) +

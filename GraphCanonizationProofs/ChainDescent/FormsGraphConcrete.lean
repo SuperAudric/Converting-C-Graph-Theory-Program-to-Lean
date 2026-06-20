@@ -133,4 +133,49 @@ theorem coarse_eq_sum_iso (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
     intro x _
     exact forall_congr' (fun j => (mem_isoSetOf_iff Q (x - t j) (τ j)).symm)
 
+/-! ### Milestone 3 — the injectivity crux: reduce to "counts recover the Q-profile"
+
+M0/M3 probes (`/tmp/m0probe.py`, `/tmp/m3probe.py`) establish, for `VO^-_4(3)` at `T = frameBase ∪ {2e₃}`:
+* coarse-count agreement ⟹ `Q`-profile `(Q(ū−t))_{t∈frame}` agreement (**81/81, no counterexamples**);
+* so `IsotropySeparatesAtBase` reduces, via the **landed `coords_determine`** (Q-profile + nondegeneracy ⟹ vector),
+  to the predicate "counts recover the Q-profile" — the corrected, base-`T` version of the superseded
+  `IsotropyCountsRecoverFrameQ` (which was false at the *symmetric* frame).
+
+**The hard kernel (`QProfileSeparatesAtBase`) is NOT resolved here** — it is the genuine uncited content. The exact
+gap (probe-pinned): the counts see only the `Q`-zero pattern (`isoClass` is shell-blind — `Q(ū−t)=1` and `=2` give
+*identical* common-isotropic counts pairwise), so the recovery is irreducibly the **joint** incidence content
+`Z(S) = #{x : Q(x−t)=0 ∀t∈S}` over all sub-frames `S` (which DO determine `u`, 81/81), not a pointwise `Q`-count.
+Hence the M2 `multiCharSum` hinge (pointwise) does not directly discharge it; the joint `Z(S)` extraction is the
+remaining work. This block lands the reduction and isolates the kernel as one named, probe-validated predicate. -/
+
+open scoped Classical in
+/-- **The M3 crux predicate — "counts recover the Q-profile" at a base `T` (the corrected `IsotropyCountsRecoverFrameQ`).**
+Agreeing fine isotropy-counts at `T` ⟹ the same `Q`-value profile over the standard basis frame (`Q ū = Q ū'` and
+`Q(ū − eᵢ) = Q(ū' − eᵢ)` ∀ basis `eᵢ`). Unlike the superseded frame-locked predicate, this is at an arbitrary
+(symmetry-broken) base `T`, where it is **probe-validated** (`VO^-_4(3)`, `T = frameBase ∪ {2e₃}`, 81/81). **OPEN** —
+the genuine uncited joint-incidence content (`Z(S)` over sub-frames). -/
+noncomputable def QProfileSeparatesAtBase (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (T : Finset (Fin (p ^ d))) : Prop :=
+  ∀ u u' : Fin (p ^ d),
+    (∀ (σ : Fin (p ^ d) → Fin 3) (c : Fin 3),
+      (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+        (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = σ t)
+        ∧ isoClass Q (affineE.symm z - affineE.symm u) = c)).card
+      = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u' ∧
+        (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = σ t)
+        ∧ isoClass Q (affineE.symm z - affineE.symm u') = c)).card)
+    → Q (affineE.symm u) = Q (affineE.symm u') ∧
+        ∀ i : Fin d, Q (affineE.symm u - Pi.single i 1) = Q (affineE.symm u' - Pi.single i 1)
+
+/-- **The M3 reduction (resolved part) — `QProfileSeparatesAtBase` ⟹ `IsotropySeparatesAtBase`.** If the counts
+recover the `Q`-profile and the polar form is nondegenerate, then the counts separate vertices: the recovered
+`Q`-profile pins the vector via the landed `coords_determine`, and `affineE.symm` is injective. So the entire
+remaining Gauss-work content for this residue is the single predicate `QProfileSeparatesAtBase Q T`. -/
+theorem isotropySeparates_of_qProfileSeparates (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {T : Finset (Fin (p ^ d))} (hQ : (Q.polarBilin).Nondegenerate)
+    (h : QProfileSeparatesAtBase Q T) : IsotropySeparatesAtBase Q T := by
+  intro u u' hfine
+  obtain ⟨h0, hi⟩ := h u u' hfine
+  exact affineE.symm.injective (coords_determine Q hQ h0 hi)
+
 end ChainDescent
