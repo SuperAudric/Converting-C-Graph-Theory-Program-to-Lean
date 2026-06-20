@@ -167,6 +167,19 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   (generalize `count2_eq_charsum`; inner = `sum_addChar_multiQuad`) + inclusion-exclusion + injectivity at the broken
   base + bridge + PORT. **B.0 (`viaOrthogonalForm`, isometry `O(Q)`) UNAFFECTED.** Witt (B.1c-i `OrbitIsIsotropyClass`)
   still needed for orbit=isotropy-class. Authoritative: plan doc STATUS (the ⚠/⚠⚠ boxes).
+- **★★★ CURRENT (2026-06-18 HANDOFF) — reformulation + M0–M3 LANDED; the bullets above are landed history.** The
+  reformulation around a symmetry-broken base is DONE (`SeparatesAtBase` / `IsotropySeparatesAtBase` /
+  `reachesRigidOrCameron_via{SymmetryBrokenBase,IsotropySeparates}`, the frame-locked predicates ⚠ SUPERSEDED in-source);
+  the Gauss toolkit is PORTED to a real module **`ChainDescent/GaussCount.lean`** (18+ axiom-clean lemmas); the consumer
+  **`ChainDescent/FormsGraphConcrete.lean`** has the M0–M3 chain (transport, fine→coarse conversion, the M3 reduction).
+  **The ENTIRE remaining Gauss-work content is now ONE open predicate `QProfileSeparatesAtBase Q T`** (counts at
+  `T = frameBase∪{2e₃}` recover the `Q`-profile; probe-validated `VO^-_4(3)` 81/81, UNPROVED). `isotropySeparates_of_qProfileSeparates`
+  + `coords_determine` reduce the seal to it; M4 is wiring but **blocked** on it. **Two viable discharge routes fully
+  expanded in [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §10:** (1) explicit
+  Gauss/incidence `Z(S)` computation (Witt-free, recommended; open step = a char-sum inversion), (3) structural perp-graph
+  + Witt frame-rigidity (blocks on building Witt). Carrying the predicate as a certificate is RULED OUT (quality bar). Key
+  constraint: `isoClass` is shell-blind ⟹ pointwise-count machinery off-path; recovery is the joint `Z(S)`. **Authoritative:
+  plan §9 (milestones) + §10 (handoff).**
 
 ### 3b. Buildable non-research infrastructure — `EdgeGeneratesFromSet`
 The **checkable multi-base isolation closure** — the relation-count analogue of `dominatorReachable_of_rainbowRank`:

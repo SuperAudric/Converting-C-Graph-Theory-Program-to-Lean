@@ -11,6 +11,19 @@
 
 ## STATUS (read first)
 
+> **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
+> landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
+> ENTIRE remaining Gauss-work content is ONE open predicate **`QProfileSeparatesAtBase Q T`** (`FormsGraphConcrete.lean`)
+> = "fine isotropy-counts at the symmetry-broken base `T = frameBase∪{2e₃}` recover the `Q`-profile." It is
+> **probe-validated (`VO^-_4(3)`, 81/81) but UNPROVED** — the genuine uncited crux. `isotropySeparates_of_qProfileSeparates`
+> + `coords_determine` reduce the seal to it; M4 is then pure wiring but **BLOCKED** on it (carrying it as a certificate
+> is RULED OUT by the quality bar). **The two viable routes to discharge it are fully expanded in §10:** **(1)** explicit
+> Gauss/incidence computation of the joint isotropic counts `Z(S)` (Witt-free, all toolkit present, RECOMMENDED) — the
+> open step is a concrete character-sum inversion (§10.1 step 4); **(3)** structural perp-graph + Witt frame-rigidity
+> (cleaner but blocks on building Witt). Key constraint (M3): `isoClass` is **shell-blind**, so the pointwise-count
+> machinery (M2 `multiCharSum`) is off-path — the recovery is the joint `Z(S)`. Witt `OrbitIsIsotropyClass` (B.1c-i) is a
+> separate parallel track the capstone also needs.
+>
 > **★ REFORMULATION LANDED (2026-06-18, axiom-clean, build green) — the frame-locked predicates are SUPERSEDED;
 > the live target is now count-injectivity at a SYMMETRY-BROKEN base.** New block in **`CascadeAffine.lean`
 > §OrthogonalForm** ("Stage B.1c (CORRECTED)"), all three decls `[propext, Classical.choice, Quot.sound]`:
@@ -547,9 +560,11 @@ the full Gauss toolkit (`GaussCount.lean`, 18 lemmas: count layer A/A2/Aₖ/`cou
 Gauss, `card_quadForm_eq`, `multiQuad`/`multiQuad_zero`/`linearMap`); the isotropy dictionary (`isoClass_eq_*`); the
 consumer bridges (`count_transport`, `qvalue_count_transport`).
 
-**Pipeline still to build:**
-`isoClass counts —[M1 dictionary+origin]→ Q-value-set counts —[qvalue_count_transport ✓]→ pointwise Q-counts
-—[M2 Gauss closed form]→ explicit f(Gram of T∪{u}) —[M3 injectivity]→ u=u'  ⟹  IsotropySeparatesAtBase  —[M4]→ sealed VO^-_4(3).`
+**Pipeline (corrected after M3's shell-blind finding — see §9 M3 / §10):**
+`fine isotropy counts —[M1 ✓]→ coarse Q-zero-pattern counts —[1.2 incl–excl]→ joint isotropic counts Z(S)
+—[1.3 = ∑ multiQuad]→ char-sums in the Gram —[1.4 EXTRACTION = the open kernel]→ Q-profile —[coords_determine ✓ M3]→ u=u'.`
+(The earlier "→ pointwise Q-counts → M2 Fourier hinge" leg is a DEAD END: `isoClass` is shell-blind, so the counts never
+give pointwise `Q=1` vs `Q=2`; `multiCharSum`/M2 are valid lemmas but off this path. See §10.)
 
 ### Milestone 0 — probe & blueprint ✅ DONE (2026-06-18, `/tmp/m0probe.py` over `VO^-_4(3)`)
 **Findings (these refine M1 and M3 below):**
@@ -598,20 +613,123 @@ which `isoClass` does not provide — so it does not directly discharge the kern
 multiQuad toolkit, but assembled as **coarse-count ⟹ `Z(S)` agreement (inclusion–exclusion) → `Z(S) = ∑_{s:S→K} S(s)`
 (a sum of `multiQuad`s) → joint extraction ⟹ Q-profile.** That joint extraction is the open kernel.
 
-**Resolution paths (for `QProfileSeparatesAtBase`):** (1) the full Gauss/incidence computation of `Z(S)` over the
-sub-frames + injectivity (heavy, multi-session, the honest discharge); (2) **carry it as a probe-validated certificate**
-in M4 (pragmatic — a real conditional `VO^-_4(3)` capstone now, like Stage A's `hFormCert`); (3) a structural
-intersection-number argument (speculative). *Risk: HIGH (unchanged — the kernel is the crux).*
+**Resolution paths (for `QProfileSeparatesAtBase`) — only two are viable; full detail in §10.**
+**(1) the explicit Gauss/incidence computation** of `Z(S)` over the sub-frames + injectivity (= §3 Route A; Witt-free
+for the kernel; all toolkit present; recommended). **(3) the structural perp-graph + Witt frame-rigidity argument**
+(= §3 Route B; cleaner but blocks on building Witt in Mathlib). **Option (2) — carrying it as a probe-validated
+certificate — is RULED OUT by the project quality bar:** an empirical, uncited predicate is not a citable hypothesis, so
+it cannot stand as the deliverable (it would merely relabel the open content). *Risk: HIGH (the kernel is the crux).*
 
-### Milestone 4 — the concrete `VO^-_4(3)` instance + capstone, in `FormsGraphConcrete`
-`Q = x₀x₁+x₂²+x₃²` over `ZMod 3` + polar-nondegeneracy; the concrete base `T = frameBase ∪ {2e₃}` (size 6, M0.3) +
-`IsBase` (or `exists_greedy_base_le_log`); instantiate M3; feed `reachesRigidOrCameron_viaIsotropySeparates` ⟹ a concrete sealed
-`VO^-_4(3)` *modulo {Witt `OrbitIsIsotropyClass`, G3}*. **This is the headline Gauss-work result.** *Risk: low (wiring).*
+### Milestone 4 — the concrete `VO^-_4(3)` instance + capstone, in `FormsGraphConcrete` — **BLOCKED on the M3 kernel**
+The wiring (low-risk): `Q = x₀x₁+x₂²+x₃²` over `ZMod 3` + polar-nondegeneracy; the concrete base `T = frameBase ∪ {2e₃}`
+(size 6, M0.3) + `IsBase` (or `exists_greedy_base_le_log`); instantiate `isotropySeparates_of_qProfileSeparates` (M3) to
+get `IsotropySeparatesAtBase`; feed `reachesRigidOrCameron_viaIsotropySeparates` ⟹ a concrete sealed `VO^-_4(3)`
+*modulo {Witt `OrbitIsIsotropyClass`, G3}*. **But this requires `QProfileSeparatesAtBase Q T` as a real (proved) input —
+which is the open M3 kernel (§10).** Since Option (2) (carry it) is ruled out, **M4 cannot complete until the kernel is
+discharged** (or until Route 3 supplies the discreteness another way). M4 is otherwise just wiring once the kernel lands.
 
 ### Milestone 5 — generalization (follow-on, post-Gauss-work)
 General `q` (char ≠ 2) then general `d`; then classes (d) alternating / (e) half-spin (reuse skeleton, symplectic/spinor
 `B`); char-2 (`q=2,4`) and Suzuki (f) are separate arguments. The Witt track (`OrbitIsIsotropyClass`, B.1c-i) runs in
 parallel and is required for a fully-sealed-modulo-citations instance.
+
+---
+
+## 10. HANDOFF — discharging the M3 kernel `QProfileSeparatesAtBase` (the two viable routes)
+
+> **Read this first if you are picking up the Gauss work.** Everything else (M0–M2, the M3 reduction, M4 wiring) is
+> built and axiom-clean; the *entire* remaining Gauss-work content is the one predicate **`QProfileSeparatesAtBase Q T`**
+> (`FormsGraphConcrete.lean`). This section is the concrete plan for the only two viable routes. They map exactly onto
+> this doc's older §3 Routes A/B, now sharpened by the M3 findings.
+
+### 10.0 What the kernel is, precisely
+For `Q = x₀x₁+x₂²+x₃²` over `ZMod 3` and `T = frameBase ∪ {2e₃}` (size 6): prove **fine isotropy-count agreement at
+`T` ⟹ `Q`-profile agreement** (`Q ū = Q ū'` and `Q(ū−eᵢ)=Q(ū'−eᵢ)` ∀ basis `eᵢ`). Then `isotropySeparates_of_qProfileSeparates`
+(landed) + `coords_determine` (landed) finish `IsotropySeparatesAtBase`, and the capstone seals (modulo Witt + G3).
+
+**The M3 structural facts that constrain any route (probe-pinned, reproducible — §10.3):**
+- The counts see ONLY the `Q`-zero pattern (`isoClass` is **shell-blind**: `Q(ū−t)=1` and `=2` give *identical*
+  pairwise common-isotropic counts). So no route can read `Q(ū−t)` off a *single* base point, and the pointwise-`Q`-count
+  machinery (`multiCharSum`, M2) is OFF-PATH.
+- The recovery is irreducibly the **joint isotropic-incidence counts** `Z(S) := #{x : Q(x−t)=0 ∀t∈S}` over sub-frames
+  `S ⊆ T∪{u}`. The full collection `{Z(S)}` DOES determine `u` (81/81). The work is computing and inverting them.
+
+### 10.1 Route 1 (= §3 Route A) — explicit Gauss/incidence computation. **RECOMMENDED** (Witt-free for the kernel).
+Build, in order (all tools are landed unless flagged):
+1. **The fold** (deferred from M1). Express the `IsotropySeparatesAtBase` count over `T∪{u}` (with `z≠u`) as a
+   `count_pi_setValued` instance: fold `T` (a `Finset`) + the `u`-slot into one `Fintype` index `ι = ↥T ⊕ {⋆}`, with
+   the single `x=ū` correction (one point). Output: fine-count agreement ⟹ **coarse `Q`-zero-pattern count agreement**.
+   *Tools:* `coarse_eq_sum_iso`, `isotropy_count_transport`, `count_pi_setValued`. *Effort: moderate (Finset/Fintype
+   bookkeeping + the `x=ū` term).*
+2. **Coarse ⟹ `Z(S)`.** The coarse joint distribution determines the marginals `Z(S)` (sum over the off-`S` pattern
+   bits — Möbius/inclusion–exclusion over the subset lattice; `x=u` correction is deterministic). *Effort: moderate,
+   pure combinatorics.*
+3. **`Z(S)` closed form.** `Z_u(S)·q^{|S|} = ∑_{s:S→K} S(s)` where `S(s)=∑_x ψ(∑_{t∈S} s_t·Q(x−t))`, split on
+   `R=∑_t s_t`: `R≠0 →` `sum_addChar_multiQuad` (`S(s)=ψ(Gram-expr(s))·∑_x ψ(R·Qx)`); `R=0 →`
+   `sum_addChar_multiQuad_zero` + `sum_addChar_linearMap`. Yields `Z_u(S)` as a character sum in the Gram entries
+   `{Q(t), polar Q t t' : t,t'∈S}` — which, for `S∋⋆`, include `Q(u)` and `polar Q u t` (`t∈S∩T`). *Tools: all landed.
+   Effort: moderate–heavy (the `s:S→K` sum + the global value `∑_x ψ(R·Qx)`, see §10.2).*
+4. **The extraction / injectivity — THE OPEN STEP.** Show `{Z_u(S)}_S` determines the `Q`-profile, i.e. the map
+   (Gram row of `u`) ↦ `{Z_u(S)}` is injective at the symmetry-broken base. The probe guarantees it holds (81/81); the
+   proof is a multi-variable character-sum inversion. *This is the genuine uncited content.* Likely sub-steps: pick a
+   concrete `R'`+`ψ` (§10.2), evaluate `∑_x ψ(R·Qx)` via the orthogonal basis, then a separating computation. **De-risk
+   FIRST (Python, §10.3): find the minimal sufficient sub-collection of `S` (do `|S|≤3` suffice? which `S` actually move
+   with the Gram row?), and validate the `Z_u(S)` closed form symbolically before formalizing.**
+
+### 10.2 Route 1 prerequisites (also needed by M4; build regardless)
+- **A concrete character target ring `R'` + primitive `ψ`.** Need `R'` a domain with a primitive additive character
+  `ψ : ZMod 3 → R'` (`ψ.IsPrimitive`). Candidates: `ℂ`, or the cyclotomic `ℤ[ζ₃]`/`ℚ(ζ₃)`. Mathlib `AddChar`/`ZMod`
+  primitivity lemmas exist; pick the one with the easiest `IsPrimitive` + nonzero Gauss value.
+- **The orthogonal basis for `Q = x₀x₁+x₂²+x₃²`** (for the diagonalization lemmas `sum_quadForm_eval` /
+  `sum_addChar_quadForm_smul`). `x₀x₁` is hyperbolic — complete the square: e.g. `v₀=(1,1,0,0)` (`Q=1`), `v₁=(1,2,0,0)`
+  (`Q=1·2=2≠0`), `v₂=e₂` (`Q=1`), `v₃=e₃` (`Q=1`); CHECK `IsOrthoᵢ` (pairwise `polar=0`) and `Q(vᵢ)≠0`. (Polar:
+  `B(x,y)=x₀y₁+y₀x₁+2x₂y₂+2x₃y₃`.)
+- **`∑_x ψ(Q x) ≠ 0`** (the cancellable global value). Over `ℂ`, `|gaussSum|²=q` so it is nonzero; needs the Mathlib
+  gaussSum magnitude (`gaussSum_mul_gaussSum…`) or a direct evaluation via `sum_quadForm_eval` (`= (∏χ(vᵢ))·Gᵈ`, `G≠0`).
+- **Polar-nondegeneracy of `Q`** (for `coords_determine` in the landed reduction): `B` above is nondegenerate over `F₃`
+  — easy (`Q.polarBilin.Nondegenerate`).
+
+### 10.3 The probes — reproduction spec (the `/tmp/*.py` are ephemeral; rebuild from this)
+`V = F₃⁴` (81 pts); `Q(x)=x₀x₁+x₂²+x₃² mod 3`; `iso(w)=0 if w=0 else 1 if Q(w)=0 else 2`; `coarse(w)=0 if Q(w)=0 else 1`.
+Bases: `frameBase={0,e₀,e₁,e₂,e₃}` (size 5), `T=frameBase∪{(0,0,0,2)}` (size 6). Count-signature of `u` = the multiset
+over `z≠u` of `((cls(z−t))_{t∈T}, cls(z−u))`. Key reproducible findings: (i) frameBase signature has a twin
+`(0,0,1,2)~(0,0,2,1)` (both fine & coarse); (ii) at `T`, coarse-signature is injective (81/81) AND coarse-agreement ⟹
+`(Q(u−t))_{t∈frame}` agreement (no counterexample); (iii) pairwise `Z({u,t})=6` for both `Q(u−t)∈{1,2}` (shell-blind),
+but `{Z(S)}` over all `S⊆T∪{u}` is injective in `u` (81/81). **For Route 1.4, the next probe to write:** the minimal
+sub-collection of `S` whose `{Z_u(S)}` is already injective, and the symbolic `Z_u(S)`-vs-Gram table.
+
+### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
+Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity
+(perp) graph (`x~y ⟺ B(x,y)=0` for isotropic `x,y`); a hyperbolic frame (apartment) then discretizes the isotropic
+skeleton *directly* via the perp-pattern, and the anisotropic shell is pinned by adjacency to it. Steps:
+1. **Witt's transitivity/extension theorem for finite-field quadratic forms** — **ABSENT from Mathlib** (the hyperbolic
+   decomposition + extension-of-isometries; ~Mathlib-contribution size). **This is the SAME build as the B.1c-i Witt
+   track (`OrbitIsIsotropyClass`)** — so Route 3 couples the Gauss work to the Witt track (do them together).
+2. The perp-graph identity `x~y ⟺ B(x,y)=0` on the cone (easy: polarization).
+3. Frame-rigidity: a hyperbolic frame determines each isotropic point by its perp-pattern (uses Witt, step 1).
+4. The non-isotropic shell: pin each anisotropic `w` by its relation to the discrete isotropic skeleton — binary
+   adjacency gives `B(w,xᵢ)` only modulo the unknown `Q(w)`; needs 1–2 extra base points or one round of Route-1 counts.
+
+**Verdict / recommendation.** Both routes converge on the **non-isotropic shell** (the located residual). **Route 1 is
+recommended for the kernel** because it is Witt-free (the isotropic-incidence counts need no Witt) and every toolkit
+lemma is present — the only open piece is the inversion 1.4, which is concrete and probe-de-riskable. **Route 3** is the
+better *mental model* and is the natural choice *only if* the Witt track is being built in parallel anyway (then steps
+3–4 ride on it). Witt is needed regardless for the capstone's `OrbitIsIsotropyClass`, but Route 1 discharges the kernel
+*without* waiting on it.
+
+### 10.5 Module / decl map for a fresh reader
+- **`ChainDescent/GaussCount.lean`** (Mathlib-only leaf) — the Gauss toolkit: `count_eq_charsum`/`count2`/`countk_*`/
+  `count_pi_setValued` (counts), `sum_addChar_*` (1-D/multivariable Gauss), `card_quadForm_eq`, `sum_addChar_multiQuad`/
+  `_zero`/`sum_addChar_linearMap` (multi-point, the Route-1.3 engines), `multiCharSum_eq_sum_count` +
+  `sum_addChar_quadForm_smul_ne_zero` (M2, off-path but reusable).
+- **`ChainDescent/CascadeAffine.lean §OrthogonalForm`** — `isoClass` + dictionary `isoClass_eq_*`; `SeparatesAtBase` /
+  `IsotropySeparatesAtBase` / `reachesRigidOrCameron_via{SymmetryBrokenBase,IsotropySeparates}` (capstones);
+  `separatesAtBase_of_isotropySeparates` (Witt bridge); `coords_determine` (the reduction back-half); the ⚠ SUPERSEDED
+  frame-locked predicates.
+- **`ChainDescent/FormsGraphConcrete.lean`** (imports both) — `count_transport`, `qvalue_count_transport`,
+  `isotropy_count_transport`, `isoSetOf`/`qSetOf`/`mem_isoSetOf_iff`, `coarse_eq_sum_iso` (M1);
+  `QProfileSeparatesAtBase` (**the open kernel**) + `isotropySeparates_of_qProfileSeparates` (M3 reduction). Route 1
+  steps 1–4 + M4 wiring land here.
 
 ---
 
