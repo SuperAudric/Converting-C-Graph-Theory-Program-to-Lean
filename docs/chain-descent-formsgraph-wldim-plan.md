@@ -844,9 +844,13 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
     Q y=0 ∧ ∀t∈S', Q(y−(t̄−w̄))=0}` over `V`, with config differences `aₜ = t̄−w̄`.
   - `incidence_agree_V` — capstone: the `V`-side count agrees `u`↔`u'`. This is Lemma A's count **minus the `y=0`
     term** (the `z≠u` correction), in Lemma-A coordinates.
-  - **Remaining bridge to B-M2** (small, mechanical): add back the `y=0` term to reach Lemma A's full
-    `#{y : Q y=0 ∧ ∀t∈S', Q(y−aₜ)=0}` (the `y=0` correction `[∀t∈S', Q aₜ=0]`), and reindex `S'`(Finset)→Lemma A's
-    `Fin m` argument.
+  - **B-M2 bridge ✅ DONE** (`ScratchLemmaB.lean`, axiom-clean): `cone_count_zero_split` (the `y=0` correction —
+    Lemma A's full count `= ` the `y≠0` restricted count `+ [∀t∈S', Q aₜ=0]`, the Gram-determined indicator) +
+    **`fullcount_agree_modulo_corr`** (capstone) — from the antecedent, the FULL Lemma-A-shaped counts agree modulo
+    the correction: `fullcount_u(S') + corr_{u'} = fullcount_{u'}(S') + corr_u`. Ready to consume Lemma A's
+    `fullcount = f(Gram)` (A-M4) in B-M3.
+  - **Only remaining glue** (truly mechanical, deferred to B-M3 at the Lemma-A application): reindex `S'`(Finset) →
+    Lemma A's `Fin m` argument (`Finset.equivFin` / `reduction_to_levelset_nondeg` instantiated at `m = S'.card`).
 - **B-M2** — *Gram parametrization + both-nondeg selection.* Express each config's `Z(S)` (via Lemma A) as `f(θ(u))`;
   the config Gram and its nondegeneracy (`det ≠ 0`) are explicit functions of `θ(u)` and the fixed base. Establish the
   both-nondeg separation property of `T₉` (the §10.6 fact, as a finite check). Output: for both-nondeg `S'`,

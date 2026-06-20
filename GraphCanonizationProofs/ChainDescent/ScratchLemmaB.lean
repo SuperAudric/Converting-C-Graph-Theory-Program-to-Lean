@@ -154,8 +154,74 @@ theorem incidence_agree_V (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
   rw [← incidence_to_V Q u S', ← incidence_to_V Q u' S']
   exact coarse_incidence_agree Q T u u' hfine hS
 
+open scoped Classical in
+/-- **B-M2 bridge — the `y=0` correction.** Lemma A's full cone-count equals B-M1's `y≠0` (restricted) count plus
+the `y=0` term, which is present iff all config differences `aₜ = t̄−w̄` are isotropic (`∀ t∈S', Q aₜ = 0`) — a
+Gram-determined indicator. Connects `incidence_agree_V` (restricted) to the full count Lemma A evaluates. -/
+theorem cone_count_zero_split (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (S' : Finset (Fin (p ^ d))) (w : Fin (p ^ d)) :
+    (Finset.univ.filter (fun y : Fin d → ZMod p =>
+        Q y = 0 ∧ ∀ t ∈ S', Q (y - (affineE.symm t - affineE.symm w)) = 0)).card
+      = (Finset.univ.filter (fun y : Fin d → ZMod p =>
+        y ≠ 0 ∧ Q y = 0 ∧ ∀ t ∈ S', Q (y - (affineE.symm t - affineE.symm w)) = 0)).card
+        + (if ∀ t ∈ S', Q (affineE.symm t - affineE.symm w) = 0 then 1 else 0) := by
+  classical
+  have hP0 : (Q (0 : Fin d → ZMod p) = 0
+        ∧ ∀ t ∈ S', Q ((0 : Fin d → ZMod p) - (affineE.symm t - affineE.symm w)) = 0)
+      ↔ ∀ t ∈ S', Q (affineE.symm t - affineE.symm w) = 0 := by
+    constructor
+    · intro h t ht; have := h.2 t ht; rwa [zero_sub, QuadraticMap.map_neg] at this
+    · exact fun h => ⟨by simp, fun t ht => by rw [zero_sub, QuadraticMap.map_neg]; exact h t ht⟩
+  by_cases h0 : ∀ t ∈ S', Q (affineE.symm t - affineE.symm w) = 0
+  · rw [if_pos h0]
+    have hmem : (0 : Fin d → ZMod p) ∈ Finset.univ.filter (fun y : Fin d → ZMod p =>
+        Q y = 0 ∧ ∀ t ∈ S', Q (y - (affineE.symm t - affineE.symm w)) = 0) := by
+      rw [Finset.mem_filter]; exact ⟨Finset.mem_univ _, hP0.mpr h0⟩
+    have heq : (Finset.univ.filter (fun y : Fin d → ZMod p =>
+          Q y = 0 ∧ ∀ t ∈ S', Q (y - (affineE.symm t - affineE.symm w)) = 0)).erase 0
+        = Finset.univ.filter (fun y : Fin d → ZMod p =>
+          y ≠ 0 ∧ Q y = 0 ∧ ∀ t ∈ S', Q (y - (affineE.symm t - affineE.symm w)) = 0) := by
+      ext y; simp only [Finset.mem_erase, Finset.mem_filter, Finset.mem_univ, true_and]
+    rw [← heq, Finset.card_erase_add_one hmem]
+  · rw [if_neg h0, add_zero]
+    congr 1
+    ext y
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    refine ⟨fun hy => ⟨?_, hy⟩, fun hy => hy.2⟩
+    rintro rfl
+    exact h0 (hP0.mp hy)
+
+open scoped Classical in
+/-- **B-M2 bridge capstone — the FULL Lemma-A-shaped counts agree modulo the Gram-determined `y=0` correction.**
+From the fine isotropy-count antecedent: `fullcount_u(S') + corr_{u'} = fullcount_{u'}(S') + corr_u`, where
+`fullcount_w(S') = #{y : Q y=0 ∧ ∀t∈S', Q(y−(t̄−w̄))=0}` (Lemma A's count, `aₜ = t̄−w̄`) and `corr_w` is the
+isotropic-differences indicator. Combining `cone_count_zero_split` (full = restricted + corr) with
+`incidence_agree_V` (restricted agree). Ready to consume Lemma A's `fullcount = f(Gram)` (A-M4) in B-M3. -/
+theorem fullcount_agree_modulo_corr (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (T : Finset (Fin (p ^ d))) (u u' : Fin (p ^ d))
+    (hfine : ∀ (σ : Fin (p ^ d) → Fin 3) (c : Fin 3),
+      (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+        (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = σ t)
+        ∧ isoClass Q (affineE.symm z - affineE.symm u) = c)).card
+      = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u' ∧
+        (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = σ t)
+        ∧ isoClass Q (affineE.symm z - affineE.symm u') = c)).card)
+    {S' : Finset (Fin (p ^ d))} (hS : S' ⊆ T) :
+    (Finset.univ.filter (fun y : Fin d → ZMod p =>
+          Q y = 0 ∧ ∀ t ∈ S', Q (y - (affineE.symm t - affineE.symm u)) = 0)).card
+        + (if ∀ t ∈ S', Q (affineE.symm t - affineE.symm u') = 0 then 1 else 0)
+      = (Finset.univ.filter (fun y : Fin d → ZMod p =>
+          Q y = 0 ∧ ∀ t ∈ S', Q (y - (affineE.symm t - affineE.symm u')) = 0)).card
+        + (if ∀ t ∈ S', Q (affineE.symm t - affineE.symm u) = 0 then 1 else 0) := by
+  have hu := cone_count_zero_split Q S' u
+  have hu' := cone_count_zero_split Q S' u'
+  have hres := incidence_agree_V Q T u u' hfine hS
+  omega
+
 end ChainDescent
 
 #print axioms ChainDescent.coarse_incidence_agree
 #print axioms ChainDescent.incidence_to_V
 #print axioms ChainDescent.incidence_agree_V
+#print axioms ChainDescent.cone_count_zero_split
+#print axioms ChainDescent.fullcount_agree_modulo_corr
