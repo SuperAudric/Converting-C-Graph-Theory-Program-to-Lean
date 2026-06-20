@@ -683,12 +683,13 @@ Build, in order (all tools are landed unless flagged):
    `sum_addChar_multiQuad_zero` + `sum_addChar_linearMap`. Yields `Z_u(S)` as a character sum in the Gram entries
    `{Q(t), polar Q t t' : t,t'∈S}` — which, for `S∋⋆`, include `Q(u)` and `polar Q u t` (`t∈S∩T`). *Tools: all landed.
    Effort: moderate–heavy (the `s:S→K` sum + the global value `∑_x ψ(R·Qx)`, see §10.2).*
-4. **The extraction / injectivity — THE OPEN STEP.** Show `{Z_u(S)}_S` determines the `Q`-profile, i.e. the map
-   (Gram row of `u`) ↦ `{Z_u(S)}` is injective at the symmetry-broken base. The probe guarantees it holds (81/81); the
-   proof is a multi-variable character-sum inversion. *This is the genuine uncited content.* Likely sub-steps: pick a
-   concrete `R'`+`ψ` (§10.2), evaluate `∑_x ψ(R·Qx)` via the orthogonal basis, then a separating computation. **De-risk
-   FIRST (Python, §10.3): find the minimal sufficient sub-collection of `S` (do `|S|≤3` suffice? which `S` actually move
-   with the Gram row?), and validate the `Z_u(S)` closed form symbolically before formalizing.**
+4. **The extraction / injectivity — THE OPEN STEP.** Show `{Z̃_u(S)}_S` determines the `Q`-profile (note: `Z̃` over
+   `z≠u`, not raw `Z` — see §10.3(A)). **De-risk DONE (2026-06-20, §10.3):** the inversion holds (81/81) but is genuine
+   joint affine-quadric intersection-number injectivity — **no closed-form / linear / single-partner shortcut**, and
+   **size-3 incidences are structurally required** (pairwise is always shell-blind). The one structural aid: it
+   **factors per-coordinate** — `Q(u−e_i)` is determined by the disjoint triple-count vector through `e_i` (§10.3(F)).
+   The closed form and the `polar`-substitution are validated (§10.3(C/D)). *This is the genuine uncited content — a
+   substantial analytic effort, not a mechanical inversion.* `decide`/`native_decide` are out (§10.3).
 
 ### 10.2 Route 1 prerequisites (also needed by M4; build regardless)
 - **A concrete character target ring `R'` + primitive `ψ`.** Need `R'` a domain with a primitive additive character
@@ -709,8 +710,91 @@ Bases: `frameBase={0,e₀,e₁,e₂,e₃}` (size 5), `T=frameBase∪{(0,0,0,2)}`
 over `z≠u` of `((cls(z−t))_{t∈T}, cls(z−u))`. Key reproducible findings: (i) frameBase signature has a twin
 `(0,0,1,2)~(0,0,2,1)` (both fine & coarse); (ii) at `T`, coarse-signature is injective (81/81) AND coarse-agreement ⟹
 `(Q(u−t))_{t∈frame}` agreement (no counterexample); (iii) pairwise `Z({u,t})=6` for both `Q(u−t)∈{1,2}` (shell-blind),
-but `{Z(S)}` over all `S⊆T∪{u}` is injective in `u` (81/81). **For Route 1.4, the next probe to write:** the minimal
-sub-collection of `S` whose `{Z_u(S)}` is already injective, and the symbolic `Z_u(S)`-vs-Gram table.
+but `{Z(S)}` over all `S⊆T∪{u}` is injective in `u` (81/81).
+
+**★ ROUTE-1.4 DE-RISK DONE (2026-06-20, `/tmp/m4probe{,2,3}.py`).** Findings that scope the open kernel:
+- **(A) Provable target = `Z̃` over `z≠u`, NOT raw `Z` over all `x`.** `rawZ_u(S) − Z̃_u(S) = [Q(u−t)=0 ∀t∈S′]` = the
+  *shell-blind* iso-bit indicator (the `x=u` term). The count-antecedent controls only `Z̃`; the Gauss closed form
+  computes `rawZ`, so the proof must track the `x=u` correction. `Z̃` (z≠u) is injective in `u` (81/81).
+- **(B) Size-3 incidences are STRUCTURALLY required.** `{Z̃_u(S):|S′|≤2}` is NOT injective; `{|S′|≤3}` IS (42 sets;
+  greedy minimal = **10 sets, max `|S′|=3`**). Pairwise is *always* shell-blind (similitude fuses the shells of a
+  single difference), independent of base — a genuine lower bound. So the proof needs the **4-point joint incidences**
+  (`u`-slot + 3 base points).
+- **(C/D) The closed form + Gram substitution are VALIDATED numerically.** `Z_u(S)·q^{|S|} = ∑_{r:S→F₃} ∑_y ψ(∑_b r_b
+  Q(y−b))` (the `countk`/multiQuad form) matches `rawZ`; and `Z_u(S) = #{y : Q(y)=0 ∧ ∀t∈S′, polar(y,u−t)=−Q(u−t)}`
+  (the `y=z−u` substitution) matches. The Gauss toolkit computes the right object.
+- **(F) ★ The recovery FACTORS per-coordinate (the key structural aid).** `Q(u−e_i)` is determined by the vector of
+  triple-counts *through* `e_i`, `{Z̃_u({e_i,t′,⋆}) : t′∈T}`: shells `1` and `2` give **disjoint** value-vectors
+  (0 cross-shell collision). So an eventual proof can recover each frame coordinate separately, then `coords_determine`.
+- **(G/H) BUT no clean scalar shortcut.** No linear functional (e.g. `∑_{t′} Z̃`), and no *single* partner `t′`,
+  separates shell 1 from shell 2 — both are shell-blind or overlap. Recovery needs the full disjoint *vector*. Also the
+  triple count is *not quite* a function of `(Q(a),Q(b),polar(a,b))` alone (degenerate-config exceptions). **⟹ the
+  inversion 1.4 is genuine joint affine-quadric intersection-number injectivity — no closed-form/linear collapse.**
+- **Decide/`native_decide` are OUT:** the antecedent quantifies `σ` over the full function type `Fin(p^d)→Fin 3`
+  (reformulating to `T`-profiles still ≈10⁹ ops; `native_decide` banned). The proof must be analytic.
+
+**Net:** route 1 is viable and the toolkit fits, but **step 1.4 is the deep research core, not a mechanical inversion**
+— budget a substantial analytic effort. The handles for it: the per-coordinate factoring (F) + the validated closed
+form (C/D) + the `z≠u` correction (A) + the size-3 lower bound (B). The clean architecture is §10.6.
+
+### 10.6 Step-4 attack — the Lemma A / Lemma B architecture (2026-06-20, `/tmp/m4{anal,arch,deg,final}.py`). **VIABLE.**
+The step-4 inversion splits into two pieces; the analytic crux is bounded and **Witt-free**.
+
+- **Lemma A (the analytic crux) — the isotropic-incidence count in closed form, on NONDEGENERATE-Gram configs.** For a
+  configuration `{v₀,…,v_m}` whose difference `B`-Gram `(B(v_i−v₀, v_j−v₀))_{i,j}` is **nondegenerate**, the count
+  `N = #{y : Q(y−v_j)=0 ∀j}` is an **explicit function of that Gram** (probe-verified: `count = f(B-Gram)` on all
+  nondegenerate-Gram configs, single-valued; value sets are tiny — `{6}` for `m=1`, `{1,2}` for `m=2`, `{0,1,2}` for
+  `m=3`). **The argument is elementary + Witt-FREE:** translate to `y₀+W` with `W = (span of the differences)^⊥`;
+  nondegenerate Gram ⟹ `V = U ⊥ W` (Mathlib `BilinForm` orthogonal complement / `isCompl`, NO Witt extension); then
+  `N` = an affine-quadric count of `Q|_W` (toolkit **`card_quadForm_eq`**), whose discriminant is `disc Q / disc Gram`
+  by discriminant-multiplicativity over `⊥` (elementary block-determinant, NOT Witt cancellation), and whose value is a
+  quadratic-character / Gauss-sum expression. **Crucial:** the *explicit* route is Witt-free, whereas the abstract
+  "same Gram ⟹ same count via an ambient isometry" route would need **Witt cancellation** (Mathlib-absent) — so Lemma A
+  must be done explicitly, which is exactly what the toolkit supports.
+- **★ The degenerate cases are DROPPED, not handled.** Probe: **the nondegenerate-Gram counts ALONE already determine
+  `u`** (81/81). So Lemma A is only ever needed in the clean nondegenerate regime; affinely-dependent / degenerate-Gram
+  configs are simply excluded from the working collection. This removes the (E)/(deg) wrinkle entirely.
+- **Lemma B (the recovery) — clean.** Given Lemma A (counts ↦ config-Gram data), recover `u`: the nondegenerate-Gram
+  count signature determines the configuration Gram (a finite, explicit `F`-table fact — tiny value sets), and the Gram
+  determines `u` (polar nondegeneracy; probe: `B(u,t)` over `t∈T` determines `u` — clean linear algebra, a mild
+  generalization of the landed `coords_determine`).
+
+**Gaps + tools (all bounded, no fundamental obstruction):**
+1. *Lemma A:* affine-quadric count of `Q|_W` on the nondeg orthogonal complement. Tools: Mathlib orthogonal-complement
+   (`LinearMap.BilinForm.orthogonal`, nondeg ⟹ `isCompl`), toolkit `card_quadForm_eq` / `sum_quadForm_eval` /
+   multiQuad, Gauss-sum magnitude (`gaussSum_sq`). **Sub-gap to check:** a Mathlib lemma for `disc(Q) = disc(Q|_U)·disc(Q|_W)`
+   over an orthogonal decomposition (block-determinant; may need a small bridge lemma). The real analytic effort, but
+   structured, general (reusable across the `VO` families), and Witt-free.
+2. *Lemma B:* the `F`-table (finite, explicit — `decide`-feasible at this size since it is over Gram tuples in `F₃`, not
+   the 81-point cone) + Gram→`u` (generalize `coords_determine` to the polar-coordinate row). Clean.
+3. *Plumbing:* the M1 "fold" + inclusion–exclusion connecting the abstract `IsotropySeparatesAtBase` antecedent to the
+   `{Z̃(S)}` over the nondegenerate-Gram sub-collection (with the `z≠u` correction, §10.3(A)). Moderate.
+
+**Verdict: step 4 is VIABLE** — a substantial but bounded multi-session analytic build (Lemma A is the crux), Witt-free,
+fully toolkit-supported, with the degenerate cases eliminated. No fundamental obstruction was found. Combined with this
+session's Witt removal, discharging Lemma A + B seals `VO⁻₄(3)` modulo `{G3}` alone.
+
+### 10.7 Lemma A — IMPLEMENTATION STARTED (2026-06-20, `ChainDescent/ScratchLemmaA.lean`, all axiom-clean)
+The plan's steps A1–A6 are landing bottom-up (WIP scratch module, `lake env lean`-verified, not yet in the build):
+- **A1 `isoIncidence_eq_linearConds`** ✓ — `Q w = 0 ⟹ (Q (w−a j)=0 ↔ polar Q w (a j) = Q (a j))`, so the count is
+  over affine-linear conditions. (Via `polar_eq_of_sub`.)
+- **A4-core `map_add_of_polar_zero`** ✓ — `polar Q w x = 0 ⟹ Q (w+x) = Q w + Q x` (the homogenizing identity).
+- **A3 `count_coset`** ✓ — given any realizing `w₀`, the count = count over `Uᗮ` of `x` with `Q (w₀+x)=0`
+  (bijection `w ↦ w−w₀`, polar bilinearity).
+- **A4-link `polar_w0_perp`** ✓ — `w₀ = ∑ c k • a k ⟹ polar Q w₀ x = 0` for `x ∈ Uᗮ` (via `polar_sum_right`).
+- **★ A1+A3+A4 combined `reduction_to_levelset`** ✓ — **the count is a HOMOGENEOUS level-set count**
+  `#{x ∈ Uᗮ : Q x = −Q w₀}`, given a spanning solution `w₀ = ∑ c k • a k`. The linear term has vanished; this is the
+  conceptual heart of Lemma A and the exact input shape `card_quadForm_eq` wants.
+
+**Remaining for full Lemma A (the heavier pieces):**
+- **A2/A3-existence:** a spanning `w₀ = ∑ c k • a k` realizing the system exists when the config Gram is nondegenerate
+  (Gram-matrix invertibility ⟹ solve the linear system in `U`). Flavor: finite-dim linear algebra / `Matrix` invertibility.
+- **A5:** apply `card_quadForm_eq` to `Q|_{Uᗮ}` — needs an orthogonal anisotropic basis of the subspace `Uᗮ`
+  (nondegenerate ⟹ exists; the subspace-restriction + basis is the main Mathlib lift).
+- **A6:** express `disc(Q|_{Uᗮ})` and `Q w₀` as functions of the config Gram (discriminant multiplicativity over `⊥`).
+
+No new obstruction surfaced while implementing; the reduction to a homogeneous level-set went through cleanly and
+axiom-clean. The remaining A2/A5/A6 are linear-algebra/basis lifts, not new mathematics.
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity
