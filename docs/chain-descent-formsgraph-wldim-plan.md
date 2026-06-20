@@ -49,10 +49,10 @@
 > where the Gauss point counts live. **★ step (2) value-set part LANDED (2026-06-18,
 > axiom-clean): `qvalue_count_transport`** — chains `count_transport` + `count_pi_setValued` into one bridge:
 > `#{z : ∀j, Q(z̄−t_j)∈A_j} = ∑_{c∈∏A_j} #{x : ∀j, Q(x−t_j)=c_j}`, landing the affine `Q`-value-set count on the
-> pointwise `Q`-counts the Gauss toolkit closes. NEXT: the dictionary application — rewrite the `isoClass`
-> conditions of `IsotropySeparatesAtBase` as these `Q`-value-sets via `isoClass_eq_*`, **with the single-point origin
-> correction** (class `0` vs `1`); then (3) the injectivity argument → prove `IsotropySeparatesAtBase` at the chosen
-> `T` for `VO^ε_4(3)`.
+> pointwise `Q`-counts the Gauss toolkit closes. **★ M0 PROBE DONE (2026-06-18, `/tmp/m0probe.py`): COARSE counts
+> SUFFICE (no origin correction needed) + base `T = frameBase ∪ {2e₃}` (size 6) has injective Q-profile ⟹ M3 = "counts
+> recover Q-profile → `coords_determine`".** See §9 (milestone roadmap) for the full M0–M5 plan. NEXT = **M1** (the
+> conversion: fine→coarse reduction + `qvalue_count_transport`, no origin correction), batched as one milestone.
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
@@ -545,18 +545,28 @@ consumer bridges (`count_transport`, `qvalue_count_transport`).
 `isoClass counts —[M1 dictionary+origin]→ Q-value-set counts —[qvalue_count_transport ✓]→ pointwise Q-counts
 —[M2 Gauss closed form]→ explicit f(Gram of T∪{u}) —[M3 injectivity]→ u=u'  ⟹  IsotropySeparatesAtBase  —[M4]→ sealed VO^-_4(3).`
 
-### Milestone 0 — probe & blueprint (cheap, Python, no Lean; do FIRST)
-A finite probe over `VO^-_4(3)` at the candidate symmetry-broken base: (a) re-confirm **fine**-count injectivity;
-(b) decide whether **coarse** counts (`Q=0` vs `Q≠0`, pure value-set, NO origin correction) already separate — this
-decides if M1 needs the origin correction or collapses to a fine→coarse sum-reduction; (c) extract the EXACT base `T`
-(greedy size-4 vs frame+1 size-6); (d) extract the **recovery blueprint** — which specific counts recover which
-`B(u,t_j)` — so M3 has a concrete target. Output gates M1 and M3.
+### Milestone 0 — probe & blueprint ✅ DONE (2026-06-18, `/tmp/m0probe.py` over `VO^-_4(3)`)
+**Findings (these refine M1 and M3 below):**
+1. **`frameBase` (size 5) FAILS both fine and coarse** — twin `(0,0,1,2)~(0,0,2,1)`. Cause: the `x₂↔x₃` isometry
+   *permutes the frame setwise*, so it is invisible to the count-signature (which is `Stab_setwise(T)`-invariant)
+   even though it IS visible to `u`'s own Q-profile. The fix is a base with trivial setwise stabilizer.
+2. **★ COARSE counts SUFFICE.** At every separating base found, the coarse split (`Q=0` vs `Q≠0`, pure `Q`-value, NO
+   origin correction) separates exactly when fine does. **⟹ M1 drops the origin correction entirely** (work with the
+   coarse/value-set counts; fine-count agreement ⟹ coarse-count agreement by summing).
+3. **Two working bases:** greedy **size-4** `{0, e₃, e₂, (0,1,1,2)}`; **frame+1 size-6** `T = {0,e₀,e₁,e₂,e₃, 2e₃}`
+   (= `frameBase ∪ {2e₃}`). Both coarse-separate.
+4. **★ Blueprint — recommend the size-6 base.** At size-6, `u ↦ (Q(u−t))_{t∈T}` is **injective (81/81)**; at size-4 it
+   is NOT (63/81). So **M3 reduces to: counts recover the Q-profile `(Q(u−t))_{t∈T}` → the landed `coords_determine`
+   gives `u`** (the extra point `2e₃` breaks the frame's setwise symmetry so the *counts* recover the profile). This
+   reuses `coords_determine` inside the `IsotropySeparatesAtBase` proof (not at the capstone, which stays count-based).
 
 ### Milestone 1 — the conversion (isotropy counts → pointwise Q-counts), in `FormsGraphConcrete`
-isoClass→value-set `Finset` rewrites (from `isoClass_eq_*`); **either** (coarse suffices, per M0) the fine→coarse
-count sum-reduction + `qvalue_count_transport`, **or** (fine needed) the single-point **origin-correction**
-inclusion–exclusion (class-0 `z=t` vs class-1). Result: the isotropy joint count = explicit combination of pointwise
-Q-counts. *Risk: low–med (origin correction is fiddly but bounded).*
+**Simplified by M0 (coarse suffices — no origin correction).** Steps: (a) the **fine→coarse reduction** — fine-count
+agreement (the `IsotropySeparatesAtBase` hypothesis) ⟹ coarse-count agreement, since each coarse value-set count is a
+sum of fine counts over the refining `σ`-profiles (`isoClass_ne_two_iff`: `Q=0 ⟺ isoClass∈{0,1}`); (b) the coarse
+count is a pure `Q`-value-set count `#{z : ∀t, Q(z̄−t̄) ∈ A_t}` with `A_t ∈ {{0}, {x|x≠0}}`, fed to the landed
+`qvalue_count_transport` → pointwise `Q`-counts. Result: coarse-count agreement ⟺ agreement of pointwise `Q`-counts.
+*Risk: low.*
 
 ### Milestone 2 — the Gauss closed form (pointwise Q-count → explicit Gram-function), in `GaussCount` + `FormsGraphConcrete`
 Prereq bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` + `Invertible 2`);
@@ -565,14 +575,16 @@ Gauss value `∑_z ψ(R·Qz) = χ(R)^d·(∏χ wᵢ)·Gᵈ`; Brick C-even numeri
 ⟹ pointwise Q-count as an explicit character sum in the Gram entries `B(u,t_j), Q(u)`. *Risk: med (heaviest assembly).*
 
 ### Milestone 3 — the injectivity (THE CRUX), in `FormsGraphConcrete`
-Using M0's blueprint: show the closed-form counts recover `B(u,t_j)` for a spanning set of `t_j` (where the
-symmetry-broken base is essential), then nondegeneracy ⟹ `u`. Conclude `IsotropySeparatesAtBase Q T` for the chosen
-base shape. *Risk: HIGH — the genuine uncited content; could need base tweaks or extra individualizations. De-risked
-by M0.*
+**Refined by M0 (size-6 base, recover-then-`coords_determine`).** Using the M2 closed form: show coarse-count
+agreement ⟹ the `Q`-profile `(Q(u−t))_{t∈T}` agrees (the extra point `2e₃` makes the joint count recover the profile —
+this is where the symmetry-broken base is essential), then the **landed `coords_determine`** (Q-profile over the basis
+frame + nondegeneracy ⟹ `u`) closes `u = u'`. Conclude `IsotropySeparatesAtBase Q T`. The injective-Q-profile blueprint
+(M0.4, 81/81 at size-6) guarantees this route exists. *Risk: HIGH — the recover-the-profile step is the genuine
+uncited content (a joint character-sum inversion); de-risked by M0 + reuse of `coords_determine`.*
 
 ### Milestone 4 — the concrete `VO^-_4(3)` instance + capstone, in `FormsGraphConcrete`
-`Q = x₀x₁+x₂²+x₃²` over `ZMod 3` + polar-nondegeneracy; the concrete symmetry-broken `T` + `IsBase` (or
-`exists_greedy_base_le_log`); instantiate M3; feed `reachesRigidOrCameron_viaIsotropySeparates` ⟹ a concrete sealed
+`Q = x₀x₁+x₂²+x₃²` over `ZMod 3` + polar-nondegeneracy; the concrete base `T = frameBase ∪ {2e₃}` (size 6, M0.3) +
+`IsBase` (or `exists_greedy_base_le_log`); instantiate M3; feed `reachesRigidOrCameron_viaIsotropySeparates` ⟹ a concrete sealed
 `VO^-_4(3)` *modulo {Witt `OrbitIsIsotropyClass`, G3}*. **This is the headline Gauss-work result.** *Risk: low (wiring).*
 
 ### Milestone 5 — generalization (follow-on, post-Gauss-work)
