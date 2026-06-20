@@ -751,9 +751,15 @@ The step-4 inversion splits into two pieces; the analytic crux is bounded and **
   quadratic-character / Gauss-sum expression. **Crucial:** the *explicit* route is Witt-free, whereas the abstract
   "same Gram ⟹ same count via an ambient isometry" route would need **Witt cancellation** (Mathlib-absent) — so Lemma A
   must be done explicitly, which is exactly what the toolkit supports.
-- **★ The degenerate cases are DROPPED, not handled.** Probe: **the nondegenerate-Gram counts ALONE already determine
-  `u`** (81/81). So Lemma A is only ever needed in the clean nondegenerate regime; affinely-dependent / degenerate-Gram
-  configs are simply excluded from the working collection. This removes the (E)/(deg) wrinkle entirely.
+- **★ The degenerate cases are AVOIDED BY BASE CHOICE (refined 2026-06-20, `/tmp/m4{gap,base}.py`).** Caveat to the
+  naive "drop degenerate": with the size-6 base, **290/3240 pairs are separated only by a config that is degenerate for
+  one of the two vertices** — and whether `{u}∪S'` is nondegenerate *depends on `u`*, so the `u`-`u'` comparison can
+  pit a Lemma-A value against an unknown degenerate value. The "nondegenerate-masked signature is injective" fact is
+  true but the mask is `u`-dependent, so it does **not** by itself let the proof drop degenerate configs. **The fix:
+  enlarge the base.** With the **size-9 base** `T₉ = frameBase ∪ {(0,0,0,2), (1,1,1,1), (1,2,1,2), (1,0,1,0)}`, every
+  pair `u ≠ u'` is separated by a config whose Gram is **nondegenerate for BOTH** `u` and `u'` (probe: all 3240 pairs).
+  So with `T₉`, only the clean nondegenerate Lemma A is ever needed — degenerate configs never enter the comparison.
+  (`T₉` is still a bounded base, size `9 ≈ 2d+1`; coarse counts still suffice.)
 - **Lemma B (the recovery) — clean.** Given Lemma A (counts ↦ config-Gram data), recover `u`: the nondegenerate-Gram
   count signature determines the configuration Gram (a finite, explicit `F`-table fact — tiny value sets), and the Gram
   determines `u` (polar nondegeneracy; probe: `B(u,t)` over `t∈T` determines `u` — clean linear algebra, a mild
@@ -795,6 +801,73 @@ The plan's steps A1–A6 are landing bottom-up (WIP scratch module, `lake env le
 
 No new obstruction surfaced while implementing; the reduction to a homogeneous level-set went through cleanly and
 axiom-clean. The remaining A2/A5/A6 are linear-algebra/basis lifts, not new mathematics.
+
+### 10.8 FULL MILESTONE PLAN for step 4 (Lemma A + Lemma B + assembly), beginning to end (2026-06-20)
+The target is `IsotropySeparatesAtBase Q T₉`, consumed by the Witt-free capstone
+`reachesRigidOrCameron_viaIsotropySeparates_wittFree` (CascadeAffine §OrthogonalForm) ⟹ sealed `VO⁻₄(3)` mod `{G3}`.
+**Use the size-9 base `T₉ = frameBase ∪ {(0,0,0,2),(1,1,1,1),(1,2,1,2),(1,0,1,0)}`** throughout (§10.6: it makes every
+pair separable by a both-nondegenerate config, so degenerate Lemma A is never needed). Each milestone ≈ one work
+session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the boundary** (process rule).
+
+**Conventions fixed for the whole build (record once, reuse):**
+- `θ(u) := (Q (affineE.symm u), fun t => polar Q (affineE.symm u) (affineE.symm t))` — the **Gram parameters** of `u`
+  against the base. `θ(u)` determines `u` (polar nondegeneracy; the `coords_determine` mechanism).
+- The working count is `Z̃` over `z ≠ u` (NOT raw `Z`); raw `Z = Z̃ + [u in the config's isotropic set]`, and the
+  correction is the shell-blind `x=u` term (§10.3(A)). Lemma A computes raw `Z`; B-M1 carries the correction.
+- Coarse counts (`Q=0` vs `Q≠0`) suffice (M0); fine→coarse is the landed `coarse_eq_sum_iso`.
+
+#### Lemma A — the isotropic-incidence count = explicit Gram-function (nondegenerate configs only)
+- **A-M1 ✅ DONE** (`ScratchLemmaA.lean`, axiom-clean): the homogeneous reduction `reduction_to_levelset` (A1 linear
+  conditions + A3 coset + A4 linear-term-vanish) — count `= #{x ∈ Uᗮ : Q x = −Q w₀}` given a spanning `w₀ = ∑ cₖ aₖ`.
+- **A-M2** — *spanning `w₀` exists for nondegenerate config Gram.* Gram matrix `G_{ij} = polar Q (aᵢ) (aⱼ)` invertible
+  ⟹ solve `G c = (Q aⱼ)ⱼ` ⟹ `∃ c, hw₀`. Tools: `Matrix` invertibility / `LinearMap` bijectivity on `U`. Output:
+  `reduction_to_levelset` becomes unconditional on nondegenerate configs. *Flavor: finite-dim linear algebra.*
+- **A-M3** — *the level-set count via `card_quadForm_eq`.* Restrict `Q` to the subspace `Uᗮ` (`QuadraticMap.comp` with
+  `Uᗮ.subtype`); build an orthogonal anisotropic basis of `Uᗮ` (nondegenerate ⟹ exists, char ≠ 2); apply the toolkit
+  `card_quadForm_eq`. Output: `#{x ∈ Uᗮ : Q x = c}` as a char-sum closed form. *The main Mathlib subspace/basis lift.*
+- **A-M4** — *evaluate to the explicit integer Gram-function.* `disc(Q|_{Uᗮ}) = disc Q / disc Gram` (discriminant
+  multiplicativity over `⊥`, block determinant); `Q w₀ = ½·(Q aⱼ)ᵀ G⁻¹ (Q aⱼ)`; the `F₃` quadratic-Gauss-sum value
+  (`gaussSum_sq`: `|G|²=3`). Output: **Lemma A** — `N = f(Gram)` explicit, nondegenerate configs (value sets `{6}`,
+  `{1,2}`, `{0,1,2}` for `|S'|=1,2,3`; cf. the m4anal 31-case `m=2` table).
+
+#### Lemma B — the counts recover `u`
+- **B-M1** — *plumbing: abstract antecedent → `{Z̃(S)}` agreement in `V`.* From `IsotropySeparatesAtBase`'s antecedent
+  (fine isotropy counts over `Fin(p^d)`, `σ` over the full function type): fold `T₉`+`u`-slot into one family (deferred
+  from M1), fine→coarse (`coarse_eq_sum_iso`), transport to `V` (`isotropy_count_transport`/`count_transport`),
+  inclusion–exclusion to the `{Z̃(S)}` over the working sub-collection, with the `z≠u` correction. Tools: all landed
+  (M1) + `count_pi_setValued`. *Flavor: Finset/Fintype bookkeeping.*
+- **B-M2** — *Gram parametrization + both-nondeg selection.* Express each config's `Z(S)` (via Lemma A) as `f(θ(u))`;
+  the config Gram and its nondegeneracy (`det ≠ 0`) are explicit functions of `θ(u)` and the fixed base. Establish the
+  both-nondeg separation property of `T₉` (the §10.6 fact, as a finite check). Output: for both-nondeg `S'`,
+  `count_u(S') = f_{S'}(θ(u))`.
+- **B-M3** — *injectivity ⟹ `IsotropySeparatesAtBase`.* From `{count_u(S')=count_{u'}(S') ∀S'}`: on every both-nondeg
+  `S'`, `f_{S'}(θ u)=f_{S'}(θ u')`; the `T₉` separation property ⟹ `θ u = θ u'` ⟹ `u=u'` (polar nondeg; generalize the
+  landed `coords_determine` to the polar-coordinate row `θ`). **Open sub-decision:** the Gram-level injectivity
+  `{f_{S'}(θ)=f_{S'}(θ') on both-nondeg S'} ⟹ θ=θ'` is finite over `F₃` Gram-parameters; prefer a structured proof via
+  the per-coordinate factoring (§10.3(F)) — plain `decide` is likely **too slow** (kernel; `native_decide` banned) at
+  `81²×|configs|`, so do not rely on it without a feasibility check.
+
+#### Assembly
+- **ASM** — instantiate `Q = x₀x₁+x₂²+x₃²` over `ZMod 3`, base `T₉`, `T₉.card ≤ 9`; compose B-M3 ⟹
+  `IsotropySeparatesAtBase Q T₉`; feed `reachesRigidOrCameron_viaIsotropySeparates_wittFree` ⟹ **sealed `VO⁻₄(3)`
+  mod `{G3}`.** Then port `ScratchLemmaA.lean` → a real module (register in `build.sh`/`lakefile`), index + doc cycle.
+
+**Dependencies:** A-M1✓→A-M2→A-M3→A-M4 (Lemma A); B-M1 ⟂ (independent plumbing); B-M2 needs {A-M4, B-M1};
+B-M3 needs B-M2; ASM needs {A-M4, B-M3}. Lemma A (A-M2..A-M4) and B-M1 can proceed in parallel.
+
+**Identified gaps / knowledge recorded here (was unmentioned):**
+1. **Degenerate Lemma A is avoided only by the size-9 base** `T₉` (size-6 needs degenerate configs for 290 pairs). This
+   is a hard constraint on the base choice — record `T₉`, not the size-6 base, as the live target. (Corrects §10.6.)
+2. **The `z≠u` correction** (`Z̃` vs raw `Z`) must be threaded through B-M1; the correction term is the shell-blind
+   `x=u` indicator.
+3. **B-M3's Gram-injectivity is finite but probably not `decide`-feasible** in the kernel — plan a structured proof
+   (per-coordinate factoring), with `decide` only as a fallback after a feasibility spike.
+4. **`coords_determine` must be generalized** from the standard frame to the polar-coordinate row `θ` over `T₉`
+   (B-M3) — a mild lift of the landed lemma.
+5. **A-M3's subspace machinery** (restrict `Q` to `Uᗮ`, orthogonal anisotropic basis of a *subspace*) is the single
+   biggest Mathlib lift; if it proves heavy, an alternative is to prove the affine-quadric count formula directly over
+   `F₃^n` for `n ≤ 3` (the only dims that occur) rather than via the abstract subspace.
+6. **Char-2 / other `q` / other families** are out of scope here (M5); this plan is `VO⁻₄(3)` only.
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity
