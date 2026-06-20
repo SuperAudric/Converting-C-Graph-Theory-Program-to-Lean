@@ -39,8 +39,11 @@
 > ✅ DONE (2026-06-20)** — the graph-level probe validated the two seams A/B/C did *not* cover (D1 raw-graph
 > decomposition + DQ2 iso-invariance): from raw *scrambled* adjacency the recovered base, `dim ker`, and canonical
 > twist-class are all scramble-invariant, and the twist-class **separates** non-isomorphic CFI-twins (matching
-> ground truth) — non-vacuous. **Next = D-M1 (C# port of extraction).** Pick-up reading order: this STATUS →
-> §11.0–§11.6 (the wall + mechanism) → §11.10 (the build, D-M0 results + D-M1 onward).**
+> ground truth) — non-vacuous. **D-M1 ✅ DONE (2026-06-20)** — extraction ported to C# against the *real*
+> `WarmPartition` refinement (`Option2ExtractionProbe.cs`): extracted `dim ker` = ground truth, scramble-invariant;
+> Layer B (WL==unit-prop) confirmed in the genuine machinery. **Next = D-M2 (Gaussian solve + canonical twist-class
+> in C#).** Pick-up reading order: this STATUS → §11.0–§11.6 (the wall + mechanism) → §11.10 (the build, D-M0/D-M1
+> results + D-M2 onward).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -538,7 +541,10 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   adjacency, D1 (recognition-free variable + base-incidence recovery) → D2 (forcing-oracle extraction) → D3/D4
   (canonical twist-class `coset_min(c, im A_G)`) all validated — scramble-invariant, **separating** (merges gauge
   twins, distinguishes genuine ones, matches ground truth), `dim ker` exact, D1/D2 cross-check holds. The two seams
-  A/B/C never touched (DQ1 raw-graph decomposition + DQ2 iso-invariance) are now probe-clean. Next = D-M1 (C# port).
+  A/B/C never touched (DQ1 raw-graph decomposition + DQ2 iso-invariance) are now probe-clean. **D-M1 (C# extraction
+  vs the real `WarmPartition`, 2026-06-20, `Option2ExtractionProbe.cs`):** ✅ extracted `dim ker` = ground truth,
+  scramble-invariant (Circ 6/8/9→0, m=7→3, RandReg(8,6,3)→0); Layer B holds in the genuine refinement. Next = D-M2
+  (Gaussian solve + canonical twist-class in C#).
   Layer D **is** the *deferred, unbuilt* C# `LinearOracle`, generalized: `TwistConstruction.cs` already does the
   `ker H` half (constructs twists = F₂-symmetry); Layer D adds the **row-space** read (forced decisions) the rigid
   case needs. Integrates as a **Phase-2 pre-processor** — decompose `(base (P,L), twist-class)`, canonize the base via
@@ -687,8 +693,14 @@ RandReg(8,6,3); 3 on non-odd `m=7`); (X) D2's `rowspace(H)` = D1's `rowspace(A_G
 arity-3 instance of "non-singleton-cell" D1), base canonized by a brute IR-lite standing in for the harness/cascade
 (scope (b)). Validates the F₂-layer mechanism *and* the iso-invariance/separation soundness crux end-to-end from the
 raw graph — the two seams A/B/C never touched (DQ1 + DQ2). Untested below: C# integration (D-M1+) and a genuinely
-non-WL-easy base. **D-M1** extraction in C# (footprint → Layer-C → `H`; test: `dim ker`
-on `MultipedeGenerator` = ground truth). **D-M2** F₂ Gaussian solve + canonical twist-class (rigid → unique twist).
+non-WL-easy base. **D-M1 — extraction in C# vs the REAL refinement. ✅ DONE (2026-06-20,
+`GraphCanonizationProject.Tests/Option2ExtractionProbe.cs`).** The forcing oracle drives the genuine `WarmPartition`
+(the descent's 1-WL) via the same `p`-pin `ChainDescent.Individualize` uses; cumulative minimal circuits → `H` →
+F₂ rank. **Extracted `dim ker` = ground truth on every run, scramble-invariant:** Circulant `m=6,8,9` → 0 (rigid),
+non-odd `m=7` → 3, `RandReg(8,6,3)` (nV>nW high-treewidth) → 0; segments recovered recognition-free as the size-2
+stable cells (= nW exactly). **Finding (no surprise = the result):** Layer B (WL == unit-propagation) holds in the
+*real* C# refinement, not just the Python port — the "WL might be stronger" risk did not materialize in the genuine
+machinery. **D-M2** F₂ Gaussian solve + canonical twist-class (rigid → unique twist).
 **D-M3** pre-processor integration → canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant).
 **D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed). **D-M5** fallback/flag
 + full cross-check battery. **D-M6** Lean: L1, then (later) L2.
