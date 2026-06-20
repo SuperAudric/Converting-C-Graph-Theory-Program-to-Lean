@@ -23,7 +23,14 @@
 > route-1 kernel `QProfileSeparatesAtBase` seals `VO⁻₄(3)` modulo `{G3}` ALONE.** Everywhere below that says "the
 > capstone also needs `OrbitIsIsotropyClass` (Witt, a separate parallel track)" is SUPERSEDED — Witt is no longer the
 > seal's obligation. (The Witt-carrying `reachesRigidOrCameron_viaIsotropySeparates` / `separatesAtBase_of_isotropySeparates`
-> are kept axiom-clean but superseded.) NEXT = the route-1 de-risk probe (§10.3).
+> are kept axiom-clean but superseded.)
+>
+> **▶▶▶ STEP-4 BUILD UNDERWAY (2026-06-20) — the live frontier is §10.8 (full milestone plan); start there.** The
+> route-1 step-4 inversion is being built via the **Lemma A / Lemma B split** (§10.6): Lemma A = "isotropic-incidence
+> count = explicit Gram-function (nondeg configs)", Lemma B = "counts recover `u`", composing to prove
+> `IsotropySeparatesAtBase Q T₉` directly (the live route — supersedes the `QProfileSeparatesAtBase` framing). **Landed,
+> axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`ScratchLemmaA.lean`); B-M1, B-M2-bridge
+> (`ScratchLemmaB.lean`). **NEXT = A-M3** (`card_quadForm_eq` on the subspace `Uᗮ`). Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -805,6 +812,12 @@ No new obstruction surfaced while implementing; the reduction to a homogeneous l
 axiom-clean. The remaining A2/A5/A6 are linear-algebra/basis lifts, not new mathematics.
 
 ### 10.8 FULL MILESTONE PLAN for step 4 (Lemma A + Lemma B + assembly), beginning to end (2026-06-20)
+> **▶ FRESH READER — START HERE.** Landed & axiom-clean (WIP scratch, §10.5): A-M1, A-M2 (`ScratchLemmaA.lean`);
+> B-M1, B-M2-bridge (`ScratchLemmaB.lean`). The two novel reductions are done. **NEXT = A-M3** (the `card_quadForm_eq`
+> subspace lift — heaviest piece; detail in the A-M3 bullet below, incl. the filter→submodule sub-step and the
+> `F₃^n`-direct fallback). Then A-M4 → B-M3 → ASM. The capstone needs NO Witt (§10.5). Read §10.6 (architecture) +
+> §10.3 (the probe facts that constrain any proof) before starting.
+
 The target is `IsotropySeparatesAtBase Q T₉`, consumed by the Witt-free capstone
 `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (CascadeAffine §OrthogonalForm) ⟹ sealed `VO⁻₄(3)` mod `{G3}`.
 **Use the size-9 base `T₉ = frameBase ∪ {(0,0,0,2),(1,1,1,1),(1,2,1,2),(1,0,1,0)}`** throughout (§10.6: it makes every
@@ -825,17 +838,24 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
   matrix `G i j = polar Q (a i) (a j)`; witness `c := (Q∘a) ᵥ* G⁻¹`, via `Matrix.vecMul_vecMul` /
   `nonsing_inv_mul` / `vecMul_one`) + **`reduction_to_levelset_nondeg`** — combines A-M1∘A-M2: for invertible config
   Gram, the count is unconditionally the homogeneous level-set `#{x ∈ Uᗮ : Q x = − Q w₀}` (`w₀ = ∑ cₖ aₖ` explicit).
-- **A-M3** — *the level-set count via `card_quadForm_eq`.* Restrict `Q` to the subspace `Uᗮ` (`QuadraticMap.comp` with
-  `Uᗮ.subtype`); build an orthogonal anisotropic basis of `Uᗮ` (nondegenerate ⟹ exists, char ≠ 2); apply the toolkit
-  `card_quadForm_eq`. Output: `#{x ∈ Uᗮ : Q x = c}` as a char-sum closed form. *The main Mathlib subspace/basis lift.*
+- **A-M3 (the next session's target; heaviest piece)** — *the level-set count via `card_quadForm_eq`.* `reduction_to_levelset_nondeg`
+  outputs the level set as a **filter over `V`**: `#{x : (∀ j, polar Q x (a j)=0) ∧ Q x = c}` (`c = −Q w₀`). card_quadForm_eq
+  is over a **fintype module `W` with an orthogonal anisotropic basis**. So A-M3 = three sub-steps: **(i)** identify the
+  filter set `{x : ∀ j, polar Q x (a j)=0}` with the submodule `Uᗮ` (the orthogonal complement / kernel of `x ↦ (polar Q x (a j))ⱼ`;
+  count over the filter = count over the subtype `↥Uᗮ`); **(ii)** the restricted form `Q.comp Uᗮ.subtype` on `↥Uᗮ`
+  (a fintype module, `[Module.Finite]`); **(iii)** an orthogonal anisotropic basis of `↥Uᗮ` (nondeg `Q|_{Uᗮ}` + char ≠ 2 ⟹
+  exists — Mathlib `QuadraticForm`/`BilinForm` diagonalization, e.g. `QuadraticForm.exists_orthogonalBasis` / `Basis` of a
+  nondeg form) then `card_quadForm_eq`. **Fallback if the abstract subspace machinery is heavy** (§10.6 gap 5): prove the
+  affine-quadric count formula directly over `F₃^n` for `n = d − |S'| ∈ {1,2,3}` (the only dims that occur), bypassing the
+  abstract `Uᗮ`. Output: `#{x ∈ Uᗮ : Q x = c}` as a char-sum / closed form.
 - **A-M4** — *evaluate to the explicit integer Gram-function.* `disc(Q|_{Uᗮ}) = disc Q / disc Gram` (discriminant
   multiplicativity over `⊥`, block determinant); `Q w₀ = ½·(Q aⱼ)ᵀ G⁻¹ (Q aⱼ)`; the `F₃` quadratic-Gauss-sum value
   (`gaussSum_sq`: `|G|²=3`). Output: **Lemma A** — `N = f(Gram)` explicit, nondegenerate configs (value sets `{6}`,
   `{1,2}`, `{0,1,2}` for `|S'|=1,2,3`; cf. the m4anal 31-case `m=2` table).
 
 #### Lemma B — the counts recover `u`
-- **B-M1 ✅ MOSTLY DONE** (`ChainDescent/ScratchLemmaB.lean`, all axiom-clean): plumbing antecedent → `V`-side
-  incidence agreement.
+- **B-M1 + B-M2 bridge ✅ DONE** (`ChainDescent/ScratchLemmaB.lean`, all axiom-clean): plumbing antecedent → `V`-side
+  incidence agreement, plus the `y=0` correction to Lemma A's full count.
   - `coarse_incidence_agree` — the core: from the fine isotropy-count antecedent, the isotropic-incidence count
     `Z̃_w(S') = #{z≠w : Q(z̄−w̄)=0 ∧ ∀t∈S', Q(z̄−t̄)=0}` agrees (`u`↔`u'`) for `S'⊆T`. **Fiberwise partition by the
     isotropy profile** — same technique as `separatesAtBase_of_isotropySeparates_weak`; the "isotropic on `S'∪{⋆}`"
@@ -865,7 +885,9 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
 #### Assembly
 - **ASM** — instantiate `Q = x₀x₁+x₂²+x₃²` over `ZMod 3`, base `T₉`, `T₉.card ≤ 9`; compose B-M3 ⟹
   `IsotropySeparatesAtBase Q T₉`; feed `reachesRigidOrCameron_viaIsotropySeparates_wittFree` ⟹ **sealed `VO⁻₄(3)`
-  mod `{G3}`.** Then port `ScratchLemmaA.lean` → a real module (register in `build.sh`/`lakefile`), index + doc cycle.
+  mod `{G3}`.** Then port **both `ScratchLemmaA.lean` + `ScratchLemmaB.lean`** → a real module (likely a new
+  `ChainDescent/FormsGraphLemmaA.lean` + integrate into `FormsGraphConcrete.lean`; register in `build.sh`/`lakefile`),
+  regenerate `PublicTheoremIndex.md`, doc cycle.
 
 **Dependencies:** A-M1✓→A-M2→A-M3→A-M4 (Lemma A); B-M1 ⟂ (independent plumbing); B-M2 needs {A-M4, B-M1};
 B-M3 needs B-M2; ASM needs {A-M4, B-M3}. Lemma A (A-M2..A-M4) and B-M1 can proceed in parallel.
@@ -904,20 +926,39 @@ better *mental model* and is the natural choice *only if* the Witt track is bein
 *without* waiting on it.
 
 ### 10.5 Module / decl map for a fresh reader
+**In the build (registered in `build.sh` + `lakefile.toml`, all axiom-clean, full build green ~33s cached / ~140s cold):**
 - **`ChainDescent/GaussCount.lean`** (Mathlib-only leaf) — the Gauss toolkit: `count_eq_charsum`/`count2`/`countk_*`/
-  `count_pi_setValued` (counts), `sum_addChar_*` (1-D/multivariable Gauss), `card_quadForm_eq`, `sum_addChar_multiQuad`/
-  `_zero`/`sum_addChar_linearMap` (multi-point, the Route-1.3 engines), `multiCharSum_eq_sum_count` +
-  `sum_addChar_quadForm_smul_ne_zero` (M2, off-path but reusable).
-- **`ChainDescent/CascadeAffine.lean §OrthogonalForm`** — `isoClass` + dictionary `isoClass_eq_*`; `SeparatesAtBase` /
-  `IsotropySeparatesAtBase` / `reachesRigidOrCameron_via{SymmetryBrokenBase,IsotropySeparates}` (capstones);
-  `separatesAtBase_of_isotropySeparates` (Witt bridge); `coords_determine` (the reduction back-half); the ⚠ SUPERSEDED
-  frame-locked predicates.
-- **`ChainDescent/FormsGraphConcrete.lean`** (imports both) — `count_transport`, `qvalue_count_transport`,
-  `isotropy_count_transport`, `isoSetOf`/`qSetOf`/`mem_isoSetOf_iff`, `coarse_eq_sum_iso` (M1);
-  `QProfileSeparatesAtBase` (**the open kernel**) + `isotropySeparates_of_qProfileSeparates` (M3 reduction). Route 1
-  steps 1–4 + M4 wiring land here.
+  `count_pi_setValued` (counts), `sum_addChar_*` (1-D/multivariable Gauss), **`card_quadForm_eq`** (THE affine-quadric
+  level-set count A-M3 consumes), `sum_addChar_multiQuad`/`_zero`/`sum_addChar_linearMap`, `multiCharSum_eq_sum_count`.
+- **`ChainDescent/CascadeAffine.lean §OrthogonalForm`** — the capstone chain.
+  - **★ THE LIVE CAPSTONE: `reachesRigidOrCameron_viaIsotropySeparates_wittFree`** (`PublicTheoremIndex.md:1248`) —
+    seals the `VO^ε` residue from a bounded base + `IsotropySeparatesAtBase Q T`, **NO Witt, NO `hSmallAutThin`**. Its
+    Witt-free chain: `RelationRefinesIsotropy` (easy half) ← `relationRefinesIsotropy_similitude` (discharged outright
+    via `isoClass_similitude_invariant`); `separatesAtBase_of_isotropySeparates_weak` (the Witt-free bridge).
+  - The TARGET predicate **`IsotropySeparatesAtBase Q T`** (`:3102`) = what Lemma A+B must prove (`∀ u u'`,
+    fine-isotropy-count agreement ⟹ `u=u'`). `coords_determine` (`:2640`, the Gram→vector back-half),
+    `affineScheme_relOfPair_eq_iff`/`orbMk_affine_eq_iff` (orbit ⟺ G₀-orbit of difference), `polar_eq_of_sub`,
+    `similitudeGroup`/`neg_mem_similitudeGroup`. ⚠ SUPERSEDED (kept, axiom-clean): the Witt-carrying
+    `separatesAtBase_of_isotropySeparates` / `reachesRigidOrCameron_viaIsotropySeparates` + the frame-locked predicates.
+- **`ChainDescent/FormsGraphConcrete.lean`** (imports both) — `count_transport`, `isotropy_count_transport`,
+  `isoSetOf`/`qSetOf`/`mem_isoSetOf_iff`, `coarse_eq_sum_iso` (M1); `QProfileSeparatesAtBase` +
+  `isotropySeparates_of_qProfileSeparates` (the M3 *reduction* — note: this is the OLD `Q`-profile route; the live
+  step-4 attack is the Lemma A/B route below, which proves `IsotropySeparatesAtBase` directly).
+
+**WIP scratch (NOT in the build; verify each with `lake env lean ChainDescent/ScratchLemmaX.lean`; PORT at ASM):**
+- **`ChainDescent/ScratchLemmaA.lean`** — Lemma A (count = explicit Gram-function on nondeg configs). **A-M1+A-M2 done:**
+  `isoIncidence_eq_linearConds` (A1), `map_add_of_polar_zero` (A4-core), `count_coset` (A3), `polar_w0_perp` (A4-link),
+  `reduction_to_levelset` (A1∘A3∘A4: count = homogeneous level-set `#{x : (∀j, polar Q x (a j)=0) ∧ Q x = −Q w₀}`
+  given a spanning `w₀=∑ cₖaₖ`), `spanning_w0_exists` (A-M2: `IsUnit (Gram).det ⟹ ∃ such w₀`),
+  `reduction_to_levelset_nondeg` (the two combined, unconditional on nondeg Gram). **Open: A-M3, A-M4 (see §10.8).**
+- **`ChainDescent/ScratchLemmaB.lean`** — Lemma B (counts recover `u`). **B-M1 + B-M2 bridge done:**
+  `coarse_incidence_agree` (B-M1 core: fine antecedent ⟹ incidence-count agreement, fiberwise),
+  `incidence_to_V` (transport+translate `Fin(p^d)`→`V`), `incidence_agree_V` (B-M1 capstone),
+  `cone_count_zero_split` (the `y=0` correction), `fullcount_agree_modulo_corr` (B-M2 bridge capstone: full
+  Lemma-A-shaped counts agree modulo the Gram-determined correction). **Open: B-M2 proper (needs A-M4), B-M3, ASM.**
 
 ---
 
-*Maintenance: update STATUS as stages land; keep route-doc §9.9.18b/c the empirical anchor and this doc the proof
-target. Capstones recorded in `PublicTheoremIndex.md:1207, 1210-1226` + the remaining-work tracker §3a.*
+*Maintenance: update §10.8 milestone ticks + §10.5 as stages land; keep route-doc §9.9.18b/c the empirical anchor and
+this doc the proof target. Live capstone `reachesRigidOrCameron_viaIsotropySeparates_wittFree`
+(`PublicTheoremIndex.md:1248`); the Lemma A/B build lives in the two scratch modules (port at ASM).*

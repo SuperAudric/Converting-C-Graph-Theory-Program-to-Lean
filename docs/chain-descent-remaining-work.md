@@ -174,8 +174,16 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   `separatesAtBase_of_isotropySeparates_weak` needs only it, and the capstone
   **`reachesRigidOrCameron_viaIsotropySeparates_wittFree`** seals the `VO^ε` residue carrying ONLY a bounded base + the
   Gauss target `IsotropySeparatesAtBase Q T` — NO Witt. Witt is needed only for the cosmetic rank-3 identification the
-  seal never uses. **⟹ discharging the route-1 Gauss kernel `QProfileSeparatesAtBase` seals `VO⁻₄(3)` modulo `{G3}`
-  ALONE.** The "capstone also needs `OrbitIsIsotropyClass` (parallel Witt track)" framing below/above is SUPERSEDED.
+  seal never uses. **⟹ proving `IsotropySeparatesAtBase Q T₉` seals `VO⁻₄(3)` modulo `{G3}` ALONE.** The "capstone also
+  needs `OrbitIsIsotropyClass` (parallel Witt track)" framing below/above is SUPERSEDED.
+- **★ STEP-4 BUILD UNDERWAY via the LEMMA A / LEMMA B split (2026-06-20).** The live route now proves
+  `IsotropySeparatesAtBase Q T₉` **directly** (Lemma A = "isotropic-incidence count = explicit Gram-function on
+  nondeg configs"; Lemma B = "counts recover `u`"), **superseding the `QProfileSeparatesAtBase` framing** of the bullet
+  below. Uses the **size-9 base `T₉`** (avoids degenerate cases). Landed axiom-clean (WIP scratch, NOT in build):
+  **A-M1+A-M2** (`ChainDescent/ScratchLemmaA.lean`: cone-count → homogeneous level-set, for invertible config Gram) and
+  **B-M1+B-M2-bridge** (`ChainDescent/ScratchLemmaB.lean`: antecedent → incidence-agreement, + `y=0` correction). The
+  two novel reductions are done; **NEXT = A-M3** (`card_quadForm_eq` on subspace `Uᗮ`) → A-M4 → B-M3 → ASM. Authoritative:
+  plan [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §10.5 (decl map) + §10.8 (milestones).
 - **★★★ CURRENT (2026-06-18 HANDOFF) — reformulation + M0–M3 LANDED; the bullets above are landed history.** The
   reformulation around a symmetry-broken base is DONE (`SeparatesAtBase` / `IsotropySeparatesAtBase` /
   `reachesRigidOrCameron_via{SymmetryBrokenBase,IsotropySeparates}`, the frame-locked predicates ⚠ SUPERSEDED in-source);
