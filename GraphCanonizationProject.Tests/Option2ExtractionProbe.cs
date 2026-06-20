@@ -309,6 +309,147 @@ public sealed class Option2ExtractionProbe
             $"SEPARATING twin (gadget {sepG}) → different matrix. Complete + iso-invariant, no F2-layer IR.");
     }
 
+    // ── D-M4 EXPLORATION (diagnostic, not an assertion) ───────────────────────
+    // The doubled+matched multipede: Aut = Z2 (copy-swap). Probe-before-commit:
+    // does breaking the Z2 with one pin SEPARATE the copies under WL (segments →
+    // size-2 cells, D1 applies) or leave them fused (size-4)? And what does the
+    // real canonizer do with it (|Aut|, canonize/flag)?
+    [Fact]
+    public void DM4_Explore_DoubledMultipede()
+    {
+        var mp = MultipedeGenerator.BuildCirculant(6);
+        var (dg, dt) = DoubleAndMatch(mp.Graph, mp.VertexTypes);
+        int N = dg.VertexCount;
+        output.WriteLine($"doubled n={N} (= 2 × {mp.Graph.VertexCount})");
+
+        // (1) cold WL cell-size histogram
+        output.WriteLine("  cold WL cells: " + CellHisto(dg, dt));
+
+        // (2) real canonizer verdict + |Aut|
+        var cd = new CanonGraphOrdererChainDescent { BudgetOverride = 20000 };
+        string verdict;
+        try { cd.Run((int[])dt.Clone(), dg); verdict = "canonical"; }
+        catch (CanonizationFlaggedException) { verdict = "flagged"; }
+        output.WriteLine($"  canonizer: {verdict}  |Aut|={cd.LastAutomorphismGroupOrder}  " +
+                         $"nodes={cd.LastNodeCount}  kind={cd.LastFlagKind}");
+
+        // (3) individualize one vertex of a size-4 (segment) cell, refine, re-histogram
+        int n = N; int[] adj = ExtractAdj(dg); sbyte[] p = SeedFromTypes(n, dt);
+        var part = new WarmPartition(n); part.Refine(adj, p);
+        var cells = GroupCells(part);
+        var seg4 = cells.Values.FirstOrDefault(c => c.Count == 4);
+        if (seg4 != null)
+        {
+            int rep = seg4.Min();
+            var p2 = (sbyte[])p.Clone();
+            foreach (int w in seg4) if (w != rep) { p2[rep * n + w] = LESS; p2[w * n + rep] = GREATER; }
+            TransitiveClose(p2, n);
+            var part2 = new WarmPartition(n); part2.Refine(adj, p2);
+            output.WriteLine($"  after individualizing 1 vtx of a size-4 cell: " + CellHistoFrom(part2));
+        }
+    }
+
+    // ── D-M4 — composition: cascade peels Aut_base (Z2), option-2 owns the core ──
+    // The doubled+matched multipede separates the two concerns into one object
+    // (doc §11.2). This asserts the separation: (a) the cascade harvests EXACTLY
+    // the Z2 copy-swap (|Aut|=2, free, scramble-invariant — nothing spurious from
+    // the F2 structure), so b(Aut)=1; (b) the rigid core is option-2's job and it
+    // canonizes it end-to-end (D-M3). The correct composition is FOLD-via-σ then
+    // option-2, NOT pin-then-option-2 — see the finding recorded with the doc.
+    [Theory]
+    [InlineData(6)]
+    [InlineData(8)]
+    public void DM4_Cascade_Peels_Z2_Then_Option2_Core(int m)
+    {
+        var mp = MultipedeGenerator.BuildCirculant(m);
+        MultipedeGenerator.AssertRigid(mp);
+        Assert.Equal(System.Numerics.BigInteger.One, AutOrder(mp.Graph, mp.VertexTypes)); // single rigid
+
+        var (dg, dt) = DoubleAndMatch(mp.Graph, mp.VertexTypes);
+        int N = dg.VertexCount, n = N / 2;
+
+        // (a) cascade peels EXACTLY the Z2 copy-swap.
+        var cd = new CanonGraphOrdererChainDescent { BudgetOverride = 20000 };
+        cd.Run((int[])dt.Clone(), dg);
+        Assert.Equal(new System.Numerics.BigInteger(2), cd.LastAutomorphismGroupOrder);
+        var aut = cd.LastAutomorphisms!;
+        for (int i = 0; i < N; i++)
+        {
+            var orb = aut.Orbit(i);
+            Assert.Equal(2, orb.Length);                      // Z2 acts freely
+        }
+        for (int i = 0; i < n; i++)                           // and it IS the copy-swap
+        {
+            var orb = aut.Orbit(i).OrderBy(x => x).ToArray();
+            Assert.Equal(new[] { i, i + n }, orb);
+        }
+        // scramble-invariant: still |Aut|=2, free.
+        for (int s = 0; s < 3; s++)
+        {
+            var (g2, t2) = ScrambleWithTypes(dg, dt, seed: 8300 + s);
+            var cd2 = new CanonGraphOrdererChainDescent { BudgetOverride = 20000 };
+            cd2.Run(t2, g2);
+            Assert.Equal(new System.Numerics.BigInteger(2), cd2.LastAutomorphismGroupOrder);
+            for (int i = 0; i < N; i++) Assert.Equal(2, cd2.LastAutomorphisms!.Orbit(i).Length);
+        }
+
+        // (b) the rigid core is option-2's job — it canonizes it end-to-end (D-M3),
+        //     i.e. the residual-after-Z2 is exactly the rigid-core cost.
+        string cf = CanonFormRuns(mp.Graph, mp.VertexTypes, out bool inv);
+        Assert.True(inv, "option-2 canonical form of the core not scramble-invariant");
+
+        output.WriteLine(
+            $"DM4 doubled(Circulant{m}) n={N}: cascade peels EXACTLY Z2 (|Aut|=2, free, copy-swap, " +
+            $"scramble-invariant) ⟹ b(Aut)=1; option-2 canonizes the rigid core end-to-end. " +
+            $"Concerns stack independently (b(Aut) ⊥ b_WL).");
+    }
+
+    private static System.Numerics.BigInteger AutOrder(AdjMatrix g, int[] types)
+    {
+        var cd = new CanonGraphOrdererChainDescent { BudgetOverride = 20000 };
+        try { cd.Run((int[])types.Clone(), g); } catch (CanonizationFlaggedException) { }
+        return cd.LastAutomorphismGroupOrder;
+    }
+
+    private static (AdjMatrix, int[]) DoubleAndMatch(AdjMatrix g, int[] types)
+    {
+        int n = g.VertexCount, N = 2 * n;
+        var adj = new int[N, N];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (g[i, j] != 0) { adj[i, j] = g[i, j]; adj[n + i, n + j] = g[i, j]; }
+        for (int i = 0; i < n; i++) { adj[i, n + i] = 1; adj[n + i, i] = 1; }   // matching
+        var t = new int[N];
+        for (int i = 0; i < n; i++) { t[i] = types[i]; t[n + i] = types[i]; }    // corresponding ⟹ same colour
+        return (new AdjMatrix(adj), t);
+    }
+
+    private static Dictionary<int, List<int>> GroupCells(WarmPartition part)
+    {
+        var byCell = new Dictionary<int, List<int>>();
+        for (int v = 0; v < part.N; v++)
+        {
+            if (!byCell.TryGetValue(part.CellOf[v], out var l)) byCell[part.CellOf[v]] = l = new List<int>();
+            l.Add(v);
+        }
+        return byCell;
+    }
+
+    private static string CellHisto(AdjMatrix g, int[] types)
+    {
+        int n = g.VertexCount; var part = new WarmPartition(n);
+        part.Refine(ExtractAdj(g), SeedFromTypes(n, types));
+        return CellHistoFrom(part);
+    }
+
+    private static string CellHistoFrom(WarmPartition part)
+    {
+        var sizes = GroupCells(part).Values.GroupBy(c => c.Count)
+                    .OrderBy(grp => grp.Key)
+                    .Select(grp => $"{grp.Count()}×size{grp.Key}");
+        return string.Join(", ", sizes);
+    }
+
     // coker=0 regime (square odd circulant): EVERY twist is isomorphic to
     // untwisted, so all must canonicalise to one identical form — a strong
     // completeness stress test (m distinct graphs collapse to a single canonical).

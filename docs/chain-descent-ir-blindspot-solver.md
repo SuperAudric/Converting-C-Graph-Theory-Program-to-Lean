@@ -47,8 +47,11 @@
 > pre-processor canonizes the rigid multipede **end-to-end** (canonical adjacency matrix), iso-invariant AND complete
 > (gauge twin → identical matrix, separating twin differs; coker=0 circulants collapse all twists to one form); the
 > coupled directions are resolved by a single linear solve (no F₂-layer IR), closing §4/§10's direction sub-question.
-> **Next = D-M4 (doubled multipede / `Aut_base` via the harness).** Pick-up reading order: this STATUS → §11.0–§11.6
-> (the wall + mechanism) → §11.10 (the build, D-M0..D-M3 results + D-M4 onward).**
+> **D-M4 ✅ DONE (2026-06-20)** — the doubled+matched multipede: the cascade peels exactly the `Z₂` copy-swap
+> (`|Aut|=2`, free, scramble-invariant), option-2 owns the rigid core; concerns stack independently. Finding: the
+> composition is **fold-via-σ then option-2**, not pin-then-option-2 (D1 misfires on the un-folded residue). **Next =
+> D-M5 (fallback/flag + full cross-check battery).** Pick-up reading order: this STATUS → §11.0–§11.6 (the wall +
+> mechanism) → §11.10 (the build, D-M0..D-M4 results + D-M5 onward).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -555,8 +558,10 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   + separating (matches ground truth); **the canonical base order is free from `WarmPartition` cell-ids — base-canon
   pass removed.** **D-M3 (pre-processor integration, end-to-end canonization, same probe file):** ✅ full canonical
   adjacency matrix, iso-invariant + complete (gauge twin → identical matrix; coker=0 circulants collapse all twists);
-  coupled directions resolved by one linear solve (no F₂-layer IR) — closes §4/§10's direction sub-question. Next =
-  D-M4 (doubled multipede / `Aut_base`).
+  coupled directions resolved by one linear solve (no F₂-layer IR) — closes §4/§10's direction sub-question. **D-M4
+  (composition with the cascade, same probe file):** ✅ cascade peels exactly the `Z₂` copy-swap (`|Aut|=2`, free,
+  scramble-invariant), option-2 owns the rigid core, concerns stack independently — **composition is fold-via-σ then
+  option-2, not pin-then-option-2** (D1 misfires on the un-folded residue). Next = D-M5 (fallback/flag + cross-checks).
   Layer D **is** the *deferred, unbuilt* C# `LinearOracle`, generalized: `TwistConstruction.cs` already does the
   `ker H` half (constructs twists = F₂-symmetry); Layer D adds the **row-space** read (forced decisions) the rigid
   case needs. Integrates as a **Phase-2 pre-processor** — decompose `(base (P,L), twist-class)`, canonize the base via
@@ -657,7 +662,13 @@ remains only for the base and the kernel (small), where the harness + cascade al
   `2^{dim ker}` kernel-branching is a *standalone-mode* feature (option 2 run without Phase 1), not part of the
   integrated path. *(new; the wiring.)*
 - **D6 — cascade/kernel composition.** `ker H` (gauge) branches/harvested by the existing twist machinery; **`Aut_base`**
-  (the doubled-multipede `Z₂`) handled when the harness canonizes `(P,L)`. *(wiring; doubled multipede is the test.)*
+  (the doubled-multipede `Z₂`) peeled by the cascade. **★ CORRECTED (D-M4 finding): the composition is FOLD-via-σ then
+  option-2, NOT pin-then-option-2.** After the cascade breaks `Z₂` with one pin the doubled residue has *mixed* cells
+  (`22×size2, 6×size4` on doubled-Circ6) — split gadget-middles also become size-2, so D1's "size-2 = segment" rule
+  **misfires** on the un-folded residue. The cascade harvests the copy-swap `σ` *explicitly* (`|Aut|=2`, verified
+  free, orbits `{i, i+n}`); option-2 must use `σ` to **quotient onto one copy** (the rigid core) and then canonize that
+  (D-M3 handles it). So D6 = fold via the harvested auto, *then* option-2 — not run option-2 on the pinned graph.
+  *(the iso-invariant `σ`-fold quotient is the remaining integration piece here; doubled multipede is the test.)*
 - **D7 — fallback/flag.** When extraction fails (unbounded arity / non-WL-easy base / ring-varying, §11.6) or the
   result fails verification → exhaustive branch (sound, may flag). *(new; the boundary.)*
 - **D8 — iso-invariance + cross-checks.** Scramble-invariance, exhaustive size-5/6, Even≠Odd, + a new rigid/doubled
@@ -735,6 +746,12 @@ canonical form**, scramble-invariant. **★ SUB-QUESTION RESOLVED (D-M3 finding)
 independence sub-question* (the worry that resolving direction bits could hit a coupled `k`-bit block costing a local
 `2^k`). The directions *are* coupled — by the F₂ system — but they are resolved by a **single linear solve** (unique
 for rigid), not greedy bit-by-bit and not `2^k`. The twist-solve **is** the poly resolution of that deferred sub-question
-for the F₂ residue. **D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed).
-**D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed). **D-M5** fallback/flag
-+ full cross-check battery. **D-M6** Lean: L1, then (later) L2.
+for the F₂ residue. **D-M4 — composition with the cascade. ✅ DONE (2026-06-20, same probe file:
+`DM4_Cascade_Peels_Z2_Then_Option2_Core` + `DM4_Explore_DoubledMultipede`).** Doubled+matched multipede: the cascade
+harvests **exactly** the `Z₂` copy-swap (`|Aut|=2`, free, orbits `{i,i+n}`, scramble-invariant — nothing spurious from
+the F₂ structure), `b(Aut)=1`; option-2 owns the rigid core (D-M3). Concerns stack independently (`b(Aut) ⊥ b_WL`, the
+§11.2 claim). **★ COMPOSITION CORRECTED (D-M4 finding):** **FOLD-via-σ then option-2**, not pin-then-option-2 — after
+one pin the residue has mixed cells (`22×size2, 6×size4`), D1's size-2 rule misfires; the cascade gives `σ` explicitly,
+option-2 quotients onto one copy then canonizes (D6). Aside: circulant multipedes canonize cheaply (thin base, not
+IR-hard at probe sizes — IR-hardness is asymptotic/high-treewidth, cited); the mechanism is identical regardless.
+**D-M5** fallback/flag + full cross-check battery. **D-M6** Lean: L1, then (later) L2.
