@@ -35,8 +35,9 @@
 > doubled+matched multipede); the F₂ gap is constructed (§11.4); the honest flag floor moves to the *ring-varying*
 > (Lichter) residue (§11.6). **Live thread = §11; Layers A+B+C DONE (mechanism verified on real multipedes; extraction
 > prototyped descent-only + SOUND, §11.4a). Next concrete step = Layer D, fully designed in §11.10 (C# first — the
-> row-space generalization of the deferred/unbuilt C# `LinearOracle`, integrated as a Phase-2 pre-processor; start at
-> D-M1). Pick-up reading order for a fresh continuation: this STATUS → §11.0–§11.6 (the wall + mechanism) → §11.10 (the build).**
+> row-space generalization of the deferred/unbuilt C# `LinearOracle`, integrated as a Phase-2 pre-processor). **Start at
+> §11.10 D-M0** — a graph-level probe that validates the two seams A/B/C did *not* cover (D1 raw-graph decomposition +
+> iso-invariance) before any C#. Pick-up reading order: this STATUS → §11.0–§11.6 (the wall + mechanism) → §11.10 (the build).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -534,8 +535,9 @@ are `b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner 
   `ker H` half (constructs twists = F₂-symmetry); Layer D adds the **row-space** read (forced decisions) the rigid
   case needs. Integrates as a **Phase-2 pre-processor** — decompose `(base (P,L), twist-class)`, canonize the base via
   the harness, **solve the twist-class by F₂ Gaussian** (bypassing IR for the F₂ layer); branch only on `ker`; the
-  cascade handles `Aut_base` (the doubled-multipede `Z₂`). C# pieces D1–D8, Lean L1/L2, risks, milestones D-M1..M6:
-  **§11.10**.
+  cascade handles `Aut_base` (the doubled-multipede `Z₂`). **First step = D-M0** (a graph-level probe validating the
+  two seams A/B/C did not cover — D1 raw-graph decomposition + iso-invariance — before any C#). C# pieces D1–D8, Lean
+  L1/L2, the iso-invariance closure, risks, milestones D-M0..M6: **§11.10**.
 
 ### 11.8 Probe reproduction specs (the `/tmp/*.py` are ephemeral — rebuild from this)
 - **`wall_probe2.py`** — CFI builder `cfi(base_edges, base_verts, twist_vertex)` (inner vertices = even-subsets of
@@ -613,31 +615,60 @@ remains only for the base and the kernel (small), where the harness + cascade al
 - **D3 — the twist constants `c`.** Read which parity each gadget enforces (the inhomogeneous part), extending
   `TwistConstruction`'s canonical-colour matching to read a *value*, not just build an automorphism. *(extends
   `TwistConstruction`; DQ3 = stay recognition-free.)*
-- **D4 — F₂ Gaussian solve.** Rank, a **canonical** `ker` basis (RREF over the WL-colour variable order ⟹ iso-invariant)
-  and the canonical twist-class (lex-min coset rep). *(new; DQ2 = the iso-invariance crux.)*
+- **D4 — F₂ Gaussian solve.** Rank and the canonical twist-class (lex-min coset rep, over the canonical WL-colour
+  variable order); a canonical `ker` basis (RREF) only for standalone mode (`ker = 0` in-pipeline). *(new; soundness =
+  the iso-invariance closure below ≡ scope (b).)*
 - **D5 — pre-processor integration.** Decompose `(base, twist)`, canonize base via harness, solve twist via D4, emit
-  the canonical labelling; IR for the F₂ layer → 0 (rigid) or `2^{dim ker}` (near-rigid). *(new; the wiring.)*
+  the canonical labelling; IR for the F₂ layer → 0. **In-pipeline `ker = 0` always** — the F₂-gauge symmetry is
+  consumed upstream by the linear oracle (`TwistConstruction`) and permutation symmetry by the cascade, so the Phase-2
+  residue is genuinely rigid. **So option 2's in-pipeline content is the row-space / *forced* solve ONLY**; the
+  `2^{dim ker}` kernel-branching is a *standalone-mode* feature (option 2 run without Phase 1), not part of the
+  integrated path. *(new; the wiring.)*
 - **D6 — cascade/kernel composition.** `ker H` (gauge) branches/harvested by the existing twist machinery; **`Aut_base`**
   (the doubled-multipede `Z₂`) handled when the harness canonizes `(P,L)`. *(wiring; doubled multipede is the test.)*
 - **D7 — fallback/flag.** When extraction fails (unbounded arity / non-WL-easy base / ring-varying, §11.6) or the
   result fails verification → exhaustive branch (sound, may flag). *(new; the boundary.)*
-- **D8 — iso-invariance + cross-checks.** Scramble-invariance, exhaustive size-5/6, Even≠Odd, + a new rigid/near-rigid/
-  doubled multipede battery. Iso-invariance crux = canonical var-order → canonical `ker` basis → canonical twist-class
-  (the `forcedNode_relabel` analogue). *(new; validation.)*
+- **D8 — iso-invariance + cross-checks.** Scramble-invariance, exhaustive size-5/6, Even≠Odd, + a new rigid/doubled
+  multipede battery. Iso-invariance is the closure below (canonical base order ⟹ deterministic twist; `canonForm` ∘
+  solve), validated empirically first in D-M0. *(new; validation.)*
 
 **Lean follow-on:** **L1 (do early, standalone):** the extraction-soundness lemma — *minimal forcing-circuits generate
 `rowspace(H)`* (the `cl_up ⊊ cl_lin` subtlety, §11.4a). Pure F₂/matroid, no graph; anchors the one non-obvious
 correctness claim. **L2 (deferred, heavy):** the generalized solver's poly-or-flag/soundness theorem (canonical form
-produced; branching `= 2^{dim ker}`; poly for bounded arity). Largely new F₂-Gaussian-canonization formalization,
-outside the seal.
+produced; poly for bounded arity). Its statement is the **F₂-Gaussian** one — *not* a `discrete_of_kRoundRelationSeparates`
+instantiation: count-injectivity (§11.0 re-base) and Gaussian *coincide in proving discreteness* but the solver's
+*mechanism* is row-reduction, not relation-count. **Why it can't reuse the seal machinery (the precise reason):** a
+rigid multipede's *orbital* scheme is discrete (trivial `Aut`), but its **2-WL closure is a non-schurian coherent
+configuration** (strictly more relations than orbitals — that *is* the WL-hardness) — exactly the object **outside the
+seal's schurian-residue scope** (C3). So L2 is a genuinely new F₂-Gaussian-canonization formalization.
 
-**Open design questions / risks:** **DQ1** — base/twist decomposition recovery from the *raw* graph (the real risk;
-clean for NS multipedes, murkier generally — where "WL-easy base" bites). **DQ2** — iso-invariant canonical `ker` basis
-+ twist-class (RREF over the canonical WL-colour order). **DQ3** — reading `c` recognition-free (extend colour-matching).
-**DQ4** — fallback soundness where the F₂ path flags.
+**Soundness / iso-invariance — the crux, and its closure.** Canonization (vs. iso-*testing*) needs an iso-invariant
+labelling, and this is a *soundness* property, the design's thinnest point. **Closure:** it is **not new machinery** — it
+is the existing `canonForm` "lex-min over symmetry branches" pattern with the F₂ solve as a *deterministic per-branch
+function*. Factor `ℓ = (base ℓ_B, twist x)`: (1) the harness canonizes the base, branching over base ties = `Aut_base`;
+**under scope (b) the base WL-discretizes per branch**, so the WL-colours give a **canonical variable order**; (2) given
+that order, `Hx = c` is a coset `x₀ + ker(H)`, and in-pipeline `ker = 0` (D5) ⟹ the twist is **deterministic** — a pure
+function of `ℓ_B*`, *no new ties*; (3) overall `= min over Aut_base-branches of (base adjacency + twist-solve)` =
+`canonForm` ∘ deterministic-solve. The base-tie × twist interaction the design must respect is exactly the `Aut_base`
+branching the harness already does. **Key consequence: scope (b) [WL-easy base] is the *soundness* condition, not a
+performance one** — it is what makes the variable order canonical, hence the twist iso-invariant; a recursively-hard
+base (base not WL-discrete) is the flag floor and never reaches the twist-solve. So **DQ2 ≡ scope (b)**, not a separate
+risk.
 
-**Milestones:** **D-M1** extraction in C# (footprint → Layer-C → `H`; test: `dim ker` on `MultipedeGenerator` = ground
-truth). **D-M2** F₂ Gaussian solve + canonical twist-class (rigid → unique twist). **D-M3** pre-processor integration →
-canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant). **D-M4** near-rigid kernel branching +
-doubled multipede (`Aut_base` via harness). **D-M5** fallback/flag + full cross-check battery. **D-M6** Lean: L1, then
-(later) L2.
+**Open design questions / risks:** **DQ1** — base/twist decomposition recovery from the *raw* graph — *the real risk,
+and the only seam A/B/C did not cover* (their probes ran on the F₂ matrix with variables/rows given; D1 is raw
+adjacency → identify variables + base split, recognition-free per §11.6). Clean for NS multipedes, murkier generally.
+**DQ2 = the iso-invariance closure above** (≡ scope (b); base WL-discrete ⟹ canonical order ⟹ deterministic twist).
+**DQ3** — reading `c` recognition-free (extend colour-matching). **DQ4** — fallback soundness where the F₂ path flags.
+
+**Milestones:** **★ D-M0 — graph-level end-to-end PROBE, before any C# (do this first; restores probe-before-commit).**
+Extend the Layer-C prototype to start from the **raw, scrambled multipede adjacency** (`BuildMultipede` output,
+relabelled): run **D1** (non-singleton-cell variable identification + base split, recognition-free) → D2 (extraction) →
+D4 (Gaussian + canonical twist-class) → emit a canonical form. Report: (i) **D1 recovers the variable set
+scramble-invariantly** (the uncovered seam); (ii) **the emitted canonical twist-class is scramble-invariant** (the
+soundness crux above); (iii) `dim ker` matches ground truth. Cheap, in `/tmp`; validates the *two* seams A/B/C did not
+(D1 + iso-invariance) before any C# is written. **D-M1** extraction in C# (footprint → Layer-C → `H`; test: `dim ker`
+on `MultipedeGenerator` = ground truth). **D-M2** F₂ Gaussian solve + canonical twist-class (rigid → unique twist).
+**D-M3** pre-processor integration → canonize the rigid multipede end-to-end, no F₂-layer IR (scramble-invariant).
+**D-M4** doubled multipede (`Aut_base` via harness; standalone-mode kernel-branching if needed). **D-M5** fallback/flag
++ full cross-check battery. **D-M6** Lean: L1, then (later) L2.
