@@ -792,9 +792,11 @@ The plan's steps A1–A6 are landing bottom-up (WIP scratch module, `lake env le
   `#{x ∈ Uᗮ : Q x = −Q w₀}`, given a spanning solution `w₀ = ∑ c k • a k`. The linear term has vanished; this is the
   conceptual heart of Lemma A and the exact input shape `card_quadForm_eq` wants.
 
+- **A-M2 ✅ DONE** (`spanning_w0_exists` + `reduction_to_levelset_nondeg`, axiom-clean): the spanning `w₀` exists for
+  invertible config Gram (`IsUnit G.det`, witness `(Q∘a) ᵥ* G⁻¹`), so the count is unconditionally the homogeneous
+  level-set on nondegenerate configs.
+
 **Remaining for full Lemma A (the heavier pieces):**
-- **A2/A3-existence:** a spanning `w₀ = ∑ c k • a k` realizing the system exists when the config Gram is nondegenerate
-  (Gram-matrix invertibility ⟹ solve the linear system in `U`). Flavor: finite-dim linear algebra / `Matrix` invertibility.
 - **A5:** apply `card_quadForm_eq` to `Q|_{Uᗮ}` — needs an orthogonal anisotropic basis of the subspace `Uᗮ`
   (nondegenerate ⟹ exists; the subspace-restriction + basis is the main Mathlib lift).
 - **A6:** express `disc(Q|_{Uᗮ})` and `Q w₀` as functions of the config Gram (discriminant multiplicativity over `⊥`).
@@ -819,9 +821,10 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
 #### Lemma A — the isotropic-incidence count = explicit Gram-function (nondegenerate configs only)
 - **A-M1 ✅ DONE** (`ScratchLemmaA.lean`, axiom-clean): the homogeneous reduction `reduction_to_levelset` (A1 linear
   conditions + A3 coset + A4 linear-term-vanish) — count `= #{x ∈ Uᗮ : Q x = −Q w₀}` given a spanning `w₀ = ∑ cₖ aₖ`.
-- **A-M2** — *spanning `w₀` exists for nondegenerate config Gram.* Gram matrix `G_{ij} = polar Q (aᵢ) (aⱼ)` invertible
-  ⟹ solve `G c = (Q aⱼ)ⱼ` ⟹ `∃ c, hw₀`. Tools: `Matrix` invertibility / `LinearMap` bijectivity on `U`. Output:
-  `reduction_to_levelset` becomes unconditional on nondegenerate configs. *Flavor: finite-dim linear algebra.*
+- **A-M2 ✅ DONE** (`ScratchLemmaA.lean`, axiom-clean): `spanning_w0_exists` (hypothesis `IsUnit G.det` for the Gram
+  matrix `G i j = polar Q (a i) (a j)`; witness `c := (Q∘a) ᵥ* G⁻¹`, via `Matrix.vecMul_vecMul` /
+  `nonsing_inv_mul` / `vecMul_one`) + **`reduction_to_levelset_nondeg`** — combines A-M1∘A-M2: for invertible config
+  Gram, the count is unconditionally the homogeneous level-set `#{x ∈ Uᗮ : Q x = − Q w₀}` (`w₀ = ∑ cₖ aₖ` explicit).
 - **A-M3** — *the level-set count via `card_quadForm_eq`.* Restrict `Q` to the subspace `Uᗮ` (`QuadraticMap.comp` with
   `Uᗮ.subtype`); build an orthogonal anisotropic basis of `Uᗮ` (nondegenerate ⟹ exists, char ≠ 2); apply the toolkit
   `card_quadForm_eq`. Output: `#{x ∈ Uᗮ : Q x = c}` as a char-sum closed form. *The main Mathlib subspace/basis lift.*

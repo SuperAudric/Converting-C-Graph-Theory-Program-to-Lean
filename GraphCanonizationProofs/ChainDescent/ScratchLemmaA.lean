@@ -20,6 +20,7 @@ avoids Witt cancellation). Develop here, port into a real module when stable.
 
 namespace ChainDescent
 open QuadraticMap Finset
+open scoped Matrix
 
 variable {p d : ℕ} [Fact p.Prime]
 
@@ -108,8 +109,47 @@ theorem reduction_to_levelset (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
   rw [map_add_of_polar_zero Q (polar_w0_perp Q a c hx)]
   constructor <;> intro h <;> linear_combination h
 
+/-- **Lemma A, step A-M2 — a spanning `w₀` exists when the config Gram is nondegenerate.** If the Gram matrix
+`G i j = polar Q (a i) (a j)` is invertible (`IsUnit G.det`), then `c := (Q ∘ a) ᵥ* G⁻¹` realizes the affine
+system: `w₀ = ∑ k, c k • a k` satisfies `polar Q w₀ (a j) = Q (a j)` for all `j`. Discharges the hypothesis of
+`reduction_to_levelset`, so the count is unconditionally the homogeneous level-set on nondegenerate configs. -/
+theorem spanning_w0_exists (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin m) (Fin m) (ZMod p)).det) :
+    ∃ c : Fin m → ZMod p, ∀ j, QuadraticMap.polar Q (∑ k, c k • a k) (a j) = Q (a j) := by
+  set G : Matrix (Fin m) (Fin m) (ZMod p) :=
+    Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) with hGdef
+  refine ⟨(fun j => Q (a j)) ᵥ* G⁻¹, fun j => ?_⟩
+  set c : Fin m → ZMod p := (fun j => Q (a j)) ᵥ* G⁻¹ with hcdef
+  have hcG : c ᵥ* G = (fun j => Q (a j)) := by
+    rw [hcdef, Matrix.vecMul_vecMul, Matrix.nonsing_inv_mul G hG, Matrix.vecMul_one]
+  have hexp : QuadraticMap.polar Q (∑ k, c k • a k) (a j) = (c ᵥ* G) j := by
+    rw [QuadraticMap.polar_comm, ← polar_sum_right Q (a j) Finset.univ c a]
+    simp only [Matrix.vecMul, dotProduct, hGdef, Matrix.of_apply]
+    exact Finset.sum_congr rfl (fun k _ => by rw [QuadraticMap.polar_comm Q (a j) (a k)])
+  rw [hexp, hcG]
+
+/-- **Lemma A, A-M1 ∘ A-M2 — the reduction, unconditional on nondegenerate configs.** If the config Gram matrix
+is invertible, the isotropic-incidence count is the HOMOGENEOUS level-set count `#{x ∈ Uᗮ : Q x = − Q w₀}` for the
+explicit `w₀ = ∑ k, c k • a k` (`c` from `spanning_w0_exists`). The remaining steps A-M3/A-M4 evaluate this
+level-set via `card_quadForm_eq` on `Q|_{Uᗮ}` and express it as a function of the Gram. -/
+theorem reduction_to_levelset_nondeg (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin m) (Fin m) (ZMod p)).det) :
+    ∃ c : Fin m → ZMod p,
+      (Finset.univ.filter (fun w : Fin d → ZMod p =>
+          Q w = 0 ∧ ∀ j, Q (w - a j) = 0)).card
+        = (Finset.univ.filter (fun x : Fin d → ZMod p =>
+          (∀ j, QuadraticMap.polar Q x (a j) = 0) ∧ Q x = - Q (∑ k, c k • a k))).card := by
+  obtain ⟨c, hc⟩ := spanning_w0_exists Q a hG
+  exact ⟨c, reduction_to_levelset Q a c hc⟩
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
 #print axioms ChainDescent.count_coset
 #print axioms ChainDescent.reduction_to_levelset
+#print axioms ChainDescent.spanning_w0_exists
+#print axioms ChainDescent.reduction_to_levelset_nondeg
