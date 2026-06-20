@@ -19,6 +19,22 @@
 
 ## STATUS (read first)
 
+> **▶▶ RE-BASING (2026-06-20) — READ §11 FIRST; the body below (§1–§10) is the original plan on the *previous*
+> A2 skeleton (potential-drop `Φ=(k−1)c`) and remains valid for the *bounded-WL-dim* rigid residue.** Two shifts
+> this session, both expanded in the new **§11**:
+> 1. **Engine re-base.** A2 pivoted from the potential-drop engine to a **count-injectivity** engine
+>    (`discrete_of_kRoundRelationSeparates`, general/landed; the forms-graph build uses it). For a *rigid* residue
+>    `RelCountsDetermineOrbit` collapses to that engine's hypothesis verbatim. So the solver's discretization core
+>    should be re-based on count-injectivity, not potential-drop (potential-drop stays only as an alt leaf-count bound).
+> 2. **The flag set is attackable, not just acceptable — "option 2".** §6 *accepts* the high-WL-dim rigid residue
+>    (the multipede) as the flag set. §11 *attacks* it: the multipede is **F₂-linear**, and the existing linear
+>    oracle already canonizes the F₂-*symmetry* case (CFI). The new content is to generalize it to F₂-*structure*
+>    recovery (no symmetry needed), replacing the WL/unit-propagation descent with **Gaussian elimination** on the
+>    descent-extracted F₂ system. **Layer-A viability VERIFIED axiom-/probe-clean (2026-06-20)** — see §11.4.
+> The wall is now precisely characterized (§11.1: `b(Aut)` vs `b_WL`); the witness is explicit (§11.2: the
+> doubled+matched multipede); the F₂ gap is constructed (§11.4); the honest flag floor moves to the *ring-varying*
+> (Lichter) residue (§11.6). **Live thread = §11; next concrete step = §11.7 Layer B.**
+
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
 all *real* (no path-fixing automorphism relates the choices). The hard sub-case is the **IR-blind-spot**:
@@ -48,7 +64,8 @@ Phase-2 cross-checks — exhaustive size-5/6 unique-canonical counts, scramble-i
 **Orientation:** §1 what the residue is and where it sits · §2 the unification with A2 (the headline) ·
 §3 why the naive cost is quasipolynomial · §4 the solver design (canonical greedy + direction-blind) ·
 §5 the two requirements + the leaf-count subtlety · §6 the flag set = tie-multiplicity = A2 row 4 ·
-§7 the SAT/constraint angle (mostly for A2) · §8 build/impl plan · §9 pointers · §10 honest scope.
+§7 the SAT/constraint angle (mostly for A2) · §8 build/impl plan · §9 pointers · §10 honest scope ·
+**§11 the live thread — option 2: the F₂-structure route for the high-WL-dim rigid residue (the flag-set attack).**
 
 ---
 
@@ -350,3 +367,142 @@ sharing their hard core with A2's drop lemma.
 - **1-WL vs coherent (Stage 1).** If Phase 2 stays on 1-WL, the `hcatch` slack (`O(1)` extra pins) must be
   paid per the build doc; cleaner to refine coherently. A wrong choice here silently reintroduces a gap
   between "A2 guarantees discreteness" and "the canonizer's refinement discretizes."
+
+---
+
+## 11. The live thread — option 2: the F₂-structure route for the high-WL-dim rigid residue
+
+> **What this section is.** The original plan (§1–§10) *accepts* the high-WL-dim rigid residue (the multipede) as
+> the flag set (§6). This section *attacks* it. It is self-contained and is the live thread (2026-06-20). Read it
+> in order; §11.7 is the milestone tracker (Layer A DONE, Layer B next). All probes are reproducible from §11.8.
+
+### 11.0 Where it sits, and the engine re-base
+A2 no longer runs on the potential-drop engine (`Φ=(k−1)c`, `exists_potential_descent`); it runs on a
+**count-injectivity** engine — `discrete_of_kRoundRelationSeparates` (`CascadeAffine.lean:1916`, **general** over
+any `AssociationScheme`, landed, axiom-clean), which consumes "the relation-count profile at a base `T` is injective
+across vertices" and outputs `Discrete`. For a **rigid** residue (`Stab(T)` trivial), `RelCountsDetermineOrbit`
+(`CascadeAffine.lean:1981`) collapses to that engine's hypothesis *verbatim* (orbits = singletons). So:
+- **Re-base the solver's discretization core on `discrete_of_kRoundRelationSeparates`** (count-injectivity), not the
+  potential-drop engine. Count-injectivity at `T` literally *is* "T discretizes"; it eliminates §5's leaf-count
+  `Φ(T_i)≈ρ^i n` subtlety (no product to bound — just "is the profile injective"). Keep potential-drop only as an
+  alternative leaf-count bound if wanted.
+- The forms-graph build (`docs/chain-descent-formsgraph-wldim-plan.md`) is the worked example of this engine on the
+  *symmetric* (bounded-WL-dim) side; the **Witt-free bridge** technique there (`ScratchWitt.lean`:
+  `separatesAtBase_of_isotropySeparates_weak`, a fiberwise partition relating coarse counts to raw relation counts)
+  is the **same proof shape** the IR-solver needs to relate coherent-cell counts to the engine's relation counts.
+
+### 11.1 The wall, exactly — two pin-counts, not one
+The seal's `O(log n)`-pin bound and the multipede's hardness are about **different quantities**:
+- **`b(Aut)`** — pins to kill symmetry (`≤ log|Aut|`); Phase-1 territory. Adding/removing the last symmetry moves
+  this by ~1 pin (the near-rigid ≈ rigid continuity).
+- **`b_WL`** — pins to make refinement discretize (= count-injective base = WL-dimension); the engine's input.
+
+The whole wall is the **gap `b_WL − b(Aut)`** (the 2-closure deficiency). The multipede is the extreme case:
+**`b(Aut)=0` (rigid) yet `b_WL=Ω(n^ε)`** (or `Θ(n)`, §11.4). `b_WL` is *monotone non-increasing* under
+symmetry-breaking, so **you can never turn a bounded-WL-dim graph into a multipede by removing symmetry** — the
+residue family (bounded `b_WL`) and the multipede (unbounded `b_WL`) are different WL-dimension classes, not
+interconvertible by the one-pin operation. The count-injectivity certificate is not *unproven* for the multipede —
+it is *false at every bounded base*. (This is why §6's flag is honest: WL/IR provably cannot canonize it cheaply —
+Neuen–Schweitzer STOC 2018 exponential IR lower bound.)
+
+### 11.2 The exact witness
+**The multipede** (Gurevich–Shelah / Neuen–Schweitzer). Two layers: (i) **CFI F₂-gadgets** over a base graph/incidence
+supply WL-hardness — segments `{p⁰,p¹}` (an F₂ value), gadgets enforcing parity; the twist `X̃` is WL-equal to `X`
+up to dimension ≈ treewidth (probed in `/tmp/wall_probe2.py`: `X(K_m)` vs `X̃(K_m)` are 1-WL-fooled for all `m`,
+2-WL-fooled for `tw≥3` — WL-dim tracks treewidth). (ii) **Rigidification** over a *meager* base (trivial F₂ kernel)
+kills CFI's gauge group `Z₂^{|E|-|V|+1}` → rigid → reaches Phase 2 with WL-hardness intact.
+
+**The clean barrier witness — the doubled+matched multipede.** Two copies of a rigid multipede + a perfect matching
+of corresponding vertices. `Aut = Z₂` exactly (the copy-swap; rigidity + matching force nothing else). It **separates
+the three coordinates** into one constructible object: the copy-swap (permutation symmetry → cascade, one pin), the
+F₂ gadget structure (untouched), the rigid WL-hard core (the wall). Use it as the **unit test** that Phase 1 peels
+the one symmetry cleanly and the residual cost is exactly the rigid-core cost — i.e. `b(Aut)` and `b_WL` stack
+independently. (Note the copy-swap is a *permutation* involution, cascade's job, deliberately not the F₂ kind.)
+
+### 11.3 The mechanism — F₂ structure is conserved across the symmetry boundary
+The multipede's segments are F₂ variables; the gadgets are F₂ parity constraints (matrix `H`). The relevant objects:
+- **`ker(H)`** = the solutions of the homogeneous system = the **gauge group = automorphisms**. CFI: `dim ker = k`
+  (abelian, harvested by the **existing linear oracle** in Phase 1). Rigid multipede: `dim ker = 0`.
+- **The descent / WL forcing ≈ F₂ unit-propagation** (fix a constraint's last unknown when all others are known) —
+  *myopic*, local, stalls on expanders.
+- **Gaussian elimination** does row operations unit-propagation cannot; it determines `x` up to `ker(H)`.
+
+So the leaf count is `2^{#decisions}`, and **`#decisions` depends entirely on the engine**: WL → `Θ(b_WL)=Ω(n^ε)`
+(the wall); F₂/Gaussian → `dim ker` (= 0 for rigid). **The discontinuity is in the method, not the graph:** the same
+F₂ structure manifests as harvestable symmetry in CFI (kernel ≠ 0, linear oracle) and as *no symmetry* in the
+multipede (kernel = 0), even though the graphs are one pin apart. **Option 2 = read the *whole* F₂ system, not just
+its kernel:** kernel elements = *free* bits (harvest, as today); row-space elements = *forced* bits (propagate by
+Gaussian, which WL stalls on). "Generalize the linear oracle from F₂-**symmetry** to F₂-**structure** recovery."
+
+### 11.4 Verified findings (Layer A probe, 2026-06-20 — `/tmp/option2_*.py`)
+At the pure-F₂ level (constraint systems as matrices), all three structural claims confirmed:
+1. **The decisive gap exists & is constructible.** A **variable-regular degree-4, constraint-size-3 bipartite
+   expander** is **RIGID (`dim ker = 0`)** yet its unit-propagation **percolation threshold is `Θ(n)`** (≈0.15n,
+   growing). So the descent needs `Θ(n)` pins → `2^{Θ(n)}` leaves, but **Gaussian elimination has 0 free decisions**
+   (unique solution). Gaussian strictly beats the descent. *(memory: [[project_option2_f2_gap_2026-06-20]].)*
+2. **Confluence = the spine fact** (`spine_branch_independent`): the unit-prop forcing closure is order/direction-
+   independent — 1 distinct closure over 8 random orderings.
+3. **Reversibility = matroid circuits**: within a constraint, each member is forced by the rest; the forcing relation
+   is the linear matroid of `H`, so its circuits (descent-visible locally) determine the whole system. This is the
+   formal content of the user's insight that the descent makes the global structure *partially visible*.
+
+### 11.5 The reframe — option 2's precise marginal value (honest scope)
+The probe sharpened *where* Gaussian beats {WL + existing oracle}:
+- **Random F₂ systems are EASY** — unit-prop already solves them (forcing# 2–3). Not the wall; no Gaussian needed.
+- **Tseitin/expander** (canonical hard XOR): genuinely stalls, **but `forcing# ≈ dim ker`** (ratio ≈1.45, constant).
+  Its hardness *is* its kernel = gauge symmetry — already harvested by the existing linear oracle. **Gaussian adds
+  nothing here.**
+- **The gap regime (`forcing ≫ ker`, `ker` small) = variable-regular / meager structure** (no low-degree peelable
+  variables). This is the multipede regime; it is **constructible and not a fine-tuned sliver** (generic var-regular
+  expanders land in it). **This is the only regime where option 2 strictly beats the existing pipeline.**
+
+So option 2's content is exactly: **replace unit-propagation with full Gaussian elimination on the descent-extracted
+F₂ system.** Existing oracle handles `ker` (symmetry); option 2 handles the *forcing-overhead* `forcing − ker = Θ(n)`
+that myopic WL peeling misses.
+
+### 11.6 The flag floor — what option 2 still does *not* close
+Gadget-*recognition* is too narrow (multiple formulations reach multipede-like structure with no shared local
+signature). Worse, the ceiling recurs: a linear oracle fixed to **F₂** is itself too narrow — **CFI-style
+constructions over varying rings** (`Z_{2^k}`) defeat any fixed-field rank operator while staying in P (Lichter,
+LICS 2021; FPC+rank ≠ P). So option 2 (F₂ generalization) **absorbs the canonical F₂-multipede** — a large named
+chunk of the IR-blind-spot, genuinely shrinking the flag set — but the **ring-varying residue remains the honest
+flag floor** (tied to the FPC+rank ≠ P frontier). Cameron is *separately* out of scope: its `O(n)` pins are
+`b(Aut)=Θ(n)` (too *much* symmetry, the "or Cameron" leg), the dual corner from the rigid residue.
+
+### 11.7 Milestones (the durable tracker)
+- **Layer A — the F₂ gap + structural facts. ✅ DONE (2026-06-20, probe-clean).** §11.4: gap constructed, confluence
+  = spine, reversibility = matroid. Reframe (§11.5) established.
+- **Layer B — WL = unit-propagation on a REAL graph. ⏳ NEXT.** Build a concrete CFI/multipede *graph*, run the
+  project-style 1-WL refinement with individualized decisions, and confirm the forcing relation **matches
+  unit-propagation on `H`**. This is the piece most likely to surprise (if real WL is *stronger* than unit-prop, the
+  extraction story changes). Decides whether the matrix model in §11.3–11.4 genuinely describes the descent.
+- **Layer C — extraction without gadget-recognition. ⏳.** Show `H` is recoverable from descent observations
+  (bounded-subset forcing probes → circuits → rows of `H`), using confluence/reversibility (§11.4) — *not* by
+  recognizing gadget shapes (§11.6). Bounded gadget arity `d` ⟹ `O(n^d)` forcing probes, poly.
+- **Layer D — the generalized oracle (Lean/C#). ⏳, gated on A–C.** Build it against `LinearOracle.lean` / `CFI.lean`:
+  determine what the oracle reads *today* (the harvested twist *group* = `ker`) vs. where the **row-space**
+  generalization attaches; then "run Gaussian elimination on the extracted `H`, branch only on `ker`." Compose with
+  the cascade (which peels permutation symmetry, e.g. the doubled-multipede's `Z₂`). Cross-check on the
+  doubled+matched multipede (§11.2) and the §11.8 instances.
+
+### 11.8 Probe reproduction specs (the `/tmp/*.py` are ephemeral — rebuild from this)
+- **`wall_probe2.py`** — CFI builder `cfi(base_edges, base_verts, twist_vertex)` (inner vertices = even-subsets of
+  incident edges, twist = odd at one vertex; edge vertices `e⁰,e¹`); 1-WL `refine1`, 2-WL `wl2_sig`. Confirms
+  `X(K_m)` vs `X̃(K_m)` WL-fooled (1-WL all `m`; 2-WL `tw≥3`), and the gauge group `Z₂^{|E|-|V|+1}`.
+- **`option2_layerA.py` / `_layerA2.py` / `_scale.py`** — F₂ matrix model. `gf2_rank` / `ker_dim`; `unit_prop(rows,
+  fixed)` = the descent's forcing closure; `perc_threshold` = smallest seed-fraction making the closure complete.
+  Constructions: `bipartite_expander(n, d, k)` = variable-`d`-regular, constraint-size-`k` (the **(4,3) rigid
+  expander is the headline**: `dim ker=0`, threshold `Θ(n)`); `tseitin_3reg` (forcing ≈ ker, the symmetry case);
+  random 3-uniform (easy). Metric to report: **`dim ker` (Gaussian #free) vs unit-prop percolation threshold
+  (descent forcing).** Key numbers: (4,3) → ker 0, threshold ≈0.15n; Tseitin → threshold/ker ≈1.45; random → forcing 2–3.
+
+### 11.9 Decl / pointer map
+- **Count-injectivity engine (re-base target):** `discrete_of_kRoundRelationSeparates`,
+  `kRoundProfileCount_eq`, `RelCountsDetermineOrbit`, `cellsAreOrbits_of_relCountsDetermineOrbit`
+  (`CascadeAffine.lean:1916/1876/1981/1995`).
+- **Witt-free fiberwise technique (reuse for coherent↔relation bridge):** `separatesAtBase_of_isotropySeparates_weak`
+  (`ScratchWitt.lean`, ported into `CascadeAffine §OrthogonalForm`); see [[project_witt_free_bridge_lead_2026-06-20]].
+- **Existing F₂-symmetry oracle (generalize this):** `LinearOracle.lean` / `CFI.lean` (the twist/gauge harvest).
+- **Spine / direction-blind substrate:** `spine_branch_independent`, `warm_6_2`, `canonForm` (top-level
+  `ChainDescent.lean`) — confluence (§11.4) is `spine_branch_independent` for F₂ forcing.
+- **Memory:** [[project_option2_f2_gap_2026-06-20]] (the verified gap + reframe), [[project_witt_free_bridge_lead_2026-06-20]].
