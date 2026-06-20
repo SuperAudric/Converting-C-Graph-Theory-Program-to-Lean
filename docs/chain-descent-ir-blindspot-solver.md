@@ -33,7 +33,7 @@
 >    descent-extracted F₂ system. **Layer-A viability VERIFIED axiom-/probe-clean (2026-06-20)** — see §11.4.
 > The wall is now precisely characterized (§11.1: `b(Aut)` vs `b_WL`); the witness is explicit (§11.2: the
 > doubled+matched multipede); the F₂ gap is constructed (§11.4); the honest flag floor moves to the *ring-varying*
-> (Lichter) residue (§11.6). **Live thread = §11; next concrete step = §11.7 Layer B.**
+> (Lichter) residue (§11.6). **Live thread = §11; Layers A+B DONE (mechanism verified on real multipedes); next concrete step = §11.7 Layer C (extraction without gadget-recognition).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -374,7 +374,7 @@ sharing their hard core with A2's drop lemma.
 
 > **What this section is.** The original plan (§1–§10) *accepts* the high-WL-dim rigid residue (the multipede) as
 > the flag set (§6). This section *attacks* it. It is self-contained and is the live thread (2026-06-20). Read it
-> in order; §11.7 is the milestone tracker (Layer A DONE, Layer B next). All probes are reproducible from §11.8.
+> in order; §11.7 is the milestone tracker (Layers A+B DONE, Layer C next). All probes are reproducible from §11.8.
 
 ### 11.0 Where it sits, and the engine re-base
 A2 no longer runs on the potential-drop engine (`Φ=(k−1)c`, `exists_potential_descent`); it runs on a
@@ -442,9 +442,17 @@ At the pure-F₂ level (constraint systems as matrices), all three structural cl
    (unique solution). Gaussian strictly beats the descent. *(memory: [[project_option2_f2_gap_2026-06-20]].)*
 2. **Confluence = the spine fact** (`spine_branch_independent`): the unit-prop forcing closure is order/direction-
    independent — 1 distinct closure over 8 random orderings.
-3. **Reversibility = matroid circuits**: within a constraint, each member is forced by the rest; the forcing relation
-   is the linear matroid of `H`, so its circuits (descent-visible locally) determine the whole system. This is the
-   formal content of the user's insight that the descent makes the global structure *partially visible*.
+3. **Circuits — two closures, do not conflate** (corrected). The **descent / unit-prop closure `cl_up`** is
+   confluent (= spine) but **NOT a matroid** in general (exchange can fail — the bootstrap-type closure; the same
+   non-matroid phenomenon as the prior residue; the probe's "circuit symmetry" only checked single-constraint local
+   circuits + passed exchange on an *easy* instance where `cl_up = cl_lin`). The **Gaussian / linear closure
+   `cl_lin`** (the full-row-space closure) **is** a matroid — representable over F₂, exchange free. Always
+   `cl_up ⊆ cl_lin`; the gap = the WL-hardness. **The plan relies on `cl_lin`, not `cl_up`:** Layer C recovers the
+   explicit rows of `H` from local descent circuits (confluence makes them consistent — needs no exchange), then
+   Gaussian elimination manufactures the linear matroid. The descent's non-matroidality is precisely *why* Gaussian
+   is the tool. Layer C's only requirement: bounded-size local forcing circuits **generate `rowspace(H)`** (they do
+   — gadget rows are local circuits, generating by definition). This is the corrected form of "the descent makes the
+   global structure partially visible."
 
 ### 11.5 The reframe — option 2's precise marginal value (honest scope)
 The probe sharpened *where* Gaussian beats {WL + existing oracle}:
@@ -472,10 +480,17 @@ flag floor** (tied to the FPC+rank ≠ P frontier). Cameron is *separately* out 
 ### 11.7 Milestones (the durable tracker)
 - **Layer A — the F₂ gap + structural facts. ✅ DONE (2026-06-20, probe-clean).** §11.4: gap constructed, confluence
   = spine, reversibility = matroid. Reframe (§11.5) established.
-- **Layer B — WL = unit-propagation on a REAL graph. ⏳ NEXT.** Build a concrete CFI/multipede *graph*, run the
-  project-style 1-WL refinement with individualized decisions, and confirm the forcing relation **matches
-  unit-propagation on `H`**. This is the piece most likely to surprise (if real WL is *stronger* than unit-prop, the
-  extraction story changes). Decides whether the matrix model in §11.3–11.4 genuinely describes the descent.
+- **Layer B — WL = unit-propagation on a REAL graph. ✅ DONE (2026-06-20, `/tmp/option2_layerB.py`).** Faithful
+  port of `MultipedeGenerator.BuildMultipede` (the C# Neuen–Schweitzer generator; base biadjacency `A_G` = the F₂
+  matrix `H`). **WL-forcing on the real multipede graph = unit-propagation on `H`, EXACTLY** — 50/50 trials on
+  circulant (m=6,8,9,11) and random/biregular bases up to 176 vertices, *both directions* (real WL is neither
+  stronger nor weaker than unit-prop — the "surprise" risk did not materialize). **Layer A+B tie on one real
+  object** (biregular col-deg-4 gadget-deg-3): `dim ker=0` (rigid) + WL==unit-prop + **greedy forcing number grows
+  ~linearly** (2,3,3,5,6 over nW=12..60) while `ker=0` → descent pays `2^{Θ(n)}`, Gaussian pays `2^0`. Random
+  non-regular stays flat (~3) = easy (confirms the meager/regular requirement). Mechanism + growth-direction
+  VERIFIED; asymptotic `2^Ω(n)` magnitude CITED (Neuen–Schweitzer; needs good-expander bases). *(memory:
+  [[project_option2_f2_gap_2026-06-20]].)* So the matrix model (§11.3–11.4) genuinely describes the descent, and
+  the local circuits are graph-visible — grounding extraction.
 - **Layer C — extraction without gadget-recognition. ⏳.** Show `H` is recoverable from descent observations
   (bounded-subset forcing probes → circuits → rows of `H`), using confluence/reversibility (§11.4) — *not* by
   recognizing gadget shapes (§11.6). Bounded gadget arity `d` ⟹ `O(n^d)` forcing probes, poly.
