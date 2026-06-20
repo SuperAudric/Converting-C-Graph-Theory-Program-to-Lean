@@ -1560,4 +1560,5 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `count_transport` | 26-43 | **Count transport `Fin(p^d) ↔ V` along `affineE`.** A vertex count over the affine point set whose predicate factors through `affineE.symm` equals the count over `V = Fin d → ZMod p`. Moves the `IsotropySeparatesAtBase` counts into the vector space where the Gauss point counts live. | — |
+| `count_transport` | 26-45 | **Count transport `Fin(p^d) ↔ V` along `affineE`.** A vertex count over the affine point set whose predicate factors through `affineE.symm` equals the count over `V = Fin d → ZMod p`. Moves the `IsotropySeparatesAtBase` counts into the vector space where the Gauss point counts live. | — |
+| `qvalue_count_transport` | 46-60 | **`Q`-value-set count on the affine point set → pointwise `Q`-counts in `V` (step 2, value-set part).** Chains `count_transport` (`Fin(p^d)→V`) with `count_pi_setValued` (set→point): `#{z : ∀j, Q(z̄−t_j)∈A_j} = ∑_{c∈∏A_j} #{x : ∀j, Q(x−t_j)=c_j}` — landing on the pointwise counts the Gauss toolkit closes. The isotropy conditions reduce to such `Q`-value-sets via `isoClass_eq_*` (modulo the origin correction). | — |

@@ -46,9 +46,13 @@
 > (2026-06-18, build green): `ChainDescent/FormsGraphConcrete.lean`** (imports `GaussCount` + `CascadeAffine`,
 > registered in `build.sh` + `lakefile.toml`) with **`count_transport`** (axiom-clean) — the count transport
 > `Fin (p^d) ↔ V` along `affineE`, moving the `IsotropySeparatesAtBase` counts into the vector space `V = Fin d → ZMod p`
-> where the Gauss point counts live. NEXT in that module: (2) the isotropy-count → value-set-count conversion
-> (`count_pi_setValued` + the dictionary `isoClass_eq_*`, with the origin correction), (3) the injectivity argument →
-> prove `IsotropySeparatesAtBase` at the chosen `T` for `VO^ε_4(3)`.
+> where the Gauss point counts live. **★ step (2) value-set part LANDED (2026-06-18,
+> axiom-clean): `qvalue_count_transport`** — chains `count_transport` + `count_pi_setValued` into one bridge:
+> `#{z : ∀j, Q(z̄−t_j)∈A_j} = ∑_{c∈∏A_j} #{x : ∀j, Q(x−t_j)=c_j}`, landing the affine `Q`-value-set count on the
+> pointwise `Q`-counts the Gauss toolkit closes. NEXT: the dictionary application — rewrite the `isoClass`
+> conditions of `IsotropySeparatesAtBase` as these `Q`-value-sets via `isoClass_eq_*`, **with the single-point origin
+> correction** (class `0` vs `1`); then (3) the injectivity argument → prove `IsotropySeparatesAtBase` at the chosen
+> `T` for `VO^ε_4(3)`.
 >
 > **★ GAUSS BUILD (B.1c-ii) — the affine-quadric POINT-COUNT FORMULA LANDED (2026-06-18, axiom-clean).** Built in
 > **`GraphCanonizationProofs/ChainDescent/ScratchGauss.lean`** (WIP module; imports ONLY Mathlib so it builds in
@@ -518,6 +522,63 @@ B.1c-ii at `VO^ε_4(3)`), not further isolation.~~
 already makes node-4-for-the-seal `modulo {G3 + Cameron/Liebeck/Skresanov + CountsDetermineFrameQ}`, with
 `CountsDetermineFrameQ` a single, concrete, probe-validated, finitely-checkable predicate — the sharpest honest
 isolation of the node-4 forms-graph residue.
+
+---
+
+## 9. Remaining roadmap to completion of the Gauss work (milestones)
+
+> **Scope.** "Completion of the Gauss work" = discharge `IsotropySeparatesAtBase Q T` for a concrete `VO^ε` (target
+> `VO^-_4(3)`) and feed `reachesRigidOrCameron_viaIsotropySeparates`. The capstone *also* needs `OrbitIsIsotropyClass`
+> (Witt, B.1c-i) — a **separate parallel track**, not Gauss work. Generalization over `q`/`d`, char-2, and Suzuki (f)
+> are follow-ons (M5).
+>
+> **Process rule (to avoid per-lemma doc churn): batch all lemmas of a milestone, then do ONE
+> build + index-regen + STATUS/MEMORY update at the milestone boundary.** Each milestone below is one work session.
+
+**Built (the connective tissue, all axiom-clean):** the reformulation (`SeparatesAtBase` / `IsotropySeparatesAtBase`
+/ `reachesRigidOrCameron_viaSymmetryBrokenBase` / `…viaIsotropySeparates` / Witt bridge `separatesAtBase_of_isotropySeparates`);
+the full Gauss toolkit (`GaussCount.lean`, 18 lemmas: count layer A/A2/Aₖ/`count_pi_setValued`, 1-D + multivariable
+Gauss, `card_quadForm_eq`, `multiQuad`/`multiQuad_zero`/`linearMap`); the isotropy dictionary (`isoClass_eq_*`); the
+consumer bridges (`count_transport`, `qvalue_count_transport`).
+
+**Pipeline still to build:**
+`isoClass counts —[M1 dictionary+origin]→ Q-value-set counts —[qvalue_count_transport ✓]→ pointwise Q-counts
+—[M2 Gauss closed form]→ explicit f(Gram of T∪{u}) —[M3 injectivity]→ u=u'  ⟹  IsotropySeparatesAtBase  —[M4]→ sealed VO^-_4(3).`
+
+### Milestone 0 — probe & blueprint (cheap, Python, no Lean; do FIRST)
+A finite probe over `VO^-_4(3)` at the candidate symmetry-broken base: (a) re-confirm **fine**-count injectivity;
+(b) decide whether **coarse** counts (`Q=0` vs `Q≠0`, pure value-set, NO origin correction) already separate — this
+decides if M1 needs the origin correction or collapses to a fine→coarse sum-reduction; (c) extract the EXACT base `T`
+(greedy size-4 vs frame+1 size-6); (d) extract the **recovery blueprint** — which specific counts recover which
+`B(u,t_j)` — so M3 has a concrete target. Output gates M1 and M3.
+
+### Milestone 1 — the conversion (isotropy counts → pointwise Q-counts), in `FormsGraphConcrete`
+isoClass→value-set `Finset` rewrites (from `isoClass_eq_*`); **either** (coarse suffices, per M0) the fine→coarse
+count sum-reduction + `qvalue_count_transport`, **or** (fine needed) the single-point **origin-correction**
+inclusion–exclusion (class-0 `z=t` vs class-1). Result: the isotropy joint count = explicit combination of pointwise
+Q-counts. *Risk: low–med (origin correction is fiddly but bounded).*
+
+### Milestone 2 — the Gauss closed form (pointwise Q-count → explicit Gram-function), in `GaussCount` + `FormsGraphConcrete`
+Prereq bridge `(Q.polarBilin).Nondegenerate ⟹ (associated Q).SeparatingLeft` (`two_nsmul_associated` + `Invertible 2`);
+the combined inner sum `S(r)` for all `r` (`multiQuad` for `R≠0`, `multiQuad_zero`+`linearMap` for `R=0`); the global
+Gauss value `∑_z ψ(R·Qz) = χ(R)^d·(∏χ wᵢ)·Gᵈ`; Brick C-even numeric check; substitute into `countk_eq_sum_charsum`
+⟹ pointwise Q-count as an explicit character sum in the Gram entries `B(u,t_j), Q(u)`. *Risk: med (heaviest assembly).*
+
+### Milestone 3 — the injectivity (THE CRUX), in `FormsGraphConcrete`
+Using M0's blueprint: show the closed-form counts recover `B(u,t_j)` for a spanning set of `t_j` (where the
+symmetry-broken base is essential), then nondegeneracy ⟹ `u`. Conclude `IsotropySeparatesAtBase Q T` for the chosen
+base shape. *Risk: HIGH — the genuine uncited content; could need base tweaks or extra individualizations. De-risked
+by M0.*
+
+### Milestone 4 — the concrete `VO^-_4(3)` instance + capstone, in `FormsGraphConcrete`
+`Q = x₀x₁+x₂²+x₃²` over `ZMod 3` + polar-nondegeneracy; the concrete symmetry-broken `T` + `IsBase` (or
+`exists_greedy_base_le_log`); instantiate M3; feed `reachesRigidOrCameron_viaIsotropySeparates` ⟹ a concrete sealed
+`VO^-_4(3)` *modulo {Witt `OrbitIsIsotropyClass`, G3}*. **This is the headline Gauss-work result.** *Risk: low (wiring).*
+
+### Milestone 5 — generalization (follow-on, post-Gauss-work)
+General `q` (char ≠ 2) then general `d`; then classes (d) alternating / (e) half-spin (reuse skeleton, symplectic/spinor
+`B`); char-2 (`q=2,4`) and Suzuki (f) are separate arguments. The Witt track (`OrbitIsIsotropyClass`, B.1c-i) runs in
+parallel and is required for a fully-sealed-modulo-citations instance.
 
 ---
 

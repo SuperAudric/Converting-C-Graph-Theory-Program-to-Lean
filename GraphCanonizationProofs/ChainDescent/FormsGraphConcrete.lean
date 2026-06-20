@@ -42,4 +42,21 @@ theorem count_transport (P : (Fin d → ZMod p) → Prop) [DecidablePred P] :
   · intro hz; exact ⟨affineE.symm z, hz, Equiv.apply_symm_apply _ _⟩
   · rintro ⟨x, hx, rfl⟩; rwa [Equiv.symm_apply_apply]
 
+open scoped Classical in
+/-- **`Q`-value-set count on the affine point set, reduced to pointwise `Q`-counts in `V` (step 2, value-set part).**
+Chains `count_transport` (`Fin (p^d) → V`) with `count_pi_setValued` (value-SET → value-POINT): a count of affine
+points `z` whose difference values `Q(z̄ − t_j)` each lie in a prescribed `Finset A_j` equals the sum, over all
+value selections `c ∈ ∏_j A_j`, of the pointwise counts `#{x : ∀j, Q(x − t_j) = c_j}` — exactly the counts the Gauss
+toolkit (`countk_eq_sum_charsum` + `multiQuad`/`multiQuad_zero`/`linearMap`) puts in closed form. The isotropy-class
+conditions of `IsotropySeparatesAtBase` reduce to such `Q`-value-set conditions via the dictionary `isoClass_eq_*`
+(anisotropic ↔ `A_j = {x | x ≠ 0}`, isotropic-or-zero ↔ `A_j = {0}`), modulo the single-point origin correction
+(class `0` vs `1`). -/
+theorem qvalue_count_transport (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (t : ι → (Fin d → ZMod p)) (A : ι → Finset (ZMod p)) :
+    (Finset.univ.filter (fun z : Fin (p ^ d) => ∀ j, Q (affineE.symm z - t j) ∈ A j)).card
+      = ∑ c ∈ Fintype.piFinset A,
+          (Finset.univ.filter (fun x : Fin d → ZMod p => ∀ j, Q (x - t j) = c j)).card :=
+  (count_transport (fun x => ∀ j, Q (x - t j) ∈ A j)).trans
+    (count_pi_setValued (fun j x => Q (x - t j)) A)
+
 end ChainDescent
