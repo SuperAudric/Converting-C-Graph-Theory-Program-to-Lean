@@ -31,10 +31,10 @@
 > `IsotropySeparatesAtBase Q T₉` directly (the live route — supersedes the `QProfileSeparatesAtBase` framing). **Landed,
 > axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`ScratchLemmaA.lean`); B-M1, B-M2-bridge
 > (`ScratchLemmaB.lean`). **A-M3 via ROUTE B UNDERWAY (2026-06-21):** increments 1 (`levelset_fourier`) + 2a
-> (`levelset_fourier_prod`) landed axiom-clean — the level-set count is now the `(s,ρ)` character sum
-> `∑_s∑_ρ ψ(−s·c)·∑_x ψ(s·Q x+polar Q x(∑ρⱼaⱼ))`. **NEXT = A-M3 increment 2b** (the `s`-split: D1 for `s≠0`,
-> `sum_addChar_linearMap` for `s=0` — couples in the nondeg config-Gram hypothesis), then 2c/A-M4 (config-Gram Gauss
-> sum → the §10.10 14-row `(m, det G, c_lev)` table). Use the **size-9 base `T₉`** (§10.6).
+> (`levelset_fourier_prod`) + 2b (`levelset_fourier_split`, the `s`-split with D1 on the bulk) landed axiom-clean.
+> **NEXT = A-M3 increment 2c** (collapse the `s=0` boundary to `q^d` via `sum_addChar_linearMap` + config independence —
+> couples in the nondeg config-Gram hypothesis), then 2d/A-M4 (config-Gram Gauss sum → the §10.10 14-row
+> `(m, det G, c_lev)` table). Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -816,13 +816,16 @@ The plan's steps A1–A6 are landing bottom-up (WIP scratch module, `lake env le
   `Option (Fin m) → F` dual into the quadratic dual `s` and the linear duals `ρ` (`Equiv.piOptionEquivProd`); the count
   is now `∑_s ∑_ρ ψ(−s·c)·∑_x ψ(s·Q x + polar Q x (∑ⱼ ρⱼ•aⱼ))`, the exact shape the `s`-split consumes.
 
+- **A-M3 increment 2b ✅ DONE (2026-06-21, `levelset_fourier_split`, axiom-clean) — the `s`-split (D1 on the bulk).**
+  Split `∑_s` at `s=0`: the `s=0` boundary is left as `∑_ρ ∑_x ψ(polar Q x (∑ⱼ ρⱼ•aⱼ))` (collapse → 2c); the `s≠0`
+  bulk evaluated via **D1 `sum_addChar_quadForm_linear`** (each `s` as `Units.mk0 s`): inner `x`-sum becomes
+  `ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))·∑_x ψ(s·Q x)`, factoring the config-Gram `ρ`-piece from the scaled global Gauss sum.
+
 **Remaining for full Lemma A (the heavier pieces):**
-- **A-M3 increment 2b (NEXT) — the `s`-split.** Split `∑_s` into `s=0` and `s≠0`. `s=0`: inner `= ∑_x ψ(polar Q x a*(ρ))`
-  `= |V|·[a*(ρ)=0]` via **`sum_addChar_linearMap`** with `φ = Q.polarBilin.flip a*(ρ)`; collapse `[a*(ρ)=0] ⟹ [ρ=0]` via
-  config-vector independence (needs nondeg config Gram ⟹ `aⱼ` independent — couples in the nondeg hypothesis here). `s≠0`:
-  inner `= ψ(−s⁻¹ Q a*(ρ))·∑_x ψ(s·Q x)` via **D1 `sum_addChar_quadForm_linear`** (already proven; convert `∑_{s≠0}` to a
-  sum over `(ZMod p)ˣ`). Output: `count·q^{m+1} = |V| + (∑_{s≠0} ψ(−s c)·χ(s)^d·W)·(config-Gram Gauss sum over ρ)`.
-- **A-M3 increment 2c / A-M4 — the config-Gram Gauss sum + the `(m, det G, c_lev)` collapse.** `∑_ρ ψ(−s⁻¹ Q a*(ρ))` is a
+- **A-M3 increment 2c (NEXT) — collapse the `s=0` boundary to `q^d`.** `∑_x ψ(polar Q x a*(ρ)) = |V|·[a*(ρ)=0]` via
+  **`sum_addChar_linearMap`** (`φ = Q.polarBilin.flip a*(ρ)`); then `[a*(ρ)=0] ⟹ [ρ=0]` by config-vector independence
+  (**nondeg config Gram ⟹ `aⱼ` independent — the nondeg hypothesis enters here**), so `∑_ρ … = |V| = q^d`.
+- **A-M3 increment 2d / A-M4 — the config-Gram Gauss sum + the `(m, det G, c_lev)` collapse.** `∑_ρ ψ(−s⁻¹ Q a*(ρ))` is a
   Gauss sum of the config form `QR(ρ)=Q(∑ρⱼaⱼ)` (Gram `G`) on `Fin m → F₃` (`sum_addChar_quadForm_smul`/`sum_quadForm_eval`);
   `W=∑ψ(Q x)` uses the fixed concrete basis `{e₀±e₁,e₂,e₃}`. Pin `N` to the §10.10 14-row `(m, det G, c_lev)` table via
   discriminant-up-to-squares (`∏χ(QR vᵢ)=χ(det G)·const`, basis-independent) + the `F₃` Gauss-sum magnitude (`gaussSum_sq`).

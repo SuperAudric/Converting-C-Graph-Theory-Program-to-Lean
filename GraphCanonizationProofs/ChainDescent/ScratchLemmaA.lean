@@ -216,6 +216,38 @@ theorem levelset_fourier_prod (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
     Fintype.sum_prod_type]
   rfl
 
+open scoped Classical in
+/-- **Lemma A, step A-M3 increment 2b — the `s`-split (D1 on the bulk).** Split the quadratic dual `∑_s` at `s = 0`.
+The `s = 0` boundary leaves the linear sum `∑_ρ ∑_x ψ(polar Q x (∑ⱼ ρⱼ•aⱼ))` (collapsed in 2c via
+`sum_addChar_linearMap` + config-vector independence, where nondegeneracy enters). The `s ≠ 0` bulk evaluates via
+**D1 `sum_addChar_quadForm_linear`** (each `s` as a unit `Units.mk0`): the inner `x`-sum becomes
+`ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))·∑_x ψ(s·Q x)`, factoring the config-Gram piece (the `ρ`-sum, → 2c) from the scaled global Gauss
+sum `∑_x ψ(s·Q x)`. -/
+theorem levelset_fourier_split (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (c : ZMod p)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive) :
+    ((Finset.univ.filter (fun x : Fin d → ZMod p =>
+        (∀ j, QuadraticMap.polar Q x (a j) = 0) ∧ Q x = c)).card : R')
+      * (p : R') ^ (m + 1)
+    = (∑ ρ : Fin m → ZMod p, ∑ x : Fin d → ZMod p,
+          ψ (QuadraticMap.polar Q x (∑ j, ρ j • a j)))
+      + ∑ s ∈ Finset.univ.erase (0 : ZMod p), ∑ ρ : Fin m → ZMod p,
+          ψ (-(s * c)) * (ψ (-(s⁻¹ * Q (∑ j, ρ j • a j))) * ∑ x : Fin d → ZMod p, ψ (s * Q x)) := by
+  rw [levelset_fourier_prod Q a c hψ,
+    ← Finset.add_sum_erase Finset.univ _ (Finset.mem_univ (0 : ZMod p))]
+  congr 1
+  · apply Finset.sum_congr rfl
+    intro ρ _
+    simp only [zero_mul, neg_zero, AddChar.map_zero_eq_one, one_mul, zero_add]
+  · apply Finset.sum_congr rfl
+    intro s hs
+    have hs0 : s ≠ 0 := Finset.ne_of_mem_erase hs
+    apply Finset.sum_congr rfl
+    intro ρ _
+    have hD1 := sum_addChar_quadForm_linear ψ Q (Units.mk0 s hs0) (∑ j, ρ j • a j)
+    rw [Units.val_mk0] at hD1
+    rw [hD1]
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -225,3 +257,4 @@ end ChainDescent
 #print axioms ChainDescent.reduction_to_levelset_nondeg
 #print axioms ChainDescent.levelset_fourier
 #print axioms ChainDescent.levelset_fourier_prod
+#print axioms ChainDescent.levelset_fourier_split
