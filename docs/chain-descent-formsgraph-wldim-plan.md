@@ -1001,11 +1001,16 @@ if B-M3's injectivity turns out to need concrete integers — likely avoidable).
    matrix-det route: `IsRefl.nondegenerate_iff_separatingLeft` (associated is symmetric) reduces to `SeparatingLeft`; from
    `∀ y, associated QR x y = 0` get `polar QR x eᵢ = 0` (`two_nsmul_associated` to dodge the `⅟2`-in-`End`), i.e. `G *ᵥ x = 0`,
    and `G` invertible ⟹ `x = 0` (the same `mulVec`/`nonsing_inv_mul` argument as `s0_boundary_collapse`). Needs `[Invertible (2:ZMod p)]`.
-3. **Orthogonal basis ⟹ anisotropic.** `exists_orthogonal_basis (associated QR).IsSymm` gives orthogonal `v` (NOT anisotropic
-   in general). For nondeg `QR`: if `QR(vᵢ)=0` then `associated QR vᵢ = 0` on the whole basis (orthogonality + `associated_eq_self_apply`)
-   ⟹ `vᵢ ∈ radical`, contradicting nondeg (`vᵢ ≠ 0`). Small lemma, the radical-trivial argument.
-4. **The two Gauss sums.** Direct: `sum_addChar_quadForm_smul` / `sum_quadForm_eval` (landed), inputs = the bases of (1) and
-   the fixed `Q`-basis, `hF : ringChar (ZMod 3) ≠ 2`, `[Invertible (2:ZMod 3)]`.
+3. **Orthogonal basis ⟹ anisotropic. ✅ DONE (2026-06-21, `configForm_exists_orthoBasis`, axiom-clean).** Cleaner than
+   planned — Mathlib already packages the radical argument: `exists_orthogonal_basis (associated_isSymm (ZMod p) QR)` gives
+   orthogonal `v`, and **`IsOrthoᵢ.not_isOrtho_basis_self_of_separatingLeft`** (fed gap-2's `SeparatingLeft`) +
+   `simp_rw [LinearMap.IsOrtho, associated_eq_self_apply]` yields `∀ i, QR (v i) ≠ 0` directly. Returns the `(v, hv, hw)`
+   triple indexed by `Fin (finrank ..)` — exactly the toolkit's index type (no `Fin m` reconciliation needed yet).
+4. **The two Gauss sums. ✅ config part DONE (2026-06-21, `configGaussSum_eval`, axiom-clean):**
+   `∑_ρ ψ(s·QR ρ) = χ(s)^n · (∏ᵢ χ(QR vᵢ)) · gaussSum^n` (`n = finrank`), composing `sum_addChar_quadForm_smul` +
+   `sum_quadForm_eval` (closes by `rfl`). This **isolates `∏ᵢ χ(QR vᵢ)` as the sole config-basis-dependent factor — the
+   clean approach point for gap-5.** The global `∑_x ψ(s·Q x) = χ(s)^d·W` is the same `sum_addChar_quadForm_smul`, applied
+   at assembly with the fixed `Q`-basis (`hF : ringChar (ZMod 3) ≠ 2`, `[Invertible (2:ZMod 3)]`).
 5. **★ The discriminant collapse `∏ᵢ χ(QR vᵢ) = χ(discr QR)` (gap-5, the crux tool-work).** In the orthogonal basis `v`,
    `associated QR` has matrix `diag(QR vᵢ)` (off-diag 0 by `IsOrthoᵢ`, diag `= QR vᵢ` by `associated_eq_self_apply`), so
    `∏ᵢ QR vᵢ = det(toMatrix v (associated QR))`; and `det(toMatrix v B) = (det of basis-change)²·det(toMatrix' B) = (unit)²·discr QR`

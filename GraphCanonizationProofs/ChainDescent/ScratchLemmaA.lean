@@ -391,6 +391,51 @@ theorem configForm_nondegenerate (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
     rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul G hG, Matrix.one_mulVec]
   rw [hxeq, hGx, Matrix.mulVec_zero]
 
+open scoped Classical in
+/-- **A-M4a gap-3 — an orthogonal *anisotropic* basis of the config form `QR`** (from nondegeneracy, gap-2). The
+`(v, hv, hw)` triple the Gauss toolkit (`sum_quadForm_eval` / `sum_addChar_quadForm_smul`) consumes.
+`exists_orthogonal_basis` gives orthogonal `v`; anisotropy `QR (v i) ≠ 0` follows because otherwise the functional
+`associated QR (v i)` vanishes on every basis vector (diagonal via `associated_eq_self_apply`, off-diagonal via
+`IsOrthoᵢ`), hence is `0`, putting `v i` in the (trivial, by gap-2) left radical — contradicting `Basis.ne_zero`. -/
+theorem configForm_exists_orthoBasis (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    [Invertible (2 : ZMod p)]
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin m) (Fin m) (ZMod p)).det) :
+    ∃ v : Module.Basis (Fin (Module.finrank (ZMod p) (Fin m → ZMod p))) (ZMod p) (Fin m → ZMod p),
+      (QuadraticMap.associated (configForm Q a)).IsOrthoᵢ v ∧
+      ∀ i, configForm Q a (v i) ≠ 0 := by
+  obtain ⟨v, hv⟩ := LinearMap.BilinForm.exists_orthogonal_basis
+    (QuadraticForm.associated_isSymm (ZMod p) (configForm Q a))
+  refine ⟨v, hv, ?_⟩
+  have hv₂ := hv.not_isOrtho_basis_self_of_separatingLeft (configForm_nondegenerate Q a hG).1
+  simp_rw [LinearMap.IsOrtho, QuadraticMap.associated_eq_self_apply] at hv₂
+  exact hv₂
+
+open scoped Classical in
+/-- **A-M4a gap-4 — the config-form Gauss sum** (composing the two landed toolkit lemmas). For an orthogonal
+anisotropic basis `v` of `QR = configForm Q a` and a unit scalar `s`,
+`∑_ρ ψ(s·QR ρ) = χ(s)^n · (∏ᵢ χ(QR vᵢ)) · gaussSum^n` (`n = finrank`, `χ` the quadratic character cast to `R'`).
+This isolates the basis-dependent factor `∏ᵢ χ(QR vᵢ)` — the **clean approach point for gap-5**, which replaces it by
+`χ(discr QR)`. (Global `∑_x ψ(s·Q x) = χ(s)^d·W` is the same `sum_addChar_quadForm_smul`, applied at assembly with a
+fixed `Q`-basis.) -/
+theorem configGaussSum_eval (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    [Invertible (2 : ZMod p)] (hF : ringChar (ZMod p) ≠ 2)
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive)
+    (v : Module.Basis (Fin (Module.finrank (ZMod p) (Fin m → ZMod p))) (ZMod p) (Fin m → ZMod p))
+    (hv : (QuadraticMap.associated (configForm Q a)).IsOrthoᵢ v)
+    (hw : ∀ i, configForm Q a (v i) ≠ 0) (s : (ZMod p)ˣ) :
+    (∑ ρ : Fin m → ZMod p, ψ ((s : ZMod p) * configForm Q a ρ))
+      = ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R')) (s : ZMod p)
+            ^ Module.finrank (ZMod p) (Fin m → ZMod p)
+        * ((∏ i, ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R'))
+              (configForm Q a (v i)))
+          * gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R')) ψ
+              ^ Module.finrank (ZMod p) (Fin m → ZMod p)) := by
+  rw [sum_addChar_quadForm_smul hF hψ (configForm Q a) v hv hw s,
+    sum_quadForm_eval hF hψ (configForm Q a) v hv hw]
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -406,3 +451,5 @@ end ChainDescent
 #print axioms ChainDescent.configForm_apply
 #print axioms ChainDescent.polar_configForm_single
 #print axioms ChainDescent.configForm_nondegenerate
+#print axioms ChainDescent.configForm_exists_orthoBasis
+#print axioms ChainDescent.configGaussSum_eval
