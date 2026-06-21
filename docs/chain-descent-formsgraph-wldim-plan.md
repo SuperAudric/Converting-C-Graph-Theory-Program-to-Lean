@@ -36,8 +36,10 @@
 > (2026-06-21, axiom-clean) — config side ASSEMBLED:** `configForm`/`polar_configForm_single`, `configForm_nondegenerate`,
 > `configForm_exists_orthoBasis`, `configGaussSum_eval`, `prod_quadChar_eq_det` (gap-5 crux), and the basis-free wrap-up
 > **`configGaussSum_eq_det`** (`∑_ρ ψ(s·QR ρ) = χ(s)^n·χ(D)·gaussSum^n`, config-dependence only through the invariant `D`).
-> **NEXT = the thin count-assembly bridge (§10.12)** then **B-M3** (own planning increment — start with the `decide`-feasibility
-> spike). A-M4b confirmed non-blocking (§10.11). Use the **size-9 base `T₉`** (§10.6).
+> **NEXT = B-M3 — full handoff in §10.13** (spike-informed: a minimal separating set is just **6 size-2 subsets**; the
+> per-coordinate structural route is **refuted**; recommended = **direct kernel `decide` over the 6-set**, gated on a
+> kernel-feasibility micro-spike, with the Lemma-A-reduced decide (the §10.12 count-assembly bridge) as fallback). A-M4b
+> confirmed non-blocking (§10.11). Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -841,11 +843,11 @@ No new obstruction surfaced while implementing; the reduction to a homogeneous l
 axiom-clean. The remaining A2/A5/A6 are linear-algebra/basis lifts, not new mathematics.
 
 ### 10.8 FULL MILESTONE PLAN for step 4 (Lemma A + Lemma B + assembly), beginning to end (2026-06-20)
-> **▶ FRESH READER — START HERE.** Landed & axiom-clean (WIP scratch, §10.5): A-M1, A-M2 (`ScratchLemmaA.lean`);
-> B-M1, B-M2-bridge (`ScratchLemmaB.lean`). The two novel reductions are done. **NEXT = A-M3** (the `card_quadForm_eq`
-> subspace lift — heaviest piece; detail in the A-M3 bullet below, incl. the filter→submodule sub-step and the
-> `F₃^n`-direct fallback). Then A-M4 → B-M3 → ASM. The capstone needs NO Witt (§10.5). Read §10.6 (architecture) +
-> §10.3 (the probe facts that constrain any proof) before starting.
+> **▶ FRESH READER — START HERE.** Landed & axiom-clean (WIP scratch, §10.5): the WHOLE A-side — Lemma A (A-M1…A-M4a,
+> all 5 gaps, `ScratchLemmaA.lean`, 17 decls) + B-M1 + B-M2-bridge (`ScratchLemmaB.lean`). **NEXT = B-M3** — the last
+> step; **its full handoff (gaps, tools, 3 spike-ranked approaches) is §10.13.** Then ASM. The capstone needs NO Witt
+> (§10.5). The A-M3/A-M4 milestone detail below is now build-history; the live frontier is §10.13. Read §10.6
+> (architecture) + §10.3 (probe facts) for background.
 
 The target is `IsotropySeparatesAtBase Q T₉`, consumed by the Witt-free capstone
 `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (CascadeAffine §OrthogonalForm) ⟹ sealed `VO⁻₄(3)` mod `{G3}`.
@@ -910,12 +912,14 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
   the config Gram and its nondegeneracy (`det ≠ 0`) are explicit functions of `θ(u)` and the fixed base. Establish the
   both-nondeg separation property of `T₉` (the §10.6 fact, as a finite check). Output: for both-nondeg `S'`,
   `count_u(S') = f_{S'}(θ(u))`.
-- **B-M3** — *injectivity ⟹ `IsotropySeparatesAtBase`.* From `{count_u(S')=count_{u'}(S') ∀S'}`: on every both-nondeg
-  `S'`, `f_{S'}(θ u)=f_{S'}(θ u')`; the `T₉` separation property ⟹ `θ u = θ u'` ⟹ `u=u'` (polar nondeg; generalize the
-  landed `coords_determine` to the polar-coordinate row `θ`). **Open sub-decision:** the Gram-level injectivity
-  `{f_{S'}(θ)=f_{S'}(θ') on both-nondeg S'} ⟹ θ=θ'` is finite over `F₃` Gram-parameters; prefer a structured proof via
-  the per-coordinate factoring (§10.3(F)) — plain `decide` is likely **too slow** (kernel; `native_decide` banned) at
-  `81²×|configs|`, so do not rely on it without a feasibility check.
+- **B-M3 — *injectivity ⟹ `IsotropySeparatesAtBase`.* ▶ FULL HANDOFF: §10.13 (gaps, tools, 3 spike-ranked approaches).**
+  Obligation: the restricted-count signature is injective over the 81 base points (`incidence_agree_V` already reduces the
+  antecedent to this). **Spike-updated picture (`/tmp/spike_bm3.py`, supersedes the cautions here):** (i) a **minimal
+  separating set is just 6 size-2 subsets** ⟹ the finite check is tiny; (ii) the **per-coordinate structural route is
+  REFUTED** (cross-coord collision) — recovery is joint; (iii) recommended = **direct kernel `decide` over the 6-set**
+  (no Lemma A; gate on a kernel-feasibility micro-spike since `native_decide` is banned), with the **Lemma-A-reduced
+  `decide`** (count → `F(detG,c_lev,corr)`, the §10.12 bridge) as the robust fallback. `coords_determine` is needed only
+  for a structured route, not for a pure `decide` over `u`.
 
 #### Assembly
 - **ASM** — instantiate `Q = x₀x₁+x₂²+x₃²` over `ZMod 3`, base `T₉`, `T₉.card ≤ 9`; compose B-M3 ⟹
@@ -932,10 +936,11 @@ B-M3 needs B-M2; ASM needs {A-M4, B-M3}. Lemma A (A-M2..A-M4) and B-M1 can proce
    is a hard constraint on the base choice — record `T₉`, not the size-6 base, as the live target. (Corrects §10.6.)
 2. **The `z≠u` correction** (`Z̃` vs raw `Z`) must be threaded through B-M1; the correction term is the shell-blind
    `x=u` indicator.
-3. **B-M3's Gram-injectivity is `decide`-feasible — DE-RISKED (§10.10 spike).** `N = N(m, det G, c_lev)` factors through
-   the **tiny** `F₃` Gram-tuple space (`m=1→3`, `m=2→27`, `m=3→729`, worst case 729), so the endpoint injectivity is a
-   small finite check, NOT the feared `81²×configs`. The structured per-coordinate factoring (§10.3(F)) is a *fallback*,
-   no longer the only option. (Still verify the kernel `decide` cost on the actual Gram-tuple formulation before relying.)
+3. **B-M3's injectivity is `decide`-feasible — DE-RISKED (§10.10 + §10.13 spikes).** `N = N(m, det G, c_lev)` factors
+   through the **tiny** `F₃` Gram-tuple space (≤729), and §10.13's spike found a **minimal separating set of just 6 size-2
+   subsets** — so the endpoint is a small finite check, NOT the feared `81²×configs`. **Per §10.13, the per-coordinate
+   structural route (§10.3(F)) is REFUTED (recovery is joint); the recommended route is a direct kernel `decide`** (gate on
+   a kernel-feasibility micro-spike; `native_decide` banned). Full B-M3 plan/approaches: **§10.13**.
 4. **`coords_determine` must be generalized** from the standard frame to the polar-coordinate row `θ` over `T₉`
    (B-M3) — a mild lift of the landed lemma.
 5. **A-M3's subspace machinery is AVOIDED — superseded by Route B (§10.10).** The single biggest Mathlib lift (restrict
@@ -1061,6 +1066,67 @@ count `= F(D, c_lev)`.
 4. **Recover `θ(u)` ⟹ `u = u'`** via a `coords_determine` generalization to the polar-row `θ`.
 Landed B-side inputs ready for B-M3: `incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`
 (`ScratchLemmaB.lean`).
+
+### 10.13 B-M3 HANDOFF — counts recover `u` (the last step to the `VO⁻₄(3)` instance seal). Spike-informed, 2026-06-21.
+> **▶ FRESH READER START HERE for B-M3.** A-side (Lemma A / A-M4a) is COMPLETE and axiom-clean (`ScratchLemmaA.lean`,
+> §10.11/§10.12). B-side B-M1 + B-M2-bridge landed (`ScratchLemmaB.lean`). B-M3 is the final piece: prove
+> `IsotropySeparatesAtBase Q T₉`, which (via the Witt-free capstone `reachesRigidOrCameron_viaIsotropySeparates_wittFree`)
+> seals `VO⁻₄(3)` mod `{G3}`.
+
+**The logical chain (what's proved, what remains).**
+- `IsotropySeparatesAtBase Q T₉` = `∀ u u', (fine isotropy-count antecedent) → u = u'`.
+- **B-M1 (LANDED, `incidence_agree_V`):** the antecedent ⟹ the **restricted** counts agree for every `S' ⊆ T₉`:
+  `restricted_u(S') = restricted_{u'}(S')`, where `restricted_w(S') = #{y ≠ 0 : Q y = 0 ∧ ∀ t∈S', Q(y − (t̄−w̄)) = 0}`.
+- **B-M3 obligation:** `(restricted_u(S') = restricted_{u'}(S') ∀ S'⊆T₉) ⟹ u = u'` — i.e. **the restricted-count signature
+  is injective over the 81 base points.** Everything below is about discharging this one finite implication.
+
+**Spike (`/tmp/spike_bm3.py`, reproduction spec below) — the decisive facts:**
+- **(A) `restricted_w(S')` is a function of `(m, detG, c_lev, corr)`** — 0 MULTI over all nondeg configs (18 classes);
+  `corr = [∀t∈S', Q(t̄−w̄)=0]` is the `y=0` bit (`cone_count_zero_split`). So per-point counts reduce to cheap `F₃` data.
+- **(B) ★ A minimal separating set is just 6 subsets, all of size 2.** The restricted-signature over **6 well-chosen
+  `|S'|=2` subsets** is already injective over the 81 base points (full-`S'` signature is 81/81). This is the key
+  enabler: the finite check is tiny (`81 × 6 ×` a `2×2` `F₃` count/determinant).
+- **(C) ✗ Single-coordinate (structural) recovery is REFUTED.** The "through-`t₀`" counts (`|S'|≤3` containing a fixed base
+  point) do NOT determine that coordinate `Q(ū−t̄₀)` — cross-coordinate collision = True. **Recovery is irreducibly joint**
+  (consistent with §10.3(F)); the naive per-coordinate route is out. Only joint approaches survive.
+
+**The exact remaining gaps.**
+- **B-M3.G1 (THE CRUX) — the finite joint injectivity:** the restricted-signature (over a separating family of `S'`) is
+  injective over `Fin 81`. Spike-validated; the question is the **proof method** (decide vs structured) given
+  `native_decide` is BANNED — kernel `decide` only.
+- **B-M3.G0 (count-assembly bridge, A-side leftover; needed for the reduced decide only):** `fullcount_w(S') = F(D_w(S'),
+  c_lev,w(S'))` for nondeg config — the §10.12 substitution of `configGaussSum_eq_det` + global `χ(s)^d·W` into
+  `levelset_count_eq`. Turns each 81-point count into cheap `(detG, c_lev)` data.
+- **B-M3.G2 — reduce the antecedent + final glue:** B-M1 already collapses the `σ:Fin(p^d)→Fin 3` quantifier to the
+  `S'⊆T₉` conditions; the residue is wiring (a `Finset S'→Fin m` reindex for the Lemma-A application, and—if a structured
+  route is used—generalizing `coords_determine` (CascadeAffine:2640) to the polar-row `θ`). A pure `decide` over `u` needs
+  no `coords_determine`.
+
+**The three approaches (spike-ranked):**
+1. **Direct `decide` (no Lemma A) — TRY FIRST.** Decide "restricted-signature over the 6 size-2 separating `S'` is
+   injective over `Fin 81`" using the **direct** 81-point counts. Code is short; needs NO A-M4a. **Risk = kernel
+   feasibility:** ~`81×6` signature builds × an 81-point `F₃` filter card each (~tens of thousands of kernel reductions;
+   `native_decide` banned). **First action: a tiny kernel-`decide` feasibility spike** (e.g. decide one 81-point
+   `restricted` count, time it) before committing.
+2. **Lemma-A-reduced `decide` (robust fallback).** Prove B-M3.G0, replace each restricted count by `F(detG, c_lev, corr)`
+   (a `2×2` `F₃` determinant + a `2×2` solve — ~10× cheaper than an 81-point count) and `decide` over those. Strictly
+   smaller per-evaluation; this is where the A-M4a investment pays off if Approach 1's kernel cost is too high.
+3. **Structural per-coordinate — REFUTED (spike C).** Do not pursue independent-coordinate recovery; recovery is joint.
+
+**Recommendation.** Try **Approach 1** (direct `decide` over the 6-set) gated on a kernel-feasibility micro-spike; fall
+back to **Approach 2** if the kernel chokes. Either way the 6-size-2 separating family (spike B) is the enabler. Caveat:
+for Approach 2 the chosen `S'` must be both-nondeg for the compared `u` (Lemma A is nondeg-only); Approach 1 is
+nondeg-agnostic (direct counts), so it sidesteps that.
+
+**Reproduction spec (rebuild `/tmp/spike_bm3.py`):** `V=F₃⁴`, `Q=x₀x₁+x₂²+x₃²`, `polar(x,y)=Q(x+y)−Qx−Qy`;
+`T₉ = {0,e₀,e₁,e₂,e₃,(0,0,0,2),(1,1,1,1),(1,2,1,2),(1,0,1,0)}`; `restricted_u(S') = #{y≠0 : Qy=0 ∧ ∀t∈S', Q(y−(t−u))=0}`;
+config Gram `Gᵢⱼ=polar(tᵢ−u,tⱼ−u)`, `c_lev=−Q(w₀)` with `G·c=(Q(tⱼ−u))ⱼ`, `w₀=∑cⱼ(tⱼ−u)`, `corr=[∀t∈S',Q(t−u)=0]`.
+Check (A) `restricted` single-valued per `(m,detG,c_lev,corr)`; (B) greedy-minimal separating set over all `S'⊆T₉`;
+(C) through-`t₀` (`|S'|≤3`) signature vs `Q(u−t₀)` cross-coord collision.
+
+**Landed inputs ready for B-M3** (`ScratchLemmaB.lean`, all axiom-clean): `coarse_incidence_agree`, `incidence_to_V`,
+`incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`. A-side: all of `ScratchLemmaA.lean`
+(`configGaussSum_eq_det` is the A-M4a endpoint for Approach 2).
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity
