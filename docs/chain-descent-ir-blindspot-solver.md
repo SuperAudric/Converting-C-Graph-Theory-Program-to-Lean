@@ -984,3 +984,13 @@ load-bearing conjecture** ("no non-abelian CFI") — empirically solid, not a th
 structure/non-linear cell (still open, still no witness) — the insight removes the symmetry half of the wall only.
 **Empirical test (not yet run):** try to hide a non-abelian symmetry as decisions, or rigidify a Johnson base (predict:
 the non-abelian symmetry leaks back as residual gauge ⟹ not rigid).
+
+**★ Refined into a standalone target (2026-06-21): [`chain-descent-cameron-entanglement.md`](./chain-descent-cameron-entanglement.md).**
+The dual-attack pass sharpened this: the load-bearing duality is *"symmetry separable from structure"* — **abelian
+symmetry is separable** (CFI ⟺ multipede; the IR-solver is the rigid dual), **non-abelian is conjecturally integral**
+(no rigid-Cameron). The iff "rigid-Cameron exists ⟺ real Cameron exists" is **false** (it would rigidify a non-abelian
+symmetry); its failure *separates* the two walls cleanly rather than collapsing them (Cameron = `b(Aut)`, classified;
+the wall = structural gap, no witness). The provable target = **"no rigid-Cameron / non-abelian symmetry is
+non-separable"** — closes the rigid seal's "or Cameron" and explains why the symmetry seal keeps it. The new doc has the
+classification-battery decomposition, the attack menu (Route A geometric-rigidity = best first target, Johnson by hand;
+Route B the unifying conjecture), and the step list.
