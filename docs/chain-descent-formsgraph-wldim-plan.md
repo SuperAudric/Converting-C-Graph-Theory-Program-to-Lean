@@ -36,10 +36,14 @@
 > (2026-06-21, axiom-clean) — config side ASSEMBLED:** `configForm`/`polar_configForm_single`, `configForm_nondegenerate`,
 > `configForm_exists_orthoBasis`, `configGaussSum_eval`, `prod_quadChar_eq_det` (gap-5 crux), and the basis-free wrap-up
 > **`configGaussSum_eq_det`** (`∑_ρ ψ(s·QR ρ) = χ(s)^n·χ(D)·gaussSum^n`, config-dependence only through the invariant `D`).
-> **NEXT = B-M3 — full handoff in §10.13** (spike-informed: a minimal separating set is just **6 size-2 subsets**; the
-> per-coordinate structural route is **refuted**; recommended = **direct kernel `decide` over the 6-set**, gated on a
-> kernel-feasibility micro-spike, with the Lemma-A-reduced decide (the §10.12 count-assembly bridge) as fallback). A-M4b
-> confirmed non-blocking (§10.11). Use the **size-9 base `T₉`** (§10.6).
+> **NEXT = B-M3 — full handoff in §10.13. ★ KERNEL-FEASIBILITY MICRO-SPIKE PASSED (2026-06-21,
+> `ChainDescent/ScratchBM3Spike.lean`): Approach 1 (direct kernel `decide`) is FEASIBLE** — the restricted-signature
+> injectivity over all 81 base points, in a `Nat`/`List` encoding over the 6 size-2 pairs, kernel-`decide`s in **~17s**
+> (no `native_decide`; `#eval` agrees). **Committed to Approach 1.** Remaining B-M3 = (1) bridge each abstract
+> `Finset (Fin d→ZMod p)` restricted count to the Nat proxy via `finFunctionFinEquiv` (elaboration-only, no decide cost),
+> (2) the landed decide, (3) trivial glue through `incidence_agree_V`, (4) ASM. NO `coords_determine`/A-side/`corr`
+> needed. A-side (`configGaussSum_eq_det`) = generalization/fallback asset only. Per-coordinate structural route refuted
+> (§10.13 spike C). A-M4b non-blocking (§10.11). Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -1127,6 +1131,34 @@ Check (A) `restricted` single-valued per `(m,detG,c_lev,corr)`; (B) greedy-minim
 **Landed inputs ready for B-M3** (`ScratchLemmaB.lean`, all axiom-clean): `coarse_incidence_agree`, `incidence_to_V`,
 `incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`. A-side: all of `ScratchLemmaA.lean`
 (`configGaussSum_eq_det` is the A-M4a endpoint for Approach 2).
+
+**★ MICRO-SPIKE RESULT (2026-06-21, `ChainDescent/ScratchBM3Spike.lean`) — APPROACH 1 IS FEASIBLE; commit to it.**
+Kernel `decide` of the full restricted-signature injectivity over all 81 base points, using a **kernel-friendly
+`Nat`/`List` encoding** (point `n∈0..80` ↔ coords `co n i=(n/3^i)%3`; counts via `List.range 81` + Bool filter; pure
+accelerated `Nat.beq`/`Nat.mod` — deliberately NO `Finset`/`Pi.fintype` Quot), phrased as an image-card Bool
+`injOver81 := allDistinct ((List.range 81).map sig)` over the **6 size-2 pairs** (T₉ codes
+`[(0,9),(27,10),(1,3),(27,70),(9,54),(1,40)]`, from `/tmp/bm3_lean_targets.py`): **succeeds in ~17s** (~8.2s
+elaboration + ~8.6s kernel; single counts ~120ms). `native_decide` NOT used. `#eval injOver81 = true` agrees. So the
+combinatorial core is kernel-decidable at acceptable cost.
+- **What it does/doesn't establish.** It proves the *Nat-encoded proxy* is kernel-feasible. The remaining work for the
+  REAL proof is the **bridge** from the abstract restricted count `#{y:Fin d→ZMod p | y≠0 ∧ Qy=0 ∧ ∀t∈S', Q(y−(t̄−ū))=0}`
+  (`incidence_agree_V`'s object) to the Nat `restricted` — i.e. transport along the digit equiv
+  **`finFunctionFinEquiv : (Fin d→Fin p)≃Fin (p^d)`** (our `co` is exactly its inverse, with `ZMod p = Fin p`) via one
+  `Finset.card_bij`/`card_nbij`, matching `Qc`/`Qsh` to `Q`. The bridge adds NO kernel-decide cost (the decide still runs
+  on the Nat proxy); it is elaboration-only, mechanical. Deciding the abstract `Finset (Fin d→ZMod p)` counts *directly*
+  (the `Pi.fintype` path) was deliberately NOT tested and is expected far slower — **do not** go that way; bridge to Nat.
+- **B-M3 plan (committed, Approach 1):**
+  1. **Bridge lemma** `restricted_eq_nat`: each abstract restricted count = the Nat `restricted u t1 t2` (via
+     `finFunctionFinEquiv`/`co`, `Finset.card_nbij`, `ZMod.natCast`/`Fin` coords). Reusable; one lemma per the count shape.
+  2. **The decide** `injOver81 = true` (landed in the spike) ⟹ `∀ u u' : Fin 81, sig u = sig u' → u = u'` (pure Nat/List,
+     kernel `decide`, ~17s).
+  3. **Glue:** `IsotropySeparatesAtBase Q T₉` ← `incidence_agree_V` (antecedent ⟹ restricted counts agree ∀S'⊆T₉) ⟹ (the
+     6 chosen S' ⊆ T₉ agree) ⟹ (via bridge) `sig u = sig u'` ⟹ (decide) `u = u'`. The "agree on all S' ⟹ agree on the 6"
+     step is trivial Finset wiring. **No `coords_determine` / no A-side / no `corr` needed** (restricted, not full count).
+  4. **ASM:** instantiate `VO⁻₄(3)` (Q = x₀x₁+x₂²+x₃² on `Fin 4→ZMod 3`) + `T₉`, feed
+     `reachesRigidOrCameron_viaIsotropySeparates_wittFree`, port `ScratchLemmaB` + the spike's decide into a real module.
+  Approach 2 (Lemma-A-reduced decide via `configGaussSum_eq_det`) and the A-side stay as the **generalization (M5) /
+  fallback** asset — not on the instance-seal critical path.
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity
