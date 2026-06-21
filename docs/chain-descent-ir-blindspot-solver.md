@@ -807,9 +807,20 @@ k-layer F₂ tower, carries included: solving mod 2 makes the low-bit sum `S₀`
 clean inhomogeneous F₂ system on the high bits (`b₁x+b₁y+b₁z ≡ (c−S₀)/2 mod 2`), and so on (the 2-adic content of Smith
 normal form). So **iterative-F₂-*with-individualization* = `Z_{2^k}` solving.** Lichter does *not* refute this: his lower
 bound is on **FPC + F₂-rank, which cannot individualize** — it computes the global F₂-rank statically, exactly missing
-the 2-torsion; the IR-solver individualizes. **The one genuinely open, probe-able question is layer exposure:** after
-pinning layer j's solution, does 1-WL/forcing surface layer (j+1)'s F₂ constraints in the graph? Algebraically they are
-present; whether the encoding reveals them is the next probe (a small `Z₄` multipede).
+the 2-torsion; the IR-solver individualizes.
+
+**★ Z₄ PROBE DONE (2026-06-21, `/tmp/z4_probe.py`) — Z₄ (2²) IS HANDLED, both levels.** (A) **Algebra:** iterative F₂
+(solve mod 2 → carry `(c−Hx₀)/2` → solve mod 4) recovers the **unique** Z₄ solution of a rigid Z₄ system, matching brute
+force, on circulant m=6,8,9. (B) **Graph (native Z₄-multipede:** 4-state segments, gadgets `Σ ≡ 0 mod 4`, rigid by odd
+base via Nakayama): cold 1-WL sees only fused 4-cells (the Z₄ gauge hides even mod 2), but **pinning 2 segments' true
+values cascades to resolve ALL segments** — 1-WL **realizes Z₄-forcing directly**, with the *same* forcing number as the
+F₂ multipede on the base (2 pins, circulant m=6). **★ SHARPENING (corrects the "layer exposure" framing):** for the
+*native* encoding there are no layers to expose — **1-WL forces the full ring at once** (full-value pins propagate;
+**parity-only / mod-2 info does NOT propagate**). The F₂-tower is the *solving* decomposition (Smith / iterative-F₂ on
+the **extracted** Z₄ system), **not** how the graph forces. So native `Z_{2^k}` = the F₂ multipede *one ring up*: ring
+inferred from the segment cell-size (`4 ⟹ Z₄`), same forcing/individualization, solve by Smith-normal-form. **Route (b)
+validated for Z₄.** *Honest scope:* this is the natural rigid Z₄-multipede; whether Lichter's *specific* FPC+rank-hard
+encoding is equally 1-WL-forcing-extractable is a finer open point (it may encode the ring to resist WL harder).
 
 **"Never flag on rigid" = rigid-GI ∈ P = the seal's `hSmallAutThin` wall.** The adaptive IR-solver is **not a logic**, so
 Gurevich's no-logic-for-P does *not* imply it must flag — that bites only *fixed* engines (fixed ring, fixed WL-level),
@@ -834,5 +845,6 @@ reduces the multipede from the high-rank side, and **both leave the identical re
 case, which §9.9.18 argues *cannot be a WL-closure residue* and relocates to this solver's flag floor. The two tracks
 meet at exactly the same open wall.
 
-**Next concrete step:** the `Z₄`-multipede **layer-exposure probe** — does iterative F₂ peel a true ring tower under
-individualization? The one thing the algebra leaves to the encoding.
+**Next concrete step:** the Z₄ probe is DONE (above — Z₄ handled, route (b) validated). Remaining finer points: (i)
+whether Lichter's *specific* hard encoding is 1-WL-forcing-extractable like the natural Z₄-multipede; (ii) the C# build
+itself — productionize D1/D2/D4 and wire at `ChainDescent.Search` `target == -1` (the gap-roadmap of the design pass).
