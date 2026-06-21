@@ -354,6 +354,43 @@ theorem polar_configForm_single (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
       = QuadraticMap.polar Q (a i) (a j) := by
   rw [polar_configForm, linComb_single, linComb_single]
 
+open scoped Classical in
+/-- **A-M4a gap-2 — the config form's associated bilinear is nondegenerate** (from `IsUnit G.det`). If
+`∀ y, associated QR x y = 0`, then in particular `polar QR x (eᵢ) = 0 ∀ i`, i.e. `G *ᵥ x = 0`, and `G` invertible
+forces `x = 0` (left-separating); symmetry of `associated QR` upgrades to `Nondegenerate`. Gateway to the orthogonal
+anisotropic basis (gap-3). -/
+theorem configForm_nondegenerate (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    [Invertible (2 : ZMod p)]
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin m) (Fin m) (ZMod p)).det) :
+    (QuadraticMap.associated (R := ZMod p) (configForm Q a)).Nondegenerate := by
+  set G : Matrix (Fin m) (Fin m) (ZMod p) :=
+    Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) with hGdef
+  rw [LinearMap.IsRefl.nondegenerate_iff_separatingLeft
+      (QuadraticForm.associated_isSymm (ZMod p) (configForm Q a)).isRefl]
+  intro x hx
+  have hGx : G *ᵥ x = 0 := by
+    funext i
+    have hp : QuadraticMap.polar (configForm Q a) x (Pi.single i 1) = 0 := by
+      have hpb : QuadraticMap.polar (configForm Q a) x (Pi.single i 1)
+          = 2 • (QuadraticMap.associated (R := ZMod p) (configForm Q a) x (Pi.single i 1)) := by
+        rw [← QuadraticMap.polarBilin_apply_apply, ← two_nsmul_associated (S := ZMod p)]
+        simp only [LinearMap.smul_apply]
+      rw [hpb, hx (Pi.single i 1), smul_zero]
+    rw [polar_configForm, linComb_single] at hp
+    rw [Pi.zero_apply, Matrix.mulVec, dotProduct]
+    rw [show (∑ j, G i j * x j)
+        = QuadraticMap.polar Q (Fintype.linearCombination (ZMod p) a x) (a i) from ?_]
+    · exact hp
+    · rw [Fintype.linearCombination_apply, QuadraticMap.polar_comm,
+        ← polar_sum_right Q (a i) Finset.univ x a]
+      exact Finset.sum_congr rfl (fun j _ => by
+        rw [hGdef, Matrix.of_apply, mul_comm, QuadraticMap.polar_comm Q (a i) (a j)])
+  have hxeq : x = G⁻¹ *ᵥ (G *ᵥ x) := by
+    rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul G hG, Matrix.one_mulVec]
+  rw [hxeq, hGx, Matrix.mulVec_zero]
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -368,3 +405,4 @@ end ChainDescent
 #print axioms ChainDescent.levelset_count_eq
 #print axioms ChainDescent.configForm_apply
 #print axioms ChainDescent.polar_configForm_single
+#print axioms ChainDescent.configForm_nondegenerate

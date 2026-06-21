@@ -997,9 +997,10 @@ if B-M3's injectivity turns out to need concrete integers — likely avoidable).
 1. **Build `QR` + Gram = `G`. ✅ DONE (2026-06-21, `ScratchLemmaA.lean`, axiom-clean):** `configForm Q a := Q.comp (Fintype.linearCombination (ZMod p) a)`;
    `configForm_apply` (`QR ρ = Q(∑ⱼρⱼaⱼ)`); `polar_configForm` (transports along `L`); **`polar_configForm_single`** (`polar QR eᵢ eⱼ = polar Q aᵢ aⱼ = Gᵢⱼ`).
    `L = Fintype.linearCombination`, `L (Pi.single i 1) = aᵢ` (`linComb_single`).
-2. **`QR` nondegenerate ⟸ `IsUnit G.det` (NEXT).** Route: `BilinForm.toMatrix (Pi.basisFun) (associated QR) = ⅟2 • G`
-   (`toMatrix_apply` + `basisFun_apply` + `associated_apply` + step-1's `polar_configForm_single`), then `Matrix.det_smul` ⟹
-   `det = (⅟2)^m·det G ≠ 0`, and `LinearMap.BilinForm.nondegenerate_of_det_ne_zero (Pi.basisFun)` gives `(associated QR).Nondegenerate`.
+2. **`QR` nondegenerate ⟸ `IsUnit G.det`. ✅ DONE (2026-06-21, `configForm_nondegenerate`, axiom-clean).** Cleaner than the
+   matrix-det route: `IsRefl.nondegenerate_iff_separatingLeft` (associated is symmetric) reduces to `SeparatingLeft`; from
+   `∀ y, associated QR x y = 0` get `polar QR x eᵢ = 0` (`two_nsmul_associated` to dodge the `⅟2`-in-`End`), i.e. `G *ᵥ x = 0`,
+   and `G` invertible ⟹ `x = 0` (the same `mulVec`/`nonsing_inv_mul` argument as `s0_boundary_collapse`). Needs `[Invertible (2:ZMod p)]`.
 3. **Orthogonal basis ⟹ anisotropic.** `exists_orthogonal_basis (associated QR).IsSymm` gives orthogonal `v` (NOT anisotropic
    in general). For nondeg `QR`: if `QR(vᵢ)=0` then `associated QR vᵢ = 0` on the whole basis (orthogonality + `associated_eq_self_apply`)
    ⟹ `vᵢ ∈ radical`, contradicting nondeg (`vᵢ ≠ 0`). Small lemma, the radical-trivial argument.
