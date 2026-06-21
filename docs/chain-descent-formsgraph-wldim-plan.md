@@ -36,14 +36,16 @@
 > (2026-06-21, axiom-clean) — config side ASSEMBLED:** `configForm`/`polar_configForm_single`, `configForm_nondegenerate`,
 > `configForm_exists_orthoBasis`, `configGaussSum_eval`, `prod_quadChar_eq_det` (gap-5 crux), and the basis-free wrap-up
 > **`configGaussSum_eq_det`** (`∑_ρ ψ(s·QR ρ) = χ(s)^n·χ(D)·gaussSum^n`, config-dependence only through the invariant `D`).
-> **NEXT = B-M3 — full handoff in §10.13. ★ KERNEL-FEASIBILITY MICRO-SPIKE PASSED (2026-06-21,
-> `ChainDescent/ScratchBM3Spike.lean`): Approach 1 (direct kernel `decide`) is FEASIBLE** — the restricted-signature
-> injectivity over all 81 base points, in a `Nat`/`List` encoding over the 6 size-2 pairs, kernel-`decide`s in **~17s**
-> (no `native_decide`; `#eval` agrees). **Committed to Approach 1.** Remaining B-M3 = (1) bridge each abstract
-> `Finset (Fin d→ZMod p)` restricted count to the Nat proxy via `finFunctionFinEquiv` (elaboration-only, no decide cost),
-> (2) the landed decide, (3) trivial glue through `incidence_agree_V`, (4) ASM. NO `coords_determine`/A-side/`corr`
-> needed. A-side (`configGaussSum_eq_det`) = generalization/fallback asset only. Per-coordinate structural route refuted
-> (§10.13 spike C). A-M4b non-blocking (§10.11). Use the **size-9 base `T₉`** (§10.6).
+> **▶▶▶ `VO⁻₄(3)` SEALED (2026-06-21, axiom-clean) — B-M3 + WIRING + SEAL ALL DONE via Approach 1.** `vo4minus_seal`
+> (`ChainDescent/ScratchBM3Glue.lean`) proves the Witt-free capstone's conclusion for the bundled minus-form
+> `Qbun = x₀x₁+x₂²+x₃²` at the size-9 base `T₉`, modulo cited `{G3}` — carrying NO `hSmallAutThin`, NO Witt. Chain:
+> `isoSep : IsotropySeparatesAtBase Qbun T₉` (B-M1 `incidence_agree_V` → restricted counts agree → bridge
+> `restricted_bridge` → decided `sigF_injective` over `Finset (Fin 81)`, ~20s kernel `decide`, no `native_decide`) →
+> `reachesRigidOrCameron_viaIsotropySeparates_wittFree`. All 4 scratch modules (ScratchLemmaA/B + ScratchBM3Bridge/Glue)
+> axiom-clean `[propext, Classical.choice, Quot.sound]` (verified `lake env lean` + `lake build` oleans). **ONLY remaining
+> step = PORT** the 4 scratch modules into `build.sh`/`lakefile.toml` + regen `PublicTheoremIndex.md` + green build (no new
+> math). See §10.13 completion block. Tier-2 (M5 all q/d, families d/e/f, Skresanov, char-2) unchanged. The A-side
+> (`configGaussSum_eq_det`) is the generalization asset for M5, not on this instance's critical path.
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -1132,7 +1134,33 @@ Check (A) `restricted` single-valued per `(m,detG,c_lev,corr)`; (B) greedy-minim
 `incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`. A-side: all of `ScratchLemmaA.lean`
 (`configGaussSum_eq_det` is the A-M4a endpoint for Approach 2).
 
-**★ MICRO-SPIKE RESULT (2026-06-21, `ChainDescent/ScratchBM3Spike.lean`) — APPROACH 1 IS FEASIBLE; commit to it.**
+**★★★ B-M3 + WIRING + SEAL COMPLETE (2026-06-21, all axiom-clean `[propext, Classical.choice, Quot.sound]`).** Approach 1
+executed end-to-end. The `VO⁻₄(3)` residue is SEALED modulo cited `{G3}`. Two new scratch modules (verified via
+`lake env lean` + `lake build` oleans; NOT yet ported into `build.sh`/`lakefile` — that's the only remaining step):
+- **`ChainDescent/ScratchBM3Bridge.lean`** (Mathlib-only) — the bridge + decided injectivity:
+  - `co_encV` (digit decode = coord `val`, via `finFunctionFinEquiv_symm_apply_val`), `QvoVal`/`Qc_encV`/`Qsh_encV`
+    (ZMod-3↔Nat arithmetic; leaf identities by `decide`, `%3` nesting by `omega`), `encV_val_zero`.
+  - **`restricted_bridge`** — the abstract `VO⁻₄(3)` restricted count over `Fin 4→ZMod 3` (the Lemma-B object) = the
+    pure-`Nat`-predicate count `restrictedF` over `Finset (Fin 81)` at the digit-codes (transport along the *computable*
+    `encV = finFunctionFinEquiv`, NOT the opaque `affineE`; `Finset.card_nbij'`).
+  - **`sigF_injective`** — `Function.Injective sigF` by kernel `decide` (~20s, no `native_decide`), the 6-size-2 family.
+- **`ChainDescent/ScratchBM3Glue.lean`** (imports CascadeAffine + ScratchLemmaB + ScratchBM3Bridge):
+  - `Bil`/`Qbun` (the bundled minus-form `x₀x₁+x₂²+x₃²` via `LinearMap.mk₂` → `toQuadraticMap`), `Qbun_apply`.
+  - `Bv` (9 base vectors), `T₉ := univ.image (affineE ∘ Bv)`, `hcard9` (`|T₉|≤9`), `Sij_subset`.
+  - `vcount_eq` (B-M1's incidence count = `restrictedF` at codes: `∀t∈{·,·}` unfolded, `Qbun→Qvo`,
+    `affineE.symm∘affineE=id`), `comp_eq` (per-pair agreement via `incidence_agree_V`).
+  - **`isoSep : IsotropySeparatesAtBase Qbun T₉`** — the B-M3 target: antecedent ⟹ (via B-M1) restricted counts agree
+    ⟹ `sigF (encV (affineE.symm u)) = sigF (encV (affineE.symm u'))` ⟹ (`sigF_injective`) `encV∘affineE.symm` equal
+    ⟹ `u = u'`. NO `coords_determine`, NO A-side, NO `corr`.
+  - **`vo4minus_seal`** — `reachesRigidOrCameron_viaIsotropySeparates_wittFree Qbun T₉ hcard9 isoSep`: THE SEAL.
+- **Decisions banked:** kernel `decide` over `Finset (Fin 81)` with a `Nat` predicate (~20s) vs the `Pi.fintype` path
+  (~321 ms/count → ~5 min, rejected). The bridge adds NO decide cost (elaboration-only); `affineE` opacity dodged by
+  *choosing* `T₉ = image affineE` of a concrete vector base.
+- **Remaining = PORT only:** move the 4 scratch modules into `build.sh` + `lakefile.toml`, regen `PublicTheoremIndex.md`,
+  full green build. (Tier-2 generalization M5 / Skresanov / char-2 unchanged.)
+
+**★ MICRO-SPIKE RESULT (2026-06-21) — APPROACH 1 IS FEASIBLE; commit to it.** (Spike file `ScratchBM3Spike.lean` deleted —
+superseded by `ScratchBM3Bridge.sigF_injective`, the real decided injectivity.)
 Kernel `decide` of the full restricted-signature injectivity over all 81 base points, using a **kernel-friendly
 `Nat`/`List` encoding** (point `n∈0..80` ↔ coords `co n i=(n/3^i)%3`; counts via `List.range 81` + Bool filter; pure
 accelerated `Nat.beq`/`Nat.mod` — deliberately NO `Finset`/`Pi.fintype` Quot), phrased as an image-card Bool
