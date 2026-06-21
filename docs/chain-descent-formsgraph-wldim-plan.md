@@ -994,10 +994,12 @@ if B-M3's injectivity turns out to need concrete integers — likely avoidable).
   on `QR`, with the gap-5 collapse `∏ᵢ χ(QR vᵢ) = χ(discr QR)` (below).
 
 **Gaps + tools (all located, Mathlib-present):**
-1. **Build `QR` + Gram = `G`.** `QR := Q.comp L`; `QR ρ = Q(∑ⱼρⱼaⱼ)` (`QuadraticMap.comp_apply`); `polar QR eᵢ eⱼ = polar Q aᵢ aⱼ = Gᵢⱼ`
-   (`QuadraticMap.polar_comp` + `L eᵢ = aᵢ`). `L` = the linear-combination map (`Fintype.linearCombination`/`Matrix.mulVecLin`).
-2. **`QR` nondegenerate ⟸ `IsUnit G.det`.** `QR.toMatrix' = ½·G` (`associated_apply` + step 1), so `discr QR = 2^{−m} det G ≠ 0`;
-   `LinearMap.BilinForm.nondegenerate_iff_det_ne_zero` (the std basis) gives `(associated QR).Nondegenerate`.
+1. **Build `QR` + Gram = `G`. ✅ DONE (2026-06-21, `ScratchLemmaA.lean`, axiom-clean):** `configForm Q a := Q.comp (Fintype.linearCombination (ZMod p) a)`;
+   `configForm_apply` (`QR ρ = Q(∑ⱼρⱼaⱼ)`); `polar_configForm` (transports along `L`); **`polar_configForm_single`** (`polar QR eᵢ eⱼ = polar Q aᵢ aⱼ = Gᵢⱼ`).
+   `L = Fintype.linearCombination`, `L (Pi.single i 1) = aᵢ` (`linComb_single`).
+2. **`QR` nondegenerate ⟸ `IsUnit G.det` (NEXT).** Route: `BilinForm.toMatrix (Pi.basisFun) (associated QR) = ⅟2 • G`
+   (`toMatrix_apply` + `basisFun_apply` + `associated_apply` + step-1's `polar_configForm_single`), then `Matrix.det_smul` ⟹
+   `det = (⅟2)^m·det G ≠ 0`, and `LinearMap.BilinForm.nondegenerate_of_det_ne_zero (Pi.basisFun)` gives `(associated QR).Nondegenerate`.
 3. **Orthogonal basis ⟹ anisotropic.** `exists_orthogonal_basis (associated QR).IsSymm` gives orthogonal `v` (NOT anisotropic
    in general). For nondeg `QR`: if `QR(vᵢ)=0` then `associated QR vᵢ = 0` on the whole basis (orthogonality + `associated_eq_self_apply`)
    ⟹ `vᵢ ∈ radical`, contradicting nondeg (`vᵢ ≠ 0`). Small lemma, the radical-trivial argument.
@@ -1014,8 +1016,16 @@ if B-M3's injectivity turns out to need concrete integers — likely avoidable).
 **ONE viable approach (recommended).** Do **A-M4a** (well-definedness) in this order: (1) `QR`+Gram, (2) nondeg via `discr=½G`,
 (3) anisotropic-basis lemma, (4) the config Gauss sum `= χ(−s⁻¹)^m·χ(discr QR)·gaussSum^m` (the gap-5 collapse is the work), (5)
 the global Gauss sum `= χ(s)^d·W` with the fixed `Q`-basis, (6) substitute into `levelset_count_eq` ⟹ `count = f(m, discr QR, c_lev)`.
-Then hand `f` to B-M3. **Defer A-M4b** (explicit 14-row integers via `gaussSum_sq`) unless B-M3 demands it. Risk is concentrated
-entirely in gap-5's basis-change-determinant bookkeeping; no fundamental obstruction (the discriminant API exists).
+Then hand `f` to B-M3. Risk is concentrated entirely in gap-5's basis-change-determinant bookkeeping; no fundamental obstruction.
+
+**A-M4b viability — CONFIRMED, and A-M4b is NOT a blocker (2026-06-21).** A-M4b (the explicit 14-row integer table) is bounded
+and tool-complete: `W = ∑ψ(Q x) = −9` (d=4: `∏χ = χ(2) = −1`, `gaussSum^4 = (gaussSum²)² = (χ(−1)·3)² = 9`), `gaussSum² = −3`
+(`gaussSum_sq`, q=3, `χ(−1)=−1`), and the `s`-sum is a **2-term** sum over `F₃ˣ = {1,2}` with `ψ = ω^•`; for odd `m` the
+irrational `gaussSum` cancels against the `χ(s)`-twisted `s`-sum (`gaussSum·(ψ(−c)−ψ(c))` is rational). **But A-M4b's closed
+form is not required for the seal:** once A-M4a gives `count = f(m, discr QR, c_lev)` (well-definedness), each needed `f`-value
+is obtained from a **single representative count** (a one-shot `decide` over 81 points, ≤14 tuples), and B-M3's injectivity then
+runs over the tiny `(discr, c_lev)` Gram-tuple space — no `gaussSum`/`ℤ[ζ₃]` evaluation needed downstream. So **A-M4a is the
+load-bearing deliverable**; the A route is viable end-to-end with A-M4b as an optional convenience.
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity

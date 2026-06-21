@@ -322,6 +322,38 @@ theorem levelset_count_eq (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
           ψ (-(s * c)) * (ψ (-(s⁻¹ * Q (∑ j, ρ j • a j))) * ∑ x : Fin d → ZMod p, ψ (s * Q x)) := by
   rw [levelset_fourier_split Q a c hψ, s0_boundary_collapse Q a hG hψ]
 
+/-! ### A-M4a — the config quadratic form `QR` and its Gram (part A). -/
+
+/-- **The config quadratic form** `QR(ρ) = Q(∑ⱼ ρⱼ•aⱼ)` on `Fin m → ZMod p`, as `Q.comp L` with `L` the
+linear-combination map. Its associated bilinear (Gram) at the standard basis is the config Gram `G`. -/
+noncomputable def configForm (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) : QuadraticForm (ZMod p) (Fin m → ZMod p) :=
+  Q.comp (Fintype.linearCombination (ZMod p) a)
+
+@[simp] theorem configForm_apply (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (ρ : Fin m → ZMod p) :
+    configForm Q a ρ = Q (∑ j, ρ j • a j) := by
+  rw [configForm, QuadraticMap.comp_apply, Fintype.linearCombination_apply]
+
+theorem linComb_single {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (i : Fin m) :
+    Fintype.linearCombination (ZMod p) a (Pi.single i 1) = a i := by
+  rw [Fintype.linearCombination_apply_single, one_smul]
+
+/-- The polar of the config form transports along `L`. -/
+theorem polar_configForm (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (ρ σ : Fin m → ZMod p) :
+    QuadraticMap.polar (configForm Q a) ρ σ
+      = QuadraticMap.polar Q (Fintype.linearCombination (ZMod p) a ρ)
+          (Fintype.linearCombination (ZMod p) a σ) := by
+  simp only [QuadraticMap.polar, configForm, QuadraticMap.comp_apply, map_add]
+
+/-- **The config form's Gram = the config Gram `G`** (at the standard basis). -/
+theorem polar_configForm_single (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (i j : Fin m) :
+    QuadraticMap.polar (configForm Q a) (Pi.single i 1) (Pi.single j 1)
+      = QuadraticMap.polar Q (a i) (a j) := by
+  rw [polar_configForm, linComb_single, linComb_single]
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -334,3 +366,5 @@ end ChainDescent
 #print axioms ChainDescent.levelset_fourier_split
 #print axioms ChainDescent.s0_boundary_collapse
 #print axioms ChainDescent.levelset_count_eq
+#print axioms ChainDescent.configForm_apply
+#print axioms ChainDescent.polar_configForm_single
