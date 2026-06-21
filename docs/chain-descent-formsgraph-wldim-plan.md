@@ -30,11 +30,12 @@
 > count = explicit Gram-function (nondeg configs)", Lemma B = "counts recover `u`", composing to prove
 > `IsotropySeparatesAtBase Q T₉` directly (the live route — supersedes the `QProfileSeparatesAtBase` framing). **Landed,
 > axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`ScratchLemmaA.lean`); B-M1, B-M2-bridge
-> (`ScratchLemmaB.lean`). **A-M3 via ROUTE B UNDERWAY (2026-06-21):** increments 1 (`levelset_fourier`) + 2a
-> (`levelset_fourier_prod`) + 2b (`levelset_fourier_split`, the `s`-split with D1 on the bulk) landed axiom-clean.
-> **NEXT = A-M3 increment 2c** (collapse the `s=0` boundary to `q^d` via `sum_addChar_linearMap` + config independence —
-> couples in the nondeg config-Gram hypothesis), then 2d/A-M4 (config-Gram Gauss sum → the §10.10 14-row
-> `(m, det G, c_lev)` table). Use the **size-9 base `T₉`** (§10.6).
+> (`ScratchLemmaB.lean`). **★ A-M3 ✅ COMPLETE via ROUTE B (2026-06-21, all axiom-clean):** `levelset_fourier` →
+> `levelset_fourier_prod` → `levelset_fourier_split` (D1 bulk) → `s0_boundary_collapse` (`s=0` → `q^d`) → **`levelset_count_eq`**
+> (the assembled closed form: `count·q^{m+1} = |V| + ∑_{s≠0}…` modulo the two Gauss sums). **NEXT = A-M4** (scoped in §10.11):
+> evaluate the global + config-Gram Gauss sums, reducing `count` to `f(m, discr QR, c_lev)` — recommended deliverable A-M4a
+> (well-definedness, no `gaussSum_sq`); the gap-5 discriminant collapse `∏χ(QR vᵢ)=χ(discr QR)` is the only new tool-work.
+> Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -819,16 +820,20 @@ The plan's steps A1–A6 are landing bottom-up (WIP scratch module, `lake env le
 - **A-M3 increment 2b ✅ DONE (2026-06-21, `levelset_fourier_split`, axiom-clean) — the `s`-split (D1 on the bulk).**
   Split `∑_s` at `s=0`: the `s=0` boundary is left as `∑_ρ ∑_x ψ(polar Q x (∑ⱼ ρⱼ•aⱼ))` (collapse → 2c); the `s≠0`
   bulk evaluated via **D1 `sum_addChar_quadForm_linear`** (each `s` as `Units.mk0 s`): inner `x`-sum becomes
-  `ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))·∑_x ψ(s·Q x)`, factoring the config-Gram `ρ`-piece from the scaled global Gauss sum.
+  `ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))·∑_x ψ(s·Q x)`.
+- **A-M3 increment 2c ✅ DONE (2026-06-21, `s0_boundary_collapse`, axiom-clean) — the `s=0` boundary `= q^d`.** Via
+  `sum_addChar_linearMap` (`φ_ρ = (polarBilin Q).flip (∑ⱼ ρⱼ•aⱼ)`) the inner sum is `|V|·[φ_ρ=0]`, and `φ_ρ=0 ⟺ ρ=0`
+  using **only the config-Gram nondegeneracy** (`IsUnit G.det`): `φ_ρ(aᵢ)=0` gives `(G *ᵥ ρ)ᵢ=0`, `G` invertible ⟹ `ρ=0`.
+  (Sharper than expected — no full `Q`-nondegeneracy needed.)
+- **★ A-M3 ✅ COMPLETE (2026-06-21, `levelset_count_eq`, axiom-clean) — the assembled closed form.** For nondeg config
+  Gram: `count·q^{m+1} = |V| + ∑_{s≠0} ψ(−s·c)·(ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))·∑_x ψ(s·Q x)) summed over ρ`. **Everything that
+  remains for Lemma A is A-M4** = evaluating the two Gauss sums; see §10.11 (scoping).
 
-**Remaining for full Lemma A (the heavier pieces):**
-- **A-M3 increment 2c (NEXT) — collapse the `s=0` boundary to `q^d`.** `∑_x ψ(polar Q x a*(ρ)) = |V|·[a*(ρ)=0]` via
-  **`sum_addChar_linearMap`** (`φ = Q.polarBilin.flip a*(ρ)`); then `[a*(ρ)=0] ⟹ [ρ=0]` by config-vector independence
-  (**nondeg config Gram ⟹ `aⱼ` independent — the nondeg hypothesis enters here**), so `∑_ρ … = |V| = q^d`.
-- **A-M3 increment 2d / A-M4 — the config-Gram Gauss sum + the `(m, det G, c_lev)` collapse.** `∑_ρ ψ(−s⁻¹ Q a*(ρ))` is a
-  Gauss sum of the config form `QR(ρ)=Q(∑ρⱼaⱼ)` (Gram `G`) on `Fin m → F₃` (`sum_addChar_quadForm_smul`/`sum_quadForm_eval`);
-  `W=∑ψ(Q x)` uses the fixed concrete basis `{e₀±e₁,e₂,e₃}`. Pin `N` to the §10.10 14-row `(m, det G, c_lev)` table via
-  discriminant-up-to-squares (`∏χ(QR vᵢ)=χ(det G)·const`, basis-independent) + the `F₃` Gauss-sum magnitude (`gaussSum_sq`).
+**Remaining for full Lemma A — A-M4 (scoped in §10.11):** evaluate the global `∑_x ψ(s·Q x)=χ(s)^d·W` (scaling, fixed
+basis of `Q`) and the config-Gram `∑_ρ ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))` (Gauss sum of `QR=Q.comp L` on `Fin m→F`), reducing
+`count` to a **function of `(m, discr QR, c_lev)`** (`discr QR = 2^{−m} det G`). The recommended A-M4a deliverable is the
+**well-definedness** (count = `f(m, discr QR, c_lev)`), which needs NO `gaussSum_sq` / explicit-integer reduction and is
+exactly what B-M3 consumes.
 
 No new obstruction surfaced while implementing; the reduction to a homogeneous level-set went through cleanly and
 axiom-clean. The remaining A2/A5/A6 are linear-algebra/basis lifts, not new mathematics.
@@ -968,6 +973,49 @@ machinery (old gap #5) AND the feared kernel `decide` blow-up (old gap #3). A-M3
 well-definedness + the `F₃` Gauss-sum magnitude. The remaining genuine Mathlib lift is the *existence* of an orthogonal
 basis of a nondeg form on `Fin m → F₃` (`exists_orthogonalBasis`, char ≠ 2) + discriminant-up-to-squares — structural,
 one-time, not per-config.
+
+### 10.11 A-M4 scoping — the two Gauss sums + the discriminant collapse (2026-06-21; A-M3 done, this is next)
+**State.** A-M3 is COMPLETE: `levelset_count_eq` (axiom-clean) gives, for nondeg config Gram,
+`count·q^{m+1} = |V| + ∑_{s≠0} ψ(−s·c)·(ψ(−s⁻¹·Q(∑ⱼρⱼaⱼ))·∑_x ψ(s·Q x))` summed over `ρ`. A-M4 evaluates the two
+Gauss sums and reduces `count` to a **function of `(m, discr QR, c_lev)`**.
+
+**A-M4 deliverable (recommended = A-M4a, well-definedness — NO explicit-integer reduction needed).** Prove
+`count = f(m, discr QR, c_lev)` (two nondeg configs with equal `(m, discr QR, c_lev)` have equal count), where
+`QR := Q.comp L`, `L : (Fin m → F) →ₗ V`, `L ρ = ∑ⱼ ρⱼ•aⱼ` (the config form), and `discr QR = QR.toMatrix'.det = 2^{−m}·det G`.
+This is **exactly what B-M3 consumes** (B-M3 then does the finite injectivity over the `(discr, c_lev)`-tuples per `S'`). It
+needs the two Gauss sums but **NOT** `gaussSum_sq` or the `F₃` `s`-sum integer evaluation (that is the optional A-M4b, only
+if B-M3's injectivity turns out to need concrete integers — likely avoidable).
+
+**The two Gauss sums (both via the landed `GaussCount` toolkit):**
+- *Global* `∑_x ψ(s·Q x) = χ(s)^d · W`, `W = ∑_x ψ(Q x)` — config-INDEPENDENT (shared by `u`,`u'`). `sum_addChar_quadForm_smul`;
+  `W` via `sum_quadForm_eval` with the **fixed concrete** orthogonal basis `{e₀+e₁, e₀−e₁, e₂, e₃}` of `Q` (all `Q`-values
+  `1,2,1,1 ≠ 0`, pairwise polar-orthogonal — a one-time check).
+- *Config* `∑_ρ ψ(−s⁻¹·QR ρ) = χ(−s⁻¹)^m · χ(discr QR) · gaussSum^m` via `sum_addChar_quadForm_smul` + `sum_quadForm_eval`
+  on `QR`, with the gap-5 collapse `∏ᵢ χ(QR vᵢ) = χ(discr QR)` (below).
+
+**Gaps + tools (all located, Mathlib-present):**
+1. **Build `QR` + Gram = `G`.** `QR := Q.comp L`; `QR ρ = Q(∑ⱼρⱼaⱼ)` (`QuadraticMap.comp_apply`); `polar QR eᵢ eⱼ = polar Q aᵢ aⱼ = Gᵢⱼ`
+   (`QuadraticMap.polar_comp` + `L eᵢ = aᵢ`). `L` = the linear-combination map (`Fintype.linearCombination`/`Matrix.mulVecLin`).
+2. **`QR` nondegenerate ⟸ `IsUnit G.det`.** `QR.toMatrix' = ½·G` (`associated_apply` + step 1), so `discr QR = 2^{−m} det G ≠ 0`;
+   `LinearMap.BilinForm.nondegenerate_iff_det_ne_zero` (the std basis) gives `(associated QR).Nondegenerate`.
+3. **Orthogonal basis ⟹ anisotropic.** `exists_orthogonal_basis (associated QR).IsSymm` gives orthogonal `v` (NOT anisotropic
+   in general). For nondeg `QR`: if `QR(vᵢ)=0` then `associated QR vᵢ = 0` on the whole basis (orthogonality + `associated_eq_self_apply`)
+   ⟹ `vᵢ ∈ radical`, contradicting nondeg (`vᵢ ≠ 0`). Small lemma, the radical-trivial argument.
+4. **The two Gauss sums.** Direct: `sum_addChar_quadForm_smul` / `sum_quadForm_eval` (landed), inputs = the bases of (1) and
+   the fixed `Q`-basis, `hF : ringChar (ZMod 3) ≠ 2`, `[Invertible (2:ZMod 3)]`.
+5. **★ The discriminant collapse `∏ᵢ χ(QR vᵢ) = χ(discr QR)` (gap-5, the crux tool-work).** In the orthogonal basis `v`,
+   `associated QR` has matrix `diag(QR vᵢ)` (off-diag 0 by `IsOrthoᵢ`, diag `= QR vᵢ` by `associated_eq_self_apply`), so
+   `∏ᵢ QR vᵢ = det(toMatrix v (associated QR))`; and `det(toMatrix v B) = (det of basis-change)²·det(toMatrix' B) = (unit)²·discr QR`
+   (`BilinForm.toMatrix`/`Basis.toMatrix` change-of-basis det). Since `χ` is multiplicative and kills nonzero squares (`χ(u²)=1`),
+   `∏ᵢ χ(QR vᵢ) = χ(∏ᵢ QR vᵢ) = χ(discr QR)`. Tools: `QuadraticMap.discr` (= `toMatrix'.det`), `BilinForm.toMatrix` basis-change
+   det, `quadraticChar` multiplicativity + `quadraticChar_sq_one`. **This is the only genuinely new tool-assembly; everything else
+   is plugging landed lemmas.**
+
+**ONE viable approach (recommended).** Do **A-M4a** (well-definedness) in this order: (1) `QR`+Gram, (2) nondeg via `discr=½G`,
+(3) anisotropic-basis lemma, (4) the config Gauss sum `= χ(−s⁻¹)^m·χ(discr QR)·gaussSum^m` (the gap-5 collapse is the work), (5)
+the global Gauss sum `= χ(s)^d·W` with the fixed `Q`-basis, (6) substitute into `levelset_count_eq` ⟹ `count = f(m, discr QR, c_lev)`.
+Then hand `f` to B-M3. **Defer A-M4b** (explicit 14-row integers via `gaussSum_sq`) unless B-M3 demands it. Risk is concentrated
+entirely in gap-5's basis-change-determinant bookkeeping; no fundamental obstruction (the discriminant API exists).
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity

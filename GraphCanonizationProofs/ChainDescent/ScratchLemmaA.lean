@@ -248,6 +248,80 @@ theorem levelset_fourier_split (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
     rw [Units.val_mk0] at hD1
     rw [hD1]
 
+open scoped Classical in
+/-- **Lemma A, step A-M3 increment 2c — the `s = 0` boundary collapses to `q^d`.** The boundary sum
+`∑_ρ ∑_x ψ(polar Q x (∑ⱼ ρⱼ•aⱼ))` equals `|V| = q^d`. Pointwise (`sum_addChar_linearMap`, with the linear functional
+`φ_ρ = (polarBilin Q).flip (∑ⱼ ρⱼ•aⱼ)`), the inner `x`-sum is `|V|·[φ_ρ = 0]`; and `φ_ρ = 0 ⟺ ρ = 0` using **only the
+config-Gram nondegeneracy** (`IsUnit G.det`): evaluating `φ_ρ` at `aᵢ` gives `(G *ᵥ ρ)ᵢ = 0`, and `G` invertible forces
+`ρ = 0`. So exactly `ρ = 0` survives, contributing `|V|`. (No full `Q`-nondegeneracy needed — the config Gram suffices.) -/
+theorem s0_boundary_collapse (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin m) (Fin m) (ZMod p)).det)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive) :
+    (∑ ρ : Fin m → ZMod p, ∑ x : Fin d → ZMod p,
+        ψ (QuadraticMap.polar Q x (∑ j, ρ j • a j)))
+      = (Fintype.card (Fin d → ZMod p) : R') := by
+  classical
+  set G : Matrix (Fin m) (Fin m) (ZMod p) :=
+    Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) with hGdef
+  have hpt : ∀ ρ : Fin m → ZMod p,
+      (∑ x : Fin d → ZMod p, ψ (QuadraticMap.polar Q x (∑ j, ρ j • a j)))
+        = if (QuadraticMap.polarBilin Q).flip (∑ j, ρ j • a j) = 0
+            then (Fintype.card (Fin d → ZMod p) : R') else 0 := by
+    intro ρ
+    rw [Finset.sum_congr rfl (fun x _ => by
+      rw [show QuadraticMap.polar Q x (∑ j, ρ j • a j)
+          = (QuadraticMap.polarBilin Q).flip (∑ j, ρ j • a j) x from by
+        rw [LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply]])]
+    exact sum_addChar_linearMap hψ _
+  have hcond : ∀ ρ : Fin m → ZMod p,
+      ((QuadraticMap.polarBilin Q).flip (∑ j, ρ j • a j) = 0) ↔ ρ = 0 := by
+    intro ρ
+    constructor
+    · intro h
+      have hGρ : G *ᵥ ρ = 0 := by
+        funext i
+        have hi0 := LinearMap.congr_fun h (a i)
+        rw [LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply, LinearMap.zero_apply] at hi0
+        rw [← polar_sum_right Q (a i) Finset.univ ρ a] at hi0
+        rw [Pi.zero_apply, Matrix.mulVec, dotProduct]
+        rw [show (∑ j, G i j * ρ j) = ∑ j, ρ j * QuadraticMap.polar Q (a i) (a j) from
+          Finset.sum_congr rfl (fun j _ => by rw [hGdef, Matrix.of_apply]; ring)]
+        exact hi0
+      have hρ : ρ = G⁻¹ *ᵥ (G *ᵥ ρ) := by
+        rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul G hG, Matrix.one_mulVec]
+      rw [hρ, hGρ, Matrix.mulVec_zero]
+    · intro h
+      subst h
+      rw [show (∑ j, (0 : Fin m → ZMod p) j • a j) = 0 from by simp, map_zero]
+  rw [Finset.sum_congr rfl (fun ρ _ => hpt ρ),
+    Finset.sum_congr rfl (fun ρ _ => if_congr (hcond ρ) rfl rfl),
+    Finset.sum_ite_eq' Finset.univ (0 : Fin m → ZMod p)
+      (fun _ => (Fintype.card (Fin d → ZMod p) : R'))]
+  simp
+
+open scoped Classical in
+/-- **Lemma A, step A-M3 ASSEMBLED — the level-set count in closed form up to the two Gauss sums (Route B).** For a
+nondegenerate config Gram (`IsUnit G.det`), the level-set count satisfies
+`count·q^{m+1} = |V| + ∑_{s≠0} ψ(−s·c)·(ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))·∑_x ψ(s·Q x)) summed over ρ`. The `|V|` is the `s=0`
+boundary (increment 2c); the bulk is the D1-evaluated `s≠0` part (increment 2b). **All that remains for Lemma A
+(A-M4)** is to evaluate the two Gauss sums: the global `∑_x ψ(s·Q x) = χ(s)^d·W` (scaling, fixed basis of `Q`) and
+the config-Gram sum `∑_ρ ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))` (Gauss sum of the config form `QR = Q.comp (∑ⱼ ρⱼ•aⱼ)` on `Fin m → F`),
+then collapse to the §10.10 `N(m, det G, c_lev)` table. -/
+theorem levelset_count_eq (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (c : ZMod p)
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin m) (Fin m) (ZMod p)).det)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive) :
+    ((Finset.univ.filter (fun x : Fin d → ZMod p =>
+        (∀ j, QuadraticMap.polar Q x (a j) = 0) ∧ Q x = c)).card : R')
+      * (p : R') ^ (m + 1)
+    = (Fintype.card (Fin d → ZMod p) : R')
+      + ∑ s ∈ Finset.univ.erase (0 : ZMod p), ∑ ρ : Fin m → ZMod p,
+          ψ (-(s * c)) * (ψ (-(s⁻¹ * Q (∑ j, ρ j • a j))) * ∑ x : Fin d → ZMod p, ψ (s * Q x)) := by
+  rw [levelset_fourier_split Q a c hψ, s0_boundary_collapse Q a hG hψ]
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -258,3 +332,5 @@ end ChainDescent
 #print axioms ChainDescent.levelset_fourier
 #print axioms ChainDescent.levelset_fourier_prod
 #print axioms ChainDescent.levelset_fourier_split
+#print axioms ChainDescent.s0_boundary_collapse
+#print axioms ChainDescent.levelset_count_eq
