@@ -30,7 +30,9 @@
 > count = explicit Gram-function (nondeg configs)", Lemma B = "counts recover `u`", composing to prove
 > `IsotropySeparatesAtBase Q T₉` directly (the live route — supersedes the `QProfileSeparatesAtBase` framing). **Landed,
 > axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`ScratchLemmaA.lean`); B-M1, B-M2-bridge
-> (`ScratchLemmaB.lean`). **NEXT = A-M3** (`card_quadForm_eq` on the subspace `Uᗮ`). Use the **size-9 base `T₉`** (§10.6).
+> (`ScratchLemmaB.lean`). **NEXT = A-M3 via ROUTE B** (full-space char-sum, spike-validated §10.10 — char-sum the
+> `reduction_to_levelset_nondeg` output over `V`; `N` collapses to a 14-row `(m, det G, c_lev)` table, NO subspace
+> restriction, NO per-config diagonalization). Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -838,20 +840,26 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
   matrix `G i j = polar Q (a i) (a j)`; witness `c := (Q∘a) ᵥ* G⁻¹`, via `Matrix.vecMul_vecMul` /
   `nonsing_inv_mul` / `vecMul_one`) + **`reduction_to_levelset_nondeg`** — combines A-M1∘A-M2: for invertible config
   Gram, the count is unconditionally the homogeneous level-set `#{x ∈ Uᗮ : Q x = − Q w₀}` (`w₀ = ∑ cₖ aₖ` explicit).
-- **A-M3 (the next session's target; heaviest piece)** — *the level-set count via `card_quadForm_eq`.* `reduction_to_levelset_nondeg`
-  outputs the level set as a **filter over `V`**: `#{x : (∀ j, polar Q x (a j)=0) ∧ Q x = c}` (`c = −Q w₀`). card_quadForm_eq
-  is over a **fintype module `W` with an orthogonal anisotropic basis**. So A-M3 = three sub-steps: **(i)** identify the
-  filter set `{x : ∀ j, polar Q x (a j)=0}` with the submodule `Uᗮ` (the orthogonal complement / kernel of `x ↦ (polar Q x (a j))ⱼ`;
-  count over the filter = count over the subtype `↥Uᗮ`); **(ii)** the restricted form `Q.comp Uᗮ.subtype` on `↥Uᗮ`
-  (a fintype module, `[Module.Finite]`); **(iii)** an orthogonal anisotropic basis of `↥Uᗮ` (nondeg `Q|_{Uᗮ}` + char ≠ 2 ⟹
-  exists — Mathlib `QuadraticForm`/`BilinForm` diagonalization, e.g. `QuadraticForm.exists_orthogonalBasis` / `Basis` of a
-  nondeg form) then `card_quadForm_eq`. **Fallback if the abstract subspace machinery is heavy** (§10.6 gap 5): prove the
-  affine-quadric count formula directly over `F₃^n` for `n = d − |S'| ∈ {1,2,3}` (the only dims that occur), bypassing the
-  abstract `Uᗮ`. Output: `#{x ∈ Uᗮ : Q x = c}` as a char-sum / closed form.
-- **A-M4** — *evaluate to the explicit integer Gram-function.* `disc(Q|_{Uᗮ}) = disc Q / disc Gram` (discriminant
-  multiplicativity over `⊥`, block determinant); `Q w₀ = ½·(Q aⱼ)ᵀ G⁻¹ (Q aⱼ)`; the `F₃` quadratic-Gauss-sum value
-  (`gaussSum_sq`: `|G|²=3`). Output: **Lemma A** — `N = f(Gram)` explicit, nondegenerate configs (value sets `{6}`,
-  `{1,2}`, `{0,1,2}` for `|S'|=1,2,3`; cf. the m4anal 31-case `m=2` table).
+- **A-M3 (the next session's target) — ROUTE B (full-space char-sum), chosen + spike-validated (§10.10).** Do **NOT**
+  restrict `Q` to the subspace `↥Uᗮ`. `reduction_to_levelset_nondeg` already outputs the count as a **filter over the full
+  `V`**: `#{x : (∀ j, polar Q x (a j)=0) ∧ Q x = c}` (`c = −Q w₀`). Char-sum *that* directly over `V` (via the existing
+  `GaussCount` toolkit), never forming `↥Uᗮ`:
+    - `count·q^{m+1} = ∑_{s∈F, r∈F^m} ψ(−s·c) · ∑_x ψ(s·Q x + ∑_j r_j·polar Q x (a_j))`;
+    - by bilinearity `∑_j r_j·polar Q x (a_j) = polar Q x a*` with `a* = ∑_j r_j a_j` — a **single** linear term — so the
+      inner `x`-sum is **D1 `sum_addChar_quadForm_linear`** (`s≠0`) / **`sum_addChar_linearMap`** (`s=0`), both landed;
+    - the residual `r`-sum is a Gauss sum of the **config-Gram form `QR(r) = Q(∑_j r_j a_j)` on the concrete space `Fin m → F₃`**
+      (Gram `= G`) — handled by `sum_addChar_quadForm_smul`/`sum_quadForm_eval`; the full-space `W = ∑ψ(Q x)` uses the **fixed
+      concrete** orthogonal basis `{e₀+e₁, e₀−e₁, e₂, e₃}` of `Q` (computed once, no existence lemma).
+  This matches **Lemma B's object** (the config Gram `G` on `Fin m → F₃`, which B-M3 already reasons about), reuses the
+  toolkit, and **handles `m=4` uniformly** (subtype route would need a separate `dim Uᗮ = 0` case; spike: `m=4` nondeg configs
+  DO occur). The only *existence* fact still needed is an orthogonal basis of `QR` — but its entries never appear (see A-M4).
+- **A-M4 — collapses to a 14-row table (§10.10 finding (5)): `N = N(m, det G, c_lev)`, no per-config diagonalization.**
+  Spike (0 MULTI over all nondeg configs): the count depends **only** on `(m, det G, c_lev)` — the orthogonal basis of `QR`
+  is needed for *existence* only, since `∏_i χ(QR(v_i)) = χ(det G)·χ(2)^?` is basis-independent (discriminant is well-defined
+  up to squares; `χ` kills the change-of-basis `det²`). So A-M4 needs: (a) `det G` from the config Gram; (b) `c_lev = −Q w₀`,
+  `Q w₀ = ½·(Q a)ᵀ G⁻¹ (Q a)`; (c) the `F₃` quadratic-Gauss-sum magnitude (`gaussSum_sq`: `|G|²=3`). Output: **Lemma A** =
+  the 14-row table `N(m, det G, c_lev)` (`m=1→6`; `m≥2 → {0,1,2}`; full table in §10.10). Both `det G` and `c_lev` are
+  explicit functions of `θ(u)`, so this is exactly the input B-M3 wants.
 
 #### Lemma B — the counts recover `u`
 - **B-M1 + B-M2 bridge ✅ DONE** (`ChainDescent/ScratchLemmaB.lean`, all axiom-clean): plumbing antecedent → `V`-side
@@ -897,14 +905,49 @@ B-M3 needs B-M2; ASM needs {A-M4, B-M3}. Lemma A (A-M2..A-M4) and B-M1 can proce
    is a hard constraint on the base choice — record `T₉`, not the size-6 base, as the live target. (Corrects §10.6.)
 2. **The `z≠u` correction** (`Z̃` vs raw `Z`) must be threaded through B-M1; the correction term is the shell-blind
    `x=u` indicator.
-3. **B-M3's Gram-injectivity is finite but probably not `decide`-feasible** in the kernel — plan a structured proof
-   (per-coordinate factoring), with `decide` only as a fallback after a feasibility spike.
+3. **B-M3's Gram-injectivity is `decide`-feasible — DE-RISKED (§10.10 spike).** `N = N(m, det G, c_lev)` factors through
+   the **tiny** `F₃` Gram-tuple space (`m=1→3`, `m=2→27`, `m=3→729`, worst case 729), so the endpoint injectivity is a
+   small finite check, NOT the feared `81²×configs`. The structured per-coordinate factoring (§10.3(F)) is a *fallback*,
+   no longer the only option. (Still verify the kernel `decide` cost on the actual Gram-tuple formulation before relying.)
 4. **`coords_determine` must be generalized** from the standard frame to the polar-coordinate row `θ` over `T₉`
    (B-M3) — a mild lift of the landed lemma.
-5. **A-M3's subspace machinery** (restrict `Q` to `Uᗮ`, orthogonal anisotropic basis of a *subspace*) is the single
-   biggest Mathlib lift; if it proves heavy, an alternative is to prove the affine-quadric count formula directly over
-   `F₃^n` for `n ≤ 3` (the only dims that occur) rather than via the abstract subspace.
+5. **A-M3's subspace machinery is AVOIDED — superseded by Route B (§10.10).** The single biggest Mathlib lift (restrict
+   `Q` to `↥Uᗮ` + orthogonal anisotropic basis of a *subtype*) is **not taken**: Route B char-sums the
+   `reduction_to_levelset_nondeg` output directly over the full `V`, and the `(m, det G, c_lev)` collapse means even the
+   config-form basis is needed for *existence* only (its entries never appear). No subtype instances, no computed basis.
 6. **Char-2 / other `q` / other families** are out of scope here (M5); this plan is `VO⁻₄(3)` only.
+
+### 10.10 A-M3 tactic spike — ROUTE B chosen + validated (2026-06-21, `/tmp/spike_routeB.py`)
+Spike to pick the A-M3 count-evaluation tactic (the user steer: match Lemma B's object). Over `VO⁻₄(3)`, base `T₉`, all
+`(u, S')` with nondegenerate config Gram (12942 configs). **Reproduction spec** (rebuild the ephemeral script from this):
+`V=F₃⁴`, `Q=x₀x₁+x₂²+x₃²`, `polar(x,y)=Q(x+y)−Q x−Q y`; `fullcount(u,S')=#{y : Q y=0 ∧ ∀t∈S', Q(y−(t̄−ū))=0}`; config
+diffs `aₜ=t̄−ū`, Gram `Gᵢⱼ=polar(aᵢ,aⱼ)`; `w₀=∑cⱼaⱼ` with `G c=(Q aⱼ)ⱼ`, `c_lev=−Q w₀`; `ψ(t)=ω^t` (`ω=e^{2πi/3}`),
+`χ(0,1,2)=(0,1,−1)`, `W=∑_x ψ(Q x)`. Route-B closed form: `fullcount·q^{m+1}=q^d+∑_{s≠0}ψ(−s·c_lev)·χ(s)^d·W·R(s)`,
+`R(s)=∑_{r∈F₃^m}ψ(−s⁻¹·Q(∑rⱼaⱼ))`.
+
+**Findings (all green):**
+1. **`N` is single-valued per config Gram** — 0 MULTI / 12942 (2837 distinct Grams). Lemma A's premise holds in route-B form.
+2. **Route-B closed form reproduces `N` exactly** — 0 mismatches / 12942. The full-space char-sum tactic closes end-to-end
+   (D1 + scaling + full-space `W` + config-Gram Gauss sum); **no subspace restriction**.
+3. **Config dims `m=|S'|` occurring (nondeg): `{1,2,3,4}`** — `m=4` nondeg configs DO occur (corrects the earlier
+   "`n∈{1,2,3}`"). Route B handles `m=4` uniformly; the subtype route would need a separate `dim Uᗮ=0` case. Distinct
+   `N` values: `{0,1,2,6}`.
+4. **Endpoint (B-M3): all-`S'` `fullcount` signature injective 81/81;** every one of the 3240 pairs is separated by a
+   **both-nondeg** `S'` (0 failures) — `T₉` confirmed, degenerate Lemma A never needed.
+5. **★ `N` depends ONLY on `(m, det G, c_lev)`** — 0 MULTI, collapsing to a **14-row table** (below). ⟹ A-M3 needs the
+   orthogonal basis of the config form for *existence* only (`∏χ(QR vᵢ)=χ(det G)·const`, basis-independent); **no per-config
+   diagonalization, no computed basis**. Both `det G` and `c_lev` are explicit functions of `θ(u)`, so B-M3's injectivity
+   factors through this table over the tiny Gram-tuple space (`m=1→3`, `m=2→27`, `m=3→729`).
+
+The 14-row Lemma-A table (`m`, `det G`, `c_lev` → `N`): `m=1`: `(1,1)→6,(2,2)→6`. `m=2`: `(1,1)→2,(1,2)→2,(2,0)→1`.
+`m=3`: `(1,0)→1,(1,1)→2,(1,2)→0,(2,0)→1,(2,1)→0,(2,2)→2`. `m=4`: `(2,0)→1,(2,1)→0,(2,2)→0`.
+
+**Verdict:** Route B is the A-M3 tactic. It matches Lemma B's config-Gram object, reuses the toolkit, avoids the subtype
+machinery (old gap #5) AND the feared kernel `decide` blow-up (old gap #3). A-M3 = char-sum the
+`reduction_to_levelset_nondeg` output over `V`; A-M4 = pin `N` to the 14-row `(m, det G, c_lev)` table via discriminant
+well-definedness + the `F₃` Gauss-sum magnitude. The remaining genuine Mathlib lift is the *existence* of an orthogonal
+basis of a nondeg form on `Fin m → F₃` (`exists_orthogonalBasis`, char ≠ 2) + discriminant-up-to-squares — structural,
+one-time, not per-config.
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity

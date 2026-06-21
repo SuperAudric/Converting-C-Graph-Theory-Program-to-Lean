@@ -107,6 +107,12 @@ close it — is set out in
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
+> **★ LIVE THREAD (2026-06-20+) — this §2 prose is the pre-affine-closure map and predates it; for the current
+> frontier read [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) STATUS.** Headlines:
+> **Witt is OFF the seal's critical path** (`reachesRigidOrCameron_viaIsotropySeparates_wittFree`, axiom-clean), so
+> discharging the route-1 step-4 inversion (`IsotropySeparatesAtBase Q T₉`, Lemma A + Lemma B, §10.8) seals `VO⁻₄(3)`
+> modulo `{G3}` **alone**. That step-4 build is the live work.
+>
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there
 > for "what's left"; the live finding is that the seal's `modulo {G3 + hSmallAutThin + hcatch + hImprim}` collapses to
