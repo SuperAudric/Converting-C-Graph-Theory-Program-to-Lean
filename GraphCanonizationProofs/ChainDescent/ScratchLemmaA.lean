@@ -485,6 +485,30 @@ theorem prod_quadChar_eq_det (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
   rw [← map_prod χ (fun i => configForm Q a (v i)), ← hdetrel, map_mul, map_mul,
     mul_right_comm, hsq, one_mul]
 
+open scoped Classical in
+/-- **A-M4a config-side ASSEMBLED — the config Gauss sum, basis-free** (gap-3 ∘ gap-4 ∘ gap-5). Eliminating the
+existential orthogonal basis, for a nondegenerate config Gram (`IsUnit G.det`) and unit `s`,
+`∑_ρ ψ(s·QR ρ) = χ(s)^n · χ(D) · gaussSum^n`, where `D = det` of the Gram of `associated QR` at `finBasis` is a
+**basis-free config invariant**. The config-dependence is now ENTIRELY through `D` — exactly the shape the count
+formula (and B-M3) needs (`v` no longer appears). -/
+theorem configGaussSum_eq_det (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    [Invertible (2 : ZMod p)] (hF : ringChar (ZMod p) ≠ 2)
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin m) (Fin m) (ZMod p)).det)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive)
+    (s : (ZMod p)ˣ) :
+    (∑ ρ : Fin m → ZMod p, ψ ((s : ZMod p) * configForm Q a ρ))
+      = ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R')) (s : ZMod p)
+            ^ Module.finrank (ZMod p) (Fin m → ZMod p)
+        * (((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R'))
+            ((LinearMap.BilinForm.toMatrix (Module.finBasis (ZMod p) (Fin m → ZMod p))
+              (QuadraticMap.associated (configForm Q a))).det)
+          * gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R')) ψ
+              ^ Module.finrank (ZMod p) (Fin m → ZMod p)) := by
+  obtain ⟨v, hv, hw⟩ := configForm_exists_orthoBasis Q a hG
+  rw [configGaussSum_eval Q hF a hψ v hv hw s, prod_quadChar_eq_det Q a v hv]
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -503,3 +527,4 @@ end ChainDescent
 #print axioms ChainDescent.configForm_exists_orthoBasis
 #print axioms ChainDescent.configGaussSum_eval
 #print axioms ChainDescent.prod_quadChar_eq_det
+#print axioms ChainDescent.configGaussSum_eq_det

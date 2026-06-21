@@ -32,10 +32,12 @@
 > axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`ScratchLemmaA.lean`); B-M1, B-M2-bridge
 > (`ScratchLemmaB.lean`). **★ A-M3 ✅ COMPLETE via ROUTE B (2026-06-21, all axiom-clean):** `levelset_fourier` →
 > `levelset_fourier_prod` → `levelset_fourier_split` (D1 bulk) → `s0_boundary_collapse` (`s=0` → `q^d`) → **`levelset_count_eq`**
-> (the assembled closed form: `count·q^{m+1} = |V| + ∑_{s≠0}…` modulo the two Gauss sums). **NEXT = A-M4** (scoped in §10.11):
-> evaluate the global + config-Gram Gauss sums, reducing `count` to `f(m, discr QR, c_lev)` — recommended deliverable A-M4a
-> (well-definedness, no `gaussSum_sq`); the gap-5 discriminant collapse `∏χ(QR vᵢ)=χ(discr QR)` is the only new tool-work.
-> Use the **size-9 base `T₉`** (§10.6).
+> (the assembled closed form: `count·q^{m+1} = |V| + ∑_{s≠0}…` modulo the two Gauss sums). **★ A-M4a ALL GAPS 1–5 DONE
+> (2026-06-21, axiom-clean) — config side ASSEMBLED:** `configForm`/`polar_configForm_single`, `configForm_nondegenerate`,
+> `configForm_exists_orthoBasis`, `configGaussSum_eval`, `prod_quadChar_eq_det` (gap-5 crux), and the basis-free wrap-up
+> **`configGaussSum_eq_det`** (`∑_ρ ψ(s·QR ρ) = χ(s)^n·χ(D)·gaussSum^n`, config-dependence only through the invariant `D`).
+> **NEXT = the thin count-assembly bridge (§10.12)** then **B-M3** (own planning increment — start with the `decide`-feasibility
+> spike). A-M4b confirmed non-blocking (§10.11). Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -1033,6 +1035,32 @@ form is not required for the seal:** once A-M4a gives `count = f(m, discr QR, c_
 is obtained from a **single representative count** (a one-shot `decide` over 81 points, ≤14 tuples), and B-M3's injectivity then
 runs over the tiny `(discr, c_lev)` Gram-tuple space — no `gaussSum`/`ℤ[ζ₃]` evaluation needed downstream. So **A-M4a is the
 load-bearing deliverable**; the A route is viable end-to-end with A-M4b as an optional convenience.
+
+### 10.12 A-M4a config-side ASSEMBLED + B-M3 prep (2026-06-21) — **all A-M4a gaps 1–5 DONE**
+**`configGaussSum_eq_det` (axiom-clean) wraps the A-M4a config side:** eliminating the existential basis (gap-3 ∘ gap-4 ∘
+gap-5), for nondeg config Gram and unit `s`,
+`∑_ρ ψ(s·QR ρ) = χ(s)^n · χ(D) · gaussSum^n`, `D = (BilinForm.toMatrix finBasis (associated (configForm Q a))).det` a
+**basis-free config invariant**, `n = finrank`. The config-dependence of the count is now ENTIRELY through `(D, c)`.
+
+**The remaining count-assembly bridge (thin, B-M3's first step or an ASM lemma):** substitute into `levelset_count_eq`,
+at scalar `−s⁻¹`, the config sum `configGaussSum_eq_det` + the global `∑_x ψ(s·Q x) = χ(s)^d·W` (`sum_addChar_quadForm_smul`
+with a carried fixed `Q`-basis), factoring the `ρ`-constants. Output:
+`(count : R')·q^{m+1} = |V| + ∑_{s≠0} ψ(−s c)·χ(s)^d·W·χ(−s⁻¹)^n·χ(D)·gaussSum^n =: F(D, c)` — a function of `(D, c)` only.
+Then chain `reduction_to_levelset_nondeg` (sets `c = c_lev = −Q w₀`) + `isoIncidence_eq_linearConds` to land the **isotropic**
+count `= F(D, c_lev)`.
+
+**What B-M3 consumes / must do (its own planning increment):**
+1. **`count_a = F(D_a, c_lev,a)`** (above) — config-dependence only through `(D_a, c_lev,a)`, both **functions of `θ(u)`**
+   (polynomials in the Gram entries `polar Q (t̄ᵢ−ū)(t̄ⱼ−ū)` and `Q(t̄ⱼ−ū)`; `D ↔ det G'` relation = a B-M3 sub-task, the
+   `½^m`/finBasis-change factor).
+2. **Restricted counts agree** (`incidence_agree_V`, landed) + the `corr` indicator (`cone_count_zero_split`, landed, also
+   `(D,c)`-determined) ⟹ a constraint on `(D_u(S'), c_lev,u(S'))_{S'}`.
+3. **The finite injectivity** — joint over both-nondeg `S'` (`F` is NOT injective per-`S'`; spike: all-`S'` signature is
+   81/81). **DO THE `decide`-FEASIBILITY SPIKE FIRST** (kernel `decide` over the ≤729 `(D,c)`-tuple space vs. a structured
+   per-coordinate proof, §10.3(F)) — gates the endpoint.
+4. **Recover `θ(u)` ⟹ `u = u'`** via a `coords_determine` generalization to the polar-row `θ`.
+Landed B-side inputs ready for B-M3: `incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`
+(`ScratchLemmaB.lean`).
 
 ### 10.4 Route 3 (= §3 Route B) — perp-graph + Witt frame-rigidity. Cleaner, but blocks on building Witt.
 Mental model: individualizing `0`, the induced subgraph on the isotropic cone `N(0)` IS the polar space's collinearity
