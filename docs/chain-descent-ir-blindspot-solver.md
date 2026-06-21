@@ -49,9 +49,16 @@
 > coupled directions are resolved by a single linear solve (no F₂-layer IR), closing §4/§10's direction sub-question.
 > **D-M4 ✅ DONE (2026-06-20)** — the doubled+matched multipede: the cascade peels exactly the `Z₂` copy-swap
 > (`|Aut|=2`, free, scramble-invariant), option-2 owns the rigid core; concerns stack independently. Finding: the
-> composition is **fold-via-σ then option-2**, not pin-then-option-2 (D1 misfires on the un-folded residue). **Next =
-> D-M5 (fallback/flag + full cross-check battery).** Pick-up reading order: this STATUS → §11.0–§11.6 (the wall +
-> mechanism) → §11.10 (the build, D-M0..D-M4 results + D-M5 onward).**
+> composition is **fold-via-σ then option-2**, not pin-then-option-2 (D1 misfires on the un-folded residue).
+> **★ DESIGN PASS (2026-06-21) — see new §11.11:** the integration hook is `ChainDescent.Search` `target == -1` (the
+> deferral Phase-1/Phase-2 boundary, replacing the exhaustive `target = fallback`); the engine is **iterative
+> F₂-solve ⊕ 1-WL refine, flag-on-stall**; **`Z_{2^k}` is an F₂ tower** (inside the engine — Lichter doesn't apply, it
+> can't individualize); the completeness ceiling = **rigid-GI ∈ P = the seal's `hSmallAutThin` wall** (not refuted by
+> no-logic-for-P); route (b) = **F₂→ring via Smith normal form** (ring inference the open piece); and the seal's node-4
+> reduction (affine/almost-simple/grid → affine) is the **same "linear = tractable" move** (route §9.9.18). **Next =
+> the `Z₄` layer-exposure probe** (does iterative F₂ peel a ring tower under individualization?), then D-M5
+> (fallback/flag + cross-checks). Pick-up reading order: this STATUS → §11.0–§11.6 → §11.10 (the build) → **§11.11
+> (obstruction class, engine, ceiling)**.**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -652,8 +659,9 @@ remains only for the base and the kernel (small), where the harness + cascade al
   order. It is nontrivial **iff `nV > nW`** (a square base ⟹ `coker = 0` ⟹ *all* twists isomorphic) — this is what
   makes the canonical form *separate* non-isomorphic twins rather than be a vacuous constant. A canonical `ker` basis
   (RREF) only for standalone mode (`ker = 0` in-pipeline). *(new; soundness = the iso-invariance closure below ≡ scope (b).)*
-- **D5 — pre-processor integration.** Decompose `(base, twist)`, ~~canonize base via harness~~ **read the canonical
-  base order off `WarmPartition`'s iso-invariant cell-ids** (D-M2 finding — the fine-coloured rigid residue is
+- **D5 — pre-processor integration.** **★ The precise hook is `ChainDescent.Search` `target == -1` (`ChainDescent.cs:243-257`),
+  replacing the `target = fallback` exhaustive branch — see §11.11.** Decompose `(base, twist)`, ~~canonize base via harness~~
+  **read the canonical base order off `WarmPartition`'s iso-invariant cell-ids** (D-M2 finding — the fine-coloured rigid residue is
   WL-discrete at the cell level, so *no* base-canonization pass is needed inside option 2; harness/cascade branching
   is reserved for genuine `Aut_base`, consumed upstream — see D6), solve twist via D4, emit
   the canonical labelling; IR for the F₂ layer → 0. **In-pipeline `ker = 0` always** — the F₂-gauge symmetry is
@@ -669,8 +677,11 @@ remains only for the base and the kernel (small), where the harness + cascade al
   free, orbits `{i, i+n}`); option-2 must use `σ` to **quotient onto one copy** (the rigid core) and then canonize that
   (D-M3 handles it). So D6 = fold via the harvested auto, *then* option-2 — not run option-2 on the pinned graph.
   *(the iso-invariant `σ`-fold quotient is the remaining integration piece here; doubled multipede is the test.)*
-- **D7 — fallback/flag.** When extraction fails (unbounded arity / non-WL-easy base / ring-varying, §11.6) or the
-  result fails verification → exhaustive branch (sound, may flag). *(new; the boundary.)*
+- **D7 — fallback/flag (verify-or-flag).** The succeed/flag verdict must be **iso-invariant** (else isomorphic inputs
+  split between option-2 and the exhaustive fallback ⟹ completeness violation, §11.11). Discharge: emit the candidate,
+  **verify by reconstruction** (rebuild from `(base, H, c, orientation)`, check it matches the input); mismatch — or
+  extraction failure (unbounded arity / non-WL-easy base / ring-varying, §11.6) — → exhaustive branch (sound, may flag).
+  *(new; the boundary. This is the reduced "item 4" — rigidity itself is Phase-1's contract, not a check here.)*
 - **D8 — iso-invariance + cross-checks.** Scramble-invariance, exhaustive size-5/6, Even≠Odd, + a new rigid/doubled
   multipede battery. Iso-invariance is the closure below (canonical base order ⟹ deterministic twist; `canonForm` ∘
   solve), validated empirically first in D-M0. *(new; validation.)*
@@ -755,3 +766,73 @@ one pin the residue has mixed cells (`22×size2, 6×size4`), D1's size-2 rule mi
 option-2 quotients onto one copy then canonizes (D6). Aside: circulant multipedes canonize cheaply (thin base, not
 IR-hard at probe sizes — IR-hardness is asymptotic/high-treewidth, cited); the mechanism is identical regardless.
 **D-M5** fallback/flag + full cross-check battery. **D-M6** Lean: L1, then (later) L2.
+
+### 11.11 Obstruction class, the iterative engine, and the completeness ceiling
+
+> Synthesis of the 2026-06-21 design pass. Settles where option-2 plugs in, what "never flag on a rigid residue"
+> can and cannot mean, and how it aligns with the seal's node-4 reduction. Supersedes the looser "pre-processor"
+> framing in §11.10 D5 and the flag-hook sketch.
+
+**Integration point (the precise hook).** Option-2 is the Phase-2 handler at the deferral boundary in
+`ChainDescent.Search`, the **`target == -1` branch** (`ChainDescent.cs:243-257`): every remaining non-singleton cell
+is a *real* decision = the Phase-1/Phase-2 boundary. Normal mode currently runs `target = fallback` (exhaustive branch
+→ flag); **option-2 replaces that line.** (`RecoveryOnly` is test instrumentation, not a real-use path.) At this point
+the residue is **rigid by construction** — Phase 1 consumed all symmetry (`real_stays_real`) — the canonical base order
+is `partition.CellOf` (free, D-M2), and any harvested `Aut` (e.g. a doubled `Z₂`) sits in `Automorphisms`. Strictly
+better than a flag-hook: no wasted exhaustive branch, runs on *every* rigid residue (circulants included → speedup +
+built-in regression), and the soundness-fatal mis-detection (treating a *symmetric* graph as rigid) **cannot arise** —
+rigidity is Phase-1's contract, not option-2's job.
+
+**The residual soundness obligation (the reduced "item 4").** Option-2 must correctly canonize the rigid residue *or*
+flag, and its succeed/flag **verdict must be iso-invariant** (else isomorphic inputs split between option-2 and the
+exhaustive fallback ⟹ completeness violation). Discharge: emit the candidate labelling, then **verify by
+reconstruction** — rebuild the graph from `(base, H, c, orientation)` and check it matches the input; mismatch → flag.
+Sound (flagging is always safe), iso-invariant (deterministic), bounded. A flag now means "obstruction outside the
+handled class" — Phase-1 starvation (a slipped symmetry / Cameron) or a genuinely non-handled residue — never
+"IR-blindspot we can't touch."
+
+**The engine: iterative F₂-solve ⊕ 1-WL refine, flag-on-stall.** Solve the extracted F₂ system, pin the solution
+(individualize), refine, repeat; flag only when a round adds nothing *and* the residue is non-discrete. This **extends
+scope (b)** from "WL-easy base" to "**F₂-tower base**" — a multipede whose base is itself an F₂-multipede is peeled
+layer by layer.
+
+**The completeness ceiling — three distinct claims (keep them separate).**
+1. *"F₂ is the only obstruction to 1-WL"* — **FALSE** (Lichter's CFI-over-`Z_{2^k}` is rigid, 1-WL-hard, not F₂).
+2. *"every rigid obstruction is linear over some abelian ring (CFI-type)"* — **CONJECTURE**, strictly broader
+   (F₂ ⊊ `Z_{2^k}` ⊊ rings); not believed to capture all of P.
+3. *"some rigid obstruction is non-linear"* — **OPEN, no constructible witness** (consistent with the 0-falsifier record).
+
+**`Z_{2^k}` is INSIDE the iterative engine, not the floor (corrects an earlier error in this thread).** `Z_{2^k}` is a
+k-layer F₂ tower, carries included: solving mod 2 makes the low-bit sum `S₀` a *known integer*, and the mod-4 layer is a
+clean inhomogeneous F₂ system on the high bits (`b₁x+b₁y+b₁z ≡ (c−S₀)/2 mod 2`), and so on (the 2-adic content of Smith
+normal form). So **iterative-F₂-*with-individualization* = `Z_{2^k}` solving.** Lichter does *not* refute this: his lower
+bound is on **FPC + F₂-rank, which cannot individualize** — it computes the global F₂-rank statically, exactly missing
+the 2-torsion; the IR-solver individualizes. **The one genuinely open, probe-able question is layer exposure:** after
+pinning layer j's solution, does 1-WL/forcing surface layer (j+1)'s F₂ constraints in the graph? Algebraically they are
+present; whether the encoding reveals them is the next probe (a small `Z₄` multipede).
+
+**"Never flag on rigid" = rigid-GI ∈ P = the seal's `hSmallAutThin` wall.** The adaptive IR-solver is **not a logic**, so
+Gurevich's no-logic-for-P does *not* imply it must flag — that bites only *fixed* engines (fixed ring, fixed WL-level),
+and its content is "**adapt** the ring," which the engine does. Even the known lower bounds are *linear* constructions
+(varying the ring), giving zero evidence for a non-linear obstruction. So the ceiling is exactly "rigid-GI ∈ P", which
+equals the project's own open wall **`hSmallAutThin`** (small-Aut ⟹ bounded WL-dim), open with no falsifier. Babai/Luks
+are plausibly poly on rigid (the Johnson/Cameron blowup is symmetry-sourced, which rigid avoids) — that *is* this wall.
+
+**Route (b): the F₂ → ring generalization (the named next enlargement of the handled class).** Same skeleton over a
+different scalar ring: F₂-rank → **Smith normal form**; `coker(A_G)` over F₂ → coker over the module; forcing = ring-unit-
+propagation = 1-WL. The Layer-C extraction and the D-M2/D-M3 solve→canonical-form chain carry over verbatim. The **one
+new piece is ring inference** — reading `k`/the abelian ring off the gadget structure iso-invariantly (Lichter's point:
+the ring varies per instance, so it can't be hard-coded).
+
+**Unification with the seal's node 4 (route §9.9.18 / remaining-work §3a).** The same move resolves node 4: a *schurian*
+rank-3 residue has `Aut(X)=G^(2)` a primitive rank-3 group; **Cameron's trichotomy {affine, almost-simple, grid}** +
+"node 4 is non-geometric" excludes almost-simple/grid (the geometric **Cameron** leg, carved) ⟹ **affine survives** ⟹
+the affine slice ⟹ **solved** modulo `{G3 + Liebeck + Skresanov + cyclotomic-2-sep + finite exceptions}` (the forms-graph
+non-cyclotomic separability = the route-1 Gauss work = the open hole). **"Affine = linear-algebraic" is option-2's
+"rigid obstruction = linear" seen from the rank-3 side** — the seal reduces node 4 from the rank-3-scheme side, option-2
+reduces the multipede from the high-rank side, and **both leave the identical residue**: the **non-schurian / non-linear**
+case, which §9.9.18 argues *cannot be a WL-closure residue* and relocates to this solver's flag floor. The two tracks
+meet at exactly the same open wall.
+
+**Next concrete step:** the `Z₄`-multipede **layer-exposure probe** — does iterative F₂ peel a true ring tower under
+individualization? The one thing the algebra leaves to the encoding.
