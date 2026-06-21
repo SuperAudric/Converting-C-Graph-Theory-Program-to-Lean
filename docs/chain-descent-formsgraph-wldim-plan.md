@@ -30,9 +30,11 @@
 > count = explicit Gram-function (nondeg configs)", Lemma B = "counts recover `u`", composing to prove
 > `IsotropySeparatesAtBase Q T₉` directly (the live route — supersedes the `QProfileSeparatesAtBase` framing). **Landed,
 > axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`ScratchLemmaA.lean`); B-M1, B-M2-bridge
-> (`ScratchLemmaB.lean`). **NEXT = A-M3 via ROUTE B** (full-space char-sum, spike-validated §10.10 — char-sum the
-> `reduction_to_levelset_nondeg` output over `V`; `N` collapses to a 14-row `(m, det G, c_lev)` table, NO subspace
-> restriction, NO per-config diagonalization). Use the **size-9 base `T₉`** (§10.6).
+> (`ScratchLemmaB.lean`). **A-M3 via ROUTE B UNDERWAY (2026-06-21):** increments 1 (`levelset_fourier`) + 2a
+> (`levelset_fourier_prod`) landed axiom-clean — the level-set count is now the `(s,ρ)` character sum
+> `∑_s∑_ρ ψ(−s·c)·∑_x ψ(s·Q x+polar Q x(∑ρⱼaⱼ))`. **NEXT = A-M3 increment 2b** (the `s`-split: D1 for `s≠0`,
+> `sum_addChar_linearMap` for `s=0` — couples in the nondeg config-Gram hypothesis), then 2c/A-M4 (config-Gram Gauss
+> sum → the §10.10 14-row `(m, det G, c_lev)` table). Use the **size-9 base `T₉`** (§10.6).
 >
 > **▶▶ HANDOFF (2026-06-18) — READ §9 (milestone roadmap) + §10 (the kernel handoff) FIRST; the notes below are the
 > landed history.** State of the Gauss work: **M0–M2 DONE, M3 reduction DONE, all axiom-clean, full build green.** The
@@ -805,10 +807,25 @@ The plan's steps A1–A6 are landing bottom-up (WIP scratch module, `lake env le
   invertible config Gram (`IsUnit G.det`, witness `(Q∘a) ᵥ* G⁻¹`), so the count is unconditionally the homogeneous
   level-set on nondegenerate configs.
 
+- **A-M3 increment 1 ✅ DONE (2026-06-21, `levelset_fourier`, axiom-clean) — the Route-B Fourier setup.** The level-set
+  count `#{x : (∀ j, polar Q x (a j)=0) ∧ Q x = c}`, scaled by `q^{m+1}`, is a double character sum indexed by
+  `Option (Fin m)` (`none` = quadratic dual `r none`, `some j` = linear duals), with the `m` linear duals collapsed by
+  bilinearity (`polar_sum_right`) into one linear term `polar Q x (∑ j, r (some j) • a j)`. Via `countk_eq_sum_charsum`
+  (the inner sum is over ALL of `V` — **no subspace `Uᗮ` formed**, the Route-B payoff).
+- **A-M3 increment 2a ✅ DONE (2026-06-21, `levelset_fourier_prod`, axiom-clean) — `(s, ρ)` reindex.** Splits the
+  `Option (Fin m) → F` dual into the quadratic dual `s` and the linear duals `ρ` (`Equiv.piOptionEquivProd`); the count
+  is now `∑_s ∑_ρ ψ(−s·c)·∑_x ψ(s·Q x + polar Q x (∑ⱼ ρⱼ•aⱼ))`, the exact shape the `s`-split consumes.
+
 **Remaining for full Lemma A (the heavier pieces):**
-- **A5:** apply `card_quadForm_eq` to `Q|_{Uᗮ}` — needs an orthogonal anisotropic basis of the subspace `Uᗮ`
-  (nondegenerate ⟹ exists; the subspace-restriction + basis is the main Mathlib lift).
-- **A6:** express `disc(Q|_{Uᗮ})` and `Q w₀` as functions of the config Gram (discriminant multiplicativity over `⊥`).
+- **A-M3 increment 2b (NEXT) — the `s`-split.** Split `∑_s` into `s=0` and `s≠0`. `s=0`: inner `= ∑_x ψ(polar Q x a*(ρ))`
+  `= |V|·[a*(ρ)=0]` via **`sum_addChar_linearMap`** with `φ = Q.polarBilin.flip a*(ρ)`; collapse `[a*(ρ)=0] ⟹ [ρ=0]` via
+  config-vector independence (needs nondeg config Gram ⟹ `aⱼ` independent — couples in the nondeg hypothesis here). `s≠0`:
+  inner `= ψ(−s⁻¹ Q a*(ρ))·∑_x ψ(s·Q x)` via **D1 `sum_addChar_quadForm_linear`** (already proven; convert `∑_{s≠0}` to a
+  sum over `(ZMod p)ˣ`). Output: `count·q^{m+1} = |V| + (∑_{s≠0} ψ(−s c)·χ(s)^d·W)·(config-Gram Gauss sum over ρ)`.
+- **A-M3 increment 2c / A-M4 — the config-Gram Gauss sum + the `(m, det G, c_lev)` collapse.** `∑_ρ ψ(−s⁻¹ Q a*(ρ))` is a
+  Gauss sum of the config form `QR(ρ)=Q(∑ρⱼaⱼ)` (Gram `G`) on `Fin m → F₃` (`sum_addChar_quadForm_smul`/`sum_quadForm_eval`);
+  `W=∑ψ(Q x)` uses the fixed concrete basis `{e₀±e₁,e₂,e₃}`. Pin `N` to the §10.10 14-row `(m, det G, c_lev)` table via
+  discriminant-up-to-squares (`∏χ(QR vᵢ)=χ(det G)·const`, basis-independent) + the `F₃` Gauss-sum magnitude (`gaussSum_sq`).
 
 No new obstruction surfaced while implementing; the reduction to a homogeneous level-set went through cleanly and
 axiom-clean. The remaining A2/A5/A6 are linear-algebra/basis lifts, not new mathematics.

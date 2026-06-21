@@ -146,6 +146,76 @@ theorem reduction_to_levelset_nondeg (Q : QuadraticForm (ZMod p) (Fin d → ZMod
   obtain ⟨c, hc⟩ := spanning_w0_exists Q a hG
   exact ⟨c, reduction_to_levelset Q a c hc⟩
 
+open scoped Classical in
+/-- **Lemma A, step A-M3 increment 1 — the Fourier expansion of the level-set count over the FULL space `V`**
+(Route B, §10.10). The level-set count `#{x : (∀ j, polar Q x (a j)=0) ∧ Q x = c}`, scaled by `q^{m+1}`, is a
+double character sum indexed by `Option (Fin m)`: the `none` slot carries the quadratic condition `Q x = c`
+(dual weight `r none`), the `some j` slots carry the `m` linear conditions `polar Q x (a j)=0` (dual weights
+`r (some j)`). The `m` linear duals collapse, by bilinearity (`polar_sum_right`), into a single linear term
+`polar Q x (∑ j, r (some j) • a j)`. This never forms the subspace `Uᗮ` — the inner sum is over all of `V`,
+ready for the D1 / `linearMap` split (increment 2). -/
+theorem levelset_fourier (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (c : ZMod p)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive) :
+    ((Finset.univ.filter (fun x : Fin d → ZMod p =>
+        (∀ j, QuadraticMap.polar Q x (a j) = 0) ∧ Q x = c)).card : R')
+      * (p : R') ^ (m + 1)
+    = ∑ r : Option (Fin m) → ZMod p,
+        ψ (-(r none * c)) * ∑ x : Fin d → ZMod p,
+          ψ (r none * Q x + QuadraticMap.polar Q x (∑ j, r (some j) • a j)) := by
+  classical
+  haveI : NeZero p := ⟨(Fact.out : p.Prime).pos.ne'⟩
+  let f : Option (Fin m) → (Fin d → ZMod p) → ZMod p :=
+    fun k x => k.elim (Q x) (fun j => QuadraticMap.polar Q x (a j))
+  let cc : Option (Fin m) → ZMod p := fun k => k.elim c (fun _ => 0)
+  have hcard := countk_eq_sum_charsum (F := ZMod p) (R' := R') hψ f cc
+  rw [ZMod.card, Fintype.card_option, Fintype.card_fin] at hcard
+  have hfilter : (Finset.univ.filter (fun x : Fin d → ZMod p => ∀ k, f k x = cc k))
+      = Finset.univ.filter (fun x : Fin d → ZMod p =>
+          (∀ j, QuadraticMap.polar Q x (a j) = 0) ∧ Q x = c) := by
+    apply Finset.filter_congr
+    intro x _
+    constructor
+    · intro h; exact ⟨fun j => h (some j), h none⟩
+    · rintro ⟨h1, h2⟩ k; cases k with
+      | none => exact h2
+      | some j => exact h1 j
+  rw [hfilter] at hcard
+  rw [hcard]
+  apply Finset.sum_congr rfl
+  intro r _
+  congr 1
+  · congr 2
+    rw [Fintype.sum_option]
+    simp only [cc, Option.elim_none, Option.elim_some, mul_zero, Finset.sum_const_zero, add_zero]
+  · apply Finset.sum_congr rfl
+    intro x _
+    congr 1
+    rw [Fintype.sum_option]
+    simp only [f, Option.elim_none, Option.elim_some]
+    rw [polar_sum_right Q x Finset.univ (fun j => r (some j)) a]
+
+open scoped Classical in
+/-- **Lemma A, step A-M3 increment 2a — reindex the dual sum into `(s, ρ)` product form.** Splits the
+`Option (Fin m) → F` dual variable into the quadratic dual `s = r none` and the linear duals `ρ = r ∘ some`
+(via `Equiv.piOptionEquivProd`), so the inner sum is `∑_x ψ(s·Q x + polar Q x (∑ⱼ ρⱼ•aⱼ))` — ready for the
+`s = 0` (`linearMap` boundary) vs `s ≠ 0` (D1 `sum_addChar_quadForm_linear`) split of increment 2b. -/
+theorem levelset_fourier_prod (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p)) (c : ZMod p)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive) :
+    ((Finset.univ.filter (fun x : Fin d → ZMod p =>
+        (∀ j, QuadraticMap.polar Q x (a j) = 0) ∧ Q x = c)).card : R')
+      * (p : R') ^ (m + 1)
+    = ∑ s : ZMod p, ∑ ρ : Fin m → ZMod p,
+        ψ (-(s * c)) * ∑ x : Fin d → ZMod p,
+          ψ (s * Q x + QuadraticMap.polar Q x (∑ j, ρ j • a j)) := by
+  rw [levelset_fourier Q a c hψ,
+    ← Equiv.sum_comp (Equiv.piOptionEquivProd (α := Fin m) (β := fun _ => ZMod p)).symm
+      (fun r : Option (Fin m) → ZMod p => ψ (-(r none * c)) * ∑ x : Fin d → ZMod p,
+        ψ (r none * Q x + QuadraticMap.polar Q x (∑ j, r (some j) • a j))),
+    Fintype.sum_prod_type]
+  rfl
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -153,3 +223,5 @@ end ChainDescent
 #print axioms ChainDescent.reduction_to_levelset
 #print axioms ChainDescent.spanning_w0_exists
 #print axioms ChainDescent.reduction_to_levelset_nondeg
+#print axioms ChainDescent.levelset_fourier
+#print axioms ChainDescent.levelset_fourier_prod
