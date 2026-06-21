@@ -55,10 +55,21 @@
 > F₂-solve ⊕ 1-WL refine, flag-on-stall**; **`Z_{2^k}` is an F₂ tower** (inside the engine — Lichter doesn't apply, it
 > can't individualize); the completeness ceiling = **rigid-GI ∈ P = the seal's `hSmallAutThin` wall** (not refuted by
 > no-logic-for-P); route (b) = **F₂→ring via Smith normal form** (ring inference the open piece); and the seal's node-4
-> reduction (affine/almost-simple/grid → affine) is the **same "linear = tractable" move** (route §9.9.18). **Next =
-> the `Z₄` layer-exposure probe** (does iterative F₂ peel a ring tower under individualization?), then D-M5
-> (fallback/flag + cross-checks). Pick-up reading order: this STATUS → §11.0–§11.6 → §11.10 (the build) → **§11.11
-> (obstruction class, engine, ceiling)**.**
+> reduction (affine/almost-simple/grid → affine) is the **same "linear = tractable" move** (route §9.9.18).
+> **★ SESSION 2026-06-21 (recorded; HANDOFF below):** Z₄ probe DONE (§11.11 — Z₄ handled both levels; native encoding
+> forces the full ring, "layer exposure" moot; ring inference = cell-size *insufficient*, must read connectivity §11.13);
+> the **build+prove roadmap** is §11.12 (B1–B6 C# / P1–P4 Lean, decisions: ring-from-start, carry-then-discharge bridge,
+> model-level, build-first); the **ring design** is §11.13; the **rigid-medium-negates-hidden-Johnson** lead is §11.14
+> (abelian hiding vs non-abelian Johnson ⟹ rigid seal may carry *no* "or Cameron").
+>
+> **▶▶ PICK UP HERE (fresh reader).** All mechanism is validated (D-M0–D-M4 + Z₄), nothing is integrated, no Lean exists.
+> The single next action is **B1+B2+B3** (§11.12) — productionize the ring-aware solver and wire it at
+> `ChainDescent.Search` `target == -1`, with verify-by-reconstruction; **P1** (L1 extraction-soundness, F₂) can start in
+> parallel. **Before D1's ring inference is built**, run the focused **group-recovery sub-probe** (§11.13 open questions:
+> recover full `A` from a general-degree gadget relation, iso-invariantly). Reading order for onboarding: this STATUS →
+> §11.0–§11.6 (wall + mechanism) → §11.10 (D-M0–D-M4 build) → §11.11 (obstruction/engine/ceiling) → **§11.12 (roadmap) →
+> §11.13 (ring) → §11.14 (hidden-Johnson lead)**. Probes: `Option2ExtractionProbe.cs` (12 tests, the C# fixtures);
+> `/tmp/*.py` ephemeral (rebuild from §11.8 + §11.11 + §11.13).**
 
 **Goal.** A polynomial-time canonizer for the rigid residue handed to Phase 2 of the deferral workflow —
 a graph (with its coherent-configuration / orbit structure already computed) whose remaining decisions are
@@ -847,4 +858,129 @@ meet at exactly the same open wall.
 
 **Next concrete step:** the Z₄ probe is DONE (above — Z₄ handled, route (b) validated). Remaining finer points: (i)
 whether Lichter's *specific* hard encoding is 1-WL-forcing-extractable like the natural Z₄-multipede; (ii) the C# build
-itself — productionize D1/D2/D4 and wire at `ChainDescent.Search` `target == -1` (the gap-roadmap of the design pass).
+itself — productionize D1/D2/D4 and wire at `ChainDescent.Search` `target == -1` (the roadmap, §11.12).
+
+### 11.12 Build + prove roadmap — the rigid seal (2026-06-21, user-approved)
+
+> The target is a **built** solver (C#, wired + cross-checked) **and** a **proven** soundness theorem (Lean) — the
+> Phase-2 analog of the symmetry seal `reachesRigidOrCameron`. Approved decisions: **include the ring from the start**
+> (not F₂-only — the ring is the analogous object; separating risks correctness); **carry the forcing-model bridge
+> temporarily** but everything is eventually discharged; **model**-level Lean (not graph); **build first**, Lean as a
+> design tool until the main proofs start.
+
+**The target theorem — the rigid seal.** `canonizesRigidResidue_or_flags`: for a rigid Phase-2 residue, *handles
+linear-over-a-ring, flags non-linear*, open content isolated into one hypothesis. It is the mirror of the symmetry seal:
+
+| | handles | the escape | wall |
+|---|---|---|---|
+| symmetry seal `reachesRigidOrCameron` | symmetry consumption | "or Cameron" | `hSmallAutThin` |
+| **rigid seal** (this) | linear-over-ring (CFI/multipede/`Z_{2^k}`) | "or non-linear" | = `hSmallAutThin` |
+
+By the node-4 unification (§11.11) the two flag floors are the **same object**; §11.14 argues the rigid seal's escape is
+*strictly tighter* (no "or Cameron" at all). Combined, the two seals isolate **one** wall.
+
+**BUILD track (C#) — empirical validity.** *(The hook is `ChainDescent.Search` `target == -1`, `ChainDescent.cs:243-257`,
+replacing the `target = fallback` exhaustive branch; rigidity is guaranteed there by Phase 1, see §11.11.)*
+- **B1 Productionize** — lift D1/D2/D4/D5 from `Option2ExtractionProbe.cs` into an `Option2Solver` class; robust D1
+  (general arity via the segment/middle bipartition); **ring-aware from the start** (§11.13); behind a config flag.
+- **B2 Wire** at `target == -1`: solver succeeds + verifies → set `_bestMatrix`, return; else fall through to the
+  existing exhaustive branch. Compose the labelling with the pinned path.
+- **B3 Verify-or-flag (D7)** — reconstruct the graph from `(base, H, c, orientation)`, compare to input; mismatch → fall
+  through. Makes the succeed/flag **verdict iso-invariant** (the one soundness-critical piece; the reduced "item 4").
+- **B4 Fold (D6)** — use harvested `σ` in `Automorphisms` to quotient onto one copy before solving (doubled/`Aut_base`);
+  the iso-invariant `σ`-fold. The one non-mechanical C# piece; off the single-multipede path.
+- **B5 Cross-checks** — scramble-invariance, exhaustive size-5/6 unique-canonical counts, Even≠Odd, the multipede
+  battery (canonizes + scramble-invariant + agrees with the existing canonizer where it already handles), a speedup
+  measurement, flag-set-shrink on a flagging fixture. "Prove it works" empirically.
+- **B6 Ring** — already designed in (§11.13); the Smith-normal-form solve + ring inference. *Not separately deferred —
+  per the decision, built into B1–B5 as the ring-general path.*
+
+**PROVE track (Lean) — the rigid seal.** *New infrastructure: the rigid residue is a NON-schurian coherent configuration,
+so the seal's `AssociationScheme`/`CoherentConfig` machinery does not apply (§11.10 L2).*
+- **P1 Extraction-soundness (L1)** — minimal forcing-circuits generate `rowspace(H)`. Pure F₂/matroid over `ZMod 2`, no
+  graph; Mathlib-direct. **Do first** (concrete, standalone). *Ring version (row-MODULE, not a matroid) is harder — keep
+  P1 F₂-first as the stepping stone, generalize after.*
+- **P2 Forcing-model bridge** — "1-WL forcing = unit-propagation on the extracted system" (Layer B). **Carry as a model
+  hypothesis** for v1 (like the seal's `orbitalScheme`/`SchurianScheme`); discharge later (a WL-formalization effort).
+- **P3 Solve + canonical-form correctness** — over the F₂/ring-system model: the linear/Smith solve yields an
+  iso-invariant complete canonical labelling (unique for rigid); `coker`/`coset_min` canonicity. The heavy new build.
+- **P4 Rigid-seal capstone** — `canonizesRigidResidue_or_flags`: composes P1+P2+P3 + B3's verify-soundness; axiom-clean;
+  isolates the `LinearObstruction` hypothesis = the wall. Plus the **parity lemma**: its `¬LinearObstruction` flag floor =
+  the symmetry seal's Cameron-complement (the formal node-4 unification; §11.14 sharpens it to "no Cameron carry").
+
+**Carried vs closed (parity with the symmetry seal).** Closed (proven): extraction soundness (P1), the linear/Smith core
++ canonical-form iso-invariance (P3), verify-or-flag soundness (B3). Carried (hypotheses): the forcing-model bridge (P2,
+dischargeable) + `LinearObstruction` (the wall, by design — exactly as the symmetry seal carries "or Cameron"). **No new
+citations** (no CFSG; unlike the symmetry seal's G3). **Sequence:** B1→B2→B3 (the MVP working solver) with P1 in parallel;
+then B4/B5 + P3/P4. Quality bar unchanged (axiom-clean, no `sorry`/`axiom`/`native_decide`, build green).
+
+### 11.13 The ring design (the value-group / Smith-normal-form generalization)
+
+> Decision (§11.12): the solver is ring-general from the start. Validated for Z₄ (§11.11). The ring is **contained** —
+> most F₂ machinery carries unchanged.
+
+**The object.** A rigid Phase-2 residue = an **`A`-linear system `M x = c`**: `A` a finite abelian value-group, `M` the
+integer incidence (`0/1` for the multipede), solved over `A` by **Smith normal form**. F₂ is just `A = Z/2`. Rigid ⟺
+trivial kernel-module. Decompose `A = ⊕ Z/p^k` (structure theorem); solve per prime-power component.
+
+**Ring-INDEPENDENT (reuse the validated F₂ machinery unchanged):** **D2 extraction** recovers `M`'s support / the gadget
+relation — *the same over any `A`* (the Z₄ probe confirmed 1-WL forces the full ring with the same forcing number, so the
+coupling is identical). Also: the forcing oracle, base-order-from-WL-cell-ids (D-M2), verify-by-reconstruction (B3).
+
+**The three ring-SPECIFIC pieces:**
+- **D1 — ring inference, REORDERED to extract→infer.** **★ KEY FINDING (`/tmp/ring_infer_probe.py`, 2026-06-21):** ring
+  inference is **relational, NOT statistical.** Cell-size and forcing histograms are **byte-identical** for `Z/4` and
+  `Z/2²` (both: 4-cell segments, `{4:6,16:6}` gadgets, identical single-pin splits). The distinction lives in the
+  extracted gadget **connectivity** — the negation relation `{(a,−a)}`, whose 2-torsion differs (`Z/4`: `{0,2}`, size 2;
+  `Z/2²`: all 4). Iso-invariant (intrinsic to the relation), extraction-level. So **D1 reads `A` from the extracted
+  relation, not from cell statistics** — extract first, then infer.
+- **D4 — Smith-normal-form solve over `A`.** Kernel-module (= gauge), unique solution (rigid), canonical coset rep =
+  `coker` over `A` (the twist-class, generalizing D-M0/D-M2's `coset_min` to a module coset). Rigidity over `Z/p^k` =
+  full `F_p` rank per prime component (Nakayama; the Z₄ probe used exactly this). Mathlib has Smith normal form over PIDs
+  (Z, then reduce).
+- **D5 — order the `|A|` states.** Each segment's states ordered by the group with the solved value as identity; gadget
+  inners by value-tuple. Generalizes the F₂ 2-state orientation.
+
+**Open ring-inference questions (the focused next sub-probe, before D1 is built):** (i) recover the **full** group `A`
+(not just 2-torsion) from a **general-degree** gadget relation, canonically; (ii) the **canonical state-ordering** tied to
+the inferred `A` (so D5 is iso-invariant); (iii) degenerate cases (relation under-determines `A` → canonical choice or
+flag). This is the ring analog of the D-M0 separation test. Probe spec: `/tmp/ring_infer_probe.py` (rebuild from §11.8
+style) — `build(biadj, A_add, A_n)` native `A`-multipede; the 2-torsion / negation-relation read is the discriminator.
+
+### 11.14 The rigid medium negates the hidden-Johnson/Cameron construction (2026-06-21 lead)
+
+> A theoretical lead (user's insight): does the rigid setting *exclude* a hidden Johnson/Cameron, tightening the rigid
+> seal's flag floor below the symmetry seal's? Strongly supported, **conjecture-level** (the crux is unproven).
+
+**The crux: the hiding mechanism is abelian; the Johnson is not.**
+- A *hidden* symmetry (one that masquerades as a real decision) is, in every known construction, a **CFI-style gauge**:
+  the cycle space `Z₂^β` / `Z_{2^k}^β`, an **abelian, linear** group acting by sign/value flips. The hiding *is* the
+  linearity — a module's action looks like independent decisions.
+- The Johnson/Cameron obstruction is a **giant alternating** symmetry — **non-abelian**. There is **no known non-abelian
+  CFI**: you cannot encode `S_m` as a linear gauge (`S_m` is not a module). So "hidden Johnson" is near-contradictory.
+
+**Which collapses both escapes in the rigid medium:** *hidden* symmetry ⟹ abelian ⟹ the linear oracle's job ⟹ consumed
+in Phase 1; *non-abelian* symmetry ⟹ not hideable ⟹ visible (large Aut) ⟹ excluded from a rigid residue by definition.
+A rigid Phase-2 residue is free of both — real decisions are terminal, any symmetry is a contradiction.
+
+**The 2×2 synthesis** (the clean picture):
+
+| | abelian / linear | non-abelian / non-linear |
+|---|---|---|
+| **symmetry** | hidden gauge → Phase-1 *linear oracle* | Johnson/Cameron → Phase-1 *cascade*, or **excluded by rigidity** |
+| **structure (rigid)** | multipede / `Z_{2^k}` → **Phase-2 IR-solver ✓ (built)** | **the wall** — §9.9.18 non-schurian, open, **no witness** |
+
+The rigid medium kills the entire **symmetry row**; the IR-solver owns **structure/linear**; the only remainder is
+**structure/non-linear**, which §9.9.18 argues *cannot be a WL-closure residue*. This is the deferral-architecture route
+to §9.9.18's conclusion and it **explains the 0-falsifier record** (every would-be witness is a symmetry construction).
+
+**Payoff for the seal:** if "rigid ⟹ no hidden Johnson/Cameron" is proven, the **rigid seal carries a strictly tighter
+flag floor — no "or Cameron" at all, only "or non-linear."** The symmetry seal needs the Cameron escape (Phase 1 may
+starve); the rigid seal sits *after* Phase 1 and provably can't face Cameron.
+
+**The attack (to formalize):** (i) hidden symmetry ⟹ abelian (the gauge is the cycle space); (ii) abelian hidden symmetry
+⟹ consumed by the linear oracle; (iii) non-abelian symmetry ⟹ not hideable ⟹ visible ⟹ killed by rigidity. **(i) is the
+load-bearing conjecture** ("no non-abelian CFI") — empirically solid, not a theorem. **What it does NOT touch:** the
+structure/non-linear cell (still open, still no witness) — the insight removes the symmetry half of the wall only.
+**Empirical test (not yet run):** try to hide a non-abelian symmetry as decisions, or rigidify a Johnson base (predict:
+the non-abelian symmetry leaks back as residual gauge ⟹ not rigid).
