@@ -1011,13 +1011,14 @@ if B-M3's injectivity turns out to need concrete integers — likely avoidable).
    `sum_quadForm_eval` (closes by `rfl`). This **isolates `∏ᵢ χ(QR vᵢ)` as the sole config-basis-dependent factor — the
    clean approach point for gap-5.** The global `∑_x ψ(s·Q x) = χ(s)^d·W` is the same `sum_addChar_quadForm_smul`, applied
    at assembly with the fixed `Q`-basis (`hF : ringChar (ZMod 3) ≠ 2`, `[Invertible (2:ZMod 3)]`).
-5. **★ The discriminant collapse `∏ᵢ χ(QR vᵢ) = χ(discr QR)` (gap-5, the crux tool-work).** In the orthogonal basis `v`,
-   `associated QR` has matrix `diag(QR vᵢ)` (off-diag 0 by `IsOrthoᵢ`, diag `= QR vᵢ` by `associated_eq_self_apply`), so
-   `∏ᵢ QR vᵢ = det(toMatrix v (associated QR))`; and `det(toMatrix v B) = (det of basis-change)²·det(toMatrix' B) = (unit)²·discr QR`
-   (`BilinForm.toMatrix`/`Basis.toMatrix` change-of-basis det). Since `χ` is multiplicative and kills nonzero squares (`χ(u²)=1`),
-   `∏ᵢ χ(QR vᵢ) = χ(∏ᵢ QR vᵢ) = χ(discr QR)`. Tools: `QuadraticMap.discr` (= `toMatrix'.det`), `BilinForm.toMatrix` basis-change
-   det, `quadraticChar` multiplicativity + `quadraticChar_sq_one`. **This is the only genuinely new tool-assembly; everything else
-   is plugging landed lemmas.**
+5. **★ The discriminant collapse `∏ᵢ χ(QR vᵢ) = χ(D)` (gap-5, THE CRUX). ✅ DONE (2026-06-21, `prod_quadChar_eq_det`,
+   axiom-clean).** Came out as planned. **Design choice that sidestepped the `Fin m`↔`Fin (finrank)` index mismatch:** the
+   reference invariant is `D := (BilinForm.toMatrix b₀ (associated QR)).det` with `b₀ = Module.finBasis` (NOT `Pi.basisFun`),
+   so `b₀` and `v` share the `Fin (finrank)` index and the change-of-basis matrix `P = b₀.toMatrix v` is square. Steps: (1)
+   `toMatrix v (associated QR) = Matrix.diagonal (QR∘v)` (`toMatrix_apply` + `isOrthoᵢ_def` off-diag + `associated_eq_self_apply`
+   diag) ⟹ `det = ∏ QR vᵢ`; (2) `toMatrix_mul_basis_toMatrix` ⟹ `P.det·D·P.det = ∏ QR vᵢ`, `P.det ≠ 0` from
+   `Basis.toMatrix_mul_toMatrix_flip`; (3) `map_prod` + `map_mul` + `quadraticChar_sq_one` (kills `P.det²`) ⟹ `∏ χ(QR vᵢ) = χ(D)`.
+   `D` is a basis-free config invariant (its relation to the `Fin m`-indexed `det G'` is a B-M3 concern, deferred).
 
 **ONE viable approach (recommended).** Do **A-M4a** (well-definedness) in this order: (1) `QR`+Gram, (2) nondeg via `discr=½G`,
 (3) anisotropic-basis lemma, (4) the config Gauss sum `= χ(−s⁻¹)^m·χ(discr QR)·gaussSum^m` (the gap-5 collapse is the work), (5)

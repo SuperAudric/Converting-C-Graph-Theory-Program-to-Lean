@@ -436,6 +436,55 @@ theorem configGaussSum_eval (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
   rw [sum_addChar_quadForm_smul hF hψ (configForm Q a) v hv hw s,
     sum_quadForm_eval hF hψ (configForm Q a) v hv hw]
 
+open scoped Classical in
+/-- **A-M4a gap-5 (THE CRUX) — the discriminant collapse.** The basis-dependent factor `∏ᵢ χ(QR vᵢ)` from gap-4
+equals `χ(D)`, where `D = det` of the Gram of `associated QR` at the canonical reference basis `b₀ = finBasis` — a
+**basis-free config invariant**. Proof: in `v` the Gram is `diagonal (QR∘v)` (so `det = ∏ QR vᵢ`); the change of basis
+`Pᵀ·(Gram at b₀)·P = (Gram at v)` (`P = b₀.toMatrix v` invertible) gives `∏ QR vᵢ = P.det²·D`; and `χ` kills the
+square (`quadraticChar_sq_one`). Using `b₀` (not `Pi.basisFun`) keeps both bases `Fin (finrank)`-indexed, so `P` is
+square. -/
+theorem prod_quadChar_eq_det (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    [Invertible (2 : ZMod p)]
+    {m : ℕ} (a : Fin m → (Fin d → ZMod p))
+    {R' : Type*} [CommRing R'] [IsDomain R']
+    (v : Module.Basis (Fin (Module.finrank (ZMod p) (Fin m → ZMod p))) (ZMod p) (Fin m → ZMod p))
+    (hv : (QuadraticMap.associated (configForm Q a)).IsOrthoᵢ v) :
+    (∏ i, ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R')) (configForm Q a (v i)))
+      = ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R'))
+          ((LinearMap.BilinForm.toMatrix (Module.finBasis (ZMod p) (Fin m → ZMod p))
+            (QuadraticMap.associated (configForm Q a))).det) := by
+  set χ := (quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R') with hχ
+  set b₀ := Module.finBasis (ZMod p) (Fin m → ZMod p) with hb₀
+  set P := b₀.toMatrix v with hPdef
+  -- step 1: Gram of `associated QR` at `v` is diagonal
+  have hdiag : LinearMap.BilinForm.toMatrix v (QuadraticMap.associated (configForm Q a))
+      = Matrix.diagonal (fun i => configForm Q a (v i)) := by
+    ext i j
+    rw [LinearMap.BilinForm.toMatrix_apply, Matrix.diagonal_apply]
+    by_cases hij : i = j
+    · subst hij; rw [if_pos rfl, QuadraticMap.associated_eq_self_apply]
+    · rw [if_neg hij]; exact LinearMap.isOrthoᵢ_def.mp hv i j hij
+  have hdetv : (LinearMap.BilinForm.toMatrix v (QuadraticMap.associated (configForm Q a))).det
+      = ∏ i, configForm Q a (v i) := by rw [hdiag, Matrix.det_diagonal]
+  -- step 2: change of basis ⟹ ∏ QR vᵢ = P.det · D · P.det
+  have hchange : Pᵀ * LinearMap.BilinForm.toMatrix b₀ (QuadraticMap.associated (configForm Q a)) * P
+      = LinearMap.BilinForm.toMatrix v (QuadraticMap.associated (configForm Q a)) :=
+    LinearMap.BilinForm.toMatrix_mul_basis_toMatrix (b := b₀) v _
+  have hPne : P.det ≠ 0 := by
+    have hflip : (v.toMatrix b₀).det * P.det = 1 := by
+      rw [← Matrix.det_mul, hPdef, v.toMatrix_mul_toMatrix_flip b₀, Matrix.det_one]
+    intro h0; rw [h0, mul_zero] at hflip; exact one_ne_zero hflip.symm
+  have hdetrel : P.det
+      * (LinearMap.BilinForm.toMatrix b₀ (QuadraticMap.associated (configForm Q a))).det * P.det
+      = ∏ i, configForm Q a (v i) := by
+    rw [← hdetv, ← hchange, Matrix.det_mul, Matrix.det_mul, Matrix.det_transpose]
+  -- step 3: χ of the product
+  have hsq : χ P.det * χ P.det = 1 := by
+    simp only [hχ, MulChar.ringHomComp_apply]
+    rw [← map_mul, ← pow_two, quadraticChar_sq_one hPne, map_one]
+  rw [← map_prod χ (fun i => configForm Q a (v i)), ← hdetrel, map_mul, map_mul,
+    mul_right_comm, hsq, one_mul]
+
 end ChainDescent
 
 #print axioms ChainDescent.isoIncidence_eq_linearConds
@@ -453,3 +502,4 @@ end ChainDescent
 #print axioms ChainDescent.configForm_nondegenerate
 #print axioms ChainDescent.configForm_exists_orthoBasis
 #print axioms ChainDescent.configGaussSum_eval
+#print axioms ChainDescent.prod_quadChar_eq_det
