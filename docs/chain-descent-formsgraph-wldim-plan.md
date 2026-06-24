@@ -296,17 +296,33 @@ coarse invariant is read off) and in how they **scale across families**. (The `w
   > mechanism confirmation `count = f(sqclass det G, level-pattern)` (the A-side identity is *proved* for the instance via
   > `configGaussSum_eq_det`, so this is corroboration not a gap) + the explicit char-2 / `d=6` extension — feeds the GATE.
 
-  > **▶ ROUTE FORK — CURRENT STANDING (2026-06-24, after AUDIT-A + AUDIT-W + SPIKE-K.1).** **Leaning Route 1, NOT yet
-  > final** (SPIKE-K part 2 — does Witt make the *inversion proof* dramatically cleaner, not just uniform? — is unrun). The
-  > decision rule's triggers for Route 3: **(c) is OFF** (AUDIT-A = GO ⟹ no NO-GO; SPIKE-K.1 saw no char-sum fragmentation
-  > in `q`); **(b) is WEAKENED** (AUDIT-W = LARGE, not cheap). **Key reframe from AUDIT-A:** Route 3's headline advantage was
-  > "uniform over `q`" — but **AUDIT-A GO makes Route 1 over abstract `K` ALSO uniform over `q`** (prime + prime-power in one
-  > proof), so Route 3's distinctive edge shrinks to **uniformity across the FAMILIES c/d/e** (one Witt lemma vs per-family
-  > char-sum inversions), trigger (a). **The genuine open trade (settle on SPIKE-K.2 + the endpoint scope):** Route 1 = no
-  > Witt, but the inversion is proved per-family (c, then d, then e — and the endpoint discipline forbids dropping any);
-  > Route 3 = one LARGE Witt build, then c/d/e fall out of a single geometry-agnostic lemma. So the fork is really
-  > *(per-family char-sum inversion) × 3 families vs (one Witt build + uniform extraction)* — a total-work comparison, not a
-  > per-instance one. SPIKE-K.2 decides it by checking whether Witt collapses the inversion qualitatively (trigger a).
+  > **✅ SPIKE-K PART 2 DONE (2026-06-24) — ROUTE 1 CHOSEN (pending the GATE).** Both branches confirmed VIABLE; the
+  > decision is Route 1. **Empirical core** (`A2MonovariantProbe.Probe_IncidenceVsCounts`, green): greedy base under
+  > rank-3 RELATIONS-only (direct adjacency — the Route-B "perp-graph/frame-rigidity, no counting" picture) vs the full
+  > COUNT profile:
+  >
+  > | family | n | rel-only | full counts |
+  > |---|---|---|---|
+  > | VO⁻₄(3) | 81 | 13 | 5 |
+  > | VO⁺₄(3) | 81 | 9 | 5 |
+  > | VO⁻₄(5) | 625 | 33 | 7 |
+  > | VO⁺₄(5) | 625 | 23 | 6 |
+  > | VO⁻₄(7) | 2401 | **fails (>cap ~36)** | 8 |
+  > | VO⁺₄(7) | 2401 | **fails (>cap)** | 7 |
+  >
+  > **The counts (the inversion) are ESSENTIAL and are the efficient workhorse** — with them the base is tiny+uniform;
+  > without them it explodes and fails by `q=7`. So Route B's distinctive promise (the inversion is *avoidable/dramatically
+  > cleaner* via incidence) does NOT cash out into a small base. **Route-1 inversion is uniform in `q`** (independent confirm):
+  > for even `d` the char-sum closed form has `χ(s)^d=1` and `g^d=(χ(−1)q)^{d/2}` — only a GLOBAL `q mod 4` sign, no
+  > *structural* fragmentation of the recovery; and SPIKE-K.1 already spanned both residue classes (`q=3,7≡3`; `q=5,9≡1`)
+  > with one base law. **Decision rationale:** (1) Route-1 extraction is BUILT and the inversion is cheap+uniform (SPIKE-K.1/.2);
+  > (2) AUDIT-A GO makes Route 1 uniform over `q` anyway, neutralising Route 3's headline edge; (3) Witt is LARGE (AUDIT-W) and
+  > its only saving — a count-free isotropic skeleton — targets an inversion Route 1 already does cheaply (poor value); (4) the
+  > Route-1 inversion *technique* transfers to (d)/(e) with `B` swapped (archive §3: "same skeleton, `B` symplectic/spinor"),
+  > so cross-family amortisation is NOT exclusive to Witt. **Witt stays the documented FALLBACK** iff (a) the non-isotropic-shell
+  > inversion proves nastier than SPIKE suggests, OR (b) (d)/(e) fail to transfer cleanly from (c) (then Witt's single-lemma
+  > packaging regains value). **Route-1 milestones = §11.3** (now the active path); Route-3 milestones = archive §4 (fallback).
+  > **NEXT = the §11.2 GATE:** promote the inversion (§11.3-2 / M2) to a convincing uniform proof sketch — the real research.
 
 ### 11.2 Risk-gate — prove the math before the engineering
 
@@ -399,7 +415,8 @@ pinned by **AUDIT-S (§11.0)**; this step executes it.
 | AUDIT-S ✅ | DONE 2026-06-24 (§11.0): per-family target = `IsotropySeparatesAtBase Q_fam T_fam` (no transport); `SchurianScheme` free; seam = cited `…viaSchurianRank3Affine` (finding 3) | every family's target (§11.6) + AUDIT-W | — (done) |
 | AUDIT-A ✅ | DONE 2026-06-24 (§11.0): GO — toolkit already abstract; forms layer mechanical `ZMod p`→`K`; merges prime+prime-power, SKIP §11.3-3; risk = `Fin(p^d)` reindex churn | field-gen vehicle (§11.3-4) | — (done; GO) |
 | AUDIT-W ✅ | DONE 2026-06-24 (§11.0): Witt EXTENSION; Mathlib ABSENT; build LARGE; reuse single-cluster (c/d/e + rank-3 id); not on critical path | Route 1 vs 3 (§11.1) | — (done; fork leans Route 1 pending SPIKE-K.2) |
-| SPIKE-K.1 ✅ | DONE 2026-06-24 (§11.1): injectivity SURVIVES at odd `q∈{3,5,7,9}` both ε; base `5,7,8,9` ≪ √n; kernel viable, Route-1 supported. Part-2 paper route-comparison still open | kernel route + the §11.2 gate | — (part 1 done; part 2 = route comparison) |
+| SPIKE-K.1 ✅ | DONE 2026-06-24 (§11.1): injectivity SURVIVES at odd `q∈{3,5,7,9}` both ε; base `5,7,8,9` ≪ √n; kernel viable | kernel route + the §11.2 gate | — (done) |
+| SPIKE-K.2 ✅ | DONE 2026-06-24 (§11.1): counts ESSENTIAL (rel-only base 13/33/fails vs full 5/7/8); inversion uniform in `q` ⟹ **ROUTE 1 CHOSEN** (Witt fallback) | Route 1 vs 3 (§11.1) | — (done; Route 1) |
 | base-O(log n) ✅ | DONE 2026-06-24 (SPIKE-K.1): `\|T_Q\|` tracks `d+log₂q` to the integer, `≤ log₂n` at every `q≥5` (the false `≈d+2` refuted) | §11.3-5 + capstone `bound` | — (within budget, confirmed) |
 | GATE | promote SPIKE-K winner to a convincing uniform proof sketch | ALL heavy builds | months of misdirected formalization |
 | HUNT | citation search for (e) half-spin / (f) Suzuki-Tits WL-dim/base | §11.4 bespoke-vs-cite | redundant bespoke proofs |
@@ -407,8 +424,10 @@ pinned by **AUDIT-S (§11.0)**; this step executes it.
 
 ### 11.8 Net ordering
 
-**`AUDIT-S` (seam target FIRST)** → `AUDIT-A` + `AUDIT-W` (parallel) → **`SPIKE-K`** (coarse-invariant injectivity at
-`q≥5` + base scaling) → **GATE** → [if Route 1: count-assembly bridge incl. `R'→ℤ` descent; if Route 3: build Witt] →
+**[DONE 2026-06-24: `AUDIT-S` → `AUDIT-A`+`AUDIT-W` → `SPIKE-K.1`+`SPIKE-K.2` ⟹ ROUTE 1 chosen, abstract-`K` field-gen,
+base `O(d+log q)` confirmed.]** Remaining: **`AUDIT-S` (seam target FIRST)** → `AUDIT-A` + `AUDIT-W` (parallel) →
+**`SPIKE-K`** (coarse-invariant injectivity at `q≥5` + base scaling) → **GATE** → [Route 1 (chosen): count-assembly
+bridge incl. `R'→ℤ` descent] →
 **the uniform kernel** — over abstract-`K` directly if AUDIT-A = GO (skipping the `q`-prime special case, §11.3-3) —
 with the `|T_Q| = O(log n)` base bound → bundling + uniform base → **Step group 4 seam** (target pinned in AUDIT-S; glue
 in parallel) → families d/e/f (HUNT-gated; uncitable ⟹ prove, never defer) → char-2 (cite-if-covered-else-prove) →

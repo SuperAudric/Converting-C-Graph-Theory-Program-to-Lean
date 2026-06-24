@@ -2165,7 +2165,10 @@ public class A2MonovariantProbe(ITestOutputHelper output)
     //  value (looked rich); at q=5 {1,4} and {2,3} collapse.  CHAR-SUM-FREE: counts by brute force, so
     //  the measured base faithfully reflects the COARSE invariant's separating power.  Reports the base
     //  size for odd q∈{3,5,7,9} (q=9 = the odd prime-power test) vs √n and the d+log q / log n budget.
-    static (int baseSize, int n, bool discrete) CountProfileBase(int q, int m, int eps, Random rng)
+    // mode 0 = rank-3 RELATIONS only (direct adjacency to base, NO counts — the Route-B "perp-graph/frame-rigidity"
+    //          incidence test: does the isotropic skeleton discretise off direct adjacency?);
+    // mode 2 = rel + size-1 + size-2 COUNTS (the full Route-A count profile, the seal's actual invariant).
+    static (int baseSize, int n, bool discrete) CountProfileBase(int q, int m, int eps, Random rng, int mode = 2)
     {
         var F = new GFq(q);
         int dim = 2 * m, n = IPow(q, dim);
@@ -2204,9 +2207,9 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         // Sub(a,b) = index of vec[a]-vec[b] (little-endian base-q, matching Vec).
         int Sub(int a, int b) { int s = 0, pw = 1; for (int i = 0; i < dim; i++) { s += F.add[vec[a][i], F.neg[vec[b][i]]] * pw; pw *= q; } return s; }
 
-        // N1ofw(w) = #{y≠0 : iso[y], iso[y-w]} ;  cnt(u;t) = N1ofw(t-u).  Precompute once (n² total).
+        // N1ofw(w) = #{y≠0 : iso[y], iso[y-w]} ;  cnt(u;t) = N1ofw(t-u).  Precompute once (n² total).  (mode≥1 only)
         var N1 = new int[n];
-        for (int w = 0; w < n; w++) { int c = 0; for (int y = 1; y < n; y++) if (iso[y] && iso[Sub(y, w)]) c++; N1[w] = c; }
+        if (mode >= 1) for (int w = 0; w < n; w++) { int c = 0; for (int y = 1; y < n; y++) if (iso[y] && iso[Sub(y, w)]) c++; N1[w] = c; }
 
         // G_δ(w) = #{y≠0 : iso[y], iso[y-w], iso[y-(w-δ)]} ;  cnt(u;ti,tj) = G_{ti-tj}(ti-u).  Cache per δ.
         var gByDelta = new Dictionary<int, int[]>();
@@ -2241,8 +2244,8 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             {
                 var sb = new StringBuilder();
                 foreach (var t in baseL) { sb.Append(rel(u, t)); sb.Append('.'); }
-                foreach (var t in baseL) { sb.Append(N1[Sub(t, u)]); sb.Append('.'); }
-                for (int a = 0; a < baseL.Count; a++) for (int b = a + 1; b < baseL.Count; b++)
+                if (mode >= 1) foreach (var t in baseL) { sb.Append(N1[Sub(t, u)]); sb.Append('.'); }
+                if (mode >= 2) for (int a = 0; a < baseL.Count; a++) for (int b = a + 1; b < baseL.Count; b++)
                 {
                     int ti = baseL[a], tj = baseL[b];
                     sb.Append(Gdelta(Sub(ti, tj))[Sub(ti, u)]); sb.Append(',');
@@ -2299,5 +2302,45 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("         base → √n or exploding at q≥5 ⟹ coarsening kills it, generalization route in trouble (header reframe risk).");
         // injectivity is by construction (greedy stops only at discrete); the finding is the SIZE + its scaling.
         Assert.True(bases.All(r => r.b < (int)Math.Sqrt(r.n)), "a count-profile base reached √n — coarsening may be killing injectivity (the q≥5 risk)");
+    }
+
+    [Fact]
+    public void Probe_IncidenceVsCounts()
+    {
+        // SPIKE-K part 2 (plan §11.1) — the fork's crux, EMPIRICAL half.  Route B (Witt frame-rigidity) claims the
+        // ISOTROPIC SKELETON discretises off DIRECT ADJACENCY alone (perp-graph: isotropic x~y ⟺ B(x,y)=0, no counting),
+        // and only the NON-ISOTROPIC SHELL needs the inversion.  Route A inverts counts throughout.  TEST: compare the
+        // greedy base under (mode 0) rank-3 RELATIONS only vs (mode 2) the full COUNT profile.
+        //  • rel-only ≈ full  ⟹ incidence nearly suffices ⟹ Route-B "no counting round" picture is right, inversion thin.
+        //  • rel-only ≫ full (or rel-only fails to discretise) ⟹ counts are ESSENTIAL ⟹ both routes meet at a real
+        //    inversion, Route 3's "dramatically cleaner" claim is FALSE ⟹ Route 1 favoured.
+        output.WriteLine("SPIKE-K part 2 — does the INVERSION matter?  rank-3 RELATIONS-only base vs full COUNT-profile base.");
+        output.WriteLine("Route-B mental model: isotropic skeleton free off direct adjacency; only the non-isotropic shell needs counts.");
+        output.WriteLine("");
+        var cases = new (string name, int q, int m, int eps)[]
+        {
+            ("VO^-_4(3)", 3, 2, -1), ("VO^+_4(3)", 3, 2, +1),
+            ("VO^-_4(5)", 5, 2, -1), ("VO^+_4(5)", 5, 2, +1),
+            ("VO^-_4(7)", 7, 2, -1), ("VO^+_4(7)", 7, 2, +1),
+        };
+        const int restarts = 5;
+        output.WriteLine($"{"family",-12} {"n",6} {"rel-only",18} {"full-counts",14}");
+        foreach (var (name, q, m, eps) in cases)
+        {
+            int n = 0, relBest = int.MaxValue; bool relDisc = false;
+            int fullBest = int.MaxValue; bool fullDisc = false;
+            for (int s = 0; s < restarts; s++)
+            {
+                var (rb, nn, rd) = CountProfileBase(q, m, eps, new Random(2000 + s), mode: 0);
+                n = nn; if (rd) { relBest = Math.Min(relBest, rb); relDisc = true; }
+                var (fb, _, fd) = CountProfileBase(q, m, eps, new Random(2000 + s), mode: 2);
+                if (fd) { fullBest = Math.Min(fullBest, fb); fullDisc = true; }
+            }
+            string relStr = relDisc ? $"{relBest}" : $">cap (not discrete)";
+            output.WriteLine($"{name,-12} {n,6} {relStr,18} {(fullDisc ? fullBest.ToString() : ">cap"),14}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READING: rel-only ≈ full ⟹ incidence suffices, inversion is thin (Route B 'no counting' picture holds, cleaner).");
+        output.WriteLine("         rel-only ≫ full / fails ⟹ counts ESSENTIAL, both routes meet at the inversion (Route 3 NOT cleaner).");
     }
 }
