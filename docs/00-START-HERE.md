@@ -107,11 +107,17 @@ close it — is set out in
 > Project quality bar: **every Lean theorem must be axiom-clean**
 > (`[propext, Classical.choice, Quot.sound]`), full build green.
 >
-> **★ LIVE THREAD (2026-06-20+) — this §2 prose is the pre-affine-closure map and predates it; for the current
-> frontier read [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) STATUS.** Headlines:
-> **Witt is OFF the seal's critical path** (`reachesRigidOrCameron_viaIsotropySeparates_wittFree`, axiom-clean), so
-> discharging the route-1 step-4 inversion (`IsotropySeparatesAtBase Q T₉`, Lemma A + Lemma B, §10.8) seals `VO⁻₄(3)`
-> modulo `{G3}` **alone**. That step-4 build is the live work.
+> **★ LIVE THREAD (2026-06-24) — this §2 prose is the pre-affine-closure map and predates it; for the current frontier
+> read [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) STATUS + §11.** Headlines:
+> **`VO⁻₄(3)` is SEALED** — `ScratchBM3Glue.vo4minus_seal` (axiom-clean `[propext, Classical.choice, Quot.sound]`) proves
+> the rigid-or-Cameron disjunction for the minus-form residue modulo cited `{G3}`, carrying **NO `hSmallAutThin`, NO Witt**
+> (Witt off the critical path via `…viaIsotropySeparates_wittFree`). Built from `IsotropySeparatesAtBase Qbun T₉` (Lemma
+> A + Lemma B + a `Nat`-bridge + a kernel `decide`); four scratch modules (`ScratchLemmaA/B`, `ScratchBM3Bridge/Glue`)
+> verified but **not yet ported** into the build (port = the only remaining step for the *instance*). **The live work is
+> now the GENERALIZATION** from this single instance to the full schurian residue (`hSmallAutThin` for all small-Aut
+> non-geometric schurian rank-3 families) — the forward roadmap is plan §11. **AUDIT-S done** (per-family target =
+> `IsotropySeparatesAtBase Q_fam T_fam`; the genuine new obligation is the cited classification *seam*, §11.0/§11.6); next
+> = AUDIT-A + AUDIT-W. The single open research problem is the uniform coarse-invariant injectivity kernel (§11.1).
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there

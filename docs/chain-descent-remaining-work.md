@@ -23,6 +23,14 @@ So "what's left" is short: **one research core** (conditional on the cited class
 **citation-formalization** and **one buildable infrastructure piece** (`EdgeGeneratesFromSet`), and the **forward IR
 solver** (gated on the same core). There is **no long cleanup list**.
 
+> **▶ UPDATE (2026-06-24) — the first forms-graph instance is SEALED.** `VO⁻₄(3)` (`ScratchBM3Glue.vo4minus_seal`,
+> axiom-clean `[propext, Classical.choice, Quot.sound]`) closes the affine-polar residue at the minus form modulo `{G3}`
+> — the first member of the forms-graph open residue below, now **proved** (not just empirically probed). The remaining
+> node-4 content is the **generalization** to all small-Aut non-geom schurian rank-3 families **+ a cited classification
+> *seam*** (no `SchemeEquiv`/transport exists in Lean yet — AUDIT-S finding 3). Forward roadmap + the three scoping audits
+> = [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §11 (**AUDIT-S done**; next
+> AUDIT-A + AUDIT-W). The single open research problem is the uniform coarse-invariant injectivity kernel (§11.1).
+
 ---
 
 ## 1. The `modulo` set — what each hypothesis is, and its true status
@@ -33,7 +41,7 @@ The live capstone is `reachesRigidOrCameron_viaBoundedMinMult` (CascadeAffine §
 | Hypothesis | What it is | True status | Collapses to |
 |---|---|---|---|
 | **G3** (`hClassify`, `PrimitiveCCClassification`) | "large primitive ⟹ Cameron section" — the cited classification | **Citation** (Babai/Sun–Wilmes/Kivva). The one citation that *may stay cited* (CFSG-based). | — (kept) |
-| **hSmallAutThin** | "small-Aut primitive residue ⟹ bounded `minMult`" = thick⟹large-Aut | **REDUCED to AFFINE this session (§9.9.18–18b):** for the SCHURIAN residue, Cameron+Liebeck+Skresanov ⟹ the residue is **affine** = `{1-dim cyclotomic — CITED (Ponomarenko-2-sep) + forms-graphs (c)–(f) — UNCITED, bounded-WL-dim OPEN}`. So **not** fully closed-mod-citations; the forms-graph part `{affine-polar, alternating, half-spin, Suzuki–Tits}` is the precise open residue — but now **explicit & CONSTRUCTIBLE** (refuting "no witness") and **PROBED across 3 classes: affine-polar `VO^-_4(q)` (q=2..5), alternating `A(5,2)`, Suzuki–Tits `VSz(8)` all SHATTER at base ≪ √n** (§9.9.18c, `Probe_FormsGraphs`; `VSz(8)` params validate exactly) — hSmallAutThin confirmed on the first unbounded-`s` (s=−3..−57) witnesses. Sub-exp floor `n^{1/5}` (§2). | the affine slice; open residue = forms-graphs (c)–(f), bounded-WL-dim OPEN but **empirically shatters across classes**. Non-schurian wall → IR-solver row 4 (§4). |
+| **hSmallAutThin** | "small-Aut primitive residue ⟹ bounded `minMult`" = thick⟹large-Aut | **REDUCED to AFFINE this session (§9.9.18–18b):** for the SCHURIAN residue, Cameron+Liebeck+Skresanov ⟹ the residue is **affine** = `{1-dim cyclotomic — CITED (Ponomarenko-2-sep) + forms-graphs (c)–(f) — UNCITED, bounded-WL-dim OPEN}`. So **not** fully closed-mod-citations; the forms-graph part `{affine-polar, alternating, half-spin, Suzuki–Tits}` is the precise open residue — but now **explicit & CONSTRUCTIBLE** (refuting "no witness") and **PROBED across 3 classes: affine-polar `VO^-_4(q)` (q=2..5), alternating `A(5,2)`, Suzuki–Tits `VSz(8)` all SHATTER at base ≪ √n** (§9.9.18c, `Probe_FormsGraphs`; `VSz(8)` params validate exactly) — hSmallAutThin confirmed on the first unbounded-`s` (s=−3..−57) witnesses. **★ FIRST INSTANCE PROVED (2026-06-24): `VO⁻₄(3)` SEALED** (`vo4minus_seal`, axiom-clean) — the affine-polar minus-form residue is no longer only probed; open content is now the **generalization** to all `(ε,m,q)` + families (d)–(f) + the cited seam (plan §11). Sub-exp floor `n^{1/5}` (§2). | the affine slice; open residue = the **generalization** of the forms-graph families (plan §11, AUDIT-S done) — `VO⁻₄(3)` proved, the rest open. Non-schurian wall → IR-solver row 4 (§4). |
 | **hcatch** | "1-WL cell ⟹ 2-WL fiber" = CFI-1992 Thm 5.2 (dimWL exchange) | At a complete extension `⟺ warmRefine discrete`. Free where 1-WL discretizes; residual = the `s(C)` certificate. | the core (§9.9.14–15) |
 | **hImprim** | "imprimitive ⟹ block-recovered ∨ abelian-consumed" | Block-tower infra **built**; content = constituent WL-recovery (A2-ii), one tower-layer down. | the core (§9.9.16) |
 
@@ -89,6 +97,15 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 ## 3. The remaining work items (categorized)
 
 ### 3a. The research core — `hSmallAutThin` / the `s(C)` certificate (node 4)
+
+> **▶ LATEST (2026-06-24): `VO⁻₄(3)` SEALED — the first forms-graph instance proved; live work = the generalization.**
+> `ScratchBM3Glue.vo4minus_seal` (axiom-clean) closes the affine-polar minus-form residue modulo `{G3}`. The remaining
+> node-4 content is the **generalization** to all small-Aut non-geom schurian rank-3 families + a **cited classification
+> seam** (AUDIT-S done — per-family target = `IsotropySeparatesAtBase Q_fam T_fam`; `SchurianScheme` free; the seam is
+> unbuilt and is the genuine new obligation). Forward roadmap =
+> [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §11. **The dated bullets below are
+> landed history** (the `QProfileSeparatesAtBase` route, the Lemma A/B build, etc. — superseded by the seal; provenance
+> in the plan's `Archive/`).
 
 > **★ MAJOR REFRAME (2026-06-17, route §9.9.18, Skresanov): node-4-SCHURIAN is AFFINE, not uncited open math.**
 > A schurian rank-3 residue has `Aut(X)=G^(2)` = a primitive rank-3 group; Cameron's trichotomy + small-Aut (kills

@@ -103,12 +103,13 @@ architecture end-to-end; §11 is the generalization.
 ## 11. FULL ROADMAP to the schurian-residue seal (modulo `{G3}`) — revised 2026-06-24
 
 > **What this is.** The total remaining work to prove, **unconditionally modulo the `{G3}` citation stack**, that after
-> deferred-decisions stage 1 (every decision real, IR-solver not yet run) the graph residue is **rigid or Cameron** —
-> i.e. to discharge `hSmallAutThin` for the small-Aut non-geometric **schurian** rank-3 residue. The single `VO⁻₄(3)`
-> instance is sealed (§1, `vo4minus_seal`); this section is the generalization program. **Scope:** the schurian residue only — the
-> non-schurian wall is the IR-solver's job (separate thread, `project_option2_f2_gap`). `SchurianScheme` is *carried*
-> (`orbitalScheme H`); whether it is a scope hypothesis or a citation obligation is settled in **AUDIT-S (§11.0)**, not by a
-> bespoke proof.
+> deferred-decisions stage 1 (every decision real, IR-solver not yet run) the graph residue is **rigid or Cameron** for
+> the small-Aut non-geometric **schurian** rank-3 residue (the node-4 obligation `hSmallAutThin` was a placeholder for —
+> but per AUDIT-S finding 3 the forms-graph route does NOT literally discharge `hSmallAutThin`; it is a *parallel* seal
+> route + a cited classification seam, §11.0/§11.6). The single `VO⁻₄(3)` instance is sealed (§1, `vo4minus_seal`); this
+> section is the generalization program. **Scope:** the schurian residue only — the non-schurian wall is the IR-solver's
+> job (separate thread, `project_option2_f2_gap`). `SchurianScheme` is *carried* (`orbitalScheme H`) and **resolved FREE**
+> by AUDIT-S (schurian by construction; nothing to discharge).
 >
 > **▶ ENDPOINT DISCIPLINE (read first).** The target is the **full unconditional seal + a clean citation stack** — NOT a
 > partial seal carrying a messy `modulo {…}` residual. Every family (incl. d/e/f and char-2) ends up **proven** or
