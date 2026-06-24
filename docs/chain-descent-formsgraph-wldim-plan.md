@@ -77,6 +77,11 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   **`ZProfileSeparates Q T`** (the sole open predicate, general `Q`), **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` (DONE),
   `isotropySeparates_of_zProfileSeparates` (end-to-end `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`), and **D2 bridge**
   `jointIsoCount_eq_restricted` (`Z_u(S)` = the Lemma-A-ready restricted count). See §13.
+- **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route**, increment 1
+  (Lean sibling of `Probe_D3dExactVsWeil`): **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge**
+  `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable atom) + **`pairCharSum_factor`** (the **"no Weil" core**:
+  `gaussSum² · ∑_w χ(Q w)χ(Q(w−c)) = ∑_y ∑_z χ(y)χ(z)·(∑_w ψ(y·Q w + z·Q(w−c)))` — `S` is a finite combination of the
+  landed additive Gauss sums `sum_addChar_multiQuad`/`_zero`, no `χ` of a high-degree poly). Needs `[CharZero R']`. See §13.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -568,13 +573,12 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > - **OPEN, in order:** **D2-analytic/D3a** (closed form `Z=F(χ det G,[c_lev=0])` — assemble landed Lemma A; big, mechanical)
 >   → **D3b** (degenerate configs) → **D3c** (`Z=Z ⟹ χ det G agree`) → **★D3d** (the research core: the `χ`-profile separates
 >   at a bounded base, uniform `q` = forms-graph bounded WL-dim) → **D3e** (construct `T` + assemble).
-> - **★ NEXT CONCRETE STEP (revised by the EXACT-vs-WEIL resolution below — D3d is WEIL-FREE):** the singleton route.
->   Build (1) **D3c-1** `Z_u({t})` recovers `χ(Q(u−t))` (`|S|=1` Lemma A + finite `F`-injectivity); (2) **per-pair
->   `c₀(δ)<1`** from the **EXACT** Gauss closed form for `S = ∑_v χ(Q(v−u)Q(v−u'))` (factors through scalars `(s,t)`;
->   bounded by `|gaussSum|=√q`, no Weil/Deligne); (3) **finite-averaging existence** `∃ T, |T|=O(d log q)` singleton-separating
->   ⟹ `ZProfileSeparates`. **D3a (full `Z=F` closed form) and the pair/higher-`Z(S)` observables are OFF the path** — only
->   the singleton `χ(Q(u−t))` is used. Base `O(d log q)` (grows; not constant). The remaining content is contained in
->   `GaussCount` (exact `S` algebra) + an averaging lemma.
+> - **★ LEAN BUILD UNDERWAY (singleton route, Weil-free). INCREMENT 1 LANDED** (`ScratchPairSep.lean`, axiom-clean): the
+>   **Gauss bridge** `quadChar_addChar_sum` + the **"no Weil" core** `pairCharSum_factor` (`gaussSum²·S = ∑_{y,z}χχ·multiQuad`).
+>   **NEXT increments:** (2) `M`-eval + diagonal vanishing (equality, toolkit); (3) `|S| ≤ q^{d/2+1}<n` for `d≥4` (the one
+>   ℂ-magnitude step, `gaussSum_sq`); (4) `c₀(δ)≤¾` (q≥q₀) + small-q `decide`; (5) finite-averaging existence of a
+>   singleton-separating `T`, `|T|=O(d log q)` ⟹ `ZProfileSeparates`. **D3a + pair/higher observables OFF the path** (only
+>   singleton `χ(Q(u−t))`, recovered from `Z_u({t})`).
 > - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
 >   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
 >   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3), `Probe_D3dExactVsWeil` (exact-vs-Weil).
@@ -766,6 +770,23 @@ the singleton observable alone separates. Both a proof sketch and the numerics.
   (4) ⟹ `ZProfileSeparates`. **D3a (the full `Z=F` closed form) and D3d's feared "Weil sub-build" are both OFF the path.**
   The remaining genuine content is the exact-`S` evaluation (Gauss-sum algebra, contained in `GaussCount`) + the averaging
   lemma. **This is the recommended D3d build.**
+
+**▶ LEAN SIBLING — INCREMENT 1 LANDED (2026-06-24, `ChainDescent/ScratchPairSep.lean`, axiom-clean
+`[propext, Classical.choice, Quot.sound]`, `lake env lean`; NOT in build).** The load-bearing core of the Weil-free route,
+in Lean:
+- **`quadChar_addChar_sum`** — the multiplicative↔additive **Gauss bridge** `∑_y χ(y)·ψ(a·y) = gaussSum χ ψ · χ(a)` for
+  ALL `a : K` (`χ = (quadraticChar K).ringHomComp (Int.castRingHom R')`, `R'` a char-zero domain). Proof: `a=0` via
+  `MulChar.sum_eq_zero_of_ne_one`; `a≠0` via Mathlib `gaussSum_mulShift` + `χ(a)²=1` (quadratic). Reusable project-wide.
+- **`pairCharSum_factor`** — the **"no Weil" core**: `gaussSum χ ψ ^ 2 · (∑_w χ(Q w)·χ(Q(w−c))) =
+  ∑_y ∑_z χ(y)·χ(z)·(∑_w ψ(y·Q w + z·Q(w−c)))`. Proof: bridge twice + `Finset.sum_mul_sum` + Fubini. The RHS inner sum is
+  exactly the landed `sum_addChar_multiQuad`/`_zero`, so `S` is rigorously a finite combination of additive Gauss sums —
+  the "no `χ` of an irreducible high-degree polynomial" fact, now a theorem.
+- **Remaining increments (ordered):** (2) **`M`-evaluation + diagonal vanishing** — plug `sum_addChar_multiQuad` (`y+z≠0`)
+  and `sum_addChar_multiQuad_zero`+`sum_addChar_linearMap` (`y+z=0` ⟹ `0` for `c≠0`, nondeg) into the RHS (equality, no ℂ);
+  (3) **magnitude bound** `|S| ≤ q^{d/2+1} < n` for `d≥4` — the one ℂ-flavored step (`gaussSum_sq` ⟹ `|gaussSum|=√q`,
+  needs `R'=ℂ`/an absolute value); (4) **`c₀(δ) ≤ ¾`** for `q≥q₀` from `|S|` + exact `z, z₂` (`card_quadForm_eq`), small `q`
+  by `decide`; (5) **finite-averaging existence** of a singleton-separating `T`, `|T|=O(d log q)` ⟹ `ZProfileSeparates`.
+  Increment (3) is the only one outside the existing equality toolkit (a small contained `ℂ`-magnitude sub-build).
 
 ---
 
