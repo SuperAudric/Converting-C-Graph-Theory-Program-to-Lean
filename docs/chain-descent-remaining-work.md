@@ -27,9 +27,12 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > axiom-clean `[propext, Classical.choice, Quot.sound]`) closes the affine-polar residue at the minus form modulo `{G3}`
 > — the first member of the forms-graph open residue below, now **proved** (not just empirically probed). The remaining
 > node-4 content is the **generalization** to all small-Aut non-geom schurian rank-3 families **+ a cited classification
-> *seam*** (no `SchemeEquiv`/transport exists in Lean yet — AUDIT-S finding 3). Forward roadmap + the three scoping audits
-> = [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §11 (**AUDIT-S done**; next
-> AUDIT-A + AUDIT-W). The single open research problem is the uniform coarse-invariant injectivity kernel (§11.1).
+> *seam*** (no `SchemeEquiv`/transport exists in Lean yet — AUDIT-S finding 3). **▶ PROGRESS (2026-06-24, late): §11
+> scoping DONE** (AUDIT-S/A/W, **Route 1 chosen**, **GATE passed**); the live work moved to
+> [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) **§13** — the reduction chain
+> (**D1 + D2-bridge**) is **landed in `ChainDescent/ScratchCrux.lean`** (axiom-clean), collapsing the whole generalization
+> to a **single open predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded WL-dimension of the affine
+> forms-graphs** (uncited research frontier; next = settle exact-quad-Gauss vs Weil on `d=2`). Read plan §13 STATUS.
 
 ---
 

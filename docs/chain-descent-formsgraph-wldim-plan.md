@@ -25,14 +25,19 @@
 > all axiom-clean (verified `lake env lean` + `lake build` oleans), **not yet ported** into `build.sh`/`lakefile` (port = the
 > only remaining step for the *instance*; no new math). Module map + reusable architecture = §1.
 >
-> **▶▶▶ THE LIVE FRONTIER = §11** — generalizing from the single sealed instance to the full schurian residue
-> (`hSmallAutThin` for every small-Aut non-geometric schurian rank-3 family, modulo `{G3}`). §11 is self-contained
-> (endpoint discipline, the kernel reframe, the route fork, the gated ordering). The one open research problem is the
-> **uniform coarse-invariant injectivity kernel** (§11.1); everything else is engineering or citation.
+> **▶▶▶ THE LIVE FRONTIER = §13 (the discharge); §11 scoping is DONE.** Generalizing from the sealed instance to the full
+> schurian residue (`hSmallAutThin` for every small-Aut non-geometric schurian rank-3 family, modulo `{G3}`). **§11's
+> scoping front is fully resolved (2026-06-24):** AUDIT-S/A/W done, **Route 1 chosen** (char-sum, not Witt), **GATE passed**
+> — so the live work moved to **§13**, the discharge of the one open lemma. **Current state (§13):** the reduction chain is
+> **landed in `ScratchCrux.lean`** (axiom-clean: **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` + **D2-bridge**
+> `jointIsoCount_eq_restricted` + `isotropySeparates_of_zProfileSeparates`), collapsing the ENTIRE generalization to a
+> **single open predicate `ZProfileSeparates Q T`** (the joint `Z(S)`-profile injectivity). Its hard core is **D3d** =
+> *uniform-`q` bounded WL-dimension of the affine forms-graphs* — uncited, info-bound-TRUE, the genuine research frontier
+> (exact-quad-Gauss vs Weil tool question unresolved). Read §13 STATUS first. The naive "kernel" framing of §11.1 is
+> superseded by §13's sharper reduction.
 >
 > **▶ Witt is OFF the seal's critical path** (`relationRefinesIsotropy_similitude` discharges the bridge's easy half
-> Witt-free). Witt returns only as *one option* for the generalization's kernel extraction (Route 3, §11.1) — gated by
-> AUDIT-W, not mandatory.
+> Witt-free); **Route 1 (char-sum) was chosen over Route 3 (Witt)** at the GATE (§11.1). Witt is the documented *fallback*.
 
 ---
 
@@ -544,6 +549,22 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 
 > **What this is.** The scoped plan for the one open research lemma (the GATE crux). Target chosen, proof chain laid out
 > against the landed scaffolding (§12), the open core isolated, the build increments ordered. This is the active work.
+
+> **§13 STATUS (read first; the blocks below are the chronological detail).**
+> - **LANDED** (`ChainDescent/ScratchCrux.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, compiles via
+>   `lake env lean`, NOT yet in `build.sh`): **D1** `qProfileSeparatesAtBase_of_zProfileSeparates`, **D2-bridge**
+>   `jointIsoCount_eq_restricted`, and the end-to-end `isotropySeparates_of_zProfileSeparates`. Reuses landed
+>   `coords_determine`, `isotropySeparates_of_qProfileSeparates`, `count_transport`, `isoClass_ne_two_iff`.
+> - **⟹ the entire generalization = one open predicate `ZProfileSeparates Q T`** (joint `Z(S)`-profile injectivity, general `Q`).
+> - **OPEN, in order:** **D2-analytic/D3a** (closed form `Z=F(χ det G,[c_lev=0])` — assemble landed Lemma A; big, mechanical)
+>   → **D3b** (degenerate configs) → **D3c** (`Z=Z ⟹ χ det G agree`) → **★D3d** (the research core: the `χ`-profile separates
+>   at a bounded base, uniform `q` = forms-graph bounded WL-dim) → **D3e** (construct `T` + assemble).
+> - **★ NEXT CONCRETE STEP (D3d investigation verdict):** settle the **exact-quad-Gauss vs Weil** tool question on the
+>   *smallest joint case* (`d=2`, one probe) BEFORE building the large D3a assembly — it decides contained-build vs Weil-sub-build.
+> - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
+>   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
+>   `Probe_D3dStructuredBase` (D3d). All green. D3d findings: χ-invariants separate `q≥5`; info bound `b ≳ 2.25√(log q)`
+>   (no fixed algebraic recovery); uncited.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
