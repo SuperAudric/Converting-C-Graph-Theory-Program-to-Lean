@@ -148,6 +148,43 @@ architecture end-to-end; §11 is the generalization.
   the latter it likely touches CFSG/Skresanov and belongs in the **citation stack**, not a "Step-group-4 discharge."
   **Deliverable:** the exact per-family target statement + a go/no-go on `SchurianScheme` = hypothesis vs citation. A
   wrong target shape wastes the whole kernel effort, so this precedes AUDIT-W (which only matters once the target is known).
+
+  > **✅ AUDIT-S DONE (2026-06-24).** Verified against current source (two Explore passes) + route-doc §9.9.18/§9.9.18a.
+  > Three findings:
+  >
+  > **(1) Per-family target statement — CLEAN, no transport, no schurian obligation.** Each family delivers exactly
+  > **`IsotropySeparatesAtBase Q_fam T_fam`** for its bundled form `Q_fam` and a base `T_fam` of size `O(d+log q)` (the
+  > `VO⁻₄(3)` template, §1). Reasons: `affineScheme (similitudeGroup Q)` is **schurian *by construction*** (built via
+  > `orbitalScheme`, returns type `SchurianScheme (p^d)` — `CascadeAffine.lean:2204`; `neg_mem_similitudeGroup` discharges
+  > the `-1∈G₀` side-condition), and the live capstone `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (`:3317`)
+  > already takes a *concrete* `Q` and concludes the seal disjunction **for `affineScheme (similitudeGroup Q)` directly** —
+  > so a family needs no scheme-iso/transport of its own. ⚠ For non-quadratic families (**(d) alternating** bilinear,
+  > **(e) half-spin**, **(f) Suzuki**) the capstone/`similitudeGroup`/`IsotropySeparatesAtBase` are **quadratic-specific**
+  > and must be re-instantiated per form object (parallel infra, same shape) — confirms §11.4's note.
+  >
+  > **(2) `SchurianScheme` = SCOPE HYPOTHESIS, FREE — neither an obligation nor a citation for this work.** It is
+  > discharged *by construction* for the concrete affine schemes (above). The only residual is "does the canonizer's
+  > actual 2-WL-closure residue equal the `orbitalScheme H` model?" — a **pre-existing, seal-wide scope assumption**
+  > (route-doc §9.9.18a/C3; promoting a *computed* scheme to schurian is documented infeasible,
+  > `general-cc-separability.md:554-558`), **orthogonal to node-4 / forms-graphs.** §11 does NOT need to prove anything
+  > about `SchurianScheme`. (The §11-header "discharged in Step group 4" is superseded — nothing to discharge.)
+  >
+  > **(3) ★ THE REAL FINDING — the SEAM is unbuilt and is the genuine §11.6 design question.** The `wittFree` capstone is
+  > a **parallel seal route** (it concludes the rigid-or-Cameron disjunction *for `affineScheme(Q)`*; it does **NOT**
+  > produce `hSmallAutThin`/`BoundedMinMult`, and there is **no Lean lemma** linking `IsotropySeparatesAtBase ⟹
+  > hSmallAutThin`). To turn per-family results into "the abstract residue `S` is rigid or Cameron" the seam must route
+  > `S` to its concrete `affineScheme(Q)` — but **no scheme-isomorphism / `SchemeEquiv` / "the seal disjunction transports
+  > along a scheme iso" exists in Lean** (only an intra-scheme `schemeEquiv` on *vertices*). So §11's "discharge
+  > `hSmallAutThin`" framing is imprecise: the deliverable is the **rigid-or-Cameron conclusion for the residue via the
+  > per-family parallel route + a cited classification case-split**, not a discharge of the generic `viaBoundedMinMult`
+  > hypothesis. **Seam decision (for §11.6), two options:** (a) carry the Skresanov/Liebeck reduction as ONE cited
+  > predicate (the route-doc's proposed `reachesRigidOrCameron_viaSchurianRank3Affine`) whose conclusion is *directly* the
+  > seal disjunction for `S` — discharged on its forms-graph part by the per-family `IsotropySeparatesAtBase` (needs no new
+  > infra, but the predicate carries the transport implicitly); or (b) build a minimal `SchemeEquiv` + a "seal disjunction
+  > transports along `SchemeEquiv`" lemma, then the cited classification gives `∃Q, S ≅ affineScheme(Q)` and you transport
+  > the per-family seal back. **Recommend (a)** — matches the existing citation-carrying style (`PrimitiveCCClassification`),
+  > avoids new scheme-iso infrastructure. Either way: the per-family *math* (finding 1) is independent of this choice, so
+  > the seam can be designed in parallel with the kernel — but it should be **pinned before assembly** (§11.6).
 - **AUDIT-A — CascadeAffine's `ZMod p` dependence (gates the abstract-field refactor, §11.1-field).** Read `CascadeAffine.lean`
   + `GaussCount.lean` and catalogue every essential use of `ZMod p` that is NOT already abstract over `[Field K]`:
   the scheme index `Fin (p^d)`, `affineE`, the affine/similitude group, `frobPerm` (field automorphisms), and the
@@ -261,32 +298,34 @@ Dependency-ordered, with the modifications folded in:
 
 ### 11.6 Step group 4 — structural wiring (citations + glue) — DESIGN THE SEAM EARLY
 
-This is the **load-bearing** step (it actually discharges `hSmallAutThin`). Its *target statement* is pinned up front in
-**AUDIT-S (§11.0)** — §11.6 EXECUTES that seam, it does not design it (a wrong target shape wastes the kernel, so the
-design must precede the families, not follow them).
+This is the **load-bearing** step — it produces the rigid-or-Cameron conclusion for the schurian residue (NOT, per
+AUDIT-S finding 3, a "discharge of `hSmallAutThin`": the per-family `wittFree` route is a *parallel* seal route, and the
+seam is a cited classification case-split that routes the abstract residue `S` to its concrete `affineScheme(Q)`). Target
+pinned by **AUDIT-S (§11.0)**; this step executes it.
 
-- **Cite Ponomarenko** for (a) the 1-dim cyclotomic slice. (citation)
-- **Execute the classification transport (target fixed by AUDIT-S).** Skresanov/CFSG gives "any small-Aut non-geom
-  schurian rank-3 scheme `≅ affineScheme (similitudeGroup Q)` for one of these `Q`, **up to scheme equivalence**." The
-  non-trivial Lean glue = transporting the *abstract* residue to *your concrete* `Q` (the iso/up-to-equivalence matching),
-  then composing the per-family `reachesRigidOrCameron_viaIsotropySeparates_wittFree`. Real glue, low math risk. (The
-  `wittFree` capstone already removed `OrbitIsIsotropyClass`/Witt from each family's critical path — a real simplification
-  vs. the older framing in the archive.)
-- **`SchurianScheme` — per AUDIT-S's verdict:** if it is a **scope hypothesis**, it is free here; if it is an
-  **obligation** (prove the stage-1 residue is schurian), it is discharged by **citation** (CFSG/Skresanov), NOT a bespoke
-  Lean proof. Resolve which in AUDIT-S before this step.
-- **Assemble:** per-family results + classification ⟹ `hSmallAutThin` ⟹ the **full** seal modulo `{G3 + cited}` (no
-  `modulo {family}` residual — endpoint discipline, §11 header).
+- **Cite Ponomarenko** for (a) the 1-dim cyclotomic slice (→ `reachesRigidOrCameron_affineSlice`). (citation)
+- **The seam vehicle (AUDIT-S finding 3, recommended option (a)).** Build the cited reduction capstone
+  `reachesRigidOrCameron_viaSchurianRank3Affine`: a single carried predicate (Skresanov/Liebeck/Cameron) whose conclusion
+  is **the seal disjunction for the residue `S` directly** — its forms-graph obligation discharged by the per-family
+  `IsotropySeparatesAtBase` + `reachesRigidOrCameron_viaIsotropySeparates_wittFree`. This carries the scheme-iso/transport
+  *inside* the citation, so **no new `SchemeEquiv` infrastructure is needed** (option (b) — a real `SchemeEquiv` + a
+  "seal disjunction transports along scheme iso" lemma — is the fallback if a cleaner separation is wanted). Real glue,
+  low math risk; the `wittFree` capstone already removed Witt from each family's critical path.
+- **`SchurianScheme` — RESOLVED FREE (AUDIT-S finding 2):** `affineScheme(similitudeGroup Q)` is schurian by construction;
+  the canonizer-residue-is-schurian question is a pre-existing seal-wide scope assumption, orthogonal to this work.
+  **Nothing to discharge here.**
+- **Assemble:** per-family results + the cited classification ⟹ the **full** rigid-or-Cameron seal for every small-Aut
+  non-geom schurian rank-3 residue, modulo `{G3 + cited}` (no `modulo {family}` residual — endpoint discipline, §11 header).
 
 ### 11.7 Consolidated probe / confirmation checklist (gates, in order)
 
 | # | Probe / confirm | Gates | Risk if skipped |
 |---|---|---|---|
-| AUDIT-S | Skresanov seam target statement + `SchurianScheme` = hypothesis vs citation | every family's target (§11.6) + AUDIT-W | grind families toward the wrong statement |
+| AUDIT-S ✅ | DONE 2026-06-24 (§11.0): per-family target = `IsotropySeparatesAtBase Q_fam T_fam` (no transport); `SchurianScheme` free; seam = cited `…viaSchurianRank3Affine` (finding 3) | every family's target (§11.6) + AUDIT-W | — (done) |
 | AUDIT-A | CascadeAffine `ZMod p` dependence → abstract-`K` go/no-go | field-gen vehicle (§11.3-4) | build GaloisField needlessly (big) |
 | AUDIT-W | exact Witt statement + Mathlib coverage | Route 1 vs 3 (§11.1) | mis-price the route fork |
 | SPIKE-K | **char-sum-FREE probe:** coarse-invariant `(sqclass det G, level-pattern)` injectivity + base-size scaling over `(ε,m,q)`, **`q ≥ 5`**; + paper route-comparison | kernel route + the §11.2 gate | build on an unprovable kernel; miss the `q≥5` info-loss |
-| base-O(log n) | confirm `|T_Q| = O(d + log q) = O(log n)` (not the false `≈ d+2`) | §11.3-5 + capstone `bound` | base silently outside the individualization budget |
+| base-O(log n) | confirm `\|T_Q\| = O(d + log q) = O(log n)` (not the false `≈ d+2`) | §11.3-5 + capstone `bound` | base silently outside the individualization budget |
 | GATE | promote SPIKE-K winner to a convincing uniform proof sketch | ALL heavy builds | months of misdirected formalization |
 | HUNT | citation search for (e) half-spin / (f) Suzuki-Tits WL-dim/base | §11.4 bespoke-vs-cite | redundant bespoke proofs |
 | descent | confirm the `R' → ℤ` descent (char-0 `R'` w/ primitive `p`-th root) for `F(D,c)` | §11.3-1 | a silent gap in the closed form |
