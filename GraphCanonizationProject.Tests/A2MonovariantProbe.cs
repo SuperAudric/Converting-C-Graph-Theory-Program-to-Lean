@@ -2385,4 +2385,203 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("READING: frameColors < n (esp. minus) ⟹ frame skeleton insufficient — confirms the field-value ambiguity gap.");
         output.WriteLine("         min-extra ~ log2(q) ⟹ the proposed 'O(log q) probes resolve the ambiguity' mechanism holds; build can use it.");
     }
+
+    // ── D3d spike (plan §13) ────────────────────────────────────────────────────────────────────────
+    //  Does the χ(det G_S) PAIR-profile (the χ-INVARIANT the count reduces to, NOT the count magnitude) separate ū,
+    //  and how does the base scale in q?  χ-level is O(1) per (ū,S) (a 2×2 determinant) so q can be pushed high to read
+    //  the growth law:  base CONSTANT in q ⟹ a fixed algebraic recovery exists (Weil-FREE proof possible);
+    //                   base ~ log q ⟹ the recovery is character-sum/Weil-flavoured (Mathlib-absent ⟹ a sub-build).
+    //  Also tests D3c info-preservation: do the χ-invariants alone separate as well as the full counts (SPIKE-K)?
+    static (int baseSize, int n, bool discrete) ChiProfileBase(int q, int m, int eps, Random rng)
+    {
+        var F = new GFq(q);
+        int dim = 2 * m, n = IPow(q, dim);
+        int bb = 0, cc = 0;
+        if (eps == -1)
+        {
+            bool found = false;
+            for (int b = 0; b < q && !found; b++) for (int c = 0; c < q && !found; c++)
+            {
+                bool aniso = true;
+                for (int y = 0; y < q && aniso; y++) for (int z = 0; z < q; z++)
+                {
+                    if (y == 0 && z == 0) continue;
+                    int g = F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]];
+                    if (g == 0) { aniso = false; break; }
+                }
+                if (aniso) { bb = b; cc = c; found = true; }
+            }
+            if (!found) throw new Exception($"no anisotropic binary form over GF({q})");
+        }
+        int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+        int Q(int[] x)
+        {
+            int s = 0, hyp = eps == -1 ? m - 1 : m;
+            for (int i = 0; i < hyp; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]];
+            if (eps == -1)
+            {
+                int y = x[2 * (m - 1)], z = x[2 * (m - 1) + 1];
+                s = F.add[s, F.add[F.add[F.mul[y, y], F.mul[F.mul[bb, y], z]], F.mul[cc, F.mul[z, z]]]];
+            }
+            return s;
+        }
+        var vec = new int[n][]; for (int v = 0; v < n; v++) vec[v] = Vec(v);
+        int Qv(int v) => Q(vec[v]);
+        // squares of GF(q) (nonzero); χ(x) = 0 (x=0) / 1 (nonzero square) / 2 (nonsquare)
+        var sq = new bool[q]; for (int y = 1; y < q; y++) sq[F.mul[y, y]] = true;
+        int chi(int x) => x == 0 ? 0 : (sq[x] ? 1 : 2);
+        int two = F.add[1, 1];
+        // a = vec[ū] - vec[t]  (componentwise)
+        int[] diff(int u, int t) { var a = new int[dim]; for (int i = 0; i < dim; i++) a[i] = F.add[vec[u][i], F.neg[vec[t][i]]]; return a; }
+        int Bil(int[] a, int[] b2)
+        {
+            // B(a,b) = Q(a+b) - Q(a) - Q(b)
+            var s = new int[dim]; for (int i = 0; i < dim; i++) s[i] = F.add[a[i], b2[i]];
+            return F.add[Q(s), F.neg[F.add[Q(a), Q(b2)]]];
+        }
+        // χ(det) for singleton {t}: det = 2·Q(ū-t)
+        int chi1(int u, int t) => chi(F.mul[two, Q(diff(u, t))]);
+        // χ(det) for pair {ti,tj}: det = (2Q ai)(2Q aj) - B(ai,aj)²
+        int chi2(int u, int ti, int tj)
+        {
+            var ai = diff(u, ti); var aj = diff(u, tj);
+            int d = F.add[F.mul[F.mul[two, Q(ai)], F.mul[two, Q(aj)]], F.neg[F.mul[Bil(ai, aj), Bil(ai, aj)]]];
+            return chi(d);
+        }
+        // greedy individualisation under the χ(det) pair-profile
+        var baseL = new List<int>();
+        int[] color = new int[n];
+        int guard = 0, cap = Math.Min(n, 6 * dim + 12 + (int)Math.Ceiling(6 * Math.Log2(q)));
+        bool discrete = false;
+        while (guard++ <= cap)
+        {
+            var keyToId = new Dictionary<string, int>();
+            for (int u = 0; u < n; u++)
+            {
+                var sb = new StringBuilder();
+                foreach (var t in baseL) { sb.Append(chi1(u, t)); sb.Append('.'); }
+                for (int a = 0; a < baseL.Count; a++) for (int b = a + 1; b < baseL.Count; b++)
+                { sb.Append(chi2(u, baseL[a], baseL[b])); sb.Append(','); }
+                string key = sb.ToString();
+                if (!keyToId.TryGetValue(key, out int id)) { id = keyToId.Count; keyToId[key] = id; }
+                color[u] = id;
+            }
+            if (keyToId.Count == n) { discrete = true; break; }
+            var sz = new Dictionary<int, int>(); foreach (var c in color) sz[c] = sz.GetValueOrDefault(c) + 1;
+            int bestColor = -1, bestSz = 1; foreach (var kv in sz) if (kv.Value > bestSz) { bestSz = kv.Value; bestColor = kv.Key; }
+            if (bestColor < 0) { discrete = true; break; }
+            var cands = new List<int>(); for (int u = 0; u < n; u++) if (color[u] == bestColor && !baseL.Contains(u)) cands.Add(u);
+            if (cands.Count == 0) break;
+            baseL.Add(cands[rng.Next(cands.Count)]);
+        }
+        return (baseL.Count, n, discrete);
+    }
+
+    [Fact]
+    public void Probe_D3dChiInvariant()
+    {
+        output.WriteLine("D3d spike (plan §13) — χ(det G_S) PAIR-profile individualization base for VO^ε_4(q), GROWING q.");
+        output.WriteLine("Profile(ū) = {χ(det Gram{t̄−ū : t∈S}) : S⊆T, |S|≤2}, χ∈{0=deg,1=sq,2=nonsq} — the χ-INVARIANT the count reduces to.");
+        output.WriteLine("KEY QUESTION (exact-vs-Weil): base CONSTANT in q ⟹ fixed algebraic recovery (Weil-free); base ~ log q ⟹ Weil-flavoured.");
+        output.WriteLine("");
+        var cases = new (string name, int q, int m, int eps)[]
+        {
+            ("VO^-_4(3)", 3, 2, -1), ("VO^+_4(3)", 3, 2, +1),
+            ("VO^-_4(5)", 5, 2, -1), ("VO^+_4(5)", 5, 2, +1),
+            ("VO^-_4(7)", 7, 2, -1), ("VO^+_4(7)", 7, 2, +1),
+            ("VO^-_4(9)", 9, 2, -1), ("VO^+_4(9)", 9, 2, +1),
+            ("VO^-_4(11)", 11, 2, -1), ("VO^+_4(11)", 11, 2, +1),
+            ("VO^-_4(13)", 13, 2, -1), ("VO^+_4(13)", 13, 2, +1),
+        };
+        const int restarts = 6;
+        output.WriteLine($"{"family",-12} {"n",6} {"χ-base",7} {"(spread)",10} {"√n",7} {"log2q",6} {"d+log2q",8}");
+        foreach (var (name, q, m, eps) in cases)
+        {
+            int n = 0, best = int.MaxValue, worst = 0;
+            for (int s = 0; s < restarts; s++)
+            {
+                var (b, nn, disc) = ChiProfileBase(q, m, eps, new Random(7000 + s));
+                n = nn; if (disc) { best = Math.Min(best, b); worst = Math.Max(worst, b); }
+            }
+            output.WriteLine($"{name,-12} {n,6} {best,7} {$"[{best}..{worst}]",10} {Math.Sqrt(n),7:F1} {Math.Log2(q),6:F1} {2 * m + Math.Log2(q),8:F1}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READING: χ-base ≈ count-base (SPIKE-K) ⟹ χ-invariants separate (D3c loses nothing); growth ~ log q ⟹ Weil tool likely.");
+    }
+
+    // χ(det) pair-profile distinct-colour count for an EXPLICIT base (the exact-vs-Weil discriminator: one FIXED
+    // structured base separating for ALL q ⟹ bounded/algebraic recovery, Weil-free).
+    static (int distinct, int n) ChiProfileDistinct(int q, int m, int eps, List<int> baseL)
+    {
+        var F = new GFq(q);
+        int dim = 2 * m, n = IPow(q, dim);
+        int bb = 0, cc = 0;
+        if (eps == -1)
+        {
+            bool found = false;
+            for (int b = 0; b < q && !found; b++) for (int c = 0; c < q && !found; c++)
+            {
+                bool aniso = true;
+                for (int y = 0; y < q && aniso; y++) for (int z = 0; z < q; z++)
+                { if (y == 0 && z == 0) continue; if (F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]] == 0) { aniso = false; break; } }
+                if (aniso) { bb = b; cc = c; found = true; }
+            }
+            if (!found) throw new Exception($"no anisotropic binary form over GF({q})");
+        }
+        int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+        int Q(int[] x)
+        {
+            int s = 0, hyp = eps == -1 ? m - 1 : m;
+            for (int i = 0; i < hyp; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]];
+            if (eps == -1) { int y = x[2 * (m - 1)], z = x[2 * (m - 1) + 1]; s = F.add[s, F.add[F.add[F.mul[y, y], F.mul[F.mul[bb, y], z]], F.mul[cc, F.mul[z, z]]]]; }
+            return s;
+        }
+        var vec = new int[n][]; for (int v = 0; v < n; v++) vec[v] = Vec(v);
+        var sq = new bool[q]; for (int y = 1; y < q; y++) sq[F.mul[y, y]] = true;
+        int chi(int x) => x == 0 ? 0 : (sq[x] ? 1 : 2);
+        int two = F.add[1, 1];
+        int[] diff(int u, int t) { var a = new int[dim]; for (int i = 0; i < dim; i++) a[i] = F.add[vec[u][i], F.neg[vec[t][i]]]; return a; }
+        int Bil(int[] a, int[] b2) { var s = new int[dim]; for (int i = 0; i < dim; i++) s[i] = F.add[a[i], b2[i]]; return F.add[Q(s), F.neg[F.add[Q(a), Q(b2)]]]; }
+        int chi1(int u, int t) => chi(F.mul[two, Q(diff(u, t))]);
+        int chi2(int u, int ti, int tj) { var ai = diff(u, ti); var aj = diff(u, tj); int bij = Bil(ai, aj); return chi(F.add[F.mul[F.mul[two, Q(ai)], F.mul[two, Q(aj)]], F.neg[F.mul[bij, bij]]]); }
+        var seen = new HashSet<string>();
+        for (int u = 0; u < n; u++)
+        {
+            var sb = new StringBuilder();
+            foreach (var t in baseL) { sb.Append(chi1(u, t)); sb.Append('.'); }
+            for (int a = 0; a < baseL.Count; a++) for (int b = a + 1; b < baseL.Count; b++) { sb.Append(chi2(u, baseL[a], baseL[b])); sb.Append(','); }
+            seen.Add(sb.ToString());
+        }
+        return (seen.Count, n);
+    }
+
+    [Fact]
+    public void Probe_D3dStructuredBase()
+    {
+        // The exact-vs-Weil discriminator. Structured base = frame {0,e_i} ∪ {first k of axis-probes 2e₀,2e₁,2e₂,2e₃}.
+        // Report the MIN k (added probes) for the χ(det) pair-profile to separate, for GROWING q.
+        //   min-k CONSTANT in q ⟹ a fixed algebraic recovery (Weil-FREE proof viable);
+        //   min-k ~ log q ⟹ character-sum/Weil recovery (Mathlib-absent ⟹ a sub-build).
+        output.WriteLine("D3d exact-vs-Weil — min #axis-probes (added to the {0,e_i} frame) for χ(det) pair-profile separation, GROWING q.");
+        output.WriteLine("");
+        int m = 2, dim = 4;
+        var qs = new[] { 5, 7, 9, 11, 13, 17, 19, 23 };   // GF(25),GF(27) irreducibles not tabulated
+        output.WriteLine($"{"q",4} {"n",7} {"eps",4} {"min-k",6} {"baseSize",9} {"separates?",11} {"log2q",6}");
+        foreach (int q in qs) foreach (int eps in new[] { -1, 1 })
+        {
+            var frame = new List<int> { 0 }; for (int i = 0; i < dim; i++) frame.Add(IPow(q, i));   // 0, e_i
+            int n = 0, mink = -1;
+            for (int k = 0; k <= dim; k++)
+            {
+                var baseL = new List<int>(frame);
+                for (int i = 0; i < k; i++) baseL.Add(2 * IPow(q, i));    // probe 2·e_i  (index = 2·q^i)
+                var (distinct, nn) = ChiProfileDistinct(q, m, eps, baseL);
+                n = nn;
+                if (distinct == nn) { mink = k; break; }
+            }
+            output.WriteLine($"{q,4} {n,7} {eps,4} {(mink < 0 ? ">4" : mink.ToString()),6} {(mink < 0 ? -1 : 5 + mink),9} {(mink < 0 ? "NO (>4 probes)" : "yes"),11} {Math.Log2(q),6:F1}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READING: min-k flat (q-independent) ⟹ bounded algebraic base ⟹ Weil-FREE proof viable; min-k ↑ with log q ⟹ Weil sub-build.");
+    }
 }

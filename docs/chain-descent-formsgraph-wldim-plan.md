@@ -628,6 +628,44 @@ assembly and the genuine *research* core:
 secure the uniform-`q` field-value-recovery argument (and settle exact-vs-Weil) on a small parametric family. D3a is only
 worth building once D3d's argument is in hand; D3d is where the difficulty and the residual risk live.
 
+**▶ D3d INVESTIGATION — DONE (2026-06-24); spikes `Probe_D3dChiInvariant` + `Probe_D3dStructuredBase` (green).**
+The decisive findings, and the unknown-vs-handleable split.
+
+*Findings:*
+1. **χ-invariants separate at `q≥5` (D3c loses nothing)** — the `χ(det G_S)` pair-profile individualises to discrete
+   with greedy base ~7–9 over `q=5..13` (`≪√n`, margin widening). `q=3` additionally needs the level bit `[c_lev=0]`
+   (small-case; the faithful invariant is `(χ det G, [c_lev=0])`, exactly Lemma A's `F`-arguments).
+2. **★ Information bound — NO fixed algebraic recovery.** A size-`b` base gives `≈C(b,2)` ternary `χ`-queries `≈0.79 b²`
+   bits, vs `4 log₂q` bits to separate `q⁴` points ⟹ **`b ≳ 2.25·√(log q)`**. The base *cannot* be constant ⟹ D3d is
+   genuinely a character-sum statement, not a fixed identity (the greedy "looks flat" only because `√log q` is tiny over
+   `q≤13`).
+3. **Naive structured probes fail** — frame `∪ {2eᵢ}` separates only at `q=5` (`>4` probes insufficient for `q≥7`); the
+   recovery needs *coupled* probes. So D3e's base construction is non-trivial (use `exists_greedy_base_le_log` for an
+   `O(log n)` base *existence*, leaving "it separates" = D3d).
+4. **Uncited** — `VO^ε` WL-dim is not in the literature (Skresanov [2007.14696] = rank-3 2-closure = the *seam*, not the
+   WL-dim bound); confirms route-doc §9.9.18b. So D3d cannot be *cited* — it must be *proved*.
+
+*The refined tool question (exact-quad vs Weil — the key unknown):* the recovery is `χ` of a **quadratic along a line**
+(`Q(ū − (t̄+c·v̄)) = Q(v̄)c² − B(ū−t̄,v̄)c + Q(ū−t̄)`), and quadratic-character sums of *quadratic* polynomials have
+**EXACT Gauss-sum evaluations — already in `GaussCount`** (`sum_addChar_quadForm` etc.). So each per-constraint sum is
+exact-quadratic (Mathlib-present); **whether the *joint* `O(log q)`-constraint assembly stays exact or needs higher-degree
+Weil (Mathlib-absent) is UNRESOLVED** — this is the one question that decides whether D3d is a contained build or a large
+Weil sub-build. More optimistic than the GATE's blanket "Weil risk."
+
+*Unknown (the irreducible open core):* **D3d** = uniform-`q` proof that the `χ`-profile at a bounded base separates
+(= forms-graph bounded WL-dim). Info-bound-TRUE, uncited, exact-quad-vs-Weil unresolved.
+
+*Handleable now (reduces the seal to the single D3d predicate):* D3a (closed form, landed-tool assembly), D3b (degenerate
+configs), D3c (from D3a + the level bit), D3e-scaffold (`exists_greedy_base_le_log` base existence), + the landed chain
+(D1, D2-bridge, `isotropySeparates_of_zProfileSeparates`).
+
+**Viability verdict.** D3d is provable-*in-principle* (concrete family, empirically TRUE, info-bound forces a character-sum
+argument) but is the genuine uncited research core. **Recommended path:** (i) build the handleable parts ⟹ the entire
+generalization is "modulo the single explicit predicate D3d" (clean, honest, achievable); (ii) resolve the exact-quad-vs-Weil
+question by working the *smallest* joint case (`d=2`, one probe) explicitly — if exact-quad, D3d is a contained `GaussCount`
+build; if Weil, a sub-build (or a deeper literature dive on character-sum bounds for these configs). Do NOT start the large
+D3a assembly until (ii) settles the tool.
+
 ---
 
 *Maintenance: this doc is the live proof target — keep §1's module map current as scratch modules port into the build, and
