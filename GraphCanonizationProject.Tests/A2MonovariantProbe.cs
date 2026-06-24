@@ -2168,7 +2168,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
     // mode 0 = rank-3 RELATIONS only (direct adjacency to base, NO counts — the Route-B "perp-graph/frame-rigidity"
     //          incidence test: does the isotropic skeleton discretise off direct adjacency?);
     // mode 2 = rel + size-1 + size-2 COUNTS (the full Route-A count profile, the seal's actual invariant).
-    static (int baseSize, int n, bool discrete) CountProfileBase(int q, int m, int eps, Random rng, int mode = 2)
+    static (int baseSize, int n, bool discrete, int seedColors) CountProfileBase(int q, int m, int eps, Random rng, int mode = 2, List<int> seed = null)
     {
         var F = new GFq(q);
         int dim = 2 * m, n = IPow(q, dim);
@@ -2233,6 +2233,8 @@ public class A2MonovariantProbe(ITestOutputHelper output)
 
         // Greedy individualization under the (rank-3 rel + size-1 + size-2 count) profile.
         var baseL = new List<int>();
+        if (seed != null) baseL.AddRange(seed);          // optional forced initial base (e.g. the {0,eᵢ} frame)
+        int seedColors = -1;                              // #colours right after the seed, before any greedy addition
         int[] color = new int[n];
         int guard = 0, cap = Math.Min(n, 4 * dim + 8 + (int)Math.Ceiling(4 * Math.Log2(q)));
         bool discrete = false;
@@ -2254,6 +2256,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
                 if (!keyToId.TryGetValue(key, out int id)) { id = keyToId.Count; keyToId[key] = id; }
                 color[u] = id;
             }
+            if (seedColors < 0) seedColors = keyToId.Count;   // colours under exactly the seed base
             if (keyToId.Count == n) { discrete = true; break; }
             // pick a representative of the largest non-singleton colour class, not already in base
             var sz = new Dictionary<int, int>(); foreach (var c in color) sz[c] = sz.GetValueOrDefault(c) + 1;
@@ -2264,7 +2267,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             if (cands.Count == 0) break;
             baseL.Add(cands[rng.Next(cands.Count)]);
         }
-        return (baseL.Count, n, discrete);
+        return (baseL.Count, n, discrete, seedColors);
     }
 
     [Fact]
@@ -2291,7 +2294,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             int n = 0, best = int.MaxValue, worst = 0;
             for (int s = 0; s < restarts; s++)
             {
-                var (b, nn, disc) = CountProfileBase(q, m, eps, new Random(1000 + s));
+                var (b, nn, disc, _) = CountProfileBase(q, m, eps, new Random(1000 + s));
                 n = nn; if (disc) { best = Math.Min(best, b); worst = Math.Max(worst, b); }
             }
             bases.Add((q, n, best));
@@ -2331,9 +2334,9 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             int fullBest = int.MaxValue; bool fullDisc = false;
             for (int s = 0; s < restarts; s++)
             {
-                var (rb, nn, rd) = CountProfileBase(q, m, eps, new Random(2000 + s), mode: 0);
+                var (rb, nn, rd, _) = CountProfileBase(q, m, eps, new Random(2000 + s), mode: 0);
                 n = nn; if (rd) { relBest = Math.Min(relBest, rb); relDisc = true; }
-                var (fb, _, fd) = CountProfileBase(q, m, eps, new Random(2000 + s), mode: 2);
+                var (fb, _, fd, _) = CountProfileBase(q, m, eps, new Random(2000 + s), mode: 2);
                 if (fd) { fullBest = Math.Min(fullBest, fb); fullDisc = true; }
             }
             string relStr = relDisc ? $"{relBest}" : $">cap (not discrete)";
@@ -2342,5 +2345,44 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("");
         output.WriteLine("READING: rel-only ≈ full ⟹ incidence suffices, inversion is thin (Route B 'no counting' picture holds, cleaner).");
         output.WriteLine("         rel-only ≫ full / fails ⟹ counts ESSENTIAL, both routes meet at the inversion (Route 3 NOT cleaner).");
+    }
+
+    [Fact]
+    public void Probe_FrameThenProbes()
+    {
+        // GATE (plan §11.2) — validate the proposed inversion MECHANISM:
+        //   frame {0,e₁,…,e_d} gives the nondeg/linear skeleton (coords_determine-style: B(eᵢ,u) ↔ u), BUT the count
+        //   profile sees only SQUARE CLASSES, leaving a field-value ambiguity — which is exactly why the d+1 frame is
+        //   FALSE for minus-type (CascadeAffine:2858).  The claim: ~O(log q) extra "probe" points resolve that ambiguity.
+        // TEST: (1) is the frame ALONE discrete (seedColors == n)?  Expect NO, esp. minus-type — locating the gap.
+        //       (2) how many EXTRA greedy points beyond the frame reach discrete, and does it scale like log q?
+        output.WriteLine("GATE mechanism probe — frame {0,e_i} (d+1 pts) skeleton, then count how many EXTRA points reach discrete.");
+        output.WriteLine("Validates: frame gives the nondeg skeleton; the field-value ambiguity (why d+1 fails for minus) needs ~log q probes.");
+        output.WriteLine("");
+        var cases = new (string name, int q, int m, int eps)[]
+        {
+            ("VO^-_4(3)", 3, 2, -1), ("VO^+_4(3)", 3, 2, +1),
+            ("VO^-_4(5)", 5, 2, -1), ("VO^+_4(5)", 5, 2, +1),
+            ("VO^-_4(7)", 7, 2, -1), ("VO^+_4(7)", 7, 2, +1),
+        };
+        const int restarts = 6;
+        output.WriteLine($"{"family",-12} {"n",6} {"frameSize",10} {"frameColors",12} {"frameDiscrete",14} {"min-extra",10} {"log2q",6}");
+        foreach (var (name, q, m, eps) in cases)
+        {
+            int dim = 2 * m;
+            var frame = new List<int> { 0 };                       // 0 vector
+            for (int i = 0; i < dim; i++) frame.Add(IPow(q, i));    // e_i = Pi.single i 1 ↦ index q^i
+            int n = 0, frameColors = 0, minExtra = int.MaxValue; bool everDisc = false;
+            for (int s = 0; s < restarts; s++)
+            {
+                var (b, nn, disc, sc) = CountProfileBase(q, m, eps, new Random(3000 + s), mode: 2, seed: frame);
+                n = nn; frameColors = sc;
+                if (disc) { minExtra = Math.Min(minExtra, b - frame.Count); everDisc = true; }
+            }
+            output.WriteLine($"{name,-12} {n,6} {frame.Count,10} {frameColors,12} {(frameColors == n ? "yes" : "NO"),14} {(everDisc ? minExtra.ToString() : ">cap"),10} {Math.Log2(q),6:F1}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READING: frameColors < n (esp. minus) ⟹ frame skeleton insufficient — confirms the field-value ambiguity gap.");
+        output.WriteLine("         min-extra ~ log2(q) ⟹ the proposed 'O(log q) probes resolve the ambiguity' mechanism holds; build can use it.");
     }
 }
