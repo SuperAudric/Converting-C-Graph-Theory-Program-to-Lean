@@ -882,6 +882,30 @@ the quadratic-Gauss arena:
   the degenerate-`(y,z)` locus (where `F` drops rank) is the "diagonal" analog. Then sum over `(y,z)` (the `pairCharSum_factor_gen`
   outer sum) and the increment-3 `c₀` bound.
 
+**▶ INCREMENT 4 (anchor existence) FOLDS INTO INCREMENT 5 (averaging) — the matching trick (2026-06-24, de-risked).** A handoff
+question: is "anchor existence" a separate hard (nested-quadric) argument? **No — it dissolves into the averaging, via a specific
+device, but with one subtlety to respect.**
+- **The matching trick.** Build `T = {t₁,…,t_k}` (k even) iid uniform and match into **disjoint** pairs `(t₁,t₂),(t₃,t₄),…`;
+  disjoint ⟹ the k/2 pairs are **independent**. `(u,u')` unseparated by `T` ⟹ none of the matched pairs separates ⟹
+  `P[unsep] ≤ c̄₀^{k/2}`, where `c̄₀ = ` density of non-separating ordered pairs in `V×V`. First moment: `E[#unsep] ≤ n²·c̄₀^{k/2}
+  < 1` for `k > 4d·log q / log(1/c̄₀)` ⟹ a base of size `O(d log q)` separates ALL pairs. **No separate anchor-existence
+  argument** — the anchor is the other matched element, and `det G₂` is symmetric in `(t,a)`. **Single required input: `c̄₀ < 1`
+  bounded.**
+- **The subtlety (decide before committing).** Computing `c̄₀` as a *joint* `(a,t)` character sum is a **degree-4 sum** (`det G₂`
+  is degree-2 in each of `a,t`) ⟹ **Deligne**, harder than the Weil-free per-anchor (fixed `a`, quadratic-in-`t`) sum of
+  increments 2/3. So the fold-in is NOT free if done naively.
+- **The reconciliation (stays Weil-free).** Bound `c̄₀ = E_a[c₀(·;a)] ≤ 1 − ρδ`, where `ρ` = density of **good anchors**
+  (`c₀(u,u';a) ≤ 1−δ`). A bad anchor (`c₀≈1`) is one where the two quadratics-in-`t` `det G₂(u;·,a)`, `det G₂(u';·,a)` align —
+  a **proper subvariety in `a`, density `O(1/q)`** ⟹ `ρ ≥ 1−O(1/q)` ⟹ `c̄₀ ≤ 1−δ'` (constant gap). Uses only the **Weil-free
+  per-anchor `c₀`** + a soft **"bad-anchor locus is low-dimensional"** lemma — NOT a universal-anchor construction, NOT Deligne.
+- **De-risked numerically (`Probe_D3dPairCount`, c̄₀/maxC0 columns):** `c̄₀ ≈ 0.45` **flat and bounded** over q=5..13, both ε
+  ⟹ matching trick closes. The worst *single* anchor `maxC0` **hits 1.00 at q=5,7** ⟹ a universal anchor does NOT have a uniform
+  gap — so the **averaging (c̄₀) route is correct and the fixed-universal-anchor route is fragile**. Bad anchors are ~1%
+  (`sep@1anchor` 99–100%), matching the `O(1/q)` subvariety estimate.
+- **⟹ Recommendation:** increment 4 = a short lemma "bad-anchor locus is a proper subvariety (density `O(1/q)`)" feeding
+  `c̄₀ ≤ 1−δ`; increment 5 = the matching-trick first moment. State the averaging input as `c̄₀` (anchor-averaged), discharged
+  from per-anchor (Weil-free) `c₀` — do NOT use a joint `(a,t)` Deligne sum and do NOT construct a universal anchor.
+
 *Maintenance: this doc is the live proof target — keep §1's module map current as scratch modules port into the build, and
 update §11's audit/spike outcomes + the §11.1 route decision as they resolve. Build history + superseded routes are frozen
 in the archive (linked in the intro). Keep route-doc §9.9.18b/c the empirical anchor and this doc the proof target. Live

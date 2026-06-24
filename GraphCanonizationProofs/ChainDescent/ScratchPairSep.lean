@@ -36,7 +36,11 @@ a separating base of size `O(d log q)`, discharging `ZProfileSeparates`.
      `pairCharSum_factor` the `y+z=0` diagonal vanished via `sum_addChar_multiQuad_zero` + `sum_addChar_linearMap`).
 Then: **increment 3** — feed the closed form into `pairCharSum_factor_gen`'s outer `∑_{y,z}` and bound the per-pair
 `c₀ < 1` (the one ℂ-magnitude step: `|gaussSum| = √q` via `gaussSum_sq`; `c₀·n = z₂' + ½(nn' + T)`, zero-counts via
-`card_quadForm_eq`). **increment 4** anchor existence. **increment 5** finite-averaging ⟹ `ZProfileSeparates`, fed to
+`card_quadForm_eq`). **increments 4+5 (anchor existence FOLDS into averaging — the matching trick):** build base `T` (k iid
+points), match into DISJOINT pairs ⟹ independent ⟹ `P[(u,u') unsep] ≤ c̄₀^{k/2}`, `c̄₀ = V×V density of non-separating pairs`;
+first moment ⟹ base `O(d log q)` separates all pairs, NO separate/universal anchor. Single input `c̄₀ < 1` (bound it from the
+per-anchor `c₀` + "bad-anchor locus is a proper subvariety, density O(1/q)" — NOT a joint `(a,t)` Deligne sum). Probe-confirmed:
+`c̄₀ ≈ 0.45` flat in q; worst single anchor `maxC0` hits 1 at small q ⟹ use the average, not a universal anchor. Fed to
 `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (`PublicTheoremIndex.md:1248`). Full narrative: plan §13.
 
 NOT in build (scratch; `lake env lean ChainDescent/ScratchPairSep.lean`). Reduction skeleton: `ScratchCrux.lean`.

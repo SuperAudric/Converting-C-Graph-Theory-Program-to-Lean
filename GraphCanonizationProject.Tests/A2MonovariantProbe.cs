@@ -2833,7 +2833,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         //  (B) |T|/√n where T=∑_t χ(det G₂(u;t,t₀))·χ(det G₂(u';t,t₀)) — exact-Gauss size √n ⟹ Weil-free (the product of two
         //      quadratics factors through scalars; the inner ∑_t ψ(y·P_u+z·P_{u'}) is an inhomog-quadratic Gauss sum, exact).
         output.WriteLine("D3d pair-count — observable invariant χ(det G₂(u;t,t₀)); c_max=max_pair min_anchor c₀ (<1 ⟹ anchors exist), |T|/√n (exact size).");
-        output.WriteLine($"{"family",-12} {"n",8} {"c_max",7} {"medAnchorFrac",14} {"max|T|/√n",10} {"sep@1anchor%",13}");
+        output.WriteLine($"{"family",-12} {"n",8} {"c_max",7} {"c̄₀",7} {"maxC0",7} {"medFrac",11} {"max|T|/√n",9} {"sep@1anc%",11}");
         foreach (var (q, eps) in new[] { (5,-1),(5,1),(7,-1),(7,1),(11,-1),(11,1),(13,-1),(13,1) })
         {
             int m = 2; var F = new GFq(q); int dim = 4, n = IPow(q, dim);
@@ -2852,6 +2852,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             var rng=new Random(909);
             double sqrtN=Math.Sqrt(n);
             double cMax=0; double maxToverSqrtN=0; var anchorFracs=new List<double>(); int sep1=0,sep1tot=0;
+            double sumC0=0; int cntC0=0; double maxC0=0;   // c̄₀ (matching-trick input) + worst single (pair,anchor) c₀ (universal-anchor input)
             int nPairs=30, nAnchors=8;
             for(int p=0;p<nPairs;p++)
             {
@@ -2863,6 +2864,7 @@ public class A2MonovariantProbe(ITestOutputHelper output)
                     long fail=0, T=0;
                     for(int t=0;t<n;t++){int iu=chiDet(u,t,t0);int iv=chiDet(up,t,t0);if(iu==iv)fail++;T+=rv(iu)*rv(iv);}
                     double c0=(double)fail/n; minC0=Math.Min(minC0,c0);
+                    sumC0+=c0; cntC0++; maxC0=Math.Max(maxC0,c0);
                     if(c0<1.0-1e-12){anchorsSep++;}
                     maxToverSqrtN=Math.Max(maxToverSqrtN,Math.Abs(T)/sqrtN);
                     sep1tot++; if(c0<1.0-1e-12)sep1++;
@@ -2872,10 +2874,12 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             }
             anchorFracs.Sort(); double medFrac=anchorFracs[anchorFracs.Count/2];
             string fam=$"VO^{(eps<0?"-":"+")}_4({q})";
-            output.WriteLine($"{fam,-12} {n,8} {cMax,7:F3} {medFrac,14:F2} {maxToverSqrtN,10:F2} {(100.0*sep1/sep1tot),13:F0}");
+            output.WriteLine($"{fam,-12} {n,8} {cMax,7:F3} {(sumC0/cntC0),7:F3} {maxC0,7:F3} {medFrac,11:F2} {maxToverSqrtN,9:F2} {(100.0*sep1/sep1tot),11:F0}");
         }
         output.WriteLine("");
-        output.WriteLine("READING: c_max<1 (bounded) ⟹ every pair has a separating anchor ⟹ averaging viable (base O(d log q)).");
-        output.WriteLine("         max|T|/√n = O(1) ⟹ exact-Gauss size ⟹ Weil-free (the deg-4 product factors). ⟹ BUILD generalized pairCharSum_factor.");
+        output.WriteLine("Cols: c_max=max_pair min_anchor c₀ | c̄₀=mean (pair,anchor) c₀ [MATCHING-TRICK input, need <1−δ] | maxC0=worst single (pair,anchor)");
+        output.WriteLine("      [universal-anchor input] | medAnchorFrac | max|T|/√n | sep@1anchor%.");
+        output.WriteLine("READING: c̄₀ bounded <1 as q grows ⟹ matching-trick averaging closes (anchor folds in, no universal anchor needed).");
+        output.WriteLine("         maxC0 also <1 bounded ⟹ even a single universal anchor would work. Both ⟹ increment 4 de-risked.");
     }
 }
