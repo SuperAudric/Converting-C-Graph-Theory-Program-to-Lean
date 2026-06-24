@@ -194,11 +194,48 @@ architecture end-to-end; §11 is the generalization.
   `frobPerm := FiniteField.frobenius`)? Mathlib's `quadraticChar`/`gaussSum` API is already abstract-finite-field, so the
   toolkit side is likely cheap; the scheme side is the risk. **Deliverable:** a refactor cost estimate + a go/no-go on
   abstract-`K`. If GO, the "all q prime" and "prime powers" line items MERGE into one.
+
+  > **✅ AUDIT-A DONE (2026-06-24) — verdict GO (cost small–medium).** The toolkit (`GaussCount.lean`, the deepest math)
+  > is *already* abstract over `{K} [Field K] [Fintype K] [DecidableEq K]` + `[Invertible (2:K)]`/`ringChar K ≠ 2` — **zero
+  > `ZMod p`, zero work.** The forms layer (`CascadeAffine §AffineScheme/§OrthogonalForm`, `ScratchLemmaA/B`) uses `ZMod p`
+  > only as "finite field + cardinality witness": `affineE = Fintype.equivFinOfCardEq affV_card`, `similitudeGroup`/affine
+  > group are pure `≃ₗ[K]`/`Kˣ` code, the count math is intrinsic to `K`. **`[Fact p.Prime]` is used ONLY to manufacture
+  > `Fin (p^d)` nonemptiness (`NeZero`), and there is NO Frobenius in the forms argument** (Frobenius/`frobLinear` lives only
+  > in the disjoint cyclotomic leg-B slice). Mathlib `quadraticChar`/`gaussSum`/`isometryEquivWeightedSumSquares` are already
+  > finite-field-generic. **Refactor = mechanical search-replace** (`ZMod p`→`K`, `p^d`→`Fintype.card K ^ d`,
+  > `ZMod.card`→`Fintype.card_fun`, nonemptiness from `Fintype.card K ≥ 2`). **Single biggest risk = the `Fin (p^d) →
+  > Fin (Fintype.card K ^ d)` reindexing churn** across ~40 signatures + `affineScheme`'s return type (volume, not difficulty;
+  > defeq/positivity proofs leaning on `p^d` being a numeral must be re-derived from `card K ≥ 2`). **CONSEQUENCE: prove the
+  > kernel ONCE over `K`, covering prime `q=p` AND prime powers `q=p^e` in one stroke — SKIP §11.3-3's `q`-prime special case**
+  > (no `GaloisField` sweep; that construction is needed only for the separate cyclotomic leg-B residue). Char-2 stays excluded
+  > under either form (`[Invertible 2]` pervasive) — separate track (§11.5), not an AUDIT-A obstruction.
 - **AUDIT-W — the exact Witt statement needed (gates Route 3, §11.1-kernel).** Pin down precisely which form of Witt's
   theorem the frame-rigidity argument consumes (Witt extension/transitivity for finite-field quadratic forms; the
   hyperbolic-decomposition). Check Mathlib for partial coverage (`QuadraticForm.Isometry`, `Matrix.... `, the
   `BilinForm` isometry API). **Deliverable:** a Mathlib-contribution size estimate for Witt, and a yes/no on "Route 3's
   kernel proof is uniform over `q` and reusable across the polar families." This is the number that decides Route 1 vs 3.
+
+  > **✅ AUDIT-W DONE (2026-06-24) — statement = Witt EXTENSION; Mathlib coverage ABSENT; build LARGE; reuse single-cluster.**
+  > **(A) The exact statement:** **Witt's extension/transitivity theorem** over a finite field of char ≠ 2 — *any isometry
+  > between subspaces of a nondeg `(V,Q)` extends to all of `V`*, used as "`O(Q)`/`GO(Q)` acts transitively on the nonzero
+  > isotropic vectors and each `Q`-value shell." This is what Route-3 frame-rigidity ("apartment determines the point") AND
+  > the hard half of `OrbitIsIsotropyClass` (the clean rank-3 `{0,isotropic,anisotropic}` identification) both consume.
+  > **(B) Mathlib coverage = ABSENT** (verified against the current pin): the `Witt` files are unrelated (`Order/BourbakiWitt`,
+  > `RingTheory/WittVector`); `QuadraticForm/` has NO Witt extension/cancellation/decomposition, NO finite-field
+  > classification (only ℂ/ℝ), NO orthogonal group of a form. Substrate present (shortens but does not close it):
+  > `IsometryEquiv`, `exists_orthogonal_basis` (`Basic.lean:1293`), `isometryEquivWeightedSumSquares`/
+  > `equivalent_weightedSumSquares_units_of_nondegenerate'` (`IsometryEquiv.lean:151,169`), `Anisotropic`.
+  > **(C) Build = LARGE** (hyperbolic plane + extension theorem proper = the bulk; then cancellation/decomposition +
+  > finite-field dim/discriminant classification + similitude-scalar fusion; char-2 bespoke regardless). **Payoff IS real:**
+  > if built, a *single* geometry-agnostic lemma `IsotropySeparatesAtBase ⟸ nondeg Q + hyperbolic frame` discharges the
+  > WHOLE affine-polar family (c) `VO^ε_{2m}(q)` uniform in (ε,m,q) at once, and templates (d) alternating / (e) half-spin
+  > with `B` swapped — so Route-3's kernel proof is uniform over `q` AND amortizes across c/d/e. Only (f) Suzuki–Tits stays
+  > bespoke. **(D) Reusability tally:** Witt is **NOT load-bearing on the current critical path** (every live seal decl is
+  > Witt-free via `relationRefinesIsotropy_similitude`); its value is concentrated in ONE cluster (Route-3 extraction + the
+  > c/d/e generalization + the clean unconditional rank-3 identification) — all the SAME extension theorem amortized, not
+  > independent consumers. The "Witt keeps coming up" impression is *mention count* across 6 docs that mostly record
+  > routing-AROUND this one absent theorem. **⟹ building Witt "as a generic resource" is weakly justified (single-cluster);
+  > it is well justified ONLY if Route 3 is chosen for the c/d/e generalization.**
 
 ### 11.1 The kernel route fork — decide BEFORE building (the central decision)
 
@@ -259,6 +296,18 @@ coarse invariant is read off) and in how they **scale across families**. (The `w
   > mechanism confirmation `count = f(sqclass det G, level-pattern)` (the A-side identity is *proved* for the instance via
   > `configGaussSum_eq_det`, so this is corroboration not a gap) + the explicit char-2 / `d=6` extension — feeds the GATE.
 
+  > **▶ ROUTE FORK — CURRENT STANDING (2026-06-24, after AUDIT-A + AUDIT-W + SPIKE-K.1).** **Leaning Route 1, NOT yet
+  > final** (SPIKE-K part 2 — does Witt make the *inversion proof* dramatically cleaner, not just uniform? — is unrun). The
+  > decision rule's triggers for Route 3: **(c) is OFF** (AUDIT-A = GO ⟹ no NO-GO; SPIKE-K.1 saw no char-sum fragmentation
+  > in `q`); **(b) is WEAKENED** (AUDIT-W = LARGE, not cheap). **Key reframe from AUDIT-A:** Route 3's headline advantage was
+  > "uniform over `q`" — but **AUDIT-A GO makes Route 1 over abstract `K` ALSO uniform over `q`** (prime + prime-power in one
+  > proof), so Route 3's distinctive edge shrinks to **uniformity across the FAMILIES c/d/e** (one Witt lemma vs per-family
+  > char-sum inversions), trigger (a). **The genuine open trade (settle on SPIKE-K.2 + the endpoint scope):** Route 1 = no
+  > Witt, but the inversion is proved per-family (c, then d, then e — and the endpoint discipline forbids dropping any);
+  > Route 3 = one LARGE Witt build, then c/d/e fall out of a single geometry-agnostic lemma. So the fork is really
+  > *(per-family char-sum inversion) × 3 families vs (one Witt build + uniform extraction)* — a total-work comparison, not a
+  > per-instance one. SPIKE-K.2 decides it by checking whether Witt collapses the inversion qualitatively (trigger a).
+
 ### 11.2 Risk-gate — prove the math before the engineering
 
 The count-assembly bridge, form-bundling, and field generalization are all **low-risk engineering that only pays off if
@@ -280,7 +329,8 @@ Dependency-ordered, with the modifications folded in:
 2. **★ The uniform injectivity kernel — THE OPEN MATH (Route per §11.1).** The coarse-invariant inversion of the header
    reframe (NOT a per-`Q` analytic fact): `{(sqclass(det G_u(S)), level-pattern_u(S))}_S` recovers `u`, uniformly in `q`.
    High risk; the real research. Every other family shares its spirit, so cracking it here is highest-leverage. Gated by §11.2.
-3. **`q` prime all `(ε,m)` — CONDITIONAL, not the default.** If AUDIT-A is GO and SPIKE-K shows the inversion is
+3. **`q` prime all `(ε,m)` — SKIP (AUDIT-A = GO, 2026-06-24).** Prove over abstract `K` directly (step 4); this special
+   case is subsumed. [Original conditional, now resolved:] If AUDIT-A is GO and SPIKE-K shows the inversion is
    geometric/uniform (the expected case, header reframe), prove the kernel **once over abstract `[Field K]`** and **SKIP**
    this `ZMod p` special case — else you prove it twice. Keep "`q`-prime first" ONLY as a fallback if SPIKE-K shows the
    proof *technique* needs concreteness, or AUDIT-A is NO-GO. ⚠ Either way this is the open kernel, NOT a `decide`
@@ -347,8 +397,8 @@ pinned by **AUDIT-S (§11.0)**; this step executes it.
 | # | Probe / confirm | Gates | Risk if skipped |
 |---|---|---|---|
 | AUDIT-S ✅ | DONE 2026-06-24 (§11.0): per-family target = `IsotropySeparatesAtBase Q_fam T_fam` (no transport); `SchurianScheme` free; seam = cited `…viaSchurianRank3Affine` (finding 3) | every family's target (§11.6) + AUDIT-W | — (done) |
-| AUDIT-A | CascadeAffine `ZMod p` dependence → abstract-`K` go/no-go | field-gen vehicle (§11.3-4) | build GaloisField needlessly (big) |
-| AUDIT-W | exact Witt statement + Mathlib coverage | Route 1 vs 3 (§11.1) | mis-price the route fork |
+| AUDIT-A ✅ | DONE 2026-06-24 (§11.0): GO — toolkit already abstract; forms layer mechanical `ZMod p`→`K`; merges prime+prime-power, SKIP §11.3-3; risk = `Fin(p^d)` reindex churn | field-gen vehicle (§11.3-4) | — (done; GO) |
+| AUDIT-W ✅ | DONE 2026-06-24 (§11.0): Witt EXTENSION; Mathlib ABSENT; build LARGE; reuse single-cluster (c/d/e + rank-3 id); not on critical path | Route 1 vs 3 (§11.1) | — (done; fork leans Route 1 pending SPIKE-K.2) |
 | SPIKE-K.1 ✅ | DONE 2026-06-24 (§11.1): injectivity SURVIVES at odd `q∈{3,5,7,9}` both ε; base `5,7,8,9` ≪ √n; kernel viable, Route-1 supported. Part-2 paper route-comparison still open | kernel route + the §11.2 gate | — (part 1 done; part 2 = route comparison) |
 | base-O(log n) ✅ | DONE 2026-06-24 (SPIKE-K.1): `\|T_Q\|` tracks `d+log₂q` to the integer, `≤ log₂n` at every `q≥5` (the false `≈d+2` refuted) | §11.3-5 + capstone `bound` | — (within budget, confirmed) |
 | GATE | promote SPIKE-K winner to a convincing uniform proof sketch | ALL heavy builds | months of misdirected formalization |
