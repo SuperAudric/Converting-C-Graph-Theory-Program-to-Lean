@@ -2822,4 +2822,60 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("READING: Z1 same value for χ=1 and χ=2 ⟹ |S|=1 BINARY (square-class NOT recovered at singleton).");
         output.WriteLine("         Z2 split=true ⟹ |S|=2 recovers χ(det G) ⟹ square-class lives at PAIRS (validates the pair observable).");
     }
+
+    [Fact]
+    public void Probe_D3dPairCount()
+    {
+        // The REAL per-pair object (corrected, pair observable).  Invariant I_u(t)=χ(det G₂(u;t,t₀)) vs anchor t₀ — observable
+        // (from Z_u({t,t₀})), a χ of a QUADRATIC in t.  Two measurements decide whether to build generalized pairCharSum_factor:
+        //  (A) c₀(u,u';t₀)=#{t : χ(det G₂(u;t,t₀))=χ(det G₂(u';t,t₀))}/n.  Need c_max = max_pairs min_anchor c₀ < 1 (bounded)
+        //      ⟹ anchor EXISTENCE + averaging viable.
+        //  (B) |T|/√n where T=∑_t χ(det G₂(u;t,t₀))·χ(det G₂(u';t,t₀)) — exact-Gauss size √n ⟹ Weil-free (the product of two
+        //      quadratics factors through scalars; the inner ∑_t ψ(y·P_u+z·P_{u'}) is an inhomog-quadratic Gauss sum, exact).
+        output.WriteLine("D3d pair-count — observable invariant χ(det G₂(u;t,t₀)); c_max=max_pair min_anchor c₀ (<1 ⟹ anchors exist), |T|/√n (exact size).");
+        output.WriteLine($"{"family",-12} {"n",8} {"c_max",7} {"medAnchorFrac",14} {"max|T|/√n",10} {"sep@1anchor%",13}");
+        foreach (var (q, eps) in new[] { (5,-1),(5,1),(7,-1),(7,1),(11,-1),(11,1),(13,-1),(13,1) })
+        {
+            int m = 2; var F = new GFq(q); int dim = 4, n = IPow(q, dim);
+            int bb = 0, cc = 0;
+            if (eps == -1) { bool fnd=false; for(int b=0;b<q&&!fnd;b++)for(int c=0;c<q&&!fnd;c++){bool an=true;for(int y=0;y<q&&an;y++)for(int z=0;z<q;z++){if(y==0&&z==0)continue;if(F.add[F.add[F.mul[y,y],F.mul[F.mul[b,y],z]],F.mul[c,F.mul[z,z]]]==0){an=false;break;}}if(an){bb=b;cc=c;fnd=true;}} }
+            int[] Vec(int v){var x=new int[dim];for(int i=0;i<dim;i++){x[i]=v%q;v/=q;}return x;}
+            int Q(int[] x){int s=0,hyp=eps==-1?m-1:m;for(int i=0;i<hyp;i++)s=F.add[s,F.mul[x[2*i],x[2*i+1]]];if(eps==-1){int y=x[2*(m-1)],z=x[2*(m-1)+1];s=F.add[s,F.add[F.add[F.mul[y,y],F.mul[F.mul[bb,y],z]],F.mul[cc,F.mul[z,z]]]];}return s;}
+            var vec=new int[n][];for(int v=0;v<n;v++)vec[v]=Vec(v);
+            var sq=new bool[q];for(int y=1;y<q;y++)sq[F.mul[y,y]]=true;
+            int chi(int x)=>x==0?0:(sq[x]?1:2); int two=F.add[1,1];
+            int[] sub(int a,int b2){var x=new int[dim];for(int i=0;i<dim;i++)x[i]=F.add[vec[a][i],F.neg[vec[b2][i]]];return x;}
+            int Bil(int[] a,int[] b2){var s=new int[dim];for(int i=0;i<dim;i++)s[i]=F.add[a[i],b2[i]];return F.add[Q(s),F.neg[F.add[Q(a),Q(b2)]]];}
+            // det G₂(u;t,t₀) = 4 Q(t−u) Q(t₀−u) − B(t−u,t₀−u)² ; returns χ of it
+            int chiDet(int u,int t,int t0){var a=sub(t,u);var a0=sub(t0,u);int b=Bil(a,a0);return chi(F.add[F.mul[F.mul[two,Q(a)],F.mul[two,Q(a0)]],F.neg[F.mul[b,b]]]);}
+            int rv(int cls)=>cls==0?0:(cls==1?1:-1);   // class {0,1,2} → character value {0,+1,−1}
+            var rng=new Random(909);
+            double sqrtN=Math.Sqrt(n);
+            double cMax=0; double maxToverSqrtN=0; var anchorFracs=new List<double>(); int sep1=0,sep1tot=0;
+            int nPairs=30, nAnchors=8;
+            for(int p=0;p<nPairs;p++)
+            {
+                int u=rng.Next(n), up=rng.Next(n); if(u==up){up=(up+1)%n;}
+                double minC0=2.0; int anchorsSep=0;
+                for(int aI=0;aI<nAnchors;aI++)
+                {
+                    int t0=rng.Next(n);
+                    long fail=0, T=0;
+                    for(int t=0;t<n;t++){int iu=chiDet(u,t,t0);int iv=chiDet(up,t,t0);if(iu==iv)fail++;T+=rv(iu)*rv(iv);}
+                    double c0=(double)fail/n; minC0=Math.Min(minC0,c0);
+                    if(c0<1.0-1e-12){anchorsSep++;}
+                    maxToverSqrtN=Math.Max(maxToverSqrtN,Math.Abs(T)/sqrtN);
+                    sep1tot++; if(c0<1.0-1e-12)sep1++;
+                }
+                cMax=Math.Max(cMax,minC0);
+                anchorFracs.Add((double)anchorsSep/nAnchors);
+            }
+            anchorFracs.Sort(); double medFrac=anchorFracs[anchorFracs.Count/2];
+            string fam=$"VO^{(eps<0?"-":"+")}_4({q})";
+            output.WriteLine($"{fam,-12} {n,8} {cMax,7:F3} {medFrac,14:F2} {maxToverSqrtN,10:F2} {(100.0*sep1/sep1tot),13:F0}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READING: c_max<1 (bounded) ⟹ every pair has a separating anchor ⟹ averaging viable (base O(d log q)).");
+        output.WriteLine("         max|T|/√n = O(1) ⟹ exact-Gauss size ⟹ Weil-free (the deg-4 product factors). ⟹ BUILD generalized pairCharSum_factor.");
+    }
 }

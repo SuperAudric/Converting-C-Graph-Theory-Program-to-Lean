@@ -77,11 +77,13 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   **`ZProfileSeparates Q T`** (the sole open predicate, general `Q`), **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` (DONE),
   `isotropySeparates_of_zProfileSeparates` (end-to-end `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`), and **D2 bridge**
   `jointIsoCount_eq_restricted` (`Z_u(S)` = the Lemma-A-ready restricted count). See §13.
-- **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route**, increment 1
-  (Lean sibling of `Probe_D3dExactVsWeil`): **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge**
-  `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable atom) + **`pairCharSum_factor`** (the **"no Weil" core**:
-  `gaussSum² · ∑_w χ(Q w)χ(Q(w−c)) = ∑_y ∑_z χ(y)χ(z)·(∑_w ψ(y·Q w + z·Q(w−c)))` — `S` is a finite combination of the
-  landed additive Gauss sums `sum_addChar_multiQuad`/`_zero`, no `χ` of a high-degree poly). Needs `[CharZero R']`. See §13.
+- **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
+  **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
+  atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
+  `gaussSum² · ∑_t χ(f t)χ(g t) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))` — factoring never uses structure on `f,g`;
+  applied with `f,g =` the pair invariants `det G₂(u;·,t₀)`, `det G₂(u';·,t₀)` (χ-of-quadratics in the probe), the inner
+  sum is an additive quadratic Gauss sum ⟹ the degree-4 product is exactly evaluable, **no Weil**) + **`pairCharSum_factor`**
+  (the form-specific `f=Q`, `g=Q(·−c)` singleton instance, now a one-line corollary). Needs `[CharZero R']`. See §13.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -580,9 +582,12 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 >   bound is for the wrong object. The square class lives at `|S|=2` (`Z_u({t,t'})` recovers `χ(det G₂)`). **Fix:** use the
 >   observable pair invariant `χ(det G₂(u;t,t₀))` (a quadratic in `t`) — same factoring shape, bridge transfers,
 >   `pairCharSum_factor` needs generalizing to two quadratic polynomials.
-> - **★ D3d STILL OPEN, sharply scoped (pair observable):** (1) per-pair bound `c₀<1` for `χ(det G₂(·;t,t₀))` (plausibly
->   Weil-free by the factoring, NOT yet computed); (2) anchor existence; (3) averaging + small-`q` `decide`. Empirically true
->   (SPIKE-K.1 used `Z_u({t,t'})`). Reduction skeleton + no-Weil technique PROVEN; the core is unsolved.
+> - **★ PAIR ROUTE CONFIRMED + GENERALIZED FACTORING LANDED (2026-06-24).** `Probe_D3dPairCount`: `c_max ∈ [0.44,0.49]<½`,
+>   `sep@1anchor≈100%` ⟹ anchor existence + averaging viable; `|T|≈0.8n` (main term, exact, no Weil). **`pairCharSum_factor_gen`**
+>   (axiom-clean) = the factoring for any `f,g:V→K`, applied to the pair invariants ⟹ "no Weil" for the real observable is a
+>   theorem-shaped reduction. **D3d STILL OPEN but now a concrete Weil-free build:** (2) inner-sum eval `∑_t ψ(y·I_u+z·I_v)`
+>   (quadratic polys, toolkit); (3) `c₀<1` from the closed form (one small ℂ-magnitude step); (4) anchor existence; (5) averaging
+>   ⟹ `ZProfileSeparates`. Reduction skeleton + no-Weil factoring PROVEN; the analytic core (2)+(3) is the remaining content.
 > - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
 >   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
 >   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3), `Probe_D3dExactVsWeil` (exact-vs-Weil).
@@ -818,6 +823,25 @@ real observable is the joint-isotropic count `Z`, not `χ(Q)` directly. Probe ve
   exactly `Z_u({t,t'})`), so the result is true; the proof's load-bearing analytic step (the pair-observable `c₀` bound) is the
   genuine remaining content. **The reduction skeleton + the no-Weil technique are proven; the core D3d is sharply scoped but
   unsolved.**
+
+**▶ PAIR-COUNT PROBE + GENERALIZED FACTORING LANDED (2026-06-24).** Acting on the CORRECTION (pair observable), both the
+probe and the Lean generalization came back in favor:
+- **`Probe_D3dPairCount`** (green): the observable invariant `χ(det G₂(u;t,t₀))` vs anchor `t₀`. **`c_max = max_pair
+  min_anchor c₀ ∈ [0.44, 0.49] < ½`** (q=5..13, both ε); **`sep@1anchor ≈ 100%`**, `medAnchorFrac = 1.0` ⟹ **anchor
+  existence is robust** (essentially every anchor separates every pair) and averaging gives a base `O(d log q)`.
+  `|T| ≈ 0.8n` (a large MAIN TERM, not `√n`) — fine: the factoring makes `T` exact *with* a main term, no Deligne.
+  (Note: the singleton `|S|` *did* cancel to `√n`; the pair `T` has a main term — both exactly evaluable.)
+- **`pairCharSum_factor_gen`** (`ScratchPairSep.lean`, axiom-clean): the factoring for ANY `f,g : V → K`. Applied with
+  `f = det G₂(u;·,t₀)`, `g = det G₂(u';·,t₀)` (each `χ` of a quadratic in the probe `t`), it reduces the degree-4 pair
+  sum to `∑_y∑_z χ(y)χ(z)·(∑_t ψ(y·f + z·g))` — the inner an exactly-evaluable quadratic Gauss sum. **The "no Weil" for
+  the real observable is now a theorem-shaped reduction**, not an analogy. `pairCharSum_factor` (singleton) is now its corollary.
+- **Remaining increments (pair route, updated):** (2) **inner-sum evaluation** `∑_t ψ(y·I_u(t)+z·I_v(t))` for the quadratic
+  polynomials `I_u(t)=det G₂(u;t,t₀) = 4Q(t−u)Q(t₀−u) − B(t−u,t₀−u)²` (complete the square; degenerate `(y,z)` = the
+  diagonal analog); (3) **`c₀(u,u';t₀) < 1`** from the closed form (`c₀·n = z₂' + ½(nn' + T)`, all exact: `T` via the
+  factoring, the zero-counts `z₂', nn'` via affine-quadric counts of `I=0`); (4) **anchor existence** (∀`u≠u'` ∃`t₀`,
+  empirically `sep@1anchor≈100%`); (5) **finite-averaging existence** of a separating base `|T|=O(d log q)` ⟹
+  `ZProfileSeparates`. Increment (2)'s inner eval is in the additive toolkit; the one ℂ-magnitude step (increment 3's bound)
+  is small and contained. **D3d is now a concrete, Weil-free build program on the pair observable.**
 
 ---
 

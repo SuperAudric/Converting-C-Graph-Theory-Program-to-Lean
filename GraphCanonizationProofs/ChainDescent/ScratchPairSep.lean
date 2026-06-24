@@ -69,11 +69,51 @@ section Factor
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable {R' : Type*} [CommRing R'] [IsDomain R'] [CharZero R']
 
-/-- **The "no Weil" core — `S` factors into additive Gauss sums.** Applying the bridge twice and reordering,
-`gaussSum χ ψ ^ 2 · (∑_w χ(Q w)·χ(Q(w−c))) = ∑_y ∑_z χ(y)χ(z)·(∑_w ψ(y·Q w + z·Q(w−c)))`. The inner
-`∑_w ψ(y·Q w + z·Q(w−c))` is the landed multi-point additive Gauss sum (`sum_addChar_multiQuad`/`_zero`), so the
-per-pair singleton sum `S` is a finite combination of additive Gauss sums — **no `χ` of an irreducible
-high-degree polynomial, no Weil/Deligne**. -/
+/-- **The "no Weil" core, GENERAL form — a product of two `χ`-of-functions factors into additive Gauss sums.** For ANY
+two functions `f g : V → K`, applying the bridge twice and reordering,
+`gaussSum χ ψ ^ 2 · (∑_t χ(f t)·χ(g t)) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))`. The factoring never uses any
+structure on `f, g` (the inner `∑_t ψ(y·f t + z·g t)` is then evaluated by the additive toolkit when `f, g` are
+*quadratic* — `sum_addChar_multiQuad`/`_zero` / completing the square). This is what makes the pair invariant
+`χ(det G₂(u;·,t₀))·χ(det G₂(u';·,t₀))` (a product of two `χ`-of-quadratics in the probe) **Weil-free**: the degree-4
+multiplicative sum factors through the SCALAR values, never needing `χ` of an irreducible high-degree polynomial. -/
+theorem pairCharSum_factor_gen (hF : ringChar K ≠ 2) (ψ : AddChar K R')
+    {V : Type*} [Fintype V] (f g : V → K) :
+    gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom R')) ψ ^ 2
+        * (∑ t : V, ((quadraticChar K).ringHomComp (Int.castRingHom R')) (f t)
+            * ((quadraticChar K).ringHomComp (Int.castRingHom R')) (g t))
+      = ∑ y : K, ∑ z : K,
+          ((quadraticChar K).ringHomComp (Int.castRingHom R')) y
+            * ((quadraticChar K).ringHomComp (Int.castRingHom R')) z
+            * (∑ t : V, ψ (y * f t + z * g t)) := by
+  set χ := (quadraticChar K).ringHomComp (Int.castRingHom R') with hχ
+  set G := gaussSum χ ψ with hG
+  have perw : ∀ t : V, G ^ 2 * (χ (f t) * χ (g t))
+      = ∑ y : K, ∑ z : K, χ y * χ z * ψ (y * f t + z * g t) := by
+    intro t
+    have h1 : G * χ (f t) = ∑ y : K, χ y * ψ (y * f t) := by
+      rw [hG, ← quadChar_addChar_sum hF ψ (f t)]
+      exact Finset.sum_congr rfl (fun y _ => by rw [mul_comm (f t) y])
+    have h2 : G * χ (g t) = ∑ z : K, χ z * ψ (z * g t) := by
+      rw [hG, ← quadChar_addChar_sum hF ψ (g t)]
+      exact Finset.sum_congr rfl (fun z _ => by rw [mul_comm (g t) z])
+    have hsq : G ^ 2 * (χ (f t) * χ (g t)) = (G * χ (f t)) * (G * χ (g t)) := by ring
+    rw [hsq, h1, h2, Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl (fun y _ => Finset.sum_congr rfl (fun z _ => ?_))
+    rw [AddChar.map_add_eq_mul]; ring
+  calc G ^ 2 * (∑ t : V, χ (f t) * χ (g t))
+      = ∑ t : V, G ^ 2 * (χ (f t) * χ (g t)) := by rw [Finset.mul_sum]
+    _ = ∑ t : V, ∑ y : K, ∑ z : K, χ y * χ z * ψ (y * f t + z * g t) :=
+        Finset.sum_congr rfl (fun t _ => perw t)
+    _ = ∑ y : K, ∑ z : K, χ y * χ z * (∑ t : V, ψ (y * f t + z * g t)) := by
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl (fun y _ => ?_)
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl (fun z _ => ?_)
+        rw [Finset.mul_sum]
+
+/-- The original form-specific factoring (the singleton model `S`), now a one-line corollary of the general lemma
+(`f = Q`, `g = Q(· − c)`). Kept for the singleton/translate instance; the live route uses `…_gen` with the pair
+invariant `f = det G₂(u; ·, t₀)`, `g = det G₂(u'; ·, t₀)`. -/
 theorem pairCharSum_factor (hF : ringChar K ≠ 2) (ψ : AddChar K R')
     {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V) (c : V) :
     gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom R')) ψ ^ 2
@@ -82,36 +122,13 @@ theorem pairCharSum_factor (hF : ringChar K ≠ 2) (ψ : AddChar K R')
       = ∑ y : K, ∑ z : K,
           ((quadraticChar K).ringHomComp (Int.castRingHom R')) y
             * ((quadraticChar K).ringHomComp (Int.castRingHom R')) z
-            * (∑ w : V, ψ (y * Q w + z * Q (w - c))) := by
-  set χ := (quadraticChar K).ringHomComp (Int.castRingHom R') with hχ
-  set g := gaussSum χ ψ with hg
-  have perw : ∀ w : V, g ^ 2 * (χ (Q w) * χ (Q (w - c)))
-      = ∑ y : K, ∑ z : K, χ y * χ z * ψ (y * Q w + z * Q (w - c)) := by
-    intro w
-    have h1 : g * χ (Q w) = ∑ y : K, χ y * ψ (y * Q w) := by
-      rw [hg, ← quadChar_addChar_sum hF ψ (Q w)]
-      exact Finset.sum_congr rfl (fun y _ => by rw [mul_comm (Q w) y])
-    have h2 : g * χ (Q (w - c)) = ∑ z : K, χ z * ψ (z * Q (w - c)) := by
-      rw [hg, ← quadChar_addChar_sum hF ψ (Q (w - c))]
-      exact Finset.sum_congr rfl (fun z _ => by rw [mul_comm (Q (w - c)) z])
-    have hsq : g ^ 2 * (χ (Q w) * χ (Q (w - c))) = (g * χ (Q w)) * (g * χ (Q (w - c))) := by ring
-    rw [hsq, h1, h2, Finset.sum_mul_sum]
-    refine Finset.sum_congr rfl (fun y _ => Finset.sum_congr rfl (fun z _ => ?_))
-    rw [AddChar.map_add_eq_mul]; ring
-  calc g ^ 2 * (∑ w : V, χ (Q w) * χ (Q (w - c)))
-      = ∑ w : V, g ^ 2 * (χ (Q w) * χ (Q (w - c))) := by rw [Finset.mul_sum]
-    _ = ∑ w : V, ∑ y : K, ∑ z : K, χ y * χ z * ψ (y * Q w + z * Q (w - c)) :=
-        Finset.sum_congr rfl (fun w _ => perw w)
-    _ = ∑ y : K, ∑ z : K, χ y * χ z * (∑ w : V, ψ (y * Q w + z * Q (w - c))) := by
-        rw [Finset.sum_comm]
-        refine Finset.sum_congr rfl (fun y _ => ?_)
-        rw [Finset.sum_comm]
-        refine Finset.sum_congr rfl (fun z _ => ?_)
-        rw [Finset.mul_sum]
+            * (∑ w : V, ψ (y * Q w + z * Q (w - c))) :=
+  pairCharSum_factor_gen hF ψ (fun w => Q w) (fun w => Q (w - c))
 
 end Factor
 
 end ChainDescent
 
 #print axioms ChainDescent.quadChar_addChar_sum
+#print axioms ChainDescent.pairCharSum_factor_gen
 #print axioms ChainDescent.pairCharSum_factor
