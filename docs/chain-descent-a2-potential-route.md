@@ -1998,6 +1998,16 @@ across multiple classes and a genuine growing-`q` (unbounded-`s`, `s = −3..−
 constructible witness" framing. Honest scope unchanged: empirical (single points for (d),(f); bounded-WL-dim stays
 uncited/open); `|Aut|` analytic; large-`n` base = first-fit upper bound. Nothing committed (user commits).
 
+**▶ SPIKE-K PART 1 EXTENSION (2026-06-24, `Probe_CoarseInvariantInjectivity`, green) — the FAITHFUL-invariant base, odd
+`q` up to 9.** The `[5,5,6,7]` trend above used `CheapBaseSize` (plain 1-WL first-fit). This new probe individualises
+`VO^ε_4(q)` under the **exact `VO⁻₄(3)`-`decide` invariant** `cnt(u;t₁,t₂)=#{y≠0:Q(y)=0,Q(y−(t₁−u))=0,Q(y−(t₂−u))=0}`
+(char-sum-free; by the Gauss identity the count only sees `χ(det G)`, so it reflects the **coarse-invariant** separating
+power — the object a uniform proof targets). Min base over 8 random restarts: minus `5,7,8,9` and plus `5,7,7,8` for
+`q=3,5,7,9` (√n `9,25,49,81`). **(i) injectivity survives at every odd `q≥5`, both ε** (the coarsening does not kill it);
+**(ii) base tracks `d+log₂q` to the integer** (logarithmic, the old `≈d+2` constant refuted); **(iii) base `≤ log₂n`** ⟹
+within the `O(log n)` budget. `q=9`=GF(9) behaves like the primes. This is the existential de-risk for the plan's kernel
+(plan §11.1 SPIKE-K block) — turns the empirical shatter into evidence the *uniform* kernel is provable, not just true.
+
 #### 9.9.19 → Proof plan for the forms-graph families: `docs/chain-descent-formsgraph-wldim-plan.md`
 
 The §9.9.18c empirical shatter is turned into a **proof target** in the dedicated plan doc

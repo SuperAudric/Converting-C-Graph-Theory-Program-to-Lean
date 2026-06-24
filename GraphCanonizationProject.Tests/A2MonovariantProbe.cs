@@ -2155,4 +2155,149 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         Assert.True(targetsMeasured >= 2, "fewer than 2 small-Aut non-geometric affine-polar node-4 targets isolated — construction/GF(q)/SRG issue");
         Assert.Equal(0, falsifiers + breadthFalsifiers);   // any small-Aut non-geometric forms graph with base ≥ √n falsifies hSmallAutThin (a real finding, not a code bug)
     }
+
+    // ── SPIKE-K part 1 (plan §11.1) ─────────────────────────────────────────────────────────────────
+    //  Does the ISOTROPY-COUNT profile — the EXACT object the VO⁻₄(3) `decide` used —
+    //      cnt(u; t1,t2) = #{ y≠0 : Q(y)=0, Q(y-(t1-u))=0, Q(y-(t2-u))=0 }
+    //  individualize the affine polar graph VO^ε_{2m}(q) to DISCRETE at a SMALL base, and crucially
+    //  does it SURVIVE at odd q≥5 where the square-class coarsening bites?  By the Gauss-sum identity
+    //  this count only ever sees χ(det G) (the square class), not det G itself: at q=3 sqclass = full
+    //  value (looked rich); at q=5 {1,4} and {2,3} collapse.  CHAR-SUM-FREE: counts by brute force, so
+    //  the measured base faithfully reflects the COARSE invariant's separating power.  Reports the base
+    //  size for odd q∈{3,5,7,9} (q=9 = the odd prime-power test) vs √n and the d+log q / log n budget.
+    static (int baseSize, int n, bool discrete) CountProfileBase(int q, int m, int eps, Random rng)
+    {
+        var F = new GFq(q);
+        int dim = 2 * m, n = IPow(q, dim);
+        // VO^ε form (replicates AffinePolar's Q): hyperbolic pairs + (ε=-1) an anisotropic binary tail.
+        int bb = 0, cc = 0;
+        if (eps == -1)
+        {
+            bool found = false;
+            for (int b = 0; b < q && !found; b++) for (int c = 0; c < q && !found; c++)
+            {
+                bool aniso = true;
+                for (int y = 0; y < q && aniso; y++) for (int z = 0; z < q; z++)
+                {
+                    if (y == 0 && z == 0) continue;
+                    int g = F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]];
+                    if (g == 0) { aniso = false; break; }
+                }
+                if (aniso) { bb = b; cc = c; found = true; }
+            }
+            if (!found) throw new Exception($"no anisotropic binary form over GF({q})");
+        }
+        int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+        int Q(int[] x)
+        {
+            int s = 0, hyp = eps == -1 ? m - 1 : m;
+            for (int i = 0; i < hyp; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]];
+            if (eps == -1)
+            {
+                int y = x[2 * (m - 1)], z = x[2 * (m - 1) + 1];
+                s = F.add[s, F.add[F.add[F.mul[y, y], F.mul[F.mul[bb, y], z]], F.mul[cc, F.mul[z, z]]]];
+            }
+            return s;
+        }
+        var vec = new int[n][]; for (int v = 0; v < n; v++) vec[v] = Vec(v);
+        var iso = new bool[n]; for (int v = 0; v < n; v++) iso[v] = Q(vec[v]) == 0;
+        // Sub(a,b) = index of vec[a]-vec[b] (little-endian base-q, matching Vec).
+        int Sub(int a, int b) { int s = 0, pw = 1; for (int i = 0; i < dim; i++) { s += F.add[vec[a][i], F.neg[vec[b][i]]] * pw; pw *= q; } return s; }
+
+        // N1ofw(w) = #{y≠0 : iso[y], iso[y-w]} ;  cnt(u;t) = N1ofw(t-u).  Precompute once (n² total).
+        var N1 = new int[n];
+        for (int w = 0; w < n; w++) { int c = 0; for (int y = 1; y < n; y++) if (iso[y] && iso[Sub(y, w)]) c++; N1[w] = c; }
+
+        // G_δ(w) = #{y≠0 : iso[y], iso[y-w], iso[y-(w-δ)]} ;  cnt(u;ti,tj) = G_{ti-tj}(ti-u).  Cache per δ.
+        var gByDelta = new Dictionary<int, int[]>();
+        int[] Gdelta(int delta)
+        {
+            if (gByDelta.TryGetValue(delta, out var arr)) return arr;
+            arr = new int[n];
+            for (int w = 0; w < n; w++)
+            {
+                int wmd = Sub(w, delta);               // w - δ
+                int c = 0;
+                for (int y = 1; y < n; y++)
+                    if (iso[y] && iso[Sub(y, w)] && iso[Sub(y, wmd)]) c++;   // y, y-w, y-(w-δ) all isotropic
+                arr[w] = c;
+            }
+            gByDelta[delta] = arr;
+            return arr;
+        }
+
+        int rel(int u, int t) => u == t ? 0 : (iso[Sub(u, t)] ? 1 : 2);
+
+        // Greedy individualization under the (rank-3 rel + size-1 + size-2 count) profile.
+        var baseL = new List<int>();
+        int[] color = new int[n];
+        int guard = 0, cap = Math.Min(n, 4 * dim + 8 + (int)Math.Ceiling(4 * Math.Log2(q)));
+        bool discrete = false;
+        while (guard++ <= cap)
+        {
+            // colour every u by its profile against the current base
+            var keyToId = new Dictionary<string, int>();
+            for (int u = 0; u < n; u++)
+            {
+                var sb = new StringBuilder();
+                foreach (var t in baseL) { sb.Append(rel(u, t)); sb.Append('.'); }
+                foreach (var t in baseL) { sb.Append(N1[Sub(t, u)]); sb.Append('.'); }
+                for (int a = 0; a < baseL.Count; a++) for (int b = a + 1; b < baseL.Count; b++)
+                {
+                    int ti = baseL[a], tj = baseL[b];
+                    sb.Append(Gdelta(Sub(ti, tj))[Sub(ti, u)]); sb.Append(',');
+                }
+                string key = sb.ToString();
+                if (!keyToId.TryGetValue(key, out int id)) { id = keyToId.Count; keyToId[key] = id; }
+                color[u] = id;
+            }
+            if (keyToId.Count == n) { discrete = true; break; }
+            // pick a representative of the largest non-singleton colour class, not already in base
+            var sz = new Dictionary<int, int>(); foreach (var c in color) sz[c] = sz.GetValueOrDefault(c) + 1;
+            int bestColor = -1, bestSz = 1; foreach (var kv in sz) if (kv.Value > bestSz) { bestSz = kv.Value; bestColor = kv.Key; }
+            if (bestColor < 0) { discrete = true; break; }
+            // pick a RANDOM member of the largest non-singleton cell (restart-randomised to de-noise greedy)
+            var cands = new List<int>(); for (int u = 0; u < n; u++) if (color[u] == bestColor && !baseL.Contains(u)) cands.Add(u);
+            if (cands.Count == 0) break;
+            baseL.Add(cands[rng.Next(cands.Count)]);
+        }
+        return (baseL.Count, n, discrete);
+    }
+
+    [Fact]
+    public void Probe_CoarseInvariantInjectivity()
+    {
+        output.WriteLine("SPIKE-K part 1 (plan §11.1) — isotropy-COUNT individualization base for VO^ε_{2m}(q), odd q, growing q.");
+        output.WriteLine("cnt(u;t1,t2) = #{y≠0 : Q(y)=0, Q(y-(t1-u))=0, Q(y-(t2-u))=0}  — the EXACT VO⁻₄(3)-`decide` invariant.");
+        output.WriteLine("Base = greedy individualization under the (rank-3 rel + size-1 + size-2 count) profile until DISCRETE.");
+        output.WriteLine("THE QUESTION: does it stay small / survive at odd q≥5 (square-class coarsening), and how does |T| scale?");
+        output.WriteLine("");
+        var cases = new (string name, int q, int m, int eps)[]
+        {
+            ("VO^-_4(3)", 3, 2, -1), ("VO^+_4(3)", 3, 2, +1),
+            ("VO^-_4(5)", 5, 2, -1), ("VO^+_4(5)", 5, 2, +1),
+            ("VO^-_4(7)", 7, 2, -1), ("VO^+_4(7)", 7, 2, +1),
+            ("VO^-_4(9)", 9, 2, -1), ("VO^+_4(9)", 9, 2, +1),
+        };
+        const int restarts = 8;   // greedy gives an UPPER bound; min over random restarts de-noises the scaling
+        output.WriteLine($"min base over {restarts} random restarts (greedy ⟹ upper bound on the true individualisation base):");
+        output.WriteLine($"{"family",-12} {"n",6} {"base",5} {"(spread)",10} {"√n",7} {"log2n",7} {"d+log2q",8}");
+        var bases = new List<(int q, int n, int b)>();
+        foreach (var (name, q, m, eps) in cases)
+        {
+            int n = 0, best = int.MaxValue, worst = 0;
+            for (int s = 0; s < restarts; s++)
+            {
+                var (b, nn, disc) = CountProfileBase(q, m, eps, new Random(1000 + s));
+                n = nn; if (disc) { best = Math.Min(best, b); worst = Math.Max(worst, b); }
+            }
+            bases.Add((q, n, best));
+            output.WriteLine($"{name,-12} {n,6} {best,5} {$"[{best}..{worst}]",10} {Math.Sqrt(n),7:F1} {Math.Log2(n),7:F1} {2 * m + Math.Log2(q),8:F1}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READING: base ≪ √n + slow growth (≈ d+log q, NOT √n) ⟹ count-profile survives the coarsening, kernel viable.");
+        output.WriteLine("         base → √n or exploding at q≥5 ⟹ coarsening kills it, generalization route in trouble (header reframe risk).");
+        // injectivity is by construction (greedy stops only at discrete); the finding is the SIZE + its scaling.
+        Assert.True(bases.All(r => r.b < (int)Math.Sqrt(r.n)), "a count-profile base reached √n — coarsening may be killing injectivity (the q≥5 risk)");
+    }
 }

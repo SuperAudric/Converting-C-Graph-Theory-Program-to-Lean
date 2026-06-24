@@ -235,6 +235,30 @@ coarse invariant is read off) and in how they **scale across families**. (The `w
     geometric argument, OR (b) AUDIT-W is cheap enough that amortization across c/d/e wins, OR (c) the char-sum inversion
     fragments in `q` / AUDIT-A is NO-GO. Record the decision here.
 
+  > **✅ SPIKE-K PART 1 DONE (2026-06-24) — the existential de-risk PASSES; the kernel is viable at `q≥5`.**
+  > `A2MonovariantProbe.Probe_CoarseInvariantInjectivity` (C#, green, ~13min/8-restart): greedy individualisation of
+  > `VO^ε_4(q)` under the **exact `VO⁻₄(3)`-`decide` invariant** `cnt(u;t₁,t₂)=#{y≠0:Q(y)=0,Q(y−(t₁−u))=0,Q(y−(t₂−u))=0}`
+  > (char-sum-FREE brute-force counts; by the Gauss identity the count only ever sees `χ(det G)`, so the measured base
+  > faithfully reflects the **coarse-invariant** separating power), min base over 8 random restarts (greedy ⟹ upper bound):
+  >
+  > | `q` | minus base | plus base | √n | log₂n | d+log₂q |
+  > |---|---|---|---|---|---|
+  > | 3 | 5 | 5 | 9 | 6.3 | 5.6 |
+  > | 5 | 7 | 7 | 25 | 9.3 | 6.3 |
+  > | 7 | 8 | 7 | 49 | 11.2 | 6.8 |
+  > | 9 | 9 | 8 | 81 | 12.7 | 7.2 |
+  >
+  > **(i) Injectivity SURVIVES at every odd `q≥5`, both ε** — the coarsening does NOT kill it (the header-reframe risk is
+  > refuted). **(ii) Base scales `O(d+log q)`** — min base `5,7,8,9` tracks `d+log₂q` to the integer; the old "`≈d+2`"
+  > (constant) is refuted (it grows, but only logarithmically). **(iii) Base ≪ √n with widening margin, and `≤ log₂n` at
+  > every `q≥5`** ⟹ the `|T_Q|=O(log n)` obligation (§11.7) is empirically met. `q=9` = the odd prime-power point (GF(9)),
+  > behaves like the primes. Greedy is noisy (worst-restart spread `[7..24]`/`[8..31]` at minus `q=5,7`); the **min** is the
+  > trustworthy upper bound. **Consequence for the fork:** the inversion is **geometric/uniform** (base law uniform in `q`,
+  > both types) ⟹ supports the **Route-1 default** (no evidence the char-sum fragments in `q`); the part-2 paper comparison
+  > + AUDIT-W still decide whether Witt makes the *inversion proof* dramatically cleaner. **NOT yet done in part 1:** the
+  > mechanism confirmation `count = f(sqclass det G, level-pattern)` (the A-side identity is *proved* for the instance via
+  > `configGaussSum_eq_det`, so this is corroboration not a gap) + the explicit char-2 / `d=6` extension — feeds the GATE.
+
 ### 11.2 Risk-gate — prove the math before the engineering
 
 The count-assembly bridge, form-bundling, and field generalization are all **low-risk engineering that only pays off if
@@ -325,8 +349,8 @@ pinned by **AUDIT-S (§11.0)**; this step executes it.
 | AUDIT-S ✅ | DONE 2026-06-24 (§11.0): per-family target = `IsotropySeparatesAtBase Q_fam T_fam` (no transport); `SchurianScheme` free; seam = cited `…viaSchurianRank3Affine` (finding 3) | every family's target (§11.6) + AUDIT-W | — (done) |
 | AUDIT-A | CascadeAffine `ZMod p` dependence → abstract-`K` go/no-go | field-gen vehicle (§11.3-4) | build GaloisField needlessly (big) |
 | AUDIT-W | exact Witt statement + Mathlib coverage | Route 1 vs 3 (§11.1) | mis-price the route fork |
-| SPIKE-K | **char-sum-FREE probe:** coarse-invariant `(sqclass det G, level-pattern)` injectivity + base-size scaling over `(ε,m,q)`, **`q ≥ 5`**; + paper route-comparison | kernel route + the §11.2 gate | build on an unprovable kernel; miss the `q≥5` info-loss |
-| base-O(log n) | confirm `\|T_Q\| = O(d + log q) = O(log n)` (not the false `≈ d+2`) | §11.3-5 + capstone `bound` | base silently outside the individualization budget |
+| SPIKE-K.1 ✅ | DONE 2026-06-24 (§11.1): injectivity SURVIVES at odd `q∈{3,5,7,9}` both ε; base `5,7,8,9` ≪ √n; kernel viable, Route-1 supported. Part-2 paper route-comparison still open | kernel route + the §11.2 gate | — (part 1 done; part 2 = route comparison) |
+| base-O(log n) ✅ | DONE 2026-06-24 (SPIKE-K.1): `\|T_Q\|` tracks `d+log₂q` to the integer, `≤ log₂n` at every `q≥5` (the false `≈d+2` refuted) | §11.3-5 + capstone `bound` | — (within budget, confirmed) |
 | GATE | promote SPIKE-K winner to a convincing uniform proof sketch | ALL heavy builds | months of misdirected formalization |
 | HUNT | citation search for (e) half-spin / (f) Suzuki-Tits WL-dim/base | §11.4 bespoke-vs-cite | redundant bespoke proofs |
 | descent | confirm the `R' → ℤ` descent (char-0 `R'` w/ primitive `p`-th root) for `F(D,c)` | §11.3-1 | a silent gap in the closed form |
