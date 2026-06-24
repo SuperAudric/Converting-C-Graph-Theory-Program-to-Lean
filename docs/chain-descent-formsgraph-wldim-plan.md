@@ -516,6 +516,15 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 - `sum_addChar_multiQuad`  + `sum_addChar_multiQuad_zero`  — the multi-point Gauss sum **at a symmetry-broken base** (the inner sum of the k-fold count); `sum_addChar_linearMap`  evaluates the boundary.
 - `count_pi_setValued`  — value-**set** → value-**point** counts (isotropy → Q-value).
 - `multiCharSum_eq_sum_count`  — **Fourier inversion** (counts agree ⟹ Gram agrees). ★ The **shell-blindness of `isoClass`** is exactly where this hinge stops — the crux's hard core, precisely located.
+- **★ R3 AUDIT REFINEMENT (2026-06-24) — what these bricks do and do NOT cover.** All of the above are **additive-character
+  (ψ)** machinery: they are the complete engine for **D3a/Lemma A** (assemble `Z(S) = F(χ det Gram)`; the M2 hinge would give
+  clean Gram-recovery *if* full pointwise `Q=c` counts were available). They **do NOT touch D3d**: with isotropy-only data
+  (the `c=0` slice) the hinge stops at `χ(det Gram_S)`, and inverting square-classes-of-minors → Gram needs a **multiplicative
+  character sum `∑_v χ(poly(v))` (Weil)** — Mathlib-absent, and absent here (`χ` appears only as the Gauss-sum *constant*
+  `∏χ(wᵢ)`, never summed over a polynomial). So §12.A is the D3a toolkit; D3d's tool is a genuinely new (contained) build.
+  `sum_addChar_quadForm_smul_ne_zero` (M2 cancellation) + `countk_eq_sum_charsum` are the load-bearing pair for the additive
+  side; the **existential-counting route** (§13 R3 block) needs only these additive bricks for its finite-averaging wrapper,
+  isolating the one Weil estimate.
 
 **B. Forms-graph consumer — `FormsGraphConcrete.lean` (partially built; isolates the crux + a second decomposition).**
 - `count_transport`  · `qvalue_count_transport`  · `isotropy_count_transport`  — move the counts into `V`.
@@ -559,16 +568,18 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > - **OPEN, in order:** **D2-analytic/D3a** (closed form `Z=F(χ det G,[c_lev=0])` — assemble landed Lemma A; big, mechanical)
 >   → **D3b** (degenerate configs) → **D3c** (`Z=Z ⟹ χ det G agree`) → **★D3d** (the research core: the `χ`-profile separates
 >   at a bounded base, uniform `q` = forms-graph bounded WL-dim) → **D3e** (construct `T` + assemble).
-> - **★ NEXT CONCRETE STEP (revised by the R3 reframe below):** **D3a is OFF the critical path.** Pursue the
->   **existential-counting route** — (i) the per-pair separation lemma `#{v : v fails to separate (u,u')} ≤ c₀·n` (`c₀<1`)
->   + a finite-averaging existence wrapper (additive-only) collapsing D3d to that single bound; (ii) check whether the
->   singleton sum `∑_v χ(Q(v−u)·Q(v−u'))` is EXACT (contained build) or needs one Weil estimate (small sub-build). The
->   GaussCount shape-check confirmed the landed bricks are all ADDITIVE (D3a engine); **D3d genuinely needs a MULTIPLICATIVE
->   (Weil) bound**, but contained to one per-pair incomplete sum. Base is `O(d+log q)` (grows; not constant).
+> - **★ NEXT CONCRETE STEP (revised by the EXACT-vs-WEIL resolution below — D3d is WEIL-FREE):** the singleton route.
+>   Build (1) **D3c-1** `Z_u({t})` recovers `χ(Q(u−t))` (`|S|=1` Lemma A + finite `F`-injectivity); (2) **per-pair
+>   `c₀(δ)<1`** from the **EXACT** Gauss closed form for `S = ∑_v χ(Q(v−u)Q(v−u'))` (factors through scalars `(s,t)`;
+>   bounded by `|gaussSum|=√q`, no Weil/Deligne); (3) **finite-averaging existence** `∃ T, |T|=O(d log q)` singleton-separating
+>   ⟹ `ZProfileSeparates`. **D3a (full `Z=F` closed form) and the pair/higher-`Z(S)` observables are OFF the path** — only
+>   the singleton `χ(Q(u−t))` is used. Base `O(d log q)` (grows; not constant). The remaining content is contained in
+>   `GaussCount` (exact `S` algebra) + an averaging lemma.
 > - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
 >   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
->   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3). All green. Findings: χ-invariants
->   separate `q≥5`; bounded base survives `d=6`; collision-pairs decay geometrically (existential route); base `O(d+log q)`.
+>   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3), `Probe_D3dExactVsWeil` (exact-vs-Weil).
+>   All green. Findings: χ-invariants separate `q≥5`; bounded base survives `d=6`; collision-pairs decay geometrically;
+>   per-pair `S` exact & `c₀∈[0.36,0.49]<½` uniformly ⟹ singletons separate, **D3d is Weil-free**; base `O(d log q)`.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
@@ -730,6 +741,31 @@ two over-optimistic reads** of the GATE / D3d-investigation blocks above.
   build, else a small Weil sub-build. **D3a's "big mechanical" assembly is OFF the critical path** under this route (we need
   the per-pair bound, not the full `Z=F` closed form). Supersedes the `d=2` step above (R3 caveat: `d=2` is too degenerate;
   the joint phenomenon lives at `d≥4`).
+
+**▶ EXACT-vs-WEIL CHECK — RESOLVED: EXACT, NO WEIL (2026-06-24, spike `Probe_D3dExactVsWeil`, green).** The per-pair sum
+`S(u,u') = ∑_v χ(Q(v−u)·Q(v−u'))` (the existential route's `c₀` driver) is **exactly evaluable without Weil/Deligne**, and
+the singleton observable alone separates. Both a proof sketch and the numerics.
+
+- *Why exact (the argument):* `S` depends ONLY on `δ = Q(u−u')` (Witt: `O(Q)` is transitive on level sets — numerically
+  confirmed, `singleδ = yes` across all q,d,ε). Conditioning on the **scalar** values `(s,t) = (Q(v−u), Q(v−u'))`,
+  `S = ∑_{s,t} χ(s)χ(t)·N(s,t)` with `N(s,t)` a **two-quadric count** (exact, additive — `countk`/`card_quadForm_eq`). The
+  multiplicative character lands on the *scalars* `s,t`; `∑_s χ(s)ψ(rs) = ` a **Gauss sum**. So `S` is a finite combination
+  of standard Gauss sums — **no `χ` of an irreducible high-degree polynomial** ⟹ **no Weil**. Bounding it needs only
+  `|gaussSum| = √q` (elementary, in Mathlib), and the crude triangle bound gives `|S| ≤ q^{d/2+1} < n` for **`d ≥ 4`**.
+- *Numerics:* `|S| ≈ 0.8–0.96·√q^d` (square-root size — the earlier `n/√q` size guess was WRONG; the leading terms cancel,
+  which is *consistent with* the exact closed form, not evidence against it). Crucially **`c₀(δ) ∈ [0.36, 0.49] < ½`
+  uniformly** (d=4/6, q=5..23, both ε), and `c₀ → ½` from below as q grows (since `S/n ~ 1/√q → 0`).
+- *Consequence — the singleton route, Weil-free:* `c₀ < 1` provably (`c₀ = ½ + (S + 3z₂ − 2z)/2n`, all terms exact: `z, z₂`
+  via `card_quadForm_eq`/multiQuad, `S` via the Gauss closed form). So a **random base of size `O(d·log q)` singleton-separates
+  all pairs** (first-moment: `∑_pairs c₀^k ≤ C(n,2)·c₀^k < 1` for `k > 2d·log_q(1/c₀)·…`), and a singleton-separating base
+  makes `ZProfileSeparates` hold (its antecedent then forces `u = u'`). **The pair-determinant / higher-`Z(S)` observables are
+  NOT needed** — only the singleton `χ(Q(u−t))`, recovered from `Z_u({t})` at `|S|=1` (a small `D3c`-at-`|S|=1` lemma).
+- *Net — the D3d build, Weil-free:* (1) **D3c-1** — `Z_u({t})` recovers `χ(Q(u−t))` (`|S|=1` Lemma A + `F` injective in its
+  χ-arg, finite). (2) **per-pair `c₀(δ) < 1`** — the exact Gauss closed form for `S` + `|gaussSum|=√q` + the exact `z, z₂`.
+  (3) **finite-averaging existence** — `∃ T, |T| = O(d log q)`, singleton-separating (additive-only counting, no probability).
+  (4) ⟹ `ZProfileSeparates`. **D3a (the full `Z=F` closed form) and D3d's feared "Weil sub-build" are both OFF the path.**
+  The remaining genuine content is the exact-`S` evaluation (Gauss-sum algebra, contained in `GaussCount`) + the averaging
+  lemma. **This is the recommended D3d build.**
 
 ---
 

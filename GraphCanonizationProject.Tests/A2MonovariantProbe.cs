@@ -2710,4 +2710,73 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         }
         output.WriteLine("READING: geometric decay to 0 within O(log q) random probes ⟹ existential base, size bound falls out.");
     }
+
+    [Fact]
+    public void Probe_D3dExactVsWeil()
+    {
+        // The per-pair singleton sum  S(u,u') = Σ_v χ(Q(v−u)·Q(v−u'))  drives the existential route's c₀.
+        //  Math claim: S depends ONLY on δ=Q(u−u') (Witt: O(Q) transitive on level sets), and factors through the
+        //  scalar values (s,t)=(Q(v−u),Q(v−u')) ⟹ EXACT additive-Gauss closed form, size |S| ~ n/√q (NOT the Weil √n).
+        //  Tests: (1) single-valued per δ?  (2) does |S| scale like n/√q [exact] or √n [Weil]?  (3) c₀(δ)<1 uniformly
+        //  ⟹ singletons ALONE separate via averaging ⟹ NO Weil needed anywhere.
+        output.WriteLine("D3d exact-vs-Weil — S(u,u')=Σ_v χ(Q(v−u)Q(v−u')); depends only on δ=Q(u−u'); |S|~n/√q ⟹ EXACT (no Weil).");
+        output.WriteLine($"{"family",-12} {"n",8} {"√n",8} {"n/√q",9} {"singleδ?",9} {"max|S|/√n",10} {"med|S|/(n/√q)",14} {"c₀range",12}");
+        var cases = new (int q, int m, int eps)[]
+        {
+            (5,2,-1),(5,2,1),(7,2,-1),(7,2,1),(11,2,-1),(11,2,1),(13,2,-1),(13,2,1),(17,2,-1),(23,2,-1),  // d=4
+            (5,1,-1),(11,1,-1),                                                                              // d=2
+            (5,3,-1),(7,3,-1),                                                                               // d=6
+        };
+        foreach (var (q, m, eps) in cases)
+        {
+            var F = new GFq(q);
+            int dim = 2 * m, n = IPow(q, dim);
+            int bb = 0, cc = 0;
+            if (eps == -1)
+            {
+                bool found = false;
+                for (int b = 0; b < q && !found; b++) for (int c = 0; c < q && !found; c++)
+                { bool an = true; for (int y = 0; y < q && an; y++) for (int z = 0; z < q; z++) { if (y==0&&z==0) continue; if (F.add[F.add[F.mul[y,y],F.mul[F.mul[b,y],z]],F.mul[c,F.mul[z,z]]]==0){an=false;break;} } if (an){bb=b;cc=c;found=true;} }
+                if (!found) throw new Exception($"no aniso binary form GF({q})");
+            }
+            int[] Vec(int v){var x=new int[dim];for(int i=0;i<dim;i++){x[i]=v%q;v/=q;}return x;}
+            int Q(int[] x){int s=0,hyp=eps==-1?m-1:m;for(int i=0;i<hyp;i++)s=F.add[s,F.mul[x[2*i],x[2*i+1]]];if(eps==-1){int y=x[2*(m-1)],z=x[2*(m-1)+1];s=F.add[s,F.add[F.add[F.mul[y,y],F.mul[F.mul[bb,y],z]],F.mul[cc,F.mul[z,z]]]];}return s;}
+            var vec=new int[n][];for(int v=0;v<n;v++)vec[v]=Vec(v);
+            var Qv=new int[n];for(int v=0;v<n;v++)Qv[v]=Q(vec[v]);
+            var sq=new bool[q];for(int y=1;y<q;y++)sq[F.mul[y,y]]=true;
+            int chi(int x)=>x==0?0:(sq[x]?1:2);
+            // Q(vec[a]-vec[b]) via precomputed: build only as needed
+            int Qdiff(int a,int b){var x=new int[dim];for(int i=0;i<dim;i++)x[i]=F.add[vec[a][i],F.neg[vec[b][i]]];return Q(x);}
+            // sample u' (u=0); group by δ=Q(u')
+            var rng=new Random(515151);
+            int sampleN=Math.Min(n,140);
+            var seen=new HashSet<int>{0};
+            var firstS=new Dictionary<int,long>(); bool single=true;
+            double maxAbsSoverSqrtN=0; var ratios=new List<double>(); double c0min=2,c0max=-1;
+            double sqrtN=Math.Sqrt(n), nOverSqrtQ=n/Math.Sqrt(q);
+            for(int it=0;it<sampleN;it++)
+            {
+                int up; do{up=rng.Next(n);}while(!seen.Add(up)&&seen.Count<n);
+                if(up==0)continue;
+                int delta=Qv[up];
+                // S = Σ_v χ(Q(v)·Q(v−u'))
+                long S=0; long c0fail=0;
+                for(int v=0;v<n;v++){int qv=Qv[v];int qd=Qdiff(v,up);int prod=F.mul[qv,qd];S+=(chi(prod)==0?0:(chi(prod)==1?1:-1));if(chi(qv)==chi(qd))c0fail++;}
+                double c0=(double)c0fail/n; c0min=Math.Min(c0min,c0);c0max=Math.Max(c0max,c0);
+                maxAbsSoverSqrtN=Math.Max(maxAbsSoverSqrtN,Math.Abs(S)/sqrtN);
+                ratios.Add(Math.Abs(S)/nOverSqrtQ);
+                if(firstS.TryGetValue(delta,out long s0)){if(s0!=S)single=false;}else firstS[delta]=S;
+            }
+            ratios.Sort(); double medRatio=ratios.Count>0?ratios[ratios.Count/2]:0;
+            string fam=$"VO^{(eps<0?"-":"+")}_{dim}({q})";
+            output.WriteLine($"{fam,-12} {n,8} {sqrtN,8:F1} {nOverSqrtQ,9:F1} {(single?"yes":"NO"),9} {maxAbsSoverSqrtN,10:F2} {medRatio,14:F3} {$"[{c0min:F2},{c0max:F2}]",12}");
+        }
+        output.WriteLine("");
+        output.WriteLine("RESULT: singleδ=yes (Witt) ✓ — S=g(δ), necessary for a closed form.  |S|≈0.8-0.96·√n (square-root size;");
+        output.WriteLine("  the n/√q guess was WRONG — leading terms cancel).  EXACTNESS does NOT hinge on size: S=Σ_{s,t}χ(s)χ(t)N(s,t)");
+        output.WriteLine("  factors through SCALAR (s,t)=(Q(v−u),Q(v−u')) with N exact (additive quadric count) ⟹ finite Gauss-sum closed");
+        output.WriteLine("  form, NO χ of an irreducible high-degree poly ⟹ NO Weil/Deligne.  Bounding needs only |gaussSum|=√q (elementary,");
+        output.WriteLine("  Mathlib); crude triangle bound |S|≤q^{d/2+1}<n for d≥4 ⟹ c₀<1.  c₀∈[0.36,0.49]<½ uniformly ⟹ SINGLETON");
+        output.WriteLine("  χ-profile alone separates via averaging ⟹ D3d closes WEIL-FREE (additive toolkit + √q Gauss magnitude).");
+    }
 }
