@@ -42,22 +42,109 @@ noncomputable def ZProfileSeparates (Q : QuadraticForm (ZMod p) (Fin d → ZMod 
     → Q (affineE.symm u) = Q (affineE.symm u') ∧
         ∀ i : Fin d, Q (affineE.symm u - Pi.single i 1) = Q (affineE.symm u' - Pi.single i 1)
 
-/-!
-### D1 (next increment) — `qProfileSeparatesAtBase_of_zProfileSeparates`
+/-- Extend a `T`-indexed isotropy profile to a full profile (junk `0` off `T`). -/
+noncomputable def extProfile {p d : ℕ} {T : Finset (Fin (p ^ d))}
+    (σ : {x // x ∈ T} → Fin 3) : Fin (p ^ d) → Fin 3 :=
+  fun x => if h : x ∈ T then σ ⟨x, h⟩ else 0
 
-Goal: `ZProfileSeparates Q T → QProfileSeparatesAtBase Q T`. Given the fine antecedent `hfine` (∀ σ c,
-fineCount_u σ c = fineCount_{u'} σ c), derive the `Z(S)` antecedent and apply `ZProfileSeparates`.
+theorem extProfile_mem {p d : ℕ} {T : Finset (Fin (p ^ d))} (σ : {x // x ∈ T} → Fin 3)
+    {t : Fin (p ^ d)} (ht : t ∈ T) : extProfile σ t = σ ⟨t, ht⟩ := dif_pos ht
 
-The core obligation — **the marginalisation `jointIsoCount Q u S = (a fixed sum of) fineCount_u σ c`:**
-`Z_u(S)` filters `{z : z≠u ∧ isoClass(z−u)≠2 ∧ ∀t∈S, isoClass(z−t)≠2}`. Fiber this set (`Finset.card_eq_sum_card_fiberwise`)
-by `z ↦ (σ_z|_T, c_z)` where `σ_z t = isoClass(affineE.symm z − affineE.symm t)`, `c_z = isoClass(z−u)`. The fiber at
-`(σ_T, c)` with `c ≠ 2 ∧ ∀t∈S, σ_T t ≠ 2` is exactly `fineCount_u σ c` (any extension of `σ_T`; the `≠2` constraints
-on `S`/pivot are implied by membership). So `Z_u(S) = ∑_{(σ_T,c) : c≠2, σ_T|_S≠2} fineCount_u σ c` over a `u`-independent
-index; termwise `hfine` ⟹ `Z_u(S) = Z_{u'}(S)`.
+open scoped Classical in
+/-- **D1 — the marginalisation reduction.** The `QProfileSeparatesAtBase` fine antecedent ⟹ the `Z(S)` antecedent, so
+`ZProfileSeparates` (the joint-incidence crux) discharges `QProfileSeparatesAtBase`. Proof: fiber `Z_w(S)` by each
+point's `(T`-profile`, pivot-class)`; "good" fibers (`c ≠ 2`, profile `≠ 2` on `S`) are exactly the fine counts (matched
+via `hfine`), "bad" fibers are empty. So `Z_u(S) = Z_{u'}(S)`, uniform in the choice of base — landed-tool-only. -/
+theorem qProfileSeparatesAtBase_of_zProfileSeparates
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) {T : Finset (Fin (p ^ d))}
+    (h : ZProfileSeparates Q T) : QProfileSeparatesAtBase Q T := by
+  intro u u' hfine
+  refine h u u' (fun S hS => ?_)
+  have main : ∀ w : Fin (p ^ d), jointIsoCount Q w S
+      = ∑ b : ({x // x ∈ T} → Fin 3) × Fin 3,
+          (Finset.univ.filter (fun z : Fin (p ^ d) =>
+            (z ≠ w ∧ isoClass Q (affineE.symm z - affineE.symm w) ≠ 2 ∧
+              ∀ t ∈ S, isoClass Q (affineE.symm z - affineE.symm t) ≠ 2) ∧
+            ((fun τ : {x // x ∈ T} => isoClass Q (affineE.symm z - affineE.symm τ.1)) = b.1 ∧
+              isoClass Q (affineE.symm z - affineE.symm w) = b.2))).card := by
+    intro w
+    rw [jointIsoCount,
+      Finset.card_eq_sum_card_fiberwise
+        (f := fun z => ((fun τ : {x // x ∈ T} => isoClass Q (affineE.symm z - affineE.symm τ.1)),
+          isoClass Q (affineE.symm z - affineE.symm w)))
+        (t := Finset.univ) (fun z _ => Finset.mem_univ _)]
+    apply Finset.sum_congr rfl
+    intro b _
+    rw [Finset.filter_filter]
+    congr 1
+    apply Finset.filter_congr
+    intro z _
+    rw [Prod.ext_iff]
+  rw [main u, main u']
+  apply Finset.sum_congr rfl
+  rintro ⟨σ, c⟩ _
+  by_cases hgood : c ≠ 2 ∧ ∀ t (ht : t ∈ S), σ ⟨t, hS ht⟩ ≠ 2
+  · obtain ⟨hc, hσS⟩ := hgood
+    have setEq : ∀ w : Fin (p ^ d),
+        (Finset.univ.filter (fun z : Fin (p ^ d) =>
+          (z ≠ w ∧ isoClass Q (affineE.symm z - affineE.symm w) ≠ 2 ∧
+            ∀ t ∈ S, isoClass Q (affineE.symm z - affineE.symm t) ≠ 2) ∧
+          ((fun τ : {x // x ∈ T} => isoClass Q (affineE.symm z - affineE.symm τ.1)) = σ ∧
+            isoClass Q (affineE.symm z - affineE.symm w) = c)))
+        = (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ w ∧
+            (∀ t ∈ T, isoClass Q (affineE.symm z - affineE.symm t) = extProfile σ t) ∧
+            isoClass Q (affineE.symm z - affineE.symm w) = c)) := by
+      intro w
+      apply Finset.filter_congr
+      intro z _
+      constructor
+      · rintro ⟨⟨hzw, _, _⟩, hσeq, hcw⟩
+        refine ⟨hzw, ?_, hcw⟩
+        intro t ht
+        have hcg := congrFun hσeq ⟨t, ht⟩
+        simp only at hcg
+        rw [extProfile_mem σ ht, hcg]
+      · rintro ⟨hzw, hTeq, hcw⟩
+        refine ⟨⟨hzw, ?_, ?_⟩, ?_, hcw⟩
+        · rw [hcw]; exact hc
+        · intro t ht
+          rw [hTeq t (hS ht), extProfile_mem σ (hS ht)]
+          exact hσS t ht
+        · funext τ
+          have htt := hTeq τ.1 τ.2
+          rw [extProfile_mem σ τ.2] at htt
+          exact htt
+    rw [setEq u, setEq u']
+    exact hfine (extProfile σ) c
+  · have empty : ∀ w : Fin (p ^ d),
+        (Finset.univ.filter (fun z : Fin (p ^ d) =>
+          (z ≠ w ∧ isoClass Q (affineE.symm z - affineE.symm w) ≠ 2 ∧
+            ∀ t ∈ S, isoClass Q (affineE.symm z - affineE.symm t) ≠ 2) ∧
+          ((fun τ : {x // x ∈ T} => isoClass Q (affineE.symm z - affineE.symm τ.1)) = σ ∧
+            isoClass Q (affineE.symm z - affineE.symm w) = c))).card = 0 := by
+      intro w
+      rw [Finset.card_eq_zero, Finset.filter_eq_empty_iff]
+      intro z _
+      rintro ⟨⟨_, hw2, hS2⟩, hσeq, hcw⟩
+      apply hgood
+      refine ⟨by rw [← hcw]; exact hw2, ?_⟩
+      intro t ht
+      have hcg := congrFun hσeq ⟨t, hS ht⟩
+      simp only at hcg
+      rw [← hcg]
+      exact hS2 t ht
+    rw [empty u, empty u']
 
-Lean cost: `Finset.card_eq_sum_card_fiberwise` with fiber type `(↥T → Fin 3) × Fin 3`, plus matching the fiber filter to
-the `QProfileSeparatesAtBase` fine filter (extend `↥T → Fin 3` to a full `Fin (p^d) → Fin 3`; the `∀ t ∈ T` predicate
-reads only `T`-values). Intricate but landed-tool-only — no new math. THEN `ZProfileSeparates` is the sole open content (D3).
--/
+/-- **The D1 chain, end-to-end.** `ZProfileSeparates` + nondegeneracy ⟹ `IsotropySeparatesAtBase` (the wittFree
+capstone's target) — composes D1 with the landed `isotropySeparates_of_qProfileSeparates`. So the *entire* open content
+of the generalization is now the single predicate `ZProfileSeparates Q T` (joint `Z(S)`-profile injectivity, D3). -/
+theorem isotropySeparates_of_zProfileSeparates
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p)) {T : Finset (Fin (p ^ d))}
+    (hQ : (Q.polarBilin).Nondegenerate) (h : ZProfileSeparates Q T) :
+    IsotropySeparatesAtBase Q T :=
+  isotropySeparates_of_qProfileSeparates Q hQ (qProfileSeparatesAtBase_of_zProfileSeparates Q h)
 
 end ChainDescent
+
+#print axioms ChainDescent.qProfileSeparatesAtBase_of_zProfileSeparates
+#print axioms ChainDescent.isotropySeparates_of_zProfileSeparates

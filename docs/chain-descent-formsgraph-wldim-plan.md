@@ -68,8 +68,9 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `Finset.card_nbij'`); **`sigF_injective`** = `Function.Injective sigF` by kernel `decide` (~20s, no `native_decide`).
 - **`ScratchBM3Glue.lean`** — bundles `Qbun`/`Bv`/`T₉`, proves **`isoSep : IsotropySeparatesAtBase Qbun T₉`** (B-M1 → bridge
   → `sigF_injective`) and **`vo4minus_seal`** (the capstone instantiated).
-- **`ScratchCrux.lean`** (NEW 2026-06-24, compiles axiom-clean) — the generalization's crux scaffold: `jointIsoCount` (`Z_u(S)`)
-  + **`ZProfileSeparates Q T`** (the reduced open predicate, general `Q`). D1 reduction = next (§13).
+- **`ScratchCrux.lean`** (NEW 2026-06-24, compiles axiom-clean) — the generalization's crux reduction: `jointIsoCount` (`Z_u(S)`),
+  **`ZProfileSeparates Q T`** (the sole open predicate, general `Q`), **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` (DONE),
+  and `isotropySeparates_of_zProfileSeparates` (end-to-end `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`). See §13.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -585,13 +586,19 @@ identities, present in `GaussCount`) or needs general **Weil bounds** (absent in
 **First increment = D1**, in a scratch module reusing FormsGraphConcrete + GaussCount; isolates `ZProfileSeparates` as the
 single open predicate over general `Q`.
 
-**▶ STARTED (2026-06-24): `ChainDescent/ScratchCrux.lean`** (compiles, axiom-clean, `lake env lean`; NOT in build). Landed
-the **scaffold**: `jointIsoCount Q u S` (the joint isotropic count `Z_u(S)`; "isotropic" = `isoClass ≠ 2`) +
-**`ZProfileSeparates Q T`** (the reduced crux predicate — agreeing `Z(S)` over `S ⊆ T` ⟹ the `Q`-profile, general `Q`).
-**D1 (`qProfileSeparatesAtBase_of_zProfileSeparates`) is the next step**, proof plan documented in-file: marginalise
-`Z_u(S)` as a `u`-independent sum of `QProfileSeparatesAtBase` fine counts via `Finset.card_eq_sum_card_fiberwise`
-(fiber by `(σ_z|_T, c_z)`), then termwise `hfine`. Landed-tool-only (no new math), intricate (subtype-function ↔ `∀ t∈T`
-matching + restriction regrouping). After D1: `ZProfileSeparates` is the sole open content (D3 research).
+**▶ `ChainDescent/ScratchCrux.lean`** (compiles, axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`;
+NOT in build). **D1 ✅ DONE (2026-06-24).** Landed:
+- `jointIsoCount Q u S` (the joint isotropic count `Z_u(S)`; "isotropic" = `isoClass ≠ 2`) + **`ZProfileSeparates Q T`**
+  (the reduced crux predicate — agreeing `Z(S)` over `S ⊆ T` ⟹ the `Q`-profile, general `Q`).
+- **`qProfileSeparatesAtBase_of_zProfileSeparates`** (D1) — the marginalisation: `Z_w(S)` fibered by each point's
+  `(T`-profile`, pivot-class)` via `Finset.card_eq_sum_card_fiberwise`; good fibers (`c≠2`, profile `≠2` on `S`) = the
+  `QProfileSeparatesAtBase` fine counts (matched via `hfine` + `extProfile`), bad fibers empty ⟹ `Z_u(S)=Z_{u'}(S)`.
+- **`isotropySeparates_of_zProfileSeparates`** — the end-to-end chain `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`
+  (composes D1 with the landed `isotropySeparates_of_qProfileSeparates`/`coords_determine`).
+
+**⟹ the ENTIRE open content of the generalization is now the single predicate `ZProfileSeparates Q T`** (the joint
+`Z(S)`-profile injectivity, general `Q`). Next = **D2** (`Z(S) = F(χ det G)` via Lemma A, for general `Q`) feeding **D3**
+(the uniform injectivity research: frame skeleton + `O(log q)` probe resolution).
 
 ---
 
