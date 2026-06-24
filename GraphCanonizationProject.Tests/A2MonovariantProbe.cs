@@ -2584,4 +2584,130 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("");
         output.WriteLine("READING: min-k flat (q-independent) ⟹ bounded algebraic base ⟹ Weil-FREE proof viable; min-k ↑ with log q ⟹ Weil sub-build.");
     }
+
+    // ── R3 — D3d at HIGHER d (plan §13; reorientation steer "prove the base is bounded, don't pin the constant") ──────
+    //  Collision statistics for the χ(det G_S) pair-profile at a GIVEN base, over arbitrary (q,m,eps).
+    //  Returns (distinct colours, n, #colliding pairs Σ C(fibre,2)) — the second is the exact-vs-Weil scaling signal.
+    static (int distinct, int n, long collisionPairs) ChiCollisionStats(int q, int m, int eps, List<int> baseL)
+    {
+        var F = new GFq(q);
+        int dim = 2 * m, n = IPow(q, dim);
+        int bb = 0, cc = 0;
+        if (eps == -1)
+        {
+            bool found = false;
+            for (int b = 0; b < q && !found; b++) for (int c = 0; c < q && !found; c++)
+            {
+                bool aniso = true;
+                for (int y = 0; y < q && aniso; y++) for (int z = 0; z < q; z++)
+                { if (y == 0 && z == 0) continue; if (F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]] == 0) { aniso = false; break; } }
+                if (aniso) { bb = b; cc = c; found = true; }
+            }
+            if (!found) throw new Exception($"no anisotropic binary form over GF({q})");
+        }
+        int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+        int Q(int[] x)
+        {
+            int s = 0, hyp = eps == -1 ? m - 1 : m;
+            for (int i = 0; i < hyp; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]];
+            if (eps == -1) { int y = x[2 * (m - 1)], z = x[2 * (m - 1) + 1]; s = F.add[s, F.add[F.add[F.mul[y, y], F.mul[F.mul[bb, y], z]], F.mul[cc, F.mul[z, z]]]]; }
+            return s;
+        }
+        var vec = new int[n][]; for (int v = 0; v < n; v++) vec[v] = Vec(v);
+        var sq = new bool[q]; for (int y = 1; y < q; y++) sq[F.mul[y, y]] = true;
+        int chi(int x) => x == 0 ? 0 : (sq[x] ? 1 : 2);
+        int two = F.add[1, 1];
+        int[] diff(int u, int t) { var a = new int[dim]; for (int i = 0; i < dim; i++) a[i] = F.add[vec[u][i], F.neg[vec[t][i]]]; return a; }
+        int Bil(int[] a, int[] b2) { var s = new int[dim]; for (int i = 0; i < dim; i++) s[i] = F.add[a[i], b2[i]]; return F.add[Q(s), F.neg[F.add[Q(a), Q(b2)]]]; }
+        int chi1(int u, int t) => chi(F.mul[two, Q(diff(u, t))]);
+        int chi2(int u, int ti, int tj) { var ai = diff(u, ti); var aj = diff(u, tj); int bij = Bil(ai, aj); return chi(F.add[F.mul[F.mul[two, Q(ai)], F.mul[two, Q(aj)]], F.neg[F.mul[bij, bij]]]); }
+        var fibre = new Dictionary<string, int>();
+        for (int u = 0; u < n; u++)
+        {
+            var sb = new StringBuilder();
+            foreach (var t in baseL) { sb.Append(chi1(u, t)); sb.Append('.'); }
+            for (int a = 0; a < baseL.Count; a++) for (int b = a + 1; b < baseL.Count; b++) { sb.Append(chi2(u, baseL[a], baseL[b])); sb.Append(','); }
+            string key = sb.ToString();
+            fibre[key] = fibre.GetValueOrDefault(key) + 1;
+        }
+        long pairs = 0; foreach (var kv in fibre) pairs += (long)kv.Value * (kv.Value - 1) / 2;
+        return (fibre.Count, n, pairs);
+    }
+
+    [Fact]
+    public void Probe_D3dHigherD()
+    {
+        // R3 at higher d. Two reads:
+        //  (A) does a BOUNDED greedy χ-base separate at d=4 (high q) and d=6 (the genuine joint case)?  min over restarts
+        //      = trustworthy upper bound on the true base.  Flat / bounded ⟹ the "prove |T| ≤ const" target is real.
+        //  (B) exact-vs-Weil: collision-pairs at the FIXED frame {0,e_i} base (size d+1, q-independent), q pushed high.
+        //      Σ C(fibre,2) a clean polynomial in q ⟹ exact-Gauss structure;  √q-scale wobble ⟹ genuine Weil tail.
+        output.WriteLine("R3 (plan §13) — D3d at HIGHER d.  (A) bounded greedy χ-base; (B) frame-collision scaling (exact-vs-Weil).");
+        output.WriteLine("");
+
+        // ── (A) greedy min χ-base, d=4 (wide q) and d=6 (joint case) ──────────────────────────────────────────────
+        output.WriteLine("(A) min greedy χ-base (min over restarts = upper bound on true base):");
+        output.WriteLine($"{"family",-13} {"d",3} {"n",8} {"min-base",9} {"(spread)",11} {"√n",8} {"2.25√log2q",11}");
+        var caseA = new (int q, int m)[] { (3,2),(5,2),(7,2),(11,2),(13,2),   // d=4
+                                           (3,3),(5,3) };                       // d=6 (joint case)
+        foreach (var (q, m) in caseA) foreach (int eps in new[] { -1, 1 })
+        {
+            int dim = 2 * m, restarts = dim >= 6 ? 2 : 4;
+            int n = 0, best = int.MaxValue, worst = 0;
+            for (int s = 0; s < restarts; s++)
+            {
+                var (b, nn, disc) = ChiProfileBase(q, m, eps, new Random(9100 + s));
+                n = nn; if (disc) { best = Math.Min(best, b); worst = Math.Max(worst, b); }
+            }
+            string fam = $"VO^{(eps<0?"-":"+")}_{dim}({q})";
+            string bs = best == int.MaxValue ? ">cap" : best.ToString();
+            output.WriteLine($"{fam,-13} {dim,3} {n,8} {bs,9} {$"[{best}..{worst}]",11} {Math.Sqrt(n),8:F0} {2.25*Math.Sqrt(Math.Log2(q)),11:F1}");
+        }
+        output.WriteLine("  READING: min-base flat across q (and d=6 ≈ d=4 + O(1)) ⟹ base BOUNDED ⟹ 'prove |T| ≤ const' viable.");
+        output.WriteLine("");
+
+        // ── (B) frame-only collision-pair scaling, d=4, q pushed high (single pass, deterministic base) ────────────
+        output.WriteLine("(B) collision-pairs at the FIXED frame {0,e_0..e_3} (size 5), d=4, growing q — exact-vs-Weil signal:");
+        output.WriteLine($"{"q",4} {"n",8} {"eps",4} {"distinct",9} {"collPairs",11} {"collPairs/q²",13} {"residCls",9}");
+        foreach (int q in new[] { 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 }) foreach (int eps in new[] { -1, 1 })
+        {
+            var frame = new List<int> { 0 }; for (int i = 0; i < 4; i++) frame.Add(IPow(q, i));   // 0, e_i
+            var (distinct, n, pairs) = ChiCollisionStats(q, 2, eps, frame);
+            output.WriteLine($"{q,4} {n,8} {eps,4} {distinct,9} {pairs,11} {(double)pairs/(q*(double)q),13:F2} {n-distinct,9}");
+        }
+        output.WriteLine("  READING: collPairs/q² → constant (clean integer law) ⟹ exact-Gauss recovery; ragged / √q wobble ⟹ Weil tail.");
+    }
+
+    [Fact]
+    public void Probe_D3dCollisionDecay()
+    {
+        // R3 follow-up — validates the EXISTENTIAL / counting proof route (steer: "prove |T| ≤ const, let it fall out").
+        //  Add RANDOM probes to the {0,e_i} frame one at a time; record #surviving colliding pairs after each.
+        //  If E[collPairs] decays geometrically (each probe ×~1/q or faster), then ∃ a separating base of size
+        //  O(d+log q) by a union/first-moment bound — the constant FALLS OUT of the decay rate, no explicit base needed,
+        //  and a Weil/Gauss bound enters only as the per-probe decay INEQUALITY (not an exact joint evaluation).
+        output.WriteLine("R3 follow-up — surviving collision-pairs vs #random probes added to the frame (existential-base route).");
+        output.WriteLine("");
+        int m = 2, dim = 4;
+        foreach (int q in new[] { 13, 23 }) foreach (int eps in new[] { -1, 1 })
+        {
+            int n = IPow(q, dim);
+            var rng = new Random(424242);
+            var baseL = new List<int> { 0 }; for (int i = 0; i < dim; i++) baseL.Add(IPow(q, i));   // frame
+            output.WriteLine($"VO^{(eps<0?"-":"+")}_4({q})  n={n}  (frame size {baseL.Count}):");
+            var (d0, _, p0) = ChiCollisionStats(q, m, eps, baseL);
+            output.WriteLine($"    +0 probes: collPairs={p0,12}  distinct={d0}");
+            for (int step = 1; step <= 8; step++)
+            {
+                int v; do { v = rng.Next(n); } while (baseL.Contains(v));
+                baseL.Add(v);
+                var (dd, _, pp) = ChiCollisionStats(q, m, eps, baseL);
+                double ratio = p0 > 0 ? (double)pp / p0 : 0; p0 = Math.Max(pp, 1);
+                output.WriteLine($"    +{step} probes: collPairs={pp,12}  distinct={dd}  (×{ratio:F3} of prev)");
+                if (pp == 0) { output.WriteLine($"    → SEPARATED at frame+{step} random probes (size {baseL.Count})."); break; }
+            }
+            output.WriteLine("");
+        }
+        output.WriteLine("READING: geometric decay to 0 within O(log q) random probes ⟹ existential base, size bound falls out.");
+    }
 }
