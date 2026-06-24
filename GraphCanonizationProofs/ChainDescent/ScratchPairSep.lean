@@ -350,6 +350,71 @@ theorem pairSum_fully_closed [Fintype K] [DecidableEq K] [Invertible (2 : K)] (h
     (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) hFassoc
   exact ⟨b, w, by rw [hb, hw]⟩
 
+/-! ### The degenerate locus (increment 2 — exact part)
+
+When `F` drops rank — `F.polarBilin` has a nonzero radical — the closed form `pairSum_fully_closed` does not apply.
+The exact handling: if a radical direction `r` (`∀ s, polar F s r = 0`, `F r = 0`) is NOT annihilated by the residual
+linear term `L`, the whole sum *vanishes* (the pair analog of the singleton's `y+z=0` diagonal vanishing). Combined
+with the fact that the outer `∑_{y,z}` carries the weight `χ(y)χ(z)` (which is `0` on the axes `{y=0}∪{z=0}`, where the
+degeneracy is forced because every `pairForm Q a` has `a` in its radical), this leaves only the thin `L(r)=0`
+sub-locus of the discriminant conic as a (bounded, lower-order) main term — handled by the increment-3 magnitude
+bound. -/
+
+/-- **Every `pairForm Q a` is degenerate: `a` lies in its polar-radical, and `pairForm Q a (a) = 0`.** This is the
+structural source of the degenerate locus (it forces degeneracy on the axes `{y=0}∪{z=0}`). Verified by expanding
+`pairForm_apply` + the polar identities. -/
+theorem pairForm_polar_anchor {V : Type*} [AddCommGroup V] [Module K V] (Q : QuadraticForm K V) (a s : V) :
+    QuadraticMap.polar (pairForm Q a) s a = 0 := by
+  have hsa : Q (s + a) = Q s + Q a + QuadraticMap.polar Q s a := by rw [QuadraticMap.polar]; ring
+  have hpsa : QuadraticMap.polar Q (s + a) a
+      = QuadraticMap.polar Q s a + QuadraticMap.polar Q a a := QuadraticMap.polar_add_left Q s a a
+  rw [QuadraticMap.polar, pairForm_apply, pairForm_apply, pairForm_apply, hsa, hpsa,
+    QuadraticMap.polar_self, nsmul_eq_mul]
+  push_cast; ring
+
+theorem pairForm_self_anchor {V : Type*} [AddCommGroup V] [Module K V] (Q : QuadraticForm K V) (a : V) :
+    pairForm Q a a = 0 := by
+  rw [pairForm_apply, QuadraticMap.polar_self, nsmul_eq_mul]
+  push_cast; ring
+
+/-- **Radical-vanishing (the degenerate-locus diagonal collapse).** If `r` lies in the polar-radical of `F`
+(`∀ s, polar F s r = 0`) with `F r = 0`, and the residual linear functional does not annihilate `r` (`L r ≠ 0`),
+then `∑_s ψ(F s + L s) = 0`. Proof: translating by `c•r` fixes `F` (constant on `⟨r⟩`-cosets) and shifts `L` by
+`c·(L r)`, so the sum is multiplied by `ψ(c·L r)`; choosing `c` with `ψ(c·L r) ≠ 1` (primitivity) forces it to `0`. -/
+theorem sum_addChar_radical_vanish {R' : Type*} [CommRing R'] [IsDomain R'] [Fintype K]
+    {ψ : AddChar K R'} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (F : QuadraticForm K V) (L : Module.Dual K V)
+    (r : V) (hrad : ∀ s, QuadraticMap.polar F s r = 0) (hFr : F r = 0) (hLr : L r ≠ 0) :
+    (∑ s : V, ψ (F s + L s)) = 0 := by
+  obtain ⟨c, hc⟩ : ∃ c : K, ψ (L r * c) ≠ 1 := by
+    by_contra hcon
+    simp only [not_exists, not_not] at hcon
+    exact (hψ hLr) (by ext c; simpa only [AddChar.mulShift_apply, AddChar.one_apply] using hcon c)
+  have hF_inv : ∀ s : V, F (s + c • r) = F s := by
+    intro s
+    have h1 : QuadraticMap.polar F s (c • r) = 0 := by
+      rw [QuadraticMap.polar_smul_right, hrad s, smul_zero]
+    have h2 : F (c • r) = 0 := by rw [QuadraticMap.map_smul, hFr, smul_zero]
+    have h3 : F (s + c • r) = QuadraticMap.polar F s (c • r) + F s + F (c • r) := by
+      rw [QuadraticMap.polar]; ring
+    rw [h3, h1, h2]; ring
+  have hL_shift : ∀ s : V, L (s + c • r) = L s + c * (L r) := by
+    intro s; rw [map_add, map_smul, smul_eq_mul]
+  have hreind : (∑ s : V, ψ (F s + L s)) = ∑ s : V, ψ (F (s + c • r) + L (s + c • r)) :=
+    (Equiv.sum_comp (Equiv.addRight (c • r)) (fun s => ψ (F s + L s))).symm
+  have heq : (∑ s : V, ψ (F (s + c • r) + L (s + c • r)))
+      = ψ (c * L r) * ∑ s : V, ψ (F s + L s) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun s _ => ?_)
+    rw [hF_inv s, hL_shift s,
+      show F s + (L s + c * L r) = (c * L r) + (F s + L s) from by ring, AddChar.map_add_eq_mul]
+  have key : (∑ s : V, ψ (F s + L s)) = ψ (c * L r) * ∑ s : V, ψ (F s + L s) := hreind.trans heq
+  have hsub : (1 - ψ (c * L r)) * (∑ s : V, ψ (F s + L s)) = 0 := by
+    rw [sub_mul, one_mul, ← key, sub_self]
+  rcases mul_eq_zero.1 hsub with h | h
+  · exact absurd (by rw [mul_comm]; exact (sub_eq_zero.1 h).symm : ψ (L r * c) = 1) hc
+  · exact h
+
 end InnerSum
 
 end ChainDescent
@@ -367,3 +432,6 @@ end ChainDescent
 #print axioms ChainDescent.exists_repr_of_nondeg
 #print axioms ChainDescent.pairSum_closed_of_nondeg
 #print axioms ChainDescent.pairSum_fully_closed
+#print axioms ChainDescent.pairForm_polar_anchor
+#print axioms ChainDescent.pairForm_self_anchor
+#print axioms ChainDescent.sum_addChar_radical_vanish

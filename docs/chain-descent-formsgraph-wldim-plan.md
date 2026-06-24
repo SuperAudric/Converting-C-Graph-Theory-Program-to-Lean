@@ -104,7 +104,9 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `sum_addChar_shifted_eval` (complete-the-square given a representing `b`), `pairSum_closed_of_repr` (chained),
   `exists_repr_of_nondeg` (`F.polarBilin` nondeg ⟹ `b` exists, via `LinearMap.BilinForm.toDual`), `pairSum_closed_of_nondeg`
   (`b` discharged from nondeg), and the capstone `pairSum_fully_closed` (`M = ψ(z·pairForm_v(u−v))·ψ(−F b)·(∏χ wᵢ)·gaussSum^d`,
-  so `|M|=q^{d/2}`). Open tail = the degenerate-`(y,z)` locus (axes ∪ conic = main term) + increment-3 `c₀`. See §13.
+  so `|M|=q^{d/2}`). **+ Degenerate locus (exact part DONE):** `pairForm_polar_anchor`/`pairForm_self_anchor` (every `pairForm Q a`
+  degenerate, `a∈radical`) and `sum_addChar_radical_vanish` (degenerate diagonal-vanishing: `r∈radical`, `L r≠0` ⟹ `∑_s ψ(F s+L s)=0`).
+  Open tail = increment-3 `c₀` bound (the ℂ magnitude of `M` + zero-counts). See §13 ("DEGENERATE LOCUS FINISHED" + "INCREMENT 3 — PLAN").
 - **`ScratchMatching.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **increment-4/5 combinatorial core**:
   **`exists_separating_base`**, the matching-trick first moment as a pure finite-counting theorem (`fail : ι → W → Prop`,
   `∀g #{w:fail g w}≤F`, `|ι|·Fᵐ<|W|ᵐ ⟹ ∃ base P:Fin m→W, ∀g ∃j ¬fail g (P j)`). Consumes the single analytic input `c̄₀<1`
@@ -908,10 +910,44 @@ pieces (i)+(ii) DONE).** The two nondeg-dependent inputs are now both landed in 
   `gaussSum^d` ⟹ **`|M| = |gaussSum|^d = q^{d/2}`** — exactly the increment-3 `c₀`-bound magnitude. Carries `F.polarBilin.Nondegenerate`
   (for `b`) + `(associated F).SeparatingLeft` (for the Gauss eval) — the SAME nondegeneracy of `F` up to the unit `2`
   (`two_nsmul_associated`), both discharged concretely at instantiation.
-- **Remaining for increment 2 (only the degenerate locus):** the **degenerate-`(y,z)` locus** where `F` drops rank — by the
-  verified fact that *every* `pairForm Q a` is degenerate (`a ∈ radical`), this locus is the whole axes `{y=0}∪{z=0}` plus the
-  pencil's discriminant conic, and is the probe's `|T|` MAIN TERM (not an edge case). Then sum over `(y,z)` (the
-  `pairCharSum_factor_gen` outer sum) ⟹ the increment-3 `c₀` bound. **The nondegenerate-locus closed form is DONE.**
+**▶ INCREMENT 2 — DEGENERATE LOCUS FINISHED (exact part) (2026-06-24, `ScratchPairSep.lean`, axiom-clean).** The exact
+(no-ℂ) handling of the `(y,z)` where `F = y•pairForm_u + z•pairForm_v` drops rank is now landed; together with
+`pairSum_fully_closed` (nondeg locus) this covers the whole `(y,z)` plane structurally:
+- **`pairForm_polar_anchor`** (`∀ s, polar (pairForm Q a) s a = 0`) + **`pairForm_self_anchor`** (`pairForm Q a a = 0`) —
+  the verified structural fact that *every* `pairForm Q a` is degenerate with `a` in its radical. This forces degeneracy
+  on the axes `{y=0}∪{z=0}` — but those are killed by the outer weight `χ(y)χ(z) = 0`, so they never contribute to `T`.
+- **`sum_addChar_radical_vanish`** — the pair analog of the singleton's diagonal-vanishing: if `r` is in `F`'s polar-radical
+  (`∀s, polar F s r = 0`, `F r = 0`) and the residual linear term does not annihilate it (`L r ≠ 0`), then
+  `∑_s ψ(F s + L s) = 0`. Proof: translating by `c•r` fixes `F`, shifts `L` by `c·(L r)`, multiplies the sum by `ψ(c·L r)`;
+  primitivity gives `c` with `ψ(c·L r) ≠ 1` ⟹ the sum is `0`. This kills every conic point with `L(r) ≠ 0`.
+- **What's left of the locus = a bounded, lower-order remainder:** only the thin `L(r)=0` sub-locus of the pencil's
+  discriminant conic survives (`≤ d` ratios `(y:z)`, both nonzero), with `|M| ≤ q^{(d+1)/2}` (corank-1) — a MAGNITUDE bound,
+  hence increment-3 (`ℂ`) work, NOT exact. So the degenerate locus is *structurally finished*; its residual is folded into
+  the increment-3 magnitude bookkeeping. **(Correction to the earlier "MAIN TERM" note: the `|T|≈0.8n` the probe saw is a
+  BAD-ANCHOR phenomenon — pencil-alignment — not the degenerate locus; for good anchors the degenerate locus is `o(n)`.)**
+
+**▶ INCREMENT 3 — PLAN (the per-pair / good-anchor `c₀ < 1` bound).** The goal: for a *good* anchor `t₀` (pencil generically
+nondegenerate), `c₀(u,v;t₀) = (#{t : χ(I_u(t)) = χ(I_v(t))})/n ≤ 1 − δ`, `I_w(t) = det G₂(w;t,t₀) = pairForm Q (t₀−w)(t−w)`.
+- **The exact decomposition (no ℂ; reuses GaussCount counting):**
+  `c₀ = ½ + (T + 3 z₂ − z_u − z_v)/(2n)`, where `z_w = #{t : I_w(t)=0}`, `z₂ = #{t : I_u=I_v=0}`,
+  `T = ∑_t χ(I_u(t))·χ(I_v(t))`. (From `χ(I_u)=χ(I_v) ⟺ both 0 ∨ (both ≠0 ∧ same class)`; `#same = ½(N₂+T)`.) So `c₀<1`
+  reduces to `T + 3z₂ − z_u − z_v < n`, and `c₀ → ½` once each term is `o(n)`.
+- **Step 3a — the ℂ setup.** Instantiate `R' = ℂ`, `ψ : AddChar K ℂ` primitive (exists, `AddChar.IsNontrivial.isPrimitive`
+  / standard), `χ = quadraticChar` into `ℂ`. The one place the development leaves the equality regime.
+- **Step 3b — `|M| = q^{d/2}` on the nondeg locus** (`|gaussSum| = √q` via Mathlib `gaussSum_sq` ⟹ `|gaussSum²|=q`; phases
+  `ψ(·)`, `χ(wᵢ)` are unit-modulus) — applied to `pairSum_fully_closed`. **Step 3c — `|M| ≤ q^{(d+1)/2}` on the residual
+  conic** (corank-1 degenerate Gauss; `sum_addChar_radical_vanish` already zeroes the `L(r)≠0` part).
+- **Step 3d — the zero-counts** `z_u, z_v ≤ 2q^{d-1}` and `z₂ ≤ 2q^{d-2}` (degenerate affine-quadric counts; `card_quadForm_eq`
+  for the nondeg directions, `count2_eq_charsum` for the pair — or crude root bounds, since only `o(n)` is needed).
+- **Step 3e — assemble `T` and `c₀`.** Via `pairCharSum_factor_gen`, `gaussSum²·T = ∑_{y,z≠0} χ(y)χ(z)·M(y,z)` (axes drop).
+  `|∑| ≤ (q−1)²·q^{d/2} + (≤d)·q^{(d+1)/2}` ⟹ `|T| ≤ q^{d/2+1} + d·q^{(d+1)/2} = o(n)` for `d ≥ 4`. With 3d ⟹
+  `c₀ = ½ + o(1) ≤ ¾` for `q ≥ q₀`; small `q` by `decide` (or absorbed by the matching trick's small-`q` handling).
+- **★ The good-anchor hypothesis = the pencil is generically nondegenerate** (`disc_{(y,z)} det(y·G_u + z·G_v) ≢ 0`, ⟺ `∃ (y,z)`
+  with `F` nondeg, ⟺ `≤ d` degenerate ratios). This is EXACTLY increment 4's good-anchor predicate (the alignment locus is its
+  complement) — so increment 3's `c₀ ≤ 1−δ` for good anchors feeds directly into increment 4's `c̄₀ ≤ 1−δ(1−O(1/q))`. The two
+  increments meet at the pencil-nondegeneracy condition.
+- **The single genuinely-new content = step 3b/3c (the ℂ magnitude of `M`)**; everything else reuses landed counting bricks
+  (`card_quadForm_eq`, `count2_eq_charsum`, `pairCharSum_factor_gen`) or is the matching-trick combinatorics already landed.
 
 **▶ INCREMENT 4 (anchor existence) FOLDS INTO INCREMENT 5 (averaging) — the matching trick (2026-06-24, de-risked).** A handoff
 question: is "anchor existence" a separate hard (nested-quadric) argument? **No — it dissolves into the averaging, via a specific
