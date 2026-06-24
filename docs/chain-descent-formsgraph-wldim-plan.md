@@ -70,7 +70,8 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   → `sigF_injective`) and **`vo4minus_seal`** (the capstone instantiated).
 - **`ScratchCrux.lean`** (NEW 2026-06-24, compiles axiom-clean) — the generalization's crux reduction: `jointIsoCount` (`Z_u(S)`),
   **`ZProfileSeparates Q T`** (the sole open predicate, general `Q`), **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` (DONE),
-  and `isotropySeparates_of_zProfileSeparates` (end-to-end `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`). See §13.
+  `isotropySeparates_of_zProfileSeparates` (end-to-end `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`), and **D2 bridge**
+  `jointIsoCount_eq_restricted` (`Z_u(S)` = the Lemma-A-ready restricted count). See §13.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -597,8 +598,35 @@ NOT in build). **D1 ✅ DONE (2026-06-24).** Landed:
   (composes D1 with the landed `isotropySeparates_of_qProfileSeparates`/`coords_determine`).
 
 **⟹ the ENTIRE open content of the generalization is now the single predicate `ZProfileSeparates Q T`** (the joint
-`Z(S)`-profile injectivity, general `Q`). Next = **D2** (`Z(S) = F(χ det G)` via Lemma A, for general `Q`) feeding **D3**
-(the uniform injectivity research: frame skeleton + `O(log q)` probe resolution).
+`Z(S)`-profile injectivity, general `Q`).
+
+**D2 (bridge) ✅ DONE (2026-06-24, axiom-clean).** `jointIsoCount_eq_restricted` — `Z_u(S) = #{w ≠ 0 : Q w = 0 ∧
+∀t∈S, Q(w − (t̄ − ū)) = 0}` (dictionary `isoClass≠2 ⟺ Q=0` + `count_transport` + shift `w = x − ū`). This is the
+instance's `restrictedF` for general `Q,u,S` — the **Lemma-A entry point** (config `a t = t̄ − ū`).
+
+**▶ The D2/D3 boundary + the D3 PLAN (2026-06-24).** What remains splits into a large landed-tool-heavy *analytic*
+assembly and the genuine *research* core:
+- **D2-analytic / D3a — the closed form `Z_u(S) = F(|S|, χ(det G_u(S)), [c=0])` for nondegenerate config Gram.**
+  Pieces LANDED in `ScratchLemmaA`: `reduction_to_levelset_nondeg` (→ homogeneous level-set), `levelset_count_eq`
+  (char-sum form), `configGaussSum_eq_det` (config Gauss = `χ(s)ⁿ·χ(D)·gaussSumⁿ`); plus `cone_count_zero_split`
+  (`ScratchLemmaB`, the `w=0` correction). NOT yet assembled into the single `= F` statement (the instance *bypassed*
+  this via `decide`). Remaining: substitute `configGaussSum_eq_det` + the global `∑ψ(sQx)=χ(s)^d·gaussSumᵈ` into
+  `levelset_count_eq`, collapse the `s`-sum, divide by `q^{m+1}`, + the `S ↔ Fin m` reindex. Big, but mechanical.
+- **D3b — degenerate configs.** Lemma A needs `IsUnit (det G)`; singletons with isotropic difference (`Q(ū−t)=0`),
+  and other rank-deficient sub-frames, fall outside it — handle separately (the level-bit `[c=0]` slice).
+- **D3c — invariant recovery.** From `Z_u(S) = Z_{u'}(S)` deduce `χ(det G_u(S)) = χ(det G_{u'}(S))` (+ level bit), via
+  `F`'s structure (the recovery the `sigF` `decide` did finitely).
+- **★ D3d — THE RESEARCH CORE (uniform-`q`, tool-uncertain).** The `{χ(det G), [c=0]}` profile over `T = frame ∪
+  O(log q) probes` pins the field-valued `Q`-profile `{Q(ū−eᵢ)}`. Mechanism (GATE-probed): frame square-classes +
+  pair-determinant `χ(4Q(ū−t)Q(ū−t')−B(ū−t,ū−t')²)` over probes resolve the field values jointly (NOT per-coordinate).
+  **Tool question unresolved:** exact quadratic-Gauss-sum identities (present) vs general Weil bounds (absent). This is
+  the genuine open content.
+- **D3e — construct `T` (`frameBase ∪ probe set`, `|T| ≤ d+1+O(log q)`) + assemble** D3a–d ⟹ `ZProfileSeparates`,
+  then `isotropySeparates_of_zProfileSeparates` ⟹ the seal.
+
+**Recommendation (GATE discipline):** before formalising the large D3a assembly, **SPIKE D3d's mechanism on paper** —
+secure the uniform-`q` field-value-recovery argument (and settle exact-vs-Weil) on a small parametric family. D3a is only
+worth building once D3d's argument is in hand; D3d is where the difficulty and the residual risk live.
 
 ---
 

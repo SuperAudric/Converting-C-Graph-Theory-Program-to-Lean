@@ -144,7 +144,51 @@ theorem isotropySeparates_of_zProfileSeparates
     IsotropySeparatesAtBase Q T :=
   isotropySeparates_of_qProfileSeparates Q hQ (qProfileSeparatesAtBase_of_zProfileSeparates Q h)
 
+open scoped Classical in
+/-- **D2 (bridge) — `Z_u(S)` as the restricted isotropic count over `V`.** Unfolding the dictionary
+(`isoClass ≠ 2 ⟺ Q = 0`), transporting `Fin (p^d) ↔ V` (`count_transport`), and shifting `w = x − ū`, the joint
+isotropic count is the Lemma-A-ready restricted count: nonzero `w` on the cone `Q w = 0` whose shift by each config
+vector `t̄ − ū` (`t ∈ S`) stays isotropic. This is exactly the instance's `restrictedF` for general `Q, u, S` — the
+entry to Lemma A (`reduction_to_levelset_nondeg`, with config `a t = affineE.symm t − affineE.symm u`). -/
+theorem jointIsoCount_eq_restricted (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (u : Fin (p ^ d)) (S : Finset (Fin (p ^ d))) :
+    jointIsoCount Q u S
+      = (Finset.univ.filter (fun w : Fin d → ZMod p => w ≠ 0 ∧ Q w = 0 ∧
+          ∀ t ∈ S, Q (w - (affineE.symm t - affineE.symm u)) = 0)).card := by
+  rw [jointIsoCount]
+  have hdict : (Finset.univ.filter (fun z : Fin (p ^ d) => z ≠ u ∧
+        isoClass Q (affineE.symm z - affineE.symm u) ≠ 2 ∧
+        ∀ t ∈ S, isoClass Q (affineE.symm z - affineE.symm t) ≠ 2))
+      = (Finset.univ.filter (fun z : Fin (p ^ d) =>
+        affineE.symm z ≠ affineE.symm u ∧ Q (affineE.symm z - affineE.symm u) = 0 ∧
+        ∀ t ∈ S, Q (affineE.symm z - affineE.symm t) = 0)) := by
+    apply Finset.filter_congr
+    intro z _
+    refine and_congr (affineE.symm.injective.ne_iff).symm
+      (and_congr (isoClass_ne_two_iff Q _)
+        (forall_congr' (fun t => imp_congr_right (fun _ => isoClass_ne_two_iff Q _))))
+  rw [hdict, count_transport (fun x : Fin d → ZMod p => x ≠ affineE.symm u ∧
+    Q (x - affineE.symm u) = 0 ∧ ∀ t ∈ S, Q (x - affineE.symm t) = 0)]
+  apply Finset.card_bij' (fun x _ => x - affineE.symm u) (fun w _ => w + affineE.symm u)
+  · rintro x hx
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx ⊢
+    obtain ⟨hne, hQ, hS⟩ := hx
+    refine ⟨sub_ne_zero.mpr hne, hQ, fun t ht => ?_⟩
+    rw [show x - affineE.symm u - (affineE.symm t - affineE.symm u) = x - affineE.symm t from by abel]
+    exact hS t ht
+  · rintro w hw
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hw ⊢
+    obtain ⟨hne, hQ, hS⟩ := hw
+    refine ⟨?_, ?_, fun t ht => ?_⟩
+    · rw [← sub_ne_zero, add_sub_cancel_right]; exact hne
+    · rw [add_sub_cancel_right]; exact hQ
+    · rw [show w + affineE.symm u - affineE.symm t = w - (affineE.symm t - affineE.symm u) from by abel]
+      exact hS t ht
+  · rintro x _; abel
+  · rintro w _; abel
+
 end ChainDescent
 
 #print axioms ChainDescent.qProfileSeparatesAtBase_of_zProfileSeparates
 #print axioms ChainDescent.isotropySeparates_of_zProfileSeparates
+#print axioms ChainDescent.jointIsoCount_eq_restricted
