@@ -559,12 +559,16 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > - **OPEN, in order:** **D2-analytic/D3a** (closed form `Z=F(χ det G,[c_lev=0])` — assemble landed Lemma A; big, mechanical)
 >   → **D3b** (degenerate configs) → **D3c** (`Z=Z ⟹ χ det G agree`) → **★D3d** (the research core: the `χ`-profile separates
 >   at a bounded base, uniform `q` = forms-graph bounded WL-dim) → **D3e** (construct `T` + assemble).
-> - **★ NEXT CONCRETE STEP (D3d investigation verdict):** settle the **exact-quad-Gauss vs Weil** tool question on the
->   *smallest joint case* (`d=2`, one probe) BEFORE building the large D3a assembly — it decides contained-build vs Weil-sub-build.
+> - **★ NEXT CONCRETE STEP (revised by the R3 reframe below):** **D3a is OFF the critical path.** Pursue the
+>   **existential-counting route** — (i) the per-pair separation lemma `#{v : v fails to separate (u,u')} ≤ c₀·n` (`c₀<1`)
+>   + a finite-averaging existence wrapper (additive-only) collapsing D3d to that single bound; (ii) check whether the
+>   singleton sum `∑_v χ(Q(v−u)·Q(v−u'))` is EXACT (contained build) or needs one Weil estimate (small sub-build). The
+>   GaussCount shape-check confirmed the landed bricks are all ADDITIVE (D3a engine); **D3d genuinely needs a MULTIPLICATIVE
+>   (Weil) bound**, but contained to one per-pair incomplete sum. Base is `O(d+log q)` (grows; not constant).
 > - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
 >   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
->   `Probe_D3dStructuredBase` (D3d). All green. D3d findings: χ-invariants separate `q≥5`; info bound `b ≳ 2.25√(log q)`
->   (no fixed algebraic recovery); uncited.
+>   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3). All green. Findings: χ-invariants
+>   separate `q≥5`; bounded base survives `d=6`; collision-pairs decay geometrically (existential route); base `O(d+log q)`.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
@@ -686,6 +690,46 @@ generalization is "modulo the single explicit predicate D3d" (clean, honest, ach
 question by working the *smallest* joint case (`d=2`, one probe) explicitly — if exact-quad, D3d is a contained `GaussCount`
 build; if Weil, a sub-build (or a deeper literature dive on character-sum bounds for these configs). Do NOT start the large
 D3a assembly until (ii) settles the tool.
+
+**▶ R3 (higher-`d`) + GaussCount shape-check + EXISTENTIAL-COUNTING REFRAME — DONE (2026-06-24).** Spikes
+`Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (`A2MonovariantProbe.cs`, green). Reshapes the D3d attack and **corrects
+two over-optimistic reads** of the GATE / D3d-investigation blocks above.
+
+- *Higher-`d` evidence:* greedy χ-base at **`d=6` separates at 8–12** (q=5) ≈ `d=4 + O(1)`; `d=4` at 6–8 over q=5..13.
+  Bounded base survives the genuine joint case. (`q=3` shows `>cap` only because the χ-only probe omits the level bit
+  `[c_lev=0]` — the documented small-case, finding 1; not a failure.)
+- *GaussCount shape-check (the requested audit):* the landed bricks — `sum_addChar_multiQuad`/`_zero` (`:369`/`:511`),
+  `countk_eq_sum_charsum` (`:442`), `card_quadForm_eq` (`:258`), `sum_addChar_quadForm_smul_ne_zero` (M2 cancellation,
+  `:232`), `multiCharSum_eq_sum_count` (M2 hinge, `:568`) — are **all ADDITIVE-character (ψ)** machinery. They are the
+  engine for **D3a/Lemma A** (assemble `Z(S)=F(|S|, χ det Gram, [c_lev])`, and the "counts-agree ⟹ Gram-agree" hinge
+  *given the full pointwise `Q=c` counts*). **They do NOT touch D3d.** ⟹ **CORRECTION** to the investigation block's
+  "tool may largely exist / may be exact": D3d needs **MULTIPLICATIVE character-sum (Weil) bounds `∑_v χ(poly(v))`** —
+  Mathlib-ABSENT and absent from GaussCount (χ appears only as the Gauss-sum *constant* `∏χ(wᵢ)`, never summed over a
+  polynomial). The additive/multiplicative split is the precise reason **D3a is closable now and D3d is not**.
+- *Why the gap is intrinsic:* the seal's data is the ISOTROPY incidence only (`isoClass`: `Q=0` vs `Q≠0`, shell-blind) =
+  the `c=0` slice. The additive hinge would give clean Gram-recovery **if** all pointwise `Q=c` counts were available; the
+  `c=0` slice yields only `χ(det Gram_S)` (square-classes of principal Gram minors). Inverting square-classes-of-minors →
+  Gram is the multiplicative/Weil step = D3d.
+- *The EXISTENTIAL-COUNTING reframe (the value):* `Probe_D3dCollisionDecay` — adding RANDOM probes to the frame,
+  #surviving collision-pairs decays geometrically to **0 at frame+4–5 probes** (q=13 and q=23 alike). Validates a **finite
+  averaging** route (NO probability/measure): `∑_{k-probe tuples} #surviving = ∑_pairs (#failing probes)^k ≤ C(n,2)·c₀^k`,
+  so `c₀^k·C(n,2) < 1` ⟹ some tuple separates ⟹ a separating base **EXISTS**, its size falling out of the count (the
+  steer "prove `|T| ≤ const`, don't pin it / let it fall out"). It reduces D3d's joint-over-`qᵈ` injectivity to a **single
+  per-pair bound**: `#{v : v fails to separate a fixed (u,u')} ≤ c₀·n`, `c₀<1`. That is **one** multiplicative χ-sum
+  `∑_v χ(g·h)(v)` of a deg-≤4 poly (`g,h` = pair-Gram dets `4Q(v−u)Q(f−u)−B(v−u,f−u)²`, quadratics in `v`) — **Weil enters
+  as ONE standard incomplete-sum estimate, not the joint problem.**
+- *Base-growth CORRECTION:* per-probe decay is a **constant fraction** (`c₀ ≈ 2^{−(d+1)}`, observed ~0.02 at *both* q=13,23
+  — NOT `1/q`), so `k = Θ(log q)` probes and **`|T| = O(d + log q)`, GROWING** (consistent with the info-bound `b≳√log q`).
+  The "near-constant base" read from q≤23 was a small-`q` artifact (`q ≪ 3^{d+1}`, below the crossover). The existential
+  route is robust to this — it yields whatever `B(d,q)` the per-pair `c₀` supports, automatically.
+- *Net (updated verdict):* D3d **does** need a Weil bound (corrects "may be exact"), but the existential route **contains**
+  it to a single per-pair incomplete multiplicative character sum + a finite-averaging lemma — far smaller than the GATE's
+  "joint Weil sub-build". **Recommended next:** (i) state the per-pair separation lemma + the finite-averaging existence
+  wrapper (additive-only; reuses landed counting infra) so D3d collapses to the single Weil estimate; (ii) check whether
+  `∑_v χ(Q(v−u)·Q(v−u'))` (singleton-only product of two translated quadratics) has an EXACT evaluation — if so a contained
+  build, else a small Weil sub-build. **D3a's "big mechanical" assembly is OFF the critical path** under this route (we need
+  the per-pair bound, not the full `Z=F` closed form). Supersedes the `d=2` step above (R3 caveat: `d=2` is too degenerate;
+  the joint phenomenon lives at `d≥4`).
 
 ---
 
