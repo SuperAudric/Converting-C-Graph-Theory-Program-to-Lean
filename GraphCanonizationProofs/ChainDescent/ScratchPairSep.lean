@@ -127,8 +127,71 @@ theorem pairCharSum_factor (hF : ringChar K ≠ 2) (ψ : AddChar K R')
 
 end Factor
 
+/-! ## Increment 2 (foundation) — the pair invariant is a quadratic form at a shift
+
+The observable per-probe invariant is `det G₂(u; t, t₀) = 4 Q(t−u) Q(t₀−u) − B(t−u, t₀−u)²` (`B = polar Q`). In the
+shift `s = t − u` this is a **homogeneous quadratic form** `pairForm Q a s = 4 Q(a) Q(s) − (polar Q s a)²` (with the
+anchor offset `a = t₀ − u`). So the inner sum `∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(u';t,t₀))` is a genuine quadratic
+Gauss sum: `pairForm` + the shift `t ↦ t − u` reduce it to the quadratic-form machinery (`sum_addChar_quadForm_linear`
+at `r = 1` to complete the square, then `sum_addChar_quadForm`). This section lands those two foundations. -/
+section InnerSum
+variable {K : Type*} [Field K]
+
+/-- **The pair invariant as a quadratic form.** `pairForm Q a` is the form `s ↦ 4·Q(a)·Q(s) − (polar Q s a)²`; its
+value at the shift `s = t − u` (anchor offset `a = t₀ − u`) is exactly the Gram determinant `det G₂(u; t, t₀)`. -/
+noncomputable def pairForm {V : Type*} [AddCommGroup V] [Module K V] (Q : QuadraticForm K V) (a : V) :
+    QuadraticForm K V :=
+  (4 * Q a) • Q - QuadraticMap.sq.comp ((LinearMap.flip Q.polarBilin) a)
+
+theorem pairForm_apply {V : Type*} [AddCommGroup V] [Module K V] (Q : QuadraticForm K V) (a s : V) :
+    pairForm Q a s = 4 * Q a * Q s - QuadraticMap.polar Q s a * QuadraticMap.polar Q s a := by
+  simp only [pairForm, QuadraticMap.sub_apply, QuadraticMap.smul_apply, QuadraticMap.comp_apply,
+    QuadraticMap.sq_apply, LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply, smul_eq_mul]
+
+/-- The Gram determinant `det G₂(u; t, t₀) = 4 Q(t−u) Q(t₀−u) − B(t−u,t₀−u)²` equals `pairForm Q (t₀−u)` evaluated at
+the shift `t − u` — the structural identity that turns the opaque pair invariant into a quadratic-form-at-a-shift. -/
+theorem detG2_eq_pairForm {V : Type*} [AddCommGroup V] [Module K V] (Q : QuadraticForm K V) (u t₀ t : V) :
+    4 * Q (t - u) * Q (t₀ - u) - QuadraticMap.polar Q (t - u) (t₀ - u) * QuadraticMap.polar Q (t - u) (t₀ - u)
+      = pairForm Q (t₀ - u) (t - u) := by
+  rw [pairForm_apply]; ring
+
+/-- **The two-pivot combine.** The inner-sum integrand `y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀)` — two pair invariants at
+DIFFERENT pivots `u, v` — expressed in the single shift `p = t − u`: a quadratic FORM `y•pairForm_u + z•pairForm_v`
+applied to `p`, plus a LINEAR term `z·polar pairForm_v (p, u−v)` and a CONSTANT `z·pairForm_v(u−v)`. (Expand pivot
+`v`'s form around `u` via the polar identity `P(p+e) = P p + polar P p e + P e`, `e = u−v`.) This is the algebraic core
+of the inner-sum evaluation: it puts `M(y,z) = ∑_t ψ(…)` into "quadratic form + linear + const" shape, ready for
+`sum_addChar_quadForm_linear` (complete the square, `r = 1`) then `sum_addChar_quadForm`. -/
+theorem pairCombine {V : Type*} [AddCommGroup V] [Module K V] (Q : QuadraticForm K V)
+    (u v t₀ t : V) (y z : K) :
+    y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)
+      = (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) (t - u)
+        + z * QuadraticMap.polar (pairForm Q (t₀ - v)) (t - u) (u - v)
+        + z * pairForm Q (t₀ - v) (u - v) := by
+  set Pv := pairForm Q (t₀ - v) with hPv
+  have hexp : Pv (t - v) = Pv (t - u) + QuadraticMap.polar Pv (t - u) (u - v) + Pv (u - v) := by
+    rw [QuadraticMap.polar]
+    have hsum : (t - u) + (u - v) = t - v := by abel
+    rw [hsum]; ring
+  rw [QuadraticMap.add_apply, QuadraticMap.smul_apply, QuadraticMap.smul_apply, smul_eq_mul,
+    smul_eq_mul, hexp]
+  ring
+
+/-- **Gauss-sum translation invariance.** `∑_t ψ(P (t − a)) = ∑_t ψ(P t)` for any quadratic form `P` (reindex
+`t ↦ t + a`). The final step of the inner-sum evaluation, recentring each pivot's shift. -/
+theorem sum_addChar_quadForm_translate {R' : Type*} [CommRing R'] (ψ : AddChar K R')
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (P : QuadraticForm K V) (a : V) :
+    (∑ t : V, ψ (P (t - a))) = ∑ t : V, ψ (P t) := by
+  have h := Equiv.sum_comp (Equiv.addRight (-a)) (fun t : V => ψ (P t))
+  simpa [sub_eq_add_neg] using h
+
+end InnerSum
+
 end ChainDescent
 
 #print axioms ChainDescent.quadChar_addChar_sum
 #print axioms ChainDescent.pairCharSum_factor_gen
 #print axioms ChainDescent.pairCharSum_factor
+#print axioms ChainDescent.pairForm_apply
+#print axioms ChainDescent.detG2_eq_pairForm
+#print axioms ChainDescent.pairCombine
+#print axioms ChainDescent.sum_addChar_quadForm_translate

@@ -83,7 +83,11 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `gaussSum² · ∑_t χ(f t)χ(g t) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))` — factoring never uses structure on `f,g`;
   applied with `f,g =` the pair invariants `det G₂(u;·,t₀)`, `det G₂(u';·,t₀)` (χ-of-quadratics in the probe), the inner
   sum is an additive quadratic Gauss sum ⟹ the degree-4 product is exactly evaluable, **no Weil**) + **`pairCharSum_factor`**
-  (the form-specific `f=Q`, `g=Q(·−c)` singleton instance, now a one-line corollary). Needs `[CharZero R']`. See §13.
+  (the form-specific `f=Q`, `g=Q(·−c)` singleton instance, now a one-line corollary). Needs `[CharZero R']`. **+ Increment 2
+  foundation:** `pairForm` / `pairForm_apply` (the pair invariant `det G₂(u;t,t₀)` IS a quadratic form `4 Q(a)·Q − (polar Q ·
+  a)²` at the shift `t−u`), `detG2_eq_pairForm`, **`pairCombine`** (the two-pivot integrand `y·det G₂(u;·) + z·det G₂(v;·)` =
+  quadratic form `(y•pairForm_u + z•pairForm_v)` at shift `t−u` + linear `z·polar pairForm_v(·,u−v)` + const), and
+  `sum_addChar_quadForm_translate` (Gauss translation invariance). See §13.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -585,9 +589,11 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > - **★ PAIR ROUTE CONFIRMED + GENERALIZED FACTORING LANDED (2026-06-24).** `Probe_D3dPairCount`: `c_max ∈ [0.44,0.49]<½`,
 >   `sep@1anchor≈100%` ⟹ anchor existence + averaging viable; `|T|≈0.8n` (main term, exact, no Weil). **`pairCharSum_factor_gen`**
 >   (axiom-clean) = the factoring for any `f,g:V→K`, applied to the pair invariants ⟹ "no Weil" for the real observable is a
->   theorem-shaped reduction. **D3d STILL OPEN but now a concrete Weil-free build:** (2) inner-sum eval `∑_t ψ(y·I_u+z·I_v)`
->   (quadratic polys, toolkit); (3) `c₀<1` from the closed form (one small ℂ-magnitude step); (4) anchor existence; (5) averaging
->   ⟹ `ZProfileSeparates`. Reduction skeleton + no-Weil factoring PROVEN; the analytic core (2)+(3) is the remaining content.
+>   theorem-shaped reduction. **INCREMENT 2 FOUNDATION LANDED** (`ScratchPairSep`, axiom-clean): `pairForm`/`pairForm_apply`/
+>   `detG2_eq_pairForm` (pair invariant = quadratic form at a shift), **`pairCombine`** (two-pivot integrand = form + linear +
+>   const), `sum_addChar_quadForm_translate`. **D3d STILL OPEN, remaining:** finish `M(y,z)` closed form (complete-the-square
+>   via `sum_addChar_quadForm_linear` at `r=1` [needs `F=y•pairForm_u+z•pairForm_v` nondeg + solve `b`] + `sum_addChar_quadForm`
+>   + degenerate locus); then (3) `c₀<1` bound (one ℂ-magnitude step); (4) anchor existence; (5) averaging ⟹ `ZProfileSeparates`.
 > - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
 >   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
 >   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3), `Probe_D3dExactVsWeil` (exact-vs-Weil).
@@ -843,7 +849,21 @@ probe and the Lean generalization came back in favor:
   `ZProfileSeparates`. Increment (2)'s inner eval is in the additive toolkit; the one ℂ-magnitude step (increment 3's bound)
   is small and contained. **D3d is now a concrete, Weil-free build program on the pair observable.**
 
----
+**▶ INCREMENT 2 FOUNDATION LANDED (2026-06-24, `ScratchPairSep.lean`, axiom-clean).** The opaque pair invariant is now in
+the quadratic-Gauss arena:
+- **`pairForm Q a := (4·Q a)•Q − sq.comp((flip Q.polarBilin) a)`** + **`pairForm_apply`** (`= 4 Q(a) Q(s) − (polar Q s a)²`)
+  + **`detG2_eq_pairForm`**: `det G₂(u;t,t₀) = pairForm Q (t₀−u) (t−u)` — the pair invariant is a homogeneous **quadratic
+  form at a shift**.
+- **`pairCombine`**: `y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀) = (y•pairForm_u + z•pairForm_v)(t−u) + z·polar pairForm_v(t−u, u−v)
+  + z·pairForm_v(u−v)` — the two-pivot integrand in "quadratic form + linear + const" shape (expand `v`'s form around `u` via
+  the polar identity). The algebraic core of the inner sum.
+- **`sum_addChar_quadForm_translate`**: `∑_t ψ(P(t−a)) = ∑_t ψ(P t)`.
+- **Remaining for the full `M(y,z)` closed form (continuation of increment 2):** shift `t = u+s` (`translate`) ⟹
+  `M = ψ(z·pairForm_v(u−v))·∑_s ψ(F(s) + z·polar pairForm_v(s,u−v))`, `F = y•pairForm_u + z•pairForm_v`; then **complete the
+  square** via `sum_addChar_quadForm_linear` at `r=1` (the linear part is `polar F(·,b)` for `b` solving `polar F(·,b) =
+  z·polar pairForm_v(·,u−v)` — needs `F` nondeg) and evaluate `∑_s ψ(F s) = χ(disc F)·gaussSum^d` via `sum_addChar_quadForm`;
+  the degenerate-`(y,z)` locus (where `F` drops rank) is the "diagonal" analog. Then sum over `(y,z)` (the `pairCharSum_factor_gen`
+  outer sum) and the increment-3 `c₀` bound.
 
 *Maintenance: this doc is the live proof target — keep §1's module map current as scratch modules port into the build, and
 update §11's audit/spike outcomes + the §11.1 route decision as they resolve. Build history + superseded routes are frozen
