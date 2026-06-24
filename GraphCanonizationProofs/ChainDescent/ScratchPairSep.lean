@@ -46,6 +46,7 @@ per-anchor `c₀` + "bad-anchor locus is a proper subvariety, density O(1/q)" �
 NOT in build (scratch; `lake env lean ChainDescent/ScratchPairSep.lean`). Reduction skeleton: `ScratchCrux.lean`.
 -/
 import ChainDescent.GaussCount
+import Mathlib.Analysis.Complex.Basic
 
 namespace ChainDescent
 
@@ -417,6 +418,80 @@ theorem sum_addChar_radical_vanish {R' : Type*} [CommRing R'] [IsDomain R'] [Fin
 
 end InnerSum
 
+/-! ## Increment 3, step 3b — the ℂ magnitude of `M` (`|M| = q^{d/2}` on the nondeg locus)
+
+The one place the development leaves the equality regime: over `ℂ`, the quadratic Gauss sum has `|gaussSum| = √q`
+(`norm_gaussSum_sq`), `AddChar` values are unit-modulus (`norm_addChar_eq_one`, roots of unity), and the
+`quadraticChar` factors have norm `≤ 1`; so the fully-explicit `M = phase · (∏χ) · gaussSum^d` has
+`‖M‖ ≤ ‖gaussSum‖^d`, i.e. `‖M‖² ≤ (card K)^d` — the magnitude the increment-3 `c₀` bound consumes. -/
+section CMagnitude
+
+/-- **`AddChar` values into `ℂ` are unit-modulus** (each `ψ c` is a `(card K)`-th root of unity). The phase factors
+of `M` therefore drop out of its magnitude. -/
+theorem norm_addChar_eq_one {K : Type*} [AddGroup K] [Fintype K] (ψ : AddChar K ℂ) (c : K) :
+    ‖ψ c‖ = 1 := by
+  have hpow : ψ c ^ Fintype.card K = 1 := by
+    rw [← AddChar.map_nsmul_eq_pow, card_nsmul_eq_zero, AddChar.map_zero_eq_one]
+  have hn : Fintype.card K ≠ 0 := Fintype.card_ne_zero
+  have h2 : ‖ψ c‖ ^ Fintype.card K = 1 := by rw [← norm_pow, hpow, norm_one]
+  rcases lt_trichotomy (‖ψ c‖) 1 with hlt | heq | hgt
+  · exfalso; have := pow_lt_one₀ (norm_nonneg _) hlt hn; rw [h2] at this; exact lt_irrefl 1 this
+  · exact heq
+  · exfalso; have := one_lt_pow₀ hgt hn; rw [h2] at this; exact lt_irrefl 1 this
+
+/-- **The quadratic Gauss sum has `|gaussSum| = √q`** (over `ℂ`): `‖gaussSum χ ψ‖² = card K`. Via Mathlib's
+`gaussSum_mul_gaussSum_pow_orderOf_sub_one` (`gaussSum² = χ(-1)·card` for the order-2 character `χ`) and `|χ(-1)| = 1`.
+The genuinely-new analytic content of increment 3. -/
+theorem norm_gaussSum_sq {K : Type*} [Field K] [Fintype K] [DecidableEq K] (hch : ringChar K ≠ 2)
+    {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive) :
+    ‖gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) ψ‖ ^ 2 = Fintype.card K := by
+  set χ := (quadraticChar K).ringHomComp (Int.castRingHom ℂ) with hχ
+  have hQuad : χ.IsQuadratic := (quadraticChar_isQuadratic K).comp _
+  have hχ1 : χ ≠ 1 := by
+    rw [hχ, MulChar.ringHomComp_ne_one_iff Int.cast_injective]
+    exact quadraticChar_ne_one hch
+  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have hord : orderOf χ = 2 := orderOf_eq_prime hQuad.sq_eq_one hχ1
+  have hsq : gaussSum χ ψ ^ 2 = χ (-1) * (Fintype.card K : ℂ) := by
+    have h := gaussSum_mul_gaussSum_pow_orderOf_sub_one hχ1 hψ
+    have hpow : χ ^ (orderOf χ - 1) = χ := by rw [hord]; exact pow_one χ
+    rw [hpow, ← pow_two] at h
+    exact h
+  have hchm1 : ‖χ (-1)‖ = 1 := by
+    rcases hQuad (-1) with h | h | h
+    · exfalso
+      have h0 : χ (-1) ^ 2 = 1 := by rw [← map_pow, neg_one_sq, map_one]
+      rw [h] at h0; simp at h0
+    · rw [h]; simp
+    · rw [h]; simp
+  rw [show ‖gaussSum χ ψ‖ ^ 2 = ‖gaussSum χ ψ ^ 2‖ from (norm_pow _ _).symm, hsq, norm_mul, hchm1,
+    one_mul, norm_natCast]
+
+/-- **`‖M(y,z)‖ ≤ ‖gaussSum‖^d` on the nondegenerate locus** (so `‖M‖² ≤ (card K)^d = q^d`). From the explicit
+`pairSum_fully_closed` value: the two `ψ`-phases have norm `1` (`norm_addChar_eq_one`), the `∏ χ(wᵢ)` factor has
+norm `≤ 1` (each `χ` value is `0, 1`, or `−1`), leaving `‖gaussSum‖^d`. The increment-3 magnitude input. -/
+theorem norm_pairSum_le {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Invertible (2 : K)]
+    (hch : ringChar K ≠ 2) {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Fintype V]
+    (Q : QuadraticForm K V) (u v t₀ : V) (y z : K)
+    (hFpolar : ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)).polarBilin).Nondegenerate)
+    (hFassoc : (QuadraticMap.associated (R := K)
+        (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v))).SeparatingLeft) :
+    ‖∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v))‖
+      ≤ ‖gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) ψ‖ ^ Module.finrank K V := by
+  set χ := (quadraticChar K).ringHomComp (Int.castRingHom ℂ) with hχ
+  have hQuad : χ.IsQuadratic := (quadraticChar_isQuadratic K).comp _
+  obtain ⟨b, w, hM⟩ := pairSum_fully_closed hch hψ Q u v t₀ y z hFpolar hFassoc
+  rw [hM, norm_mul, norm_mul, norm_mul, norm_pow, norm_addChar_eq_one, norm_addChar_eq_one,
+    one_mul, one_mul]
+  have hprod : ‖∏ i, χ (w i : K)‖ ≤ 1 := by
+    rw [norm_prod]
+    refine Finset.prod_le_one (fun i _ => norm_nonneg _) (fun i _ => ?_)
+    rcases hQuad (w i : K) with h | h | h <;> rw [h] <;> simp
+  exact mul_le_of_le_one_left (by positivity) hprod
+
+end CMagnitude
+
 end ChainDescent
 
 #print axioms ChainDescent.quadChar_addChar_sum
@@ -435,3 +510,6 @@ end ChainDescent
 #print axioms ChainDescent.pairForm_polar_anchor
 #print axioms ChainDescent.pairForm_self_anchor
 #print axioms ChainDescent.sum_addChar_radical_vanish
+#print axioms ChainDescent.norm_addChar_eq_one
+#print axioms ChainDescent.norm_gaussSum_sq
+#print axioms ChainDescent.norm_pairSum_le
