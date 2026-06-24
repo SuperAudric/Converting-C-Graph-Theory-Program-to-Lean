@@ -573,12 +573,16 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > - **OPEN, in order:** **D2-analytic/D3a** (closed form `Z=F(χ det G,[c_lev=0])` — assemble landed Lemma A; big, mechanical)
 >   → **D3b** (degenerate configs) → **D3c** (`Z=Z ⟹ χ det G agree`) → **★D3d** (the research core: the `χ`-profile separates
 >   at a bounded base, uniform `q` = forms-graph bounded WL-dim) → **D3e** (construct `T` + assemble).
-> - **★ LEAN BUILD UNDERWAY (singleton route, Weil-free). INCREMENT 1 LANDED** (`ScratchPairSep.lean`, axiom-clean): the
->   **Gauss bridge** `quadChar_addChar_sum` + the **"no Weil" core** `pairCharSum_factor` (`gaussSum²·S = ∑_{y,z}χχ·multiQuad`).
->   **NEXT increments:** (2) `M`-eval + diagonal vanishing (equality, toolkit); (3) `|S| ≤ q^{d/2+1}<n` for `d≥4` (the one
->   ℂ-magnitude step, `gaussSum_sq`); (4) `c₀(δ)≤¾` (q≥q₀) + small-q `decide`; (5) finite-averaging existence of a
->   singleton-separating `T`, `|T|=O(d log q)` ⟹ `ZProfileSeparates`. **D3a + pair/higher observables OFF the path** (only
->   singleton `χ(Q(u−t))`, recovered from `Z_u({t})`).
+> - **★ LEAN INCREMENT 1 LANDED** (`ScratchPairSep.lean`, axiom-clean): the **Gauss bridge** `quadChar_addChar_sum` + the
+>   **"no Weil" core** `pairCharSum_factor` (`gaussSum²·S = ∑_{y,z}χχ·multiQuad`; the factoring technique, proven).
+> - **★★ CORRECTION (the singleton route is FLAWED; see the §13 CORRECTION block).** The observable is the PAIR count, not
+>   `χ(Q)`: `Z_u({t})` is BINARY (`Probe_D3cObservable` — only `[Q(u−t)=0]`), so `χ(Q(u−t))` is unobservable and the exact-`S`
+>   bound is for the wrong object. The square class lives at `|S|=2` (`Z_u({t,t'})` recovers `χ(det G₂)`). **Fix:** use the
+>   observable pair invariant `χ(det G₂(u;t,t₀))` (a quadratic in `t`) — same factoring shape, bridge transfers,
+>   `pairCharSum_factor` needs generalizing to two quadratic polynomials.
+> - **★ D3d STILL OPEN, sharply scoped (pair observable):** (1) per-pair bound `c₀<1` for `χ(det G₂(·;t,t₀))` (plausibly
+>   Weil-free by the factoring, NOT yet computed); (2) anchor existence; (3) averaging + small-`q` `decide`. Empirically true
+>   (SPIKE-K.1 used `Z_u({t,t'})`). Reduction skeleton + no-Weil technique PROVEN; the core is unsolved.
 > - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
 >   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
 >   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3), `Probe_D3dExactVsWeil` (exact-vs-Weil).
@@ -787,6 +791,33 @@ in Lean:
   needs `R'=ℂ`/an absolute value); (4) **`c₀(δ) ≤ ¾`** for `q≥q₀` from `|S|` + exact `z, z₂` (`card_quadForm_eq`), small `q`
   by `decide`; (5) **finite-averaging existence** of a singleton-separating `T`, `|T|=O(d log q)` ⟹ `ZProfileSeparates`.
   Increment (3) is the only one outside the existing equality toolkit (a small contained `ℂ`-magnitude sub-build).
+
+**▶▶ CORRECTION (2026-06-24) — the SINGLETON route is FLAWED; the observable is the PAIR count (spike `Probe_D3cObservable`,
+green). The two bullets above (and the EXACT-vs-WEIL block's "singleton route, Weil-free") OVERSTATE the result.** The seal's
+real observable is the joint-isotropic count `Z`, not `χ(Q)` directly. Probe verdict:
+- **`|S|=1` is BINARY:** `Z_u({t}) = #{w≠0 : Qw=0 ∧ Q(w−c)=0}` takes the SAME value for `χ(Q(u−t))=1` and `=2` (e.g.
+  `VO⁻₄(5)`: both `{20}`; only `Q(u−t)=0` differs). Proof: `w↦λw` fixes the cone `{Q=0}` and scales `polar(w,c)`, so the
+  count is constant on every nonzero level — it sees only `[Q(u−t)=0]`, NOT the square class. **So `χ(Q(u−t))` is NOT
+  observable, and `D3c-1` (recover it from `Z_u({t})`) is FALSE.** The exact-`S = ∑_v χ(Q(v−u)Q(v−u'))` computation, though
+  genuinely Weil-free, is for an **unobservable** quantity.
+- **`|S|=2` recovers the square class:** `Z_u({t,t'})` splits cleanly by `χ(det G₂)` (disjoint value-sets, every q). So the
+  square-class lives at **pairs** (consistent with Lemma A's `Z=F(χ det G)` for the nondeg 2-config, and with `vo4minus_seal`,
+  which separated via size-2 sub-frames).
+- **The fix (route recoverable, technique transfers):** use the **observable pair invariant** `χ(det G₂(u; t, t₀))` against an
+  anchor `t₀` in place of the singleton. As a function of the probe `t` this is **`χ` of a quadratic** (`det G₂ =
+  4Q(t−u)Q(t₀−u) − B(t−u,t₀−u)²`, degree 2 in `t`), and it IS recoverable from `Z_u({t,t₀})`. The per-pair separation count is
+  then `#{t : χ(P_u(t)) = χ(P_{u'}(t))}` with `P_u, P_{u'}` quadratics in `t` — the SAME factoring shape as `pairCharSum_factor`
+  (→ finite additive Gauss sums, Weil-free). Increment 1's **bridge transfers directly**; `pairCharSum_factor` needs
+  generalizing from "form `Q` + translate `c`" to "two quadratic *polynomials*" (inner sum = an inhomogeneous-quadratic Gauss
+  sum, still exactly evaluable).
+- **What this means for the open core (honest):** D3d is **still open**, now precisely scoped to the **pair** observable:
+  (1) the per-pair bound `c₀<1` for `χ(det G₂(·;t,t₀))` (plausibly Weil-free by the same factoring — the inner
+  `∑_t ψ(y·P_u + z·P_{u'})` is an inhomogeneous-quadratic Gauss sum — but **NOT yet computed**); (2) **anchor existence**
+  (∀`u≠u'` ∃`t₀` making `P_u, P_{u'}` square-class-different for enough `t` — the pair-level analog of the nested-quadric
+  argument); (3) averaging + small-`q` `decide`. Empirically the pair-`Z` profile separates at `O(d+log q)` (SPIKE-K.1 used
+  exactly `Z_u({t,t'})`), so the result is true; the proof's load-bearing analytic step (the pair-observable `c₀` bound) is the
+  genuine remaining content. **The reduction skeleton + the no-Weil technique are proven; the core D3d is sharply scoped but
+  unsolved.**
 
 ---
 

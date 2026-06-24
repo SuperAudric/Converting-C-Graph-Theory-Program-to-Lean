@@ -2772,11 +2772,54 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             output.WriteLine($"{fam,-12} {n,8} {sqrtN,8:F1} {nOverSqrtQ,9:F1} {(single?"yes":"NO"),9} {maxAbsSoverSqrtN,10:F2} {medRatio,14:F3} {$"[{c0min:F2},{c0max:F2}]",12}");
         }
         output.WriteLine("");
-        output.WriteLine("RESULT: singleδ=yes (Witt) ✓ — S=g(δ), necessary for a closed form.  |S|≈0.8-0.96·√n (square-root size;");
-        output.WriteLine("  the n/√q guess was WRONG — leading terms cancel).  EXACTNESS does NOT hinge on size: S=Σ_{s,t}χ(s)χ(t)N(s,t)");
-        output.WriteLine("  factors through SCALAR (s,t)=(Q(v−u),Q(v−u')) with N exact (additive quadric count) ⟹ finite Gauss-sum closed");
-        output.WriteLine("  form, NO χ of an irreducible high-degree poly ⟹ NO Weil/Deligne.  Bounding needs only |gaussSum|=√q (elementary,");
-        output.WriteLine("  Mathlib); crude triangle bound |S|≤q^{d/2+1}<n for d≥4 ⟹ c₀<1.  c₀∈[0.36,0.49]<½ uniformly ⟹ SINGLETON");
-        output.WriteLine("  χ-profile alone separates via averaging ⟹ D3d closes WEIL-FREE (additive toolkit + √q Gauss magnitude).");
+        output.WriteLine("RESULT: singleδ=yes (Witt) ✓.  |S|≈0.8-0.96·√n (the n/√q guess was WRONG; leading terms cancel — consistent with");
+        output.WriteLine("  the exact closed form). EXACTNESS hinges on factoring: S=Σ_{s,t}χ(s)χ(t)N(s,t), N exact additive quadric count ⟹");
+        output.WriteLine("  finite Gauss-sum combination, NO χ of a high-degree poly ⟹ NO Weil.  CAVEAT (see Probe_D3cObservable): this S is");
+        output.WriteLine("  the SINGLETON model; the seal's real observable is the joint count Z, whose square-class info lives at |S|≥2 (pairs).");
+    }
+
+    [Fact]
+    public void Probe_D3cObservable()
+    {
+        // CRITICAL CHECK: the seal's REAL observable is the joint-isotropic count Z (isotropy incidence), NOT χ(Q) directly.
+        //  (1) Z1(c) = #{w≠0 : Q w=0 ∧ Q(w−c)=0} — does it recover χ(Q c) (square-class), or only [Q c=0] (binary)?
+        //  (2) Z2(c1,c2) = #{w≠0 : Qw=0 ∧ Q(w−c1)=0 ∧ Q(w−c2)=0} — for NONDEG full-nonzero pairs, does Z2 split by
+        //      χ(det G2) (= recovers square-class at |S|=2, validating Lemma A's F-injectivity / the probes' χ-proxy)?
+        output.WriteLine("D3c observable check — does the joint-isotropic count Z recover χ(det G)?  (1) |S|=1 binary?  (2) |S|=2 splits by χ(det)?");
+        foreach (var (q, eps) in new[] { (5, -1), (5, 1), (7, -1), (7, 1), (11, -1), (11, 1) })
+        {
+            int m = 2; var F = new GFq(q); int dim = 4, n = IPow(q, dim);
+            int bb = 0, cc = 0;
+            if (eps == -1) { bool fnd = false; for (int b = 0; b < q && !fnd; b++) for (int c = 0; c < q && !fnd; c++) { bool an = true; for (int y = 0; y < q && an; y++) for (int z = 0; z < q; z++) { if (y==0&&z==0) continue; if (F.add[F.add[F.mul[y,y],F.mul[F.mul[b,y],z]],F.mul[c,F.mul[z,z]]]==0){an=false;break;} } if(an){bb=b;cc=c;fnd=true;} } }
+            int[] Vec(int v){var x=new int[dim];for(int i=0;i<dim;i++){x[i]=v%q;v/=q;}return x;}
+            int Q(int[] x){int s=0,hyp=eps==-1?m-1:m;for(int i=0;i<hyp;i++)s=F.add[s,F.mul[x[2*i],x[2*i+1]]];if(eps==-1){int y=x[2*(m-1)],z=x[2*(m-1)+1];s=F.add[s,F.add[F.add[F.mul[y,y],F.mul[F.mul[bb,y],z]],F.mul[cc,F.mul[z,z]]]];}return s;}
+            var vec=new int[n][];for(int v=0;v<n;v++)vec[v]=Vec(v);
+            var Qv=new int[n];for(int v=0;v<n;v++)Qv[v]=Q(vec[v]);
+            var sq=new bool[q];for(int y=1;y<q;y++)sq[F.mul[y,y]]=true;
+            int chi(int x)=>x==0?0:(sq[x]?1:2); int two=F.add[1,1];
+            int Bil(int a,int b2){var s=new int[dim];for(int i=0;i<dim;i++)s[i]=F.add[vec[a][i],vec[b2][i]];return F.add[Q(s),F.neg[F.add[Qv[a],Qv[b2]]]];}
+            int Qsub(int a,int b2){var x=new int[dim];for(int i=0;i<dim;i++)x[i]=F.add[vec[a][i],F.neg[vec[b2][i]]];return Q(x);}
+            // Z1(c): c given as vector index; count w≠0 isotropic with w−c isotropic
+            int Z1(int c){int cnt=0;for(int w=1;w<n;w++){if(Qv[w]==0&&Qsub(w,c)==0)cnt++;}return cnt;}
+            int Z2(int c1,int c2){int cnt=0;for(int w=1;w<n;w++){if(Qv[w]==0&&Qsub(w,c1)==0&&Qsub(w,c2)==0)cnt++;}return cnt;}
+            // (1) Z1 grouped by χ(Q c)
+            var z1by = new Dictionary<int, HashSet<int>>(); // χ(Qc) -> set of Z1 values
+            var rng = new Random(31);
+            for (int it = 0; it < 60; it++){int c=rng.Next(1,n);int k=chi(Qv[c]);if(!z1by.ContainsKey(k))z1by[k]=new HashSet<int>();z1by[k].Add(Z1(c));}
+            string z1desc = string.Join(" | ", new[]{0,1,2}.Where(z1by.ContainsKey).Select(k=>$"χ={k}:{{{string.Join(",",z1by[k].OrderBy(x=>x))}}}"));
+            // (2) Z2 for NONDEG full-nonzero pairs grouped by χ(det G2)
+            var z2by = new Dictionary<int, HashSet<int>>(); int sampled=0;
+            for (int it = 0; it < 400 && sampled < 200; it++){
+                int c1=rng.Next(1,n), c2=rng.Next(1,n); if(c1==c2)continue;
+                if(Qv[c1]==0||Qv[c2]==0)continue; int b=Bil(c1,c2);
+                int det=F.add[F.mul[F.mul[two,Qv[c1]],F.mul[two,Qv[c2]]],F.neg[F.mul[b,b]]];
+                if(det==0)continue; int k=chi(det); if(!z2by.ContainsKey(k))z2by[k]=new HashSet<int>(); z2by[k].Add(Z2(c1,c2)); sampled++;
+            }
+            string z2desc = string.Join(" | ", new[]{1,2}.Where(z2by.ContainsKey).Select(k=>$"χ(det)={k}:{{{string.Join(",",z2by[k].OrderBy(x=>x))}}}"));
+            bool z2split = z2by.ContainsKey(1)&&z2by.ContainsKey(2)&&!z2by[1].Overlaps(z2by[2]);
+            output.WriteLine($"VO^{(eps<0?"-":"+")}_4({q}): Z1 by χ(Qc): {z1desc}   ||  Z2 by χ(det): {z2desc}  split={z2split}");
+        }
+        output.WriteLine("READING: Z1 same value for χ=1 and χ=2 ⟹ |S|=1 BINARY (square-class NOT recovered at singleton).");
+        output.WriteLine("         Z2 split=true ⟹ |S|=2 recovers χ(det G) ⟹ square-class lives at PAIRS (validates the pair observable).");
     }
 }
