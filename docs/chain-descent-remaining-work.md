@@ -137,7 +137,7 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   `Q(v−t)`, recovering form coords (`coords_determine`, the crux's Witt-free back-half). **Caveat:** `O(Q)` is the *finer*
   orthogonal scheme, **not yet** the rank-3 SRG `VO^ε`. **Next = Stage B.1**: the **similitude** group `ΓO(Q)` (rank-3
   SRG; depth-1 → isotropy bits only) + the genuine two-round **count** crux (Route A; back-half = `coords_determine`),
-  `d=4 VO^ε_4(q)` first. Residual = the non-isotropic shell. Plan: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §3–§5/§7.
+  `d=4 VO^ε_4(q)` first. Residual = the non-isotropic shell. Plan: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §1–§2 (now `VO⁻₄(3)` SEALED) + §11 (generalization).
 - **★ Stage B.1 LANDED (2026-06-18, axiom-clean):** the **similitude** group + the node-4 conditional capstone —
   `similitudeGroup` (`GO(Q)`), `neg_mem_similitudeGroup`, `isometry_le_similitude`, `SimilitudeFrameSeparates` (the
   named count crux), `reachesRigidOrCameron_viaSimilitudeForm` (CascadeAffine.lean §OrthogonalForm,
@@ -183,7 +183,7 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   **A-M1+A-M2** (`ChainDescent/ScratchLemmaA.lean`: cone-count → homogeneous level-set, for invertible config Gram) and
   **B-M1+B-M2-bridge** (`ChainDescent/ScratchLemmaB.lean`: antecedent → incidence-agreement, + `y=0` correction). The
   two novel reductions are done; **NEXT = A-M3** (`card_quadForm_eq` on subspace `Uᗮ`) → A-M4 → B-M3 → ASM. Authoritative:
-  plan [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §10.5 (decl map) + §10.8 (milestones).
+  plan [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §1 (decl map) + §11 (roadmap); full build records in the plan's archive.
 - **★★★ CURRENT (2026-06-18 HANDOFF) — reformulation + M0–M3 LANDED; the bullets above are landed history.** The
   reformulation around a symmetry-broken base is DONE (`SeparatesAtBase` / `IsotropySeparatesAtBase` /
   `reachesRigidOrCameron_via{SymmetryBrokenBase,IsotropySeparates}`, the frame-locked predicates ⚠ SUPERSEDED in-source);
@@ -192,7 +192,7 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   **The ENTIRE remaining Gauss-work content is now ONE open predicate `QProfileSeparatesAtBase Q T`** (counts at
   `T = frameBase∪{2e₃}` recover the `Q`-profile; probe-validated `VO^-_4(3)` 81/81, UNPROVED). `isotropySeparates_of_qProfileSeparates`
   + `coords_determine` reduce the seal to it; M4 is wiring but **blocked** on it. **Two viable discharge routes fully
-  expanded in [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §10:** (1) explicit
+  expanded in the plan's archive (`Archive/ChainDescent/chain-descent-formsgraph-wldim-archive.md`) §10:** (1) explicit
   Gauss/incidence `Z(S)` computation (Witt-free, recommended; open step = a char-sum inversion), (3) structural perp-graph
   + Witt frame-rigidity (blocks on building Witt). Carrying the predicate as a certificate is RULED OUT (quality bar). Key
   constraint: `isoClass` is shell-blind ⟹ pointwise-count machinery off-path; recovery is the joint `Z(S)`. **Authoritative:
