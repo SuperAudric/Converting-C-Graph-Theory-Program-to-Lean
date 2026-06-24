@@ -471,6 +471,49 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 
 ---
 
+## 12. Preexisting lemmas — the landed scaffolding the crux build reuses (index sweep 2026-06-24)
+
+> **What this is.** A full read of `PublicTheoremIndex.md` (1579 lines) surfaced substantial **already-built, axiom-clean**
+> infrastructure for the Route-1 crux — more than the GATE assumed. Line numbers are rows in `PublicTheoremIndex.md`
+> (the **Notes/Line** there give the source location). The headline: the crux's *extraction layer is essentially complete*
+> and there are **two** decomposition routes to `IsotropySeparatesAtBase`, not one. Don't rebuild these.
+
+**A. Extraction toolkit — `GaussCount.lean` (fully built; the count-assembly bridge, §11.3-1, is mostly *already here*).**
+- `count_eq_charsum`  · `count2_eq_charsum`  · `countk_eq_charsum`  · `countk_eq_sum_charsum`  — k-fold counts as character sums.
+- `sum_addChar_quadForm`  · `sum_quadForm_eval`  · `sum_addChar_quadForm_smul`  — multivariable quadratic Gauss sum + the `χ(s)^d` scaling.
+- `card_quadForm_eq`  — the affine-quadric point count.
+- `sum_addChar_multiQuad`  + `sum_addChar_multiQuad_zero`  — the multi-point Gauss sum **at a symmetry-broken base** (the inner sum of the k-fold count); `sum_addChar_linearMap`  evaluates the boundary.
+- `count_pi_setValued`  — value-**set** → value-**point** counts (isotropy → Q-value).
+- `multiCharSum_eq_sum_count`  — **Fourier inversion** (counts agree ⟹ Gram agrees). ★ The **shell-blindness of `isoClass`** is exactly where this hinge stops — the crux's hard core, precisely located.
+
+**B. Forms-graph consumer — `FormsGraphConcrete.lean` (partially built; isolates the crux + a second decomposition).**
+- `count_transport`  · `qvalue_count_transport`  · `isotropy_count_transport`  — move the counts into `V`.
+- `isoSetOf` / `qSetOf` / `mem_isoSetOf_iff` (1574–1576) · `coarse_eq_sum_iso`  — isotropy↔Q-value dictionary, fine→coarse.
+- `QProfileSeparatesAtBase`  — **the M3 crux** (isotropy-counts at `T` ⟹ Q-profile); probe-validated for `VO⁻₄` at a **symmetry-broken** `T = frameBase ∪ {2e₃}`, 81/81.
+- `isotropySeparates_of_qProfileSeparates`  — `QProfileSeparatesAtBase` + nondeg ⟹ `IsotropySeparatesAtBase`, **via `coords_determine`** ⟹ a *live* second route (see the correction below).
+- ⚠ Plan §1 currently tags this module "OLD / superseded by Lemma A/B (archive)"; the index shows it is a **live public module** with the isolated crux + transport + dictionary. Reconcile (verify against source) and reuse rather than rebuild.
+
+**C. The general affine depth-2 engine our crux plugs into.**
+- `IsotropySeparatesAtBase`  · `SeparatesAtBase`  · `separatesAtBase_of_isotropySeparates_weak`  · `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (1248, the live capstone).
+- `discrete_affineScheme_of_twoRoundDiffSeparates`  · `affineScheme_relOfPair_translation`  · `affineDepth2Count`  — multi-coset-intersection-injectivity engine; `IsotropySeparatesAtBase → SeparatesAtBase →` this engine `→ Discrete`.
+
+**D. General crux framing + an alternative node-4 capstone.**
+- `PersistentTwinYieldsBlock`  + `persistentTwinYieldsBlock_iff_yieldsLarge_of_primitive`  — on the primitive floor the general crux collapses to "¬separates → IsLarge" (the general form of node 4 the geometric attack targets).
+- `reachesRigidOrCameron_viaAffineFormScheme`  + `RelCountsDetermineOrbit`  · `cellsAreOrbits_of_relCountsDetermineOrbit`  — a **second** node-4 forms-graph capstone (general counting predicate at the free frame → `…viaSpielman`); relevant to the §11.6 seam optionality.
+- `cellsAreOrbits_schemeAdj_singleton`  · `jointProfileRecoversAt_singleton`  — single-base recovery is project-wide free; multi-base is the open content (our crux is the concrete `VO^ε` instance).
+
+**E. Base construction + seam.**
+- `exists_greedy_base_le_log`  · `exists_greedy_base_scheme`  — the `O(log n)` base tool (§11.3-5).
+- `AlgIso` (1328 `Separability` / 1361 `CoherentConfig`) — the **inter-scheme** iso object; sharpens AUDIT-S seam option (b) (the transport object exists; only a "seal-disjunction transports along `AlgIso`" lemma is missing).
+
+**Approach impact (recorded; doc-body corrections deferred):**
+1. **★ Correction to the GATE (§11.2):** `coords_determine` is **not** a dead route. The frame-locked (`d+1`) version is dead, but `QProfileSeparatesAtBase` + `isotropySeparates_of_qProfileSeparates` (1578–1579) is a *live* alternative decomposition at a symmetry-broken base, probe-validated for `VO⁻₄(3)`. The build has **two** routes to the crux: (a) direct profile-injectivity (Lemma A/B, the `vo4minus_seal` path) and (b) Q-profile recovery + `coords_determine`.
+2. The crux is **better-scaffolded than the GATE recorded** (extraction layer A fully built; Fourier hinge + shell-blindness locate the hard core) — strengthens the GO verdict.
+3. **δ′ / forced-triangle route confirmed inapplicable** to the rank-3 core (route-doc §9.9.9a: no rainbow triangles, generic `λ,μ>1` ⟹ no `c=1` forced triangles), so the Gauss count route is genuinely necessary — closes a tempting shortcut.
+4. **Direction unchanged** (Route 1 / `IsotropySeparatesAtBase` via uniform count-injectivity); these are refinements + a correction, not a redirect.
+
+---
+
 *Maintenance: this doc is the live proof target — keep §1's module map current as scratch modules port into the build, and
 update §11's audit/spike outcomes + the §11.1 route decision as they resolve. Build history + superseded routes are frozen
 in the archive (linked in the intro). Keep route-doc §9.9.18b/c the empirical anchor and this doc the proof target. Live
