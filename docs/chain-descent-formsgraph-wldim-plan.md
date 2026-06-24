@@ -68,7 +68,13 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `Finset.card_nbij'`); **`sigF_injective`** = `Function.Injective sigF` by kernel `decide` (~20s, no `native_decide`).
 - **`ScratchBM3Glue.lean`** — bundles `Qbun`/`Bv`/`T₉`, proves **`isoSep : IsotropySeparatesAtBase Qbun T₉`** (B-M1 → bridge
   → `sigF_injective`) and **`vo4minus_seal`** (the capstone instantiated).
-- ⚠ `FormsGraphConcrete.lean` holds the OLD `QProfileSeparatesAtBase` / M3-reduction route — superseded by Lemma A/B (archive).
+- **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
+  **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
+  counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
+  general — `QProfileSeparatesAtBase + nondeg ⟹ IsotropySeparatesAtBase`, via the landed `coords_determine`). NB this is NOT
+  superseded (corrects the old note): it is a second, general decomposition whose back-half is landed; only its front-half
+  `QProfileSeparatesAtBase` is the open crux (`:145` — shell-blindness; never discharged in Lean even for VO⁻₄(3), probe-only).
+  Route (a) (Lemma A/B → `sigF` `decide`) is what closed the *instance*; (a)/(b) share the SAME open core (joint `Z(S)`).
 
 **The reusable architecture (template for every family — §11).** `IsotropySeparatesAtBase Q T` ⟸ **Lemma A** (count =
 explicit function of the config Gram) ∘ **Lemma B** (the antecedent reduces to restricted-count agreement over sub-frames)
@@ -364,9 +370,25 @@ the uniform kernel has a proof.** So the ordering is risk-gated, not merely depe
 > `GaussCount.lean`** are the favourable case; **general Weil bounds (absent in Mathlib)** are the unfavourable case and
 > the residual risk. **GATE verdict: GO** — the kernel is TRUE (probes), the reduction is mostly LANDED, the crux is
 > sharply scoped with a present-tooling path. Build the crux recovery lemma **first** (it gates everything); if it needs
-> general Weil, that is a contained sub-build, else fall back to Route 3 (Witt). **Next = begin the crux in Lean: state
-> `IsotropySeparatesAtBase` for the constructed `{frame ∪ probes}` base + the (R1)+(R3) reduction scaffold, isolating the
-> crux as the single open lemma.**
+> general Weil, that is a contained sub-build, else fall back to Route 3 (Witt).
+>
+> **▶ GATE REFINEMENT (2026-06-24, lemma audit) — TWO packagings of the crux, ONE shared core; the scaffold + tools are
+> already built.** (1) **`coords_determine` is NOT dead** (corrects the narration): it is the live nondeg finish of
+> **route (b)** — `isotropySeparates_of_qProfileSeparates` (FormsGraphConcrete:174, PROVEN general) reduces the crux to
+> **`QProfileSeparatesAtBase`** (recover the field-valued `Q`-profile from isotropy counts at an arbitrary base), then
+> `coords_determine` finishes. So the back-half splits two ways: route (a) `count=F(Gram)` [Lemma-A landed] + profile
+> injectivity; route (b) `QProfileSeparatesAtBase` [crux] + `coords_determine` [landed]. (2) **Both meet at the SAME hard
+> core** — shell-blindness (FormsGraphConcrete:145: `isoClass` can't tell `Q=square` from `Q=nonsquare` pairwise; the
+> pointwise Fourier hinge stops; the **joint `Z(S)` over sub-frames** is what's needed). (3) **The core's attack tools are
+> built:** `count_pi_setValued` (GaussCount:541, value-SET→value-POINT counts — the lever turning shell-blind isotropy
+> counts into field-valued `Q`-counts) → `multiCharSum_eq_sum_count` (:568, Fourier hinge) → `sum_addChar_multiQuad_zero`
+> (:511, the `R=0`/symmetry-broken-base Gauss sum the probe used). The joint sub-frame structure is what defeats
+> shell-blindness — still the open content. (4) **δ′/forced-triangle is confirmed inapplicable** (rank-3 ⟹ no rainbow
+> triangles / no `c=1` forced triangles; route-doc §9.9.9a) — the Gauss-count route is genuinely necessary.
+> **Next = discharge `QProfileSeparatesAtBase` uniformly** (route (b): the cleanest crux statement — concrete field-value
+> recovery + landed `coords_determine` finish + the in-build general scaffold; first attack = the three-tool chain above).
+> Caveat: route (b)'s crux was never closed in Lean even at VO⁻₄(3) (probe-only `/tmp/m3probe.py`), so it is a
+> scaffold-with-open-crux, not a closed instance being lifted — weigh against route (a)'s landed Lemma-A front-half.
 
 ### 11.3 Step group 1 — affine-polar `VO^ε_{2m}(q)` (the direct extension; our work lives here)
 
@@ -473,7 +495,7 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 
 ## 12. Preexisting lemmas — the landed scaffolding the crux build reuses (index sweep 2026-06-24)
 
-> **What this is.** A full read of `PublicTheoremIndex.md` (1579 lines) surfaced substantial **already-built, axiom-clean**
+> **What this is.** A full read of `PublicTheoremIndex.md` surfaced substantial **already-built, axiom-clean**
 > infrastructure for the Route-1 crux — more than the GATE assumed. Line numbers are rows in `PublicTheoremIndex.md`
 > (the **Notes/Line** there give the source location). The headline: the crux's *extraction layer is essentially complete*
 > and there are **two** decomposition routes to `IsotropySeparatesAtBase`, not one. Don't rebuild these.
@@ -488,7 +510,7 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 
 **B. Forms-graph consumer — `FormsGraphConcrete.lean` (partially built; isolates the crux + a second decomposition).**
 - `count_transport`  · `qvalue_count_transport`  · `isotropy_count_transport`  — move the counts into `V`.
-- `isoSetOf` / `qSetOf` / `mem_isoSetOf_iff` (1574–1576) · `coarse_eq_sum_iso`  — isotropy↔Q-value dictionary, fine→coarse.
+- `isoSetOf` / `qSetOf` / `mem_isoSetOf_iff` · `coarse_eq_sum_iso`  — isotropy↔Q-value dictionary, fine→coarse.
 - `QProfileSeparatesAtBase`  — **the M3 crux** (isotropy-counts at `T` ⟹ Q-profile); probe-validated for `VO⁻₄` at a **symmetry-broken** `T = frameBase ∪ {2e₃}`, 81/81.
 - `isotropySeparates_of_qProfileSeparates`  — `QProfileSeparatesAtBase` + nondeg ⟹ `IsotropySeparatesAtBase`, **via `coords_determine`** ⟹ a *live* second route (see the correction below).
 - ⚠ Plan §1 currently tags this module "OLD / superseded by Lemma A/B (archive)"; the index shows it is a **live public module** with the isolated crux + transport + dictionary. Reconcile (verify against source) and reuse rather than rebuild.
@@ -507,7 +529,7 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 - `AlgIso` (1328 `Separability` / 1361 `CoherentConfig`) — the **inter-scheme** iso object; sharpens AUDIT-S seam option (b) (the transport object exists; only a "seal-disjunction transports along `AlgIso`" lemma is missing).
 
 **Approach impact (recorded; doc-body corrections deferred):**
-1. **★ Correction to the GATE (§11.2):** `coords_determine` is **not** a dead route. The frame-locked (`d+1`) version is dead, but `QProfileSeparatesAtBase` + `isotropySeparates_of_qProfileSeparates` (1578–1579) is a *live* alternative decomposition at a symmetry-broken base, probe-validated for `VO⁻₄(3)`. The build has **two** routes to the crux: (a) direct profile-injectivity (Lemma A/B, the `vo4minus_seal` path) and (b) Q-profile recovery + `coords_determine`.
+1. **★ Correction to the GATE (§11.2):** `coords_determine` is **not** a dead route. The frame-locked (`d+1`) version is dead, but `QProfileSeparatesAtBase` + `isotropySeparates_of_qProfileSeparates` is a *live* alternative decomposition at a symmetry-broken base, probe-validated for `VO⁻₄(3)`. The build has **two** routes to the crux: (a) direct profile-injectivity (Lemma A/B, the `vo4minus_seal` path) and (b) Q-profile recovery + `coords_determine`.
 2. The crux is **better-scaffolded than the GATE recorded** (extraction layer A fully built; Fourier hinge + shell-blindness locate the hard core) — strengthens the GO verdict.
 3. **δ′ / forced-triangle route confirmed inapplicable** to the rank-3 core (route-doc §9.9.9a: no rainbow triangles, generic `λ,μ>1` ⟹ no `c=1` forced triangles), so the Gauss count route is genuinely necessary — closes a tempting shortcut.
 4. **Direction unchanged** (Route 1 / `IsotropySeparatesAtBase` via uniform count-injectivity); these are refinements + a correction, not a redirect.
