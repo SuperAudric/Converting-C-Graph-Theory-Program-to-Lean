@@ -99,7 +99,10 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   foundation:** `pairForm` / `pairForm_apply` (the pair invariant `det G₂(u;t,t₀)` IS a quadratic form `4 Q(a)·Q − (polar Q ·
   a)²` at the shift `t−u`), `detG2_eq_pairForm`, **`pairCombine`** (the two-pivot integrand `y·det G₂(u;·) + z·det G₂(v;·)` =
   quadratic form `(y•pairForm_u + z•pairForm_v)` at shift `t−u` + linear `z·polar pairForm_v(·,u−v)` + const), and
-  `sum_addChar_quadForm_translate` (Gauss translation invariance). See §13.
+  `sum_addChar_quadForm_translate` (Gauss translation invariance). **+ Increment 2 `M(y,z)` closed form (assembled):**
+  `pairSum_to_shifted` (unconditional reorganisation `M = ψ(const)·∑_s ψ(F s + linear)`), `sum_addChar_shifted_eval`
+  (complete-the-square given a representing `b`: `∑_s ψ(F s + L s) = ψ(−F b)·∑_s ψ(F s)`), and `pairSum_closed_of_repr`
+  (chained: `M = ψ(z·pairForm_v(u−v))·ψ(−F b)·∑_s ψ(F s)`). Open tail = `b`-existence (`F` nondeg) + `∑_s ψ(F s)` eval. See §13.
 - **`ScratchMatching.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **increment-4/5 combinatorial core**:
   **`exists_separating_base`**, the matching-trick first moment as a pure finite-counting theorem (`fail : ι → W → Prop`,
   `∀g #{w:fail g w}≤F`, `|ι|·Fᵐ<|W|ᵐ ⟹ ∃ base P:Fin m→W, ∀g ∃j ¬fail g (P j)`). Consumes the single analytic input `c̄₀<1`
@@ -880,12 +883,24 @@ the quadratic-Gauss arena:
   + z·pairForm_v(u−v)` — the two-pivot integrand in "quadratic form + linear + const" shape (expand `v`'s form around `u` via
   the polar identity). The algebraic core of the inner sum.
 - **`sum_addChar_quadForm_translate`**: `∑_t ψ(P(t−a)) = ∑_t ψ(P t)`.
-- **Remaining for the full `M(y,z)` closed form (continuation of increment 2):** shift `t = u+s` (`translate`) ⟹
-  `M = ψ(z·pairForm_v(u−v))·∑_s ψ(F(s) + z·polar pairForm_v(s,u−v))`, `F = y•pairForm_u + z•pairForm_v`; then **complete the
-  square** via `sum_addChar_quadForm_linear` at `r=1` (the linear part is `polar F(·,b)` for `b` solving `polar F(·,b) =
-  z·polar pairForm_v(·,u−v)` — needs `F` nondeg) and evaluate `∑_s ψ(F s) = χ(disc F)·gaussSum^d` via `sum_addChar_quadForm`;
-  the degenerate-`(y,z)` locus (where `F` drops rank) is the "diagonal" analog. Then sum over `(y,z)` (the `pairCharSum_factor_gen`
-  outer sum) and the increment-3 `c₀` bound.
+
+**▶ INCREMENT 2 — `M(y,z)` CLOSED FORM ASSEMBLED (modulo two isolated inputs) (2026-06-24, `ScratchPairSep.lean`,
+axiom-clean).** Three forward lemmas land the closed form down to two clean nondeg-dependent pieces:
+- **`pairSum_to_shifted`** (UNCONDITIONAL) — the reorganisation: `M(y,z) = ∑_t ψ(y·pairForm_u(t−u) + z·pairForm_v(t−v))
+  = ψ(z·pairForm_v(u−v)) · ∑_s ψ(F(s) + z·polar pairForm_v(s, u−v))`, `F = y•pairForm_u + z•pairForm_v`. Proof: `pairCombine`
+  pointwise + pull out the constant phase + recentre `t ↦ t−u` (`Fintype.sum_equiv (Equiv.subRight u)`). No nondeg used.
+- **`sum_addChar_shifted_eval`** (complete the square; UNCONDITIONAL given the representation) — if the residual linear term
+  `L s` equals `polar F s b` for a vector `b`, then `∑_s ψ(F s + L s) = ψ(−F b)·∑_s ψ(F s)`. Proof: `sum_addChar_quadForm_linear`
+  at `r = 1`.
+- **`pairSum_closed_of_repr`** (ASSEMBLED) — chains the two: given `b` with `z·polar pairForm_v(s, u−v) = polar F s b ∀s`,
+  `M(y,z) = ψ(z·pairForm_v(u−v)) · ψ(−F b) · ∑_s ψ(F s)`.
+- **Remaining for the full closed form (the only open pieces now, both nondeg-dependent):** (i) **`b`-existence** — `F`
+  nondegenerate ⟹ the functional `s ↦ z·polar pairForm_v(s, u−v)` is `polar F (·, b)` for some `b` (Mathlib: `polarBilin F`
+  nondeg ⟹ `LinearMap.BilinForm.toDual` iso ⟹ `b = toDual⁻¹ ℓ`); (ii) **`∑_s ψ(F s)` eval** = `(∏χ wᵢ)·gaussSum^d` via
+  `sum_addChar_quadForm` (needs `F` nondeg/`SeparatingLeft` + `ψ.IsPrimitive` + `[Invertible (2:K)]`); (iii) the **degenerate
+  `(y,z)` locus** where `F` drops rank — by the verified fact that *every* `pairForm Q a` is degenerate (`a ∈ radical`), this
+  locus is the whole axes `{y=0}∪{z=0}` plus the pencil's discriminant conic, and is the probe's `|T|` MAIN TERM (not an edge
+  case). Then sum over `(y,z)` (the `pairCharSum_factor_gen` outer sum) ⟹ the increment-3 `c₀` bound.
 
 **▶ INCREMENT 4 (anchor existence) FOLDS INTO INCREMENT 5 (averaging) — the matching trick (2026-06-24, de-risked).** A handoff
 question: is "anchor existence" a separate hard (nested-quadric) argument? **No — it dissolves into the averaging, via a specific

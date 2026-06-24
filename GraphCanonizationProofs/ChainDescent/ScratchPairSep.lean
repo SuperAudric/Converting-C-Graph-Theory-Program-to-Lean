@@ -214,6 +214,79 @@ theorem sum_addChar_quadForm_translate {R' : Type*} [CommRing R'] (ψ : AddChar 
   have h := Equiv.sum_comp (Equiv.addRight (-a)) (fun t : V => ψ (P t))
   simpa [sub_eq_add_neg] using h
 
+/-- **The single-shift reduction of `M(y,z)` (increment 2, forward step — UNCONDITIONAL).** The inner sum
+`M(y,z) = ∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀))` (written via `pairForm`) reduces, by `pairCombine` then
+recentring `t ↦ t−u`, to a CONSTANT phase times a sum of `ψ` of `F(s) + (linear in s)`, where
+`F = y•pairForm_u + z•pairForm_v`. No nondegeneracy is used here; this is the clean reorganisation that sets up
+the complete-the-square step (which then needs `F` nondeg to absorb the linear term into `polar F · b`). -/
+theorem pairSum_to_shifted {R' : Type*} [CommRing R'] (ψ : AddChar K R')
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V)
+    (u v t₀ : V) (y z : K) :
+    (∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)))
+      = ψ (z * pairForm Q (t₀ - v) (u - v))
+        * ∑ s : V, ψ ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) s
+            + z * QuadraticMap.polar (pairForm Q (t₀ - v)) s (u - v)) := by
+  set Pu := pairForm Q (t₀ - u) with hPu
+  set Pv := pairForm Q (t₀ - v) with hPv
+  set F := y • Pu + z • Pv with hF
+  have hstep : ∀ t : V, y * Pu (t - u) + z * Pv (t - v)
+      = (F (t - u) + z * QuadraticMap.polar Pv (t - u) (u - v)) + z * Pv (u - v) := by
+    intro t
+    have h := pairCombine Q u v t₀ t y z
+    rw [← hPu, ← hPv, ← hF] at h
+    rw [h]
+  calc (∑ t : V, ψ (y * Pu (t - u) + z * Pv (t - v)))
+      = ∑ t : V, ψ ((F (t - u) + z * QuadraticMap.polar Pv (t - u) (u - v)) + z * Pv (u - v)) :=
+        Finset.sum_congr rfl (fun t _ => by rw [hstep t])
+    _ = ∑ t : V, ψ (F (t - u) + z * QuadraticMap.polar Pv (t - u) (u - v)) * ψ (z * Pv (u - v)) :=
+        Finset.sum_congr rfl (fun t _ => by rw [AddChar.map_add_eq_mul])
+    _ = (∑ t : V, ψ (F (t - u) + z * QuadraticMap.polar Pv (t - u) (u - v))) * ψ (z * Pv (u - v)) := by
+        rw [← Finset.sum_mul]
+    _ = ψ (z * Pv (u - v)) * ∑ t : V, ψ (F (t - u) + z * QuadraticMap.polar Pv (t - u) (u - v)) := by
+        rw [mul_comm]
+    _ = ψ (z * Pv (u - v)) * ∑ s : V, ψ (F s + z * QuadraticMap.polar Pv s (u - v)) := by
+        congr 1
+        exact Fintype.sum_equiv (Equiv.subRight u)
+          (fun t => ψ (F (t - u) + z * QuadraticMap.polar Pv (t - u) (u - v)))
+          (fun s => ψ (F s + z * QuadraticMap.polar Pv s (u - v)))
+          (fun t => by rw [Equiv.subRight_apply])
+
+/-- **Complete the square (increment 2, forward step).** Once the linear term `L s` of the shifted sum is
+represented as `polar F s b` (possible exactly when `F` is nondegenerate — that representability is the separate
+next piece), the linear part is absorbed by a translate and `∑_s ψ(F s + L s) = ψ(−F b)·∑_s ψ(F s)`. This is
+`sum_addChar_quadForm_linear` at `r = 1`. Unconditional given the representation `hb`. -/
+theorem sum_addChar_shifted_eval {R' : Type*} [CommRing R'] (ψ : AddChar K R')
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (F : QuadraticForm K V) (L : V → K) (b : V)
+    (hb : ∀ s, L s = QuadraticMap.polar F s b) :
+    (∑ s : V, ψ (F s + L s)) = ψ (-(F b)) * ∑ s : V, ψ (F s) := by
+  have h := sum_addChar_quadForm_linear ψ F 1 b
+  simp only [Units.val_one, one_mul, inv_one] at h
+  rw [Finset.sum_congr rfl (fun s (_ : s ∈ Finset.univ) => by rw [hb s] :
+        ∀ s ∈ Finset.univ, ψ (F s + L s) = ψ (F s + QuadraticMap.polar F s b))]
+  exact h
+
+/-- **The `M(y,z)` closed form, modulo the representation `b` (increment 2 — ASSEMBLED).** Chains
+`pairSum_to_shifted` (reorganise) with `sum_addChar_shifted_eval` (complete the square): given a vector `b`
+representing the residual linear term against `F = y•pairForm_u + z•pairForm_v` (i.e. `hb`, which exists exactly
+when `F` is nondegenerate), the inner sum `M(y,z) = ∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀))` collapses to
+`ψ(z·pairForm_v(u−v)) · ψ(−F b) · ∑_s ψ(F s)`. The two remaining inputs — the existence of `b` (nondeg of `F`)
+and the evaluation `∑_s ψ(F s) = (∏χ wᵢ)·gaussSum^d` (`sum_addChar_quadForm`) — are now the only open pieces of
+the closed form (plus the degenerate-`(y,z)` locus where `F` drops rank: the axes `{y=0}∪{z=0}` + the pencil's
+discriminant conic, since every `pairForm` is itself degenerate). -/
+theorem pairSum_closed_of_repr {R' : Type*} [CommRing R'] (ψ : AddChar K R')
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V)
+    (u v t₀ : V) (y z : K) (b : V)
+    (hb : ∀ s, z * QuadraticMap.polar (pairForm Q (t₀ - v)) s (u - v)
+            = QuadraticMap.polar (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) s b) :
+    (∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)))
+      = ψ (z * pairForm Q (t₀ - v) (u - v))
+        * (ψ (-((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) b))
+            * ∑ s : V, ψ ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) s)) := by
+  rw [pairSum_to_shifted ψ Q u v t₀ y z]
+  congr 1
+  exact sum_addChar_shifted_eval ψ (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v))
+    (fun s => z * QuadraticMap.polar (pairForm Q (t₀ - v)) s (u - v)) b hb
+
 end InnerSum
 
 end ChainDescent
@@ -225,3 +298,6 @@ end ChainDescent
 #print axioms ChainDescent.detG2_eq_pairForm
 #print axioms ChainDescent.pairCombine
 #print axioms ChainDescent.sum_addChar_quadForm_translate
+#print axioms ChainDescent.pairSum_to_shifted
+#print axioms ChainDescent.sum_addChar_shifted_eval
+#print axioms ChainDescent.pairSum_closed_of_repr
