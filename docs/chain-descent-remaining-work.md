@@ -30,9 +30,13 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > *seam*** (no `SchemeEquiv`/transport exists in Lean yet — AUDIT-S finding 3). **▶ PROGRESS (2026-06-24, late): §11
 > scoping DONE** (AUDIT-S/A/W, **Route 1 chosen**, **GATE passed**); the live work moved to
 > [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) **§13** — the reduction chain
-> (**D1 + D2-bridge**) is **landed in `ChainDescent/ScratchCrux.lean`** (axiom-clean), collapsing the whole generalization
-> to a **single open predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded WL-dimension of the affine
-> forms-graphs** (uncited research frontier; next = settle exact-quad-Gauss vs Weil on `d=2`). Read plan §13 STATUS.
+> (**D1 + D2-bridge**, `ChainDescent/ScratchCrux.lean`, axiom-clean) collapses the whole generalization to a **single open
+> predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded WL-dimension of the affine forms-graphs**.
+> **D3d is now WEIL-FREE** (the exact-vs-Weil question is resolved): the seal's observable is the **pair** count `Z_u({t,t'})`
+> (not the singleton — a verified correction), its invariant `χ(det G₂)` is `χ` of a quadratic, and the per-pair sum factors
+> into additive Gauss sums. Lean build underway in **`ChainDescent/ScratchPairSep.lean`** (axiom-clean): increment 1 (Gauss
+> bridge + `pairCharSum_factor_gen`) + increment 2 foundation (`pairForm`/`pairCombine`) done; next = finish the `M(y,z)`
+> closed form → `c₀<1` → averaging. Read plan §13 STATUS + `ScratchPairSep.lean`.
 
 ---
 

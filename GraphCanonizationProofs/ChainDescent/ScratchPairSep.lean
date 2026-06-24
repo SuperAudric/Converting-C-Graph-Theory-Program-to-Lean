@@ -1,19 +1,45 @@
 /-
-# Per-pair separation — the Lean sibling of `Probe_D3dExactVsWeil` (plan §13, D3d, Weil-free route)
+# Per-pair separation — the Weil-free D3d route (plan §13). HANDOFF / pick-up point.
 
-The existential-counting route reduces D3d to a per-pair bound on
-`S(c) = ∑_w χ(Q w · Q (w − c))` (the singleton-separation driver, `c = u' − u`). The C# probe established it is
-EXACT (no Weil): `S` factors through the scalar values `(Q w, Q (w−c))`, so it is a finite combination of the
-ADDITIVE Gauss sums the toolkit already builds — no `χ` of an irreducible high-degree polynomial.
+**Goal of this module.** Discharge the one open predicate `ZProfileSeparates Q T` (the joint `Z(S)`-profile separates
+pivots at a bounded base = D3d = forms-graph bounded WL-dimension). The route: the seal's observable is the **pair**
+joint-isotropic count `Z_u({t,t'})` (NB the SINGLETON `Z_u({t})` is binary — `Probe_D3cObservable`; do not use it). Its
+separating invariant is `χ(det G₂(u;t,t₀))` against an anchor `t₀`, which is `χ` of a **quadratic in the probe `t`**. For a
+pair of pivots `u,u'`, `u` is separated from `u'` iff some probe `t` gives a different invariant; the per-pair fail count
+is controlled by the character sum `∑_t χ(det G₂(u;t,t₀))·χ(det G₂(u';t,t₀))`, which **factors into additive Gauss sums
+(no Weil)**. Probe `Probe_D3dPairCount`: `c₀ ≤ 0.49 < 1`, anchor existence robust. Then a finite-averaging argument gives
+a separating base of size `O(d log q)`, discharging `ZProfileSeparates`.
 
-This module formalizes that. Increment 1 (this file):
-* `quadChar_addChar_sum` — the multiplicative↔additive **Gauss bridge** `∑_y χ(y)·ψ(a·y) = gaussSum χ ψ · χ(a)`
-  (for ALL `a`, the quadratic character of `K` composed into a domain `R'`). The reusable atom.
-* `pairCharSum_factor` — applying the bridge twice + Fubini: `gaussSum χ ψ ^ 2 · S = ∑_y ∑_z χ(y)χ(z)·M(y,z)`
-  where `M(y,z) = ∑_w ψ(y·Q w + z·Q(w−c))` is the landed multi-point additive Gauss sum
-  (`sum_addChar_multiQuad`/`_zero`). This is the rigorous "no Weil" core: `S` is built from additive Gauss sums.
+**LANDED in this file (all axiom-clean `[propext, Classical.choice, Quot.sound]`):**
+* `quadChar_addChar_sum` — the multiplicative↔additive **Gauss bridge** `∑_y χ(y)·ψ(a·y) = gaussSum χ ψ · χ(a)` (∀`a`;
+  `χ = (quadraticChar K).ringHomComp (Int.castRingHom R')`, `R'` a char-zero domain). The reusable atom.
+* `pairCharSum_factor_gen` — the **"no Weil" core**, GENERAL: for any `f,g : V → K`,
+  `gaussSum² · ∑_t χ(f t)χ(g t) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))`. (`pairCharSum_factor` = the `f=Q,g=Q(·−c)`
+  singleton corollary.) Apply with `f = det G₂(u;·,t₀)`, `g = det G₂(u';·,t₀)`.
+* `pairForm` / `pairForm_apply` / `detG2_eq_pairForm` — the pair invariant IS the quadratic form
+  `pairForm Q a = 4 Q(a)·Q − (polar Q · a)²` evaluated at the shift `t−u` (anchor offset `a = t₀−u`).
+* `pairCombine` — the two-pivot integrand `y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀)` in "quadratic FORM `(y•pairForm_u +
+  z•pairForm_v)` at shift `t−u` + LINEAR `z·polar pairForm_v(·,u−v)` + CONST `z·pairForm_v(u−v)`" shape.
+* `sum_addChar_quadForm_translate` — `∑_t ψ(P(t−a)) = ∑_t ψ(P t)`.
 
-Axiom-clean target `[propext, Classical.choice, Quot.sound]`.
+**★ PICK UP HERE — the exact next step (finish increment 2: the `M(y,z)` closed form).** Combine the above:
+  1. `M(y,z) := ∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀))`. By `pairCombine` + `detG2_eq_pairForm`, the integrand is
+     `(F)(t−u) + z·polar pairForm_v(t−u, u−v) + z·pairForm_v(u−v)`, `F := y•pairForm Q (t₀−u) + z•pairForm Q (t₀−v)`.
+  2. Pull out the constant `ψ(z·pairForm_v(u−v))`; shift `t = u+s` (use `sum_addChar_quadForm_translate`):
+     `M = ψ(z·pairForm_v(u−v)) · ∑_s ψ(F(s) + polar F s b)` once the linear part `z·polar pairForm_v(·,u−v)` is rewritten
+     as `polar F (·, b)` for `b` solving `polar F (·,b) = z·polar pairForm_v(·,u−v)` (exists when `F` is NONDEGENERATE).
+  3. Complete the square: `sum_addChar_quadForm_linear` (GaussCount) at `r = 1` (Q := F) ⟹
+     `∑_s ψ(F s + polar F s b) = ψ(−F b)·∑_s ψ(F s)`.
+  4. Evaluate `∑_s ψ(F s) = (∏χ(wᵢ))·gaussSum^d = χ(disc F)·gaussSum^d` via `sum_addChar_quadForm` (needs `F` nondeg /
+     `SeparatingLeft`, `[Invertible (2:K)]`).
+  5. Handle the DEGENERATE `(y,z)` locus (where `F` drops rank — the "diagonal" analog; e.g. for the singleton
+     `pairCharSum_factor` the `y+z=0` diagonal vanished via `sum_addChar_multiQuad_zero` + `sum_addChar_linearMap`).
+Then: **increment 3** — feed the closed form into `pairCharSum_factor_gen`'s outer `∑_{y,z}` and bound the per-pair
+`c₀ < 1` (the one ℂ-magnitude step: `|gaussSum| = √q` via `gaussSum_sq`; `c₀·n = z₂' + ½(nn' + T)`, zero-counts via
+`card_quadForm_eq`). **increment 4** anchor existence. **increment 5** finite-averaging ⟹ `ZProfileSeparates`, fed to
+`reachesRigidOrCameron_viaIsotropySeparates_wittFree` (`PublicTheoremIndex.md:1248`). Full narrative: plan §13.
+
+NOT in build (scratch; `lake env lean ChainDescent/ScratchPairSep.lean`). Reduction skeleton: `ScratchCrux.lean`.
 -/
 import ChainDescent.GaussCount
 

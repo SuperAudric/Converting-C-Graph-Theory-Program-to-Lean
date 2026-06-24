@@ -117,11 +117,15 @@ close it — is set out in
 > now the GENERALIZATION** from this single instance to the full schurian residue (`hSmallAutThin` for all small-Aut
 > non-geometric schurian rank-3 families) — the forward roadmap is plan §11. **AUDIT-S done** (per-family target =
 > `IsotropySeparatesAtBase Q_fam T_fam`; the genuine new obligation is the cited classification *seam*).
-> **§11's scoping is now DONE** (AUDIT-S/A/W, **Route 1 chosen**, **GATE passed**); the live work moved to **plan §13**:
+> **§11's scoping is now DONE** (AUDIT-S/A/W, **Route 1 chosen**, **GATE passed**); the live work is **plan §13**:
 > the reduction chain (**D1 + D2-bridge**) is **landed in `ChainDescent/ScratchCrux.lean`** (axiom-clean), collapsing the
 > whole generalization to a **single open predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded
-> WL-dimension of the affine forms-graphs** (uncited research frontier; next = settle exact-quad-Gauss vs Weil on `d=2`).
-> Read plan §13 STATUS.
+> WL-dimension of the affine forms-graphs**. **D3d is now WEIL-FREE** (exact-vs-Weil resolved): the observable is the
+> **pair** count `Z_u({t,t'})` (not the singleton — a verified correction), its invariant `χ(det G₂)` is `χ` of a quadratic,
+> and the per-pair sum factors into additive Gauss sums (`pairCharSum_factor_gen`). The Lean build is underway in
+> **`ChainDescent/ScratchPairSep.lean`** (axiom-clean): increment 1 (bridge + factoring) + increment 2 foundation
+> (`pairForm`/`pairCombine`) done; **next = finish the `M(y,z)` closed form** (complete-the-square + form Gauss eval) → `c₀<1`
+> → averaging. **Read plan §13 STATUS, then `ScratchPairSep.lean`.**
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there

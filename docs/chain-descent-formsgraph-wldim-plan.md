@@ -27,14 +27,26 @@
 >
 > **▶▶▶ THE LIVE FRONTIER = §13 (the discharge); §11 scoping is DONE.** Generalizing from the sealed instance to the full
 > schurian residue (`hSmallAutThin` for every small-Aut non-geometric schurian rank-3 family, modulo `{G3}`). **§11's
-> scoping front is fully resolved (2026-06-24):** AUDIT-S/A/W done, **Route 1 chosen** (char-sum, not Witt), **GATE passed**
-> — so the live work moved to **§13**, the discharge of the one open lemma. **Current state (§13):** the reduction chain is
-> **landed in `ScratchCrux.lean`** (axiom-clean: **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` + **D2-bridge**
-> `jointIsoCount_eq_restricted` + `isotropySeparates_of_zProfileSeparates`), collapsing the ENTIRE generalization to a
-> **single open predicate `ZProfileSeparates Q T`** (the joint `Z(S)`-profile injectivity). Its hard core is **D3d** =
-> *uniform-`q` bounded WL-dimension of the affine forms-graphs* — uncited, info-bound-TRUE, the genuine research frontier
-> (exact-quad-Gauss vs Weil tool question unresolved). Read §13 STATUS first. The naive "kernel" framing of §11.1 is
-> superseded by §13's sharper reduction.
+> scoping front is fully resolved:** AUDIT-S/A/W done, **Route 1 chosen** (char-sum, not Witt), **GATE passed**. The live
+> work is **§13**, the discharge of the one open predicate.
+>
+> **▶▶ CURRENT STATE — read this, then §13 STATUS, then `ScratchPairSep.lean` (PICK UP HERE).** The entire generalization is
+> reduced (axiom-clean, `ScratchCrux.lean`: **D1** + **D2-bridge** + `isotropySeparates_of_zProfileSeparates`) to the single
+> predicate **`ZProfileSeparates Q T`** (the joint `Z(S)`-profile separates pivots at a bounded base = **D3d**). Two big
+> developments since:
+> - **D3d is WEIL-FREE** (the exact-vs-Weil question is RESOLVED in favour of *no Weil*). The seal's observable is the
+>   **pair** joint-isotropic count `Z_u({t,t'})` (NOT the singleton — `Z_u({t})` is binary, a verified correction). Its
+>   separating invariant `χ(det G₂(u;t,t₀))` is `χ` of a **quadratic** in the probe, and the relevant per-pair character sum
+>   **factors through scalar values into additive Gauss sums** — proved general as `pairCharSum_factor_gen`. Probe
+>   `Probe_D3dPairCount`: `c₀ ≤ 0.49 < 1` bounded, anchor existence robust (`sep@1anchor ≈ 100%`).
+> - **Lean build underway in `ChainDescent/ScratchPairSep.lean`** (axiom-clean, NOT in build): **increment 1** (Gauss bridge
+>   `quadChar_addChar_sum` + factoring `pairCharSum_factor_gen`) and **increment 2 foundation** (`pairForm`/`pairForm_apply`/
+>   `detG2_eq_pairForm` = the pair invariant is a quadratic form at a shift; `pairCombine` = two-pivot integrand in
+>   form+linear+const shape; `sum_addChar_quadForm_translate`) are DONE. **EXACT NEXT STEP = finish the `M(y,z)` closed form**
+>   (complete the square via `sum_addChar_quadForm_linear` at `r=1` + evaluate via `sum_addChar_quadForm` + the degenerate
+>   locus), then the `c₀<1` bound (increment 3, one ℂ-magnitude step) → anchor existence → averaging ⟹ `ZProfileSeparates`.
+>   Full detail + the remaining-increment math: §13 (the "INCREMENT 2 FOUNDATION" block + the "CORRECTION" block, which
+>   records why the singleton route was abandoned — do NOT re-walk it).
 >
 > **▶ Witt is OFF the seal's critical path** (`relationRefinesIsotropy_similitude` discharges the bridge's easy half
 > Witt-free); **Route 1 (char-sum) was chosen over Route 3 (Witt)** at the GATE (§11.1). Witt is the documented *fallback*.
@@ -576,11 +588,12 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 >   `jointIsoCount_eq_restricted`, and the end-to-end `isotropySeparates_of_zProfileSeparates`. Reuses landed
 >   `coords_determine`, `isotropySeparates_of_qProfileSeparates`, `count_transport`, `isoClass_ne_two_iff`.
 > - **⟹ the entire generalization = one open predicate `ZProfileSeparates Q T`** (joint `Z(S)`-profile injectivity, general `Q`).
-> - **OPEN, in order:** **D2-analytic/D3a** (closed form `Z=F(χ det G,[c_lev=0])` — assemble landed Lemma A; big, mechanical)
->   → **D3b** (degenerate configs) → **D3c** (`Z=Z ⟹ χ det G agree`) → **★D3d** (the research core: the `χ`-profile separates
->   at a bounded base, uniform `q` = forms-graph bounded WL-dim) → **D3e** (construct `T` + assemble).
+> - **(D-step taxonomy — the SINGLETON-era ordering, now SUPERSEDED by the pair route below; kept only as a map of the
+>   pieces.)** **D2-analytic/D3a** (closed form `Z=F(χ det G,[c_lev=0])` — Lemma A) → **D3b** (degenerate configs) → **D3c**
+>   (`Z=Z ⟹ χ det G agree`) → **★D3d** (the research core) → **D3e** (construct `T`). **Under the pair route, D3a is OFF the
+>   critical path** (only the `|S|=2` invariant is used).
 > - **★ LEAN INCREMENT 1 LANDED** (`ScratchPairSep.lean`, axiom-clean): the **Gauss bridge** `quadChar_addChar_sum` + the
->   **"no Weil" core** `pairCharSum_factor` (`gaussSum²·S = ∑_{y,z}χχ·multiQuad`; the factoring technique, proven).
+>   **"no Weil" core** `pairCharSum_factor_gen` (general `f,g`; `pairCharSum_factor` = its singleton corollary).
 > - **★★ CORRECTION (the singleton route is FLAWED; see the §13 CORRECTION block).** The observable is the PAIR count, not
 >   `χ(Q)`: `Z_u({t})` is BINARY (`Probe_D3cObservable` — only `[Q(u−t)=0]`), so `χ(Q(u−t))` is unobservable and the exact-`S`
 >   bound is for the wrong object. The square class lives at `|S|=2` (`Z_u({t,t'})` recovers `χ(det G₂)`). **Fix:** use the
@@ -594,11 +607,13 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 >   const), `sum_addChar_quadForm_translate`. **D3d STILL OPEN, remaining:** finish `M(y,z)` closed form (complete-the-square
 >   via `sum_addChar_quadForm_linear` at `r=1` [needs `F=y•pairForm_u+z•pairForm_v` nondeg + solve `b`] + `sum_addChar_quadForm`
 >   + degenerate locus); then (3) `c₀<1` bound (one ℂ-magnitude step); (4) anchor existence; (5) averaging ⟹ `ZProfileSeparates`.
-> - **Evidence base:** spikes in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs` — `Probe_CoarseInvariantInjectivity`
->   (SPIKE-K.1), `Probe_IncidenceVsCounts` (.2), `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` +
->   `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` + `Probe_D3dCollisionDecay` (R3), `Probe_D3dExactVsWeil` (exact-vs-Weil).
->   All green. Findings: χ-invariants separate `q≥5`; bounded base survives `d=6`; collision-pairs decay geometrically;
->   per-pair `S` exact & `c₀∈[0.36,0.49]<½` uniformly ⟹ singletons separate, **D3d is Weil-free**; base `O(d log q)`.
+> - **Evidence base (all green, regression assets in `GraphCanonizationProject.Tests/A2MonovariantProbe.cs`):**
+>   `Probe_CoarseInvariantInjectivity` (SPIKE-K.1, used the pair count `Z_u({t,t'})`), `Probe_IncidenceVsCounts` (.2),
+>   `Probe_FrameThenProbes` (GATE), `Probe_D3dChiInvariant` + `Probe_D3dStructuredBase` (D3d), `Probe_D3dHigherD` +
+>   `Probe_D3dCollisionDecay` (R3), `Probe_D3dExactVsWeil` (singleton exact-vs-Weil), **`Probe_D3cObservable`** (proved
+>   `Z_u({t})` BINARY, `Z_u({t,t'})` recovers `χ(det G₂)` — the singleton→pair correction), **`Probe_D3dPairCount`** (the
+>   real pair observable: `c₀ ≤ 0.49 < 1`, `sep@1anchor ≈ 100%`). Findings: bounded base survives `d=6`; the **pair**
+>   observable separates with `c₀<1` bounded + anchor existence; **D3d is Weil-free**; base `O(d log q)`.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
@@ -761,9 +776,11 @@ two over-optimistic reads** of the GATE / D3d-investigation blocks above.
   the per-pair bound, not the full `Z=F` closed form). Supersedes the `d=2` step above (R3 caveat: `d=2` is too degenerate;
   the joint phenomenon lives at `d≥4`).
 
-**▶ EXACT-vs-WEIL CHECK — RESOLVED: EXACT, NO WEIL (2026-06-24, spike `Probe_D3dExactVsWeil`, green).** The per-pair sum
-`S(u,u') = ∑_v χ(Q(v−u)·Q(v−u'))` (the existential route's `c₀` driver) is **exactly evaluable without Weil/Deligne**, and
-the singleton observable alone separates. Both a proof sketch and the numerics.
+**▶ EXACT-vs-WEIL CHECK — RESOLVED: EXACT, NO WEIL (2026-06-24, spike `Probe_D3dExactVsWeil`, green).**
+**⚠ THE "singleton observable" CLAIM IN THIS BLOCK IS SUPERSEDED — see the CORRECTION block below: the singleton count is
+binary; the live route uses the PAIR observable. The "exact, no Weil" conclusion SURVIVES (it transfers to the pair invariant).**
+The per-pair sum `S(u,u') = ∑_v χ(Q(v−u)·Q(v−u'))` (the singleton-model `c₀` driver) is **exactly evaluable without
+Weil/Deligne**. Both a proof sketch and the numerics.
 
 - *Why exact (the argument):* `S` depends ONLY on `δ = Q(u−u')` (Witt: `O(Q)` is transitive on level sets — numerically
   confirmed, `singleδ = yes` across all q,d,ε). Conditioning on the **scalar** values `(s,t) = (Q(v−u), Q(v−u'))`,
