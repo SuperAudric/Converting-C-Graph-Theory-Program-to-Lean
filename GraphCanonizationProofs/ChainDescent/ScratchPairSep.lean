@@ -287,6 +287,69 @@ theorem pairSum_closed_of_repr {R' : Type*} [CommRing R'] (ψ : AddChar K R')
   exact sum_addChar_shifted_eval ψ (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v))
     (fun s => z * QuadraticMap.polar (pairForm Q (t₀ - v)) s (u - v)) b hb
 
+/-- **Representability from nondegeneracy (increment 2, piece (i)).** On a finite-dimensional space, if the polar
+bilinear form of `F` is nondegenerate then every linear functional `ℓ` is `polar F (·, b)` for some `b` — exactly
+the input `pairSum_closed_of_repr` needs. Via Mathlib's `LinearMap.BilinForm.toDual` (the nondeg-form ≃ dual) and
+the symmetry of `polar`. -/
+theorem exists_repr_of_nondeg {V : Type*} [AddCommGroup V] [Module K V] [FiniteDimensional K V]
+    (F : QuadraticForm K V) (hF : (F.polarBilin).Nondegenerate) (ℓ : Module.Dual K V) :
+    ∃ b : V, ∀ s : V, ℓ s = QuadraticMap.polar F s b := by
+  refine ⟨(LinearMap.BilinForm.toDual F.polarBilin hF).symm ℓ, fun s => ?_⟩
+  have h := LinearMap.BilinForm.apply_toDual_symm_apply (B := F.polarBilin) (hB := hF) ℓ s
+  rw [QuadraticMap.polarBilin_apply_apply] at h
+  rw [← h]
+  exact QuadraticMap.polar_comm F _ _
+
+/-- **The `M(y,z)` closed form from nondegeneracy alone (increment 2, (i) discharged).** Combining
+`exists_repr_of_nondeg` with `pairSum_closed_of_repr`: when `F = y•pairForm_u + z•pairForm_v` has nondegenerate
+polar form, there is a `b` (the canonical representative of the residual linear term) with
+`M(y,z) = ψ(z·pairForm_v(u−v)) · ψ(−F b) · ∑_s ψ(F s)`. The only remaining step to a fully explicit value is the
+quadratic Gauss-sum evaluation of `∑_s ψ(F s)` (`sum_addChar_quadForm`), and the degenerate-`(y,z)` locus. -/
+theorem pairSum_closed_of_nondeg {R' : Type*} [CommRing R'] (ψ : AddChar K R')
+    {V : Type*} [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Fintype V]
+    (Q : QuadraticForm K V) (u v t₀ : V) (y z : K)
+    (hF : ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)).polarBilin).Nondegenerate) :
+    ∃ b : V,
+      (∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)))
+        = ψ (z * pairForm Q (t₀ - v) (u - v))
+          * (ψ (-((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) b))
+              * ∑ s : V, ψ ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) s)) := by
+  obtain ⟨b, hb⟩ := exists_repr_of_nondeg (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) hF
+    (z • (LinearMap.flip (pairForm Q (t₀ - v)).polarBilin (u - v)))
+  refine ⟨b, pairSum_closed_of_repr ψ Q u v t₀ y z b (fun s => ?_)⟩
+  have hℓ : (z • (LinearMap.flip (pairForm Q (t₀ - v)).polarBilin (u - v))) s
+      = z * QuadraticMap.polar (pairForm Q (t₀ - v)) s (u - v) := by
+    simp only [LinearMap.smul_apply, LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply,
+      smul_eq_mul]
+  rw [← hℓ]; exact hb s
+
+/-- **The fully explicit `M(y,z)` closed form (increment 2 — COMPLETE on the nondegenerate locus).** Chaining
+`pairSum_closed_of_nondeg` (absorb the linear term) with `sum_addChar_quadForm` (evaluate the quadratic Gauss sum)
+gives, for `F = y•pairForm_u + z•pairForm_v` nondegenerate,
+`M(y,z) = ψ(z·pairForm_v(u−v)) · ψ(−F b) · (∏ᵢ χ(wᵢ)) · gaussSum^d`. Every factor is a unit-modulus phase except
+`gaussSum^d`, so `|M| = |gaussSum|^d = q^{d/2}` — the magnitude that drives the increment-3 `c₀` bound. The two
+nondegeneracy hypotheses (`polarBilin.Nondegenerate` for the representation, `(associated F).SeparatingLeft` for the
+Gauss evaluation) are the SAME nondegeneracy of `F` up to the unit `2` (`two_nsmul_associated`); both are discharged
+concretely at instantiation. Open beyond this: the degenerate-`(y,z)` locus (axes ∪ conic — the main term). -/
+theorem pairSum_fully_closed [Fintype K] [DecidableEq K] [Invertible (2 : K)] (hch : ringChar K ≠ 2)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar K R'} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [FiniteDimensional K V] [Fintype V]
+    (Q : QuadraticForm K V) (u v t₀ : V) (y z : K)
+    (hFpolar : ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)).polarBilin).Nondegenerate)
+    (hFassoc : (QuadraticMap.associated (R := K)
+        (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v))).SeparatingLeft) :
+    ∃ (b : V) (w : Fin (Module.finrank K V) → Kˣ),
+      (∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)))
+        = ψ (z * pairForm Q (t₀ - v) (u - v))
+          * (ψ (-((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) b))
+              * ((∏ i, ((quadraticChar K).ringHomComp (Int.castRingHom R')) (w i : K))
+                  * gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom R')) ψ
+                      ^ Module.finrank K V)) := by
+  obtain ⟨b, hb⟩ := pairSum_closed_of_nondeg ψ Q u v t₀ y z hFpolar
+  obtain ⟨w, hw⟩ := sum_addChar_quadForm hch hψ
+    (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) hFassoc
+  exact ⟨b, w, by rw [hb, hw]⟩
+
 end InnerSum
 
 end ChainDescent
@@ -301,3 +364,6 @@ end ChainDescent
 #print axioms ChainDescent.pairSum_to_shifted
 #print axioms ChainDescent.sum_addChar_shifted_eval
 #print axioms ChainDescent.pairSum_closed_of_repr
+#print axioms ChainDescent.exists_repr_of_nondeg
+#print axioms ChainDescent.pairSum_closed_of_nondeg
+#print axioms ChainDescent.pairSum_fully_closed
