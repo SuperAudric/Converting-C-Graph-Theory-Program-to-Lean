@@ -68,6 +68,8 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `Finset.card_nbij'`); **`sigF_injective`** = `Function.Injective sigF` by kernel `decide` (~20s, no `native_decide`).
 - **`ScratchBM3Glue.lean`** — bundles `Qbun`/`Bv`/`T₉`, proves **`isoSep : IsotropySeparatesAtBase Qbun T₉`** (B-M1 → bridge
   → `sigF_injective`) and **`vo4minus_seal`** (the capstone instantiated).
+- **`ScratchCrux.lean`** (NEW 2026-06-24, compiles axiom-clean) — the generalization's crux scaffold: `jointIsoCount` (`Z_u(S)`)
+  + **`ZProfileSeparates Q T`** (the reduced open predicate, general `Q`). D1 reduction = next (§13).
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -513,7 +515,7 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 - `isoSetOf` / `qSetOf` / `mem_isoSetOf_iff` · `coarse_eq_sum_iso`  — isotropy↔Q-value dictionary, fine→coarse.
 - `QProfileSeparatesAtBase`  — **the M3 crux** (isotropy-counts at `T` ⟹ Q-profile); probe-validated for `VO⁻₄` at a **symmetry-broken** `T = frameBase ∪ {2e₃}`, 81/81.
 - `isotropySeparates_of_qProfileSeparates`  — `QProfileSeparatesAtBase` + nondeg ⟹ `IsotropySeparatesAtBase`, **via `coords_determine`** ⟹ a *live* second route (see the correction below).
-- ⚠ Plan §1 currently tags this module "OLD / superseded by Lemma A/B (archive)"; the index shows it is a **live public module** with the isolated crux + transport + dictionary. Reconcile (verify against source) and reuse rather than rebuild.
+- ✅ **§1 now corrected** (verified against source 2026-06-24): this is a **live, in-build** (`lakefile.toml` `defaultTargets`), **general** (`p,d,Q,T`) module — NOT superseded. `isotropySeparates_of_qProfileSeparates` is PROVEN general (calls `coords_determine`); only the front-half `QProfileSeparatesAtBase` is the open crux (`:145` shell-blindness; probe-only, never closed in Lean). Reuse, don't rebuild.
 
 **C. The general affine depth-2 engine our crux plugs into.**
 - `IsotropySeparatesAtBase`  · `SeparatesAtBase`  · `separatesAtBase_of_isotropySeparates_weak`  · `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (1248, the live capstone).
@@ -528,11 +530,68 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 - `exists_greedy_base_le_log`  · `exists_greedy_base_scheme`  — the `O(log n)` base tool (§11.3-5).
 - `AlgIso` (1328 `Separability` / 1361 `CoherentConfig`) — the **inter-scheme** iso object; sharpens AUDIT-S seam option (b) (the transport object exists; only a "seal-disjunction transports along `AlgIso`" lemma is missing).
 
-**Approach impact (recorded; doc-body corrections deferred):**
-1. **★ Correction to the GATE (§11.2):** `coords_determine` is **not** a dead route. The frame-locked (`d+1`) version is dead, but `QProfileSeparatesAtBase` + `isotropySeparates_of_qProfileSeparates` is a *live* alternative decomposition at a symmetry-broken base, probe-validated for `VO⁻₄(3)`. The build has **two** routes to the crux: (a) direct profile-injectivity (Lemma A/B, the `vo4minus_seal` path) and (b) Q-profile recovery + `coords_determine`.
-2. The crux is **better-scaffolded than the GATE recorded** (extraction layer A fully built; Fourier hinge + shell-blindness locate the hard core) — strengthens the GO verdict.
+**Approach impact (✅ FOLDED into §1 + the §11.2 GATE-refinement block, 2026-06-24; verified against source):**
+1. **★ Correction to the GATE (§11.2):** `coords_determine` is **not** a dead route. The frame-locked (`d+1`) version is dead, but `QProfileSeparatesAtBase` + `isotropySeparates_of_qProfileSeparates` is a *live* alternative decomposition at a symmetry-broken base, probe-validated for `VO⁻₄(3)`. The build has **two** routes to the crux: (a) direct profile-injectivity (Lemma A/B, the `vo4minus_seal` path) and (b) Q-profile recovery + `coords_determine`. **Sharpened in §11.2:** (a)/(b) are two *packagings* of the SAME hard core (shell-blindness / joint `Z(S)`), differing only in the back-half.
+2. The crux is **better-scaffolded than the GATE recorded** (extraction layer A fully built; Fourier hinge + shell-blindness locate the hard core) — strengthens the GO verdict. **§11.2:** the core's first attack = `count_pi_setValued → multiCharSum_eq_sum_count → sum_addChar_multiQuad_zero`.
 3. **δ′ / forced-triangle route confirmed inapplicable** to the rank-3 core (route-doc §9.9.9a: no rainbow triangles, generic `λ,μ>1` ⟹ no `c=1` forced triangles), so the Gauss count route is genuinely necessary — closes a tempting shortcut.
 4. **Direction unchanged** (Route 1 / `IsotropySeparatesAtBase` via uniform count-injectivity); these are refinements + a correction, not a redirect.
+
+---
+
+## 13. Discharge scoping — `QProfileSeparatesAtBase` for general `Q` (2026-06-24)
+
+> **What this is.** The scoped plan for the one open research lemma (the GATE crux). Target chosen, proof chain laid out
+> against the landed scaffolding (§12), the open core isolated, the build increments ordered. This is the active work.
+
+**Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
+`T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
+(`isotropySeparates_of_qProfileSeparates` + `coords_determine`, zero new wiring) — proved using the **route-(a) engine**
+(Lemma A `configGaussSum_eq_det`, landed + general). The routes CONVERGE: FormsGraphConcrete:144–148 already pins the crux
+as the **joint incidence content `Z(S) = #{x : Q(x−t)=0 ∀t∈S}`** over sub-frames `S ⊆ T`, which is exactly route (a)'s
+`Z(S)` profile. So there is one crux, two names.
+
+**The proof chain (what's landed ▸ what's open).**
+1. ▸ *[landed `coarse_eq_sum_iso` / `count_pi_setValued`]* the fine isotropy-count antecedent ⟹ coarse `Q`-value-**set**
+   count agreement; specialising the set to `{0}` (isotropic) ⟹ the **joint isotropic counts `Z(S)` agree** for all `S ⊆ T`.
+   (D1 below = completing this marginalisation from the `QProfileSeparatesAtBase` antecedent.)
+2. ▸ *[landed + general Lemma A `configGaussSum_eq_det`]* `Z(S) = F(|S|, χ(det G_u(S)), c)` — explicit; `G_u(S)` = Gram of
+   `{t−u : t∈S}`, even `d` ⟹ level collapses to the bit `[c=0]`. (D2 = wiring this for general `Q`, generalising Lemma B.)
+3. **★ OPEN CRUX (D3):** the profile `{(χ(det G_u(S)), [c=0])}_{S⊆T}` is **injective in `u`**, uniformly in `q`, for
+   `T = frame {0,eᵢ} ∪ {O(log q) probes}`. Equivalently (shell-blindness, FormsGraphConcrete:145): the joint `Z(S)`-profile
+   separates. Probe-validated (SPIKE-K.1/.2 + `Probe_FrameThenProbes`): frame = linear skeleton (separates most), `O(log q)`
+   probes resolve the residual field-value ambiguity via the pair-config square-classes.
+4. ▸ *[landed `coords_determine`]* recovered `Q`-profile + nondeg ⟹ `u`; `QProfileSeparatesAtBase ⟹ IsotropySeparatesAtBase`.
+
+**The crux's hard core + tool.** The recovery is **joint, not per-coordinate** (the "root-detect along a line" shortcut is
+refuted — needs ~`q` points). The content is injectivity of the `χ`-profile of the 2×2 Gram determinants
+`det G_u({t,p}) = 4Q(ū−t)Q(ū−p) − B(ū−t,ū−p)²` over `{frame × probes}`. First attack = the landed chain
+`count_pi_setValued → multiCharSum_eq_sum_count → sum_addChar_multiQuad_zero` (the `R=0` symmetry-broken-base Gauss sum) to
+turn the joint isotropic counts into the explicit `χ(det G)` data, then a **quadratic-character argument** that `O(log q)`
+probe square-classes pin the frame `Q`-values. **Residual risk:** whether that last step is EXACT (quadratic Gauss-sum
+identities, present in `GaussCount`) or needs general **Weil bounds** (absent in Mathlib — a contained sub-build). Route-3
+(Witt) remains the fallback.
+
+**Build increments (ordered).**
+- **D1 — `Z(S)` extraction.** Lemma: the `QProfileSeparatesAtBase` fine antecedent ⟹ `∀ S ⊆ T, Z_u(S) = Z_{u'}(S)` (joint
+  isotropic counts). Marginalise the fine profile (sum over base-points ∉ S and the pivot class) via `coarse_eq_sum_iso`.
+  Reduces the target to a clean **`ZProfileSeparates`** predicate. *Achievable now; reuses landed pieces.*
+- **D2 — `Z(S) = F(χ det G)` for general `Q`.** Generalise Lemma B's `incidence_agree_V` off the instance, feeding Lemma A.
+- **D3 — THE CRUX.** `ZProfileSeparates` for `T = frame ∪ probes`, uniform in `q` (the research; D3a skeleton / D3b probe
+  resolution per the GATE mechanism).
+- **D4 — construct `T` + assemble.** Explicit base (`frameBase ∪ probe set`, `|T| ≤ d+1+O(log q)`); compose D1–D3 +
+  `isotropySeparates_of_qProfileSeparates` ⟹ the uniform `IsotropySeparatesAtBase`, fed to the wittFree capstone.
+- Then: field-gen (abstract `K`, AUDIT-A GO), `VO^ε` bundling, families d/e (B swapped), char-2, Suzuki, seam.
+
+**First increment = D1**, in a scratch module reusing FormsGraphConcrete + GaussCount; isolates `ZProfileSeparates` as the
+single open predicate over general `Q`.
+
+**▶ STARTED (2026-06-24): `ChainDescent/ScratchCrux.lean`** (compiles, axiom-clean, `lake env lean`; NOT in build). Landed
+the **scaffold**: `jointIsoCount Q u S` (the joint isotropic count `Z_u(S)`; "isotropic" = `isoClass ≠ 2`) +
+**`ZProfileSeparates Q T`** (the reduced crux predicate — agreeing `Z(S)` over `S ⊆ T` ⟹ the `Q`-profile, general `Q`).
+**D1 (`qProfileSeparatesAtBase_of_zProfileSeparates`) is the next step**, proof plan documented in-file: marginalise
+`Z_u(S)` as a `u`-independent sum of `QProfileSeparatesAtBase` fine counts via `Finset.card_eq_sum_card_fiberwise`
+(fiber by `(σ_z|_T, c_z)`), then termwise `hfine`. Landed-tool-only (no new math), intricate (subtype-function ↔ `∀ t∈T`
+matching + restriction regrouping). After D1: `ZProfileSeparates` is the sole open content (D3 research).
 
 ---
 
