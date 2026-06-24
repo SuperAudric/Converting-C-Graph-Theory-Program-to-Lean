@@ -2833,8 +2833,11 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         //  (B) |T|/√n where T=∑_t χ(det G₂(u;t,t₀))·χ(det G₂(u';t,t₀)) — exact-Gauss size √n ⟹ Weil-free (the product of two
         //      quadratics factors through scalars; the inner ∑_t ψ(y·P_u+z·P_{u'}) is an inhomog-quadratic Gauss sum, exact).
         output.WriteLine("D3d pair-count — observable invariant χ(det G₂(u;t,t₀)); c_max=max_pair min_anchor c₀ (<1 ⟹ anchors exist), |T|/√n (exact size).");
-        output.WriteLine($"{"family",-12} {"n",8} {"c_max",7} {"c̄₀",7} {"maxC0",7} {"medFrac",11} {"max|T|/√n",9} {"sep@1anc%",11}");
-        foreach (var (q, eps) in new[] { (5,-1),(5,1),(7,-1),(7,1),(11,-1),(11,1),(13,-1),(13,1) })
+        // ★ MATCHING-TRICK validation: the first-moment input is cbarMax = max_pair (mean_anchor c₀), NOT the global mean.
+        //   Also badFrac = fraction of anchors with c₀ ≥ 0.9 (the "bad/aligned" anchors); must decay ~O(1/q) for the
+        //   c̄₀ ≤ 1−δ(1−O(1/q)) reduction (bad-anchor locus = proper subvariety, Schwartz-Zippel).  q·badFracMax should be ~flat.
+        output.WriteLine($"{"family",-12} {"n",8} {"c_max",7} {"c̄₀mean",7} {"cbarMax",7} {"maxC0",7} {"badFrMx",7} {"q·badFrMx",9} {"max|T|/√n",9} {"sep@1anc%",11}");
+        foreach (var (q, eps) in new[] { (5,-1),(5,1),(7,-1),(7,1),(11,-1),(11,1),(13,-1),(13,1),(17,-1),(17,1) })
         {
             int m = 2; var F = new GFq(q); int dim = 4, n = IPow(q, dim);
             int bb = 0, cc = 0;
@@ -2851,35 +2854,37 @@ public class A2MonovariantProbe(ITestOutputHelper output)
             int rv(int cls)=>cls==0?0:(cls==1?1:-1);   // class {0,1,2} → character value {0,+1,−1}
             var rng=new Random(909);
             double sqrtN=Math.Sqrt(n);
-            double cMax=0; double maxToverSqrtN=0; var anchorFracs=new List<double>(); int sep1=0,sep1tot=0;
-            double sumC0=0; int cntC0=0; double maxC0=0;   // c̄₀ (matching-trick input) + worst single (pair,anchor) c₀ (universal-anchor input)
-            int nPairs=30, nAnchors=8;
+            double cMax=0; double maxToverSqrtN=0; int sep1=0,sep1tot=0;
+            double sumC0=0; int cntC0=0; double maxC0=0;   // global mean + worst single (pair,anchor) c₀ (universal-anchor input)
+            double cbarMax=0;     // ★ max_pair (mean_anchor c₀) — the TRUE matching-trick first-moment input
+            double badFracMax=0;  // ★ max_pair (frac anchors with c₀≥0.9) — the bad/aligned-anchor density (want ~O(1/q))
+            int nPairs=30, nAnchors=24;
             for(int p=0;p<nPairs;p++)
             {
                 int u=rng.Next(n), up=rng.Next(n); if(u==up){up=(up+1)%n;}
-                double minC0=2.0; int anchorsSep=0;
+                double minC0=2.0; double pairSumC0=0; int pairBad=0;
                 for(int aI=0;aI<nAnchors;aI++)
                 {
                     int t0=rng.Next(n);
                     long fail=0, T=0;
                     for(int t=0;t<n;t++){int iu=chiDet(u,t,t0);int iv=chiDet(up,t,t0);if(iu==iv)fail++;T+=rv(iu)*rv(iv);}
                     double c0=(double)fail/n; minC0=Math.Min(minC0,c0);
-                    sumC0+=c0; cntC0++; maxC0=Math.Max(maxC0,c0);
-                    if(c0<1.0-1e-12){anchorsSep++;}
+                    sumC0+=c0; cntC0++; maxC0=Math.Max(maxC0,c0); pairSumC0+=c0;
+                    if(c0>=0.9) pairBad++;
                     maxToverSqrtN=Math.Max(maxToverSqrtN,Math.Abs(T)/sqrtN);
                     sep1tot++; if(c0<1.0-1e-12)sep1++;
                 }
                 cMax=Math.Max(cMax,minC0);
-                anchorFracs.Add((double)anchorsSep/nAnchors);
+                cbarMax=Math.Max(cbarMax,pairSumC0/nAnchors);
+                badFracMax=Math.Max(badFracMax,(double)pairBad/nAnchors);
             }
-            anchorFracs.Sort(); double medFrac=anchorFracs[anchorFracs.Count/2];
             string fam=$"VO^{(eps<0?"-":"+")}_4({q})";
-            output.WriteLine($"{fam,-12} {n,8} {cMax,7:F3} {(sumC0/cntC0),7:F3} {maxC0,7:F3} {medFrac,11:F2} {maxToverSqrtN,9:F2} {(100.0*sep1/sep1tot),11:F0}");
+            output.WriteLine($"{fam,-12} {n,8} {cMax,7:F3} {(sumC0/cntC0),7:F3} {cbarMax,7:F3} {maxC0,7:F3} {badFracMax,7:F3} {(q*badFracMax),9:F2} {maxToverSqrtN,9:F2} {(100.0*sep1/sep1tot),11:F0}");
         }
         output.WriteLine("");
-        output.WriteLine("Cols: c_max=max_pair min_anchor c₀ | c̄₀=mean (pair,anchor) c₀ [MATCHING-TRICK input, need <1−δ] | maxC0=worst single (pair,anchor)");
-        output.WriteLine("      [universal-anchor input] | medAnchorFrac | max|T|/√n | sep@1anchor%.");
-        output.WriteLine("READING: c̄₀ bounded <1 as q grows ⟹ matching-trick averaging closes (anchor folds in, no universal anchor needed).");
-        output.WriteLine("         maxC0 also <1 bounded ⟹ even a single universal anchor would work. Both ⟹ increment 4 de-risked.");
+        output.WriteLine("Cols: c_max=max_pair min_anchor c₀ | c̄₀mean=global mean (pair,anchor) c₀ | cbarMax=★max_pair(mean_anchor c₀) [TRUE matching-trick input, need <1−δ]");
+        output.WriteLine("      | maxC0=worst single (pair,anchor) [universal-anchor input] | badFrMx=max_pair frac anchors c₀≥0.9 | q·badFrMx (flat ⟹ O(1/q)) | max|T|/√n | sep@1anchor%.");
+        output.WriteLine("READING: cbarMax bounded <1 as q grows ⟹ matching-trick first moment closes uniformly over pairs (the real input, not the global mean).");
+        output.WriteLine("         q·badFrMx ~flat ⟹ bad/aligned anchors are an O(1/q) proper subvariety (Schwartz-Zippel) ⟹ c̄₀ ≤ 1−δ(1−O(1/q)).");
     }
 }

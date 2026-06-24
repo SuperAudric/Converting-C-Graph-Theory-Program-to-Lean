@@ -100,6 +100,11 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   a)²` at the shift `t−u`), `detG2_eq_pairForm`, **`pairCombine`** (the two-pivot integrand `y·det G₂(u;·) + z·det G₂(v;·)` =
   quadratic form `(y•pairForm_u + z•pairForm_v)` at shift `t−u` + linear `z·polar pairForm_v(·,u−v)` + const), and
   `sum_addChar_quadForm_translate` (Gauss translation invariance). See §13.
+- **`ScratchMatching.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **increment-4/5 combinatorial core**:
+  **`exists_separating_base`**, the matching-trick first moment as a pure finite-counting theorem (`fail : ι → W → Prop`,
+  `∀g #{w:fail g w}≤F`, `|ι|·Fᵐ<|W|ᵐ ⟹ ∃ base P:Fin m→W, ∀g ∃j ¬fail g (P j)`). Consumes the single analytic input `c̄₀<1`
+  (instantiate `W=V×V`, `ι={(u,u'):u≠u'}`) ⟹ separating base of size `O(d log q)`; anchor existence dissolves (anchor = the
+  other matched coordinate). See §13's "MATCHING TRICK CONFIRMED" block.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -905,6 +910,39 @@ device, but with one subtlety to respect.**
 - **⟹ Recommendation:** increment 4 = a short lemma "bad-anchor locus is a proper subvariety (density `O(1/q)`)" feeding
   `c̄₀ ≤ 1−δ`; increment 5 = the matching-trick first moment. State the averaging input as `c̄₀` (anchor-averaged), discharged
   from per-anchor (Weil-free) `c₀` — do NOT use a joint `(a,t)` Deligne sum and do NOT construct a universal anchor.
+
+**▶ MATCHING TRICK CONFIRMED + COUNTING CORE LANDED + GAPS SHARPENED (2026-06-24).** Stress-tested the increment-4 fold-in
+above; it is **sound**, and the load-bearing combinatorial core is now an axiom-clean theorem. Three things:
+- **★ `ScratchMatching.exists_separating_base`** (`ChainDescent/ScratchMatching.lean`, axiom-clean
+  `[propext, Classical.choice, Quot.sound]`, `lake env lean`; NOT in build) — the matching-trick first moment as a **pure
+  finite-counting** theorem (no probability/measure): for `fail : ι → W → Prop` (`W` = matched-pair space, `ι` = targets) with
+  `∀g, #{w : fail g w} ≤ F` and `|ι|·Fᵐ < |W|ᵐ`, there is a base `P : Fin m → W` with `∀g, ∃j, ¬fail g (P j)`. Proof: the count
+  of bases failing a fixed target factors as `(#fail)ᵐ` (independent coordinates, `Fintype.card_piFinset`); union bound over
+  targets. **This is the increment-5 engine and it consumes the single analytic input `c̄₀ < 1` directly** — instantiate `W=V×V`
+  (probe×anchor), `ι={(u,u'):u≠u'}`, `F=⌊c̄₀·n²⌋`; `|ι|·Fᵐ<|W|ᵐ ⟺ n²·c̄₀ᵐ<1 ⟺ m=O(d log q)`. Anchor existence has fully
+  dissolved: the anchor is the other matched coordinate (`det G₂` symmetric in `(t,a)`), no universal-anchor construction.
+- **★ Probe strengthened + premise validated (`Probe_D3dPairCount`, new cols).** The old `c̄₀` column was the *global* mean over
+  (pair,anchor) — NOT the first-moment input. New **`cbarMax = max_pair (mean_anchor c₀)`** (the TRUE input) = **0.47–0.52, flat
+  and <1 over q=5..17, both ε** ⟹ first moment closes uniformly over pairs with gap **δ≈0.5**. **`maxC0` hits 1.000 at q=5,7**
+  ⟹ universal-anchor route confirmed FRAGILE (averaging essential). **`q·badFrMx` ≈ 0.2–0.3 then 0** (bad anchors = frac with
+  `c₀≥0.9`) ⟹ bad/aligned anchors are O(1/q) or rarer — the Schwartz-Zippel regime. The premise `c̄₀<1` is solidly validated on
+  the right quantity.
+- **★ Sharpened remaining gaps (the `c̄₀<1` input decomposes cleanly).** `c̄₀(u,u') = mean_a c₀(u,u';a) ≤ 1 − δ(1 − β)`, β = bad-anchor
+  fraction:
+  1. **(G-align, NEW, soft, tool CONFIRMED present)** bad/aligned anchors form a *proper subvariety* in `a`, density `β ≤ O(1/q)`.
+     The alignment condition (the two quadratics-in-`t` `det G₂(u;·,a)`, `det G₂(u';·,a)` are square-proportional) is the zero set
+     of a nonzero `MvPolynomial` of bounded total degree in `a`; density bound = **`Mathlib.Algebra.MvPolynomial.SchwartzZippel`
+     `schwartz_zippel_totalDegree`** (`#{zeros}/qⁿ ≤ totalDegree/q`, integral domain) — Weil-FREE. **One non-vacuity obligation
+     remains (the irreducible residue of "anchor existence", now trivial): the alignment polynomial is `≢ 0` for every `u≠u'`
+     (≡ ∃ a good anchor) — true because for generic `a` the two `pairForm` have DIFFERENT radicals `⟨a−u⟩≠⟨a−u'⟩` (`u≠u'`).**
+  2. **(G-anchor = increments 2/3, the real analytic core, UNCHANGED)** off the alignment variety, the per-anchor Gauss sum is small
+     ⟹ `c₀(u,u';a) ≤ 1−δ`. This is the `pairCharSum_factor_gen` + `M(y,z)` closed-form + `|gaussSum|=√q` work.
+  - **NB the doc bullet above said "degree-4 ⟹ Deligne" for the joint sum — that is why we do NOT compute `c̄₀` jointly; the
+    decomposition (G-align via Schwartz-Zippel + G-anchor Weil-free per-anchor) keeps everything Weil-free.** The matching trick
+    relocates "construct a universal anchor" to "alignment poly ≢ 0" (much weaker) + a Schwartz-Zippel density bound (Mathlib).
+- **Net verdict:** the matching trick **solves** anchor existence. Remaining math = G-anchor (the per-anchor `c₀<1`, = increments
+  2/3, already the planned analytic frontier) + G-align (Schwartz-Zippel density + the soft `≢0` non-vanishing). The combinatorial
+  glue (`exists_separating_base`) and the empirical premise are now locked.
 
 *Maintenance: this doc is the live proof target — keep §1's module map current as scratch modules port into the build, and
 update §11's audit/spike outcomes + the §11.1 route decision as they resolve. Build history + superseded routes are frozen
