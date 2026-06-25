@@ -490,6 +490,99 @@ theorem norm_pairSum_le {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Inver
     rcases hQuad (w i : K) with h | h | h <;> rw [h] <;> simp
   exact mul_le_of_le_one_left (by positivity) hprod
 
+/-! ### Increment 3, step 3c-tool — the degenerate quadratic Gauss-sum magnitude
+
+The unified tool for the degenerate locus: `‖∑_x ψ(Q x)‖² = qᵈ · |radical Q|` for ANY quadratic form `Q` (no
+nondegeneracy). Quotient-free proof: `‖·‖² = (∑ψ)·conj(∑ψ) = ∑_{x,h} ψ(Q x − Q(x+h))`, expand
+`Q x − Q(x+h) = −polar Q x h − Q h`, and `∑_x ψ(−polar Q x h) = qᵈ·[h ∈ radical]` by `sum_addChar_linearMap`; on the
+radical `Q h = 0` so the phase is 1. Generalizes `norm_gaussSum_sq` (nondeg ⟹ radical = {0}). Powers both 3c (conic
+magnitude, `|radical| ≤ q`) and 3d (zero-counts via `card_quadForm_eq`). -/
+theorem norm_sq_sum_addChar_quadForm {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Invertible (2 : K)]
+    {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V) :
+    ‖∑ x : V, ψ (Q x)‖ ^ 2
+      = (Fintype.card V : ℝ)
+        * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar Q x h = 0)).card := by
+  classical
+  set S := ∑ x : V, ψ (Q x) with hS
+  -- conjugate of a ψ-value is ψ of the negation (values are unit-modulus)
+  have hconj : ∀ z : K, (starRingEnd ℂ) (ψ z) = ψ (-z) := by
+    intro z
+    have hns : Complex.normSq (ψ z) = 1 := by
+      rw [Complex.normSq_eq_norm_sq, norm_addChar_eq_one]; norm_num
+    have hmul : ψ z * (starRingEnd ℂ) (ψ z) = 1 := by rw [Complex.mul_conj, hns, Complex.ofReal_one]
+    have hne : ψ z ≠ 0 := left_ne_zero_of_mul_eq_one hmul
+    have hconjz : (starRingEnd ℂ) (ψ z) = (ψ z)⁻¹ := by
+      rw [← one_mul ((starRingEnd ℂ) (ψ z)), ← inv_mul_cancel₀ hne, mul_assoc, hmul, mul_one]
+    rw [hconjz, ← AddChar.map_neg_eq_inv]
+  -- the core complex identity: S · conj S = card V · |radical|
+  have hmain : S * (starRingEnd ℂ) S
+      = (Fintype.card V : ℂ)
+        * ((Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar Q x h = 0)).card : ℂ) := by
+    have hconjS : (starRingEnd ℂ) S = ∑ y : V, ψ (-(Q y)) := by
+      rw [hS, map_sum]; exact Finset.sum_congr rfl (fun y _ => hconj (Q y))
+    rw [hS, hconjS, Finset.sum_mul_sum]
+    -- ∑_x ∑_y ψ(Q x) * ψ(-(Q y)) = ∑_x ∑_y ψ(Q x - Q y)
+    have e1 : ∀ x y : V, ψ (Q x) * ψ (-(Q y)) = ψ (Q x - Q y) := by
+      intro x y; rw [← AddChar.map_add_eq_mul]; congr 1; ring
+    rw [Finset.sum_congr rfl (fun x _ => Finset.sum_congr rfl (fun y _ => e1 x y))]
+    -- reindex inner y ↦ x + h
+    have e2 : ∀ x : V, (∑ y : V, ψ (Q x - Q y)) = ∑ h : V, ψ (Q x - Q (x + h)) :=
+      fun x => (Equiv.sum_comp (Equiv.addLeft x) (fun y => ψ (Q x - Q y))).symm
+    rw [Finset.sum_congr rfl (fun x _ => e2 x)]
+    -- Q x - Q(x+h) = -(polar Q x h) - Q h
+    have e3 : ∀ x h : V, ψ (Q x - Q (x + h)) = ψ (-(QuadraticMap.polar Q x h) - Q h) := by
+      intro x h; congr 1; rw [QuadraticMap.polar]; ring
+    rw [Finset.sum_congr rfl (fun x _ => Finset.sum_congr rfl (fun h _ => e3 x h)), Finset.sum_comm]
+    -- ∑_h ∑_x ψ(-(polar Q x h) - Q h) = ∑_h ψ(-Q h)·(∑_x ψ(-(polar Q x h)))
+    have e4 : ∀ h : V, (∑ x : V, ψ (-(QuadraticMap.polar Q x h) - Q h))
+        = ψ (-(Q h)) * ∑ x : V, ψ (-(QuadraticMap.polar Q x h)) := by
+      intro h
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl (fun x _ => by rw [← AddChar.map_add_eq_mul]; congr 1; ring)
+    rw [Finset.sum_congr rfl (fun h _ => e4 h)]
+    -- inner linear sum via sum_addChar_linearMap
+    have e5 : ∀ h : V, (∑ x : V, ψ (-(QuadraticMap.polar Q x h)))
+        = if (∀ x, QuadraticMap.polar Q x h = 0) then (Fintype.card V : ℂ) else 0 := by
+      intro h
+      have hφx : ∀ x, (-(Q.polarBilin.flip h)) x = -(QuadraticMap.polar Q x h) := by
+        intro x; rw [LinearMap.neg_apply, LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply]
+      rw [show (∑ x : V, ψ (-(QuadraticMap.polar Q x h)))
+            = ∑ x : V, ψ ((-(Q.polarBilin.flip h)) x) from
+          Finset.sum_congr rfl (fun x _ => by rw [hφx x]),
+        sum_addChar_linearMap hψ]
+      refine if_congr ?_ rfl rfl
+      rw [LinearMap.ext_iff]
+      constructor
+      · intro hh x; have := hh x; rw [hφx x, LinearMap.zero_apply, neg_eq_zero] at this; exact this
+      · intro hh x; rw [hφx x, LinearMap.zero_apply, neg_eq_zero]; exact hh x
+    rw [Finset.sum_congr rfl (fun h _ => by rw [e5 h])]
+    -- ∑_h ψ(-Q h)·(if radical then card else 0) = card·|radical|
+    have e6 : ∀ h : V, ψ (-(Q h))
+          * (if (∀ x, QuadraticMap.polar Q x h = 0) then (Fintype.card V : ℂ) else 0)
+        = (if (∀ x, QuadraticMap.polar Q x h = 0) then (Fintype.card V : ℂ) else 0) := by
+      intro h
+      split_ifs with hP
+      · have hQh : Q h = 0 := by
+          have hps := QuadraticMap.polar_self Q h
+          rw [hP h, nsmul_eq_mul] at hps
+          have h2 : ((2 : ℕ) : K) * Q h = 0 := hps.symm
+          have h2K : ((2 : ℕ) : K) ≠ 0 := by
+            simpa using (Invertible.ne_zero (2 : K))
+          exact (mul_eq_zero.1 h2).resolve_left h2K
+        rw [hQh, neg_zero, AddChar.map_zero_eq_one, one_mul]
+      · rw [mul_zero]
+    rw [Finset.sum_congr rfl (fun h _ => e6 h), ← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul,
+      mul_comm]
+  -- bridge to ‖S‖²
+  have key : ((‖S‖ ^ 2 : ℝ) : ℂ)
+      = (Fintype.card V : ℂ)
+        * ((Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar Q x h = 0)).card : ℂ) := by
+    rw [← hmain, Complex.mul_conj]
+    norm_cast
+    rw [Complex.normSq_eq_norm_sq]
+  exact_mod_cast key
+
 end CMagnitude
 
 end ChainDescent
@@ -513,3 +606,4 @@ end ChainDescent
 #print axioms ChainDescent.norm_addChar_eq_one
 #print axioms ChainDescent.norm_gaussSum_sq
 #print axioms ChainDescent.norm_pairSum_le
+#print axioms ChainDescent.norm_sq_sum_addChar_quadForm
