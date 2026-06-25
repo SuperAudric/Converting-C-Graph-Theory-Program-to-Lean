@@ -155,6 +155,69 @@ theorem bad_anchor_card_le_hgood [Fintype V] [DecidableEq V] (Q : QuadraticForm 
 
 end Reduction
 
+section SchwartzZippelCount
+variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+  {V : Type*} [AddCommGroup V] [Module K V] [Fintype V]
+
+/-- **Bad-anchor count via a representing polynomial — the rigorous Schwartz–Zippel reduction.** If a bad-anchor
+predicate `badpred` is contained in the zero set of a *nonzero* polynomial `P` read off the anchor's coordinates
+(`hrep : badpred t₀ → eval (b.equivFun t₀) P = 0`), then `#{t₀ : badpred} · |K| ≤ P.totalDegree · |V|`, i.e.
+density `≤ totalDegree/q`. Coordinatize `V ≅ K^d` via `b.equivFun`, then `mvPoly_zeros_count_le_dim`. For `β` this is
+applied with `badpred = ¬hgood` and `P` = the pencil determinant at a fixed nondeg witness `(y₀,z₀)` (which a good
+anchor makes `≠ 0`); `hrep` then holds because `¬hgood ⟹` every pencil member is degenerate
+(`polarRad_ne_bot_iff_det_eq_zero`). -/
+theorem bad_anchor_count_le_of_poly {d : ℕ} (b : Basis (Fin d) K V)
+    (badpred : V → Prop) [DecidablePred badpred]
+    (P : MvPolynomial (Fin d) K) (hP : P ≠ 0)
+    (hrep : ∀ t₀, badpred t₀ → MvPolynomial.eval (b.equivFun t₀) P = 0) :
+    (univ.filter badpred).card * Fintype.card K ≤ P.totalDegree * Fintype.card V := by
+  classical
+  have hsub : univ.filter badpred
+      ⊆ univ.filter (fun t₀ : V => MvPolynomial.eval (b.equivFun t₀) P = 0) := by
+    intro t₀ ht
+    rw [mem_filter] at ht ⊢
+    exact ⟨ht.1, hrep t₀ ht.2⟩
+  have hreindex : (univ.filter (fun t₀ : V => MvPolynomial.eval (b.equivFun t₀) P = 0)).card
+      = (univ.filter (fun f : Fin d → K => MvPolynomial.eval f P = 0)).card := by
+    apply Finset.card_nbij' (fun t₀ => b.equivFun t₀) (fun f => b.equivFun.symm f)
+    · intro t₀ ht
+      rw [Finset.mem_coe, mem_filter] at ht ⊢
+      exact ⟨mem_univ _, ht.2⟩
+    · intro f hf
+      rw [Finset.mem_coe, mem_filter] at hf ⊢
+      exact ⟨mem_univ _, by rw [LinearEquiv.apply_symm_apply]; exact hf.2⟩
+    · intro t₀ _; simp only [LinearEquiv.symm_apply_apply]
+    · intro f _; simp only [LinearEquiv.apply_symm_apply]
+  calc (univ.filter badpred).card * Fintype.card K
+      ≤ (univ.filter (fun t₀ : V => MvPolynomial.eval (b.equivFun t₀) P = 0)).card * Fintype.card K :=
+        Nat.mul_le_mul_right _ (Finset.card_le_card hsub)
+    _ = (univ.filter (fun f : Fin d → K => MvPolynomial.eval f P = 0)).card * Fintype.card K := by
+        rw [hreindex]
+    _ ≤ P.totalDegree * Fintype.card (Fin d → K) := mvPoly_zeros_count_le_dim hP
+    _ = P.totalDegree * Fintype.card V := by
+        rw [← Fintype.card_congr b.equivFun.toEquiv]
+
+omit [Fintype K] [DecidableEq K] [Fintype V] in
+/-- **`hrep` for `¬hgood`, from a representing polynomial.** If `P` represents the pencil-determinant at a fixed witness
+`(y₀,z₀)` — `eval (coords t₀) P = det(toMatrix₂ b b (polarBilin (y₀•pairForm_u + z₀•pairForm_v)))` — then on every
+`¬hgood` anchor `eval (coords t₀) P = 0` (the witness member is degenerate there, `polarRad_ne_bot_iff_det_eq_zero`).
+This discharges `bad_anchor_count_le_of_poly`'s `hrep`, so the ONLY remaining obligation to close `β` is **constructing
+such a `P` (with `P ≠ 0`)** — i.e. coordinatizing the pencil determinant + nonzero by a good-anchor witness. -/
+theorem notHgood_eval_zero_of_repr {d : ℕ} (b : Basis (Fin d) K V) (Q : QuadraticForm K V)
+    (y₀ z₀ : K) (u v : V) (P : MvPolynomial (Fin d) K)
+    (hrepP : ∀ t₀, MvPolynomial.eval (b.equivFun t₀) P
+      = (LinearMap.toMatrix₂ b b (QuadraticMap.polarBilin
+          (y₀ • pairForm Q (t₀ - u) + z₀ • pairForm Q (t₀ - v)))).det) :
+    ∀ t₀, (¬ ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥) →
+      MvPolynomial.eval (b.equivFun t₀) P = 0 := by
+  intro t₀ hbad
+  rw [hrepP t₀]
+  apply (polarRad_ne_bot_iff_det_eq_zero b _).mp
+  intro hbot
+  exact hbad ⟨y₀, z₀, hbot⟩
+
+end SchwartzZippelCount
+
 end ChainDescent
 
 #print axioms ChainDescent.mvPoly_zeros_count_le_dim
@@ -162,3 +225,5 @@ end ChainDescent
 #print axioms ChainDescent.hPv_of_hgood
 #print axioms ChainDescent.hnz_of_hgood
 #print axioms ChainDescent.bad_anchor_card_le_hgood
+#print axioms ChainDescent.bad_anchor_count_le_of_poly
+#print axioms ChainDescent.notHgood_eval_zero_of_repr

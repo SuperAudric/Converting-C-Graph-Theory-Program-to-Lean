@@ -54,10 +54,12 @@
 > is landed (`ScratchIncr4.fail_count_split`/`matching_F_bound`: `F ≤ c·|V| + |V|·β`), and **input `c` is closed** — a good anchor has
 > `#{t:¬sep} ≤ 15/16·|V|` (`good_anchor_fail_le_const`, from `good_anchor_fail_le` + `zeroCountShift_card_le`, axiom-clean), so
 > `c/|V| ≤ 15/16 < 1`. The live frontier is the **bad-anchor `β`**: the SZ-in-`t₀` engine `mvPoly_zeros_count_le_dim` is LANDED
-> (`ScratchIncr4b`), the reduction `hgood ⟹ hnz∧hPu∧hPv` is PROVED, and `bad_anchor_card_le_hgood` packages it as
-> **`β ≤ #{¬hgood} + 2`** (all axiom-clean) — so `β` is governed by the SINGLE locus `{¬hgood}`. REMAINING `β` = bound
-> `#{¬hgood}`: express `{¬hgood} = {t₀ : pencilDisc(·;t₀) ≡ 0}` as a nonzero `t₀`-poly (`pencilDisc` coeff, non-vacuity =
-> distinct radicals for `u≠v`) + coordinatize `V≅K^d`, then the SZ engine. Then **increment 5** (laid out in §13 "INCREMENT 5
+> (`ScratchIncr4b`, all 7 lemmas axiom-clean): the reduction `hgood ⟹ hnz∧hPu∧hPv` + `bad_anchor_card_le_hgood`
+> (`β ≤ #{¬hgood}+2`) + the rigorous SZ reduction `bad_anchor_count_le_of_poly` (nonzero repr poly `P` ⟹ `#{¬hgood}·|K| ≤
+> deg P·|V|`) + `notHgood_eval_zero_of_repr` (discharges its `hrep`). **`β` is reduced to ONE obligation: construct the
+> representing polynomial `P`** — coordinatize the pencil determinant as `MvPolynomial (Fin d) K` (`P := det` of the Gram
+> poly matrix, `eval`-correct by `map_det`; `P≠0` by a good-anchor witness). The single heavy coordinatization piece. Then
+> **increment 5** (laid out in §13 "INCREMENT 5
 > — WHAT'S EXPECTED", to be REPLACED by a "how it went" writeup once built): `c̄₀<1` arithmetic →
 > ℕ-package into `exists_separating_base` (`m=O(d log q)`) → `fail ⟺ ¬(bridge criterion)` (the coordinate seam `Fin(p^d)`/`affineE`
 > ↔ abstract `V`) → `zProfileSeparates_of_zSep` → seal.
@@ -196,15 +198,19 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   (a zero/proportional member would make the whole pencil a multiple of one degenerate form). So the bad set collapses
   (mod `t₀∈{u,v}`) to `{¬hgood} ∪ {Q(t₀−u)=0} ∪ {Q(t₀−v)=0}`. The two quadric loci are immediate from
   `zeroCountShift_card_le` (applied to `Q`); the meaty piece is `{¬hgood} = {t₀ : pencilDisc(·,·;t₀) ≡ 0}`.
-  **Landed (all axiom-clean):** (a) the Schwartz–Zippel-in-`Fin d` engine **`mvPoly_zeros_count_le_dim`** (`p≠0 ⟹
+  **Landed (all 7 axiom-clean):** (a) the Schwartz–Zippel-in-`Fin d` engine **`mvPoly_zeros_count_le_dim`** (`p≠0 ⟹
   #{f:Fin d→K | eval f p=0}·|K| ≤ totalDegree·|K^d|`, zero-density `≤ totalDegree/q`); (b) the **reduction
-  `hgood ⟹ hnz∧hPu∧hPv`** — helpers `mem_polarRad_smul_pairForm` (`a ∈ polarRad(c•pairForm Q a)`) +
-  `polarRad_smul_pairForm_ne_bot` (`a≠0 ⟹ polarRad(c•pairForm Q a)≠⊥`) feed `hPu_of_hgood`/`hPv_of_hgood`/`hnz_of_hgood`
-  (a zero/proportional/vanishing member collapses the pencil to a degenerate `c•pairForm`); (c) the packaged
-  **`bad_anchor_card_le_hgood`: `β = #{¬(hnz∧hgood∧hPu∧hPv)} ≤ #{¬hgood} + 2`** (the `+2` = the points `t₀∈{u,v}`).
-  **Remaining `β` = the single locus `#{¬hgood}`**: express `{¬hgood} = {t₀ : pencilDisc(·;t₀) ≡ 0}` as `eval (coords t₀)
-  P = 0` for a nonzero `t₀`-polynomial `P` (a `pencilDisc` coefficient, nonzero by non-vacuity = `∃` good anchor ⟺ distinct
-  radicals for `u≠v`) + coordinatize `V ≅ K^d` via a basis, then apply `mvPoly_zeros_count_le_dim`.
+  `hgood ⟹ hnz∧hPu∧hPv`** — helpers `mem_polarRad_smul_pairForm` + `polarRad_smul_pairForm_ne_bot` feed
+  `hPu_of_hgood`/`hPv_of_hgood`/`hnz_of_hgood`; (c) packaged **`bad_anchor_card_le_hgood`: `β ≤ #{¬hgood} + 2`**;
+  (d) the **rigorous SZ reduction `bad_anchor_count_le_of_poly`** — given a nonzero `P : MvPolynomial (Fin d) K` with
+  `(¬hgood t₀ → eval (b.equivFun t₀) P = 0)`, `#{¬hgood}·|K| ≤ P.totalDegree·|V|` (coordinatize `V≅K^d` via `b.equivFun`
+  + the engine); (e) **`notHgood_eval_zero_of_repr`** — discharges that `hrep` whenever `P` *represents* the pencil
+  determinant at a fixed witness (`eval (coords t₀) P = det(toMatrix₂ b b (polarBilin (y₀•pairForm_u+z₀•pairForm_v)))`),
+  via `polarRad_ne_bot_iff_det_eq_zero`. **So `β` is reduced to ONE explicit obligation:** construct that representing
+  polynomial `P` with `P ≠ 0` — i.e. coordinatize the pencil determinant as an `MvPolynomial` in `t₀` (entries
+  `polar(pairForm Q(t₀−u))(bᵢ)(bⱼ) = 4 Q(t₀−u)·gᵢⱼ − 2·Lᵢ(t₀)·Lⱼ(t₀)`, degree 2 in `t₀`; `P := det` of the Gram poly
+  matrix, `eval`-correct by `RingHom.map_det`; `P≠0` by a good-anchor witness = distinct radicals for `u≠v`). This is the
+  single heavy coordinatization piece; everything around it is now axiom-clean.
 - **`ScratchCorank.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **corank ≥ 2 enabler** for 3e-ii:
   **`radical_card_mul_card_le`** (`F ≠ 0 ⟹ |radical F| · |K| ≤ |V|`, i.e. `|radical| ≤ q^{d−1}` UNIFORMLY over all coranks —
   the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
@@ -1510,11 +1516,14 @@ zero member" already flagged `hnz`; this refinement makes the full triple the in
 **▶▶ INCREMENT 4 BAD-ANCHOR `β` — STRUCTURAL REDUCTION + SZ ENGINE LANDED (2026-06-26, `ScratchIncr4b.lean`, axiom-clean).**
 Key simplification: `pairForm Q (t₀−v)` is ALWAYS degenerate (`pairForm_polar_anchor`), so `hgood` (a nondeg pencil
 member exists) forces `hnz ∧ hPu ∧ hPv` — the bad set collapses (mod `t₀∈{u,v}`) to `{¬hgood} ∪ {Q(t₀−u)=0} ∪ {Q(t₀−v)=0}`.
-**`hgood ⟹ hnz∧hPu∧hPv` is now PROVED** (`hPu_of_hgood`/`hPv_of_hgood`/`hnz_of_hgood`, axiom-clean), packaged as
-**`bad_anchor_card_le_hgood`: `β ≤ #{¬hgood} + 2`** — so the bad-anchor count is governed by the SINGLE locus `{¬hgood}`
-(the `+2` = `t₀∈{u,v}`). The SZ engine `mvPoly_zeros_count_le_dim` (`#{f:Fin d→K|eval f p=0}·|K| ≤ totalDegree·|K^d|`) is
-landed. **Remaining `β` = bound `#{¬hgood}`**: `{¬hgood} = {t₀ : pencilDisc(·;t₀) ≡ 0}` as a nonzero `t₀`-polynomial
-(`pencilDisc` coefficient) + coordinatize `V ≅ K^d`, then `mvPoly_zeros_count_le_dim`.
+**`β` is now REDUCED TO ONE EXPLICIT OBLIGATION (all surrounding infra axiom-clean).** Landed: `hgood ⟹ hnz∧hPu∧hPv`
+(`hPu_of_hgood`/`hPv_of_hgood`/`hnz_of_hgood`) → `bad_anchor_card_le_hgood`: `β ≤ #{¬hgood} + 2`; the SZ engine
+`mvPoly_zeros_count_le_dim`; the rigorous SZ reduction `bad_anchor_count_le_of_poly` (given a nonzero representing
+polynomial `P`, `#{¬hgood}·|K| ≤ deg P·|V|`); and `notHgood_eval_zero_of_repr` (discharges its `hrep` from `P` representing
+the pencil det at a fixed witness, via `polarRad_ne_bot_iff_det_eq_zero`). **Remaining = construct `P`**: coordinatize the
+pencil determinant as an `MvPolynomial (Fin d) K` (entries `polar(pairForm Q(t₀−u))(bᵢ)(bⱼ) = 4 Q(t₀−u)gᵢⱼ − 2 Lᵢ(t₀)Lⱼ(t₀)`,
+deg 2 in `t₀`; `P := det` of the Gram poly matrix, `eval`-correct by `RingHom.map_det`; `P ≠ 0` by a good-anchor witness).
+The single heavy coordinatization piece.
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** Once `c` (`≤ 15/16·|V|`, DONE) and `β`
 (`≤ C·|V|/q`) are in hand, increment 5 produces the separating base and discharges `ZProfileSeparates`:
