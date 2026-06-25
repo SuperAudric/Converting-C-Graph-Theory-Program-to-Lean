@@ -583,6 +583,115 @@ theorem norm_sq_sum_addChar_quadForm {K : Type*} [Field K] [Fintype K] [Decidabl
     rw [Complex.normSq_eq_norm_sq]
   exact_mod_cast key
 
+/-- **The with-linear degenerate magnitude bound (3c — uniform over nondeg AND conic).** For ANY quadratic form `Q`
+and linear functional `L`, `‖∑_x ψ(Q x + L x)‖² ≤ qᵈ · |radical Q|`. (Exact: `S·conj S = qᵈ·∑_{h∈radical} ψ(−L h)`,
+bounded by the triangle inequality + `‖ψ‖ = 1`.) This is the magnitude `M` actually needs (its integrand carries a
+linear term), and it covers the degenerate conic (`|radical| ≤ q ⟹ ‖∑‖ ≤ q^{(d+1)/2}`) and nondeg
+(`|radical| = 1 ⟹ ‖∑‖ ≤ q^{d/2}`) uniformly. -/
+theorem norm_sq_sum_addChar_quadForm_linear_le {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    [Invertible (2 : K)] {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V) (L : Module.Dual K V) :
+    ‖∑ x : V, ψ (Q x + L x)‖ ^ 2
+      ≤ (Fintype.card V : ℝ)
+        * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar Q x h = 0)).card := by
+  classical
+  set S := ∑ x : V, ψ (Q x + L x) with hS
+  set rad := Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar Q x h = 0) with hrad
+  have hconj : ∀ z : K, (starRingEnd ℂ) (ψ z) = ψ (-z) := by
+    intro z
+    have hns : Complex.normSq (ψ z) = 1 := by
+      rw [Complex.normSq_eq_norm_sq, norm_addChar_eq_one]; norm_num
+    have hmul : ψ z * (starRingEnd ℂ) (ψ z) = 1 := by rw [Complex.mul_conj, hns, Complex.ofReal_one]
+    have hne : ψ z ≠ 0 := left_ne_zero_of_mul_eq_one hmul
+    have hconjz : (starRingEnd ℂ) (ψ z) = (ψ z)⁻¹ := by
+      rw [← one_mul ((starRingEnd ℂ) (ψ z)), ← inv_mul_cancel₀ hne, mul_assoc, hmul, mul_one]
+    rw [hconjz, ← AddChar.map_neg_eq_inv]
+  have hmain : S * (starRingEnd ℂ) S = (Fintype.card V : ℂ) * ∑ h ∈ rad, ψ (-(L h)) := by
+    have hconjS : (starRingEnd ℂ) S = ∑ y : V, ψ (-(Q y + L y)) := by
+      rw [hS, map_sum]; exact Finset.sum_congr rfl (fun y _ => hconj (Q y + L y))
+    rw [hS, hconjS, Finset.sum_mul_sum]
+    have e1 : ∀ x y : V, ψ (Q x + L x) * ψ (-(Q y + L y)) = ψ ((Q x + L x) - (Q y + L y)) := by
+      intro x y; rw [← AddChar.map_add_eq_mul]; congr 1; ring
+    rw [Finset.sum_congr rfl (fun x _ => Finset.sum_congr rfl (fun y _ => e1 x y))]
+    have e2 : ∀ x : V, (∑ y : V, ψ ((Q x + L x) - (Q y + L y)))
+        = ∑ h : V, ψ ((Q x + L x) - (Q (x + h) + L (x + h))) :=
+      fun x => (Equiv.sum_comp (Equiv.addLeft x) (fun y => ψ ((Q x + L x) - (Q y + L y)))).symm
+    rw [Finset.sum_congr rfl (fun x _ => e2 x)]
+    have e3 : ∀ x h : V, ψ ((Q x + L x) - (Q (x + h) + L (x + h)))
+        = ψ (-(QuadraticMap.polar Q x h) - (Q h + L h)) := by
+      intro x h; congr 1
+      have hLadd : L (x + h) = L x + L h := L.map_add x h
+      rw [QuadraticMap.polar, hLadd]; ring
+    rw [Finset.sum_congr rfl (fun x _ => Finset.sum_congr rfl (fun h _ => e3 x h)), Finset.sum_comm]
+    have e4 : ∀ h : V, (∑ x : V, ψ (-(QuadraticMap.polar Q x h) - (Q h + L h)))
+        = ψ (-(Q h + L h)) * ∑ x : V, ψ (-(QuadraticMap.polar Q x h)) := by
+      intro h
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl (fun x _ => by rw [← AddChar.map_add_eq_mul]; congr 1; ring)
+    rw [Finset.sum_congr rfl (fun h _ => e4 h)]
+    have e5 : ∀ h : V, (∑ x : V, ψ (-(QuadraticMap.polar Q x h)))
+        = if (∀ x, QuadraticMap.polar Q x h = 0) then (Fintype.card V : ℂ) else 0 := by
+      intro h
+      have hφx : ∀ x, (-(Q.polarBilin.flip h)) x = -(QuadraticMap.polar Q x h) := by
+        intro x; rw [LinearMap.neg_apply, LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply]
+      rw [show (∑ x : V, ψ (-(QuadraticMap.polar Q x h)))
+            = ∑ x : V, ψ ((-(Q.polarBilin.flip h)) x) from
+          Finset.sum_congr rfl (fun x _ => by rw [hφx x]), sum_addChar_linearMap hψ]
+      refine if_congr ?_ rfl rfl
+      rw [LinearMap.ext_iff]
+      constructor
+      · intro hh x; have := hh x; rw [hφx x, LinearMap.zero_apply, neg_eq_zero] at this; exact this
+      · intro hh x; rw [hφx x, LinearMap.zero_apply, neg_eq_zero]; exact hh x
+    rw [Finset.sum_congr rfl (fun h _ => by rw [e5 h])]
+    have e6 : ∀ h : V, ψ (-(Q h + L h))
+          * (if (∀ x, QuadraticMap.polar Q x h = 0) then (Fintype.card V : ℂ) else 0)
+        = (if (∀ x, QuadraticMap.polar Q x h = 0) then ψ (-(L h)) * (Fintype.card V : ℂ) else 0) := by
+      intro h
+      split_ifs with hP
+      · have hQh : Q h = 0 := by
+          have hps := QuadraticMap.polar_self Q h
+          rw [hP h, nsmul_eq_mul] at hps
+          have h2 : ((2 : ℕ) : K) * Q h = 0 := hps.symm
+          have h2K : ((2 : ℕ) : K) ≠ 0 := by simpa using (Invertible.ne_zero (2 : K))
+          exact (mul_eq_zero.1 h2).resolve_left h2K
+        rw [hQh, zero_add]
+      · rw [mul_zero]
+    rw [Finset.sum_congr rfl (fun h _ => e6 h), ← Finset.sum_filter, ← hrad, Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun h _ => by rw [mul_comm])
+  have hnormeq : ‖S‖ ^ 2 = ‖S * (starRingEnd ℂ) S‖ := by
+    rw [norm_mul, Complex.norm_conj]; ring
+  rw [hnormeq, hmain, norm_mul, norm_natCast]
+  refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+  calc ‖∑ h ∈ rad, ψ (-(L h))‖
+      ≤ ∑ h ∈ rad, ‖ψ (-(L h))‖ := norm_sum_le _ _
+    _ = ∑ _h ∈ rad, (1 : ℝ) := Finset.sum_congr rfl (fun h _ => norm_addChar_eq_one ψ _)
+    _ = (rad.card : ℝ) := by rw [Finset.sum_const, nsmul_eq_mul, mul_one]
+
+/-- **The uniform `|M(y,z)|²` bound (3c — the magnitude consumed by the increment-3 `c₀` bound).** For the inner sum
+`M(y,z) = ∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀))`, `‖M‖² ≤ qᵈ · |radical F|`, `F = y•pairForm_u + z•pairForm_v`.
+On the NONDEG locus `|radical F| = 1 ⟹ ‖M‖² ≤ qᵈ` (matches `norm_pairSum_le`); on the degenerate conic
+`|radical F| ≤ q ⟹ ‖M‖² ≤ q^{d+1}` (so `‖M‖ ≤ q^{(d+1)/2}`). Via `pairSum_to_shifted` (`M = ψ(const)·∑_s ψ(F s + L s)`)
++ `norm_sq_sum_addChar_quadForm_linear_le`. -/
+theorem norm_sq_pairSum_le {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Invertible (2 : K)]
+    {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] (Q : QuadraticForm K V) (u v t₀ : V) (y z : K) :
+    ‖∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v))‖ ^ 2
+      ≤ (Fintype.card V : ℝ)
+        * (Finset.univ.filter (fun h : V =>
+            ∀ x, QuadraticMap.polar (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) x h = 0)).card := by
+  rw [pairSum_to_shifted ψ Q u v t₀ y z, norm_mul, norm_addChar_eq_one, one_mul]
+  have hL : ∀ s, z * QuadraticMap.polar (pairForm Q (t₀ - v)) s (u - v)
+      = (z • (pairForm Q (t₀ - v)).polarBilin.flip (u - v)) s := by
+    intro s
+    rw [LinearMap.smul_apply, LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply, smul_eq_mul]
+  rw [show (∑ s : V, ψ ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) s
+            + z * QuadraticMap.polar (pairForm Q (t₀ - v)) s (u - v)))
+        = ∑ s : V, ψ ((y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) s
+            + (z • (pairForm Q (t₀ - v)).polarBilin.flip (u - v)) s) from
+      Finset.sum_congr rfl (fun s _ => by rw [hL s])]
+  exact norm_sq_sum_addChar_quadForm_linear_le hψ (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v))
+    (z • (pairForm Q (t₀ - v)).polarBilin.flip (u - v))
+
 end CMagnitude
 
 end ChainDescent
@@ -607,3 +716,5 @@ end ChainDescent
 #print axioms ChainDescent.norm_gaussSum_sq
 #print axioms ChainDescent.norm_pairSum_le
 #print axioms ChainDescent.norm_sq_sum_addChar_quadForm
+#print axioms ChainDescent.norm_sq_sum_addChar_quadForm_linear_le
+#print axioms ChainDescent.norm_sq_pairSum_le
