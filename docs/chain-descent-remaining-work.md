@@ -138,10 +138,15 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ScratchCrux) +
 >   `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248), both axiom-clean (no Witt, no `hSmallAutThin`). ⟹ once
 >   Layer A lands, **affine-polar `VO^ε` is sealed modulo `{G3}` + the seam.**
-> - **Layer C — other forms-graph families (★).** Pair route is generic in a *quadratic* `Q` (covers affine-polar in one
->   stroke), but NOT: (d) alternating (alternating bilinear form, own predicate, same technique, medium), (e) half-spin /
->   (f) Suzuki–Tits (cite-hunt first — may be citable in rank-3/2-transitive lit), char-2 §11.5 (whole route assumes
->   `ringChar≠2`/`Invertible 2`; distinct track).
+> - **Layer C — other forms-graph families (★, spikes done 2026-06-26).** Pair route is generic in a *quadratic* `Q` (covers
+>   affine-polar in one stroke), but NOT: **(d) alternating** (alternating bilinear form, own predicate, same technique, medium);
+>   **(e) half-spin** (char-agnostic form-adjacent spinor geometry — expect a transfer closer to affine-polar; spike pending);
+>   **char-2 §11.5** (uncitable per the char-2 feasibility check; whole odd-char A-side evaporates — no `χ`; needs a from-scratch
+>   Mathlib substrate = Arf invariant + char-2 quadric count via additive-trace; the combinatorial layer reuses char-agnostically;
+>   distinct track); **(f) Suzuki–Tits** — SPIKED (plan §11.4): reachable not a wall, but **folds INTO the char-2 track** (it IS
+>   char-2: `Sz(q)`, `q=2^{2e+1}`) and is the most bespoke analytic engine (non-form σ-twisted ovoid, cospectral with `VO⁻₄`).
+>   Optimistic path = direct geometric individualization on the explicit Tits coordinates (no `χ`/Weil); fallback = σ-twisted
+>   count (Weil risk). The handle is findable; the open question is which.
 > - **Layer D — the structural seam (◐ SPIKED 2026-06-26, `ScratchSeam.lean`, axiom-clean; §11.6).** The cited classification
 >   case-split routing the abstract residue `S` → concrete `affineScheme(Q)`, where `{G3 + Skresanov + Liebeck + Ponomarenko-2-sep}`
 >   get consumed. **The seam CLOSES architecturally** — stub `reachesRigidOrCameron_viaSchurianRank3Affine` compiles, reducing it to

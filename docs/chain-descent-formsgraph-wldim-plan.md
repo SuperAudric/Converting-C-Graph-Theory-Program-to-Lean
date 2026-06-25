@@ -524,8 +524,47 @@ Dependency-ordered, with the modifications folded in:
   `IsotropySeparatesAtBase`. ⚠ NOTE: the form object is an *alternating bilinear* form, not a quadratic form, so the
   geometry-agnostic orthogonal lemma (§11.1) does NOT cover it directly — it needs its own predicate instance, but rides
   on the same kernel *technique*. Medium.
-- **(e) half-spin** — spinor geometry, different incidence. Medium–high.
-- **(f) Suzuki–Tits** — the exceptional outlier; ⚠ **not "small"** (the `Sz(q)` geometry is genuinely special).
+- **(e) half-spin** — spinor geometry, different incidence. Medium–high. **(Less special than (f): char-agnostic, form-adjacent
+  incidence — expect a Handle-1/form-count transfer closer to affine-polar/alternating. Spike pending.)**
+- **(f) Suzuki–Tits** — the exceptional outlier; the `Sz(q)` geometry is genuinely special (small-Aut, but neither odd-char nor a form).
+
+> **▶▶▶ SUZUKI–TITS (f) TRANSFER SPIKE DONE (2026-06-26) — verdict: reachable, NOT a wall, but the most bespoke analytic engine;
+> FOLD INTO the char-2 track. The odd-char technique does NOT transfer, and the failure clues a direct-geometric alternate.**
+>
+> **Structural facts (grounded: probe `SuzukiTits`, route-doc §9.9.18c).** `VSz(q)` is the Cayley graph on `GF(q)^4` with
+> connection set the cone over the Suzuki–Tits ovoid `O = {(1,a,b, ab + a^{σ+2} + b^σ)} ∪ {(0,0,0,1)}`, `q = 2^{2e+1}`, `σ` the
+> **Tits endomorphism** (`σ² = Frobenius`; `q=8 ⟹ σ(x)=x⁴`). It is small-Aut (`|Aut| ~ q⁴ = n^{1+o(1)}`, `Sz(q) ⊂ Aut`),
+> **cospectral with `VO⁻₄(q)`** (same params `(4096,455,6,56)`, distinguished ONLY by `Sz(q)`), and the probe **shatters it at
+> base 9 ≪ √4096** (bounded-WL-dim confirmed).
+>
+> **Why the affine-polar technique does NOT transfer — two independent reasons, both clueing the alternate:**
+> 1. **Char-2, necessarily.** `Sz(q) = ²B₂(q)` exists ONLY for `q = 2^{2e+1}`. So Suzuki inherits the *entire* char-2 situation
+>    (§11.5): no `χ` (every element of `F_{2^k}^×` is a square), no Gauss sums, no `det`-via-polar — the whole odd-char A-side
+>    (`χ(det G₂)`, `K = χ(disc)·gaussSum^{d+2}`, `c0_le_threequarters`, the bridge B1a/B1b) has **no char-2 analog through `χ`**.
+> 2. **Non-form.** `VSz(q)` is defined by the σ-twisted **ovoid polynomial** `c + ab + a^{σ+2} + b^σ`, not a quadratic/bilinear
+>    form — so even the char-2 *orthogonal* substrate (Arf, char-2 quadric count) does **not** directly apply. And cospectrality
+>    with `VO⁻₄(q)` means **no shortcut via spectrum/parameters** — the separating invariant MUST see the σ-twist.
+>
+> **The alternate technique (what the failure clues — there is no form, so use the explicit ovoid coordinates):**
+> - **★ Handle 1 (OPTIMISTIC — direct geometric individualization, no exponential sums).** The Tits coordinatization makes a
+>   vertex's `(a,b)` explicit (`c` determined by the ovoid equation). Individualize `O(1)` reference vertices, read off the
+>   σ-twisted incidences ⟹ pin `(a,b,c)` purely combinatorially. Char-2-substrate-light, **no `χ`/Gauss/Weil**; consistent with
+>   the base-9 probe. **Try this FIRST.**
+> - **Handle 2 (FALLBACK — σ-twisted count).** Run the Layer-A skeleton with the σ-twisted ovoid form replacing `Q`, in char-2
+>   additive-trace. ⚠ **RISK:** the σ-twist (`a^{σ+2}`, `σ²=Frob`) yields σ-twisted exponential sums (Kloosterman/Sato–Tate
+>   territory) that may need **Weil/Deligne** — exactly the deep bounds the affine-polar route worked to avoid. Suzuki's count
+>   route is the **highest analytic risk of any family**; Handle 1 exists precisely to dodge it.
+>
+> **Strategic placement — Suzuki is NOT a 5th independent family; fold it into the char-2 track.** Both are char-2; both reuse
+> the **char-agnostic combinatorial layer** (matching `ScratchMatching`, `ZProfileSeparates`/`ScratchBridgeZ`, the seam
+> `ScratchSeam`, Layer B) which touches no `χ`; both need the non-`χ` additive-trace substrate (which char-2 already builds).
+> Suzuki is the most bespoke *analytic* engine but it is a **single family with fully explicit coordinates**. Sequence: after the
+> char-2 orthogonal substrate exists, Suzuki either **extends** it (Handle 2) or **sidesteps** it (Handle 1, geometric).
+>
+> **Net feasibility:** reachable, not a wall — single family, explicit Tits coordinates, empirical base-9 shatter, reusable
+> combinatorial layer. Risks: the shared char-2 Mathlib substrate gap (§11.5), the σ-twisted semilinear structure (no Mathlib
+> support — the Tits endomorphism is exotic), and the Handle-2 Weil risk (mitigated by Handle 1). **The handle IS findable; the
+> open question is which of the two, settled by attempting Handle 1's geometric recovery on the explicit coordinatization.**
 - **★ CITATION-HUNT FIRST (before any bespoke (e)/(f) proof):** the core orthogonal/affine-polar family is **uncitable**
   (forms-graph bounded-WL-dim is OPEN both ways in the literature — `reference_srg_wl_literature_2026-06-17`), which is
   what makes proving it a contribution. But (e)/(f) are exceptional and MAY have a handle in the rank-3 / 2-transitive /
