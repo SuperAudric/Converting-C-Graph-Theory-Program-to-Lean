@@ -124,13 +124,13 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     (reuses `degenerate_count_le`-style tools). De-risked numerically (`Probe_D3dPairCount`: `c̄₀≈0.45` flat).
 >   - ★ **Increment 5 — apply the matching trick** (small): feed `c̄₀<1` into **`ScratchMatching.exists_separating_base`
 >     (LANDED, axiom-clean)** with `m=O(d log q)` ⟹ separating base `O(d log q)`.
->   - ◐ **Observable↔count bridge** (CONFIRMED + B1b landed 2026-06-26, `ScratchBridge.lean`, axiom-clean): `c0_le_threequarters` is
->     in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. The link is the `|S|=2` Lemma A: on the
->     nondeg-config locus, even `d`, `Z_w·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)` (`K≠0`), so the four `(χ,[c=0])` values are distinct
->     for `q>2` ⟹ `χ`-separation ⟹ `Z`-separation. **B1b** (the distinctness) is **proved** (`chiSep_imp_zSep`); ★ **B1a** (assemble
->     the closed form from `levelset_count_eq`+`configGaussSum_eq_det`+`sum_addChar_quadForm_smul` at `m=2`) + ★ **B1-deg** (the
->     degenerate-config `χ=0` value — couples to the good anchor; restrict the matching to config-nondeg pairs to avoid it) remain.
->     De-risked: contained Gauss assembly, NO Weil, NOT a hidden wall. (Plan §13 BRIDGE block.)
+>   - ◐ **Observable↔count bridge** (ARCHITECTURALLY CLOSED 2026-06-26, `ScratchBridge`/`ScratchBridgeA`/`ScratchBridgeZ`, axiom-clean):
+>     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
+>     χ-separating base) →[`pairCount_ne_of_chiSep` (**B1b**) + `levelset_count_collapse` (**B1a core**: `Z_w·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`,
+>     `K≠0`)]→ (`Z`-separating base) →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`. Three pieces LANDED axiom-clean;
+>     **B1-deg DISSOLVED** (config-degenerate locus density `O(1/√q)`, folds into the increment-4 matching density — no degenerate `Z`
+>     value needed). ★ **ONLY remaining = B1a mechanical wrapping** (cone↔levelset + `w=0` + `D↔pairForm` + `R'→ℕ`, all landed-tool).
+>     NO Weil, NOT a hidden wall. (Plan §13 BRIDGE block.)
 >   - ★ **Field generalization** (medium refactor): `c0_le_threequarters` is already abstract `[Field K]` (prime-power `q`
 >     covered analytically — subsumes the old "uniform kernel"/"q-prime-first"); but `ScratchCrux`/`ZProfileSeparates` are
 >     `ZMod p` only and must lift to **abstract `[Field K] [Fintype K]`** (per AUDIT-A — a typeclass refactor, NOT a `GaloisField`

@@ -148,11 +148,17 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `ScratchBucket.c0_le` (the pure-real final arithmetic). Assembles `card_agree_le`+`normT_bucket_bound`+`zeroCount_sq_le`+radical bound.
   NB `hq1 : 64q²≤|V|` ⟺ `d ≥ 3`, the families' own range (`VO^ε_{2m}`, `d=2m≥4`) — see §1 SCOPE NOTE; `d=2` is out of scope.
 - **`ScratchBridge.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build) — the
-  **observable↔count bridge, B1b** (`chiSep_imp_zSep`): from the `|S|=2` even-`d` closed form `Z_w = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`
-  (`K = χ(disc Q)·gaussSum^{d+2} ≠ 0`), the four `(χ,[c=0])` values are distinct for `q>2` ⟹ `χ(det G₂)_u ≠ χ(det G₂)_v ⟹
-  Z_u({t,t₀}) ≠ Z_v({t,t₀})`. Connects increment 3/4/5's pair-observable separation to `ScratchCrux.ZProfileSeparates`'s joint
-  counts. **B1a analytic core LANDED** in `ScratchBridgeA` (next entry); B1a mechanical remainder + **B1-deg** (the degenerate-config
-  `χ=0` value, coupling to the good anchor) remain — see §13 BRIDGE block.
+  **observable↔count bridge, B1b**: `chiSep_imp_zSep` (from the `|S|=2` even-`d` closed form `Z_w = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`,
+  `K ≠ 0`, the four `(χ,[c=0])` values are distinct for `q>2` ⟹ `χ(det G₂)_u ≠ χ(det G₂)_v ⟹ Z_u({t,t₀}) ≠ Z_v({t,t₀})`) +
+  **`pairCount_ne_of_chiSep`** (the same in joint-count language: closed form for each point + χ-separation ⟹ `Z_u ≠ Z_v`). Feeds
+  the bridge capstone `ScratchBridgeZ.zProfileSeparates_of_zSep`. **B1a analytic core LANDED** in `ScratchBridgeA`; only B1a's
+  mechanical wrapping remains (B1-deg **dissolved** — see §13 BRIDGE block).
+- **`ScratchBridgeZ.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
+  `ScratchCrux` → build its olean first) — the **bridge capstone** `zProfileSeparates_of_zSep`: any `Z`-separating base
+  (`∀ u≠u', ∃ S⊆T, jointIsoCount Q u S ≠ jointIsoCount Q u' S`) discharges `ScratchCrux.ZProfileSeparates Q T` outright. With
+  `pairCount_ne_of_chiSep` + `levelset_count_collapse` (turning a config-nondeg χ-separating pair into a `Z`-separating sub-frame),
+  this **architecturally closes the bridge** and **dissolves B1-deg** (the config-degenerate locus, density `O(1/√q)`, folds into
+  the increment-4 matching density — no degenerate-config `Z` value needed). See §13 BRIDGE block.
 - **`ScratchBridgeA.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchLemmaA` → build its olean first) — the **B1a analytic core** `levelset_count_collapse`: for config size `m=2`, **even `d`**,
   nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
@@ -671,15 +677,15 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 >   observable↔count bridge ⟹ `ZProfileSeparates`; then families (d–f)/char-2 + the structural seam + port. PICK-UP detail: the
 >   "▶▶ STATUS (2026-06-25)" note in the INCREMENT 4 block below + `chain-descent-remaining-work.md` §3a.1 (full layered map).
 >   The bullets below this one are CHRONOLOGICAL HISTORY (steps now done — trust this bullet + the INCREMENT 3 PLAN block, all-DONE).
-> - **★ OBSERVABLE↔COUNT BRIDGE CONFIRMED + B1b & B1a-CORE LANDED (2026-06-26, `ScratchBridge.lean` + `ScratchBridgeA.lean`,
->   axiom-clean).** The link from increment 3/4/5's pair-observable separation to `ZProfileSeparates`'s joint counts is de-risked:
->   on the nondeg-config locus, even `d`, `Z_w({t,t₀})·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)` (`K = gaussSum²·∑ψ(Qx) ≠ 0`), four
->   distinct `(χ,[c=0])` values for `q>2` ⟹ `χ`-sep ⟹ `Z`-sep (`chiSep_imp_zSep`, **B1b**). The closed-form `s`-sum collapse
->   (**B1a analytic core**) is now PROVED (`levelset_count_collapse`) from `levelset_count_eq`+`configGaussSum_eq_det`+
->   `sum_addChar_quadForm_smul`+`AddChar.sum_mulShift`. Remaining: **B1a** mechanical remainder (cone↔levelset + `w=0` +
->   `D↔pairForm` + `R'→ℕ`) + **B1-deg** (`χ=0` degenerate config — restrict the matching to config-nondeg good-anchor pairs to
->   avoid it). Detail: the "▶▶ OBSERVABLE↔COUNT BRIDGE" block in the INCREMENT 4 region below. **Not a hidden wall** — contained
->   Gauss assembly, no Weil.
+> - **★ OBSERVABLE↔COUNT BRIDGE ARCHITECTURALLY CLOSED; B1-deg DISSOLVED (2026-06-26, `ScratchBridge`/`ScratchBridgeA`/
+>   `ScratchBridgeZ`, all axiom-clean).** End-to-end chain: (config-nondeg χ-separating base, increment 4/5)
+>   →[`pairCount_ne_of_chiSep` (**B1b**) + `levelset_count_collapse` (**B1a core**, the `s`-sum collapse
+>   `Z_w·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`, `K≠0`)]→ (`Z`-separating base) →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`.
+>   Three of the four pieces are LANDED axiom-clean (`pairCount_ne_of_chiSep`, `levelset_count_collapse`,
+>   `zProfileSeparates_of_zSep`). **B1-deg (degenerate config `χ=0`) is DISSOLVED** — the config-degenerate locus has density
+>   `O(1/√q)` and folds into the increment-4 matching's bad set (no degenerate-config `Z` value needed). **ONLY remaining bridge
+>   work = B1a's mechanical wrapping** (cone↔levelset + `w=0` + `D↔pairForm` + `R'→ℕ`, all landed-tool). Detail: "▶▶ OBSERVABLE↔COUNT
+>   BRIDGE" block in the INCREMENT 4 region below. **Not a hidden wall** — contained Gauss assembly, no Weil.
 > - **LANDED** (`ChainDescent/ScratchCrux.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, compiles via
 >   `lake env lean`, NOT yet in `build.sh`): **D1** `qProfileSeparatesAtBase_of_zProfileSeparates`, **D2-bridge**
 >   `jointIsoCount_eq_restricted`, and the end-to-end `isotropySeparates_of_zProfileSeparates`. Reuses landed
@@ -1167,16 +1173,26 @@ remainder (families, seam, port): `chain-descent-remaining-work.md` §3a.1.
      The increment-3/4/5 separation is in `χ(det G₂)` **alone** — that is still *sufficient* (B1b shows `χ`-separation survives
      the `c`-bit: no `(χ_u,b_u)` vs `(χ_v,b_v)` collision when `χ_u≠χ_v`), but the bridge proof must carry the explicit 4-value
      form, NOT merely "`Z` is a function of `χ`". B1b is exactly this check.
-  2. **The degenerate-config case (`χ=0`) is unbuilt and couples to the good anchor (concern shared with increment 4).** Lemma A
-     needs `IsUnit (det G₂)`; when a separating pair has `χ_u=0` (config-degenerate) vs `χ_v=±1`, the bridge needs the rank-deficient
-     count `Z_deg` (the `D3b` value) and `Z_deg ≠` the nondeg values. **Recommended:** restrict the matching/good-anchor (increment 4)
-     to **config-nondegenerate separating pairs**, so the bridge only ever needs the `±1/±1` case (B1b, done). This ties the bridge's
-     completeness to the good-anchor predicate `{hgood ∧ hnz ∧ hPu}` — fold it into the increment-4 restatement.
+  2. **The degenerate-config case (`χ=0`) — B1-deg — is DISSOLVED, not a remaining piece (2026-06-26).** Lemma A needs
+     `IsUnit (det G₂)`; a separating pair with `χ_u=0` (config-degenerate) vs `χ_v=±1` would need the rank-deficient count
+     `Z_deg` (the `D3b` value). **The clean resolution is to never need it:** the bridge reduction
+     **`ScratchBridgeZ.zProfileSeparates_of_zSep`** (axiom-clean) shows `ZProfileSeparates Q T` follows from *any*
+     `Z`-separating base (`∀ u≠v, ∃ S⊆T, Z_u(S) ≠ Z_v(S)`), and the per-pair step **`ScratchBridge.pairCount_ne_of_chiSep`**
+     (B1b in count form, axiom-clean) turns a **config-nondeg** χ-separating pair into a `Z`-separating one. So the matching
+     (increment 4) is targeted at config-nondeg separating pairs; the config-degenerate locus `{det G₂ = 0}` is an affine-quadric
+     zero set of density `O(1/√q)` (the `zeroCount_sq_le` bound increment 3 already uses), folded into the matching's "bad" set
+     alongside bad anchors — costing only an `O(1/√q)` gap shrink (`#{strict-sep t} ≥ (¼ − O(1/√q))·|V| > 0` for `q ≳ const`).
+     **So B1-deg is relocated into the increment-4 density, not proved** (computing `Z_deg` directly via rank-deficient Lemma A
+     remains an off-critical-path option). The bridge is thereby **architecturally closed**: it needs only B1a's mechanical
+     wrapping + a config-nondeg `Z`-separating base from increment 4/5.
   3. **`q=2` breaks distinctness** (`q−1=1` collapses two of the four values) — harmless, char-2 is already a separate excluded
-     track (`Invertible 2`), but it confirms the bridge is **odd-`q` only**, consistent with the rest of the route.
-- **Net verdict — bridge DE-RISKED.** On the nondeg locus the bridge is a contained `GaussCount` assembly (B1a) + a finite
-  distinctness (B1b, **landed**); the only genuinely-new coupling is the degenerate-config case, which the good-anchor restriction
-  removes. No Weil, no new theory. This is *not* the hidden wall the route's success hinged on.
+     track (`Invertible 2`), but it confirms the bridge is **odd-`q` only**, consistent with the rest of the route (see §11.5).
+- **Net verdict — bridge ARCHITECTURALLY CLOSED, B1-deg dissolved.** The end-to-end chain is: (config-nondeg χ-separating base,
+  increment 4/5) →[`pairCount_ne_of_chiSep` (B1b) + `levelset_count_collapse` (B1a core)]→ (`Z`-separating base)
+  →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`. Landed axiom-clean: the two endpoints (`pairCount_ne_of_chiSep`,
+  `zProfileSeparates_of_zSep`) + the analytic core (`levelset_count_collapse`). **The ONLY remaining bridge work is B1a's
+  mechanical wrapping** (cone↔levelset + `w=0` + `D↔pairForm` + `R'→ℕ`, all landed-tool) — no degenerate-config computation, no
+  Weil, no new theory. This is *not* the hidden wall the route's success hinged on.
 
 **▶ MATCHING TRICK CONFIRMED + COUNTING CORE LANDED + GAPS SHARPENED (2026-06-24).** Stress-tested the increment-4 fold-in
 above; it is **sound**, and the load-bearing combinatorial core is now an axiom-clean theorem. Three things:

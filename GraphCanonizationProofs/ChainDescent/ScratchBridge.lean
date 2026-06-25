@@ -56,6 +56,25 @@ theorem chiSep_imp_zSep {n q K cu cv bu bv : ℤ}
   rw [hrw]
   exact mul_ne_zero (mul_ne_zero hcu0 hK) hF
 
+/-- **B1b in the joint-count language — the per-pair bridge step.** Given the `|S|=2`, even-`d` closed form for the
+joint isotropic count of each point (`Z_w · q³ = qᵈ + χ_w · K · (q·b_w − 1)`, the nondeg-config output of
+`ScratchBridgeA.levelset_count_collapse` with `n = qᵈ`, `K = gaussSum²·∑ψ(Q)`, `χ_w = χ(det G₂_w)`, `b_w = [c_w=0]`),
+two points whose pair invariants `χ(det G₂)` differ (`hne`) have **different joint counts** `Z_u ≠ Z_v` at that pair.
+This is exactly what feeds `zProfileSeparates_of_zSep` (a config-nondeg χ-separating pair is a `Z`-separating
+sub-frame). The hypotheses `hZu`/`hZv` are discharged by completing B1a's mechanical wrapping; everything else is
+`chiSep_imp_zSep`. -/
+theorem pairCount_ne_of_chiSep {Zu Zv n q K cu cv bu bv : ℤ}
+    (hq : 2 < q)
+    (hK : K ≠ 0)
+    (hbu : bu = 0 ∨ bu = 1) (hbv : bv = 0 ∨ bv = 1)
+    (hcu : cu = 1 ∨ cu = -1) (hcv : cv = 1 ∨ cv = -1)
+    (hne : cu ≠ cv)
+    (hZu : Zu * q ^ 3 = n + cu * K * (q * bu - 1))
+    (hZv : Zv * q ^ 3 = n + cv * K * (q * bv - 1)) :
+    Zu ≠ Zv := by
+  intro h
+  exact chiSep_imp_zSep hq hK hbu hbv hcu hcv hne (by rw [← hZu, ← hZv, h])
+
 end ChainDescent
 
 #print axioms ChainDescent.chiSep_imp_zSep
