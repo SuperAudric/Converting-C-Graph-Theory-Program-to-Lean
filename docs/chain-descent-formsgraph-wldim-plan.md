@@ -151,8 +151,14 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   **observable↔count bridge, B1b** (`chiSep_imp_zSep`): from the `|S|=2` even-`d` closed form `Z_w = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`
   (`K = χ(disc Q)·gaussSum^{d+2} ≠ 0`), the four `(χ,[c=0])` values are distinct for `q>2` ⟹ `χ(det G₂)_u ≠ χ(det G₂)_v ⟹
   Z_u({t,t₀}) ≠ Z_v({t,t₀})`. Connects increment 3/4/5's pair-observable separation to `ScratchCrux.ZProfileSeparates`'s joint
-  counts. **B1a** (assemble the closed form from `levelset_count_eq`+`configGaussSum_eq_det`+`sum_addChar_quadForm_smul` at `m=2`)
-  and **B1-deg** (the degenerate-config `χ=0` value, coupling to the good anchor) remain open — see §13 BRIDGE block.
+  counts. **B1a analytic core LANDED** in `ScratchBridgeA` (next entry); B1a mechanical remainder + **B1-deg** (the degenerate-config
+  `χ=0` value, coupling to the good anchor) remain — see §13 BRIDGE block.
+- **`ScratchBridgeA.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
+  `ScratchLemmaA` → build its olean first) — the **B1a analytic core** `levelset_count_collapse`: for config size `m=2`, **even `d`**,
+  nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
+  `levelset_count_eq` (the "big but mechanical" `D3a` at `|S|=2` the `VO⁻₄(3)` instance bypassed via `decide`); config-dependence
+  enters only through `χ(D) = χ(det G₂)`, the bridge observable. Feeds `ScratchBridge.chiSep_imp_zSep`. Remaining B1a = cone↔levelset
+  + `w=0` correction + `D↔pairForm` + `R'→ℕ` descent (all landed-tool/mechanical).
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -529,6 +535,24 @@ Dependency-ordered, with the modifications folded in:
   **cite ONLY if the classification's char-2 cases are genuinely covered by an existing theorem (a clean citation);
   otherwise it is in scope to prove** — per the endpoint discipline it is NOT a messy deferral. Distinct track regardless.
 
+> **▶ WHY char-2 IS A REQUIRED BRANCH, NOT OPTIONAL (the "odd-`q` only" question, 2026-06-26).** The entire pair route
+> (and the `wittFree`/Lemma-A machinery, and `c0_le_threequarters`/B1a/B1b) carries `ringChar ≠ 2` / `Invertible 2` — it is
+> **odd-`q` only**. But the affine rank-3 forms-graph families `VO^ε_{2m}(q)` exist over **every** `q`, including `q = 2^k`,
+> and Liebeck's affine-rank-3 classification places the **even-`q` orthogonal instances squarely in the same node-4
+> small-Aut non-geometric schurian residue** as the odd-`q` ones (they are genuine, distinct residue graphs — the char-2
+> quadratic form carries the Arf/quadratic-refinement data its alternating polar does *not*, so they do **not** collapse
+> into the geometric bilinear-forms leg). **So every graph DOES hit a branch — but the char-2 forms-graphs hit a branch
+> that is currently NEITHER built NOR cited.** This is the honest status: it is a **tracked, in-scope obligation** (endpoint
+> discipline, §11 header: "every family incl. char-2 ends up proven or cleanly cited", §11.8 net ordering
+> "char-2 cite-if-covered-else-prove") — NOT a silent hole in the seal's logic (the residue is carried, the branch is named)
+> — but it IS genuine remaining work: the seal is **not complete** until the char-2 forms-graph branch is filled. The "odd-`q`
+> only" limit of the pair route is therefore correct and expected, with char-2 a parallel obligation, not a non-issue.
+> **Recommended next for that branch:** a citation-hunt (Liebeck classification + any char-2 forms-graph WL-dim/base results)
+> — cite if a clean one exists, else prove via the bespoke char-2 Gauss/incidence argument (the polar is alternating, so the
+> A-side reduction must be redone; `card_quadForm_eq`-style counts over `𝔽_{2^k}` with the Dickson/Arf invariant replacing
+> `χ(disc)`). The 1-dim cyclotomic slice over even `q` is separately covered by the Ponomarenko citation (§11.6), so the
+> char-2 GAP is specifically the forms-graphs (c)–(f), not the cyclotomic part.
+
 ### 11.6 Step group 4 — structural wiring (citations + glue) — DESIGN THE SEAM EARLY
 
 This is the **load-bearing** step — it produces the rigid-or-Cameron conclusion for the schurian residue (NOT, per
@@ -647,12 +671,15 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 >   observable↔count bridge ⟹ `ZProfileSeparates`; then families (d–f)/char-2 + the structural seam + port. PICK-UP detail: the
 >   "▶▶ STATUS (2026-06-25)" note in the INCREMENT 4 block below + `chain-descent-remaining-work.md` §3a.1 (full layered map).
 >   The bullets below this one are CHRONOLOGICAL HISTORY (steps now done — trust this bullet + the INCREMENT 3 PLAN block, all-DONE).
-> - **★ OBSERVABLE↔COUNT BRIDGE CONFIRMED + B1b LANDED (2026-06-26, `ScratchBridge.lean`, axiom-clean).** The link from increment
->   3/4/5's pair-observable separation to `ZProfileSeparates`'s joint counts is de-risked: on the nondeg-config locus, even `d`,
->   `Z_w({t,t₀})·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)` (`K≠0`), four distinct `(χ,[c=0])` values for `q>2` ⟹ `χ`-sep ⟹ `Z`-sep
->   (`chiSep_imp_zSep`). Remaining: **B1a** (assemble the closed form at `m=2` from landed Lemma A) + **B1-deg** (`χ=0` degenerate
->   config — restrict the matching to config-nondeg good-anchor pairs to avoid it). Detail: the "▶▶ OBSERVABLE↔COUNT BRIDGE" block
->   in the INCREMENT 4 region below. **Not a hidden wall** — contained Gauss assembly, no Weil.
+> - **★ OBSERVABLE↔COUNT BRIDGE CONFIRMED + B1b & B1a-CORE LANDED (2026-06-26, `ScratchBridge.lean` + `ScratchBridgeA.lean`,
+>   axiom-clean).** The link from increment 3/4/5's pair-observable separation to `ZProfileSeparates`'s joint counts is de-risked:
+>   on the nondeg-config locus, even `d`, `Z_w({t,t₀})·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)` (`K = gaussSum²·∑ψ(Qx) ≠ 0`), four
+>   distinct `(χ,[c=0])` values for `q>2` ⟹ `χ`-sep ⟹ `Z`-sep (`chiSep_imp_zSep`, **B1b**). The closed-form `s`-sum collapse
+>   (**B1a analytic core**) is now PROVED (`levelset_count_collapse`) from `levelset_count_eq`+`configGaussSum_eq_det`+
+>   `sum_addChar_quadForm_smul`+`AddChar.sum_mulShift`. Remaining: **B1a** mechanical remainder (cone↔levelset + `w=0` +
+>   `D↔pairForm` + `R'→ℕ`) + **B1-deg** (`χ=0` degenerate config — restrict the matching to config-nondeg good-anchor pairs to
+>   avoid it). Detail: the "▶▶ OBSERVABLE↔COUNT BRIDGE" block in the INCREMENT 4 region below. **Not a hidden wall** — contained
+>   Gauss assembly, no Weil.
 > - **LANDED** (`ChainDescent/ScratchCrux.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, compiles via
 >   `lake env lean`, NOT yet in `build.sh`): **D1** `qProfileSeparatesAtBase_of_zProfileSeparates`, **D2-bridge**
 >   `jointIsoCount_eq_restricted`, and the end-to-end `isotropySeparates_of_zProfileSeparates`. Reuses landed
@@ -1122,8 +1149,15 @@ remainder (families, seam, port): `chain-descent-remaining-work.md` §3a.1.
   `Z_u({t,t₀})·q³ = qᵈ + χ(det G₂(u;t,t₀))·K·(q·[c=0] − 1)`, `K = χ(disc Q)·gaussSum^{d+2}` a **nonzero rational integer**
   (`gaussSum² = χ(−1)·q`). Derivation: `levelset_count_eq` (landed) + `configGaussSum_eq_det` (landed: config-dependence enters
   **only** through `χ(det G₂)` — the key) + `sum_addChar_quadForm_smul` (landed global Gauss); then `m=2 ⟹ χ(−s⁻¹)²=1`,
-  even `d ⟹ χ(s)ᵈ=1` collapse the `s`-bracket to `∑_{s≠0}ψ(−sc)=q[c=0]−1`. **B1a** = formalising this collapse + the `÷q³`
-  descent at `m=2` — the "big but mechanical" `D3a` at `|S|=2` (the `VO⁻₄(3)` instance *bypassed* it via `decide`).
+  even `d ⟹ χ(s)ᵈ=1` collapse the `s`-bracket to `∑_{s≠0}ψ(−sc)=q[c=0]−1`. **★ B1a ANALYTIC CORE LANDED (2026-06-26,
+  `ScratchBridgeA.levelset_count_collapse`, axiom-clean):** exactly this `s`-sum collapse — `(level-set count at c)·q³ =
+  |V| + χ(D)·(gaussSum²·W)·(q·[c=0]−1)`, `W = ∑ₓψ(Qx)`, `D = det` config Gram — assembled from `levelset_count_eq` +
+  `configGaussSum_eq_det` + `sum_addChar_quadForm_smul` + `AddChar.sum_mulShift`, with the `m=2`/even-`d` χ-power kill
+  (`χ(−s⁻¹)²=1`, `χ(s)ᵈ=1`) done by rewriting only the power subterms (the `finBasis` dependent type is untouched). `K = gaussSum²·W`
+  is `u`-independent (config enters only via `χ(D)`; `= χ(disc Q)·gaussSum^{d+2}` after `sum_quadForm_eval`). **Remaining B1a (all
+  landed-tool or mechanical, OFF the analytic core):** (i) cone-count↔level-set (`reduction_to_levelset_nondeg`) + the `w=0`
+  correction (`ScratchLemmaB.cone_count_zero_split`); (ii) `D ↔ pairForm`/`det G₂` identification (so `χ(D)=χ(I_w(t))`); (iii) the
+  `R'→ℕ` descent (`÷q³`, `Nat.cast` injective). The `VO⁻₄(3)` instance *bypassed* all of this via `decide`.
 - **★ B1b LANDED (the load-bearing distinctness): `ScratchBridge.chiSep_imp_zSep`.** From the closed form, the four
   `(χ,[c=0]) ∈ {±1}×{0,1}` values `qᵈ ± K`, `qᵈ ± K(q−1)` are **distinct for `q>2` (`K≠0`)**, so `χ(det G₂)_u ≠ χ(det G₂)_v ⟹
   Z_u ≠ Z_v`. Proved abstractly (`Z_w = n + χ_w·K·(q·b_w−1)`, `χ_w∈{±1}`, `b_w∈{0,1}` ⟹ `χ_u≠χ_v ⟹ Z_u≠Z_v`), so it consumes
