@@ -129,7 +129,10 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     χ-separating base) →[`pairCount_ne_of_chiSep` (**B1b**) + `levelset_count_collapse` (**B1a core**: `Z_w·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`,
 >     `K≠0`)]→ (`Z`-separating base) →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`. Three pieces LANDED axiom-clean;
 >     **B1-deg DISSOLVED** (config-degenerate locus density `O(1/√q)`, folds into the increment-4 matching density — no degenerate `Z`
->     value needed). ★ **ONLY remaining = B1a mechanical wrapping** (cone↔levelset + `w=0` + `D↔pairForm` + `R'→ℕ`, all landed-tool).
+>     value needed). **B1a wrap (i)+(ii) LANDED** (`ScratchBridgeB`/`ScratchBridgeC`, axiom-clean: fullcount closed form); ★ remaining
+>     = **wrap (iii) `χ(D)=χ(I_w)`** (de-risked — factor-2 vanishes under `χ`) **+ assembly** (over ℂ, no `R'→ℕ` descent). ★ **FINDING:**
+>     the `corr` term ([both config-diffs isotropic], codim-2, `O(1/q²)`) ⟹ increment-4 good-pair predicate gains `corr=0` →
+>     `{hgood ∧ hnz ∧ corr=0}`. Detail: plan §13 BRIDGE net verdict.
 >     NO Weil, NOT a hidden wall. (Plan §13 BRIDGE block.)
 >   - ★ **Field generalization** (medium refactor): `c0_le_threequarters` is already abstract `[Field K]` (prime-power `q`
 >     covered analytically — subsumes the old "uniform kernel"/"q-prime-first"); but `ScratchCrux`/`ZProfileSeparates` are

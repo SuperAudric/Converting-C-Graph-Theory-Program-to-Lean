@@ -127,9 +127,12 @@ close it — is set out in
 > per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE — capstone **`ScratchC0Final.c0_le_threequarters`** (good anchor + `q≥q₀`/`d≥3` ⟹
 > `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`), built across 8 new scratch modules on top of `ScratchPairSep` (24 lemmas). The reduction
 > backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal` is LANDED (`ScratchCrux` + `…viaIsotropySeparates_wittFree`).
-> **NEXT = increments 4–5 (the matching trick): good-anchor density `c̄₀<1` → `ScratchMatching.exists_separating_base` (LANDED)
-> → separating base `O(d log q)` → `ZProfileSeparates`; then families (d–f)/char-2 + the structural seam + port.**
-> **Read `chain-descent-remaining-work.md` §3a.1 (full layered map), plan §13 STATUS, then `ScratchC0Final.lean`.**
+> **SINCE THEN (2026-06-26):** the **bridge** (`χ(det G₂)`↔`Z_u(S)`) is ARCHITECTURALLY CLOSED + B1-deg dissolved
+> (`ScratchBridge`/`A`/`Z`); **B1a wrap (i)+(ii) LANDED** (`ScratchBridgeB`/`C`, fullcount closed form), wrap (iii)+assembly next;
+> the **seam** is SPIKED (closes, `ScratchSeam`, modulo a mechanical `htransport`); **char-2+Suzuki** spiked (one bespoke char-2
+> track, deferred). **NEXT = B1a wrap (iii) → increment 4 (good-pair predicate `{hgood ∧ hnz ∧ corr=0}`) → increment 5 (matching).**
+> **Read the plan's top "CURRENT HANDOFF (2026-06-26)" block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the
+> *polynomial* seal; `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there

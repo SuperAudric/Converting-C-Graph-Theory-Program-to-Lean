@@ -16,6 +16,41 @@
 
 ## STATUS (read first)
 
+> **▶▶▶▶ CURRENT HANDOFF (2026-06-26) — read THIS first; the dated blocks below are chronological history.** Increment 3
+> (`c₀ ≤ ¾`) is closed (`ScratchC0Final.c0_le_threequarters`). Since then, four things landed/resolved — **the live frontier is
+> now B1a wrap (iii) + final assembly, then increment 4.** Authoritative detail: §13 STATUS + the §13 "OBSERVABLE↔COUNT BRIDGE"
+> block; cross-family detail in §11.4/§11.5; strategic framing in `chain-descent-remaining-work.md` §3a.1.
+>
+> 1. **★ THE BRIDGE (`χ(det G₂)` observable ⟷ `Z_u(S)` counts) is ARCHITECTURALLY CLOSED; B1-deg DISSOLVED.** Chain:
+>    (config-nondeg χ-separating base) →[`ScratchBridge.pairCount_ne_of_chiSep` (B1b) + `ScratchBridgeA.levelset_count_collapse`
+>    (B1a core)]→ (`Z`-separating base) →[`ScratchBridgeZ.zProfileSeparates_of_zSep`]→ `ZProfileSeparates`. The degenerate-config
+>    case is *dissolved* into the increment-4 matching density (`O(1/√q)` locus), not computed. Modules: `ScratchBridge`,
+>    `ScratchBridgeA`, `ScratchBridgeZ` (all axiom-clean, NOT in build).
+> 2. **★ B1a WRAP — (i)+(ii) LANDED, (iii) de-risked.** `ScratchBridgeB.fullcount_eq_jointIsoCount_add_corr` (i) +
+>    `ScratchBridgeC.fullcount_pair_eq_levelset`/`fullcount_pair_closed` (ii: the **fullcount closed form**
+>    `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀=0]−1)`). **Remaining B1a = (iii) `χ(D)=χ(I_w)`** (de-risked: the
+>    `associated=½·polar` factor-2 vanishes under `χ` since `χ(¼)=1`) **+ final assembly** of (i)+(ii)+(iii) into the per-pair
+>    `jointIsoCount` closed form feeding `pairCount_ne_of_chiSep`. Work over `R'=ℂ` (no `R'→ℕ` descent — distinctness in ℂ suffices).
+> 3. **★ FINDING (do NOT lose) — the `corr` term ⟹ increment-4 predicate refinement.** The observable closed form is
+>    `jointIsoCount·q³ = qᵈ − corr·q³ + χ(I_w)·K·(q·[Q w₀=0]−1)`, `corr=[both config-diffs isotropic]` (codim-2, density `O(1/q²)`).
+>    B1b's clean four-value distinctness needs `corr_u=corr_v=0`, so **increment 4's good-pair predicate is `{hgood (disc≢0) ∧ hnz
+>    (pairForms indep) ∧ corr=0}`** on both points (three small Schwartz–Zippel loci, all density `O(1/q)`–`O(1/q²)`, folded into the
+>    matching bad set). The analytic core (`c0_le_threequarters`) is untouched.
+> 4. **★ SPIKES DONE (feasibility of the rest) — all reachable, none a wall.** (a) **SEAM** (`ScratchSeam.lean`, axiom-clean):
+>    `reachesRigidOrCameron_viaSchurianRank3Affine` stub compiles ⟹ the abstract residue routes to `affineScheme(Q)` modulo ONE new
+>    obligation `htransport` (seal disjunction invariant along a realizing permutation), which is **mechanical** — the riskiest
+>    disjunct sits on the landed `forcedNode_relabel` (full iso-invariance). **Build it as a real lemma (option b), not hidden in the
+>    citation.** §11.6. (b) **char-2 + Suzuki** (§11.4/§11.5): both need a **bespoke** char-2 engine (no `χ`/Gauss; Arf + additive-trace,
+>    Mathlib substrate absent) but it is one shared track (Suzuki folds into char-2), reachable, gated on that substrate, **deferred**
+>    until odd-char affine-polar + seam close. The char-agnostic combinatorial layer (matching/bridge/seam/Layer B) reuses.
+>
+> **PICK UP HERE:** finish B1a wrap (iii) (`χ(D)=χ(I_w)`, reuse `ScratchPairSep.detG2_eq_pairForm` + `ScratchLemmaA.polar_configForm_single`)
+> → assemble the per-pair `jointIsoCount` closed form (over ℂ, corr=0 case) → **increment 4** (prove the good-pair predicate
+> `{hgood ∧ hnz ∧ corr=0}` holds at density `1−O(1/q)` per pair, via `ScratchGoodAnchor`-style Schwartz–Zippel) → **increment 5**
+> (wire `ScratchMatching.exists_separating_base` with `c̄₀<1`). Then field-gen (`ScratchCrux` `ZMod p`→abstract `K`), the corank
+> tightening (`q≳d²`→`q≳const`, §13 increment-3 block), families (d)/(e), and the seam build. **Strategic note:** the goal is the
+> *polynomial* seal; `reachesRigidOrCameron_viaSpielman` (idx 1117, axiom-clean) is the citable **sub-exp fallback** if a family walls.
+
 > **▶▶▶ `VO⁻₄(3)` SEALED (2026-06-21, axiom-clean `[propext, Classical.choice, Quot.sound]`).**
 > `ScratchBM3Glue.vo4minus_seal` proves the Witt-free capstone's conclusion for the bundled minus-form `Qbun = x₀x₁+x₂²+x₃²`
 > at the size-9 base `T₉`, modulo the cited `{G3}` stack — carrying **NO `hSmallAutThin`, NO Witt**. Chain:
@@ -173,8 +208,14 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `ScratchLemmaA` → build its olean first) — the **B1a analytic core** `levelset_count_collapse`: for config size `m=2`, **even `d`**,
   nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
   `levelset_count_eq` (the "big but mechanical" `D3a` at `|S|=2` the `VO⁻₄(3)` instance bypassed via `decide`); config-dependence
-  enters only through `χ(D) = χ(det G₂)`, the bridge observable. Feeds `ScratchBridge.chiSep_imp_zSep`. Remaining B1a = cone↔levelset
-  + `w=0` correction + `D↔pairForm` + `R'→ℕ` descent (all landed-tool/mechanical).
+  enters only through `χ(D) = χ(det G₂)`, the bridge observable. Feeds `ScratchBridge.chiSep_imp_zSep`. (Consumed by wrap (ii)
+  in `ScratchBridgeC`; remaining B1a = wrap (iii) `D↔pairForm` + assembly, over ℂ — §13 BRIDGE net verdict.)
+- **`ScratchSeam.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
+  `CascadeAffine`) — **THE SEAM SPIKE** `reachesRigidOrCameron_viaSchurianRank3Affine` (+ `SchemeRealizes`, `SealDisj`): the
+  abstract residue `S` reaches the seal disjunction given (C) the cited classification (`Cameron ∨ ≅ affineScheme(Q)` with
+  `IsotropySeparatesAtBase Q T`) + (T) the transport `htransport`. Stub COMPILES ⟹ seam closes modulo the one mechanical
+  obligation `htransport` (seal disjunction invariant along a realizing permutation; build via landed `forcedNode_relabel`,
+  option b). See §11.6 SEAM SPIKE box. Forms-graph case discharged by `…viaIsotropySeparates_wittFree`.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -781,7 +822,10 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > against the landed scaffolding (§12), the open core isolated, the build increments ordered. This is the active work.
 
 > **§13 STATUS (read first; the blocks below are the chronological detail).**
-> - **★★★ CURRENT (2026-06-25 handoff) — INCREMENT 3 CLOSED (all axiom-clean, full `lake build` green, NOT in build.sh).**
+> - **▶▶▶▶ CURRENT FRONTIER = the top-of-doc "CURRENT HANDOFF (2026-06-26)" block + the "OBSERVABLE↔COUNT BRIDGE
+>   ARCHITECTURALLY CLOSED (2026-06-26)" bullet two below.** Bridge closed, B1a wrap (i)+(ii) landed (wrap (iii)+assembly next),
+>   seam/char-2/Suzuki spiked. The 2026-06-25 bullet immediately below is now CHRONOLOGICAL HISTORY (increment 3, the prior frontier).
+> - **(HISTORY) 2026-06-25 — INCREMENT 3 CLOSED (all axiom-clean, full `lake build` green, NOT in build.sh).**
 >   The pair route's per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE: capstone **`ScratchC0Final.c0_le_threequarters`** (good anchor
 >   `hgood`/`hnz`/`hPu` + `q≥q₀` [`64q²≤|V|`⟺`d≥3`, `64d²≤q`, `256≤q`] ⟹ `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`). Built across 8 new
 >   scratch modules on top of `ScratchPairSep` (24 lemmas): `ScratchCorank` (`radical_card_mul_card_le`), `ScratchGoodAnchor`
