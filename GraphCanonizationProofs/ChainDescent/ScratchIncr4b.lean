@@ -54,6 +54,111 @@ theorem mvPoly_zeros_count_le_dim {K : Type*} [Field K] [Fintype K] [DecidableEq
   rw [hcard]
   exact_mod_cast hsz
 
+section Reduction
+variable {K : Type*} [Field K] {V : Type*} [AddCommGroup V] [Module K V]
+
+/-- Every scalar multiple `c • pairForm Q a` has the anchor `a` in its polar-radical (`pairForm_polar_anchor`
+transports through `polar_smul`). -/
+theorem mem_polarRad_smul_pairForm (Q : QuadraticForm K V) (a : V) (c : K) :
+    a ∈ polarRad (c • pairForm Q a) := by
+  rw [mem_polarRad]
+  intro x
+  have h : QuadraticMap.polar (c • pairForm Q a) x a
+      = c • QuadraticMap.polar (pairForm Q a) x a := by
+    simp only [QuadraticMap.polar, QuadraticMap.smul_apply, smul_sub]
+  rw [h, pairForm_polar_anchor, smul_zero]
+
+/-- A nonzero scalar-multiple-of-`pairForm` form has nontrivial radical (the anchor `a ≠ 0`), hence is degenerate. -/
+theorem polarRad_smul_pairForm_ne_bot (Q : QuadraticForm K V) {a : V} (ha : a ≠ 0) (c : K) :
+    polarRad (c • pairForm Q a) ≠ ⊥ :=
+  (Submodule.ne_bot_iff _).2 ⟨a, mem_polarRad_smul_pairForm Q a c, ha⟩
+
+variable (Q : QuadraticForm K V) (u v t₀ : V)
+
+/-- **`hgood ⟹ hPu`.** A nondeg pencil member forces `pairForm Q (t₀−u) ≠ 0`: if it were `0` the pencil would reduce
+to `z • pairForm Q (t₀−v)`, degenerate (anchor `t₀−v ≠ 0`). -/
+theorem hPu_of_hgood (hv : t₀ ≠ v)
+    (hg : ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥) :
+    pairForm Q (t₀ - u) ≠ 0 := by
+  intro hPu0
+  obtain ⟨y, z, hyz⟩ := hg
+  rw [hPu0, smul_zero, zero_add] at hyz
+  exact polarRad_smul_pairForm_ne_bot Q (sub_ne_zero.mpr hv) z hyz
+
+/-- **`hgood ⟹ hPv`** (symmetric to `hPu_of_hgood`). -/
+theorem hPv_of_hgood (hu : t₀ ≠ u)
+    (hg : ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥) :
+    pairForm Q (t₀ - v) ≠ 0 := by
+  intro hPv0
+  obtain ⟨y, z, hyz⟩ := hg
+  rw [hPv0, smul_zero, add_zero] at hyz
+  exact polarRad_smul_pairForm_ne_bot Q (sub_ne_zero.mpr hu) y hyz
+
+/-- **`hgood ⟹ hnz`.** A nondeg pencil member forbids a zero member on `y,z ≠ 0`: a zero member makes
+`pairForm Q (t₀−u) ∝ pairForm Q (t₀−v)`, collapsing the *whole* pencil to a scalar multiple of the (degenerate)
+`pairForm Q (t₀−v)` — so no member could be nondegenerate. -/
+theorem hnz_of_hgood (hv : t₀ ≠ v)
+    (hg : ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥) :
+    ∀ y z : K, y ≠ 0 → z ≠ 0 → y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0 := by
+  intro y₁ z₁ hy1 _ hyz1
+  have h1 : y₁ • pairForm Q (t₀ - u) = -(z₁ • pairForm Q (t₀ - v)) :=
+    eq_neg_of_add_eq_zero_left hyz1
+  have hPueq : pairForm Q (t₀ - u) = (y₁⁻¹ * (-z₁)) • pairForm Q (t₀ - v) := by
+    rw [mul_smul, neg_smul, ← h1, smul_smul, inv_mul_cancel₀ hy1, one_smul]
+  obtain ⟨y₀, z₀, hyz0⟩ := hg
+  rw [hPueq, smul_smul, ← add_smul] at hyz0
+  exact polarRad_smul_pairForm_ne_bot Q (sub_ne_zero.mpr hv) _ hyz0
+
+open scoped Classical in
+/-- **The bad-anchor reduction (input `β`).** The full good-anchor predicate `hnz ∧ hgood ∧ hPu ∧ hPv` (what
+`good_anchor_fail_le_const` consumes) fails on at most `#{t₀ : ¬hgood} + 2` anchors — i.e. `β ≤ #{¬hgood} + 2`. By the
+three implications, the only way to fail `hnz`/`hPu`/`hPv` while `hgood` holds is `t₀ ∈ {u,v}` (two points). So the
+bad-anchor count is governed by the single locus `{¬hgood} = {t₀ : pencilDisc(·;t₀) ≡ 0}`, the remaining
+Schwartz–Zippel-in-`t₀` target (via `mvPoly_zeros_count_le_dim`). -/
+theorem bad_anchor_card_le_hgood [Fintype V] [DecidableEq V] (Q : QuadraticForm K V) (u v : V) :
+    (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+            y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+          ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+          ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card
+      ≤ (univ.filter (fun t₀ : V =>
+          ¬ ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)).card + 2 := by
+  classical
+  have hsub : (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+            y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+          ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+          ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0)))
+      ⊆ (univ.filter (fun t₀ : V =>
+          ¬ ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)) ∪ {u, v} := by
+    intro t₀ ht
+    simp only [mem_filter, mem_univ, true_and] at ht
+    simp only [mem_union, mem_filter, mem_univ, true_and, mem_insert, mem_singleton]
+    by_cases hgt : ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥
+    · refine Or.inr ?_
+      by_contra hne
+      rw [not_or] at hne
+      exact ht ⟨hnz_of_hgood Q u v t₀ hne.2 hgt, hgt,
+        hPu_of_hgood Q u v t₀ hne.2 hgt, hPv_of_hgood Q u v t₀ hne.1 hgt⟩
+    · exact Or.inl hgt
+  calc (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card
+      ≤ ((univ.filter (fun t₀ : V =>
+            ¬ ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥))
+          ∪ ({u, v} : Finset V)).card := Finset.card_le_card hsub
+    _ ≤ (univ.filter (fun t₀ : V =>
+            ¬ ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)).card
+          + ({u, v} : Finset V).card := Finset.card_union_le _ _
+    _ ≤ (univ.filter (fun t₀ : V =>
+            ¬ ∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)).card + 2 :=
+        Nat.add_le_add_left ((Finset.card_insert_le _ _).trans (by simp)) _
+
+end Reduction
+
 end ChainDescent
 
 #print axioms ChainDescent.mvPoly_zeros_count_le_dim
+#print axioms ChainDescent.hPu_of_hgood
+#print axioms ChainDescent.hPv_of_hgood
+#print axioms ChainDescent.hnz_of_hgood
+#print axioms ChainDescent.bad_anchor_card_le_hgood
