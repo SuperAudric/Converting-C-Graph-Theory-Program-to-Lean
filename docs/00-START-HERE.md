@@ -122,10 +122,14 @@ close it — is set out in
 > whole generalization to a **single open predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded
 > WL-dimension of the affine forms-graphs**. **D3d is now WEIL-FREE** (exact-vs-Weil resolved): the observable is the
 > **pair** count `Z_u({t,t'})` (not the singleton — a verified correction), its invariant `χ(det G₂)` is `χ` of a quadratic,
-> and the per-pair sum factors into additive Gauss sums (`pairCharSum_factor_gen`). The Lean build is underway in
-> **`ChainDescent/ScratchPairSep.lean`** (axiom-clean): increment 1 (bridge + factoring) + increment 2 foundation
-> (`pairForm`/`pairCombine`) done; **next = finish the `M(y,z)` closed form** (complete-the-square + form Gauss eval) → `c₀<1`
-> → averaging. **Read plan §13 STATUS, then `ScratchPairSep.lean`.**
+> and the per-pair sum factors into additive Gauss sums (`pairCharSum_factor_gen`).
+> **★★★ INCREMENT 3 CLOSED (2026-06-25, all axiom-clean, full `lake build` green, NOT in build.sh):** the pair route's
+> per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE — capstone **`ScratchC0Final.c0_le_threequarters`** (good anchor + `q≥q₀`/`d≥3` ⟹
+> `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`), built across 8 new scratch modules on top of `ScratchPairSep` (24 lemmas). The reduction
+> backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal` is LANDED (`ScratchCrux` + `…viaIsotropySeparates_wittFree`).
+> **NEXT = increments 4–5 (the matching trick): good-anchor density `c̄₀<1` → `ScratchMatching.exists_separating_base` (LANDED)
+> → separating base `O(d log q)` → `ZProfileSeparates`; then families (d–f)/char-2 + the structural seam + port.**
+> **Read `chain-descent-remaining-work.md` §3a.1 (full layered map), plan §13 STATUS, then `ScratchC0Final.lean`.**
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there

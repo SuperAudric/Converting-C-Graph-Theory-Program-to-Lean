@@ -623,17 +623,17 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > against the landed scaffolding (§12), the open core isolated, the build increments ordered. This is the active work.
 
 > **§13 STATUS (read first; the blocks below are the chronological detail).**
-> - **★★ CURRENT (2026-06-24 handoff) — increments 1, 2, and ALL of increment 3's magnitude analysis are DONE; 24 axiom-clean
->   lemmas in `ScratchPairSep.lean` (full file `lake env lean` green, NOT in build.sh).** The reduction (`ScratchCrux.lean`)
->   collapses everything to `ZProfileSeparates`; the pair route discharges it via `c₀<1` + the matching trick. LANDED: inc 1
->   (`quadChar_addChar_sum`, `pairCharSum_factor_gen`); inc 2 full `M(y,z)` closed form (`pairSum_fully_closed`) + degenerate-locus
->   exact lemmas; inc 3 magnitude — `norm_gaussSum_sq` (`|gaussSum|=√q`), `norm_sq_pairSum_le` (uniform `‖M‖²≤qᵈ·|radical F|`,
->   covers conic), `zeroCount_sq_le` (3d), **`normT_le`** (3e-i, the `|T|` bound). Matching-trick engine `exists_separating_base`
->   LANDED (`ScratchMatching.lean`). **REMAINING (no more magnitude analysis): (a) good-anchor count `#degenerate-(y,z)≤d(q−1)` via
->   `MvPolynomial.schwartz_zippel_totalDegree` on the pencil discriminant [SHARED w/ inc 4]; (b) `c₀` counting identity `2·NS≤2z_u+n+T_ℤ`;
->   (c) sqrt-squared arithmetic ⟹ `c₀≤¾`; (d) the matching-trick → `ZProfileSeparates` wiring.** PICK-UP detail: the `ScratchPairSep.lean`
->   header + the "INCREMENT 3 — PLAN" block below. The bullets below this one are CHRONOLOGICAL HISTORY (some say "remaining" of
->   steps now done — trust this bullet + the step-by-step "PLAN" block for current state).
+> - **★★★ CURRENT (2026-06-25 handoff) — INCREMENT 3 CLOSED (all axiom-clean, full `lake build` green, NOT in build.sh).**
+>   The pair route's per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE: capstone **`ScratchC0Final.c0_le_threequarters`** (good anchor
+>   `hgood`/`hnz`/`hPu` + `q≥q₀` [`64q²≤|V|`⟺`d≥3`, `64d²≤q`, `256≤q`] ⟹ `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`). Built across 8 new
+>   scratch modules on top of `ScratchPairSep` (24 lemmas): `ScratchCorank` (`radical_card_mul_card_le`), `ScratchGoodAnchor`
+>   (`degenerate_count_le`, incl. degeneracy⟺det bridge), `ScratchBucket`/`ScratchChiNorm`/`ScratchTBound` (`normT_bucket_bound`),
+>   `ScratchCount`/`ScratchC0` (`card_agree_le`), `ScratchC0Final` (`c0_le` + capstone). Reduction backbone `ZProfileSeparates →
+>   IsotropySeparatesAtBase → seal` LANDED (`ScratchCrux` + idx 1248). **REMAINING = increments 4–5 (matching trick) + the
+>   layered remainder:** (4) good-anchor density `c̄₀<1`; (5) `exists_separating_base` (LANDED) ⟹ separating base `O(d log q)`;
+>   observable↔count bridge ⟹ `ZProfileSeparates`; then families (d–f)/char-2 + the structural seam + port. PICK-UP detail: the
+>   "▶▶ STATUS (2026-06-25)" note in the INCREMENT 4 block below + `chain-descent-remaining-work.md` §3a.1 (full layered map).
+>   The bullets below this one are CHRONOLOGICAL HISTORY (steps now done — trust this bullet + the INCREMENT 3 PLAN block, all-DONE).
 > - **LANDED** (`ChainDescent/ScratchCrux.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, compiles via
 >   `lake env lean`, NOT yet in `build.sh`): **D1** `qProfileSeparatesAtBase_of_zProfileSeparates`, **D2-bridge**
 >   `jointIsoCount_eq_restricted`, and the end-to-end `isotropySeparates_of_zProfileSeparates`. Reuses landed
@@ -1082,6 +1082,14 @@ device, but with one subtlety to respect.**
 - **⟹ Recommendation:** increment 4 = a short lemma "bad-anchor locus is a proper subvariety (density `O(1/q)`)" feeding
   `c̄₀ ≤ 1−δ`; increment 5 = the matching-trick first moment. State the averaging input as `c̄₀` (anchor-averaged), discharged
   from per-anchor (Weil-free) `c₀` — do NOT use a joint `(a,t)` Deligne sum and do NOT construct a universal anchor.
+
+**▶▶ STATUS (2026-06-25) — INCREMENT 3 CLOSED; THIS BLOCK (increments 4–5) IS THE IMMEDIATE NEXT STEP.** The per-anchor input
+`c₀ ≤ ¾ < 1` is now LANDED axiom-clean as **`ScratchC0Final.c0_le_threequarters`** (good anchor + `q≥q₀` ⟹ `NS ≤ ¾·|V|`). So the
+remaining frontier is exactly: (4) the **good-anchor density** lemma below (`c̄₀ = E_a[c₀] ≤ 1−δ'`, bad-anchor locus a proper
+subvariety, density `O(1/q)`) + (5) feed `c̄₀<1` into `exists_separating_base` (LANDED) ⟹ separating base `O(d log q)` + the
+**observable↔count bridge** (`χ(det G₂)` ⟸ `Z_u({t,t₀})`; separating base ⟹ `ZProfileSeparates`'s `∀ S⊆T` profile-separation).
+Then Layer B (`ZProfileSeparates → IsotropySeparatesAtBase → seal`) is already landed (`ScratchCrux` + idx 1248). Full layered
+remainder (families, seam, port): `chain-descent-remaining-work.md` §3a.1.
 
 **▶ MATCHING TRICK CONFIRMED + COUNTING CORE LANDED + GAPS SHARPENED (2026-06-24).** Stress-tested the increment-4 fold-in
 above; it is **sound**, and the load-bearing combinatorial core is now an axiom-clean theorem. Three things:

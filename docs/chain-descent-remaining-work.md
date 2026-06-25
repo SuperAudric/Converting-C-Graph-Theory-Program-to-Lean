@@ -34,9 +34,19 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded WL-dimension of the affine forms-graphs**.
 > **D3d is now WEIL-FREE** (the exact-vs-Weil question is resolved): the seal's observable is the **pair** count `Z_u({t,t'})`
 > (not the singleton — a verified correction), its invariant `χ(det G₂)` is `χ` of a quadratic, and the per-pair sum factors
-> into additive Gauss sums. Lean build underway in **`ChainDescent/ScratchPairSep.lean`** (axiom-clean): increment 1 (Gauss
-> bridge + `pairCharSum_factor_gen`) + increment 2 foundation (`pairForm`/`pairCombine`) done; next = finish the `M(y,z)`
-> closed form → `c₀<1` → averaging. Read plan §13 STATUS + `ScratchPairSep.lean`.
+> into additive Gauss sums.
+>
+> **▶▶▶ UPDATE (2026-06-25) — INCREMENT 3 CLOSED (all axiom-clean, NOT in build.sh).** The Weil-free pair route's
+> **per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE.** Capstone **`ScratchC0Final.c0_le_threequarters`**: for a good anchor
+> (`hgood` ∃ nondeg pencil member + `hnz` no zero member + `hPu` pairForm≠0) with `q ≥ q₀` (`64q²≤|V|` ⟺ `d≥3`, `64d²≤q`,
+> `256≤q`), the agreement count `NS = #{t : χ(I_u t)=χ(I_v t)} ≤ ¾·|V|`. Built across **8 new scratch modules** on top of
+> `ScratchPairSep` (24 lemmas): `ScratchCorank` (corank-uniform radical bound `radical_card_mul_card_le`), `ScratchGoodAnchor`
+> (good-anchor count `degenerate_count_le`, fully proven incl. the degeneracy⟺det bridge), `ScratchBucket`/`ScratchChiNorm`/
+> `ScratchTBound` (the `|T|` bound `normT_bucket_bound`), `ScratchCount`/`ScratchC0` (counting identity `card_agree_le`),
+> `ScratchC0Final` (`c0_le` + the capstone). **The reduction backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal`
+> is LANDED** (`ScratchCrux.isotropySeparates_of_zProfileSeparates` + `reachesRigidOrCameron_viaIsotropySeparates_wittFree`,
+> both axiom-clean). **NEXT = the matching trick (increments 4–5) + the layered remainder** to general seal — see §3a.1 below.
+> Read plan §13 (all-DONE) + [[project_witt_free_bridge_lead_2026-06-20]] (tail) + `ScratchC0Final.lean`.
 
 ---
 
@@ -104,6 +114,39 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 ## 3. The remaining work items (categorized)
 
 ### 3a. The research core — `hSmallAutThin` / the `s(C)` certificate (node 4)
+
+> **★★★ 3a.1 — THE LAYERED REMAINDER (2026-06-25, authoritative "what's left" from increment-3-done to general seal mod
+> citations).** Increment 3 (per-anchor `c₀ ≤ ¾`) is CLOSED (capstone `ScratchC0Final.c0_le_threequarters`, axiom-clean).
+> The remaining work, by layer (★=open, ✓=landed):
+> - **Layer A — finish discharging `ZProfileSeparates` for affine-polar (the live frontier).**
+>   - ★ **Increment 4 — good-anchor density** (small): the bad-anchor locus (where `det G₂(u;·,a)`, `det G₂(u';·,a)` align)
+>     is a proper subvariety, density `O(1/q)` ⟹ `c̄₀ = E_a[c₀] ≤ 1−δ' < 1`. Another pencil-degeneracy Schwartz–Zippel count
+>     (reuses `degenerate_count_le`-style tools). De-risked numerically (`Probe_D3dPairCount`: `c̄₀≈0.45` flat).
+>   - ★ **Increment 5 — apply the matching trick** (small): feed `c̄₀<1` into **`ScratchMatching.exists_separating_base`
+>     (LANDED, axiom-clean)** with `m=O(d log q)` ⟹ separating base `O(d log q)`.
+>   - ★ **Observable↔count bridge** (medium): `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the
+>     joint counts `Z_u(S)`. Need `χ(det G₂(u;t,t₀))` recoverable from `Z_u({t,t₀})`, and "separating base separates all `(u,u')`"
+>     ⟹ the `∀ S⊆T` profile-separation. UNBUILT.
+>   - ★ **Field generalization** (medium refactor): `c0_le_threequarters` is already abstract `[Field K]` (prime-power `q`
+>     covered analytically — subsumes the old "uniform kernel"/"q-prime-first"); but `ScratchCrux`/`ZProfileSeparates` are
+>     `ZMod p` only and must lift to `GaloisField`/abstract `K`. Plus small-`q`/threshold handling.
+> - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ScratchCrux) +
+>   `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248), both axiom-clean (no Witt, no `hSmallAutThin`). ⟹ once
+>   Layer A lands, **affine-polar `VO^ε` is sealed modulo `{G3}` + the seam.**
+> - **Layer C — other forms-graph families (★).** Pair route is generic in a *quadratic* `Q` (covers affine-polar in one
+>   stroke), but NOT: (d) alternating (alternating bilinear form, own predicate, same technique, medium), (e) half-spin /
+>   (f) Suzuki–Tits (cite-hunt first — may be citable in rank-3/2-transitive lit), char-2 §11.5 (whole route assumes
+>   `ringChar≠2`/`Invertible 2`; distinct track).
+> - **Layer D — the structural seam (★, LOAD-BEARING, §11.6).** The cited classification case-split routing the abstract
+>   residue `S` → concrete `affineScheme(Q)` (a `SchemeEquiv`/transport — does NOT exist in Lean yet, AUDIT-S finding 3).
+>   Where `{G3 + Skresanov + Liebeck + Ponomarenko-2-sep}` get consumed. The single biggest open piece beyond affine-polar.
+> - **Layer E — carried hypotheses (Lean-carried, not new math): `hImprim`** (block tower built; collapses to same core) +
+>   **`SchurianScheme`** (model assumption `orbitalScheme H`, not discharged).
+> - **Layer F — PORT (mechanical, no math):** the 8 new modules + `ScratchCrux`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*` into
+>   `build.sh`+`lakefile`+`PublicTheoremIndex.md`. Same "only remaining = PORT" status as the sealed `VO⁻₄(3)` modules.
+> - **Residual citations at the endpoint:** `{G3` (Babai/CFSG, allowed to stay)` + Skresanov + Liebeck + Ponomarenko-cyclotomic-2-sep}`.
+>   Honest caveat: affine-polar alone isn't the whole residue — the seam (D) + non-quadratic families (C) are where "general
+>   seal" still needs real work or citations.
 
 > **▶ LATEST (2026-06-24): `VO⁻₄(3)` SEALED — the first forms-graph instance proved; live work = the generalization.**
 > `ScratchBM3Glue.vo4minus_seal` (axiom-clean) closes the affine-polar minus-form residue modulo `{G3}`. The remaining
