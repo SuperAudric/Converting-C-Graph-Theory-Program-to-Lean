@@ -39,14 +39,15 @@
 >   separating invariant `χ(det G₂(u;t,t₀))` is `χ` of a **quadratic** in the probe, and the relevant per-pair character sum
 >   **factors through scalar values into additive Gauss sums** — proved general as `pairCharSum_factor_gen`. Probe
 >   `Probe_D3dPairCount`: `c₀ ≤ 0.49 < 1` bounded, anchor existence robust (`sep@1anchor ≈ 100%`).
-> - **Lean build underway in `ChainDescent/ScratchPairSep.lean`** (axiom-clean, NOT in build): **increment 1** (Gauss bridge
->   `quadChar_addChar_sum` + factoring `pairCharSum_factor_gen`) and **increment 2 foundation** (`pairForm`/`pairForm_apply`/
->   `detG2_eq_pairForm` = the pair invariant is a quadratic form at a shift; `pairCombine` = two-pivot integrand in
->   form+linear+const shape; `sum_addChar_quadForm_translate`) are DONE. **EXACT NEXT STEP = finish the `M(y,z)` closed form**
->   (complete the square via `sum_addChar_quadForm_linear` at `r=1` + evaluate via `sum_addChar_quadForm` + the degenerate
->   locus), then the `c₀<1` bound (increment 3, one ℂ-magnitude step) → anchor existence → averaging ⟹ `ZProfileSeparates`.
->   Full detail + the remaining-increment math: §13 (the "INCREMENT 2 FOUNDATION" block + the "CORRECTION" block, which
->   records why the singleton route was abandoned — do NOT re-walk it).
+> - **Lean build in `ChainDescent/ScratchPairSep.lean`** (24 lemmas, all axiom-clean, full file `lake env lean` green, NOT in
+>   build.sh): **increments 1, 2, AND 3's entire magnitude analysis are DONE.** Inc 1 (Gauss bridge + factoring); inc 2
+>   (the `M(y,z)` closed form `pairSum_fully_closed` + degenerate-locus exact lemmas); inc 3 (`norm_gaussSum_sq` = `|gaussSum|=√q`;
+>   `norm_sq_pairSum_le` = uniform `‖M‖²≤qᵈ·|radical F|` covering conic; `zeroCount_sq_le`; **`normT_le`** = the `|T|` bound).
+>   **EXACT NEXT STEP — no more magnitude analysis; finish `c₀<1` (3e-ii/iii):** (a) the **good-anchor count** `#degenerate-(y,z)≤d(q−1)`
+>   via `MvPolynomial.schwartz_zippel_totalDegree` on the pencil discriminant [SHARED with increment 4]; (b) the `c₀` counting
+>   identity `2·NS≤2·z_u+n+T_ℤ`; (c) sqrt-squared arithmetic ⟹ `c₀≤¾`. Then the matching-trick assembly
+>   (`ScratchMatching.exists_separating_base`, LANDED) ⟹ `ZProfileSeparates`. Full detail: §13 + the `ScratchPairSep.lean` header
+>   "PICK UP HERE" block. The "CORRECTION" block in §13 records why the singleton route was abandoned — do NOT re-walk it.
 >
 > **▶ Witt is OFF the seal's critical path** (`relationRefinesIsotropy_similitude` discharges the bridge's easy half
 > Witt-free); **Route 1 (char-sum) was chosen over Route 3 (Witt)** at the GATE (§11.1). Witt is the documented *fallback*.
@@ -602,6 +603,17 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > against the landed scaffolding (§12), the open core isolated, the build increments ordered. This is the active work.
 
 > **§13 STATUS (read first; the blocks below are the chronological detail).**
+> - **★★ CURRENT (2026-06-24 handoff) — increments 1, 2, and ALL of increment 3's magnitude analysis are DONE; 24 axiom-clean
+>   lemmas in `ScratchPairSep.lean` (full file `lake env lean` green, NOT in build.sh).** The reduction (`ScratchCrux.lean`)
+>   collapses everything to `ZProfileSeparates`; the pair route discharges it via `c₀<1` + the matching trick. LANDED: inc 1
+>   (`quadChar_addChar_sum`, `pairCharSum_factor_gen`); inc 2 full `M(y,z)` closed form (`pairSum_fully_closed`) + degenerate-locus
+>   exact lemmas; inc 3 magnitude — `norm_gaussSum_sq` (`|gaussSum|=√q`), `norm_sq_pairSum_le` (uniform `‖M‖²≤qᵈ·|radical F|`,
+>   covers conic), `zeroCount_sq_le` (3d), **`normT_le`** (3e-i, the `|T|` bound). Matching-trick engine `exists_separating_base`
+>   LANDED (`ScratchMatching.lean`). **REMAINING (no more magnitude analysis): (a) good-anchor count `#degenerate-(y,z)≤d(q−1)` via
+>   `MvPolynomial.schwartz_zippel_totalDegree` on the pencil discriminant [SHARED w/ inc 4]; (b) `c₀` counting identity `2·NS≤2z_u+n+T_ℤ`;
+>   (c) sqrt-squared arithmetic ⟹ `c₀≤¾`; (d) the matching-trick → `ZProfileSeparates` wiring.** PICK-UP detail: the `ScratchPairSep.lean`
+>   header + the "INCREMENT 3 — PLAN" block below. The bullets below this one are CHRONOLOGICAL HISTORY (some say "remaining" of
+>   steps now done — trust this bullet + the step-by-step "PLAN" block for current state).
 > - **LANDED** (`ChainDescent/ScratchCrux.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, compiles via
 >   `lake env lean`, NOT yet in `build.sh`): **D1** `qProfileSeparatesAtBase_of_zProfileSeparates`, **D2-bridge**
 >   `jointIsoCount_eq_restricted`, and the end-to-end `isotropySeparates_of_zProfileSeparates`. Reuses landed

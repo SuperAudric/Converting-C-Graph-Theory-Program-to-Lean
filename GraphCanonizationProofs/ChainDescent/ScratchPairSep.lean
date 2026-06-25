@@ -10,40 +10,48 @@ is controlled by the character sum `∑_t χ(det G₂(u;t,t₀))·χ(det G₂(u'
 (no Weil)**. Probe `Probe_D3dPairCount`: `c₀ ≤ 0.49 < 1`, anchor existence robust. Then a finite-averaging argument gives
 a separating base of size `O(d log q)`, discharging `ZProfileSeparates`.
 
-**LANDED in this file (all axiom-clean `[propext, Classical.choice, Quot.sound]`):**
-* `quadChar_addChar_sum` — the multiplicative↔additive **Gauss bridge** `∑_y χ(y)·ψ(a·y) = gaussSum χ ψ · χ(a)` (∀`a`;
-  `χ = (quadraticChar K).ringHomComp (Int.castRingHom R')`, `R'` a char-zero domain). The reusable atom.
-* `pairCharSum_factor_gen` — the **"no Weil" core**, GENERAL: for any `f,g : V → K`,
-  `gaussSum² · ∑_t χ(f t)χ(g t) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))`. (`pairCharSum_factor` = the `f=Q,g=Q(·−c)`
-  singleton corollary.) Apply with `f = det G₂(u;·,t₀)`, `g = det G₂(u';·,t₀)`.
-* `pairForm` / `pairForm_apply` / `detG2_eq_pairForm` — the pair invariant IS the quadratic form
-  `pairForm Q a = 4 Q(a)·Q − (polar Q · a)²` evaluated at the shift `t−u` (anchor offset `a = t₀−u`).
-* `pairCombine` — the two-pivot integrand `y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀)` in "quadratic FORM `(y•pairForm_u +
-  z•pairForm_v)` at shift `t−u` + LINEAR `z·polar pairForm_v(·,u−v)` + CONST `z·pairForm_v(u−v)`" shape.
-* `sum_addChar_quadForm_translate` — `∑_t ψ(P(t−a)) = ∑_t ψ(P t)`.
+**LANDED in this file — 24 lemmas, all axiom-clean `[propext, Classical.choice, Quot.sound]`; full file `lake env lean`
+green (NOT in build.sh).** Grouped by increment:
 
-**★ PICK UP HERE — the exact next step (finish increment 2: the `M(y,z)` closed form).** Combine the above:
-  1. `M(y,z) := ∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀))`. By `pairCombine` + `detG2_eq_pairForm`, the integrand is
-     `(F)(t−u) + z·polar pairForm_v(t−u, u−v) + z·pairForm_v(u−v)`, `F := y•pairForm Q (t₀−u) + z•pairForm Q (t₀−v)`.
-  2. Pull out the constant `ψ(z·pairForm_v(u−v))`; shift `t = u+s` (use `sum_addChar_quadForm_translate`):
-     `M = ψ(z·pairForm_v(u−v)) · ∑_s ψ(F(s) + polar F s b)` once the linear part `z·polar pairForm_v(·,u−v)` is rewritten
-     as `polar F (·, b)` for `b` solving `polar F (·,b) = z·polar pairForm_v(·,u−v)` (exists when `F` is NONDEGENERATE).
-  3. Complete the square: `sum_addChar_quadForm_linear` (GaussCount) at `r = 1` (Q := F) ⟹
-     `∑_s ψ(F s + polar F s b) = ψ(−F b)·∑_s ψ(F s)`.
-  4. Evaluate `∑_s ψ(F s) = (∏χ(wᵢ))·gaussSum^d = χ(disc F)·gaussSum^d` via `sum_addChar_quadForm` (needs `F` nondeg /
-     `SeparatingLeft`, `[Invertible (2:K)]`).
-  5. Handle the DEGENERATE `(y,z)` locus (where `F` drops rank — the "diagonal" analog; e.g. for the singleton
-     `pairCharSum_factor` the `y+z=0` diagonal vanished via `sum_addChar_multiQuad_zero` + `sum_addChar_linearMap`).
-Then: **increment 3** — feed the closed form into `pairCharSum_factor_gen`'s outer `∑_{y,z}` and bound the per-pair
-`c₀ < 1` (the one ℂ-magnitude step: `|gaussSum| = √q` via `gaussSum_sq`; `c₀·n = z₂' + ½(nn' + T)`, zero-counts via
-`card_quadForm_eq`). **increments 4+5 (anchor existence FOLDS into averaging — the matching trick):** build base `T` (k iid
-points), match into DISJOINT pairs ⟹ independent ⟹ `P[(u,u') unsep] ≤ c̄₀^{k/2}`, `c̄₀ = V×V density of non-separating pairs`;
-first moment ⟹ base `O(d log q)` separates all pairs, NO separate/universal anchor. Single input `c̄₀ < 1` (bound it from the
-per-anchor `c₀` + "bad-anchor locus is a proper subvariety, density O(1/q)" — NOT a joint `(a,t)` Deligne sum). Probe-confirmed:
-`c̄₀ ≈ 0.45` flat in q; worst single anchor `maxC0` hits 1 at small q ⟹ use the average, not a universal anchor. Fed to
-`reachesRigidOrCameron_viaIsotropySeparates_wittFree` (`PublicTheoremIndex.md:1248`). Full narrative: plan §13.
+*Increment 1 — Gauss bridge + factoring (general `R'`, char-zero domain):* `quadChar_addChar_sum` (the **Gauss bridge**
+`∑_y χ(y)·ψ(a·y) = gaussSum χ ψ · χ(a)`, reusable atom) + `pairCharSum_factor_gen` (the **"no Weil" core**:
+`gaussSum² · ∑_t χ(f t)χ(g t) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))`, any `f,g`; `pairCharSum_factor` = singleton corollary).
 
-NOT in build (scratch; `lake env lean ChainDescent/ScratchPairSep.lean`). Reduction skeleton: `ScratchCrux.lean`.
+*Increment 2 — `M(y,z) = ∑_t ψ(y·det G₂(u;t,t₀)+z·det G₂(v;t,t₀))` closed form on the NONDEGENERATE locus:*
+`pairForm`/`pairForm_apply`/`detG2_eq_pairForm` (pair invariant IS `pairForm Q a = 4 Q(a)·Q − (polar Q · a)²` at shift `t−u`),
+`pairCombine` (two-pivot integrand = form `(y•pairForm_u + z•pairForm_v)` + linear `z·polar pairForm_v(·,u−v)` + const),
+`sum_addChar_quadForm_translate`, `pairSum_to_shifted`, `sum_addChar_shifted_eval` (complete-the-square given `b`),
+`pairSum_closed_of_repr`, `exists_repr_of_nondeg` (`b` from `F.polarBilin` nondeg via `BilinForm.toDual`),
+`pairSum_closed_of_nondeg`, `pairSum_fully_closed` (`M = ψ(const)·ψ(−F b)·(∏χ wᵢ)·gaussSum^d`); degenerate-locus (exact):
+`pairForm_polar_anchor`/`pairForm_self_anchor` (every `pairForm Q a` degenerate, `a∈radical`), `sum_addChar_radical_vanish`.
+
+*Increment 3 — per-pair `c₀<1` machinery (over `ℂ`; needs `import Mathlib.Analysis.Complex.Basic`):*
+`norm_addChar_eq_one`, `norm_gaussSum_sq` (**`‖gaussSum‖²=q`** = `|gaussSum|=√q`), `norm_pairSum_le`,
+**`norm_sq_sum_addChar_quadForm`** (`‖∑ψ(Q)‖²=qᵈ·|radical Q|`, ANY `Q`), **`norm_sq_sum_addChar_quadForm_linear_le`**
+(`‖∑ψ(Q+L)‖²≤qᵈ·|radical Q|`), **`norm_sq_pairSum_le`** (3c: `‖M(y,z)‖²≤qᵈ·|radical F|`, nondeg AND conic uniformly),
+**`zeroCount_sq_le`** (3d: `(z·q−qᵈ)²≤(q−1)²·qᵈ·|radical P|`), **`normT_le`** (3e-i:
+`q·‖T‖ ≤ ∑_{y,z} ‖χy‖‖χz‖·√(qᵈ·|radical F_{y,z}|)`, `T = ∑_t χ(det G₂(u;·,t₀))χ(det G₂(v;·,t₀))`).
+
+**★ PICK UP HERE — finish increment 3 (`c₀<1`), then the matching-trick assembly. NO MORE MAGNITUDE ANALYSIS NEEDED**
+(all Gauss-sum/magnitude tools above are landed). The remaining steps are counting + Schwartz-Zippel + arithmetic:
+  1. **Good-anchor count (the one remaining analytic input; SHARED with increment 4).** Bound `normT_le`'s RHS radical-sum:
+     `#{(y,z) : F_{y,z} = y•pairForm_u + z•pairForm_v degenerate} ≤ d(q−1)`, by **`MvPolynomial.schwartz_zippel_totalDegree`**
+     (Mathlib, confirmed present) on the pencil discriminant `det(y·G_u + z·G_v)` (degree `d` in `(y,z)`; `≢0` ⟺ good anchor).
+     ⟹ `‖T‖ ≤ [(q−1)²·q^{d/2} + d(q−1)·q^{(d+1)/2}]/q` (nondeg `(y,z)`: `|radical|=1`; conic: `|radical|≤q`).
+  2. **`c₀` counting identity (pure ℤ counting).** `2·NS ≤ 2·z_u + n + T_ℤ` (`NS = #{t : χ(I_u t)=χ(I_v t)}`; `χ`-value cases:
+     `#both0 ≤ z_u`, `#{both≠0,same} = ½(N₂+T_ℤ)`); cast `T_ℤ ↔ T_ℂ` (`‖T_ℂ‖ = |T_ℤ|`). (Simplification: only `z_u` needed,
+     drop `z₂`,`z_v`.)
+  3. **Arithmetic.** Plug `zeroCount_sq_le` (`z_u`) + step-1 `‖T‖` bound ⟹ `c₀ = NS/n ≤ ¾` for `q ≥ q₀` (sqrt comparisons, done
+     squared); small `q` by `decide` or via the matching trick's small-`q` handling.
+  4. **Matching-trick assembly (increments 4+5).** `ScratchMatching.exists_separating_base` (LANDED, axiom-clean) is the engine:
+     match the base into DISJOINT independent probe/anchor pairs (`det G₂` symmetric in `(t,a)`, so anchor existence dissolves) ⟹
+     `c̄₀ < 1` (V×V non-separating density, from step-1 good-anchor count + step-2/3 per-anchor `c₀`) ⟹ separating base `O(d log q)`.
+     Then bridge `χ(det G₂)` recoverable from `Z_u({t,t₀})` ⟹ `ZProfileSeparates` ⟹
+     `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (`PublicTheoremIndex.md:1248`). Probe `Probe_D3dPairCount`: `cbarMax≈0.5`
+     flat, `q·badFrMx→0` (good-anchor O(1/q)). Full narrative + status: plan §13.
+
+NOT in build (scratch; `lake env lean ChainDescent/ScratchPairSep.lean`). Reduction skeleton: `ScratchCrux.lean`;
+matching trick: `ScratchMatching.lean`.
 -/
 import ChainDescent.GaussCount
 import Mathlib.Analysis.Complex.Basic
