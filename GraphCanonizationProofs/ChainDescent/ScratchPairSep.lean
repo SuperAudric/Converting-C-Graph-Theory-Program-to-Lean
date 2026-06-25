@@ -692,6 +692,81 @@ theorem norm_sq_pairSum_le {K : Type*} [Field K] [Fintype K] [DecidableEq K] [In
   exact norm_sq_sum_addChar_quadForm_linear_le hψ (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v))
     (z • (pairForm Q (t₀ - v)).polarBilin.flip (u - v))
 
+/-- **Zero-count bound (3d).** For a quadratic form `P` (possibly degenerate), the number of zeros `z = #{x : P x = 0}`
+satisfies `(z·q − qᵈ)² ≤ (q−1)²·qᵈ·|radical P|` (`qᵈ = card V`). From `count_eq_charsum` (`z·q = ∑_x ∑_t ψ(t·P x)`),
+peeling the `t = 0` term (`= qᵈ`), and bounding the rest by the magnitude tool: each `‖∑_x ψ(t·P x)‖² = qᵈ·|radical P|`
+(scaling `t ≠ 0` preserves the radical). On the conic-relevant case `|radical P| ≤ q ⟹ z ≤ q^{d-1} + q^{(d+1)/2}`. -/
+theorem zeroCount_sq_le {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Invertible (2 : K)]
+    {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] [DecidableEq V] (P : QuadraticForm K V) :
+    (((Finset.univ.filter (fun x : V => P x = 0)).card : ℝ) * (Fintype.card K) - (Fintype.card V)) ^ 2
+      ≤ ((Fintype.card K : ℝ) - 1) ^ 2
+        * ((Fintype.card V : ℝ)
+            * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card) := by
+  classical
+  -- D := ∑_{t≠0} ∑_x ψ(t·P x) = (z:ℂ)·q − qᵈ
+  have hcount := count_eq_charsum hψ (fun x : V => P x) 0
+  simp only [sub_zero] at hcount
+  rw [Finset.sum_comm, ← Finset.add_sum_erase _ _ (Finset.mem_univ (0 : K))] at hcount
+  simp only [zero_mul, AddChar.map_zero_eq_one, Finset.sum_const, Finset.card_univ, nsmul_eq_mul,
+    mul_one] at hcount
+  set z : ℕ := (Finset.univ.filter (fun x : V => P x = 0)).card with hz
+  set D : ℂ := ∑ t ∈ Finset.univ.erase (0 : K), ∑ x : V, ψ (t * P x) with hD
+  have hDeq : D = (z : ℂ) * (Fintype.card K) - (Fintype.card V) := by
+    rw [hD]; linear_combination hcount
+  -- each inner sum's norm² = qᵈ · |radical P|
+  have hmag : ∀ t ∈ Finset.univ.erase (0 : K),
+      ‖∑ x : V, ψ (t * P x)‖ ≤ Real.sqrt ((Fintype.card V : ℝ)
+        * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card) := by
+    intro t ht
+    have ht0 : t ≠ 0 := Finset.ne_of_mem_erase ht
+    have hsm : (∑ x : V, ψ (t * P x)) = ∑ x : V, ψ ((t • P) x) :=
+      Finset.sum_congr rfl (fun x _ => by rw [QuadraticMap.smul_apply, smul_eq_mul])
+    have hpsm : ∀ x h : V, QuadraticMap.polar (t • P) x h = t * QuadraticMap.polar P x h := by
+      intro x h; simp only [QuadraticMap.polar, QuadraticMap.smul_apply, smul_eq_mul]; ring
+    have hradeq : (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar (t • P) x h = 0))
+        = (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)) := by
+      ext h
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+      constructor
+      · intro hh x
+        have := hh x; rw [hpsm] at this
+        exact (mul_eq_zero.1 this).resolve_left ht0
+      · intro hh x; rw [hpsm, hh x, mul_zero]
+    rw [hsm, show ‖∑ x : V, ψ ((t • P) x)‖
+          = Real.sqrt (‖∑ x : V, ψ ((t • P) x)‖ ^ 2) from (Real.sqrt_sq (norm_nonneg _)).symm,
+      norm_sq_sum_addChar_quadForm hψ (t • P), hradeq]
+  -- ‖D‖ ≤ (q−1)·√(qᵈ·|rad|)
+  have hDnorm : ‖D‖ ≤ ((Fintype.card K : ℝ) - 1)
+      * Real.sqrt ((Fintype.card V : ℝ)
+          * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card) := by
+    calc ‖D‖ ≤ ∑ t ∈ Finset.univ.erase (0 : K), ‖∑ x : V, ψ (t * P x)‖ := norm_sum_le _ _
+      _ ≤ ∑ _t ∈ Finset.univ.erase (0 : K), Real.sqrt ((Fintype.card V : ℝ)
+            * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card) :=
+          Finset.sum_le_sum hmag
+      _ = ((Fintype.card K : ℝ) - 1)
+            * Real.sqrt ((Fintype.card V : ℝ)
+              * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card) := by
+          rw [Finset.sum_const, Finset.card_erase_of_mem (Finset.mem_univ 0), Finset.card_univ,
+            nsmul_eq_mul]
+          congr 2
+          rw [Nat.cast_sub Fintype.card_pos, Nat.cast_one]
+  -- square, and ‖D‖² = (z·q − qᵈ)²
+  have hreal : ‖D‖ ^ 2 = ((z : ℝ) * (Fintype.card K) - (Fintype.card V)) ^ 2 := by
+    have hcast : D = (((z : ℝ) * (Fintype.card K) - (Fintype.card V) : ℝ) : ℂ) := by
+      rw [hDeq]; push_cast; ring
+    rw [hcast, Complex.norm_real, Real.norm_eq_abs, sq_abs]
+  calc (((z : ℝ) * (Fintype.card K) - (Fintype.card V)) ^ 2)
+      = ‖D‖ ^ 2 := hreal.symm
+    _ ≤ (((Fintype.card K : ℝ) - 1)
+          * Real.sqrt ((Fintype.card V : ℝ)
+            * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card)) ^ 2 := by
+        exact pow_le_pow_left₀ (norm_nonneg _) hDnorm 2
+    _ = ((Fintype.card K : ℝ) - 1) ^ 2
+          * ((Fintype.card V : ℝ)
+            * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card) := by
+        rw [mul_pow, Real.sq_sqrt (by positivity)]
+
 end CMagnitude
 
 end ChainDescent
@@ -718,3 +793,4 @@ end ChainDescent
 #print axioms ChainDescent.norm_sq_sum_addChar_quadForm
 #print axioms ChainDescent.norm_sq_sum_addChar_quadForm_linear_le
 #print axioms ChainDescent.norm_sq_pairSum_le
+#print axioms ChainDescent.zeroCount_sq_le
