@@ -159,6 +159,11 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `pairCount_ne_of_chiSep` + `levelset_count_collapse` (turning a config-nondeg χ-separating pair into a `Z`-separating sub-frame),
   this **architecturally closes the bridge** and **dissolves B1-deg** (the config-degenerate locus, density `O(1/√q)`, folds into
   the increment-4 matching density — no degenerate-config `Z` value needed). See §13 BRIDGE block.
+- **`ScratchBridgeB.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
+  `ScratchCrux` + `ScratchLemmaB`) — **B1a wrap (i)** `fullcount_eq_jointIsoCount_add_corr`: the Lemma-A fullcount =
+  `jointIsoCount Q u S + [∀t∈S, Q(t̄−ū)=0]` (`cone_count_zero_split` ∘ `jointIsoCount_eq_restricted`). Connects the bridge
+  observable `jointIsoCount` to `levelset_count_collapse`'s fullcount. Remaining B1a wrap: `|S|=2` config indexing →
+  `reduction_to_levelset_nondeg` → collapse; `D↔pairForm`; all over `ℂ` (no `R'→ℕ` descent — §13 BRIDGE net verdict).
 - **`ScratchBridgeA.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchLemmaA` → build its olean first) — the **B1a analytic core** `levelset_count_collapse`: for config size `m=2`, **even `d`**,
   nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
@@ -1295,9 +1300,18 @@ remainder (families, seam, port): `chain-descent-remaining-work.md` §3a.1.
 - **Net verdict — bridge ARCHITECTURALLY CLOSED, B1-deg dissolved.** The end-to-end chain is: (config-nondeg χ-separating base,
   increment 4/5) →[`pairCount_ne_of_chiSep` (B1b) + `levelset_count_collapse` (B1a core)]→ (`Z`-separating base)
   →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`. Landed axiom-clean: the two endpoints (`pairCount_ne_of_chiSep`,
-  `zProfileSeparates_of_zSep`) + the analytic core (`levelset_count_collapse`). **The ONLY remaining bridge work is B1a's
-  mechanical wrapping** (cone↔levelset + `w=0` + `D↔pairForm` + `R'→ℕ`, all landed-tool) — no degenerate-config computation, no
-  Weil, no new theory. This is *not* the hidden wall the route's success hinged on.
+  `zProfileSeparates_of_zSep`) + the analytic core (`levelset_count_collapse`). **Remaining = B1a's mechanical wrapping**
+  (no degenerate-config computation, no Weil, no new theory):
+  - ✓ **wrap (i) LANDED (2026-06-26, `ScratchBridgeB.fullcount_eq_jointIsoCount_add_corr`, axiom-clean):**
+    `fullcount = jointIsoCount + [y=0 corr]` — connects the observable `jointIsoCount` to the Lemma-A `fullcount`
+    (`cone_count_zero_split` ∘ `jointIsoCount_eq_restricted`).
+  - ★ wrap (ii): `|S|=2` config indexing (`S={t,t₀}`, `t≠t₀` → `a = ![t̄−ū, t̄₀−ū] : Fin 2 → V`) → `reduction_to_levelset_nondeg`
+    → `levelset_count_collapse`.
+  - ★ wrap (iii): `D ↔ pairForm`/`det G₂` (`χ(D) = χ(I_w(t))`; track the BilinForm-`toMatrix`-vs-`polar` factor-2 → `χ(2)^k`).
+  - **SIMPLIFICATION (no `R'→ℕ` descent needed):** work in `R' = ℂ` throughout. Distinctness in ℂ suffices — the counts are
+    `ℕ`-casts, `K = gaussSum²·∑ψ(Q)` is a **nonzero cyclotomic integer** (need not be in `ℤ`), and `pairCount_ne_of_chiSep`/B1b
+    restate over ℂ (the `q(b_u+b_v)−2 ≠ 0` step holds for the nat-cast `q ≥ 3`). So the integrality/`÷q³` descent drops out.
+  This is *not* the hidden wall the route's success hinged on.
 
 **▶ MATCHING TRICK CONFIRMED + COUNTING CORE LANDED + GAPS SHARPENED (2026-06-24).** Stress-tested the increment-4 fold-in
 above; it is **sound**, and the load-bearing combinatorial core is now an axiom-clean theorem. Three things:
