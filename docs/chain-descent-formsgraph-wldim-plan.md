@@ -125,6 +125,9 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
   submodule), `polarRad_card_filter` (filter-card = `Nat.card` of the submodule, instance-free via `Nat.card`/`Set.ncard`), and
   `polarRad_ne_top_of_ne_zero` (`F ≠ 0 ⟹ radical proper`, char ≠ 2). See §13 "CORANK ≥ 2 HANDLED".
+- **`ScratchGoodAnchor.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **good-anchor count** analytic cores
+  for 3e-ii(a): **`mvPoly_zeros_count_le`** (Schwartz–Zippel, `#{(y,z): p(y,z)=0} ≤ totalDegree(p)·q`) + **`det_totalDegree_le`**
+  (`totalDegree(det) ≤ d` for a linear-entry matrix). Remaining = the concrete-pencil bridge (C)/(D)/(E) in the file header.
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -996,11 +999,19 @@ nondegenerate), `c₀(u,v;t₀) = (#{t : χ(I_u(t)) = χ(I_v(t))})/n ≤ 1 − �
   uniform bound is for the DEGENERATE bucket only** — the nondegenerate members must keep `|radical| = 1` (`√|V|` each), else the
   `(q−1)²` count of them blows the bound. So 3e-ii's split is: nondeg `(q−1)²·q^{d/2}` + deg `(#deg)·q^{d−1/2}`, the deg term
   now uniformly controlled by `radical_card_mul_card_le` regardless of corank.
+- **★ GOOD-ANCHOR COUNT — analytic cores LANDED (2026-06-25, `ChainDescent/ScratchGoodAnchor.lean`, axiom-clean).** Two reusable
+  lemmas: **`mvPoly_zeros_count_le`** (the Schwartz–Zippel count, `p ≠ 0 ⟹ #{(y,z): p(y,z)=0} ≤ totalDegree(p)·q`, via
+  `MvPolynomial.schwartz_zippel_totalDegree` + `Fintype.piFinset_univ` + NNRat `div_le_iff₀`/`div_mul_cancel₀` arithmetic) and
+  **`det_totalDegree_le`** (the degree cap, `det` of a `d×d` linear-entry matrix has `totalDegree ≤ d`, via `Matrix.det_apply` +
+  `totalDegree_finset_sum`/`_finset_prod`/`_smul_le`). Together ⟹ `#{(y,z): disc(y,z)=0} ≤ d·q` once `disc` is the pencil
+  discriminant. **REMAINING bridge to the concrete pencil** (header (C)/(D)/(E) of `ScratchGoodAnchor.lean`): (C) define
+  `disc = det(X 0·C(A) + X 1·C(B))` (Gram matrices of `polar pairForm_u/_v`), entry-degree ≤ 1 + `eval` identity; (D) LINCHPIN
+  `F_{y,z} degenerate ⟺ det = 0` via `LinearMap.BilinForm.nondegenerate_iff_det_ne_zero` + `polarRad ≠ ⊥`; (E) good anchor ⟹ `disc ≢ 0`.
 - **Step 3e (ii)+(iii) — REMAINING (no more magnitude analysis; counting + Schwartz-Zippel + arithmetic).**
-  (a) **good-anchor count** — bound the RHS radical-sum: `#conic = #{(y,z): F_{y,z} degenerate} ≤ d(q−1)` (Schwartz-Zippel on the
-  pencil discriminant; **the one remaining analytic input, shared with increment 4**). With the corank-uniform deg bound (just
-  landed), `‖T‖ ≤ [(q−1)²q^{d/2} + d(q−1)q^{(d+1)/2}]/q`. (Open glue: χ-norm `‖χy‖∈{0,1}`, nondeg/deg sum split, plug the
-  uniform bound — all elementary once the SZ count is in hand.)
+  (a) **good-anchor count** — bound the RHS radical-sum: `#conic = #{(y,z): F_{y,z} degenerate} ≤ d·q` (Schwartz-Zippel on the
+  pencil discriminant; **the one remaining analytic input, shared with increment 4** — its two analytic cores now landed, see ★ above).
+  With the corank-uniform deg bound, `‖T‖ ≤ [(q−1)²q^{d/2} + d·q·q^{(d+1)/2}]/q`. (Open glue: χ-norm `‖χy‖∈{0,1}`, nondeg/deg sum
+  split, the (C)/(D)/(E) discriminant bridge, plug the uniform bound.)
   (b) **`c₀` counting identity** `2·NS ≤ 2·z_u + n + T_ℤ` (χ-value case analysis over ℤ; `NS = #{t: χ(I_u)=χ(I_v)}`); cast
   `T_ℤ ↔ T_ℂ` (`‖T_ℂ‖ = |T_ℤ|`). (c) **arithmetic** — plug `zeroCount_sq_le` (`z_u`) + the `‖T‖` bound ⟹ `c₀ ≤ ¾` for `q ≥ q₀`
   (sqrt comparisons, done squared). **All magnitude tools (3b/3c/3d + `normT_le`) AND the corank-uniform deg bound are landed;
