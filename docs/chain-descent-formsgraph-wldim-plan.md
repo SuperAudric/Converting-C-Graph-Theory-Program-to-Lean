@@ -26,11 +26,17 @@
 >    (B1a core)]→ (`Z`-separating base) →[`ScratchBridgeZ.zProfileSeparates_of_zSep`]→ `ZProfileSeparates`. The degenerate-config
 >    case is *dissolved* into the increment-4 matching density (`O(1/√q)` locus), not computed. Modules: `ScratchBridge`,
 >    `ScratchBridgeA`, `ScratchBridgeZ` (all axiom-clean, NOT in build).
-> 2. **★ B1a WRAP — (i)+(ii) LANDED, (iii) de-risked.** `ScratchBridgeB.fullcount_eq_jointIsoCount_add_corr` (i) +
->    `ScratchBridgeC.fullcount_pair_eq_levelset`/`fullcount_pair_closed` (ii: the **fullcount closed form**
->    `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀=0]−1)`). **Remaining B1a = (iii) `χ(D)=χ(I_w)`** (de-risked: the
->    `associated=½·polar` factor-2 vanishes under `χ` since `χ(¼)=1`) **+ final assembly** of (i)+(ii)+(iii) into the per-pair
->    `jointIsoCount` closed form feeding `pairCount_ne_of_chiSep`. Work over `R'=ℂ` (no `R'→ℕ` descent — distinctness in ℂ suffices).
+> 2. **★ B1a WRAP — COMPLETE; the bridge is now closed end-to-end (2026-06-26, `ScratchBridgeD.lean`, all axiom-clean).**
+>    (i) `ScratchBridgeB.fullcount_eq_jointIsoCount_add_corr` + (ii) `ScratchBridgeC.fullcount_pair_*` (the fullcount closed
+>    form `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀=0]−1)`) + **(iii) `chi_configDet_eq_chi_pairForm`** (`χ(D)=χ(I_w)`;
+>    the `½·polar` factor and the `finBasis↔basisFun` change of basis BOTH enter as **squares**, killed by `χ` — no `finBasis`-is-
+>    standard identification needed) + **final assembly `jointIsoCount_pair_closed_corr0`** (the corr=0 per-pair closed form
+>    `Z_u·p³ = |V| + χ(I_u)·K·(p·[Q w₀=0]−1)`) + **the ℂ-restated B1b** (`chiSep_imp_zSep_field`/`pairCount_ne_of_chiSep_field`,
+>    `CharZero` — no `R'→ℕ` descent) + **the end-to-end per-pair capstone `jointIsoCount_ne_of_chiSep_pair`** (`χ(I)`-separation
+>    ⟹ `Z`-separation, the exact input to `ScratchBridgeZ.zProfileSeparates_of_zSep`). NB the model is the **prime-field** case
+>    (`q = p`, field `ZMod p`); `q = pᵉ` is the field generalization (concern #4). One named fact is *carried* not re-derived:
+>    `hK : gaussSum²·∑ψ(Q) ≠ 0` (Gauss-factor nonvanishing — independent of increment 4, dischargeable via `‖gaussSum‖²=q` +
+>    `∑ψ(Q)=χ(disc)·gaussSumᵈ`).
 > 3. **★ FINDING (do NOT lose) — the `corr` term ⟹ increment-4 predicate refinement.** The observable closed form is
 >    `jointIsoCount·q³ = qᵈ − corr·q³ + χ(I_w)·K·(q·[Q w₀=0]−1)`, `corr=[both config-diffs isotropic]` (codim-2, density `O(1/q²)`).
 >    B1b's clean four-value distinctness needs `corr_u=corr_v=0`, so **increment 4's good-pair predicate is `{hgood (disc≢0) ∧ hnz
@@ -44,12 +50,16 @@
 >    Mathlib substrate absent) but it is one shared track (Suzuki folds into char-2), reachable, gated on that substrate, **deferred**
 >    until odd-char affine-polar + seam close. The char-agnostic combinatorial layer (matching/bridge/seam/Layer B) reuses.
 >
-> **PICK UP HERE:** finish B1a wrap (iii) (`χ(D)=χ(I_w)`, reuse `ScratchPairSep.detG2_eq_pairForm` + `ScratchLemmaA.polar_configForm_single`)
-> → assemble the per-pair `jointIsoCount` closed form (over ℂ, corr=0 case) → **increment 4** (prove the good-pair predicate
-> `{hgood ∧ hnz ∧ corr=0}` holds at density `1−O(1/q)` per pair, via `ScratchGoodAnchor`-style Schwartz–Zippel) → **increment 5**
-> (wire `ScratchMatching.exists_separating_base` with `c̄₀<1`). Then field-gen (`ScratchCrux` `ZMod p`→abstract `K`), the corank
-> tightening (`q≳d²`→`q≳const`, §13 increment-3 block), families (d)/(e), and the seam build. **Strategic note:** the goal is the
-> *polynomial* seal; `reachesRigidOrCameron_viaSpielman` (idx 1117, axiom-clean) is the citable **sub-exp fallback** if a family walls.
+> **PICK UP HERE (B1a DONE):** the bridge is closed; the live frontier is now **increment 4** — prove the good-pair predicate
+> `{hgood ∧ hnz ∧ corr=0}` holds at density `1−O(1/q)` per pair (via `ScratchGoodAnchor`-style Schwartz–Zippel; the dominant gap
+> term is the config-degenerate locus `O(1/√q)`, not the `corr` `O(1/q²)` — budget the matching first-moment against `O(1/√q)`) →
+> **increment 5** (wire `ScratchMatching.exists_separating_base` with `c̄₀<1`; supply the frame `S={t,t₀}` + `hne` to
+> `jointIsoCount_ne_of_chiSep_pair` → `zProfileSeparates_of_zSep`). Two small carried obligations to discharge along the way:
+> `hK` (Gauss-factor `≠0`, above) and the **corank tightening** (`q≳d²`→`q≳const`, §13 increment-3 block — **option (i): re-use the
+> sharp per-member `ScratchPairSep.norm_sq_pairSum_le` per corank bucket** rather than the uniform `radical_card_mul_card_le`; agreed
+> to do this *after* B1a). Then field-gen (`ScratchCrux` `ZMod p`→abstract `K`/`GaloisField`), families (d)/(e), the seam build, and
+> the PORT into `build.sh`. **Strategic note:** the goal is the *polynomial* seal; `reachesRigidOrCameron_viaSpielman` (idx 1117,
+> axiom-clean) is the citable **sub-exp fallback** if a family walls.
 
 > **▶▶▶ `VO⁻₄(3)` SEALED (2026-06-21, axiom-clean `[propext, Classical.choice, Quot.sound]`).**
 > `ScratchBM3Glue.vo4minus_seal` proves the Witt-free capstone's conclusion for the bundled minus-form `Qbun = x₀x₁+x₂²+x₃²`
@@ -186,8 +196,9 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   **observable↔count bridge, B1b**: `chiSep_imp_zSep` (from the `|S|=2` even-`d` closed form `Z_w = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`,
   `K ≠ 0`, the four `(χ,[c=0])` values are distinct for `q>2` ⟹ `χ(det G₂)_u ≠ χ(det G₂)_v ⟹ Z_u({t,t₀}) ≠ Z_v({t,t₀})`) +
   **`pairCount_ne_of_chiSep`** (the same in joint-count language: closed form for each point + χ-separation ⟹ `Z_u ≠ Z_v`). Feeds
-  the bridge capstone `ScratchBridgeZ.zProfileSeparates_of_zSep`. **B1a analytic core LANDED** in `ScratchBridgeA`; only B1a's
-  mechanical wrapping remains (B1-deg **dissolved** — see §13 BRIDGE block).
+  the bridge capstone `ScratchBridgeZ.zProfileSeparates_of_zSep`. **B1a (analytic core + all wraps) now COMPLETE** —
+  `ScratchBridgeA`–`D`; the ℤ-stated `chiSep_imp_zSep`/`pairCount_ne_of_chiSep` here are superseded by the ℂ-restated
+  `ScratchBridgeD` versions used in the assembly (B1-deg **dissolved** — see §13 BRIDGE block).
 - **`ScratchBridgeZ.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchCrux` → build its olean first) — the **bridge capstone** `zProfileSeparates_of_zSep`: any `Z`-separating base
   (`∀ u≠u', ∃ S⊆T, jointIsoCount Q u S ≠ jointIsoCount Q u' S`) discharges `ScratchCrux.ZProfileSeparates Q T` outright. With
@@ -201,9 +212,16 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
 - **`ScratchBridgeC.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchBridgeA` + `ScratchBridgeB`) — **B1a wrap (ii):** `fullcount_pair_eq_levelset` (ii-a, `Finset {t,t₀}`↔`Fin 2` config
   indexing + `reduction_to_levelset_nondeg`) + **`fullcount_pair_closed`** (ii-b, the **fullcount closed form**
-  `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀=0]−1)`, config-nondeg + even `d`). Remaining B1a wrap: (iii) `D↔pairForm`
-  (`χ(D)=χ(I_w)`, factor-2). NB wrap (ii) surfaced the **`corr` term** ⟹ increment-4 good-pair predicate gains `corr=0` (§13 BRIDGE
-  net verdict "FINDING"). All over `ℂ` (no `R'→ℕ` descent).
+  `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀=0]−1)`, config-nondeg + even `d`). NB wrap (ii) surfaced the **`corr`
+  term** ⟹ increment-4 good-pair predicate gains `corr=0` (§13 BRIDGE net verdict "FINDING").
+- **`ScratchBridgeD.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
+  `ScratchBridgeC` + `ScratchPairSep`) — **B1a wrap (iii) + the final ℂ assembly, closing the bridge end-to-end.**
+  `configPolarDet_eq_pairForm` (2×2 polar Gram det = `pairForm`) → **`chi_configDet_eq_chi_pairForm`** (wrap (iii): `χ(D)=χ(I_w)`;
+  the `½·polar` factor + the `finBasis↔basisFun` change of basis enter as squares killed by `χ`, via reindex + `det_submatrix_equiv_self`
+  + `toMatrix_mul_basis_toMatrix` — no standard-basis identification) → **`jointIsoCount_pair_closed_corr0`** (assembly: the corr=0
+  per-pair closed form) ; `chi_eq_one_or_neg_one` + **`chiSep_imp_zSep_field`/`pairCount_ne_of_chiSep_field`** (ℂ-restated B1b,
+  `CharZero`, no `R'→ℕ` descent) → end-to-end capstone **`jointIsoCount_ne_of_chiSep_pair`** (`χ(I)`-sep ⟹ `Z`-sep, feeds
+  `ScratchBridgeZ.zProfileSeparates_of_zSep`). Carries `hK : gaussSum²·∑ψ(Q)≠0` (independent Gauss nonvanishing). Prime-field model.
 - **`ScratchBridgeA.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchLemmaA` → build its olean first) — the **B1a analytic core** `levelset_count_collapse`: for config size `m=2`, **even `d`**,
   nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
@@ -1357,10 +1375,18 @@ remainder (families, seam, port): `chain-descent-remaining-work.md` §3a.1.
   - ✓ **wrap (ii) LANDED (2026-06-26, `ScratchBridgeC`, axiom-clean):** `fullcount_pair_eq_levelset` (ii-a, the `Finset
     {t,t₀}`↔`Fin 2` config indexing + `reduction_to_levelset_nondeg`) + **`fullcount_pair_closed`** (ii-b) — the **fullcount
     closed form** `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀ = 0] − 1)`, config-nondeg + even `d`, over general `R'`.
-  - ★ wrap (iii) — DE-RISKED, clean: `χ(D) = χ(I_w(t))`. The config Gram via `associated = ½·polar` (Mathlib
-    `two_nsmul_associated`) gives `D = det(½·polar Gram)_{2×2} = ¼·det G₂ = ¼·I_w(t)` (det G₂ = `pairForm`,
-    `ScratchPairSep.detG2_eq_pairForm` + `polar_configForm_single`). The factor `χ(¼) = χ(2)⁻² = 1` (quadratic char kills the
-    square), so **the factor-2 VANISHES under `χ` — `χ(D) = χ(I_w)` exactly, no residual `χ(2)` term.** Mechanical, not a wall.
+  - ✓ **wrap (iii) LANDED (2026-06-26, `ScratchBridgeD.chi_configDet_eq_chi_pairForm`, axiom-clean):** `χ(D) = χ(I_w(t))`.
+    Proved cleaner than the `D = ¼·det G₂` framing: BOTH the `associated = ½·polar` factor (`(⅟2)²`) AND the
+    `Module.finBasis ↔ Pi.basisFun` change of basis (`(det P)²`, via `LinearMap.BilinForm.toMatrix_mul_basis_toMatrix` after
+    reindexing `finBasis` to `Fin 2` — det-preserving, `det_submatrix_equiv_self`) enter as **squares**, killed by `χ`
+    (`hkill : χ(s²·x)=χ x`). So **no identification of `finBasis` with the standard basis is needed** (it is generally false);
+    `χ(D)=χ(I_w)` exactly, no residual `χ(2)`. Supporting: `configPolarDet_eq_pairForm` (2×2 polar Gram det = `pairForm`).
+  - ✓ **final assembly + ℂ-restated B1b LANDED (2026-06-26, `ScratchBridgeD`, axiom-clean):** `jointIsoCount_pair_closed_corr0`
+    (the corr=0 per-pair closed form `Z_u·p³ = |V| + χ(I_u)·K·(p·[Q w₀=0]−1)`, K=`gaussSum²·∑ψ(Q)`) + `chiSep_imp_zSep_field`/
+    `pairCount_ne_of_chiSep_field` (B1b over a `CharZero` field — the `q(bᵤ+bᵥ)−2≠0` step is a nat-cast argument, NO `R'→ℕ`
+    descent) + the end-to-end per-pair capstone **`jointIsoCount_ne_of_chiSep_pair`** (`χ(I)`-separation ⟹ `Z`-separation, the
+    exact `∃S⊆T` witness `zProfileSeparates_of_zSep` consumes). **The bridge is now closed end-to-end.** Carried (not re-derived):
+    `hK : gaussSum²·∑ψ(Q) ≠ 0` (independent Gauss nonvanishing). NB prime-field model (`q=p`); `q=pᵉ` = field-gen (concern #4).
   - **★★ FINDING from wrap (ii) — the `corr` term, and a refinement to increment 4 (do NOT lose this).** Combining wrap (i)+(ii)
     gives the *observable* closed form `jointIsoCount·q³ = qᵈ − corr·q³ + χ(I_w)·K·(q·[Q w₀=0] − 1)`, `corr = [Q(t̄−w̄)=0 ∧
     Q(t̄₀−w̄)=0]` (both config-differences isotropic). The clean B1b (`pairCount_ne_of_chiSep`, `Z = n + χ·K·(q·b−1)`, same `n`)

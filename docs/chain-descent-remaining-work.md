@@ -124,16 +124,16 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     (reuses `degenerate_count_le`-style tools). De-risked numerically (`Probe_D3dPairCount`: `c̄₀≈0.45` flat).
 >   - ★ **Increment 5 — apply the matching trick** (small): feed `c̄₀<1` into **`ScratchMatching.exists_separating_base`
 >     (LANDED, axiom-clean)** with `m=O(d log q)` ⟹ separating base `O(d log q)`.
->   - ◐ **Observable↔count bridge** (ARCHITECTURALLY CLOSED 2026-06-26, `ScratchBridge`/`ScratchBridgeA`/`ScratchBridgeZ`, axiom-clean):
+>   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ScratchBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
 >     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
->     χ-separating base) →[`pairCount_ne_of_chiSep` (**B1b**) + `levelset_count_collapse` (**B1a core**: `Z_w·q³ = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`,
->     `K≠0`)]→ (`Z`-separating base) →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`. Three pieces LANDED axiom-clean;
->     **B1-deg DISSOLVED** (config-degenerate locus density `O(1/√q)`, folds into the increment-4 matching density — no degenerate `Z`
->     value needed). **B1a wrap (i)+(ii) LANDED** (`ScratchBridgeB`/`ScratchBridgeC`, axiom-clean: fullcount closed form); ★ remaining
->     = **wrap (iii) `χ(D)=χ(I_w)`** (de-risked — factor-2 vanishes under `χ`) **+ assembly** (over ℂ, no `R'→ℕ` descent). ★ **FINDING:**
->     the `corr` term ([both config-diffs isotropic], codim-2, `O(1/q²)`) ⟹ increment-4 good-pair predicate gains `corr=0` →
->     `{hgood ∧ hnz ∧ corr=0}`. Detail: plan §13 BRIDGE net verdict.
->     NO Weil, NOT a hidden wall. (Plan §13 BRIDGE block.)
+>     χ-separating base) →[`pairCount_ne_of_chiSep_field` (**B1b**, ℂ) + the per-pair closed form `jointIsoCount_pair_closed_corr0`
+>     (**B1a**: `Z_u·p³ = |V| + χ(I_u)·K·(p[Q w₀=0]−1)`)]→ (`Z`-separating base) →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`,
+>     packaged as the per-pair capstone **`jointIsoCount_ne_of_chiSep_pair`**. **B1-deg DISSOLVED** (config-degenerate locus density
+>     `O(1/√q)`, folds into the increment-4 matching density). **All B1a wraps LANDED** — (i)`ScratchBridgeB` + (ii)`ScratchBridgeC` +
+>     **(iii) `ScratchBridgeD.chi_configDet_eq_chi_pairForm`** (`χ(D)=χ(I_w)`; `½·polar` factor + change-of-basis both enter as squares
+>     killed by `χ`) + the ℂ assembly. Carried: `hK : gaussSum²·∑ψ(Q)≠0` (independent Gauss nonvanishing). ★ **FINDING:** the `corr`
+>     term ([both config-diffs isotropic], codim-2, `O(1/q²)`) ⟹ increment-4 good-pair predicate gains `corr=0` → `{hgood ∧ hnz ∧ corr=0}`.
+>     NO Weil, NO `R'→ℕ` descent (worked over ℂ), NOT a hidden wall. (Plan §13 BRIDGE block; prime-field model `q=p`.)
 >   - ★ **Field generalization** (medium refactor): `c0_le_threequarters` is already abstract `[Field K]` (prime-power `q`
 >     covered analytically — subsumes the old "uniform kernel"/"q-prime-first"); but `ScratchCrux`/`ZProfileSeparates` are
 >     `ZMod p` only and must lift to **abstract `[Field K] [Fintype K]`** (per AUDIT-A — a typeclass refactor, NOT a `GaloisField`
