@@ -162,8 +162,13 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
 - **`ScratchBridgeB.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchCrux` + `ScratchLemmaB`) — **B1a wrap (i)** `fullcount_eq_jointIsoCount_add_corr`: the Lemma-A fullcount =
   `jointIsoCount Q u S + [∀t∈S, Q(t̄−ū)=0]` (`cone_count_zero_split` ∘ `jointIsoCount_eq_restricted`). Connects the bridge
-  observable `jointIsoCount` to `levelset_count_collapse`'s fullcount. Remaining B1a wrap: `|S|=2` config indexing →
-  `reduction_to_levelset_nondeg` → collapse; `D↔pairForm`; all over `ℂ` (no `R'→ℕ` descent — §13 BRIDGE net verdict).
+  observable `jointIsoCount` to `levelset_count_collapse`'s fullcount.
+- **`ScratchBridgeC.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
+  `ScratchBridgeA` + `ScratchBridgeB`) — **B1a wrap (ii):** `fullcount_pair_eq_levelset` (ii-a, `Finset {t,t₀}`↔`Fin 2` config
+  indexing + `reduction_to_levelset_nondeg`) + **`fullcount_pair_closed`** (ii-b, the **fullcount closed form**
+  `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀=0]−1)`, config-nondeg + even `d`). Remaining B1a wrap: (iii) `D↔pairForm`
+  (`χ(D)=χ(I_w)`, factor-2). NB wrap (ii) surfaced the **`corr` term** ⟹ increment-4 good-pair predicate gains `corr=0` (§13 BRIDGE
+  net verdict "FINDING"). All over `ℂ` (no `R'→ℕ` descent).
 - **`ScratchBridgeA.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchLemmaA` → build its olean first) — the **B1a analytic core** `levelset_count_collapse`: for config size `m=2`, **even `d`**,
   nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
@@ -1305,9 +1310,23 @@ remainder (families, seam, port): `chain-descent-remaining-work.md` §3a.1.
   - ✓ **wrap (i) LANDED (2026-06-26, `ScratchBridgeB.fullcount_eq_jointIsoCount_add_corr`, axiom-clean):**
     `fullcount = jointIsoCount + [y=0 corr]` — connects the observable `jointIsoCount` to the Lemma-A `fullcount`
     (`cone_count_zero_split` ∘ `jointIsoCount_eq_restricted`).
-  - ★ wrap (ii): `|S|=2` config indexing (`S={t,t₀}`, `t≠t₀` → `a = ![t̄−ū, t̄₀−ū] : Fin 2 → V`) → `reduction_to_levelset_nondeg`
-    → `levelset_count_collapse`.
-  - ★ wrap (iii): `D ↔ pairForm`/`det G₂` (`χ(D) = χ(I_w(t))`; track the BilinForm-`toMatrix`-vs-`polar` factor-2 → `χ(2)^k`).
+  - ✓ **wrap (ii) LANDED (2026-06-26, `ScratchBridgeC`, axiom-clean):** `fullcount_pair_eq_levelset` (ii-a, the `Finset
+    {t,t₀}`↔`Fin 2` config indexing + `reduction_to_levelset_nondeg`) + **`fullcount_pair_closed`** (ii-b) — the **fullcount
+    closed form** `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀ = 0] − 1)`, config-nondeg + even `d`, over general `R'`.
+  - ★ wrap (iii) — DE-RISKED, clean: `χ(D) = χ(I_w(t))`. The config Gram via `associated = ½·polar` (Mathlib
+    `two_nsmul_associated`) gives `D = det(½·polar Gram)_{2×2} = ¼·det G₂ = ¼·I_w(t)` (det G₂ = `pairForm`,
+    `ScratchPairSep.detG2_eq_pairForm` + `polar_configForm_single`). The factor `χ(¼) = χ(2)⁻² = 1` (quadratic char kills the
+    square), so **the factor-2 VANISHES under `χ` — `χ(D) = χ(I_w)` exactly, no residual `χ(2)` term.** Mechanical, not a wall.
+  - **★★ FINDING from wrap (ii) — the `corr` term, and a refinement to increment 4 (do NOT lose this).** Combining wrap (i)+(ii)
+    gives the *observable* closed form `jointIsoCount·q³ = qᵈ − corr·q³ + χ(I_w)·K·(q·[Q w₀=0] − 1)`, `corr = [Q(t̄−w̄)=0 ∧
+    Q(t̄₀−w̄)=0]` (both config-differences isotropic). The clean B1b (`pairCount_ne_of_chiSep`, `Z = n + χ·K·(q·b−1)`, same `n`)
+    **silently assumed `corr = 0`** — with `corr_u ≠ corr_v` the effective `n` differs by `q³` and the four-value distinctness can
+    collide (checked: e.g. `q=3, d=4`). **Resolution (same dissolution as B1-deg):** `corr_w = 1` is a *codimension-2* condition
+    (`Q(a₁)=Q(a₂)=0`), density `O(1/q²)`, so require `corr_u = corr_v = 0` in the matching's separating-pair predicate — folding the
+    `O(1/q²)` `corr=1` locus into the increment-4 bad set alongside the config-degenerate and bad-anchor loci. Then `jointIsoCount`
+    reduces to the clean `Z = qᵈ + χ·K·(q·b−1)` and B1b applies unchanged. **So increment 4's good-pair predicate is now
+    `{config-nondeg ∧ corr=0}` on both points** (three small Schwartz–Zippel loci total: `disc≢0`/`hgood`, `pairForm` indep/`hnz`,
+    `corr=0`); the analytic core (`c0_le_threequarters`, B1b) is untouched.
   - **SIMPLIFICATION (no `R'→ℕ` descent needed):** work in `R' = ℂ` throughout. Distinctness in ℂ suffices — the counts are
     `ℕ`-casts, `K = gaussSum²·∑ψ(Q)` is a **nonzero cyclotomic integer** (need not be in `ℤ`), and `pairCount_ne_of_chiSep`/B1b
     restate over ℂ (the `q(b_u+b_v)−2 ≠ 0` step holds for the nat-cast `q ≥ 3`). So the integrality/`÷q³` descent drops out.
