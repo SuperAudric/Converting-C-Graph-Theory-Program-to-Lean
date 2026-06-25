@@ -767,6 +767,46 @@ theorem zeroCount_sq_le {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Inver
             * (Finset.univ.filter (fun h : V => ∀ x, QuadraticMap.polar P x h = 0)).card) := by
         rw [mul_pow, Real.sq_sqrt (by positivity)]
 
+/-- **The `|T|` bound (3e, step i — the load-bearing analytic step).** The per-pair character sum
+`T = ∑_t χ(det G₂(u;t,t₀))·χ(det G₂(v;t,t₀))` (over ℂ) satisfies `q·‖T‖ ≤ ∑_{y,z} ‖χ y‖·‖χ z‖·√(qᵈ·|radical F_{y,z}|)`,
+`F_{y,z} = y•pairForm_u + z•pairForm_v`. From the factoring `gaussSum²·T = ∑_{y,z} χ(y)χ(z)·M(y,z)`
+(`pairCharSum_factor_gen`), `‖gaussSum‖² = q` (`norm_gaussSum_sq`), the triangle inequality, and the uniform
+`‖M(y,z)‖ ≤ √(qᵈ·|radical F|)` (`norm_sq_pairSum_le`). The axes drop (`‖χ 0‖ = 0`); bounding the RHS radical-sum is the
+good-anchor count (Schwartz–Zippel, shared with increment 4). -/
+theorem normT_le {K : Type*} [Field K] [Fintype K] [DecidableEq K] [Invertible (2 : K)]
+    (hF : ringChar K ≠ 2) {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    {V : Type*} [AddCommGroup V] [Module K V] [Fintype V] [DecidableEq V]
+    (Q : QuadraticForm K V) (u v t₀ : V) :
+    (Fintype.card K : ℝ)
+        * ‖∑ t : V, ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (pairForm Q (t₀ - u) (t - u))
+            * ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (pairForm Q (t₀ - v) (t - v))‖
+      ≤ ∑ y : K, ∑ z : K,
+          ‖((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) y‖
+            * ‖((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) z‖
+            * Real.sqrt ((Fintype.card V : ℝ)
+              * (Finset.univ.filter (fun h : V =>
+                  ∀ x, QuadraticMap.polar (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) x h = 0)).card) := by
+  set χ := (quadraticChar K).ringHomComp (Int.castRingHom ℂ) with hχ
+  have hq : ‖gaussSum χ ψ‖ ^ 2 = (Fintype.card K : ℝ) := norm_gaussSum_sq hF hψ
+  have hfac := pairCharSum_factor_gen hF ψ (fun t : V => pairForm Q (t₀ - u) (t - u))
+    (fun t : V => pairForm Q (t₀ - v) (t - v))
+  have h1 := congrArg norm hfac
+  rw [norm_mul, norm_pow, hq] at h1
+  rw [h1]
+  calc ‖∑ y : K, ∑ z : K, χ y * χ z
+          * (∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)))‖
+      ≤ ∑ y : K, ‖∑ z : K, χ y * χ z
+          * (∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)))‖ :=
+        norm_sum_le _ _
+    _ ≤ ∑ y : K, ∑ z : K, ‖χ y * χ z
+          * (∑ t : V, ψ (y * pairForm Q (t₀ - u) (t - u) + z * pairForm Q (t₀ - v) (t - v)))‖ :=
+        Finset.sum_le_sum (fun y _ => norm_sum_le _ _)
+    _ ≤ _ := Finset.sum_le_sum (fun y _ => Finset.sum_le_sum (fun z _ => ?_))
+  rw [norm_mul, norm_mul]
+  exact mul_le_mul_of_nonneg_left
+    ((Real.le_sqrt (norm_nonneg _) (by positivity)).mpr (norm_sq_pairSum_le hψ Q u v t₀ y z))
+    (by positivity)
+
 end CMagnitude
 
 end ChainDescent
@@ -794,3 +834,4 @@ end ChainDescent
 #print axioms ChainDescent.norm_sq_sum_addChar_quadForm_linear_le
 #print axioms ChainDescent.norm_sq_pairSum_le
 #print axioms ChainDescent.zeroCount_sq_le
+#print axioms ChainDescent.normT_le
