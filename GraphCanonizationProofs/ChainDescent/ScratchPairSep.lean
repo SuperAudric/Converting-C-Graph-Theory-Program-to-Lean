@@ -37,7 +37,10 @@ green (NOT in build.sh).** Grouped by increment:
   1. **Good-anchor count (the one remaining analytic input; SHARED with increment 4).** Bound `normT_le`'s RHS radical-sum:
      `#{(y,z) : F_{y,z} = y•pairForm_u + z•pairForm_v degenerate} ≤ d(q−1)`, by **`MvPolynomial.schwartz_zippel_totalDegree`**
      (Mathlib, confirmed present) on the pencil discriminant `det(y·G_u + z·G_v)` (degree `d` in `(y,z)`; `≢0` ⟺ good anchor).
-     ⟹ `‖T‖ ≤ [(q−1)²·q^{d/2} + d(q−1)·q^{(d+1)/2}]/q` (nondeg `(y,z)`: `|radical|=1`; conic: `|radical|≤q`).
+     ⟹ `‖T‖ ≤ [(q−1)²·q^{d/2} + d(q−1)·q^{(d+1)/2}]/q` (nondeg `(y,z)`: `|radical|=1`; conic: `|radical|≤q^{d−1}`).
+     **★ CORANK ≥ 2 NOW HANDLED (2026-06-25, `ScratchCorank.lean`, axiom-clean): `radical_card_mul_card_le`** =
+     `F ≠ 0 ⟹ |radical F|·q ≤ |V|` UNIFORMLY over corank (proper-subspace bound) — so the degenerate bucket needs NO per-corank
+     stratification; the nondeg bucket keeps `|radical|=1`. Remaining glue here: χ-norm `‖χy‖∈{0,1}` + nondeg/deg split + plug.
   2. **`c₀` counting identity (pure ℤ counting).** `2·NS ≤ 2·z_u + n + T_ℤ` (`NS = #{t : χ(I_u t)=χ(I_v t)}`; `χ`-value cases:
      `#both0 ≤ z_u`, `#{both≠0,same} = ½(N₂+T_ℤ)`); cast `T_ℤ ↔ T_ℂ` (`‖T_ℂ‖ = |T_ℤ|`). (Simplification: only `z_u` needed,
      drop `z₂`,`z_v`.)
