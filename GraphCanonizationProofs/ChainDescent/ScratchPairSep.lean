@@ -32,26 +32,22 @@ green (NOT in build.sh).** Grouped by increment:
 **`zeroCount_sq_le`** (3d: `(z·q−qᵈ)²≤(q−1)²·qᵈ·|radical P|`), **`normT_le`** (3e-i:
 `q·‖T‖ ≤ ∑_{y,z} ‖χy‖‖χz‖·√(qᵈ·|radical F_{y,z}|)`, `T = ∑_t χ(det G₂(u;·,t₀))χ(det G₂(v;·,t₀))`).
 
-**★ PICK UP HERE — finish increment 3 (`c₀<1`), then the matching-trick assembly. NO MORE MAGNITUDE ANALYSIS NEEDED**
-(all Gauss-sum/magnitude tools above are landed). The remaining steps are counting + Schwartz-Zippel + arithmetic:
-  1. **Good-anchor count (the one remaining analytic input; SHARED with increment 4).** Bound `normT_le`'s RHS radical-sum:
-     `#{(y,z) : F_{y,z} = y•pairForm_u + z•pairForm_v degenerate} ≤ d(q−1)`, by **`MvPolynomial.schwartz_zippel_totalDegree`**
-     (Mathlib, confirmed present) on the pencil discriminant `det(y·G_u + z·G_v)` (degree `d` in `(y,z)`; `≢0` ⟺ good anchor).
-     ⟹ `‖T‖ ≤ [(q−1)²·q^{d/2} + d(q−1)·q^{(d+1)/2}]/q` (nondeg `(y,z)`: `|radical|=1`; conic: `|radical|≤q^{d−1}`).
-     **★ CORANK ≥ 2 NOW HANDLED (2026-06-25, `ScratchCorank.lean`, axiom-clean): `radical_card_mul_card_le`** =
-     `F ≠ 0 ⟹ |radical F|·q ≤ |V|` UNIFORMLY over corank (proper-subspace bound) — so the degenerate bucket needs NO per-corank
-     stratification; the nondeg bucket keeps `|radical|=1`. Remaining glue here: χ-norm `‖χy‖∈{0,1}` + nondeg/deg split + plug.
-  2. **`c₀` counting identity (pure ℤ counting).** `2·NS ≤ 2·z_u + n + T_ℤ` (`NS = #{t : χ(I_u t)=χ(I_v t)}`; `χ`-value cases:
-     `#both0 ≤ z_u`, `#{both≠0,same} = ½(N₂+T_ℤ)`); cast `T_ℤ ↔ T_ℂ` (`‖T_ℂ‖ = |T_ℤ|`). (Simplification: only `z_u` needed,
-     drop `z₂`,`z_v`.)
-  3. **Arithmetic.** Plug `zeroCount_sq_le` (`z_u`) + step-1 `‖T‖` bound ⟹ `c₀ = NS/n ≤ ¾` for `q ≥ q₀` (sqrt comparisons, done
-     squared); small `q` by `decide` or via the matching trick's small-`q` handling.
-  4. **Matching-trick assembly (increments 4+5).** `ScratchMatching.exists_separating_base` (LANDED, axiom-clean) is the engine:
-     match the base into DISJOINT independent probe/anchor pairs (`det G₂` symmetric in `(t,a)`, so anchor existence dissolves) ⟹
-     `c̄₀ < 1` (V×V non-separating density, from step-1 good-anchor count + step-2/3 per-anchor `c₀`) ⟹ separating base `O(d log q)`.
-     Then bridge `χ(det G₂)` recoverable from `Z_u({t,t₀})` ⟹ `ZProfileSeparates` ⟹
-     `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (`PublicTheoremIndex.md:1248`). Probe `Probe_D3dPairCount`: `cbarMax≈0.5`
-     flat, `q·badFrMx→0` (good-anchor O(1/q)). Full narrative + status: plan §13.
+**★★★ INCREMENT 3 CLOSED (2026-06-25). The per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE, axiom-clean.** This file's `normT_le`
+is one input; the assembly across 8 scratch modules is done — capstone **`ScratchC0Final.c0_le_threequarters`**: for a good anchor
+(`hgood` ∃ nondeg member, `hnz` no zero member, `hPu` pairForm≠0) with `q≥q₀` (`64q²≤|V|` ⟺ `d≥3`, `64d²≤q`, `256≤q`),
+`NS = #{t : χ(I_u t)=χ(I_v t)} ≤ ¾·|V|`. The chain:
+  - **Good-anchor count** `#degenerate ≤ d·q` — `ScratchGoodAnchor.degenerate_count_le` (Schwartz–Zippel `mvPoly_zeros_count_le`
+    + degree cap `det_totalDegree_le` + the degeneracy⟺det bridge `polarRad_ne_bot_iff_det_eq_zero`).
+  - **Corank ≥ 2** — `ScratchCorank.radical_card_mul_card_le` (`F≠0 ⟹ |radical|·q ≤ |V|` uniformly; degenerate bucket).
+  - **`|T|` bound** — `ScratchTBound.normT_bucket_bound` (`q·‖T‖ ≤ q²√|V| + d·q·|V|/√q`), bucket-split of `normT_le`'s RHS via
+    `ScratchBucket.sum_two_bucket_le`/`sqrt_mul_le_div` + χ-norm `ScratchChiNorm.norm_quadraticChar`.
+  - **Counting identity** — `ScratchCount.counting_identity` (`2·NS ≤ 2·z_u + n + T_ℤ`) + `ScratchC0.card_agree_le` (`… + ‖T_ℂ‖`).
+  - **Final arithmetic** — `ScratchBucket.c0_le` ⟹ `c0_le_threequarters`.
+
+**★ NEXT = increments 4–5 (matching-trick assembly), NOT in this file.** `ScratchMatching.exists_separating_base` (LANDED,
+axiom-clean) is the engine: `c0_le_threequarters` (per good anchor) + the good-anchor fraction ⟹ `c̄₀ < 1` (V×V non-separating
+density) ⟹ separating base `O(d log q)` ⟹ `ZProfileSeparates` ⟹ `reachesRigidOrCameron_viaIsotropySeparates_wittFree`
+(`PublicTheoremIndex.md:1248`). Probe `Probe_D3dPairCount`: `cbarMax≈0.5` flat, `q·badFrMx→0`. Full narrative + status: plan §13.
 
 NOT in build (scratch; `lake env lean ChainDescent/ScratchPairSep.lean`). Reduction skeleton: `ScratchCrux.lean`;
 matching trick: `ScratchMatching.lean`.

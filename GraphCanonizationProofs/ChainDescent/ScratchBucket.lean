@@ -43,7 +43,46 @@ theorem sqrt_mul_le_div {V k r : ℝ} (hV : 0 ≤ V) (hk : 0 < k) (h : r * k ≤
   calc Real.sqrt (V * r) ≤ Real.sqrt (V ^ 2 / k) := Real.sqrt_le_sqrt h1
     _ = V / Real.sqrt k := by rw [Real.sqrt_div (by positivity), Real.sqrt_sq hV]
 
+/-- **The final c₀ bound (3e-iii finish).** From the counting bound `2·NS ≤ 2·z_u + n + T` (`card_agree_le`), the `|T|`
+bound `T ≤ q·√n + d·n/√q` (`normT_bucket_bound`, ÷q), and the zero-count `z_u·q ≤ n + (q−1)·n/√q` (`zeroCount_sq_le` with
+the proper-subspace radical bound), under the threshold `64q² ≤ n` (i.e. `d ≥ 3`), `64d² ≤ q`, `256 ≤ q`: `NS ≤ ¾·n`, i.e.
+`c₀ = NS/n ≤ ¾`. -/
+theorem c0_le {n q dR T zu NS : ℝ} (hn : 0 < n) (hq : 0 < q) (hd : 0 ≤ dR)
+    (hcount : 2 * NS ≤ 2 * zu + n + T)
+    (hT : T ≤ q * Real.sqrt n + dR * n / Real.sqrt q)
+    (hzu : zu * q ≤ n + (q - 1) * n / Real.sqrt q)
+    (hq1 : 64 * q ^ 2 ≤ n) (hq2 : 64 * dR ^ 2 ≤ q) (hq3 : 256 ≤ q) :
+    NS ≤ 3 / 4 * n := by
+  set r := Real.sqrt q with hrdef
+  set m := Real.sqrt n with hmdef
+  have hr : 0 < r := Real.sqrt_pos.2 hq
+  have hm : 0 ≤ m := Real.sqrt_nonneg _
+  have hnn : m * m = n := Real.mul_self_sqrt hn.le
+  have h8q : 8 * q ≤ m := by
+    rw [hmdef, show (8 : ℝ) * q = Real.sqrt ((8 * q) ^ 2) from (Real.sqrt_sq (by positivity)).symm]
+    exact Real.sqrt_le_sqrt (by nlinarith [hq1])
+  have h8d : 8 * dR ≤ r := by
+    rw [hrdef, show (8 : ℝ) * dR = Real.sqrt ((8 * dR) ^ 2) from (Real.sqrt_sq (by positivity)).symm]
+    exact Real.sqrt_le_sqrt (by nlinarith [hq2])
+  have h16 : (16 : ℝ) ≤ r := by
+    rw [hrdef, show (16 : ℝ) = Real.sqrt (16 ^ 2) from (Real.sqrt_sq (by norm_num)).symm]
+    exact Real.sqrt_le_sqrt (by nlinarith [hq3])
+  -- T ≤ n/4
+  have hA : q * m ≤ n / 8 := by nlinarith [mul_le_mul_of_nonneg_right h8q hm, hnn]
+  have hB : dR * n / r ≤ n / 8 := by
+    rw [div_le_iff₀ hr]; nlinarith [mul_le_mul_of_nonneg_right h8d hn.le]
+  have hTb : T ≤ n / 4 := by linarith [hT, hA, hB]
+  -- z_u ≤ n/8
+  have hC : n ≤ q * n / 16 := by nlinarith [hq3, hn]
+  have hD : (q - 1) * n / r ≤ q * n / 16 := by
+    rw [div_le_iff₀ hr]; nlinarith [mul_le_mul_of_nonneg_left h16 hq.le, hn.le, mul_nonneg hq.le hn.le]
+  have hzub : zu ≤ n / 8 := by
+    have hzq : zu * q ≤ n / 8 * q := by nlinarith [hzu, hC, hD]
+    exact le_of_mul_le_mul_right hzq hq
+  linarith [hcount, hTb, hzub]
+
 end ChainDescent
 
 #print axioms ChainDescent.sum_two_bucket_le
 #print axioms ChainDescent.sqrt_mul_le_div
+#print axioms ChainDescent.c0_le
