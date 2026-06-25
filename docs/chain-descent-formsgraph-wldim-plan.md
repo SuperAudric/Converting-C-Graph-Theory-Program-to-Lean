@@ -559,6 +559,50 @@ Dependency-ordered, with the modifications folded in:
 > `χ(disc)`). The 1-dim cyclotomic slice over even `q` is separately covered by the Ponomarenko citation (§11.6), so the
 > char-2 GAP is specifically the forms-graphs (c)–(f), not the cyclotomic part.
 
+
+> **▶▶▶ CHAR-2 CITABILITY / FEASIBILITY CHECK DONE (2026-06-26) — verdict: NOT citable, NOT a wall, but a SUBSTANTIAL
+> bespoke build + missing Mathlib substrate.** Mirrors the AUDIT-W format.
+>
+> **(A) Citability = NO (must be proved).** A literature sweep (Gavrilyuk/Ponomarenko WL-dim line + polar-space SRG line)
+> finds **no published bounded-WL-dim / poly-individualization result for the orthogonal forms-graph `VO^ε_{2m}(q)`
+> families**, char-2 or otherwise. The closest WL-dim results are for *adjacent-but-different* families — Cai–Guo–Gavrilyuk–
+> Ponomarenko (Combinatorica 2025, `arXiv:2312.00460`) prove WL-dim ≤ 4 for the **Fon-Der-Flaass** construction (a different
+> SRG family) — and the polar-space papers (`arXiv:2402.05055`, `arXiv:1606.05898`) are about *constructing/switching* polar
+> SRGs, not their WL-dimension. So char-2 bounded-WL-dim is **open, same status as odd char** (the SRG-WL wall is char-agnostic).
+> The *structure* (Liebeck/Skresanov) covers char-2; only the WL-dim **result** is uncited. **No free pass via geometry:** the
+> char-2 *quadratic* forms-graph does NOT collapse into the carved geometric *bilinear/symplectic* leg — the quadratic form
+> strictly refines its alternating polar (the Arf datum), giving a distinct non-geometric rank-3 SRG. **Positive signal:** the
+> SAME authors as our cited stack (Gavrilyuk, Ponomarenko) are *actively* proving bounded-WL-dim for structured SRG families,
+> so the technique class is alive and a future/ongoing watch could yield coverage.
+>
+> **(B) What breaks in char 2 (the entire odd-char A-side evaporates).** (1) `Invertible 2` fails ⟹ `Q` is **not** recoverable
+> from its polar; (2) the polar form is **alternating/symplectic** and degenerate-relative-to-`Q` ⟹ `det G` (polar-Gram det) is
+> a Pfaffian², **blind to the type** — the wrong invariant; (3) **there is no quadratic character `χ`** — `F_{2^k}^×` has odd
+> order `2^k−1`, every element is a square (squaring = Frobenius, a bijection) ⟹ the whole `χ(det G₂)` observable, `K =
+> χ(disc)·gaussSum^{d+2}`, `c0_le_threequarters`, B1a/B1b, the bridge **have no char-2 analog through `χ`**; (4) the `gaussSum²=
+> χ(−1)q` identity is odd-char.
+>
+> **(C) What replaces it (classical, complete, but UNBUILT).** The **Arf invariant** (`∈ F_2`, the ± type) replaces `χ(disc)`;
+> the count of `{Q=c}` over `F_{2^k}` is the classical char-2 quadric point-count (`q^{d-1} ± q^{d/2-1}`, governed by Arf),
+> computed via the **additive (trace) character** and an Arf-weighted exponential sum. The config invariant becomes the **Arf of
+> the restricted/pair form**, not a Gram determinant. None of this is open math — char-2 quadrics are fully understood.
+>
+> **(D) Mathlib coverage = essentially NIL.** No **Arf invariant**, no **Dickson invariant** (only Dickson *polynomials* /
+> Dickson's lemma), no `CharTwo` development in `LinearAlgebra/QuadraticForm/`, no char-2 quadric point-count. `quadraticChar`/
+> `gaussSum` are odd-char by construction. So char-2 needs the missing substrate built from near-zero.
+>
+> **(E) Net — reachable, parallel-to-affine-polar + substrate, MODERATE-to-LARGE.** The **combinatorial layer transfers
+> char-agnostically** (the matching trick `exists_separating_base`, the `ZProfileSeparates` reduction `ScratchBridgeZ`, the seam
+> `ScratchSeam`, Layer B — all pure finite combinatorics / scheme structure, no `χ`). The **analytic kernel must be rebuilt**:
+> a char-2 `IsotropySeparatesAtBase` proved with Arf + additive-trace counts replacing `χ`/Gauss, on top of a from-scratch
+> Mathlib char-2 quadratic-form substrate (Arf invariant + quadric count). So char-2 ≈ **a second copy of Layer A in char-2
+> language + a substrate build** — not a wall (the result is empirically plausible: the early `Probe_FormsGraphs` included
+> `q=2` and it shattered at a small base), but real volume. The proof *skeleton* (count profile separates at a bounded base) is
+> the SAME; only the count engine changes (`χ`/Gauss → Arf/additive-trace). **Recommended:** treat it as its own track, started
+> by building the Mathlib char-2 substrate (Arf invariant of a quadratic form over `F_{2^k}` + the quadric point-count), which
+> is reusable and the genuine prerequisite; defer until odd-char affine-polar + the seam are closed (it shares no analytic code
+> with them, only the combinatorial layer).
+
 ### 11.6 Step group 4 — structural wiring (citations + glue) — DESIGN THE SEAM EARLY
 
 This is the **load-bearing** step — it produces the rigid-or-Cameron conclusion for the schurian residue (NOT, per
