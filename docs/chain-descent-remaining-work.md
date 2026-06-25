@@ -142,9 +142,14 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >   stroke), but NOT: (d) alternating (alternating bilinear form, own predicate, same technique, medium), (e) half-spin /
 >   (f) Suzuki–Tits (cite-hunt first — may be citable in rank-3/2-transitive lit), char-2 §11.5 (whole route assumes
 >   `ringChar≠2`/`Invertible 2`; distinct track).
-> - **Layer D — the structural seam (★, LOAD-BEARING, §11.6).** The cited classification case-split routing the abstract
->   residue `S` → concrete `affineScheme(Q)` (a `SchemeEquiv`/transport — does NOT exist in Lean yet, AUDIT-S finding 3).
->   Where `{G3 + Skresanov + Liebeck + Ponomarenko-2-sep}` get consumed. The single biggest open piece beyond affine-polar.
+> - **Layer D — the structural seam (◐ SPIKED 2026-06-26, `ScratchSeam.lean`, axiom-clean; §11.6).** The cited classification
+>   case-split routing the abstract residue `S` → concrete `affineScheme(Q)`, where `{G3 + Skresanov + Liebeck + Ponomarenko-2-sep}`
+>   get consumed. **The seam CLOSES architecturally** — stub `reachesRigidOrCameron_viaSchurianRank3Affine` compiles, reducing it to
+>   ONE new obligation `htransport` (the seal disjunction is invariant along a realizing permutation). `htransport` is **mechanical,
+>   not a wall**: the riskiest disjunct (`SchemeRecoveredByDepth`) sits on the landed `forcedNode_relabel` (full iso-invariance under
+>   arbitrary relabelling) + `IsAut`/`IsBase` conjugation. Build it as a real lemma (option b); option (a) (hide transport in the
+>   citation) rejected as unfaithful. No longer the under-scoped unknown — bounded, landed-atom-backed glue. Still the biggest
+>   *structural* build beyond affine-polar, but de-risked.
 > - **Layer E — carried hypotheses (Lean-carried, not new math): `hImprim`** (block tower built; collapses to same core) +
 >   **`SchurianScheme`** (model assumption `orbitalScheme H`, not discharged).
 > - **Layer F — PORT (mechanical, no math):** the 8 new modules + `ScratchCrux`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*` into

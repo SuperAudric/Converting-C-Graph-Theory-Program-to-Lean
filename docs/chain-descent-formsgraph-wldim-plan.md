@@ -566,14 +566,36 @@ AUDIT-S finding 3, a "discharge of `hSmallAutThin`": the per-family `wittFree` r
 seam is a cited classification case-split that routes the abstract residue `S` to its concrete `affineScheme(Q)`). Target
 pinned by **AUDIT-S (§11.0)**; this step executes it.
 
+> **▶▶▶ SEAM SPIKE DONE (2026-06-26, `ChainDescent/ScratchSeam.lean`, axiom-clean) — the seam CLOSES architecturally; it
+> reduces to ONE new obligation, and option (b) is the clean route (correcting the earlier option-(a) lean).** The stub
+> **`reachesRigidOrCameron_viaSchurianRank3Affine`** compiles axiom-clean: from (C) the cited classification
+> (`IsCameronScheme S ∨ ∃ Q T f, T.card ≤ bound ∧ IsotropySeparatesAtBase Q T ∧ SchemeRealizes f S (affineScheme Q)`) and
+> (T) a transport hypothesis, it concludes `SealDisj S` — the forms-graph case discharged by the landed
+> `reachesRigidOrCameron_viaIsotropySeparates_wittFree`, transported back to `S`. **So the seam closes modulo exactly ONE
+> new piece: `htransport` — the seal disjunction is invariant along a realizing permutation `f`
+> (`SchemeRealizes f S X := ∀ v w, (schemeAdj S).adj v w = (schemeAdj X).adj (f v) (f w)`).**
+>
+> **`htransport` is mechanical, not a wall — and it should be PROVED (option b), not hidden in the citation (option a).**
+> The earlier AUDIT-S lean toward option (a) ("carry the transport *inside* the citation") is **dispreferred**: it would make
+> `hclass` assert a non-trivial transport as an axiom, breaking the faithful-citation bar — and it is unnecessary, because the
+> transport substrate is **already landed**. All four disjuncts are defined purely via `schemeAdj` + `IsAut`/`IsBase`
+> (`isAut_schemeAdj_iff` = adjacency-auts ARE scheme-auts), and the recovery side — the riskiest disjunct
+> `SchemeRecoveredByDepth` — sits on **`forcedNode_relabel`** (`Cascade.lean:3020`, "the forced node is equivariant under
+> *arbitrary* relabelling — full iso-invariance") + `movedSet_relabel` + the residual-support equivariance lemmas, which
+> already prove the recovery machinery commutes with an arbitrary `relabelAdj σ`. So `htransport` assembles from landed
+> equivariance atoms (forced-node/moved-set relabelling + `IsAut`/`IsBase` conjugation); `IsCameronScheme` (a free predicate)
+> only has to be *instantiated* iso-invariantly (a design constraint, trivially met). **Residual risk = assembly friction
+> (connecting `SchemeRealizes`'s `schemeAdj` form to `relabelAdj`, and threading conjugation through the 4 disjuncts), NOT a
+> wall.** Verdict: build `htransport` as a real lemma (option b); `AlgIso.InducedBy f` already provides the "iso realized by
+> `f`" primitive. The seam is no longer the under-scoped unknown AUDIT-S flagged — it is bounded, landed-atom-backed glue.
+
 - **Cite Ponomarenko** for (a) the 1-dim cyclotomic slice (→ `reachesRigidOrCameron_affineSlice`). (citation)
-- **The seam vehicle (AUDIT-S finding 3, recommended option (a)).** Build the cited reduction capstone
-  `reachesRigidOrCameron_viaSchurianRank3Affine`: a single carried predicate (Skresanov/Liebeck/Cameron) whose conclusion
-  is **the seal disjunction for the residue `S` directly** — its forms-graph obligation discharged by the per-family
-  `IsotropySeparatesAtBase` + `reachesRigidOrCameron_viaIsotropySeparates_wittFree`. This carries the scheme-iso/transport
-  *inside* the citation, so **no new `SchemeEquiv` infrastructure is needed** (option (b) — a real `SchemeEquiv` + a
-  "seal disjunction transports along scheme iso" lemma — is the fallback if a cleaner separation is wanted). Real glue,
-  low math risk; the `wittFree` capstone already removed Witt from each family's critical path.
+- **The seam vehicle — `reachesRigidOrCameron_viaSchurianRank3Affine` (stub LANDED, see the spike box above).** A single
+  carried *classification* predicate (Skresanov/Liebeck/Cameron) routing `S` to `Cameron ∨ (≅ a forms-graph `affineScheme(Q)`
+  with `IsotropySeparatesAtBase Q T`)`, **+ a separately-PROVED transport lemma `htransport`** (option b). The forms-graph
+  obligation is discharged per-family by `IsotropySeparatesAtBase` + `…viaIsotropySeparates_wittFree`; the transport is the
+  one new build, backed by the landed `forcedNode_relabel`/`movedSet_relabel`/`IsAut`-conjugation equivariance. (Option (a) —
+  transport hidden inside the citation — is rejected as unfaithful; see the spike box.)
 - **`SchurianScheme` — RESOLVED FREE (AUDIT-S finding 2):** `affineScheme(similitudeGroup Q)` is schurian by construction;
   the canonizer-residue-is-schurian question is a pre-existing seal-wide scope assumption, orthogonal to this work.
   **Nothing to discharge here.**
