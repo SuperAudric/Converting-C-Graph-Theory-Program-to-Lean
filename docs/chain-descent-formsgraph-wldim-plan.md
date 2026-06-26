@@ -237,13 +237,15 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `not_isOrtho_basis_self_of_separatingLeft`) + the project-native bridge `associated_separatingLeft_of_polarRad`
   (`polarRad Q = ⊥ ⟹ (associated Q).SeparatingLeft`). **26 axiom-clean lemmas total.** Both bridge-input gaps (C-corr,
   C-basis) CLOSED; lone deep remaining inc-4 item = **NV** (algebraic heart now also done — see `ScratchIncr4d` below).
-- **`ScratchIncr4d.lean`** (NEW 2026-06-26, 4 axiom-clean lemmas, NOT in build; imports `ScratchIncr4c`) — **the NV
-  (non-vacuity of `hgood`) algebraic heart.** Reduces `∃ y z, polarRad(y•pairForm Q(t₀₀−u)+z•pairForm Q(t₀₀−v))=⊥` to
-  "∃ a nondeg plane through `w=v−u` with anisotropic generators". `polar_pencil_apply` (NV-1: pencil polar formula) +
-  `pencil_radical_key` (`s∈polarRad ⟹ 4c·s = (2y polar(s,a))·a+(2z polar(s,b))·b`) + `polarRad_pencil_subset_span` (NV-2:
-  `c≠0 ⟹ radical⊆⟨a,b⟩`) + **`polarRad_pencil_eq_bot`** (NV-3: nondeg `Q`, `y,z≠0`, `c≠0`, `pairForm Q a b≠0` ⟹ member
-  nondegenerate, via the `2×2` `det = 4yz·pairForm Q a b`). Remaining NV = **NV-4** (geometry+counting: anisotropic-generator
-  nondeg plane through `w`; both-isotropic case genuinely excluded) + **NV-5** (pick `y,z`) + capstone (`t₀₀=a+u`).
+- **`ScratchIncr4d.lean`** (NEW 2026-06-26, **14 axiom-clean lemmas**, NOT in build; imports `ScratchIncr4c`) — **NV
+  (non-vacuity of `hgood`) COMPLETE.** Discharges `∃ y z, polarRad(y•pairForm Q(t₀₀−u)+z•pairForm Q(t₀₀−v))=⊥`.
+  *Algebraic heart:* `polar_pencil_apply` (NV-1) + `pencil_radical_key` + `polarRad_pencil_subset_span` (NV-2) +
+  **`polarRad_pencil_eq_bot`** (NV-3: nondeg `Q`, `y,z≠0`, `c≠0`, `pairForm Q a b≠0` ⟹ member nondeg, via `2×2`
+  `det=4yz·pairForm`). *Geometry+counting:* `pairForm_self_sub` (the degree-2 formula `pairForm Q a (a−w)=4QaQw−polar(a,w)²`) +
+  `exists_ne_zero_polar_eq_zero` (rank-nullity) + **`exists_pairForm_self_sub_ne_zero`** (NV-4a: ≢0, the rank-≤1 contradiction)
+  + `exists_anisotropic`/`gramQuadPoly_ne_zero`/`planeDiscPoly`(+`_eval`/`_totalDegree_le`/`_ne_zero`) + **`exists_good_plane_anchor`**
+  (NV-4: ∃ `a` with `Qa,Q(a−w),pairForm Q a (a−w) ≠ 0`, union bound over 3 quadrics, `|K|≥7`). *Capstone:* **`exists_hgood`**
+  (NV-5 + assembly: `t₀₀=a+u`, `(y,z)=(1,±1)`). ⟹ inc-4 cleanup CLOSED.
 - **`ScratchCorank.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **corank ≥ 2 enabler** for 3e-ii:
   **`radical_card_mul_card_le`** (`F ≠ 0 ⟹ |radical F| · |K| ≤ |V|`, i.e. `|radical| ≤ q^{d−1}` UNIFORMLY over all coranks —
   the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
@@ -1611,10 +1613,22 @@ Key identity used: `pairForm Q a b = 4QaQb − polar(a,b)² = det(polar Q |_{⟨
 `Q(a),Q(a−w) ≠ 0` (anisotropic — gives `c≠0` and corr-kill) ∧ `a, a−w` independent.** ⚠ NB the **both-isotropic case is
 genuinely excluded**: if `Q(a)=Q(a−w)=0` (hyperbolic plane) then `c=0` for ALL `y,z` and every member is degenerate
 (radical ⊇ `⟨a,b⟩^⊥`, nonzero for `d>2`) — so NV-4 must deliver anisotropic generators, not merely a nondeg plane.
-**Remaining NV = NV-4** (geometry+counting: such an `a` exists — `Q(w)≠0` orthogonal-sum of anisotropic lines / `Q(w)=0`
-hyperbolic plane `⟨w,w''⟩`, then a `2×2`-in-plane Schwartz–Zippel count for anisotropic `a, a−w`, needs `q ≥ q₀`) **+ NV-5**
-(pick `y,z≠0` with `c=yQa+zQb≠0`, trivial once `Qa,Qb≠0`) **+ the capstone** (`t₀₀ = a+u`, apply NV-3). The
-conceptually-hard algebra is DONE; NV-4 is standard quadratic-form geometry + finite counting.
+**▶▶▶▶ NV COMPLETE (2026-06-26, `ScratchIncr4d.lean`, 14 axiom-clean lemmas) — `hgood` non-vacuity fully discharged.**
+- **NV-4 `exists_good_plane_anchor`** (∃ `a`: `Q a ≠ 0 ∧ Q(a−w) ≠ 0 ∧ pairForm Q a (a−w) ≠ 0`, for nondeg `Q`, `w≠0`,
+  `finrank V ≥ 2`, `|K| ≥ 7`). Key simplification — the **degree-2** formula `pairForm Q a (a−w) = 4 Q a Q w − polar(a,w)²`
+  (`pairForm_self_sub`). **NV-4a `exists_pairForm_self_sub_ne_zero`** (the geometric core): this is not identically zero in
+  `a`, else `Q` is rank-≤1 (its polar would kill a nonzero `b ⊥ w`, found by `exists_ne_zero_polar_eq_zero` via rank-nullity),
+  contradicting `polarRad Q = ⊥` — a clean degenerate-everywhere⟹contradiction argument, **no orthogonal-complement /
+  totally-isotropic machinery needed**. **NV-4b** (counting): the three quadric loci `{Q a=0}`,`{Q(a−w)=0}`,`{pairForm=0}`
+  each have `≤ 2·|V|/|K|` points (Schwartz–Zippel on `gramQuadPoly`/`QPoly`/the new `planeDiscPoly`, the last nonvanishing
+  by NV-4a); their union has `< |V|` points for `|K| > 6`, so a common good `a` exists.
+- **NV-5 + capstone `exists_hgood`**: `t₀₀ = a+u` (so `t₀₀−u = a`, `t₀₀−v = a−w`); pick `(y₀,z₀) = (1,1)` if
+  `Q a + Q(a−w) ≠ 0`, else `(1,−1)` (then `c = 2 Q a ≠ 0`); NV-3 (`polarRad_pencil_eq_bot`) seals
+  `polarRad(y₀•pairForm Q(t₀₀−u) + z₀•pairForm Q(t₀₀−v)) = ⊥` — exactly `pencilDetPoly_ne_zero`/`beta_full_count_closed`'s
+  carried `hgood`.
+**⟹ The entire increment-4 cleanup (B-ii, B-iii, C-corr, C-basis, NV) is now CLOSED.** The β bound is unconditional modulo
+the family properties (nondeg `Q`, `finrank ≥ 2`, `|K| ≥ 7`). Next: **#1 corank tightening** (decoupled) → **increment 5**
+(matching assembly + the field/seam typing decision).
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** Once `c` (`≤ 15/16·|V|`, DONE) and `β`
 (`≤ C·|V|/q`) are in hand, increment 5 produces the separating base and discharges `ZProfileSeparates`:

@@ -20,7 +20,8 @@ Write `a = t₀₀ − u`, `b = t₀₀ − v = a − w`, `w = v − u ≠ 0`. F
   `Q(w)=0`: hyperbolic plane `⟨w,w''⟩`, `polar(w,w'')≠0`), with anisotropic generators `a, a−w` by counting (`q≥q₀`).
 - **NV-5:** pick `y,z ≠ 0` with `c ≠ 0` (elementary) → capstone `t₀₀ = a + u`.
 
-This file is the staged build. **NV-1 LANDED below; NV-2…NV-5 are the remaining stages.**
+**NV is COMPLETE (14 axiom-clean lemmas).** Capstone `exists_hgood`: for `u ≠ v`, nondeg `Q`, `finrank V ≥ 2`,
+`|K| ≥ 7`, the good-anchor witness exists — discharging the `hgood` hypothesis carried throughout the β machinery.
 
 NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4d.lean`, after `lake build ChainDescent.ScratchIncr4c`).
 -/
@@ -137,9 +138,268 @@ theorem polarRad_pencil_eq_bot [Invertible (2 : K)] (Q : QuadraticForm K V) (hQ 
   · exact absurd h h4c
   · exact h
 
+/-! ### NV-4 — the geometric witness + counting (an anisotropic-generator nondeg plane through `w`).
+
+NV-3 reduces `hgood` to: `∃ a, pairForm Q a (a−w) ≠ 0 ∧ Q a ≠ 0 ∧ Q (a−w) ≠ 0`. The key simplification is the clean
+**degree-2** formula `pairForm Q a (a−w) = 4·Q(a)·Q(w) − polar(a,w)²` (`pairForm_self_sub`): the "discriminant of the
+plane `⟨a,w⟩`". NV-4a (`exists_pairForm_self_sub_ne_zero`) shows it is not identically zero (else `Q` would be a rank-≤1
+form, contradicting nondegeneracy); NV-4b then counts the three quadric loci and finds a common non-vanishing point. -/
+
+/-- **The plane-discriminant formula.** `pairForm Q a (a−w) = 4·Q(a)·Q(w) − polar(a,w)²` — the determinant of the Gram
+of `⟨a, a−w⟩ = ⟨a, w⟩`, a **degree-2** polynomial in `a` (key for the NV-4 counting). -/
+theorem pairForm_self_sub (Q : QuadraticForm K V) (a w : V) :
+    pairForm Q a (a - w) = 4 * Q a * Q w - QuadraticMap.polar Q a w * QuadraticMap.polar Q a w := by
+  have hQsub : Q (a - w) = Q a + Q w - QuadraticMap.polar Q a w := by
+    have e1 : QuadraticMap.polar Q a (-w) = Q (a + -w) - Q a - Q (-w) := rfl
+    rw [QuadraticMap.polar_neg_right, ← sub_eq_add_neg, QuadraticMap.map_neg] at e1
+    linear_combination -e1
+  have hpol : QuadraticMap.polar Q (a - w) a = 2 * Q a - QuadraticMap.polar Q a w := by
+    rw [QuadraticMap.polar_sub_left, QuadraticMap.polar_self, QuadraticMap.polar_comm Q w a,
+        nsmul_eq_mul, Nat.cast_ofNat]
+  rw [pairForm_apply, hQsub, hpol]; ring
+
+/-- A nonzero vector orthogonal to `w` exists once `finrank V ≥ 2`: the functional `b ↦ polar Q b w` has a kernel of
+positive dimension (rank-nullity, codomain `K` is `1`-dimensional). -/
+theorem exists_ne_zero_polar_eq_zero [FiniteDimensional K V] (Q : QuadraticForm K V) (w : V)
+    (hd : 2 ≤ Module.finrank K V) :
+    ∃ b : V, b ≠ 0 ∧ QuadraticMap.polar Q b w = 0 := by
+  set f : V →ₗ[K] K := (QuadraticMap.polarBilin Q).flip w with hf
+  have hrank := LinearMap.finrank_range_add_finrank_ker f
+  have hr1 : Module.finrank K (LinearMap.range f) ≤ 1 := by
+    have h := Submodule.finrank_le (LinearMap.range f)
+    rwa [Module.finrank_self] at h
+  have hker_pos : 0 < Module.finrank K (LinearMap.ker f) := by omega
+  have hker_ne : LinearMap.ker f ≠ ⊥ := by
+    intro hbot
+    rw [hbot, finrank_bot] at hker_pos
+    exact absurd hker_pos (lt_irrefl 0)
+  obtain ⟨b, hbmem, hb0⟩ := (Submodule.ne_bot_iff _).mp hker_ne
+  refine ⟨b, hb0, ?_⟩
+  have hfb : f b = 0 := LinearMap.mem_ker.mp hbmem
+  rwa [hf, LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply] at hfb
+
+/-- **NV-4a — the geometric witness.** For nondegenerate `Q`, `w ≠ 0`, `finrank V ≥ 2`, the plane discriminant
+`pairForm Q a (a−w) = 4 Q a Q w − polar(a,w)²` is **not identically zero** in `a`. Otherwise `Q` would satisfy
+`4 Q a Q w = polar(a,w)²` for all `a` — a rank-≤1 form (its polar would vanish on a nonzero vector orthogonal to `w`),
+contradicting `polarRad Q = ⊥`. -/
+theorem exists_pairForm_self_sub_ne_zero [Invertible (2 : K)] [FiniteDimensional K V]
+    (Q : QuadraticForm K V) (hQ : polarRad Q = ⊥) (w : V) (hw : w ≠ 0) (hd : 2 ≤ Module.finrank K V) :
+    ∃ a : V, pairForm Q a (a - w) ≠ 0 := by
+  have h2 : (2 : K) ≠ 0 := (isUnit_of_invertible (2 : K)).ne_zero
+  have h4 : (4 : K) ≠ 0 := by rw [show (4 : K) = 2 * 2 by norm_num]; exact mul_ne_zero h2 h2
+  by_contra hcon
+  simp only [not_exists, not_not, pairForm_self_sub] at hcon
+  -- nondegeneracy
+  have hnondeg : ∀ m : V, (∀ x, QuadraticMap.polar Q x m = 0) → m = 0 := by
+    intro m hm
+    have hmem : m ∈ polarRad Q := mem_polarRad.mpr hm
+    rw [hQ, Submodule.mem_bot] at hmem
+    exact hmem
+  by_cases hQw : Q w = 0
+  · -- `Q w = 0`: the identity forces `polar(·,w) ≡ 0`, so `w ∈ radical`
+    apply hw
+    apply hnondeg w
+    intro x
+    have hx := hcon x
+    rw [hQw, mul_zero, zero_sub, neg_eq_zero] at hx
+    exact mul_self_eq_zero.mp hx
+  · -- `Q w ≠ 0`: a nonzero `b ⊥ w` lies in the radical
+    obtain ⟨b, hb0, hbw⟩ := exists_ne_zero_polar_eq_zero Q w hd
+    apply hb0
+    apply hnondeg b
+    intro x
+    -- `Q b = 0`
+    have hQb : Q b = 0 := by
+      have hb := hcon b
+      rw [hbw, mul_zero, sub_zero] at hb
+      rcases mul_eq_zero.mp hb with h | h
+      · rcases mul_eq_zero.mp h with h' | h'
+        · exact absurd h' h4
+        · exact h'
+      · exact absurd h hQw
+    -- `Q (x + b) = Q x`
+    have hQxb : Q (x + b) = Q x := by
+      have hx := hcon x
+      have hxb := hcon (x + b)
+      have hpxb : QuadraticMap.polar Q (x + b) w = QuadraticMap.polar Q x w := by
+        rw [QuadraticMap.polar_add_left, hbw, add_zero]
+      rw [hpxb] at hxb
+      have hzero : 4 * Q w * (Q (x + b) - Q x) = 0 := by linear_combination hxb - hx
+      have h4Qw : (4 * Q w : K) ≠ 0 := mul_ne_zero h4 hQw
+      rcases mul_eq_zero.mp hzero with h | h
+      · exact absurd h h4Qw
+      · exact sub_eq_zero.mp h
+    rw [QuadraticMap.polar, hQxb, hQb]; ring
+
+/-- A nondegenerate `Q` over a nontrivial space is **not the zero form** — `∃ a, Q a ≠ 0` (else `polar Q ≡ 0`, so
+`polarRad Q = ⊤ ≠ ⊥`). -/
+theorem exists_anisotropic (Q : QuadraticForm K V) (hQ : polarRad Q = ⊥) [Nontrivial V] :
+    ∃ a : V, Q a ≠ 0 := by
+  by_contra hcon
+  simp only [not_exists, not_not] at hcon
+  obtain ⟨v, hv⟩ := exists_ne (0 : V)
+  apply hv
+  have hmem : v ∈ polarRad Q := by
+    rw [mem_polarRad]
+    intro x
+    rw [QuadraticMap.polar, hcon (x + v), hcon x, hcon v]; ring
+  rw [hQ, Submodule.mem_bot] at hmem
+  exact hmem
+
+section NV4bCount
+open MvPolynomial
+variable {d : ℕ} (b : Basis (Fin d) K V)
+
+/-- `gramQuadPoly b Q ≠ 0` when `Q` is nonzero somewhere (`gramQuadPoly_eval = Q t₀`). -/
+theorem gramQuadPoly_ne_zero [Invertible (2 : K)] (Q : QuadraticForm K V) (hex : ∃ w₀, Q w₀ ≠ 0) :
+    gramQuadPoly b Q ≠ 0 := by
+  obtain ⟨w₀, hw₀⟩ := hex
+  intro h0
+  apply hw₀
+  have hev := gramQuadPoly_eval b Q w₀
+  rw [h0, map_zero] at hev
+  exact hev.symm
+
+/-- The polynomial representing the plane discriminant `pairForm Q a (a−w) = 4·Q(a)·Q(w) − polar(a,w)²`. -/
+noncomputable def planeDiscPoly [Invertible (2 : K)] (Q : QuadraticForm K V) (w : V) :
+    MvPolynomial (Fin d) K :=
+  C (4 * Q w) * gramQuadPoly b Q
+    - (coordPoly (fun k => QuadraticMap.polar Q (b k) w)) ^ 2
+
+theorem planeDiscPoly_eval [Invertible (2 : K)] (Q : QuadraticForm K V) (w a : V) :
+    MvPolynomial.eval (b.equivFun a) (planeDiscPoly b Q w) = pairForm Q a (a - w) := by
+  have hcoord : MvPolynomial.eval (b.equivFun a) (coordPoly (fun k => QuadraticMap.polar Q (b k) w))
+      = QuadraticMap.polar Q a w := by
+    have h := coordPoly_eval_linFunc b ((QuadraticMap.polarBilin Q).flip w) a
+    simp only [LinearMap.flip_apply, QuadraticMap.polarBilin_apply_apply] at h
+    exact h
+  rw [planeDiscPoly, map_sub, map_mul, eval_C, gramQuadPoly_eval, map_pow, hcoord, pairForm_self_sub]
+  ring
+
+theorem planeDiscPoly_totalDegree_le [Invertible (2 : K)] (Q : QuadraticForm K V) (w : V) :
+    (planeDiscPoly b Q w).totalDegree ≤ 2 := by
+  rw [planeDiscPoly]
+  refine (MvPolynomial.totalDegree_sub _ _).trans ?_
+  rw [max_le_iff]
+  refine ⟨?_, ?_⟩
+  · refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+    rw [MvPolynomial.totalDegree_C, zero_add]
+    exact gramQuadPoly_totalDegree_le b Q
+  · rw [pow_two]
+    refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+    have h := coordPoly_totalDegree_le (fun k => QuadraticMap.polar Q (b k) w)
+    omega
+
+theorem planeDiscPoly_ne_zero [Invertible (2 : K)] (Q : QuadraticForm K V) (w a₀ : V)
+    (h : pairForm Q a₀ (a₀ - w) ≠ 0) : planeDiscPoly b Q w ≠ 0 := by
+  intro h0
+  apply h
+  have hev := planeDiscPoly_eval b Q w a₀
+  rw [h0, map_zero] at hev
+  exact hev.symm
+
+/-- **NV-4 — an anisotropic-generator nondegenerate plane through `w`.** For nondegenerate `Q`, `w ≠ 0`,
+`finrank V ≥ 2`, `|K| ≥ 7`: there is `a` with `Q a ≠ 0`, `Q (a−w) ≠ 0`, and `pairForm Q a (a−w) ≠ 0`. The three bad
+loci are quadrics (each `≤ 2·|V|/|K|` by Schwartz–Zippel on `gramQuadPoly`/`QPoly`/`planeDiscPoly`), with `planeDiscPoly`
+nonvanishing by NV-4a; their union has `< |V|` points for `|K| > 6`, so a common good point exists. -/
+theorem exists_good_plane_anchor [Invertible (2 : K)] [Fintype K] [DecidableEq K] [Fintype V] [DecidableEq V]
+    (Q : QuadraticForm K V) (hQ : polarRad Q = ⊥) (w : V) (hw : w ≠ 0)
+    (hd : 2 ≤ Module.finrank K V) (hq : 7 ≤ Fintype.card K) :
+    ∃ a : V, Q a ≠ 0 ∧ Q (a - w) ≠ 0 ∧ pairForm Q a (a - w) ≠ 0 := by
+  classical
+  have hntv : Nontrivial V :=
+    Module.nontrivial_of_finrank_pos (show 0 < Module.finrank K V by omega)
+  obtain ⟨w₀, hw₀⟩ := exists_anisotropic Q hQ
+  obtain ⟨a₀, ha₀⟩ := exists_pairForm_self_sub_ne_zero Q hQ w hw hd
+  let b : Basis (Fin (Module.finrank K V)) K V := Module.finBasis K V
+  have c1 : (univ.filter (fun a : V => Q a = 0)).card * Fintype.card K ≤ 2 * Fintype.card V := by
+    calc (univ.filter (fun a : V => Q a = 0)).card * Fintype.card K
+        ≤ (gramQuadPoly b Q).totalDegree * Fintype.card V :=
+          bad_anchor_count_le_of_poly b (fun a => Q a = 0) (gramQuadPoly b Q)
+            (gramQuadPoly_ne_zero b Q ⟨w₀, hw₀⟩) (fun a h => by rw [gramQuadPoly_eval]; exact h)
+      _ ≤ 2 * Fintype.card V := by gcongr; exact gramQuadPoly_totalDegree_le b Q
+  have c2 : (univ.filter (fun a : V => Q (a - w) = 0)).card * Fintype.card K ≤ 2 * Fintype.card V :=
+    qZero_count_le b Q w w₀ hw₀
+  have c3 : (univ.filter (fun a : V => pairForm Q a (a - w) = 0)).card * Fintype.card K
+      ≤ 2 * Fintype.card V := by
+    calc (univ.filter (fun a : V => pairForm Q a (a - w) = 0)).card * Fintype.card K
+        ≤ (planeDiscPoly b Q w).totalDegree * Fintype.card V :=
+          bad_anchor_count_le_of_poly b (fun a => pairForm Q a (a - w) = 0) (planeDiscPoly b Q w)
+            (planeDiscPoly_ne_zero b Q w a₀ ha₀) (fun a h => by rw [planeDiscPoly_eval]; exact h)
+      _ ≤ 2 * Fintype.card V := by gcongr; exact planeDiscPoly_totalDegree_le b Q w
+  set B1 := univ.filter (fun a : V => Q a = 0) with hB1
+  set B2 := univ.filter (fun a : V => Q (a - w) = 0) with hB2
+  set B3 := univ.filter (fun a : V => pairForm Q a (a - w) = 0) with hB3
+  have hsum : (B1 ∪ B2 ∪ B3).card ≤ B1.card + B2.card + B3.card :=
+    (Finset.card_union_le _ _).trans (Nat.add_le_add_right (Finset.card_union_le _ _) _)
+  have hScard : (B1 ∪ B2 ∪ B3).card * Fintype.card K ≤ 6 * Fintype.card V := by
+    calc (B1 ∪ B2 ∪ B3).card * Fintype.card K
+        ≤ (B1.card + B2.card + B3.card) * Fintype.card K := Nat.mul_le_mul_right _ hsum
+      _ = B1.card * Fintype.card K + B2.card * Fintype.card K + B3.card * Fintype.card K := by ring
+      _ ≤ 2 * Fintype.card V + 2 * Fintype.card V + 2 * Fintype.card V :=
+          Nat.add_le_add (Nat.add_le_add c1 c2) c3
+      _ = 6 * Fintype.card V := by ring
+  have h7 : 7 * (B1 ∪ B2 ∪ B3).card ≤ 6 * Fintype.card V := by
+    calc 7 * (B1 ∪ B2 ∪ B3).card ≤ Fintype.card K * (B1 ∪ B2 ∪ B3).card :=
+          Nat.mul_le_mul_right _ hq
+      _ = (B1 ∪ B2 ∪ B3).card * Fintype.card K := Nat.mul_comm _ _
+      _ ≤ 6 * Fintype.card V := hScard
+  have hVpos : 0 < Fintype.card V := Fintype.card_pos
+  have hSlt : (B1 ∪ B2 ∪ B3).card < Fintype.card V := by omega
+  have hSne : B1 ∪ B2 ∪ B3 ≠ univ := by
+    intro h; rw [h, Finset.card_univ] at hSlt; exact absurd hSlt (lt_irrefl _)
+  have hexnm : ∃ a, a ∉ B1 ∪ B2 ∪ B3 := by
+    by_contra hall
+    simp only [not_exists, not_not] at hall
+    exact hSne (Finset.eq_univ_iff_forall.mpr hall)
+  obtain ⟨a, ha⟩ := hexnm
+  simp only [hB1, hB2, hB3, Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and,
+    not_or] at ha
+  exact ⟨a, ha.1.1, ha.1.2, ha.2⟩
+
+/-- **NV (capstone) — non-vacuity of `hgood`.** For `u ≠ v`, nondegenerate `Q`, `finrank V ≥ 2`, `|K| ≥ 7`: there is a
+good anchor `t₀₀` and pencil coefficients `(y₀,z₀)` with `polarRad(y₀•pairForm Q(t₀₀−u) + z₀•pairForm Q(t₀₀−v)) = ⊥`
+— exactly the carried hypothesis of `ScratchIncr4c.pencilDetPoly_ne_zero`/`beta_full_count_closed`. Take `t₀₀ = a+u`
+for the anisotropic-generator nondeg plane `a` of NV-4 (so `t₀₀−u = a`, `t₀₀−v = a−w`), then NV-5 picks `(y₀,z₀)`:
+`(1,1)` if `Q a + Q(a−w) ≠ 0`, else `(1,−1)` (giving `c = 2·Q a ≠ 0`), and NV-3 (`polarRad_pencil_eq_bot`) seals it. -/
+theorem exists_hgood [Invertible (2 : K)] [Fintype K] [DecidableEq K] [Fintype V] [DecidableEq V]
+    (Q : QuadraticForm K V) (hQ : polarRad Q = ⊥) (u v : V) (huv : u ≠ v)
+    (hd : 2 ≤ Module.finrank K V) (hq : 7 ≤ Fintype.card K) :
+    ∃ (t₀₀ : V) (y₀ z₀ : K),
+      polarRad (y₀ • pairForm Q (t₀₀ - u) + z₀ • pairForm Q (t₀₀ - v)) = ⊥ := by
+  set w := v - u with hwdef
+  have hw : w ≠ 0 := sub_ne_zero.mpr (Ne.symm huv)
+  obtain ⟨a, hQa, hQaw, hpf⟩ := exists_good_plane_anchor Q hQ w hw hd hq
+  have h2 : (2 : K) ≠ 0 := (isUnit_of_invertible (2 : K)).ne_zero
+  have htu : (a + u) - u = a := by abel
+  have htv : (a + u) - v = a - w := by rw [hwdef]; abel
+  by_cases hsum : Q a + Q (a - w) = 0
+  · refine ⟨a + u, 1, -1, ?_⟩
+    rw [htu, htv]
+    refine polarRad_pencil_eq_bot Q hQ a (a - w) 1 (-1) one_ne_zero (by norm_num) ?_ hpf
+    have hQval : Q (a - w) = - Q a := by linear_combination hsum
+    have heq : (1 : K) * Q a + (-1) * Q (a - w) = 2 * Q a := by rw [hQval]; ring
+    rw [heq]; exact mul_ne_zero h2 hQa
+  · refine ⟨a + u, 1, 1, ?_⟩
+    rw [htu, htv]
+    refine polarRad_pencil_eq_bot Q hQ a (a - w) 1 1 one_ne_zero one_ne_zero ?_ hpf
+    rw [one_mul, one_mul]; exact hsum
+
+end NV4bCount
+
 end ChainDescent
 
 #print axioms ChainDescent.polar_pencil_apply
 #print axioms ChainDescent.pencil_radical_key
 #print axioms ChainDescent.polarRad_pencil_subset_span
 #print axioms ChainDescent.polarRad_pencil_eq_bot
+#print axioms ChainDescent.pairForm_self_sub
+#print axioms ChainDescent.exists_ne_zero_polar_eq_zero
+#print axioms ChainDescent.exists_pairForm_self_sub_ne_zero
+#print axioms ChainDescent.exists_anisotropic
+#print axioms ChainDescent.gramQuadPoly_ne_zero
+#print axioms ChainDescent.planeDiscPoly_eval
+#print axioms ChainDescent.planeDiscPoly_totalDegree_le
+#print axioms ChainDescent.planeDiscPoly_ne_zero
+#print axioms ChainDescent.exists_good_plane_anchor
+#print axioms ChainDescent.exists_hgood
