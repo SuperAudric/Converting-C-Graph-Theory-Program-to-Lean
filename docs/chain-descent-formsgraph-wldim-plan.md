@@ -1115,6 +1115,27 @@ the `K[X]`-matrix eval/column plumbing). NB the per-pivot pairForm has corank EX
 `= ⟨t₀−w⟩` (`pairForm_polar_anchor` + nondeg) — so `A'`,`B'` are rank `d−1` (used implicitly; the route does not actually need it,
 the general `corank ≤ mult` suffices).
 
+**▶ BUILD PROGRESS (SESSION 2 cont., 2026-06-26) — STEP 2 + STEP 3 DONE (axiom-clean, NOT in build).**
+`ScratchPencilCorank.lean` (6 lemmas, all `[propext, Classical.choice, Quot.sound]`, `lake env lean` green):
+- `pencilPoly A B := A.map C + X • B.map C : Matrix _ _ K[X]`; `pencilPoly_mul_map` (`pencilPoly A B * Q.map C =
+  pencilPoly (A*Q) (B*Q)` — the key product identity that makes the `S`-columns `(X−C t₀)•const`).
+- **`pow_card_dvd_pencilDet_of_cols`** (the column-factoring core): ANY invertible `Q` with its `S`-columns in
+  `ker(A+t₀•B)` ⟹ `(X−C t₀)^|S| ∣ det(pencilPoly A B)`. Realized via `N = M₀'·D`, `D = diagonal(S↦X−C t₀, else 1)`,
+  `det D = (X−C t₀)^|S|` (`Matrix.mul_diagonal`+`det_diagonal`+`prod_ite_mem_eq`); unit `C(det Q)` absorbed via `isUnit_C`.
+- **`exists_cols_ker`** (the adapted `Q`): basis of `ker(M₀.mulVecLin)` ⊕ complement (`Submodule.exists_isCompl` +
+  `prodEquivOfIsCompl` + `Basis.prod` + reindex `finSumFinEquiv∘finCongr`), packaged as `(Pi.basisFun).toMatrix`;
+  `|S| = finrank ker`, invertible via `Basis.invertibleToMatrix`.
+- **`finrankKer_le_rootMult`** (★ THE CRUX, axiom-clean): `finrank ker(A+t₀•B) ≤ rootMultiplicity t₀ (det(A+X•B))`
+  (combine the two via `le_rootMultiplicity_iff`). This is the genuinely-new matrix-pencil math the scope flagged.
+- `pencilDet_natDegree_le` (`≤ d`, via Mathlib `natDegree_det_X_add_C_le`) + **`sum_finrankKer_le`** (★ ∑ corank ≤ d over
+  any ratio set `T`: `∑ finrankKer ≤ ∑ rootMult ≤ card roots ≤ natDegree ≤ d`) — the budget that replaces the uniform
+  bucket's `d` factor with a constant.
+**REMAINING for the tightening (laborious, non-research):** (A) the `|radical| ↔ ker` bridge `finrank(polarRad G) =
+finrank ker((toMatrix₂ b b (polarBilin G)).mulVecLin)` (bilinear-form kernel ≃ matrix kernel) + the projective-ratio
+regrouping (`(y,z)∈s` deg ↦ ratio `t=z/y`, `q−1` each, scale-invariance of the radical); (B) the concentration
+`∑_t (√q)^{c_t} ≤ 2·(√q)^{d−1}` under `∑c_t≤d, 1≤c_t≤d−1` (ℝ); (C) the ℝ integration replacing `normT_bucket_bound`'s
+deg term `(d·|K|)·(|V|/√|K|)` with `2·|K|·(|V|/√|K|)` ⟹ new `c0_le` dropping `hq2`, binding threshold = `hq3 (q≥256)`.
+
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
 (`isotropySeparates_of_qProfileSeparates` + `coords_determine`, zero new wiring) — proved using the **route-(a) engine**
