@@ -135,11 +135,13 @@ close it — is set out in
 > `|K|≥7`). So `c̄₀<1` and **β is unconditional** modulo family props; no carried existence hypotheses remain in inc-4. The
 > **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked (deferred). **FRONTIER = INCREMENT
 > 5** (the matching assembly + bridge wiring); the field/seam typing decision is **RESOLVED** (concern #4 lifted bridge+Crux
-> to abstract `K`), and the **decoupled #1 corank tightening is ✅ DONE** (`q≳d²`→`q≳const`; capstone
-> `ScratchTBoundCorank.c0_le_threequarters_corank` = drop-in replacement for `c0_le_threequarters`, `hq2` removed — increment 5
-> calls the `_corank` capstone). Working order now: **small-q tail → hK cleanup → increment 5.** **Read the plan's top "CURRENT
-> HANDOFF (2026-06-26)" PICK UP HERE block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal;
-> `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
+> to abstract `K`). **#1 corank tightening ✅ DONE** (`q≳d²`→`q≥256`, `ScratchTBoundCorank.c0_le_threequarters_corank`) **and the
+> small-q "Route 0" ✅ DONE** (`q≥256→q≥16`, `ScratchTBoundCorank2.c0_le_threequarters_corank2`; adds hyps `4≤d`/indep/nondeg/
+> `Q(t₀−u)≠0`). The **small-q tail is now SCOPED** (plan §13 "SMALL-Q TAIL (SCOPE)" + "ROUTE 2 (SCOPE)"): **Route 2** (exact `c₀`,
+> line-regroup → `≤d`-term degenerate-line cancellation, elementary/no-Weil) is the PRIORITIZED *terminating* route (removes the
+> tail; probe-first recommended). Working order now: **small-q Route 2 (build) → hK cleanup → increment 5.** **Read the plan's top
+> "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial*
+> seal; `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there

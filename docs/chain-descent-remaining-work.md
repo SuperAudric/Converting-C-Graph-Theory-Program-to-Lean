@@ -137,8 +137,10 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     all axiom-clean), so increment 5 wires over **abstract `K`** with the K-named lemmas (`jointIsoCountK_ne_of_chiSep_pair` →
 >     `zProfileSeparatesK_of_zSep` → `isotropySeparatesK_of_zProfileSeparatesK` → `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`
 >     for q=p). Plus the **decoupled #1 corank tightening ✅ DONE 2026-06-26** (`q≳d²`→`q≳const`; capstone
->     `ScratchTBoundCorank.c0_le_threequarters_corank` = drop-in replacement for `c0_le_threequarters` with `hq2` removed —
->     increment 5 should call the `_corank` capstone). Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED" + top SESSION-2 handoff.
+>     `ScratchTBoundCorank.c0_le_threequarters_corank` = drop-in replacement for `c0_le_threequarters` with `hq2` removed) **+ the
+>     small-q "Route 0" ✅ DONE 2026-06-26** (`ScratchTBoundCorank2.c0_le_threequarters_corank2`, threshold `q≥256→q≥16`; adds hyps
+>     `4≤d`/`hab`/`hQnd`/`Q(t₀−u)≠0`). Increment 5 calls the `_corank`/`_corank2` capstone. Full layout: plan §13 "INCREMENT 5 —
+>     WHAT'S EXPECTED" + top SESSION-2 handoff.
 >   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ScratchBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
 >     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
 >     χ-separating base) →[`pairCount_ne_of_chiSep_field` (**B1b**, ℂ) + the per-pair closed form `jointIsoCount_pair_closed_corr0`
@@ -153,8 +155,12 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     abstract `[Field K]`; the rest (`ScratchCrux`/`ZProfileSeparates`/`IsotropySeparatesAtBase` + the bridge) is now lifted to
 >     **abstract `[Field K][Fintype K]`** V-indexed (`ScratchFieldGen`+`ScratchLemmaAK`+`ScratchBridgeAllK`+`ScratchBridgeK`), with
 >     the q=p adapter `ScratchFieldGenAdapter` connecting to the in-build seal capstone. GaussCount was already abstract ⟹ the lift
->     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate); + the **small-q tail** (explicit
->     handling of sub-threshold `q < 256`; the corank tightening already lowered the threshold from `q≳d²` to the constant `q≥256`).
+>     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate); + the **small-q tail** — SCOPED
+>     (plan §13 "SMALL-Q TAIL (SCOPE)" + "ROUTE 2 (SCOPE)"): small-q is *entirely* the degenerate bucket, m-uniform. **Route 0 DONE**
+>     (threshold `q≳d²→256→16`, `_corank`/`_corank2`); **Route 2** (exact `c₀`, line-regroup → `≤d`-term degenerate-line cancellation,
+>     elementary no-Weil) is the PRIORITIZED *terminating* route (removes the tail entirely). Route 1 (finite cancellation) =
+>     Route 2's crux kernel. PROBE-FIRST recommended (the `c'=0` "bad line" question). NB the small-q "Route 0/1/2" numbering is
+>     LOCAL to this tail, distinct from §11.1's "kernel route fork" (Route 1=char-sum / Route 3=Witt).
 > - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ScratchCrux) +
 >   `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248), both axiom-clean (no Witt, no `hSmallAutThin`). ⟹ once
 >   Layer A lands, **affine-polar `VO^ε` is sealed modulo `{G3}` + the seam.**

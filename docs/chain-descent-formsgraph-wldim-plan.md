@@ -17,18 +17,22 @@
 ## STATUS (read first)
 
 > **▶▶▶▶▶ CURRENT HANDOFF (2026-06-26, SESSION 2 — read THIS first; supersedes the SESSION-1 handoff block just below).**
-> **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (SCOPED;
-> Route 0 IN PROGRESS) → hK cleanup → increment 5.** State:
-> - **▶ SMALL-Q TAIL — SCOPED + Route 0 STARTED this session.** Full scoping = the new "### §13 — SMALL-Q TAIL (SCOPE)"
->   block in §13. Headline: small-q is *entirely* the degenerate bucket and m-uniform; the deg bucket has a **free `√q`**
+> **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (Route 0 ✅DONE
+> `q≥16`; Route 2 SCOPED = next, the terminating route) → hK cleanup → increment 5.** State:
+> - **▶ SMALL-Q TAIL — Route 0 DONE + Route 2 SCOPED this session.** Full scoping = the "### §13 — SMALL-Q TAIL (SCOPE)"
+>   and "### §13 — ROUTE 2 (SCOPE)" blocks in §13. Headline: small-q is *entirely* the degenerate bucket and m-uniform; the deg bucket has a **free `√q`**
 >   (uniform corank cap `d−1` vs the geometric `d−2`: the pencil polar is `4λB − rank-2`). **Route 0** (corank-cap `d−2`,
 >   threshold `256→16`): **COMPLETE, axiom-clean** — capstone `ScratchTBoundCorank2.c0_le_threequarters_corank2` (drop-in
 >   for `c0_le_threequarters_corank`, `hq3 : 16 ≤ q`); 9 lemmas in `ScratchPencilCorank2`/`ScratchTBoundCorank2`. KEY FINDING:
 >   needed BOTH the deg-bucket corank-`d−2` cap AND a corank-1 `z_u` fix (`single_polarRad_finrank_le`) — deg alone bottoms
 >   out at `q≈81`. New hyps: `4≤d`, `t₀−u,t₀−v` indep, `Q` nondeg, `Q(t₀−u)≠0`. (plan §13 STATUS.)
->   **Route 2** (exact `c₀`, no threshold, hard kernel = one degenerate-quadric count — elementary, NOT Weil) is
->   **PRIORITIZED** as the terminating target (transferability/generalization). Threading caveat: needs `t₀−u, t₀−v`
->   independent (strengthen `exists_hgood`/NV). One dead end recorded: S2 (the in-`M` linear-vanishing) is geometrically
+>   **Route 2** (exact `c₀`, no threshold) is the **PRIORITIZED terminating target — now SCOPED** (§13 "ROUTE 2 (SCOPE)"):
+>   line-regroup `gaussSum²·T = ∑_{[y₀:z₀]} χ(y₀)χ(z₀)(q·Z_J − qᵈ)`; nondeg lines triangle→`q√n` (`hq1`); the `≤d` degenerate
+>   lines EXACT via `sum_addChar_radical_vanish` + `card_quadForm_eq`; **crux = a finite `≤d`-term degenerate-line cancellation
+>   (the `c'=0` "bad" lines) — which is exactly Route 1's content, so Routes 1+2 are one kernel.** NO Weil. PROBE-FIRST
+>   recommended. (NB the small-q "Route 0/1/2" numbering is LOCAL to this tail, distinct from §11.1's "kernel route fork
+>   Route 1=char-sum/Route 3=Witt".) Threading caveat: Route 0's capstone needs `t₀−u, t₀−v` independent **and** `Q(t₀−u)≠0`
+>   (strengthen `exists_hgood`/NV — for increment 5). One dead end recorded: S2 (the in-`M` linear-vanishing) is geometrically
 >   vacuous at the binding `λ=0` term — do not chase.
 > - **✅ CONCERN #4 (field generalization to abstract `[Field K][Fintype K]`) — DONE this session (the analytic + bridge lift).**
 >   The SESSION-1 "MAIN CARE = field/seam typing decision, lift-first" is **RESOLVED by executing the lift.** Five NEW modules
@@ -283,6 +287,28 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   to `hq3`), and **THE CAPSTONE `c0_le_threequarters_corank`** — drop-in replacement for `ScratchC0Final.c0_le_threequarters`,
   same interface (`hgood`/`hnz`/`hPu`/`hq1`/`hq3` + trivial `hd:1≤d`/`hq4:4≤|K|`), **`hq2` removed**. Verify the whole chain:
   `lake build ChainDescent.ScratchTBoundCorank`.
+- **`ScratchPencilCorank2.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchPairSep` + `ScratchCorank` +
+  `Mathlib.LinearAlgebra.Dual.Lemmas`) — **ROUTE 0 (small-q, threshold `256→16`), the geometric core.** `polar_pairForm`
+  (`polar(pairForm Q a) x h = 4Q(a)·polar Q x h − 2·polar Q x a·polar Q h a`) + `polar_pencil_pairForm` (its pencil version;
+  NB renamed to avoid the clash with `ScratchGoodAnchor.polar_pencil`) + **`pencil_polarRad_finrank_le`** (the pencil corank cap
+  `finrank(polarRad(y•pairForm Q a + z•pairForm Q b)) ≤ d−2` for `y,z≠0`, `a,b` independent, `Q.polarBilin` nondeg, `4≤d`;
+  case-split `λ:=yQ(a)+zQ(b)`: `λ≠0` ⟹ `radical ⊆ span{a,b}`, `λ=0` ⟹ `radical ⊆ ker φ_a ⊓ ker φ_b` codim 2 via
+  `mem_span_of_iInf_ker_le_ker`) + **`single_polarRad_finrank_le`** (the single-form corank-1 cap
+  `finrank(polarRad(pairForm Q a)) ≤ 1` for `Q a ≠ 0`, nondeg — the `z_u` sibling). GOTCHAS: `Nondegenerate = SeparatingLeft ∧
+  SeparatingRight` (use `hQnd.1`, doesn't unfold on application); avoid `linear_combination …/2` (leaves `2⁻¹·2` ring can't
+  cancel — extract from `2·(goal)=0` via `mul_eq_zero` + `Invertible.ne_zero`); `4 = 2*2` for `(4:K)≠0` (not `norm_num`).
+- **`ScratchTBoundCorank2.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchTBoundCorank` +
+  `ScratchPencilCorank2`) — **ROUTE 0, the re-thread to `q≥16`.** `le_two_pow_sub_two` (`D ≤ 2^{D−2}`, `D≥4`) +
+  **`concentration_bound2`** (cap-`d−2` concentration `∑ s^{c_t} ≤ 2·s^{D−2}` under `1≤c_t≤D−2, ∑≤D, D≥4`; the all-ones case
+  via `le_two_pow_sub_two`) + **`deg_bucket_le2`** (deg bucket `≤ 2·|V|`, one `√q` better, via `pencil_polarRad_finrank_le` +
+  `concentration_bound2`) + **`c0_le2`** (the threshold-16 arithmetic, deg term `2n/q` + the corank-1 `z_u` bound
+  `zu·q ≤ n + (q−1)√n√q`) + `normT_bucket_bound_corank2` (`|K|·‖T‖ ≤ |K|²√|V| + 2|V|`) + **THE CAPSTONE
+  `c0_le_threequarters_corank2`** — drop-in for `c0_le_threequarters_corank` with `hq3 : 16 ≤ q` (was 256). New hyps vs
+  `_corank`: `4≤d`, `t₀−u,t₀−v` independent (`hab`), `Q.polarBilin` nondeg (`hQnd`), anchor non-isotropic `Q(t₀−u)≠0` (`hQu`,
+  subsumes `hPu`). **★ FINDING: the deg-bucket cap ALONE bottoms at `q≈81`** — the `z_u` bound carries an *independent* `n/√q`
+  term (it had charged the single `pairForm Q(t₀−u)` the loose corank-`d−1`); reaching `q≥16` needed `single_polarRad_finrank_le`
+  too. **THREAD for increment 5: `exists_hgood`/NV must be confirmed/strengthened to supply `hab` and `hQu`.** Verify:
+  `lake build ChainDescent.ScratchTBoundCorank2`.
 - **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
   **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
   atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
@@ -1222,23 +1248,27 @@ perturbation of `4Q(a)B`; `B = polar_Q`, `polar_pairForm` lemma). So the pencil 
    and `L(h) = 4zQ(b)·B(h, u−v)`; since `u−v = a−b ∈ span(a,b) = radical^⊥`, `L|_radical ≡ 0`, so `M ≠ 0` at full
    magnitude there. The "M vanishes off the linear locus" idea gives nothing for the term that actually binds.
 
-**The three routes.**
-- **Route 0 — geometric corank cap `d−2` (STEPPING STONE, IN PROGRESS).** Prove a pencil-specific `|radical F_{y,z}| ≤
-  q^{d−2}` (lemma `pencil_polarRad_finrank_le` in **`ScratchPencilCorank2.lean`**, NEW: `finrank(polarRad F) ≤ d−2` for
-  `y,z≠0`, `a,b` independent, `Q` nondeg, `d≥4`; case-split `λ=0` ⟹ `radical ⊆ a^⊥∩b^⊥` (codim 2) / `λ≠0` ⟹
-  `radical ⊆ span{a,b}` (dim ≤2)). Feed to the existing concentration/bucket machinery with cap `d−2` (needs a
-  `concentration_bound` variant: cap `d−2`, `∑c≤d` ⟹ `≤ 2(√q)^{d−2}`). Deg term drops `2n/√q → 2n/q`, so the binding
-  step `deg ≤ n/8` becomes **`q ≥ 16` (down from 256)**. No new analytic input, no Weil — a local bound swap. Cheapest
-  certain win; **does NOT terminate** (residue `{q<16}` still has large-`n` members for large `d`).
-- **Route 1 — finite (`≤d`-term) cancellation among degenerate ratios.** Regroup `(y,z)` by projective lines *before*
-  S1: each line collapses to a zero-count fluctuation `χ(y₀)χ(z₀)(q·Z_J − qᵈ)` (complete additive sum in `λ`, `χ(λ²)=1`;
-  reuses `count_eq_charsum`/`zeroCount_sq_le`). This is a **`≤ d`-term** cancellation (the degenerate points), **not** a
-  `q`-term line sum, so genuinely no-Weil. Targets the residual `λ=0` term after Route 0 → reaches `hq1`.
-- **Route 2 — exact `c₀` (D3d-exact) — PRIORITIZED for termination/transfer.** Same line-regroup, but evaluate
-  `q·Z_J − qᵈ` exactly. Hard kernel = the zero-count of **one degenerate (corank `d−2`) quadric + linear term**, which is
-  *elementary* (`card_quadForm_eq`/`sum_addChar_quadForm`, `GaussCount`), **NOT** the irreducible-high-degree Weil case the
-  project avoids. **No threshold ⟹ no tail at all.** Cleanest endpoint, most work — chosen as the real target because
-  termination generalizes/transfers to the other forms-graph families (Layer C).
+**The three routes.** **⚠ DISAMBIGUATION — this "Route 0/1/2" numbering is LOCAL to the small-q tail and is UNRELATED to
+§11.1's "kernel route fork" (where "Route 1 = char-sum" vs "Route 3 = Witt", the GATE decision for the *whole* discharge).
+Here Route 0/1/2 are three ways to handle the *degenerate bucket* of the per-anchor `c₀` bound.**
+- **Route 0 — geometric corank cap `d−2` (STEPPING STONE — ✅ DONE 2026-06-26; see the STATUS block above).** Pencil-specific
+  `|radical F_{y,z}| ≤ q^{d−2}` (`pencil_polarRad_finrank_le`) + corank-1 `z_u` (`single_polarRad_finrank_le`) + the re-thread
+  ⟹ threshold `q ≥ 256 → q ≥ 16`. No Weil, but **does NOT terminate** (`{q<16}` still has large-`n` members for large `d`).
+- **Route 1 — finite (`≤d`-term) cancellation among the degenerate lines.** Regroup the `(y,z)` support sum by projective
+  lines `[y₀:z₀]` *before* applying the per-`(y,z)` triangle inequality (slack S1): each line collapses (via `count_eq_charsum`,
+  `χ(λ²)=1`) to a single zero-count fluctuation `χ(y₀)χ(z₀)(q·Z_J − qᵈ)`, `J = y₀I_u + z₀I_v`. The nondeg lines triangle-bound
+  to `q√n` (absorbed by `hq1`); the **`≤ d` degenerate lines** are the only residual, and their *signed* sum (the `χ(y₀)χ(z₀)`
+  phases) is bounded by a **finite, `≤d`-term cancellation** — NOT a `q`-term line sum, so genuinely **no Weil**. Where Route 0
+  charges each degenerate line its worst-case magnitude (`n/q`), Route 1 keeps the phases and shows the binding (`λ=0`) line's
+  contribution either vanishes or cancels against the others ⟹ threshold collapses to `hq1` (the family range, i.e. no
+  separate small-`q` threshold). **It is the same `≤d`-term cancellation that Route 2's exact evaluation reduces to** (below).
+- **Route 2 — exact `c₀` (D3d-exact) — PRIORITIZED for termination/transfer.** Same line-regroup, but *evaluate* each
+  `q·Z_J − qᵈ` exactly via the elementary quadric counts (`card_quadForm_eq`, `sum_addChar_radical_vanish`, `GaussCount`) —
+  **NOT** the irreducible-high-degree Weil case the project avoids — and remove `hq3` entirely (no tail). **Full scope, the
+  per-line evaluation, and the crux are in the "### §13 — ROUTE 2 (SCOPE)" block below.** Key result of scoping: the exact
+  computation **reduces to the same `≤d`-term degenerate-line cancellation as Route 1** (the `|N_2 − q| = q−1` "bad" lines).
+  So Routes 1 and 2 are one kernel — Route 2 = (elementary exact reduction) + (Route 1's finite cancellation). Chosen as the
+  real target because termination generalizes/transfers to the other forms-graph families (Layer C).
 
 **Framing correction.** The *nondeg* `q√n` term does hide a genuine Weil sum (`∑_{[y:z]}χ` over the pencil line), but the
 project never needs to beat it (`hq1` absorbs it). All three routes touch only the **degenerate** term ⟹ all stay Weil-free.
