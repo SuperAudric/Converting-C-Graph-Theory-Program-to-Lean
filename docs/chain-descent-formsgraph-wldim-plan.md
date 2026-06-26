@@ -1141,11 +1141,19 @@ via `b.equivFun` carrying `polarRad G` *onto* the matrix kernel (key `(Gram *ᵥ
 (`|radical(y•P+z•R)| = |K|^{corank(A+(z/y)•B)}` — bridges `ScratchTBound`'s filter-card to the matrix corank) +
 `corank_ratio_eq` (finrank version); `sum_comp_ratio_le` (fiber-collapse `∑_{x∈S} h(ρx) ≤ N·∑_{t∈image} h t`, `N`=max
 fiber card) + `fiber_fst_card_le` (each ratio-fiber `≤ |K|`, injects via fst).
-**REMAINING (final assembly, non-research):** (A-assembly) `deg_bucket_le` = `∑_{x∈s deg} g x ≤ 2·|K|·(|V|/√|K|)`:
-factor `g x = √|V|·(√q)^{c(ρx)}` (`radicalCard_eq_pow`, `√(q^c)=(√q)^c`), apply `sum_comp_ratio_le` (N=|K|, fiber bound)
-then `concentration_bound` (s=√q, D=d; `1≤c≤d−1` from `polarRad≠⊥`/`hnz` via `corank_ratio_eq`+`finrank_pos`/`finrank_lt`,
-`∑c≤d` from `sum_finrankKer_le`); (C) wire into a corank-stratified `normT_bucket_bound` (deg term `2·|K|·(|V|/√|K|)`)
-⟹ new `c0_le` (dR→2, drop `hq2`; `hB` then uses the existing `h16`/`hq3 (q≥256)` — VERIFIED against the real `c0_le`).
+**(A-assembly) + (C) — DONE (axiom-clean). THE `hq2` THRESHOLD IS REMOVED END-TO-END.**
+- `ScratchPencilRegroup.deg_bucket_le` (+ helper `sqrt_natpow`): `∑_{x∈s deg} g x ≤ 2·|K|·(|V|/√|K|)` — factors
+  `g x = √|V|·(√q)^{c(ρx)}` (`radicalCard_eq_pow`), `sum_comp_ratio_le` (N=|K|, `fiber_fst_card_le`), `concentration_bound`
+  (s=√q, D=d; `1≤c≤d−1` from `polarRad≠⊥`/`hnz` via `corank_ratio_eq` + `Submodule.finrank_eq_zero`/`finrank_lt`,
+  `∑c≤d` from `sum_finrankKer_le`).
+- `ScratchTBoundCorank.normT_bucket_bound_corank`: `|K|·‖T‖ ≤ |K|²·√|V| + 2·|K|·(|V|/√|K|)` (reuses
+  `normT_bucket_bound`'s χ-collapse + nondeg bucket; swaps the deg bucket for `deg_bucket_le`).
+- `ScratchTBoundCorank.c0_le_const`: `NS ≤ ¾·n` from `c0_le` **at `dR := 2`** — the original `hq2 : 64·dR²≤q` becomes
+  `64·2²=256 ≤ q` = the existing `hq3`, so **`hq2` is dropped**; binding hyps are just `hq1 (d≥3)` and `hq3 (q≥256)`.
+**REMAINING (mechanical wiring only):** (i) `pencilPoly_det_ne_zero` — derive the `hp` (univariate pencil det `≠0`)
+from the good anchor `hgood (∃ nondeg member)` (the homogeneous-det dehomogenization; the `y=0` case via leading coeff);
+(ii) a corank variant `c0_le_threequarters_corank` (mirror `ScratchC0Final.c0_le_threequarters` with
+`normT_bucket_bound_corank` + `c0_le_const`). VO⁻₄(q): final threshold `q ≥ 1024 → q ≥ 256`.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general

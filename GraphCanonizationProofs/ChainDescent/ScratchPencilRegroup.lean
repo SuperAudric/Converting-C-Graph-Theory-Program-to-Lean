@@ -14,6 +14,7 @@ NOT in build (scratch).
 -/
 import ChainDescent.ScratchPencilBridge
 import ChainDescent.ScratchGoodAnchor
+import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 namespace ChainDescent
 
@@ -96,6 +97,125 @@ theorem fiber_fst_card_le [Fintype K] [DecidableEq K] (S : Finset (K × K))
   rw [hab'] at key
   exact Prod.ext hab' (mul_right_cancel₀ (inv_ne_zero hb1) key)
 
+/-- `√(a^c) = (√a)^c` for `a ≥ 0`. -/
+theorem sqrt_natpow (a : ℝ) (ha : 0 ≤ a) (c : ℕ) : Real.sqrt (a ^ c) = Real.sqrt a ^ c := by
+  induction c with
+  | zero => simp
+  | succ n ih => rw [pow_succ, pow_succ, Real.sqrt_mul (by positivity), ih]
+
+/-- **The corank-stratified degenerate bucket bound (A-assembly).** The `ScratchTBound` degenerate-bucket sum
+`∑_{x∈s deg} √(|V|·|radical|)` is at most `2·|K|·(|V|/√|K|)` — the `d`-free bound (vs the uniform `d·|K|·(|V|/√|K|)`).
+Chains `radicalCard_eq_pow` (factor `g = √|V|·(√q)^{corank}`), `sum_comp_ratio_le`/`fiber_fst_card_le` (regroup pairs
+to ratios, `≤ |K|` each), and `concentration_bound` (the `∑ corank ≤ d`, `corank ≤ d−1` budget). -/
+theorem deg_bucket_le {V : Type*} [AddCommGroup V] [Module K V] [Fintype K] [DecidableEq K]
+    [Fintype V] [DecidableEq V] [Invertible (2 : K)]
+    (b : Basis (Fin d) K V) (P R : QuadraticForm K V) (hd : 1 ≤ d) (hq4 : 4 ≤ Fintype.card K)
+    (hnz : ∀ y z : K, y ≠ 0 → z ≠ 0 → y • P + z • R ≠ 0)
+    (hp : (pencilPoly (LinearMap.toMatrix₂ b b (QuadraticMap.polarBilin P))
+            (LinearMap.toMatrix₂ b b (QuadraticMap.polarBilin R))).det ≠ 0) :
+    ∑ x ∈ ((Finset.univ.filter (fun x : K × K => x.1 ≠ 0 ∧ x.2 ≠ 0)).filter
+        (fun x => polarRad (x.1 • P + x.2 • R) ≠ ⊥)),
+      Real.sqrt ((Fintype.card V : ℝ)
+        * (Finset.univ.filter (fun h : V =>
+            ∀ w, QuadraticMap.polar (x.1 • P + x.2 • R) w h = 0)).card)
+      ≤ 2 * Fintype.card K * (Fintype.card V / Real.sqrt (Fintype.card K)) := by
+  classical
+  set A := LinearMap.toMatrix₂ b b (QuadraticMap.polarBilin P) with hA
+  set B := LinearMap.toMatrix₂ b b (QuadraticMap.polarBilin R) with hB
+  set q : ℕ := Fintype.card K with hq
+  set n : ℕ := Fintype.card V with hn
+  set ρ : K × K → K := fun x => x.2 * x.1⁻¹ with hρ
+  set cork : K → ℕ := fun t => finrank K (LinearMap.ker ((A + t • B).mulVecLin)) with hcork
+  set S := (Finset.univ.filter (fun x : K × K => x.1 ≠ 0 ∧ x.2 ≠ 0)).filter
+      (fun x => polarRad (x.1 • P + x.2 • R) ≠ ⊥) with hS
+  -- membership facts
+  have hxne : ∀ x ∈ S, x.1 ≠ 0 ∧ x.2 ≠ 0 := by
+    intro x hx; exact (Finset.mem_filter.1 (Finset.mem_filter.1 hx).1).2
+  have hxrad : ∀ x ∈ S, polarRad (x.1 • P + x.2 • R) ≠ ⊥ := by
+    intro x hx; exact (Finset.mem_filter.1 hx).2
+  -- field facts
+  have hsqrtq2 : (2 : ℝ) ≤ Real.sqrt q := by
+    rw [show (2 : ℝ) = Real.sqrt 4 by rw [show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq (by norm_num)]]
+    exact Real.sqrt_le_sqrt (by exact_mod_cast hq4)
+  have hqpos : (0 : ℝ) < q := by
+    have h : 0 < q := by omega
+    exact_mod_cast h
+  have hnq : (n : ℝ) = (q : ℝ) ^ d := by
+    rw [hn, hq, Module.card_eq_pow_finrank (K := K) (V := V), Module.finrank_eq_card_basis b,
+      Fintype.card_fin]; push_cast; ring
+  have hfin : finrank K V = d := by rw [Module.finrank_eq_card_basis b, Fintype.card_fin]
+  -- Step 1: g x = √n · (√q)^{cork (ρ x)}
+  have hgx : ∀ x ∈ S, Real.sqrt ((n : ℝ)
+      * (Finset.univ.filter (fun h : V =>
+          ∀ w, QuadraticMap.polar (x.1 • P + x.2 • R) w h = 0)).card)
+        = Real.sqrt n * Real.sqrt q ^ (cork (ρ x)) := by
+    intro x hx
+    have h1 : ((Finset.univ.filter (fun h : V =>
+        ∀ w, QuadraticMap.polar (x.1 • P + x.2 • R) w h = 0)).card : ℝ)
+        = (q : ℝ) ^ (cork (ρ x)) := by
+      rw [radicalCard_eq_pow b P R (hxne x hx).1, ← hA, ← hB]
+      push_cast
+      rfl
+    rw [h1, Real.sqrt_mul (by positivity), sqrt_natpow _ (le_of_lt hqpos)]
+  rw [Finset.sum_congr rfl hgx, ← Finset.mul_sum]
+  -- Step 2: regroup pairs → ratios
+  have hN : ∀ t : K, ((S.filter (fun x => ρ x = t)).card : ℝ) ≤ (q : ℝ) := by
+    intro t
+    rw [hρ]
+    exact_mod_cast fiber_fst_card_le S (fun x hx => (hxne x hx).1) t
+  have hstep2 : ∑ x ∈ S, Real.sqrt q ^ (cork (ρ x))
+      ≤ (q : ℝ) * ∑ t ∈ S.image ρ, Real.sqrt q ^ (cork t) :=
+    sum_comp_ratio_le S ρ (fun t => Real.sqrt q ^ (cork t)) (fun t => by positivity) q hN
+  -- Step 3: concentration over the ratio set
+  set T := S.image ρ with hT
+  have hce : ∀ x ∈ S, cork (ρ x) = finrank K (polarRad (x.1 • P + x.2 • R)) := fun x hxS =>
+    corank_ratio_eq b P R (hxne x hxS).1
+  have hlo : ∀ t ∈ T, 1 ≤ cork t := by
+    intro t ht
+    rw [hT, Finset.mem_image] at ht
+    obtain ⟨x, hxS, hxt⟩ := ht
+    rw [← hxt, hce x hxS, Nat.one_le_iff_ne_zero]
+    intro hzero
+    exact hxrad x hxS (Submodule.finrank_eq_zero.1 hzero)
+  have hhi : ∀ t ∈ T, cork t ≤ d - 1 := by
+    intro t ht
+    rw [hT, Finset.mem_image] at ht
+    obtain ⟨x, hxS, hxt⟩ := ht
+    rw [← hxt, hce x hxS]
+    have hmem0 : x.1 • P + x.2 • R ≠ 0 := hnz x.1 x.2 (hxne x hxS).1 (hxne x hxS).2
+    have hlt : finrank K (polarRad (x.1 • P + x.2 • R)) < d := by
+      rw [← hfin]; exact Submodule.finrank_lt (polarRad_ne_top_of_ne_zero _ hmem0)
+    omega
+  have hsumcork : ∑ t ∈ T, cork t ≤ d := by
+    rw [hT]; exact sum_finrankKer_le A B (S.image ρ) hp
+  have hstep3 : ∑ t ∈ T, Real.sqrt q ^ (cork t) ≤ 2 * Real.sqrt q ^ (d - 1) :=
+    concentration_bound hsqrtq2 hsumcork hlo hhi
+  -- Step 4: assemble the arithmetic
+  have hkey : Real.sqrt n * ((q : ℝ) * (2 * Real.sqrt q ^ (d - 1)))
+      ≤ 2 * (q : ℝ) * ((n : ℝ) / Real.sqrt q) := by
+    apply le_of_eq
+    obtain ⟨m, hm⟩ : ∃ m, d = m + 1 := ⟨d - 1, by omega⟩
+    subst hm
+    have hsqpos : (0 : ℝ) < Real.sqrt q := Real.sqrt_pos.2 hqpos
+    have hu2 : Real.sqrt q ^ 2 = (q : ℝ) := Real.sq_sqrt (le_of_lt hqpos)
+    have hsqn : Real.sqrt (n : ℝ) = Real.sqrt q ^ (m + 1) := by
+      rw [hnq, sqrt_natpow _ (le_of_lt hqpos)]
+    have hpow : Real.sqrt q ^ (2 * m + 1) * Real.sqrt q = (q : ℝ) ^ (m + 1) := by
+      rw [← pow_succ, show 2 * m + 1 + 1 = 2 * (m + 1) by ring, pow_mul, hu2]
+    have hndiv : (n : ℝ) / Real.sqrt q = Real.sqrt q ^ (2 * m + 1) := by
+      rw [hnq, ← hpow, mul_div_assoc, div_self (ne_of_gt hsqpos), mul_one]
+    rw [hsqn, hndiv, Nat.add_sub_cancel]
+    generalize Real.sqrt q = u at hu2 ⊢
+    rw [← hu2]
+    ring
+  calc Real.sqrt n * ∑ x ∈ S, Real.sqrt q ^ (cork (ρ x))
+      ≤ Real.sqrt n * ((q : ℝ) * ∑ t ∈ T, Real.sqrt q ^ (cork t)) :=
+        mul_le_mul_of_nonneg_left hstep2 (Real.sqrt_nonneg _)
+    _ ≤ Real.sqrt n * ((q : ℝ) * (2 * Real.sqrt q ^ (d - 1))) := by
+        apply mul_le_mul_of_nonneg_left _ (Real.sqrt_nonneg _)
+        exact mul_le_mul_of_nonneg_left hstep3 (le_of_lt hqpos)
+    _ ≤ 2 * (q : ℝ) * ((n : ℝ) / Real.sqrt q) := hkey
+
 end ChainDescent
 
 #print axioms ChainDescent.ker_smul_mulVecLin
@@ -104,3 +224,4 @@ end ChainDescent
 #print axioms ChainDescent.corank_ratio_eq
 #print axioms ChainDescent.sum_comp_ratio_le
 #print axioms ChainDescent.fiber_fst_card_le
+#print axioms ChainDescent.deg_bucket_le
