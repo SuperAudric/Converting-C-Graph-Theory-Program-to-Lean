@@ -118,12 +118,19 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > **★★★ 3a.1 — THE LAYERED REMAINDER (2026-06-25, authoritative "what's left" from increment-3-done to general seal mod
 > citations).** Increment 3 (per-anchor `c₀ ≤ ¾`) is CLOSED (capstone `ScratchC0Final.c0_le_threequarters`, axiom-clean).
 > The remaining work, by layer (★=open, ✓=landed):
-> - **Layer A — finish discharging `ZProfileSeparates` for affine-polar (the live frontier).**
->   - ★ **Increment 4 — good-anchor density** (small): the bad-anchor locus (where `det G₂(u;·,a)`, `det G₂(u';·,a)` align)
->     is a proper subvariety, density `O(1/q)` ⟹ `c̄₀ = E_a[c₀] ≤ 1−δ' < 1`. Another pencil-degeneracy Schwartz–Zippel count
->     (reuses `degenerate_count_le`-style tools). De-risked numerically (`Probe_D3dPairCount`: `c̄₀≈0.45` flat).
->   - ★ **Increment 5 — apply the matching trick** (small): feed `c̄₀<1` into **`ScratchMatching.exists_separating_base`
->     (LANDED, axiom-clean)** with `m=O(d log q)` ⟹ separating base `O(d log q)`.
+> - **Layer A — finish discharging `ZProfileSeparates` for affine-polar (the live frontier = increment 5).**
+>   - ✓ **Increment 4 — DONE (modulo non-vacuity), axiom-clean** (`ScratchIncr4`/`ScratchIncr4b`/`ScratchIncr4c`).
+>     Anchor-averaging backbone `fail_count_split`/`matching_F_bound` (`F ≤ c·|V| + |V|·β`). **Input `c`:**
+>     `good_anchor_fail_le_const` (good anchor ⟹ `#{¬sep} ≤ 15/16·|V|`, from `c0_le_threequarters` + `zeroCountShift_card_le`).
+>     **Input `β`:** `hgood ⟹ hnz∧hPu∧hPv` collapses the bad set to `{¬hgood}`; the repr polynomial `pencilDetPoly` is
+>     CONSTRUCTED (`pencilDetPoly_eval` + `pencilDetPoly_ne_zero`) ⟹ `badHgood_count_le`: `#{¬hgood}·|K| ≤ deg(P)·|V| = O(d/q)`.
+>     So `c̄₀ = c/|V|+β/|V| ≤ 15/16 + O(d/q) < 1`. **Open residue:** (i) non-vacuity `hgood` (∃ good anchor for `u≠v`, a
+>     hypothesis); (ii) trivial `β ≤ #{¬hgood}+2` composition (deferred to inc-5); (iii) optional `totalDegree(P)≤2d` polish.
+>   - ★ **Increment 5 (THE LIVE FRONTIER) — the matching assembly + bridge wiring:** feed `c̄₀<1` into
+>     **`ScratchMatching.exists_separating_base` (LANDED, axiom-clean)** (`m=O(d log q)`, needs a `c̄₀ᵐ`-smallness ℕ helper)
+>     ⟹ separating base; define matching `fail := ¬(bridge criterion)` so `¬fail ⟹` separation IS
+>     `jointIsoCount_ne_of_chiSep_pair`; MAIN CARE = the **coordinate seam** `Fin(p^d)`/`affineE` ↔ abstract `V`; then
+>     `zProfileSeparates_of_zSep` → seal. Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED".
 >   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ScratchBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
 >     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
 >     χ-separating base) →[`pairCount_ne_of_chiSep_field` (**B1b**, ℂ) + the per-pair closed form `jointIsoCount_pair_closed_corr0`

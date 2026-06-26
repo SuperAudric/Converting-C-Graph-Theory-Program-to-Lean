@@ -3,17 +3,25 @@
 
 `ScratchIncr4b` reduced the bad-anchor count `β` to ONE obligation: a nonzero `P : MvPolynomial (Fin d) K` that
 *represents the pencil determinant* — `eval (b.equivFun t₀) P = det(toMatrix₂ b b (polarBilin (y₀•pairForm_u +
-z₀•pairForm_v)))` — at a fixed witness `(y₀,z₀)`. This module builds `P` by coordinatizing the Gram entries.
+z₀•pairForm_v)))` — at a fixed witness `(y₀,z₀)`. **This module BUILDS that `P` (12 lemmas, all axiom-clean), closing
+`β` modulo non-vacuity.**
 
-**Layer 1 (this commit) — the coordinatization workhorse.** A linear functional `f : V →ₗ[K] K` is represented by the
-degree-1 polynomial `coordPoly (fun k => f (b k)) = ∑ₖ C(f bₖ)·Xₖ`, which evaluates at `x = b.equivFun t₀` to `f t₀`
-(`coordPoly_eval_linFunc`). This handles every *linear-in-`t₀`* piece (`polar Q w (t₀−c)` via `polarBilin Q w`).
+* **Layer 1 — coordinatization workhorse.** A linear functional `f : V →ₗ[K] K` ↦ `coordPoly (fun k => f (b k)) =
+  ∑ₖ C(f bₖ)·Xₖ`, evaluating at `x = b.equivFun t₀` to `f t₀` (`coordPoly_eval_linFunc`).
+* **Layer 2 — the quadratic `Q(t₀)`** via the diagonal double-sum `polar_t0_t0_sum` (`polar Q t₀ t₀ = ∑_{k,l}
+  xₖxₗ·polar Q bₖ bₗ`) + `gramQuadPoly_eval` (`Q = ½·polar`, needs `Invertible 2`).
+* **Layer 3 — the affine `LPoly`/`QPoly`** (`polar Q w (t₀−c)`, `Q(t₀−c)`).
+* **Layer 4 — the Gram entry + determinant**: `polar_pairForm_apply`, `entryPoly`/`entryPoly_eval`, then
+  `pencilDetPoly := det(Matrix.of (C y₀·entryPoly_u + C z₀·entryPoly_v))` with `pencilDetPoly_eval` (`eval`-correct by
+  `RingHom.map_det`) + `pencilDetPoly_ne_zero` (good-anchor witness). Capstone **`badHgood_count_le`:
+  `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`** (= `O(d/q)` density).
 
-**Layers 2–4 (next) —** the quadratic piece `Q(t₀−c) = ½·polar Q t₀ t₀ + …` via the double-sum
-`polar Q t₀ t₀ = ∑_{k,l} xₖxₗ·polar Q bₖ bₗ`; then the Gram-entry polynomial `Eᵢⱼ = C(4gᵢⱼ)·QPoly − C 2·Lᵢ·Lⱼ`,
-`P := det(Matrix.of Eᵢⱼ)` (`eval`-correct by `RingHom.map_det`), and `P ≠ 0` via a good-anchor witness.
+`β` is thereby CLOSED modulo: (i) non-vacuity `hgood` (∃ good anchor for `u≠v` = distinct radicals, a hypothesis);
+(ii) the trivial `β ≤ #{¬hgood}+2` composition with `ScratchIncr4b.bad_anchor_card_le_hgood` (deferred to inc-5 to dodge
+a cosmetic cross-module `Classical.propDecidable` mismatch on the `{¬hgood}` filter); (iii) an optional
+`totalDegree(pencilDetPoly) ≤ 2d` polish (for the explicit `O(d/q)`).
 
-NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4c.lean`).
+NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4c.lean`, after `lake build ChainDescent.ScratchIncr4b`).
 -/
 import ChainDescent.ScratchIncr4b
 

@@ -127,12 +127,15 @@ close it — is set out in
 > per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE — capstone **`ScratchC0Final.c0_le_threequarters`** (good anchor + `q≥q₀`/`d≥3` ⟹
 > `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`), built across 8 new scratch modules on top of `ScratchPairSep` (24 lemmas). The reduction
 > backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal` is LANDED (`ScratchCrux` + `…viaIsotropySeparates_wittFree`).
-> **SINCE THEN (2026-06-26):** the **bridge** (`χ(det G₂)`↔`Z_u(S)`) is ARCHITECTURALLY CLOSED + B1-deg dissolved
-> (`ScratchBridge`/`A`/`Z`); **B1a wrap (i)+(ii) LANDED** (`ScratchBridgeB`/`C`, fullcount closed form), wrap (iii)+assembly next;
-> the **seam** is SPIKED (closes, `ScratchSeam`, modulo a mechanical `htransport`); **char-2+Suzuki** spiked (one bespoke char-2
-> track, deferred). **NEXT = B1a wrap (iii) → increment 4 (good-pair predicate `{hgood ∧ hnz ∧ corr=0}`) → increment 5 (matching).**
-> **Read the plan's top "CURRENT HANDOFF (2026-06-26)" block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the
-> *polynomial* seal; `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
+> **SINCE THEN (2026-06-26):** the **bridge** (`χ(det G₂)`↔`Z_u(S)`) is CLOSED END-TO-END (`ScratchBridge`/`A`/`B`/`C`/`D`/`Z`,
+> all B1a wraps + the ℂ per-pair capstone `jointIsoCount_ne_of_chiSep_pair`); **increment 4 is DONE (modulo non-vacuity)** —
+> input `c` (`good_anchor_fail_le_const`: good anchor ⟹ `#{¬sep}≤15/16·|V|`, `ScratchIncr4`) and bad-anchor `β`
+> (`badHgood_count_le`: `#{¬hgood}·|K|≤deg(P)·|V|=O(d/q)`, repr polynomial `pencilDetPoly` constructed, `ScratchIncr4b`/`c`),
+> so `c̄₀ = c/|V|+β/|V| < 1`; the **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked
+> (one bespoke char-2 track, deferred). **FRONTIER = INCREMENT 5** (the matching assembly + bridge wiring; the coordinate seam
+> `Fin(p^d)`/`affineE` ↔ abstract `V`). **Read the plan's top "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block first, then
+> `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; `reachesRigidOrCameron_viaSpielman` is the citable
+> sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there

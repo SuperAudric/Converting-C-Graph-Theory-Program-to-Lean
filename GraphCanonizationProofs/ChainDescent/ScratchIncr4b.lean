@@ -17,12 +17,15 @@ so `β`'s bad set is `{¬hgood} ∪ {Q(t₀−u)=0} ∪ {Q(t₀−v)=0}` (+ two 
 bounded by Schwartz–Zippel **in `t₀`**: some coefficient of `pencilDisc` (a polynomial in `(y,z)`) is a nonzero
 polynomial in `t₀`'s coordinates, of bounded total degree, so `#{¬hgood} ≤ deg·|V|/q`.
 
-**This module lands the Schwartz–Zippel-in-`Fin d` engine** `mvPoly_zeros_count_le_dim` (the `t₀`-variable count;
-`ScratchGoodAnchor.mvPoly_zeros_count_le` was the `Fin 2`/`(y,z)` form) + the coordinatized count wrapper. The
-per-condition polynomial constructions (`{¬hgood}` as `eval = 0` of a nonzero `t₀`-polynomial; `hgood ⟹ hnz∧hPu∧hPv`)
-are the remaining bad-anchor work, on top of this engine.
+**This module lands** the Schwartz–Zippel-in-`Fin d` engine `mvPoly_zeros_count_le_dim`; the reduction
+`hgood ⟹ hnz∧hPu∧hPv` (`hPu_of_hgood`/`hPv_of_hgood`/`hnz_of_hgood` + helpers) packaged as `bad_anchor_card_le_hgood`
+(`β ≤ #{¬hgood} + 2`); the rigorous SZ-via-polynomial reduction `bad_anchor_count_le_of_poly` (nonzero repr poly `P` ⟹
+`#{¬hgood}·|K| ≤ deg P·|V|`); and `notHgood_eval_zero_of_repr` (discharges its `hrep` from a representing `P`). The
+representing polynomial `P = pencilDetPoly` itself is CONSTRUCTED in `ScratchIncr4c` (which composes these into the
+capstone `badHgood_count_le`), closing `β` modulo non-vacuity.
 
-NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4b.lean`).
+NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4b.lean`, after
+`lake build ChainDescent.ScratchIncr4 ChainDescent.ScratchGoodAnchor`).
 -/
 import ChainDescent.ScratchIncr4
 import ChainDescent.ScratchGoodAnchor

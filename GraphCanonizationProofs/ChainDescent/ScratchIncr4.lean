@@ -12,13 +12,18 @@ and a target `g = (u,v)` is *separated* by `(t,t₀)` when the joint isotropic c
 into `F = #{(t,t₀) : ¬sep} ≤ c·|V| + |V|·β`, where `c` = the per-good-anchor fail bound and `β` = the bad-anchor
 count. Dividing by `|V|² = |W|` gives `c̄₀ = c/|V| + β/|V| ≤ ¾ + O(1/√q) + O(1/q) < 1` — the matching-trick input.
 
-**This module lands the structural backbone** — the anchor-averaging split `fail_count_split` (a pure finite-counting
-identity, no analysis) that turns "per-good-anchor bound + bad-anchor count" into the product-space fail bound `F`, and
-its `exists_separating_base`-ready corollary `matching_F_bound`. The two analytic inputs (the good-anchor `c` from
-increment 3 + zero-counts, and the bad-anchor `β` from Schwartz–Zippel in `t₀`) are the remaining increment-4 work;
-this lemma is what consumes them and is where they plug in.
+**This module lands the structural backbone + input `c`:**
+* the anchor-averaging split `fail_count_split` (pure finite counting) + its `exists_separating_base`-ready corollary
+  `matching_F_bound` (`F ≤ c·|B| + |A|·β`);
+* **input `c` (the good-anchor fail bound), DONE** — `good_anchor_fail_le` (decomposition `fail ⟹ {χ-eq} ∨ {I_u=0} ∨
+  {I_v=0}` + `c0_le_threequarters`) + `zeroCountShift_card_le` (`P≠0 ⟹ #{t:P(t−u)=0}·q ≤ |V|+(q−1)|V|/√q`) ⟹ capstone
+  **`good_anchor_fail_le_const`: a good anchor has `#{t:¬sep} ≤ 15/16·|V|`** (`q≥256`), so `c/|V| ≤ 15/16 < 1`.
 
-NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4.lean`).
+The other input — the bad-anchor count `β` (Schwartz–Zippel in `t₀`) — is in `ScratchIncr4b` (reduction) + `ScratchIncr4c`
+(the representing-polynomial construction). The matching assembly (`c̄₀ = c/|V| + β/|V| < 1` → `exists_separating_base`)
+is increment 5.
+
+NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4.lean`, after `lake build ChainDescent.ScratchC0Final`).
 -/
 import ChainDescent.ScratchMatching
 import ChainDescent.ScratchC0Final

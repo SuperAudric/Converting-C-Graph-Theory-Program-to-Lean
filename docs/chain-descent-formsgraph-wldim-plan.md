@@ -16,10 +16,14 @@
 
 ## STATUS (read first)
 
-> **▶▶▶▶ CURRENT HANDOFF (2026-06-26) — read THIS first; the dated blocks below are chronological history.** Increment 3
-> (`c₀ ≤ ¾`) is closed (`ScratchC0Final.c0_le_threequarters`). Since then, four things landed/resolved — **the live frontier is
-> now B1a wrap (iii) + final assembly, then increment 4.** Authoritative detail: §13 STATUS + the §13 "OBSERVABLE↔COUNT BRIDGE"
-> block; cross-family detail in §11.4/§11.5; strategic framing in `chain-descent-remaining-work.md` §3a.1.
+> **▶▶▶▶ CURRENT HANDOFF (2026-06-26) — read THIS first; the dated blocks below are chronological history.** The whole
+> reduction `seal ⟸ ZProfileSeparates ⟸ (separating base) ⟸ (matching: `c̄₀<1`)` is now built end-to-end **except the
+> increment-5 assembly**: increment 3 (`c₀≤¾`), the observable↔count **bridge** (B1a, all wraps), increment-4 **input `c`**
+> (`c/|V|≤15/16`), and increment-4 **bad-anchor `β`** (`O(d/q)`, repr-polynomial constructed) are ALL landed axiom-clean.
+> **THE LIVE FRONTIER IS INCREMENT 5** — wire `c̄₀ = c/|V|+β/|V| < 1` into `ScratchMatching.exists_separating_base` and
+> connect to the bridge (the coordinate seam `Fin(p^d)`/`affineE` ↔ abstract `V`). **Read the "PICK UP HERE" block below**
+> (the four numbered bullets are what-landed history); full detail = §13 ("INCREMENT 5 — WHAT'S EXPECTED" + the bridge/inc-3/4
+> blocks); strategic framing = `chain-descent-remaining-work.md` §3a.1.
 >
 > 1. **★ THE BRIDGE (`χ(det G₂)` observable ⟷ `Z_u(S)` counts) is ARCHITECTURALLY CLOSED; B1-deg DISSOLVED.** Chain:
 >    (config-nondeg χ-separating base) →[`ScratchBridge.pairCount_ne_of_chiSep` (B1b) + `ScratchBridgeA.levelset_count_collapse`
@@ -50,8 +54,8 @@
 >    Mathlib substrate absent) but it is one shared track (Suzuki folds into char-2), reachable, gated on that substrate, **deferred**
 >    until odd-char affine-polar + seam close. The char-agnostic combinatorial layer (matching/bridge/seam/Layer B) reuses.
 >
-> **PICK UP HERE (B1a DONE; increment-4 BACKBONE + input `c` DONE):** the bridge is closed, the increment-4 anchor-averaging backbone
-> is landed (`ScratchIncr4.fail_count_split`/`matching_F_bound`: `F ≤ c·|V| + |V|·β`), and **input `c` is closed** — a good anchor has
+> **PICK UP HERE — FRONTIER = INCREMENT 5 (bridge + increment-4 inputs `c` and `β` all DONE):** the bridge is closed, the
+> increment-4 anchor-averaging backbone is landed (`ScratchIncr4.fail_count_split`/`matching_F_bound`: `F ≤ c·|V| + |V|·β`), and **input `c` is closed** — a good anchor has
 > `#{t:¬sep} ≤ 15/16·|V|` (`good_anchor_fail_le_const`, from `good_anchor_fail_le` + `zeroCountShift_card_le`, axiom-clean), so
 > `c/|V| ≤ 15/16 < 1`. The live frontier is the **bad-anchor `β`**: the SZ-in-`t₀` engine `mvPoly_zeros_count_le_dim` is LANDED
 > (`ScratchIncr4b` + `ScratchIncr4c`, all axiom-clean): the reduction `hgood ⟹ hnz∧hPu∧hPv` + `bad_anchor_card_le_hgood`
@@ -85,7 +89,7 @@
 > scoping front is fully resolved:** AUDIT-S/A/W done, **Route 1 chosen** (char-sum, not Witt), **GATE passed**. The live
 > work is **§13**, the discharge of the one open predicate.
 >
-> **▶▶ CURRENT STATE — read this, then §13 STATUS, then `ScratchPairSep.lean` (PICK UP HERE).** The entire generalization is
+> **▶▶ CURRENT STATE (chronological — current frontier is the PICK UP HERE block above, increment 5).** The entire generalization is
 > reduced (axiom-clean, `ScratchCrux.lean`: **D1** + **D2-bridge** + `isotropySeparates_of_zProfileSeparates`) to the single
 > predicate **`ZProfileSeparates Q T`** (the joint `Z(S)`-profile separates pivots at a bounded base = **D3d**). Two big
 > developments since:
@@ -191,7 +195,8 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
     extracted from the `z_u` block of `c0_le_threequarters`) ⟹ capstone **`good_anchor_fail_le_const`**: a good anchor
     (`hnz ∧ hgood ∧ hPu ∧ hPv`, `q≥256`) has **`#{t : ¬sep} ≤ 15/16·|V|`** (`z/|V| ≤ 1/256+1/16 = 17/256 < 3/32` twice ⟹
     `¾+3/16=15/16`). So `c/|V| ≤ 15/16 < 1` — the good-anchor side of `c̄₀<1` is closed.
-  - **Remaining for increment 4 = `β`** (bad-anchor count `O(|V|/q)`) + the ℕ-packaging (increment 5).
+  - **Increment-4 `β` (bad-anchor count) is DONE** in `ScratchIncr4b`+`ScratchIncr4c` (`badHgood_count_le`, `O(d/q)`).
+    Remaining = the increment-5 ℕ-packaging/matching assembly (modulo non-vacuity).
 - **`ScratchIncr4b.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `ScratchIncr4` + `ScratchGoodAnchor`) — **increment 4: the bad-anchor count `β` (Schwartz–Zippel in `t₀`).**
   **★ Structural reduction (key):** since `pairForm Q (t₀−v)` is ALWAYS degenerate (`pairForm_polar_anchor`: `t₀−v ∈`
@@ -277,7 +282,7 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
   `levelset_count_eq` (the "big but mechanical" `D3a` at `|S|=2` the `VO⁻₄(3)` instance bypassed via `decide`); config-dependence
   enters only through `χ(D) = χ(det G₂)`, the bridge observable. Feeds `ScratchBridge.chiSep_imp_zSep`. (Consumed by wrap (ii)
-  in `ScratchBridgeC`; remaining B1a = wrap (iii) `D↔pairForm` + assembly, over ℂ — §13 BRIDGE net verdict.)
+  in `ScratchBridgeC`; B1a is now COMPLETE — wrap (iii) + assembly are in `ScratchBridgeD`, see §13 BRIDGE net verdict.)
 - **`ScratchSeam.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
   `CascadeAffine`) — **THE SEAM SPIKE** `reachesRigidOrCameron_viaSchurianRank3Affine` (+ `SchemeRealizes`, `SealDisj`): the
   abstract residue `S` reaches the seal disjunction given (C) the cited classification (`Cameron ∨ ≅ affineScheme(Q)` with
@@ -890,9 +895,12 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > against the landed scaffolding (§12), the open core isolated, the build increments ordered. This is the active work.
 
 > **§13 STATUS (read first; the blocks below are the chronological detail).**
-> - **▶▶▶▶ CURRENT FRONTIER = the top-of-doc "CURRENT HANDOFF (2026-06-26)" block + the "OBSERVABLE↔COUNT BRIDGE
->   ARCHITECTURALLY CLOSED (2026-06-26)" bullet two below.** Bridge closed, B1a wrap (i)+(ii) landed (wrap (iii)+assembly next),
->   seam/char-2/Suzuki spiked. The 2026-06-25 bullet immediately below is now CHRONOLOGICAL HISTORY (increment 3, the prior frontier).
+> - **▶▶▶▶ CURRENT FRONTIER = INCREMENT 5 (see the top-of-doc "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block).** All of:
+>   increment 3 (`c₀≤¾`), the observable↔count **bridge** (B1a, all wraps — `ScratchBridge`/`A`/`B`/`C`/`D`/`Z`), increment-4
+>   **input `c`** (`good_anchor_fail_le_const`, `ScratchIncr4`), and increment-4 **bad-anchor `β`** (`badHgood_count_le`,
+>   `ScratchIncr4b`/`ScratchIncr4c` — repr polynomial constructed) are LANDED axiom-clean. **Increment 5** = wire `c̄₀<1` into
+>   `exists_separating_base` + the bridge (§"INCREMENT 5 — WHAT'S EXPECTED" below). The dated bullets below are CHRONOLOGICAL
+>   HISTORY (increment 3, the bridge blocks, the increment-4 blocks — all now done; trust this bullet + the top-of-doc PICK UP HERE).
 > - **(HISTORY) 2026-06-25 — INCREMENT 3 CLOSED (all axiom-clean, full `lake build` green, NOT in build.sh).**
 >   The pair route's per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE: capstone **`ScratchC0Final.c0_le_threequarters`** (good anchor
 >   `hgood`/`hnz`/`hPu` + `q≥q₀` [`64q²≤|V|`⟺`d≥3`, `64d²≤q`, `256≤q`] ⟹ `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`). Built across 8 new
