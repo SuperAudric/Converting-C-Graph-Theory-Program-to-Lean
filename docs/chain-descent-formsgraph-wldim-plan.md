@@ -229,8 +229,11 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   **`beta_count_closed`: `β·|K| ≤ 2d·|V| + 2·|K| = O(d/q)`** (combines `badHgood_count_le` + `pencilDetPoly_totalDegree_le`
   + `bad_anchor_card_le_hgood`; cross-module `DecidablePred` mismatch bridged by `convert … <;> congr!`). **So β is CLOSED
   to an explicit `O(d/q)` bound modulo ONLY (i) non-vacuity `hgood`** (∃ good anchor for `u≠v` = distinct radicals — item
-  **NV**, carried as the `t₀₀` hypothesis). Items (ii) Nat-composition + (iii) `totalDegree ≤ 2d` are DONE (B-ii/B-iii). 20
-  axiom-clean lemmas total.
+  **NV**, carried as the `t₀₀` hypothesis). Items (ii) Nat-composition + (iii) `totalDegree ≤ 2d` are DONE (B-ii/B-iii).
+  **C-corr (2026-06-26):** `corr_zero_of_anchor` (good anchor `Q(t₀−u)≠0` kills the bridge's `corr` ∀`t`) + `QPoly_ne_zero`
+  + `qZero_count_le` (`#{Q(t₀−c)=0}·|K| ≤ 2·|V|`) + capstone **`beta_full_count_closed`** (FULL good-anchor predicate incl.
+  `Q(t₀−u),Q(t₀−v)≠0`: `β_full·|K| ≤ (2d+4)·|V| + 2·|K|`). **24 axiom-clean lemmas total.** Remaining bridge-input gap =
+  **C-basis** (ortho-anisotropic basis `hv/hw`) + **NV**.
 - **`ScratchCorank.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **corank ≥ 2 enabler** for 3e-ii:
   **`radical_card_mul_card_le`** (`F ≠ 0 ⟹ |radical F| · |K| ≤ |V|`, i.e. `|radical| ≤ q^{d−1}` UNIFORMLY over all coranks —
   the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
@@ -1562,6 +1565,17 @@ axiom-clean lemmas)** — `coordPoly_eval_linFunc` (workhorse), `gramQuadPoly_ev
   the lone deep remaining piece; carried as the `t₀₀` hypothesis of `beta_count_closed`/`pencilDetPoly_ne_zero`). Items
   (ii) Nat-composition and (iii) `totalDegree ≤ 2d` are now DONE (above). [historical: (ii)/(iii) were tagged
   deferred/optional; both landed 2026-06-26.]
+
+**▶▶▶ C-corr DONE (2026-06-26, `ScratchIncr4c.lean`, all axiom-clean) — the bridge's `corr=0` is folded into `β`.** The
+bridge `ScratchBridgeD.jointIsoCount_ne_of_chiSep_pair` carries `hcorru/hcorrv` (`¬(Q(t−u)=0 ∧ Q(t₀−u)=0)` ∀ probe `t`).
+A good anchor with `Q(t₀−u)≠0` discharges it for ALL `t` (`corr_zero_of_anchor` — the second conjunct is false). The price
+is two quadric loci `{t₀:Q(t₀−u)=0}`,`{t₀:Q(t₀−v)=0}`, each counted by the SAME SZ engine on the already-built `QPoly`
+(`QPoly_ne_zero` + `qZero_count_le : #{Q(t₀−c)=0}·|K| ≤ 2·|V|`, via `QPoly_totalDegree_le ≤ 2`). Capstone
+**`beta_full_count_closed`**: the FULL good-anchor predicate `hnz ∧ hgood ∧ hPu ∧ hPv ∧ Q(t₀−u)≠0 ∧ Q(t₀−v)≠0` has bad-set
+**`β_full·|K| ≤ (2d+4)·|V| + 2·|K| = O(d/q)`** (union bound: `beta_count_closed` + 2·`qZero_count_le`). So `corr` is no
+longer a separate inc-5 worry — the matching's good-anchor locus already excludes it, at no asymptotic cost. **Remaining
+bridge-input gap = C-basis** (the ortho-anisotropic basis `hv : associated Q has an orthogonal basis`, `hw : ∀ i, Q(vb i)≠0`
+that `jointIsoCount_ne_of_chiSep_pair` carries — a `Q`-level lemma, not anchor-dependent) **+ NV**.
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** Once `c` (`≤ 15/16·|V|`, DONE) and `β`
 (`≤ C·|V|/q`) are in hand, increment 5 produces the separating base and discharges `ZProfileSeparates`:

@@ -324,6 +324,113 @@ theorem beta_count_closed [Fintype K] [DecidableEq K] [Fintype V] [DecidableEq V
           + 2 * Fintype.card K := by ring
     _ ≤ 2 * d * Fintype.card V + 2 * Fintype.card K := Nat.add_le_add_right key _
 
+/-! ### C-corr — the corr-killing anchor conditions `Q(t₀−u) ≠ 0`, `Q(t₀−v) ≠ 0`.
+
+The bridge `ScratchBridgeD.jointIsoCount_ne_of_chiSep_pair` carries `hcorru/hcorrv` — `¬(Q(t−u)=0 ∧ Q(t₀−u)=0)` for
+every probe `t`. A *good anchor* with `Q(t₀−u) ≠ 0` discharges this for ALL `t` (the second conjunct is false), so
+`corr` is killed at the anchor level (`corr_zero_of_anchor`). The price is two more bad-anchor loci `{t₀ : Q(t₀−u)=0}`,
+`{t₀ : Q(t₀−v)=0}`, each a quadric counted by the SAME Schwartz–Zippel engine on `QPoly` (`QPoly_eval = Q(t₀−c)`,
+`QPoly_totalDegree_le : ≤ 2`), folding `corr` into `β` at density `O(1/q)`. -/
+
+/-- A good anchor (`Q(t₀−u) ≠ 0`) kills the bridge's `corr` condition for every probe `t`: `¬(Q(t−u)=0 ∧ Q(t₀−u)=0)`. -/
+theorem corr_zero_of_anchor (Q : QuadraticForm K V) (u t₀ : V) (h : Q (t₀ - u) ≠ 0) (t : V) :
+    ¬ (Q (t - u) = 0 ∧ Q (t₀ - u) = 0) := fun hc => h hc.2
+
+/-- `QPoly b Q c ≠ 0` whenever the form is nonzero somewhere (`Q w₀ ≠ 0`): its value at `t₀ = w₀ + c` is `Q w₀ ≠ 0`. -/
+theorem QPoly_ne_zero [Invertible (2 : K)] (Q : QuadraticForm K V) (c w₀ : V) (hw₀ : Q w₀ ≠ 0) :
+    QPoly b Q c ≠ 0 := by
+  intro h0
+  have hev := QPoly_eval b Q c (w₀ + c)
+  rw [h0, map_zero, add_sub_cancel_right] at hev
+  exact hw₀ hev.symm
+
+include b in
+/-- **The corr-locus count.** `#{t₀ : Q(t₀−c)=0}·|K| ≤ 2·|V|` (a quadric in `t₀`), via the SZ engine on `QPoly`
+(`QPoly_eval`/`QPoly_totalDegree_le`). -/
+theorem qZero_count_le [Fintype K] [DecidableEq K] [Fintype V] [Invertible (2 : K)]
+    (Q : QuadraticForm K V) (c w₀ : V) (hw₀ : Q w₀ ≠ 0) :
+    (univ.filter (fun t₀ : V => Q (t₀ - c) = 0)).card * Fintype.card K ≤ 2 * Fintype.card V := by
+  calc (univ.filter (fun t₀ : V => Q (t₀ - c) = 0)).card * Fintype.card K
+      ≤ (QPoly b Q c).totalDegree * Fintype.card V :=
+        bad_anchor_count_le_of_poly b (fun t₀ => Q (t₀ - c) = 0) (QPoly b Q c)
+          (QPoly_ne_zero b Q c w₀ hw₀) (fun t₀ h => by rw [QPoly_eval]; exact h)
+    _ ≤ 2 * Fintype.card V := by gcongr; exact QPoly_totalDegree_le b Q c
+
+include b in
+open scoped Classical in
+/-- **C-corr capstone — the FULL bad-anchor count, including the two corr-killing loci.** The bridge's good-anchor
+predicate is `hnz ∧ hgood ∧ hPu ∧ hPv ∧ Q(t₀−u)≠0 ∧ Q(t₀−v)≠0` (the last two kill `corr`, `corr_zero_of_anchor`). Its
+complement `β_full ⊆ {¬(hnz∧hgood∧hPu∧hPv)} ∪ {Q(t₀−u)=0} ∪ {Q(t₀−v)=0}`, so `beta_count_closed` (`≤ 2d·|V|+2·|K|`) +
+two `qZero_count_le` (`≤ 2·|V|` each) give **`β_full·|K| ≤ (2d+4)·|V| + 2·|K| = O(d/q)`**. Premises: non-vacuity `hgood`
+(item NV) + the form is nonzero somewhere (`Q w₀ ≠ 0`, automatic for a nondegenerate `Q`). -/
+theorem beta_full_count_closed [Fintype K] [DecidableEq K] [Fintype V] [DecidableEq V] [Invertible (2 : K)]
+    (Q : QuadraticForm K V) (y₀ z₀ : K) (u v t₀₀ w₀ : V)
+    (hgood : polarRad (y₀ • pairForm Q (t₀₀ - u) + z₀ • pairForm Q (t₀₀ - v)) = ⊥)
+    (hw₀ : Q w₀ ≠ 0) :
+    (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+            y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+          ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+          ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0
+          ∧ Q (t₀ - u) ≠ 0 ∧ Q (t₀ - v) ≠ 0))).card * Fintype.card K
+      ≤ (2 * d + 4) * Fintype.card V + 2 * Fintype.card K := by
+  have hb := beta_count_closed b Q y₀ z₀ u v t₀₀ hgood
+  have hu := qZero_count_le b Q u w₀ hw₀
+  have hv' := qZero_count_le b Q v w₀ hw₀
+  have hcard : (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+            y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+          ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+          ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0
+          ∧ Q (t₀ - u) ≠ 0 ∧ Q (t₀ - v) ≠ 0))).card
+      ≤ (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+            y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+          ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+          ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card
+        + (univ.filter (fun t₀ : V => Q (t₀ - u) = 0)).card
+        + (univ.filter (fun t₀ : V => Q (t₀ - v) = 0)).card := by
+    have hsub : (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0
+            ∧ Q (t₀ - u) ≠ 0 ∧ Q (t₀ - v) ≠ 0)))
+        ⊆ (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0)))
+          ∪ (univ.filter (fun t₀ : V => Q (t₀ - u) = 0))
+          ∪ (univ.filter (fun t₀ : V => Q (t₀ - v) = 0)) := by
+      intro t₀ ht
+      simp only [mem_filter, mem_univ, true_and, mem_union] at ht ⊢
+      by_cases hE : Q (t₀ - u) = 0
+      · exact Or.inl (Or.inr hE)
+      · by_cases hF : Q (t₀ - v) = 0
+        · exact Or.inr hF
+        · exact Or.inl (Or.inl (fun hbase =>
+            ht ⟨hbase.1, hbase.2.1, hbase.2.2.1, hbase.2.2.2, hE, hF⟩))
+    calc _ ≤ _ := Finset.card_le_card hsub
+      _ ≤ _ + (univ.filter (fun t₀ : V => Q (t₀ - v) = 0)).card := Finset.card_union_le _ _
+      _ ≤ _ := Nat.add_le_add_right (Finset.card_union_le _ _) _
+  calc (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0
+            ∧ Q (t₀ - u) ≠ 0 ∧ Q (t₀ - v) ≠ 0))).card * Fintype.card K
+      ≤ ((univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card
+          + (univ.filter (fun t₀ : V => Q (t₀ - u) = 0)).card
+          + (univ.filter (fun t₀ : V => Q (t₀ - v) = 0)).card) * Fintype.card K :=
+        Nat.mul_le_mul_right _ hcard
+    _ = (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card * Fintype.card K
+          + (univ.filter (fun t₀ : V => Q (t₀ - u) = 0)).card * Fintype.card K
+          + (univ.filter (fun t₀ : V => Q (t₀ - v) = 0)).card * Fintype.card K := by ring
+    _ ≤ (2 * d * Fintype.card V + 2 * Fintype.card K) + 2 * Fintype.card V + 2 * Fintype.card V :=
+        Nat.add_le_add (Nat.add_le_add hb hu) hv'
+    _ = (2 * d + 4) * Fintype.card V + 2 * Fintype.card K := by ring
+
 end ChainDescent
 
 #print axioms ChainDescent.coordPoly_eval
@@ -346,3 +453,7 @@ end ChainDescent
 #print axioms ChainDescent.pencilDetPoly_totalDegree_le
 #print axioms ChainDescent.badHgood_count_le
 #print axioms ChainDescent.beta_count_closed
+#print axioms ChainDescent.corr_zero_of_anchor
+#print axioms ChainDescent.QPoly_ne_zero
+#print axioms ChainDescent.qZero_count_le
+#print axioms ChainDescent.beta_full_count_closed
