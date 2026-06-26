@@ -193,8 +193,16 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `QProfileSeparatesAtBaseK`/`IsotropySeparatesAtBaseK`, `extProfileK`(+`_mem`), **D1** `qProfileSeparatesAtBaseK_of_zProfileSeparatesK`,
   `isotropySeparatesK_of_qProfileSeparatesK` (= `coords_determineK` directly), the end-to-end `isotropySeparatesK_of_zProfileSeparatesK`,
   and **D2** `jointIsoCountK_eq_restricted`. **Remaining concern-#4 pieces:** lift the bridge modules (`ScratchBridge{A,B,C,D,Z}`)
-  to `K` (re-target `jointIsoCountK`/`ZProfileSeparatesK`), + the q=p adapter (`IsotropySeparatesAtBaseK` ⟹ the in-build
-  Fin(p^d) `IsotropySeparatesAtBase` via `affineE` relabel, so the capstone fires); q=pᵉ adapter = Layer D seam (`efield`).
+  to `K` (re-target `jointIsoCountK`/`ZProfileSeparatesK`); q=pᵉ adapter = Layer D seam (`efield`). [q=p adapter DONE — see next.]
+- **`ScratchFieldGenAdapter.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, zero warnings/
+  sorryAx, NOT in build; imports `ScratchFieldGen` + `CascadeAffine`) — **CONCERN #4, the q=p adapter: the abstract-K chain
+  REACHES the in-build capstone.** `isoClassK_eq_isoClass` (the V-indexed `isoClassK` at `K=ZMod p` = the build's `isoClass`,
+  via both dictionaries) + `isoCount_transport` (the σ-profile count relabel `affineE`, via `Finset.card_nbij'`) +
+  **`isotropySeparatesAtBase_of_K`** (`IsotropySeparatesAtBaseK Q (T.image affineE.symm)` ⟹ the build's `Fin(p^d)`-indexed
+  `IsotropySeparatesAtBase Q T` — pure relabel) + capstone **`reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`**
+  (composes the adapter with `reachesRigidOrCameron_viaIsotropySeparates_wittFree`: the abstract-K predicate at a bounded base
+  seals the `VO^ε` residue mod `{G3}`, no Witt/`hSmallAutThin`). **Confirms `affineE` is exactly "a single endpoint conversion
+  at the scheme seam"** — analytic content over abstract `K`/`V`, only this thin relabel touches the `Fin(p^d)` scheme machinery.
 - **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
   **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
   atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
