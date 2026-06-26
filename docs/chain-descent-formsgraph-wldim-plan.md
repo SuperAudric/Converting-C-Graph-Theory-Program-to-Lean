@@ -16,14 +16,17 @@
 
 ## STATUS (read first)
 
-> **▶▶▶▶ CURRENT HANDOFF (2026-06-26) — read THIS first; the dated blocks below are chronological history.** The whole
-> reduction `seal ⟸ ZProfileSeparates ⟸ (separating base) ⟸ (matching: `c̄₀<1`)` is now built end-to-end **except the
-> increment-5 assembly**: increment 3 (`c₀≤¾`), the observable↔count **bridge** (B1a, all wraps), increment-4 **input `c`**
-> (`c/|V|≤15/16`), and increment-4 **bad-anchor `β`** (`O(d/q)`, repr-polynomial constructed) are ALL landed axiom-clean.
-> **THE LIVE FRONTIER IS INCREMENT 5** — wire `c̄₀ = c/|V|+β/|V| < 1` into `ScratchMatching.exists_separating_base` and
-> connect to the bridge (the coordinate seam `Fin(p^d)`/`affineE` ↔ abstract `V`). **Read the "PICK UP HERE" block below**
-> (the four numbered bullets are what-landed history); full detail = §13 ("INCREMENT 5 — WHAT'S EXPECTED" + the bridge/inc-3/4
-> blocks); strategic framing = `chain-descent-remaining-work.md` §3a.1.
+> **▶▶▶▶ CURRENT HANDOFF (2026-06-26, updated) — read THIS first; the dated blocks below are chronological history.** The
+> reduction `seal ⟸ ZProfileSeparates ⟸ (separating base) ⟸ (matching: `c̄₀<1`)` is built end-to-end **except the
+> increment-5 assembly + two decoupled items (corank tightening, field/seam typing).** Landed axiom-clean: increment 3
+> (`c₀≤¾`), the observable↔count **bridge** (B1a, all wraps), and the **ENTIRE increment-4 cleanup** — input `c`, bad-anchor
+> `β`, AND every bridge-input / non-vacuity gap (**B-ii, B-iii, C-corr, C-basis, NV**). **β is now UNCONDITIONAL** modulo
+> family properties (nondeg `Q`, `finrank ≥ 2`, `|K| ≥ 7`); the `hgood` non-vacuity is fully discharged
+> (`ScratchIncr4d.exists_hgood`, 14 axiom-clean lemmas). **THE LIVE FRONTIER IS INCREMENT 5** — wire the landed inputs into
+> `ScratchMatching.exists_separating_base`, **gated by the field/seam typing decision** (abstract-`K` analytic core ↔
+> `ZMod p`/`Fin(p^d)` bridge). **Read the "PICK UP HERE" block below** (the four numbered bullets are bridge/finding/spike
+> history); full detail = §13 ("INCREMENT 5 — WHAT'S EXPECTED" + the bridge/inc-3/4 blocks); strategic framing =
+> `chain-descent-remaining-work.md` §3a.1.
 >
 > 1. **★ THE BRIDGE (`χ(det G₂)` observable ⟷ `Z_u(S)` counts) is ARCHITECTURALLY CLOSED; B1-deg DISSOLVED.** Chain:
 >    (config-nondeg χ-separating base) →[`ScratchBridge.pairCount_ne_of_chiSep` (B1b) + `ScratchBridgeA.levelset_count_collapse`
@@ -54,28 +57,52 @@
 >    Mathlib substrate absent) but it is one shared track (Suzuki folds into char-2), reachable, gated on that substrate, **deferred**
 >    until odd-char affine-polar + seam close. The char-agnostic combinatorial layer (matching/bridge/seam/Layer B) reuses.
 >
-> **PICK UP HERE — FRONTIER = INCREMENT 5 (bridge + increment-4 inputs `c` and `β` all DONE):** the bridge is closed, the
-> increment-4 anchor-averaging backbone is landed (`ScratchIncr4.fail_count_split`/`matching_F_bound`: `F ≤ c·|V| + |V|·β`), and **input `c` is closed** — a good anchor has
-> `#{t:¬sep} ≤ 15/16·|V|` (`good_anchor_fail_le_const`, from `good_anchor_fail_le` + `zeroCountShift_card_le`, axiom-clean), so
-> `c/|V| ≤ 15/16 < 1`. The live frontier is the **bad-anchor `β`**: the SZ-in-`t₀` engine `mvPoly_zeros_count_le_dim` is LANDED
-> (`ScratchIncr4b` + `ScratchIncr4c`, all axiom-clean): the reduction `hgood ⟹ hnz∧hPu∧hPv` + `bad_anchor_card_le_hgood`
-> (`β ≤ #{¬hgood}+2`) + the SZ reduction `bad_anchor_count_le_of_poly` + `notHgood_eval_zero_of_repr`, AND **the representing
-> polynomial `P = pencilDetPoly` is now CONSTRUCTED** (`ScratchIncr4c`: full coordinatization of the pencil determinant,
-> `pencilDetPoly_eval` + `pencilDetPoly_ne_zero`) → capstone **`badHgood_count_le`: `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|
-> = O(d/q)`**. **β is now CLOSED to an EXPLICIT bound modulo ONLY non-vacuity (2026-06-26, B-iii + B-ii landed,
-> `ScratchIncr4c`, axiom-clean):** `pencilDetPoly_totalDegree_le` (`≤ 2d`, via `det_totalDegree_le_gen`) + `beta_count_closed`
-> (`β·|K| ≤ 2d·|V| + 2·|K| = O(d/q)`, cross-module `DecidablePred` bridged by `convert … <;> congr!`). The lone remaining β
-> obligation is **(i) non-vacuity `hgood`** (∃ good anchor for `u≠v` = distinct radicals — item **NV**, carried as the `t₀₀`
-> hypothesis); items (ii) Nat-composition + (iii) `totalDegree ≤ 2d` are DONE. Then **increment 5** (laid out in §13 "INCREMENT 5
-> — WHAT'S EXPECTED", to be REPLACED by a "how it went" writeup once built): `c̄₀<1` arithmetic →
-> ℕ-package into `exists_separating_base` (`m=O(d log q)`) → `fail ⟺ ¬(bridge criterion)` (the coordinate seam `Fin(p^d)`/`affineE`
-> ↔ abstract `V`) → `zProfileSeparates_of_zSep` → seal.
-> Two small carried obligations to discharge along the way:
-> `hK` (Gauss-factor `≠0`, above) and the **corank tightening** (`q≳d²`→`q≳const`, §13 increment-3 block — **option (i): re-use the
-> sharp per-member `ScratchPairSep.norm_sq_pairSum_le` per corank bucket** rather than the uniform `radical_card_mul_card_le`; agreed
-> to do this *after* B1a). Then field-gen (`ScratchCrux` `ZMod p`→abstract `K`/`GaloisField`), families (d)/(e), the seam build, and
-> the PORT into `build.sh`. **Strategic note:** the goal is the *polynomial* seal; `reachesRigidOrCameron_viaSpielman` (idx 1117,
-> axiom-clean) is the citable **sub-exp fallback** if a family walls.
+> **PICK UP HERE — FRONTIER = INCREMENT 5; the increment-4 cleanup is fully CLOSED (2026-06-26).**
+>
+> **Increment-4 cleanup — ALL DONE (axiom-clean, `ScratchIncr4`/`b`/`c`/`d`; NOT in build):**
+> - **input `c`** — `good_anchor_fail_le_const` (`#{t:¬sep} ≤ 15/16·|V|`), via `good_anchor_fail_le` + `zeroCountShift_card_le`.
+> - **bad-anchor `β`** — B-iii `pencilDetPoly_totalDegree_le` (`≤ 2d`, via `det_totalDegree_le_gen`) + B-ii `beta_count_closed`
+>   (`β·|K| ≤ 2d·|V|+2·|K|`; cross-module `DecidablePred` bridged by `convert … <;> congr!`) + **C-corr** `beta_full_count_closed`
+>   (full good-anchor predicate incl. `Q(t₀−u),Q(t₀−v)≠0`, which kills the bridge's `corr`: `β_full·|K| ≤ (2d+4)·|V|+2·|K| = O(d/q)`).
+> - **C-basis** — `exists_orthoAnisotropic_basis` + `associated_separatingLeft_of_polarRad` (the bridge's `hv`/`hw`, from `polarRad Q=⊥`).
+> - **NV** (`hgood` non-vacuity) — `ScratchIncr4d.exists_hgood` (14 lemmas): for `u≠v`, nondeg `Q`, `finrank≥2`, `|K|≥7`, a good
+>   anchor `t₀₀` + `(y₀,z₀)` with `polarRad(y₀•pairForm Q(t₀₀−u)+z₀•pairForm Q(t₀₀−v))=⊥` exists. (NV-3 `polarRad_pencil_eq_bot`
+>   ← NV-4 `exists_good_plane_anchor` ← NV-4a `exists_pairForm_self_sub_ne_zero` + NV-4b counting.)
+>
+> **INCREMENT 5 — THE HOOK-IN (what to wire, with the exact landed lemmas):**
+> 1. **`c̄₀ < 1`:** `fail_count_split`/`matching_F_bound` give `F ≤ c·|V| + |V|·β_full`; plug `c = 15/16·|V|`
+>    (`good_anchor_fail_le_const`) + `β_full ≤ (2d+4)·|V|/|K| + 2` (`beta_full_count_closed`) ⟹ `c̄₀ = F/|V|² ≤ 15/16 + O(d/q) < 1`
+>    for `q ≳ d` (consistent with `|K|≥256`). Pure arithmetic.
+> 2. **ℕ-package into `ScratchMatching.exists_separating_base`** (`m = O(d log q)`; needs a `c̄₀ᵐ`-smallness ℕ helper, the only
+>    genuinely-new combinatorics). Per-pair good-anchor existence for the matching = `exists_hgood` (NV).
+> 3. **`fail (u,v) (t,t₀) := ¬(bridge criterion)`** so `¬fail ⟹ jointIsoCount Q u {t,t₀} ≠ jointIsoCount Q v {t,t₀}` IS the
+>    bridge capstone `ScratchBridgeD.jointIsoCount_ne_of_chiSep_pair`. Its hypotheses are now all supplied: `hcorru/hcorrv` by
+>    C-corr (`corr_zero_of_anchor`, free on good anchors with `Q(t₀−u)≠0`), `hv/hw` by C-basis, config-nondeg = `I_u,I_v≠0`.
+> 4. **Assemble `ZProfileSeparates`:** `zProfileSeparates_of_zSep` → Layer B (`ScratchCrux` + idx 1248
+>    `reachesRigidOrCameron_viaIsotropySeparates_wittFree`) → seal.
+> **★★ MAIN CARE = the field/seam typing decision (concern #4) — DECIDE BEFORE WIRING.** The analytic core
+> (`ScratchIncr4`/`c`/`d`, `c0`, β, NV) is abstract `[Field K]`/`V`; the bridge + `ScratchCrux`/`IsotropySeparatesAtBase`/the
+> seal capstone are `ZMod p`/`Fin(p^d)`. Two paths: (a) **lift the bridge+Crux+IsotropySeparatesAtBase to abstract `[Field K]
+> [Fintype K]` FIRST** — dissolves the coordinate seam (everything in abstract `V`; `affineE` becomes a single endpoint
+> conversion) AND covers `q=pᵉ` (concern #4); or (b) wire against `ZMod p`, convert per-pair via `affineE`. **Recommended:
+> (a) lift-first** (the analytic content is already field-generic).
+>
+> **TWO DECOUPLED OPEN ITEMS (run any time; before/parallel to inc-5):**
+> - **#1 corank tightening** (`q≳d²` → `q≳const`): the threshold `64·d²≤q` (`ScratchBucket.c0_le` hyp `hq2`) enters in EXACTLY
+>   one place — the deg-bucket term `dR·n/√q` in `normT_bucket_bound` (`ScratchTBound`), which uses the uniform
+>   `radical_card_mul_card_le` (`|radical|≤q^{d−1}`). Fix = **option (i):** replace it with the sharp per-member
+>   `ScratchPairSep.norm_sq_pairSum_le` (`‖M‖²≤qᵈ·|radical F|`) **stratified by corank**, using `∑corank ≤ deg(disc) = d`
+>   (have `pencilDisc_totalDegree_le`). ⚠ watch the single-high-corank member (`corank ≤ d−1`). Self-contained in
+>   `ScratchTBound`/`ScratchBucket`, touches no wiring. Currently the asymptotic route covers only `q≥1024` for `d=4` (a tail
+>   that GROWS with `d`); the fix makes it a fixed finite tail (handled by `decide`, like `VO⁻₄(3)`).
+> - **Field generalization (concern #4)** — same as the inc-5 "main care": lift `ScratchCrux`/`ZProfileSeparates`/
+>   `IsotropySeparatesAtBase`/the seal capstone from `ZMod p` to abstract `[Field K][Fintype K]` (a typeclass refactor, NOT a
+>   `GaloisField` construction). On the critical path for `q=pᵉ` families (q=4,8,9,…), entangled with inc-5's seam.
+>
+> Then: families (d)/(e) + char-2 (Layer C), the seam build (Layer D, spiked `ScratchSeam`), and the **PORT** of all scratch
+> modules into `build.sh`/`lakefile`/`PublicTheoremIndex.md`. Still carried by the bridge capstone: `hK` (Gauss-factor `≠0`,
+> dischargeable via `‖gaussSum‖²=q` + `∑ψ(Q)=χ(disc)·gaussSumᵈ`). **Strategic note:** the goal is the *polynomial* seal;
+> `reachesRigidOrCameron_viaSpielman` (idx 1117, axiom-clean) is the citable **sub-exp fallback** if a family walls.
 
 > **▶▶▶ `VO⁻₄(3)` SEALED (2026-06-21, axiom-clean `[propext, Classical.choice, Quot.sound]`).**
 > `ScratchBM3Glue.vo4minus_seal` proves the Witt-free capstone's conclusion for the bundled minus-form `Qbun = x₀x₁+x₂²+x₃²`
@@ -1630,19 +1657,23 @@ genuinely excluded**: if `Q(a)=Q(a−w)=0` (hyperbolic plane) then `c=0` for ALL
 the family properties (nondeg `Q`, `finrank ≥ 2`, `|K| ≥ 7`). Next: **#1 corank tightening** (decoupled) → **increment 5**
 (matching assembly + the field/seam typing decision).
 
-**▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** Once `c` (`≤ 15/16·|V|`, DONE) and `β`
-(`≤ C·|V|/q`) are in hand, increment 5 produces the separating base and discharges `ZProfileSeparates`:
-1. **`c̄₀ < 1`:** `F = c·|V| + |V|·β ≤ (15/16 + C/q)·|V|²`, so `c̄₀ = F/|V|² ≤ 15/16 + C/q < 1` for `q > 16C` (consistent with
-   `q ≥ 256`). Pure arithmetic on the landed `fail_count_split`.
-2. **ℕ-packaging + `exists_separating_base`:** take `F := ⌊c̄₀·|V|²⌋` (or the integer bound), `ι = {(u,v):u≠v}`
-   (`|ι| ≤ |V|²`), `W = V×V` (`|W| = |V|²`). The hypothesis `|ι|·Fᵐ < |W|ᵐ ⟺ |V|²·c̄₀ᵐ < 1` holds at `m = ⌈2·log|V| /
-   log(1/c̄₀)⌉ = O(d log q)`. Yields a matched base `P : Fin m → V×V` with `∀ u≠v, ∃ j, ¬fail (u,v) (P j)`.
-   *(Sub-task: a `c̄₀ᵐ` smallness → ℕ inequality helper; the only genuinely new combinatorics, ~`Nat.one_lt_pow`/log bound.)*
-3. **`fail` ⟺ ¬(bridge separation):** define the matching's `fail (u,v) (t,t₀)` as the negation of
-   `jointIsoCount_ne_of_chiSep_pair`'s criterion (`χ(I_u)≠χ(I_v) ∧ I_u,I_v ≠ 0 ∧ corr=0`, with `corr=0` free on good
-   anchors). Then `¬fail ⟹ jointIsoCount Q u {t,t₀} ≠ jointIsoCount Q v {t,t₀}` IS the bridge capstone. **Coordinate seam:**
-   the bridge lives in `Fin (p^d)`/`affineE`; `c`/`c0`/`β` live in abstract `V`. Increment 5 unifies them (the `affineE`
-   relabel is a bijection; or land everything in abstract `V` first, the field-gen refactor). This is the main wiring care.
+**▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** All inputs are now landed (`c`, `β_full`,
+non-vacuity `hgood`, the bridge, C-corr/C-basis); increment 5 produces the separating base and discharges `ZProfileSeparates`:
+1. **`c̄₀ < 1`:** `F = c·|V| + |V|·β_full`; plug `c = 15/16·|V|` (`good_anchor_fail_le_const`) + `β_full·|K| ≤ (2d+4)·|V|+2·|K|`
+   (`beta_full_count_closed`, so `β_full ≤ (2d+4)|V|/|K| + 2`) ⟹ `c̄₀ = F/|V|² ≤ 15/16 + O(d/q) < 1` for `q ≳ d` (consistent
+   with `q ≥ 256`). Pure arithmetic on the landed `fail_count_split`/`matching_F_bound`.
+2. **ℕ-packaging + `exists_separating_base`:** take `F := ⌊c̄₀·|V|²⌋`, `ι = {(u,v):u≠v}` (`|ι| ≤ |V|²`), `W = V×V`. The
+   hypothesis `|ι|·Fᵐ < |W|ᵐ ⟺ |V|²·c̄₀ᵐ < 1` holds at `m = O(d log q)`. Yields a matched base `P : Fin m → V×V` with
+   `∀ u≠v, ∃ j, ¬fail (u,v) (P j)`. Per-pair good-anchor existence (so the bad set is a strict subset) = **`exists_hgood`** (NV).
+   *(Sub-task: a `c̄₀ᵐ` smallness → ℕ inequality helper; the only genuinely-new combinatorics, ~`Nat.one_lt_pow`/log bound.)*
+3. **`fail` ⟺ ¬(bridge separation):** define `fail (u,v) (t,t₀)` as the negation of the bridge capstone
+   **`ScratchBridgeD.jointIsoCount_ne_of_chiSep_pair`**'s criterion. Its hypotheses are ALL now supplied: `χ(I_u)≠χ(I_v)` +
+   config-nondeg (`I_u,I_v≠0`) from the criterion; `hcorru/hcorrv` (corr=0) from **C-corr** (`corr_zero_of_anchor`, free on good
+   anchors where `Q(t₀−u),Q(t₀−v)≠0` — already in `beta_full_count_closed`'s good-anchor predicate); `hv/hw` from **C-basis**
+   (`exists_orthoAnisotropic_basis`). Then `¬fail ⟹ jointIsoCount Q u {t,t₀} ≠ jointIsoCount Q v {t,t₀}` IS the bridge capstone.
+   **★ Coordinate/field seam (the main wiring care, decide first — see top-of-doc PICK UP HERE):** the bridge + `ZProfileSeparates`
+   live in `Fin(p^d)`/`ZMod p`; `c`/`c0`/`β`/NV live in abstract `[Field K]`/`V`. Recommended: lift the bridge+Crux to abstract
+   `K` first (dissolves the seam + handles `q=pᵉ`), rather than the per-pair `affineE` relabel.
 4. **Assemble `ZProfileSeparates`:** base `T := image of P` (the `≤ 2m = O(d log q)` points `{t_j, t₀_j}`); for each
    `u≠v`, the witnessing `j` gives `S = {t_j, t₀_j} ⊆ T` with `jointIsoCount Q u S ≠ jointIsoCount Q v S`, so
    `zProfileSeparates_of_zSep` (LANDED) ⟹ `ZProfileSeparates Q T`. Then Layer B (`ScratchCrux` + idx 1248) ⟹ the seal.

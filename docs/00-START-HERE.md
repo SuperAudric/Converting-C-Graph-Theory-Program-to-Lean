@@ -128,12 +128,15 @@ close it — is set out in
 > `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`), built across 8 new scratch modules on top of `ScratchPairSep` (24 lemmas). The reduction
 > backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal` is LANDED (`ScratchCrux` + `…viaIsotropySeparates_wittFree`).
 > **SINCE THEN (2026-06-26):** the **bridge** (`χ(det G₂)`↔`Z_u(S)`) is CLOSED END-TO-END (`ScratchBridge`/`A`/`B`/`C`/`D`/`Z`,
-> all B1a wraps + the ℂ per-pair capstone `jointIsoCount_ne_of_chiSep_pair`); **increment 4 is DONE (modulo non-vacuity)** —
-> input `c` (`good_anchor_fail_le_const`: good anchor ⟹ `#{¬sep}≤15/16·|V|`, `ScratchIncr4`) and bad-anchor `β`
-> (`badHgood_count_le`: `#{¬hgood}·|K|≤deg(P)·|V|=O(d/q)`, repr polynomial `pencilDetPoly` constructed, `ScratchIncr4b`/`c`),
-> so `c̄₀ = c/|V|+β/|V| < 1`; the **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked
-> (one bespoke char-2 track, deferred). **FRONTIER = INCREMENT 5** (the matching assembly + bridge wiring; the coordinate seam
-> `Fin(p^d)`/`affineE` ↔ abstract `V`). **Read the plan's top "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block first, then
+> all B1a wraps + the ℂ per-pair capstone `jointIsoCount_ne_of_chiSep_pair`); **the ENTIRE increment-4 cleanup is now CLOSED**
+> (axiom-clean, `ScratchIncr4`/`b`/`c`/`d`) — input `c` (`good_anchor_fail_le_const`: `#{¬sep}≤15/16·|V|`), bad-anchor `β`
+> (B-iii `pencilDetPoly_totalDegree_le≤2d` + B-ii `beta_count_closed` + C-corr `beta_full_count_closed`: `β_full·|K|≤(2d+4)|V|+2|K|`),
+> C-basis (bridge's `hv/hw`), and **NV** (`ScratchIncr4d.exists_hgood`, 14 lemmas — `hgood` non-vacuity for nondeg `Q`/`finrank≥2`/
+> `|K|≥7`). So `c̄₀<1` and **β is unconditional** modulo family props; no carried existence hypotheses remain in inc-4. The
+> **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked (deferred). **FRONTIER = INCREMENT
+> 5** (the matching assembly + bridge wiring), **gated by the field/seam typing decision** (`Fin(p^d)`/`ZMod p` bridge ↔
+> abstract-`K` core — lift bridge+Crux to abstract `K` first, recommended); plus the **decoupled #1 corank tightening**
+> (`q≳d²`→`q≳const`). **Read the plan's top "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block first, then
 > `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; `reachesRigidOrCameron_viaSpielman` is the citable
 > sub-exp fallback.
 >

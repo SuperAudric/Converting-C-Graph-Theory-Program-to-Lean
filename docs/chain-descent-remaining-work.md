@@ -119,18 +119,22 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > citations).** Increment 3 (per-anchor `c₀ ≤ ¾`) is CLOSED (capstone `ScratchC0Final.c0_le_threequarters`, axiom-clean).
 > The remaining work, by layer (★=open, ✓=landed):
 > - **Layer A — finish discharging `ZProfileSeparates` for affine-polar (the live frontier = increment 5).**
->   - ✓ **Increment 4 — DONE (modulo non-vacuity), axiom-clean** (`ScratchIncr4`/`ScratchIncr4b`/`ScratchIncr4c`).
->     Anchor-averaging backbone `fail_count_split`/`matching_F_bound` (`F ≤ c·|V| + |V|·β`). **Input `c`:**
->     `good_anchor_fail_le_const` (good anchor ⟹ `#{¬sep} ≤ 15/16·|V|`, from `c0_le_threequarters` + `zeroCountShift_card_le`).
->     **Input `β`:** `hgood ⟹ hnz∧hPu∧hPv` collapses the bad set to `{¬hgood}`; the repr polynomial `pencilDetPoly` is
->     CONSTRUCTED (`pencilDetPoly_eval` + `pencilDetPoly_ne_zero`) ⟹ `badHgood_count_le`: `#{¬hgood}·|K| ≤ deg(P)·|V| = O(d/q)`.
->     So `c̄₀ = c/|V|+β/|V| ≤ 15/16 + O(d/q) < 1`. **Open residue:** (i) non-vacuity `hgood` (∃ good anchor for `u≠v`, a
->     hypothesis); (ii) trivial `β ≤ #{¬hgood}+2` composition (deferred to inc-5); (iii) optional `totalDegree(P)≤2d` polish.
+>   - ✓ **Increment 4 — FULLY DONE (cleanup CLOSED), axiom-clean** (`ScratchIncr4`/`b`/`c`/`d`).
+>     Anchor-averaging backbone `fail_count_split`/`matching_F_bound` (`F ≤ c·|V| + |V|·β_full`). **Input `c`:**
+>     `good_anchor_fail_le_const` (good anchor ⟹ `#{¬sep} ≤ 15/16·|V|`). **Bad-anchor `β`:** `pencilDetPoly` CONSTRUCTED +
+>     `badHgood_count_le`; **B-iii** `pencilDetPoly_totalDegree_le ≤2d` + **B-ii** `beta_count_closed` (`β·|K| ≤ 2d·|V|+2·|K|`) +
+>     **C-corr** `beta_full_count_closed` (full good-anchor predicate incl. `Q(t₀−u),Q(t₀−v)≠0`, kills bridge corr:
+>     `β_full·|K| ≤ (2d+4)·|V|+2·|K| = O(d/q)`). **C-basis** `exists_orthoAnisotropic_basis`+`associated_separatingLeft_of_polarRad`
+>     (bridge's `hv/hw`). **NV** `ScratchIncr4d.exists_hgood` (14 lemmas: `hgood` non-vacuity, for `u≠v`/nondeg `Q`/`finrank≥2`/
+>     `|K|≥7`). So `c̄₀ = c/|V|+β_full/|V| ≤ 15/16 + O(d/q) < 1`, **β unconditional** modulo family props. No carried existence
+>     hypotheses remain in inc-4.
 >   - ★ **Increment 5 (THE LIVE FRONTIER) — the matching assembly + bridge wiring:** feed `c̄₀<1` into
 >     **`ScratchMatching.exists_separating_base` (LANDED, axiom-clean)** (`m=O(d log q)`, needs a `c̄₀ᵐ`-smallness ℕ helper)
 >     ⟹ separating base; define matching `fail := ¬(bridge criterion)` so `¬fail ⟹` separation IS
->     `jointIsoCount_ne_of_chiSep_pair`; MAIN CARE = the **coordinate seam** `Fin(p^d)`/`affineE` ↔ abstract `V`; then
->     `zProfileSeparates_of_zSep` → seal. Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED".
+>     `jointIsoCount_ne_of_chiSep_pair` (its `corr`/`hv`/`hw` discharged by C-corr/C-basis; per-pair anchor existence = NV
+>     `exists_hgood`); **MAIN CARE = the field/seam typing decision** (`Fin(p^d)`/`ZMod p` bridge ↔ abstract-`K` analytic core —
+>     lift bridge+Crux to abstract `K` first, recommended); then `zProfileSeparates_of_zSep` → seal. Plus the **decoupled #1
+>     corank tightening** (`q≳d²`→`q≳const`). Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED" + top PICK UP HERE.
 >   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ScratchBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
 >     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
 >     χ-separating base) →[`pairCount_ne_of_chiSep_field` (**B1b**, ℂ) + the per-pair closed form `jointIsoCount_pair_closed_corr0`
