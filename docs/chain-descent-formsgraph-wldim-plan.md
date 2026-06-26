@@ -1130,11 +1130,14 @@ the general `corank ≤ mult` suffices).
 - `pencilDet_natDegree_le` (`≤ d`, via Mathlib `natDegree_det_X_add_C_le`) + **`sum_finrankKer_le`** (★ ∑ corank ≤ d over
   any ratio set `T`: `∑ finrankKer ≤ ∑ rootMult ≤ card roots ≤ natDegree ≤ d`) — the budget that replaces the uniform
   bucket's `d` factor with a constant.
-**REMAINING for the tightening (laborious, non-research):** (A) the `|radical| ↔ ker` bridge `finrank(polarRad G) =
+**(B) CONCENTRATION — DONE (axiom-clean, in `ScratchPencilCorank.lean`):** `pow_sum_mul_bound` (`s≥2 ⟹ ∑ s^{c_t} ≤
+s^{∑c_t}`, by `Finset.induction` + `a+b≤ab` via `nlinarith`) + **`concentration_bound`** (`s≥2, 1≤c_t≤D−1, ∑c_t≤D ⟹
+∑ s^{c_t} ≤ 2·s^{D−1}`, by the split `∑≤D−1` / `=D`). The `pow_le_pow_right₀` + `Finset.add_sum_erase` are the keys.
+**REMAINING (laborious, non-research):** (A) the `|radical| ↔ ker` bridge `finrank(polarRad G) =
 finrank ker((toMatrix₂ b b (polarBilin G)).mulVecLin)` (bilinear-form kernel ≃ matrix kernel) + the projective-ratio
-regrouping (`(y,z)∈s` deg ↦ ratio `t=z/y`, `q−1` each, scale-invariance of the radical); (B) the concentration
-`∑_t (√q)^{c_t} ≤ 2·(√q)^{d−1}` under `∑c_t≤d, 1≤c_t≤d−1` (ℝ); (C) the ℝ integration replacing `normT_bucket_bound`'s
-deg term `(d·|K|)·(|V|/√|K|)` with `2·|K|·(|V|/√|K|)` ⟹ new `c0_le` dropping `hq2`, binding threshold = `hq3 (q≥256)`.
+regrouping (`(y,z)∈s` deg ↦ ratio `t=z/y`, `q−1` each via `Finset.sum_fiberwise`, scale-invariance `ker(y•M)=ker M`);
+(C) the ℝ integration replacing `normT_bucket_bound`'s deg term `(d·|K|)·(|V|/√|K|)` with `2·|K|·(|V|/√|K|)` (feeding
+`concentration_bound` with `s=√q`, `D=d`) ⟹ new `c0_le` dropping `hq2`, binding threshold = `hq3 (q≥256)`.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general

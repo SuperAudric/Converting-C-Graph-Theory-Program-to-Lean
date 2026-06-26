@@ -31,6 +31,8 @@ import Mathlib.Algebra.Polynomial.Div
 import Mathlib.Algebra.Polynomial.Roots
 import Mathlib.LinearAlgebra.Matrix.Polynomial
 import Mathlib.LinearAlgebra.Dimension.Finrank
+import Mathlib.Data.Real.Basic
+import Mathlib.Algebra.Order.BigOperators.Group.Finset
 
 namespace ChainDescent
 
@@ -176,6 +178,67 @@ theorem sum_finrankKer_le (A B : Matrix (Fin d) (Fin d) K) (T : Finset K)
     _ ≤ p.natDegree := Polynomial.card_roots' _
     _ ≤ d := pencilDet_natDegree_le A B
 
+/-- **Multiplicative bound** (`s ≥ 2`): a sum of `s`-powers with exponents `≥ 1` is at most `s` to the sum of the
+exponents. (Induction; the step is `a + b ≤ a·b` for `a, b ≥ 2`.) -/
+theorem pow_sum_mul_bound {ι : Type*} {s : ℝ} (hs : 2 ≤ s) {c : ι → ℕ} {T : Finset ι}
+    (hc : ∀ t ∈ T, 1 ≤ c t) :
+    ∑ t ∈ T, s ^ (c t) ≤ s ^ (∑ t ∈ T, c t) := by
+  classical
+  revert hc
+  induction T using Finset.induction with
+  | empty => intro _; simp
+  | insert a T ha IH =>
+    intro hc
+    rw [Finset.sum_insert ha, Finset.sum_insert ha, pow_add]
+    have hs1 : (1 : ℝ) ≤ s := by linarith
+    have hca : 1 ≤ c a := hc a (Finset.mem_insert_self a T)
+    have hcT : ∀ t ∈ T, 1 ≤ c t := fun t ht => hc t (Finset.mem_insert_of_mem ht)
+    have hsumT := IH hcT
+    rcases T.eq_empty_or_nonempty with hT | hT
+    · subst hT; simp
+    · have hsa : 2 ≤ s ^ (c a) :=
+        le_trans hs (by calc s = s ^ 1 := (pow_one s).symm
+          _ ≤ s ^ (c a) := pow_le_pow_right₀ hs1 hca)
+      have hone_le : 1 ≤ ∑ t ∈ T, c t := by
+        obtain ⟨b, hb⟩ := hT
+        exact le_trans (hcT b hb) (Finset.single_le_sum (fun i _ => Nat.zero_le _) hb)
+      have hsT : 2 ≤ s ^ (∑ t ∈ T, c t) :=
+        le_trans hs (by calc s = s ^ 1 := (pow_one s).symm
+          _ ≤ s ^ (∑ t ∈ T, c t) := pow_le_pow_right₀ hs1 hone_le)
+      have key : s ^ (c a) + s ^ (∑ t ∈ T, c t) ≤ s ^ (c a) * s ^ (∑ t ∈ T, c t) := by
+        nlinarith [hsa, hsT]
+      calc s ^ (c a) + ∑ t ∈ T, s ^ (c t)
+          ≤ s ^ (c a) + s ^ (∑ t ∈ T, c t) := by linarith
+        _ ≤ s ^ (c a) * s ^ (∑ t ∈ T, c t) := key
+
+/-- **CONCENTRATION** (the bucket arithmetic). If `s ≥ 2`, the exponents satisfy `1 ≤ c t ≤ D − 1` and
+`∑ c t ≤ D`, then `∑ s^(c t) ≤ 2·s^(D−1)`. (Split on `∑ c t ≤ D−1` — direct mult bound — vs `= D` — peel off
+one term `≤ s^(D−1)`, the rest sum `≤ D−1`, mult bound again.) This is the fact that turns the corank-`(d−1)`
+worst case into a constant-factor bound rather than a `d`-fold one. -/
+theorem concentration_bound {ι : Type*} {s : ℝ} (hs : 2 ≤ s) {c : ι → ℕ} {T : Finset ι} {D : ℕ}
+    (hsum : ∑ t ∈ T, c t ≤ D) (hlo : ∀ t ∈ T, 1 ≤ c t) (hhi : ∀ t ∈ T, c t ≤ D - 1) :
+    ∑ t ∈ T, s ^ (c t) ≤ 2 * s ^ (D - 1) := by
+  classical
+  have hs1 : (1 : ℝ) ≤ s := by linarith
+  have hspos : (0 : ℝ) ≤ s ^ (D - 1) := by positivity
+  by_cases hcase : ∑ t ∈ T, c t ≤ D - 1
+  · calc ∑ t ∈ T, s ^ (c t) ≤ s ^ (∑ t ∈ T, c t) := pow_sum_mul_bound hs hlo
+      _ ≤ s ^ (D - 1) := pow_le_pow_right₀ hs1 hcase
+      _ ≤ 2 * s ^ (D - 1) := by linarith
+  · have hTne : T.Nonempty := by
+      rw [Finset.nonempty_iff_ne_empty]
+      intro hempty; rw [hempty, Finset.sum_empty] at hcase; omega
+    obtain ⟨a, haT⟩ := hTne
+    rw [← Finset.add_sum_erase T (fun t => s ^ (c t)) haT]
+    have h1 : s ^ (c a) ≤ s ^ (D - 1) := pow_le_pow_right₀ hs1 (hhi a haT)
+    have heq : c a + ∑ t ∈ T.erase a, c t = ∑ t ∈ T, c t := Finset.add_sum_erase T c haT
+    have hca1 : 1 ≤ c a := hlo a haT
+    have hrest_sum : ∑ t ∈ T.erase a, c t ≤ D - 1 := by omega
+    have h2 : ∑ t ∈ T.erase a, s ^ (c t) ≤ s ^ (D - 1) :=
+      le_trans (pow_sum_mul_bound hs (fun t ht => hlo t (Finset.mem_of_mem_erase ht)))
+        (pow_le_pow_right₀ hs1 hrest_sum)
+    linarith
+
 end ChainDescent
 
 #print axioms ChainDescent.pencilPoly_mul_map
@@ -184,3 +247,5 @@ end ChainDescent
 #print axioms ChainDescent.finrankKer_le_rootMult
 #print axioms ChainDescent.pencilDet_natDegree_le
 #print axioms ChainDescent.sum_finrankKer_le
+#print axioms ChainDescent.pow_sum_mul_bound
+#print axioms ChainDescent.concentration_bound
