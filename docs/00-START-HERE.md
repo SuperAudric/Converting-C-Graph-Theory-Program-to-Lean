@@ -134,11 +134,12 @@ close it — is set out in
 > C-basis (bridge's `hv/hw`), and **NV** (`ScratchIncr4d.exists_hgood`, 14 lemmas — `hgood` non-vacuity for nondeg `Q`/`finrank≥2`/
 > `|K|≥7`). So `c̄₀<1` and **β is unconditional** modulo family props; no carried existence hypotheses remain in inc-4. The
 > **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked (deferred). **FRONTIER = INCREMENT
-> 5** (the matching assembly + bridge wiring), **gated by the field/seam typing decision** (`Fin(p^d)`/`ZMod p` bridge ↔
-> abstract-`K` core — lift bridge+Crux to abstract `K` first, recommended); plus the **decoupled #1 corank tightening**
-> (`q≳d²`→`q≳const`). **Read the plan's top "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block first, then
-> `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; `reachesRigidOrCameron_viaSpielman` is the citable
-> sub-exp fallback.
+> 5** (the matching assembly + bridge wiring); the field/seam typing decision is **RESOLVED** (concern #4 lifted bridge+Crux
+> to abstract `K`), and the **decoupled #1 corank tightening is ✅ DONE** (`q≳d²`→`q≳const`; capstone
+> `ScratchTBoundCorank.c0_le_threequarters_corank` = drop-in replacement for `c0_le_threequarters`, `hq2` removed — increment 5
+> calls the `_corank` capstone). Working order now: **small-q tail → hK cleanup → increment 5.** **Read the plan's top "CURRENT
+> HANDOFF (2026-06-26)" PICK UP HERE block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal;
+> `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there

@@ -136,8 +136,9 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     lift-first is DONE** (concern #4: `ScratchFieldGen`/`ScratchFieldGenAdapter`/`ScratchBridgeK`/`ScratchLemmaAK`/`ScratchBridgeAllK`,
 >     all axiom-clean), so increment 5 wires over **abstract `K`** with the K-named lemmas (`jointIsoCountK_ne_of_chiSep_pair` →
 >     `zProfileSeparatesK_of_zSep` → `isotropySeparatesK_of_zProfileSeparatesK` → `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`
->     for q=p). Plus the **decoupled #1 corank tightening** (`q≳d²`→`q≳const`, now SCOPED — plan §13 "CORANK TIGHTENING (SCOPE)").
->     Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED" + top SESSION-2 handoff.
+>     for q=p). Plus the **decoupled #1 corank tightening ✅ DONE 2026-06-26** (`q≳d²`→`q≳const`; capstone
+>     `ScratchTBoundCorank.c0_le_threequarters_corank` = drop-in replacement for `c0_le_threequarters` with `hq2` removed —
+>     increment 5 should call the `_corank` capstone). Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED" + top SESSION-2 handoff.
 >   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ScratchBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
 >     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
 >     χ-separating base) →[`pairCount_ne_of_chiSep_field` (**B1b**, ℂ) + the per-pair closed form `jointIsoCount_pair_closed_corr0`
@@ -152,8 +153,8 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     abstract `[Field K]`; the rest (`ScratchCrux`/`ZProfileSeparates`/`IsotropySeparatesAtBase` + the bridge) is now lifted to
 >     **abstract `[Field K][Fintype K]`** V-indexed (`ScratchFieldGen`+`ScratchLemmaAK`+`ScratchBridgeAllK`+`ScratchBridgeK`), with
 >     the q=p adapter `ScratchFieldGenAdapter` connecting to the in-build seal capstone. GaussCount was already abstract ⟹ the lift
->     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate); + small-`q`/threshold handling
->     (the "small-q tail" item, coupled with corank tightening).
+>     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate); + the **small-q tail** (explicit
+>     handling of sub-threshold `q < 256`; the corank tightening already lowered the threshold from `q≳d²` to the constant `q≥256`).
 > - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ScratchCrux) +
 >   `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248), both axiom-clean (no Witt, no `hSmallAutThin`). ⟹ once
 >   Layer A lands, **affine-polar `VO^ε` is sealed modulo `{G3}` + the seam.**

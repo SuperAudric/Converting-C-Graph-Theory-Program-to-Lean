@@ -17,7 +17,7 @@
 ## STATUS (read first)
 
 > **▶▶▶▶▶ CURRENT HANDOFF (2026-06-26, SESSION 2 — read THIS first; supersedes the SESSION-1 handoff block just below).**
-> **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (SCOPED, building) → small-q tail →
+> **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (NEXT) →
 > hK cleanup → increment 5.** State:
 > - **✅ CONCERN #4 (field generalization to abstract `[Field K][Fintype K]`) — DONE this session (the analytic + bridge lift).**
 >   The SESSION-1 "MAIN CARE = field/seam typing decision, lift-first" is **RESOLVED by executing the lift.** Five NEW modules
@@ -34,11 +34,18 @@
 >   coordinate seam dissolves). KEY scoping finding: the whole analytic chain is field-generic in substance; only `affineE` +
 >   the scheme machinery (`affineScheme`/`similitudeGroup`) is the seam, staying at the capstone boundary. The **only** remaining
 >   concern-#4 piece is the **q=pᵉ SCHEME seam** (`efield` transport, Layer D — separate; the q=p adapter is the template).
-> - **◐ #1 CORANK TIGHTENING — SCOPED this session (route fixed, no shortcut), build in progress (`ScratchPencilCorank.lean`,
->   not yet started in Lean).** See the dedicated **"§13 — CORANK TIGHTENING (SCOPE)"** block in §13 for the full route. One-line:
->   the crux is `corank(F_{y,z}) ≤ rootMultiplicity` (matrix-pencil; genuinely new — NOT the "mechanical" the SESSION-1 #1 item
->   below implies), via `det((A'+t₀B')-deficient → (X−C t₀)^c ∣ det)` using `N=M₀·D` column-scaling + `Polynomial.le_rootMultiplicity_iff`
->   + `card_roots'`; then drops `ScratchBucket.c0_le`'s `hq2 (64d²≤q)`, leaving the existing `hq3 (q≥256)` as a CONSTANT threshold.
+> - **✅ #1 CORANK TIGHTENING — DONE this session (4 NEW modules, 24 lemmas, all axiom-clean, NOT in build.sh).** Drops
+>   `ScratchBucket.c0_le`'s `hq2 (64d²≤q)`, leaving `hq3 (q≥256)` as the CONSTANT binding threshold. The crux was the
+>   genuinely-new matrix-pencil `corank(A+t₀B) ≤ rootMultiplicity` (`N=M₀·D` column-scaling + `le_rootMultiplicity_iff`).
+>   **THE CAPSTONE = `ScratchTBoundCorank.c0_le_threequarters_corank`** — a **drop-in corank-tightened replacement** for
+>   `ScratchC0Final.c0_le_threequarters` (same `hgood`/`hnz`/`hPu`/`hq1`/`hq3` interface + trivial `hd:1≤d`/`hq4:4≤|K|`,
+>   **`hq2` GONE**), proving `NS ≤ ¾·|V|`. Modules (build order): **`ScratchPencilCorank.lean`** (matrix-pencil core
+>   `finrankKer_le_rootMult`/`sum_finrankKer_le`, concentration `concentration_bound`, `pencilPoly_det_ne_zero`) →
+>   **`ScratchPencilBridge.lean`** (`finrank_polarRad_eq_finrankKer`) → **`ScratchPencilRegroup.lean`** (scale-inv, ratio
+>   regroup, `deg_bucket_le`, `pencilDet_ne_zero_of_good`) → **`ScratchTBoundCorank.lean`** (`normT_bucket_bound_corank`,
+>   `c0_le_const`, the capstone). Verify: `lake env lean ChainDescent/ScratchTBoundCorank.lean` (after its import oleans
+>   build). **Full detail = the "§13 — CORANK TIGHTENING (SCOPE)" + "BUILD PROGRESS" blocks in §13. Wiring note: increment 5
+>   should call `c0_le_threequarters_corank` (not the un-tightened `c0_le_threequarters`) to inherit the dropped `hq2`.**
 > - The reduction `seal ⟸ ZProfileSeparates ⟸ (separating base) ⟸ (matching: `c̄₀<1`)` is built end-to-end (over both `ZMod p`
 >   AND now abstract `K`) **except increment 5 + the two open items above.** Increment-3 (`c₀≤¾`), the bridge (all wraps), and
 >   the ENTIRE increment-4 cleanup (B-ii/B-iii/C-corr/C-basis/NV) are landed axiom-clean. **Read the SESSION-1 "PICK UP HERE"
@@ -118,15 +125,11 @@
 > → `ScratchFieldGenAdapter.reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` (q=p) → seal. (q=pᵉ uses the same chain + the
 > `efield` scheme seam, Layer D.) The `Fin(p^d)`/`affineE` bridge of the ORIGINAL (SESSION-1) modules is no longer needed for inc-5.
 >
-> **TWO DECOUPLED OPEN ITEMS (run any time; before/parallel to inc-5):**
-> - **#1 corank tightening** (`q≳d²` → `q≳const`) — **SCOPED (SESSION 2); SUPERSEDES the "self-contained mechanical" framing of
->   this bullet.** The threshold `64·d²≤q` (`ScratchBucket.c0_le` hyp `hq2`) enters in EXACTLY one place — the deg-bucket term
->   `dR·n/√q` in `normT_bucket_bound` (`ScratchTBound`), from the uniform `radical_card_mul_card_le` (`|radical|≤q^{d−1}`). The
->   fix DOES need the corank-stratified sum `∑corank ≤ deg(disc) = d`, but the SCOPING (this session) found the crux is genuinely
->   new matrix-pencil math, NOT mechanical: `corank(F_{y,z}) ≤ rootMultiplicity` (a naive `corank ≤ const` is FALSE — corank
->   reaches `d−2` at a single ratio). **Full route + Mathlib tools + the `N=M₀·D` realization = the "§13 — CORANK TIGHTENING
->   (SCOPE)" block in §13.** Build = `ScratchPencilCorank.lean` (core: `corank ≤ rootMultiplicity`) → corank-stratified
->   `normT_bucket_bound` → new `c0_le` dropping `hq2` (binding threshold becomes the existing `hq3 q≥256`, a CONSTANT).
+> **DECOUPLED ITEMS:**
+> - **#1 corank tightening** (`q≳d²` → `q≳const`) — **✅ DONE (SESSION 2). Capstone
+>   `ScratchTBoundCorank.c0_le_threequarters_corank` (axiom-clean) = drop-in replacement for `c0_le_threequarters` with `hq2`
+>   removed.** 4 modules (`ScratchPencilCorank`/`ScratchPencilBridge`/`ScratchPencilRegroup`/`ScratchTBoundCorank`). Full detail
+>   = the "§13 — CORANK TIGHTENING (SCOPE) + BUILD PROGRESS" blocks in §13. **Increment 5 should call the `_corank` capstone.**
 > - **Field generalization (concern #4)** — ✅ DONE this session (the analytic+bridge lift, see SESSION-2 block at top). Remaining:
 >   the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate; the q=p adapter `ScratchFieldGenAdapter` is the template).
 >
@@ -248,6 +251,27 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   (χ(pairForm)-separation ⟹ `jointIsoCountK Q u {t,t₀} ≠ jointIsoCountK Q v {t,t₀}`; carries `2 < Fintype.card K` + `hK`; **reuses
   the already-abstract `pairCount_ne_of_chiSep_field`/`chiSep_imp_zSep_field` from `ScratchBridgeD`**). **⟹ Concern #4's analytic +
   bridge lift is COMPLETE** (over abstract `[Field K][Fintype K]`); only the q=pᵉ SCHEME seam (`efield` transport, Layer D) remains.
+- **`ScratchPencilCorank.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports Mathlib matrix/polynomial + `Real.Basic`)
+  — **CORANK TIGHTENING, the matrix-pencil core.** `pencilPoly A B := A.map C + X•B.map C`; `pow_card_dvd_pencilDet_of_cols`
+  + `exists_cols_ker` ⟹ **`finrankKer_le_rootMult`** (`corank(A+t₀B) ≤ rootMultiplicity t₀ (det)`, the genuinely-new crux);
+  `pencilDet_natDegree_le` + **`sum_finrankKer_le`** (`∑corank ≤ d`); `pow_sum_mul_bound` + **`concentration_bound`**
+  (`∑(√q)^{c_t} ≤ 2(√q)^{d−1}` under `1≤c_t≤d−1, ∑c_t≤d`); `pencilPoly_det_eval` + `pencilPoly_det_ne_zero` (good anchor ⟹
+  pencil det ≠ 0). GOTCHAS: needs `import Mathlib.Data.Real.Basic`; use `pow_le_pow_right₀` (not `pow_le_pow_right'` — no
+  `MulLeftMono ℝ`); `le_or_lt` not in scope (use `by_cases`).
+- **`ScratchPencilBridge.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchPencilCorank` + `ScratchCorank`)
+  — **CORANK, the `|radical| ↔ ker` bridge:** **`finrank_polarRad_eq_finrankKer`** (`finrank(polarRad G) =
+  finrank ker((toMatrix₂ b b (polarBilin G)).mulVecLin)`, via `b.equivFun` carrying `polarRad` onto the matrix kernel).
+- **`ScratchPencilRegroup.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchPencilBridge` +
+  `ScratchGoodAnchor` + `Analysis.SpecialFunctions.Sqrt`) — **CORANK, the ratio regroup + assembly:** `ker_smul_mulVecLin`/
+  `finrankKer_ratio` (scale-inv), `radicalCard_eq_pow`/`corank_ratio_eq` (`|radical| = q^{corank(ratio)}`), `sum_comp_ratio_le`/
+  `fiber_fst_card_le` (fiber regroup), `sqrt_natpow`, **`deg_bucket_le`** (the corank-stratified deg bucket
+  `∑_{x∈s deg} g x ≤ 2·|K|·(|V|/√|K|)`), `pencilDet_ne_zero_of_good` (the `hgood → hp` bridge).
+- **`ScratchTBoundCorank.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchTBound` + `ScratchC0` +
+  `ScratchPencilRegroup`) — **CORANK, the `|T|` bound + capstone:** `normT_bucket_bound_corank`
+  (`|K|·‖T‖ ≤ |K|²·√|V| + 2·|K|·(|V|/√|K|)` — deg coeff `2` not `d`), `c0_le_const` (`c0_le` at `dR:=2` ⟹ `hq2` collapses
+  to `hq3`), and **THE CAPSTONE `c0_le_threequarters_corank`** — drop-in replacement for `ScratchC0Final.c0_le_threequarters`,
+  same interface (`hgood`/`hnz`/`hPu`/`hq1`/`hq3` + trivial `hd:1≤d`/`hq4:4≤|K|`), **`hq2` removed**. Verify the whole chain:
+  `lake build ChainDescent.ScratchTBoundCorank`.
 - **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
   **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
   atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
@@ -1815,8 +1839,9 @@ genuinely excluded**: if `Q(a)=Q(a−w)=0` (hyperbolic plane) then `c=0` for ALL
   `polarRad(y₀•pairForm Q(t₀₀−u) + z₀•pairForm Q(t₀₀−v)) = ⊥` — exactly `pencilDetPoly_ne_zero`/`beta_full_count_closed`'s
   carried `hgood`.
 **⟹ The entire increment-4 cleanup (B-ii, B-iii, C-corr, C-basis, NV) is now CLOSED.** The β bound is unconditional modulo
-the family properties (nondeg `Q`, `finrank ≥ 2`, `|K| ≥ 7`). Next: **#1 corank tightening** (decoupled) → **increment 5**
-(matching assembly + the field/seam typing decision).
+the family properties (nondeg `Q`, `finrank ≥ 2`, `|K| ≥ 7`). Next: **#1 corank tightening (✅DONE — capstone
+`c0_le_threequarters_corank`, hq2 removed)** → **small-q tail** → **hK cleanup** → **increment 5** (matching assembly;
+field/seam typing decision RESOLVED by concern #4). NB increment 5's per-anchor input is now the `_corank` capstone.
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** All inputs are now landed (`c`, `β_full`,
 non-vacuity `hgood`, the bridge, C-corr/C-basis); increment 5 produces the separating base and discharges `ZProfileSeparates`:
