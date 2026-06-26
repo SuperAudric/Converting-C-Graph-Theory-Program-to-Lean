@@ -183,6 +183,18 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   **`ZProfileSeparates Q T`** (the sole open predicate, general `Q`), **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` (DONE),
   `isotropySeparates_of_zProfileSeparates` (end-to-end `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`), and **D2 bridge**
   `jointIsoCount_eq_restricted` (`Z_u(S)` = the Lemma-A-ready restricted count). See §13.
+- **`ScratchFieldGen.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, zero warnings, NOT
+  in build; imports `GaussCount` only) — **CONCERN #4 (field generalization), foundational half: the V-indexed, abstract
+  `[Field K][Fintype K]` lift of the analytic count chain.** Re-types the build's `ZMod p`/`Fin(p^d)` analytic layer over
+  an abstract finite field `K` with `V = Fin d → K` indexed **directly** (no `affineE` digit encoding — it becomes a single
+  endpoint conversion at the scheme seam). Mirrors, with `affineE` stripped (which only *simplifies* the proofs — the
+  `count_transport`/`affineE.symm.injective` steps vanish): `isoClassK` + the 4 dictionary lemmas (`CascadeAffine.isoClass`),
+  `polar_eq_of_subK`/`coords_determineK` (`CascadeAffine`), the count predicates `jointIsoCountK`/`ZProfileSeparatesK`/
+  `QProfileSeparatesAtBaseK`/`IsotropySeparatesAtBaseK`, `extProfileK`(+`_mem`), **D1** `qProfileSeparatesAtBaseK_of_zProfileSeparatesK`,
+  `isotropySeparatesK_of_qProfileSeparatesK` (= `coords_determineK` directly), the end-to-end `isotropySeparatesK_of_zProfileSeparatesK`,
+  and **D2** `jointIsoCountK_eq_restricted`. **Remaining concern-#4 pieces:** lift the bridge modules (`ScratchBridge{A,B,C,D,Z}`)
+  to `K` (re-target `jointIsoCountK`/`ZProfileSeparatesK`), + the q=p adapter (`IsotropySeparatesAtBaseK` ⟹ the in-build
+  Fin(p^d) `IsotropySeparatesAtBase` via `affineE` relabel, so the capstone fires); q=pᵉ adapter = Layer D seam (`efield`).
 - **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
   **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
   atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
