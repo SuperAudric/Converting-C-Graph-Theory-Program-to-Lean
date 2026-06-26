@@ -1133,16 +1133,19 @@ the general `corank ≤ mult` suffices).
 **(B) CONCENTRATION — DONE (axiom-clean, in `ScratchPencilCorank.lean`):** `pow_sum_mul_bound` (`s≥2 ⟹ ∑ s^{c_t} ≤
 s^{∑c_t}`, by `Finset.induction` + `a+b≤ab` via `nlinarith`) + **`concentration_bound`** (`s≥2, 1≤c_t≤D−1, ∑c_t≤D ⟹
 ∑ s^{c_t} ≤ 2·s^{D−1}`, by the split `∑≤D−1` / `=D`). The `pow_le_pow_right₀` + `Finset.add_sum_erase` are the keys.
-**(A) BRIDGE — finrank half DONE (axiom-clean, `ScratchPencilBridge.lean`):** **`finrank_polarRad_eq_finrankKer`**
-(`finrank(polarRad G) = finrank ker((toMatrix₂ b b (polarBilin G)).mulVecLin)`) — proved via `b.equivFun` carrying
-`polarRad G` *onto* the matrix kernel (key identity `(Gram *ᵥ b.equivFun h) i = polarBilin G (b i) h`, a functional
-zero on the basis is zero) + `LinearEquiv.finrank_map_eq`. **REMAINING (laborious, non-research):** (A-regroup) the
-projective-ratio regrouping (`(y,z)∈s` deg ↦ ratio `t=z/y`, `q−1` each via `Finset.sum_fiberwise_of_maps_to`,
-scale-invariance `ker((y•A+z•B).mulVecLin)=ker((A+(z/y)•B).mulVecLin)` for `y≠0`) so `∑_{(y,z)} = (q−1)·∑_t`;
-(C) the ℝ integration: a corank-stratified deg bucket `∑_{x∈s deg} g x = √|V|·∑_t (q−1)(√q)^{c_t} ≤ √|V|·q·2(√q)^{d−1}
-= 2·|K|·(|V|/√|K|)` (feeding `concentration_bound s=√q D=d` + `sum_finrankKer_le` for `∑c_t≤d` + bridge for
-`|radical|=q^{c_t}`), replacing `normT_bucket_bound`'s `(d·|K|)·(|V|/√|K|)` ⟹ new `c0_le` (dR→2, drop `hq2`; the `hB`
-step then uses the existing `h16`/`hq3 (q≥256)` — VERIFIED end-to-end against the real `c0_le`).
+**(A) BRIDGE + REGROUP INFRASTRUCTURE — DONE (axiom-clean).** `ScratchPencilBridge.lean`:
+**`finrank_polarRad_eq_finrankKer`** (`finrank(polarRad G) = finrank ker((toMatrix₂ b b (polarBilin G)).mulVecLin)`)
+via `b.equivFun` carrying `polarRad G` *onto* the matrix kernel (key `(Gram *ᵥ b.equivFun h) i = polarBilin G (b i) h`
++ a functional zero on the basis is zero + `LinearEquiv.finrank_map_eq`). `ScratchPencilRegroup.lean` (6 lemmas):
+`ker_smul_mulVecLin` + `finrankKer_ratio` (scale-inv `ker((y•A+z•B))=ker((A+(z/y)•B))`, `y≠0`); `radicalCard_eq_pow`
+(`|radical(y•P+z•R)| = |K|^{corank(A+(z/y)•B)}` — bridges `ScratchTBound`'s filter-card to the matrix corank) +
+`corank_ratio_eq` (finrank version); `sum_comp_ratio_le` (fiber-collapse `∑_{x∈S} h(ρx) ≤ N·∑_{t∈image} h t`, `N`=max
+fiber card) + `fiber_fst_card_le` (each ratio-fiber `≤ |K|`, injects via fst).
+**REMAINING (final assembly, non-research):** (A-assembly) `deg_bucket_le` = `∑_{x∈s deg} g x ≤ 2·|K|·(|V|/√|K|)`:
+factor `g x = √|V|·(√q)^{c(ρx)}` (`radicalCard_eq_pow`, `√(q^c)=(√q)^c`), apply `sum_comp_ratio_le` (N=|K|, fiber bound)
+then `concentration_bound` (s=√q, D=d; `1≤c≤d−1` from `polarRad≠⊥`/`hnz` via `corank_ratio_eq`+`finrank_pos`/`finrank_lt`,
+`∑c≤d` from `sum_finrankKer_le`); (C) wire into a corank-stratified `normT_bucket_bound` (deg term `2·|K|·(|V|/√|K|)`)
+⟹ new `c0_le` (dR→2, drop `hq2`; `hB` then uses the existing `h16`/`hq3 (q≥256)` — VERIFIED against the real `c0_le`).
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
