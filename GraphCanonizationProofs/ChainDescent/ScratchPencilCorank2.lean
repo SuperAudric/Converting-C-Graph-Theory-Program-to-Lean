@@ -34,8 +34,8 @@ theorem polar_pairForm {K V} [Field K] [AddCommGroup V] [Module K V]
   rw [QuadraticMap.polar, pairForm_apply, pairForm_apply, pairForm_apply, hQadd, hpadd]
   ring
 
-/-- The polar of the pencil `F = y•pairForm Q a + z•pairForm Q b`. -/
-theorem polar_pencil {K V} [Field K] [AddCommGroup V] [Module K V]
+/-- The polar of the pencil `F = y•pairForm Q a + z•pairForm Q b`, fully expanded. -/
+theorem polar_pencil_pairForm {K V} [Field K] [AddCommGroup V] [Module K V]
     (Q : QuadraticForm K V) (a b : V) (y z : K) (x h : V) :
     QuadraticMap.polar (y • pairForm Q a + z • pairForm Q b) x h
       = 4 * (y * Q a + z * Q b) * QuadraticMap.polar Q x h
@@ -76,7 +76,7 @@ theorem pencil_polarRad_finrank_le {K V} [Field K] [AddCommGroup V] [Module K V]
               + z * QuadraticMap.polar Q h b * QuadraticMap.polar Q x b) := by
     intro h hh x
     have := hh x
-    rw [hF, polar_pencil] at this
+    rw [hF, polar_pencil_pairForm] at this
     rw [hlam]
     linear_combination this
   by_cases hlam0 : lam = 0
@@ -230,7 +230,54 @@ theorem pencil_polarRad_finrank_le {K V} [Field K] [AddCommGroup V] [Module K V]
       Submodule.finrank_mono hsub
     omega
 
+/-- **The single-form corank-1 cap (the `z_u` sibling of the pencil cap).** For `Q.polarBilin` nondegenerate and a
+non-isotropic anchor `Q a ≠ 0`, the polar-radical of `pairForm Q a` is `⊆ span{a}`, hence `finrank ≤ 1` — the corank is
+exactly 1 (`radical = ⟨a⟩`), not the uniform `d−1`. This is what tightens the `z_u` (zero-count) bound's `n/√q` term to
+`√n·√q`, dropping its threshold from `q ≥ 256` to `q ≥ 16`. -/
+theorem single_polarRad_finrank_le {K V} [Field K] [AddCommGroup V] [Module K V]
+    [FiniteDimensional K V] [Invertible (2 : K)]
+    (Q : QuadraticForm K V) (a : V)
+    (hQnd : Q.polarBilin.Nondegenerate) (hQa : Q a ≠ 0) :
+    Module.finrank K (polarRad (pairForm Q a)) ≤ 1 := by
+  classical
+  have hnd : ∀ w : V, (∀ x, QuadraticMap.polar Q x w = 0) → w = 0 := by
+    intro w hw
+    apply hQnd.1 w
+    intro n
+    rw [QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar_comm]
+    exact hw n
+  have h2Qa : (2 : K) * Q a ≠ 0 := mul_ne_zero (Invertible.ne_zero (2 : K)) hQa
+  have hsub : polarRad (pairForm Q a) ≤ Submodule.span K {a} := by
+    intro h hh
+    -- (2 Q a)•h − (polar h a)•a lies in the radical of Q, hence is 0
+    have hwrad : ∀ x, QuadraticMap.polar Q x
+        ((2 * Q a) • h - (QuadraticMap.polar Q h a) • a) = 0 := by
+      intro x
+      have hstar : QuadraticMap.polar (pairForm Q a) x h = 0 := hh x
+      rw [polar_pairForm] at hstar
+      rw [QuadraticMap.polar_sub_right, QuadraticMap.polar_smul_right,
+        QuadraticMap.polar_smul_right, smul_eq_mul, smul_eq_mul]
+      have h2 : (2 : K) * ((2 * Q a) * QuadraticMap.polar Q x h
+          - QuadraticMap.polar Q h a * QuadraticMap.polar Q x a) = 0 := by
+        linear_combination hstar
+      rcases mul_eq_zero.mp h2 with hc | hc
+      · exact absurd hc (Invertible.ne_zero (2 : K))
+      · exact hc
+    have hz0 := hnd _ hwrad
+    have hheq : (2 * Q a) • h = (QuadraticMap.polar Q h a) • a := sub_eq_zero.mp hz0
+    have hmem : (2 * Q a) • h ∈ Submodule.span K {a} := by
+      rw [hheq]; exact Submodule.smul_mem _ _ (Submodule.subset_span (by simp))
+    have hsplit : h = (2 * Q a)⁻¹ • ((2 * Q a) • h) := by
+      rw [smul_smul, inv_mul_cancel₀ h2Qa, one_smul]
+    rw [hsplit]; exact Submodule.smul_mem _ _ hmem
+  calc Module.finrank K (polarRad (pairForm Q a))
+      ≤ Module.finrank K (Submodule.span K {a}) := Submodule.finrank_mono hsub
+    _ ≤ 1 := by
+        have := finrank_span_le_card (R := K) ({a} : Set V)
+        simpa using this
+
 end ChainDescent
 
 #print axioms ChainDescent.polar_pairForm
 #print axioms ChainDescent.pencil_polarRad_finrank_le
+#print axioms ChainDescent.single_polarRad_finrank_le

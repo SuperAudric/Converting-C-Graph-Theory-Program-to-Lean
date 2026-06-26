@@ -22,8 +22,10 @@
 > - **▶ SMALL-Q TAIL — SCOPED + Route 0 STARTED this session.** Full scoping = the new "### §13 — SMALL-Q TAIL (SCOPE)"
 >   block in §13. Headline: small-q is *entirely* the degenerate bucket and m-uniform; the deg bucket has a **free `√q`**
 >   (uniform corank cap `d−1` vs the geometric `d−2`: the pencil polar is `4λB − rank-2`). **Route 0** (corank-cap `d−2`,
->   threshold `256→16`, stepping stone): **crux lemma `pencil_polarRad_finrank_le` LANDED axiom-clean** (`ScratchPencilCorank2.lean`);
->   remaining = concentration-`d−2` variant + re-thread → `q≥16` capstone (plan §13 STATUS).
+>   threshold `256→16`): **COMPLETE, axiom-clean** — capstone `ScratchTBoundCorank2.c0_le_threequarters_corank2` (drop-in
+>   for `c0_le_threequarters_corank`, `hq3 : 16 ≤ q`); 9 lemmas in `ScratchPencilCorank2`/`ScratchTBoundCorank2`. KEY FINDING:
+>   needed BOTH the deg-bucket corank-`d−2` cap AND a corank-1 `z_u` fix (`single_polarRad_finrank_le`) — deg alone bottoms
+>   out at `q≈81`. New hyps: `4≤d`, `t₀−u,t₀−v` indep, `Q` nondeg, `Q(t₀−u)≠0`. (plan §13 STATUS.)
 >   **Route 2** (exact `c₀`, no threshold, hard kernel = one degenerate-quadric count — elementary, NOT Weil) is
 >   **PRIORITIZED** as the terminating target (transferability/generalization). Threading caveat: needs `t₀−u, t₀−v`
 >   independent (strengthen `exists_hgood`/NV). One dead end recorded: S2 (the in-`M` linear-vanishing) is geometrically
@@ -1248,16 +1250,24 @@ shrinks but does **not** terminate the tail — `decide`-per-instance never scal
 `q<16`, `d≤2M₀`); only Route 2 (no threshold) or a uniform structural small-`q` argument terminates. Hence Route 2 is the
 priority; Route 0 is a cheap, certain, decoupled `16×` stepping stone taken first.
 
-**STATUS (2026-06-26):** Route 0 — **crux lemma LANDED, axiom-clean** (`ScratchPencilCorank2.lean`, NOT in build):
-`polar_pairForm` (polar of `pairForm Q a` = `4Q(a)·polar − 2·polar(·,a)·polar(·,a)`) + **`pencil_polarRad_finrank_le`**
-(`finrank(polarRad(y•pairForm Q a + z•pairForm Q b)) ≤ finrank V − 2` for `y,z≠0`, `a,b` independent, `Q.polarBilin`
-nondeg, `finrank V ≥ 4`) — both `[propext, Classical.choice, Quot.sound]`. The case-split is exactly the geometry above
-(`λ≠0` ⟹ `radical ⊆ span{a,b}` via `hnd`-on-`(4λ)•h − (2y·polar h a)•a − (2z·polar h b)•b`; `λ=0` ⟹
-`radical ⊆ ker φ_a ⊓ ker φ_b`, codim 2 via `mem_span_of_iInf_ker_le_ker` for the `ker φ_a ⊊` step). **NEXT (remaining
-Route 0):** (L2) a `concentration_bound` variant with cap `d−2` (`∑c≤d`, `c≤d−2` ⟹ `≤ 2(√q)^{d−2}`); (L3) re-thread
-through `deg_bucket_le`/`normT_bucket_bound_corank`/`c0_le` with the `d−2` cap (mirror the corank-tightening plumbing)
-→ `q≥16` capstone; (thread) confirm/strengthen `exists_hgood`/NV to supply `t₀−u, t₀−v` independent (the lemma's
-hypothesis). **Route 2** (exact `c₀`) is the prioritized terminating target after this stepping stone.
+**STATUS (2026-06-26): Route 0 COMPLETE — threshold `q ≥ 256 → q ≥ 16`, all axiom-clean, NOT in build.** Capstone
+**`ScratchTBoundCorank2.c0_le_threequarters_corank2`** = drop-in for `c0_le_threequarters_corank` with `hq3 : 16 ≤ q`
+(was 256). 9 new lemmas across 2 modules:
+- **`ScratchPencilCorank2.lean`** (geometric core): `polar_pairForm` + **`pencil_polarRad_finrank_le`** (pencil corank
+  `≤ d−2`, the `λ=0`/`λ≠0` case-split; `λ=0` codim-2 via `mem_span_of_iInf_ker_le_ker`) + **`single_polarRad_finrank_le`**
+  (single-form corank `≤ 1` for `Q a ≠ 0` — the `z_u` sibling).
+- **`ScratchTBoundCorank2.lean`** (re-thread): `le_two_pow_sub_two` + `concentration_bound2` (cap `d−2` ⟹ `≤ 2(√q)^{d−2}`,
+  all-ones case via `D ≤ 2^{D−2}`) + `deg_bucket_le2` (deg bucket `≤ 2·|V|`) + `c0_le2` (threshold-16 arithmetic) +
+  `normT_bucket_bound_corank2` (`|K|·‖T‖ ≤ |K|²√|V| + 2|V|`) + the capstone.
+- **★ KEY FINDING (recorded):** the deg-bucket tightening **alone** does NOT reach `q≥16` — it bottoms out near `q≥81`,
+  because the `z_u` (zero-count) bound carries an *independent* `n/√q` term (it charged the single form `pairForm Q(t₀−u)`
+  the loose corank-`d−1`). Reaching `q≥16` required **also** the corank-1 `z_u` fix (`single_polarRad_finrank_le`, needs
+  `Q(t₀−u)≠0`), giving `z_u·q ≤ n + (q−1)√n√q`. So Route 0's capstone carries new hyps vs `_corank`: `4 ≤ d`, `t₀−u,t₀−v`
+  **independent** (`hab`), `Q.polarBilin` **nondegenerate** (`hQnd`), anchor **non-isotropic** `Q(t₀−u)≠0` (`hQu`, subsumes `hPu`).
+- **THREAD (for increment 5):** `exists_hgood`/NV must be checked/strengthened to supply `hab` (`t₀−u,t₀−v` indep) and `hQu`
+  (`Q(t₀−u)≠0`) — both are generic-anchor conditions, but not yet confirmed discharged.
+
+**Route 2** (exact `c₀`, no threshold) remains the prioritized *terminating* target after this stepping stone.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
