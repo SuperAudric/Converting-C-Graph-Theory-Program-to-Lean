@@ -1269,6 +1269,52 @@ priority; Route 0 is a cheap, certain, decoupled `16×` stepping stone taken fir
 
 **Route 2** (exact `c₀`, no threshold) remains the prioritized *terminating* target after this stepping stone.
 
+### §13 — ROUTE 2 (SCOPE) — the exact `c₀`, no threshold (the terminating route, 2026-06-26)
+
+**Goal.** Replace the triangle-inequality bound on `T` (`normT_le`) with an EXACT evaluation, removing `hq3` ENTIRELY
+(no tail). `hq1` (`64q²≤n` ⟺ `d≥3`) STAYS — it is the families' own range (`d=2m≥4`), not a threshold to remove. The
+probe (`c₀∈[0.44,0.49]` at `q=5..13`) confirms the answer is `c₀<½` for all `q`, so the exact computation will close it.
+
+**The exact object — line-regroup.** From `pairCharSum_factor_gen` + `‖gaussSum²‖=q`, regroup the `(y,z)` support sum by
+**projective lines** `[y₀:z₀]` (`y₀,z₀≠0`; `q−1` lines, each `q−1` scalars). Using `χ(λ²)=1`:
+`gaussSum²·T = ∑_{[y₀:z₀]} χ(y₀)χ(z₀)·(q·Z_J − qᵈ)`, `J := y₀·I_u + z₀·I_v`, `Z_J = #{t : J(t)=0}` — each line collapses
+to a **zero-count fluctuation** via `count_eq_charsum` (`∑_{λ≠0}∑_t ψ(λ·J(t)) = q·Z_J − qᵈ`). This is the load-bearing
+new reduction (NEW lemma `line_regroup`; moderate, reindex + `count_eq_charsum`).
+
+**Per-line evaluation.**
+- **Nondeg lines** (pencil `F_{y₀,z₀}` nondeg): `J` is a nondeg affine quadric; `|q·Z_J − qᵈ| ≤ O(q^{d/2+1})`
+  (`card_quadForm_eq`/magnitude). **Triangle-bound** these (no exact, NO Weil) ⟹ `≤ q√n` total, absorbed by `hq1`.
+  The nondeg `χ`-over-the-line sum IS a Weil sum, but — as always in this route — we never beat it, `hq1` does.
+- **Degenerate lines (`≤ d`): EXACT — the hard kernel.** `sum_addChar_radical_vanish` dichotomy on whether the linear
+  part `L ⊥ radical(J)`:
+  - `L ⊄ rad`: `∑_t ψ(λJ) = 0 ∀λ` ⟹ `q·Z_J − qᵈ = 0`. **These lines contribute NOTHING.**
+  - `L ⊥ rad` (incl. the dominant `λ=0`, corank `d−2`): since `L⊥rad`, `J` depends only on the `(d−c)` non-radical
+    coords ⟹ `Z_J = q^c · N_{red}`, `N_{red}` = the reduced affine quadric count over the `(d−c)`-dim nondeg block —
+    **reuse `card_quadForm_eq`** on that block (the `λ=0` dominant gives a **binary** `N_2`, `d−c=2`). Then
+    `q·Z_J − qᵈ = q^{d−1}·(N_2 − q)`.
+
+**★ THE CRUX (and where Route 2 CONVERGES with Route 1).** `|N_2 − q|` is **`1`** (⟹ line contributes `n/q²`, negligible)
+when the completed-square constant `c'≠0`, but **`q−1`** (⟹ `n/q`, the binding term) when `c'=0` (binary conic through the
+"center"). So Route 2 terminates **iff** either (i) `c'≠0` on every degenerate line (no bad case), OR (ii) the bad (`c'=0`)
+lines' contributions `χ(y₀)χ(z₀)·(±(q−1))·q^{d−1}` **cancel** across the `≤d` degenerate lines — a **finite, `≤d`-term**
+cancellation (NO Weil), which is exactly **Route 1's content**. So the "exact" route reduces, after the elementary
+quadric counts, to the same finite degenerate-line cancellation; Routes 1 and 2 share this kernel.
+
+**Tools — mostly PRESENT (`GaussCount`).** `count_eq_charsum`, `card_quadForm_eq` (reused at `d−c` vars), `sum_addChar_radical_vanish`,
+`sum_addChar_quadForm`/`_linear`, 1-D Gauss (`sum_addChar_smul_sq`). **NEW infra:** (a) `line_regroup`; (b) the `L⊥rad ⟹
+J factors through the non-radical block` reduction (`Z_J = q^c·N_red`) — cleanest via a **radical-adapted basis** (radical =
+last `d−c` coords; `L⊥rad` ⟹ `L` uses only the first `d−c`), avoiding Mathlib quotient-quadratic-form gaps; (c) the
+degenerate-line assembly + the finite `c'=0` cancellation (the crux). **NO Weil anywhere** (only 1-D `λ`-sums, `(d−c)`-dim
+quadric counts, and triangle on the nondeg lines).
+
+**RISK + PROBE-FIRST.** The crux risk is whether the bad `c'=0` case occurs and, if so, whether the `≤d`-term cancellation
+closes it. **First step = a C# probe:** for `J=y₀I_u+z₀I_v` on `VO^ε_4(q)` (`q=5..13`), at each degenerate line compute
+the completed-square constant `c'` — is `c'≠0` always (clean: no bad case), or do the `c'=0` lines cancel by `χ`-phase? This
+verdict sets the difficulty (clean reduction vs. a genuine cancellation lemma). **Size:** ~5–7 lemmas, 1–2 modules; the
+radical-adapted-basis reduction (b) is the main new infrastructure, the cancellation (c) the main risk. **Recommended build
+order:** probe → `line_regroup` (clean, reusable) → nondeg triangle bound → degenerate `L⊄rad` (=0) → `L⊥rad` reduction
+(b) → assembly/cancellation (c) → `c0_exact` capstone (no `hq3`).
+
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
 (`isotropySeparates_of_qProfileSeparates` + `coords_determine`, zero new wiring) — proved using the **route-(a) engine**
