@@ -232,8 +232,11 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   **NV**, carried as the `t₀₀` hypothesis). Items (ii) Nat-composition + (iii) `totalDegree ≤ 2d` are DONE (B-ii/B-iii).
   **C-corr (2026-06-26):** `corr_zero_of_anchor` (good anchor `Q(t₀−u)≠0` kills the bridge's `corr` ∀`t`) + `QPoly_ne_zero`
   + `qZero_count_le` (`#{Q(t₀−c)=0}·|K| ≤ 2·|V|`) + capstone **`beta_full_count_closed`** (FULL good-anchor predicate incl.
-  `Q(t₀−u),Q(t₀−v)≠0`: `β_full·|K| ≤ (2d+4)·|V| + 2·|K|`). **24 axiom-clean lemmas total.** Remaining bridge-input gap =
-  **C-basis** (ortho-anisotropic basis `hv/hw`) + **NV**.
+  `Q(t₀−u),Q(t₀−v)≠0`: `β_full·|K| ≤ (2d+4)·|V| + 2·|K|`). **C-basis (2026-06-26):** `exists_orthoAnisotropic_basis`
+  (nondeg `Q` ⟹ ortho-anisotropic basis = the bridge's `vb`/`hv`/`hw`, via Mathlib `exists_orthogonal_basis` +
+  `not_isOrtho_basis_self_of_separatingLeft`) + the project-native bridge `associated_separatingLeft_of_polarRad`
+  (`polarRad Q = ⊥ ⟹ (associated Q).SeparatingLeft`). **26 axiom-clean lemmas total.** Both bridge-input gaps (C-corr,
+  C-basis) CLOSED; lone deep remaining inc-4 item = **NV**.
 - **`ScratchCorank.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **corank ≥ 2 enabler** for 3e-ii:
   **`radical_card_mul_card_le`** (`F ≠ 0 ⟹ |radical F| · |K| ≤ |V|`, i.e. `|radical| ≤ q^{d−1}` UNIFORMLY over all coranks —
   the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
@@ -1573,9 +1576,18 @@ is two quadric loci `{t₀:Q(t₀−u)=0}`,`{t₀:Q(t₀−v)=0}`, each counted 
 (`QPoly_ne_zero` + `qZero_count_le : #{Q(t₀−c)=0}·|K| ≤ 2·|V|`, via `QPoly_totalDegree_le ≤ 2`). Capstone
 **`beta_full_count_closed`**: the FULL good-anchor predicate `hnz ∧ hgood ∧ hPu ∧ hPv ∧ Q(t₀−u)≠0 ∧ Q(t₀−v)≠0` has bad-set
 **`β_full·|K| ≤ (2d+4)·|V| + 2·|K| = O(d/q)`** (union bound: `beta_count_closed` + 2·`qZero_count_le`). So `corr` is no
-longer a separate inc-5 worry — the matching's good-anchor locus already excludes it, at no asymptotic cost. **Remaining
-bridge-input gap = C-basis** (the ortho-anisotropic basis `hv : associated Q has an orthogonal basis`, `hw : ∀ i, Q(vb i)≠0`
-that `jointIsoCount_ne_of_chiSep_pair` carries — a `Q`-level lemma, not anchor-dependent) **+ NV**.
+longer a separate inc-5 worry — the matching's good-anchor locus already excludes it, at no asymptotic cost.
+
+**▶▶▶ C-basis DONE (2026-06-26, `ScratchIncr4c.lean`, axiom-clean) — the bridge's `hv`/`hw` discharged from nondegeneracy.**
+`exists_orthoAnisotropic_basis`: a nondegenerate (`(associated Q).SeparatingLeft`) form over a finite-dim space (char ≠ 2)
+has an **orthogonal basis of anisotropic vectors** — exactly the `vb`/`hv : (associated Q).IsOrthoᵢ vb`/`hw : ∀ i, Q(vb i)≠0`
+that `jointIsoCount_ne_of_chiSep_pair` carries. Via Mathlib `LinearMap.BilinForm.exists_orthogonal_basis` (diagonalize) +
+`IsOrthoᵢ.not_isOrtho_basis_self_of_separatingLeft` (a null diagonal vector ⟹ left radical, ⊥ by nondeg) +
+`associated_eq_self_apply` (`(associated Q)(vb i)(vb i)=Q(vb i)`). Plus the **project-native bridge**
+`associated_separatingLeft_of_polarRad` (`polarRad Q = ⊥ ⟹ (associated Q).SeparatingLeft`, via
+`polarRad_eq_bot_iff_separatingRight` + `two_nsmul_associated`), so the family's nondegeneracy — stated as `polarRad = ⊥`,
+the project workhorse — feeds it directly. A `Q`-level fact (no anchor/probe). **So both bridge-input gaps (corr = C-corr,
+`hv/hw` = C-basis) are CLOSED; the lone deep remaining inc-4 item is NV** (non-vacuity `hgood`, distinct radicals).
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** Once `c` (`≤ 15/16·|V|`, DONE) and `β`
 (`≤ C·|V|/q`) are in hand, increment 5 produces the separating base and discharges `ZProfileSeparates`:

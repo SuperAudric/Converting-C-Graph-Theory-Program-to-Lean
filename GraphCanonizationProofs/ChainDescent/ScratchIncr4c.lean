@@ -431,6 +431,46 @@ theorem beta_full_count_closed [Fintype K] [DecidableEq K] [Fintype V] [Decidabl
         Nat.add_le_add (Nat.add_le_add hb hu) hv'
     _ = (2 * d + 4) * Fintype.card V + 2 * Fintype.card K := by ring
 
+/-! ### C-basis — the ortho-anisotropic basis the bridge carries (`hv`/`hw`).
+
+`ScratchBridgeD.jointIsoCount_ne_of_chiSep_pair` carries an orthogonal basis `vb` for `associated Q` with every
+`Q (vb i) ≠ 0` (`hv : (associated Q).IsOrthoᵢ vb`, `hw : ∀ i, Q (vb i) ≠ 0`). These are NOT anchor/probe-dependent —
+they are a property of the form `Q` itself, available from nondegeneracy (`SeparatingLeft`):
+- `vb`/`hv` from Mathlib's `exists_orthogonal_basis` (a symmetric bilinear form over a field with `2` invertible
+  diagonalizes);
+- `hw` from `IsOrthoᵢ.not_isOrtho_basis_self_of_separatingLeft` — a diagonal basis vector with `(associated Q)(vb i)(vb i)=0`
+  would lie in the left radical, contradicting nondegeneracy; and `(associated Q)(vb i)(vb i) = Q (vb i)`. -/
+
+/-- **C-basis.** A nondegenerate (`SeparatingLeft`) quadratic form `Q` over a finite-dimensional space (char ≠ 2) has an
+**orthogonal basis of anisotropic vectors** — exactly the `vb`/`hv`/`hw` the bridge `jointIsoCount_ne_of_chiSep_pair`
+carries. A `Q`-level fact (no anchor/probe), discharged once when the family supplies its nondegenerate form. -/
+theorem exists_orthoAnisotropic_basis [Invertible (2 : K)] [FiniteDimensional K V]
+    (Q : QuadraticForm K V) (hsep : (QuadraticMap.associated Q).SeparatingLeft) :
+    ∃ vb : Basis (Fin (Module.finrank K V)) K V,
+      (QuadraticMap.associated Q).IsOrthoᵢ vb ∧ ∀ i, Q (vb i) ≠ 0 := by
+  obtain ⟨vb, hv⟩ := LinearMap.BilinForm.exists_orthogonal_basis (QuadraticForm.associated_isSymm K Q)
+  refine ⟨vb, hv, fun i hQ0 => hv.not_isOrtho_basis_self_of_separatingLeft hsep i ?_⟩
+  change (QuadraticMap.associated Q) (vb i) (vb i) = 0
+  rw [QuadraticMap.associated_eq_self_apply]
+  exact hQ0
+
+/-- **Bridge to the project-native nondegeneracy.** `polarRad Q = ⊥` (the form used throughout — `hgood`,
+`degenerate_count_le`, `polarRad_ne_bot_iff_det_eq_zero`) gives `(associated Q).SeparatingLeft`, the hypothesis of
+`exists_orthoAnisotropic_basis`. Chain: `polarRad = ⊥ ↔ (polarBilin Q).SeparatingRight` (`polarRad_eq_bot_iff_separatingRight`),
+and `polarBilin Q x z = 2 • associated Q x z` (`two_nsmul_associated`) makes the two separating conditions agree (char ≠ 2),
+modulo `polar`-symmetry. -/
+theorem associated_separatingLeft_of_polarRad [Invertible (2 : K)] (Q : QuadraticForm K V)
+    (h : polarRad Q = ⊥) : (QuadraticMap.associated Q).SeparatingLeft := by
+  rw [polarRad_eq_bot_iff_separatingRight] at h
+  intro x hx
+  refine h x ?_
+  intro z
+  have e2 : (QuadraticMap.polarBilin Q) x z = (2 : ℕ) • (QuadraticMap.associated Q) x z := by
+    conv_lhs => rw [← QuadraticMap.two_nsmul_associated (S := K)]
+    simp only [two_nsmul, LinearMap.add_apply]
+  rw [QuadraticMap.polarBilin_apply_apply, QuadraticMap.polar_comm,
+    ← QuadraticMap.polarBilin_apply_apply, e2, hx z, smul_zero]
+
 end ChainDescent
 
 #print axioms ChainDescent.coordPoly_eval
@@ -457,3 +497,5 @@ end ChainDescent
 #print axioms ChainDescent.QPoly_ne_zero
 #print axioms ChainDescent.qZero_count_le
 #print axioms ChainDescent.beta_full_count_closed
+#print axioms ChainDescent.exists_orthoAnisotropic_basis
+#print axioms ChainDescent.associated_separatingLeft_of_polarRad
