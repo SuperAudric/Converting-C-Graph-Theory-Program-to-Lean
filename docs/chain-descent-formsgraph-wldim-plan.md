@@ -236,7 +236,14 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   (nondeg `Q` ⟹ ortho-anisotropic basis = the bridge's `vb`/`hv`/`hw`, via Mathlib `exists_orthogonal_basis` +
   `not_isOrtho_basis_self_of_separatingLeft`) + the project-native bridge `associated_separatingLeft_of_polarRad`
   (`polarRad Q = ⊥ ⟹ (associated Q).SeparatingLeft`). **26 axiom-clean lemmas total.** Both bridge-input gaps (C-corr,
-  C-basis) CLOSED; lone deep remaining inc-4 item = **NV**.
+  C-basis) CLOSED; lone deep remaining inc-4 item = **NV** (algebraic heart now also done — see `ScratchIncr4d` below).
+- **`ScratchIncr4d.lean`** (NEW 2026-06-26, 4 axiom-clean lemmas, NOT in build; imports `ScratchIncr4c`) — **the NV
+  (non-vacuity of `hgood`) algebraic heart.** Reduces `∃ y z, polarRad(y•pairForm Q(t₀₀−u)+z•pairForm Q(t₀₀−v))=⊥` to
+  "∃ a nondeg plane through `w=v−u` with anisotropic generators". `polar_pencil_apply` (NV-1: pencil polar formula) +
+  `pencil_radical_key` (`s∈polarRad ⟹ 4c·s = (2y polar(s,a))·a+(2z polar(s,b))·b`) + `polarRad_pencil_subset_span` (NV-2:
+  `c≠0 ⟹ radical⊆⟨a,b⟩`) + **`polarRad_pencil_eq_bot`** (NV-3: nondeg `Q`, `y,z≠0`, `c≠0`, `pairForm Q a b≠0` ⟹ member
+  nondegenerate, via the `2×2` `det = 4yz·pairForm Q a b`). Remaining NV = **NV-4** (geometry+counting: anisotropic-generator
+  nondeg plane through `w`; both-isotropic case genuinely excluded) + **NV-5** (pick `y,z`) + capstone (`t₀₀=a+u`).
 - **`ScratchCorank.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **corank ≥ 2 enabler** for 3e-ii:
   **`radical_card_mul_card_le`** (`F ≠ 0 ⟹ |radical F| · |K| ≤ |V|`, i.e. `|radical| ≤ q^{d−1}` UNIFORMLY over all coranks —
   the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
@@ -1588,6 +1595,26 @@ that `jointIsoCount_ne_of_chiSep_pair` carries. Via Mathlib `LinearMap.BilinForm
 `polarRad_eq_bot_iff_separatingRight` + `two_nsmul_associated`), so the family's nondegeneracy — stated as `polarRad = ⊥`,
 the project workhorse — feeds it directly. A `Q`-level fact (no anchor/probe). **So both bridge-input gaps (corr = C-corr,
 `hv/hw` = C-basis) are CLOSED; the lone deep remaining inc-4 item is NV** (non-vacuity `hgood`, distinct radicals).
+
+**▶▶▶ NV ALGEBRAIC HEART DONE (2026-06-26, `ScratchIncr4d.lean`, 4 axiom-clean lemmas) — the deep part.** `hgood` is
+`∃ y z, polarRad(y•pairForm Q(t₀₀−u) + z•pairForm Q(t₀₀−v)) = ⊥`. Writing `a = t₀₀−u`, `b = t₀₀−v = a−w`, `w = v−u ≠ 0`:
+- **NV-1 `polar_pencil_apply`** — `polar(y•pairForm Q a + z•pairForm Q b) s r = 4c·polar Q s r − 2y·polar(s,a)polar(r,a)
+  − 2z·polar(s,b)polar(r,b)`, `c = yQa+zQb` (pure algebra on `polar_pairForm_apply` + form-level `polar_add`/`polar_smul`).
+- **`pencil_radical_key`** — `s ∈ polarRad ⟹ (4c)·s = (2y polar(s,a))·a + (2z polar(s,b))·b` (invert the nondeg `polar Q`,
+  from `polarRad Q = ⊥`).
+- **NV-2 `polarRad_pencil_subset_span`** — `c ≠ 0 ⟹ polarRad ⊆ ⟨a,b⟩` (divide by `4c`).
+- **NV-3 `polarRad_pencil_eq_bot`** (capstone) — nondeg `Q`, `y,z ≠ 0`, `c ≠ 0`, **`pairForm Q a b ≠ 0`** ⟹ the member is
+  **nondegenerate**. Evaluate the radical equation at `r = a,b` ⟹ a `2×2` system in `(polar(s,a),polar(s,b))` with
+  `det = 4yz·pairForm Q a b ≠ 0` ⟹ both vanish ⟹ `pencil_radical_key` ⟹ `s = 0`.
+Key identity used: `pairForm Q a b = 4QaQb − polar(a,b)² = det(polar Q |_{⟨a,b⟩})`, so `pairForm Q a b ≠ 0 ⟺ ⟨a,b⟩` is a
+**nondegenerate plane**. **So `hgood` reduces to: ∃ `a` with `pairForm Q a (a−w) ≠ 0` (nondeg plane through `w`) ∧
+`Q(a),Q(a−w) ≠ 0` (anisotropic — gives `c≠0` and corr-kill) ∧ `a, a−w` independent.** ⚠ NB the **both-isotropic case is
+genuinely excluded**: if `Q(a)=Q(a−w)=0` (hyperbolic plane) then `c=0` for ALL `y,z` and every member is degenerate
+(radical ⊇ `⟨a,b⟩^⊥`, nonzero for `d>2`) — so NV-4 must deliver anisotropic generators, not merely a nondeg plane.
+**Remaining NV = NV-4** (geometry+counting: such an `a` exists — `Q(w)≠0` orthogonal-sum of anisotropic lines / `Q(w)=0`
+hyperbolic plane `⟨w,w''⟩`, then a `2×2`-in-plane Schwartz–Zippel count for anisotropic `a, a−w`, needs `q ≥ q₀`) **+ NV-5**
+(pick `y,z≠0` with `c=yQa+zQb≠0`, trivial once `Qa,Qb≠0`) **+ the capstone** (`t₀₀ = a+u`, apply NV-3). The
+conceptually-hard algebra is DONE; NV-4 is standard quadratic-form geometry + finite counting.
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** Once `c` (`≤ 15/16·|V|`, DONE) and `β`
 (`≤ C·|V|/q`) are in hand, increment 5 produces the separating base and discharges `ZProfileSeparates`:
