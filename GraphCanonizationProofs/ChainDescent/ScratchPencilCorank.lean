@@ -178,6 +178,43 @@ theorem sum_finrankKer_le (A B : Matrix (Fin d) (Fin d) K) (T : Finset K)
     _ ≤ p.natDegree := Polynomial.card_roots' _
     _ ≤ d := pencilDet_natDegree_le A B
 
+/-- Evaluating the pencil determinant at `t₀` recovers `det(A + t₀·B)`. -/
+theorem pencilPoly_det_eval (A B : Matrix (Fin d) (Fin d) K) (t₀ : K) :
+    (pencilPoly A B).det.eval t₀ = (A + t₀ • B).det := by
+  rw [← Polynomial.coe_evalRingHom, RingHom.map_det]
+  congr 1
+  ext i j
+  simp only [RingHom.mapMatrix_apply, Matrix.map_apply, pencilPoly, Matrix.add_apply,
+    Matrix.smul_apply, Matrix.map_apply, Polynomial.coe_evalRingHom, Polynomial.eval_add,
+    Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X, smul_eq_mul]
+
+/-- **Good anchor ⟹ pencil determinant nonzero.** If `A + t·B` (equivalently the homogeneous pencil `y·A + z·B`) is
+nonsingular at *some* ratio, the univariate pencil determinant `det(A + X·B)` is not the zero polynomial. (The `y ≠ 0`
+case evaluates at `z/y`; the `y = 0` case uses that the `X^d`-coefficient is `det B`.) -/
+theorem pencilPoly_det_ne_zero (A B : Matrix (Fin d) (Fin d) K)
+    (hgood : ∃ y z : K, (y • A + z • B).det ≠ 0) :
+    (pencilPoly A B).det ≠ 0 := by
+  obtain ⟨y, z, hyz⟩ := hgood
+  intro hzero
+  apply hyz
+  by_cases hy : y = 0
+  · subst hy
+    rw [zero_smul, zero_add, Matrix.det_smul, Fintype.card_fin]
+    have hB : B.det = 0 := by
+      have hc := Polynomial.coeff_det_X_add_C_card B A
+      rw [Fintype.card_fin,
+        show ((X : K[X]) • B.map C + A.map C) = pencilPoly A B by unfold pencilPoly; rw [add_comm],
+        hzero, Polynomial.coeff_zero] at hc
+      exact hc.symm
+    rw [hB, mul_zero]
+  · have hsplit : y • A + z • B = y • (A + (z * y⁻¹) • B) := by
+      have hyz' : y * (z * y⁻¹) = z := by field_simp
+      rw [smul_add, smul_smul, hyz']
+    rw [hsplit, Matrix.det_smul, Fintype.card_fin,
+      show (A + (z * y⁻¹) • B).det = (pencilPoly A B).det.eval (z * y⁻¹) from
+        (pencilPoly_det_eval A B (z * y⁻¹)).symm,
+      hzero, Polynomial.eval_zero, mul_zero]
+
 /-- **Multiplicative bound** (`s ≥ 2`): a sum of `s`-powers with exponents `≥ 1` is at most `s` to the sum of the
 exponents. (Induction; the step is `a + b ≤ a·b` for `a, b ≥ 2`.) -/
 theorem pow_sum_mul_bound {ι : Type*} {s : ℝ} (hs : 2 ≤ s) {c : ι → ℕ} {T : Finset ι}
@@ -249,3 +286,5 @@ end ChainDescent
 #print axioms ChainDescent.sum_finrankKer_le
 #print axioms ChainDescent.pow_sum_mul_bound
 #print axioms ChainDescent.concentration_bound
+#print axioms ChainDescent.pencilPoly_det_eval
+#print axioms ChainDescent.pencilPoly_det_ne_zero

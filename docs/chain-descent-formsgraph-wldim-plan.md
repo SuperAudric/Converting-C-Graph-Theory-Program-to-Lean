@@ -1150,10 +1150,17 @@ fiber card) + `fiber_fst_card_le` (each ratio-fiber `≤ |K|`, injects via fst).
   `normT_bucket_bound`'s χ-collapse + nondeg bucket; swaps the deg bucket for `deg_bucket_le`).
 - `ScratchTBoundCorank.c0_le_const`: `NS ≤ ¾·n` from `c0_le` **at `dR := 2`** — the original `hq2 : 64·dR²≤q` becomes
   `64·2²=256 ≤ q` = the existing `hq3`, so **`hq2` is dropped**; binding hyps are just `hq1 (d≥3)` and `hq3 (q≥256)`.
-**REMAINING (mechanical wiring only):** (i) `pencilPoly_det_ne_zero` — derive the `hp` (univariate pencil det `≠0`)
-from the good anchor `hgood (∃ nondeg member)` (the homogeneous-det dehomogenization; the `y=0` case via leading coeff);
-(ii) a corank variant `c0_le_threequarters_corank` (mirror `ScratchC0Final.c0_le_threequarters` with
-`normT_bucket_bound_corank` + `c0_le_const`). VO⁻₄(q): final threshold `q ≥ 1024 → q ≥ 256`.
+**WIRING — DONE (axiom-clean). ⟹ CORANK TIGHTENING COMPLETE.**
+- `ScratchPencilCorank.pencilPoly_det_eval` (`(pencilPoly A B).det.eval t₀ = (A+t₀•B).det`, via `RingHom.map_det`+`evalRingHom`)
+  + `pencilPoly_det_ne_zero` (`(∃ y z, (y•A+z•B).det≠0) ⟹ (pencilPoly A B).det≠0`; `y≠0` → eval at `z/y`, `y=0` → the
+  `X^d`-coeff is `det B` via `Polynomial.coeff_det_X_add_C_card`).
+- `ScratchPencilRegroup.pencilDet_ne_zero_of_good` (the `hgood → hp` bridge, via `polarRad_ne_bot_iff_det_eq_zero`).
+- **`ScratchTBoundCorank.c0_le_threequarters_corank`** (THE CAPSTONE) — a **drop-in corank-tightened replacement** for
+  `ScratchC0Final.c0_le_threequarters`: same `hgood`/`hnz`/`hPu`/`hq1`/`hq3` interface (plus trivial `hd:1≤d`,
+  `hq4:4≤|K|`), **`hq2` removed**. Proves `NS ≤ ¾·|V|` (so `c₀ ≤ ¾ < 1`) with binding threshold `hq3 (q≥256)` only.
+**⟹ VO⁻₄(q) family threshold `q ≥ 1024 → q ≥ 256`, fully formalized.** Build: `ScratchPencilCorank` (11) +
+`ScratchPencilBridge` (1) + `ScratchPencilRegroup` (9) + `ScratchTBoundCorank` (3) — all axiom-clean, NOT in build.sh
+(PORT = follow-up). NEXT QUEUE ITEM = small-q tail, then hK cleanup, then increment 5.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general

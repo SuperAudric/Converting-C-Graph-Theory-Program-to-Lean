@@ -103,6 +103,21 @@ theorem sqrt_natpow (a : ℝ) (ha : 0 ≤ a) (c : ℕ) : Real.sqrt (a ^ c) = Rea
   | zero => simp
   | succ n ih => rw [pow_succ, pow_succ, Real.sqrt_mul (by positivity), ih]
 
+/-- **Good anchor ⟹ pencil determinant nonzero (the `hgood → hp` bridge).** A good anchor (a nondegenerate pencil
+member `polarRad (y•P + z•R) = ⊥`) gives the `normT_bucket_bound_corank` hypothesis: the univariate pencil determinant
+of the Gram matrices is nonzero. -/
+theorem pencilDet_ne_zero_of_good {V : Type*} [AddCommGroup V] [Module K V]
+    (b : Basis (Fin d) K V) (P R : QuadraticForm K V)
+    (hgood : ∃ y z : K, polarRad (y • P + z • R) = ⊥) :
+    (pencilPoly (LinearMap.toMatrix₂ b b (QuadraticMap.polarBilin P))
+        (LinearMap.toMatrix₂ b b (QuadraticMap.polarBilin R))).det ≠ 0 := by
+  apply pencilPoly_det_ne_zero
+  obtain ⟨y, z, hyz⟩ := hgood
+  refine ⟨y, z, ?_⟩
+  rw [← toMatrix₂_polarBilin_pencil b, ne_eq, ← polarRad_ne_bot_iff_det_eq_zero b (y • P + z • R),
+    not_not]
+  exact hyz
+
 /-- **The corank-stratified degenerate bucket bound (A-assembly).** The `ScratchTBound` degenerate-bucket sum
 `∑_{x∈s deg} √(|V|·|radical|)` is at most `2·|K|·(|V|/√|K|)` — the `d`-free bound (vs the uniform `d·|K|·(|V|/√|K|)`).
 Chains `radicalCard_eq_pow` (factor `g = √|V|·(√q)^{corank}`), `sum_comp_ratio_le`/`fiber_fst_card_le` (regroup pairs
