@@ -1390,7 +1390,7 @@ private theorem reachesRigidOrCameron_viaNoConfusionCover {IsLarge : Nat → Pro
     · exact ⟨0, Or.inr (exhaustiveObstruction_scheme hClassify S hne hprim hrank hlarge)⟩
     · exact ⟨0, Or.inl (Or.inl (hImprim hprim))⟩
   · -- No cover ⟹ every over-`B` base shatters ⟹ recovered.
-    push_neg at hcov
+    push Not at hcov
     exact reachesRigidOrCameron_viaShattering hB hClassify S hne hrank hroom
       ((S.toAssociationScheme.toCoherentConfig hne).indistinguishingHalves_of_not_bigConfusionCover B hcov)
       hcatch hImprim

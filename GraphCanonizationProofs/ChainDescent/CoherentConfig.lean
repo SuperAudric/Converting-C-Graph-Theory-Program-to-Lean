@@ -2135,7 +2135,7 @@ theorem balancedSplits_or_majority (v α β : Fin n) :
   · exact Or.inl h
   · refine Or.inr ?_
     unfold BalancedSplits at h
-    push_neg at h
+    push Not at h
     exact h
 
 /-- §CC.21 (Stage 1b) **The intersecting-majority pigeonhole — the near-pencil structure.** Majority fibers for two
@@ -2171,7 +2171,7 @@ fails to see `(α,β)`'s confusion monochromatically, that point balance-splits 
 bridge from "no geometric obstruction" to "the splitter the closure mechanics consumes." Axiom-clean. -/
 theorem exists_balancedSplits_of_not_forall_majority (α β : Fin n)
     (h : ¬ ∀ v, X.MajorityRelation v α β) : ∃ v, X.BalancedSplits v α β := by
-  push_neg at h
+  push Not at h
   obtain ⟨v, hv⟩ := h
   rcases X.balancedSplits_or_majority v α β with hb | hm
   · exact ⟨v, hb⟩
@@ -2332,7 +2332,7 @@ theorem exists_avoiding_of_not_cover (h : ¬ X.BigConfusionCover) :
   obtain ⟨v, hv⟩ := h
   refine ⟨v, fun α β hαβ hund => ?_⟩
   by_contra hlt
-  push_neg at hlt
+  push Not at hlt
   refine hv ⟨α, β, hαβ, hlt, ?_⟩
   simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and]
   exact hund
@@ -2466,7 +2466,7 @@ theorem indistinguishingNumber_pointExtension_biUnion_le (S T : Finset (Fin n)) 
     rw [W.confusionSet_eq_empty_of_relOf_v_ne hsing hsd, Finset.card_empty]
     exact Nat.zero_le M
   · -- no `s ∈ S` distinguishes it: the confusion is `⊆ C_{X_T}`, and the pair lands in `hM`.
-    push_neg at hkill
+    push Not at hkill
     have hsub : W.confusionSet α β ⊆ Y.confusionSet α β := by
       intro γ hγ
       simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and] at hγ ⊢
@@ -2710,7 +2710,7 @@ theorem boundedConfusionLoad_of_boundedMinMult {B M : Nat} (h : X.BoundedMinMult
       (Nat.add_le_add_right (le_trans Finset.card_image_le hv) 1)
   · intro α β hαβ hdist
     by_contra hlt
-    push_neg at hlt
+    push Not at hlt
     have hvmem : v ∈ Y.confusionSet α β := by
       simp only [confusionSet, Finset.mem_filter, Finset.mem_univ, true_and]
       exact hdist v (Finset.mem_insert_self v _)
@@ -2734,5 +2734,3 @@ theorem boundedConfusionMultiplicity_of_boundedMinMult {B M : Nat} (h : X.Bounde
 end CoherentConfig
 
 end ChainDescent
-
-

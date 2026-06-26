@@ -17,8 +17,17 @@
 ## STATUS (read first)
 
 > **▶▶▶▶▶ CURRENT HANDOFF (2026-06-26, SESSION 2 — read THIS first; supersedes the SESSION-1 handoff block just below).**
-> **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (NEXT) →
-> hK cleanup → increment 5.** State:
+> **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (SCOPED;
+> Route 0 IN PROGRESS) → hK cleanup → increment 5.** State:
+> - **▶ SMALL-Q TAIL — SCOPED + Route 0 STARTED this session.** Full scoping = the new "### §13 — SMALL-Q TAIL (SCOPE)"
+>   block in §13. Headline: small-q is *entirely* the degenerate bucket and m-uniform; the deg bucket has a **free `√q`**
+>   (uniform corank cap `d−1` vs the geometric `d−2`: the pencil polar is `4λB − rank-2`). **Route 0** (corank-cap `d−2`,
+>   threshold `256→16`, stepping stone): **crux lemma `pencil_polarRad_finrank_le` LANDED axiom-clean** (`ScratchPencilCorank2.lean`);
+>   remaining = concentration-`d−2` variant + re-thread → `q≥16` capstone (plan §13 STATUS).
+>   **Route 2** (exact `c₀`, no threshold, hard kernel = one degenerate-quadric count — elementary, NOT Weil) is
+>   **PRIORITIZED** as the terminating target (transferability/generalization). Threading caveat: needs `t₀−u, t₀−v`
+>   independent (strengthen `exists_hgood`/NV). One dead end recorded: S2 (the in-`M` linear-vanishing) is geometrically
+>   vacuous at the binding `λ=0` term — do not chase.
 > - **✅ CONCERN #4 (field generalization to abstract `[Field K][Fintype K]`) — DONE this session (the analytic + bridge lift).**
 >   The SESSION-1 "MAIN CARE = field/seam typing decision, lift-first" is **RESOLVED by executing the lift.** Five NEW modules
 >   (all axiom-clean `[propext, Classical.choice, Quot.sound]`, zero warnings, NOT in build): **`ScratchFieldGen.lean`**
@@ -1185,6 +1194,70 @@ fiber card) + `fiber_fst_card_le` (each ratio-fiber `≤ |K|`, injects via fst).
 **⟹ VO⁻₄(q) family threshold `q ≥ 1024 → q ≥ 256`, fully formalized.** Build: `ScratchPencilCorank` (11) +
 `ScratchPencilBridge` (1) + `ScratchPencilRegroup` (9) + `ScratchTBoundCorank` (3) — all axiom-clean, NOT in build.sh
 (PORT = follow-up). NEXT QUEUE ITEM = small-q tail, then hK cleanup, then increment 5.
+
+### §13 — SMALL-Q TAIL (SCOPE) — the degenerate-bucket sharpening (SESSION 2, 2026-06-26)
+
+**Decomposition (the binding term is m-uniform, entirely degenerate).** `c0_le`'s `hT : T ≤ q·√n + dR·n/√q` splits:
+the nondeg term `q·√n` binds only `hq1 (q^{m−1} ≥ 8)` (m-dependent but tiny, satisfied by all families); the deg term
+(corank-tightened `2·n/√q`) binds `hq3 (√q ≥ 16, q ≥ 256)`, **independent of m**. So small-q is *entirely* a
+degenerate-bucket problem, and `m`-uniform: the deg bucket `2|V|/√q` is a fixed fraction of `|V|` no matter how large `m`
+is. The bound is loose — probes show the true `c₀ ∈ [0.44, 0.49] < ½` even at `q = 5..13`.
+
+**The exact object (where the looseness lives, to the line).** From `pairCharSum_factor_gen` (`ScratchPairSep:117`) +
+`‖gaussSum²‖ = q`: `q‖T‖ = ‖∑_{y,z} χ(y)χ(z)·M(y,z)‖`, `M(y,z) = ∑_t ψ(y·I_u(t) + z·I_v(t))`. Phase is discarded at
+**three nested slacks**: **(S1)** the triangle inequality over `(y,z)` in `normT_le` (`ScratchPairSep:803-810`);
+**(S2)** inside each `M`, `‖M‖²` charged `qᵈ·|radical F|` but *exactly* `= qᵈ·|∑_{h∈rad}ψ(−L h)|`
+(`ScratchPairSep:616`), `= 0` unless the linear part `L ⊥ radical` — discarded at `:672-675`; **(S3)** the **uniform
+corank cap** `radical_card_mul_card_le` (`ScratchCorank:77`) charges every member `|radical| ≤ q^{d−1}` (corank ≤ `d−1`).
+
+**Two geometric facts that decide the routes.** Each `pairForm Q a` has polar Gram `4Q(a)·B − 2(Ba)(Ba)ᵀ` (rank-1
+perturbation of `4Q(a)B`; `B = polar_Q`, `polar_pairForm` lemma). So the pencil polar is `4λB − 2(y φ_a⊗φ_a + z φ_b⊗φ_b)`,
+`λ = yQ(a)+zQ(b)`, `φ_a = B a`, a **rank-2** perturbation. Consequences:
+1. **Max corank is `d−2`, not `d−1`.** `λ≠0`: `4λB` (invertible) − rank-2 ⟹ corank ≤ 2. `λ=0` (one projective point):
+   `−2·(rank ≤ 2)` ⟹ corank = `d−2`. So `max corank = d−2` for `d ≥ 4`, good anchor (`a=t₀−u, b=t₀−v` **independent**).
+   **⟹ S3 is loose by exactly one corank level = a free `√q`.**
+2. **S2 is geometrically VACUOUS at the binding (`λ=0`) term** — DEAD END, do not chase. At `λ=0`, `radical = a^⊥∩b^⊥`
+   and `L(h) = 4zQ(b)·B(h, u−v)`; since `u−v = a−b ∈ span(a,b) = radical^⊥`, `L|_radical ≡ 0`, so `M ≠ 0` at full
+   magnitude there. The "M vanishes off the linear locus" idea gives nothing for the term that actually binds.
+
+**The three routes.**
+- **Route 0 — geometric corank cap `d−2` (STEPPING STONE, IN PROGRESS).** Prove a pencil-specific `|radical F_{y,z}| ≤
+  q^{d−2}` (lemma `pencil_polarRad_finrank_le` in **`ScratchPencilCorank2.lean`**, NEW: `finrank(polarRad F) ≤ d−2` for
+  `y,z≠0`, `a,b` independent, `Q` nondeg, `d≥4`; case-split `λ=0` ⟹ `radical ⊆ a^⊥∩b^⊥` (codim 2) / `λ≠0` ⟹
+  `radical ⊆ span{a,b}` (dim ≤2)). Feed to the existing concentration/bucket machinery with cap `d−2` (needs a
+  `concentration_bound` variant: cap `d−2`, `∑c≤d` ⟹ `≤ 2(√q)^{d−2}`). Deg term drops `2n/√q → 2n/q`, so the binding
+  step `deg ≤ n/8` becomes **`q ≥ 16` (down from 256)**. No new analytic input, no Weil — a local bound swap. Cheapest
+  certain win; **does NOT terminate** (residue `{q<16}` still has large-`n` members for large `d`).
+- **Route 1 — finite (`≤d`-term) cancellation among degenerate ratios.** Regroup `(y,z)` by projective lines *before*
+  S1: each line collapses to a zero-count fluctuation `χ(y₀)χ(z₀)(q·Z_J − qᵈ)` (complete additive sum in `λ`, `χ(λ²)=1`;
+  reuses `count_eq_charsum`/`zeroCount_sq_le`). This is a **`≤ d`-term** cancellation (the degenerate points), **not** a
+  `q`-term line sum, so genuinely no-Weil. Targets the residual `λ=0` term after Route 0 → reaches `hq1`.
+- **Route 2 — exact `c₀` (D3d-exact) — PRIORITIZED for termination/transfer.** Same line-regroup, but evaluate
+  `q·Z_J − qᵈ` exactly. Hard kernel = the zero-count of **one degenerate (corank `d−2`) quadric + linear term**, which is
+  *elementary* (`card_quadForm_eq`/`sum_addChar_quadForm`, `GaussCount`), **NOT** the irreducible-high-degree Weil case the
+  project avoids. **No threshold ⟹ no tail at all.** Cleanest endpoint, most work — chosen as the real target because
+  termination generalizes/transfers to the other forms-graph families (Layer C).
+
+**Framing correction.** The *nondeg* `q√n` term does hide a genuine Weil sum (`∑_{[y:z]}χ` over the pencil line), but the
+project never needs to beat it (`hq1` absorbs it). All three routes touch only the **degenerate** term ⟹ all stay Weil-free.
+
+**Threading caveat (must verify).** Route 0/1/2 all need `a = t₀−u`, `b = t₀−v` **linearly independent** (else `a,b`
+dependent ⟹ pencil corank can be `d−1`, the cap fails). The good-anchor existence (`exists_hgood`, NV / `ScratchIncr4d`)
+must be checked/strengthened to supply `t₀` off the affine line through `u,v`. Honest caveat: threshold-lowering (Route 0/1)
+shrinks but does **not** terminate the tail — `decide`-per-instance never scales (`n=q^d` astronomically large even at
+`q<16`, `d≤2M₀`); only Route 2 (no threshold) or a uniform structural small-`q` argument terminates. Hence Route 2 is the
+priority; Route 0 is a cheap, certain, decoupled `16×` stepping stone taken first.
+
+**STATUS (2026-06-26):** Route 0 — **crux lemma LANDED, axiom-clean** (`ScratchPencilCorank2.lean`, NOT in build):
+`polar_pairForm` (polar of `pairForm Q a` = `4Q(a)·polar − 2·polar(·,a)·polar(·,a)`) + **`pencil_polarRad_finrank_le`**
+(`finrank(polarRad(y•pairForm Q a + z•pairForm Q b)) ≤ finrank V − 2` for `y,z≠0`, `a,b` independent, `Q.polarBilin`
+nondeg, `finrank V ≥ 4`) — both `[propext, Classical.choice, Quot.sound]`. The case-split is exactly the geometry above
+(`λ≠0` ⟹ `radical ⊆ span{a,b}` via `hnd`-on-`(4λ)•h − (2y·polar h a)•a − (2z·polar h b)•b`; `λ=0` ⟹
+`radical ⊆ ker φ_a ⊓ ker φ_b`, codim 2 via `mem_span_of_iInf_ker_le_ker` for the `ker φ_a ⊊` step). **NEXT (remaining
+Route 0):** (L2) a `concentration_bound` variant with cap `d−2` (`∑c≤d`, `c≤d−2` ⟹ `≤ 2(√q)^{d−2}`); (L3) re-thread
+through `deg_bucket_le`/`normT_bucket_bound_corank`/`c0_le` with the `d−2` cap (mirror the corank-tightening plumbing)
+→ `q≥16` capstone; (thread) confirm/strengthen `exists_hgood`/NV to supply `t₀−u, t₀−v` independent (the lemma's
+hypothesis). **Route 2** (exact `c₀`) is the prioritized terminating target after this stepping stone.
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
