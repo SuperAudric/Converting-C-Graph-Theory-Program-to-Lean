@@ -203,6 +203,20 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   (composes the adapter with `reachesRigidOrCameron_viaIsotropySeparates_wittFree`: the abstract-K predicate at a bounded base
   seals the `VO^ε` residue mod `{G3}`, no Witt/`hSmallAutThin`). **Confirms `affineE` is exactly "a single endpoint conversion
   at the scheme seam"** — analytic content over abstract `K`/`V`, only this thin relabel touches the `Fin(p^d)` scheme machinery.
+- **`ScratchBridgeK.lean`** (NEW 2026-06-26, axiom-clean, zero warnings, NOT in build; imports `ScratchFieldGen`) —
+  **CONCERN #4, bridge soft endpoint:** `zProfileSeparatesK_of_zSep` (a `Z`-separating base ⟹ `ZProfileSeparatesK`, pure logic).
+- **`ScratchLemmaAK.lean`** (NEW 2026-06-26, axiom-clean, zero warnings, NOT in build; imports `ScratchFieldGen`) —
+  **CONCERN #4, the bridge analytic core:** the full abstract-`K` lift of `ScratchLemmaA` (~20 lemmas — `levelset_count_eqK`,
+  `configGaussSum_eq_detK`, `reduction_to_levelset_nondegK`, `configFormK`(+`_apply`), `s0_boundary_collapseK`, …). Mechanical
+  (`GaussCount` already abstract over a finite field; `ZMod p`→`K`, `(p:R')`→`(Fintype.card K:R')`, drop `NeZero`/`ZMod.card`).
+- **`ScratchBridgeAllK.lean`** (NEW 2026-06-26, axiom-clean, zero warnings, NOT in build; imports `ScratchLemmaAK` +
+  `ScratchPairSep` + `ScratchBridgeD`) — **CONCERN #4, the FULL bridge over abstract `K`** (K-lift of `ScratchBridge{A,B,C,D}` +
+  `cone_count_zero_split` in one module): `cone_count_zero_splitK`, `fullcount_eq_jointIsoCountK_add_corr`,
+  `levelset_count_collapseK`, `fullcount_pair_{eq_levelset,closed}K`, `configPolarDet_eq_pairFormK`, `chi_configDet_eq_chi_pairFormK`,
+  `chi_eq_one_or_neg_oneK`, `jointIsoCountK_pair_closed_corr0`, and the **per-pair capstone `jointIsoCountK_ne_of_chiSep_pair`**
+  (χ(pairForm)-separation ⟹ `jointIsoCountK Q u {t,t₀} ≠ jointIsoCountK Q v {t,t₀}`; carries `2 < Fintype.card K` + `hK`; **reuses
+  the already-abstract `pairCount_ne_of_chiSep_field`/`chiSep_imp_zSep_field` from `ScratchBridgeD`**). **⟹ Concern #4's analytic +
+  bridge lift is COMPLETE** (over abstract `[Field K][Fintype K]`); only the q=pᵉ SCHEME seam (`efield` transport, Layer D) remains.
 - **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
   **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
   atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
