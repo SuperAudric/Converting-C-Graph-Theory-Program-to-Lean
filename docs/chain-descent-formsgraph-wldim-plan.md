@@ -62,9 +62,11 @@
 > (`β ≤ #{¬hgood}+2`) + the SZ reduction `bad_anchor_count_le_of_poly` + `notHgood_eval_zero_of_repr`, AND **the representing
 > polynomial `P = pencilDetPoly` is now CONSTRUCTED** (`ScratchIncr4c`: full coordinatization of the pencil determinant,
 > `pencilDetPoly_eval` + `pencilDetPoly_ne_zero`) → capstone **`badHgood_count_le`: `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|
-> = O(d/q)`**. **β is CLOSED modulo:** (i) non-vacuity `hgood` (∃ good anchor for `u≠v`, a hypothesis); (ii) the trivial
-> `β ≤ #{¬hgood}+2` Nat-composition (deferred to inc-5, cosmetic `DecidablePred` mismatch); (iii) optional
-> `totalDegree(pencilDetPoly) ≤ 2d` polish. Then **increment 5** (laid out in §13 "INCREMENT 5
+> = O(d/q)`**. **β is now CLOSED to an EXPLICIT bound modulo ONLY non-vacuity (2026-06-26, B-iii + B-ii landed,
+> `ScratchIncr4c`, axiom-clean):** `pencilDetPoly_totalDegree_le` (`≤ 2d`, via `det_totalDegree_le_gen`) + `beta_count_closed`
+> (`β·|K| ≤ 2d·|V| + 2·|K| = O(d/q)`, cross-module `DecidablePred` bridged by `convert … <;> congr!`). The lone remaining β
+> obligation is **(i) non-vacuity `hgood`** (∃ good anchor for `u≠v` = distinct radicals — item **NV**, carried as the `t₀₀`
+> hypothesis); items (ii) Nat-composition + (iii) `totalDegree ≤ 2d` are DONE. Then **increment 5** (laid out in §13 "INCREMENT 5
 > — WHAT'S EXPECTED", to be REPLACED by a "how it went" writeup once built): `c̄₀<1` arithmetic →
 > ℕ-package into `exists_separating_base` (`m=O(d log q)`) → `fail ⟺ ¬(bridge criterion)` (the coordinate seam `Fin(p^d)`/`affineE`
 > ↔ abstract `V`) → `zProfileSeparates_of_zSep` → seal.
@@ -220,11 +222,15 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `LPoly`/`QPoly` (`polar Q w (t₀−c)`, `Q(t₀−c)`); the general `polar_pairForm_apply`; the Gram-entry `entryPoly`/
   `entryPoly_eval`; **`pencilDetPoly := det(Matrix.of (C y₀·entryPoly_u + C z₀·entryPoly_v))`** with
   **`pencilDetPoly_eval`** (represents the pencil det, via `RingHom.map_det` + per-entry) and **`pencilDetPoly_ne_zero`**
-  (nonzero from a good-anchor witness). Capstone **`badHgood_count_le`: `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`**
-  (= `O(d/q)` density). **So β is CLOSED modulo:** (i) the non-vacuity `hgood` (∃ good anchor for `u≠v` = distinct radicals
-  — a hypothesis), (ii) the trivial `β ≤ #{¬hgood}+2` Nat-composition with `bad_anchor_card_le_hgood` (deferred to inc-5 to
-  dodge a cosmetic cross-module `DecidablePred` mismatch), (iii) optionally a `totalDegree(pencilDetPoly) ≤ 2d` polish (for
-  the explicit `O(d/q)`; the bound currently reads in terms of `totalDegree(P)`).
+  (nonzero from a good-anchor witness). Capstone **`badHgood_count_le`: `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`**.
+  **B-iii (2026-06-26):** the explicit degree cap **`pencilDetPoly_totalDegree_le : totalDegree ≤ 2·d`** via the
+  bounded-degree generalization **`det_totalDegree_le_gen`** (`totalDegree ≤ D` entries ⟹ `det ≤ D·d`) + per-layer caps
+  (`coordPoly`/`LPoly` `≤ 1`; `gramQuadPoly`/`QPoly`/`entryPoly` `≤ 2`). **B-ii (2026-06-26):** the explicit composition
+  **`beta_count_closed`: `β·|K| ≤ 2d·|V| + 2·|K| = O(d/q)`** (combines `badHgood_count_le` + `pencilDetPoly_totalDegree_le`
+  + `bad_anchor_card_le_hgood`; cross-module `DecidablePred` mismatch bridged by `convert … <;> congr!`). **So β is CLOSED
+  to an explicit `O(d/q)` bound modulo ONLY (i) non-vacuity `hgood`** (∃ good anchor for `u≠v` = distinct radicals — item
+  **NV**, carried as the `t₀₀` hypothesis). Items (ii) Nat-composition + (iii) `totalDegree ≤ 2d` are DONE (B-ii/B-iii). 20
+  axiom-clean lemmas total.
 - **`ScratchCorank.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **corank ≥ 2 enabler** for 3e-ii:
   **`radical_card_mul_card_le`** (`F ≠ 0 ⟹ |radical F| · |K| ≤ |V|`, i.e. `|radical| ≤ q^{d−1}` UNIFORMLY over all coranks —
   the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
@@ -1541,9 +1547,21 @@ the pencil det at a fixed witness, via `polarRad_ne_bot_iff_det_eq_zero`). **`P`
 axiom-clean lemmas)** — `coordPoly_eval_linFunc` (workhorse), `gramQuadPoly_eval` (via `polar_t0_t0_sum`), `LPoly`/`QPoly`,
 `polar_pairForm_apply`, `entryPoly_eval`, **`pencilDetPoly`** + `pencilDetPoly_eval` (`RingHom.map_det`) +
 `pencilDetPoly_ne_zero` → capstone **`badHgood_count_le`: `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V| = O(d/q)`**.
-**β CLOSED modulo:** (i) non-vacuity `hgood` (∃ good anchor for `u≠v` = distinct radicals, a hypothesis); (ii) the trivial
-`β ≤ #{¬hgood}+2` Nat-composition (deferred to inc-5, cosmetic `DecidablePred` mismatch); (iii) optional
-`totalDegree(pencilDetPoly) ≤ 2d` polish for the explicit `O(d/q)`.
+
+**▶▶▶ B-iii + B-ii DONE (2026-06-26, `ScratchIncr4c.lean`, all axiom-clean) — `β` now closed to an EXPLICIT `O(d/q)` bound.**
+- **B-iii (`totalDegree(pencilDetPoly) ≤ 2d`):** the bounded-degree generalization `det_totalDegree_le_gen` (entries of
+  `totalDegree ≤ D` over any variable type ⟹ `det.totalDegree ≤ D·d`, generalizing `ScratchGoodAnchor.det_totalDegree_le`)
+  + the per-layer caps `coordPoly_totalDegree_le`/`LPoly_totalDegree_le` (`≤ 1`),
+  `gramQuadPoly_totalDegree_le`/`QPoly_totalDegree_le`/`entryPoly_totalDegree_le` (`≤ 2`) ⟹
+  **`pencilDetPoly_totalDegree_le : totalDegree ≤ 2·d`** (det of `d×d` quadratic-entry matrix, `D=2`).
+- **B-ii (the explicit composition):** **`beta_count_closed`** combines `badHgood_count_le` + `pencilDetPoly_totalDegree_le`
+  + `ScratchIncr4b.bad_anchor_card_le_hgood` (`β ≤ #{¬hgood}+2`) into the full **`β·|K| ≤ 2d·|V| + 2·|K|`** (density
+  `β/|V| ≤ 2d/q + 2/|V| = O(d/q)`). The cross-module `Classical.propDecidable` mismatch on the `{¬hgood}` filter is bridged
+  by `convert … using 2 <;> congr!` (the instances are subsingletons); no longer deferred.
+- **β CLOSED modulo ONLY (i): non-vacuity `hgood`** (∃ good anchor for `u≠v` = distinct radicals — increment-4 item **NV**,
+  the lone deep remaining piece; carried as the `t₀₀` hypothesis of `beta_count_closed`/`pencilDetPoly_ne_zero`). Items
+  (ii) Nat-composition and (iii) `totalDegree ≤ 2d` are now DONE (above). [historical: (ii)/(iii) were tagged
+  deferred/optional; both landed 2026-06-26.]
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** Once `c` (`≤ 15/16·|V|`, DONE) and `β`
 (`≤ C·|V|/q`) are in hand, increment 5 produces the separating base and discharges `ZProfileSeparates`:

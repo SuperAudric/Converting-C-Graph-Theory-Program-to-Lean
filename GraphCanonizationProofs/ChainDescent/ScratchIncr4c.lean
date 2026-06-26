@@ -174,6 +174,98 @@ theorem pencilDetPoly_ne_zero [Fintype K] [DecidableEq K] [Invertible (2 : K)]
   rw [pencilDetPoly_eval] at hev
   exact (polarRad_ne_bot_iff_det_eq_zero b _).mpr hev hgood
 
+/-! ### B-iii — the explicit degree bound `totalDegree (pencilDetPoly) ≤ 2·d`.
+
+`badHgood_count_le`'s `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|` is only an *explicit* `O(d/q)` density once
+the determinant's degree is pinned. The layers cap cleanly: `coordPoly`/`LPoly` are linear (`≤ 1`),
+`gramQuadPoly`/`QPoly`/`entryPoly` are quadratic (`≤ 2`), and the determinant of a `d × d` matrix of quadratic
+entries has `totalDegree ≤ 2·d` (`det_totalDegree_le_gen`, the bounded-degree generalization of
+`ScratchGoodAnchor.det_totalDegree_le`). -/
+
+/-- **Per-entry degree bound for a determinant (general `D`).** Generalizes `ScratchGoodAnchor.det_totalDegree_le`
+(linear pencil, `D = 1`, `Fin 2` variables) to entries of `totalDegree ≤ D` over any variable type: the determinant
+of a `d × d` matrix has `totalDegree ≤ D · d`. -/
+theorem det_totalDegree_le_gen {R : Type*} [CommRing R] {n : ℕ} {τ : Type*}
+    (M : Matrix (Fin n) (Fin n) (MvPolynomial τ R)) (D : ℕ)
+    (hM : ∀ i j, (M i j).totalDegree ≤ D) :
+    M.det.totalDegree ≤ D * n := by
+  rw [Matrix.det_apply]
+  refine (MvPolynomial.totalDegree_finset_sum _ _).trans (Finset.sup_le (fun σ _ => ?_))
+  refine (MvPolynomial.totalDegree_smul_le _ _).trans ?_
+  refine (MvPolynomial.totalDegree_finset_prod _ _).trans ?_
+  calc ∑ i : Fin n, (M (σ i) i).totalDegree
+      ≤ ∑ _i : Fin n, D := Finset.sum_le_sum (fun i _ => hM (σ i) i)
+    _ = D * n := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul]; exact mul_comm n D
+
+theorem coordPoly_totalDegree_le (g : Fin d → K) : (coordPoly g).totalDegree ≤ 1 := by
+  rw [coordPoly]
+  refine (MvPolynomial.totalDegree_finset_sum _ _).trans (Finset.sup_le (fun k _ => ?_))
+  refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+  have hX := MvPolynomial.totalDegree_X (σ := Fin d) (R := K) k
+  rw [MvPolynomial.totalDegree_C]; omega
+
+theorem gramQuadPoly_totalDegree_le [Invertible (2 : K)] (Q : QuadraticForm K V) :
+    (gramQuadPoly b Q).totalDegree ≤ 2 := by
+  rw [gramQuadPoly]
+  refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+  rw [MvPolynomial.totalDegree_C, zero_add]
+  refine (MvPolynomial.totalDegree_finset_sum _ _).trans (Finset.sup_le (fun k _ => ?_))
+  refine (MvPolynomial.totalDegree_finset_sum _ _).trans (Finset.sup_le (fun l _ => ?_))
+  refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+  rw [MvPolynomial.totalDegree_C, zero_add]
+  refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+  have hX1 := MvPolynomial.totalDegree_X (σ := Fin d) (R := K) l
+  have hX2 := MvPolynomial.totalDegree_X (σ := Fin d) (R := K) k
+  omega
+
+theorem LPoly_totalDegree_le (Q : QuadraticForm K V) (w c : V) :
+    (LPoly b Q w c).totalDegree ≤ 1 := by
+  rw [LPoly]
+  refine (MvPolynomial.totalDegree_sub _ _).trans ?_
+  rw [max_le_iff]
+  exact ⟨coordPoly_totalDegree_le _, by rw [MvPolynomial.totalDegree_C]; exact Nat.zero_le 1⟩
+
+theorem QPoly_totalDegree_le [Invertible (2 : K)] (Q : QuadraticForm K V) (c : V) :
+    (QPoly b Q c).totalDegree ≤ 2 := by
+  rw [QPoly]
+  refine (MvPolynomial.totalDegree_sub _ _).trans ?_
+  rw [max_le_iff]
+  refine ⟨?_, (coordPoly_totalDegree_le _).trans (by norm_num)⟩
+  refine (MvPolynomial.totalDegree_add _ _).trans ?_
+  rw [max_le_iff]
+  exact ⟨gramQuadPoly_totalDegree_le b Q, by rw [MvPolynomial.totalDegree_C]; exact Nat.zero_le 2⟩
+
+theorem entryPoly_totalDegree_le [Invertible (2 : K)] (Q : QuadraticForm K V) (a : V) (i j : Fin d) :
+    (entryPoly b Q a i j).totalDegree ≤ 2 := by
+  rw [entryPoly]
+  refine (MvPolynomial.totalDegree_sub _ _).trans ?_
+  rw [max_le_iff]
+  refine ⟨?_, ?_⟩
+  · refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+    rw [MvPolynomial.totalDegree_C, zero_add]
+    exact QPoly_totalDegree_le b Q a
+  · refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+    rw [MvPolynomial.totalDegree_C, zero_add]
+    refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+    have h1 := LPoly_totalDegree_le b Q (b i) a
+    have h2 := LPoly_totalDegree_le b Q (b j) a
+    omega
+
+/-- **`totalDegree (pencilDetPoly) ≤ 2·d`** (B-iii). The determinant of the `d × d` matrix of quadratic Gram-entry
+polynomials, via `det_totalDegree_le_gen` at `D = 2` (each entry `C y₀·entryPoly_u + C z₀·entryPoly_v` is quadratic). -/
+theorem pencilDetPoly_totalDegree_le [Invertible (2 : K)] (Q : QuadraticForm K V) (y₀ z₀ : K) (u v : V) :
+    (pencilDetPoly b Q y₀ z₀ u v).totalDegree ≤ 2 * d := by
+  rw [pencilDetPoly]
+  refine det_totalDegree_le_gen _ 2 (fun i j => ?_)
+  rw [Matrix.of_apply]
+  refine (MvPolynomial.totalDegree_add _ _).trans ?_
+  rw [max_le_iff]
+  refine ⟨?_, ?_⟩ <;>
+  · refine (MvPolynomial.totalDegree_mul _ _).trans ?_
+    rw [MvPolynomial.totalDegree_C, zero_add]
+    exact entryPoly_totalDegree_le b Q _ i j
+
 open scoped Classical in
 /-- **`#{¬hgood}` bounded — the bad-anchor Schwartz–Zippel count.** Instantiating `bad_anchor_count_le_of_poly` at the
 constructed `P = pencilDetPoly` (nonzero by the good-anchor witness, representing by `pencilDetPoly_eval`):
@@ -189,13 +281,48 @@ theorem badHgood_count_le [Fintype K] [DecidableEq K] [Fintype V] [Invertible (2
     (pencilDetPoly_ne_zero b Q y₀ z₀ u v t₀₀ hgood)
     (notHgood_eval_zero_of_repr b Q y₀ z₀ u v _ (pencilDetPoly_eval b Q y₀ z₀ u v))
 
-/- **β CLOSED (modulo non-vacuity).** Composing `badHgood_count_le` (`#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`,
-this module) with the landed `ScratchIncr4b.bad_anchor_card_le_hgood` (`β ≤ #{¬hgood} + 2`) bounds the full bad-anchor
-count `β·|K| ≤ (pencilDetPoly).totalDegree·|V| + 2·|K|` — density `β/|V| ≤ totalDegree/q + O(1/|V|) = O(d/q)`. The only
-premise is the **non-vacuity** `hgood` (∃ good anchor for `u≠v`, the "distinct radicals" condition). This final Nat-
-arithmetic composition is deferred to the increment-5 assembly, where the matching's `fail`/good-anchor `DecidablePred`
-instances are fixed in one place (combining the two lemmas here hits a cross-module `Classical.propDecidable` mismatch
-on the `{¬hgood}` filter — cosmetic, not mathematical). -/
+include b in
+open scoped Classical in
+/-- **B-ii — `β` closed to an explicit `O(d/q)` bound.** Composing `badHgood_count_le` (`#{¬hgood}·|K| ≤
+(pencilDetPoly).totalDegree·|V|`) with B-iii (`pencilDetPoly_totalDegree_le`, `totalDegree ≤ 2d`) and the landed
+`ScratchIncr4b.bad_anchor_card_le_hgood` (`β ≤ #{¬hgood} + 2`): the **full** bad-anchor count
+`β = #{t₀ : ¬(hnz ∧ hgood ∧ hPu ∧ hPv)}` obeys `β·|K| ≤ 2d·|V| + 2·|K|`, i.e. density `β/|V| ≤ 2d/q + 2/|V| = O(d/q)`.
+The only premise is **non-vacuity** `hgood` (∃ good anchor for `u≠v`, the "distinct radicals" condition — increment-4
+item NV). Both `{¬hgood}` filters use `Classical.propDecidable` (`open scoped Classical`), so the composition is clean. -/
+theorem beta_count_closed [Fintype K] [DecidableEq K] [Fintype V] [DecidableEq V] [Invertible (2 : K)]
+    (Q : QuadraticForm K V) (y₀ z₀ : K) (u v t₀₀ : V)
+    (hgood : polarRad (y₀ • pairForm Q (t₀₀ - u) + z₀ • pairForm Q (t₀₀ - v)) = ⊥) :
+    (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+            y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+          ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+          ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card * Fintype.card K
+      ≤ 2 * d * Fintype.card V + 2 * Fintype.card K := by
+  -- restate the cross-module reduction with *this* module's `Classical.propDecidable` instances
+  -- (the predicates are identical; only the `DecidablePred` instances differ, and they are subsingletons)
+  have h1 : (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card
+      ≤ (univ.filter (fun t₀ : V => ¬ ∃ y z : K,
+            polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)).card + 2 := by
+    convert bad_anchor_card_le_hgood (K := K) Q u v using 2 <;> congr!
+  have key : (univ.filter (fun t₀ : V => ¬ ∃ y z : K,
+        polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)).card * Fintype.card K
+      ≤ 2 * d * Fintype.card V :=
+    le_trans (badHgood_count_le b Q y₀ z₀ u v t₀₀ hgood)
+      (Nat.mul_le_mul_right _ (pencilDetPoly_totalDegree_le b Q y₀ z₀ u v))
+  calc (univ.filter (fun t₀ : V => ¬ ((∀ y z : K, y ≠ 0 → z ≠ 0 →
+              y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v) ≠ 0)
+            ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)
+            ∧ pairForm Q (t₀ - u) ≠ 0 ∧ pairForm Q (t₀ - v) ≠ 0))).card * Fintype.card K
+      ≤ ((univ.filter (fun t₀ : V => ¬ ∃ y z : K,
+            polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)).card + 2)
+          * Fintype.card K :=
+        Nat.mul_le_mul_right _ h1
+    _ = (univ.filter (fun t₀ : V => ¬ ∃ y z : K,
+            polarRad (y • pairForm Q (t₀ - u) + z • pairForm Q (t₀ - v)) = ⊥)).card * Fintype.card K
+          + 2 * Fintype.card K := by ring
+    _ ≤ 2 * d * Fintype.card V + 2 * Fintype.card K := Nat.add_le_add_right key _
 
 end ChainDescent
 
@@ -210,4 +337,12 @@ end ChainDescent
 #print axioms ChainDescent.entryPoly_eval
 #print axioms ChainDescent.pencilDetPoly_eval
 #print axioms ChainDescent.pencilDetPoly_ne_zero
+#print axioms ChainDescent.det_totalDegree_le_gen
+#print axioms ChainDescent.coordPoly_totalDegree_le
+#print axioms ChainDescent.gramQuadPoly_totalDegree_le
+#print axioms ChainDescent.LPoly_totalDegree_le
+#print axioms ChainDescent.QPoly_totalDegree_le
+#print axioms ChainDescent.entryPoly_totalDegree_le
+#print axioms ChainDescent.pencilDetPoly_totalDegree_le
 #print axioms ChainDescent.badHgood_count_le
+#print axioms ChainDescent.beta_count_closed
