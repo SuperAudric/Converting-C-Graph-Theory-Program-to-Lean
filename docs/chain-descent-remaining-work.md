@@ -132,9 +132,12 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     **`ScratchMatching.exists_separating_base` (LANDED, axiom-clean)** (`m=O(d log q)`, needs a `c̄₀ᵐ`-smallness ℕ helper)
 >     ⟹ separating base; define matching `fail := ¬(bridge criterion)` so `¬fail ⟹` separation IS
 >     `jointIsoCount_ne_of_chiSep_pair` (its `corr`/`hv`/`hw` discharged by C-corr/C-basis; per-pair anchor existence = NV
->     `exists_hgood`); **MAIN CARE = the field/seam typing decision** (`Fin(p^d)`/`ZMod p` bridge ↔ abstract-`K` analytic core —
->     lift bridge+Crux to abstract `K` first, recommended); then `zProfileSeparates_of_zSep` → seal. Plus the **decoupled #1
->     corank tightening** (`q≳d²`→`q≳const`). Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED" + top PICK UP HERE.
+>     `exists_hgood`); then `zProfileSeparates_of_zSep` → seal. **MAIN CARE (field/seam typing) ✅ RESOLVED 2026-06-26 — the
+>     lift-first is DONE** (concern #4: `ScratchFieldGen`/`ScratchFieldGenAdapter`/`ScratchBridgeK`/`ScratchLemmaAK`/`ScratchBridgeAllK`,
+>     all axiom-clean), so increment 5 wires over **abstract `K`** with the K-named lemmas (`jointIsoCountK_ne_of_chiSep_pair` →
+>     `zProfileSeparatesK_of_zSep` → `isotropySeparatesK_of_zProfileSeparatesK` → `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`
+>     for q=p). Plus the **decoupled #1 corank tightening** (`q≳d²`→`q≳const`, now SCOPED — plan §13 "CORANK TIGHTENING (SCOPE)").
+>     Full layout: plan §13 "INCREMENT 5 — WHAT'S EXPECTED" + top SESSION-2 handoff.
 >   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ScratchBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
 >     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
 >     χ-separating base) →[`pairCount_ne_of_chiSep_field` (**B1b**, ℂ) + the per-pair closed form `jointIsoCount_pair_closed_corr0`
@@ -145,10 +148,12 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     killed by `χ`) + the ℂ assembly. Carried: `hK : gaussSum²·∑ψ(Q)≠0` (independent Gauss nonvanishing). ★ **FINDING:** the `corr`
 >     term ([both config-diffs isotropic], codim-2, `O(1/q²)`) ⟹ increment-4 good-pair predicate gains `corr=0` → `{hgood ∧ hnz ∧ corr=0}`.
 >     NO Weil, NO `R'→ℕ` descent (worked over ℂ), NOT a hidden wall. (Plan §13 BRIDGE block; prime-field model `q=p`.)
->   - ★ **Field generalization** (medium refactor): `c0_le_threequarters` is already abstract `[Field K]` (prime-power `q`
->     covered analytically — subsumes the old "uniform kernel"/"q-prime-first"); but `ScratchCrux`/`ZProfileSeparates` are
->     `ZMod p` only and must lift to **abstract `[Field K] [Fintype K]`** (per AUDIT-A — a typeclass refactor, NOT a `GaloisField`
->     construction). Plus small-`q`/threshold handling.
+>   - ✓ **Field generalization (concern #4) — DONE 2026-06-26 (the analytic + bridge lift).** `c0_le_threequarters` was already
+>     abstract `[Field K]`; the rest (`ScratchCrux`/`ZProfileSeparates`/`IsotropySeparatesAtBase` + the bridge) is now lifted to
+>     **abstract `[Field K][Fintype K]`** V-indexed (`ScratchFieldGen`+`ScratchLemmaAK`+`ScratchBridgeAllK`+`ScratchBridgeK`), with
+>     the q=p adapter `ScratchFieldGenAdapter` connecting to the in-build seal capstone. GaussCount was already abstract ⟹ the lift
+>     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate); + small-`q`/threshold handling
+>     (the "small-q tail" item, coupled with corank tightening).
 > - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ScratchCrux) +
 >   `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248), both axiom-clean (no Witt, no `hSmallAutThin`). ⟹ once
 >   Layer A lands, **affine-polar `VO^ε` is sealed modulo `{G3}` + the seam.**

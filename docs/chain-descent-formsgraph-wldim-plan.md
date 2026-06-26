@@ -16,17 +16,46 @@
 
 ## STATUS (read first)
 
-> **▶▶▶▶ CURRENT HANDOFF (2026-06-26, updated) — read THIS first; the dated blocks below are chronological history.** The
+> **▶▶▶▶▶ CURRENT HANDOFF (2026-06-26, SESSION 2 — read THIS first; supersedes the SESSION-1 handoff block just below).**
+> **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (SCOPED, building) → small-q tail →
+> hK cleanup → increment 5.** State:
+> - **✅ CONCERN #4 (field generalization to abstract `[Field K][Fintype K]`) — DONE this session (the analytic + bridge lift).**
+>   The SESSION-1 "MAIN CARE = field/seam typing decision, lift-first" is **RESOLVED by executing the lift.** Five NEW modules
+>   (all axiom-clean `[propext, Classical.choice, Quot.sound]`, zero warnings, NOT in build): **`ScratchFieldGen.lean`**
+>   (V-indexed `V=Fin d→K` predicates + reductions: `isoClassK`, `coords_determineK`, `jointIsoCountK`, `ZProfileSeparatesK`,
+>   `QProfileSeparatesAtBaseK`, `IsotropySeparatesAtBaseK`, D1 `qProfileSeparatesAtBaseK_of_zProfileSeparatesK`, end-to-end
+>   `isotropySeparatesK_of_zProfileSeparatesK`, D2 `jointIsoCountK_eq_restricted`); **`ScratchFieldGenAdapter.lean`** (the q=p
+>   adapter: `isotropySeparatesAtBase_of_K` + capstone `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` — the abstract-K
+>   predicate REACHES the in-build seal capstone for q=p, via an `affineE` relabel); **`ScratchBridgeK.lean`** (soft endpoint
+>   `zProfileSeparatesK_of_zSep`); **`ScratchLemmaAK.lean`** (full K-lift of `ScratchLemmaA`, ~20 lemmas, the Gauss analytic core);
+>   **`ScratchBridgeAllK.lean`** (full K-lift of `ScratchBridge{A,B,C,D}` + `cone_count_zero_split`, capstone
+>   **`jointIsoCountK_ne_of_chiSep_pair`** — χ(pairForm)-sep ⟹ `jointIsoCountK` differ; carries `2<Fintype.card K` + `hK`;
+>   reuses the already-abstract `pairCount_ne_of_chiSep_field`). **⟹ increment 5 should now wire over abstract `K`** (the
+>   coordinate seam dissolves). KEY scoping finding: the whole analytic chain is field-generic in substance; only `affineE` +
+>   the scheme machinery (`affineScheme`/`similitudeGroup`) is the seam, staying at the capstone boundary. The **only** remaining
+>   concern-#4 piece is the **q=pᵉ SCHEME seam** (`efield` transport, Layer D — separate; the q=p adapter is the template).
+> - **◐ #1 CORANK TIGHTENING — SCOPED this session (route fixed, no shortcut), build in progress (`ScratchPencilCorank.lean`,
+>   not yet started in Lean).** See the dedicated **"§13 — CORANK TIGHTENING (SCOPE)"** block in §13 for the full route. One-line:
+>   the crux is `corank(F_{y,z}) ≤ rootMultiplicity` (matrix-pencil; genuinely new — NOT the "mechanical" the SESSION-1 #1 item
+>   below implies), via `det((A'+t₀B')-deficient → (X−C t₀)^c ∣ det)` using `N=M₀·D` column-scaling + `Polynomial.le_rootMultiplicity_iff`
+>   + `card_roots'`; then drops `ScratchBucket.c0_le`'s `hq2 (64d²≤q)`, leaving the existing `hq3 (q≥256)` as a CONSTANT threshold.
+> - The reduction `seal ⟸ ZProfileSeparates ⟸ (separating base) ⟸ (matching: `c̄₀<1`)` is built end-to-end (over both `ZMod p`
+>   AND now abstract `K`) **except increment 5 + the two open items above.** Increment-3 (`c₀≤¾`), the bridge (all wraps), and
+>   the ENTIRE increment-4 cleanup (B-ii/B-iii/C-corr/C-basis/NV) are landed axiom-clean. **Read the SESSION-1 "PICK UP HERE"
+>   block below** for the increment-4/5 lemma-level detail (still current); full detail = §13; strategic framing =
+>   `chain-descent-remaining-work.md` §3a.1; cross-session detail = `[[project_witt_free_bridge_lead_2026-06-20]]` tail.
+>
+> **▶▶▶▶ CURRENT HANDOFF (2026-06-26, SESSION 1 — superseded by SESSION 2 above for the frontier; still current for the
+> increment-4/5 lemma detail).** The
 > reduction `seal ⟸ ZProfileSeparates ⟸ (separating base) ⟸ (matching: `c̄₀<1`)` is built end-to-end **except the
 > increment-5 assembly + two decoupled items (corank tightening, field/seam typing).** Landed axiom-clean: increment 3
 > (`c₀≤¾`), the observable↔count **bridge** (B1a, all wraps), and the **ENTIRE increment-4 cleanup** — input `c`, bad-anchor
 > `β`, AND every bridge-input / non-vacuity gap (**B-ii, B-iii, C-corr, C-basis, NV**). **β is now UNCONDITIONAL** modulo
 > family properties (nondeg `Q`, `finrank ≥ 2`, `|K| ≥ 7`); the `hgood` non-vacuity is fully discharged
 > (`ScratchIncr4d.exists_hgood`, 14 axiom-clean lemmas). **THE LIVE FRONTIER IS INCREMENT 5** — wire the landed inputs into
-> `ScratchMatching.exists_separating_base`, **gated by the field/seam typing decision** (abstract-`K` analytic core ↔
-> `ZMod p`/`Fin(p^d)` bridge). **Read the "PICK UP HERE" block below** (the four numbered bullets are bridge/finding/spike
-> history); full detail = §13 ("INCREMENT 5 — WHAT'S EXPECTED" + the bridge/inc-3/4 blocks); strategic framing =
-> `chain-descent-remaining-work.md` §3a.1.
+> `ScratchMatching.exists_separating_base` (now over abstract `K`, concern #4 done). **Read the "PICK UP HERE" block below**
+> (the four numbered bullets are bridge/finding/spike history); full detail = §13 ("INCREMENT 5 — WHAT'S EXPECTED" + the
+> bridge/inc-3/4 blocks); strategic framing = `chain-descent-remaining-work.md` §3a.1.
 >
 > 1. **★ THE BRIDGE (`χ(det G₂)` observable ⟷ `Z_u(S)` counts) is ARCHITECTURALLY CLOSED; B1-deg DISSOLVED.** Chain:
 >    (config-nondeg χ-separating base) →[`ScratchBridge.pairCount_ne_of_chiSep` (B1b) + `ScratchBridgeA.levelset_count_collapse`
@@ -80,24 +109,26 @@
 >    C-corr (`corr_zero_of_anchor`, free on good anchors with `Q(t₀−u)≠0`), `hv/hw` by C-basis, config-nondeg = `I_u,I_v≠0`.
 > 4. **Assemble `ZProfileSeparates`:** `zProfileSeparates_of_zSep` → Layer B (`ScratchCrux` + idx 1248
 >    `reachesRigidOrCameron_viaIsotropySeparates_wittFree`) → seal.
-> **★★ MAIN CARE = the field/seam typing decision (concern #4) — DECIDE BEFORE WIRING.** The analytic core
-> (`ScratchIncr4`/`c`/`d`, `c0`, β, NV) is abstract `[Field K]`/`V`; the bridge + `ScratchCrux`/`IsotropySeparatesAtBase`/the
-> seal capstone are `ZMod p`/`Fin(p^d)`. Two paths: (a) **lift the bridge+Crux+IsotropySeparatesAtBase to abstract `[Field K]
-> [Fintype K]` FIRST** — dissolves the coordinate seam (everything in abstract `V`; `affineE` becomes a single endpoint
-> conversion) AND covers `q=pᵉ` (concern #4); or (b) wire against `ZMod p`, convert per-pair via `affineE`. **Recommended:
-> (a) lift-first** (the analytic content is already field-generic).
+> **★★ MAIN CARE = the field/seam typing decision (concern #4) — ✅ RESOLVED (SESSION 2): lift-first DONE.** The bridge +
+> reductions + `IsotropySeparatesAtBase` are now lifted to abstract `[Field K][Fintype K]` (`ScratchFieldGen`/`ScratchBridgeK`/
+> `ScratchLemmaAK`/`ScratchBridgeAllK`), and the q=p adapter (`ScratchFieldGenAdapter`) connects them to the in-build seal
+> capstone. So increment 5 wires over abstract `K` using the K-named lemmas: matching `fail := ¬(bridge criterion)` →
+> `ScratchBridgeAllK.jointIsoCountK_ne_of_chiSep_pair` (its `hcorru/hcorrv` from C-corr, `vb/hv/hw` from C-basis, anchor
+> existence from NV `exists_hgood`) → `ScratchBridgeK.zProfileSeparatesK_of_zSep` → `ScratchFieldGen.isotropySeparatesK_of_zProfileSeparatesK`
+> → `ScratchFieldGenAdapter.reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` (q=p) → seal. (q=pᵉ uses the same chain + the
+> `efield` scheme seam, Layer D.) The `Fin(p^d)`/`affineE` bridge of the ORIGINAL (SESSION-1) modules is no longer needed for inc-5.
 >
 > **TWO DECOUPLED OPEN ITEMS (run any time; before/parallel to inc-5):**
-> - **#1 corank tightening** (`q≳d²` → `q≳const`): the threshold `64·d²≤q` (`ScratchBucket.c0_le` hyp `hq2`) enters in EXACTLY
->   one place — the deg-bucket term `dR·n/√q` in `normT_bucket_bound` (`ScratchTBound`), which uses the uniform
->   `radical_card_mul_card_le` (`|radical|≤q^{d−1}`). Fix = **option (i):** replace it with the sharp per-member
->   `ScratchPairSep.norm_sq_pairSum_le` (`‖M‖²≤qᵈ·|radical F|`) **stratified by corank**, using `∑corank ≤ deg(disc) = d`
->   (have `pencilDisc_totalDegree_le`). ⚠ watch the single-high-corank member (`corank ≤ d−1`). Self-contained in
->   `ScratchTBound`/`ScratchBucket`, touches no wiring. Currently the asymptotic route covers only `q≥1024` for `d=4` (a tail
->   that GROWS with `d`); the fix makes it a fixed finite tail (handled by `decide`, like `VO⁻₄(3)`).
-> - **Field generalization (concern #4)** — same as the inc-5 "main care": lift `ScratchCrux`/`ZProfileSeparates`/
->   `IsotropySeparatesAtBase`/the seal capstone from `ZMod p` to abstract `[Field K][Fintype K]` (a typeclass refactor, NOT a
->   `GaloisField` construction). On the critical path for `q=pᵉ` families (q=4,8,9,…), entangled with inc-5's seam.
+> - **#1 corank tightening** (`q≳d²` → `q≳const`) — **SCOPED (SESSION 2); SUPERSEDES the "self-contained mechanical" framing of
+>   this bullet.** The threshold `64·d²≤q` (`ScratchBucket.c0_le` hyp `hq2`) enters in EXACTLY one place — the deg-bucket term
+>   `dR·n/√q` in `normT_bucket_bound` (`ScratchTBound`), from the uniform `radical_card_mul_card_le` (`|radical|≤q^{d−1}`). The
+>   fix DOES need the corank-stratified sum `∑corank ≤ deg(disc) = d`, but the SCOPING (this session) found the crux is genuinely
+>   new matrix-pencil math, NOT mechanical: `corank(F_{y,z}) ≤ rootMultiplicity` (a naive `corank ≤ const` is FALSE — corank
+>   reaches `d−2` at a single ratio). **Full route + Mathlib tools + the `N=M₀·D` realization = the "§13 — CORANK TIGHTENING
+>   (SCOPE)" block in §13.** Build = `ScratchPencilCorank.lean` (core: `corank ≤ rootMultiplicity`) → corank-stratified
+>   `normT_bucket_bound` → new `c0_le` dropping `hq2` (binding threshold becomes the existing `hq3 q≥256`, a CONSTANT).
+> - **Field generalization (concern #4)** — ✅ DONE this session (the analytic+bridge lift, see SESSION-2 block at top). Remaining:
+>   the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate; the q=p adapter `ScratchFieldGenAdapter` is the template).
 >
 > Then: families (d)/(e) + char-2 (Layer C), the seam build (Layer D, spiked `ScratchSeam`), and the **PORT** of all scratch
 > modules into `build.sh`/`lakefile`/`PublicTheoremIndex.md`. Still carried by the bridge capstone: `hK` (Gauss-factor `≠0`,
@@ -977,6 +1008,9 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 > against the landed scaffolding (§12), the open core isolated, the build increments ordered. This is the active work.
 
 > **§13 STATUS (read first; the blocks below are the chronological detail).**
+> - **▶ SESSION-2 (2026-06-26): CONCERN #4 (field-gen) DONE + CORANK TIGHTENING SCOPED — see the top-of-doc SESSION-2
+>   handoff + the "CORANK TIGHTENING (SCOPE)" block immediately below.** Working order: #4 (done) → corank (scoped, building) →
+>   small-q tail → hK cleanup → increment 5. Increment 5 now wires over **abstract `K`** (concern #4's 5 new modules).
 > - **▶▶▶▶ CURRENT FRONTIER = INCREMENT 5 (see the top-of-doc "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block).** All of:
 >   increment 3 (`c₀≤¾`), the observable↔count **bridge** (B1a, all wraps — `ScratchBridge`/`A`/`B`/`C`/`D`/`Z`), increment-4
 >   **input `c`** (`good_anchor_fail_le_const`, `ScratchIncr4`), and increment-4 **bad-anchor `β`** (`badHgood_count_le`,
@@ -1034,6 +1068,52 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 >   `Z_u({t})` BINARY, `Z_u({t,t'})` recovers `χ(det G₂)` — the singleton→pair correction), **`Probe_D3dPairCount`** (the
 >   real pair observable: `c₀ ≤ 0.49 < 1`, `sep@1anchor ≈ 100%`). Findings: bounded base survives `d=6`; the **pair**
 >   observable separates with `c₀<1` bounded + anchor existence; **D3d is Weil-free**; base `O(d log q)`.
+
+### §13 — CORANK TIGHTENING (SCOPE) — the `q≳d² → q≳const` fix (SESSION 2, 2026-06-26)
+
+**Goal.** Remove `ScratchBucket.c0_le`'s hypothesis `hq2 : 64·dR² ≤ q` (the `q≳d²` threshold), leaving the existing
+`hq3 : 256 ≤ q` (a CONSTANT) as the binding one. This determines what the final theorem proves on the families: for `VO⁻₄(q)`
+(d=4) it currently needs `q ≥ 1024`; the fix drops that to `q ≥ 256`, shrinking the sub-threshold tail (handled by the
+"small-q tail" item next) from `{q<1024}` to `{q<256}`.
+
+**Where the threshold enters (exactly one place).** `c0_le` (`ScratchBucket.lean`) step `hB`/`h8d` needs the deg-bucket term
+`dR·n/√q ≤ n/8`, i.e. `8·dR ≤ √q`, i.e. `64dR²≤q`. That term comes from `normT_bucket_bound` (`ScratchTBound.lean`): the
+degenerate bucket is bounded `(d·|K|)·(|V|/√|K|)` = (count `d·q` via `degenerate_count_le`) × (uniform magnitude `q^{d−1/2}`
+via `radical_card_mul_card_le`, i.e. charging EVERY degenerate member the worst corank `d−1`).
+
+**No shortcut (verified this session).** The incidence count `∑_{(y,z)}|radical F_{y,z}|` and a Cauchy–Schwarz route BOTH
+reduce back to `∑_λ corank(B'−λA')` — the same pencil-corank sum. And a uniform `corank ≤ const` is FALSE: for two corank-1
+forms the pencil reaches **corank `d−2` at a single ratio** (`A'=diag(1,…,1,0)`, `B'=diag(0,1,…,1)`, at `y+z=0`; there
+`∑corank = d−2 ≤ d = deg`). So the load-bearing fact is genuinely `corank ≤ rootMultiplicity`, summed — real matrix-pencil math.
+
+**The route (all Mathlib tools confirmed present).**
+1. `p(X) := det(A' + X·B')` over `K[X]` (`A',B'` = the `d×d` Gram matrices `(pairForm_u).polarBilin`, `(pairForm_v).polarBilin`
+   in a basis). For SUPPORT ratios `(y,z)`, `y,z≠0`, the member `∝ A'+X·B'` at `X=z/y≠0`; the `q−1` scalar multiples of a ratio
+   share one radical. `p ≠ 0` on a good anchor; `natDegree p ≤ d`.
+2. **`corank(A'+t₀B') ≤ p.rootMultiplicity t₀`** (the genuinely-NEW core — build in `ScratchPencilCorank.lean`):
+   let `c = finrank ker(A'+t₀B')`; take an invertible `Q : Matrix (Fin d)(Fin d) K` whose columns on a size-`c` index set `S`
+   span `ker(A'+t₀B')` (basis extension of the kernel). Then `N(X) := (A'.map C + X•B'.map C) * Q.map C` has, for `j∈S`,
+   column `j = (X − C t₀) • (const vector C(B'·qⱼ))` — because `(A'+t₀B')·qⱼ = 0 ⟹ A'qⱼ = −t₀·B'qⱼ`. So **`N = M₀ · D`** with
+   `D = Matrix.diagonal (fun i => if i∈S then (X − C t₀) else 1)` (`det D = (X−C t₀)^c`) and `M₀` = `N` with the `S`-columns
+   replaced by the constants. `det N = det M₀ · (X−C t₀)^c`, and `det N = p · C(det Q)` with `C(det Q)` a unit in `K[X]`
+   (`det Q ∈ Kˣ`) ⟹ `(X − C t₀)^c ∣ p` ⟹ (by **`Polynomial.le_rootMultiplicity_iff`**, needs `p≠0`) `c ≤ rootMultiplicity`.
+   *Tools:* `Matrix.det_mul`, `Matrix.det_diagonal`, `det_mul_column`-free (use `N=M₀·D`), `LinearIndependent.extend` / `Basis`
+   for `Q`, `Polynomial.le_rootMultiplicity_iff`/`pow_rootMultiplicity_dvd` (`Algebra/Polynomial/Div.lean`). Map/eval:
+   `(A'+t₀B') = eval-at-t₀ of (A'.map C + X•B'.map C)` via `RingHom.map_det` / `Matrix.det` over `K[X]`.
+3. **`∑_{roots} corank ≤ d`:** `∑_{roots} rootMultiplicity = Multiset.card p.roots ≤ natDegree p ≤ d` (**`Polynomial.card_roots'`**).
+4. **Arithmetic + integration:** with the per-ratio corank `c_r` and `∑c_r ≤ d`, the deg-bucket sum `∑_r (q−1)·√(qᵈ·q^{c_r}) =
+   (q−1)·q^{d/2}·∑_r q^{c_r/2}`, and `∑_r q^{c_r/2} ≤ C·q^{(d−1)/2}` (concentration: under `∑c_r ≤ d` the max is one big term
+   `q^{(d−1)/2}` + tail). ⟹ deg term `≈ n/√q` (constant `C`, NO `d` factor). Replace the deg bucket in `normT_bucket_bound`
+   accordingly; then a new `c0_le` variant with `hT : T ≤ q·√n + C·n/√q` (no `dR`) ⟹ drop `hq2`. **⚠ The single high-corank
+   member** (`corank` up to `d−1`) is exactly the `q^{(d−1)/2}` term — handled by the concentration bound, NOT a special case.
+
+**Reusable (built):** `ScratchPairSep.norm_sq_pairSum_le` (`‖M(y,z)‖²≤|V|·|radical(y•pairForm_u+z•pairForm_v)|`),
+`ScratchGoodAnchor.degenerate_count_le` (≤`d·|K|`) + `pencilDisc_totalDegree_le` (≤`d`), `ScratchCorank.radical_card_mul_card_le`
+(corank ≤ `d−1`, the uniform fallback). **New:** `ScratchPencilCorank.lean` (step 2) + the arithmetic/integration in
+`ScratchTBound`/`ScratchBucket`/`ScratchC0Final`. **Size ≈ 150–250 lines**, bulk in step 2 (the `Q`-from-basis-extension and
+the `K[X]`-matrix eval/column plumbing). NB the per-pivot pairForm has corank EXACTLY 1 when `Q(t₀−w)≠0` (good anchor): radical
+`= ⟨t₀−w⟩` (`pairForm_polar_anchor` + nondeg) — so `A'`,`B'` are rank `d−1` (used implicitly; the route does not actually need it,
+the general `corank ≤ mult` suffices).
 
 **Target + route.** Prove **`QProfileSeparatesAtBase Q T`** (FormsGraphConcrete:157) for general `Q` at a constructed base
 `T` of size `O(d + log q)`. This is the **route-(b) wrapper** — its reduction to the seal is LANDED and general
