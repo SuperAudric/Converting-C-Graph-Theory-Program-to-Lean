@@ -1311,9 +1311,57 @@ priority; Route 0 is a cheap, certain, decoupled `16×` stepping stone taken fir
 
 ### §13 — ROUTE 2 (SCOPE) — the exact `c₀`, no threshold (the terminating route, 2026-06-26)
 
+> **▶▶▶▶ BUILD PLAN — DE-RISKED & SIMPLIFIED AGAIN (2026-06-27, `Probe_Route2ExactSmallQ`); this supersedes the
+> line-regroup-centric plan in the boxes below for the ACTUAL build.** Two findings forced a cleaner decomposition:
+> 1. **The triangle `T`-bound does NOT close the tail through `card_agree_le`.** `card_agree_le` (`2·NS ≤ 2·zu + |V| + T`)
+>    needs `T/|V| < 1 − 2/q`, but triangle gives `(1−1/q)² = 1 − 2/q + 1/q²` — over by exactly `1/q²`, for every `q`.
+>    (And it can't be patched at `q=3`: both `q−1=2` lines are degenerate there.)
+> 2. **`q=4,8,16` are CHARACTERISTIC 2** (separate Arf track) ⟹ the odd-char tail below Route 0's `q≥16` is
+>    `q∈{3,5,7,9,11,13}`. The existing `normT_bucket_bound_corank2` already gives `c₀<1` for `q≥7` (via `T/|V|<1−2/q`),
+>    so the genuinely-hard odd tail is **`{q=3, all m}` + `{q=5, d=4}`**.
+>
+> **THE FIX (replaces line_regroup):** a **strictly tighter counting identity**. The per-element inequality
+> `2·[ca=cb] ≤ 1 + [ca=0] + ca·cb` (coefficient `1` on `[ca=0]`, not `2` — `decide`-verified on all 9 value pairs) sums to
+> **`card_agree_le_tight : 2·NS ≤ zu + |V| + T`**. Then with **tight `zu = |V|/q`** (corank-1 quadric count) and the
+> **triangle `T ≤ (1−1/q)²·|V|`** (`pairCharSum_factor_gen` + `corank≤d−2`):
+> `NS/|V| ≤ ½ + 1/(2q) + (1−1/q)²/2`, and `1 − that = (q−1)/(2q²)` exactly ⟹ the clean closed-form capstone
+> **`NS ≤ (1 − (q−1)/(2q²))·|V|`** — `< |V|` for ALL odd `q ≥ 3`, `δ = (q−1)/(2q²)` (≈0.11 at q=3, ≈0.036 at q=13),
+> **no `hq3`, no line_regroup, no per-line `card_quadForm`, no sign-of-`S`.** Probe `Probe_Route2ExactSmallQ` confirms:
+> the exact identity `NS = Z_both0+(N_nz+S)/2` held `16/16`, exact `c₀ ≤ 0.556` (the bound is a loose-but-valid upper env).
+>
+> **BUILD STATUS (2026-06-27):** **piece 1 `card_agree_le_tight` LANDED axiom-clean** (`ScratchCountTight.lean`:
+> `int_char_pointwise_tight` [no axioms] + `counting_identity_tight` + `card_agree_le_tight`). **REMAINING:** piece 2
+> `normT_triangle` (`q·T ≤ (q−1)²·q^{d−1}`, reuse `normT_le` + `pencil_polarRad_finrank_le` + `‖χy‖≤[y≠0]`); piece 3
+> tight `zu = q^{d−1}` (corank-1 `pairForm Q a`, radical `=⟨a⟩` for `Q a≠0`, descend to nondeg `(d−1)`-dim, `card_quadForm_eq`
+> — the hardest); piece 4 assembly capstone `c0_route2 : NS ≤ (1−(q−1)/(2q²))·|V|`. NB this carries the same good-anchor
+> hyps as Route 0 (`hab`, `hQu`, nondeg) now supplied by the strengthened `exists_hgood`. The line-regroup boxes below are
+> retained for provenance (line_regroup is still ℤ-validated and correct, just not needed for this bound).
+
+> **▶▶▶ PROBE RESULT (2026-06-27, `Probe_Route2DegenerateLines`) — THE CRUX DISSOLVES; Route 2 is much easier than scoped.**
+> The de-risking probe (validate the line-regroup identity in ℤ + test the binding `d>q` axis) returned, across BOTH
+> `d=4` growing-`q` AND fixed-small-`q` growing-`d` (incl. `d=10,q=3`, `d=8,q=5`):
+> - **`line_regroup` identity holds EXACTLY in ℤ on every sample** (`χ(−1)·q·T = ∑_{z₀≠0}χ(z₀)(q·Z_{I_u+z₀I_v} − qᵈ)`,
+>   `8/8` all rows) — the load-bearing new lemma is de-risked before any Lean.
+> - **The "`≤d`-term χ-cancellation crux" was a PHANTOM.** Only `q−1` projective lines `[1:z₀]` exist, so `#degenerate ≤
+>   min(d, q−1)` — capped by `q−1`, **NOT `d`** (confirmed: `#deg=2=q−1` at `q=3` even as `d→10`). Since `q·T = ∑χ(z₀)f`,
+>   each degenerate line contributes `≤ n/q` to `T`, so the WHOLE degenerate part is `|T_deg|/n ≤ (1−1/q)² < 1` **by
+>   TRIANGLE INEQUALITY** — no cancellation, no threshold. Measured `|T_deg|/n` is FLAT in `d` (0.222 at `q=3` for all
+>   `d∈{4,6,8,10}`), and `max|T|/n ≤ triBound = (1−1/q)²+(q−1)²/q^{m+1} < 1` on every row (verdict `tri<1 ✓` throughout).
+> - The bad (`c'=0`) lines DO occur (`badOcc=True`, `maxRedF=q−1`) but are **harmless** (`≤q−1` of them, each `≤n/q`).
+>
+> **⟹ RE-SCOPE.** Route 2's per-line magnitude bound `|f_deg| ≤ q^{d−1}(q−1)` is guaranteed by **`corank ≤ d−2`**, which is
+> EXACTLY Route 0's already-proven `ScratchPencilCorank2.pencil_polarRad_finrank_le` (for the good anchor `hab`). So Route 2
+> terminates with **NO cancellation lemma** — it needs only: **(a) `line_regroup`** (ℤ-validated), **(b)** the per-line quadric
+> count `card_quadForm_eq` (landed) bounding `|f_deg|`, **(c)** `corank ≤ d−2` (landed, Route 0), **(d)** the elementary
+> triangle `|T_deg|/n ≤ (1−1/q)²` + the nondeg part absorbed by `hq1`. The "degenerate-line cancellation" / Route-1-kernel
+> sub-plan below is SUPERSEDED (kept for provenance). This removes `hq3` with no tail. **NEXT = build `line_regroup` (the one
+> genuinely new lemma) then the triangle assembly.** Probe verdict columns + fallback tree are in the test's output.
+
 **Goal.** Replace the triangle-inequality bound on `T` (`normT_le`) with an EXACT evaluation, removing `hq3` ENTIRELY
 (no tail). `hq1` (`64q²≤n` ⟺ `d≥3`) STAYS — it is the families' own range (`d=2m≥4`), not a threshold to remove. The
 probe (`c₀∈[0.44,0.49]` at `q=5..13`) confirms the answer is `c₀<½` for all `q`, so the exact computation will close it.
+**(▲ Superseded by the PROBE RESULT box above: the "exact evaluation" is overkill — a triangle bound using `corank ≤ d−2`
+suffices; the degenerate lines need NO exact cancellation. The line-regroup + per-line `card_quadForm_eq` bound is the route.)**
 
 **The exact object — line-regroup.** From `pairCharSum_factor_gen` + `‖gaussSum²‖=q`, regroup the `(y,z)` support sum by
 **projective lines** `[y₀:z₀]` (`y₀,z₀≠0`; `q−1` lines, each `q−1` scalars). Using `χ(λ²)=1`:

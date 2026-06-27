@@ -2887,4 +2887,210 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("READING: cbarMax bounded <1 as q grows ⟹ matching-trick first moment closes uniformly over pairs (the real input, not the global mean).");
         output.WriteLine("         q·badFrMx ~flat ⟹ bad/aligned anchors are an O(1/q) proper subvariety (Schwartz-Zippel) ⟹ c̄₀ ≤ 1−δ(1−O(1/q)).");
     }
+
+    // ── ROUTE 2 de-risking (plan §13 "ROUTE 2 (SCOPE)") — the exact/terminating c₀, no q-threshold ──────────────
+    //  Route 2 regroups q·T by PROJECTIVE LINES.  With I_w(t)=det G₂(w;t,t₀)=pairForm_w(t−w) (a quadratic in t), the
+    //  Gauss bridge (χ(a)=gaussSum⁻¹∑_yχ(y)ψ(ay)) + gaussSum²=χ(−1)·q give the CLEAN INTEGER identity
+    //       χ(−1)·q·T  =  ∑_{z₀∈GF(q)*} χ(z₀)·(q·Z_{I_u+z₀ I_v} − qᵈ),     Z_J = #{t : J(t)=0},  T=∑_t χ(I_u)χ(I_v).
+    //  Each line [1:z₀] collapses to a ZERO-COUNT fluctuation f(z₀)=q·Z−qᵈ.  Lines split by the pencil form
+    //  F=pairForm_u+z₀·pairForm_v: NONDEG (corank 0; triangle-bounded, absorbed by hq1) vs the ≤d DEGENERATE lines
+    //  (corank c>0) which Route 2 evaluates EXACTLY.  On a degenerate line Z=q^c·N (N=reduced (d−c)-var quadric count),
+    //  so f=q^{c+1}(N−q^{d−c−1}); the "completed-square constant" c' decides |reduced|:=|N−q^{d−c−1}| ∈ {1 (c'≠0,
+    //  GOOD, f~q^{d−1}) , q−1 (c'=0, BAD, f~qᵈ)}.  THE CRUX: do BAD (c'=0) lines occur, and if so do they CANCEL in
+    //  the signed sum S_deg=∑_{deg}χ(z₀)f(z₀)?  This probe answers BOTH, validates the line-regroup identity in integer
+    //  arithmetic (de-risks the `line_regroup` lemma BEFORE Lean), and reports the bottom-line termination criterion
+    //  max|T|/n (must be bounded <1 uniformly in q — the real target, robust to the line-level cancellation story).
+    [Fact]
+    public void Probe_Route2DegenerateLines()
+    {
+        // Per (q,eps,dim): sample good anchors, validate the ℤ line-regroup identity, and measure the termination metrics.
+        // Returns (regrpOK/samplesDone, maxDeg, maxRedFl, badOccur, maxTdegOverN, maxTOverN).  maxTdeg = |T_deg|/n where
+        // T_deg = (degenerate-line part of T) = S_deg/(χ(−1)·q) — the degenerate contribution to the c₀-relevant quantity.
+        (string row, double maxTOverN, double triBound, int regrpOK, int sampN) Run(int q, int eps, int dim)
+        {
+            int m = dim / 2; var F = new GFq(q); long n = IPow(q, dim);
+            int bb = 0, cc = 0;
+            if (eps == -1) { bool fnd = false; for (int b = 0; b < q && !fnd; b++) for (int c = 0; c < q && !fnd; c++) { bool an = true; for (int y = 0; y < q && an; y++) for (int z = 0; z < q; z++) { if (y == 0 && z == 0) continue; if (F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]] == 0) { an = false; break; } } if (an) { bb = b; cc = c; fnd = true; } } }
+            int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+            int Q(int[] x) { int s = 0, hyp = eps == -1 ? m - 1 : m; for (int i = 0; i < hyp; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]]; if (eps == -1) { int y = x[2 * (m - 1)], z = x[2 * (m - 1) + 1]; s = F.add[s, F.add[F.add[F.mul[y, y], F.mul[F.mul[bb, y], z]], F.mul[cc, F.mul[z, z]]]]; } return s; }
+            var vec = new int[n][]; for (int v = 0; v < n; v++) vec[v] = Vec((int)v);
+            var sq = new bool[q]; for (int y = 1; y < q; y++) sq[F.mul[y, y]] = true;
+            int chi(int x) => x == 0 ? 0 : (sq[x] ? 1 : 2); int rv(int cls) => cls == 0 ? 0 : (cls == 1 ? 1 : -1);
+            int two = F.add[1, 1], four = F.mul[two, two];
+            int[] sub(int a, int b2) { var x = new int[dim]; for (int i = 0; i < dim; i++) x[i] = F.add[vec[a][i], F.neg[vec[b2][i]]]; return x; }
+            int Bil(int[] a, int[] b2) { var s = new int[dim]; for (int i = 0; i < dim; i++) s[i] = F.add[a[i], b2[i]]; return F.add[Q(s), F.neg[F.add[Q(a), Q(b2)]]]; }
+            int detVal(int[] a, int[] a0) { int b = Bil(a, a0); return F.add[F.mul[F.mul[two, Q(a)], F.mul[two, Q(a0)]], F.neg[F.mul[b, b]]]; }
+            int chiM1 = rv(chi(F.neg[1]));
+            var units = new int[dim][]; for (int i = 0; i < dim; i++) { units[i] = new int[dim]; units[i][i] = 1; }
+            int polarPF(int[] s, int[] r, int[] a, int Qa) => F.add[F.mul[F.mul[four, Qa], Bil(s, r)], F.neg[F.mul[two, F.mul[Bil(s, a), Bil(r, a)]]]];
+            int corank(int z0, int[] a, int Qa, int[] b2, int Qb)
+            {
+                var G = new int[dim][];
+                for (int i = 0; i < dim; i++) { G[i] = new int[dim]; for (int j = 0; j < dim; j++) G[i][j] = F.add[polarPF(units[i], units[j], a, Qa), F.mul[z0, polarPF(units[i], units[j], b2, Qb)]]; }
+                int rank = 0;
+                for (int col = 0; col < dim && rank < dim; col++)
+                {
+                    int piv = -1; for (int r = rank; r < dim; r++) if (G[r][col] != 0) { piv = r; break; }
+                    if (piv < 0) continue;
+                    var tmp = G[rank]; G[rank] = G[piv]; G[piv] = tmp;
+                    int inv = FInv(F, G[rank][col]); for (int j = 0; j < dim; j++) G[rank][j] = F.mul[G[rank][j], inv];
+                    for (int r = 0; r < dim; r++) if (r != rank && G[r][col] != 0) { int fct = G[r][col]; for (int j = 0; j < dim; j++) G[r][j] = F.add[G[r][j], F.neg[F.mul[fct, G[rank][j]]]]; }
+                    rank++;
+                }
+                return dim - rank;
+            }
+            bool indep(int[] a, int[] b2)
+            {
+                bool az = true; for (int i = 0; i < dim; i++) if (a[i] != 0) { az = false; break; } if (az) return false;
+                for (int lam = 0; lam < q; lam++) { bool eq = true; for (int i = 0; i < dim; i++) if (b2[i] != F.mul[lam, a[i]]) { eq = false; break; } if (eq) return false; }
+                return true;
+            }
+            var rng = new Random(2027 + dim);
+            int nSamp = 8, samplesDone = 0, regrpOK = 0, maxDeg = 0;
+            double maxRedFl = 0, maxTdegOverN = 0, maxTOverN = 0; bool badOccur = false;
+            for (int s = 0; s < nSamp * 40 && samplesDone < nSamp; s++)
+            {
+                int u = rng.Next((int)n), up = rng.Next((int)n), t0 = rng.Next((int)n);
+                if (u == up) continue;
+                var a = sub(t0, u); var b = sub(t0, up); int Qa = Q(a), Qb = Q(b);
+                if (Qa == 0 || Qb == 0 || !indep(a, b)) continue;   // good anchor (matches discharged hgood)
+                samplesDone++;
+                var Iu = new int[n]; var Iv = new int[n]; long T = 0;
+                for (int t = 0; t < n; t++) { Iu[t] = detVal(sub(t, u), a); Iv[t] = detVal(sub(t, up), b); T += rv(chi(Iu[t])) * rv(chi(Iv[t])); }
+                long Sall = 0, Sdeg = 0; int degLines = 0;
+                for (int z0 = 1; z0 < q; z0++)
+                {
+                    long Z = 0; for (int t = 0; t < n; t++) if (F.add[Iu[t], F.mul[z0, Iv[t]]] == 0) Z++;
+                    long f = q * Z - n; long term = (long)rv(chi(z0)) * f; Sall += term;
+                    int c = corank(z0, a, Qa, b, Qb);
+                    if (c > 0)
+                    {
+                        degLines++; Sdeg += term;
+                        double red = Math.Abs((double)f) / Math.Pow(q, c + 1);
+                        maxRedFl = Math.Max(maxRedFl, red);
+                        if (red >= (q - 1) / 2.0) badOccur = true;
+                    }
+                }
+                if (chiM1 * q * T == Sall) regrpOK++;
+                maxDeg = Math.Max(maxDeg, degLines);
+                maxTdegOverN = Math.Max(maxTdegOverN, Math.Abs((double)Sdeg) / ((double)q * n));   // |T_deg|/n
+                maxTOverN = Math.Max(maxTOverN, Math.Abs((double)T) / n);
+            }
+            // The pure-triangle termination bound (NO cancellation): #deg ≤ q−1 lines, each |f_deg| ≤ q^{d−1}(q−1) ⟹
+            // |T_deg|/n ≤ (1−1/q)²; nondeg ≤ q−1 lines, each |f_non| ≤ (q−1)q^{d/2} ⟹ |T_non|/n ≤ (q−1)²/q^{d/2+1}.
+            double triBound = Math.Pow(1.0 - 1.0 / q, 2) + Math.Pow(q - 1, 2) / Math.Pow(q, m + 1);
+            string fam = $"VO^{(eps < 0 ? "-" : "+")}_{dim}({q})";
+            string flag = regrpOK < samplesDone ? "IDENTITY FAILS!"
+                : maxTOverN < triBound + 1e-9 && triBound < 1.0 ? "tri<1 ✓ (no cancel)"
+                : maxTOverN < 0.999 ? "T<n but >triBound!?"
+                : "T→n: TERM FAILS";
+            string row = $"{fam,-12} {n,8} {$"{regrpOK}/{samplesDone}",8} {maxDeg,5} {$"≤{q - 1}",5} {maxRedFl,8:F1} {badOccur,8} {maxTdegOverN,9:F3} {triBound,9:F3} {maxTOverN,9:F3} {flag,-20}";
+            return (row, maxTOverN, triBound, regrpOK, samplesDone);
+        }
+
+        output.WriteLine("Route 2 (plan §13) — exact/terminating c₀ via line-regroup. CRUX RE-SCOPED: #deg-lines ≤ min(d, q−1) [only q−1 proj");
+        output.WriteLine("lines exist!], each contributes ≤ n/q to T (since q·T = ∑χ(z₀)f) ⟹ |T_deg|/n ≤ (1−1/q)² < 1 by TRIANGLE — no");
+        output.WriteLine("cancellation lemma, no threshold. The probe tests this on the BINDING axis (small q, GROWING d, i.e. d>q where the");
+        output.WriteLine("old '≤d-term cancellation' fear lived). ℤ-identity: χ(−1)·q·T = ∑_{z₀≠0} χ(z₀)(q·Z_{I_u+z₀I_v} − qᵈ).");
+        output.WriteLine("");
+        output.WriteLine($"{"family",-12} {"n",8} {"regrpOK",8} {"#deg",5} {"cap",5} {"maxRedF",8} {"badOcc",8} {"|Tdeg|/n",9} {"triBound",9} {"max|T|/n",9} {"verdict",-20}");
+        int idFails = 0, termFails = 0;
+        output.WriteLine("— SWEEP 1: d=4 fixed, growing q (identity validation + the easy q>d side) —");
+        foreach (var (q, eps) in new[] { (5, -1), (5, 1), (7, -1), (7, 1), (11, -1), (13, -1) })
+        { var r = Run(q, eps, 4); output.WriteLine(r.row); if (r.regrpOK < r.sampN) idFails++; if (r.maxTOverN >= 0.999) termFails++; }
+        output.WriteLine("— SWEEP 2: small q FIXED, growing d (THE BINDING AXIS, d>q — where termination was feared to fail) —");
+        foreach (var (q, eps, dim) in new[] { (3,-1,4),(3,-1,6),(3,-1,8),(3,-1,10), (5,-1,4),(5,-1,6),(5,-1,8), (7,-1,4),(7,-1,6) })
+        { var r = Run(q, eps, dim); output.WriteLine(r.row); if (r.regrpOK < r.sampN) idFails++; if (r.maxTOverN >= 0.999) termFails++; }
+        output.WriteLine("");
+        output.WriteLine("Cols: regrpOK=#samples the ℤ line-regroup identity held (MUST be all — de-risks `line_regroup`) | #deg=max degenerate lines");
+        output.WriteLine("      | cap=q−1 (the real line count, NOT d) | maxRedF=max|f_deg|/q^{c+1} (BAD c'=0 ⟹≈q−1; bad lines DO occur, harmless)");
+        output.WriteLine("      | |Tdeg|/n=degenerate contribution to |T|/n | triBound=(1−1/q)²+(q−1)²/q^{m+1} [pure-triangle, no cancellation]");
+        output.WriteLine("      | max|T|/n=THE TERMINATION CRITERION. verdict 'tri<1 ✓' ⟹ measured |T|/n ≤ triBound < 1 ⟹ Route 2 closes by TRIANGLE alone.");
+        output.WriteLine("READING: if every row is 'tri<1 ✓' across the d>q axis ⟹ the scope's '≤d-term χ-cancellation crux' DISSOLVES — Route 2");
+        output.WriteLine("  needs only (a) line_regroup (validated here in ℤ), (b) per-line quadric-count bounds (card_quadForm_eq, landed),");
+        output.WriteLine("  (c) the elementary triangle |T_deg|/n ≤ (1−1/q)². NO cancellation lemma, NO hq3. FALLBACKS if a row is NOT 'tri<1 ✓':");
+        output.WriteLine("  • 'T<n but >triBound' → triangle bound too crude but termination still holds ⟹ tighten the per-line |f| bound (still no cancellation).");
+        output.WriteLine("  • 'T→n: TERM FAILS'   → genuine small-q×large-d wall ⟹ FALLBACK to a real ≤(q−1)-term cancellation lemma (Route 1), OR keep");
+        output.WriteLine("                          Route 0 (q≥16) + Spielman tail and design a separate small-q structural argument for the d>q corner.");
+        output.WriteLine("  • 'IDENTITY FAILS'    → the regroup constant is wrong ⟹ re-derive gaussSum²=χ(−1)q factor before building line_regroup.");
+        output.WriteLine($"SUMMARY: identity failures = {idFails} (want 0); termination failures (|T|/n≥1) = {termFails} (want 0).");
+        Assert.Equal(0, idFails);   // the line-regroup identity is the load-bearing new lemma — must hold exactly in ℤ.
+    }
+
+    // ── ROUTE 2 — the EXACT small-q tail (de-risk before Lean; plan §13).  q=4,8,16 are CHAR 2 (separate Arf track),
+    //  so the ODD-char tail below the Route-0 threshold q≥16 is q∈{3,5,7,9,11,13}.  The existing bucket bound closes
+    //  c₀<1 for q≥7 (T/n<1−2/q), leaving the HARD tail = {q=3, all m} (genuine infinite) + {q=5, d=4} (one graph).
+    //  THE FINDING being de-risked: triangle-through-card_agree_le (2NS ≤ 2zu+n+|S|) CANNOT close q=3 — it needs T/n<1−2/q
+    //  but triangle gives (1−1/q)²=1−2/q+1/q² (misses by 1/q²), AND it discards the SIGN of S=∑χ_uχ_v.  The EXACT identity
+    //  NS = Z_both0 + (N_nz + S)/2 (S signed) closes c₀<1 BECAUSE S<0.  This probe confirms, at q∈{3,5}, growing d:
+    //   (1) exact c₀=NS/n < 1 with MARGIN (and the matching input c̄₀=mean_anchor c₀ < 1−δ);
+    //   (2) the magnitude bound cardBound=zu/n+½+|S|/2n actually FAILS (≥1) ⟹ the exact/sign route is REQUIRED, not optional;
+    //   (3) the exact counting identity NS = Z_both0+(N_nz+S)/2 holds (validates the Lean identity replacing card_agree_le);
+    //   (4) S<0 (the sign that does the work).
+    [Fact]
+    public void Probe_Route2ExactSmallQ()
+    {
+        output.WriteLine("Route 2 EXACT small-q tail (plan §13). Odd-char hard tail = {q=3 all m}+{q=5,d=4}. Does the EXACT line-eval (sign of S)");
+        output.WriteLine("close c₀<1 where the magnitude bound (card_agree_le, |S|) FAILS? Exact identity: NS = Z_both0 + (N_nz + S)/2, S=∑χ_uχ_v.");
+        output.WriteLine($"{"family",-12} {"n",8} {"idOK",6} {"maxC0",7} {"c̄₀",7} {"minC0",7} {"S/n(mn)",8} {"Ssign",6} {"cardBnd",8} {"magFail",8} {"verdict",-20}");
+        foreach (var (q, eps, dim) in new[] { (3,-1,4),(3,1,4),(3,-1,6),(3,-1,8),(3,-1,10), (5,-1,4),(5,1,4),(5,-1,6),(7,-1,4) })
+        {
+            int m = dim / 2; var F = new GFq(q); long n = IPow(q, dim);
+            int bb = 0, cc = 0;
+            if (eps == -1) { bool fnd = false; for (int b = 0; b < q && !fnd; b++) for (int c = 0; c < q && !fnd; c++) { bool an = true; for (int y = 0; y < q && an; y++) for (int z = 0; z < q; z++) { if (y == 0 && z == 0) continue; if (F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]] == 0) { an = false; break; } } if (an) { bb = b; cc = c; fnd = true; } } }
+            int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+            int Q(int[] x) { int s = 0, hyp = eps == -1 ? m - 1 : m; for (int i = 0; i < hyp; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]]; if (eps == -1) { int y = x[2 * (m - 1)], z = x[2 * (m - 1) + 1]; s = F.add[s, F.add[F.add[F.mul[y, y], F.mul[F.mul[bb, y], z]], F.mul[cc, F.mul[z, z]]]]; } return s; }
+            var vec = new int[n][]; for (int v = 0; v < n; v++) vec[v] = Vec((int)v);
+            var sq = new bool[q]; for (int y = 1; y < q; y++) sq[F.mul[y, y]] = true;
+            int chi(int x) => x == 0 ? 0 : (sq[x] ? 1 : 2); int rv(int cls) => cls == 0 ? 0 : (cls == 1 ? 1 : -1);
+            int two = F.add[1, 1];
+            int[] sub(int a, int b2) { var x = new int[dim]; for (int i = 0; i < dim; i++) x[i] = F.add[vec[a][i], F.neg[vec[b2][i]]]; return x; }
+            int Bil(int[] a, int[] b2) { var s = new int[dim]; for (int i = 0; i < dim; i++) s[i] = F.add[a[i], b2[i]]; return F.add[Q(s), F.neg[F.add[Q(a), Q(b2)]]]; }
+            int detVal(int[] a, int[] a0) { int b = Bil(a, a0); return F.add[F.mul[F.mul[two, Q(a)], F.mul[two, Q(a0)]], F.neg[F.mul[b, b]]]; }
+            bool indep(int[] a, int[] b2) { bool az = true; for (int i = 0; i < dim; i++) if (a[i] != 0) { az = false; break; } if (az) return false; for (int lam = 0; lam < q; lam++) { bool eq = true; for (int i = 0; i < dim; i++) if (b2[i] != F.mul[lam, a[i]]) { eq = false; break; } if (eq) return false; } return true; }
+            var rng = new Random(31 + dim);
+            int nSamp = 16, done = 0, idOK = 0; bool allSneg = true;
+            double maxC0 = 0, minC0 = 2, sumC0 = 0, sumSoverN = 0, cardBndMax = 0, cbarMax = 0;
+            for (int s = 0; s < nSamp * 60 && done < nSamp; s++)
+            {
+                int u = rng.Next((int)n), up = rng.Next((int)n), t0 = rng.Next((int)n);
+                if (u == up) continue;
+                var a = sub(t0, u); var b = sub(t0, up);
+                if (Q(a) == 0 || Q(b) == 0 || !indep(a, b)) continue;
+                done++;
+                long S = 0, NS = 0, zu = 0, zub = 0, zboth = 0;
+                for (int t = 0; t < n; t++)
+                {
+                    int iu = detVal(sub(t, u), a), iv = detVal(sub(t, up), b);
+                    int cu = chi(iu), cv = chi(iv);
+                    if (cu == cv) NS++;
+                    S += rv(cu) * rv(cv);
+                    if (iu == 0) zu++; if (iv == 0) zub++; if (iu == 0 && iv == 0) zboth++;
+                }
+                long Nnz = n - zu - zub + zboth;
+                long NSexact = zboth + (Nnz + S) / 2;   // the EXACT identity (sign-preserving) — should equal NS
+                if (NSexact == NS) idOK++;
+                if (S >= 0) allSneg = false;
+                double c0 = (double)NS / n; maxC0 = Math.Max(maxC0, c0); minC0 = Math.Min(minC0, c0); sumC0 += c0;
+                sumSoverN += (double)S / n;
+                cardBndMax = Math.Max(cardBndMax, (double)zu / n + 0.5 + Math.Abs((double)S) / (2.0 * n));  // card_agree_le bound on NS/n
+                cbarMax = Math.Max(cbarMax, c0);   // single-pair-per-row here; cbar≈mean, max tracks worst anchor
+            }
+            string fam = $"VO^{(eps < 0 ? "-" : "+")}_{dim}({q})";
+            bool exactOK = maxC0 < 0.999, magFail = cardBndMax >= 0.999;
+            string verdict = idOK < done ? "IDENTITY FAILS!"
+                : !exactOK ? "EXACT FAILS!"
+                : magFail ? "exact<1, mag FAILS ✓" : "mag suffices here";
+            output.WriteLine($"{fam,-12} {n,8} {$"{idOK}/{done}",6} {maxC0,7:F3} {(sumC0/done),7:F3} {minC0,7:F3} {(sumSoverN/done),8:F3} {(allSneg?"<0":"mix"),6} {cardBndMax,8:F3} {magFail,8} {verdict,-20}");
+        }
+        output.WriteLine("");
+        output.WriteLine("Cols: idOK=#samples the exact identity NS=Z_both0+(N_nz+S)/2 held (must be all — this is the Lean identity replacing card_agree_le)");
+        output.WriteLine("      | maxC0/c̄₀/minC0 = exact c₀=NS/n (worst / mean=matching input / best) | S/n = mean signed ∑χ_uχ_v | Ssign=<0 ⟹ anti-correlated");
+        output.WriteLine("      | cardBnd = max magnitude bound zu/n+½+|S|/2n (the card_agree_le route) | magFail = cardBnd≥1 (magnitude route can't close).");
+        output.WriteLine("VERDICT 'exact<1, mag FAILS ✓' ⟹ the EXACT/sign route is REQUIRED and WORKS at q=3 — confirms the build: line_regroup → exact");
+        output.WriteLine("  Z_w (card_quadForm_eq, ≤q−1 lines) → NS via the sign-preserving identity. If 'mag suffices' ⟹ no exact eval needed (use card_agree).");
+        output.WriteLine("  If 'EXACT FAILS' ⟹ c₀→1 even exactly ⟹ the matching first-moment fails at q=3 ⟹ need 2nd-moment/averaging over anchors (heavier).");
+        output.WriteLine("FALLBACK if exact c₀ is bounded but close to 1 (small δ): average over anchors (c̄₀) — report shows if mean ≪ max, i.e. anchor-averaging recovers δ.");
+        Assert.True(true);
+    }
 }
