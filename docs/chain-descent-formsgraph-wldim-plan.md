@@ -19,6 +19,26 @@
 > **▶▶▶▶▶▶ CURRENT HANDOFF (2026-06-27, SESSION 3 — read THIS first; supersedes SESSION 2 below for the frontier).**
 > **User-set working order (one at a time): #4 field-gen (✅DONE) → #1 corank tightening (✅DONE) → small-q tail
 > (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (◀ NEXT).** What landed this session:
+> - **▶ INCREMENT 5 STARTED (2026-06-27, `ScratchIncr5.lean`, 2 pieces axiom-clean, NOT in build).** The
+>   scope-independent matching mechanics: **`exists_pow_matching_lt`** (`F < |W| ⟹ ∃ m, |ι|·Fᵐ < |W|ᵐ`, the ℕ-smallness
+>   helper feeding `exists_separating_base`'s `hlt`, via `pow_unbounded_of_one_lt`) + **`exists_separating_base_of_split`**
+>   (from per-good-anchor ℕ bound `cN`, bad-anchor ℕ bound `βN`, and `cN+βN<|V|`, produce a base `P : Fin m → V×V` whose
+>   2-element sub-frames each target avoids failing — `matching_F_bound`→`exists_pow_matching_lt`→`exists_separating_base`).
+>   **NEXT pieces:** (2b) derive `cN`/`βN`/`cN+βN<|V|` from `good_anchor_fail_le_const`+`beta_full_count_closed`+q-thresholds;
+>   (3) bridge wiring `¬Fail ∧ Good ⟹ jointIsoCountK differ` (via `jointIsoCountK_ne_of_chiSep_pair`); (4) assemble
+>   `zSep → ZProfileSeparatesK → IsotropySeparatesAtBaseK → seal`.
+> - **★★★ INCREMENT-5 SCOPE FINDING (2026-06-27, corrects a documented caveat) — the matching has its OWN `q`-floor,
+>   independent of the per-anchor `c₀` work.** `good_anchor_fail_le` folds the **isotropic-shell counts** `#{I_u=0}+#{I_v=0}`
+>   (each `~|V|/q`) INTO input `c` (not into `β`); `good_anchor_fail_le_const` controls them only via the **loose**
+>   `zeroCountShift_card_le`, needing **`q≥256`** to reach `c/|V|≤15/16`, and `β_full/|V| ≤ (2d+4)/q` then forces **`c̄₀<1`
+>   only for `q ≳ 32d`** (hence `q≥256` at the lead `d`). The small-`q` tail (`c0_le_route2`, `q<16`) tightened `NS` (the
+>   χ-equal block) but `fail = NS ∪ {I_u=0} ∪ {I_v=0}` ALSO pays the two shells, each `~|V|/q`; at `q=3` the shells alone are
+>   `~⅔|V|` each, so `fail/|V|≈1` regardless of how tight `NS` is. **⟹ the route-2 tail does NOT lower this matching's floor**
+>   (the plan's earlier "δ=1/(4q²) only affects the base-size constant" was too optimistic — it overlooked the shell term in
+>   `c`). **Increment 5 therefore delivers the affine-polar seal for `q ≳ 32d` (`q≥256` lead family)** — a genuine infinite
+>   slice. Lowering the floor needs (a) a TIGHT corank-based shell count (`~|V|/q` not the loose `√q`-corrected bound) → floor
+>   `q≳O(d)`; then (b) genuinely-small-`q`-with-growing-`d` (infinite sub-family) walls the 2-point-frame matching outright,
+>   needing larger separating frames or a different small-`q` assembly. SEPARATE follow-up, flagged not folded.
 > - **✅ hK CLEANUP DONE (2026-06-27, axiom-clean, built).** The bridge capstones' carried `hK : gaussSum²·∑ψ(Q) ≠ 0`
 >   is **discharged internally** — removed as a hypothesis from BOTH `ScratchBridgeD.jointIsoCount_ne_of_chiSep_pair`
 >   (q=p) AND `ScratchBridgeAllK.jointIsoCountK_ne_of_chiSep_pair` (abstract K). Two NEW reusable lemmas in
