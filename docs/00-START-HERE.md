@@ -146,10 +146,11 @@ close it — is set out in
 > closes the affine-polar `VO^ε` residue (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron` disjunction modulo `{G3}`,
 > Witt-free, no `hSmallAutThin`** — capstone `reachesRigidOrCameron_affinePolar`. **NON-VACUITY THREAD ✅DONE (2026-06-27):**
 > the seal now **carries** `T.card ≤ 128·(Nat.log 2 ((p^d)²) + 1) = O(d log p)` (log-free block keystone
-> `exists_pow_matching_block`), so the slice is non-vacuous — a genuine **quasipolynomial** WL-base. **Working order now: the
-> recommended breakpoint = PORT `ScratchIncr5`'s dependency closure into `build.sh` + condense the 2200-line plan doc**, taken
-> now because the q=p slice is a finished theorem (stable seam, before floor-lowering re-edits the graph); then resume
-> floor-lowering (q≳32d → O(d)). **Read the plan's top "CURRENT HANDOFF (2026-06-27, SESSION 3)" block first, then
+> `exists_pow_matching_block`), so the slice is non-vacuous — a genuine **quasipolynomial** WL-base. **PORT + DOC-CONDENSE
+> ✅DONE (2026-06-27):** all 27 forms-graph pair-route modules are in `build.sh` (serial full build ~98s, axiom-clean;
+> `PublicTheoremIndex` regenerated), and the plan doc was condensed 2225→~1000 lines (build history → the archive).
+> **Working order now: floor-lowering** (`q≳32d → O(d)` via a tight corank shell count, then larger frames for
+> small-q-growing-d), then q=pᵉ seam (Layer D) / other families. **Read the plan STATUS block first, then
 > `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; NB the matching base is `O(log n)` (quasipoly
 > regime) — the optimal O(1)/frame WL-dim (structural Skresanov) is a separate, harder track, needed for true polynomial since
 > the canonizer charges ~`n^{|T|}` (a rigid residue forks `n` ways per individualization);

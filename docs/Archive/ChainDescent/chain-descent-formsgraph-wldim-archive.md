@@ -1243,3 +1243,45 @@ better *mental model* and is the natural choice *only if* the Witt track is bein
 
 ---
 
+
+---
+
+## Increment 3–5 + sessions 1–3 build history (archived 2026-06-27, after the q=p seal landed + was ported)
+
+> Frozen from the live doc's STATUS block when the q=p affine-polar seal (`reachesRigidOrCameron_affinePolar`) was
+> completed, made non-vacuous (`T.card = O(d log p)`), and ported into `build.sh`. The blow-by-blow is recoverable from
+> git + the now-in-build source; this preserves only the **non-obvious findings** and the route decisions worth not
+> re-walking. The live doc keeps the current state, the reusable-blocks list, and the forward roadmap.
+
+**The reduction chain, as it was built (all now in `build.sh`, axiom-clean):**
+`ScratchCrux` (D1 + D2-bridge) reduced the whole generalization to ONE predicate `ZProfileSeparates Q T` (= D3d =
+forms-graph bounded WL-dim). D3d resolved **Weil-free**: the observable is the **pair** count `Z_u({t,t'})` (the
+SINGLETON `Z_u({t})` is binary — a verified correction; do not use it), its invariant `χ(det G₂)` is `χ` of a quadratic,
+and the per-pair character sum factors into additive Gauss sums (`pairCharSum_factor_gen`). Then: increment 3
+(`c0_le_threequarters`, `NS ≤ ¾|V|` per good anchor) → increment 4 (good-anchor fail `c ≤ 15/16|V|`, bad-anchor
+`β = O(d/q)` via Schwartz–Zippel on the pencil determinant) → increment 5 (matching → base → seal).
+
+**Non-obvious findings worth keeping (the "didn't have to be this way"):**
+- **The bridge architecture closed before the analytic detail** — `χ(det G₂) ↔ Z_u(S)` via `levelset_count_collapse`
+  (B1a) + `pairCount_ne_of_chiSep` (B1b); the **degenerate-config case dissolved** into the increment-4 matching density
+  (an `O(1/√q)` locus), never computed. The clean four-value distinctness needs `corr = 0` (both config-diffs isotropic,
+  codim-2), which became a third small Schwartz–Zippel locus folded into the matching bad set — NOT extra analytic work.
+- **`hgood` alone forces `hnz`/`hPu`/`hPv`** (increment 4b): because `pairForm Q (t₀−v)` is always degenerate, a
+  nondegenerate pencil member can only come from a genuine `(y,z)`-combination, so the good-anchor predicate collapses to
+  `hgood ∧ Q(t₀−u)≠0 ∧ Q(t₀−v)≠0` (modulo the negligible `t₀ ∈ {u,v}`).
+- **The field/seam typing decision (concern #4) resolved lift-first** — lifting the bridge + reductions to abstract
+  `[Field K]` (`ScratchFieldGen*`/`ScratchBridgeAllK`/`ScratchLemmaAK`) was a mechanical typeclass swap (`ZMod p ↦ K`,
+  `(p : R') ↦ (Fintype.card K : R')`) because the analytic content used no `ZMod p`-specific fact. `affineE` is the
+  single endpoint relabel (`ScratchFieldGenAdapter`). This is why q=pᵉ (Layer D) is a seam, not a re-proof.
+- **The matching's INDEPENDENT q-floor (the scope correction)** — `good_anchor_fail_le` folds the isotropic-shell counts
+  `#{I_u=0}+#{I_v=0}` (each `~|V|/q`) INTO input `c` (not `β`), controlled only by the loose `zeroCountShift_card_le`
+  (`q≥256`). So `c̄₀<1` holds only for `q ≳ 32d`. The small-q route-2 tail tightens `NS` but `fail` still pays the two
+  shells (at q=3 each `~⅔|V|`), so **route-2 does NOT lower the matching floor** — the earlier "δ=1/(4q²) only affects the
+  base-size constant" was too optimistic. Floor-lowering is genuine follow-up (tight corank shell count → `q≳O(d)`).
+
+**Spikes / decisions (don't re-walk):** SEAM (`ScratchSeam`, axiom-clean stub) ⟹ the abstract residue routes to
+`affineScheme(Q)` modulo ONE mechanical obligation `htransport`, to be built as a real lemma (not hidden in the
+citation), on the landed `forcedNode_relabel`. char-2 + Suzuki = one bespoke track (Arf + additive trace; Mathlib
+substrate absent), deferred. Route 1 (char-sum) chosen over Route 3 (Witt) at the §11.1 GATE; Witt is the fallback.
+The `VO⁻₄(3)` instance was sealed earlier (`ScratchBM3Glue.vo4minus_seal`, size-9 base `T₉`, kernel `decide` ~20s) as
+the concrete-frame proof-of-concept; the generalization (this chain) supersedes it as the live route.

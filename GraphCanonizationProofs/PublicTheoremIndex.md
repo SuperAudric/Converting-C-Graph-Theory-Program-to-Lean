@@ -1548,18 +1548,20 @@ imports both this module and `CascadeAffine`. All decls axiom-clean `[propext, C
 | `sum_quadForm_eval` | 150-186 | **Brick B3′** — basis-explicit `sum_addChar_quadForm` (weights `Q(v i)` for an orthogonal basis `v`; value pinned, no existential). Powers the scaling relation. | — |
 | `sum_addChar_quadForm_smul` | 188-225 | **Brick C-scale** — scaling the form by a unit `s` scales the Gauss sum by `χ(s)^d`: `∑ₓ ψ(s·Q x) = χ(s)^d·∑ₓ ψ(Q x)` (change of additive character). For `d` even, scale-invariant. | — |
 | `sum_addChar_quadForm_smul_ne_zero` | 227-250 | **(M2 — the cancellable constant)** If `∑_x ψ(Q x) ≠ 0` then `∑_x ψ(s·Q x) ≠ 0` for any unit `s` (factor `χ(s)^d` is a unit). This is the global Gauss value that cancels when comparing two configurations' multi-point sums `S(r) = ψ(Gram-expr)·∑_x ψ(R·Q x)`, yielding `ψ(Gram-expr_u) = ψ(Gram-expr_{u'})`. | — |
-| `card_quadForm_eq` | 252-291 | **Brick C — THE affine-quadric point count (Mathlib-absent).** `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑ₓ ψ(Q x)`, from Brick A + the scaling relation. The assembled count formula. | — |
-| `sum_addChar_quadForm_linear` | 293-321 | **Brick D1 — complete the square.** `∑_w ψ(r·Q w + polar Q w a') = ψ(−r⁻¹·Q a')·∑_w ψ(r·Q w)` (linear term absorbed by the shift `w ↦ w + r⁻¹a'`). The engine of hyperplane-section / joint counts. | — |
-| `count2_eq_charsum` | 323-343 | **Brick A2** — the two-condition count `#{x:f x=c ∧ g x=d}` as a double-indexed character sum (generalizes Brick A). The entry point for the k-fold count assembly (the Gauss endpoint). | — |
-| `quad_sub` | 345-353 | **Helper** — the parallelogram identity `Q(a−b) = Q a + Q b − polar Q a b`. | — |
-| `polar_sum_right` | 355-363 | **Helper** — `polar Q z ·` is additive over a finite sum in its second argument: `∑ⱼ rⱼ·polar Q z tⱼ = polar Q z (∑ⱼ rⱼ•tⱼ)` (via `polarBilin`). | — |
-| `sum_addChar_multiQuad` | 365-403 | **Multi-point quadratic Gauss sum (generalizes D1) — THE inner sum of the k-fold count.** `∑_z ψ(∑ⱼ rⱼ·Q(z−tⱼ)) = ψ(const)·∑_z ψ(R·Q z)` for `R=∑rⱼ≠0` (summand collapses to D1 via `quad_sub`+`polar_sum_right`). The engine for the count at a symmetry-broken base. | — |
-| `countk_eq_charsum` | 405-435 | **Brick A_k — the k-fold count as a product-of-sums.** Generalizes `count_eq_charsum`/`count2_eq_charsum` to a `Fintype`-indexed family of conditions: `∑_x ∏_j (∑_{r_j} ψ(r_j(f_j x−c_j))) = #{x:∀j, f_j x=c_j}·q^{#ι}` (product of orthogonality indicators). | — |
-| `countk_eq_sum_charsum` | 437-467 | **Brick A_k factored — the k-fold count over dual variables.** `#{x:∀j, f_j x=c_j}·q^{#ι} = ∑_{r:ι→F} ψ(−∑_j r_j c_j)·∑_x ψ(∑_j r_j·f_j x)` (expand via `Fintype.prod_sum`, collapse via `addChar_sum`). With `f_j x = Q(x−t_j)` the inner sum is exactly `sum_addChar_multiQuad` — the closed-form multi-point `Q`-count for the symmetry-broken-base injectivity (the Gauss endpoint). | — |
-| `sum_addChar_linearMap` | 468-504 | **The linear-functional character sum (boundary engine).** `∑_x ψ(φ x) = |V|·[φ=0]` for a `K`-linear functional `φ` and primitive `ψ` (translation by `x₀` with `ψ(φ x₀)≠1`, from primitivity). Evaluates the `R=∑r_j=0` boundary of the multi-point count. | — |
-| `sum_addChar_multiQuad_zero` | 506-533 | **Multi-point quadratic Gauss sum, the `R=0` boundary** (companion to `sum_addChar_multiQuad`). When `∑_j r_j=0` the `R·Qz` term vanishes and the summand is linear: `∑_z ψ(∑_j r_j·Q(z−t_j)) = ψ(∑_j r_j·Q t_j)·∑_z ψ(polar Q z (−∑_j r_j•t_j))`; the surviving factor evaluates by `sum_addChar_linearMap`. Together with `multiQuad` (R≠0), evaluates the inner sum for ALL `r`. | — |
-| `count_pi_setValued` | 535-559 | **The inclusion–exclusion engine — value-SET counts = sum of value-POINT counts.** `#{z : ∀j, h_j z ∈ A_j} = ∑_{c∈∏A_j} #{z : ∀j, h_j z = c_j}` (fiberwise partition additivity). With `h_j z = Q(z−t_j)` it turns isotropy-class counts (each class = a `Q`-value-set: anisotropic ↔ `K∖{0}`, isotropic-or-zero ↔ `{0}`) into the pointwise `Q`-value counts the Gauss toolkit closes. | — |
-| `multiCharSum_eq_sum_count` | 561-587 | **(M2 hinge — Fourier inversion)** `∑_x ψ(∑_j r_j·f_j x) = ∑_{c:ι→F} ψ(∑_j r_j·c_j)·#{x:∀j, f_j x=c_j}` (partition `x` by value-tuple). The dual of `countk_eq_sum_charsum`: all pointwise counts agree ⟹ all multi-point Gauss sums `S(r)` agree. With `f_j x=Q(x−t_j)`, `S(r)` carries the Gram (`sum_addChar_multiQuad`), so count-agreement ⟹ Gram-agreement. Elementary (no primitivity/domain). | — |
+| `gaussSum_sq_ne_zero` | 252-268 | — | — |
+| `sum_addChar_quadForm_ne_zero` | 270-287 | — | — |
+| `card_quadForm_eq` | 289-328 | **Brick C — THE affine-quadric point count (Mathlib-absent).** `#{x:Q x=c}·q = #V + (∑_{t≠0} ψ(−tc)·χ(t)^d)·∑ₓ ψ(Q x)`, from Brick A + the scaling relation. The assembled count formula. | — |
+| `sum_addChar_quadForm_linear` | 330-358 | **Brick D1 — complete the square.** `∑_w ψ(r·Q w + polar Q w a') = ψ(−r⁻¹·Q a')·∑_w ψ(r·Q w)` (linear term absorbed by the shift `w ↦ w + r⁻¹a'`). The engine of hyperplane-section / joint counts. | — |
+| `count2_eq_charsum` | 360-380 | **Brick A2** — the two-condition count `#{x:f x=c ∧ g x=d}` as a double-indexed character sum (generalizes Brick A). The entry point for the k-fold count assembly (the Gauss endpoint). | — |
+| `quad_sub` | 382-390 | **Helper** — the parallelogram identity `Q(a−b) = Q a + Q b − polar Q a b`. | — |
+| `polar_sum_right` | 392-400 | **Helper** — `polar Q z ·` is additive over a finite sum in its second argument: `∑ⱼ rⱼ·polar Q z tⱼ = polar Q z (∑ⱼ rⱼ•tⱼ)` (via `polarBilin`). | — |
+| `sum_addChar_multiQuad` | 402-440 | **Multi-point quadratic Gauss sum (generalizes D1) — THE inner sum of the k-fold count.** `∑_z ψ(∑ⱼ rⱼ·Q(z−tⱼ)) = ψ(const)·∑_z ψ(R·Q z)` for `R=∑rⱼ≠0` (summand collapses to D1 via `quad_sub`+`polar_sum_right`). The engine for the count at a symmetry-broken base. | — |
+| `countk_eq_charsum` | 442-472 | **Brick A_k — the k-fold count as a product-of-sums.** Generalizes `count_eq_charsum`/`count2_eq_charsum` to a `Fintype`-indexed family of conditions: `∑_x ∏_j (∑_{r_j} ψ(r_j(f_j x−c_j))) = #{x:∀j, f_j x=c_j}·q^{#ι}` (product of orthogonality indicators). | — |
+| `countk_eq_sum_charsum` | 474-504 | **Brick A_k factored — the k-fold count over dual variables.** `#{x:∀j, f_j x=c_j}·q^{#ι} = ∑_{r:ι→F} ψ(−∑_j r_j c_j)·∑_x ψ(∑_j r_j·f_j x)` (expand via `Fintype.prod_sum`, collapse via `addChar_sum`). With `f_j x = Q(x−t_j)` the inner sum is exactly `sum_addChar_multiQuad` — the closed-form multi-point `Q`-count for the symmetry-broken-base injectivity (the Gauss endpoint). | — |
+| `sum_addChar_linearMap` | 505-541 | **The linear-functional character sum (boundary engine).** `∑_x ψ(φ x) = |V|·[φ=0]` for a `K`-linear functional `φ` and primitive `ψ` (translation by `x₀` with `ψ(φ x₀)≠1`, from primitivity). Evaluates the `R=∑r_j=0` boundary of the multi-point count. | — |
+| `sum_addChar_multiQuad_zero` | 543-570 | **Multi-point quadratic Gauss sum, the `R=0` boundary** (companion to `sum_addChar_multiQuad`). When `∑_j r_j=0` the `R·Qz` term vanishes and the summand is linear: `∑_z ψ(∑_j r_j·Q(z−t_j)) = ψ(∑_j r_j·Q t_j)·∑_z ψ(polar Q z (−∑_j r_j•t_j))`; the surviving factor evaluates by `sum_addChar_linearMap`. Together with `multiQuad` (R≠0), evaluates the inner sum for ALL `r`. | — |
+| `count_pi_setValued` | 572-596 | **The inclusion–exclusion engine — value-SET counts = sum of value-POINT counts.** `#{z : ∀j, h_j z ∈ A_j} = ∑_{c∈∏A_j} #{z : ∀j, h_j z = c_j}` (fiberwise partition additivity). With `h_j z = Q(z−t_j)` it turns isotropy-class counts (each class = a `Q`-value-set: anisotropic ↔ `K∖{0}`, isotropic-or-zero ↔ `{0}`) into the pointwise `Q`-value counts the Gauss toolkit closes. | — |
+| `multiCharSum_eq_sum_count` | 598-624 | **(M2 hinge — Fourier inversion)** `∑_x ψ(∑_j r_j·f_j x) = ∑_{c:ι→F} ψ(∑_j r_j·c_j)·#{x:∀j, f_j x=c_j}` (partition `x` by value-tuple). The dual of `countk_eq_sum_charsum`: all pointwise counts agree ⟹ all multi-point Gauss sums `S(r)` agree. With `f_j x=Q(x−t_j)`, `S(r)` carries the Gram (`sum_addChar_multiQuad`), so count-agreement ⟹ Gram-agreement. Elementary (no primitivity/domain). | — |
 ## ChainDescent/FormsGraphConcrete.lean
 
 The `FormsGraph`-side consumer (imports `CascadeAffine` + `GaussCount`) that discharges `IsotropySeparatesAtBase Q T`
@@ -1577,3 +1579,508 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `coarse_eq_sum_iso` | 117-134 | **(M1 core — fine→coarse)** A coarse `Q`-value-set count `#{x:∀j, Q(x−t_j)∈qSetOf(τ_j)}` = the sum over refining isotropy profiles `σ∈∏isoSetOf(τ_j)` of fine counts `#{x:∀j, isoClass(x−t_j)=σ_j}` (`count_pi_setValued` at the isotropy value-type). So fine-count agreement ⟹ coarse-count agreement, no origin correction (M0). | — |
 | `QProfileSeparatesAtBase` | 152-168 | **(M3 crux — the corrected `IsotropyCountsRecoverFrameQ`)** Agreeing fine isotropy-counts at base `T` ⟹ same `Q`-profile over the standard basis frame. At an arbitrary *symmetry-broken* `T` (unlike the superseded frame-locked predicate), where it is probe-validated (`VO^-_4(3)`, `T=frameBase∪{2e₃}`, 81/81). **OPEN** — the genuine uncited joint-incidence content (`Z(S)` over sub-frames; `isoClass` is shell-blind so the M2 pointwise hinge doesn't apply). | Definition, `noncomputable` |
 | `isotropySeparates_of_qProfileSeparates` | 170-179 | **(M3 reduction — resolved)** `QProfileSeparatesAtBase Q T` + nondegenerate polar form ⟹ `IsotropySeparatesAtBase Q T`, via the landed `coords_determine` (Q-profile + nondeg ⟹ vector) and `affineE.symm` injective. So the entire remaining Gauss-work content for this residue is the single predicate `QProfileSeparatesAtBase`. | — |
+## ChainDescent/ScratchBM3Bridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `BM3Bridge.encV` | 15 | — | `abbrev` |
+| `BM3Bridge.Qvo` | 17-18 | — | Definition |
+| `BM3Bridge.co` | 20-21 | — | Definition |
+| `BM3Bridge.Qc` | 22 | — | Definition |
+| `BM3Bridge.Qsh` | 23-28 | — | Definition |
+| `BM3Bridge.co_encV` | 30-34 | — | — |
+| `BM3Bridge.val_zero` | 36-37 | — | — |
+| `BM3Bridge.coord_id` | 38-39 | — | — |
+| `BM3Bridge.QvoVal` | 41-46 | — | — |
+| `BM3Bridge.Qc_encV` | 48-50 | — | — |
+| `BM3Bridge.coord_sub` | 52-56 | — | — |
+| `BM3Bridge.Qsh_encV` | 58-63 | — | — |
+| `BM3Bridge.encV_zero` | 65-66 | — | — |
+| `BM3Bridge.encV_val_zero` | 68-70 | — | — |
+| `BM3Bridge.restrictedF` | 72-75 | — | Definition |
+| `BM3Bridge.restricted_bridge` | 77-104 | — | — |
+| `BM3Bridge.fam` | 106-107 | — | Definition |
+| `BM3Bridge.sigF` | 108 | — | Definition |
+| `BM3Bridge.sigF_injective` | 110-111 | — | — |
+
+## ChainDescent/ScratchBM3Glue.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Bil` | 17-23 | — | Definition, `noncomputable` |
+| `Qbun` | 25-26 | — | Definition, `noncomputable` |
+| `Qbun_apply` | 28-29 | — | `@[simp]` |
+| `Bv` | 31-34 | — | Definition |
+| `T₉` | 36-37 | — | Definition, `noncomputable` |
+| `hcard9` | 39-41 | — | — |
+| `Sij_subset` | 43-50 | — | — |
+| `vcount_eq` | 52-64 | — | — |
+| `comp_eq` | 66-79 | — | — |
+| `isoSep` | 81-117 | — | — |
+| `vo4minus_seal` | 119-122 | — | Definition |
+
+## ChainDescent/ScratchBridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `chiSep_imp_zSep` | 37-57 | — | — |
+| `pairCount_ne_of_chiSep` | 59-76 | — | — |
+
+## ChainDescent/ScratchBridgeA.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `levelset_count_collapse` | 31-120 | — | — |
+
+## ChainDescent/ScratchBridgeAllK.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `cone_count_zero_splitK` | 30-62 | — | — |
+| `fullcount_eq_jointIsoCountK_add_corr` | 67-74 | — | — |
+| `levelset_count_collapseK` | 79-156 | — | — |
+| `fullcount_pair_eq_levelsetK` | 161-186 | — | — |
+| `fullcount_pair_closedK` | 187-212 | — | — |
+| `configPolarDet_eq_pairFormK` | 217-227 | — | — |
+| `chi_configDet_eq_chi_pairFormK` | 229-297 | — | — |
+| `chi_eq_one_or_neg_oneK` | 299-312 | — | — |
+| `jointIsoCountK_pair_closed_corr0` | 313-345 | — | — |
+| `jointIsoCountK_ne_of_chiSep_pair` | 346-381 | — | — |
+
+## ChainDescent/ScratchBridgeB.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `fullcount_eq_jointIsoCount_add_corr` | 31-41 | — | — |
+
+## ChainDescent/ScratchBridgeC.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `fullcount_pair_eq_levelset` | 25-60 | — | — |
+| `fullcount_pair_closed` | 61-94 | — | — |
+
+## ChainDescent/ScratchBridgeD.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `configPolarDet_eq_pairForm` | 27-43 | — | — |
+| `chi_configDet_eq_chi_pairForm` | 45-125 | — | — |
+| `chi_eq_one_or_neg_one` | 127-138 | — | — |
+| `chiSep_imp_zSep_field` | 140-166 | — | — |
+| `pairCount_ne_of_chiSep_field` | 168-181 | — | — |
+| `jointIsoCount_pair_closed_corr0` | 182-224 | — | — |
+| `jointIsoCount_ne_of_chiSep_pair` | 225-277 | — | — |
+
+## ChainDescent/ScratchBridgeK.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `zProfileSeparatesK_of_zSep` | 22-33 | — | — |
+
+## ChainDescent/ScratchBridgeZ.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `zProfileSeparates_of_zSep` | 32-46 | — | — |
+
+## ChainDescent/ScratchBucket.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `sum_two_bucket_le` | 15-34 | — | — |
+| `sqrt_mul_le_div` | 36-44 | — | — |
+| `c0_le` | 46-82 | — | — |
+
+## ChainDescent/ScratchC0.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `charSum_int_le_norm` | 14-26 | — | — |
+| `card_agree_le` | 28-44 | — | — |
+
+## ChainDescent/ScratchC0Final.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `c0_le_threequarters` | 20-100 | — | — |
+
+## ChainDescent/ScratchChiNorm.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `norm_quadraticChar` | 8-22 | — | — |
+
+## ChainDescent/ScratchCorank.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `polarRad` | 31-41 | — | Definition |
+| `mem_polarRad` | 43-44 | — | `@[simp]` |
+| `polarRad_card_filter` | 46-57 | — | — |
+| `polarRad_ne_top_of_ne_zero` | 59-72 | — | — |
+| `radical_card_mul_card_le` | 74-89 | — | — |
+
+## ChainDescent/ScratchCount.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `int_char_pointwise` | 13-18 | — | — |
+| `counting_identity` | 20-44 | — | — |
+
+## ChainDescent/ScratchCountTight.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `int_char_pointwise_tight` | 23-30 | — | — |
+| `counting_identity_tight` | 32-55 | — | — |
+| `card_agree_le_tight` | 57-74 | — | — |
+
+## ChainDescent/ScratchCrux.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `jointIsoCount` | 25-34 | — | Definition, `noncomputable` |
+| `ZProfileSeparates` | 35-43 | — | Definition, `noncomputable` |
+| `extProfile` | 45-48 | — | Definition, `noncomputable` |
+| `extProfile_mem` | 50-53 | — | — |
+| `qProfileSeparatesAtBase_of_zProfileSeparates` | 54-136 | — | — |
+| `isotropySeparates_of_zProfileSeparates` | 138-147 | — | — |
+| `jointIsoCount_eq_restricted` | 148-188 | — | — |
+
+## ChainDescent/ScratchFieldGen.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `isoClassK` | 35-39 | — | Definition, `noncomputable` |
+| `isoClassK_eq_zero_iff` | 40-49 | — | — |
+| `isoClassK_eq_two_iff` | 50-59 | — | — |
+| `isoClassK_eq_one_iff` | 60-69 | — | — |
+| `isoClassK_ne_two_iff` | 70-73 | — | — |
+| `polar_eq_of_subK` | 78-87 | — | — |
+| `coords_determineK` | 88-103 | — | — |
+| `jointIsoCountK` | 108-115 | — | Definition, `noncomputable` |
+| `ZProfileSeparatesK` | 116-124 | — | Definition, `noncomputable` |
+| `QProfileSeparatesAtBaseK` | 125-138 | — | Definition, `noncomputable` |
+| `IsotropySeparatesAtBaseK` | 139-150 | — | Definition, `noncomputable` |
+| `extProfileK` | 154-159 | — | Definition, `noncomputable` |
+| `extProfileK_mem` | 160-163 | — | — |
+| `qProfileSeparatesAtBaseK_of_zProfileSeparatesK` | 164-244 | — | — |
+| `isotropySeparatesK_of_qProfileSeparatesK` | 246-253 | — | — |
+| `isotropySeparatesK_of_zProfileSeparatesK` | 255-260 | — | — |
+| `jointIsoCountK_eq_restricted` | 265-293 | — | — |
+
+## ChainDescent/ScratchFieldGenAdapter.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `isoClassK_eq_isoClass` | 25-35 | — | — |
+| `isoCount_transport` | 36-67 | — | — |
+| `isotropySeparatesAtBase_of_K` | 69-82 | — | — |
+| `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` | 84-97 | — | — |
+
+## ChainDescent/ScratchGoodAnchor.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `mvPoly_zeros_count_le` | 42-61 | — | — |
+| `det_totalDegree_le` | 63-78 | — | — |
+| `pencilDisc` | 79-85 | — | Definition, `noncomputable` |
+| `pencilDisc_totalDegree_le` | 86-96 | — | — |
+| `pencilDisc_eval` | 97-104 | — | — |
+| `polar_pencil` | 109-114 | — | — |
+| `polarRad_eq_bot_iff_separatingRight` | 116-126 | — | — |
+| `polarRad_ne_bot_iff_det_eq_zero` | 128-133 | — | — |
+| `toMatrix₂_polarBilin_pencil` | 135-145 | — | — |
+| `pencilZeros_count_le` | 149-163 | — | — |
+| `degenerate_count_le` | 165-197 | — | — |
+
+## ChainDescent/ScratchIncr4.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `fail_count_split` | 35-72 | — | — |
+| `matching_F_bound` | 74-86 | — | — |
+| `good_anchor_fail_le` | 88-141 | — | — |
+| `zeroCountShift_card_le` | 143-186 | — | — |
+| `good_anchor_fail_le_const` | 188-235 | — | — |
+
+## ChainDescent/ScratchIncr4b.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `mvPoly_zeros_count_le_dim` | 37-58 | — | — |
+| `mem_polarRad_smul_pairForm` | 63-72 | — | — |
+| `polarRad_smul_pairForm_ne_bot` | 74-79 | — | — |
+| `hPu_of_hgood` | 81-89 | — | — |
+| `hPv_of_hgood` | 91-98 | — | — |
+| `hnz_of_hgood` | 100-115 | — | — |
+| `bad_anchor_card_le_hgood` | 116-157 | — | — |
+| `bad_anchor_count_le_of_poly` | 165-203 | — | — |
+| `notHgood_eval_zero_of_repr` | 204-220 | — | — |
+
+## ChainDescent/ScratchIncr4c.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `coordPoly` | 35-37 | — | Definition, `noncomputable` |
+| `coordPoly_eval` | 39-41 | — | `@[simp]` |
+| `linFunc_eq_sum` | 43-49 | — | — |
+| `coordPoly_eval_linFunc` | 51-55 | — | — |
+| `polar_t0_t0_sum` | 57-72 | — | — |
+| `gramQuadPoly` | 74-76 | — | Definition, `noncomputable` |
+| `gramQuadPoly_eval` | 78-91 | — | — |
+| `LPoly` | 93-95 | — | Definition, `noncomputable` |
+| `LPoly_eval` | 97-103 | — | — |
+| `QPoly` | 105-107 | — | Definition, `noncomputable` |
+| `QPoly_eval` | 109-119 | — | — |
+| `polar_pairForm_apply` | 121-131 | — | — |
+| `entryPoly` | 133-137 | — | Definition, `noncomputable` |
+| `entryPoly_eval` | 139-144 | — | — |
+| `pencilDetPoly` | 146-150 | — | Definition, `noncomputable` |
+| `pencilDetPoly_eval` | 152-163 | — | — |
+| `pencilDetPoly_ne_zero` | 165-175 | — | — |
+| `det_totalDegree_le_gen` | 185-199 | — | — |
+| `coordPoly_totalDegree_le` | 201-206 | — | — |
+| `gramQuadPoly_totalDegree_le` | 208-220 | — | — |
+| `LPoly_totalDegree_le` | 222-227 | — | — |
+| `QPoly_totalDegree_le` | 229-237 | — | — |
+| `entryPoly_totalDegree_le` | 239-253 | — | — |
+| `pencilDetPoly_totalDegree_le` | 255-269 | — | — |
+| `badHgood_count_le` | 270-285 | — | — |
+| `beta_count_closed` | 286-325 | — | — |
+| `corr_zero_of_anchor` | 335-337 | — | — |
+| `QPoly_ne_zero` | 339-347 | — | — |
+| `qZero_count_le` | 348-360 | — | — |
+| `beta_full_count_closed` | 361-432 | — | — |
+| `exists_orthoAnisotropic_basis` | 444-455 | — | — |
+| `associated_separatingLeft_of_polarRad` | 457-472 | — | — |
+
+## ChainDescent/ScratchIncr4d.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `polar_pencil_apply` | 36-48 | — | — |
+| `pencil_radical_key` | 50-71 | — | — |
+| `polarRad_pencil_subset_span` | 73-89 | — | — |
+| `polarRad_pencil_eq_bot` | 91-139 | — | — |
+| `pairForm_self_sub` | 148-159 | — | — |
+| `exists_ne_zero_polar_eq_zero` | 161-179 | — | — |
+| `exists_pairForm_self_sub_ne_zero` | 181-232 | — | — |
+| `exists_anisotropic` | 234-247 | — | — |
+| `gramQuadPoly_ne_zero` | 253-261 | — | — |
+| `planeDiscPoly` | 263-267 | — | Definition, `noncomputable` |
+| `planeDiscPoly_eval` | 269-277 | — | — |
+| `planeDiscPoly_totalDegree_le` | 279-291 | — | — |
+| `planeDiscPoly_ne_zero` | 293-299 | — | — |
+| `exists_good_plane_anchor` | 301-358 | — | — |
+| `linearIndependent_of_pairForm_ne_zero` | 360-375 | — | — |
+| `exists_hgood` | 377-411 | — | — |
+
+## ChainDescent/ScratchIncr5.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `exists_pow_matching_lt` | 32-49 | matching-length existence: `F < |W| ⟹ ∃m, |ι|·Fᵐ < |W|ᵐ` (feeds `exists_separating_base`'s `hlt`). | — |
+| `exists_pow_matching_le` | 51-87 | the same with an explicit `Real.log` length bound `m ≤ log|ι|/log(|W|/F)+1` (standalone; the live chain uses the block variant). | — |
+| `exists_pow_matching_block` | 89-124 | **log-free matching keystone**: from the ratio `64·F ≤ 63·|W|`, `∃m ≤ 64·(Nat.log 2 |ι| + 1), |ι|·Fᵐ < |W|ᵐ` (block fact `2·63⁶⁴ ≤ 64⁶⁴`). Non-vacuity backbone. REUSABLE. | — |
+| `exists_separating_base_of_split` | 126-151 | matching mechanics: per-good-anchor fail `cN` + bad-anchor `βN` + `cN+βN<|V|` ⟹ a base `Fin m → V×V` each target avoids. | — |
+| `exists_separating_base_of_split_bounded` | 153-182 | the `_of_split` sibling threading `m ≤ 64·(Nat.log 2 |ι| + 1)` from the ratio hypothesis `64·(cN+βN) ≤ 63·|V|`. | — |
+| `cbar_lt` | 184-204 | the `c̄₀<1` arithmetic `16cN≤15N ∧ q·βN≤(2d+4)N+2q ∧ q≥32(2d+4) ∧ N>64 ⟹ cN+βN<N` (now superseded by the ratio bound; kept). | — |
+| `jointIsoCountK_ne_of_sep` | 205-231 | bridge wiring: the separation event (χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0) fires `jointIsoCountK_ne_of_chiSep_pair`. | — |
+| `exists_zProfileSeparatesK` | 232-382 | **family assembly**: for nondeg `Q` on `Fin d→K` (even d≥2, q≳32d/q≥256), the matching yields a base `T` with `ZProfileSeparatesK Q T` and `T.card ≤ 128·(Nat.log 2 (|V|²)+1)`. | — |
+| `exists_isotropySeparatesAtBaseK` | 383-404 | the seal-ready deliverable: `∃T, T.card ≤ 128·(Nat.log 2(|V|²)+1) ∧ IsotropySeparatesAtBaseK Q T` (via `isotropySeparatesK_of_zProfileSeparatesK`). | — |
+| `reachesRigidOrCameron_affinePolar` | 405-441 | **THE q=p SEAL**: odd prime p, nondeg `Q` on `Fin d→ZMod p`, p≥256/p≳32d ⟹ the affine-polar VO^ε residue reaches `reachesRigidOrCameron` modulo {G3}, Witt-free, no `hSmallAutThin`, carrying `T.card = O(d log p)` (quasipoly base). | — |
+
+## ChainDescent/ScratchLemmaA.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `isoIncidence_eq_linearConds` | 27-44 | — | — |
+| `map_add_of_polar_zero` | 46-53 | — | — |
+| `count_coset` | 55-77 | — | — |
+| `polar_w0_perp` | 79-88 | — | — |
+| `reduction_to_levelset` | 90-110 | — | — |
+| `spanning_w0_exists` | 112-131 | — | — |
+| `reduction_to_levelset_nondeg` | 133-149 | — | — |
+| `levelset_fourier` | 150-198 | — | — |
+| `levelset_fourier_prod` | 199-219 | — | — |
+| `levelset_fourier_split` | 220-251 | — | — |
+| `s0_boundary_collapse` | 252-304 | — | — |
+| `levelset_count_eq` | 305-323 | — | — |
+| `configForm` | 327-331 | — | Definition, `noncomputable` |
+| `configForm_apply` | 333-336 | — | `@[simp]` |
+| `linComb_single` | 338-340 | — | — |
+| `polar_configForm` | 342-348 | — | — |
+| `polar_configForm_single` | 350-357 | — | — |
+| `configForm_nondegenerate` | 358-394 | — | — |
+| `configForm_exists_orthoBasis` | 395-415 | — | — |
+| `configGaussSum_eval` | 416-439 | — | — |
+| `prod_quadChar_eq_det` | 440-488 | — | — |
+| `configGaussSum_eq_det` | 489-510 | — | — |
+
+## ChainDescent/ScratchLemmaAK.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `isoIncidence_eq_linearCondsK` | 20-37 | — | — |
+| `map_add_of_polar_zeroK` | 38-44 | — | — |
+| `count_cosetK` | 46-67 | — | — |
+| `polar_w0_perpK` | 68-76 | — | — |
+| `reduction_to_levelsetK` | 78-95 | — | — |
+| `spanning_w0_existsK` | 96-112 | — | — |
+| `reduction_to_levelset_nondegK` | 114-127 | — | — |
+| `levelset_fourierK` | 128-169 | — | — |
+| `levelset_fourier_prodK` | 170-187 | — | — |
+| `levelset_fourier_splitK` | 188-214 | — | — |
+| `s0_boundary_collapseK` | 215-263 | — | — |
+| `levelset_count_eqK` | 264-276 | — | — |
+| `configFormK` | 280-285 | — | Definition, `noncomputable` |
+| `configFormK_apply` | 286-291 | — | `@[simp]` |
+| `linComb_singleK` | 292-296 | — | — |
+| `polar_configFormK` | 297-305 | — | — |
+| `polar_configFormK_single` | 306-314 | — | — |
+| `configFormK_nondegenerate` | 315-349 | — | — |
+| `configFormK_exists_orthoBasis` | 350-366 | — | — |
+| `configGaussSum_evalK` | 367-385 | — | — |
+| `prod_quadChar_eq_detK` | 386-426 | — | — |
+| `configGaussSum_eq_detK` | 427-444 | — | — |
+
+## ChainDescent/ScratchLemmaB.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `coarse_incidence_agree` | 20-97 | — | — |
+| `incidence_to_V` | 98-133 | — | — |
+| `incidence_agree_V` | 134-157 | — | — |
+| `cone_count_zero_split` | 158-194 | — | — |
+| `fullcount_agree_modulo_corr` | 195-219 | — | — |
+
+## ChainDescent/ScratchMatching.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `exists_separating_base` | 20-63 | — | — |
+
+## ChainDescent/ScratchPairSep.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `quadChar_addChar_sum` | 67-102 | — | — |
+| `pairCharSum_factor_gen` | 110-150 | — | — |
+| `pairCharSum_factor` | 152-164 | — | — |
+| `pairForm` | 178-182 | — | Definition, `noncomputable` |
+| `pairForm_apply` | 184-187 | — | — |
+| `detG2_eq_pairForm` | 189-194 | — | — |
+| `pairCombine` | 196-215 | — | — |
+| `sum_addChar_quadForm_translate` | 217-223 | — | — |
+| `pairSum_to_shifted` | 225-260 | — | — |
+| `sum_addChar_shifted_eval` | 262-274 | — | — |
+| `pairSum_closed_of_repr` | 276-296 | — | — |
+| `exists_repr_of_nondeg` | 298-309 | — | — |
+| `pairSum_closed_of_nondeg` | 311-332 | — | — |
+| `pairSum_fully_closed` | 334-359 | — | — |
+| `pairForm_polar_anchor` | 371-381 | — | — |
+| `pairForm_self_anchor` | 383-386 | — | — |
+| `sum_addChar_radical_vanish` | 388-424 | — | — |
+| `norm_addChar_eq_one` | 436-447 | — | — |
+| `norm_gaussSum_sq` | 449-475 | — | — |
+| `norm_pairSum_le` | 477-498 | — | — |
+| `norm_sq_sum_addChar_quadForm` | 507-591 | — | — |
+| `norm_sq_sum_addChar_quadForm_linear_le` | 593-675 | — | — |
+| `norm_sq_pairSum_le` | 677-700 | — | — |
+| `zeroCount_sq_le` | 702-775 | — | — |
+| `normT_le` | 777-815 | — | — |
+
+## ChainDescent/ScratchPencilBridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `finrank_polarRad_eq_finrankKer` | 26-73 | — | — |
+
+## ChainDescent/ScratchPencilCorank.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `pencilPoly` | 43-45 | — | Definition, `noncomputable` |
+| `pencilPoly_mul_map` | 47-51 | — | — |
+| `pow_card_dvd_pencilDet_of_cols` | 53-101 | — | — |
+| `exists_cols_ker` | 103-142 | — | — |
+| `finrankKer_le_rootMult` | 144-152 | — | — |
+| `pencilDet_natDegree_le` | 154-159 | — | — |
+| `sum_finrankKer_le` | 161-179 | — | — |
+| `pencilPoly_det_eval` | 181-189 | — | — |
+| `pencilPoly_det_ne_zero` | 191-216 | — | — |
+| `pow_sum_mul_bound` | 218-249 | — | — |
+| `concentration_bound` | 251-277 | — | — |
+
+## ChainDescent/ScratchPencilCorank2.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `polar_pairForm` | 23-35 | — | — |
+| `polar_pencil_pairForm` | 37-49 | — | — |
+| `pencil_polarRad_finrank_le` | 51-231 | — | — |
+| `single_polarRad_finrank_le` | 233-277 | — | — |
+
+## ChainDescent/ScratchPencilRegroup.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `ker_smul_mulVecLin` | 25-30 | — | — |
+| `finrankKer_ratio` | 32-39 | — | — |
+| `radicalCard_eq_pow` | 41-57 | — | — |
+| `corank_ratio_eq` | 59-66 | — | — |
+| `sum_comp_ratio_le` | 68-81 | — | — |
+| `fiber_fst_card_le` | 83-98 | — | — |
+| `sqrt_natpow` | 100-104 | — | — |
+| `pencilDet_ne_zero_of_good` | 106-119 | — | — |
+| `deg_bucket_le` | 121-232 | — | — |
+
+## ChainDescent/ScratchRoute2.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `chi_norm_le` | 24-31 | — | — |
+| `sum_chi_indicator` | 33-40 | — | — |
+| `normT_triangle` | 48-132 | — | — |
+| `c0_le_route2` | 134-222 | — | — |
+
+## ChainDescent/ScratchRoute2Arith.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `c0_route2_arith` | 6-52 | — | — |
+
+## ChainDescent/ScratchSeam.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SchemeRealizes` | 33-37 | — | Definition |
+| `SealDisj` | 39-44 | — | Definition |
+| `reachesRigidOrCameron_viaSchurianRank3Affine` | 46-68 | — | — |
+
+## ChainDescent/ScratchTBound.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `normT_bucket_bound` | 20-106 | — | — |
+
+## ChainDescent/ScratchTBoundCorank.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `normT_bucket_bound_corank` | 20-96 | — | — |
+| `c0_le_const` | 98-108 | — | — |
+| `c0_le_threequarters_corank` | 110-190 | — | — |
+
+## ChainDescent/ScratchTBoundCorank2.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `le_two_pow_sub_two` | 27-35 | — | — |
+| `concentration_bound2` | 37-84 | — | — |
+| `deg_bucket_le2` | 86-186 | — | — |
+| `c0_le2` | 188-226 | — | — |
+| `normT_bucket_bound_corank2` | 228-294 | — | — |
+| `c0_le_threequarters_corank2` | 296-376 | — | — |
