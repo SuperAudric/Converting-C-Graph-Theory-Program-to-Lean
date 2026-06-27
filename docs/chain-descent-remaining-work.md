@@ -155,12 +155,17 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     abstract `[Field K]`; the rest (`ScratchCrux`/`ZProfileSeparates`/`IsotropySeparatesAtBase` + the bridge) is now lifted to
 >     **abstract `[Field K][Fintype K]`** V-indexed (`ScratchFieldGen`+`ScratchLemmaAK`+`ScratchBridgeAllK`+`ScratchBridgeK`), with
 >     the q=p adapter `ScratchFieldGenAdapter` connecting to the in-build seal capstone. GaussCount was already abstract ⟹ the lift
->     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate); + the **small-q tail** — SCOPED
->     (plan §13 "SMALL-Q TAIL (SCOPE)" + "ROUTE 2 (SCOPE)"): small-q is *entirely* the degenerate bucket, m-uniform. **Route 0 DONE**
->     (threshold `q≳d²→256→16`, `_corank`/`_corank2`); **Route 2** (exact `c₀`, line-regroup → `≤d`-term degenerate-line cancellation,
->     elementary no-Weil) is the PRIORITIZED *terminating* route (removes the tail entirely). Route 1 (finite cancellation) =
->     Route 2's crux kernel. PROBE-FIRST recommended (the `c'=0` "bad line" question). NB the small-q "Route 0/1/2" numbering is
->     LOCAL to this tail, distinct from §11.1's "kernel route fork" (Route 1=char-sum / Route 3=Witt).
+>     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate). The **small-q tail is now
+>     ✅✅✅ COMPLETE (2026-06-27, Route 2)** — see "▶ SMALL-Q TAIL" below.
+>   - ✓✓✓ **Small-q tail — DONE 2026-06-27 (Route 2 tail), all axiom-clean, NOT in build.sh.** Removes the `q≥16`/`q≥256` threshold
+>     for the per-anchor `c₀<1` bound. 4 NEW modules: **`ScratchCountTight`** (`card_agree_le_tight`: `2NS≤zu+|V|+T`),
+>     **`ScratchRoute2Arith`** (`c0_route2_arith` assembly), **`ScratchRoute2`** (`normT_triangle` + CAPSTONE **`c0_le_route2`**:
+>     `NS ≤ (1−1/(4q²))·|V| < |V|` for odd `|K|≥3`, `d≥4`, NO threshold; drop-in tail sibling of Route 0's `c0_le_threequarters_corank2`,
+>     `c₀≤¾` `q≥16`). **Coverage:** odd `q∈{3,5,7,9,11,13}` → route2; `q≥16` → corank2; `q∈{4,8,16}` char-2 = separate Arf track.
+>     Two de-risk findings: `line_regroup` (ℤ-validated, `Probe_Route2DegenerateLines`) correct but **unused** for the bound;
+>     **tight `zu` NOT needed** (loose `zeroCount_sq_le` suffices, `n≥q⁴` dominates `√(nq)`). Caveat: `δ=1/(4q²)` loose (probe
+>     `Probe_Route2ExactSmallQ`: true `c₀≤0.556`) ⟹ only affects inc-5 matching base-size constant (still poly), tightenable.
+>     Good-anchor hyps `hab`/`hQu` supplied by strengthened `ScratchIncr4d.exists_hgood`. Full = plan §13 "ROUTE 2 (SCOPE)" BUILD STATUS box.
 > - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ScratchCrux) +
 >   `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248), both axiom-clean (no Witt, no `hSmallAutThin`). ⟹ once
 >   Layer A lands, **affine-polar `VO^ε` is sealed modulo `{G3}` + the seam.**
@@ -183,8 +188,11 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >   *structural* build beyond affine-polar, but de-risked.
 > - **Layer E — carried hypotheses (Lean-carried, not new math): `hImprim`** (block tower built; collapses to same core) +
 >   **`SchurianScheme`** (model assumption `orbitalScheme H`, not discharged).
-> - **Layer F — PORT (mechanical, no math):** the 8 new modules + `ScratchCrux`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*` into
->   `build.sh`+`lakefile`+`PublicTheoremIndex.md`. Same "only remaining = PORT" status as the sealed `VO⁻₄(3)` modules.
+> - **Layer F — PORT (mechanical, no math):** ALL scratch modules → `build.sh`+`lakefile`+`PublicTheoremIndex.md`. Inventory:
+>   increment-3 8 + `ScratchCrux`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*`; **#1 corank** (`ScratchPencilCorank`/`Bridge`/`Regroup`/
+>   `TBoundCorank`); **field-gen #4** (`ScratchFieldGen`/`FieldGenAdapter`/`BridgeK`/`LemmaAK`/`BridgeAllK`); **increment-4**
+>   (`ScratchIncr4`/`b`/`c`/`d`); **Route 0** (`ScratchPencilCorank2`/`TBoundCorank2`); **Route 2 tail** (`ScratchCountTight`/
+>   `ScratchRoute2Arith`/`ScratchRoute2`); spikes (`ScratchSeam`). Same "only remaining = PORT" status as the sealed `VO⁻₄(3)` modules.
 > - **Residual citations at the endpoint:** `{G3` (Babai/CFSG, allowed to stay)` + Skresanov + Liebeck + Ponomarenko-cyclotomic-2-sep}`.
 >   Honest caveat: affine-polar alone isn't the whole residue — the seam (D) + non-quadratic families (C) are where "general
 >   seal" still needs real work or citations.

@@ -16,9 +16,44 @@
 
 ## STATUS (read first)
 
-> **▶▶▶▶▶ CURRENT HANDOFF (2026-06-26, SESSION 2 — read THIS first; supersedes the SESSION-1 handoff block just below).**
+> **▶▶▶▶▶▶ CURRENT HANDOFF (2026-06-27, SESSION 3 — read THIS first; supersedes SESSION 2 below for the frontier).**
+> **User-set working order (one at a time): #4 field-gen (✅DONE) → #1 corank tightening (✅DONE) → small-q tail
+> (✅✅✅ COMPLETE) → hK cleanup (◀ NEXT) → increment 5.** What landed this session:
+> - **✅✅✅ SMALL-Q TAIL CLOSED IN LEAN (Route 2 tail), all axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in
+>   build.sh.** Full detail = the "▶▶▶▶ BUILD PLAN" box at the top of "### §13 — ROUTE 2 (SCOPE)". **4 NEW modules:**
+>   - **`ScratchCountTight.lean`** — piece 1: `int_char_pointwise_tight` (no axioms) + `counting_identity_tight` +
+>     **`card_agree_le_tight`** (`2·NS ≤ zu + |V| + T`; tighter than `card_agree_le`'s `2·zu` via the pointwise
+>     `2[ca=cb] ≤ 1+[ca=0]+ca·cb`, `decide`-verified).
+>   - **`ScratchRoute2Arith.lean`** — piece 3: **`c0_route2_arith`** (pure-ℝ assembly: tight count + loose `zeroCount_sq_le`
+>     zu + triangle T + `q⁴≤n` ⟹ `4q²·NS ≤ (4q²−1)·|V|`; the `√` lives only internally).
+>   - **`ScratchRoute2.lean`** — piece 2 `normT_triangle` (`q·T ≤ (q−1)²·q^{d−1}` via `normT_le` + `pencil_polarRad_finrank_le`
+>     + helpers `chi_norm_le`/`sum_chi_indicator`) + **piece 4 CAPSTONE `c0_le_route2`**: for a good anchor
+>     (`hd4:4≤d`/`hQnd`/`hab`/`hQu`), odd `|K|≥3`, **`NS ≤ (1 − 1/(4q²))·|V| < |V|`, NO threshold `hq3`.** Drop-in tail
+>     sibling of Route 0's `c0_le_threequarters_corank2` (`c₀≤¾`, `q≥16`).
+>   - **Verify** (after import oleans): `lake build ChainDescent.ScratchCountTight ChainDescent.ScratchRoute2Arith` then
+>     `lake env lean ChainDescent/ScratchRoute2.lean`.
+>   - **Coverage now complete (per-anchor `c₀<1`, no threshold):** odd `q∈{3,5,7,9,11,13}` → `c0_le_route2`; `q≥16` →
+>     `c0_le_threequarters_corank2`; `q∈{4,8,16}` char-2 = separate Arf track (deferred). **Two simplifications the de-risk
+>     earned:** (a) **`line_regroup` NOT needed** for the bound (it's ℤ-validated/correct, just unused — the win was the
+>     tighter counting identity); (b) **tight `zu` NOT needed** (loose `zeroCount_sq_le` suffices since `n≥q⁴` dominates its
+>     `√(nq)` term — no radical-descent count, no per-line `card_quadForm`).
+>   - **Honest caveat:** `δ=1/(4q²)` is loose (C# probe shows true `c₀≤0.556`, `δ≈0.44`); only affects increment-5's matching
+>     base-size *constant* (still polynomial), tightenable later (tight zu → `1/(2q²)`; exact eval → `≈0.44`). For `q=7..13`
+>     the existing bucket bound has more margin, so the binding loose corner is just `q∈{3,5}`.
+> - **✅ `exists_hgood` STRENGTHENED (threading caveat fully discharged).** `ScratchIncr4d.exists_hgood`'s conclusion now
+>   exposes `hgood ∧ Q(t₀₀−u)≠0 ∧ LinearIndependent ![t₀₀−u, t₀₀−v]` (new lemma `linearIndependent_of_pairForm_ne_zero`,
+>   `pairForm≠0 ⟹ ![a,b]` indep — the facts were already proved inside, just exposed). ⟹ both `c0_le_route2` AND
+>   `c0_le_threequarters_corank2` (and the β-machinery) get `hab`/`hQu` for free; increment 5 needs no extra anchor work.
+> - **C# de-risk probes added** (`GraphCanonizationProject.Tests/A2MonovariantProbe.cs`, both green): **`Probe_Route2DegenerateLines`**
+>   (line-regroup ℤ-identity holds 8/8 across `d=4` grow-q AND fixed-q grow-d) + **`Probe_Route2ExactSmallQ`** (exact counting
+>   identity `NS = Z_both0+(N_nz+S)/2` holds 16/16, exact `c₀≤0.556` at q=3 — the empirical floor under `c0_le_route2`'s bound).
+> - **NEXT = hK cleanup** (discharge the bridge's carried `hK : gaussSum²·∑ψ(Q)≠0` via `‖gaussSum‖²=q` + `∑ψ(Q)=χ(disc)·gaussSumᵈ`),
+>   then **increment 5** (matching assembly + bridge wiring; calls a per-anchor `c₀<1` capstone — `c0_le_route2` for the tail,
+>   `c0_le_threequarters_corank2` for `q≥16`). The SESSION-1/2 increment-4/5 lemma-level detail below is still current.
+>
+> **▶▶▶▶▶ HANDOFF (2026-06-26, SESSION 2 — superseded by SESSION 3 above for the frontier; still current for increment-4/5 detail).**
 > **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (Route 0 ✅DONE
-> `q≥16`; Route 2 SCOPED = next, the terminating route) → hK cleanup → increment 5.** State:
+> `q≥16`; Route 2 ✅DONE — see SESSION 3) → hK cleanup → increment 5.** State:
 > - **▶ SMALL-Q TAIL — Route 0 DONE + Route 2 SCOPED this session.** Full scoping = the "### §13 — SMALL-Q TAIL (SCOPE)"
 >   and "### §13 — ROUTE 2 (SCOPE)" blocks in §13. Headline: small-q is *entirely* the degenerate bucket and m-uniform; the deg bucket has a **free `√q`**
 >   (uniform corank cap `d−1` vs the geometric `d−2`: the pencil polar is `4λB − rank-2`). **Route 0** (corank-cap `d−2`,
@@ -1226,7 +1261,8 @@ fiber card) + `fiber_fst_card_le` (each ratio-fiber `≤ |K|`, injects via fst).
   `hq4:4≤|K|`), **`hq2` removed**. Proves `NS ≤ ¾·|V|` (so `c₀ ≤ ¾ < 1`) with binding threshold `hq3 (q≥256)` only.
 **⟹ VO⁻₄(q) family threshold `q ≥ 1024 → q ≥ 256`, fully formalized.** Build: `ScratchPencilCorank` (11) +
 `ScratchPencilBridge` (1) + `ScratchPencilRegroup` (9) + `ScratchTBoundCorank` (3) — all axiom-clean, NOT in build.sh
-(PORT = follow-up). NEXT QUEUE ITEM = small-q tail, then hK cleanup, then increment 5.
+(PORT = follow-up). (HISTORICAL "next" pointer — the queue has since advanced; small-q tail is ✅DONE. Current next =
+hK cleanup, then increment 5; see the SESSION-3 handoff at the top of this doc.)
 
 ### §13 — SMALL-Q TAIL (SCOPE) — the degenerate-bucket sharpening (SESSION 2, 2026-06-26)
 

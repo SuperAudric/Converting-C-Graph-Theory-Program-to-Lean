@@ -136,12 +136,13 @@ close it — is set out in
 > **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked (deferred). **FRONTIER = INCREMENT
 > 5** (the matching assembly + bridge wiring); the field/seam typing decision is **RESOLVED** (concern #4 lifted bridge+Crux
 > to abstract `K`). **#1 corank tightening ✅ DONE** (`q≳d²`→`q≥256`, `ScratchTBoundCorank.c0_le_threequarters_corank`) **and the
-> small-q "Route 0" ✅ DONE** (`q≥256→q≥16`, `ScratchTBoundCorank2.c0_le_threequarters_corank2`; adds hyps `4≤d`/indep/nondeg/
-> `Q(t₀−u)≠0`). The **small-q tail is now SCOPED** (plan §13 "SMALL-Q TAIL (SCOPE)" + "ROUTE 2 (SCOPE)"): **Route 2** (exact `c₀`,
-> line-regroup → `≤d`-term degenerate-line cancellation, elementary/no-Weil) is the PRIORITIZED *terminating* route (removes the
-> tail; probe-first recommended). Working order now: **small-q Route 2 (build) → hK cleanup → increment 5.** **Read the plan's top
-> "CURRENT HANDOFF (2026-06-26)" PICK UP HERE block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial*
-> seal; `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
+> small-q "Route 0" ✅ DONE** (`q≥256→q≥16`, `ScratchTBoundCorank2.c0_le_threequarters_corank2`). **★ The small-q tail is now
+> ✅✅✅ COMPLETE (2026-06-27, Route 2):** capstone **`ScratchRoute2.c0_le_route2`** (`NS ≤ (1−1/(4q²))·|V| < |V|`, odd `|K|≥3`,
+> `d≥4`, **NO threshold**) closes the per-anchor `c₀<1` bound with no `q`-floor — 4 axiom-clean modules (`ScratchCountTight`,
+> `ScratchRoute2Arith`, `ScratchRoute2`). Coverage: odd `q∈{3,5,7,9,11,13}` → route2, `q≥16` → corank2, `q∈{4,8,16}` char-2 =
+> separate Arf track. **Working order now: hK cleanup (NEXT) → increment 5.** **Read the plan's top "CURRENT HANDOFF (2026-06-27,
+> SESSION 3)" block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal;
+> `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there
