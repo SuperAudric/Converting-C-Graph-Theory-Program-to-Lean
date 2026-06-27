@@ -48,6 +48,44 @@ theorem exists_pow_matching_lt {ι W : Type*} [Fintype ι] [Fintype W] (F : ℕ)
     rw [div_pow, lt_div_iff₀ (pow_pos hFR m)] at hm
     exact_mod_cast hm
 
+/-- **The matching length is logarithmic — explicit bound.** Refines `exists_pow_matching_lt` with
+`m ≤ log|ι| / log(|W|/F) + 1`. (The base size `≤ 2m` is then `O(log|ι|/δ)` once `|W|/F ≥ 1/c̄₀` is bounded away
+from `1`.) Proof: `m := ⌊L⌋₊ + 1` for `L = log|ι|/log(|W|/F)`; `m > L ⟹ (|W|/F)^m > |ι| ⟹ |ι|·F^m < |W|^m`. -/
+theorem exists_pow_matching_le {ι W : Type*} [Fintype ι] [Fintype W] (F : ℕ)
+    (hF : F < Fintype.card W) (hι : 0 < Fintype.card ι) :
+    ∃ m : ℕ,
+      (m : ℝ) ≤ Real.log (Fintype.card ι) / Real.log (Fintype.card W / F) + 1
+        ∧ Fintype.card ι * F ^ m < Fintype.card W ^ m := by
+  have hWpos : 0 < Fintype.card W := lt_of_le_of_lt (Nat.zero_le F) hF
+  rcases Nat.eq_zero_or_pos F with hF0 | hFpos
+  · subst hF0
+    refine ⟨1, ?_, ?_⟩
+    · simp [Real.log_zero]
+    · simpa using hWpos
+  · have hFR : (0 : ℝ) < F := by exact_mod_cast hFpos
+    have hιR : (1 : ℝ) ≤ (Fintype.card ι : ℝ) := by exact_mod_cast hι
+    have hr : (1 : ℝ) < (Fintype.card W : ℝ) / F := (one_lt_div hFR).2 (by exact_mod_cast hF)
+    have hlogr : 0 < Real.log ((Fintype.card W : ℝ) / F) := Real.log_pos hr
+    have hlogι : 0 ≤ Real.log (Fintype.card ι : ℝ) := Real.log_nonneg hιR
+    set L := Real.log (Fintype.card ι) / Real.log ((Fintype.card W : ℝ) / F) with hLdef
+    have hLnn : 0 ≤ L := div_nonneg hlogι hlogr.le
+    refine ⟨⌊L⌋₊ + 1, ?_, ?_⟩
+    · have := Nat.floor_le hLnn
+      push_cast; linarith
+    · set m := ⌊L⌋₊ + 1 with hmdef
+      have hmR : (m : ℝ) = (⌊L⌋₊ : ℝ) + 1 := by rw [hmdef]; push_cast; ring
+      have hLm : L < (m : ℝ) := by rw [hmR]; exact Nat.lt_floor_add_one L
+      have heq : L * Real.log ((Fintype.card W : ℝ) / F) = Real.log (Fintype.card ι) := by
+        rw [hLdef]; exact div_mul_cancel₀ _ (ne_of_gt hlogr)
+      have hlog : Real.log (Fintype.card ι) < (m : ℝ) * Real.log ((Fintype.card W : ℝ) / F) := by
+        rw [← heq]; exact mul_lt_mul_of_pos_right hLm hlogr
+      have hlog2 : Real.log (Fintype.card ι) < Real.log (((Fintype.card W : ℝ) / F) ^ m) := by
+        rw [Real.log_pow]; exact hlog
+      have hpow : (Fintype.card ι : ℝ) < ((Fintype.card W : ℝ) / F) ^ m :=
+        (Real.log_lt_log_iff (by linarith) (by positivity)).mp hlog2
+      rw [div_pow, lt_div_iff₀ (by positivity : (0:ℝ) < (F:ℝ)^m)] at hpow
+      exact_mod_cast hpow
+
 /-- **The matching mechanics, packaged.** Given a per-pair fail predicate `Fail g t t₀` over probe `t` and anchor
 `t₀`, with a uniform per-good-anchor probe-fail bound `cN`, a uniform bad-anchor count bound `βN`, and the
 `c̄₀ < 1` condition `cN + βN < |V|`, there is a base `P : Fin m → V × V` such that every target `g` has a
@@ -294,6 +332,7 @@ theorem reachesRigidOrCameron_affinePolar {p d : ℕ} [Fact p.Prime]
 end ChainDescent
 
 #print axioms ChainDescent.exists_pow_matching_lt
+#print axioms ChainDescent.exists_pow_matching_le
 #print axioms ChainDescent.exists_separating_base_of_split
 #print axioms ChainDescent.cbar_lt
 #print axioms ChainDescent.jointIsoCountK_ne_of_sep

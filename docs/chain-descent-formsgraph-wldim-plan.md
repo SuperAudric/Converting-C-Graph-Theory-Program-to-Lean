@@ -32,13 +32,18 @@
 >   residue **reaches the `reachesRigidOrCameron` disjunction modulo `{G3}`, Witt-free, no `hSmallAutThin`** — the matching
 >   base transported through `affineE` (`T = (matching base).image affineE`, `T.image affineE.symm = matching base`) feeds
 >   `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`, depth bound `= T.card`.
->   **★★ REMAINING HONEST GAP (the one thing left for a *non-vacuous* seal): expose that `T.card` is bounded.** The depth
->   bound is currently `T.card` = the matching base `= myT.card ≤ 2m`, with `m` from the still-existential
->   `exists_pow_matching_lt`. The matching base is `O(log|ι|/δ) = O(d log p) = O(log n)` (the standard matching-trick size,
->   `δ = 1−c̄₀ ≥ 1/32` constant for `p≳32d`) — so it is the project's intended LOG-size base, NOT yet exposed explicitly.
->   Final refinement = refine `exists_pow_matching_lt` to `m ≤ ⌈log|ι|/log(1/c̄₀)⌉` (a `Real.log`/`Nat.ceil` bound) and
->   thread `T.card ≤ 2m` into the statement. NB: this is the O(log n) matching base (quasipoly-regime); the *optimal* O(1)
->   WL-dim for these families is the structural (Skresanov) fact, beyond the generic matching trick. The 4 spine pieces:
+>   **★★ NON-VACUITY KEYSTONE LANDED (2026-06-27, `exists_pow_matching_le`, axiom-clean):** the matching length is
+>   explicitly bounded — `∃ m ≤ log|ι|/log(|W|/F) + 1, |ι|·Fᵐ < |W|ᵐ` (`m := ⌊L⌋₊+1`; `Real.log_pow`+`Real.log_lt_log_iff`).
+>   This proves the base IS logarithmically bounded; the seal statement just doesn't yet *carry* `T.card ≤ 2m`.
+>   **REMAINING (pure plumbing, no new math, ~60-100 lines): thread a *stateable* clean bound into the seal.** The raw
+>   `exists_pow_matching_le` bound references proof-local `cN`/`βN`, so the public statement needs the ratio simplification
+>   `cN+βN ≤ 63·cardV/64` (provable: `cN≤15/16·cardV` + `βN≤cardV/32+2` for `p≳32d`) ⟹ `|W|/F = cardV/(cN+βN) ≥ 64/63` ⟹
+>   `m ≤ 2·log cardV/log(64/63)+1 = O(d log p)`; OR the log-free block route (`(63/64)⁶⁴ < 1/2` ⟹
+>   `m = 64·(Nat.log 2 |ι| + 1)`, `2·63⁶⁴ ≤ 64⁶⁴` by `norm_num`). Then `T.card ≤ 2m` (`card_union_le`+`card_image_le`)
+>   threaded through `exists_zProfileSeparatesK`/`…IsotropySeparatesAtBaseK`/`reachesRigidOrCameron_affinePolar`.
+>   NB: this is the O(log n) matching base (quasipoly-regime); the *optimal* O(1) WL-dim is the structural (Skresanov)
+>   fact, beyond the generic matching trick (see SESSION-3 strategic note on whether it's worth a dedicated track).
+>   The 4 spine pieces:
 >   1. **`exists_pow_matching_lt`** (`F < |W| ⟹ ∃ m, |ι|·Fᵐ < |W|ᵐ`, the ℕ-smallness helper feeding
 >      `exists_separating_base`'s `hlt`, via `pow_unbounded_of_one_lt`).
 >   2. **`exists_separating_base_of_split`** (from per-good-anchor ℕ `cN`, bad-anchor ℕ `βN`, `cN+βN<|V|` ⟹ base
