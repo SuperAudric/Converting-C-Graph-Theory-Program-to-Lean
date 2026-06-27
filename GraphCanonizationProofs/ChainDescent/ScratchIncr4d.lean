@@ -357,30 +357,55 @@ theorem exists_good_plane_anchor [Invertible (2 : K)] [Fintype K] [DecidableEq K
     not_or] at ha
   exact ⟨a, ha.1.1, ha.1.2, ha.2⟩
 
+/-- **`pairForm` nonvanishing ⟹ linear independence.** `pairForm Q a b = 4·Q(a)·Q(b) − polar(a,b)²` is the Gram
+determinant of `{a,b}` under `polar Q`, so it vanishes whenever `a, b` are linearly dependent (if `b = c•a` then
+`pairForm Q a (c•a) = 4c²Q(a)² − (2cQ(a))² = 0`). Contrapositive: a nonzero pair invariant forces `![a, b]`
+linearly independent. Pure bilinearity — no `Invertible 2`. (Used to expose `hab` from `exists_hgood`'s `hpf`.) -/
+theorem linearIndependent_of_pairForm_ne_zero (Q : QuadraticForm K V) {a b : V}
+    (hab : pairForm Q a b ≠ 0) : LinearIndependent K ![a, b] := by
+  have ha : a ≠ 0 := by
+    rintro rfl
+    exact hab (by rw [pairForm_apply]; simp [QuadraticMap.polar, map_zero])
+  rw [LinearIndependent.pair_iff' ha]
+  intro c hc
+  apply hab
+  rw [← hc, pairForm_apply, QuadraticMap.map_smul, QuadraticMap.polar_smul_left,
+    QuadraticMap.polar_self]
+  simp only [smul_eq_mul, nsmul_eq_mul, Nat.cast_ofNat]
+  ring
+
 /-- **NV (capstone) — non-vacuity of `hgood`.** For `u ≠ v`, nondegenerate `Q`, `finrank V ≥ 2`, `|K| ≥ 7`: there is a
-good anchor `t₀₀` and pencil coefficients `(y₀,z₀)` with `polarRad(y₀•pairForm Q(t₀₀−u) + z₀•pairForm Q(t₀₀−v)) = ⊥`
-— exactly the carried hypothesis of `ScratchIncr4c.pencilDetPoly_ne_zero`/`beta_full_count_closed`. Take `t₀₀ = a+u`
-for the anisotropic-generator nondeg plane `a` of NV-4 (so `t₀₀−u = a`, `t₀₀−v = a−w`), then NV-5 picks `(y₀,z₀)`:
-`(1,1)` if `Q a + Q(a−w) ≠ 0`, else `(1,−1)` (giving `c = 2·Q a ≠ 0`), and NV-3 (`polarRad_pencil_eq_bot`) seals it. -/
+good anchor `t₀₀` and pencil coefficients `(y₀,z₀)` with `polarRad(y₀•pairForm Q(t₀₀−u) + z₀•pairForm Q(t₀₀−v)) = ⊥`,
+**and** `t₀₀−u` is anisotropic (`Q(t₀₀−u) ≠ 0`) **and** `![t₀₀−u, t₀₀−v]` is linearly independent — exactly the carried
+hypotheses (`hgood`/`hQu`/`hab`) of `ScratchIncr4c.beta_full_count_closed` AND the Route-0 capstone
+`ScratchTBoundCorank2.c0_le_threequarters_corank2`. Take `t₀₀ = a+u` for the anisotropic-generator nondeg plane `a`
+of NV-4 (so `t₀₀−u = a`, `t₀₀−v = a−w`): `Q a ≠ 0` gives `hQu`; `pairForm Q a (a−w) ≠ 0` (the plane is nondegenerate)
+gives `hab` via `linearIndependent_of_pairForm_ne_zero`. NV-5 then picks `(y₀,z₀)`: `(1,1)` if `Q a + Q(a−w) ≠ 0`,
+else `(1,−1)` (giving `c = 2·Q a ≠ 0`), and NV-3 (`polarRad_pencil_eq_bot`) seals the radical. -/
 theorem exists_hgood [Invertible (2 : K)] [Fintype K] [DecidableEq K] [Fintype V] [DecidableEq V]
     (Q : QuadraticForm K V) (hQ : polarRad Q = ⊥) (u v : V) (huv : u ≠ v)
     (hd : 2 ≤ Module.finrank K V) (hq : 7 ≤ Fintype.card K) :
     ∃ (t₀₀ : V) (y₀ z₀ : K),
-      polarRad (y₀ • pairForm Q (t₀₀ - u) + z₀ • pairForm Q (t₀₀ - v)) = ⊥ := by
+      polarRad (y₀ • pairForm Q (t₀₀ - u) + z₀ • pairForm Q (t₀₀ - v)) = ⊥
+        ∧ Q (t₀₀ - u) ≠ 0
+        ∧ LinearIndependent K ![t₀₀ - u, t₀₀ - v] := by
   set w := v - u with hwdef
   have hw : w ≠ 0 := sub_ne_zero.mpr (Ne.symm huv)
   obtain ⟨a, hQa, hQaw, hpf⟩ := exists_good_plane_anchor Q hQ w hw hd hq
   have h2 : (2 : K) ≠ 0 := (isUnit_of_invertible (2 : K)).ne_zero
   have htu : (a + u) - u = a := by abel
   have htv : (a + u) - v = a - w := by rw [hwdef]; abel
+  have hQu : Q ((a + u) - u) ≠ 0 := by rw [htu]; exact hQa
+  have hindep : LinearIndependent K ![(a + u) - u, (a + u) - v] := by
+    rw [htu, htv]; exact linearIndependent_of_pairForm_ne_zero Q hpf
   by_cases hsum : Q a + Q (a - w) = 0
-  · refine ⟨a + u, 1, -1, ?_⟩
+  · refine ⟨a + u, 1, -1, ?_, hQu, hindep⟩
     rw [htu, htv]
     refine polarRad_pencil_eq_bot Q hQ a (a - w) 1 (-1) one_ne_zero (by norm_num) ?_ hpf
     have hQval : Q (a - w) = - Q a := by linear_combination hsum
     have heq : (1 : K) * Q a + (-1) * Q (a - w) = 2 * Q a := by rw [hQval]; ring
     rw [heq]; exact mul_ne_zero h2 hQa
-  · refine ⟨a + u, 1, 1, ?_⟩
+  · refine ⟨a + u, 1, 1, ?_, hQu, hindep⟩
     rw [htu, htv]
     refine polarRad_pencil_eq_bot Q hQ a (a - w) 1 1 one_ne_zero one_ne_zero ?_ hpf
     rw [one_mul, one_mul]; exact hsum
@@ -402,4 +427,5 @@ end ChainDescent
 #print axioms ChainDescent.planeDiscPoly_totalDegree_le
 #print axioms ChainDescent.planeDiscPoly_ne_zero
 #print axioms ChainDescent.exists_good_plane_anchor
+#print axioms ChainDescent.linearIndependent_of_pairForm_ne_zero
 #print axioms ChainDescent.exists_hgood

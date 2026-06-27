@@ -31,9 +31,13 @@
 >   lines EXACT via `sum_addChar_radical_vanish` + `card_quadForm_eq`; **crux = a finite `≤d`-term degenerate-line cancellation
 >   (the `c'=0` "bad" lines) — which is exactly Route 1's content, so Routes 1+2 are one kernel.** NO Weil. PROBE-FIRST
 >   recommended. (NB the small-q "Route 0/1/2" numbering is LOCAL to this tail, distinct from §11.1's "kernel route fork
->   Route 1=char-sum/Route 3=Witt".) Threading caveat: Route 0's capstone needs `t₀−u, t₀−v` independent **and** `Q(t₀−u)≠0`
->   (strengthen `exists_hgood`/NV — for increment 5). One dead end recorded: S2 (the in-`M` linear-vanishing) is geometrically
->   vacuous at the binding `λ=0` term — do not chase.
+>   Route 1=char-sum/Route 3=Witt".) **Threading caveat ✅ DISCHARGED (2026-06-26):** Route 0's capstone needs `t₀−u, t₀−v`
+>   independent (`hab`) **and** `Q(t₀−u)≠0` (`hQu`); `ScratchIncr4d.exists_hgood` now exposes BOTH in its conclusion
+>   (`∃ t₀₀ y₀ z₀, hgood ∧ Q(t₀₀−u)≠0 ∧ LinearIndependent ![t₀₀−u, t₀₀−v]`), via the new
+>   `linearIndependent_of_pairForm_ne_zero` (`pairForm≠0 ⟹ ![a,b]` indep, the Gram-det argument) applied to the plane
+>   anchor's `hpf`. The facts were already proved inside `exists_hgood` (from `exists_good_plane_anchor`'s `Q a≠0` + `pairForm
+>   Q a (a−w)≠0`); the fix was a conclusion-widening + one bilinearity lemma, axiom-clean. So increment 5 gets `hab`/`hQu` for
+>   free. One dead end recorded: S2 (the in-`M` linear-vanishing) is geometrically vacuous at the binding `λ=0` term — do not chase.
 > - **✅ CONCERN #4 (field generalization to abstract `[Field K][Fintype K]`) — DONE this session (the analytic + bridge lift).**
 >   The SESSION-1 "MAIN CARE = field/seam typing decision, lift-first" is **RESOLVED by executing the lift.** Five NEW modules
 >   (all axiom-clean `[propext, Classical.choice, Quot.sound]`, zero warnings, NOT in build): **`ScratchFieldGen.lean`**
@@ -307,8 +311,9 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `_corank`: `4≤d`, `t₀−u,t₀−v` independent (`hab`), `Q.polarBilin` nondeg (`hQnd`), anchor non-isotropic `Q(t₀−u)≠0` (`hQu`,
   subsumes `hPu`). **★ FINDING: the deg-bucket cap ALONE bottoms at `q≈81`** — the `z_u` bound carries an *independent* `n/√q`
   term (it had charged the single `pairForm Q(t₀−u)` the loose corank-`d−1`); reaching `q≥16` needed `single_polarRad_finrank_le`
-  too. **THREAD for increment 5: `exists_hgood`/NV must be confirmed/strengthened to supply `hab` and `hQu`.** Verify:
-  `lake build ChainDescent.ScratchTBoundCorank2`.
+  too. **THREAD for increment 5 ✅ DONE (2026-06-26): `ScratchIncr4d.exists_hgood` now supplies `hab` and `hQu`** (conclusion
+  widened to `hgood ∧ Q(t₀₀−u)≠0 ∧ LinearIndependent ![t₀₀−u, t₀₀−v]` via new `linearIndependent_of_pairForm_ne_zero`;
+  axiom-clean). Verify: `lake build ChainDescent.ScratchTBoundCorank2`.
 - **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
   **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
   atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
@@ -1273,9 +1278,10 @@ Here Route 0/1/2 are three ways to handle the *degenerate bucket* of the per-anc
 **Framing correction.** The *nondeg* `q√n` term does hide a genuine Weil sum (`∑_{[y:z]}χ` over the pencil line), but the
 project never needs to beat it (`hq1` absorbs it). All three routes touch only the **degenerate** term ⟹ all stay Weil-free.
 
-**Threading caveat (must verify).** Route 0/1/2 all need `a = t₀−u`, `b = t₀−v` **linearly independent** (else `a,b`
-dependent ⟹ pencil corank can be `d−1`, the cap fails). The good-anchor existence (`exists_hgood`, NV / `ScratchIncr4d`)
-must be checked/strengthened to supply `t₀` off the affine line through `u,v`. Honest caveat: threshold-lowering (Route 0/1)
+**Threading caveat ✅ DISCHARGED (2026-06-26).** Route 0/1/2 all need `a = t₀−u`, `b = t₀−v` **linearly independent**
+(else `a,b` dependent ⟹ pencil corank can be `d−1`, the cap fails). `ScratchIncr4d.exists_hgood` now supplies this (and
+`Q(t₀−u)≠0`) directly — its conclusion was widened to `hgood ∧ Q(t₀₀−u)≠0 ∧ LinearIndependent ![t₀₀−u, t₀₀−v]` via the new
+`linearIndependent_of_pairForm_ne_zero` (`pairForm≠0 ⟹` indep). Honest caveat: threshold-lowering (Route 0/1)
 shrinks but does **not** terminate the tail — `decide`-per-instance never scales (`n=q^d` astronomically large even at
 `q<16`, `d≤2M₀`); only Route 2 (no threshold) or a uniform structural small-`q` argument terminates. Hence Route 2 is the
 priority; Route 0 is a cheap, certain, decoupled `16×` stepping stone taken first.
@@ -1294,8 +1300,12 @@ priority; Route 0 is a cheap, certain, decoupled `16×` stepping stone taken fir
   the loose corank-`d−1`). Reaching `q≥16` required **also** the corank-1 `z_u` fix (`single_polarRad_finrank_le`, needs
   `Q(t₀−u)≠0`), giving `z_u·q ≤ n + (q−1)√n√q`. So Route 0's capstone carries new hyps vs `_corank`: `4 ≤ d`, `t₀−u,t₀−v`
   **independent** (`hab`), `Q.polarBilin` **nondegenerate** (`hQnd`), anchor **non-isotropic** `Q(t₀−u)≠0` (`hQu`, subsumes `hPu`).
-- **THREAD (for increment 5):** `exists_hgood`/NV must be checked/strengthened to supply `hab` (`t₀−u,t₀−v` indep) and `hQu`
-  (`Q(t₀−u)≠0`) — both are generic-anchor conditions, but not yet confirmed discharged.
+- **THREAD (for increment 5) ✅ DONE (2026-06-26):** `ScratchIncr4d.exists_hgood` now supplies `hab` (`t₀−u,t₀−v` indep)
+  and `hQu` (`Q(t₀−u)≠0`) directly in its strengthened conclusion (`∃ t₀₀ y₀ z₀, hgood ∧ Q(t₀₀−u)≠0 ∧
+  LinearIndependent ![t₀₀−u, t₀₀−v]`), via the new bilinearity lemma `linearIndependent_of_pairForm_ne_zero`
+  (`pairForm Q a b ≠ 0 ⟹ ![a,b]` lin.indep., the Gram-determinant argument). Axiom-clean; the facts were already
+  established inside `exists_hgood` (plane anchor's `Q a≠0` + `pairForm≠0`) and merely exposed. ⟹ both Route-0
+  consumption and the β-machinery's anchor conditions are unblocked for increment 5.
 
 **Route 2** (exact `c₀`, no threshold) remains the prioritized *terminating* target after this stepping stone.
 
