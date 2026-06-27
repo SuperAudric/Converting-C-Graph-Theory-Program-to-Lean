@@ -1329,13 +1329,25 @@ priority; Route 0 is a cheap, certain, decoupled `16×` stepping stone taken fir
 > **no `hq3`, no line_regroup, no per-line `card_quadForm`, no sign-of-`S`.** Probe `Probe_Route2ExactSmallQ` confirms:
 > the exact identity `NS = Z_both0+(N_nz+S)/2` held `16/16`, exact `c₀ ≤ 0.556` (the bound is a loose-but-valid upper env).
 >
-> **BUILD STATUS (2026-06-27):** **piece 1 `card_agree_le_tight` LANDED axiom-clean** (`ScratchCountTight.lean`:
-> `int_char_pointwise_tight` [no axioms] + `counting_identity_tight` + `card_agree_le_tight`). **REMAINING:** piece 2
-> `normT_triangle` (`q·T ≤ (q−1)²·q^{d−1}`, reuse `normT_le` + `pencil_polarRad_finrank_le` + `‖χy‖≤[y≠0]`); piece 3
-> tight `zu = q^{d−1}` (corank-1 `pairForm Q a`, radical `=⟨a⟩` for `Q a≠0`, descend to nondeg `(d−1)`-dim, `card_quadForm_eq`
-> — the hardest); piece 4 assembly capstone `c0_route2 : NS ≤ (1−(q−1)/(2q²))·|V|`. NB this carries the same good-anchor
-> hyps as Route 0 (`hab`, `hQu`, nondeg) now supplied by the strengthened `exists_hgood`. The line-regroup boxes below are
-> retained for provenance (line_regroup is still ℤ-validated and correct, just not needed for this bound).
+> **BUILD STATUS (2026-06-27): ✅✅✅ ROUTE 2 TAIL COMPLETE — all 4 pieces LANDED axiom-clean, NOT in build.sh.**
+> - **piece 1 `card_agree_le_tight`** (`ScratchCountTight.lean`: `int_char_pointwise_tight` [no axioms] + `counting_identity_tight`
+>   + `card_agree_le_tight` — `2·NS ≤ zu + |V| + T`).
+> - **piece 2 `normT_triangle`** (`ScratchRoute2.lean`: `q·T ≤ (q−1)²·q^{d−1}` via `normT_le` + `pencil_polarRad_finrank_le`
+>   + `chi_norm_le`/`sum_chi_indicator`).
+> - **piece 3 `c0_route2_arith`** (`ScratchRoute2Arith.lean`: the assembly arithmetic — `2NS≤zu+|V|+T` + loose `zeroCount_sq_le`
+>   zu + triangle T + `q⁴≤n` ⟹ `4q²·NS ≤ (4q²−1)·|V|`; the `√` lives only internally).
+> - **piece 4 CAPSTONE `c0_le_route2`** (`ScratchRoute2.lean`): **`NS ≤ (1 − 1/(4q²))·|V| < |V|`** for a good anchor
+>   (`hab`/`hQnd`/`hQu`/`hd4:4≤d`), odd `|K| ≥ 3`, **NO threshold `hq3`**. Drop-in tail sibling of Route 0's
+>   `c0_le_threequarters_corank2` (which gives `c₀≤¾` for `q≥16`).
+>
+> **KEY SIMPLIFICATION (vs the original plan):** *tight `zu = q^{d−1}` was NOT needed* — the LOOSE `zeroCount_sq_le`
+> (already built) suffices because `n ≥ q⁴` (d≥4) dominates its `√(nq)` correction. So no radical-descent count, no
+> `line_regroup`, no per-line `card_quadForm`. **⟹ the small-q tail that motivated Route 0/1/2 is CLOSED in Lean
+> (mod PORT): odd `q ∈ {3,5,7,9,11,13}` via `c0_le_route2`, `q ≥ 16` via `c0_le_threequarters_corank2`, char-2 `q∈{4,8,16}`
+> = separate Arf track.** Honest caveat: `c0_le_route2`'s `δ = 1/(4q²)` is loose (probe shows true `c₀ ≤ 0.556`, `δ≈0.44`);
+> for q=7..13 the existing bucket bound has more margin. The thin δ only affects increment-5's matching base-size constant
+> (still polynomial); tightenable later (tight zu → `δ=1/(2q²)`; exact eval → `δ≈0.44`). NB carries good-anchor hyps now
+> supplied by strengthened `exists_hgood`. Line-regroup (ℤ-validated) retained for provenance, unused for this bound.
 
 > **▶▶▶ PROBE RESULT (2026-06-27, `Probe_Route2DegenerateLines`) — THE CRUX DISSOLVES; Route 2 is much easier than scoped.**
 > The de-risking probe (validate the line-regroup identity in ℤ + test the binding `d>q` axis) returned, across BOTH
