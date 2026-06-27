@@ -19,6 +19,10 @@ Axiom-clean target `[propext, Classical.choice, Quot.sound]`; NOT in build.
 -/
 import ChainDescent.ScratchMatching
 import ChainDescent.ScratchIncr4
+import ChainDescent.ScratchIncr4d
+import ChainDescent.ScratchBridgeAllK
+import ChainDescent.ScratchBridgeK
+import ChainDescent.ScratchFieldGenAdapter
 import Mathlib.Tactic
 
 namespace ChainDescent
@@ -53,8 +57,8 @@ theorem exists_separating_base_of_split
     {ι : Type*} [Fintype ι] {V : Type*} [Fintype V] [DecidableEq V]
     (Fail : ι → V → V → Prop) [∀ g t₀, DecidablePred (fun t => Fail g t t₀)]
     (Good : ι → V → Prop) [∀ g, DecidablePred (Good g)] (cN βN : ℕ)
-    (hc : ∀ g t₀, Good g t₀ → (univ.filter (fun t => Fail g t t₀)).card ≤ cN)
-    (hβ : ∀ g, (univ.filter (fun t₀ => ¬ Good g t₀)).card ≤ βN)
+    (hc : ∀ g t₀, Good g t₀ → (Finset.univ.filter (fun t => Fail g t t₀)).card ≤ cN)
+    (hβ : ∀ g, (Finset.univ.filter (fun t₀ => ¬ Good g t₀)).card ≤ βN)
     (hlt : cN + βN < Fintype.card V) :
     ∃ (m : ℕ) (P : Fin m → V × V), ∀ g : ι, ∃ j, ¬ Fail g (P j).1 (P j).2 := by
   classical
@@ -71,7 +75,56 @@ theorem exists_separating_base_of_split
     (cN * Fintype.card V + Fintype.card V * βN) (fun g => hFbound g) hm
   exact ⟨m, P, hP⟩
 
+/-- **The `c̄₀ < 1` arithmetic.** From the good-anchor fail bound `16·cN ≤ 15·N` (i.e. `cN ≤ 15/16·N`) and the
+bad-anchor density `q·βN ≤ (2d+4)·N + 2·q` (i.e. `βN ≤ (2d+4)·N/q + 2`), with `q ≥ 32·(2d+4)` and `N > 64`,
+the matching threshold `cN + βN < N` holds. Proved over `ℝ` (multiply by `16q`) then cast back. -/
+theorem cbar_lt {N q d cN βN : ℕ}
+    (h16 : 16 * cN ≤ 15 * N) (hqβ : q * βN ≤ (2 * d + 4) * N + 2 * q)
+    (hqthr : 32 * (2 * d + 4) ≤ q) (hNthr : 64 < N) (hqpos : 0 < q) :
+    cN + βN < N := by
+  have h16' : (16 : ℝ) * cN ≤ 15 * N := by exact_mod_cast h16
+  have hqβ' : (q : ℝ) * βN ≤ (2 * d + 4) * N + 2 * q := by exact_mod_cast hqβ
+  have hqthr' : (32 : ℝ) * (2 * d + 4) ≤ q := by exact_mod_cast hqthr
+  have hNthr' : (64 : ℝ) < N := by exact_mod_cast hNthr
+  have hqpos' : (0 : ℝ) < q := by exact_mod_cast hqpos
+  have hNpos' : (0 : ℝ) < N := by linarith
+  have goalR : (cN : ℝ) + βN < N := by
+    nlinarith [h16', hqβ', hqthr', hNthr', hqpos', hNpos',
+      mul_le_mul_of_nonneg_left h16' hqpos'.le,
+      mul_le_mul_of_nonneg_right hqthr' hNpos'.le,
+      mul_lt_mul_of_pos_right hNthr' hqpos']
+  exact_mod_cast goalR
+
+open QuadraticMap in
+/-- **Piece 3 — bridge wiring: the separation event fires the count inequality.** If at the sub-frame `{t, t₀}`
+the two pair invariants have different (ℤ-valued) quadratic characters, both config invariants are nonzero, and
+the anchor is `Q`-nondegenerate at both `u, v` (`Q(t₀-u), Q(t₀-v) ≠ 0`), then the joint isotropic counts differ.
+Repackages `ScratchBridgeAllK.jointIsoCountK_ne_of_chiSep_pair`: `I≠0 ⟹` config Gram unit
+(`configPolarDet_eq_pairFormK`+`isUnit_iff_ne_zero`); `Q(t₀-·)≠0 ⟹ hcorr`; ℤ-`χ`-inequality casts to `R'`. -/
+theorem jointIsoCountK_ne_of_sep {K : Type*} [Field K] [Fintype K] [DecidableEq K] {d : ℕ}
+    (Q : QuadraticForm K (Fin d → K)) [Invertible (2 : K)]
+    (hF : ringChar K ≠ 2) (hcardK : 2 < Fintype.card K) (hd : Even d)
+    {R' : Type*} [Field R'] [CharZero R'] {ψ : AddChar K R'} (hψ : ψ.IsPrimitive)
+    (vb : Module.Basis (Fin (Module.finrank K (Fin d → K))) K (Fin d → K))
+    (hv : (QuadraticMap.associated (R := K) Q).IsOrthoᵢ vb) (hw : ∀ i, Q (vb i) ≠ 0)
+    (u v t t₀ : Fin d → K)
+    (hIu : pairForm Q (t₀ - u) (t - u) ≠ 0) (hIv : pairForm Q (t₀ - v) (t - v) ≠ 0)
+    (hQu : Q (t₀ - u) ≠ 0) (hQv : Q (t₀ - v) ≠ 0)
+    (hchi : quadraticChar K (pairForm Q (t₀ - u) (t - u))
+          ≠ quadraticChar K (pairForm Q (t₀ - v) (t - v))) :
+    jointIsoCountK Q u {t, t₀} ≠ jointIsoCountK Q v {t, t₀} := by
+  refine jointIsoCountK_ne_of_chiSep_pair Q hF hcardK u v t t₀ hd ?_ ?_ hψ vb hv hw ?_ ?_ ?_
+  · rw [configPolarDet_eq_pairFormK Q u t t₀]; exact isUnit_iff_ne_zero.mpr hIu
+  · rw [configPolarDet_eq_pairFormK Q v t t₀]; exact isUnit_iff_ne_zero.mpr hIv
+  · exact fun h => hQu h.2
+  · exact fun h => hQv h.2
+  · intro heq
+    rw [MulChar.ringHomComp_apply, MulChar.ringHomComp_apply, eq_intCast, eq_intCast] at heq
+    exact hchi (by exact_mod_cast heq)
+
 end ChainDescent
 
 #print axioms ChainDescent.exists_pow_matching_lt
 #print axioms ChainDescent.exists_separating_base_of_split
+#print axioms ChainDescent.cbar_lt
+#print axioms ChainDescent.jointIsoCountK_ne_of_sep

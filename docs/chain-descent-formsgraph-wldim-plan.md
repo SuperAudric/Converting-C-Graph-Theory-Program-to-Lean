@@ -19,14 +19,22 @@
 > **▶▶▶▶▶▶ CURRENT HANDOFF (2026-06-27, SESSION 3 — read THIS first; supersedes SESSION 2 below for the frontier).**
 > **User-set working order (one at a time): #4 field-gen (✅DONE) → #1 corank tightening (✅DONE) → small-q tail
 > (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (◀ NEXT).** What landed this session:
-> - **▶ INCREMENT 5 STARTED (2026-06-27, `ScratchIncr5.lean`, 2 pieces axiom-clean, NOT in build).** The
->   scope-independent matching mechanics: **`exists_pow_matching_lt`** (`F < |W| ⟹ ∃ m, |ι|·Fᵐ < |W|ᵐ`, the ℕ-smallness
->   helper feeding `exists_separating_base`'s `hlt`, via `pow_unbounded_of_one_lt`) + **`exists_separating_base_of_split`**
->   (from per-good-anchor ℕ bound `cN`, bad-anchor ℕ bound `βN`, and `cN+βN<|V|`, produce a base `P : Fin m → V×V` whose
->   2-element sub-frames each target avoids failing — `matching_F_bound`→`exists_pow_matching_lt`→`exists_separating_base`).
->   **NEXT pieces:** (2b) derive `cN`/`βN`/`cN+βN<|V|` from `good_anchor_fail_le_const`+`beta_full_count_closed`+q-thresholds;
->   (3) bridge wiring `¬Fail ∧ Good ⟹ jointIsoCountK differ` (via `jointIsoCountK_ne_of_chiSep_pair`); (4) assemble
->   `zSep → ZProfileSeparatesK → IsotropySeparatesAtBaseK → seal`.
+> - **▶ INCREMENT 5 — THE SPINE IS BUILT (2026-06-27, `ScratchIncr5.lean`, 4 pieces axiom-clean, NOT in build).** The
+>   reusable, mostly-scope-independent backbone:
+>   1. **`exists_pow_matching_lt`** (`F < |W| ⟹ ∃ m, |ι|·Fᵐ < |W|ᵐ`, the ℕ-smallness helper feeding
+>      `exists_separating_base`'s `hlt`, via `pow_unbounded_of_one_lt`).
+>   2. **`exists_separating_base_of_split`** (from per-good-anchor ℕ `cN`, bad-anchor ℕ `βN`, `cN+βN<|V|` ⟹ base
+>      `P : Fin m → V×V` whose 2-element sub-frames each target avoids; `matching_F_bound`→helper→`exists_separating_base`).
+>   3. **`cbar_lt`** (the `c̄₀<1` arithmetic: `16cN≤15N` + `q·βN≤(2d+4)N+2q` + `q≥32(2d+4)` + `N>64` ⟹ `cN+βN<N`; ℝ-cast).
+>   4. **`jointIsoCountK_ne_of_sep`** (bridge wiring: the separation event `χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0`
+>      fires `jointIsoCountK_ne_of_chiSep_pair` — `I≠0 ⟹` config Gram unit, `Q(t₀-·)≠0 ⟹ hcorr`, ℤ-χ-ineq casts to ℂ).
+>   **REMAINING = piece 5, the family assembly** (the long, scope-committed glue): define `Fail (u,v) t t₀ :=
+>   ¬(χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0)` (the last two conjuncts make `¬Fail` fire piece 4; on a *good* anchor
+>   they're const-true so `#Fail` = `good_anchor_fail_le_const`'s count) + `Good (u,v) t₀ :=` the `beta_full_count_closed`
+>   predicate; discharge `hc` (`good_anchor_fail_le_const` + `filter_congr` + real→ℕ `Nat.le_div_iff_mul_le`), `hβ`
+>   (`beta_full_count_closed` + `exists_hgood` witness + ℕ), `hlt` (`cbar_lt` + the family q-thresholds); then
+>   `exists_separating_base_of_split` → set `T = ⋃{t,t₀}` → `zSep` (each pair separated by piece 4) →
+>   `zProfileSeparatesK_of_zSep` → `isotropySeparatesK_of_zProfileSeparatesK` (needs `Q` nondeg) → adapter → seal (`q≳32d`).
 > - **★★★ INCREMENT-5 SCOPE FINDING (2026-06-27, corrects a documented caveat) — the matching has its OWN `q`-floor,
 >   independent of the per-anchor `c₀` work.** `good_anchor_fail_le` folds the **isotropic-shell counts** `#{I_u=0}+#{I_v=0}`
 >   (each `~|V|/q`) INTO input `c` (not into `β`); `good_anchor_fail_le_const` controls them only via the **loose**
