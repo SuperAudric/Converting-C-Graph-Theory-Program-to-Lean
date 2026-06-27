@@ -141,9 +141,16 @@ close it — is set out in
 > `d≥4`, **NO threshold**) closes the per-anchor `c₀<1` bound with no `q`-floor — 4 axiom-clean modules (`ScratchCountTight`,
 > `ScratchRoute2Arith`, `ScratchRoute2`). Coverage: odd `q∈{3,5,7,9,11,13}` → route2, `q≥16` → corank2, `q∈{4,8,16}` char-2 =
 > separate Arf track. **hK cleanup ✅DONE (2026-06-27, axiom-clean)** — the bridge's carried `hK : gaussSum²·∑ψ(Q)≠0` is
-> discharged internally (`GaussCount.gaussSum_sq_ne_zero` + `sum_addChar_quadForm_ne_zero`). **Working order now: increment 5
-> (NEXT).** **Read the plan's top "CURRENT HANDOFF (2026-06-27,
-> SESSION 3)" block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal;
+> discharged internally (`GaussCount.gaussSum_sq_ne_zero` + `sum_addChar_quadForm_ne_zero`). **★★★ INCREMENT 5 ASSEMBLED
+> END-TO-END + q=p SEAL REACHED (2026-06-27, `ScratchIncr5.lean`, 8 decls axiom-clean, NOT in build):** the matching assembly
+> closes the affine-polar `VO^ε` residue (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron` disjunction modulo `{G3}`,
+> Witt-free, no `hSmallAutThin`** — capstone `reachesRigidOrCameron_affinePolar`. **Working order now: the NON-VACUITY THREAD
+> (NEXT)** — the seal's depth bound is currently `T.card` (the matching base, provably `O(log n)` via the landed keystone
+> `exists_pow_matching_le`, but not yet *carried* into the statement); finishing it = pure plumbing (~60-100 lines, two routes
+> scoped in plan §13). **Read the plan's top "CURRENT HANDOFF (2026-06-27,
+> SESSION 3)" block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; NB the matching base
+> is `O(log n)` (quasipoly regime) — the optimal O(1)/frame WL-dim (structural Skresanov) is a separate, harder track, worth
+> it for true polynomial if the canonizer charges `n^{|T|}` (an architecture question to settle — see plan §13 strategic note);
 > `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —

@@ -18,8 +18,12 @@
 
 > **▶▶▶▶▶▶ CURRENT HANDOFF (2026-06-27, SESSION 3 — read THIS first; supersedes SESSION 2 below for the frontier).**
 > **User-set working order (one at a time): #4 field-gen (✅DONE) → #1 corank tightening (✅DONE) → small-q tail
-> (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (◀ NEXT).** What landed this session:
-> - **▶▶▶ INCREMENT 5 — ASSEMBLED END-TO-END (2026-06-27, `ScratchIncr5.lean`, 6 decls axiom-clean, NOT in build).**
+> (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (✅ASSEMBLED + q=p seal reached; non-vacuity thread = ◀ NEXT).**
+> **★ FRESH-READER NEXT STEP:** finish the non-vacuity thread (carry `T.card ≤ 2m` into the seal statement — see "REMAINING
+> (pure plumbing)" below; the block route is cleaner). Decision pending: whether to first spike the architecture question
+> (does the canonizer charge `n^{|T|}`?) that decides if the O(1)/frame track is needed for true polynomial — see the
+> SESSION-3 strategic note at the end of this STATUS block. What landed this session:
+> - **▶▶▶ INCREMENT 5 — ASSEMBLED END-TO-END (2026-06-27, `ScratchIncr5.lean`, 8 decls axiom-clean, NOT in build).**
 >   The matching assembly type-checks all the way to the Witt-free seal input. **Capstone
 >   `exists_isotropySeparatesAtBaseK`**: for a nondegenerate `Q` on `Fin d → K` (even `d≥2`) with the family thresholds
 >   (`q≥256`, `q≳32d` via `hqthr : 32(2d+4)≤q`), **`∃ T : Finset (Fin d → K), IsotropySeparatesAtBaseK Q T`** — the exact
@@ -51,12 +55,13 @@
 >   3. **`cbar_lt`** (the `c̄₀<1` arithmetic: `16cN≤15N` + `q·βN≤(2d+4)N+2q` + `q≥32(2d+4)` + `N>64` ⟹ `cN+βN<N`; ℝ-cast).
 >   4. **`jointIsoCountK_ne_of_sep`** (bridge wiring: the separation event `χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0`
 >      fires `jointIsoCountK_ne_of_chiSep_pair` — `I≠0 ⟹` config Gram unit, `Q(t₀-·)≠0 ⟹ hcorr`, ℤ-χ-ineq casts to ℂ).
->   **REMAINING = piece 5, the family assembly** (the long, scope-committed glue): define `Fail (u,v) t t₀ :=
->   ¬(χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0)` (the last two conjuncts make `¬Fail` fire piece 4; on a *good* anchor
->   they're const-true so `#Fail` = `good_anchor_fail_le_const`'s count) + `Good (u,v) t₀ :=` the `beta_full_count_closed`
->   predicate; discharge `hc` (`good_anchor_fail_le_const` + `filter_congr` + real→ℕ `Nat.le_div_iff_mul_le`), `hβ`
->   (`beta_full_count_closed` + `exists_hgood` witness + ℕ), `hlt` (`cbar_lt` + the family q-thresholds); then
->   `exists_separating_base_of_split` → set `T = ⋃{t,t₀}` → `zSep` (each pair separated by piece 4) →
+>   (Plus the keystone **`exists_pow_matching_le`** = piece 1 with the explicit `m`-bound.)
+>   **Piece 5 (✅DONE) — the family assembly** `exists_zProfileSeparatesK` (the long, scope-committed glue): defines
+>   `Fail (u,v) t t₀ := ¬(χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0)` (the last two conjuncts make `¬Fail` fire piece 4;
+>   on a *good* anchor they're const-true so `#Fail` = `good_anchor_fail_le_const`'s count) + `Good (u,v) t₀ :=` the
+>   `beta_full_count_closed` predicate; discharges `hc` (`good_anchor_fail_le_const` + `filter_congr` + real→ℕ
+>   `Nat.le_div_iff_mul_le`), `hβ` (`beta_full_count_closed` + `exists_hgood` witness + ℕ), `hlt` (`cbar_lt` + the family
+>   q-thresholds); then `exists_separating_base_of_split` → `T = ⋃{t,t₀}` → `zSep` (each pair separated by piece 4) →
 >   `zProfileSeparatesK_of_zSep` → `isotropySeparatesK_of_zProfileSeparatesK` (needs `Q` nondeg) → adapter → seal (`q≳32d`).
 > - **★★★ INCREMENT-5 SCOPE FINDING (2026-06-27, corrects a documented caveat) — the matching has its OWN `q`-floor,
 >   independent of the per-anchor `c₀` work.** `good_anchor_fail_le` folds the **isotropic-shell counts** `#{I_u=0}+#{I_v=0}`
@@ -112,7 +117,20 @@
 >   NOT `c0_le_route2`, because route2's gap `1/(4q²)` is only constant in the bounded-q tail; using it for growing `q ~ n^{1/d}`
 >   would make the matching base size `m ~ q²·log n ~ n^{2/d}·log n` (e.g. `√n` at d=4), destroying bounded WL-dim. The
 >   good-anchor hyps are compatible (both fed by `exists_hgood`), so the `q<16`/`q≥16` case split is clean. The SESSION-1/2
->   increment-4/5 lemma-level detail below is still current.
+>   increment-4/5 lemma-level detail below is still current. (NB: increment 5 as built uses the `q≥256` `good_anchor_fail_le_const`
+>   directly, so the route2/corank2 swap is only for the *future floor-lowering*, not the current assembly.)
+> - **★★★ SESSION-3 STRATEGIC NOTE — is the O(1)/frame WL-dim worth a dedicated track? (the open decision for a fresh reader).**
+>   The matching route (everything built) yields an **`O(log n)` base** ⟹ `n^{O(log n)}` = **quasi-polynomial** IF the canonizer
+>   charges `n^{|T|}`. An `O(d)` *frame* base gives `O(1)` for the d-fixed/q-growing slice (exactly the `q≳32d` regime) ⟹
+>   **polynomial**. So the frame is strictly stronger where we work, and is **likely necessary for the stated *polynomial* goal**
+>   (the matching tops out at quasipoly). **Viable in Lean** (the predicate exists; `VO⁻₄(3)` was sealed via `decide` with a
+>   concrete frame `T₉`) but **hard uniformly** — the frame predicates were found *mis-shaped at the standard frame* (one-round
+>   counts shell-blind to the `eᵢ`-swap isometry; needs a symmetry-broken base), which is *why* the project pivoted to the
+>   matching; and the `c₀`/bridge tools are about *pair* separation, not a fixed frame, so they don't transfer cleanly. Better
+>   **transferability** (form-coordinate recovery generalizes to alternating/half-spin). **THE GATING QUESTION to spike first:**
+>   does the seal→canonizer pipeline actually charge `n^{|T|}`, or can it find the matching base *deterministically* (⟹ poly even
+>   at log size)? If `n^{|T|}`, the frame is the polynomial endpoint and worth a dedicated track; if deterministic, the matching
+>   already suffices. **Recommendation: run that architecture spike before committing to a full frame build.**
 >
 > **▶▶▶▶▶ HANDOFF (2026-06-26, SESSION 2 — superseded by SESSION 3 above for the frontier; still current for increment-4/5 detail).**
 > **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (Route 0 ✅DONE

@@ -128,11 +128,20 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     (bridge's `hv/hw`). **NV** `ScratchIncr4d.exists_hgood` (14 lemmas: `hgood` non-vacuity, for `u≠v`/nondeg `Q`/`finrank≥2`/
 >     `|K|≥7`). So `c̄₀ = c/|V|+β_full/|V| ≤ 15/16 + O(d/q) < 1`, **β unconditional** modulo family props. No carried existence
 >     hypotheses remain in inc-4.
->   - ★ **Increment 5 (THE LIVE FRONTIER) — the matching assembly + bridge wiring:** feed `c̄₀<1` into
->     **`ScratchMatching.exists_separating_base` (LANDED, axiom-clean)** (`m=O(d log q)`, needs a `c̄₀ᵐ`-smallness ℕ helper)
->     ⟹ separating base; define matching `fail := ¬(bridge criterion)` so `¬fail ⟹` separation IS
->     `jointIsoCount_ne_of_chiSep_pair` (its `corr`/`hv`/`hw` discharged by C-corr/C-basis; per-pair anchor existence = NV
->     `exists_hgood`); then `zProfileSeparates_of_zSep` → seal. **MAIN CARE (field/seam typing) ✅ RESOLVED 2026-06-26 — the
+>   - ✅✅✅ **Increment 5 — ASSEMBLED END-TO-END + q=p SEAL REACHED (2026-06-27, `ScratchIncr5.lean`, 8 decls axiom-clean,
+>     NOT in build).** The matching assembly closes affine-polar `VO^ε` (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron`
+>     disjunction modulo `{G3}`, Witt-free** — capstone **`reachesRigidOrCameron_affinePolar`**. Pieces: spine
+>     (`exists_pow_matching_lt`/`_le` [ℕ-smallness + explicit log `m`-bound], `exists_separating_base_of_split` [matching
+>     mechanics], `cbar_lt` [`c̄₀<1` arith], `jointIsoCountK_ne_of_sep` [bridge wiring]) + family assembly
+>     (`exists_zProfileSeparatesK` [Fail/Good, `hc`/`hβ`/`hlt`, ι=distinct-pairs subtype] →
+>     `exists_isotropySeparatesAtBaseK` → `reachesRigidOrCameron_affinePolar` via `affineE`). **★ ONE REMAINING (non-vacuity
+>     plumbing, no new math): carry `T.card ≤ 2m` into the seal statement** — the keystone `exists_pow_matching_le` proves
+>     `m = O(log n)`, but the public statement still reads `∃ T,…`; needs the ratio simplification (`cN+βN ≤ 63cardV/64`) or
+>     the log-free block route. Two findings: **(i) matching has its OWN `q≳32d` floor** (isotropic shells `#{I=0}~|V|/q` in
+>     input `c`, NOT removed by the route-2 NS tightening — corrects the earlier caveat); **(ii) base is `O(log n)` ⟹
+>     quasipoly** (optimal O(1)/frame = structural Skresanov, separate harder track; worth it for true polynomial IF canonizer
+>     charges `n^{|T|}` — architecture Q to spike). Detail = plan §13 SESSION-3 handoff. *(Below = the build history.)*
+>     **MAIN CARE (field/seam typing) ✅ RESOLVED 2026-06-26 — the
 >     lift-first is DONE** (concern #4: `ScratchFieldGen`/`ScratchFieldGenAdapter`/`ScratchBridgeK`/`ScratchLemmaAK`/`ScratchBridgeAllK`,
 >     all axiom-clean), so increment 5 wires over **abstract `K`** with the K-named lemmas (`jointIsoCountK_ne_of_chiSep_pair` →
 >     `zProfileSeparatesK_of_zSep` → `isotropySeparatesK_of_zProfileSeparatesK` → `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`
@@ -193,7 +202,9 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >   increment-3 8 + `ScratchCrux`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*`; **#1 corank** (`ScratchPencilCorank`/`Bridge`/`Regroup`/
 >   `TBoundCorank`); **field-gen #4** (`ScratchFieldGen`/`FieldGenAdapter`/`BridgeK`/`LemmaAK`/`BridgeAllK`); **increment-4**
 >   (`ScratchIncr4`/`b`/`c`/`d`); **Route 0** (`ScratchPencilCorank2`/`TBoundCorank2`); **Route 2 tail** (`ScratchCountTight`/
->   `ScratchRoute2Arith`/`ScratchRoute2`); spikes (`ScratchSeam`). Same "only remaining = PORT" status as the sealed `VO⁻₄(3)` modules.
+>   `ScratchRoute2Arith`/`ScratchRoute2`); **increment 5** (`ScratchIncr5`, 8 decls incl. `reachesRigidOrCameron_affinePolar`);
+>   **hK cleanup** (2 new lemmas now in `GaussCount` — `gaussSum_sq_ne_zero`/`sum_addChar_quadForm_ne_zero`; `GaussCount` is a
+>   leaf so this is a low-cost port); spikes (`ScratchSeam`). Same "only remaining = PORT" status as the sealed `VO⁻₄(3)` modules.
 > - **Residual citations at the endpoint:** `{G3` (Babai/CFSG, allowed to stay)` + Skresanov + Liebeck + Ponomarenko-cyclotomic-2-sep}`.
 >   Honest caveat: affine-polar alone isn't the whole residue — the seam (D) + non-quadratic families (C) are where "general
 >   seal" still needs real work or citations.
