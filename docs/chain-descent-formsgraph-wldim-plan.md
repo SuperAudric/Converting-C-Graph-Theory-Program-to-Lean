@@ -19,8 +19,26 @@
 > **▶▶▶▶▶▶ CURRENT HANDOFF (2026-06-27, SESSION 3 — read THIS first; supersedes SESSION 2 below for the frontier).**
 > **User-set working order (one at a time): #4 field-gen (✅DONE) → #1 corank tightening (✅DONE) → small-q tail
 > (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (◀ NEXT).** What landed this session:
-> - **▶ INCREMENT 5 — THE SPINE IS BUILT (2026-06-27, `ScratchIncr5.lean`, 4 pieces axiom-clean, NOT in build).** The
->   reusable, mostly-scope-independent backbone:
+> - **▶▶▶ INCREMENT 5 — ASSEMBLED END-TO-END (2026-06-27, `ScratchIncr5.lean`, 6 decls axiom-clean, NOT in build).**
+>   The matching assembly type-checks all the way to the Witt-free seal input. **Capstone
+>   `exists_isotropySeparatesAtBaseK`**: for a nondegenerate `Q` on `Fin d → K` (even `d≥2`) with the family thresholds
+>   (`q≥256`, `q≳32d` via `hqthr : 32(2d+4)≤q`), **`∃ T : Finset (Fin d → K), IsotropySeparatesAtBaseK Q T`** — the exact
+>   predicate the Witt-free capstone consumes. Built from `exists_zProfileSeparatesK` (`∃ T, ZProfileSeparatesK Q T`, the
+>   genuinely-new content) → `isotropySeparatesK_of_zProfileSeparatesK`. The family glue (Fail/Good defs, `hc` via
+>   `good_anchor_fail_le_const`+`filter_congr`+`Nat.le_div_iff_mul_le`, `hβ` via `beta_full_count_closed`+`exists_hgood`,
+>   `hlt` via `cbar_lt`, ι = distinct-pairs subtype to dodge the `u=v` degeneracy) all landed.
+>   **★ PIECE 6 — THE q=p SEAL IS REACHED (2026-06-27, axiom-clean).** `reachesRigidOrCameron_affinePolar`: for an odd
+>   prime `p`, nondegenerate `Q` on `Fin d → ZMod p`, family thresholds (`p≥256`, `p≳32d`), the affine-polar `VO^ε`
+>   residue **reaches the `reachesRigidOrCameron` disjunction modulo `{G3}`, Witt-free, no `hSmallAutThin`** — the matching
+>   base transported through `affineE` (`T = (matching base).image affineE`, `T.image affineE.symm = matching base`) feeds
+>   `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`, depth bound `= T.card`.
+>   **★★ REMAINING HONEST GAP (the one thing left for a *non-vacuous* seal): expose that `T.card` is bounded.** The depth
+>   bound is currently `T.card` = the matching base `= myT.card ≤ 2m`, with `m` from the still-existential
+>   `exists_pow_matching_lt`. The matching base is `O(log|ι|/δ) = O(d log p) = O(log n)` (the standard matching-trick size,
+>   `δ = 1−c̄₀ ≥ 1/32` constant for `p≳32d`) — so it is the project's intended LOG-size base, NOT yet exposed explicitly.
+>   Final refinement = refine `exists_pow_matching_lt` to `m ≤ ⌈log|ι|/log(1/c̄₀)⌉` (a `Real.log`/`Nat.ceil` bound) and
+>   thread `T.card ≤ 2m` into the statement. NB: this is the O(log n) matching base (quasipoly-regime); the *optimal* O(1)
+>   WL-dim for these families is the structural (Skresanov) fact, beyond the generic matching trick. The 4 spine pieces:
 >   1. **`exists_pow_matching_lt`** (`F < |W| ⟹ ∃ m, |ι|·Fᵐ < |W|ᵐ`, the ℕ-smallness helper feeding
 >      `exists_separating_base`'s `hlt`, via `pow_unbounded_of_one_lt`).
 >   2. **`exists_separating_base_of_split`** (from per-good-anchor ℕ `cN`, bad-anchor ℕ `βN`, `cN+βN<|V|` ⟹ base

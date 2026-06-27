@@ -122,9 +122,181 @@ theorem jointIsoCountK_ne_of_sep {K : Type*} [Field K] [Fintype K] [DecidableEq 
     rw [MulChar.ringHomComp_apply, MulChar.ringHomComp_apply, eq_intCast, eq_intCast] at heq
     exact hchi (by exact_mod_cast heq)
 
+open QuadraticMap in
+/-- **Piece 5 — the family assembly: a bounded base whose joint isotropic counts separate every pair.**
+For a nondegenerate quadratic form `Q` on `Fin d → K` (even `d`), with the family thresholds `q ≳ 32d`, `q ≥ 256`,
+the matching trick produces a finite base `T` with `ZProfileSeparatesK Q T`. Wires: `good_anchor_fail_le_const`
+(input `c = 15/16·|V|`) + `beta_full_count_closed`/`exists_hgood` (bad-anchor `β = O(d/q)`) + `cbar_lt` (`c̄₀<1`)
+→ `exists_separating_base_of_split` → `jointIsoCountK_ne_of_sep` per pair → `zProfileSeparatesK_of_zSep`. -/
+theorem exists_zProfileSeparatesK {K : Type*} [Field K] [Fintype K] [DecidableEq K] {d : ℕ}
+    (Q : QuadraticForm K (Fin d → K)) [Invertible (2 : K)]
+    (hF : ringChar K ≠ 2) (hd : Even d) (hdge : 2 ≤ d)
+    {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    (hQrad : polarRad Q = ⊥)
+    (hq1 : 64 * (Fintype.card K : ℝ) ^ 2 ≤ Fintype.card (Fin d → K))
+    (hq2 : 64 * (d : ℝ) ^ 2 ≤ Fintype.card K) (hq3 : 256 ≤ (Fintype.card K : ℝ))
+    (hqthr : 32 * (2 * d + 4) ≤ Fintype.card K)
+    (hNthr : 64 < Fintype.card (Fin d → K)) :
+    ∃ T : Finset (Fin d → K), ZProfileSeparatesK Q T := by
+  classical
+  set V := Fin d → K
+  set cardV := Fintype.card V with hcardVdef
+  set cardK := Fintype.card K with hcardKdef
+  -- threshold consequences in ℕ
+  have h256 : (256 : ℕ) ≤ cardK := by rw [hcardKdef]; exact_mod_cast hq3
+  have hcardK7 : 7 ≤ cardK := by omega
+  have hcardK2 : 2 < cardK := by omega
+  have hKpos : 0 < cardK := by omega
+  have hfinrank : 2 ≤ Module.finrank K V := by
+    have : Module.finrank K V = d := by
+      show Module.finrank K (Fin d → K) = d
+      rw [Module.finrank_fintype_fun_eq_card, Fintype.card_fin]
+    omega
+  have hsepL : (QuadraticMap.associated Q).SeparatingLeft := associated_separatingLeft_of_polarRad Q hQrad
+  obtain ⟨vb, hv, hw⟩ := exists_orthoAnisotropic_basis Q hsepL
+  -- Nontrivial V (for exists_anisotropic)
+  haveI : Nonempty (Fin d) := ⟨⟨0, by omega⟩⟩
+  haveI : Nontrivial V := by
+    show Nontrivial (Fin d → K); infer_instance
+  obtain ⟨w₀, hw₀⟩ := exists_anisotropic Q hQrad
+  let b : Module.Basis (Fin d) K V := Pi.basisFun K (Fin d)
+  -- the matching predicates
+  set Good : {p : V × V // p.1 ≠ p.2} → V → Prop := fun g t₀ =>
+    (∀ y z : K, y ≠ 0 → z ≠ 0 → y • pairForm Q (t₀ - g.1.1) + z • pairForm Q (t₀ - g.1.2) ≠ 0)
+      ∧ (∃ y z : K, polarRad (y • pairForm Q (t₀ - g.1.1) + z • pairForm Q (t₀ - g.1.2)) = ⊥)
+      ∧ pairForm Q (t₀ - g.1.1) ≠ 0 ∧ pairForm Q (t₀ - g.1.2) ≠ 0
+      ∧ Q (t₀ - g.1.1) ≠ 0 ∧ Q (t₀ - g.1.2) ≠ 0 with hGoodDef
+  set Fail : {p : V × V // p.1 ≠ p.2} → V → V → Prop := fun g t t₀ =>
+    ¬ (quadraticChar K (pairForm Q (t₀ - g.1.1) (t - g.1.1))
+          ≠ quadraticChar K (pairForm Q (t₀ - g.1.2) (t - g.1.2))
+        ∧ pairForm Q (t₀ - g.1.1) (t - g.1.1) ≠ 0 ∧ pairForm Q (t₀ - g.1.2) (t - g.1.2) ≠ 0
+        ∧ Q (t₀ - g.1.1) ≠ 0 ∧ Q (t₀ - g.1.2) ≠ 0) with hFailDef
+  set cN : ℕ := 15 * cardV / 16 with hcNdef
+  set βN : ℕ := ((2 * d + 4) * cardV + 2 * cardK) / cardK with hβNdef
+  -- hc : per-good-anchor fail bound
+  have hc : ∀ g t₀, Good g t₀ → (Finset.univ.filter (fun t => Fail g t t₀)).card ≤ cN := by
+    intro g t₀ hG
+    obtain ⟨hnz, hgood, hPu, hPv, hQu0, hQv0⟩ := hG
+    have hsetEq : (Finset.univ.filter (fun t => Fail g t t₀))
+        = (Finset.univ.filter (fun t : V => ¬ (quadraticChar K (pairForm Q (t₀ - g.1.1) (t - g.1.1))
+              ≠ quadraticChar K (pairForm Q (t₀ - g.1.2) (t - g.1.2))
+            ∧ pairForm Q (t₀ - g.1.1) (t - g.1.1) ≠ 0 ∧ pairForm Q (t₀ - g.1.2) (t - g.1.2) ≠ 0))) := by
+      apply Finset.filter_congr
+      intro t _
+      simp only [hFailDef, not_iff_not]
+      constructor
+      · rintro ⟨h1, h2, h3, _, _⟩; exact ⟨h1, h2, h3⟩
+      · rintro ⟨h1, h2, h3⟩; exact ⟨h1, h2, h3, hQu0, hQv0⟩
+    rw [hsetEq]
+    have hreal := good_anchor_fail_le_const (b := b) hF hψ Q g.1.1 g.1.2 t₀ hnz hgood hPu hPv hq1 hq2 hq3
+    -- (#fail : ℝ) ≤ 15/16·cardV ⟹ #fail ≤ (15·cardV)/16 (ℕ)
+    have h16 : 16 * (Finset.univ.filter (fun t : V => ¬ (quadraticChar K (pairForm Q (t₀ - g.1.1) (t - g.1.1))
+              ≠ quadraticChar K (pairForm Q (t₀ - g.1.2) (t - g.1.2))
+            ∧ pairForm Q (t₀ - g.1.1) (t - g.1.1) ≠ 0 ∧ pairForm Q (t₀ - g.1.2) (t - g.1.2) ≠ 0))).card
+        ≤ 15 * cardV := by
+      have : (16 : ℝ) * ((Finset.univ.filter (fun t : V => ¬ (quadraticChar K (pairForm Q (t₀ - g.1.1) (t - g.1.1))
+              ≠ quadraticChar K (pairForm Q (t₀ - g.1.2) (t - g.1.2))
+            ∧ pairForm Q (t₀ - g.1.1) (t - g.1.1) ≠ 0 ∧ pairForm Q (t₀ - g.1.2) (t - g.1.2) ≠ 0))).card : ℝ)
+          ≤ 15 * cardV := by rw [hcardVdef]; linarith [hreal]
+      exact_mod_cast this
+    rw [hcNdef]
+    exact (Nat.le_div_iff_mul_le (by norm_num)).mpr (by linarith [h16])
+  -- hβ : bad-anchor count bound
+  have hβ : ∀ g, (Finset.univ.filter (fun t₀ => ¬ Good g t₀)).card ≤ βN := by
+    intro g
+    obtain ⟨t₀₀, y₀, z₀, hrad, _, _⟩ := exists_hgood Q hQrad g.1.1 g.1.2 g.2 hfinrank hcardK7
+    have hbeta := beta_full_count_closed (b := b) Q y₀ z₀ g.1.1 g.1.2 t₀₀ w₀ hrad hw₀
+    rw [hβNdef]
+    refine (Nat.le_div_iff_mul_le hKpos).mpr ?_
+    refine le_trans (le_of_eq ?_) hbeta
+    congr 1
+  -- hlt : c̄₀ < 1
+  have hlt : cN + βN < cardV := by
+    have hA : 16 * cN ≤ 15 * cardV := by rw [hcNdef, Nat.mul_comm]; exact Nat.div_mul_le_self _ _
+    have hB : cardK * βN ≤ (2 * d + 4) * cardV + 2 * cardK := by
+      rw [hβNdef, Nat.mul_comm]; exact Nat.div_mul_le_self _ _
+    exact cbar_lt hA hB hqthr hNthr hKpos
+  -- run the matching
+  obtain ⟨m, P, hP⟩ := exists_separating_base_of_split Fail Good cN βN hc hβ hlt
+  refine ⟨(Finset.univ.image (fun j => (P j).1)) ∪ (Finset.univ.image (fun j => (P j).2)), ?_⟩
+  -- zSep ⟹ ZProfileSeparatesK
+  apply zProfileSeparatesK_of_zSep
+  intro u u' hne
+  obtain ⟨j, hj⟩ := hP ⟨(u, u'), hne⟩
+  rw [hFailDef] at hj
+  simp only [not_not] at hj
+  obtain ⟨hchi, hIu, hIv, hQu, hQv⟩ := hj
+  refine ⟨{(P j).1, (P j).2}, ?_, ?_⟩
+  · intro x hx
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with hx | hx <;> subst hx
+    · exact Finset.mem_union_left _ (Finset.mem_image.2 ⟨j, Finset.mem_univ _, rfl⟩)
+    · exact Finset.mem_union_right _ (Finset.mem_image.2 ⟨j, Finset.mem_univ _, rfl⟩)
+  · exact jointIsoCountK_ne_of_sep Q hF hcardK2 hd hψ vb hv hw u u' (P j).1 (P j).2 hIu hIv hQu hQv hchi
+
+open QuadraticMap in
+/-- **Increment 5, the seal-ready deliverable.** The matching base `T` of `exists_zProfileSeparatesK` discharges the
+Witt-free seal input `IsotropySeparatesAtBaseK Q T` (via `isotropySeparatesK_of_zProfileSeparatesK`, needing only
+`Q.polarBilin` nondegenerate). So the affine-polar `VO^ε` residue at `q ≳ 32d` has a finite separating base whose
+fine isotropy-count profile pins every vertex — the predicate the Witt-free capstone
+`reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` consumes (modulo mapping `T` through `affineE` + a base-size
+bound; that bound = the explicit `m` from a refined `exists_pow_matching_lt`, a follow-up). -/
+theorem exists_isotropySeparatesAtBaseK {K : Type*} [Field K] [Fintype K] [DecidableEq K] {d : ℕ}
+    (Q : QuadraticForm K (Fin d → K)) [Invertible (2 : K)]
+    (hF : ringChar K ≠ 2) (hd : Even d) (hdge : 2 ≤ d)
+    {ψ : AddChar K ℂ} (hψ : ψ.IsPrimitive)
+    (hQrad : polarRad Q = ⊥) (hQnd : (Q.polarBilin).Nondegenerate)
+    (hq1 : 64 * (Fintype.card K : ℝ) ^ 2 ≤ Fintype.card (Fin d → K))
+    (hq2 : 64 * (d : ℝ) ^ 2 ≤ Fintype.card K) (hq3 : 256 ≤ (Fintype.card K : ℝ))
+    (hqthr : 32 * (2 * d + 4) ≤ Fintype.card K)
+    (hNthr : 64 < Fintype.card (Fin d → K)) :
+    ∃ T : Finset (Fin d → K), IsotropySeparatesAtBaseK Q T := by
+  obtain ⟨T, hT⟩ := exists_zProfileSeparatesK Q hF hd hdge hψ hQrad hq1 hq2 hq3 hqthr hNthr
+  exact ⟨T, isotropySeparatesK_of_zProfileSeparatesK Q hQnd hT⟩
+
+open QuadraticMap in
+/-- **Piece 6 — the q = p seal.** The matching base of `exists_isotropySeparatesAtBaseK`, transported through the
+digit bijection `affineE`, feeds the Witt-free seal capstone: for an odd prime `p` and a nondegenerate `Q` on
+`Fin d → ZMod p` with the family thresholds (`p ≥ 256`, `p ≳ 32d`), the affine-polar `VO^ε` residue **reaches
+`reachesRigidOrCameron` modulo `{G3}`** — no Witt, no `hSmallAutThin`. The base is `T = (matching base).image affineE`
+and the depth bound is `T.card` (HONEST GAP: that `T.card` is polynomially bounded is not yet exposed — it is the
+matching length `≤ 2m`, with `m` from the still-existential `exists_pow_matching_lt`; the explicit log bound is the
+remaining analysis). -/
+theorem reachesRigidOrCameron_affinePolar {p d : ℕ} [Fact p.Prime]
+    {IsCameronScheme : ∀ (m : Nat), SchurianScheme m → Prop}
+    (hp2 : p ≠ 2) (hd : Even d) (hdge : 2 ≤ d)
+    (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    {ψ : AddChar (ZMod p) ℂ} (hψ : ψ.IsPrimitive)
+    (hQrad : polarRad Q = ⊥) (hQnd : (Q.polarBilin).Nondegenerate)
+    (hq1 : 64 * (Fintype.card (ZMod p) : ℝ) ^ 2 ≤ Fintype.card (Fin d → ZMod p))
+    (hq2 : 64 * (d : ℝ) ^ 2 ≤ Fintype.card (ZMod p))
+    (hq3 : 256 ≤ (Fintype.card (ZMod p) : ℝ))
+    (hqthr : 32 * (2 * d + 4) ≤ Fintype.card (ZMod p))
+    (hNthr : 64 < Fintype.card (Fin d → ZMod p)) :
+    ∃ T : Finset (Fin (p ^ d)),
+      ((SchemeBlockRecovered (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q))
+          ∨ AbelianConsumed (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)))
+          ∨ SchemeRecoveredByDepth (p ^ d)
+              (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) T.card)
+        ∨ IsCameronScheme (p ^ d) (affineScheme (similitudeGroup Q) (neg_mem_similitudeGroup Q)) := by
+  have hF : ringChar (ZMod p) ≠ 2 := by rw [ZMod.ringChar_zmod_n]; exact hp2
+  haveI : Invertible (2 : ZMod p) := invertibleOfNonzero (Ring.two_ne_zero hF)
+  obtain ⟨myT, hsep⟩ :=
+    exists_isotropySeparatesAtBaseK Q hF hd hdge hψ hQrad hQnd hq1 hq2 hq3 hqthr hNthr
+  refine ⟨myT.image affineE, ?_⟩
+  have himg : (myT.image affineE).image affineE.symm = myT := by
+    rw [Finset.image_image,
+      show (affineE.symm ∘ affineE) = id from funext (fun x => affineE.symm_apply_apply x),
+      Finset.image_id]
+  exact reachesRigidOrCameron_viaIsotropySeparatesK_wittFree Q (myT.image affineE) (le_refl _)
+    (by rw [himg]; exact hsep)
+
 end ChainDescent
 
 #print axioms ChainDescent.exists_pow_matching_lt
 #print axioms ChainDescent.exists_separating_base_of_split
 #print axioms ChainDescent.cbar_lt
 #print axioms ChainDescent.jointIsoCountK_ne_of_sep
+#print axioms ChainDescent.exists_zProfileSeparatesK
+#print axioms ChainDescent.exists_isotropySeparatesAtBaseK
+#print axioms ChainDescent.reachesRigidOrCameron_affinePolar
