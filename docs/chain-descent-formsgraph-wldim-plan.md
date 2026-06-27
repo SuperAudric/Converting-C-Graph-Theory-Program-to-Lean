@@ -18,11 +18,25 @@
 
 > **▶▶▶▶▶▶ CURRENT HANDOFF (2026-06-27, SESSION 3 — read THIS first; supersedes SESSION 2 below for the frontier).**
 > **User-set working order (one at a time): #4 field-gen (✅DONE) → #1 corank tightening (✅DONE) → small-q tail
-> (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (✅ASSEMBLED + q=p seal reached; non-vacuity thread = ◀ NEXT).**
-> **★ FRESH-READER NEXT STEP:** finish the non-vacuity thread (carry `T.card ≤ 2m` into the seal statement — see "REMAINING
-> (pure plumbing)" below; the block route is cleaner). Decision pending: whether to first spike the architecture question
-> (does the canonizer charge `n^{|T|}`?) that decides if the O(1)/frame track is needed for true polynomial — see the
-> SESSION-3 strategic note at the end of this STATUS block. What landed this session:
+> (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (✅ASSEMBLED + q=p seal reached + ✅✅ NON-VACUITY THREAD DONE).**
+> **★ FRESH-READER NEXT STEP (the recommended breakpoint): PORT the `ScratchIncr5` dependency closure into `build.sh` +
+> condense this 2200-line doc.** The q=p quasipoly slice is now a finished, self-contained theorem (no further churn on
+> it), so this is the clean seam to pay the port debt *before* the upstream floor-lowering work re-edits the dependency
+> graph. Then resume floor-lowering (q≳32d → O(d) via tight corank shell count). NB the matching base is `O(log n)` ⟹
+> `n^{O(log n)}` = **quasipolynomial**; true polynomial needs the O(1)/frame track (SESSION-3 strategic note below) — its
+> gating spike (does the canonizer charge `n^{|T|}`?) is essentially settled "yes" (a rigid residue forks `n` ways per
+> individualization; the deterministic-base escape would prove too much and was not found in prior search). What landed
+> this session:
+> - **▶▶ NON-VACUITY THREAD — DONE (2026-06-27, `ScratchIncr5.lean`, now 10 decls axiom-clean, `lake build` green).**
+>   The seal `reachesRigidOrCameron_affinePolar` now **carries** `T.card ≤ 128·(Nat.log 2 ((p^d)² ) + 1) = O(d log p)`
+>   as a conjunct — the slice is non-vacuous (a genuine quasipolynomial WL-base). Two NEW reusable decls: **log-free
+>   keystone `exists_pow_matching_block`** (`64·F ≤ 63·|W| ⟹ ∃ m ≤ 64·(Nat.log 2 |ι| + 1), |ι|·Fᵐ < |W|ᵐ`, via block fact
+>   `2·63⁶⁴ ≤ 64⁶⁴` by `norm_num` ⟹ `2·F⁶⁴ ≤ |W|⁶⁴`, raise to `k = Nat.log 2 |ι| + 1`, `|ι| < 2ᵏ`) +
+>   **`exists_separating_base_of_split_bounded`** (the `_of_split` sibling threading the `m`-bound from the *ratio*
+>   hypothesis `64·(cN+βN) ≤ 63·|V|`). `exists_zProfileSeparatesK`/`…IsotropySeparatesAtBaseK`/the seal all now carry
+>   `T.card ≤ 128·(Nat.log 2 (|V|²) + 1)` (via `card_union_le`+`card_image_le`+`Nat.log_mono_right`). The ratio bound is
+>   sound: `cN ≤ 60·|V|/64`, `βN ≤ 2·|V|/64 + 2` (for `q≳32d`), `128 ≤ |V|` (from `hq1`+`hq3`) ⟹ `64(cN+βN) ≤ 63|V|`.
+>   The old `cbar_lt`/`exists_separating_base_of_split` remain (unused by the live chain, kept). What landed earlier:
 > - **▶▶▶ INCREMENT 5 — ASSEMBLED END-TO-END (2026-06-27, `ScratchIncr5.lean`, 8 decls axiom-clean, NOT in build).**
 >   The matching assembly type-checks all the way to the Witt-free seal input. **Capstone
 >   `exists_isotropySeparatesAtBaseK`**: for a nondegenerate `Q` on `Fin d → K` (even `d≥2`) with the family thresholds
@@ -36,17 +50,10 @@
 >   residue **reaches the `reachesRigidOrCameron` disjunction modulo `{G3}`, Witt-free, no `hSmallAutThin`** — the matching
 >   base transported through `affineE` (`T = (matching base).image affineE`, `T.image affineE.symm = matching base`) feeds
 >   `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`, depth bound `= T.card`.
->   **★★ NON-VACUITY KEYSTONE LANDED (2026-06-27, `exists_pow_matching_le`, axiom-clean):** the matching length is
->   explicitly bounded — `∃ m ≤ log|ι|/log(|W|/F) + 1, |ι|·Fᵐ < |W|ᵐ` (`m := ⌊L⌋₊+1`; `Real.log_pow`+`Real.log_lt_log_iff`).
->   This proves the base IS logarithmically bounded; the seal statement just doesn't yet *carry* `T.card ≤ 2m`.
->   **REMAINING (pure plumbing, no new math, ~60-100 lines): thread a *stateable* clean bound into the seal.** The raw
->   `exists_pow_matching_le` bound references proof-local `cN`/`βN`, so the public statement needs the ratio simplification
->   `cN+βN ≤ 63·cardV/64` (provable: `cN≤15/16·cardV` + `βN≤cardV/32+2` for `p≳32d`) ⟹ `|W|/F = cardV/(cN+βN) ≥ 64/63` ⟹
->   `m ≤ 2·log cardV/log(64/63)+1 = O(d log p)`; OR the log-free block route (`(63/64)⁶⁴ < 1/2` ⟹
->   `m = 64·(Nat.log 2 |ι| + 1)`, `2·63⁶⁴ ≤ 64⁶⁴` by `norm_num`). Then `T.card ≤ 2m` (`card_union_le`+`card_image_le`)
->   threaded through `exists_zProfileSeparatesK`/`…IsotropySeparatesAtBaseK`/`reachesRigidOrCameron_affinePolar`.
->   NB: this is the O(log n) matching base (quasipoly-regime); the *optimal* O(1) WL-dim is the structural (Skresanov)
->   fact, beyond the generic matching trick (see SESSION-3 strategic note on whether it's worth a dedicated track).
+>   **★★ NON-VACUITY: now fully threaded (✅DONE above).** The analytic keystone `exists_pow_matching_le`
+>   (`∃ m ≤ log|ι|/log(|W|/F) + 1, |ι|·Fᵐ < |W|ᵐ`, `Real.log`) is kept as a standalone; the LIVE chain uses the log-free
+>   block route (`exists_pow_matching_block`, `Nat.log`) which is cleaner for the public statement. The ratio simplification
+>   `64·(cN+βN) ≤ 63·cardV` and the `T.card ≤ 2m` threading are both landed. (Earlier this was the open "REMAINING plumbing".)
 >   The 4 spine pieces:
 >   1. **`exists_pow_matching_lt`** (`F < |W| ⟹ ∃ m, |ι|·Fᵐ < |W|ᵐ`, the ℕ-smallness helper feeding
 >      `exists_separating_base`'s `hlt`, via `pow_unbounded_of_one_lt`).

@@ -144,13 +144,15 @@ close it — is set out in
 > discharged internally (`GaussCount.gaussSum_sq_ne_zero` + `sum_addChar_quadForm_ne_zero`). **★★★ INCREMENT 5 ASSEMBLED
 > END-TO-END + q=p SEAL REACHED (2026-06-27, `ScratchIncr5.lean`, 8 decls axiom-clean, NOT in build):** the matching assembly
 > closes the affine-polar `VO^ε` residue (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron` disjunction modulo `{G3}`,
-> Witt-free, no `hSmallAutThin`** — capstone `reachesRigidOrCameron_affinePolar`. **Working order now: the NON-VACUITY THREAD
-> (NEXT)** — the seal's depth bound is currently `T.card` (the matching base, provably `O(log n)` via the landed keystone
-> `exists_pow_matching_le`, but not yet *carried* into the statement); finishing it = pure plumbing (~60-100 lines, two routes
-> scoped in plan §13). **Read the plan's top "CURRENT HANDOFF (2026-06-27,
-> SESSION 3)" block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; NB the matching base
-> is `O(log n)` (quasipoly regime) — the optimal O(1)/frame WL-dim (structural Skresanov) is a separate, harder track, worth
-> it for true polynomial if the canonizer charges `n^{|T|}` (an architecture question to settle — see plan §13 strategic note);
+> Witt-free, no `hSmallAutThin`** — capstone `reachesRigidOrCameron_affinePolar`. **NON-VACUITY THREAD ✅DONE (2026-06-27):**
+> the seal now **carries** `T.card ≤ 128·(Nat.log 2 ((p^d)²) + 1) = O(d log p)` (log-free block keystone
+> `exists_pow_matching_block`), so the slice is non-vacuous — a genuine **quasipolynomial** WL-base. **Working order now: the
+> recommended breakpoint = PORT `ScratchIncr5`'s dependency closure into `build.sh` + condense the 2200-line plan doc**, taken
+> now because the q=p slice is a finished theorem (stable seam, before floor-lowering re-edits the graph); then resume
+> floor-lowering (q≳32d → O(d)). **Read the plan's top "CURRENT HANDOFF (2026-06-27, SESSION 3)" block first, then
+> `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; NB the matching base is `O(log n)` (quasipoly
+> regime) — the optimal O(1)/frame WL-dim (structural Skresanov) is a separate, harder track, needed for true polynomial since
+> the canonizer charges ~`n^{|T|}` (a rigid residue forks `n` ways per individualization);
 > `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
