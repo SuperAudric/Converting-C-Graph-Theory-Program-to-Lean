@@ -148,7 +148,8 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     packaged as the per-pair capstone **`jointIsoCount_ne_of_chiSep_pair`**. **B1-deg DISSOLVED** (config-degenerate locus density
 >     `O(1/√q)`, folds into the increment-4 matching density). **All B1a wraps LANDED** — (i)`ScratchBridgeB` + (ii)`ScratchBridgeC` +
 >     **(iii) `ScratchBridgeD.chi_configDet_eq_chi_pairForm`** (`χ(D)=χ(I_w)`; `½·polar` factor + change-of-basis both enter as squares
->     killed by `χ`) + the ℂ assembly. Carried: `hK : gaussSum²·∑ψ(Q)≠0` (independent Gauss nonvanishing). ★ **FINDING:** the `corr`
+>     killed by `χ`) + the ℂ assembly. (`hK : gaussSum²·∑ψ(Q)≠0` was carried; **now DISCHARGED 2026-06-27** — `GaussCount.gaussSum_sq_ne_zero`
+>     + `sum_addChar_quadForm_ne_zero`, removed from both bridge capstones, axiom-clean.) ★ **FINDING:** the `corr`
 >     term ([both config-diffs isotropic], codim-2, `O(1/q²)`) ⟹ increment-4 good-pair predicate gains `corr=0` → `{hgood ∧ hnz ∧ corr=0}`.
 >     NO Weil, NO `R'→ℕ` descent (worked over ℂ), NOT a hidden wall. (Plan §13 BRIDGE block; prime-field model `q=p`.)
 >   - ✓ **Field generalization (concern #4) — DONE 2026-06-26 (the analytic + bridge lift).** `c0_le_threequarters` was already

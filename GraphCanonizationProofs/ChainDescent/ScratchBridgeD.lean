@@ -228,9 +228,9 @@ open scoped Classical in
 isotropic counts differ (`jointIsoCount Q u {t,t₀} ≠ jointIsoCount Q v {t,t₀}`). This is exactly the per-pair input
 to `ScratchBridgeZ.zProfileSeparates_of_zSep`, completing the observable↔count bridge over `F = ℂ`.
 
-`hK` is the Gauss-factor nonvanishing `K = gaussSum²·∑ψ(Q) ≠ 0` — an independent fact (`‖gaussSum‖² = q`,
-`∑ψ(Q) = χ(disc)·gaussSumᵈ`, both nonzero over ℂ), carried here rather than re-derived; it is NOT an increment-4
-output and does not gate the separation logic. -/
+The Gauss-factor nonvanishing `gaussSum²·∑ψ(Q) ≠ 0` is now **discharged internally** (no longer a hypothesis):
+`gaussSum² = χ(-1)·card K ≠ 0` (`gaussSum_sq_ne_zero`) and `∑ψ(Q) = (∏ χ(Q vᵢ))·gaussSumᵈ ≠ 0`
+(`sum_addChar_quadForm_ne_zero`, from the anisotropic basis `vb`/`hv`/`hw`). -/
 theorem jointIsoCount_ne_of_chiSep_pair (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
     [Invertible (2 : ZMod p)] (hF : ringChar (ZMod p) ≠ 2)
     (u v t t₀ : Fin (p ^ d)) (hd : Even d)
@@ -247,13 +247,15 @@ theorem jointIsoCount_ne_of_chiSep_pair (Q : QuadraticForm (ZMod p) (Fin d → Z
     (hv : (QuadraticMap.associated (R := ZMod p) Q).IsOrthoᵢ vb) (hw : ∀ i, Q (vb i) ≠ 0)
     (hcorru : ¬ (Q (affineE.symm t - affineE.symm u) = 0 ∧ Q (affineE.symm t₀ - affineE.symm u) = 0))
     (hcorrv : ¬ (Q (affineE.symm t - affineE.symm v) = 0 ∧ Q (affineE.symm t₀ - affineE.symm v) = 0))
-    (hK : gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom F)) ψ ^ 2
-        * ∑ x : Fin d → ZMod p, ψ (Q x) ≠ 0)
     (hne : ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom F))
             (pairForm Q (affineE.symm t₀ - affineE.symm u) (affineE.symm t - affineE.symm u))
           ≠ ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom F))
             (pairForm Q (affineE.symm t₀ - affineE.symm v) (affineE.symm t - affineE.symm v))) :
     jointIsoCount Q u {t, t₀} ≠ jointIsoCount Q v {t, t₀} := by
+  -- the carried Gauss-factor nonvanishing `hK` is discharged from `hF`/`hψ` + the anisotropic basis `vb`
+  have hK : gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom F)) ψ ^ 2
+      * ∑ x : Fin d → ZMod p, ψ (Q x) ≠ 0 :=
+    mul_ne_zero (gaussSum_sq_ne_zero hF hψ) (sum_addChar_quadForm_ne_zero hF hψ Q vb hv hw)
   -- `q = p > 2` (p odd prime)
   have hp2 : p ≠ 2 := by rw [ZMod.ringChar_zmod_n p] at hF; exact hF
   have hq : 2 < p := lt_of_le_of_ne (Fact.out : p.Prime).two_le (Ne.symm hp2)

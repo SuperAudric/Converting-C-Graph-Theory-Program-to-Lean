@@ -344,7 +344,8 @@ theorem jointIsoCountK_pair_closed_corr0 (Q : QuadraticForm K (Fin d → K))
 
 open scoped Classical in
 /-- **THE BRIDGE, per-pair end-to-end (K) — `χ(I)`-separation ⟹ `Z`-separation.** Carries `2 < Fintype.card K`
-(the K-analogue of `2 < p`) and `hK` (Gauss-factor nonvanishing). Feeds `ScratchBridgeK.zProfileSeparatesK_of_zSep`. -/
+(the K-analogue of `2 < p`); the Gauss-factor nonvanishing is discharged internally (`gaussSum_sq_ne_zero` +
+`sum_addChar_quadForm_ne_zero`). Feeds `ScratchBridgeK.zProfileSeparatesK_of_zSep`. -/
 theorem jointIsoCountK_ne_of_chiSep_pair (Q : QuadraticForm K (Fin d → K))
     [Invertible (2 : K)] (hF : ringChar K ≠ 2) (hcardK : 2 < Fintype.card K)
     (u v t t₀ : Fin d → K) (hd : Even d)
@@ -357,11 +358,13 @@ theorem jointIsoCountK_ne_of_chiSep_pair (Q : QuadraticForm K (Fin d → K))
     (hv : (QuadraticMap.associated (R := K) Q).IsOrthoᵢ vb) (hw : ∀ i, Q (vb i) ≠ 0)
     (hcorru : ¬ (Q (t - u) = 0 ∧ Q (t₀ - u) = 0))
     (hcorrv : ¬ (Q (t - v) = 0 ∧ Q (t₀ - v) = 0))
-    (hK : gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom F)) ψ ^ 2
-        * ∑ x : Fin d → K, ψ (Q x) ≠ 0)
     (hne : ((quadraticChar K).ringHomComp (Int.castRingHom F)) (pairForm Q (t₀ - u) (t - u))
           ≠ ((quadraticChar K).ringHomComp (Int.castRingHom F)) (pairForm Q (t₀ - v) (t - v))) :
     jointIsoCountK Q u {t, t₀} ≠ jointIsoCountK Q v {t, t₀} := by
+  -- the carried Gauss-factor nonvanishing `hK` is discharged from `hF`/`hψ` + the anisotropic basis `vb`
+  have hK : gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom F)) ψ ^ 2
+      * ∑ x : Fin d → K, ψ (Q x) ≠ 0 :=
+    mul_ne_zero (gaussSum_sq_ne_zero hF hψ) (sum_addChar_quadForm_ne_zero hF hψ Q vb hv hw)
   have hpu : pairForm Q (t₀ - u) (t - u) ≠ 0 := by
     have h := hGu; rw [configPolarDet_eq_pairFormK Q u t t₀] at h; exact h.ne_zero
   have hpv : pairForm Q (t₀ - v) (t - v) ≠ 0 := by

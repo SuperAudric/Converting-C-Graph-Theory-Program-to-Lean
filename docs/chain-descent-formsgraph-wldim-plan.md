@@ -18,7 +18,15 @@
 
 > **▶▶▶▶▶▶ CURRENT HANDOFF (2026-06-27, SESSION 3 — read THIS first; supersedes SESSION 2 below for the frontier).**
 > **User-set working order (one at a time): #4 field-gen (✅DONE) → #1 corank tightening (✅DONE) → small-q tail
-> (✅✅✅ COMPLETE) → hK cleanup (◀ NEXT) → increment 5.** What landed this session:
+> (✅✅✅ COMPLETE) → hK cleanup (✅DONE) → increment 5 (◀ NEXT).** What landed this session:
+> - **✅ hK CLEANUP DONE (2026-06-27, axiom-clean, built).** The bridge capstones' carried `hK : gaussSum²·∑ψ(Q) ≠ 0`
+>   is **discharged internally** — removed as a hypothesis from BOTH `ScratchBridgeD.jointIsoCount_ne_of_chiSep_pair`
+>   (q=p) AND `ScratchBridgeAllK.jointIsoCountK_ne_of_chiSep_pair` (abstract K). Two NEW reusable lemmas in
+>   **`GaussCount.lean`** (built into oleans, axiom-clean): **`gaussSum_sq_ne_zero`** (`gaussSum² = χ(-1)·card K ≠ 0`
+>   via Mathlib `gaussSum_sq` + `χ(-1)²=1` + char-zero `card K ≠ 0`) and **`sum_addChar_quadForm_ne_zero`**
+>   (`∑ψ(Q) = (∏ χ(Q vᵢ))·gaussSumᵈ ≠ 0` via `sum_quadForm_eval` + anisotropic basis). The discharge reuses the
+>   capstone's already-present `hF`/`[Invertible 2]`/`hψ`/`vb`/`hv`/`hw` — no new family hypotheses. ⟹ the bridge
+>   capstone increment 5 wires now carries ONE fewer hypothesis.
 > - **✅✅✅ SMALL-Q TAIL CLOSED IN LEAN (Route 2 tail), all axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in
 >   build.sh.** Full detail = the "▶▶▶▶ BUILD PLAN" box at the top of "### §13 — ROUTE 2 (SCOPE)". **4 NEW modules:**
 >   - **`ScratchCountTight.lean`** — piece 1: `int_char_pointwise_tight` (no axioms) + `counting_identity_tight` +
@@ -47,9 +55,13 @@
 > - **C# de-risk probes added** (`GraphCanonizationProject.Tests/A2MonovariantProbe.cs`, both green): **`Probe_Route2DegenerateLines`**
 >   (line-regroup ℤ-identity holds 8/8 across `d=4` grow-q AND fixed-q grow-d) + **`Probe_Route2ExactSmallQ`** (exact counting
 >   identity `NS = Z_both0+(N_nz+S)/2` holds 16/16, exact `c₀≤0.556` at q=3 — the empirical floor under `c0_le_route2`'s bound).
-> - **NEXT = hK cleanup** (discharge the bridge's carried `hK : gaussSum²·∑ψ(Q)≠0` via `‖gaussSum‖²=q` + `∑ψ(Q)=χ(disc)·gaussSumᵈ`),
->   then **increment 5** (matching assembly + bridge wiring; calls a per-anchor `c₀<1` capstone — `c0_le_route2` for the tail,
->   `c0_le_threequarters_corank2` for `q≥16`). The SESSION-1/2 increment-4/5 lemma-level detail below is still current.
+> - **NEXT = increment 5** (matching assembly + bridge wiring; calls a per-anchor `c₀<1` capstone — `c0_le_route2` for the
+>   tail, `c0_le_threequarters_corank2` for `q≥16`). **★ WIRING CARE (de-risk note):** the two-regime split is *soundness-
+>   critical*, not an optimization — for `q≥16` increment 5 MUST use the constant-gap `c0_le_threequarters_corank2` (`c₀≤¾`),
+>   NOT `c0_le_route2`, because route2's gap `1/(4q²)` is only constant in the bounded-q tail; using it for growing `q ~ n^{1/d}`
+>   would make the matching base size `m ~ q²·log n ~ n^{2/d}·log n` (e.g. `√n` at d=4), destroying bounded WL-dim. The
+>   good-anchor hyps are compatible (both fed by `exists_hgood`), so the `q<16`/`q≥16` case split is clean. The SESSION-1/2
+>   increment-4/5 lemma-level detail below is still current.
 >
 > **▶▶▶▶▶ HANDOFF (2026-06-26, SESSION 2 — superseded by SESSION 3 above for the frontier; still current for increment-4/5 detail).**
 > **User-set working order (one at a time): #4 field-gen (DONE) → #1 corank tightening (✅DONE) → small-q tail (Route 0 ✅DONE
@@ -188,8 +200,9 @@
 >   the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate; the q=p adapter `ScratchFieldGenAdapter` is the template).
 >
 > Then: families (d)/(e) + char-2 (Layer C), the seam build (Layer D, spiked `ScratchSeam`), and the **PORT** of all scratch
-> modules into `build.sh`/`lakefile`/`PublicTheoremIndex.md`. Still carried by the bridge capstone: `hK` (Gauss-factor `≠0`,
-> dischargeable via `‖gaussSum‖²=q` + `∑ψ(Q)=χ(disc)·gaussSumᵈ`). **Strategic note:** the goal is the *polynomial* seal;
+> modules into `build.sh`/`lakefile`/`PublicTheoremIndex.md`. (The bridge's `hK` Gauss-factor nonvanishing is now
+> **discharged** — `GaussCount.gaussSum_sq_ne_zero` + `sum_addChar_quadForm_ne_zero`, see SESSION-3 handoff at top.)
+> **Strategic note:** the goal is the *polynomial* seal;
 > `reachesRigidOrCameron_viaSpielman` (idx 1117, axiom-clean) is the citable **sub-exp fallback** if a family walls.
 
 > **▶▶▶ `VO⁻₄(3)` SEALED (2026-06-21, axiom-clean `[propext, Classical.choice, Quot.sound]`).**
@@ -2105,7 +2118,7 @@ genuinely excluded**: if `Q(a)=Q(a−w)=0` (hyperbolic plane) then `c=0` for ALL
   carried `hgood`.
 **⟹ The entire increment-4 cleanup (B-ii, B-iii, C-corr, C-basis, NV) is now CLOSED.** The β bound is unconditional modulo
 the family properties (nondeg `Q`, `finrank ≥ 2`, `|K| ≥ 7`). Next: **#1 corank tightening (✅DONE — capstone
-`c0_le_threequarters_corank`, hq2 removed)** → **small-q tail** → **hK cleanup** → **increment 5** (matching assembly;
+`c0_le_threequarters_corank`, hq2 removed)** → **small-q tail (✅DONE)** → **hK cleanup (✅DONE)** → **increment 5** (matching assembly;
 field/seam typing decision RESOLVED by concern #4). NB increment 5's per-anchor input is now the `_corank` capstone.
 
 **▶▶ INCREMENT 5 — WHAT'S EXPECTED (the matching assembly + bridge wiring).** All inputs are now landed (`c`, `β_full`,

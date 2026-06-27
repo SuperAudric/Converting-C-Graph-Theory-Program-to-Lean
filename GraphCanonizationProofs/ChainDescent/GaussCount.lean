@@ -249,6 +249,43 @@ theorem sum_addChar_quadForm_smul_ne_zero {K : Type*} [Field K] [Fintype K] [Dec
   rw [h, mul_zero] at hsq
   exact one_ne_zero hsq.symm
 
+/-- **The quadratic Gauss sum squared is nonzero** (in a char-zero domain). By `gaussSum_sq`,
+`gaussSum χ ψ ^ 2 = χ(-1)·card K`, and both factors are nonzero: `χ(-1)` is a unit (`χ(-1)² = 1`, so `≠ 0`)
+and `card K ≠ 0` in characteristic zero. This is the first factor of the bridge's carried `hK`. -/
+theorem gaussSum_sq_ne_zero {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    (hF : ringChar K ≠ 2) {R' : Type*} [CommRing R'] [IsDomain R'] [CharZero R']
+    {ψ : AddChar K R'} (hψ : ψ.IsPrimitive) :
+    gaussSum ((quadraticChar K).ringHomComp (Int.castRingHom R')) ψ ^ 2 ≠ 0 := by
+  set χ := (quadraticChar K).ringHomComp (Int.castRingHom R') with hχ
+  have hχ1 : χ ≠ 1 := by
+    rw [hχ, MulChar.ringHomComp_ne_one_iff Int.cast_injective]
+    exact quadraticChar_ne_one hF
+  have hQuad : χ.IsQuadratic := (quadraticChar_isQuadratic K).comp _
+  rw [gaussSum_sq hχ1 hQuad hψ]
+  refine mul_ne_zero ?_ ?_
+  · have h1 : χ (-1) ^ 2 = 1 := by rw [← map_pow, neg_one_sq, map_one]
+    intro h; rw [h] at h1; simp at h1
+  · exact_mod_cast Fintype.card_ne_zero
+
+/-- **The quadratic Gauss sum over `V` is nonzero** (given an orthogonal anisotropic basis, char zero). By
+`sum_quadForm_eval`, `∑_x ψ(Q x) = (∏ᵢ χ(Q vᵢ))·gaussSum^d`; each factor `χ(Q vᵢ) ≠ 0` (anisotropic, `χ`
+nonzero on units) and `gaussSum^d ≠ 0` (`gaussSum_sq_ne_zero`). The second factor of the bridge's carried `hK`. -/
+theorem sum_addChar_quadForm_ne_zero {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    [Invertible (2 : K)] (hF : ringChar K ≠ 2) {R' : Type*} [CommRing R'] [IsDomain R'] [CharZero R']
+    {ψ : AddChar K R'} (hψ : ψ.IsPrimitive) {V : Type*} [AddCommGroup V] [Module K V]
+    [FiniteDimensional K V] [Fintype V] (Q : QuadraticForm K V)
+    (v : Module.Basis (Fin (Module.finrank K V)) K V)
+    (hv : (QuadraticMap.associated (R := K) Q).IsOrthoᵢ v) (hw : ∀ i, Q (v i) ≠ 0) :
+    (∑ x : V, ψ (Q x)) ≠ 0 := by
+  set χ := (quadraticChar K).ringHomComp (Int.castRingHom R') with hχ
+  rw [sum_quadForm_eval hF hψ Q v hv hw]
+  refine mul_ne_zero ?_ (pow_ne_zero _ (fun h => gaussSum_sq_ne_zero hF hψ (by rw [h]; ring)))
+  rw [Finset.prod_ne_zero_iff]
+  intro i _ h
+  have hmm : χ (Q (v i) * (Q (v i))⁻¹) = χ (Q (v i)) * χ (Q (v i))⁻¹ := map_mul χ _ _
+  rw [mul_inv_cancel₀ (hw i), map_one, h, zero_mul] at hmm
+  exact one_ne_zero hmm
+
 /-- **Brick C — the affine-quadric point count (character-sum form).** The number of solutions of
 `Q x = c`, scaled by `#K`, equals `#V` plus `(∑_{t≠0} ψ(−tc)·χ(t)^d)·∑_x ψ(Q x)`. This is the
 assembled affine-quadric point-count formula (Mathlib-absent), from Brick A + the scaling relation.

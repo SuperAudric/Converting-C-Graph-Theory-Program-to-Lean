@@ -140,7 +140,9 @@ close it — is set out in
 > ✅✅✅ COMPLETE (2026-06-27, Route 2):** capstone **`ScratchRoute2.c0_le_route2`** (`NS ≤ (1−1/(4q²))·|V| < |V|`, odd `|K|≥3`,
 > `d≥4`, **NO threshold**) closes the per-anchor `c₀<1` bound with no `q`-floor — 4 axiom-clean modules (`ScratchCountTight`,
 > `ScratchRoute2Arith`, `ScratchRoute2`). Coverage: odd `q∈{3,5,7,9,11,13}` → route2, `q≥16` → corank2, `q∈{4,8,16}` char-2 =
-> separate Arf track. **Working order now: hK cleanup (NEXT) → increment 5.** **Read the plan's top "CURRENT HANDOFF (2026-06-27,
+> separate Arf track. **hK cleanup ✅DONE (2026-06-27, axiom-clean)** — the bridge's carried `hK : gaussSum²·∑ψ(Q)≠0` is
+> discharged internally (`GaussCount.gaussSum_sq_ne_zero` + `sum_addChar_quadForm_ne_zero`). **Working order now: increment 5
+> (NEXT).** **Read the plan's top "CURRENT HANDOFF (2026-06-27,
 > SESSION 3)" block first, then `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal;
 > `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
 >
