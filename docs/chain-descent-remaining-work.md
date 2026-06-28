@@ -30,23 +30,23 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > *seam*** (no `SchemeEquiv`/transport exists in Lean yet — AUDIT-S finding 3). **▶ PROGRESS (2026-06-24, late): §11
 > scoping DONE** (AUDIT-S/A/W, **Route 1 chosen**, **GATE passed**); the live work moved to
 > [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) **§13** — the reduction chain
-> (**D1 + D2-bridge**, `ChainDescent/ScratchCrux.lean`, axiom-clean) collapses the whole generalization to a **single open
+> (**D1 + D2-bridge**, `ChainDescent/ProfileReduction.lean`, axiom-clean) collapses the whole generalization to a **single open
 > predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded WL-dimension of the affine forms-graphs**.
 > **D3d is now WEIL-FREE** (the exact-vs-Weil question is resolved): the seal's observable is the **pair** count `Z_u({t,t'})`
 > (not the singleton — a verified correction), its invariant `χ(det G₂)` is `χ` of a quadratic, and the per-pair sum factors
 > into additive Gauss sums.
 >
 > **▶▶▶ UPDATE (2026-06-25) — INCREMENT 3 CLOSED (all axiom-clean, NOT in build.sh).** The Weil-free pair route's
-> **per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE.** Capstone **`ScratchC0Final.c0_le_threequarters`**: for a good anchor
+> **per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE.** Capstone **`PerAnchorBound.c0_le_threequarters`**: for a good anchor
 > (`hgood` ∃ nondeg pencil member + `hnz` no zero member + `hPu` pairForm≠0) with `q ≥ q₀` (`64q²≤|V|` ⟺ `d≥3`, `64d²≤q`,
 > `256≤q`), the agreement count `NS = #{t : χ(I_u t)=χ(I_v t)} ≤ ¾·|V|`. Built across **8 new scratch modules** on top of
-> `ScratchPairSep` (24 lemmas): `ScratchCorank` (corank-uniform radical bound `radical_card_mul_card_le`), `ScratchGoodAnchor`
-> (good-anchor count `degenerate_count_le`, fully proven incl. the degeneracy⟺det bridge), `ScratchBucket`/`ScratchChiNorm`/
-> `ScratchTBound` (the `|T|` bound `normT_bucket_bound`), `ScratchCount`/`ScratchC0` (counting identity `card_agree_le`),
-> `ScratchC0Final` (`c0_le` + the capstone). **The reduction backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal`
-> is LANDED** (`ScratchCrux.isotropySeparates_of_zProfileSeparates` + `reachesRigidOrCameron_viaIsotropySeparates_wittFree`,
+> `PairForm` (24 lemmas): `PencilTBound` (corank-uniform radical bound `radical_card_mul_card_le`), `PencilTBound`
+> (good-anchor count `degenerate_count_le`, fully proven incl. the degeneracy⟺det bridge), `PencilTBound`/`PencilTBound`/
+> `PencilTBound` (the `|T|` bound `normT_bucket_bound`), `PerAnchorBound`/`PerAnchorBound` (counting identity `card_agree_le`),
+> `PerAnchorBound` (`c0_le` + the capstone). **The reduction backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal`
+> is LANDED** (`ProfileReduction.isotropySeparates_of_zProfileSeparates` + `reachesRigidOrCameron_viaIsotropySeparates_wittFree`,
 > both axiom-clean). **NEXT = the matching trick (increments 4–5) + the layered remainder** to general seal — see §3a.1 below.
-> Read plan §13 (all-DONE) + [[project_witt_free_bridge_lead_2026-06-20]] (tail) + `ScratchC0Final.lean`.
+> Read plan §13 (all-DONE) + [[project_witt_free_bridge_lead_2026-06-20]] (tail) + `PerAnchorBound.lean`.
 
 ---
 
@@ -116,19 +116,19 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 ### 3a. The research core — `hSmallAutThin` / the `s(C)` certificate (node 4)
 
 > **★★★ 3a.1 — THE LAYERED REMAINDER (2026-06-25, authoritative "what's left" from increment-3-done to general seal mod
-> citations).** Increment 3 (per-anchor `c₀ ≤ ¾`) is CLOSED (capstone `ScratchC0Final.c0_le_threequarters`, axiom-clean).
+> citations).** Increment 3 (per-anchor `c₀ ≤ ¾`) is CLOSED (capstone `PerAnchorBound.c0_le_threequarters`, axiom-clean).
 > The remaining work, by layer (★=open, ✓=landed):
 > - **Layer A — finish discharging `ZProfileSeparates` for affine-polar (the live frontier = increment 5).**
->   - ✓ **Increment 4 — FULLY DONE (cleanup CLOSED), axiom-clean** (`ScratchIncr4`/`b`/`c`/`d`).
+>   - ✓ **Increment 4 — FULLY DONE (cleanup CLOSED), axiom-clean** (`BadAnchorCount`/`b`/`c`/`d`).
 >     Anchor-averaging backbone `fail_count_split`/`matching_F_bound` (`F ≤ c·|V| + |V|·β_full`). **Input `c`:**
 >     `good_anchor_fail_le_const` (good anchor ⟹ `#{¬sep} ≤ 15/16·|V|`). **Bad-anchor `β`:** `pencilDetPoly` CONSTRUCTED +
 >     `badHgood_count_le`; **B-iii** `pencilDetPoly_totalDegree_le ≤2d` + **B-ii** `beta_count_closed` (`β·|K| ≤ 2d·|V|+2·|K|`) +
 >     **C-corr** `beta_full_count_closed` (full good-anchor predicate incl. `Q(t₀−u),Q(t₀−v)≠0`, kills bridge corr:
 >     `β_full·|K| ≤ (2d+4)·|V|+2·|K| = O(d/q)`). **C-basis** `exists_orthoAnisotropic_basis`+`associated_separatingLeft_of_polarRad`
->     (bridge's `hv/hw`). **NV** `ScratchIncr4d.exists_hgood` (14 lemmas: `hgood` non-vacuity, for `u≠v`/nondeg `Q`/`finrank≥2`/
+>     (bridge's `hv/hw`). **NV** `GoodAnchorNonvacuity.exists_hgood` (14 lemmas: `hgood` non-vacuity, for `u≠v`/nondeg `Q`/`finrank≥2`/
 >     `|K|≥7`). So `c̄₀ = c/|V|+β_full/|V| ≤ 15/16 + O(d/q) < 1`, **β unconditional** modulo family props. No carried existence
 >     hypotheses remain in inc-4.
->   - ✅✅✅ **Increment 5 — ASSEMBLED END-TO-END + q=p SEAL REACHED (2026-06-27, `ScratchIncr5.lean`, 8 decls axiom-clean,
+>   - ✅✅✅ **Increment 5 — ASSEMBLED END-TO-END + q=p SEAL REACHED (2026-06-27, `AffinePolarSeal.lean`, 8 decls axiom-clean,
 >     NOT in build).** The matching assembly closes affine-polar `VO^ε` (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron`
 >     disjunction modulo `{G3}`, Witt-free** — capstone **`reachesRigidOrCameron_affinePolar`**. Pieces: spine
 >     (`exists_pow_matching_lt`/`_le` [ℕ-smallness + explicit log `m`-bound], `exists_separating_base_of_split` [matching
@@ -142,7 +142,7 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     quasipoly** (optimal O(1)/frame = structural Skresanov, separate harder track; worth it for true polynomial IF canonizer
 >     charges `n^{|T|}` — architecture Q to spike). Detail = plan §13 SESSION-3 handoff. *(Below = the build history.)*
 >     **MAIN CARE (field/seam typing) ✅ RESOLVED 2026-06-26 — the
->     lift-first is DONE** (concern #4: `ScratchFieldGen`/`ScratchFieldGenAdapter`/`ScratchBridgeK`/`ScratchLemmaAK`/`ScratchBridgeAllK`,
+>     lift-first is DONE** (concern #4: `FieldGeneric`/`FieldGeneric`/`FieldGeneric`/`IsotropicIncidenceCountK`/`ObservableCountBridgeK`,
 >     all axiom-clean), so increment 5 wires over **abstract `K`** with the K-named lemmas (`jointIsoCountK_ne_of_chiSep_pair` →
 >     `zProfileSeparatesK_of_zSep` → `isotropySeparatesK_of_zProfileSeparatesK` → `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`
 >     for q=p). Plus the **decoupled #1 corank tightening ✅ DONE 2026-06-26** (`q≳d²`→`q≳const`; capstone
@@ -150,21 +150,21 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     small-q "Route 0" ✅ DONE 2026-06-26** (`ScratchTBoundCorank2.c0_le_threequarters_corank2`, threshold `q≥256→q≥16`; adds hyps
 >     `4≤d`/`hab`/`hQnd`/`Q(t₀−u)≠0`). Increment 5 calls the `_corank`/`_corank2` capstone. Full layout: plan §13 "INCREMENT 5 —
 >     WHAT'S EXPECTED" + top SESSION-2 handoff.
->   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ScratchBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
+>   - ✓ **Observable↔count bridge — CLOSED END-TO-END 2026-06-26** (`ObservableCountBridge`/`A`/`B`/`C`/**`D`**/`Z`, all axiom-clean):
 >     `c0_le_threequarters` is in `χ(det G₂)`-agreement; `ZProfileSeparates` is in the joint counts `Z_u(S)`. Chain: (config-nondeg
 >     χ-separating base) →[`pairCount_ne_of_chiSep_field` (**B1b**, ℂ) + the per-pair closed form `jointIsoCount_pair_closed_corr0`
 >     (**B1a**: `Z_u·p³ = |V| + χ(I_u)·K·(p[Q w₀=0]−1)`)]→ (`Z`-separating base) →[`zProfileSeparates_of_zSep`]→ `ZProfileSeparates`,
 >     packaged as the per-pair capstone **`jointIsoCount_ne_of_chiSep_pair`**. **B1-deg DISSOLVED** (config-degenerate locus density
->     `O(1/√q)`, folds into the increment-4 matching density). **All B1a wraps LANDED** — (i)`ScratchBridgeB` + (ii)`ScratchBridgeC` +
->     **(iii) `ScratchBridgeD.chi_configDet_eq_chi_pairForm`** (`χ(D)=χ(I_w)`; `½·polar` factor + change-of-basis both enter as squares
+>     `O(1/√q)`, folds into the increment-4 matching density). **All B1a wraps LANDED** — (i)`ObservableCountBridge` + (ii)`ObservableCountBridge` +
+>     **(iii) `ObservableCountBridge.chi_configDet_eq_chi_pairForm`** (`χ(D)=χ(I_w)`; `½·polar` factor + change-of-basis both enter as squares
 >     killed by `χ`) + the ℂ assembly. (`hK : gaussSum²·∑ψ(Q)≠0` was carried; **now DISCHARGED 2026-06-27** — `GaussCount.gaussSum_sq_ne_zero`
 >     + `sum_addChar_quadForm_ne_zero`, removed from both bridge capstones, axiom-clean.) ★ **FINDING:** the `corr`
 >     term ([both config-diffs isotropic], codim-2, `O(1/q²)`) ⟹ increment-4 good-pair predicate gains `corr=0` → `{hgood ∧ hnz ∧ corr=0}`.
 >     NO Weil, NO `R'→ℕ` descent (worked over ℂ), NOT a hidden wall. (Plan §13 BRIDGE block; prime-field model `q=p`.)
 >   - ✓ **Field generalization (concern #4) — DONE 2026-06-26 (the analytic + bridge lift).** `c0_le_threequarters` was already
->     abstract `[Field K]`; the rest (`ScratchCrux`/`ZProfileSeparates`/`IsotropySeparatesAtBase` + the bridge) is now lifted to
->     **abstract `[Field K][Fintype K]`** V-indexed (`ScratchFieldGen`+`ScratchLemmaAK`+`ScratchBridgeAllK`+`ScratchBridgeK`), with
->     the q=p adapter `ScratchFieldGenAdapter` connecting to the in-build seal capstone. GaussCount was already abstract ⟹ the lift
+>     abstract `[Field K]`; the rest (`ProfileReduction`/`ZProfileSeparates`/`IsotropySeparatesAtBase` + the bridge) is now lifted to
+>     **abstract `[Field K][Fintype K]`** V-indexed (`FieldGeneric`+`IsotropicIncidenceCountK`+`ObservableCountBridgeK`+`FieldGeneric`), with
+>     the q=p adapter `FieldGeneric` connecting to the in-build seal capstone. GaussCount was already abstract ⟹ the lift
 >     was mechanical. **Remaining:** the q=pᵉ SCHEME seam (`efield` transport, Layer D — separate). The **small-q tail is now
 >     ✅✅✅ COMPLETE (2026-06-27, Route 2)** — see "▶ SMALL-Q TAIL" below.
 >   - ✓✓✓ **Small-q tail — DONE 2026-06-27 (Route 2 tail), all axiom-clean, NOT in build.sh.** Removes the `q≥16`/`q≥256` threshold
@@ -175,8 +175,8 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 >     Two de-risk findings: `line_regroup` (ℤ-validated, `Probe_Route2DegenerateLines`) correct but **unused** for the bound;
 >     **tight `zu` NOT needed** (loose `zeroCount_sq_le` suffices, `n≥q⁴` dominates `√(nq)`). Caveat: `δ=1/(4q²)` loose (probe
 >     `Probe_Route2ExactSmallQ`: true `c₀≤0.556`) ⟹ only affects inc-5 matching base-size constant (still poly), tightenable.
->     Good-anchor hyps `hab`/`hQu` supplied by strengthened `ScratchIncr4d.exists_hgood`. Full = plan §13 "ROUTE 2 (SCOPE)" BUILD STATUS box.
-> - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ScratchCrux) +
+>     Good-anchor hyps `hab`/`hQu` supplied by strengthened `GoodAnchorNonvacuity.exists_hgood`. Full = plan §13 "ROUTE 2 (SCOPE)" BUILD STATUS box.
+> - **Layer B — `ZProfileSeparates → seal`: ✓ LANDED.** `isotropySeparates_of_zProfileSeparates` (ProfileReduction) +
 >   `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248), both axiom-clean (no Witt, no `hSmallAutThin`). ⟹ once
 >   Layer A lands, **affine-polar `VO^ε` is sealed modulo `{G3}` + the seam.**
 > - **Layer C — other forms-graph families (★, spikes done 2026-06-26).** Pair route is generic in a *quadratic* `Q` (covers
@@ -199,10 +199,10 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > - **Layer E — carried hypotheses (Lean-carried, not new math): `hImprim`** (block tower built; collapses to same core) +
 >   **`SchurianScheme`** (model assumption `orbitalScheme H`, not discharged).
 > - **Layer F — PORT (mechanical, no math):** ALL scratch modules → `build.sh`+`lakefile`+`PublicTheoremIndex.md`. Inventory:
->   increment-3 8 + `ScratchCrux`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*`; **#1 corank** (`ScratchPencilCorank`/`Bridge`/`Regroup`/
->   `TBoundCorank`); **field-gen #4** (`ScratchFieldGen`/`FieldGenAdapter`/`BridgeK`/`LemmaAK`/`BridgeAllK`); **increment-4**
->   (`ScratchIncr4`/`b`/`c`/`d`); **Route 0** (`ScratchPencilCorank2`/`TBoundCorank2`); **Route 2 tail** (`ScratchCountTight`/
->   `ScratchRoute2Arith`/`ScratchRoute2`); **increment 5** (`ScratchIncr5`, 8 decls incl. `reachesRigidOrCameron_affinePolar`);
+>   increment-3 8 + `ProfileReduction`/`Matching`/`PairSep`/`LemmaA-B`/`BM3*`; **#1 corank** (`ScratchPencilCorank`/`Bridge`/`Regroup`/
+>   `TBoundCorank`); **field-gen #4** (`FieldGeneric`/`FieldGenAdapter`/`BridgeK`/`LemmaAK`/`BridgeAllK`); **increment-4**
+>   (`BadAnchorCount`/`b`/`c`/`d`); **Route 0** (`ScratchPencilCorank2`/`TBoundCorank2`); **Route 2 tail** (`ScratchCountTight`/
+>   `ScratchRoute2Arith`/`ScratchRoute2`); **increment 5** (`AffinePolarSeal`, 8 decls incl. `reachesRigidOrCameron_affinePolar`);
 >   **hK cleanup** (2 new lemmas now in `GaussCount` — `gaussSum_sq_ne_zero`/`sum_addChar_quadForm_ne_zero`; `GaussCount` is a
 >   leaf so this is a low-cost port); spikes (`ScratchSeam`). Same "only remaining = PORT" status as the sealed `VO⁻₄(3)` modules.
 > - **Residual citations at the endpoint:** `{G3` (Babai/CFSG, allowed to stay)` + Skresanov + Liebeck + Ponomarenko-cyclotomic-2-sep}`.
@@ -308,8 +308,8 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   `IsotropySeparatesAtBase Q T₉` **directly** (Lemma A = "isotropic-incidence count = explicit Gram-function on
   nondeg configs"; Lemma B = "counts recover `u`"), **superseding the `QProfileSeparatesAtBase` framing** of the bullet
   below. Uses the **size-9 base `T₉`** (avoids degenerate cases). Landed axiom-clean (WIP scratch, NOT in build):
-  **A-M1+A-M2** (`ChainDescent/ScratchLemmaA.lean`: cone-count → homogeneous level-set, for invertible config Gram) and
-  **B-M1+B-M2-bridge** (`ChainDescent/ScratchLemmaB.lean`: antecedent → incidence-agreement, + `y=0` correction). The
+  **A-M1+A-M2** (`ChainDescent/IsotropicIncidenceCount.lean`: cone-count → homogeneous level-set, for invertible config Gram) and
+  **B-M1+B-M2-bridge** (`ChainDescent/ProfileReduction.lean`: antecedent → incidence-agreement, + `y=0` correction). The
   two novel reductions are done; **NEXT = A-M3** (`card_quadForm_eq` on subspace `Uᗮ`) → A-M4 → B-M3 → ASM. Authoritative:
   plan [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md) §1 (decl map) + §11 (roadmap); full build records in the plan's archive.
 - **★★★ CURRENT (2026-06-18 HANDOFF) — reformulation + M0–M3 LANDED; the bullets above are landed history.** The

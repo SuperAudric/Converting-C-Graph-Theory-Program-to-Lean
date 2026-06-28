@@ -112,26 +112,26 @@ close it — is set out in
 > **`VO⁻₄(3)` is SEALED** — `ScratchBM3Glue.vo4minus_seal` (axiom-clean `[propext, Classical.choice, Quot.sound]`) proves
 > the rigid-or-Cameron disjunction for the minus-form residue modulo cited `{G3}`, carrying **NO `hSmallAutThin`, NO Witt**
 > (Witt off the critical path via `…viaIsotropySeparates_wittFree`). Built from `IsotropySeparatesAtBase Qbun T₉` (Lemma
-> A + Lemma B + a `Nat`-bridge + a kernel `decide`); four scratch modules (`ScratchLemmaA/B`, `ScratchBM3Bridge/Glue`)
+> A + Lemma B + a `Nat`-bridge + a kernel `decide`); four scratch modules (Lemma A + Lemma B (now `IsotropicIncidenceCount` + `ProfileReduction`), `ScratchBM3Bridge/Glue`)
 > verified but **not yet ported** into the build (port = the only remaining step for the *instance*). **The live work is
 > now the GENERALIZATION** from this single instance to the full schurian residue (`hSmallAutThin` for all small-Aut
 > non-geometric schurian rank-3 families) — the forward roadmap is plan §11. **AUDIT-S done** (per-family target =
 > `IsotropySeparatesAtBase Q_fam T_fam`; the genuine new obligation is the cited classification *seam*).
 > **§11's scoping is now DONE** (AUDIT-S/A/W, **Route 1 chosen**, **GATE passed**); the live work is **plan §13**:
-> the reduction chain (**D1 + D2-bridge**) is **landed in `ChainDescent/ScratchCrux.lean`** (axiom-clean), collapsing the
+> the reduction chain (**D1 + D2-bridge**) is **landed in `ChainDescent/ProfileReduction.lean`** (axiom-clean), collapsing the
 > whole generalization to a **single open predicate `ZProfileSeparates`**, whose core = **D3d = uniform-`q` bounded
 > WL-dimension of the affine forms-graphs**. **D3d is now WEIL-FREE** (exact-vs-Weil resolved): the observable is the
 > **pair** count `Z_u({t,t'})` (not the singleton — a verified correction), its invariant `χ(det G₂)` is `χ` of a quadratic,
 > and the per-pair sum factors into additive Gauss sums (`pairCharSum_factor_gen`).
 > **★★★ INCREMENT 3 CLOSED (2026-06-25, all axiom-clean, full `lake build` green, NOT in build.sh):** the pair route's
-> per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE — capstone **`ScratchC0Final.c0_le_threequarters`** (good anchor + `q≥q₀`/`d≥3` ⟹
-> `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`), built across 8 new scratch modules on top of `ScratchPairSep` (24 lemmas). The reduction
-> backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal` is LANDED (`ScratchCrux` + `…viaIsotropySeparates_wittFree`).
-> **SINCE THEN (2026-06-26):** the **bridge** (`χ(det G₂)`↔`Z_u(S)`) is CLOSED END-TO-END (`ScratchBridge`/`A`/`B`/`C`/`D`/`Z`,
+> per-anchor `c₀ ≤ ¾ < 1` bound is COMPLETE — capstone **`PerAnchorBound.c0_le_threequarters`** (good anchor + `q≥q₀`/`d≥3` ⟹
+> `NS = #{t:χ(I_u)=χ(I_v)} ≤ ¾·|V|`), built across 8 new scratch modules on top of `PairForm` (24 lemmas). The reduction
+> backbone `ZProfileSeparates → IsotropySeparatesAtBase → seal` is LANDED (`ProfileReduction` + `…viaIsotropySeparates_wittFree`).
+> **SINCE THEN (2026-06-26):** the **bridge** (`χ(det G₂)`↔`Z_u(S)`) is CLOSED END-TO-END (`ObservableCountBridge`/`A`/`B`/`C`/`D`/`Z`,
 > all B1a wraps + the ℂ per-pair capstone `jointIsoCount_ne_of_chiSep_pair`); **the ENTIRE increment-4 cleanup is now CLOSED**
-> (axiom-clean, `ScratchIncr4`/`b`/`c`/`d`) — input `c` (`good_anchor_fail_le_const`: `#{¬sep}≤15/16·|V|`), bad-anchor `β`
+> (axiom-clean, `BadAnchorCount`/`b`/`c`/`d`) — input `c` (`good_anchor_fail_le_const`: `#{¬sep}≤15/16·|V|`), bad-anchor `β`
 > (B-iii `pencilDetPoly_totalDegree_le≤2d` + B-ii `beta_count_closed` + C-corr `beta_full_count_closed`: `β_full·|K|≤(2d+4)|V|+2|K|`),
-> C-basis (bridge's `hv/hw`), and **NV** (`ScratchIncr4d.exists_hgood`, 14 lemmas — `hgood` non-vacuity for nondeg `Q`/`finrank≥2`/
+> C-basis (bridge's `hv/hw`), and **NV** (`GoodAnchorNonvacuity.exists_hgood`, 14 lemmas — `hgood` non-vacuity for nondeg `Q`/`finrank≥2`/
 > `|K|≥7`). So `c̄₀<1` and **β is unconditional** modulo family props; no carried existence hypotheses remain in inc-4. The
 > **seam** is SPIKED (`ScratchSeam`, modulo mechanical `htransport`); **char-2+Suzuki** spiked (deferred). **FRONTIER = INCREMENT
 > 5** (the matching assembly + bridge wiring); the field/seam typing decision is **RESOLVED** (concern #4 lifted bridge+Crux
@@ -142,7 +142,7 @@ close it — is set out in
 > `ScratchRoute2Arith`, `ScratchRoute2`). Coverage: odd `q∈{3,5,7,9,11,13}` → route2, `q≥16` → corank2, `q∈{4,8,16}` char-2 =
 > separate Arf track. **hK cleanup ✅DONE (2026-06-27, axiom-clean)** — the bridge's carried `hK : gaussSum²·∑ψ(Q)≠0` is
 > discharged internally (`GaussCount.gaussSum_sq_ne_zero` + `sum_addChar_quadForm_ne_zero`). **★★★ INCREMENT 5 ASSEMBLED
-> END-TO-END + q=p SEAL REACHED (2026-06-27, `ScratchIncr5.lean`, 8 decls axiom-clean, NOT in build):** the matching assembly
+> END-TO-END + q=p SEAL REACHED (2026-06-27, `AffinePolarSeal.lean`, 8 decls axiom-clean, NOT in build):** the matching assembly
 > closes the affine-polar `VO^ε` residue (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron` disjunction modulo `{G3}`,
 > Witt-free, no `hSmallAutThin`** — capstone `reachesRigidOrCameron_affinePolar`. **NON-VACUITY THREAD ✅DONE (2026-06-27):**
 > the seal now **carries** `T.card ≤ 128·(Nat.log 2 ((p^d)²) + 1) = O(d log p)` (log-free block keystone

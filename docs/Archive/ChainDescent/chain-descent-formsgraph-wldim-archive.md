@@ -28,8 +28,8 @@
 > route-1 step-4 inversion is being built via the **Lemma A / Lemma B split** (§10.6): Lemma A = "isotropic-incidence
 > count = explicit Gram-function (nondeg configs)", Lemma B = "counts recover `u`", composing to prove
 > `IsotropySeparatesAtBase Q T₉` directly (the live route — supersedes the `QProfileSeparatesAtBase` framing). **Landed,
-> axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`ScratchLemmaA.lean`); B-M1, B-M2-bridge
-> (`ScratchLemmaB.lean`). **★ A-M3 ✅ COMPLETE via ROUTE B (2026-06-21, all axiom-clean):** `levelset_fourier` →
+> axiom-clean (WIP scratch, NOT in build — see §10.5):** A-M1, A-M2 (`IsotropicIncidenceCount.lean`); B-M1, B-M2-bridge
+> (`ProfileReduction.lean`). **★ A-M3 ✅ COMPLETE via ROUTE B (2026-06-21, all axiom-clean):** `levelset_fourier` →
 > `levelset_fourier_prod` → `levelset_fourier_split` (D1 bulk) → `s0_boundary_collapse` (`s=0` → `q^d`) → **`levelset_count_eq`**
 > (the assembled closed form: `count·q^{m+1} = |V| + ∑_{s≠0}…` modulo the two Gauss sums). **★ A-M4a ALL GAPS 1–5 DONE
 > (2026-06-21, axiom-clean) — config side ASSEMBLED:** `configForm`/`polar_configForm_single`, `configForm_nondegenerate`,
@@ -40,7 +40,7 @@
 > `Qbun = x₀x₁+x₂²+x₃²` at the size-9 base `T₉`, modulo cited `{G3}` — carrying NO `hSmallAutThin`, NO Witt. Chain:
 > `isoSep : IsotropySeparatesAtBase Qbun T₉` (B-M1 `incidence_agree_V` → restricted counts agree → bridge
 > `restricted_bridge` → decided `sigF_injective` over `Finset (Fin 81)`, ~20s kernel `decide`, no `native_decide`) →
-> `reachesRigidOrCameron_viaIsotropySeparates_wittFree`. All 4 scratch modules (ScratchLemmaA/B + ScratchBM3Bridge/Glue)
+> `reachesRigidOrCameron_viaIsotropySeparates_wittFree`. All 4 scratch modules (IsotropicIncidenceCount/B + ScratchBM3Bridge/Glue)
 > axiom-clean `[propext, Classical.choice, Quot.sound]` (verified `lake env lean` + `lake build` oleans). **ONLY remaining
 > step = PORT** the 4 scratch modules into `build.sh`/`lakefile.toml` + regen `PublicTheoremIndex.md` + green build (no new
 > math). See §10.13 completion block. Tier-2 (M5 all q/d, families d/e/f, Skresanov, char-2) unchanged. The A-side
@@ -804,7 +804,7 @@ The step-4 inversion splits into two pieces; the analytic crux is bounded and **
 fully toolkit-supported, with the degenerate cases eliminated. No fundamental obstruction was found. Combined with this
 session's Witt removal, discharging Lemma A + B seals `VO⁻₄(3)` modulo `{G3}` alone.
 
-### 10.7 Lemma A — IMPLEMENTATION STARTED (2026-06-20, `ChainDescent/ScratchLemmaA.lean`, all axiom-clean)
+### 10.7 Lemma A — IMPLEMENTATION STARTED (2026-06-20, `ChainDescent/IsotropicIncidenceCount.lean`, all axiom-clean)
 The plan's steps A1–A6 are landing bottom-up (WIP scratch module, `lake env lean`-verified, not yet in the build):
 - **A1 `isoIncidence_eq_linearConds`** ✓ — `Q w = 0 ⟹ (Q (w−a j)=0 ↔ polar Q w (a j) = Q (a j))`, so the count is
   over affine-linear conditions. (Via `polar_eq_of_sub`.)
@@ -852,7 +852,7 @@ axiom-clean. The remaining A2/A5/A6 are linear-algebra/basis lifts, not new math
 
 ### 10.8 FULL MILESTONE PLAN for step 4 (Lemma A + Lemma B + assembly), beginning to end (2026-06-20)
 > **▶ FRESH READER — START HERE.** Landed & axiom-clean (WIP scratch, §10.5): the WHOLE A-side — Lemma A (A-M1…A-M4a,
-> all 5 gaps, `ScratchLemmaA.lean`, 17 decls) + B-M1 + B-M2-bridge (`ScratchLemmaB.lean`). **NEXT = B-M3** — the last
+> all 5 gaps, `IsotropicIncidenceCount.lean`, 17 decls) + B-M1 + B-M2-bridge (`ProfileReduction.lean`). **NEXT = B-M3** — the last
 > step; **its full handoff (gaps, tools, 3 spike-ranked approaches) is §10.13.** Then ASM. The capstone needs NO Witt
 > (§10.5). The A-M3/A-M4 milestone detail below is now build-history; the live frontier is §10.13. Read §10.6
 > (architecture) + §10.3 (probe facts) for background.
@@ -871,9 +871,9 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
 - Coarse counts (`Q=0` vs `Q≠0`) suffice (M0); fine→coarse is the landed `coarse_eq_sum_iso`.
 
 #### Lemma A — the isotropic-incidence count = explicit Gram-function (nondegenerate configs only)
-- **A-M1 ✅ DONE** (`ScratchLemmaA.lean`, axiom-clean): the homogeneous reduction `reduction_to_levelset` (A1 linear
+- **A-M1 ✅ DONE** (`IsotropicIncidenceCount.lean`, axiom-clean): the homogeneous reduction `reduction_to_levelset` (A1 linear
   conditions + A3 coset + A4 linear-term-vanish) — count `= #{x ∈ Uᗮ : Q x = −Q w₀}` given a spanning `w₀ = ∑ cₖ aₖ`.
-- **A-M2 ✅ DONE** (`ScratchLemmaA.lean`, axiom-clean): `spanning_w0_exists` (hypothesis `IsUnit G.det` for the Gram
+- **A-M2 ✅ DONE** (`IsotropicIncidenceCount.lean`, axiom-clean): `spanning_w0_exists` (hypothesis `IsUnit G.det` for the Gram
   matrix `G i j = polar Q (a i) (a j)`; witness `c := (Q∘a) ᵥ* G⁻¹`, via `Matrix.vecMul_vecMul` /
   `nonsing_inv_mul` / `vecMul_one`) + **`reduction_to_levelset_nondeg`** — combines A-M1∘A-M2: for invertible config
   Gram, the count is unconditionally the homogeneous level-set `#{x ∈ Uᗮ : Q x = − Q w₀}` (`w₀ = ∑ cₖ aₖ` explicit).
@@ -899,7 +899,7 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
   explicit functions of `θ(u)`, so this is exactly the input B-M3 wants.
 
 #### Lemma B — the counts recover `u`
-- **B-M1 + B-M2 bridge ✅ DONE** (`ChainDescent/ScratchLemmaB.lean`, all axiom-clean): plumbing antecedent → `V`-side
+- **B-M1 + B-M2 bridge ✅ DONE** (`ChainDescent/ProfileReduction.lean`, all axiom-clean): plumbing antecedent → `V`-side
   incidence agreement, plus the `y=0` correction to Lemma A's full count.
   - `coarse_incidence_agree` — the core: from the fine isotropy-count antecedent, the isotropic-incidence count
     `Z̃_w(S') = #{z≠w : Q(z̄−w̄)=0 ∧ ∀t∈S', Q(z̄−t̄)=0}` agrees (`u`↔`u'`) for `S'⊆T`. **Fiberwise partition by the
@@ -909,7 +909,7 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
     Q y=0 ∧ ∀t∈S', Q(y−(t̄−w̄))=0}` over `V`, with config differences `aₜ = t̄−w̄`.
   - `incidence_agree_V` — capstone: the `V`-side count agrees `u`↔`u'`. This is Lemma A's count **minus the `y=0`
     term** (the `z≠u` correction), in Lemma-A coordinates.
-  - **B-M2 bridge ✅ DONE** (`ScratchLemmaB.lean`, axiom-clean): `cone_count_zero_split` (the `y=0` correction —
+  - **B-M2 bridge ✅ DONE** (`ProfileReduction.lean`, axiom-clean): `cone_count_zero_split` (the `y=0` correction —
     Lemma A's full count `= ` the `y≠0` restricted count `+ [∀t∈S', Q aₜ=0]`, the Gram-determined indicator) +
     **`fullcount_agree_modulo_corr`** (capstone) — from the antecedent, the FULL Lemma-A-shaped counts agree modulo
     the correction: `fullcount_u(S') + corr_{u'} = fullcount_{u'}(S') + corr_u`. Ready to consume Lemma A's
@@ -932,7 +932,7 @@ session; **batch a milestone's lemmas, then ONE build + index + doc cycle at the
 #### Assembly
 - **ASM** — instantiate `Q = x₀x₁+x₂²+x₃²` over `ZMod 3`, base `T₉`, `T₉.card ≤ 9`; compose B-M3 ⟹
   `IsotropySeparatesAtBase Q T₉`; feed `reachesRigidOrCameron_viaIsotropySeparates_wittFree` ⟹ **sealed `VO⁻₄(3)`
-  mod `{G3}`.** Then port **both `ScratchLemmaA.lean` + `ScratchLemmaB.lean`** → a real module (likely a new
+  mod `{G3}`.** Then port **both `IsotropicIncidenceCount.lean` + `ProfileReduction.lean`** → a real module (likely a new
   `ChainDescent/FormsGraphLemmaA.lean` + integrate into `FormsGraphConcrete.lean`; register in `build.sh`/`lakefile`),
   regenerate `PublicTheoremIndex.md`, doc cycle.
 
@@ -1009,7 +1009,7 @@ if B-M3's injectivity turns out to need concrete integers — likely avoidable).
   on `QR`, with the gap-5 collapse `∏ᵢ χ(QR vᵢ) = χ(discr QR)` (below).
 
 **Gaps + tools (all located, Mathlib-present):**
-1. **Build `QR` + Gram = `G`. ✅ DONE (2026-06-21, `ScratchLemmaA.lean`, axiom-clean):** `configForm Q a := Q.comp (Fintype.linearCombination (ZMod p) a)`;
+1. **Build `QR` + Gram = `G`. ✅ DONE (2026-06-21, `IsotropicIncidenceCount.lean`, axiom-clean):** `configForm Q a := Q.comp (Fintype.linearCombination (ZMod p) a)`;
    `configForm_apply` (`QR ρ = Q(∑ⱼρⱼaⱼ)`); `polar_configForm` (transports along `L`); **`polar_configForm_single`** (`polar QR eᵢ eⱼ = polar Q aᵢ aⱼ = Gᵢⱼ`).
    `L = Fintype.linearCombination`, `L (Pi.single i 1) = aᵢ` (`linComb_single`).
 2. **`QR` nondegenerate ⟸ `IsUnit G.det`. ✅ DONE (2026-06-21, `configForm_nondegenerate`, axiom-clean).** Cleaner than the
@@ -1073,11 +1073,11 @@ count `= F(D, c_lev)`.
    per-coordinate proof, §10.3(F)) — gates the endpoint.
 4. **Recover `θ(u)` ⟹ `u = u'`** via a `coords_determine` generalization to the polar-row `θ`.
 Landed B-side inputs ready for B-M3: `incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`
-(`ScratchLemmaB.lean`).
+(`ProfileReduction.lean`).
 
 ### 10.13 B-M3 HANDOFF — counts recover `u` (the last step to the `VO⁻₄(3)` instance seal). Spike-informed, 2026-06-21.
-> **▶ FRESH READER START HERE for B-M3.** A-side (Lemma A / A-M4a) is COMPLETE and axiom-clean (`ScratchLemmaA.lean`,
-> §10.11/§10.12). B-side B-M1 + B-M2-bridge landed (`ScratchLemmaB.lean`). B-M3 is the final piece: prove
+> **▶ FRESH READER START HERE for B-M3.** A-side (Lemma A / A-M4a) is COMPLETE and axiom-clean (`IsotropicIncidenceCount.lean`,
+> §10.11/§10.12). B-side B-M1 + B-M2-bridge landed (`ProfileReduction.lean`). B-M3 is the final piece: prove
 > `IsotropySeparatesAtBase Q T₉`, which (via the Witt-free capstone `reachesRigidOrCameron_viaIsotropySeparates_wittFree`)
 > seals `VO⁻₄(3)` mod `{G3}`.
 
@@ -1132,8 +1132,8 @@ config Gram `Gᵢⱼ=polar(tᵢ−u,tⱼ−u)`, `c_lev=−Q(w₀)` with `G·c=(Q
 Check (A) `restricted` single-valued per `(m,detG,c_lev,corr)`; (B) greedy-minimal separating set over all `S'⊆T₉`;
 (C) through-`t₀` (`|S'|≤3`) signature vs `Q(u−t₀)` cross-coord collision.
 
-**Landed inputs ready for B-M3** (`ScratchLemmaB.lean`, all axiom-clean): `coarse_incidence_agree`, `incidence_to_V`,
-`incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`. A-side: all of `ScratchLemmaA.lean`
+**Landed inputs ready for B-M3** (`ProfileReduction.lean`, all axiom-clean): `coarse_incidence_agree`, `incidence_to_V`,
+`incidence_agree_V`, `cone_count_zero_split`, `fullcount_agree_modulo_corr`. A-side: all of `IsotropicIncidenceCount.lean`
 (`configGaussSum_eq_det` is the A-M4a endpoint for Approach 2).
 
 **★★★ B-M3 + WIRING + SEAL COMPLETE (2026-06-21, all axiom-clean `[propext, Classical.choice, Quot.sound]`).** Approach 1
@@ -1146,7 +1146,7 @@ executed end-to-end. The `VO⁻₄(3)` residue is SEALED modulo cited `{G3}`. Tw
     pure-`Nat`-predicate count `restrictedF` over `Finset (Fin 81)` at the digit-codes (transport along the *computable*
     `encV = finFunctionFinEquiv`, NOT the opaque `affineE`; `Finset.card_nbij'`).
   - **`sigF_injective`** — `Function.Injective sigF` by kernel `decide` (~20s, no `native_decide`), the 6-size-2 family.
-- **`ChainDescent/ScratchBM3Glue.lean`** (imports CascadeAffine + ScratchLemmaB + ScratchBM3Bridge):
+- **`ChainDescent/ScratchBM3Glue.lean`** (imports CascadeAffine + ProfileReduction + ScratchBM3Bridge):
   - `Bil`/`Qbun` (the bundled minus-form `x₀x₁+x₂²+x₃²` via `LinearMap.mk₂` → `toQuadraticMap`), `Qbun_apply`.
   - `Bv` (9 base vectors), `T₉ := univ.image (affineE ∘ Bv)`, `hcard9` (`|T₉|≤9`), `Sij_subset`.
   - `vcount_eq` (B-M1's incidence count = `restrictedF` at codes: `∀t∈{·,·}` unfolded, `Qbun→Qvo`,
@@ -1186,7 +1186,7 @@ combinatorial core is kernel-decidable at acceptable cost.
      6 chosen S' ⊆ T₉ agree) ⟹ (via bridge) `sig u = sig u'` ⟹ (decide) `u = u'`. The "agree on all S' ⟹ agree on the 6"
      step is trivial Finset wiring. **No `coords_determine` / no A-side / no `corr` needed** (restricted, not full count).
   4. **ASM:** instantiate `VO⁻₄(3)` (Q = x₀x₁+x₂²+x₃² on `Fin 4→ZMod 3`) + `T₉`, feed
-     `reachesRigidOrCameron_viaIsotropySeparates_wittFree`, port `ScratchLemmaB` + the spike's decide into a real module.
+     `reachesRigidOrCameron_viaIsotropySeparates_wittFree`, port `ProfileReduction` + the spike's decide into a real module.
   Approach 2 (Lemma-A-reduced decide via `configGaussSum_eq_det`) and the A-side stay as the **generalization (M5) /
   fallback** asset — not on the instance-seal critical path.
 
@@ -1230,12 +1230,12 @@ better *mental model* and is the natural choice *only if* the Witt track is bein
   step-4 attack is the Lemma A/B route below, which proves `IsotropySeparatesAtBase` directly).
 
 **WIP scratch (NOT in the build; verify each with `lake env lean ChainDescent/ScratchLemmaX.lean`; PORT at ASM):**
-- **`ChainDescent/ScratchLemmaA.lean`** — Lemma A (count = explicit Gram-function on nondeg configs). **A-M1+A-M2 done:**
+- **`ChainDescent/IsotropicIncidenceCount.lean`** — Lemma A (count = explicit Gram-function on nondeg configs). **A-M1+A-M2 done:**
   `isoIncidence_eq_linearConds` (A1), `map_add_of_polar_zero` (A4-core), `count_coset` (A3), `polar_w0_perp` (A4-link),
   `reduction_to_levelset` (A1∘A3∘A4: count = homogeneous level-set `#{x : (∀j, polar Q x (a j)=0) ∧ Q x = −Q w₀}`
   given a spanning `w₀=∑ cₖaₖ`), `spanning_w0_exists` (A-M2: `IsUnit (Gram).det ⟹ ∃ such w₀`),
   `reduction_to_levelset_nondeg` (the two combined, unconditional on nondeg Gram). **Open: A-M3, A-M4 (see §10.8).**
-- **`ChainDescent/ScratchLemmaB.lean`** — Lemma B (counts recover `u`). **B-M1 + B-M2 bridge done:**
+- **`ChainDescent/ProfileReduction.lean`** — Lemma B (counts recover `u`). **B-M1 + B-M2 bridge done:**
   `coarse_incidence_agree` (B-M1 core: fine antecedent ⟹ incidence-count agreement, fiberwise),
   `incidence_to_V` (transport+translate `Fin(p^d)`→`V`), `incidence_agree_V` (B-M1 capstone),
   `cone_count_zero_split` (the `y=0` correction), `fullcount_agree_modulo_corr` (B-M2 bridge capstone: full
@@ -1254,7 +1254,7 @@ better *mental model* and is the natural choice *only if* the Witt track is bein
 > re-walking. The live doc keeps the current state, the reusable-blocks list, and the forward roadmap.
 
 **The reduction chain, as it was built (all now in `build.sh`, axiom-clean):**
-`ScratchCrux` (D1 + D2-bridge) reduced the whole generalization to ONE predicate `ZProfileSeparates Q T` (= D3d =
+`ProfileReduction` (D1 + D2-bridge) reduced the whole generalization to ONE predicate `ZProfileSeparates Q T` (= D3d =
 forms-graph bounded WL-dim). D3d resolved **Weil-free**: the observable is the **pair** count `Z_u({t,t'})` (the
 SINGLETON `Z_u({t})` is binary — a verified correction; do not use it), its invariant `χ(det G₂)` is `χ` of a quadratic,
 and the per-pair character sum factors into additive Gauss sums (`pairCharSum_factor_gen`). Then: increment 3
@@ -1270,9 +1270,9 @@ and the per-pair character sum factors into additive Gauss sums (`pairCharSum_fa
   nondegenerate pencil member can only come from a genuine `(y,z)`-combination, so the good-anchor predicate collapses to
   `hgood ∧ Q(t₀−u)≠0 ∧ Q(t₀−v)≠0` (modulo the negligible `t₀ ∈ {u,v}`).
 - **The field/seam typing decision (concern #4) resolved lift-first** — lifting the bridge + reductions to abstract
-  `[Field K]` (`ScratchFieldGen*`/`ScratchBridgeAllK`/`ScratchLemmaAK`) was a mechanical typeclass swap (`ZMod p ↦ K`,
+  `[Field K]` (`FieldGeneric*`/`ObservableCountBridgeK`/`IsotropicIncidenceCountK`) was a mechanical typeclass swap (`ZMod p ↦ K`,
   `(p : R') ↦ (Fintype.card K : R')`) because the analytic content used no `ZMod p`-specific fact. `affineE` is the
-  single endpoint relabel (`ScratchFieldGenAdapter`). This is why q=pᵉ (Layer D) is a seam, not a re-proof.
+  single endpoint relabel (`FieldGeneric`). This is why q=pᵉ (Layer D) is a seam, not a re-proof.
 - **The matching's INDEPENDENT q-floor (the scope correction)** — `good_anchor_fail_le` folds the isotropic-shell counts
   `#{I_u=0}+#{I_v=0}` (each `~|V|/q`) INTO input `c` (not `β`), controlled only by the loose `zeroCountShift_card_le`
   (`q≥256`). So `c̄₀<1` holds only for `q ≳ 32d`. The small-q route-2 tail tightens `NS` but `fail` still pays the two

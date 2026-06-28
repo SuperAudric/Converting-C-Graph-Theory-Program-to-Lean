@@ -56,7 +56,7 @@ theorem concentration_bound2 {ι : Type*} {s : ℝ} (hs : 2 ≤ s) {c : ι → �
         (pow_le_pow_right₀ hs1 hrest)
     linarith
   · -- all corank = 1
-    push_neg at hbig
+    push Not at hbig
     have hsumeq : ∑ t ∈ T, s ^ (c t) = (T.card : ℝ) * s := by
       rw [Finset.sum_congr rfl (fun t ht => by
         have h1 := hbig t ht; have h2 := hlo t ht

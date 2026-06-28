@@ -17,33 +17,33 @@
 ## STATUS (read first)
 
 **THE q=p AFFINE-POLAR SEAL IS DONE AND PORTED (2026-06-27, axiom-clean `[propext, Classical.choice, Quot.sound]`, in
-`build.sh`).** Capstone **`ScratchIncr5.reachesRigidOrCameron_affinePolar`** (`PublicTheoremIndex.md` →
-`ChainDescent/ScratchIncr5.lean`): for an odd prime `p` and a nondegenerate quadratic form `Q` on `Fin d → ZMod p`
+`build.sh`).** Capstone **`AffinePolarSeal.reachesRigidOrCameron_affinePolar`** (`PublicTheoremIndex.md` →
+`ChainDescent/AffinePolarSeal.lean`): for an odd prime `p` and a nondegenerate quadratic form `Q` on `Fin d → ZMod p`
 (even `d ≥ 2`, `p ≥ 256`, `p ≳ 32d`), the affine-polar `VO^ε` residue **reaches the `reachesRigidOrCameron` disjunction
 modulo `{G3}`, Witt-free, no `hSmallAutThin`**, carrying an explicit base bound
 `T.card ≤ 128·(Nat.log 2 ((p^d)²) + 1) = O(d log p)` — a non-vacuous **quasipolynomial** WL-base for this slice. The
 27 forms-graph scratch modules are now in `build.sh` (serial full build ~98s; whole closure axiom-clean).
 
 **The chain — every step now in `build.sh`; full decl list = `PublicTheoremIndex.md`, design = §1 + §13:**
-`per-anchor c₀ ≤ ¾` (increment 3, `ScratchC0Final.c0_le_threequarters`) + `bad-anchor β = O(d/q)` (increment 4,
-`ScratchIncr4{,b,c,d}`) ⟹ `c̄₀ < 1` ⟹ a log-bounded **matching base** (increment 5, `ScratchMatching` +
-`ScratchIncr5.exists_pow_matching_block`) ⟹ `ZProfileSeparatesK` ⟹ `IsotropySeparatesAtBaseK` ⟹ the q=p seal. The
-observable↔count **bridge** (`χ(det G₂) ↔ Z_u(S)`, `ScratchBridge{A,B,C,D,AllK}` / `ScratchLemmaA{,K}`) is the analytic
-heart; the whole analytic chain is **field-generic** (`ScratchFieldGen*`), with `affineE` a single endpoint relabel.
+`per-anchor c₀ ≤ ¾` (increment 3, `PerAnchorBound.c0_le_threequarters`) + `bad-anchor β = O(d/q)` (increment 4,
+`BadAnchorCount{,b,c,d}`) ⟹ `c̄₀ < 1` ⟹ a log-bounded **matching base** (increment 5, `Matching` +
+`AffinePolarSeal.exists_pow_matching_block`) ⟹ `ZProfileSeparatesK` ⟹ `IsotropySeparatesAtBaseK` ⟹ the q=p seal. The
+observable↔count **bridge** (`χ(det G₂) ↔ Z_u(S)`, `ObservableCountBridge{A,B,C,D,AllK}` / `IsotropicIncidenceCount{,K}`) is the analytic
+heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `affineE` a single endpoint relabel.
 
 **★ REUSABLE BUILDING BLOCKS — the non-obvious assets a future contributor should know EXIST (not rebuild):**
-- **Schwartz–Zippel over a finite field** — `ScratchGoodAnchor.mvPoly_zeros_count_le` (`p ≠ 0 ⟹ #zeros ≤ totalDegree·|K|`).
-- **Abstract first-moment / matching lemma** — `ScratchMatching.exists_separating_base` (`|ι|·Fᵐ < |W|ᵐ ⟹ a separating
-  base`, pure cardinality, no probability), with the **log-free length bound** `ScratchIncr5.exists_pow_matching_block`.
-- **Coordinatization workhorse** — `ScratchIncr4c` turns linear-functional / quadratic-form data into `MvPolynomial`
+- **Schwartz–Zippel over a finite field** — `PencilTBound.mvPoly_zeros_count_le` (`p ≠ 0 ⟹ #zeros ≤ totalDegree·|K|`).
+- **Abstract first-moment / matching lemma** — `Matching.exists_separating_base` (`|ι|·Fᵐ < |W|ᵐ ⟹ a separating
+  base`, pure cardinality, no probability), with the **log-free length bound** `AffinePolarSeal.exists_pow_matching_block`.
+- **Coordinatization workhorse** — `Coordinatization` turns linear-functional / quadratic-form data into `MvPolynomial`
   evaluations (`coordPoly`, `gramQuadPoly`, `pencilDetPoly`) — what puts a pencil determinant under Schwartz–Zippel.
-- **χ-kills-squares** — `ScratchBridgeD.chi_configDet_eq_chi_pairForm`: the `½·polar` factor-2 and any change-of-basis
+- **χ-kills-squares** — `ObservableCountBridge.chi_configDet_eq_chi_pairForm`: the `½·polar` factor-2 and any change-of-basis
   `det` enter only as squares, so the quadratic character `χ` erases them (no "is this the standard basis?" obligation).
-- **Gauss-sum closed forms** — `ScratchLemmaA*`: `configGaussSum_eq_det` (config-Gram det ↔ Gauss sum) + `card_quadForm_eq`
+- **Gauss-sum closed forms** — `IsotropicIncidenceCount*`: `configGaussSum_eq_det` (config-Gram det ↔ Gauss sum) + `card_quadForm_eq`
   (isotropic count via an orthogonal anisotropic basis); plus `GaussCount.gaussSum_sq_ne_zero` / `sum_addChar_quadForm_ne_zero`.
-- **polarRad as a `Submodule`** + the **corank-uniform** proper-subspace bound `|radical|·q ≤ |V|` (`ScratchCorank`) —
+- **polarRad as a `Submodule`** + the **corank-uniform** proper-subspace bound `|radical|·q ≤ |V|` (`PencilTBound`) —
   avoids any corank case-split.
-- **Field-genericity** (`ScratchFieldGen*`) — the analytic content needs no `ZMod p`-specific fact; this makes q=pᵉ
+- **Field-genericity** (`FieldGeneric*`) — the analytic content needs no `ZMod p`-specific fact; this makes q=pᵉ
   (Layer D) and the other families a typeclass swap, not a re-proof.
 
 **WHAT'S LEFT (frontier, roughly priority order):**
@@ -51,7 +51,7 @@ heart; the whole analytic chain is **field-generic** (`ScratchFieldGen*`), with 
    per-anchor c₀). Needs a TIGHT corank shell count (→ `q≳O(d)`), then larger separating frames for small-q-growing-d.
    The landed-but-unwired route-2 / corank-2 lemmas (`c0_le_route2`, `c0_le_threequarters_corank2`, on disk, axiom-clean,
    NOT in `build.sh`) + the design = §13 "Floor-lowering assets".
-2. **q = pᵉ scheme seam (Layer D)** — `efield : GaloisField p e ≃ₗ F_p^{de}`; the q=p adapter `ScratchFieldGenAdapter`
+2. **q = pᵉ scheme seam (Layer D)** — `efield : GaloisField p e ≃ₗ F_p^{de}`; the q=p adapter `FieldGeneric`
    is the template. §11.6.
 3. **Other schurian families** (alternating / half-spin) — reuse the skeleton + the field-generic chain. §11.4.
 4. **char-2 + Suzuki** — one bespoke track (Arf + additive trace; Mathlib substrate absent); deferred. §11.5.
@@ -79,7 +79,7 @@ poly ⟺ `d = O(1)`). Then `X` individualizes to **discrete** at a base of size 
 cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification `{Cameron, Liebeck, Skresanov}`.
 
 > **▶ SCOPE NOTE — `d = 2` is OUT OF SCOPE by construction (not a gap).** The target affine-polar families are
-> `VO^ε_{2m}(q)`, so `d = 2m ≥ 4`; the per-anchor capstone `ScratchC0Final.c0_le_threequarters` carries `hq1 : 64q² ≤ |V| = qᵈ`
+> `VO^ε_{2m}(q)`, so `d = 2m ≥ 4`; the per-anchor capstone `PerAnchorBound.c0_le_threequarters` carries `hq1 : 64q² ≤ |V| = qᵈ`
 > (⟺ `q^{d−2} ≥ 64`, i.e. `d ≥ 3` for any `q ≥ 8`), which the families satisfy with room to spare. `d = 2` is excluded both
 > there and at the level of the *phenomenon* (R3 caveat: "the joint phenomenon lives at `d ≥ 4`; `d = 2` is too degenerate").
 > So a reader should not treat the `d ≥ 3` hypothesis as missing coverage — it is the families' own range.
@@ -96,265 +96,54 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `relationRefinesIsotropy_similitude` + `separatesAtBase_of_isotropySeparates_weak`). Target predicate
   **`IsotropySeparatesAtBase Q T`** (`:3102`); shared back-half `coords_determine` (`:2640`).
 
-*Scratch modules (axiom-clean). **PORT + RESTRUCTURE STATUS (updated 2026-06-28): the forms-graph pair-route closure was
-ported into `build.sh` (2026-06-27) and then restructured from 27 `Scratch*` files into 14 named modules (2026-06-28).
-`build.sh`'s `MODULES` array + `PublicTheoremIndex.md` (per-decl descriptions) are AUTHORITATIVE; the per-module prose
-below is the original `Scratch*`-named writeup, kept for the decl-level math detail but with stale module names.** The
-rename/merge map (old → new): `ScratchMatching`→`Matching`; `ScratchPairSep`→`PairForm`;
-`ScratchCorank`+`GoodAnchor`+`Bucket`+`ChiNorm`+`TBound`→`PencilTBound`; `ScratchCount`+`C0`+`C0Final`→`PerAnchorBound`;
-`ScratchIncr4`+`Incr4b`→`BadAnchorCount`; `ScratchIncr4c`→`Coordinatization`; `ScratchIncr4d`→`GoodAnchorNonvacuity`;
-`ScratchLemmaA`→`IsotropicIncidenceCount`; `ScratchBridgeA/B/C/D`→`ObservableCountBridge`; `ScratchCrux`+`LemmaB`→`ProfileReduction`;
-`ScratchFieldGen`+`BridgeK`+`FieldGenAdapter`→`FieldGeneric`; `ScratchLemmaAK`→`IsotropicIncidenceCountK`;
-`ScratchBridgeAllK`→`ObservableCountBridgeK`; `ScratchIncr5`→`AffinePolarSeal`. The "NOT in build" notes below predate the
-port and remain accurate ONLY for the floor-lowering / seam / char-2 modules (`ScratchPencil*`, `ScratchTBoundCorank*`,
-`ScratchRoute2*`, `ScratchSeam`, …) that are not on the seal's critical path.***
-- **`ScratchLemmaA.lean` — Lemma A** ("isotropic-incidence count = explicit Gram-function on nondeg configs"): the count
-  reduces to a homogeneous level-set (`reduction_to_levelset_nondeg`), a Route-B char-sum closed form (`levelset_count_eq`),
-  and the config-side Gauss sum **`configGaussSum_eq_det`** (`∑ψ(s·QR ρ) = χ(s)ⁿ·χ(D)·gaussSumⁿ`; config-dependence only
-  through the invariant `D`). **The generalization's A-side asset (§11.3).**
-- **`ScratchLemmaB.lean` — Lemma B** ("counts recover `u`"): **`incidence_agree_V`** (fine isotropy-count antecedent ⟹
-  restricted incidence counts agree, fiberwise + transport to `V`), `cone_count_zero_split`, `fullcount_agree_modulo_corr`.
-- **`ScratchBM3Bridge.lean`** (Mathlib-only) — bridges the abstract count over `Fin d→ZMod p` to a kernel-fast `Nat`-predicate
-  count over `Finset (Fin 81)` along the *computable* digit equiv `encV = finFunctionFinEquiv` (**`restricted_bridge`**,
-  `Finset.card_nbij'`); **`sigF_injective`** = `Function.Injective sigF` by kernel `decide` (~20s, no `native_decide`).
-- **`ScratchBM3Glue.lean`** — bundles `Qbun`/`Bv`/`T₉`, proves **`isoSep : IsotropySeparatesAtBase Qbun T₉`** (B-M1 → bridge
-  → `sigF_injective`) and **`vo4minus_seal`** (the capstone instantiated).
-- **`ScratchCrux.lean`** (NEW 2026-06-24, compiles axiom-clean) — the generalization's crux reduction: `jointIsoCount` (`Z_u(S)`),
-  **`ZProfileSeparates Q T`** (the sole open predicate, general `Q`), **D1** `qProfileSeparatesAtBase_of_zProfileSeparates` (DONE),
-  `isotropySeparates_of_zProfileSeparates` (end-to-end `ZProfileSeparates + nondeg ⟹ IsotropySeparatesAtBase`), and **D2 bridge**
-  `jointIsoCount_eq_restricted` (`Z_u(S)` = the Lemma-A-ready restricted count). See §13.
-- **`ScratchFieldGen.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, zero warnings, NOT
-  in build; imports `GaussCount` only) — **CONCERN #4 (field generalization), foundational half: the V-indexed, abstract
-  `[Field K][Fintype K]` lift of the analytic count chain.** Re-types the build's `ZMod p`/`Fin(p^d)` analytic layer over
-  an abstract finite field `K` with `V = Fin d → K` indexed **directly** (no `affineE` digit encoding — it becomes a single
-  endpoint conversion at the scheme seam). Mirrors, with `affineE` stripped (which only *simplifies* the proofs — the
-  `count_transport`/`affineE.symm.injective` steps vanish): `isoClassK` + the 4 dictionary lemmas (`CascadeAffine.isoClass`),
-  `polar_eq_of_subK`/`coords_determineK` (`CascadeAffine`), the count predicates `jointIsoCountK`/`ZProfileSeparatesK`/
-  `QProfileSeparatesAtBaseK`/`IsotropySeparatesAtBaseK`, `extProfileK`(+`_mem`), **D1** `qProfileSeparatesAtBaseK_of_zProfileSeparatesK`,
-  `isotropySeparatesK_of_qProfileSeparatesK` (= `coords_determineK` directly), the end-to-end `isotropySeparatesK_of_zProfileSeparatesK`,
-  and **D2** `jointIsoCountK_eq_restricted`. **Remaining concern-#4 pieces:** lift the bridge modules (`ScratchBridge{A,B,C,D,Z}`)
-  to `K` (re-target `jointIsoCountK`/`ZProfileSeparatesK`); q=pᵉ adapter = Layer D seam (`efield`). [q=p adapter DONE — see next.]
-- **`ScratchFieldGenAdapter.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, zero warnings/
-  sorryAx, NOT in build; imports `ScratchFieldGen` + `CascadeAffine`) — **CONCERN #4, the q=p adapter: the abstract-K chain
-  REACHES the in-build capstone.** `isoClassK_eq_isoClass` (the V-indexed `isoClassK` at `K=ZMod p` = the build's `isoClass`,
-  via both dictionaries) + `isoCount_transport` (the σ-profile count relabel `affineE`, via `Finset.card_nbij'`) +
-  **`isotropySeparatesAtBase_of_K`** (`IsotropySeparatesAtBaseK Q (T.image affineE.symm)` ⟹ the build's `Fin(p^d)`-indexed
-  `IsotropySeparatesAtBase Q T` — pure relabel) + capstone **`reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`**
-  (composes the adapter with `reachesRigidOrCameron_viaIsotropySeparates_wittFree`: the abstract-K predicate at a bounded base
-  seals the `VO^ε` residue mod `{G3}`, no Witt/`hSmallAutThin`). **Confirms `affineE` is exactly "a single endpoint conversion
-  at the scheme seam"** — analytic content over abstract `K`/`V`, only this thin relabel touches the `Fin(p^d)` scheme machinery.
-- **`ScratchBridgeK.lean`** (NEW 2026-06-26, axiom-clean, zero warnings, NOT in build; imports `ScratchFieldGen`) —
-  **CONCERN #4, bridge soft endpoint:** `zProfileSeparatesK_of_zSep` (a `Z`-separating base ⟹ `ZProfileSeparatesK`, pure logic).
-- **`ScratchLemmaAK.lean`** (NEW 2026-06-26, axiom-clean, zero warnings, NOT in build; imports `ScratchFieldGen`) —
-  **CONCERN #4, the bridge analytic core:** the full abstract-`K` lift of `ScratchLemmaA` (~20 lemmas — `levelset_count_eqK`,
-  `configGaussSum_eq_detK`, `reduction_to_levelset_nondegK`, `configFormK`(+`_apply`), `s0_boundary_collapseK`, …). Mechanical
-  (`GaussCount` already abstract over a finite field; `ZMod p`→`K`, `(p:R')`→`(Fintype.card K:R')`, drop `NeZero`/`ZMod.card`).
-- **`ScratchBridgeAllK.lean`** (NEW 2026-06-26, axiom-clean, zero warnings, NOT in build; imports `ScratchLemmaAK` +
-  `ScratchPairSep` + `ScratchBridgeD`) — **CONCERN #4, the FULL bridge over abstract `K`** (K-lift of `ScratchBridge{A,B,C,D}` +
-  `cone_count_zero_split` in one module): `cone_count_zero_splitK`, `fullcount_eq_jointIsoCountK_add_corr`,
-  `levelset_count_collapseK`, `fullcount_pair_{eq_levelset,closed}K`, `configPolarDet_eq_pairFormK`, `chi_configDet_eq_chi_pairFormK`,
-  `chi_eq_one_or_neg_oneK`, `jointIsoCountK_pair_closed_corr0`, and the **per-pair capstone `jointIsoCountK_ne_of_chiSep_pair`**
-  (χ(pairForm)-separation ⟹ `jointIsoCountK Q u {t,t₀} ≠ jointIsoCountK Q v {t,t₀}`; carries `2 < Fintype.card K` + `hK`; **reuses
-  the already-abstract `pairCount_ne_of_chiSep_field`/`chiSep_imp_zSep_field` from `ScratchBridgeD`**). **⟹ Concern #4's analytic +
-  bridge lift is COMPLETE** (over abstract `[Field K][Fintype K]`); only the q=pᵉ SCHEME seam (`efield` transport, Layer D) remains.
-- **`ScratchPencilCorank.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports Mathlib matrix/polynomial + `Real.Basic`)
-  — **CORANK TIGHTENING, the matrix-pencil core.** `pencilPoly A B := A.map C + X•B.map C`; `pow_card_dvd_pencilDet_of_cols`
-  + `exists_cols_ker` ⟹ **`finrankKer_le_rootMult`** (`corank(A+t₀B) ≤ rootMultiplicity t₀ (det)`, the genuinely-new crux);
-  `pencilDet_natDegree_le` + **`sum_finrankKer_le`** (`∑corank ≤ d`); `pow_sum_mul_bound` + **`concentration_bound`**
-  (`∑(√q)^{c_t} ≤ 2(√q)^{d−1}` under `1≤c_t≤d−1, ∑c_t≤d`); `pencilPoly_det_eval` + `pencilPoly_det_ne_zero` (good anchor ⟹
-  pencil det ≠ 0). GOTCHAS: needs `import Mathlib.Data.Real.Basic`; use `pow_le_pow_right₀` (not `pow_le_pow_right'` — no
-  `MulLeftMono ℝ`); `le_or_lt` not in scope (use `by_cases`).
-- **`ScratchPencilBridge.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchPencilCorank` + `ScratchCorank`)
-  — **CORANK, the `|radical| ↔ ker` bridge:** **`finrank_polarRad_eq_finrankKer`** (`finrank(polarRad G) =
-  finrank ker((toMatrix₂ b b (polarBilin G)).mulVecLin)`, via `b.equivFun` carrying `polarRad` onto the matrix kernel).
-- **`ScratchPencilRegroup.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchPencilBridge` +
-  `ScratchGoodAnchor` + `Analysis.SpecialFunctions.Sqrt`) — **CORANK, the ratio regroup + assembly:** `ker_smul_mulVecLin`/
-  `finrankKer_ratio` (scale-inv), `radicalCard_eq_pow`/`corank_ratio_eq` (`|radical| = q^{corank(ratio)}`), `sum_comp_ratio_le`/
-  `fiber_fst_card_le` (fiber regroup), `sqrt_natpow`, **`deg_bucket_le`** (the corank-stratified deg bucket
-  `∑_{x∈s deg} g x ≤ 2·|K|·(|V|/√|K|)`), `pencilDet_ne_zero_of_good` (the `hgood → hp` bridge).
-- **`ScratchTBoundCorank.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchTBound` + `ScratchC0` +
-  `ScratchPencilRegroup`) — **CORANK, the `|T|` bound + capstone:** `normT_bucket_bound_corank`
-  (`|K|·‖T‖ ≤ |K|²·√|V| + 2·|K|·(|V|/√|K|)` — deg coeff `2` not `d`), `c0_le_const` (`c0_le` at `dR:=2` ⟹ `hq2` collapses
-  to `hq3`), and **THE CAPSTONE `c0_le_threequarters_corank`** — drop-in replacement for `ScratchC0Final.c0_le_threequarters`,
-  same interface (`hgood`/`hnz`/`hPu`/`hq1`/`hq3` + trivial `hd:1≤d`/`hq4:4≤|K|`), **`hq2` removed**. Verify the whole chain:
-  `lake build ChainDescent.ScratchTBoundCorank`.
-- **`ScratchPencilCorank2.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchPairSep` + `ScratchCorank` +
-  `Mathlib.LinearAlgebra.Dual.Lemmas`) — **ROUTE 0 (small-q, threshold `256→16`), the geometric core.** `polar_pairForm`
-  (`polar(pairForm Q a) x h = 4Q(a)·polar Q x h − 2·polar Q x a·polar Q h a`) + `polar_pencil_pairForm` (its pencil version;
-  NB renamed to avoid the clash with `ScratchGoodAnchor.polar_pencil`) + **`pencil_polarRad_finrank_le`** (the pencil corank cap
-  `finrank(polarRad(y•pairForm Q a + z•pairForm Q b)) ≤ d−2` for `y,z≠0`, `a,b` independent, `Q.polarBilin` nondeg, `4≤d`;
-  case-split `λ:=yQ(a)+zQ(b)`: `λ≠0` ⟹ `radical ⊆ span{a,b}`, `λ=0` ⟹ `radical ⊆ ker φ_a ⊓ ker φ_b` codim 2 via
-  `mem_span_of_iInf_ker_le_ker`) + **`single_polarRad_finrank_le`** (the single-form corank-1 cap
-  `finrank(polarRad(pairForm Q a)) ≤ 1` for `Q a ≠ 0`, nondeg — the `z_u` sibling). GOTCHAS: `Nondegenerate = SeparatingLeft ∧
-  SeparatingRight` (use `hQnd.1`, doesn't unfold on application); avoid `linear_combination …/2` (leaves `2⁻¹·2` ring can't
-  cancel — extract from `2·(goal)=0` via `mul_eq_zero` + `Invertible.ne_zero`); `4 = 2*2` for `(4:K)≠0` (not `norm_num`).
-- **`ScratchTBoundCorank2.lean`** (NEW 2026-06-26, axiom-clean, NOT in build; imports `ScratchTBoundCorank` +
-  `ScratchPencilCorank2`) — **ROUTE 0, the re-thread to `q≥16`.** `le_two_pow_sub_two` (`D ≤ 2^{D−2}`, `D≥4`) +
-  **`concentration_bound2`** (cap-`d−2` concentration `∑ s^{c_t} ≤ 2·s^{D−2}` under `1≤c_t≤D−2, ∑≤D, D≥4`; the all-ones case
-  via `le_two_pow_sub_two`) + **`deg_bucket_le2`** (deg bucket `≤ 2·|V|`, one `√q` better, via `pencil_polarRad_finrank_le` +
-  `concentration_bound2`) + **`c0_le2`** (the threshold-16 arithmetic, deg term `2n/q` + the corank-1 `z_u` bound
-  `zu·q ≤ n + (q−1)√n√q`) + `normT_bucket_bound_corank2` (`|K|·‖T‖ ≤ |K|²√|V| + 2|V|`) + **THE CAPSTONE
-  `c0_le_threequarters_corank2`** — drop-in for `c0_le_threequarters_corank` with `hq3 : 16 ≤ q` (was 256). New hyps vs
-  `_corank`: `4≤d`, `t₀−u,t₀−v` independent (`hab`), `Q.polarBilin` nondeg (`hQnd`), anchor non-isotropic `Q(t₀−u)≠0` (`hQu`,
-  subsumes `hPu`). **★ FINDING: the deg-bucket cap ALONE bottoms at `q≈81`** — the `z_u` bound carries an *independent* `n/√q`
-  term (it had charged the single `pairForm Q(t₀−u)` the loose corank-`d−1`); reaching `q≥16` needed `single_polarRad_finrank_le`
-  too. **THREAD for increment 5 ✅ DONE (2026-06-26): `ScratchIncr4d.exists_hgood` now supplies `hab` and `hQu`** (conclusion
-  widened to `hgood ∧ Q(t₀₀−u)≠0 ∧ LinearIndependent ![t₀₀−u, t₀₀−v]` via new `linearIndependent_of_pairForm_ne_zero`;
-  axiom-clean). Verify: `lake build ChainDescent.ScratchTBoundCorank2`.
-- **`ScratchPairSep.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **Weil-free per-pair route** core:
-  **`quadChar_addChar_sum`** (the multiplicative↔additive **Gauss bridge** `∑_y χ(y)ψ(a·y) = gaussSum·χ(a)` ∀`a`; reusable
-  atom) + **`pairCharSum_factor_gen`** (the **"no Weil" core, GENERAL**: for ANY `f, g : V → K`,
-  `gaussSum² · ∑_t χ(f t)χ(g t) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))` — factoring never uses structure on `f,g`;
-  applied with `f,g =` the pair invariants `det G₂(u;·,t₀)`, `det G₂(u';·,t₀)` (χ-of-quadratics in the probe), the inner
-  sum is an additive quadratic Gauss sum ⟹ the degree-4 product is exactly evaluable, **no Weil**) + **`pairCharSum_factor`**
-  (the form-specific `f=Q`, `g=Q(·−c)` singleton instance, now a one-line corollary). Needs `[CharZero R']`. **+ Increment 2
-  foundation:** `pairForm` / `pairForm_apply` (the pair invariant `det G₂(u;t,t₀)` IS a quadratic form `4 Q(a)·Q − (polar Q ·
-  a)²` at the shift `t−u`), `detG2_eq_pairForm`, **`pairCombine`** (the two-pivot integrand `y·det G₂(u;·) + z·det G₂(v;·)` =
-  quadratic form `(y•pairForm_u + z•pairForm_v)` at shift `t−u` + linear `z·polar pairForm_v(·,u−v)` + const), and
-  `sum_addChar_quadForm_translate` (Gauss translation invariance). **+ Increment 2 `M(y,z)` closed form (COMPLETE on the
-  nondeg locus):** `pairSum_to_shifted` (unconditional reorganisation `M = ψ(const)·∑_s ψ(F s + linear)`),
-  `sum_addChar_shifted_eval` (complete-the-square given a representing `b`), `pairSum_closed_of_repr` (chained),
-  `exists_repr_of_nondeg` (`F.polarBilin` nondeg ⟹ `b` exists, via `LinearMap.BilinForm.toDual`), `pairSum_closed_of_nondeg`
-  (`b` discharged from nondeg), and the capstone `pairSum_fully_closed` (`M = ψ(z·pairForm_v(u−v))·ψ(−F b)·(∏χ wᵢ)·gaussSum^d`,
-  so `|M|=q^{d/2}`). **+ Degenerate locus (exact part DONE):** `pairForm_polar_anchor`/`pairForm_self_anchor` (every `pairForm Q a`
-  degenerate, `a∈radical`) and `sum_addChar_radical_vanish` (degenerate diagonal-vanishing: `r∈radical`, `L r≠0` ⟹ `∑_s ψ(F s+L s)=0`).
-  Open tail = increment-3 `c₀` bound. **+ Increment 3 step 3b (ℂ magnitude) DONE:** `norm_gaussSum_sq` (`‖gaussSum‖²=card`),
-  `norm_addChar_eq_one` (AddChar values unit-modulus), `norm_pairSum_le` (`‖M‖≤‖gaussSum‖^d` on nondeg locus), and the
-  **unified degenerate-magnitude tool** `norm_sq_sum_addChar_quadForm` (`‖∑ψ(Q)‖²=qᵈ·|radical Q|`, ANY `Q`), its **with-linear
-  bound** `norm_sq_sum_addChar_quadForm_linear_le` (`‖∑ψ(Q+L)‖²≤qᵈ·|radical Q|`), and the **uniform M bound (3c)**
-  `norm_sq_pairSum_le` (`‖M(y,z)‖²≤qᵈ·|radical F|`, covers nondeg+conic). Needs `import Mathlib.Analysis.Complex.Basic`.
-  + the **zero-count bound (3d)** `zeroCount_sq_le` (`(z·q−qᵈ)²≤(q−1)²·qᵈ·|radical P|`) + the **`|T|` bound (3e-i)** `normT_le`
-  (`q·‖T‖ ≤ ∑_{y,z} ‖χy‖‖χz‖·√(qᵈ·|radical F|)`). See §13 ("INCREMENT 3 — PLAN", steps 3b+3c+3d+3e-i DONE). Open tail =
-  3e-(ii/iii): good-anchor #conic count (Schwartz-Zippel, shared w/ inc4) + `c₀` counting identity + arithmetic.
-- **`ScratchMatching.lean`** (NEW 2026-06-24, compiles axiom-clean, NOT in build) — the **increment-4/5 combinatorial core**:
-  **`exists_separating_base`**, the matching-trick first moment as a pure finite-counting theorem (`fail : ι → W → Prop`,
-  `∀g #{w:fail g w}≤F`, `|ι|·Fᵐ<|W|ᵐ ⟹ ∃ base P:Fin m→W, ∀g ∃j ¬fail g (P j)`). Consumes the single analytic input `c̄₀<1`
-  (instantiate `W=V×V`, `ι={(u,u'):u≠u'}`) ⟹ separating base of size `O(d log q)`; anchor existence dissolves (anchor = the
-  other matched coordinate). See §13's "MATCHING TRICK CONFIRMED" block.
-- **`ScratchIncr4.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchMatching` + `ScratchC0Final`) — **increment 4: the anchor-averaging backbone + the good-anchor fail bound (input `c`).**
-  - **Backbone:** **`fail_count_split`** (`fail : A→B→Prop`, `A`=probe `t`, `B`=anchor `t₀`; per good anchor `#{a:fail a b}≤c`
-    + `#bad ≤ β` ⟹ `#{(a,b):fail} ≤ c·|B| + |A|·β`, pure finite counting) + **`matching_F_bound`** (target-indexed
-    `fail : ι→A→B→Prop` ⟹ `∀ g, #{(t,t₀):fail g} ≤ c·|B|+|A|·β =: F`, exactly `exists_separating_base`'s `hF`). So
-    `c̄₀ = F/|V|² = c/|V| + β/|V|`.
-  - **Input `c` DONE:** **`good_anchor_fail_le`** (decomposition `fail ⟹ {χ-eq} ∨ {I_u=0} ∨ {I_v=0}` + `c0_le_threequarters`
-    ⟹ `#fail ≤ ¾|V| + #{I_u=0} + #{I_v=0}`) + **`zeroCountShift_card_le`** (`P≠0 ⟹ #{t:P(t−u)=0}·q ≤ |V|+(q−1)|V|/√q`,
-    extracted from the `z_u` block of `c0_le_threequarters`) ⟹ capstone **`good_anchor_fail_le_const`**: a good anchor
-    (`hnz ∧ hgood ∧ hPu ∧ hPv`, `q≥256`) has **`#{t : ¬sep} ≤ 15/16·|V|`** (`z/|V| ≤ 1/256+1/16 = 17/256 < 3/32` twice ⟹
-    `¾+3/16=15/16`). So `c/|V| ≤ 15/16 < 1` — the good-anchor side of `c̄₀<1` is closed.
-  - **Increment-4 `β` (bad-anchor count) is DONE** in `ScratchIncr4b`+`ScratchIncr4c` (`badHgood_count_le`, `O(d/q)`).
-    Remaining = the increment-5 ℕ-packaging/matching assembly (modulo non-vacuity).
-- **`ScratchIncr4b.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchIncr4` + `ScratchGoodAnchor`) — **increment 4: the bad-anchor count `β` (Schwartz–Zippel in `t₀`).**
-  **★ Structural reduction (key):** since `pairForm Q (t₀−v)` is ALWAYS degenerate (`pairForm_polar_anchor`: `t₀−v ∈`
-  its radical), a nondeg pencil member needs a genuine `(y,z)`-combination ⟹ **`hgood` alone forces `hnz ∧ hPu ∧ hPv`**
-  (a zero/proportional member would make the whole pencil a multiple of one degenerate form). So the bad set collapses
-  (mod `t₀∈{u,v}`) to `{¬hgood} ∪ {Q(t₀−u)=0} ∪ {Q(t₀−v)=0}`. The two quadric loci are immediate from
-  `zeroCountShift_card_le` (applied to `Q`); the meaty piece is `{¬hgood} = {t₀ : pencilDisc(·,·;t₀) ≡ 0}`.
-  **Landed (all 7 axiom-clean):** (a) the Schwartz–Zippel-in-`Fin d` engine **`mvPoly_zeros_count_le_dim`** (`p≠0 ⟹
-  #{f:Fin d→K | eval f p=0}·|K| ≤ totalDegree·|K^d|`, zero-density `≤ totalDegree/q`); (b) the **reduction
-  `hgood ⟹ hnz∧hPu∧hPv`** — helpers `mem_polarRad_smul_pairForm` + `polarRad_smul_pairForm_ne_bot` feed
-  `hPu_of_hgood`/`hPv_of_hgood`/`hnz_of_hgood`; (c) packaged **`bad_anchor_card_le_hgood`: `β ≤ #{¬hgood} + 2`**;
-  (d) the **rigorous SZ reduction `bad_anchor_count_le_of_poly`** — given a nonzero `P : MvPolynomial (Fin d) K` with
-  `(¬hgood t₀ → eval (b.equivFun t₀) P = 0)`, `#{¬hgood}·|K| ≤ P.totalDegree·|V|` (coordinatize `V≅K^d` via `b.equivFun`
-  + the engine); (e) **`notHgood_eval_zero_of_repr`** — discharges that `hrep` whenever `P` *represents* the pencil
-  determinant at a fixed witness (`eval (coords t₀) P = det(toMatrix₂ b b (polarBilin (y₀•pairForm_u+z₀•pairForm_v)))`),
-  via `polarRad_ne_bot_iff_det_eq_zero`.
-- **`ScratchIncr4c.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchIncr4b`) — **the representing polynomial `P` is CONSTRUCTED — β's heavy coordinatization is DONE (12 lemmas).**
-  Coordinatization workhorse `coordPoly`/`coordPoly_eval_linFunc` (a linear functional `f` ↦ `∑ₖ C(f bₖ)·Xₖ`, evaluating
-  to `f t₀`); the quadratic `Q(t₀)` via the diagonal double-sum `polar_t0_t0_sum` + `gramQuadPoly_eval`; the affine
-  `LPoly`/`QPoly` (`polar Q w (t₀−c)`, `Q(t₀−c)`); the general `polar_pairForm_apply`; the Gram-entry `entryPoly`/
-  `entryPoly_eval`; **`pencilDetPoly := det(Matrix.of (C y₀·entryPoly_u + C z₀·entryPoly_v))`** with
-  **`pencilDetPoly_eval`** (represents the pencil det, via `RingHom.map_det` + per-entry) and **`pencilDetPoly_ne_zero`**
-  (nonzero from a good-anchor witness). Capstone **`badHgood_count_le`: `#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`**.
-  **B-iii (2026-06-26):** the explicit degree cap **`pencilDetPoly_totalDegree_le : totalDegree ≤ 2·d`** via the
-  bounded-degree generalization **`det_totalDegree_le_gen`** (`totalDegree ≤ D` entries ⟹ `det ≤ D·d`) + per-layer caps
-  (`coordPoly`/`LPoly` `≤ 1`; `gramQuadPoly`/`QPoly`/`entryPoly` `≤ 2`). **B-ii (2026-06-26):** the explicit composition
-  **`beta_count_closed`: `β·|K| ≤ 2d·|V| + 2·|K| = O(d/q)`** (combines `badHgood_count_le` + `pencilDetPoly_totalDegree_le`
-  + `bad_anchor_card_le_hgood`; cross-module `DecidablePred` mismatch bridged by `convert … <;> congr!`). **So β is CLOSED
-  to an explicit `O(d/q)` bound modulo ONLY (i) non-vacuity `hgood`** (∃ good anchor for `u≠v` = distinct radicals — item
-  **NV**, carried as the `t₀₀` hypothesis). Items (ii) Nat-composition + (iii) `totalDegree ≤ 2d` are DONE (B-ii/B-iii).
-  **C-corr (2026-06-26):** `corr_zero_of_anchor` (good anchor `Q(t₀−u)≠0` kills the bridge's `corr` ∀`t`) + `QPoly_ne_zero`
-  + `qZero_count_le` (`#{Q(t₀−c)=0}·|K| ≤ 2·|V|`) + capstone **`beta_full_count_closed`** (FULL good-anchor predicate incl.
-  `Q(t₀−u),Q(t₀−v)≠0`: `β_full·|K| ≤ (2d+4)·|V| + 2·|K|`). **C-basis (2026-06-26):** `exists_orthoAnisotropic_basis`
-  (nondeg `Q` ⟹ ortho-anisotropic basis = the bridge's `vb`/`hv`/`hw`, via Mathlib `exists_orthogonal_basis` +
-  `not_isOrtho_basis_self_of_separatingLeft`) + the project-native bridge `associated_separatingLeft_of_polarRad`
-  (`polarRad Q = ⊥ ⟹ (associated Q).SeparatingLeft`). **26 axiom-clean lemmas total.** Both bridge-input gaps (C-corr,
-  C-basis) CLOSED; lone deep remaining inc-4 item = **NV** (algebraic heart now also done — see `ScratchIncr4d` below).
-- **`ScratchIncr4d.lean`** (NEW 2026-06-26, **14 axiom-clean lemmas**, NOT in build; imports `ScratchIncr4c`) — **NV
-  (non-vacuity of `hgood`) COMPLETE.** Discharges `∃ y z, polarRad(y•pairForm Q(t₀₀−u)+z•pairForm Q(t₀₀−v))=⊥`.
-  *Algebraic heart:* `polar_pencil_apply` (NV-1) + `pencil_radical_key` + `polarRad_pencil_subset_span` (NV-2) +
-  **`polarRad_pencil_eq_bot`** (NV-3: nondeg `Q`, `y,z≠0`, `c≠0`, `pairForm Q a b≠0` ⟹ member nondeg, via `2×2`
-  `det=4yz·pairForm`). *Geometry+counting:* `pairForm_self_sub` (the degree-2 formula `pairForm Q a (a−w)=4QaQw−polar(a,w)²`) +
-  `exists_ne_zero_polar_eq_zero` (rank-nullity) + **`exists_pairForm_self_sub_ne_zero`** (NV-4a: ≢0, the rank-≤1 contradiction)
-  + `exists_anisotropic`/`gramQuadPoly_ne_zero`/`planeDiscPoly`(+`_eval`/`_totalDegree_le`/`_ne_zero`) + **`exists_good_plane_anchor`**
-  (NV-4: ∃ `a` with `Qa,Q(a−w),pairForm Q a (a−w) ≠ 0`, union bound over 3 quadrics, `|K|≥7`). *Capstone:* **`exists_hgood`**
-  (NV-5 + assembly: `t₀₀=a+u`, `(y,z)=(1,±1)`). ⟹ inc-4 cleanup CLOSED.
-- **`ScratchCorank.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build) — the **corank ≥ 2 enabler** for 3e-ii:
-  **`radical_card_mul_card_le`** (`F ≠ 0 ⟹ |radical F| · |K| ≤ |V|`, i.e. `|radical| ≤ q^{d−1}` UNIFORMLY over all coranks —
-  the degenerate bucket of `normT_le`'s RHS needs no per-corank stratification), built from `polarRad` (the polar-radical as a
-  submodule), `polarRad_card_filter` (filter-card = `Nat.card` of the submodule, instance-free via `Nat.card`/`Set.ncard`), and
-  `polarRad_ne_top_of_ne_zero` (`F ≠ 0 ⟹ radical proper`, char ≠ 2). See §13 "CORANK ≥ 2 HANDLED".
-- **`ScratchGoodAnchor.lean`** (NEW 2026-06-25, compiles axiom-clean, NOT in build; imports `ScratchCorank` so needs
-  `lake build ChainDescent.ScratchCorank` first) — the **good-anchor count, FULLY PROVEN**: capstone **`degenerate_count_le`**
-  (`good anchor ⟹ #{(y,z): polarRad (y•P+z•R) ≠ ⊥} ≤ d·|K|`), from analytic cores `mvPoly_zeros_count_le` (Schwartz–Zippel) +
-  `det_totalDegree_le` (degree cap) and the concrete-pencil bridge (`pencilDisc`/`_eval`/`_totalDegree_le`,
-  `polarRad_ne_bot_iff_det_eq_zero`, `toMatrix₂_polarBilin_pencil`, `polar_pencil`).
-- **`ScratchBucket.lean`** / **`ScratchChiNorm.lean`** / **`ScratchTBound.lean`** (NEW 2026-06-25, axiom-clean, NOT in build) —
-  the **3e-ii `|T|`-bound assembly**. `ScratchBucket`: `sum_two_bucket_le` (abstract nondeg/deg split `∑g ≤ Ca·Ma+Cb·Mb`) +
-  `sqrt_mul_le_div` (`r·k≤V ⟹ √(V·r)≤V/√k`, deg magnitude). `ScratchChiNorm`: `norm_quadraticChar` (`‖χy‖ = if y=0 then 0 else 1`).
-  `ScratchTBound`: **`normT_bucket_bound`** = `|K|·‖T‖ ≤ |K|²·√|V| + (d·|K|)·(|V|/√|K|)`, wiring `normT_le` + the two buckets.
-  (`ScratchTBound` imports the four scratch modules → build their oleans first.)
-- **`ScratchCount.lean`** / **`ScratchC0.lean`** (NEW 2026-06-25, axiom-clean, NOT in build) — the **3e-iii counting identity**.
-  `ScratchCount`: `int_char_pointwise` (per-element χ-value ineq, no axioms) + **`counting_identity`** (`2·NS ≤ 2·z_u + n + T_ℤ`,
-  generic `a,b:V→K`). `ScratchC0`: `charSum_int_le_norm` (`T_ℤ ≤ ‖T_ℂ‖`) + **`card_agree_le`** (`2·NS ≤ 2·z_u + n + ‖T_ℂ‖` over ℝ).
-- **`ScratchC0Final.lean`** (NEW 2026-06-25, axiom-clean, NOT in build; imports `ScratchTBound`+`ScratchC0` → build their oleans) —
-  **INCREMENT 3 CAPSTONE `c0_le_threequarters`**: per good anchor + threshold `q≥q₀`, `NS ≤ ¾·|V|` (`c₀ ≤ ¾ < 1`). Plus
-  `ScratchBucket.c0_le` (the pure-real final arithmetic). Assembles `card_agree_le`+`normT_bucket_bound`+`zeroCount_sq_le`+radical bound.
-  NB `hq1 : 64q²≤|V|` ⟺ `d ≥ 3`, the families' own range (`VO^ε_{2m}`, `d=2m≥4`) — see §1 SCOPE NOTE; `d=2` is out of scope.
-- **`ScratchBridge.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build) — the
-  **observable↔count bridge, B1b**: `chiSep_imp_zSep` (from the `|S|=2` even-`d` closed form `Z_w = qᵈ + χ(det G₂_w)·K·(q[c=0]−1)`,
-  `K ≠ 0`, the four `(χ,[c=0])` values are distinct for `q>2` ⟹ `χ(det G₂)_u ≠ χ(det G₂)_v ⟹ Z_u({t,t₀}) ≠ Z_v({t,t₀})`) +
-  **`pairCount_ne_of_chiSep`** (the same in joint-count language: closed form for each point + χ-separation ⟹ `Z_u ≠ Z_v`). Feeds
-  the bridge capstone `ScratchBridgeZ.zProfileSeparates_of_zSep`. **B1a (analytic core + all wraps) now COMPLETE** —
-  `ScratchBridgeA`–`D`; the ℤ-stated `chiSep_imp_zSep`/`pairCount_ne_of_chiSep` here are superseded by the ℂ-restated
-  `ScratchBridgeD` versions used in the assembly (B1-deg **dissolved** — see §13 BRIDGE block).
-- **`ScratchBridgeZ.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchCrux` → build its olean first) — the **bridge capstone** `zProfileSeparates_of_zSep`: any `Z`-separating base
-  (`∀ u≠u', ∃ S⊆T, jointIsoCount Q u S ≠ jointIsoCount Q u' S`) discharges `ScratchCrux.ZProfileSeparates Q T` outright. With
-  `pairCount_ne_of_chiSep` + `levelset_count_collapse` (turning a config-nondeg χ-separating pair into a `Z`-separating sub-frame),
-  this **architecturally closes the bridge** and **dissolves B1-deg** (the config-degenerate locus, density `O(1/√q)`, folds into
-  the increment-4 matching density — no degenerate-config `Z` value needed). See §13 BRIDGE block.
-- **`ScratchBridgeB.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchCrux` + `ScratchLemmaB`) — **B1a wrap (i)** `fullcount_eq_jointIsoCount_add_corr`: the Lemma-A fullcount =
-  `jointIsoCount Q u S + [∀t∈S, Q(t̄−ū)=0]` (`cone_count_zero_split` ∘ `jointIsoCount_eq_restricted`). Connects the bridge
-  observable `jointIsoCount` to `levelset_count_collapse`'s fullcount.
-- **`ScratchBridgeC.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchBridgeA` + `ScratchBridgeB`) — **B1a wrap (ii):** `fullcount_pair_eq_levelset` (ii-a, `Finset {t,t₀}`↔`Fin 2` config
-  indexing + `reduction_to_levelset_nondeg`) + **`fullcount_pair_closed`** (ii-b, the **fullcount closed form**
-  `fullcount·q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀=0]−1)`, config-nondeg + even `d`). NB wrap (ii) surfaced the **`corr`
-  term** ⟹ increment-4 good-pair predicate gains `corr=0` (§13 BRIDGE net verdict "FINDING").
-- **`ScratchBridgeD.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchBridgeC` + `ScratchPairSep`) — **B1a wrap (iii) + the final ℂ assembly, closing the bridge end-to-end.**
-  `configPolarDet_eq_pairForm` (2×2 polar Gram det = `pairForm`) → **`chi_configDet_eq_chi_pairForm`** (wrap (iii): `χ(D)=χ(I_w)`;
-  the `½·polar` factor + the `finBasis↔basisFun` change of basis enter as squares killed by `χ`, via reindex + `det_submatrix_equiv_self`
-  + `toMatrix_mul_basis_toMatrix` — no standard-basis identification) → **`jointIsoCount_pair_closed_corr0`** (assembly: the corr=0
-  per-pair closed form) ; `chi_eq_one_or_neg_one` + **`chiSep_imp_zSep_field`/`pairCount_ne_of_chiSep_field`** (ℂ-restated B1b,
-  `CharZero`, no `R'→ℕ` descent) → end-to-end capstone **`jointIsoCount_ne_of_chiSep_pair`** (`χ(I)`-sep ⟹ `Z`-sep, feeds
-  `ScratchBridgeZ.zProfileSeparates_of_zSep`). Carries `hK : gaussSum²·∑ψ(Q)≠0` (independent Gauss nonvanishing). Prime-field model.
-- **`ScratchBridgeA.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `ScratchLemmaA` → build its olean first) — the **B1a analytic core** `levelset_count_collapse`: for config size `m=2`, **even `d`**,
-  nondeg config Gram, `(level-set count at c)·q³ = |V| + χ(D)·(gaussSum²·∑ₓψ(Qx))·(q·[c=0]−1)`. The `s`-sum collapse from
-  `levelset_count_eq` (the "big but mechanical" `D3a` at `|S|=2` the `VO⁻₄(3)` instance bypassed via `decide`); config-dependence
-  enters only through `χ(D) = χ(det G₂)`, the bridge observable. Feeds `ScratchBridge.chiSep_imp_zSep`. (Consumed by wrap (ii)
-  in `ScratchBridgeC`; B1a is now COMPLETE — wrap (iii) + assembly are in `ScratchBridgeD`, see §13 BRIDGE net verdict.)
-- **`ScratchSeam.lean`** (NEW 2026-06-26, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build; imports
-  `CascadeAffine`) — **THE SEAM SPIKE** `reachesRigidOrCameron_viaSchurianRank3Affine` (+ `SchemeRealizes`, `SealDisj`): the
-  abstract residue `S` reaches the seal disjunction given (C) the cited classification (`Cameron ∨ ≅ affineScheme(Q)` with
-  `IsotropySeparatesAtBase Q T`) + (T) the transport `htransport`. Stub COMPILES ⟹ seam closes modulo the one mechanical
-  obligation `htransport` (seal disjunction invariant along a realizing permutation; build via landed `forcedNode_relabel`,
-  option b). See §11.6 SEAM SPIKE box. Forms-graph case discharged by `…viaIsotropySeparates_wittFree`.
+### Forms-graph pair-route module map
+
+**Restructure note (2026-06-28).** The pair route was ported into `build.sh` and restructured from 27 `Scratch*` files
+into 14 named modules. **Authoritative sources: `scripts/build.sh`'s `MODULES` array (one-line module annotations) and
+`GraphCanonizationProofs/PublicTheoremIndex.md` (per-decl descriptions — every decl of the 14 modules is described).**
+The decl-level math writeup that used to live here is now fully captured by those; this is the orientation map.
+
+**In build (14 modules, axiom-clean `[propext, Classical.choice, Quot.sound]`, topological order):**
+- **`Matching`** — the abstract first-moment / union-bound separating-base lemma `exists_separating_base` (REUSABLE, general).
+- **`PairForm`** — the per-pair χ-separation foundation: `pairForm` (the `|S|=2` config-Gram det as a quadratic), the
+  Gauss bridge, the `M(y,z)` closed form, `normT_le`.
+- **`PencilTBound`** — the `‖T‖` magnitude bound: pencil radical (`polarRad` Submodule, corank-uniform), Schwartz–Zippel
+  `mvPoly_zeros_count_le` + `degenerate_count_le`, the two-bucket arithmetic (REUSABLE), capstone `normT_bucket_bound`.
+- **`PerAnchorBound`** — the per-anchor non-separation capstone `c0_le_threequarters` (`NS ≤ ¾·|V|`) + the counting identity.
+- **`BadAnchorCount`** — the good-anchor fail bound `good_anchor_fail_le_const` (`≤ 15/16·|V|`) + the structural β reduction.
+- **`Coordinatization`** — form data → `MvPolynomial` evaluations (`coordPoly`/`gramQuadPoly`/`pencilDetPoly`) (REUSABLE);
+  what puts the pencil determinant under Schwartz–Zippel.
+- **`GoodAnchorNonvacuity`** — `exists_hgood` (a good anchor exists for `u≠v`, nondeg `Q`, `finrank≥2`, `|K|≥7`).
+- **`IsotropicIncidenceCount`** — Lemma A over `ZMod p`: the isotropic-incidence count as an explicit Gram-function
+  (`card_quadForm_eq`, `configGaussSum_eq_det`, `levelset_count_eq`).
+- **`IsotropicIncidenceCountK`** — Lemma A over an abstract finite field `K` (the field-generic mirror).
+- **`ProfileReduction`** — the `ZProfileSeparates` reduction (D1) + the B-M1 incidence step (`incidence_agree_V`).
+- **`ObservableCountBridge`** — the χ(det G₂)↔`Z_u(S)` bridge over `ZMod p`: the `|S|=2` even-`d` closed form
+  (`levelset_count_collapse`), the χ-kills-squares identification (`chi_configDet_eq_chi_pairForm`), capstone
+  `jointIsoCount_ne_of_chiSep_pair`.
+- **`ObservableCountBridgeK`** — the same bridge over abstract `K` (`jointIsoCountK_ne_of_chiSep_pair`).
+- **`FieldGeneric`** — the abstract-`K` substrate: V-indexed predicates (`ZProfileSeparatesK`, `IsotropySeparatesAtBaseK`,
+  `isotropySeparatesK_of_zProfileSeparatesK`), the soft endpoint `zProfileSeparatesK_of_zSep`, and the q=p `affineE` adapter
+  `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree`.
+- **`AffinePolarSeal`** — the matching assembly + the q=p seal **`reachesRigidOrCameron_affinePolar`** (carries
+  `T.card = O(d log p)`), via the keystone `exists_pow_matching_block`.
+
+**On disk, NOT in build — follow-up (detail: §13 "Floor-lowering assets" + the archive):**
+- **Floor-lowering** (per-anchor tightening below `q≥256`; axiom-clean, verified, not yet wired): `ScratchPencilCorank{,2}`,
+  `ScratchPencilBridge`, `ScratchPencilRegroup`, `ScratchTBoundCorank{,2}` (`c0_le_threequarters_corank{,2}`, drops `hq2`,
+  reaches `q≥16`), `ScratchRoute2{,Arith}`, `ScratchCountTight` (`c0_le_route2`: `NS ≤ (1−1/4q²)·|V|`, no threshold).
+- **`VO⁻₄(3)` instance** (the concrete `decide`-based proof-of-concept; its *result* is superseded by `AffinePolarSeal` as
+  the general route, kept as a worked instance): `ScratchBM3Bridge`, `ScratchBM3Glue` (`vo4minus_seal`).
+- **Seam spike**: `ScratchSeam` (the one mechanical `htransport` obligation; §11.6).
+
+**Rename / merge map (new ← old).** `Matching`←ScratchMatching · `PairForm`←PairSep · `PencilTBound`←Corank+GoodAnchor+
+Bucket+ChiNorm+TBound · `PerAnchorBound`←Count+C0+C0Final · `BadAnchorCount`←Incr4+Incr4b · `Coordinatization`←Incr4c ·
+`GoodAnchorNonvacuity`←Incr4d · `IsotropicIncidenceCount`←LemmaA · `IsotropicIncidenceCountK`←LemmaAK ·
+`ProfileReduction`←Crux+LemmaB · `ObservableCountBridge`←BridgeA+B+C+D · `ObservableCountBridgeK`←BridgeAllK ·
+`FieldGeneric`←FieldGen+BridgeK+FieldGenAdapter · `AffinePolarSeal`←Incr5. (Orphans `ScratchBridge` / `ScratchBridgeZ`
+were deleted — their `pairCount_ne_of_chiSep` / `zProfileSeparates_of_zSep` are superseded by the field-generic
+`pairCount_ne_of_chiSep_field` (in `ObservableCountBridge`) and `zProfileSeparatesK_of_zSep` (in `FieldGeneric`).)
+
 - **`FormsGraphConcrete.lean`** (IN BUILD, `lakefile.toml` `defaultTargets`, axiom-clean, GENERAL in `p,d,Q,T`) — the
   **route-(b) decomposition** and a live consumer. `QProfileSeparatesAtBase` (`:157`, arbitrary base `T`: agreeing isotropy
   counts ⟹ the field-valued `Q`-profile `{Q(v−t)}` agrees) + **`isotropySeparates_of_qProfileSeparates`** (`:174`, PROVEN
@@ -490,7 +279,7 @@ architecture end-to-end; §11 is the generalization.
 
   > **✅ AUDIT-A DONE (2026-06-24) — verdict GO (cost small–medium).** The toolkit (`GaussCount.lean`, the deepest math)
   > is *already* abstract over `{K} [Field K] [Fintype K] [DecidableEq K]` + `[Invertible (2:K)]`/`ringChar K ≠ 2` — **zero
-  > `ZMod p`, zero work.** The forms layer (`CascadeAffine §AffineScheme/§OrthogonalForm`, `ScratchLemmaA/B`) uses `ZMod p`
+  > `ZMod p`, zero work.** The forms layer (`CascadeAffine §AffineScheme/§OrthogonalForm`, Lemma A + Lemma B (now `IsotropicIncidenceCount` + `ProfileReduction`)) uses `ZMod p`
   > only as "finite field + cardinality witness": `affineE = Fintype.equivFinOfCardEq affV_card`, `similitudeGroup`/affine
   > group are pure `≃ₗ[K]`/`Kˣ` code, the count math is intrinsic to `K`. **`[Fact p.Prime]` is used ONLY to manufacture
   > `Fin (p^d)` nonemptiness (`NeZero`), and there is NO Frobenius in the forms argument** (Frobenius/`frobLinear` lives only
@@ -746,7 +535,7 @@ Dependency-ordered, with the modifications folded in:
 >   route is the **highest analytic risk of any family**; Handle 1 exists precisely to dodge it.
 >
 > **Strategic placement — Suzuki is NOT a 5th independent family; fold it into the char-2 track.** Both are char-2; both reuse
-> the **char-agnostic combinatorial layer** (matching `ScratchMatching`, `ZProfileSeparates`/`ScratchBridgeZ`, the seam
+> the **char-agnostic combinatorial layer** (matching `Matching`, `ZProfileSeparates`/`FieldGeneric`, the seam
 > `ScratchSeam`, Layer B) which touches no `χ`; both need the non-`χ` additive-trace substrate (which char-2 already builds).
 > Suzuki is the most bespoke *analytic* engine but it is a **single family with fully explicit coordinates**. Sequence: after the
 > char-2 orthogonal substrate exists, Suzuki either **extends** it (Handle 2) or **sidesteps** it (Handle 1, geometric).
@@ -821,7 +610,7 @@ Dependency-ordered, with the modifications folded in:
 > `gaussSum` are odd-char by construction. So char-2 needs the missing substrate built from near-zero.
 >
 > **(E) Net — reachable, parallel-to-affine-polar + substrate, MODERATE-to-LARGE.** The **combinatorial layer transfers
-> char-agnostically** (the matching trick `exists_separating_base`, the `ZProfileSeparates` reduction `ScratchBridgeZ`, the seam
+> char-agnostically** (the matching trick `exists_separating_base`, the `ZProfileSeparates` reduction `FieldGeneric`, the seam
 > `ScratchSeam`, Layer B — all pure finite combinatorics / scheme structure, no `χ`). The **analytic kernel must be rebuilt**:
 > a char-2 `IsotropySeparatesAtBase` proved with Arf + additive-trace counts replacing `χ`/Gauss, on top of a from-scratch
 > Mathlib char-2 quadratic-form substrate (Arf invariant + quadric count). So char-2 ≈ **a second copy of Layer A in char-2
@@ -958,7 +747,7 @@ assemble into the **full** seal modulo `{G3 + cited}`. `decide` rides along as t
 ## 13. Discharge of `ZProfileSeparates` (D3d) — DONE; + floor-lowering assets
 
 **What §13 was.** The scoped discharge of the one open research lemma — `QProfileSeparatesAtBase Q` for general `Q`,
-reduced (D1 + D2-bridge, `ScratchCrux`) to the single predicate **`ZProfileSeparates Q T`** (= D3d = forms-graph
+reduced (D1 + D2-bridge, `ProfileReduction`) to the single predicate **`ZProfileSeparates Q T`** (= D3d = forms-graph
 bounded WL-dim). **This is now CLOSED**: the q=p affine-polar seal `reachesRigidOrCameron_affinePolar` is built and in
 `build.sh` (see STATUS + §1). The build-increment chronology (increment 3 `c₀≤¾`, the observable↔count bridge B1a/B1b,
 the increment-4 cleanup, the singleton→pair correction, increment 5) is frozen in the archive + git; the decl-level map
@@ -967,7 +756,7 @@ is `PublicTheoremIndex.md`.
 **Verified corrections worth NOT re-walking** (detail in the archive):
 - **The observable is the PAIR count `Z_u({t,t'})`, not the singleton** — `Z_u({t})` is binary (`Probe_D3cObservable`),
   so `χ(Q)` is unobservable; the square class lives at `|S|=2`, where `Z_u({t,t'})` recovers `χ(det G₂)`.
-- **D3d is Weil-free** — the per-pair character sum factors into additive Gauss sums (`ScratchPairSep.pairCharSum_factor_gen`,
+- **D3d is Weil-free** — the per-pair character sum factors into additive Gauss sums (`PairForm.pairCharSum_factor_gen`,
   the reusable "no-Weil" core); the nondeg lines are triangle-bounded and absorbed by `hq1`, never beaten.
 
 **Evidence base** (regression assets, `GraphCanonizationProject.Tests/A2MonovariantProbe.cs`, all green):

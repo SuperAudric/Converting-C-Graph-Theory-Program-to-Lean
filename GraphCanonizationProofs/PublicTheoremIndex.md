@@ -1619,19 +1619,6 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `isoSep` | 81-117 | — | — |
 | `vo4minus_seal` | 119-122 | — | Definition |
 
-## ChainDescent/ScratchBridge.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `chiSep_imp_zSep` | 37-57 | — | — |
-| `pairCount_ne_of_chiSep` | 59-76 | — | — |
-
-## ChainDescent/ScratchBridgeZ.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `zProfileSeparates_of_zSep` | 32-46 | — | — |
-
 ## ChainDescent/ScratchCountTight.lean
 
 | Name | Line | Description | Notes |
@@ -1782,7 +1769,7 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `pencilDetPoly` | 146-150 | **The representing polynomial `P`** for the pencil determinant at witness `(y₀,z₀)`: the determinant of the `d×d` matrix of Gram-entry polynomials. | Definition, `noncomputable` |
 | `pencilDetPoly_eval` | 152-163 | **`P` represents the pencil determinant** — `eval (coords t₀) P = det(toMatrix₂ b b (polarBilin (y₀•pairForm_u + z₀•pairForm_v)))`. Via `RingHom.map_det` (eval is a ring hom) + the per-entry `entryPoly_eval` + `polar_pencil`. | — |
 | `pencilDetPoly_ne_zero` | 165-175 | **`P ≠ 0`** when there is a good anchor `t₀₀` with witness `(y₀,z₀)` (`polarRad = ⊥` there): the determinant is nonzero at `t₀₀`'s coordinates (`polarRad_ne_bot_iff_det_eq_zero`), so the polynomial cannot vanish identically. | — |
-| `det_totalDegree_le_gen` | 185-199 | **Per-entry degree bound for a determinant (general `D`).** Generalizes `ScratchGoodAnchor.det_totalDegree_le` (linear pencil, `D = 1`, `Fin 2` variables) to entries of `totalDegree ≤ D` over any variable type: the determinant of a `d × d` matrix has `totalDegree ≤ D · d`. | — |
+| `det_totalDegree_le_gen` | 185-199 | **Per-entry degree bound for a determinant (general `D`).** Generalizes `PencilTBound.det_totalDegree_le` (linear pencil, `D = 1`, `Fin 2` variables) to entries of `totalDegree ≤ D` over any variable type: the determinant of a `d × d` matrix has `totalDegree ≤ D · d`. | — |
 | `coordPoly_totalDegree_le` | 201-206 | `coordPoly` (a coordinate linear functional) has total degree ≤ 1. | — |
 | `gramQuadPoly_totalDegree_le` | 208-220 | `gramQuadPoly` (the quadratic form as a coordinate polynomial) has total degree ≤ 2. | — |
 | `LPoly_totalDegree_le` | 222-227 | The affine linear polynomial `LPoly` has total degree ≤ 1. | — |
@@ -1790,7 +1777,7 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `entryPoly_totalDegree_le` | 239-253 | The Gram-entry polynomial has total degree ≤ 2 (so its `d×d` determinant `pencilDetPoly` has degree ≤ 2d). | — |
 | `pencilDetPoly_totalDegree_le` | 255-269 | **`totalDegree (pencilDetPoly) ≤ 2·d`** (B-iii). The determinant of the `d × d` matrix of quadratic Gram-entry polynomials, via `det_totalDegree_le_gen` at `D = 2` (each entry `C y₀·entryPoly_u + C z₀·entryPoly_v` is quadratic). | — |
 | `badHgood_count_le` | 270-285 | **`#{¬hgood}` bounded — the bad-anchor Schwartz–Zippel count.** Instantiating `bad_anchor_count_le_of_poly` at the constructed `P = pencilDetPoly` (nonzero by the good-anchor witness, representing by `pencilDetPoly_eval`): `#{t₀ : ¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`, i.e. density `≤…` | — |
-| `beta_count_closed` | 286-325 | **B-ii — `β` closed to an explicit `O(d/q)` bound.** Composing `badHgood_count_le` (`#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`) with B-iii (`pencilDetPoly_totalDegree_le`, `totalDegree ≤ 2d`) and the landed `ScratchIncr4b.bad_anchor_card_le_hgood` (`β ≤ #{¬hgood} + 2`): the **full**… | — |
+| `beta_count_closed` | 286-325 | **B-ii — `β` closed to an explicit `O(d/q)` bound.** Composing `badHgood_count_le` (`#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`) with B-iii (`pencilDetPoly_totalDegree_le`, `totalDegree ≤ 2d`) and the landed `BadAnchorCount.bad_anchor_card_le_hgood` (`β ≤ #{¬hgood} + 2`): the **full**… | — |
 | `corr_zero_of_anchor` | 335-337 | A good anchor (`Q(t₀−u) ≠ 0`) kills the bridge's `corr` condition for every probe `t`: `¬(Q(t−u)=0 ∧ Q(t₀−u)=0)`. | — |
 | `QPoly_ne_zero` | 339-347 | `QPoly b Q c ≠ 0` whenever the form is nonzero somewhere (`Q w₀ ≠ 0`): its value at `t₀ = w₀ + c` is `Q w₀ ≠ 0`. | — |
 | `qZero_count_le` | 348-360 | **The corr-locus count.** `#{t₀ : Q(t₀−c)=0}·|K| ≤ 2·|V|` (a quadric in `t₀`), via the SZ engine on `QPoly` (`QPoly_eval`/`QPoly_totalDegree_le`). | — |
@@ -1815,14 +1802,14 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `IsotropySeparatesAtBaseK` | 136-147 | **`IsotropySeparatesAtBase`** (V-indexed): the fine isotropy-count profile at `T` separates all vertices. | Definition, `noncomputable` |
 | `extProfileK` | 151-156 | Extend a `T`-indexed isotropy profile to a full profile (junk `0` off `T`). | Definition, `noncomputable` |
 | `extProfileK_mem` | 157-160 | On `t ∈ T`, the extended isotropy profile `extProfileK σ` agrees with `σ` (abstract-K version). | — |
-| `qProfileSeparatesAtBaseK_of_zProfileSeparatesK` | 161-241 | **D1 — `ZProfileSeparatesK` ⟹ `QProfileSeparatesAtBaseK`.** Marginalise the fine profile over base-points ∉ `S` and the pivot class. (Faithful V-indexed copy of `ScratchCrux.qProfileSeparatesAtBase_of_zProfileSeparates`.) | — |
+| `qProfileSeparatesAtBaseK_of_zProfileSeparatesK` | 161-241 | **D1 — `ZProfileSeparatesK` ⟹ `QProfileSeparatesAtBaseK`.** Marginalise the fine profile over base-points ∉ `S` and the pivot class. (Faithful V-indexed copy of `ProfileReduction.qProfileSeparatesAtBase_of_zProfileSeparates`.) | — |
 | `isotropySeparatesK_of_qProfileSeparatesK` | 243-250 | **`QProfileSeparatesAtBaseK` ⟹ `IsotropySeparatesAtBaseK`** (V-indexed): the recovered `Q`-profile pins the vector via `coords_determineK` directly (no `affineE.symm.injective`). | — |
 | `isotropySeparatesK_of_zProfileSeparatesK` | 252-257 | **End-to-end reduction (abstract K).** `ZProfileSeparatesK Q T` ⟹ `IsotropySeparatesAtBaseK Q T` when `Q.polarBilin` is nondegenerate. | — |
 | `jointIsoCountK_eq_restricted` | 262-290 | **D2 (bridge)** — `jointIsoCountK Q u S` as the Lemma-A-ready restricted count over `V`: nonzero `w` on the cone `Q w = 0` whose shift by each config vector `t − u` (`t ∈ S`) stays isotropic. The original's `count_transport` (`Fin (p^d) ↔ V`) step is gone — we are already in `V`. | — |
 | `zProfileSeparatesK_of_zSep` | 298-309 | **Soft endpoint.** If every distinct pivot pair is separated by some sub-frame `S ⊆ T` in the joint isotropic counts, then `ZProfileSeparatesK Q T` holds (pure logic on the predicate). | — |
 | `isoClassK_eq_isoClass` | 319-329 | The V-indexed `isoClassK` (abstract `K`, here `K = ZMod p`) agrees with the build's `Fin (p^d)`-flavoured `isoClass` on the vector space — both are `if w = 0 then 0 else if Q w = 0 then 1 else 2`. | — |
 | `isoCount_transport` | 330-361 | **The relabel.** For a single pivot `w : Fin (p^d)`, the V-indexed isotropy-profile count (at base `T.image affineE.symm`, profile `σV`, pivot class `c`) equals the build's `Fin (p^d)`-indexed count (at base `T`, profile `σV ∘ affineE.symm`, pivot class `c`), via the bijection `affineE`. | — |
-| `isotropySeparatesAtBase_of_K` | 363-376 | **The q = p adapter.** `IsotropySeparatesAtBaseK Q (T.image affineE.symm)` (the abstract-K, V-indexed predicate of `ScratchFieldGen`) ⟹ `IsotropySeparatesAtBase Q T` (the build's `Fin (p^d)`-indexed predicate). Pure relabel: descend to `V` via `affineE.symm.injective`, transport the count agreement… | — |
+| `isotropySeparatesAtBase_of_K` | 363-376 | **The q = p adapter.** `IsotropySeparatesAtBaseK Q (T.image affineE.symm)` (the abstract-K, V-indexed predicate of `FieldGeneric`) ⟹ `IsotropySeparatesAtBase Q T` (the build's `Fin (p^d)`-indexed predicate). Pure relabel: descend to `V` via `affineE.symm.injective`, transport the count agreement… | — |
 | `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` | 378-391 | **The q=p adapter.** The abstract-`K` predicate `IsotropySeparatesAtBaseK Q (T.image affineE.symm)` reaches the in-build `Fin(p^d)`-indexed Witt-free seal capstone (a pure `affineE` relabel). | — |
 ## ChainDescent/GoodAnchorNonvacuity.lean
 
