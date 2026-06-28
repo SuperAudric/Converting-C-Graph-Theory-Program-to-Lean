@@ -48,6 +48,16 @@ solver** (gated on the same core). There is **no long cleanup list**.
 > both axiom-clean). **NEXT = the matching trick (increments 4–5) + the layered remainder** to general seal — see §3a.1 below.
 > Read plan §13 (all-DONE) + [[project_witt_free_bridge_lead_2026-06-20]] (tail) + `PerAnchorBound.lean`.
 
+> **▶ UPDATE (2026-06-28) — the seal stands at QUASIPOLY; a full POLYNOMIAL bound was investigated and ruled out (clean
+> pure-Lean route).** The q=p seal `reachesRigidOrCameron_affinePolar` carries a non-vacuous **quasipoly** WL-base
+> (`O(d log p)`); `viaSpielman` gives the citable sub-exp floor. Pushing to **polynomial** was deeply scoped this session:
+> proving the (empirically poly) generic canonizer poly reduces to `TwinsRealizedByResidualAut ≡ CellsAreOrbits` = the open
+> bounded-WL-dim core (the descent runs on the coarse similitude SRG, so Stage-B.0's clean `coords_determine` mechanism
+> needs the finer `O(Q)` = form recovery = a C# "Witt oracle"). **Fork: Route C (Witt oracle → clean poly) vs. accept
+> quasipoly.** Full arc + decision table: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md)
+> §1 item 1 "PROVABLE-BOUND INVESTIGATION" + memory `project_formsgraph_wldim_viability_2026-06-28`. This does **not** change
+> the seal's status below (quasipoly, modulo `{G3}`); it bounds how much further the *complexity* claim can go.
+
 ---
 
 ## 1. The `modulo` set — what each hypothesis is, and its true status

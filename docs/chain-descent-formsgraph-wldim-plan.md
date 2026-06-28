@@ -38,6 +38,16 @@
 > families are now LOWER priority (they widen the *quasipoly* result, which the recovery route would supersede).
 > Full detail: §1 item 1 + [[project_formsgraph_wldim_viability_2026-06-28]] (memory).
 
+> **★★★ POLY-ROUTE VERDICT (2026-06-28, investigation closed) — a clean PURE-LEAN polynomial bound is RULED OUT; it
+> reduces to open bounded-WL-dim.** The "complexity proof of the existing harvest" (Route A) was scoped to its keystone
+> `TwinsRealizedByResidualAut ≡ CellsAreOrbits` (the open `s(C)` core); the affine-realizer shortcut failed (per-pair ≠
+> simultaneous), and tracing the partial-base resolver through `coords_determine`/B.0 showed B.0's clean mechanism works
+> only for the finer **isometry scheme `O(Q)`** — the descent runs on the coarser **similitude SRG** (relation `isoClass`,
+> not exact `Q`), so resolving relative spheres → orbits is the count crux at *every* partial base = bounded-WL-dim = open.
+> **The real fork: Route C (constructive-Witt C# oracle → recover `Q` → clean poly via B.0) vs. ACCEPT QUASIPOLY** (the
+> banked seal). User prefers avoiding the C# oracle ⟹ pragmatic call = accept quasipoly; poly stays documented-open. Routes
+> A/B/C + the full investigation arc are in §1 item 1 (the "PROVABLE-BOUND INVESTIGATION" block) + the memory file.
+
 **THE q=p AFFINE-POLAR SEAL IS DONE AND PORTED (2026-06-27, axiom-clean `[propext, Classical.choice, Quot.sound]`, in
 `build.sh`).** Capstone **`AffinePolarSeal.reachesRigidOrCameron_affinePolar`** (`PublicTheoremIndex.md` →
 `ChainDescent/AffinePolarSeal.lean`): for an odd prime `p` and a nondegenerate quadratic form `Q` on `Fin d → ZMod p`
