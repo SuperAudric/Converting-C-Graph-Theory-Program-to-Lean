@@ -1,19 +1,101 @@
 /-
-# Increment 3 CLOSED: `c₀ ≤ 3/4` for a good anchor (q ≥ q₀).
+# Per-anchor non-separation bound (increment 3) — `c₀ ≤ ¾ < 1` for a good anchor.
 
-Assembles every landed piece into the final per-anchor non-separation bound:
-* `card_agree_le`     : `2·NS ≤ 2·z_u + n + ‖T‖`           (the counting identity, 3e-iii)
-* `normT_bucket_bound`: `q·‖T‖ ≤ q²√n + (d·q)(n/√q)`        (the |T| bound, 3e-ii)
-* `zeroCount_sq_le` + `radical_card_mul_card_le` : the `z_u` bound (proper-subspace radical)
-* `c0_le`             : the final arithmetic ⟹ `NS ≤ ¾·n`.
-Under the threshold `64q² ≤ n` (⟺ `d ≥ 3`, the open node), `64d² ≤ q`, `256 ≤ q`.
+Turns the `‖T‖` magnitude bound (`PencilTBound`) into a bound on the per-good-anchor non-separating probe count
+`NS = #{t : χ(I_u t) = χ(I_v t)}`:
 
-NOT in build (scratch; build oleans of imported scratch modules first).
+* **counting identity** (was `ScratchCount`): `2·NS ≤ 2·z_u + |V| + T_ℤ` (`z_u = #{I_u = 0}`), from a per-element
+  χ-value inequality.
+* **ℤ↔ℂ connect** (was `ScratchC0`): `T_ℤ ≤ |T_ℤ| = ‖T_ℂ‖`, so `2·NS ≤ 2·z_u + |V| + ‖T_ℂ‖`.
+* **capstone `c0_le_threequarters`** (was `ScratchC0Final`): assembling the counting identity, `normT_bucket_bound`,
+  and the `z_u` proper-subspace bound ⟹ `NS ≤ ¾·|V|` for a good anchor (`q ≥ q₀`, `d ≥ 3`).
+
+(Merge of the former `ScratchCount` + `ScratchC0` + `ScratchC0Final`.)
 -/
-import ChainDescent.ScratchTBound
-import ChainDescent.ScratchC0
+import ChainDescent.PencilTBound
+import Mathlib.Analysis.Complex.Basic
+import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
 
 namespace ChainDescent
+
+section -- ═══════════ was ScratchCount ═══════════
+
+open Finset
+
+/-- Per-element χ-value inequality (the heart of the counting identity). For `ca, cb ∈ {-1,0,1}`:
+`2·[ca=cb] ≤ 2·[ca=0] + 1 + ca·cb`. -/
+theorem int_char_pointwise (ca cb : ℤ)
+    (hca : ca = -1 ∨ ca = 0 ∨ ca = 1) (hcb : cb = -1 ∨ cb = 0 ∨ cb = 1) :
+    2 * (if ca = cb then (1 : ℤ) else 0) ≤ 2 * (if ca = 0 then (1 : ℤ) else 0) + 1 + ca * cb := by
+  rcases hca with h | h | h <;> rcases hcb with h' | h' | h' <;> subst h <;> subst h' <;> decide
+
+/-- **The c₀ counting identity.** `2·#{t : χ(a t) = χ(b t)} ≤ 2·#{t : a t = 0} + |V| + ∑_t χ(a t)·χ(b t)`,
+for the quadratic character `χ = quadraticChar K`. (`a, b = I_u, I_v`.) -/
+theorem counting_identity {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    {V : Type*} [Fintype V] [DecidableEq V] (a b : V → K) :
+    2 * ((Finset.univ.filter (fun t => quadraticChar K (a t) = quadraticChar K (b t))).card : ℤ)
+      ≤ 2 * ((Finset.univ.filter (fun t => a t = 0)).card : ℤ)
+        + (Fintype.card V : ℤ)
+        + ∑ t : V, quadraticChar K (a t) * quadraticChar K (b t) := by
+  have hval : ∀ k : K, quadraticChar K k = -1 ∨ quadraticChar K k = 0 ∨ quadraticChar K k = 1 := by
+    intro k
+    by_cases hk : k = 0
+    · subst hk; rw [quadraticChar_zero]; tauto
+    · rcases quadraticChar_dichotomy hk with h | h <;> tauto
+  -- replace the `a t = 0` filter by the `χ(a t) = 0` filter
+  have hz : (Finset.univ.filter (fun t => a t = 0))
+          = (Finset.univ.filter (fun t => quadraticChar K (a t) = 0)) := by
+    apply Finset.filter_congr
+    intro t _
+    rw [quadraticChar_eq_zero_iff]
+  rw [hz, Finset.card_filter, Finset.card_filter,
+    show (Fintype.card V : ℤ) = ∑ _t : V, (1 : ℤ) from by
+      rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, mul_one]]
+  push_cast
+  rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  exact Finset.sum_le_sum (fun t _ => int_char_pointwise _ _ (hval _) (hval _))
+
+end
+
+section -- ═══════════ was ScratchC0 ═══════════
+
+open Finset
+
+/-- The integer character sum is `≤` the norm of the complex character sum (`T_ℤ ≤ |T_ℤ| = ‖T_ℂ‖`). -/
+theorem charSum_int_le_norm {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    {V : Type*} [Fintype V] (a b : V → K) :
+    ((∑ t : V, quadraticChar K (a t) * quadraticChar K (b t) : ℤ) : ℝ)
+      ≤ ‖∑ t : V, ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (a t)
+          * ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (b t)‖ := by
+  have hcast : (∑ t : V, ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (a t)
+        * ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (b t))
+      = (((∑ t : V, quadraticChar K (a t) * quadraticChar K (b t) : ℤ) : ℝ) : ℂ) := by
+    push_cast [MulChar.ringHomComp_apply]
+    simp only [eq_intCast]
+  rw [hcast, Complex.norm_real]
+  exact le_abs_self _
+
+/-- **The count controlled by the magnitude.** `2·#{χ(a)=χ(b)} ≤ 2·#{a=0} + |V| + ‖T_ℂ‖` over ℝ, combining
+`counting_identity` with `charSum_int_le_norm`. -/
+theorem card_agree_le {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+    {V : Type*} [Fintype V] [DecidableEq V] (a b : V → K) :
+    2 * ((Finset.univ.filter (fun t => quadraticChar K (a t) = quadraticChar K (b t))).card : ℝ)
+      ≤ 2 * ((Finset.univ.filter (fun t => a t = 0)).card : ℝ)
+        + (Fintype.card V : ℝ)
+        + ‖∑ t : V, ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (a t)
+            * ((quadraticChar K).ringHomComp (Int.castRingHom ℂ)) (b t)‖ := by
+  have hc := counting_identity a b
+  have hT := charSum_int_le_norm a b
+  have hcR : 2 * ((Finset.univ.filter
+        (fun t => quadraticChar K (a t) = quadraticChar K (b t))).card : ℝ)
+      ≤ 2 * ((Finset.univ.filter (fun t => a t = 0)).card : ℝ) + (Fintype.card V : ℝ)
+        + ((∑ t : V, quadraticChar K (a t) * quadraticChar K (b t) : ℤ) : ℝ) := by
+    exact_mod_cast hc
+  linarith [hcR, hT]
+
+end
+
+section -- ═══════════ was ScratchC0Final ═══════════
 
 open Finset Module
 
@@ -99,6 +181,12 @@ theorem c0_le_threequarters {K : Type*} [Field K] [Fintype K] [DecidableEq K] [I
       rw [hzPdef, ← hreindex]
     rw [hzeq]; exact hcount
 
+end
+
 end ChainDescent
 
+#print axioms ChainDescent.int_char_pointwise
+#print axioms ChainDescent.counting_identity
+#print axioms ChainDescent.charSum_int_le_norm
+#print axioms ChainDescent.card_agree_le
 #print axioms ChainDescent.c0_le_threequarters

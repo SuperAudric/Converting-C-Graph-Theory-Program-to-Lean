@@ -1,29 +1,219 @@
 /-
-# B1a wrap (iii) + the ℂ-restated final assembly — closing the observable↔count bridge.
+# The observable↔count bridge (prime field) — `χ(det G₂) ↔ Z_u(S)`.
 
-This module lands the two remaining bridge pieces (the architecture was closed in `ScratchBridge`/`A`/`B`/`C`):
+Turns the per-pair separating invariant `χ(det G₂(u; t, t₀))` into the observable joint isotropic counts
+`Z_u(S) = jointIsoCount Q u S`, over the prime field `ZMod p`. The chain (all for the `|S| = 2` sub-frame `{t, t₀}`,
+even form dimension `d`):
 
-* **wrap (iii) — `chi_configDet_eq_chi_pairForm`**: the `χ`-identification `χ(D) = χ(I_w(t))`, where `D` is the
-  `Module.finBasis` config-Gram determinant appearing in `fullcount_pair_closed` and `I_w(t) = det G₂(w;t,t₀) =
-  pairForm Q (t̄₀−ū)(t̄−ū)`. The `associated = ½·polar` factor-2 and the `finBasis`↔`Pi.basisFun` change of basis BOTH
-  enter only as **square** factors (`(⅟2)²`, `(det P)²`), which the quadratic character `χ` kills — so `χ(D) = χ(I_w)`
-  exactly, no residual `χ(2)` and no need to identify `finBasis` with the standard basis.
-* **the ℂ-restated B1b (`chiSep_imp_zSep_field`/`pairCount_ne_of_chiSep_field`)** + **the assembled per-pair closed form
-  (`jointIsoCount_pair_closed_corr0`)**: over a `CharZero` field (ℂ), on the `corr = 0` locus, the observable joint count
-  satisfies `Z_u({t,t₀})·q³ = qᵈ + χ(I_u)·K·(q·[Q w₀=0] − 1)` (`K = gaussSum²·∑ψ(Q)`), so two points whose pair invariant
-  `χ(I)` differs have distinct joint counts (`jointIsoCount_ne_of_chiSep_pair`). This feeds `zProfileSeparates_of_zSep`.
+* **wrap (collapse) `levelset_count_collapse`** — the `s`-sum of the Lemma-A (`IsotropicIncidenceCount`) closed form
+  collapses, for `|S| = 2` and even `d`, to `count · q³ = |V| + χ(D)·(gaussSum²·∑ψ(Q))·(q·[c=0] − 1)`, with the config
+  dependence entering ONLY through `χ(D)` (= the pair invariant). `χ-kills-squares` lives in wrap (iii).
+* **wrap (i) `fullcount_eq_jointIsoCount_add_corr`** — the Lemma-A fullcount = the observable `jointIsoCount` + the
+  `y=0` correction indicator.
+* **wrap (ii) `fullcount_pair_eq_levelset` / `fullcount_pair_closed`** — index the pair as a `Fin 2` config and feed
+  the fullcount through the collapse, giving the fullcount closed form over `{t, t₀}`.
+* **wrap (iii) `chi_configDet_eq_chi_pairForm`** — `χ(D) = χ(I_w(t))`: the `½·polar` factor-2 and the
+  `finBasis ↔ basisFun` change of basis both enter as SQUARES, killed by `χ`.
+* **assembly `jointIsoCount_pair_closed_corr0`** + the ℂ-restated distinctness (`chiSep_imp_zSep_field` /
+  `pairCount_ne_of_chiSep_field`) ⟹ the per-pair capstone **`jointIsoCount_ne_of_chiSep_pair`**: `χ(I)`-separation ⟹
+  `Z`-separation. Feeds `ScratchBridgeK.zProfileSeparatesK_of_zSep` (via the abstract-K lift `ScratchBridgeAllK`).
 
-NOT in build (scratch; `lake env lean`, after `lake build ChainDescent.ScratchBridgeC ChainDescent.ScratchPairSep`).
+(Merge of the former `ScratchBridge{A,B,C,D}`. The abstract-`K` mirror is `ScratchBridgeAllK`.)
 -/
-import ChainDescent.ScratchBridgeC
-import ChainDescent.ScratchPairSep
+import ChainDescent.IsotropicIncidenceCount
+import ChainDescent.ProfileReduction
+import ChainDescent.PairForm
 
 namespace ChainDescent
 
-open QuadraticMap Module Matrix
+open QuadraticMap Finset Module Matrix
 
 variable {p d : ℕ} [Fact p.Prime]
 
+-- ═══ collapse (was ScratchBridgeA) ═══
+open scoped Classical in
+/-- **B1a analytic core — the `|S|=2`, even-`d` `s`-sum collapse.** For a nondegenerate config Gram (`hG`), config
+size `m = 2`, and **even** `d` with an orthogonal anisotropic basis `v` of `Q` (`hv`/`hw`), the level-set count at
+level `c` satisfies
+`count · q³ = |V| + χ(D) · (gaussSum² · W) · (q·[c=0] − 1)`,
+`D = det` of `associated (configForm Q a)` at `finBasis`, `W = ∑_x ψ(Q x)`. The config-dependence enters **only**
+through `χ(D)` (= the pair invariant `χ(det G₂)`) — the property the bridge needs. -/
+theorem levelset_count_collapse (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    [Invertible (2 : ZMod p)] (hF : ringChar (ZMod p) ≠ 2)
+    (a : Fin 2 → (Fin d → ZMod p)) (c : ZMod p) (hd : Even d)
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q (a i) (a j)) :
+        Matrix (Fin 2) (Fin 2) (ZMod p)).det)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive)
+    (v : Module.Basis (Fin (Module.finrank (ZMod p) (Fin d → ZMod p))) (ZMod p) (Fin d → ZMod p))
+    (hv : (QuadraticMap.associated (R := ZMod p) Q).IsOrthoᵢ v) (hw : ∀ i, Q (v i) ≠ 0) :
+    ((Finset.univ.filter (fun x : Fin d → ZMod p =>
+        (∀ j, QuadraticMap.polar Q x (a j) = 0) ∧ Q x = c)).card : R') * (p : R') ^ 3
+      = (Fintype.card (Fin d → ZMod p) : R')
+        + ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R'))
+            ((LinearMap.BilinForm.toMatrix (Module.finBasis (ZMod p) (Fin 2 → ZMod p))
+              (QuadraticMap.associated (configForm Q a))).det)
+          * (gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R')) ψ ^ 2
+              * ∑ x : Fin d → ZMod p, ψ (Q x))
+          * ((p : R') * (if c = 0 then 1 else 0) - 1) := by
+  classical
+  haveI : NeZero p := ⟨(Fact.out : p.Prime).pos.ne'⟩
+  set χ := (quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R') with hχ
+  set g := gaussSum χ ψ with hg
+  set W := ∑ x : Fin d → ZMod p, ψ (Q x) with hW
+  set D := (LinearMap.BilinForm.toMatrix (Module.finBasis (ZMod p) (Fin 2 → ZMod p))
+      (QuadraticMap.associated (configForm Q a))).det with hD
+  -- the landed closed form, then collapse the `s`-sum
+  rw [show ((p : R') ^ 3) = (p : R') ^ (2 + 1) from by norm_num, levelset_count_eq Q a c hG hψ]
+  congr 1
+  -- per-`s` evaluation of the inner `ρ`-sum
+  have hsq : ∀ t : ZMod p, t ≠ 0 → χ t ^ 2 = 1 := by
+    intro t ht
+    have h := quadraticChar_sq_one (F := ZMod p) ht
+    have : (χ t) ^ 2 = ((1 : ℤ) : R') := by
+      rw [hχ, MulChar.ringHomComp_apply, ← map_pow]; exact_mod_cast congrArg (Int.cast (R := R')) h
+    simpa using this
+  have hterm : ∀ s ∈ Finset.univ.erase (0 : ZMod p),
+      (∑ ρ : Fin 2 → ZMod p, ψ (-(s * c)) *
+          (ψ (-(s⁻¹ * Q (∑ j, ρ j • a j))) * ∑ x : Fin d → ZMod p, ψ (s * Q x)))
+        = ψ (-(s * c)) * (χ D * (g ^ 2 * W)) := by
+    intro s hs
+    have hs0 : s ≠ 0 := Finset.ne_of_mem_erase hs
+    -- factor out the `ρ`-independent pieces
+    have hfac : ∀ ρ : Fin 2 → ZMod p,
+        ψ (-(s * c)) * (ψ (-(s⁻¹ * Q (∑ j, ρ j • a j))) * ∑ x : Fin d → ZMod p, ψ (s * Q x))
+          = (ψ (-(s * c)) * ∑ x : Fin d → ZMod p, ψ (s * Q x))
+            * ψ ((-(s⁻¹)) * configForm Q a ρ) := by
+      intro ρ
+      rw [configForm_apply, show (-(s⁻¹)) * Q (∑ j, ρ j • a j) = -(s⁻¹ * Q (∑ j, ρ j • a j)) from by
+        ring]
+      ring
+    rw [Finset.sum_congr rfl (fun ρ _ => hfac ρ), ← Finset.mul_sum]
+    -- config `ρ`-sum via `configGaussSum_eq_det` at the unit `s' = -s⁻¹`
+    have hsinv : (-(s⁻¹)) ≠ 0 := neg_ne_zero.mpr (inv_ne_zero hs0)
+    have hcfg := configGaussSum_eq_det Q hF a hG hψ (Units.mk0 (-(s⁻¹)) hsinv)
+    rw [Units.val_mk0] at hcfg
+    rw [hcfg]
+    -- global `x`-sum via `sum_addChar_quadForm_smul` at the unit `s`
+    have hglob := sum_addChar_quadForm_smul hF hψ Q v hv hw (Units.mk0 s hs0)
+    rw [Units.val_mk0] at hglob
+    rw [hglob, ← hW]
+    -- kill the `s`-character powers (`m = 2` even, `d` even) by rewriting only the power subterms
+    have hp1 : χ (-(s⁻¹)) ^ (Module.finrank (ZMod p) (Fin 2 → ZMod p)) = 1 := by
+      rw [Module.finrank_fin_fun (R := ZMod p)]; exact hsq _ hsinv
+    have hp2 : χ s ^ (Module.finrank (ZMod p) (Fin d → ZMod p)) = 1 := by
+      rw [Module.finrank_fin_fun (R := ZMod p)]
+      obtain ⟨r, hr⟩ := hd
+      rw [hr, ← two_mul, pow_mul, hsq s hs0, one_pow]
+    have hp3 : g ^ (Module.finrank (ZMod p) (Fin 2 → ZMod p)) = g ^ 2 := by
+      rw [Module.finrank_fin_fun (R := ZMod p)]
+    rw [hp1, hp2, hp3]
+    simp only [hχ, hg, hW, hD]
+    ring
+  rw [Finset.sum_congr rfl hterm, ← Finset.sum_mul]
+  -- additive orthogonality: `∑_{s≠0} ψ(−(s·c)) = q·[c=0] − 1`
+  have horth : (∑ s ∈ Finset.univ.erase (0 : ZMod p), ψ (-(s * c)))
+      = (p : R') * (if c = 0 then 1 else 0) - 1 := by
+    rw [Finset.sum_erase_eq_sub (Finset.mem_univ (0 : ZMod p)),
+      Finset.sum_congr rfl (fun s _ => by rw [show -(s * c) = s * (-c) from by ring]),
+      AddChar.sum_mulShift (-c) hψ]
+    simp only [zero_mul, neg_zero, AddChar.map_zero_eq_one, ZMod.card, neg_eq_zero]
+    rcases eq_or_ne c 0 with hc | hc
+    · simp [hc]
+    · simp [hc]
+  rw [horth]
+  ring
+
+
+-- ═══ wrap i (was ScratchBridgeB) ═══
+open scoped Classical in
+/-- **B1a wrap (i) — `fullcount = jointIsoCount + (y=0 correction)`.** The Lemma-A fullcount over `V`
+(`#{y : Q y = 0 ∧ ∀ t∈S, Q(y−(t̄−ū)) = 0}`, the `reduction_to_levelset_nondeg` entry point) equals the observable
+`jointIsoCount Q u S` (the same count restricted to `y ≠ 0`) plus the correction `[∀ t∈S, Q(t̄−ū)=0]`. Pure compose of
+`cone_count_zero_split` (full = restricted + corr) and `jointIsoCount_eq_restricted` (jointIsoCount = restricted). -/
+theorem fullcount_eq_jointIsoCount_add_corr (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (S : Finset (Fin (p ^ d))) (u : Fin (p ^ d)) :
+    (Finset.univ.filter (fun y : Fin d → ZMod p =>
+        Q y = 0 ∧ ∀ t ∈ S, Q (y - (affineE.symm t - affineE.symm u)) = 0)).card
+      = jointIsoCount Q u S
+        + (if ∀ t ∈ S, Q (affineE.symm t - affineE.symm u) = 0 then 1 else 0) := by
+  rw [cone_count_zero_split Q S u, ← jointIsoCount_eq_restricted]
+
+
+-- ═══ wrap ii (was ScratchBridgeC) ═══
+open scoped Classical in
+/-- **B1a wrap (ii-a) — fullcount over `{t,t₀}` = the homogeneous level-set count.** Index the pair `{t,t₀}` as the
+`Fin 2` config `a = ![t̄−ū, t̄₀−ū]`; on the config-nondegenerate locus (`hG : IsUnit (config Gram det)`) the Lemma-A
+fullcount equals the level-set count of `Q|_{Uᗮ}` at level `−Q w₀` for the spanning `w₀ = ∑ c k • a k`. Pure compose of
+the `Finset {t,t₀}` ↔ `Fin 2` predicate conversion with the landed `reduction_to_levelset_nondeg`. -/
+theorem fullcount_pair_eq_levelset (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (u t t₀ : Fin (p ^ d))
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q
+        (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] i)
+        (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] j)) :
+      Matrix (Fin 2) (Fin 2) (ZMod p)).det) :
+    ∃ c : Fin 2 → ZMod p,
+      (Finset.univ.filter (fun y : Fin d → ZMod p =>
+          Q y = 0 ∧ ∀ s ∈ ({t, t₀} : Finset (Fin (p ^ d))),
+            Q (y - (affineE.symm s - affineE.symm u)) = 0)).card
+        = (Finset.univ.filter (fun x : Fin d → ZMod p =>
+          (∀ j, QuadraticMap.polar Q x
+              (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] j) = 0)
+          ∧ Q x = - Q (∑ k, c k •
+              (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] k)))).card := by
+  set a : Fin 2 → (Fin d → ZMod p) :=
+    ![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] with ha
+  -- the Finset-`{t,t₀}` membership predicate equals the `Fin 2`-config predicate
+  have hpred : (Finset.univ.filter (fun y : Fin d → ZMod p =>
+        Q y = 0 ∧ ∀ s ∈ ({t, t₀} : Finset (Fin (p ^ d))),
+          Q (y - (affineE.symm s - affineE.symm u)) = 0))
+      = (Finset.univ.filter (fun y : Fin d → ZMod p =>
+        Q y = 0 ∧ ∀ j, Q (y - a j) = 0)) := by
+    apply Finset.filter_congr
+    intro y _
+    refine and_congr_right (fun _ => ?_)
+    simp only [Finset.mem_insert, Finset.mem_singleton, forall_eq_or_imp, forall_eq,
+      Fin.forall_fin_two, ha, Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [hpred]
+  exact reduction_to_levelset_nondeg Q a hG
+
+open scoped Classical in
+/-- **B1a wrap (ii-b) — the fullcount closed form over `{t,t₀}`.** Composing wrap (ii-a) with
+`levelset_count_collapse`: for even `d` and a config-nondegenerate Gram, the Lemma-A fullcount over `{t,t₀}` satisfies
+`fullcount · q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀ = 0] − 1)`, with `w₀ = ∑ c k • a k` the spanning solution and
+`D = det` of the config Gram. The level bit `[c=0]` is `[−Q w₀ = 0] = [Q w₀ = 0]`. This is the fullcount side of the
+bridge's per-pair closed form; the observable `jointIsoCount` then equals `fullcount − corr` (wrap (i)). -/
+theorem fullcount_pair_closed (Q : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    [Invertible (2 : ZMod p)] (hF : ringChar (ZMod p) ≠ 2)
+    (u t t₀ : Fin (p ^ d)) (hd : Even d)
+    (hG : IsUnit (Matrix.of (fun i j => QuadraticMap.polar Q
+        (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] i)
+        (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] j)) :
+      Matrix (Fin 2) (Fin 2) (ZMod p)).det)
+    {R' : Type*} [CommRing R'] [IsDomain R'] {ψ : AddChar (ZMod p) R'} (hψ : ψ.IsPrimitive)
+    (v : Module.Basis (Fin (Module.finrank (ZMod p) (Fin d → ZMod p))) (ZMod p) (Fin d → ZMod p))
+    (hv : (QuadraticMap.associated (R := ZMod p) Q).IsOrthoᵢ v) (hw : ∀ i, Q (v i) ≠ 0) :
+    ∃ w₀ : Fin d → ZMod p,
+      ((Finset.univ.filter (fun y : Fin d → ZMod p =>
+          Q y = 0 ∧ ∀ s ∈ ({t, t₀} : Finset (Fin (p ^ d))),
+            Q (y - (affineE.symm s - affineE.symm u)) = 0)).card : R') * (p : R') ^ 3
+        = (Fintype.card (Fin d → ZMod p) : R')
+          + ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R'))
+              ((LinearMap.BilinForm.toMatrix (Module.finBasis (ZMod p) (Fin 2 → ZMod p))
+                (QuadraticMap.associated (configForm Q
+                  ![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u]))).det)
+            * (gaussSum ((quadraticChar (ZMod p)).ringHomComp (Int.castRingHom R')) ψ ^ 2
+                * ∑ x : Fin d → ZMod p, ψ (Q x))
+            * ((p : R') * (if Q w₀ = 0 then 1 else 0) - 1) := by
+  obtain ⟨c, hc⟩ := fullcount_pair_eq_levelset Q u t t₀ hG
+  refine ⟨∑ k, c k • (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] k), ?_⟩
+  rw [hc, levelset_count_collapse Q hF
+      ![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u]
+      (- Q (∑ k, c k • (![affineE.symm t - affineE.symm u, affineE.symm t₀ - affineE.symm u] k)))
+      hd hG hψ v hv hw]
+  simp only [neg_eq_zero]
+
+
+-- ═══ wrap iii + assembly (was ScratchBridgeD) ═══
 /-- The config polar-Gram determinant (the `IsUnit` hypothesis matrix of `fullcount_pair_closed`/`levelset_count_collapse`)
 is the pair invariant `pairForm`. `det_fin_two` + `polar_self` (`polar Q x x = 2 Q x`) + `polar_comm` + the structural
 `detG2_eq_pairForm` (`4 Q(a₀) Q(a₁) − B(a₀,a₁)² = pairForm`). -/
@@ -276,8 +466,13 @@ theorem jointIsoCount_ne_of_chiSep_pair (Q : QuadraticForm (ZMod p) (Fin d → Z
   intro hjeq
   exact pairCount_ne_of_chiSep_field hq hK hbu hbv hcu hcv hne hu hvv (by exact_mod_cast hjeq)
 
+
 end ChainDescent
 
+#print axioms ChainDescent.levelset_count_collapse
+#print axioms ChainDescent.fullcount_eq_jointIsoCount_add_corr
+#print axioms ChainDescent.fullcount_pair_eq_levelset
+#print axioms ChainDescent.fullcount_pair_closed
 #print axioms ChainDescent.configPolarDet_eq_pairForm
 #print axioms ChainDescent.chi_configDet_eq_chi_pairForm
 #print axioms ChainDescent.chiSep_imp_zSep_field
