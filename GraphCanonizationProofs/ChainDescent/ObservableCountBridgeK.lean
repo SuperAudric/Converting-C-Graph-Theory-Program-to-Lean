@@ -14,9 +14,9 @@ of `2 < p`).
 
 Axiom-clean target `[propext, Classical.choice, Quot.sound]`; NOT in build.
 -/
-import ChainDescent.ScratchLemmaAK
-import ChainDescent.ScratchPairSep
-import ChainDescent.ScratchBridgeD
+import ChainDescent.IsotropicIncidenceCountK
+import ChainDescent.PairForm
+import ChainDescent.ObservableCountBridge
 
 namespace ChainDescent
 

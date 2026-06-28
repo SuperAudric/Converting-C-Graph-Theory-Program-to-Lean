@@ -146,9 +146,11 @@ close it — is set out in
 > closes the affine-polar `VO^ε` residue (q=p, `q≳32d`/`q≥256`) to the **`reachesRigidOrCameron` disjunction modulo `{G3}`,
 > Witt-free, no `hSmallAutThin`** — capstone `reachesRigidOrCameron_affinePolar`. **NON-VACUITY THREAD ✅DONE (2026-06-27):**
 > the seal now **carries** `T.card ≤ 128·(Nat.log 2 ((p^d)²) + 1) = O(d log p)` (log-free block keystone
-> `exists_pow_matching_block`), so the slice is non-vacuous — a genuine **quasipolynomial** WL-base. **PORT + DOC-CONDENSE
-> ✅DONE (2026-06-27):** all 27 forms-graph pair-route modules are in `build.sh` (serial full build ~98s, axiom-clean;
-> `PublicTheoremIndex` regenerated), and the plan doc was condensed 2225→~1000 lines (build history → the archive).
+> `exists_pow_matching_block`), so the slice is non-vacuous — a genuine **quasipolynomial** WL-base. **PORT + RESTRUCTURE +
+> DESCRIBE ✅DONE (2026-06-27/28):** the forms-graph pair-route closure is in `build.sh`, **restructured from 27 `Scratch*`
+> files into 14 named modules** (`AffinePolarSeal`, `ObservableCountBridge{,K}`, `PencilTBound`, `PairForm`, `FieldGeneric`,
+> `BadAnchorCount`, `Coordinatization`, …; rename map in plan §1), full build green ~109s, axiom-clean; `PublicTheoremIndex`
+> re-homed with all 223 decls described. The plan doc was condensed 2225→~1000 lines (build history → the archive).
 > **Working order now: floor-lowering** (`q≳32d → O(d)` via a tight corank shell count, then larger frames for
 > small-q-growing-d), then q=pᵉ seam (Layer D) / other families. **Read the plan STATUS block first, then
 > `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; NB the matching base is `O(log n)` (quasipoly

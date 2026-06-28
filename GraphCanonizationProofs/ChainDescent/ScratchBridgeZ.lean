@@ -23,7 +23,7 @@ So the bridge reduces to: increment 4/5 must produce the hypothesis `hsep` below
 turned into a `Z`-separating base by the per-pair step) — and `ZProfileSeparates` follows. NOT in build (scratch;
 `lake env lean ChainDescent/ScratchBridgeZ.lean`, after `lake build ChainDescent.ScratchCrux`).
 -/
-import ChainDescent.ScratchCrux
+import ChainDescent.ProfileReduction
 
 namespace ChainDescent
 

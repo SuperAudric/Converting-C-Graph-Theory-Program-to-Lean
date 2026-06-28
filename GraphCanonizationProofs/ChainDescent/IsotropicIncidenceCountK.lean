@@ -9,7 +9,7 @@ toolkit (`GaussCount`) is already abstract over a finite field, so the lift is a
 
 Mirrors `ScratchLemmaA` decl-for-decl. Axiom-clean target `[propext, Classical.choice, Quot.sound]`; NOT in build.
 -/
-import ChainDescent.ScratchFieldGen
+import ChainDescent.FieldGeneric
 
 namespace ChainDescent
 open QuadraticMap Finset

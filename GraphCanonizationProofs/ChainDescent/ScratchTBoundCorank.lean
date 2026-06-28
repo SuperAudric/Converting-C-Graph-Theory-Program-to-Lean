@@ -9,8 +9,8 @@ is removed (no separate `c0_le` needed; the constant case is already covered).
 
 NOT in build (scratch).
 -/
-import ChainDescent.ScratchTBound
-import ChainDescent.ScratchC0
+import ChainDescent.PencilTBound
+import ChainDescent.PerAnchorBound
 import ChainDescent.ScratchPencilRegroup
 
 namespace ChainDescent

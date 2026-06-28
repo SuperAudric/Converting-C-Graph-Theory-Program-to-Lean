@@ -14,7 +14,7 @@ Then `LinearEquiv.finrank_map_eq` transports the dimension.
 NOT in build (scratch; `lake env lean ChainDescent/ScratchPencilBridge.lean`, after building the imported scratch oleans).
 -/
 import ChainDescent.ScratchPencilCorank
-import ChainDescent.ScratchCorank
+import ChainDescent.PencilTBound
 import Mathlib.LinearAlgebra.Matrix.SesquilinearForm
 
 namespace ChainDescent

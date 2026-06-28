@@ -25,7 +25,7 @@ Write `a = t₀₀ − u`, `b = t₀₀ − v = a − w`, `w = v − u ≠ 0`. F
 
 NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4d.lean`, after `lake build ChainDescent.ScratchIncr4c`).
 -/
-import ChainDescent.ScratchIncr4c
+import ChainDescent.Coordinatization
 
 namespace ChainDescent
 

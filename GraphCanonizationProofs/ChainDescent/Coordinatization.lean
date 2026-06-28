@@ -23,7 +23,7 @@ a cosmetic cross-module `Classical.propDecidable` mismatch on the `{¬hgood}` fi
 
 NOT in build (scratch; `lake env lean ChainDescent/ScratchIncr4c.lean`, after `lake build ChainDescent.ScratchIncr4b`).
 -/
-import ChainDescent.ScratchIncr4b
+import ChainDescent.BadAnchorCount
 
 namespace ChainDescent
 

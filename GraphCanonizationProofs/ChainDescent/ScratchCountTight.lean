@@ -14,7 +14,7 @@ identity `NS = Z_both0 + (N_nz+S)/2` held `16/16`, exact `c₀ ≤ 0.556 < 1`; t
 upper bound feeding it.)
 
 NOT in build (scratch; `lake env lean ChainDescent/ScratchCountTight.lean` after its imports' oleans build). -/
-import ChainDescent.ScratchC0
+import ChainDescent.PerAnchorBound
 
 namespace ChainDescent
 

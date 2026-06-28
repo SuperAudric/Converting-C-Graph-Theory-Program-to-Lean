@@ -17,12 +17,11 @@ NOT remove the shell overhead, so it does not lower this matching's floor; that 
 
 Axiom-clean target `[propext, Classical.choice, Quot.sound]`; NOT in build.
 -/
-import ChainDescent.ScratchMatching
-import ChainDescent.ScratchIncr4
-import ChainDescent.ScratchIncr4d
-import ChainDescent.ScratchBridgeAllK
-import ChainDescent.ScratchBridgeK
-import ChainDescent.ScratchFieldGenAdapter
+import ChainDescent.Matching
+import ChainDescent.BadAnchorCount
+import ChainDescent.GoodAnchorNonvacuity
+import ChainDescent.ObservableCountBridgeK
+import ChainDescent.FieldGeneric
 import Mathlib.Tactic
 
 namespace ChainDescent

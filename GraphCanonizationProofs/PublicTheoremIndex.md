@@ -440,7 +440,7 @@ The a-priori cascade-oracle Lean contract (plan: `docs/Archive/ChainDescent/chai
 | `orbitPartition_of_support_disjoint` | 112-126 | §C.0.1 **Support backbone.** An automorphism that fixes the individualized set `S` pointwise and sends `v ↦ w` certifies that `v, w` share an `Aut_S`-orbit. | — |
 | `exists_orbit_witness_of_aut` | 128-138 | §C.0.1 **Availability depth.** A symmetry of support size `s` keeps its orbit pair certifiable down to individualized sets of size `n − s` — full-support symmetries only at the root, transpositions almost to the leaves. | — |
 | `CascadeOracleSpec` | 140-152 | The a-priori cascade-oracle interface: at an internal descent node, return either `none` or a verified automorphism merging two representatives. The cascade analogue of `LinearOracleSpec` (not leaf-gated). | Definition |
-| `some_isAut` | 159-167 | Soundness: whatever permutation the oracle returns is guaranteed to be an automorphism of `adj`. | — |
+| `some_isAut` | 159-167 | **Soundness (subtype-level):** when the oracle returns `some result`, the returned permutation is automatically an automorphism. | — |
 | `OrbitMapSpec` | 169-181 | The oracle's soundness contract: every merge it returns is a genuine `Aut_D`-orbit pair — the property that makes pruning the merged branch safe. | Definition |
 | `merged_sameCell` | 183-194 | A sound oracle only ever merges vertices that 1-WL already left in the same cell, so it never collapses across cells. | — |
 | `OrbitRecoverableAt` | 216-225 | The orbit-recovery target at `S`: the `Aut_S`-orbit relation equals the 1-WL cell relation, so refinement computes orbits and a complete oracle exists. | Definition |
@@ -830,7 +830,7 @@ existence of committed-set-avoiding gadget flips (the cascade-1b content).
 | `stabilizerAt_smul` | 621-623 | The subgroup action is permutation application: `g • v = ↑g v`. | `@[simp]` |
 | `mem_stabilizerAt_empty` | 625-631 | **Root = ambient `P`-preserving group.** `StabilizerAt adj P ∅` is exactly the `P`-preserving automorphisms (`FixesPointwise ∅` vacuous). | — |
 | `stabilizerAt_mono` | 633-639 | **Stabilizer containment.** `S ⊆ S' → StabilizerAt adj P S' ≤ StabilizerAt adj P S` (fixing more gives a smaller group; subgroup form of `OrbitPartition.mono`). | — |
-| `stabilizerAt_eq_bot_iff_isBase` | 630-644 | **`StabilizerAt = ⊥ ⟺ base.** The residual is trivial exactly when `S` is a base (`IsBase`). | — |
+| `stabilizerAt_eq_bot_iff_isBase` | **`StabilizerAt = ⊥ ⟺ base.** The residual is trivial exactly when `S` is a base (`IsBase`). | **`StabilizerAt = ⊥ ⟺ base.** The residual is trivial exactly when `S` is a base (`IsBase`). | — |
 | `mem_orbit_stabilizerAt_iff` | 657-668 | **Per-node orbit bridge.** `MulAction.orbit (StabilizerAt adj P S) v` is exactly the `OrbitPartition` relation at `S` (generalizes Group.lean's root bridge off `S = ∅`). | — |
 | `residualAut_mem_stabilizerAt` | 690-693 | **(A2) Fold-in entry.** A verified `P`-preserving path-fixing automorphism is a member of `StabilizerAt adj P S`. | — |
 | `closure_le_stabilizerAt` | 695-702 | **(A2) The harvested chain stays inside the true residual.** If every harvested generator is a verified path-fixing automorphism, `Subgroup.closure gens ≤ StabilizerAt adj P S` — the over-split-sound contract, group side. | — |
@@ -1490,7 +1490,7 @@ Axiom-clean `[propext, Classical.choice, Quot.sound]`, no `sorry`.
 | `CoherentConfig.exists_balancedSplits_of_not_forall_majority` | 2169-2178 | §CC.21 (A2 Stage 1b) **No obstruction on a class ⟹ a balanced splitter exists** — if some point fails to see the confusion monochromatically, it balance-splits it (dichotomy). The bridge from "no geometric obstruction" to the splitter the closure mechanics consumes. Axiom-clean. | — |
 | `CoherentConfig.relOf_v_eq_of_confused` | 2190-2219 | §CC.22 (A2 Stage 1b, G-mech kill-lemma core) On a CC with `v` a **singleton fiber**, any `γ` failing to distinguish `α,β` (`relOf γ α = relOf γ β`) forces `v` not to distinguish them either (`relOf v α = relOf v β`). The singleton fiber isolates the triangle count through `v` to `z=v` (`relOf_diag_right_eq`+`SingletonFiber`), so `interNum (relOf γ v) b (relOf γ α) = [b = relOf v α]`; the same count against `β` (same class) is `[b = relOf v β]`, forcing equality. Pure `interNum` coherence — no construction internals/tower. Axiom-clean. | — |
 | `CoherentConfig.confusionSet_eq_empty_of_relOf_v_ne` | 2221-2229 | §CC.22 (A2 Stage 1b) **THE KILL LEMMA.** `v` a singleton fiber that *distinguishes* `α,β` (`relOf v α ≠ relOf v β`) ⟹ the confusion set `C(α,β)` is **empty** — individualizing `v` destroys that pair's indistinguishing class outright. The closure mechanism behind A2's per-step `c`-drop (route doc §4c): `c(X_{T∪v})` is bounded by the largest confusion among pairs `v` does *not* distinguish, so a `v` outside all over-half confusion sets halves `c`. Contrapositive of `relOf_v_eq_of_confused`. Axiom-clean. | — |
-| `CoherentConfig.indistinguishingNumber_pointExtension_insert_le` | 2139-2181 | §CC.22 (A2 Stage 1b, G-mech **the bound** — route doc §4c step 2) **The kill-lemma bound on `c(X_{T∪v})`.** If every pair `(α,β)` (`α≠β`) that `v` fails to distinguish in `X_T` (`relOf_{X_T} v α = relOf_{X_T} v β`) has `\|C_{X_T}(α,β)\| ≤ M`, then `c(pointExtension X (insert v T)) ≤ M`. Per non-reflexive `W`-class (rep pair `α≠β`): the kill lemma (`v` a singleton fiber of `W`) empties the confusion of every pair `v` *distinguishes`; each survivor is `⊆ C_{X_T}` (monotone via `Refines W X_T`) with `v` undistinguishing in `X_T` too, so `≤ M`. Dissolves the G-sim gap (one covering hypothesis replaces a per-class splitter). Step 3 consumes with `M = c(X_T)/2`. Axiom-clean. | — |
+| `CoherentConfig.indistinguishingNumber_pointExtension_insert_le` | §CC.22 (A2 Stage 1b, G-mech **the bound** — route doc §4c step 2) **The kill-lemma bound on `c(X_{T∪v})`.** If every pair `(α,β)` (`α≠β`) that `v` fails to distinguish in `X_T` (`relOf_{X_T} v α = relOf_{X_T} v β`) has `\|C_{X_T}(α,β)\| ≤ M`, then `c(pointExtension X (insert v T)) ≤ M`. Per non-reflexive `W`-class (rep pair `α≠β`): the kill lemma (`v` a singleton fiber of `W`) empties the confusion of every pair `v` *distinguishes`; each survivor is `⊆ C_{X_T}` (monotone via `Refines W X_T`) with `v` undistinguishing in `X_T` too, so `≤ M`. Dissolves the G-sim gap (one covering hypothesis replaces a per-class splitter). Step 3 consumes with `M = c(X_T)/2`. Axiom-clean. | §CC.22 (A2 Stage 1b, G-mech **the bound** — route doc §4c step 2) **The kill-lemma bound on `c(X_{T∪v})`.** If every pair `(α,β)` (`α≠β`) that `v` fails to distinguish in `X_T` (`relOf_{X_T} v α = relOf_{X_T} v β`) has `|C_{X_T}(α,β)| ≤ M`, then `c(pointExtension X (insert v T)) ≤ M`. Per non-reflexive `W`-class (rep pair `α≠β`): the kill lemma (`v` a singleton fiber of `W`) empties the confusion of every pair `v` *distinguishes`; each survivor is `⊆ C_{X_T}` (monotone via `Refines W X_T`) with `v` undistinguishing in `X_T` too, so `≤ M`. Dissolves the G-sim gap (one covering hypothesis replaces a per-class splitter). Step 3 consumes with `M = c(X_T)/2`. Axiom-clean. | — |
 | `CoherentConfig.indistinguishingHalves_of_exists_avoiding_v` | 2275-2300 | §CC.22 (A2 Stage 1b, G-mech **the halving wiring** — route doc §4c step 3) **`IndistinguishingHalves` from an avoiding `v` per over-`B` base.** If every base `T` with `Φ T > B` admits a `v` avoiding all big confusion sets (every `v`-undistinguished pair `(α,β)`, `α≠β`, has `2·|C_{X_T}(α,β)| ≤ c(X_T)`), then `X.IndistinguishingHalves B`. Pure arithmetic on the step-2 bound at `M = c(X_T)/2`: gives `c(X_{T∪v}) ≤ c(X_T)/2`, hence `2·c(X_{T∪v}) ≤ c(X_T)`. Open content left = existence of the avoiding `v` (its negation = the `BigConfusionCover` obstruction, step 4). Axiom-clean. | — |
 | `CoherentConfig.BigConfusionCover` | 2313-2321 | §CC.22 (A2 Stage 1b, route doc §4c step 4) **The big-confusion-set covering obstruction.** The size-`>c(X)/2` confusion sets (`c(X) < 2·|C(α,β)|`, `α≠β`) **cover `Fin n`**: every vertex fails to distinguish some pair with an over-half confusion class. Exact negation of "an avoiding `v` exists" (step 3's hypothesis). A cover forces `n ≤ (#big sets)·c(X)` ⟹ `≥ n/c` near-maximal confusion sets = a partial-geometry / near-pencil line system, routed to `Cameron ∨ finite` by the cited Neumaier + primitive-CC dichotomy (G-cite, step 5); the residue, being neither, has no cover. | Definition |
 | `CoherentConfig.exists_avoiding_of_not_cover` | 2323-2338 | §CC.22 (A2 Stage 1b, route doc §4c step 4) **No cover ⟹ an avoiding `v` exists.** `¬ BigConfusionCover ⟹ ∃ v` outside all big confusion sets, i.e. every pair `(α,β)` (`α≠β`) with `relOf v α = relOf v β` has `2·|C(α,β)| ≤ c(X)` — exactly the avoiding-`v` hypothesis of `indistinguishingHalves_of_exists_avoiding_v`. Via `not_forall` + `not_le`. Axiom-clean. | — |
@@ -1626,107 +1626,11 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `chiSep_imp_zSep` | 37-57 | — | — |
 | `pairCount_ne_of_chiSep` | 59-76 | — | — |
 
-## ChainDescent/ScratchBridgeA.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `levelset_count_collapse` | 31-120 | — | — |
-
-## ChainDescent/ScratchBridgeAllK.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `cone_count_zero_splitK` | 30-62 | — | — |
-| `fullcount_eq_jointIsoCountK_add_corr` | 67-74 | — | — |
-| `levelset_count_collapseK` | 79-156 | — | — |
-| `fullcount_pair_eq_levelsetK` | 161-186 | — | — |
-| `fullcount_pair_closedK` | 187-212 | — | — |
-| `configPolarDet_eq_pairFormK` | 217-227 | — | — |
-| `chi_configDet_eq_chi_pairFormK` | 229-297 | — | — |
-| `chi_eq_one_or_neg_oneK` | 299-312 | — | — |
-| `jointIsoCountK_pair_closed_corr0` | 313-345 | — | — |
-| `jointIsoCountK_ne_of_chiSep_pair` | 346-381 | — | — |
-
-## ChainDescent/ScratchBridgeB.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `fullcount_eq_jointIsoCount_add_corr` | 31-41 | — | — |
-
-## ChainDescent/ScratchBridgeC.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `fullcount_pair_eq_levelset` | 25-60 | — | — |
-| `fullcount_pair_closed` | 61-94 | — | — |
-
-## ChainDescent/ScratchBridgeD.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `configPolarDet_eq_pairForm` | 27-43 | — | — |
-| `chi_configDet_eq_chi_pairForm` | 45-125 | — | — |
-| `chi_eq_one_or_neg_one` | 127-138 | — | — |
-| `chiSep_imp_zSep_field` | 140-166 | — | — |
-| `pairCount_ne_of_chiSep_field` | 168-181 | — | — |
-| `jointIsoCount_pair_closed_corr0` | 182-224 | — | — |
-| `jointIsoCount_ne_of_chiSep_pair` | 225-277 | — | — |
-
-## ChainDescent/ScratchBridgeK.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `zProfileSeparatesK_of_zSep` | 22-33 | — | — |
-
 ## ChainDescent/ScratchBridgeZ.lean
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `zProfileSeparates_of_zSep` | 32-46 | — | — |
-
-## ChainDescent/ScratchBucket.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `sum_two_bucket_le` | 15-34 | — | — |
-| `sqrt_mul_le_div` | 36-44 | — | — |
-| `c0_le` | 46-82 | — | — |
-
-## ChainDescent/ScratchC0.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `charSum_int_le_norm` | 14-26 | — | — |
-| `card_agree_le` | 28-44 | — | — |
-
-## ChainDescent/ScratchC0Final.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `c0_le_threequarters` | 20-100 | — | — |
-
-## ChainDescent/ScratchChiNorm.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `norm_quadraticChar` | 8-22 | — | — |
-
-## ChainDescent/ScratchCorank.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `polarRad` | 31-41 | — | Definition |
-| `mem_polarRad` | 43-44 | — | `@[simp]` |
-| `polarRad_card_filter` | 46-57 | — | — |
-| `polarRad_ne_top_of_ne_zero` | 59-72 | — | — |
-| `radical_card_mul_card_le` | 74-89 | — | — |
-
-## ChainDescent/ScratchCount.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `int_char_pointwise` | 13-18 | — | — |
-| `counting_identity` | 20-44 | — | — |
 
 ## ChainDescent/ScratchCountTight.lean
 
@@ -1735,262 +1639,6 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `int_char_pointwise_tight` | 23-30 | — | — |
 | `counting_identity_tight` | 32-55 | — | — |
 | `card_agree_le_tight` | 57-74 | — | — |
-
-## ChainDescent/ScratchCrux.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `jointIsoCount` | 25-34 | — | Definition, `noncomputable` |
-| `ZProfileSeparates` | 35-43 | — | Definition, `noncomputable` |
-| `extProfile` | 45-48 | — | Definition, `noncomputable` |
-| `extProfile_mem` | 50-53 | — | — |
-| `qProfileSeparatesAtBase_of_zProfileSeparates` | 54-136 | — | — |
-| `isotropySeparates_of_zProfileSeparates` | 138-147 | — | — |
-| `jointIsoCount_eq_restricted` | 148-188 | — | — |
-
-## ChainDescent/ScratchFieldGen.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `isoClassK` | 35-39 | — | Definition, `noncomputable` |
-| `isoClassK_eq_zero_iff` | 40-49 | — | — |
-| `isoClassK_eq_two_iff` | 50-59 | — | — |
-| `isoClassK_eq_one_iff` | 60-69 | — | — |
-| `isoClassK_ne_two_iff` | 70-73 | — | — |
-| `polar_eq_of_subK` | 78-87 | — | — |
-| `coords_determineK` | 88-103 | — | — |
-| `jointIsoCountK` | 108-115 | — | Definition, `noncomputable` |
-| `ZProfileSeparatesK` | 116-124 | — | Definition, `noncomputable` |
-| `QProfileSeparatesAtBaseK` | 125-138 | — | Definition, `noncomputable` |
-| `IsotropySeparatesAtBaseK` | 139-150 | — | Definition, `noncomputable` |
-| `extProfileK` | 154-159 | — | Definition, `noncomputable` |
-| `extProfileK_mem` | 160-163 | — | — |
-| `qProfileSeparatesAtBaseK_of_zProfileSeparatesK` | 164-244 | — | — |
-| `isotropySeparatesK_of_qProfileSeparatesK` | 246-253 | — | — |
-| `isotropySeparatesK_of_zProfileSeparatesK` | 255-260 | — | — |
-| `jointIsoCountK_eq_restricted` | 265-293 | — | — |
-
-## ChainDescent/ScratchFieldGenAdapter.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `isoClassK_eq_isoClass` | 25-35 | — | — |
-| `isoCount_transport` | 36-67 | — | — |
-| `isotropySeparatesAtBase_of_K` | 69-82 | — | — |
-| `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` | 84-97 | — | — |
-
-## ChainDescent/ScratchGoodAnchor.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `mvPoly_zeros_count_le` | 42-61 | — | — |
-| `det_totalDegree_le` | 63-78 | — | — |
-| `pencilDisc` | 79-85 | — | Definition, `noncomputable` |
-| `pencilDisc_totalDegree_le` | 86-96 | — | — |
-| `pencilDisc_eval` | 97-104 | — | — |
-| `polar_pencil` | 109-114 | — | — |
-| `polarRad_eq_bot_iff_separatingRight` | 116-126 | — | — |
-| `polarRad_ne_bot_iff_det_eq_zero` | 128-133 | — | — |
-| `toMatrix₂_polarBilin_pencil` | 135-145 | — | — |
-| `pencilZeros_count_le` | 149-163 | — | — |
-| `degenerate_count_le` | 165-197 | — | — |
-
-## ChainDescent/ScratchIncr4.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `fail_count_split` | 35-72 | — | — |
-| `matching_F_bound` | 74-86 | — | — |
-| `good_anchor_fail_le` | 88-141 | — | — |
-| `zeroCountShift_card_le` | 143-186 | — | — |
-| `good_anchor_fail_le_const` | 188-235 | — | — |
-
-## ChainDescent/ScratchIncr4b.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `mvPoly_zeros_count_le_dim` | 37-58 | — | — |
-| `mem_polarRad_smul_pairForm` | 63-72 | — | — |
-| `polarRad_smul_pairForm_ne_bot` | 74-79 | — | — |
-| `hPu_of_hgood` | 81-89 | — | — |
-| `hPv_of_hgood` | 91-98 | — | — |
-| `hnz_of_hgood` | 100-115 | — | — |
-| `bad_anchor_card_le_hgood` | 116-157 | — | — |
-| `bad_anchor_count_le_of_poly` | 165-203 | — | — |
-| `notHgood_eval_zero_of_repr` | 204-220 | — | — |
-
-## ChainDescent/ScratchIncr4c.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `coordPoly` | 35-37 | — | Definition, `noncomputable` |
-| `coordPoly_eval` | 39-41 | — | `@[simp]` |
-| `linFunc_eq_sum` | 43-49 | — | — |
-| `coordPoly_eval_linFunc` | 51-55 | — | — |
-| `polar_t0_t0_sum` | 57-72 | — | — |
-| `gramQuadPoly` | 74-76 | — | Definition, `noncomputable` |
-| `gramQuadPoly_eval` | 78-91 | — | — |
-| `LPoly` | 93-95 | — | Definition, `noncomputable` |
-| `LPoly_eval` | 97-103 | — | — |
-| `QPoly` | 105-107 | — | Definition, `noncomputable` |
-| `QPoly_eval` | 109-119 | — | — |
-| `polar_pairForm_apply` | 121-131 | — | — |
-| `entryPoly` | 133-137 | — | Definition, `noncomputable` |
-| `entryPoly_eval` | 139-144 | — | — |
-| `pencilDetPoly` | 146-150 | — | Definition, `noncomputable` |
-| `pencilDetPoly_eval` | 152-163 | — | — |
-| `pencilDetPoly_ne_zero` | 165-175 | — | — |
-| `det_totalDegree_le_gen` | 185-199 | — | — |
-| `coordPoly_totalDegree_le` | 201-206 | — | — |
-| `gramQuadPoly_totalDegree_le` | 208-220 | — | — |
-| `LPoly_totalDegree_le` | 222-227 | — | — |
-| `QPoly_totalDegree_le` | 229-237 | — | — |
-| `entryPoly_totalDegree_le` | 239-253 | — | — |
-| `pencilDetPoly_totalDegree_le` | 255-269 | — | — |
-| `badHgood_count_le` | 270-285 | — | — |
-| `beta_count_closed` | 286-325 | — | — |
-| `corr_zero_of_anchor` | 335-337 | — | — |
-| `QPoly_ne_zero` | 339-347 | — | — |
-| `qZero_count_le` | 348-360 | — | — |
-| `beta_full_count_closed` | 361-432 | — | — |
-| `exists_orthoAnisotropic_basis` | 444-455 | — | — |
-| `associated_separatingLeft_of_polarRad` | 457-472 | — | — |
-
-## ChainDescent/ScratchIncr4d.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `polar_pencil_apply` | 36-48 | — | — |
-| `pencil_radical_key` | 50-71 | — | — |
-| `polarRad_pencil_subset_span` | 73-89 | — | — |
-| `polarRad_pencil_eq_bot` | 91-139 | — | — |
-| `pairForm_self_sub` | 148-159 | — | — |
-| `exists_ne_zero_polar_eq_zero` | 161-179 | — | — |
-| `exists_pairForm_self_sub_ne_zero` | 181-232 | — | — |
-| `exists_anisotropic` | 234-247 | — | — |
-| `gramQuadPoly_ne_zero` | 253-261 | — | — |
-| `planeDiscPoly` | 263-267 | — | Definition, `noncomputable` |
-| `planeDiscPoly_eval` | 269-277 | — | — |
-| `planeDiscPoly_totalDegree_le` | 279-291 | — | — |
-| `planeDiscPoly_ne_zero` | 293-299 | — | — |
-| `exists_good_plane_anchor` | 301-358 | — | — |
-| `linearIndependent_of_pairForm_ne_zero` | 360-375 | — | — |
-| `exists_hgood` | 377-411 | — | — |
-
-## ChainDescent/ScratchIncr5.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `exists_pow_matching_lt` | 32-49 | matching-length existence: `F < |W| ⟹ ∃m, |ι|·Fᵐ < |W|ᵐ` (feeds `exists_separating_base`'s `hlt`). | — |
-| `exists_pow_matching_le` | 51-87 | the same with an explicit `Real.log` length bound `m ≤ log|ι|/log(|W|/F)+1` (standalone; the live chain uses the block variant). | — |
-| `exists_pow_matching_block` | 89-124 | **log-free matching keystone**: from the ratio `64·F ≤ 63·|W|`, `∃m ≤ 64·(Nat.log 2 |ι| + 1), |ι|·Fᵐ < |W|ᵐ` (block fact `2·63⁶⁴ ≤ 64⁶⁴`). Non-vacuity backbone. REUSABLE. | — |
-| `exists_separating_base_of_split` | 126-151 | matching mechanics: per-good-anchor fail `cN` + bad-anchor `βN` + `cN+βN<|V|` ⟹ a base `Fin m → V×V` each target avoids. | — |
-| `exists_separating_base_of_split_bounded` | 153-182 | the `_of_split` sibling threading `m ≤ 64·(Nat.log 2 |ι| + 1)` from the ratio hypothesis `64·(cN+βN) ≤ 63·|V|`. | — |
-| `cbar_lt` | 184-204 | the `c̄₀<1` arithmetic `16cN≤15N ∧ q·βN≤(2d+4)N+2q ∧ q≥32(2d+4) ∧ N>64 ⟹ cN+βN<N` (now superseded by the ratio bound; kept). | — |
-| `jointIsoCountK_ne_of_sep` | 205-231 | bridge wiring: the separation event (χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0) fires `jointIsoCountK_ne_of_chiSep_pair`. | — |
-| `exists_zProfileSeparatesK` | 232-382 | **family assembly**: for nondeg `Q` on `Fin d→K` (even d≥2, q≳32d/q≥256), the matching yields a base `T` with `ZProfileSeparatesK Q T` and `T.card ≤ 128·(Nat.log 2 (|V|²)+1)`. | — |
-| `exists_isotropySeparatesAtBaseK` | 383-404 | the seal-ready deliverable: `∃T, T.card ≤ 128·(Nat.log 2(|V|²)+1) ∧ IsotropySeparatesAtBaseK Q T` (via `isotropySeparatesK_of_zProfileSeparatesK`). | — |
-| `reachesRigidOrCameron_affinePolar` | 405-441 | **THE q=p SEAL**: odd prime p, nondeg `Q` on `Fin d→ZMod p`, p≥256/p≳32d ⟹ the affine-polar VO^ε residue reaches `reachesRigidOrCameron` modulo {G3}, Witt-free, no `hSmallAutThin`, carrying `T.card = O(d log p)` (quasipoly base). | — |
-
-## ChainDescent/ScratchLemmaA.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `isoIncidence_eq_linearConds` | 27-44 | — | — |
-| `map_add_of_polar_zero` | 46-53 | — | — |
-| `count_coset` | 55-77 | — | — |
-| `polar_w0_perp` | 79-88 | — | — |
-| `reduction_to_levelset` | 90-110 | — | — |
-| `spanning_w0_exists` | 112-131 | — | — |
-| `reduction_to_levelset_nondeg` | 133-149 | — | — |
-| `levelset_fourier` | 150-198 | — | — |
-| `levelset_fourier_prod` | 199-219 | — | — |
-| `levelset_fourier_split` | 220-251 | — | — |
-| `s0_boundary_collapse` | 252-304 | — | — |
-| `levelset_count_eq` | 305-323 | — | — |
-| `configForm` | 327-331 | — | Definition, `noncomputable` |
-| `configForm_apply` | 333-336 | — | `@[simp]` |
-| `linComb_single` | 338-340 | — | — |
-| `polar_configForm` | 342-348 | — | — |
-| `polar_configForm_single` | 350-357 | — | — |
-| `configForm_nondegenerate` | 358-394 | — | — |
-| `configForm_exists_orthoBasis` | 395-415 | — | — |
-| `configGaussSum_eval` | 416-439 | — | — |
-| `prod_quadChar_eq_det` | 440-488 | — | — |
-| `configGaussSum_eq_det` | 489-510 | — | — |
-
-## ChainDescent/ScratchLemmaAK.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `isoIncidence_eq_linearCondsK` | 20-37 | — | — |
-| `map_add_of_polar_zeroK` | 38-44 | — | — |
-| `count_cosetK` | 46-67 | — | — |
-| `polar_w0_perpK` | 68-76 | — | — |
-| `reduction_to_levelsetK` | 78-95 | — | — |
-| `spanning_w0_existsK` | 96-112 | — | — |
-| `reduction_to_levelset_nondegK` | 114-127 | — | — |
-| `levelset_fourierK` | 128-169 | — | — |
-| `levelset_fourier_prodK` | 170-187 | — | — |
-| `levelset_fourier_splitK` | 188-214 | — | — |
-| `s0_boundary_collapseK` | 215-263 | — | — |
-| `levelset_count_eqK` | 264-276 | — | — |
-| `configFormK` | 280-285 | — | Definition, `noncomputable` |
-| `configFormK_apply` | 286-291 | — | `@[simp]` |
-| `linComb_singleK` | 292-296 | — | — |
-| `polar_configFormK` | 297-305 | — | — |
-| `polar_configFormK_single` | 306-314 | — | — |
-| `configFormK_nondegenerate` | 315-349 | — | — |
-| `configFormK_exists_orthoBasis` | 350-366 | — | — |
-| `configGaussSum_evalK` | 367-385 | — | — |
-| `prod_quadChar_eq_detK` | 386-426 | — | — |
-| `configGaussSum_eq_detK` | 427-444 | — | — |
-
-## ChainDescent/ScratchLemmaB.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `coarse_incidence_agree` | 20-97 | — | — |
-| `incidence_to_V` | 98-133 | — | — |
-| `incidence_agree_V` | 134-157 | — | — |
-| `cone_count_zero_split` | 158-194 | — | — |
-| `fullcount_agree_modulo_corr` | 195-219 | — | — |
-
-## ChainDescent/ScratchMatching.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `exists_separating_base` | 20-63 | — | — |
-
-## ChainDescent/ScratchPairSep.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `quadChar_addChar_sum` | 67-102 | — | — |
-| `pairCharSum_factor_gen` | 110-150 | — | — |
-| `pairCharSum_factor` | 152-164 | — | — |
-| `pairForm` | 178-182 | — | Definition, `noncomputable` |
-| `pairForm_apply` | 184-187 | — | — |
-| `detG2_eq_pairForm` | 189-194 | — | — |
-| `pairCombine` | 196-215 | — | — |
-| `sum_addChar_quadForm_translate` | 217-223 | — | — |
-| `pairSum_to_shifted` | 225-260 | — | — |
-| `sum_addChar_shifted_eval` | 262-274 | — | — |
-| `pairSum_closed_of_repr` | 276-296 | — | — |
-| `exists_repr_of_nondeg` | 298-309 | — | — |
-| `pairSum_closed_of_nondeg` | 311-332 | — | — |
-| `pairSum_fully_closed` | 334-359 | — | — |
-| `pairForm_polar_anchor` | 371-381 | — | — |
-| `pairForm_self_anchor` | 383-386 | — | — |
-| `sum_addChar_radical_vanish` | 388-424 | — | — |
-| `norm_addChar_eq_one` | 436-447 | — | — |
-| `norm_gaussSum_sq` | 449-475 | — | — |
-| `norm_pairSum_le` | 477-498 | — | — |
-| `norm_sq_sum_addChar_quadForm` | 507-591 | — | — |
-| `norm_sq_sum_addChar_quadForm_linear_le` | 593-675 | — | — |
-| `norm_sq_pairSum_le` | 677-700 | — | — |
-| `zeroCount_sq_le` | 702-775 | — | — |
-| `normT_le` | 777-815 | — | — |
 
 ## ChainDescent/ScratchPencilBridge.lean
 
@@ -2060,12 +1708,6 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `SealDisj` | 39-44 | — | Definition |
 | `reachesRigidOrCameron_viaSchurianRank3Affine` | 46-68 | — | — |
 
-## ChainDescent/ScratchTBound.lean
-
-| Name | Line | Description | Notes |
-|------|------|-------------|-------|
-| `normT_bucket_bound` | 20-106 | — | — |
-
 ## ChainDescent/ScratchTBoundCorank.lean
 
 | Name | Line | Description | Notes |
@@ -2084,3 +1726,295 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `c0_le2` | 188-226 | — | — |
 | `normT_bucket_bound_corank2` | 228-294 | — | — |
 | `c0_le_threequarters_corank2` | 296-376 | — | — |
+## ChainDescent/AffinePolarSeal.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `exists_pow_matching_lt` | 31-48 | Matching-length existence: `F < card W ⟹ ∃ m, (card ι)·Fᵐ < (card W)ᵐ` — supplies `exists_separating_base`'s hypothesis. | — |
+| `exists_pow_matching_le` | 50-86 | The matching length with an explicit `Real.log` bound `m ≤ log(card ι)/log(card W/F) + 1` (standalone; the live chain uses the log-free `exists_pow_matching_block`). | — |
+| `exists_pow_matching_block` | 88-123 | **Log-free matching-length keystone (REUSABLE).** From the ratio `64·F ≤ 63·(card W)`, a separating base exists of length `m ≤ 64·(Nat.log 2 (card ι) + 1) = O(log (card ι))` (block fact `2·63⁶⁴ ≤ 64⁶⁴`) — the non-vacuity backbone, no `Real.log`. | — |
+| `exists_separating_base_of_split` | 125-150 | Matching mechanics: per-good-anchor fail bound `cN` + bad-anchor count `βN` + `cN+βN < card V` ⟹ a base `Fin m → V×V` whose 2-element sub-frames each target avoids. | — |
+| `exists_separating_base_of_split_bounded` | 152-181 | The `exists_separating_base_of_split` sibling that also carries the logarithmic length bound `m ≤ 64·(Nat.log 2 (card ι)+1)`, from the ratio hypothesis `64·(cN+βN) ≤ 63·(card V)`. | — |
+| `cbar_lt` | 183-203 | The `c̄₀<1` arithmetic: `16cN≤15N ∧ q·βN≤(2d+4)N+2q ∧ q≥32(2d+4) ∧ N>64 ⟹ cN+βN<N` (superseded in the live chain by the ratio bound; retained). | — |
+| `jointIsoCountK_ne_of_sep` | 204-230 | Bridge wiring used by increment 5: the separation event (χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0) discharges `jointIsoCountK_ne_of_chiSep_pair`'s hypotheses and fires the count inequality. | — |
+| `exists_zProfileSeparatesK` | 231-381 | **The family assembly.** Running the matching trick over good/bad anchors produces a finite base `T` separating every distinct pivot pair in the joint isotropic counts (`ZProfileSeparatesK Q T`), with `T.card = O(d log q)`. | — |
+| `exists_isotropySeparatesAtBaseK` | 382-403 | **The seal-ready deliverable.** A nondegenerate `Q` on `Fin d → K` (even `d≥2`, `q≳32d`) admits a finite base `T` with `IsotropySeparatesAtBaseK Q T` and `T.card ≤ 128·(Nat.log 2 (card V)²+1)` — exactly the input the Witt-free seal capstone consumes. | — |
+| `reachesRigidOrCameron_affinePolar` | 404-440 | **The q=p affine-polar seal.** For an odd prime `p` and a nondegenerate quadratic form `Q` on `Fin d → ZMod p` (even `d≥2`, `p≥256`, `p≳32d`), the affine-polar VO^ε residue reaches the `reachesRigidOrCameron` disjunction modulo {G3} — Witt-free, no `hSmallAutThin` — carrying an explicit base bound… | — |
+## ChainDescent/BadAnchorCount.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `fail_count_split` | 24-61 | **Anchor-averaging split — the increment-4 backbone.** For a fail predicate `fail : A → B → Prop` over a product space (`A` = probe, `B` = anchor), if every **good** anchor `b` has `#{a : fail a b} ≤ c` and the bad anchors number `≤ β`, then the total fail count over `A × B` is `≤ c·|B| + |A|·β`.… | — |
+| `matching_F_bound` | 63-75 | **The matching-trick `F`, ready for `exists_separating_base`.** A target-indexed fail predicate `fail : ι → A → B → Prop` (`g = (u,v)`, `(a,b) = (t,t₀)`) with uniform per-good-anchor bound `c` and uniform bad-anchor count `β` gives, for *every* target, `#{(t,t₀) : fail g} ≤ c·|B| + |A|·β =: F`.… | — |
+| `good_anchor_fail_le` | 77-130 | **Increment 4 — the good-anchor fail bound (input `c`).** For a **good anchor** `t₀` (the `c0_le_threequarters` hypotheses `hnz`/`hgood`/`hPu` + the size thresholds), the probes `t` that the bridge FAILS to use for separation — those where the separation criterion `χ(I_u(t)) ≠ χ(I_v(t)) ∧ I_u(t) ≠…` | — |
+| `zeroCountShift_card_le` | 132-175 | **The shifted zero-count bound (the remaining piece of input `c`).** For any *nonzero* quadratic form `P` and shift `u`, `#{t : P(t−u) = 0} · |K| ≤ |V| + (|K|−1)·|V|/√|K|` — so `#{t : P(t−u)=0}/|V| ≤ 1/q + (q−1)/(q√q) = O(1/√q)`. Reindex `t ↦ t−u` to the homogeneous count, then `zeroCount_sq_le`… | — |
+| `good_anchor_fail_le_const` | 177-224 | **The good-anchor fail bound (matching input `c`).** On a good anchor, `#{t : ¬separated} ≤ 15/16·(card V)`. | — |
+| `mvPoly_zeros_count_le_dim` | 232-253 | **Schwartz–Zippel in `Fin d` — the bad-anchor counting engine.** For a *nonzero* `d`-variable polynomial `p`, the zero set over `K^d` satisfies `#{f : Fin d → K | eval f p = 0} · |K| ≤ p.totalDegree · |K^d|`, i.e. `#{zeros}/|K^d| ≤ totalDegree/|K| = O(1/q)`. | — |
+| `mem_polarRad_smul_pairForm` | 258-267 | Every scalar multiple `c • pairForm Q a` has the anchor `a` in its polar-radical (`pairForm_polar_anchor` transports through `polar_smul`). | — |
+| `polarRad_smul_pairForm_ne_bot` | 269-274 | A nonzero scalar-multiple-of-`pairForm` form has nontrivial radical (the anchor `a ≠ 0`), hence is degenerate. | — |
+| `hPu_of_hgood` | 276-284 | **`hgood ⟹ hPu`.** A nondeg pencil member forces `pairForm Q (t₀−u) ≠ 0`: if it were `0` the pencil would reduce to `z • pairForm Q (t₀−v)`, degenerate (anchor `t₀−v ≠ 0`). | — |
+| `hPv_of_hgood` | 286-293 | **`hgood ⟹ hPv`** (symmetric to `hPu_of_hgood`). | — |
+| `hnz_of_hgood` | 295-310 | **`hgood ⟹ hnz`.** A nondeg pencil member forbids a zero member on `y,z ≠ 0`: a zero member makes `pairForm Q (t₀−u) ∝ pairForm Q (t₀−v)`, collapsing the *whole* pencil to a scalar multiple of the (degenerate) `pairForm Q (t₀−v)` — so no member could be nondegenerate. | — |
+| `bad_anchor_card_le_hgood` | 311-352 | **The bad-anchor reduction (input `β`).** The full good-anchor predicate `hnz ∧ hgood ∧ hPu ∧ hPv` (what `good_anchor_fail_le_const` consumes) fails on at most `#{t₀ : ¬hgood} + 2` anchors — i.e. `β ≤ #{¬hgood} + 2`. | — |
+| `bad_anchor_count_le_of_poly` | 360-398 | **Bad-anchor count via a representing polynomial — the rigorous Schwartz–Zippel reduction.** If a bad-anchor predicate `badpred` is contained in the zero set of a *nonzero* polynomial `P` read off the anchor's coordinates (`hrep : badpred t₀ → eval (b.equivFun t₀) P = 0`), then `#{t₀ : badpred} ·…` | — |
+| `notHgood_eval_zero_of_repr` | 399-415 | **`hrep` for `¬hgood`, from a representing polynomial.** If `P` represents the pencil-determinant at a fixed witness `(y₀,z₀)` — `eval (coords t₀) P = det(toMatrix₂ b b (polarBilin (y₀•pairForm_u + z₀•pairForm_v)))` — then on every `¬hgood` anchor `eval (coords t₀) P = 0` (the witness member is… | — |
+## ChainDescent/Coordinatization.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `coordPoly` | 35-37 | The degree-`≤1` polynomial with coefficient function `g` on the coordinate variables. | Definition, `noncomputable` |
+| `coordPoly_eval` | 39-41 | Evaluation: `coordPoly` of a linear functional, at the coordinate point `b.equivFun t₀`, recovers the functional's value at `t₀`. | `@[simp]` |
+| `linFunc_eq_sum` | 43-49 | A linear functional expanded over the basis: `f t₀ = ∑ₖ f(bₖ)·(coords t₀)ₖ`. | — |
+| `coordPoly_eval_linFunc` | 51-55 | **The coordinatization workhorse.** A linear functional `f` is represented by `coordPoly (f ∘ b)`: its evaluation at the coordinates of `t₀` is `f t₀`. | — |
+| `polar_t0_t0_sum` | 57-72 | The diagonal bilinear expansion `polar Q t₀ t₀ = ∑_{k,l} polar Q bₖ bₗ · xₗ · xₖ` (`x = coords t₀`), by applying the linear-functional expansion twice (`polarBilin Q` is bilinear). | — |
+| `gramQuadPoly` | 74-76 | The polynomial representing `Q(t₀)` (the diagonal Gram quadratic, scaled by `⅟2`). | Definition, `noncomputable` |
+| `gramQuadPoly_eval` | 78-91 | Evaluation: `gramQuadPoly b Q` at `b.equivFun t₀` equals `Q t₀` — the quadratic form as a polynomial in the coordinates (needs `Invertible 2`). | — |
+| `LPoly` | 93-95 | The polynomial representing the affine-linear `polar Q w (t₀ − c)`. | Definition, `noncomputable` |
+| `LPoly_eval` | 97-103 | Evaluation: the affine linear polynomial `LPoly` at `b.equivFun t₀` recovers `polar Q w (t₀ - c)`. | — |
+| `QPoly` | 105-107 | The polynomial representing the quadratic `Q (t₀ − c)`. | Definition, `noncomputable` |
+| `QPoly_eval` | 109-119 | Evaluation: the affine quadratic polynomial `QPoly` at `b.equivFun t₀` recovers `Q (t₀ - c)`. | — |
+| `polar_pairForm_apply` | 121-131 | The general polar of `pairForm Q a`: `polar(pairForm Q a) s r = 4 Q(a)·polar Q s r − 2·polar Q s a·polar Q r a` (the `r = a` case is `pairForm_polar_anchor`). | — |
+| `entryPoly` | 133-137 | The polynomial representing the Gram entry `polar(pairForm Q (t₀−a))(bᵢ)(bⱼ)`. | Definition, `noncomputable` |
+| `entryPoly_eval` | 139-144 | Evaluation: `entryPoly b Q a i j` at `b.equivFun t₀` equals the Gram entry `polar (pairForm Q (t₀-a)) (b i) (b j)`. | — |
+| `pencilDetPoly` | 146-150 | **The representing polynomial `P`** for the pencil determinant at witness `(y₀,z₀)`: the determinant of the `d×d` matrix of Gram-entry polynomials. | Definition, `noncomputable` |
+| `pencilDetPoly_eval` | 152-163 | **`P` represents the pencil determinant** — `eval (coords t₀) P = det(toMatrix₂ b b (polarBilin (y₀•pairForm_u + z₀•pairForm_v)))`. Via `RingHom.map_det` (eval is a ring hom) + the per-entry `entryPoly_eval` + `polar_pencil`. | — |
+| `pencilDetPoly_ne_zero` | 165-175 | **`P ≠ 0`** when there is a good anchor `t₀₀` with witness `(y₀,z₀)` (`polarRad = ⊥` there): the determinant is nonzero at `t₀₀`'s coordinates (`polarRad_ne_bot_iff_det_eq_zero`), so the polynomial cannot vanish identically. | — |
+| `det_totalDegree_le_gen` | 185-199 | **Per-entry degree bound for a determinant (general `D`).** Generalizes `ScratchGoodAnchor.det_totalDegree_le` (linear pencil, `D = 1`, `Fin 2` variables) to entries of `totalDegree ≤ D` over any variable type: the determinant of a `d × d` matrix has `totalDegree ≤ D · d`. | — |
+| `coordPoly_totalDegree_le` | 201-206 | `coordPoly` (a coordinate linear functional) has total degree ≤ 1. | — |
+| `gramQuadPoly_totalDegree_le` | 208-220 | `gramQuadPoly` (the quadratic form as a coordinate polynomial) has total degree ≤ 2. | — |
+| `LPoly_totalDegree_le` | 222-227 | The affine linear polynomial `LPoly` has total degree ≤ 1. | — |
+| `QPoly_totalDegree_le` | 229-237 | The affine quadratic polynomial `QPoly` has total degree ≤ 2. | — |
+| `entryPoly_totalDegree_le` | 239-253 | The Gram-entry polynomial has total degree ≤ 2 (so its `d×d` determinant `pencilDetPoly` has degree ≤ 2d). | — |
+| `pencilDetPoly_totalDegree_le` | 255-269 | **`totalDegree (pencilDetPoly) ≤ 2·d`** (B-iii). The determinant of the `d × d` matrix of quadratic Gram-entry polynomials, via `det_totalDegree_le_gen` at `D = 2` (each entry `C y₀·entryPoly_u + C z₀·entryPoly_v` is quadratic). | — |
+| `badHgood_count_le` | 270-285 | **`#{¬hgood}` bounded — the bad-anchor Schwartz–Zippel count.** Instantiating `bad_anchor_count_le_of_poly` at the constructed `P = pencilDetPoly` (nonzero by the good-anchor witness, representing by `pencilDetPoly_eval`): `#{t₀ : ¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`, i.e. density `≤…` | — |
+| `beta_count_closed` | 286-325 | **B-ii — `β` closed to an explicit `O(d/q)` bound.** Composing `badHgood_count_le` (`#{¬hgood}·|K| ≤ (pencilDetPoly).totalDegree·|V|`) with B-iii (`pencilDetPoly_totalDegree_le`, `totalDegree ≤ 2d`) and the landed `ScratchIncr4b.bad_anchor_card_le_hgood` (`β ≤ #{¬hgood} + 2`): the **full**… | — |
+| `corr_zero_of_anchor` | 335-337 | A good anchor (`Q(t₀−u) ≠ 0`) kills the bridge's `corr` condition for every probe `t`: `¬(Q(t−u)=0 ∧ Q(t₀−u)=0)`. | — |
+| `QPoly_ne_zero` | 339-347 | `QPoly b Q c ≠ 0` whenever the form is nonzero somewhere (`Q w₀ ≠ 0`): its value at `t₀ = w₀ + c` is `Q w₀ ≠ 0`. | — |
+| `qZero_count_le` | 348-360 | **The corr-locus count.** `#{t₀ : Q(t₀−c)=0}·|K| ≤ 2·|V|` (a quadric in `t₀`), via the SZ engine on `QPoly` (`QPoly_eval`/`QPoly_totalDegree_le`). | — |
+| `beta_full_count_closed` | 361-432 | **The bad-anchor density (matching input `β`).** The non-good anchors satisfy `β·(card K) ≤ (2d+4)·(card V) + 2·(card K) = O(d/q)·(card V)`, via Schwartz–Zippel on the pencil-determinant polynomial. | — |
+| `exists_orthoAnisotropic_basis` | 444-455 | **C-basis.** A nondegenerate (`SeparatingLeft`) quadratic form `Q` over a finite-dimensional space (char ≠ 2) has an **orthogonal basis of anisotropic vectors** — exactly the `vb`/`hv`/`hw` the bridge `jointIsoCount_ne_of_chiSep_pair` carries. A `Q`-level fact (no anchor/probe), discharged once… | — |
+| `associated_separatingLeft_of_polarRad` | 457-472 | **Bridge to the project-native nondegeneracy.** `polarRad Q = ⊥` (the form used throughout — `hgood`, `degenerate_count_le`, `polarRad_ne_bot_iff_det_eq_zero`) gives `(associated Q).SeparatingLeft`, the hypothesis of `exists_orthoAnisotropic_basis`. Chain: `polarRad = ⊥ ↔ (polarBilin…` | — |
+## ChainDescent/FieldGeneric.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `isoClassK` | 32-36 | **Isotropy class** of `w : Fin d → K` under `Q`: `0` (zero vector), `1` (nonzero isotropic), `2` (anisotropic). | Definition, `noncomputable` |
+| `isoClassK_eq_zero_iff` | 37-46 | Class `0` ⟺ the zero vector. | — |
+| `isoClassK_eq_two_iff` | 47-56 | Class `2` ⟺ anisotropic (`Q w ≠ 0`). A *pure* `Q`-value condition. | — |
+| `isoClassK_eq_one_iff` | 57-66 | Class `1` ⟺ nonzero isotropic (`w ≠ 0 ∧ Q w = 0`). | — |
+| `isoClassK_ne_two_iff` | 67-70 | The coarse "isotropic-or-zero" split: `isoClassK ≠ 2` ⟺ `Q w = 0`. | — |
+| `polar_eq_of_subK` | 75-84 | `polar Q v e = Q v + Q e − Q (v − e)`. | — |
+| `coords_determineK` | 85-100 | **The back-half — form coordinates determine the vector.** Same `Q`-profile on the standard basis frame + nondegenerate polar form ⟹ `v = v'`. (V-indexed; the `affineE.symm.injective` step of the original vanishes.) | — |
+| `jointIsoCountK` | 105-112 | **The joint isotropic count `Z_u(S)`** over `V = Fin d → K`, indexed directly (no `affineE`). | Definition, `noncomputable` |
+| `ZProfileSeparatesK` | 113-121 | **The reduced crux predicate `ZProfileSeparates`** (V-indexed). Agreeing joint isotropic counts over every sub-frame `S ⊆ T` ⟹ the same `Q`-profile over the standard basis frame. | Definition, `noncomputable` |
+| `QProfileSeparatesAtBaseK` | 122-135 | **`QProfileSeparatesAtBase`** (V-indexed): agreeing fine isotropy counts at `T` ⟹ the `Q`-profile agrees. | Definition, `noncomputable` |
+| `IsotropySeparatesAtBaseK` | 136-147 | **`IsotropySeparatesAtBase`** (V-indexed): the fine isotropy-count profile at `T` separates all vertices. | Definition, `noncomputable` |
+| `extProfileK` | 151-156 | Extend a `T`-indexed isotropy profile to a full profile (junk `0` off `T`). | Definition, `noncomputable` |
+| `extProfileK_mem` | 157-160 | On `t ∈ T`, the extended isotropy profile `extProfileK σ` agrees with `σ` (abstract-K version). | — |
+| `qProfileSeparatesAtBaseK_of_zProfileSeparatesK` | 161-241 | **D1 — `ZProfileSeparatesK` ⟹ `QProfileSeparatesAtBaseK`.** Marginalise the fine profile over base-points ∉ `S` and the pivot class. (Faithful V-indexed copy of `ScratchCrux.qProfileSeparatesAtBase_of_zProfileSeparates`.) | — |
+| `isotropySeparatesK_of_qProfileSeparatesK` | 243-250 | **`QProfileSeparatesAtBaseK` ⟹ `IsotropySeparatesAtBaseK`** (V-indexed): the recovered `Q`-profile pins the vector via `coords_determineK` directly (no `affineE.symm.injective`). | — |
+| `isotropySeparatesK_of_zProfileSeparatesK` | 252-257 | **End-to-end reduction (abstract K).** `ZProfileSeparatesK Q T` ⟹ `IsotropySeparatesAtBaseK Q T` when `Q.polarBilin` is nondegenerate. | — |
+| `jointIsoCountK_eq_restricted` | 262-290 | **D2 (bridge)** — `jointIsoCountK Q u S` as the Lemma-A-ready restricted count over `V`: nonzero `w` on the cone `Q w = 0` whose shift by each config vector `t − u` (`t ∈ S`) stays isotropic. The original's `count_transport` (`Fin (p^d) ↔ V`) step is gone — we are already in `V`. | — |
+| `zProfileSeparatesK_of_zSep` | 298-309 | **Soft endpoint.** If every distinct pivot pair is separated by some sub-frame `S ⊆ T` in the joint isotropic counts, then `ZProfileSeparatesK Q T` holds (pure logic on the predicate). | — |
+| `isoClassK_eq_isoClass` | 319-329 | The V-indexed `isoClassK` (abstract `K`, here `K = ZMod p`) agrees with the build's `Fin (p^d)`-flavoured `isoClass` on the vector space — both are `if w = 0 then 0 else if Q w = 0 then 1 else 2`. | — |
+| `isoCount_transport` | 330-361 | **The relabel.** For a single pivot `w : Fin (p^d)`, the V-indexed isotropy-profile count (at base `T.image affineE.symm`, profile `σV`, pivot class `c`) equals the build's `Fin (p^d)`-indexed count (at base `T`, profile `σV ∘ affineE.symm`, pivot class `c`), via the bijection `affineE`. | — |
+| `isotropySeparatesAtBase_of_K` | 363-376 | **The q = p adapter.** `IsotropySeparatesAtBaseK Q (T.image affineE.symm)` (the abstract-K, V-indexed predicate of `ScratchFieldGen`) ⟹ `IsotropySeparatesAtBase Q T` (the build's `Fin (p^d)`-indexed predicate). Pure relabel: descend to `V` via `affineE.symm.injective`, transport the count agreement… | — |
+| `reachesRigidOrCameron_viaIsotropySeparatesK_wittFree` | 378-391 | **The q=p adapter.** The abstract-`K` predicate `IsotropySeparatesAtBaseK Q (T.image affineE.symm)` reaches the in-build `Fin(p^d)`-indexed Witt-free seal capstone (a pure `affineE` relabel). | — |
+## ChainDescent/GoodAnchorNonvacuity.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `polar_pencil_apply` | 36-48 | **NV-1 — the pencil polar formula.** The polar of a pencil member `y • pairForm Q a + z • pairForm Q b` is `4c · polar Q s r − 2y · polar(s,a)·polar(r,a) − 2z · polar(s,b)·polar(r,b)` with `c = y·Q(a) + z·Q(b)`. Pure algebra on `polar_pairForm_apply` + bilinearity (`polar` of a sum/scalar-multiple… | — |
+| `pencil_radical_key` | 50-71 | **The radical equation (shared by NV-2/NV-3).** For nondegenerate `Q`, `s ∈ polarRad B` forces `(4c)·s = (2y·polar(s,a))·a + (2z·polar(s,b))·b` (`c = y·Q(a)+z·Q(b)`), by inverting the nondegenerate `polar Q` against the NV-1 polar formula. | — |
+| `polarRad_pencil_subset_span` | 73-89 | **NV-2 — the radical lands in `⟨a,b⟩`.** For nondegenerate `Q`, if `c = y·Q(a)+z·Q(b) ≠ 0` then every `s ∈ polarRad (y • pairForm Q a + z • pairForm Q b)` lies in `span K {a,b}` (divide `pencil_radical_key` by `4c ≠ 0`). | — |
+| `polarRad_pencil_eq_bot` | 91-139 | **NV-3 — the pencil member is nondegenerate.** For nondegenerate `Q` with `y,z ≠ 0`, `c = y·Q(a)+z·Q(b) ≠ 0`, and `pairForm Q a b ≠ 0` (⟺ `⟨a,b⟩` a nondegenerate plane), the member `y • pairForm Q a + z • pairForm Q b` is **nondegenerate** (`polarRad = ⊥`). Evaluating the radical equation at `r =…` | — |
+| `pairForm_self_sub` | 148-159 | **The plane-discriminant formula.** `pairForm Q a (a−w) = 4·Q(a)·Q(w) − polar(a,w)²` — the determinant of the Gram of `⟨a, a−w⟩ = ⟨a, w⟩`, a **degree-2** polynomial in `a` (key for the NV-4 counting). | — |
+| `exists_ne_zero_polar_eq_zero` | 161-179 | A nonzero vector orthogonal to `w` exists once `finrank V ≥ 2`: the functional `b ↦ polar Q b w` has a kernel of positive dimension (rank-nullity, codomain `K` is `1`-dimensional). | — |
+| `exists_pairForm_self_sub_ne_zero` | 181-232 | **NV-4a — the geometric witness.** For nondegenerate `Q`, `w ≠ 0`, `finrank V ≥ 2`, the plane discriminant `pairForm Q a (a−w) = 4 Q a Q w − polar(a,w)²` is **not identically zero** in `a`. Otherwise `Q` would satisfy `4 Q a Q w = polar(a,w)²` for all `a` — a rank-≤1 form (its polar would vanish on… | — |
+| `exists_anisotropic` | 234-247 | A nondegenerate `Q` over a nontrivial space is **not the zero form** — `∃ a, Q a ≠ 0` (else `polar Q ≡ 0`, so `polarRad Q = ⊤ ≠ ⊥`). | — |
+| `gramQuadPoly_ne_zero` | 253-261 | `gramQuadPoly b Q ≠ 0` when `Q` is nonzero somewhere (`gramQuadPoly_eval = Q t₀`). | — |
+| `planeDiscPoly` | 263-267 | The polynomial representing the plane discriminant `pairForm Q a (a−w) = 4·Q(a)·Q(w) − polar(a,w)²`. | Definition, `noncomputable` |
+| `planeDiscPoly_eval` | 269-277 | Evaluation: `planeDiscPoly b Q w` at `b.equivFun a` equals `pairForm Q a (a - w)` — the plane discriminant as a coordinate polynomial. | — |
+| `planeDiscPoly_totalDegree_le` | 279-291 | Total-degree bound for the plane-discriminant polynomial (feeds Schwartz–Zippel in the non-vacuity count). | — |
+| `planeDiscPoly_ne_zero` | 293-299 | The plane-discriminant polynomial is nonzero given a point where `pairForm Q a₀ (a₀-w) ≠ 0` — so Schwartz–Zippel bounds its zero set. | — |
+| `exists_good_plane_anchor` | 301-358 | **NV-4 — an anisotropic-generator nondegenerate plane through `w`.** For nondegenerate `Q`, `w ≠ 0`, `finrank V ≥ 2`, `|K| ≥ 7`: there is `a` with `Q a ≠ 0`, `Q (a−w) ≠ 0`, and `pairForm Q a (a−w) ≠ 0`. The three bad loci are quadrics (each `≤ 2·|V|/|K|` by Schwartz–Zippel on… | — |
+| `linearIndependent_of_pairForm_ne_zero` | 360-375 | **`pairForm` nonvanishing ⟹ linear independence.** `pairForm Q a b = 4·Q(a)·Q(b) − polar(a,b)²` is the Gram determinant of `{a,b}` under `polar Q`, so it vanishes whenever `a, b` are linearly dependent (if `b = c•a` then `pairForm Q a (c•a) = 4c²Q(a)² − (2cQ(a))² = 0`). Contrapositive: a nonzero… | — |
+| `exists_hgood` | 377-411 | **Good-anchor non-vacuity.** For `u≠v`, nondegenerate `Q`, `finrank≥2`, `card K ≥ 7`, a good anchor exists (a witness `t₀` and pencil coefficients with vanishing polar radical); the conclusion also exposes `Q(t₀-u)≠0` and the linear independence of `t₀-u, t₀-v`. | — |
+## ChainDescent/IsotropicIncidenceCount.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `isoIncidence_eq_linearConds` | 27-44 | **Lemma A, step A1 — the isotropic-incidence count rewrites with LINEAR conditions.** On the cone `Q w = 0`, the condition `Q (w − a j) = 0` is equivalent to the affine-linear `polar Q w (a j) = Q (a j)` (by the polar identity `polar Q w a = Q w + Q a − Q (w − a)`). So the count is over linear… | — |
+| `map_add_of_polar_zero` | 46-53 | **Lemma A, step A4-core — `Q` is additive across a polar-orthogonal pair.** If `polar Q w x = 0` then `Q (w + x) = Q w + Q x`. (This is what makes the affine level-set HOMOGENEOUS once `w₀ ⊥ Uᗮ`.) | — |
+| `count_coset` | 55-77 | **Lemma A, step A3 — the linear-condition count is a count over the kernel coset.** Given any `w₀` realizing the affine system (`polar Q w₀ (a j) = Q (a j)`), the solution set of the system is `w₀ + Uᗮ` (`Uᗮ = {x | ∀ j, polar Q x (a j) = 0}`), so the cone-count over the system equals the count… | — |
+| `polar_w0_perp` | 79-88 | **Lemma A, step A4-link — `w₀ ∈ span{a j}` is polar-orthogonal to `Uᗮ`.** If `w₀ = ∑ k, c k • a k` and `x` is in `Uᗮ` (`∀ j, polar Q x (a j) = 0`), then `polar Q w₀ x = 0`. (Polar bilinearity, `polar_sum_right`.) | — |
+| `reduction_to_levelset` | 90-110 | **Lemma A, steps A1+A3+A4 combined — the count is a HOMOGENEOUS level-set count over `Uᗮ`.** Given a spanning solution `w₀ = ∑ k, c k • a k` of the affine system (`polar Q w₀ (a j) = Q (a j)`), the isotropic-incidence count equals the count, over `Uᗮ = {x | ∀ j, polar Q x (a j) = 0}`, of `x` with… | — |
+| `spanning_w0_exists` | 112-131 | **Lemma A, step A-M2 — a spanning `w₀` exists when the config Gram is nondegenerate.** If the Gram matrix `G i j = polar Q (a i) (a j)` is invertible (`IsUnit G.det`), then `c := (Q ∘ a) ᵥ* G⁻¹` realizes the affine system: `w₀ = ∑ k, c k • a k` satisfies `polar Q w₀ (a j) = Q (a j)` for all `j`.… | — |
+| `reduction_to_levelset_nondeg` | 133-149 | **Lemma A, A-M1 ∘ A-M2 — the reduction, unconditional on nondegenerate configs.** If the config Gram matrix is invertible, the isotropic-incidence count is the HOMOGENEOUS level-set count `#{x ∈ Uᗮ : Q x = − Q w₀}` for the explicit `w₀ = ∑ k, c k • a k` (`c` from `spanning_w0_exists`). The… | — |
+| `levelset_fourier` | 150-198 | **Lemma A, step A-M3 increment 1 — the Fourier expansion of the level-set count over the FULL space `V`** (Route B, §10.10). The level-set count `#{x : (∀ j, polar Q x (a j)=0) ∧ Q x = c}`, scaled by `q^{m+1}`, is a double character sum indexed by `Option (Fin m)`: the `none` slot carries the… | — |
+| `levelset_fourier_prod` | 199-219 | **Lemma A, step A-M3 increment 2a — reindex the dual sum into `(s, ρ)` product form.** Splits the `Option (Fin m) → F` dual variable into the quadratic dual `s = r none` and the linear duals `ρ = r ∘ some` (via `Equiv.piOptionEquivProd`), so the inner sum is `∑_x ψ(s·Q x + polar Q x (∑ⱼ ρⱼ•aⱼ))` —… | — |
+| `levelset_fourier_split` | 220-251 | **Lemma A, step A-M3 increment 2b — the `s`-split (D1 on the bulk).** Split the quadratic dual `∑_s` at `s = 0`. The `s = 0` boundary leaves the linear sum `∑_ρ ∑_x ψ(polar Q x (∑ⱼ ρⱼ•aⱼ))` (collapsed in 2c via `sum_addChar_linearMap` + config-vector independence, where nondegeneracy enters). | — |
+| `s0_boundary_collapse` | 252-304 | **Lemma A, step A-M3 increment 2c — the `s = 0` boundary collapses to `q^d`.** The boundary sum `∑_ρ ∑_x ψ(polar Q x (∑ⱼ ρⱼ•aⱼ))` equals `|V| = q^d`. Pointwise (`sum_addChar_linearMap`, with the linear functional `φ_ρ = (polarBilin Q).flip (∑ⱼ ρⱼ•aⱼ)`), the inner `x`-sum is `|V|·[φ_ρ = 0]`; and… | — |
+| `levelset_count_eq` | 305-323 | **Lemma A, step A-M3 ASSEMBLED — the level-set count in closed form up to the two Gauss sums (Route B).** For a nondegenerate config Gram (`IsUnit G.det`), the level-set count satisfies `count·q^{m+1} = |V| + ∑_{s≠0} ψ(−s·c)·(ψ(−s⁻¹·Q(∑ⱼ ρⱼ•aⱼ))·∑_x ψ(s·Q x)) summed over ρ`. The `|V|` is the `s=0`… | — |
+| `configForm` | 327-331 | **The config quadratic form** `QR(ρ) = Q(∑ⱼ ρⱼ•aⱼ)` on `Fin m → ZMod p`, as `Q.comp L` with `L` the linear-combination map. Its associated bilinear (Gram) at the standard basis is the config Gram `G`. | Definition, `noncomputable` |
+| `configForm_apply` | 333-336 | Unfolds `configForm Q a` — the quadratic form pulled back along a `Fin m` configuration `a`. | `@[simp]` |
+| `linComb_single` | 338-340 | `Fintype.linearCombination a (Pi.single i 1) = a i` (single-index linear combination selects the i-th vector). | — |
+| `polar_configForm` | 342-348 | The polar of the config form transports along `L`. | — |
+| `polar_configForm_single` | 350-357 | **The config form's Gram = the config Gram `G`** (at the standard basis). | — |
+| `configForm_nondegenerate` | 358-394 | **A-M4a gap-2 — the config form's associated bilinear is nondegenerate** (from `IsUnit G.det`). If `∀ y, associated QR x y = 0`, then in particular `polar QR x (eᵢ) = 0 ∀ i`, i.e. | — |
+| `configForm_exists_orthoBasis` | 395-415 | **A-M4a gap-3 — an orthogonal *anisotropic* basis of the config form `QR`** (from nondegeneracy, gap-2). The `(v, hv, hw)` triple the Gauss toolkit (`sum_quadForm_eval` / `sum_addChar_quadForm_smul`) consumes. | — |
+| `configGaussSum_eval` | 416-439 | **A-M4a gap-4 — the config-form Gauss sum** (composing the two landed toolkit lemmas). For an orthogonal anisotropic basis `v` of `QR = configForm Q a` and a unit scalar `s`, `∑_ρ ψ(s·QR ρ) = χ(s)^n · (∏ᵢ χ(QR vᵢ)) · gaussSum^n` (`n = finrank`, `χ` the quadratic character cast to `R'`). | — |
+| `prod_quadChar_eq_det` | 440-488 | **A-M4a gap-5 (THE CRUX) — the discriminant collapse.** The basis-dependent factor `∏ᵢ χ(QR vᵢ)` from gap-4 equals `χ(D)`, where `D = det` of the Gram of `associated QR` at the canonical reference basis `b₀ = finBasis` — a **basis-free config invariant**. Proof: in `v` the Gram is `diagonal (QR∘v)`… | — |
+| `configGaussSum_eq_det` | 489-510 | **A-M4a config-side ASSEMBLED — the config Gauss sum, basis-free** (gap-3 ∘ gap-4 ∘ gap-5). Eliminating the existential orthogonal basis, for a nondegenerate config Gram (`IsUnit G.det`) and unit `s`, `∑_ρ ψ(s·QR ρ) = χ(s)^n · χ(D) · gaussSum^n`, where `D = det` of the Gram of `associated QR` at… | — |
+## ChainDescent/IsotropicIncidenceCountK.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `isoIncidence_eq_linearCondsK` | 20-37 | **A1 (K)** — isotropic-incidence count rewrites with LINEAR conditions. | — |
+| `map_add_of_polar_zeroK` | 38-44 | **A4-core (K)** — `Q` is additive across a polar-orthogonal pair. | — |
+| `count_cosetK` | 46-67 | **A3 (K)** — the linear-condition count is a count over the kernel coset. | — |
+| `polar_w0_perpK` | 68-76 | **A4-link (K)** — `w₀ ∈ span{a j}` is polar-orthogonal to `Uᗮ`. | — |
+| `reduction_to_levelsetK` | 78-95 | **A1+A3+A4 (K)** — the count is a HOMOGENEOUS level-set count over `Uᗮ`. | — |
+| `spanning_w0_existsK` | 96-112 | **A-M2 (K)** — a spanning `w₀` exists when the config Gram is nondegenerate. | — |
+| `reduction_to_levelset_nondegK` | 114-127 | **A-M1 ∘ A-M2 (K)** — the reduction, unconditional on nondegenerate configs. | — |
+| `levelset_fourierK` | 128-169 | **A-M3 inc 1 (K)** — the Fourier expansion of the level-set count over the FULL space `V`. | — |
+| `levelset_fourier_prodK` | 170-187 | **A-M3 inc 2a (K)** — reindex the dual sum into `(s, ρ)` product form. | — |
+| `levelset_fourier_splitK` | 188-214 | **A-M3 inc 2b (K)** — the `s`-split (D1 on the bulk). | — |
+| `s0_boundary_collapseK` | 215-263 | **A-M3 inc 2c (K)** — the `s = 0` boundary collapses to `q^d`. | — |
+| `levelset_count_eqK` | 264-276 | **A-M3 ASSEMBLED (K)** — the level-set count in closed form up to the two Gauss sums. | — |
+| `configFormK` | 280-285 | **The config quadratic form (K)** `QR(ρ) = Q(∑ⱼ ρⱼ•aⱼ)` on `Fin m → K`. | Definition, `noncomputable` |
+| `configFormK_apply` | 286-291 | Unfolds `configFormK Q a` (the abstract-K config form). | `@[simp]` |
+| `linComb_singleK` | 292-296 | Abstract-K version of `linComb_single`: `Fintype.linearCombination a (Pi.single i 1) = a i`. | — |
+| `polar_configFormK` | 297-305 | The polar of the config form transports along `L`. | — |
+| `polar_configFormK_single` | 306-314 | **The config form's Gram = the config Gram `G`** (K). | — |
+| `configFormK_nondegenerate` | 315-349 | **A-M4a gap-2 (K)** — the config form's associated bilinear is nondegenerate. | — |
+| `configFormK_exists_orthoBasis` | 350-366 | **A-M4a gap-3 (K)** — an orthogonal *anisotropic* basis of the config form `QR`. | — |
+| `configGaussSum_evalK` | 367-385 | **A-M4a gap-4 (K)** — the config-form Gauss sum. | — |
+| `prod_quadChar_eq_detK` | 386-426 | **A-M4a gap-5 (K, THE CRUX)** — the discriminant collapse. | — |
+| `configGaussSum_eq_detK` | 427-444 | **A-M4a config-side ASSEMBLED (K)** — the config Gauss sum, basis-free. | — |
+## ChainDescent/Matching.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `exists_separating_base` | 20-63 | **The matching-trick first moment (REUSABLE, general).** If every target's fail-set has at most `F` elements and `(card ι)·Fᵐ < (card W)ᵐ`, then some length-`m` base `Fin m → W` separates every target. Pure cardinality / union bound — no probability. | — |
+## ChainDescent/ObservableCountBridge.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `levelset_count_collapse` | 35-128 | **The `|S|`=2, even-d closed form.** For a config-nondegenerate Gram and even `d`, the homogeneous level-set count collapses to `count·q³ = card V + χ(D)·(gaussSum²·∑ψ(Q))·(q·[c=0]−1)`, the config dependence entering only through the pair invariant `χ(D)`. | — |
+| `fullcount_eq_jointIsoCount_add_corr` | 129-143 | **B1a wrap (i) — `fullcount = jointIsoCount + (y=0 correction)`.** The Lemma-A fullcount over `V` (`#{y : Q y = 0 ∧ ∀ t∈S, Q(y−(t̄−ū)) = 0}`, the `reduction_to_levelset_nondeg` entry point) equals the observable `jointIsoCount Q u S` (the same count restricted to `y ≠ 0`) plus the correction `[∀…` | — |
+| `fullcount_pair_eq_levelset` | 144-179 | **B1a wrap (ii-a) — fullcount over `{t,t₀}` = the homogeneous level-set count.** Index the pair `{t,t₀}` as the `Fin 2` config `a = ![t̄−ū, t̄₀−ū]`; on the config-nondegenerate locus (`hG : IsUnit (config Gram det)`) the Lemma-A fullcount equals the level-set count of `Q|_{Uᗮ}` at level `−Q w₀` for… | — |
+| `fullcount_pair_closed` | 180-216 | **B1a wrap (ii-b) — the fullcount closed form over `{t,t₀}`.** Composing wrap (ii-a) with `levelset_count_collapse`: for even `d` and a config-nondegenerate Gram, the Lemma-A fullcount over `{t,t₀}` satisfies `fullcount · q³ = qᵈ + χ(D)·(gaussSum²·∑ψ(Q))·(q·[Q w₀ = 0] − 1)`, with `w₀ = ∑ c k • a k`… | — |
+| `configPolarDet_eq_pairForm` | 217-233 | The config polar-Gram determinant (the `IsUnit` hypothesis matrix of `fullcount_pair_closed`/`levelset_count_collapse`) is the pair invariant `pairForm`. `det_fin_two` + `polar_self` (`polar Q x x = 2 Q x`) + `polar_comm` + the structural `detG2_eq_pairForm` (`4 Q(a₀) Q(a₁) − B(a₀,a₁)² = pairForm`). | — |
+| `chi_configDet_eq_chi_pairForm` | 235-315 | **χ-kills-squares (REUSABLE).** `χ(det config-Gram) = χ(I_w(t))`: the `½·polar` factor-2 and the change-of-basis determinant enter only as squares, so the quadratic character erases them — no identification of the basis with the standard one is needed. | — |
+| `chi_eq_one_or_neg_one` | 317-328 | The quadratic character of a nonzero element is `±1` (its square is `1`, a domain has no other roots). | — |
+| `chiSep_imp_zSep_field` | 330-356 | **The ℂ-restated B1b (`chiSep_imp_zSep`) over a `CharZero` field.** The four-value distinctness of the closed form `n + c·K·(q·b − 1)` (`c ∈ {±1}`, `b ∈ {0,1}`, `K ≠ 0`, `q > 2`), but stated over a `CharZero` field `F` (= ℂ), so the `R' → ℕ` integrality descent is unnecessary — distinctness holds… | — |
+| `pairCount_ne_of_chiSep_field` | 358-371 | **B1b in count form over a `CharZero` field — the per-pair bridge step.** Two pivots whose pair invariants `χ(I)` differ (`hne`) have different joint isotropic counts at a sub-frame, given each point's closed form `Z_w · q³ = n + χ_w·K·(q·b_w − 1)`. The ℂ analogue of… | — |
+| `jointIsoCount_pair_closed_corr0` | 372-414 | **B1a final assembly — the observable per-pair closed form (corr = 0).** Combining wrap (i) (`fullcount = jointIsoCount + corr`), wrap (ii) (`fullcount_pair_closed`), and wrap (iii) (`chi_configDet_eq_chi_pairForm`): on the `corr = 0` locus (`hcorr`: not both config-differences isotropic), the… | — |
+| `jointIsoCount_ne_of_chiSep_pair` | 415-467 | **The observable↔count bridge, per pair (ZMod p).** Two pivots whose pair invariant `χ(det G₂(u;t,t₀))` differs — both config invariants nonzero, corr term vanishing — have distinct joint isotropic counts `Z_u({t,t₀})`. Turns χ-separation into Z-separation. | — |
+## ChainDescent/ObservableCountBridgeK.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `cone_count_zero_splitK` | 30-62 | **The `y=0` split (K)** — `fullcount = restricted (y≠0) + [∀ t∈S', Q(t−w)=0]`. | — |
+| `fullcount_eq_jointIsoCountK_add_corr` | 67-74 | **B1a wrap (i) (K)** — `fullcount = jointIsoCountK + (y=0 correction)`. | — |
+| `levelset_count_collapseK` | 79-156 | **B1a analytic core (K)** — the `|S|=2`, even-`d` `s`-sum collapse. | — |
+| `fullcount_pair_eq_levelsetK` | 161-186 | **B1a wrap (ii-a) (K)** — fullcount over `{t,t₀}` = the homogeneous level-set count. | — |
+| `fullcount_pair_closedK` | 187-212 | **B1a wrap (ii-b) (K)** — the fullcount closed form over `{t,t₀}`. | — |
+| `configPolarDet_eq_pairFormK` | 217-227 | **The config polar-Gram det is the pair invariant `pairForm` (K).** | — |
+| `chi_configDet_eq_chi_pairFormK` | 229-297 | **wrap (iii) (K) — `χ(D) = χ(I_w(t))`.** | — |
+| `chi_eq_one_or_neg_oneK` | 299-312 | The quadratic character of a nonzero element is `±1` (K). | — |
+| `jointIsoCountK_pair_closed_corr0` | 313-345 | **B1a final assembly (K) — the observable per-pair closed form (corr = 0).** | — |
+| `jointIsoCountK_ne_of_chiSep_pair` | 346-381 | The abstract-`K` mirror of `jointIsoCount_ne_of_chiSep_pair`: χ-separation of the pair invariant ⟹ distinct joint isotropic counts `jointIsoCountK`. | — |
+## ChainDescent/PairForm.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `quadChar_addChar_sum` | 67-102 | **The multiplicative↔additive Gauss bridge.** For the quadratic character `χ` of `K` composed into a char-zero domain `R'`, and any additive character `ψ : AddChar K R'`, `∑_y χ(y)·ψ(a·y) = gaussSum χ ψ · χ(a)` for every `a : K` (including `a = 0`, both sides `0`). | — |
+| `pairCharSum_factor_gen` | 110-150 | **The "no Weil" core, GENERAL form — a product of two `χ`-of-functions factors into additive Gauss sums.** For ANY two functions `f g : V → K`, applying the bridge twice and reordering, `gaussSum χ ψ ^ 2 · (∑_t χ(f t)·χ(g t)) = ∑_y ∑_z χ(y)χ(z)·(∑_t ψ(y·f t + z·g t))`. The factoring never uses any… | — |
+| `pairCharSum_factor` | 152-164 | The original form-specific factoring (the singleton model `S`), now a one-line corollary of the general lemma (`f = Q`, `g = Q(· − c)`). Kept for the singleton/translate instance; the live route uses `…_gen` with the pair invariant `f = det G₂(u; ·, t₀)`, `g = det G₂(u'; ·, t₀)`. | — |
+| `pairForm` | 178-182 | **The pair invariant as a quadratic form.** `pairForm Q a` is the form `s ↦ 4·Q(a)·Q(s) − (polar Q s a)²`; its value at the shift `s = t − u` (anchor offset `a = t₀ − u`) is exactly the Gram determinant `det G₂(u; t, t₀)`. | Definition, `noncomputable` |
+| `pairForm_apply` | 184-187 | Unfolds `pairForm Q a s = 4·Q a·Q s − polar Q s a · polar Q s a` (the `|S|`=2 config-Gram determinant, a quadratic in `s`). | — |
+| `detG2_eq_pairForm` | 189-194 | The Gram determinant `det G₂(u; t, t₀) = 4 Q(t−u) Q(t₀−u) − B(t−u,t₀−u)²` equals `pairForm Q (t₀−u)` evaluated at the shift `t − u` — the structural identity that turns the opaque pair invariant into a quadratic-form-at-a-shift. | — |
+| `pairCombine` | 196-215 | **The two-pivot combine.** The inner-sum integrand `y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀)` — two pair invariants at DIFFERENT pivots `u, v` — expressed in the single shift `p = t − u`: a quadratic FORM `y•pairForm_u + z•pairForm_v` applied to `p`, plus a LINEAR term `z·polar pairForm_v (p, u−v)` and… | — |
+| `sum_addChar_quadForm_translate` | 217-223 | **Gauss-sum translation invariance.** `∑_t ψ(P (t − a)) = ∑_t ψ(P t)` for any quadratic form `P` (reindex `t ↦ t + a`). The final step of the inner-sum evaluation, recentring each pivot's shift. | — |
+| `pairSum_to_shifted` | 225-260 | **The single-shift reduction of `M(y,z)` (increment 2, forward step — UNCONDITIONAL).** The inner sum `M(y,z) = ∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀))` (written via `pairForm`) reduces, by `pairCombine` then recentring `t ↦ t−u`, to a CONSTANT phase times a sum of `ψ` of `F(s) + (linear in s)`… | — |
+| `sum_addChar_shifted_eval` | 262-274 | **Complete the square (increment 2, forward step).** Once the linear term `L s` of the shifted sum is represented as `polar F s b` (possible exactly when `F` is nondegenerate — that representability is the separate next piece), the linear part is absorbed by a translate and `∑_s ψ(F s + L s) =…` | — |
+| `pairSum_closed_of_repr` | 276-296 | **The `M(y,z)` closed form, modulo the representation `b` (increment 2 — ASSEMBLED).** Chains `pairSum_to_shifted` (reorganise) with `sum_addChar_shifted_eval` (complete the square): given a vector `b` representing the residual linear term against `F = y•pairForm_u + z•pairForm_v` (i.e. `hb`, which… | — |
+| `exists_repr_of_nondeg` | 298-309 | **Representability from nondegeneracy (increment 2, piece (i)).** On a finite-dimensional space, if the polar bilinear form of `F` is nondegenerate then every linear functional `ℓ` is `polar F (·, b)` for some `b` — exactly the input `pairSum_closed_of_repr` needs. Via Mathlib's… | — |
+| `pairSum_closed_of_nondeg` | 311-332 | **The `M(y,z)` closed form from nondegeneracy alone (increment 2, (i) discharged).** Combining `exists_repr_of_nondeg` with `pairSum_closed_of_repr`: when `F = y•pairForm_u + z•pairForm_v` has nondegenerate polar form, there is a `b` (the canonical representative of the residual linear term) with… | — |
+| `pairSum_fully_closed` | 334-359 | **The fully explicit `M(y,z)` closed form (increment 2 — COMPLETE on the nondegenerate locus).** Chaining `pairSum_closed_of_nondeg` (absorb the linear term) with `sum_addChar_quadForm` (evaluate the quadratic Gauss sum) gives, for `F = y•pairForm_u + z•pairForm_v` nondegenerate, `M(y,z) =…` | — |
+| `pairForm_polar_anchor` | 371-381 | **Every `pairForm Q a` is degenerate: `a` lies in its polar-radical, and `pairForm Q a (a) = 0`.** This is the structural source of the degenerate locus (it forces degeneracy on the axes `{y=0}∪{z=0}`). Verified by expanding `pairForm_apply` + the polar identities. | — |
+| `pairForm_self_anchor` | 383-386 | `pairForm Q a a = 0` — the pair invariant vanishes on the diagonal (the anchor direction lies in its radical). | — |
+| `sum_addChar_radical_vanish` | 388-424 | **Radical-vanishing (the degenerate-locus diagonal collapse).** If `r` lies in the polar-radical of `F` (`∀ s, polar F s r = 0`) with `F r = 0`, and the residual linear functional does not annihilate `r` (`L r ≠ 0`), then `∑_s ψ(F s + L s) = 0`. Proof: translating by `c•r` fixes `F` (constant on… | — |
+| `norm_addChar_eq_one` | 436-447 | **`AddChar` values into `ℂ` are unit-modulus** (each `ψ c` is a `(card K)`-th root of unity). The phase factors of `M` therefore drop out of its magnitude. | — |
+| `norm_gaussSum_sq` | 449-475 | **The quadratic Gauss sum has `|gaussSum| = √q`** (over `ℂ`): `‖gaussSum χ ψ‖² = card K`. Via Mathlib's `gaussSum_mul_gaussSum_pow_orderOf_sub_one` (`gaussSum² = χ(-1)·card` for the order-2 character `χ`) and `|χ(-1)| = 1`. | — |
+| `norm_pairSum_le` | 477-498 | **`‖M(y,z)‖ ≤ ‖gaussSum‖^d` on the nondegenerate locus** (so `‖M‖² ≤ (card K)^d = q^d`). From the explicit `pairSum_fully_closed` value: the two `ψ`-phases have norm `1` (`norm_addChar_eq_one`), the `∏ χ(wᵢ)` factor has norm `≤ 1` (each `χ` value is `0, 1`, or `−1`), leaving `‖gaussSum‖^d`. | — |
+| `norm_sq_sum_addChar_quadForm` | 507-591 | `‖∑ₓ ψ(Q x)‖² = (card V)·…` — the magnitude of the global quadratic Gauss sum (the `K` Gauss-factor). | — |
+| `norm_sq_sum_addChar_quadForm_linear_le` | 593-675 | **The with-linear degenerate magnitude bound (3c — uniform over nondeg AND conic).** For ANY quadratic form `Q` and linear functional `L`, `‖∑_x ψ(Q x + L x)‖² ≤ qᵈ · |radical Q|`. (Exact: `S·conj S = qᵈ·∑_{h∈radical} ψ(−L h)`, bounded by the triangle inequality + `‖ψ‖ = 1`.) This is the magnitude… | — |
+| `norm_sq_pairSum_le` | 677-700 | **The uniform `|M(y,z)|²` bound (3c — the magnitude consumed by the increment-3 `c₀` bound).** For the inner sum `M(y,z) = ∑_t ψ(y·det G₂(u;t,t₀) + z·det G₂(v;t,t₀))`, `‖M‖² ≤ qᵈ · |radical F|`, `F = y•pairForm_u + z•pairForm_v`. On the NONDEG locus `|radical F| = 1 ⟹ ‖M‖² ≤ qᵈ` (matches… | — |
+| `zeroCount_sq_le` | 702-775 | **Zero-count bound (3d).** For a quadratic form `P` (possibly degenerate), the number of zeros `z = #{x : P x = 0}` satisfies `(z·q − qᵈ)² ≤ (q−1)²·qᵈ·|radical P|` (`qᵈ = card V`). From `count_eq_charsum` (`z·q = ∑_x ∑_t ψ(t·P x)`), peeling the `t = 0` term (`= qᵈ`), and bounding the rest by the… | — |
+| `normT_le` | 777-815 | **The `|T|` bound (3e, step i — the load-bearing analytic step).** The per-pair character sum `T = ∑_t χ(det G₂(u;t,t₀))·χ(det G₂(v;t,t₀))` (over ℂ) satisfies `q·‖T‖ ≤ ∑_{y,z} ‖χ y‖·‖χ z‖·√(qᵈ·|radical F_{y,z}|)`, `F_{y,z} = y•pairForm_u + z•pairForm_v`. From the factoring `gaussSum²·T = ∑_{y,z}…` | — |
+## ChainDescent/PencilTBound.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `polarRad` | 38-48 | The polar-radical of a quadratic form `F`, bundled as a submodule: `{ h | ∀ x, polar F x h = 0 }`. (Right radical of `F.polarBilin`.) | Definition |
+| `mem_polarRad` | 50-51 | Membership criterion for the polar-radical submodule `polarRad Q`. | `@[simp]` |
+| `polarRad_card_filter` | 53-64 | The `Finset.filter` cardinality used in `normT_le`'s RHS equals `Nat.card` of `polarRad F`. Routed through `Nat.card`/`Set.ncard` (instance-free) to avoid `Fintype`-on-submodule instance mismatches. | — |
+| `polarRad_ne_top_of_ne_zero` | 66-79 | **`F ≠ 0 ⟹ its polar-radical is a PROPER subspace** (char ≠ 2).** If the radical were everything, then `polar F x x = 0` for all `x`, i.e. `2 • F x = 0`, i.e.` | — |
+| `radical_card_mul_card_le` | 81-96 | **The corank-uniform proper-subspace bound (the corank ≥ 2 enabler).** For any NONZERO quadratic form `F` on a finite space `V` over a finite field `K` (char ≠ 2), `|radical F| · |K| ≤ |V|` — equivalently `|radical F| ≤ q^{d-1}`, regardless of the corank. | — |
+| `mvPoly_zeros_count_le` | 104-123 | **Schwartz–Zippel over a finite field (REUSABLE).** A nonzero two-variable polynomial over `K` has at most `totalDegree·(card K)` common zeros in `K²`. | — |
+| `det_totalDegree_le` | 125-140 | **The pencil-discriminant degree bound.** The determinant of a `d × d` matrix whose every entry is a 2-variable polynomial of `totalDegree ≤ 1` (a *linear pencil* `y·A + z·B`) has `totalDegree ≤ d`. This caps the discriminant `disc(y,z) = det(y·G_u + z·G_v)` at degree `d`, the `p.totalDegree` fed… | — |
+| `pencilDisc` | 141-147 | The **pencil discriminant** of two matrices `A, B` over `K`: the determinant of the linear-pencil matrix `y·A + z·B` packaged as a 2-variable polynomial `det(X₀·A + X₁·B) : MvPolynomial (Fin 2) K`. | Definition, `noncomputable` |
+| `pencilDisc_totalDegree_le` | 148-158 | `pencilDisc A B` has `totalDegree ≤ d` (each entry is linear in `(X₀, X₁)`). | — |
+| `pencilDisc_eval` | 159-166 | Evaluating `pencilDisc A B` at `(y, z)` recovers `det(y·A + z·B)`. | — |
+| `polar_pencil` | 171-176 | Polar of the pencil form `y•P + z•R` is the linear combination of the polars. | — |
+| `polarRad_eq_bot_iff_separatingRight` | 178-188 | The polar-radical is trivial ⟺ the polar bilinear form separates on the right. | — |
+| `polarRad_ne_bot_iff_det_eq_zero` | 190-195 | **Degeneracy ⟺ vanishing determinant** (the bridge linchpin). For a basis `b`, the pencil member `G` is degenerate (`polarRad G ≠ ⊥`) iff the determinant of the Gram matrix of its polar form vanishes. | — |
+| `toMatrix₂_polarBilin_pencil` | 197-207 | In matrix coordinates, the pencil `y•P + z•R`'s polar bilinear form is `y·(matrix of P.polarBilin) + z·(matrix of R.polarBilin)`. | — |
+| `pencilZeros_count_le` | 211-225 | The Schwartz–Zippel count over `K × K` (via the `(y,z) ↦ ![y,z]` bijection). | — |
+| `degenerate_count_le` | 227-259 | **The good-anchor degenerate-pencil count.** Given a good anchor, the number of degenerate pencil ratios `(y,z)` is `≤ d·(card K)` (Schwartz–Zippel on the pencil discriminant). | — |
+| `sum_two_bucket_le` | 267-286 | **Two-bucket sum bound.** Split `s` by predicate `p`; if `g ≤ Ma` on the `¬p` bucket and `g ≤ Mb` on the `p` bucket, with cardinalities `≤ Ca`, `≤ Cb` respectively (and `Ma, Mb ≥ 0`), then `∑_{i∈s} g i ≤ Ca·Ma + Cb·Mb`. | — |
+| `sqrt_mul_le_div` | 288-296 | **Deg-bucket magnitude.** If `r·k ≤ V` (the proper-subspace radical bound), then `√(V·r) ≤ V/√k`. Used with `r = |radical F_{y,z}|`, `k = |K|`, `V = card V`: a degenerate member contributes at most `card V / √|K|`. | — |
+| `c0_le` | 298-334 | **The final c₀ bound (3e-iii finish).** From the counting bound `2·NS ≤ 2·z_u + n + T` (`card_agree_le`), the `|T|` bound `T ≤ q·√n + d·n/√q` (`normT_bucket_bound`, ÷q), and the zero-count `z_u·q ≤ n + (q−1)·n/√q` (`zeroCount_sq_le` with the proper-subspace radical bound), under the threshold… | — |
+| `norm_quadraticChar` | 342-356 | The quadratic character composed into `ℂ` has norm `0` at `0` and `1` elsewhere. | — |
+| `normT_bucket_bound` | 364-450 | **The `‖T‖` magnitude bound.** Bucket-splitting the character sum into nondegenerate and degenerate pencil members gives `(card K)·‖T‖ ≤ q²√n + (d·q)(n/√q)`. | — |
+## ChainDescent/PerAnchorBound.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+
+| `int_char_pointwise` | 25-30 | Per-element χ-value inequality (the heart of the counting identity). For `ca, cb ∈ {-1,0,1}`: `2·[ca=cb] ≤ 2·[ca=0] + 1 + ca·cb`. | — |
+| `counting_identity` | 32-56 | **The c₀ counting identity.** `2·#{t : χ(a t) = χ(b t)} ≤ 2·#{t : a t = 0} + |V| + ∑_t χ(a t)·χ(b t)`, for the quadratic character `χ = quadraticChar K`. (`a, b = I_u, I_v`.) | — |
+| `charSum_int_le_norm` | 64-76 | The integer character sum is `≤` the norm of the complex character sum (`T_ℤ ≤ |T_ℤ| = ‖T_ℂ‖`). | — |
+| `card_agree_le` | 78-94 | **The count controlled by the magnitude.** `2·#{χ(a)=χ(b)} ≤ 2·#{a=0} + |V| + ‖T_ℂ‖` over ℝ, combining `counting_identity` with `charSum_int_le_norm`. | — |
+| `c0_le_threequarters` | 102-182 | **The per-anchor non-separation bound (increment 3).** For a good anchor with `q≥q₀`, `d≥3`, the fraction of probes failing to separate a pivot pair is `NS ≤ ¾·(card V) < 1` — assembled from the counting identity, the `‖T‖` magnitude bound, and the radical zero-count. | — |
+## ChainDescent/ProfileReduction.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `jointIsoCount` | 27-36 | **The joint isotropic count `Z_u(S)`** = `#{z ≠ u : z isotropic-to-u, and isotropic-to-every t ∈ S}`, where "isotropic" is `isoClass ≠ 2` (the dictionary: `isoClass w = 2 ⟺ Q w ≠ 0`). This is the joint-incidence content the crux reduces to (the `VO⁻₄(3)` `sigF` counts at `|S| = 2`). | Definition, `noncomputable` |
+| `ZProfileSeparates` | 37-45 | **The reduced crux predicate.** Agreeing joint isotropic counts `Z(S)` over every sub-frame `S ⊆ T` ⟹ the same `Q`-profile over the standard frame (the `QProfileSeparatesAtBase` conclusion). This is the genuine open content (D3): the joint `Z(S)`-profile separates `u`. | Definition, `noncomputable` |
+| `extProfile` | 47-50 | Extend a `T`-indexed isotropy profile to a full profile (junk `0` off `T`). | Definition, `noncomputable` |
+| `extProfile_mem` | 52-55 | On `t ∈ T`, the extended isotropy profile `extProfile σ` agrees with `σ`. | — |
+| `qProfileSeparatesAtBase_of_zProfileSeparates` | 56-138 | **D1 — the marginalisation reduction.** The `QProfileSeparatesAtBase` fine antecedent ⟹ the `Z(S)` antecedent, so `ZProfileSeparates` (the joint-incidence crux) discharges `QProfileSeparatesAtBase`. Proof: fiber `Z_w(S)` by each point's `(T`-profile`, pivot-class)`; "good" fibers (`c ≠ 2`, profile… | — |
+| `isotropySeparates_of_zProfileSeparates` | 140-149 | **The D1 chain, end-to-end.** `ZProfileSeparates` + nondegeneracy ⟹ `IsotropySeparatesAtBase` (the wittFree capstone's target) — composes D1 with the landed `isotropySeparates_of_qProfileSeparates`. So the *entire* open content of the generalization is now the single predicate `ZProfileSeparates Q…` | — |
+| `jointIsoCount_eq_restricted` | 150-190 | **D2 (bridge) — `Z_u(S)` as the restricted isotropic count over `V`.** Unfolding the dictionary (`isoClass ≠ 2 ⟺ Q = 0`), transporting `Fin (p^d) ↔ V` (`count_transport`), and shifting `w = x − ū`, the joint isotropic count is the Lemma-A-ready restricted count: nonzero `w` on the cone `Q w = 0`… | — |
+| `coarse_incidence_agree` | 200-277 | **B-M1 core — isotropic-incidence agreement from the fine isotropy-count antecedent.** | — |
+| `incidence_to_V` | 278-313 | **B-M1, transport+translate — the incidence count moves to `V` in Lemma-A coordinates.** The cone-incidence count over `Fin (p^d)` (basepoint `w`) equals the count over `V` of `y ≠ 0` with `Q y = 0` and `Q (y − aₜ) = 0` for the config differences `aₜ = t̄ − w̄`. One bijection `z ↦ affineE.symm z −…` | — |
+| `incidence_agree_V` | 314-337 | **B-M1 capstone — the incidence counts agree in `V` (Lemma-A coordinates).** Composing the fiberwise agreement (`coarse_incidence_agree`) with the transport/translate (`incidence_to_V`): from the fine isotropy-count antecedent, the `V`-side incidence count `#{y ≠ 0 : Q y = 0 ∧ ∀ t∈S', Q (y −…` | — |
+| `cone_count_zero_split` | 338-374 | **B-M2 bridge — the `y=0` correction.** Lemma A's full cone-count equals B-M1's `y≠0` (restricted) count plus the `y=0` term, which is present iff all config differences `aₜ = t̄−w̄` are isotropic (`∀ t∈S', Q aₜ = 0`) — a Gram-determined indicator. Connects `incidence_agree_V` (restricted) to the… | — |
+| `fullcount_agree_modulo_corr` | 375-399 | **B-M2 bridge capstone — the FULL Lemma-A-shaped counts agree modulo the Gram-determined `y=0` correction.** From the fine isotropy-count antecedent: `fullcount_u(S') + corr_{u'} = fullcount_{u'}(S') + corr_u`, where `fullcount_w(S') = #{y : Q y=0 ∧ ∀t∈S', Q(y−(t̄−w̄))=0}` (Lemma A's count, `aₜ =…` | — |

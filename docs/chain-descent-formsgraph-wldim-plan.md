@@ -96,12 +96,18 @@ cyclotomic citation this is node-4-for-the-seal, modulo the CFSG identification 
   `relationRefinesIsotropy_similitude` + `separatesAtBase_of_isotropySeparates_weak`). Target predicate
   **`IsotropySeparatesAtBase Q T`** (`:3102`); shared back-half `coords_determine` (`:2640`).
 
-*Scratch modules (axiom-clean). **PORT STATUS (2026-06-27): the forms-graph pair-route closure — 27 modules
-(`ScratchMatching`, `PairSep`, `Corank`, `GoodAnchor`, `Bucket`, `ChiNorm`, `TBound`, `Count`, `C0`, `C0Final`,
-`Incr4{,b,c,d}`, `FieldGen`, `LemmaA{,K}`, `BridgeA/B/C/D/AllK/K`, `Crux`, `LemmaB`, `FieldGenAdapter`, `Incr5`) — is now
-IN `build.sh` (its `MODULES` array is authoritative). The inline "NOT in build" notes below predate the port and remain
-accurate ONLY for the floor-lowering / seam / char-2 modules (`ScratchPencil*`, `ScratchTBoundCorank*`, `ScratchRoute2*`,
-`ScratchSeam`, …) that are not on the seal's critical path.***
+*Scratch modules (axiom-clean). **PORT + RESTRUCTURE STATUS (updated 2026-06-28): the forms-graph pair-route closure was
+ported into `build.sh` (2026-06-27) and then restructured from 27 `Scratch*` files into 14 named modules (2026-06-28).
+`build.sh`'s `MODULES` array + `PublicTheoremIndex.md` (per-decl descriptions) are AUTHORITATIVE; the per-module prose
+below is the original `Scratch*`-named writeup, kept for the decl-level math detail but with stale module names.** The
+rename/merge map (old → new): `ScratchMatching`→`Matching`; `ScratchPairSep`→`PairForm`;
+`ScratchCorank`+`GoodAnchor`+`Bucket`+`ChiNorm`+`TBound`→`PencilTBound`; `ScratchCount`+`C0`+`C0Final`→`PerAnchorBound`;
+`ScratchIncr4`+`Incr4b`→`BadAnchorCount`; `ScratchIncr4c`→`Coordinatization`; `ScratchIncr4d`→`GoodAnchorNonvacuity`;
+`ScratchLemmaA`→`IsotropicIncidenceCount`; `ScratchBridgeA/B/C/D`→`ObservableCountBridge`; `ScratchCrux`+`LemmaB`→`ProfileReduction`;
+`ScratchFieldGen`+`BridgeK`+`FieldGenAdapter`→`FieldGeneric`; `ScratchLemmaAK`→`IsotropicIncidenceCountK`;
+`ScratchBridgeAllK`→`ObservableCountBridgeK`; `ScratchIncr5`→`AffinePolarSeal`. The "NOT in build" notes below predate the
+port and remain accurate ONLY for the floor-lowering / seam / char-2 modules (`ScratchPencil*`, `ScratchTBoundCorank*`,
+`ScratchRoute2*`, `ScratchSeam`, …) that are not on the seal's critical path.***
 - **`ScratchLemmaA.lean` — Lemma A** ("isotropic-incidence count = explicit Gram-function on nondeg configs"): the count
   reduces to a homogeneous level-set (`reduction_to_levelset_nondeg`), a Route-B char-sum closed form (`levelset_count_eq`),
   and the config-side Gauss sum **`configGaussSum_eq_det`** (`∑ψ(s·QR ρ) = χ(s)ⁿ·χ(D)·gaussSumⁿ`; config-dependence only

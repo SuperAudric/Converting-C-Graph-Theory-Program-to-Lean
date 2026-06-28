@@ -1,5 +1,5 @@
 import ChainDescent.CascadeAffine
-import ChainDescent.ScratchLemmaB
+import ChainDescent.ProfileReduction
 import ChainDescent.ScratchBM3Bridge
 /-!
 # B-M3 wiring — `IsotropySeparatesAtBase Qbun T₉` and the `VO⁻₄(3)` seal.

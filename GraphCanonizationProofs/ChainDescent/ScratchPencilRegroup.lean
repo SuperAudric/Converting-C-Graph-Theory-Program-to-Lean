@@ -13,7 +13,7 @@ This file builds the regroup infrastructure:
 NOT in build (scratch).
 -/
 import ChainDescent.ScratchPencilBridge
-import ChainDescent.ScratchGoodAnchor
+import ChainDescent.PencilTBound
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 namespace ChainDescent

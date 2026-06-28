@@ -10,8 +10,8 @@ Two elementary linear-algebra lemmas about the pencil `F = yâ€¢pairForm Q a + zâ
 
 NOT in build (scratch; verify with `lake env lean ChainDescent/ScratchPencilCorank2.lean`).
 -/
-import ChainDescent.ScratchPairSep
-import ChainDescent.ScratchCorank
+import ChainDescent.PairForm
+import ChainDescent.PencilTBound
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.Dual.Lemmas

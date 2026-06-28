@@ -398,7 +398,7 @@ Index of public Lean theorems, lemmas, and definitions in the archived (`Archive
 |------|------|-------------|-------|
 | `swapVertexLabels_self_inverse` | 47-49 | — | — |
 | `swapVertexLabels_comm` | 51-55 | — | — |
-| `AdjMatrix.Isomorphic.symm` | 59-70 | — | — |
+| `AdjMatrix.Isomorphic.symm` | 59-70 | Symmetry of `OrbitPartition` (via permutation inverse). | — |
 | `labelEdgesAccordingToRankings_isomorphic` | 74-126 | — | — |
 | `run_isomorphic_to_input` | 128-131 | — | — |
 | `run_eq_implies_iso` | 135-146 | — | — |
@@ -409,7 +409,7 @@ Index of public Lean theorems, lemmas, and definitions in the archived (`Archive
 |------|------|-------------|-------|
 | `VertexType` | 5 | — | `abbrev` |
 | `EdgeType` | 6 | — | `abbrev` |
-| `Graph.AdjMatrix` | 10-11 | — | Structure |
+| `Graph.AdjMatrix` | 10-11 | Self-contained adjacency matrix on `Fin n`, wrapping a `Fin n → Fin n → Nat` field. | Structure |
 | `swapVertexLabels` | 17-21 | — | Definition |
 | `Isomorphic` | 23-34 | — | Inductive |
 | `adjToString` | 36-41 | — | Definition |
