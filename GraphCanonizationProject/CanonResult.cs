@@ -38,11 +38,21 @@ namespace Canonizer
                                    // symmetric cell, deferring a lower-id real one
         long Phase2Nodes,          // nodes where every cell was a real decision —
                                    // the rigid residue is branched (Phase 2)
-        long CachedRealSkips)      // harvests skipped because the cell was already
+        long CachedRealSkips,      // harvests skipped because the cell was already
                                    // known-real (real-stays-real cache) — the oracle
                                    // work detached from the Phase-2 enumeration
+        // ── Resolution-mechanism histogram (Route A — how single-path cells resolve) ──
+        // Footprint class of every ClassifyCell harvest (NOT just branching nodes —
+        // these tally the symmetric-consumption path the single-path descent takes).
+        long ClassifyClass1,       // all-singleton footprint at depth 0 (linear/forced)
+        long ClassifyClass3,       // resolved by the cascade recursion (depth >= 1)
+        long ClassifyStarved,      // class 2 — STARVED, harvest recovered nothing for
+                                   // the anchor. The Route-A breaker: if this is ever
+                                   // > 0 the existing harvest is NOT provably complete.
+        long ConsumedSymmetric)    // cells consumed as a single orbit (single-path steps)
     {
-        public static readonly CascadeStats Empty = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        public static readonly CascadeStats Empty =
+            new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     // The outcome of a chain-descent run (docs/chain-descent-strategy.md §4, §6):

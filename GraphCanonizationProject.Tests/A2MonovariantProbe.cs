@@ -3294,4 +3294,45 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("      If instead branch>0 / leaves>1 grow with d ⟹ REAL branching occurs ⟹ also confirms the blindspot (different mechanism). If ms stays poly ⟹ already handled, Witt is mere optimization.");
         Assert.True(true);
     }
+
+    // ROUTE A — watch HOW the single-path descent resolves each cell, to find a provable
+    // invariant that bounds the node count WITHOUT a new oracle. The lever (per the steer):
+    // to CONSUME a cell as symmetric, the harvest must have already recovered the autos that
+    // collapse it to one orbit. The decisive signals:
+    //   • starved (class 2) == 0 everywhere  ⟹ the existing harvest ALWAYS recovers the
+    //     cell's orbit (no real decision it cannot collapse) — the Route-A invariant.
+    //   • |Aut| recovered == known |Aut|     ⟹ recovery is COMPLETE (full group in hand).
+    //   • class1 vs class3 split + recDepth   ⟹ the mechanism (forced all-singleton vs the
+    //     bounded cascade recursion); recDepth ~ d bounded ⟹ recovery is cheap/structural.
+    [Fact]
+    public void Probe_RouteA_ResolutionMechanism()
+    {
+        output.WriteLine("ROUTE A: how does the single-path descent resolve each VO^-_d(q) cell? (starved==0 & full |Aut| ⟹ harvest provably recovers)");
+        output.WriteLine($"  {"q",3} {"d",3} {"n",6} {"outcome",-10} {"nodes",6} {"depth",5} {"consSym",7} {"class1",6} {"class3",6} {"STARVED",7} {"recDep",6} {"gens",6} {"|Aut|",12}");
+        void RunCase(int q, int m)
+        {
+            int dim = 2 * m; long nL = 1; for (int i = 0; i < dim; i++) nL *= q;
+            if (nL > 800) { output.WriteLine($"  {q,3} {dim,3} {nL,6}  (skipped n>800)"); return; }
+            int n = (int)nL;
+            bool[,] adj; try { adj = AffinePolar(q, m, -1); } catch (Exception e) { output.WriteLine($"  {q,3} {dim,3} {n,6}  (no aniso: {e.Message})"); return; }
+            var edges = new int[n, n];
+            for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) edges[x, y] = adj[x, y] ? 1 : 0;
+            var cd = new Canonizer.CanonGraphOrdererChainDescent { BudgetOverride = 100_000_000L };
+            string outcome = "canonical";
+            try { cd.Run(new int[n], new Canonizer.AdjMatrix(edges)); }
+            catch (Canonizer.CanonizationFlaggedException) { outcome = $"FLAG[{cd.LastFlagKind}]"; }
+            catch (Exception e) { outcome = $"ERR:{e.GetType().Name}"; }
+            output.WriteLine($"  {q,3} {dim,3} {n,6} {outcome,-10} {cd.LastNodeCount,6} {cd.LastMaxDepth,5} {cd.LastConsumedSymmetric,7} {cd.LastClassifyClass1,6} {cd.LastClassifyClass3,6} {cd.LastClassifyStarved,7} {cd.LastMaxRecursionDepth,6} {cd.LastGeneratorsHarvested,6} {cd.LastAutomorphismGroupOrder,12}");
+        }
+        output.WriteLine("── d=4 (q-sweep) ──");
+        foreach (var q in new[] { 2, 3, 4, 5 }) RunCase(q, 2);
+        output.WriteLine("── d=6 (q-sweep) ──");
+        foreach (var q in new[] { 2, 3 }) RunCase(q, 3);
+        output.WriteLine("");
+        output.WriteLine("READ: STARVED==0 in every row ⟹ the existing harvest never hits a cell it cannot collapse — every");
+        output.WriteLine("      single-path step's orbit was recovered just-in-time. That is the Route-A invariant to prove:");
+        output.WriteLine("      'each refinement cell is one Aut_path-orbit (Witt transitivity) AND the twist harvest recovers it'.");
+        output.WriteLine("      |Aut| matching the known group order ⟹ recovery is COMPLETE; recDepth ~ d ⟹ bounded & structural.");
+        Assert.True(true);
+    }
 }

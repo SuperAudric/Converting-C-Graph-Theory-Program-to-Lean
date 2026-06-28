@@ -85,6 +85,14 @@ namespace Canonizer
                      _deferralActiveNodes, _phase2Nodes, _cachedRealSkips;
         private int _maxRecursionDepth;
 
+        // ── Resolution-mechanism histogram (Route A) ────────────────────────
+        // The footprint class of every ClassifyCell harvest — tallies the
+        // single-path symmetric-consumption mechanism, not just branching nodes.
+        // _classifyStarved > 0 anywhere ⟹ the existing harvest is NOT provably
+        // complete on that case (the Route-A provability breaker).
+        private long _classifyClass1, _classifyClass3, _classifyStarved,
+                     _consumedSymmetric;
+
         // Real-decision cache for the complex deferred-decision scheduler: unordered
         // vertex pairs known to be a *real* decision (different orbits) at the
         // current path. Sound by real-stays-real (OrbitPartition.real_stays_real):
@@ -170,7 +178,9 @@ namespace Canonizer
                     _decisionNodes, _branchingNodes,
                     _branchAllSingleton, _branchResolved, _branchStarved,
                     _generatorsHarvested, _resolvedByRecursion, _maxRecursionDepth,
-                    _deferralActiveNodes, _phase2Nodes, _cachedRealSkips));
+                    _deferralActiveNodes, _phase2Nodes, _cachedRealSkips,
+                    _classifyClass1, _classifyClass3, _classifyStarved,
+                    _consumedSymmetric));
 
             if (_flagged)
                 return CanonResult.Flag(_flagReason ?? "flagged", Automorphisms, stats);
@@ -237,7 +247,7 @@ namespace Canonizer
                     if (cellMembers[c].Count < 2) continue;
                     if (firstNonSingleton == -1) firstNonSingleton = c;
                     int cls = ClassifyCell(p, partition, cellMembers[c], cacheAdded, out int survivors);
-                    if (survivors <= 1) { target = c; footprintClass = cls; break; }
+                    if (survivors <= 1) { target = c; footprintClass = cls; _consumedSymmetric++; break; }
                     if (fallback == -1) { fallback = c; fallbackClass = cls; }
                 }
                 if (target == -1)
@@ -352,6 +362,11 @@ namespace Canonizer
             }
 
             int cls = HarvestTwists(p, partition, cell, cell[0]);
+            // Resolution-mechanism histogram (Route A): which footprint class the
+            // harvest used. class 2 (starved) anywhere ⟹ harvest not provably complete.
+            if (cls == 1) _classifyClass1++;
+            else if (cls == 3) _classifyClass3++;
+            else if (cls == 2) _classifyStarved++;
             var survivors = new List<int> { cell[0] };
             for (int i = 1; i < cell.Count; i++)
                 if (!CoveredByPathFixingAut(cell[i], survivors))

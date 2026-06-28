@@ -39,6 +39,16 @@ namespace Canonizer
         public long LastResolvedByRecursion { get; private set; }
         public int LastMaxRecursionDepth { get; private set; }
 
+        // Resolution-mechanism histogram (Route A): how the single-path symmetric
+        // cells got resolved. LastClassifyStarved > 0 ⟹ the existing harvest is NOT
+        // provably complete on this case (a real decision the harvest could not
+        // collapse). All resolution via class 1/3 with starved == 0 ⟹ the harvest
+        // always recovered the cell's orbit — the Route-A invariant holds here.
+        public long LastClassifyClass1 { get; private set; }
+        public long LastClassifyClass3 { get; private set; }
+        public long LastClassifyStarved { get; private set; }
+        public long LastConsumedSymmetric { get; private set; }
+
         // The node budget the last run carried (interpret LastNodeCount
         // against it), and the descent-tree node count per depth — the cost
         // shape (a flat all-ones profile is a single descent path).
@@ -104,6 +114,10 @@ namespace Canonizer
             LastGeneratorsHarvested = result.Stats.Cascade.GeneratorsHarvested;
             LastResolvedByRecursion = result.Stats.Cascade.ResolvedByRecursion;
             LastMaxRecursionDepth = result.Stats.Cascade.MaxRecursionDepth;
+            LastClassifyClass1 = result.Stats.Cascade.ClassifyClass1;
+            LastClassifyClass3 = result.Stats.Cascade.ClassifyClass3;
+            LastClassifyStarved = result.Stats.Cascade.ClassifyStarved;
+            LastConsumedSymmetric = result.Stats.Cascade.ConsumedSymmetric;
             LastBudget = result.Stats.Budget;
             LastNodesByDepth = result.Stats.NodesByDepth;
             LastAutomorphismGroupOrder = result.ResidualGroup.Order;
