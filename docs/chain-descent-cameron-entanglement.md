@@ -179,6 +179,10 @@ That makes the problem concrete even though the general statement is GI-adjacent
 
 ## 7. Pointers
 
+- **Lean formalization of the WL-visibility dichotomy (Route B, in progress):**
+  [`chain-descent-wl-visibility.md`](./chain-descent-wl-visibility.md) — proves *why* the standard gadget is WL-blind to
+  group structure (coordinate-regularity) and *that* a commutator gadget breaks the blindness. Phase-0 algebraic cores
+  landed axiom-clean (`ChainDescent/ScratchWLVisibility.lean`). This is the durable home for the Route-B Lean thread.
 - The lead this formalizes: IR-solver doc **§11.14** (the abelian-hiding vs non-abelian-Johnson 2×2; the
   "separable vs. integral" framing).
 - The two-pin-count dichotomy: IR-solver doc **§11.1** (`b(Aut)` vs `b_WL`).
