@@ -26,9 +26,13 @@
 > harvest**, which is faithfully poly in `n` at fixed `d` (`~n^{2.85}`) but carries a **`d`-factor beyond `n`** (same
 > `n=256`: `d=4`=19s, `d=8`>9min) ⟹ infeasible at `d=8`. (4) **Whether that `d`-factor is super-poly (a new structure-aware
 > "Witt" harvest is NECESSARY) or high-poly (the existing harvest already gives poly, just slow — Witt is an OPTIMIZATION)
-> is OPEN and gates the build.** **▶ THE GATING NEXT STEP: analyse the cascade harvest recursion's `d`-complexity in
-> `ChainDescent.cs` (exploratory leaf-collision harvest) — does its exploration breadth grow poly or exp in `d`?** That
-> decides whether the polynomial seal needs a new recovery oracle or just a complexity proof of the existing one. The
+> ~~is OPEN and gates the build~~ **— RESOLVED 2026-06-28 (code analysis): HIGH-POLY; Witt = optimization, not necessity.**
+> The `ChainDescent.cs` harvest has NO exponential mechanism (every loop `n`-bounded + single-path ⟹ hard poly ceiling
+> ≈ n⁵–n⁶ at fixed `n`), and `d ≤ log₂ n` (since `n=q^d ≥ 2^d`) collapses ANY `d`-overhead — `d^k` or constant-base `C^d`
+> — to poly(n), so **poly-vs-exp-in-d is MOOT for polynomiality**. The existing generic harvest ALREADY canonizes forms
+> graphs in polynomial time; the `d=8` 30× slowdown is a high-degree-poly worst case (q=2 = weakest WL refinement ⟹
+> deepest `DeepenAnchor` + largest cells), not exponential. ⟹ **the build task is a COMPLEXITY PROOF of the existing harvest
+> + the Lean recovery route, NOT a new oracle.** Full reasoning: §1 item 1 "RESOLVED" block. The
 > recovery route = `SchemeRecovered`/`hFormCert`/Stage B.0 `coords_determine` (partly landed, `remaining-work.md:256-279`).
 > Banked: quasipoly (the matching, below) + sub-exp (`reachesRigidOrCameron_viaSpielman`). Floor-lowering / q=pᵉ / other
 > families are now LOWER priority (they widen the *quasipoly* result, which the recovery route would supersede).
@@ -134,6 +138,28 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
    the generic harvest is strictly super-poly (Witt "necessary") or high-poly (Witt "optimization") is open.** Decisive
    resolutions: analyse the harvest recursion's `d`-complexity directly, OR build Witt and observe `d=8,10,12` go fast.
    The single-path STRUCTURE is solid; the harvest is NOT gated on the open WL-dim math.
+   **★★★ RESOLVED (2026-06-28, code analysis of the `ChainDescent.cs` harvest — the "analyse directly" resolution above):
+   the generic harvest is POLYNOMIAL; Witt is an OPTIMIZATION, not a necessity. Poly-vs-exp-in-d is MOOT for polynomiality.**
+   Two pillars. **(P1) No exponential mechanism — hard poly ceiling at fixed `n`.** Every harvest loop is `n`-bounded and
+   nothing forks: the committed `Search`→`Branch` descent is single-path (`BranchingNodes=0`, and capped at `budget=16n⁴`
+   regardless else it flags); **`DeepenAnchor` is single-path** (one sub-cell + one vertex per level, strictly refining ⟹
+   ≤ `n` levels, hard cap `depth ≤ _n`); **`ReplayDeepening` is single-path** (≤ `|seq|` levels); the rep loops are
+   `≤ |cell| ≤ n`; and the helpers (`TwistConstruction` O(n) dict-match, `RefinementFootprint` O(n log n) diff,
+   `CoveredByPathFixingAut` BFS) are poly. So total work = a *product of n-bounded factors* `committed-path(≤budget) ×
+   cells(≤n) × DeepenAnchor-levels(≤n) × reps(≤n) × refine(poly)` = **poly(n)** — a hard ceiling (≈ n⁵–n⁶) that `d` cannot
+   breach. **(P2) `d ≤ log₂ n`** (since `n=q^d ≥ 2^d`) ⟹ ANY d-overhead — `d^k` OR even constant-base `C^d` — is
+   `≤ C^{log₂ n} = n^{log₂ C} =` **poly(n)**. So both branches of the "gating question" collapse to poly(n); the real
+   distinction was always *single-path poly(n)·poly(d)* vs *rigid-forking `n^{|T|}`*, already settled by `BranchingNodes=0`.
+   **No contradiction with the matching's "quasipoly never poly":** the matching charges `n^{|T|}` (multiplies `n` PER
+   base-element ⟹ `n^d=q^{d²}` quasipoly), whereas the harvest pays `n` ONCE + a `poly(d)` single-path overhead (the
+   huge-Aut orbit-pruning collapses the n-way fork). The `d=8`/`n=256` 30× slowdown is consistent with a **high-degree
+   polynomial** (≈ `d^5` at q=2 — weakest WL refinement ⟹ deepest `DeepenAnchor` + largest cells; `n=256` at ~n⁵ ≈ 10¹²
+   ops ≈ minutes), NOT an exponential. ⟹ **the existing generic harvest already canonizes forms graphs in POLYNOMIAL time.**
+   Witt (Stage B.0 `coords_determine`) lowers the polynomial DEGREE / wall-clock at small `n` — worth building for
+   feasibility at large `d` — but is not needed for the *polynomial* claim. **The build task is a COMPLEXITY PROOF of the
+   existing harvest + the Lean recovery route, NOT a new oracle.** Remaining genuine open piece for the LEAN seal: the
+   recovery route must show the `Θ(d)` frame is iso-invariantly *constructible* (poly), not *searched* (`n^{|T|}`) — that
+   is exactly what the single-path empirical finding asserts and `coords_determine`/`viaSimilitudeForm` must formalize.
 2. **Floor-lowering** `q ≳ 32d → O(d) → small-q` — the matching has its OWN q-floor from the isotropic shells (NOT the
    per-anchor c₀). Needs a TIGHT corank shell count (→ `q≳O(d)`), then larger separating frames for small-q-growing-d.
    The landed-but-unwired route-2 / corank-2 lemmas (`c0_le_route2`, `c0_le_threequarters_corank2`, on disk, axiom-clean,

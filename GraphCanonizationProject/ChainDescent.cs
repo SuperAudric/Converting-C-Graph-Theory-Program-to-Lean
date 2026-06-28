@@ -387,6 +387,16 @@ namespace Canonizer
         // Returns the footprint class for attribution: 0 = empty/closure-fail,
         // 1 = all-singleton at depth 0 (linear oracle), 3 = resolved by the cascade
         // recursion, 2 = still non-singleton past the depth bound (starved).
+        //
+        // OPTIMIZATION LEAD (not planned — for whoever profiles a slow family). This
+        // generic harvest is polynomial but high-degree: the q=2, large-d forms-graph
+        // families (affine-polar VO^ε etc.) hit a deep DeepenAnchor + large cells, so
+        // they canonize correctly but slowly. A family-specific a-priori oracle —
+        // e.g. a constructive-Witt isometry oracle for the classical-group forms
+        // graphs — would harvest the automorphisms directly from the form algebra and
+        // lower the degree. It would plug in as an ITransversalOracle alongside
+        // CascadeOracle; the generic path stays the correct fallback. No correctness
+        // stake (the seal's polynomiality rests on the generic bound), purely speed.
         private int HarvestTwists(sbyte[] p, WarmPartition partition, List<int> cell, int r1)
         {
             var seq = new List<int>();
