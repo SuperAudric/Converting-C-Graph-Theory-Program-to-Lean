@@ -90,6 +90,33 @@ That makes the problem concrete even though the general statement is GI-adjacent
   a rigid graph — it must be visible, hence killed by rigidity. **Crux:** characterize "hideable symmetry" and show it
   is abelian. **Status:** the conjecture behind §11.14; empirically solid (every gauge construction is abelian), no
   proof. **Why fresh:** it would subsume the family battery in one theorem.
+  - **▶ EMPIRICAL SUPPORT (2026-06-28, `GraphCanonizationProject.Tests/NonAbelianCfiProbe.cs`,
+    [[project_nonabelian_cfi_witness_2026-06-28]]):** the natural attempt to BUILD a hidden non-abelian gauge — the
+    CFI / multipede generalized to an arbitrary finite group Γ (gadget = ordered product `g₁·…·g_d = e`) — is
+    **WL-blind to the non-abelian structure.** S₃ ≡ Z₆ and D₄ ≡ Z₈ behave identically in every WL measure
+    (`segFused`, `b_WL`, forcing-collapse), on every base, even though the graphs are genuinely non-isomorphic
+    (different canonical forms). So WL-hardness depends only on `|Γ|` (Latin-square regularity), not on commutativity:
+    a non-abelian gauge built this way collapses, to WL, onto an abelian gauge of the same order. Mechanism: WL only
+    counts, and the `product=e` level-set incidence has identical counts for all groups of a given order;
+    non-commutativity lives in the conjugacy/commutator structure the local gadget never exposes. **This is a NEGATIVE
+    witness hunt = positive evidence for Route B** (with a concrete reason), matching the literature's use of only
+    abelian groups for CFI-over-rings. **Caveat:** one construction (single product constraint per gadget); a
+    commutator-exposing gadget might make non-abelian WL-visible — the *standard* non-abelian CFI is ruled out, not all
+    constructions.
+  - **▶ DISCRIMINATOR REFINEMENT (2026-06-28, `Probe_ExtractionDiscriminator`) — WL *depth* is blind, but the recovered
+    *structure* is genuinely non-abelian.** Recovering the gadget relation `R_v` from the graph and testing isotopy-to-an-
+    abelian-group (via Albert's theorem + relation-graph canonization) gives: `R_v` is the genuine relation of Γ
+    (`recovered==Γ` always), and it is abelian-isotopic **iff Γ is abelian** — so S₃/D₄-CFI carry genuinely non-abelian
+    structure that **no abelian module fits** (option-2's Smith/ring route flags it). So "rigid ⟹ abelian-linear
+    structure" is FALSE: a *rigid* graph (anchored ⟹ `|Aut|=1`) can carry non-abelian STRUCTURE. **The catch (why this is
+    not a counterexample to Route B):** that structure is **tame — poly-canonizable** (fixed finite Γ ⟹ a fixed CSP; the
+    full canonizer canonized S₃-CFI), and it is non-abelian *structure without symmetry*, not a hidden non-abelian
+    *gauge*. So it occupies the structure/non-abelian corner but is NOT the non-poly wall. The genuine-wall candidate is
+    a **group-VARYING** non-abelian CFI (the non-abelian analog of Lichter's ring-varying construction) — untested.
+    **Practical upshot for the rigid seal:** its "or non-linear" escape / option-2's handled class should read "linear/CSP
+    over a fixed finite group (abelian OR non-abelian)," not "linear over an abelian ring" — the non-abelian-but-fixed
+    case is poly (coset enumeration / fixed-group CSP) yet outside the Smith-normal-form route as currently specced
+    (IR-solver §11.13). See [[project_nonabelian_cfi_witness_2026-06-28]].
 - **Route C — Gap = 0 for Cameron (the pin-count route).** Prove every Cameron family has **gap `b_WL − b(Aut) = O(1)`**
   (no structural hardness beyond its symmetry). Then a rigid graph carrying a Cameron scheme would have `b(Aut) = 0`
   and `O(1)` gap, hence `b_WL = O(1)` — it discretizes cheaply, so it is *handled, not a wall*. **Crux:** a per-family
