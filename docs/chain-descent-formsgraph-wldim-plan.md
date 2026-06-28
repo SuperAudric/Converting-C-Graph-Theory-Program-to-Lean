@@ -16,6 +16,24 @@
 
 ## STATUS (read first)
 
+> **★★★ 2026-06-28 REFRAME — the polynomial route is NOT this doc's WL-dimension/matching route; it is the RECOVERY /
+> harvest route, and it sidesteps the open bounded-WL-dim conjecture. READ §1 "WHAT'S LEFT" item 1 for the full finding.**
+> One-screen version: (1) the matching seal below is **quasipolynomial** and that is essentially TIGHT for any
+> *individualization/WL* method — measured: frame & count base = `Θ(d)`, residue `d` UNBOUNDED, and bounded-WL-dim is
+> **open math** (not Skresanov-citable). (2) **BUT running the actual chain-descent canonizer (route #5) shows it canonizes
+> `VO⁻₄(q)` in a SINGLE PATH** (`leaves=1`, `BranchingNodes=0`, full `|Aut|` recovered) — forms graphs are huge-`Aut`, not
+> rigid, so the `n^{|T|}` cost model is WRONG; the descent tree is poly. (3) The real cost is the **generic automorphism
+> harvest**, which is faithfully poly in `n` at fixed `d` (`~n^{2.85}`) but carries a **`d`-factor beyond `n`** (same
+> `n=256`: `d=4`=19s, `d=8`>9min) ⟹ infeasible at `d=8`. (4) **Whether that `d`-factor is super-poly (a new structure-aware
+> "Witt" harvest is NECESSARY) or high-poly (the existing harvest already gives poly, just slow — Witt is an OPTIMIZATION)
+> is OPEN and gates the build.** **▶ THE GATING NEXT STEP: analyse the cascade harvest recursion's `d`-complexity in
+> `ChainDescent.cs` (exploratory leaf-collision harvest) — does its exploration breadth grow poly or exp in `d`?** That
+> decides whether the polynomial seal needs a new recovery oracle or just a complexity proof of the existing one. The
+> recovery route = `SchemeRecovered`/`hFormCert`/Stage B.0 `coords_determine` (partly landed, `remaining-work.md:256-279`).
+> Banked: quasipoly (the matching, below) + sub-exp (`reachesRigidOrCameron_viaSpielman`). Floor-lowering / q=pᵉ / other
+> families are now LOWER priority (they widen the *quasipoly* result, which the recovery route would supersede).
+> Full detail: §1 item 1 + [[project_formsgraph_wldim_viability_2026-06-28]] (memory).
+
 **THE q=p AFFINE-POLAR SEAL IS DONE AND PORTED (2026-06-27, axiom-clean `[propext, Classical.choice, Quot.sound]`, in
 `build.sh`).** Capstone **`AffinePolarSeal.reachesRigidOrCameron_affinePolar`** (`PublicTheoremIndex.md` →
 `ChainDescent/AffinePolarSeal.lean`): for an odd prime `p` and a nondegenerate quadratic form `Q` on `Fin d → ZMod p`

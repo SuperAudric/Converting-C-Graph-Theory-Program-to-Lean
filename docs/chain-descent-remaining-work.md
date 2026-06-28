@@ -253,6 +253,14 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   **Concrete next:** test whether Skresanov's rank-3 `G^(2)` description trivialises the deficiency at a bounded base
   for the affine residue (an affine-rank-3 carve capstone, sibling to the cyclotomic slice). See [[reference_srg_wl_literature_2026-06-17]].
 - **Floors available now:** sub-exp via `…viaSpielman` (fully citable, Cameron-free; floor value `exp(Õ(n^{1/5}))`, §2 DELTA).
+> **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
+> actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full
+> `|Aut|` recovered) — forms graphs are huge-`Aut`, so the `n^{|T|}` cost model is wrong and the descent tree is poly. The
+> `hFormCert` / `coords_determine` content below (recover the form, harvest the isometries) is exactly the structure-aware
+> per-node harvest the canonizer needs; it **sidesteps the open bounded-WL-dim conjecture** (the matching/frame WL route is
+> only quasipoly). **Gating open question: is the *current generic* harvest poly or exp in the form dimension `d`?** (timing
+> infeasible at `d=8`; poly-vs-exp unresolved). Full finding: [`chain-descent-formsgraph-wldim-plan.md`](./chain-descent-formsgraph-wldim-plan.md)
+> STATUS "2026-06-28 REFRAME" + §1 item 1; memory `project_formsgraph_wldim_viability_2026-06-28`.
 - **★ Stage A LANDED (2026-06-18, axiom-clean):** `reachesRigidOrCameron_viaAffineFormScheme` (CascadeAffine.lean,
   `PublicTheoremIndex.md:1207`) is the conditional capstone for the schurian node-4 forms-graph residue. It carries the
   free group base `IsBase … T` + the certificate `hFormCert : RelCountsDetermineOrbit … T` (the **only open content**),

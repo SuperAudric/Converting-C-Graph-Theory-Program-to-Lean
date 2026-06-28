@@ -151,12 +151,18 @@ close it — is set out in
 > files into 14 named modules** (`AffinePolarSeal`, `ObservableCountBridge{,K}`, `PencilTBound`, `PairForm`, `FieldGeneric`,
 > `BadAnchorCount`, `Coordinatization`, …; rename map in plan §1), full build green ~109s, axiom-clean; `PublicTheoremIndex`
 > re-homed with all 223 decls described. The plan doc was condensed 2225→~1000 lines (build history → the archive).
-> **Working order now: floor-lowering** (`q≳32d → O(d)` via a tight corank shell count, then larger frames for
-> small-q-growing-d), then q=pᵉ seam (Layer D) / other families. **Read the plan STATUS block first, then
-> `chain-descent-remaining-work.md` §3a.1.** Goal = the *polynomial* seal; NB the matching base is `O(log n)` (quasipoly
-> regime) — the optimal O(1)/frame WL-dim (structural Skresanov) is a separate, harder track, needed for true polynomial since
-> the canonizer charges ~`n^{|T|}` (a rigid residue forks `n` ways per individualization);
-> `reachesRigidOrCameron_viaSpielman` is the citable sub-exp fallback.
+> **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
+> [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is
+> essentially tight for any *individualization/WL* method (frame & count base measured `= Θ(d)`, residue `d` unbounded,
+> bounded-WL-dim is open math). **BUT route #5 — running the actual canonizer — found it solves `VO⁻₄(q)` in a SINGLE PATH
+> (`leaves=1`, `BranchingNodes=0`, full `|Aut|` recovered): forms graphs are huge-`Aut`, so `n^{|T|}` is the WRONG cost
+> model and the descent tree is poly.** The polynomial route is therefore the **RECOVERY / harvest route** (`SchemeRecovered`
+> / Stage B.0 `coords_determine`), which **sidesteps the open WL-dim problem.** The real cost is the generic automorphism
+> harvest: faithfully poly in `n` at fixed `d`, but with a `d`-factor beyond `n` (infeasible at `d=8`); whether that factor
+> is super-poly (a new "Witt" harvest is NECESSARY) or high-poly (already poly, Witt = optimization) is **OPEN and gates the
+> build**. **▶ GATING NEXT STEP: analyse the cascade harvest recursion's `d`-complexity in `ChainDescent.cs`.** Floor-lowering
+> / q=pᵉ / other families are now LOWER priority (they widen the quasipoly result the recovery route would supersede).
+> `reachesRigidOrCameron_viaSpielman` = the citable sub-exp fallback.
 >
 > **★ REMAINING-WORK TRACKER (2026-06-17): [`chain-descent-remaining-work.md`](./chain-descent-remaining-work.md)** —
 > the one-screen map of everything left (modulo set, citation replacement, buildable infra, the IR solver). Start there
