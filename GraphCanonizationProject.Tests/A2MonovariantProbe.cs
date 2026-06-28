@@ -3249,36 +3249,49 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine($"  {"q",3} {"d",3} {"n",6} {"outcome",-16} {"nodes",9} {"depth",5} {"leaves",7} {"pruned",7} {"|Aut|",12} {"nodes/n",8}");
 
         string logf = "/tmp/claude-1000/-workspace/2ff7aec7-390b-4afd-a24d-05273854175f/scratchpad/canon5rows.txt";
-        try { File.WriteAllText(logf, "ROUTE#5 rows (incremental) — d-sweep q=2, small budget to flag fast if forking\n"); } catch { }
-        // FINDING (2026-06-28): d≤6 ⟹ SINGLE PATH (leaves=1, ~d+2 nodes, full |Aut| recovered, profile [1,1,…]) —
-        // the forking is fully collapsed by symmetry harvest ⟹ n^{|T|} is the WRONG cost model for forms graphs
-        // (they are NOT rigid). d=8 (n=256) does NOT resolve even at budget=50 (would flag fast if forking) ⟹ the
-        // bottleneck is PER-NODE HARVEST cost (generic automorphism discovery), not tree size. The poly route is
-        // single-path + a STRUCTURE-AWARE (constructive-Witt) harvest (= Stage B.0 coords_determine), which sidesteps
-        // the open bounded-WL-dim problem. d≤6 cases below complete fast and show the single path.
-        (int q, int m)[] cases = { (2,2),(3,2),(4,2),(2,3) };  // d=4 (q=2,3,4) + d=6 (q=2) — all single-path, fast
-        foreach (var (q, m) in cases)
+        try { File.WriteAllText(logf, "ROUTE#5 — IS BRANCHING REAL? (committed branch vs unbudgeted harvest cost)\n"); } catch { }
+        output.WriteLine("  Distinguishes REAL branching (branch=BranchingNodes, ph2=Phase2Nodes, leaves) from off-budget HARVEST cost");
+        output.WriteLine("  (recDepth=MaxRecursionDepth, gens=GeneratorsHarvested, ms=wall-clock). branch=ph2=0 & leaves=1 ⟹ single path (no");
+        output.WriteLine("  real branching); ms/recDepth/gens exploding with d while branch=0 ⟹ harvest is the off-budget cost (Witt needed).");
+        output.WriteLine($"  {"q",3} {"d",3} {"n",6} {"outcome",-12} {"ms",8} {"nodes",6} {"leaves",6} {"branch",6} {"ph2",5} {"recDep",6} {"gens",7} {"|Aut|",11}");
+        int perCaseMs = 60_000;
+        void RunCase(int q, int m, long budget)
         {
             int dim = 2 * m; long nL = 1; for (int i = 0; i < dim; i++) nL *= q;
-            if (nL > 300) { output.WriteLine($"  {q,3} {dim,3} {nL,6}  (skipped n>300)"); continue; }
+            if (nL > 1100) { output.WriteLine($"  {q,3} {dim,3} {nL,6}  (skipped n>1100)"); return; }
             int n = (int)nL;
-            bool[,] adj; try { adj = AffinePolar(q, m, -1); } catch (Exception e) { output.WriteLine($"  {q,3} {dim,3} {n,6}  (no aniso: {e.Message})"); continue; }
+            bool[,] adj; try { adj = AffinePolar(q, m, -1); } catch (Exception e) { output.WriteLine($"  {q,3} {dim,3} {n,6}  (no aniso: {e.Message})"); return; }
             var edges = new int[n, n];
             for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) edges[x, y] = adj[x, y] ? 1 : 0;
-            var cd = new Canonizer.CanonGraphOrdererChainDescent { BudgetOverride = 500_000L };
-            string outcome;
-            try { cd.Run(new int[n], new Canonizer.AdjMatrix(edges)); outcome = "canonical"; }
-            catch (Canonizer.CanonizationFlaggedException) { outcome = $"FLAG[{cd.LastFlagKind}]"; }
-            catch (Exception e) { outcome = $"ERR:{e.GetType().Name}"; }
-            double npr = cd.LastNodeCount / (double)n;
-            string row = $"  {q,3} {dim,3} {n,6} {outcome,-16} {cd.LastNodeCount,9} {cd.LastMaxDepth,5} {cd.LastLeafCount,7} {cd.LastPrunedBranches,7} {cd.LastAutomorphismGroupOrder,12} {npr,8:F2}";
-            string prof = $"        depth profile (nodes/level): [{string.Join(",", cd.LastNodesByDepth)}]";
-            output.WriteLine(row); output.WriteLine(prof);
-            try { File.AppendAllText(logf, row + "\n" + prof + "\n"); } catch { }
+            var cd = new Canonizer.CanonGraphOrdererChainDescent { BudgetOverride = budget };
+            string outcome = "canonical"; var sw = System.Diagnostics.Stopwatch.StartNew();
+            var task = System.Threading.Tasks.Task.Run(() =>
+            {
+                try { cd.Run(new int[n], new Canonizer.AdjMatrix(edges)); }
+                catch (Canonizer.CanonizationFlaggedException) { outcome = $"FLAG[{cd.LastFlagKind}]"; }
+                catch (Exception e) { outcome = $"ERR:{e.GetType().Name}"; }
+            });
+            bool done = task.Wait(perCaseMs); sw.Stop();
+            string row;
+            if (!done) row = $"  {q,3} {dim,3} {n,6} {"TIMEOUT",-12} {">" + perCaseMs,8}  (still grinding — off-budget; committed nodes were <budget or it'd flag)";
+            else row = $"  {q,3} {dim,3} {n,6} {outcome,-12} {sw.ElapsedMilliseconds,8} {cd.LastNodeCount,6} {cd.LastLeafCount,6} {cd.LastBranchingNodes,6} {cd.LastPhase2Nodes,5} {cd.LastMaxRecursionDepth,6} {cd.LastGeneratorsHarvested,7} {cd.LastAutomorphismGroupOrder,11}";
+            output.WriteLine(row);
+            try { File.AppendAllText(logf, row + "\n"); } catch { }
         }
+        // FINDINGS (2026-06-28): AXIS 1 = faithfully poly in n at fixed d (d=4: ~n^2.85, single-path, branch=0).
+        // AXIS 2 = a real d-factor BEYOND n: same n=256, d=4(q=4)=19s but d=8(q=2)>9min (>30×) ⟹ infeasible at d=8.
+        // NO real branching anywhere (BranchingNodes=Phase2Nodes=0, leaves=1; budget=50 at d=8 never flags). So it is a
+        // PERFORMANCE wall (the generic harvest's d-cost), NOT a correctness blindspot; poly-vs-exp in d is unresolved by
+        // timing (d=4,6 only complete). Witt harvest is poly-in-d by construction ⟹ the scaling fix.
+        output.WriteLine("── AXIS 1: q-sweep at d=4 (growing n, fixed structure) — poly in n? ──");
+        foreach (var q in new[] { 2, 3, 4, 5 }) RunCase(q, 2, 100_000_000L);
+        try { File.AppendAllText(logf, "-- d-sweep --\n"); } catch { }
+        output.WriteLine("── AXIS 2: d-sweep at q=2 (growing form dimension) — d-factor beyond n? (d=8 caps at perCaseMs) ──");
+        foreach (var m in new[] { 2, 3, 4 }) RunCase(2, m, 100_000_000L);
         output.WriteLine("");
-        output.WriteLine("READ: nodes/n bounded & nodes~poly(n) across q ⟹ canonizer ALREADY poly on forms graphs ⟹ route #1 (deterministic/orbit-collapse) LIVE — find the mechanism in the depth profile + pruning.");
-        output.WriteLine("      nodes explode / FLAG as q grows ⟹ confirms quasipoly cap; #1 not realised by current oracle.  |Aut| correct ⟹ symmetry detected; high pruned ⟹ orbit-combination (#2) active.");
+        output.WriteLine("READ: AXIS 1 (q,n grow) poly-time + branch=0,leaves=1 ⟹ canonizer faithfully poly on the n-axis (matches its track record).");
+        output.WriteLine("      AXIS 2 (d grows): if branch=0,leaves=1 but ms/recDep/gens EXPLODE ⟹ no real branching, the off-budget HARVEST is super-poly in d ⟹ Witt oracle NECESSARY (not special-casing).");
+        output.WriteLine("      If instead branch>0 / leaves>1 grow with d ⟹ REAL branching occurs ⟹ also confirms the blindspot (different mechanism). If ms stays poly ⟹ already handled, Witt is mere optimization.");
         Assert.True(true);
     }
 }

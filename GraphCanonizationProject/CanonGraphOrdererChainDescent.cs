@@ -28,6 +28,17 @@ namespace Canonizer
         public long LastNodeCount { get; private set; }
         public int LastMaxDepth { get; private set; }
 
+        // Cascade-harvest attribution (CascadeStats). LastBranchingNodes/LastPhase2Nodes
+        // = whether REAL branching occurred (≈0 ⇒ single path via harvested symmetry).
+        // LastMaxRecursionDepth/LastResolvedByRecursion/LastGeneratorsHarvested = the
+        // (unbudgeted) exploratory-harvest cost — the suspect for off-budget grind.
+        public long LastBranchingNodes { get; private set; }
+        public long LastDecisionNodes { get; private set; }
+        public long LastPhase2Nodes { get; private set; }
+        public long LastGeneratorsHarvested { get; private set; }
+        public long LastResolvedByRecursion { get; private set; }
+        public int LastMaxRecursionDepth { get; private set; }
+
         // The node budget the last run carried (interpret LastNodeCount
         // against it), and the descent-tree node count per depth — the cost
         // shape (a flat all-ones profile is a single descent path).
@@ -87,6 +98,12 @@ namespace Canonizer
             LastMaxDepth = result.Stats.MaxDepth;
             LastPrunedBranches = result.Stats.PrunedBranches;
             LastLeafCount = result.Stats.LeafCount;
+            LastBranchingNodes = result.Stats.Cascade.BranchingNodes;
+            LastDecisionNodes = result.Stats.Cascade.DecisionNodes;
+            LastPhase2Nodes = result.Stats.Cascade.Phase2Nodes;
+            LastGeneratorsHarvested = result.Stats.Cascade.GeneratorsHarvested;
+            LastResolvedByRecursion = result.Stats.Cascade.ResolvedByRecursion;
+            LastMaxRecursionDepth = result.Stats.Cascade.MaxRecursionDepth;
             LastBudget = result.Stats.Budget;
             LastNodesByDepth = result.Stats.NodesByDepth;
             LastAutomorphismGroupOrder = result.ResidualGroup.Order;

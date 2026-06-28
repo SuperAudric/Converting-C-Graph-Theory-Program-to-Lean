@@ -102,9 +102,20 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
    harder, suboptimal route (try bases ⟹ quasipoly); the harvest route the canonizer actually uses is poly and is the
    right target.** NEXT = (a) implement a constructive-Witt per-node harvest in C# + confirm `d=8,10,12` stay
    single-path-fast; (b) align the Lean seal to the recovery route (depth `d+1` frame + poly Witt harvest =
-   Stage B.0/B.1 `coords_determine`/`reachesRigidOrCameron_viaSimilitudeForm`, already partly landed). CAVEAT: single-path
-   STRUCTURE is empirically solid (`d≤6`); poly per-node harvest is theoretically available (Witt) but NOT in the current
-   generic oracle — building it is the open engineering+proof task, but it is NOT gated on the open WL-dim math.
+   Stage B.0/B.1 `coords_determine`/`reachesRigidOrCameron_viaSimilitudeForm`, already partly landed).
+   **★ SHARPENED (2026-06-28, instrumented `BranchingNodes`/`Phase2Nodes`/wall-clock) — corrects an over-claim:**
+   (i) **NO real branching, confirmed:** every completing case has `BranchingNodes=0`, `Phase2Nodes=0`, `leaves=1` (true
+   single path), and budget=50 at `d=8` never flags (committed nodes `<50`). (ii) **At FIXED d the canonizer is genuinely
+   polynomial in n** (`d=4`: `~n^{2.85}`, `45→703→18757ms` for `n=16,81,256`) — it is *faithfully poly on the n-axis*,
+   matching its track record. (iii) **The harvest cost depends on the form dimension `d` BEYOND `n`:** at the SAME `n=256`,
+   `d=4` (q=4) completes in 19s but `d=8` (q=2) exceeds **9 min** (`>30×`) — a real `d`-factor, infeasible at `d=8`. (iv)
+   **BUT poly-in-d vs exp-in-d is UNRESOLVED by timing** — only `d=4,6` complete, too short a range (a `30×` factor over
+   `Δd=4` fits both `d^5` and `~2.4^d`). So the honest status: **not a correctness blindspot** (the canonizer canonizes
+   correctly, single-path, right `|Aut|` — it does NOT flag); a **performance** wall at growing `d`. The constructive-Witt
+   harvest is poly-in-d *by construction*, so it removes the `d`-factor regardless — **justified as the scaling fix; whether
+   the generic harvest is strictly super-poly (Witt "necessary") or high-poly (Witt "optimization") is open.** Decisive
+   resolutions: analyse the harvest recursion's `d`-complexity directly, OR build Witt and observe `d=8,10,12` go fast.
+   The single-path STRUCTURE is solid; the harvest is NOT gated on the open WL-dim math.
 2. **Floor-lowering** `q ≳ 32d → O(d) → small-q` — the matching has its OWN q-floor from the isotropic shells (NOT the
    per-anchor c₀). Needs a TIGHT corank shell count (→ `q≳O(d)`), then larger separating frames for small-q-growing-d.
    The landed-but-unwired route-2 / corank-2 lemmas (`c0_le_route2`, `c0_le_threequarters_corank2`, on disk, axiom-clean,
