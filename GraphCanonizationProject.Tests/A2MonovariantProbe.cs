@@ -3231,4 +3231,54 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("      cntBase grows ~d ⟹ count-predicate also Θ(d) ⟹ frame=fixed-d poly only; all-d needs k-WL (Skresanov). T₉=9@d=4 ⟹ expect ~2d.");
         Assert.True(true);
     }
+
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    //  ROUTE #5 — how the ACTUAL chain-descent canonizer (CascadeOracle) solves VO^-_d(q).  The
+    //  individualization base is Θ(d) ⟹ naive cost n^{Θ(d)} = quasipoly.  But the chain-descent branches
+    //  on ORBIT REPS, not all tuples — if the forms-graph symmetry collapses the forking (the oracle
+    //  recovers Aut and prunes), the real node count could be far smaller (route #1/#2: deterministic /
+    //  combination logic).  THE DIAGNOSTIC: run the real canonizer, read LastNodeCount + the per-depth
+    //  profile + |Aut| recovered + flag, and read the node-count scaling vs n.  nodes~poly(n) across q
+    //  ⟹ canonizer ALREADY poly on forms graphs ⟹ #1 LIVE (find the mechanism).  nodes explode / FLAG
+    //  ⟹ confirms the quasipoly cap.  PrunedBranches high + |Aut| correct ⟹ orbit-combination (#2) active.
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    [Fact]
+    public void Probe_FormsGraphCanonScaling()
+    {
+        output.WriteLine("ROUTE #5: actual chain-descent canonizer on VO^-_d(q) — node-count scaling = poly or quasipoly?  (budget 1e8)");
+        output.WriteLine($"  {"q",3} {"d",3} {"n",6} {"outcome",-16} {"nodes",9} {"depth",5} {"leaves",7} {"pruned",7} {"|Aut|",12} {"nodes/n",8}");
+
+        string logf = "/tmp/claude-1000/-workspace/2ff7aec7-390b-4afd-a24d-05273854175f/scratchpad/canon5rows.txt";
+        try { File.WriteAllText(logf, "ROUTE#5 rows (incremental) — d-sweep q=2, small budget to flag fast if forking\n"); } catch { }
+        // FINDING (2026-06-28): d≤6 ⟹ SINGLE PATH (leaves=1, ~d+2 nodes, full |Aut| recovered, profile [1,1,…]) —
+        // the forking is fully collapsed by symmetry harvest ⟹ n^{|T|} is the WRONG cost model for forms graphs
+        // (they are NOT rigid). d=8 (n=256) does NOT resolve even at budget=50 (would flag fast if forking) ⟹ the
+        // bottleneck is PER-NODE HARVEST cost (generic automorphism discovery), not tree size. The poly route is
+        // single-path + a STRUCTURE-AWARE (constructive-Witt) harvest (= Stage B.0 coords_determine), which sidesteps
+        // the open bounded-WL-dim problem. d≤6 cases below complete fast and show the single path.
+        (int q, int m)[] cases = { (2,2),(3,2),(4,2),(2,3) };  // d=4 (q=2,3,4) + d=6 (q=2) — all single-path, fast
+        foreach (var (q, m) in cases)
+        {
+            int dim = 2 * m; long nL = 1; for (int i = 0; i < dim; i++) nL *= q;
+            if (nL > 300) { output.WriteLine($"  {q,3} {dim,3} {nL,6}  (skipped n>300)"); continue; }
+            int n = (int)nL;
+            bool[,] adj; try { adj = AffinePolar(q, m, -1); } catch (Exception e) { output.WriteLine($"  {q,3} {dim,3} {n,6}  (no aniso: {e.Message})"); continue; }
+            var edges = new int[n, n];
+            for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) edges[x, y] = adj[x, y] ? 1 : 0;
+            var cd = new Canonizer.CanonGraphOrdererChainDescent { BudgetOverride = 500_000L };
+            string outcome;
+            try { cd.Run(new int[n], new Canonizer.AdjMatrix(edges)); outcome = "canonical"; }
+            catch (Canonizer.CanonizationFlaggedException) { outcome = $"FLAG[{cd.LastFlagKind}]"; }
+            catch (Exception e) { outcome = $"ERR:{e.GetType().Name}"; }
+            double npr = cd.LastNodeCount / (double)n;
+            string row = $"  {q,3} {dim,3} {n,6} {outcome,-16} {cd.LastNodeCount,9} {cd.LastMaxDepth,5} {cd.LastLeafCount,7} {cd.LastPrunedBranches,7} {cd.LastAutomorphismGroupOrder,12} {npr,8:F2}";
+            string prof = $"        depth profile (nodes/level): [{string.Join(",", cd.LastNodesByDepth)}]";
+            output.WriteLine(row); output.WriteLine(prof);
+            try { File.AppendAllText(logf, row + "\n" + prof + "\n"); } catch { }
+        }
+        output.WriteLine("");
+        output.WriteLine("READ: nodes/n bounded & nodes~poly(n) across q ⟹ canonizer ALREADY poly on forms graphs ⟹ route #1 (deterministic/orbit-collapse) LIVE — find the mechanism in the depth profile + pruning.");
+        output.WriteLine("      nodes explode / FLAG as q grows ⟹ confirms quasipoly cap; #1 not realised by current oracle.  |Aut| correct ⟹ symmetry detected; high pruned ⟹ orbit-combination (#2) active.");
+        Assert.True(true);
+    }
 }

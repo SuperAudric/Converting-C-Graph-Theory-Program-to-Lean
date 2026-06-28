@@ -85,6 +85,26 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
    residue) or a constant improvement — **NOT a priority, since it does not advance the polynomial goal.** Pushing toward
    polynomial = attacking the open bounded-WL-dim conjecture (a GI-theory frontier; Skresanov affine-2-closure carve and
    the `s(X)=b(X)−b(G)` gap are the leads, both open).
+   **★★★ ROUTE-#5 FINDING (2026-06-28, `Probe_FormsGraphCanonScaling`) — the cost model above is WRONG for forms graphs;
+   there is a THIRD route that sidesteps the open WL-dim problem.** Running the ACTUAL chain-descent canonizer on
+   `VO⁻₄(q)`: for `d≤6` it canonizes in a **SINGLE PATH** — `leaves=1`, `≈d+2` nodes, depth profile `[1,1,…,1]`, recovering
+   the **full** `|Aut|` (q=2→1920=|Aut(Clebsch)|✓, q=3→233280, q=4→12533760). **The `n^{|T|}` charge that drives the whole
+   quasipoly/WL-dim pessimism assumes a RIGID residue that forks `n` ways per individualization — but forms graphs are the
+   OPPOSITE (huge `Aut`), so the harness's a-posteriori orbit-pruning collapses ALL forking to one path.** ⟹ the descent
+   TREE is polynomial (single path, depth `~d~log n`), regardless of WL-dim. **The real barrier is the PER-NODE HARVEST
+   cost** (generic automorphism discovery — `CascadeOracle` is 30 lines, pruning lives in `ChainDescent.cs`): at `d=8` it
+   does NOT resolve even at budget=50 (would flag instantly if forking) ⟹ stuck inside `<50` nodes ⟹ per-node harvest
+   blows up, NOT the tree. **For forms graphs the automorphisms are isometries, findable in poly time by constructive Witt
+   = exactly Stage B.0 `coords_determine` (`remaining-work.md:261`).** So the **polynomial route = single-path descent +
+   a STRUCTURE-AWARE (Witt) per-node harvest**, which is the RECOVERY route (`SchemeRecovered`/`hFormCert`), and it
+   **sidesteps the open bounded-WL-dim conjecture** (harvest ≠ WL-discretization; forms-graph iso is known poly via the
+   classical-group algebra). **This REORDERS the strategic conclusion: the matching/frame WL-separation analysed the
+   harder, suboptimal route (try bases ⟹ quasipoly); the harvest route the canonizer actually uses is poly and is the
+   right target.** NEXT = (a) implement a constructive-Witt per-node harvest in C# + confirm `d=8,10,12` stay
+   single-path-fast; (b) align the Lean seal to the recovery route (depth `d+1` frame + poly Witt harvest =
+   Stage B.0/B.1 `coords_determine`/`reachesRigidOrCameron_viaSimilitudeForm`, already partly landed). CAVEAT: single-path
+   STRUCTURE is empirically solid (`d≤6`); poly per-node harvest is theoretically available (Witt) but NOT in the current
+   generic oracle — building it is the open engineering+proof task, but it is NOT gated on the open WL-dim math.
 2. **Floor-lowering** `q ≳ 32d → O(d) → small-q` — the matching has its OWN q-floor from the isotropic shells (NOT the
    per-anchor c₀). Needs a TIGHT corank shell count (→ `q≳O(d)`), then larger separating frames for small-q-growing-d.
    The landed-but-unwired route-2 / corank-2 lemmas (`c0_le_route2`, `c0_le_threequarters_corank2`, on disk, axiom-clean,
