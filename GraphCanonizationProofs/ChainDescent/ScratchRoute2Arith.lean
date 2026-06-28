@@ -1,5 +1,4 @@
 import Mathlib.Analysis.SpecialFunctions.Sqrt
-import Mathlib.Tactic
 
 namespace ChainDescent
 

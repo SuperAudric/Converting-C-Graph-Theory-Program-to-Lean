@@ -22,7 +22,6 @@ import ChainDescent.BadAnchorCount
 import ChainDescent.GoodAnchorNonvacuity
 import ChainDescent.ObservableCountBridgeK
 import ChainDescent.FieldGeneric
-import Mathlib.Tactic
 
 namespace ChainDescent
 
