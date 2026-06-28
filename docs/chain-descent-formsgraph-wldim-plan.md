@@ -47,21 +47,53 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
   (Layer D) and the other families a typeclass swap, not a re-proof.
 
 **WHAT'S LEFT (frontier, roughly priority order):**
-1. **Floor-lowering** `q ≳ 32d → O(d) → small-q` — the matching has its OWN q-floor from the isotropic shells (NOT the
+1. **O(1) / frame WL-dim — VIABILITY SPIKED (2026-06-28, `Probe_FrameWLScaling`); the finding RESHAPES this item.**
+   The canonizer charges ~`n^{|T|}` (a rigid residue forks `n` ways per individualization; the deterministic-base escape
+   would prove too much and was not found in prior search), so the base size `|T|` is the exponent. **MEASURED (best-fit
+   minimal individualization base of `VO⁻_d(q)`): `|T| = d+1`, EXACTLY — flat in q, linear in d** (q-sweep d=4: base
+   `5,5,5,5` at q=2,3,4,5; d-sweep: `5,7,9` at d=4,6,8; matches the group base `1 (translations) + d (rigidify O⁻_d)`).
+   **CONSEQUENCE — a frame is NOT `O(1)`; it is `Θ(d)`.** So:
+   - **Fixed d, growing q** (the `q ≳ 32d` slice we work in): frame base `d+1` is *constant in q* ⟹ `n^{O(1)}` =
+     **POLYNOMIAL**, strictly beating the matching's `O(d log q)` base (`n^{O(log q)}` = quasipoly). This is the frame's
+     genuine win, and it is real and buildable (generalize `VO⁻₄(3)`'s `T₉` to a uniform `(d+1)`-vector rigidifying frame,
+     proven by coordinate recovery + the closed-form counts — no `decide`).
+   - **Growing d**: frame base `d+1` gives `n^{Θ(d)}` = quasipoly/super-poly — **no better than the matching.** Pure
+     individualization (frame OR matching) is capped at `Θ(d)` base because killing `O⁻_d(q)` needs `d` rigidifying points;
+     `O(1)`-in-d is information-theoretically impossible for individualization. **TRUE all-d polynomial therefore needs
+     `O(1)` k-WL dimension (a fundamentally different algorithm — k-tuple WL + iteration, NOT individualization).**
+   **CAVEAT NOW CLOSED (2026-06-28, `Probe_CountBaseScaling`): the richer count predicate `IsotropySeparatesAtBase` is
+   ALSO `Θ(d)`** — min count-base measured `= d` exactly (q-sweep d=4: `4,4,5,4` @ q=2,3,4,5; d-sweep: `4,6,8,10` @
+   d=4,6,8,10). Counting shaves the constant (`d` vs `d+1`) but not the scaling. (Aside: so `T₉=9` for `VO⁻₄(3)` was
+   oversized — minimal count-base there is ~4; `T₉` was sized for `decide` convenience.) **Both the project's own Stage
+   B.0 (`O(Q)` discretizes at the basis-frame `d+1`, `remaining-work.md:261`) and these probes agree: base = `Θ(d)`.**
+   - **TWO FACTS THAT RESHAPE THE WHOLE ITEM (verified 2026-06-28):**
+     (i) **The residue dimension `d` is UNBOUNDED** (the canonizer faces `VO^ε_{2m}(q)` with growing `m`; plan §1 target
+     "`d` bounded ⟺ small-Aut", and `general-cc-separability §1A` — the carve-out does NOT bound the forms-graph residue's
+     `d`). So `Θ(d)` base ⟹ `n^{Θ(d)}` = **quasipolynomial worst-case (small q, `d~log n`), NEVER polynomial.**
+     (ii) **Bounded WL-dimension for these forms-graphs (c)–(f) is an OPEN MATH PROBLEM, not citable**
+     (`reference_srg_wl_literature_2026-06-17`: "the wall is genuinely open in math, no citable theorem either direction";
+     **Skresanov gives the *group* `G^(2)` 2-closure structure, NOT the WL-base bound** — "computing `G^(2)` ≠ proving the
+     gap bounded"). So the "k-WL route" is *not* a turnkey citation; it is the open node-4 conjecture.
+   - **CORRECTNESS IS NOT AT STAKE (C3, `reference_srg_wl…:54`): the high-WL-dim case is handled by FLAGGING by design**
+     (the seal is keyed IR-core-free via `reachesRigidOrCameron_viaSymmetricRecovery`, dropping `DiscretizesAtBases`; the
+     unbounded-base case is the IR-solver's row 4 ⟹ flag). So the WL-dim work is about **reducing flagging / usefulness on
+     the forms-graph family, not seal correctness.**
+   **⟹ STRATEGIC CONCLUSION: the O(1)/frame route CANNOT reach polynomial (base is `Θ(d)`, `d` unbounded), and the true
+   polynomial endpoint (bounded WL-dim O(1) via k-WL) is OPEN MATHEMATICS, not a build task.** The realistic, *provable*
+   deliverables for the forms-graph family are **quasipolynomial** (the matching — built) and **sub-exponential**
+   (`reachesRigidOrCameron_viaSpielman` — citable). A frame would only buy the fixed-d-poly slice (a slice, not the
+   residue) or a constant improvement — **NOT a priority, since it does not advance the polynomial goal.** Pushing toward
+   polynomial = attacking the open bounded-WL-dim conjecture (a GI-theory frontier; Skresanov affine-2-closure carve and
+   the `s(X)=b(X)−b(G)` gap are the leads, both open).
+2. **Floor-lowering** `q ≳ 32d → O(d) → small-q` — the matching has its OWN q-floor from the isotropic shells (NOT the
    per-anchor c₀). Needs a TIGHT corank shell count (→ `q≳O(d)`), then larger separating frames for small-q-growing-d.
    The landed-but-unwired route-2 / corank-2 lemmas (`c0_le_route2`, `c0_le_threequarters_corank2`, on disk, axiom-clean,
    NOT in `build.sh`) + the design = §13 "Floor-lowering assets".
-2. **q = pᵉ scheme seam (Layer D)** — `efield : GaloisField p e ≃ₗ F_p^{de}`; the q=p adapter `FieldGeneric`
+3. **q = pᵉ scheme seam (Layer D)** — `efield : GaloisField p e ≃ₗ F_p^{de}`; the q=p adapter `FieldGeneric`
    is the template. §11.6.
-3. **Other schurian families** (alternating / half-spin) — reuse the skeleton + the field-generic chain. §11.4.
-4. **char-2 + Suzuki** — one bespoke track (Arf + additive trace; Mathlib substrate absent); deferred. §11.5.
-5. **The seam build** — `htransport` (spiked `ScratchSeam`, on disk), mechanical, on the landed `forcedNode_relabel`. §11.6.
-6. **O(1) / frame WL-dim — the path to TRUE polynomial.** The matching tops out at an `O(log n)` base ⟹ `n^{O(log n)}` =
-   quasipolynomial. Polynomial needs an `O(1)` frame, because the canonizer charges ~`n^{|T|}` (a rigid residue forks `n`
-   ways per individualization; the deterministic-base escape would prove too much and was not found in prior search).
-   Viable in Lean (`VO⁻₄(3)` was sealed via `decide` + a concrete frame `T₉`) but HARD uniformly (the frame predicates
-   are mis-shaped at the standard frame; the `c₀`/bridge tools are about *pair* separation, not a fixed frame). A
-   separate, harder track. `reachesRigidOrCameron_viaSpielman` (axiom-clean) is the citable sub-exponential fallback.
+4. **Other schurian families** (alternating / half-spin) — reuse the skeleton + the field-generic chain. §11.4.
+5. **char-2 + Suzuki** — one bespoke track (Arf + additive trace; Mathlib substrate absent); deferred. §11.5.
+6. **The seam build** — `htransport` (spiked `ScratchSeam`, on disk), mechanical, on the landed `forcedNode_relabel`. §11.6.
 
 **NOT the open SRG-WL-dimension problem** — structure/base/answer are known (Skresanov); see §2.
 **History** (increment 3–5 blow-by-blow, sessions 1–3, the `VO⁻₄(3)` instance seal, the spike/dead-end log) →

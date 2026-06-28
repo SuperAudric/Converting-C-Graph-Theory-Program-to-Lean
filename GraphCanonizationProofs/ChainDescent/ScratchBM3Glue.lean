@@ -12,7 +12,7 @@ open QuadraticMap BM3Bridge
 
 set_option maxHeartbeats 1000000
 
-instance : Fact (Nat.Prime 3) := ⟨by norm_num⟩
+instance : Fact (Nat.Prime 3) := ⟨by decide⟩
 
 /-- the VO⁻₄(3) bilinear form `B(x,y) = x₀y₁ + x₂y₂ + x₃y₃` (so `B x x = Qvo x`). -/
 noncomputable def Bil : LinearMap.BilinForm (ZMod 3) (Fin 4 → ZMod 3) :=

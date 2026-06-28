@@ -3093,4 +3093,142 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("FALLBACK if exact c₀ is bounded but close to 1 (small δ): average over anchors (c̄₀) — report shows if mean ≪ max, i.e. anchor-averaging recovers δ.");
         Assert.True(true);
     }
+
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    //  FRAME-WL VIABILITY SPIKE (2026-06-28).  The matching seal gives an individualization base of
+    //  size O(d log q) ⟹ n^{O(log n)} = QUASIPOLYNOMIAL.  An O(1)/frame WL-dim would give POLYNOMIAL.
+    //  THE DECIDING QUESTION: does the minimal individualization base of the affine-polar forms graph
+    //  stay CONSTANT as q grows (⟹ frame beats matching ⟹ poly for fixed d), or grow like log q (⟹
+    //  frame = matching, stays quasipoly, and TRUE poly needs k-WL not individualization)?
+    //  We sweep q wide at fixed d=4, and d at small q, reading base = CheapBaseSize (first-fit 1-WL
+    //  individualization base on the rank-3 graph; an UPPER bound on the scheme isotropy-count base).
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    [Fact]
+    public void Probe_FrameWLScaling()
+    {
+        output.WriteLine("FRAME-WL VIABILITY: individualization base vs (q, d) for VO^-_{2m}(q).");
+        output.WriteLine("Question: base = const(q) [⟹ frame beats matching ⟹ poly@fixed-d] OR ~log q [⟹ frame=matching=quasipoly]?");
+        output.WriteLine("");
+
+        // best-fit greedy (GreedyBaseCurve) is much tighter than first-fit but O(n)·refine per step;
+        // cap n for the best-fit measure, fall back to first-fit (upper bound) above the cap.
+        (int q, int m)[] qSweep = { (2,2),(3,2),(4,2),(5,2) };          // d=4, best-fit feasible n≤625
+        (int q, int m)[] dSweep = { (2,2),(2,3),(2,4),(3,2),(4,2),(5,2) }; // best-fit feasible
+
+        void Run(string title, (int q, int m)[] cases)
+        {
+            output.WriteLine(title);
+            output.WriteLine($"  {"q",3} {"d",3} {"n",9} {"base",5} {"fit",4} {"log2 q",7} {"d+1",4} {"base/log2q",10}");
+            foreach (var (q, m) in cases)
+            {
+                int dim = 2 * m; long n = 1; for (int i = 0; i < dim; i++) n *= q;
+                if (n > 700) { output.WriteLine($"  {q,3} {dim,3} {n,9}  (skipped: best-fit n>700)"); continue; }
+                bool[,] adj;
+                try { adj = AffinePolar(q, m, -1); }
+                catch (Exception e) { output.WriteLine($"  {q,3} {dim,3} {n,9}  (no aniso form: {e.Message})"); continue; }
+                int b = GreedyBaseCurve((int)n, adj).Count - 1; string fit = "best";   // tight minimal base
+                double l2q = Math.Log(q) / Math.Log(2);
+                output.WriteLine($"  {q,3} {dim,3} {n,9} {b,5} {fit,4} {l2q,7:F2} {dim+1,4} {(b/l2q),10:F2}");
+            }
+            output.WriteLine("");
+        }
+
+        Run("── q-SWEEP (d=4 fixed): is BEST-FIT base flat or ~log q? ──", qSweep);
+        Run("── d-SWEEP: how does base scale with d? ──", dSweep);
+
+        output.WriteLine("READ: q-sweep BEST-FIT base FLAT ⟹ frame O(1)-in-q ⟹ poly@fixed-d viable (build frame).");
+        output.WriteLine("      q-sweep base ~ log q (base/log2q ≈ const) ⟹ frame = matching = quasipoly; O(1) needs k-WL, NOT individualization.");
+        output.WriteLine("      d-sweep: base ≈ d+1 ⟹ rigidifying frame (Θ(d), const-q) ⟹ poly@fixed-d, NOT poly@growing-d.");
+        Assert.True(true);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    //  COUNT-PREDICATE base scaling (closes the caveat on Probe_FrameWLScaling).  The Lean predicate
+    //  IsotropySeparatesAtBase is RICHER than pure individualization: u's invariant is the HISTOGRAM
+    //  (σ:T→Fin3, c:Fin3) ↦ #{z≠u : isoClass(z−t)=σ(t) ∀t∈T, isoClass(z−u)=c}.  The pure-individualization
+    //  base is d+1; does the richer count buy O(1)?  We greedily find the min base T for which
+    //  u ↦ histogram is injective (= IsotropySeparatesAtBase holds), and read its (q,d)-scaling.
+    //  isoClass = {0:Q=0, 1:nonzero square, 2:nonzero nonsquare} (a faithful 3-colouring of the rank-3
+    //  scheme; separation is partition-invariant so exact labels don't matter).  eps=-1 (elliptic).
+    // ════════════════════════════════════════════════════════════════════════════════════════════
+    [Fact]
+    public void Probe_CountBaseScaling()
+    {
+        output.WriteLine("COUNT-PREDICATE base: min |T| for IsotropySeparatesAtBase (the RICHER count profile = actual Lean predicate).");
+        output.WriteLine("Q: count-base O(1) [⟹ all-d POLY via frame, overturns d+1 cap!] OR Θ(d) like individualization?  (T₉=9 at d=4 predicts ~2d)");
+        output.WriteLine($"  {"q",3} {"d",3} {"n",8} {"cntBase",8} {"indiv=d+1",10} {"cntBase/d",10}");
+
+        (int q, int m)[] cases = { (2,2),(3,2),(4,2),(5,2), (2,3),(3,3), (2,4), (2,5) };  // q-sweep@d=4 + d-sweep
+
+        static long Mix(long x) { x ^= x >> 33; x *= unchecked((long)0xff51afd7ed558ccdL); x ^= x >> 33; return x; }
+
+        foreach (var (q, m) in cases)
+        {
+            int dim = 2 * m; long nL = 1; for (int i = 0; i < dim; i++) nL *= q;
+            if (nL > 1100) { output.WriteLine($"  {q,3} {dim,3} {nL,8}  (skipped n>1100)"); continue; }
+            int n = (int)nL;
+            var F = new GFq(q);
+            int bb = 0, cc = 0; bool found = false;       // anisotropic binary form (eps=-1)
+            for (int b = 0; b < q && !found; b++) for (int c = 0; c < q && !found; c++)
+            {
+                bool aniso = true;
+                for (int y = 0; y < q && aniso; y++) for (int z = 0; z < q; z++)
+                { if (y == 0 && z == 0) continue; int g = F.add[F.add[F.mul[y, y], F.mul[F.mul[b, y], z]], F.mul[c, F.mul[z, z]]]; if (g == 0) { aniso = false; break; } }
+                if (aniso) { bb = b; cc = c; found = true; }
+            }
+            if (!found) { output.WriteLine($"  {q,3} {dim,3} {n,8}  (no aniso form)"); continue; }
+            int[] Vec(int v) { var x = new int[dim]; for (int i = 0; i < dim; i++) { x[i] = v % q; v /= q; } return x; }
+            int Q(int[] x)
+            {
+                int s = 0; for (int i = 0; i < m - 1; i++) s = F.add[s, F.mul[x[2 * i], x[2 * i + 1]]];
+                int yy = x[2 * (m - 1)], zz = x[2 * (m - 1) + 1];
+                return F.add[s, F.add[F.add[F.mul[yy, yy], F.mul[F.mul[bb, yy], zz]], F.mul[cc, F.mul[zz, zz]]]];
+            }
+            var isSq = new bool[q]; for (int x = 0; x < q; x++) isSq[F.mul[x, x]] = true;
+            var vecs = new int[n][]; for (int v = 0; v < n; v++) vecs[v] = Vec(v);
+            var isoOfVec = new byte[n]; for (int v = 0; v < n; v++) { int qv = Q(vecs[v]); isoOfVec[v] = qv == 0 ? (byte)0 : (isSq[qv] ? (byte)1 : (byte)2); }
+            // diffIso[z,u] = isoClass(Vec(z) − Vec(u))  (translation scheme ⟹ a function of z−u)
+            var diffIso = new byte[n, n]; var w = new int[dim];
+            for (int z = 0; z < n; z++) for (int u = 0; u < n; u++) { for (int i = 0; i < dim; i++) w[i] = F.add[vecs[z][i], F.neg[vecs[u][i]]]; diffIso[z, u] = isoOfVec[Enc(w, q)]; }
+
+            // u's count-invariant under base T = order-independent hash of the histogram { (prof_T(z), diffIso[z,u]) : z≠u }.
+            long[] Sigs(List<int> T)
+            {
+                var sig = new long[n]; var hist = new Dictionary<long, int>();
+                for (int u = 0; u < n; u++)
+                {
+                    hist.Clear();
+                    for (int z = 0; z < n; z++)
+                    {
+                        if (z == u) continue;
+                        long key = 0; foreach (int t in T) key = key * 4 + diffIso[z, t]; key = key * 4 + diffIso[z, u];
+                        hist[key] = hist.GetValueOrDefault(key) + 1;
+                    }
+                    long h = 0; foreach (var kv in hist) h += Mix(unchecked(kv.Key * 1099511628211L + kv.Value * 2654435761L)); // order-indep
+                    sig[u] = h;
+                }
+                return sig;
+            }
+            int Distinct(long[] s) => s.Distinct().Count();
+
+            var T = new List<int>(); int guard = 0;
+            while (Distinct(Sigs(T)) < n && guard++ < dim + 5)
+            {
+                var cur = Sigs(T);
+                // candidates: one representative per current colour class (same-coloured ⟹ symmetric ⟹ same refinement)
+                var seen = new HashSet<long>(); var cand = new List<int>();
+                for (int u = 0; u < n; u++) if (!T.Contains(u) && seen.Add(cur[u])) cand.Add(u);
+                int best = -1, bestD = -1;
+                foreach (int t in cand) { T.Add(t); int d = Distinct(Sigs(T)); T.RemoveAt(T.Count - 1); if (d > bestD) { bestD = d; best = t; } }
+                if (best < 0) break; T.Add(best);
+            }
+            bool sep = Distinct(Sigs(T)) >= n;
+            string cb = sep ? T.Count.ToString() : $"FAIL>{T.Count}";
+            output.WriteLine($"  {q,3} {dim,3} {n,8} {cb,8} {dim + 1,10} {(sep ? (T.Count / (double)dim).ToString("F2") : "—"),10}");
+        }
+        output.WriteLine("");
+        output.WriteLine("READ: cntBase const across q (fixed d) AND across d ⟹ O(1) count-base ⟹ all-d POLY via frame (would overturn the d+1 cap).");
+        output.WriteLine("      cntBase grows ~d ⟹ count-predicate also Θ(d) ⟹ frame=fixed-d poly only; all-d needs k-WL (Skresanov). T₉=9@d=4 ⟹ expect ~2d.");
+        Assert.True(true);
+    }
 }
