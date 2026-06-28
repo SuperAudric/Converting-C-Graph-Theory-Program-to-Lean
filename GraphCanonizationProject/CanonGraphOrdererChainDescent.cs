@@ -49,6 +49,13 @@ namespace Canonizer
         public long LastClassifyStarved { get; private set; }
         public long LastConsumedSymmetric { get; private set; }
 
+        // Read-only Route-A trace (per committed node): consumed cell size, count of
+        // non-singleton cells it was chosen among, adjacency to the last path vertex.
+        public IReadOnlyList<int> LastTraceDepth { get; private set; } = [];
+        public IReadOnlyList<int> LastTraceCellSize { get; private set; } = [];
+        public IReadOnlyList<int> LastTraceNonSingleton { get; private set; } = [];
+        public IReadOnlyList<int> LastTraceAdjToLast { get; private set; } = [];
+
         // The node budget the last run carried (interpret LastNodeCount
         // against it), and the descent-tree node count per depth — the cost
         // shape (a flat all-ones profile is a single descent path).
@@ -118,6 +125,10 @@ namespace Canonizer
             LastClassifyClass3 = result.Stats.Cascade.ClassifyClass3;
             LastClassifyStarved = result.Stats.Cascade.ClassifyStarved;
             LastConsumedSymmetric = result.Stats.Cascade.ConsumedSymmetric;
+            LastTraceDepth = descent.TraceDepth;
+            LastTraceCellSize = descent.TraceCellSize;
+            LastTraceNonSingleton = descent.TraceNonSingleton;
+            LastTraceAdjToLast = descent.TraceAdjToLast;
             LastBudget = result.Stats.Budget;
             LastNodesByDepth = result.Stats.NodesByDepth;
             LastAutomorphismGroupOrder = result.ResidualGroup.Order;

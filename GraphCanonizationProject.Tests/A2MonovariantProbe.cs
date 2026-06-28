@@ -3335,4 +3335,39 @@ public class A2MonovariantProbe(ITestOutputHelper output)
         output.WriteLine("      |Aut| matching the known group order ⟹ recovery is COMPLETE; recDepth ~ d ⟹ bounded & structural.");
         Assert.True(true);
     }
+
+    // ROUTE A, partial-base measurement — watch the always-available symmetric cell at each
+    // committed base. If the consumed cell is a clean "sphere" (consistent geometric type, size
+    // following the relative-sphere pattern), a Witt-at-partial-bases proof has a concrete target.
+    // If erratic, the core is likely irreducibly hard. consumedSize = the single-orbit cell taken;
+    // #nonSing = how many non-singleton cells it was chosen among; adjToLast = how many of the cell
+    // are adjacent to the last individualised vertex (relation split to the path).
+    [Fact]
+    public void Probe_RouteA_PartialBaseSpheres()
+    {
+        output.WriteLine("ROUTE A partial-base: is the consumed symmetric cell a clean 'sphere' at every base? (VO^-_d(q))");
+        void RunCase(int q, int m)
+        {
+            int dim = 2 * m; long nL = 1; for (int i = 0; i < dim; i++) nL *= q;
+            if (nL > 800) { output.WriteLine($"  q={q} d={dim} n={nL} (skipped n>800)"); return; }
+            int n = (int)nL;
+            bool[,] adj; try { adj = AffinePolar(q, m, -1); } catch (Exception e) { output.WriteLine($"  q={q} d={dim} (no aniso: {e.Message})"); return; }
+            var edges = new int[n, n];
+            for (int x = 0; x < n; x++) for (int y = 0; y < n; y++) edges[x, y] = adj[x, y] ? 1 : 0;
+            var cd = new Canonizer.CanonGraphOrdererChainDescent { BudgetOverride = 100_000_000L };
+            string outcome = "ok";
+            try { cd.Run(new int[n], new Canonizer.AdjMatrix(edges)); }
+            catch (Exception e) { outcome = e.GetType().Name; }
+            output.WriteLine($"  q={q} d={dim} n={n} [{outcome}] |Aut|={cd.LastAutomorphismGroupOrder}  (depth: size/nonSing/adjToLast)");
+            var sb = new System.Text.StringBuilder("    ");
+            for (int i = 0; i < cd.LastTraceCellSize.Count; i++)
+                sb.Append($"{cd.LastTraceDepth[i]}:{cd.LastTraceCellSize[i]}/{cd.LastTraceNonSingleton[i]}/{cd.LastTraceAdjToLast[i]}  ");
+            output.WriteLine(sb.ToString());
+        }
+        RunCase(2, 2); RunCase(3, 2); RunCase(4, 2); RunCase(2, 3); RunCase(3, 3);
+        output.WriteLine("READ: consumedSize following the sphere pattern (e.g. ~ q^{d-1} then shrinking by a clean factor each");
+        output.WriteLine("      individualisation) + small #nonSing + a consistent adjToLast split ⟹ the symmetric cell is a");
+        output.WriteLine("      relative sphere Stab(path) is transitive on (Witt) ⟹ the partial-base attack has a concrete target.");
+        Assert.True(true);
+    }
 }

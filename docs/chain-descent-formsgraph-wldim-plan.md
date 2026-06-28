@@ -160,6 +160,38 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
    existing harvest + the Lean recovery route, NOT a new oracle.** Remaining genuine open piece for the LEAN seal: the
    recovery route must show the `Θ(d)` frame is iso-invariantly *constructible* (poly), not *searched* (`n^{|T|}`) — that
    is exactly what the single-path empirical finding asserts and `coords_determine`/`viaSimilitudeForm` must formalize.
+   **★★★ PROVABLE-BOUND INVESTIGATION (2026-06-28; Lean quality bar — "empirically poly" insufficient). Three routes
+   scoped; A tested NEGATIVE; C recorded as the fallback; current = push A's family before C.**
+   - **Route A — prove the EXISTING generic harvest poly (no new C# code).** Decompose total = node-count × per-node.
+     Per-node = hard-poly-ceiling (loops `n`-bounded, single-path; Lean-formalizable). Node-count crux = branch-freeness,
+     which reduces to **`TwinsRealizedByResidualAut` ≡ `CellsAreOrbits`** (WL cells = `Aut`-orbits at the base;
+     `twinsRealizedByResidualAut_iff_cellsAreOrbits`, `Cascade.lean:4560`) = the **OPEN `s(C)` / `RelCountsDetermineOrbit`
+     core**. **PHASE-1 TEST NEGATIVE (2026-06-28):** the affine explicit realizer does NOT dodge it — `orbMk_affine_eq_iff`
+     gives only PER-PAIR orbit equivalence (each `s`: some `g_s`), but the realizer needs a SINGLE `S`-fixing `g₀`
+     simultaneously; that assembly IS `CellsAreOrbits`. WORSE than the seal: branch-free needs it at EVERY partial base
+     `Sᵢ` (seal discharges separation at ONE full base via the matching). So Route A = the same core, at more places, no
+     shortcut. **Sharpening (deferral):** poly actually needs only "**∃ a single-orbit cell to consume at each base until
+     discrete**" (the `EnableDeferral` scheduler consumes symmetric cells, defers reals; `Phase2Nodes=0` empirically) —
+     WEAKER than full `CellsAreOrbits`, possibly more tractable, but still a WL-vs-orbit statement at partial bases.
+   - **Route B — potential/monovariant node-count bound** (reuse `exists_potential_descent`). Still needs the same
+     progress fact (some cell collapses each step) ⟹ rests on the same core; a formalization wrapper, not an escape.
+   - **Route C — the constructive-Witt oracle (RECORDED FALLBACK; user prefers to AVOID — C# oracle risk).** Sidesteps
+     `CellsAreOrbits` entirely: **recover `Q` algebraically** from the rank-3 relations (the two non-identity relations
+     ARE the isotropy types — the `coords_determine`/Stage-B.0 content, partly landed), then `Aut = GO(Q)` is a KNOWN
+     group with explicit generators, canonicalized by standard poly group algorithms (Schreier–Sims). Plugs into the
+     existing `ITransversalOracle` seam so it IS the actual algorithm being proven. Complexity elementary; correctness
+     depth = form-recovery (already tracked). Checkpoint discipline: carry the form-recovery correctness as a hypothesis,
+     prove the poly/canonicalization downstream closes (mirrors the Gauss/`hOrbit` checkpoints).
+   - **★ ROUTE-A ATTACK DEEP-SCOPED — NOT cleanly viable in pure Lean (2026-06-28).** Read-only measurement
+     (`Probe_RouteA_PartialBaseSpheres`) confirmed the consumed symmetric cell is a clean relative sphere at every base
+     (depth-1 = neighbor sphere = valency, free by rank-3/schurian). But tracing the resolver through `coords_determine`/
+     `viaOrthogonalForm` (B.0) shows B.0's clean "orbit-of-difference ⟹ exact `Q(v−t)`" mechanism works ONLY for the
+     **isometry** scheme `O(Q)`. The descent runs on the coarser **similitude SRG** (relation = `isoClass`, isotropic-vs-
+     anisotropic, NOT exact `Q`-value), so resolving the sphere to an orbit needs the **count crux** `IsotropySeparatesAtBase`
+     at every partial base = **`CellsAreOrbits`-throughout = bounded WL-dimension = the OPEN core**. The clean B.0 escape
+     needs the finer `O(Q)` (form recovered = Route C). **⟹ pure-Lean SRG-native poly ⟹ crack open bounded-WL-dim (research);
+     no clean shortcut found.** The real fork: **Route C (form recovery + B.0, needs the C# oracle) vs. accept the banked
+     quasipoly.** Memory: `project_formsgraph_wldim_viability_2026-06-28`.
 2. **Floor-lowering** `q ≳ 32d → O(d) → small-q` — the matching has its OWN q-floor from the isotropic shells (NOT the
    per-anchor c₀). Needs a TIGHT corank shell count (→ `q≳O(d)`), then larger separating frames for small-q-growing-d.
    The landed-but-unwired route-2 / corank-2 lemmas (`c0_le_route2`, `c0_le_threequarters_corank2`, on disk, axiom-clean,

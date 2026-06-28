@@ -73,6 +73,17 @@ namespace Canonizer
         // Descent-tree node count per depth — the per-level cost profile.
         private readonly List<int> _nodesByDepth = new();
 
+        // Read-only Route-A trace: per committed node, the consumed cell's size,
+        // how many non-singleton cells it was chosen among, and its adjacency
+        // split to the last path vertex. Exposes the symmetric-cell ("sphere")
+        // pattern. Pure instrumentation; never read by the descent.
+        private readonly List<int> _traceDepth = new(), _traceCellSize = new(),
+            _traceNonSingleton = new(), _traceAdjToLast = new();
+        public IReadOnlyList<int> TraceDepth => _traceDepth;
+        public IReadOnlyList<int> TraceCellSize => _traceCellSize;
+        public IReadOnlyList<int> TraceNonSingleton => _traceNonSingleton;
+        public IReadOnlyList<int> TraceAdjToLast => _traceAdjToLast;
+
         // ── A-priori cascade/linear oracle harvest attribution ──────────────
         // Cost-shape accumulators for the cascade oracle, emitted as
         // DescentStats.Cascade (docs/chain-descent-cascade-oracle.md): residual
@@ -274,6 +285,27 @@ namespace Canonizer
                 while (cellMembers[target].Count < 2) target++;
             }
             var members = cellMembers[target];
+
+            // Read-only trace (Route-A measurement): the consumed cell's size, the
+            // number of non-singleton cells it was chosen among, and its relation
+            // split to the most-recent path vertex (adjacent vs non-adjacent). Tests
+            // whether the always-available symmetric cell is a clean structured
+            // "sphere" (a relative sphere Stab(path) is transitive on) — the target a
+            // Witt-at-partial-bases proof would key on. Pure instrumentation.
+            {
+                int nonSingleton = 0;
+                for (int c = 0; c < numCells; c++) if (cellMembers[c].Count >= 2) nonSingleton++;
+                int adj = 0;
+                if (_path.Count > 0)
+                {
+                    int last = _path[_path.Count - 1];
+                    foreach (int v in members) if (_adj[last * _n + v] != 0) adj++;
+                }
+                _traceDepth.Add(depth);
+                _traceCellSize.Add(members.Count);
+                _traceNonSingleton.Add(nonSingleton);
+                _traceAdjToLast.Add(adj);
+            }
 
             var decision = _oracle.Classify(_n, _adj, members, _path, Automorphisms);
 
