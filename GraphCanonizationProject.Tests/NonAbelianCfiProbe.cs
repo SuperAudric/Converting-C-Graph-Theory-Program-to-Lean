@@ -130,6 +130,37 @@ public sealed class NonAbelianCfiProbe
     private static Grp D4() =>      // ⟨(0 1 2 3),(1 3)⟩ = dihedral of order 8
         GroupFromPerms("D4", 4, new List<int[]> { new[] { 1, 2, 3, 0 }, new[] { 0, 3, 2, 1 } });
 
+    // dihedral group of order 2n: ⟨ n-cycle, reflection i↦(n-i) mod n ⟩ on n points.
+    private static Grp Dn(int n)
+    {
+        var cyc = Enumerable.Range(0, n).Select(i => (i + 1) % n).ToArray();
+        var refl = Enumerable.Range(0, n).Select(i => (n - i) % n).ToArray();
+        return GroupFromPerms($"D{n}", n, new List<int[]> { cyc, refl });
+    }
+
+    // Heisenberg group over F_p (3×3 upper unitriangular), order p³, nilpotent
+    // class 2 — the genuinely non-abelian p-group analog of Lichter's Z_{p^k}.
+    // Element (a,b,c) ↦ index a·p²+b·p+c; (a,b,c)(a',b',c')=(a+a',b+b',c+c'+a·b').
+    private static Grp Heisenberg(int p)
+    {
+        int q = p * p * p;
+        int M(int x) => ((x % p) + p) % p;
+        (int, int, int) Dec(int i) => (i / (p * p), (i / p) % p, i % p);
+        int Enc(int a, int b, int c) => M(a) * p * p + M(b) * p + M(c);
+        var mul = new int[q, q];
+        for (int i = 0; i < q; i++)
+            for (int j = 0; j < q; j++)
+            {
+                var (a, b, c) = Dec(i); var (a2, b2, c2) = Dec(j);
+                mul[i, j] = Enc(a + a2, b + b2, c + c2 + a * b2);
+            }
+        var inv = new int[q];
+        for (int i = 0; i < q; i++) { var (a, b, c) = Dec(i); inv[i] = Enc(-a, -b, -c + a * b); }
+        bool ab = true;
+        for (int i = 0; i < q && ab; i++) for (int j = 0; j < q; j++) if (mul[i, j] != mul[j, i]) { ab = false; break; }
+        return new Grp($"H(F{p})", mul, inv, ab);
+    }
+
     // ── CFI / multipede over a group Γ ────────────────────────────────────────
     private sealed class GroupCfi
     {
@@ -432,6 +463,90 @@ public sealed class NonAbelianCfiProbe
             Assert.Equal(gammaRef, recovered);                  // extraction recovered Γ's actual relation
             Assert.Equal(G.Abelian, isAbelianIsotope);          // abelian-isotope ⟺ Γ abelian (Albert)
         }
+    }
+
+    // recover gadget-0's consistent value-triples R_v from the GRAPH (each
+    // tuple-vertex's segment-neighbours, mapped to local value indices).
+    private static List<(int, int, int)> RecoverGadgetRelation(GroupCfi cfi, int q)
+    {
+        var seg0 = cfi.Gadget0Segs;
+        var posOf = new Dictionary<int, int>();
+        for (int s = 0; s < seg0.Length; s++)
+            for (int gv = 0; gv < q; gv++) posOf[cfi.SegVerts[seg0[s]][gv]] = s * q + gv;
+        int[] adj = FlatAdj(cfi.Graph);
+        var R = new List<(int, int, int)>();
+        foreach (int tv in cfi.Gadget0Tuples)
+        {
+            var coord = new int[seg0.Length];
+            for (int u = 0; u < cfi.N; u++)
+                if (adj[tv * cfi.N + u] != 0 && posOf.TryGetValue(u, out int packed)) coord[packed / q] = packed % q;
+            R.Add((coord[0], coord[1], coord[2]));
+        }
+        return R;
+    }
+
+    // ── the GROUP-VARYING probe: the last 2×2 category (non-abelian, growing) ──
+    // The non-abelian analog of Lichter's ring-varying CFI. As the group grows in
+    // a family (dihedral D₃…D₈, orders 6→16; Heisenberg H(F₃), order 27 — vs the
+    // cyclic family Z₆…Z₁₆), confirm: (i) extraction keeps recovering the GENUINE
+    // relation (recovered==Γ — the structure stays accessible with growth);
+    // (ii) it stays NON-abelian / outside the abelian-ring route (abelian-isotope
+    // = NO); (iii) the WL-forcing depth b_WL scales TAMELY (≈|Γ|, same as abelian)
+    // — i.e. no super-poly blowup in extraction or WL-depth as the group grows.
+    // If all hold, the only place a wall could hide is the SOLVE step (canonicalize
+    // the recovered growing-non-abelian system = a group-canonization theory Q).
+    [Fact]
+    public void Probe_GroupVaryingNonAbelian()
+    {
+        var family = new (Grp ab, Grp nonab)[]
+        {
+            (Zn(6),  Dn(3)), (Zn(8),  Dn(4)), (Zn(10), Dn(5)),
+            (Zn(12), Dn(6)), (Zn(14), Dn(7)), (Zn(16), Dn(8)),
+        };
+        var thin = MultipedeGenerator.CirculantBiadjacency(4, new[] { 0, 1, 3 });   // for relation recovery
+        var hard = OddRandomRegular(6, 4, 3);                                       // for b_WL (some treewidth)
+
+        output.WriteLine("Group-varying non-abelian CFI (Lichter's non-abelian analog). Dihedral D_n vs cyclic Z_{2n}.");
+        output.WriteLine("Confirm: extraction recovers genuine relation, stays non-abelian, and b_WL scales tamely (≈|Γ|).");
+        output.WriteLine("(recovered = R == Γ's relation as a set; abelian = R transposition-invariant — for {ijk=e} this ⟺ Γ");
+        output.WriteLine(" abelian, agreeing with the discriminator's isotopy-canon test on q≤8.)");
+        output.WriteLine($"{"grp",-7} {"|G|",3} {"ab",2}  {"recovered==Γ?",13} {"abelian?",9}  {"b_WL",4}  {"n(graph)",8}");
+
+        // cheap O(q²) replacements for the canonization tests (validated against the
+        // rigorous isotopy-canon test at q≤8 in Probe_ExtractionDiscriminator).
+        static bool SetEq(List<(int, int, int)> a, List<(int, int, int)> b) =>
+            new HashSet<(int, int, int)>(a).SetEquals(new HashSet<(int, int, int)>(b));
+        static bool Commutes(List<(int, int, int)> R)
+        {
+            var s = new HashSet<(int, int, int)>(R);
+            foreach (var (i, j, k) in R) if (!s.Contains((j, i, k))) return false;
+            return true;
+        }
+
+        void Row(Grp G, bool doBWL)
+        {
+            int q = G.N;
+            var R = RecoverGadgetRelation(BuildGroupCfi(G, thin), q);
+            bool recovered = SetEq(R, GroupRelation(G));
+            bool abelian = Commutes(R);
+
+            string bwl = "—"; int ng = 0;
+            if (doBWL)
+            {
+                var cfiHard = BuildGroupCfi(G, hard, anchorSeg0: true);
+                ng = cfiHard.N;
+                var (b, _, _, _) = MeasureWL(cfiHard.N, FlatAdj(cfiHard.Graph), cfiHard.Types, cfiHard.SegVerts);
+                bwl = b.ToString();
+            }
+            output.WriteLine($"{G.Name,-7} {q,3} {(G.Abelian ? "y" : "n"),2}  {(recovered ? "yes" : "NO"),13} {(abelian ? "yes" : "NO"),9}  {bwl,4}  {ng,8}");
+
+            Assert.True(recovered);                 // extraction recovers Γ's genuine relation, at every size
+            Assert.Equal(G.Abelian, abelian);       // and classifies abelian/non-abelian correctly
+        }
+
+        foreach (var (ab, nonab) in family) { Row(ab, doBWL: true); Row(nonab, doBWL: true); }
+        // the genuinely-nilpotent p-group point (order 27); b_WL skipped (729/gadget).
+        Row(Heisenberg(3), doBWL: false);
     }
 
     private static List<(int, int, int)> GroupRelation(Grp G)

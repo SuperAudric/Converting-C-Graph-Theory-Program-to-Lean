@@ -117,6 +117,16 @@ That makes the problem concrete even though the general statement is GI-adjacent
     over a fixed finite group (abelian OR non-abelian)," not "linear over an abelian ring" — the non-abelian-but-fixed
     case is poly (coset enumeration / fixed-group CSP) yet outside the Smith-normal-form route as currently specced
     (IR-solver §11.13). See [[project_nonabelian_cfi_witness_2026-06-28]].
+  - **▶ GROUP-VARYING CHECK (2026-06-28, `Probe_GroupVaryingNonAbelian`) — the last category is tame.** The non-abelian
+    analog of Lichter's ring-varying CFI: across a growing family (dihedral D₃…D₈, orders 6→16, + Heisenberg `H(F₃)`,
+    order 27) the extraction recovers the genuine relation at every size, it stays non-abelian, and `b_WL` stays
+    non-abelian-blind and tame — **no wall in extraction or WL-depth even as the group grows.** Since dihedral and
+    Heisenberg are **solvable**, Babai–Luks string-canonization is poly, so the family is plausibly poly end-to-end. The
+    genuine non-poly-wall candidate therefore **narrows to growing NON-SOLVABLE groups** (Aₙ / simple), which the full
+    CFI cannot feasibly probe (gadget = `|Γ|^{d-1}` vertices) — so it is now a *theory* question (is CFI over growing
+    simple groups super-poly?), with no constructible probe witness. Practical net: the rigid seal's "or non-linear"
+    escape covers "linear/CSP over a fixed-or-growing **solvable** group"; only growing non-solvable groups remain a
+    theoretical wall candidate.
 - **Route C — Gap = 0 for Cameron (the pin-count route).** Prove every Cameron family has **gap `b_WL − b(Aut) = O(1)`**
   (no structural hardness beyond its symmetry). Then a rigid graph carrying a Cameron scheme would have `b(Aut) = 0`
   and `O(1)` gap, hence `b_WL = O(1)` — it discretizes cheaply, so it is *handled, not a wall*. **Crux:** a per-family
