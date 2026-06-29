@@ -294,8 +294,36 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
   **Fallbacks + criteria** (built in): if inversion is non-singular only for large `q` → **partial `CellsAreOrbits`
   (large-`q`)** = a real poly result for a sub-family; if it hits a genuine non-degeneracy obstruction = the frontier →
   formalize **wall ⟺ bounded-WL-dim** (clean meta-result) = the decisive signal to bank quasipoly + pivot to Route C.
-  **Probe first:** test the frame-base inversion on `VO⁻₄` (probe-validated 81/81) — the *shape* of the obstruction
-  picks the fallback. Expect 3c to be hard / possibly the GI-frontier; 3a/3b are certain builds.
+
+  - **★★★ 3c CRACKABILITY PROBE — DONE (2026-06-29; Python probes in scratchpad, methodology below).** Tested
+    `CellsAreOrbits` directly: compare the actual refinement partition to the true `Stab(S)`-orbit partition
+    (`φ_S(v)=(Q(v),polar(v,s)_s)` exact when span(S) anisotropic; scaling-class when totally isotropic — the delimiter,
+    confirmed empirically). Swept `VO^±_4(q)` `q∈{3,5,7,11}` and `VO^±_6(3)`. **Findings (each an insight):**
+    1. **`CellsAreOrbits` holds at every SPANNING anisotropic (μ=1) base even with plain 1-WL** — uniformly, all `q,d`,
+       both types. The only over-merges are the μ-free (totally-isotropic-span) prefix = tech debt (the delimiter).
+    2. **1-WL is INSUFFICIENT at the bounded *single-anchor* μ=1 base** (`S={0,a}`, `a` anisotropic): over-merges, and
+       the gap GROWS with `q` (orbits `12,30,56,132`; 1-WL stuck `≈10–11`). Even iterated/pivot-augmented *binary* 1-WL
+       stays stuck. So WL-dim `>1` anchor with 1-WL.
+    3. **The seal's single-round `Z_u(S)` joint-count ALSO under-determines at the bounded base** (`10<12`, `11<30`, …)
+       — it is a large-base *separator* (= the quasipoly seal); its character matrix is **singular at a bounded base**.
+       This is the precise form of the anticipated "non-degeneracy obstruction": **the clean single-round Gauss/`Z_u(S)`
+       inversion (3c as originally written) FAILS at a bounded base.**
+    4. **★ THE CRACK: the *iterated* `χ(det G₂)` pivot-count (graph-invariant 2-WL using the seal's pair observable)
+       DETERMINES the orbit at the bounded single-anchor μ=1 base — exactly (`12,30,56` = orbits), uniformly across
+       `q∈{3,5,7}`, both types.** Full binary 2-WL agrees (`q=3`). So the wall is **true and crackable**, but the
+       determination needs **iterating** the pair observable (2-WL fixpoint), not the single round.
+    5. **Caveat (cap):** the determination genuinely needs the *pair* observable `χ(det G₂)` (graph-invariant) — a probe
+       using singleton square-class succeeded but is INVALID (the cap: singleton square-class flips under `Q↦cQ`), and
+       binary-adjacency-only is insufficient. So the crack is specifically the `χ(det G₂)` 2-WL count.
+
+    **⟹ REDIRECTED 3c (the actionable result).** The target is **not** the single-round `Z_u(S)` inversion (proven
+    singular at bounded base) — it is the **iterated `χ(det G₂)` pivot-count** (the 2-WL fixpoint of the seal's pair
+    observable): show *it* inverts to exact Gram at a bounded base. The obstruction is real for one round; **iteration
+    recovers full rank**, uniformly in `q` (so NOT a large-`q`-only phenomenon — the `q≥256` fallback is not forced).
+    Open robustness Qs for the next probe: iteration *depth* (O(1)? grows with `d`?) and uniformity as `d` grows.
+    Probe methodology (reproducible): `φ_S` orbit via Witt + scaling-class delimiter; refinement = colour refinement
+    with the stated observable; `CellsAreOrbits ⟺ refinement-partition = φ_S-partition`. (Scratchpad: `wall_probe*.py`,
+    `wall_2wl.py`, `wall_pair.py`.)
 - **Parallel — Witt build (now the higher priority; fully scoped in §7).** The shared enabler for Increments 2–3's
   easy halves and the depth-1 sphere. Mathlib has the primitives but no Witt theory; the staged plan + difficulty +
   recommendation are in **§7**. The cheap first slice (W0+W1) discharges `WittConeTransitive` and makes the depth-1
