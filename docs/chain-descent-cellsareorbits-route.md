@@ -322,10 +322,22 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
     singular at bounded base) — it is the **iterated `χ(det G₂)` pivot-count** (the 2-WL fixpoint of the seal's pair
     observable): show *it* inverts to exact Gram at a bounded base. The obstruction is real for one round; **iteration
     recovers full rank**, uniformly in `q` (so NOT a large-`q`-only phenomenon — the `q≥256` fallback is not forced).
-    Open robustness Qs for the next probe: iteration *depth* (O(1)? grows with `d`?) and uniformity as `d` grows.
     Probe methodology (reproducible): `φ_S` orbit via Witt + scaling-class delimiter; refinement = colour refinement
     with the stated observable; `CellsAreOrbits ⟺ refinement-partition = φ_S-partition`. (Scratchpad: `wall_probe*.py`,
     `wall_2wl.py`, `wall_pair.py`.)
+
+  - **★★★ DEPTH PROBE — DONE (2026-06-29; the decisive go/no-go, GO). `wall_depth.py` / `wall_depth2.py`.** Measured the
+    iteration *depth* of the `χ(det G₂)` pivot-count = the first round at which its partition **determines** the orbit
+    (refines `φ_S`). **The depth is `O(1)` — uniformly bounded, NOT growing with `d`, base-depth `|S|`, type, or `q`:**
+    determination at **round 1** (q=3) or **round 2** (q=5,7), fixpoint at round 2–3. Held across ambient `d ∈ {4,6}`,
+    base depth `|S| ∈ {2,3,4,5}` with orbit count *growing* `12→36→108→324`, both `VO^±`, `q ∈ {3,5,7}` (full binary
+    2-WL agreed at d=4 q=3, det@2). Notably deeper bases determine *faster* (q=5: `|S|=2` det@2 → `|S|=3` det@1), so
+    depth does **not** grow with base depth. **⟹ The wall is genuinely crackable for the family; the frontier / Route-C
+    fallback is NOT forced, and the large-`q` fallback is not needed (uniform in `q`).** Scope/caveat: pure-Python memory
+    capped the sweep at `d ≤ 6` (geom precompute is `O(n²)`); `d=8` and more base-types are the residual uniformity
+    check, but the `d=4→6` × growing-`|S|` evidence is strong. **NEXT = the Lean 3c proper**: prove `WallKernelFor Obs`
+    for `Obs` = the iterated `χ(det G₂)` 2-WL, exploiting the `O(1)` iteration depth (the inversion is a *bounded* number
+    of character-sum rounds, not an unbounded fixpoint).
 - **Parallel — Witt build (now the higher priority; fully scoped in §7).** The shared enabler for Increments 2–3's
   easy halves and the depth-1 sphere. Mathlib has the primitives but no Witt theory; the staged plan + difficulty +
   recommendation are in **§7**. The cheap first slice (W0+W1) discharges `WittConeTransitive` and makes the depth-1
