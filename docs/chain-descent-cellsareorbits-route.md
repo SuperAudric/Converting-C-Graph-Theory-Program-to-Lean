@@ -51,6 +51,13 @@ yet — it is open both ways (the forms graph may or may not have bounded WL-dim
   `canonAdj`-lift atom: labelled output invariant under an automorphism relabel of the discrete leaf colouring, via
   `rankPerm_comp` + `labelledAdj_eq_of_isAut`). Remaining = the `samePartition`→*literal*-relabel step, which is exactly
   what `canonForm` (lex-min over `DirAssignment`s, a §15.7 placeholder) supplies.
+- `ChainDescent/ScratchWallKernel.lean` — **★ Increment 3a — the wall isolated as one predicate (DONE)**: the open
+  content at an anisotropic base is named `WallKernel` (square-class profile *determines* exact Gram), with the
+  reduction proved around it — soundness `stabOrbit_imp_sameExactGram_of_anisotropic` (free, via the μ=1 delimiter +
+  `similitude_polar`), the carried Witt-extension input `WittExtendsToOrbit`, and the isolation capstone
+  `stabOrbit_iff_sameSquareClass_of_wallKernel` (at an anisotropic base, modulo {Witt}, `CellsAreOrbits` ⟺ `WallKernel`).
+  The open content is now exactly one predicate. (`WallKernel` = the exact-Gram form of the seal's `ZProfileSeparates`;
+  the count-observable bridge + character-inversion attack = 3b/3c.)
 
 **Next (re-prioritised after handoff review).** The reviewer correctly flagged that `poly ⟺ B` is a design slogan,
 not the Lean — the **node-count bridge is the route's missing pillar** (see §1 KNOWN GAP + §6 Increment 0). Order:
@@ -249,11 +256,46 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
   `modulo {W-dec}`. (Its *cell half* — same refinement profile ⟹ same orbit — additionally needs **W-ext**; that
   wiring is folded into Increment 3's frame, since it is the same square-class→exact-Gram statement specialised to the
   free regime where it is discharged by realizability.)
-- **Increment 3 — the wall (the open kernel).** State the kernel predicate (anisotropic base: same square-class
-  profile ⟹ same `Stab(S)`-orbit). Reduce it via Witt extension to "square-class profile ⟹ exact-Gram profile."
-  This is the genuine research. First buildable sub-step: connect it to `ZProfileSeparates` and try to **upgrade the
-  separator to a certifier** — show the joint profile over a frame *determines* (not just separates) the exact Gram.
-  This is bounded-WL-dim; expect it to be hard and possibly the GI-frontier.
+- **★ Increment 3 — the wall (the open kernel). PLAN (2026-06-29, grounded against the seal source).** Grounding
+  finding: the wall is **not a new object** — the whole route reduces, through the *existing* seal chain
+  `ZProfileSeparates → QProfileSeparatesAtBase → IsotropySeparatesAtBase`, to **`ZProfileSeparates`** (*agreeing joint
+  isotropic counts `Z_u(S)` over every sub-frame `S ⊆ T` ⟹ agreeing exact `Q`-profile*), which is already
+  *determination*-flavored. The wall is `ZProfileSeparates` **with the base `T` shrunk from the matching `Θ(log n)` to
+  the `O(d)` frame**:
+
+  | | base | status | gives |
+  |---|---|---|---|
+  | seal | `T` = matching, `Θ(log n)` | ✅ PROVEN via `c0_le_threequarters` (≤¾ fail/anchor) + union bound (`reachesRigidOrCameron_affinePolar`) | quasipoly |
+  | **wall** | `T` = `O(d)` frame | ✗ OPEN | poly |
+
+  **Why the gap is fundamental to the current method:** `c0_le_threequarters` is a *constant-fraction-per-anchor* bound
+  (each good anchor separates ≥¼ of pairs); a fraction bound separates all `~|V|²` pairs only by union-bounding over
+  `Θ(log n)` anchors — it **structurally cannot** reach an `O(d)` base. Shrinking the base needs "each anchor kills a
+  fraction" replaced by "the `O(d)`-frame count-profile **determines** the orbit" — a *different kind of argument*.
+
+  **Three sub-steps:**
+  - **3a — ✅ DONE (`ScratchWallKernel.lean`, axiom-clean).** The open content at an anisotropic base is isolated as the
+    single predicate **`WallKernel`** (square-class profile *determines* exact Gram), with the reduction proved around
+    it: soundness `stabOrbit_imp_sameExactGram_of_anisotropic` (free, μ=1 delimiter + `similitude_polar`), carried
+    `WittExtendsToOrbit` (Witt tech debt), and the isolation capstone `stabOrbit_iff_sameSquareClass_of_wallKernel` — at
+    an anisotropic base, **modulo {Witt}, `CellsAreOrbits` ⟺ `WallKernel`**. (Built in the geometric `Similitude`/orbit
+    setting, extending `ScratchOrbitBaseCase`; `WallKernel` is the exact-Gram form of `ZProfileSeparates`.) **Deferred to
+    next:** the geometric similitude-*equivariance* of `WallKernel` ("every base up to aut" — the geometric analogue of
+    the spine's `baseTransport`); and the count-observable bridge `WallKernel` ↔ bounded-base `ZProfileSeparates` (3b).
+  - **3b.** Prove certifier ⟹ separator (bounded-base `ZProfileSeparates` ⟹ the seal's separation) and isolate the
+    converse's extra requirement — locates the gap as a Lean object.
+  - **3c (the research).** Replace the `c0` *fraction* bound with **Fourier/character inversion**: the counts `Z_u(S)`
+    *are* character sums in the Gram data (exactly what `ObservableCountBridge` / `pairCharSum_factor_gen` expose), so
+    "counts over all sub-frames of the frame determine the `Q`-profile" is a **moment-inversion / non-singularity**
+    statement. Concrete target: the map `Q-profile ↦ (Z_u(S))_{S⊆frame}` is **injective**, via non-singularity of the
+    associated character matrix. The natural strengthening of the existing Gauss machinery from *bounding* to
+    *inverting* — reuses `pairCharSum_factor_gen`, `gaussSum_sq_ne_zero`, the `χ(det G₂)↔Z_u` bridge.
+
+  **Fallbacks + criteria** (built in): if inversion is non-singular only for large `q` → **partial `CellsAreOrbits`
+  (large-`q`)** = a real poly result for a sub-family; if it hits a genuine non-degeneracy obstruction = the frontier →
+  formalize **wall ⟺ bounded-WL-dim** (clean meta-result) = the decisive signal to bank quasipoly + pivot to Route C.
+  **Probe first:** test the frame-base inversion on `VO⁻₄` (probe-validated 81/81) — the *shape* of the obstruction
+  picks the fallback. Expect 3c to be hard / possibly the GI-frontier; 3a/3b are certain builds.
 - **Parallel — Witt build (now the higher priority; fully scoped in §7).** The shared enabler for Increments 2–3's
   easy halves and the depth-1 sphere. Mathlib has the primitives but no Witt theory; the staged plan + difficulty +
   recommendation are in **§7**. The cheap first slice (W0+W1) discharges `WittConeTransitive` and makes the depth-1

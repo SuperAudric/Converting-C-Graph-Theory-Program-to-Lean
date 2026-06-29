@@ -2111,3 +2111,24 @@ See `docs/chain-descent-cellsareorbits-route.md` §6.
 | `baseTransport` | 284-294 | **★ Full-base `g`-equivariance (the "iterate across levels" lemma).** For any aut `g` and base `T`, the descent at `g(T)` (pulled back by `g`) is `samePartition` the descent at `T`. `g` global ⟹ holds at every base incl. a leaf ⟹ subsumes level-by-level iteration in one lemma. | — |
 | `repTransport_eq_baseTransport_instance` | 298-310 | `(insert v₁ S).image g = insert v₂ S` for `g` fixing `S` with `g v₁=v₂` — confirms `repTransport` is the `S`-fixing instance of `baseTransport`. | — |
 | `labelledAdj_rankPerm_transport` | 330-344 | **The `canonAdj`-lift atom.** Labelled output `labelledAdj (rankPerm π) adj` is invariant under a `g`-relabel of the discrete leaf colouring (`g` an aut), via `rankPerm_comp` + `labelledAdj_eq_of_isAut`. Remaining lift gap = `samePartition`→literal relabel = `canonForm` (§15.7 placeholder). | — |
+
+## ChainDescent/ScratchWallKernel.lean
+
+**Increment 3a — the wall isolated as one predicate (2026-06-29), NOT in `build.sh`.** `CellsAreOrbits` in the
+anisotropic regime (the "wall") reduced to a single open predicate `WallKernel` (square-class profile *determines*
+exact Gram), with everything else proved. Geometric `Similitude`/orbit setting (extends `ScratchOrbitBaseCase`).
+Axiom-clean `[propext, Classical.choice, Quot.sound]`. Imports `ChainDescent.ScratchOrbitBaseCase`. `WallKernel` = the
+exact-Gram form of the seal's `ZProfileSeparates`; the character-inversion attack = 3c. See
+`docs/chain-descent-cellsareorbits-route.md` §6 Increment 3.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `similitude_polar` | 47-52 | Similitudes scale the polar form: `polar Q (g x) (g y) = μ · polar Q x y` (polarisation of `Q∘g=μ·Q`); for `μ=1` (isometry) the polar is preserved. | — |
+| `SameExactGram` | 55-57 | Exact Gram profile to `S`: equal `Q` and equal `polar · s` ∀ `s ∈ S`. Determines the `Stab(S)`-orbit (via Witt). | Definition |
+| `SameSquareClass` | 60-62 | Square-class profile to `S`: `χ` (quadratic character) of the exact Gram data — the finest graph-invariant (the cap). What refinement sees. | Definition |
+| `sameExactGram_imp_sameSquareClass` | 65-66 | Exact ⟹ square-class (free, apply `χ`). | — |
+| `stabOrbit_imp_sameExactGram_of_anisotropic` | 71-82 | **Soundness (free).** Orbit ⟹ exact Gram at an anisotropic base: the `S`-fixing similitude has `μ=1` (delimiter), so it is an isometry preserving `Q` and `polar · s`. | — |
+| `WallKernel` | 86-87 | **★ The open kernel.** Square-class profile *determines* exact Gram profile — the entire open content of `CellsAreOrbits` in the anisotropic regime (bounded-base determination = separator→certifier). Count-form = `ZProfileSeparates`. | Definition |
+| `WittExtendsToOrbit` | 92-93 | Carried Witt-extension input (tech debt): equal exact Gram to `S` ⟹ same `Stab(S)`-isometry-orbit. | Definition |
+| `stabOrbit_of_sameSquareClass` | 98-100 | The reduction (hard direction): `WallKernel` + Witt ⟹ same square-class ⟹ same orbit. | — |
+| `stabOrbit_iff_sameSquareClass_of_wallKernel` | 106-111 | **★ Isolation capstone.** At an anisotropic base, modulo {Witt}, `CellsAreOrbits` (orbit ⟺ square-class) **⟺ `WallKernel`** — the route's open content is exactly one named predicate. | — |
