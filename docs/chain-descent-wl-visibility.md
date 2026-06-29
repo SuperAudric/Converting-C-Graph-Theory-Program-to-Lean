@@ -37,6 +37,24 @@ bounded-WL-dim core (the *poly* facet); see cameron-entanglement §2's opposite-
 - **`commDeg_const_iff_comm`** — the **visibility mechanism**. The commuting-degree varies ⟺ Γ is non-abelian, so a
   commutator-type relation **exposes** non-abelian structure. Non-abelian content is hideable *only* in
   coordinate-regular relations; the moment a relation sees commutativity, it is 1-WL-visible.
+- **`linear_eq_unique` / `product_fix_two_indep`** (added 2026-06-29) — the **degree-2 kernel** for the `≥2`-WL
+  altitude. Hidden symmetry lives in the WL-closure (the coherent configuration, `≥2`-WL counting *pairs*), not in
+  1-WL — at 1-WL these regular gadgets are stuck for trivial regularity reasons, independent of the hiding question.
+  The 2-WL count on the minimal `d=3` gadget fixes *two* coordinates, leaving a linear equation `u·z·w = 1` in the
+  third with a **unique** solution (`z = u⁻¹·w⁻¹`): count `= 1`, `Γ`-blind. This is `product_coord_regular` one degree
+  up — the same noncommutative-quasigroup algebra — so the load-bearing `≥2`-WL rung (R1′) is reachable via the cores,
+  not "high/open". (General-`d` aggregate `|Γ|^{d−2}` = a `List.ofFn`-product counting wrapper; deferred to R2.)
+
+**Phase 1 DONE (2026-06-29, axiom-clean).** `ChainDescent/WLGeneric.lean` re-states the 1-WL primitives
+(`signature`, `sigKey_eq_iff`, `refineStep`, `refineStep_iff`, `warmRefine`, `samePartition`) over an arbitrary
+`[Fintype V] [DecidableEq V]`, reusing the top-level `POE`/`encTuple` (re-deriving the two `private` injectivity
+lemmas locally). The canonizer's `Fin n` invariants are untouched. `refineStep_iff` — the only lemma the rungs
+consume — is `[propext, Classical.choice, Quot.sound]`. (`lake env lean`, not in `build.sh`.)
+
+**Altitude decision (2026-06-29, user-approved): algebra-core-first, defer the refinement altitude.** R1a-at-1-WL is
+correct but certifies only 1-WL-mediated hiding (the weak rung); the load-bearing statement is `≥2`-WL. Rather than
+commit Phase 2 to either altitude blind, land the degree-2 kernel (above, done) — which feeds *both* a multi-`d` 1-WL
+R1a and the 2-WL statement — then choose the graph/refinement altitude with the foundation in hand.
 
 **The plan (rungs, increasing difficulty / decreasing reachability):**
 - **R1 — the group-CFI carries no hidden non-abelian symmetry** (one rung of the family battery; reachable). Its
@@ -179,7 +197,7 @@ signature — the splitting lever: equal ⟹ hidden, unequal ⟹ visible), `warm
 | Phase | Deliverable | Consumes | Risk |
 |---|---|---|---|
 | **0 ✓** | cores (`ScratchWLVisibility.lean`) | — | done |
-| **1** | `Fintype V`-generic 1-WL (`WLGeneric.lean`) | top-level `ChainDescent.lean` | low (mechanical) |
+| **1 ✓** | `Fintype V`-generic 1-WL (`WLGeneric.lean`) — `signature`/`sigKey_eq_iff`/`refineStep_iff`/`warmRefine`/`samePartition` over `[Fintype V][DecidableEq V]`, axiom-clean (`lake env lean`, not in build) | top-level `ChainDescent.lean` | done |
 | **2** | **R1a** (group-CFI 1-WL closure is abelian-equivalent) | `product_coord_regular`, P1, gaps 3–4 | med (signature↔count) |
 | **3** | **R1b** (Γ-symmetry visible; anchoring ⟹ rigid) | `commDeg`, `Group.lean`, gap 5 | med (Aut modelling) |
 | **4** | **R2** characterization (`CoordRegular` ⟺ hideable) | R1, R2 predicate | med |

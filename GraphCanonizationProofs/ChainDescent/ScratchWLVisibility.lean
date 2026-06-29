@@ -54,6 +54,48 @@ theorem product_coord_regular_indep {G : Type*} [Group G] [Fintype G] [Decidable
       = Fintype.card {p : G × G // a' * p.1 * p.2 = 1} := by
   rw [product_coord_regular, product_coord_regular]
 
+/-! ## Degree-2 coordinate-regularity — the kernel for ≥2-WL blindness
+
+`product_coord_regular` is *fix-one* coordinate-regularity (the 1-WL count: fixing one
+coordinate of `t₀·t₁·t₂ = 1` leaves `|G|` completions). The coherent configuration that
+hidden symmetry lives in is `≥2`-WL, which counts completions with *two* coordinates
+fixed. For the minimal `d = 3` gadget that count is the kernel below: fixing any two of
+the three ordered coordinates leaves a **linear equation `u · z · w = 1` in the third**,
+whose solution `z = u⁻¹ · w⁻¹` is **unique** — count `= 1`, independent of the fixed
+values `u, w` and of `G`. This is exactly the `Γ`-blindness a 2-WL pair-refinement needs
+on the minimal gadget; it is the d=3 instance of "fix all-but-one coordinate of an
+ordered product ⟹ the last is determined", the noncommutative quasigroup law one degree
+up from `product_coord_regular`.
+
+(The general-`d` *aggregate* `#{t : Fin d → G // ∏ t = 1 ∧ t k = a} = |G|^{d−2}`,
+independent of `a`, follows from this kernel by a `List.ofFn`-product splitting + counting
+wrapper; it is the R2 / full-multipede extension and is deferred — the minimal gadget needs
+only the kernel.) -/
+
+/-- **Degree-2 coordinate-regularity (the kernel).** The solution set of the linear
+equation `u · z · w = 1` is a singleton (`z = u⁻¹ · w⁻¹`); hence its cardinality is `1`,
+independent of `u`, `w`, and `G`. Fixing any two of the three coordinates of
+`t₀·t₁·t₂ = 1` instantiates this (with `(u, w)` the surrounding fixed factors), so every
+fix-two completion count on the minimal product gadget is `1` — `Γ`-blind. -/
+theorem linear_eq_unique {G : Type*} [Group G] [Fintype G] [DecidableEq G] (u w : G) :
+    Fintype.card {z : G // u * z * w = 1} = 1 := by
+  rw [Fintype.card_eq_one_iff]
+  refine ⟨⟨u⁻¹ * w⁻¹, ?_⟩, ?_⟩
+  · rw [mul_assoc, mul_assoc, inv_mul_cancel, mul_one, mul_inv_cancel]
+  · rintro ⟨z, hz⟩
+    refine Subtype.ext ?_
+    have h2 : u * z = w⁻¹ := mul_eq_one_iff_eq_inv.mp hz
+    exact eq_inv_mul_iff_mul_eq.mpr h2
+
+/-- Fix-two completion counts on the minimal `d = 3` product gadget `t₀·t₁·t₂ = 1`
+agree across all three coordinate pairs and all fixed values — each is `1`
+(`linear_eq_unique`), so a 2-WL pair-refinement sees the same count regardless of `G`.
+This is the degree-2 analogue of `product_coord_regular_indep`. -/
+theorem product_fix_two_indep {G : Type*} [Group G] [Fintype G] [DecidableEq G]
+    (a b a' b' : G) :
+    Fintype.card {z : G // a * z * b = 1} = Fintype.card {z : G // a' * z * b' = 1} := by
+  rw [linear_eq_unique, linear_eq_unique]
+
 /-! ## Visibility heart — the commuting-degree separates abelian from non-abelian -/
 
 /-- The **commuting-degree** of `g`: the number of elements commuting with `g`
@@ -101,6 +143,8 @@ theorem commDeg_const_iff_comm {G : Type*} [Group G] [Fintype G] [DecidableEq G]
 
 #print axioms product_coord_regular
 #print axioms product_coord_regular_indep
+#print axioms linear_eq_unique
+#print axioms product_fix_two_indep
 #print axioms commDeg_const_of_comm
 #print axioms commDeg_nonconst_of_noncomm
 #print axioms commDeg_const_iff_comm
