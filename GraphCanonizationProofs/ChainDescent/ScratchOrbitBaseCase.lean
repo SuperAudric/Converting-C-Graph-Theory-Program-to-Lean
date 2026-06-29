@@ -96,4 +96,64 @@ theorem depth1_isotropic_sphere_one_orbit {Q : QuadraticForm K V} (hW : WittCone
   rw [sub_zero] at hadjv hadjw
   exact hW v w hv hw hadjv hadjw
 
+/-! ## The totally-isotropic prefix — the orbit-level delimiter
+
+The induction's *free prefix* (`span S` totally isotropic) rests on multiplier freedom in `Stab(S)`. The **origin base
+`S = {0}`** — the prefix's first step — needs **no Witt input**: the scalar similitudes `x ↦ l·x` already realize every
+square multiplier, making `Stab(0)`-orbits square-class-coarse (matching what refinement sees). The complementary wall
+side is the multiplier-rigidity lemma promoted to orbits. Together they are `CellsAreOrbits` for the anisotropic shell
+at the origin, free of the open core; extending the *free* side past `{0}` to a general totally-isotropic base is what
+needs the Witt-decomposition construction of multiplier-realizing similitudes (the gating keystone). -/
+
+/-- The scalar automorphism `x ↦ l • x` as a linear equivalence (`l ≠ 0`). -/
+def scalarEquiv (l : K) (hl : l ≠ 0) : V ≃ₗ[K] V :=
+  LinearEquiv.ofLinear (l • LinearMap.id) (l⁻¹ • LinearMap.id)
+    (by ext x; simp [smul_smul, mul_inv_cancel₀ hl])
+    (by ext x; simp [smul_smul, inv_mul_cancel₀ hl])
+
+@[simp] theorem scalarEquiv_apply (l : K) (hl : l ≠ 0) (x : V) :
+    scalarEquiv l hl x = l • x := by
+  simp [scalarEquiv]
+
+/-- The **scalar similitude** `x ↦ l • x`: an automorphism of the affine-polar graph with multiplier `l²`, fixing the
+origin. It realizes every **square** multiplier in `Stab(0)` with no Witt input — the engine of the free prefix at the
+origin base. -/
+def scalarSimilitude (Q : QuadraticForm K V) (l : K) (hl : l ≠ 0) : Similitude Q where
+  toLinearEquiv := scalarEquiv l hl
+  mult := l * l
+  mult_ne := mul_ne_zero hl hl
+  map := fun x => by rw [scalarEquiv_apply, QuadraticMap.map_smul, smul_eq_mul]
+
+/-- The `Stab(S)`-orbit relation: `w'` is reachable from `w` by an automorphism fixing `S` pointwise. -/
+def StabOrbit (Q : QuadraticForm K V) (S : Set V) (w w' : V) : Prop :=
+  ∃ g : Similitude Q, (∀ s ∈ S, g.toLinearEquiv s = s) ∧ g.toLinearEquiv w = w'
+
+/-- **The wall side of the delimiter (orbit level).** At a base containing an **anisotropic** vector, every
+`Stab(S)`-orbit preserves the **exact** norm `Q` (the connecting similitude has `μ = 1`, by
+`mult_eq_one_of_fixes_anisotropic`). So in the multiplier-dead regime orbits are exact-norm-fine — strictly finer than
+the square-class cells refinement sees (`ScratchSimilitudeCap`). This locates the open core at the orbit level:
+`CellsAreOrbits` there needs the square-class profile to recover the exact norm. -/
+theorem stabOrbit_preserves_norm_of_anisotropic_base {Q : QuadraticForm K V} {S : Set V} {a : V}
+    (haS : a ∈ S) (ha : Q a ≠ 0) {w w' : V} (h : StabOrbit Q S w w') : Q w' = Q w := by
+  obtain ⟨g, hfix, hgw⟩ := h
+  have hμ : g.mult = 1 := mult_eq_one_of_fixes_anisotropic g ha (hfix a haS)
+  have hmap := g.map w
+  rw [hgw, hμ, one_mul] at hmap
+  exact hmap
+
+/-- **The free side of the delimiter at the origin base (no Witt).** At base `{0}` (the depth-1 prefix), the scalar
+similitude puts `l • w` in the `Stab({0})`-orbit of `w` for every `l ≠ 0`, with `Q(l•w) = l²·Q w`. So the orbit of an
+anisotropic `w` already contains a vector of **every norm in `Q w`'s square class** — `Stab(0)`-orbits are
+square-class-coarse, matching exactly what refinement sees. This is `CellsAreOrbits` for the anisotropic shell at the
+origin, free of the open core (the isotropic sphere is the complementary `WittConeTransitive` half). -/
+theorem stabOrbit_zero_base_scales {Q : QuadraticForm K V} (l : K) (hl : l ≠ 0) (w : V) :
+    StabOrbit Q ({0} : Set V) w (l • w) ∧ Q (l • w) = (l * l) * Q w := by
+  refine ⟨⟨scalarSimilitude Q l hl, ?_, ?_⟩, ?_⟩
+  · intro s hs
+    rw [Set.mem_singleton_iff] at hs
+    subst hs
+    simp [scalarSimilitude]
+  · simp [scalarSimilitude]
+  · rw [QuadraticMap.map_smul, smul_eq_mul]
+
 end ChainDescent.OrbitBaseCase
