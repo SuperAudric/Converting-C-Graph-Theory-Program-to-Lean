@@ -203,12 +203,16 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
      no clean shortcut found.** The real fork: **Route C (form recovery + B.0, needs the C# oracle) vs. accept the banked
      quasipoly.** Memory: `project_formsgraph_wldim_viability_2026-06-28`.
    - **★ DEDICATED ROUTE DOC (2026-06-29): [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md)** —
-     the CellsAreOrbits route (= this Route A/B; "B" = the proposition `CellsAreOrbits`) now has a self-contained build
-     doc. **Landed axiom-clean (NOT in build.sh):** the similitude **cap** (`ScratchSimilitudeCap`), the induction
-     **base case** + free-prefix Increment 2 (`ScratchOrbitBaseCase`), and **Witt W0+W1** (`ScratchWittCone`:
-     reflections-as-isometries; `WittConeTransitive` reduced to the concrete residual `IsotropicPairing`). Open core
-     unchanged (anisotropic-tail kernel = bounded-WL-dim). Read that doc's STATUS + §9 for the immediate next task
-     (discharge `IsotropicPairing`).
+     the CellsAreOrbits route (= this Route A/B; "B" = the proposition `CellsAreOrbits`) has a self-contained build doc.
+     **Whole structural scaffold landed axiom-clean (5 `Scratch*` modules, NOT in build.sh):** the similitude **cap**
+     (`ScratchSimilitudeCap`), induction **base case** + free prefix (`ScratchOrbitBaseCase`), **Witt W0+W1**
+     (`ScratchWittCone`), the **node-count bridge + transport seam** (`ScratchNodeCountBridge`: `poly ⟸ B` reduction,
+     rep-choice invariance), and the **wall isolated as one predicate `WallKernel`/`WallKernelFor`** (`ScratchWallKernel`,
+     Increment 3a). **★★★ The open core is no longer "open both ways":** the 2026-06-29 crackability + **depth probes**
+     (durable `GraphCanonizationProofs/wall_*.py`) found the wall is **true, crackable, and `O(1)`-depth uniformly** —
+     the iterated `χ(det G₂)` 2-WL determines the orbit in 1–2 rounds, uniformly in `d, |S|, q,` type. **Live next = Lean
+     3c proper:** prove `WallKernelFor` for that observable as a bounded-depth character inversion. Read that doc's STATUS
+     + §6 Increment 3 + §9 (FRESH READER) for the full pick-up.
 2. **Floor-lowering** `q ≳ 32d → O(d) → small-q` — the matching has its OWN q-floor from the isotropic shells (NOT the
    per-anchor c₀). Needs a TIGHT corank shell count (→ `q≳O(d)`), then larger separating frames for small-q-growing-d.
    The landed-but-unwired route-2 / corank-2 lemmas (`c0_le_route2`, `c0_le_threequarters_corank2`, on disk, axiom-clean,

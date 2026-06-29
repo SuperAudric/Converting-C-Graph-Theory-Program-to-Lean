@@ -3,10 +3,11 @@
 > **What this is.** The working doc for **Route B**: proving the affine-polar forms-graph residue is canonized in
 > **polynomial** time by the *existing refinement-based* canonizer, via the open core **`CellsAreOrbits`** (= bounded
 > WL-dimension of the forms graph). It is the deliberate alternative to **Route C** (constructive form recovery; more
-> likely to succeed but a larger build + behavioural change). The value of Route B is structural: **`poly ⟺ B`** — the
-> current design reduces the entire forms-graph poly question to this one proposition, which is worth pinning down in its
-> own right. This doc scopes *exactly* what B needs, records what is already proved, and lays out the work-forward order
-> so a new reader can pick it up cold.
+> likely to succeed but a larger build + behavioural change). The value of Route B is structural: **`poly ⟸ B`** (B is
+> *sufficient* for poly; a 2026-06-29 handoff-review correction of the earlier `poly ⟺ B` slogan — see §1 KNOWN GAP) —
+> the current design reduces the entire forms-graph poly question to this one proposition, which is worth pinning down in
+> its own right. This doc scopes *exactly* what B needs, records what is already proved, and lays out the work-forward
+> order so a new reader can pick it up cold.
 >
 > Provenance: the viability investigation (`project_formsgraph_wldim_viability_2026-06-28`), the similitude cap +
 > base-case build (this session, 2026-06-29), the Route-A finding (`twinsRealizedByResidualAut_iff_cellsAreOrbits`).
@@ -22,9 +23,14 @@
 
 ## STATUS (read first)
 
-**Live, early.** The base case of the induction is **built and axiom-clean**; the genuine open core (the "wall") is
-isolated and precisely stated; Witt is isolated as a carried hypothesis (tech debt). Nothing of the *wall* is proved
-yet — it is open both ways (the forms graph may or may not have bounded WL-dimension).
+**Live — base case done, the wall isolated and *probed crackable*.** The base case of the induction is **built and
+axiom-clean**; the node-count bridge + transport seam are built (modulo the `canonForm` placeholder); the genuine open
+core (the "wall") is **isolated as one predicate `WallKernel`** (3a, axiom-clean) and Witt is a carried hypothesis (tech
+debt). **The wall is no longer "open both ways":** the 2026-06-29 crackability + depth probes (§6 Increment 3) found it
+is **true and crackable** — the iterated `χ(det G₂)` 2-WL observable determines the orbit with `O(1)` iteration depth,
+uniformly in `d, |S|, q,` type. So the live work is the **Lean 3c proper** (prove `WallKernelFor` for that observable,
+exploiting the bounded depth). What is *not yet proved in Lean* is `WallKernel` itself (= the wall) and the `canonForm`
+lift; the empirics strongly support both.
 
 **Built (axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`):**
 - `ChainDescent/ScratchSimilitudeCap.lean` — **the cap**: the graph determines `Q` only up to scaling, so refinement
@@ -56,20 +62,27 @@ yet — it is open both ways (the forms graph may or may not have bounded WL-dim
   reduction proved around it — soundness `stabOrbit_imp_sameExactGram_of_anisotropic` (free, via the μ=1 delimiter +
   `similitude_polar`), the carried Witt-extension input `WittExtendsToOrbit`, and the isolation capstone
   `stabOrbit_iff_sameSquareClass_of_wallKernel` (at an anisotropic base, modulo {Witt}, `CellsAreOrbits` ⟺ `WallKernel`).
-  The open content is now exactly one predicate. (`WallKernel` = the exact-Gram form of the seal's `ZProfileSeparates`;
-  the count-observable bridge + character-inversion attack = 3b/3c.)
+  **Made observable-PARAMETRIC** after the 3c probe — `WallKernelFor Obs` + `stabOrbit_iff_obs_of_wallKernelFor`: the
+  single-round `WallKernel` is the **refuted separator** instance (`= SameSquareClass`, FALSE at a bounded base), and
+  the framework now aims at the *right* observable `Obs` = the iterated `χ(det G₂)` 2-WL (any graph-invariant `Obs` is
+  orbit-sound for free, so the reduction is identical). (`WallKernel` = the exact-Gram form of the seal's
+  `ZProfileSeparates`.) **Probe status (§6 Increment 3): the iterated-observable `WallKernelFor` is empirically TRUE
+  with `O(1)` determination depth, uniformly** — so 3c is the live Lean target, not a frontier wall.
 
-**Next (re-prioritised after handoff review).** The reviewer correctly flagged that `poly ⟺ B` is a design slogan,
-not the Lean — the **node-count bridge is the route's missing pillar** (see §1 KNOWN GAP + §6 Increment 0). Order:
-1. **★ Increment 0 — node-count bridge** — **provable core ✅ DONE** (`ScratchNodeCountBridge`, axiom-clean):
-grounding showed the bridge is mostly *assembly* over a near-complete substrate (node-count `≤ n`, prune soundness,
-per-node firing all LANDED); the genuinely-new content — prune *completeness* (`selectedCell_single_stabOrbit`) — is
-built, the capstone discharges both poly ingredients, **and the transport seam's depth-1 core (`repTransport`) is built**
-(rep-choice invariance: a different rep of a single-orbit cell ⟹ a `g`-relabeling of the same partition).
-**Remaining on the seam = iterate the depth-1 transport across descent levels + lift the partition-relabeling to
-`canonAdj` equality** (the latter partly blocked on the `canonForm` lex-min placeholder; meta-consumed). 2. **Increment
-3** — state the wall kernel precisely (the open math). 3. **finish W1** — discharge `IsotropicPairing` (cheap base-case
-completion; low-leverage — land en route, not as the payoff). See §6/§7.
+**Next — current frontier (2026-06-29, post depth-probe).** The structural scaffold is *done*: node-count bridge
+(Increment 0), transport seam, and the wall isolation (3a) are all built and axiom-clean. The crackability + depth
+probes returned **GO** (the wall is true, crackable, `O(1)` depth). So the live work, in order:
+1. **★ Lean 3c proper (the prize).** Prove `WallKernelFor Obs` (`ScratchWallKernel`) for `Obs` = the iterated
+   `χ(det G₂)` 2-WL observable — i.e. the bounded-depth character-inversion. Exploit the probed `O(1)` depth: this is a
+   *fixed* (1–2) number of character-sum rounds, not an unbounded WL fixpoint, so it reuses `pairCharSum_factor_gen` /
+   `gaussSum_sq_ne_zero` / the `χ(det G₂)↔Z_u` bridge as a small fixed-round object. **This is the open math and the
+   payoff.**
+2. **3a-equivariance + 3b** — the geometric similitude-equivariance of `WallKernel` ("every base up to aut", analogue
+   of `baseTransport`); the count-observable bridge `WallKernelFor` ↔ bounded-base `ZProfileSeparates`.
+3. **Loose ends (low-leverage, land any time):** discharge `IsotropicPairing` (finishes W1 / the depth-1 base case);
+   the `canonForm` lift of the transport seam (gating prereq, *not* Route-B-specific — blocked on the §15.7 placeholder).
+4. **Residual empirics (optional, for certainty):** push the depth probe to `d=8`+ and more base-types (pure-Python
+   memory capped it at `d≤6`; a C/numpy rewrite reaches further).
 
 **Quality bar:** axiom-clean, no `sorry`/no fresh `axiom`, `native_decide` banned, full build green when ported.
 
@@ -105,14 +118,19 @@ The reduction this route rests on — stated **honestly**, because the Lean is w
 > group-order + information bound, established this session), so the base-size route *cannot* reach poly; the
 > node-count bridge is the **only** mechanism that makes Route B beat quasipoly.
 
-So B is the *math* core (sufficient, open both ways), but it is **not the complete bottleneck**: the node-count bridge
-is a second, independent open piece — pure spine combinatorics, independent of Witt and the wall. Pinning B (true,
+So B is the *math* core (sufficient; unproven in Lean but empirically supported — probed crackable, §6 Increment 3), but
+it is **not the complete bottleneck**: the node-count bridge is a second piece — pure spine combinatorics, independent
+of Witt and the wall (now built, modulo the `canonForm` placeholder). Pinning B (true,
 false, or conditional) is a real result; but it only *pays off* through the bridge.
 
-**Honesty up front — B is open *both ways*.** We do not know B is true. The forms graph could have *unbounded*
-WL-dimension (the "node-4 wall"); empirics (single path) support B but only reach small `d`. This is why Route C
-(which does not need B; see §7) is kept in view. Route B is chosen here because `poly ⟺ B` is independently valuable and
-the base case is real, **accepting that it may be a delay relative to the more-likely-to-succeed Route C.**
+**Honesty up front — B is unproven in Lean, but the empirics now strongly support it.** We do not yet have a Lean proof
+of B (the wall, `WallKernel`). Earlier this was "open both ways"; the 2026-06-29 crackability + depth probes (§6
+Increment 3) **shifted the evidence decisively toward B being true**: the iterated `χ(det G₂)` 2-WL observable
+determines the orbit with `O(1)` iteration depth, uniformly in `d, |S|, q,` type (orbit counts grown to 324). So the
+"node-4 wall" is, for this family, empirically *not* a wall — it is a bounded-depth inversion awaiting formalization.
+Route C (which does not need B; see §7) is still kept in view as the fallback if 3c stalls. Route B is chosen here
+because `poly ⟸ B` is independently valuable and the structural scaffold is real, **accepting that it may be a delay
+relative to the more-likely-to-succeed Route C.**
 
 ---
 
@@ -323,8 +341,8 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
     observable): show *it* inverts to exact Gram at a bounded base. The obstruction is real for one round; **iteration
     recovers full rank**, uniformly in `q` (so NOT a large-`q`-only phenomenon — the `q≥256` fallback is not forced).
     Probe methodology (reproducible): `φ_S` orbit via Witt + scaling-class delimiter; refinement = colour refinement
-    with the stated observable; `CellsAreOrbits ⟺ refinement-partition = φ_S-partition`. (Scratchpad: `wall_probe*.py`,
-    `wall_2wl.py`, `wall_pair.py`.)
+    with the stated observable; `CellsAreOrbits ⟺ refinement-partition = φ_S-partition`. (Durable scripts:
+    `GraphCanonizationProofs/wall_2wl.py`, `wall_pair.py`.)
 
   - **★★★ DEPTH PROBE — DONE (2026-06-29; the decisive go/no-go, GO). `wall_depth.py` / `wall_depth2.py`.** Measured the
     iteration *depth* of the `χ(det G₂)` pivot-count = the first round at which its partition **determines** the orbit
@@ -425,27 +443,37 @@ are defensible to keep as `modulo {Witt}` tech debt until the open core is under
   into B is if its recovery were done via WL counting, which it deliberately is not. Route C is **tech debt, not open
   math** (known-true polar-space coordinatization), but a larger build + behavioural change (needs the form-recovery
   oracle / a constructive Lean recovery). **If B is false, Route C is the only route** — that is its real value.
-- **Why Route B anyway.** `poly ⟺ B` is independently valuable; the base case is real; and a refinement-only poly
-  proof (if B is true) is cleaner than Route C's construction. Chosen with eyes open that Route C is more likely to
-  succeed and this may be a delay.
+- **Why Route B anyway.** `poly ⟸ B` is independently valuable; the scaffold is real; and a refinement-only poly proof
+  (now that the depth probe shows B is crackable at `O(1)` depth) is cleaner than Route C's construction. Chosen with
+  eyes open that Route C is the fallback if 3c stalls.
 
 ---
 
 ## 9. Pointers
 
-- **★ FRESH READER — PICK UP HERE.** Read this STATUS + §1 (esp. the **KNOWN GAP** on `poly ⟺ B`) + §6 Increment 0.
-  **Increment 0's provable core + the transport seam (depth-1 `repTransport`, the `baseTransport` iterate, and the
-  `labelledAdj_rankPerm_transport` lift atom) are ✅ DONE** (`ScratchNodeCountBridge.lean`, axiom-clean). The seam's
-  **only remaining piece is the `samePartition`→literal-relabel bridge = `canonForm`** (lex-min over `DirAssignment`s,
-  a §15.7 placeholder) — building `canonForm` is the gating prerequisite, not a Route-B-specific task. So the live
-  Route-B math is now **Increment 3** (the wall kernel),
-  and land `IsotropicPairing` (in `ScratchWittCone.lean`, via the built `wittConeTransitive_of_pairing` +
-  `exists_hyperbolic_partner`) as a cheap base-case completion en route. All four Scratch modules compile
-  (`lake env lean`), axiom-clean, NOT in `build.sh`; oleans are built so imports check directly.
-- **Built modules:** `GraphCanonizationProofs/ChainDescent/ScratchSimilitudeCap.lean`,
-  `GraphCanonizationProofs/ChainDescent/ScratchOrbitBaseCase.lean`,
-  `GraphCanonizationProofs/ChainDescent/ScratchWittCone.lean`,
-  `GraphCanonizationProofs/ChainDescent/ScratchNodeCountBridge.lean` (all decls described in `PublicTheoremIndex.md`).
+- **★ FRESH READER — PICK UP HERE (2026-06-29 handoff).** Read this STATUS + §1 (esp. the **KNOWN GAP** on `poly ⟸ B`)
+  + **§6 Increment 3** (the wall: the plan table, the crackability probe, and the **DEPTH PROBE = GO**). State of play:
+  the whole structural scaffold is **built and axiom-clean** — the node-count bridge (Increment 0), the transport seam,
+  and the wall isolation (3a, `WallKernel`/`WallKernelFor`). The two probes (`GraphCanonizationProofs/wall_*.py`)
+  established the wall is **true, crackable, and `O(1)`-depth uniformly** — so it is the route's *live target*, not a
+  frontier. **THE LIVE TASK = Lean 3c proper:** prove `WallKernelFor Obs` (`ScratchWallKernel`) for `Obs` = the iterated
+  `χ(det G₂)` 2-WL, as a **bounded-depth (1–2 round) character inversion** — reuse `pairCharSum_factor_gen` /
+  `gaussSum_sq_ne_zero` / the `χ(det G₂)↔Z_u` bridge. Secondary: 3a-equivariance + 3b (count-observable bridge to
+  `ZProfileSeparates`). Loose ends (any time): `IsotropicPairing` (finishes W1), the `canonForm` seam lift (not
+  Route-B-specific). All five Scratch modules compile (`lake env lean`), axiom-clean, NOT in `build.sh`; oleans built so
+  imports check directly. **Verify before building on it:** `bash scripts/build.sh` (the seal/in-build infra) +
+  `lake env lean ChainDescent/ScratchWallKernel.lean` (the live module).
+- **Built modules** (all axiom-clean, NOT in `build.sh`; all decls described in `PublicTheoremIndex.md`):
+  `GraphCanonizationProofs/ChainDescent/ScratchSimilitudeCap.lean` (the cap),
+  `…/ScratchOrbitBaseCase.lean` (base case + delimiter + free prefix),
+  `…/ScratchWittCone.lean` (Witt W0+W1),
+  `…/ScratchNodeCountBridge.lean` (node-count bridge + transport seam),
+  `…/ScratchWallKernel.lean` (**the wall — `WallKernel`/`WallKernelFor`, the live 3c target**).
+- **Probe scripts (empirical, reproducible — durable in the repo, `python3 GraphCanonizationProofs/wall_*.py`):**
+  `wall_pair.py` / `wall_2wl.py` (the crack: iterated `χ(det G₂)` determines the orbit, 1-WL does not),
+  `wall_depth.py` / `wall_depth2.py` (the depth-probe = GO, `O(1)` determination depth uniformly). Methodology: compare
+  the refinement partition to the true `Stab(S)`-orbit (`φ_S` via Witt + the scaling-class delimiter for
+  totally-isotropic span); `CellsAreOrbits ⟺ refinement-partition = φ_S-partition`. (Pure Python, no deps; `d≤6`.)
 - **Existing machinery to reuse:** `PairForm` (`pairForm`, `detG2_eq_pairForm`), `PerAnchorBound`
   (`c0_le_threequarters`), `AffinePolarSeal` (`exists_pow_matching_block`, `reachesRigidOrCameron_affinePolar`),
   `ProfileReduction` (`ZProfileSeparates`, `jointIsoCount`), `Cascade` (`twinsRealizedByResidualAut_iff_cellsAreOrbits`,
