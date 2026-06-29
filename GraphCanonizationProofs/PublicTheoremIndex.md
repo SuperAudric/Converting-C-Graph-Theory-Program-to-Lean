@@ -2026,3 +2026,54 @@ line for poly is *coloring vs group* (Route C / `CellsAreOrbits`), not square-cl
 | `chi_pairForm_smul` | 90-92 | **The square class is a graph invariant (T2).** `χ(det G₂) = χ(pairForm)` is unchanged by scaling the form (`c²` killed by `χ`) — why the canonizer's pair observable is well-defined on the graph (= on the scaling class of `Q`). | — |
 | `chi_singleton_smul` | 97-99 | **The singleton square class is NOT a graph invariant (T3a).** `χ((c•Q) a) = χ(c)·χ(Q a)` flips by `χ(c)` — the formal proof of the empirical "singleton `Z_u({t})` is binary" finding (only the `χ(c)`-invariant fact `Q=0` survives). | — |
 | `pairForm_value_not_invariant` | 104-106 | **The exact value is NOT a graph invariant (T3b).** The exact pair value scales by `c²`, so presentations `Q`, `c•Q` of the *same graph* disagree on it whenever `c² ≠ 1` — no isomorphism-invariant procedure (refinement of any dimension, or Route C) recovers the exact form value, only its square class. | — |
+
+## ChainDescent/ScratchOrbitBaseCase.lean
+
+**CellsAreOrbits route, increment 1 + 2 (2026-06-29), NOT in `build.sh`.** The base case of the `CellsAreOrbits`
+induction (the open core of the forms-graph poly route) + the multiplier-rigidity delimiter + the free-prefix orbit
+coarsening. Models affine-polar automorphisms as `Similitude Q` (`g : V ≃ₗ V`, `μ ≠ 0`, `Q∘g = μ·Q`). Axiom-clean
+`[propext, Classical.choice, Quot.sound]`, pure geometry (no `Fintype`). Builds on `PairForm`. See
+`docs/chain-descent-cellsareorbits-route.md`.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `Similitude` | 44-48 | A similitude of `Q`: a linear equiv `g` with `Q (g x) = mult · Q x`, `mult ≠ 0`. An isometry is `mult = 1`. | Structure |
+| `affinePolar_empty_base_one_orbit` | 52-53 | **Depth 0** — the whole vertex set is one orbit (translations): `∀ v w, ∃ t, v + t = w`. `CellsAreOrbits` at `S = ∅`, free. | — |
+| `mult_eq_one_of_fixes_anisotropic` | 58-63 | **The delimiter.** A similitude fixing an anisotropic vector (`Q v ≠ 0`) has `mult = 1`. Once an anisotropic vector is pinned, residual similitudes are isometries. | — |
+| `mult_eq_one_of_fixes_span_anisotropic` | 68-77 | Delimiter, span form: fixing a set whose span contains an anisotropic vector forces `mult = 1` — so multiplier freedom in `Stab(S)` requires `span S` totally isotropic. | — |
+| `WittConeTransitive` | 81-83 | **Isolated Witt input**: isometries act transitively on nonzero isotropic vectors. Discharged (mod the residual) in `ScratchWittCone`. | Definition |
+| `neighborSphere_zero_eq_isotropic` | 87-88 | The graph-neighbours of `0` are exactly the nonzero isotropic vectors (`Q(v−0)=0 ⟺ Q v = 0`). | — |
+| `depth1_isotropic_sphere_one_orbit` | 93-97 | **Depth 1** — the isotropic neighbour sphere is one isometry-orbit, given `WittConeTransitive`. The second base rung. | — |
+| `scalarEquiv` / `scalarEquiv_apply` | 109-119 | The scalar automorphism `x ↦ l • x` (`l ≠ 0`) as a linear equiv, and its apply lemma. | Def / `@[simp]` |
+| `scalarSimilitude` | 121-126 | The scalar similitude `x ↦ l • x`, multiplier `l²`, fixing the origin — realizes every square multiplier in `Stab(0)` with no Witt input. | Definition |
+| `StabOrbit` | 128-129 | The `Stab(S)`-orbit relation: `w'` reachable from `w` by a similitude fixing `S` pointwise. | Definition |
+| `stabOrbit_preserves_norm_of_anisotropic_base` | 136-147 | **Wall side (orbit level).** At an anisotropic base, every `Stab(S)`-orbit preserves the exact norm `Q` (`mult = 1`) — orbits are norm-fine, strictly finer than square-class cells. The open core located at the orbit level. | — |
+| `stabOrbit_zero_base_scales` | 149-168 | **Free side at the origin (no Witt).** `l • w` is in the `Stab({0})`-orbit of `w` with `Q(l•w) = l²·Q w` — origin-base orbits are square-class-coarse, matching refinement. | — |
+| `TotallyIsotropic` | 170-171 | A base `S` is totally isotropic when `Q` vanishes on `span S`. | Definition |
+| `MultiplierRealizable` | 175-179 | `Stab(S)` realizes every nonzero multiplier (the multiplier freedom the free prefix runs on). | Definition |
+| `WittRealizes` | 181-183 | **Carried Witt-decomposition input (W-dec)**: over every totally-isotropic base, all multipliers are realizable. | Definition |
+| `stabOrbit_realizable_base_scales` | 189-198 | **Increment 2** — free-prefix orbit coarsening: given `MultiplierRealizable Q S`, the `Stab(S)`-orbit of `w` reaches norm `μ·Q w` for every `μ ≠ 0`. | — |
+| `not_multiplierRealizable_of_anisotropic` | 200-210 | The delimiter at predicate level: `MultiplierRealizable Q S` fails once `S` carries an anisotropic vector (with a `μ ≠ 0, 1` witness). The free/​wall boundary. | — |
+| `stabOrbit_totallyIsotropic_scales` | 212-216 | **Increment 2 capstone** — free-prefix orbit coarsening over any totally-isotropic base, modulo the carried `WittRealizes`. | — |
+
+## ChainDescent/ScratchWittCone.lean
+
+**Witt build, stages W0 + W1 (2026-06-29), NOT in `build.sh`.** Discharges the `WittConeTransitive` input of
+`ScratchOrbitBaseCase` down to a concrete residual. W0 = the orthogonal-reflection engine; W1 = cone-transitivity
+reduced to `IsotropicPairing`. Axiom-clean `[propext, Classical.choice, Quot.sound]`. Imports `ScratchOrbitBaseCase`
+(for `Similitude`/`WittConeTransitive`) + `Mathlib.LinearAlgebra.Reflection`. See `docs/chain-descent-cellsareorbits-route.md` §7.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `reflFunc` / `reflFunc_apply` | 27-34 | The reflection functional `y ↦ polar Q y v / Q v` (the `f` of `Module.reflection`) and its apply lemma. | Def `noncomputable` |
+| `reflFunc_self` | 36-40 | `reflFunc Q v v = 2` (the `Module.reflection` hypothesis), for `Q v ≠ 0`. | — |
+| `refl` | 42-44 | The orthogonal reflection `τ_v : y ↦ y − (polar Q y v / Q v) • v` as a linear equiv (via `Module.reflection`). | Def `noncomputable` |
+| `map_sub'` | 46-51 | The quadratic-difference expansion `Q (a − b) = Q a − polar Q a b + Q b`. | — |
+| `refl_isometry` | 54-63 | **W0** — the reflection is an isometry: `Q (τ_v y) = Q y` (needs only `Q v ≠ 0`). | — |
+| `reflSim` | 65-71 | **W0** — the reflection packaged as a `Similitude` (multiplier 1). | Def `noncomputable` |
+| `refl_swap` | 73-81 | **W0** — `Q u = Q v ∧ Q(u−v) ≠ 0 ⟹ τ_{u−v}(u) = v`. For isotropic `u,v` this is the `polar ≠ 0` case. | — |
+| `simComp` | 83-90 | Composition of similitudes (multipliers multiply); chains two reflections. | Def `noncomputable` |
+| `cone_case_polar_ne` | 92-100 | **W1, `polar ≠ 0` case** — two nonzero isotropic vectors with `polar Q u u' ≠ 0` are related by one reflection. | — |
+| `exists_hyperbolic_partner` | 102-119 | **The partner lemma** — a nonzero isotropic vector has an isotropic partner `f` with `polar Q u f = 1` (from nondegeneracy `hnd`). The key tool for the residual. | — |
+| `IsotropicPairing` | 121-126 | **The residual** of W1: for any two nonzero isotropic `u, u'`, an isotropic `w` non-orthogonal to both. A concrete vector-existence statement; the only remaining content of `WittConeTransitive`. | Definition |
+| `wittConeTransitive_of_pairing` | 128-148 | **W1 — the reduction.** `IsotropicPairing Q ⟹ WittConeTransitive Q` (the `polar≠0` case via `cone_case_polar_ne`; the `polar=0` case via two reflections through the pairing vector, composed by `simComp`). | — |

@@ -10,6 +10,13 @@
 >
 > Provenance: the viability investigation (`project_formsgraph_wldim_viability_2026-06-28`), the similitude cap +
 > base-case build (this session, 2026-06-29), the Route-A finding (`twinsRealizedByResidualAut_iff_cellsAreOrbits`).
+>
+> **⚠ Naming note (avoid confusion).** "B" here is the *proposition* `CellsAreOrbits` (= bounded WL-dim). This doc's
+> "Route B = prove poly **through** B" is the **refinement route**, which corresponds to the forms-graph plan's
+> (`chain-descent-formsgraph-wldim-plan.md`) **Route A** ("prove the existing harvest poly") and its **Route B**
+> ("monovariant node-count wrapper") — both rest on proving `CellsAreOrbits`. It is **unrelated** to START-HERE's
+> "Route B" (the *superseded imprimitive branch*). This doc's **Route C** (constructive form recovery) **is the same**
+> as the plan's Route C. When in doubt, refer to the *content* (`CellsAreOrbits` vs form-recovery), not the letter.
 
 ---
 
@@ -248,8 +255,15 @@ are defensible to keep as `modulo {Witt}` tech debt until the open core is under
 
 ## 9. Pointers
 
+- **★ FRESH READER — PICK UP HERE.** Read this STATUS + §4 (what B needs) + §7.4 (the Witt build state). The **single
+  immediate task** is: discharge `IsotropicPairing` (in `ScratchWittCone.lean`) — a concrete finite-field
+  vector-existence lemma — which, via the already-built `wittConeTransitive_of_pairing`, makes the depth-1 base case
+  unconditional. Tool in hand: `exists_hyperbolic_partner`. After that: Increment 3 (the wall, §6) is the open research.
+  All three Scratch modules compile (`lake env lean`), axiom-clean, NOT in `build.sh`; their oleans are built so
+  `ScratchWittCone` (which imports `ScratchOrbitBaseCase`) checks directly.
 - **Built modules:** `GraphCanonizationProofs/ChainDescent/ScratchSimilitudeCap.lean`,
-  `GraphCanonizationProofs/ChainDescent/ScratchOrbitBaseCase.lean` (decls described in `PublicTheoremIndex.md`).
+  `GraphCanonizationProofs/ChainDescent/ScratchOrbitBaseCase.lean`,
+  `GraphCanonizationProofs/ChainDescent/ScratchWittCone.lean` (all decls described in `PublicTheoremIndex.md`).
 - **Existing machinery to reuse:** `PairForm` (`pairForm`, `detG2_eq_pairForm`), `PerAnchorBound`
   (`c0_le_threequarters`), `AffinePolarSeal` (`exists_pow_matching_block`, `reachesRigidOrCameron_affinePolar`),
   `ProfileReduction` (`ZProfileSeparates`, `jointIsoCount`), `Cascade` (`twinsRealizedByResidualAut_iff_cellsAreOrbits`,
