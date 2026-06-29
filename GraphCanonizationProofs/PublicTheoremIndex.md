@@ -2077,3 +2077,24 @@ reduced to `IsotropicPairing`. Axiom-clean `[propext, Classical.choice, Quot.sou
 | `exists_hyperbolic_partner` | 102-119 | **The partner lemma** — a nonzero isotropic vector has an isotropic partner `f` with `polar Q u f = 1` (from nondegeneracy `hnd`). The key tool for the residual. | — |
 | `IsotropicPairing` | 121-126 | **The residual** of W1: for any two nonzero isotropic `u, u'`, an isotropic `w` non-orthogonal to both. A concrete vector-existence statement; the only remaining content of `WittConeTransitive`. | Definition |
 | `wittConeTransitive_of_pairing` | 128-148 | **W1 — the reduction.** `IsotropicPairing Q ⟹ WittConeTransitive Q` (the `polar≠0` case via `cone_case_polar_ne`; the `polar=0` case via two reflections through the pairing vector, composed by `simComp`). | — |
+
+## ChainDescent/ScratchNodeCountBridge.lean
+
+**Increment 0 — the node-count bridge (2026-06-29), NOT in `build.sh`.** The CellsAreOrbits route's poly *payoff*
+mechanism: the single-path disposition delivers the two poly ingredients (bounded node count + every consumed cell one
+residual orbit). Grounding finding — three of four ingredients were already landed (node-count `≤ n`, prune soundness,
+per-node firing); this module adds the missing one, prune *completeness*. Keyed on the *weaker* `SelectedCellIsOrbit`
+(scheduler-matching), discharged by full `CellsAreOrbits`. Axiom-clean `[propext, Classical.choice, Quot.sound]`.
+Imports `ChainDescent.Cascade`. Residual = the `canonAdj`-transport seam. See `docs/chain-descent-cellsareorbits-route.md` §6.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `SelectedCellIsOrbit` | 46-54 | **0a** — `CellsAreOrbits` restricted to `sel`'s targeted cell: same-coloured vertices of the *consumed* cell are `Stab(S)`-orbit-equivalent. Strictly weaker than full `CellsAreOrbits`; matches the scheduler. | Definition |
+| `selectedCellIsOrbit_of_cellsAreOrbits` | 64-66 | **0b** — full `CellsAreOrbits S ⟹ SelectedCellIsOrbit`. The §4 forms-graph math (modulo Witt + the wall) discharges the bridge hypothesis for free. | — |
+| `selectedCell_single_stabOrbit` | 76-86 | **0c — prune completeness (the missing pillar).** Under `SelectedCellIsOrbit`, two same-cell vertices lie in one `StabilizerAt`-orbit (the consumed cell is *one* orbit ⟹ one sibling-class). The direction prune *soundness* (`covered_sound`) does not give. Via `mem_orbit_stabilizerAt_iff`. | — |
+| `selectedCell_prune_sound_complete` | 91-99 | The two reps are *mutually* `OrbitPartition` — dropping either is sound (isomorphic) and complete (no class lost). Turns "fork over reps" into "descend on one". | — |
+| `spine_node_count_le` | 108-112 | **Node count `≤ n`** — re-export of the landed `defaultSpineChain_reaches_leaf` (single path reaches a discrete leaf in `≤ n` levels). Step (3) is free — NOT `exists_potential_descent` (that bounds *base size*, the quasipoly engine). | — |
+| `SinglePathDisposition` | 120-122 | The bridge-keyed hypothesis: `∀ S, SelectedCellIsOrbit … S` (every consumed cell one orbit). Structural form of the empirical `Phase2Nodes = 0`. Weaker than `∀ S, CellsAreOrbits`. | Definition |
+| `singlePathDisposition_of_cellsAreOrbits` | 125-128 | The forms-graph math (full `CellsAreOrbits` at every base) discharges the disposition. | — |
+| `CertifiedSinglePath` | 137-145 | The two poly ingredients bundled: `boundedNodes` (`≤ n`) + `cellsCertified` (every consumed cell one residual orbit). The structural object the **meta** poly-argument reads "poly time" off. | Structure |
+| `certifiedSinglePath_of_disposition` | 152-159 | **★ The bridge capstone (Increment 0).** `SinglePathDisposition ⟹ CertifiedSinglePath` — both poly ingredients discharged from the disposition. Residual to a poly seal = the `canonAdj`-transport seam (rep-choice invariance; meta-consumed). | — |

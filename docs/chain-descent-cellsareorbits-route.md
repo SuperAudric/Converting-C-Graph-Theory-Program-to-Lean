@@ -39,12 +39,23 @@ yet — it is open both ways (the forms graph may or may not have bounded WL-dim
   `polar ≠ 0` case `cone_case_polar_ne`, the hyperbolic-partner lemma `exists_hyperbolic_partner`, and the **reduction**
   `wittConeTransitive_of_pairing` — `WittConeTransitive Q` now follows from the concrete residual `IsotropicPairing Q`
   (existence of an isotropic vector non-orthogonal to two given isotropic vectors).
+- `ChainDescent/ScratchNodeCountBridge.lean` — **★ Increment 0, the node-count bridge (provable core LANDED)**: the
+  weaker scheduler-matching predicate `SelectedCellIsOrbit` + `selectedCellIsOrbit_of_cellsAreOrbits` (the §4 math
+  discharges it for free); the **completeness core** `selectedCell_single_stabOrbit` (consumed cell = one
+  `StabilizerAt`-orbit — the piece prune *soundness* alone does not give) + `selectedCell_prune_sound_complete`; the
+  node-count re-export `spine_node_count_le` (`≤ n`, from the landed `defaultSpineChain_reaches_leaf`); and the capstone
+  `certifiedSinglePath_of_disposition` — the disposition delivers **both** poly ingredients (bounded nodes + every
+  consumed cell certified one orbit). Residual = the `canonAdj`-transport seam (§6 Increment 0).
 
 **Next (re-prioritised after handoff review).** The reviewer correctly flagged that `poly ⟺ B` is a design slogan,
 not the Lean — the **node-count bridge is the route's missing pillar** (see §1 KNOWN GAP + §6 Increment 0). Order:
-1. **★ Increment 0 — node-count bridge** (HIGHEST; Witt/wall-independent; *validates the premise*). 2. **Increment 3**
-— state the wall kernel precisely (the open math). 3. **finish W1** — discharge `IsotropicPairing` (cheap base-case
-completion; low-leverage — land en route, not as the payoff). See §6/§7.
+1. **★ Increment 0 — node-count bridge** — **provable core ✅ DONE** (`ScratchNodeCountBridge`, axiom-clean):
+grounding showed the bridge is mostly *assembly* over a near-complete substrate (node-count `≤ n`, prune soundness,
+per-node firing all LANDED); the genuinely-new content — prune *completeness* (`selectedCell_single_stabOrbit`) — is
+built, and the capstone discharges both poly ingredients. **Remaining = the `canonAdj`-transport seam** (rep-choice
+invariance of the leaf canonical; the meta poly-argument consumes it). 2. **Increment 3** — state the wall kernel
+precisely (the open math). 3. **finish W1** — discharge `IsotropicPairing` (cheap base-case completion; low-leverage —
+land en route, not as the payoff). See §6/§7.
 
 **Quality bar:** axiom-clean, no `sorry`/no fresh `axiom`, `native_decide` banned, full build green when ported.
 
@@ -172,23 +183,43 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
 
 ## 6. Work-forward plan (ordered increments)
 
-- **★ Increment 0 — the node-count bridge (NEW, HIGHEST PRIORITY; Witt- and wall-independent).** The route's
-  actually-missing pillar (§1 KNOWN GAP). Build the structural reduction **`SinglePathDisposition ⟹ poly node count`**,
-  then key a **poly-seal capstone** on it. Three notes that determine how to build it:
-  - **Substrate (it's partly scoped already):** `spine_branch_independent` (descent-spine invariants, top-level
-    `ChainDescent.lean`) + `exists_potential_descent` (the monovariant = bounded descent steps). The
-    forms-graph-plan's *"Route B — potential/monovariant node-count bound (reuse `exists_potential_descent`)"* **is this
-    bridge under another name** — flagged there, never built or connected to `CellsAreOrbits`.
-  - **Key it on the WEAKER predicate, not full `CellsAreOrbits`.** The canonizer uses deferral (`EnableDeferral`);
-    empirically `Phase2Nodes = 0`. Poly needs only: *at each base a single-orbit (symmetric) cell is consumable, and
-    consuming them reaches a discrete base with no Phase-2 (real-decision) node* — the **single-path disposition**.
-    Full `CellsAreOrbits`-at-every-cell is *sufficient* but over-strong (the plan's "Route A sharpening" noted this).
-  - **Honest ceiling:** even with the bridge, final "poly time" stays **meta** (no runtime model is formalized). The
-    bridge produces the *structural* single-path claim the meta-argument consumes — which `SeparatesAtBoundedBase`
-    (quasipoly) does **not**. Do not aim for a runtime-complexity theorem; that is not how this project's seals work.
-  - **Why first:** the base is irreducibly `Θ(log n)`, so this is the *only* path to beat quasipoly. If it cannot even
-    be *expressed* in the spine model, that is decisive — Route B then has no poly distinct from the banked quasipoly,
-    and that finding is worth more than any further Witt/wall work.
+- **★ Increment 0 — the node-count bridge — PROVABLE CORE ✅ DONE (`ScratchNodeCountBridge.lean`, axiom-clean).** The
+  route's actually-missing pillar (§1 KNOWN GAP), Witt- and wall-independent. **Grounding finding: the bridge is mostly
+  *assembly* over a near-complete substrate** — three of its four ingredients are already landed, so the doc's earlier
+  "build a node-count bridge" framing overstated what was missing:
+
+  | Bridge ingredient | Status |
+  |---|---|
+  | node count `≤ n` (single path reaches a discrete leaf in `≤ n` levels) | **LANDED** — `defaultSpineChain_reaches_leaf` (`ChainDescent.lean`) |
+  | canonical well-defined / direction-invariant | **LANDED** — `spine_branch_independent` + `IsLeaf` spine-invariance |
+  | prune *soundness* (drop an orbit-equivalent sibling) | **LANDED** — `orbit_pathFixing_sound` / `covered_sound` (`Cascade.lean`) |
+  | per-node firing (CellsAreOrbits ⟹ harvest cert) | **LANDED** — `colourMatch_exists_of_cellsAreOrbits` (`CascadeOracle.lean`) |
+  | prune *completeness* (consumed cell = one orbit ⟹ one sibling-class) | **✅ BUILT this increment** — `selectedCell_single_stabOrbit` |
+
+  - **CORRECTION — do NOT reuse `exists_potential_descent`.** That monovariant bounds the base *size* to `2^|T₀| ≤
+    Φ(∅)`, i.e. `O(log n)` — it is the **quasipoly-*base* engine** (what the banked seal carries). Node *count* is a
+    different quantity and is already `≤ n` for free (`defaultSpineChain_reaches_leaf`), independent of base size.
+    Conflating the two would re-derive quasipoly. (Supersedes the plan's *"Route B — reuse `exists_potential_descent`"*
+    framing for this purpose.)
+  - **CORRECTION — the missing pillar is prune *completeness*, not node-count.** Soundness ("the dropped sibling was
+    isomorphic") was landed; what `SelectedCellIsOrbit` adds is *completeness* — the consumed cell is a *single* orbit,
+    so there is exactly one sibling-class and the cheap single path branches not at all. Built: `selectedCell_single_stabOrbit`.
+  - **Keyed on the WEAKER predicate, as planned.** `SelectedCellIsOrbit` = `CellsAreOrbits` restricted to `sel`'s
+    targeted cell (the scheduler only individualizes there; empirically `Phase2Nodes = 0`). The §4 math (full
+    `CellsAreOrbits`, modulo Witt + the wall) discharges it for free (`selectedCellIsOrbit_of_cellsAreOrbits`).
+  - **Capstone built:** `certifiedSinglePath_of_disposition` — `SinglePathDisposition` (the weak disposition at every
+    base) delivers **both** poly ingredients: bounded nodes (`≤ n`) **and** every consumed cell certified one residual
+    orbit. Packaged as `CertifiedSinglePath`.
+  - **★ REMAINING (Increment-0 residual) = the `canonAdj`-transport seam.** That a `CertifiedSinglePath` actually
+    *computes the iso-invariant lex-min canonical* — representative-choice invariance of the leaf `canonAdj` over
+    certified single-orbit cells — is the one piece NOT built (it needs `canonAdj`-level plumbing). It is the
+    *structural* claim the **meta** poly-argument consumes; final "poly time" stays meta (no runtime model is
+    formalized — do not aim for a runtime-complexity theorem). Next sub-step: define this transport predicate over the
+    spine model and reduce it onto `spine_branch_independent` (direction-invariance already done; rep-choice invariance
+    is the analogue to add).
+  - **Why this was first:** the base is irreducibly `Θ(log n)`, so this is the *only* path to beat quasipoly. The
+    grounding answered the "can it even be expressed?" question affirmatively — the substrate carries it — so Route B's
+    poly is *not* a priori collapsed into the banked quasipoly; the live obligation is the transport seam + the §4 math.
 - **Increment 2 — general free prefix, modulo Witt — ✅ DONE (2026-06-29, axiom-clean, `ScratchOrbitBaseCase.lean`).**
   Generalised `stabOrbit_zero_base_scales` from `S = {0}` to any totally-isotropic base via the carried predicate
   `WittRealizes Q` (= the §7 **W-dec** input: multiplier-`μ` similitudes fixing a totally-isotropic subspace exist).
@@ -210,12 +241,14 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
   base case unconditional.
 
 **Definition of done for Route B** (three pieces, not one):
-1. **node-count bridge** (Increment 0) — a structural theorem `SinglePathDisposition ⟹ poly node count`, keyed on a
-   NEW predicate (single-path / per-step-consumable-single-orbit-cell) that is **weaker than full `CellsAreOrbits`** and
-   is **NOT** `SeparatesAtBoundedBase` (that is the quasipoly seal);
-2. **the math** — `CellsAreOrbits` (`modulo {Witt}`) discharging that predicate for the affine-polar residue (via
-   `twinsRealizedByResidualAut_iff_cellsAreOrbits` assembled across nodes);
-3. **the capstone** — a poly-seal keyed on (1)'s predicate, the poly twin of `reachesRigidOrCameron_affinePolar`.
+1. **node-count bridge** (Increment 0) — keyed on `SelectedCellIsOrbit` (weaker than full `CellsAreOrbits`, **NOT**
+   `SeparatesAtBoundedBase`). **Provable core ✅ DONE** (`ScratchNodeCountBridge.lean`): `certifiedSinglePath_of_disposition`
+   gives bounded nodes (`≤ n`) + every consumed cell one orbit. **Residual = the `canonAdj`-transport seam** (rep-choice
+   invariance of the leaf canonical; meta-consumed).
+2. **the math** — `CellsAreOrbits` (`modulo {Witt}`) discharging the disposition for the affine-polar residue (via
+   `selectedCellIsOrbit_of_cellsAreOrbits` + `twinsRealizedByResidualAut_iff_cellsAreOrbits`). [OPEN — Increment 3 + Witt.]
+3. **the capstone** — a poly-seal keyed on `SinglePathDisposition`, the poly twin of `reachesRigidOrCameron_affinePolar`
+   (assembled from 1's `CertifiedSinglePath` + the transport seam + 2's math).
 
 NB final "poly time" remains a meta-argument over (3); (1) supplies the structural single-path claim the meta-argument
 needs and the quasipoly seal lacks. **Build order: (1) first** — it validates the whole premise and is independent of
@@ -298,15 +331,16 @@ are defensible to keep as `modulo {Witt}` tech debt until the open core is under
 ## 9. Pointers
 
 - **★ FRESH READER — PICK UP HERE.** Read this STATUS + §1 (esp. the **KNOWN GAP** on `poly ⟺ B`) + §6 Increment 0.
-  The **priority task** is **Increment 0 — the node-count bridge** (§6): it is the route's missing pillar and is
-  independent of Witt and the wall; building it (or finding it can't be expressed) is the decisive next step. Then
-  pin Increment 3 (the wall kernel), and land `IsotropicPairing` (in `ScratchWittCone.lean`, via the built
-  `wittConeTransitive_of_pairing` + `exists_hyperbolic_partner`) as a cheap base-case completion en route. All three
-  Scratch modules compile (`lake env lean`), axiom-clean, NOT in `build.sh`; oleans are built so `ScratchWittCone`
-  (which imports `ScratchOrbitBaseCase`) checks directly.
+  **Increment 0's provable core is ✅ DONE** (`ScratchNodeCountBridge.lean`, axiom-clean). The **priority task** is now
+  its residual — the **`canonAdj`-transport seam** (§6 Increment 0: rep-choice invariance of the leaf canonical, the
+  analogue of the landed `spine_branch_independent` direction-invariance). Then pin **Increment 3** (the wall kernel),
+  and land `IsotropicPairing` (in `ScratchWittCone.lean`, via the built `wittConeTransitive_of_pairing` +
+  `exists_hyperbolic_partner`) as a cheap base-case completion en route. All four Scratch modules compile
+  (`lake env lean`), axiom-clean, NOT in `build.sh`; oleans are built so imports check directly.
 - **Built modules:** `GraphCanonizationProofs/ChainDescent/ScratchSimilitudeCap.lean`,
   `GraphCanonizationProofs/ChainDescent/ScratchOrbitBaseCase.lean`,
-  `GraphCanonizationProofs/ChainDescent/ScratchWittCone.lean` (all decls described in `PublicTheoremIndex.md`).
+  `GraphCanonizationProofs/ChainDescent/ScratchWittCone.lean`,
+  `GraphCanonizationProofs/ChainDescent/ScratchNodeCountBridge.lean` (all decls described in `PublicTheoremIndex.md`).
 - **Existing machinery to reuse:** `PairForm` (`pairForm`, `detG2_eq_pairForm`), `PerAnchorBound`
   (`c0_le_threequarters`), `AffinePolarSeal` (`exists_pow_matching_block`, `reachesRigidOrCameron_affinePolar`),
   `ProfileReduction` (`ZProfileSeparates`, `jointIsoCount`), `Cascade` (`twinsRealizedByResidualAut_iff_cellsAreOrbits`,
