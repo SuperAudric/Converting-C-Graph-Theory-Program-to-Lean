@@ -156,4 +156,62 @@ theorem stabOrbit_zero_base_scales {Q : QuadraticForm K V} (l : K) (hl : l ≠ 0
   · simp [scalarSimilitude]
   · rw [QuadraticMap.map_smul, smul_eq_mul]
 
+/-! ## Increment 2 — the general free prefix (modulo Witt-decomposition realizability)
+
+The origin-base coarsening (`stabOrbit_zero_base_scales`) used scalars, which only fix `0` and only reach **square**
+multipliers. For a general totally-isotropic base `S` the multiplier-`μ` similitudes fixing `S` (for *every* `μ`) are
+supplied by the **Witt decomposition** `V = (W ⊕ W') ⊥ U` (Mathlib-absent, the other agent's build) — carried here as
+the predicate `WittRealizes Q`. Given it, `Stab(S)`-orbits over a totally-isotropic base are multiplier-coarse (they
+reach every norm `μ·Q w`), which is the orbit half of `CellsAreOrbits` for the free prefix; and the delimiter
+(`not_multiplierRealizable_of_anisotropic`) shows realizability can hold **only** off the anisotropic vectors — the
+precise boundary where the prefix ends and the wall begins. -/
+
+/-- A base `S` is **totally isotropic** when `Q` vanishes on its whole span. -/
+def TotallyIsotropic (Q : QuadraticForm K V) (S : Set V) : Prop :=
+  ∀ x ∈ Submodule.span K S, Q x = 0
+
+/-- `Stab(S)` **realizes every nonzero multiplier**: for each `μ ≠ 0` some similitude fixes `S` pointwise with that
+multiplier. This is the multiplier-freedom the free prefix runs on. -/
+def MultiplierRealizable (Q : QuadraticForm K V) (S : Set V) : Prop :=
+  ∀ μ : K, μ ≠ 0 → ∃ g : Similitude Q, (∀ s ∈ S, g.toLinearEquiv s = s) ∧ g.mult = μ
+
+/-- **The carried Witt-decomposition theorem (tech debt).** Over every totally-isotropic base, all multipliers are
+realizable — the content of the Witt decomposition `V = (W ⊕ W') ⊥ U` (Mathlib-absent). Carried as a named hypothesis;
+the parallel Witt build discharges it. The whole free prefix consumes exactly this. -/
+def WittRealizes (Q : QuadraticForm K V) : Prop :=
+  ∀ S : Set V, TotallyIsotropic Q S → MultiplierRealizable Q S
+
+/-- **Increment 2 — free-prefix orbit coarsening (general base, modulo realizability).** Generalises
+`stabOrbit_zero_base_scales` from `{0}` to any base with `MultiplierRealizable Q S`: the `Stab(S)`-orbit of `w` reaches a
+vector of norm `μ·Q w` for **every** `μ ≠ 0`. So in the free prefix orbits cannot see the exact norm (nor its square
+class), matching the totally-isotropic refinement (where `χ(det G₂)` is constant). The orbit half of `CellsAreOrbits`
+for the prefix. -/
+theorem stabOrbit_realizable_base_scales {Q : QuadraticForm K V} {S : Set V}
+    (hR : MultiplierRealizable Q S) (w : V) {μ : K} (hμ : μ ≠ 0) :
+    ∃ w', StabOrbit Q S w w' ∧ Q w' = μ * Q w := by
+  obtain ⟨g, hfix, hmult⟩ := hR μ hμ
+  refine ⟨g.toLinearEquiv w, ⟨g, hfix, rfl⟩, ?_⟩
+  rw [g.map w, hmult]
+
+/-- **The delimiter at the predicate level.** `MultiplierRealizable Q S` can hold only when `S` carries no anisotropic
+vector: an anisotropic `a ∈ S` forces every `Stab(S)` multiplier to `1` (`mult_eq_one_of_fixes_anisotropic`), so any
+realizable `μ ≠ 1` is impossible. (Caller supplies a witness `μ ≠ 0, 1`, available whenever `|K| ≥ 3` — always, for the
+odd-`q` residue.) This is the precise boundary between the free prefix and the wall. -/
+theorem not_multiplierRealizable_of_anisotropic {Q : QuadraticForm K V} {S : Set V} {a : V}
+    (haS : a ∈ S) (ha : Q a ≠ 0) {μ : K} (hμ0 : μ ≠ 0) (hμ1 : μ ≠ 1)
+    (hR : MultiplierRealizable Q S) : False := by
+  obtain ⟨g, hfix, hmult⟩ := hR μ hμ0
+  have h1 : g.mult = 1 := mult_eq_one_of_fixes_anisotropic g ha (hfix a haS)
+  rw [hmult] at h1
+  exact hμ1 h1
+
+/-- **Increment 2 capstone — free-prefix orbit coarsening, modulo the carried Witt input.** Given the
+Witt-decomposition input `WittRealizes Q`, at any **totally-isotropic** base `S` the `Stab(S)`-orbit of `w` reaches
+every norm `μ·Q w`. This is `CellsAreOrbits`' orbit half for the entire free prefix, conditional only on the carried
+Witt-decomposition theorem (`modulo {Witt}`). -/
+theorem stabOrbit_totallyIsotropic_scales {Q : QuadraticForm K V} (hW : WittRealizes Q)
+    {S : Set V} (hS : TotallyIsotropic Q S) (w : V) {μ : K} (hμ : μ ≠ 0) :
+    ∃ w', StabOrbit Q S w w' ∧ Q w' = μ * Q w :=
+  stabOrbit_realizable_base_scales (hW S hS) w hμ
+
 end ChainDescent.OrbitBaseCase

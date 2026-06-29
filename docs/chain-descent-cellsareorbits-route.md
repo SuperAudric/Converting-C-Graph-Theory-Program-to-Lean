@@ -22,11 +22,14 @@ yet — it is open both ways (the forms graph may or may not have bounded WL-dim
 **Built (axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`):**
 - `ChainDescent/ScratchSimilitudeCap.lean` — **the cap**: the graph determines `Q` only up to scaling, so refinement
   is capped at the **square class** (`χ(det G₂)` invariant; exact value and singleton square-class are *not*).
-- `ChainDescent/ScratchOrbitBaseCase.lean` — **base case + delimiter**: empty base (translation-transitive),
-  depth-1 isotropic sphere (modulo the isolated `WittConeTransitive`), the multiplier-rigidity delimiter, and the
-  origin-base orbit-level delimiter (scalar realization + wall-side norm preservation).
+- `ChainDescent/ScratchOrbitBaseCase.lean` — **base case + delimiter + free prefix (Increment 2)**: empty base
+  (translation-transitive), depth-1 isotropic sphere (modulo the isolated `WittConeTransitive`), the multiplier-rigidity
+  delimiter, the origin-base orbit delimiter (scalar realization + wall-side norm preservation), and **Increment 2** —
+  the general free-prefix orbit coarsening over any totally-isotropic base modulo the carried `WittRealizes` (= W-dec)
+  predicate, with `not_multiplierRealizable_of_anisotropic` pinning the predicate to the free regime.
 
-**Next:** Increment 2 (general free prefix, modulo Witt) → Increment 3 (the wall). See §6.
+**Next:** Increment 3 (the wall) — the genuine open kernel; Witt build (W-cone/W-ext/W-dec) in flight on a parallel
+agent (see §7). See §6.
 
 **Quality bar:** axiom-clean, no `sorry`/no fresh `axiom`, `native_decide` banned, full build green when ported.
 
@@ -140,11 +143,16 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
 
 ## 6. Work-forward plan (ordered increments)
 
-- **Increment 2 — general free prefix, modulo Witt.** Extend `stabOrbit_zero_base_scales` from `S = {0}` to any `S`
-  with `span S` totally isotropic. Define a `WittDecomposition`/`MultiplierRealizable` predicate (multiplier-`μ`
-  similitudes fixing a totally isotropic subspace exist) and prove the step free in that regime. The construction of
-  those similitudes is the Witt-decomposition tech debt; carry it as the predicate. **Outcome:** the free prefix is
-  `CellsAreOrbits`-proved `modulo {Witt}`.
+- **Increment 2 — general free prefix, modulo Witt — ✅ DONE (2026-06-29, axiom-clean, `ScratchOrbitBaseCase.lean`).**
+  Generalised `stabOrbit_zero_base_scales` from `S = {0}` to any totally-isotropic base via the carried predicate
+  `WittRealizes Q` (= the §7 **W-dec** input: multiplier-`μ` similitudes fixing a totally-isotropic subspace exist).
+  Landed: `TotallyIsotropic`, `MultiplierRealizable`, `WittRealizes` (defs); `stabOrbit_realizable_base_scales` (orbit
+  reaches every norm `μ·Q w` from realizability); `stabOrbit_totallyIsotropic_scales` (the capstone, `modulo {W-dec}`);
+  and `not_multiplierRealizable_of_anisotropic` (the predicate-level delimiter — realizability fails the instant `S`
+  carries an anisotropic vector). **Outcome:** the free prefix's *orbit half* of `CellsAreOrbits` is proved
+  `modulo {W-dec}`. (Its *cell half* — same refinement profile ⟹ same orbit — additionally needs **W-ext**; that
+  wiring is folded into Increment 3's frame, since it is the same square-class→exact-Gram statement specialised to the
+  free regime where it is discharged by realizability.)
 - **Increment 3 — the wall (the open kernel).** State the kernel predicate (anisotropic base: same square-class
   profile ⟹ same `Stab(S)`-orbit). Reduce it via Witt extension to "square-class profile ⟹ exact-Gram profile."
   This is the genuine research. First buildable sub-step: connect it to `ZProfileSeparates` and try to **upgrade the
