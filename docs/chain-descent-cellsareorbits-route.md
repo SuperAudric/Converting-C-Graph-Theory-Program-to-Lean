@@ -150,9 +150,10 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
   This is the genuine research. First buildable sub-step: connect it to `ZProfileSeparates` and try to **upgrade the
   separator to a certifier** — show the joint profile over a frame *determines* (not just separates) the exact Gram.
   This is bounded-WL-dim; expect it to be hard and possibly the GI-frontier.
-- **Parallel — Witt extension build.** The shared enabler for Increments 2–3's easy halves and the depth-1 sphere.
-  Scope what Mathlib has (`IsometryEquiv`, `exists_orthogonal_basis`, `Anisotropic`) vs the missing extension /
-  cancellation / decomposition lemmas. Discharging it converts all of `modulo {Witt}` to unconditional.
+- **Parallel — Witt build (now the higher priority; fully scoped in §7).** The shared enabler for Increments 2–3's
+  easy halves and the depth-1 sphere. Mathlib has the primitives but no Witt theory; the staged plan + difficulty +
+  recommendation are in **§7**. The cheap first slice (W0+W1) discharges `WittConeTransitive` and makes the depth-1
+  base case unconditional.
 
 **Definition of done for Route B:** `CellsAreOrbits` proved for the affine-polar residue (`modulo {Witt}` acceptable
 as tech debt) ⟹ wired through `twinsRealizedByResidualAut_iff_cellsAreOrbits` to a polynomial seal capstone, the
@@ -160,7 +161,57 @@ poly twin of `reachesRigidOrCameron_affinePolar`.
 
 ---
 
-## 7. Where this sits (Route B vs Route C vs the seal)
+## 7. The Witt build — detailed scope (current priority)
+
+Witt is the shared enabler (depth-1 sphere, the free prefix, and the easy half of every inductive step). It is **tech
+debt** (known-true classical geometry, char ≠ 2 — fine for the odd-`q` route; char 2 is a separate track regardless),
+but is being built now rather than carried. Verified against current Mathlib (2026-06-29): **Mathlib has no Witt
+theory, but all the primitives are present**, so this is a real build, not from scratch.
+
+### 7.1 What's needed (three facts, increasing strength)
+- **W-cone** — isometries are transitive on nonzero **isotropic** vectors. Discharges `WittConeTransitive` ⟹ makes
+  `depth1_isotropic_sphere_one_orbit` **unconditional** (the depth-1 base case, done).
+- **W-ext** — the **Witt extension theorem**: an isometry between subspaces of a nondegenerate space extends to a
+  global isometry (equivalently: fixing a subspace `S`, isometries are transitive on vectors with equal exact-Gram
+  profile to `S`). Discharges the **easy half** of every inductive step.
+- **W-dec** — the **Witt decomposition**: `V = (maximal totally isotropic ⊕ hyperbolic dual) ⊥ anisotropic`; and
+  multiplier-`μ` similitudes fixing a totally isotropic subspace exist. Discharges the **general free prefix**
+  (Increment 2).
+
+### 7.2 Mathlib support (present — the backbone)
+- `Module.reflection (h : f x = 2) : M ≃ₗ[R] M` (`Mathlib/LinearAlgebra/Reflection.lean`) — the generic reflection
+  `y ↦ y − f(y)•x`. Specializes to the orthogonal reflection `τ_v` by taking `f = polar Q (·) v / Q v` (then
+  `f v = polar Q v v / Q v = 2`). The reflection *map* is free; its *isometry* property w.r.t. `Q` is the lemma to add.
+- `LinearMap.BilinForm.exists_orthogonal_basis` (needs `Invertible (2:K)`) — diagonalization.
+- `BilinForm.orthogonal` + `isCompl_orthogonal_of_restrict_nondegenerate` + `isCompl_span_singleton_orthogonal`
+  (`Mathlib/LinearAlgebra/BilinearForm/Orthogonal.lean`) — orthogonal direct-sum decompositions (the structural
+  backbone of the induction).
+- `QuadraticForm.Isometry` / `IsometryEquiv`, `polarBilin`, `Nondegenerate`, `Anisotropic`, `Radical`.
+
+### 7.3 Gaps to build (no Witt theory in Mathlib)
+| Stage | Target | Difficulty | Value |
+|---|---|---|---|
+| **W0** | orthogonal reflection `τ_v` is an isometry; `Q u = Q v ≠ 0 ⟹ τ_{u−v}` (or `τ_{u+v}`) maps `u ↦ v` | **Small** | foundation / reusable atom |
+| **W1** | **cone transitivity** (isotropic): reflections + case split on `B(u,v)` (the `B(u,v)=0` case via an intermediate isotropic `w`) | **Medium** | **discharges `WittConeTransitive`; completes depth-1** |
+| **W2** | anisotropic-shell transitivity (isometries transitive on a fixed nonzero norm) | **Medium** | relative-sphere structure |
+| **W3** | **Witt extension theorem** (induction on `dim U`; orthogonal-complement peeling; isotropic case via hyperbolic completion) | **Large** | step's easy half |
+| **W4** | **Witt decomposition** + multiplier realization fixing totally isotropic subspaces | **Large** | general free prefix (Increment 2) |
+
+### 7.4 Build order + recommendation
+- **Do W0 + W1 first.** Small + medium, self-contained, and the payoff is concrete: `WittConeTransitive` discharged ⟹
+  the depth-1 base case is *done, no hypothesis*. Reflections are a reusable atom for everything downstream.
+- **W2** next only if the relative-sphere structure is wanted explicitly before the wall.
+- **W3 + W4 are LARGE** and — critically — only convert `modulo {Witt}` → unconditional on the **scaffold**; they do
+  **not** touch the wall (the open kernel survives regardless). So the honest cost-benefit: building them buys a cleaner
+  final statement, **not** progress on the open core. Recommended to defer them as carried hypotheses until the wall's
+  tractability is assessed (Increment 3), and pull them in only when closing out.
+
+**Net:** W0+W1 is a cheap, clean, self-contained win that completes the base case. W3+W4 are the genuine LARGE build and
+are defensible to keep as `modulo {Witt}` tech debt until the open core is understood, since they don't advance it.
+
+---
+
+## 8. Where this sits (Route B vs Route C vs the seal)
 
 - **The seal (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build).** Proves **quasipoly** (the matching =
   a *separator*, `Θ(log n)` base). It does **not** prove B; B is strictly stronger (separation at one full base vs
@@ -178,7 +229,7 @@ poly twin of `reachesRigidOrCameron_affinePolar`.
 
 ---
 
-## 8. Pointers
+## 9. Pointers
 
 - **Built modules:** `GraphCanonizationProofs/ChainDescent/ScratchSimilitudeCap.lean`,
   `GraphCanonizationProofs/ChainDescent/ScratchOrbitBaseCase.lean` (decls described in `PublicTheoremIndex.md`).
