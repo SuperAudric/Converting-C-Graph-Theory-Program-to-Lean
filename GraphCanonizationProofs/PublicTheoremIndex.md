@@ -2005,3 +2005,24 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | `incidence_agree_V` | 314-337 | **B-M1 capstone — the incidence counts agree in `V` (Lemma-A coordinates).** Composing the fiberwise agreement (`coarse_incidence_agree`) with the transport/translate (`incidence_to_V`): from the fine isotropy-count antecedent, the `V`-side incidence count `#{y ≠ 0 : Q y = 0 ∧ ∀ t∈S', Q (y −…` | — |
 | `cone_count_zero_split` | 338-374 | **B-M2 bridge — the `y=0` correction.** Lemma A's full cone-count equals B-M1's `y≠0` (restricted) count plus the `y=0` term, which is present iff all config differences `aₜ = t̄−w̄` are isotropic (`∀ t∈S', Q aₜ = 0`) — a Gram-determined indicator. Connects `incidence_agree_V` (restricted) to the… | — |
 | `fullcount_agree_modulo_corr` | 375-399 | **B-M2 bridge capstone — the FULL Lemma-A-shaped counts agree modulo the Gram-determined `y=0` correction.** From the fine isotropy-count antecedent: `fullcount_u(S') + corr_{u'} = fullcount_{u'}(S') + corr_u`, where `fullcount_w(S') = #{y : Q y=0 ∧ ∀t∈S', Q(y−(t̄−w̄))=0}` (Lemma A's count, `aₜ =…` | — |
+
+## ChainDescent/ScratchSimilitudeCap.lean
+
+**Viability spike (2026-06-29), NOT in `build.sh`** — the "similitude cap" closing the last in-architecture-poly lead.
+Formalizes that the affine-polar graph determines `Q` only up to scaling (a similitude), so refinement is provably
+capped at the **square class**: `χ(det G₂)` is a graph invariant, but the exact form value (and the singleton square
+class) is not. Verdict consequence: the `χ(det G₂)` refinement route is provably quasipoly, not poly — the dividing
+line for poly is *coloring vs group* (Route C / `CellsAreOrbits`), not square-class vs field-value. Axiom-clean
+`[propext, Classical.choice, Quot.sound]`, builds on `PairForm`.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `quad_smul_apply` | 49-51 | Scaling the form scales its values: `(c • Q) x = c * Q x`. | `@[simp]` |
+| `polar_smul` | 54-55 | Scaling the form scales its polar: `polar (c • Q) s a = c * polar Q s a`. | — |
+| `adj_smul_iff` | 59-61 | **The similitude cap (T1).** The affine-polar adjacency `Q x = 0` is unchanged by scaling the form (`c ≠ 0`). | — |
+| `affinePolarAdj_smul_eq` | 65-68 | **The graph is identical for `Q` and `c•Q`.** The adjacency relation `(x,y) ↦ Q(x−y)=0` is *literally equal*, so the graph determines `Q` only up to scaling — any isomorphism-invariant of a vertex pair must be invariant under `Q ↦ c•Q`. | — |
+| `pairForm_smul_apply` | 71-75 | The pair invariant scales by `c²`: `pairForm (c•Q) a s = c² · pairForm Q a s`. | — |
+| `chi_sq_mul` | 78-87 | `χ(c² · v) = χ(v)` for `c ≠ 0` — the square multiplier is invisible to the quadratic character. | — |
+| `chi_pairForm_smul` | 90-92 | **The square class is a graph invariant (T2).** `χ(det G₂) = χ(pairForm)` is unchanged by scaling the form (`c²` killed by `χ`) — why the canonizer's pair observable is well-defined on the graph (= on the scaling class of `Q`). | — |
+| `chi_singleton_smul` | 97-99 | **The singleton square class is NOT a graph invariant (T3a).** `χ((c•Q) a) = χ(c)·χ(Q a)` flips by `χ(c)` — the formal proof of the empirical "singleton `Z_u({t})` is binary" finding (only the `χ(c)`-invariant fact `Q=0` survives). | — |
+| `pairForm_value_not_invariant` | 104-106 | **The exact value is NOT a graph invariant (T3b).** The exact pair value scales by `c²`, so presentations `Q`, `c•Q` of the *same graph* disagree on it whenever `c² ≠ 1` — no isomorphism-invariant procedure (refinement of any dimension, or Route C) recovers the exact form value, only its square class. | — |
