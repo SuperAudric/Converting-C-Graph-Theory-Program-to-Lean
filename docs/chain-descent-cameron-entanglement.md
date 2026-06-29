@@ -179,10 +179,13 @@ That makes the problem concrete even though the general statement is GI-adjacent
 
 ## 7. Pointers
 
-- **Lean formalization of the WL-visibility dichotomy (Route B, in progress):**
-  [`chain-descent-wl-visibility.md`](./chain-descent-wl-visibility.md) — proves *why* the standard gadget is WL-blind to
-  group structure (coordinate-regularity) and *that* a commutator gadget breaks the blindness. Phase-0 algebraic cores
-  landed axiom-clean (`ChainDescent/ScratchWLVisibility.lean`). This is the durable home for the Route-B Lean thread.
+- **Lean attack on Route B (the rigid-Cameron build plan):**
+  [`chain-descent-wl-visibility.md`](./chain-descent-wl-visibility.md) — the Lean companion to this doc. Retargeted
+  2026-06-29 from a 1-WL-dichotomy *curiosity* into a **direct rigid-Cameron attack**: the coordinate-regularity core is
+  the *hideability* mechanism, the commDeg dichotomy the *visibility* mechanism, and rung R1 = "the group-CFI carries no
+  hidden non-abelian symmetry" (one family-battery rung). Phase-0 algebraic cores landed axiom-clean
+  (`ChainDescent/ScratchWLVisibility.lean`). Durable home for the Route-B Lean thread. (Filename is legacy; rename to
+  `chain-descent-rigid-cameron-attack.md` optional.)
 - The lead this formalizes: IR-solver doc **§11.14** (the abelian-hiding vs non-abelian-Johnson 2×2; the
   "separable vs. integral" framing).
 - The two-pin-count dichotomy: IR-solver doc **§11.1** (`b(Aut)` vs `b_WL`).

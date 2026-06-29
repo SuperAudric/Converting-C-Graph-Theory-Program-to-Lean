@@ -1,217 +1,218 @@
-# WL-visibility of group structure — a Lean formalization plan
+# No rigid-Cameron — the Lean attack (Route B: non-abelian symmetry is not hideable)
 
-> **What this is.** The build plan for formalizing, in Lean, the **WL-visibility dichotomy** for group structure that
-> `NonAbelianCfiProbe` established empirically: the standard CFI/multipede gadget is **1-WL-blind** to a group's
-> structure (S₃ behaves exactly like Z₆), while a **commutator / commuting-pairs gadget is 1-WL-visible**. The
-> mathematical hearts of both halves are already built (axiom-clean); this doc records the targets, the proven cores,
-> the reusable tools (with exact lemma names), the remaining gaps, and the phased plan. Written for a developer new to
-> this thread. Provenance: memory `project_wl_visibility_lean_2026-06-28`, `project_nonabelian_cfi_witness_2026-06-28`,
-> the duality doc [`chain-descent-cameron-entanglement.md`](./chain-descent-cameron-entanglement.md) §4 Route B.
+> **What this is.** The Lean build plan for the **rigid-Cameron** target — proving that a *rigid* graph cannot carry a
+> hidden **Cameron** (large non-abelian) symmetry, which **closes the seal's "or Cameron" escape**. It is the
+> *formalization* companion to the strategy doc [`chain-descent-cameron-entanglement.md`](./chain-descent-cameron-entanglement.md)
+> (the problem statement + the full attack menu + the family battery); this doc carries the **Lean** pieces that are
+> already built and the staged plan to turn them into a discharge of (a formalizable fragment of) **Route B** there.
+> Provenance: the `NonAbelianCfiProbe` arc (memory `project_nonabelian_cfi_witness_2026-06-28`), the Phase-0 cores
+> (`project_wl_visibility_lean_2026-06-28`), cameron-entanglement §3–§4.
+>
+> **Filename note.** This file was formerly "WL-visibility of group structure" (a 1-WL-dichotomy formalization). It was
+> **retargeted 2026-06-29** to the direct rigid-Cameron attack — the dichotomy theorems are now *lemmas*, not the goal.
+> The path is kept so existing cross-references resolve; rename to `chain-descent-rigid-cameron-attack.md` is optional.
 
 ---
 
 ## STATUS (read first)
 
-**Phase 0 DONE (2026-06-28, axiom-clean `[propext, Classical.choice, Quot.sound]`).** The two algebraic hearts of the
-dichotomy are proved in `GraphCanonizationProofs/ChainDescent/ScratchWLVisibility.lean` (`lake env lean` scratch, NOT in
-`build.sh`):
-- **blindness heart** `product_coord_regular` — coordinate-regularity of the product relation;
-- **visibility heart** `commDeg_const_iff_comm` (+ `_const_of_comm`, `_nonconst_of_noncomm`) — the commuting-degree is
-  constant iff the group is abelian.
+**Retargeted 2026-06-29.** The previous target ("formalize the 1-WL-visibility dichotomy: S₃ ≡ Z₆, commutator-gadget
+visible") was the **mechanism**, not a result the project needs in its own right. The dichotomy certifies *why* a
+construction hides or exposes group structure — which is exactly what a **Route-B** (no-rigid-Cameron) attack consumes.
+So this doc now plans the attack, with the dichotomy demoted to its load-bearing lemmas.
 
-**Two design decisions are settled** (do not re-litigate):
-1. **Generalize 1-WL to an arbitrary `[Fintype V] [DecidableEq V]` vertex type** (not `Fin n`). Removes all index
-   encoding; reused by every theorem. (User-approved 2026-06-28.)
-2. **State the dichotomy on MINIMAL graphs**, not the full multipede: the **commuting graph** for visibility (T2) and a
-   **single product-gadget** for blindness (T1). The full-multipede generalization is deferred (Phase 4).
+**Why this is on the critical path** (corrected understanding, 2026-06-29). "No rigid-Cameron" closes the rigid seal's
+**"or Cameron"** escape (cameron-entanglement §3): a rigid graph has `b(Aut)=0`, Cameron's hardness *is* `b(Aut)`
+(gap ≈ 0), so a rigid graph cannot be Cameron-hard — *unless* a Cameron symmetry can be **hidden** (carried by the
+WL-closure, non-schurian, not as a graph automorphism). The CFI/multipede shows the **abelian** analogue of hidden
+symmetry is real (the cycle-space gauge). **Route B = prove the non-abelian analogue cannot exist** ⟹ no hidden
+Cameron ⟹ "or Cameron" deleted. This is the **Cameron facet** of the seal's flag floor — distinct from the
+bounded-WL-dim core (the *poly* facet); see cameron-entanglement §2's opposite-corners.
 
-**Next = Phase 1** (generalize the 1-WL primitives to `Fintype V`), then Phase 2 (T2 visibility — the smaller half,
-consumes `commDeg_nonconst_of_noncomm`), Phase 3 (T1 blindness — consumes `product_coord_regular`), Phase 4 (T3
-characterization + multipede generalization). Quality bar: axiom-clean, no `sorry` / no fresh `axiom` /
-`native_decide` banned, full build green when ported.
+**Phase 0 cores — built, axiom-clean, repositioned (not rebuilt)** (`ChainDescent/ScratchWLVisibility.lean`,
+`[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`):
+- **`product_coord_regular`** — the **hideability mechanism**. The product relation `g₁·…·g_d = 1` is
+  coordinate-regular (a perfect quasigroup), so 1-WL counts depend only on `|Γ|`, *not* on whether Γ is abelian. This is
+  *how* an abelian gauge hides — and the reason the non-abelian content of a group-CFI is **invisible to refinement**.
+- **`commDeg_const_iff_comm`** — the **visibility mechanism**. The commuting-degree varies ⟺ Γ is non-abelian, so a
+  commutator-type relation **exposes** non-abelian structure. Non-abelian content is hideable *only* in
+  coordinate-regular relations; the moment a relation sees commutativity, it is 1-WL-visible.
 
----
+**The plan (rungs, increasing difficulty / decreasing reachability):**
+- **R1 — the group-CFI carries no hidden non-abelian symmetry** (one rung of the family battery; reachable). Its
+  non-abelian structure is *visible-or-killed, never hidden*. Cores are the load-bearing lemmas. **Next.**
+- **R2 — the characterization** "a single-relation gadget is 1-WL-hideable ⟺ its relation is coordinate-regular, and
+  coordinate-regular content is abelian-equivalent." Generalizes R1 off the product gadget.
+- **R3 — Route B general** ("the only hideable symmetry is abelian") — GI-adjacent; the *target*, not the near-term.
 
-## 1. The question and why it matters
-
-The canonizer's open frontier is the **structural wall** (rigid graphs that resist Weisfeiler–Leman). Every known
-WL-hard rigid graph (CFI / multipede / Lichter) is **linear over an abelian gauge**; whether a *non-abelian* gauge can
-produce WL-hardness is the open "structure / non-linear" corner (cameron-entanglement §4 Route B; the rigid seal's flag
-floor, `chain-descent-ir-blindspot-solver.md` §11.14).
-
-`NonAbelianCfiProbe` (C#) answered the empirical version: generalizing the CFI gadget from F₂ to an arbitrary finite
-group Γ (gadget = the relation `g₁·g₂·…·g_d = 1`), the resulting graph's **WL-hardness depends only on `|Γ|`, never on
-whether Γ is abelian** — S₃ ≡ Z₆ and D₄ ≡ Z₈ behave *byte-for-byte identically* in every WL measure, even though the
-graphs are non-isomorphic. WL is **blind** to the non-abelian structure. By contrast, a gadget that exposes
-*commutativity* (connect `a`–`b` iff `ab = ba`) is 1-WL-**visible** (centralizer sizes vary). This doc formalizes that
-dichotomy and isolates its cause.
-
-**The cause (the theorem to prove):** a single-constraint gadget is **1-WL-blind to Γ iff its relation is
-coordinate-regular** (a perfect quasigroup — any one coordinate's value leaves a completion count independent of the
-value and the group). The product relation `g₁…g_d = 1` is coordinate-regular (cancellation); the commutator relation
-is not. 1-WL only counts, and the counts of a coordinate-regular relation see only `|Γ|`.
+Quality bar: axiom-clean, no `sorry` / no fresh `axiom` / `native_decide` banned; full build green when ported.
 
 ---
 
-## 2. The target theorems
+## 1. The target, precisely
 
-Let `Γ` be a finite group (`[Group G] [Fintype G] [DecidableEq G]`).
+From cameron-entanglement §1 (read it for the full statement):
 
-- **T1 (blindness).** Color refinement on the **product-gadget graph** `B_d(Γ)` does not refine the fine colouring
-  {one colour per segment, one per gadget} — i.e. `warmRefine` is stuck at it, for every Γ. Corollary: `B_d(Γ)` and
-  `B_d(Γ′)` are **1-WL-equivalent** whenever `|Γ| = |Γ′|` (e.g. S₃ ≡ Z₆). Engine: each segment value-vertex has a
-  Γ-independent signature (coordinate-regularity), so `refineStep` produces no split.
-- **T2 (visibility).** Color refinement on the **commuting graph** `Comm(Γ)` (vertices = Γ, `a ~ b ⟺ ab = ba`, `a≠b`)
-  **does** refine the trivial colouring **iff** Γ is non-abelian, because vertices split by `commDeg` (= centralizer
-  size). Corollary: `Comm(S₃) ≢ Comm(Z₆)` (different degree sequences) — non-abelian structure is 1-WL-visible.
-- **T3 (characterization, the capstone).** A single-constraint gadget on a finite relation `R ⊆ Γ^d` is 1-WL-blind to
-  Γ **iff** `R` is coordinate-regular. T1 (product, blind) and T2 (commutator, visible) are the ± instances.
+> **(No rigid-Cameron.)** A rigid graph cannot carry a hidden Cameron symmetry — equivalently, a Cameron's
+> (non-abelian) symmetry is **non-separable** from the structure that makes it hard.
 
-> **Scope note.** "1-WL-blind / -visible" is the right altitude: it already separates the cases, it is what the probe
-> measured (WL-*depth* `b_WL`, of which 1-WL-stability is the base case), and it keeps the graphs out of the
-> association-scheme machinery (which does not apply — see §4). A k-WL version is a possible later strengthening but is
-> **not** needed for the dichotomy.
+It splits (cameron-entanglement §1):
+- **(a) schurian / visible** — the Cameron group sits in `Aut(G)`. *Trivially impossible* for rigid `G`. No work.
+- **(b) non-schurian / hidden** — `G` is rigid, but its **WL-closure** (the coherent configuration refinement computes)
+  is Cameron-like, its symmetry *combinatorial*, not a graph automorphism. **This is the whole problem.** The CFI gauge
+  is the *abelian* instance of (b); the question is whether a **non-abelian** instance exists.
 
----
-
-## 3. What is already built (Phase 0) — exact decls + insights
-
-File: `GraphCanonizationProofs/ChainDescent/ScratchWLVisibility.lean`, namespace `WLVis`, all axiom-clean
-`[propext, Classical.choice, Quot.sound]`. Imports are trimmed to the minimum (≈3× faster than `import Mathlib`):
-`Mathlib.Algebra.Group.Basic`, `Mathlib.Data.Fintype.EquivFin`, `Mathlib.Data.Fintype.Prod`,
-`Mathlib.Logic.Equiv.Basic`, `Mathlib.Tactic.Push`.
-
-**Blindness heart:**
-- `product_coord_regular (a : G) : Fintype.card {p : G × G // a * p.1 * p.2 = 1} = Fintype.card G` — degree-3
-  coordinate-regularity. **Proof:** the explicit `Equiv` `(y,z) ↦ y`, inverse `y ↦ (y, (a*y)⁻¹)`; the inverse's
-  membership proof is `mul_inv_cancel`, and `left_inv` recovers `z = (a*y)⁻¹` via **`eq_inv_of_mul_eq_one_right`**.
-- `product_coord_regular_indep (a a' : G) : … card … = … card …'` — the same count is independent of the fixed value
-  (`rw [product_coord_regular, product_coord_regular]`). This is the form blindness literally needs.
-
-**Visibility heart:**
-- `commDeg (g : G) : ℕ := Fintype.card {h : G // g * h = h * g}` — the commuting-degree = the 1-WL degree in a
-  commuting-pairs gadget. **Use the explicit subtype `{h // g*h=h*g}`, not the opaque `Commute g h` def** (see gotcha).
-- `commDeg_const_of_comm (hab : ∀ a b, a*b=b*a) (g) : commDeg g = Fintype.card G` — proof
-  `Fintype.card_congr (Equiv.subtypeUnivEquiv (fun h => hab g h))`.
-- `commDeg_nonconst_of_noncomm (h : ∃ a b, a*b≠b*a) : ∃ g, commDeg g < commDeg (1 : G)` — pick the non-commuting `a`;
-  `commDeg 1 = |G|` via `Equiv.subtypeUnivEquiv`; `commDeg a < |G|` via **`Fintype.card_subtype_lt (x := b)`** (the
-  non-partner `b` witnesses a missing element).
-- `commDeg_const_iff_comm : (∀ g, commDeg g = Fintype.card G) ↔ (∀ a b, a*b=b*a)` — the dichotomy in one line
-  (`push Not` + `omega`).
-
-**Insights from the build (save the next developer time):**
-1. **Subtypes of a group need `[DecidableEq G]`** to get a `Fintype` instance (`DecidablePred` of the defining
-   equation). Every decl carries it.
-2. **Do not use `Commute g h`** as the subtype predicate — `Commute` is an opaque `def`, so `Fintype {h // Commute g h}`
-   fails to synthesize. Spell out `{h // g * h = h * g}`.
-3. **Annotate `(1 : G)`** in statements/terms — a bare `1` defaults to `ℕ`, producing a spurious `Group ℕ` /
-   `Fintype ℕ` synthesis failure and a downstream `rw` mismatch (`commDeg 1` (ℕ) ≠ `commDeg (1:G)`).
-4. `push Not at h` is the current spelling (`push_neg` is deprecated; `Mathlib.Tactic.Push`).
-5. The **degree-d generalization** of `product_coord_regular` (`#{t : Fin d → G // ∏ t = 1 ∧ t i = a} = |G|^{d-2}`,
-   independent of `a`) is the natural next lemma if T1 is stated for general degree; the d=3 case suffices for the
-   minimal product-gadget. Tools: the bijection that adjusts one free coordinate (group cancellation, `Equiv.mulLeft`).
+**What the cores buy.** The natural way to *try* to build a non-abelian instance of (b) is the **group-CFI**: take the
+CFI/multipede and replace the F₂ gauge with an arbitrary finite group Γ (gadget relation `g₁·…·g_d = 1`). The
+`NonAbelianCfiProbe` arc showed this attempt **fails** — its WL view depends only on `|Γ|`, so the non-abelian
+structure never becomes a hidden symmetry. The Phase-0 cores are the *algebra* of that failure. R1 turns the probe's
+empirical finding into a Lean theorem; R2/R3 generalize the mechanism toward the real Route B.
 
 ---
 
-## 4. Tools that already exist (reuse — exact names)
+## 2. The pieces that are available (Phase 0) — repositioned
 
-**Graph-level 1-WL — top-level `GraphCanonizationProofs/ChainDescent.lean`** (this is the engine T1/T2 run on):
-- `Colouring n := Fin n → Nat`; `AdjMatrix n`; `PMatrix n` (the partial-order matrix; pass the trivial all-`unknown`
-  for a plain graph).
-- `signature adj P χ v : Multiset (Nat × Nat × POE)` — the neighbour `(colour, adj-value, P-relation)` multiset over
-  `u ≠ v`. **This is the object whose Γ-(in)dependence is the whole proof.**
-- `refineStep adj P χ` and **`refineStep_iff`** : `refineStep … v = refineStep … w ↔ χ v = χ w ∧ signature … v =
-  signature … w`. **The lever:** equal signatures ⟹ no split (T1); unequal signatures ⟹ split (T2).
-- `warmRefine adj P initial := (refineStep adj P)^[n] initial`; `warmRefine_refines`.
-- `samePartition χ₁ χ₂ := ∀ i j, χ₁ i = χ₁ j ↔ χ₂ i = χ₂ j` (+ `refl`/`symm`/`trans`). The "stuck" target of T1 is
-  `samePartition (warmRefine …) initial`.
+File `ChainDescent/ScratchWLVisibility.lean`, namespace `WLVis`, all axiom-clean. (Build/lemma detail unchanged from the
+prior version; only the *role* is reframed.)
 
-> **These are defined on `Fin n`.** Phase 1 generalizes them to an arbitrary `[Fintype V] [DecidableEq V]` (decision §0).
-> The generalization is mechanical (`signature` sums over `Finset.univ.filter (· ≠ v)`, already `Fintype`-shaped); the
-> only `Fin n`-specific use is the iteration count `n` in `warmRefine` — replace by `Fintype.card V`.
+**Hideability mechanism — `product_coord_regular`.**
+`product_coord_regular (a : G) : Fintype.card {p : G × G // a * p.1 * p.2 = 1} = Fintype.card G` (+ `_indep`). Fixing
+one coordinate to *any* value leaves `|G|` completions, independent of the value **and of commutativity**. Proof: the
+explicit `Equiv` `(y,z) ↦ y`, inverse `y ↦ (y,(a*y)⁻¹)` (`eq_inv_of_mul_eq_one_right`, `mul_inv_cancel`). *Role in the
+attack:* this is exactly why refinement on a group-CFI cannot separate any segment by group structure — the WL-closure
+of the group-CFI over Γ is the **same coherent configuration** as for any group of order `|Γ|`, i.e. **abelian-equivalent**.
+A hidden symmetry lives in that closure; if the closure is abelian-equivalent, the only symmetry it can hide is too.
 
-**Mathlib (all confirmed used in Phase 0):** `Group`, `Fintype`, `DecidableEq`, `Fintype.card_eq`,
-`Fintype.card_congr`, `Equiv.subtypeUnivEquiv`, `Fintype.card_subtype_lt`, `eq_inv_of_mul_eq_one_right`,
-`mul_inv_cancel`, `Equiv.mulLeft` (for the degree-d generalization), `Fintype.equivFin` (only if any `Fin n` transport
-is still needed). For T2's degree-sequence corollary: centralizer cardinalities live in
-`Mathlib/GroupTheory/Subgroup/Centralizer.lean` if a `Subgroup.centralizer` framing is preferred over the bare subtype.
+**Visibility mechanism — `commDeg` / `commDeg_const_iff_comm`.**
+`commDeg g := Fintype.card {h // g*h=h*g}`; constant `= |G|` ⟺ Γ abelian (`commDeg_const_of_comm` /
+`commDeg_nonconst_of_noncomm`, via `Equiv.subtypeUnivEquiv` / `Fintype.card_subtype_lt`). *Role:* the contrapositive of
+hideability — non-abelian structure **is** 1-WL-visible *when the relation exposes commutativity*. So a construction
+hides non-abelian structure **only** by using coordinate-regular (commutativity-blind) relations; the moment it doesn't,
+rigidity kills the now-visible symmetry. This is the "non-abelian ⟹ visible ⟹ killed by rigidity" half of Route B.
 
-**NOT applicable — do not reach for it.** The scheme-level discreteness engine (`AssociationScheme`,
-`kRoundProfileCount`, `discrete_of_kRoundRelationSeparates` in `CascadeAffine.lean`) is for association schemes /
-orbital schemes. The commuting graph and the product-gadget are **not** schemes (not vertex-transitive / not regular),
-so the graph-level `warmRefine` is the correct and only tool here.
+> Gotchas (carry forward): subtypes need `[DecidableEq G]` for `Fintype`; spell `{h // g*h=h*g}`, not opaque `Commute`;
+> annotate `(1 : G)` in statements (bare `1` defaults to ℕ). `push Not` (not deprecated `push_neg`).
 
 ---
 
-## 5. The gaps, and how to close each
+## 3. R1 — the group-CFI carries no hidden non-abelian symmetry
 
-1. **Generalize 1-WL to `[Fintype V] [DecidableEq V]` (Phase 1, the one infra change).** Re-state `signature`,
-   `refineStep`, `refineStep_iff`, `warmRefine`, `samePartition` over a vertex type `V` (graph = `V → V → …`). Mechanical
-   (the defs already quantify over `Finset.univ`); iteration count `n ↦ Fintype.card V`. *Decision:* do this as a small
-   new module (e.g. `ChainDescent/WLGeneric.lean`) rather than editing the top-level file, to keep the canonizer's
-   `Fin n` invariants untouched; re-derive `refineStep_iff` (the only lemma the proofs need) generically.
-2. **Build the minimal graphs (Phase 2/3).**
-   - **Commuting graph `Comm(Γ)`** (T2): vertices `= Γ`, `adj a b := decide (a*b = b*a ∧ a ≠ b)`. Trivial — no
-     encoding. `warmRefine` round-1 colour of `a` is its degree `= commDeg a − 1`; `commDeg_nonconst_of_noncomm` ⟹ ≥2
-     colours ⟺ non-abelian ⟹ refines. The S₃≢Z₆ corollary = different degree multisets (a `Multiset`-of-degrees
-     invariant; cheap).
-   - **Product-gadget `B_d(Γ)`** (T1): vertices `= (Σ _ : Fin d, Γ) ⊕ {t : Fin d → Γ // ∏ t = 1}` (segments ⊕ tuples),
-     `adj` = incidence (`tuple t — (i, t i)`). Fine colouring = segment-index for the left part, a single colour for the
-     right. The signature of `(i, a)` is, per the incidence, a multiset whose multiplicity of the gadget-colour is the
-     coordinate-regular count `product_coord_regular` ⟹ independent of `a` ⟹ `refineStep_iff` ⟹ no split.
-3. **Signature ↔ count bridge (Phase 2/3, the load-bearing lemma).** Relate `signature (i,a)` to
-   `Fintype.card {tuples adjacent to (i,a)}`. The signature is a `Multiset.map` over neighbours; its relevant content is
-   the multiplicity of each neighbour-colour = a `Finset.card` = the coordinate-regular count. Tool: `Multiset.count` /
-   `Finset.card` rewriting; this is the main proof obligation and where `product_coord_regular` / `commDeg` plug in.
-4. **Cross-graph 1-WL-equivalence (Phase 2/3, small new def).** `warmRefine`/`samePartition` are within one graph. Define
-   `WLEquiv` of two coloured graphs as equality of the **multiset of stable-colour class sizes** (the standard 1-WL
-   invariant). T1's corollary (`B_d(Γ) ≡ B_d(Γ′)`) and T2's separation (`Comm(S₃) ≢ Comm(Z₆)`) are then statements
-   about these multisets. Keep it minimal (don't formalize full 1-WL game equivalence).
-5. **T3 characterization (Phase 4).** Abstract over a relation `R ⊆ Γ^d` with a `CoordRegular R` predicate (any
-   `d−1` coords + a value of the last has a count independent of choices); prove blind ⟺ `CoordRegular`. The product and
-   commutator gadgets instantiate it. Optional but it is the clean general statement.
-6. **Full-multipede generalization (Phase 4, optional).** Lift T1 from a single gadget to the multipede over a base
-   graph (segments shared across gadgets). Only needed if the doc wants the literal CFI object; the dichotomy does not
-   require it.
+**The claim (the first family-battery rung).** The group-CFI over Γ is **not** a rigid-Cameron: its non-abelian
+structure is **visible** (an actual automorphism, when present) or **killed** (by rigidification), never **hidden** in
+the WL-closure. Concretely, two statements that together rule out the construction:
+
+- **R1a (hidden ⟹ abelian-equivalent, 1-WL level).** The 1-WL closure (color refinement) of the group-CFI over Γ is
+  group-blind beyond `|Γ|` — `samePartition (warmRefine …) initial` holds for the segment colouring, for every Γ,
+  because every value-vertex's signature is the coordinate-regular count (`product_coord_regular`). Hence the closure is
+  the same for Γ and any Γ′ with `|Γ|=|Γ′|`; in particular the same as for the *abelian* Z_{|Γ|}. **Any symmetry the
+  1-WL closure carries is abelian-equivalent** — there is no hidden *non-abelian* content at the refinement level.
+- **R1b (the genuine Γ-symmetry is visible, and rigidity kills it).** The un-anchored group-CFI has `Aut = Γ` acting as
+  the global gauge — for non-abelian Γ a real, **visible**, non-abelian automorphism group of order `|Γ|` (schurian,
+  consumed by the cascade). Anchoring one segment yields `Aut = 1` (rigid): the non-abelian content survives only as a
+  fixed CSP relation with **no** automorphism realizing it. So the non-abelian symmetry is never simultaneously
+  *large* and *hidden*.
+
+**Why this is the right first target.** It is *one* Cameron family (the group-CFI) shown to have no rigid version —
+exactly the per-family shape cameron-entanglement §4 prescribes — and it is the family the project's own probe flagged
+as the most natural non-abelian-CFI candidate. Ruling it out removes the most plausible counterexample to no-rigid-Cameron.
+
+**Honest scope of R1.** The *formal* cores are **1-WL**; R1a as stated is a 1-WL statement. The probe found the
+blindness at full IR-depth `b_WL` (S₃ ≡ Z₆ in depth, not just one round), which is the statement rigid-Cameron really
+wants. Strengthening R1a from 1-WL to `b_WL`/`k`-WL is **R1′** (harder; the same altitude gap noted in §6). R1 at 1-WL
+is the right first deliverable: it is what the cores reach cleanly and it already rules out 1-WL-mediated hiding.
 
 ---
 
-## 6. Sequencing
+## 4. R2 / R3 — generalizing the mechanism
+
+- **R2 — the hideability characterization.** Abstract over a relation `R ⊆ Γ^d` with a predicate `CoordRegular R` (any
+  `d−1` coordinates plus a value of the last leave a completion count independent of choices). Prove: a single-relation
+  gadget is **1-WL-hideable ⟺ `CoordRegular R`**, and coordinate-regular content is **abelian-equivalent** (1-WL sees
+  only the quasigroup, hence only `|Γ|`). The product relation (hideable, `product_coord_regular`) and the commutator
+  relation (visible, `commDeg`) are the ± instances. This lifts R1 off the specific product gadget and is the clean
+  general statement of "what can hide."
+- **R3 — Route B in general** ("the only hideable symmetry a graph can carry is abelian"). Characterize *hideable
+  symmetry* across all constructions and show it is abelian (cameron-entanglement §4 Route B). **GI-adjacent** — the
+  target of the whole line, not a near-term build. R2 is the formalizable down-payment on it.
+
+---
+
+## 5. The complementary angle (Route C / gap = 0) — note, not this doc's build
+
+cameron-entanglement §3–§4 also give a **construction-free** route: a rigid graph has `b(Aut)=0`; a hidden Cameron
+would force `b_WL > 0` with all of it structural (gap), but Cameron's hardness is *symmetry* (gap ≈ 0) — a
+contradiction. This is conceptually cleaner and family-uniform, but the Phase-0 cores **do not serve it** (it is about
+`b(Aut)` vs `b_WL`, not about coordinate-regularity of a gadget). Worth keeping as the parallel angle: if R2 stalls, the
+`b(Aut)`/gap argument is the other way in. Do **not** duplicate it here — it belongs in cameron-entanglement; this doc
+owns the **mechanism / construction-battery** side that the cores support.
+
+---
+
+## 6. Tools, gaps, sequencing
+
+**1-WL engine (reuse) — top-level `ChainDescent.lean`:** `signature` (the neighbour `(colour, adj, POE)` multiset —
+the object whose Γ-(in)dependence is the proof), `refineStep_iff` (same refined colour ⟺ same old colour ∧ same
+signature — the splitting lever: equal ⟹ hidden, unequal ⟹ visible), `warmRefine`, `samePartition`. Defined on `Fin n`.
+
+**Gaps, ordered:**
+1. **Generalize 1-WL to `[Fintype V] [DecidableEq V]`** (settled decision; do in a new `ChainDescent/WLGeneric.lean`,
+   leaving the canonizer's `Fin n` invariants untouched). Mechanical: `signature` already sums over `Finset.univ`;
+   iteration count `n ↦ Fintype.card V`; re-derive `refineStep_iff` generically (the only lemma the rungs need). The
+   `warmRefine` termination lemma is *not* on the critical path for R1a (a "stuck at fixpoint" statement follows from
+   `refineStep_iff` directly).
+2. **Build the group-CFI graph** (R1): vertices `= (Σ _ : Fin d, Γ) ⊕ {t : Fin d → Γ // ∏ t = 1}` (segments ⊕ tuples),
+   `adj` = incidence `tuple t — (i, t i)`; anchoring = pin one segment's colours. R1a's signature-is-coordinate-regular
+   step plugs `product_coord_regular` into `refineStep_iff`. The minimal single-gadget form suffices; the full
+   multipede over a base graph is an optional later generalization (only if the literal CFI object is wanted).
+3. **Signature ↔ count bridge** (R1a): relate `signature (i,a)` to the gadget-incidence count = the coordinate-regular
+   count; `Multiset.count` / `Finset.card` rewriting. The load-bearing lemma.
+4. **Cross-graph 1-WL-equivalence** (R1a's "same closure for Γ, Γ′"): a small `WLEquiv` def = equality of the multiset
+   of stable-colour class sizes. Keep minimal.
+5. **The `Aut`/visibility side of R1b**: model `Aut(group-CFI)` and the anchoring that trivializes it. This is the
+   genuinely new infra vs. the old plan — it connects the gadget to a permutation-automorphism statement (reuse
+   `ChainDescent/Group.lean` scaffolding). Scope it before committing: R1b may be cleanest as a *concrete* statement
+   (the global Γ-action is an automorphism; pinning a segment forces the identity) rather than a general theorem.
+6. **R2 predicate `CoordRegular`** and the ⟺; **R3** deferred.
+
+**Sequencing:**
 
 | Phase | Deliverable | Consumes | Risk |
 |---|---|---|---|
-| **0 ✓** | algebraic cores (`ScratchWLVisibility.lean`) | — | done |
-| **1** | `Fintype V`-generic 1-WL (`WLGeneric.lean`): `signature`/`refineStep_iff`/`warmRefine`/`samePartition` | top-level `ChainDescent.lean` defs | low (mechanical) |
-| **2** | **T2 visibility** on `Comm(Γ)` + `Comm(S₃)≢Comm(Z₆)` | `commDeg_nonconst_of_noncomm`, P1, gap 4 | low–med |
-| **3** | **T1 blindness** on `B_d(Γ)` + `B_d(Γ)≡B_d(Γ′)` | `product_coord_regular`, P1, gaps 3–4 | med (signature↔count) |
-| **4** | T3 characterization; (optional) multipede lift | P2, P3 | med |
+| **0 ✓** | cores (`ScratchWLVisibility.lean`) | — | done |
+| **1** | `Fintype V`-generic 1-WL (`WLGeneric.lean`) | top-level `ChainDescent.lean` | low (mechanical) |
+| **2** | **R1a** (group-CFI 1-WL closure is abelian-equivalent) | `product_coord_regular`, P1, gaps 3–4 | med (signature↔count) |
+| **3** | **R1b** (Γ-symmetry visible; anchoring ⟹ rigid) | `commDeg`, `Group.lean`, gap 5 | med (Aut modelling) |
+| **4** | **R2** characterization (`CoordRegular` ⟺ hideable) | R1, R2 predicate | med |
+| **5** | R1′ (1-WL → `b_WL`/`k`-WL) ; R3 (general Route B) | all above | high / open |
 
-Do **T2 before T1** — it is smaller (trivial graph, no incidence bookkeeping) and exercises the P1 generic 1-WL +
-gap-4 cross-graph notion end-to-end, de-risking T1.
-
----
-
-## 7. Pointers
-
-- **Built cores:** `GraphCanonizationProofs/ChainDescent/ScratchWLVisibility.lean` (Phase 0, axiom-clean, not in build).
-- **1-WL engine to generalize:** top-level `GraphCanonizationProofs/ChainDescent.lean` (`signature`, `refineStep_iff`,
-  `warmRefine`, `samePartition`).
-- **Empirical source:** `GraphCanonizationProject.Tests/NonAbelianCfiProbe.cs` (5 probes: WL-hardness, rigidified,
-  S3-vs-Z6 distinct, extraction discriminator, group-varying) — memory `project_nonabelian_cfi_witness_2026-06-28`.
-- **The duality this serves:** `chain-descent-cameron-entanglement.md` §4 Route B (no non-abelian gauge);
-  `chain-descent-ir-blindspot-solver.md` §11.14 (the 2×2; rigid-seal flag floor).
-- **Memory:** `project_wl_visibility_lean_2026-06-28` (this plan, condensed), `project_nonabelian_cfi_witness_2026-06-28`
-  (the probe arc + the fixed/varying × abelian/non-abelian map; the wall narrows to growing non-solvable groups).
+Do **R1a before R1b** — R1a is the cleaner core-consumer and exercises P1 + the cross-graph notion end-to-end;
+R1b adds the automorphism-modelling that is the new infra.
 
 ---
 
-## 8. Honest scope
+## 7. Honest scope
 
-- This formalizes **why WL is blind to non-abelian structure in the standard gadget** (coordinate-regularity) and
-  **that a commutator gadget breaks the blindness** — it does **not** resolve whether any rigid graph is a genuine
-  non-poly wall. The probe arc already showed the fixed/varying-solvable group-CFI families are *tame* (extractable,
-  WL-depth-tame, poly); the remaining wall candidate is **growing non-solvable groups**, which is a theory question
-  (Babai–Luks string-canonization), not reachable by this construction (gadget size `|Γ|^{d−1}` explodes) and **out of
-  scope here**.
-- T1/T2 are about **1-WL**. The probe's `b_WL` (individualization-refinement depth) blindness is a stronger statement;
-  1-WL-stability is its base case and the right first target. A `b_WL` / k-WL version would be a separate, harder build.
+- This proves **no-rigid-Cameron for the group-CFI construction** (R1) and characterizes hideability (R2). It does
+  **not** prove the general "no hideable non-abelian symmetry" (R3, GI-adjacent) — that is the target of the whole
+  Route-B line, not this build. The probe already showed the group-CFI family is *tame* (visible-or-killed, poly even
+  rigidified — fixed-group CSP), and that the residual wall candidate is **growing non-solvable** groups, outside any
+  feasible construction (theory).
+- R1 as built is at **1-WL**; the project-relevant statement is at `b_WL`. The 1-WL rung rules out refinement-mediated
+  hiding and is the honest first step; R1′ is the strengthening.
+- This is the **Cameron facet** of the flag floor. Closing it removes "or Cameron"; it does **not** touch the
+  bounded-WL-dim *poly* core (the box-1 recovery mirror) — that is a different object (cameron-entanglement §2,
+  opposite corners) pursued separately.
+
+---
+
+## 8. Pointers
+
+- **Strategy / problem / attack menu / family battery:** [`chain-descent-cameron-entanglement.md`](./chain-descent-cameron-entanglement.md)
+  (§1 claim, §3 why-it-closes-the-escape, §4 Routes A–E, §5 step list). **This doc is its Lean companion.**
+- **Built cores:** `GraphCanonizationProofs/ChainDescent/ScratchWLVisibility.lean` (axiom-clean, not in build).
+- **1-WL engine to generalize:** top-level `GraphCanonizationProofs/ChainDescent.lean`.
+- **Empirical source:** `GraphCanonizationProject.Tests/NonAbelianCfiProbe.cs` (group-CFI; visible/killed/extraction).
+- **Memory:** `project_nonabelian_cfi_witness_2026-06-28` (the probe arc + the fixed/varying × abelian/non-abelian map),
+  `project_wl_visibility_lean_2026-06-28` (the cores).
+- **Seal context:** the rigid seal's flag floor — `chain-descent-ir-blindspot-solver.md` §11.14;
+  `chain-descent-remaining-work.md` §3a/§4.
