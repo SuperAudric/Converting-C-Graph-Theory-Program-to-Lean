@@ -274,14 +274,16 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
   fraction" replaced by "the `O(d)`-frame count-profile **determines** the orbit" — a *different kind of argument*.
 
   **Three sub-steps:**
-  - **3a — ✅ DONE (`ScratchWallKernel.lean`, axiom-clean).** The open content at an anisotropic base is isolated as the
-    single predicate **`WallKernel`** (square-class profile *determines* exact Gram), with the reduction proved around
-    it: soundness `stabOrbit_imp_sameExactGram_of_anisotropic` (free, μ=1 delimiter + `similitude_polar`), carried
-    `WittExtendsToOrbit` (Witt tech debt), and the isolation capstone `stabOrbit_iff_sameSquareClass_of_wallKernel` — at
-    an anisotropic base, **modulo {Witt}, `CellsAreOrbits` ⟺ `WallKernel`**. (Built in the geometric `Similitude`/orbit
-    setting, extending `ScratchOrbitBaseCase`; `WallKernel` is the exact-Gram form of `ZProfileSeparates`.) **Deferred to
-    next:** the geometric similitude-*equivariance* of `WallKernel` ("every base up to aut" — the geometric analogue of
-    the spine's `baseTransport`); and the count-observable bridge `WallKernel` ↔ bounded-base `ZProfileSeparates` (3b).
+  - **3a — ✅ DONE (`ScratchWallKernel.lean`, axiom-clean).** The open content at an anisotropic base is isolated as a
+    single predicate, with the reduction proved around it: soundness `stabOrbit_imp_sameExactGram_of_anisotropic` (free,
+    μ=1 delimiter + `similitude_polar`), carried `WittExtendsToOrbit` (Witt tech debt), and the isolation capstone — at
+    an anisotropic base, **modulo {Witt}, `CellsAreOrbits` ⟺ `WallKernel`**. (Geometric `Similitude`/orbit setting,
+    extending `ScratchOrbitBaseCase`.) **★ Made observable-PARAMETRIC** (`WallKernelFor Obs` +
+    `stabOrbit_iff_obs_of_wallKernelFor`) after the 3c probe (below): the single-round `WallKernel` (= `SameSquareClass`
+    instance) is the **refuted separator** (FALSE at a bounded base); the framework now aims at `WallKernelFor Obs` for
+    the *right* observable `Obs` = the iterated `χ(det G₂)` 2-WL — any graph-invariant `Obs` is orbit-sound for free, so
+    the reduction is identical. **Deferred to next:** geometric similitude-*equivariance* of the kernel ("every base up
+    to aut", analogue of `baseTransport`); the count-observable bridge to bounded-base `ZProfileSeparates` (3b).
   - **3b.** Prove certifier ⟹ separator (bounded-base `ZProfileSeparates` ⟹ the seal's separation) and isolate the
     converse's extra requirement — locates the gap as a Lean object.
   - **3c (the research).** Replace the `c0` *fraction* bound with **Fourier/character inversion**: the counts `Z_u(S)`

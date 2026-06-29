@@ -109,4 +109,44 @@ theorem stabOrbit_iff_sameSquareClass_of_wallKernel {a : V} (haS : a ∈ S) (ha 
   ⟨fun h => sameExactGram_imp_sameSquareClass (stabOrbit_imp_sameExactGram_of_anisotropic haS ha h),
    stabOrbit_of_sameSquareClass hW hWitt⟩
 
+/-! ## Observable-parametric form — the redirected 3c target (2026-06-29 crackability probe)
+
+`WallKernel` above hard-codes the **single-round** square-class profile (`SameSquareClass` = per-base `χ` of the Gram
+entries). The 3c crackability probe (route doc §6 Increment 3) found that this is the **separator** level: it
+*under-determines* at a bounded base, so `WallKernel` is empirically **FALSE** there (e.g. orbits `12, 30, 56` vs the
+single-round profile stuck `≈ 10`). The **crack**: the determination *does* hold for the **iterated `χ(det G₂)`**
+observable (the 2-WL fixpoint of the seal's pair form), exactly and uniformly in `q`. So the wall's true target is the
+kernel for the *right* observable, not the single-round one.
+
+This section abstracts the observable. `WallKernelFor Obs` = "the relation `Obs` determines the exact Gram to `S`". Any
+**graph-invariant** `Obs` is orbit-sound for free (`StabOrbit ⟹ Obs`), so the reduction is identical; the open content
+is `WallKernelFor Obs` for `Obs` = the iterated `χ(det G₂)` 2-WL relation. The single-round `WallKernel` is the instance
+`Obs = SameSquareClass Q S` (definitionally) — the *refuted* separator; the redirected 3c builds the iterated instance.
+The decisive remaining question (probe): does the 2-WL iteration depth stay `O(1)` as `d` grows (⟹ crackable) or grow
+with `d` (⟹ the frontier, = banked quasipoly, pivot to Route C)? -/
+
+/-- **The observable-parametric wall kernel.** A relation `Obs` *determines* the exact Gram to `S`. The open content of
+`CellsAreOrbits`, parameterised by *which* refinement observable is used. Probe-validated target: `Obs` = the iterated
+`χ(det G₂)` 2-WL pair-count (the crack). `Obs = SameSquareClass Q S` (single round) is refuted at a bounded base. -/
+def WallKernelFor (Obs : V → V → Prop) (Q : QuadraticForm K V) (S : Set V) : Prop :=
+  ∀ t t' : V, Obs t t' → SameExactGram Q S t t'
+
+/-- `WallKernel` is the single-round (`SameSquareClass`) instance of `WallKernelFor`. -/
+theorem wallKernel_eq_wallKernelFor : WallKernel Q S = WallKernelFor (SameSquareClass Q S) Q S := rfl
+
+/-- The reduction, observable-parametric: `WallKernelFor Obs` + Witt ⟹ `Obs ⟹ StabOrbit`. -/
+theorem stabOrbit_of_obs {Obs : V → V → Prop} (hW : WallKernelFor Obs Q S)
+    (hWitt : WittExtendsToOrbit Q S) (h : Obs t t') : StabOrbit Q S t t' :=
+  hWitt t t' (hW t t' h)
+
+/-- **★ Observable-parametric isolation capstone.** Given orbit-soundness of `Obs` (free for any graph invariant) and
+the carried Witt input, `CellsAreOrbits` for the observable `Obs` (orbit ⟺ `Obs`) **⟺ `WallKernelFor Obs`**. The
+redirected 3c proves `WallKernelFor Obs` for `Obs` = the iterated `χ(det G₂)` 2-WL relation; this capstone then makes it
+`CellsAreOrbits` with no further work. -/
+theorem stabOrbit_iff_obs_of_wallKernelFor {Obs : V → V → Prop}
+    (hSound : ∀ {x y : V}, StabOrbit Q S x y → Obs x y)
+    (hW : WallKernelFor Obs Q S) (hWitt : WittExtendsToOrbit Q S) :
+    StabOrbit Q S t t' ↔ Obs t t' :=
+  ⟨fun h => hSound h, stabOrbit_of_obs hW hWitt⟩
+
 end ChainDescent.Wall
