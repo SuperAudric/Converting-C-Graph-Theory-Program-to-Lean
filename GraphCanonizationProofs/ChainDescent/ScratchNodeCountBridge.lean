@@ -149,4 +149,99 @@ theorem certifiedSinglePath_of_disposition {adj : AdjMatrix n} {P₀ : PMatrix n
   cellsCertified := fun S _ _ hv hw hcelleq =>
     selectedCell_single_stabOrbit (hdisp S) hv hw hcelleq
 
+/-! ## The transport seam — representative-choice invariance (depth-1 core)
+
+The Increment-0 residual: that a `CertifiedSinglePath` computes the *iso-invariant* canonical, i.e. consuming a
+different *representative* of a single-orbit cell does not change the leaf canonical. This is the analogue of the
+landed `spine_branch_independent` (guess-*direction* invariance), but across *representative choice* — and it is the
+piece that lets the meta poly-argument read "the cheap single path = the true canonical".
+
+**This section builds its depth-1 core.** An orbit automorphism `g ∈ Stab(S)` carrying one representative `v₁ ↦ v₂`
+transports the one-deeper partition: the `v₂`-individualized descent, *pulled back by `g`*, has the *same partition* as
+the `v₁`-individualized descent. So the two representative choices yield `g`-relabelings of one another — the same graph.
+
+The mechanism is the cross-config `warmRefine_transport` (an automorphism carries one config's refinement onto
+another's) plus the `samePartition` congruence of `warmRefine`. The subtlety the seam turns on: `individualizedColouring`
+labels each pinned vertex by its *own index*, so `g` moves the literal labels and the colourings are **not** equal — but
+their *partitions* coincide (singletons exactly on the pinned set, one class elsewhere), which is all the canonical
+needs. The remaining (downstream) work — iterate across levels and lift the partition-relabeling to `canonAdj` equality
+— is partly blocked on `canonForm` (the lex-min wrapper, a §15.7 placeholder); this depth-1 core is the load-bearing
+equivariance it will rest on. -/
+
+/-- **`warmRefine` is a `samePartition` congruence in its seed** (the `D = ∅` case of `warmRefine_agree_off'`):
+refining two same-partition seed colourings yields same-partition results. The engine that lets the
+representative-transport pass through warm refinement. -/
+theorem warmRefine_congr_samePartition {adj : AdjMatrix n} {P : PMatrix n} {χ χ' : Colouring n}
+    (h : samePartition χ χ') :
+    samePartition (warmRefine adj P χ) (warmRefine adj P χ') :=
+  warmRefine_agree_off' adj P P χ χ' ∅ h (fun _ _ _ => rfl)
+    (fun x hx => absurd hx (by simp))
+
+/-- **Membership transport for the pinned set.** An `S`-fixing automorphism `g` with `g v₁ = v₂` carries
+`insert v₁ S` onto `insert v₂ S`: `g i ∈ insert v₂ S ↔ i ∈ insert v₁ S`. -/
+theorem mem_insert_transport {S : Finset (Fin n)} {g : Equiv.Perm (Fin n)}
+    (hgfix : ∀ s ∈ S, g s = s) {v₁ v₂ : Fin n} (hgv : g v₁ = v₂) (i : Fin n) :
+    g i ∈ insert v₂ S ↔ i ∈ insert v₁ S := by
+  rw [Finset.mem_insert, Finset.mem_insert]
+  have hv : g i = v₂ ↔ i = v₁ := by rw [← hgv]; exact g.injective.eq_iff
+  have hS : g i ∈ S ↔ i ∈ S := by
+    constructor
+    · intro hgi
+      have hfix : g (g i) = g i := hgfix (g i) hgi
+      have : g i = i := g.injective hfix
+      rwa [this] at hgi
+    · intro hi; rwa [hgfix i hi]
+  rw [hv, hS]
+
+/-- **Seed transport (`samePartition`).** The `v₁`-individualized seed and the `g`-pullback of the `v₂`-individualized
+seed induce the *same partition*: both are "singletons on the pinned set, one class elsewhere", and `g` matches the
+pinned sets (`mem_insert_transport`). The literal label values differ (index-based), but the partition does not. -/
+theorem indiv_samePartition_transport {S : Finset (Fin n)} {g : Equiv.Perm (Fin n)}
+    (hgfix : ∀ s ∈ S, g s = s) {v₁ v₂ : Fin n} (hgv : g v₁ = v₂) :
+    samePartition (individualizedColouring n (insert v₁ S))
+      (fun v => individualizedColouring n (insert v₂ S) (g v)) := by
+  intro i j
+  have hi := mem_insert_transport hgfix hgv i
+  have hj := mem_insert_transport hgfix hgv j
+  simp only [individualizedColouring]
+  by_cases hI : i ∈ insert v₁ S <;> by_cases hJ : j ∈ insert v₁ S
+  · rw [if_pos hI, if_pos hJ, if_pos (hi.mpr hI), if_pos (hj.mpr hJ)]
+    simp only [add_left_inj, Fin.val_inj, EmbeddingLike.apply_eq_iff_eq]
+  · rw [if_pos hI, if_neg hJ, if_pos (hi.mpr hI), if_neg (fun h => hJ (hj.mp h))]
+    simp
+  · rw [if_neg hI, if_pos hJ, if_neg (fun h => hI (hi.mp h)), if_pos (hj.mpr hJ)]
+    simp
+  · rw [if_neg hI, if_neg hJ, if_neg (fun h => hI (hi.mp h)), if_neg (fun h => hJ (hj.mp h))]
+
+/-- **★ The representative-transport core (depth 1).** An orbit automorphism `g ∈ Stab(S)` carrying representative
+`v₁ ↦ v₂` makes the `v₂`-individualized descent, *pulled back by `g`*, have the *same partition* as the
+`v₁`-individualized descent. So choosing a different representative of a single-orbit consumed cell yields a
+`g`-relabeling of the same partition — the seam's load-bearing equivariance. Proof: seed transport
+(`indiv_samePartition_transport`) → `warmRefine` `samePartition`-congruence → cross-config `warmRefine_transport`
+collapses the pullback `warmRefine (χ₂ ∘ g)` to `(warmRefine χ₂) ∘ g`. -/
+theorem repTransport {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+    {g : Equiv.Perm (Fin n)} {v₁ v₂ : Fin n}
+    (hgaut : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u)
+    (hgfix : ∀ s ∈ S, g s = s) (hgv : g v₁ = v₂) :
+    samePartition (warmRefine adj P (individualizedColouring n (insert v₁ S)))
+      (fun v => warmRefine adj P (individualizedColouring n (insert v₂ S)) (g v)) := by
+  have hcong := warmRefine_congr_samePartition (adj := adj) (P := P)
+    (indiv_samePartition_transport hgfix hgv)
+  have hfe : warmRefine adj P (fun w => individualizedColouring n (insert v₂ S) (g w))
+      = fun v => warmRefine adj P (individualizedColouring n (insert v₂ S)) (g v) :=
+    funext fun v => (warmRefine_transport hgaut hgP (fun _ => rfl) v).symm
+  rwa [hfe] at hcong
+
+/-- **The representative-transport from the orbit witness.** Repackages `repTransport` with the automorphism `g`
+supplied by `OrbitPartition adj P S v₁ v₂` — exactly what `selectedCell_single_stabOrbit` yields between two
+representatives of a single-orbit consumed cell. So: two representatives of a certified cell give descents that are
+`g`-relabelings of one another (same partition up to `g`). -/
+theorem repTransport_of_orbitPartition {adj : AdjMatrix n} {P : PMatrix n} {S : Finset (Fin n)}
+    {v₁ v₂ : Fin n} (h : OrbitPartition adj P S v₁ v₂) :
+    ∃ g : Equiv.Perm (Fin n), IsAut g adj ∧ (∀ s ∈ S, g s = s) ∧ g v₁ = v₂ ∧
+      samePartition (warmRefine adj P (individualizedColouring n (insert v₁ S)))
+        (fun v => warmRefine adj P (individualizedColouring n (insert v₂ S)) (g v)) := by
+  obtain ⟨g, hgaut, hgP, hgfix, hgv⟩ := h
+  exact ⟨g, hgaut, hgfix, hgv, repTransport hgaut hgP hgfix hgv⟩
+
 end ChainDescent.NodeCountBridge
