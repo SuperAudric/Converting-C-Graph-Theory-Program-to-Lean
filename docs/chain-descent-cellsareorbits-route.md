@@ -40,8 +40,11 @@ yet — it is open both ways (the forms graph may or may not have bounded WL-dim
   `wittConeTransitive_of_pairing` — `WittConeTransitive Q` now follows from the concrete residual `IsotropicPairing Q`
   (existence of an isotropic vector non-orthogonal to two given isotropic vectors).
 
-**Next:** finish W1 — discharge `IsotropicPairing` (concrete vector-existence, field-genericity casework) ⟹
-`WittConeTransitive` unconditional ⟹ depth-1 base case done. Then Increment 3 (the wall). See §6/§7.
+**Next (re-prioritised after handoff review).** The reviewer correctly flagged that `poly ⟺ B` is a design slogan,
+not the Lean — the **node-count bridge is the route's missing pillar** (see §1 KNOWN GAP + §6 Increment 0). Order:
+1. **★ Increment 0 — node-count bridge** (HIGHEST; Witt/wall-independent; *validates the premise*). 2. **Increment 3**
+— state the wall kernel precisely (the open math). 3. **finish W1** — discharge `IsotropicPairing` (cheap base-case
+completion; low-leverage — land en route, not as the payoff). See §6/§7.
 
 **Quality bar:** axiom-clean, no `sorry`/no fresh `axiom`, `native_decide` banned, full build green when ported.
 
@@ -58,14 +61,28 @@ orbit, so it never has to branch. That proviso is exactly:
 > `Stab(S)`-orbit. Equivalently: the WL-closure (square-class refinement) partition equals the orbit partition =
 > **bounded WL-dimension** of the forms-graph families.
 
-The central fact this whole route rests on:
+The reduction this route rests on — stated **honestly**, because the Lean is weaker than the slogan:
 
-> **`poly ⟺ B`.** The refinement-based canonizer runs in polynomial time on the forms-graph residue **iff** B holds.
-> (⟸ B ⟹ single path ⟹ poly node count ⟹ poly, per-node already poly. The reduction wiring is the landed
-> `twinsRealizedByResidualAut_iff_cellsAreOrbits`, Cascade.lean, plus the sum-over-nodes budget.)
+> **`poly ⟸ B` (B is *sufficient*; the chain has a MISSING pillar).** B gives poly along three steps:
+> 1. **per base** — `twinsRealizedByResidualAut_iff_cellsAreOrbits` (LANDED, `Cascade.lean`): WL-cells at base `S` =
+>    `Stab(S)`-orbits.
+> 2. **assembly** — B at *every* descent node ⟹ the consumed cell is a single orbit at each step ⟹ the descent tree
+>    is a **single path**. **[NOT landed** — the iff is *per-base*; assembling it across descent nodes needs the spine
+>    model.]
+> 3. **node-count → poly** — single path of length `= base = Θ(log n)` ⟹ poly node count ⟹ poly (per-node already
+>    poly). **[NOT landed** — a *meta* budget argument; the project formalizes **no runtime model**, so every seal is
+>    structural and "poly" is always meta.]
 
-So even short of a full proof, **B is the precise, complete bottleneck of the refinement route** — not a speculative
-helper. Pinning it (true, false, or conditional) is a result in itself.
+> **⚠ KNOWN GAP — this is NOT yet `poly ⟺ B` in Lean.** Steps 2 + 3 are the **node-count bridge** (§6, Increment 0),
+> the route's *actually-missing pillar*. Without it, proving B and plugging into the existing infra
+> (`separatesAtBoundedBase_of_twinsRealized`) yields only `SeparatesAtBoundedBase` with bound `=` base size `= Θ(log n)`
+> `=` **the quasipoly seal you already have** — *not* poly. And the base is irreducibly `Θ(log n)` (spanning +
+> group-order + information bound, established this session), so the base-size route *cannot* reach poly; the
+> node-count bridge is the **only** mechanism that makes Route B beat quasipoly.
+
+So B is the *math* core (sufficient, open both ways), but it is **not the complete bottleneck**: the node-count bridge
+is a second, independent open piece — pure spine combinatorics, independent of Witt and the wall. Pinning B (true,
+false, or conditional) is a real result; but it only *pays off* through the bridge.
 
 **Honesty up front — B is open *both ways*.** We do not know B is true. The forms graph could have *unbounded*
 WL-dimension (the "node-4 wall"); empirics (single path) support B but only reach small `d`. This is why Route C
@@ -155,6 +172,23 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
 
 ## 6. Work-forward plan (ordered increments)
 
+- **★ Increment 0 — the node-count bridge (NEW, HIGHEST PRIORITY; Witt- and wall-independent).** The route's
+  actually-missing pillar (§1 KNOWN GAP). Build the structural reduction **`SinglePathDisposition ⟹ poly node count`**,
+  then key a **poly-seal capstone** on it. Three notes that determine how to build it:
+  - **Substrate (it's partly scoped already):** `spine_branch_independent` (descent-spine invariants, top-level
+    `ChainDescent.lean`) + `exists_potential_descent` (the monovariant = bounded descent steps). The
+    forms-graph-plan's *"Route B — potential/monovariant node-count bound (reuse `exists_potential_descent`)"* **is this
+    bridge under another name** — flagged there, never built or connected to `CellsAreOrbits`.
+  - **Key it on the WEAKER predicate, not full `CellsAreOrbits`.** The canonizer uses deferral (`EnableDeferral`);
+    empirically `Phase2Nodes = 0`. Poly needs only: *at each base a single-orbit (symmetric) cell is consumable, and
+    consuming them reaches a discrete base with no Phase-2 (real-decision) node* — the **single-path disposition**.
+    Full `CellsAreOrbits`-at-every-cell is *sufficient* but over-strong (the plan's "Route A sharpening" noted this).
+  - **Honest ceiling:** even with the bridge, final "poly time" stays **meta** (no runtime model is formalized). The
+    bridge produces the *structural* single-path claim the meta-argument consumes — which `SeparatesAtBoundedBase`
+    (quasipoly) does **not**. Do not aim for a runtime-complexity theorem; that is not how this project's seals work.
+  - **Why first:** the base is irreducibly `Θ(log n)`, so this is the *only* path to beat quasipoly. If it cannot even
+    be *expressed* in the spine model, that is decisive — Route B then has no poly distinct from the banked quasipoly,
+    and that finding is worth more than any further Witt/wall work.
 - **Increment 2 — general free prefix, modulo Witt — ✅ DONE (2026-06-29, axiom-clean, `ScratchOrbitBaseCase.lean`).**
   Generalised `stabOrbit_zero_base_scales` from `S = {0}` to any totally-isotropic base via the carried predicate
   `WittRealizes Q` (= the §7 **W-dec** input: multiplier-`μ` similitudes fixing a totally-isotropic subspace exist).
@@ -175,9 +209,17 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
   recommendation are in **§7**. The cheap first slice (W0+W1) discharges `WittConeTransitive` and makes the depth-1
   base case unconditional.
 
-**Definition of done for Route B:** `CellsAreOrbits` proved for the affine-polar residue (`modulo {Witt}` acceptable
-as tech debt) ⟹ wired through `twinsRealizedByResidualAut_iff_cellsAreOrbits` to a polynomial seal capstone, the
-poly twin of `reachesRigidOrCameron_affinePolar`.
+**Definition of done for Route B** (three pieces, not one):
+1. **node-count bridge** (Increment 0) — a structural theorem `SinglePathDisposition ⟹ poly node count`, keyed on a
+   NEW predicate (single-path / per-step-consumable-single-orbit-cell) that is **weaker than full `CellsAreOrbits`** and
+   is **NOT** `SeparatesAtBoundedBase` (that is the quasipoly seal);
+2. **the math** — `CellsAreOrbits` (`modulo {Witt}`) discharging that predicate for the affine-polar residue (via
+   `twinsRealizedByResidualAut_iff_cellsAreOrbits` assembled across nodes);
+3. **the capstone** — a poly-seal keyed on (1)'s predicate, the poly twin of `reachesRigidOrCameron_affinePolar`.
+
+NB final "poly time" remains a meta-argument over (3); (1) supplies the structural single-path claim the meta-argument
+needs and the quasipoly seal lacks. **Build order: (1) first** — it validates the whole premise and is independent of
+the wall.
 
 ---
 
@@ -255,12 +297,13 @@ are defensible to keep as `modulo {Witt}` tech debt until the open core is under
 
 ## 9. Pointers
 
-- **★ FRESH READER — PICK UP HERE.** Read this STATUS + §4 (what B needs) + §7.4 (the Witt build state). The **single
-  immediate task** is: discharge `IsotropicPairing` (in `ScratchWittCone.lean`) — a concrete finite-field
-  vector-existence lemma — which, via the already-built `wittConeTransitive_of_pairing`, makes the depth-1 base case
-  unconditional. Tool in hand: `exists_hyperbolic_partner`. After that: Increment 3 (the wall, §6) is the open research.
-  All three Scratch modules compile (`lake env lean`), axiom-clean, NOT in `build.sh`; their oleans are built so
-  `ScratchWittCone` (which imports `ScratchOrbitBaseCase`) checks directly.
+- **★ FRESH READER — PICK UP HERE.** Read this STATUS + §1 (esp. the **KNOWN GAP** on `poly ⟺ B`) + §6 Increment 0.
+  The **priority task** is **Increment 0 — the node-count bridge** (§6): it is the route's missing pillar and is
+  independent of Witt and the wall; building it (or finding it can't be expressed) is the decisive next step. Then
+  pin Increment 3 (the wall kernel), and land `IsotropicPairing` (in `ScratchWittCone.lean`, via the built
+  `wittConeTransitive_of_pairing` + `exists_hyperbolic_partner`) as a cheap base-case completion en route. All three
+  Scratch modules compile (`lake env lean`), axiom-clean, NOT in `build.sh`; oleans are built so `ScratchWittCone`
+  (which imports `ScratchOrbitBaseCase`) checks directly.
 - **Built modules:** `GraphCanonizationProofs/ChainDescent/ScratchSimilitudeCap.lean`,
   `GraphCanonizationProofs/ChainDescent/ScratchOrbitBaseCase.lean`,
   `GraphCanonizationProofs/ChainDescent/ScratchWittCone.lean` (all decls described in `PublicTheoremIndex.md`).
