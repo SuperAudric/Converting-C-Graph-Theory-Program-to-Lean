@@ -44,11 +44,13 @@ yet — it is open both ways (the forms graph may or may not have bounded WL-dim
   (the §4 math discharges it for free); the **completeness core** `selectedCell_single_stabOrbit` (consumed cell = one
   `StabilizerAt`-orbit — the piece prune *soundness* alone does not give) + `selectedCell_prune_sound_complete`; the
   node-count re-export `spine_node_count_le` (`≤ n`, from the landed `defaultSpineChain_reaches_leaf`); the capstone
-  `certifiedSinglePath_of_disposition` (disposition ⟹ **both** poly ingredients); **and the transport seam's depth-1
-  core** — `repTransport` / `repTransport_of_orbitPartition`: an orbit aut `g ∈ Stab(S)` carrying rep `v₁ ↦ v₂` makes
-  the `v₂`-descent (pulled back by `g`) `samePartition` the `v₁`-descent (rep-choice invariance), via the cross-config
-  `warmRefine_transport` + a `samePartition` congruence. Remaining = iterate across levels + lift to `canonAdj`
-  equality (partly blocked on the `canonForm` placeholder).
+  `certifiedSinglePath_of_disposition` (disposition ⟹ **both** poly ingredients); **and the transport seam** —
+  `repTransport` (depth-1 rep-choice invariance: orbit aut `g ∈ Stab(S)` carrying `v₁ ↦ v₂` makes the `v₂`-descent
+  pulled-back-by-`g` `samePartition` the `v₁`-descent), **`baseTransport`** (the general `g`-equivariance at *any* base
+  `T` vs `g(T)` — subsumes "iterate across levels" since `g` is global), and **`labelledAdj_rankPerm_transport`** (the
+  `canonAdj`-lift atom: labelled output invariant under an automorphism relabel of the discrete leaf colouring, via
+  `rankPerm_comp` + `labelledAdj_eq_of_isAut`). Remaining = the `samePartition`→*literal*-relabel step, which is exactly
+  what `canonForm` (lex-min over `DirAssignment`s, a §15.7 placeholder) supplies.
 
 **Next (re-prioritised after handoff review).** The reviewer correctly flagged that `poly ⟺ B` is a design slogan,
 not the Lean — the **node-count bridge is the route's missing pillar** (see §1 KNOWN GAP + §6 Increment 0). Order:
@@ -215,18 +217,25 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
   - **Capstone built:** `certifiedSinglePath_of_disposition` — `SinglePathDisposition` (the weak disposition at every
     base) delivers **both** poly ingredients: bounded nodes (`≤ n`) **and** every consumed cell certified one residual
     orbit. Packaged as `CertifiedSinglePath`.
-  - **★ Transport seam (Increment-0 residual) — DEPTH-1 CORE ✅ BUILT.** That a `CertifiedSinglePath` *computes the
-    iso-invariant canonical* = representative-choice invariance of the leaf canonical over certified single-orbit cells.
-    Its **depth-1 core is now built** (`repTransport`): an orbit aut `g ∈ Stab(S)` carrying rep `v₁ ↦ v₂` makes the
-    `v₂`-individualized descent (pulled back by `g`) `samePartition` the `v₁`-individualized descent — so two reps of a
-    single-orbit cell give `g`-relabelings of one another. Mechanism: cross-config `warmRefine_transport` + a
-    `samePartition` congruence (`warmRefine_congr_samePartition`); the subtlety is that `individualizedColouring` labels
-    by *index*, so `g` moves literal labels but the *partition* is invariant (which is all the canonical needs).
-    **Still remaining:** (i) iterate the depth-1 transport across descent levels, (ii) lift the partition-relabeling to
-    `canonAdj` equality — (ii) is partly blocked on the `canonForm` lex-min wrapper (a §15.7 placeholder). It is the
-    *structural* claim the **meta** poly-argument consumes; final "poly time" stays meta (no runtime model is
-    formalized — do not aim for a runtime-complexity theorem). This is the analogue of the landed
-    `spine_branch_independent` (direction-invariance); `repTransport` is the rep-choice analogue, now in hand.
+  - **★ Transport seam (Increment-0 residual) — DEPTH-1 CORE + ITERATE + LIFT-ATOM ✅ BUILT.** That a
+    `CertifiedSinglePath` *computes the iso-invariant canonical* = representative-choice invariance of the leaf canonical
+    over certified single-orbit cells. Built (all axiom-clean):
+    - **Depth-1 core** `repTransport`: an orbit aut `g ∈ Stab(S)` carrying rep `v₁ ↦ v₂` makes the `v₂`-descent (pulled
+      back by `g`) `samePartition` the `v₁`-descent. Mechanism: cross-config `warmRefine_transport` +
+      `warmRefine_congr_samePartition`.
+    - **Iterate across levels** `baseTransport`: the general `g`-equivariance — for *any* base `T` and automorphism `g`,
+      the descent at `g(T)` is the `g`-relabeling of the descent at `T`. Because `g` is **global**, this holds at every
+      base (incl. a leaf), so it subsumes the level-by-level iteration in one lemma — no induction needed.
+      (`repTransport_eq_baseTransport_instance` confirms `repTransport` is its `S`-fixing instance.)
+    - **Lift atom** `labelledAdj_rankPerm_transport`: the canonical *output* `labelledAdj (rankPerm π) adj` is invariant
+      under a `g`-relabel of the discrete leaf colouring (via `rankPerm_comp` + `labelledAdj_eq_of_isAut`).
+    - **★ Remaining (precise):** `baseTransport` delivers `samePartition`, not a *literal* `π₂ = π₁ ∘ g`, because
+      `individualizedColouring` labels by *index* (so `g` moves literal colour values while preserving the partition);
+      `rankPerm`/`labelledAdj` read colour values, so the lift atom needs the literal relabel. Bridging
+      `samePartition` → equal labelled canonical is exactly the job of **`canonForm`** (lex-min over `DirAssignment`s,
+      designed to depend only on partition + graph) — a §15.7 *placeholder*. So the lift is complete **modulo
+      `canonForm`**. Final "poly time" stays meta (no runtime model — do not aim for a runtime-complexity theorem).
+      This whole seam is the rep-choice analogue of the landed `spine_branch_independent` (direction-invariance).
   - **Why this was first:** the base is irreducibly `Θ(log n)`, so this is the *only* path to beat quasipoly. The
     grounding answered the "can it even be expressed?" question affirmatively — the substrate carries it — so Route B's
     poly is *not* a priori collapsed into the banked quasipoly; the live obligation is the transport seam + the §4 math.
@@ -341,10 +350,11 @@ are defensible to keep as `modulo {Witt}` tech debt until the open core is under
 ## 9. Pointers
 
 - **★ FRESH READER — PICK UP HERE.** Read this STATUS + §1 (esp. the **KNOWN GAP** on `poly ⟺ B`) + §6 Increment 0.
-  **Increment 0's provable core + the transport seam's depth-1 core are ✅ DONE** (`ScratchNodeCountBridge.lean`,
-  axiom-clean). The **priority task** is now the seam's remainder — **iterate `repTransport` across descent levels +
-  lift the partition-relabeling to `canonAdj` equality** (§6 Increment 0; the lift is partly blocked on the `canonForm`
-  lex-min placeholder). Then pin **Increment 3** (the wall kernel),
+  **Increment 0's provable core + the transport seam (depth-1 `repTransport`, the `baseTransport` iterate, and the
+  `labelledAdj_rankPerm_transport` lift atom) are ✅ DONE** (`ScratchNodeCountBridge.lean`, axiom-clean). The seam's
+  **only remaining piece is the `samePartition`→literal-relabel bridge = `canonForm`** (lex-min over `DirAssignment`s,
+  a §15.7 placeholder) — building `canonForm` is the gating prerequisite, not a Route-B-specific task. So the live
+  Route-B math is now **Increment 3** (the wall kernel),
   and land `IsotropicPairing` (in `ScratchWittCone.lean`, via the built `wittConeTransitive_of_pairing` +
   `exists_hyperbolic_partner`) as a cheap base-case completion en route. All four Scratch modules compile
   (`lake env lean`), axiom-clean, NOT in `build.sh`; oleans are built so imports check directly.

@@ -244,4 +244,103 @@ theorem repTransport_of_orbitPartition {adj : AdjMatrix n} {P : PMatrix n} {S : 
   obtain ⟨g, hgaut, hgP, hgfix, hgv⟩ := h
   exact ⟨g, hgaut, hgfix, hgv, repTransport hgaut hgP hgfix hgv⟩
 
+/-! ### Iterating across levels — the full-base `g`-equivariance
+
+`repTransport` is depth-1 (one consumed cell). The descent continues, individualizing more vertices until the leaf.
+Because the orbit automorphism `g` is **global** (an automorphism of the whole graph, fixing the committed prefix),
+the iteration does **not** need an induction: `g` carries the *entire* descent subtree at once. The clean statement is
+the depth-1 lemma with the pinned set generalised from `insert v₁ S` to an **arbitrary base `T`** and its image `g(T)`:
+for any automorphism `g`, the descent at `g(T)` is the `g`-relabeling of the descent at `T`. Taking `T` to be a leaf
+base gives the full-leaf transport — the "iterate across levels" piece, in one lemma. -/
+
+/-- **Membership transport, general base.** `g i ∈ T.image g ↔ i ∈ T` (just injectivity of `g`). -/
+theorem mem_image_transport {T : Finset (Fin n)} {g : Equiv.Perm (Fin n)} (i : Fin n) :
+    g i ∈ T.image g ↔ i ∈ T := by
+  rw [Finset.mem_image]
+  constructor
+  · rintro ⟨a, ha, hga⟩; rwa [g.injective hga] at ha
+  · intro hi; exact ⟨i, hi, rfl⟩
+
+/-- **Seed transport, general base.** The `T`-individualized seed and the `g`-pullback of the `g(T)`-individualized
+seed induce the same partition. The general form of `indiv_samePartition_transport`. -/
+theorem indiv_samePartition_image {T : Finset (Fin n)} {g : Equiv.Perm (Fin n)} :
+    samePartition (individualizedColouring n T)
+      (fun v => individualizedColouring n (T.image g) (g v)) := by
+  intro i j
+  have hi := mem_image_transport (T := T) (g := g) i
+  have hj := mem_image_transport (T := T) (g := g) j
+  simp only [individualizedColouring]
+  by_cases hI : i ∈ T <;> by_cases hJ : j ∈ T
+  · rw [if_pos hI, if_pos hJ, if_pos (hi.mpr hI), if_pos (hj.mpr hJ)]
+    simp only [add_left_inj, Fin.val_inj, EmbeddingLike.apply_eq_iff_eq]
+  · rw [if_pos hI, if_neg hJ, if_pos (hi.mpr hI), if_neg (fun h => hJ (hj.mp h))]; simp
+  · rw [if_neg hI, if_pos hJ, if_neg (fun h => hI (hi.mp h)), if_pos (hj.mpr hJ)]; simp
+  · rw [if_neg hI, if_neg hJ, if_neg (fun h => hI (hi.mp h)), if_neg (fun h => hJ (hj.mp h))]
+
+/-- **★ Full-base `g`-equivariance (the "iterate across levels" lemma).** For any automorphism `g` (preserving `P`)
+and any base `T`, the descent at `g(T)`, pulled back by `g`, has the *same partition* as the descent at `T`. Because
+`g` is global, this holds at **every** base — in particular at a leaf base — so it subsumes the level-by-level
+iteration of `repTransport` in a single statement: the whole single-orbit-rep-swap descent is a `g`-relabeling. -/
+theorem baseTransport {adj : AdjMatrix n} {P : PMatrix n} {T : Finset (Fin n)}
+    {g : Equiv.Perm (Fin n)} (hgaut : IsAut g adj) (hgP : ∀ x u, P (g x) (g u) = P x u) :
+    samePartition (warmRefine adj P (individualizedColouring n T))
+      (fun v => warmRefine adj P (individualizedColouring n (T.image g)) (g v)) := by
+  have hcong := warmRefine_congr_samePartition (adj := adj) (P := P)
+    (indiv_samePartition_image (T := T) (g := g))
+  have hfe : warmRefine adj P (fun w => individualizedColouring n (T.image g) (g w))
+      = fun v => warmRefine adj P (individualizedColouring n (T.image g)) (g v) :=
+    funext fun v => (warmRefine_transport hgaut hgP (fun _ => rfl) v).symm
+  rwa [hfe] at hcong
+
+/-- **`repTransport` is the `S`-fixing instance of `baseTransport`.** When `g` fixes `S` pointwise and `g v₁ = v₂`,
+the image `(insert v₁ S).image g` is exactly `insert v₂ S`, so `baseTransport` at `T = insert v₁ S` recovers
+`repTransport`. (Confirms the depth-1 lemma is the orbit-cell specialisation of the general equivariance.) -/
+theorem repTransport_eq_baseTransport_instance {S : Finset (Fin n)} {g : Equiv.Perm (Fin n)}
+    (hgfix : ∀ s ∈ S, g s = s) {v₁ v₂ : Fin n} (hgv : g v₁ = v₂) :
+    (insert v₁ S).image g = insert v₂ S := by
+  have hSimg : S.image g = S := by
+    ext x
+    simp only [Finset.mem_image]
+    constructor
+    · rintro ⟨a, ha, rfl⟩; rwa [hgfix a ha]
+    · intro hx; exact ⟨x, hx, hgfix x hx⟩
+  rw [Finset.image_insert, hgv, hSimg]
+
+/-! ### Lifting the partition-relabeling to the labelled canonical
+
+The descent's leaf partitions under two single-orbit representatives are `g`-relabelings of one another
+(`baseTransport`). The canonical *output* is `labelledAdj (rankPerm π) adj`. The atom below shows that output is
+**invariant** under a `g`-relabeling of the discrete leaf colouring, for `g` an automorphism: relabeling the colouring
+by `g` conjugate-shifts the rank permutation (`rankPerm_comp`), and an automorphism is invisible at the labelled level
+(`labelledAdj_eq_of_isAut`). So once the leaf colourings are related by a *literal* `g`-relabel, the labelled
+canonical agrees.
+
+**The remaining gap (precisely).** `baseTransport` delivers `samePartition`, **not** a literal `π₂ = π₁ ∘ g`, because
+`individualizedColouring` labels each pinned vertex by its own *index* — so `g` moves the literal colour values while
+preserving the partition. `rankPerm`/`labelledAdj` read colour *values* (via `vertexRank`), so the atom needs the
+literal relabel, which the index-based seed does not provide. Bridging `samePartition` → equal labelled canonical is
+exactly the job of `canonForm` (the lex-min over `DirAssignment`s, designed to depend only on the partition + graph) —
+a §15.7 *placeholder*. So the lift is complete *modulo* `canonForm`; this atom is the relabel-invariance it will use. -/
+
+/-- **Labelled-output invariance under an automorphism relabel.** If `g` is an automorphism of `adj` and `π` is a
+discrete colouring, the labelled adjacency from the `g`-relabeled colouring `π ∘ g` equals that from `π`. Via
+`rankPerm_comp` (`rankPerm (π ∘ g) = rankPerm π · g`) + `labelledAdj_eq_of_isAut` (automorphisms are invisible at the
+labelled level). The canonical-output half of the transport lift; pairs with `baseTransport` once the seed is made
+literal-relabel (the `canonForm` step). -/
+theorem labelledAdj_rankPerm_transport {adj : AdjMatrix n} {π : Colouring n}
+    {g : Equiv.Perm (Fin n)} (hg : IsAut g adj)
+    (h₁ : Discrete π) (h₂ : Discrete (fun v => π (g v))) :
+    labelledAdj (Colouring.rankPerm (fun v => π (g v)) h₂) adj
+      = labelledAdj (Colouring.rankPerm π h₁) adj := by
+  rw [rankPerm_comp π g h₁ h₂]
+  funext i j
+  simp only [labelledAdj]
+  have hsymm : ∀ x : Fin n, (Colouring.rankPerm π h₁ * g).symm x
+      = g.symm ((Colouring.rankPerm π h₁).symm x) := fun x =>
+    (Equiv.symm_apply_eq _).mpr (by simp [Equiv.Perm.mul_apply])
+  rw [hsymm i, hsymm j]
+  have hg' := congrFun (congrFun (labelledAdj_eq_of_isAut hg)
+    ((Colouring.rankPerm π h₁).symm i)) ((Colouring.rankPerm π h₁).symm j)
+  simpa only [labelledAdj] using hg'
+
 end ChainDescent.NodeCountBridge

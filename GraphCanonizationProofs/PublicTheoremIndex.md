@@ -2080,26 +2080,34 @@ reduced to `IsotropicPairing`. Axiom-clean `[propext, Classical.choice, Quot.sou
 
 ## ChainDescent/ScratchNodeCountBridge.lean
 
-**Increment 0 — the node-count bridge (2026-06-29), NOT in `build.sh`.** The CellsAreOrbits route's poly *payoff*
-mechanism: the single-path disposition delivers the two poly ingredients (bounded node count + every consumed cell one
-residual orbit). Grounding finding — three of four ingredients were already landed (node-count `≤ n`, prune soundness,
-per-node firing); this module adds the missing one, prune *completeness*. Keyed on the *weaker* `SelectedCellIsOrbit`
-(scheduler-matching), discharged by full `CellsAreOrbits`. Axiom-clean `[propext, Classical.choice, Quot.sound]`.
-Imports `ChainDescent.Cascade`. Residual = the `canonAdj`-transport seam. See `docs/chain-descent-cellsareorbits-route.md` §6.
+**Increment 0 — the node-count bridge + transport seam (2026-06-29), NOT in `build.sh`.** The CellsAreOrbits route's
+poly *payoff* mechanism: the single-path disposition delivers the two poly ingredients (bounded node count + every
+consumed cell one residual orbit), plus the **transport seam** (representative-choice invariance of the leaf canonical).
+Grounding finding — most ingredients were already landed (node-count `≤ n`, prune soundness, per-node firing,
+direction-invariance); this module adds prune *completeness*, the depth-1 rep-transport `repTransport`, the general
+`baseTransport` (iterate), and the `canonAdj`-lift atom `labelledAdj_rankPerm_transport`. Keyed on the *weaker*
+`SelectedCellIsOrbit`, discharged by full `CellsAreOrbits`. Axiom-clean `[propext, Classical.choice, Quot.sound]`.
+Imports `ChainDescent.Cascade`. Remaining seam gap = `samePartition`→literal relabel = `canonForm` (§15.7 placeholder).
+See `docs/chain-descent-cellsareorbits-route.md` §6.
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `SelectedCellIsOrbit` | 46-54 | **0a** — `CellsAreOrbits` restricted to `sel`'s targeted cell: same-coloured vertices of the *consumed* cell are `Stab(S)`-orbit-equivalent. Strictly weaker than full `CellsAreOrbits`; matches the scheduler. | Definition |
-| `selectedCellIsOrbit_of_cellsAreOrbits` | 64-66 | **0b** — full `CellsAreOrbits S ⟹ SelectedCellIsOrbit`. The §4 forms-graph math (modulo Witt + the wall) discharges the bridge hypothesis for free. | — |
-| `selectedCell_single_stabOrbit` | 76-86 | **0c — prune completeness (the missing pillar).** Under `SelectedCellIsOrbit`, two same-cell vertices lie in one `StabilizerAt`-orbit (the consumed cell is *one* orbit ⟹ one sibling-class). The direction prune *soundness* (`covered_sound`) does not give. Via `mem_orbit_stabilizerAt_iff`. | — |
-| `selectedCell_prune_sound_complete` | 91-99 | The two reps are *mutually* `OrbitPartition` — dropping either is sound (isomorphic) and complete (no class lost). Turns "fork over reps" into "descend on one". | — |
-| `spine_node_count_le` | 108-112 | **Node count `≤ n`** — re-export of the landed `defaultSpineChain_reaches_leaf` (single path reaches a discrete leaf in `≤ n` levels). Step (3) is free — NOT `exists_potential_descent` (that bounds *base size*, the quasipoly engine). | — |
-| `SinglePathDisposition` | 120-122 | The bridge-keyed hypothesis: `∀ S, SelectedCellIsOrbit … S` (every consumed cell one orbit). Structural form of the empirical `Phase2Nodes = 0`. Weaker than `∀ S, CellsAreOrbits`. | Definition |
-| `singlePathDisposition_of_cellsAreOrbits` | 125-128 | The forms-graph math (full `CellsAreOrbits` at every base) discharges the disposition. | — |
-| `CertifiedSinglePath` | 137-145 | The two poly ingredients bundled: `boundedNodes` (`≤ n`) + `cellsCertified` (every consumed cell one residual orbit). The structural object the **meta** poly-argument reads "poly time" off. | Structure |
-| `certifiedSinglePath_of_disposition` | 152-159 | **★ The bridge capstone (Increment 0).** `SinglePathDisposition ⟹ CertifiedSinglePath` — both poly ingredients discharged from the disposition. Residual to a poly seal = the `canonAdj`-transport seam (rep-choice invariance; meta-consumed). | — |
-| `warmRefine_congr_samePartition` | 184-188 | `warmRefine` is a `samePartition` congruence in its seed (the `D=∅` case of `warmRefine_agree_off'`). The engine that passes representative-transport through warm refinement. | — |
-| `mem_insert_transport` | 192-205 | An `S`-fixing aut `g` with `g v₁=v₂` carries `insert v₁ S` onto `insert v₂ S`: `g i ∈ insert v₂ S ↔ i ∈ insert v₁ S`. | — |
-| `indiv_samePartition_transport` | 210-227 | **Seed transport.** The `v₁`-individualized seed and the `g`-pullback of the `v₂`-individualized seed induce the same partition (both singletons-on-pinned-set; `g` matches the pinned sets). Literal index-labels differ, partition does not. | — |
-| `repTransport` | 235-249 | **★ The representative-transport core (depth 1).** An orbit aut `g ∈ Stab(S)` carrying rep `v₁ ↦ v₂` makes the `v₂`-individualized descent (pulled back by `g`) `samePartition` the `v₁`-descent — rep-choice invariance, the transport seam's load-bearing equivariance. Via cross-config `warmRefine_transport` + the congruence. | — |
-| `repTransport_of_orbitPartition` | 256-263 | `repTransport` with `g` supplied by `OrbitPartition adj P S v₁ v₂` (what `selectedCell_single_stabOrbit` yields). Two reps of a certified single-orbit cell give `g`-relabeled descents. | — |
+| `SelectedCellIsOrbit` | 46-58 | **0a** — `CellsAreOrbits` restricted to `sel`'s targeted cell: same-coloured vertices of the *consumed* cell are `Stab(S)`-orbit-equivalent. Strictly weaker than full `CellsAreOrbits`; matches the scheduler. | Definition |
+| `selectedCellIsOrbit_of_cellsAreOrbits` | 60-62 | **0b** — full `CellsAreOrbits S ⟹ SelectedCellIsOrbit`. The §4 forms-graph math (modulo Witt + the wall) discharges the bridge hypothesis for free. | — |
+| `selectedCell_single_stabOrbit` | 72-83 | **0c — prune completeness (the missing pillar).** Under `SelectedCellIsOrbit`, two same-cell vertices lie in one `StabilizerAt`-orbit (the consumed cell is *one* orbit ⟹ one sibling-class). The direction prune *soundness* (`covered_sound`) does not give. Via `mem_orbit_stabilizerAt_iff`. | — |
+| `selectedCell_prune_sound_complete` | 86-99 | The two reps are *mutually* `OrbitPartition` — dropping either is sound (isomorphic) and complete (no class lost). Turns "fork over reps" into "descend on one". | — |
+| `spine_node_count_le` | 102-111 | **Node count `≤ n`** — re-export of the landed `defaultSpineChain_reaches_leaf` (single path reaches a discrete leaf in `≤ n` levels). Step (3) is free — NOT `exists_potential_descent` (that bounds *base size*, the quasipoly engine). | — |
+| `SinglePathDisposition` | 113-115 | The bridge-keyed hypothesis: `∀ S, SelectedCellIsOrbit … S` (every consumed cell one orbit). Structural form of the empirical `Phase2Nodes = 0`. Weaker than `∀ S, CellsAreOrbits`. | Definition |
+| `singlePathDisposition_of_cellsAreOrbits` | 118-122 | The forms-graph math (full `CellsAreOrbits` at every base) discharges the disposition. | — |
+| `CertifiedSinglePath` | 128-141 | The two poly ingredients bundled: `boundedNodes` (`≤ n`) + `cellsCertified` (every consumed cell one residual orbit). The structural object the **meta** poly-argument reads "poly time" off. | Structure |
+| `certifiedSinglePath_of_disposition` | 143-151 | **★ The bridge capstone (Increment 0).** `SinglePathDisposition ⟹ CertifiedSinglePath` — both poly ingredients discharged from the disposition. | — |
+| `warmRefine_congr_samePartition` | 174-178 | `warmRefine` is a `samePartition` congruence in its seed (the `D=∅` case of `warmRefine_agree_off'`). The engine that passes representative-transport through warm refinement. | — |
+| `mem_insert_transport` | 182-194 | An `S`-fixing aut `g` with `g v₁=v₂` carries `insert v₁ S` onto `insert v₂ S`: `g i ∈ insert v₂ S ↔ i ∈ insert v₁ S`. | — |
+| `indiv_samePartition_transport` | 199-214 | **Seed transport.** The `v₁`-individualized seed and the `g`-pullback of the `v₂`-individualized seed induce the same partition (both singletons-on-pinned-set; `g` matches the pinned sets). Literal index-labels differ, partition does not. | — |
+| `repTransport` | 222-233 | **★ The representative-transport core (depth 1).** An orbit aut `g ∈ Stab(S)` carrying rep `v₁ ↦ v₂` makes the `v₂`-individualized descent (pulled back by `g`) `samePartition` the `v₁`-descent — rep-choice invariance, the transport seam's load-bearing equivariance. Via cross-config `warmRefine_transport` + the congruence. | — |
+| `repTransport_of_orbitPartition` | 239-245 | `repTransport` with `g` supplied by `OrbitPartition adj P S v₁ v₂` (what `selectedCell_single_stabOrbit` yields). Two reps of a certified single-orbit cell give `g`-relabeled descents. | — |
+| `mem_image_transport` | 257-263 | Membership transport, general base: `g i ∈ T.image g ↔ i ∈ T` (injectivity of `g`). | — |
+| `indiv_samePartition_image` | 266-280 | Seed transport, general base: the `T`-individualized seed and the `g`-pullback of the `g(T)`-individualized seed induce the same partition. General form of `indiv_samePartition_transport`. | — |
+| `baseTransport` | 284-294 | **★ Full-base `g`-equivariance (the "iterate across levels" lemma).** For any aut `g` and base `T`, the descent at `g(T)` (pulled back by `g`) is `samePartition` the descent at `T`. `g` global ⟹ holds at every base incl. a leaf ⟹ subsumes level-by-level iteration in one lemma. | — |
+| `repTransport_eq_baseTransport_instance` | 298-310 | `(insert v₁ S).image g = insert v₂ S` for `g` fixing `S` with `g v₁=v₂` — confirms `repTransport` is the `S`-fixing instance of `baseTransport`. | — |
+| `labelledAdj_rankPerm_transport` | 330-344 | **The `canonAdj`-lift atom.** Labelled output `labelledAdj (rankPerm π) adj` is invariant under a `g`-relabel of the discrete leaf colouring (`g` an aut), via `rankPerm_comp` + `labelledAdj_eq_of_isAut`. Remaining lift gap = `samePartition`→literal relabel = `canonForm` (§15.7 placeholder). | — |
