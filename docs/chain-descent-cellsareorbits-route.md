@@ -27,9 +27,14 @@ yet — it is open both ways (the forms graph may or may not have bounded WL-dim
   delimiter, the origin-base orbit delimiter (scalar realization + wall-side norm preservation), and **Increment 2** —
   the general free-prefix orbit coarsening over any totally-isotropic base modulo the carried `WittRealizes` (= W-dec)
   predicate, with `not_multiplierRealizable_of_anisotropic` pinning the predicate to the free regime.
+- `ChainDescent/ScratchWittCone.lean` — **Witt build W0 + W1 (cone-transitivity reduction)**: the orthogonal
+  reflection as an isometry (`refl_isometry`, `reflSim`), the swap `refl_swap`, similitude composition `simComp`, the
+  `polar ≠ 0` case `cone_case_polar_ne`, the hyperbolic-partner lemma `exists_hyperbolic_partner`, and the **reduction**
+  `wittConeTransitive_of_pairing` — `WittConeTransitive Q` now follows from the concrete residual `IsotropicPairing Q`
+  (existence of an isotropic vector non-orthogonal to two given isotropic vectors).
 
-**Next:** Increment 3 (the wall) — the genuine open kernel; Witt build (W-cone/W-ext/W-dec) in flight on a parallel
-agent (see §7). See §6.
+**Next:** finish W1 — discharge `IsotropicPairing` (concrete vector-existence, field-genericity casework) ⟹
+`WittConeTransitive` unconditional ⟹ depth-1 base case done. Then Increment 3 (the wall). See §6/§7.
 
 **Quality bar:** axiom-clean, no `sorry`/no fresh `axiom`, `native_decide` banned, full build green when ported.
 
@@ -199,15 +204,19 @@ theory, but all the primitives are present**, so this is a real build, not from 
 ### 7.3 Gaps to build (no Witt theory in Mathlib)
 | Stage | Target | Difficulty | Value |
 |---|---|---|---|
-| **W0** | orthogonal reflection `τ_v` is an isometry; `Q u = Q v ≠ 0 ⟹ τ_{u−v}` (or `τ_{u+v}`) maps `u ↦ v` | **Small** | foundation / reusable atom |
-| **W1** | **cone transitivity** (isotropic): reflections + case split on `B(u,v)` (the `B(u,v)=0` case via an intermediate isotropic `w`) | **Medium** | **discharges `WittConeTransitive`; completes depth-1** |
+| **W0** | orthogonal reflection `τ_v` is an isometry; `Q u = Q v ∧ Q(u−v)≠0 ⟹ τ_{u−v}` maps `u ↦ v` | ✅ **DONE** (`ScratchWittCone`) | foundation / reusable atom |
+| **W1** | **cone transitivity** — `polar≠0` case ✅ done; **reduced** to the residual `IsotropicPairing` (∃ isotropic `w` non-orthogonal to both) via `wittConeTransitive_of_pairing` + the partner lemma `exists_hyperbolic_partner` | **Reduced**; residual = `IsotropicPairing` (Medium, field-genericity casework) | discharges `WittConeTransitive`; completes depth-1 |
 | **W2** | anisotropic-shell transitivity (isometries transitive on a fixed nonzero norm) | **Medium** | relative-sphere structure |
 | **W3** | **Witt extension theorem** (induction on `dim U`; orthogonal-complement peeling; isotropic case via hyperbolic completion) | **Large** | step's easy half |
 | **W4** | **Witt decomposition** + multiplier realization fixing totally isotropic subspaces | **Large** | general free prefix (Increment 2) |
 
 ### 7.4 Build order + recommendation
-- **Do W0 + W1 first.** Small + medium, self-contained, and the payoff is concrete: `WittConeTransitive` discharged ⟹
-  the depth-1 base case is *done, no hypothesis*. Reflections are a reusable atom for everything downstream.
+- **W0 ✅ done, W1 reduced** (`ScratchWittCone.lean`, axiom-clean). The reflection engine is built and
+  `WittConeTransitive` is reduced to the concrete residual `IsotropicPairing`. **Remaining for W1:** discharge
+  `IsotropicPairing` — a finite-field vector-existence statement (the isotropic cone of a dim-`≥4` nondeg form is not
+  covered by two hyperplanes), provable via `exists_hyperbolic_partner` + casework (edge cases at `|K|=3`, and the
+  `polar Q f g ≠ 0` correction). Once landed, `wittConeTransitive_of_pairing` makes the depth-1 base case
+  unconditional, *no hypothesis*.
 - **W2** next only if the relative-sphere structure is wanted explicitly before the wall.
 - **W3 + W4 are LARGE** and — critically — only convert `modulo {Witt}` → unconditional on the **scaffold**; they do
   **not** touch the wall (the open kernel survives regardless). So the honest cost-benefit: building them buys a cleaner
