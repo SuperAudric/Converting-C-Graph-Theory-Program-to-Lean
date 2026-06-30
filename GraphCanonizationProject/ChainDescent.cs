@@ -73,6 +73,25 @@ namespace Canonizer
         // Descent-tree node count per depth — the per-level cost profile.
         private readonly List<int> _nodesByDepth = new();
 
+        // ── Phase-0 branch profile (recovery route T0: leaves ≤ B^L) ─────────
+        // b_i = the surviving representatives explored at a node AFTER
+        // a-posteriori harvest pruning = #Stab(path)-orbits in the selected cell
+        // (the branching factor). B = max b_i; L = max branching nodes on any
+        // root→leaf path (exact, accumulated bottom-up — NOT the aggregate
+        // _branchingNodes, which counts branching nodes across the whole tree).
+        // The poly-leaf-count claim is leaves ≤ B^L, so BOTH B (≤ poly(q)?) and
+        // L (= O(d)?) are the quantities Phase 0 must scale-test. Pure
+        // instrumentation; never read by the descent.
+        private int _maxBranchFactor;        // B
+        private int _maxBranchPathDepth;     // L
+        private readonly List<int> _branchFactors = new();  // b_i, branching nodes only
+        private readonly List<int> _branchDepths = new();    // its depth (parallel)
+        // Scratch: the branching-depth of the subtree the most-recently-returned
+        // Search computed. -1 = sentinel "no child node ran" (a Branch that bailed
+        // on a closure contradiction). Read by the parent rep loop after each
+        // Branch call to accumulate the per-path maximum.
+        private int _subtreeBranchDepth;
+
         // Read-only Route-A trace: per committed node, the consumed cell's size,
         // how many non-singleton cells it was chosen among, and its adjacency
         // split to the last path vertex. Exposes the symmetric-cell ("sphere")
@@ -185,6 +204,8 @@ namespace Canonizer
             var stats = new DescentStats(
                 _nodeCount, _maxDepth, _leafCount, _prunedBranches,
                 _budget, _nodesByDepth.ToArray(),
+                _maxBranchFactor, _maxBranchPathDepth,
+                _branchFactors.ToArray(), _branchDepths.ToArray(),
                 new CascadeStats(
                     _decisionNodes, _branchingNodes,
                     _branchAllSingleton, _branchResolved, _branchStarved,
@@ -204,11 +225,12 @@ namespace Canonizer
         // target cell's representatives.
         private void Search(sbyte[] p, WarmPartition partition)
         {
-            if (_flagged) return;
+            if (_flagged) { _subtreeBranchDepth = 0; return; }
             if (++_nodeCount > _budget)
             {
                 _flagged = true;
                 _flagReason = $"node budget {_budget} exceeded";
+                _subtreeBranchDepth = 0;
                 return;
             }
             int depth = _path.Count;
@@ -223,6 +245,7 @@ namespace Canonizer
             if (numCells == _n)
             {
                 HandleLeaf(cellOf);
+                _subtreeBranchDepth = 0; // a leaf has no branching below it
                 return;
             }
 
@@ -316,6 +339,9 @@ namespace Canonizer
             // descends and prunes; otherwise it harvests after the first rep.
             var explored = new List<int>();
             bool harvested = harvestedInSelection;
+            // Phase-0: deepest branching subtree among this node's explored children.
+            // -1 ⟹ no child node ran yet (every Branch bailed on a closure clash).
+            int childBranchDepth = -1;
             foreach (int v in decision.Representatives)
             {
                 if (_flagged) return;
@@ -326,6 +352,10 @@ namespace Canonizer
                 }
                 explored.Add(v);
                 Branch(p, partition, members, v);
+                // Branch set _subtreeBranchDepth to the child's branch depth (≥0),
+                // or left the -1 sentinel if it bailed without descending.
+                if (_subtreeBranchDepth > childBranchDepth)
+                    childBranchDepth = _subtreeBranchDepth;
 
                 // Linear/cascade oracle: after the first explored representative,
                 // harvest verified twists/orbit-maps onto the others so
@@ -356,6 +386,22 @@ namespace Canonizer
                 else if (footprintClass == 3) _branchResolved++;
                 else if (footprintClass == 2) _branchStarved++;
             }
+
+            // ── Phase-0 branch profile ──────────────────────────────────────
+            // b_i = explored.Count (surviving reps after harvest pruning). B is
+            // its running max; this node adds 1 to the subtree branch depth iff
+            // it actually forked (b_i > 1). _subtreeBranchDepth is then reported
+            // up to the parent rep loop (above).
+            if (explored.Count > _maxBranchFactor) _maxBranchFactor = explored.Count;
+            if (explored.Count > 1)
+            {
+                _branchFactors.Add(explored.Count);
+                _branchDepths.Add(depth);
+            }
+            int subtree = (childBranchDepth < 0 ? 0 : childBranchDepth)
+                          + (explored.Count > 1 ? 1 : 0);
+            _subtreeBranchDepth = subtree;
+            if (subtree > _maxBranchPathDepth) _maxBranchPathDepth = subtree;
         }
 
         // Encode an unordered vertex pair as a single long key for the real cache.
@@ -566,6 +612,10 @@ namespace Canonizer
         // Individualise v below every other member of its cell, then recurse.
         private void Branch(sbyte[] p, WarmPartition partition, List<int> cell, int v)
         {
+            // Phase-0 sentinel: -1 means "no child node ran" (overwritten by the
+            // child Search below). A closure clash returns early, leaving -1 so the
+            // parent rep loop does not count a non-existent subtree.
+            _subtreeBranchDepth = -1;
             var pChild = (sbyte[])p.Clone();
             foreach (int w in cell)
             {

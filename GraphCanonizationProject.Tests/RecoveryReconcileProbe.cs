@@ -82,6 +82,18 @@ public class RecoveryReconcileProbe
         var c = r.Stats.Cascade;
         o.WriteLine($"  [{tag}] {(r.Flagged ? "FLAG (" + r.FlagReason + ")" : "CANON")}  " +
                     $"leaves={r.Stats.LeafCount} nodes={r.Stats.NodeCount} pruned={r.Stats.PrunedBranches} |Aut|={r.ResidualGroup.Order}");
+        // ── Phase-0 branch profile (T0: leaves ≤ B^L) ────────────────────────
+        // B = MaxBranchFactor (≤ poly(q)?), L = MaxBranchPathDepth (= O(d)?).
+        // The decisive pair: if B stays ≤ q-ish and L stays ~d as (q,d) grow,
+        // leaves = B^L = q^{O(d)} = poly(n) and T0 holds; if B grows super-poly
+        // in q or L super-linearly in d, T0 fails on this family.
+        string bf = r.Stats.BranchFactors.Length == 0 ? "[]"
+            : "[" + string.Join(",", System.Linq.Enumerable.Zip(
+                r.Stats.BranchFactors, r.Stats.BranchDepths, (b, d) => $"{b}@d{d}")) + "]";
+        o.WriteLine($"        PHASE0  B(maxBranchFactor)={r.Stats.MaxBranchFactor} " +
+                    $"L(maxBranchPathDepth)={r.Stats.MaxBranchPathDepth} maxDepth={r.Stats.MaxDepth} " +
+                    $"branchFactors={bf}");
+        o.WriteLine($"        nodesByDepth=[{string.Join(",", r.Stats.NodesByDepth)}]");
         o.WriteLine($"        decisionNodes={c.DecisionNodes} branchingNodes={c.BranchingNodes} " +
                     $"harvested={c.GeneratorsHarvested} resolvedByRec={c.ResolvedByRecursion} maxRecDepth={c.MaxRecursionDepth}");
         o.WriteLine($"        branch[allSingleton]={c.BranchAllSingleton} branch[resolved]={c.BranchResolved} " +
@@ -151,6 +163,61 @@ public class RecoveryReconcileProbe
         var adj = AffinePolar(q, m, eps);
         string nm = $"VO^{(eps < 0 ? "-" : "+")}_{2 * m}({q}) n={n}";
         _out.WriteLine(nm);
+        var dDefer = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
+        {
+            EnableLinearOracle = true,
+            EnableDeferral = true
+        };
+        Report(_out, "deferral", dDefer.Canonize(new sbyte[n * n], new WarmPartition(n)));
+    }
+
+    // PHASE 0 — the T0 GATE. leaves ≤ B^L with B = max branching factor,
+    // L = max branching nodes on a root→leaf path. T0 (poly leaf count) holds iff
+    // B ≤ poly(q) uniformly in d AND L = O(d); then B^L = q^{O(d)} = poly(n).
+    // This sweep reads B and L (now reported by Report) in DEFAULT (branch-but-
+    // resolve) mode — the canonical-form-preserving path the Lean spine certifies,
+    // and the only mode where the poly-leaf-count target is non-trivial.
+    //   • q-SWEEP at fixed d=4 (m=2): is B bounded, or does it grow with q? This is
+    //     the under-measured axis — model_gap.py shows the cell/orbit gap grows
+    //     with q, so B vs q is the open question §4's "b_i ≤ q" heuristic asserts.
+    //   • d-SWEEP at fixed q=2 (m=2,3,4 ⟹ d=4,6,8, n=16,64,256): does leaves stay
+    //     poly and L track d (≈ the Θ(d) group base), or does either blow up?
+    // Deferral mode is reported alongside for the single-path (leaves=1) baseline.
+    // FEASIBILITY (measured 2026-06-30): default (no-deferral) mode at large n is
+    // SLOW — VO^-_4(3) n=81 is instant and single-path (B=1), but VO^-_4(5) n=625
+    // default mode runs for many minutes (the per-node harvest cost at large n, not
+    // the tree). So read the B/L scaling from the small/feasible cells (q=2,3 and the
+    // q=2 d-sweep n=16,64,256); for q≥5 prefer the deferral-mode line or budget time.
+    [Theory]
+    [Trait("Category", "LongRunning")]
+    // q-sweep, fixed d=4
+    [InlineData(2, 2, -1)]
+    [InlineData(3, 2, -1)]
+    [InlineData(5, 2, -1)]
+    [InlineData(2, 2, +1)]
+    [InlineData(3, 2, +1)]
+    [InlineData(5, 2, +1)]
+    // d-sweep, fixed q=2 (d=6,8 add to the d=4 cases above; d=8/n=256 is slow ~min)
+    [InlineData(2, 3, -1)]
+    [InlineData(2, 4, -1)]
+    [InlineData(2, 3, +1)]
+    [InlineData(2, 4, +1)]
+    public void Phase0_BranchProfile(int q, int m, int eps)
+    {
+        int n = IPow(q, 2 * m);
+        var adj = AffinePolar(q, m, eps);
+        string nm = $"VO^{(eps < 0 ? "-" : "+")}_{2 * m}({q}) n={n}  [d={2 * m}, q={q}]";
+        _out.WriteLine(nm);
+
+        // DEFAULT mode (deferral off) — the branch-but-resolve path T0 targets.
+        var dDefault = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
+        {
+            EnableLinearOracle = true,
+            EnableDeferral = false
+        };
+        Report(_out, "default(no-defer)", dDefault.Canonize(new sbyte[n * n], new WarmPartition(n)));
+
+        // DEFERRAL mode — the single-path baseline (expect leaves=1, B=1, L=0).
         var dDefer = new ChainDescent(n, adj, new CascadeOracle(), ChainDescent.DefaultBudget(n))
         {
             EnableLinearOracle = true,

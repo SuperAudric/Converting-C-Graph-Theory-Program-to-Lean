@@ -12,6 +12,17 @@ namespace Canonizer
                                // all-ones profile is a single descent path
                                // (the Tier-1 ideal), a growing profile a
                                // fanning tree.
+        // ── Phase-0 branch profile (recovery route T0: leaves ≤ B^L) ──────────
+        // The poly-leaf-count target is leaves ≤ B^L with B = max branching
+        // factor and L = max branching nodes on any root→leaf path. A branching
+        // node explores b_i > 1 representatives AFTER a-posteriori harvest
+        // pruning, so b_i = #Stab(path)-orbits in the selected cell (the open
+        // content the recovery doc must bound by poly(q), uniformly in d).
+        int MaxBranchFactor,   // B = max_i b_i (1 ⟺ a true single path)
+        int MaxBranchPathDepth,// L = max branching nodes on a single path (exact,
+                               // bottom-up; NOT the aggregate BranchingNodes)
+        int[] BranchFactors,   // b_i at each branching node (the distribution)
+        int[] BranchDepths,    // ... and its descent depth (parallel to BranchFactors)
         CascadeStats Cascade); // a-priori cascade/linear oracle harvest attribution
 
     // Harvest attribution from the a-priori cascade oracle
