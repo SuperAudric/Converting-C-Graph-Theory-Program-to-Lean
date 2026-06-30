@@ -151,6 +151,17 @@ close it — is set out in
 > files into 14 named modules** (`AffinePolarSeal`, `ObservableCountBridge{,K}`, `PencilTBound`, `PairForm`, `FieldGeneric`,
 > `BadAnchorCount`, `Coordinatization`, …; rename map in plan §1), full build green ~109s, axiom-clean; `PublicTheoremIndex`
 > re-homed with all 223 decls described. The plan doc was condensed 2225→~1000 lines (build history → the archive).
+> **★★★★ LIVE FRONTIER (2026-06-30 v2) — the polynomial route is [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
+> RETARGETED to `T0` (bounded branching). READ THAT DOC FIRST.** The forms-graph residue is SEALED at **quasipoly**
+> (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in build; sub-exp floor `reachesRigidOrCameron_viaSpielman`). For
+> POLYNOMIAL: the existing canonizer canonizes `VO^ε` with a **small branch-but-resolve tree** (default mode branches —
+> `VO⁻₄(5)`: `branchingNodes=4`, `leaves=6`, `STARVED=0`; *not* a single path). So the target is **poly leaf count**
+> `∏ᵢbᵢ ≤ poly(n)` with `bᵢ ≤ poly(q)` (the # orbits per selected cell, uniform in `d`) — **strictly weaker than
+> `CellsAreOrbits`**. Plan of attack = recovery doc §6 (Phase 0 empirical gate → Phase 1 bounded-branching bridge → Phase 2
+> discharge `bᵢ≤poly(q)`). The `CellsAreOrbits`/`hFormCert`/cross-branch-harvest predicates are *stronger* (likely
+> quasipoly-adjacent) and relocated. **The 2026-06-28 banner below is SUPERSEDED** (its "SINGLE PATH" was deferral mode; the
+> default canonical-form-preserving path branches). Demoted bounded-WL-dim route: [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).
+>
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
 > [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is
 > essentially tight for any *individualization/WL* method (frame & count base measured `= Θ(d)`, residue `d` unbounded,

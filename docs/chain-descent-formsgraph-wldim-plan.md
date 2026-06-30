@@ -16,6 +16,18 @@
 
 ## STATUS (read first)
 
+> **════════ 2026-06-30 v2 — THE POLY ROUTE IS NOW OWNED BY [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md),
+> RETARGETED TO `T0` (bounded branching). READ THAT DOC FIRST for the live poly work. ════════**
+> This plan doc remains the authoritative home for the **banked quasipoly SEAL** (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`,
+> in `build.sh`) + the Gauss/matching build. **The poly story below is SUPERSEDED** on three points the recovery doc corrects:
+> (i) the C# default mode does **not** single-path — it **branches and resolves** (`VO⁻₄(5)`: `branchingNodes=4`,
+> `leaves=6`, `STARVED=0`); the `leaves=1`/`BranchingNodes=0` claim was *deferral* mode. (ii) The poly target is therefore
+> **poly leaf count** `∏ᵢbᵢ ≤ poly(n)` (`bᵢ ≤ poly(q)` uniform in `d`), **strictly weaker than `CellsAreOrbits`**. (iii)
+> `hFormCert` / `RelCountsDetermineOrbit` / cross-branch-harvest `hreal` all secretly require `CellsAreOrbits` (the *stronger*,
+> harder, likely-quasipoly target) — they feed the SEAL, not the poly leaf-count. The decisive Phase2 probe is RESOLVED
+> (`RecoveryReconcileProbe.cs`: `Phase2=0`, no rigid residue). Live plan of attack = recovery doc §6 (Phase 0 gate → bridge →
+> discharge). The boxes below predate this v2 retarget and are kept for the seal/build history.
+
 > **★★★ 2026-06-30 — the RECOVERY route is now CONFIRMED implementation-faithful (and the Route-B / `CellsAreOrbits`
 > alternative is confirmed the wrong model).** A direct comparison against the C# canonizer source (this session; detail in
 > `chain-descent-cellsareorbits-route.md` STATUS HANDOFF + §6 "MODEL GAP — RE-ANALYZED", and `[[project_formsgraph_wldim_viability_2026-06-28]]`)

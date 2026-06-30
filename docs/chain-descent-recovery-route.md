@@ -1,10 +1,11 @@
 # The recovery route — proving the forms-graph poly bound the way the canonizer actually works
 
 > **What this is.** The working doc for the **recovery route**: proving the affine-polar forms-graph residue is canonized
-> in **polynomial** time by the *existing* chain-descent canonizer, the way it actually achieves a single path —
-> **cross-branch automorphism harvest + form-recovery of the residue**, not refinement reaching orbits. This is the
-> **recommended** polynomial target (2026-06-30), and it is **implementation-faithful**: the open Lean content is the same
-> object the C# canonizer's completeness counter measures, and that counter is empirically clean on the residual family.
+> in **polynomial** time by the *existing* chain-descent canonizer, the way it actually stays poly — a **small
+> branch-but-resolve tree** (cross-branch automorphism harvest prunes within-orbit siblings), **not** refinement reaching
+> orbits and **not** a single path. This is the **recommended** polynomial target (2026-06-30), **retargeted (v2) to the
+> mathematically weakest sufficient condition — `T0`: bounded branching ⟹ poly leaf count** (the open content is
+> `bᵢ ≤ poly(q)`, far weaker than `CellsAreOrbits`). The C# default mode satisfies exactly this (it branches and resolves).
 >
 > **Relation to the other route doc.** [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md)
 > pursues poly *through* bounded WL-dimension (`CellsAreOrbits` = refinement reaches orbits). That was found to be the
@@ -104,7 +105,7 @@ route's bet, backed by the probe (`STARVED = 0`, `leaves` small): bounded branch
   — the affine-polar forms graph `VO^ε_{2m}(q)`. A translation (Cayley) scheme ⟹ vertex-transitive + schurian.
 - **Automorphisms.** The affine similitude group: translations `⋊` `ΓO^ε(Q)` (linear similitudes `Q(gx) = μ(g)·Qx`, with
   field automorphisms; for prime `q`, just `GO^ε(Q)`). `|Aut|` is huge (e.g. `VO⁻₄(3)`: `233280 = 3⁴ · |GO⁻₄(3)|`) — the
-  graph is far from rigid, which is *why* the harvest single-paths.
+  graph is far from rigid, which is *why* the harvest keeps the branching small (few orbits per cell).
 - **Skresanov isolation.** By the route-doc §9.9.18 reduction, the small-Aut non-geometric *schurian* rank-3 residue is
   affine, and splits into `{1-dim cyclotomic (cited) + forms-graphs (c)–(f)}`. The recovery core is needed only on (c)–(f)
   `{affine-polar / alternating / half-spin / Suzuki–Tits}`.
@@ -351,13 +352,12 @@ whether or not the count crux holds, because the form exists unconditionally and
 and counting.
 
 **Cost-benefit.** Route C is a **larger build + a behavioural change** (needs the form-recovery oracle / a constructive Lean
-recovery), and the user prefers to avoid the C# oracle risk. It is the **fallback if step 1 stalls** (the inversion hits a
-genuine non-degeneracy obstruction), and the **only** route if the count crux turns out false on some family. Keep it in
-view; do not build it unless step 1 stalls.
+recovery), and the user prefers to avoid the C# oracle risk. It is the **fallback if T0 stalls** — i.e. if Phase 0 shows
+`leaves` super-poly, or `bᵢ ≤ poly(q)` hits a genuine obstruction across all of Phase 2's leads (structural + δ′ + Skresanov
++ EdgeGenerates + Gauss). Keep it in view; do not build it until T0 is exhausted (per user).
 
-**Where this sits.** The banked quasipoly seal (`reachesRigidOrCameron_affinePolar`) is the floor; the recovery route
-(step 1) is the upgrade to poly via the same Gauss machinery; Route C is the heavier guaranteed-poly alternative. Pursue in
-that order.
+**Where this sits.** The banked quasipoly seal (`reachesRigidOrCameron_affinePolar`) is the floor; the recovery route (T0,
+poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly alternative. Pursue in that order.
 
 ---
 

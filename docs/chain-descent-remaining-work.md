@@ -273,9 +273,18 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > earlier `descent_probe.py` `Phase2=1` was a greedy artifact, no genuine rigid residue). Default mode may branch-but-resolve
 > (VO⁻₄(5): 4 resolved branches, leaves=6); deferral gives the true single path (leaves=1). **The recovery core is needed
 > ONLY on the Skresanov-isolated residual families (Stage A carries it scoped to that residue); it is FALSE in general.**
+> **▶ RETARGETED (2026-06-30 v2) — the poly target is `T0` = BOUNDED BRANCHING, not `hFormCert`/`CellsAreOrbits`.** A
+> further check found that `hFormCert`/`RelCountsDetermineOrbit` (and the cross-branch-harvest `crossBranchHarvest_reproduces_residual`,
+> whose `hreal` provably needs cells=orbits) all secretly require the *stronger* `CellsAreOrbits` — likely only quasipoly-adjacent.
+> The C# default mode does NOT single-path: it **branches and resolves** (`VO⁻₄(5)`: `branchingNodes=4`, `leaves=6`,
+> `STARVED=0`). So the mathematically weakest sufficient target is **poly leaf count** `∏ᵢbᵢ ≤ poly(n)` (`bᵢ`=#orbits in the
+> selected cell at level i; `bᵢ ≤ poly(q)` uniform in `d` ⟹ `q^{O(d)}=poly(n)`), strictly weaker than `CellsAreOrbits`
+> (`bᵢ=1`). `hFormCert`/`RelCountsDetermineOrbit`/`IsotropySeparatesAtBase` are now the **SEAL** predicates (banked at
+> quasipoly), not the poly target. Full strength ladder + phased plan (Phase 0 empirical gate → Phase 1 bridge → Phase 2
+> discharge `bᵢ≤poly(q)`): the route doc below.
 > **▶ LIVE PLANNING DOC: [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md)** (NEW 2026-06-30,
-> self-contained) — the recovery route's claim, the landed Stage A/B substrate, the open core, the C#↔Lean bridge, and the
-> work-forward plan. The WL-dim alternative `chain-descent-cellsareorbits-route.md` is demoted to independent-math.
+> self-contained, **retargeted to T0**) — the claim, the strength ladder, the relocated stronger pieces, the phased plan of
+> attack. The WL-dim alternative `chain-descent-cellsareorbits-route.md` is demoted to independent-math.
 >
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full
