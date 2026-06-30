@@ -263,13 +263,17 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   **Concrete next:** test whether Skresanov's rank-3 `G^(2)` description trivialises the deficiency at a bounded base
   for the affine residue (an affine-rank-3 carve capstone, sibling to the cyclotomic slice). See [[reference_srg_wl_literature_2026-06-17]].
 - **Floors available now:** sub-exp via `…viaSpielman` (fully citable, Cameron-free; floor value `exp(Õ(n^{1/5}))`, §2 DELTA).
-> **★★★ 2026-06-30 — RECOVERY route CONFIRMED implementation-faithful; the `CellsAreOrbits`/bounded-WL-dim alternative
-> confirmed the WRONG model of the C#.** Direct C#-source comparison (this session) showed the single path comes from
-> **1-WL + a deferral selector + cross-branch harvest + form-recovery**, not from refinement reaching orbits
-> (`CellsAreOrbits` is genuinely WL-dim 2 and not the mechanism). So `hFormCert`/`coords_determine` below IS the right poly
-> target. **Decisive open probe (gates the recovery core):** does the deferring 1-WL descent provably always find an
-> orbit-pure ("symmetric") cell, or is there a genuine rigid residue the recovery must handle? (`descent_probe.py`:
-> Phase2=1 greedy vs the C#'s Phase2=0.) Detail: `chain-descent-cellsareorbits-route.md` STATUS HANDOFF + §6.
+> **★★★ 2026-06-30 — RECOVERY route CONFIRMED implementation-faithful AND empirically COMPLETE on the residual family.**
+> Direct C#-source comparison showed the single path comes from **1-WL + a deferral selector + cross-branch harvest +
+> form-recovery**, not from refinement reaching orbits (`CellsAreOrbits` is genuinely WL-dim 2, not the mechanism). So
+> `hFormCert`/`coords_determine` below IS the right poly target. **Decisive probe ✅ RESOLVED** (`RecoveryReconcileProbe.cs`,
+> the real canonizer on `VO^ε_4(q)` q=3,5): the Route-A completeness breaker **`ClassifyStarved`/`BranchStarved` = 0 in
+> every case, both modes, full `|Aut|` recovered, no flag** ⟹ the existing harvest is empirically COMPLETE on the family =
+> `RelCountsDetermineOrbit`/`hFormCert` HOLDS here. `Phase2=0` everywhere (deferral always finds an orbit-pure cell — the
+> earlier `descent_probe.py` `Phase2=1` was a greedy artifact, no genuine rigid residue). Default mode may branch-but-resolve
+> (VO⁻₄(5): 4 resolved branches, leaves=6); deferral gives the true single path (leaves=1). **The recovery core is needed
+> ONLY on the Skresanov-isolated residual families (Stage A carries it scoped to that residue); it is FALSE in general.**
+> Detail: `chain-descent-cellsareorbits-route.md` STATUS HANDOFF (RESOLVED block) + §6.
 >
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full

@@ -50,11 +50,31 @@
 >   1-WL) with the bridge's actual, weaker hypothesis `SelectedCellIsOrbit` (selected cell only), and ignored the C#'s
 >   deferral selector. With deferral, `SelectedCellIsOrbit` mostly holds at 1-WL.
 >
-> **DECISIVE NEXT PROBE (gates both routes):** the Phase-2 *residue*. `descent_probe.py` (1-WL + deferral, replicating the
-> C# selector) consumes nearly every cell orbit-pure but leaves **one** rigid-residue node (Phase2=1) where no orbit-pure
-> cell exists — vs the C#'s reported Phase2=0. Resolve whether the deferring descent *provably always* finds an orbit-pure
-> cell (Phase2→0) or there is a genuine rigid residue the form-recovery must handle. That pins the recovery route's core
-> obligation. Check against the actual C# canonizer's Phase2/recovery counters on `VO⁻₄(q)`.
+> **DECISIVE PROBE — ✅ RESOLVED (2026-06-30, `RecoveryReconcileProbe.cs`, the REAL canonizer, ground-truth `CascadeStats`).**
+> Ran the actual chain-descent canonizer on `VO^ε_4(q)` (q=3,5; both ε) in DEFAULT (deferral-off, the path Lean's
+> `spine_branch_independent` certifies) and DEFERRAL modes, reading the documented Route-A completeness breaker
+> `ClassifyStarved`/`BranchStarved` (`CanonResult.cs`: "if this is ever > 0 the existing harvest is NOT provably complete").
+> **Findings — all decisive in the recovery route's favour:**
+> - **`STARVED = 0` in EVERY case, BOTH modes.** No flag, **full `|Aut|` recovered** (e.g. VO⁻₄(3) `|Aut|=233280 = 81·2880 =`
+>   `3⁴·|GO⁻₄(3)|`, the complete affine orthogonal similitude group; VO⁻₄(5) `|Aut|=78000000`). ⟹ **the existing generic
+>   harvest is empirically COMPLETE on `VO^ε_4(q)`** = the recovery core (`hFormCert`/`RelCountsDetermineOrbit`) HOLDS on this
+>   residual family. This is the direct C# evidence for the route.
+> - **The probe-vs-C# discrepancy is reconciled — both were right, different modes.** DEFAULT mode CAN branch
+>   (VO⁻₄(5): `branchingNodes=4`, `leaves=6`, but `branch[resolved]=4`, `STARVED=0` — it **branches but the harvest resolves
+>   every branch**), matching `descent_probe.py`'s greedy 2-4 branch nodes. DEFERRAL collapses the SAME graph to `leaves=1`,
+>   `branchingNodes=0` — the route-#5 "single path" claim. So `descent_probe.py`'s greedy default-mode branching and route #5's
+>   deferral-mode single path are *both correct*.
+> - **`Phase2 = 0` everywhere** (deferral ALWAYS finds an orbit-pure cell). `descent_probe.py`'s `Phase2=1` was a
+>   greedy-replication artifact (the Python orbit/cell-selection did not match the C#'s harvest-based orbit recovery), NOT a
+>   genuine rigid residue. So there is **no rigid residue with no orbit-pure cell** on this family.
+> - **Mechanism confirmed = recovery, not refinement:** `GeneratorsHarvested=120–825`, `resolvedByRecursion=3–18`,
+>   `maxRecDepth=3–6` (≈ d, bounded), `consumedSymmetric≈base length`. A-posteriori harvest + bounded recursion.
+>
+> **⟹ The recovery route is empirically validated end-to-end on `VO^ε_4(q)`. The Lean obligation is now sharp:** prove
+> `RelCountsDetermineOrbit`/`hFormCert` (= the C#'s `STARVED=0` = harvest completeness) **on the Skresanov-isolated residual
+> families** (it is FALSE in general — only claimed where the seal needs it). The concrete handle is the existing Gauss /
+> `IsotropySeparatesAtBase` machinery (the live capstone `…viaIsotropySeparates_wittFree`, idx 1248) strengthened from
+> "separate at one big base" to "determine the orbit at a bounded base". *(d-scaling check `VO^-_6(3)`/`VO^-_4(7)` pending.)*
 >
 > **Banked (unaffected):** the quasipoly seal (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in `build.sh`,
 > axiom-clean) + sub-exp (`viaSpielman`). **Durable probes** (`GraphCanonizationProofs/`): `model_gap.py`,
