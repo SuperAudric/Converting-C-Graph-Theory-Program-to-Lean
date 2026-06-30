@@ -16,6 +16,17 @@
 
 ## STATUS (read first)
 
+> **★★★ 2026-06-30 — the RECOVERY route is now CONFIRMED implementation-faithful (and the Route-B / `CellsAreOrbits`
+> alternative is confirmed the wrong model).** A direct comparison against the C# canonizer source (this session; detail in
+> `chain-descent-cellsareorbits-route.md` STATUS HANDOFF + §6 "MODEL GAP — RE-ANALYZED", and `[[project_formsgraph_wldim_viability_2026-06-28]]`)
+> showed the C# achieves its single path via **1-WL refinement + a deferral selector + cross-branch automorphism harvest +
+> form-recovery of the residue** — NOT by refinement reaching orbits (`CellsAreOrbits` = bounded-WL-dim is genuinely WL-dim
+> 2 and is not the mechanism). So the **recovery route below (Stage A/B: `hFormCert` / `RelCountsDetermineOrbit` /
+> `coords_determine`) is the right polynomial target**; the bounded-WL-dim route is independent-math value only.
+> **Decisive open probe (gates the recovery core):** does the deferring 1-WL descent provably always find an orbit-pure
+> ("symmetric") cell, or is there a genuine rigid residue the form-recovery must handle? (`descent_probe.py`: Phase2=1 in a
+> greedy replication vs the C#'s reported Phase2=0.) — Below predates this confirmation but is consistent with it.
+
 > **★★★ 2026-06-28 REFRAME — the polynomial route is NOT this doc's WL-dimension/matching route; it is the RECOVERY /
 > harvest route, and it sidesteps the open bounded-WL-dim conjecture. READ §1 "WHAT'S LEFT" item 1 for the full finding.**
 > One-screen version: (1) the matching seal below is **quasipolynomial** and that is essentially TIGHT for any

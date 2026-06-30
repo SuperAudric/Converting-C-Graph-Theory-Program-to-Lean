@@ -1,5 +1,10 @@
 # The CellsAreOrbits route — proving the forms-graph poly bound through B (bounded WL-dimension)
 
+> **⚠ 2026-06-30: Route B is DEMOTED — see the HANDOFF box in STATUS below.** This session found Route B's abstraction
+> (`CellsAreOrbits` = cells reach orbits) does not model the actual C# canonizer (1-WL + deferral + harvest + recovery).
+> The recommended priority is now the **recovery route** (plan doc Stage A/B). This doc remains the home for the built
+> Route-B scaffold + the bounded-WL-dim statement as independent mathematics.
+
 > **What this is.** The working doc for **Route B**: proving the affine-polar forms-graph residue is canonized in
 > **polynomial** time by the *existing refinement-based* canonizer, via the open core **`CellsAreOrbits`** (= bounded
 > WL-dimension of the forms graph). It is the deliberate alternative to **Route C** (constructive form recovery; more
@@ -23,16 +28,49 @@
 
 ## STATUS (read first)
 
-**Live — base case done, the wall isolated and *probed crackable*.** The base case of the induction is **built and
-axiom-clean**; the node-count bridge + transport seam are built (modulo the `canonForm` placeholder); the genuine open
-core (the "wall") is **isolated as one predicate `WallKernel`** (3a, axiom-clean) and Witt is a carried hypothesis (tech
-debt). The 2026-06-29 crackability + depth probes (§6 Increment 3) found the wall **true and crackable** — the iterated
-`χ(det G₂)` 2-WL observable determines the orbit with `O(1)` iteration depth, uniformly in `d, |S|, q,` type. So the live
-work is the **Lean 3c proper** (prove `WallKernelFor` for that observable, exploiting bounded depth).
-**★ 2026-06-30 3b MODEL GAP — RE-ANALYZED; "needs 2-WL" WITHDRAWN; recommend prioritizing the RECOVERY route (see §6
-"MODEL GAP — RE-ANALYZED").** Chain: (1) `CellsAreOrbits` (∀ cells) IS false at 1-WL on the rank-3 isoClass scheme
-(`model_gap.py`: stuck 10<12 at `|S|=2`); (2) but the node-count bridge needs only the **weaker `SelectedCellIsOrbit`**
-(selected cell; `ScratchNodeCountBridge:43`) — equating them was the error; (3) the C# is **1-WL + an all-reps oracle +
+> **════════ HANDOFF (2026-06-30) — READ THIS BOX FIRST ════════**
+>
+> **Recommendation: prioritize the RECOVERY route, not Route B (this doc).** This session compared Route B's model to the
+> actual C# canonizer and found Route B's central abstraction — *refinement cells = orbits* (`CellsAreOrbits` =
+> bounded-WL-dim) — **does not model what the C# does.** The C# achieves its single path by **1-WL + a deferral selector +
+> cross-branch automorphism harvest + form-recovery of the residue**, NOT by refinement reaching orbits. So the
+> implementation-faithful polynomial proof is the **recovery route** (plan `chain-descent-formsgraph-wldim-plan.md` Stage
+> A/B: `hFormCert` / `RelCountsDetermineOrbit` / `coords_determine`; open core = "recover Aut-orbits at a bounded base = no
+> 2-closure deficiency", GI-adjacent, Skresanov rank-3 2-closure lead — see `chain-descent-remaining-work.md`).
+>
+> **Route B (this doc) is DEMOTED** to: (i) a built, axiom-clean *scaffold* (cap / base case / Witt / node-count bridge /
+> transport seam / wall isolation — all NOT in `build.sh`), and (ii) the bounded-WL-dim statement as **independent
+> mathematics** (the forms graph has WL-dim 2). It is still a coherent route if pursued for that value — see the rest of
+> this doc — but it is no longer the recommended priority.
+>
+> **DO NOT RE-WALK (settled dead ends, §6 "MODEL GAP — RE-ANALYZED"):**
+> - *"base-`d` 1-WL discreteness ⟹ poly"* — false: discreteness bounds the node *count*, not `cellsCertified` (cells=orbits
+>   at the bounded bases the descent visits).
+> - *"Route B needs a 2-WL refinement model"* — **withdrawn**: it conflated `CellsAreOrbits` (∀ cells, genuinely false at
+>   1-WL) with the bridge's actual, weaker hypothesis `SelectedCellIsOrbit` (selected cell only), and ignored the C#'s
+>   deferral selector. With deferral, `SelectedCellIsOrbit` mostly holds at 1-WL.
+>
+> **DECISIVE NEXT PROBE (gates both routes):** the Phase-2 *residue*. `descent_probe.py` (1-WL + deferral, replicating the
+> C# selector) consumes nearly every cell orbit-pure but leaves **one** rigid-residue node (Phase2=1) where no orbit-pure
+> cell exists — vs the C#'s reported Phase2=0. Resolve whether the deferring descent *provably always* finds an orbit-pure
+> cell (Phase2→0) or there is a genuine rigid residue the form-recovery must handle. That pins the recovery route's core
+> obligation. Check against the actual C# canonizer's Phase2/recovery counters on `VO⁻₄(q)`.
+>
+> **Banked (unaffected):** the quasipoly seal (`AffinePolarSeal.reachesRigidOrCameron_affinePolar`, in `build.sh`,
+> axiom-clean) + sub-exp (`viaSpielman`). **Durable probes** (`GraphCanonizationProofs/`): `model_gap.py`,
+> `descent_probe.py`, `wall_frame.py`, `wall_{2wl,pair,depth,depth2}.py`.
+> **════════ END HANDOFF ════════**
+
+**The rest of this STATUS + §1–§9 describe Route B (the demoted scaffold), kept for reference and for the
+independent-math value.** ~~Live~~ (SUPERSEDED framing) — base case done, the wall isolated and *probed crackable*: the
+base case is **built and axiom-clean**; the node-count bridge + transport seam are built (modulo the `canonForm`
+placeholder); the open core (the "wall") is **isolated as one predicate `WallKernel`** (3a, axiom-clean), Witt carried.
+The 2026-06-29 probes found the wall true & crackable (iterated `χ(det G₂)` 2-WL, `O(1)` depth). *Under the handoff above,
+3c is no longer the recommended live work* — it is the bounded-2-WL-dim statement, of independent interest only.
+**★ 2026-06-30 3b MODEL GAP — RE-ANALYZED (full detail in §6 "MODEL GAP — RE-ANALYZED").** Chain: (1) `CellsAreOrbits`
+(∀ cells) IS false at 1-WL on the rank-3 isoClass scheme (`model_gap.py`: stuck 10<12 at `|S|=2`); (2) but the node-count
+bridge needs only the **weaker `SelectedCellIsOrbit`** (selected cell; `ScratchNodeCountBridge:43`) — equating them was the
+error; (3) the C# is **1-WL + an all-reps oracle +
 within-`Stab(path)`-orbit harvest pruning + a DEFERRAL selector** (consume orbit-pure cells, defer multi-orbit ones; ChainDescent.cs:251-281,589),
 and with deferral nearly every cell is consumed orbit-pure at 1-WL (`descent_probe.py`), leaving only a rigid residue.
 **⟹ Route B does NOT need 2-WL; but its `cells=orbits`/bounded-WL-dim abstraction is the WRONG model of the C#**, whose
@@ -378,7 +416,9 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
       bases `|S|=2,3` — exactly where 1-WL FAILS (finding #2). So it does not discharge `SinglePathDisposition`. The poly
       bound genuinely needs orbit-certification at bounded bases = the 2-WL `χ(det G₂)` determination (3c). The base-`d`
       finding survives only as a (minor) sharpening of the node count `≤ d`.
-    - **★ The REAL 3b — the model gap (load-bearing; gates Route B viability).** `CellsAreOrbits` is *literally* 1-WL on
+    - **★ The REAL 3b — the model gap (load-bearing).** ⚠ **[SUPERSEDED — read "MODEL GAP — RE-ANALYZED" below; the
+      "needs 2-WL / settle FIRST" framing here is WITHDRAWN. Kept as the hypothesis that prompted `model_gap.py`.]**
+      `CellsAreOrbits` is *literally* 1-WL on
       `schemeAdj`. The 3c determination is 2-WL. So 3c discharges `CellsAreOrbits` **only if `schemeAdj` exposes the
       `χ(det G₂)` pair data** — i.e. the residual's association scheme is the **2-WL closure / coherent configuration**, not
       the bare rank-3 similitude SRG (`{id, iso, aniso}`, square/nonsquare fused). **If 2-WL-closed:** warmRefine reaches

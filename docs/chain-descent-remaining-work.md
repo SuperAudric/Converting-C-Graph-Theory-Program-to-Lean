@@ -263,6 +263,14 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
   **Concrete next:** test whether Skresanov's rank-3 `G^(2)` description trivialises the deficiency at a bounded base
   for the affine residue (an affine-rank-3 carve capstone, sibling to the cyclotomic slice). See [[reference_srg_wl_literature_2026-06-17]].
 - **Floors available now:** sub-exp via `…viaSpielman` (fully citable, Cameron-free; floor value `exp(Õ(n^{1/5}))`, §2 DELTA).
+> **★★★ 2026-06-30 — RECOVERY route CONFIRMED implementation-faithful; the `CellsAreOrbits`/bounded-WL-dim alternative
+> confirmed the WRONG model of the C#.** Direct C#-source comparison (this session) showed the single path comes from
+> **1-WL + a deferral selector + cross-branch harvest + form-recovery**, not from refinement reaching orbits
+> (`CellsAreOrbits` is genuinely WL-dim 2 and not the mechanism). So `hFormCert`/`coords_determine` below IS the right poly
+> target. **Decisive open probe (gates the recovery core):** does the deferring 1-WL descent provably always find an
+> orbit-pure ("symmetric") cell, or is there a genuine rigid residue the recovery must handle? (`descent_probe.py`:
+> Phase2=1 greedy vs the C#'s Phase2=0.) Detail: `chain-descent-cellsareorbits-route.md` STATUS HANDOFF + §6.
+>
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full
 > `|Aut|` recovered) — forms graphs are huge-`Aut`, so the `n^{|T|}` cost model is wrong and the descent tree is poly. The
