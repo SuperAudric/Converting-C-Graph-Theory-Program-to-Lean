@@ -273,7 +273,9 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > earlier `descent_probe.py` `Phase2=1` was a greedy artifact, no genuine rigid residue). Default mode may branch-but-resolve
 > (VO⁻₄(5): 4 resolved branches, leaves=6); deferral gives the true single path (leaves=1). **The recovery core is needed
 > ONLY on the Skresanov-isolated residual families (Stage A carries it scoped to that residue); it is FALSE in general.**
-> Detail: `chain-descent-cellsareorbits-route.md` STATUS HANDOFF (RESOLVED block) + §6.
+> **▶ LIVE PLANNING DOC: [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md)** (NEW 2026-06-30,
+> self-contained) — the recovery route's claim, the landed Stage A/B substrate, the open core, the C#↔Lean bridge, and the
+> work-forward plan. The WL-dim alternative `chain-descent-cellsareorbits-route.md` is demoted to independent-math.
 >
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full

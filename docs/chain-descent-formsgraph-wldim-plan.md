@@ -213,8 +213,15 @@ heart; the whole analytic chain is **field-generic** (`FieldGeneric*`), with `af
      needs the finer `O(Q)` (form recovered = Route C). **⟹ pure-Lean SRG-native poly ⟹ crack open bounded-WL-dim (research);
      no clean shortcut found.** The real fork: **Route C (form recovery + B.0, needs the C# oracle) vs. accept the banked
      quasipoly.** Memory: `project_formsgraph_wldim_viability_2026-06-28`.
-   - **★ DEDICATED ROUTE DOC (2026-06-29): [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md)** —
+   - **★★★ LIVE ROUTE DOC (2026-06-30): [`chain-descent-recovery-route.md`](./chain-descent-recovery-route.md)** — the
+     **recovery route** (Route C-adjacent / harvest-completeness) is now the recommended polynomial target, in a
+     self-contained planning doc. The C# canonizer reaches its single path via cross-branch harvest + form-recovery (NOT
+     refinement reaching orbits); its completeness counter `ClassifyStarved` is empirically 0 on `VO^ε_4(q)`
+     (`RecoveryReconcileProbe.cs`) = the open Lean core `RelCountsDetermineOrbit`/`IsotropySeparatesAtBase`-at-bounded-base
+     holds on the residual family. Read that doc for the live pick-up.
+   - **★ DEMOTED ROUTE DOC (2026-06-29): [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md)** —
      the CellsAreOrbits route (= this Route A/B; "B" = the proposition `CellsAreOrbits`) has a self-contained build doc.
+     **Demoted 2026-06-30 to independent-math** (the forms graph has WL-dim 2; not the C#'s model).
      **Whole structural scaffold landed axiom-clean (5 `Scratch*` modules, NOT in build.sh):** the similitude **cap**
      (`ScratchSimilitudeCap`), induction **base case** + free prefix (`ScratchOrbitBaseCase`), **Witt W0+W1**
      (`ScratchWittCone`), the **node-count bridge + transport seam** (`ScratchNodeCountBridge`: `poly ⟸ B` reduction,

@@ -241,7 +241,7 @@ namespace Canonizer
             // the rigid residue). Sound because a deferred real stays real
             // (`OrbitPartition.real_stays_real`, ChainDescent/CascadeOracle.lean).
             // It changes the canonical form (the schedule fixes the leaf labelling),
-            // so it is off by default.
+            // so it is off in some tests.
             int target, footprintClass = -1;
             bool harvestedInSelection = false;
             // Real-decision cache entries added by this node's classification, to be
