@@ -29,17 +29,17 @@ core (the "wall") is **isolated as one predicate `WallKernel`** (3a, axiom-clean
 debt). The 2026-06-29 crackability + depth probes (§6 Increment 3) found the wall **true and crackable** — the iterated
 `χ(det G₂)` 2-WL observable determines the orbit with `O(1)` iteration depth, uniformly in `d, |S|, q,` type. So the live
 work is the **Lean 3c proper** (prove `WallKernelFor` for that observable, exploiting bounded depth).
-**★ 2026-06-30 3b MODEL GAP — RESOLVED (NEGATIVELY for the 1-WL model; see §6 Increment 3 "3b SCOPING" + "MODEL GAP
-RESOLVED").** `CellsAreOrbits` is *literally* 1-WL on the rank-3 isoClass `schemeAdj` (`affineScheme`,
-`isoClassK ∈ {0,iso,aniso}`), and a faithful probe (`model_gap.py`) shows that 1-WL model is **STUCK — cells coarser than
-orbits — at the bounded bases** the node-count bridge ranges over (`SinglePathDisposition = ∀ S`; e.g. `|S|=2`: 10<12,
-11<30, gap growing with `q`), while genuine **2-WL reaches orbits exactly**. So the forms graph has **WL-dimension 2, not
-1**, and **Route B as currently modeled does NOT give poly** — it needs a **2-WL refinement model** (refine ordered pairs /
-1-WL on the pair-orbital coherent config), over which `CellsAreOrbits`/`SinglePathDisposition`/the node-count bridge are
-restated and 3c (the `χ(det G₂)` determination = bounded-2-WL-dimension) discharges the predicate. **This 2-WL model
-upgrade is now the gating step before 3c.** (A base-`d`-1-WL redirection was attempted and retracted — discreteness at base
-`d` bounds node *count* only, not `cellsCertified`.) What is *not yet proved in Lean* is the 2-WL model layer, `WallKernelFor`
-(3c), and the `canonForm` lift; the empirics (incl. the C# single-path run, which uses a refinement rich enough) support all.
+**★ 2026-06-30 3b MODEL GAP — RE-ANALYZED; "needs 2-WL" WITHDRAWN; recommend prioritizing the RECOVERY route (see §6
+"MODEL GAP — RE-ANALYZED").** Chain: (1) `CellsAreOrbits` (∀ cells) IS false at 1-WL on the rank-3 isoClass scheme
+(`model_gap.py`: stuck 10<12 at `|S|=2`); (2) but the node-count bridge needs only the **weaker `SelectedCellIsOrbit`**
+(selected cell; `ScratchNodeCountBridge:43`) — equating them was the error; (3) the C# is **1-WL + an all-reps oracle +
+within-`Stab(path)`-orbit harvest pruning + a DEFERRAL selector** (consume orbit-pure cells, defer multi-orbit ones; ChainDescent.cs:251-281,589),
+and with deferral nearly every cell is consumed orbit-pure at 1-WL (`descent_probe.py`), leaving only a rigid residue.
+**⟹ Route B does NOT need 2-WL; but its `cells=orbits`/bounded-WL-dim abstraction is the WRONG model of the C#**, whose
+single path comes from deferral + harvest + form-recovery, not from refinement reaching orbits. **So the
+implementation-faithful poly target is the RECOVERY route** (plan Stage A/B `hFormCert`/`coords_determine`); Route B's
+residual value = the bounded-WL-dim theorem as independent math. *Not yet proved in Lean:* the recovery core (`hFormCert`,
+GI-adjacent), and (if Route B is kept) `SelectedCellIsOrbit`+deferral at 1-WL + the `canonForm` lift.
 
 **Built (axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`):**
 - `ChainDescent/ScratchSimilitudeCap.lean` — **the cap**: the graph determines `Q` only up to scaling, so refinement
@@ -78,20 +78,19 @@ upgrade is now the gating step before 3c.** (A base-`d`-1-WL redirection was att
   `ZProfileSeparates`.) **Probe status (§6 Increment 3): the iterated-observable `WallKernelFor` is empirically TRUE
   with `O(1)` determination depth, uniformly** — so 3c is the live Lean target, not a frontier wall.
 
-**Next — current frontier (2026-06-30, post 3b model-gap resolution).** The structural scaffold is built (node-count
-bridge, transport seam, wall isolation 3a — all axiom-clean), BUT the 3b model gap is **resolved negatively for the
-1-WL model**: `CellsAreOrbits` (1-WL on the rank-3 isoClass scheme) is FALSE at bounded bases (`model_gap.py`), so Route B
-needs a **2-WL refinement model**. The live work, in order:
-1. **★ 3b/MODEL — the 2-WL refinement layer (now the gating step).** Define the 2-WL refinement (refine ordered pairs, or
-   1-WL on the pair-orbital coherent config) and restate `CellsAreOrbits` / `SinglePathDisposition` / the node-count bridge
-   + transport seam over it. The bridge logic is WL-agnostic (partition + orbit-soundness), so this should be a mechanical
-   port; the transport lemmas (`warmRefine_transport` etc.) need 2-WL analogues. **Scope this before any 3c Lean.**
-2. **★ 3c (the prize).** Prove the 2-WL `CellsAreOrbits` at bounded bases = `WallKernelFor Obs` (`ScratchWallKernel`) for
-   `Obs` = the iterated `χ(det G₂)` 2-WL observable — the bounded-depth (`O(1)`, probed) character inversion; reuse
-   `pairCharSum_factor_gen` / `gaussSum_sq_ne_zero` / the `χ(det G₂)↔Z_u` bridge. This is the open math = bounded-2-WL-dim.
-3. **Loose ends (low-leverage, land any time):** discharge `IsotropicPairing` (finishes W1 / the depth-1 base case);
-   the `canonForm` lift of the transport seam (gating prereq, *not* Route-B-specific — blocked on the §15.7 placeholder).
-4. **Residual empirics (optional):** push the depth probe to `d=8`+ / more base-types (pure-Python capped at `d≤6`).
+**Next — current frontier (2026-06-30, post 3b re-analysis).** The C# comparison (§6 "MODEL GAP — RE-ANALYZED") shows the
+C# achieves its single path by **1-WL + deferral + harvest + form-recovery**, NOT by refinement reaching orbits — so Route
+B's `cells=orbits` abstraction is the wrong model, and the recommended priority is the **recovery route**. The work, in
+recommended order:
+1. **★ RECOVERY ROUTE (recommended primary).** The implementation-faithful poly target: `hFormCert` /
+   `RelCountsDetermineOrbit` / `coords_determine` (plan Stage A/B; `remaining-work.md`) — "recover Aut-orbits at a bounded
+   base = no 2-closure deficiency". GI-adjacent open core (Skresanov rank-3 2-closure lead). This is what the C# does.
+2. **Reconcile the residue** (cheap, decisive for both routes): does the deferring 1-WL descent provably always find an
+   orbit-pure cell (Phase2→0), or is there a genuine rigid residue recovery must handle? (`descent_probe.py` shows Phase2=1
+   in the greedy replication vs the C#'s 0.)
+3. **Route B (demoted to independent-math value).** If kept for the bounded-WL-dim theorem: prove `SelectedCellIsOrbit` +
+   deferral at 1-WL (NOT the withdrawn 2-WL model), the `canonForm` lift, `IsotropicPairing`. The `χ(det G₂)`/3c content
+   remains the bounded-2-WL-dim statement, of interest but off the C#'s critical path.
 
 **Quality bar:** axiom-clean, no `sorry`/no fresh `axiom`, `native_decide` banned, full build green when ported.
 
@@ -389,20 +388,28 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
       residual is that closure). The C# single-path run is evidence the *actual* canonizer's refinement is rich enough; the
       Lean question is whether the modeled `schemeAdj` matches. (The `χ(det G₂)`/`WallKernelFor` apparatus is unchanged and
       on the critical path; `wall_frame.py` is kept as the node-count `≤d` evidence.)
-    - **★★★ MODEL GAP RESOLVED (2026-06-30; `model_gap.py`) — NEGATIVELY for the 1-WL model: Route B as modeled does NOT
-      give poly; it needs a 2-WL refinement.** Source: `affineScheme = orbitalScheme(affineG G₀)`, relations = `G₀`-orbits
-      on differences (`CascadeAffine:2204`); the graph-invariant relation is `isoClassK ∈ {0, iso, aniso}` (`FieldGeneric:33`)
-      — **rank 3** (aniso NOT split square/nonsquare; similitude-invariant). So `schemeAdj` is the bare rank-3 scheme, NOT a
-      2-WL closure. Faithful probe (1-WL on the rank-3 isoClass scheme + individualize = the exact `CellsAreOrbits` model):
-      at the **bounded `|S|=2` base it is STUCK — cells COARSER than orbits, uniformly, gap GROWING with `q`**: `VO^±_4(3)`
-      10<12, `VO^±_4(5)` 11<30, `VO^±_6(3)` 10<12; while **2-WL reaches orbits exactly** (12, 30, …). At the leaf `|S|=d`
-      both discretize. **⟹ `CellsAreOrbits` is FALSE at the bounded bases the node-count bridge ranges over** (`∀ S`), so the
-      `SinglePathDisposition` cannot hold with 1-WL `warmRefine`. **The forms graph has WL-dimension 2, not 1.** The fix is a
-      **2-WL model**: redefine the refinement as 2-WL (refine ordered pairs) — equivalently, run 1-WL on the orbital scheme
-      of the *pair* action (the 2-orbital coherent config) — restate `CellsAreOrbits`/`SinglePathDisposition`/the node-count
-      bridge + transport seam over it, and prove the 2-WL `CellsAreOrbits` at bounded bases via 3c (the `χ(det G₂)`
-      determination = exactly bounded-2-WL-dimension). This is a real but bounded **model upgrade**, now the gating step
-      before 3c. (Probe: `GraphCanonizationProofs/model_gap.py`.)
+    - **★★★ MODEL GAP — RE-ANALYZED (2026-06-30; `model_gap.py`, `descent_probe.py`, C# source). The "Route B needs 2-WL"
+      conclusion is WITHDRAWN; the deeper finding is that Route B's `cells=orbits` abstraction does NOT model the C#, which
+      uses 1-WL + DEFERRAL + harvest + recovery. ⟹ prioritize the RECOVERY route.** Steps:
+      1. `affineScheme = orbitalScheme(affineG G₀)`, relation `isoClassK ∈ {0,iso,aniso}` (`FieldGeneric:33`,
+         `CascadeAffine:2204`) = **rank 3**. `model_gap.py`: 1-WL on it is STUCK at bounded `|S|=2` (cells coarser than
+         orbits: 10<12, 11<30, gap grows with `q`); 2-WL reaches orbits. So **`CellsAreOrbits` (∀ cells) is FALSE at 1-WL**.
+      2. **BUT the node-count bridge is keyed on the strictly weaker `SelectedCellIsOrbit`** (only the *selected* cell;
+         `ScratchNodeCountBridge:43`), not `CellsAreOrbits`. Equating them (the prior "needs 2-WL" claim) was the error.
+      3. **The C# uses 1-WL** (WarmPartition.cs:7), an **all-reps oracle** (CascadeOracle.cs), **within-`Stab(path)`-orbit-only
+         harvest pruning** (`CoveredByPathFixingAut`, ChainDescent.cs:589), and a **DEFERRAL selector** (ChainDescent.cs:251-281)
+         that consumes an orbit-pure ("symmetric", `survivors≤1`) cell and defers multi-orbit cells, branching only at a
+         Phase-2 rigid-residue node. `descent_probe.py`: a naive first-cell selector branches (2-4 nodes), but **with deferral
+         nearly every cell is consumed orbit-pure at 1-WL**, leaving a single rigid-residue node (Phase2=1 in the greedy
+         replication vs the C#'s reported 0 — the residue = recovery content).
+      **⟹ Verdict.** (a) Route B does NOT need a 2-WL model (withdrawn); `SelectedCellIsOrbit` + deferral mostly lives at
+      1-WL. (b) But Route B's `cells=orbits`/bounded-WL-dim abstraction is **the wrong model of the C#**, whose single path
+      comes from **deferral + harvest + form-recovery of the residue**, not from refinement reaching orbits. So the
+      implementation-faithful poly target is the **RECOVERY route** (`hFormCert`/`RelCountsDetermineOrbit`/`coords_determine`,
+      plan Stage A/B; remaining-work.md) — same node-4 wall, but stated as the C# actually works. Route B's residual value =
+      the bounded-WL-dim theorem as *independent* mathematics (WL-dim 2). Loose end: prove the deferring descent always finds
+      an orbit-pure cell (Phase2→0), or characterize the genuine residue recovery handles. Probes: `model_gap.py`,
+      `descent_probe.py` (`GraphCanonizationProofs/`).
 - **Parallel — Witt build (now the higher priority; fully scoped in §7).** The shared enabler for Increments 2–3's
   easy halves and the depth-1 sphere. Mathlib has the primitives but no Witt theory; the staged plan + difficulty +
   recommendation are in **§7**. The cheap first slice (W0+W1) discharges `WittConeTransitive` and makes the depth-1
