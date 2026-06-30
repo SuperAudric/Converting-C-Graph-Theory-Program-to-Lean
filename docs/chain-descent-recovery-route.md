@@ -53,14 +53,14 @@
 > branching-depth bound (NOT given by `defaultSpineChain_reaches_leaf ≤ n`, which bounds single-chain length only). Both are
 > *far* weaker than `CellsAreOrbits` and both must be measured (§4, §6 Phase 0) before being assumed.
 >
-> **LIVE NEXT TASK — Phase 0 (GATE) ✅ DONE (not falsified); Phase 1 (Lean bridge) is now the live step.** (1) **Phase 0 —
-> RUN 2026-06-30** (`Phase0_BranchProfile`, full q/d sweep): T0 not falsified, positively supported — `STARVED=0` everywhere,
-> q=2 single-path through **d=8** (`leaves=1`), only `VO⁻₄(5)` branches (`B=3, L=2, leaves=6`, `bᵢ < q`); the q≥7 scaling tail
-> is blocked by the per-node-cost wall (see §4 table). (2) **Phase 1 (Lean bridge) — NOW LIVE:** generalize
-> `ScratchNodeCountBridge` from `SinglePathDisposition` (`B=1`) to **`BoundedBranchingDisposition`** (`bᵢ ≤ B`) ⟹
-> `leaves ≤ Bᴸ` ⟹ poly (carry `L` as an explicit parameter; forms-graph-independent, pure tree combinatorics — the cleanest
-> Lean landing). Then Phase 2
-> discharges `bᵢ ≤ poly(q)` + the `L = O(d)` obligation for the forms graph (DRG freebie gives `b₁ = 1`). Full plan: §6.
+> **LIVE NEXT TASK — Phase 0 ✅ + Phase 1 ✅ DONE; the live step is now Phase 2 (forms-graph discharge) + the realisation
+> seam.** (1) **Phase 0 — RUN 2026-06-30** (`Phase0_BranchProfile`): T0 not falsified, positively supported — `STARVED=0`
+> everywhere, q=2 single-path through **d=8** (`leaves=1`), only `VO⁻₄(5)` branches (`B=3, L=2, leaves=6`, `bᵢ < q`); q≥7 tail
+> blocked by the per-node-cost wall (§4). (2) **Phase 1 — LANDED** (`ScratchBoundedBranching.lean`, axiom-clean): the bridge
+> `BoundedBranchingDisposition` + `certifiedBoundedTree_of_disposition` ⟹ **`leaves ≤ Bᴸ`** (`CertifiedBoundedTree.leafBound`),
+> on the proven tree-combinatorics core `BTree.leaves_le_pow`; `B=1` single-path corner recovered. (3) **NOW LIVE — Phase 2 +
+> the seam:** discharge `bᵢ ≤ poly(q)` (the `degBound`, `B ≤ poly(q)`) **and** the `L = O(d)` branch-depth (`depthBound`) for
+> the forms graph (these are the carried realisation hypotheses, the Increment-1 seam); DRG freebie gives `b₁ = 1`. Full plan: §6.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
@@ -157,7 +157,7 @@ relocated. The strength ladder, weakest → strongest:
 
 | # | predicate | what it gives | who needs it | landed substrate |
 |---|---|---|---|---|
-| **★ T0** | **bounded branching `bᵢ ≤ poly(q)`** (selected cell has `≤ poly(q)` orbits) | **poly leaf count `∏bᵢ = poly(n)`** — branch-but-resolve | **default mode** (`STARVED=0`, `leaves` small) | **none yet — Phase 1 builds it** (generalize `ScratchNodeCountBridge`) |
+| **★ T0** | **bounded branching `bᵢ ≤ poly(q)`** (selected cell has `≤ poly(q)` orbits) | **poly leaf count `∏bᵢ = poly(n)`** — branch-but-resolve | **default mode** (`STARVED=0`, `leaves` small) | **✅ Phase 1 LANDED** — `ScratchBoundedBranching` (`BoundedBranchingDisposition` + `certifiedBoundedTree_of_disposition`; the `leaves ≤ Bᴸ` core `BTree.leaves_le_pow`, axiom-clean) |
 | T1 | `∃` a pure cell at each base | single path **via deferral** | deferral mode (`Phase2=0`) | `SelectedCellIsOrbit` parametric in `sel` (the "pick a pure cell" part unbuilt) |
 | T2 | `SinglePathDisposition` (the *selected* cell is one orbit) | single path | a *fixed-selector* deferral | `certifiedSinglePath_of_disposition` (`ScratchNodeCountBridge`) — the `B=1` corner of T0 |
 | T3 | full `CellsAreOrbits` (∀ cells = orbits) | single path, **+ reproduces |Aut|** | — (false at 1-WL, `|S|≥2`) | `WallKernelFor Obs`; Route II `hreal` |
@@ -196,10 +196,11 @@ the structural bound `bᵢ ≤ poly(q)` (§4, §6 Phase 2).
 
 ## 3. What is already proved (the foundation, all axiom-clean)
 
-Two layers are landed: the **poly spine** (the node-count bridge — the recovery route's mechanism, currently at the `B=1`
-corner) and the **seal infrastructure** (Stage A/B — the correctness disjunction, already banked at quasipoly). The open
-content is the **T0 bounded-branching** generalization of the spine (Phase 1) + its forms-graph discharge (Phase 2); the
-seal layer is reference/banked.
+Two layers are landed: the **poly spine** (the node-count bridge — the recovery route's mechanism, now generalized to
+bounded branching: the `B=1` single-path corner `ScratchNodeCountBridge` **and** the T0 bridge `ScratchBoundedBranching`
+with `leaves ≤ Bᴸ`, both axiom-clean) and the **seal infrastructure** (Stage A/B — the correctness disjunction, banked at
+quasipoly). The remaining open content is the **forms-graph discharge** of the bridge's carried hypotheses (Phase 2:
+`bᵢ ≤ poly(q)` and `L = O(d)`) + the concrete-descent realisation seam; the seal layer is reference/banked.
 
 ### 3a′. THE POLY SPINE — the node-count bridge (`ScratchNodeCountBridge`, axiom-clean, NOT in build)
 The recovery route's mechanism. **Currently landed at the `B=1` (single-path) corner; Phase 1 generalizes it to T0
@@ -212,9 +213,21 @@ The recovery route's mechanism. **Currently landed at the `B=1` (single-path) co
 - **Residual (Increment-0):** the `canonAdj`-transport seam — rep-choice invariance of the leaf canonical (analogue of
   `spine_branch_independent`). Depth-1 core landed.
 
-**Phase 1 builds on top:** `BoundedBranchingDisposition` (`bᵢ ≤ B`) + `certifiedBoundedTree_of_disposition`
-(`leaves ≤ Bᴸ`) — the **T0** generalization that captures the C# default mode (branch-but-resolve). `certifiedSinglePath_*`
-is its `B=1` special case.
+**Phase 1 — ✅ LANDED (`ScratchBoundedBranching.lean`, axiom-clean `[propext, Classical.choice, Quot.sound]`, NOT in build).**
+The **T0** generalization that captures the C# default mode (branch-but-resolve):
+- **§1 — the pure tree-combinatorics core (the load-bearing `D3` math):** `BTree` (rose tree) + `leaves`/`branchDepth`/`BoundedDeg`
+  + **`BTree.leaves_le_pow : BoundedDeg B t → leaves t ≤ B ^ branchDepth t`** — a tree with node-degree `≤ B` and `≤ L`
+  branching levels on any path has `≤ Bᴸ` leaves. Forms-graph-free, reusable.
+- **§2 — the disposition:** `SelectedCellOrbitsLE` (selected cell covered by `≤ B` `Stab(S)`-orbits) + `BoundedBranchingDisposition`
+  (`= ∀ S`), generalizing `SelectedCellIsOrbit`/`SinglePathDisposition`; monotone in `B`; `selectedCellOrbitsLE_one_of_isOrbit`
+  = the `B=1` corner (a mono single-orbit cell is a `≤1`-orbit cover).
+- **§3 — the capstone:** `CertifiedBoundedTree` (bundles the disposition `cellsBounded` + the descent tree's `degBound`/`depthBound`)
+  with **`CertifiedBoundedTree.leafBound : leaves t ≤ Bᴸ`** (the poly leaf count), and **`certifiedBoundedTree_of_disposition`**
+  (generalizes `certifiedSinglePath_of_disposition`). `leaves_le_one_of_certifiedBoundedTree_one` recovers the `B=1` single path.
+- **Residual (Increment-1 seam, parallel to Increment-0's `canonAdj`):** that the *concrete* branching descent realizes the
+  orbit-branching tree — i.e. `degBound`/`depthBound` follow from the disposition because the tree's node degrees ARE the
+  per-base orbit counts — is carried as structure fields, discharged in Phase 4 (the concrete branching descent). The `B=1`
+  instance of this seam is the single-path module's landed content.
 
 ### 3a. The conditional capstones (the SEAL layer — banked at quasipoly; reference)
 - **Stage A — `reachesRigidOrCameron_viaAffineFormScheme`** (idx 1207). The abstract scheme-level capstone for the
@@ -363,10 +376,14 @@ reports `B`, `L`, per-node `BranchFactors`/`BranchDepths`, `NodesByDepth` in `De
   d≥6 are blocked by the **per-node-cost wall** (`VO⁻₈(2)` ≈ 29 min, single path), the Route-C (§7) axis. Re-run with a
   constructive-Witt per-node harvest to extend the table.
 
-**Phase 1 — the bridge (Lean; generalize `ScratchNodeCountBridge`).** Build **`BoundedBranchingDisposition adj P sel B`**
-(the selected cell has `≤ B` `Stab(S)`-orbits at every base) and **`certifiedBoundedTree_of_disposition`**: `bᵢ ≤ B` + depth
-`L` ⟹ leaf count `≤ Bᴸ` ⟹ the poly node-count object. `certifiedSinglePath_of_disposition` is the `B=1` corner. Self-contained,
-axiom-clean; **does not need the forms graph** — pure tree combinatorics. **The cleanest first Lean landing.**
+**Phase 1 — the bridge (Lean). ✅ DONE (`ScratchBoundedBranching.lean`, axiom-clean, NOT in build).**
+**`BoundedBranchingDisposition adj P sel B`** (selected cell `≤ B` `Stab(S)`-orbits at every base) +
+**`certifiedBoundedTree_of_disposition`**: `bᵢ ≤ B` + branch-depth `L` ⟹ **`leaves ≤ Bᴸ`** (`CertifiedBoundedTree.leafBound`),
+on the self-contained tree-combinatorics core **`BTree.leaves_le_pow`**. `certifiedSinglePath`'s `B=1` corner recovered
+(`leaves_le_one_of_certifiedBoundedTree_one`). Forms-graph-free, as planned. **The two realisation hypotheses** in
+`certifiedBoundedTree_of_disposition` — `degBound` (the descent tree branches `≤ B`, from the disposition) and `depthBound`
+(`≤ L` branching levels) — are the **Increment-1 seam** (the concrete branching descent; Phase 4), carried as structure
+fields exactly as the `B=1` single-path module carries its `canonAdj` seam.
 
 **Phase 2 — discharge D2 for the forms graph (Lean; the open math).** Prove `bᵢ ≤ poly(q)` (the form Phase 0 pins). The
 structural handle is a **heuristic, not a near-proof** (§4 caveat): one new Gram coordinate bounds the cell-refinement
