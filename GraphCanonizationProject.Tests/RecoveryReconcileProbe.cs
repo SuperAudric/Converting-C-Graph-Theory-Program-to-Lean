@@ -139,10 +139,12 @@ public class RecoveryReconcileProbe
     }
 
     // d-SCALING: the open question is the UNBOUNDED-d residue. Does STARVED stay 0 as d grows?
+    // Deferral-only (single-path mode, fewest nodes). n=2401 (VO^-_4(7)) was dropped — infeasible
+    // wall-clock; VO^-_6(3) n=729 is the real d=6-vs-d=4 signal. Re-add larger cases only if STARVED
+    // appears at d=6 (then the residue is genuine and worth the cost).
     [Theory]
     [Trait("Category", "LongRunning")]
     [InlineData(3, 3, -1)] // VO^-_6(3) n=729
-    [InlineData(7, 2, -1)] // VO^-_4(7) n=2401
     public void Reconcile_dScaling(int q, int m, int eps)
     {
         int n = IPow(q, 2 * m);

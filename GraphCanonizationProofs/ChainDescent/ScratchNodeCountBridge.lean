@@ -149,6 +149,18 @@ theorem certifiedSinglePath_of_disposition {adj : AdjMatrix n} {P₀ : PMatrix n
   cellsCertified := fun S _ _ hv hw hcelleq =>
     selectedCell_single_stabOrbit (hdisp S) hv hw hcelleq
 
+/-- **Recovery route — angle (b), the explicit composition.** Full `CellsAreOrbits` at every base discharges the
+single-path disposition (`singlePathDisposition_of_cellsAreOrbits`), hence the certified single path. This is the path
+the recovery route takes when going *through* the (stronger) forms-graph `CellsAreOrbits` scaffold
+(`ScratchWallKernel` → `CellsAreOrbits` → here) rather than proving `SelectedCellIsOrbit` directly on the sphere.
+Named for the recovery-route wiring (`chain-descent-recovery-route.md` §6 step 1). -/
+theorem certifiedSinglePath_of_cellsAreOrbits {adj : AdjMatrix n} {P₀ : PMatrix n} {χι₀ : Colouring n}
+    {sel : Colouring n → Finset (Fin n)}
+    (hcell : TargetsNonsingletonCell sel) (hne : NonemptyOnNonDiscrete sel)
+    (h : ∀ S, CellsAreOrbits adj P₀ S) :
+    CertifiedSinglePath adj P₀ χι₀ sel :=
+  certifiedSinglePath_of_disposition hcell hne (singlePathDisposition_of_cellsAreOrbits h)
+
 /-! ## The transport seam — representative-choice invariance (depth-1 core)
 
 The Increment-0 residual: that a `CertifiedSinglePath` computes the *iso-invariant* canonical, i.e. consuming a
