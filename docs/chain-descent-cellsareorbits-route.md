@@ -29,15 +29,17 @@ core (the "wall") is **isolated as one predicate `WallKernel`** (3a, axiom-clean
 debt). The 2026-06-29 crackability + depth probes (§6 Increment 3) found the wall **true and crackable** — the iterated
 `χ(det G₂)` 2-WL observable determines the orbit with `O(1)` iteration depth, uniformly in `d, |S|, q,` type. So the live
 work is the **Lean 3c proper** (prove `WallKernelFor` for that observable, exploiting bounded depth).
-**★ 2026-06-30 3b SCOPING — a correction + a surfaced model gap (NOT a redirection; see §6 Increment 3 "3b SCOPING"):**
-a redirection to "plain-1-WL discretizes at base `d`" was attempted and **RETRACTED** — discreteness at base `d` bounds the
-node *count* but does **not** discharge the node-count bridge's `cellsCertified`, which needs cells=orbits at **every**
-bounded intermediate base (`SinglePathDisposition = ∀ S`), exactly where 1-WL fails (finding #2) and 2-WL `χ(det G₂)` is
-needed. So 3c (the `χ(det G₂)` determination) **is** on the critical path. The scoping did surface a real, load-bearing
-**model gap = the true 3b**: `CellsAreOrbits` is *literally* 1-WL on `schemeAdj` (Cascade.lean:4509), so the 3c
-determination discharges it **only if `schemeAdj` exposes the `χ(det G₂)` pair data** (residual scheme = 2-WL closure, not
-bare rank-3 similitude SRG). This gates Route B's viability. What is *not yet proved in Lean* is `WallKernelFor` (= 3c),
-the 3b model bridge, and the `canonForm` lift; the empirics (incl. the C# single-path run) support all three.
+**★ 2026-06-30 3b MODEL GAP — RESOLVED (NEGATIVELY for the 1-WL model; see §6 Increment 3 "3b SCOPING" + "MODEL GAP
+RESOLVED").** `CellsAreOrbits` is *literally* 1-WL on the rank-3 isoClass `schemeAdj` (`affineScheme`,
+`isoClassK ∈ {0,iso,aniso}`), and a faithful probe (`model_gap.py`) shows that 1-WL model is **STUCK — cells coarser than
+orbits — at the bounded bases** the node-count bridge ranges over (`SinglePathDisposition = ∀ S`; e.g. `|S|=2`: 10<12,
+11<30, gap growing with `q`), while genuine **2-WL reaches orbits exactly**. So the forms graph has **WL-dimension 2, not
+1**, and **Route B as currently modeled does NOT give poly** — it needs a **2-WL refinement model** (refine ordered pairs /
+1-WL on the pair-orbital coherent config), over which `CellsAreOrbits`/`SinglePathDisposition`/the node-count bridge are
+restated and 3c (the `χ(det G₂)` determination = bounded-2-WL-dimension) discharges the predicate. **This 2-WL model
+upgrade is now the gating step before 3c.** (A base-`d`-1-WL redirection was attempted and retracted — discreteness at base
+`d` bounds node *count* only, not `cellsCertified`.) What is *not yet proved in Lean* is the 2-WL model layer, `WallKernelFor`
+(3c), and the `canonForm` lift; the empirics (incl. the C# single-path run, which uses a refinement rich enough) support all.
 
 **Built (axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`):**
 - `ChainDescent/ScratchSimilitudeCap.lean` — **the cap**: the graph determines `Q` only up to scaling, so refinement
@@ -76,17 +78,17 @@ the 3b model bridge, and the `canonForm` lift; the empirics (incl. the C# single
   `ZProfileSeparates`.) **Probe status (§6 Increment 3): the iterated-observable `WallKernelFor` is empirically TRUE
   with `O(1)` determination depth, uniformly** — so 3c is the live Lean target, not a frontier wall.
 
-**Next — current frontier (2026-06-30, post 3b scoping correction).** The structural scaffold is *done*: node-count
-bridge (Increment 0), transport seam, and the wall isolation (3a) are all built and axiom-clean. The 3b scoping
-(§6 Increment 3 "3b SCOPING") **retracted a base-`d`-1-WL redirection** (it bounds node count, not the disposition) and
-surfaced a load-bearing **model gap**. The live work, in order:
-1. **★ 3b — the model bridge (load-bearing; gates viability).** Confirm `schemeAdj` for the forms-graph residual exposes
-   the `χ(det G₂)` pair data (residual scheme = 2-WL closure / coherent config, not bare rank-3 similitude SRG), so that
-   the 1-WL `warmRefine` reaching orbits at bounded bases ⟺ the 2-WL `χ(det G₂)` determination. If bare rank-3,
-   `CellsAreOrbits` is FALSE at bounded bases and Route B needs a 2-WL refinement upgrade — so settle this FIRST.
-2. **★ 3c (the prize).** Prove `WallKernelFor Obs` (`ScratchWallKernel`) for `Obs` = the iterated `χ(det G₂)` 2-WL
-   observable — the bounded-depth (`O(1)`, probed) character inversion; reuse `pairCharSum_factor_gen` /
-   `gaussSum_sq_ne_zero` / the `χ(det G₂)↔Z_u` bridge. This is the open math; with 3b it discharges `CellsAreOrbits`.
+**Next — current frontier (2026-06-30, post 3b model-gap resolution).** The structural scaffold is built (node-count
+bridge, transport seam, wall isolation 3a — all axiom-clean), BUT the 3b model gap is **resolved negatively for the
+1-WL model**: `CellsAreOrbits` (1-WL on the rank-3 isoClass scheme) is FALSE at bounded bases (`model_gap.py`), so Route B
+needs a **2-WL refinement model**. The live work, in order:
+1. **★ 3b/MODEL — the 2-WL refinement layer (now the gating step).** Define the 2-WL refinement (refine ordered pairs, or
+   1-WL on the pair-orbital coherent config) and restate `CellsAreOrbits` / `SinglePathDisposition` / the node-count bridge
+   + transport seam over it. The bridge logic is WL-agnostic (partition + orbit-soundness), so this should be a mechanical
+   port; the transport lemmas (`warmRefine_transport` etc.) need 2-WL analogues. **Scope this before any 3c Lean.**
+2. **★ 3c (the prize).** Prove the 2-WL `CellsAreOrbits` at bounded bases = `WallKernelFor Obs` (`ScratchWallKernel`) for
+   `Obs` = the iterated `χ(det G₂)` 2-WL observable — the bounded-depth (`O(1)`, probed) character inversion; reuse
+   `pairCharSum_factor_gen` / `gaussSum_sq_ne_zero` / the `χ(det G₂)↔Z_u` bridge. This is the open math = bounded-2-WL-dim.
 3. **Loose ends (low-leverage, land any time):** discharge `IsotropicPairing` (finishes W1 / the depth-1 base case);
    the `canonForm` lift of the transport seam (gating prereq, *not* Route-B-specific — blocked on the §15.7 placeholder).
 4. **Residual empirics (optional):** push the depth probe to `d=8`+ / more base-types (pure-Python capped at `d≤6`).
@@ -387,6 +389,20 @@ levels, sharply: **"the relative spheres the canonizer visits in the multiplier-
       residual is that closure). The C# single-path run is evidence the *actual* canonizer's refinement is rich enough; the
       Lean question is whether the modeled `schemeAdj` matches. (The `χ(det G₂)`/`WallKernelFor` apparatus is unchanged and
       on the critical path; `wall_frame.py` is kept as the node-count `≤d` evidence.)
+    - **★★★ MODEL GAP RESOLVED (2026-06-30; `model_gap.py`) — NEGATIVELY for the 1-WL model: Route B as modeled does NOT
+      give poly; it needs a 2-WL refinement.** Source: `affineScheme = orbitalScheme(affineG G₀)`, relations = `G₀`-orbits
+      on differences (`CascadeAffine:2204`); the graph-invariant relation is `isoClassK ∈ {0, iso, aniso}` (`FieldGeneric:33`)
+      — **rank 3** (aniso NOT split square/nonsquare; similitude-invariant). So `schemeAdj` is the bare rank-3 scheme, NOT a
+      2-WL closure. Faithful probe (1-WL on the rank-3 isoClass scheme + individualize = the exact `CellsAreOrbits` model):
+      at the **bounded `|S|=2` base it is STUCK — cells COARSER than orbits, uniformly, gap GROWING with `q`**: `VO^±_4(3)`
+      10<12, `VO^±_4(5)` 11<30, `VO^±_6(3)` 10<12; while **2-WL reaches orbits exactly** (12, 30, …). At the leaf `|S|=d`
+      both discretize. **⟹ `CellsAreOrbits` is FALSE at the bounded bases the node-count bridge ranges over** (`∀ S`), so the
+      `SinglePathDisposition` cannot hold with 1-WL `warmRefine`. **The forms graph has WL-dimension 2, not 1.** The fix is a
+      **2-WL model**: redefine the refinement as 2-WL (refine ordered pairs) — equivalently, run 1-WL on the orbital scheme
+      of the *pair* action (the 2-orbital coherent config) — restate `CellsAreOrbits`/`SinglePathDisposition`/the node-count
+      bridge + transport seam over it, and prove the 2-WL `CellsAreOrbits` at bounded bases via 3c (the `χ(det G₂)`
+      determination = exactly bounded-2-WL-dimension). This is a real but bounded **model upgrade**, now the gating step
+      before 3c. (Probe: `GraphCanonizationProofs/model_gap.py`.)
 - **Parallel — Witt build (now the higher priority; fully scoped in §7).** The shared enabler for Increments 2–3's
   easy halves and the depth-1 sphere. Mathlib has the primitives but no Witt theory; the staged plan + difficulty +
   recommendation are in **§7**. The cheap first slice (W0+W1) discharges `WittConeTransitive` and makes the depth-1
