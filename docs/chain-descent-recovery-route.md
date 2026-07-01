@@ -491,8 +491,10 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > discretisation core (= route A below). **ITEM B = `bᵢ≤poly(q)`** — δ′ walled (`ScratchDominatorForms`), but revived as
 > bounded orbit-multiplicity: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`), leaf bound lifted to per-level
 > (`ScratchBoundedMultLeaves`), and **span-dim ≥ 2 (route A) reduced** (`ScratchSpanDim2Recovery`) to one Gauss predicate.
-> **THE SINGLE LIVE ITEM: route A increment 2 (the complement-factoring Gauss proof) — see ITEM B "INCREMENT 2" below and
-> the top-of-doc FRESH-READER HANDOFF.** All seven modules axiom-clean.
+> **THE SINGLE LIVE ITEM: route A increment 2 (the complement-factoring Gauss proof) — its FOUNDATION (the orthogonal
+> split of the difference norm, `ScratchComplementFactor`) is now LANDED; the remaining piece is applying the split
+> inside the 2-round count (see ITEM B "INCREMENT 2" below and the top-of-doc FRESH-READER HANDOFF).** All eight modules
+> axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -633,12 +635,19 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `WallKernelFor (fun t t' => obs t = obs t') Q ↑S` for `obs` = the 2-round count — soundness and the reduction are proved;
 > the Gauss core is the single carried predicate.
 >
-> **INCREMENT 2 — the complement-factoring (step 4, the genuine new math; NOT built, API-confirmed).** Decomposition API
-> exists: `LinearMap.BilinForm.orthogonal Q.polarBilin ⟨a,b⟩` + `isCompl_orthogonal_of_restrict_nondegenerate` (needs
-> `IsRefl` — polar is symmetric — and the 2-dim restriction nondegenerate) gives `V = ⟨a,b⟩ ⊕ ⟨a,b⟩^⊥`. Then `Q(v−u) =
-> Q(v∥−u∥) + Q(v⊥−u⊥)` (orthogonality) factors the count; the `⊥`-part is `v`-independent within a `Q`-level-set (Witt on
-> the complement), so cancels ⟹ the `d`-independent local count. Substantial multi-step Gauss build (`PairForm`/`GaussCount`
-> + the decomposition); the next focused increment.
+> **INCREMENT 2 — the complement-factoring (step 4, the genuine new math). ◑ FOUNDATION LANDED (2026-07-01,
+> `ScratchComplementFactor.lean`, axiom-clean, NOT in build).** The **orthogonal split of the difference norm** — the
+> identity the whole count-factoring rests on — is proved: `map_sub_split` (`Q((v₁+v₂)−(u₁+u₂)) = Q(v₁−u₁) + Q(v₂−u₂)`
+> for `v₁,u₁ ∈ W`, `v₂,u₂ ∈ Wᗮ`), built from `map_add_of_polar_zero` (`polar=0 ⟹ Q(x+y)=Qx+Qy`, from
+> `QuadraticMap.map_add`) + `polar_zero_of_mem_orthogonal` (membership in `Wᗮ = BilinForm.orthogonal Q.polarBilin W`
+> kills the polar pairing), plus `exists_decomp_of_isCompl` (obtains the `W`/`Wᗮ` components from `IsCompl W Wᗮ`). The
+> decomposition API is confirmed present: `BilinForm.orthogonal Q.polarBilin ⟨a,b⟩` +
+> `isCompl_orthogonal_of_restrict_nondegenerate` (needs `IsRefl` — polar is symmetric — and the 2-dim restriction
+> nondegenerate) gives `V = ⟨a,b⟩ ⊕ ⟨a,b⟩^⊥`. **REMAINING (the count-factoring proper, next sub-increment):** apply the
+> split *inside* the 2-round isotropy count — the count over `w = w∥ + w⊥` factors, and for fixed `w∥` the inner
+> `w⊥`-count depends on the vertex only through `Q(v⊥)` (a Gauss sum over the `(d−2)`-dim complement, `PairForm`/
+> `GaussCount`); that `v`-independent-up-to-`Q(v⊥)` factor cancels in the separation comparison (Witt on the complement)
+> ⟹ the `d`-independent local count. Substantial multi-step Gauss build; the split geometry it stands on is now landed.
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
@@ -646,14 +655,17 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the seven scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the eight scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
-> (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`).
+> (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
+> `ScratchComplementFactor` (route-A increment 2 foundation: the orthogonal split `map_sub_split`).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP:** route A increment 2 — the complement-factoring Gauss proof of `WallKernelFor(2-round count)` at
-> span-dim-2 (§8 ITEM B "INCREMENT 2"); everything upstream is proved and reduces to it.
+> span-dim-2 (§8 ITEM B "INCREMENT 2"); its geometric FOUNDATION (the orthogonal split `map_sub_split`,
+> `ScratchComplementFactor`) is landed, and the remaining piece is applying the split inside the 2-round count. Everything
+> upstream is proved and reduces to it.
 > **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan) + §8 (ITEM A/B).
 > **════════ END PICK-UP ════════**
 - **SEAL endpoints (banked at quasipoly; reference):** `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248,
