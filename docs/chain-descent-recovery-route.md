@@ -53,7 +53,19 @@
 > branching-depth bound (NOT given by `defaultSpineChain_reaches_leaf ≤ n`, which bounds single-chain length only). Both are
 > *far* weaker than `CellsAreOrbits` and both must be measured (§4, §6 Phase 0) before being assumed.
 >
-> **LIVE NEXT TASK — Phase 0 ✅ + Phase 1 ✅ DONE + Phase 2 FOUNDATION ✅; the live step is the poly crux + `L`.** (1)
+> **════════ FRESH-READER HANDOFF (2026-07-01) — read this paragraph first ════════**
+> **Where the poly crux stands, in one breath.** The crux `bᵢ ≤ poly(q)` (per-cell orbit count) is now a clean **two-piece**
+> target, both located by the probes: **(i) span-dim-1** — `bᵢ ≤ q²`, **PROVEN** unconditionally (`ScratchSpanDimBound`,
+> `stabOrbit_cover_card_le_line`); **(ii) span-dim ≥ 2** (route A) — `bᵢ = 1`, reduced (`ScratchSpanDim2Recovery` incr 1,
+> proved) to the single Gauss predicate `WallKernelFor(2-round count)`, whose **family proof is the LIVE step**: route A
+> **increment 2 = the complement-factoring** (§8 ITEM B "INCREMENT 2"; `V=⟨a,b⟩⊕⟨a,b⟩^⊥`, the `d−2`-dim complement's
+> count-contribution cancels within a `Q`-level-set ⟹ a `d`-independent local count, reusing `PairForm`/`GaussCount`;
+> Mathlib decomposition API confirmed). Probes back it: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`),
+> and span-dim-2 recovery is bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`) ⟹ crackable, not frontier.
+> These two pieces + Phase 1's `leaves_le_prod_concentrated` compose to `leaves ≤ poly(n)`. `L` is a corollary of A (route B).
+> **Start at:** this HANDOFF → the "Verify the landed substrate" list (bottom of STATUS) → §8 ITEM A/B. **════════**
+>
+> **LANDED SUBSTRATE (was "LIVE NEXT TASK") — Phase 0 ✅ + Phase 1 ✅ + Phase 2 FOUNDATION ✅.** (1)
 > **Phase 0 — RUN 2026-06-30** (`Phase0_BranchProfile`): T0 not falsified, positively supported — `STARVED=0` everywhere,
 > q=2 single-path through **d=8** (`leaves=1`), only `VO⁻₄(5)` branches (`B=3, L=2, leaves=6`, `bᵢ < q`); q≥7 tail blocked by
 > the per-node-cost wall (§4). (2) **Phase 1 — LANDED** (`ScratchBoundedBranching.lean`, axiom-clean): the bridge
@@ -79,11 +91,13 @@
 > `bᵢ=1` elsewhere, `d`-uniform** (`q=3`: B=3 at d=4,6; `q=3,5,7`→B=3,10,21). So the crux is non-vacuous & empirically poly,
 > and branching is *concentrated*. Landed `ScratchBoundedMultLeaves.lean` (axiom-clean): **`leaves_le_prod`** — lifts Phase 1's
 > uniform `leaves ≤ Bᴸ` to **per-level** `leaves ≤ ∏ⱼ b(j)` + `leaves_le_prod_concentrated` (branching confined to level-set
-> `J` ⟹ `leaves ≤ ∏_{j∈J} b j`), so the probe profile gives `leaves ≤ q(q−1)/2 = poly(n)` directly. (7) **★ NOW LIVE:** the
-> **poly crux** SHARPENS to the probe-backed **`bᵢ ≤ q(q−1)/2`, concentrated at span-dim-1** (the per-level orbit-mult bound
-> feeding `leaves_le_prod`; the interNum-level δ′ stays walled — bounded-mult lives at the orbit level). Options: prove the
-> span-dim-1 orbit-mult bound (a-priori `stabOrbit_cover_card_le` gives `q^{|S|+1}`, poly at bounded `|S|`; needs the
-> concentration), `χ(det G₂)`@`d+1` probe, Skresanov. Full plan: §6 ITEM A/B.
+> `J` ⟹ `leaves ≤ ∏_{j∈J} b j`), so the probe profile gives `leaves ≤ q(q−1)/2 = poly(n)` directly. (7) **CRUX SPLIT + span-dim-1
+> PROVEN + route A scaffold (2026-07-01).** The crux `bᵢ≤poly(q)` splits into **span-dim-1** (`bᵢ≤q²`, **PROVEN**,
+> `ScratchSpanDimBound.stabOrbit_cover_card_le_line`) and **span-dim ≥ 2 = route A** (`bᵢ=1`). Route A's direct proof stalls
+> (it's the multi-base `s(C)` recovery — Gauss content), but the probe says it's **crackable** (bounded-round `r*∈{3,4}`,
+> d-uniform). Route A **increment 1 LANDED** (`ScratchSpanDim2Recovery`): reduces `bᵢ=1` to `WallKernelFor(2-round count)`.
+> **★ NOW LIVE = route A increment 2 = the complement-factoring** (the Gauss family proof; §8 ITEM B "INCREMENT 2"). See
+> the FRESH-READER HANDOFF at the top. Full plan: §8 ITEM A/B.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
@@ -471,9 +485,14 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 ## 8. Pointers + HANDOFF (2026-07-01)
 
 > **════════ FRESH READER — PICK UP HERE ════════**
-> **State:** Phase 0 (empirical gate) ✅, Phase 1 (the `leaves ≤ Bᴸ` bridge) ✅, Phase 2 FOUNDATION (a-priori
-> `B ≤ |K|^{|S|+1}`, quasipoly) ✅ — all axiom-clean, verified. The recovery route now delivers **quasipoly end-to-end
-> through its own bridge**, unconditional mod Witt. **Two live items remain, both open, both expected to be picked up:**
+> **State (2026-07-01):** Phase 0 ✅, Phase 1 (`leaves ≤ Bᴸ`) ✅, Phase 2 FOUNDATION (a-priori `B ≤ |K|^{|S|+1}`, quasipoly)
+> ✅ — quasipoly end-to-end through its own bridge, mod Witt. **Since then the poly crux has been SPLIT and half-proved:**
+> **ITEM A = `L=O(d)`** — geometric core + span-growth **SOLVED** (`ScratchBranchDepth`); reduced to the shared cell-
+> discretisation core (= route A below). **ITEM B = `bᵢ≤poly(q)`** — δ′ walled (`ScratchDominatorForms`), but revived as
+> bounded orbit-multiplicity: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`), leaf bound lifted to per-level
+> (`ScratchBoundedMultLeaves`), and **span-dim ≥ 2 (route A) reduced** (`ScratchSpanDim2Recovery`) to one Gauss predicate.
+> **THE SINGLE LIVE ITEM: route A increment 2 (the complement-factoring Gauss proof) — see ITEM B "INCREMENT 2" below and
+> the top-of-doc FRESH-READER HANDOFF.** All seven modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -626,9 +645,16 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `BoundedBranchingDisposition` (over `AdjMatrix n`/`OrbitPartition`) via the seal's `affineE` endpoint transport — the same
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
-> **Verify the landed substrate:** `lake env lean ChainDescent/ScratchBoundedBranching.lean` (Phase 1 bridge) +
-> `lake env lean ChainDescent/ScratchBranchingBound.lean` (Phase 2 foundation) + `bash scripts/build.sh` (in-build banked seal).
-> **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan).
+> **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
+> `lake build` the seven scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
+> `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
+> (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`).
+> **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
+> (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
+> **THE LIVE STEP:** route A increment 2 — the complement-factoring Gauss proof of `WallKernelFor(2-round count)` at
+> span-dim-2 (§8 ITEM B "INCREMENT 2"); everything upstream is proved and reduces to it.
+> **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan) + §8 (ITEM A/B).
 > **════════ END PICK-UP ════════**
 - **SEAL endpoints (banked at quasipoly; reference):** `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248,
   input `IsotropySeparatesAtBase Q T` idx 1240) and the abstract twin `reachesRigidOrCameron_viaAffineFormScheme` (idx 1207,
