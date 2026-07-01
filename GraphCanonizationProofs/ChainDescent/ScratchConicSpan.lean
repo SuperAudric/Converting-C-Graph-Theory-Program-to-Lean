@@ -148,4 +148,100 @@ theorem hspan_of_conic [FiniteDimensional K V]
       (Submodule.sub_mem _ hu_W hm0) (Submodule.sub_mem _ hu_W hm1) (Submodule.sub_mem _ hu_W hm2)
       hz0 hz1 hz2 hwindep⟩
 
+/-- **The orthogonal decomposition always exists (i-a).** For an orthogonal anisotropic pair `a, b`, every vertex `u`
+splits as `u = u_W + u_⊥` with `u_W ∈ W = span{a,b}` and `u_⊥ ∈ Wᗮ` — *directly*, via the projection
+`u_W = (polar Q u a / polar Q a a)•a + (polar Q u b / polar Q b b)•b` (the diagonal Gram makes the coefficients
+explicit; `polar Q a a = 2·Q a ≠ 0`). No `IsCompl`/restrict machinery. Discharges the carried decomposition of
+`hspan_of_conic`, so it applies to a bare `u`. -/
+theorem exists_orthogonal_decomp {a b : V}
+    (hQa : Q a ≠ 0) (hQb : Q b ≠ 0) (hab : QuadraticMap.polar Q a b = 0)
+    [Invertible (2 : K)] (u : V) :
+    ∃ u_W u_perp : V, u = u_W + u_perp ∧ u_W ∈ Submodule.span K ({a, b} : Set V) ∧
+      u_perp ∈ BilinForm.orthogonal Q.polarBilin (Submodule.span K ({a, b} : Set V)) := by
+  have h2 : (2 : K) ≠ 0 := (isUnit_of_invertible (2 : K)).ne_zero
+  have h2a : QuadraticMap.polar Q a a ≠ 0 := by
+    rw [QuadraticMap.polar_self, nsmul_eq_mul]; exact mul_ne_zero (by exact_mod_cast h2) hQa
+  have h2b : QuadraticMap.polar Q b b ≠ 0 := by
+    rw [QuadraticMap.polar_self, nsmul_eq_mul]; exact mul_ne_zero (by exact_mod_cast h2) hQb
+  have hba : QuadraticMap.polar Q b a = 0 := by rw [QuadraticMap.polar_comm]; exact hab
+  set α := QuadraticMap.polar Q u a / QuadraticMap.polar Q a a with hα
+  set β := QuadraticMap.polar Q u b / QuadraticMap.polar Q b b with hβ
+  refine ⟨α • a + β • b, u - (α • a + β • b), by abel,
+    Submodule.add_mem _ (Submodule.smul_mem _ _ (Submodule.subset_span (by simp)))
+      (Submodule.smul_mem _ _ (Submodule.subset_span (by simp))), ?_⟩
+  rw [BilinForm.mem_orthogonal_iff]
+  intro n hn
+  rw [BilinForm.isOrtho_def, polarBilin_apply_apply]
+  refine Submodule.span_induction ?_ ?_ ?_ ?_ hn
+  · intro x hx
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
+    rcases hx with rfl | rfl
+    · rw [QuadraticMap.polar_sub_right, QuadraticMap.polar_add_right,
+        QuadraticMap.polar_smul_right, QuadraticMap.polar_smul_right, hab, smul_zero, add_zero,
+        smul_eq_mul, hα, QuadraticMap.polar_comm Q x u, div_mul_cancel₀ _ h2a, sub_self]
+    · rw [QuadraticMap.polar_sub_right, QuadraticMap.polar_add_right,
+        QuadraticMap.polar_smul_right, QuadraticMap.polar_smul_right, hba, smul_zero, zero_add,
+        smul_eq_mul, hβ, QuadraticMap.polar_comm Q x u, div_mul_cancel₀ _ h2b, sub_self]
+  · rw [QuadraticMap.polar_comm, QuadraticMap.polar_zero_right]
+  · intro x y _ _ hx hy; rw [QuadraticMap.polar_add_left, hx, hy, add_zero]
+  · intro c x _ hx; rw [QuadraticMap.polar_smul_left, hx, smul_zero]
+
+/-- **★ The `hspan` dichotomy (i-a capstone) — bare vertex.** For an orthogonal anisotropic pair `a, b`, `q ≥ 7`, and
+any vertex `u`: **either** `u`'s complement component is isotropic (`∃ u_W ∈ W`, `u − u_W ∈ Wᗮ` with
+`Q (u − u_W) = 0` — the singleton locus, recovery doc §8 ITEM B "(ii)") **or** `Z(u)` affinely spans `W` (the `hspan`
+input of `exactGram_of_sameWProfile`). Combines `exists_orthogonal_decomp` (i-a) with `hspan_of_conic` (generic case),
+routing the case split to exactly where the singleton sub-obligation attaches. -/
+theorem hspan_or_singleton [FiniteDimensional K V]
+    {a b : V} (hQa : Q a ≠ 0) (hQb : Q b ≠ 0) (hab : QuadraticMap.polar Q a b = 0)
+    (hF : ringChar K ≠ 2) [Invertible (2 : K)] (hq : 7 ≤ Fintype.card K) (u : V) :
+    (∃ u_W ∈ Submodule.span K ({a, b} : Set V),
+        u - u_W ∈ BilinForm.orthogonal Q.polarBilin (Submodule.span K ({a, b} : Set V))
+          ∧ Q (u - u_W) = 0) ∨
+    (∃ w₀ : V, w₀ ∈ Submodule.span K ({a, b} : Set V) ∧ Q (u - w₀) = 0 ∧
+      Submodule.span K ((fun w => w - w₀) ''
+        {w : V | w ∈ Submodule.span K ({a, b} : Set V) ∧ Q (u - w) = 0})
+        = Submodule.span K ({a, b} : Set V)) := by
+  obtain ⟨u_W, u_perp, hdecomp, hu_W, hu_perp⟩ := exists_orthogonal_decomp hQa hQb hab u
+  have hup : u - u_W = u_perp := by rw [hdecomp]; abel
+  by_cases hcp : Q u_perp = 0
+  · exact Or.inl ⟨u_W, hu_W, by rw [hup]; exact hu_perp, by rw [hup]; exact hcp⟩
+  · exact Or.inr (hspan_of_conic hQa hQb hab hF hq hdecomp hu_W hu_perp hcp)
+
+/-- **★ (ii) — the singleton-locus recovery core.** In the singleton locus (`u_⊥, u'_⊥ isotropic`, i.e.
+`Q u_⊥ = Q u'_⊥ = 0`), the exact Gram to `{a,b}` is fully determined by the `W`-component: `Q u = Q u_W`,
+`polar Q u a = polar Q u_W a`, `polar Q u b = polar Q u_W b` (the complement contributes nothing — it is isotropic and
+polar-orthogonal to `W`). So two singleton-locus vertices with the **same `W`-component** (`u_W = u'_W`) have the
+**same exact Gram** — no spanning, easier than the generic case. This is the left disjunct of `hspan_or_singleton`; the
+remaining (II)-seam obligation (the observable pins `u_W` = the unique isotropic-in-`W` neighbour) is the *same*
+base-augmentation content as the generic branch. -/
+theorem exactGram_of_isotropic_complement
+    {a b u u' u_W u'_W u_perp u'_perp : V}
+    (hu : u = u_W + u_perp) (hu' : u' = u'_W + u'_perp)
+    (hu_W : u_W ∈ Submodule.span K ({a, b} : Set V))
+    (hu'_W : u'_W ∈ Submodule.span K ({a, b} : Set V))
+    (hu_perp : u_perp ∈ BilinForm.orthogonal Q.polarBilin (Submodule.span K ({a, b} : Set V)))
+    (hu'_perp : u'_perp ∈ BilinForm.orthogonal Q.polarBilin (Submodule.span K ({a, b} : Set V)))
+    (hiso : Q u_perp = 0) (hiso' : Q u'_perp = 0) (hWeq : u_W = u'_W) :
+    Q u = Q u' ∧ QuadraticMap.polar Q u a = QuadraticMap.polar Q u' a
+      ∧ QuadraticMap.polar Q u b = QuadraticMap.polar Q u' b := by
+  have haW : a ∈ Submodule.span K ({a, b} : Set V) := Submodule.subset_span (by simp)
+  have hbW : b ∈ Submodule.span K ({a, b} : Set V) := Submodule.subset_span (by simp)
+  have hQu : Q u = Q u_W := by
+    rw [hu, ChainDescent.ComplementFactor.map_add_split hu_W hu_perp, hiso, add_zero]
+  have hQu' : Q u' = Q u'_W := by
+    rw [hu', ChainDescent.ComplementFactor.map_add_split hu'_W hu'_perp, hiso', add_zero]
+  have hpolar : ∀ s : V, s ∈ Submodule.span K ({a, b} : Set V) →
+      QuadraticMap.polar Q u s = QuadraticMap.polar Q u_W s := by
+    intro s hs
+    rw [hu, QuadraticMap.polar_add_left, QuadraticMap.polar_comm Q u_perp s,
+      ChainDescent.ComplementFactor.polar_zero_of_mem_orthogonal hs hu_perp, add_zero]
+  have hpolar' : ∀ s : V, s ∈ Submodule.span K ({a, b} : Set V) →
+      QuadraticMap.polar Q u' s = QuadraticMap.polar Q u'_W s := by
+    intro s hs
+    rw [hu', QuadraticMap.polar_add_left, QuadraticMap.polar_comm Q u'_perp s,
+      ChainDescent.ComplementFactor.polar_zero_of_mem_orthogonal hs hu'_perp, add_zero]
+  refine ⟨by rw [hQu, hQu', hWeq], ?_, ?_⟩
+  · rw [hpolar a haW, hpolar' a haW, hWeq]
+  · rw [hpolar b hbW, hpolar' b hbW, hWeq]
+
 end ChainDescent.ConicSpan

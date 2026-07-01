@@ -722,10 +722,19 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 >       `a,b` orthogonal anisotropic and a decomposition `u = u_W + u_⊥` (`u_W∈W=span{a,b}`, `u_⊥∈Wᗮ`) with `Q u_⊥ ≠ 0`
 >       (`c=−Q u_⊥ ≠ 0`) and `q≥7`, `Z(u)={w∈W:Q(u−w)=0}` **affinely spans `W`** — i.e. the `hspan` hypothesis of
 >       `exactGram_of_sameWProfile` holds. Level identity `Q(u−w)=Q(u_W−w)+Q u_⊥` via `map_sub_split`; `Z(u)=u_W−L_c`.
->     - **Remaining in A2 (both mechanical/scheduled):** **(a)** discharge the carried decomposition — derive `IsCompl W Wᗮ`
->       from `Q|_W` nondeg (`BilinForm.isCompl_orthogonal_of_restrict_nondegenerate` + `exists_decomp_of_isCompl`), so
->       `hspan_of_conic` applies to a bare vertex `u`; standard Mathlib plumbing. **(b)** the **singleton sub-case** `Q u_⊥=0`
->       (⟹ `c=0`, `Z(u)` a single point) — genuine, scheduled (recovery doc §8 ITEM B "(ii)"); `q∈{3,5}` finite tail folds in.
+>     - **(i-a) Decomposition-discharge — LANDED (2026-07-01, `ScratchConicSpan`, axiom-clean).** `exists_orthogonal_decomp`
+>       (every `u` splits `u = u_W + u_⊥`, `u_W∈W`, `u_⊥∈Wᗮ`, via the *explicit projection* `u_W = (polar Q u a/polar Q a a)•a
+>       + (polar Q u b/polar Q b b)•b` — no `IsCompl`/restrict machinery) + the bare-vertex capstone **`hspan_or_singleton`**:
+>       for any `u`, **either** the singleton locus (`Q(u−u_W)=0`, `u−u_W∈Wᗮ`) **or** `Z(u)` spans `W` (`hspan`). So (I)
+>       applies to a bare vertex, with the case split routed exactly to where (ii) attaches.
+>     - **(ii) Singleton sub-case — SCOPED + core LANDED (2026-07-01, `ScratchConicSpan`, axiom-clean).** NOT a gap — it
+>       recovers *more easily* than the generic case. In the singleton locus (`Q u_⊥ = 0`) the exact Gram to `{a,b}`
+>       **collapses onto `u_W`**: `Q u = Q u_W`, `polar Q u a = polar Q u_W a` (complement isotropic + polar-orthogonal to
+>       `W`). Core **`exactGram_of_isotropic_complement`**: two singleton-locus vertices with the same `W`-component
+>       (`u_W = u'_W`) have the same exact Gram — no spanning. **Remaining (ii)-specific:** the small bridge `u_W = u'_W`
+>       from `hprof` + singleton (`u_W ∈ Z(u')` by `hprof`, and `Z(u') = {u'_W}` when the plane form is anisotropic — a
+>       `χ(−QaQb⁻¹)=−1` conic fact, reuses `ScratchConicCount`); then the shared (II) seam (observable ⟹ `hprof`), same
+>       base-augmentation content as the generic branch. So (ii) is fully parallel, `q∈{3,5}` tail folds in.
 > - **(II) The observable → geometric-profile SEAM (the frontier, NOT built).** Connect the WL-stable / iterated observable
 >   to "isoClass profile over `W`" — the fixpoint propagation the probe's `r*∈{3,4}` measures (span points discretise in
 >   `O(1)` rounds). Sub-options: (a) explicit `k`-round WL operator + `d`-uniform recovery at `k=O(1)`; (b) bounded base
@@ -752,7 +761,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchSpanDim2Geom` (`exactGram_of_sameWProfile` — the geometric recovery CORE: isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent),
 > `ScratchSpanDim2Span` (`hspan_of_two_indep` — the `hspan` combinatorial bridge: three non-collinear isotropic points ⟹ `hspan`),
 > `ScratchConicCount` (`sum_quadraticChar_sq_sub` `∑ₓχ(x²−a)=−1` + `card_binary_form` `#{w₁x²+w₂y²=c}=q−ε` — the conic count, elementary, no Gauss; + `exists_both_nonzero_solution` — count ⟹ both-nonzero solution, `q≥7`),
-> `ScratchConicSpan` (`exists_three_indep_levelset` — three non-collinear plane level-set points; `hspan_of_conic` — the A2 transport capstone: `Z(u)` spans `W` for generic `c≠0`).
+> `ScratchConicSpan` (`exists_three_indep_levelset` — three non-collinear plane level-set points; `hspan_of_conic` — the A2 transport capstone: `Z(u)` spans `W` for generic `c≠0`; `exists_orthogonal_decomp` + `hspan_or_singleton` — i-a bare-vertex dichotomy singleton-∨-hspan; `exactGram_of_isotropic_complement` — ii singleton-locus recovery core).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
