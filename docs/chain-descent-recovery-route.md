@@ -69,12 +69,18 @@
 > - **(II) SEAM — the frontier, NOT built.** Connect the WL-stable / iterated observable to "isoClass profile over `W`"
 >   (the fixpoint propagation the probe's `r*∈{3,4}` measures). Sub-options in §8 ITEM B; decision deferred.
 >
-> **▶ THE IMMEDIATE NEXT STEP (finishing CORE (I)):** the **`hspan` assembly + transport** — from the count
-> `q−ε ≥ q−1 ≥ 5` (`q≥6`) get a both-coordinate-nonzero solution `(x₀,y₀)` ⟹ three explicit non-collinear solutions
-> `(±x₀,±y₀)` ⟹ `hspan_of_two_indep`; then **transport** (diagonalise `Q_W=Q|_W` via an orthogonal basis + the affine
-> bijection `Z ≅ L_c` from `ScratchComplementFactor.map_add_split`, `W` nondeg) to move the concrete `F×F` count to the
-> abstract `Z`. Plus a finite small-`q`/`c=0`-singleton tail. Full detail: §8 ITEM B "hspan DISCHARGE".
-> **AFTER that:** the seam-(II) decision, then compose via `leaves_le_prod_concentrated`.
+> **▶ READ §9 FIRST for the logical plan + the reasoning (self-contained).** §9 records the (I)/(II) architecture, the
+> five insights **with their derivations** (chiefly Insight 1 — *why there is no single-round bypass*, so the WL iteration
+> is mandatory and (I) is on the critical path), the landed substrate, and the ordered plan + dead ends. The dated bullets
+> in this STATUS are the chronology; §9 is the map.
+>
+> **▶ THE IMMEDIATE NEXT STEP — Step B (the base-augmentation reduction, II-easy).** CORE (I) is now LANDED for **both**
+> branches (Step A done — generic `hspan_of_conic` + singleton `exactGram_of_isotropic_complement` + bare-vertex
+> `hspan_or_singleton`, all axiom-clean, `ScratchConicSpan`). Next: define `Obs_aug(u) := (isoClass(u−w))_{w∈W}`, prove
+> `Obs_aug ⟹ hprof` (trivial, `isoClassK_ne_two_iff`), compose through `hspan_or_singleton` to bank
+> `WallKernelFor Obs_aug` — short, local, no counting. **AFTER that:** Step C, the crux "**C^∞ pins `W`**" (the
+> `d`-independent plane-pinning, where the open math lives), then re-instantiate `obsEq_iff_stabOrbit` on the WL-stable
+> observable and compose via `leaves_le_prod_concentrated`. Full plan: §9.5.
 > **Probes** back the direction: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`); span-dim-2 recovery
 > bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`). **`L`** is a corollary of route A (route B).
 > **Start at:** this HANDOFF → the "Verify the landed substrate" list (bottom of STATUS) → §8 ITEM A/B. **════════**
@@ -787,3 +793,109 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 - **Forms-graph plan (seal/quasipoly build + Routes A/B/C arc):** `chain-descent-formsgraph-wldim-plan.md` STATUS + §1 item 1.
 - **Modulo set / what's left map:** `chain-descent-remaining-work.md` §3a. **Demoted WL-dim route:**
   `chain-descent-cellsareorbits-route.md`. **Cross-session detail:** `[[project_formsgraph_wldim_viability_2026-06-28]]`.
+
+---
+
+## 9. Route A — the plan, and *why it is what it is* (self-contained; a fresh reader reconstructs the reasoning here)
+
+> **Why this section exists.** §8 is a chronological handoff (dated bullets); this section is the **logical** one — the
+> architecture, the insights **with their derivations**, and the ordered plan, written so a new reader reaches the same
+> conclusions without re-walking the dead ends (chiefly: *why there is no single-round bypass*). Assumes the cost model
+> of §1–§4. Everything below is landed axiom-clean `[propext, Classical.choice, Quot.sound]` unless marked OPEN; none is
+> in `build.sh`.
+
+### 9.1 The target (what route A must prove)
+`bᵢ = 1` at a span-dim-2 anisotropic base `S ⊇ {0,a,b}` (`a,b` orthogonal anisotropic, plane `W = span{a,b}`): the 1-WL
+refinement cell equals one `Stab(S)`-orbit. Via the scaffold `ScratchSpanDim2Recovery.obsEq_iff_stabOrbit` this reduces
+to **`WallKernelFor Obs`**: `Obs(u) = Obs(u') ⟹ SameExactGram Q {a,b} u u'` — i.e. `Q u = Q u'`, `polar u a = polar u' a`,
+`polar u b = polar u' b` — after which the carried Witt extension upgrades `SameExactGram` to same-orbit. `Obs` is
+*whatever 1-WL computes* after individualizing `S` (the stable colouring `C^∞`).
+
+### 9.2 The (I)/(II) split
+Everything factors through the geometric quantity **`hprof`** = "`u`'s isotropic set in `W` is contained in `u'`'s":
+`∀ w∈W, Q(u−w)=0 → Q(u'−w)=0`.
+- **(I) geometric core** — `hprof ⟹ SameExactGram`. **LANDED (both branches, §9.4).**
+- **(II) the seam** — `Obs(u)=Obs(u') ⟹ hprof`. **OPEN — the sole remaining open math of route A.**
+
+### 9.3 The five insights that fix this architecture (each with its derivation)
+
+**Insight 1 — there is NO single-round bypass; the iteration is mandatory; therefore (I) is on the critical path, not a shortcut to avoid.**
+One naturally hopes to read `SameExactGram` straight off a single round — either off the counts (Gauss-direct) or off a
+single-round isotropy profile (geometric-direct) — skipping the (I)/(II) machinery. **Both fail for the same reason.**
+`ScratchComplementFactorK.levelset_count_factors_through_chiDet` proves a single joint isotropy count depends on the
+configuration **only through `χ(det G_config)`**, a **2-valued** quantity. A bounded profile of such counts over the
+sub-configs of `{0,a,b}` therefore carries `O(1)` bits, whereas the orbits to be separated number `Θ(q³)` (the
+`q²(q+1)` orbit count at span-dim-2, `recovery_depth_probe.py`). The conic count (`ScratchConicCount`) does **not**
+rescue this — it counts a level set, it adds no bits to the *observable*. So no single round separates; the information
+only appears after WL **iteration** (`r*∈{3,4}` rounds, flat in `d`). **Consequence:** the real fork is *how to obtain
+the iterated information*, **not** geometric-vs-Gauss — and (I), which converts the *iterated* profile into the exact
+Gram, is the genuine finisher.
+
+**Insight 2 — the plane `W` is orbit-rigid, so `hprof` (the isotropy profile over `W`) is exactly what the iteration should deliver.**
+`ScratchBranchDepth.stab_fixes_span`: an `S`-fixing similitude fixes all of `W = span{a,b}` pointwise, so every plane
+point is a singleton `Stab(S)`-orbit. The plane is thus legitimately "determinable," and the natural content the WL
+iteration propagates is: the rigid plane-colours fold into `u`'s stable colour, i.e. `isoClass(u−w)` becomes known for
+`w∈W` — which **is** `hprof`. This is why (I)'s hypothesis is stated over the whole plane.
+
+**Insight 3 — (I) needs *less* than full-plane agreement (so (II) has a smaller target).**
+`ScratchSpanDim2Geom.exactGram_of_sameWProfile`'s proof uses `hprof` only via the `.mp` direction and only at points of
+`Z(u) = {w∈W : Q(u−w)=0}`. So (A1) the interface was weakened to the one-directional form above. (II) need only propagate
+*one* isotropic-containment over the spanning set `Z(u)`.
+
+**Insight 4 — base-augmentation is a proof device that reduces (II) to a `d`-independent plane-pinning and avoids formalizing a `k`-round WL operator — but it does NOT remove the counting engine.**
+Define the *augmented single-round* observable `Obs_aug(u) := (isoClass(u−w))_{w∈W}` (individualize the whole plane).
+Then **(II-easy)** `Obs_aug(u)=Obs_aug(u') ⟹ hprof` is trivial (`isoClass` determines whether `Q(·)=0`, via
+`isoClassK_ne_two_iff`), so (II-easy) + (I) gives `WallKernelFor Obs_aug` with **no counting**. The remaining
+**(II-hard)** is "the 1-WL-stable colouring `C^∞` at `{0,a,b}` refines `Obs_aug`" = **"C^∞ pins the plane `W`"**
+(assigns each `w∈W` a recoverable colour). Because `C^∞` is a *refinement fixpoint*, "C^∞ refines `Obs_aug`" needs **no
+round-counting** — only that `W` is pinned in `C^∞`. And "pin `W`" is a **2-dimensional, `d`-independent** statement
+(matching `r*`-flat-in-`d`), into which the landed complement-factoring (`ScratchComplementFactorK`, cancels the `d−2`
+complement to a count over `K²`) and the conic count plug. **Honest boundary:** "pin `W`" does *not* follow from
+orbit-rigidity alone (WL is coarser than orbits — a singleton *orbit* need not be a singleton *colour*), so the counting
+engine is still required. Base-augmentation **reshapes** the round-counting obligation into a `d`-independent plane-pinning
+closure; it does not dissolve the math.
+
+**Insight 5 — the singleton locus recovers *more easily*, so it is a separate branch, not a gap.**
+When `u`'s complement component `u_⊥` is isotropic (`Q u_⊥ = 0`, forcing level `c=0`; on an anisotropic plane
+`Z(u)={u_W}`, a singleton where (I)'s spanning fails), the exact Gram **collapses onto `u_W`**: `Q u = Q u_W` and
+`polar u a = polar u_W a` (the complement is isotropic *and* polar-orthogonal to `W`). So two singleton vertices with the
+same `W`-component share the exact Gram (`ScratchConicSpan.exactGram_of_isotropic_complement`). `hspan_or_singleton`
+routes `u` to the generic (I) branch or this one.
+
+### 9.4 The landed substrate (the (I)-level geometry, both branches)
+The chain, generic branch: `ScratchConicCount` (`card_binary_form` `#{w₁x²+w₂y²=c}=q−ε`, `exists_both_nonzero_solution`
+for `q≥7`) → `ScratchConicSpan.exists_three_indep_levelset` (three non-collinear plane level-set points) →
+`hspan_of_conic` (transport `Z(u)=u_W−L_c` via `ScratchComplementFactor.map_sub_split`, produces `hspan`) →
+`ScratchSpanDim2Span.hspan_of_two_indep` → `ScratchSpanDim2Geom.exactGram_of_sameWProfile` (the core, `hprof ⟹ SameExactGram`).
+Bare vertex: `ScratchConicSpan.exists_orthogonal_decomp` (explicit projection, no `IsCompl`) + `hspan_or_singleton`
+(dichotomy). Singleton branch: `exactGram_of_isotropic_complement`. Soundness of the observable:
+`ScratchJointCountInvariant.obsInvariant_jointCountProfile`. `d`-cancellation (reused from the seal):
+`ScratchComplementFactorK.levelset_count_factors_through_chiDet`.
+
+### 9.5 The ordered plan (what to do next)
+- **Step A — DONE.** A1 weaken (I) to one-directional `hprof`; A2 the full (I)-level geometry for **both** branches
+  (generic `hspan_of_conic` + singleton `exactGram_of_isotropic_complement`), plus the bare-vertex dichotomy
+  `hspan_or_singleton`.
+- **Step B — the base-augmentation reduction (II-easy), NEXT.** Define `Obs_aug`; prove `Obs_aug ⟹ hprof` (trivial, via
+  `isoClassK_ne_two_iff`); compose with (I) both branches through `hspan_or_singleton` to bank **`WallKernelFor Obs_aug`**.
+  Short, local, no counting.
+- **Step C — the crux: "C^∞ pins `W`" (II-hard) = the `d`-independent plane-pinning.** Prove the 1-WL fixpoint at
+  `{0,a,b}` assigns each `w∈W` a recoverable colour, by a **span-induction closure over `W`** (`0,a,b` pinned → all of
+  `W`), each step a fixed 2-dim count over `K²` — complement-factoring (`ScratchComplementFactorK`) removes the `d−2`
+  complement, the conic/pair-form count (`ScratchConicCount`/`PairForm`/`GaussCount`) separates the new plane point.
+  **This is where the remaining open math lives.** Fallback if the closure stalls: an explicit `k`-round WL operator
+  with a `d`-uniform `O(1)`-round bound (heavier; base-augmentation exists to avoid it).
+- **(ii)-glue (small, parallel).** `u_W = u'_W` from `hprof` + the singleton fact `Z(u') = {u'_W}` (a `χ(−QaQb⁻¹)=−1`
+  conic fact, reuses `ScratchConicCount`); then (ii) rejoins the shared Step C seam.
+- **Assembly.** Re-instantiate `obsEq_iff_stabOrbit` on the WL-stable observable (the current scaffold is wired to the
+  single-round `jointCountProfile`, which Insight 1 shows is insufficient — this swap is required); compose to the poly
+  leaf count via `ScratchBoundedMultLeaves.leaves_le_prod_concentrated`.
+
+### 9.6 Dead ends recorded (do not re-walk)
+- **Gauss-direct / geometric-direct single-round recovery** — refuted by Insight 1 (`levelset_count_factors_through_chiDet`
+  ⟹ `χ(det)`-valued ⟹ `O(1)` bits vs `Θ(q³)` orbits). Any "skip the iteration" idea dies here.
+- **`WallKernelFor(jointCountProfile)` (single round) as the route-A predicate** — the scaffold reduces to it, but it is
+  *insufficient at a bounded base* (same refutation; `ScratchWallKernel` "redirected 3c" note). The iterated observable
+  is required.
+- **Deriving the decomposition via `IsCompl`/restrict-nondegenerate** — unnecessary; `exists_orthogonal_decomp` does it
+  directly by explicit projection (the diagonal plane Gram gives closed-form coefficients).
