@@ -68,9 +68,14 @@
 > **KEY FINDING:** the two `L` seams collapse to **one** — the span-growth residual (singleton-orbit forks) leaves span
 > AND `Stab` fixed, so it IS **cell-discretisation**, which IS the **same WL-orbit defect as the poly crux** (ITEM B). So
 > `B` and `L` share one open core; `L`'s remainder is NOT a separate easier target. `L = O(d)` NOT yet closed (genuinely
-> open, not "moderate"); cheapest test = iterated `χ(det G₂)` at the `d+1` frame (Stage B.0 probe). (5) **★ NOW LIVE:** the
-> **poly crux** `B ≤ poly(q)` = the shared core ⟺ selected cell cuts `|K|^{|S|}` Gram profiles to `poly(q)` (WL-orbit
-> defect; leads δ′/Skresanov/`EdgeGeneratesFromSet`). DRG freebie gives `b₁=1`. Full plan: §6 ITEM A/B.
+> open, not "moderate"); cheapest test = iterated `χ(det G₂)` at the `d+1` frame (Stage B.0 probe). (5) **δ′ LEAD SCOPED +
+> SUBSTRATE LANDED (2026-07-01)** (`ScratchDominatorForms.lean`, axiom-clean): the δ′ engine is built + discharged on the
+> 1-D cyclotomic family; **DIMENSIONAL WALL** — the two-point forced-triangle step gives 2 `Q`-constraints, cannot pin in
+> `d≥3` (same wall as the seal's 2-round pair form; discharge was dim-1). Landed the **full-base** pinning
+> `spanning_exactQ_determines` (reuses §1); verdict: δ′ restructures but doesn't dodge the WL-orbit defect — needs the
+> extension route (`hcatch`) or a multi-point engine, both = the shared core. (6) **★ NOW LIVE:** the **poly crux**
+> `B ≤ poly(q)` = the shared core ⟺ selected cell cuts `|K|^{|S|}` Gram profiles to `poly(q)`. Options: multi-point δ′
+> engine, `χ(det G₂)`@`d+1` probe, Skresanov, `EdgeGeneratesFromSet`. DRG freebie gives `b₁=1`. Full plan: §6 ITEM A/B.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
@@ -504,11 +509,28 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > **▶ ITEM B — `B ≤ poly(q)` (the poly crux; the research core).** Obligation: `certifiedBoundedTree`'s `degBound` at the
 > **poly** tier. **Precise form (landed reduction):** `stabOrbit_cover_card_le` (`ScratchBranchingBound.lean`) gives
 > `#orbits ≤ |K|^{|S|+1}` via orbits ↪ exact-Gram profiles; poly ⟺ **the selected cell cuts the `|K|^{|S|}` profiles to
-> `poly(q)`** (the WL-orbit defect — same object as the seal core, at a small base). **First lead to try (per the doc):**
-> **δ′ dominator-closure** (`dominatorReachable_affine_step`, `CascadeAffine`) — a *non-counting* forced-triangle route,
-> **never tried on `VO^ε`**; if it bounds the per-cell orbit split it feeds `degBound` directly, no Gauss. Fallbacks:
-> Skresanov 2-closure, `EdgeGeneratesFromSet`. Gauss `χ(det G₂)` proves the stronger `bᵢ=1` (overshoot; reserve). If all
-> stall → Route C (§7).
+> `poly(q)`** (the WL-orbit defect — same object as the seal core, at a small base).
+>
+> **δ′ DOMINATOR-CLOSURE LEAD — SCOPED + SUBSTRATE LANDED (2026-07-01).** The δ′ forced-triangle engine is fully built
+> (`CascadeAffine` §S-bridge-δ: `DominatorReachable`, `dominatorReachable_of_rank`, affine criterion
+> `affineScheme_interNum_eq_one_of_unique`, seal consumer `separatesAtBoundedBase_of_dominatorClosure`) and **already
+> discharged end-to-end** on the 1-D cyclotomic family (`dominatorReachable_G0pow_neg` / `reachesRigidOrCameron_viaG0powNeg`,
+> via cross-ratio). **★ THE DIMENSIONAL WALL (scoping finding):** the δ′ *step* (`DominatorReachable.step`) pins `γ` from
+> just **two** points = **two** scalar `Q`-constraints; two quadratics cut a codim-`≤2` (`≈ q^{d−2}`-point) subvariety of
+> `K^d`, **not** a singleton for `d ≥ 3`. So the raw two-point forced triangle **cannot pin on `VO^ε`** (`d≥4`) in the
+> scheme's own colours — the SAME wall that forced the seal onto the 2-round `χ(det G₂)` pair form, and exactly why the
+> successful discharge is the **dimension-1 line** and the rainbow variant "cannot reach the rank-3 SRG core". **Landed**
+> (`ChainDescent/ScratchDominatorForms.lean`, axiom-clean): `polar_eq_qSub` + `spanning_exactQ_determines` — the **full-base**
+> pinning (exact-`Q` profile to a `span=⊤` base determines the vertex; the affine isometry scheme's `huniq` at a spanning
+> base, reusing §1's `spanning_sameExactGram_determines`) + `twoPoint_insufficient_unless_spans` (the two-point premise is
+> the non-spanning projection). **VERDICT:** δ′ **restructures** the crux as an inductive closure but does **not** dodge it —
+> on `VO^ε` it needs either (a) the **extension** relations (`reachesRigidOrCameron_viaExtensionDominatorClosure`, carries
+> `hcatch`) or (b) a **multi-point** pinning engine (full-base, landed here); both reduce to the **same** WL-orbit defect as
+> the crux. What δ′ buys: the full-base pinning is unconditional geometry, isolating the open content to the **fusion**
+> (rank-3 similitude vs exact `Q`-value) — the 2-round count the seal handles. **Next δ′ move (if pursued):** either extend
+> the engine with a multi-point step (turns `spanning_exactQ_determines` into a real closure on the isometry scheme, then
+> tackle fusion), or run the `χ(det G₂)`-at-`d+1`-frame probe (shared with ITEM A). **Fallbacks:** Skresanov 2-closure,
+> `EdgeGeneratesFromSet`. Gauss `χ(det G₂)` proves the stronger `bᵢ=1` (overshoot; reserve). If all stall → Route C (§7).
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
