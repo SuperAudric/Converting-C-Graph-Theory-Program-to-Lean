@@ -556,6 +556,25 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > (`BoundedConfusionMultiplicity` steer): the bound is a *non-trivial* `Θ(q²)` (not 0, not `q^{|S|}`), and the full per-level
 > distribution is reported — not a tuned pass/fail.
 >
+> **★ SPAN-DIM-1 BOUND `bᵢ ≤ q²` — PROVEN (2026-07-01, the provable half).** Landed `ScratchSpanDimBound.lean` (axiom-clean):
+> `stabOrbit_cover_card_le_line` — if `span S ⊆ K·a` (finrank ≤ 1) then, mod Witt, the space is covered by `≤ |K|² = q²`
+> `Stab(S)`-orbit reps, so `bᵢ ≤ q²` at any span-dim-1 base, **unconditionally**. Mechanism (`polar_eq_of_mem_span_singleton`):
+> `polar Q t` is linear, so on the line `polar Q t s = c_s·polar Q t a` — the whole `S`-profile collapses to
+> `(Q t, polar Q t a) ∈ K²`, sharpening Phase 2's `|K|^{|S|+1}` to `|K|^{finrank(span S)+1}` at `finrank=1`. Upper-bounds the
+> probe's `q(q−1)/2 < q²`. This makes the *branching-level factor* poly with no open hypothesis.
+>
+> **REMAINING HALF — the concentration (open, but sharply located + empirically TRUE).** `leaves = ∏bᵢ`; the span-dim-1 bound
+> caps the one big factor. Poly needs branching **confined** to `O(1)` such levels, i.e. **`bᵢ = 1` at span-dim `≥ 2`**
+> (`CellsAreOrbits` off span-dim-1). Key reframe: this is a **WallKernel** statement, but at span-dim `≥ 2` where the probe
+> shows it **HOLDS** — *not* the span-dim-1 instance that was refuted (that refutation *is* the `q²` defect this bound covers).
+> So the open content is a **positive, empirically-true** WallKernel-at-span-dim-`≥2`, the WL-orbit defect located where it is
+> true. Two attack routes: **(A)** prove `bᵢ=1` at span-dim `≥ 2` directly (2 independent anisotropic directions + 1-WL
+> iteration recover exact-Gram — candidate lever: the seal's 2-round `χ(det G₂)` observable, does it discretise at span-dim 2?);
+> **(B)** `L = O(1)` structurally — branching ⟹ span-dim `≤ 1` (route A contrapositive), and span grows past dim 1 within
+> `O(1)` forks (`nontrivialForks_le_finrank`, `ScratchBranchDepth`) ⟹ `O(1)` branching levels; needs the Phase-4 descent model.
+> Both routes reduce to route A's positive WallKernel-at-span-dim-`≥2`. **Viability:** strictly better-posed than the generic
+> crux (located + true + `q²`-bounded elsewhere); if A stalls, the `χ(det G₂)`@span-dim-2 probe is the cheap next test.
+>
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
 > `BoundedBranchingDisposition` (over `AdjMatrix n`/`OrbitPartition`) via the seal's `affineE` endpoint transport — the same
