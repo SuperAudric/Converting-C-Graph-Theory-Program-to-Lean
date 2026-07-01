@@ -73,9 +73,17 @@
 > 1-D cyclotomic family; **DIMENSIONAL WALL** — the two-point forced-triangle step gives 2 `Q`-constraints, cannot pin in
 > `d≥3` (same wall as the seal's 2-round pair form; discharge was dim-1). Landed the **full-base** pinning
 > `spanning_exactQ_determines` (reuses §1); verdict: δ′ restructures but doesn't dodge the WL-orbit defect — needs the
-> extension route (`hcatch`) or a multi-point engine, both = the shared core. (6) **★ NOW LIVE:** the **poly crux**
-> `B ≤ poly(q)` = the shared core ⟺ selected cell cuts `|K|^{|S|}` Gram profiles to `poly(q)`. Options: multi-point δ′
-> engine, `χ(det G₂)`@`d+1` probe, Skresanov, `EdgeGeneratesFromSet`. DRG freebie gives `b₁=1`. Full plan: §6 ITEM A/B.
+> extension route (`hcatch`) or a multi-point engine, both = the shared core. (6) **BOUNDED-MULT NON-VACUITY ✅ +
+> LEAF-BOUND UPGRADE (2026-07-01).** The δ′ *singleton* is walled, but the recovery target only needs bounded *orbit*
+> multiplicity. Probe (`forced_triangle_mult.py`): **`bᵢ ≤ q(q−1)/2 = Θ(q²)` — POLY(q), at EXACTLY ONE level (span-dim-1),
+> `bᵢ=1` elsewhere, `d`-uniform** (`q=3`: B=3 at d=4,6; `q=3,5,7`→B=3,10,21). So the crux is non-vacuous & empirically poly,
+> and branching is *concentrated*. Landed `ScratchBoundedMultLeaves.lean` (axiom-clean): **`leaves_le_prod`** — lifts Phase 1's
+> uniform `leaves ≤ Bᴸ` to **per-level** `leaves ≤ ∏ⱼ b(j)` + `leaves_le_prod_concentrated` (branching confined to level-set
+> `J` ⟹ `leaves ≤ ∏_{j∈J} b j`), so the probe profile gives `leaves ≤ q(q−1)/2 = poly(n)` directly. (7) **★ NOW LIVE:** the
+> **poly crux** SHARPENS to the probe-backed **`bᵢ ≤ q(q−1)/2`, concentrated at span-dim-1** (the per-level orbit-mult bound
+> feeding `leaves_le_prod`; the interNum-level δ′ stays walled — bounded-mult lives at the orbit level). Options: prove the
+> span-dim-1 orbit-mult bound (a-priori `stabOrbit_cover_card_le` gives `q^{|S|+1}`, poly at bounded `|S|`; needs the
+> concentration), `χ(det G₂)`@`d+1` probe, Skresanov. Full plan: §6 ITEM A/B.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
@@ -531,6 +539,22 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > the engine with a multi-point step (turns `spanning_exactQ_determines` into a real closure on the isometry scheme, then
 > tackle fusion), or run the `χ(det G₂)`-at-`d+1`-frame probe (shared with ITEM A). **Fallbacks:** Skresanov 2-closure,
 > `EdgeGeneratesFromSet`. Gauss `χ(det G₂)` proves the stronger `bᵢ=1` (overshoot; reserve). If all stall → Route C (§7).
+>
+> **★ BOUNDED-MULTIPLICITY REVIVAL — NON-VACUITY CHECK PASSED (2026-07-01, `forced_triangle_mult.py`).** The δ′ *singleton*
+> (`interNum=1`) target is walled (2-pt cut → `q^{d−2}` POINTS). But the recovery target only needs the *orbit* multiplicity
+> `bᵢ = #{Stab(S)-orbits in the WL cell} ≤ poly(q)` — and the wall bounds POINTS, not orbits (the `q^{d−2}` filter points form
+> few orbits under the large residual stabiliser). **Measured** (`bᵢ` = max orbits-per-cell over greedy-anisotropic base
+> levels, `VO^ε` sound isoClass model, `q∈{3,5,7}`, `d∈{4,6}`, both `ε`): **`bᵢ ≤ q(q−1)/2 = Θ(q²)` — POLY(q), and it
+> occurs at EXACTLY ONE level** (`|S|=2`, the span-dim-`0→1` transition); `bᵢ=1` at every other level (`CellsAreOrbits`
+> *holds* at span-dim `0,1` and `≥2`, failing only at span-dim-1). **`d`-uniform** (`q=3`: identical `B=3` at `d=4` and `d=6`).
+> This is the SAME defect the WallKernel refutation saw (orbits `12,30,56` vs cells `10,11,11` at `|S|=2`) — now seen to
+> **recover at `|S|=3`**. **Consequences:** (i) the crux `B ≤ poly(q)` is **non-vacuous and empirically poly** — `bᵢ ≤ q(q−1)/2`;
+> (ii) branching is **concentrated at one level**, so `L` (branchDepth = #`≥2`-forks) is `O(1)` here, and Phase 1's *existing*
+> `leaves ≤ Bᴸ` gives `leaves ≤ q(q−1)/2 = poly(n)` directly; (iii) the interNum-level δ′ stays walled — the useful
+> bounded-multiplicity lives at the **orbit** level (Phase 1's `BoundedBranchingDisposition`). So the open crux SHARPENS from
+> "`B ≤ poly(q)`?" to the concrete, probe-backed **"`bᵢ ≤ q(q−1)/2`, concentrated at span-dim-1"**. Vacuity-trap caution
+> (`BoundedConfusionMultiplicity` steer): the bound is a *non-trivial* `Θ(q²)` (not 0, not `q^{|S|}`), and the full per-level
+> distribution is reported — not a tuned pass/fail.
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
