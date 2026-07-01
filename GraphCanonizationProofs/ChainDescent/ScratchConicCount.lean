@@ -149,4 +149,101 @@ theorem card_binary_form (hF : ringChar F ≠ 2) [Invertible (2 : F)] {w₁ w₂
         rw [Finset.sum_add_distrib]; simp [Finset.card_univ]
     _ = Fintype.card F - quadraticChar F (-(w₁ * w₂⁻¹)) := by rw [hxsum]; ring
 
+/-- **A quadratic has ≤ 2 roots.** `#{y : y² = k} ≤ 2` in a field: any two roots differ only by sign
+(`(y − y₀)(y + y₀) = y² − y₀² = 0`), so the root set is contained in `{y₀, −y₀}`. -/
+theorem card_sq_eq_le_two {k : F} :
+    (univ.filter (fun y : F => y ^ 2 = k)).card ≤ 2 := by
+  rcases (univ.filter (fun y : F => y ^ 2 = k)).eq_empty_or_nonempty with h | h
+  · rw [h]; simp
+  · obtain ⟨y₀, hy₀⟩ := h
+    rw [Finset.mem_filter] at hy₀
+    have hsub : (univ.filter (fun y : F => y ^ 2 = k)) ⊆ ({y₀, -y₀} : Finset F) := by
+      intro y hy
+      rw [Finset.mem_filter] at hy
+      have hfac : (y - y₀) * (y + y₀) = 0 := by linear_combination hy.2 - hy₀.2
+      have hcase : y = y₀ ∨ y = -y₀ := by
+        rcases mul_eq_zero.mp hfac with h1 | h1
+        · left; linear_combination h1
+        · right; linear_combination h1
+      simpa only [Finset.mem_insert, Finset.mem_singleton] using hcase
+    refine (Finset.card_le_card hsub).trans ?_
+    exact (Finset.card_insert_le _ _).trans (by simp)
+
+/-- **★ A both-coordinate-nonzero solution exists.** For a nondegenerate diagonal binary form `w₁x² + w₂y²`
+(`w₁, w₂ ≠ 0`), level `c ≠ 0`, and `q = |F| ≥ 7`, the level set has a solution with **both** coordinates nonzero. The
+count is `|L_c| = q − ε ≥ q − 1 ≥ 6` (`card_binary_form`), while the axis solutions number `≤ 4` (`≤ 2` on each axis by
+`card_sq_eq_le_two`), so a both-nonzero solution remains. This yields the three explicit non-collinear points
+`(x₀,y₀), (−x₀,y₀), (x₀,−y₀)` that discharge `hspan`. -/
+theorem exists_both_nonzero_solution (hF : ringChar F ≠ 2) [Invertible (2 : F)]
+    {w₁ w₂ c : F} (hw₁ : w₁ ≠ 0) (hw₂ : w₂ ≠ 0) (hc : c ≠ 0) (hq : 7 ≤ Fintype.card F) :
+    ∃ x y : F, w₁ * x ^ 2 + w₂ * y ^ 2 = c ∧ x ≠ 0 ∧ y ≠ 0 := by
+  by_contra hcon
+  push_neg at hcon
+  -- `hcon : ∀ x y, w₁x²+w₂y²=c → x ≠ 0 → y = 0` — every solution lies on an axis.
+  -- Lower bound: `|L_c| ≥ 6`.
+  have hcard : (6 : ℤ) ≤ ((univ.filter
+      (fun p : F × F => w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c)).card : ℤ) := by
+    have hbf := card_binary_form hF hw₁ hw₂ hc
+    have hne : -(w₁ * w₂⁻¹) ≠ 0 := by
+      simp only [neg_ne_zero]; exact mul_ne_zero hw₁ (inv_ne_zero hw₂)
+    have hχ : quadraticChar F (-(w₁ * w₂⁻¹)) ≤ 1 := by
+      have h1 := quadraticChar_sq_one (F := F) hne
+      nlinarith [sq_nonneg (quadraticChar F (-(w₁ * w₂⁻¹)) - 1)]
+    have hqZ : (7 : ℤ) ≤ (Fintype.card F : ℤ) := by exact_mod_cast hq
+    rw [hbf]; linarith
+  -- Every solution has `p.1 = 0 ∨ p.2 = 0`.
+  have haxis : ∀ p ∈ (univ.filter (fun p : F × F => w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c)),
+      p.1 = 0 ∨ p.2 = 0 := by
+    intro p hp
+    rw [Finset.mem_filter] at hp
+    by_cases hx : p.1 = 0
+    · exact Or.inl hx
+    · exact Or.inr (hcon p.1 p.2 hp.2 hx)
+  -- So `L_c ⊆ (x=0 slice) ∪ (y=0 slice)`.
+  have hSsub : (univ.filter (fun p : F × F => w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c)) ⊆
+      (univ.filter (fun p : F × F => (w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c) ∧ p.1 = 0)) ∪
+      (univ.filter (fun p : F × F => (w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c) ∧ p.2 = 0)) := by
+    intro p hp
+    have hax := haxis p hp
+    rw [Finset.mem_filter] at hp
+    rw [Finset.mem_union, Finset.mem_filter, Finset.mem_filter]
+    rcases hax with h0 | h0
+    · exact Or.inl ⟨Finset.mem_univ p, hp.2, h0⟩
+    · exact Or.inr ⟨Finset.mem_univ p, hp.2, h0⟩
+  -- Each axis slice has `≤ 2` points.
+  have hSxcard : (univ.filter
+      (fun p : F × F => (w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c) ∧ p.1 = 0)).card ≤ 2 := by
+    refine le_trans (Finset.card_le_card_of_injOn (f := Prod.snd)
+      (t := univ.filter (fun y : F => y ^ 2 = c * w₂⁻¹)) ?_ ?_) card_sq_eq_le_two
+    · intro p hp
+      rw [Finset.mem_coe, Finset.mem_filter] at hp
+      rw [Finset.mem_coe, Finset.mem_filter]
+      refine ⟨Finset.mem_univ _, ?_⟩
+      have h1 : w₂ * p.2 ^ 2 = c := by have h2 := hp.2.1; rw [hp.2.2] at h2; simpa using h2
+      field_simp
+      linear_combination h1
+    · intro p hp q hq hpq
+      rw [Finset.mem_coe, Finset.mem_filter] at hp hq
+      exact Prod.ext (hp.2.2.trans hq.2.2.symm) hpq
+  have hSycard : (univ.filter
+      (fun p : F × F => (w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c) ∧ p.2 = 0)).card ≤ 2 := by
+    refine le_trans (Finset.card_le_card_of_injOn (f := Prod.fst)
+      (t := univ.filter (fun x : F => x ^ 2 = c * w₁⁻¹)) ?_ ?_) card_sq_eq_le_two
+    · intro p hp
+      rw [Finset.mem_coe, Finset.mem_filter] at hp
+      rw [Finset.mem_coe, Finset.mem_filter]
+      refine ⟨Finset.mem_univ _, ?_⟩
+      have h1 : w₁ * p.1 ^ 2 = c := by have h2 := hp.2.1; rw [hp.2.2] at h2; simpa using h2
+      field_simp
+      linear_combination h1
+    · intro p hp q hq hpq
+      rw [Finset.mem_coe, Finset.mem_filter] at hp hq
+      exact Prod.ext hpq (hp.2.2.trans hq.2.2.symm)
+  -- `|L_c| ≤ 4`, contradicting `≥ 6`.
+  have hle : (univ.filter (fun p : F × F => w₁ * p.1 ^ 2 + w₂ * p.2 ^ 2 = c)).card ≤ 4 := by
+    refine (Finset.card_le_card hSsub).trans ?_
+    exact (Finset.card_union_le _ _).trans (by omega)
+  have : (6 : ℤ) ≤ 4 := hcard.trans (by exact_mod_cast hle)
+  norm_num at this
+
 end ChainDescent.ConicCount

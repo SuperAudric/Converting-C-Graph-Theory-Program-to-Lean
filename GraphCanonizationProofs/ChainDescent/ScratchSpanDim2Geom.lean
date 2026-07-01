@@ -45,12 +45,14 @@ theorem norm_diff_affine {u u' w : V} :
   rw [map_sub_eq, map_sub_eq, QuadraticMap.polar_sub_left]
   ring
 
-/-- **★ The span-dim-2 geometric recovery core.** Let `W` be the plane, `a, b ∈ W`. If two vertices `u, u'` have the
-**same isotropy profile over `W`** (`hprof`) and the common isotropic set `{w ∈ W : Q(u − w) = 0}` **affinely spans** `W`
-(anchored at `w₀`: `Z − w₀` linearly spans `W`, `hspan`), then they have the **same exact Gram** to `{a, b}`:
+/-- **★ The span-dim-2 geometric recovery core.** Let `W` be the plane, `a, b ∈ W`. If `u'`'s isotropic set over `W`
+**contains** `u`'s (`hprof`, the *one-directional* hypothesis: `Q(u−w)=0 → Q(u'−w)=0` for `w ∈ W` — the proof uses only
+this `.mp` direction, not the full `↔`, so `(II)` need only propagate one containment) and `u`'s isotropic set
+`Z = {w ∈ W : Q(u − w) = 0}` **affinely spans** `W` (anchored at `w₀`: `Z − w₀` linearly spans `W`, `hspan`), then they
+have the **same exact Gram** to `{a, b}`:
 `Q u = Q u'`, `polar u a = polar u' a`, `polar u b = polar u' b`. `d`-independent; no Gauss, no Witt. -/
 theorem exactGram_of_sameWProfile {W : Submodule K V} {a b : V} (haW : a ∈ W) (hbW : b ∈ W)
-    {u u' : V} (hprof : ∀ w ∈ W, (Q (u - w) = 0 ↔ Q (u' - w) = 0))
+    {u u' : V} (hprof : ∀ w ∈ W, Q (u - w) = 0 → Q (u' - w) = 0)
     {w₀ : V} (hw₀ : w₀ ∈ W) (hw₀0 : Q (u - w₀) = 0)
     (hspan : Submodule.span K
         ((fun w => w - w₀) '' {w : V | w ∈ W ∧ Q (u - w) = 0}) = W) :
@@ -63,8 +65,8 @@ theorem exactGram_of_sameWProfile {W : Submodule K V} {a b : V} (haW : a ∈ W) 
   -- `f` vanishes on the generators `w − w₀` for `w` in the common isotropic set.
   have hgen : ∀ x ∈ (fun w => w - w₀) '' {w : V | w ∈ W ∧ Q (u - w) = 0}, f x = 0 := by
     rintro _ ⟨w, ⟨hwW, hw0⟩, rfl⟩
-    have hw0' : Q (u' - w) = 0 := (hprof w hwW).mp hw0
-    have hw₀0' : Q (u' - w₀) = 0 := (hprof w₀ hw₀).mp hw₀0
+    have hw0' : Q (u' - w) = 0 := hprof w hwW hw0
+    have hw₀0' : Q (u' - w₀) = 0 := hprof w₀ hw₀ hw₀0
     have dW : Q (u - w) - Q (u' - w) = f w + (Q u - Q u') := by
       rw [hfapp]; exact norm_diff_affine
     have dW₀ : Q (u - w₀) - Q (u' - w₀) = f w₀ + (Q u - Q u') := by
@@ -85,7 +87,7 @@ theorem exactGram_of_sameWProfile {W : Submodule K V} {a b : V} (haW : a ∈ W) 
     · intro c y _ hy; rw [map_smul, hy, smul_zero]
   -- `Q u = Q u'` from the anchor (`w₀ ∈ W`, both isotropic).
   have hQ : Q u = Q u' := by
-    have hw₀0' : Q (u' - w₀) = 0 := (hprof w₀ hw₀).mp hw₀0
+    have hw₀0' : Q (u' - w₀) = 0 := hprof w₀ hw₀ hw₀0
     have d₀ : Q (u - w₀) - Q (u' - w₀) = f w₀ + (Q u - Q u') := by
       rw [hfapp]; exact norm_diff_affine
     rw [hw₀0, hw₀0', hfW w₀ hw₀] at d₀

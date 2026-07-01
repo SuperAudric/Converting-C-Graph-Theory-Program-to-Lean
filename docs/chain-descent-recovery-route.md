@@ -709,18 +709,28 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 >       (`#{z:z²=b}=χ(b)+1`) + the hyperbola bijection `(x,z)↦(x−z,x+z)` (`#{x²−z²=a} = #{uv=a} = q−1`); then
 >       **`card_binary_form`** `#{(x,y) : w₁x²+w₂y²=c} = q − χ(−w₁w₂⁻¹)` (`= q − ε`, `ε=±1`) for `c≠0`. This *replaces* the
 >       planned `card_quadForm_eq`/`gaussSum_sq` route — far cleaner.
->     - **Remaining (mechanical assembly + transport):** from `q − ε ≥ q − 1 ≥ 5` (`q≥6`), the count exceeds the `≤4` axis
->       solutions ⟹ ∃ a **both-coordinate-nonzero** solution `(x₀,y₀)` ⟹ three explicit non-collinear solutions
->       `(±x₀,±y₀)` (determinant `4x₀y₀≠0`) ⟹ `hspan_of_two_indep`. Plus the **transport**: diagonalise `Q_W = Q|_W`
->       (orthogonal basis) + the affine bijection `Z ≅ L_c` (`map_add_split` split, `W` nondeg) to move the concrete
->       `F×F` count to the abstract `Z`. Small-`q` (`q∈{3,5}`) + the `c=0`-anisotropic singleton = a finite/direct tail.
+>     - **Both-nonzero solution — LANDED (2026-07-01, `ScratchConicCount`, axiom-clean).** `card_sq_eq_le_two`
+>       (`#{y:y²=k}≤2`) + **`exists_both_nonzero_solution`**: for `q=|F|≥7` the count `q−ε≥6` exceeds the `≤4` axis
+>       solutions, so `∃ (x₀,y₀)` with `w₁x₀²+w₂y₀²=c` and `x₀≠0,y₀≠0`. This is the analytic heart; the three explicit
+>       non-collinear solutions are `(±x₀,±y₀)` (differences `(−2x₀,0),(0,−2y₀)` independent, `2x₀y₀≠0`).
+>     - **A1 — (I) interface WEAKENED (2026-07-01, `ScratchSpanDim2Geom`, axiom-clean).** `exactGram_of_sameWProfile`'s
+>       hypothesis is now the one-directional `∀w∈W, Q(u−w)=0 → Q(u'−w)=0` (the proof only ever used `.mp`), so (II) need
+>       only propagate *one* isotropic-containment, not full-plane agreement.
+>     - **Remaining in A2 (assembly + transport + tail):** build the three `W`-points `x₀•e₁±… ` from an orthogonal
+>       anisotropic basis `{e₁,e₂}` of `W` (`exists_orthoAnisotropic_basis`) + `exists_both_nonzero_solution`, prove their
+>       difference-independence (from `e₁,e₂` indep + `2x₀,2y₀≠0`), feed `hspan_of_two_indep`; then the **transport** —
+>       `u = u_W + u_⊥` (`exists_decomp_of_isCompl`, `Q|_W` nondeg), the level identity `Q(u−w)=0 ⟺ Q_W(u_W−w)=c`
+>       (`map_sub_split`, `c=−Q(u_⊥)`) placing the `W`-points in `Z(u)`. **Genuine sub-case (not just small `q`):** `c=0`
+>       anisotropic (`u_⊥` isotropic-in-`Wᗮ`) ⟹ `Z(u)` singleton — needs separate recovery. `q∈{3,5}` finite tail.
 > - **(II) The observable → geometric-profile SEAM (the frontier, NOT built).** Connect the WL-stable / iterated observable
 >   to "isoClass profile over `W`" — the fixpoint propagation the probe's `r*∈{3,4}` measures (span points discretise in
 >   `O(1)` rounds). Sub-options: (a) explicit `k`-round WL operator + `d`-uniform recovery at `k=O(1)`; (b) bounded base
 >   *augmentation* (individualise `O(q)` determined points of `W` — trades rounds for base size, stays poly); (c) nested
 >   2-round Gauss count (`χ(det G₂)` iterated). Decision pending; this is where the difficulty now concentrates.
-> **NEXT:** finish (I)'s `hspan` — the isolated binary-conic count `|L_c|=q−ε` (`card_quadForm_eq`+`gaussSum_sq`) + the
-> ≤2-per-line non-collinearity + small-`q`/singleton tail — then the mechanical assembly (∃ both-nonzero solution → 3 non-collinear → transport) + choose/attack (II).
+ **NEXT (updated 2026-07-01):** A1 (weaken (I)) ✅ + the both-nonzero solution (`exists_both_nonzero_solution`) ✅ are
+> LANDED. Remaining in A2 = the `W`-level **assembly** (3 non-collinear points via `exists_orthoAnisotropic_basis`) +
+> **transport** (`u=u_W+u_⊥` decomposition, level identity via `map_sub_split`) + the `c=0`-anisotropic singleton sub-case.
+> Then Step B (base-augmentation reduction `Obs_aug ⟹ SameExactGram`) + attack (II) "C^∞ pins W" (the plane-pinning closure).
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
