@@ -491,10 +491,11 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > discretisation core (= route A below). **ITEM B = `bᵢ≤poly(q)`** — δ′ walled (`ScratchDominatorForms`), but revived as
 > bounded orbit-multiplicity: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`), leaf bound lifted to per-level
 > (`ScratchBoundedMultLeaves`), and **span-dim ≥ 2 (route A) reduced** (`ScratchSpanDim2Recovery`) to one Gauss predicate.
-> **THE SINGLE LIVE ITEM: route A increment 2 (the complement-factoring Gauss proof) — its FOUNDATION (the orthogonal
-> split of the difference norm, `ScratchComplementFactor`) is now LANDED; the remaining piece is applying the split
-> inside the 2-round count (see ITEM B "INCREMENT 2" below and the top-of-doc FRESH-READER HANDOFF).** All eight modules
-> axiom-clean.
+> **THE SINGLE LIVE ITEM: route A's exact-Gram recovery at the span-dim-2 base. RE-SCOPED (2026-07-01):** the
+> complement-factoring is done (reused from the seal — `ScratchComplementFactorK` harvests the `d`-cancellation from
+> `levelset_count_eqK`/`configGaussSum_eq_detK`); the remaining content is the **sub-config `ZProfileSeparatesK` + iterated
+> observable** (one count is only `χ(det)`-valued) — see ITEM B "INCREMENT 2" below and the top-of-doc FRESH-READER
+> HANDOFF. All nine modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -635,19 +636,32 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `WallKernelFor (fun t t' => obs t = obs t') Q ↑S` for `obs` = the 2-round count — soundness and the reduction are proved;
 > the Gauss core is the single carried predicate.
 >
-> **INCREMENT 2 — the complement-factoring (step 4, the genuine new math). ◑ FOUNDATION LANDED (2026-07-01,
-> `ScratchComplementFactor.lean`, axiom-clean, NOT in build).** The **orthogonal split of the difference norm** — the
-> identity the whole count-factoring rests on — is proved: `map_sub_split` (`Q((v₁+v₂)−(u₁+u₂)) = Q(v₁−u₁) + Q(v₂−u₂)`
-> for `v₁,u₁ ∈ W`, `v₂,u₂ ∈ Wᗮ`), built from `map_add_of_polar_zero` (`polar=0 ⟹ Q(x+y)=Qx+Qy`, from
-> `QuadraticMap.map_add`) + `polar_zero_of_mem_orthogonal` (membership in `Wᗮ = BilinForm.orthogonal Q.polarBilin W`
-> kills the polar pairing), plus `exists_decomp_of_isCompl` (obtains the `W`/`Wᗮ` components from `IsCompl W Wᗮ`). The
-> decomposition API is confirmed present: `BilinForm.orthogonal Q.polarBilin ⟨a,b⟩` +
-> `isCompl_orthogonal_of_restrict_nondegenerate` (needs `IsRefl` — polar is symmetric — and the 2-dim restriction
-> nondegenerate) gives `V = ⟨a,b⟩ ⊕ ⟨a,b⟩^⊥`. **REMAINING (the count-factoring proper, next sub-increment):** apply the
-> split *inside* the 2-round isotropy count — the count over `w = w∥ + w⊥` factors, and for fixed `w∥` the inner
-> `w⊥`-count depends on the vertex only through `Q(v⊥)` (a Gauss sum over the `(d−2)`-dim complement, `PairForm`/
-> `GaussCount`); that `v`-independent-up-to-`Q(v⊥)` factor cancels in the separation comparison (Witt on the complement)
-> ⟹ the `d`-independent local count. Substantial multi-step Gauss build; the split geometry it stands on is now landed.
+> **INCREMENT 2 — the complement-factoring. ★ MAJOR RE-SCOPE (2026-07-01): the count-factoring is ALREADY BUILT (for the
+> quasipoly seal); the `d`-cancellation is now HARVESTED, and the genuine remaining route-A content is RELOCATED to the
+> iterated/sub-config observable.** Checking what exists (`IsotropicIncidenceCountK`) revealed the seal already did the
+> `V = U ⊕ Uᗮ` split (`reduction_to_levelsetK`) and the closed-form count (`levelset_count_eqK`:
+> `count·|K|^{m+1} = |V| + ∑_{s≠0}∑_ρ ψ(−sc)·(ψ(−s⁻¹·Q(∑ρa))·∑_x ψ(s·Q x))`), where the **`d`-dependence is exactly the
+> two config-independent factors `|V|=|K|^d` and the global Gauss sum `∑_x ψ(s·Q x)`**, and the config-dependence collapses
+> — via `configGaussSum_eq_detK` — to the single scalar **`χ(det G_config)`**. So the complement-factoring I was about to
+> build is done. **LANDED (2026-07-01):**
+> - `ScratchComplementFactor.lean` (axiom-clean) — the abstract-`V` orthogonal split (`map_sub_split`:
+>   `Q((v₁+v₂)−(u₁+u₂)) = Q(v₁−u₁)+Q(v₂−u₂)`, + `exists_decomp_of_isCompl`); the general-`V` bridge to the geometric
+>   `StabOrbit`/`SameExactGram` world (the seal's `map_add_of_polar_zeroK` is the `Fin d → K` instance).
+> - `ScratchComplementFactorK.lean` (axiom-clean) — **`levelset_count_factors_through_chiDet`**: the `d`-cancellation,
+>   reused: two configs with the same `χ(det G_config)` give the **same** (scaled) level-set count at every level `c`,
+>   **uniformly in `d`** (the `|V|` and global-Gauss `d`-factors are common ⟹ cancel; config enters only via `χ(det)`).
+>
+> **★ THE RE-SCOPE (the honest consequence — corrects the "one count ⟹ exact Gram" framing above).** Because a single
+> isotropy count is only **`χ(det)`-valued** (2-valued in the config — this is precisely why the *seal* needed a *matching*
+> of many pairs + `c₀≤¾` union to reach frame discreteness), route A's *exact-Gram* recovery `(Q u, polar u a, polar u b)`
+> at a span-dim-2 base **cannot come from one count**. It needs (a) the count **profile over the sub-configs** `S ⊆ {0,a,b}`
+> (= `ZProfileSeparatesK` at the small base `{a,b}`, targeting the exact Gram to `{a,b}` rather than the full frame), and
+> (b) the **iterated** observable — the `χ(det G₂)` 2-WL fixpoint, matching the probe's `r*∈{3,4}` rounds — not the single
+> round. The single-round content is now pinned + `d`-cancelled; **the remaining route-A content = the iteration's
+> `d`-uniform convergence** (the probe says `r*` is flat in `d`, so crackable). **NEXT:** instantiate `ZProfileSeparatesK`
+> at the span-dim-2 base and show the sub-config `χ(det)`-profile + `O(1)` iterations recover the 3 exact-Gram coordinates,
+> `d`-uniformly — reusing `levelset_count_eqK`/`configGaussSum_eq_detK` (single round) + `jointIsoCountK_ne_of_chiSep_pair`
+> (the seal's landed pair-separation) as the per-round step.
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
@@ -655,17 +669,19 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the eight scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the nine scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
-> `ScratchComplementFactor` (route-A increment 2 foundation: the orthogonal split `map_sub_split`).
+> `ScratchComplementFactor` (abstract-`V` orthogonal split `map_sub_split`), `ScratchComplementFactorK`
+> (`levelset_count_factors_through_chiDet` — the `d`-cancellation, reusing the seal's `levelset_count_eqK`/`configGaussSum_eq_detK`).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
-> **THE LIVE STEP:** route A increment 2 — the complement-factoring Gauss proof of `WallKernelFor(2-round count)` at
-> span-dim-2 (§8 ITEM B "INCREMENT 2"); its geometric FOUNDATION (the orthogonal split `map_sub_split`,
-> `ScratchComplementFactor`) is landed, and the remaining piece is applying the split inside the 2-round count. Everything
-> upstream is proved and reduces to it.
+> **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
+> `ScratchComplementFactorK.levelset_count_factors_through_chiDet` harvests the `d`-cancellation). The remaining route-A
+> content is the **sub-config `ZProfileSeparatesK` + iterated observable** recovering the 3 exact-Gram coordinates at the
+> span-dim-2 base, `d`-uniformly (probe: `r*∈{3,4}` flat) — reusing `levelset_count_eqK`/`configGaussSum_eq_detK` +
+> `jointIsoCountK_ne_of_chiSep_pair` per round. See §8 ITEM B "INCREMENT 2".
 > **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan) + §8 (ITEM A/B).
 > **════════ END PICK-UP ════════**
 - **SEAL endpoints (banked at quasipoly; reference):** `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248,
