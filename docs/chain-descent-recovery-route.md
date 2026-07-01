@@ -520,7 +520,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
 > (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
 > Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
-> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All thirteen modules axiom-clean.
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All fourteen modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -716,12 +716,16 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 >     - **A1 — (I) interface WEAKENED (2026-07-01, `ScratchSpanDim2Geom`, axiom-clean).** `exactGram_of_sameWProfile`'s
 >       hypothesis is now the one-directional `∀w∈W, Q(u−w)=0 → Q(u'−w)=0` (the proof only ever used `.mp`), so (II) need
 >       only propagate *one* isotropic-containment, not full-plane agreement.
->     - **Remaining in A2 (assembly + transport + tail):** build the three `W`-points `x₀•e₁±… ` from an orthogonal
->       anisotropic basis `{e₁,e₂}` of `W` (`exists_orthoAnisotropic_basis`) + `exists_both_nonzero_solution`, prove their
->       difference-independence (from `e₁,e₂` indep + `2x₀,2y₀≠0`), feed `hspan_of_two_indep`; then the **transport** —
->       `u = u_W + u_⊥` (`exists_decomp_of_isCompl`, `Q|_W` nondeg), the level identity `Q(u−w)=0 ⟺ Q_W(u_W−w)=c`
->       (`map_sub_split`, `c=−Q(u_⊥)`) placing the `W`-points in `Z(u)`. **Genuine sub-case (not just small `q`):** `c=0`
->       anisotropic (`u_⊥` isotropic-in-`Wᗮ`) ⟹ `Z(u)` singleton — needs separate recovery. `q∈{3,5}` finite tail.
+>     - **Assembly + transport — LANDED (2026-07-01, `ScratchConicSpan`, axiom-clean).** `map_ortho_comb`
+>       (`Q(x•a+y•b)=x²Qa+y²Qb`) + `indep_smul_pair` + **`exists_three_indep_levelset`** (three non-collinear points of the
+>       plane `Q`-level set `{v:Qv=c}` from the both-nonzero solution) + the transport capstone **`hspan_of_conic`**: given
+>       `a,b` orthogonal anisotropic and a decomposition `u = u_W + u_⊥` (`u_W∈W=span{a,b}`, `u_⊥∈Wᗮ`) with `Q u_⊥ ≠ 0`
+>       (`c=−Q u_⊥ ≠ 0`) and `q≥7`, `Z(u)={w∈W:Q(u−w)=0}` **affinely spans `W`** — i.e. the `hspan` hypothesis of
+>       `exactGram_of_sameWProfile` holds. Level identity `Q(u−w)=Q(u_W−w)+Q u_⊥` via `map_sub_split`; `Z(u)=u_W−L_c`.
+>     - **Remaining in A2 (both mechanical/scheduled):** **(a)** discharge the carried decomposition — derive `IsCompl W Wᗮ`
+>       from `Q|_W` nondeg (`BilinForm.isCompl_orthogonal_of_restrict_nondegenerate` + `exists_decomp_of_isCompl`), so
+>       `hspan_of_conic` applies to a bare vertex `u`; standard Mathlib plumbing. **(b)** the **singleton sub-case** `Q u_⊥=0`
+>       (⟹ `c=0`, `Z(u)` a single point) — genuine, scheduled (recovery doc §8 ITEM B "(ii)"); `q∈{3,5}` finite tail folds in.
 > - **(II) The observable → geometric-profile SEAM (the frontier, NOT built).** Connect the WL-stable / iterated observable
 >   to "isoClass profile over `W`" — the fixpoint propagation the probe's `r*∈{3,4}` measures (span points discretise in
 >   `O(1)` rounds). Sub-options: (a) explicit `k`-round WL operator + `d`-uniform recovery at `k=O(1)`; (b) bounded base
@@ -738,7 +742,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the thirteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the fourteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
@@ -747,7 +751,8 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchJointCountInvariant` (`obsInvariant_jointCountProfile` — soundness of the seal's `jointIsoCountK` sub-config profile),
 > `ScratchSpanDim2Geom` (`exactGram_of_sameWProfile` — the geometric recovery CORE: isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent),
 > `ScratchSpanDim2Span` (`hspan_of_two_indep` — the `hspan` combinatorial bridge: three non-collinear isotropic points ⟹ `hspan`),
-> `ScratchConicCount` (`sum_quadraticChar_sq_sub` `∑ₓχ(x²−a)=−1` + `card_binary_form` `#{w₁x²+w₂y²=c}=q−ε` — the conic count, elementary, no Gauss).
+> `ScratchConicCount` (`sum_quadraticChar_sq_sub` `∑ₓχ(x²−a)=−1` + `card_binary_form` `#{w₁x²+w₂y²=c}=q−ε` — the conic count, elementary, no Gauss; + `exists_both_nonzero_solution` — count ⟹ both-nonzero solution, `q≥7`),
+> `ScratchConicSpan` (`exists_three_indep_levelset` — three non-collinear plane level-set points; `hspan_of_conic` — the A2 transport capstone: `Z(u)` spans `W` for generic `c≠0`).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
