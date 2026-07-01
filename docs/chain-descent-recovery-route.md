@@ -53,14 +53,17 @@
 > branching-depth bound (NOT given by `defaultSpineChain_reaches_leaf ≤ n`, which bounds single-chain length only). Both are
 > *far* weaker than `CellsAreOrbits` and both must be measured (§4, §6 Phase 0) before being assumed.
 >
-> **LIVE NEXT TASK — Phase 0 ✅ + Phase 1 ✅ DONE; the live step is now Phase 2 (forms-graph discharge) + the realisation
-> seam.** (1) **Phase 0 — RUN 2026-06-30** (`Phase0_BranchProfile`): T0 not falsified, positively supported — `STARVED=0`
-> everywhere, q=2 single-path through **d=8** (`leaves=1`), only `VO⁻₄(5)` branches (`B=3, L=2, leaves=6`, `bᵢ < q`); q≥7 tail
-> blocked by the per-node-cost wall (§4). (2) **Phase 1 — LANDED** (`ScratchBoundedBranching.lean`, axiom-clean): the bridge
+> **LIVE NEXT TASK — Phase 0 ✅ + Phase 1 ✅ DONE + Phase 2 FOUNDATION ✅; the live step is the poly crux + `L`.** (1)
+> **Phase 0 — RUN 2026-06-30** (`Phase0_BranchProfile`): T0 not falsified, positively supported — `STARVED=0` everywhere,
+> q=2 single-path through **d=8** (`leaves=1`), only `VO⁻₄(5)` branches (`B=3, L=2, leaves=6`, `bᵢ < q`); q≥7 tail blocked by
+> the per-node-cost wall (§4). (2) **Phase 1 — LANDED** (`ScratchBoundedBranching.lean`, axiom-clean): the bridge
 > `BoundedBranchingDisposition` + `certifiedBoundedTree_of_disposition` ⟹ **`leaves ≤ Bᴸ`** (`CertifiedBoundedTree.leafBound`),
-> on the proven tree-combinatorics core `BTree.leaves_le_pow`; `B=1` single-path corner recovered. (3) **NOW LIVE — Phase 2 +
-> the seam:** discharge `bᵢ ≤ poly(q)` (the `degBound`, `B ≤ poly(q)`) **and** the `L = O(d)` branch-depth (`depthBound`) for
-> the forms graph (these are the carried realisation hypotheses, the Increment-1 seam); DRG freebie gives `b₁ = 1`. Full plan: §6.
+> on the proven tree-combinatorics core `BTree.leaves_le_pow`; `B=1` corner recovered. (3) **Phase 2 — FOUNDATION LANDED**
+> (`ScratchBranchingBound.lean`, axiom-clean): `stabOrbit_cover_card_le : #{Stab(S)-orbits} ≤ |K|^{|S|+1}` (orbits ↪
+> exact-Gram profiles, mod Witt) ⟹ `degBound` at the **quasipoly** tier (recovery bridge now re-derives banked quasipoly,
+> unconditional). (4) **★ NOW LIVE:** the **poly crux** `B ≤ poly(q)` ⟺ the selected cell cuts `|K|^{|S|}` Gram profiles to
+> `poly(q)` (WL-orbit defect; leads δ′/Skresanov/`EdgeGeneratesFromSet`), **and** `L = O(d)` = 1-WL discretizes in `O(d)`
+> levels (moderate, via `coords_determineK`). DRG freebie gives `b₁=1`. Full plan: §6.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
@@ -385,12 +388,26 @@ on the self-contained tree-combinatorics core **`BTree.leaves_le_pow`**. `certif
 (`≤ L` branching levels) — are the **Increment-1 seam** (the concrete branching descent; Phase 4), carried as structure
 fields exactly as the `B=1` single-path module carries its `canonAdj` seam.
 
-**Phase 2 — discharge D2 for the forms graph (Lean; the open math).** Prove `bᵢ ≤ poly(q)` (the form Phase 0 pins). The
-structural handle is a **heuristic, not a near-proof** (§4 caveat): one new Gram coordinate bounds the cell-refinement
-*increment* `≤ q`, but the in-cell *orbit* count is a-priori `≤ q^{|Sᵢ|}` and the cell-vs-orbit gap grows with `q` — so the
-`bᵢ ≤ q` target must be earned, not assumed. DRG freebie gives `b₁ = 1`. **Untried non-Gauss leads to try here first** (they target the *weak* `bᵢ`
-bound, not the strong `bᵢ=1`): **δ′ dominator-closure** (`dominatorReachable_affine_step`, never tried on `VO^ε`),
-**Skresanov 2-closure**, **`EdgeGeneratesFromSet`**. Gauss `χ(det G₂)` proves the *stronger* `bᵢ=1` — overshoots T0; reserve it.
+**Phase 2 — discharge D2 (`bᵢ ≤ poly(q)`) + D1 (`L = O(d)`) for the forms graph (Lean; the open math). ◑ FOUNDATION LANDED.**
+
+- **✅ The foundational reduction + a-priori bound — `ScratchBranchingBound.lean` (axiom-clean, NOT in build).** Reusing the
+  demoted route's geometric model (`Similitude`/`StabOrbit`/`SameExactGram`, `ScratchOrbitBaseCase`/`ScratchWallKernel`), the
+  branching factor `bᵢ = #{Stab(S)-orbits}` **injects into exact-Gram profiles** `(Q t, (polar Q t s)_{s∈S})` (via soundness
+  `stabOrbit_imp_sameExactGram_of_anisotropic` + carried Witt `WittExtendsToOrbit`), giving the **unconditional**
+  `stabOrbit_cover_card_le : #{Stab(S)-orbits} ≤ |K|^{|S|+1}` (`card_gramProfiles_le` counts the profiles). This discharges
+  the Phase-1 `degBound` at the **quasipoly** tier (`B = |K|^{|S|+1}`, `|S|=O(d)` ⟹ `leaves ≤ |K|^{O(d²)}`) — i.e. the
+  recovery bridge now **re-derives the banked quasipoly, unconditionally (mod Witt)**. This is the foundation every poly
+  approach needs (orbits are counted via Gram profiles).
+- **★ The poly crux, now PRECISE.** `B ≤ poly(q)` ⟺ **the selected cell (one refinement class) cuts the `|K|^{|S|}` Gram
+  profiles down to `poly(q)`** — the WL-orbit defect, the open research crux (same object as the seal core, at a small base).
+  The "one new Gram coordinate ⟹ `bᵢ ≤ q`" story is a *heuristic*, not a near-proof (§4): it bounds the cell-refinement
+  increment, not the in-cell orbit/profile count. **Untried non-Gauss leads for the per-cell cut:** **δ′ dominator-closure**
+  (`dominatorReachable_affine_step`, never tried on `VO^ε`), **Skresanov 2-closure**, **`EdgeGeneratesFromSet`**. DRG freebie
+  gives `b₁ = 1`. Gauss `χ(det G₂)` proves the *stronger* `bᵢ=1` (overshoot; reserve).
+- **★ D1 (`L = O(d)`) is a distinct obligation** = the 1-WL refinement **discretizes the forms graph in `O(d)` levels** (so
+  branching stops after `O(d)` forks). Geometric handle: at a base whose polar-images span (`coords_determineK`, landed),
+  the exact Gram determines the vertex, so orbits are singletons — the "frame completes the descent" fact; connecting it to
+  1-WL discretization is the moderate remaining piece. Empirically `L=2` at `d=4` (Phase 0).
 
 **Phase 3 — D4 within-orbit recovery.** Same-orbit siblings are pruned (the harvest finds the map). The orbit-existence is
 the *free* direction; reuse `RecoverableByDepth` / the harvest substrate. (This is where the landed Part A machinery is
