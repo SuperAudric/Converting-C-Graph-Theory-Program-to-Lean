@@ -591,9 +591,35 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > separate the `Θ(q³)` orbits uniformly in `d`. Reuses `PairForm`/`GaussCount`. **Route B note:** B (`L=O(1)`) is NOT
 > independent — it needs A's "branching ⟹ span-dim ≤ 1" to confine forks; given A, a span-dim-1 fork into a non-trivial
 > orbit *grows* span to dim-2 (`span_lt_span_insert_of_stabOrbit_ne`), so the span-dim-1 phase contributes `O(1)` branching
-> levels ⟹ `L=O(1)`. So A is the single gate; B is its cheap corollary. **Next:** attempt the pair-form-at-span-dim-2
-> family instantiation (the crackable proof path), or confirm the pair-form specifically separates at span-dim-2 (a
-> targeted `χ(det G₂)`-count probe) before the Lean build.
+> levels ⟹ `L=O(1)`. So A is the single gate; B is its cheap corollary.
+>
+> **▶ PLAN OF ATTACK — the span-dim-2 family instantiation (STARTED 2026-07-01, `ScratchSpanDim2Recovery.lean`).** Target:
+> `bᵢ=1` at a span-dim-2 anisotropic base `S ⊇ {0,a,b}` for `VO^ε`, all `d` — i.e. the 2-round isotropy-count profile at `S`
+> separates the `Stab(S)`-orbits (= exact-Gram classes `(Q v, polar v a, polar v b)`). NOT a plug-in of the seal's
+> `IsotropySeparatesAtBase` (that targets *discreteness* at a *spanning* frame via per-instance `decide`); this is
+> orbit-separation at a *bounded* base, `d`-uniform. Steps: **(1)** state the target geometrically + the count-separation
+> predicate `SpanDim2CountSeparates` (2-round isotropy-count profile ⟹ same exact-Gram); **(2)** soundness (orbit ⟹ same
+> count) is FREE (any graph-invariant is orbit-constant); **(3)** reduce `bᵢ=1` to `SpanDim2CountSeparates` via the cell↔count
+> bridge (`twoRoundProfileCount_eq`/`discrete_of_twoRoundRelationSeparates` restricted to orbit-level); **(4)** the `d`-uniform
+> **key lever** — the orthogonal complement `⟨a,b⟩^⊥` (dim `d−2`) contributes a **`v`-independent Gauss factor** to every
+> count, so it *cancels* in the separation comparison, reducing the count to a **fixed `d`-independent** local count over
+> `⟨a,b⟩` (⟹ decidable / uniform character sum). This complement-factoring is the crux that makes it a *family* (not
+> per-instance) argument, and is exactly what the `r*`-flat / orbit-count-`d`-uniform probe predicts. **(5)** the residual local
+> count-separation is the named Gauss core (`PairForm`/`GaussCount`), now `d`-independent.
+>
+> **INCREMENT 1 — LANDED (2026-07-01, `ScratchSpanDim2Recovery.lean`, axiom-clean).** The reduction scaffold (steps 1–3),
+> generalising `ScratchWallKernel`'s observable pattern to a function-valued `obs : V → β`: `ObsInvariant` (obs is
+> `Stab(S)`-invariant) + `stabOrbit_imp_obsEq` (soundness, FREE) + capstone **`obsEq_iff_stabOrbit`** (`ObsInvariant` +
+> `WallKernelFor obs` + Witt ⟹ **`obs t = obs t' ↔ StabOrbit`**, i.e. `bᵢ=1`), bundled as `SpanDim2Recovers`. So route A =
+> `WallKernelFor (fun t t' => obs t = obs t') Q ↑S` for `obs` = the 2-round count — soundness and the reduction are proved;
+> the Gauss core is the single carried predicate.
+>
+> **INCREMENT 2 — the complement-factoring (step 4, the genuine new math; NOT built, API-confirmed).** Decomposition API
+> exists: `LinearMap.BilinForm.orthogonal Q.polarBilin ⟨a,b⟩` + `isCompl_orthogonal_of_restrict_nondegenerate` (needs
+> `IsRefl` — polar is symmetric — and the 2-dim restriction nondegenerate) gives `V = ⟨a,b⟩ ⊕ ⟨a,b⟩^⊥`. Then `Q(v−u) =
+> Q(v∥−u∥) + Q(v⊥−u⊥)` (orthogonality) factors the count; the `⊥`-part is `v`-independent within a `Q`-level-set (Witt on
+> the complement), so cancels ⟹ the `d`-independent local count. Substantial multi-step Gauss build (`PairForm`/`GaussCount`
+> + the decomposition); the next focused increment.
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
