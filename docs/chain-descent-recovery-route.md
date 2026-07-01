@@ -53,16 +53,30 @@
 > branching-depth bound (NOT given by `defaultSpineChain_reaches_leaf ≤ n`, which bounds single-chain length only). Both are
 > *far* weaker than `CellsAreOrbits` and both must be measured (§4, §6 Phase 0) before being assumed.
 >
-> **════════ FRESH-READER HANDOFF (2026-07-01) — read this paragraph first ════════**
-> **Where the poly crux stands, in one breath.** The crux `bᵢ ≤ poly(q)` (per-cell orbit count) is now a clean **two-piece**
-> target, both located by the probes: **(i) span-dim-1** — `bᵢ ≤ q²`, **PROVEN** unconditionally (`ScratchSpanDimBound`,
-> `stabOrbit_cover_card_le_line`); **(ii) span-dim ≥ 2** (route A) — `bᵢ = 1`, reduced (`ScratchSpanDim2Recovery` incr 1,
-> proved) to the single Gauss predicate `WallKernelFor(2-round count)`, whose **family proof is the LIVE step**: route A
-> **increment 2 = the complement-factoring** (§8 ITEM B "INCREMENT 2"; `V=⟨a,b⟩⊕⟨a,b⟩^⊥`, the `d−2`-dim complement's
-> count-contribution cancels within a `Q`-level-set ⟹ a `d`-independent local count, reusing `PairForm`/`GaussCount`;
-> Mathlib decomposition API confirmed). Probes back it: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`),
-> and span-dim-2 recovery is bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`) ⟹ crackable, not frontier.
-> These two pieces + Phase 1's `leaves_le_prod_concentrated` compose to `leaves ≤ poly(n)`. `L` is a corollary of A (route B).
+> **════════ FRESH-READER HANDOFF (2026-07-01, current) — read this paragraph first ════════**
+> **Where the poly crux stands, in one breath.** The crux `bᵢ ≤ poly(q)` (per-cell orbit count) is a **two-piece** target:
+> **(i) span-dim-1** — `bᵢ ≤ q²`, **PROVEN** unconditionally (`ScratchSpanDimBound.stabOrbit_cover_card_le_line`);
+> **(ii) span-dim ≥ 2** (route A) — `bᵢ = 1`. Route A is reduced (`ScratchSpanDim2Recovery.obsEq_iff_stabOrbit`) to
+> `WallKernelFor(obs)` for the seal's joint-count observable, and split into a **geometric CORE (I)** + an **iteration
+> SEAM (II)**:
+> - **(I) CORE — LANDED (mostly).** The isoClass profile of `u` over the plane `W = span{a,b}` determines the exact Gram
+>   `(Q u, polar u a, polar u b)`, `d`-**independently** (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`). Its one carried
+>   hypothesis `hspan` (the isotropic set `Z` affinely spans `W`) is discharged by: the combinatorial bridge
+>   `ScratchSpanDim2Span.hspan_of_two_indep` (three non-collinear points ⟹ `hspan`) **+** the **conic count**
+>   `ScratchConicCount` (`sum_quadraticChar_sq_sub`: `∑ₓχ(x²−a)=−1`; `card_binary_form`: `#{w₁x²+w₂y²=c}=q−ε`),
+>   done ELEMENTARILY (no Gauss sums). Also LANDED: soundness `ScratchJointCountInvariant.obsInvariant_jointCountProfile`,
+>   and the `d`-cancellation `ScratchComplementFactorK.levelset_count_factors_through_chiDet` (reused from the seal).
+> - **(II) SEAM — the frontier, NOT built.** Connect the WL-stable / iterated observable to "isoClass profile over `W`"
+>   (the fixpoint propagation the probe's `r*∈{3,4}` measures). Sub-options in §8 ITEM B; decision deferred.
+>
+> **▶ THE IMMEDIATE NEXT STEP (finishing CORE (I)):** the **`hspan` assembly + transport** — from the count
+> `q−ε ≥ q−1 ≥ 5` (`q≥6`) get a both-coordinate-nonzero solution `(x₀,y₀)` ⟹ three explicit non-collinear solutions
+> `(±x₀,±y₀)` ⟹ `hspan_of_two_indep`; then **transport** (diagonalise `Q_W=Q|_W` via an orthogonal basis + the affine
+> bijection `Z ≅ L_c` from `ScratchComplementFactor.map_add_split`, `W` nondeg) to move the concrete `F×F` count to the
+> abstract `Z`. Plus a finite small-`q`/`c=0`-singleton tail. Full detail: §8 ITEM B "hspan DISCHARGE".
+> **AFTER that:** the seam-(II) decision, then compose via `leaves_le_prod_concentrated`.
+> **Probes** back the direction: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`); span-dim-2 recovery
+> bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`). **`L`** is a corollary of route A (route B).
 > **Start at:** this HANDOFF → the "Verify the landed substrate" list (bottom of STATUS) → §8 ITEM A/B. **════════**
 >
 > **LANDED SUBSTRATE (was "LIVE NEXT TASK") — Phase 0 ✅ + Phase 1 ✅ + Phase 2 FOUNDATION ✅.** (1)
@@ -96,8 +110,15 @@
 > `ScratchSpanDimBound.stabOrbit_cover_card_le_line`) and **span-dim ≥ 2 = route A** (`bᵢ=1`). Route A's direct proof stalls
 > (it's the multi-base `s(C)` recovery — Gauss content), but the probe says it's **crackable** (bounded-round `r*∈{3,4}`,
 > d-uniform). Route A **increment 1 LANDED** (`ScratchSpanDim2Recovery`): reduces `bᵢ=1` to `WallKernelFor(2-round count)`.
-> **★ NOW LIVE = route A increment 2 = the complement-factoring** (the Gauss family proof; §8 ITEM B "INCREMENT 2"). See
-> the FRESH-READER HANDOFF at the top. Full plan: §8 ITEM A/B.
+> **(8) ROUTE A RECOVERY — split into geometric CORE (I) + iteration SEAM (II); (I) mostly LANDED (2026-07-01).** obs fixed
+> to the seal's `jointIsoCountK` profile; soundness LANDED (`ScratchJointCountInvariant.obsInvariant_jointCountProfile`);
+> `d`-cancellation LANDED (`ScratchComplementFactorK.levelset_count_factors_through_chiDet`, reused from seal — the planned
+> "complement-factoring" was already built for the seal). **(I) CORE:** `ScratchSpanDim2Geom.exactGram_of_sameWProfile`
+> (isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent) + its `hspan` discharge:
+> `ScratchSpanDim2Span.hspan_of_two_indep` (combinatorial bridge) + `ScratchConicCount` (`sum_quadraticChar_sq_sub`,
+> `card_binary_form` — the conic count `q−ε`, elementary/no-Gauss). **★ NOW LIVE = finish (I)'s `hspan`: the assembly +
+> transport** (§8 ITEM B "hspan DISCHARGE" + the top FRESH-READER HANDOFF's "IMMEDIATE NEXT STEP"). **(II) SEAM** (WL-stable
+> ⟹ profile-over-`W`) = the frontier, deferred. Full plan: §8 ITEM A/B.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
