@@ -493,9 +493,13 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > (`ScratchBoundedMultLeaves`), and **span-dim ≥ 2 (route A) reduced** (`ScratchSpanDim2Recovery`) to one Gauss predicate.
 > **THE SINGLE LIVE ITEM: route A's exact-Gram recovery at the span-dim-2 base. RE-SCOPED (2026-07-01):** the
 > complement-factoring is done (reused from the seal — `ScratchComplementFactorK` harvests the `d`-cancellation from
-> `levelset_count_eqK`/`configGaussSum_eq_detK`); the remaining content is the **sub-config `ZProfileSeparatesK` + iterated
-> observable** (one count is only `χ(det)`-valued) — see ITEM B "INCREMENT 2" below and the top-of-doc FRESH-READER
-> HANDOFF. All nine modules axiom-clean.
+> `levelset_count_eqK`/`configGaussSum_eq_detK`); the observable is fixed to the seal's `jointIsoCountK` sub-config profile
+> and its **soundness (`ObsInvariant`) is now LANDED** (`ScratchJointCountInvariant`), so route A reduces to the single open
+> predicate **`WallKernelFor (jointCountProfile Q S₀ ·) Q ↑S₀`** (the `χ(det)`-profile + `O(1)` iterations recovering the 3
+> exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
+> (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
+> Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All eleven modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -650,6 +654,12 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > - `ScratchComplementFactorK.lean` (axiom-clean) — **`levelset_count_factors_through_chiDet`**: the `d`-cancellation,
 >   reused: two configs with the same `χ(det G_config)` give the **same** (scaled) level-set count at every level `c`,
 >   **uniformly in `d`** (the `|V|` and global-Gauss `d`-factors are common ⟹ cancel; config enters only via `χ(det)`).
+> - `ScratchJointCountInvariant.lean` (axiom-clean) — **the FREE half for the concrete observable.** The seal's
+>   `jointIsoCountK` is `Stab(S₀)`-invariant: `isoClassK_similitude` (a similitude preserves the isotropy class,
+>   `Q(gw)=μ·Qw`, `μ≠0`) ⟹ `jointIsoCountK_similitude_fix` (a base-fixing similitude preserves the joint count, via the
+>   bijection `z ↦ g z`) ⟹ **`obsInvariant_jointCountProfile`** (`ObsInvariant (jointCountProfile Q S₀) Q ↑S₀` for the
+>   sub-config profile `S' ⊆ S₀`). So `obsEq_iff_stabOrbit` now reduces route A at a span-dim-2 base `S₀` to the **single
+>   open predicate `WallKernelFor (jointCountProfile Q S₀ ·) Q ↑S₀`** (+ carried Witt) — soundness fully discharged.
 >
 > **★ THE RE-SCOPE (the honest consequence — corrects the "one count ⟹ exact Gram" framing above).** Because a single
 > isotropy count is only **`χ(det)`-valued** (2-valued in the config — this is precisely why the *seal* needed a *matching*
@@ -658,10 +668,24 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > (= `ZProfileSeparatesK` at the small base `{a,b}`, targeting the exact Gram to `{a,b}` rather than the full frame), and
 > (b) the **iterated** observable — the `χ(det G₂)` 2-WL fixpoint, matching the probe's `r*∈{3,4}` rounds — not the single
 > round. The single-round content is now pinned + `d`-cancelled; **the remaining route-A content = the iteration's
-> `d`-uniform convergence** (the probe says `r*` is flat in `d`, so crackable). **NEXT:** instantiate `ZProfileSeparatesK`
-> at the span-dim-2 base and show the sub-config `χ(det)`-profile + `O(1)` iterations recover the 3 exact-Gram coordinates,
-> `d`-uniformly — reusing `levelset_count_eqK`/`configGaussSum_eq_detK` (single round) + `jointIsoCountK_ne_of_chiSep_pair`
-> (the seal's landed pair-separation) as the per-round step.
+> `d`-uniform convergence** (the probe says `r*` is flat in `d`, so crackable).
+>
+> **★ THE EXACT-GRAM RECOVERY PLAN (2026-07-01) — split into a tractable geometric CORE + the iteration SEAM.** The
+> `WallKernelFor` target factors:
+> - **(I) Geometric recovery core — LANDED (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`, axiom-clean).** The isoClass
+>   profile of `u` over the *whole plane* `W = span{a,b}` determines `(Q u, polar u a, polar u b)`, `d`-**independently**,
+>   with **no Gauss/Witt/iteration**. Mechanism: the difference `Q(u−w) − Q(u'−w) = polar Q (u'−u) w + (Qu − Qu')` is
+>   **affine** in `w` (`norm_diff_affine` — the quadratic parts cancel); on the common isotropic set `Z = {w∈W : Q(u−w)=0}`
+>   it is `0`; if `Z` **affinely spans** `W` (carried hyp `hspan`), the affine functional `polar Q (u'−u) ·` vanishes on all
+>   of `W` ⟹ `polar u a = polar u' a`, `polar u b = polar u' b`, `Q u = Q u'`. So the information is provably present at
+>   span-dim-2. Carries only `hspan` (the conic affinely spans `W` — geometric non-degeneracy, true except degenerate levels
+>   / tiny `q`, a finite tail to discharge). NB: needs **no** `W`-nondegeneracy (the affine-difference argument is direct).
+> - **(II) The observable → geometric-profile SEAM (the frontier, NOT built).** Connect the WL-stable / iterated observable
+>   to "isoClass profile over `W`" — the fixpoint propagation the probe's `r*∈{3,4}` measures (span points discretise in
+>   `O(1)` rounds). Sub-options: (a) explicit `k`-round WL operator + `d`-uniform recovery at `k=O(1)`; (b) bounded base
+>   *augmentation* (individualise `O(q)` determined points of `W` — trades rounds for base size, stays poly); (c) nested
+>   2-round Gauss count (`χ(det G₂)` iterated). Decision pending; this is where the difficulty now concentrates.
+> **NEXT:** discharge (I)'s `hspan` for the forms graph (level set spans `W`, mod small-`q` tail) + choose/attack (II).
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
@@ -669,12 +693,14 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the nine scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the eleven scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
 > `ScratchComplementFactor` (abstract-`V` orthogonal split `map_sub_split`), `ScratchComplementFactorK`
-> (`levelset_count_factors_through_chiDet` — the `d`-cancellation, reusing the seal's `levelset_count_eqK`/`configGaussSum_eq_detK`).
+> (`levelset_count_factors_through_chiDet` — the `d`-cancellation, reusing the seal's `levelset_count_eqK`/`configGaussSum_eq_detK`),
+> `ScratchJointCountInvariant` (`obsInvariant_jointCountProfile` — soundness of the seal's `jointIsoCountK` sub-config profile),
+> `ScratchSpanDim2Geom` (`exactGram_of_sameWProfile` — the geometric recovery CORE: isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
