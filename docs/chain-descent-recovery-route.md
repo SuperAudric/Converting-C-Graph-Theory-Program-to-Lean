@@ -499,7 +499,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
 > (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
 > Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
-> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All eleven modules axiom-clean.
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All thirteen modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -678,14 +678,28 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 >   **affine** in `w` (`norm_diff_affine` — the quadratic parts cancel); on the common isotropic set `Z = {w∈W : Q(u−w)=0}`
 >   it is `0`; if `Z` **affinely spans** `W` (carried hyp `hspan`), the affine functional `polar Q (u'−u) ·` vanishes on all
 >   of `W` ⟹ `polar u a = polar u' a`, `polar u b = polar u' b`, `Q u = Q u'`. So the information is provably present at
->   span-dim-2. Carries only `hspan` (the conic affinely spans `W` — geometric non-degeneracy, true except degenerate levels
->   / tiny `q`, a finite tail to discharge). NB: needs **no** `W`-nondegeneracy (the affine-difference argument is direct).
+>   span-dim-2. Carries only `hspan` (the conic affinely spans `W`). NB: needs **no** `W`-nondegeneracy (the affine
+>   argument is direct).
+>   - **`hspan` DISCHARGE — combinatorial half + the conic count both LANDED (axiom-clean).**
+>     - **Combinatorial bridge** (`ScratchSpanDim2Span.hspan_of_two_indep`): `hspan` follows from "`Z` has **three
+>       non-collinear points**" (two independent difference vectors span the 2-dim `W`) — form-independent linear algebra.
+>     - **The conic count** (`ScratchConicCount`, done **ELEMENTARILY — no Gauss sums**): the crux character sum
+>       **`sum_quadraticChar_sq_sub`** `∑ₓ χ(x²−a) = −1` (`a≠0`), proved via `quadraticChar_card_sqrts`
+>       (`#{z:z²=b}=χ(b)+1`) + the hyperbola bijection `(x,z)↦(x−z,x+z)` (`#{x²−z²=a} = #{uv=a} = q−1`); then
+>       **`card_binary_form`** `#{(x,y) : w₁x²+w₂y²=c} = q − χ(−w₁w₂⁻¹)` (`= q − ε`, `ε=±1`) for `c≠0`. This *replaces* the
+>       planned `card_quadForm_eq`/`gaussSum_sq` route — far cleaner.
+>     - **Remaining (mechanical assembly + transport):** from `q − ε ≥ q − 1 ≥ 5` (`q≥6`), the count exceeds the `≤4` axis
+>       solutions ⟹ ∃ a **both-coordinate-nonzero** solution `(x₀,y₀)` ⟹ three explicit non-collinear solutions
+>       `(±x₀,±y₀)` (determinant `4x₀y₀≠0`) ⟹ `hspan_of_two_indep`. Plus the **transport**: diagonalise `Q_W = Q|_W`
+>       (orthogonal basis) + the affine bijection `Z ≅ L_c` (`map_add_split` split, `W` nondeg) to move the concrete
+>       `F×F` count to the abstract `Z`. Small-`q` (`q∈{3,5}`) + the `c=0`-anisotropic singleton = a finite/direct tail.
 > - **(II) The observable → geometric-profile SEAM (the frontier, NOT built).** Connect the WL-stable / iterated observable
 >   to "isoClass profile over `W`" — the fixpoint propagation the probe's `r*∈{3,4}` measures (span points discretise in
 >   `O(1)` rounds). Sub-options: (a) explicit `k`-round WL operator + `d`-uniform recovery at `k=O(1)`; (b) bounded base
 >   *augmentation* (individualise `O(q)` determined points of `W` — trades rounds for base size, stays poly); (c) nested
 >   2-round Gauss count (`χ(det G₂)` iterated). Decision pending; this is where the difficulty now concentrates.
-> **NEXT:** discharge (I)'s `hspan` for the forms graph (level set spans `W`, mod small-`q` tail) + choose/attack (II).
+> **NEXT:** finish (I)'s `hspan` — the isolated binary-conic count `|L_c|=q−ε` (`card_quadForm_eq`+`gaussSum_sq`) + the
+> ≤2-per-line non-collinearity + small-`q`/singleton tail — then the mechanical assembly (∃ both-nonzero solution → 3 non-collinear → transport) + choose/attack (II).
 >
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
@@ -693,14 +707,16 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the eleven scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the thirteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
 > `ScratchComplementFactor` (abstract-`V` orthogonal split `map_sub_split`), `ScratchComplementFactorK`
 > (`levelset_count_factors_through_chiDet` — the `d`-cancellation, reusing the seal's `levelset_count_eqK`/`configGaussSum_eq_detK`),
 > `ScratchJointCountInvariant` (`obsInvariant_jointCountProfile` — soundness of the seal's `jointIsoCountK` sub-config profile),
-> `ScratchSpanDim2Geom` (`exactGram_of_sameWProfile` — the geometric recovery CORE: isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent).
+> `ScratchSpanDim2Geom` (`exactGram_of_sameWProfile` — the geometric recovery CORE: isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent),
+> `ScratchSpanDim2Span` (`hspan_of_two_indep` — the `hspan` combinatorial bridge: three non-collinear isotropic points ⟹ `hspan`),
+> `ScratchConicCount` (`sum_quadraticChar_sq_sub` `∑ₓχ(x²−a)=−1` + `card_binary_form` `#{w₁x²+w₂y²=c}=q−ε` — the conic count, elementary, no Gauss).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
