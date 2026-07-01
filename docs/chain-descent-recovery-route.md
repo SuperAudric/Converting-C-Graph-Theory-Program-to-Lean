@@ -61,9 +61,16 @@
 > on the proven tree-combinatorics core `BTree.leaves_le_pow`; `B=1` corner recovered. (3) **Phase 2 — FOUNDATION LANDED**
 > (`ScratchBranchingBound.lean`, axiom-clean): `stabOrbit_cover_card_le : #{Stab(S)-orbits} ≤ |K|^{|S|+1}` (orbits ↪
 > exact-Gram profiles, mod Witt) ⟹ `degBound` at the **quasipoly** tier (recovery bridge now re-derives banked quasipoly,
-> unconditional). (4) **★ NOW LIVE:** the **poly crux** `B ≤ poly(q)` ⟺ the selected cell cuts `|K|^{|S|}` Gram profiles to
-> `poly(q)` (WL-orbit defect; leads δ′/Skresanov/`EdgeGeneratesFromSet`), **and** `L = O(d)` = 1-WL discretizes in `O(d)`
-> levels (moderate, via `coords_determineK`). DRG freebie gives `b₁=1`. Full plan: §6.
+> unconditional). (4) **`L = O(d)` — GEOMETRIC CORE + SPAN-GROWTH SOLVED (2026-07-01)** (`ScratchBranchDepth.lean`,
+> axiom-clean, 10 thms): `spanning_sameExactGram_determines` (generalised `coords_determineK` to a spanning base) +
+> `stabOrbit_singleton_of_spanning` (spanning anisotropic base ⟹ orbit-singletons) + `branchLevels_le_finrank` + the §3
+> fixed-point kernel (`stab_fixes_span` ⟹ `nontrivialForks_le_finrank`: **forks into non-trivial orbits ≤ finrank = d**).
+> **KEY FINDING:** the two `L` seams collapse to **one** — the span-growth residual (singleton-orbit forks) leaves span
+> AND `Stab` fixed, so it IS **cell-discretisation**, which IS the **same WL-orbit defect as the poly crux** (ITEM B). So
+> `B` and `L` share one open core; `L`'s remainder is NOT a separate easier target. `L = O(d)` NOT yet closed (genuinely
+> open, not "moderate"); cheapest test = iterated `χ(det G₂)` at the `d+1` frame (Stage B.0 probe). (5) **★ NOW LIVE:** the
+> **poly crux** `B ≤ poly(q)` = the shared core ⟺ selected cell cuts `|K|^{|S|}` Gram profiles to `poly(q)` (WL-orbit
+> defect; leads δ′/Skresanov/`EdgeGeneratesFromSet`). DRG freebie gives `b₁=1`. Full plan: §6 ITEM A/B.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
@@ -455,13 +462,44 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `B ≤ |K|^{|S|+1}`, quasipoly) ✅ — all axiom-clean, verified. The recovery route now delivers **quasipoly end-to-end
 > through its own bridge**, unconditional mod Witt. **Two live items remain, both open, both expected to be picked up:**
 >
-> **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable).** Obligation: the 1-WL descent discretizes the forms graph in
-> `O(d)` levels, so branching stops after `O(d)` forks (`certifiedBoundedTree`'s `depthBound`). **Handle (landed):**
-> `coords_determineK` (`ChainDescent/FieldGeneric.lean:87`) — nondeg polar + Gram-to-standard-frame ⟹ vertex determined.
-> **First concrete step:** generalize `coords_determineK` from the standard basis `{Pi.single i 1}` to an arbitrary
-> polar-spanning base `S` (`SameExactGram Q ↑S t t' → t = t'` when `S` polar-spans), then show that gives orbit-singletons
-> at a spanning base; the *remaining* gap is connecting "spanning base" to "1-WL discretizes" (the moderate piece — the C#
-> refinement, not pure geometry). Empirical: `L=2` at `d=4` (Phase 0). Build in a sibling of `ScratchBranchingBound.lean`.
+> **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
+> 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
+> (`certifiedBoundedTree`'s `depthBound`). **LANDED** (`ChainDescent/ScratchBranchDepth.lean`, axiom-clean, NOT in build):
+> (1) `spanning_sameExactGram_determines` — the doc's "first concrete step": generalises `coords_determineK` from the
+> standard frame `{Pi.single i 1}` to an **arbitrary base with `span = ⊤`** (nondeg polar + exact Gram to `S` ⟹ vertex
+> determined; only the polar half is used). (2) `stabOrbit_singleton_of_spanning` — composing with soundness: at a
+> **spanning anisotropic** base every `Stab(S)`-orbit is a **singleton** (the "`O(d)` base rigidifies `O^ε_d`" backbone).
+> (3) `branchLevels_le_finrank` / `branchLevels_le_dim_forms` — the **`O(d)` arithmetic**: `L` independent branch-vectors
+> ⟹ `L ≤ finrank K V = d`, feeding Phase 1's `depthBound` with `L := d`.
+>
+> **SPAN-GROWTH SEAM — SOLVED (2026-07-01, §3 of the module).** The fixed-point kernel: an `S`-fixing similitude is
+> linear ⟹ fixes all of `span S` ⟹ a vertex `w ∈ span S` is a **fixed point** (singleton orbit)
+> (`stab_fixes_span`/`stabOrbit_trivial_of_mem_span`). Contrapositive: a **non-trivial** orbit lies **outside** `span S`
+> (`notMem_span_of_stabOrbit_ne`), so individualizing it **strictly grows the span**
+> (`span_lt_span_insert_of_stabOrbit_ne`). With the strict-chain count (`strictChain_le_finrank`, axiom-clean), **the
+> number of forks into non-trivial orbits on any path is `≤ finrank = d`** (`nontrivialForks_le_finrank`). So span-growth
+> is discharged for the forks that grow the span — it was NOT independent tech debt but a provable geometric fact.
+>
+> **★ THE TWO SEAMS ARE ONE — the remainder collapses to cell-discretisation (KEY FINDING 2026-07-01).** After
+> span-growth, `L = (non-trivial-orbit forks, ≤ d, PROVED) + (singleton-orbit forks, T)`. A singleton-orbit fork enters a
+> `{w}` with `w ∈ span S`: this leaves **both** `span S` and `Stab(S)` unchanged, so it can be a fork **only** because the
+> coarser refinement *cell* split (1-WL sees new isotropy data `isoClass(Q(·−w))` the orbit structure does not). Hence
+> `T` = the cell-vs-orbit defect = **cell-discretisation**, which is the **same WL-orbit defect as the poly crux ITEM B**
+> (`B ≤ poly(q)`), now surfacing at the level of branch *depth*. **Consolidation:** the recovery route's two open factors
+> (`B` and `L`) share **one** open core — bound the cell/orbit relationship on `VO^ε` by `poly(q)`. `L`'s residual is not
+> a separate, more-tractable target; closing the poly crux (ITEM B) also closes `L`.
+>
+> **CELL-DISCRETISATION — SCOPING (2026-07-01).** Precise obligation: at a base approaching `span = ⊤`, the 1-WL cells
+> reach orbit-resolution (singletons — `stabOrbit_singleton_of_spanning` makes orbits singletons at `span=⊤`, so cells
+> = orbits ⟺ cells singleton there) within `O(d)` extra levels. The content = **the isotropy-class profile recovers the
+> exact-Gram profile** at a (near-)spanning base — a *full-base* instance of `WallKernelFor Obs` (`ScratchWallKernel`),
+> the seal's open kernel. Two honest consequences: **(i)** it is NOT cheaper than the seal core in general (same defect),
+> so `L = O(d)` is genuinely open, not "moderate" as earlier framed — correcting the STATUS/§4 wording; **(ii)** but at a
+> **spanning** base it is *more constrained* than the seal's *bounded*-base kernel (`WallKernel` was refuted at a bounded
+> base, §6 Increment 3), so the spanning instance may crack where the bounded one didn't — the lead is the **iterated
+> `χ(det G₂)` observable** (the seal's crack) evaluated at the `d+1` frame (Stage B.0 / `Probe_FrameWLScaling`, plan §1):
+> does it discretise in `O(d)` levels at the spanning frame? That probe (empirical) is the cheapest next test for `L`.
+> Empirical anchor: `L=2` at `d=4`, `L=0` for q=2 through `d=8` (Phase 0) — consistent with fast discretisation.
 >
 > **▶ ITEM B — `B ≤ poly(q)` (the poly crux; the research core).** Obligation: `certifiedBoundedTree`'s `degBound` at the
 > **poly** tier. **Precise form (landed reduction):** `stabOrbit_cover_card_le` (`ScratchBranchingBound.lean`) gives
