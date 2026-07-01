@@ -74,13 +74,13 @@
 > is mandatory and (I) is on the critical path), the landed substrate, and the ordered plan + dead ends. The dated bullets
 > in this STATUS are the chronology; §9 is the map.
 >
-> **▶ THE IMMEDIATE NEXT STEP — Step B (the base-augmentation reduction, II-easy).** CORE (I) is now LANDED for **both**
-> branches (Step A done — generic `hspan_of_conic` + singleton `exactGram_of_isotropic_complement` + bare-vertex
-> `hspan_or_singleton`, all axiom-clean, `ScratchConicSpan`). Next: define `Obs_aug(u) := (isoClass(u−w))_{w∈W}`, prove
-> `Obs_aug ⟹ hprof` (trivial, `isoClassK_ne_two_iff`), compose through `hspan_or_singleton` to bank
-> `WallKernelFor Obs_aug` — short, local, no counting. **AFTER that:** Step C, the crux "**C^∞ pins `W`**" (the
-> `d`-independent plane-pinning, where the open math lives), then re-instantiate `obsEq_iff_stabOrbit` on the WL-stable
-> observable and compose via `leaves_le_prod_concentrated`. Full plan: §9.5.
+> **▶ THE IMMEDIATE NEXT STEP — Step C, the crux "C^∞ pins `W`" (the `d`-independent plane-pinning).** Step A ✅ (I)-geometry
+> both branches; Step B ✅ (`ScratchBaseAug`, axiom-clean) — `IsoSetEq ⟹ SameExactGram` banked for **both** branches with the
+> (ii)-glue *derived* (`eq_wComp_of_isotropic_of_anisotropic`), no counting. **So everything now reduces to Step C:** prove
+> the 1-WL fixpoint at `{0,a,b}` refines `IsoSetEq` (pins each `w∈W`), by a span-induction closure over `W`, each step a
+> `d`-independent 2-dim count over `K²` (complement-factoring removes the `d−2` complement; the conic/pair-form count
+> separates). **This is where the remaining open math lives.** Then re-instantiate `obsEq_iff_stabOrbit` on the WL-stable
+> observable and compose via `leaves_le_prod_concentrated`. Full plan + dead ends: §9.
 > **Probes** back the direction: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`); span-dim-2 recovery
 > bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`). **`L`** is a corollary of route A (route B).
 > **Start at:** this HANDOFF → the "Verify the landed substrate" list (bottom of STATUS) → §8 ITEM A/B. **════════**
@@ -526,7 +526,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
 > (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
 > Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
-> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All fourteen modules axiom-clean.
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All fifteen modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -757,7 +757,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the fourteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the fifteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
@@ -767,7 +767,8 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchSpanDim2Geom` (`exactGram_of_sameWProfile` — the geometric recovery CORE: isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent),
 > `ScratchSpanDim2Span` (`hspan_of_two_indep` — the `hspan` combinatorial bridge: three non-collinear isotropic points ⟹ `hspan`),
 > `ScratchConicCount` (`sum_quadraticChar_sq_sub` `∑ₓχ(x²−a)=−1` + `card_binary_form` `#{w₁x²+w₂y²=c}=q−ε` — the conic count, elementary, no Gauss; + `exists_both_nonzero_solution` — count ⟹ both-nonzero solution, `q≥7`),
-> `ScratchConicSpan` (`exists_three_indep_levelset` — three non-collinear plane level-set points; `hspan_of_conic` — the A2 transport capstone: `Z(u)` spans `W` for generic `c≠0`; `exists_orthogonal_decomp` + `hspan_or_singleton` — i-a bare-vertex dichotomy singleton-∨-hspan; `exactGram_of_isotropic_complement` — ii singleton-locus recovery core).
+> `ScratchConicSpan` (`exists_three_indep_levelset` — three non-collinear plane level-set points; `hspan_of_conic` — the A2 transport capstone: `Z(u)` spans `W` for generic `c≠0`; `exists_orthogonal_decomp` + `hspan_or_singleton` — i-a bare-vertex dichotomy singleton-∨-hspan; `exactGram_of_isotropic_complement` — ii singleton-locus recovery core),
+> `ScratchBaseAug` (Step B — `IsoSetEq` observable + `sameExactGram_of_isoSetEq_generic`/`_singleton_anis`: `IsoSetEq ⟹ SameExactGram` both branches, no counting; `eq_wComp_of_isotropic_of_anisotropic` — the derived (ii)-glue).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
@@ -868,7 +869,9 @@ for `q≥7`) → `ScratchConicSpan.exists_three_indep_levelset` (three non-colli
 `hspan_of_conic` (transport `Z(u)=u_W−L_c` via `ScratchComplementFactor.map_sub_split`, produces `hspan`) →
 `ScratchSpanDim2Span.hspan_of_two_indep` → `ScratchSpanDim2Geom.exactGram_of_sameWProfile` (the core, `hprof ⟹ SameExactGram`).
 Bare vertex: `ScratchConicSpan.exists_orthogonal_decomp` (explicit projection, no `IsCompl`) + `hspan_or_singleton`
-(dichotomy). Singleton branch: `exactGram_of_isotropic_complement`. Soundness of the observable:
+(dichotomy). Singleton branch: `exactGram_of_isotropic_complement`. **Step B (observable → SameExactGram, both branches):**
+`ScratchBaseAug` — `IsoSetEq` + `sameExactGram_of_isoSetEq_generic` + `sameExactGram_of_isoSetEq_singleton_anis` +
+`eq_wComp_of_isotropic_of_anisotropic` (the (ii)-glue). Soundness of the observable:
 `ScratchJointCountInvariant.obsInvariant_jointCountProfile`. `d`-cancellation (reused from the seal):
 `ScratchComplementFactorK.levelset_count_factors_through_chiDet`.
 
@@ -876,17 +879,22 @@ Bare vertex: `ScratchConicSpan.exists_orthogonal_decomp` (explicit projection, n
 - **Step A — DONE.** A1 weaken (I) to one-directional `hprof`; A2 the full (I)-level geometry for **both** branches
   (generic `hspan_of_conic` + singleton `exactGram_of_isotropic_complement`), plus the bare-vertex dichotomy
   `hspan_or_singleton`.
-- **Step B — the base-augmentation reduction (II-easy), NEXT.** Define `Obs_aug`; prove `Obs_aug ⟹ hprof` (trivial, via
-  `isoClassK_ne_two_iff`); compose with (I) both branches through `hspan_or_singleton` to bank **`WallKernelFor Obs_aug`**.
-  Short, local, no counting.
-- **Step C — the crux: "C^∞ pins `W`" (II-hard) = the `d`-independent plane-pinning.** Prove the 1-WL fixpoint at
-  `{0,a,b}` assigns each `w∈W` a recoverable colour, by a **span-induction closure over `W`** (`0,a,b` pinned → all of
-  `W`), each step a fixed 2-dim count over `K²` — complement-factoring (`ScratchComplementFactorK`) removes the `d−2`
-  complement, the conic/pair-form count (`ScratchConicCount`/`PairForm`/`GaussCount`) separates the new plane point.
-  **This is where the remaining open math lives.** Fallback if the closure stalls: an explicit `k`-round WL operator
-  with a `d`-uniform `O(1)`-round bound (heavier; base-augmentation exists to avoid it).
-- **(ii)-glue (small, parallel).** `u_W = u'_W` from `hprof` + the singleton fact `Z(u') = {u'_W}` (a `χ(−QaQb⁻¹)=−1`
-  conic fact, reuses `ScratchConicCount`); then (ii) rejoins the shared Step C seam.
+- **Step B — the base-augmentation reduction (II-easy). ✅ DONE (2026-07-01, `ScratchBaseAug`, axiom-clean).** Observable
+  `IsoSetEq Q W u u'` = "same isotropic set in `W`"; `IsoSetEq ⟹ SameExactGram` banked for **both** branches, no counting:
+  generic `sameExactGram_of_isoSetEq_generic` (via (I) + `hspan_of_conic`); singleton
+  `sameExactGram_of_isoSetEq_singleton_anis` (on an anisotropic plane). **The (ii)-glue is now DONE** — the match
+  `u_W = u'_W` is **derived** from `IsoSetEq` via `eq_wComp_of_isotropic_of_anisotropic` (`Z(u)={u_W}` from the level
+  identity + anisotropy), not carried. So both branches close down to the single Step C seam.
+- **Step C — the crux: "C^∞ pins `W`" (II-hard) = the `d`-independent plane-pinning. NEXT / OPEN.** Prove the 1-WL
+  fixpoint at `{0,a,b}` refines `IsoSetEq` (assigns each `w∈W` a recoverable colour), by a **span-induction closure over
+  `W`** (`0,a,b` pinned → all of `W`), each step a fixed 2-dim count over `K²` — complement-factoring
+  (`ScratchComplementFactorK`) removes the `d−2` complement, the conic/pair-form count
+  (`ScratchConicCount`/`PairForm`/`GaussCount`) separates the new plane point. **This is where the remaining open math
+  lives.** Fallback if the closure stalls: an explicit `k`-round WL operator with a `d`-uniform `O(1)`-round bound
+  (heavier; base-augmentation exists to avoid it).
+- **`c=0`-hyperbolic tail (small, deferred).** The singleton branch assumes an *anisotropic* plane; `Q u_⊥ = 0` on a
+  *hyperbolic* plane still has `Z(u)` spanning (2 lines), so it folds into the **generic** branch once a `c=0`-spanning
+  lemma (the `L_0` = 2-lines count) is added. Not on the Step C critical path.
 - **Assembly.** Re-instantiate `obsEq_iff_stabOrbit` on the WL-stable observable (the current scaffold is wired to the
   single-round `jointCountProfile`, which Insight 1 shows is insufficient — this swap is required); compose to the poly
   leaf count via `ScratchBoundedMultLeaves.leaves_le_prod_concentrated`.
