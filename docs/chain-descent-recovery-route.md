@@ -575,6 +575,26 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > Both routes reduce to route A's positive WallKernel-at-span-dim-`≥2`. **Viability:** strictly better-posed than the generic
 > crux (located + true + `q²`-bounded elsewhere); if A stalls, the `χ(det G₂)`@span-dim-2 probe is the cheap next test.
 >
+> **★ ROUTE A ATTEMPTED (2026-07-01) — direct proof STALLS, but the DIRECTION is CRACKABLE.** Scoping verdict: route A is
+> the **multi-base recovery** `JointProfileRecoversAt` at `|T|≥2` — the open `s(C)` content in general (`cellsAreOrbits`
+> single-base is free, `cellsAreOrbits_schemeAdj_singleton`; multi-base is the gap). The probe's non-monotone pattern
+> confirms it: recovery holds at `|T|=1`, **fails at `|T|=2`** (span-dim-1, the `q²` defect), **holds at `|T|≥3`**
+> (span-dim-2). The seal discharges this only **per-instance via `decide`/Gauss** (`IsotropySeparatesAtBase` →
+> `sigF_injective`, ~20s/instance, overshooting to *discreteness*), not as a general family bound; and the geometric
+> shortcut (isoClass→exact) hits the **Gauss-counting wall** (isoClass is 3-valued; exact recovery needs the count). So no
+> elementary proof. **BUT the direction check `recovery_depth_probe.py` is strongly positive:** at a span-dim-2 base, 1-WL
+> recovers the orbits in **`r* ∈ {3,4}` rounds** (VO⁻:3, VO⁺:4) — **flat in `d`** (q=3: `r*=3` at both `d=4,6`) and in `q`;
+> and the orbit count there is `q²(q+1) = Θ(q³)`, **d-uniform**. So route A is a **bounded-round (`O(1)`), d-uniform,
+> `Θ(q³)`-orbit** recovery — the *crackable* verdict (had `r*` grown with `d`, it would be the frontier). **The real proof
+> path:** instantiate the seal's **2-round pair-form `χ(det G₂)`** count-separation at a span-dim-2 base as a **d-uniform
+> family** argument (not per-instance `decide`) — the `r*`-flat + orbit-count-d-uniform evidence says the pair-form should
+> separate the `Θ(q³)` orbits uniformly in `d`. Reuses `PairForm`/`GaussCount`. **Route B note:** B (`L=O(1)`) is NOT
+> independent — it needs A's "branching ⟹ span-dim ≤ 1" to confine forks; given A, a span-dim-1 fork into a non-trivial
+> orbit *grows* span to dim-2 (`span_lt_span_insert_of_stabOrbit_ne`), so the span-dim-1 phase contributes `O(1)` branching
+> levels ⟹ `L=O(1)`. So A is the single gate; B is its cheap corollary. **Next:** attempt the pair-form-at-span-dim-2
+> family instantiation (the crackable proof path), or confirm the pair-form specifically separates at span-dim-2 (a
+> targeted `χ(det G₂)`-count probe) before the Lean build.
+>
 > **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
 > `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
 > `BoundedBranchingDisposition` (over `AdjMatrix n`/`OrbitPartition`) via the seal's `affineE` endpoint transport — the same
