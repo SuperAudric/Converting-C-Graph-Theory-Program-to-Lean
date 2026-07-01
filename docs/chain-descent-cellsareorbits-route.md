@@ -27,6 +27,12 @@ mechanism — it is a true-but-tangential structural fact. Full demotion arc: §
 
 **What's built (axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`):**
 
+> **▶ NOTE (2026-07-01): the geometric scaffold below is a LIVE dependency of the recovery route, not dead code.** The
+> recovery route's Phase 2 (`ChainDescent/ScratchBranchingBound.lean`) imports `ScratchOrbitBaseCase`/`ScratchWallKernel`
+> and reuses their `Similitude`/`StabOrbit`/`SameExactGram` model + the soundness lemma to prove the a-priori branching
+> bound `#{Stab(S)-orbits} ≤ |K|^{|S|+1}`. The recovery route needs only the *weaker* `bᵢ ≤ poly(q)` (not `WallKernel`'s
+> `bᵢ=1`), so `WallKernelFor` remains the *independent-math* (WL-dim-2) target while the base/soundness pieces are shared.
+
 | Module | Content |
 |---|---|
 | `ScratchSimilitudeCap.lean` | **the cap** — the graph fixes `Q` only up to scaling, so refinement is capped at the **square class** (`χ(det G₂)` invariant; exact value and singleton square-class are not). The wall is real, not a formalization gap. |

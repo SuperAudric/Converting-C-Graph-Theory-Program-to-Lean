@@ -286,6 +286,17 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > self-contained, **retargeted to T0**) — the claim, the strength ladder, the relocated stronger pieces, the phased plan of
 > attack. The WL-dim alternative `chain-descent-cellsareorbits-route.md` is demoted to independent-math.
 >
+> **▶▶▶ UPDATE (2026-07-01) — Phase 0 + Phase 1 + Phase 2-FOUNDATION LANDED (recovery route delivers QUASIPOLY end-to-end
+> through its own bridge; two poly items remain).** Read the recovery doc §8 HANDOFF. (a) **Phase 0 ✅** (`Phase0_BranchProfile`,
+> `DescentStats`+`MaxBranchFactor`/`MaxBranchPathDepth`): T0 not falsified — q=2 single-path thru d=8, only `VO⁻₄(5)` branches
+> (`B=3,L=2,leaves=6,bᵢ<q`), `STARVED=0`; q≥7 blocked by per-node-cost wall. (b) **Phase 1 ✅** `ChainDescent/ScratchBoundedBranching.lean`
+> (axiom-clean): `BTree.leaves_le_pow`+`certifiedBoundedTree_of_disposition` ⟹ `leaves ≤ Bᴸ`. (c) **Phase 2 FOUNDATION ✅**
+> `ChainDescent/ScratchBranchingBound.lean` (axiom-clean): `stabOrbit_cover_card_le : #{Stab(S)-orbits} ≤ |K|^{|S|+1}` (orbits ↪
+> exact-Gram profiles, mod Witt; reuses `ScratchOrbitBaseCase`/`ScratchWallKernel`) ⟹ `degBound` at quasipoly. **TWO LIVE
+> ITEMS (both open, both to be picked up):** ITEM A `L=O(d)` (moderate, handle `coords_determineK`) + ITEM B `B≤poly(q)` (the
+> WL-orbit-defect poly crux = seal core; first lead δ′ `dominatorReachable_affine_step`, never tried on `VO^ε`). Model seam
+> (geometric↔abstract via `affineE`) = Phase 4. Full pick-up = recovery doc §8 HANDOFF.
+>
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full
 > `|Aut|` recovered) — forms graphs are huge-`Aut`, so the `n^{|T|}` cost model is wrong and the descent tree is poly. The

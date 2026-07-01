@@ -1685,7 +1685,7 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `c0_route2_arith` | 6-52 | — | — |
+| `c0_route2_arith` | 5-51 | — | — |
 
 ## ChainDescent/ScratchSeam.lean
 
@@ -1718,16 +1718,16 @@ dictionary. Build order: (1) count transport `Fin(p^d) ↔ V`; (2) isotropy→va
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 
-| `exists_pow_matching_lt` | 31-48 | Matching-length existence: `F < card W ⟹ ∃ m, (card ι)·Fᵐ < (card W)ᵐ` — supplies `exists_separating_base`'s hypothesis. | — |
-| `exists_pow_matching_le` | 50-86 | The matching length with an explicit `Real.log` bound `m ≤ log(card ι)/log(card W/F) + 1` (standalone; the live chain uses the log-free `exists_pow_matching_block`). | — |
-| `exists_pow_matching_block` | 88-123 | **Log-free matching-length keystone (REUSABLE).** From the ratio `64·F ≤ 63·(card W)`, a separating base exists of length `m ≤ 64·(Nat.log 2 (card ι) + 1) = O(log (card ι))` (block fact `2·63⁶⁴ ≤ 64⁶⁴`) — the non-vacuity backbone, no `Real.log`. | — |
-| `exists_separating_base_of_split` | 125-150 | Matching mechanics: per-good-anchor fail bound `cN` + bad-anchor count `βN` + `cN+βN < card V` ⟹ a base `Fin m → V×V` whose 2-element sub-frames each target avoids. | — |
-| `exists_separating_base_of_split_bounded` | 152-181 | The `exists_separating_base_of_split` sibling that also carries the logarithmic length bound `m ≤ 64·(Nat.log 2 (card ι)+1)`, from the ratio hypothesis `64·(cN+βN) ≤ 63·(card V)`. | — |
-| `cbar_lt` | 183-203 | The `c̄₀<1` arithmetic: `16cN≤15N ∧ q·βN≤(2d+4)N+2q ∧ q≥32(2d+4) ∧ N>64 ⟹ cN+βN<N` (superseded in the live chain by the ratio bound; retained). | — |
-| `jointIsoCountK_ne_of_sep` | 204-230 | Bridge wiring used by increment 5: the separation event (χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0) discharges `jointIsoCountK_ne_of_chiSep_pair`'s hypotheses and fires the count inequality. | — |
-| `exists_zProfileSeparatesK` | 231-381 | **The family assembly.** Running the matching trick over good/bad anchors produces a finite base `T` separating every distinct pivot pair in the joint isotropic counts (`ZProfileSeparatesK Q T`), with `T.card = O(d log q)`. | — |
-| `exists_isotropySeparatesAtBaseK` | 382-403 | **The seal-ready deliverable.** A nondegenerate `Q` on `Fin d → K` (even `d≥2`, `q≳32d`) admits a finite base `T` with `IsotropySeparatesAtBaseK Q T` and `T.card ≤ 128·(Nat.log 2 (card V)²+1)` — exactly the input the Witt-free seal capstone consumes. | — |
-| `reachesRigidOrCameron_affinePolar` | 404-440 | **The q=p affine-polar seal.** For an odd prime `p` and a nondegenerate quadratic form `Q` on `Fin d → ZMod p` (even `d≥2`, `p≥256`, `p≳32d`), the affine-polar VO^ε residue reaches the `reachesRigidOrCameron` disjunction modulo {G3} — Witt-free, no `hSmallAutThin` — carrying an explicit base bound… | — |
+| `exists_pow_matching_lt` | 30-47 | Matching-length existence: `F < card W ⟹ ∃ m, (card ι)·Fᵐ < (card W)ᵐ` — supplies `exists_separating_base`'s hypothesis. | — |
+| `exists_pow_matching_le` | 49-85 | The matching length with an explicit `Real.log` bound `m ≤ log(card ι)/log(card W/F) + 1` (standalone; the live chain uses the log-free `exists_pow_matching_block`). | — |
+| `exists_pow_matching_block` | 87-122 | **Log-free matching-length keystone (REUSABLE).** From the ratio `64·F ≤ 63·(card W)`, a separating base exists of length `m ≤ 64·(Nat.log 2 (card ι) + 1) = O(log (card ι))` (block fact `2·63⁶⁴ ≤ 64⁶⁴`) — the non-vacuity backbone, no `Real.log`. | — |
+| `exists_separating_base_of_split` | 124-149 | Matching mechanics: per-good-anchor fail bound `cN` + bad-anchor count `βN` + `cN+βN < card V` ⟹ a base `Fin m → V×V` whose 2-element sub-frames each target avoids. | — |
+| `exists_separating_base_of_split_bounded` | 151-180 | The `exists_separating_base_of_split` sibling that also carries the logarithmic length bound `m ≤ 64·(Nat.log 2 (card ι)+1)`, from the ratio hypothesis `64·(cN+βN) ≤ 63·(card V)`. | — |
+| `cbar_lt` | 182-202 | The `c̄₀<1` arithmetic: `16cN≤15N ∧ q·βN≤(2d+4)N+2q ∧ q≥32(2d+4) ∧ N>64 ⟹ cN+βN<N` (superseded in the live chain by the ratio bound; retained). | — |
+| `jointIsoCountK_ne_of_sep` | 203-229 | Bridge wiring used by increment 5: the separation event (χ(I_u)≠χ(I_v) ∧ I_u,I_v≠0 ∧ Q(t₀-u),Q(t₀-v)≠0) discharges `jointIsoCountK_ne_of_chiSep_pair`'s hypotheses and fires the count inequality. | — |
+| `exists_zProfileSeparatesK` | 230-380 | **The family assembly.** Running the matching trick over good/bad anchors produces a finite base `T` separating every distinct pivot pair in the joint isotropic counts (`ZProfileSeparatesK Q T`), with `T.card = O(d log q)`. | — |
+| `exists_isotropySeparatesAtBaseK` | 381-402 | **The seal-ready deliverable.** A nondegenerate `Q` on `Fin d → K` (even `d≥2`, `q≳32d`) admits a finite base `T` with `IsotropySeparatesAtBaseK Q T` and `T.card ≤ 128·(Nat.log 2 (card V)²+1)` — exactly the input the Witt-free seal capstone consumes. | — |
+| `reachesRigidOrCameron_affinePolar` | 403-439 | **The q=p affine-polar seal.** For an odd prime `p` and a nondegenerate quadratic form `Q` on `Fin d → ZMod p` (even `d≥2`, `p≥256`, `p≳32d`), the affine-polar VO^ε residue reaches the `reachesRigidOrCameron` disjunction modulo {G3} — Witt-free, no `hSmallAutThin` — carrying an explicit base bound… | — |
 ## ChainDescent/BadAnchorCount.lean
 
 | Name | Line | Description | Notes |
@@ -2017,15 +2017,15 @@ line for poly is *coloring vs group* (Route C / `CellsAreOrbits`), not square-cl
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `quad_smul_apply` | 49-51 | Scaling the form scales its values: `(c • Q) x = c * Q x`. | `@[simp]` |
-| `polar_smul` | 54-55 | Scaling the form scales its polar: `polar (c • Q) s a = c * polar Q s a`. | — |
-| `adj_smul_iff` | 59-61 | **The similitude cap (T1).** The affine-polar adjacency `Q x = 0` is unchanged by scaling the form (`c ≠ 0`). | — |
-| `affinePolarAdj_smul_eq` | 65-68 | **The graph is identical for `Q` and `c•Q`.** The adjacency relation `(x,y) ↦ Q(x−y)=0` is *literally equal*, so the graph determines `Q` only up to scaling — any isomorphism-invariant of a vertex pair must be invariant under `Q ↦ c•Q`. | — |
-| `pairForm_smul_apply` | 71-75 | The pair invariant scales by `c²`: `pairForm (c•Q) a s = c² · pairForm Q a s`. | — |
-| `chi_sq_mul` | 78-87 | `χ(c² · v) = χ(v)` for `c ≠ 0` — the square multiplier is invisible to the quadratic character. | — |
-| `chi_pairForm_smul` | 90-92 | **The square class is a graph invariant (T2).** `χ(det G₂) = χ(pairForm)` is unchanged by scaling the form (`c²` killed by `χ`) — why the canonizer's pair observable is well-defined on the graph (= on the scaling class of `Q`). | — |
-| `chi_singleton_smul` | 97-99 | **The singleton square class is NOT a graph invariant (T3a).** `χ((c•Q) a) = χ(c)·χ(Q a)` flips by `χ(c)` — the formal proof of the empirical "singleton `Z_u({t})` is binary" finding (only the `χ(c)`-invariant fact `Q=0` survives). | — |
-| `pairForm_value_not_invariant` | 104-106 | **The exact value is NOT a graph invariant (T3b).** The exact pair value scales by `c²`, so presentations `Q`, `c•Q` of the *same graph* disagree on it whenever `c² ≠ 1` — no isomorphism-invariant procedure (refinement of any dimension, or Route C) recovers the exact form value, only its square class. | — |
+| `quad_smul_apply` | 48-51 | Scaling the form scales its values: `(c • Q) x = c * Q x`. | `@[simp]` |
+| `polar_smul` | 53-56 | Scaling the form scales its polar: `polar (c • Q) s a = c * polar Q s a`. | — |
+| `adj_smul_iff` | 58-61 | **The similitude cap (T1).** The affine-polar adjacency `Q x = 0` is unchanged by scaling the form (`c ≠ 0`). | — |
+| `affinePolarAdj_smul_eq` | 63-68 | **The graph is identical for `Q` and `c•Q`.** The adjacency relation `(x,y) ↦ Q(x−y)=0` is *literally equal*, so the graph determines `Q` only up to scaling — any isomorphism-invariant of a vertex pair must be invariant under `Q ↦ c•Q`. | — |
+| `pairForm_smul_apply` | 70-75 | The pair invariant scales by `c²`: `pairForm (c•Q) a s = c² · pairForm Q a s`. | — |
+| `chi_sq_mul` | 77-85 | `χ(c² · v) = χ(v)` for `c ≠ 0` — the square multiplier is invisible to the quadratic character. | — |
+| `chi_pairForm_smul` | 87-92 | **The square class is a graph invariant (T2).** `χ(det G₂) = χ(pairForm)` is unchanged by scaling the form (`c²` killed by `χ`) — why the canonizer's pair observable is well-defined on the graph (= on the scaling class of `Q`). | — |
+| `chi_singleton_smul` | 94-99 | **The singleton square class is NOT a graph invariant (T3a).** `χ((c•Q) a) = χ(c)·χ(Q a)` flips by `χ(c)` — the formal proof of the empirical "singleton `Z_u({t})` is binary" finding (only the `χ(c)`-invariant fact `Q=0` survives). | — |
+| `pairForm_value_not_invariant` | 101-106 | **The exact value is NOT a graph invariant (T3b).** The exact pair value scales by `c²`, so presentations `Q`, `c•Q` of the *same graph* disagree on it whenever `c² ≠ 1` — no isomorphism-invariant procedure (refinement of any dimension, or Route C) recovers the exact form value, only its square class. | — |
 
 ## ChainDescent/ScratchOrbitBaseCase.lean
 
@@ -2037,24 +2037,24 @@ coarsening. Models affine-polar automorphisms as `Similitude Q` (`g : V ≃ₗ V
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `Similitude` | 44-48 | A similitude of `Q`: a linear equiv `g` with `Q (g x) = mult · Q x`, `mult ≠ 0`. An isometry is `mult = 1`. | Structure |
-| `affinePolar_empty_base_one_orbit` | 52-53 | **Depth 0** — the whole vertex set is one orbit (translations): `∀ v w, ∃ t, v + t = w`. `CellsAreOrbits` at `S = ∅`, free. | — |
-| `mult_eq_one_of_fixes_anisotropic` | 58-63 | **The delimiter.** A similitude fixing an anisotropic vector (`Q v ≠ 0`) has `mult = 1`. Once an anisotropic vector is pinned, residual similitudes are isometries. | — |
-| `mult_eq_one_of_fixes_span_anisotropic` | 68-77 | Delimiter, span form: fixing a set whose span contains an anisotropic vector forces `mult = 1` — so multiplier freedom in `Stab(S)` requires `span S` totally isotropic. | — |
-| `WittConeTransitive` | 81-83 | **Isolated Witt input**: isometries act transitively on nonzero isotropic vectors. Discharged (mod the residual) in `ScratchWittCone`. | Definition |
-| `neighborSphere_zero_eq_isotropic` | 87-88 | The graph-neighbours of `0` are exactly the nonzero isotropic vectors (`Q(v−0)=0 ⟺ Q v = 0`). | — |
-| `depth1_isotropic_sphere_one_orbit` | 93-97 | **Depth 1** — the isotropic neighbour sphere is one isometry-orbit, given `WittConeTransitive`. The second base rung. | — |
-| `scalarEquiv` / `scalarEquiv_apply` | 109-119 | The scalar automorphism `x ↦ l • x` (`l ≠ 0`) as a linear equiv, and its apply lemma. | Def / `@[simp]` |
-| `scalarSimilitude` | 121-126 | The scalar similitude `x ↦ l • x`, multiplier `l²`, fixing the origin — realizes every square multiplier in `Stab(0)` with no Witt input. | Definition |
-| `StabOrbit` | 128-129 | The `Stab(S)`-orbit relation: `w'` reachable from `w` by a similitude fixing `S` pointwise. | Definition |
-| `stabOrbit_preserves_norm_of_anisotropic_base` | 136-147 | **Wall side (orbit level).** At an anisotropic base, every `Stab(S)`-orbit preserves the exact norm `Q` (`mult = 1`) — orbits are norm-fine, strictly finer than square-class cells. The open core located at the orbit level. | — |
-| `stabOrbit_zero_base_scales` | 149-168 | **Free side at the origin (no Witt).** `l • w` is in the `Stab({0})`-orbit of `w` with `Q(l•w) = l²·Q w` — origin-base orbits are square-class-coarse, matching refinement. | — |
-| `TotallyIsotropic` | 170-171 | A base `S` is totally isotropic when `Q` vanishes on `span S`. | Definition |
-| `MultiplierRealizable` | 175-179 | `Stab(S)` realizes every nonzero multiplier (the multiplier freedom the free prefix runs on). | Definition |
-| `WittRealizes` | 181-183 | **Carried Witt-decomposition input (W-dec)**: over every totally-isotropic base, all multipliers are realizable. | Definition |
-| `stabOrbit_realizable_base_scales` | 189-198 | **Increment 2** — free-prefix orbit coarsening: given `MultiplierRealizable Q S`, the `Stab(S)`-orbit of `w` reaches norm `μ·Q w` for every `μ ≠ 0`. | — |
-| `not_multiplierRealizable_of_anisotropic` | 200-210 | The delimiter at predicate level: `MultiplierRealizable Q S` fails once `S` carries an anisotropic vector (with a `μ ≠ 0, 1` witness). The free/​wall boundary. | — |
-| `stabOrbit_totallyIsotropic_scales` | 212-216 | **Increment 2 capstone** — free-prefix orbit coarsening over any totally-isotropic base, modulo the carried `WittRealizes`. | — |
+| `Similitude` | 42-48 | A similitude of `Q`: a linear equiv `g` with `Q (g x) = mult · Q x`, `mult ≠ 0`. An isometry is `mult = 1`. | Structure |
+| `affinePolar_empty_base_one_orbit` | 50-53 | **Depth 0** — the whole vertex set is one orbit (translations): `∀ v w, ∃ t, v + t = w`. `CellsAreOrbits` at `S = ∅`, free. | — |
+| `mult_eq_one_of_fixes_anisotropic` | 55-63 | **The delimiter.** A similitude fixing an anisotropic vector (`Q v ≠ 0`) has `mult = 1`. Once an anisotropic vector is pinned, residual similitudes are isometries. | — |
+| `mult_eq_one_of_fixes_span_anisotropic` | 65-77 | Delimiter, span form: fixing a set whose span contains an anisotropic vector forces `mult = 1` — so multiplier freedom in `Stab(S)` requires `span S` totally isotropic. | — |
+| `WittConeTransitive` | 79-83 | **Isolated Witt input**: isometries act transitively on nonzero isotropic vectors. Discharged (mod the residual) in `ScratchWittCone`. | Definition |
+| `neighborSphere_zero_eq_isotropic` | 85-88 | The graph-neighbours of `0` are exactly the nonzero isotropic vectors (`Q(v−0)=0 ⟺ Q v = 0`). | — |
+| `depth1_isotropic_sphere_one_orbit` | 90-97 | **Depth 1** — the isotropic neighbour sphere is one isometry-orbit, given `WittConeTransitive`. The second base rung. | — |
+| `scalarEquiv` / `scalarEquiv_apply` | 108-112 | The scalar automorphism `x ↦ l • x` (`l ≠ 0`) as a linear equiv, and its apply lemma. | Definition |
+| `scalarSimilitude` | 118-125 | The scalar similitude `x ↦ l • x`, multiplier `l²`, fixing the origin — realizes every square multiplier in `Stab(0)` with no Witt input. | Definition |
+| `StabOrbit` | 127-129 | The `Stab(S)`-orbit relation: `w'` reachable from `w` by a similitude fixing `S` pointwise. | Definition |
+| `stabOrbit_preserves_norm_of_anisotropic_base` | 131-142 | **Wall side (orbit level).** At an anisotropic base, every `Stab(S)`-orbit preserves the exact norm `Q` (`mult = 1`) — orbits are norm-fine, strictly finer than square-class cells. The open core located at the orbit level. | — |
+| `stabOrbit_zero_base_scales` | 144-157 | **Free side at the origin (no Witt).** `l • w` is in the `Stab({0})`-orbit of `w` with `Q(l•w) = l²·Q w` — origin-base orbits are square-class-coarse, matching refinement. | — |
+| `TotallyIsotropic` | 169-171 | A base `S` is totally isotropic when `Q` vanishes on `span S`. | Definition |
+| `MultiplierRealizable` | 173-176 | `Stab(S)` realizes every nonzero multiplier (the multiplier freedom the free prefix runs on). | Definition |
+| `WittRealizes` | 178-182 | **Carried Witt-decomposition input (W-dec)**: over every totally-isotropic base, all multipliers are realizable. | Definition |
+| `stabOrbit_realizable_base_scales` | 184-194 | **Increment 2** — free-prefix orbit coarsening: given `MultiplierRealizable Q S`, the `Stab(S)`-orbit of `w` reaches norm `μ·Q w` for every `μ ≠ 0`. | — |
+| `not_multiplierRealizable_of_anisotropic` | 196-206 | The delimiter at predicate level: `MultiplierRealizable Q S` fails once `S` carries an anisotropic vector (with a `μ ≠ 0, 1` witness). The free/​wall boundary. | — |
+| `stabOrbit_totallyIsotropic_scales` | 208-215 | **Increment 2 capstone** — free-prefix orbit coarsening over any totally-isotropic base, modulo the carried `WittRealizes`. | — |
 
 ## ChainDescent/ScratchWittCone.lean
 
@@ -2065,18 +2065,18 @@ reduced to `IsotropicPairing`. Axiom-clean `[propext, Classical.choice, Quot.sou
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `reflFunc` / `reflFunc_apply` | 27-34 | The reflection functional `y ↦ polar Q y v / Q v` (the `f` of `Module.reflection`) and its apply lemma. | Def `noncomputable` |
-| `reflFunc_self` | 36-40 | `reflFunc Q v v = 2` (the `Module.reflection` hypothesis), for `Q v ≠ 0`. | — |
-| `refl` | 42-44 | The orthogonal reflection `τ_v : y ↦ y − (polar Q y v / Q v) • v` as a linear equiv (via `Module.reflection`). | Def `noncomputable` |
-| `map_sub'` | 46-51 | The quadratic-difference expansion `Q (a − b) = Q a − polar Q a b + Q b`. | — |
-| `refl_isometry` | 54-63 | **W0** — the reflection is an isometry: `Q (τ_v y) = Q y` (needs only `Q v ≠ 0`). | — |
-| `reflSim` | 65-71 | **W0** — the reflection packaged as a `Similitude` (multiplier 1). | Def `noncomputable` |
-| `refl_swap` | 73-81 | **W0** — `Q u = Q v ∧ Q(u−v) ≠ 0 ⟹ τ_{u−v}(u) = v`. For isotropic `u,v` this is the `polar ≠ 0` case. | — |
-| `simComp` | 83-90 | Composition of similitudes (multipliers multiply); chains two reflections. | Def `noncomputable` |
-| `cone_case_polar_ne` | 92-100 | **W1, `polar ≠ 0` case** — two nonzero isotropic vectors with `polar Q u u' ≠ 0` are related by one reflection. | — |
-| `exists_hyperbolic_partner` | 102-119 | **The partner lemma** — a nonzero isotropic vector has an isotropic partner `f` with `polar Q u f = 1` (from nondegeneracy `hnd`). The key tool for the residual. | — |
-| `IsotropicPairing` | 121-126 | **The residual** of W1: for any two nonzero isotropic `u, u'`, an isotropic `w` non-orthogonal to both. A concrete vector-existence statement; the only remaining content of `WittConeTransitive`. | Definition |
-| `wittConeTransitive_of_pairing` | 128-148 | **W1 — the reduction.** `IsotropicPairing Q ⟹ WittConeTransitive Q` (the `polar≠0` case via `cone_case_polar_ne`; the `polar=0` case via two reflections through the pairing vector, composed by `simComp`). | — |
+| `reflFunc` / `reflFunc_apply` | 26-28 | The reflection functional `y ↦ polar Q y v / Q v` (the `f` of `Module.reflection`) and its apply lemma. | Definition, `noncomputable` |
+| `reflFunc_self` | 35-39 | `reflFunc Q v v = 2` (the `Module.reflection` hypothesis), for `Q v ≠ 0`. | — |
+| `refl` | 41-43 | The orthogonal reflection `τ_v : y ↦ y − (polar Q y v / Q v) • v` as a linear equiv (via `Module.reflection`). | Definition, `noncomputable` |
+| `map_sub'` | 45-51 | The quadratic-difference expansion `Q (a − b) = Q a − polar Q a b + Q b`. | — |
+| `refl_isometry` | 53-62 | **W0** — the reflection is an isometry: `Q (τ_v y) = Q y` (needs only `Q v ≠ 0`). | — |
+| `reflSim` | 64-69 | **W0** — the reflection packaged as a `Similitude` (multiplier 1). | Definition, `noncomputable` |
+| `refl_swap` | 71-80 | **W0** — `Q u = Q v ∧ Q(u−v) ≠ 0 ⟹ τ_{u−v}(u) = v`. For isotropic `u,v` this is the `polar ≠ 0` case. | — |
+| `simComp` | 82-88 | Composition of similitudes (multipliers multiply); chains two reflections. | Definition, `noncomputable` |
+| `cone_case_polar_ne` | 90-98 | **W1, `polar ≠ 0` case** — two nonzero isotropic vectors with `polar Q u u' ≠ 0` are related by one reflection. | — |
+| `exists_hyperbolic_partner` | 100-116 | **The partner lemma** — a nonzero isotropic vector has an isotropic partner `f` with `polar Q u f = 1` (from nondegeneracy `hnd`). The key tool for the residual. | — |
+| `IsotropicPairing` | 118-123 | **The residual** of W1: for any two nonzero isotropic `u, u'`, an isotropic `w` non-orthogonal to both. A concrete vector-existence statement; the only remaining content of `WittConeTransitive`. | Definition |
+| `wittConeTransitive_of_pairing` | 125-146 | **W1 — the reduction.** `IsotropicPairing Q ⟹ WittConeTransitive Q` (the `polar≠0` case via `cone_case_polar_ne`; the `polar=0` case via two reflections through the pairing vector, composed by `simComp`). | — |
 
 ## ChainDescent/ScratchNodeCountBridge.lean
 
@@ -2092,25 +2092,26 @@ See `docs/chain-descent-cellsareorbits-route.md` §6.
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `SelectedCellIsOrbit` | 46-58 | **0a** — `CellsAreOrbits` restricted to `sel`'s targeted cell: same-coloured vertices of the *consumed* cell are `Stab(S)`-orbit-equivalent. Strictly weaker than full `CellsAreOrbits`; matches the scheduler. | Definition |
-| `selectedCellIsOrbit_of_cellsAreOrbits` | 60-62 | **0b** — full `CellsAreOrbits S ⟹ SelectedCellIsOrbit`. The §4 forms-graph math (modulo Witt + the wall) discharges the bridge hypothesis for free. | — |
-| `selectedCell_single_stabOrbit` | 72-83 | **0c — prune completeness (the missing pillar).** Under `SelectedCellIsOrbit`, two same-cell vertices lie in one `StabilizerAt`-orbit (the consumed cell is *one* orbit ⟹ one sibling-class). The direction prune *soundness* (`covered_sound`) does not give. Via `mem_orbit_stabilizerAt_iff`. | — |
-| `selectedCell_prune_sound_complete` | 86-99 | The two reps are *mutually* `OrbitPartition` — dropping either is sound (isomorphic) and complete (no class lost). Turns "fork over reps" into "descend on one". | — |
-| `spine_node_count_le` | 102-111 | **Node count `≤ n`** — re-export of the landed `defaultSpineChain_reaches_leaf` (single path reaches a discrete leaf in `≤ n` levels). Step (3) is free — NOT `exists_potential_descent` (that bounds *base size*, the quasipoly engine). | — |
-| `SinglePathDisposition` | 113-115 | The bridge-keyed hypothesis: `∀ S, SelectedCellIsOrbit … S` (every consumed cell one orbit). Structural form of the empirical `Phase2Nodes = 0`. Weaker than `∀ S, CellsAreOrbits`. | Definition |
-| `singlePathDisposition_of_cellsAreOrbits` | 118-122 | The forms-graph math (full `CellsAreOrbits` at every base) discharges the disposition. | — |
-| `CertifiedSinglePath` | 128-141 | The two poly ingredients bundled: `boundedNodes` (`≤ n`) + `cellsCertified` (every consumed cell one residual orbit). The structural object the **meta** poly-argument reads "poly time" off. | Structure |
-| `certifiedSinglePath_of_disposition` | 143-151 | **★ The bridge capstone (Increment 0).** `SinglePathDisposition ⟹ CertifiedSinglePath` — both poly ingredients discharged from the disposition. | — |
-| `warmRefine_congr_samePartition` | 174-178 | `warmRefine` is a `samePartition` congruence in its seed (the `D=∅` case of `warmRefine_agree_off'`). The engine that passes representative-transport through warm refinement. | — |
-| `mem_insert_transport` | 182-194 | An `S`-fixing aut `g` with `g v₁=v₂` carries `insert v₁ S` onto `insert v₂ S`: `g i ∈ insert v₂ S ↔ i ∈ insert v₁ S`. | — |
-| `indiv_samePartition_transport` | 199-214 | **Seed transport.** The `v₁`-individualized seed and the `g`-pullback of the `v₂`-individualized seed induce the same partition (both singletons-on-pinned-set; `g` matches the pinned sets). Literal index-labels differ, partition does not. | — |
-| `repTransport` | 222-233 | **★ The representative-transport core (depth 1).** An orbit aut `g ∈ Stab(S)` carrying rep `v₁ ↦ v₂` makes the `v₂`-individualized descent (pulled back by `g`) `samePartition` the `v₁`-descent — rep-choice invariance, the transport seam's load-bearing equivariance. Via cross-config `warmRefine_transport` + the congruence. | — |
-| `repTransport_of_orbitPartition` | 239-245 | `repTransport` with `g` supplied by `OrbitPartition adj P S v₁ v₂` (what `selectedCell_single_stabOrbit` yields). Two reps of a certified single-orbit cell give `g`-relabeled descents. | — |
-| `mem_image_transport` | 257-263 | Membership transport, general base: `g i ∈ T.image g ↔ i ∈ T` (injectivity of `g`). | — |
-| `indiv_samePartition_image` | 266-280 | Seed transport, general base: the `T`-individualized seed and the `g`-pullback of the `g(T)`-individualized seed induce the same partition. General form of `indiv_samePartition_transport`. | — |
-| `baseTransport` | 284-294 | **★ Full-base `g`-equivariance (the "iterate across levels" lemma).** For any aut `g` and base `T`, the descent at `g(T)` (pulled back by `g`) is `samePartition` the descent at `T`. `g` global ⟹ holds at every base incl. a leaf ⟹ subsumes level-by-level iteration in one lemma. | — |
-| `repTransport_eq_baseTransport_instance` | 298-310 | `(insert v₁ S).image g = insert v₂ S` for `g` fixing `S` with `g v₁=v₂` — confirms `repTransport` is the `S`-fixing instance of `baseTransport`. | — |
-| `labelledAdj_rankPerm_transport` | 330-344 | **The `canonAdj`-lift atom.** Labelled output `labelledAdj (rankPerm π) adj` is invariant under a `g`-relabel of the discrete leaf colouring (`g` an aut), via `rankPerm_comp` + `labelledAdj_eq_of_isAut`. Remaining lift gap = `samePartition`→literal relabel = `canonForm` (§15.7 placeholder). | — |
+| `SelectedCellIsOrbit` | 42-53 | **0a** — `CellsAreOrbits` restricted to `sel`'s targeted cell: same-coloured vertices of the *consumed* cell are `Stab(S)`-orbit-equivalent. Strictly weaker than full `CellsAreOrbits`; matches the scheduler. | Definition |
+| `selectedCellIsOrbit_of_cellsAreOrbits` | 57-63 | **0b** — full `CellsAreOrbits S ⟹ SelectedCellIsOrbit`. The §4 forms-graph math (modulo Witt + the wall) discharges the bridge hypothesis for free. | — |
+| `selectedCell_single_stabOrbit` | 67-81 | **0c — prune completeness (the missing pillar).** Under `SelectedCellIsOrbit`, two same-cell vertices lie in one `StabilizerAt`-orbit (the consumed cell is *one* orbit ⟹ one sibling-class). The direction prune *soundness* (`covered_sound`) does not give. Via `mem_orbit_stabilizerAt_iff`. | — |
+| `selectedCell_prune_sound_complete` | 83-94 | The two reps are *mutually* `OrbitPartition` — dropping either is sound (isomorphic) and complete (no class lost). Turns "fork over reps" into "descend on one". | — |
+| `spine_node_count_le` | 98-106 | **Node count `≤ n`** — re-export of the landed `defaultSpineChain_reaches_leaf` (single path reaches a discrete leaf in `≤ n` levels). Step (3) is free — NOT `exists_potential_descent` (that bounds *base size*, the quasipoly engine). | — |
+| `SinglePathDisposition` | 110-115 | The bridge-keyed hypothesis: `∀ S, SelectedCellIsOrbit … S` (every consumed cell one orbit). Structural form of the empirical `Phase2Nodes = 0`. Weaker than `∀ S, CellsAreOrbits`. | Definition |
+| `singlePathDisposition_of_cellsAreOrbits` | 117-121 | The forms-graph math (full `CellsAreOrbits` at every base) discharges the disposition. | — |
+| `CertifiedSinglePath` | 123-136 | The two poly ingredients bundled: `boundedNodes` (`≤ n`) + `cellsCertified` (every consumed cell one residual orbit). The structural object the **meta** poly-argument reads "poly time" off. | Structure |
+| `certifiedSinglePath_of_disposition` | 138-150 | **★ The bridge capstone (Increment 0).** `SinglePathDisposition ⟹ CertifiedSinglePath` — both poly ingredients discharged from the disposition. | — |
+| `NodeCountBridge.certifiedSinglePath_of_cellsAreOrbits` | 152-162 | — | — |
+| `warmRefine_congr_samePartition` | 183-190 | `warmRefine` is a `samePartition` congruence in its seed (the `D=∅` case of `warmRefine_agree_off'`). The engine that passes representative-transport through warm refinement. | — |
+| `mem_insert_transport` | 192-206 | An `S`-fixing aut `g` with `g v₁=v₂` carries `insert v₁ S` onto `insert v₂ S`: `g i ∈ insert v₂ S ↔ i ∈ insert v₁ S`. | — |
+| `indiv_samePartition_transport` | 208-226 | **Seed transport.** The `v₁`-individualized seed and the `g`-pullback of the `v₂`-individualized seed induce the same partition (both singletons-on-pinned-set; `g` matches the pinned sets). Literal index-labels differ, partition does not. | — |
+| `repTransport` | 228-245 | **★ The representative-transport core (depth 1).** An orbit aut `g ∈ Stab(S)` carrying rep `v₁ ↦ v₂` makes the `v₂`-individualized descent (pulled back by `g`) `samePartition` the `v₁`-descent — rep-choice invariance, the transport seam's load-bearing equivariance. Via cross-config `warmRefine_transport` + the congruence. | — |
+| `repTransport_of_orbitPartition` | 247-257 | `repTransport` with `g` supplied by `OrbitPartition adj P S v₁ v₂` (what `selectedCell_single_stabOrbit` yields). Two reps of a certified single-orbit cell give `g`-relabeled descents. | — |
+| `mem_image_transport` | 268-274 | Membership transport, general base: `g i ∈ T.image g ↔ i ∈ T` (injectivity of `g`). | — |
+| `indiv_samePartition_image` | 276-290 | Seed transport, general base: the `T`-individualized seed and the `g`-pullback of the `g(T)`-individualized seed induce the same partition. General form of `indiv_samePartition_transport`. | — |
+| `baseTransport` | 292-305 | **★ Full-base `g`-equivariance (the "iterate across levels" lemma).** For any aut `g` and base `T`, the descent at `g(T)` (pulled back by `g`) is `samePartition` the descent at `T`. `g` global ⟹ holds at every base incl. a leaf ⟹ subsumes level-by-level iteration in one lemma. | — |
+| `repTransport_eq_baseTransport_instance` | 307-319 | `(insert v₁ S).image g = insert v₂ S` for `g` fixing `S` with `g v₁=v₂` — confirms `repTransport` is the `S`-fixing instance of `baseTransport`. | — |
+| `labelledAdj_rankPerm_transport` | 337-356 | **The `canonAdj`-lift atom.** Labelled output `labelledAdj (rankPerm π) adj` is invariant under a `g`-relabel of the discrete leaf colouring (`g` an aut), via `rankPerm_comp` + `labelledAdj_eq_of_isAut`. Remaining lift gap = `samePartition`→literal relabel = `canonForm` (§15.7 placeholder). | — |
 
 ## ChainDescent/ScratchWallKernel.lean
 
@@ -2123,16 +2124,97 @@ exact-Gram form of the seal's `ZProfileSeparates`; the character-inversion attac
 
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
-| `similitude_polar` | 47-52 | Similitudes scale the polar form: `polar Q (g x) (g y) = μ · polar Q x y` (polarisation of `Q∘g=μ·Q`); for `μ=1` (isometry) the polar is preserved. | — |
-| `SameExactGram` | 55-57 | Exact Gram profile to `S`: equal `Q` and equal `polar · s` ∀ `s ∈ S`. Determines the `Stab(S)`-orbit (via Witt). | Definition |
-| `SameSquareClass` | 60-62 | Square-class profile to `S`: `χ` (quadratic character) of the exact Gram data — the finest graph-invariant (the cap). What refinement sees. | Definition |
-| `sameExactGram_imp_sameSquareClass` | 65-66 | Exact ⟹ square-class (free, apply `χ`). | — |
-| `stabOrbit_imp_sameExactGram_of_anisotropic` | 71-82 | **Soundness (free).** Orbit ⟹ exact Gram at an anisotropic base: the `S`-fixing similitude has `μ=1` (delimiter), so it is an isometry preserving `Q` and `polar · s`. | — |
-| `WallKernel` | 86-87 | **★ The open kernel.** Square-class profile *determines* exact Gram profile — the entire open content of `CellsAreOrbits` in the anisotropic regime (bounded-base determination = separator→certifier). Count-form = `ZProfileSeparates`. | Definition |
-| `WittExtendsToOrbit` | 92-93 | Carried Witt-extension input (tech debt): equal exact Gram to `S` ⟹ same `Stab(S)`-isometry-orbit. | Definition |
-| `stabOrbit_of_sameSquareClass` | 98-100 | The reduction (hard direction): `WallKernel` + Witt ⟹ same square-class ⟹ same orbit. | — |
-| `stabOrbit_iff_sameSquareClass_of_wallKernel` | 106-111 | **★ Isolation capstone (single-round).** At an anisotropic base, modulo {Witt}, `CellsAreOrbits` (orbit ⟺ square-class) **⟺ `WallKernel`**. (The single-round `SameSquareClass` instance — refuted at a bounded base by the 3c probe; see the parametric form below.) | — |
-| `WallKernelFor` | 131-132 | **The observable-parametric wall kernel.** A relation `Obs` *determines* the exact Gram to `S` — `CellsAreOrbits`'s open content parameterised by the refinement observable. Probe-validated target: `Obs` = iterated `χ(det G₂)` 2-WL pair-count (the crack); `Obs = SameSquareClass` (single round) is refuted at a bounded base. | Definition |
-| `wallKernel_eq_wallKernelFor` | 135 | `WallKernel` is the `SameSquareClass` instance of `WallKernelFor` (definitional). | — |
-| `stabOrbit_of_obs` | 138-140 | Observable-parametric reduction: `WallKernelFor Obs` + Witt ⟹ `Obs ⟹ StabOrbit`. | — |
-| `stabOrbit_iff_obs_of_wallKernelFor` | 147-152 | **★ Observable-parametric isolation capstone.** Given orbit-soundness of `Obs` (free for any graph invariant) + Witt, `CellsAreOrbits` for `Obs` (orbit ⟺ `Obs`) **⟺ `WallKernelFor Obs`**. Redirected 3c proves it for `Obs` = iterated `χ(det G₂)` 2-WL. | — |
+| `similitude_polar` | 45-51 | Similitudes scale the polar form: `polar Q (g x) (g y) = μ · polar Q x y` (polarisation of `Q∘g=μ·Q`); for `μ=1` (isometry) the polar is preserved. | — |
+| `SameExactGram` | 53-56 | Exact Gram profile to `S`: equal `Q` and equal `polar · s` ∀ `s ∈ S`. Determines the `Stab(S)`-orbit (via Witt). | Definition |
+| `SameSquareClass` | 58-62 | Square-class profile to `S`: `χ` (quadratic character) of the exact Gram data — the finest graph-invariant (the cap). What refinement sees. | Definition |
+| `sameExactGram_imp_sameSquareClass` | 64-66 | Exact ⟹ square-class (free, apply `χ`). | — |
+| `stabOrbit_imp_sameExactGram_of_anisotropic` | 68-80 | **Soundness (free).** Orbit ⟹ exact Gram at an anisotropic base: the `S`-fixing similitude has `μ=1` (delimiter), so it is an isometry preserving `Q` and `polar · s`. | — |
+| `WallKernel` | 82-87 | **★ The open kernel.** Square-class profile *determines* exact Gram profile — the entire open content of `CellsAreOrbits` in the anisotropic regime (bounded-base determination = separator→certifier). Count-form = `ZProfileSeparates`. | Definition |
+| `WittExtendsToOrbit` | 89-93 | Carried Witt-extension input (tech debt): equal exact Gram to `S` ⟹ same `Stab(S)`-isometry-orbit. | Definition |
+| `stabOrbit_of_sameSquareClass` | 95-100 | The reduction (hard direction): `WallKernel` + Witt ⟹ same square-class ⟹ same orbit. | — |
+| `stabOrbit_iff_sameSquareClass_of_wallKernel` | 102-110 | **★ Isolation capstone (single-round).** At an anisotropic base, modulo {Witt}, `CellsAreOrbits` (orbit ⟺ square-class) **⟺ `WallKernel`**. (The single-round `SameSquareClass` instance — refuted at a bounded base by the 3c probe; see the parametric form below.) | — |
+| `WallKernelFor` | 128-132 | **The observable-parametric wall kernel.** A relation `Obs` *determines* the exact Gram to `S` — `CellsAreOrbits`'s open content parameterised by the refinement observable. Probe-validated target: `Obs` = iterated `χ(det G₂)` 2-WL pair-count (the crack); `Obs = SameSquareClass` (single round) is refuted at a bounded base. | Definition |
+| `wallKernel_eq_wallKernelFor` | 134-135 | `WallKernel` is the `SameSquareClass` instance of `WallKernelFor` (definitional). | — |
+| `stabOrbit_of_obs` | 137-140 | Observable-parametric reduction: `WallKernelFor Obs` + Witt ⟹ `Obs ⟹ StabOrbit`. | — |
+| `stabOrbit_iff_obs_of_wallKernelFor` | 142-150 | **★ Observable-parametric isolation capstone.** Given orbit-soundness of `Obs` (free for any graph invariant) + Witt, `CellsAreOrbits` for `Obs` (orbit ⟺ `Obs`) **⟺ `WallKernelFor Obs`**. Redirected 3c proves it for `Obs` = iterated `χ(det G₂)` 2-WL. | — |
+## ChainDescent/ScratchBoundedBranching.lean
+
+**Phase 1 — the bounded-branching node-count bridge `leaves ≤ Bᴸ` (recovery route T0, 2026-06-30), NOT in `build.sh`.**
+Generalizes the single-path `ScratchNodeCountBridge` (`B = 1`) to the C# default mode (branch-but-resolve). §1 is the
+pure tree-combinatorics core (`BTree` + `leaves_le_pow : BoundedDeg B t → leaves t ≤ B ^ branchDepth t`, the `D3` math,
+forms-graph-free); §2 the disposition (`SelectedCellOrbitsLE`/`BoundedBranchingDisposition`, cell covered by `≤ B` orbits);
+§3 the capstone (`CertifiedBoundedTree` + `leafBound : leaves ≤ Bᴸ` + `certifiedBoundedTree_of_disposition`), with the
+`B = 1` single-path corner recovered. Carried `degBound`/`depthBound` = the Increment-1 realisation seam (concrete branching
+descent ↔ orbit tree, Phase 4). Axiom-clean `[propext, Classical.choice, Quot.sound]`. See
+`docs/chain-descent-recovery-route.md` §6/§8.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `BoundedBranching.BTree` | 50-52 | **Phase 1 (recovery route T0).** A finitely-branching rooted tree (rose tree); a childless node is a leaf. The abstract carrier of the `leaves ≤ Bᴸ` combinatorics. | Inductive |
+| `BoundedBranching.BTree.leaves` | 56-59 | Leaf count of a `BTree`: `1` for a childless node, else the sum over children. | Definition |
+| `BoundedBranching.BTree.branchDepth` | 61-66 | The `L` in `leaves ≤ Bᴸ`: the max, over root→leaf paths, of the number of nodes with `≥ 2` children (genuine forks) — NOT the total depth. | Definition |
+| `BoundedBranching.BTree.BoundedDeg` | 68-70 | Every node of the tree has `≤ B` children (the per-node branching bound `bᵢ ≤ B`). | Definition |
+| `BoundedBranching.BTree.leaves_nil` | 72 | `leaves (node []) = 1` (a leaf has one leaf). | `@[simp]` |
+| `BoundedBranching.BTree.leaves_cons` | 73-74 | `leaves (node (c::cs)) = Σ` child leaves (the non-leaf unfolding). | `@[simp]` |
+| `BoundedBranching.BTree.le_foldr_max` | 76-81 | A list element is `≤` the list's `foldr max 0` (the running maximum). | — |
+| `BoundedBranching.BTree.sum_map_const` | 83-88 | Sum of a constant map equals length × constant. | — |
+| `BoundedBranching.BTree.leaves_le_pow` | 90-127 | **★ Key theorem (D3, the `leaves ≤ Bᴸ` core).** A tree with every node of degree `≤ B` has `≤ B ^ branchDepth` leaves — the recovery route's poly-leaf-count arithmetic. Forms-graph-free, reusable. | — |
+| `BoundedBranching.BTree.leaves_le_one_of_boundedDeg_one` | 129-133 | `B = 1` (no node branches) ⟹ `leaves ≤ 1` — the tree-level single-path corner. | — |
+| `BoundedBranching.SelectedCellOrbitsLE` | 147-154 | **Phase 1 predicate.** The selected cell at base `S` is covered by `≤ B` `Stab(S)`-orbits — the `B`-bounded generalization of `SelectedCellIsOrbit` (`bᵢ ≤ B`). | Definition |
+| `BoundedBranching.BoundedBranchingDisposition` | 156-161 | The bridge-keyed hypothesis: every base's selected cell has `≤ B` orbits (`∀ S, SelectedCellOrbitsLE`). Generalizes `SinglePathDisposition` (the `B = 1` case). | Definition |
+| `BoundedBranching.SelectedCellOrbitsLE.mono` | 163-169 | Monotone in `B`: a `≤ B`-orbit cover is a `≤ B'`-cover for `B ≤ B'`. | — |
+| `BoundedBranching.BoundedBranchingDisposition.mono` | 171-175 | Monotone in `B` (pointwise from `SelectedCellOrbitsLE.mono`). | — |
+| `BoundedBranching.selectedCellOrbitsLE_one_of_isOrbit` | 177-194 | The `B = 1` corner: a monochromatic single-orbit cell (`SelectedCellIsOrbit`) is a `≤ 1`-orbit cover. | — |
+| `BoundedBranching.CertifiedBoundedTree` | 203-214 | **Phase 1 poly object (T0).** Bundles the disposition (`≤ B` orbits/cell) with an abstract descent tree's degree/depth bounds; exports `leaves ≤ Bᴸ`. The bounded-branching analogue of `CertifiedSinglePath`. | Structure |
+| `BoundedBranching.CertifiedBoundedTree.leafBound` | 216-222 | **★ The exported poly leaf bound `leaves ≤ Bᴸ`**, from `BTree.leaves_le_pow` composed with `branchDepth ≤ L`. | — |
+| `BoundedBranching.certifiedBoundedTree_of_disposition` | 224-236 | **★ The Phase-1 bridge capstone.** The bounded-branching disposition plus a descent tree realizing `≤ B` branching within `≤ L` levels ⟹ `CertifiedBoundedTree` (hence `leaves ≤ Bᴸ`). Generalizes `certifiedSinglePath_of_disposition`. | — |
+| `BoundedBranching.leaves_le_one_of_certifiedBoundedTree_one` | 238-245 | The `B = 1` corner: a certified bounded tree with `B = 1` has a single leaf (recovers the single path). | — |
+
+## ChainDescent/ScratchBranchingBound.lean
+
+**Phase 2 — the a-priori branching bound `bᵢ ≤ |K|^{|S|+1}` (recovery route T0, forms graph, 2026-07-01), NOT in `build.sh`.**
+Discharges the Phase-1 bridge's `degBound` at the **quasipoly** tier: reusing the demoted route's geometric model
+(`ScratchOrbitBaseCase`/`ScratchWallKernel`: `Similitude`/`StabOrbit`/`SameExactGram` + soundness + carried Witt), the
+branching factor `#{Stab(S)-orbits}` **injects into exact-Gram profiles** (`gramProfile`), giving the unconditional
+`stabOrbit_cover_card_le : #{Stab(S)-orbits} ≤ |K|^{|S|+1}` (`card_gramProfiles_le` counts the profiles). So the recovery
+bridge re-derives the banked quasipoly unconditionally (mod Witt); the polynomial target is the strictly sharper "the cell
+cuts `|K|^{|S|}` profiles to `poly(q)`" (the WL-orbit-defect crux). Axiom-clean `[propext, Classical.choice, Quot.sound]`.
+See `docs/chain-descent-recovery-route.md` §6/§8.
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `BranchingBound.gramProfile` | 40-43 | **Phase 2.** The exact-Gram profile of `t` relative to a finite base `S`: `(Q t, (polar Q t s)_{s∈S})`. Orbits inject into these profiles (mod Witt). | Definition |
+| `BranchingBound.gramProfile_eq_iff` | 45-56 | Equal Gram profiles ⟺ `SameExactGram` (same exact Gram data to `S`). | — |
+| `BranchingBound.card_gramProfiles_le` | 58-65 | The number of distinct exact-Gram profiles relative to `S` is `≤ |K|^{|S|+1}`. | — |
+| `BranchingBound.stabOrbit_cover_card_le` | 67-94 | **★ Key theorem (Phase 2 foundation, the a-priori branching bound).** Modulo Witt (`WittExtendsToOrbit`), the whole space is covered by `≤ |K|^{|S|+1}` `Stab(S)`-orbit representatives (orbits ↪ exact-Gram profiles) — discharges the Phase-1 `degBound` at the **quasipoly** tier; the polynomial target sharpens `B` to `poly(q)` per cell. | — |
+
+## ChainDescent/ScratchWLVisibility.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `WLVis.product_coord_regular` | 32-48 | — | — |
+| `WLVis.product_coord_regular_indep` | 50-55 | — | — |
+| `WLVis.linear_eq_unique` | 75-88 | — | — |
+| `WLVis.product_fix_two_indep` | 90-97 | — | — |
+| `WLVis.commDeg` | 101-105 | — | Definition, `noncomputable` |
+| `WLVis.commDeg_const_of_comm` | 107-111 | — | — |
+| `WLVis.commDeg_nonconst_of_noncomm` | 113-127 | — | — |
+| `WLVis.commDeg_const_iff_comm` | 129-150 | — | — |
+
+## ChainDescent/WLGeneric.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `WLGeneric.Colouring` | 35-36 | — | Definition |
+| `WLGeneric.GAdj` | 38-40 | — | `abbrev` |
+| `WLGeneric.GPOE` | 42-44 | — | `abbrev` |
+| `WLGeneric.signature` | 48-53 | — | Definition |
+| `WLGeneric.sigKey` | 68-71 | — | Definition |
+| `WLGeneric.sigKey_eq_iff` | 73-86 | — | — |
+| `WLGeneric.refineStep` | 90-93 | — | Definition |
+| `WLGeneric.refineStep_iff` | 95-104 | — | — |
+| `WLGeneric.warmRefine` | 106-110 | — | Definition |
+| `WLGeneric.samePartition` | 114-116 | — | Definition |
+| `WLGeneric.samePartition.refl` | 122 | — | — |
+| `WLGeneric.samePartition.symm` | 124-125 | — | — |
+| `WLGeneric.samePartition.trans` | 127-129 | — | — |

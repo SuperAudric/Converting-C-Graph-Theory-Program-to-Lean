@@ -339,3 +339,9 @@ Maintained by `scripts/GenerateTheoremIndexes.py rewrite --with-line-numbers`: *
 | Name | Line | Description | Notes |
 |------|------|-------------|-------|
 | `CoherentConfig.nat_kk_sub_self` | 1262-1265 | §CC.12 arithmetic helper: `k*k - k = k*(k-1)` (Nat), for the CC (19)-estimate assembly (CC copy of the homogeneous `Separability` helper). | — |
+## ChainDescent/WLGeneric.lean
+
+| Name | Line | Description | Notes |
+|------|------|-------------|-------|
+| `WLGeneric.toNat_injective` | 57-59 | — | — |
+| `WLGeneric.encTuple_injective` | 61-66 | — | — |

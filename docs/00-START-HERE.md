@@ -161,6 +161,11 @@ close it — is set out in
 > discharge `bᵢ≤poly(q)`). The `CellsAreOrbits`/`hFormCert`/cross-branch-harvest predicates are *stronger* (likely
 > quasipoly-adjacent) and relocated. **The 2026-06-28 banner below is SUPERSEDED** (its "SINGLE PATH" was deferral mode; the
 > default canonical-form-preserving path branches). Demoted bounded-WL-dim route: [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).
+> **▶ PROGRESS (2026-07-01): Phase 0 + Phase 1 + Phase 2-FOUNDATION LANDED (all axiom-clean) — recovery route now delivers
+> QUASIPOLY end-to-end through its own bridge.** Phase 1 bridge `ChainDescent/ScratchBoundedBranching.lean` (`leaves ≤ Bᴸ`
+> from `BTree.leaves_le_pow`); Phase 2 foundation `ChainDescent/ScratchBranchingBound.lean` (`stabOrbit_cover_card_le :
+> #orbits ≤ |K|^{|S|+1}`, orbits ↪ exact-Gram profiles). **Two open poly items remain, both to be picked up:** `L=O(d)`
+> (moderate) + `B≤poly(q)` (WL-orbit-defect crux). **Full handoff + concrete next steps = recovery doc §8 "HANDOFF".**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
 > [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is

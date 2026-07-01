@@ -337,7 +337,7 @@ weaker-payoff than the harvest poly. Not the T0 target.
 ## 5. The C# ↔ Lean bridge (the empirical validation)
 
 The route is implementation-faithful: the open Lean target (T0) is exactly what the canonizer's counters measure. The
-correspondence (T0's `BoundedBranchingDisposition` is *Phase 1* — not yet in source; `SinglePathDisposition`/T2 is the landed
+correspondence (T0's `BoundedBranchingDisposition` — LANDED in `ScratchBoundedBranching.lean`; `SinglePathDisposition`/T2 the
 `B=1` corner):
 
 | C# (`CanonResult.cs` / `ChainDescent.cs`) | Lean | meaning |
@@ -423,9 +423,8 @@ are relocated (§2c) — valid but harder, likely quasipoly-adjacent; not the T0
 
 **Definition of done (recovery route, affine-polar):** `BoundedBranchingDisposition` (with `B = poly(q)`) proved for the
 family ⟹ `certifiedBoundedTree_of_disposition` gives the poly leaf-count object ⟹ the `canonAdj` seam closes ⟹ structural poly
-object complete; the C# `STARVED = 0` + small `leaves` is the empirical witness.
-the empirical witness. The SEAL is separately banked (`reachesRigidOrCameron_affinePolar`, quasipoly). "Poly" remains the
-meta-claim over the bounded node count + poly per-node.
+object complete; the C# `STARVED = 0` + small `leaves` is the empirical witness. The SEAL is separately banked
+(`reachesRigidOrCameron_affinePolar`, quasipoly). "Poly" remains the meta-claim over the bounded node count + poly per-node.
 
 ---
 
@@ -449,14 +448,39 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 
 ---
 
-## 8. Pointers
+## 8. Pointers + HANDOFF (2026-07-01)
 
-- **★ FRESH READER — PICK UP HERE.** Read this STATUS + §1 (the cost model) + §2c (the strength ladder — target T0) + §4
-  (T0, the open core) + §6 (the phased plan). Then verify the landed substrate (`lake env lean ChainDescent.ScratchNodeCountBridge`
-  for the poly spine's `B=1` corner; `bash scripts/build.sh` for the in-build banked seal).
-- **Live Lean target (POLY, T0):** **Phase 0** (extend `RecoveryReconcileProbe.cs` to report per-level `bᵢ` + `leaves`-vs-`d`),
-  then **Phase 1** = `BoundedBranchingDisposition` + `certifiedBoundedTree_of_disposition` (generalize `ScratchNodeCountBridge`,
-  whose `B=1` corner `certifiedSinglePath_of_disposition` is landed). Open math = `bᵢ ≤ poly(q)` (Phase 2).
+> **════════ FRESH READER — PICK UP HERE ════════**
+> **State:** Phase 0 (empirical gate) ✅, Phase 1 (the `leaves ≤ Bᴸ` bridge) ✅, Phase 2 FOUNDATION (a-priori
+> `B ≤ |K|^{|S|+1}`, quasipoly) ✅ — all axiom-clean, verified. The recovery route now delivers **quasipoly end-to-end
+> through its own bridge**, unconditional mod Witt. **Two live items remain, both open, both expected to be picked up:**
+>
+> **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable).** Obligation: the 1-WL descent discretizes the forms graph in
+> `O(d)` levels, so branching stops after `O(d)` forks (`certifiedBoundedTree`'s `depthBound`). **Handle (landed):**
+> `coords_determineK` (`ChainDescent/FieldGeneric.lean:87`) — nondeg polar + Gram-to-standard-frame ⟹ vertex determined.
+> **First concrete step:** generalize `coords_determineK` from the standard basis `{Pi.single i 1}` to an arbitrary
+> polar-spanning base `S` (`SameExactGram Q ↑S t t' → t = t'` when `S` polar-spans), then show that gives orbit-singletons
+> at a spanning base; the *remaining* gap is connecting "spanning base" to "1-WL discretizes" (the moderate piece — the C#
+> refinement, not pure geometry). Empirical: `L=2` at `d=4` (Phase 0). Build in a sibling of `ScratchBranchingBound.lean`.
+>
+> **▶ ITEM B — `B ≤ poly(q)` (the poly crux; the research core).** Obligation: `certifiedBoundedTree`'s `degBound` at the
+> **poly** tier. **Precise form (landed reduction):** `stabOrbit_cover_card_le` (`ScratchBranchingBound.lean`) gives
+> `#orbits ≤ |K|^{|S|+1}` via orbits ↪ exact-Gram profiles; poly ⟺ **the selected cell cuts the `|K|^{|S|}` profiles to
+> `poly(q)`** (the WL-orbit defect — same object as the seal core, at a small base). **First lead to try (per the doc):**
+> **δ′ dominator-closure** (`dominatorReachable_affine_step`, `CascadeAffine`) — a *non-counting* forced-triangle route,
+> **never tried on `VO^ε`**; if it bounds the per-cell orbit split it feeds `degBound` directly, no Gauss. Fallbacks:
+> Skresanov 2-closure, `EdgeGeneratesFromSet`. Gauss `χ(det G₂)` proves the stronger `bᵢ=1` (overshoot; reserve). If all
+> stall → Route C (§7).
+>
+> **▶ THE MODEL SEAM (Phase 4, applies to both items).** The geometric work (`StabOrbit`/`SameExactGram` over
+> `QuadraticForm K V`, where `ScratchBranchingBound` + the base cases live) connects to Phase 1's *abstract*
+> `BoundedBranchingDisposition` (over `AdjMatrix n`/`OrbitPartition`) via the seal's `affineE` endpoint transport — the same
+> bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
+>
+> **Verify the landed substrate:** `lake env lean ChainDescent/ScratchBoundedBranching.lean` (Phase 1 bridge) +
+> `lake env lean ChainDescent/ScratchBranchingBound.lean` (Phase 2 foundation) + `bash scripts/build.sh` (in-build banked seal).
+> **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan).
+> **════════ END PICK-UP ════════**
 - **SEAL endpoints (banked at quasipoly; reference):** `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248,
   input `IsotropySeparatesAtBase Q T` idx 1240) and the abstract twin `reachesRigidOrCameron_viaAffineFormScheme` (idx 1207,
   input `RelCountsDetermineOrbit` idx 1203). The in-build seal is `AffinePolarSeal.reachesRigidOrCameron_affinePolar`.
