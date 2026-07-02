@@ -1102,15 +1102,51 @@ base `{0,a,b}`:
 Findings: (1) **3-stage bootstrap**, `r1=11` flat in `q`; `r*` = **3 (minus) vs 4 (plus)** — form-dependent, so β1 must
 prove *bounded-round convergence*, NOT "round 3 = Gram". (2) **Stratified yield WORKS but is multi-step:** counting `u`
 against the round-2 strata separates *all* same-r2/different-Gram pairs by round 3 for minus type, but `VO⁺₄(5)` leaves 2
-pairs unseparated at round 3 (217/219), finished at round 4. (3) **★ THE DECISIVE FINDING — round 2 (the WL class-count
-invariant) is INCOMPARABLE to the seal's `χ(det)` square-class observable** (`round2_char.py`: `r2` vs `χ(det)`-profile =
-`32/27`, `81/87`, `103/134`, `66/80`; *neither* refines the other). So **β1 canNOT be a port of the seal's per-anchor
-`χ(det)` machinery** (`PerAnchorBound`/`jointIsoCountK_ne_of_sep`): those analyse a *single* `jointIsoCountK`-to-a-config
-(which factors through `χ(det)`, 2-valued), whereas a WL class-count is a count to an `iso3`-CLASS = a *weighted sum* of
-`χ(det)`-counts over the level-set decomposition, carrying genuine multiplicity the sign `χ(det)` loses. **This is exactly
-what breaks through the bounded-base wall the seal's `χ(det)` is stuck at** — and it is why the poly route (bounded base +
-WL multiplicities) is fundamentally different from the quasipoly seal (`O(log n)` frame of individualised anchors), not a
-re-run of it at a smaller base. **Consequence for the plan:** `ClassCountsSeparateGram`'s proof needs *new* analysis of WL
-multiplicity sums (sums/products of quadratic characters — higher Gauss sums), not the seal's existing per-anchor bound.
-The `β1`/hybrid crux lemma is: *the weighted `χ(det)`-count sums over `iso3`-strata separate the exact Gram in `O(1)`
-iterations, uniformly in `d`* — probe-true, genuinely new Gauss content. `round2_probe.py`/`round2_char.py` are durable.
+pairs unseparated at round 3 (217/219), finished at round 4.
+
+**(3) ★★ ROUND 2 CLOSED FORM — NAILED (2026-07-02, `round2_closedform.py`): round 2 = the seal's `jointIsoCountK`-profile
+over sub-configs `S ⊆ {0,a,b}`, EXACT partition equality in all cases** (`r2 = Zprof`: `32/81/103/66/32`). Derivation:
+round 2 is the *fine* isotropy-count profile at base `{0,a,b}` with pivot `u`; the anisotropic-to-`u` (`k=2`) counts add no
+`u`-info (they are a constant minus the `k∈{0,1}` counts), and by inclusion–exclusion (the
+`qProfileSeparatesAtBaseK_of_zProfileSeparatesK` pattern) the fine profile ⟺ the `Z`-count profile
+`Z(u;S)=#{z≠u : Q(z−u)=0, Q(z−t)=0 ∀t∈S}` = `jointIsoCountK`. By the seal's bridge
+(`levelset_count_eqK`/`configGaussSum_eq_detK`) each factors through `χ(det G_config)`, so **round 2 has the closed form
+`(χ(det G_{{u}∪S}))_{S⊆{0,a,b}}` and is FULLY SEAL-REUSABLE.** [**Correction:** the previous "round 2 is *incomparable* to
+`χ(det)`" claim was an ARTIFACT of a wrong candidate in `round2_char.py` — it used `χ(pairForm)` on the *wrong* vectors and
+omitted the config Grams (incl. the triple `{u,a,b}`); the correct config-Gram `χ(det)` = `jointIsoCountK` matches round 2
+exactly. There is no "new incomparable WL-multiplicity object" at round 2.] Round 2 is **stuck below Gram** (`81<125`) —
+exactly as the seal's single-round is known to be at a *bounded* base.
+
+**(4) So the genuinely-new, poly-specific content is ROUND 3, precisely located.** Round 3 counts `z` (isotropic to `u`)
+stratified by `z`'s *round-2 class* = `z`'s `χ(det)`-profile to `{0,a,b}`. As a sum: `#{z : Q(u−z)=0, z ∈ σ}` where `σ`
+is a `χ(det)`-defined stratum — i.e. a **mixed Gauss sum `Σ_z 𝟙[Q(u−z)=0]·(character-function of z's base-Gram class)`**.
+This is what the seal does *not* do (it individualises more points → `O(log n)` frame → quasipoly; WL counts against the
+`χ(det)`-strata at a *bounded* base instead). It is structured and Gauss-tractable — NOT an opaque multiplicity. **The
+β1/hybrid crux lemma:** *these mixed `𝟙[isotropic]·χ(base-Gram)` sums separate the exact Gram of `u` in `O(1)` iterations,
+uniformly in `d`* — probe-true, the real poly-vs-quasipoly content. Rounds 1–2 are seal-characterised (closed form);
+round 3 is the new work. `round2_probe.py`/`round2_char.py`/`round2_closedform.py` are durable.
+
+**(5) ★★ ROUND 3 CHARACTERISED (2026-07-02, `round3_probe.py`) — the mechanism reaches ORBITS, form-independently, and
+the plus-tail is fully explained.** The round-3 observable `T(u;g) = #{z : gram(z)=g, Q(u−z)=0}` (count `z` isotropic-to-`u`
+stratified by `z`'s Gram-to-base `g=(Qz,polar z a,polar z b)∈K³`) **separates the orbits EXACTLY** — `T_exact`-classes
+`= #orbits` (`36/150/392`) for **both minus AND plus, in ONE step, form-INDEPENDENT.**
+- **Character-sum form:** `T(u;g) = q⁻⁴ Σ_{s,t₀,t₁,t₂} ψ(−t·g) ψ(s·Qu) · G(s+t₀; t₁a+t₂b−su)`, `G(α;w)=Σ_z ψ(αQz+polar(z,w))`.
+  Completing the square in `z`, `u` enters **only through its DUAL Gram** (`s²Q*(u) + s·polar*(u,a) + s·polar*(u,b)`) — which
+  sees the complement `W^⊥`. That is *why* `T` separates finer than the **primal** gram-to-`{a,b}`: the latter is itself
+  **coarser than orbits** (`27<36`, `125<150`) because `{a,b}` spans only the 2-plane `W`, so it misses the complement
+  structure (whether `u_⊥=0`, `Q(u_⊥)`) that distinguishes plane-vertices — which *are* singleton orbits (`stab_fixes_span`) —
+  from non-plane vertices sharing the same plane-Gram. **The clean, form-independent Gauss target:** the transfer kernel
+  `K(u_dualgram, g)` is **non-degenerate** (the profile `{T(u;g)}_g` inverts to `u`'s dual Gram = its orbit) — a Fourier
+  non-degeneracy of the `𝟙[isotropic]×gram` kernel.
+- **The plus-tail EXPLAINED (and it is NOT a real obstruction):** the *actual* WL round 3 counts against the round-2
+  (`χ(det)`) strata, which are slightly **coarser** than exact-Gram strata. For `VO⁺₄(5)` this coarseness collides **exactly
+  2 orbit-pairs** (`T_r2 = 148 ≠ 150`), split at round 4; minus type and `VO⁺₄(3)` are fine at round 3. So `r*=4` is purely a
+  *strata-coarseness* artifact — it **vanishes** against exact-Gram strata (`T_exact = 150` for `VO⁺₄(5)` too).
+
+**⟹ STRATEGY UPDATE: the HYBRID beats pure β1.** The form-dependent round count (`3` vs `4`) is *only* a strata-granularity
+effect, so tracking exact rounds is the wrong framing. The clean route: prove the **form-independent** fact "counting against
+Gram-strata separates orbits" (= `K` non-degenerate, a Fourier/Gauss non-degeneracy — reuses `GaussCount` + the seal's
+`levelset_count_eqK`), then a **fixpoint argument** (the stable `C∞` is equitable; if it were coarser than orbits, the
+round-3 count *against its own strata* would strictly refine it — contradiction — so `C∞ = orbits`). This discharges
+`ClassCountsSeparateGram` without any form-dependent round-counting. **The single remaining Gauss lemma: `K` non-degenerate.**
+`round3_probe.py` is durable.
