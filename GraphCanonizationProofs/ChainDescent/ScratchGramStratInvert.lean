@@ -8,17 +8,20 @@ phase `ψ(−⟨(r₀,r₁,r₂),g⟩)`. Fourier-inverting over `g ∈ K³` (ort
 (the count *functions* are equal, so their `g`-transforms are equal — trivially — and this identity evaluates the
 transform). That marginal is where `u`'s Gram data + the `u_⊥` distinction live (Piece 1c(iii)).
 
-* **`gsum_orthogonality`** — ✅ LANDED — the `K³` character orthogonality `∑_{g:K×K×K} ψ(⟨t,g⟩) = |K|³·𝟙[t=0]`, via
-  `AddChar.sum_mulShift` on each coordinate (the heart of the inversion). This is the reusable Gauss brick that collapses
-  the `(r₀,r₁,r₂)`-sum against the `g`-profile.
+This module is **complete** (all three declarations landed, axiom-clean):
 
-**NEXT sub-steps (not yet built — the transform assembly + its consequence):**
-* `gramStrat_transform_eval` — the evaluated `g`-transform `(∑_g ψ(⟨s,g⟩)·gramStratCount u g)·|K|⁴ =
-  |K|³·∑_t InnerZ_u(s,t)`, `InnerZ_u(s,t) = ∑_z ψ((s₀+t)·Qz + polar z (s₁•a+s₂•b−t•u) + t·Qu)`. Assembles from
-  `gramStratCount_charsum_normalized` + `gsum_orthogonality` + a `Fin 4 → K` fiber reindex (the remaining plumbing).
-* `sameGramStratCounts_transform` — `SameGramStratCounts u u'` ⟹ equal transformed marginals ∀`s` (trivial once the
-  transform is evaluated: equal count functions ⟹ equal transforms). Feeds 1c(iii) (bulk non-degeneracy → primal Gram,
-  boundary → `u_⊥` distinction, then **Witt-on-`W^⊥`** — carried as a hypothesis; Mathlib lacks Witt extension).
+* **`gsum_orthogonality`** — the `K³` character orthogonality `∑_{g:K×K×K} ψ(⟨t,g⟩) = |K|³·𝟙[t=0]`, via
+  `AddChar.sum_mulShift` on each coordinate (the heart of the inversion). Collapses the `(r₀,r₁,r₂)`-sum against the
+  `g`-profile. NB coordinate factoring uses explicit `have`s, since `← Finset.mul_sum` does not fire inside `simp_rw`
+  (higher-order match).
+* **`innerZ`** — the surviving inner z-sum, kept an opaque `def` so `Finset.mul_sum` cannot distribute into it during the
+  transform (a build steer).
+* **`gramStrat_transform_eval`** — the evaluated `g`-transform: `(∑_g ψ(⟨s,g⟩)·gramStratCount u g)·|K|⁴ =
+  ∑_r 𝟙[r₀₁₂=s]·|K|³·innerZ_u(r)`. From `gramStratCount_charsum_normalized` + `gsum_orthogonality` + `Finset.sum_comm`.
+* **`sameGramStratCounts_transform`** — `SameGramStratCounts u u'` ⟹ equal `innerZ` fibre sums ∀`s` (trivial once the
+  transform is evaluated: equal count functions ⟹ equal transforms). This is the input to **Piece 1c(iii)**
+  (`ScratchGramStratOrbit`: bulk non-degeneracy → primal Gram, boundary → the `u∈span{a,b}` flag, then the carried
+  refined-Witt) that discharges the open predicate `GramCountsRecoverGram`.
 
 Reuses `GaussCount` (`AddChar.sum_mulShift`) and `ScratchGramStratCharSum` (`gramStratCount_charsum_normalized`).
 Axiom-clean `[propext, Classical.choice, Quot.sound]`, `lake env lean`, NOT in `build.sh`.

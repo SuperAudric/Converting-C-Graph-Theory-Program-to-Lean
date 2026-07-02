@@ -19,9 +19,11 @@ reaches the orbit. Hence the crux is phrased `SameGramStratCounts ⟹ StabOrbit`
   Gram-stratum `g`; `SameGramStratCounts` the induced relation.
 * **`sameGramStratCounts_of_stabOrbit`** — SOUNDNESS (free): a base-fixing isometry (`μ = 1` at the anisotropic base)
   reindexes the count, so orbit-related vertices share the profile.
-* **`GramCountsRecoverOrbit`** — the CRUX (K-non-degeneracy): `SameGramStratCounts ⟹ StabOrbit`. The open Gauss content
-  (Piece 1b/1c): the count profile determines `u`'s dual Gram = its orbit (Fourier non-degeneracy of the
-  `𝟙[isotropic]×gram` transfer kernel).
+* **`GramCountsRecoverOrbit`** — the CRUX (K-non-degeneracy): `SameGramStratCounts ⟹ StabOrbit`. Piece 1b/1c(i)/1c(ii)
+  build the character-sum machinery (`ScratchGramStratCharSum`/`Eval`/`Invert`); **Piece 1c(iii) (`ScratchGramStratOrbit`)
+  REDUCES this crux to two named predicates** — the open Gauss lemma `GramCountsRecoverGram` (probe-true) + the carried
+  known-true `RefinedWittExtends`. Discharge `GramCountsRecoverGram` (via the g-profile transform + inner-sum evals) to
+  close the crux.
 * **`gramCountsEq_iff_stabOrbit`** — capstone: soundness + crux ⟹ **`SameGramStratCounts u u' ↔ StabOrbit`** = `bᵢ = 1`
   for the round-3 observable (no Witt detour).
 

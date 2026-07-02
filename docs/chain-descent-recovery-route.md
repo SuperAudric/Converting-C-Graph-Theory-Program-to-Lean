@@ -83,13 +83,21 @@
 > is mandatory and (I) is on the critical path), the landed substrate, and the ordered plan + dead ends. The dated bullets
 > in this STATUS are the chronology; §9 is the map.
 >
-> **▶ CURRENT FRONTIER (2026-07-02) — the Lean build of route A's counting crux has STARTED; here is the whole picture.**
-> The **geometric reduction is DONE** (`ScratchPlanePin`: `bᵢ=1` ⟺ "1-WL refines `zSet`" ⟺ `C∞` determines the orbit).
-> The **counting mechanism is settled by probe** (`round2_probe`/`round2_closedform`/`round3_probe`, §9.7 findings 1–5):
-> the plane-point-pinning line (`ChiProfileSeparatesPlane`→`PlanePinnable`, singleton anchors) is **REFUTED** (`pin_probe.py`,
-> stalls at `q≥5`); the correct observable is **ambient colour-CLASS counts**; and the round structure is
-> **r1=3iso → r2=seal `jointIsoCountK`-profile (closed form, SEAL-REUSABLE) → r3 = the count `T(u;g)=#{z:gram(z)=g,Q(u−z)=0}`
-> which reaches ORBITS exactly, form-independently.**
+> **▶ CURRENT FRONTIER (2026-07-02) — route A's round-3 crux (Piece 1) is BUILT END-TO-END and reduces to TWO named
+> predicates; here is the whole picture.** The **counting mechanism is settled by probe** (round structure
+> **r1=3iso → r2=seal `jointIsoCountK`-profile → r3 = the count `T(u;g)=#{z:gram(z)=g,Q(u−z)=0}` reaching ORBITS exactly,
+> form-independently**, §9.7 findings 1–5), and the **round-3 observable is now built in Lean, orbit-direct** (five
+> `ScratchGramStrat*` modules, all axiom-clean, NOT in build.sh — see the section plan below and the verify-list):
+> `bᵢ=1` at the span-dim-2 base = the crux `GramCountsRecoverOrbit` (`SameGramStratCounts ⟹ StabOrbit`), which
+> `ScratchGramStratOrbit` **reduces to exactly two named predicates** (`gramCountsEq_iff_stabOrbit_refined`):
+> **`GramCountsRecoverGram`** (the ONE OPEN Gauss lemma = "`K` non-degenerate", probe-true) + **`RefinedWittExtends`**
+> (CARRIED, known-true by Witt on the nondegenerate `W^⊥`). **▶ NEXT = discharge `GramCountsRecoverGram`** via the g-profile
+> transform (`sameGramStratCounts_transform`) + the two inner-sum evaluations (`gramStrat_inner_eval_ne`/`_zero`); this also
+> needs a primitive additive character instantiated (currently deferred, as the seal defers it). `RefinedWittExtends` stays
+> carried until a Witt build exists (or is discharged by a future Mathlib Witt-extension theorem).
+> **[NB — the earlier "frontier = `ClassCountsSeparateGram`" framing (in the paragraphs just above + §9.7 mid-section) is
+> SUPERSEDED: that predicate routes through `SameExactGram`+Witt, which is Witt-DEAD at `{a,b}` (orbits 36 ⊋ 27 gram-classes);
+> the live spine is the ORBIT-DIRECT `GramCountsRecoverOrbit` chain. Read the section plan below, not the ClassCounts framing.]**
 >
 > **THE SECTION PLAN (recovery to `bᵢ=1`), 3 pieces — see §9.7 "LEAN BUILD STARTED":**
 > - **Piece 1 — the K-non-degeneracy crux.** **1a ✅ LANDED (`ScratchGramStratCount`, axiom-clean):** the round-3 observable
@@ -591,7 +599,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
 > (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
 > Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
-> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All twenty-one modules axiom-clean.
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All twenty-five modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -822,8 +830,10 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `BoundedBranchingDisposition` (over `AdjMatrix n`/`OrbitPartition`) via the seal's `affineE` endpoint transport — the same
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
-> **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the twenty-one scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal).**
+> The **round-3 crux chain (Piece 1a→1c(iii)) is the frontier** — build it with
+> `lake build ChainDescent.ScratchGramStratCount ChainDescent.ScratchGramStratCharSum ChainDescent.ScratchGramStratEval ChainDescent.ScratchGramStratInvert ChainDescent.ScratchGramStratOrbit`.
+> Full list — `lake build` the twenty-five scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
@@ -847,11 +857,14 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchGramStratOrbit` (Step C Piece 1c(iii) ✅ REDUCTION — the crux reduced to two named predicates: `GramCountsRecoverGram` [OPEN Gauss, probe-true: SameGramStratCounts ⟹ SameExactGram + span-flag] + `RefinedWittExtends` [CARRIED, known-true: SameExactGram + span-flag ⟹ StabOrbit, Witt on nondeg W^⊥] + `gramCountsRecoverOrbit_of` [composition ⟹ `GramCountsRecoverOrbit`] + `gramCountsEq_iff_stabOrbit_refined` [⟹ bᵢ=1 mod the two] + `stabOrbit_imp_span_iff` [flag orbit-sound, so RefinedWittExtends is the tight converse]).
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
-> **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
-> `ScratchComplementFactorK.levelset_count_factors_through_chiDet` harvests the `d`-cancellation). The remaining route-A
-> content is the **sub-config `ZProfileSeparatesK` + iterated observable** recovering the 3 exact-Gram coordinates at the
-> span-dim-2 base, `d`-uniformly (probe: `r*∈{3,4}` flat) — reusing `levelset_count_eqK`/`configGaussSum_eq_detK` +
-> `jointIsoCountK_ne_of_chiSep_pair` per round. See §8 ITEM B "INCREMENT 2".
+> **THE LIVE STEP (updated 2026-07-02):** the round-3 crux chain (Piece 1a→1c(iii)) is BUILT and reduces `bᵢ=1` to two
+> named predicates (see the CURRENT FRONTIER paragraph at the top of this STATUS + the section plan). **The single open
+> Gauss lemma is `ScratchGramStratOrbit.GramCountsRecoverGram`** (`SameGramStratCounts ⟹ SameExactGram + span-flag`); prove
+> it from `ScratchGramStratInvert.sameGramStratCounts_transform` (equal `innerZ` fibre sums) + the inner-sum evaluations
+> `ScratchGramStratEval.gramStrat_inner_eval_ne`/`_zero` (bulk ⟹ primal Gram, boundary ⟹ span-flag), and instantiate a
+> primitive additive character (deferred, as the seal defers it). The other predicate `RefinedWittExtends` (known-true, Witt
+> on nondeg `W^⊥`) stays carried. **[The pre-orbit-direct "sub-config `ZProfileSeparatesK` / `ClassCountsSeparateGram`"
+> framing is SUPERSEDED — see the CURRENT FRONTIER note.]**
 > **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan) + §8 (ITEM A/B).
 > **════════ END PICK-UP ════════**
 - **SEAL endpoints (banked at quasipoly; reference):** `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248,
@@ -954,6 +967,10 @@ Bare vertex: `ScratchConicSpan.exists_orthogonal_decomp` (explicit projection, n
 `d`-cancellation (reused from the seal): `ScratchComplementFactorK.levelset_count_factors_through_chiDet`.
 
 ### 9.5 The ordered plan (what to do next)
+> **[SUPERSEDED as the plan 2026-07-02 — this Step A/B/C plan predates the ORBIT-DIRECT pivot; its Step C ("C^∞ pins `W`")
+> and Assembly targeted `SameExactGram`/`ClassCountsSeparateGram`, which is Witt-DEAD at `{a,b}` (36>27). The CURRENT plan
+> is §9.7's "LEAN BUILD STARTED" (Pieces 1a→1c(iii), all landed and orbit-direct) + the top-of-doc CURRENT FRONTIER. Read
+> this §9.5 for the (I)-geometry history only.]**
 - **Step A — DONE.** A1 weaken (I) to one-directional `hprof`; A2 the full (I)-level geometry for **both** branches
   (generic `hspan_of_conic` + singleton `exactGram_of_isotropic_complement`), plus the bare-vertex dichotomy
   `hspan_or_singleton`.
@@ -1208,9 +1225,15 @@ for closing `bᵢ=1` at the span-dim-2 base:
   def was switched off `open scoped Classical` → genuine `DecidableEq K` `DecidablePred` (still builds axiom-clean), so its
   filter shares the toolkit's decidability instance; (ii) even so, `countk`'s `∀ (j:Fin 4)` decidability instance is not
   defeq to a restatement's (matrix-index reduction differs), so the count↔`gramStratCount` bridge needs `convert … using 3`
-  + an instance-agnostic `ext` subgoal, not `rw`/`exact`. **1c (next):** the Fourier non-degeneracy — evaluate the inner sum
-  (`sum_addChar_quadForm_linear` D1 / `sum_addChar_multiQuad_zero`), invert the `g`-profile (u enters via its dual Gram),
-  `multiCharSum_eq_sum_count` for the count→sum dual, ⟹ `GramCountsRecoverOrbit`.
+  + an instance-agnostic `ext` subgoal, not `rw`/`exact`. **1c(i) ✅ LANDED** (`ScratchGramStratEval`): inner z-sum evaluated
+  — `gramStrat_inner_eval_ne` (bulk `ρ=r₀+r₃≠0`, D1) + `gramStrat_inner_eval_zero` (boundary `ρ=0`, `sum_addChar_linearMap`).
+  **1c(ii) ✅ COMPLETE** (`ScratchGramStratInvert`): the g-profile inversion — `gsum_orthogonality` + `innerZ` (opaque def) +
+  `gramStrat_transform_eval` + `sameGramStratCounts_transform` (`SameGramStratCounts ⟹ equal innerZ fibre sums ∀s`).
+  **1c(iii) ✅ REDUCTION** (`ScratchGramStratOrbit`): the crux reduces to two named predicates — `GramCountsRecoverGram`
+  (OPEN Gauss, probe-true) + `RefinedWittExtends` (CARRIED, known-true, Witt on nondeg `W^⊥`) — via `gramCountsRecoverOrbit_of`;
+  `gramCountsEq_iff_stabOrbit_refined` ⟹ `bᵢ=1` modulo the two; `stabOrbit_imp_span_iff` shows the flag is orbit-sound.
+  **▶ Piece 1 open content = the single Gauss lemma `GramCountsRecoverGram`** (attack: `sameGramStratCounts_transform` +
+  `gramStrat_inner_eval_ne`/`_zero` + a primitive char).
 - **Piece 2 — the WL bridge:** `SameClassCounts C → SameGramStratCounts` (the actual WL colouring's counts refine the
   gram-strat counts, via round 2 = seal `jointIsoCountK`). **★ ORBIT-DIRECT — NOT via `ClassCountsSeparateGram`:** that
   predicate targets `SameExactGram` and its capstone carries `WittExtendsToOrbit Q {a,b}`, **FALSE** at this base (orbits
