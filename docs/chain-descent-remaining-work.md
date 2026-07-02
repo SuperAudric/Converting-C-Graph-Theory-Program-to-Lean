@@ -286,16 +286,18 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > self-contained, **retargeted to T0**) — the claim, the strength ladder, the relocated stronger pieces, the phased plan of
 > attack. The WL-dim alternative `chain-descent-cellsareorbits-route.md` is demoted to independent-math.
 >
-> **▶▶▶ UPDATE (2026-07-01) — Phase 0 + Phase 1 + Phase 2-FOUNDATION LANDED (recovery route delivers QUASIPOLY end-to-end
-> through its own bridge; two poly items remain).** Read the recovery doc §8 HANDOFF. (a) **Phase 0 ✅** (`Phase0_BranchProfile`,
-> `DescentStats`+`MaxBranchFactor`/`MaxBranchPathDepth`): T0 not falsified — q=2 single-path thru d=8, only `VO⁻₄(5)` branches
-> (`B=3,L=2,leaves=6,bᵢ<q`), `STARVED=0`; q≥7 blocked by per-node-cost wall. (b) **Phase 1 ✅** `ChainDescent/ScratchBoundedBranching.lean`
-> (axiom-clean): `BTree.leaves_le_pow`+`certifiedBoundedTree_of_disposition` ⟹ `leaves ≤ Bᴸ`. (c) **Phase 2 FOUNDATION ✅**
-> `ChainDescent/ScratchBranchingBound.lean` (axiom-clean): `stabOrbit_cover_card_le : #{Stab(S)-orbits} ≤ |K|^{|S|+1}` (orbits ↪
-> exact-Gram profiles, mod Witt; reuses `ScratchOrbitBaseCase`/`ScratchWallKernel`) ⟹ `degBound` at quasipoly. **TWO LIVE
-> ITEMS (both open, both to be picked up):** ITEM A `L=O(d)` (moderate, handle `coords_determineK`) + ITEM B `B≤poly(q)` (the
-> WL-orbit-defect poly crux = seal core; first lead δ′ `dominatorReachable_affine_step`, never tried on `VO^ε`). Model seam
-> (geometric↔abstract via `affineE`) = Phase 4. Full pick-up = recovery doc §8 HANDOFF.
+> **▶▶▶ UPDATE (2026-07-02) — recovery route's poly crux reduced to ONE open predicate `ChiProfileSeparatesPlane` (17
+> scratch modules, all axiom-clean, NOT in build.sh).** Read the recovery doc **§9** (self-contained logical map, esp.
+> §9.7). Phases 0–2 landed (quasipoly end-to-end). The poly crux `bᵢ≤poly(q)` split into **span-dim-1 (`bᵢ≤q²`, PROVEN,
+> `ScratchSpanDimBound`)** + **span-dim≥2 = route A (`bᵢ=1`, which also gives `L=O(1)` by concentrating branching at
+> span-dim≤1 — over-narrowing-checked)**. Route A now reduced end-to-end: geometric recovery core both branches
+> (`ScratchSpanDim2Geom`/`ScratchConicSpan`), base-augmentation Step B (`ScratchBaseAug`), Step C reduction to the `zSet`
+> observable (`ScratchPlanePin`: `bᵢ=1` for `zSet`), and the **Route α sub-step** (`ScratchPlaneSep`: the seal's per-pair
+> lever `jointIsoCountK_ne_of_sep` fires for plane points) — reducing everything to **`ChiProfileSeparatesPlane`** (the
+> χ(pairForm)-profile over base pairs separates the plane; a `d`-independent 2-dim accumulation = the seal's
+> per-anchor+union assembly re-run over `W≅K²`) **+** the 1-WL-computability wiring (Route β). **★ 2-dim reframe:** via
+> complement-factoring the crux is NOT the general WL-dim wall but a bounded 2-dim individualization of `VO^ε_2(q)`.
+> Model seam (geometric↔abstract via `affineE`) = Phase 4. Full pick-up = recovery doc §9.
 >
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full

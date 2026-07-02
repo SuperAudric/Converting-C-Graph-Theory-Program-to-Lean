@@ -54,20 +54,24 @@
 > *far* weaker than `CellsAreOrbits` and both must be measured (§4, §6 Phase 0) before being assumed.
 >
 > **════════ FRESH-READER HANDOFF (2026-07-01, current) — read this paragraph first ════════**
-> **Where the poly crux stands, in one breath.** The crux `bᵢ ≤ poly(q)` (per-cell orbit count) is a **two-piece** target:
-> **(i) span-dim-1** — `bᵢ ≤ q²`, **PROVEN** unconditionally (`ScratchSpanDimBound.stabOrbit_cover_card_le_line`);
-> **(ii) span-dim ≥ 2** (route A) — `bᵢ = 1`. Route A is reduced (`ScratchSpanDim2Recovery.obsEq_iff_stabOrbit`) to
-> `WallKernelFor(obs)` for the seal's joint-count observable, and split into a **geometric CORE (I)** + an **iteration
-> SEAM (II)**:
-> - **(I) CORE — LANDED (mostly).** The isoClass profile of `u` over the plane `W = span{a,b}` determines the exact Gram
->   `(Q u, polar u a, polar u b)`, `d`-**independently** (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`). Its one carried
->   hypothesis `hspan` (the isotropic set `Z` affinely spans `W`) is discharged by: the combinatorial bridge
->   `ScratchSpanDim2Span.hspan_of_two_indep` (three non-collinear points ⟹ `hspan`) **+** the **conic count**
->   `ScratchConicCount` (`sum_quadraticChar_sq_sub`: `∑ₓχ(x²−a)=−1`; `card_binary_form`: `#{w₁x²+w₂y²=c}=q−ε`),
->   done ELEMENTARILY (no Gauss sums). Also LANDED: soundness `ScratchJointCountInvariant.obsInvariant_jointCountProfile`,
->   and the `d`-cancellation `ScratchComplementFactorK.levelset_count_factors_through_chiDet` (reused from the seal).
-> - **(II) SEAM — the frontier, NOT built.** Connect the WL-stable / iterated observable to "isoClass profile over `W`"
->   (the fixpoint propagation the probe's `r*∈{3,4}` measures). Sub-options in §8 ITEM B; decision deferred.
+> **Where the poly crux stands, in one breath (updated 2026-07-02).** The crux `bᵢ ≤ poly(q)` (per-cell orbit count) is
+> a **two-piece** target: **(i) span-dim-1** — `bᵢ ≤ q²`, **PROVEN** (`ScratchSpanDimBound.stabOrbit_cover_card_le_line`);
+> **(ii) span-dim ≥ 2** (route A) — `bᵢ = 1`, which (over-narrowing-checked §9.7) *concentrates* branching at
+> span-dim≤1 so it also yields `L=O(1)`, `leaves ≤ q²`. Route A = `WallKernelFor(obs)` factoring through `hprof`
+> (isotropy over the plane `W`), split into geometric **CORE (I)** + counting **SEAM (II)** — and the CORE + the whole
+> reduction are now **LANDED**:
+> - **(I) CORE — LANDED, BOTH branches** (`ScratchSpanDim2Geom`/`ScratchConicSpan`, axiom-clean): `hprof ⟹ SameExactGram`
+>   generically (`exactGram_of_sameWProfile` + the `hspan` discharge: `hspan_of_two_indep` + the elementary conic count
+>   `ScratchConicCount` + the transport `hspan_of_conic`) and on the singleton locus (`exactGram_of_isotropic_complement`),
+>   unified by the bare-vertex dichotomy `hspan_or_singleton`.
+> - **STEP B — LANDED** (`ScratchBaseAug`): the observable `IsoSetEq` ⟹ `SameExactGram`, both branches, with the (ii)-glue
+>   `u_W=u'_W` *derived* (`eq_wComp_of_isotropic_of_anisotropic`).
+> - **STEP C reduction — LANDED** (`ScratchPlanePin`): the `zSet` observable resolves cells to orbits
+>   (`zSetEq_iff_stabOrbit_anisotropic`, `bᵢ=1`), reducing everything to "1-WL refines `zSet`" (= C^∞ pins `W`).
+> - **(II) SEAM — Route α sub-step LANDED** (`ScratchPlaneSep`): the seal's per-pair lever fires for plane points
+>   (`plane_count_sep`); **route A reduces to the single open predicate `ChiProfileSeparatesPlane`**
+>   (`count_profile_separates_of_kernel`). The **2-dim reframe** (§9.7): via complement-factoring this is a
+>   `d`-independent 2-dim count-accumulation over `W ≅ K²`, NOT the general WL-dim wall.
 >
 > **▶ READ §9 FIRST for the logical plan + the reasoning (self-contained).** §9 records the (I)/(II) architecture, the
 > five insights **with their derivations** (chiefly Insight 1 — *why there is no single-round bypass*, so the WL iteration
@@ -85,7 +89,9 @@
 > `leaves_le_prod_concentrated`. Full plan + reasoning + dead ends: §9 (esp. §9.7).
 > **Probes** back the direction: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`); span-dim-2 recovery
 > bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`). **`L`** is a corollary of route A (route B).
-> **Start at:** this HANDOFF → the "Verify the landed substrate" list (bottom of STATUS) → §8 ITEM A/B. **════════**
+> **Start at:** this HANDOFF → **§9 (the self-contained logical map: architecture + 5 insights + plan + dead ends, esp.
+> §9.7 for the Step C attack)** → the "Verify the landed substrate" list (bottom of STATUS). (§8 ITEM A/B is the older
+> chronological scoping, now subsumed by §9.) **════════**
 >
 > **LANDED SUBSTRATE (was "LIVE NEXT TASK") — Phase 0 ✅ + Phase 1 ✅ + Phase 2 FOUNDATION ✅.** (1)
 > **Phase 0 — RUN 2026-06-30** (`Phase0_BranchProfile`): T0 not falsified, positively supported — `STARVED=0` everywhere,
@@ -124,9 +130,9 @@
 > "complement-factoring" was already built for the seal). **(I) CORE:** `ScratchSpanDim2Geom.exactGram_of_sameWProfile`
 > (isoClass profile over `W=span{a,b}` ⟹ exact Gram, `d`-independent) + its `hspan` discharge:
 > `ScratchSpanDim2Span.hspan_of_two_indep` (combinatorial bridge) + `ScratchConicCount` (`sum_quadraticChar_sq_sub`,
-> `card_binary_form` — the conic count `q−ε`, elementary/no-Gauss). **★ NOW LIVE = finish (I)'s `hspan`: the assembly +
-> transport** (§8 ITEM B "hspan DISCHARGE" + the top FRESH-READER HANDOFF's "IMMEDIATE NEXT STEP"). **(II) SEAM** (WL-stable
-> ⟹ profile-over-`W`) = the frontier, deferred. Full plan: §8 ITEM A/B.
+> `card_binary_form` — the conic count `q−ε`, elementary/no-Gauss). **[SUPERSEDED 2026-07-02: (I) is now fully LANDED
+> both branches, Steps B + C-reduction + Route α sub-step done — see the top FRESH-READER HANDOFF + §9.7. The live item is
+> now proving `ChiProfileSeparatesPlane`.]** Full plan: §9.
 >
 > **Relocated (stronger target — valid but harder, likely quasipoly-adjacent; → CellsAreOrbits doc / §2c):** full
 > `CellsAreOrbits` + the `WallKernelFor Obs` determiner (the demoted route); and **Route II
@@ -743,11 +749,12 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 >       from `hprof` + singleton (`u_W ∈ Z(u')` by `hprof`, and `Z(u') = {u'_W}` when the plane form is anisotropic — a
 >       `χ(−QaQb⁻¹)=−1` conic fact, reuses `ScratchConicCount`); then the shared (II) seam (observable ⟹ `hprof`), same
 >       base-augmentation content as the generic branch. So (ii) is fully parallel, `q∈{3,5}` tail folds in.
-> - **(II) The observable → geometric-profile SEAM (the frontier, NOT built).** Connect the WL-stable / iterated observable
->   to "isoClass profile over `W`" — the fixpoint propagation the probe's `r*∈{3,4}` measures (span points discretise in
->   `O(1)` rounds). Sub-options: (a) explicit `k`-round WL operator + `d`-uniform recovery at `k=O(1)`; (b) bounded base
->   *augmentation* (individualise `O(q)` determined points of `W` — trades rounds for base size, stays poly); (c) nested
->   2-round Gauss count (`χ(det G₂)` iterated). Decision pending; this is where the difficulty now concentrates.
+> - **(II) The observable → geometric-profile SEAM. [SUPERSEDED 2026-07-02 — largely BUILT; see §9.7 for the current
+>   state.]** The chosen path was base-augmentation (sub-option (b)): Step B (`ScratchBaseAug`) discharged `IsoSetEq ⟹
+>   SameExactGram` (both branches, incl. the (ii)-glue), the Step C reduction (`ScratchPlanePin`) reduced to "1-WL refines
+>   `zSet`", and the Route α sub-step (`ScratchPlaneSep`) reduced that to the single open predicate
+>   `ChiProfileSeparatesPlane` (the `d`-independent 2-dim χ-accumulation). What remains: prove `ChiProfileSeparatesPlane`
+>   + the 1-WL-computability wiring. The `r*∈{3,4}` fixpoint is now understood as this 2-dim accumulation (§9.7).
  **NEXT (updated 2026-07-01):** A1 (weaken (I)) ✅ + the both-nonzero solution (`exists_both_nonzero_solution`) ✅ are
 > LANDED. Remaining in A2 = the `W`-level **assembly** (3 non-collinear points via `exists_orthoAnisotropic_basis`) +
 > **transport** (`u=u_W+u_⊥` decomposition, level identity via `map_sub_split`) + the `c=0`-anisotropic singleton sub-case.

@@ -161,11 +161,14 @@ close it — is set out in
 > discharge `bᵢ≤poly(q)`). The `CellsAreOrbits`/`hFormCert`/cross-branch-harvest predicates are *stronger* (likely
 > quasipoly-adjacent) and relocated. **The 2026-06-28 banner below is SUPERSEDED** (its "SINGLE PATH" was deferral mode; the
 > default canonical-form-preserving path branches). Demoted bounded-WL-dim route: [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).
-> **▶ PROGRESS (2026-07-01): Phase 0 + Phase 1 + Phase 2-FOUNDATION LANDED (all axiom-clean) — recovery route now delivers
-> QUASIPOLY end-to-end through its own bridge.** Phase 1 bridge `ChainDescent/ScratchBoundedBranching.lean` (`leaves ≤ Bᴸ`
-> from `BTree.leaves_le_pow`); Phase 2 foundation `ChainDescent/ScratchBranchingBound.lean` (`stabOrbit_cover_card_le :
-> #orbits ≤ |K|^{|S|+1}`, orbits ↪ exact-Gram profiles). **Two open poly items remain, both to be picked up:** `L=O(d)`
-> (moderate) + `B≤poly(q)` (WL-orbit-defect crux). **Full handoff + concrete next steps = recovery doc §8 "HANDOFF".**
+> **▶ PROGRESS (2026-07-02): recovery route's poly crux is reduced to ONE open predicate (all substrate axiom-clean, 17
+> scratch modules, NOT in build.sh).** Phases 0–2 landed (quasipoly end-to-end through the bridge). The poly crux
+> `bᵢ≤poly(q)` split: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`); **span-dim≥2 = route A (`bᵢ=1`)** is now
+> reduced end-to-end — the geometric recovery core (both branches), the base-augmentation reduction (Step B), and the
+> Step C reduction to the `zSet` observable are all LANDED, and the **Route α sub-step** (`ScratchPlaneSep`) confirms the
+> seal's per-pair separation lever fires for plane points and isolates the **single remaining open predicate
+> `ChiProfileSeparatesPlane`** (a `d`-independent 2-dim χ-accumulation = the seal's per-anchor+union assembly re-run over
+> `W≅K²`). **Full handoff + logical map + the Step C attack = recovery doc §9 (esp. §9.7).**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
 > [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is
