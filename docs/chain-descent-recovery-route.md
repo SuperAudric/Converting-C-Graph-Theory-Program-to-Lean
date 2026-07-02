@@ -1460,6 +1460,25 @@ against a character `φ` of the `C₂`-strata:
 So L3 = **assembly + the additive/multiplicative coupling over one `z`-sum**, not from-scratch Gauss theory; complement-
 factoring makes it a `d`-independent computation over `W ≅ K²` (matching the probe's `d`-uniformity).
 
+**9.8.5-RESULT — ★ FACTORIZATION CHECK RUN (2026-07-02, `factorization_probe.py`) — NEGATIVE; the clean-assembly hope is
+FALSIFIED.** Two decisive measurements:
+- **`Zprof` is INCOMPARABLE to `gramK`** (neither refines the other; `C2#=32/81/103` vs `GRAM#=27/125/343` for `q=3/5/7`).
+  So `Zprof(z)` is **not** a function of `gramK(z)`, and the round-3 observable is **not** a `χ(det)`-fibre partial-sum of
+  Piece 1's `T`. (The §9.8.5 derivation above assumed `Zprof = F(gramK)`, which is false.)
+- **The `χ(det)`-stratified isotropic count reaches only `16/28/44` classes** (`q=3/5/7`) — *below* `gramK` (27/125/343) and
+  far below orbits (36/150/392), refining neither. So the **assembly-accessible (`χ(det)`) moments are grossly insufficient**;
+  the WL power that reaches orbits lives in the part of `Zprof` **not** captured by the seal's `χ(det)`/`isoConeSum` toolkit.
+- **★ The clean silver-lining structure (also confirmed, d-uniform, both types): `(gramK, Zprof) = orbits`.** Round 2 already
+  supplies the flag `gramK` misses; round 3's *only* job is to add `gramK`-refinement to round 2. But `Zprof`'s essential
+  info is beyond `χ(det)`, so this is still a genuinely new (entangled) mixed sum — **NOT** an assembly of landed pieces.
+- **⟹ VERDICT:** L3 is a **from-scratch build** — evaluating a sum whose strata (the full 1-WL round-2 colouring) exceed the
+  landed `χ(det)` machinery. This is the WL-dimension power (the very thing that makes WL beat the seal's quasipoly `χ(det)`
+  bound) appearing concretely as an obstruction, i.e. **node-4-wall territory**. Re-weigh (see §8/§7): either take on the
+  full round-2-strata arithmetic (research frontier, high risk/reward) or pivot to **Route C** (§7, constructive
+  form-recovery — a *bounded* build that sidesteps the WL crux). Per the user's ordering ("exhaust T0's clean leads, then
+  Route C"), the negative factorization is the trigger to weigh Route C seriously against the open-ended WL-strata build.
+  Probes durable: `factorization_probe.py`.
+
 **9.8.6 The two honest costs.** (1) **Type-dependence is real** (unlike idealized Piece 1): minus resolves at L3, plus needs
 L4 (2 pairs, `148→150`/`390→392`, fan 2). Purely `Zprof`-coarseness (against `gramK`-strata it is form-independent — why
 Piece 1 was clean); `refine²(C₂) ⊒ orbits` absorbs it, but L4 is a second small mixed step. (2) **The mixed coupling has no
@@ -1475,12 +1494,15 @@ reviewer doubt.** Citation is a recorded fallback only.
 **9.8.8 First concrete sub-steps (for the next builder).**
 1. **Lock the input (low-risk):** port/confirm `C₂ = Zprof` as a named colouring reusing `levelset_count_eqK`/
    `configGaussSum_eq_detK` — L3 needs a concrete input to stratify against.
-2. **The factorization check (DECISIVE — do BEFORE the full build):** derive `zprofStratCount`'s transform on paper + a
-   small-`q` symbolic probe, testing whether `∑_z ψ(sQ(u−z))·χ(det G(z))` **factors** into `(isoConeSum-type additive) ×
-   (χ(det)-type multiplicative)`. Factors ⟹ L3 = `isoConeSum_ne_zero` (landed) × a `χ(det)`-non-degeneracy (seal-adjacent) =
-   clean assembly. Entangles ⟹ genuine Salié sum, re-weigh effort (Route A seed, or Route C §7). This single result decides
-   whether (B)'s remaining sum is an assembly of landed pieces or a new Gauss evaluation.
-3. Then build L3 (the mixed sum), L4 (plus tail), assemble the tower, drop `ColorRefinesGramK`.
+2. **The factorization check — ✅ DONE 2026-07-02, result NEGATIVE (§9.8.5-RESULT, `factorization_probe.py`).** `Zprof` is
+   incomparable to `gramK` and the `χ(det)`-stratified count reaches only `16/28/44` « orbits ⟹ **not a clean assembly**;
+   L3 is a from-scratch build over the full round-2 strata (beyond the landed `χ(det)` toolkit). Clean structural upside:
+   `(gramK, Zprof) = orbits` (round 2 supplies the flag). **DECISION POINT reached** — see step 3.
+3. **Re-weigh (the check said "entangle"):** either (3a) take on the from-scratch round-2-strata arithmetic — the genuine
+   WL-dimension frontier (node-4-wall territory, high risk/reward), or (3b) **pivot to Route C** (§7 — recover `Q`
+   algebraically ⟹ `Aut = GO(Q)` known ⟹ Schreier–Sims; a *bounded* build that sidesteps the WL crux). The user's ordering
+   ("exhaust T0's clean leads, then Route C") + build-preference make this the natural Route-C trigger. Await the user's call
+   before committing.
 
 **Probes (durable, `GraphCanonizationProofs/`):** `class_cascade_probe.py` (this section — finite fixed-depth `d`-uniform-to-
 `d=8` tower; class vs singleton contrast), `round_anatomy.py`/`round2_closedform.py` (round identities: `C₂=Zprof`),
