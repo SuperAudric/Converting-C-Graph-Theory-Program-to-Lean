@@ -169,14 +169,13 @@ close it — is set out in
 > **REFUTED** (`pin_probe.py`); the correct observable is **ambient colour-CLASS counts**, with round structure
 > `r1=3iso → r2=seal jointIsoCountK (closed form) → r3=orbits`. **Route A now reduces to ONE Gauss lemma —
 > `GramCountsRecoverOrbit` (the K-non-degeneracy: the round-3 count profile recovers the orbit)** — and its Lean build has
-> begun: **Piece 1a + 1b + 1c(i) + 1c(ii) LANDED** (`ScratchGramStratCount`: observable + crux, orbit-direct;
-> `ScratchGramStratCharSum`: character-sum identity via `countk_eq_sum_charsum`; `ScratchGramStratEval`: inner z-sum
-> evaluated via D1 + `sum_addChar_linearMap`; `ScratchGramStratInvert`: **1c(ii) COMPLETE** — `gsum_orthogonality` +
-> `innerZ` + `gramStrat_transform_eval` + `sameGramStratCounts_transform` = `SameGramStratCounts` ⟹ equal `innerZ` fibre
-> sums). **NEXT = Piece 1c(iii)** non-degeneracy (bulk ⟹ primal Gram, boundary ⟹ `u∈span{a,b}` flag) + orbit realization.
-> **★ FLAGGED BLOCKER:** the final Witt-on-`W^⊥` step has no Mathlib Witt extension (plain `WittExtendsToOrbit Q {a,b}` is
-> false, 36>27) → route past by carrying the *refined*-Witt hyp `SameExactGram ∧ (u∈span{a,b}↔u'∈span{a,b}) ⟹ StabOrbit`
-> (known-true by Witt on nondeg `W^⊥`).
+> begun: **Piece 1a–1c ALL LANDED** (`ScratchGramStratCount`: observable + crux, orbit-direct; `ScratchGramStratCharSum`:
+> character-sum identity; `ScratchGramStratEval`: inner z-sum evaluated; `ScratchGramStratInvert`: **1c(ii)** the g-profile
+> inversion `SameGramStratCounts ⟹ equal innerZ fibre sums`; `ScratchGramStratOrbit`: **1c(iii) REDUCTION** — the crux =
+> two named predicates + composition). **Piece 1 now compiles `bᵢ=1` modulo exactly two predicates:**
+> `GramCountsRecoverGram` (OPEN Gauss, probe-true) + `RefinedWittExtends` (CARRIED, known-true by Witt on nondeg `W^⊥`;
+> Mathlib lacks Witt extension, and unrefined `WittExtendsToOrbit Q {a,b}` is false, 36>27). **NEXT = discharge the single
+> open Gauss lemma `GramCountsRecoverGram`** (via the transform + `inner_eval_ne`/`_zero`; needs a primitive char).
 > **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory

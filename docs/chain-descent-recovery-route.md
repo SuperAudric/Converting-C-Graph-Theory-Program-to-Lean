@@ -112,14 +112,20 @@
 >   inner z-sum) + `gramStrat_transform_eval` (`(∑_g ψ(⟨s,g⟩)·gramStratCount u g)·|K|⁴ = ∑_r 𝟙[r₀₁₂=s]·|K|³·innerZ_u(r)`,
 >   via `charsum_normalized` + orthogonality + `Finset.sum_comm`) + **`sameGramStratCounts_transform`** (payoff:
 >   `SameGramStratCounts u u'` ⟹ equal `innerZ` fibre sums ∀`s` — trivial once the transform is evaluated). Clean input to
->   1c(iii). **▶ NEXT = Piece 1c(iii):** the non-degeneracy + orbit realization. (a) bulk (`ρ=r₀+r₃≠0`,
->   `gramStrat_inner_eval_ne`) ⟹ `u`'s primal Gram `(Qu, polar u a, polar u b)`; (b) boundary (`ρ=0`,
->   `gramStrat_inner_eval_zero`) ⟹ the `u_⊥=0` distinction (`u ∈ span{a,b}`); (c) **Witt-on-`W^⊥`**. ★★ **Witt is the one
->   Mathlib-absent piece** (no Witt extension; plain `WittExtendsToOrbit Q {a,b}` FALSE, 36>27). **Routing (form confirmed
->   known-true & intrinsic):** carry `SameExactGram Q {a,b} u u' ∧ (u ∈ span{a,b} ↔ u' ∈ span{a,b}) ⟹ StabOrbit` — a theorem
->   of Witt on the nondegenerate `W^⊥` (`SameExactGram` forces `u_W=u'_W` and `Q u_⊥=Q u'_⊥`; the flag rules out the sole
->   obstruction `u_⊥=0` vs nonzero-isotropic, then Witt extends the line isometry `u_⊥↦u'_⊥`). So `GramCountsRecoverOrbit`
->   reduces to (Gauss non-degeneracy, provable) + (this refined-Witt, carried).
+>   1c(iii). **1c(iii) ✅ REDUCTION LANDED (`ScratchGramStratOrbit`, axiom-clean):** the crux `GramCountsRecoverOrbit` is
+>   reduced to **exactly two named predicates**, composition proved (`gramCountsRecoverOrbit_of`), plus the `bᵢ=1` capstone
+>   `gramCountsEq_iff_stabOrbit_refined` (modulo the two) and the flag-soundness `stabOrbit_imp_span_iff` (so the carried
+>   Witt is the *tight* converse):
+>   - **`GramCountsRecoverGram`** (OPEN Gauss, probe-true) — `SameGramStratCounts ⟹ SameExactGram Q {a,b} ∧ (u∈span{a,b} ↔
+>     u'∈span{a,b})`. Attack: primitive `ψ` → `sameGramStratCounts_transform` (equal `innerZ` fibre sums) → Fourier-invert;
+>     **bulk** (`gramStrat_inner_eval_ne`) ⟹ primal Gram `(Qu, polar u a, polar u b)`, **boundary**
+>     (`gramStrat_inner_eval_zero`) ⟹ the `u∈span{a,b}` flag (indicator `polarBilin.flip(r₁a+r₂b−r₃u)=0 ⟺ u∈span{a,b}`).
+>   - **`RefinedWittExtends`** (CARRIED, known-true) — `SameExactGram ∧ (u∈span{a,b} ↔ u'∈span{a,b}) ⟹ StabOrbit`. Witt on
+>     nondeg `W^⊥`; carried only because Mathlib lacks Witt extension. (Unrefined `WittExtendsToOrbit Q {a,b}` FALSE, 36>27;
+>     the flag repairs it.)
+>   **▶ NEXT = discharge `GramCountsRecoverGram`** (the single open Gauss lemma — the "`K` non-degenerate" content) via the
+>   transform + `inner_eval_ne`/`_zero`; and instantiate a primitive additive character. `RefinedWittExtends` awaits a Witt
+>   build (or stays carried, like `WittExtendsToOrbit`).
 > - **Piece 2 — the WL bridge:** `SameClassCounts C ⟹ SameGramStratCounts` (the actual WL colouring's counts refine the
 >   gram-strat counts). **★ ORBIT-DIRECT — do NOT route through `ClassCountsSeparateGram`:** that predicate targets
 >   `SameExactGram`, and its capstone `ScratchWLClassCounts.colorEq_iff_stabOrbit` carries `WittExtendsToOrbit Q {a,b}`,
@@ -837,7 +843,8 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchGramStratCount` (Step C Piece 1a — the round-3 observable `gramK`/`gramStratCount`/`SameGramStratCounts` + soundness `sameGramStratCounts_of_stabOrbit` [via `gramK_isometry`/`polar_isometry`] + the crux `GramCountsRecoverOrbit` [K-non-degeneracy: profile ⟹ orbit, targets orbit DIRECTLY not `SameExactGram`+Witt] + `gramCountsEq_iff_stabOrbit` [⟹ `bᵢ=1` modulo crux]; `gramStratCount` now genuine-`DecidableEq` not `Classical`),
 > `ScratchGramStratCharSum` (Step C Piece 1b — the character-sum identity: `gramStratCount_charsum` [raw four-constraint Fourier expansion via `countk_eq_sum_charsum`] + `gramStrat_inner_normalize` [inner z-exponent = D1 normal form `(r₀+r₃)Qz+polar z (r₁•a+r₂•b−r₃•u)+r₃Qu`] + `gramStratCount_charsum_normalized` [combined]; pure `GaussCount` assembly; the count↔`gramStratCount` bridge uses `convert`+`ext` to absorb the `∀(j:Fin 4)`-instance mismatch),
 > `ScratchGramStratEval` (Step C Piece 1c(i) — inner z-sum evaluated: `gramStrat_inner_eval_ne` [bulk `ρ=r₀+r₃≠0`, D1 `sum_addChar_quadForm_linear`: `=ψ(r₃Qu)·ψ(−ρ⁻¹Q(r₁a+r₂b−r₃u))·∑ψ(ρQz)`] + `gramStrat_inner_eval_zero` [boundary `ρ=0`, `sum_addChar_linearMap`: `=ψ(r₃Qu)·(|V| if `polarBilin.flip wᵣ=0` else 0)`]),
-> `ScratchGramStratInvert` (Step C Piece 1c(ii) ✅ COMPLETE — `gsum_orthogonality` [`K³` char orthogonality `∑_{g:K×K×K} ψ(⟨t,g⟩)=|K|³·𝟙[t=0]` via coordinatewise `AddChar.sum_mulShift`; collapse each coord sum with explicit `have`s since `← mul_sum` fails in `simp_rw`] + `innerZ` [opaque def of the surviving inner z-sum, so `mul_sum` can't distribute into it] + `gramStrat_transform_eval` [the evaluated g-transform: `(∑_g ψ(⟨s,g⟩)·gramStratCount u g)·|K|⁴ = ∑_r 𝟙[r₀₁₂=s]·|K|³·innerZ_u(r)`] + `sameGramStratCounts_transform` [SameGramStratCounts ⟹ equal innerZ fibre sums ∀s]).
+> `ScratchGramStratInvert` (Step C Piece 1c(ii) ✅ COMPLETE — `gsum_orthogonality` [`K³` char orthogonality `∑_{g:K×K×K} ψ(⟨t,g⟩)=|K|³·𝟙[t=0]` via coordinatewise `AddChar.sum_mulShift`; collapse each coord sum with explicit `have`s since `← mul_sum` fails in `simp_rw`] + `innerZ` [opaque def of the surviving inner z-sum, so `mul_sum` can't distribute into it] + `gramStrat_transform_eval` [the evaluated g-transform: `(∑_g ψ(⟨s,g⟩)·gramStratCount u g)·|K|⁴ = ∑_r 𝟙[r₀₁₂=s]·|K|³·innerZ_u(r)`] + `sameGramStratCounts_transform` [SameGramStratCounts ⟹ equal innerZ fibre sums ∀s]),
+> `ScratchGramStratOrbit` (Step C Piece 1c(iii) ✅ REDUCTION — the crux reduced to two named predicates: `GramCountsRecoverGram` [OPEN Gauss, probe-true: SameGramStratCounts ⟹ SameExactGram + span-flag] + `RefinedWittExtends` [CARRIED, known-true: SameExactGram + span-flag ⟹ StabOrbit, Witt on nondeg W^⊥] + `gramCountsRecoverOrbit_of` [composition ⟹ `GramCountsRecoverOrbit`] + `gramCountsEq_iff_stabOrbit_refined` [⟹ bᵢ=1 mod the two] + `stabOrbit_imp_span_iff` [flag orbit-sound, so RefinedWittExtends is the tight converse]).
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
@@ -1215,9 +1222,9 @@ for closing `bᵢ=1` at the span-dim-2 base:
   `gramCountsEq_iff_stabOrbit`) + `leaves_le_prod_concentrated`. (`ScratchWLClassCounts`'s `colorEq_iff_stabOrbit` /
   `ClassCountsSeparateGram` capstone is Witt-dead at `{a,b}` and superseded; its `iso3`/`classCount`/`IsWLStable` defs +
   soundness are still used.)
-**NEXT = Piece 1c(iii)** — the non-degeneracy + orbit realization: (a) bulk (`gramStrat_inner_eval_ne`) ⟹ `u`'s primal Gram;
-(b) boundary (`gramStrat_inner_eval_zero`) ⟹ `u∈span{a,b}` flag; (c) **Witt-on-`W^⊥` → carry the refined-Witt hypothesis**
-`SameExactGram ∧ (u∈span{a,b} ↔ u'∈span{a,b}) ⟹ StabOrbit` (known-true by Witt on nondeg `W^⊥`; Mathlib has no Witt
-extension, and plain `WittExtendsToOrbit Q {a,b}` is false, 36>27). Landed: Piece 1b (`ScratchGramStratCharSum`), 1c(i)
-(`ScratchGramStratEval`), **1c(ii) COMPLETE (`ScratchGramStratInvert`: `gsum_orthogonality` + `innerZ` + `gramStrat_transform_eval`
-+ `sameGramStratCounts_transform`)**.
+**NEXT = discharge `GramCountsRecoverGram`** (the single open Gauss lemma = "`K` non-degenerate": `SameGramStratCounts` ⟹
+`SameExactGram` + span-flag) via `sameGramStratCounts_transform` + `gramStrat_inner_eval_ne`/`_zero`, plus instantiate a
+primitive additive character; `RefinedWittExtends` stays carried (known-true; awaits a Witt build). **Piece 1 now compiles
+`bᵢ=1` modulo exactly these two named predicates** (`gramCountsEq_iff_stabOrbit_refined`). Landed: Piece 1b
+(`ScratchGramStratCharSum`), 1c(i) (`ScratchGramStratEval`), **1c(ii) COMPLETE (`ScratchGramStratInvert`)**, **1c(iii)
+REDUCTION (`ScratchGramStratOrbit`)**.
