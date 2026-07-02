@@ -113,17 +113,18 @@
 > StabOrbit` (`bᵢ=1` for the WL colouring)** modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant}` (colouring properties;
 > `ColorRefinesGramK` = the clean WL-dim residual, weaker than `C∞=orbits`) + `RefinedWittExtends` (Witt citation). **The
 > ENTIRE Gauss/analytic content is proved axiom-clean, `hψ` constructed.**
-> **▶ NEW NEXT (2026-07-02) — the round-3 step lemma; the FULL, self-contained, new-reader-ready plan is §9.8.** Pieces
-> 1+2 reduce `bᵢ=1` to four hypotheses; three are routine (`IsWLStable`/`ObsInvariant` colouring props, `RefinedWittExtends`
-> Witt citation). The fourth, **`ColorRefinesGramK`, is the DISGUISED main crux** — the refinement probe
-> (`class_cascade_probe.py`) shows the WL colouring refines `gramK` at *exactly* the round it reaches orbits, so it is
-> equivalent to the goal, NOT a modest residual (§9.8.1). **Decision: Route (B)** — re-base the round-3 observable onto the
-> ACTUAL round-2 (`Zprof`) strata, which DISSOLVES `ColorRefinesGramK` (the observable becomes 1-WL-computable by
-> construction, §9.8.3–4). The cascade is a finite fixed-depth (`≤4`), `d`-uniform-to-`d=8` tower (probe §9.8.2); the crux
-> L3 is a mixed additive×`χ(det)` Gauss sum assembled from three landed halves (`isoConeSum` + seal `χ(det)` +
-> complement-factoring) + one new coupling (§9.8.5). **Discharge by BUILD not citation** (user; §9.8.7). First sub-steps
-> (§9.8.8): lock `C₂=Zprof` (seal-reuse) + the DECISIVE factorization check. Piece 3 = `leaves_le_prod_concentrated`. (Odd
-> ambient dim is a *separate family* — `VO_{2m}` is even, so `isoConeSum_eval_even` already covers the target.)
+> **▶ NEXT SESSION = ROUTE C (§7). The direct WL-dimension build of `bᵢ=1` (Routes A/B) STALLED at the node-4 wall
+> (2026-07-02) — full verdict §9.8.9.** The story: Pieces 1+2 reduced `bᵢ=1` to `ColorRefinesGramK` (+ 3 routine
+> hypotheses); the refinement + cascade probes showed `ColorRefinesGramK` is the DISGUISED main crux (WL refines `gramK` at
+> *exactly* the round it hits orbits — equivalent to the goal, §9.8.1–2). Route (B) tried to dissolve it by re-basing onto
+> the actual round-2 (`Zprof`) strata; the **factorization check came back NEGATIVE** (`Zprof` incomparable to `gramK`,
+> `χ(det)`-moments reach `16/28/44` « orbits, §9.8.5-RESULT) and stepping into the from-scratch build **stalled**: round-2 is
+> a `Stab`-invariant **"count of counts"** with no character-sum handle, and the one clean handle (the **FLAG** lead) is also
+> negative (§9.8.9). The irreducible wall = `gramK` recovery is circular; every clean 1-WL observable misses the exact
+> bilinear values. **⟹ direct WL route CLOSED (open research problem, not a build).** Pieces 1+2 remain correct/banked,
+> gated on the un-dischargeable `ColorRefinesGramK`. **Pick up Route C** (§7 + §9.8.9): recover `Q` algebraically ⟹
+> `Aut = GO(Q)` known ⟹ Schreier–Sims — a *bounded* build sidestepping the WL crux. (`VO_{2m}` is even, so Piece 1's
+> `isoConeSum_eval_even` covers the target dim; odd = separate family.)
 > **[NB — dead ends recorded (do not re-walk): the "Fourier-invert the fibre sums; bulk recovers Gram" attack is EMPTY (the
 > marginal is trivially `|K|`·count-transform); the elementary first-moment fails in char `p` (`q|#{Qw=0}`). Gram lives in
 > the phase ⟹ ℂ/char route necessary. §9.7.]**
@@ -1498,11 +1499,35 @@ reviewer doubt.** Citation is a recorded fallback only.
    incomparable to `gramK` and the `χ(det)`-stratified count reaches only `16/28/44` « orbits ⟹ **not a clean assembly**;
    L3 is a from-scratch build over the full round-2 strata (beyond the landed `χ(det)` toolkit). Clean structural upside:
    `(gramK, Zprof) = orbits` (round 2 supplies the flag). **DECISION POINT reached** — see step 3.
-3. **Re-weigh (the check said "entangle"):** either (3a) take on the from-scratch round-2-strata arithmetic — the genuine
-   WL-dimension frontier (node-4-wall territory, high risk/reward), or (3b) **pivot to Route C** (§7 — recover `Q`
-   algebraically ⟹ `Aut = GO(Q)` known ⟹ Schreier–Sims; a *bounded* build that sidesteps the WL crux). The user's ordering
-   ("exhaust T0's clean leads, then Route C") + build-preference make this the natural Route-C trigger. Await the user's call
-   before committing.
+3. **Re-weigh (the check said "entangle") — ✅ STEPPED THROUGH 2026-07-02, the frontier STALLED. See §9.8.9.**
+
+**9.8.9 ★★ FRONTIER STALL VERDICT (2026-07-02) — the WL-strata / direct-`bᵢ=1` route is CLOSED; next session = Route C.**
+Stepping one gate into the from-scratch WL-strata build (3a) hit a hard stall. The evidence (`flag_stall_probe.py`,
+`factorization_probe.py`):
+- **Round-2 is a "count of counts", not a character level set.** The true round-2 colouring `C2` is reconstructed by
+  **neither** `χ(det)`, the actual joint-isotropy **counts**, **nor** their combination `(ISO,χ,count)` (incomparable to
+  `C2` — over-separates plus/large-`q`, under-separates minus). `C2` is a `Stab`-invariant **count profile** (counts of
+  isotropic intersections), a coarsening of orbits with **no additive/multiplicative character-sum handle** — round-3
+  (counting `z` against `C2`-classes) is therefore a *count of counts*, which the Gauss toolkit (landed or standard) cannot
+  evaluate. This is exactly the structural reason WL-dimension resists closed-form analysis (and why the seal used `χ(det)`
+  pair-forms to reach only quasipoly). **Node-4 wall, concretely.**
+- **The FLAG lead (the one clean handle) is NEGATIVE.** `orbits = (gramK, FLAG)` with `FLAG` = plane membership (an
+  algebraic locus, not a count-of-counts). But (1) the `(ISO, complement-class)`-stratified isotropic count does **not**
+  separate orbits (`34/84/142/107/386` « orbits) — it misses `gramK`'s exact bilinear values; and (2) `FLAG` is
+  1-WL-determined at the **same** round `r*` as the orbits (no cheap "flag-first" decomposition). So the flag does not
+  break the crux.
+- **The irreducible wall: `gramK` recovery is a circular crux.** Every clean, 1-WL-computable observable (ISO, FLAG, COMP,
+  `χ(det)`) misses the exact bilinear `gramK` values; the only object that carries them (the round-2 strata) is the
+  count-of-counts with no handle. There is no non-circular, character-sum-evaluable route to `gramK` at a bounded base.
+
+**⟹ VERDICT.** The direct WL-dimension build of `bᵢ=1` (Routes A and B) is **stalled at the node-4 wall** — a genuine open
+research problem, not a tractable build. Pieces 1+2 (the idealized `gramK`-stratified recovery + the WL bridge) remain
+correct and banked, gated on the un-dischargeable `ColorRefinesGramK`. **Next session: Route C** (§7) — recover `Q`
+algebraically from the rank-3 isotropy relations (Stage B.0 `coords_determine` is landed), giving `Aut = GO(Q)` as a *known*
+group canonicalized by Schreier–Sims through the existing `ITransversalOracle`. A *bounded* build that **sidesteps** the WL
+crux entirely; correctness depth = form-recovery (carry as hypothesis, prove the downstream canonicalization). **Pick up at
+§7 + `chain-descent-remaining-work.md` / the plan doc's Route-C scoping.**
+**Stall probes (durable):** `factorization_probe.py`, `flag_stall_probe.py`.
 
 **Probes (durable, `GraphCanonizationProofs/`):** `class_cascade_probe.py` (this section — finite fixed-depth `d`-uniform-to-
 `d=8` tower; class vs singleton contrast), `round_anatomy.py`/`round2_closedform.py` (round identities: `C₂=Zprof`),
