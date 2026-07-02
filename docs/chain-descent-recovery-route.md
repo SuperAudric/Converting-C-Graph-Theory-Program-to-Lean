@@ -89,12 +89,14 @@
 > form-independently**, §9.7 findings 1–5), and the **round-3 observable is now built in Lean, orbit-direct** (five
 > `ScratchGramStrat*` modules, all axiom-clean, NOT in build.sh — see the section plan below and the verify-list):
 > `bᵢ=1` at the span-dim-2 base = the crux `GramCountsRecoverOrbit` (`SameGramStratCounts ⟹ StabOrbit`), which
-> `ScratchGramStratOrbit` **reduces to exactly two named predicates** (`gramCountsEq_iff_stabOrbit_refined`):
-> **`GramCountsRecoverGram`** (the ONE OPEN Gauss lemma = "`K` non-degenerate", probe-true) + **`RefinedWittExtends`**
-> (CARRIED, known-true by Witt on the nondegenerate `W^⊥`). **▶ NEXT = discharge `GramCountsRecoverGram`** via the g-profile
-> transform (`sameGramStratCounts_transform`) + the two inner-sum evaluations (`gramStrat_inner_eval_ne`/`_zero`); this also
-> needs a primitive additive character instantiated (currently deferred, as the seal defers it). `RefinedWittExtends` stays
-> carried until a Witt build exists (or is discharged by a future Mathlib Witt-extension theorem).
+> `ScratchGramStratOrbit` **reduces to exactly two named predicates** (`gramCountsEq_iff_stabOrbit_refined`), **both carrying
+> a `GoodBase Q a b` antecedent** (`a,b` orth aniso + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`) so they are TRUE and
+> dischargeable — NOT the FALSE bare `∀ Q a b` forms (a false predicate can never be discharged toward the unconditional
+> seal): **`GramCountsRecoverGram`** (the ONE GENUINELY-OPEN Gauss lemma = "`K` non-degenerate", must be PROVED, probe-true)
+> + **`RefinedWittExtends`** (a CITATION of Witt's theorem — acceptable to carry, like the seal cites G3/Babai). **▶ NEXT =
+> discharge `GramCountsRecoverGram`** via the g-profile transform (`sameGramStratCounts_transform`) + the two inner-sum
+> evaluations (`gramStrat_inner_eval_ne`/`_zero`); this also needs a primitive additive character instantiated (deferred, as
+> the seal defers it). `RefinedWittExtends` = the Witt citation.
 > **[NB — the earlier "frontier = `ClassCountsSeparateGram`" framing (in the paragraphs just above + §9.7 mid-section) is
 > SUPERSEDED: that predicate routes through `SameExactGram`+Witt, which is Witt-DEAD at `{a,b}` (orbits 36 ⊋ 27 gram-classes);
 > the live spine is the ORBIT-DIRECT `GramCountsRecoverOrbit` chain. Read the section plan below, not the ClassCounts framing.]**
@@ -122,18 +124,21 @@
 >   `SameGramStratCounts u u'` ⟹ equal `innerZ` fibre sums ∀`s` — trivial once the transform is evaluated). Clean input to
 >   1c(iii). **1c(iii) ✅ REDUCTION LANDED (`ScratchGramStratOrbit`, axiom-clean):** the crux `GramCountsRecoverOrbit` is
 >   reduced to **exactly two named predicates**, composition proved (`gramCountsRecoverOrbit_of`), plus the `bᵢ=1` capstone
->   `gramCountsEq_iff_stabOrbit_refined` (modulo the two) and the flag-soundness `stabOrbit_imp_span_iff` (so the carried
->   Witt is the *tight* converse):
->   - **`GramCountsRecoverGram`** (OPEN Gauss, probe-true) — `SameGramStratCounts ⟹ SameExactGram Q {a,b} ∧ (u∈span{a,b} ↔
->     u'∈span{a,b})`. Attack: primitive `ψ` → `sameGramStratCounts_transform` (equal `innerZ` fibre sums) → Fourier-invert;
->     **bulk** (`gramStrat_inner_eval_ne`) ⟹ primal Gram `(Qu, polar u a, polar u b)`, **boundary**
->     (`gramStrat_inner_eval_zero`) ⟹ the `u∈span{a,b}` flag (indicator `polarBilin.flip(r₁a+r₂b−r₃u)=0 ⟺ u∈span{a,b}`).
->   - **`RefinedWittExtends`** (CARRIED, known-true) — `SameExactGram ∧ (u∈span{a,b} ↔ u'∈span{a,b}) ⟹ StabOrbit`. Witt on
->     nondeg `W^⊥`; carried only because Mathlib lacks Witt extension. (Unrefined `WittExtendsToOrbit Q {a,b}` FALSE, 36>27;
->     the flag repairs it.)
->   **▶ NEXT = discharge `GramCountsRecoverGram`** (the single open Gauss lemma — the "`K` non-degenerate" content) via the
->   transform + `inner_eval_ne`/`_zero`; and instantiate a primitive additive character. `RefinedWittExtends` awaits a Witt
->   build (or stays carried, like `WittExtendsToOrbit`).
+>   `gramCountsEq_iff_stabOrbit_refined` and the flag-soundness `stabOrbit_imp_span_iff`. **★ Both predicates carry a
+>   `GoodBase Q a b` antecedent** (`a,b` orthogonal anisotropic + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`) — ESSENTIAL, not
+>   cosmetic: the bare `∀ Q a b` forms are literally FALSE (`b` isotropic ⟹ `W` degenerate ⟹ Witt fails; Gauss probe-truth is
+>   only at nondeg orthogonal-anisotropic bases), and a false statement can never be *discharged* — which would permanently
+>   block the unconditional-seal goal. With `GoodBase` both are TRUE (vacuous off-base, genuine on-base) and dischargeable;
+>   the caller (affine-polar residue, odd `q`) supplies `GoodBase` at every span-dim-2 base.
+>   - **`GramCountsRecoverGram`** (**GENUINELY OPEN Gauss** — must be PROVED, probe-true) — `GoodBase → (SameGramStratCounts
+>     ⟹ SameExactGram + span-flag)`. Attack: primitive `ψ` → `sameGramStratCounts_transform` (equal `innerZ` fibre sums) →
+>     Fourier-invert; **bulk** (`gramStrat_inner_eval_ne`) ⟹ primal Gram, **boundary** (`gramStrat_inner_eval_zero`) ⟹ the
+>     `u∈span{a,b}` flag (indicator `polarBilin.flip(r₁a+r₂b−r₃u)=0 ⟺ u∈span{a,b}`).
+>   - **`RefinedWittExtends`** (**CITATION of Witt's theorem** — acceptable to carry, like G3/Babai; discharge via a Mathlib
+>     Witt build if one appears) — `GoodBase → (SameExactGram + span-flag ⟹ StabOrbit)`. Witt on nondeg `W^⊥`. (Unrefined
+>     `WittExtendsToOrbit Q {a,b}` FALSE 36>27; the flag repairs it.)
+>   **▶ NEXT = discharge `GramCountsRecoverGram`** (the single OPEN Gauss lemma = "`K` non-degenerate") via the transform +
+>   `inner_eval_ne`/`_zero`; and instantiate a primitive additive character. `RefinedWittExtends` = the Witt citation.
 > - **Piece 2 — the WL bridge:** `SameClassCounts C ⟹ SameGramStratCounts` (the actual WL colouring's counts refine the
 >   gram-strat counts). **★ ORBIT-DIRECT — do NOT route through `ClassCountsSeparateGram`:** that predicate targets
 >   `SameExactGram`, and its capstone `ScratchWLClassCounts.colorEq_iff_stabOrbit` carries `WittExtendsToOrbit Q {a,b}`,
@@ -854,7 +859,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchGramStratCharSum` (Step C Piece 1b — the character-sum identity: `gramStratCount_charsum` [raw four-constraint Fourier expansion via `countk_eq_sum_charsum`] + `gramStrat_inner_normalize` [inner z-exponent = D1 normal form `(r₀+r₃)Qz+polar z (r₁•a+r₂•b−r₃•u)+r₃Qu`] + `gramStratCount_charsum_normalized` [combined]; pure `GaussCount` assembly; the count↔`gramStratCount` bridge uses `convert`+`ext` to absorb the `∀(j:Fin 4)`-instance mismatch),
 > `ScratchGramStratEval` (Step C Piece 1c(i) — inner z-sum evaluated: `gramStrat_inner_eval_ne` [bulk `ρ=r₀+r₃≠0`, D1 `sum_addChar_quadForm_linear`: `=ψ(r₃Qu)·ψ(−ρ⁻¹Q(r₁a+r₂b−r₃u))·∑ψ(ρQz)`] + `gramStrat_inner_eval_zero` [boundary `ρ=0`, `sum_addChar_linearMap`: `=ψ(r₃Qu)·(|V| if `polarBilin.flip wᵣ=0` else 0)`]),
 > `ScratchGramStratInvert` (Step C Piece 1c(ii) ✅ COMPLETE — `gsum_orthogonality` [`K³` char orthogonality `∑_{g:K×K×K} ψ(⟨t,g⟩)=|K|³·𝟙[t=0]` via coordinatewise `AddChar.sum_mulShift`; collapse each coord sum with explicit `have`s since `← mul_sum` fails in `simp_rw`] + `innerZ` [opaque def of the surviving inner z-sum, so `mul_sum` can't distribute into it] + `gramStrat_transform_eval` [the evaluated g-transform: `(∑_g ψ(⟨s,g⟩)·gramStratCount u g)·|K|⁴ = ∑_r 𝟙[r₀₁₂=s]·|K|³·innerZ_u(r)`] + `sameGramStratCounts_transform` [SameGramStratCounts ⟹ equal innerZ fibre sums ∀s]),
-> `ScratchGramStratOrbit` (Step C Piece 1c(iii) ✅ REDUCTION — the crux reduced to two named predicates: `GramCountsRecoverGram` [OPEN Gauss, probe-true: SameGramStratCounts ⟹ SameExactGram + span-flag] + `RefinedWittExtends` [CARRIED, known-true: SameExactGram + span-flag ⟹ StabOrbit, Witt on nondeg W^⊥] + `gramCountsRecoverOrbit_of` [composition ⟹ `GramCountsRecoverOrbit`] + `gramCountsEq_iff_stabOrbit_refined` [⟹ bᵢ=1 mod the two] + `stabOrbit_imp_span_iff` [flag orbit-sound, so RefinedWittExtends is the tight converse]).
+> `ScratchGramStratOrbit` (Step C Piece 1c(iii) ✅ REDUCTION — the crux reduced to two named predicates, **both carrying a `GoodBase Q a b` antecedent** [`a,b` orth aniso + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`] so they are TRUE/dischargeable, NOT the FALSE bare `∀ Q a b` forms: `GramCountsRecoverGram` [GENUINELY OPEN Gauss, must be PROVED, probe-true: GoodBase → SameGramStratCounts ⟹ SameExactGram + span-flag] + `RefinedWittExtends` [CITATION of Witt's theorem, acceptable-to-carry: GoodBase → SameExactGram + span-flag ⟹ StabOrbit, Witt on nondeg W^⊥] + `gramCountsRecoverOrbit_of`/`gramCountsEq_iff_stabOrbit_refined` [⟹ bᵢ=1 mod the two] + `stabOrbit_imp_span_iff` [flag orbit-sound ⟹ RefinedWittExtends is the tight converse]).
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (updated 2026-07-02):** the round-3 crux chain (Piece 1a→1c(iii)) is BUILT and reduces `bᵢ=1` to two
@@ -1229,11 +1234,13 @@ for closing `bᵢ=1` at the span-dim-2 base:
   — `gramStrat_inner_eval_ne` (bulk `ρ=r₀+r₃≠0`, D1) + `gramStrat_inner_eval_zero` (boundary `ρ=0`, `sum_addChar_linearMap`).
   **1c(ii) ✅ COMPLETE** (`ScratchGramStratInvert`): the g-profile inversion — `gsum_orthogonality` + `innerZ` (opaque def) +
   `gramStrat_transform_eval` + `sameGramStratCounts_transform` (`SameGramStratCounts ⟹ equal innerZ fibre sums ∀s`).
-  **1c(iii) ✅ REDUCTION** (`ScratchGramStratOrbit`): the crux reduces to two named predicates — `GramCountsRecoverGram`
-  (OPEN Gauss, probe-true) + `RefinedWittExtends` (CARRIED, known-true, Witt on nondeg `W^⊥`) — via `gramCountsRecoverOrbit_of`;
-  `gramCountsEq_iff_stabOrbit_refined` ⟹ `bᵢ=1` modulo the two; `stabOrbit_imp_span_iff` shows the flag is orbit-sound.
-  **▶ Piece 1 open content = the single Gauss lemma `GramCountsRecoverGram`** (attack: `sameGramStratCounts_transform` +
-  `gramStrat_inner_eval_ne`/`_zero` + a primitive char).
+  **1c(iii) ✅ REDUCTION** (`ScratchGramStratOrbit`): the crux reduces to two named predicates, **both carrying a
+  `GoodBase Q a b` antecedent** (`a,b` orth aniso + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`) so they are TRUE and
+  dischargeable — NOT the FALSE bare `∀ Q a b` forms (which could never be discharged) — `GramCountsRecoverGram`
+  (GENUINELY-OPEN Gauss, must be PROVED, probe-true) + `RefinedWittExtends` (a CITATION of Witt's theorem, acceptable to
+  carry) — via `gramCountsRecoverOrbit_of`; `gramCountsEq_iff_stabOrbit_refined` ⟹ `bᵢ=1` modulo the two;
+  `stabOrbit_imp_span_iff` shows the flag is orbit-sound. **▶ Piece 1 open content = the single Gauss lemma
+  `GramCountsRecoverGram`** (attack: `sameGramStratCounts_transform` + `gramStrat_inner_eval_ne`/`_zero` + a primitive char).
 - **Piece 2 — the WL bridge:** `SameClassCounts C → SameGramStratCounts` (the actual WL colouring's counts refine the
   gram-strat counts, via round 2 = seal `jointIsoCountK`). **★ ORBIT-DIRECT — NOT via `ClassCountsSeparateGram`:** that
   predicate targets `SameExactGram` and its capstone carries `WittExtendsToOrbit Q {a,b}`, **FALSE** at this base (orbits
@@ -1245,9 +1252,10 @@ for closing `bᵢ=1` at the span-dim-2 base:
   `gramCountsEq_iff_stabOrbit`) + `leaves_le_prod_concentrated`. (`ScratchWLClassCounts`'s `colorEq_iff_stabOrbit` /
   `ClassCountsSeparateGram` capstone is Witt-dead at `{a,b}` and superseded; its `iso3`/`classCount`/`IsWLStable` defs +
   soundness are still used.)
-**NEXT = discharge `GramCountsRecoverGram`** (the single open Gauss lemma = "`K` non-degenerate": `SameGramStratCounts` ⟹
+**NEXT = discharge `GramCountsRecoverGram`** (the single open Gauss lemma = "`K` non-degenerate": `GoodBase → SameGramStratCounts` ⟹
 `SameExactGram` + span-flag) via `sameGramStratCounts_transform` + `gramStrat_inner_eval_ne`/`_zero`, plus instantiate a
-primitive additive character; `RefinedWittExtends` stays carried (known-true; awaits a Witt build). **Piece 1 now compiles
-`bᵢ=1` modulo exactly these two named predicates** (`gramCountsEq_iff_stabOrbit_refined`). Landed: Piece 1b
+primitive additive character; `RefinedWittExtends` = the Witt citation. **Both predicates carry a `GoodBase Q a b` antecedent
+so they are TRUE/dischargeable, not the FALSE bare `∀ Q a b` forms** (essential for the unconditional-seal goal). **Piece 1
+compiles `bᵢ=1` modulo exactly these two** (`gramCountsEq_iff_stabOrbit_refined`). Landed: Piece 1b
 (`ScratchGramStratCharSum`), 1c(i) (`ScratchGramStratEval`), **1c(ii) COMPLETE (`ScratchGramStratInvert`)**, **1c(iii)
 REDUCTION (`ScratchGramStratOrbit`)**.

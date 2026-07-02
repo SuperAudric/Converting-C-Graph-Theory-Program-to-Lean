@@ -172,10 +172,12 @@ close it — is set out in
 > begun: **Piece 1a–1c ALL LANDED** (`ScratchGramStratCount`: observable + crux, orbit-direct; `ScratchGramStratCharSum`:
 > character-sum identity; `ScratchGramStratEval`: inner z-sum evaluated; `ScratchGramStratInvert`: **1c(ii)** the g-profile
 > inversion `SameGramStratCounts ⟹ equal innerZ fibre sums`; `ScratchGramStratOrbit`: **1c(iii) REDUCTION** — the crux =
-> two named predicates + composition). **Piece 1 now compiles `bᵢ=1` modulo exactly two predicates:**
-> `GramCountsRecoverGram` (OPEN Gauss, probe-true) + `RefinedWittExtends` (CARRIED, known-true by Witt on nondeg `W^⊥`;
-> Mathlib lacks Witt extension, and unrefined `WittExtendsToOrbit Q {a,b}` is false, 36>27). **NEXT = discharge the single
-> open Gauss lemma `GramCountsRecoverGram`** (via the transform + `inner_eval_ne`/`_zero`; needs a primitive char).
+> two named predicates + composition). **Piece 1 now compiles `bᵢ=1` modulo exactly two predicates, both carrying a
+> `GoodBase Q a b` antecedent** (`a,b` orth aniso + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`) so they are TRUE and
+> dischargeable — NOT the FALSE bare `∀ Q a b` forms (a false predicate can never be discharged toward the unconditional
+> seal): `GramCountsRecoverGram` (GENUINELY-OPEN Gauss, must be PROVED) + `RefinedWittExtends` (a CITATION of Witt's theorem,
+> acceptable to carry). **NEXT = discharge `GramCountsRecoverGram`** (via the transform + `inner_eval_ne`/`_zero`; needs a
+> primitive char); `RefinedWittExtends` = the Witt citation.
 > **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
