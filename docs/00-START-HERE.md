@@ -187,11 +187,16 @@ close it — is set out in
 > (`ScratchGramStratWLBridge`, axiom-clean): `sameGramStratCounts_of_sameClassCounts` (colouring refines `gramK` ⟹
 > `SameClassCounts → SameGramStratCounts`) + assembly `colorEq_iff_stabOrbit_wittOnly` = **`C u=C u' ↔ StabOrbit` (`bᵢ=1`
 > for the WL colouring)** modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittExtends}`. **The ENTIRE
-> Gauss/analytic content is proved axiom-clean, `hψ` constructed** (10 `ScratchGramStrat*` modules). NEW frontier = Piece 3
-> assembly + discharge residuals (`ColorRefinesGramK`=WL-dim, colouring props, Witt citation); odd dim awaits an extension
-> of `isoConeSum_eval_even`. Dead ends (don't re-walk): "fibre-sum bulk recovers Gram" empty; first moment fails char `p`;
-> Kloosterman zero-set worry evaporated (even-dim scale-invariance ⟹ nowhere-zero).
-> **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
+> Gauss/analytic content is proved axiom-clean, `hψ` constructed** (10 `ScratchGramStrat*` modules). **★★★ NEW FRONTIER
+> (2026-07-02): the crux is `ColorRefinesGramK` — the DISGUISED main crux** (refinement probe: WL refines `gramK` at
+> *exactly* the round it reaches orbits ⟹ equivalent to the goal, NOT a modest residual). **PLAN = recovery doc §9.8
+> (self-contained, new-reader-ready): Route (B)** re-bases the round-3 observable onto the actual round-2 (`Zprof`) strata,
+> which DISSOLVES `ColorRefinesGramK` (observable becomes 1-WL-computable). Cascade is a finite fixed-depth (`≤4`),
+> `d`-uniform-to-`d=8` tower (`class_cascade_probe.py`; class anchors essential, singleton stalls at 11); crux L3 = mixed
+> additive×`χ(det)` Gauss sum from three landed halves + one new coupling; **discharge by BUILD not citation**. Other
+> residuals routine (`IsWLStable`/`ObsInvariant`, Witt); Piece 3 = `leaves_le_prod_concentrated`. Dead ends (don't re-walk):
+> "fibre-sum bulk recovers Gram" empty; first moment fails char `p`; plane-pinning `PlanePinnable` REFUTED.
+> **Full handoff + section plan + all findings = recovery doc STATUS + §9.7 + §9.8.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
 > [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is

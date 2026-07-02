@@ -113,10 +113,17 @@
 > StabOrbit` (`bᵢ=1` for the WL colouring)** modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant}` (colouring properties;
 > `ColorRefinesGramK` = the clean WL-dim residual, weaker than `C∞=orbits`) + `RefinedWittExtends` (Witt citation). **The
 > ENTIRE Gauss/analytic content is proved axiom-clean, `hψ` constructed.**
-> **▶ NEW NEXT = Piece 3 assembly** (`leaves_le_prod_concentrated`) + discharge the residuals: `ColorRefinesGramK` (WL
-> separates exact Gram to the individualized base — a WL-dim fact, or the doc's deeper round-3-equitability route), the
-> standard colouring properties (`IsWLStable`/`ObsInvariant`), and the Witt citation. Odd dim awaits an extension of
-> `isoConeSum_eval_even` (even-dim scale-invariance is what makes the cone sum nowhere-zero).
+> **▶ NEW NEXT (2026-07-02) — the round-3 step lemma; the FULL, self-contained, new-reader-ready plan is §9.8.** Pieces
+> 1+2 reduce `bᵢ=1` to four hypotheses; three are routine (`IsWLStable`/`ObsInvariant` colouring props, `RefinedWittExtends`
+> Witt citation). The fourth, **`ColorRefinesGramK`, is the DISGUISED main crux** — the refinement probe
+> (`class_cascade_probe.py`) shows the WL colouring refines `gramK` at *exactly* the round it reaches orbits, so it is
+> equivalent to the goal, NOT a modest residual (§9.8.1). **Decision: Route (B)** — re-base the round-3 observable onto the
+> ACTUAL round-2 (`Zprof`) strata, which DISSOLVES `ColorRefinesGramK` (the observable becomes 1-WL-computable by
+> construction, §9.8.3–4). The cascade is a finite fixed-depth (`≤4`), `d`-uniform-to-`d=8` tower (probe §9.8.2); the crux
+> L3 is a mixed additive×`χ(det)` Gauss sum assembled from three landed halves (`isoConeSum` + seal `χ(det)` +
+> complement-factoring) + one new coupling (§9.8.5). **Discharge by BUILD not citation** (user; §9.8.7). First sub-steps
+> (§9.8.8): lock `C₂=Zprof` (seal-reuse) + the DECISIVE factorization check. Piece 3 = `leaves_le_prod_concentrated`. (Odd
+> ambient dim is a *separate family* — `VO_{2m}` is even, so `isoConeSum_eval_even` already covers the target.)
 > **[NB — dead ends recorded (do not re-walk): the "Fourier-invert the fibre sums; bulk recovers Gram" attack is EMPTY (the
 > marginal is trivially `|K|`·count-transform); the elementary first-moment fails in char `p` (`q|#{Qw=0}`). Gram lives in
 > the phase ⟹ ℂ/char route necessary. §9.7.]**
@@ -1376,3 +1383,105 @@ WL colouring) modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittE
 **All landed axiom-clean, NOT in build.sh** (10 modules): 1a–1c(iii) (`ScratchGramStrat{Count,CharSum,Eval,Invert,Orbit}`),
 factorization+reduction (`Gauss`/`GaussReduce`), closed form + separation (`ConeEval`/`ConeSep`), WL bridge (`WLBridge`).
 Predicates keep `GoodBase` (+even dim); separation needs `Even (finrank)` (true for `VO_{2m}`; odd = future).
+
+---
+
+### 9.8 THE ROUND-3 STEP LEMMA — the live plan (2026-07-02, build-preferred, self-contained for a fresh reader)
+
+**Pick up here after Pieces 1+2 (§9.7 "LEAN BUILD STARTED").** Those reduced `bᵢ=1` at the good span-dim-2 base to
+four hypotheses on the WL colouring `C` (capstone `ScratchGramStratWLBridge.colorEq_iff_stabOrbit_wittOnly`). Three are
+routine — `IsWLStable`/`ObsInvariant` (the concrete colouring's equitability + `Stab`-invariance) and `RefinedWittExtends`
+(a Witt citation). The fourth, **`ColorRefinesGramK`** (`C` is at least as fine as the exact plane-Gram
+`gramK = (Qu, polar u a, polar u b)`), is the genuine crux — and it is **not** the modest residual the Piece-2 wording
+suggests. This section is the plan to discharge it **by build** (user preference over citation: machine-checkable, no
+reviewer doubt).
+
+**9.8.1 Why `ColorRefinesGramK` is the disguised main crux (the circularity).** `sameGramStratCounts_of_sameClassCounts`
+uses `ColorRefinesGramK` to turn 1-WL class-counts (stratified by `C`) into Piece 1's gram-stratified counts (stratified by
+*exact* `gramK`). But the real 1-WL never *has* `gramK`-strata until it is already at the orbit partition. Empirically
+(`class_cascade_probe.py` + last turn's refinement probe): the round at which `C` first *refines* `gramK` (`refines-GRAM`)
+is **exactly** the round it reaches orbits (`refines-ORB`) — never earlier, for every `q,d,ε` tested (VO⁺₄(5) round 3 has
+148 cells > `gramK`'s 125 yet still fails to refine `gramK`). So modulo the landed machinery + Piece 1, `ColorRefinesGramK`
+is **equivalent to the goal** `C∞ = orbits`; it cannot be discharged *through* Piece 1 (any such route needs `C` to already
+refine `gramK`). Its real content = **bounded-round convergence of the actual coarser-strata 1-WL up to `gramK`-fineness,
+uniform in `d`.**
+
+**9.8.2 The class-cascade probe — the induction is finite, fixed-depth, `d`-uniform (`class_cascade_probe.py`).** From the
+good-base seed on ambient `VO^ε_d(q)`, two cascades:
+- **FULL** (count isotropic-`z` against *all* current colour CLASSES = real 1-WL): reaches orbits in `r*=3` (minus) / `4`
+  (plus), fan-out (refinement-tree branching) **bounded, poly(q), `d`-uniform** (`q=3`: max fan ~11 identical at `d=4,6,8`;
+  `~8→38→57` for `q=3,5,7`). **`d`-uniformity confirmed to `d=8` (n=6561): the tower's shape is identical to `d=4`.**
+- **SINGLETON** (count only against singleton classes = the ambient `pin_probe` analogue): **STALLS at 11 = ISO** for every
+  `q,d` — confirms the refuted singleton mechanism and that multi-element **class** anchors carry all the power.
+
+So the cascade is a depth-`O(1)`, poly(q)-fan-out, `d`-uniform refinement tree = a **finite fixed-depth induction**, not an
+unbounded WL operator. This licenses formalizing an explicit 3–4-rung tower and answers "does it blow up in `d`?" (no, `≤4`,
+flat to `d=8`).
+
+**9.8.3 The architecture decision — Route (B), which DISSOLVES `ColorRefinesGramK`.**
+- **Route (A)** — keep Piece 1's clean idealized (`gramK`-strata) observable, discharge `ColorRefinesGramK` separately.
+  *Rejected as primary:* `ColorRefinesGramK` is equivalent to the goal (§9.8.1), so (A) defers the whole difficulty into one
+  hypothesis with no reduction. Kept only as a seed if (B)'s sum proves intractable.
+- **Route (B) — RE-BASE the round-3 observable onto the ACTUAL round-2 (`Zprof`) strata (RECOMMENDED).** Define
+  `zprofStratCount Q S u σ := #{ z : C₂ z = σ ∧ Q(u−z)=0 }`, with `C₂` = the round-2 colouring (`Zprof` =
+  `jointIsoCountK`-profile, **seal-built**). `C₂` is 1-WL-computable *by construction*, so **there is no `ColorRefinesGramK`
+  hypothesis** — we count against the strata the colouring actually has, and the circular residual disappears. The observable
+  is also faithful to what the canonizer computes.
+
+**9.8.4 The tower + the target lemma (Route B).** Concrete fixed-depth tower, each a genuine 1-WL round from the good-base
+seed:
+
+| | = | status |
+|---|---|---|
+| `C₁` = ISO | `(iso3(u), iso3(u−a), iso3(u−b))` | trivial |
+| `C₂` = Zprof | `jointIsoCountK`-profile to sub-configs of `{0,a,b}` = `(χ(det G_config))` | **seal-built** (`levelset_count_eqK`/`configGaussSum_eq_detK`) |
+| `C₃` = refine(`C₂`) | count isotropic-`z` against `C₂`-classes | **L3 — the crux** |
+| `C₄` = refine(`C₃`) | (plus only) the 2-orbit-pair tail | **L4** — small, bespoke |
+
+- **L3 (target):** `SameZprofStratCounts Q S u u' → StabOrbit Q {a,b} u u'` (minus, one step); uniform form
+  `refine²(C₂) ⊒ orbits` for both types (licensed by the probe's depth-`≤4`). The analogue of Piece 1's
+  `GramCountsRecoverOrbit`, against real `Zprof` strata.
+- **Soundness** (`StabOrbit → SameZprofStratCounts`): FREE (`Zprof` + isotropy are `Stab`-invariant), as in Piece 1.
+- **Assembly:** L1–L4 + soundness ⟹ `C∞ = orbits` = `bᵢ=1`, **no `ColorRefinesGramK`**; then Piece 3
+  (`leaves_le_prod_concentrated`) to poly leaf count.
+
+**9.8.5 What L3 is analytically — a mixed additive×`χ(det)` sum, from three landed halves + one new coupling.** Moment
+against a character `φ` of the `C₂`-strata:
+`∑_σ φ(σ) n_σ(u) = ∑_{z:Q(u−z)=0} φ(Zprof(z)) = |K|⁻¹ ∑_s ∑_z ψ(sQ(u−z))·χ(det G(z))`
+(via isoConeSum's `[Q(u−z)=0]=|K|⁻¹∑_sψ(sQ(u−z))` and `Zprof=χ(det)`). The inner sum is a **quadratic Gauss sum with a
+`χ(det)` multiplicative twist** (Salié/Kloosterman-flavoured) — the one new ingredient. Machinery inventory:
+
+| ingredient | role | landed as |
+|---|---|---|
+| additive isotropy `ψ(sQ(u−z))` + nowhere-vanishing | the `Q(u−z)=0` backbone | `isoConeSum`, `isoConeSum_eval_even` (Piece 1) |
+| multiplicative `χ(det G(z))` strata | the `Zprof` weight | `configGaussSum_eq_detK`, `sum_addChar_quadForm_smul` |
+| `d`-cancellation (complement factors) | `d`-uniformity → fixed `K²` problem | `ScratchComplementFactorK.levelset_count_factors_through_chiDet` |
+
+So L3 = **assembly + the additive/multiplicative coupling over one `z`-sum**, not from-scratch Gauss theory; complement-
+factoring makes it a `d`-independent computation over `W ≅ K²` (matching the probe's `d`-uniformity).
+
+**9.8.6 The two honest costs.** (1) **Type-dependence is real** (unlike idealized Piece 1): minus resolves at L3, plus needs
+L4 (2 pairs, `148→150`/`390→392`, fan 2). Purely `Zprof`-coarseness (against `gramK`-strata it is form-independent — why
+Piece 1 was clean); `refine²(C₂) ⊒ orbits` absorbs it, but L4 is a second small mixed step. (2) **The mixed coupling has no
+direct precedent**: the seal does `χ(det)` counts *without* the isotropy-to-`u` constraint; Piece 1 does isotropy *with*
+idealized additive strata; neither couples both characters over one `z`-sum. This is the research content and is **not**
+de-risked by the probe (which bounds structure, not the sum's value).
+
+**9.8.7 Discharge by BUILD, not citation (user preference).** `ColorRefinesGramK`/L3 is a WL-dimension statement for
+`VO^ε`; a published 2-closure/WL-dim bound (Skresanov rank-3) *could* cite it away, but (a) the node-4 WL wall is open both
+ways (SOTA note), so a tight citable bound likely does not exist, and (b) **build is preferred — machine-checkable, no
+reviewer doubt.** Citation is a recorded fallback only.
+
+**9.8.8 First concrete sub-steps (for the next builder).**
+1. **Lock the input (low-risk):** port/confirm `C₂ = Zprof` as a named colouring reusing `levelset_count_eqK`/
+   `configGaussSum_eq_detK` — L3 needs a concrete input to stratify against.
+2. **The factorization check (DECISIVE — do BEFORE the full build):** derive `zprofStratCount`'s transform on paper + a
+   small-`q` symbolic probe, testing whether `∑_z ψ(sQ(u−z))·χ(det G(z))` **factors** into `(isoConeSum-type additive) ×
+   (χ(det)-type multiplicative)`. Factors ⟹ L3 = `isoConeSum_ne_zero` (landed) × a `χ(det)`-non-degeneracy (seal-adjacent) =
+   clean assembly. Entangles ⟹ genuine Salié sum, re-weigh effort (Route A seed, or Route C §7). This single result decides
+   whether (B)'s remaining sum is an assembly of landed pieces or a new Gauss evaluation.
+3. Then build L3 (the mixed sum), L4 (plus tail), assemble the tower, drop `ColorRefinesGramK`.
+
+**Probes (durable, `GraphCanonizationProofs/`):** `class_cascade_probe.py` (this section — finite fixed-depth `d`-uniform-to-
+`d=8` tower; class vs singleton contrast), `round_anatomy.py`/`round2_closedform.py` (round identities: `C₂=Zprof`),
+`recovery_depth_probe.py` (`r*∈{3,4}`).
