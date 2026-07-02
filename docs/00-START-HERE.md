@@ -183,10 +183,14 @@ close it — is set out in
 > `IsoConeSumSeparatesGram` DISCHARGED — PROVED axiom-clean** (`ScratchGramStratConeEval`/`ConeSep`). Key = `isoConeSum_eval_even`:
 > for **even** ambient dim (`VO_{2m}`) the Gauss sum is scale-invariant, giving the closed form + nowhere-vanishing
 > (`isoConeSum_ne_zero`); off-diagonal/diagonal follow from non-vanishing+primitivity, flag from the closed form.
-> **⟹ Route A Piece 1 = `bᵢ=1` modulo ONLY the Witt citation `RefinedWittExtends`** (capstone
-> `gramCountsEq_iff_stabOrbit_wittOnly`, axiom-clean). **The ENTIRE Gauss/analytic content is done.** NEW frontier = Piece 2
-> (WL bridge) → Piece 3 assembly. Dead ends (don't re-walk): "fibre-sum bulk recovers Gram" empty; elementary first moment
-> fails char `p`; Kloosterman zero-set worry evaporated (even-dim scale-invariance ⟹ nowhere-zero).
+> **⟹ Route A Piece 1 = `bᵢ=1` modulo ONLY the Witt citation.** **★★★ SINCE (cont.): Piece 2 (WL bridge) LANDED**
+> (`ScratchGramStratWLBridge`, axiom-clean): `sameGramStratCounts_of_sameClassCounts` (colouring refines `gramK` ⟹
+> `SameClassCounts → SameGramStratCounts`) + assembly `colorEq_iff_stabOrbit_wittOnly` = **`C u=C u' ↔ StabOrbit` (`bᵢ=1`
+> for the WL colouring)** modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittExtends}`. **The ENTIRE
+> Gauss/analytic content is proved axiom-clean, `hψ` constructed** (10 `ScratchGramStrat*` modules). NEW frontier = Piece 3
+> assembly + discharge residuals (`ColorRefinesGramK`=WL-dim, colouring props, Witt citation); odd dim awaits an extension
+> of `isoConeSum_eval_even`. Dead ends (don't re-walk): "fibre-sum bulk recovers Gram" empty; first moment fails char `p`;
+> Kloosterman zero-set worry evaporated (even-dim scale-invariance ⟹ nowhere-zero).
 > **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory

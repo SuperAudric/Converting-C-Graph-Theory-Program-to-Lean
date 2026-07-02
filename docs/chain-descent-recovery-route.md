@@ -105,9 +105,18 @@
 > `isoConeSum_ne_zero` (nowhere-zero at even dim). Separation then: off-diagonal + diagonal both from *non-vanishing* +
 > primitivity (no value needed); flag from the closed form once phases match. **⟹ Route A Piece 1 = `bᵢ=1` modulo ONLY
 > the Witt citation `RefinedWittExtends`** (capstone `gramCountsEq_iff_stabOrbit_wittOnly`, axiom-clean, `hψ` constructed).
-> **▶ NEW NEXT = Piece 2** (WL bridge `SameClassCounts C → SameGramStratCounts`, orbit-direct, coupled fixpoint math) →
-> Piece 3 assembly (`leaves_le_prod_concentrated`). Witt discharge = a future Mathlib Witt-extension theorem (carried, like
-> the seal cites G3/Babai).
+> **★★★ UPDATE (2026-07-02, cont.): Piece 2 (the WL bridge) LANDED — `ScratchGramStratWLBridge`, axiom-clean.**
+> `sameGramStratCounts_of_sameClassCounts`: if the colouring **refines `gramK`** (`ColorRefinesGramK`, the necessary
+> fineness residual — `{z:gramK z=g}` = union of colour classes ⟹ `gramStratCount u g = ∑_{g-colours c}(classCount u c 0 +
+> classCount u c 1)`, a `u`-indep sum equal under `SameClassCounts`), then `SameClassCounts → SameGramStratCounts`.
+> **Assembly capstone `colorEq_iff_stabOrbit_wittOnly`** (`ScratchGramStratWLBridge`, axiom-clean): **`C u = C u' ↔
+> StabOrbit` (`bᵢ=1` for the WL colouring)** modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant}` (colouring properties;
+> `ColorRefinesGramK` = the clean WL-dim residual, weaker than `C∞=orbits`) + `RefinedWittExtends` (Witt citation). **The
+> ENTIRE Gauss/analytic content is proved axiom-clean, `hψ` constructed.**
+> **▶ NEW NEXT = Piece 3 assembly** (`leaves_le_prod_concentrated`) + discharge the residuals: `ColorRefinesGramK` (WL
+> separates exact Gram to the individualized base — a WL-dim fact, or the doc's deeper round-3-equitability route), the
+> standard colouring properties (`IsWLStable`/`ObsInvariant`), and the Witt citation. Odd dim awaits an extension of
+> `isoConeSum_eval_even` (even-dim scale-invariance is what makes the cone sum nowhere-zero).
 > **[NB — dead ends recorded (do not re-walk): the "Fourier-invert the fibre sums; bulk recovers Gram" attack is EMPTY (the
 > marginal is trivially `|K|`·count-transform); the elementary first-moment fails in char `p` (`q|#{Qw=0}`). Gram lives in
 > the phase ⟹ ℂ/char route necessary. §9.7.]**
@@ -879,6 +888,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchGramStratGaussReduce` (Step C Piece 1c — the REDUCTION, `hψ` DISCHARGED: `gramK_eq_iff_sameExactGram` + **`IsoConeSumSeparatesGram`** [the isolated cone non-degeneracy, GoodBase+even-dim antecedent, purely `isoConeSum`] + `gramCountsRecoverGram_of_isoConeSep` [constructs primitive char via `AddChar.FiniteField.primitiveChar K ℚ` ⟹ `GramCountsRecoverGram` carrying NO `hψ`] + `gramCountsEq_iff_stabOrbit_of_isoConeSep` [⟹ `bᵢ=1` mod `IsoConeSumSeparatesGram` + `RefinedWittExtends`]).
 > `ScratchGramStratConeEval` (Step C Piece 1c — the CLOSED FORM: **`isoConeSum_eval_even`** [even dim ⟹ scale-invariant Gauss sum `G(s)=G₁` ⟹ `|K|·isoConeSum(y)=|V|𝟙[y=0]+G₁(|K|𝟙[Qy=0]−1)`; via `𝟙[Qw=0]=|K|⁻¹∑ψ(sQw)`, split s=0 [`sum_addChar_linearMap`] / s≠0 [Brick D1 + C-scale `sum_addChar_quadForm_smul`], reindex `s↦−s⁻¹` involution] + **`isoConeSum_ne_zero`** [nowhere-zero at even dim: `G₁≠0` + integer factor `∈{|K|−1,−1}`] + `associated_separatingLeft_of_polarBilin_nondeg`).
 > `ScratchGramStratConeSep` (Step C Piece 1c — **`IsoConeSumSeparatesGram` DISCHARGED**: **`isoConeSumSeparatesGram`** [PROVED: off-diagonal `polar u a/b` + diagonal `Qu` from `isoConeSum_ne_zero`+primitivity (no value needed); flag from closed form once phases match, `𝟙[y_u=0]=𝟙[y_u'=0]` at `t₀=1`] + capstone **`gramCountsEq_iff_stabOrbit_wittOnly`** [`bᵢ=1` modulo ONLY the Witt citation `RefinedWittExtends`, axiom-clean, `hψ` constructed]).
+> `ScratchGramStratWLBridge` (Step C **Piece 2 — the WL bridge**: `ColorRefinesGramK` [colouring ≥ as fine as `gramK`, necessary residual] + **`sameGramStratCounts_of_sameClassCounts`** [`ColorRefinesGramK`+`SameClassCounts` ⟹ `SameGramStratCounts` via `gramStratCount u g=∑_{g-colours}(classCount 0+classCount 1)`, `Q(u−z)=0⟺iso3∈{0,1}`, `card_eq_sum_card_fiberwise`] + assembly **`colorEq_iff_stabOrbit_wittOnly`** [`C u=C u' ↔ StabOrbit`, `bᵢ=1`, modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittExtends}`]).
 > **★ CORRECTION recorded (do not re-walk):** the "Fourier-invert fibre sums; bulk recovers Gram" attack is EMPTY (the r₃-marginal is trivially `|K|`·count-transform); the elementary first moment fails in char `p` (`q|#{Qw=0}`). Gram lives in the phase ⟹ ℂ/character route necessary.
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
@@ -1307,8 +1317,16 @@ flag/complement in `isoConeSum`. No Gauss brick / primitivity / `IsDomain` neede
   the **flag** falls out of the closed form once phases match (`𝟙[y_u=0]=𝟙[y_u'=0]`, read at `t₀=1`). NB the earlier
   Kloosterman-zero-set worry EVAPORATED — even-dim scale-invariance makes `isoConeSum` nowhere zero, so no zero-set analysis.
 - **Capstone `gramCountsEq_iff_stabOrbit_wittOnly`** (`ScratchGramStratConeSep`, axiom-clean): **`bᵢ=1` modulo ONLY the Witt
-  citation `RefinedWittExtends`** (`hψ` constructed internally). **▶ NEW NEXT = Piece 2** (WL bridge). **All landed
-  axiom-clean, NOT in build.sh:** 1b/1c(i)/1c(ii) (`ScratchGramStrat{CharSum,Eval,Invert}`), 1c(iii)
-  (`ScratchGramStratOrbit`), factorization+reduction (`ScratchGramStratGauss`/`GaussReduce`), **closed form + separation
-  (`ScratchGramStratConeEval`/`ConeSep`)**. Predicates keep the `GoodBase` antecedent (+even dim); the separation needs
-  `Even (finrank)` (true for `VO_{2m}`).
+  citation `RefinedWittExtends`** (`hψ` constructed internally).
+
+**★★★ PIECE 2 — the WL bridge — LANDED (2026-07-02, cont., `ScratchGramStratWLBridge`, axiom-clean).**
+`sameGramStratCounts_of_sameClassCounts` (**`ColorRefinesGramK` C** ⟹ `SameClassCounts → SameGramStratCounts`): with the
+colouring at least as fine as `gramK`, `{z:gramK z=g}` is a union of colour classes, so `gramStratCount u g = ∑_{g-colours
+c}(classCount u c 0+classCount u c 1)` (isotropy `Q(u−z)=0 ⟺ iso3∈{0,1}`), a `u`-indep class-count sum — equal under
+`SameClassCounts`. The refinement hypothesis is *necessary* (trivial colouring sees only isotropy degree) and holds for
+`C∞=orbits` (weaker than the goal). **Assembly `colorEq_iff_stabOrbit_wittOnly`**: `C u=C u' ↔ StabOrbit` (`bᵢ=1` for the
+WL colouring) modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittExtends}`. **NEW NEXT = Piece 3 assembly**
+(`leaves_le_prod_concentrated`) + discharge residuals (`ColorRefinesGramK` = WL-dim, colouring props, Witt).
+**All landed axiom-clean, NOT in build.sh** (10 modules): 1a–1c(iii) (`ScratchGramStrat{Count,CharSum,Eval,Invert,Orbit}`),
+factorization+reduction (`Gauss`/`GaussReduce`), closed form + separation (`ConeEval`/`ConeSep`), WL bridge (`WLBridge`).
+Predicates keep `GoodBase` (+even dim); separation needs `Even (finrank)` (true for `VO_{2m}`; odd = future).
