@@ -74,13 +74,15 @@
 > is mandatory and (I) is on the critical path), the landed substrate, and the ordered plan + dead ends. The dated bullets
 > in this STATUS are the chronology; §9 is the map.
 >
-> **▶ THE IMMEDIATE NEXT STEP — the Step C counting: prove "1-WL-stable refines `zSet`" (= C^∞ pins `W`).** Steps A ✅ +
-> B ✅ + **Step C reduction ✅** (`ScratchPlanePin`, axiom-clean): the `zSet` observable resolves cells to orbits
-> (`zSetEq_iff_stabOrbit_anisotropic`: `zSet u=zSet u' ↔ StabOrbit`, `bᵢ=1`, on an anisotropic plane, mod Witt). **The
-> ENTIRE remaining route-A content is now one statement: 1-WL-stable at `{0,a,b}` refines `zSet`** (`zSet` is
-> `Stab`-invariant but must be shown 1-WL-computable — the plane points pinned by the iteration). Attack: the
-> `d`-independent span-induction plane-pinning closure over `W` (complement-factoring to `K²` + conic/pair-form
-> separation). Then compose via `leaves_le_prod_concentrated`. Full plan + dead ends: §9.
+> **▶ THE IMMEDIATE NEXT STEP — prove the accumulation kernel `ChiProfileSeparatesPlane` (the Gauss frontier).** Steps
+> A ✅ + B ✅ + **Step C reduction ✅** (`ScratchPlanePin`) + **Route α sub-step ✅** (`ScratchPlaneSep`, 2026-07-02,
+> axiom-clean): the seal's per-pair lever fires for plane points (`plane_count_sep`), and route A now reduces to the
+> **single open predicate `ChiProfileSeparatesPlane`** — "the `χ(pairForm)`-profile over base pairs separates the
+> plane" (`count_profile_separates_of_kernel`: kernel ⟹ joint-count profile injective on `W`). **Two things to close
+> route A:** (1) prove `ChiProfileSeparatesPlane` — the `d`-independent 2-dim accumulation, = the seal's per-anchor +
+> union assembly (`PerAnchorBound`/`BadAnchorCount`/matching) re-run over `W ≅ K²`; (2) the 1-WL-computability wiring
+> ("count profile injective on `W` ⟹ 1-WL refines `zSet`", Route β territory). Then compose via
+> `leaves_le_prod_concentrated`. Full plan + reasoning + dead ends: §9 (esp. §9.7).
 > **Probes** back the direction: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`); span-dim-2 recovery
 > bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`). **`L`** is a corollary of route A (route B).
 > **Start at:** this HANDOFF → the "Verify the landed substrate" list (bottom of STATUS) → §8 ITEM A/B. **════════**
@@ -526,7 +528,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
 > (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
 > Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
-> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All sixteen modules axiom-clean.
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All seventeen modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -757,7 +759,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the sixteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the seventeen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
@@ -769,7 +771,8 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchConicCount` (`sum_quadraticChar_sq_sub` `∑ₓχ(x²−a)=−1` + `card_binary_form` `#{w₁x²+w₂y²=c}=q−ε` — the conic count, elementary, no Gauss; + `exists_both_nonzero_solution` — count ⟹ both-nonzero solution, `q≥7`),
 > `ScratchConicSpan` (`exists_three_indep_levelset` — three non-collinear plane level-set points; `hspan_of_conic` — the A2 transport capstone: `Z(u)` spans `W` for generic `c≠0`; `exists_orthogonal_decomp` + `hspan_or_singleton` — i-a bare-vertex dichotomy singleton-∨-hspan; `exactGram_of_isotropic_complement` — ii singleton-locus recovery core),
 > `ScratchBaseAug` (Step B — `IsoSetEq` observable + `sameExactGram_of_isoSetEq_generic`/`_singleton_anis`: `IsoSetEq ⟹ SameExactGram` both branches, no counting; `eq_wComp_of_isotropic_of_anisotropic` — the derived (ii)-glue),
-> `ScratchPlanePin` (Step C reduction — `zSet` observable + `zSet_invariant` + `wallKernel_zSet_anisotropic` + `zSetEq_iff_stabOrbit_anisotropic`: `bᵢ=1` for `zSet`, reducing route A to "1-WL refines `zSet`").
+> `ScratchPlanePin` (Step C reduction — `zSet` observable + `zSet_invariant` + `wallKernel_zSet_anisotropic` + `zSetEq_iff_stabOrbit_anisotropic`: `bᵢ=1` for `zSet`, reducing route A to "1-WL refines `zSet`"),
+> `ScratchPlaneSep` (Step C Route α sub-step — `plane_count_sep` [the seal's per-pair lever fires for plane points] + `ChiProfileSeparatesPlane` [the isolated open accumulation kernel] + `count_profile_separates_of_kernel` [kernel ⟹ count profile injective on `W`]).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
@@ -916,3 +919,61 @@ Bare vertex: `ScratchConicSpan.exists_orthogonal_decomp` (explicit projection, n
   is required.
 - **Deriving the decomposition via `IsCompl`/restrict-nondegenerate** — unnecessary; `exists_orthogonal_decomp` does it
   directly by explicit projection (the diagonal plane Gram gives closed-form coefficients).
+
+### 9.7 Step C — over-narrowing check, the 2-dim reframe, and the attack routes (2026-07-01)
+
+**Over-narrowing verdict: NOT over-narrowed.** Three risks checked:
+- **bᵢ=1 is the *efficient* target, not an overshoot vs the weaker `bᵢ≤poly(q)`.** `bᵢ=1` at span-dim≥2 *concentrates*
+  all branching at span-dim≤1 (the span grows monotonically; once at span-dim≥2 with `bᵢ=1` you never branch again), so
+  `L=O(1)` and `leaves ≤ q²` **directly** — no separate `L=O(d)`. The relaxation `bᵢ≤poly(q)` *re-introduces* `L=O(d)`
+  (branching at every level; the product needs the depth bound), which collapses to the *same* cell-discretisation core.
+  So `bᵢ=1` kills `B` and `L` at once — it is the right target, confirmed by the probe (branching concentrated at
+  span-dim-1).
+- **Iteration is genuinely required** (Insight 1, airtight): one count = 1 bit (`χ(det)`), separating `Θ(q³)` plane
+  orbits needs `Θ(log q)` bits. Not a missed single-round shortcut.
+- **Anisotropic-plane restriction is removable** (not fundamental): it is an artifact of `hspan_of_conic` covering only
+  `c≠0`; the `c=0`-hyperbolic case (`Z` = 2 lines, still spans) folds into the generic branch once the 2-lines count is
+  added.
+
+**★ THE 2-DIM REFRAME (the key handle).** Via the *landed* complement-factoring
+(`ScratchComplementFactorK.levelset_count_factors_through_chiDet`), every count that would pin a plane point **factors
+through the plane, the `d−2` complement cancelling**. So "1-WL refines `zSet`" reduces to a **`d`-independent,
+2-dimensional count-separation**: pin the points of `W ≅ K²` by their complement-factored count-profiles. This is a
+*bounded, concrete* individualization of the 2-dim plane `VO^ε_2(q)` from `{0,a,b}` — **NOT** the general SRG
+WL-dimension wall. The probe's `r*∈{3,4}`-flat-in-`d` **is** this 2-dim problem being `d`-uniform. (NB: on an anisotropic
+plane the *within-plane* counts are translation-homogeneous, so the separating counts are the **base-config** counts —
+`jointIsoCountK` to `{0,a,b,w}`-type configs, which depend on `w`'s Gram to the base — `χ(det)`-valued per round,
+accumulating over rounds. This is why the base points, not the plane's internal structure, drive the separation.)
+
+**Attack routes.**
+- **Route α — span-induction pinning closure (PREFERRED; avoids a general WL operator).** Grow a pinned set `P ⊆ W`
+  (base `{0,a,b}`); each step pins a new plane point by its count-profile to `P` (complement-factored → a fixed `K²`
+  count via `ScratchConicCount`/`PairForm`). Closure over the 2-dim `W` terminates. **Load-bearing lemma:** a plane
+  point is determined by its `χ(det)`-profile over enough base-configs (the accumulation).
+- **Route β — explicit `k`-round WL operator (fallback).** Define the iterated colouring; prove `O(1)`-round convergence
+  `d`-uniformly. Heavier (needs the round-count bound + a WL framework).
+- **Reusable levers (all landed):** `jointIsoCountK_ne_of_chiSep_pair` (seal's per-round pair separation),
+  `ScratchComplementFactorK` (`d`-cancellation to `K²`), `ScratchConicCount` (plane counts), `PairForm`/`GaussCount`,
+  `PerAnchorBound` (the per-anchor fraction bound the seal uses to assemble many anchors).
+- **First sub-step (Route α) — ✅ LANDED (2026-07-02, `ScratchPlaneSep`, axiom-clean).** The per-round separator
+  **fires for plane points**: `plane_count_sep` = the seal's `jointIsoCountK_ne_of_sep` at `u,v := w,w'` — two plane
+  points whose `χ(pairForm)` to a base pair `{t,t₀}` differ have **different** joint isotropy counts (each base pair =
+  one `χ`-bit). The **accumulation is isolated** as one clean open predicate `ChiProfileSeparatesPlane` (the
+  `χ(pairForm)`-profile over base pairs separates the plane), and the reduction `count_profile_separates_of_kernel`
+  proves: kernel ⟹ the 2-round joint-count profile is injective on `W`. **So route A now reduces to the single open
+  predicate `ChiProfileSeparatesPlane`** (+ the deferred 1-WL-computability wiring). Route α **has legs** — the lever
+  applies verbatim; the residue is the `d`-independent 2-dim accumulation.
+
+**The honest hard part.** The `O(1)`-round convergence — *how* a bounded number of `χ(det)`-bit rounds accumulate
+`Θ(log q)` bits to pin the plane — is not yet analytically pinned; the probe is the evidence, the proof is the frontier.
+Route α makes it a concrete `K²` induction (the seal's per-anchor + union assembly, at the plane level) rather than an
+abstract WL-dimension claim — the best available handle. This is a genuine Gauss build; there is **no** purely-structural
+scaffold left (the structural reduction is already complete in `ScratchPlanePin` — "1-WL refines `zSet`" is the residue).
+
+**Post-sub-step status (2026-07-02):** the accumulation is now the **single named open predicate**
+`ScratchPlaneSep.ChiProfileSeparatesPlane` — "the `χ(pairForm)`-profile over base pairs separates the plane." Proving it
+is the seal's per-anchor + union assembly re-run at the `d`-independent plane level (reuse `PerAnchorBound` /
+`BadAnchorCount` / the matching trick, but over `W ≅ K²` instead of the `O(log n)` frame). The two things still needed to
+*close* route A: **(1)** prove `ChiProfileSeparatesPlane` (the Gauss accumulation — the frontier); **(2)** the
+1-WL-computability wiring "joint-count profile injective on `W` ⟹ 1-WL refines `zSet`" (Route β territory: a minimal WL
+framework, or a direct argument that the base-config counts are 1-WL-derivable from the individualised base).
