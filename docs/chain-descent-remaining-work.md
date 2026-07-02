@@ -286,18 +286,19 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > self-contained, **retargeted to T0**) — the claim, the strength ladder, the relocated stronger pieces, the phased plan of
 > attack. The WL-dim alternative `chain-descent-cellsareorbits-route.md` is demoted to independent-math.
 >
-> **▶▶▶ UPDATE (2026-07-02) — recovery route's poly crux reduced to ONE open predicate `ChiProfileSeparatesPlane` (17
-> scratch modules, all axiom-clean, NOT in build.sh).** Read the recovery doc **§9** (self-contained logical map, esp.
-> §9.7). Phases 0–2 landed (quasipoly end-to-end). The poly crux `bᵢ≤poly(q)` split into **span-dim-1 (`bᵢ≤q²`, PROVEN,
-> `ScratchSpanDimBound`)** + **span-dim≥2 = route A (`bᵢ=1`, which also gives `L=O(1)` by concentrating branching at
-> span-dim≤1 — over-narrowing-checked)**. Route A now reduced end-to-end: geometric recovery core both branches
-> (`ScratchSpanDim2Geom`/`ScratchConicSpan`), base-augmentation Step B (`ScratchBaseAug`), Step C reduction to the `zSet`
-> observable (`ScratchPlanePin`: `bᵢ=1` for `zSet`), and the **Route α sub-step** (`ScratchPlaneSep`: the seal's per-pair
-> lever `jointIsoCountK_ne_of_sep` fires for plane points) — reducing everything to **`ChiProfileSeparatesPlane`** (the
-> χ(pairForm)-profile over base pairs separates the plane; a `d`-independent 2-dim accumulation = the seal's
-> per-anchor+union assembly re-run over `W≅K²`) **+** the 1-WL-computability wiring (Route β). **★ 2-dim reframe:** via
-> complement-factoring the crux is NOT the general WL-dim wall but a bounded 2-dim individualization of `VO^ε_2(q)`.
-> Model seam (geometric↔abstract via `affineE`) = Phase 4. Full pick-up = recovery doc §9.
+> **▶▶▶ UPDATE (2026-07-02) — recovery route's poly crux reduced to ONE Gauss lemma; its Lean build has STARTED (21
+> scratch modules, all axiom-clean, NOT in build.sh).** Read the recovery doc **STATUS + §9** (self-contained, esp. §9.7).
+> Phases 0–2 landed (quasipoly end-to-end). Poly crux `bᵢ≤poly(q)` split into **span-dim-1 (`bᵢ≤q²`, PROVEN,
+> `ScratchSpanDimBound`)** + **span-dim≥2 = route A (`bᵢ=1`, also giving `L=O(1)`)**. Route A reduced end-to-end: geometric
+> recovery both branches + Step B + Step C reduction to "1-WL refines `zSet`". **★ The counting mechanism was settled by
+> probe:** plane-point pinning (`ChiProfileSeparatesPlane`/`PlanePinnable`) is **REFUTED** (`pin_probe.py`, stalls at `q≥5`);
+> the correct observable is **ambient colour-CLASS counts**, round structure `r1=3iso → r2=seal jointIsoCountK (closed form,
+> seal-reusable) → r3=orbits` (form-independent). **Route A now = ONE Gauss lemma `GramCountsRecoverOrbit`** (the round-3
+> count profile recovers the orbit = K-non-degeneracy), whose **Lean build has begun: Piece 1a LANDED**
+> (`ScratchGramStratCount`: round-3 observable + soundness + crux + capstone; targets the orbit directly, since orbits are
+> finer than `SameExactGram Q {a,b}` and `WittExtendsToOrbit {a,b}` is false). **NEXT = Piece 1b** (character-sum identity,
+> reusing `levelset_count_eqK`/`GaussCount`), then 1c (Fourier non-deg), Piece 2 (WL bridge), Piece 3 (assembly). Full
+> section plan + all findings = recovery doc §9.7.
 >
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full

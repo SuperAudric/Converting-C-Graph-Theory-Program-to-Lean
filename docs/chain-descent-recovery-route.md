@@ -53,7 +53,7 @@
 > branching-depth bound (NOT given by `defaultSpineChain_reaches_leaf ≤ n`, which bounds single-chain length only). Both are
 > *far* weaker than `CellsAreOrbits` and both must be measured (§4, §6 Phase 0) before being assumed.
 >
-> **════════ FRESH-READER HANDOFF (2026-07-01, current) — read this paragraph first ════════**
+> **════════ FRESH-READER HANDOFF (2026-07-02, current) — read this paragraph first ════════**
 > **Where the poly crux stands, in one breath (updated 2026-07-02).** The crux `bᵢ ≤ poly(q)` (per-cell orbit count) is
 > a **two-piece** target: **(i) span-dim-1** — `bᵢ ≤ q²`, **PROVEN** (`ScratchSpanDimBound.stabOrbit_cover_card_le_line`);
 > **(ii) span-dim ≥ 2** (route A) — `bᵢ = 1`, which (over-narrowing-checked §9.7) *concentrates* branching at
@@ -83,36 +83,32 @@
 > is mandatory and (I) is on the critical path), the landed substrate, and the ordered plan + dead ends. The dated bullets
 > in this STATUS are the chronology; §9 is the map.
 >
-> **▶ THE IMMEDIATE NEXT STEP — prove `ClassCountsSeparateGram` (the corrected frontier; `ScratchWLClassCounts`).** The
-> full geometric reduction is DONE (`ScratchPlanePin`: `bᵢ=1` ⟺ "1-WL refines `zSet`" ⟺ `C^∞` determines the exact Gram).
-> **★★ PROBE-DRIVEN CORRECTION (2026-07-02): the plane-point-pinning line is REFUTED; the mechanism is colour-CLASS
-> counts.** `pin_probe.py` shows the singleton-anchor closure (`ChiProfileSeparatesPlane` → `PlanePinnable`, χ-profiles to
-> *pinned singletons*) **STALLS at the 3-point base for every `q≥5`** — so `PlanePinnable` is **FALSE for `q≥5`**
-> (matching `ScratchWallKernel`'s "single-round refuted at a bounded base"). What delivers `bᵢ=1` (`recovery_depth_probe.py`)
-> is **ambient 1-WL by counts to colour CLASSES** (cells = orbits in `r*∈{3,4}`, flat in `d`). So the correct observable is
-> the class-count profile, and route A reduces to **`ClassCountsSeparateGram C Q ↑{a,b}`** = `WallKernelFor (SameClassCounts
-> C Q) …` — the class-count profile separates the exact Gram (`ScratchWLClassCounts`, axiom-clean; `colorEq_iff_stabOrbit`
-> gives `bᵢ=1` from it, via the scaffold). **TRUE** per probe, unlike `PlanePinnable`. **Superseded-but-subsumed:**
-> `ScratchPlanePinInduction` (`PlanePinnable`) and the `ScratchWLWiring` singleton bridge (their singleton-anchor mechanism
-> stalls); the `ScratchWLWiring` *Core* (`PinsPlane ⟹ bᵢ=1`) survives (its `PinsPlane` is a *consequence* of the correct
-> recovery). See §9.7 "PROBE-DRIVEN CORRECTION" for the full reasoning.
-> **▶ THE 1-WL-COMPUTABILITY WIRING — LANDED (`ScratchWLWiring`, 2026-07-02, axiom-clean).** Built on a minimal explicit
-> 1-WL interface. **Core (the payoff):** "`C` pins the plane `W`" (`PinsPlane`: every plane point a colour-singleton) +
-> `ReadsSingletonIsotropy` (WL reflects `Q(·−w)=0` to colour-singletons — standard 1-WL, an interface field) ⟹ `C` refines
-> `zSet` (`refines_zSet_of_pinsPlane`) ⟹ via `zSetEq_iff_stabOrbit_anisotropic`, **WL-colour equality ⟹ same orbit**
-> (`stabOrbit_of_colorEq`); + soundness ⟹ the full **`C u=C u' ↔ StabOrbit` = `bᵢ=1`** (`colorEq_iff_stabOrbit`).
-> **Bridge:** `pinsPlane_of_planePinnable` — `PlanePinnable` + `ReadsSingletonCounts` (WL reflects `jointIsoCountK` to
-> singleton anchors — standard 1-WL) + base-individualisation ⟹ `PinsPlane`, **modulo one genuinely-open residual now
-> NAMED: `SeparatesPlaneFromComplement`** (plane points get a different `C`-colour from every non-plane vertex).
-> **★ NEW FINDING (the honest remaining WL-dimension content):** that residual is NOT free — orbit-rigidity of the plane
-> does not make its points colour-singletons *versus the complement*, yet a *global* singleton is what both the induction
-> (anchors must be read) and the payoff need. The base-augmentation framing glossed this ("pin `W` does not follow from
-> orbit-rigidity"); it is now a first-class Lean predicate. **So the residual set to close route A is:** (1) prove
-> `PlanePinnable` — the `d`-independent 2-dim accumulation with *reachable* anchors, = the seal's per-anchor + union
-> assembly (`PerAnchorBound`/`BadAnchorCount`/matching) re-run over `W ≅ K²` as a growing closure; (2a) discharge the two
-> standard-1-WL interface fields in a minimal WL-colour framework (Route β — bookkeeping, not research); (2b) prove
-> `SeparatesPlaneFromComplement` (the real residual WL-dimension content). Then compose via `leaves_le_prod_concentrated`.
-> Full plan + reasoning + dead ends: §9 (esp. §9.7).
+> **▶ CURRENT FRONTIER (2026-07-02) — the Lean build of route A's counting crux has STARTED; here is the whole picture.**
+> The **geometric reduction is DONE** (`ScratchPlanePin`: `bᵢ=1` ⟺ "1-WL refines `zSet`" ⟺ `C∞` determines the orbit).
+> The **counting mechanism is settled by probe** (`round2_probe`/`round2_closedform`/`round3_probe`, §9.7 findings 1–5):
+> the plane-point-pinning line (`ChiProfileSeparatesPlane`→`PlanePinnable`, singleton anchors) is **REFUTED** (`pin_probe.py`,
+> stalls at `q≥5`); the correct observable is **ambient colour-CLASS counts**; and the round structure is
+> **r1=3iso → r2=seal `jointIsoCountK`-profile (closed form, SEAL-REUSABLE) → r3 = the count `T(u;g)=#{z:gram(z)=g,Q(u−z)=0}`
+> which reaches ORBITS exactly, form-independently.**
+>
+> **THE SECTION PLAN (recovery to `bᵢ=1`), 3 pieces — see §9.7 "LEAN BUILD STARTED":**
+> - **Piece 1 — the K-non-degeneracy crux.** **1a ✅ LANDED (`ScratchGramStratCount`, axiom-clean):** the round-3 observable
+>   (`gramK`/`gramStratCount`/`SameGramStratCounts`), **soundness** (`sameGramStratCounts_of_stabOrbit`), the open crux
+>   **`GramCountsRecoverOrbit : SameGramStratCounts ⟹ StabOrbit`**, and the capstone `gramCountsEq_iff_stabOrbit` (⟹ `bᵢ=1`
+>   modulo the crux). **★ Targets the orbit DIRECTLY, not `SameExactGram Q {a,b}`+Witt** — because `{a,b}` spans only the
+>   2-plane, orbits are *finer* than `SameExactGram` (`36>27`) and `WittExtendsToOrbit Q {a,b}` is FALSE (plane-vertex vs
+>   nonzero-isotropic-complement). **▶ NEXT = Piece 1b:** the character-sum identity for `gramStratCount` (reuse
+>   `levelset_count_eqK`/`configGaussSum_eq_detK`/`GaussCount`), then **1c** the Fourier non-degeneracy (profile → dual Gram
+>   → orbit) — the genuine Gauss content proving `GramCountsRecoverOrbit`.
+> - **Piece 2 — the WL bridge:** `SameClassCounts C ⟹ SameGramStratCounts` (the actual WL colouring's counts refine the
+>   gram-strat counts, via r2 = seal `jointIsoCountK`), discharging `ScratchWLClassCounts.ClassCountsSeparateGram`.
+> - **Piece 3 — assembly:** compose with `colorEq_iff_stabOrbit` + `ScratchBoundedMultLeaves.leaves_le_prod_concentrated`.
+>
+> **Superseded-but-subsumed (do not build on):** `ScratchPlanePinInduction` (`PlanePinnable`) and the `ScratchWLWiring`
+> *singleton bridge* (`pinsPlane_of_planePinnable`, `ReadsSingletonCounts`, the residual `SeparatesPlaneFromComplement`) —
+> their singleton-anchor mechanism stalls (`pin_probe.py`). The `ScratchWLWiring` **Core** (`refines_zSet_of_pinsPlane`/
+> `colorEq_iff_stabOrbit`: `PinsPlane ⟹ bᵢ=1`) and `ScratchWLClassCounts` (the class-count observable + reduction) survive.
+> Full reasoning + all findings + dead ends: **§9.7** (self-contained).
 > **Probes** back the direction: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`); span-dim-2 recovery
 > bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`). **`L`** is a corollary of route A (route B).
 > **Start at:** this HANDOFF → **§9 (the self-contained logical map: architecture + 5 insights + plan + dead ends, esp.

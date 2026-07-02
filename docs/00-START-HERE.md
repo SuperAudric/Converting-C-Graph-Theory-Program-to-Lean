@@ -161,14 +161,17 @@ close it — is set out in
 > discharge `bᵢ≤poly(q)`). The `CellsAreOrbits`/`hFormCert`/cross-branch-harvest predicates are *stronger* (likely
 > quasipoly-adjacent) and relocated. **The 2026-06-28 banner below is SUPERSEDED** (its "SINGLE PATH" was deferral mode; the
 > default canonical-form-preserving path branches). Demoted bounded-WL-dim route: [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).
-> **▶ PROGRESS (2026-07-02): recovery route's poly crux is reduced to ONE open predicate (all substrate axiom-clean, 17
-> scratch modules, NOT in build.sh).** Phases 0–2 landed (quasipoly end-to-end through the bridge). The poly crux
-> `bᵢ≤poly(q)` split: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`); **span-dim≥2 = route A (`bᵢ=1`)** is now
-> reduced end-to-end — the geometric recovery core (both branches), the base-augmentation reduction (Step B), and the
-> Step C reduction to the `zSet` observable are all LANDED, and the **Route α sub-step** (`ScratchPlaneSep`) confirms the
-> seal's per-pair separation lever fires for plane points and isolates the **single remaining open predicate
-> `ChiProfileSeparatesPlane`** (a `d`-independent 2-dim χ-accumulation = the seal's per-anchor+union assembly re-run over
-> `W≅K²`). **Full handoff + logical map + the Step C attack = recovery doc §9 (esp. §9.7).**
+> **▶ PROGRESS (2026-07-02): recovery route's poly crux reduced to ONE Gauss lemma; the Lean build of it has STARTED (all
+> substrate axiom-clean, 21 scratch modules, NOT in build.sh).** Phases 0–2 landed (quasipoly end-to-end). Poly crux
+> `bᵢ≤poly(q)` split: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`); **span-dim≥2 = route A (`bᵢ=1`)** reduced
+> end-to-end: geometric recovery (both branches) + Step B + the Step C reduction to "1-WL refines `zSet`" all LANDED.
+> **★ The counting mechanism was settled by probe:** plane-point pinning (`ChiProfileSeparatesPlane`/`PlanePinnable`) is
+> **REFUTED** (`pin_probe.py`); the correct observable is **ambient colour-CLASS counts**, with round structure
+> `r1=3iso → r2=seal jointIsoCountK (closed form) → r3=orbits`. **Route A now reduces to ONE Gauss lemma —
+> `GramCountsRecoverOrbit` (the K-non-degeneracy: the round-3 count profile recovers the orbit)** — and its Lean build has
+> begun: **Piece 1a LANDED** (`ScratchGramStratCount`: observable + soundness + crux + capstone; targets the orbit directly,
+> not `SameExactGram`+Witt). **NEXT = Piece 1b** (the character-sum identity, reusing `levelset_count_eqK`/`GaussCount`).
+> **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
 > [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is
