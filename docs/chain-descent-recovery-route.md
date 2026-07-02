@@ -125,7 +125,54 @@
 > SUPERSEDED: that predicate routes through `SameExactGram`+Witt, which is Witt-DEAD at `{a,b}` (orbits 36 ⊋ 27 gram-classes);
 > the live spine is the ORBIT-DIRECT `GramCountsRecoverOrbit` chain. Read the section plan below, not the ClassCounts framing.]**
 >
+> **═══════════ HANDOFF (2026-07-02) — picking up Route A from Pieces 1+2 (READ THIS to continue) ═══════════**
+>
+> **WHERE WE ARE.** Route A's `bᵢ=1` (span-dim-2 base, even `d`) is **built end-to-end and axiom-clean** across 10
+> `ScratchGramStrat*` modules (NOT in `build.sh`). The top capstone is
+> **`ScratchGramStratWLBridge.colorEq_iff_stabOrbit_wittOnly`**: `C u = C u' ↔ StabOrbit Q {a,b} u u'` (the WL colour cells
+> ARE the orbits) modulo exactly four hypotheses. **The entire Gauss/analytic content is PROVED** (the primitive additive
+> character is constructed internally via `AddChar.FiniteField.primitiveChar K ℚ`; no `hψ` carried).
+>
+> **TO BUILD/VERIFY EVERYTHING:** `lake build ChainDescent.ScratchGramStratWLBridge` (transitively builds the whole
+> critical path; ~4s incremental). Axiom-check any capstone with `#print axioms` in a scratch importer (expect
+> `[propext, Classical.choice, Quot.sound]`). Per-module typecheck: `lake env lean ChainDescent/<Module>.lean`.
+>
+> **CRITICAL PATH (7 modules, load-bearing for the capstone):** `Count → Gauss → {Orbit, GaussReduce} → ConeEval →
+> ConeSep → WLBridge` (+ `WLClassCounts`, imported by `WLBridge`). **OFF-PATH (3 modules, correct + axiom-clean but NOT
+> imported by the capstone):** `CharSum`/`Eval`/`Invert` (Piece 1b/1c(i)/1c(ii)) = the earlier *fibre-sum* Fourier route,
+> which turned out EMPTY for extraction (see the dead-end NB above). Keep them as reference; do not build on them for Route A.
+>
+> **THE FOUR RESIDUAL HYPOTHESES (what's left to discharge), in priority order:**
+> 1. **`ColorRefinesGramK C Q a b`** (`ScratchGramStratWLBridge`) — the WL-dimension residual: the canonizer's colouring is
+>    at least as fine as the exact Gram to `{0,a,b}`. TRUE for `C∞=orbits` (orbits refine `gramK` by soundness), *weaker*
+>    than the goal. Discharge = a WL-dimension fact (WL/coherent-config separates exact Gram at the individualized base) —
+>    OR the doc's deeper round-3-equitability route (§9.7 finding 5). This is the genuinely-open combinatorial residual.
+> 2. **`IsWLStable C Q`** + **`ObsInvariant C Q {a,b}`** (`ScratchWLClassCounts`/`ScratchSpanDim2Recovery`) — standard
+>    properties of the *actual* stable WL colouring (equitability + `Stab`-invariance). Discharge = instantiate `C` at the
+>    canonizer's stable colouring and prove these hold (routine, but needs the concrete `C`).
+> 3. **`RefinedWittExtends Q a b`** (`ScratchGramStratOrbit`) — Witt's extension theorem on the nondegenerate `W^⊥`
+>    (Mathlib-absent). A legitimate CITATION to carry (like the seal cites G3/Babai); or a future Mathlib Witt build.
+>
+> **PIECE 3 (the remaining assembly to the poly bound).** `bᵢ=1` (this result, span-dim≥2) + `bᵢ≤q²` (span-dim-1,
+> `ScratchSpanDimBound.stabOrbit_cover_card_le_line`, DONE) + `L=O(d)` feed the leaf-count bound
+> `ScratchBoundedMultLeaves.leaves_le_prod_concentrated` (`leaves t ≤ ∏_{j∈J} b j`) ⟹ poly leaf count. `L=O(d)` follows
+> from `bᵢ=1` concentrating branching at span-dim≤1 (§9.7). Substrate: Phase 0/1/2 (§6), all landed.
+>
+> **ODD `d`.** This closes **even** ambient dimension (`VO_{2m}`, the target). Odd `d` needs an extension of
+> `isoConeSum_eval_even` — even-dim scale-invariance (`χ(s)^n=1`) is exactly what makes `isoConeSum` nowhere-zero; odd `n`
+> reintroduces a Kloosterman/Salié zero-set that the even case sidesteps. A valid follow-on, not needed for even `d`.
+>
+> **DEAD ENDS (do not re-walk):** (a) "Fourier-invert the fibre sums; bulk recovers Gram" — EMPTY (the `r₃`-marginal is
+> trivially `|K|`·the count's `g`-transform); (b) the elementary first-moment (`∑_g g·count = N·gramK`) — fails in char `p`
+> (`q | N=#{Qw=0}`); (c) plane-point pinning (`PlanePinnable`) — REFUTED by probe. Gram must be read off the *phase* ⟹ the
+> ℂ/character route is necessary. Full reasoning + all findings: §9.7.
+> **═══════════════════════════════════════════════════════════════════════════════════════════════════════**
+>
 > **THE SECTION PLAN (recovery to `bᵢ=1`), 3 pieces — see §9.7 "LEAN BUILD STARTED":**
+> **[⚠ HISTORICAL — this section plan is the *original* plan; Pieces 1 & 2 are now DONE (see the HANDOFF block just above for
+> the current state). In particular the "Piece 1c attack" described below (Fourier-invert the fibre sums; bulk ⟹ primal
+> Gram) is a DEAD END — the actual discharge is the factorization + closed-form route (`ConeEval`/`ConeSep`). Read this
+> section for the piece-numbering/history only, not the live attack.]**
 > - **Piece 1 — the K-non-degeneracy crux.** **1a ✅ LANDED (`ScratchGramStratCount`, axiom-clean):** the round-3 observable
 >   (`gramK`/`gramStratCount`/`SameGramStratCounts`), **soundness** (`sameGramStratCounts_of_stabOrbit`), the open crux
 >   **`GramCountsRecoverOrbit : SameGramStratCounts ⟹ StabOrbit`**, and the capstone `gramCountsEq_iff_stabOrbit` (⟹ `bᵢ=1`
@@ -892,14 +939,13 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > **★ CORRECTION recorded (do not re-walk):** the "Fourier-invert fibre sums; bulk recovers Gram" attack is EMPTY (the r₃-marginal is trivially `|K|`·count-transform); the elementary first moment fails in char `p` (`q|#{Qw=0}`). Gram lives in the phase ⟹ ℂ/character route necessary.
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
-> **THE LIVE STEP (updated 2026-07-02):** the round-3 crux chain (Piece 1a→1c(iii)) is BUILT and reduces `bᵢ=1` to two
-> named predicates (see the CURRENT FRONTIER paragraph at the top of this STATUS + the section plan). **The single open
-> Gauss lemma is `ScratchGramStratOrbit.GramCountsRecoverGram`** (`SameGramStratCounts ⟹ SameExactGram + span-flag`); prove
-> it from `ScratchGramStratInvert.sameGramStratCounts_transform` (equal `innerZ` fibre sums) + the inner-sum evaluations
-> `ScratchGramStratEval.gramStrat_inner_eval_ne`/`_zero` (bulk ⟹ primal Gram, boundary ⟹ span-flag), and instantiate a
-> primitive additive character (deferred, as the seal defers it). The other predicate `RefinedWittExtends` (known-true, Witt
-> on nondeg `W^⊥`) stays carried. **[The pre-orbit-direct "sub-config `ZProfileSeparatesK` / `ClassCountsSeparateGram`"
-> framing is SUPERSEDED — see the CURRENT FRONTIER note.]**
+> **THE LIVE STEP (updated 2026-07-02 — Pieces 1 & 2 DONE):** Route A's `bᵢ=1` (even `d`) is BUILT end-to-end and
+> axiom-clean; the entire Gauss content is PROVED (`hψ` constructed). Top capstone =
+> **`ScratchGramStratWLBridge.colorEq_iff_stabOrbit_wittOnly`** (`C u=C u' ↔ StabOrbit` modulo four hypotheses). **▶ TO
+> CONTINUE, read the HANDOFF block at the top of this STATUS** — it lists the four residuals (in priority order),
+> Piece 3 (leaf-count assembly), the odd-`d` note, the critical-path vs off-path modules, and the build/verify commands.
+> **[The `GramCountsRecoverGram`-open framing (in the HISTORICAL section plan) and the pre-orbit-direct "`ZProfileSeparatesK`
+> / `ClassCountsSeparateGram`" framing are both SUPERSEDED — see the HANDOFF block.]**
 > **Then read:** this STATUS + §1 (cost model) + §2c (strength ladder) + §4 (the open core) + §6 (phased plan) + §8 (ITEM A/B).
 > **════════ END PICK-UP ════════**
 - **SEAL endpoints (banked at quasipoly; reference):** `reachesRigidOrCameron_viaIsotropySeparates_wittFree` (idx 1248,

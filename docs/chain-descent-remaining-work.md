@@ -293,12 +293,14 @@ citations that *can* be built but are not on the critical path (the δ′/rainbo
 > recovery both branches + Step B + Step C reduction to "1-WL refines `zSet`". **★ The counting mechanism was settled by
 > probe:** plane-point pinning (`ChiProfileSeparatesPlane`/`PlanePinnable`) is **REFUTED** (`pin_probe.py`, stalls at `q≥5`);
 > the correct observable is **ambient colour-CLASS counts**, round structure `r1=3iso → r2=seal jointIsoCountK (closed form,
-> seal-reusable) → r3=orbits` (form-independent). **Route A now = ONE Gauss lemma `GramCountsRecoverOrbit`** (the round-3
-> count profile recovers the orbit = K-non-degeneracy), whose **Lean build has begun: Piece 1a LANDED**
-> (`ScratchGramStratCount`: round-3 observable + soundness + crux + capstone; targets the orbit directly, since orbits are
-> finer than `SameExactGram Q {a,b}` and `WittExtendsToOrbit {a,b}` is false). **NEXT = Piece 1b** (character-sum identity,
-> reusing `levelset_count_eqK`/`GaussCount`), then 1c (Fourier non-deg), Piece 2 (WL bridge), Piece 3 (assembly). Full
-> section plan + all findings = recovery doc §9.7.
+> seal-reusable) → r3=orbits` (form-independent). **★★★ UPDATE (2026-07-02): Route A `bᵢ=1` (even `d`) is BUILT END-TO-END,
+> axiom-clean — Pieces 1 & 2 DONE.** 10 `ScratchGramStrat*` modules; the ENTIRE Gauss/analytic content is PROVED (`hψ`
+> constructed). Top capstone **`ScratchGramStratWLBridge.colorEq_iff_stabOrbit_wittOnly`**: `C u=C u' ↔ StabOrbit` (`bᵢ=1`
+> for the WL colouring) modulo four hypotheses — `ColorRefinesGramK` (WL-dim residual), `IsWLStable`/`ObsInvariant`
+> (colouring props), `RefinedWittExtends` (Witt citation). Key math: even dim ⟹ Gauss sum scale-invariant ⟹ `isoConeSum`
+> nowhere-zero ⟹ clean separation. **NEXT = Piece 3** (leaf-count assembly `leaves_le_prod_concentrated`) + discharge the
+> residuals; odd `d` awaits an `isoConeSum_eval_even` extension. **Read the recovery doc STATUS HANDOFF block** for the
+> full pickup guide (residuals in priority order, critical-path modules, build commands). Full findings = recovery doc §9.7.
 >
 > **★★★ 2026-06-28 — Stage A/B IS THE POLYNOMIAL ("RECOVERY") ROUTE, and route #5 empirically validated it.** Running the
 > actual chain-descent canonizer on `VO⁻₄(q)` shows it canonizes in a **single path** (`leaves=1`, `BranchingNodes=0`, full
