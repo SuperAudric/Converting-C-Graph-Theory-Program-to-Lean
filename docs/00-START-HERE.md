@@ -176,8 +176,13 @@ close it — is set out in
 > `GoodBase Q a b` antecedent** (`a,b` orth aniso + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`) so they are TRUE and
 > dischargeable — NOT the FALSE bare `∀ Q a b` forms (a false predicate can never be discharged toward the unconditional
 > seal): `GramCountsRecoverGram` (GENUINELY-OPEN Gauss, must be PROVED) + `RefinedWittExtends` (a CITATION of Witt's theorem,
-> acceptable to carry). **NEXT = discharge `GramCountsRecoverGram`** (via the transform + `inner_eval_ne`/`_zero`; needs a
-> primitive char); `RefinedWittExtends` = the Witt citation.
+> acceptable to carry). **★ SINCE (2026-07-02, cont.): `GramCountsRecoverGram` DISCHARGED to a classical isotropic-cone
+> Gauss-sum non-degeneracy, and `hψ` DISCHARGED** (`ScratchGramStratGauss`/`GaussReduce`, axiom-clean): core = the
+> factorization `countHat u t = ψ(⟨t,gramK u⟩)·isoConeSum(t₀•u+t₁•a+t₂•b)` (Gram in the phase); the reduction constructs a
+> primitive char (Mathlib `AddChar.FiniteField.primitiveChar K ℚ`) so nothing carries `hψ`. **NEW frontier = discharge
+> `IsoConeSumSeparatesGram`** (classical char-sum fact — citation candidate / Gauss build, not `gramStratCount`). Dead ends
+> recorded (don't re-walk): "fibre-sum bulk recovers Gram" is empty (marginal = `|K|`·count-transform, trivially equal);
+> elementary first moment fails in char `p` (`q|#{Qw=0}`). `RefinedWittExtends` = the Witt citation.
 > **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
