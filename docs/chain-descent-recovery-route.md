@@ -1085,6 +1085,32 @@ axiom-clean and logically valid; the **Core** of `ScratchWLWiring` (`refines_zSe
 `SeparatesPlaneFromComplement` likewise is subsumed into the ambient class-count recovery.
 
 **The frontier is now `ClassCountsSeparateGram`** — the WL-dimension statement that ambient class-count 1-WL separates
-exact-Gram classes at a span-dim-2 base, uniformly in `d`. Probe-true (`r*∈{3,4}` flat in `d`). Proving it is the seal's
-per-anchor + union assembly run against **colour classes** (not singleton anchors) — the genuine remaining Gauss/WL work.
-Then compose via `leaves_le_prod_concentrated`.
+exact-Gram classes at a span-dim-2 base, uniformly in `d`. Probe-true (`r*∈{3,4}` flat in `d`). Then compose via
+`leaves_le_prod_concentrated`.
+
+**★★ ROUND-STRUCTURE PROBE (2026-07-02, `round2_probe.py` / `round2_char.py`) — the attack `β1` (bounded-round) deepened;
+KEY: WL rounds use MULTIPLICITIES the seal's `χ(det)` theory does not cover.** Per-round class counts on `VO^ε_4(q)` at
+base `{0,a,b}`:
+
+| | r1 (3iso) | r2 | r3 | r4 | orbits |
+|---|---|---|---|---|---|
+| `VO⁻₄(3)` | 11 | 32 | **36** | — | 36 |
+| `VO⁻₄(5)` | 11 | **81** | **150** | — | 150 |
+| `VO⁻₄(7)` | 11 | 103 | **392** | — | 392 |
+| `VO⁺₄(5)` | 11 | 66 | 148 | **150** | 150 |
+
+Findings: (1) **3-stage bootstrap**, `r1=11` flat in `q`; `r*` = **3 (minus) vs 4 (plus)** — form-dependent, so β1 must
+prove *bounded-round convergence*, NOT "round 3 = Gram". (2) **Stratified yield WORKS but is multi-step:** counting `u`
+against the round-2 strata separates *all* same-r2/different-Gram pairs by round 3 for minus type, but `VO⁺₄(5)` leaves 2
+pairs unseparated at round 3 (217/219), finished at round 4. (3) **★ THE DECISIVE FINDING — round 2 (the WL class-count
+invariant) is INCOMPARABLE to the seal's `χ(det)` square-class observable** (`round2_char.py`: `r2` vs `χ(det)`-profile =
+`32/27`, `81/87`, `103/134`, `66/80`; *neither* refines the other). So **β1 canNOT be a port of the seal's per-anchor
+`χ(det)` machinery** (`PerAnchorBound`/`jointIsoCountK_ne_of_sep`): those analyse a *single* `jointIsoCountK`-to-a-config
+(which factors through `χ(det)`, 2-valued), whereas a WL class-count is a count to an `iso3`-CLASS = a *weighted sum* of
+`χ(det)`-counts over the level-set decomposition, carrying genuine multiplicity the sign `χ(det)` loses. **This is exactly
+what breaks through the bounded-base wall the seal's `χ(det)` is stuck at** — and it is why the poly route (bounded base +
+WL multiplicities) is fundamentally different from the quasipoly seal (`O(log n)` frame of individualised anchors), not a
+re-run of it at a smaller base. **Consequence for the plan:** `ClassCountsSeparateGram`'s proof needs *new* analysis of WL
+multiplicity sums (sums/products of quadratic characters — higher Gauss sums), not the seal's existing per-anchor bound.
+The `β1`/hybrid crux lemma is: *the weighted `χ(det)`-count sums over `iso3`-strata separate the exact Gram in `O(1)`
+iterations, uniformly in `d`* — probe-true, genuinely new Gauss content. `round2_probe.py`/`round2_char.py` are durable.
