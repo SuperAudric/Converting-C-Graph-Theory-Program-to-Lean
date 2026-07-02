@@ -103,10 +103,14 @@
 >   `gramStratCount_charsum_normalized` (combined). Pure assembly of the `GaussCount` toolkit (`countk_eq_sum_charsum`,
 >   `quad_sub`, polar bilinearity); no new Gauss theory. *(NB — Piece 1a's `gramStratCount` def was switched off
 >   `open scoped Classical` to a genuine `DecidableEq K`-based `DecidablePred`, so its filter shares the toolkit's
->   decidability instance; the instance still needs `convert`+`ext` to bridge into `countk`'s.)* **▶ NEXT = Piece 1c:** the
->   Fourier non-degeneracy — evaluate the inner sum by `sum_addChar_quadForm_linear` (D1, `r₀+r₃≠0`) /
->   `sum_addChar_multiQuad_zero` (`=0`), invert the profile over `g` (u enters via its dual Gram), and use
->   `multiCharSum_eq_sum_count` (the count→Gauss-sum dual) to prove `GramCountsRecoverOrbit`.
+>   decidability instance; the instance still needs `convert`+`ext` to bridge into `countk`'s.)* **1c(i) ✅ LANDED**
+>   (`ScratchGramStratEval`, axiom-clean): the inner z-sum evaluated — `gramStrat_inner_eval_ne` (bulk `ρ:=r₀+r₃≠0`, D1
+>   complete-the-square: `= ψ(r₃Qu)·ψ(−ρ⁻¹·Q(r₁•a+r₂•b−r₃•u))·∑_z ψ(ρ·Qz)`; `u` enters via `ψ(r₃Qu)` **and** `Q(r₁a+r₂b−r₃u)`)
+>   + `gramStrat_inner_eval_zero` (boundary `ρ=0`, `sum_addChar_linearMap`: `= ψ(r₃Qu)·(|V| if `polarBilin.flip wᵣ=0` else 0)`).
+>   **▶ NEXT = Piece 1c(ii):** assemble the full count (reindex `ρ=r₀+r₃`, sum the evaluated inner terms), invert the
+>   `g`-profile — `SameGramStratCounts` ⟹ `u`'s dual-Gram data agrees (u enters only via `Qu, polar u a, polar u b` + the
+>   `u_⊥=0` distinction) — via `multiCharSum_eq_sum_count`; then **1c(iii)** the Witt-on-`W^⊥` step (data ⟹ `StabOrbit`;
+>   the plane-vertex-vs-isotropic-complement geometry, likely a carried Witt-type hypothesis) ⟹ `GramCountsRecoverOrbit`.
 > - **Piece 2 — the WL bridge:** `SameClassCounts C ⟹ SameGramStratCounts` (the actual WL colouring's counts refine the
 >   gram-strat counts). **★ ORBIT-DIRECT — do NOT route through `ClassCountsSeparateGram`:** that predicate targets
 >   `SameExactGram`, and its capstone `ScratchWLClassCounts.colorEq_iff_stabOrbit` carries `WittExtendsToOrbit Q {a,b}`,
@@ -822,7 +826,8 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchWLWiring` (Step C 1-WL-computability wiring, SUPERSEDED-but-subsumed by class counts — Core SURVIVES: `PinsPlane`/`ReadsSingletonIsotropy` ⟹ `refines_zSet_of_pinsPlane` ⟹ `colorEq_iff_stabOrbit` [C pins W ⟹ `bᵢ=1`]; Bridge `pinsPlane_of_planePinnable` uses the refuted singleton mechanism — see §9.7 correction),
 > `ScratchWLClassCounts` (Step C CORRECTED observable — `iso3`/`classCount`/`SameClassCounts`/`IsWLStable` + **`ClassCountsSeparateGram`** [= `WallKernelFor (SameClassCounts C Q)`, the class-count/iterated observable, the TRUE frontier replacing the refuted `PlanePinnable`] + `wallKernel_of_wlStable`/`colorEq_iff_stabOrbit` [⟹ `bᵢ=1`] + `sameClassCounts_of_stabOrbit` [soundness FREE]),
 > `ScratchGramStratCount` (Step C Piece 1a — the round-3 observable `gramK`/`gramStratCount`/`SameGramStratCounts` + soundness `sameGramStratCounts_of_stabOrbit` [via `gramK_isometry`/`polar_isometry`] + the crux `GramCountsRecoverOrbit` [K-non-degeneracy: profile ⟹ orbit, targets orbit DIRECTLY not `SameExactGram`+Witt] + `gramCountsEq_iff_stabOrbit` [⟹ `bᵢ=1` modulo crux]; `gramStratCount` now genuine-`DecidableEq` not `Classical`),
-> `ScratchGramStratCharSum` (Step C Piece 1b — the character-sum identity: `gramStratCount_charsum` [raw four-constraint Fourier expansion via `countk_eq_sum_charsum`] + `gramStrat_inner_normalize` [inner z-exponent = D1 normal form `(r₀+r₃)Qz+polar z (r₁•a+r₂•b−r₃•u)+r₃Qu`] + `gramStratCount_charsum_normalized` [combined]; pure `GaussCount` assembly; the count↔`gramStratCount` bridge uses `convert`+`ext` to absorb the `∀(j:Fin 4)`-instance mismatch).
+> `ScratchGramStratCharSum` (Step C Piece 1b — the character-sum identity: `gramStratCount_charsum` [raw four-constraint Fourier expansion via `countk_eq_sum_charsum`] + `gramStrat_inner_normalize` [inner z-exponent = D1 normal form `(r₀+r₃)Qz+polar z (r₁•a+r₂•b−r₃•u)+r₃Qu`] + `gramStratCount_charsum_normalized` [combined]; pure `GaussCount` assembly; the count↔`gramStratCount` bridge uses `convert`+`ext` to absorb the `∀(j:Fin 4)`-instance mismatch),
+> `ScratchGramStratEval` (Step C Piece 1c(i) — inner z-sum evaluated: `gramStrat_inner_eval_ne` [bulk `ρ=r₀+r₃≠0`, D1 `sum_addChar_quadForm_linear`: `=ψ(r₃Qu)·ψ(−ρ⁻¹Q(r₁a+r₂b−r₃u))·∑ψ(ρQz)`] + `gramStrat_inner_eval_zero` [boundary `ρ=0`, `sum_addChar_linearMap`: `=ψ(r₃Qu)·(|V| if `polarBilin.flip wᵣ=0` else 0)`]).
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
@@ -1200,5 +1205,6 @@ for closing `bᵢ=1` at the span-dim-2 base:
   `gramCountsEq_iff_stabOrbit`) + `leaves_le_prod_concentrated`. (`ScratchWLClassCounts`'s `colorEq_iff_stabOrbit` /
   `ClassCountsSeparateGram` capstone is Witt-dead at `{a,b}` and superseded; its `iso3`/`classCount`/`IsWLStable` defs +
   soundness are still used.)
-**NEXT = Piece 1c** (evaluate the inner z-sum by D1/`multiQuad_zero`, invert the `g`-profile → `u`'s dual Gram, and use
-`multiCharSum_eq_sum_count` to prove `GramCountsRecoverOrbit`). Piece 1b (`ScratchGramStratCharSum`) is landed.
+**NEXT = Piece 1c(ii)** (assemble the full count from the evaluated inner sums, reindex `ρ=r₀+r₃`, invert the `g`-profile
+via `multiCharSum_eq_sum_count` → `u`'s dual-Gram data; then 1c(iii) the Witt-on-`W^⊥` step ⟹ `GramCountsRecoverOrbit`).
+Piece 1b (`ScratchGramStratCharSum`) + Piece 1c(i) (`ScratchGramStratEval`, inner z-sum evaluated) are landed.

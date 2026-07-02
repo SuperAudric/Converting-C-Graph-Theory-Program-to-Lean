@@ -169,10 +169,11 @@ close it — is set out in
 > **REFUTED** (`pin_probe.py`); the correct observable is **ambient colour-CLASS counts**, with round structure
 > `r1=3iso → r2=seal jointIsoCountK (closed form) → r3=orbits`. **Route A now reduces to ONE Gauss lemma —
 > `GramCountsRecoverOrbit` (the K-non-degeneracy: the round-3 count profile recovers the orbit)** — and its Lean build has
-> begun: **Piece 1a + 1b LANDED** (`ScratchGramStratCount`: observable + soundness + crux + capstone, orbit-direct not
-> `SameExactGram`+Witt; `ScratchGramStratCharSum`: the character-sum identity via `countk_eq_sum_charsum`, inner z-sum in
-> D1 normal form). **NEXT = Piece 1c** (evaluate the inner sum by D1/`multiQuad_zero`, Fourier-invert the profile → dual
-> Gram, `multiCharSum_eq_sum_count` ⟹ prove `GramCountsRecoverOrbit`).
+> begun: **Piece 1a + 1b + 1c(i) LANDED** (`ScratchGramStratCount`: observable + soundness + crux + capstone, orbit-direct
+> not `SameExactGram`+Witt; `ScratchGramStratCharSum`: the character-sum identity via `countk_eq_sum_charsum`, inner z-sum
+> in D1 normal form; `ScratchGramStratEval`: inner z-sum evaluated, bulk `ρ≠0` via D1 + boundary `ρ=0` via
+> `sum_addChar_linearMap`). **NEXT = Piece 1c(ii)** (assemble + Fourier-invert the `g`-profile → `u`'s dual Gram via
+> `multiCharSum_eq_sum_count`; then 1c(iii) Witt-on-`W^⊥` ⟹ prove `GramCountsRecoverOrbit`).
 > **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
