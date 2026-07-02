@@ -20,6 +20,12 @@
 
 ## STATUS (read first)
 
+> **█████ 2026-07-02 SUPER-BANNER — the direct WL/poly build (Routes A/B, `bᵢ=1`) has STALLED at the node-4 wall; NEXT
+> SESSION = ROUTE C (§7). Read the "NEXT SESSION = ROUTE C" block below + §9.8.9 (verdict). Every paragraph below dated
+> earlier than this that presents the round-3 crux / Piece 3 / Route (B) as the *live frontier* is HISTORICAL — the plan was
+> executed and closed (§9.8.5-RESULT, §9.8.9). Pieces 1+2 are correct and banked, gated on the un-dischargeable
+> `ColorRefinesGramK`. The banked quasipoly seal is unaffected. █████**
+
 > **════════ PICK-UP (2026-06-30, v2 — RETARGETED to the weakest predicate) — READ THIS FIRST ════════**
 >
 > **What this route is, in one line.** Prove the *existing* canonizer runs in poly time on the forms-graph residue by
@@ -1387,7 +1393,11 @@ Predicates keep `GoodBase` (+even dim); separation needs `Even (finrank)` (true 
 
 ---
 
-### 9.8 THE ROUND-3 STEP LEMMA — the live plan (2026-07-02, build-preferred, self-contained for a fresh reader)
+### 9.8 THE ROUND-3 STEP LEMMA — the plan, EXECUTED and STALLED (2026-07-02)
+
+> **⚠ READ FIRST: this plan was executed and STALLED at the node-4 wall — see the VERDICT in §9.8.9. Next session = Route C
+> (§7). §9.8.1–8 below record the plan + the (A)/(B) reasoning (still useful context); §9.8.5-RESULT + §9.8.9 record why it
+> closed. Do not pick this up as a live build.**
 
 **Pick up here after Pieces 1+2 (§9.7 "LEAN BUILD STARTED").** Those reduced `bᵢ=1` at the good span-dim-2 base to
 four hypotheses on the WL colouring `C` (capstone `ScratchGramStratWLBridge.colorEq_iff_stabOrbit_wittOnly`). Three are

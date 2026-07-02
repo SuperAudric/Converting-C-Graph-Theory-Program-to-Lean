@@ -187,16 +187,19 @@ close it — is set out in
 > (`ScratchGramStratWLBridge`, axiom-clean): `sameGramStratCounts_of_sameClassCounts` (colouring refines `gramK` ⟹
 > `SameClassCounts → SameGramStratCounts`) + assembly `colorEq_iff_stabOrbit_wittOnly` = **`C u=C u' ↔ StabOrbit` (`bᵢ=1`
 > for the WL colouring)** modulo `{ColorRefinesGramK, IsWLStable, ObsInvariant, RefinedWittExtends}`. **The ENTIRE
-> Gauss/analytic content is proved axiom-clean, `hψ` constructed** (10 `ScratchGramStrat*` modules). **★★★ NEW FRONTIER
-> (2026-07-02): the crux is `ColorRefinesGramK` — the DISGUISED main crux** (refinement probe: WL refines `gramK` at
-> *exactly* the round it reaches orbits ⟹ equivalent to the goal, NOT a modest residual). **PLAN = recovery doc §9.8
-> (self-contained, new-reader-ready): Route (B)** re-bases the round-3 observable onto the actual round-2 (`Zprof`) strata,
-> which DISSOLVES `ColorRefinesGramK` (observable becomes 1-WL-computable). Cascade is a finite fixed-depth (`≤4`),
-> `d`-uniform-to-`d=8` tower (`class_cascade_probe.py`; class anchors essential, singleton stalls at 11); crux L3 = mixed
-> additive×`χ(det)` Gauss sum from three landed halves + one new coupling; **discharge by BUILD not citation**. Other
-> residuals routine (`IsWLStable`/`ObsInvariant`, Witt); Piece 3 = `leaves_le_prod_concentrated`. Dead ends (don't re-walk):
-> "fibre-sum bulk recovers Gram" empty; first moment fails char `p`; plane-pinning `PlanePinnable` REFUTED.
-> **Full handoff + section plan + all findings = recovery doc STATUS + §9.7 + §9.8.**
+> Gauss/analytic content is proved axiom-clean, `hψ` constructed** (10 `ScratchGramStrat*` modules). **★★★ FRONTIER
+> STALLED → NEXT SESSION = ROUTE C (2026-07-02).** Pieces 1+2 are gated on **`ColorRefinesGramK`**, which the probes
+> showed is the DISGUISED main crux (WL refines `gramK` at *exactly* the round it hits orbits ⟹ equivalent to the goal, NOT a
+> modest residual). Route (B) [re-base the round-3 observable onto actual round-2 `Zprof` strata] tried to dissolve it, but
+> the **factorization check came back NEGATIVE** (`Zprof` incomparable to `gramK`; `χ(det)` moments `16/28/44` « orbits) and
+> stepping into the from-scratch build **STALLED**: round-2 is a `Stab`-invariant **count-of-counts** with no character-sum
+> handle, and the one clean handle (the **FLAG** lead) is also negative. Irreducible wall = **`gramK`-recovery is circular**
+> = the node-4 WL-dimension wall (open both ways). **⟹ the direct WL build of `bᵢ=1` is CLOSED** (open research problem, not
+> a tractable build); Pieces 1+2 remain correct/banked. **NEXT SESSION = ROUTE C** (recovery §7 + §9.8.9): recover `Q`
+> algebraically ⟹ `Aut=GO(Q)` known ⟹ Schreier–Sims — a *bounded* build that sidesteps the WL crux. Dead ends (don't
+> re-walk): "fibre-sum bulk recovers Gram" empty; first moment fails char `p`; plane-pinning `PlanePinnable` REFUTED;
+> the direct WL-strata build STALLED (§9.8.9). **Full verdict + evidence = recovery doc top HANDOFF + §9.8 (esp. §9.8.9);
+> cascade/stall probes `class_cascade_probe.py`/`factorization_probe.py`/`flag_stall_probe.py`.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
 > [[project_formsgraph_wldim_viability_2026-06-28]].** The matching base is `O(log n)` ⟹ **quasipolynomial**, and that is
