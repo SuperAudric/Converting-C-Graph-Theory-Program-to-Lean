@@ -179,10 +179,14 @@ close it — is set out in
 > acceptable to carry). **★ SINCE (2026-07-02, cont.): `GramCountsRecoverGram` DISCHARGED to a classical isotropic-cone
 > Gauss-sum non-degeneracy, and `hψ` DISCHARGED** (`ScratchGramStratGauss`/`GaussReduce`, axiom-clean): core = the
 > factorization `countHat u t = ψ(⟨t,gramK u⟩)·isoConeSum(t₀•u+t₁•a+t₂•b)` (Gram in the phase); the reduction constructs a
-> primitive char (Mathlib `AddChar.FiniteField.primitiveChar K ℚ`) so nothing carries `hψ`. **NEW frontier = discharge
-> `IsoConeSumSeparatesGram`** (classical char-sum fact — citation candidate / Gauss build, not `gramStratCount`). Dead ends
-> recorded (don't re-walk): "fibre-sum bulk recovers Gram" is empty (marginal = `|K|`·count-transform, trivially equal);
-> elementary first moment fails in char `p` (`q|#{Qw=0}`). `RefinedWittExtends` = the Witt citation.
+> primitive char (Mathlib `AddChar.FiniteField.primitiveChar K ℚ`) so nothing carries `hψ`. **★★★ SINCE (cont.):
+> `IsoConeSumSeparatesGram` DISCHARGED — PROVED axiom-clean** (`ScratchGramStratConeEval`/`ConeSep`). Key = `isoConeSum_eval_even`:
+> for **even** ambient dim (`VO_{2m}`) the Gauss sum is scale-invariant, giving the closed form + nowhere-vanishing
+> (`isoConeSum_ne_zero`); off-diagonal/diagonal follow from non-vanishing+primitivity, flag from the closed form.
+> **⟹ Route A Piece 1 = `bᵢ=1` modulo ONLY the Witt citation `RefinedWittExtends`** (capstone
+> `gramCountsEq_iff_stabOrbit_wittOnly`, axiom-clean). **The ENTIRE Gauss/analytic content is done.** NEW frontier = Piece 2
+> (WL bridge) → Piece 3 assembly. Dead ends (don't re-walk): "fibre-sum bulk recovers Gram" empty; elementary first moment
+> fails char `p`; Kloosterman zero-set worry evaporated (even-dim scale-invariance ⟹ nowhere-zero).
 > **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory

@@ -64,7 +64,8 @@ additive character `ψ`, equality of the factored transforms `ψ(⟨t,gramK u⟩
 forces the exact Gram (`gramK u = gramK u'`) and the plane flag. Stated purely via the classical `isoConeSum` — no
 `gramStratCount`. **The honest single open Gauss statement** (`GramCountsRecoverGram`'s content); probe-true. -/
 def IsoConeSumSeparatesGram (Q : QuadraticForm K V) (a b : V) : Prop :=
-  GoodBase Q a b → ∀ {R' : Type} [Field R'] (ψ : AddChar K R'), ψ.IsPrimitive → ∀ u u' : V,
+  GoodBase Q a b → Even (Module.finrank K V) →
+    ∀ {R' : Type} [Field R'] [CharZero R'] (ψ : AddChar K R'), ψ.IsPrimitive → ∀ u u' : V,
     (∀ t : K × K × K,
       ψ (t.1 * Q u + t.2.1 * QuadraticMap.polar Q u a + t.2.2 * QuadraticMap.polar Q u b)
           * isoConeSum Q ψ (t.1 • u + t.2.1 • a + t.2.2 • b)
@@ -78,7 +79,7 @@ additive character on `K` exists (Mathlib `FiniteField.primitiveChar`, into a cy
 `0 ≠ ringChar K`); equal counts give equal `countHat` (`countHat_eq_of_sameGramStratCounts`), which `countHat_factor`
 rewrites into the factored equality; `IsoConeSumSeparatesGram` then yields `gramK u = gramK u'` (⟹ `SameExactGram`, via
 `gramK_eq_iff_sameExactGram`) and the flag. **No `hψ` is carried** — it is discharged here. -/
-theorem gramCountsRecoverGram_of_isoConeSep {a b : V}
+theorem gramCountsRecoverGram_of_isoConeSep {a b : V} (heven : Even (Module.finrank K V))
     (hsep : IsoConeSumSeparatesGram Q a b) : GramCountsRecoverGram Q a b := by
   intro hbase u u' hcounts
   -- construct a primitive additive character on K (into a cyclotomic field of ℚ, characteristic 0)
@@ -98,7 +99,7 @@ theorem gramCountsRecoverGram_of_isoConeSep {a b : V}
     rw [countHat_factor, countHat_factor] at hc
     exact hc
   obtain ⟨hg, hflag⟩ :=
-    hsep hbase (R' := CyclotomicField pac.n ℚ) pac.char pac.prim u u' hfact
+    hsep hbase heven (R' := CyclotomicField pac.n ℚ) pac.char pac.prim u u' hfact
   exact ⟨gramK_eq_iff_sameExactGram.mp hg, hflag⟩
 
 /-- **★ Capstone — `bᵢ = 1` for the round-3 observable, modulo the cone non-degeneracy + Witt.** Composing the reduction
@@ -106,8 +107,9 @@ with `gramCountsEq_iff_stabOrbit_refined`: at a `GoodBase`, `SameGramStratCounts
 cells ARE the `Stab({a,b})`-orbits, modulo exactly `IsoConeSumSeparatesGram` (the classical Gauss non-degeneracy) and
 `RefinedWittExtends` (carried Witt). The primitive character is discharged. -/
 theorem gramCountsEq_iff_stabOrbit_of_isoConeSep {a b : V} (hbase : GoodBase Q a b)
-    (hsep : IsoConeSumSeparatesGram Q a b) (h2 : RefinedWittExtends Q a b) {u u' : V} :
+    (heven : Even (Module.finrank K V)) (hsep : IsoConeSumSeparatesGram Q a b)
+    (h2 : RefinedWittExtends Q a b) {u u' : V} :
     SameGramStratCounts Q a b u u' ↔ StabOrbit Q ({a, b} : Set V) u u' :=
-  gramCountsEq_iff_stabOrbit_refined hbase (gramCountsRecoverGram_of_isoConeSep hsep) h2
+  gramCountsEq_iff_stabOrbit_refined hbase (gramCountsRecoverGram_of_isoConeSep heven hsep) h2
 
 end ChainDescent.GramStrat

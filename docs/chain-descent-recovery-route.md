@@ -98,11 +98,19 @@
 > is DISCHARGED** (`ScratchGramStratGauss`/`GaussReduce`, axiom-clean). Core = the factorization `countHat_factor`:
 > `countHat u t = ψ(⟨t,gramK u⟩)·isoConeSum(t₀•u+t₁•a+t₂•b)` (`u`'s Gram in the phase); the reduction constructs a primitive
 > char (Mathlib `AddChar.FiniteField.primitiveChar K ℚ`) so `gramCountsRecoverGram_of_isoConeSep` carries no `hψ`.
-> **▶ NEW NEXT = discharge `IsoConeSumSeparatesGram`** — the isotropic-cone Gauss-sum non-degeneracy (equal factored
-> transforms ∀`t` ⟹ same Gram + flag), a classical char-sum fact (citation candidate / self-contained Gauss build), NOT
-> `gramStratCount` combinatorics. Capstone `gramCountsEq_iff_stabOrbit_of_isoConeSep` ⟹ `bᵢ=1` modulo it + `RefinedWittExtends`.
-> **[NB — the older attack "Fourier-invert the fibre sums; bulk recovers Gram" is EMPTY (the marginal is trivially equal =
-> `|K|`·count-transform); and the elementary first-moment fails in char `p` (`q|#{Qw=0}`). §9.7 records both.]**
+> **★★★ UPDATE (2026-07-02, cont.): `IsoConeSumSeparatesGram` is now DISCHARGED — PROVED axiom-clean**
+> (`isoConeSumSeparatesGram`, `ScratchGramStratConeSep`). The entire Gauss/analytic content of Route A's Piece 1 is done.
+> Key lemma = **`isoConeSum_eval_even`** (`ScratchGramStratConeEval`): for **even** ambient dim (the `VO_{2m}` case) the
+> quadratic Gauss sum is scale-invariant (`G(s)=χ(s)^n G₁=G₁`), so `|K|·isoConeSum(y)=|V|𝟙[y=0]+G₁(|K|𝟙[Qy=0]−1)`; hence
+> `isoConeSum_ne_zero` (nowhere-zero at even dim). Separation then: off-diagonal + diagonal both from *non-vanishing* +
+> primitivity (no value needed); flag from the closed form once phases match. **⟹ Route A Piece 1 = `bᵢ=1` modulo ONLY
+> the Witt citation `RefinedWittExtends`** (capstone `gramCountsEq_iff_stabOrbit_wittOnly`, axiom-clean, `hψ` constructed).
+> **▶ NEW NEXT = Piece 2** (WL bridge `SameClassCounts C → SameGramStratCounts`, orbit-direct, coupled fixpoint math) →
+> Piece 3 assembly (`leaves_le_prod_concentrated`). Witt discharge = a future Mathlib Witt-extension theorem (carried, like
+> the seal cites G3/Babai).
+> **[NB — dead ends recorded (do not re-walk): the "Fourier-invert the fibre sums; bulk recovers Gram" attack is EMPTY (the
+> marginal is trivially `|K|`·count-transform); the elementary first-moment fails in char `p` (`q|#{Qw=0}`). Gram lives in
+> the phase ⟹ ℂ/char route necessary. §9.7.]**
 > `RefinedWittExtends` = the Witt citation.
 > **[NB — the earlier "frontier = `ClassCountsSeparateGram`" framing (in the paragraphs just above + §9.7 mid-section) is
 > SUPERSEDED: that predicate routes through `SameExactGram`+Witt, which is Witt-DEAD at `{a,b}` (orbits 36 ⊋ 27 gram-classes);
@@ -868,7 +876,9 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchGramStratInvert` (Step C Piece 1c(ii) ✅ COMPLETE — `gsum_orthogonality` [`K³` char orthogonality `∑_{g:K×K×K} ψ(⟨t,g⟩)=|K|³·𝟙[t=0]` via coordinatewise `AddChar.sum_mulShift`; collapse each coord sum with explicit `have`s since `← mul_sum` fails in `simp_rw`] + `innerZ` [opaque def of the surviving inner z-sum, so `mul_sum` can't distribute into it] + `gramStrat_transform_eval` [the evaluated g-transform: `(∑_g ψ(⟨s,g⟩)·gramStratCount u g)·|K|⁴ = ∑_r 𝟙[r₀₁₂=s]·|K|³·innerZ_u(r)`] + `sameGramStratCounts_transform` [SameGramStratCounts ⟹ equal innerZ fibre sums ∀s]),
 > `ScratchGramStratOrbit` (Step C Piece 1c(iii) ✅ REDUCTION — the crux reduced to two named predicates, **both carrying a `GoodBase Q a b` antecedent** [`a,b` orth aniso + `(2:K)≠0` + `Q.polarBilin.Nondegenerate`] so they are TRUE/dischargeable, NOT the FALSE bare `∀ Q a b` forms: `GramCountsRecoverGram` [GENUINELY OPEN Gauss, must be PROVED, probe-true: GoodBase → SameGramStratCounts ⟹ SameExactGram + span-flag] + `RefinedWittExtends` [CITATION of Witt's theorem, acceptable-to-carry: GoodBase → SameExactGram + span-flag ⟹ StabOrbit, Witt on nondeg W^⊥] + `gramCountsRecoverOrbit_of`/`gramCountsEq_iff_stabOrbit_refined` [⟹ bᵢ=1 mod the two] + `stabOrbit_imp_span_iff` [flag orbit-sound ⟹ RefinedWittExtends is the tight converse]).
 > `ScratchGramStratGauss` (Step C Piece 1c — the DISCHARGE CORE, factorization: `countHat` [g-Fourier of the count] + `isoConeSum` [`∑_{w:Qw=0} ψ(polar w y)`, the classical cone sum] + `countHat_eq_isoSum` [`countHat u t = ∑_{z:Q(u−z)=0} ψ(⟨t,gramK z⟩)`] + **`countHat_factor`** [`= ψ(⟨t,gramK u⟩)·isoConeSum(t₀•u+t₁•a+t₂•b)`; Gram in the phase] + `countHat_eq_of_sameGramStratCounts` [trivial]; needs no Gauss brick/primitivity/IsDomain — any CommRing/ψ),
-> `ScratchGramStratGaussReduce` (Step C Piece 1c — the REDUCTION, `hψ` DISCHARGED: `gramK_eq_iff_sameExactGram` + **`IsoConeSumSeparatesGram`** [the isolated classical cone non-degeneracy = NEW frontier: equal factored transforms ∀t ⟹ gramK u=gramK u' + flag, GoodBase antecedent, purely `isoConeSum`] + `gramCountsRecoverGram_of_isoConeSep` [constructs primitive char via `AddChar.FiniteField.primitiveChar K ℚ` ⟹ `GramCountsRecoverGram` carrying NO `hψ`] + `gramCountsEq_iff_stabOrbit_of_isoConeSep` [⟹ `bᵢ=1` mod `IsoConeSumSeparatesGram` + `RefinedWittExtends`]).
+> `ScratchGramStratGaussReduce` (Step C Piece 1c — the REDUCTION, `hψ` DISCHARGED: `gramK_eq_iff_sameExactGram` + **`IsoConeSumSeparatesGram`** [the isolated cone non-degeneracy, GoodBase+even-dim antecedent, purely `isoConeSum`] + `gramCountsRecoverGram_of_isoConeSep` [constructs primitive char via `AddChar.FiniteField.primitiveChar K ℚ` ⟹ `GramCountsRecoverGram` carrying NO `hψ`] + `gramCountsEq_iff_stabOrbit_of_isoConeSep` [⟹ `bᵢ=1` mod `IsoConeSumSeparatesGram` + `RefinedWittExtends`]).
+> `ScratchGramStratConeEval` (Step C Piece 1c — the CLOSED FORM: **`isoConeSum_eval_even`** [even dim ⟹ scale-invariant Gauss sum `G(s)=G₁` ⟹ `|K|·isoConeSum(y)=|V|𝟙[y=0]+G₁(|K|𝟙[Qy=0]−1)`; via `𝟙[Qw=0]=|K|⁻¹∑ψ(sQw)`, split s=0 [`sum_addChar_linearMap`] / s≠0 [Brick D1 + C-scale `sum_addChar_quadForm_smul`], reindex `s↦−s⁻¹` involution] + **`isoConeSum_ne_zero`** [nowhere-zero at even dim: `G₁≠0` + integer factor `∈{|K|−1,−1}`] + `associated_separatingLeft_of_polarBilin_nondeg`).
+> `ScratchGramStratConeSep` (Step C Piece 1c — **`IsoConeSumSeparatesGram` DISCHARGED**: **`isoConeSumSeparatesGram`** [PROVED: off-diagonal `polar u a/b` + diagonal `Qu` from `isoConeSum_ne_zero`+primitivity (no value needed); flag from closed form once phases match, `𝟙[y_u=0]=𝟙[y_u'=0]` at `t₀=1`] + capstone **`gramCountsEq_iff_stabOrbit_wittOnly`** [`bᵢ=1` modulo ONLY the Witt citation `RefinedWittExtends`, axiom-clean, `hψ` constructed]).
 > **★ CORRECTION recorded (do not re-walk):** the "Fourier-invert fibre sums; bulk recovers Gram" attack is EMPTY (the r₃-marginal is trivially `|K|`·count-transform); the elementary first moment fails in char `p` (`q|#{Qw=0}`). Gram lives in the phase ⟹ ℂ/character route necessary.
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
@@ -1283,12 +1293,22 @@ flag/complement in `isoConeSum`. No Gauss brick / primitivity / `IsDomain` neede
 `hψ`**. Capstone `gramCountsEq_iff_stabOrbit_of_isoConeSep` ⟹ **`bᵢ=1` modulo exactly `IsoConeSumSeparatesGram` (Gauss) +
 `RefinedWittExtends` (Witt)**.
 
-**▶ NEW FRONTIER = discharge `IsoConeSumSeparatesGram`** (equal factored transforms ∀`t` ⟹ `gramK u=gramK u'` + flag;
-stated purely via `isoConeSum`) — now a **classical finite-field character-sum non-degeneracy** (isotropic-cone Gauss
-sum), a citation candidate (Lidl–Niederreiter) *or* a self-contained Gauss build. **Attack:** `isoConeSum` closed form via
-`𝟙[Qw=0]=|K|⁻¹∑_sψ(s·Qw)`+Brick D1 = `|K|⁻¹(|V|·𝟙[y=0]+∑_{s≠0}ψ(−s⁻¹Qy)·G(s))`; `t₀=0` slice (`y=t₁a+t₂b`, `u`-indep)
-pins `polar u a/b`; `t₀≠0` pins `Qu`; flag `= ∃t₀≠0, t₀•u+t₁a+t₂b=0`. Subtlety = the cone-sum zero-set (Kloosterman
-`Φ(m)=∑_{s≠0}ψ(−s⁻¹m)G(s)`). **All landed axiom-clean, NOT in build.sh:** 1b/1c(i)/1c(ii)
-(`ScratchGramStrat{CharSum,Eval,Invert}`), 1c(iii) (`ScratchGramStratOrbit`), factorization+reduction
-(`ScratchGramStratGauss`/`GaussReduce`). Both predicates keep the `GoodBase` antecedent (TRUE/dischargeable, not the FALSE
-bare `∀ Q a b`).
+**★★★ `IsoConeSumSeparatesGram` DISCHARGED — PROVED axiom-clean (2026-07-02, cont., `ScratchGramStratConeEval` +
+`ScratchGramStratConeSep`).** The entire Gauss/analytic content of Route A's Piece 1 is now done.
+- **`isoConeSum_eval_even`** (`ScratchGramStratConeEval`) — the closed form. For **even** ambient dim (the `VO_{2m}` case)
+  the quadratic Gauss sum is *scale-invariant* (`∑_x ψ(s·Qx)=χ(s)^n·G₁=G₁`, `χ(s)^n=1` for even `n`), collapsing the
+  `s`-sum to additive orthogonality: `|K|·isoConeSum(y)=|V|·𝟙[y=0]+G₁·(|K|·𝟙[Qy=0]−1)`, `G₁=∑_xψ(Qx)`. Proof = expand
+  `𝟙[Qw=0]=|K|⁻¹∑_sψ(s·Qw)`, split `s=0` (linear, `sum_addChar_linearMap`+nondeg) from `s≠0` (Brick D1 + Brick C-scale
+  `sum_addChar_quadForm_smul`), reindex `s↦−s⁻¹` (involution). Corollary **`isoConeSum_ne_zero`** (nowhere-zero at even dim,
+  `G₁≠0` + integer factor `∈{|K|−1,−1}`).
+- **`isoConeSumSeparatesGram`** (`ScratchGramStratConeSep`) — the separation. Off-diagonal (`polar u a/b`) + diagonal (`Qu`)
+  both from `isoConeSum_ne_zero` + primitivity *without knowing the value* (the `t₀=0` slice makes `isoConeSum` a common
+  nonzero factor; the `(t₀,0,0)` slice gives `isoConeSum(t₀•u)` constant-in-`t₀` & nonzero, and cross-multiplying kills it);
+  the **flag** falls out of the closed form once phases match (`𝟙[y_u=0]=𝟙[y_u'=0]`, read at `t₀=1`). NB the earlier
+  Kloosterman-zero-set worry EVAPORATED — even-dim scale-invariance makes `isoConeSum` nowhere zero, so no zero-set analysis.
+- **Capstone `gramCountsEq_iff_stabOrbit_wittOnly`** (`ScratchGramStratConeSep`, axiom-clean): **`bᵢ=1` modulo ONLY the Witt
+  citation `RefinedWittExtends`** (`hψ` constructed internally). **▶ NEW NEXT = Piece 2** (WL bridge). **All landed
+  axiom-clean, NOT in build.sh:** 1b/1c(i)/1c(ii) (`ScratchGramStrat{CharSum,Eval,Invert}`), 1c(iii)
+  (`ScratchGramStratOrbit`), factorization+reduction (`ScratchGramStratGauss`/`GaussReduce`), **closed form + separation
+  (`ScratchGramStratConeEval`/`ConeSep`)**. Predicates keep the `GoodBase` antecedent (+even dim); the separation needs
+  `Even (finrank)` (true for `VO_{2m}`).
