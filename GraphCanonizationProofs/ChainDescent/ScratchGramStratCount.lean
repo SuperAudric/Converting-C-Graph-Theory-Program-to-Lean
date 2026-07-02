@@ -43,9 +43,9 @@ variable {K V : Type*} [Field K] [Fintype K] [DecidableEq K]
 def gramK (Q : QuadraticForm K V) (a b u : V) : K × K × K :=
   (Q u, QuadraticMap.polar Q u a, QuadraticMap.polar Q u b)
 
-open scoped Classical in
 /-- **The round-3 gram-stratified count:** `#{z : gram(z) = g ∧ Q(u − z) = 0}` — count `z` isotropic-to-`u` in Gram
-stratum `g`. -/
+stratum `g`. (Genuine `DecidableEq K`-based `DecidablePred`, not `Classical`, so the count's filter shares its
+decidability instance with the `GaussCount` toolkit — needed for the Piece 1b character-sum identity.) -/
 noncomputable def gramStratCount (Q : QuadraticForm K V) (a b u : V) (g : K × K × K) : ℕ :=
   (Finset.univ.filter (fun z => gramK Q a b z = g ∧ Q (u - z) = 0)).card
 

@@ -97,12 +97,28 @@
 >   **`GramCountsRecoverOrbit : SameGramStratCounts ⟹ StabOrbit`**, and the capstone `gramCountsEq_iff_stabOrbit` (⟹ `bᵢ=1`
 >   modulo the crux). **★ Targets the orbit DIRECTLY, not `SameExactGram Q {a,b}`+Witt** — because `{a,b}` spans only the
 >   2-plane, orbits are *finer* than `SameExactGram` (`36>27`) and `WittExtendsToOrbit Q {a,b}` is FALSE (plane-vertex vs
->   nonzero-isotropic-complement). **▶ NEXT = Piece 1b:** the character-sum identity for `gramStratCount` (reuse
->   `levelset_count_eqK`/`configGaussSum_eq_detK`/`GaussCount`), then **1c** the Fourier non-degeneracy (profile → dual Gram
->   → orbit) — the genuine Gauss content proving `GramCountsRecoverOrbit`.
+>   nonzero-isotropic-complement). **1b ✅ LANDED (`ScratchGramStratCharSum`, axiom-clean):** the character-sum identity —
+>   `gramStratCount_charsum` (the raw four-constraint Fourier expansion via `countk_eq_sum_charsum`) +
+>   `gramStrat_inner_normalize` (inner z-sum in the `(r₀+r₃)Qz + polar z (r₁•a+r₂•b−r₃•u) + r₃Qu` D1-normal form) +
+>   `gramStratCount_charsum_normalized` (combined). Pure assembly of the `GaussCount` toolkit (`countk_eq_sum_charsum`,
+>   `quad_sub`, polar bilinearity); no new Gauss theory. *(NB — Piece 1a's `gramStratCount` def was switched off
+>   `open scoped Classical` to a genuine `DecidableEq K`-based `DecidablePred`, so its filter shares the toolkit's
+>   decidability instance; the instance still needs `convert`+`ext` to bridge into `countk`'s.)* **▶ NEXT = Piece 1c:** the
+>   Fourier non-degeneracy — evaluate the inner sum by `sum_addChar_quadForm_linear` (D1, `r₀+r₃≠0`) /
+>   `sum_addChar_multiQuad_zero` (`=0`), invert the profile over `g` (u enters via its dual Gram), and use
+>   `multiCharSum_eq_sum_count` (the count→Gauss-sum dual) to prove `GramCountsRecoverOrbit`.
 > - **Piece 2 — the WL bridge:** `SameClassCounts C ⟹ SameGramStratCounts` (the actual WL colouring's counts refine the
->   gram-strat counts, via r2 = seal `jointIsoCountK`), discharging `ScratchWLClassCounts.ClassCountsSeparateGram`.
-> - **Piece 3 — assembly:** compose with `colorEq_iff_stabOrbit` + `ScratchBoundedMultLeaves.leaves_le_prod_concentrated`.
+>   gram-strat counts). **★ ORBIT-DIRECT — do NOT route through `ClassCountsSeparateGram`:** that predicate targets
+>   `SameExactGram`, and its capstone `ScratchWLClassCounts.colorEq_iff_stabOrbit` carries `WittExtendsToOrbit Q {a,b}`,
+>   which is **FALSE** at the span-dim-2 base (orbits `36 ⊋ 27` gram-classes — the exact reason Piece 1a targets the orbit
+>   directly). So Piece 2 feeds `SameGramStratCounts` into `gramCountsEq_iff_stabOrbit`, never touching `SameExactGram`/Witt.
+>   NB Piece 2 is **coupled math, not plumbing**: the bridge holds at the fixpoint `C∞`, and its content is the finding-5
+>   equitability argument = a generalization of Piece 1's K-non-degeneracy to `C∞`'s own strata (cf. the `VO⁺₄(5)` round-4
+>   tail where coarse strata need one extra iteration).
+> - **Piece 3 — assembly:** compose `SameClassCounts ⟹ SameGramStratCounts ⟹ StabOrbit` (via `gramCountsEq_iff_stabOrbit`,
+>   orbit-direct) + `ScratchBoundedMultLeaves.leaves_le_prod_concentrated`. (`ScratchWLClassCounts` still contributes the
+>   `iso3`/`classCount`/`IsWLStable` defs + soundness; only its `colorEq_iff_stabOrbit`/`ClassCountsSeparateGram` capstone is
+>   Witt-dead at `{a,b}` and superseded.)
 >
 > **Superseded-but-subsumed (do not build on):** `ScratchPlanePinInduction` (`PlanePinnable`) and the `ScratchWLWiring`
 > *singleton bridge* (`pinsPlane_of_planePinnable`, `ReadsSingletonCounts`, the residual `SeparatesPlaneFromComplement`) —
@@ -805,7 +821,8 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchPlanePinInduction` (Step C inductive reformulation — `SeparatedBy`/`pinStep`/`pinIter`/`PinClosure`/`PlanePinnable` [the pinning closure = the corrected, *inductive* accumulation target, replacing the one-shot `ChiProfileSeparatesPlane`] + `chiProfileSeparatesPlane_of_pinnable`/`count_profile_separates_of_pinnable` [closure ⟹ one-shot ⟹ count profile injective on `W`; anchors reachable-in-order, which the wiring needs]),
 > `ScratchWLWiring` (Step C 1-WL-computability wiring, SUPERSEDED-but-subsumed by class counts — Core SURVIVES: `PinsPlane`/`ReadsSingletonIsotropy` ⟹ `refines_zSet_of_pinsPlane` ⟹ `colorEq_iff_stabOrbit` [C pins W ⟹ `bᵢ=1`]; Bridge `pinsPlane_of_planePinnable` uses the refuted singleton mechanism — see §9.7 correction),
 > `ScratchWLClassCounts` (Step C CORRECTED observable — `iso3`/`classCount`/`SameClassCounts`/`IsWLStable` + **`ClassCountsSeparateGram`** [= `WallKernelFor (SameClassCounts C Q)`, the class-count/iterated observable, the TRUE frontier replacing the refuted `PlanePinnable`] + `wallKernel_of_wlStable`/`colorEq_iff_stabOrbit` [⟹ `bᵢ=1`] + `sameClassCounts_of_stabOrbit` [soundness FREE]),
-> `ScratchGramStratCount` (Step C Piece 1a — the round-3 observable `gramK`/`gramStratCount`/`SameGramStratCounts` + soundness `sameGramStratCounts_of_stabOrbit` [via `gramK_isometry`/`polar_isometry`] + the crux `GramCountsRecoverOrbit` [K-non-degeneracy: profile ⟹ orbit, targets orbit DIRECTLY not `SameExactGram`+Witt] + `gramCountsEq_iff_stabOrbit` [⟹ `bᵢ=1` modulo crux]).
+> `ScratchGramStratCount` (Step C Piece 1a — the round-3 observable `gramK`/`gramStratCount`/`SameGramStratCounts` + soundness `sameGramStratCounts_of_stabOrbit` [via `gramK_isometry`/`polar_isometry`] + the crux `GramCountsRecoverOrbit` [K-non-degeneracy: profile ⟹ orbit, targets orbit DIRECTLY not `SameExactGram`+Witt] + `gramCountsEq_iff_stabOrbit` [⟹ `bᵢ=1` modulo crux]; `gramStratCount` now genuine-`DecidableEq` not `Classical`),
+> `ScratchGramStratCharSum` (Step C Piece 1b — the character-sum identity: `gramStratCount_charsum` [raw four-constraint Fourier expansion via `countk_eq_sum_charsum`] + `gramStrat_inner_normalize` [inner z-exponent = D1 normal form `(r₀+r₃)Qz+polar z (r₁•a+r₂•b−r₃•u)+r₃Qu`] + `gramStratCount_charsum_normalized` [combined]; pure `GaussCount` assembly; the count↔`gramStratCount` bridge uses `convert`+`ext` to absorb the `∀(j:Fin 4)`-instance mismatch).
 > **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
@@ -1083,7 +1100,11 @@ axiom-clean and logically valid; the **Core** of `ScratchWLWiring` (`refines_zSe
 
 **The frontier is now `ClassCountsSeparateGram`** — the WL-dimension statement that ambient class-count 1-WL separates
 exact-Gram classes at a span-dim-2 base, uniformly in `d`. Probe-true (`r*∈{3,4}` flat in `d`). Then compose via
-`leaves_le_prod_concentrated`.
+`leaves_le_prod_concentrated`. **[SUPERSEDED 2026-07-02 by Piece 1a — the frontier is now the ORBIT-DIRECT crux
+`GramCountsRecoverOrbit` (`ScratchGramStratCount`), NOT `ClassCountsSeparateGram`.** The latter targets `SameExactGram`
+and its capstone needs `WittExtendsToOrbit Q {a,b}`, which is FALSE here (orbits `36 ⊋ 27` gram-classes). Read the
+"LEAN BUILD STARTED" section-plan below (Pieces 1–3) as the current spine; `ClassCountsSeparateGram` survives only as the
+observable/soundness layer.]**
 
 **★★ ROUND-STRUCTURE PROBE (2026-07-02, `round2_probe.py` / `round2_char.py`) — the attack `β1` (bounded-round) deepened;
 KEY: WL rounds use MULTIPLICITIES the seal's `χ(det)` theory does not cover.** Per-round class counts on `VO^ε_4(q)` at
@@ -1157,9 +1178,27 @@ for closing `bᵢ=1` at the span-dim-2 base:
   capstone `gramCountsEq_iff_stabOrbit` (soundness + crux ⟹ `bᵢ=1`). **★ Targets the orbit DIRECTLY — NOT via
   `SameExactGram Q {a,b}` + Witt**, because `{a,b}` spans only the 2-plane so the orbit is *finer* than `SameExactGram`
   (`36 > 27`; `WittExtendsToOrbit Q {a,b}` is FALSE — the plane-vertex vs nonzero-isotropic-complement collision). This
-  correctly routes around the vacuity the `SameExactGram`+Witt scaffold would hit at this base. **1b/1c (next):** the
-  character-sum identity (`levelset_count_eqK`/`GaussCount`) + Fourier non-degeneracy (profile → dual Gram → orbit).
+  correctly routes around the vacuity the `SameExactGram`+Witt scaffold would hit at this base. **1b ✅ LANDED**
+  (`ScratchGramStratCharSum`, axiom-clean): the character-sum identity — `gramStratCount_charsum` (raw four-constraint
+  Fourier expansion via `countk_eq_sum_charsum`), `gramStrat_inner_normalize` (inner z-exponent = `(r₀+r₃)Qz +
+  polar z (r₁•a+r₂•b−r₃•u) + r₃Qu`, the D1 normal form, via `quad_sub` + polar bilinearity), `gramStratCount_charsum_normalized`
+  (combined). Pure `GaussCount` assembly, no new Gauss theory. **Build notes (reusable):** (i) Piece 1a's `gramStratCount`
+  def was switched off `open scoped Classical` → genuine `DecidableEq K` `DecidablePred` (still builds axiom-clean), so its
+  filter shares the toolkit's decidability instance; (ii) even so, `countk`'s `∀ (j:Fin 4)` decidability instance is not
+  defeq to a restatement's (matrix-index reduction differs), so the count↔`gramStratCount` bridge needs `convert … using 3`
+  + an instance-agnostic `ext` subgoal, not `rw`/`exact`. **1c (next):** the Fourier non-degeneracy — evaluate the inner sum
+  (`sum_addChar_quadForm_linear` D1 / `sum_addChar_multiQuad_zero`), invert the `g`-profile (u enters via its dual Gram),
+  `multiCharSum_eq_sum_count` for the count→sum dual, ⟹ `GramCountsRecoverOrbit`.
 - **Piece 2 — the WL bridge:** `SameClassCounts C → SameGramStratCounts` (the actual WL colouring's counts refine the
-  gram-strat counts, via round 2 = seal `jointIsoCountK`) — discharges `ScratchWLClassCounts.ClassCountsSeparateGram`.
-- **Piece 3 — assembly:** compose with `colorEq_iff_stabOrbit` + `leaves_le_prod_concentrated`.
-**NEXT = Piece 1b** (the character-sum identity for `gramStratCount`).
+  gram-strat counts, via round 2 = seal `jointIsoCountK`). **★ ORBIT-DIRECT — NOT via `ClassCountsSeparateGram`:** that
+  predicate targets `SameExactGram` and its capstone carries `WittExtendsToOrbit Q {a,b}`, **FALSE** at this base (orbits
+  `36 ⊋ 27` gram-classes — why Piece 1a is orbit-direct). Piece 2 feeds `SameGramStratCounts` into
+  `gramCountsEq_iff_stabOrbit`, never touching `SameExactGram`/Witt. **Piece 2 is coupled math, not plumbing:** the bridge
+  holds at the fixpoint `C∞` and reduces to the finding-5 equitability argument — a generalization of Piece 1's
+  K-non-degeneracy to `C∞`'s own (coarser) strata (cf. the `VO⁺₄(5)` round-4 tail).
+- **Piece 3 — assembly:** compose `SameClassCounts ⟹ SameGramStratCounts ⟹ StabOrbit` (orbit-direct via
+  `gramCountsEq_iff_stabOrbit`) + `leaves_le_prod_concentrated`. (`ScratchWLClassCounts`'s `colorEq_iff_stabOrbit` /
+  `ClassCountsSeparateGram` capstone is Witt-dead at `{a,b}` and superseded; its `iso3`/`classCount`/`IsWLStable` defs +
+  soundness are still used.)
+**NEXT = Piece 1c** (evaluate the inner z-sum by D1/`multiQuad_zero`, invert the `g`-profile → `u`'s dual Gram, and use
+`multiCharSum_eq_sum_count` to prove `GramCountsRecoverOrbit`). Piece 1b (`ScratchGramStratCharSum`) is landed.

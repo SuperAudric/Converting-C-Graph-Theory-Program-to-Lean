@@ -162,15 +162,17 @@ close it — is set out in
 > quasipoly-adjacent) and relocated. **The 2026-06-28 banner below is SUPERSEDED** (its "SINGLE PATH" was deferral mode; the
 > default canonical-form-preserving path branches). Demoted bounded-WL-dim route: [`chain-descent-cellsareorbits-route.md`](./chain-descent-cellsareorbits-route.md).
 > **▶ PROGRESS (2026-07-02): recovery route's poly crux reduced to ONE Gauss lemma; the Lean build of it has STARTED (all
-> substrate axiom-clean, 21 scratch modules, NOT in build.sh).** Phases 0–2 landed (quasipoly end-to-end). Poly crux
+> substrate axiom-clean, many scratch modules, NOT in build.sh).** Phases 0–2 landed (quasipoly end-to-end). Poly crux
 > `bᵢ≤poly(q)` split: **span-dim-1 `bᵢ≤q²` PROVEN** (`ScratchSpanDimBound`); **span-dim≥2 = route A (`bᵢ=1`)** reduced
 > end-to-end: geometric recovery (both branches) + Step B + the Step C reduction to "1-WL refines `zSet`" all LANDED.
 > **★ The counting mechanism was settled by probe:** plane-point pinning (`ChiProfileSeparatesPlane`/`PlanePinnable`) is
 > **REFUTED** (`pin_probe.py`); the correct observable is **ambient colour-CLASS counts**, with round structure
 > `r1=3iso → r2=seal jointIsoCountK (closed form) → r3=orbits`. **Route A now reduces to ONE Gauss lemma —
 > `GramCountsRecoverOrbit` (the K-non-degeneracy: the round-3 count profile recovers the orbit)** — and its Lean build has
-> begun: **Piece 1a LANDED** (`ScratchGramStratCount`: observable + soundness + crux + capstone; targets the orbit directly,
-> not `SameExactGram`+Witt). **NEXT = Piece 1b** (the character-sum identity, reusing `levelset_count_eqK`/`GaussCount`).
+> begun: **Piece 1a + 1b LANDED** (`ScratchGramStratCount`: observable + soundness + crux + capstone, orbit-direct not
+> `SameExactGram`+Witt; `ScratchGramStratCharSum`: the character-sum identity via `countk_eq_sum_charsum`, inner z-sum in
+> D1 normal form). **NEXT = Piece 1c** (evaluate the inner sum by D1/`multiQuad_zero`, Fourier-invert the profile → dual
+> Gram, `multiCharSum_eq_sum_count` ⟹ prove `GramCountsRecoverOrbit`).
 > **Full handoff + section plan + all findings = recovery doc STATUS + §9.7.**
 >
 > **★★★ FRONTIER REFRAMED (2026-06-28) — read the plan STATUS "2026-06-28 REFRAME" banner + §1 item 1 + memory
