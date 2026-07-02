@@ -91,12 +91,24 @@
 > `χ(pairForm)`-profile over *already-pinned* anchor pairs separates it from all of `W`, reaches all of `W`"
 > (`ScratchPlanePinInduction`: `pinStep`/`pinIter`/`PinClosure`). It plugs straight into the existing reduction —
 > `chiProfileSeparatesPlane_of_pinnable` (`PlanePinnable` + a ≤3-pair `hbase` + `S₀⊇pinned` ⟹ the one-shot predicate) and
-> `count_profile_separates_of_pinnable` (end-to-end ⟹ joint-count profile injective on `W`). **Two things to close route
-> A:** (1) prove `PlanePinnable` — the `d`-independent 2-dim accumulation with *reachable* anchors, = the seal's
-> per-anchor + union assembly (`PerAnchorBound`/`BadAnchorCount`/matching) re-run over `W ≅ K²` as a closure that grows the
-> pinned set; (2) the 1-WL-computability wiring ("joint-count profile injective on `W` ⟹ 1-WL refines `zSet`", Route β
-> territory — the closure's reachable-in-order anchors are exactly what makes it dischargeable). Then compose via
-> `leaves_le_prod_concentrated`. Full plan + reasoning + dead ends: §9 (esp. §9.7).
+> `count_profile_separates_of_pinnable` (end-to-end ⟹ joint-count profile injective on `W`).
+> **▶ THE 1-WL-COMPUTABILITY WIRING — LANDED (`ScratchWLWiring`, 2026-07-02, axiom-clean).** Built on a minimal explicit
+> 1-WL interface. **Core (the payoff):** "`C` pins the plane `W`" (`PinsPlane`: every plane point a colour-singleton) +
+> `ReadsSingletonIsotropy` (WL reflects `Q(·−w)=0` to colour-singletons — standard 1-WL, an interface field) ⟹ `C` refines
+> `zSet` (`refines_zSet_of_pinsPlane`) ⟹ via `zSetEq_iff_stabOrbit_anisotropic`, **WL-colour equality ⟹ same orbit**
+> (`stabOrbit_of_colorEq`); + soundness ⟹ the full **`C u=C u' ↔ StabOrbit` = `bᵢ=1`** (`colorEq_iff_stabOrbit`).
+> **Bridge:** `pinsPlane_of_planePinnable` — `PlanePinnable` + `ReadsSingletonCounts` (WL reflects `jointIsoCountK` to
+> singleton anchors — standard 1-WL) + base-individualisation ⟹ `PinsPlane`, **modulo one genuinely-open residual now
+> NAMED: `SeparatesPlaneFromComplement`** (plane points get a different `C`-colour from every non-plane vertex).
+> **★ NEW FINDING (the honest remaining WL-dimension content):** that residual is NOT free — orbit-rigidity of the plane
+> does not make its points colour-singletons *versus the complement*, yet a *global* singleton is what both the induction
+> (anchors must be read) and the payoff need. The base-augmentation framing glossed this ("pin `W` does not follow from
+> orbit-rigidity"); it is now a first-class Lean predicate. **So the residual set to close route A is:** (1) prove
+> `PlanePinnable` — the `d`-independent 2-dim accumulation with *reachable* anchors, = the seal's per-anchor + union
+> assembly (`PerAnchorBound`/`BadAnchorCount`/matching) re-run over `W ≅ K²` as a growing closure; (2a) discharge the two
+> standard-1-WL interface fields in a minimal WL-colour framework (Route β — bookkeeping, not research); (2b) prove
+> `SeparatesPlaneFromComplement` (the real residual WL-dimension content). Then compose via `leaves_le_prod_concentrated`.
+> Full plan + reasoning + dead ends: §9 (esp. §9.7).
 > **Probes** back the direction: `bᵢ=q(q−1)/2` concentrated at span-dim-1 (`forced_triangle_mult.py`); span-dim-2 recovery
 > bounded-round `r*∈{3,4}` d-uniform (`recovery_depth_probe.py`). **`L`** is a corollary of route A (route B).
 > **Start at:** this HANDOFF → **§9 (the self-contained logical map: architecture + 5 insights + plan + dead ends, esp.
@@ -544,7 +556,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
 > (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
 > Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
-> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All eighteen modules axiom-clean.
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All nineteen modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -776,7 +788,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the eighteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the nineteen scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
@@ -790,7 +802,8 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchBaseAug` (Step B — `IsoSetEq` observable + `sameExactGram_of_isoSetEq_generic`/`_singleton_anis`: `IsoSetEq ⟹ SameExactGram` both branches, no counting; `eq_wComp_of_isotropic_of_anisotropic` — the derived (ii)-glue),
 > `ScratchPlanePin` (Step C reduction — `zSet` observable + `zSet_invariant` + `wallKernel_zSet_anisotropic` + `zSetEq_iff_stabOrbit_anisotropic`: `bᵢ=1` for `zSet`, reducing route A to "1-WL refines `zSet`"),
 > `ScratchPlaneSep` (Step C Route α sub-step — `plane_count_sep` [the seal's per-pair lever fires for plane points] + `ChiProfileSeparatesPlane` [the isolated open accumulation kernel] + `count_profile_separates_of_kernel` [kernel ⟹ count profile injective on `W`]),
-> `ScratchPlanePinInduction` (Step C inductive reformulation — `SeparatedBy`/`pinStep`/`pinIter`/`PinClosure`/`PlanePinnable` [the pinning closure = the corrected, *inductive* accumulation target, replacing the one-shot `ChiProfileSeparatesPlane`] + `chiProfileSeparatesPlane_of_pinnable`/`count_profile_separates_of_pinnable` [closure ⟹ one-shot ⟹ count profile injective on `W`; anchors reachable-in-order, which the wiring needs]).
+> `ScratchPlanePinInduction` (Step C inductive reformulation — `SeparatedBy`/`pinStep`/`pinIter`/`PinClosure`/`PlanePinnable` [the pinning closure = the corrected, *inductive* accumulation target, replacing the one-shot `ChiProfileSeparatesPlane`] + `chiProfileSeparatesPlane_of_pinnable`/`count_profile_separates_of_pinnable` [closure ⟹ one-shot ⟹ count profile injective on `W`; anchors reachable-in-order, which the wiring needs]),
+> `ScratchWLWiring` (Step C 1-WL-computability wiring — Core: `PinsPlane`/`ReadsSingletonIsotropy` ⟹ `refines_zSet_of_pinsPlane` ⟹ `stabOrbit_of_colorEq`/`colorEq_iff_stabOrbit` [C pins W ⟹ WL cells = orbits, `bᵢ=1`]; Bridge: `pinsPlane_of_planePinnable` [`PlanePinnable` + `ReadsSingletonCounts` + `hbaseIndiv` ⟹ `PinsPlane`, modulo the named residual `SeparatesPlaneFromComplement` — the honest remaining WL-dim content]).
 > **Probes (`GraphCanonizationProofs/`):** `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
@@ -1010,7 +1023,28 @@ anchors from all of `W`, reaches **all** of `W`." (`pinStep`/`pinIter`/`PinClosu
 `S₀ ⊇ pinned` ⟹ the one-shot `ChiProfileSeparatesPlane`) and `count_profile_separates_of_pinnable` (end-to-end ⟹
 `jointIsoCountK` profile injective on `W`). **What this buys:** the closure certifies the anchors are *reachable in order*
 — exactly what the wiring needs (each pinned anchor is individualised in turn, so counts to it are 1-WL increments), which
-the one-shot `S₀` did not. The **two things still needed to close route A:** **(1)** prove `PlanePinnable` (the Gauss
-accumulation as a growing closure over `W ≅ K²` — the frontier); **(2)** the 1-WL-computability wiring "joint-count profile
-injective on `W` ⟹ 1-WL refines `zSet`" (Route β: a minimal WL-colour object, or a direct argument that the base-config
-counts to pinned anchors are 1-WL increments) — now precisely stated and structurally dischargeable via the closure.
+the one-shot `S₀` did not.
+
+**★ THE 1-WL-COMPUTABILITY WIRING — LANDED (2026-07-02, `ScratchWLWiring`, axiom-clean).** Item (2), built on a minimal
+explicit 1-WL interface (so the standard-WL content is named, the open residual surfaced):
+- **Core payoff (abstract `V`):** `IsColorSingleton`, `PinsPlane C W` (= "`C^∞` pins the plane", every plane point a
+  colour-singleton), and the interface field `ReadsSingletonIsotropy` (WL reflects `Q(·−w)=0` to a colour-singleton `w` —
+  standard 1-WL: a count against a singleton colour-class is `1`/`0`). Then `refines_zSet_of_pinsPlane` (⟹ `C` refines
+  `zSet`) → `stabOrbit_of_colorEq` (WL-colour equality ⟹ same orbit, via `zSetEq_iff_stabOrbit_anisotropic`) →
+  `colorEq_iff_stabOrbit` (+ soundness = `ObsInvariant` ⟹ the full **`C u=C u' ↔ StabOrbit`, `bᵢ=1`** for the WL colouring).
+  *This is the wiring's deliverable: once `C` pins the plane, the WL cells ARE the `Stab`-orbits.*
+- **Bridge (`V=Fin d→K`):** `pinsPlane_of_planePinnable` — `PlanePinnable` + `ReadsSingletonCounts` (the count analogue
+  interface field, standard 1-WL) + base individualisation (`hbaseIndiv`, free from the descent) ⟹ `PinsPlane`, by an
+  induction on the closure level (`colorSingleton_of_mem_pinIter`: fresh points are separated from other plane points by
+  `plane_count_sep` + `ReadsSingletonCounts`, and from the complement by the residual below).
+- **★ NEW FINDING — the honest residual, now NAMED: `SeparatesPlaneFromComplement`** (plane points get a different
+  `C`-colour from every non-plane vertex). This is the genuine remaining WL-dimension content: the plane's orbit-rigidity
+  (Insight 2) does **not** make its points colour-singletons *versus the complement* (WL is coarser than orbits), yet a
+  *global* singleton is what both the induction (an anchor must be read via `ReadsSingletonCounts`) and the payoff
+  (`refines_zSet_of_pinsPlane`) require. The base-augmentation framing glossed exactly this ("pin `W` does not follow from
+  orbit-rigidity", Insight 4's honest boundary); it is now a first-class Lean predicate, needed at *every* induction level.
+
+**The residual set to close route A (updated):** (1) prove `PlanePinnable` (the Gauss accumulation as a growing closure
+over `W≅K²` — the frontier); (2a) discharge the two standard-1-WL interface fields (`ReadsSingletonIsotropy` /
+`ReadsSingletonCounts`) in a minimal WL-colour framework (Route β — bookkeeping); (2b) prove
+`SeparatesPlaneFromComplement` (the real residual WL-dimension content — the plane-vs-complement colour separation).
