@@ -560,7 +560,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > exact-Gram coordinates, `d`-uniformly). The recovery splits into a **geometric CORE (I) — LANDED**
 > (`ScratchSpanDim2Geom.exactGram_of_sameWProfile`: the isoClass profile over the plane `W=span{a,b}` determines the exact
 > Gram, `d`-independently) — and the **iteration SEAM (II)** (WL-stable ⟹ profile-over-`W`, the frontier). See ITEM B
-> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All twenty modules axiom-clean.
+> "INCREMENT 2" / "THE EXACT-GRAM RECOVERY PLAN" below and the top-of-doc FRESH-READER HANDOFF. All twenty-one modules axiom-clean.
 >
 > **▶ ITEM A — `L = O(d)` (branch-depth; the more tractable). ◑ GEOMETRIC CORE LANDED (2026-07-01).** Obligation: the
 > 1-WL descent discretizes the forms graph in `O(d)` levels, so branching stops after `O(d)` forks
@@ -792,7 +792,7 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > bridge the seal uses. Deferred to Phase 4 assembly; carried as the `CertifiedBoundedTree` realisation fields for now.
 >
 > **Verify the landed substrate (all axiom-clean, NOT in `build.sh`; `bash scripts/build.sh` for the in-build banked seal):**
-> `lake build` the twenty scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
+> `lake build` the twenty-one scratch modules — Phase 1 `ScratchBoundedBranching` (`leaves≤Bᴸ`), Phase 2 `ScratchBranchingBound`
 > (`#orbits≤|K|^{|S|+1}`), `ScratchBranchDepth` (`L=O(d)` core + span-growth), `ScratchDominatorForms` (δ′ walled +
 > `spanning_exactQ_determines`), `ScratchBoundedMultLeaves` (`leaves_le_prod` per-level bound), `ScratchSpanDimBound`
 > (`bᵢ≤q²` @span-dim-1, PROVEN), `ScratchSpanDim2Recovery` (route-A scaffold: `bᵢ=1` ⟸ `WallKernelFor(2-round count)`),
@@ -808,8 +808,9 @@ poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly 
 > `ScratchPlaneSep` (Step C Route α sub-step — `plane_count_sep` [the seal's per-pair lever fires for plane points] + `ChiProfileSeparatesPlane` [the isolated open accumulation kernel] + `count_profile_separates_of_kernel` [kernel ⟹ count profile injective on `W`]),
 > `ScratchPlanePinInduction` (Step C inductive reformulation — `SeparatedBy`/`pinStep`/`pinIter`/`PinClosure`/`PlanePinnable` [the pinning closure = the corrected, *inductive* accumulation target, replacing the one-shot `ChiProfileSeparatesPlane`] + `chiProfileSeparatesPlane_of_pinnable`/`count_profile_separates_of_pinnable` [closure ⟹ one-shot ⟹ count profile injective on `W`; anchors reachable-in-order, which the wiring needs]),
 > `ScratchWLWiring` (Step C 1-WL-computability wiring, SUPERSEDED-but-subsumed by class counts — Core SURVIVES: `PinsPlane`/`ReadsSingletonIsotropy` ⟹ `refines_zSet_of_pinsPlane` ⟹ `colorEq_iff_stabOrbit` [C pins W ⟹ `bᵢ=1`]; Bridge `pinsPlane_of_planePinnable` uses the refuted singleton mechanism — see §9.7 correction),
-> `ScratchWLClassCounts` (Step C CORRECTED observable — `iso3`/`classCount`/`SameClassCounts`/`IsWLStable` + **`ClassCountsSeparateGram`** [= `WallKernelFor (SameClassCounts C Q)`, the class-count/iterated observable, the TRUE frontier replacing the refuted `PlanePinnable`] + `wallKernel_of_wlStable`/`colorEq_iff_stabOrbit` [⟹ `bᵢ=1`] + `sameClassCounts_of_stabOrbit` [soundness FREE]).
-> **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
+> `ScratchWLClassCounts` (Step C CORRECTED observable — `iso3`/`classCount`/`SameClassCounts`/`IsWLStable` + **`ClassCountsSeparateGram`** [= `WallKernelFor (SameClassCounts C Q)`, the class-count/iterated observable, the TRUE frontier replacing the refuted `PlanePinnable`] + `wallKernel_of_wlStable`/`colorEq_iff_stabOrbit` [⟹ `bᵢ=1`] + `sameClassCounts_of_stabOrbit` [soundness FREE]),
+> `ScratchGramStratCount` (Step C Piece 1a — the round-3 observable `gramK`/`gramStratCount`/`SameGramStratCounts` + soundness `sameGramStratCounts_of_stabOrbit` [via `gramK_isometry`/`polar_isometry`] + the crux `GramCountsRecoverOrbit` [K-non-degeneracy: profile ⟹ orbit, targets orbit DIRECTLY not `SameExactGram`+Witt] + `gramCountsEq_iff_stabOrbit` [⟹ `bᵢ=1` modulo crux]).
+> **Probes (`GraphCanonizationProofs/`):** `pin_probe.py` (REFUTES the singleton closure: stalls at 3/`q²` for `q≥5`; plane 1-WL stalls at 4 classes), `round2_probe.py`/`round2_closedform.py`/`round3_probe.py` (round-structure: r2=seal `jointIsoCountK`, r3=orbits form-indep), `forced_triangle_mult.py` (non-vacuity: `bᵢ≤q(q−1)/2`), `recovery_depth_probe.py`
 > (route-A direction: `r*∈{3,4}` d-uniform). Both memory-light; run under `ulimit -v` (WL is `O(n²)`, OOM risk at large `n`).
 > **THE LIVE STEP (re-scoped 2026-07-01):** route A's complement-factoring is done (reused from the seal —
 > `ScratchComplementFactorK.levelset_count_factors_through_chiDet` harvests the `d`-cancellation). The remaining route-A
@@ -1150,3 +1151,19 @@ Gram-strata separates orbits" (= `K` non-degenerate, a Fourier/Gauss non-degener
 round-3 count *against its own strata* would strictly refine it — contradiction — so `C∞ = orbits`). This discharges
 `ClassCountsSeparateGram` without any form-dependent round-counting. **The single remaining Gauss lemma: `K` non-degenerate.**
 `round3_probe.py` is durable.
+
+**★★ LEAN BUILD STARTED (2026-07-02) — the section plan + Piece 1a landed (`ScratchGramStratCount`, axiom-clean).** Plan
+for closing `bᵢ=1` at the span-dim-2 base:
+- **Piece 1 — the K-non-degeneracy lemma (the Gauss crux).** **1a ✅ LANDED** (`ScratchGramStratCount`): the round-3
+  observable `gramK Q a b u = (Q u, polar u a, polar u b)`, `gramStratCount u g = #{z : gramK z = g ∧ Q(u−z)=0}`,
+  `SameGramStratCounts`; **soundness** `sameGramStratCounts_of_stabOrbit` (orbit ⟹ same profile, free via the
+  isometry-reindex `gramK_isometry`/`polar_isometry`); the crux `GramCountsRecoverOrbit : SameGramStratCounts ⟹ StabOrbit`;
+  capstone `gramCountsEq_iff_stabOrbit` (soundness + crux ⟹ `bᵢ=1`). **★ Targets the orbit DIRECTLY — NOT via
+  `SameExactGram Q {a,b}` + Witt**, because `{a,b}` spans only the 2-plane so the orbit is *finer* than `SameExactGram`
+  (`36 > 27`; `WittExtendsToOrbit Q {a,b}` is FALSE — the plane-vertex vs nonzero-isotropic-complement collision). This
+  correctly routes around the vacuity the `SameExactGram`+Witt scaffold would hit at this base. **1b/1c (next):** the
+  character-sum identity (`levelset_count_eqK`/`GaussCount`) + Fourier non-degeneracy (profile → dual Gram → orbit).
+- **Piece 2 — the WL bridge:** `SameClassCounts C → SameGramStratCounts` (the actual WL colouring's counts refine the
+  gram-strat counts, via round 2 = seal `jointIsoCountK`) — discharges `ScratchWLClassCounts.ClassCountsSeparateGram`.
+- **Piece 3 — assembly:** compose with `colorEq_iff_stabOrbit` + `leaves_le_prod_concentrated`.
+**NEXT = Piece 1b** (the character-sum identity for `gramStratCount`).
