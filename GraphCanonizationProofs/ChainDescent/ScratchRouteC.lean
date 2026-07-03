@@ -30,8 +30,9 @@ similitudeScheme` is A3's brick 1.
 
 **F4 (iso-invariance of the recovered form) — equivariance core now LANDED (F4 section below):**
 `recoveredForm_colouring_equivariant` + bricks `similitude_colouring_equivariant` / `similitude_conePreserving`. The one
-non-elementary link is `ConeSepDeterminesForm` (same isotropic cone ⟹ scalar-multiple form = A1's `vanishDim=1`
-uniqueness), named + carried as a classical citation — so **F4 and A1's Lean side unify into one carried fact**, the
+non-elementary link is `NondegQuadricDeterminesForm` (same isotropic cone ⟹ scalar-multiple form = A1's `vanishDim=1`
+uniqueness; the EXACT scoped classical theorem, `p≠2`/`d≥4`), named + carried as a classical citation (Hirschfeld,
+projective Nullstellensatz for a nondegenerate quadric) — so **F4 and A1's Lean side unify into one carried fact**, the
 equivariance proved around it. Remaining Route-C open items: that classical carry + the meta-poly bootstrapping (F1
 consumes `Aut`, whose poly recovery for this residue is the open T0 problem — see the plan's STATUS "OPEN — meta-poly
 bootstrapping"). Full pickup: `docs/chain-descent-route-c-plan.md` STATUS + §6a. See §4 for the preexisting-lemma names.
@@ -175,19 +176,35 @@ one classical fact).** The chain *graph iso → linear `g` with cone-preservatio
 → colouring equivariant* has exactly one non-elementary link: **cone-preservation ⟹ similitude**, i.e.
 "a nondegenerate quadric determines its quadratic form up to a nonzero scalar". That is precisely A1's
 finite-geometry content (probe-confirmed `vanishDim = 1`, `route_c_reconstruct_probe.py`) and is carried
-here as the scoped named predicate `ConeSepDeterminesForm` — a classical citation, same discipline as
-Witt/G3. Everything else (the similitude ⟹ equivariant-colouring identity, and similitude ⟹ cone-preserving)
+here as the **exact scoped** named premise `NondegQuadricDeterminesForm` (`p ≠ 2`, `4 ≤ d`, `Q` nondeg — the
+range where it is TRUE; the unrestricted form is false at `d=3,q=3`) — a classical citation, same discipline
+as Witt/G3. Everything else (the similitude ⟹ equivariant-colouring identity, and similitude ⟹ cone-preserving)
 is elementary linear algebra, proved below axiom-clean. So F4 lands its genuine content (the equivariance)
 and names — rather than hides — the one classical carry it shares with A1. -/
 
-/-- **A1 / F4's shared classical carry — a nondegenerate quadric determines its form up to a scalar.**
-If `Q` and `R` have the same isotropic cone (`Q v = 0 ↔ R v = 0` for all `v`), then `R` is a nonzero
-scalar multiple of `Q`. This is the finite-geometry uniqueness behind A1 (the degree-2 forms vanishing
-on the cone are exactly `⟨Q⟩`, `vanishDim = 1`, probe-confirmed for nondegenerate `Q`, `d ≥ 4`); carried
-as a citation (it is a classical fact, not re-proved here). Scoped to the two forms in question so it is
-**true** (the unrestricted `∀ Q R` form is false for degenerate/low-dim forms — cf. the vacuity trap). -/
-def ConeSepDeterminesForm (Q R : QuadraticForm (ZMod p) (Fin d → ZMod p)) : Prop :=
-  (∀ v, Q v = 0 ↔ R v = 0) → ∃ μ : (ZMod p)ˣ, ∀ v, R v = (μ : ZMod p) * Q v
+/-- **A1 / F4's shared classical carry — a nondegenerate quadric determines its form up to a scalar
+(the EXACT, correctly-scoped classical theorem, carried as a citation).** For `p` odd and `d ≥ 4`: any
+two quadratic forms `Q`, `R` on `𝔽_p^d` with `Q` nondegenerate and the **same isotropic cone**
+(`Q v = 0 ↔ R v = 0`) satisfy `R = μ·Q` for a nonzero scalar `μ`. Equivalently, the degree-2 forms
+vanishing on the quadric `Q = 0` are exactly `⟨Q⟩` (`vanishDim = 1`); equivalently, the vanishing ideal
+of a nondegenerate quadric is principal.
+
+**Citation, not a Lean proof.** This is classical finite geometry (Hirschfeld, *Projective Geometries
+over Finite Fields*, quadrics chapter; the projective Nullstellensatz for a nondegenerate quadric).
+Mathlib has no quadric zero-locus result, so — following the project discipline for cited results
+(`Theorem41Statement`, `PrimitiveCCClassification`) — it is carried as a **named premise** threaded to
+the capstone, NOT proved here.
+
+**The scope is load-bearing and makes it EXACTLY TRUE (not a vacuity trap).** The unrestricted `∀ Q R`
+form is FALSE: at `d = 3, q = 3` a nondegenerate conic has only `q+1 = 4` points, which lie on a pencil
+of conics (`vanishDim = 2`). The hypotheses `p ≠ 2`, `4 ≤ d`, `Q.polarBilin.Nondegenerate` are exactly
+the range where it holds — probe-confirmed `vanishDim = 1` for `d = 4,6,8`, `q = 3,5,7,11`
+(`route_c_reconstruct_probe.py`), and covering all affine-polar `VO^ε_{2m}` (`m ≥ 2`). The bounds are
+built into the statement as antecedents so a `p = 2` / `d < 4` instance is (correctly) vacuous. -/
+def NondegQuadricDeterminesForm (p d : ℕ) [Fact p.Prime] : Prop :=
+  p ≠ 2 → 4 ≤ d → ∀ (Q R : QuadraticForm (ZMod p) (Fin d → ZMod p)),
+    (Q.polarBilin).Nondegenerate → (∀ v, Q v = 0 ↔ R v = 0) →
+      ∃ μ : (ZMod p)ˣ, ∀ v, R v = (μ : ZMod p) * Q v
 
 /-- **F4 brick 1 — a form similitude carries the difference colouring (equivariance, provable).** If `g`
 is a similitude from `Q` to `Q'` (`Q' (g v) = μ · Q v`), then the recovered-`Q` **difference** colouring
@@ -205,7 +222,7 @@ theorem similitude_colouring_equivariant
 /-- **F4 brick 1b — a form similitude preserves the cone (consistency, provable).** If `g` is a
 similitude from `Q` to `Q'` with unit factor `μ`, then `g` carries the `Q`-cone to the `Q'`-cone
 (`Q' (g v) = 0 ↔ Q v = 0`). The converse (cone-preservation ⟹ similitude) is the carried
-`ConeSepDeterminesForm`. Together they say: for nondegenerate forms, "similitude" and "cone-preserving"
+`NondegQuadricDeterminesForm`. Together they say: for nondegenerate forms, "similitude" and "cone-preserving"
 coincide — which is why recovering `Q` up to scalar (A1) is well-defined. -/
 theorem similitude_conePreserving
     (Q Q' : QuadraticForm (ZMod p) (Fin d → ZMod p))
@@ -221,22 +238,24 @@ theorem similitude_conePreserving
 
 /-- **F4 — the recovered-`Q` difference colouring is iso-invariant (equivariant under a graph iso's
 linear part).** Given the linear part `g` of a graph isomorphism (which carries the `Q`-cone to the
-`Q'`-cone: `Q v = 0 ↔ Q' (g v) = 0`) and the classical uniqueness `ConeSepDeterminesForm` (A1's carried
-fact), the recovered difference colouring transports with a single global scalar `μ`:
-`Q' (g u − g t) = μ · Q (u − t)` for all `u, t`. So canonicalizing via the recovered form produces a
-*canonical* (iso-invariant) colouring — the property the poly canonicalization claim needs, and the one
-the banked seal does **not** supply (discreteness does not transfer to the coarser similitude scheme).
-Composes with A3 brick 1 (`isometryScheme_refines_similitudeScheme`) and `viaOrthogonalForm_spanning` to
-give: iso-invariant discrete colouring at a spanning base ⟹ (meta) poly canonical labelling. Axiom-clean;
-the only non-elementary input is the named classical carry `ConeSepDeterminesForm`. -/
+`Q'`-cone: `Q v = 0 ↔ Q' (g v) = 0`), the nondegeneracy of `Q`, and the **exact cited classical fact**
+`NondegQuadricDeterminesForm` (A1's uniqueness, `hcite`, scoped `p ≠ 2`, `4 ≤ d`), the recovered
+difference colouring transports with a single global scalar `μ`: `Q' (g u − g t) = μ · Q (u − t)` for all
+`u, t`. So canonicalizing via the recovered form produces a *canonical* (iso-invariant) colouring — the
+property the poly canonicalization claim needs, and the one the banked seal does **not** supply
+(discreteness does not transfer to the coarser similitude scheme). Composes with A3 brick 1
+(`isometryScheme_refines_similitudeScheme`) and `viaOrthogonalForm_spanning` to give: iso-invariant
+discrete colouring at a spanning base ⟹ (meta) poly canonical labelling. Axiom-clean; the only
+non-elementary input is `hcite`, threaded up as a premise exactly like `Theorem41Statement`. -/
 theorem recoveredForm_colouring_equivariant
+    (hcite : NondegQuadricDeterminesForm p d) (hp : p ≠ 2) (hd : 4 ≤ d)
     (Q Q' : QuadraticForm (ZMod p) (Fin d → ZMod p))
+    (hQ : (Q.polarBilin).Nondegenerate)
     {g : (Fin d → ZMod p) ≃ₗ[ZMod p] (Fin d → ZMod p)}
-    (hcone : ∀ v, Q v = 0 ↔ Q' (g v) = 0)
-    (hclassical : ConeSepDeterminesForm Q
-      (Q'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p)))) :
+    (hcone : ∀ v, Q v = 0 ↔ Q' (g v) = 0) :
     ∃ μ : (ZMod p)ˣ, ∀ u t : Fin d → ZMod p, Q' (g u - g t) = (μ : ZMod p) * Q (u - t) := by
-  obtain ⟨μ, hμ⟩ := hclassical hcone
+  obtain ⟨μ, hμ⟩ := hcite hp hd Q
+    (Q'.comp (g : (Fin d → ZMod p) →ₗ[ZMod p] (Fin d → ZMod p))) hQ hcone
   exact ⟨μ, fun u t => similitude_colouring_equivariant Q Q' (fun v => hμ v) u t⟩
 
 end ChainDescent.RouteC

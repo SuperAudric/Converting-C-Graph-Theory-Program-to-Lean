@@ -18,10 +18,11 @@
 
 ## STATUS (read first)
 
-**Where Route C stands (2026-07-03).** The **recovery front is built and confirmed**; the Route-C spine is assembled
-from landed pieces; **F4's equivariance core is now LANDED (axiom-clean)** — the residual reduces to A1's finite-geometry
-uniqueness (`ConeSepDeterminesForm`, now named + carried as a classical citation) + the meta poly claim + the
-bootstrapping question (how coordinates are recovered without already having `Aut`; see the "OPEN — meta-poly" note).
+**Where Route C stands (2026-07-03).** The **recovery front is built and confirmed**; the Route-C Lean spine is assembled
+and axiom-clean; **F4 (iso-invariance) is LANDED**, and the two items my review flagged are resolved: the classical carry
+is **discharged as an exact scoped citation** (`NondegQuadricDeterminesForm`), and the **meta-poly bootstrapping is
+assessed sound** (§7a — global coordinatization, not the node-4 wall in disguise). What remains is downstream engineering
+(F2, the other-family adapters) + the residuals R1–R3 for the later rigorous C#→Lean runtime stage.
 
 **✅ DONE — the C# recovery front (abstract graph → coordinates → form → graph), confirmed against the REAL harness.**
 - **F1 — additive-structure recovery** (`PermutationGroup.RegularNormalPSubgroup` + `AffineStructureRecovery.Recover`):
@@ -41,21 +42,24 @@ bootstrapping question (how coordinates are recovered without already having `Au
 - `isometryScheme_refines_similitudeScheme` (**A3 brick 1**) — `O(Q)≤GO(Q)` ⟹ the isometry scheme (exact-`Q` relations)
   refines the given similitude graph (isotropy-only). The consistency half of the bridge.
 - **F4 equivariance core (NEW 2026-07-03, axiom-clean):** `recoveredForm_colouring_equivariant` — the linear part `g` of
-  a graph iso carries the `Q`-cone to the `Q'`-cone, hence (via the carried `ConeSepDeterminesForm`) the recovered
+  a graph iso carries the `Q`-cone to the `Q'`-cone, hence (via the carried `NondegQuadricDeterminesForm`) the recovered
   **difference colouring** transports by one global scalar: `Q'(g u − g t) = μ · Q(u − t)`. Provable bricks
   `similitude_colouring_equivariant` (the equivariance identity) + `similitude_conePreserving` (cone consistency); the
-  one non-elementary link is `ConeSepDeterminesForm` (below).
+  one non-elementary link is `NondegQuadricDeterminesForm` (below).
 - **The assembled spine:** recover `Q` (F1+A1, C# done) → work on the finer isometry scheme (refines the given graph,
   brick 1) → discretize at a spanning base (`viaOrthogonalForm_spanning`, landed) → the whole thing is iso-invariant
   (F4). **Discreteness does NOT transfer down to the similitude scheme** (that's the node-4 stall) — so Route C is a
   *distinct canonicalization object*, and F4 supplies exactly the iso-invariance that makes "discrete ⟹ canonical".
 
 **◻ REMAINING — the classical carry, the meta claim, and the bootstrapping question.**
-- **`ConeSepDeterminesForm` (A1's Lean side = F4's one non-elementary link):** "a nondegenerate quadric determines its
-  quadratic form up to a nonzero scalar" (the `vanishDim=1` fact, probe-confirmed). **Correction to the earlier "only F4
-  remains":** F4 and A1's Lean lemma are *two faces of this one classical fact* — F4 now names + carries it (Witt/G3
-  discipline) and proves the equivariance around it; discharging it (a finite-geometry development) or accepting it as a
-  citation is the remaining Lean choice. Not vacuous: it is scoped (the unrestricted `∀ Q R` form is false).
+- **✅ `NondegQuadricDeterminesForm` — DISCHARGED as an exact citation (2026-07-03).** "a nondegenerate quadric
+  determines its quadratic form up to a nonzero scalar" (the `vanishDim=1` fact, = A1's Lean side = F4's one
+  non-elementary link — they unify). Now a **correctly-scoped named premise** (`p ≠ 2`, `4 ≤ d`, `Q.polarBilin`
+  nondegenerate) — the *exact range where it is TRUE* (the unrestricted `∀ Q R` form is FALSE at `d=3,q=3`: a conic's 4
+  points lie on a pencil, `vanishDim=2`). Carried like `Theorem41Statement`/G3 (Mathlib has no quadric Nullstellensatz);
+  reference = Hirschfeld, *Projective Geometries over Finite Fields* / the projective Nullstellensatz for a nondegenerate
+  quadric; probe-confirmed exactly in-scope (`d=4,6,8`, `q=3,5,7,11`). A full Lean proof (finite-geometry development) is
+  optional future work; the citation is exact + non-vacuous, so the carry is legitimate.
 - **Meta poly claim:** "poly" stays a meta-argument over the bounded-base discreteness object + poly per-node (no runtime
   model in Lean).
 - **★ ASSESSED — meta-poly bootstrapping (spotted + resolved 2026-07-03; full write-up §7a):** F1 as built recovers
@@ -207,9 +211,9 @@ All in `GraphCanonizationProofs/ChainDescent/` unless noted. Index rows = `Graph
 | `RouteC.coords_determine_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `coords_determine`: `Q`-values at any *spanning* base `S` (`span S = ⊤`) determine the vertex |
 | `RouteC.reachesRigidOrCameron_viaOrthogonalForm_spanning` | `ScratchRouteC.lean` (**Route C, NEW, axiom-clean**) | spanning generalization of `viaOrthogonalForm`: `O(Q)` discretizes at any base `T∋o` whose differences `{t̄−ō}` span — the iso-invariantly-chosen base Route C needs |
 | `RouteC.isometryScheme_refines_similitudeScheme` | `ScratchRouteC.lean` (**Route C A3 brick 1, NEW, axiom-clean**) | `O(Q)≤GO(Q)` ⟹ the isometry scheme refines the given similitude graph (finer `relOfPair`) — the recovered form is consistent, not fabricated |
-| `RouteC.ConeSepDeterminesForm` | `ScratchRouteC.lean` (**Route C, NEW — the carried classical fact**) | scoped predicate: same isotropic cone ⟹ scalar-multiple form (A1's `vanishDim=1` uniqueness; carried as citation, Witt/G3 discipline) |
+| `RouteC.NondegQuadricDeterminesForm` | `ScratchRouteC.lean` (**Route C — the exact carried classical citation, NEW**) | scoped premise (`p≠2`, `4≤d`, `Q` nondeg): same isotropic cone ⟹ scalar-multiple form (A1's `vanishDim=1` uniqueness). The EXACT true statement (unrestricted form false at `d=3,q=3`); Hirschfeld / projective Nullstellensatz; carried like `Theorem41Statement` |
 | `RouteC.similitude_colouring_equivariant`, `RouteC.similitude_conePreserving` | `ScratchRouteC.lean` (**Route C F4 bricks, NEW, axiom-clean**) | a form similitude carries the difference colouring by one scalar (`Q'(gu−gt)=μ·Q(u−t)`) + preserves the cone — pure linearity |
-| `RouteC.recoveredForm_colouring_equivariant` | `ScratchRouteC.lean` (**Route C F4 capstone, NEW, axiom-clean**) | graph-iso cone-preservation + `ConeSepDeterminesForm` ⟹ the recovered difference colouring is equivariant (iso-invariant up to global scalar) — the "discrete ⟹ canonical" link |
+| `RouteC.recoveredForm_colouring_equivariant` | `ScratchRouteC.lean` (**Route C F4 capstone, NEW, axiom-clean**) | graph-iso cone-preservation + `NondegQuadricDeterminesForm` ⟹ the recovered difference colouring is equivariant (iso-invariant up to global scalar) — the "discrete ⟹ canonical" link |
 | `similitudeGroup Q`, `neg_mem_similitudeGroup`, `isometry_le_similitude` | `CascadeAffine.lean:2746`,`:2766`,`:2771` | `GO(Q)` = the given graph's linear group; `O(Q) ≤ GO(Q)` |
 | `reachesRigidOrCameron_viaSpielman` | `Cascade.lean:4690` | the wrapper: a bounded-base discreteness witness ⟹ the seal disjunction (Cameron-free sub-exp floor) |
 | `reachesRigidOrCameron_viaAffineFormScheme` | `CascadeAffine.lean:2057` (idx 1207) | Stage-A capstone; the seal wiring for the forms-graph residue (context) |
@@ -275,7 +279,7 @@ All in `GraphCanonizationProofs/` (pure Python, `python3 <file>`; reuse `model_g
 | **F1** | **Additive/affine recovery** — `T = O_p(Aut)` (the socle), a basis → coordinates, any vertex → origin | C#+Lean | **✅ CONFIRMED + PRODUCTIONIZED (2026-07-03).** Confirmed against the REAL harness (`RouteCF1Probe.cs`): recovers `T` exactly (ground-truth), regular + elementary-abelian, coordinatizes the cone (`vanishDim=1`) — VO^ε₄(q), q=2,3,5, both types; char-agnostic (full `Aut` delivered). **Production code landed:** general group ops on `PermutationGroup.cs` (`RegularNormalPSubgroup(p)`, `NormalClosure`, `Elements`, `HasExponentDividing`, `Perm.Order`/`Pow`) + `AffineStructureRecovery.Recover` (coordinatization); the probe now exercises the production path (all pass; 26 existing `PermutationGroup` tests green). "`soc = O_p = T`" = the affine-primitive **socle theorem** (cite). Remaining: the Lean side (F4 iso-invariance) + `q=pᵉ` (F2). |
 | **F2** | **𝔽_q-scalar recovery** (q=pᵉ) — recover the field/Frobenius structure (the ΓL/semilinear seam) | C#+Lean | **new; deferrable.** `q=p` needs nothing (additive = 𝔽_p-linear automatically). `FieldGeneric`/`efield` = the template; same seam the WL route had (plan Layer D) |
 | **F3** | **`IFormStructure` interface + generic engine** (refine-by-φ, canonical base, discretize) | C# | new, thin; the merge point |
-| **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **✅ EQUIVARIANCE CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `recoveredForm_colouring_equivariant` (+ bricks `similitude_colouring_equivariant`/`similitude_conePreserving`). Residual = the carried classical `ConeSepDeterminesForm` (= A1's finite-geometry uniqueness — F4 and A1-Lean unify) + the meta-poly bootstrapping (STATUS "OPEN"). Not vacuous (predicate scoped) |
+| **F4** | **Iso-invariance of the recovered `φ`** — the `forcedNode_relabel` analog: `RecoverForm` is relabeling-equivariant up to scalar | Lean | **✅ EQUIVARIANCE CORE LANDED (2026-07-03, axiom-clean, `ScratchRouteC.lean`):** `recoveredForm_colouring_equivariant` (+ bricks `similitude_colouring_equivariant`/`similitude_conePreserving`). Rests only on `NondegQuadricDeterminesForm` — **discharged as an exact scoped citation** (= A1's finite-geometry uniqueness; F4 and A1-Lean unify). Not vacuous (scoped `p≠2`/`d≥4`, exactly the true range) |
 | **F5** | **Generic seal→poly spine** — `RecoverForm ⟹ refined scheme ⟹ discrete_affineScheme_of_jointSeparates ⟹ viaSpielman` | Lean | **downstream all landed & generic**; only the A3 refinement bridge is new |
 
 ### Instance 1 — affine-polar `VO^ε` (proves the whole spine)
@@ -312,7 +316,7 @@ reduce to writing their `IFormStructure` implementation.
    `QuadraticFormRecovery`, `RouteCF1Probe.cs`).
 2. ✅ **A2⁺ + A3 brick 1** (Lean spine from landed pieces) — DONE, axiom-clean (`ScratchRouteC.lean`).
 3. ✅ **F4** equivariance core — **LANDED 2026-07-03, axiom-clean** (`recoveredForm_colouring_equivariant` + bricks).
-   Residual = the carried `ConeSepDeterminesForm` (A1 uniqueness) + meta-poly bootstrapping (STATUS "OPEN").
+   Rests only on `NondegQuadricDeterminesForm` — now DISCHARGED as an exact scoped citation (§ STATUS remaining).
 4. ✅ **Meta-poly bootstrapping** — ASSESSED + RESOLVED (§7a): Route C is poly, non-circular (global coordinatization ≠
    bounded WL; Aut-free geometric recovery, probe-confirmed enabling primitive). Residuals R1–R3 deferred to the rigorous
    C#→Lean runtime stage (build the geometric coordinatizer; name Buekenhout–Shult; double-check `d=4`).
@@ -320,7 +324,7 @@ reduce to writing their `IFormStructure` implementation.
 6. ◻ **Instances 2→3→4** — pure adapters; Suzuki last (needs the char-2 substrate as its own prerequisite).
 
 **Definition of done (Route C, affine-polar):** F1 recovers coordinates iso-invariantly (F4 ✅ equivariance core); A1
-recovers `Q` (C# ✅; Lean uniqueness = the carried `ConeSepDeterminesForm`); A3 refines to the isometry scheme (brick 1
+recovers `Q` (C# ✅; Lean uniqueness = the carried `NondegQuadricDeterminesForm`); A3 refines to the isometry scheme (brick 1
 ✅); `viaOrthogonalForm_spanning` discretizes at the `O(d)` base and seals via `viaSpielman` (✅) — the structural
 bounded-base discreteness object complete, "poly" the meta-claim over it **modulo the bootstrapping question**. The C#
 engine reproduces `|Aut|` via `PermutationGroup`. **The Lean spine is now assembled;** the open items are the classical
