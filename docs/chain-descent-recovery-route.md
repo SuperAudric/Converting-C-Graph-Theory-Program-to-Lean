@@ -670,6 +670,26 @@ recovery), and the user prefers to avoid the C# oracle risk. It is the **fallbac
 **Where this sits.** The banked quasipoly seal (`reachesRigidOrCameron_affinePolar`) is the floor; the recovery route (T0,
 poly leaf count) is the upgrade to poly; Route C is the heavier guaranteed-poly alternative. Pursue in that order.
 
+**★ De-risked (2026-07-03, `route_c_reconstruct_probe.py`) — Route C's sole correctness hypothesis HOLDS.** Route C
+recovers `Q` from the graph's connection set = the isotropic cone `C = {x≠0 : Q(x)=0}`; its only correctness assumption is
+"the degree-2 forms vanishing on `C` are exactly `⟨Q⟩` (dim 1) ⟹ `Q` recoverable up to scalar by one linear solve." The
+probe measured `vanishDim = 1` in **every** case (ε=±, d=4,6,8, q=3,5,7,11) — no small-`q` exception in the target range.
+So the form is reconstructible by a single poly linear solve, no WL/orbits/counting, and — since `O(Q)=O(μQ)`,
+`GO(Q)=GO(μQ)` — the up-to-scalar ambiguity is exactly what `viaOrthogonalForm` needs. **Two assets this makes precise:**
+(a) the *back-half is already landed* — `reachesRigidOrCameron_viaOrthogonalForm` (`CascadeAffine.lean:2704`, axiom-clean)
+seals the isometry scheme `O(Q)` at the `d+1` frame via `coords_determine`, unconditionally given nondeg `Q`; Route C's
+only new content is the front reduction "recovered `Q` upgrades the similitude SRG to `O(Q)`". (b) *one anisotropic pin
+collapses `GO(Q)` to `O(Q)`* (in `Stab`, `g` fixing anisotropic `p` forces the similitude factor `μ=1`) — pins *which*
+known group at base `O(1)`, no citation. Honest caveat: (b) collapses the group, not what refinement *sees*, so it is not
+a WL shortcut; form-recovery (a) is the load-bearing step.
+
+**★ Route C is the *symmetric* half of one meta-algorithm — its rigid mirror is Option 2** (IR-solver
+[`chain-descent-ir-blindspot-solver.md`](./chain-descent-ir-blindspot-solver.md) §11.15, the "recovery ↔ co-recovery
+duality"). Both *recover the residual algebraic structure from the graph/descent, then finish with exact algebra instead of
+WL*: Route C recovers the form `Q` ⟹ known group `GO(Q)` ⟹ Schreier–Sims (symmetric residue); Option 2 recovers the F₂
+constraint system `H` ⟹ `ker(H)` ⟹ Gaussian (rigid residue). The reconstruction probe here and Option 2's Layer-C
+forcing-circuit extraction are the *same kind of step*. See §11.15 for the full dual dictionary + the unified-harvest lead.
+
 ---
 
 ## 8. Pointers + HANDOFF (2026-07-01)

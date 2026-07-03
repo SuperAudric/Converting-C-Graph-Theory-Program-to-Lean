@@ -994,3 +994,68 @@ the wall = structural gap, no witness). The provable target = **"no rigid-Camero
 non-separable"** — closes the rigid seal's "or Cameron" and explains why the symmetry seal keeps it. The new doc has the
 classification-battery decomposition, the attack menu (Route A geometric-rigidity = best first target, Johnson by hand;
 Route B the unifying conjecture), and the step list.
+
+### 11.15 The recovery ↔ co-recovery duality — the first-design "rigid equivalent," now recorded (2026-07-03)
+
+> **What this is.** The symmetry-based **recovery/harvest** method (Cascade / Part A `StabilizerAt` /
+> `coversOrbits_of_realizers`; the poly instance for the forms residue is **Route C**) was, at first design, proposed
+> *with a rigid mirror* — a dual method for the rigid residue — which was **never written down** because attention went to
+> the symmetric version. **Option 2 (§11.0–§11.10) is that mirror, built in 2026-06-20 without recording that it was the
+> long-proposed dual.** This subsection records the duality as a first-class principle so the two legs stop looking like
+> unrelated efforts. It is a *framing*, not new math; every claim below points at a landed object.
+
+**The one meta-algorithm.** Both legs are the *same* move: **recover the residual algebraic structure from the descent's
+cross-branch observations, then finish with EXACT algebra instead of iterating WL.** They differ only in *which* structure
+is recovered and *which* exact algebra finishes it. The calculator saw this at design time — it explicitly weighed an
+**orbit language vs. a constraint language** (`chain-descent-calculator.md` §2: "none is an orbit language — that mismatch
+is why the boolean approach failed structurally"), chose orbits for the symmetric case, and named **XOR/Gaussian the
+abelian corner** (§2–§3: "the linear oracle is that abelian corner, done properly"). The rigid corner was split off at the
+conservation finding `lockstep_disc_imp_stab_trivial` (the within-cell discretizing oracle *cannot* harvest a moved orbit)
+— but only ever recorded as "the linear/discretizing oracle," never as the general **co-recovery** dual of recovery.
+
+**The dual dictionary** (each row: symmetric recovery ↔ rigid co-recovery):
+
+| | **Recovery** (symmetric residue) | **Co-recovery** (rigid residue) |
+|---|---|---|
+| residual object | automorphism **group** `Aut_S` (stabilizer chain) | forcing / **constraint module** `H` (the rigidity system) |
+| generator harvested cross-branch | path-fixing **realizer** (a permutation) | minimal **forcing circuit** (a relation / row of `H`) |
+| harvest engine (Lean) | `coversOrbits_of_realizers` / Part A `StabilizerAt` | option-2 **Layer C** extraction → `rowspace(H)` (§11.4a) |
+| "free bits" = branching | **orbits** (branch 1/orbit; `bᵢ`=#orbits) | **`ker(H)`** (branch on kernel basis; rigid ⟹ `ker=0` ⟹ single path) |
+| exact-algebra finish | **Schreier–Sims** (base+transversals; `|Aut|=∏` orbit sizes) | **Gaussian** (unique solution mod `ker`) |
+| WL's approximation, and its defect | cells **⊇** orbits (over-**merge** is the gap) | unit-prop closure `cl_up` **⊆** `cl_lin` (under-**forcing** is the gap) |
+| the shared abelian corner | `Aut = Z₂ᵐ` gauge = the **linear oracle** | `H` over F₂ = Gaussian/Z₂ — **CFI ⟺ multipede** meet here |
+| flag floor (structure possibly too rich for the fixed solver) | **non-abelian Cameron** (≡ GI∈P; the "or Cameron" leg) | **ring-varying** F₂→`Z_{2^k}` (Lichter, FPC+rank≠P; §11.6) |
+
+The two are dual under the **group ↔ constraint / orbit ↔ forcing** correspondence, and the abelian corner (Z₂ gauge) is
+exactly where they coincide — which is *why* XOR "almost worked" on CFI and nothing else (calculator §3): CFI's gauge is a
+constraint module *and* an abelian group, so recovery and co-recovery are the same computation there. Off that corner they
+split: recovery needs a *group* (Schreier–Sims), co-recovery a *module* (Gaussian/Smith).
+
+**The two realized instances are the two mirror poly routes we are now weighing.**
+- **Route C** (recovery-route §7; this residue = the forms graph): recover `Q` (the structure), whence `Aut = GO(Q)` is a
+  *known* group ⟹ Schreier–Sims. Symmetric leg. *(De-risked 2026-07-03: `route_c_reconstruct_probe.py` — the isotropic
+  cone determines `Q` up to scalar by one linear solve, `vanishDim=1` for ε=±, d=4,6,8, q≤11; no small-`q` exception.)*
+- **Option 2** (§11): recover `H` (the structure), whence the "co-group" `ker(H)` ⟹ Gaussian. Rigid leg.
+- **Same object, both legs:** Route C's *cone-reconstruction* and option-2's *Layer-C forcing-circuit extraction* are the
+  **same kind of step** — recover the defining algebraic substrate from the graph/descent, recognition-free. The ring
+  design (§11.13, Smith normal form over `Z_{2^k}`) is a third point on the *co-recovery* axis (which exact algebra
+  canonicalizes the recovered module); the flag floor is where no *fixed* exact algebra suffices.
+
+**Why record now (forward value, actionable):**
+1. **A unified harvest substrate is available.** `StabilizerAt`/Part A (group harvest) and option-2 Layer C (constraint
+   harvest) are the *same* cross-branch generator-collection with different generator types (permutation vs. relation) and
+   different soundness proofs (verified automorphism vs. verified forcing circuit). A shared `ResidualStructure` abstraction
+   — a group in the symmetric case, a module in the rigid case — would let both seal legs reuse one harvest + soundness
+   core, instead of the current parallel builds. This is the concrete engineering payoff of the duality.
+2. **It makes §11.14's 2×2 a corollary, not a coincidence.** The "symmetry row killed by rigidity, structure/linear owned
+   by the IR-solver, structure/non-linear = the wall" picture *is* this dictionary's flag-floor row read across the
+   abelian/non-abelian split. The dual flag floors (Cameron ↔ ring-varying) are the *same* phenomenon — "the recovered
+   structure's algebra outruns the fixed exact-solver" — on the two sides.
+3. **It tells us Route C's risk is bounded the same way option 2's is.** Option 2's honest floor is *ring-varying /
+   unbounded-arity / non-WL-easy base* (§11.6); Route C's mirror floor is *the recovered group being non-classical* — which
+   the Skresanov reduction already excludes for the schurian residue. So the duality predicts (and the §2c/§11.6 records
+   confirm) that both realized legs sit *strictly inside* their respective flag floors on the carved residues.
+
+**Provenance note.** This is the user's recollection (2026-07-03) that a rigid equivalent of recovery was proposed at first
+design and not recorded; the textual corroboration is calculator §2–§3 (orbit-vs-constraint language, the abelian corner)
++ the `lockstep_disc_imp_stab_trivial` split. Option 2 independently rebuilt the rigid leg; this subsection reconciles them.
